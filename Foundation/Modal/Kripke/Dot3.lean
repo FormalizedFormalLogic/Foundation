@@ -42,7 +42,7 @@ private lemma connected_of_dot3 (atleast : Atleast 2 α) : F#α ⊧* .𝟯 → C
 private lemma dot3_of_connected : Connected F → F#α ⊧* .𝟯 := by
   intro hCon;
   simp [Kripke.ValidOnFrame, Kripke.ValidOnModel, Axioms.Dot3];
-  intro δ p q e V x; subst e;
+  intro δ φ ψ e V x; subst e;
   apply Kripke.Satisfies.or_def.mpr;
   simp [Kripke.Satisfies];
   by_contra hC; push_neg at hC;
@@ -86,24 +86,24 @@ lemma connected_CanonicalFrame
   by_contra hC; push_neg at hC;
   have ⟨nhYZ, nhZY⟩ := hC; clear hC;
   simp only [Frame.Rel', Set.not_subset] at nhYZ nhZY;
-  obtain ⟨p, hpY, hpZ⟩ := nhYZ; replace hpY : □p ∈ Y.theory := hpY;
-  obtain ⟨q, hqZ, hqY⟩ := nhZY; replace hqZ : □q ∈ Z.theory := hqZ;
+  obtain ⟨φ, hpY, hpZ⟩ := nhYZ; replace hpY : □φ ∈ Y.theory := hpY;
+  obtain ⟨ψ, hqZ, hqY⟩ := nhZY; replace hqZ : □ψ ∈ Z.theory := hqZ;
 
-  have hpqX : □(□p ➝ q) ∉ X.theory := by
+  have hpqX : □(□φ ➝ ψ) ∉ X.theory := by
     apply iff_mem_box.not.mpr; push_neg;
     use Y;
     constructor;
     . assumption;
     . apply iff_mem_imp.not.mpr; simp [hpY, hqY];
-  have hqpX : □(□q ➝ p) ∉ X.theory := by
+  have hqpX : □(□ψ ➝ φ) ∉ X.theory := by
     apply iff_mem_box.not.mpr; push_neg;
     use Z;
     constructor;
     . assumption;
     . apply iff_mem_imp.not.mpr; simp [hpZ, hqZ];
 
-  have : (□(□p ➝ q) ⋎ □(□q ➝ p)) ∉ X.theory := by apply iff_mem_or.not.mpr; push_neg; exact ⟨hpqX, hqpX⟩;
-  have : □(□p ➝ q) ⋎ □(□q ➝ p) ∈ X.theory := by apply subset_axiomset _; aesop;
+  have : (□(□φ ➝ ψ) ⋎ □(□ψ ➝ φ)) ∉ X.theory := by apply iff_mem_or.not.mpr; push_neg; exact ⟨hpqX, hqpX⟩;
+  have : □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) ∈ X.theory := by apply subset_axiomset _; aesop;
   contradiction;
 
 instance

@@ -6,25 +6,25 @@ namespace LO
 
 namespace Propositional.Classical
 
-variable (T : Theory ℕ) {p q r : Formula ℕ}
+variable (T : Theory ℕ) {φ ψ r : Formula ℕ}
 
-example : T ⊢! p ⋎ q ⋎ r ⋎ s ⭤ r ⋎ p ⋎ s ⋎ q ⋎ p := by tautology
+example : T ⊢! φ ⋎ ψ ⋎ r ⋎ s ⭤ r ⋎ φ ⋎ s ⋎ ψ ⋎ φ := by tautology
 
-example : T ⊢! p ⭤ p ⋎ p ⋎ p ⋎ p ⋎ p ⋎ p ⋎ p := by tautology
+example : T ⊢! φ ⭤ φ ⋎ φ ⋎ φ ⋎ φ ⋎ φ ⋎ φ ⋎ φ := by tautology
 
-example : T ⊢! ((p ➝ q) ➝ p) ➝ p := by tautology
+example : T ⊢! ((φ ➝ ψ) ➝ φ) ➝ φ := by tautology
 
-example : T ⊢! (r ➝ p) ➝ ((p ➝ q) ➝ r) ➝ p := by tautology
+example : T ⊢! (r ➝ φ) ➝ ((φ ➝ ψ) ➝ r) ➝ φ := by tautology
 
-example : T ⊢! (∼p ➝ p) ➝ p := by tautology
+example : T ⊢! (∼φ ➝ φ) ➝ φ := by tautology
 
-example : T ⊢! (p ➝ q) ⋎ (q ➝ p) := by tautology
+example : T ⊢! (φ ➝ ψ) ⋎ (ψ ➝ φ) := by tautology
 
-example : T ⊢! (p ⭤ q) ⭤ (∼q ⭤ ∼p) := by tautology
+example : T ⊢! (φ ⭤ ψ) ⭤ (∼ψ ⭤ ∼φ) := by tautology
 
-example (h : T ⊢! p ⭤ q) : T ⊢! ∼q ⭤ ∼p := by prover [h]
+example (h : T ⊢! φ ⭤ ψ) : T ⊢! ∼ψ ⭤ ∼φ := by prover [h]
 
-example (h : T ⊢! p ⭤ q) (hp : T ⊢! p) : T ⊢! q := by prover [h, hp]
+example (h : T ⊢! φ ⭤ ψ) (hp : T ⊢! φ) : T ⊢! ψ := by prover [h, hp]
 
 end Propositional.Classical
 

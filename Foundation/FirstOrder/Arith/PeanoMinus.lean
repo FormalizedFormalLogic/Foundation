@@ -175,7 +175,7 @@ open LO.Arith
 variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ≼ T]
 
 instance CobhamR0.subTheoryPAMinus : 𝐑₀ ≼ 𝐏𝐀⁻ := System.Subtheory.ofAxm! <| by
-  intro p h
+  intro φ h
   rcases h
   case equal h =>
     exact System.by_axm _ (Theory.PAMinus.equal _ h)

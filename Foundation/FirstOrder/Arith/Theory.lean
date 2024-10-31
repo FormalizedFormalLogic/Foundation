@@ -8,18 +8,18 @@ open Arith
 
 variable {L : Language} [L.ORing] {ξ : Type*} [DecidableEq ξ]
 
-def succInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “!p 0 → (∀ x, !p x → !p (x + 1)) → ∀ x, !p x”
+def succInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “!φ 0 → (∀ x, !φ x → !φ (x + 1)) → ∀ x, !φ x”
 
-def orderInd {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y < x, !p y) → !p x) → ∀ x, !p x”
+def orderInd {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “(∀ x, (∀ y < x, !φ y) → !φ x) → ∀ x, !φ x”
 
-def leastNumber {ξ} (p : Semiformula L ξ 1) : Formula L ξ := “(∃ x, !p x) → ∃ z, !p z ∧ ∀ x < z, ¬!p x”
+def leastNumber {ξ} (φ : Semiformula L ξ 1) : Formula L ξ := “(∃ x, !φ x) → ∃ z, !φ z ∧ ∀ x < z, ¬!φ x”
 
 namespace Theory
 
 variable (L)
 
 inductive CobhamR0 : Theory ℒₒᵣ
-  | equal : ∀ p ∈ 𝐄𝐐, CobhamR0 p
+  | equal : ∀ φ ∈ 𝐄𝐐, CobhamR0 φ
   | Ω₁ (n m : ℕ)  : CobhamR0 “↑n + ↑m = ↑(n + m)”
   | Ω₂ (n m : ℕ)  : CobhamR0 “↑n * ↑m = ↑(n * m)”
   | Ω₃  (n m : ℕ)  : n ≠ m → CobhamR0 “↑n ≠ ↑m”
@@ -28,7 +28,7 @@ inductive CobhamR0 : Theory ℒₒᵣ
 notation "𝐑₀" => CobhamR0
 
 inductive PAMinus : Theory ℒₒᵣ
-  | equal         : ∀ p ∈ 𝐄𝐐, PAMinus p
+  | equal         : ∀ φ ∈ 𝐄𝐐, PAMinus φ
   | addZero       : PAMinus “x | x + 0 = x”
   | addAssoc      : PAMinus “x y z | (x + y) + z = x + (y + z)”
   | addComm       : PAMinus “x y | x + y = y + x”
@@ -50,7 +50,7 @@ inductive PAMinus : Theory ℒₒᵣ
 notation "𝐏𝐀⁻" => PAMinus
 
 def indScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
-  { q | ∃ p : Semiformula L ℕ 1, Γ p ∧ q = succInd p }
+  { ψ | ∃ φ : Semiformula L ℕ 1, Γ φ ∧ ψ = succInd φ }
 
 abbrev iOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ Semiformula.Open
 
@@ -84,15 +84,15 @@ variable {L}
 
 lemma coe_indH_subset_indH : (indScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theory L) ⊆ indScheme L (Arith.Hierarchy Γ ν) := by
   simp [Theory.indH, Theory.indScheme]
-  rintro _ p Hp rfl
-  exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) p, Hierarchy.oringEmb Hp,
+  rintro _ φ Hp rfl
+  exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) φ, Hierarchy.oringEmb Hp,
     by simp [Formula.lMap_fvUnivClosure, succInd, Semiformula.lMap_substs]⟩
 
 instance PAMinus.subtheoryOfIndH : 𝐏𝐀⁻ ≼ 𝐈𝐍𝐃Γ n := System.Subtheory.ofSubset (by simp [indH, Theory.add_def])
 
-instance EQ.subtheoryOfCobhamR0 : 𝐄𝐐 ≼ 𝐑₀ := System.Subtheory.ofSubset <| fun p hp ↦ CobhamR0.equal p hp
+instance EQ.subtheoryOfCobhamR0 : 𝐄𝐐 ≼ 𝐑₀ := System.Subtheory.ofSubset <| fun φ hp ↦ CobhamR0.equal φ hp
 
-instance EQ.subtheoryOfPAMinus : 𝐄𝐐 ≼ 𝐏𝐀⁻ := System.Subtheory.ofSubset <| fun p hp ↦ PAMinus.equal p hp
+instance EQ.subtheoryOfPAMinus : 𝐄𝐐 ≼ 𝐏𝐀⁻ := System.Subtheory.ofSubset <| fun φ hp ↦ PAMinus.equal φ hp
 
 instance EQ.subtheoryOfIndH : 𝐄𝐐 ≼ 𝐈𝐍𝐃Γ n := System.Subtheory.comp PAMinus.subtheoryOfIndH EQ.subtheoryOfPAMinus
 

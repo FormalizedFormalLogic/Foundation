@@ -19,10 +19,10 @@ variable {F : Kripke.Frame}
 private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F#α ⊧* 𝗚𝗿𝘇 := by
   rintro ⟨hRefl, hTrans, hWCWF⟩;
   simp [Axioms.Grz];
-  intro p V;
+  intro φ V;
 
-  let X := { x | Satisfies ⟨F, V⟩ x (□(□(p ➝ □p) ➝ p)) ∧ ¬(Satisfies ⟨F, V⟩ x p) };
-  let Y := { x | Satisfies ⟨F, V⟩ x (□(□(p ➝ □p) ➝ p)) ∧ ¬(Satisfies ⟨F, V⟩ x (□p)) ∧ (Satisfies ⟨F, V⟩ x p) };
+  let X := { x | Satisfies ⟨F, V⟩ x (□(□(φ ➝ □φ) ➝ φ)) ∧ ¬(Satisfies ⟨F, V⟩ x φ) };
+  let Y := { x | Satisfies ⟨F, V⟩ x (□(□(φ ➝ □φ) ➝ φ)) ∧ ¬(Satisfies ⟨F, V⟩ x (□φ)) ∧ (Satisfies ⟨F, V⟩ x φ) };
   have : (X ∩ Y) = ∅ := by aesop;
 
   suffices ∀ x ∈ X ∪ Y, ∃ y ∈ X ∪ Y, (IrreflGen F.Rel) x y by
@@ -69,25 +69,25 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
 
 variable [DecidableEq α]
 
-private lemma valid_on_frame_T_and_Four_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* ({□p ➝ (p ⋏ (□p ➝ □□p)) | (p : Formula α)}) := by
+private lemma valid_on_frame_T_and_Four_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* ({□φ ➝ (φ ⋏ (□φ ➝ □□φ)) | (φ : Formula α)}) := by
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
-  intro p V x;
-  let q := p ⋏ (□p ➝ □□p);
-  have h₁ : Satisfies ⟨F#α, V⟩ x (□p ➝ □(□(q ➝ □q) ➝ q)) := K_sound.sound lemma_Grz₁! (by simp) V x;
-  have h₂ : Satisfies ⟨F#α, V⟩ x (□(□(q ➝ □q) ➝ q) ➝ q)  := h q V x;
+  intro φ V x;
+  let ψ := φ ⋏ (□φ ➝ □□φ);
+  have h₁ : Satisfies ⟨F#α, V⟩ x (□φ ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := K_sound.sound lemma_Grz₁! (by simp) V x;
+  have h₂ : Satisfies ⟨F#α, V⟩ x (□(□(ψ ➝ □ψ) ➝ ψ) ➝ ψ)  := h ψ V x;
   exact λ f => h₂ (h₁ f);
 
 private lemma valid_on_frame_T_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* 𝗧 := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
-  intro p V x hx;
-  exact Satisfies.and_def.mp (this p V x hx) |>.1
+  intro φ V x hx;
+  exact Satisfies.and_def.mp (this φ V x hx) |>.1
 
 private lemma valid_on_frame_Four_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* 𝟰 := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
-  intro p V x hx;
-  exact (Satisfies.and_def.mp (this p V x hx) |>.2) hx;
+  intro φ V x hx;
+  exact (Satisfies.and_def.mp (this φ V x hx) |>.2) hx;
 
 variable [Inhabited α]
 

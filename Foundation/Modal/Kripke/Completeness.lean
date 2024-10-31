@@ -23,9 +23,9 @@ variable [Nonempty (MCT Λ)]
 variable {Ω₁ Ω₂ : (CanonicalFrame Λ).World}
 
 omit [DecidableEq α] [Λ.IsNormal] in
-@[simp] lemma rel_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {p}, □p ∈ Ω₁.theory → p ∈ Ω₂.theory := by simp [Frame.Rel']; aesop;
+@[simp] lemma rel_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {φ}, □φ ∈ Ω₁.theory → φ ∈ Ω₂.theory := by simp [Frame.Rel']; aesop;
 
-lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω₁.theory → p ∈ Ω₂.theory := by
+lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {φ}, □^[n]φ ∈ Ω₁.theory → φ ∈ Ω₂.theory := by
   induction n generalizing Ω₁ Ω₂ with
   | zero =>
     simp_all;
@@ -34,7 +34,7 @@ lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω�
     . intro h; apply intro_equality; simpa;
   | succ n ih =>
     constructor;
-    . intro h p hp;
+    . intro h φ hp;
       obtain ⟨⟨Ω₃, _⟩, R₁₃, R₃₂⟩ := h;
       apply ih.mp R₃₂ $ rel_def_box.mp R₁₃ (by simpa using hp);
     . intro h;
@@ -42,12 +42,12 @@ lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω�
         apply Theory.intro_union_consistent;
         rintro Γ Δ ⟨hΓ, hΔ⟩ hC;
 
-        replace hΓ : ∀ p ∈ Γ, □p ∈ Ω₁.theory := by simpa using hΓ;
+        replace hΓ : ∀ φ ∈ Γ, □φ ∈ Ω₁.theory := by simpa using hΓ;
         have dΓconj : Ω₁.theory *⊢[Λ]! □⋀Γ := membership_iff.mp $ iff_mem_box_conj.mpr hΓ;
 
-        have hΔ₂ : ∀ p ∈ ◇'⁻¹^[n]Δ, p ∈ Ω₂.theory := by
-          intro p hp;
-          exact Set.iff_mem_multidia.mp $ hΔ (◇^[n]p) (by simpa using hp);
+        have hΔ₂ : ∀ φ ∈ ◇'⁻¹^[n]Δ, φ ∈ Ω₂.theory := by
+          intro φ hp;
+          exact Set.iff_mem_multidia.mp $ hΔ (◇^[n]φ) (by simpa using hp);
 
         have hΔconj : ⋀◇'⁻¹^[n]Δ ∈ Ω₂.theory := iff_mem_conj.mpr hΔ₂;
 
@@ -55,8 +55,8 @@ lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω�
           have d₁ : Λ ⊢! ⋀Γ ➝ ⋀Δ ➝ ⊥ := and_imply_iff_imply_imply'!.mp hC;
           have : Λ ⊢! ⋀(◇'^[n]◇'⁻¹^[n]Δ) ➝ ⋀Δ := by
             apply conjconj_subset!;
-            intro q hq;
-            obtain ⟨r, _, _⟩ := hΔ q hq;
+            intro ψ hq;
+            obtain ⟨r, _, _⟩ := hΔ ψ hq;
             subst_vars;
             simpa;
           have : Λ ⊢! ◇^[n]⋀◇'⁻¹^[n]Δ ➝ ⋀Δ := imp_trans''! iff_conjmultidia_multidiaconj! $ this;
@@ -71,23 +71,23 @@ lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, □^[n]p ∈ Ω�
         contradiction;
       use Ω;
       constructor;
-      . intro p hp;
+      . intro φ hp;
         apply hΩ;
         simp_all;
       . apply ih.mpr;
         apply multibox_multidia.mpr;
-        intro p hp;
+        intro φ hp;
         apply hΩ;
         simp_all;
 
-lemma multirel_def_multibox' : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, p ∈ (□''⁻¹^[n]Ω₁.theory) → p ∈ Ω₂.theory := by
+lemma multirel_def_multibox' : Ω₁ ≺^[n] Ω₂ ↔ ∀ {φ}, φ ∈ (□''⁻¹^[n]Ω₁.theory) → φ ∈ Ω₂.theory := by
   constructor;
-  . intro h p hp; exact multirel_def_multibox.mp h hp;
+  . intro h φ hp; exact multirel_def_multibox.mp h hp;
   . intro h; apply multirel_def_multibox.mpr; assumption;
 
-lemma multirel_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {p}, (p ∈ Ω₂.theory → ◇^[n]p ∈ Ω₁.theory) := Iff.trans multirel_def_multibox multibox_multidia
+lemma multirel_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {φ}, (φ ∈ Ω₂.theory → ◇^[n]φ ∈ Ω₁.theory) := Iff.trans multirel_def_multibox multibox_multidia
 
-lemma rel_def_dia : Ω₁ ≺ Ω₂ ↔ ∀ {p}, p ∈ Ω₂.theory → ◇p ∈ Ω₁.theory := by simpa using multirel_def_multidia (n := 1) (Ω₁ := Ω₁) (Ω₂ := Ω₂)
+lemma rel_def_dia : Ω₁ ≺ Ω₂ ↔ ∀ {φ}, φ ∈ Ω₂.theory → ◇φ ∈ Ω₁.theory := by simpa using multirel_def_multidia (n := 1) (Ω₁ := Ω₁) (Ω₂ := Ω₂)
 
 end CanonicalFrame
 
@@ -112,11 +112,11 @@ end CanonicalModel
 
 section
 
-variable [Nonempty (MCT Λ)] {p : Formula α}
+variable [Nonempty (MCT Λ)] {φ : Formula α}
 
-lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.theory) := by
-  induction p using Formula.rec' with
-  | hbox p ih =>
+lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ φ ↔ (φ ∈ Ω.theory) := by
+  induction φ using Formula.rec' with
+  | hbox φ ih =>
     intro Ω;
     constructor;
     . intro h;
@@ -127,7 +127,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
     . intro h Ω' hΩ';
       apply ih.mpr;
       exact CanonicalFrame.rel_def_box.mp hΩ' h;
-  | himp p q ihp ihq =>
+  | himp φ ψ ihp ihq =>
     intro Ω;
     constructor;
     . intro h;
@@ -143,22 +143,22 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ p ↔ (p ∈ Ω.
   | _ => simp_all [Kripke.Satisfies];
 
 
-lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢! p := by
+lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ φ ↔ Λ ⊢! φ := by
   constructor;
   . contrapose;
     intro h;
-    have : Theory.Consistent Λ ({∼p}) := by
+    have : Theory.Consistent Λ ({∼φ}) := by
       apply Theory.def_consistent.mpr;
       intro Γ hΓ;
       by_contra hC;
-      have : Λ ⊢! p := dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj! hΓ hC;
+      have : Λ ⊢! φ := dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj! hΓ hC;
       contradiction;
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
     simp [Kripke.ValidOnModel];
     use Ω;
-    exact truthlemma.not.mpr $ iff_mem_neg.mp (show ∼p ∈ Ω.theory by simp_all);
+    exact truthlemma.not.mpr $ iff_mem_neg.mp (show ∼φ ∈ Ω.theory by simp_all);
   . intro h Ω;
-    suffices p ∈ Ω.theory by exact truthlemma.mpr this;
+    suffices φ ∈ Ω.theory by exact truthlemma.mpr this;
     by_contra hC;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Theory.iff_insert_inconsistent.mp $ (MaximalConsistentTheory.maximal' hC);
     have : Γ ⊢[Λ]! ⊥ := FiniteContext.provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hΓ₂ ⨀ h;
@@ -167,19 +167,19 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel Λ) ⊧ p ↔ Λ �
 
 lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel Λ) ⊧* Λ.axioms := by
   apply Semantics.realizeSet_iff.mpr;
-  intro p hp;
+  intro φ hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;
   exact Deduction.maxm! (by assumption);
 
 lemma realize_theory_of_self_canonicalModel : (CanonicalModel Λ) ⊧* (System.theory Λ) := by
   apply Semantics.realizeSet_iff.mpr;
-  intro p hp;
+  intro φ hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;
   simpa [System.theory] using hp;
 
 end
 
-lemma complete_of_mem_canonicalFrame [Nonempty (MCT Λ)] {𝔽 : FrameClass} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽#α ⊧ p → (Λ) ⊢! p := by
+lemma complete_of_mem_canonicalFrame [Nonempty (MCT Λ)] {𝔽 : FrameClass} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽#α ⊧ φ → (Λ) ⊢! φ := by
   simp [Semantics.Realize, Kripke.ValidOnFrame];
   contrapose;
   push_neg;

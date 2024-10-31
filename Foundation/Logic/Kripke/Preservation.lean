@@ -107,7 +107,7 @@ def mkAtomic
   }
 
 def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := mkAtomic (f.toFramePseudoEpimorphism.comp (g.toFramePseudoEpimorphism)) $ by
-    intro x p;
+    intro x φ;
     constructor;
     . intro h;
       apply g.atomic.mp;
@@ -192,7 +192,7 @@ instance [Finite F.World] : Finite (F.PointGenerated r).World := by
   apply Subtype.finite;
 
 instance [DecidableEq F.World] : DecidableEq (F.PointGenerated r).World := by
-  apply Subtype.instDecidableEq (p := λ w => w = r ∨ r ≺ w);
+  apply Subtype.instDecidableEq (φ := λ w => w = r ∨ r ≺ w);
 
 end Frame.PointGenerated
 

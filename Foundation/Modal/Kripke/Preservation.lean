@@ -17,23 +17,23 @@ namespace Modal.Kripke
 
 open Formula
 
-def ModalEquivalent {M₁ M₂ : Kripke.Model α} (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ {p}, w₁ ⊧ p ↔ w₂ ⊧ p
+def ModalEquivalent {M₁ M₂ : Kripke.Model α} (w₁ : M₁.World) (w₂ : M₂.World) : Prop := ∀ {φ}, w₁ ⊧ φ ↔ w₂ ⊧ φ
 infix:50 " ↭ " => ModalEquivalent
 
 variable {F₁ F₂ : Kripke.Frame}
          {M₁ M₂ : Kripke.Model α}
 
 lemma modal_equivalent_of_bisimilar (Bi : M₁ ⇄ M₂) (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
-  intro p;
-  induction p using Formula.rec' generalizing x₁ x₂ with
+  intro φ;
+  induction φ using Formula.rec' generalizing x₁ x₂ with
   | hatom a => exact Bi.atomic bisx;
-  | himp p q ihp ihq =>
+  | himp φ ψ ihp ihq =>
     constructor;
     . intro hpq hp;
       exact ihq bisx |>.mp $ hpq $ ihp bisx |>.mpr hp;
     . intro hpq hp;
       exact ihq bisx |>.mpr $ hpq $ ihp bisx |>.mp hp;
-  | hbox p ih =>
+  | hbox φ ih =>
     constructor;
     . intro h y₂ rx₂y₂;
       obtain ⟨y₁, ⟨bisy, rx₁y₁⟩⟩ := Bi.back bisx rx₂y₂;
@@ -48,7 +48,7 @@ lemma modal_equivalence_of_modal_morphism (f : M₁ →ₚ M₂) (w : M₁.World
   apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.bisimulation f;
   simp [Model.PseudoEpimorphism.bisimulation];
 
-lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁#α ⊧ p → F₂#α ⊧ p := by
+lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁#α ⊧ φ → F₂#α ⊧ φ := by
   contrapose;
   intro h;
   obtain ⟨V₂, w₂, h⟩ := by simpa [Kripke.ValidOnFrame, Kripke.ValidOnModel] using h;
@@ -69,7 +69,7 @@ lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_s
 
 lemma iff_theory_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁#α ⊧* T → F₂#α ⊧* T := by
   simp only [Semantics.realizeSet_iff];
-  intro h p hp;
+  intro h φ hp;
   exact iff_formula_valid_on_frame_surjective_morphism f f_surjective (h hp);
 
 theorem undefinable_irreflexive : ¬∃ (Λ : Hilbert α), ∀ F, F ∈ 𝔽(Λ) ↔ F ∈ IrreflexiveFrameClass.{0} := by

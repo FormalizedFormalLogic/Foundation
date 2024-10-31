@@ -11,7 +11,7 @@ Also provides 𝓜 characterization of compactness.
 * `LO.Compact`: The semantic compactness of Foundation.
 
 ## Notation
-* `𝓜 ⊧ p`: a proposition that states `𝓜` satisfies `p`.
+* `𝓜 ⊧ φ`: a proposition that states `𝓜` satisfies `φ`.
 * `𝓜 ⊧* T`: a proposition that states that `𝓜` satisfies each formulae in a set `T`.
 
 -/
@@ -38,16 +38,16 @@ protected class Bot where
   realize_bot (𝓜 : M) : ¬𝓜 ⊧ (⊥ : F)
 
 protected class And where
-  realize_and {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋏ q ↔ 𝓜 ⊧ p ∧ 𝓜 ⊧ q
+  realize_and {𝓜 : M} {φ ψ : F} : 𝓜 ⊧ φ ⋏ ψ ↔ 𝓜 ⊧ φ ∧ 𝓜 ⊧ ψ
 
 protected class Or where
-  realize_or {𝓜 : M} {p q : F} : 𝓜 ⊧ p ⋎ q ↔ 𝓜 ⊧ p ∨ 𝓜 ⊧ q
+  realize_or {𝓜 : M} {φ ψ : F} : 𝓜 ⊧ φ ⋎ ψ ↔ 𝓜 ⊧ φ ∨ 𝓜 ⊧ ψ
 
 protected class Imp where
-  realize_imp {𝓜 : M} {p q : F} : 𝓜 ⊧ p ➝ q ↔ (𝓜 ⊧ p → 𝓜 ⊧ q)
+  realize_imp {𝓜 : M} {φ ψ : F} : 𝓜 ⊧ φ ➝ ψ ↔ (𝓜 ⊧ φ → 𝓜 ⊧ ψ)
 
 protected class Not where
-  realize_not {𝓜 : M} {p : F} : 𝓜 ⊧ ∼p ↔ ¬𝓜 ⊧ p
+  realize_not {𝓜 : M} {φ : F} : 𝓜 ⊧ ∼φ ↔ ¬𝓜 ⊧ φ
 
 class Tarski extends
   Semantics.Top M,
@@ -73,21 +73,21 @@ variable [Tarski M]
 
 variable {𝓜 : M}
 
-@[simp] lemma realize_iff {p q : F} :
-    𝓜 ⊧ p ⭤ q ↔ ((𝓜 ⊧ p) ↔ (𝓜 ⊧ q)) := by
+@[simp] lemma realize_iff {φ ψ : F} :
+    𝓜 ⊧ φ ⭤ ψ ↔ ((𝓜 ⊧ φ) ↔ (𝓜 ⊧ ψ)) := by
   simp [LogicalConnective.iff, iff_iff_implies_and_implies]
 
 @[simp] lemma realize_list_conj {l : List F} :
-    𝓜 ⊧ l.conj ↔ ∀ p ∈ l, 𝓜 ⊧ p := by induction l <;> simp [*]
+    𝓜 ⊧ l.conj ↔ ∀ φ ∈ l, 𝓜 ⊧ φ := by induction l <;> simp [*]
 
 @[simp] lemma realize_finset_conj {s : Finset F} :
-    𝓜 ⊧ s.conj ↔ ∀ p ∈ s, 𝓜 ⊧ p := by simp [Finset.conj]
+    𝓜 ⊧ s.conj ↔ ∀ φ ∈ s, 𝓜 ⊧ φ := by simp [Finset.conj]
 
 @[simp] lemma realize_list_disj {l : List F} :
-    𝓜 ⊧ l.disj ↔ ∃ p ∈ l, 𝓜 ⊧ p := by induction l <;> simp [*]
+    𝓜 ⊧ l.disj ↔ ∃ φ ∈ l, 𝓜 ⊧ φ := by induction l <;> simp [*]
 
 @[simp] lemma realize_finset_disj {s : Finset F} :
-    𝓜 ⊧ s.disj ↔ ∃ p ∈ s, 𝓜 ⊧ p := by simp [Finset.disj]
+    𝓜 ⊧ s.disj ↔ ∃ φ ∈ s, 𝓜 ⊧ φ := by simp [Finset.disj]
 
 end
 
@@ -106,7 +106,7 @@ def models (T : Set F) : Set M := {𝓜 | 𝓜 ⊧* T}
 
 variable {M}
 
-def theory (𝓜 : M) : Set F := {f | 𝓜 ⊧ f}
+def theory (𝓜 : M) : Set F := {φ | 𝓜 ⊧ φ}
 
 class Meaningful (𝓜 : M) : Prop where
   exists_unrealize : ∃ f, ¬𝓜 ⊧ f
@@ -184,7 +184,7 @@ instance [Semantics F M] : Semantics F (Set M) := ⟨fun s f ↦ ∀ ⦃𝓜⦄,
 def Consequence (T : Set F) (f : F) : Prop := models M T ⊧ f
 
 -- note that ⊨ (\vDash) is *NOT* ⊧ (\models)
-notation T:45 " ⊨[" M "] " p:46 => Consequence M T p
+notation T:45 " ⊨[" M "] " φ:46 => Consequence M T φ
 
 variable {M}
 

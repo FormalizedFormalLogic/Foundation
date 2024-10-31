@@ -139,27 +139,27 @@ lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Structure.rel (M := QuotEq L 
 lemma val_mk {e} {ε} (t : Semiterm L μ n) : Semiterm.valm (QuotEq L M) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) t = ⟦Semiterm.valm M e ε t⟧ :=
   by induction t <;> simp [*, funk_mk, Semiterm.val_func]
 
-lemma eval_mk {e} {ε} {p : Semiformula L μ n} :
-    Semiformula.Evalm (QuotEq L M) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) p ↔ Semiformula.Evalm M e ε p := by
-  induction p using Semiformula.rec' <;> simp [*, Semiformula.eval_rel, Semiformula.eval_nrel, val_mk, rel_mk]
-  case hall n p ih =>
+lemma eval_mk {e} {ε} {φ : Semiformula L μ n} :
+    Semiformula.Evalm (QuotEq L M) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) φ ↔ Semiformula.Evalm M e ε φ := by
+  induction φ using Semiformula.rec' <;> simp [*, Semiformula.eval_rel, Semiformula.eval_nrel, val_mk, rel_mk]
+  case hall n φ ih =>
     constructor
     · intro h a; exact (ih (e := a :> e)).mp (by simpa [Matrix.comp_vecCons] using h ⟦a⟧)
     · intro h a;
       induction' a using Quotient.ind with a
       simpa [Matrix.comp_vecCons] using ih.mpr (h a)
-  case hex n p ih =>
+  case hex n φ ih =>
     constructor
     · intro ⟨a, h⟩
       induction' a using Quotient.ind with a
       exact ⟨a, (ih (e := a :> e)).mp (by simpa [Matrix.comp_vecCons] using h)⟩
     · intro ⟨a, h⟩; exact ⟨⟦a⟧, by simpa [Matrix.comp_vecCons] using ih.mpr h⟩
 
-lemma eval_mk₀ {ε} {p : Formula L ξ} :
-    Semiformula.Evalfm (QuotEq L M) (fun i => ⟦ε i⟧) p ↔ Semiformula.Evalfm (L := L) M ε p := by
-  simpa [Matrix.empty_eq] using eval_mk (H := H) (e := ![]) (ε := ε) (p := p)
+lemma eval_mk₀ {ε} {φ : Formula L ξ} :
+    Semiformula.Evalfm (QuotEq L M) (fun i => ⟦ε i⟧) φ ↔ Semiformula.Evalfm (L := L) M ε φ := by
+  simpa [Matrix.empty_eq] using eval_mk (H := H) (e := ![]) (ε := ε) (φ := φ)
 
-lemma models_iff {p : SyntacticFormula L} : QuotEq L M ⊧ₘ p ↔ M ⊧ₘ p := by
+lemma models_iff {φ : SyntacticFormula L} : QuotEq L M ⊧ₘ φ ↔ M ⊧ₘ φ := by
   constructor
   · intro h f; exact eval_mk₀.mp (h (fun x ↦ ⟦f x⟧))
   · intro h f
@@ -177,7 +177,7 @@ lemma rel_eq (a b : QuotEq L M) : (@Semiformula.Operator.Eq.eq L _).val (M := Qu
   induction' b using Quotient.ind with b
   rw[of_eq_of]; simp [eqv, Semiformula.Operator.val];
   simpa [Evalm, Matrix.fun_eq_vec₂, Empty.eq_elim] using
-    eval_mk (H := H) (e := ![a, b]) (ε := Empty.elim) (p := Semiformula.Operator.Eq.eq.sentence)
+    eval_mk (H := H) (e := ![a, b]) (ε := Empty.elim) (φ := Semiformula.Operator.Eq.eq.sentence)
 
 instance structureEq : Structure.Eq L (QuotEq L M) := ⟨rel_eq⟩
 
@@ -187,8 +187,8 @@ end Eq
 
 end Structure
 
-lemma consequence_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] {p : SyntacticFormula L} :
-    T ⊨[Struc.{v, u} L] p ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ p) := by
+lemma consequence_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] {φ : SyntacticFormula L} :
+    T ⊨[Struc.{v, u} L] φ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M], M ⊧ₘ* T → M ⊧ₘ φ) := by
   simp [consequence_iff]; constructor
   · intro h M x s _ hM; exact h M x hM
   · intro h M x s hM
@@ -197,8 +197,8 @@ lemma consequence_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] {p : SyntacticFormula L
     have e : Structure.Eq.QuotEq L M ≡ₑ[L] M := Structure.Eq.QuotEq.elementaryEquiv L M
     exact e.models.mp $ h (Structure.Eq.QuotEq L M) ⟦x⟧ (e.modelsTheory.mpr hM)
 
-lemma consequence_iff_eq' {T : Theory L} [𝐄𝐐 ≼ T] {p : SyntacticFormula L} :
-    T ⊨[Struc.{v, u} L] p ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M] [M ⊧ₘ* T], M ⊧ₘ p) := by
+lemma consequence_iff_eq' {T : Theory L} [𝐄𝐐 ≼ T] {φ : SyntacticFormula L} :
+    T ⊨[Struc.{v, u} L] φ ↔ (∀ (M : Type v) [Nonempty M] [Structure L M] [Structure.Eq L M] [M ⊧ₘ* T], M ⊧ₘ φ) := by
   rw [consequence_iff_eq]
 
 lemma satisfiable_iff_eq {T : Theory L} [𝐄𝐐 ≼ T] :
@@ -267,15 +267,15 @@ end ModelOfSatEq
 
 namespace Semiformula
 
-def existsUnique (p : Semiformula L μ (n + 1)) : Semiformula L μ n :=
-  “∃ y, !p y ⋯ ∧ ∀ z, !p z ⋯ → z = y”
+def existsUnique (φ : Semiformula L μ (n + 1)) : Semiformula L μ n :=
+  “∃ y, !φ y ⋯ ∧ ∀ z, !φ z ⋯ → z = y”
 
 prefix:64 "∃'! " => existsUnique
 
 variable {M : Type*} [s : Structure L M] [Structure.Eq L M]
 
-@[simp] lemma eval_existsUnique {e ε} {p : Semiformula L μ (n + 1)} :
-    Eval s e ε (∃'! p) ↔ ∃! x, Eval s (x :> e) ε p := by
+@[simp] lemma eval_existsUnique {e ε} {φ : Semiformula L μ (n + 1)} :
+    Eval s e ε (∃'! φ) ↔ ∃! x, Eval s (x :> e) ε φ := by
   simp [existsUnique, Semiformula.eval_substs, Matrix.comp_vecCons', ExistsUnique]
 
 end Semiformula
@@ -288,14 +288,14 @@ syntax:max "∃! " first_order_formula:0 : first_order_formula
 syntax:max "∃! " ident ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | ∃! $p:first_order_formula ]) => do
+  | `(⤫formula[ $binders* | $fbinders* | ∃! $φ:first_order_formula ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertAt 0 v
-    `(∃'! ⤫formula[ $binders'* | $fbinders* | $p])
-  | `(⤫formula[ $binders* | $fbinders* | ∃! $x, $p ])                 => do
+    `(∃'! ⤫formula[ $binders'* | $fbinders* | $φ])
+  | `(⤫formula[ $binders* | $fbinders* | ∃! $x, $φ ])                 => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(∃'! ⤫formula[ $binders'* | $fbinders* | $p ])
+    `(∃'! ⤫formula[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
 

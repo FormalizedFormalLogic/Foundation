@@ -117,24 +117,24 @@ end GL_MDPCounterexampleModel
 
 end Kripke
 
-variable {X : Theory α} {p₁ p₂ : Formula α}
+variable {X : Theory α} {φ₁ φ₂ : Formula α}
 
-lemma GL_MDP_Aux [Inhabited α] (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *⊢[𝐆𝐋]! □p₁ ∨ (□''X) *⊢[𝐆𝐋]! □p₂ := by
+lemma GL_MDP_Aux [Inhabited α] (h : (□''X) *⊢[𝐆𝐋]! □φ₁ ⋎ □φ₂) : (□''X) *⊢[𝐆𝐋]! □φ₁ ∨ (□''X) *⊢[𝐆𝐋]! □φ₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
-  have : 𝐆𝐋 ⊢! ⋀□'Δ ➝ (□p₁ ⋎ □p₂) := FiniteContext.provable_iff.mp hΓ;
-  have : 𝐆𝐋 ⊢! □⋀Δ ➝ (□p₁ ⋎ □p₂) := imp_trans''! (by simp) this;
+  have : 𝐆𝐋 ⊢! ⋀□'Δ ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
+  have : 𝐆𝐋 ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := imp_trans''! (by simp) this;
   generalize e : ⋀Δ = c at this;
 
-  have : (𝐆𝐋 ⊢! ⊡c ➝ p₁) ⋎ (𝐆𝐋 ⊢! ⊡c ➝ p₂) := by
+  have : (𝐆𝐋 ⊢! ⊡c ➝ φ₁) ⋎ (𝐆𝐋 ⊢! ⊡c ➝ φ₂) := by
     by_contra hC;
-    have ⟨h₁, h₂⟩ : (𝐆𝐋 ⊬ ⊡c ➝ p₁) ∧ (𝐆𝐋 ⊬ ⊡c ➝ p₂) := not_or.mp hC;
+    have ⟨h₁, h₂⟩ : (𝐆𝐋 ⊬ ⊡c ➝ φ₁) ∧ (𝐆𝐋 ⊬ ⊡c ➝ φ₂) := not_or.mp hC;
 
     obtain ⟨M₁, hM₁⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₁;
     obtain ⟨M₂, hM₂⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₂;
 
-    replace hM₁ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₁ (M₁ := M₁) (M₂ := M₂) _ M₁.root (⊡c ⋏ ∼p₁) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₁;
-    replace hM₂ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₂ (M₁ := M₁) (M₂ := M₂) _ M₂.root (⊡c ⋏ ∼p₂) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₂;
+    replace hM₁ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₁ (M₁ := M₁) (M₂ := M₂) _ M₁.root (⊡c ⋏ ∼φ₁) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₁;
+    replace hM₂ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₂ (M₁ := M₁) (M₂ := M₂) _ M₂.root (⊡c ⋏ ∼φ₂) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₂;
 
     let M := GL_MDPCounterexampleModel M₁ M₂;
 
@@ -145,24 +145,24 @@ lemma GL_MDP_Aux [Inhabited α] (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p�
       . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₁).1).2 _ Rrx
       . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₂).1).1;
       . exact (Satisfies.and_def.mp $ (Satisfies.and_def.mp hM₂).1).2 _ Rrx
-    have hp₁ : ¬(Satisfies M.toModel M.root (□p₁)) := by
+    have hp₁ : ¬(Satisfies M.toModel M.root (□φ₁)) := by
       dsimp [Satisfies]; push_neg;
       use .inr (.inl M₁.root);
       constructor;
       . apply M.Tree.root_rooted; simp;
       . exact (Satisfies.and_def.mp hM₁).2;
-    have hp₂ : ¬(Satisfies M.toModel M.root (□p₂)) := by
+    have hp₂ : ¬(Satisfies M.toModel M.root (□φ₂)) := by
       dsimp [Satisfies]; push_neg;
       use .inr (.inr M₂.root);
       constructor;
       . apply M.Tree.root_rooted; simp;
       . exact (Satisfies.and_def.mp hM₂).2;
-    have : ¬(Satisfies M.toModel M.root (□p₁ ⋎ □p₂)) := by
+    have : ¬(Satisfies M.toModel M.root (□φ₁ ⋎ □φ₂)) := by
       apply Satisfies.not_def.mpr;
       apply Satisfies.or_def.not.mpr;
       push_neg;
       exact ⟨hp₁, hp₂⟩;
-    have : ¬(Satisfies M.toModel M.root (□c ➝ (□p₁ ⋎ □p₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
+    have : ¬(Satisfies M.toModel M.root (□c ➝ (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
     have := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mpr ⟨M, this⟩;
     contradiction;
 
@@ -175,8 +175,8 @@ lemma GL_MDP_Aux [Inhabited α] (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p�
     tauto;
   };
 
-theorem GL_MDP [Inhabited α] (h : 𝐆𝐋 ⊢! □p₁ ⋎ □p₂) : 𝐆𝐋 ⊢! p₁ ∨ 𝐆𝐋 ⊢! p₂ := by
-  have := GL_MDP_Aux (X := ∅) (p₁ := p₁) (p₂ := p₂) $ Context.of! h;
+theorem GL_MDP [Inhabited α] (h : 𝐆𝐋 ⊢! □φ₁ ⋎ □φ₂) : 𝐆𝐋 ⊢! φ₁ ∨ 𝐆𝐋 ⊢! φ₂ := by
+  have := GL_MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
   simp at this;
   rcases this with (h | h) <;> {
     have := unnec! $ Context.emptyPrf! h;

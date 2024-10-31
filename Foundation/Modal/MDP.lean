@@ -7,7 +7,7 @@ variable {F : Type*} [LogicalConnective F] [Box F]
 variable {S : Type*} [System F S]
 
 class ModalDisjunctive (𝓢 : S) : Prop where
-  modal_disjunctive : ∀ {p q : F}, 𝓢 ⊢! □p ⋎ □q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
+  modal_disjunctive : ∀ {φ ψ : F}, 𝓢 ⊢! □φ ⋎ □ψ → 𝓢 ⊢! φ ∨ 𝓢 ⊢! ψ
 
 alias modal_disjunctive := ModalDisjunctive.modal_disjunctive
 
@@ -19,8 +19,8 @@ instance [Disjunctive 𝓢] [Unnecessitation 𝓢] : ModalDisjunctive 𝓢 where
     . left; exact unnec! h;
     . right; exact unnec! h;
 
-private lemma unnec_of_mdp_aux [ModalDisjunctive 𝓢] (h : 𝓢 ⊢! □p) : 𝓢 ⊢! p := by
-    have : 𝓢 ⊢! □p ⋎ □p := or₁'! h;
+private lemma unnec_of_mdp_aux [ModalDisjunctive 𝓢] (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! φ := by
+    have : 𝓢 ⊢! □φ ⋎ □φ := or₁'! h;
     rcases modal_disjunctive this with (h | h) <;> tauto;
 
 noncomputable instance unnecessitation_of_modalDisjunctive [ModalDisjunctive 𝓢] : Unnecessitation 𝓢 where

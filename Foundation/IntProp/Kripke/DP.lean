@@ -9,7 +9,7 @@ open Formula Formula.Kripke
 namespace Kripke
 
 variable {α}
-variable {p q : Formula α}
+variable {φ ψ : Formula α}
 
 abbrev IntDPCounterexampleFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ : F₁.World) (w₂ : F₂.World) : Kripke.Frame where
   World := Unit ⊕ F₁.World ⊕ F₂.World;
@@ -77,9 +77,9 @@ lemma IntDPCounterexampleModel.atomic_hereditary
 variable {M₁ : Kripke.Model α} {M₂ : Kripke.Model α}
 
 lemma satisfies_left_on_IntDPCounterexampleModel :
-  (Satisfies M₁ w p) ↔ (Satisfies (IntDPCounterexampleModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inl w) p) := by
-  induction p using rec' generalizing w with
-  | himp p q ihp ihq =>
+  (Satisfies M₁ w φ) ↔ (Satisfies (IntDPCounterexampleModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inl w) φ) := by
+  induction φ using rec' generalizing w with
+  | himp φ ψ ihp ihq =>
     constructor;
     . intro hpq X hWX hp;
       obtain ⟨x, hx, ex⟩ : ∃ x, (M₁.Frame.Rel w x) ∧ (Sum.inr $ Sum.inl x) = X := by
@@ -94,9 +94,9 @@ lemma satisfies_left_on_IntDPCounterexampleModel :
   | _ => simp_all [IntDPCounterexampleModel, Satisfies.iff_models, Satisfies];
 
 lemma satisfies_right_on_IntDPCounterexampleModel :
-  (Satisfies M₂ w p) ↔ (Satisfies (IntDPCounterexampleModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inr w) p) := by
-  induction p using rec' generalizing w with
-  | himp p q ihp ihq =>
+  (Satisfies M₂ w φ) ↔ (Satisfies (IntDPCounterexampleModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inr w) φ) := by
+  induction φ using rec' generalizing w with
+  | himp φ ψ ihp ihq =>
     constructor;
     . intro h X hWX hp;
       obtain ⟨x, hx, ex⟩ : ∃ x, (M₂.Frame.Rel w x) ∧ (Sum.inr $ Sum.inr x) = X := by
@@ -110,7 +110,7 @@ lemma satisfies_right_on_IntDPCounterexampleModel :
       exact ihq.mpr $ h (by simpa) $ ihp.mp hp;
   | _ => simp_all [IntDPCounterexampleModel, Satisfies.iff_models, Satisfies];
 
-theorem disjunctive_int [Inhabited α] [DecidableEq α] [Encodable α] : 𝐈𝐧𝐭 ⊢! p ⋎ q → 𝐈𝐧𝐭 ⊢! p ∨ 𝐈𝐧𝐭 ⊢! q := by
+theorem disjunctive_int [Inhabited α] [DecidableEq α] [Encodable α] : 𝐈𝐧𝐭 ⊢! φ ⋎ ψ → 𝐈𝐧𝐭 ⊢! φ ∨ 𝐈𝐧𝐭 ⊢! ψ := by
   contrapose;
   intro hC; push_neg at hC;
   have ⟨hnp, hnq⟩ := hC;

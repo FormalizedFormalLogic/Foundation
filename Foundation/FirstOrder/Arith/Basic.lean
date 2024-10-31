@@ -143,20 +143,20 @@ namespace Semiformula
 
 variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add] {ξ : Type*}
 
-def ballLTSucc (t : Semiterm L ξ n) (p : Semiformula L ξ (n + 1)) : Semiformula L ξ n := p.ballLT ‘!!t + 1’
+def ballLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := φ.ballLT ‘!!t + 1’
 
-def bexLTSucc (t : Semiterm L ξ n) (p : Semiformula L ξ (n + 1)) : Semiformula L ξ n := p.bexLT ‘!!t + 1’
+def bexLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := φ.bexLT ‘!!t + 1’
 
 variable {M : Type*} {s : Structure L M} [LT M] [One M] [Add M] [Structure.LT L M] [Structure.One L M] [Structure.Add L M]
 
-variable {t : Semiterm L ξ n} {p : Semiformula L ξ (n + 1)}
+variable {t : Semiterm L ξ n} {φ : Semiformula L ξ (n + 1)}
 
 lemma eval_ballLTSucc {e ε} :
-    Eval s e ε (p.ballLTSucc t) ↔ ∀ x < t.val s e ε + 1, Eval s (x :> e) ε p := by
+    Eval s e ε (φ.ballLTSucc t) ↔ ∀ x < t.val s e ε + 1, Eval s (x :> e) ε φ := by
   simp [ballLTSucc, Operator.numeral]
 
 lemma eval_bexLTSucc {e ε} :
-    Eval s e ε (p.bexLTSucc t) ↔ ∃ x < t.val s e ε + 1, Eval s (x :> e) ε p := by
+    Eval s e ε (φ.bexLTSucc t) ↔ ∃ x < t.val s e ε + 1, Eval s (x :> e) ε φ := by
   simp [bexLTSucc, Operator.numeral]
 
 end Semiformula
@@ -170,14 +170,14 @@ syntax:max "∀ " ident " <⁺ " first_order_term ", " first_order_formula:0 : f
 syntax:max "∃ " ident " <⁺ " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | ∀ $x <⁺ $t, $p]) => do
+  | `(⤫formula[ $binders* | $fbinders* | ∀ $x <⁺ $t, $φ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(Semiformula.ballLTSucc ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ∃ $x <⁺ $t, $p]) => do
+    `(Semiformula.ballLTSucc ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ∃ $x <⁺ $t, $φ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(Semiformula.bexLTSucc ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $p ])
+    `(Semiformula.bexLTSucc ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
 
@@ -185,7 +185,7 @@ namespace Arith
 
 class SoundOn {L : Language} [Structure L ℕ]
     (T : Theory L) (F : SyntacticFormula L → Prop) where
-  sound : ∀ {p}, F p → T ⊢! p → ℕ ⊧ₘ p
+  sound : ∀ {φ}, F φ → T ⊢! φ → ℕ ⊧ₘ φ
 
 section
 
@@ -200,14 +200,14 @@ section
 
 variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T]
 
-lemma consequence_of (p : SyntacticFormula L)
+lemma consequence_of (φ : SyntacticFormula L)
   (H : ∀ (M : Type (max u w))
          [ORingStruc M]
          [Structure L M]
          [Structure.ORing L M]
          [M ⊧ₘ* T],
-         M ⊧ₘ p) :
-    T ⊨ p := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
+         M ⊧ₘ φ) :
+    T ⊨ φ := consequence_iff_consequence.{u, w}.mp <| consequence_iff_eq.mpr fun M _ _ _ hT =>
   letI : Structure.Model L M ⊧ₘ* T :=
     ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv L M)).mp hT)
   (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv L M)).mpr (H (Structure.Model L M))
@@ -240,18 +240,18 @@ variable {L : Language} [L.Eq]
 
 inductive EQ' : Theory L
   | refl : EQ' “x | x = x”
-  | replace (p : SyntacticSemiformula L 1) : EQ' “∀ x y, x = y → !p x → !p y”
+  | replace (φ : SyntacticSemiformula L 1) : EQ' “∀ x y, x = y → !φ x → !φ y”
 
 notation "𝐄𝐐'" => EQ'
 
 variable (T : Theory L)
 
 noncomputable instance EQ'.subTheoryOfEQ : (𝐄𝐐' : Theory L) ≼ 𝐄𝐐 := System.Subtheory.ofAxm! <| by
-  rintro p h
-  rcases (show 𝐄𝐐' p from h)
+  rintro φ h
+  rcases (show 𝐄𝐐' φ from h)
   case refl =>
     apply System.by_axm _ (by simpa using eqAxiom.refl)
-  case replace p =>
+  case replace φ =>
     apply complete <| EQ.provOf.{0, 0} _ ?_
     intro M _ s _ _
     simp [models_iff, Semiformula.eval_substs]

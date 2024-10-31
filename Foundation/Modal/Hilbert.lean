@@ -19,16 +19,16 @@ structure InferenceRule (α : Type*) where
   -/
   antecedents_nonempty : antecedents ≠ [] := by simp
 
-abbrev Necessitation (p : Formula α) : InferenceRule α := ⟨[p], □p, by simp⟩
-abbrev Necessitation.set : Set (InferenceRule α) := { Necessitation p | p }
+abbrev Necessitation (φ : Formula α) : InferenceRule α := ⟨[φ], □φ, by simp⟩
+abbrev Necessitation.set : Set (InferenceRule α) := { Necessitation φ | φ }
 notation "⟮Nec⟯" => Necessitation.set
 
-abbrev LoebRule (p : Formula α) : InferenceRule α := ⟨[□p ➝ p], p, by simp⟩
-abbrev LoebRule.set : Set (InferenceRule α) := { LoebRule p | p }
+abbrev LoebRule (φ : Formula α) : InferenceRule α := ⟨[□φ ➝ φ], φ, by simp⟩
+abbrev LoebRule.set : Set (InferenceRule α) := { LoebRule φ | φ }
 notation "⟮Loeb⟯" => LoebRule.set
 
-abbrev HenkinRule (p : Formula α) : InferenceRule α := ⟨[□p ⭤ p], p, by simp⟩
-abbrev HenkinRule.set : Set (InferenceRule α) := { HenkinRule p | p }
+abbrev HenkinRule (φ : Formula α) : InferenceRule α := ⟨[□φ ⭤ φ], φ, by simp⟩
+abbrev HenkinRule.set : Set (InferenceRule α) := { HenkinRule φ | φ }
 notation "⟮Henkin⟯" => HenkinRule.set
 
 end
@@ -38,12 +38,12 @@ structure Hilbert (α : Type*) where
   rules : Set (InferenceRule α)
 
 inductive Deduction (Λ : Hilbert α) : (Formula α) → Type _
-  | maxm {p}     : p ∈ Λ.axioms → Deduction Λ p
-  | rule {rl}    : rl ∈ Λ.rules → (∀ {p}, p ∈ rl.antecedents → Deduction Λ p) → Deduction Λ rl.consequence
-  | mdp {p q}    : Deduction Λ (p ➝ q) → Deduction Λ p → Deduction Λ q
-  | imply₁ p q   : Deduction Λ $ Axioms.Imply₁ p q
-  | imply₂ p q r : Deduction Λ $ Axioms.Imply₂ p q r
-  | ec p q       : Deduction Λ $ Axioms.ElimContra p q
+  | maxm {φ}     : φ ∈ Λ.axioms → Deduction Λ φ
+  | rule {rl}    : rl ∈ Λ.rules → (∀ {φ}, φ ∈ rl.antecedents → Deduction Λ φ) → Deduction Λ rl.consequence
+  | mdp {φ ψ}    : Deduction Λ (φ ➝ ψ) → Deduction Λ φ → Deduction Λ ψ
+  | imply₁ φ ψ   : Deduction Λ $ Axioms.Imply₁ φ ψ
+  | imply₂ φ ψ r : Deduction Λ $ Axioms.Imply₂ φ ψ r
+  | ec φ ψ       : Deduction Λ $ Axioms.ElimContra φ ψ
 
 namespace Deduction
 
@@ -61,7 +61,7 @@ instance : System.Classical Λ where
 
 instance : System.HasDiaDuality Λ := inferInstance
 
-lemma maxm! {p} (h : p ∈ Λ.axioms) : Λ ⊢! p := ⟨maxm h⟩
+lemma maxm! {φ} (h : φ ∈ Λ.axioms) : Λ ⊢! φ := ⟨maxm h⟩
 
 end Deduction
 
@@ -74,21 +74,21 @@ class HasNecessitation (Λ : Hilbert α) where
   has_necessitation : ⟮Nec⟯ ⊆ Λ.rules := by aesop
 
 instance [HasNecessitation Λ] : System.Necessitation Λ where
-  nec := @λ p d => rule (show { antecedents := [p], consequence := □p } ∈ Λ.rules by apply HasNecessitation.has_necessitation; simp_all) (by aesop);
+  nec := @λ φ d => rule (show { antecedents := [φ], consequence := □φ } ∈ Λ.rules by apply HasNecessitation.has_necessitation; simp_all) (by aesop);
 
 
 class HasLoebRule (Λ : Hilbert α) where
   has_loeb : ⟮Loeb⟯ ⊆ Λ.rules := by aesop
 
 instance [HasLoebRule Λ] : System.LoebRule Λ where
-  loeb := @λ p d => rule (show { antecedents := [□p ➝ p], consequence := p } ∈ Λ.rules by apply HasLoebRule.has_loeb; simp_all) (by aesop);
+  loeb := @λ φ d => rule (show { antecedents := [□φ ➝ φ], consequence := φ } ∈ Λ.rules by apply HasLoebRule.has_loeb; simp_all) (by aesop);
 
 
 class HasHenkinRule (Λ : Hilbert α) where
   has_henkin : ⟮Henkin⟯ ⊆ Λ.rules := by aesop
 
 instance [HasHenkinRule Λ] : System.HenkinRule Λ where
-  henkin := @λ p d => rule (show { antecedents := [□p ⭤ p], consequence := p } ∈ Λ.rules by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
+  henkin := @λ φ d => rule (show { antecedents := [□φ ⭤ φ], consequence := φ } ∈ Λ.rules by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
 
 
 class HasNecOnly (Λ : Hilbert α) where
@@ -117,44 +117,44 @@ open Hilbert
 variable {Λ : Hilbert α}
 
 noncomputable def inducition!
-  {motive  : (p : Formula α) → Λ ⊢! p → Sort*}
+  {motive  : (φ : Formula α) → Λ ⊢! φ → Sort*}
   (hRules  : (r : InferenceRule α) → (hr : r ∈ Λ.rules) →
-             (hant : ∀ {p}, p ∈ r.antecedents → Λ ⊢! p) →
-             (ih : ∀ {p}, (hp : p ∈ r.antecedents) →
-             motive p (hant hp)) → motive r.consequence ⟨rule hr (λ hp => (hant hp).some)⟩)
-  (hMaxm     : ∀ {p}, (h : p ∈ Λ.axioms) → motive p ⟨maxm h⟩)
-  (hMdp      : ∀ {p q}, {hpq : Λ ⊢! p ➝ q} → {hp : Λ ⊢! p} → motive (p ➝ q) hpq → motive p hp → motive q ⟨mdp hpq.some hp.some⟩)
-  (hImply₁     : ∀ {p q}, motive (p ➝ q ➝ p) $ ⟨imply₁ p q⟩)
-  (hImply₂     : ∀ {p q r}, motive ((p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r) $ ⟨imply₂ p q r⟩)
-  (hElimContra : ∀ {p q}, motive (Axioms.ElimContra p q) $ ⟨ec p q⟩)
-  : ∀ {p}, (d : Λ ⊢! p) → motive p d := by
-  intro p d;
+             (hant : ∀ {φ}, φ ∈ r.antecedents → Λ ⊢! φ) →
+             (ih : ∀ {φ}, (hp : φ ∈ r.antecedents) →
+             motive φ (hant hp)) → motive r.consequence ⟨rule hr (λ hp => (hant hp).some)⟩)
+  (hMaxm     : ∀ {φ}, (h : φ ∈ Λ.axioms) → motive φ ⟨maxm h⟩)
+  (hMdp      : ∀ {φ ψ}, {hpq : Λ ⊢! φ ➝ ψ} → {hp : Λ ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ ⟨mdp hpq.some hp.some⟩)
+  (hImply₁     : ∀ {φ ψ}, motive (φ ➝ ψ ➝ φ) $ ⟨imply₁ φ ψ⟩)
+  (hImply₂     : ∀ {φ ψ r}, motive ((φ ➝ ψ ➝ r) ➝ (φ ➝ ψ) ➝ φ ➝ r) $ ⟨imply₂ φ ψ r⟩)
+  (hElimContra : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ ⟨ec φ ψ⟩)
+  : ∀ {φ}, (d : Λ ⊢! φ) → motive φ d := by
+  intro φ d;
   induction d.some with
   | maxm h => exact hMaxm h
   | mdp hpq hp ihpq ihp => exact hMdp (ihpq ⟨hpq⟩) (ihp ⟨hp⟩)
-  | rule hr h ih => apply hRules _ hr; intro p hp; exact ih hp ⟨h hp⟩;
+  | rule hr h ih => apply hRules _ hr; intro φ hp; exact ih hp ⟨h hp⟩;
   | imply₁ => exact hImply₁
   | imply₂ => exact hImply₂
   | ec => exact hElimContra
 
 /-- Useful induction for normal modal logic. -/
 noncomputable def inducition_with_necOnly! [Λ.HasNecOnly]
-  {motive  : (p : Formula α) → Λ ⊢! p → Prop}
-  (hMaxm   : ∀ {p}, (h : p ∈ Λ.axioms) → motive p ⟨maxm h⟩)
-  (hMdp    : ∀ {p q}, {hpq : Λ ⊢! p ➝ q} → {hp : Λ ⊢! p} → motive (p ➝ q) hpq → motive p hp → motive q (hpq ⨀ hp))
-  (hNec    : ∀ {p}, {hp : Λ ⊢! p} → (ihp : motive p hp) → motive (□p) (System.nec! hp))
-  (hImply₁   : ∀ {p q}, motive (p ➝ q ➝ p) $ ⟨imply₁ p q⟩)
-  (hImply₂   : ∀ {p q r}, motive ((p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r) $ ⟨imply₂ p q r⟩)
-  (hElimContra : ∀ {p q}, motive (Axioms.ElimContra p q) $ ⟨ec p q⟩)
-  : ∀ {p}, (d : Λ ⊢! p) → motive p d := by
-  intro p d;
+  {motive  : (φ : Formula α) → Λ ⊢! φ → Prop}
+  (hMaxm   : ∀ {φ}, (h : φ ∈ Λ.axioms) → motive φ ⟨maxm h⟩)
+  (hMdp    : ∀ {φ ψ}, {hpq : Λ ⊢! φ ➝ ψ} → {hp : Λ ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (hpq ⨀ hp))
+  (hNec    : ∀ {φ}, {hp : Λ ⊢! φ} → (ihp : motive φ hp) → motive (□φ) (System.nec! hp))
+  (hImply₁   : ∀ {φ ψ}, motive (φ ➝ ψ ➝ φ) $ ⟨imply₁ φ ψ⟩)
+  (hImply₂   : ∀ {φ ψ r}, motive ((φ ➝ ψ ➝ r) ➝ (φ ➝ ψ) ➝ φ ➝ r) $ ⟨imply₂ φ ψ r⟩)
+  (hElimContra : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ ⟨ec φ ψ⟩)
+  : ∀ {φ}, (d : Λ ⊢! φ) → motive φ d := by
+  intro φ d;
   induction d using Deduction.inducition! with
   | hMaxm h => exact hMaxm h
   | hMdp ihpq ihp => exact hMdp (ihpq) (ihp);
   | hRules rl hrl hant ih =>
     rw [HasNecOnly.has_necessitation_only] at hrl;
-    obtain ⟨p, rfl⟩ := hrl;
-    exact @hNec p (hant (by simp)) $ ih (by simp);
+    obtain ⟨φ, rfl⟩ := hrl;
+    exact @hNec φ (hant (by simp)) $ ih (by simp);
   | hImply₁ => exact hImply₁
   | hImply₂ => exact hImply₂
   | hElimContra => exact hElimContra
@@ -196,7 +196,7 @@ variable {Ax : Theory α}
 
 lemma def_ax : (𝜿Ax).axioms = (𝗞 ∪ Ax) := by simp;
 
-lemma maxm! (h : p ∈ Ax) : 𝜿Ax ⊢! p := ⟨Deduction.maxm (by simp [def_ax]; right; assumption)⟩
+lemma maxm! (h : φ ∈ Ax) : 𝜿Ax ⊢! φ := ⟨Deduction.maxm (by simp [def_ax]; right; assumption)⟩
 
 end Normal
 
@@ -350,10 +350,10 @@ open System
 open Formula (atom)
 
 lemma normal_weakerThan_of_maxm {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal]
-  (hMaxm : ∀ {p : Formula α}, p ∈ Λ₁.axioms → Λ₂ ⊢! p)
+  (hMaxm : ∀ {φ : Formula α}, φ ∈ Λ₁.axioms → Λ₂ ⊢! φ)
   : Λ₁ ≤ₛ Λ₂ := by
   apply System.weakerThan_iff.mpr;
-  intro p h;
+  intro φ h;
   induction h using Deduction.inducition_with_necOnly! with
   | hMaxm hp => exact hMaxm hp;
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
@@ -363,7 +363,7 @@ lemma normal_weakerThan_of_maxm {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ�
 lemma normal_weakerThan_of_subset {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal] (hSubset : Λ₁.axioms ⊆ Λ₂.axioms)
   : Λ₁ ≤ₛ Λ₂ := by
   apply normal_weakerThan_of_maxm;
-  intro p hp;
+  intro φ hp;
   exact ⟨Deduction.maxm $ hSubset hp⟩;
 
 lemma K_weakerThan_KD : (𝐊 : Hilbert α) ≤ₛ 𝐊𝐃 := normal_weakerThan_of_subset $ by aesop;
@@ -390,40 +390,40 @@ lemma K_weakerThan_GL : (𝐊 : Hilbert α) ≤ₛ 𝐆𝐋 := normal_weakerThan
 
 lemma K4_weakerThan_Triv : (𝐊𝟒 : Hilbert α) ≤ₛ 𝐓𝐫𝐢𝐯 := by
   apply normal_weakerThan_of_maxm;
-  intro p hp;
+  intro φ hp;
   rcases hp with (hK | hFour)
   . obtain ⟨_, _, rfl⟩ := hK; exact axiomK!;
   . obtain ⟨_, _, rfl⟩ := hFour; exact axiomFour!;
 
 lemma K4_weakerThan_GL : (𝐊𝟒 : Hilbert α) ≤ₛ 𝐆𝐋 := by
   apply normal_weakerThan_of_maxm;
-  intro p hp;
+  intro φ hp;
   rcases hp with (hK | hFour)
   . obtain ⟨_, _, rfl⟩ := hK; exact axiomK!;
   . obtain ⟨_, _, rfl⟩ := hFour; exact axiomFour!;
 
 lemma KT_weakerThan_Grz : (𝐊𝐓 : Hilbert α) ≤ₛ 𝐆𝐫𝐳 := by
   apply normal_weakerThan_of_maxm;
-  intro p hp;
+  intro φ hp;
   rcases hp with (hK | hGrz)
   . obtain ⟨_, _, rfl⟩ := hK; exact axiomK!;
   . obtain ⟨_, _, rfl⟩ := hGrz; exact axiomT!;
 
 lemma K4_weakerThan_Grz : (𝐊𝟒 : Hilbert α) ≤ₛ 𝐆𝐫𝐳 := by
   apply normal_weakerThan_of_maxm;
-  intro p hp;
+  intro φ hp;
   rcases hp with (hK | hGrz)
   . obtain ⟨_, _, rfl⟩ := hK; exact axiomK!;
   . obtain ⟨_, _, rfl⟩ := hGrz; exact axiomFour!;
 
 
 lemma KD_weakerThan_KP : (𝐊𝐃 : Hilbert α) ≤ₛ 𝐊𝐏 := normal_weakerThan_of_maxm $ by
-  rintro p (⟨p, q, rfl⟩ | ⟨p, rfl⟩);
+  rintro φ (⟨φ, ψ, rfl⟩ | ⟨φ, rfl⟩);
   . exact axiomK!;
   . exact axiomD!;
 
 lemma KP_weakerThan_KD : (𝐊𝐏 : Hilbert α) ≤ₛ 𝐊𝐃 := normal_weakerThan_of_maxm $ by
-  rintro p (⟨p, q, rfl⟩ | ⟨_, rfl⟩);
+  rintro φ (⟨φ, ψ, rfl⟩ | ⟨_, rfl⟩);
   . exact axiomK!;
   . exact axiomP!;
 
@@ -432,7 +432,7 @@ lemma KD_equiv_KP : (𝐊𝐃 : Hilbert α) =ₛ 𝐊𝐏 := Equiv.antisymm_iff.
 
 lemma GL_weakerThan_K4Loeb : (𝐆𝐋 : Hilbert α) ≤ₛ 𝐊𝟒(𝐋) := by
   apply System.weakerThan_iff.mpr;
-  intro p h;
+  intro φ h;
   induction h using Deduction.inducition_with_necOnly! with
   | hMaxm hp =>
     rcases hp with (hK | hL)
@@ -444,7 +444,7 @@ lemma GL_weakerThan_K4Loeb : (𝐆𝐋 : Hilbert α) ≤ₛ 𝐊𝟒(𝐋) := by
 
 lemma K4Loeb_weakerThan_K4Henkin : (𝐊𝟒(𝐋) : Hilbert α) ≤ₛ 𝐊𝟒(𝐇) := by
   apply System.weakerThan_iff.mpr;
-  intro p h;
+  intro φ h;
   induction h using Deduction.inducition! with
   | hMaxm hp =>
     rcases hp with (hK | hFour)
@@ -453,13 +453,13 @@ lemma K4Loeb_weakerThan_K4Henkin : (𝐊𝟒(𝐋) : Hilbert α) ≤ₛ 𝐊𝟒
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
   | hRules rl hrl hant ihp =>
     rcases hrl with (hNec | hLoeb);
-    . obtain ⟨p, rfl⟩ := hNec; exact nec! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
-    . obtain ⟨p, rfl⟩ := hLoeb; exact loeb! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
+    . obtain ⟨φ, rfl⟩ := hNec; exact nec! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
+    . obtain ⟨φ, rfl⟩ := hLoeb; exact loeb! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
   | _ => trivial;
 
 lemma K4Henkin_weakerThan_K4H : (𝐊𝟒(𝐇) : Hilbert α) ≤ₛ 𝐊𝟒𝐇 := by
   apply System.weakerThan_iff.mpr;
-  intro p h;
+  intro φ h;
   induction h using Deduction.inducition! with
   | hMaxm hp =>
     rcases hp with (hK | hFour)
@@ -468,13 +468,13 @@ lemma K4Henkin_weakerThan_K4H : (𝐊𝟒(𝐇) : Hilbert α) ≤ₛ 𝐊𝟒�
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
   | hRules rl hrl hant ihp =>
     rcases hrl with (hNec | hHenkin);
-    . obtain ⟨p, rfl⟩ := hNec; exact nec! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
-    . obtain ⟨p, rfl⟩ := hHenkin; exact henkin! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
+    . obtain ⟨φ, rfl⟩ := hNec; exact nec! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
+    . obtain ⟨φ, rfl⟩ := hHenkin; exact henkin! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
   | _ => trivial;
 
 lemma K4Henkin_weakerThan_GL : (𝐊𝟒𝐇 : Hilbert α) ≤ₛ 𝐆𝐋 := by
   apply normal_weakerThan_of_maxm;
-  intro p hp;
+  intro φ hp;
   rcases hp with hK | hFour | hH
   . obtain ⟨_, _, rfl⟩ := hK; exact axiomK!;
   . obtain ⟨_, _, rfl⟩ := hFour; exact axiomFour!;
@@ -489,12 +489,12 @@ lemma GL_equiv_K4Loeb : (𝐆𝐋 : Hilbert α) =ₛ 𝐊𝟒(𝐋) := by
 set_option linter.unusedSectionVars false in -- TODO: remove
 lemma GL_weakerThan_GLS : (𝐆𝐋 : Hilbert α) ≤ₛ 𝐆𝐋𝐒 := by
   apply System.weakerThan_iff.mpr;
-  intro p h;
+  intro φ h;
   exact Deduction.maxm! (by left; simpa);
 
 lemma S5Grz_weakerThan_Triv : (𝐒𝟓𝐆𝐫𝐳 : Hilbert α) ≤ₛ 𝐓𝐫𝐢𝐯 := by
   apply normal_weakerThan_of_maxm;
-  intro p hp;
+  intro φ hp;
   rcases hp with ⟨_, _, rfl⟩ | (⟨_, rfl⟩ | ⟨_, rfl⟩) | ⟨_, rfl⟩
   . exact axiomK!;
   . exact axiomT!;
@@ -503,7 +503,7 @@ lemma S5Grz_weakerThan_Triv : (𝐒𝟓𝐆𝐫𝐳 : Hilbert α) ≤ₛ 𝐓�
 
 lemma Triv_weakerThan_S5Grz : (𝐓𝐫𝐢𝐯 : Hilbert α) ≤ₛ 𝐒𝟓𝐆𝐫𝐳 := by
   apply normal_weakerThan_of_maxm;
-  intro p hp;
+  intro φ hp;
   rcases hp with ⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩
   . exact axiomK!;
   . exact axiomT!;
