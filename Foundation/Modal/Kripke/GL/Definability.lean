@@ -10,45 +10,7 @@ open System
 open Kripke
 open Formula
 
-variable {α : Type u} [Inhabited α]
-
-private lemma trans_of_L {F : Kripke.Frame} : F#α ⊧* 𝗟 → Transitive F.Rel := by
-  contrapose;
-  intro hT; simp [Transitive] at hT;
-  obtain ⟨w₁, w₂, r₁₂, w₃, r₂₃, nr₁₃⟩ := hT;
-  apply iff_not_validOnFrame.mpr;
-  use (Axioms.L (atom default));
-  constructor;
-  . simp;
-  . use (λ w' _ => w' ≠ w₂ ∧ w' ≠ w₃), w₁;
-    simp only [Kripke.Satisfies]; simp;
-    constructor;
-    . intro x hx h;
-      by_cases hx₂ : x = w₂;
-      . subst hx₂;
-        simpa using h _ r₂₃;
-      . by_cases hx₃ : x = w₃ <;> simp_all [Kripke.Satisfies, hx₃];
-    . existsi w₂; simpa [Kripke.Satisfies];
-
-private lemma cwf_of_L {F : Kripke.Frame} : F#α ⊧* 𝗟 → ConverseWellFounded F.Rel := by
-  contrapose;
-  intro hCF;
-  obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
-  apply iff_not_validOnFrame.mpr;
-  use (Axioms.L (atom default));
-  constructor;
-  . simp;
-  . use (λ w _ => w ∉ X), x;
-    simp only [Kripke.Satisfies]; simp;
-    constructor;
-    . intro y _;
-      by_cases hys : y ∈ X
-      . obtain ⟨z, _, Rxz⟩ := hX₂ y hys;
-        simp_all;
-        use z;
-      . aesop;
-    . obtain ⟨y, _, _⟩ := hX₂ x (by assumption);
-      use y;
+variable {α : Type u}
 
 private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F#α ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
@@ -69,6 +31,47 @@ private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ Conv
       apply not_imp_not.mp $ hm₂ n (hTrans rwm rmn);
       exact rmn;
     . exact hm;
+
+private lemma trans_of_L  [Inhabited α] {F : Kripke.Frame} : F#α ⊧* 𝗟 → Transitive F.Rel := by
+  contrapose;
+  intro hT; simp [Transitive] at hT;
+  obtain ⟨w₁, w₂, r₁₂, w₃, r₂₃, nr₁₃⟩ := hT;
+  apply iff_not_validOnFrame.mpr;
+  use (Axioms.L (atom default));
+  constructor;
+  . simp;
+  . use (λ w' _ => w' ≠ w₂ ∧ w' ≠ w₃), w₁;
+    simp only [Kripke.Satisfies]; simp;
+    constructor;
+    . intro x hx h;
+      by_cases hx₂ : x = w₂;
+      . subst hx₂;
+        simpa using h _ r₂₃;
+      . by_cases hx₃ : x = w₃ <;> simp_all [Kripke.Satisfies, hx₃];
+    . existsi w₂; simpa [Kripke.Satisfies];
+
+variable [Inhabited α]
+
+private lemma cwf_of_L {F : Kripke.Frame} : F#α ⊧* 𝗟 → ConverseWellFounded F.Rel := by
+  contrapose;
+  intro hCF;
+  obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
+  apply iff_not_validOnFrame.mpr;
+  use (Axioms.L (atom default));
+  constructor;
+  . simp;
+  . use (λ w _ => w ∉ X), x;
+    simp only [Kripke.Satisfies]; simp;
+    constructor;
+    . intro y _;
+      by_cases hys : y ∈ X
+      . obtain ⟨z, _, Rxz⟩ := hX₂ y hys;
+        simp_all;
+        use z;
+      . intros;
+        simp_all only [not_false_eq_true];
+    . obtain ⟨y, _, _⟩ := hX₂ x (by assumption);
+      use y;
 
 instance axiomL_definability : 𝔽((𝗟 : Theory α)).DefinedBy (TransitiveConverseWellFoundedFrameClass) where
   define := by

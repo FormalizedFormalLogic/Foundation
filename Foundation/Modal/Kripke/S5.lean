@@ -7,7 +7,7 @@ open LO.Kripke
 
 namespace Kripke
 
-variable {α : Type u} [Inhabited α] [DecidableEq α]
+variable {α : Type u}
 
 lemma iff_Universal_ReflexiveEuclidean_validOnFrameClass : UniversalFrameClass.{u}#α ⊧ p ↔ ReflexiveEuclideanFrameClass.{u}#α ⊧ p := by
   constructor;
@@ -17,7 +17,7 @@ lemma iff_Universal_ReflexiveEuclidean_validOnFrameClass : UniversalFrameClass.{
   . rintro h F F_univ;
     exact @h F (⟨refl_of_universal F_univ, eucl_of_universal F_univ⟩);
 
-instance S5_complete_universal : Complete 𝐒𝟓 (UniversalFrameClass.{u}#α) := ⟨by
+instance S5_complete_universal [Inhabited α] [DecidableEq α] : Complete 𝐒𝟓 (UniversalFrameClass.{u}#α) := ⟨by
   intro p hF;
   exact S5_complete.complete $ iff_Universal_ReflexiveEuclidean_validOnFrameClass.mp hF;
 ⟩

@@ -15,10 +15,10 @@ variable [DecidableEq α]
          {M : Kripke.Model α} {r x : M.World} {p q : Formula α}
 
 open Formula.Kripke
-open Formula.Subformulas
+open Formula.subformulae
 
 lemma iff_satisfy_complexity_limit_modelAux
-  (hq : q ∈ 𝒮 p)
+  (hq : q ∈ p.subformulae)
   (hx : ∃ n ≤ p.complexity - q.complexity, r ≺^[n] x)
   : x ⊧ q ↔ Satisfies (ComplexityLimitedModel M r p) ⟨x, (by obtain ⟨n, _, _⟩ := hx; use n; exact ⟨by omega, by assumption⟩)⟩ q := by
   induction q using Formula.rec' generalizing x p with
@@ -64,10 +64,10 @@ lemma iff_satisfy_complexity_limit_modelAux
   | _ => simp [Satisfies, ComplexityLimitedModel];
 
 lemma iff_satisfy_complexity_limit_model : r ⊧ p ↔ Satisfies (ComplexityLimitedModel M r p) ⟨r, (by use 0; simp)⟩ p := by
-  apply iff_satisfy_complexity_limit_modelAux (show p ∈ 𝒮 p by simp);
+  apply iff_satisfy_complexity_limit_modelAux (show p ∈ p.subformulae by simp);
   use 0; simp;
 
-lemma complexity_limit_model_subformula_closedAux {q₁ q₂ : Formula α} (hq₁ : p ∈ 𝒮 q₁) (hq₂ : p ∈ 𝒮 q₂)
+lemma complexity_limit_model_subformula_closedAux {q₁ q₂ : Formula α} (hq₁ : p ∈ q₁.subformulae) (hq₂ : p ∈ q₂.subformulae)
   : Satisfies (ComplexityLimitedModel M r q₁) ⟨r, (by use 0; simp)⟩ p → Satisfies (ComplexityLimitedModel M r q₂) ⟨r, (by use 0; simp)⟩ p := by
   intro h;
   apply @iff_satisfy_complexity_limit_modelAux α _ M r r q₂ p (by assumption) ?_ |>.mp;
@@ -75,7 +75,7 @@ lemma complexity_limit_model_subformula_closedAux {q₁ q₂ : Formula α} (hq�
   use 0; simp;
   use 0; simp;
 
-lemma complexity_limit_model_subformula_closed (hq : p ∈ 𝒮 q)
+lemma complexity_limit_model_subformula_closed (hq : p ∈ q.subformulae)
   : Satisfies (ComplexityLimitedModel M r p) ⟨r, (by use 0; simp)⟩ p ↔ Satisfies (ComplexityLimitedModel M r q) ⟨r, (by use 0; simp)⟩ p := by
   constructor;
   . apply complexity_limit_model_subformula_closedAux <;> simp_all;

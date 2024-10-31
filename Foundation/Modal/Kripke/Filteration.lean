@@ -185,11 +185,11 @@ instance K_finite_complete [DecidableEq α] : Complete 𝐊 (AllFrameClass.{u}�
   apply K_complete.complete;
   intro F _ V x;
   let M : Kripke.Model α := ⟨F, V⟩;
-  let FM := CoarsestFilterationModel M ↑(𝒮 p);
+  let FM := CoarsestFilterationModel M ↑p.subformulae;
 
   apply filteration FM (CoarsestFilterationModel.filterOf) (by aesop) |>.mpr;
   apply hp (by
-    suffices Finite (FilterEqvQuotient M p.Subformulas) by simp; use ⟨FM.Frame⟩;
+    suffices Finite (FilterEqvQuotient M p.subformulae) by simp; use ⟨FM.Frame⟩;
     apply FilterEqvQuotient.finite;
     simp;
   ) FM.Valuation
@@ -203,10 +203,10 @@ instance KTB_finite_complete [DecidableEq α] [Inhabited α] : Complete 𝐊𝐓
   apply KTB_complete.complete;
   intro F ⟨F_refl, F_symm⟩ V x;
   let M : Kripke.Model α := ⟨F, V⟩;
-  let FM := FinestFilterationModel M (𝒮 p);
+  let FM := FinestFilterationModel M p.subformulae;
   apply filteration FM (FinestFilterationModel.filterOf) (by aesop) |>.mpr;
   apply hp (by
-    suffices Finite (FilterEqvQuotient M (𝒮 p)) by
+    suffices Finite (FilterEqvQuotient M p.subformulae) by
       use ⟨FM.Frame⟩;
       refine ⟨⟨?_, ?_⟩, ?_⟩;
       . apply reflexive_filteration_model (FinestFilterationModel.filterOf);
@@ -277,10 +277,10 @@ instance S4_finite_complete [Inhabited α] [DecidableEq α] : Complete 𝐒𝟒 
   apply S4_complete.complete;
   intro F ⟨F_refl, F_trans⟩ V x;
   let M : Kripke.Model α := ⟨F, V⟩;
-  let FM := FinestFilterationTransitiveClosureModel M (𝒮 p);
-  apply @filteration α M (𝒮 p) _ FM ?filterOf x p (by simp) |>.mpr;
+  let FM := FinestFilterationTransitiveClosureModel M p.subformulae;
+  apply @filteration α M p.subformulae _ FM ?filterOf x p (by simp) |>.mpr;
   apply hp (by
-    suffices Finite (FilterEqvQuotient M (𝒮 p)) by
+    suffices Finite (FilterEqvQuotient M p.subformulae) by
       use ⟨FM.Frame⟩;
       refine ⟨⟨?_, rel_transitive⟩, rfl⟩;
       . exact rel_reflexive (by apply F_trans) F_refl;
@@ -300,10 +300,10 @@ instance KT4B_finite_complete [Inhabited α] [DecidableEq α] : Complete 𝐊�
   apply KT4B_complete.complete;
   intro F ⟨F_refl, F_trans, F_symm⟩ V x;
   let M : Kripke.Model α := ⟨F, V⟩;
-  let FM := FinestFilterationTransitiveClosureModel M (𝒮 p);
-  apply @filteration α M (𝒮 p) _ FM ?filterOf x p (by simp) |>.mpr;
+  let FM := FinestFilterationTransitiveClosureModel M p.subformulae;
+  apply @filteration α M p.subformulae _ FM ?filterOf x p (by simp) |>.mpr;
   apply hp (by
-    suffices Finite (FilterEqvQuotient M (𝒮 p)) by
+    suffices Finite (FilterEqvQuotient M p.subformulae) by
       use ⟨FM.Frame⟩;
       refine ⟨⟨?refl, rel_transitive, ?symm⟩, rfl⟩;
       . exact rel_reflexive (by apply F_trans) F_refl;

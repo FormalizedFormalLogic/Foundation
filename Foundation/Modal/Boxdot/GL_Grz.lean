@@ -100,7 +100,7 @@ end Kripke
 open Formula.Kripke
 open Kripke
 
-variable {α : Type u} [Inhabited α] [DecidableEq α]
+variable {α : Type u} [DecidableEq α]
 variable {p : Formula α}
 
 open Formula (BoxdotTranslation)
@@ -111,7 +111,7 @@ lemma boxdotTranslatedGL_of_Grz : 𝐆𝐫𝐳 ⊢! p → 𝐆𝐋 ⊢! pᵇ := 
   . dsimp [BoxdotTranslation]; exact boxdot_axiomK!;
   . dsimp [BoxdotTranslation]; exact boxdot_Grz_of_L!
 
-lemma Grz_of_boxdotTranslatedGL : 𝐆𝐋 ⊢! pᵇ → 𝐆𝐫𝐳 ⊢! p := by
+lemma Grz_of_boxdotTranslatedGL [Inhabited α] : 𝐆𝐋 ⊢! pᵇ → 𝐆𝐫𝐳 ⊢! p := by
   contrapose;
   intro h;
   apply (not_imp_not.mpr $ Kripke.GL_finite_sound.sound);
@@ -134,11 +134,11 @@ lemma Grz_of_boxdotTranslatedGL : 𝐆𝐋 ⊢! pᵇ → 𝐆𝐫𝐳 ⊢! p := 
     use V, x;
     exact iff_reflexivize_irreflexivize FF_refl |>.not.mp h;
 
-theorem iff_Grz_boxdotTranslatedGL : 𝐆𝐫𝐳 ⊢! p ↔ 𝐆𝐋 ⊢! pᵇ := by
+theorem iff_Grz_boxdotTranslatedGL [Inhabited α] : 𝐆𝐫𝐳 ⊢! p ↔ 𝐆𝐋 ⊢! pᵇ := by
   constructor;
   . apply boxdotTranslatedGL_of_Grz;
   . apply Grz_of_boxdotTranslatedGL;
 
-instance : BoxdotProperty (α := α) 𝐆𝐫𝐳 𝐆𝐋 := ⟨iff_Grz_boxdotTranslatedGL⟩
+instance [Inhabited α] : BoxdotProperty (α := α) 𝐆𝐫𝐳 𝐆𝐋 := ⟨iff_Grz_boxdotTranslatedGL⟩
 
 end LO.Modal

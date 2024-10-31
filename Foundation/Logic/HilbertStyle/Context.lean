@@ -101,7 +101,7 @@ def weakening [DecidableEq F] (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢] p → Δ ⊢[�
 
 lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢]! p → Δ ⊢[𝓢]! p := fun h ↦ Axiomatized.le_of_subset (by simpa) h
 
-def of {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := dhyp (⋀Γ) b
+def of {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := imply₁' (q := ⋀Γ) b
 
 def emptyPrf {p : F} : [] ⊢[𝓢] p → 𝓢 ⊢ p := fun b ↦ b ⨀ verum
 
@@ -146,7 +146,7 @@ instance [System.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : System.Minimal Γ w
 def mdp' [DecidableEq F] (bΓ : Γ ⊢[𝓢] p ➝ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[𝓢] q := wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
 def deduct {p q : F} : {Γ : List F} → (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ➝ q
-  | .nil => fun b ↦ ofDef <| dhyp _ (toDef b)
+  | .nil => fun b ↦ ofDef <| imply₁' (toDef b)
   | .cons _ _ => fun b ↦ ofDef <| andImplyIffImplyImply'.mp (impTrans'' (andComm _ _) (toDef b))
 
 lemma deduct! (h : (p :: Γ) ⊢[𝓢]! q) :  Γ ⊢[𝓢]! p ➝ q  := ⟨FiniteContext.deduct h.some⟩

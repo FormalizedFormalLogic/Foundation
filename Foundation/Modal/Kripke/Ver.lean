@@ -12,7 +12,7 @@ open System
 open Kripke
 open Formula
 
-variable {α : Type u} [Inhabited α] [DecidableEq α]
+variable {α : Type u}
 
 lemma axiomVer_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗩𝗲𝗿 ↔ F ∈ IsolatedFrameClass) := by
   simp [Kripke.ValidOnFrame];
@@ -35,6 +35,8 @@ instance Ver_definability : 𝔽((𝐕𝐞𝐫 : Hilbert α)).DefinedBy (Isolate
 instance : Sound 𝐕𝐞𝐫 (IsolatedFrameClass#α) := inferInstance
 
 instance : System.Consistent (𝐕𝐞𝐫 : Hilbert α) := inferInstance
+
+variable [DecidableEq α]
 
 lemma isolated_CanonicalFrame {Ax : Theory α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent 𝜿Ax] : Isolated (CanonicalFrame 𝜿Ax) := by
   intro x y rxy;

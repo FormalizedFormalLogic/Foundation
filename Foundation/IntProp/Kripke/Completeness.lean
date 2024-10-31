@@ -13,8 +13,9 @@ open Kripke
 
 namespace Kripke
 
-variable {α : Type u} [Inhabited α] [DecidableEq α] [Encodable α]
-         {Λ : Hilbert α} [Λ.IncludeEFQ]
+-- variable [Inhabited α] [DecidableEq α] [Encodable α] [Λ.IncludeEFQ]
+variable {α : Type u}
+         {Λ : Hilbert α}
 
 open SaturatedConsistentTableau
 
@@ -42,7 +43,7 @@ lemma transitive : Transitive (CanonicalFrame Λ) := by
   apply Set.Subset.trans;
 
 open Classical in
-lemma confluent [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
+lemma confluent [Encodable α] [Λ.IncludeEFQ] [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
   simp [Confluent, CanonicalFrame];
   intro x y z Rxy Rxz;
   suffices Tableau.Consistent Λ (y.tableau.1 ∪ z.tableau.1, ∅) by
@@ -132,7 +133,7 @@ lemma confluent [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
   exact mdp₁_mem mem_nnΘz_x $ mdp₁ mem_Θx_x d;
 
 
-lemma connected [HasAxiomDummett Λ] : Connected (CanonicalFrame Λ) := by
+lemma connected [DecidableEq α] [HasAxiomDummett Λ] : Connected (CanonicalFrame Λ) := by
   simp [Connected, CanonicalFrame];
   intro x y z Rxy Ryz;
   apply or_iff_not_imp_left.mpr;
@@ -181,6 +182,7 @@ variable [Nonempty (SCT Λ)]
 variable {t : SCT Λ} {p q : Formula α}
 
 private lemma truthlemma.himp
+  [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
   {t : (CanonicalModel Λ).World}
   (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ p ↔ p ∈ t.tableau.1)
   (ihq : ∀ {t : (CanonicalModel Λ).World}, t ⊧ q ↔ q ∈ t.tableau.1)
@@ -233,6 +235,7 @@ private lemma truthlemma.himp
       );
 
 private lemma truthlemma.hneg
+  [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
   {t : (CanonicalModel Λ).World}
   (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ p ↔ p ∈ t.tableau.1)
   : t ⊧ ∼p ↔ ∼p ∈ t.tableau.1 := by
@@ -264,13 +267,17 @@ private lemma truthlemma.hneg
     have : Λ ⊢! p ⋏ ∼p ➝ ⊥ := intro_bot_of_and!;
     contradiction;
 
-lemma truthlemma {t : (CanonicalModel Λ).World} : t ⊧ p ↔ p ∈ t.tableau.1 := by
+lemma truthlemma
+  [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
+  {t : (CanonicalModel Λ).World} : t ⊧ p ↔ p ∈ t.tableau.1 := by
   induction p using Formula.rec' generalizing t with
   | himp p q ihp ihq => exact truthlemma.himp ihp ihq
   | hneg p ihp => exact truthlemma.hneg ihp;
   | _ => simp [Satisfies.iff_models, Satisfies, *];
 
-lemma deducible_of_validOnCanonicelModel : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢! p := by
+lemma deducible_of_validOnCanonicelModel
+  [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
+  : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢! p := by
   constructor;
   . contrapose;
     intro h;
@@ -296,9 +303,10 @@ lemma deducible_of_validOnCanonicelModel : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢!
 section
 
 variable [System.Consistent Λ]
-variable [DecidableEq α] [Encodable α]
+variable [DecidableEq α] [Encodable α] [Λ.IncludeEFQ]
 variable {𝔽 : Kripke.FrameClass}
 
+omit [Consistent Λ] in
 lemma complete (H : CanonicalFrame Λ ∈ 𝔽) {p : Formula α} : 𝔽#α ⊧ p → Λ ⊢! p := by
   intro h;
   apply deducible_of_validOnCanonicelModel.mp;

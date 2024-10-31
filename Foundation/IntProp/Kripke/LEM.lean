@@ -14,7 +14,6 @@ open System
 open Formula Formula.Kripke
 
 variable {α : Type u}
-variable [DecidableEq α] [Inhabited α]
 
 abbrev NoLEMFrame : Kripke.Frame where
   World := PUnit ⊕ PUnit
@@ -33,7 +32,7 @@ lemma NoLEMFrame.confluent : Confluent NoLEMFrame.Rel := by simp [Confluent];
 
 lemma NoLEMFrame.connected : Connected NoLEMFrame.Rel := by simp [Connected];
 
-lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐈𝐧𝐭) ⊧ p ⋎ ∼p) := by
+lemma noLEM_on_frameclass [Inhabited α] : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐈𝐧𝐭) ⊧ p ⋎ ∼p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -49,7 +48,7 @@ lemma noLEM_on_frameclass : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert
 /--
   Law of Excluded Middle is not always provable in intuitionistic logic.
 -/
-theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬ p ⋎ ∼p := by
+theorem noLEM [Inhabited α] : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬ p ⋎ ∼p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass (α := α);
   use p;
   by_contra hC;
@@ -59,7 +58,7 @@ theorem noLEM : ∃ (p : Formula α), 𝐈𝐧𝐭 ⊬ p ⋎ ∼p := by
 /--
   Intuitionistic logic is proper weaker than classical logic.
 -/
-theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : Hilbert α) <ₛ 𝐂𝐥 := by
+theorem Int_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (𝐈𝐧𝐭 : Hilbert α) <ₛ 𝐂𝐥 := by
   constructor;
   . exact Int_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
@@ -74,7 +73,7 @@ theorem Int_strictly_weaker_than_Cl : (𝐈𝐧𝐭 : Hilbert α) <ₛ 𝐂𝐥 
 
 section
 
-lemma noLEM_on_frameclass_KC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐊𝐂) ⊧ p ⋎ ∼p) := by
+lemma noLEM_on_frameclass_KC [DecidableEq α] [Inhabited α]  : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐊𝐂) ⊧ p ⋎ ∼p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -87,14 +86,14 @@ lemma noLEM_on_frameclass_KC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilb
     . simp;
     . simp [ValidOnModel, Satisfies];
 
-lemma noLEM_KC: ∃ (p : Formula α), 𝐊𝐂 ⊬ p ⋎ ∼p := by
+lemma noLEM_KC [DecidableEq α] [Inhabited α] : ∃ (p : Formula α), 𝐊𝐂 ⊬ p ⋎ ∼p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass_KC (α := α);
   use p;
   by_contra hC;
   have := @Kripke.sound _ _ _ hC;
   contradiction;
 
-theorem KC_strictly_weaker_than_Cl : (𝐊𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
+theorem KC_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (𝐊𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
   constructor;
   . exact KC_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
@@ -110,7 +109,7 @@ end
 
 section
 
-lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐋𝐂) ⊧ p ⋎ ∼p) := by
+lemma noLEM_on_frameclass_LC [Inhabited α] : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐋𝐂) ⊧ p ⋎ ∼p) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
@@ -123,14 +122,14 @@ lemma noLEM_on_frameclass_LC : ∃ (p : Formula α), ¬((Kripke.FrameClassOfHilb
     . simp;
     . simp [ValidOnModel, Satisfies];
 
-lemma noLEM_LC: ∃ (p : Formula α), 𝐋𝐂 ⊬ p ⋎ ∼p := by
+lemma noLEM_LC [Inhabited α] : ∃ (p : Formula α), 𝐋𝐂 ⊬ p ⋎ ∼p := by
   obtain ⟨p, hp⟩ := noLEM_on_frameclass_LC (α := α);
   use p;
   by_contra hC;
   have := @Kripke.sound _ _ _ hC;
   contradiction;
 
-theorem LC_strictly_weaker_than_Cl : (𝐋𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
+theorem LC_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (𝐋𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
   constructor;
   . exact LC_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;

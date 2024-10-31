@@ -13,8 +13,61 @@ open Formula (atom)
 open Formula.Kripke
 open Relation (IrreflGen)
 
-variable {α : Type u} [Inhabited α] [DecidableEq α]
+variable {α : Type u}
 variable {F : Kripke.Frame}
+
+private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F#α ⊧* 𝗚𝗿𝘇 := by
+  rintro ⟨hRefl, hTrans, hWCWF⟩;
+  simp [Axioms.Grz];
+  intro p V;
+
+  let X := { x | Satisfies ⟨F, V⟩ x (□(□(p ➝ □p) ➝ p)) ∧ ¬(Satisfies ⟨F, V⟩ x p) };
+  let Y := { x | Satisfies ⟨F, V⟩ x (□(□(p ➝ □p) ➝ p)) ∧ ¬(Satisfies ⟨F, V⟩ x (□p)) ∧ (Satisfies ⟨F, V⟩ x p) };
+  have : (X ∩ Y) = ∅ := by aesop;
+
+  suffices ∀ x ∈ X ∪ Y, ∃ y ∈ X ∪ Y, (IrreflGen F.Rel) x y by
+    have : (X ∪ Y) = ∅ := by
+      by_contra hC;
+      replace hC := Set.nonempty_iff_ne_empty.mpr hC;
+      obtain ⟨z, z_sub, hz⟩ := hWCWF.has_min (X ∪ Y) hC;
+      obtain ⟨x, x_sub, hx⟩ := this z z_sub;
+      exact hz x x_sub hx;
+    have : X = ∅ := by aesop;
+    -- TODO: need more refactor
+    have := Set.not_nonempty_iff_eq_empty.mpr this;
+    have := Set.nonempty_def.not.mp this; push_neg at this;
+    simp [X] at this;
+    exact this;
+
+  intro w hw;
+  rcases hw with (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
+  . have := hw₁ _ (by apply hRefl);
+    have := not_imp_not.mpr this hw₂;
+    simp [Satisfies] at this;
+    obtain ⟨x, Rwx, hx, hbx⟩ := this;
+    use x;
+    constructor;
+    . right;
+      refine ⟨?_, (by simp [Satisfies, hbx]), (by assumption)⟩;
+      intro y Rxy hy;
+      exact hw₁ _ (hTrans Rwx Rxy) hy;
+    . constructor;
+      . aesop;
+      . exact Rwx;
+  . simp [Satisfies] at hw₂;
+    obtain ⟨x, Rwx, hx⟩ := hw₂;
+    use x;
+    constructor;
+    . left;
+      refine ⟨?_, (by assumption)⟩;
+      intro y Rxy hy;
+      exact hw₁ _ (hTrans Rwx Rxy) hy;
+    . constructor;
+      . aesop;
+      . exact Rwx;
+
+
+variable [DecidableEq α]
 
 private lemma valid_on_frame_T_and_Four_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* ({□p ➝ (p ⋏ (□p ➝ □□p)) | (p : Formula α)}) := by
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
@@ -35,6 +88,8 @@ private lemma valid_on_frame_Four_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro p V x hx;
   exact (Satisfies.and_def.mp (this p V x hx) |>.2) hx;
+
+variable [Inhabited α]
 
 private lemma refl_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : Reflexive F := by
   exact axiomT_defines.define.mp $ valid_on_frame_T_of_Grz h;
@@ -109,56 +164,6 @@ private lemma WCWF_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : WCWF F := by
         contrapose;
         exact this _ hx;
       . simp [Satisfies, V];
-
-private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F#α ⊧* 𝗚𝗿𝘇 := by
-  rintro ⟨hRefl, hTrans, hWCWF⟩;
-  simp [Axioms.Grz];
-  intro p V;
-
-  let X := { x | Satisfies ⟨F, V⟩ x (□(□(p ➝ □p) ➝ p)) ∧ ¬(Satisfies ⟨F, V⟩ x p) };
-  let Y := { x | Satisfies ⟨F, V⟩ x (□(□(p ➝ □p) ➝ p)) ∧ ¬(Satisfies ⟨F, V⟩ x (□p)) ∧ (Satisfies ⟨F, V⟩ x p) };
-  have : (X ∩ Y) = ∅ := by aesop;
-
-  suffices ∀ x ∈ X ∪ Y, ∃ y ∈ X ∪ Y, (IrreflGen F.Rel) x y by
-    have : (X ∪ Y) = ∅ := by
-      by_contra hC;
-      replace hC := Set.nonempty_iff_ne_empty.mpr hC;
-      obtain ⟨z, z_sub, hz⟩ := hWCWF.has_min (X ∪ Y) hC;
-      obtain ⟨x, x_sub, hx⟩ := this z z_sub;
-      exact hz x x_sub hx;
-    have : X = ∅ := by aesop;
-    -- TODO: need more refactor
-    have := Set.not_nonempty_iff_eq_empty.mpr this;
-    have := Set.nonempty_def.not.mp this; push_neg at this;
-    simp [X] at this;
-    exact this;
-
-  intro w hw;
-  rcases hw with (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
-  . have := hw₁ _ (by apply hRefl);
-    have := not_imp_not.mpr this hw₂;
-    simp [Satisfies] at this;
-    obtain ⟨x, Rwx, hx, hbx⟩ := this;
-    use x;
-    constructor;
-    . right;
-      refine ⟨?_, (by simp [Satisfies, hbx]), (by assumption)⟩;
-      intro y Rxy hy;
-      exact hw₁ _ (hTrans Rwx Rxy) hy;
-    . constructor;
-      . aesop;
-      . exact Rwx;
-  . simp [Satisfies] at hw₂;
-    obtain ⟨x, Rwx, hx⟩ := hw₂;
-    use x;
-    constructor;
-    . left;
-      refine ⟨?_, (by assumption)⟩;
-      intro y Rxy hy;
-      exact hw₁ _ (hTrans Rwx Rxy) hy;
-    . constructor;
-      . aesop;
-      . exact Rwx;
 
 instance axiomGrz_defineability : 𝔽((𝗚𝗿𝘇 : Theory α)).DefinedBy ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass where
   define := by
