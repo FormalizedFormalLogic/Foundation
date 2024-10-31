@@ -1,4 +1,4 @@
-import Logic.FirstOrder.Arith.Hierarchy
+import Foundation.FirstOrder.Arith.Hierarchy
 
 namespace Fin
 
@@ -33,5 +33,17 @@ variable (ω : Rew L ξ₁ n₁ ξ₂ n₂)
 
 
 end Semiformula
+
+class Language.DecidableEq (L : Language) where
+  func : (k : ℕ) → DecidableEq (L.Func k)
+  rel : (k : ℕ) → DecidableEq (L.Rel k)
+
+instance (L : Language) [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] : L.DecidableEq := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+
+instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Func k) := Language.DecidableEq.func k
+
+instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
+
+instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
 
 end LO.FirstOrder

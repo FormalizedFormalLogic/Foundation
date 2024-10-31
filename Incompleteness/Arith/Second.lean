@@ -1,5 +1,5 @@
 import Incompleteness.Arith.D3
-import Logic.Logic.HilbertStyle.Supplemental
+import Foundation.Logic.HilbertStyle.Supplemental
 import Incompleteness.ToFoundation.Basic
 
 noncomputable section
@@ -192,6 +192,7 @@ lemma provableₐ_D3_context {Γ σ} (hσπ : Γ ⊢[T.alt]! U.bewₐ σ) : Γ �
 
 variable [ℕ ⊧ₘ* T] [𝐑₀ ≼ U]
 
+omit [𝐈𝚺₁ ≼ T] in
 lemma provableₐ_sound {σ} : T ⊢!. U.bewₐ σ → U ⊢! ↑σ := by
   intro h
   have : U.Provableₐ (⌜σ⌝ : ℕ) := by simpa [models₀_iff] using consequence_iff.mp (sound! (T := T) h) ℕ inferInstance
