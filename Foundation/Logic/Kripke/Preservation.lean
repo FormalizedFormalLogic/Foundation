@@ -192,7 +192,7 @@ instance [Finite F.World] : Finite (F.PointGenerated r).World := by
   apply Subtype.finite;
 
 instance [DecidableEq F.World] : DecidableEq (F.PointGenerated r).World := by
-  apply Subtype.instDecidableEq (φ := λ w => w = r ∨ r ≺ w);
+  apply Subtype.instDecidableEq (p := λ w => w = r ∨ r ≺ w);
 
 end Frame.PointGenerated
 

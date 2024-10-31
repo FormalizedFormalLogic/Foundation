@@ -13,7 +13,7 @@ postfix:90 "ᵇ" => Formula.BoxdotTranslation
 
 
 class BoxdotProperty (Λ₁ Λ₂ : Hilbert α) where
-  bdp {φ} : Λ₁ ⊢! φ ↔ Λ₂ ⊢! pᵇ
+  bdp {φ} : Λ₁ ⊢! φ ↔ Λ₂ ⊢! φᵇ
 
 
 open System
@@ -23,7 +23,7 @@ variable {φ : Formula α}
 
 theorem boxdotTranslated
   {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal]
-  (h : ∀ φ ∈ Λ₁.axioms, Λ₂ ⊢! pᵇ) : Λ₁ ⊢! φ → Λ₂ ⊢! pᵇ := by
+  (h : ∀ φ ∈ Λ₁.axioms, Λ₂ ⊢! φᵇ) : Λ₁ ⊢! φ → Λ₂ ⊢! φᵇ := by
   intro d;
   induction d using Deduction.inducition_with_necOnly! with
   | hMaxm hs => exact h _ hs;
@@ -37,7 +37,7 @@ theorem boxdotTranslated
     dsimp only [BoxdotTranslation];
     trivial;
 
-lemma boxdotTranslatedK4_of_S4 : 𝐒𝟒 ⊢! φ → 𝐊𝟒 ⊢! pᵇ := boxdotTranslated $ by
+lemma boxdotTranslatedK4_of_S4 : 𝐒𝟒 ⊢! φ → 𝐊𝟒 ⊢! φᵇ := boxdotTranslated $ by
   intro φ hp;
   simp at hp;
   rcases hp with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
@@ -45,16 +45,16 @@ lemma boxdotTranslatedK4_of_S4 : 𝐒𝟒 ⊢! φ → 𝐊𝟒 ⊢! pᵇ := boxd
   . dsimp [BoxdotTranslation]; exact boxdot_axiomT!;
   . dsimp [BoxdotTranslation]; exact boxdot_axiomFour!
 
-lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! φ ⭤ pᵇ := by
+lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! φ ⭤ φᵇ := by
   induction φ using Formula.rec' with
   | hbox φ ihp => exact iff_trans''! (box_iff! ihp) iff_box_boxdot!;
   | himp φ ψ ihp ihq => exact imp_replace_iff! ihp ihq;
   | _ => exact iff_id!;
 
-lemma S4_of_boxdotTranslatedK4 (h : 𝐊𝟒 ⊢! pᵇ) : 𝐒𝟒 ⊢! φ := by
+lemma S4_of_boxdotTranslatedK4 (h : 𝐊𝟒 ⊢! φᵇ) : 𝐒𝟒 ⊢! φ := by
   exact (and₂'! iff_boxdotTranslation_S4) ⨀ (weakerThan_iff.mp $ K4_weakerThan_S4) h
 
-theorem iff_S4_boxdotTranslatedK4 : 𝐒𝟒 ⊢! φ ↔ 𝐊𝟒 ⊢! pᵇ := by
+theorem iff_S4_boxdotTranslatedK4 : 𝐒𝟒 ⊢! φ ↔ 𝐊𝟒 ⊢! φᵇ := by
   constructor;
   . apply boxdotTranslatedK4_of_S4;
   . apply S4_of_boxdotTranslatedK4;

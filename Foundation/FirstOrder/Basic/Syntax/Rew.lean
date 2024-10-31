@@ -122,7 +122,7 @@ def toF : Rew L Empty n (Fin n) 0 := Rew.bind (&·) Empty.elim
 
 def embSubsts (v : Fin k → Semiterm L ξ n) : Rew L Empty k ξ n := Rew.bind v Empty.elim
 
-protected def ψ (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Rew L ξ₁ (n₁ + 1) ξ₂ (n₂ + 1) :=
+protected def q (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Rew L ξ₁ (n₁ + 1) ξ₂ (n₂ + 1) :=
   bind (#0 :> bShift ∘ ω ∘ bvar) (bShift ∘ ω ∘ fvar)
 
 lemma eq_id_of_eq {ω : Rew L ξ n ξ n} (hb : ∀ x, ω #x = #x) (he : ∀ x, ω &x = &x) (t) : ω t = t := by

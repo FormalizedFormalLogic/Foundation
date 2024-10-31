@@ -40,9 +40,9 @@ variable (φ : L₁ →ᵥ L₂) {M : Type w} (s₂ : Structure L₂ M)
 
 @[simp] lemma lMap_rel {k} {r : L₁.Rel k} {v : Fin k → M} : (s₂.lMap φ).rel r v ↔ s₂.rel (φ.rel r) v := of_eq rfl
 
-def ofEquiv {M : Type w} [Structure L M] {N : Type w'} (φ : M ≃ N) : Structure L N where
-  func := fun _ f v => φ (func f (φ.symm ∘ v))
-  rel  := fun _ r v => rel r (φ.symm ∘ v)
+def ofEquiv {M : Type w} [Structure L M] {N : Type w'} (Θ : M ≃ N) : Structure L N where
+  func := fun _ f v => Θ (func f (Θ.symm ∘ v))
+  rel  := fun _ r v => rel r (Θ.symm ∘ v)
 
 protected abbrev Decidable (L : Language.{u}) (M : Type w) [s : Structure L M] :=
   {k : ℕ} → (r : L.Rel k) → (v : Fin k → M) → Decidable (s.rel r v)
@@ -190,14 +190,14 @@ namespace Structure
 
 section
 
-variable [s : Structure L M] (φ : M ≃ N)
+variable [s : Structure L M] (Θ : M ≃ N)
 
 lemma ofEquiv_func (f : L.Func k) (v : Fin k → N) :
-    (ofEquiv φ).func f v = φ (func f (φ.symm ∘ v)) := rfl
+    (ofEquiv Θ).func f v = Θ (func f (Θ.symm ∘ v)) := rfl
 
 lemma ofEquiv_val (e : Fin n → N) (ε : ξ → N) (t : Semiterm L ξ n) :
-    t.val (ofEquiv φ) e ε = φ (t.val s (φ.symm ∘ e) (φ.symm ∘ ε)) := by
-  induction t <;> simp [*, Semiterm.val_func, ofEquiv_func φ, Function.comp_def]
+    t.val (ofEquiv Θ) e ε = Θ (t.val s (Θ.symm ∘ e) (Θ.symm ∘ ε)) := by
+  induction t <;> simp [*, Semiterm.val_func, ofEquiv_func Θ, Function.comp_def]
 
 end
 
@@ -494,30 +494,30 @@ namespace Structure
 section
 
 open Semiformula
-variable [s : Structure L M] (φ : M ≃ N)
+variable [s : Structure L M] (Θ : M ≃ N)
 
 lemma ofEquiv_rel (r : L.Rel k) (v : Fin k → N) :
-    (Structure.ofEquiv φ).rel r v ↔ Structure.rel r (φ.symm ∘ v) := iff_of_eq rfl
+    (Structure.ofEquiv Θ).rel r v ↔ Structure.rel r (Θ.symm ∘ v) := iff_of_eq rfl
 
 lemma eval_ofEquiv_iff : ∀ {n} {e : Fin n → N} {ε : ξ → N} {φ : Semiformula L ξ n},
-    Eval (ofEquiv φ) e ε φ ↔ Eval s (φ.symm ∘ e) (φ.symm ∘ ε) φ
+    Eval (ofEquiv Θ) e ε φ ↔ Eval s (Θ.symm ∘ e) (Θ.symm ∘ ε) φ
   | _, e, ε, ⊤         => by simp
   | _, e, ε, ⊥         => by simp
-  | _, e, ε, .rel r v  => by simp [Function.comp_def, eval_rel, ofEquiv_rel φ, Structure.ofEquiv_val φ]
-  | _, e, ε, .nrel r v => by simp [Function.comp_def, eval_nrel, ofEquiv_rel φ, Structure.ofEquiv_val φ]
+  | _, e, ε, .rel r v  => by simp [Function.comp_def, eval_rel, ofEquiv_rel Θ, Structure.ofEquiv_val Θ]
+  | _, e, ε, .nrel r v => by simp [Function.comp_def, eval_nrel, ofEquiv_rel Θ, Structure.ofEquiv_val Θ]
   | _, e, ε, φ ⋏ ψ     => by simp [eval_ofEquiv_iff (φ := φ), eval_ofEquiv_iff (φ := ψ)]
   | _, e, ε, φ ⋎ ψ     => by simp [eval_ofEquiv_iff (φ := φ), eval_ofEquiv_iff (φ := ψ)]
   | _, e, ε, ∀' φ      => by
     simp; exact
-    ⟨fun h x => by simpa[Matrix.comp_vecCons''] using eval_ofEquiv_iff.mp (h (φ x)),
-     fun h x => eval_ofEquiv_iff.mpr (by simpa[Matrix.comp_vecCons''] using h (φ.symm x))⟩
+    ⟨fun h x => by simpa[Matrix.comp_vecCons''] using eval_ofEquiv_iff.mp (h (Θ x)),
+     fun h x => eval_ofEquiv_iff.mpr (by simpa[Matrix.comp_vecCons''] using h (Θ.symm x))⟩
   | _, e, ε, ∃' φ      => by
     simp; exact
-    ⟨by rintro ⟨x, h⟩; exists φ.symm x; simpa[Matrix.comp_vecCons''] using eval_ofEquiv_iff.mp h,
-     by rintro ⟨x, h⟩; exists φ x; apply eval_ofEquiv_iff.mpr; simpa[Matrix.comp_vecCons''] using h⟩
+    ⟨by rintro ⟨x, h⟩; exists Θ.symm x; simpa[Matrix.comp_vecCons''] using eval_ofEquiv_iff.mp h,
+     by rintro ⟨x, h⟩; exists Θ x; apply eval_ofEquiv_iff.mpr; simpa[Matrix.comp_vecCons''] using h⟩
 
 lemma evalf_ofEquiv_iff {ε : ξ → N} {φ : Formula L ξ} :
-    Evalf (ofEquiv φ) ε φ ↔ Evalf s (φ.symm ∘ ε) φ := by simpa using eval_ofEquiv_iff (φ := φ) (ε := ε) (φ := φ) (e := ![])
+    Evalf (ofEquiv Θ) ε φ ↔ Evalf s (Θ.symm ∘ ε) φ := by simpa using eval_ofEquiv_iff (Θ := Θ) (ε := ε) (φ := φ) (e := ![])
 
 end
 

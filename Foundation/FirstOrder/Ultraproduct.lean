@@ -78,7 +78,7 @@ lemma eval_Uprod [(i : I) → Nonempty (A i)] {φ : Semiformula L μ n} :
           by rw [val_vecCons_val_eq]; exact hι
         by_contra hc
         have : ¬Evalm (A i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ :=
-          Classical.epsilon_spec (φ := fun z => ¬(Eval (s i) (z :> fun x ↦ (e x).val i) _ φ)) ⟨a, hc⟩
+          Classical.epsilon_spec (p := fun z => ¬(Eval (s i) (z :> fun x ↦ (e x).val i) _ φ)) ⟨a, hc⟩
         contradiction)
     · intro h x
       exact Filter.mem_of_superset h (by intro i h; simpa [val_vecCons_val_eq] using h (x.val i))
@@ -93,7 +93,7 @@ lemma eval_Uprod [(i : I) → Nonempty (A i)] {φ : Semiformula L μ n} :
       exact Filter.mem_of_superset h (by
         intro i; rintro ⟨x, hx⟩
         have : Eval (s i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ :=
-          Classical.epsilon_spec (φ := fun z => Eval (s i) (z :> fun x ↦ (e x).val i) _ φ) ⟨x, hx⟩
+          Classical.epsilon_spec (p := fun z => Eval (s i) (z :> fun x ↦ (e x).val i) _ φ) ⟨x, hx⟩
         rw[val_vecCons_val_eq] at this; exact this)
 
 lemma val_Uprod [(i : I) → Nonempty (A i)] {φ : Formula L μ} :
