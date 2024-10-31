@@ -42,7 +42,7 @@ inductive Deduction (Λ : Hilbert α) : (Formula α) → Type _
   | rule {rl}    : rl ∈ Λ.rules → (∀ {φ}, φ ∈ rl.antecedents → Deduction Λ φ) → Deduction Λ rl.consequence
   | mdp {φ ψ}    : Deduction Λ (φ ➝ ψ) → Deduction Λ φ → Deduction Λ ψ
   | imply₁ φ ψ   : Deduction Λ $ Axioms.Imply₁ φ ψ
-  | imply₂ φ ψ r : Deduction Λ $ Axioms.Imply₂ φ ψ r
+  | imply₂ φ ψ χ : Deduction Λ $ Axioms.Imply₂ φ ψ χ
   | ec φ ψ       : Deduction Λ $ Axioms.ElimContra φ ψ
 
 namespace Deduction
@@ -125,7 +125,7 @@ noncomputable def inducition!
   (hMaxm     : ∀ {φ}, (h : φ ∈ Λ.axioms) → motive φ ⟨maxm h⟩)
   (hMdp      : ∀ {φ ψ}, {hpq : Λ ⊢! φ ➝ ψ} → {hp : Λ ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ ⟨mdp hpq.some hp.some⟩)
   (hImply₁     : ∀ {φ ψ}, motive (φ ➝ ψ ➝ φ) $ ⟨imply₁ φ ψ⟩)
-  (hImply₂     : ∀ {φ ψ r}, motive ((φ ➝ ψ ➝ r) ➝ (φ ➝ ψ) ➝ φ ➝ r) $ ⟨imply₂ φ ψ r⟩)
+  (hImply₂     : ∀ {φ ψ χ}, motive ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ) $ ⟨imply₂ φ ψ χ⟩)
   (hElimContra : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ ⟨ec φ ψ⟩)
   : ∀ {φ}, (d : Λ ⊢! φ) → motive φ d := by
   intro φ d;
@@ -144,7 +144,7 @@ noncomputable def inducition_with_necOnly! [Λ.HasNecOnly]
   (hMdp    : ∀ {φ ψ}, {hpq : Λ ⊢! φ ➝ ψ} → {hp : Λ ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (hpq ⨀ hp))
   (hNec    : ∀ {φ}, {hp : Λ ⊢! φ} → (ihp : motive φ hp) → motive (□φ) (System.nec! hp))
   (hImply₁   : ∀ {φ ψ}, motive (φ ➝ ψ ➝ φ) $ ⟨imply₁ φ ψ⟩)
-  (hImply₂   : ∀ {φ ψ r}, motive ((φ ➝ ψ ➝ r) ➝ (φ ➝ ψ) ➝ φ ➝ r) $ ⟨imply₂ φ ψ r⟩)
+  (hImply₂   : ∀ {φ ψ χ}, motive ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ) $ ⟨imply₂ φ ψ χ⟩)
   (hElimContra : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ ⟨ec φ ψ⟩)
   : ∀ {φ}, (d : Λ ⊢! φ) → motive φ d := by
   intro φ d;

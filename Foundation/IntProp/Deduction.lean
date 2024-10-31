@@ -28,13 +28,13 @@ inductive Deduction (Λ : Hilbert α) : Formula α → Type _
   | mdp {φ ψ}    : Deduction Λ (φ ➝ ψ) → Deduction Λ φ → Deduction Λ ψ
   | verum        : Deduction Λ $ ⊤
   | imply₁ φ ψ   : Deduction Λ $ φ ➝ ψ ➝ φ
-  | imply₂ φ ψ r : Deduction Λ $ (φ ➝ ψ ➝ r) ➝ (φ ➝ ψ) ➝ φ ➝ r
+  | imply₂ φ ψ χ : Deduction Λ $ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
   | and₁ φ ψ     : Deduction Λ $ φ ⋏ ψ ➝ φ
   | and₂ φ ψ     : Deduction Λ $ φ ⋏ ψ ➝ ψ
   | and₃ φ ψ     : Deduction Λ $ φ ➝ ψ ➝ φ ⋏ ψ
   | or₁ φ ψ      : Deduction Λ $ φ ➝ φ ⋎ ψ
   | or₂ φ ψ      : Deduction Λ $ ψ ➝ φ ⋎ ψ
-  | or₃ φ ψ r    : Deduction Λ $ (φ ➝ r) ➝ (ψ ➝ r) ➝ (φ ⋎ ψ ➝ r)
+  | or₃ φ ψ χ    : Deduction Λ $ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
   | neg_equiv φ  : Deduction Λ $ Axioms.NegEquiv φ
 
 instance : System (Formula α) (Hilbert α) := ⟨Deduction⟩
@@ -130,13 +130,13 @@ noncomputable def rec! {α : Type u} {Λ : Hilbert α}
   (mdp    : ∀ {φ ψ}, {hpq : Λ ⊢! (φ ➝ ψ)} → {hp : Λ ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (hpq ⨀ hp))
   (verum  : motive ⊤ verum!)
   (imply₁ : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ) imply₁!)
-  (imply₂ : ∀ {φ ψ r}, motive ((φ ➝ ψ ➝ r) ➝ (φ ➝ ψ) ➝ φ ➝ r) imply₂!)
+  (imply₂ : ∀ {φ ψ χ}, motive ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ) imply₂!)
   (and₁   : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ φ) and₁!)
   (and₂   : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ ψ) and₂!)
   (and₃   : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) and₃!)
   (or₁    : ∀ {φ ψ},   motive (φ ➝ φ ⋎ ψ) or₁!)
   (or₂    : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) or₂!)
-  (or₃    : ∀ {φ ψ r}, motive ((φ ➝ r) ➝ (ψ ➝ r) ➝ φ ⋎ ψ ➝ r) or₃!)
+  (or₃    : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) or₃!)
   (neg_equiv : ∀ {φ}, motive (Axioms.NegEquiv φ) neg_equiv!) :
   {a : Formula α} → (t : Λ ⊢! a) → motive a t := by
   intro φ d;

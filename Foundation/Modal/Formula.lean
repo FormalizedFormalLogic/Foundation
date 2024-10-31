@@ -182,8 +182,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
   | atom a, ψ => by
     cases ψ <;> try { simp; exact isFalse not_false }
     simp; exact decEq _ _;
-  | φ ➝ ψ, r => by
-    cases r using cases' <;> try { simp; exact isFalse not_false }
+  | φ ➝ ψ, χ => by
+    cases χ using cases' <;> try { simp; exact isFalse not_false }
     case himp φ' ψ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp =>
@@ -228,16 +228,16 @@ variable [DecidableEq α]
 
 @[simp] lemma mem_self {φ : Formula α} : φ ∈ φ.subformulae := by induction φ <;> { simp [subformulae]; try tauto; }
 
-variable {φ ψ r : Formula α}
+variable {φ ψ χ : Formula α}
 
-lemma mem_imp (h : (ψ ➝ r) ∈ φ.subformulae) : ψ ∈ φ.subformulae ∧ r ∈ φ.subformulae := by
+lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulae) : ψ ∈ φ.subformulae ∧ χ ∈ φ.subformulae := by
   induction φ using Formula.rec' with
   | himp => simp_all [subformulae]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [subformulae];
 
-lemma mem_imp₁ (h : (ψ ➝ r) ∈ φ.subformulae) : ψ ∈ φ.subformulae := mem_imp h |>.1
+lemma mem_imp₁ (h : (ψ ➝ χ) ∈ φ.subformulae) : ψ ∈ φ.subformulae := mem_imp h |>.1
 
-lemma mem_imp₂ (h : (ψ ➝ r) ∈ φ.subformulae) : r ∈ φ.subformulae := mem_imp h |>.2
+lemma mem_imp₂ (h : (ψ ➝ χ) ∈ φ.subformulae) : χ ∈ φ.subformulae := mem_imp h |>.2
 
 lemma mem_box (h : □ψ ∈ φ.subformulae := by assumption) : ψ ∈ φ.subformulae := by
   induction φ using Formula.rec' <;> {
@@ -387,7 +387,7 @@ end Atoms
 
 namespace Formula
 
-variable {φ ψ r : Formula α}
+variable {φ ψ χ : Formula α}
 
 @[elab_as_elim]
 def cases_neg [DecidableEq α] {C : Formula α → Sort w}

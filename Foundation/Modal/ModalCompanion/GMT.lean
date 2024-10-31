@@ -10,7 +10,7 @@ open Modal.Kripke
 variable {α : Type u} [DecidableEq α] [Inhabited α] [Encodable α]
 
 variable {iΛ : IntProp.Hilbert α} {mΛ : Modal.Hilbert α}
-variable {φ ψ r : IntProp.Formula α}
+variable {φ ψ χ : IntProp.Formula α}
 
 lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! pᵍ) → (𝐈𝐧𝐭 ⊢! φ) := by
   contrapose;

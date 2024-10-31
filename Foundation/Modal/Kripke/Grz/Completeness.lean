@@ -22,13 +22,13 @@ lemma mem_boximpbox (h : ψ ∈ φ.subformulae.prebox) : □(ψ ➝ □ψ) ∈ �
 
 lemma mem_origin (h : ψ ∈ φ.subformulae) : ψ ∈ φ.subformulaeGrz := by simp_all [subformulaeGrz];
 
-lemma mem_imp (h : (ψ ➝ r) ∈ φ.subformulaeGrz) : ψ ∈ φ.subformulaeGrz ∧ r ∈ φ.subformulaeGrz := by
+lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulaeGrz) : ψ ∈ φ.subformulaeGrz ∧ χ ∈ φ.subformulaeGrz := by
   simp_all [subformulaeGrz];
   aesop;
 
-lemma mem_imp₁ (h : (ψ ➝ r) ∈ φ.subformulaeGrz) : ψ ∈ φ.subformulaeGrz := mem_imp h |>.1
+lemma mem_imp₁ (h : (ψ ➝ χ) ∈ φ.subformulaeGrz) : ψ ∈ φ.subformulaeGrz := mem_imp h |>.1
 
-lemma mem_imp₂ (h : (ψ ➝ r) ∈ φ.subformulaeGrz) : r ∈ φ.subformulaeGrz := mem_imp h |>.2
+lemma mem_imp₂ (h : (ψ ➝ χ) ∈ φ.subformulaeGrz) : χ ∈ φ.subformulaeGrz := mem_imp h |>.2
 
 macro_rules | `(tactic| trivial) => `(tactic|
     first
@@ -93,10 +93,10 @@ private lemma Grz_truthlemma.lemma1
   {X : CCF 𝐆𝐫𝐳 (φ.subformulaeGrz)} (hq : □ψ ∈ φ.subformulae)
   : ((X.formulae.prebox.box) ∪ {□(ψ ➝ □ψ), -ψ}) ⊆ (φ.subformulaeGrz)⁻ := by
   simp only [Formulae.complementary];
-  intro r hr;
+  intro χ hr;
   simp [Finset.mem_union] at hr;
   apply Finset.mem_union.mpr;
-  rcases hr with (rfl | ⟨r, hr, rfl⟩ | rfl);
+  rcases hr with (rfl | ⟨χ, hr, rfl⟩ | rfl);
   . left;
     simp;
     tauto;
@@ -115,9 +115,9 @@ private lemma Grz_truthlemma.lemma2
   : Formulae.Consistent 𝐆𝐫𝐳 ((X.formulae.prebox.box) ∪ {□(ψ ➝ □ψ), -ψ}) := by
     apply Formulae.intro_union_consistent;
     rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
-    replace hΓ₂ : ∀ r ∈ Γ₂, r = □(ψ ➝ □ψ) ∨ r = -ψ := by
-      intro r hr;
-      simpa using hΓ₂ r hr;
+    replace hΓ₂ : ∀ χ ∈ Γ₂, χ = □(ψ ➝ □ψ) ∨ χ = -ψ := by
+      intro χ hr;
+      simpa using hΓ₂ χ hr;
 
     by_contra hC;
     have : Γ₁ ⊢[𝐆𝐫𝐳]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
@@ -143,14 +143,14 @@ private lemma Grz_truthlemma.lemma2
     have : 𝐆𝐫𝐳 ⊢! ⋀□'Γ₁ ➝ □ψ := imp_trans''! collect_box_conj! this;
     have : 𝐆𝐫𝐳 ⊢! ⋀□'(X.formulae.prebox.box |>.toList) ➝ □ψ := imp_trans''! (conjconj_subset! (by
       simp;
-      intro r hr;
+      intro χ hr;
       have := hΓ₁ _ hr; simp at this;
       tauto;
     )) this;
     have : 𝐆𝐫𝐳 ⊢! ⋀□'(X.formulae.prebox.toList) ➝ □ψ := imp_trans''! (conjconj_provable! (by
       intro ψ hq;
       simp at hq;
-      obtain ⟨r, hr, rfl⟩ := hq;
+      obtain ⟨χ, hr, rfl⟩ := hq;
       apply axiomFour'!;
       apply FiniteContext.by_axm!;
       simpa;
@@ -181,7 +181,7 @@ lemma Grz_truthlemma [Inhabited α] {X : (GrzCompleteModel φ).World} (q_sub : �
   induction ψ using Formula.rec' generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
-  | himp ψ r ihq ihr =>
+  | himp ψ χ ihq ihr =>
     constructor;
     . contrapose;
       intro h;
@@ -223,7 +223,7 @@ lemma Grz_truthlemma [Inhabited α] {X : (GrzCompleteModel φ).World} (q_sub : �
         use Y;
         constructor;
         . constructor;
-          . intro r _ hr₂;
+          . intro χ _ hr₂;
             apply hY.1;
             simpa;
           . apply imp_iff_not_or (b := X = Y) |>.mpr;

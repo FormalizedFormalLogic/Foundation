@@ -113,7 +113,7 @@ lemma sound {φ : Formula α} (d : Λ ⊢! φ) : mod Λ ⊧ φ := by
     simpa [val_def'.mp ihp] using this
   case verum => simp
   case imply₁ => simp
-  case imply₂ φ ψ r => simp [himp_himp_inf_himp_inf_le]
+  case imply₂ φ ψ χ => simp [himp_himp_inf_himp_inf_le]
   case and₁ => simp
   case and₂ => simp
   case and₃ => simp

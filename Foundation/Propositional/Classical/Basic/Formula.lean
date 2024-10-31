@@ -164,8 +164,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
   | natom a, ψ => by
       cases ψ using cases' <;> try { simp; exact isFalse not_false }
       simp; exact decEq _ _
-  | φ ⋏ ψ,   r => by
-      cases r using cases' <;> try { simp; exact isFalse not_false }
+  | φ ⋏ ψ,   χ => by
+      cases χ using cases' <;> try { simp; exact isFalse not_false }
       case hand φ' ψ' =>
         exact match hasDecEq φ φ' with
         | isTrue hp =>
@@ -173,8 +173,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
           | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
           | isFalse hq => isFalse (by simp[hp, hq])
         | isFalse hp => isFalse (by simp[hp])
-  | φ ⋎ ψ,   r => by
-      cases r using cases' <;> try { simp; exact isFalse not_false }
+  | φ ⋎ ψ,   χ => by
+      cases χ using cases' <;> try { simp; exact isFalse not_false }
       case hor φ' ψ' =>
         exact match hasDecEq φ φ' with
         | isTrue hp =>

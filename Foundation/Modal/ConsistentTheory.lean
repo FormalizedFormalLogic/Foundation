@@ -477,9 +477,9 @@ lemma iff_mem_multibox : (□^[n]φ ∈ Ω.theory) ↔ (∀ {Ω' : MCT Λ}, (□
         push_neg at this;
         have : Λ ⊬ ⋀□'^[n]Γ ➝ □^[n]φ := FiniteContext.provable_iff.not.mp $ this (□'^[n]Γ) (by
           intro ψ hq;
-          obtain ⟨r, hr₁, hr₂⟩ := by simpa using hq;
+          obtain ⟨χ, hr₁, hr₂⟩ := by simpa using hq;
           subst hr₂;
-          simpa using hΓ₁ r hr₁;
+          simpa using hΓ₁ χ hr₁;
         );
         revert this;
         contrapose;

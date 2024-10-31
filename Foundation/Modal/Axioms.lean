@@ -3,7 +3,7 @@ import Foundation.Modal.LogicSymbol
 namespace LO.Axioms
 
 variable {F : Type*} [LogicalConnective F] [Box F]
-variable (φ ψ r : F)
+variable (φ ψ χ : F)
 
 /-- `◇` is duality of `□`. -/
 protected abbrev DiaDuality [Dia F] := ◇φ ⭤ ∼(□(∼φ))

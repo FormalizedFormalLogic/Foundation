@@ -23,7 +23,7 @@ namespace Satisfies
 
 instance semantics (M : Kripke.Model.{u, v} α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
-variable {M : Model α} {w : M.World} {φ ψ r : Formula α}
+variable {M : Model α} {w : M.World} {φ ψ χ : Formula α}
 
 @[simp] protected lemma iff_models : w ⊧ φ ↔ Formula.Kripke.Satisfies M w φ := iff_of_eq rfl
 
@@ -77,7 +77,7 @@ namespace ValidOnModel
 
 instance semantics : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
-variable {M : Model α} {φ ψ r : Formula α}
+variable {M : Model α} {φ ψ χ : Formula α}
 
 @[simp] protected lemma iff_models : M ⊧ φ ↔ Formula.Kripke.ValidOnModel M φ := iff_of_eq rfl
 
@@ -101,7 +101,7 @@ protected lemma or₂ : M ⊧ ψ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Sat
 
 protected lemma or₃
   (F_trans : Transitive M.Frame.Rel)
-  : M ⊧ (φ ➝ r) ➝ (ψ ➝ r) ➝ (φ ⋎ ψ ➝ r) := by
+  : M ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
   simp_all only [ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, Satisfies.imp_def, Satisfies.or_def];
   intro w₁ w₂ _ hpr w₃ hw₂₃ hqr w₄ hw₃₄ hpq;
   cases hpq with
@@ -118,7 +118,7 @@ protected lemma imply₁
 protected lemma imply₂
   (F_trans : Transitive M.Frame.Rel)
   (F_refl : Reflexive M.Frame.Rel)
-  : M ⊧ (φ ➝ ψ ➝ r) ➝ (φ ➝ ψ) ➝ φ ➝ r := by
+  : M ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := by
   intro x y _ hpqr z Ryz hpq w Rzw hp;
   have Ryw := F_trans Ryz Rzw;
   have Rww := F_refl w;
@@ -196,7 +196,7 @@ variable {F : Frame.Dep α}
 
 @[simp] protected lemma models_iff : F ⊧ f ↔ ValidOnFrame F f := iff_of_eq rfl
 
-variable {F : Frame.Dep α} {φ ψ r : Formula α}
+variable {F : Frame.Dep α} {φ ψ χ : Formula α}
 
 protected lemma verum : F ⊧ ⊤ := fun _ => ValidOnModel.verum
 
@@ -210,11 +210,11 @@ protected lemma or₁ : F ⊧ φ ➝ φ ⋎ ψ := fun _ => ValidOnModel.or₁
 
 protected lemma or₂ : F ⊧ ψ ➝ φ ⋎ ψ := fun _ => ValidOnModel.or₂
 
-protected lemma or₃ (F_trans : Transitive F) : F ⊧ (φ ➝ r) ➝ (ψ ➝ r) ➝ (φ ⋎ ψ ➝ r) := fun _ => ValidOnModel.or₃ F_trans
+protected lemma or₃ (F_trans : Transitive F) : F ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := fun _ => ValidOnModel.or₃ F_trans
 
 protected lemma imply₁ (F_trans : Transitive F) : F ⊧ φ ➝ ψ ➝ φ := fun hV => ValidOnModel.imply₁ hV F_trans
 
-protected lemma imply₂ (F_trans : Transitive F) (F_refl : Reflexive F) : F ⊧ (φ ➝ ψ ➝ r) ➝ (φ ➝ ψ) ➝ φ ➝ r := fun _ => ValidOnModel.imply₂ F_trans F_refl
+protected lemma imply₂ (F_trans : Transitive F) (F_refl : Reflexive F) : F ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := fun _ => ValidOnModel.imply₂ F_trans F_refl
 
 protected lemma mdp (F_refl : Reflexive F) (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := fun hV => ValidOnModel.mdp F_refl (hpq hV) (hp hV)
 

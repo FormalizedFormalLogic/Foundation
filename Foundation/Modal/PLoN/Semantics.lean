@@ -107,7 +107,7 @@ variable {M : PLoN.Model α}
 
 protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
 
-protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ r) := by simp [ValidOnModel]; tauto;
+protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
 
 protected lemma elim_contra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
 
@@ -139,7 +139,7 @@ protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
 
 protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnFrame]; tauto;
 
-protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ r) := by simp [ValidOnFrame]; tauto;
+protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnFrame]; tauto;
 
 protected lemma elim_contra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elim_contra;
 
@@ -168,7 +168,7 @@ protected lemma mdp (hpq : 𝔽 ⊧ φ ➝ ψ) (hp : 𝔽 ⊧ φ) : 𝔽 ⊧ ψ 
 
 protected lemma imply₁ : 𝔽 ⊧ (Axioms.Imply₁ φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.imply₁;
 
-protected lemma imply₂ : 𝔽 ⊧ (Axioms.Imply₂ φ ψ r) := by intro _ _; exact PLoN.ValidOnFrame.imply₂;
+protected lemma imply₂ : 𝔽 ⊧ (Axioms.Imply₂ φ ψ χ) := by intro _ _; exact PLoN.ValidOnFrame.imply₂;
 
 protected lemma elim_contra : 𝔽 ⊧ (Axioms.ElimContra φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.elim_contra;
 

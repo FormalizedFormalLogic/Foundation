@@ -16,7 +16,7 @@ abbrev GLCompleteFrame (φ : Formula α) : Kripke.FiniteFrame where
   World := CCF 𝐆𝐋 φ.subformulae
   Rel X Y :=
     (∀ ψ ∈ □''⁻¹φ.subformulae, □ψ ∈ X.formulae → (ψ ∈ Y.formulae ∧ □ψ ∈ Y.formulae)) ∧
-    (∃ r ∈ □''⁻¹φ.subformulae, □r ∉ X.formulae ∧ □r ∈ Y.formulae)
+    (∃ χ ∈ □''⁻¹φ.subformulae, □χ ∉ X.formulae ∧ □χ ∈ Y.formulae)
 
 namespace GLCompleteFrame
 
@@ -24,13 +24,13 @@ lemma irreflexive : Irreflexive (GLCompleteFrame φ).Rel := by simp [Irreflexive
 
 lemma transitive : Transitive (GLCompleteFrame φ).Rel := by
   simp;
-  rintro X Y Z ⟨RXY, ⟨r, _, _, _⟩⟩ ⟨RYZ, _⟩;
+  rintro X Y Z ⟨RXY, ⟨χ, _, _, _⟩⟩ ⟨RYZ, _⟩;
   constructor;
   . rintro ψ hq₁ hq₂;
     exact RYZ ψ hq₁ $ RXY ψ hq₁ hq₂ |>.2;
-  . use r;
+  . use χ;
     refine ⟨by assumption, by assumption, ?_⟩;
-    exact RYZ r (by assumption) (by assumption) |>.2;
+    exact RYZ χ (by assumption) (by assumption) |>.2;
 
 end GLCompleteFrame
 
@@ -48,9 +48,9 @@ private lemma GL_truthlemma.lemma1
   {X : CCF 𝐆𝐋 φ.subformulae} (hq : □ψ ∈ φ.subformulae)
   : ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□ψ, -ψ}) ⊆ φ.subformulae⁻ := by
   simp only [Formulae.complementary];
-  intro r hr;
+  intro χ hr;
   simp [Finset.mem_union] at hr;
-  rcases hr with (rfl | hp | ⟨r, hr, rfl⟩ | rfl);
+  rcases hr with (rfl | hp | ⟨χ, hr, rfl⟩ | rfl);
   . apply Finset.mem_union.mpr;
     tauto;
   . have := X.closed.subset hp;
@@ -73,9 +73,9 @@ private lemma GL_truthlemma.lemma2
   apply Formulae.intro_union_consistent;
   rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
 
-  replace hΓ₂ : ∀ r ∈ Γ₂, r = □ψ ∨ r = -ψ := by
-    intro r hr;
-    simpa using hΓ₂ r hr;
+  replace hΓ₂ : ∀ χ ∈ Γ₂, χ = □ψ ∨ χ = -ψ := by
+    intro χ hr;
+    simpa using hΓ₂ χ hr;
 
   by_contra hC;
   have : Γ₁ ⊢[𝐆𝐋]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
@@ -96,15 +96,15 @@ private lemma GL_truthlemma.lemma2
   have : 𝐆𝐋 ⊢! ⋀□'Γ₁ ➝ □ψ := provable_iff.mp this;
   have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox ∪ X.formulae.prebox.box |>.toList) ➝ □ψ := imp_trans''! (conjconj_subset! (by
     simp;
-    intro r hr;
+    intro χ hr;
     have := hΓ₁ _ hr; simp at this;
     tauto;
   )) this;
   have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox.toList) ➝ □ψ := imp_trans''! (conjconj_provable! (by
     intro ψ hq;
     simp at hq;
-    obtain ⟨r, hr, rfl⟩ := hq;
-    rcases hr with (hr | ⟨r, hr, rfl⟩);
+    obtain ⟨χ, hr, rfl⟩ := hq;
+    rcases hr with (hr | ⟨χ, hr, rfl⟩);
     . apply FiniteContext.by_axm!;
       simpa;
     . apply axiomFour'!;
@@ -125,7 +125,7 @@ lemma GL_truthlemma {X : (GLCompleteModel φ)} (q_sub : ψ ∈ φ.subformulae) :
   induction ψ using Formula.rec' generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
-  | himp ψ r ihq ihr =>
+  | himp ψ χ ihq ihr =>
     constructor;
     . contrapose;
       intro h;
@@ -154,7 +154,7 @@ lemma GL_truthlemma {X : (GLCompleteModel φ)} (q_sub : ψ ∈ φ.subformulae) :
       simp [Satisfies];
       use Y;
       constructor;
-      . intro r _ hr_sub;
+      . intro χ _ hr_sub;
         constructor;
         . apply hY₁.1.1; simpa;
         . apply hY₁.1.2; simpa;

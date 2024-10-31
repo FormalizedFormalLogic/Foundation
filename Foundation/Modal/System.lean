@@ -397,7 +397,7 @@ end
 section
 
 variable [BasicModalLogicalConnective F] [DecidableEq F]
-variable {φ ψ r : F} {Γ Δ : List F}
+variable {φ ψ χ : F} {Γ Δ : List F}
 variable {𝓢 : S}
 
 instance [System.Minimal 𝓢] [ModalDeMorgan F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
@@ -728,7 +728,7 @@ def collect_dia_or' (h : 𝓢 ⊢ ◇φ ⋎ ◇ψ) : 𝓢 ⊢ ◇(φ ⋎ ψ) := 
       cases hq with
       | inl => subst_vars; exact and₁'! id!;
       | inr hq =>
-        obtain ⟨r, hr₁, hr₂⟩ := hq;
+        obtain ⟨χ, hr₁, hr₂⟩ := hq;
         exact (iff_provable_list_conj.mp $ (of'! ih) ⨀ (and₂'! $ id!)) ψ (by aesop);
   | _ => simp
 
@@ -1176,14 +1176,14 @@ lemma Context.provable_iff_boxed : (□''X) *⊢[𝓢]! φ ↔ ∃ Δ : List F, 
     . rintro ψ hq;
       apply sΓ ψ;
       simp at hq;
-      obtain ⟨r, _, rfl⟩ := hq;
+      obtain ⟨χ, _, rfl⟩ := hq;
       assumption;
     . apply FiniteContext.provable_iff.mpr;
       apply imp_trans''! ?_ (FiniteContext.provable_iff.mp hΓ);
       apply conjconj_subset!;
       intro ψ hq;
       have := sΓ ψ hq;
-      obtain ⟨r, _, rfl⟩ := this;
+      obtain ⟨χ, _, rfl⟩ := this;
       simp_all;
   . rintro ⟨Δ, hΔ, h⟩;
     apply Context.provable_iff.mpr;

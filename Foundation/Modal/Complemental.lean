@@ -100,7 +100,7 @@ variable [DecidableEq α]
 def complementary (P : Formulae α) : Formulae α := P ∪ (P.image (Formula.complement))
 postfix:80 "⁻" => Formulae.complementary
 
-variable {P P₁ P₂ : Formulae α} {φ ψ r: Formula α}
+variable {P P₁ P₂ : Formulae α} {φ ψ χ: Formula α}
 
 lemma complementary_mem (h : φ ∈ P) : φ ∈ P⁻ := by simp [complementary]; tauto;
 macro_rules | `(tactic| trivial) => `(tactic| apply complementary_mem $ by assumption)
@@ -108,7 +108,7 @@ macro_rules | `(tactic| trivial) => `(tactic| apply complementary_mem $ by assum
 lemma complementary_comp (h : φ ∈ P) : -φ ∈ P⁻ := by simp [complementary]; tauto;
 macro_rules | `(tactic| trivial) => `(tactic| apply complementary_comp $ by assumption)
 
-lemma complementary_mem_box (hi : ∀ {ψ r}, ψ ➝ r ∈ P → ψ ∈ P := by trivial) : □φ ∈ P⁻ → □φ ∈ P := by
+lemma complementary_mem_box (hi : ∀ {ψ χ}, ψ ➝ χ ∈ P → ψ ∈ P := by trivial) : □φ ∈ P⁻ → □φ ∈ P := by
   simp [complementary];
   intro h;
   rcases h with (h | ⟨ψ, hq, eq⟩);
@@ -383,16 +383,16 @@ lemma iff_mem_compl (hq_sub : ψ ∈ S) : (ψ ∈ X.formulae) ↔ (-ψ ∉ X.for
       have : ↑X.formulae *⊢[Λ]! ψ := Context.by_axm! hnq;
       have : ↑X.formulae *⊢[Λ]! ⊥ := complement_derive_bot hq this;
       simpa;
-    | himp ψ r h =>
+    | himp ψ χ h =>
       simp only [Formula.complement.imp_def₁ h] at hnq;
-      have : ↑X.formulae *⊢[Λ]! ∼(ψ ➝ r) := Context.by_axm! hnq;
+      have : ↑X.formulae *⊢[Λ]! ∼(ψ ➝ χ) := Context.by_axm! hnq;
       have : ↑X.formulae *⊢[Λ]! ⊥ := this ⨀ hq;
       simpa;
   . intro h; exact mem_of_not_mem_compl (by assumption) h;
 
 lemma iff_mem_imp
-  (hsub_qr : (ψ ➝ r) ∈ S) (hsub_q : ψ ∈ S := by trivial)  (hsub_r : r ∈ S := by trivial)
-  : ((ψ ➝ r) ∈ X.formulae) ↔ (ψ ∈ X.formulae) → (-r ∉ X.formulae) := by
+  (hsub_qr : (ψ ➝ χ) ∈ S) (hsub_q : ψ ∈ S := by trivial)  (hsub_r : χ ∈ S := by trivial)
+  : ((ψ ➝ χ) ∈ X.formulae) ↔ (ψ ∈ X.formulae) → (-χ ∉ X.formulae) := by
   constructor;
   . intro hqr hq;
     apply iff_mem_compl hsub_r |>.mp;
@@ -410,16 +410,16 @@ lemma iff_mem_imp
       | hneg ψ =>
         simp only [Formula.complement.neg_def] at hq;
         exact efq_of_neg₂! $ Context.by_axm! hq;
-      | himp ψ r h =>
+      | himp ψ χ h =>
         simp only [Formula.complement.imp_def₁ h] at hq;
         exact efq_of_neg! $ Context.by_axm! (by simpa using hq);
     . apply membership_iff (by assumption) |>.mpr;
       exact imply₁'! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
 
 lemma iff_not_mem_imp
-  (hsub_qr : (ψ ➝ r) ∈ S) (hsub_q : ψ ∈ S := by trivial)  (hsub_r : r ∈ S := by trivial)
-  : ((ψ ➝ r) ∉ X.formulae) ↔ (ψ ∈ X.formulae) ∧ (-r ∈ X.formulae) := by
-  simpa using @iff_mem_imp α _ Λ S X ψ r hsub_qr hsub_q hsub_r |>.not;
+  (hsub_qr : (ψ ➝ χ) ∈ S) (hsub_q : ψ ∈ S := by trivial)  (hsub_r : χ ∈ S := by trivial)
+  : ((ψ ➝ χ) ∉ X.formulae) ↔ (ψ ∈ X.formulae) ∧ (-χ ∈ X.formulae) := by
+  simpa using @iff_mem_imp α _ Λ S X ψ χ hsub_qr hsub_q hsub_r |>.not;
 
 lemma equality_def : X₁ = X₂ ↔ X₁.formulae = X₂.formulae := by
   constructor;

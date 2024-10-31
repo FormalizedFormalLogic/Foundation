@@ -88,7 +88,7 @@ lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
       . apply ih.mpr;
         use y;
 
-lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ r) : x ⊧ φ ➝ r := by simp_all;
+lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 
 lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
 
@@ -112,7 +112,7 @@ instance semantics : Semantics (Formula α) (Kripke.Model α) := ⟨fun M ↦ Fo
 instance : Semantics.Bot (Kripke.Model α) where
   realize_bot M := by simp [Kripke.ValidOnModel, Kripke.Satisfies];
 
-variable {M : Model α} {φ ψ r : Formula α}
+variable {M : Model α} {φ ψ χ : Formula α}
 
 protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro x;
@@ -126,7 +126,7 @@ protected lemma verum : M ⊧ ⊤ := by intro; tauto;
 
 protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
 
-protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ r) := by simp [ValidOnModel]; tauto;
+protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
 
 protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel, Satisfies]; tauto;
 
@@ -168,7 +168,7 @@ protected lemma verum : F ⊧ ⊤ := by intros _; tauto;
 
 protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by intro V; exact ValidOnModel.imply₁ (M := ⟨F, V⟩);
 
-protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ r) := by intro V; exact ValidOnModel.imply₂ (M := ⟨F, V⟩);
+protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by intro V; exact ValidOnModel.imply₂ (M := ⟨F, V⟩);
 
 protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elimContra (M := ⟨F, V⟩);
 

@@ -56,7 +56,7 @@ lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {φ}, □^[n]φ ∈ Ω
           have : Λ ⊢! ⋀(◇'^[n]◇'⁻¹^[n]Δ) ➝ ⋀Δ := by
             apply conjconj_subset!;
             intro ψ hq;
-            obtain ⟨r, _, _⟩ := hΔ ψ hq;
+            obtain ⟨χ, _, _⟩ := hΔ ψ hq;
             subst_vars;
             simpa;
           have : Λ ⊢! ◇^[n]⋀◇'⁻¹^[n]Δ ➝ ⋀Δ := imp_trans''! iff_conjmultidia_multidiaconj! $ this;

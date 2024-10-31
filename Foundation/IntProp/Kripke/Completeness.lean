@@ -195,10 +195,10 @@ private lemma truthlemma.himp
     obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert φ t.tableau.1, {ψ})) $ by
       simp only [Tableau.Consistent];
       intro Γ Δ hΓ hΔ;
-      replace hΓ : ∀ r, r ∈ Γ.remove φ → r ∈ t.tableau.1 := by
-        intro r hr;
+      replace hΓ : ∀ χ, χ ∈ Γ.remove φ → χ ∈ t.tableau.1 := by
+        intro χ hr;
         have ⟨hr₁, hr₂⟩ := List.mem_remove_iff.mp hr;
-        have := by simpa using hΓ r hr₁;
+        have := by simpa using hΓ χ hr₁;
         simp_all;
       by_contra hC;
       have : Λ ⊢! ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
@@ -208,7 +208,7 @@ private lemma truthlemma.himp
         have : [φ, φ ➝ ⋁Δ] ⊢[Λ]! ⋁Δ := by_axm! ⨀ this;
         exact disj_allsame'! (by simpa using hΔ) this;
       )
-      have : Λ ⊬ ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := by simpa using (t.consistent hΓ (show ∀ r ∈ [φ ➝ ψ], r ∈ t.tableau.2 by simp_all));
+      have : Λ ⊬ ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := by simpa using (t.consistent hΓ (show ∀ χ ∈ [φ ➝ ψ], χ ∈ t.tableau.2 by simp_all));
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
