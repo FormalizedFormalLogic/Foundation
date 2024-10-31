@@ -88,7 +88,7 @@
    "rev": "8374be249f74f8aa57c3ae22777eb3be4781807d",
    "name": "foundation",
    "manifestFile": "lake-manifest.json",
-   "inputRev": "master",
+   "inputRev": "rename",
    "inherited": true,
    "configFile": "lakefile.lean"},
   {"url": "https://github.com/FormalizedFormalLogic/Arithmetization",
@@ -101,5 +101,5 @@
    "inputRev": "master",
    "inherited": false,
    "configFile": "lakefile.lean"}],
- "name": "Incompleteness",
+ "name": "incompleteness",
  "lakeDir": ".lake"}
