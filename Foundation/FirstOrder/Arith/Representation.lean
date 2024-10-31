@@ -112,40 +112,40 @@ end Partrec
 
 namespace RePred
 
-variable {α β : Type*} [Primcodable α] [Primcodable β] {φ ψ : α → Prop}
+variable {α β : Type*} [Primcodable α] [Primcodable β] {p q : α → Prop}
 
-@[simp] protected lemma const (φ : Prop) : RePred fun _ : α ↦ φ := by
-  by_cases h : φ <;> simp [h]
+@[simp] protected lemma const (p : Prop) : RePred fun _ : α ↦ p := by
+  by_cases h : p <;> simp [h]
   · simpa using Partrec.some.dom_re
   · simpa using (Partrec.none (α := α) (σ := α)).dom_re
 
-lemma iff : RePred φ ↔ ∃ f : α →. Unit, Partrec f ∧ φ = fun x ↦ (f x).Dom :=
+lemma iff : RePred p ↔ ∃ f : α →. Unit, Partrec f ∧ p = fun x ↦ (f x).Dom :=
   ⟨fun h ↦ ⟨_, h, by ext x; simp [Part.assert]⟩, by rintro ⟨f, hf, rfl⟩; exact hf.dom_re⟩
 
-lemma iff' : RePred φ ↔ ∃ f : α →. Unit, Partrec f ∧ ∀ x, φ x ↔ (f x).Dom :=
+lemma iff' : RePred p ↔ ∃ f : α →. Unit, Partrec f ∧ ∀ x, p x ↔ (f x).Dom :=
   ⟨fun h ↦ ⟨_, h, by intro x; simp [Part.assert]⟩, by rintro ⟨f, hf, H⟩; exact hf.dom_re.of_eq (by simp [H])⟩
 
-lemma and (hp : RePred φ) (hq : RePred ψ) : RePred fun x ↦ φ x ∧ ψ x := by
+lemma and (hp : RePred p) (hq : RePred q) : RePred fun x ↦ p x ∧ q x := by
   rcases RePred.iff.mp hp with ⟨f, hf, rfl⟩
   rcases RePred.iff.mp hq with ⟨g, hg, rfl⟩
   let h : α →. Unit := fun x ↦ (f x).bind fun _ ↦ (g x).map fun _ ↦ ()
   have : Partrec h := Partrec.bind hf <| Partrec.to₂ <| Partrec.map (hg.comp Computable.fst) (Computable.const ()).to₂
   exact RePred.iff.mpr ⟨_, this, by funext x; simp [h]⟩
 
-lemma or (hp : RePred φ) (hq : RePred ψ) : RePred fun x ↦ φ x ∨ ψ x := by
+lemma or (hp : RePred p) (hq : RePred q) : RePred fun x ↦ p x ∨ q x := by
   rcases RePred.iff.mp hp with ⟨f, hf, rfl⟩
   rcases RePred.iff.mp hq with ⟨g, hg, rfl⟩
   rcases hf.merge hg (by intro a x; simp) with ⟨k, hk, h⟩
   exact RePred.iff.mpr ⟨k, hk, by funext x; simp [Part.unit_dom_iff, h]⟩
 
-lemma projection {φ : α × β → Prop} (hp : RePred φ) : RePred fun x ↦ ∃ y, φ (x, y) := by
+lemma projection {p : α × β → Prop} (hp : RePred p) : RePred fun x ↦ ∃ y, p (x, y) := by
   rcases RePred.iff.mp hp with ⟨f, hf, rfl⟩
   have : Partrec₂ fun a b ↦ f (a, b) := hf.comp <| Computable.pair .fst .snd
   obtain ⟨g, hg, Hg⟩ := Partrec.projection this (by simp)
   exact RePred.iff.mpr ⟨g, hg, by funext x; simp [Part.unit_dom_iff, Hg]⟩
 
-protected lemma comp {f : α → β} (hf : Computable f) {φ : β → Prop} (hp : RePred φ) : RePred fun x ↦ φ (f x) := by
-  rcases RePred.iff.mp hp with ⟨φ, pp, rfl⟩
+protected lemma comp {f : α → β} (hf : Computable f) {p : β → Prop} (hp : RePred p) : RePred fun x ↦ p (f x) := by
+  rcases RePred.iff.mp hp with ⟨p, pp, rfl⟩
   exact RePred.iff'.mpr ⟨_, pp.comp hf, by intro x; simp⟩
 
 end RePred
