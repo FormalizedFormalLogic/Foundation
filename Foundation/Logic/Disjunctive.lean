@@ -4,7 +4,6 @@ namespace LO.System
 
 variable {F : Type*} [LogicalConnective F]
 variable {S : Type*} [System F S]
-variable [DecidableEq F]
 
 class Disjunctive (𝓢 : S) : Prop where
   disjunctive : ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
@@ -16,7 +15,7 @@ lemma iff_disjunctive {𝓢 : S}  : (Disjunctive 𝓢) ↔ ∀ {p q}, 𝓢 ⊢! 
   . apply Disjunctive.disjunctive;
   . exact λ d ↦ ⟨d⟩;
 
-lemma iff_complete_disjunctive {𝓢 : S} [System.Classical 𝓢] : (System.Complete 𝓢) ↔ (Disjunctive 𝓢) := by
+lemma iff_complete_disjunctive [DecidableEq F] {𝓢 : S} [System.Classical 𝓢] : (System.Complete 𝓢) ↔ (Disjunctive 𝓢) := by
   constructor;
   . intro hComp;
     apply iff_disjunctive.mpr;

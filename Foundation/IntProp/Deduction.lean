@@ -152,6 +152,7 @@ open System
 
 variable {Λ₁ Λ₂ : Hilbert α}
 
+omit [DecidableEq α] in
 lemma weaker_than_of_subset_axiomset' (hMaxm : ∀ {p : Formula α}, p ∈ Ax(Λ₁) → Λ₂ ⊢! p)
   : Λ₁ ≤ₛ Λ₂ := by
   apply System.weakerThan_iff.mpr;
@@ -172,6 +173,7 @@ lemma Int_weaker_than_KC : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐊𝐂 := weaker
 
 lemma Int_weaker_than_LC : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐋𝐂 := weaker_than_of_subset_axiomset
 
+omit [DecidableEq α] in
 lemma KC_weaker_than_Cl : (𝐊𝐂 : Hilbert α) ≤ₛ 𝐂𝐥 := by
   apply weaker_than_of_subset_axiomset';
   intro p hp;
