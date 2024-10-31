@@ -10,4 +10,4 @@ lean_lib Arithmetization {
   -- add any library configuration options here
 }
 
-require "FormalizedFormalLogic" / "foundation" @ git "update-4.13"
+require "FormalizedFormalLogic" / "foundation" @ git "master"
