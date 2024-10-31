@@ -7,7 +7,7 @@ namespace LO
 open LO.FirstOrder LO.FirstOrder.DerivabilityCondition
 open LO.Modal
 
-variable {α : Type u} [DecidableEq α]
+variable {α : Type u}
 variable [Semiterm.Operator.GoedelNumber L (Sentence L)]
          {T U : Theory L}
 
@@ -41,8 +41,8 @@ open System
 open ProvabilityPredicate
 
 variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         [DecidableEq (Sentence L)]
-         {T U : FirstOrder.Theory L} [T ≼ U] [Diagonalization T]
+         [L.DecidableEq]
+         {T U : FirstOrder.Theory L} [T ≼ U]
          {𝔅 : ProvabilityPredicate T U}
 
 lemma arithmetical_soundness_N (h : 𝐍 ⊢! p) : ∀ {f : Realization α L}, U ⊢!. (f.interpret 𝔅 p) := by
@@ -55,7 +55,7 @@ lemma arithmetical_soundness_N (h : 𝐍 ⊢! p) : ∀ {f : Realization α L}, U
     exact ihpq ⨀ ihp;
   | _ => dsimp [Realization.interpret]; trivial;
 
-lemma arithmetical_soundness_GL [𝔅.HBL] (h : 𝐆𝐋 ⊢! p) : ∀ {f : Realization α L}, U ⊢!. (f.interpret 𝔅 p) := by
+lemma arithmetical_soundness_GL [Diagonalization T] [𝔅.HBL] (h : 𝐆𝐋 ⊢! p) : ∀ {f : Realization α L}, U ⊢!. (f.interpret 𝔅 p) := by
   intro f;
   induction h using Deduction.inducition_with_necOnly! with
   | hMaxm hp =>

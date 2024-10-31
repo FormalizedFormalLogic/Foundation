@@ -10,13 +10,13 @@ open LO.Arith FirstOrder.Arith
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
 
 variable (V)
 
 namespace Derivation2
 
-def cast (d : T ⊢₃ Γ) (h : Γ = Δ) : T ⊢₃ Δ := h ▸ d
+def cast {T : Theory L} (d : T ⊢₂ Γ) (h : Γ = Δ) : T ⊢₂ Δ := h ▸ d
 
 def Sequent.codeIn (Γ : Finset (SyntacticFormula L)) : V := ∑ p ∈ Γ, exp (⌜p⌝ : V)
 
@@ -73,7 +73,7 @@ lemma Sequent.mem_codeIn_iff' {Γ : Finset (SyntacticFormula L)} : x ∈ (⌜Γ�
   · intro h; exact Sequent.mem_codeIn h
   · rintro ⟨p, hp, rfl⟩; simp [Sequent.mem_codeIn_iff, hp]
 
-lemma setShift_quote (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift ⌜Γ⌝ = ⌜Finset.image (Rew.hom Rew.shift) Γ⌝ := by
+lemma setShift_quote [DefinableLanguage L] (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift ⌜Γ⌝ = ⌜Finset.image (Rew.hom Rew.shift) Γ⌝ := by
   apply mem_ext
   intro x; simp [mem_setShift_iff]
   constructor
@@ -89,9 +89,9 @@ lemma setShift_quote (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift 
 
 variable (V)
 
-variable {T : Theory L} [T.Delta1Definable]
+variable {T : Theory L}
 
-def codeIn : {Γ : Finset (SyntacticFormula L)} → T ⊢₃ Γ → V
+def codeIn : {Γ : Finset (SyntacticFormula L)} → T ⊢₂ Γ → V
   | _, closed Δ p _ _                         => Arith.axL ⌜Δ⌝ ⌜p⌝
   | _, root (Δ := Δ) p _ _                    => Arith.root ⌜Δ⌝ ⌜p⌝
   | _, verum (Δ := Δ) _                       => Arith.verumIntro ⌜Δ⌝
@@ -103,11 +103,11 @@ def codeIn : {Γ : Finset (SyntacticFormula L)} → T ⊢₃ Γ → V
   | _, shift (Δ := Δ) d                       => Arith.shiftRule ⌜Δ.image Rew.shift.hom⌝ d.codeIn
   | _, cut (Δ := Δ) (p := p) d dn             => Arith.cutRule ⌜Δ⌝ ⌜p⌝ d.codeIn dn.codeIn
 
-instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⊢₃ Γ) V := ⟨codeIn V⟩
+instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⊢₂ Γ) V := ⟨codeIn V⟩
 
-lemma quote_derivation_def {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (⌜d⌝ : V) = d.codeIn V := rfl
+lemma quote_derivation_def {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (⌜d⌝ : V) = d.codeIn V := rfl
 
-@[simp] lemma fstidx_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : fstIdx (⌜d⌝ : V) = ⌜Γ⌝ := by
+@[simp] lemma fstidx_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : fstIdx (⌜d⌝ : V) = ⌜Γ⌝ := by
   induction d <;> simp [quote_derivation_def, codeIn]
 
 end Derivation2
@@ -138,7 +138,7 @@ lemma quote_image_shift (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShi
   case empty => simp
   case insert p Γ _ ih => simp [ih]
 
-@[simp] lemma derivation_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (T.codeIn V).Derivation ⌜d⌝ := by
+@[simp] lemma derivation_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (T.codeIn V).Derivation ⌜d⌝ := by
   induction d
   case closed p hp hn =>
     exact Language.Theory.Derivation.axL (by simp)
@@ -184,15 +184,15 @@ lemma quote_image_shift (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShi
       ⟨by simp [fstidx_quote], ih⟩
       ⟨by simp [fstidx_quote], ihn⟩
 
-@[simp] lemma derivationOf_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (T.codeIn V).DerivationOf ⌜d⌝ ⌜Γ⌝ :=
+@[simp] lemma derivationOf_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (T.codeIn V).DerivationOf ⌜d⌝ ⌜Γ⌝ :=
   ⟨by simp, by simp⟩
 
-lemma derivable_of_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₃ Γ) : (T.codeIn V).Derivable ⌜Γ⌝ :=
+lemma derivable_of_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (T.codeIn V).Derivable ⌜Γ⌝ :=
   ⟨⌜d⌝, by simp⟩
 
 section
 
-variable [L.ConstantInhabited] {T : Theory L} [T.Delta1Definable]
+variable {T : Theory L} [T.Delta1Definable]
 
 theorem provable_of_provable {p} : T ⊢! p → (T.codeIn V).Provable ⌜p⌝ := fun h ↦ by
   simpa using derivable_of_quote (V := V) (provable_iff_derivable2.mp h).some
@@ -221,6 +221,8 @@ lemma double_add_one_div_of_double (n m : ℕ) : (2 * n + 1) / (2 * m) = n / m :
     = (1 + 2 * n) / 2 / m := by simp [add_comm, Nat.div_div_eq_div_mul]
   _ = n / m := by simp [Nat.add_mul_div_left]
 
+example (x : ℕ) : ¬Odd (2 * x) := by { refine not_odd_iff_even.mpr (even_two_mul x) }
+
 lemma mem_bitIndices_iff {x s : ℕ} : x ∈ s.bitIndices ↔ Odd (s / 2 ^ x) := by
   induction s using Nat.binaryRec generalizing x
   case z => simp [Nat.dvd_zero]
@@ -232,7 +234,7 @@ lemma mem_bitIndices_iff {x s : ℕ} : x ∈ s.bitIndices ↔ Odd (s / 2 ^ x) :=
         exact hx
       · intro h
         cases' x with x
-        · simp at h
+        · simp [not_odd_iff_even.mpr (even_two_mul s)] at h
         · refine ⟨x, ?_, rfl⟩
           rwa [show 2 ^ (x + 1) = 2 * 2 ^ x by simp [Nat.pow_add_one, mul_comm], Nat.mul_div_mul_left _ _ (by simp)] at h
     · constructor
@@ -286,7 +288,7 @@ variable {T : Theory L} [T.Delta1Definable]
 
 open Derivation2
 
-lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation d) : ∃ Γ, ⌜Γ⌝ = fstIdx d ∧ T ⊢₃! Γ := by
+lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation d) : ∃ Γ, ⌜Γ⌝ = fstIdx d ∧ T ⊢₂! Γ := by
   induction d using Nat.strongRec
   case ind d ih =>
   rcases h.case with ⟨hs, H⟩
@@ -358,7 +360,7 @@ lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation 
     rcases Sequent.mem_codeIn hs with ⟨p, hp, rfl⟩
     refine ⟨Derivation2.root p (mem_coded_theory_iff.mp hT) hp⟩
 
-lemma Language.Theory.Provable.sound2 {p : SyntacticFormula L} (h : (T.codeIn ℕ).Provable ⌜p⌝) : T ⊢₃.! p := by
+lemma Language.Theory.Provable.sound2 {p : SyntacticFormula L} (h : (T.codeIn ℕ).Provable ⌜p⌝) : T ⊢₂.! p := by
   rcases h with ⟨d, hp, hd⟩
   rcases hd.sound with ⟨Γ, e, b⟩
   have : Γ = {p} := Sequent.quote_inj (V := ℕ) <| by simp [e, hp]
@@ -367,7 +369,7 @@ lemma Language.Theory.Provable.sound2 {p : SyntacticFormula L} (h : (T.codeIn �
 
 end
 
-variable [L.ConstantInhabited] {T : Theory L} [T.Delta1Definable]
+variable {T : Theory L} [T.Delta1Definable]
 
 lemma Language.Theory.Provable.sound {p : SyntacticFormula L} (h : (T.codeIn ℕ).Provable ⌜p⌝) : T ⊢! p :=
   provable_iff_derivable2.mpr <| Language.Theory.Provable.sound2 (by simpa using h)
