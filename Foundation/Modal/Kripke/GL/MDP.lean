@@ -3,8 +3,6 @@ import Foundation.Modal.Kripke.GL.Tree
 
 namespace LO.Modal
 
-variable [Inhabited α] [DecidableEq α]
-
 open LO.Kripke
 open System
 open Classical
@@ -121,7 +119,7 @@ end Kripke
 
 variable {X : Theory α} {p₁ p₂ : Formula α}
 
-lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *⊢[𝐆𝐋]! □p₁ ∨ (□''X) *⊢[𝐆𝐋]! □p₂ := by
+lemma GL_MDP_Aux [Inhabited α] (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *⊢[𝐆𝐋]! □p₁ ∨ (□''X) *⊢[𝐆𝐋]! □p₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
   have : 𝐆𝐋 ⊢! ⋀□'Δ ➝ (□p₁ ⋎ □p₂) := FiniteContext.provable_iff.mp hΓ;
@@ -135,8 +133,8 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
     obtain ⟨M₁, hM₁⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₁;
     obtain ⟨M₂, hM₂⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₂;
 
-    replace hM₁ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₁ (M₁ := M₁) (M₂ := M₂) M₁.root (⊡c ⋏ ∼p₁) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₁;
-    replace hM₂ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₂ (M₁ := M₁) (M₂ := M₂) M₂.root (⊡c ⋏ ∼p₂) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₂;
+    replace hM₁ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₁ (M₁ := M₁) (M₂ := M₂) _ M₁.root (⊡c ⋏ ∼p₁) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₁;
+    replace hM₂ := @GL_MDPCounterexampleModel.modal_equivalence_original_world₂ (M₁ := M₁) (M₂ := M₂) _ M₂.root (⊡c ⋏ ∼p₂) |>.mp $ Formula.Kripke.Satisfies.not_imp.mp hM₂;
 
     let M := GL_MDPCounterexampleModel M₁ M₂;
 
@@ -177,7 +175,7 @@ lemma GL_MDP_Aux (h : (□''X) *⊢[𝐆𝐋]! □p₁ ⋎ □p₂) : (□''X) *
     tauto;
   };
 
-theorem GL_MDP (h : 𝐆𝐋 ⊢! □p₁ ⋎ □p₂) : 𝐆𝐋 ⊢! p₁ ∨ 𝐆𝐋 ⊢! p₂ := by
+theorem GL_MDP [Inhabited α] (h : 𝐆𝐋 ⊢! □p₁ ⋎ □p₂) : 𝐆𝐋 ⊢! p₁ ∨ 𝐆𝐋 ⊢! p₂ := by
   have := GL_MDP_Aux (X := ∅) (p₁ := p₁) (p₂ := p₂) $ Context.of! h;
   simp at this;
   rcases this with (h | h) <;> {
@@ -185,6 +183,6 @@ theorem GL_MDP (h : 𝐆𝐋 ⊢! □p₁ ⋎ □p₂) : 𝐆𝐋 ⊢! p₁ ∨ 
     tauto;
   }
 
-instance : System.ModalDisjunctive (𝐆𝐋 : Hilbert α) := ⟨GL_MDP⟩
+instance [Inhabited α] : System.ModalDisjunctive (𝐆𝐋 : Hilbert α) := ⟨GL_MDP⟩
 
 end LO.Modal

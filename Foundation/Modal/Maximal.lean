@@ -119,7 +119,7 @@ lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⭤ pⱽ := by
   | hbox =>
     apply iff_intro!;
     . exact imply₁'! verum!
-    . exact dhyp! (by simp)
+    . exact imply₁'! (by simp)
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
@@ -198,14 +198,14 @@ example : 𝐓𝐫𝐢𝐯 ⊬ Axioms.L (atom default : Formula α) := by
   apply unprovable_classical_of_exists_ClassicalValuation;
   simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
-  trivial;
+  tauto;
 
 lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬ Axioms.L (atom default : Formula α) := by
   apply not_imp_not.mpr trivTranslated_of_K4;
   apply unprovable_classical_of_exists_ClassicalValuation;
   simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
-  trivial;
+  tauto;
 
 theorem K4_strictReducible_GL : (𝐊𝟒 : Hilbert α) <ₛ 𝐆𝐋 := by
   dsimp [StrictlyWeakerThan];
@@ -222,7 +222,7 @@ lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬ Axioms.T (atom default : Formula α) :
   apply unprovable_classical_of_exists_ClassicalValuation;
   simp [Axioms.T, VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
-  trivial;
+  tauto;
 
 
 instance instGLConsistencyViaUnprovableAxiomT : System.Consistent (𝐆𝐋 : Hilbert α) := by

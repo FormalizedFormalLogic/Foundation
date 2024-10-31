@@ -140,8 +140,12 @@ open LO.Kripke
 open Formula (atom Kripke.Satisfies)
 open Formula.Kripke.Satisfies (multibox_def multidia_def)
 
-variable {α : Type u} [Inhabited α] [DecidableEq α]
+variable {α : Type u}
 
+
+section
+
+variable [Inhabited α]
 
 lemma axiomGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗴𝗲(t) ↔ F ∈ (GeachConfluentFrameClass t)) := by
   intro F;
@@ -185,7 +189,6 @@ instance axiomFour_defines : 𝔽((𝟰 : Theory α)).DefinedBy TransitiveFrameC
   convert axiomGeach_definability (α := α) (t := ⟨0, 2, 1, 0⟩);
   simp [GeachConfluentFrameClass, ←GeachConfluent.transitive_def];
 
-
 lemma axiomMultiGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗚𝗲(ts) ↔ F ∈ (MultiGeachConfluentFrameClass ts)) := by
   intro F;
   induction ts using List.induction_with_singleton with
@@ -214,6 +217,7 @@ instance sound_Geach : Sound 𝐆𝐞(ts) ((MultiGeachConfluentFrameClass ts)#α
 
 instance : System.Consistent (𝐆𝐞(ts) : Hilbert α) := inferInstance
 
+
 instance instGeachLogicSound
   {Λ : Hilbert α} {𝔽 : FrameClass} [logic_geach : Λ.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Sound Λ (𝔽#α) := by
   convert sound_Geach (α := α) (ts := ts);
@@ -236,10 +240,13 @@ instance S5_sound : Sound 𝐒𝟓 (ReflexiveEuclideanFrameClass#α) := inferIns
 
 instance KT4B_sound : Sound 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass#α) := inferInstance
 
+end
+
+
 open System
 open Theory MaximalConsistentTheory CanonicalFrame
 
-variable {Ax : Theory α} [System.Consistent (𝜿Ax)]
+variable {Ax : Theory α} [System.Consistent (𝜿Ax)] [DecidableEq α]
 
 lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame 𝜿Ax).Rel := by
   rintro Ω₁ Ω₂ Ω₃ h;
@@ -285,6 +292,9 @@ lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachC
     constructor;
     . apply geachConfluent_CanonicalFrame; simp_all;
     . apply ih; simp_all;
+
+
+variable [Inhabited α]
 
 instance instMultiGeachComplete : Complete 𝜿(𝗚𝗲(ts)) ((MultiGeachConfluentFrameClass.{u} ts)#α) :=
   instComplete_of_mem_canonicalFrame (MultiGeachConfluentFrameClass ts) $ by

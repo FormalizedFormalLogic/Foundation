@@ -2,7 +2,7 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 namespace LO
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [System F S]
+variable {F S : Type*} [LogicalConnective F] [System F S]
 
 namespace System
 
@@ -21,7 +21,7 @@ protected lemma ProvablyEquivalent.symm [System.Minimal 𝓢] {p q : F} : p ≡ 
 protected lemma ProvablyEquivalent.trans [System.Minimal 𝓢] {p q r : F} : p ≡ q → q ≡ r → p ≡ r := iff_trans''!
 
 lemma provable_iff_provablyEquivalent_verum [System.Minimal 𝓢] {p : F} : 𝓢 ⊢! p ↔ p ≡ ⊤ :=
-  ⟨fun h ↦ iff_intro! imply_left_verum (dhyp! h), fun h ↦ (and_right! h) ⨀ verum!⟩
+  ⟨fun h ↦ iff_intro! imply_left_verum! (imply₁'! h), fun h ↦ (and_right! h) ⨀ verum!⟩
 
 variable (𝓢)
 
@@ -37,40 +37,40 @@ variable [System.Minimal 𝓢]
 
 lemma of_eq_of {p q : F} : (⟦p⟧ : LindenbaumAlgebra 𝓢) = ⟦q⟧ ↔ p ≡ q := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
 
-instance : LE (LindenbaumAlgebra 𝓢) :=
+instance [DecidableEq F] : LE (LindenbaumAlgebra 𝓢) :=
   ⟨Quotient.lift₂ (fun p q ↦ 𝓢 ⊢! p ➝ q) fun p₁ q₁ p₂ q₂ hp hq ↦ by simp only [eq_iff_iff, imp_replace_iff!' hp hq]⟩
 
-lemma le_def {p q : F} : (⟦p⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦q⟧ ↔ 𝓢 ⊢! p ➝ q := iff_of_eq rfl
+lemma le_def [DecidableEq F] {p q : F} : (⟦p⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦q⟧ ↔ 𝓢 ⊢! p ➝ q := iff_of_eq rfl
 
 instance : Top (LindenbaumAlgebra 𝓢) := ⟨⟦⊤⟧⟩
 
 instance : Bot (LindenbaumAlgebra 𝓢) := ⟨⟦⊥⟧⟩
 
-instance : Inf (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ⋏ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
+instance [DecidableEq F] : Inf (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ⋏ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
   simpa only [Quotient.eq] using and_replace_iff! hp hq⟩
 
-instance : Sup (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ⋎ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
+instance [DecidableEq F] : Sup (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ⋎ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
   simpa only [Quotient.eq] using or_replace_iff! hp hq⟩
 
-instance : HImp (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ➝ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
+instance [DecidableEq F] : HImp (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun p q ↦ ⟦p ➝ q⟧) fun p₁ q₁ p₂ q₂ hp hq ↦ by
   simpa only [Quotient.eq] using imp_replace_iff! hp hq⟩
 
-instance : HasCompl (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift (fun p ↦ ⟦∼p⟧) fun p₁ p₂ hp ↦ by
+instance [DecidableEq F] : HasCompl (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift (fun p ↦ ⟦∼p⟧) fun p₁ p₂ hp ↦ by
   simpa only [Quotient.eq] using neg_replace_iff'! hp⟩
 
 lemma top_def : (⊤ : LindenbaumAlgebra 𝓢) = ⟦⊤⟧ := rfl
 
 lemma bot_def : (⊥ : LindenbaumAlgebra 𝓢) = ⟦⊥⟧ := rfl
 
-lemma inf_def (p q : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢) ⊓ ⟦q⟧ = ⟦p ⋏ q⟧ := rfl
+lemma inf_def [DecidableEq F] (p q : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢) ⊓ ⟦q⟧ = ⟦p ⋏ q⟧ := rfl
 
-lemma sup_def (p q : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢) ⊔ ⟦q⟧ = ⟦p ⋎ q⟧ := rfl
+lemma sup_def [DecidableEq F] (p q : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢) ⊔ ⟦q⟧ = ⟦p ⋎ q⟧ := rfl
 
-lemma himp_def (p q : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢) ⇨ ⟦q⟧ = ⟦p ➝ q⟧ := rfl
+lemma himp_def [DecidableEq F] (p q : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢) ⇨ ⟦q⟧ = ⟦p ➝ q⟧ := rfl
 
-lemma compl_def (p : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢)ᶜ = ⟦∼p⟧ := rfl
+lemma compl_def [DecidableEq F] (p : F) : (⟦p⟧ : LindenbaumAlgebra 𝓢)ᶜ = ⟦∼p⟧ := rfl
 
-instance : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) where
+instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) where
   le_refl p := by
     induction' p using Quotient.ind with p
     simp [le_def]
@@ -120,7 +120,7 @@ instance : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) where
   le_top p := by
     induction' p using Quotient.ind with p
     simp only [top_def, le_def]
-    exact imply_left_verum
+    exact imply_left_verum!
   le_himp_iff p q r := by
     induction' p using Quotient.ind with p
     induction' q using Quotient.ind with q
@@ -158,7 +158,7 @@ open LindenbaumAlgebra
 
 variable [System.Intuitionistic 𝓢]
 
-instance LindenbaumAlgebra.heyting : HeytingAlgebra (LindenbaumAlgebra 𝓢) where
+instance LindenbaumAlgebra.heyting [DecidableEq F] : HeytingAlgebra (LindenbaumAlgebra 𝓢) where
   bot_le p := by
     induction' p using Quotient.ind with p
     simp only [bot_def, le_def]
@@ -176,18 +176,18 @@ open LindenbaumAlgebra
 
 variable [System.Classical 𝓢]
 
-instance LindenbaumAlgebra.boolean : BooleanAlgebra (LindenbaumAlgebra 𝓢) where
+instance LindenbaumAlgebra.boolean [DecidableEq F] : BooleanAlgebra (LindenbaumAlgebra 𝓢) where
   inf_compl_le_bot p := by
     induction' p using Quotient.ind with p
     simp only [compl_def, inf_def, bot_def, le_def, intro_bot_of_and!]
   top_le_sup_compl p := by
     induction' p using Quotient.ind with p
     simp [compl_def, sup_def, top_def, le_def]
-    apply dhyp! lem!
+    apply imply₁'! lem!
   le_top p := by
     induction' p using Quotient.ind with p
     simp only [top_def, le_def]
-    exact imply_left_verum
+    exact imply_left_verum!
   bot_le p := by
     induction' p using Quotient.ind with p
     simp only [bot_def, le_def]

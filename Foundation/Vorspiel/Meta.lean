@@ -7,6 +7,7 @@ import Mathlib.Data.Fin.Fin2
 
 open Qq Lean Elab Meta Tactic
 
+/-
 universe u v
 
 inductive DbgResult (α : Type u) : α → Type u
@@ -510,3 +511,5 @@ namespace DEq
 end DEq
 
 end Denotation
+
+-/

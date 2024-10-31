@@ -106,20 +106,19 @@ end Positive
 lemma bv_eq_empty_of_positive {t : Semiterm L ξ 1} (ht : t.Positive) : t.bv = ∅ :=
   Finset.eq_empty_of_forall_not_mem <| by simp [Positive, Fin.eq_zero] at ht ⊢; assumption
 
-variable [DecidableEq ξ]
-
-def fv : Semiterm L ξ n → Finset ξ
+def fv [DecidableEq ξ] : Semiterm L ξ n → Finset ξ
   | #_       => ∅
   | &x       => {x}
   | func _ v => .biUnion .univ fun i ↦ fv (v i)
 
-@[simp] lemma fv_bvar : (#x : Semiterm L ξ n).fv = ∅ := rfl
+@[simp] lemma fv_bvar [DecidableEq ξ] : (#x : Semiterm L ξ n).fv = ∅ := rfl
 
-@[simp] lemma fv_fvar : (&x : Semiterm L ξ n).fv = {x} := rfl
+@[simp] lemma fv_fvar [DecidableEq ξ] : (&x : Semiterm L ξ n).fv = {x} := rfl
 
-lemma fv_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).fv = .biUnion .univ fun i ↦ fv (v i) := rfl
+lemma fv_func [DecidableEq ξ] {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
+    (func f v).fv = .biUnion .univ fun i ↦ fv (v i) := rfl
 
-@[simp] lemma fv_constant (f : L.Func 0) (v : Fin 0 → Semiterm L ξ n) : (func f v).fv = ∅ := rfl
+@[simp] lemma fv_constant [DecidableEq ξ] (f : L.Func 0) (v : Fin 0 → Semiterm L ξ n) : (func f v).fv = ∅ := rfl
 
 def complexity : Semiterm L ξ n → ℕ
   | #_       => 0

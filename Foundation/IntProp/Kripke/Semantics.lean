@@ -6,7 +6,7 @@ namespace LO.IntProp
 open System
 open Kripke
 
-variable {α : Type u} [Inhabited α]
+variable {α : Type u}
 
 namespace Formula.Kripke
 
@@ -77,11 +77,7 @@ namespace ValidOnModel
 
 instance semantics : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
-variable
-  {M : Model α} {p q r : Formula α}
-  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
-  (F_trans : Transitive M.Frame.Rel := by simpa)
-  (F_refl : Reflexive M.Frame.Rel := by simpa)
+variable {M : Model α} {p q r : Formula α}
 
 @[simp] protected lemma iff_models : M ⊧ p ↔ Formula.Kripke.ValidOnModel M p := iff_of_eq rfl
 
@@ -91,7 +87,10 @@ protected lemma and₁ : M ⊧ p ⋏ q ➝ p := by simp_all [ValidOnModel, Satis
 
 protected lemma and₂ : M ⊧ p ⋏ q ➝ q := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma and₃ : M ⊧ p ➝ q ➝ p ⋏ q := by
+protected lemma and₃
+  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
+  (F_trans : Transitive M.Frame.Rel)
+  : M ⊧ p ➝ q ➝ p ⋏ q := by
   intro x y _ hp z Ryz hq;
   replace hp : Satisfies M z p := formula_hereditary atom_hereditary F_trans Ryz hp;
   exact ⟨hp, hq⟩;
@@ -100,24 +99,32 @@ protected lemma or₁ : M ⊧ p ➝ p ⋎ q := by simp_all [ValidOnModel, Satisf
 
 protected lemma or₂ : M ⊧ q ➝ p ⋎ q := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma or₃ : M ⊧ (p ➝ r) ➝ (q ➝ r) ➝ (p ⋎ q ➝ r) := by
+protected lemma or₃
+  (F_trans : Transitive M.Frame.Rel)
+  : M ⊧ (p ➝ r) ➝ (q ➝ r) ➝ (p ⋎ q ➝ r) := by
   simp_all only [ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, Satisfies.imp_def, Satisfies.or_def];
   intro w₁ w₂ _ hpr w₃ hw₂₃ hqr w₄ hw₃₄ hpq;
   cases hpq with
   | inl hp => exact hpr (F_trans hw₂₃ hw₃₄) hp;
   | inr hq => exact hqr hw₃₄ hq;
 
-protected lemma imply₁ : M ⊧ p ➝ q ➝ p := by
+protected lemma imply₁
+  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
+  (F_trans : Transitive M.Frame.Rel)
+  : M ⊧ p ➝ q ➝ p := by
   intro x y _ hp z Ryz _;
   exact formula_hereditary atom_hereditary F_trans Ryz hp;
 
-protected lemma imply₂ : M ⊧ (p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r := by
+protected lemma imply₂
+  (F_trans : Transitive M.Frame.Rel)
+  (F_refl : Reflexive M.Frame.Rel)
+  : M ⊧ (p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r := by
   intro x y _ hpqr z Ryz hpq w Rzw hp;
   have Ryw := F_trans Ryz Rzw;
   have Rww := F_refl w;
   exact hpqr Ryw hp Rww (hpq Rzw hp);
 
-protected lemma mdp (hpq : M ⊧ p ➝ q) (hp : M ⊧ p) : M ⊧ q := by
+protected lemma mdp (F_refl : Reflexive M.Frame.Rel) (hpq : M ⊧ p ➝ q) (hp : M ⊧ p) : M ⊧ q := by
   intro w;
   exact hpq w (F_refl w) $ hp w;
 
@@ -130,7 +137,10 @@ protected lemma neg_equiv : M ⊧ Axioms.NegEquiv p := by
   . intro x _ h y rxy hyp; exact h rxy hyp;
   . intro x _ h y rxy; exact h rxy;
 
-protected lemma lem : Symmetric M.Frame.Rel → M ⊧ Axioms.LEM p := by
+protected lemma lem
+  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
+  (F_trans : Transitive M.Frame.Rel)
+  : Symmetric M.Frame.Rel → M ⊧ Axioms.LEM p := by
   simp_all [ValidOnModel, Satisfies, Symmetric];
   contrapose; push_neg;
   rintro ⟨x, nhxp, ⟨y, Rxy, hyp⟩⟩;
@@ -141,7 +151,10 @@ protected lemma lem : Symmetric M.Frame.Rel → M ⊧ Axioms.LEM p := by
     have := formula_hereditary atom_hereditary F_trans Ryx hyp;
     contradiction;
 
-protected lemma dum : Connected M.Frame.Rel → M ⊧ Axioms.GD p q := by
+protected lemma dum
+  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
+  (F_trans : Transitive M.Frame.Rel)
+  : Connected M.Frame.Rel → M ⊧ Axioms.GD p q := by
   simp [ValidOnModel, Satisfies, Connected];
   contrapose; push_neg;
   rintro ⟨x, ⟨y, Rxy, hyp, nhyq⟩, ⟨z, Ryz, hzq, nhyp⟩⟩;
@@ -154,7 +167,10 @@ protected lemma dum : Connected M.Frame.Rel → M ⊧ Axioms.GD p q := by
     have := formula_hereditary atom_hereditary F_trans Rzy hzq;
     contradiction;
 
-protected lemma wlem : Confluent M.Frame.Rel → M ⊧ Axioms.WeakLEM p := by
+protected lemma wlem
+  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
+  (F_trans : Transitive M.Frame.Rel)
+  : Confluent M.Frame.Rel → M ⊧ Axioms.WeakLEM p := by
   simp [ValidOnModel, Satisfies, Confluent];
   contrapose; push_neg;
   rintro ⟨x, ⟨y, Rxy, hyp⟩, ⟨z, Rxz, hz⟩⟩;
@@ -181,8 +197,6 @@ variable {F : Frame.Dep α}
 @[simp] protected lemma models_iff : F ⊧ f ↔ ValidOnFrame F f := iff_of_eq rfl
 
 variable {F : Frame.Dep α} {p q r : Formula α}
-         (F_trans : Transitive F)
-         (F_refl : Reflexive F)
 
 protected lemma verum : F ⊧ ⊤ := fun _ => ValidOnModel.verum
 
@@ -190,29 +204,29 @@ protected lemma and₁ : F ⊧ p ⋏ q ➝ p := fun _ => ValidOnModel.and₁
 
 protected lemma and₂ : F ⊧ p ⋏ q ➝ q := fun _ => ValidOnModel.and₂
 
-protected lemma and₃ : F ⊧ p ➝ q ➝ p ⋏ q := fun hV => ValidOnModel.and₃ hV F_trans
+protected lemma and₃ (F_trans : Transitive F) : F ⊧ p ➝ q ➝ p ⋏ q := fun hV => ValidOnModel.and₃ hV F_trans
 
 protected lemma or₁ : F ⊧ p ➝ p ⋎ q := fun _ => ValidOnModel.or₁
 
 protected lemma or₂ : F ⊧ q ➝ p ⋎ q := fun _ => ValidOnModel.or₂
 
-protected lemma or₃ : F ⊧ (p ➝ r) ➝ (q ➝ r) ➝ (p ⋎ q ➝ r) := fun _ => ValidOnModel.or₃ F_trans
+protected lemma or₃ (F_trans : Transitive F) : F ⊧ (p ➝ r) ➝ (q ➝ r) ➝ (p ⋎ q ➝ r) := fun _ => ValidOnModel.or₃ F_trans
 
-protected lemma imply₁ : F ⊧ p ➝ q ➝ p := fun hV => ValidOnModel.imply₁ hV F_trans
+protected lemma imply₁ (F_trans : Transitive F) : F ⊧ p ➝ q ➝ p := fun hV => ValidOnModel.imply₁ hV F_trans
 
-protected lemma imply₂ : F ⊧ (p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r := fun _ => ValidOnModel.imply₂ F_trans F_refl
+protected lemma imply₂ (F_trans : Transitive F) (F_refl : Reflexive F) : F ⊧ (p ➝ q ➝ r) ➝ (p ➝ q) ➝ p ➝ r := fun _ => ValidOnModel.imply₂ F_trans F_refl
 
-protected lemma mdp (hpq : F ⊧ p ➝ q) (hp : F ⊧ p) : F ⊧ q := fun hV => ValidOnModel.mdp F_refl (hpq hV) (hp hV)
+protected lemma mdp (F_refl : Reflexive F) (hpq : F ⊧ p ➝ q) (hp : F ⊧ p) : F ⊧ q := fun hV => ValidOnModel.mdp F_refl (hpq hV) (hp hV)
 
 protected lemma efq : F ⊧ Axioms.EFQ p := fun _ => ValidOnModel.efq
 
 protected lemma neg_equiv : F ⊧ Axioms.NegEquiv p := fun _ => ValidOnModel.neg_equiv
 
-protected lemma lem (F_symm : Symmetric F.Rel) : F ⊧ Axioms.LEM p := fun hV => ValidOnModel.lem hV F_trans F_symm
+protected lemma lem (F_trans : Transitive F)  (F_symm : Symmetric F.Rel) : F ⊧ Axioms.LEM p := fun hV => ValidOnModel.lem hV F_trans F_symm
 
-protected lemma dum (F_conn : Connected F.Rel) : F ⊧ Axioms.GD p q := fun hV => ValidOnModel.dum hV F_trans F_conn
+protected lemma dum (F_trans : Transitive F) (F_conn : Connected F.Rel) : F ⊧ Axioms.GD p q := fun hV => ValidOnModel.dum hV F_trans F_conn
 
-protected lemma wlem (F_conf : Confluent F.Rel) : F ⊧ Axioms.WeakLEM p := fun hV => ValidOnModel.wlem hV F_trans F_conf
+protected lemma wlem (F_trans : Transitive F) (F_conf : Confluent F.Rel) : F ⊧ Axioms.WeakLEM p := fun hV => ValidOnModel.wlem hV F_trans F_conf
 
 instance : Semantics.Bot (Frame.Dep α) where
   realize_bot _ := by

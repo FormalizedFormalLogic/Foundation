@@ -5,7 +5,7 @@ namespace LO
 
 namespace System
 
-variable (F : Type*) [LogicalConnective F] [DecidableEq F] {S : Type*} [System F S]
+variable (F : Type*) {S : Type*}
 
 structure FiniteContext (𝓢 : S) where
   ctx : List F
@@ -18,13 +18,13 @@ variable {𝓢 : S}
 
 instance : Coe (List F) (FiniteContext F 𝓢) := ⟨mk⟩
 
-abbrev conj (Γ : FiniteContext F 𝓢) : F := ⋀Γ.ctx
+abbrev conj [LogicalConnective F] (Γ : FiniteContext F 𝓢) : F := ⋀Γ.ctx
 
-abbrev disj (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
+abbrev disj [LogicalConnective F] (Γ : FiniteContext F 𝓢) : F := ⋁Γ.ctx
 
 instance : EmptyCollection (FiniteContext F 𝓢) := ⟨⟨[]⟩⟩
 
-instance : Membership F (FiniteContext F 𝓢) := ⟨(· ∈ ·.ctx)⟩
+instance : Membership F (FiniteContext F 𝓢) := ⟨λ Γ x => (x ∈ Γ.ctx)⟩
 
 instance : HasSubset (FiniteContext F 𝓢) := ⟨(·.ctx ⊆ ·.ctx)⟩
 
@@ -42,6 +42,8 @@ instance : Collection F (FiniteContext F 𝓢) where
   subset_iff := List.subset_def
   not_mem_empty := by simp
   mem_cons_iff := by simp [Cons.cons, mem_def]
+
+variable [System F S] [LogicalConnective F]
 
 instance (𝓢 : S) : System F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢ ·.conj ➝ ·)⟩
 
@@ -75,20 +77,13 @@ lemma toₛ! (b : Γ ⊢[𝓢]! p) : 𝓢 ⊢! ⋀Γ ➝ p := b
 
 lemma provable_iff {p : F} : Γ ⊢[𝓢]! p ↔ 𝓢 ⊢! ⋀Γ ➝ p := iff_of_eq rfl
 
+
+section
+
 variable {Γ Δ E : List F}
+variable [System.Minimal 𝓢]
 
-variable
-  [System.ModusPonens 𝓢]
-  [System.HasAxiomVerum 𝓢]
-  [System.HasAxiomImply₁ 𝓢]
-  [System.HasAxiomImply₂ 𝓢]
-  [System.HasAxiomAndElim₁ 𝓢]
-  [System.HasAxiomAndElim₂ 𝓢]
-  [System.HasAxiomAndInst 𝓢]
-  [System.HasAxiomOrInst₁ 𝓢]
-  [System.HasAxiomOrInst₂ 𝓢]
-
-instance : Axiomatized (FiniteContext F 𝓢) where
+instance [DecidableEq F] : Axiomatized (FiniteContext F 𝓢) where
   prfAxm := fun hp ↦ generalConj' hp
   weakening := fun H b ↦ impTrans'' (conjImplyConj' H) b
 
@@ -98,38 +93,34 @@ instance : Compact (FiniteContext F 𝓢) where
   φ_subset := by simp
   φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
-def byAxm {p} (h : p ∈ Γ := by simp) : Γ ⊢[𝓢] p := Axiomatized.prfAxm (by simpa)
+def byAxm [DecidableEq F] {p} (h : p ∈ Γ := by simp) : Γ ⊢[𝓢] p := Axiomatized.prfAxm (by simpa)
 
-lemma by_axm! {p} (h : p ∈ Γ := by simp) : Γ ⊢[𝓢]! p := Axiomatized.provable_axm _ (by simpa)
+lemma by_axm! [DecidableEq F] {p} (h : p ∈ Γ := by simp) : Γ ⊢[𝓢]! p := Axiomatized.provable_axm _ (by simpa)
 
-def weakening (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢] p → Δ ⊢[𝓢] p := Axiomatized.weakening (by simpa)
+def weakening [DecidableEq F] (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢] p → Δ ⊢[𝓢] p := Axiomatized.weakening (by simpa)
 
-lemma weakening! (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢]! p → Δ ⊢[𝓢]! p := fun h ↦ Axiomatized.le_of_subset (by simpa) h
+lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {p} : Γ ⊢[𝓢]! p → Δ ⊢[𝓢]! p := fun h ↦ Axiomatized.le_of_subset (by simpa) h
 
-def of {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := dhyp (⋀Γ) b
+def of {p : F} (b : 𝓢 ⊢ p) : Γ ⊢[𝓢] p := imply₁' (q := ⋀Γ) b
 
 def emptyPrf {p : F} : [] ⊢[𝓢] p → 𝓢 ⊢ p := fun b ↦ b ⨀ verum
 
 def provable_iff_provable {p : F} : 𝓢 ⊢! p ↔ [] ⊢[𝓢]! p :=
   ⟨fun b ↦ ⟨of b.some⟩, fun b ↦ ⟨emptyPrf b.some⟩⟩
 
-lemma of'! (h : 𝓢 ⊢! p) : Γ ⊢[𝓢]! p := weakening! (by simp) $ provable_iff_provable.mp h
+lemma of'! [DecidableEq F] (h : 𝓢 ⊢! p) : Γ ⊢[𝓢]! p := weakening! (by simp) $ provable_iff_provable.mp h
 
-def id : [p] ⊢[𝓢] p := byAxm
+def id [DecidableEq F] : [p] ⊢[𝓢] p := byAxm
+@[simp] lemma id! [DecidableEq F] : [p] ⊢[𝓢]! p := by_axm!
 
-def byAxm₀ : (p :: Γ) ⊢[𝓢] p := byAxm
+def byAxm₀ [DecidableEq F] : (p :: Γ) ⊢[𝓢] p := byAxm
+lemma by_axm₀! [DecidableEq F] : (p :: Γ) ⊢[𝓢]! p := by_axm!
 
-def byAxm₁ : (p :: q :: Γ) ⊢[𝓢] q := byAxm
+def byAxm₁ [DecidableEq F] : (p :: q :: Γ) ⊢[𝓢] q := byAxm
+lemma by_axm₁! [DecidableEq F] : (p :: q :: Γ) ⊢[𝓢]! q := by_axm!
 
-def byAxm₂ : (p :: q :: r :: Γ) ⊢[𝓢] r := byAxm
-
-lemma by_axm₀! : (p :: Γ) ⊢[𝓢]! p := by_axm!
-
-lemma by_axm₁! : (p :: q :: Γ) ⊢[𝓢]! q := by_axm!
-
-lemma by_axm₂! : (p :: q :: r :: Γ) ⊢[𝓢]! r := by_axm!
-
-@[simp] lemma id! : [p] ⊢[𝓢]! p := by_axm!
+def byAxm₂ [DecidableEq F] : (p :: q :: r :: Γ) ⊢[𝓢] r := byAxm
+lemma by_axm₂! [DecidableEq F] : (p :: q :: r :: Γ) ⊢[𝓢]! r := by_axm!
 
 instance (Γ : FiniteContext F 𝓢) : System.ModusPonens Γ := ⟨mdp₁⟩
 
@@ -139,24 +130,23 @@ instance (Γ : FiniteContext F 𝓢) : System.HasAxiomImply₁ Γ := ⟨fun _ _ 
 
 instance (Γ : FiniteContext F 𝓢) : System.HasAxiomImply₂ Γ := ⟨fun _ _ _ ↦ of imply₂⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomAndElim₁ Γ := ⟨fun _ _ ↦ of and₁⟩
-
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomAndElim₂ Γ := ⟨fun _ _ ↦ of and₂⟩
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomAndElim Γ := ⟨fun _ _ ↦ of and₁, fun _ _ ↦ of and₂⟩
 
 instance (Γ : FiniteContext F 𝓢) : System.HasAxiomAndInst Γ := ⟨fun _ _ ↦ of and₃⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomOrInst₁ Γ := ⟨fun _ _ ↦ of or₁⟩
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomOrInst Γ := ⟨fun _ _ ↦ of or₁, fun _ _ ↦ of or₂⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomOrInst₂ Γ := ⟨fun _ _ ↦ of or₂⟩
+instance (Γ : FiniteContext F 𝓢) : System.HasAxiomOrElim Γ := ⟨fun _ _ _ ↦ of or₃⟩
 
-instance [HasAxiomOrElim 𝓢] (Γ : FiniteContext F 𝓢) : System.HasAxiomOrElim Γ := ⟨fun _ _ _ ↦ of or₃⟩
+instance (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨fun _ ↦ of neg_equiv⟩
 
-instance [NegationEquiv 𝓢] (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨fun _ ↦ of neg_equiv⟩
+instance [System.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : System.Minimal Γ where
 
-def mdp' (bΓ : Γ ⊢[𝓢] p ➝ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[𝓢] q := wk (by simp) bΓ ⨀ wk (by simp) bΔ
+
+def mdp' [DecidableEq F] (bΓ : Γ ⊢[𝓢] p ➝ q) (bΔ : Δ ⊢[𝓢] p) : (Γ ++ Δ) ⊢[𝓢] q := wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
 def deduct {p q : F} : {Γ : List F} → (p :: Γ) ⊢[𝓢] q → Γ ⊢[𝓢] p ➝ q
-  | .nil => fun b ↦ ofDef <| dhyp _ (toDef b)
+  | .nil => fun b ↦ ofDef <| imply₁' (toDef b)
   | .cons _ _ => fun b ↦ ofDef <| andImplyIffImplyImply'.mp (impTrans'' (andComm _ _) (toDef b))
 
 lemma deduct! (h : (p :: Γ) ⊢[𝓢]! q) :  Γ ⊢[𝓢]! p ➝ q  := ⟨FiniteContext.deduct h.some⟩
@@ -184,7 +174,7 @@ instance deduction : Deduction (FiniteContext F 𝓢) where
   ofInsert := deduct
   inv := deductInv
 
-instance : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
+instance [DecidableEq F] : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
   ⟨fun {Γ Δ _} bΓ bΔ ↦
     have : Γ ⊢ Δ.conj := conjIntro' _ (fun _ hp ↦ bΓ hp)
     ofDef <| impTrans'' (toDef this) (toDef bΔ)⟩
@@ -192,16 +182,15 @@ instance : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
 instance [HasAxiomEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomEFQ Γ := ⟨fun _ ↦ of efq⟩
 
 instance [HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
-
-instance [HasAxiomDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomDNE Γ := ⟨fun p ↦ of (HasAxiomDNE.dne p)⟩
-
-instance [System.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : System.Minimal Γ where
-
 instance [System.Intuitionistic 𝓢] (Γ : FiniteContext F 𝓢) : System.Intuitionistic Γ where
 
+instance [HasAxiomDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomDNE Γ := ⟨fun p ↦ of (HasAxiomDNE.dne p)⟩
 instance [System.Classical 𝓢] (Γ : FiniteContext F 𝓢) : System.Classical Γ where
 
+end
+
 end FiniteContext
+
 
 variable (F)
 
@@ -209,6 +198,7 @@ structure Context (𝓢 : S) where
   ctx : Set F
 
 variable {F}
+
 
 namespace Context
 
@@ -218,7 +208,7 @@ instance : Coe (Set F) (Context F 𝓢) := ⟨mk⟩
 
 instance : EmptyCollection (Context F 𝓢) := ⟨⟨∅⟩⟩
 
-instance : Membership F (Context F 𝓢) := ⟨(· ∈ ·.ctx)⟩
+instance : Membership F (Context F 𝓢) := ⟨λ Γ x => (x ∈ Γ.ctx)⟩
 
 instance : HasSubset (Context F 𝓢) := ⟨(·.ctx ⊆ ·.ctx)⟩
 
@@ -236,6 +226,8 @@ instance : Collection F (Context F 𝓢) where
   subset_iff := by rintro ⟨s⟩ ⟨u⟩; simp [Set.subset_def]
   not_mem_empty := by simp
   mem_cons_iff := by simp [Cons.cons, mem_def]
+
+variable [LogicalConnective F] [System F S]
 
 structure Proof (Γ : Context F 𝓢) (p : F) where
   ctx : List F
@@ -266,6 +258,7 @@ notation Γ:45 " *⊢[" 𝓢 "]* " s:46 => PrfSet 𝓢 Γ s
 
 notation Γ:45 " *⊢[" 𝓢 "]*! " s:46 => ProvableSet 𝓢 Γ s
 
+section
 
 variable {𝓢}
 
@@ -276,7 +269,7 @@ section minimal
 
 variable [System.Minimal 𝓢]
 
-instance : Axiomatized (Context F 𝓢) where
+instance [DecidableEq F] : Axiomatized (Context F 𝓢) where
   prfAxm := fun {Γ p} hp ↦ ⟨[p], by simpa using hp, byAxm (by simp [Collection.set])⟩
   weakening := fun h b ↦ ⟨b.ctx, fun p hp ↦ Collection.subset_iff.mp h p (b.subset p hp), b.prf⟩
 
@@ -304,7 +297,7 @@ def deduct [DecidableEq F] {p q : F} {Γ : Set F} : (insert p Γ) *⊢[𝓢] q �
 def deductInv {p q : F} {Γ : Set F} : Γ *⊢[𝓢] p ➝ q → (insert p Γ) *⊢[𝓢] q
   | ⟨Δ, h, b⟩ => ⟨p :: Δ, by simp; intro r hr; exact Or.inr (h r hr), FiniteContext.deductInv b⟩
 
-instance deduction : Deduction (Context F 𝓢) where
+instance deduction [DecidableEq F] : Deduction (Context F 𝓢) where
   ofInsert := deduct
   inv := deductInv
 
@@ -312,14 +305,14 @@ def of {p : F} (b : 𝓢 ⊢ p) : Γ *⊢[𝓢] p := ⟨[], by simp, FiniteConte
 
 lemma of! (b : 𝓢 ⊢! p) : Γ *⊢[𝓢]! p := ⟨Context.of b.some⟩
 
-def mdp {Γ : Set F} (bpq : Γ *⊢[𝓢] p ➝ q) (bp : Γ *⊢[𝓢] p) : Γ *⊢[𝓢] q :=
+def mdp [DecidableEq F] {Γ : Set F} (bpq : Γ *⊢[𝓢] p ➝ q) (bp : Γ *⊢[𝓢] p) : Γ *⊢[𝓢] q :=
   ⟨ bpq.ctx ++ bp.ctx, by
     simp; rintro r (hr | hr)
     · exact bpq.subset r hr
     · exact bp.subset r hr,
     FiniteContext.mdp' bpq.prf bp.prf ⟩
 
-lemma by_axm! (h : p ∈ Γ) : Γ *⊢[𝓢]! p := System.by_axm _ (by simpa)
+lemma by_axm! [DecidableEq F] (h : p ∈ Γ) : Γ *⊢[𝓢]! p := System.by_axm _ (by simpa)
 
 def emptyPrf {p : F} : ∅ *⊢[𝓢] p → 𝓢 ⊢ p := by
   rintro ⟨Γ, hΓ, h⟩;
@@ -331,7 +324,7 @@ lemma emptyPrf! {p : F} : ∅ *⊢[𝓢]! p → 𝓢 ⊢! p := fun h ↦ ⟨empt
 
 lemma provable_iff_provable {p : F} : 𝓢 ⊢! p ↔ ∅ *⊢[𝓢]! p := ⟨of!, emptyPrf!⟩
 
-instance minimal (Γ : Context F 𝓢) : System.Minimal Γ where
+instance minimal [DecidableEq F] (Γ : Context F 𝓢) : System.Minimal Γ where
   mdp := mdp
   verum := of verum
   imply₁ := fun _ _ ↦ of imply₁
@@ -352,9 +345,11 @@ instance [HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := infer
 
 end minimal
 
-instance [System.Intuitionistic 𝓢] (Γ : Context F 𝓢) : System.Intuitionistic Γ where
+instance [DecidableEq F] [System.Intuitionistic 𝓢] (Γ : Context F 𝓢) : System.Intuitionistic Γ where
 
-instance [System.Classical 𝓢] (Γ : Context F 𝓢) : System.Classical Γ where
+instance [DecidableEq F] [System.Classical 𝓢] (Γ : Context F 𝓢) : System.Classical Γ where
+
+end
 
 end Context
 

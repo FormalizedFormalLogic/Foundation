@@ -640,21 +640,7 @@ prefix:80 "⋁" => disj₂
   | nil => contradiction;
   | cons q rs => simp [disj₂]
 
--- TODO: Move to vorpsiel
-lemma induction_with_singleton
-  {motive : List F → Prop}
-  (hnil : motive [])
-  (hsingle : ∀ a, motive [a])
-  (hcons : ∀ a as, as ≠ [] → motive as → motive (a :: as)) : ∀ as, motive as := by
-  intro as;
-  induction as with
-  | nil => exact hnil;
-  | cons a as ih => cases as with
-    | nil => exact hsingle a;
-    | cons b bs => exact hcons a (b :: bs) (by simp) ih;
-
 end
-
 
 end List
 
@@ -662,7 +648,7 @@ namespace Finset
 
 section
 
-variable [LogicalConnective α] [DecidableEq α]
+variable [LogicalConnective α]
 
 noncomputable def conj (s : Finset α) : α := s.toList.conj
 -- prefix:80 "⋀" => Finset.conj
@@ -670,7 +656,8 @@ noncomputable def conj (s : Finset α) : α := s.toList.conj
 lemma map_conj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.conj ↔ ∀ a ∈ s, f a := by
   simpa using List.map_conj f s.toList
 
-lemma map_conj_union [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).conj ↔ f (s₁.conj ⋏ s₂.conj) := by
+lemma map_conj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
+    (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).conj ↔ f (s₁.conj ⋏ s₂.conj) := by
   simp [map_conj];
   constructor;
   . intro h;
@@ -688,7 +675,8 @@ noncomputable def disj (s : Finset α) : α := s.toList.disj
 lemma map_disj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s : Finset α) : f s.disj ↔ ∃ a ∈ s, f a := by
   simpa using List.map_disj f s.toList
 
-lemma map_disj_union [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).disj ↔ f (s₁.disj ⋎ s₂.disj) := by
+lemma map_disj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
+    (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).disj ↔ f (s₁.disj ⋎ s₂.disj) := by
   simp [map_disj];
   constructor;
   . rintro ⟨a, h₁ | h₂, hb⟩;

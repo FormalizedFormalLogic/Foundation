@@ -64,7 +64,7 @@ instance [Operator.LT L] : LT (Model L M) :=
 instance [Operator.LT L] : Structure.LT L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
 
 instance [Operator.Mem L] : Membership (Model L M) (Model L M) :=
-  ⟨fun x y => (@Operator.Mem.mem L _).val ![x, y]⟩
+  ⟨fun x y => (@Operator.Mem.mem L _).val ![y, x]⟩
 
 instance [Operator.Mem L] : Structure.Mem L (Model L M) := ⟨fun _ _ => iff_of_eq rfl⟩
 

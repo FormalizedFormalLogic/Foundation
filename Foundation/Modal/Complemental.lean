@@ -2,7 +2,6 @@ import Foundation.Modal.ConsistentTheory
 
 namespace LO.Modal
 
-variable [DecidableEq α]
 variable {Λ : Hilbert α}
 
 namespace Formula
@@ -39,7 +38,7 @@ lemma resort_box (h : -p = □q) : p = ∼□q := by
   . subst_vars; rfl;
   . contradiction;
 
-lemma or (p : Formula α) : -p = ∼p ∨ ∃ q, ∼q = p := by
+lemma or [DecidableEq α] (p : Formula α) : -p = ∼p ∨ ∃ q, ∼q = p := by
   induction p using Formula.cases_neg with
   | himp _ _ hn => simp [imp_def₁ hn];
   | hfalsum => simp;
@@ -57,7 +56,7 @@ variable [System (Formula α) S] {𝓢 : S}
 variable [System.ModusPonens 𝓢]
 variable {p q : Formula α}
 
-lemma complement_derive_bot (hp : 𝓢 ⊢! p) (hcp : 𝓢 ⊢! -p) : 𝓢 ⊢! ⊥ := by
+lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! p) (hcp : 𝓢 ⊢! -p) : 𝓢 ⊢! ⊥ := by
   induction p using Formula.cases_neg with
   | hfalsum => assumption;
   | hatom a =>
@@ -73,7 +72,7 @@ lemma complement_derive_bot (hp : 𝓢 ⊢! p) (hcp : 𝓢 ⊢! -p) : 𝓢 ⊢! 
     simp [Formula.complement] at hcp;
     exact hcp ⨀ hp;
 
-lemma neg_complement_derive_bot (hp : 𝓢 ⊢! ∼p) (hcp : 𝓢 ⊢! ∼(-p)) : 𝓢 ⊢! ⊥ := by
+lemma neg_complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! ∼p) (hcp : 𝓢 ⊢! ∼(-p)) : 𝓢 ⊢! ⊥ := by
   induction p using Formula.cases_neg with
   | hfalsum =>
     simp [Formula.complement] at hcp;
@@ -95,6 +94,8 @@ end
 
 
 namespace Formulae
+
+variable [DecidableEq α]
 
 def complementary (P : Formulae α) : Formulae α := P ∪ (P.image (Formula.complement))
 postfix:80 "⁻" => Formulae.complementary
@@ -120,19 +121,28 @@ class ComplementaryClosed (P : Formulae α) (S : Formulae α) : Prop where
   subset : P ⊆ S⁻
   either : ∀ p ∈ S, p ∈ P ∨ -p ∈ P
 
-def SubformulaeComplementaryClosed (P : Formulae α) (p : Formula α) : Prop := P.ComplementaryClosed (𝒮 p)
+def SubformulaeComplementaryClosed (P : Formulae α) (p : Formula α) : Prop := P.ComplementaryClosed p.subformulae
 
 
 
 section Consistent
 
-def Consistent (Λ : Hilbert α) (P : Formulae α) : Prop :=  P *⊬[Λ] ⊥
+def Consistent (Λ : Hilbert α) (P : Formulae α) : Prop := P *⊬[Λ] ⊥
 
 open Theory
 
+omit [DecidableEq α] in
 @[simp]
-lemma iff_theory_consistent_formulae_consistent {P : Formulae α}
-  : Theory.Consistent Λ P ↔ Formulae.Consistent Λ P := by simp [Consistent, Theory.Consistent]
+lemma iff_theory_consistent_formulae_consistent {P : Formulae α} : Theory.Consistent Λ P ↔ Formulae.Consistent Λ P := by
+  simp [Consistent, Theory.Consistent]
+
+omit [DecidableEq α] in
+@[simp]
+lemma empty_conisistent [System.Consistent Λ] : Formulae.Consistent Λ ∅ := by
+  rw [←iff_theory_consistent_formulae_consistent];
+  convert Theory.emptyset_consistent (α := α);
+  . simp;
+  . assumption;
 
 lemma provable_iff_insert_neg_not_consistent : ↑P *⊢[Λ]! p ↔ ¬(Formulae.Consistent Λ (insert (∼p) P)) := by
   rw [←iff_theory_consistent_formulae_consistent];
@@ -184,13 +194,6 @@ lemma intro_triunion_consistent
     . left; right; assumption;
     . right; assumption;
 
-@[simp]
-lemma empty_conisistent [System.Consistent Λ] : Formulae.Consistent Λ ∅ := by
-  rw [←iff_theory_consistent_formulae_consistent];
-  convert Theory.emptyset_consistent (α := α);
-  . simp;
-  . assumption;
-
 
 namespace exists_consistent_complementary_closed
 
@@ -213,8 +216,8 @@ lemma next_consistent
   split;
   . simpa;
   . rename_i h;
-    have h₁ := Formulae.neg_provable_iff_insert_not_consistent (Λ := Λ) (P := P) (p := p) |>.mpr h;
     by_contra hC;
+    have h₁ := Formulae.neg_provable_iff_insert_not_consistent (Λ := Λ) (P := P) (p := p) |>.mpr h;
     have h₂ := Formulae.neg_provable_iff_insert_not_consistent (Λ := Λ) (P := P) (p := -p) |>.mpr hC;
     have := neg_complement_derive_bot h₁ h₂;
     contradiction;
@@ -302,6 +305,7 @@ end Consistent
 end Formulae
 
 
+variable [DecidableEq α]
 
 structure ComplementaryClosedConsistentFormulae (Λ) (S : Formulae α) where
   formulae : Formulae α
@@ -410,7 +414,7 @@ lemma iff_mem_imp
         simp only [Formula.complement.imp_def₁ h] at hq;
         exact efq_of_neg! $ Context.by_axm! (by simpa using hq);
     . apply membership_iff (by assumption) |>.mpr;
-      exact dhyp! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
+      exact imply₁'! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
 
 lemma iff_not_mem_imp
   (hsub_qr : (q ➝ r) ∈ S) (hsub_q : q ∈ S := by trivial)  (hsub_r : r ∈ S := by trivial)

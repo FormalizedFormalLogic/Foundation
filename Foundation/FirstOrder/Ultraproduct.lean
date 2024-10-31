@@ -10,7 +10,7 @@ universe u v
 
 variable {L : Language.{u}} {μ : Type v}
  {I : Type u} (A : I → Type u)
- [(i : I) → Nonempty (A i)] [s : (i : I) → FirstOrder.Structure L (A i)]
+ [s : (i : I) → FirstOrder.Structure L (A i)]
  (𝓤 : Ultrafilter I)
 
 namespace Structure
@@ -53,10 +53,10 @@ namespace Semiformula
 variable {e : Fin n → Uprod A 𝓤} {ε : μ → Uprod A 𝓤}
 
 lemma val_vecCons_val_eq {z : Uprod A 𝓤} {i : I} :
-    (z.val i :> fun x ↦ (e x).val i) = (fun x ↦ ((z :> e) x).val i) :=
-  by simp[Matrix.comp_vecCons (Uprod.val · i), Function.comp]
+    (z.val i :> fun x ↦ (e x).val i) = (fun x ↦ ((z :> e) x).val i) := by
+  simp [Matrix.comp_vecCons (Uprod.val · i), Function.comp_def]
 
-lemma eval_Uprod {p : Semiformula L μ n} :
+lemma eval_Uprod [(i : I) → Nonempty (A i)] {p : Semiformula L μ n} :
     Evalm (Uprod A 𝓤) e ε p ↔ {i | Eval (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
   induction p using rec' <;>
     simp [*, Prop.top_eq_true, Prop.bot_eq_false, eval_rel, eval_nrel, Semiterm.val_Uprod]
@@ -96,9 +96,9 @@ lemma eval_Uprod {p : Semiformula L μ n} :
           Classical.epsilon_spec (p := fun z => Eval (s i) (z :> fun x ↦ (e x).val i) _ p) ⟨x, hx⟩
         rw[val_vecCons_val_eq] at this; exact this)
 
-lemma val_Uprod {p : Formula L μ} :
-    Evalfm (Uprod A 𝓤) ε p ↔ {i | Evalf (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 :=
-  by simp[Evalf, eval_Uprod, Matrix.empty_eq]
+lemma val_Uprod [(i : I) → Nonempty (A i)] {p : Formula L μ} :
+    Evalfm (Uprod A 𝓤) ε p ↔ {i | Evalf (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
+  simp [Evalf, eval_Uprod, Matrix.empty_eq]
 
 end Semiformula
 
@@ -107,7 +107,7 @@ lemma models_Uprod [Nonempty I] [(i : I) → Nonempty (A i)] {p : SyntacticFormu
 
 variable (A)
 
-def Semiformula.domain (p : SyntacticFormula L) := {i | A i ⊧ₘ p}
+def Semiformula.domain [(i : I) → Nonempty (A i)] (p : SyntacticFormula L) := {i | A i ⊧ₘ p}
 
 end
 
@@ -126,11 +126,13 @@ lemma ultrafilter_exists [(t : FinSubtheory T) → Nonempty (A t)]
     ∃ 𝓤 : Ultrafilter (FinSubtheory T), Set.image (Semiformula.domain A) T ⊆ 𝓤.sets :=
   Ultrafilter.exists_ultrafilter_of_finite_inter_nonempty _ (by
     haveI : DecidableEq (Set (FinSubtheory T)) := fun _ _ => Classical.propDecidable _
-    simp[Finset.subset_image_iff, Semiformula.domain]
     intro t ht
-    use t; use ht
-    intro σ hσ
-    exact (H ⟨t, ht⟩).RealizeSet hσ)
+    have : ∃ t' : Finset (SyntacticFormula L), ↑t' ⊆ T ∧ Finset.image (Semiformula.domain A) t' = t := by
+      simpa [Finset.subset_set_image_iff] using ht
+    rcases this with ⟨t, htT, rfl⟩
+    exact ⟨⟨t, htT⟩, by
+      suffices ∀ i ∈ t, A ⟨t, htT⟩ ⊧ₘ i by simpa [Semiformula.domain] using this
+      intro i hi; exact (H ⟨t, htT⟩).RealizeSet hi⟩)
 
 lemma compactness_aux :
     Satisfiable T ↔ ∀ i : FinSubtheory T, Satisfiable (i.val : Theory L) := by

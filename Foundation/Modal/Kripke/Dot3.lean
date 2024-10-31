@@ -13,10 +13,10 @@ open System
 open Kripke
 open Formula
 
-variable {α : Type u} [Inhabited α] [DecidableEq α] [atleast : Atleast 2 α]
+variable {α : Type u}
 variable {F : Kripke.Frame}
 
-private lemma connected_of_dot3 : F#α ⊧* .𝟯 → Connected F := by
+private lemma connected_of_dot3 (atleast : Atleast 2 α) : F#α ⊧* .𝟯 → Connected F := by
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, rxy, z, ryz, nryz, nrzy⟩ := hCon;
@@ -51,17 +51,17 @@ private lemma dot3_of_connected : Connected F → F#α ⊧* .𝟯 := by
   | inl ryz => have := hp z ryz; contradiction;
   | inr rzy => have := hq y rzy; contradiction;
 
-instance axiomDot3_Definability : 𝔽((.𝟯 : Theory α)).DefinedBy ConnectedFrameClass where
+instance axiomDot3_Definability [Atleast 2 α] : 𝔽((.𝟯 : Theory α)).DefinedBy ConnectedFrameClass where
   define := by
     intro F;
     constructor;
-    . exact connected_of_dot3;
+    . exact connected_of_dot3 (by assumption);
     . exact dot3_of_connected;
   nonempty := by
     use ⟨PUnit, λ _ _ => True⟩;
     tauto;
 
-instance axiomS4Dot3_defines : 𝔽(((𝗧 ∪ 𝟰 ∪ .𝟯) : Theory α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := by
+instance axiomS4Dot3_defines [Atleast 2 α] [Inhabited α] [DecidableEq α] : 𝔽(((𝗧 ∪ 𝟰 ∪ .𝟯) : Theory α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := by
   rw [(show ReflexiveTransitiveConnectedFrameClass = ({ F | (Reflexive F ∧ Transitive F) ∧ Connected F } : FrameClass) by aesop)];
   apply definability_union_frameclass_of_theory;
   . convert axiomMultiGeach_definability (ts := [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩]);
@@ -73,12 +73,14 @@ instance axiomS4Dot3_defines : 𝔽(((𝗧 ∪ 𝟰 ∪ .𝟯) : Theory α)).Def
     simp [Reflexive, Transitive, Connected];
     refine ⟨⟨?_, ?_⟩, ?_⟩ <;> tauto;
 
-instance S4Dot3_defines : 𝔽((𝐒𝟒.𝟑 : Hilbert α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := inferInstance
+instance S4Dot3_defines [Inhabited α] [DecidableEq α] [Atleast 2 α] : 𝔽((𝐒𝟒.𝟑 : Hilbert α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := inferInstance
 
-instance : System.Consistent (𝐒𝟒.𝟑 : Hilbert α) := inferInstance
+instance  [Inhabited α] [DecidableEq α] [Atleast 2 α] : System.Consistent (𝐒𝟒.𝟑 : Hilbert α) := inferInstance
 
 open MaximalConsistentTheory in
-lemma connected_CanonicalFrame {Ax : Theory α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝜿Ax)] : Connected (CanonicalFrame 𝜿Ax) := by
+lemma connected_CanonicalFrame
+  [Inhabited α] [DecidableEq α] [Atleast 2 α]
+  {Ax : Theory α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝜿Ax)] : Connected (CanonicalFrame 𝜿Ax) := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;
   by_contra hC; push_neg at hC;
@@ -104,7 +106,9 @@ lemma connected_CanonicalFrame {Ax : Theory α} (hAx : .𝟯 ⊆ Ax) [System.Con
   have : □(□p ➝ q) ⋎ □(□q ➝ p) ∈ X.theory := by apply subset_axiomset _; aesop;
   contradiction;
 
-instance : Complete (𝐒𝟒.𝟑 : Hilbert α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame ReflexiveTransitiveConnectedFrameClass $ by
+instance
+  [Inhabited α] [DecidableEq α] [Atleast 2 α]
+  : Complete (𝐒𝟒.𝟑 : Hilbert α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame ReflexiveTransitiveConnectedFrameClass $ by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
   . simp [GeachConfluent.reflexive_def];
     apply geachConfluent_CanonicalFrame;

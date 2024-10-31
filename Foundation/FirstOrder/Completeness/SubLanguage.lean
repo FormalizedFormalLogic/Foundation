@@ -88,6 +88,7 @@ noncomputable def langRel : ∀ {n}, Semiformula L μ n → Finset (Σ k, L.Rel 
   | _, ∀' p     => langRel p
   | _, ∃' p     => langRel p
 
+omit [∀ k, DecidableEq (L.Rel k)] in
 lemma langFunc_rel_ss {k} (r : L.Rel k) (v : Fin k → Semiterm L μ n) (i) :
     (v i).lang ⊆ (rel r v).langFunc :=
   by intros x; simp[langFunc]; intros h; exact ⟨i, h⟩
@@ -155,15 +156,11 @@ noncomputable def extendStructure (Φ : L₁ →ᵥ L₂) {M : Type w} [Nonempty
 
 namespace extendStructure
 
-variable
-  (Φ : L₁ →ᵥ L₂)
-  (injf : ∀ k, Function.Injective (Φ.func : L₁.Func k → L₂.Func k))
-  (injr : ∀ k, Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k))
-  {M : Type u} [Nonempty M] (s₁ : Structure L₁ M)
-  {n} (e : Fin n → M) (ε : μ → M)
+variable {M : Type u} [Nonempty M] (s₁ : Structure L₁ M)
 
 protected lemma func
-  {k} (injf : Function.Injective (Φ.func : L₁.Func k → L₂.Func k)) (f₁ : L₁.Func k) (v : Fin k → M) :
+    (Φ : L₁ →ᵥ L₂)
+    {k} (injf : Function.Injective (Φ.func : L₁.Func k → L₂.Func k)) (f₁ : L₁.Func k) (v : Fin k → M) :
     (s₁.extendStructure Φ).func (Φ.func f₁) v = s₁.func f₁ v := by
   simp[extendStructure]
   have : ∃ y, ∃ f₁' : L₁.Func k, Φ.func f₁' = Φ.func f₁ ∧ y = s₁.func f₁' v := ⟨s₁.func f₁ v, f₁, rfl, rfl⟩
@@ -171,32 +168,46 @@ protected lemma func
   rcases injf f'eq with rfl; exact h
 
 protected lemma rel
-  {k} (injr : Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k)) (r₁ : L₁.Rel k) (v : Fin k → M) :
+    (Φ : L₁ →ᵥ L₂)
+    {k} (injr : Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k))
+    (r₁ : L₁.Rel k) (v : Fin k → M) :
     (s₁.extendStructure Φ).rel (Φ.rel r₁) v ↔ s₁.rel r₁ v := by
   simp[extendStructure]; refine ⟨by intros h; rcases h with ⟨r₁', e, h⟩; rcases injr e; exact h, by intros h; refine ⟨r₁, rfl, h⟩⟩
 
 lemma val_lMap
+    (Φ : L₁ →ᵥ L₂)
     (injf : ∀ k, Function.Injective (Φ.func : L₁.Func k → L₂.Func k))
-    (s₁ : Structure L₁ M) (t : Semiterm L₁ μ n) :
+    {n} (e : Fin n → M) (ε : μ → M)
+    (t : Semiterm L₁ μ n) :
     Semiterm.val (s₁.extendStructure Φ) e ε (t.lMap Φ) = Semiterm.val s₁ e ε t := by
   induction t <;> simp[*, Semiterm.lMap_func, Semiterm.val_func]
   case func k f v ih =>
-    exact extendStructure.func Φ s₁ (injf k) f (fun i => Semiterm.val s₁ e ε (v i))
+    exact extendStructure.func s₁ Φ (injf k) f fun i ↦ Semiterm.val s₁ e ε (v i)
 
 open Semiformula
 
-lemma eval_lMap {p : Semiformula L₁ μ n} :
+lemma eval_lMap
+    (Φ : L₁ →ᵥ L₂)
+    (injf : ∀ k, Function.Injective (Φ.func : L₁.Func k → L₂.Func k))
+    (injr : ∀ k, Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k))
+    {n} (e : Fin n → M) (ε : μ → M)
+    {p : Semiformula L₁ μ n} :
     Eval (s₁.extendStructure Φ) e ε (lMap Φ p) ↔ Eval s₁ e ε p := by
-  induction p using Semiformula.rec' <;> simp[*, val_lMap Φ e ε injf s₁, Semiformula.lMap_rel, Semiformula.lMap_nrel, eval_rel, eval_nrel]
+  induction p using Semiformula.rec' <;>
+    simp [*, val_lMap s₁ Φ injf e ε, Semiformula.lMap_rel, Semiformula.lMap_nrel, eval_rel, eval_nrel]
   · case hrel k r v =>
-    exact extendStructure.rel Φ s₁ (injr k) r (fun i => Semiterm.val s₁ e ε (v i))
+    exact extendStructure.rel s₁ Φ (injr k) r (fun i => Semiterm.val s₁ e ε (v i))
   · case hnrel k r v =>
     simpa[not_iff_not] using
-      extendStructure.rel Φ s₁ (injr k) r (fun i => Semiterm.val s₁ e ε (v i))
+      extendStructure.rel s₁ Φ (injr k) r (fun i => Semiterm.val s₁ e ε (v i))
 
-lemma models_lMap (p : SyntacticFormula L₁) :
+lemma models_lMap
+    (Φ : L₁ →ᵥ L₂)
+    (injf : ∀ k, Function.Injective (Φ.func : L₁.Func k → L₂.Func k))
+    (injr : ∀ k, Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k))
+    (p : SyntacticFormula L₁) :
     Semantics.Realize (s₁.extendStructure Φ).toStruc (Semiformula.lMap Φ p) ↔ Semantics.Realize s₁.toStruc p := by
-  simp[Semantics.Realize, Evalf, eval_lMap Φ injf injr]
+  simp [Semantics.Realize, Evalf, eval_lMap s₁ Φ injf injr]
 
 end extendStructure
 
@@ -204,27 +215,30 @@ end Structure
 
 section lMap
 
-variable
-  (Φ : L₁ →ᵥ L₂)
-  (injf : ∀ k, Function.Injective (Φ.func : L₁.Func k → L₂.Func k))
-  (injr : ∀ k, Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k))
-
-lemma lMap_models_lMap_iff {T : Theory L₁} {p : SyntacticFormula L₁} :
+lemma lMap_models_lMap_iff
+    (Φ : L₁ →ᵥ L₂)
+    (injf : ∀ k, Function.Injective (Φ.func : L₁.Func k → L₂.Func k))
+    (injr : ∀ k, Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k))
+    {T : Theory L₁} {p : SyntacticFormula L₁} :
     Theory.lMap Φ T ⊨ Semiformula.lMap Φ p ↔ T ⊨ p := by
   constructor
   · intro h s₁ hs₁
-    exact (Structure.extendStructure.models_lMap Φ injf injr s₁.struc p).mp $ h
+    exact (Structure.extendStructure.models_lMap s₁.struc Φ injf injr p).mp $ h
       (by simp[Semantics.realizeSet_iff, Theory.lMap, Semantics.models]
-          intro p hp; exact (Structure.extendStructure.models_lMap (Φ := Φ) injf injr s₁.struc p).mpr (hs₁.realize hp))
+          intro p hp; exact (Structure.extendStructure.models_lMap s₁.struc Φ injf injr p).mpr (hs₁.realize _ hp))
   · exact lMap_models_lMap
 
-lemma satisfiable_lMap {T : Theory L₁} (s : Satisfiable T) :
+lemma satisfiable_lMap
+    (Φ : L₁ →ᵥ L₂)
+    (injf : ∀ k, Function.Injective (Φ.func : L₁.Func k → L₂.Func k))
+    (injr : ∀ k, Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k))
+    {T : Theory L₁} (s : Satisfiable T) :
     Satisfiable (Semiformula.lMap Φ '' T) := by
   rcases s with ⟨⟨M, i, s⟩, hM⟩
   exact ⟨⟨M, i, s.extendStructure Φ⟩, by
     simp[Semantics.realizeSet_iff]
     intro p hp
-    exact (Structure.extendStructure.models_lMap Φ injf injr s p).mpr (hM.realize hp)⟩
+    exact (Structure.extendStructure.models_lMap s Φ injf injr p).mpr (hM.realize _ hp)⟩
 
 end lMap
 

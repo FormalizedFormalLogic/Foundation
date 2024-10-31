@@ -63,6 +63,7 @@ instance : HomClass (M₁ →ₛ[L] M₂) L M₁ M₂ where
   map_func := Hom.func'
   map_rel := Hom.rel'
 
+omit [Nonempty M₁] [Nonempty M₂]
 @[ext] lemma Hom.ext (φ ψ : M₁ →ₛ[L] M₂) (h : ∀ x, φ x = ψ x) : φ = ψ := DFunLike.ext φ ψ h
 
 namespace HomClass
@@ -79,7 +80,7 @@ protected lemma rel {k} (r : L.Rel k) (v : Fin k → M₁) :
 
 lemma val_term (e : Fin n → M₁) (ε : ξ → M₁) (t : Semiterm L ξ n) :
     φ (t.val s₁ e ε) = t.val s₂ (φ ∘ e) (φ ∘ ε) := by
-  induction t <;> simp [*, Semiterm.val_func, HomClass.func, Function.comp]
+  induction t <;> simp [*, Semiterm.val_func, HomClass.func, Function.comp_def]
 
 end HomClass
 
@@ -132,8 +133,9 @@ namespace ClosedSubset
 
 variable (u : ClosedSubset L M)
 
-instance : SetLike (ClosedSubset L M) M := ⟨ClosedSubset.domain, ClosedSubset.ext⟩
+instance : SetLike (ClosedSubset L M) M := ⟨ClosedSubset.domain, fun _ _ ↦ ClosedSubset.ext⟩
 
+omit [Nonempty M]
 lemma closed {k} (f : L.Func k) {v : Fin k → M} (hv : ∀ i, v i ∈ u) : s.func f v ∈ u := u.domain_closed f hv
 
 instance toStructure [s : Structure L M] (u : ClosedSubset L M) : Structure L u where
@@ -146,9 +148,9 @@ protected lemma rel {k} (r : L.Rel k) (v : Fin k → u) : u.toStructure.rel r v 
 
 def inclusion : u ↪ₛ[L] M where
   toFun := Subtype.val
-  func' := by simp [ClosedSubset.func, Function.comp]
-  rel' := by simp [ClosedSubset.rel, Function.comp]
-  rel_inv' := by simp [ClosedSubset.rel, Function.comp]
+  func' := by simp [ClosedSubset.func, Function.comp_def]
+  rel' := by simp [ClosedSubset.rel, Function.comp_def]
+  rel_inv' := by simp [ClosedSubset.rel, Function.comp_def]
   toFun_inj := Subtype.val_injective
 
 end ClosedSubset
@@ -161,12 +163,13 @@ open Structure
 variable {F : Type*} [FunLike F M₁ M₂] [EmbeddingClass F L M₁ M₂] (φ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : ξ → M₁}
 
+omit [Nonempty M₁] [Nonempty M₂]
 lemma eval_hom_iff_of_open : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} {p : Semiformula L ξ n}, p.Open →
     (Eval s₁ e₁ ε₁ p ↔ Eval s₂ (φ ∘ e₁) (φ ∘ ε₁) p)
   | _, e₁, ε₁, ⊤,        _ => by simp
   | _, e₁, ε₁, ⊥,        _ => by simp
-  | _, e₁, ε₁, rel r v,  _ => by simp [Function.comp, eval_rel, ←EmbeddingClass.rel φ, HomClass.val_term]
-  | _, e₁, ε₁, nrel r v, _ => by simp [Function.comp, eval_nrel, ←EmbeddingClass.rel φ, HomClass.val_term]
+  | _, e₁, ε₁, rel r v,  _ => by simp [Function.comp_def, eval_rel, ←EmbeddingClass.rel φ, HomClass.val_term]
+  | _, e₁, ε₁, nrel r v, _ => by simp [Function.comp_def, eval_nrel, ←EmbeddingClass.rel φ, HomClass.val_term]
   | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
   | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
 
@@ -221,7 +224,7 @@ lemma ofEquiv [Nonempty N] (φ : M ≃ N) :
   simp [models_iff, Empty.eq_elim, Structure.evalf_ofEquiv_iff (φ := φ)]
   constructor
   · intro h f; exact h _
-  · intro h f; simpa [←Function.comp.assoc] using h (φ ∘ f)
+  · intro h f; simpa [←Function.comp_assoc] using h (φ ∘ f)
 
 end ElementaryEquiv
 

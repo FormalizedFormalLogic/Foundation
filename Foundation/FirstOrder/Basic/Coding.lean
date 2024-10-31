@@ -2,7 +2,7 @@ import Foundation.FirstOrder.Basic.BinderNotation
 
 namespace LO.FirstOrder
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
+variable {L : Language} [(k : ℕ) → Encodable (L.Func k)]
 
 variable {ξ : Type*} [Encodable ξ]
 
@@ -59,6 +59,8 @@ instance encodable : Encodable (Semiterm L ξ n) where
 end Semiterm
 
 namespace Semiformula
+
+variable [(k : ℕ) → Encodable (L.Rel k)]
 
 def toNat : {n : ℕ} → Semiformula L ξ n → ℕ
   | _, rel (arity := arity) R v  => (Nat.pair 0 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1
@@ -144,9 +146,6 @@ instance encodable : Encodable (Semiformula L ξ n) where
   encode := toNat
   decode := ofNat n
   encodek := ofNat_toNat
-
-#eval encode (“0 = 1” : Sentence ℒₒᵣ)
--- 197238223176519750397888674610667118222730
 
 end Semiformula
 

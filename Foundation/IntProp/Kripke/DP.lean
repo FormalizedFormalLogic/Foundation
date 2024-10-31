@@ -8,7 +8,7 @@ open Formula Formula.Kripke
 
 namespace Kripke
 
-variable {α} [Inhabited α] [DecidableEq α] [Encodable α]
+variable {α}
 variable {p q : Formula α}
 
 abbrev IntDPCounterexampleFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ : F₁.World) (w₂ : F₂.World) : Kripke.Frame where
@@ -110,7 +110,7 @@ lemma satisfies_right_on_IntDPCounterexampleModel :
       exact ihq.mpr $ h (by simpa) $ ihp.mp hp;
   | _ => simp_all [IntDPCounterexampleModel, Satisfies.iff_models, Satisfies];
 
-theorem disjunctive_int : 𝐈𝐧𝐭 ⊢! p ⋎ q → 𝐈𝐧𝐭 ⊢! p ∨ 𝐈𝐧𝐭 ⊢! q := by
+theorem disjunctive_int [Inhabited α] [DecidableEq α] [Encodable α] : 𝐈𝐧𝐭 ⊢! p ⋎ q → 𝐈𝐧𝐭 ⊢! p ∨ 𝐈𝐧𝐭 ⊢! q := by
   contrapose;
   intro hC; push_neg at hC;
   have ⟨hnp, hnq⟩ := hC;
@@ -140,7 +140,7 @@ theorem disjunctive_int : 𝐈𝐧𝐭 ⊢! p ⋎ q → 𝐈𝐧𝐭 ⊢! p ∨ 
           (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr wq) (by aesop))
         $ satisfies_right_on_IntDPCounterexampleModel |>.not.mp hq;
 
-instance : Disjunctive (𝐈𝐧𝐭 : Hilbert α) := ⟨disjunctive_int⟩
+instance [DecidableEq α] [Inhabited α] [Encodable α] : Disjunctive (𝐈𝐧𝐭 : Hilbert α) := ⟨disjunctive_int⟩
 
 end Kripke
 
