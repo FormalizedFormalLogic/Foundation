@@ -7,7 +7,7 @@ open FirstOrder FirstOrder.Arith
 
 noncomputable section
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐏𝐀⁻]
+variable {V : Type*} [ORingStruc V]
 
 section IOpen
 
@@ -59,48 +59,6 @@ lemma div_exists_unique_pos (a : V) {b} (pos : 0 < b) : ∃! u, b * u ≤ a ∧ 
       _ ≤ b * u'      := (_root_.mul_le_mul_left pos).mpr (lt_iff_succ_le.mp lt)
       _ ≤ a           := hu'.1
     exact LT.lt.false this)
-
-/-
-lemma mod (a : V) {b} (pos : 0 < b) : ∃! u, ∃ v < b, a = b * u + v := by
-  have : ∃! u, b * u ≤ a ∧ a < b * (u + 1) := by
-    have : ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
-      have : a < b * (a + 1) → ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
-        simpa using open_leastNumber (P := λ u ↦ b * u ≤ a) ⟨“&b * #0 ≤ &a”, by simp, by intro x; simp⟩
-      simp at this
-      have hx : a < b * (a + 1) := by
-        have : a + 0 < b * a + b :=
-          add_lt_add_of_le_of_lt (le_mul_self_of_pos_left pos) pos
-        simpa [mul_add] using this
-      exact this hx
-    rcases this with ⟨u, hu⟩
-    exact ExistsUnique.intro u hu (by
-      intro u' hu'
-      by_contra ne
-      wlog lt : u < u'
-      · exact this a pos u' hu' u hu (Ne.symm ne) (Ne.lt_of_le ne $ by simpa using lt)
-      have : a < a := by calc
-        a < b * (u + 1) := hu.2
-        _ ≤ b * u'      := (_root_.mul_le_mul_left pos).mpr (lt_iff_succ_le.mp lt)
-        _ ≤ a           := hu'.1
-      exact LT.lt.false this)
-  have iff : ∀ u, (∃ v < b, a = b * u + v) ↔ (b * u ≤ a ∧ a < b * (u + 1)) := by
-    intro u; constructor
-    · rintro ⟨v, hv, rfl⟩
-      simp [mul_add, hv]
-    · intro h
-      let v := a - b * u
-      have e : a = b*u + v := by simp [add_tsub_self_of_le h.1]
-      have : v < b := by
-        by_contra hyv
-        have hyv : b ≤ v := by simpa using hyv
-        have : a < a := by calc
-          a < b * (u + 1) := h.2
-          _ ≤ b * u + v   := by simpa [mul_add] using hyv
-          _ = a           := e.symm
-        exact LT.lt.false this
-      exact ⟨v, this, e⟩
-  exact (exists_unique_congr iff).mpr this
--/
 
 section div
 
@@ -832,19 +790,21 @@ end polynomial_induction
 
 @[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₀ [V ⊧ₘ* 𝐈𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  hierarchy_polynomial_induction 𝚺 0 hP zero even odd
+  hierarchy_polynomial_induction 𝚺 0 (P := P) hP zero even odd
 
 @[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₁ [V ⊧ₘ* 𝐈𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  hierarchy_polynomial_induction 𝚺 1 hP zero even odd
+  hierarchy_polynomial_induction 𝚺 1 (P := P) hP zero even odd
 
 @[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_pi₁ [V ⊧ₘ* 𝐈𝚷₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  hierarchy_polynomial_induction 𝚷 1 hP zero even odd
+  hierarchy_polynomial_induction 𝚷 1 (P := P) hP zero even odd
 
-lemma nat_cast_pair (n m : ℕ) : (⟪n, m⟫ : ℕ) = ⟪(n : V), (m : V)⟫ := by simp [pair]
+variable [V ⊧ₘ* 𝐈open]
 
-lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [Arith.pair, Nat.pair]; congr
+lemma nat_cast_pair (n m : ℕ) : (⟪n, m⟫ : ℕ) = ⟪(↑n : V), (↑m : V)⟫ := by simp [pair]
+
+lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [Arith.pair, Nat.pair]
 
 lemma pair_coe_eq_coe_pair (m n : ℕ) :  ⟪n, m⟫ = (Nat.pair n m : V) := by simp [nat_cast_pair, nat_pair_eq]
 

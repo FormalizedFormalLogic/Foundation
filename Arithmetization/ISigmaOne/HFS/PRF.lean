@@ -76,13 +76,13 @@ variable {c v}
 
 namespace CSeq
 
-variable {s : V} (h : c.CSeq v s)
+variable {s : V}
 
-lemma seq : Seq s := h.1
+lemma seq (h : c.CSeq v s) : Seq s := h.1
 
-lemma zero : ⟪0, c.zero v⟫ ∈ s := h.2.1
+lemma zero (h : c.CSeq v s) : ⟪0, c.zero v⟫ ∈ s := h.2.1
 
-lemma succ : ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s := h.2.2
+lemma succ (h : c.CSeq v s) : ∀ i < lh s - 1, ∀ z, ⟪i, z⟫ ∈ s → ⟪i + 1, c.succ v i z⟫ ∈ s := h.2.2
 
 lemma unique {s₁ s₂ : V} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁₂ : lh s₁ ≤ lh s₂) {i} (hi : i < lh s₁) {z₁ z₂} :
     ⟪i, z₁⟫ ∈ s₁ → ⟪i, z₂⟫ ∈ s₂ → z₁ = z₂ := by

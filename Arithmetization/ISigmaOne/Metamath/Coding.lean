@@ -4,13 +4,15 @@ import Mathlib.Combinatorics.Colex
 
 namespace LO.FirstOrder
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
+variable {L : Language}
 
-variable {ξ : Type*} [Encodable ξ]
+variable {ξ : Type*}
 
 open Encodable
 
 namespace Semiterm
+
+variable [Encodable ξ] [(k : ℕ) → Encodable (L.Func k)]
 
 lemma encode_eq_toNat (t : Semiterm L ξ n) : Encodable.encode t = toNat t := rfl
 
@@ -28,9 +30,13 @@ end Semiterm
 
 namespace Semiformula
 
-lemma encode_eq_toNat (p : Semiformula L ξ n) : Encodable.encode p = toNat p := rfl
+variable [Encodable ξ] [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
 
-@[simp] lemma encode_emb (p : Semisentence L n) : Encodable.encode (Rew.emb.hom p : Semiformula L ξ n) = Encodable.encode p := by
+lemma encode_eq_toNat
+    (p : Semiformula L ξ n) : Encodable.encode p = toNat p := rfl
+
+@[simp] lemma encode_emb
+    (p : Semisentence L n) : Encodable.encode (Rew.emb.hom p : Semiformula L ξ n) = Encodable.encode p := by
   simp [encode_eq_toNat]
   induction p using rec' <;> simp [toNat, Rew.rel, Rew.nrel, *]
 
@@ -107,7 +113,7 @@ lemma quote_eq_vecToNat (v : Fin k → ℕ) : ⌜v⌝ = Matrix.vecToNat v := by
   induction k
   case zero => simp
   case succ k ih =>
-    simp [quote_matrix_succ, Matrix.vecToNat, cons, nat_pair_eq, Function.comp, ih]
+    simp [quote_matrix_succ, Matrix.vecToNat, cons, nat_pair_eq, Function.comp_def, ih]
 
 section
 
@@ -142,9 +148,11 @@ open LO.Arith FirstOrder.Arith
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language}
 
 variable (V)
+
+variable [(k : ℕ) → Encodable (L.Func k)]
 
 lemma quote_eq_toNat (t : SyntacticSemiterm L n) : (⌜t⌝ : V) = toNat t := rfl
 
@@ -314,6 +322,7 @@ lemma quote_termShiftVec {k n} (v : Fin k → SyntacticSemiterm L n) :
       rw [Matrix.fun_eq_vec₂ (v := fun x : Fin 2 ↦ (![Operator.numeral ℒₒᵣ (k + 1), op(1)] x).operator ![])]
       simp [ih]; congr; apply quote_one'
 
+omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
 lemma quote_eterm_eq_quote_emb (t : Semiterm L Empty n) : (⌜t⌝ : V) = (⌜Rew.embs t⌝ : V) := by
   simp [quote_eq_coe_encode]
 
@@ -333,7 +342,7 @@ open LO.Arith FirstOrder.Arith
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
 
 lemma quote_eq_toNat (p : SyntacticSemiformula L n) : (⌜p⌝ : V) = toNat p := rfl
 
@@ -468,6 +477,7 @@ lemma qVec_quote (w : Fin n → SyntacticSemiterm L m) :
   case hall p ih => simp [←ih, qVec_quote, Semiterm.quote_bvar]
   case hex p ih => simp [←ih, qVec_quote, Semiterm.quote_bvar]
 
+omit  [DefinableLanguage L] in
 lemma quote_sentence_eq_quote_emb (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜Rew.embs.hom σ⌝ := by simp [quote_eq_coe_encode]
 
 lemma quote_substs' {n m} (w : Fin n → Semiterm L Empty m) (σ : Semisentence L n) :

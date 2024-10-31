@@ -1,11 +1,5 @@
 import Arithmetization.ISigmaOne.HFS.Vec
 
-/-!
-
-# Vec
-
--/
-
 noncomputable section
 
 namespace LO.Arith
@@ -38,7 +32,6 @@ def _root_.Finset.arithmetize (s : Finset V) : V := finsetArithmetizeAux s.toLis
 @[simp] lemma finset_insert_arithmetize (a : V) (s : Finset V) :
     (insert a s).arithmetize = insert a s.arithmetize := mem_ext <| by
   intro x; simp
-
 
 end LO.Arith
 

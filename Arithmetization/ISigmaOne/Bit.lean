@@ -13,7 +13,7 @@ variable [V ⊧ₘ* 𝐈𝚺₁]
 
 def Bit (i a : V) : Prop := LenBit (exp i) a
 
-instance : Membership V V := ⟨Bit⟩
+instance : Membership V V := ⟨fun a i ↦ Bit i a⟩
 
 def _root_.LO.FirstOrder.Arith.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y” (by simp)
@@ -27,9 +27,12 @@ lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) via bitDef
 @[simp] lemma bit_defined_iff (v) :
     Semiformula.Evalbm V v bitDef.val ↔ v 0 ∈ v 1 := bit_defined.df.iff v
 
-@[instance] def mem_definable : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) := bit_defined.to_definable
+instance mem_definable : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) := bit_defined.to_definable
 
-@[instance] def mem_definable' (ℌ : HierarchySymbol) : ℌ-Relation ((· ∈ ·) : V → V → Prop) := mem_definable.of_zero
+instance mem_definable' (ℌ : HierarchySymbol) : ℌ-Relation ((· ∈ ·) : V → V → Prop) := mem_definable.of_zero
+
+instance mem_definable'' (ℌ : HierarchySymbol) : ℌ-Relation (Membership.mem : V → V → Prop) := by
+  simpa using (mem_definable' ℌ).retraction (n := 2) ![1, 0]
 
 lemma mem_absolute (i a : ℕ) : i ∈ a ↔ (i : V) ∈ (a : V) := by
   simpa using Defined.shigmaZero_absolute V bit_defined bit_defined ![i, a]
@@ -48,14 +51,14 @@ section
     (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Boldface (fun v ↦ ∀ x ∈ f v, P v x) := by
   have : Γ-[m + 1].Boldface (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
-    .ball_lt hf (.imp (by simpa using HierarchySymbol.Boldface.comp₂ (by simp) (hf.retraction Fin.succ)) h)
+    .ball_lt hf (.imp (HierarchySymbol.Boldface.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction Fin.succ)) h)
   exact this.of_iff <| by intro v; exact ⟨fun h x _ hxv ↦ h x hxv, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
 
 @[definability] lemma HierarchySymbol.Boldface.bex_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Boldface (fun v ↦ ∃ x ∈ f v, P v x) := by
   have : Γ-[m + 1].Boldface (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
-    .bex_lt hf (.and (by simpa using HierarchySymbol.Boldface.comp₂ (by simp) (hf.retraction _)) h)
+    .bex_lt hf (.and (HierarchySymbol.Boldface.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction _)) h)
   exact this.of_iff <| by
     intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩, by rintro ⟨x, _, hx, hvx⟩; exact ⟨x, hx, hvx⟩⟩
 
@@ -190,7 +193,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V]
+variable {V : Type*} [ORingStruc V]
 
 variable [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -206,6 +209,7 @@ section empty
 
 scoped instance : EmptyCollection V := ⟨0⟩
 
+omit [V ⊧ₘ* 𝐈𝚺₁] in
 lemma emptyset_def : (∅ : V) = 0 := rfl
 
 @[simp] lemma not_mem_empty (i : V) : i ∉ (∅ : V) := by simp [emptyset_def, mem_iff_bit, Bit]
@@ -287,7 +291,7 @@ end insert
 lemma one_eq_singleton : (1 : V) = {∅} := by simp [singleton_eq_insert, insert, bitInsert, emptyset_def]
 
 @[simp] lemma mem_singleton_iff {i j : V} :
-    i ∈ ({j} : V) ↔ i = j := by simp [singleton_eq_insert]
+    i ∈ ({j} : V) ↔ i = j := by simp [singleton_eq_insert, -insert_emptyc_eq]
 
 lemma bitRemove_lt_of_mem {i a : V} (h : i ∈ a) : bitRemove i a < a := by
   simp [h, bitRemove, tsub_lt_iff_left (exp_le_of_mem h)]
@@ -481,6 +485,8 @@ lemma insert_remove {i a : V} (h : i ∈ a) : insert i (bitRemove i a) = a := me
 section
 
 variable {m : ℕ} [Fact (1 ≤ m)] [V ⊧ₘ* 𝐈𝐍𝐃𝚺 m]
+
+omit [V ⊧ₘ* 𝐈𝚺₁]
 
 private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
     haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)

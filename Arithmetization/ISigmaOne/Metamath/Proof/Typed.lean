@@ -69,7 +69,7 @@ instance : Insert L.Formula L.Sequent := ⟨fun p Γ ↦ ⟨insert p.val Γ.val,
 
 instance : Union L.Sequent := ⟨fun Γ Δ ↦ ⟨Γ.val ∪ Δ.val, by simp⟩⟩
 
-instance : Membership L.Formula L.Sequent := ⟨(·.val ∈ ·.val)⟩
+instance : Membership L.Formula L.Sequent := ⟨fun Γ p ↦ (p.val ∈ Γ.val)⟩
 
 instance : HasSubset L.Sequent := ⟨(·.val ⊆ ·.val)⟩
 

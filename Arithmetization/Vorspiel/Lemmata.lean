@@ -199,7 +199,8 @@ scoped instance : CovariantClass M M (Function.swap (· * ·)) (· ≤ ·) := �
 
 @[simp] lemma sq_eq_one_iff {a : M} : a^2 = 1 ↔ a = 1 := by simp [sq]
 
-lemma lt_square_of_lt {a : M} (pos : 1 < a) : a < a^2 := lt_self_pow pos Nat.one_lt_two
+lemma lt_square_of_lt {a : M} (pos : 1 < a) : a < a^2 := by
+  rw [sq]; apply lt_mul_self pos
 
 lemma two_mul_le_sq {i : M} (h : 2 ≤ i) : 2 * i ≤ i ^ 2 := by simp [sq]; exact mul_le_mul_right h
 
@@ -279,7 +280,7 @@ open LO.Arith
 
 variable {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐏𝐀⁻] {L : Language} [L.LT] [L.Zero] [L.One] [L.Add]
 
-variable [Structure L M] [Structure.LT L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
+variable [Structure L M] [Structure.LT L M] [Structure.One L M] [Structure.Add L M]
 
 @[simp] lemma eval_ballLTSucc' {t : Semiterm L ξ n} {p : Semiformula L ξ (n + 1)} :
     Semiformula.Evalm M e ε (p.ballLTSucc t) ↔ ∀ x ≤ Semiterm.valm M e ε t, Semiformula.Evalm M (x :> e) ε p := by

@@ -107,7 +107,7 @@ def prConstruction : PR.Construction V φ.prBlueprint where
   zero := fun _ ↦ ∅
   succ := c.succ
   zero_defined := by intro v; simp [Blueprint.prBlueprint, emptyset_def]
-  succ_defined := by intro v; simp [Blueprint.prBlueprint, c.eval_succDef]; rfl
+  succ_defined := by intro v; simp [Blueprint.prBlueprint, c.eval_succDef]
 
 variable (v)
 
@@ -154,10 +154,12 @@ lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
   induction u using order_induction_pi1 generalizing s
   · apply HierarchySymbol.Boldface.all
     apply HierarchySymbol.Boldface.imp
-    · apply HierarchySymbol.Boldface.comp₂ (by definability)
-      exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
-    · apply HierarchySymbol.Boldface.comp₂ (by definability)
-      exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> ‘#2 + 1’ :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+    · apply HierarchySymbol.Boldface.comp₂
+        ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+        (by definability)
+    · apply HierarchySymbol.Boldface.comp₂
+        ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> ‘#2 + 1’ :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+        (by definability)
   case ind u ih =>
     rcases zero_or_succ s with (rfl | ⟨s, rfl⟩)
     · simp
@@ -192,15 +194,18 @@ lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
   have : ∃ F : V, ∀ x, x ∈ F ↔ x < m ∧ c.Fixpoint v x := by
     have : 𝚺₁-Predicate fun x ↦ x < m ∧ c.Fixpoint v x :=
       HierarchySymbol.Boldface.and (by definability)
-        (HierarchySymbol.Boldface.ex (HierarchySymbol.Boldface.comp₂ (by definability)
-          ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩))
+        (HierarchySymbol.Boldface.ex
+          (HierarchySymbol.Boldface.comp₂
+            ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+            (by definability)))
     exact finite_comprehension₁! this ⟨m, fun i hi ↦ hi.1⟩ |>.exists
   rcases this with ⟨F, hF⟩
   have : ∀ x ∈ F, ∃ u, x ∈ c.limSeq v u := by
     intro x hx; exact hF x |>.mp hx |>.2
   have : ∃ f, IsMapping f ∧ domain f = F ∧ ∀ (x y : V), ⟪x, y⟫ ∈ f → x ∈ c.limSeq v y := sigmaOne_skolem
-    (by apply HierarchySymbol.Boldface.comp₂ (by definability)
-        exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩) this
+    (by apply HierarchySymbol.Boldface.comp₂
+          ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
+          (by definability)) this
   rcases this with ⟨f, mf, rfl, hf⟩
   exact ⟨f, by
     intro z hzm hz

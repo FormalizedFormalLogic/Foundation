@@ -43,31 +43,31 @@ instance ppow2_definable : 𝚺₀-Predicate (PPow2 : V → Prop) := ppow2_defin
 
 namespace SPPow2
 
-variable {m : V} (hm : SPPow2 m)
+variable {m : V}
 
-lemma not_lenbit_one : ¬LenBit 1 m := hm.1
+lemma not_lenbit_one (hm : SPPow2 m) : ¬LenBit 1 m := hm.1
 
-lemma lenbit_two : LenBit 2 m := hm.2.1
+lemma lenbit_two (hm : SPPow2 m) : LenBit 2 m := hm.2.1
 
-lemma lenbit_iff {i : V} (hi : i ≤ m) (pi : Pow2 i) (lt2 : 2 < i) :
+lemma lenbit_iff (hm : SPPow2 m) {i : V} (hi : i ≤ m) (pi : Pow2 i) (lt2 : 2 < i) :
     LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m := hm.2.2 i hi pi lt2
 
-lemma one_lt {i : V} (hi : LenBit i m) : 1 < i := by
+lemma one_lt (hm : SPPow2 m) {i : V} (hi : LenBit i m) : 1 < i := by
   by_contra A
   rcases (le_one_iff_eq_zero_or_one.mp (show i ≤ 1 from by simpa using A)) with (rfl | rfl)
   · simp at hi
   · exact hm.1 hi
 
-lemma two_lt {i : V} (hi : LenBit i m) (ne2 : i ≠ 2) : 2 < i :=
+lemma two_lt (hm : SPPow2 m) {i : V} (hi : LenBit i m) (ne2 : i ≠ 2) : 2 < i :=
   lt_of_le_of_ne (one_lt_iff_two_le.mp $ hm.one_lt hi) (Ne.symm ne2)
 
-lemma sqrt {i : V} (hi : LenBit i m) (pi : Pow2 i) (ne2 : i ≠ 2) :
+lemma sqrt (hm : SPPow2 m) {i : V} (hi : LenBit i m) (pi : Pow2 i) (ne2 : i ≠ 2) :
     LenBit (√i) m := ((hm.lenbit_iff hi.le pi (hm.two_lt hi ne2)).mp hi).2
 
-lemma sq_sqrt_eq {i : V} (hi : LenBit i m) (pi : Pow2 i) (ne2 : i ≠ 2) :
+lemma sq_sqrt_eq (hm : SPPow2 m) {i : V} (hi : LenBit i m) (pi : Pow2 i) (ne2 : i ≠ 2) :
     (√i)^2 = i := ((hm.lenbit_iff hi.le pi (hm.two_lt hi ne2)).mp hi).1
 
-lemma of_sqrt {i : V} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√i)^2 = i) (hi : LenBit (√i) m) :
+lemma of_sqrt (hm : SPPow2 m) {i : V} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√i)^2 = i) (hi : LenBit (√i) m) :
     LenBit i m := by
   by_cases ne1 : i = 1
   · rcases ne1; simpa using hi
@@ -88,7 +88,7 @@ lemma of_sqrt {i : V} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√i)^2 = i) (hi : 
 @[simp] lemma not_one : ¬SPPow2 (1 : V) := by
   rintro ⟨_, h, _⟩; simp [LenBit.iff_rem, one_lt_two] at h
 
-lemma sq_le_of_lt {i j : V} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m) : i < j → i^2 ≤ j := by
+lemma sq_le_of_lt (hm : SPPow2 m) {i j : V} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m) : i < j → i^2 ≤ j := by
   intro hij
   suffices ∀ i < j, Pow2 i → Pow2 j → LenBit i m → LenBit j m → i^2 ≤ j from this i hij pi pj hi hj
   clear i pi hi hij pj hj
@@ -115,7 +115,7 @@ lemma sq_le_of_lt {i j : V} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : 
               (pi.sqrt (hm.sq_sqrt_eq hi pi ine2)) (pj.sqrt (hm.sq_sqrt_eq hj pj jne2)) (hm.sqrt hi pi ine2) (hm.sqrt hj pj jne2)
         simpa [hm.sq_sqrt_eq hj pj jne2] using sq_le_sq.mpr this
 
-lemma last_uniq {i j : V} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m)
+lemma last_uniq (hm : SPPow2 m) {i j : V} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m)
     (hsqi : m < i^2) (hsqj : m < j^2) : i = j := by
   by_contra ne
   wlog hij : i < j

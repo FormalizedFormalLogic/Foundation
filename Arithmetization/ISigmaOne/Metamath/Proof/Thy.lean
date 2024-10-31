@@ -7,7 +7,7 @@ namespace LO.Arith
 
 open FirstOrder FirstOrder.Arith
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V]
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
@@ -21,7 +21,7 @@ structure _root_.LO.FirstOrder.Arith.LDef.TDef (pL : LDef) where
 protected structure Language.Theory (L : Arith.Language V) {pL : LDef} [Arith.Language.Defined L pL] where
   set : Set V
 
-instance : Membership V L.Theory := ⟨fun x T ↦ x ∈ T.set⟩
+instance : Membership V L.Theory := ⟨fun T x ↦ x ∈ T.set⟩
 
 instance : HasSubset L.Theory := ⟨fun T U ↦ T.set ⊆ U.set⟩
 
