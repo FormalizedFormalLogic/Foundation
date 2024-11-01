@@ -81,8 +81,8 @@ namespace LO.Axioms
 
 variable {F : Type*} [LogicalConnective F] [BasicModalLogicalConnective F]
 
-protected abbrev Geach (t : GeachTaple) (p : F) := ◇^[t.i](□^[t.m]p) ➝ □^[t.j](◇^[t.n]p)
-abbrev Geach.set (t : GeachTaple) : Set F := { Axioms.Geach t p | (p) }
+protected abbrev Geach (t : GeachTaple) (φ : F) := ◇^[t.i](□^[t.m]φ) ➝ □^[t.j](◇^[t.n]φ)
+abbrev Geach.set (t : GeachTaple) : Set F := { Axioms.Geach t φ | (φ) }
 notation:max "𝗴𝗲(" t ")" => Geach.set t
 
 namespace Geach

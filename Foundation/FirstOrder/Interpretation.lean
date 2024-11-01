@@ -36,13 +36,13 @@ def translationAux : {n : ℕ} → Semisentence L' n → Semisentence L n
   | _, Semiformula.nrel r v => ∼ι.translationRel r v
   | _, ⊤                    => ⊤
   | _, ⊥                    => ⊥
-  | _, p ⋏ q                => translationAux p ⋏ translationAux q
-  | _, p ⋎ q                => translationAux p ⋎ translationAux q
-  | _, ∀' p                 => ∀[ι.domain/[#0]] translationAux p
-  | _, ∃' p                 => ∃[ι.domain/[#0]] translationAux p
+  | _, φ ⋏ ψ                => translationAux φ ⋏ translationAux ψ
+  | _, φ ⋎ ψ                => translationAux φ ⋎ translationAux ψ
+  | _, ∀' φ                 => ∀[ι.domain/[#0]] translationAux φ
+  | _, ∃' φ                 => ∃[ι.domain/[#0]] translationAux φ
 
-lemma translationAux_neg {n : ℕ} (p : Semisentence L' n) : ι.translationAux (∼p) = ∼ ι.translationAux p := by
-  induction p using Semiformula.rec' <;> simp [translationAux, *, ←Semiformula.neg_eq]
+lemma translationAux_neg {n : ℕ} (φ : Semisentence L' n) : ι.translationAux (∼φ) = ∼ ι.translationAux φ := by
+  induction φ using Semiformula.rec' <;> simp [translationAux, *, ←Semiformula.neg_eq]
 
 def translation {n : ℕ} : Semisentence L' n →ˡᶜ Semisentence L n where
   toTr := ι.translationAux
@@ -59,9 +59,9 @@ def translation {n : ℕ} : Semisentence L' n →ˡᶜ Semisentence L n where
 @[simp] lemma translation_nrel {k} (r : L'.Rel k) (v : Fin k → Semiterm L' Empty n) :
     ι.translation (Semiformula.nrel r v) = ∼ι.translationRel r v := rfl
 
-@[simp] lemma translation_all (p : Semisentence L' (n + 1)) : ι.translation (∀' p) = ∀[ι.domain/[#0]] ι.translation p := rfl
+@[simp] lemma translation_all (φ : Semisentence L' (n + 1)) : ι.translation (∀' φ) = ∀[ι.domain/[#0]] ι.translation φ := rfl
 
-@[simp] lemma translation_ex (p : Semisentence L' (n + 1)) : ι.translation (∃' p) = ∃[ι.domain/[#0]] ι.translation p := rfl
+@[simp] lemma translation_ex (φ : Semisentence L' (n + 1)) : ι.translation (∃' φ) = ∃[ι.domain/[#0]] ι.translation φ := rfl
 
 section semantics
 
@@ -134,29 +134,29 @@ lemma eval_translationRel_iff {n k} (e : Fin n → ι.Sub M) (r : L'.Rel k) (v :
     rcases this
     exact h
 
-lemma eval_translation_iff {p : Semisentence L' n} {e : Fin n → ι.Sub M} :
-    Evalbm M (fun i ↦ e i) (ι.translation p) ↔ Evalbm (ι.Sub M) e p := by
-  induction p using Semiformula.rec'
+lemma eval_translation_iff {φ : Semisentence L' n} {e : Fin n → ι.Sub M} :
+    Evalbm M (fun i ↦ e i) (ι.translation φ) ↔ Evalbm (ι.Sub M) e φ := by
+  induction φ using Semiformula.rec'
     <;> simp [*, Matrix.constant_eq_singleton, eval_substs, eval_translationRel_iff, eval_rel, eval_nrel]
-  case hall n p ih =>
+  case hall n φ ih =>
     constructor
     · intro h x hx
       exact ih.mp (by simpa [Matrix.comp_vecCons'] using h x hx)
     · intro h x hx
       simpa [Matrix.comp_vecCons'] using ih.mpr (h x hx)
-  case hex n p ih =>
+  case hex n φ ih =>
     constructor
     · rintro ⟨x, hx, h⟩
       refine ⟨x, hx, ih.mp (by simpa [Matrix.comp_vecCons'] using h)⟩
     · intro ⟨x, hx, h⟩
       refine ⟨x, hx, by simpa [Matrix.comp_vecCons'] using ih.mpr h⟩
 
-lemma eval_translation_iff₀ {p : Sentence L'} :
-    Evalbm M ![] (ι.translation p) ↔ Evalbm (ι.Sub M) ![] p := by
-  simpa [Matrix.empty_eq] using eval_translation_iff (M := M) (ι := ι) (e := ![]) (p := p)
+lemma eval_translation_iff₀ {φ : Sentence L'} :
+    Evalbm M ![] (ι.translation φ) ↔ Evalbm (ι.Sub M) ![] φ := by
+  simpa [Matrix.empty_eq] using eval_translation_iff (M := M) (ι := ι) (e := ![]) (φ := φ)
 
-lemma models_translation_iff {p : SyntacticFormula L'} :
-    M ⊧ₘ Rew.emb.hom (ι.translation (∀∀₀p)) ↔ (ι.Sub M) ⊧ₘ p := by
+lemma models_translation_iff {φ : SyntacticFormula L'} :
+    M ⊧ₘ Rew.emb.hom (ι.translation (∀∀₀φ)) ↔ (ι.Sub M) ⊧ₘ φ := by
     simp [models_iff, eval_translation_iff₀, eval_close₀]
 
 end semantics
@@ -173,7 +173,7 @@ end Interpretation
 
 class TheoryInterpretation {L L' : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (U : Theory L') where
   interpretation : Interpretation T L'
-  interpret_theory : ∀ p ∈ U, T ⊨ Rew.emb.hom (interpretation.translation (∀∀₀p))
+  interpret_theory : ∀ φ ∈ U, T ⊨ Rew.emb.hom (interpretation.translation (∀∀₀φ))
 
 infix:50 " ⊳ " => TheoryInterpretation
 
@@ -183,14 +183,14 @@ open Interpretation
 
 variable {L L' : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ≼ T] {U : Theory L'} (ι : T ⊳ U)
 
-abbrev translation (p : Semisentence L' n) : Semisentence L n := ι.interpretation.translation p
+abbrev translation (φ : Semisentence L' n) : Semisentence L n := ι.interpretation.translation φ
 
 lemma sub_models_theory {M : Type u} [Nonempty M] [Structure L M] [Structure.Eq L M] (hT : M ⊧ₘ* T) :
     (ι.interpretation.Sub M) ⊧ₘ* U := modelsTheory_iff.mpr fun {σ} hσ ↦ models_translation_iff.mp (ι.interpret_theory σ hσ hT)
 
-lemma theorem_translation {p : SyntacticFormula L'} (h : U ⊨ p) : T ⊨ ↑(ι.translation (∀∀₀p)) :=
+lemma theorem_translation {φ : SyntacticFormula L'} (h : U ⊨ φ) : T ⊨ ↑(ι.translation (∀∀₀φ)) :=
   EQ.provOf _ fun M _ _ _ hT ↦
-    (@models_translation_iff L L' _ T _ ι.interpretation M _ _ hT _ p).mpr <| h <| ι.sub_models_theory hT
+    (@models_translation_iff L L' _ T _ ι.interpretation M _ _ hT _ φ).mpr <| h <| ι.sub_models_theory hT
 
 open Interpretation
 

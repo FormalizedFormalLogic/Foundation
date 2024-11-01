@@ -12,11 +12,11 @@ abbrev Sequent (α : Type*) := List (Formula α)
 inductive Derivation (T : Theory α) : Sequent α → Type _
 | axL (Δ a)   : Derivation T (Formula.atom a :: Formula.natom a :: Δ)
 | verum (Δ)   : Derivation T (⊤ :: Δ)
-| or {Δ p q}  : Derivation T (p :: q :: Δ) → Derivation T (p ⋎ q :: Δ)
-| and {Δ p q} : Derivation T (p :: Δ) → Derivation T (q :: Δ) → Derivation T (p ⋏ q :: Δ)
+| or {Δ φ ψ}  : Derivation T (φ :: ψ :: Δ) → Derivation T (φ ⋎ ψ :: Δ)
+| and {Δ φ ψ} : Derivation T (φ :: Δ) → Derivation T (ψ :: Δ) → Derivation T (φ ⋏ ψ :: Δ)
 | wk {Δ Γ}    : Derivation T Δ → Δ ⊆ Γ → Derivation T Γ
-| cut {Δ p}   : Derivation T (p :: Δ) → Derivation T (∼p :: Δ) → Derivation T Δ
-| root {p}    : p ∈ T → Derivation T [p]
+| cut {Δ φ}   : Derivation T (φ :: Δ) → Derivation T (∼φ :: Δ) → Derivation T Δ
+| root {φ}    : φ ∈ T → Derivation T [φ]
 
 instance : OneSided (Formula α) (Theory α) := ⟨Derivation⟩
 
@@ -43,21 +43,21 @@ def verum' (h : ⊤ ∈ Δ) : T ⟹ Δ := (verum Δ).wk (by simp[h])
 def axL' (a : α)
     (h : Formula.atom a ∈ Δ) (hn : Formula.natom a ∈ Δ) : T ⟹ Δ := (axL Δ a).wk (by simp[h, hn])
 
-def em {p : Formula α} {Δ : Sequent α} (hpos : p ∈ Δ) (hneg : ∼p ∈ Δ) : T ⟹ Δ := by
-  induction p using Formula.rec' generalizing Δ <;> simp at hneg
+def em {φ : Formula α} {Δ : Sequent α} (hpos : φ ∈ Δ) (hneg : ∼φ ∈ Δ) : T ⟹ Δ := by
+  induction φ using Formula.rec' generalizing Δ <;> simp at hneg
   case hverum           => exact verum' hpos
   case hfalsum          => exact verum' hneg
   case hatom a          => exact axL' a hpos hneg
   case hnatom a         => exact axL' a hneg hpos
-  case hand p q ihp ihq =>
-    have ihp : T ⟹ p :: ∼p :: ∼q :: Δ := ihp (by simp) (by simp)
-    have ihq : T ⟹ q :: ∼p :: ∼q :: Δ := ihq (by simp) (by simp)
-    have : T ⟹ ∼p :: ∼q :: Δ := (ihp.and ihq).wk (by simp[hpos])
+  case hand φ ψ ihp ihq =>
+    have ihp : T ⟹ φ :: ∼φ :: ∼ψ :: Δ := ihp (by simp) (by simp)
+    have ihq : T ⟹ ψ :: ∼φ :: ∼ψ :: Δ := ihq (by simp) (by simp)
+    have : T ⟹ ∼φ :: ∼ψ :: Δ := (ihp.and ihq).wk (by simp[hpos])
     exact this.or.wk (by simp[hneg])
-  case hor p q ihp ihq  =>
-    have ihp : T ⟹ ∼p :: p :: q :: Δ := ihp (by simp) (by simp)
-    have ihq : T ⟹ ∼q :: p :: q :: Δ := ihq (by simp) (by simp)
-    have : T ⟹ p :: q :: Δ := (ihp.and ihq).wk (by simp[hneg])
+  case hor φ ψ ihp ihq  =>
+    have ihp : T ⟹ ∼φ :: φ :: ψ :: Δ := ihp (by simp) (by simp)
+    have ihq : T ⟹ ∼ψ :: φ :: ψ :: Δ := ihq (by simp) (by simp)
+    have : T ⟹ φ :: ψ :: Δ := (ihp.and ihq).wk (by simp[hneg])
     exact this.or.wk (by simp[hpos])
 
 instance : Tait (Formula α) (Theory α) where
@@ -70,7 +70,7 @@ instance : Tait (Formula α) (Theory α) where
 instance : Tait.Cut (Formula α) (Theory α) := ⟨Derivation.cut⟩
 
 def trans (F : U ⊢* T) {Γ : Sequent α} : T ⟹ Γ → U ⟹ Γ
-  | axL Γ p   => axL Γ p
+  | axL Γ φ   => axL Γ φ
   | verum Γ   => verum Γ
   | and d₁ d₂ => and (trans F d₁) (trans F d₂)
   | or d      => or (trans F d)
@@ -85,7 +85,7 @@ instance : Tait.Axiomatized (Formula α) (Theory α) where
 variable [DecidableEq α]
 
 def compact {Γ : Sequent α} : T ⟹ Γ → (s : { s : Finset (Formula α) // ↑s ⊆ T}) × (s : Theory α) ⟹ Γ
-  | axL Γ p   => ⟨⟨∅, by simp⟩, axL Γ p⟩
+  | axL Γ φ   => ⟨⟨∅, by simp⟩, axL Γ φ⟩
   | verum Γ   => ⟨⟨∅, by simp⟩, verum Γ⟩
   | and d₁ d₂ =>
     let ⟨s₁, d₁⟩ := compact d₁
@@ -103,8 +103,8 @@ def compact {Γ : Sequent α} : T ⟹ Γ → (s : { s : Finset (Formula α) // �
     let ⟨s₂, d₂⟩ := compact d₂
     ⟨⟨(s₁ ∪ s₂ : Finset (Formula α)), by simp [s₁.prop, s₂.prop]⟩,
       cut (Tait.ofAxiomSubset (by simp) d₁) (Tait.ofAxiomSubset (by simp) d₂)⟩
-  | root (p := p) h =>
-    ⟨⟨{p}, by simp [h]⟩, root (by simp)⟩
+  | root (φ := φ) h =>
+    ⟨⟨{φ}, by simp [h]⟩, root (by simp)⟩
 
 instance : System.Compact (Theory α) where
   φ b := (compact b).1
@@ -112,29 +112,29 @@ instance : System.Compact (Theory α) where
   φ_subset b := by simpa using (compact b).1.prop
   φ_finite b := by simp
 
-def deductionAux {Γ : Sequent α} {p} : T ⟹ Γ → T \ {p} ⟹ ∼p :: Γ
-  | axL Γ p   => wk (axL Γ p) (by simp)
+def deductionAux {Γ : Sequent α} {φ} : T ⟹ Γ → T \ {φ} ⟹ ∼φ :: Γ
+  | axL Γ φ   => wk (axL Γ φ) (by simp)
   | verum Γ   => wk (verum Γ) (by simp)
   | and d₁ d₂ =>
     Tait.rotate₁ <| and (Tait.rotate₁ <| deductionAux d₁) (Tait.rotate₁ <| deductionAux d₂)
   | or d      => Tait.rotate₁ <| Tait.or <| Tait.wk (deductionAux d) (by intro x; simp; tauto)
-  | wk d ss   => wk (deductionAux d) <| List.cons_subset_cons (∼p) ss
+  | wk d ss   => wk (deductionAux d) <| List.cons_subset_cons (∼φ) ss
   | cut d₁ d₂ => cut (Tait.rotate₁ <| deductionAux d₁) (Tait.rotate₁ <| deductionAux d₂)
-  | root (p := q) h =>
-    if hq : p = q then em (p := p) (by simp [hq]) (by simp) else
-      Tait.wk (show T \ {p} ⟹ [q] from Tait.root (by simp [h, Ne.symm hq])) (by simp)
+  | root (φ := ψ) h =>
+    if hq : φ = ψ then em (φ := φ) (by simp [hq]) (by simp) else
+      Tait.wk (show T \ {φ} ⟹ [ψ] from Tait.root (by simp [h, Ne.symm hq])) (by simp)
 
-def deduction {Γ : Sequent α} {p} (d : insert p T ⟹ Γ) : T ⟹ ∼p :: Γ := Tait.ofAxiomSubset (by simp) (deductionAux d)
+def deduction {Γ : Sequent α} {φ} (d : insert φ T ⟹ Γ) : T ⟹ ∼φ :: Γ := Tait.ofAxiomSubset (by simp) (deductionAux d)
 
 lemma inconsistent_iff_provable :
-    System.Inconsistent (insert p T) ↔ T ⊢! ∼p := by
+    System.Inconsistent (insert φ T) ↔ T ⊢! ∼φ := by
   constructor
   · intro h; exact ⟨deduction (Tait.inconsistent_iff_provable.mp h).get⟩
   · rintro b
-    exact System.inconsistent_of_provable_of_unprovable (p := p) (System.by_axm _ <| by simp) (System.wk! (by simp) b)
+    exact System.inconsistent_of_provable_of_unprovable (φ := φ) (System.by_axm _ <| by simp) (System.wk! (by simp) b)
 
 lemma consistent_iff_unprovable :
-    System.Consistent (insert p T) ↔ T ⊬ ∼p := by simp [←System.not_inconsistent_iff_consistent, inconsistent_iff_provable]
+    System.Consistent (insert φ T) ↔ T ⊬ ∼φ := by simp [←System.not_inconsistent_iff_consistent, inconsistent_iff_provable]
 
 omit [DecidableEq α]
 @[simp] lemma inconsistent_theory_iff :

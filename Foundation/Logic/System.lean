@@ -16,9 +16,9 @@ Also defines soundness and completeness.
 * `LO.System.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
 
 ## Notation
-* `𝓢 ⊢ p`: a type of formalized proofs of `p : F` from deductive system `𝓢 : S`.
-* `𝓢 ⊢! p`: a proposition that states there is a proof of `p` from `𝓢`, i.e. `p` is provable from `𝓢`.
-* `𝓢 ⊬ p`: a proposition that states `p` is not provable from `𝓢`.
+* `𝓢 ⊢ φ`: a type of formalized proofs of `φ : F` from deductive system `𝓢 : S`.
+* `𝓢 ⊢! φ`: a proposition that states there is a proof of `φ` from `𝓢`, i.e. `φ` is provable from `𝓢`.
+* `𝓢 ⊬ φ`: a proposition that states `φ` is not provable from `𝓢`.
 * `𝓢 ⊢* T`: a type of formalized proofs for each formulae in a set `T` from `𝓢`.
 * `𝓢 ⊢!* T`: a proposition that states each formulae in `T` is provable from `𝓢`.
 
@@ -269,7 +269,7 @@ def comp {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝ 𝓤) (ψ : 𝓢 ↝
 @[simp] lemma comp_app {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝ 𝓤) (ψ : 𝓢 ↝ 𝓣) (f : F) :
     φ.comp ψ f = φ (ψ f) := rfl
 
-lemma provable {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↝ 𝓣) {p} (h : 𝓢 ⊢! p) : 𝓣 ⊢! φ p := ⟨φ.prf h.get⟩
+lemma provable {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↝ 𝓣) {φ} (h : 𝓢 ⊢! φ) : 𝓣 ⊢! f φ := ⟨f.prf h.get⟩
 
 end Translation
 
@@ -277,9 +277,9 @@ namespace Bitranslation
 
 variable {S S' S'' : Type*} {F F' F'' : Type*} [System F S] [System F' S'] [System F'' S'']
 
-@[simp] lemma r_l_app {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↭ 𝓣) (p : F') : φ.r (φ.l p) = p := congr_fun φ.r_l p
+@[simp] lemma r_l_app {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↭ 𝓣) (φ : F') : f.r (f.l φ) = φ := congr_fun f.r_l φ
 
-@[simp] lemma l_r_app {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↭ 𝓣) (p : F) : φ.l (φ.r p) = p := congr_fun φ.l_r p
+@[simp] lemma l_r_app {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↭ 𝓣) (φ : F) : f.l (f.r φ) = φ := congr_fun f.l_r φ
 
 protected def id (𝓢 : S) : 𝓢 ↭ 𝓢 where
   r := Translation.id 𝓢
@@ -322,10 +322,10 @@ def comp {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝¹ 𝓤) (ψ : 𝓢 �
 @[simp] lemma comp_app {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝¹ 𝓤) (ψ : 𝓢 ↝¹ 𝓣) (f : F) :
     φ.comp ψ f = φ (ψ f) := rfl
 
-lemma provable {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↝¹ 𝓣) {p} (h : 𝓢 ⊢! p) : 𝓣 ⊢! φ p := ⟨φ.prf h.get⟩
+lemma provable {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↝¹ 𝓣) {φ} (h : 𝓢 ⊢! φ) : 𝓣 ⊢! f φ := ⟨f.prf h.get⟩
 
-lemma provable_iff {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↝¹ 𝓣) {p} : 𝓣 ⊢! φ p ↔ 𝓢 ⊢! p :=
-  ⟨fun h ↦ ⟨φ.prfInv h.get⟩, fun h ↦ ⟨φ.prf h.get⟩⟩
+lemma provable_iff {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↝¹ 𝓣) {φ} : 𝓣 ⊢! f φ ↔ 𝓢 ⊢! φ :=
+  ⟨fun h ↦ ⟨f.prfInv h.get⟩, fun h ↦ ⟨f.prf h.get⟩⟩
 
 end FaithfulTranslation
 
@@ -346,9 +346,9 @@ def translation [𝓢 ≼ 𝓣] : 𝓢 ↝ 𝓣 where
   toFun := id
   prf := prf
 
-def ofTranslation (t : 𝓢 ↝ 𝓣) (h : ∀ p, t p = p) : 𝓢 ≼ 𝓣 := ⟨fun {p} b ↦ h p ▸ (t.prf b)⟩
+def ofTranslation (t : 𝓢 ↝ 𝓣) (h : ∀ φ, t φ = φ) : 𝓢 ≼ 𝓣 := ⟨fun {φ} b ↦ h φ ▸ (t.prf b)⟩
 
-lemma prf! [𝓢 ≼ 𝓣] {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := λ ⟨p⟩ ↦ ⟨Subtheory.prf p⟩
+lemma prf! [𝓢 ≼ 𝓣] {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := λ ⟨φ⟩ ↦ ⟨Subtheory.prf φ⟩
 
 end Subtheory
 
@@ -377,7 +377,7 @@ alias byAxm := Axiomatized.prfAxm
 alias wk := Axiomatized.weakening
 
 class StrongCut [Collection F T] where
-  cut {𝓢 : S} {𝓣 : T} {p} : 𝓢 ⊢* Collection.set 𝓣 → 𝓣 ⊢ p → 𝓢 ⊢ p
+  cut {𝓢 : S} {𝓣 : T} {φ} : 𝓢 ⊢* Collection.set 𝓣 → 𝓣 ⊢ φ → 𝓢 ⊢ φ
 
 variable {S T}
 
@@ -424,7 +424,7 @@ namespace StrongCut
 
 variable [Collection F T] [StrongCut S T]
 
-lemma cut! {𝓢 : S} {𝓣 : T} {p : F} (H : 𝓢 ⊢!* Collection.set 𝓣) (hp : 𝓣 ⊢! p) : 𝓢 ⊢! p := by
+lemma cut! {𝓢 : S} {𝓣 : T} {φ : F} (H : 𝓢 ⊢!* Collection.set 𝓣) (hp : 𝓣 ⊢! φ) : 𝓢 ⊢! φ := by
   rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.get b⟩
 
 def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣 ↝ 𝓢 where
@@ -470,7 +470,7 @@ variable {S : Type*} {F : Type*} [LogicalConnective F] [System F S]
 variable (S)
 
 class DeductiveExplosion where
-  dexp {𝓢 : S} : 𝓢 ⊢ ⊥ → (p : F) → 𝓢 ⊢ p
+  dexp {𝓢 : S} : 𝓢 ⊢ ⊥ → (φ : F) → 𝓢 ⊢ φ
 
 variable {S}
 
@@ -508,30 +508,30 @@ end
 variable (S)
 
 class Deduction [Cons F S] where
-  ofInsert {p q : F} {𝓢 : S} : cons p 𝓢 ⊢ q → 𝓢 ⊢ p ➝ q
-  inv {p q : F} {𝓢 : S} : 𝓢 ⊢ p ➝ q → cons p 𝓢 ⊢ q
+  ofInsert {φ ψ : F} {𝓢 : S} : cons φ 𝓢 ⊢ ψ → 𝓢 ⊢ φ ➝ ψ
+  inv {φ ψ : F} {𝓢 : S} : 𝓢 ⊢ φ ➝ ψ → cons φ 𝓢 ⊢ ψ
 
 variable {S}
 
 section deduction
 
-variable [Cons F S] [Deduction S] {𝓢 : S} {p q : F}
+variable [Cons F S] [Deduction S] {𝓢 : S} {φ ψ : F}
 
 alias deduction := Deduction.ofInsert
 
-lemma Deduction.of_insert! (h : cons p 𝓢 ⊢! q) : 𝓢 ⊢! p ➝ q := by
+lemma Deduction.of_insert! (h : cons φ 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ➝ ψ := by
   rcases h with ⟨b⟩; exact ⟨Deduction.ofInsert b⟩
 
 alias deduction! := Deduction.of_insert!
 
-lemma Deduction.inv! (h : 𝓢 ⊢! p ➝ q) : cons p 𝓢 ⊢! q := by
+lemma Deduction.inv! (h : 𝓢 ⊢! φ ➝ ψ) : cons φ 𝓢 ⊢! ψ := by
   rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
 
-def Deduction.translation (p : F) (𝓢 : S) : cons p 𝓢 ↝ 𝓢 where
-  toFun := fun q ↦ p ➝ q
+def Deduction.translation (φ : F) (𝓢 : S) : cons φ 𝓢 ↝ 𝓢 where
+  toFun := fun ψ ↦ φ ➝ ψ
   prf := deduction
 
-lemma deduction_iff : cons p 𝓢 ⊢! q ↔ 𝓢 ⊢! p ➝ q := ⟨deduction!, Deduction.inv!⟩
+lemma deduction_iff : cons φ 𝓢 ⊢! ψ ↔ 𝓢 ⊢! φ ➝ ψ := ⟨deduction!, Deduction.inv!⟩
 
 end deduction
 
@@ -553,7 +553,7 @@ section
 
 variable {𝓢 𝓣 : S} {𝓜 𝓝 : M} [Sound 𝓢 𝓜] [Sound 𝓣 𝓝]
 
-lemma not_provable_of_countermodel {p : F} (hp : ¬𝓜 ⊧ p) : 𝓢 ⊬ p :=
+lemma not_provable_of_countermodel {φ : F} (hp : ¬𝓜 ⊧ φ) : 𝓢 ⊬ φ :=
   fun b ↦ hp (Sound.sound b)
 
 lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → System.Consistent 𝓢 :=

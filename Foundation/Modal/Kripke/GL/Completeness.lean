@@ -6,37 +6,37 @@ namespace LO.Modal
 open LO.Kripke
 
 variable {α : Type u} [Inhabited α] [DecidableEq α]
-variable {p q : Formula α}
+variable {φ ψ : Formula α}
 
 namespace Kripke
 
 open Formula
 
-abbrev GLCompleteFrame (p : Formula α) : Kripke.FiniteFrame where
-  World := CCF 𝐆𝐋 p.subformulae
+abbrev GLCompleteFrame (φ : Formula α) : Kripke.FiniteFrame where
+  World := CCF 𝐆𝐋 φ.subformulae
   Rel X Y :=
-    (∀ q ∈ □''⁻¹p.subformulae, □q ∈ X.formulae → (q ∈ Y.formulae ∧ □q ∈ Y.formulae)) ∧
-    (∃ r ∈ □''⁻¹p.subformulae, □r ∉ X.formulae ∧ □r ∈ Y.formulae)
+    (∀ ψ ∈ □''⁻¹φ.subformulae, □ψ ∈ X.formulae → (ψ ∈ Y.formulae ∧ □ψ ∈ Y.formulae)) ∧
+    (∃ χ ∈ □''⁻¹φ.subformulae, □χ ∉ X.formulae ∧ □χ ∈ Y.formulae)
 
 namespace GLCompleteFrame
 
-lemma irreflexive : Irreflexive (GLCompleteFrame p).Rel := by simp [Irreflexive];
+lemma irreflexive : Irreflexive (GLCompleteFrame φ).Rel := by simp [Irreflexive];
 
-lemma transitive : Transitive (GLCompleteFrame p).Rel := by
+lemma transitive : Transitive (GLCompleteFrame φ).Rel := by
   simp;
-  rintro X Y Z ⟨RXY, ⟨r, _, _, _⟩⟩ ⟨RYZ, _⟩;
+  rintro X Y Z ⟨RXY, ⟨χ, _, _, _⟩⟩ ⟨RYZ, _⟩;
   constructor;
-  . rintro q hq₁ hq₂;
-    exact RYZ q hq₁ $ RXY q hq₁ hq₂ |>.2;
-  . use r;
+  . rintro ψ hq₁ hq₂;
+    exact RYZ ψ hq₁ $ RXY ψ hq₁ hq₂ |>.2;
+  . use χ;
     refine ⟨by assumption, by assumption, ?_⟩;
-    exact RYZ r (by assumption) (by assumption) |>.2;
+    exact RYZ χ (by assumption) (by assumption) |>.2;
 
 end GLCompleteFrame
 
 
-abbrev GLCompleteModel (p : Formula α) : Kripke.Model α where
-  Frame := GLCompleteFrame p
+abbrev GLCompleteModel (φ : Formula α) : Kripke.Model α where
+  Frame := GLCompleteFrame φ
   Valuation X a := (atom a) ∈ X.formulae
 
 open System System.FiniteContext
@@ -45,12 +45,12 @@ open ComplementaryClosedConsistentFormulae
 
 omit [Inhabited α] in
 private lemma GL_truthlemma.lemma1
-  {X : CCF 𝐆𝐋 p.subformulae} (hq : □q ∈ p.subformulae)
-  : ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) ⊆ p.subformulae⁻ := by
+  {X : CCF 𝐆𝐋 φ.subformulae} (hq : □ψ ∈ φ.subformulae)
+  : ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□ψ, -ψ}) ⊆ φ.subformulae⁻ := by
   simp only [Formulae.complementary];
-  intro r hr;
+  intro χ hr;
   simp [Finset.mem_union] at hr;
-  rcases hr with (rfl | hp | ⟨r, hr, rfl⟩ | rfl);
+  rcases hr with (rfl | hp | ⟨χ, hr, rfl⟩ | rfl);
   . apply Finset.mem_union.mpr;
     tauto;
   . have := X.closed.subset hp;
@@ -61,71 +61,71 @@ private lemma GL_truthlemma.lemma1
   . exact X.closed.subset hr;
   . apply Finset.mem_union.mpr;
     right; simp;
-    use q;
+    use ψ;
     constructor;
     . exact subformulae.mem_box hq;
     . rfl;
 
 omit [Inhabited α] in
 private lemma GL_truthlemma.lemma2
-  {X : CCF 𝐆𝐋 p.subformulae} (hq₁ : □q ∈ p.subformulae) (hq₂ : □q ∉ X.formulae)
-  : Formulae.Consistent 𝐆𝐋 ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□q, -q}) := by
+  {X : CCF 𝐆𝐋 φ.subformulae} (hq₁ : □ψ ∈ φ.subformulae) (hq₂ : □ψ ∉ X.formulae)
+  : Formulae.Consistent 𝐆𝐋 ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□ψ, -ψ}) := by
   apply Formulae.intro_union_consistent;
   rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
 
-  replace hΓ₂ : ∀ r ∈ Γ₂, r = □q ∨ r = -q := by
-    intro r hr;
-    simpa using hΓ₂ r hr;
+  replace hΓ₂ : ∀ χ ∈ Γ₂, χ = □ψ ∨ χ = -ψ := by
+    intro χ hr;
+    simpa using hΓ₂ χ hr;
 
   by_contra hC;
   have : Γ₁ ⊢[𝐆𝐋]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
-  have : Γ₁ ⊢[𝐆𝐋]! (□q ⋏ -q) ➝ ⊥ := imp_trans''! (by
-    suffices Γ₁ ⊢[𝐆𝐋]! ⋀[□q, -q] ➝ ⋀Γ₂ by
+  have : Γ₁ ⊢[𝐆𝐋]! (□ψ ⋏ -ψ) ➝ ⊥ := imp_trans''! (by
+    suffices Γ₁ ⊢[𝐆𝐋]! ⋀[□ψ, -ψ] ➝ ⋀Γ₂ by
       simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
     apply conjconj_subset!;
     simpa using hΓ₂;
   ) this;
-  have : Γ₁ ⊢[𝐆𝐋]! □q ➝ -q ➝ ⊥ := and_imply_iff_imply_imply'!.mp this;
-  have : Γ₁ ⊢[𝐆𝐋]! □q ➝ q := by
-    rcases Formula.complement.or (p := q) with (hp | ⟨q, rfl⟩);
+  have : Γ₁ ⊢[𝐆𝐋]! □ψ ➝ -ψ ➝ ⊥ := and_imply_iff_imply_imply'!.mp this;
+  have : Γ₁ ⊢[𝐆𝐋]! □ψ ➝ ψ := by
+    rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
     . rw [hp] at this;
       exact imp_trans''! this dne!;
     . simpa only [complement] using this;
-  have : (□'Γ₁) ⊢[𝐆𝐋]! □(□q ➝ q) := contextual_nec! this;
-  have : (□'Γ₁) ⊢[𝐆𝐋]! □q := axiomL! ⨀ this;
-  have : 𝐆𝐋 ⊢! ⋀□'Γ₁ ➝ □q := provable_iff.mp this;
-  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox ∪ X.formulae.prebox.box |>.toList) ➝ □q := imp_trans''! (conjconj_subset! (by
+  have : (□'Γ₁) ⊢[𝐆𝐋]! □(□ψ ➝ ψ) := contextual_nec! this;
+  have : (□'Γ₁) ⊢[𝐆𝐋]! □ψ := axiomL! ⨀ this;
+  have : 𝐆𝐋 ⊢! ⋀□'Γ₁ ➝ □ψ := provable_iff.mp this;
+  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox ∪ X.formulae.prebox.box |>.toList) ➝ □ψ := imp_trans''! (conjconj_subset! (by
     simp;
-    intro r hr;
+    intro χ hr;
     have := hΓ₁ _ hr; simp at this;
     tauto;
   )) this;
-  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox.toList) ➝ □q := imp_trans''! (conjconj_provable! (by
-    intro q hq;
+  have : 𝐆𝐋 ⊢! ⋀□'(X.formulae.prebox.toList) ➝ □ψ := imp_trans''! (conjconj_provable! (by
+    intro ψ hq;
     simp at hq;
-    obtain ⟨r, hr, rfl⟩ := hq;
-    rcases hr with (hr | ⟨r, hr, rfl⟩);
+    obtain ⟨χ, hr, rfl⟩ := hq;
+    rcases hr with (hr | ⟨χ, hr, rfl⟩);
     . apply FiniteContext.by_axm!;
       simpa;
     . apply axiomFour'!;
       apply FiniteContext.by_axm!;
       simpa;
   )) this;
-  have : X.formulae *⊢[𝐆𝐋]! □q := by
+  have : X.formulae *⊢[𝐆𝐋]! □ψ := by
     apply Context.provable_iff.mpr;
     use □'X.formulae.prebox.toList;
     constructor;
     . simp;
     . assumption;
-  have : □q ∈ X.formulae := membership_iff hq₁ |>.mpr this;
+  have : □ψ ∈ X.formulae := membership_iff hq₁ |>.mpr this;
   contradiction;
 
-lemma GL_truthlemma {X : (GLCompleteModel p)} (q_sub : q ∈ p.subformulae) :
-  Satisfies (GLCompleteModel p) X q ↔ q ∈ X.formulae := by
-  induction q using Formula.rec' generalizing X with
+lemma GL_truthlemma {X : (GLCompleteModel φ)} (q_sub : ψ ∈ φ.subformulae) :
+  Satisfies (GLCompleteModel φ) X ψ ↔ ψ ∈ X.formulae := by
+  induction ψ using Formula.rec' generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
-  | himp q r ihq ihr =>
+  | himp ψ χ ihq ihr =>
     constructor;
     . contrapose;
       intro h;
@@ -145,20 +145,20 @@ lemma GL_truthlemma {X : (GLCompleteModel p)} (q_sub : q ∈ p.subformulae) :
       constructor;
       . assumption;
       . simpa using iff_mem_compl (subformulae.mem_imp₂ q_sub) |>.not.mp (by simpa using hr);
-  | hbox q ih =>
+  | hbox ψ ih =>
     constructor;
     . contrapose;
       intro h;
-      obtain ⟨Y, hY₁⟩ := lindenbaum (S := p.subformulae) (GL_truthlemma.lemma1 q_sub) (GL_truthlemma.lemma2 q_sub h);
+      obtain ⟨Y, hY₁⟩ := lindenbaum (S := φ.subformulae) (GL_truthlemma.lemma1 q_sub) (GL_truthlemma.lemma2 q_sub h);
       simp only [Finset.union_subset_iff] at hY₁;
       simp [Satisfies];
       use Y;
       constructor;
-      . intro r _ hr_sub;
+      . intro χ _ hr_sub;
         constructor;
         . apply hY₁.1.1; simpa;
         . apply hY₁.1.2; simpa;
-      . use q;
+      . use ψ;
         refine ⟨q_sub, h, ?_, ?_⟩;
         . apply hY₁.2; simp;
         . apply ih (subformulae.mem_box q_sub) |>.not.mpr;
@@ -166,24 +166,24 @@ lemma GL_truthlemma {X : (GLCompleteModel p)} (q_sub : q ∈ p.subformulae) :
     . intro h Y RXY;
       apply ih (subformulae.mem_box q_sub) |>.mpr;
       simp at RXY;
-      refine RXY.1 q ?_ h |>.1;
+      refine RXY.1 ψ ?_ h |>.1;
       assumption;
 
-private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ#α ⊧ p → 𝐆𝐋 ⊢! p := by
+private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ#α ⊧ φ → 𝐆𝐋 ⊢! φ := by
   contrapose;
   intro h;
   apply exists_finite_frame.mpr;
-  use (GLCompleteFrame p);
+  use (GLCompleteFrame φ);
   constructor;
   . exact ⟨GLCompleteFrame.transitive, GLCompleteFrame.irreflexive⟩;
   . simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
-    obtain ⟨X, hX₁⟩ := lindenbaum (S := p.subformulae) (X := {-p})
+    obtain ⟨X, hX₁⟩ := lindenbaum (S := φ.subformulae) (X := {-φ})
       (by
         simp [Formulae.complementary];
-        right; use p; constructor <;> simp;
+        right; use φ; constructor <;> simp;
       )
       (Formulae.unprovable_iff_singleton_compl_consistent.mp h);
-    use (GLCompleteModel p).Valuation, X;
+    use (GLCompleteModel φ).Valuation, X;
     apply GL_truthlemma (by simp) |>.not.mpr;
     exact iff_mem_compl (by simp) |>.not.mpr $ by
       simp;

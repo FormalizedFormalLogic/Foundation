@@ -15,12 +15,12 @@ variable {α : Type u}
 private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F#α ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
   simp [Axioms.L];
-  intro p V w;
+  intro φ V w;
   apply Kripke.Satisfies.imp_def.mpr;
   contrapose;
   intro h; simp [Kripke.Satisfies] at h;
   obtain ⟨x, Rwx, h⟩ := h;
-  obtain ⟨m, ⟨⟨rwm, hm⟩, hm₂⟩⟩ := hWF.has_min ({ x | (F.Rel w x) ∧ ¬(Kripke.Satisfies ⟨F, V⟩ x p) }) $ by use x; tauto;
+  obtain ⟨m, ⟨⟨rwm, hm⟩, hm₂⟩⟩ := hWF.has_min ({ x | (F.Rel w x) ∧ ¬(Kripke.Satisfies ⟨F, V⟩ x φ) }) $ by use x; tauto;
   simp [Kripke.Satisfies];
   use m;
   constructor;

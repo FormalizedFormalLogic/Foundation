@@ -19,7 +19,7 @@ class OneSided (F : outParam Type*) (K : Type*) where
 
 infix:45 " ⟹ " => OneSided.Derivation
 
-abbrev OneSided.Derivation₁ [OneSided F K] (𝓚 : K) (p : F) : Type _ := 𝓚 ⟹ [p]
+abbrev OneSided.Derivation₁ [OneSided F K] (𝓚 : K) (φ : F) : Type _ := 𝓚 ⟹ [φ]
 
 infix:45 " ⟹. " => OneSided.Derivation₁
 
@@ -27,7 +27,7 @@ abbrev OneSided.Derivable [OneSided F K] (𝓚 : K) (Δ : List F) : Prop := None
 
 infix:45 " ⟹! " => OneSided.Derivable
 
-abbrev OneSided.Derivable₁ [OneSided F K] (𝓚 : K) (p : F) : Prop := Nonempty (𝓚 ⟹. p)
+abbrev OneSided.Derivable₁ [OneSided F K] (𝓚 : K) (φ : F) : Prop := Nonempty (𝓚 ⟹. φ)
 
 infix:45 " ⟹!. " => OneSided.Derivable₁
 
@@ -36,17 +36,17 @@ noncomputable def OneSided.Derivable.get [OneSided F K] (𝓚 : K) (Δ : List F)
 
 class Tait (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] extends OneSided F K where
   verum (𝓚 : K) (Δ : List F)         : 𝓚 ⟹ ⊤ :: Δ
-  and {𝓚 : K} {p q : F} {Δ : List F} : 𝓚 ⟹ p :: Δ → 𝓚 ⟹ q :: Δ → 𝓚 ⟹ p ⋏ q :: Δ
-  or {𝓚 : K} {p q : F} {Δ : List F}  : 𝓚 ⟹ p :: q :: Δ → 𝓚 ⟹ p ⋎ q :: Δ
+  and {𝓚 : K} {φ ψ : F} {Δ : List F} : 𝓚 ⟹ φ :: Δ → 𝓚 ⟹ ψ :: Δ → 𝓚 ⟹ φ ⋏ ψ :: Δ
+  or {𝓚 : K} {φ ψ : F} {Δ : List F}  : 𝓚 ⟹ φ :: ψ :: Δ → 𝓚 ⟹ φ ⋎ ψ :: Δ
   wk {𝓚 : K} {Δ Δ' : List F}         : 𝓚 ⟹ Δ → Δ ⊆ Δ' → 𝓚 ⟹ Δ'
-  em {𝓚 : K} {p} {Δ : List F}        : p ∈ Δ → ∼p ∈ Δ → 𝓚 ⟹ Δ
+  em {𝓚 : K} {φ} {Δ : List F}        : φ ∈ Δ → ∼φ ∈ Δ → 𝓚 ⟹ Δ
 
 class Tait.Cut (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] [Tait F K] where
-  cut {𝓚 : K} {Δ : List F} {p} : 𝓚 ⟹ p :: Δ → 𝓚 ⟹ ∼p :: Δ → 𝓚 ⟹ Δ
+  cut {𝓚 : K} {Δ : List F} {φ} : 𝓚 ⟹ φ :: Δ → 𝓚 ⟹ ∼φ :: Δ → 𝓚 ⟹ Δ
 
 class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] [Tait F K] where
-  root {𝓚 : K} {p}    : p ∈ 𝓚 → 𝓚 ⟹. p
-  trans {𝓚 𝓛 : K} {Γ} : ((q : F) → q ∈ 𝓚 → 𝓛 ⟹. q) → 𝓚 ⟹ Γ → 𝓛 ⟹ Γ
+  root {𝓚 : K} {φ}    : φ ∈ 𝓚 → 𝓚 ⟹. φ
+  trans {𝓚 𝓛 : K} {Γ} : ((ψ : F) → ψ ∈ 𝓚 → 𝓛 ⟹. ψ) → 𝓚 ⟹ Γ → 𝓛 ⟹ Γ
 
 variable {F S K : Type*} [LogicalConnective F] [Collection F K]
 
@@ -64,7 +64,7 @@ open System
 
 variable [DeMorgan F] [Tait F K]
 
-variable {𝓚 : K} {Γ Δ : List F} {p q p₁ p₂ p₃ p₄ : F}
+variable {𝓚 : K} {Γ Δ : List F} {φ ψ φ₁ φ₂ φ₃ φ₄ : F}
 
 def ofEq (b : 𝓚 ⟹ Γ) (h : Γ = Δ) : 𝓚 ⟹ Δ := h ▸ b
 
@@ -76,32 +76,32 @@ lemma verum! (𝓚 : K) (Γ : List F) : 𝓚 ⟹! ⊤ :: Γ := ⟨verum _ _⟩
 
 lemma verum'! (h : ⊤ ∈ Γ) : 𝓚 ⟹! Γ := ⟨verum' h⟩
 
-lemma and! (hp : 𝓚 ⟹! p :: Γ) (hq : 𝓚 ⟹! q :: Γ) : 𝓚 ⟹! p ⋏ q :: Γ := ⟨and hp.get hq.get⟩
+lemma and! (hp : 𝓚 ⟹! φ :: Γ) (hq : 𝓚 ⟹! ψ :: Γ) : 𝓚 ⟹! φ ⋏ ψ :: Γ := ⟨and hp.get hq.get⟩
 
-lemma or! (h : 𝓚 ⟹! p :: q :: Γ) : 𝓚 ⟹! p ⋎ q :: Γ := ⟨or h.get⟩
+lemma or! (h : 𝓚 ⟹! φ :: ψ :: Γ) : 𝓚 ⟹! φ ⋎ ψ :: Γ := ⟨or h.get⟩
 
 lemma wk! (h : 𝓚 ⟹! Γ) (ss : Γ ⊆ Δ) : 𝓚 ⟹! Δ := ⟨wk h.get ss⟩
 
-lemma em! (hp : p ∈ Γ) (hn : ∼p ∈ Γ) : 𝓚 ⟹! Γ := ⟨em hp hn⟩
+lemma em! (hp : φ ∈ Γ) (hn : ∼φ ∈ Γ) : 𝓚 ⟹! Γ := ⟨em hp hn⟩
 
-def close (p : F) (hp : p ∈ Γ := by simp) (hn : ∼p ∈ Γ := by simp) : 𝓚 ⟹ Γ := em hp hn
+def close (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝓚 ⟹ Γ := em hp hn
 
-lemma close! (p : F) (hp : p ∈ Γ := by simp) (hn : ∼p ∈ Γ := by simp) : 𝓚 ⟹! Γ := em! hp hn
+lemma close! (φ : F) (hp : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : 𝓚 ⟹! Γ := em! hp hn
 
-def and' {p q : F} (h : p ⋏ q ∈ Γ) (dp : 𝓚 ⟹ p :: Γ) (dq : 𝓚 ⟹ q :: Γ) : 𝓚 ⟹ Γ :=
+def and' {φ ψ : F} (h : φ ⋏ ψ ∈ Γ) (dp : 𝓚 ⟹ φ :: Γ) (dq : 𝓚 ⟹ ψ :: Γ) : 𝓚 ⟹ Γ :=
   wk (and dp dq) (by simp [h])
 
-def or' {p q : F} (h : p ⋎ q ∈ Γ) (dpq : 𝓚 ⟹ p :: q :: Γ) : 𝓚 ⟹ Γ :=
+def or' {φ ψ : F} (h : φ ⋎ ψ ∈ Γ) (dpq : 𝓚 ⟹ φ :: ψ :: Γ) : 𝓚 ⟹ Γ :=
   wk (or dpq) (by simp [h])
 
-def wkTail (d : 𝓚 ⟹ Γ) : 𝓚 ⟹ p :: Γ := wk d (by simp)
+def wkTail (d : 𝓚 ⟹ Γ) : 𝓚 ⟹ φ :: Γ := wk d (by simp)
 
-def rotate₁ (d : 𝓚 ⟹ p₂ :: p₁ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: Γ := wk d (by simp)
+def rotate₁ (d : 𝓚 ⟹ φ₂ :: φ₁ :: Γ) : 𝓚 ⟹ φ₁ :: φ₂ :: Γ := wk d (by simp)
 
-def rotate₂ (d : 𝓚 ⟹ p₃ :: p₁ :: p₂ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: p₃ :: Γ :=
+def rotate₂ (d : 𝓚 ⟹ φ₃ :: φ₁ :: φ₂ :: Γ) : 𝓚 ⟹ φ₁ :: φ₂ :: φ₃ :: Γ :=
   wk d (by simp; apply List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| by simp))
 
-def rotate₃ (d : 𝓚 ⟹ p₄ :: p₁ :: p₂ :: p₃ :: Γ) : 𝓚 ⟹ p₁ :: p₂ :: p₃ :: p₄ :: Γ :=
+def rotate₃ (d : 𝓚 ⟹ φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ) : 𝓚 ⟹ φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ :=
   wk d (by simp; apply List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| List.subset_cons_of_subset _ <| by simp))
 
 variable {𝓚 𝓛 : K} {Γ : List F}
@@ -110,13 +110,13 @@ alias cut := Tait.Cut.cut
 
 alias root := Tait.Axiomatized.root
 
-lemma cut! [Tait.Cut F K] (hp : 𝓚 ⟹! p :: Δ) (hn : 𝓚 ⟹! ∼p :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
+lemma cut! [Tait.Cut F K] (hp : 𝓚 ⟹! φ :: Δ) (hn : 𝓚 ⟹! ∼φ :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
 
-lemma root! [Tait.Axiomatized F K] {p} (h : p ∈ 𝓚) : 𝓚 ⟹!. p := ⟨root h⟩
+lemma root! [Tait.Axiomatized F K] {φ} (h : φ ∈ 𝓚) : 𝓚 ⟹!. φ := ⟨root h⟩
 
-def byAxm [Tait.Axiomatized F K] (p) (h : p ∈ 𝓚) (hΓ : p ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (root h) (by simp_all)
+def byAxm [Tait.Axiomatized F K] (φ) (h : φ ∈ 𝓚) (hΓ : φ ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (root h) (by simp_all)
 
-lemma byAxm! [Tait.Axiomatized F K] (p) (h : p ∈ 𝓚) (hΓ : p ∈ Γ := by simp) : 𝓚 ⟹! Γ := ⟨byAxm p h hΓ⟩
+lemma byAxm! [Tait.Axiomatized F K] (φ) (h : φ ∈ 𝓚) (hΓ : φ ∈ Γ := by simp) : 𝓚 ⟹! Γ := ⟨byAxm φ h hΓ⟩
 
 def ofAxiomSubset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → 𝓛 ⟹ Γ :=
   Tait.Axiomatized.trans fun _ hq ↦ Tait.Axiomatized.root (Collection.subset_iff.mp h _ hq)
@@ -138,17 +138,17 @@ instance [Tait.Axiomatized F K] : System.StrongCut K K where
   cut {_ _ _ bs b} := Tait.Axiomatized.trans (fun _ hq ↦ bs hq) b
 
 instance [Tait.Cut F K] : DeductiveExplosion K where
-  dexp {𝓚 b p} := wk (Tait.Cut.cut b (by simpa using verum _ _)) (by simp)
+  dexp {𝓚 b φ} := wk (Tait.Cut.cut b (by simpa using verum _ _)) (by simp)
 
 /-
 instance : System.Deduction K where
-  ofInsert {p q 𝓚 b} := by {  }
-  inv {p q 𝓚 b} :=
-    let h : cons p 𝓚 ⟹ [∼p ⋎ q, q] :=
-      wk (show cons p 𝓚 ⟹ [∼p ⋎ q] from ofEq (ofAxiomSubset (by simp) b) (by simp [DeMorgan.imply])) (by simp)
-    let n : cons p 𝓚 ⟹ [∼(∼p ⋎ q), q] :=
-      let hp : cons p 𝓚 ⟹ [p, q] := wk (show cons p 𝓚 ⊢ p from byAxm (by simp)) (by simp)
-      let hq : cons p 𝓚 ⟹ [∼q, q] := em (p := q) (by simp) (by simp)
+  ofInsert {φ ψ 𝓚 b} := by {  }
+  inv {φ ψ 𝓚 b} :=
+    let h : cons φ 𝓚 ⟹ [∼φ ⋎ ψ, ψ] :=
+      wk (show cons φ 𝓚 ⟹ [∼φ ⋎ ψ] from ofEq (ofAxiomSubset (by simp) b) (by simp [DeMorgan.imply])) (by simp)
+    let n : cons φ 𝓚 ⟹ [∼(∼φ ⋎ ψ), ψ] :=
+      let hp : cons φ 𝓚 ⟹ [φ, ψ] := wk (show cons φ 𝓚 ⊢ φ from byAxm (by simp)) (by simp)
+      let hq : cons φ 𝓚 ⟹ [∼ψ, ψ] := em (φ := ψ) (by simp) (by simp)
       ofEq (and hp hq) (by simp)
     cut h n
 -/
@@ -163,69 +163,69 @@ lemma consistent_iff_unprovable [Tait.Axiomatized F K] [Tait.Cut F K] :
   not_iff_not.mp <| by simp [not_consistent_iff_inconsistent, inconsistent_iff_provable]
 
 /-
-lemma provable_iff_inconsistent {p} :
-    𝓚 ⊢! p ↔ Inconsistent (cons (∼p) 𝓚) := by
+lemma provable_iff_inconsistent {φ} :
+    𝓚 ⊢! φ ↔ Inconsistent (cons (∼φ) 𝓚) := by
   simp [inconsistent_iff_provable, deduction_iff, DeMorgan.imply]
   constructor
   · intro h; exact cut! (of_axiom_subset (by simp) h) (root! <| by simp)
   · rintro ⟨b⟩
     exact ⟨by simpa using Tait.Axiomatized.proofOfContra b⟩
 
-lemma refutable_iff_inconsistent {p} :
-    𝓚 ⊢! ∼p ↔ Inconsistent (cons p 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (p := ∼p)
+lemma refutable_iff_inconsistent {φ} :
+    𝓚 ⊢! ∼φ ↔ Inconsistent (cons φ 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (φ := ∼φ)
 
-lemma consistent_insert_iff_not_refutable {p}  :
-    System.Consistent (cons p 𝓚) ↔ 𝓚 ⊬ ∼p := by
+lemma consistent_insert_iff_not_refutable {φ}  :
+    System.Consistent (cons φ 𝓚) ↔ 𝓚 ⊬ ∼φ := by
   simp [System.Unprovable, refutable_iff_inconsistent, System.not_inconsistent_iff_consistent]
 
-lemma inconsistent_of_provable_and_refutable {p} (bp : 𝓚 ⊢! p) (br : 𝓚 ⊢! ∼p) : Inconsistent 𝓚 :=
+lemma inconsistent_of_provable_and_refutable {φ} (bp : 𝓚 ⊢! φ) (br : 𝓚 ⊢! ∼φ) : Inconsistent 𝓚 :=
   inconsistent_iff_provable.mpr <| cut! bp br
 -/
 
 instance [Tait.Cut F K] : System.Classical 𝓚 where
-  mdp {p q dpq dp} :=
-    let dpq : 𝓚 ⟹ [∼p ⋎ q, q] := wk dpq (by simp [DeMorgan.imply])
-    let dnq : 𝓚 ⟹ [∼(∼p ⋎ q), q] :=
-      let d : 𝓚 ⟹ [p ⋏ ∼q, q] := and (wk dp <| by simp) (close q)
+  mdp {φ ψ dpq dp} :=
+    let dpq : 𝓚 ⟹ [∼φ ⋎ ψ, ψ] := wk dpq (by simp [DeMorgan.imply])
+    let dnq : 𝓚 ⟹ [∼(∼φ ⋎ ψ), ψ] :=
+      let d : 𝓚 ⟹ [φ ⋏ ∼ψ, ψ] := and (wk dp <| by simp) (close ψ)
       ofEq d (by simp)
     cut dpq dnq
-  neg_equiv p := ofEq
-    (show 𝓚 ⊢ (p ⋎ ∼p ⋎ ⊥) ⋏ (p ⋏ ⊤ ⋎ ∼p) from
-      and (or <| rotate₁ <| or <| close p) (or <| and (close p) verum'))
+  neg_equiv φ := ofEq
+    (show 𝓚 ⊢ (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
+      and (or <| rotate₁ <| or <| close φ) (or <| and (close φ) verum'))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
   verum := verum _ _
-  imply₁ p q :=
-    have : 𝓚 ⊢ ∼p ⋎ ∼q ⋎ p := or <| rotate₁ <| or <| close p
+  imply₁ φ ψ :=
+    have : 𝓚 ⊢ ∼φ ⋎ ∼ψ ⋎ φ := or <| rotate₁ <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
-  imply₂ p q r :=
-    have : 𝓚 ⊢ p ⋏ q ⋏ ∼ r ⋎ p ⋏ ∼q ⋎ ∼p ⋎ r :=
+  imply₂ φ ψ χ :=
+    have : 𝓚 ⊢ φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
       or <| rotate₁ <| or <| rotate₁ <| or <| rotate₃ <| and
-        (close p)
-        (and (rotate₃ <| and (close p) (close q)) (close r))
+        (close φ)
+        (and (rotate₃ <| and (close φ) (close ψ)) (close χ))
     ofEq this (by simp [DeMorgan.imply])
-  and₁ p q :=
-    have : 𝓚 ⊢ (∼p ⋎ ∼q) ⋎ p := or <| or <| close p
+  and₁ φ ψ :=
+    have : 𝓚 ⊢ (∼φ ⋎ ∼ψ) ⋎ φ := or <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
-  and₂ p q :=
-    have : 𝓚 ⊢ (∼p ⋎ ∼q) ⋎ q := or <| or <| close q
+  and₂ φ ψ :=
+    have : 𝓚 ⊢ (∼φ ⋎ ∼ψ) ⋎ ψ := or <| or <| close ψ
     ofEq this (by simp [DeMorgan.imply])
-  and₃ p q :=
-    have : 𝓚 ⊢ ∼p ⋎ ∼q ⋎ p ⋏ q := or <| rotate₁ <| or <| rotate₁ <| and (close p) (close q)
+  and₃ φ ψ :=
+    have : 𝓚 ⊢ ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := or <| rotate₁ <| or <| rotate₁ <| and (close φ) (close ψ)
     ofEq this (by simp [DeMorgan.imply])
-  or₁ p q :=
-    have : 𝓚 ⊢ ∼p ⋎ p ⋎ q := or <| rotate₁ <| or <| close p
+  or₁ φ ψ :=
+    have : 𝓚 ⊢ ∼φ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
-  or₂ p q :=
-    have : 𝓚 ⊢ ∼q ⋎ p ⋎ q := or <| rotate₁ <| or <| close q
+  or₂ φ ψ :=
+    have : 𝓚 ⊢ ∼ψ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close ψ
     ofEq this (by simp [DeMorgan.imply])
-  or₃ p q r :=
-    have : 𝓚 ⊢ p ⋏ ∼ r ⋎ q ⋏ ∼ r ⋎ ∼p ⋏ ∼q ⋎ r :=
+  or₃ φ ψ χ :=
+    have : 𝓚 ⊢ φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
       or <| rotate₁ <| or <| rotate₁ <| or <| and
-        (rotate₃ <| and (close p) (close r))
-        (rotate₂ <| and (close q) (close r))
+        (rotate₃ <| and (close φ) (close χ))
+        (rotate₂ <| and (close ψ) (close χ))
     ofEq this (by simp [DeMorgan.imply])
-  dne p :=
-    have : 𝓚 ⊢ ∼p ⋎ p := or <| close p
+  dne φ :=
+    have : 𝓚 ⊢ ∼φ ⋎ φ := or <| close φ
     ofEq this (by simp [DeMorgan.imply])
 
 end Tait

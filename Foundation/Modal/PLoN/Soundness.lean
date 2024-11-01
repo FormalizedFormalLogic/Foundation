@@ -6,12 +6,12 @@ namespace PLoN
 
 open Formula
 
-variable {p : Formula α} {Λ : Hilbert α}
+variable {φ : Formula α} {Λ : Hilbert α}
 
-lemma sound (defines : Λ.DefinesPLoNFrameClass 𝔽) (d : Λ ⊢! p) : 𝔽 ⊧ p := by
+lemma sound (defines : Λ.DefinesPLoNFrameClass 𝔽) (d : Λ ⊢! φ) : 𝔽 ⊧ φ := by
   intro F hF;
   have := defines.mpr hF;
-  exact Semantics.RealizeSet.setOf_iff.mp this p d;
+  exact Semantics.RealizeSet.setOf_iff.mp this φ d;
 
 lemma sound_of_defines (defines : Λ.DefinesPLoNFrameClass 𝔽) : Sound Λ 𝔽 := ⟨sound defines⟩
 

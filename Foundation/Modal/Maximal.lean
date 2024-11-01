@@ -13,10 +13,10 @@ def Formula.toModalFormula : Formula α → Modal.Formula α
   | .atom a => Modal.Formula.atom a
   | ⊤ => ⊤
   | ⊥ => ⊥
-  | ∼p => ∼(toModalFormula p)
-  | p ➝ q => (toModalFormula p) ➝ (toModalFormula q)
-  | p ⋏ q => (toModalFormula p) ⋏ (toModalFormula q)
-  | p ⋎ q => (toModalFormula p) ⋎ (toModalFormula q)
+  | ∼φ => ∼(toModalFormula φ)
+  | φ ➝ ψ => (toModalFormula φ) ➝ (toModalFormula ψ)
+  | φ ⋏ ψ => (toModalFormula φ) ⋏ (toModalFormula ψ)
+  | φ ⋎ ψ => (toModalFormula φ) ⋎ (toModalFormula ψ)
 postfix:75 "ᴹ" => Formula.toModalFormula
 
 end LO.IntProp
@@ -30,31 +30,31 @@ variable {α} [DecidableEq α]
 
 namespace Formula
 
-def toPropFormula (p : Formula α) (_ : p.degree = 0 := by simp_all [Formula.degree, Formula.degree_neg, Formula.degree_imp]) : IntProp.Formula α :=
-  match p with
+def toPropFormula (φ : Formula α) (_ : φ.degree = 0 := by simp_all [Formula.degree, Formula.degree_neg, Formula.degree_imp]) : IntProp.Formula α :=
+  match φ with
   | atom a => IntProp.Formula.atom a
   | ⊥ => ⊥
-  | p ➝ q => p.toPropFormula ➝ q.toPropFormula
+  | φ ➝ ψ => φ.toPropFormula ➝ ψ.toPropFormula
 postfix:75 "ᴾ" => Formula.toPropFormula
 
 namespace toPropFormula
 
 open System
-variable {p q : Formula α} (hp : p.degree = 0 := by simpa) (hq : q.degree = 0 := by simpa)
+variable {φ ψ : Formula α} (hp : φ.degree = 0 := by simpa) (hq : ψ.degree = 0 := by simpa)
 
 end toPropFormula
 
 def TrivTranslation : Formula α → Formula α
   | atom a => atom a
-  | □p => p.TrivTranslation
+  | □φ => φ.TrivTranslation
   | ⊥ => ⊥
-  | p ➝ q => (p.TrivTranslation) ➝ (q.TrivTranslation)
+  | φ ➝ ψ => (φ.TrivTranslation) ➝ (ψ.TrivTranslation)
 postfix:75 "ᵀ" => TrivTranslation
 
 namespace TrivTranslation
 
-@[simp] lemma degree_zero : pᵀ.degree = 0 := by induction p <;> simp [TrivTranslation, degree, *];
-@[simp] lemma back : pᵀᴾᴹ = pᵀ := by induction p using rec' <;> simp [IntProp.Formula.toModalFormula, TrivTranslation, *];
+@[simp] lemma degree_zero : φᵀ.degree = 0 := by induction φ <;> simp [TrivTranslation, degree, *];
+@[simp] lemma back : φᵀᴾᴹ = φᵀ := by induction φ using rec' <;> simp [IntProp.Formula.toModalFormula, TrivTranslation, *];
 
 end TrivTranslation
 
@@ -63,14 +63,14 @@ def VerTranslation : Formula α → Formula α
   | atom a => atom a
   | □_ => ⊤
   | ⊥ => ⊥
-  | p ➝ q => (p.VerTranslation) ➝ (q.VerTranslation)
+  | φ ➝ ψ => (φ.VerTranslation) ➝ (ψ.VerTranslation)
 postfix:75 "ⱽ" => VerTranslation
 
 namespace VerTranslation
 
-@[simp] lemma degree_zero : pⱽ.degree = 0 := by induction p <;> simp [degree, *];
-@[simp] lemma back  : pⱽᴾᴹ = pⱽ := by
-  induction p using rec' with
+@[simp] lemma degree_zero : φⱽ.degree = 0 := by induction φ <;> simp [degree, *];
+@[simp] lemma back  : φⱽᴾᴹ = φⱽ := by
+  induction φ using rec' with
   | himp => simp [VerTranslation, toPropFormula, IntProp.Formula.toModalFormula, *];
   | _ => rfl;
 
@@ -81,7 +81,7 @@ end Formula
 
 open Deduction
 
-variable {p : Formula α}
+variable {φ : Formula α}
 
 open System
 open Formula
@@ -104,9 +104,9 @@ macro_rules | `(tactic| trivial) => `(tactic|
     | apply imp_id!;
   )
 
-lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⭤ pᵀ := by
-  induction p using Formula.rec' with
-  | hbox p ih =>
+lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! φ ⭤ φᵀ := by
+  induction φ using Formula.rec' with
+  | hbox φ ih =>
     simp [TrivTranslation];
     apply iff_intro!;
     . exact imp_trans''! axiomT! (and₁'! ih)
@@ -114,8 +114,8 @@ lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! p ⭤ pᵀ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⭤ pⱽ := by
-  induction p using Formula.rec' with
+lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! φ ⭤ φⱽ := by
+  induction φ using Formula.rec' with
   | hbox =>
     apply iff_intro!;
     . exact imply₁'! verum!
@@ -123,7 +123,7 @@ lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! p ⭤ pⱽ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-lemma of_classical {mΛ : Modal.Hilbert α} {p : IntProp.Formula α} : (𝐂𝐥 ⊢! p) → (mΛ ⊢! pᴹ) := by
+lemma of_classical {mΛ : Modal.Hilbert α} {φ : IntProp.Formula α} : (𝐂𝐥 ⊢! φ) → (mΛ ⊢! φᴹ) := by
   intro h;
   induction h.some with
   | eaxm ih =>
@@ -136,7 +136,7 @@ lemma of_classical {mΛ : Modal.Hilbert α} {p : IntProp.Formula α} : (𝐂𝐥
     exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
   | _ => dsimp [IntProp.Formula.toModalFormula]; trivial;
 
-lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := by
+lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! φ ↔ 𝐂𝐥 ⊢! φᵀᴾ := by
   constructor;
   . intro h;
     induction h using Deduction.inducition_with_necOnly! with
@@ -149,11 +149,11 @@ lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! p ↔ 𝐂𝐥 ⊢! pᵀᴾ := 
     | hNec ih => dsimp [TrivTranslation]; trivial;
     | _ => dsimp [TrivTranslation]; trivial;
   . intro h;
-    have d₁ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ ➝ p := and₂'! deducible_iff_trivTranslation;
-    have d₂ : 𝐓𝐫𝐢𝐯 ⊢! pᵀ := by simpa only [TrivTranslation.back] using of_classical h;
+    have d₁ : 𝐓𝐫𝐢𝐯 ⊢! φᵀ ➝ φ := and₂'! deducible_iff_trivTranslation;
+    have d₂ : 𝐓𝐫𝐢𝐯 ⊢! φᵀ := by simpa only [TrivTranslation.back] using of_classical h;
     exact d₁ ⨀ d₂;
 
-lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
+lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! φ ↔ 𝐂𝐥 ⊢! φⱽᴾ := by
   constructor;
   . intro h;
     induction h using Deduction.inducition_with_necOnly! with
@@ -166,17 +166,17 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! p ↔ 𝐂𝐥 ⊢! pⱽᴾ := by
     | hNec => dsimp [VerTranslation]; trivial;
     | _ => dsimp [VerTranslation]; trivial;
   . intro h;
-    have d₁ : 𝐕𝐞𝐫 ⊢! pⱽ ➝ p := and₂'! deducible_iff_verTranslation;
-    have d₂ : 𝐕𝐞𝐫 ⊢! pⱽ := by simpa using of_classical h;
+    have d₁ : 𝐕𝐞𝐫 ⊢! φⱽ ➝ φ := and₂'! deducible_iff_verTranslation;
+    have d₂ : 𝐕𝐞𝐫 ⊢! φⱽ := by simpa using of_classical h;
     exact d₁ ⨀ d₂;
 
-lemma trivTranslated_of_K4 : 𝐊𝟒 ⊢! p → 𝐂𝐥 ⊢! pᵀᴾ := by
+lemma trivTranslated_of_K4 : 𝐊𝟒 ⊢! φ → 𝐂𝐥 ⊢! φᵀᴾ := by
   intro h;
   apply iff_Triv_classical.mp;
   exact System.weakerThan_iff.mp K4_weakerThan_Triv h;
 
 
-lemma verTranslated_of_GL : 𝐆𝐋 ⊢! p → 𝐂𝐥 ⊢! pⱽᴾ := by
+lemma verTranslated_of_GL : 𝐆𝐋 ⊢! φ → 𝐂𝐥 ⊢! φⱽᴾ := by
   intro h;
   induction h using Deduction.inducition_with_necOnly! with
     | hMaxm a =>

@@ -166,7 +166,7 @@ lemma axiomGeach_defines : ∀ {F : Kripke.Frame}, (F#α ⊧* 𝗴𝗲(t) ↔ F 
     use u;
     exact ⟨hyu, hzu⟩;
   . simp [Axioms.Geach, Kripke.Satisfies];
-    intro h p V x him;
+    intro h φ V x him;
     apply multibox_def.mpr;
     intro z rxz;
     apply multidia_def.mpr;
@@ -234,7 +234,7 @@ instance K4_sound : Sound 𝐊𝟒 (TransitiveFrameClass#α) := inferInstance
 
 instance S4_sound : Sound 𝐒𝟒 (PreorderFrameClass#α) := inferInstance
 
-@[deprecated] lemma S4_sound_aux : 𝐒𝟒 ⊢! p → (PreorderFrameClass#α) ⊧ p := S4_sound.sound
+@[deprecated] lemma S4_sound_aux : 𝐒𝟒 ⊢! φ → (PreorderFrameClass#α) ⊧ φ := S4_sound.sound
 
 instance S5_sound : Sound 𝐒𝟓 (ReflexiveEuclideanFrameClass#α) := inferInstance
 
@@ -255,10 +255,10 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
     apply intro_union_consistent;
     rintro Γ Δ ⟨hΓ, hΔ⟩ hC;
 
-    replace hΓ : ∀ p ∈ Γ, □^[t.m]p ∈ Ω₂.theory := by simpa using hΓ;
+    replace hΓ : ∀ φ ∈ Γ, □^[t.m]φ ∈ Ω₂.theory := by simpa using hΓ;
     have hΓconj : □^[t.m]⋀Γ ∈ Ω₂.theory := iff_mem_multibox_conj.mpr hΓ;
 
-    replace hΔ : ∀ p ∈ Δ, □^[t.n]p ∈ Ω₃.theory := by simpa using hΔ;
+    replace hΔ : ∀ φ ∈ Δ, □^[t.n]φ ∈ Ω₃.theory := by simpa using hΔ;
     have : □^[t.n]⋀Δ ∈ Ω₃.theory := iff_mem_multibox_conj.mpr hΔ;
 
     have : □^[t.j](◇^[t.n]⋀Γ) ∈ Ω₁.theory := iff_mem_imp.mp

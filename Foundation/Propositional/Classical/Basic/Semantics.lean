@@ -18,12 +18,12 @@ def valAux : Formula α → F
   | natom a => ∼v a
   | ⊤       => ⊤
   | ⊥       => ⊥
-  | p ⋏ q   => p.valAux ⋏ q.valAux
-  | p ⋎ q   => p.valAux ⋎ q.valAux
+  | φ ⋏ ψ   => φ.valAux ⋏ ψ.valAux
+  | φ ⋎ ψ   => φ.valAux ⋎ ψ.valAux
 
-lemma valAux_neg (p : Formula α) :
-    valAux v (∼p) = ∼(valAux v p) :=
-  by induction p using rec' <;> simp[*, valAux, ←neg_eq, or_iff_not_imp_left]
+lemma valAux_neg (φ : Formula α) :
+    valAux v (∼φ) = ∼(valAux v φ) :=
+  by induction φ using rec' <;> simp[*, valAux, ←neg_eq, or_iff_not_imp_left]
 
 def val : Formula α →ˡᶜ F where
   toTr := valAux v

@@ -198,69 +198,69 @@ syntax:max "∃[" first_order_formula "] " first_order_formula:0 : first_order_f
 
 macro_rules
   | `(⤫formula[ $binders* | $fbinders* | ($e:first_order_formula)          ]) => `(⤫formula[ $binders* | $fbinders* | $e ])
-  | `(⤫formula[ $_*       | $_*        | !!$p:term                         ]) => `($p)
-  | `(⤫formula[ $binders* | $fbinders* | !$p:term $vs:first_order_term*    ]) => do
+  | `(⤫formula[ $_*       | $_*        | !!$φ:term                         ]) => `($φ)
+  | `(⤫formula[ $binders* | $fbinders* | !$φ:term $vs:first_order_term*    ]) => do
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(⤫term[ $binders* | $fbinders* | $a ] :> $s))
-    `(Rew.substs $v |>.hom $p)
-  | `(⤫formula[ $binders* | $fbinders* | !$p:term $vs:first_order_term* ⋯  ]) =>
+    `(Rew.substs $v |>.hom $φ)
+  | `(⤫formula[ $binders* | $fbinders* | !$φ:term $vs:first_order_term* ⋯  ]) =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s ↦ `(⤫term[ $binders* | $fbinders* | $a] :> $s))
-    `(Rew.substs $v |>.hom $p)
-  | `(⤫formula[ $_*       | $_*        | .!!$p:term ])                        => `(Rew.emb.hom $p)
-  | `(⤫formula[ $binders* | $fbinders* | .!$p:term $vs:first_order_term* ])   => do
+    `(Rew.substs $v |>.hom $φ)
+  | `(⤫formula[ $_*       | $_*        | .!!$φ:term ])                        => `(Rew.emb.hom $φ)
+  | `(⤫formula[ $binders* | $fbinders* | .!$φ:term $vs:first_order_term* ])   => do
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s ↦ `(⤫term[ $binders* | $fbinders* | $a ] :> $s))
-    `(Rew.embSubsts $v |>.hom $p)
-  | `(⤫formula[ $binders* | $fbinders* | .!$p:term $vs:first_order_term* ⋯ ]) =>
+    `(Rew.embSubsts $v |>.hom $φ)
+  | `(⤫formula[ $binders* | $fbinders* | .!$φ:term $vs:first_order_term* ⋯ ]) =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(⤫term[ $binders* | $fbinders* | $a ] :> $s))
-    `(Rew.embSubsts $v |>.hom $p)
+    `(Rew.embSubsts $v |>.hom $φ)
   | `(⤫formula[ $_*       | $_*        | ⊤                                 ]) => `(⊤)
   | `(⤫formula[ $_*       | $_*        | ⊥                                 ]) => `(⊥)
-  | `(⤫formula[ $binders* | $fbinders* | $p ∧ $q                           ]) => `(⤫formula[ $binders* | $fbinders* | $p ] ⋏ ⤫formula[ $binders* | $fbinders* | $q ])
-  | `(⤫formula[ $binders* | $fbinders* | $p ∨ $q                           ]) => `(⤫formula[ $binders* | $fbinders* | $p ] ⋎ ⤫formula[ $binders* | $fbinders* | $q ])
-  | `(⤫formula[ $binders* | $fbinders* | ¬$p                               ]) => `(∼⤫formula[ $binders* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | $p → $q                           ]) => `(⤫formula[ $binders* | $fbinders* | $p ] ➝ ⤫formula[ $binders* | $fbinders* | $q ])
-  | `(⤫formula[ $binders* | $fbinders* | $p ↔ $q                           ]) => `(⤫formula[ $binders* | $fbinders* | $p ] ⭤ ⤫formula[ $binders* | $fbinders* | $q ])
-  | `(⤫formula[ $binders* | $fbinders* | ⋀ $i, $p                          ]) => `(Matrix.conj fun $i ↦ ⤫formula[ $binders* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ⋁ $i, $p                          ]) => `(Matrix.disj fun $i ↦ ⤫formula[ $binders* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ⋀ $i < $t, $p                     ]) => `(conjLt (fun $i ↦ ⤫formula[ $binders* | $fbinders* | $p ]) $t)
-  | `(⤫formula[ $binders* | $fbinders* | ⋁ $i < $t, $p                     ]) => `(disjLt (fun $i ↦ ⤫formula[ $binders* | $fbinders* | $p ]) $t)
-  | `(⤫formula[ $binders* | $fbinders* | ∀ $xs*, $p                        ]) => do
+  | `(⤫formula[ $binders* | $fbinders* | $φ ∧ $ψ                           ]) => `(⤫formula[ $binders* | $fbinders* | $φ ] ⋏ ⤫formula[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula[ $binders* | $fbinders* | $φ ∨ $ψ                           ]) => `(⤫formula[ $binders* | $fbinders* | $φ ] ⋎ ⤫formula[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula[ $binders* | $fbinders* | ¬$φ                               ]) => `(∼⤫formula[ $binders* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | $φ → $ψ                           ]) => `(⤫formula[ $binders* | $fbinders* | $φ ] ➝ ⤫formula[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula[ $binders* | $fbinders* | $φ ↔ $ψ                           ]) => `(⤫formula[ $binders* | $fbinders* | $φ ] ⭤ ⤫formula[ $binders* | $fbinders* | $ψ ])
+  | `(⤫formula[ $binders* | $fbinders* | ⋀ $i, $φ                          ]) => `(Matrix.conj fun $i ↦ ⤫formula[ $binders* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ⋁ $i, $φ                          ]) => `(Matrix.disj fun $i ↦ ⤫formula[ $binders* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ⋀ $i < $t, $φ                     ]) => `(conjLt (fun $i ↦ ⤫formula[ $binders* | $fbinders* | $φ ]) $t)
+  | `(⤫formula[ $binders* | $fbinders* | ⋁ $i < $t, $φ                     ]) => `(disjLt (fun $i ↦ ⤫formula[ $binders* | $fbinders* | $φ ]) $t)
+  | `(⤫formula[ $binders* | $fbinders* | ∀ $xs*, $φ                        ]) => do
     let xs := xs.reverse
     let binders' : TSyntaxArray `ident ← xs.foldrM
       (fun z binders' ↦ do
         if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
         return binders'.insertAt 0 z)
       binders
-    let s : TSyntax `term ← xs.size.rec `(⤫formula[ $binders'* | $fbinders* | $p ]) (fun _ q ↦ q >>= fun q ↦ `(∀' $q))
+    let s : TSyntax `term ← xs.size.rec `(⤫formula[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∀' $ψ))
     return s
-  | `(⤫formula[ $binders* | $fbinders* | ∃ $xs*, $p                        ]) => do
+  | `(⤫formula[ $binders* | $fbinders* | ∃ $xs*, $φ                        ]) => do
     let xs := xs.reverse
     let binders' : TSyntaxArray `ident ← xs.foldrM
       (fun z binders' ↦ do
         if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
         return binders'.insertAt 0 z)
       binders
-    let s : TSyntax `term ← xs.size.rec `(⤫formula[ $binders'* | $fbinders* | $p ]) (fun _ q ↦ q >>= fun q ↦ `(∃' $q))
+    let s : TSyntax `term ← xs.size.rec `(⤫formula[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∃' $ψ))
     return s
-  | `(⤫formula[ $binders* | $fbinders* | ∀' $p ])                            => do
+  | `(⤫formula[ $binders* | $fbinders* | ∀' $φ ])                            => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertAt 0 v
-    `(∀' ⤫formula[ $binders'* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ∃' $p ])                            => do
+    `(∀' ⤫formula[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ∃' $φ ])                            => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertAt 0 v
-    `(∃' ⤫formula[ $binders'* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ∀[ $p ] $q ])                       => do
+    `(∃' ⤫formula[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ∀[ $φ ] $ψ ])                       => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertAt 0 v
-    `(∀[⤫formula[ $binders'* | $fbinders* | $p ]] ⤫formula[ $binders'* | $fbinders* | $q ])
-  | `(⤫formula[ $binders* | $fbinders* | ∃[ $p ] $q ])                       => do
+    `(∀[⤫formula[ $binders'* | $fbinders* | $φ ]] ⤫formula[ $binders'* | $fbinders* | $ψ ])
+  | `(⤫formula[ $binders* | $fbinders* | ∃[ $φ ] $ψ ])                       => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertAt 0 v
-    `(∃[⤫formula[ $binders'* | $fbinders* | $p ]] ⤫formula[ $binders'* | $fbinders* | $q ])
+    `(∃[⤫formula[ $binders'* | $fbinders* | $φ ]] ⤫formula[ $binders'* | $fbinders* | $ψ ])
 
 syntax "“" ident* "| "  first_order_formula:0 "”" : term
 syntax "“" ident* ". "  first_order_formula:0 "”" : term
@@ -291,30 +291,30 @@ syntax:max "∃ " ident " ≤ " first_order_term ", " first_order_formula:0 : fi
 syntax:max "∃ " ident " ∈ " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | ∀ $x < $t, $p ]) => do
+  | `(⤫formula[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(Semiformula.ballLT ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ∀ $x ≤ $t, $p ]) => do
+    `(Semiformula.ballLT ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ∀ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(Semiformula.ballLE ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ∀ $x ∈ $t, $p ]) => do
+    `(Semiformula.ballLE ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ∀ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(Semiformula.ballMem ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ∃ $x < $t, $p ]) => do
+    `(Semiformula.ballMem ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ∃ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(Semiformula.bexLT ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ∃ $x ≤ $t, $p ]) => do
+    `(Semiformula.bexLT ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ∃ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(Semiformula.bexLE ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $p ])
-  | `(⤫formula[ $binders* | $fbinders* | ∃ $x ∈ $t, $p ]) => do
+    `(Semiformula.bexLE ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula[ $binders* | $fbinders* | ∃ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertAt 0 x
-    `(Semiformula.bexMem ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $p ])
+    `(Semiformula.bexMem ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term = $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.Eq.eq ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]])
   | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LT.lt ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]])
   | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term > $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LT.lt ![⤫term[ $binders* | $fbinders* | $u ], ⤫term[ $binders* | $fbinders* | $t]])
@@ -343,59 +343,59 @@ def unexpsnderLe : Unexpander
 
 @[app_unexpander Wedge.wedge]
 def unexpandAnd : Unexpander
-  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula ”) => `(“ ($p ∧ $q) ”)
-  | `($_ “ $p:first_order_formula ” $u:term                   ) => `(“ ($p ∧ !$u) ”)
-  | `($_ $t:term                    “ $q:first_order_formula ”) => `(“ (!$t ∧ $q) ”)
+  | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ ($φ ∧ $ψ) ”)
+  | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ ($φ ∧ !$u) ”)
+  | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (!$t ∧ $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander Vee.vee]
 def unexpandOr : Unexpander
-  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula ”) => `(“ ($p ∨ $q) ”)
-  | `($_ “ $p:first_order_formula ” $u:term                   ) => `(“ ($p ∨ !$u) ”)
-  | `($_ $t:term                    “ $q:first_order_formula ”) => `(“ (!$t ∨ $q) ”)
+  | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ ($φ ∨ $ψ) ”)
+  | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ ($φ ∨ !$u) ”)
+  | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (!$t ∨ $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander Tilde.tilde]
 def unexpandNeg : Unexpander
-  | `($_ “ $p:first_order_formula ”) => `(“ ¬$p ”)
+  | `($_ “ $φ:first_order_formula ”) => `(“ ¬$φ ”)
   | _                                => throw ()
 
 @[app_unexpander UnivQuantifier.univ]
 def unexpandUniv : Unexpander
-  | `($_ “ $p:first_order_formula ”) => `(“ ∀' $p:first_order_formula ”)
+  | `($_ “ $φ:first_order_formula ”) => `(“ ∀' $φ:first_order_formula ”)
   | _                                => throw ()
 
 @[app_unexpander ExQuantifier.ex]
 def unexpandEx : Unexpander
-  | `($_ “ $p:first_order_formula”) => `(“ ∃' $p:first_order_formula ”)
+  | `($_ “ $φ:first_order_formula”) => `(“ ∃' $φ:first_order_formula ”)
   | _                                   => throw ()
 
 @[app_unexpander LogicalConnective.ball]
 def unexpandBall : Unexpander
-  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula ”) => `(“ (∀[$p] $q) ”)
-  | `($_ “ $p:first_order_formula ” $u:term                   ) => `(“ (∀[$p] !$u) ”)
-  | `($_ $t:term                    “ $q:first_order_formula ”) => `(“ (∀[!$t] $q) ”)
+  | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∀[$φ] $ψ) ”)
+  | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∀[$φ] !$u) ”)
+  | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∀[!$t] $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander LogicalConnective.bex]
 def unexpandBex : Unexpander
-  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula ”) => `(“ (∃[$p] $q) ”)
-  | `($_ “ $p:first_order_formula ” $u:term                   ) => `(“ (∃[$p] !$u) ”)
-  | `($_ $t:term                    “ $q:first_order_formula ”) => `(“ (∃[!$t] $q) ”)
+  | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∃[$φ] $ψ) ”)
+  | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∃[$φ] !$u) ”)
+  | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∃[!$t] $ψ) ”)
   | _                                                           => throw ()
 
 @[app_unexpander Arrow.arrow]
 def unexpandArrow : Unexpander
-  | `($_ “ $p:first_order_formula ” “ $q:first_order_formula”) => `(“ ($p → $q) ”)
-  | `($_ “ $p:first_order_formula ” $u:term                  ) => `(“ ($p → !$u) ”)
-  | `($_ $t:term                    “ $q:first_order_formula”) => `(“ (!$t → $q) ”)
+  | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula”) => `(“ ($φ → $ψ) ”)
+  | `($_ “ $φ:first_order_formula ” $u:term                  ) => `(“ ($φ → !$u) ”)
+  | `($_ $t:term                    “ $ψ:first_order_formula”) => `(“ (!$t → $ψ) ”)
   | _                                                          => throw ()
 
 @[app_unexpander LogicalConnective.iff]
 def unexpandIff : Unexpander
-  | `($_ “ $p:first_order_formula” “ $q:first_order_formula”) => `(“ ($p ↔ $q) ”)
-  | `($_ “ $p:first_order_formula” $u:term                  ) => `(“ ($p ↔ !$u) ”)
-  | `($_ $t:term                   “ $q:first_order_formula”) => `(“ (!$t ↔ $q) ”)
+  | `($_ “ $φ:first_order_formula” “ $ψ:first_order_formula”) => `(“ ($φ ↔ $ψ) ”)
+  | `($_ “ $φ:first_order_formula” $u:term                  ) => `(“ ($φ ↔ !$u) ”)
+  | `($_ $t:term                   “ $ψ:first_order_formula”) => `(“ (!$t ↔ $ψ) ”)
   | _                                                         => throw ()
 
 @[app_unexpander Semiformula.Operator.operator]

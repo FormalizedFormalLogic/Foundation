@@ -24,63 +24,63 @@ instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t�
   . intro h; cases h; simp;
   . rintro ⟨h₁, h₂⟩; cases t₁; cases t₂; simp_all;
 
-def Consistent (Λ : Hilbert α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ t.1) → (∀ p ∈ Δ, p ∈ t.2) → Λ ⊬ ⋀Γ ➝ ⋁Δ
+def Consistent (Λ : Hilbert α) (t : Tableau α) := ∀ {Γ Δ : List (Formula α)}, (∀ φ ∈ Γ, φ ∈ t.1) → (∀ φ ∈ Δ, φ ∈ t.2) → Λ ⊬ ⋀Γ ➝ ⋁Δ
 
-variable {p q: Formula α} {T U : Theory α}
+variable {φ ψ: Formula α} {T U : Theory α}
 
 section
 
 variable [DecidableEq α]
 
-lemma iff_consistent_insert₁ : Tableau.Consistent Λ ((insert p T), U) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → Λ ⊬ p ⋏ ⋀Γ ➝ ⋁Δ := by
+lemma iff_consistent_insert₁ : Tableau.Consistent Λ ((insert φ T), U) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ φ ∈ Γ, φ ∈ T) → (∀ φ ∈ Δ, φ ∈ U) → Λ ⊬ φ ⋏ ⋀Γ ➝ ⋁Δ := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
-    have : Λ ⊬ ⋀(p :: Γ) ➝ ⋁Δ := h (by simp; intro q hq; right; exact hΓ q hq;) hΔ;
-    have : Λ ⊢! ⋀(p :: Γ) ➝ ⋁Δ := iff_imply_left_cons_conj'!.mpr hC;
+    have : Λ ⊬ ⋀(φ :: Γ) ➝ ⋁Δ := h (by simp; intro ψ hq; right; exact hΓ ψ hq;) hΔ;
+    have : Λ ⊢! ⋀(φ :: Γ) ➝ ⋁Δ := iff_imply_left_cons_conj'!.mpr hC;
     contradiction;
   . intro h Γ Δ hΓ hΔ;
     simp_all only [Set.mem_insert_iff];
-    have : Λ ⊬ p ⋏ ⋀(Γ.remove p) ➝ ⋁Δ := h (by
-      intro q hq;
-      have := by simpa using hΓ q $ List.mem_of_mem_remove hq;
+    have : Λ ⊬ φ ⋏ ⋀(Γ.remove φ) ➝ ⋁Δ := h (by
+      intro ψ hq;
+      have := by simpa using hΓ ψ $ List.mem_of_mem_remove hq;
       cases this with
       | inl h => simpa [h] using List.mem_remove_iff.mp hq;
       | inr h => assumption;
     ) hΔ;
     by_contra hC;
-    have : Λ ⊢! p ⋏ ⋀(Γ.remove p) ➝ ⋁Δ := imp_trans''! and_comm! $ imply_left_remove_conj! (p := p) hC;
+    have : Λ ⊢! φ ⋏ ⋀(Γ.remove φ) ➝ ⋁Δ := imp_trans''! and_comm! $ imply_left_remove_conj! (φ := φ) hC;
     contradiction;
 
-lemma iff_not_consistent_insert₁ : ¬Tableau.Consistent Λ ((insert p T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ Λ ⊢! p ⋏ ⋀Γ ➝ ⋁Δ := by
+lemma iff_not_consistent_insert₁ : ¬Tableau.Consistent Λ ((insert φ T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ φ ∈ Γ, φ ∈ T) ∧ (∀ φ ∈ Δ, φ ∈ U) ∧ Λ ⊢! φ ⋏ ⋀Γ ➝ ⋁Δ := by
   constructor;
   . contrapose; push_neg; apply iff_consistent_insert₁.mpr;
   . contrapose; push_neg; apply iff_consistent_insert₁.mp;
 
 variable [Λ.IncludeEFQ]
 
-lemma iff_consistent_insert₂ : Tableau.Consistent Λ (T, (insert p U)) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ p ∈ Γ, p ∈ T) → (∀ p ∈ Δ, p ∈ U) → Λ ⊬ ⋀Γ ➝ p ⋎ ⋁Δ := by
+lemma iff_consistent_insert₂ : Tableau.Consistent Λ (T, (insert φ U)) ↔ ∀ {Γ Δ : List (Formula α)}, (∀ φ ∈ Γ, φ ∈ T) → (∀ φ ∈ Δ, φ ∈ U) → Λ ⊬ ⋀Γ ➝ φ ⋎ ⋁Δ := by
   constructor;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
-    have : Λ ⊬ ⋀Γ ➝ ⋁(p :: Δ) := h hΓ (by simp; intro q hq; right; exact hΔ q hq);
-    have : Λ ⊢! ⋀Γ ➝ ⋁(p :: Δ) := implyRight_cons_disj!.mpr hC;
+    have : Λ ⊬ ⋀Γ ➝ ⋁(φ :: Δ) := h hΓ (by simp; intro ψ hq; right; exact hΔ ψ hq);
+    have : Λ ⊢! ⋀Γ ➝ ⋁(φ :: Δ) := implyRight_cons_disj!.mpr hC;
     contradiction;
   . intro h Γ Δ hΓ hΔ;
     simp_all;
-    have : Λ ⊬ ⋀Γ ➝ p ⋎ ⋁(Δ.remove p) := h hΓ (by
-      intro q hq;
-      have := by simpa using hΔ q $ List.mem_of_mem_remove hq;
+    have : Λ ⊬ ⋀Γ ➝ φ ⋎ ⋁(Δ.remove φ) := h hΓ (by
+      intro ψ hq;
+      have := by simpa using hΔ ψ $ List.mem_of_mem_remove hq;
       cases this with
       | inl h => simpa [h] using List.mem_remove_iff.mp hq;
       | inr h => assumption;
     );
     by_contra hC;
-    have : Λ ⊢! ⋀Γ ➝ p ⋎ ⋁(Δ.remove p) := imp_trans''! hC $ forthback_disj_remove;
+    have : Λ ⊢! ⋀Γ ➝ φ ⋎ ⋁(Δ.remove φ) := imp_trans''! hC $ forthback_disj_remove;
     contradiction;
 
 
-lemma iff_not_consistent_insert₂ : ¬Tableau.Consistent Λ (T, (insert p U)) ↔ ∃ Γ Δ : List (Formula α), (∀ p ∈ Γ, p ∈ T) ∧ (∀ p ∈ Δ, p ∈ U) ∧ Λ ⊢! ⋀Γ ➝ p ⋎ ⋁Δ := by
+lemma iff_not_consistent_insert₂ : ¬Tableau.Consistent Λ (T, (insert φ U)) ↔ ∃ Γ Δ : List (Formula α), (∀ φ ∈ Γ, φ ∈ T) ∧ (∀ φ ∈ Δ, φ ∈ U) ∧ Λ ⊢! ⋀Γ ➝ φ ⋎ ⋁Δ := by
   constructor;
   . contrapose; push_neg; apply iff_consistent_insert₂.mpr;
   . contrapose; push_neg; apply iff_consistent_insert₂.mp;
@@ -89,7 +89,7 @@ section Consistent
 
 variable {t : Tableau α}
 
-lemma consistent_either (hCon : Tableau.Consistent Λ t) (p : Formula α) : Tableau.Consistent Λ ((insert p t.1), t.2) ∨ Tableau.Consistent Λ (t.1, (insert p t.2)) := by
+lemma consistent_either (hCon : Tableau.Consistent Λ t) (φ : Formula α) : Tableau.Consistent Λ ((insert φ t.1), t.2) ∨ Tableau.Consistent Λ (t.1, (insert φ t.2)) := by
   by_contra hC;
   push_neg at hC;
   have ⟨hC₁, hC₂⟩ := hC;
@@ -100,26 +100,26 @@ lemma consistent_either (hCon : Tableau.Consistent Λ t) (p : Formula α) : Tabl
   obtain ⟨Γ₂, Δ₂, hΓ₂, hΔ₂, h₂⟩ := iff_not_consistent_insert₂.mp hC₂;
 
   have : Λ ⊢! ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := imp_trans''! (and₁'! iff_concat_conj!) $ imp_trans''! (cut! h₁ h₂) (and₂'! iff_concact_disj!);
-  have : Λ ⊬ ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := hCon (by simp; rintro q (hq₁ | hq₂); exact hΓ₁ q hq₁; exact hΓ₂ q hq₂) (by simp; rintro q (hq₁ | hq₂); exact hΔ₁ q hq₁; exact hΔ₂ q hq₂);
+  have : Λ ⊬ ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := hCon (by simp; rintro ψ (hq₁ | hq₂); exact hΓ₁ ψ hq₁; exact hΓ₂ ψ hq₂) (by simp; rintro ψ (hq₁ | hq₂); exact hΔ₁ ψ hq₁; exact hΔ₂ ψ hq₂);
   contradiction;
 
 omit [DecidableEq α] [Λ.IncludeEFQ] in
 lemma disjoint_of_consistent (hCon : Tableau.Consistent Λ t) : Disjoint t.1 t.2 := by
   by_contra h;
   obtain ⟨T, hp₁, hp₂, hp⟩ := by simpa [Disjoint] using h;
-  obtain ⟨p, hp⟩ := Set.nonempty_def.mp $ Set.nonempty_iff_ne_empty.mpr hp;
+  obtain ⟨φ, hp⟩ := Set.nonempty_def.mp $ Set.nonempty_iff_ne_empty.mpr hp;
   simp [Consistent] at hCon;
-  have : Λ ⊬ ⋀[p] ➝ ⋁[p] := hCon
+  have : Λ ⊬ ⋀[φ] ➝ ⋁[φ] := hCon
     (by simp_all; apply hp₁; assumption)
     (by simp_all; apply hp₂; assumption);
-  have : Λ ⊢! ⋀[p] ➝ ⋁[p] := by simp;
+  have : Λ ⊢! ⋀[φ] ➝ ⋁[φ] := by simp;
   contradiction;
 
 omit [DecidableEq α] [Λ.IncludeEFQ] in
-lemma not_mem₂ (hCon : Tableau.Consistent Λ t) {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.1) (h : Λ ⊢! ⋀Γ ➝ q) : q ∉ t.2 := by
+lemma not_mem₂ (hCon : Tableau.Consistent Λ t) {Γ : List (Formula α)} (hΓ : ∀ φ ∈ Γ, φ ∈ t.1) (h : Λ ⊢! ⋀Γ ➝ ψ) : ψ ∉ t.2 := by
   by_contra hC;
-  have : Λ ⊢! ⋀Γ ➝ ⋁[q] := by simpa;
-  have : Λ ⊬ ⋀Γ ➝ ⋁[q] := hCon (by aesop) (by aesop);
+  have : Λ ⊢! ⋀Γ ➝ ⋁[ψ] := by simpa;
+  have : Λ ⊬ ⋀Γ ➝ ⋁[ψ] := hCon (by aesop) (by aesop);
   contradiction;
 
 end Consistent
@@ -127,31 +127,31 @@ end Consistent
 end
 
 
-abbrev Saturated (t : Tableau α) := ∀ p : Formula α, p ∈ t.1 ∨ p ∈ t.2
+abbrev Saturated (t : Tableau α) := ∀ φ : Formula α, φ ∈ t.1 ∨ φ ∈ t.2
 
 section Saturated
 
 variable {t : Tableau α}
 
-lemma mem₂_of_not_mem₁ (hMat : Saturated t) : p ∉ t.1 → p ∈ t.2 := by
+lemma mem₂_of_not_mem₁ (hMat : Saturated t) : φ ∉ t.1 → φ ∈ t.2 := by
   intro h;
-  cases (hMat p) with
+  cases (hMat φ) with
   | inl h' => exact absurd h' h;
   | inr _ => assumption;
 
-lemma mem₁_of_not_mem₂ (hMat : Saturated t) : p ∉ t.2 → p ∈ t.1 := by
+lemma mem₁_of_not_mem₂ (hMat : Saturated t) : φ ∉ t.2 → φ ∈ t.1 := by
   intro h;
-  cases (hMat p) with
+  cases (hMat φ) with
   | inl _ => assumption;
   | inr h' => exact absurd h' h;
 
 
-lemma not_mem₁_iff_mem₂ (hCon : Tableau.Consistent Λ t) (hMat : Saturated t) : p ∉ t.1 ↔ p ∈ t.2 := by
+lemma not_mem₁_iff_mem₂ (hCon : Tableau.Consistent Λ t) (hMat : Saturated t) : φ ∉ t.1 ↔ φ ∈ t.2 := by
   constructor;
   . apply mem₂_of_not_mem₁ hMat;
   . apply Set.disjoint_right.mp $ disjoint_of_consistent hCon;
 
-lemma not_mem₂_iff_mem₁ (hCon : Tableau.Consistent Λ t) (hMat : Saturated t) : p ∉ t.2 ↔ p ∈ t.1 := by
+lemma not_mem₂_iff_mem₁ (hCon : Tableau.Consistent Λ t) (hMat : Saturated t) : φ ∉ t.2 ↔ φ ∈ t.1 := by
   constructor;
   . apply mem₁_of_not_mem₂ hMat;
   . apply Set.disjoint_left.mp $ disjoint_of_consistent hCon;
@@ -164,18 +164,18 @@ lemma saturated_duality
   constructor;
   . intro h;
     apply Set.eq_of_subset_of_subset;
-    . intro p hp;
+    . intro φ hp;
       apply not_mem₁_iff_mem₂ ct₂ st₂ |>.mp; rw [←h];
       apply not_mem₁_iff_mem₂ ct₁ st₁ |>.mpr hp;
-    . intro p hp;
+    . intro φ hp;
       apply not_mem₁_iff_mem₂ ct₁ st₁ |>.mp; rw [h];
       apply not_mem₁_iff_mem₂ ct₂ st₂ |>.mpr hp;
   . intro h;
     apply Set.eq_of_subset_of_subset;
-    . intro p hp;
+    . intro φ hp;
       apply not_mem₂_iff_mem₁ ct₂ st₂ |>.mp; rw [←h];
       apply not_mem₂_iff_mem₁ ct₁ st₁ |>.mpr hp;
-    . intro p hp;
+    . intro φ hp;
       apply not_mem₂_iff_mem₁ ct₁ st₁ |>.mp; rw [h];
       apply not_mem₂_iff_mem₁ ct₂ st₂ |>.mpr hp;
 
@@ -186,9 +186,9 @@ variable [Λ.IncludeEFQ]
 lemma self_consistent [h : System.Consistent Λ] : Tableau.Consistent Λ (Ax(Λ), ∅) := by
   intro Γ Δ hΓ hΔ;
   replace hΔ : Δ = [] := List.nil_iff.mpr hΔ;
-  obtain ⟨q, hq⟩ := h.exists_unprovable;
+  obtain ⟨ψ, hq⟩ := h.exists_unprovable;
   by_contra hC;
-  have : Λ ⊢! q := by
+  have : Λ ⊢! ψ := by
     subst hΔ;
     simp at hC;
     exact imp_trans''! hC efq! ⨀ (by
@@ -206,13 +206,13 @@ variable {t : Tableau α}
 open Classical
 open Encodable
 
-def lindenbaum_next (p : Formula α) (t : Tableau α) : Tableau α := if Tableau.Consistent Λ (insert p t.1, t.2) then (insert p t.1, t.2) else (t.1, insert p t.2)
+def lindenbaum_next (φ : Formula α) (t : Tableau α) : Tableau α := if Tableau.Consistent Λ (insert φ t.1, t.2) then (insert φ t.1, t.2) else (t.1, insert φ t.2)
 
 def lindenbaum_next_indexed [Encodable α] (t : Tableau α) : ℕ → Tableau α
   | 0 => t
   | i + 1 =>
     match (decode i) with
-    | some p => (lindenbaum_next_indexed t i).lindenbaum_next Λ p
+    | some φ => (lindenbaum_next_indexed t i).lindenbaum_next Λ φ
     | none => lindenbaum_next_indexed t i
 local notation:max t"[" i "]" => lindenbaum_next_indexed Λ t i
 
@@ -222,11 +222,11 @@ local notation:max t"∞" => lindenbaum_maximal Λ t
 variable {Λ}
 
 omit [Encodable α] in
-lemma next_parametericConsistent (consistent : Tableau.Consistent Λ t) (p : Formula α) : Tableau.Consistent Λ (t.lindenbaum_next Λ p) := by
+lemma next_parametericConsistent (consistent : Tableau.Consistent Λ t) (φ : Formula α) : Tableau.Consistent Λ (t.lindenbaum_next Λ φ) := by
   simp [lindenbaum_next];
   split;
   . simpa;
-  . have := consistent_either consistent p;
+  . have := consistent_either consistent φ;
     simp_all only [false_or];
 
 omit [Λ.IncludeEFQ] in
@@ -240,7 +240,7 @@ lemma lindenbaum_next_indexed_parametricConsistent_succ {i : ℕ} : Tableau.Cons
   . tauto;
 
 omit [Λ.IncludeEFQ] in
-lemma mem_lindenbaum_next_indexed (t) (p : Formula α) : p ∈ t[(encode p) + 1].1 ∨ p ∈ t[(encode p) + 1].2 := by
+lemma mem_lindenbaum_next_indexed (t) (φ : Formula α) : φ ∈ t[(encode φ) + 1].1 ∨ φ ∈ t[(encode φ) + 1].2 := by
   simp [lindenbaum_next_indexed, lindenbaum_next];
   split;
   . left; tauto;
@@ -278,42 +278,42 @@ lemma exists_parametricConsistent_saturated_tableau (hCon : Tableau.Consistent �
   refine ⟨?subset, ?consistent, ?saturated⟩;
   case subset => constructor <;> apply Set.subset_iUnion_of_subset 0 (by simp);
   case saturated =>
-    intro p;
-    cases mem_lindenbaum_next_indexed t p with
-    | inl h => left; simp [lindenbaum_maximal]; use (encode p + 1);
-    | inr h => right; simp [lindenbaum_maximal]; use (encode p + 1);
+    intro φ;
+    cases mem_lindenbaum_next_indexed t φ with
+    | inl h => left; simp [lindenbaum_maximal]; use (encode φ + 1);
+    | inr h => right; simp [lindenbaum_maximal]; use (encode φ + 1);
   case consistent =>
     intro Γ Δ hΓ hΔ;
     simp_all [lindenbaum_maximal];
-    obtain ⟨m, hΓ⟩ : ∃ m, ∀ p ∈ Γ, p ∈ t[m].1 := by
+    obtain ⟨m, hΓ⟩ : ∃ m, ∀ φ ∈ Γ, φ ∈ t[m].1 := by
       induction Γ with
       | nil => simp;
-      | cons p Γ ih =>
+      | cons φ Γ ih =>
         simp_all;
         obtain ⟨i, hi⟩ := hΓ.1;
         obtain ⟨m, hm⟩ := ih;
         use (i + m);
         constructor;
         . exact lindenbaum_next_indexed_subset₁_of_lt (by simp) hi;
-        . intro q hq;
-          exact lindenbaum_next_indexed_subset₁_of_lt (by simp) $ hm q hq;
-    obtain ⟨n, hΔ⟩ : ∃ n, ∀ p ∈ Δ, p ∈ t[n].2 := by
+        . intro ψ hq;
+          exact lindenbaum_next_indexed_subset₁_of_lt (by simp) $ hm ψ hq;
+    obtain ⟨n, hΔ⟩ : ∃ n, ∀ φ ∈ Δ, φ ∈ t[n].2 := by
       induction Δ with
       | nil => simp;
-      | cons p Δ ih =>
+      | cons φ Δ ih =>
         simp_all;
         obtain ⟨i, hi⟩ := hΔ.1;
         obtain ⟨n, hn⟩ := ih;
         use (i + n);
         constructor;
         . exact lindenbaum_next_indexed_subset₂_of_lt (by simp) hi;
-        . intro q hq;
-          exact lindenbaum_next_indexed_subset₂_of_lt (by simp) $ hn q hq;
+        . intro ψ hq;
+          exact lindenbaum_next_indexed_subset₂_of_lt (by simp) $ hn ψ hq;
     rcases (lt_trichotomy m n) with hm | hmn | hn;
-    . exact lindenbaum_next_indexed_parametricConsistent hCon n (by intro p hp; exact lindenbaum_next_indexed_subset₁_of_lt hm.le $ hΓ p hp) hΔ;
+    . exact lindenbaum_next_indexed_parametricConsistent hCon n (by intro φ hp; exact lindenbaum_next_indexed_subset₁_of_lt hm.le $ hΓ φ hp) hΔ;
     . subst hmn;
       exact lindenbaum_next_indexed_parametricConsistent hCon m hΓ hΔ;
-    . exact lindenbaum_next_indexed_parametricConsistent hCon m hΓ (by intro p hp; exact lindenbaum_next_indexed_subset₂_of_lt hn.le $ hΔ p hp);
+    . exact lindenbaum_next_indexed_parametricConsistent hCon m hΓ (by intro φ hp; exact lindenbaum_next_indexed_subset₂_of_lt hn.le $ hΔ φ hp);
 
 protected alias lindenbaum := exists_parametricConsistent_saturated_tableau
 
@@ -332,7 +332,7 @@ alias SCT := SaturatedConsistentTableau
 
 namespace SaturatedConsistentTableau
 
-variable {t₀ : Tableau α} {p q : Formula α}
+variable {t₀ : Tableau α} {φ ψ : Formula α}
 
 lemma lindenbaum [Λ.IncludeEFQ] [Encodable α] (hCon : Tableau.Consistent Λ t₀) : ∃ (t : SaturatedConsistentTableau Λ), t₀ ⊆ t.tableau := by
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
@@ -344,9 +344,9 @@ variable {t : SCT Λ}
 
 @[simp] lemma disjoint : Disjoint t.tableau.1 t.tableau.2 := t.tableau.disjoint_of_consistent t.consistent
 
-lemma not_mem₁_iff_mem₂ : p ∉ t.tableau.1 ↔ p ∈ t.tableau.2 := Tableau.not_mem₁_iff_mem₂ t.consistent t.saturated
+lemma not_mem₁_iff_mem₂ : φ ∉ t.tableau.1 ↔ φ ∈ t.tableau.2 := Tableau.not_mem₁_iff_mem₂ t.consistent t.saturated
 
-lemma not_mem₂_iff_mem₁ : p ∉ t.tableau.2 ↔ p ∈ t.tableau.1 := Tableau.not_mem₂_iff_mem₁ t.consistent t.saturated
+lemma not_mem₂_iff_mem₁ : φ ∉ t.tableau.2 ↔ φ ∈ t.tableau.1 := Tableau.not_mem₂_iff_mem₁ t.consistent t.saturated
 
 variable {t t₁ t₂ : SCT Λ}
 
@@ -361,12 +361,12 @@ lemma equality_of₁ (e₁ : t₁.tableau.1 = t₂.tableau.1) : t₁ = t₂ := b
 
 lemma equality_of₂ (e₂ : t₁.tableau.2 = t₂.tableau.2) : t₁ = t₂ := equality_of₁ $ saturated_duality.mpr e₂
 
-lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ p ∈ Γ, p ∈ t.tableau.1) (h : Λ ⊢! ⋀Γ ➝ q) : q ∉ t.tableau.2 := t.tableau.not_mem₂ t.consistent hΓ h
+lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ φ ∈ Γ, φ ∈ t.tableau.1) (h : Λ ⊢! ⋀Γ ➝ ψ) : ψ ∉ t.tableau.2 := t.tableau.not_mem₂ t.consistent hΓ h
 
-lemma mdp₁ (hp₁ : p ∈ t.tableau.1) (h : Λ ⊢! p ➝ q) : q ∈ t.tableau.1 := by
+lemma mdp₁ (hp₁ : φ ∈ t.tableau.1) (h : Λ ⊢! φ ➝ ψ) : ψ ∈ t.tableau.1 := by
   apply not_mem₂_iff_mem₁.mp;
   by_contra hq₂;
-  have : Λ ⊬ p ➝ q := by simpa using t.consistent (Γ := [p]) (Δ := [q]) (by simpa) (by simpa);
+  have : Λ ⊬ φ ➝ ψ := by simpa using t.consistent (Γ := [φ]) (Δ := [ψ]) (by simpa) (by simpa);
   contradiction;
 
 @[simp]
@@ -385,24 +385,24 @@ lemma not_mem₁_falsum : ⊥ ∉ t.tableau.1 := by
   contradiction;
 
 @[simp]
-lemma iff_mem₁_and : p ⋏ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∧ q ∈ t.tableau.1 := by
+lemma iff_mem₁_and : φ ⋏ ψ ∈ t.tableau.1 ↔ φ ∈ t.tableau.1 ∧ ψ ∈ t.tableau.1 := by
   constructor;
   . intro h; constructor <;> exact mdp₁ h (by simp)
   . rintro ⟨hp, hq⟩;
     apply not_mem₂_iff_mem₁.mp;
     by_contra hC;
-    have : Λ ⊢! ⋀[p, q] ➝ ⋁[p ⋏ q] := by simp;
-    have : Λ ⊬ ⋀[p, q] ➝ ⋁[p ⋏ q] := t.consistent (by simp_all) (by simp_all);
+    have : Λ ⊢! ⋀[φ, ψ] ➝ ⋁[φ ⋏ ψ] := by simp;
+    have : Λ ⊬ ⋀[φ, ψ] ➝ ⋁[φ ⋏ ψ] := t.consistent (by simp_all) (by simp_all);
     contradiction;
 
-lemma iff_mem₁_conj {Γ : List (Formula α)} : ⋀Γ ∈ t.tableau.1 ↔ ∀ p ∈ Γ, p ∈ t.tableau.1 := by
+lemma iff_mem₁_conj {Γ : List (Formula α)} : ⋀Γ ∈ t.tableau.1 ↔ ∀ φ ∈ Γ, φ ∈ t.tableau.1 := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
-  | hsingle p => simp;
-  | hcons p Γ Γ_nil ih =>
+  | hsingle φ => simp;
+  | hcons φ Γ Γ_nil ih =>
     simp only [(List.conj₂_cons_nonempty Γ_nil), List.mem_cons];
     constructor;
-    . rintro h p (rfl | hp);
+    . rintro h φ (rfl | hp);
       . exact iff_mem₁_and.mp h |>.1;
       . exact ih.mp (iff_mem₁_and.mp h |>.2) _ hp;
     . intro h;
@@ -410,41 +410,41 @@ lemma iff_mem₁_conj {Γ : List (Formula α)} : ⋀Γ ∈ t.tableau.1 ↔ ∀ p
       simp_all;
 
 @[simp]
-lemma iff_mem₁_or : p ⋎ q ∈ t.tableau.1 ↔ p ∈ t.tableau.1 ∨ q ∈ t.tableau.1 := by
+lemma iff_mem₁_or : φ ⋎ ψ ∈ t.tableau.1 ↔ φ ∈ t.tableau.1 ∨ ψ ∈ t.tableau.1 := by
   constructor;
   . intro h;
     by_contra hC; push_neg at hC;
-    have : p ∈ t.tableau.2 := not_mem₁_iff_mem₂.mp hC.1;
-    have : q ∈ t.tableau.2 := not_mem₁_iff_mem₂.mp hC.2;
-    have : Λ ⊢! ⋀[p ⋎ q] ➝ ⋁[p, q] := by simp;
-    have : Λ ⊬ ⋀[p ⋎ q] ➝ ⋁[p, q] := t.consistent (by simp_all) (by simp_all);
+    have : φ ∈ t.tableau.2 := not_mem₁_iff_mem₂.mp hC.1;
+    have : ψ ∈ t.tableau.2 := not_mem₁_iff_mem₂.mp hC.2;
+    have : Λ ⊢! ⋀[φ ⋎ ψ] ➝ ⋁[φ, ψ] := by simp;
+    have : Λ ⊬ ⋀[φ ⋎ ψ] ➝ ⋁[φ, ψ] := t.consistent (by simp_all) (by simp_all);
     contradiction;
   . intro h;
     cases h with
     | inl h => exact mdp₁ h or₁!
     | inr h => exact mdp₁ h or₂!
 
-lemma not_mem₁_neg_of_mem₁ [DecidableEq α] : p ∈ t.tableau.1 → ∼p ∉ t.tableau.1 := by
+lemma not_mem₁_neg_of_mem₁ [DecidableEq α] : φ ∈ t.tableau.1 → ∼φ ∉ t.tableau.1 := by
   intro hp;
   by_contra hnp;
   have := iff_mem₁_and.mpr ⟨hp, hnp⟩;
-  have : ⊥ ∈ t.tableau.1 := mdp₁ (q := ⊥) this (by simp);
+  have : ⊥ ∈ t.tableau.1 := mdp₁ (ψ := ⊥) this (by simp);
   have : ⊥ ∉ t.tableau.1 := not_mem₁_falsum
   contradiction;
 
-lemma mem₂_neg_of_mem₁ [DecidableEq α] : p ∈ t.tableau.1 → ∼p ∈ t.tableau.2 := by
+lemma mem₂_neg_of_mem₁ [DecidableEq α] : φ ∈ t.tableau.1 → ∼φ ∈ t.tableau.2 := by
   intro h;
-  exact not_mem₁_iff_mem₂ (p := ∼p) (t := t) |>.mp $ not_mem₁_neg_of_mem₁ h;
+  exact not_mem₁_iff_mem₂ (φ := ∼φ) (t := t) |>.mp $ not_mem₁_neg_of_mem₁ h;
 
-lemma mem₁_of_provable : Λ ⊢! p → p ∈ t.tableau.1 := by
+lemma mem₁_of_provable : Λ ⊢! φ → φ ∈ t.tableau.1 := by
   intro h;
   exact mdp₁ mem₁_verum $ imply₁'! h;
 
-lemma mdp₁_mem [DecidableEq α] (hp : p ∈ t.tableau.1) (h : p ➝ q ∈ t.tableau.1) : q ∈ t.tableau.1 := by
+lemma mdp₁_mem [DecidableEq α] (hp : φ ∈ t.tableau.1) (h : φ ➝ ψ ∈ t.tableau.1) : ψ ∈ t.tableau.1 := by
   apply not_mem₂_iff_mem₁.mp;
   by_contra hC;
-  have : Λ ⊬ (p ⋏ (p ➝ q)) ➝ q := t.consistent (Γ := [p, p ➝ q]) (Δ := [q]) (by aesop) (by simpa);
-  have : Λ ⊢! (p ⋏ (p ➝ q)) ➝ q := mdp_in!
+  have : Λ ⊬ (φ ⋏ (φ ➝ ψ)) ➝ ψ := t.consistent (Γ := [φ, φ ➝ ψ]) (Δ := [ψ]) (by aesop) (by simpa);
+  have : Λ ⊢! (φ ⋏ (φ ➝ ψ)) ➝ ψ := mdp_in!
   contradiction;
 
 end SaturatedConsistentTableau

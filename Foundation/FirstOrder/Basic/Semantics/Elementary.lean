@@ -160,22 +160,22 @@ end Structure
 namespace Semiformula
 open Structure
 
-variable {F : Type*} [FunLike F M₁ M₂] [EmbeddingClass F L M₁ M₂] (φ : F)
+variable {F : Type*} [FunLike F M₁ M₂] [EmbeddingClass F L M₁ M₂] (Θ : F)
 variable {e₁ : Fin n → M₁} {ε₁ : ξ → M₁}
 
 omit [Nonempty M₁] [Nonempty M₂]
-lemma eval_hom_iff_of_open : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} {p : Semiformula L ξ n}, p.Open →
-    (Eval s₁ e₁ ε₁ p ↔ Eval s₂ (φ ∘ e₁) (φ ∘ ε₁) p)
+lemma eval_hom_iff_of_open : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n}, φ.Open →
+    (Eval s₁ e₁ ε₁ φ ↔ Eval s₂ (Θ ∘ e₁) (Θ ∘ ε₁) φ)
   | _, e₁, ε₁, ⊤,        _ => by simp
   | _, e₁, ε₁, ⊥,        _ => by simp
-  | _, e₁, ε₁, rel r v,  _ => by simp [Function.comp_def, eval_rel, ←EmbeddingClass.rel φ, HomClass.val_term]
-  | _, e₁, ε₁, nrel r v, _ => by simp [Function.comp_def, eval_nrel, ←EmbeddingClass.rel φ, HomClass.val_term]
-  | _, e₁, ε₁, p ⋏ q,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
-  | _, e₁, ε₁, p ⋎ q,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
+  | _, e₁, ε₁, rel r v,  _ => by simp [Function.comp_def, eval_rel, ←EmbeddingClass.rel Θ, HomClass.val_term]
+  | _, e₁, ε₁, nrel r v, _ => by simp [Function.comp_def, eval_nrel, ←EmbeddingClass.rel Θ, HomClass.val_term]
+  | _, e₁, ε₁, φ ⋏ ψ,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
+  | _, e₁, ε₁, φ ⋎ ψ,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
 
-lemma eval_hom_univClosure {n} {ε₁ : ξ → M₁} {p : Semiformula L ξ n} (hp : p.Open) :
-    Evalf s₂ (φ ∘ ε₁) (∀* p) → Evalf s₁ ε₁ (∀* p) := by
-  simp; intro h e₁; exact (eval_hom_iff_of_open φ hp).mpr (h (φ ∘ e₁))
+lemma eval_hom_univClosure {n} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n} (hp : φ.Open) :
+    Evalf s₂ (Θ ∘ ε₁) (∀* φ) → Evalf s₁ ε₁ (∀* φ) := by
+  simp; intro h e₁; exact (eval_hom_iff_of_open Θ hp).mpr (h (Θ ∘ e₁))
 
 end Semiformula
 
@@ -191,7 +191,7 @@ namespace Structure
 
 variable (L M₁ M₂)
 
-def ElementaryEquiv : Prop := ∀ p : SyntacticFormula L, M₁ ⊧ₘ p ↔ M₂ ⊧ₘ p
+def ElementaryEquiv : Prop := ∀ φ : SyntacticFormula L, M₁ ⊧ₘ φ ↔ M₂ ⊧ₘ φ
 
 notation:50 M₁ " ≡ₑ[" L "] " M₂ => ElementaryEquiv L M₁ M₂
 
@@ -212,19 +212,19 @@ lemma trans :
   fun h₁ h₂ σ => Iff.trans (h₁ σ) (h₂ σ)
 
 lemma models (h : M₁ ≡ₑ[L] M₂) :
-    ∀ {p : SyntacticFormula L}, M₁ ⊧ₘ p ↔ M₂ ⊧ₘ p := @h
+    ∀ {φ : SyntacticFormula L}, M₁ ⊧ₘ φ ↔ M₂ ⊧ₘ φ := @h
 
 lemma modelsTheory (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
     M₁ ⊧ₘ* T ↔ M₂ ⊧ₘ* T := by simp [modelsTheory_iff, h.models]
 
-lemma ofEquiv [Nonempty N] (φ : M ≃ N) :
-    letI : Structure L N := Structure.ofEquiv φ
-    M ≡ₑ[L] N := fun p => by
-  letI : Structure L N := Structure.ofEquiv φ
-  simp [models_iff, Empty.eq_elim, Structure.evalf_ofEquiv_iff (φ := φ)]
+lemma ofEquiv [Nonempty N] (Θ : M ≃ N) :
+    letI : Structure L N := Structure.ofEquiv Θ
+    M ≡ₑ[L] N := fun φ => by
+  letI : Structure L N := Structure.ofEquiv Θ
+  simp [models_iff, Empty.eq_elim, Structure.evalf_ofEquiv_iff (Θ := Θ)]
   constructor
   · intro h f; exact h _
-  · intro h f; simpa [←Function.comp_assoc] using h (φ ∘ f)
+  · intro h f; simpa [←Function.comp_assoc] using h (Θ ∘ f)
 
 end ElementaryEquiv
 

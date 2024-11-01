@@ -111,8 +111,8 @@ variable {M} {e : Fin n → M} {ε : ξ → M}
     (t.lMap Language.oringEmb : Semiterm L ξ n).valm M e ε = t.valm M e ε := by
   simp [Semiterm.val_lMap, standardModel_lMap_oringEmb_eq_standardModel]
 
-@[simp] lemma eval_lMap_oringEmb {p : Semiformula ℒₒᵣ ξ n} :
-    Semiformula.Evalm M e ε (.lMap Language.oringEmb p : Semiformula L ξ n) ↔ Semiformula.Evalm M e ε p := by
+@[simp] lemma eval_lMap_oringEmb {φ : Semiformula ℒₒᵣ ξ n} :
+    Semiformula.Evalm M e ε (.lMap Language.oringEmb φ : Semiformula L ξ n) ↔ Semiformula.Evalm M e ε φ := by
   simp [Semiformula.eval_lMap, standardModel_lMap_oringEmb_eq_standardModel]
 
 end
@@ -127,10 +127,10 @@ variable {M : Type*} [ORingStruc M] [s : Structure L M]
     M ⊧ₘ* (T.lMap oringEmb : Theory L) ↔ M ⊧ₘ* T := by
   simp [modelsTheory_iff]
   constructor
-  · intro H p hp f
-    exact eval_lMap_oringEmb.mp <| @H (Semiformula.lMap oringEmb p) (Set.mem_image_of_mem _ hp) f
+  · intro H φ hp f
+    exact eval_lMap_oringEmb.mp <| @H (Semiformula.lMap oringEmb φ) (Set.mem_image_of_mem _ hp) f
   · simp [Theory.lMap]
-    intro H p hp f; exact eval_lMap_oringEmb.mpr (H hp f)
+    intro H φ hp f; exact eval_lMap_oringEmb.mpr (H hp f)
 
 instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
@@ -177,7 +177,7 @@ instance models_PAMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
     have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
     exact modelsTheory_iff.mp this h⟩
 
-lemma models_succInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd p := by
+lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ := by
   simp[Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
     Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
   intro e hzero hsucc x; induction' x with x ih
@@ -185,14 +185,14 @@ lemma models_succInd (p : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd p :=
   · exact hsucc x ih
 
 instance models_iSigma (Γ k) : ℕ ⊧ₘ* 𝐈𝐍𝐃Γ k := by
-  simp [Theory.indScheme, models_PAMinus]; rintro _ p _ rfl; simp [models_succInd]
+  simp [Theory.indScheme, models_PAMinus]; rintro _ φ _ rfl; simp [models_succInd]
 
 instance models_iSigmaZero : ℕ ⊧ₘ* 𝐈𝚺₀ := inferInstance
 
 instance models_iSigmaOne : ℕ ⊧ₘ* 𝐈𝚺₁ := inferInstance
 
 instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
-  simp [Theory.peano, Theory.indScheme, models_PAMinus]; rintro _ p _ rfl; simp [models_succInd]
+  simp [Theory.peano, Theory.indScheme, models_PAMinus]; rintro _ φ _ rfl; simp [models_succInd]
 
 end Standard
 
@@ -215,12 +215,12 @@ abbrev Theory.TrueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 notation "𝐓𝐀" => Theory.TrueArith
 
 instance Standard.models_trueArith : ℕ ⊧ₘ* 𝐓𝐀 :=
-  modelsTheory_iff.mpr fun {p} ↦ by simp
+  modelsTheory_iff.mpr fun {φ} ↦ by simp
 
 variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
 
-lemma oRing_consequence_of (p : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ p) :
-    T ⊨ p := consequence_of T p fun M _ s _ _ ↦ by
+lemma oRing_consequence_of (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+    T ⊨ φ := consequence_of T φ fun M _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M
 

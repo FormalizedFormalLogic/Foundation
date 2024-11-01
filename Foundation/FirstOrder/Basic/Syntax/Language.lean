@@ -382,36 +382,36 @@ open Qq Lean Elab Meta Tactic
 def denoteFunc : (k : ℕ) → Q(oRing.Func $k) → MetaM (oRing.Func k)
   | 0, e =>
     match e with
-    | ∼q(Zero.zero) => return Language.Zero.zero
-    | ∼q(One.one)   => return Language.One.one
+    | ∼ψ(Zero.zero) => return Language.Zero.zero
+    | ∼ψ(One.one)   => return Language.One.one
   | 2, e =>
     match e with
-    | ∼q(Language.Add.add) => return Language.Add.add
-    | ∼q(Language.Mul.mul) => return Language.Mul.mul
+    | ∼ψ(Language.Add.add) => return Language.Add.add
+    | ∼ψ(Language.Mul.mul) => return Language.Mul.mul
   | _, e => throwError m!"error in DenotationORing : {e}"
 
 def denoteRel : (k : ℕ) → Q(oRing.Rel $k) → MetaM (oRing.Rel k)
   | 2, e =>
     match e with
-    | ∼q(Language.Eq.eq) => return Language.Eq.eq
-    | ∼q(Language.LT.lt) => return Language.LT.lt
+    | ∼ψ(Language.Eq.eq) => return Language.Eq.eq
+    | ∼ψ(Language.LT.lt) => return Language.LT.lt
   | _, e => throwError m!"error in DenotationORing : {e}"
 
-instance (k : ℕ) : Denotation q(oRing.Func $k) (oRing.Func k) where
+instance (k : ℕ) : Denotation ψ(oRing.Func $k) (oRing.Func k) where
    denote := denoteFunc k
    toExpr := fun f =>
      ( match f with
-       | Func.zero => q(Language.Zero.zero)
-       | Func.one  => q(Language.One.one)
-       | Func.add  => q(Language.Add.add)
-       | Func.mul  => q(Language.Mul.mul) : Q(oRing.Func $k))
+       | Func.zero => ψ(Language.Zero.zero)
+       | Func.one  => ψ(Language.One.one)
+       | Func.add  => ψ(Language.Add.add)
+       | Func.mul  => ψ(Language.Mul.mul) : Q(oRing.Func $k))
 
-instance (k : ℕ) : Denotation q(oRing.Rel $k) (oRing.Rel k) where
+instance (k : ℕ) : Denotation ψ(oRing.Rel $k) (oRing.Rel k) where
    denote := denoteRel k
    toExpr := fun f =>
      ( match f with
-       | Rel.eq => q(Language.Eq.eq)
-       | Rel.lt => q(Language.LT.lt) : Q(oRing.Rel $k))
+       | Rel.eq => ψ(Language.Eq.eq)
+       | Rel.lt => ψ(Language.LT.lt) : Q(oRing.Rel $k))
 
 end ORing
 -/

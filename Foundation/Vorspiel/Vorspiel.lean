@@ -436,9 +436,9 @@ namespace Function
 
 variable  {α : Type u} {β : Type v}
 
-def funEqOn (p : α → Prop) (f g : α → β) : Prop := ∀ a, p a → f a = g a
+def funEqOn (φ : α → Prop) (f g : α → β) : Prop := ∀ a, φ a → f a = g a
 
-lemma funEqOn.of_subset {p q : α → Prop} {f g : α → β} (e : funEqOn p f g) (h : ∀ a, q a → p a) : funEqOn q f g :=
+lemma funEqOn.of_subset {φ ψ : α → Prop} {f g : α → β} (e : funEqOn φ f g) (h : ∀ a, ψ a → φ a) : funEqOn ψ f g :=
   by intro a ha; exact e a (h a ha)
 
 end Function
@@ -448,8 +448,8 @@ open Matrix
 variable {α : Type u} [s : Setoid α] {β : Sort v}
 
 @[elab_as_elim]
-lemma inductionOnVec {p : (Fin n → Quotient s) → Prop} (v : Fin n → Quotient s)
-  (h : ∀ v : Fin n → α, p (fun i => Quotient.mk s (v i))) : p v :=
+lemma inductionOnVec {φ : (Fin n → Quotient s) → Prop} (v : Fin n → Quotient s)
+  (h : ∀ v : Fin n → α, φ (fun i => Quotient.mk s (v i))) : φ v :=
   Quotient.induction_on_pi v h
 
 def liftVec : ∀ {n} (f : (Fin n → α) → β),
@@ -651,10 +651,10 @@ variable [DecidableEq α]
 lemma remove_nil (a : α) : [].remove a = [] := by simp [List.remove]
 
 @[simp]
-lemma eq_remove_cons {l : List α} : (q :: l).remove q = l.remove q := by induction l <;> simp_all [List.remove];
+lemma eq_remove_cons {l : List α} : (ψ :: l).remove ψ = l.remove ψ := by induction l <;> simp_all [List.remove];
 
 @[simp]
-lemma remove_singleton_of_ne {p q : α} (h : p ≠ q) : [p].remove q = [p] := by simp_all [List.remove, Ne.symm];
+lemma remove_singleton_of_ne {φ ψ : α} (h : φ ≠ ψ) : [φ].remove ψ = [φ] := by simp_all [List.remove, Ne.symm];
 
 lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
   simp [List.remove, List.of_mem_filter]

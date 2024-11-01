@@ -107,7 +107,7 @@ def mkAtomic
   }
 
 def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := mkAtomic (f.toFramePseudoEpimorphism.comp (g.toFramePseudoEpimorphism)) $ by
-    intro x p;
+    intro x φ;
     constructor;
     . intro h;
       apply g.atomic.mp;

@@ -31,128 +31,128 @@ def toStr : Formula α → String
   | ⊤       => "\\top"
   | ⊥       => "\\bot"
   | atom a  => "{" ++ toString a ++ "}"
-  | ∼p      => "\\lnot " ++ toStr p
-  | p ⋏ q   => "\\left(" ++ toStr p ++ " \\land " ++ toStr q ++ "\\right)"
-  | p ⋎ q   => "\\left(" ++ toStr p ++ " \\lor "  ++ toStr q ++ "\\right)"
-  | p ➝ q   => "\\left(" ++ toStr p ++ " \\rightarrow " ++ toStr q ++ "\\right)"
+  | ∼φ      => "\\lnot " ++ toStr φ
+  | φ ⋏ ψ   => "\\left(" ++ toStr φ ++ " \\land " ++ toStr ψ ++ "\\right)"
+  | φ ⋎ ψ   => "\\left(" ++ toStr φ ++ " \\lor "  ++ toStr ψ ++ "\\right)"
+  | φ ➝ ψ   => "\\left(" ++ toStr φ ++ " \\rightarrow " ++ toStr ψ ++ "\\right)"
 
 instance : Repr (Formula α) := ⟨fun t _ => toStr t⟩
 instance : ToString (Formula α) := ⟨toStr⟩
 
 end ToString
 
-@[simp] lemma and_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Wedge.wedge]
-@[simp] lemma or_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Vee.vee]
-@[simp] lemma imp_inj (p₁ q₁ p₂ q₂ : Formula α) : p₁ ➝ p₂ = q₁ ➝ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp[Arrow.arrow]
-@[simp] lemma neg_inj (p q : Formula α) : ∼p = ∼q ↔ p = q := by simp[Tilde.tilde]
+@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Wedge.wedge]
+@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Vee.vee]
+@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Arrow.arrow]
+@[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp[Tilde.tilde]
 
--- lemma neg_def (p : Formula α) : ∼p = p ➝ ⊥ := rfl
+-- lemma neg_def (φ : Formula α) : ∼φ = φ ➝ ⊥ := rfl
 
-lemma iff_def (p q : Formula α) : p ⭤ q = (p ➝ q) ⋏ (q ➝ p) := by rfl
+lemma iff_def (φ ψ : Formula α) : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := by rfl
 
 def complexity : Formula α → ℕ
 | atom _  => 0
 | ⊤       => 0
 | ⊥       => 0
-| ∼p      => p.complexity + 1
-| p ➝ q  => max p.complexity q.complexity + 1
-| p ⋏ q   => max p.complexity q.complexity + 1
-| p ⋎ q   => max p.complexity q.complexity + 1
+| ∼φ      => φ.complexity + 1
+| φ ➝ ψ  => max φ.complexity ψ.complexity + 1
+| φ ⋏ ψ   => max φ.complexity ψ.complexity + 1
+| φ ⋎ ψ   => max φ.complexity ψ.complexity + 1
 
 @[simp] lemma complexity_bot : complexity (⊥ : Formula α) = 0 := rfl
 @[simp] lemma complexity_top : complexity (⊤ : Formula α) = 0 := rfl
 
 @[simp] lemma complexity_atom (a : α) : complexity (atom a) = 0 := rfl
 
-@[simp] lemma complexity_imp (p q : Formula α) : complexity (p ➝ q) = max p.complexity q.complexity + 1 := rfl
-@[simp] lemma complexity_imp' (p q : Formula α) : complexity (imp p q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_imp (φ ψ : Formula α) : complexity (φ ➝ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_imp' (φ ψ : Formula α) : complexity (imp φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
-@[simp] lemma complexity_and (p q : Formula α) : complexity (p ⋏ q) = max p.complexity q.complexity + 1 := rfl
-@[simp] lemma complexity_and' (p q : Formula α) : complexity (and p q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_and (φ ψ : Formula α) : complexity (φ ⋏ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_and' (φ ψ : Formula α) : complexity (and φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
-@[simp] lemma complexity_or (p q : Formula α) : complexity (p ⋎ q) = max p.complexity q.complexity + 1 := rfl
-@[simp] lemma complexity_or' (p q : Formula α) : complexity (or p q) = max p.complexity q.complexity + 1 := rfl
+@[simp] lemma complexity_or (φ ψ : Formula α) : complexity (φ ⋎ ψ) = max φ.complexity ψ.complexity + 1 := rfl
+@[simp] lemma complexity_or' (φ ψ : Formula α) : complexity (or φ ψ) = max φ.complexity ψ.complexity + 1 := rfl
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
     (hfalsum : C ⊥)
     (hverum  : C ⊤)
     (hatom   : ∀ a : α, C (atom a))
-    (hneg    : ∀ p : Formula α, C (∼p))
-    (himp    : ∀ (p q : Formula α), C (p ➝ q))
-    (hand    : ∀ (p q : Formula α), C (p ⋏ q))
-    (hor     : ∀ (p q : Formula α), C (p ⋎ q))
-    : (p : Formula α) → C p
+    (hneg    : ∀ φ : Formula α, C (∼φ))
+    (himp    : ∀ (φ ψ : Formula α), C (φ ➝ ψ))
+    (hand    : ∀ (φ ψ : Formula α), C (φ ⋏ ψ))
+    (hor     : ∀ (φ ψ : Formula α), C (φ ⋎ ψ))
+    : (φ : Formula α) → C φ
   | ⊥       => hfalsum
   | ⊤       => hverum
   | atom a  => hatom a
-  | ∼p      => hneg p
-  | p ➝ q  => himp p q
-  | p ⋏ q   => hand p q
-  | p ⋎ q   => hor p q
+  | ∼φ      => hneg φ
+  | φ ➝ ψ  => himp φ ψ
+  | φ ⋏ ψ   => hand φ ψ
+  | φ ⋎ ψ   => hor φ ψ
 
 @[elab_as_elim]
 def rec' {C : Formula α → Sort w}
   (hfalsum : C ⊥)
   (hverum  : C ⊤)
   (hatom   : ∀ a : α, C (atom a))
-  (hneg    : ∀ p : Formula α, C p → C (∼p))
-  (himp    : ∀ (p q : Formula α), C p → C q → C (p ➝ q))
-  (hand    : ∀ (p q : Formula α), C p → C q → C (p ⋏ q))
-  (hor     : ∀ (p q : Formula α), C p → C q → C (p ⋎ q))
-  : (p : Formula α) → C p
+  (hneg    : ∀ φ : Formula α, C φ → C (∼φ))
+  (himp    : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ➝ ψ))
+  (hand    : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ⋏ ψ))
+  (hor     : ∀ (φ ψ : Formula α), C φ → C ψ → C (φ ⋎ ψ))
+  : (φ : Formula α) → C φ
   | ⊥       => hfalsum
   | ⊤       => hverum
   | atom a  => hatom a
-  | ∼p      => hneg p (rec' hfalsum hverum hatom hneg himp hand hor p)
-  | p ➝ q  => himp p q (rec' hfalsum hverum hatom hneg himp hand hor p) (rec' hfalsum hverum hatom hneg himp hand hor q)
-  | p ⋏ q   => hand p q (rec' hfalsum hverum hatom hneg himp hand hor p) (rec' hfalsum hverum hatom hneg himp hand hor q)
-  | p ⋎ q   => hor p q (rec' hfalsum hverum hatom hneg himp hand hor p) (rec' hfalsum hverum hatom hneg himp hand hor q)
+  | ∼φ      => hneg φ (rec' hfalsum hverum hatom hneg himp hand hor φ)
+  | φ ➝ ψ  => himp φ ψ (rec' hfalsum hverum hatom hneg himp hand hor φ) (rec' hfalsum hverum hatom hneg himp hand hor ψ)
+  | φ ⋏ ψ   => hand φ ψ (rec' hfalsum hverum hatom hneg himp hand hor φ) (rec' hfalsum hverum hatom hneg himp hand hor ψ)
+  | φ ⋎ ψ   => hor φ ψ (rec' hfalsum hverum hatom hneg himp hand hor φ) (rec' hfalsum hverum hatom hneg himp hand hor ψ)
 
 section Decidable
 
 variable [DecidableEq α]
 
-def hasDecEq : (p q : Formula α) → Decidable (p = q)
-  | ⊥, q => by
-    cases q using cases' <;>
+def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
+  | ⊥, ψ => by
+    cases ψ using cases' <;>
     { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
-  | ⊤, q => by
-    cases q using cases' <;>
+  | ⊤, ψ => by
+    cases ψ using cases' <;>
     { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
-  | atom a, q => by
-    cases q using cases' <;> try { simp; exact isFalse not_false }
+  | atom a, ψ => by
+    cases ψ using cases' <;> try { simp; exact isFalse not_false }
     simp; exact decEq _ _
-  | ∼p, q => by
-    cases q using cases' <;> try { simp; exact isFalse not_false }
-    case hneg p' =>
-      exact match hasDecEq p p' with
+  | ∼φ, ψ => by
+    cases ψ using cases' <;> try { simp; exact isFalse not_false }
+    case hneg φ' =>
+      exact match hasDecEq φ φ' with
       | isTrue hp  => isTrue (by simp[hp])
       | isFalse hp => isFalse (by simp[hp])
-  | p ➝ q, r => by
-    cases r using cases' <;> try { simp; exact isFalse not_false }
-    case himp p' q' =>
-      exact match hasDecEq p p' with
+  | φ ➝ ψ, χ => by
+    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    case himp φ' ψ' =>
+      exact match hasDecEq φ φ' with
       | isTrue hp =>
-        match hasDecEq q q' with
+        match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
         | isFalse hq => isFalse (by simp[hp, hq])
       | isFalse hp => isFalse (by simp[hp])
-  | p ⋏ q, r => by
-    cases r using cases' <;> try { simp; exact isFalse not_false }
-    case hand p' q' =>
-      exact match hasDecEq p p' with
+  | φ ⋏ ψ, χ => by
+    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    case hand φ' ψ' =>
+      exact match hasDecEq φ φ' with
       | isTrue hp =>
-        match hasDecEq q q' with
+        match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
         | isFalse hq => isFalse (by simp[hp, hq])
       | isFalse hp => isFalse (by simp[hp])
-  | p ⋎ q, r => by
-    cases r using cases' <;> try { simp; exact isFalse not_false }
-    case hor p' q' =>
-      exact match hasDecEq p p' with
+  | φ ⋎ ψ, χ => by
+    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    case hor φ' ψ' =>
+      exact match hasDecEq φ φ' with
       | isTrue hp =>
-        match hasDecEq q q' with
+        match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
         | isFalse hq => isFalse (by simp[hp, hq])
       | isFalse hp => isFalse (by simp[hp])
@@ -170,10 +170,10 @@ def toNat : Formula α → ℕ
   | atom a  => (Nat.pair 0 <| encode a) + 1
   | ⊤       => (Nat.pair 1 0) + 1
   | ⊥       => (Nat.pair 2 0) + 1
-  | ∼p      => (Nat.pair 3 <| p.toNat) + 1
-  | p ➝ q   => (Nat.pair 4 <| p.toNat.pair q.toNat) + 1
-  | p ⋏ q   => (Nat.pair 5 <| p.toNat.pair q.toNat) + 1
-  | p ⋎ q   => (Nat.pair 6 <| p.toNat.pair q.toNat) + 1
+  | ∼φ      => (Nat.pair 3 <| φ.toNat) + 1
+  | φ ➝ ψ   => (Nat.pair 4 <| φ.toNat.pair ψ.toNat) + 1
+  | φ ⋏ ψ   => (Nat.pair 5 <| φ.toNat.pair ψ.toNat) + 1
+  | φ ⋎ ψ   => (Nat.pair 6 <| φ.toNat.pair ψ.toNat) + 1
 
 def ofNat : ℕ → Option (Formula α)
   | 0 => none
@@ -187,39 +187,39 @@ def ofNat : ℕ → Option (Formula α)
     | 3 =>
       have : c < e + 1 := Nat.lt_succ.mpr $ Nat.unpair_right_le _
       do
-        let p <- ofNat c
-        return ∼p
+        let φ <- ofNat c
+        return ∼φ
     | 4 =>
       have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
       have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
       do
-        let p <- ofNat c.unpair.1
-        let q <- ofNat c.unpair.2
-        return p ➝ q
+        let φ <- ofNat c.unpair.1
+        let ψ <- ofNat c.unpair.2
+        return φ ➝ ψ
     | 5 =>
       have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
       have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
       do
-        let p <- ofNat c.unpair.1
-        let q <- ofNat c.unpair.2
-        return p ⋏ q
+        let φ <- ofNat c.unpair.1
+        let ψ <- ofNat c.unpair.2
+        return φ ⋏ ψ
     | 6 =>
       have : c.unpair.1 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_left_le _) $ Nat.unpair_right_le _
       have : c.unpair.2 < e + 1 := Nat.lt_succ.mpr $ le_trans (Nat.unpair_right_le _) $ Nat.unpair_right_le _
       do
-        let p <- ofNat c.unpair.1
-        let q <- ofNat c.unpair.2
-        return p ⋎ q
+        let φ <- ofNat c.unpair.1
+        let ψ <- ofNat c.unpair.2
+        return φ ⋎ ψ
     | _ => none
 
-lemma ofNat_toNat : ∀ (p : Formula α), ofNat (toNat p) = some p
+lemma ofNat_toNat : ∀ (φ : Formula α), ofNat (toNat φ) = some φ
   | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek, Option.map_some'];
   | ⊤       => by simp [toNat, ofNat]
   | ⊥       => by simp [toNat, ofNat]
-  | ∼p      => by simp [toNat, ofNat, ofNat_toNat p]
-  | p ➝ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
-  | p ⋏ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
-  | p ⋎ q   => by simp [toNat, ofNat, ofNat_toNat p, ofNat_toNat q]
+  | ∼φ      => by simp [toNat, ofNat, ofNat_toNat φ]
+  | φ ➝ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
+  | φ ⋏ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
+  | φ ⋎ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
 
 instance : Encodable (Formula α) where
   encode := toNat

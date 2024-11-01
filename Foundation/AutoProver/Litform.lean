@@ -32,10 +32,10 @@ def toStr : Litform α → String
   | ⊤      => "⊤"
   | ⊥      => "⊥"
   | atom a => toString a
-  | ∼p     => "(¬" ++ toStr p ++ ")"
-  | p ⋏ q  => "(" ++ toStr p ++ " ∧ " ++ toStr q ++ ")"
-  | p ⋎ q  => "(" ++ toStr p ++ " ∨ "  ++ toStr q ++ ")"
-  | p ➝ q => "(" ++ toStr p ++ " ➝ "  ++ toStr q ++ ")"
+  | ∼φ     => "(¬" ++ toStr φ ++ ")"
+  | φ ⋏ ψ  => "(" ++ toStr φ ++ " ∧ " ++ toStr ψ ++ ")"
+  | φ ⋎ ψ  => "(" ++ toStr φ ++ " ∨ "  ++ toStr ψ ++ ")"
+  | φ ➝ ψ => "(" ++ toStr φ ++ " ➝ "  ++ toStr ψ ++ ")"
 
 instance : Repr (Litform α) := ⟨fun t _ => toStr t⟩
 
@@ -50,31 +50,31 @@ variable (F : Q(Type*)) (ls : Q(LogicalConnective $F))
 abbrev Lit (F : Q(Type*)) := Litform Q($F)
 
 abbrev toExpr : Lit F → Q($F)
-  | atom e  => q($e)
-  | ⊤       => q(⊤)
-  | ⊥       => q(⊥)
-  | p ⋏ q   => q($(toExpr p) ⋏ $(toExpr q))
-  | p ⋎ q   => q($(toExpr p) ⋎ $(toExpr q))
-  | ∼p      => q(∼$(toExpr p))
-  | p ➝ q  => q($(toExpr p) ➝ $(toExpr q))
+  | atom e  => ψ($e)
+  | ⊤       => ψ(⊤)
+  | ⊥       => ψ(⊥)
+  | φ ⋏ ψ   => ψ($(toExpr φ) ⋏ $(toExpr ψ))
+  | φ ⋎ ψ   => ψ($(toExpr φ) ⋎ $(toExpr ψ))
+  | ∼φ      => ψ(∼$(toExpr φ))
+  | φ ➝ ψ  => ψ($(toExpr φ) ➝ $(toExpr ψ))
 
 partial def denote : Q($F) → MetaM (Lit F)
-  | ∼q(⊤)        => return ⊤
-  | ∼q(⊥)        => return ⊥
-  | ∼q($p ⋏ $q)  => return (←denote p) ⋏ (←denote q)
-  | ∼q($p ⋎ $q)  => return (←denote p) ⋎ (←denote q)
-  | ∼q($p ➝ $q) => return (←denote p) ➝ (←denote q)
-  | ∼q($p ⭤ $q)  => return (←denote p) ⭤ (←denote q)
-  | ∼q(∼$p)      => return ∼(←denote p)
-  | ∼q($e)       => return atom e
+  | ∼ψ(⊤)        => return ⊤
+  | ∼ψ(⊥)        => return ⊥
+  | ∼ψ($φ ⋏ $ψ)  => return (←denote φ) ⋏ (←denote ψ)
+  | ∼ψ($φ ⋎ $ψ)  => return (←denote φ) ⋎ (←denote ψ)
+  | ∼ψ($φ ➝ $ψ) => return (←denote φ) ➝ (←denote ψ)
+  | ∼ψ($φ ⭤ $ψ)  => return (←denote φ) ⭤ (←denote ψ)
+  | ∼ψ(∼$φ)      => return ∼(←denote φ)
+  | ∼ψ($e)       => return atom e
 
-instance denotation : Denotation q($F) (Lit F) where
+instance denotation : Denotation ψ($F) (Lit F) where
   denote' := denote F ls
   toExpr' := toExpr F ls
 
-abbrev DEq (p q : Lit F) :=
+abbrev DEq (φ ψ : Lit F) :=
   letI := denotation F ls
-  Denotation.DEq F p q
+  Denotation.DEq F φ ψ
 
 end Meta
 

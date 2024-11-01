@@ -13,43 +13,43 @@ namespace Formula.Kripke
 def Satisfies (M : Kripke.Model α) (x : M.World) : Formula α → Prop
   | atom a  => M.Valuation x a
   | ⊥  => False
-  | p ➝ q => (Satisfies M x p) ➝ (Satisfies M x q)
-  | □p   => ∀ y, x ≺ y → (Satisfies M y p)
+  | φ ➝ ψ => (Satisfies M x φ) ➝ (Satisfies M x ψ)
+  | □φ   => ∀ y, x ≺ y → (Satisfies M y φ)
 
 namespace Satisfies
 
 protected instance semantics {M : Kripke.Model α} : Semantics (Formula α) (M.World) := ⟨fun x ↦ Formula.Kripke.Satisfies M x⟩
 
-variable {M : Kripke.Model α} {x : M.World} {p q : Formula α}
+variable {M : Kripke.Model α} {x : M.World} {φ ψ : Formula α}
 
 @[simp]
-protected lemma iff_models : x ⊧ p ↔ Kripke.Satisfies M x p := iff_of_eq rfl
+protected lemma iff_models : x ⊧ φ ↔ Kripke.Satisfies M x φ := iff_of_eq rfl
 
-lemma box_def : x ⊧ □p ↔ ∀ y, x ≺ y → y ⊧ p := by simp [Kripke.Satisfies];
+lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺ y → y ⊧ φ := by simp [Kripke.Satisfies];
 
-lemma dia_def : x ⊧ ◇p ↔ ∃ y, x ≺ y ∧ y ⊧ p := by simp [Kripke.Satisfies];
+lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Kripke.Satisfies];
 
-lemma not_def : x ⊧ ∼p ↔ ¬(x ⊧ p) := by
-  induction p using Formula.rec' generalizing x with
+lemma not_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by
+  induction φ using Formula.rec' generalizing x with
   | _ => simp_all [Satisfies];
 instance : Semantics.Not (M.World) := ⟨not_def⟩
 
-lemma imp_def : x ⊧ p ➝ q ↔ (x ⊧ p) → (x ⊧ q) := by tauto;
+lemma imp_def : x ⊧ φ ➝ ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;
 instance : Semantics.Imp (M.World) := ⟨imp_def⟩
 
-lemma or_def : x ⊧ p ⋎ q ↔ x ⊧ p ∨ x ⊧ q := by simp [Satisfies]; tauto;
+lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies]; tauto;
 instance : Semantics.Or (M.World) := ⟨or_def⟩
 
-lemma and_def : x ⊧ p ⋏ q ↔ x ⊧ p ∧ x ⊧ q := by simp [Satisfies];
+lemma and_def : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies];
 instance : Semantics.And (M.World) := ⟨and_def⟩
 
 protected instance : Semantics.Tarski (M.World) where
   realize_top := by tauto;
   realize_bot := by tauto;
 
-lemma negneg_def : x ⊧ ∼∼p ↔ x ⊧ p := by simp [Satisfies];
+lemma negneg_def : x ⊧ ∼∼φ ↔ x ⊧ φ := by simp [Satisfies];
 
-lemma multibox_def : x ⊧ □^[n]p ↔ ∀ {y}, x ≺^[n] y → y ⊧ p := by
+lemma multibox_def : x ⊧ □^[n]φ ↔ ∀ {y}, x ≺^[n] y → y ⊧ φ := by
   induction n generalizing x with
   | zero => aesop;
   | succ n ih =>
@@ -64,13 +64,13 @@ lemma multibox_def : x ⊧ □^[n]p ↔ ∀ {y}, x ≺^[n] y → y ⊧ p := by
       intro u Ryu;
       exact h _ Rxy Ryu;
 
-lemma multidia_def : x ⊧ ◇^[n]p ↔ ∃ y, x ≺^[n] y ∧ y ⊧ p := by
+lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
   induction n generalizing x with
   | zero => simp;
   | succ n ih =>
     constructor;
     . intro h;
-      replace h : x ⊧ (◇◇^[n]p) := by simpa using h;
+      replace h : x ⊧ (◇◇^[n]φ) := by simpa using h;
       obtain ⟨v, hwv, hv⟩ := dia_def.mp h;
       obtain ⟨x, hvx, hx⟩ := ih.mp hv;
       use x;
@@ -88,20 +88,20 @@ lemma multidia_def : x ⊧ ◇^[n]p ↔ ∃ y, x ≺^[n] y ∧ y ⊧ p := by
       . apply ih.mpr;
         use y;
 
-lemma trans (hpq : x ⊧ p ➝ q) (hqr : x ⊧ q ➝ r) : x ⊧ p ➝ r := by simp_all;
+lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 
-lemma mdp (hpq : x ⊧ p ➝ q) (hp : x ⊧ p) : x ⊧ q := by simp_all;
+lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
 
-lemma dia_dual : x ⊧ ◇p ↔ x ⊧ ∼□(∼p) := by simp [Satisfies];
+lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Satisfies];
 
-lemma box_dual : x ⊧ □p ↔ x ⊧ ∼◇(∼p) := by simp [Satisfies];
+lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Satisfies];
 
-lemma not_imp : ¬(x ⊧ p ➝ q) ↔ x ⊧ p ⋏ ∼q := by simp [Satisfies];
+lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Satisfies];
 
 end Satisfies
 
 
-def ValidOnModel (M : Kripke.Model α) (p : Formula α) := ∀ x : M.World, x ⊧ p
+def ValidOnModel (M : Kripke.Model α) (φ : Formula α) := ∀ x : M.World, x ⊧ φ
 
 namespace ValidOnModel
 
@@ -112,25 +112,25 @@ instance semantics : Semantics (Formula α) (Kripke.Model α) := ⟨fun M ↦ Fo
 instance : Semantics.Bot (Kripke.Model α) where
   realize_bot M := by simp [Kripke.ValidOnModel, Kripke.Satisfies];
 
-variable {M : Model α} {p q r : Formula α}
+variable {M : Model α} {φ ψ χ : Formula α}
 
-protected lemma mdp (hpq : M ⊧ p ➝ q) (hp : M ⊧ p) : M ⊧ q := by
+protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro x;
   exact (Satisfies.imp_def.mp $ hpq x) (hp x);
 
-protected lemma nec (h : M ⊧ p) : M ⊧ □p := by
+protected lemma nec (h : M ⊧ φ) : M ⊧ □φ := by
   intro x y _;
   exact h y;
 
 protected lemma verum : M ⊧ ⊤ := by intro; tauto;
 
-protected lemma imply₁ : M ⊧ (Axioms.Imply₁ p q) := by simp [ValidOnModel]; tauto;
+protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
 
-protected lemma imply₂ : M ⊧ (Axioms.Imply₂ p q r) := by simp [ValidOnModel]; tauto;
+protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
 
-protected lemma elimContra : M ⊧ (Axioms.ElimContra p q) := by simp [ValidOnModel, Satisfies]; tauto;
+protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel, Satisfies]; tauto;
 
-protected lemma axiomK : M ⊧ (Axioms.K p q)  := by
+protected lemma axiomK : M ⊧ (Axioms.K φ ψ)  := by
   intro V;
   apply Satisfies.imp_def.mpr;
   intro hpq;
@@ -143,7 +143,7 @@ protected lemma axiomK : M ⊧ (Axioms.K p q)  := by
 end ValidOnModel
 
 
-def ValidOnFrame (F : Frame) (p : Formula α) := ∀ V, (⟨F, V⟩ : Kripke.Model α) ⊧ p
+def ValidOnFrame (F : Frame) (φ : Formula α) := ∀ V, (⟨F, V⟩ : Kripke.Model α) ⊧ φ
 
 namespace ValidOnFrame
 
@@ -151,28 +151,28 @@ instance semantics : Semantics (Formula α) (Frame.Dep α) := ⟨fun F ↦ Formu
 
 variable {F : Frame.Dep α}
 
-@[simp] protected lemma models_iff : F ⊧ p ↔ Kripke.ValidOnFrame F p := iff_of_eq rfl
+@[simp] protected lemma models_iff : F ⊧ φ ↔ Kripke.ValidOnFrame F φ := iff_of_eq rfl
 
 instance : Semantics.Bot (Frame.Dep α) where
   realize_bot _ := by simp [Kripke.ValidOnFrame];
 
-protected lemma nec (h : F ⊧ p) : F ⊧ □p := by
+protected lemma nec (h : F ⊧ φ) : F ⊧ □φ := by
   intro V x y _;
   exact h V y;
 
-protected lemma mdp (hpq : F ⊧ p ➝ q) (hp : F ⊧ p) : F ⊧ q := by
+protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
   intro V x;
   exact (hpq V x) (hp V x);
 
 protected lemma verum : F ⊧ ⊤ := by intros _; tauto;
 
-protected lemma imply₁ : F ⊧ (Axioms.Imply₁ p q) := by intro V; exact ValidOnModel.imply₁ (M := ⟨F, V⟩);
+protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by intro V; exact ValidOnModel.imply₁ (M := ⟨F, V⟩);
 
-protected lemma imply₂ : F ⊧ (Axioms.Imply₂ p q r) := by intro V; exact ValidOnModel.imply₂ (M := ⟨F, V⟩);
+protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by intro V; exact ValidOnModel.imply₂ (M := ⟨F, V⟩);
 
-protected lemma elimContra : F ⊧ (Axioms.ElimContra p q) := by intro V; exact ValidOnModel.elimContra (M := ⟨F, V⟩);
+protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elimContra (M := ⟨F, V⟩);
 
-protected lemma axiomK : F ⊧ (Axioms.K p q) := by intro V; exact ValidOnModel.axiomK (M := ⟨F, V⟩);
+protected lemma axiomK : F ⊧ (Axioms.K φ ψ) := by intro V; exact ValidOnModel.axiomK (M := ⟨F, V⟩);
 
 protected lemma axiomK_set : F ⊧* 𝗞 := by
   simp [Semantics.realizeSet_iff];
@@ -183,7 +183,7 @@ end ValidOnFrame
 
 
 
-@[simp] def ValidOnFrameClass (𝔽 : FrameClass) (p : Formula α) := ∀ {F : Frame}, F ∈ 𝔽 → F#α ⊧ p
+@[simp] def ValidOnFrameClass (𝔽 : FrameClass) (φ : Formula α) := ∀ {F : Frame}, F ∈ 𝔽 → F#α ⊧ φ
 
 namespace ValidOnFrameClass
 
@@ -191,21 +191,21 @@ protected instance semantics : Semantics (Formula α) (FrameClass.Dep α) := ⟨
 
 variable {𝔽 : FrameClass.Dep α}
 
-@[simp] protected lemma models_iff : 𝔽 ⊧ p ↔ Formula.Kripke.ValidOnFrameClass 𝔽 p := iff_of_eq rfl
+@[simp] protected lemma models_iff : 𝔽 ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass 𝔽 φ := iff_of_eq rfl
 
-protected lemma nec (h : 𝔽 ⊧ p) : 𝔽 ⊧ □p := by
+protected lemma nec (h : 𝔽 ⊧ φ) : 𝔽 ⊧ □φ := by
   intro _ hF;
   apply Kripke.ValidOnFrame.nec;
   exact h hF;
 
-protected lemma mdp (hpq : 𝔽 ⊧ p ➝ q) (hp : 𝔽 ⊧ p) : 𝔽 ⊧ q := by
+protected lemma mdp (hpq : 𝔽 ⊧ φ ➝ ψ) (hp : 𝔽 ⊧ φ) : 𝔽 ⊧ ψ := by
   intro _ hF;
   exact Kripke.ValidOnFrame.mdp (hpq hF) (hp hF)
 
 end ValidOnFrameClass
 
 
-abbrev ValidOnFiniteFrameClass (𝔽 : FiniteFrameClass) (p : Formula α) := 𝔽.toFrameClass#α ⊧ p
+abbrev ValidOnFiniteFrameClass (𝔽 : FiniteFrameClass) (φ : Formula α) := 𝔽.toFrameClass#α ⊧ φ
 
 namespace ValidOnFiniteFrameClass
 
@@ -213,7 +213,7 @@ protected instance semantics : Semantics (Formula α) (FiniteFrameClass.Dep α) 
 
 variable {𝔽 : FiniteFrameClass.Dep α}
 
-@[simp] protected lemma models_iff : 𝔽 ⊧ p ↔ Kripke.ValidOnFiniteFrameClass 𝔽 p := iff_of_eq rfl
+@[simp] protected lemma models_iff : 𝔽 ⊧ φ ↔ Kripke.ValidOnFiniteFrameClass 𝔽 φ := iff_of_eq rfl
 
 end ValidOnFiniteFrameClass
 
@@ -226,30 +226,30 @@ namespace Kripke
 open Formula.Kripke (ValidOnFrame ValidOnModel Satisfies)
 
 variable {𝔽 : Kripke.FrameClass} {F : Kripke.Frame}
-         {p q : Formula α}
+         {φ ψ : Formula α}
 
 protected lemma axiomK : 𝔽#α ⊧* 𝗞 := by
   simp only [Semantics.RealizeSet.setOf_iff];
-  rintro f ⟨p, q, _⟩ F _;
+  rintro f ⟨φ, ψ, _⟩ F _;
   apply (Semantics.RealizeSet.setOf_iff.mp $ ValidOnFrame.axiomK_set) f;
-  use p, q;
+  use φ, ψ;
 
-protected lemma nec (h : 𝔽#α ⊧ p) : 𝔽#α ⊧ □p := by
+protected lemma nec (h : 𝔽#α ⊧ φ) : 𝔽#α ⊧ □φ := by
   intro _ hF;
   apply ValidOnFrame.nec;
   exact h hF;
 
-protected lemma mdp (hpq : 𝔽#α ⊧ p ➝ q) (hp : 𝔽#α ⊧ p) : 𝔽#α ⊧ q := by
+protected lemma mdp (hpq : 𝔽#α ⊧ φ ➝ ψ) (hp : 𝔽#α ⊧ φ) : 𝔽#α ⊧ ψ := by
   intro _ hF;
   exact Formula.Kripke.ValidOnFrame.mdp (hpq hF) (hp hF)
 
-lemma iff_not_validOnFrameClass : ¬(𝔽#α ⊧ p) ↔ ∃ F ∈ 𝔽, ∃ V x, ¬Satisfies ⟨F, V⟩ x p := by
+lemma iff_not_validOnFrameClass : ¬(𝔽#α ⊧ φ) ↔ ∃ F ∈ 𝔽, ∃ V x, ¬Satisfies ⟨F, V⟩ x φ := by
   simp [ValidOnFrame, ValidOnModel, Satisfies];
 
-lemma iff_not_set_validOnFrameClass : ¬(𝔽#α ⊧* T) ↔ ∃ p ∈ T, ∃ F ∈ 𝔽, ∃ V x, ¬Satisfies ⟨F, V⟩ x p  := by
+lemma iff_not_set_validOnFrameClass : ¬(𝔽#α ⊧* T) ↔ ∃ φ ∈ T, ∃ F ∈ 𝔽, ∃ V x, ¬Satisfies ⟨F, V⟩ x φ  := by
   simp [Semantics.realizeSet_iff, ValidOnFrame, ValidOnModel, Satisfies];
 
-lemma iff_not_validOnFrame : ¬(F#α ⊧* T) ↔ ∃ p ∈ T, ∃ V x, ¬Satisfies ⟨F, V⟩ x p := by
+lemma iff_not_validOnFrame : ¬(F#α ⊧* T) ↔ ∃ φ ∈ T, ∃ V x, ¬Satisfies ⟨F, V⟩ x φ := by
   simp [Semantics.realizeSet_iff, ValidOnFrame, ValidOnModel, Satisfies];
 
 
@@ -300,9 +300,9 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] :
     . intro h;
       apply defi.define.mp;
       constructor;
-      intro p hp;
-      exact h p $ Deduction.maxm! $ by right; exact hp;
-    . intro hF p hp;
+      intro φ hp;
+      exact h φ $ Deduction.maxm! $ by right; exact hp;
+    . intro hF φ hp;
       induction hp using Deduction.inducition_with_necOnly! with
       | hMaxm h =>
         simp at h;
@@ -322,7 +322,7 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] :
 instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 𝔽] : 𝔽(𝜿(Ax)).Characteraizable 𝔽 where
   characterize := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
-    intro F hF p hp;
+    intro F hF φ hp;
     induction hp using Deduction.inducition_with_necOnly! with
     | hMaxm h =>
       simp at h;
@@ -351,9 +351,9 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).
     . intro h;
       apply defi.define.mp;
       constructor;
-      intro p hp;
-      exact h p $ Deduction.maxm! $ by right; exact hp;
-    . intro hF p hp;
+      intro φ hp;
+      exact h φ $ Deduction.maxm! $ by right; exact hp;
+    . intro hF φ hp;
       induction hp using Deduction.inducition_with_necOnly! with
       | hMaxm h =>
         simp at h;
@@ -373,7 +373,7 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).
 instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).Characteraizable 𝔽] : 𝔽ꟳ(𝜿(Ax)).Characteraizable 𝔽 where
   characterize := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
-    intro F hF p hp;
+    intro F hF φ hp;
     induction hp using Deduction.inducition_with_necOnly! with
     | hMaxm h =>
       simp at h;
@@ -393,19 +393,19 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).C
 section sound
 
 variable {α : Type u}
-variable {Λ : Hilbert α} {p : Formula α}
+variable {Λ : Hilbert α} {φ : Formula α}
 
-lemma sound : Λ ⊢! p → 𝔽(Λ) ⊧ p := by
+lemma sound : Λ ⊢! φ → 𝔽(Λ) ⊧ φ := by
   intro hp F hF;
   simp [Hilbert.theorems, System.theory] at hF;
-  exact hF p hp;
+  exact hF φ hp;
 instance : Sound Λ 𝔽(Λ) := ⟨sound⟩
 
-lemma sound_finite : Λ ⊢! p → 𝔽ꟳ(Λ) ⊧ p := by
+lemma sound_finite : Λ ⊢! φ → 𝔽ꟳ(Λ) ⊧ φ := by
   intro hp F hF;
   simp [Hilbert.theorems, System.theory] at hF;
   obtain ⟨FF, hFF₁, rfl⟩ := hF;
-  exact hFF₁ p hp;
+  exact hFF₁ φ hp;
 instance : Sound Λ 𝔽ꟳ(Λ) := ⟨sound_finite⟩
 
 lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
@@ -429,14 +429,14 @@ lemma unprovable_bot_finite (hc : 𝔽ꟳ(Λ).Nonempty) : Λ ⊬ ⊥ := by
 instance (hc : 𝔽ꟳ(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot_finite hc
 
 lemma sound_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).Characteraizable 𝔽]
-  : Λ ⊢! p → 𝔽#α ⊧ p := by
+  : Λ ⊢! φ → 𝔽#α ⊧ φ := by
   intro h F hF;
   apply sound h;
   apply char.characterize hF;
 instance {𝔽 : FrameClass} [𝔽(Λ).Characteraizable 𝔽] : Sound Λ 𝔽#α := ⟨sound_of_characterizability⟩
 
 lemma sound_of_finite_characterizability {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Λ).Characteraizable 𝔽]
-  : Λ ⊢! p → 𝔽#α ⊧ p := by
+  : Λ ⊢! φ → 𝔽#α ⊧ φ := by
   intro h F hF;
   apply sound_finite h;
   obtain ⟨FF, hFF, rfl⟩ := hF;
@@ -479,19 +479,19 @@ instance K_sound : Sound 𝐊 (AllFrameClass#α) := inferInstance
 instance K_consistent : System.Consistent (𝐊 : Hilbert α) := inferInstance
 
 
-lemma restrict_finite : 𝔽#α ⊧ p → 𝔽ꟳ#α ⊧ p := by
+lemma restrict_finite : 𝔽#α ⊧ φ → 𝔽ꟳ#α ⊧ φ := by
   intro h F hF;
   obtain ⟨FF, hFF₁, rfl⟩ := hF;
   exact h (by simpa)
 
 instance {Λ : Hilbert α} [sound : Sound Λ 𝔽#α] : Sound Λ 𝔽ꟳ#α := ⟨by
-  intro p h;
+  intro φ h;
   exact restrict_finite $ sound.sound h;
 ⟩
 
 instance : Sound 𝐊 (AllFrameClassꟳ#α) := inferInstance
 
-lemma exists_finite_frame : ¬𝔽ꟳ#α ⊧ p ↔ ∃ F ∈ 𝔽ꟳ, ¬F#α ⊧ p := by simp;
+lemma exists_finite_frame : ¬𝔽ꟳ#α ⊧ φ ↔ ∃ F ∈ 𝔽ꟳ, ¬F#α ⊧ φ := by simp;
 
 class FiniteFrameProperty (Λ : Hilbert α) (𝔽 : FrameClass) where
   [complete : Complete Λ 𝔽ꟳ#α]
@@ -576,7 +576,7 @@ lemma weakerThan_of_subset_FrameClass
   [sound₁ : Sound 𝜿Ax₁ 𝔽₁#α] [complete₂ : Complete 𝜿Ax₂ 𝔽₂#α]
   (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : 𝜿Ax₁ ≤ₛ 𝜿Ax₂ := by
   apply System.weakerThan_iff.mpr;
-  intro p hp;
+  intro φ hp;
   apply complete₂.complete;
   intro F hF;
   exact sound₁.sound hp $ h𝔽 hF;

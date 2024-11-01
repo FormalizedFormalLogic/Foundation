@@ -55,8 +55,8 @@ lemma val_numeral {n} : ∀ (t : Semiterm ℒₒᵣ ξ n),
   | Semiterm.func Language.Add.add v,   e, f => by simp [Semiterm.val_func, val_numeral (v 0), val_numeral (v 1), numeral_add_numeral]
   | Semiterm.func Language.Mul.mul v,   e, f => by simp [Semiterm.val_func, val_numeral (v 0), val_numeral (v 1), numeral_mul_numeral]
 
-lemma bold_sigma_one_completeness {n} {p : Semiformula ℒₒᵣ ξ n} (hp : Hierarchy 𝚺 1 p) {e f} :
-    Semiformula.Evalm ℕ e f p → Semiformula.Evalm M (fun x ↦ numeral (e x)) (fun x ↦ numeral (f x)) p := by
+lemma bold_sigma_one_completeness {n} {φ : Semiformula ℒₒᵣ ξ n} (hp : Hierarchy 𝚺 1 φ) {e f} :
+    Semiformula.Evalm ℕ e f φ → Semiformula.Evalm M (fun x ↦ numeral (e x)) (fun x ↦ numeral (f x)) φ := by
   revert e
   apply sigma₁_induction' hp
   case hVerum => simp
@@ -67,22 +67,22 @@ lemma bold_sigma_one_completeness {n} {p : Semiformula ℒₒᵣ ξ n} (hp : Hie
   case hNLT => intro n t₁ t₂ e; simp [val_numeral]
   case hAnd =>
     simp only [LogicalConnective.HomClass.map_and, LogicalConnective.Prop.and_eq, and_imp]
-    intro n p q _ _ ihp ihq e hp hq
+    intro n φ ψ _ _ ihp ihq e hp hq
     exact ⟨ihp hp, ihq hq⟩
   case hOr =>
     simp only [LogicalConnective.HomClass.map_or, LogicalConnective.Prop.or_eq]
-    rintro n p q _ _ ihp ihq e (hp | hq)
+    rintro n φ ψ _ _ ihp ihq e (hp | hq)
     · left; exact ihp hp
     · right; exact ihq hq
   case hBall =>
     simp only [Semiformula.eval_ball, Nat.succ_eq_add_one, Semiformula.eval_operator₂,
       Semiterm.val_bvar, Matrix.cons_val_zero, Semiterm.val_bShift, Structure.LT.lt, val_numeral]
-    intro n t p _ ihp e hp x hx
+    intro n t φ _ ihp e hp x hx
     rcases lt_numeral_iff.mp hx with ⟨x, rfl⟩
     simpa [Matrix.comp_vecCons'] using ihp (hp x (by simp))
   case hEx =>
     simp only [Semiformula.eval_ex, Nat.succ_eq_add_one, forall_exists_index]
-    intro n p _ ihp e x hp
+    intro n φ _ ihp e x hp
     exact ⟨numeral x, by simpa [Matrix.comp_vecCons'] using ihp hp⟩
 
 lemma sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :

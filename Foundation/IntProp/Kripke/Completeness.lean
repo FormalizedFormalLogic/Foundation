@@ -68,14 +68,14 @@ lemma confluent [Encodable α] [Λ.IncludeEFQ] [HasAxiomWeakLEM Λ] : Confluent 
     contradiction;
   push_neg at hΓz;
 
-  let Θy := Γ.filter (λ p => p ∈ y.tableau.1 ∧ p ∉ x.tableau.1);
-  let Θz := Γ.filter (λ p => p ∈ z.tableau.1 ∧ p ∉ x.tableau.1);
-  let Θx := Γ.filter (λ p => (p ∈ y.tableau.1 ∧ p ∈ x.tableau.1) ∨ (p ∈ z.tableau.1 ∧ p ∈ x.tableau.1));
+  let Θy := Γ.filter (λ φ => φ ∈ y.tableau.1 ∧ φ ∉ x.tableau.1);
+  let Θz := Γ.filter (λ φ => φ ∈ z.tableau.1 ∧ φ ∉ x.tableau.1);
+  let Θx := Γ.filter (λ φ => (φ ∈ y.tableau.1 ∧ φ ∈ x.tableau.1) ∨ (φ ∈ z.tableau.1 ∧ φ ∈ x.tableau.1));
 
   suffices ∼⋀Θy ∈ x.tableau.1 by
     have : ∼⋀Θy ∈ y.tableau.1 := Rxy this;
     have : ⋀Θy ∈ y.tableau.1 := iff_mem₁_conj.mpr $ by
-      intro p hp;
+      intro φ hp;
       have := by simpa using List.of_mem_filter hp;
       exact this.1;
     have : Λ ⊬ ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ∼⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
@@ -94,7 +94,7 @@ lemma confluent [Encodable α] [Λ.IncludeEFQ] [HasAxiomWeakLEM Λ] : Confluent 
       . exact (FiniteContext.of'! d₂) ⨀ (and₂'! this);
     ) d₁;
     exact imp_trans''! d₃ $ conjconj_subset! $ by
-      intro p hp; simp;
+      intro φ hp; simp;
       apply or_iff_not_imp_left.mpr;
       intro nmem_Θx;
       have := (not_imp_not.mpr $ List.mem_filter_of_mem hp) nmem_Θx; simp at this;
@@ -118,11 +118,11 @@ lemma confluent [Encodable α] [Λ.IncludeEFQ] [HasAxiomWeakLEM Λ] : Confluent 
   have d : Λ ⊢! ⋀Θx ➝ ∼∼⋀Θz ➝ ∼⋀Θy := imp_trans''! this contra₀!;
 
   have mem_Θx_x : ⋀Θx ∈ x.tableau.1 := iff_mem₁_conj.mpr $ by
-    intro p hp;
+    intro φ hp;
     have := by simpa using List.of_mem_filter hp;
     rcases this with ⟨_, _⟩ | ⟨_, _⟩ <;> assumption;
   have mem_Θz_z : ⋀Θz ∈ z.tableau.1 := iff_mem₁_conj.mpr $ by
-    intro p hp;
+    intro φ hp;
     have := by simpa using List.of_mem_filter hp;
     exact this.1;
 
@@ -138,17 +138,17 @@ lemma connected [DecidableEq α] [HasAxiomDummett Λ] : Connected (CanonicalFram
   intro x y z Rxy Ryz;
   apply or_iff_not_imp_left.mpr;
   intro nRyz;
-  obtain ⟨p, hyp, nhzp⟩ := Set.not_subset.mp nRyz;
-  intro q hqz;
-  have : q ➝ p ∉ x.tableau.1 := by
+  obtain ⟨φ, hyp, nhzp⟩ := Set.not_subset.mp nRyz;
+  intro ψ hqz;
+  have : ψ ➝ φ ∉ x.tableau.1 := by
     by_contra hqpx;
-    have hqpz : q ➝ p ∈ z.tableau.1 := by aesop;
-    have : p ∈ z.tableau.1 := mdp₁_mem hqz hqpz;
+    have hqpz : ψ ➝ φ ∈ z.tableau.1 := by aesop;
+    have : φ ∈ z.tableau.1 := mdp₁_mem hqz hqpz;
     contradiction;
-  have := iff_mem₁_or.mp $ mem₁_of_provable (t := x) (p := (p ➝ q) ⋎ (q ➝ p)) dummett!;
-  have hpqx : p ➝ q ∈ x.tableau.1 := by aesop;
-  have hpqy : p ➝ q ∈ y.tableau.1 := Rxy hpqx;
-  have : q ∈ y.tableau.1 := mdp₁_mem hyp hpqy;
+  have := iff_mem₁_or.mp $ mem₁_of_provable (t := x) (φ := (φ ➝ ψ) ⋎ (ψ ➝ φ)) dummett!;
+  have hpqx : φ ➝ ψ ∈ x.tableau.1 := by aesop;
+  have hpqy : φ ➝ ψ ∈ y.tableau.1 := Rxy hpqx;
+  have : ψ ∈ y.tableau.1 := mdp₁_mem hyp hpqy;
   exact this;
 
 end CanonicalFrame
@@ -179,36 +179,36 @@ section
 
 variable [Nonempty (SCT Λ)]
 
-variable {t : SCT Λ} {p q : Formula α}
+variable {t : SCT Λ} {φ ψ : Formula α}
 
 private lemma truthlemma.himp
   [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
   {t : (CanonicalModel Λ).World}
-  (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ p ↔ p ∈ t.tableau.1)
-  (ihq : ∀ {t : (CanonicalModel Λ).World}, t ⊧ q ↔ q ∈ t.tableau.1)
-  : t ⊧ p ➝ q ↔ p ➝ q ∈ t.tableau.1 := by
+  (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ φ ↔ φ ∈ t.tableau.1)
+  (ihq : ∀ {t : (CanonicalModel Λ).World}, t ⊧ ψ ↔ ψ ∈ t.tableau.1)
+  : t ⊧ φ ➝ ψ ↔ φ ➝ ψ ∈ t.tableau.1 := by
   constructor;
   . contrapose;
     simp_all [Satisfies];
     intro h;
     replace h := not_mem₁_iff_mem₂.mp h;
-    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert p t.tableau.1, {q})) $ by
+    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert φ t.tableau.1, {ψ})) $ by
       simp only [Tableau.Consistent];
       intro Γ Δ hΓ hΔ;
-      replace hΓ : ∀ r, r ∈ Γ.remove p → r ∈ t.tableau.1 := by
-        intro r hr;
+      replace hΓ : ∀ χ, χ ∈ Γ.remove φ → χ ∈ t.tableau.1 := by
+        intro χ hr;
         have ⟨hr₁, hr₂⟩ := List.mem_remove_iff.mp hr;
-        have := by simpa using hΓ r hr₁;
+        have := by simpa using hΓ χ hr₁;
         simp_all;
       by_contra hC;
-      have : Λ ⊢! ⋀(Γ.remove p) ➝ (p ➝ q) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
+      have : Λ ⊢! ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
         apply deduct'!;
         apply deduct!;
-        have : [p, p ➝ ⋁Δ] ⊢[Λ]! p := by_axm!;
-        have : [p, p ➝ ⋁Δ] ⊢[Λ]! ⋁Δ := by_axm! ⨀ this;
+        have : [φ, φ ➝ ⋁Δ] ⊢[Λ]! φ := by_axm!;
+        have : [φ, φ ➝ ⋁Δ] ⊢[Λ]! ⋁Δ := by_axm! ⨀ this;
         exact disj_allsame'! (by simpa using hΔ) this;
       )
-      have : Λ ⊬ ⋀(Γ.remove p) ➝ (p ➝ q) := by simpa using (t.consistent hΓ (show ∀ r ∈ [p ➝ q], r ∈ t.tableau.2 by simp_all));
+      have : Λ ⊬ ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := by simpa using (t.consistent hΓ (show ∀ χ ∈ [φ ➝ ψ], χ ∈ t.tableau.2 by simp_all));
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
@@ -226,36 +226,36 @@ private lemma truthlemma.himp
     apply not_mem₂_iff_mem₁.mp;
     exact not_mem₂
       (by simp_all)
-      (show Λ ⊢! ⋀[p, p ➝ q] ➝ q by
+      (show Λ ⊢! ⋀[φ, φ ➝ ψ] ➝ ψ by
         simp;
         apply and_imply_iff_imply_imply'!.mpr;
         apply deduct'!;
         apply deduct!;
-        exact by_axm! ⨀ (by_axm! (p := p));
+        exact by_axm! ⨀ (by_axm! (φ := φ));
       );
 
 private lemma truthlemma.hneg
   [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
   {t : (CanonicalModel Λ).World}
-  (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ p ↔ p ∈ t.tableau.1)
-  : t ⊧ ∼p ↔ ∼p ∈ t.tableau.1 := by
+  (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ φ ↔ φ ∈ t.tableau.1)
+  : t ⊧ ∼φ ↔ ∼φ ∈ t.tableau.1 := by
   constructor;
   . contrapose;
     simp_all [Satisfies];
     intro h;
     replace h := not_mem₁_iff_mem₂.mp h;
-    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert p t.tableau.1, ∅)) $ by
+    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert φ t.tableau.1, ∅)) $ by
       simp only [Tableau.Consistent];
       intro Γ Δ hΓ hΔ;
-      replace hΓ : ∀ q, q ∈ Γ.remove p → q ∈ t.tableau.1 := by
-        intro q hq;
+      replace hΓ : ∀ ψ, ψ ∈ Γ.remove φ → ψ ∈ t.tableau.1 := by
+        intro ψ hq;
         have ⟨hq₁, hq₂⟩ := List.mem_remove_iff.mp hq;
-        have := by simpa using hΓ q hq₁;
+        have := by simpa using hΓ ψ hq₁;
         simp_all;
       replace hΔ : Δ = [] := List.nil_iff.mpr hΔ; subst hΔ;
       by_contra hC; simp at hC;
-      have : Λ ⊢! ⋀(Γ.remove p) ➝ ∼p := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
-      have : Λ ⊬ ⋀(Γ.remove p) ➝ ∼p := by simpa using t.consistent (Δ := [∼p]) hΓ (by simpa);
+      have : Λ ⊢! ⋀(Γ.remove φ) ➝ ∼φ := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
+      have : Λ ⊬ ⋀(Γ.remove φ) ➝ ∼φ := by simpa using t.consistent (Δ := [∼φ]) hΓ (by simpa);
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
@@ -263,31 +263,31 @@ private lemma truthlemma.hneg
     intro ht t' htt';
     apply ihp.not.mpr;
     by_contra hC;
-    have : Λ ⊬ p ⋏ ∼p ➝ ⊥ := by simpa using t'.consistent (Γ := [p, ∼p]) (Δ := []) (by aesop) (by simp);
-    have : Λ ⊢! p ⋏ ∼p ➝ ⊥ := intro_bot_of_and!;
+    have : Λ ⊬ φ ⋏ ∼φ ➝ ⊥ := by simpa using t'.consistent (Γ := [φ, ∼φ]) (Δ := []) (by aesop) (by simp);
+    have : Λ ⊢! φ ⋏ ∼φ ➝ ⊥ := intro_bot_of_and!;
     contradiction;
 
 lemma truthlemma
   [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
-  {t : (CanonicalModel Λ).World} : t ⊧ p ↔ p ∈ t.tableau.1 := by
-  induction p using Formula.rec' generalizing t with
-  | himp p q ihp ihq => exact truthlemma.himp ihp ihq
-  | hneg p ihp => exact truthlemma.hneg ihp;
+  {t : (CanonicalModel Λ).World} : t ⊧ φ ↔ φ ∈ t.tableau.1 := by
+  induction φ using Formula.rec' generalizing t with
+  | himp φ ψ ihp ihq => exact truthlemma.himp ihp ihq
+  | hneg φ ihp => exact truthlemma.hneg ihp;
   | _ => simp [Satisfies.iff_models, Satisfies, *];
 
 lemma deducible_of_validOnCanonicelModel
   [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
-  : (CanonicalModel Λ) ⊧ p ↔ Λ ⊢! p := by
+  : (CanonicalModel Λ) ⊧ φ ↔ Λ ⊢! φ := by
   constructor;
   . contrapose;
     intro h;
-    have : Tableau.Consistent Λ (∅, {p}) := by
+    have : Tableau.Consistent Λ (∅, {φ}) := by
       simp only [Tableau.Consistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
       replace hΓ : Γ = [] := List.nil_iff.mpr hΓ;
       subst hΓ;
-      have : Λ ⊢! p := disj_allsame'! hΔ (hC ⨀ verum!);
+      have : Λ ⊢! φ := disj_allsame'! hΔ (hC ⨀ verum!);
       contradiction;
     obtain ⟨t', ht'⟩ := lindenbaum this;
     simp [ValidOnModel.iff_models, ValidOnModel]
@@ -296,7 +296,7 @@ lemma deducible_of_validOnCanonicelModel
     apply not_mem₁_iff_mem₂.mpr;
     simp_all;
   . intro h t;
-    suffices p ∈ t.tableau.1 by exact truthlemma.mpr this;
+    suffices φ ∈ t.tableau.1 by exact truthlemma.mpr this;
     exact mem₁_of_provable h;
 
 
@@ -307,7 +307,7 @@ variable [DecidableEq α] [Encodable α] [Λ.IncludeEFQ]
 variable {𝔽 : Kripke.FrameClass}
 
 omit [Consistent Λ] in
-lemma complete (H : CanonicalFrame Λ ∈ 𝔽) {p : Formula α} : 𝔽#α ⊧ p → Λ ⊢! p := by
+lemma complete (H : CanonicalFrame Λ ∈ 𝔽) {φ : Formula α} : 𝔽#α ⊧ φ → Λ ⊢! φ := by
   intro h;
   apply deducible_of_validOnCanonicelModel.mp;
   apply h;

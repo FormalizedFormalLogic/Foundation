@@ -56,58 +56,58 @@ lemma val_vecCons_val_eq {z : Uprod A 𝓤} {i : I} :
     (z.val i :> fun x ↦ (e x).val i) = (fun x ↦ ((z :> e) x).val i) := by
   simp [Matrix.comp_vecCons (Uprod.val · i), Function.comp_def]
 
-lemma eval_Uprod [(i : I) → Nonempty (A i)] {p : Semiformula L μ n} :
-    Evalm (Uprod A 𝓤) e ε p ↔ {i | Eval (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
-  induction p using rec' <;>
+lemma eval_Uprod [(i : I) → Nonempty (A i)] {φ : Semiformula L μ n} :
+    Evalm (Uprod A 𝓤) e ε φ ↔ {i | Eval (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ} ∈ 𝓤 := by
+  induction φ using rec' <;>
     simp [*, Prop.top_eq_true, Prop.bot_eq_false, eval_rel, eval_nrel, Semiterm.val_Uprod]
   case hverum => exact Filter.univ_mem
   case hnrel k r v =>
     exact Ultrafilter.compl_mem_iff_not_mem.symm
   case hand =>
     exact Filter.inter_mem_iff.symm
-  case hor p q ihp ihq =>
+  case hor φ ψ ihp ihq =>
     exact Ultrafilter.union_mem_iff.symm
-  case hall p _ =>
+  case hall φ _ =>
     constructor
     · intro h
       let z : Uprod A 𝓤 := ⟨fun i =>
-        Classical.epsilon (fun z => ¬Eval (s i) (z :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p)⟩
+        Classical.epsilon (fun z => ¬Eval (s i) (z :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ)⟩
       exact Filter.mem_of_superset (h z) (by
         intro i hι a
-        have : Eval (s i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p :=
+        have : Eval (s i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ :=
           by rw [val_vecCons_val_eq]; exact hι
         by_contra hc
-        have : ¬Evalm (A i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p :=
-          Classical.epsilon_spec (p := fun z => ¬(Eval (s i) (z :> fun x ↦ (e x).val i) _ p)) ⟨a, hc⟩
+        have : ¬Evalm (A i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ :=
+          Classical.epsilon_spec (p := fun z => ¬(Eval (s i) (z :> fun x ↦ (e x).val i) _ φ)) ⟨a, hc⟩
         contradiction)
     · intro h x
       exact Filter.mem_of_superset h (by intro i h; simpa [val_vecCons_val_eq] using h (x.val i))
-  case hex p _ =>
+  case hex φ _ =>
     constructor
     · rintro ⟨x, hx⟩
       exact Filter.mem_of_superset hx (by intro i h; use x.val i; simpa[val_vecCons_val_eq] using h)
     · intro h
       let z : Uprod A 𝓤 := ⟨fun i =>
-        Classical.epsilon (fun z => Eval (s i) (z :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p)⟩
+        Classical.epsilon (fun z => Eval (s i) (z :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ)⟩
       use z
       exact Filter.mem_of_superset h (by
         intro i; rintro ⟨x, hx⟩
-        have : Eval (s i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) p :=
-          Classical.epsilon_spec (p := fun z => Eval (s i) (z :> fun x ↦ (e x).val i) _ p) ⟨x, hx⟩
+        have : Eval (s i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ :=
+          Classical.epsilon_spec (p := fun z => Eval (s i) (z :> fun x ↦ (e x).val i) _ φ) ⟨x, hx⟩
         rw[val_vecCons_val_eq] at this; exact this)
 
-lemma val_Uprod [(i : I) → Nonempty (A i)] {p : Formula L μ} :
-    Evalfm (Uprod A 𝓤) ε p ↔ {i | Evalf (s i) (fun x ↦ (ε x).val i) p} ∈ 𝓤 := by
+lemma val_Uprod [(i : I) → Nonempty (A i)] {φ : Formula L μ} :
+    Evalfm (Uprod A 𝓤) ε φ ↔ {i | Evalf (s i) (fun x ↦ (ε x).val i) φ} ∈ 𝓤 := by
   simp [Evalf, eval_Uprod, Matrix.empty_eq]
 
 end Semiformula
 
-lemma models_Uprod [Nonempty I] [(i : I) → Nonempty (A i)] {p : SyntacticFormula L} :
-    (Uprod A 𝓤) ⊧ₘ p ↔ {i | (A i) ⊧ₘ p} ∈ 𝓤 := by simp [models_iff₀, Semiformula.val_Uprod, Empty.eq_elim]
+lemma models_Uprod [Nonempty I] [(i : I) → Nonempty (A i)] {φ : SyntacticFormula L} :
+    (Uprod A 𝓤) ⊧ₘ φ ↔ {i | (A i) ⊧ₘ φ} ∈ 𝓤 := by simp [models_iff₀, Semiformula.val_Uprod, Empty.eq_elim]
 
 variable (A)
 
-def Semiformula.domain [(i : I) → Nonempty (A i)] (p : SyntacticFormula L) := {i | A i ⊧ₘ p}
+def Semiformula.domain [(i : I) → Nonempty (A i)] (φ : SyntacticFormula L) := {i | A i ⊧ₘ φ}
 
 end
 

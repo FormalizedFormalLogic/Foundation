@@ -166,7 +166,7 @@ def univItr : (k : ℕ) → α (n + k) → α n
   | 0,     a => a
   | k + 1, a => univItr k (∀' a)
 
-notation "∀^[" k "] " p:64 => univItr k p
+notation "∀^[" k "] " φ:64 => univItr k φ
 
 @[simp] lemma univItr_zero (a : α n) : ∀^[0] a = a := rfl
 
@@ -194,7 +194,7 @@ def exItr : (k : ℕ) → α (n + k) → α n
   | 0,     a => a
   | k + 1, a => exItr k (∃' a)
 
-notation "∃^[" k "] " p:64 => exItr k p
+notation "∃^[" k "] " φ:64 => exItr k φ
 
 @[simp] lemma exItr_zero (a : α n) : ∃^[0] a = a := rfl
 
@@ -211,12 +211,12 @@ section
 variable {α : ℕ → Type*} [UnivQuantifier α] [ExQuantifier α]
 
 def quant : Polarity → α (n + 1) → α n
-  | 𝚺, p => ∃' p
-  | 𝚷, p => ∀' p
+  | 𝚺, φ => ∃' φ
+  | 𝚷, φ => ∀' φ
 
-@[simp] lemma quant_sigma (p : α (n + 1)) : quant 𝚺 p = ∃' p := rfl
+@[simp] lemma quant_sigma (φ : α (n + 1)) : quant 𝚺 φ = ∃' φ := rfl
 
-@[simp] lemma quant_pi (p : α (n + 1)) : quant 𝚷 p = ∀' p := rfl
+@[simp] lemma quant_pi (φ : α (n + 1)) : quant 𝚷 φ = ∀' φ := rfl
 
 end
 
@@ -267,16 +267,16 @@ end logicNotation
 class DeMorgan (F : Type*) [LogicalConnective F] where
   verum           : ∼(⊤ : F) = ⊥
   falsum          : ∼(⊥ : F) = ⊤
-  imply (p q : F) : (p ➝ q) = ∼p ⋎ q
-  and (p q : F)   : ∼(p ⋏ q) = ∼p ⋎ ∼q
-  or (p q : F)    : ∼(p ⋎ q) = ∼p ⋏ ∼q
-  neg (p : F)     : ∼∼p = p
+  imply (φ ψ : F) : (φ ➝ ψ) = ∼φ ⋎ ψ
+  and (φ ψ : F)   : ∼(φ ⋏ ψ) = ∼φ ⋎ ∼ψ
+  or (φ ψ : F)    : ∼(φ ⋎ ψ) = ∼φ ⋏ ∼ψ
+  neg (φ : F)     : ∼∼φ = φ
 
 attribute [simp] DeMorgan.verum DeMorgan.falsum DeMorgan.and DeMorgan.or DeMorgan.neg
 
-/-- Introducing `∼p` as an abbreviation of `p ➝ ⊥`. -/
+/-- Introducing `∼φ` as an abbreviation of `φ ➝ ⊥`. -/
 class NegAbbrev (F : Type*) [Tilde F] [Arrow F] [Bot F] where
-  neg {p : F} : ∼p = p ➝ ⊥
+  neg {φ : F} : ∼φ = φ ➝ ⊥
 -- attribute [simp] NegAbbrev.neg
 
 namespace LogicalConnective
@@ -303,15 +303,15 @@ instance PropLogicSymbols : LogicalConnective Prop where
 
 @[simp] lemma Prop.bot_eq : ⊥ = False := rfl
 
-@[simp] lemma Prop.neg_eq (p : Prop) : ∼ p = ¬p := rfl
+@[simp] lemma Prop.neg_eq (φ : Prop) : ∼φ = ¬φ := rfl
 
-@[simp] lemma Prop.arrow_eq (p q : Prop) : (p ➝ q) = (p → q) := rfl
+@[simp] lemma Prop.arrow_eq (φ ψ : Prop) : (φ ➝ ψ) = (φ → ψ) := rfl
 
-@[simp] lemma Prop.and_eq (p q : Prop) : (p ⋏ q) = (p ∧ q) := rfl
+@[simp] lemma Prop.and_eq (φ ψ : Prop) : (φ ⋏ ψ) = (φ ∧ ψ) := rfl
 
-@[simp] lemma Prop.or_eq (p q : Prop) : (p ⋎ q) = (p ∨ q) := rfl
+@[simp] lemma Prop.or_eq (φ ψ : Prop) : (φ ⋎ ψ) = (φ ∨ ψ) := rfl
 
-@[simp] lemma Prop.iff_eq (p q : Prop) : (p ⭤ q) = (p ↔ q) := by simp[LogicalConnective.iff, iff_iff_implies_and_implies]
+@[simp] lemma Prop.iff_eq (φ ψ : Prop) : (φ ⭤ ψ) = (φ ↔ ψ) := by simp[LogicalConnective.iff, iff_iff_implies_and_implies]
 
 instance : DeMorgan Prop where
   verum := by simp
@@ -324,10 +324,10 @@ instance : DeMorgan Prop where
 class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
   map_top : ∀ (f : F), f ⊤ = ⊤
   map_bot : ∀ (f : F), f ⊥ = ⊥
-  map_neg : ∀ (f : F) (p : α), f (∼ p) = ∼f p
-  map_imply : ∀ (f : F) (p q : α), f (p ➝ q) = f p ➝ f q
-  map_and : ∀ (f : F) (p q : α), f (p ⋏ q) = f p ⋏ f q
-  map_or  : ∀ (f : F) (p q : α), f (p ⋎ q) = f p ⋎ f q
+  map_neg : ∀ (f : F) (φ : α), f (∼ φ) = ∼f φ
+  map_imply : ∀ (f : F) (φ ψ : α), f (φ ➝ ψ) = f φ ➝ f ψ
+  map_and : ∀ (f : F) (φ ψ : α), f (φ ⋏ ψ) = f φ ⋏ f ψ
+  map_or  : ∀ (f : F) (φ ψ : α), f (φ ⋎ ψ) = f φ ⋎ f ψ
 
 attribute [simp] HomClass.map_top HomClass.map_bot HomClass.map_neg HomClass.map_imply HomClass.map_and HomClass.map_or
 
@@ -349,10 +349,10 @@ structure Hom where
   toTr : α → β
   map_top' : toTr ⊤ = ⊤
   map_bot' : toTr ⊥ = ⊥
-  map_neg' : ∀ p, toTr (∼ p) = ∼toTr p
-  map_imply' : ∀ p q, toTr (p ➝ q) = toTr p ➝ toTr q
-  map_and' : ∀ p q, toTr (p ⋏ q) = toTr p ⋏ toTr q
-  map_or'  : ∀ p q, toTr (p ⋎ q) = toTr p ⋎ toTr q
+  map_neg' : ∀ φ, toTr (∼φ) = ∼toTr φ
+  map_imply' : ∀ φ ψ, toTr (φ ➝ ψ) = toTr φ ➝ toTr ψ
+  map_and' : ∀ φ ψ, toTr (φ ⋏ ψ) = toTr φ ⋏ toTr ψ
+  map_or'  : ∀ φ ψ, toTr (φ ⋎ ψ) = toTr φ ⋎ toTr ψ
 
 infix:25 " →ˡᶜ " => Hom
 
@@ -406,13 +406,13 @@ section quantifier
 
 variable {α : ℕ → Type*} [(i : ℕ) → LogicalConnective (α i)] [UnivQuantifier α] [ExQuantifier α]
 
-def ball (p : α (n + 1)) (q : α (n + 1)) : α n := ∀' (p ➝ q)
+def ball (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀' (φ ➝ ψ)
 
-def bex (p : α (n + 1)) (q : α (n + 1)) : α n := ∃' (p ⋏ q)
+def bex (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃' (φ ⋏ ψ)
 
-notation:64 "∀[" p "] " q => ball p q
+notation:64 "∀[" φ "] " ψ => ball φ ψ
 
-notation:64 "∃[" p "] " q => bex p q
+notation:64 "∃[" φ "] " ψ => bex φ ψ
 
 end quantifier
 
@@ -434,16 +434,16 @@ end LogicalConnective
 section Subclosed
 
 class Tilde.Subclosed [Tilde F] (C : F → Prop) where
-  tilde_closed : C (∼p) → C p
+  tilde_closed : C (∼φ) → C φ
 
 class Arrow.Subclosed [Arrow F] (C : F → Prop) where
-  arrow_closed : C (p ➝ q) → C p ∧ C q
+  arrow_closed : C (φ ➝ ψ) → C φ ∧ C ψ
 
 class Wedge.Subclosed [Wedge F] (C : F → Prop) where
-  wedge_closed : C (p ⋏ q) → C p ∧ C q
+  wedge_closed : C (φ ⋏ ψ) → C φ ∧ C ψ
 
 class Vee.Subclosed [Vee F] (C : F → Prop) where
-  vee_closed : C (p ⋎ q) → C p ∧ C q
+  vee_closed : C (φ ⋎ ψ) → C φ ∧ C ψ
 
 attribute [aesop safe 5 forward]
   Tilde.Subclosed.tilde_closed
@@ -463,16 +463,16 @@ section conjdisj
 
 variable {α β : Type*} [LogicalConnective α] [LogicalConnective β]
 
-def conjLt (p : ℕ → α) : ℕ → α
+def conjLt (φ : ℕ → α) : ℕ → α
   | 0     => ⊤
-  | k + 1 => p k ⋏ conjLt p k
+  | k + 1 => φ k ⋏ conjLt φ k
 
-@[simp] lemma conjLt_zero (p : ℕ → α) : conjLt p 0 = ⊤ := rfl
+@[simp] lemma conjLt_zero (φ : ℕ → α) : conjLt φ 0 = ⊤ := rfl
 
-@[simp] lemma conjLt_succ (p : ℕ → α) (k) : conjLt p (k + 1) = p k ⋏ conjLt p k := rfl
+@[simp] lemma conjLt_succ (φ : ℕ → α) (k) : conjLt φ (k + 1) = φ k ⋏ conjLt φ k := rfl
 
-@[simp] lemma hom_conj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (p : ℕ → α) :
-    f (conjLt p k) ↔ ∀ i < k, f (p i) := by
+@[simp] lemma hom_conj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (φ : ℕ → α) :
+    f (conjLt φ k) ↔ ∀ i < k, f (φ i) := by
   induction' k with k ih <;> simp[*]
   constructor
   · rintro ⟨hk, h⟩
@@ -483,16 +483,16 @@ def conjLt (p : ℕ → α) : ℕ → α
   · rintro h
     exact ⟨h k (by simp), fun i hi ↦ h i (Nat.lt_add_right 1 hi)⟩
 
-def disjLt (p : ℕ → α) : ℕ → α
+def disjLt (φ : ℕ → α) : ℕ → α
   | 0     => ⊥
-  | k + 1 => p k ⋎ disjLt p k
+  | k + 1 => φ k ⋎ disjLt φ k
 
-@[simp] lemma disjLt_zero (p : ℕ → α) : disjLt p 0 = ⊥ := rfl
+@[simp] lemma disjLt_zero (φ : ℕ → α) : disjLt φ 0 = ⊥ := rfl
 
-@[simp] lemma disjLt_succ (p : ℕ → α) (k) : disjLt p (k + 1) = p k ⋎ disjLt p k := rfl
+@[simp] lemma disjLt_succ (φ : ℕ → α) (k) : disjLt φ (k + 1) = φ k ⋎ disjLt φ k := rfl
 
-@[simp] lemma hom_disj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (p : ℕ → α) :
-    f (disjLt p k) ↔ ∃ i < k, f (p i) := by
+@[simp] lemma hom_disj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (φ : ℕ → α) :
+    f (disjLt φ k) ↔ ∃ i < k, f (φ i) := by
   induction' k with k ih <;> simp[*]
   constructor
   · rintro (h | ⟨i, hi, h⟩)
@@ -600,45 +600,45 @@ end
 section
 
 variable {F : Type u} [LogicalConnective F]
-variable {p q : F}
+variable {φ ψ : F}
 
-/-- Remark: `[p].conj₂ = p ≠ p ⋏ ⊤ = [p].conj` -/
+/-- Remark: `[φ].conj₂ = φ ≠ φ ⋏ ⊤ = [φ].conj` -/
 def conj₂ : List F → F
 | [] => ⊤
-| [p] => p
-| p :: q :: rs => p ⋏ (q :: rs).conj₂
+| [φ] => φ
+| φ :: ψ :: rs => φ ⋏ (ψ :: rs).conj₂
 
 prefix:80 "⋀" => List.conj₂
 
 @[simp] lemma conj₂_nil : ⋀[] = (⊤ : F) := rfl
 
-@[simp] lemma conj₂_singleton : ⋀[p] = p := rfl
+@[simp] lemma conj₂_singleton : ⋀[φ] = φ := rfl
 
-@[simp] lemma conj₂_doubleton : ⋀[p, q] = p ⋏ q := rfl
+@[simp] lemma conj₂_doubleton : ⋀[φ, ψ] = φ ⋏ ψ := rfl
 
 @[simp] lemma conj₂_cons_nonempty {a : F} {as : List F} (h : as ≠ [] := by assumption) : ⋀(a :: as) = a ⋏ ⋀as := by
   cases as with
   | nil => contradiction;
-  | cons q rs => simp [List.conj₂]
+  | cons ψ rs => simp [List.conj₂]
 
-/-- Remark: `[p].disj = p ≠ p ⋎ ⊥ = [p].disj` -/
+/-- Remark: `[φ].disj = φ ≠ φ ⋎ ⊥ = [φ].disj` -/
 def disj₂ : List F → F
 | [] => ⊥
-| [p] => p
-| p :: q :: rs => p ⋎ (q :: rs).disj₂
+| [φ] => φ
+| φ :: ψ :: rs => φ ⋎ (ψ :: rs).disj₂
 
 prefix:80 "⋁" => disj₂
 
 @[simp] lemma disj₂_nil : ⋁[] = (⊥ : F) := rfl
 
-@[simp] lemma disj₂_singleton : ⋁[p] = p := rfl
+@[simp] lemma disj₂_singleton : ⋁[φ] = φ := rfl
 
-@[simp] lemma disj₂_doubleton : ⋁[p, q] = p ⋎ q := rfl
+@[simp] lemma disj₂_doubleton : ⋁[φ, ψ] = φ ⋎ ψ := rfl
 
 @[simp] lemma disj₂_cons_nonempty {a : F} {as : List F} (h : as ≠ [] := by assumption) : ⋁(a :: as) = a ⋎ ⋁as := by
   cases as with
   | nil => contradiction;
-  | cons q rs => simp [disj₂]
+  | cons ψ rs => simp [disj₂]
 
 end
 

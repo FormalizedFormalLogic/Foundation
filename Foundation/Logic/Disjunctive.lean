@@ -6,11 +6,11 @@ variable {F : Type*} [LogicalConnective F]
 variable {S : Type*} [System F S]
 
 class Disjunctive (𝓢 : S) : Prop where
-  disjunctive : ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q
+  disjunctive : ∀ {φ ψ}, 𝓢 ⊢! φ ⋎ ψ → 𝓢 ⊢! φ ∨ 𝓢 ⊢! ψ
 
 alias disjunctive := Disjunctive.disjunctive
 
-lemma iff_disjunctive {𝓢 : S}  : (Disjunctive 𝓢) ↔ ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q := by
+lemma iff_disjunctive {𝓢 : S}  : (Disjunctive 𝓢) ↔ ∀ {φ ψ}, 𝓢 ⊢! φ ⋎ ψ → 𝓢 ⊢! φ ∨ 𝓢 ⊢! ψ := by
   constructor;
   . apply Disjunctive.disjunctive;
   . exact λ d ↦ ⟨d⟩;
@@ -19,12 +19,12 @@ lemma iff_complete_disjunctive [DecidableEq F] {𝓢 : S} [System.Classical 𝓢
   constructor;
   . intro hComp;
     apply iff_disjunctive.mpr;
-    intro p q hpq;
-    rcases (hComp p) with (hp | hnp);
+    intro φ ψ hpq;
+    rcases (hComp φ) with (hp | hnp);
     . left; assumption;
     . right; exact or₃'''! (efq_of_neg! hnp) imp_id! hpq;
-  . intro hDisj p;
-    replace hDisj : ∀ {p q}, 𝓢 ⊢! p ⋎ q → 𝓢 ⊢! p ∨ 𝓢 ⊢! q := iff_disjunctive.mp hDisj;
-    exact @hDisj p (∼p) lem!;
+  . intro hDisj φ;
+    replace hDisj : ∀ {φ ψ}, 𝓢 ⊢! φ ⋎ ψ → 𝓢 ⊢! φ ∨ 𝓢 ⊢! ψ := iff_disjunctive.mp hDisj;
+    exact @hDisj φ (∼φ) lem!;
 
 end LO.System

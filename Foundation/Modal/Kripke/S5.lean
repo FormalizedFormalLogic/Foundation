@@ -9,7 +9,7 @@ namespace Kripke
 
 variable {α : Type u}
 
-lemma iff_Universal_ReflexiveEuclidean_validOnFrameClass : UniversalFrameClass.{u}#α ⊧ p ↔ ReflexiveEuclideanFrameClass.{u}#α ⊧ p := by
+lemma iff_Universal_ReflexiveEuclidean_validOnFrameClass : UniversalFrameClass.{u}#α ⊧ φ ↔ ReflexiveEuclideanFrameClass.{u}#α ⊧ φ := by
   constructor;
   . intro h F hF V r;
     apply modal_equivalent_at_root_on_generated_model ⟨F, V⟩ (by apply trans_of_refl_eucl hF.1 hF.2) r |>.mp;
@@ -18,7 +18,7 @@ lemma iff_Universal_ReflexiveEuclidean_validOnFrameClass : UniversalFrameClass.{
     exact @h F (⟨refl_of_universal F_univ, eucl_of_universal F_univ⟩);
 
 instance S5_complete_universal [Inhabited α] [DecidableEq α] : Complete 𝐒𝟓 (UniversalFrameClass.{u}#α) := ⟨by
-  intro p hF;
+  intro φ hF;
   exact S5_complete.complete $ iff_Universal_ReflexiveEuclidean_validOnFrameClass.mp hF;
 ⟩
 

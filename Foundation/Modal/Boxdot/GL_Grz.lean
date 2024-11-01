@@ -40,12 +40,12 @@ lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F �
     . exact F_trans Rxy Ryz;
   . simp;
 
-variable {p : Formula α}
+variable {φ : Formula α}
 
-lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (pᵇ)) ↔ (Satisfies ⟨F^=, V⟩ x p) := by
-  induction p using Formula.rec' generalizing x with
-  | hatom p => simp [Satisfies];
-  | hbox p ih =>
+lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (φᵇ)) ↔ (Satisfies ⟨F^=, V⟩ x φ) := by
+  induction φ using Formula.rec' generalizing x with
+  | hatom φ => simp [Satisfies];
+  | hbox φ ih =>
     simp [Formula.BoxdotTranslation, Box.boxdot, Satisfies];
     constructor;
     . rintro ⟨h₁, h₂⟩;
@@ -61,16 +61,16 @@ lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (pᵇ)) ↔ (Satisf
         exact @h y (ReflGen.single Rxy);
   | _ => simp_all [Satisfies];
 
-lemma iff_frame_boxdot_reflexive_closure {F : Frame} : (F#α ⊧ (pᵇ)) ↔ ((F^=)#α ⊧ p) := by
+lemma iff_frame_boxdot_reflexive_closure {F : Frame} : (F#α ⊧ (φᵇ)) ↔ ((F^=)#α ⊧ φ) := by
   constructor;
   . intro h V x; apply iff_boxdot_reflexive_closure.mp; exact h V x;
   . intro h V x; apply iff_boxdot_reflexive_closure.mpr; exact h V x;
 
-lemma iff_reflexivize_irreflexivize {F : Frame} (F_Refl : Reflexive F) {x : F.World} {V} : (Satisfies ⟨F, V⟩ x p) ↔ (Satisfies ⟨F^≠^=, V⟩ x p) := by
-  induction p using Formula.rec' generalizing x with
-  | hatom p => rfl;
+lemma iff_reflexivize_irreflexivize {F : Frame} (F_Refl : Reflexive F) {x : F.World} {V} : (Satisfies ⟨F, V⟩ x φ) ↔ (Satisfies ⟨F^≠^=, V⟩ x φ) := by
+  induction φ using Formula.rec' generalizing x with
+  | hatom φ => rfl;
   | hfalsum => rfl;
-  | himp p q ihp ihq =>
+  | himp φ ψ ihp ihq =>
     constructor;
     . intro h hp;
       apply ihq.mp;
@@ -78,7 +78,7 @@ lemma iff_reflexivize_irreflexivize {F : Frame} (F_Refl : Reflexive F) {x : F.Wo
     . intro h hp;
       apply ihq.mpr;
       exact h $ ihp.mp hp;
-  | hbox p ihp =>
+  | hbox φ ihp =>
     constructor;
     . intro h y Rxy;
       apply ihp (x := y) |>.mp;
@@ -101,17 +101,17 @@ open Formula.Kripke
 open Kripke
 
 variable {α : Type u} [DecidableEq α]
-variable {p : Formula α}
+variable {φ : Formula α}
 
 open Formula (BoxdotTranslation)
 open System in
-lemma boxdotTranslatedGL_of_Grz : 𝐆𝐫𝐳 ⊢! p → 𝐆𝐋 ⊢! pᵇ := boxdotTranslated $ by
-  intro p hp;
+lemma boxdotTranslatedGL_of_Grz : 𝐆𝐫𝐳 ⊢! φ → 𝐆𝐋 ⊢! φᵇ := boxdotTranslated $ by
+  intro φ hp;
   rcases hp with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
   . dsimp [BoxdotTranslation]; exact boxdot_axiomK!;
   . dsimp [BoxdotTranslation]; exact boxdot_Grz_of_L!
 
-lemma Grz_of_boxdotTranslatedGL [Inhabited α] : 𝐆𝐋 ⊢! pᵇ → 𝐆𝐫𝐳 ⊢! p := by
+lemma Grz_of_boxdotTranslatedGL [Inhabited α] : 𝐆𝐋 ⊢! φᵇ → 𝐆𝐫𝐳 ⊢! φ := by
   contrapose;
   intro h;
   apply (not_imp_not.mpr $ Kripke.GL_finite_sound.sound);
@@ -134,7 +134,7 @@ lemma Grz_of_boxdotTranslatedGL [Inhabited α] : 𝐆𝐋 ⊢! pᵇ → 𝐆𝐫
     use V, x;
     exact iff_reflexivize_irreflexivize FF_refl |>.not.mp h;
 
-theorem iff_Grz_boxdotTranslatedGL [Inhabited α] : 𝐆𝐫𝐳 ⊢! p ↔ 𝐆𝐋 ⊢! pᵇ := by
+theorem iff_Grz_boxdotTranslatedGL [Inhabited α] : 𝐆𝐫𝐳 ⊢! φ ↔ 𝐆𝐋 ⊢! φᵇ := by
   constructor;
   . apply boxdotTranslatedGL_of_Grz;
   . apply Grz_of_boxdotTranslatedGL;

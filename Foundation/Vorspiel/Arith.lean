@@ -58,18 +58,18 @@ lemma or_eq (n m : ℕ) : or n m = if 0 < n ∨ 0 < m then 1 else 0 := by simp[o
 
 @[simp] lemma pos_pos_iff (n : ℕ) : 0 < pos n ↔ 0 < n := by simp[pos]
 
-def ball (n : ℕ) (p : ℕ → ℕ) : ℕ := n.rec 1 (fun n ih => (p n).pos.and ih)
+def ball (n : ℕ) (φ : ℕ → ℕ) : ℕ := n.rec 1 (fun n ih => (φ n).pos.and ih)
 
-@[simp] lemma ball_pos_iff {p : ℕ → ℕ} {n : ℕ} : 0 < ball n p ↔ ∀ m < n, 0 < p m := by
+@[simp] lemma ball_pos_iff {φ : ℕ → ℕ} {n : ℕ} : 0 < ball n φ ↔ ∀ m < n, 0 < φ m := by
   induction' n with n ih <;> simp[ball, Nat.lt_succ_iff] at*
   · simp[ih]; exact ⟨
     by rintro ⟨hn, hp⟩ m hm; rcases lt_or_eq_of_le hm with (hm | rfl); { exact hp _ hm }; { exact hn },
     by intro h; exact ⟨h n (Nat.le_refl n), fun m hm => h m (le_of_lt hm)⟩⟩
 
-@[simp] lemma ball_eq_zero_iff {p : ℕ → ℕ} {n : ℕ} : ball n p = 0 ↔ ∃ m < n, p m = 0 := by
-  simpa[-ball_pos_iff] using not_iff_not.mpr (ball_pos_iff (p := p) (n := n))
+@[simp] lemma ball_eq_zero_iff {φ : ℕ → ℕ} {n : ℕ} : ball n φ = 0 ↔ ∃ m < n, φ m = 0 := by
+  simpa[-ball_pos_iff] using not_iff_not.mpr (ball_pos_iff (φ := φ) (n := n))
 
-lemma ball_pos_iff_eq_one {p : ℕ → ℕ} {n : ℕ} : ball n p = 1 ↔ 0 < ball n p := by
+lemma ball_pos_iff_eq_one {φ : ℕ → ℕ} {n : ℕ} : ball n φ = 1 ↔ 0 < ball n φ := by
   induction' n with n _ <;> simp[ball, Nat.lt_succ_iff] at*
   · constructor
     · intro h; simpa using pos_of_eq_one h
@@ -418,9 +418,9 @@ lemma beta (i j : Fin n) : Arith₁ (fun v => Nat.beta (v.get i) (v.get j)) :=
   (rem 0 1).comp₂ _ ((unpair₁ 0).comp₁ (·.unpair.1) (proj i))
     ((succ 0).comp₁ _ $ (mul 0 1).comp₂ _ (succ j) ((unpair₂ 0).comp₁ (·.unpair.2) (proj i)))
 
-lemma ball {p : Vector ℕ n → ℕ → ℕ} (hp : @Arith₁ (n + 1) (fun v => p v.tail v.head)) (i) :
-    Arith₁ (fun v => ball (v.get i) (p v)) := by
-  let F : Vector ℕ (n + 1) → ℕ := fun v => (p v.tail v.head).inv.or (isLeNat (v.get i.succ) v.head)
+lemma ball {φ : Vector ℕ n → ℕ → ℕ} (hp : @Arith₁ (n + 1) (fun v => φ v.tail v.head)) (i) :
+    Arith₁ (fun v => ball (v.get i) (φ v)) := by
+  let F : Vector ℕ (n + 1) → ℕ := fun v => (φ v.tail v.head).inv.or (isLeNat (v.get i.succ) v.head)
   have hF : Arith₁ F := (or 0 1).comp₂ _ ((inv 0).comp₁ _ hp) ((le 0 1).comp₂ _ (proj i.succ) head)
   have : @Arith₁ (n + 1) (fun v => isEqNat v.head (v.get i.succ)) :=
     (equal 0 1).comp₂ _ head (proj i.succ)
@@ -430,14 +430,14 @@ lemma ball {p : Vector ℕ n → ℕ → ℕ} (hp : @Arith₁ (n + 1) (fun v => 
     simp only [tail_cons, head_cons, get_cons_succ, or_pos_iff, inv_pos_iff, not_lt,
       nonpos_iff_eq_zero, isLeNat_pos_iff, Bool.decide_or, PFun.coe_val, eq_some_iff, mem_map_iff,
       mem_rfind, mem_some_iff, F]
-    by_cases H : ∀ m < v.get i, 0 < p v m
+    by_cases H : ∀ m < v.get i, 0 < φ v m
     · exact ⟨v.get i,
         ⟨by symm; simp, by intro m hm; symm; simp[hm]; exact Nat.not_eq_zero_of_lt (H m hm)⟩,
         by { simp[isEqNat]; symm; exact ball_pos_iff_eq_one.mpr (by simpa) }⟩
-    · have : ∃ x < Vector.get v i, p v x = 0 ∧ ∀ y < x, p v y ≠ 0 := by
+    · have : ∃ x < Vector.get v i, φ v x = 0 ∧ ∀ y < x, φ v y ≠ 0 := by
         simp at H; rcases least_number _ H with ⟨x, hx, hxl⟩
         exact ⟨x, hx.1, hx.2, by
-          intro y hy; have : y < v.get i → p v y ≠ 0 := by simpa using hxl y hy
+          intro y hy; have : y < v.get i → φ v y ≠ 0 := by simpa using hxl y hy
           exact this (lt_trans hy hx.1)⟩
       rcases this with ⟨x, hx, hpx, hlx⟩
       exact ⟨x, ⟨by symm; simp[hpx], by intro m hm; symm; simp[hlx m hm, lt_trans hm hx]⟩, by
