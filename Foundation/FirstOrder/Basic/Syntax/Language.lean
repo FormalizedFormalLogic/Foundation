@@ -12,7 +12,6 @@ This file defines the language of first-order logic.
 
 namespace LO
 
-open Primrec
 namespace FirstOrder
 
 structure Language where
@@ -151,33 +150,6 @@ instance FuncGe3IsEmpty : ∀ k ≥ 3, IsEmpty (oRing.Func k)
   | 2       => by simp [show ¬3 ≤ 2 from of_decide_eq_false rfl]
   | (n + 3) => fun _ => ⟨by rintro ⟨⟩⟩
 
-private lemma Func_encodeDecode_primrec : Primrec₂ (fun k e =>
-  if k = 0 ∧ e = 0 then some 0
-  else if k = 0 ∧ e = 1 then some 1
-  else if k = 2 ∧ e = 0 then some 0
-  else if k = 2 ∧ e = 1 then some 1
-  else none) :=
-  to₂ <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
-      <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
-      <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
-      <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
-      <| const _
-
-instance (k) : Primcodable (oRing.Func k) where
-  prim := nat_iff.mp <| (Primrec.encode.comp (Func_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
-    simp[Encodable.decode]
-    rcases k with (_ | k)
-    · rcases e with (_ | e) <;> simp
-      · rfl
-      · rcases e with (_ | e) <;> simp
-        · rfl
-    · rcases k with (_ | k) <;> simp
-      · rcases k with (_ | k) <;> simp
-        · rcases e with (_ | e) <;> simp
-          · rfl
-          · rcases e with (_ | e) <;> simp
-            · rfl)
-
 instance (k) : Encodable (oRing.Rel k) where
   encode := fun x =>
     match x with
@@ -190,73 +162,7 @@ instance (k) : Encodable (oRing.Rel k) where
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
-private lemma Rel_encodeDecode_primrec : Primrec₂ (fun k e =>
-  if k = 2 ∧ e = 0 then some 0
-  else if k = 2 ∧ e = 1 then some 1
-  else none) :=
-  to₂ <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
-      <| Primrec.ite (PrimrecPred.and (Primrec.eq.comp fst (const _)) (Primrec.eq.comp snd (const _))) (const _)
-      <| const _
-
-instance (k) : Primcodable (oRing.Rel k) where
-  prim := nat_iff.mp <| (Primrec.encode.comp (Rel_encodeDecode_primrec.comp (Primrec.const k) Primrec.id)).of_eq (fun e => by
-    simp[Encodable.decode]
-    rcases k with (_ | k) <;> simp
-    rcases k with (_ | k) <;> simp
-    rcases k with (_ | k) <;> simp
-    rcases e with (_ | e) <;> simp
-    · rfl
-    · rcases e with (_ | e) <;> simp
-      · rfl)
-
 end ORing
-
-namespace ORingExp
-
-inductive Func : ℕ → Type
-  | zero : Func 0
-  | one : Func 0
-  | exp : Func 1
-  | add : Func 2
-  | mul : Func 2
-
-inductive Rel : ℕ → Type
-  | eq : Rel 2
-  | lt : Rel 2
-
-end ORingExp
-
-@[reducible]
-def oRingExp : Language where
-  Func := ORingExp.Func
-  Rel := ORingExp.Rel
-
-notation "ℒₒᵣ(exp)" => oRingExp
-
-namespace ORingExp
-
-instance (k) : ToString (oRingExp.Func k) :=
-⟨ fun s =>
-  match s with
-  | Func.zero => "0"
-  | Func.one  => "1"
-  | Func.exp  => "(^)"
-  | Func.add  => "(+)"
-  | Func.mul  => "(\\cdot)"⟩
-
-instance (k) : ToString (oRingExp.Rel k) :=
-⟨ fun s =>
-  match s with
-  | Rel.eq => "\\mathrm{Eq}"
-  | Rel.lt    => "\\mathrm{LT}"⟩
-
-instance (k) : DecidableEq (oRingExp.Func k) := fun a b =>
-  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
-
-instance (k) : DecidableEq (oRingExp.Rel k) := fun a b =>
-  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
-
-end ORingExp
 
 namespace Constant
 
@@ -339,17 +245,6 @@ instance : ORing oRing where
 instance : ConstantInhabited ℒₒᵣ where
   default := Language.Zero.zero
 
-instance : ORing oRingExp where
-  eq := .eq
-  lt := .lt
-  zero := .zero
-  one := .one
-  add := .add
-  mul := .mul
-
-instance : Language.Exp oRingExp where
-  exp := .exp
-
 instance : Star unit where
   star := ()
 
@@ -373,48 +268,6 @@ instance (L : Language) (S : Language) [L.Eq] : (L.add S).Eq where
 
 instance (L : Language) (S : Language) [L.LT] : (L.add S).LT where
   lt := Sum.inl LT.lt
-
-/-
-namespace ORing
-
-open Qq Lean Elab Meta Tactic
-
-def denoteFunc : (k : ℕ) → Q(oRing.Func $k) → MetaM (oRing.Func k)
-  | 0, e =>
-    match e with
-    | ∼ψ(Zero.zero) => return Language.Zero.zero
-    | ∼ψ(One.one)   => return Language.One.one
-  | 2, e =>
-    match e with
-    | ∼ψ(Language.Add.add) => return Language.Add.add
-    | ∼ψ(Language.Mul.mul) => return Language.Mul.mul
-  | _, e => throwError m!"error in DenotationORing : {e}"
-
-def denoteRel : (k : ℕ) → Q(oRing.Rel $k) → MetaM (oRing.Rel k)
-  | 2, e =>
-    match e with
-    | ∼ψ(Language.Eq.eq) => return Language.Eq.eq
-    | ∼ψ(Language.LT.lt) => return Language.LT.lt
-  | _, e => throwError m!"error in DenotationORing : {e}"
-
-instance (k : ℕ) : Denotation ψ(oRing.Func $k) (oRing.Func k) where
-   denote := denoteFunc k
-   toExpr := fun f =>
-     ( match f with
-       | Func.zero => ψ(Language.Zero.zero)
-       | Func.one  => ψ(Language.One.one)
-       | Func.add  => ψ(Language.Add.add)
-       | Func.mul  => ψ(Language.Mul.mul) : Q(oRing.Func $k))
-
-instance (k : ℕ) : Denotation ψ(oRing.Rel $k) (oRing.Rel k) where
-   denote := denoteRel k
-   toExpr := fun f =>
-     ( match f with
-       | Rel.eq => ψ(Language.Eq.eq)
-       | Rel.lt => ψ(Language.LT.lt) : Q(oRing.Rel $k))
-
-end ORing
--/
 
 @[ext] structure Hom (L₁ L₂ : Language) where
   func : {k : ℕ} → L₁.Func k → L₂.Func k

@@ -433,25 +433,6 @@ lemma eval_iff_of_funEqOn (φ : Semiformula L ξ n) (h : Function.funEqOn (fvar?
     simp; apply exists_congr; intro x
     exact ih (fun x hx ↦ h _ $ by simp [fvar?]; exact hx)
 
-lemma val_fvUnivClosure_inhabited [h : Nonempty ξ] [DecidableEq ξ] {φ : Formula L ξ} :
-    Evalf s Empty.elim (∀ᶠ* φ) ↔ ∀ ε, Evalf s ε φ := by
-  simp [Formula.fvUnivClosure, eval_rewriteMap]
-  haveI : Inhabited ξ := ⟨Classical.ofNonempty⟩
-  constructor
-  · intro h ε
-    have := h (fun i ↦ ε $ Semiformula.fvListingInv _ i)
-    exact (eval_iff_of_funEqOn φ (by intro x hx; simp [fvListingInv_fvListing hx])).mp this
-  · intro h e
-    exact h (fun x ↦ e $ Semiformula.fvListing φ x)
-
-@[simp] lemma val_fvUnivClosure [Nonempty M] [DecidableEq ξ] {φ : Formula L ξ} :
-    Evalf s Empty.elim (∀ᶠ* φ) ↔ ∀ ε, Evalf s ε φ := by
-  by_cases hμ : Nonempty ξ
-  · exact val_fvUnivClosure_inhabited
-  · haveI hμ : IsEmpty ξ := not_nonempty_iff.mp hμ
-    simp [Formula.fvUnivClosure_sentence φ, IsEmpty.eq_elim]
-    simp [Matrix.empty_eq]
-
 lemma eval_toEmpty {φ : Semiformula L ξ n} (hp : φ.fvarList = []) : Eval s e f φ ↔ Evalb s e (φ.toEmpty hp) := by
   induction φ using Semiformula.rec'
   case hrel k R v =>
