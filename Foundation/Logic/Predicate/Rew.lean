@@ -755,7 +755,7 @@ lemma smul_ext' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) 
 
 abbrev substitute (φ : F ξ n₁) (w : Fin n₁ → Semiterm L ξ n₂) : F ξ n₂ := Rew.substs w • φ
 
-scoped [LO.FirstOrder] infix:80 "//" => LO.FirstOrder.Rewriting.substitute
+scoped [LO.FirstOrder] infix:90 " ⇜ " => LO.FirstOrder.Rewriting.substitute
 
 @[coe] abbrev embedding {ο} [IsEmpty ο] (φ : F ο n) {ξ} : F ξ n := @Rew.emb L ο _ ξ n • φ
 
@@ -765,13 +765,13 @@ section Notation
 
 open Lean PrettyPrinter Delaborator
 
-scoped syntax (name := substituteNotation) term:max "/[" term,* "]" : term
+syntax (name := substituteNotation) term:max "/[" term,* "]" : term
 
-scoped macro_rules (kind := substituteNotation)
-  | `($φ:term /[$terms:term,*]) => `($φ // ![$terms,*])
+macro_rules (kind := substituteNotation)
+  | `($φ:term /[$terms:term,*]) => `($φ ⇜ ![$terms,*])
 
 @[app_unexpander Rewriting.substitute]
-def Rewriting.unexpsnderSubstitute : Unexpander
+def _root_.unexpsnderSubstitute : Unexpander
   | `($_ $φ:term ![$ts:term,*]) => `($φ /[ $ts,* ])
   | _                           => throw ()
 
@@ -808,7 +808,7 @@ lemma embedding_injective : Function.Injective fun φ : F ο n ↦ (embedding φ
 
 /-- `coe_substs_eq_substs_coe` -/
 lemma enbedding_substitute_eq_substitute_embedding (φ : F ο k) (v : Fin k → Semiterm L ο n) :
-    (embedding (φ//v) : F ξ n) = (embedding φ : F ξ k)//(fun i ↦ emb (v i)) := by
+    (embedding (φ ⇜ v) : F ξ n) = (embedding φ : F ξ k)⇜(fun i ↦ emb (v i)) := by
   unfold embedding substitute
   rw [←comp_smul, ←comp_smul]
   congr 1
@@ -818,7 +818,7 @@ lemma enbedding_substitute_eq_substitute_embedding (φ : F ο k) (v : Fin k → 
 
 /-- `coe_substs_eq_substs_coe₁` -/
 lemma coe_substs_eq_substs_coe₁ (φ : F ο 1) (t : Semiterm L ο n) :
-    (embedding (φ//![t]) : F ξ n) = (embedding φ : F ξ 1)//![(emb t : Semiterm L ξ n)] := by
+    (embedding (φ/[t]) : F ξ n) = (embedding φ : F ξ 1)/[(emb t : Semiterm L ξ n)] := by
   simpa [Matrix.constant_eq_singleton] using enbedding_substitute_eq_substitute_embedding φ ![t]
 
 end Embedding

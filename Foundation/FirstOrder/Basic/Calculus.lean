@@ -494,18 +494,18 @@ lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : System.Inconsistent T₁ → S
 end Hom
 
 omit [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-private lemma map_subst_eq_free (φ : SyntacticSemiformula L 1) (h : ¬φ.fvar? m) :
+private lemma map_subst_eq_free (φ : SyntacticSemiformula L 1) (h : ¬φ.FVar? m) :
     (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom (φ/[&m]) = Rew.free.hom φ := by
   simp[←Rew.hom_comp_app];
   exact Semiformula.rew_eq_of_funEqOn (by simp[Rew.comp_app, Fin.eq_zero])
     (fun x hx => by simp[Rew.comp_app]; rintro rfl; contradiction)
 
-private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ.fvar? m) :
+private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ.FVar? m) :
     Δ.map (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom = Δ⁺ := by
   apply List.map_congr_left
   intro φ hp; exact rew_eq_of_funEqOn₀ (by intro x hx; simp; rintro rfl; have := h φ hp; contradiction)
 
-def genelalizeByNewver {φ : SyntacticSemiformula L 1} (hp : ¬φ.fvar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.fvar? m)
+def genelalizeByNewver {φ : SyntacticSemiformula L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
     (d : T ⟹ φ/[&m] :: Δ) : T ⟹ (∀' φ) :: Δ := by
   have : T ⟹ (Rew.free.hom φ) :: Δ⁺ :=
     Derivation.cast (Derivation.map d (fun x => if x = m then 0 else x + 1))

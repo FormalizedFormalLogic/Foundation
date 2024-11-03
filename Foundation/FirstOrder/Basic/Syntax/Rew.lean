@@ -203,11 +203,17 @@ instance : Coe (Semisentence L n) (SyntacticSemiformula L n) := ⟨Rewriting.emb
 @[simp] lemma coe_inj (σ π : Semisentence L n) : (σ : SyntacticSemiformula L n) = π ↔ σ = π := LawfulRewriting.embedding_injective.eq_iff
 
 lemma coe_substitute_eq_substitute_coe (φ : Semisentence L k) (v : Fin k → Semiterm L Empty n) :
-    (↑(φ//v) : SyntacticSemiformula L n) = (φ : SyntacticSemiformula L k)//(fun i ↦ v i) :=
+    (↑(φ ⇜ v) : SyntacticSemiformula L n) = (φ : SyntacticSemiformula L k)⇜(fun i ↦ v i) :=
   LawfulRewriting.enbedding_substitute_eq_substitute_embedding φ v
 
+open Lean PrettyPrinter Delaborator in
+@[app_unexpander Rewriting.substitute]
+def _root_.unexpsnderSubstitute' : Unexpander
+  | `($_ $φ:term ![$ts:term,*]) => `($φ /[ $ts,* ])
+  | _                           => throw ()
+
 lemma coe_substs_eq_substs_coe₁ (φ : Semisentence L 1) (t : Semiterm L Empty n) :
-    (↑(φ/[t]) : SyntacticSemiformula L n) = (↑φ : SyntacticSemiformula L 1)//![(t : Semiterm L ℕ n)] :=
+    (↑(φ/[t]) : SyntacticSemiformula L n) = (↑φ : SyntacticSemiformula L 1)/[(t : Semiterm L ℕ n)] :=
   LawfulRewriting.coe_substs_eq_substs_coe₁ φ t
 
 @[elab_as_elim]
@@ -356,7 +362,7 @@ private lemma not_fvar?_fixitr_fvSup (φ : SyntacticFormula L) : ¬(@Rew.fixitr 
     simp [this] at hx
 
 @[simp] lemma substs_comp_fixitr_eq_map (φ : SyntacticFormula L) (f : ℕ → SyntacticTerm L) :
-    (@Rew.fixitr L 0 φ.fvSup • φ)//(fun x ↦ f x) = (Rew.rewrite f) • φ := by
+    (@Rew.fixitr L 0 φ.fvSup • φ)⇜(fun x ↦ f x) = (Rew.rewrite f) • φ := by
   unfold Rewriting.substitute; rw [←LawfulRewriting.comp_smul]
   apply rew_eq_of_funEqOn
   · simp
@@ -364,7 +370,7 @@ private lemma not_fvar?_fixitr_fvSup (φ : SyntacticFormula L) : ¬(@Rew.fixitr 
     simp [Rew.comp_app, Rew.fixitr_fvar, Semiformula.lt_fvSup_of_fvar? hx]
 
 @[simp] lemma substs_comp_fixitr (φ : SyntacticFormula L) :
-    (@Rew.fixitr L 0 φ.fvSup • φ)//(fun x ↦ &x) = φ := by
+    (@Rew.fixitr L 0 φ.fvSup • φ)⇜(fun x ↦ &x) = φ := by
   unfold Rewriting.substitute; rw [←LawfulRewriting.comp_smul]
   apply rew_eq_self_of
   · simp
@@ -444,7 +450,7 @@ lemma lMap_rewrite (f : ξ₁ → Semiterm L₁ ξ₂ n) (φ : Semiformula L₁ 
   simp [Rew.rewrite, lMap_bind, Function.comp_def]
 
 lemma lMap_substs (w : Fin k → Semiterm L₁ ξ n) (φ : Semiformula L₁ ξ k) :
-    lMap Φ (φ//w) = (lMap Φ φ)//(Semiterm.lMap Φ ∘ w) := lMap_bind _ _ _
+    lMap Φ (φ⇜w) = (lMap Φ φ)⇜(Semiterm.lMap Φ ∘ w) := lMap_bind _ _ _
 
 lemma lMap_shift (φ : SyntacticSemiformula L₁ n) : lMap Φ (@Rew.shift L₁ n • φ) = @Rew.shift L₂ n • lMap Φ φ := lMap_bind _ _ _
 
