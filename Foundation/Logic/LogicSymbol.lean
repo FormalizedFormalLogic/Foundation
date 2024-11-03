@@ -15,78 +15,6 @@ a function that preserves logical connectives.
 
 namespace LO
 
-@[notation_class] class SigmaSymbol (α : Type*) where
-  sigma : α
-
-@[notation_class] class PiSymbol (α : Type*) where
-  pi : α
-
-@[notation_class] class DeltaSymbol (α : Type*) where
-  delta : α
-
-notation "𝚺" => SigmaSymbol.sigma
-
-notation "𝚷" => PiSymbol.pi
-
-notation "𝚫" => DeltaSymbol.delta
-
-attribute [match_pattern] SigmaSymbol.sigma PiSymbol.pi DeltaSymbol.delta
-
-inductive Polarity := | sigma | pi
-
-namespace Polarity
-
-instance : SigmaSymbol Polarity := ⟨sigma⟩
-
-instance : PiSymbol Polarity := ⟨pi⟩
-
-def alt : Polarity → Polarity
-  | 𝚺 => 𝚷
-  | 𝚷 => 𝚺
-
-@[simp] lemma eq_sigma : sigma = 𝚺 := rfl
-
-@[simp] lemma eq_pi : pi = 𝚷 := rfl
-
-@[simp] lemma alt_sigma : alt 𝚺 = 𝚷 := rfl
-
-@[simp] lemma alt_pi : alt 𝚷 = 𝚺 := rfl
-
-@[simp] lemma alt_alt (Γ : Polarity) : Γ.alt.alt = Γ := by rcases Γ <;> simp
-
-end Polarity
-
-inductive SigmaPiDelta := | sigma | pi | delta
-
-namespace SigmaPiDelta
-
-instance : SigmaSymbol SigmaPiDelta := ⟨sigma⟩
-
-instance : PiSymbol SigmaPiDelta := ⟨pi⟩
-
-instance : DeltaSymbol SigmaPiDelta := ⟨delta⟩
-
-def alt : SigmaPiDelta → SigmaPiDelta
-  | 𝚺 => 𝚷
-  | 𝚷 => 𝚺
-  | 𝚫 => 𝚫
-
-@[simp] lemma eq_sigma : sigma = 𝚺 := rfl
-
-@[simp] lemma eq_pi : pi = 𝚷 := rfl
-
-@[simp] lemma eq_delta : delta = 𝚫 := rfl
-
-@[simp] lemma alt_sigma : alt 𝚺 = 𝚷 := rfl
-
-@[simp] lemma alt_pi : alt 𝚷 = 𝚺 := rfl
-
-@[simp] lemma alt_delta : alt 𝚫 = 𝚫 := rfl
-
-@[simp] lemma alt_alt (Γ : SigmaPiDelta) : Γ.alt.alt = Γ := by rcases Γ <;> simp
-
-end SigmaPiDelta
-
 section logicNotation
 
 @[notation_class] class Tilde (α : Type*) where
@@ -104,20 +32,6 @@ section logicNotation
 class LogicalConnective (α : Type*)
   extends Top α, Bot α, Tilde α, Arrow α, Wedge α, Vee α
 
-@[notation_class] class UnivQuantifier (α : ℕ → Type*) where
-  univ : ∀ {n}, α (n + 1) → α n
-
-@[notation_class] class ExQuantifier (α : ℕ → Type*) where
-  ex : ∀ {n}, α (n + 1) → α n
-
-@[notation_class] class UnivQuantifier₂ (α : ℕ → ℕ → Type*) where
-  univ₂₁ : ∀ {m n}, α (m + 1) n → α m n
-  univ₂₂ : ∀ {m n}, α m (n + 1) → α m n
-
-@[notation_class] class ExQuantifier₂ (α : ℕ → ℕ → Type*) where
-  ex₂₁ : ∀ {m n}, α (m + 1) n → α m n
-  ex₂₂ : ∀ {m n}, α m (n + 1) → α m n
-
 prefix:75 "∼" => Tilde.tilde
 
 infixr:60 " ➝ " => Arrow.arrow
@@ -126,141 +40,11 @@ infixr:69 " ⋏ " => Wedge.wedge
 
 infixr:68 " ⋎ " => Vee.vee
 
-prefix:64 "∀' " => UnivQuantifier.univ
-
-prefix:64 "∃' " => ExQuantifier.ex
-
-prefix:64 "∀¹ " => UnivQuantifier₂.univ₂₁
-prefix:64 "∀² " => UnivQuantifier₂.univ₂₂
-
-prefix:64 "∃¹ " => ExQuantifier₂.ex₂₁
-prefix:64 "∃² " => ExQuantifier₂.ex₂₂
-
 attribute [match_pattern]
   Tilde.tilde
   Arrow.arrow
   Wedge.wedge
   Vee.vee
-  UnivQuantifier.univ
-  ExQuantifier.ex
-  UnivQuantifier₂.univ₂₁
-  UnivQuantifier₂.univ₂₂
-  ExQuantifier₂.ex₂₁
-  ExQuantifier₂.ex₂₂
-
-section UnivQuantifier
-
-variable {α : ℕ → Type*} [UnivQuantifier α]
-
-def univClosure : {n : ℕ} → α n → α 0
-  | 0,     a => a
-  | _ + 1, a => univClosure (∀' a)
-
-prefix:64 "∀* " => univClosure
-
-@[simp] lemma univClosure_zero (a : α 0) : ∀* a = a := rfl
-
-lemma univClosure_succ {n} (a : α (n + 1)) : ∀* a = ∀* ∀' a := rfl
-
-def univItr : (k : ℕ) → α (n + k) → α n
-  | 0,     a => a
-  | k + 1, a => univItr k (∀' a)
-
-notation "∀^[" k "] " φ:64 => univItr k φ
-
-@[simp] lemma univItr_zero (a : α n) : ∀^[0] a = a := rfl
-
-@[simp] lemma univItr_one (a : α (n + 1)) : ∀^[1] a = ∀' a := rfl
-
-lemma univItr_succ {k} (a : α (n + (k + 1))) : ∀^[k + 1] a = ∀^[k] (∀' a) := rfl
-
-end UnivQuantifier
-
-section ExQuantifier
-
-variable {α : ℕ → Type*} [ExQuantifier α]
-
-def exClosure : {n : ℕ} → α n → α 0
-  | 0,     a => a
-  | _ + 1, a => exClosure (∃' a)
-
-prefix:64 "∃* " => exClosure
-
-@[simp] lemma exClosure_zero (a : α 0) : ∃* a = a := rfl
-
-lemma exClosure_succ {n} (a : α (n + 1)) : ∃* a = ∃* ∃' a := rfl
-
-def exItr : (k : ℕ) → α (n + k) → α n
-  | 0,     a => a
-  | k + 1, a => exItr k (∃' a)
-
-notation "∃^[" k "] " φ:64 => exItr k φ
-
-@[simp] lemma exItr_zero (a : α n) : ∃^[0] a = a := rfl
-
-@[simp] lemma exItr_one (a : α (n + 1)) : ∃^[1] a = ∃' a := rfl
-
-lemma exItr_succ {k} (a : α (n + (k + 1))) : ∃^[k + 1] a = ∃^[k] (∃' a) := rfl
-
-end ExQuantifier
-
-section UnivQuantifier₂
-
-section
-
-variable {α : ℕ → Type*} [UnivQuantifier α] [ExQuantifier α]
-
-def quant : Polarity → α (n + 1) → α n
-  | 𝚺, φ => ∃' φ
-  | 𝚷, φ => ∀' φ
-
-@[simp] lemma quant_sigma (φ : α (n + 1)) : quant 𝚺 φ = ∃' φ := rfl
-
-@[simp] lemma quant_pi (φ : α (n + 1)) : quant 𝚷 φ = ∀' φ := rfl
-
-end
-
-variable {α : ℕ → ℕ → Type*} [UnivQuantifier₂ α]
-
-def univClosure₂₁ : {m n : ℕ} → α m n → α 0 n
-  | 0,     _, a => a
-  | _ + 1, _, a => univClosure₂₁ (∀¹ a)
-
-def univClosure₂₂ : {m n : ℕ} → α m n → α m 0
-  | _, 0,     a => a
-  | _, _ + 1, a => univClosure₂₂ (∀² a)
-
-@[simp] lemma univClosure₂₁_zero {n} (a : α 0 n) : univClosure₂₁ a = a := rfl
-
-lemma univClosure₂₁_succ {m n} (a : α (m + 1) n) : univClosure₂₁ a = univClosure₂₁ (∀¹ a) := rfl
-
-@[simp] lemma univClosure₂₂_zero {m} (a : α m 0) : univClosure₂₂ a = a := rfl
-
-lemma univClosure₂₂_succ {m n} (a : α m (n + 1)) : univClosure₂₂ a = univClosure₂₂ (∀² a) := rfl
-
-end UnivQuantifier₂
-
-section ExQuantifier₂
-
-variable {α : ℕ → ℕ → Type*} [ExQuantifier₂ α]
-
-def exClosure₂₁ : {m n : ℕ} → α m n → α 0 n
-  | 0,     _, a => a
-  | _ + 1, _, a => exClosure₂₁ (∃¹ a)
-
-def exClosure₂₂ : {m n : ℕ} → α m n → α m 0
-  | _, 0,     a => a
-  | _, _ + 1, a => exClosure₂₂ (∃² a)
-
-@[simp] lemma exClosure₂₁_zero {n} (a : α 0 n) : exClosure₂₁ a = a := rfl
-
-lemma exClosure₂₁_succ {m n} (a : α (m + 1) n) : exClosure₂₁ a = exClosure₂₁ (∃¹ a) := rfl
-
-@[simp] lemma exClosure₂₂_zero {m} (a : α m 0) : exClosure₂₂ a = a := rfl
-
-lemma exClosure₂₂_succ {m n} (a : α m (n + 1)) : exClosure₂₂ a = exClosure₂₂ (∃² a) := rfl
-
-end ExQuantifier₂
 
 end logicNotation
 
@@ -402,20 +186,6 @@ def comp (g : β →ˡᶜ γ) (f : α →ˡᶜ β) : α →ˡᶜ γ where
 
 end Hom
 
-section quantifier
-
-variable {α : ℕ → Type*} [(i : ℕ) → LogicalConnective (α i)] [UnivQuantifier α] [ExQuantifier α]
-
-def ball (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀' (φ ➝ ψ)
-
-def bex (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃' (φ ⋏ ψ)
-
-notation:64 "∀[" φ "] " ψ => ball φ ψ
-
-notation:64 "∃[" φ "] " ψ => bex φ ψ
-
-end quantifier
-
 class AndOrClosed {F} [LogicalConnective F] (C : F → Prop) where
   verum  : C ⊤
   falsum : C ⊥
@@ -429,7 +199,6 @@ class Closed {F} [LogicalConnective F] (C : F → Prop) extends AndOrClosed C wh
 attribute [simp] AndOrClosed.verum AndOrClosed.falsum
 
 end LogicalConnective
-
 
 section Subclosed
 

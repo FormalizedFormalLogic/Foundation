@@ -290,11 +290,11 @@ lemma eval_nrel {k} {r : L.Rel k} {v} :
 
 @[simp] lemma eval_ball {φ ψ : Semiformula L ξ (n + 1)} :
     Eval s e ε (∀[φ] ψ) ↔ ∀ x : M, Eval s (x :> e) ε φ → Eval s (x :> e) ε ψ := by
-  simp [LogicalConnective.ball]
+  simp [ball]
 
 @[simp] lemma eval_bex {φ ψ : Semiformula L ξ (n + 1)} :
     Eval s e ε (∃[φ] ψ) ↔ ∃ x : M, Eval s (x :> e) ε φ ⋏ Eval s (x :> e) ε ψ := by
-  simp [LogicalConnective.bex]
+  simp [bex]
 
 @[simp] lemma eval_univClosure {e'} {φ : Semiformula L ξ n'} :
     Eval s e' ε (∀* φ) ↔ ∀ e, Eval s e ε φ := by

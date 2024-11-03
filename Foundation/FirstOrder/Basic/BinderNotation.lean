@@ -370,14 +370,14 @@ def unexpandEx : Unexpander
   | `($_ “ $φ:first_order_formula”) => `(“ ∃' $φ:first_order_formula ”)
   | _                                   => throw ()
 
-@[app_unexpander LogicalConnective.ball]
+@[app_unexpander ball]
 def unexpandBall : Unexpander
   | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∀[$φ] $ψ) ”)
   | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∀[$φ] !$u) ”)
   | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∀[!$t] $ψ) ”)
   | _                                                           => throw ()
 
-@[app_unexpander LogicalConnective.bex]
+@[app_unexpander bex]
 def unexpandBex : Unexpander
   | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∃[$φ] $ψ) ”)
   | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∃[$φ] !$u) ”)
