@@ -4,7 +4,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language} [L.LT] {ξ : Type v}
+variable {L : Language} [L.LT]
 
 namespace Arith
 

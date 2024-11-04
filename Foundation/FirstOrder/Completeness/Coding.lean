@@ -7,10 +7,10 @@ namespace FirstOrder
 open Semiformula
 variable {L : Language.{u}}
 
-def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.upper).foldr max 0
+def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.fvSup).foldr max 0
 
 lemma not_fvar?_newVar {φ : SyntacticFormula L} {Γ : Sequent L} (h : φ ∈ Γ) : ¬FVar? φ (newVar Γ) :=
-  not_fvar?_of_lt_upper φ (by simpa[newVar] using List.le_max_of_le (List.mem_map_of_mem _ h) (by simp))
+  not_fvar?_of_lt_fvSup φ (by simpa[newVar] using List.le_max_of_le (List.mem_map_of_mem _ h) (by simp))
 
 namespace Derivation
 
