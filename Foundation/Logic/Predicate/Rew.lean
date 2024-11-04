@@ -719,7 +719,7 @@ class Rewriting (L : outParam Language) (F : Type* → ℕ → Type*)
 
 namespace Rewriting
 
-variable {F : Type* → ℕ → Type*}
+variable
   [(ξ : Type _) → (n : ℕ) → LogicalConnective (F ξ n)] [(ξ : Type _) → Quantifier (F ξ)]
   [Rewriting L F]
 
@@ -755,9 +755,15 @@ lemma smul_ext' {ω₁ ω₂ : Rew L ξ₁ n₁ ξ₂ n₂} (h : ω₁ = ω₂) 
 
 abbrev substitute (φ : F ξ n₁) (w : Fin n₁ → Semiterm L ξ n₂) : F ξ n₂ := Rew.substs w • φ
 
-scoped [LO.FirstOrder] infix:90 " ⇜ " => LO.FirstOrder.Rewriting.substitute
+infix:90 " ⇜ " => LO.FirstOrder.Rewriting.substitute
 
 @[coe] abbrev embedding {ο} [IsEmpty ο] (φ : F ο n) {ξ} : F ξ n := @Rew.emb L ο _ ξ n • φ
+
+abbrev shift (φ : F ℕ n) : F ℕ n := @Rew.shift L n • φ
+
+abbrev free (φ : F ℕ (n + 1)) : F ℕ n := @Rew.free L n • φ
+
+abbrev fix (φ : F ℕ n) : F ℕ (n + 1) := @Rew.fix L n • φ
 
 end Rewriting
 
@@ -827,20 +833,20 @@ lemma smul_shift_injective : Function.Injective fun φ : F ℕ n ↦ @shift L n 
   smul_map_injective Function.injective_id Nat.succ_injective
 
 @[simp] lemma fix_free (φ : F ℕ (n + 1)) :
-    @fix L n • @free L n • φ = φ := by simp [←comp_smul]
+    fix (free φ) = φ := by simp [←comp_smul]
 
-@[simp] lemma hom_free_fix (φ : F ℕ n) :
-    @free L n • @fix L n • φ = φ := by simp [←comp_smul]
+@[simp] lemma free_fix (φ : F ℕ n) :
+    free (fix φ) = φ := by simp [←comp_smul]
 
-abbrev shift (φ : F ℕ n) : F ℕ n := @Rew.shift L n • φ
+@[simp] lemma substitute_empty (φ : F ξ 0) (v : Fin 0 → Semiterm L ξ 0) : (φ ⇜ v) = φ := by simp [substitute]
 
 /-- `hom_substs_mbar_zero_comp_shift_eq_free` -/
 @[simp] lemma app_substs_fbar_zero_comp_shift_eq_free (φ : F ℕ 1) :
     (shift φ)/[&0] = @free L 0 • φ := by simp [←comp_smul, substs_mbar_zero_comp_shift_eq_free]
 
 lemma free_rewrite_eq (f : ℕ → SyntacticTerm L) (φ : F ℕ 1) :
-    @free L 0 • (rewrite fun x ↦ bShift (f x)) • φ =
-    rewrite (&0 :>ₙ fun x ↦ Rew.shift (f x)) • @free L 0 • φ := by
+    free ((rewrite fun x ↦ bShift (f x)) • φ) =
+    rewrite (&0 :>ₙ fun x ↦ Rew.shift (f x)) • free φ := by
   simpa [←comp_smul] using smul_ext' (by ext x <;> simp [Rew.comp_app, Fin.eq_zero])
 
 lemma shift_rewrite_eq (f : ℕ → SyntacticTerm L) (φ : F ℕ 0) :
@@ -859,7 +865,7 @@ lemma shiftEmb_def (φ : F ℕ n) :
   shiftEmb φ = shift φ := rfl
 
 lemma fix_allClosure (φ : F ℕ n) :
-    ∀' @fix L 0 • (∀* φ) = ∀* @fix L n • φ := by
+    ∀' fix (∀* φ) = ∀* fix φ := by
   induction n
   case zero => simp [univClosure_succ]
   case succ n ih => simp [univClosure_succ, ih]

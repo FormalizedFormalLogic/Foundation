@@ -206,12 +206,6 @@ lemma coe_substitute_eq_substitute_coe (φ : Semisentence L k) (v : Fin k → Se
     (↑(φ ⇜ v) : SyntacticSemiformula L n) = (φ : SyntacticSemiformula L k)⇜(fun i ↦ v i) :=
   LawfulRewriting.enbedding_substitute_eq_substitute_embedding φ v
 
-open Lean PrettyPrinter Delaborator in
-@[app_unexpander Rewriting.substitute]
-def _root_.unexpsnderSubstitute' : Unexpander
-  | `($_ $φ:term ![$ts:term,*]) => `($φ /[ $ts,* ])
-  | _                           => throw ()
-
 lemma coe_substs_eq_substs_coe₁ (φ : Semisentence L 1) (t : Semiterm L Empty n) :
     (↑(φ/[t]) : SyntacticSemiformula L n) = (↑φ : SyntacticSemiformula L 1)/[(t : Semiterm L ℕ n)] :=
   LawfulRewriting.coe_substs_eq_substs_coe₁ φ t
@@ -224,8 +218,8 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   (nrel   : ∀ {l : ℕ} (r : L.Rel l) (v : Fin l → SyntacticTerm L), C (nrel r v))
   (and    : ∀ (φ ψ : SyntacticFormula L), C φ → C ψ → C (φ ⋏ ψ))
   (or     : ∀ (φ ψ : SyntacticFormula L), C φ → C ψ → C (φ ⋎ ψ))
-  (all    : ∀ (φ : SyntacticSemiformula L 1), C (@Rew.free L 0 • φ) → C (∀' φ))
-  (ex     : ∀ (φ : SyntacticSemiformula L 1), C (@Rew.free L 0 • φ) → C (∃' φ)) :
+  (all    : ∀ (φ : SyntacticSemiformula L 1), C (Rewriting.free φ) → C (∀' φ))
+  (ex     : ∀ (φ : SyntacticSemiformula L 1), C (Rewriting.free φ) → C (∃' φ)) :
     ∀ (φ : SyntacticFormula L), C φ
   | ⊤         => verum
   | ⊥         => falsum
@@ -233,8 +227,8 @@ def formulaRec {C : SyntacticFormula L → Sort _}
   | .nrel r v => nrel r v
   | φ ⋏ ψ     => and φ ψ (formulaRec verum falsum rel nrel and or all ex φ) (formulaRec verum falsum rel nrel and or all ex ψ)
   | φ ⋎ ψ     => or φ ψ  (formulaRec verum falsum rel nrel and or all ex φ) (formulaRec verum falsum rel nrel and or all ex ψ)
-  | ∀' φ      => all φ   (formulaRec verum falsum rel nrel and or all ex (@Rew.free L 0 • φ))
-  | ∃' φ      => ex φ    (formulaRec verum falsum rel nrel and or all ex (@Rew.free L 0 • φ))
+  | ∀' φ      => all φ   (formulaRec verum falsum rel nrel and or all ex (Rewriting.free φ))
+  | ∃' φ      => ex φ    (formulaRec verum falsum rel nrel and or all ex (Rewriting.free φ))
   termination_by φ => φ.complexity
 
 lemma fvar?_rew [DecidableEq ξ₁] [DecidableEq ξ₂]
@@ -450,7 +444,7 @@ lemma lMap_rewrite (f : ξ₁ → Semiterm L₁ ξ₂ n) (φ : Semiformula L₁ 
   simp [Rew.rewrite, lMap_bind, Function.comp_def]
 
 lemma lMap_substs (w : Fin k → Semiterm L₁ ξ n) (φ : Semiformula L₁ ξ k) :
-    lMap Φ (φ⇜w) = (lMap Φ φ)⇜(Semiterm.lMap Φ ∘ w) := lMap_bind _ _ _
+    lMap Φ (φ ⇜ w) = (lMap Φ φ)⇜(Semiterm.lMap Φ ∘ w) := lMap_bind _ _ _
 
 lemma lMap_shift (φ : SyntacticSemiformula L₁ n) : lMap Φ (@Rew.shift L₁ n • φ) = @Rew.shift L₂ n • lMap Φ φ := lMap_bind _ _ _
 

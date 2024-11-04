@@ -11,7 +11,7 @@ namespace LO
 
 namespace FirstOrder
 
-variable {L : Language.{u}} {ξ : Type v} {μ₁ : Type v₁} {μ₂ : Type v₂}
+variable {L : Language.{u}}
 
 @[ext] class Structure (L : Language.{u}) (M : Type w) where
   func : ⦃k : ℕ⦄ → L.Func k → (Fin k → M) → M
@@ -332,7 +332,7 @@ lemma eval_nrel {k} {r : L.Rel k} {v} :
 
 section rew
 
-variable {ξ₁ ξ₂} {ε : ξ → M} {ε₂ : ξ₂ → M}
+variable {ε : ξ → M} {ε₂ : ξ₂ → M}
 
 lemma eval_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) :
     Eval s e₂ ε₂ (ω • φ) ↔ Eval s (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.bvar) (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.fvar) φ := by
@@ -340,7 +340,7 @@ lemma eval_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁
   case hall => simp [Function.comp_def]; exact iff_of_eq <| forall_congr fun x ↦ by congr; funext i; cases i using Fin.cases <;> simp
   case hex => simp [Function.comp_def]; exact exists_congr fun x ↦ iff_of_eq $ by congr; funext i; cases i using Fin.cases <;> simp
 
-lemma eval_rew_q {ξ₁ ξ₂} {ε₂ : ξ₂ → M} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ (n₁ + 1)) :
+lemma eval_rew_q {ε₂ : ξ₂ → M} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ (n₁ + 1)) :
     Eval s (x :> e₂) ε₂ (ω.q • φ) ↔
     Eval s
       (x :> Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.bvar)
@@ -378,7 +378,7 @@ lemma eval_substs {k} (w : Fin k → Semiterm L ξ n) (φ : Semiformula L ξ k) 
     Eval s e ε (φ ⇜ w) ↔ Eval s (fun i ↦ (w i).val s e ε) ε φ := by
   simp [eval_rew, Function.comp_def]
 
-@[simp] lemma eval_emb {ξ : Type} {ε : ξ → M} (φ : Semiformula L Empty n) :
+@[simp] lemma eval_emb {ε : ξ → M} (φ : Semiformula L Empty n) :
     Eval s e ε (Rewriting.embedding (ξ := ξ) φ : Semiformula L ξ n) ↔ Eval s e Empty.elim φ := by
   simp [eval_rew, Function.comp_def]; apply iff_of_eq; congr; funext x; contradiction
 
