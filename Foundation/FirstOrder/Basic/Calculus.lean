@@ -42,7 +42,7 @@ inductive Derivation (T : Theory L) : Sequent L → Type _
 | verum (Γ)    : Derivation T (⊤ :: Γ)
 | or {Γ φ ψ}   : Derivation T (φ :: ψ :: Γ) → Derivation T (φ ⋎ ψ :: Γ)
 | and {Γ φ ψ}  : Derivation T (φ :: Γ) → Derivation T (ψ :: Γ) → Derivation T (φ ⋏ ψ :: Γ)
-| all {Γ} {φ : SyntacticSemiformula L 1} : Derivation T (Rewriting.free φ :: Γ⁺) → Derivation T ((∀' φ) :: Γ)
+| all {Γ φ}    : Derivation T (Rewriting.free φ :: Γ⁺) → Derivation T ((∀' φ) :: Γ)
 | ex {Γ φ} (t) : Derivation T (φ/[t] :: Γ) → Derivation T ((∃' φ) :: Γ)
 | wk {Γ Δ}     : Derivation T Δ → Δ ⊆ Γ → Derivation T Γ
 | cut {Γ φ}    : Derivation T (φ :: Γ) → Derivation T (∼φ :: Γ) → Derivation T Γ

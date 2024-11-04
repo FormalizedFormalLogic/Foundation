@@ -20,10 +20,10 @@ inductive Derivation2 (T : Theory L) : Finset (SyntacticFormula L) → Type _
 | verum {Δ}                                : ⊤ ∈ Δ → Derivation2 T Δ
 | and   {Δ} {φ ψ : SyntacticFormula L}     : φ ⋏ ψ ∈ Δ → Derivation2 T (insert φ Δ) → Derivation2 T (insert ψ Δ) → Derivation2 T Δ
 | or    {Δ} {φ ψ : SyntacticFormula L}     : φ ⋎ ψ ∈ Δ → Derivation2 T (insert φ (insert ψ Δ)) → Derivation2 T Δ
-| all   {Δ} {φ : SyntacticSemiformula L 1} : ∀' φ ∈ Δ → Derivation2 T (insert (Rew.free.hom φ) (Δ.image Rew.shift.hom)) → Derivation2 T Δ
+| all   {Δ} {φ : SyntacticSemiformula L 1} : ∀' φ ∈ Δ → Derivation2 T (insert (Rewriting.free φ) (Δ.image Rewriting.shift)) → Derivation2 T Δ
 | ex    {Δ} {φ : SyntacticSemiformula L 1} : ∃' φ ∈ Δ → (t : SyntacticTerm L) → Derivation2 T (insert (φ/[t]) Δ) → Derivation2 T Δ
 | wk    {Δ Γ} : Derivation2 T Δ → Δ ⊆ Γ → Derivation2 T Γ
-| shift {Δ}   : Derivation2 T Δ → Derivation2 T (Δ.image Rew.shift.hom)
+| shift {Δ}   : Derivation2 T Δ → Derivation2 T (Δ.image Rewriting.shift)
 | cut   {Δ φ} : Derivation2 T (insert φ Δ) → Derivation2 T (insert (∼φ) Δ) → Derivation2 T Δ
 
 scoped infix:45 " ⊢₂ " => Derivation2
@@ -39,7 +39,7 @@ scoped infix: 45 " ⊢₂.! " => Derivable2SingleConseq
 variable {T : Theory L}
 
 lemma shifts_toFinset_eq_image_shift (Δ : Sequent L) :
-    (shifts Δ).toFinset = Δ.toFinset.image Rew.shift.hom := by ext φ; simp [shifts]
+    (shifts Δ).toFinset = Δ.toFinset.image Rewriting.shift := by ext φ; simp [shifts]
 
 def Derivation.toDerivation2 T : {Γ : Sequent L} → T ⟹ Γ → T ⊢₂ Γ.toFinset
   | _, Derivation.axL Δ R v            => Derivation2.closed _ (Semiformula.rel R v) (by simp) (by simp)
