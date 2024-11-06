@@ -86,7 +86,7 @@ lemma coe_indH_subset_indH : (indScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theo
   simp [Theory.indH, Theory.indScheme]
   rintro _ φ Hp rfl
   exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) φ, Hierarchy.oringEmb Hp,
-    by simp [Formula.lMap_fvUnivClosure, succInd, Semiformula.lMap_substs]⟩
+    by simp [succInd, Semiformula.lMap_substs]⟩
 
 instance PAMinus.subtheoryOfIndH : 𝐏𝐀⁻ ≼ 𝐈𝐍𝐃Γ n := System.Subtheory.ofSubset (by simp [indH, Theory.add_def])
 

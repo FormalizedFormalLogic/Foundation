@@ -1,5 +1,3 @@
-import Foundation.FirstOrder.Basic.Syntax.Language
-import Foundation.FirstOrder.Basic.Syntax.Term
 import Foundation.FirstOrder.Basic.Syntax.Formula
 import Foundation.FirstOrder.Basic.Syntax.Rew
 import Foundation.FirstOrder.Basic.Semantics.Semantics

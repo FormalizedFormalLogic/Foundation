@@ -3,6 +3,7 @@ import Foundation.FirstOrder.Completeness.Completeness
 import Foundation.FirstOrder.Completeness.Corollaries
 import Foundation.Vorspiel.ExistsUnique
 
+/-
 namespace LO.FirstOrder
 
 @[ext]
@@ -11,9 +12,9 @@ structure Interpretation {L : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (
   rel {k} : L'.Rel k → Semisentence L k
   func {k} : L'.Func k → Semisentence L (k + 1)
   domain_nonempty :
-    T ⊨ ∃' Rew.emb.hom domain
+    T ⊨ ∃' Rewriting.embedding domain
   func_defined {k} (f : L'.Func k) :
-    T ⊨ ∀* ((Matrix.conj fun i ↦ (Rew.emb.hom domain)/[#i]) ➝ ∃'! ((Rew.emb.hom domain)/[#0] ⋏ Rew.emb.hom (func f)))
+    T ⊨ ∀* ((Matrix.conj fun i ↦ (Rewriting.embedding domain)/[#i]) ➝ ∃'! ((Rewriting.embedding domain)/[#0] ⋏ Rewriting.embedding (func f)))
 
 namespace Interpretation
 
@@ -24,12 +25,12 @@ variable (ι : Interpretation T L')
 def varEquals {n : ℕ} : Semiterm L' Empty n → Semisentence L (n + 1)
   | #x                => “z. z = #x.succ”
   | Semiterm.func f v =>
-      Rew.toS.hom
+      Rew.toS •
         <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·.succ))).hom (varEquals <| v i)) ➝
           (Rew.embSubsts (&0 :> (# ·))).hom (ι.func f))
 
 def translationRel {k} (r : L'.Rel k) (v : Fin k → Semiterm L' Empty n) : Semisentence L n :=
-  Rew.toS.hom <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·))).hom (ι.varEquals <| v i)) ➝ Rew.emb.hom (ι.rel r))
+  Rew.toS.hom <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·))).hom (ι.varEquals <| v i)) ➝ Rewriting.embedding (ι.rel r))
 
 def translationAux : {n : ℕ} → Semisentence L' n → Semisentence L n
   | _, Semiformula.rel r v  => ι.translationRel r v
@@ -156,7 +157,7 @@ lemma eval_translation_iff₀ {φ : Sentence L'} :
   simpa [Matrix.empty_eq] using eval_translation_iff (M := M) (ι := ι) (e := ![]) (φ := φ)
 
 lemma models_translation_iff {φ : SyntacticFormula L'} :
-    M ⊧ₘ Rew.emb.hom (ι.translation (∀∀₀φ)) ↔ (ι.Sub M) ⊧ₘ φ := by
+    M ⊧ₘ Rewriting.embedding (ι.translation (∀∀₀φ)) ↔ (ι.Sub M) ⊧ₘ φ := by
     simp [models_iff, eval_translation_iff₀, eval_close₀]
 
 end semantics
@@ -173,7 +174,7 @@ end Interpretation
 
 class TheoryInterpretation {L L' : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (U : Theory L') where
   interpretation : Interpretation T L'
-  interpret_theory : ∀ φ ∈ U, T ⊨ Rew.emb.hom (interpretation.translation (∀∀₀φ))
+  interpret_theory : ∀ φ ∈ U, T ⊨ Rewriting.embedding (interpretation.translation (∀∀₀φ))
 
 infix:50 " ⊳ " => TheoryInterpretation
 
@@ -197,3 +198,4 @@ open Interpretation
 end TheoryInterpretation
 
 end LO.FirstOrder
+-/

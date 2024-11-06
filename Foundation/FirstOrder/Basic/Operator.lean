@@ -289,7 +289,7 @@ abbrev Const (L : Language.{u}) := Operator L 0
 namespace Operator
 
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L ξ n) : Semiformula L ξ n :=
-  (Rew.substs v).hom (Rew.emb.hom o.sentence)
+  Rewriting.embedding o.sentence ⇜ v
 
 def const (c : Const L) : Semiformula L ξ n := c.operator ![]
 
@@ -300,7 +300,9 @@ def comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) : Operator L l
 
 lemma operator_comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) (v : Fin l → Semiterm L ξ n) :
   (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
-    simp [operator, comp, ←Rew.hom_comp_app]; congr 2
+    unfold operator Rewriting.embedding Rewriting.substitute comp
+    simp only [operator, ← LawfulRewriting.comp_smul, Rew.emb_eq_id, Rew.comp_id];
+    congr 1
     ext <;> simp [Rew.comp_app]
     · congr
     · contradiction
@@ -363,14 +365,14 @@ lemma LE.def_of_Eq_of_LT [Operator.Eq L] [Operator.LT L] :
   simp [operator, LE.sentence_eq, Eq.sentence_eq, LT.sentence_eq, Matrix.fun_eq_vec₂]
 
 lemma lt_def [L.LT] (t u : Semiterm L ξ n) :
-    LT.lt.operator ![t, u] = Semiformula.rel Language.LT.lt ![t, u] := by simp [operator, LT.sentence_eq, Rew.rel]
+    LT.lt.operator ![t, u] = Semiformula.rel Language.LT.lt ![t, u] := by simp [operator, LT.sentence_eq, rew_rel]
 
 lemma eq_def [L.Eq] (t u : Semiterm L ξ n) :
-    Eq.eq.operator ![t, u] = Semiformula.rel Language.Eq.eq ![t, u] := by simp [operator, Eq.sentence_eq, Rew.rel]
+    Eq.eq.operator ![t, u] = Semiformula.rel Language.Eq.eq ![t, u] := by simp [operator, Eq.sentence_eq, rew_rel]
 
 lemma le_def [L.Eq] [L.LT] (t u : Semiterm L ξ n) :
     LE.le.operator ![t, u] = Semiformula.rel Language.Eq.eq ![t, u] ⋎ Semiformula.rel Language.LT.lt ![t, u] := by
-  simp [operator, Eq.sentence_eq, LT.sentence_eq, LE.sentence_eq, Rew.rel]
+  simp [operator, Eq.sentence_eq, LT.sentence_eq, LE.sentence_eq, rew_rel]
 
 variable {L : Language}
 
@@ -432,8 +434,6 @@ namespace Rew
 
 variable
   {L L' : Language.{u}} {L₁ : Language.{u₁}} {L₂ : Language.{u₂}} {L₃ : Language.{u₃}}
-  {ξ ξ' : Type v} {ξ₁ : Type v₁} {ξ₂ : Type v₂} {ξ₃ : Type v₃}
-  {n n₁ n₂ n₃ : ℕ}
 
 variable (ω : Rew L ξ₁ n₁ ξ₂ n₂)
 
@@ -461,33 +461,34 @@ protected lemma operator' (o : Semiterm.Operator L k) (v : Fin k → Semiterm L 
   by simp [Semiterm.Operator.const, Empty.eq_elim]
 
 lemma hom_operator (o : Semiformula.Operator L k) (v : Fin k → Semiterm L ξ₁ n₁) :
-    ω.hom (o.operator v) = o.operator (fun i => ω (v i)) := by
-  simp [Semiformula.Operator.operator, ←Rew.hom_comp_app]; congr 2
+    ω • o.operator v = o.operator fun i ↦ ω (v i) := by
+  unfold Semiformula.Operator.operator Rewriting.substitute Rewriting.embedding
+  simp only [← LawfulRewriting.comp_smul]; congr 1
   ext <;> simp [Rew.comp_app]; contradiction
 
 lemma hom_operator' (o : Semiformula.Operator L k) (v : Fin k → Semiterm L ξ₁ n₁) :
-    ω.hom (o.operator v) = o.operator (ω ∘ v) := ω.hom_operator o v
+    ω • o.operator v = o.operator (ω ∘ v) := ω.hom_operator o v
 
 @[simp] lemma hom_finitary0 (o : Semiformula.Operator L 0) (v : Fin 0 → Semiterm L ξ₁ n₁) :
-    ω.hom (o.operator v) = o.operator ![] := by simp [ω.hom_operator', Matrix.empty_eq]
+    ω • (o.operator v) = o.operator ![] := by simp [ω.hom_operator', Matrix.empty_eq]
 
 @[simp] lemma hom_finitary1 (o : Semiformula.Operator L 1) (t : Semiterm L ξ₁ n₁) :
-    ω.hom (o.operator ![t]) = o.operator ![ω t] := by simp [ω.hom_operator']
+    ω • (o.operator ![t]) = o.operator ![ω t] := by simp [ω.hom_operator']
 
 @[simp] lemma hom_finitary2 (o : Semiformula.Operator L 2) (t₁ t₂ : Semiterm L ξ₁ n₁) :
-    ω.hom (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp [ω.hom_operator']
+    ω • (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp [ω.hom_operator']
 
 @[simp] lemma hom_finitary3 (o : Semiformula.Operator L 3) (t₁ t₂ t₃ : Semiterm L ξ₁ n₁) :
-    ω.hom (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp [ω.hom_operator']
+    ω • (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp [ω.hom_operator']
 
-@[simp] lemma hom_const : ω.hom (Semiformula.Operator.const c) = Semiformula.Operator.const c := by
+@[simp] lemma hom_const : ω • (Semiformula.Operator.const c : Semiformula L ξ₁ n₁) = Semiformula.Operator.const c := by
   simp [Semiformula.Operator.const, ω.hom_operator']
 
 open Semiformula
 
-lemma eq_equal_iff [L.Eq] {φ} {t u : Semiterm L ξ₂ n₂} :
-    ω.hom φ = Operator.Eq.eq.operator ![t, u] ↔ ∃ t' u', ω t' = t ∧ ω u' = u ∧ φ = Operator.Eq.eq.operator ![t', u'] := by
-  cases φ using Semiformula.rec' <;> simp [Rew.rel, Rew.nrel, Operator.operator, Operator.Eq.sentence_eq]
+lemma eq_equal_iff [L.Eq] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n₂} :
+    ω • φ = Operator.Eq.eq.operator ![t, u] ↔ ∃ t' u', ω t' = t ∧ ω u' = u ∧ φ = Operator.Eq.eq.operator ![t', u'] := by
+  cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel, Operator.operator, Operator.Eq.sentence_eq]
   case hrel k' r' v =>
     by_cases hk : k' = 2 <;> simp [hk]; rcases hk with rfl; simp
     by_cases hr : r' = Language.Eq.eq <;> simp [hr, Function.funext_iff]
@@ -495,10 +496,10 @@ lemma eq_equal_iff [L.Eq] {φ} {t u : Semiterm L ξ₂ n₂} :
     · rintro H; exact ⟨v 0, H 0, v 1, H 1, by intro i; cases i using Fin.cases <;> simp [Fin.eq_zero]⟩
     · rintro ⟨t', rfl, u', rfl, H⟩; intro i; cases i using Fin.cases <;> simp [H, Fin.eq_zero]
 
-lemma eq_lt_iff [L.LT] {φ} {t u : Semiterm L ξ₂ n₂} :
-    ω.hom φ = Operator.LT.lt.operator ![t, u] ↔
+lemma eq_lt_iff [L.LT] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n₂} :
+    ω • φ = Operator.LT.lt.operator ![t, u] ↔
     ∃ t' u', ω t' = t ∧ ω u' = u ∧ φ = Operator.LT.lt.operator ![t', u'] := by
-  cases φ using Semiformula.rec' <;> simp [Rew.rel, Rew.nrel, Operator.operator, Operator.LT.sentence_eq]
+  cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel, Operator.operator, Operator.LT.sentence_eq]
   case hrel k' r' v =>
     by_cases hk : k' = 2 <;> simp [hk]; rcases hk with rfl; simp
     by_cases hr : r' = Language.LT.lt <;> simp [hr, Function.funext_iff]

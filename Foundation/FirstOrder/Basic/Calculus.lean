@@ -11,41 +11,41 @@ open Semiformula
 variable {L : Language} {T : Theory L}
 
 def shifts (Δ : List (SyntacticSemiformula L n)) :
-  List (SyntacticSemiformula L n) := Δ.map Rew.shift.hom
+  List (SyntacticSemiformula L n) := Δ.map Rewriting.shift
 
 scoped postfix:max "⁺" => shifts
 
 @[simp] lemma mem_shifts_iff {φ : SyntacticSemiformula L n} {Δ : List (SyntacticSemiformula L n)} :
-    Rew.shift.hom φ ∈ Δ⁺ ↔ φ ∈ Δ :=
-  List.mem_map_of_injective Rew.shift.hom_injective
+    Rewriting.shift φ ∈ Δ⁺ ↔ φ ∈ Δ :=
+  List.mem_map_of_injective LawfulRewriting.smul_shift_injective
 
 @[simp] lemma shifts_ss (Δ Γ : List (SyntacticSemiformula L n)) :
-    Δ⁺ ⊆ Γ⁺ ↔ Δ ⊆ Γ := List.map_subset_iff _ Rew.shift.hom_injective
+    Δ⁺ ⊆ Γ⁺ ↔ Δ ⊆ Γ := List.map_subset_iff _ LawfulRewriting.smul_shift_injective
 
 @[simp] lemma shifts_cons (φ : SyntacticSemiformula L n) (Δ : List (SyntacticSemiformula L n)) :
-    (φ :: Δ)⁺ = Rew.shift.hom φ :: Δ⁺ := by simp[shifts]
+    (φ :: Δ)⁺ = Rewriting.shift φ :: Δ⁺ := by simp [shifts]
 
 @[simp] lemma shifts_nil : ([] : Sequent L)⁺ = [] := by rfl
 
 lemma shifts_union (Δ Γ : List (SyntacticSemiformula L n)) :
-    (Δ ++ Γ)⁺ = Δ⁺ ++ Γ⁺ := by simp[shifts]
+    (Δ ++ Γ)⁺ = Δ⁺ ++ Γ⁺ := by simp [shifts]
 
 lemma shifts_neg (Γ : List (SyntacticSemiformula L n)) :
     (Γ.map (∼·))⁺ = (Γ⁺).map (∼·) := by simp [shifts]
 
 @[simp] lemma shifts_emb (Γ : List (Semisentence L n)) :
-    (Γ.map Rew.emb.hom)⁺ = Γ.map Rew.emb.hom := by
-  simp[shifts, Function.comp_def, ←Rew.hom_comp_app]
+    (Γ.map (Rewriting.embedding (ξ := ℕ)))⁺ = Γ.map (Rewriting.embedding (ξ := ℕ)) := by
+  simp [shifts, Function.comp_def, ←LawfulRewriting.comp_smul]
 
 inductive Derivation (T : Theory L) : Sequent L → Type _
-| axL (Δ) {k} (r : L.Rel k) (v) : Derivation T (rel r v :: nrel r v :: Δ)
-| verum (Δ)    : Derivation T (⊤ :: Δ)
-| or {Δ φ ψ}   : Derivation T (φ :: ψ :: Δ) → Derivation T (φ ⋎ ψ :: Δ)
-| and {Δ φ ψ}  : Derivation T (φ :: Δ) → Derivation T (ψ :: Δ) → Derivation T (φ ⋏ ψ :: Δ)
-| all {Δ φ}    : Derivation T (Rew.free.hom φ :: Δ⁺) → Derivation T ((∀' φ) :: Δ)
-| ex {Δ φ} (t) : Derivation T (φ/[t] :: Δ) → Derivation T ((∃' φ) :: Δ)
-| wk {Δ Γ}     : Derivation T Δ → Δ ⊆ Γ → Derivation T Γ
-| cut {Δ φ}    : Derivation T (φ :: Δ) → Derivation T (∼φ :: Δ) → Derivation T Δ
+| axL (Γ) {k} (r : L.Rel k) (v) : Derivation T (rel r v :: nrel r v :: Γ)
+| verum (Γ)    : Derivation T (⊤ :: Γ)
+| or {Γ φ ψ}   : Derivation T (φ :: ψ :: Γ) → Derivation T (φ ⋎ ψ :: Γ)
+| and {Γ φ ψ}  : Derivation T (φ :: Γ) → Derivation T (ψ :: Γ) → Derivation T (φ ⋏ ψ :: Γ)
+| all {Γ φ}    : Derivation T (Rewriting.free φ :: Γ⁺) → Derivation T ((∀' φ) :: Γ)
+| ex {Γ φ} (t) : Derivation T (φ/[t] :: Γ) → Derivation T ((∃' φ) :: Γ)
+| wk {Γ Δ}     : Derivation T Δ → Δ ⊆ Γ → Derivation T Γ
+| cut {Γ φ}    : Derivation T (φ :: Γ) → Derivation T (∼φ :: Γ) → Derivation T Γ
 | root {φ}     : φ ∈ T → Derivation T [φ]
 
 instance : OneSided (SyntacticFormula L) (Theory L) := ⟨Derivation⟩
@@ -62,13 +62,14 @@ namespace Derivation
 
 variable {T U : Theory L} {Δ Δ₁ Δ₂ Γ : Sequent L} {φ ψ r : SyntacticFormula L}
 
+open LawfulRewriting
 /-
 inductive CutRestricted (C : Set (SyntacticFormula L)) : {Δ : Sequent L} → ⊢ᵀ Δ → Prop
 | axL (Δ) {k} (r : L.Rel k) (v)                 : CutRestricted C (axL Δ r v)
 | verum (Δ)                                     : CutRestricted C (verum Δ)
 | or {Δ φ ψ} {d : ⊢ᵀ φ :: ψ :: Δ}               : CutRestricted C d → CutRestricted C d.or
 | and {Δ φ ψ} {dp : ⊢ᵀ φ :: Δ} {dq : ⊢ᵀ ψ :: Δ} : CutRestricted C dp → CutRestricted C dq → CutRestricted C (dp.and dq)
-| all {Δ φ} {d : ⊢ᵀ Rew.free.hom φ :: Δ⁺}       : CutRestricted C d → CutRestricted C d.all
+| all {Δ φ} {d : ⊢ᵀ Rewriting.free φ :: Δ⁺}       : CutRestricted C d → CutRestricted C d.all
 | ex {Δ φ} (t) {d : ⊢ᵀ φ/[t] :: Δ}              : CutRestricted C d → CutRestricted C d.ex
 | wk {Δ Γ} {d : ⊢ᵀ Δ} (ss : Δ ⊆ Γ)              : CutRestricted C d → CutRestricted C (d.wk ss)
 | cut {Δ φ} {dp : ⊢ᵀ φ :: Δ} {dn : ⊢ᵀ ∼φ :: Δ}  : CutRestricted C dp → CutRestricted C dn → φ ∈ C → CutRestricted C (dp.cut dn)
@@ -87,7 +88,7 @@ attribute [simp] CutRestricted.axL CutRestricted.verum
     CutRestricted C (Derivation.and dp dq) ↔ CutRestricted C dp ∧ CutRestricted C dq :=
   ⟨by rintro ⟨⟩; constructor <;> assumption, by rintro ⟨dp, dq⟩; exact CutRestricted.and dp dq⟩
 
-@[simp] lemma all' {φ} {d : ⊢ᵀ Rew.free.hom φ :: Δ⁺} : CutRestricted C (Derivation.all d) ↔ CutRestricted C d :=
+@[simp] lemma all' {φ} {d : ⊢ᵀ Rewriting.free φ :: Δ⁺} : CutRestricted C (Derivation.all d) ↔ CutRestricted C d :=
   ⟨by rintro ⟨⟩; assumption, CutRestricted.all⟩
 
 @[simp] lemma ex' {φ} (t) {d : ⊢ᵀ φ/[t] :: Δ} : CutRestricted C (Derivation.ex t d) ↔ CutRestricted C d :=
@@ -138,7 +139,7 @@ section length
 
 @[simp] lemma length_or {φ ψ} (d : T ⟹ φ :: ψ :: Δ) : length (or d) = d.length.succ := rfl
 
-@[simp] lemma length_all {φ} (d : T ⟹ Rew.free.hom φ :: Δ⁺) : length (all d) = d.length.succ := rfl
+@[simp] lemma length_all {φ} (d : T ⟹ Rew.free • φ :: Δ⁺) : length (all d) = d.length.succ := rfl
 
 @[simp] lemma length_ex {t} {φ} (d : T ⟹ φ/[t] :: Δ) : length (ex t d) = d.length.succ := rfl
 
@@ -221,7 +222,7 @@ def verum' (h : ⊤ ∈ Δ) : T ⟹ Δ := (verum Δ).wk (by simp[h])
 def axL' {k} (r : L.Rel k) (v)
     (h : Semiformula.rel r v ∈ Δ) (hn : Semiformula.nrel r v ∈ Δ) : T ⟹ Δ := (axL Δ r v).wk (by simp[h, hn])
 
-def all' {φ} (h : ∀' φ ∈ Δ) (d : T ⟹ Rew.free.hom φ :: Δ⁺) : T ⟹ Δ := d.all.wk (by simp [h])
+def all' {φ} (h : ∀' φ ∈ Δ) (d : T ⟹ Rewriting.free φ :: Δ⁺) : T ⟹ Δ := d.all.wk (by simp [h])
 
 def ex' {φ} (h : ∃' φ ∈ Δ) (t) (d : T ⟹ φ/[t] :: Δ) : T ⟹ Δ := (d.ex t).wk (by simp [h])
 
@@ -236,34 +237,30 @@ ne_of_ne_complexity (by simp)
 
 def em {φ : SyntacticFormula L} {Δ : Sequent L} (hpos : φ ∈ Δ) (hneg : ∼φ ∈ Δ) : T ⟹ Δ := by
   induction φ using Semiformula.formulaRec generalizing Δ <;> simp at hneg
-  case hverum           => exact verum' hpos
-  case hfalsum          => exact verum' hneg
-  case hrel r v         => exact axL' r v hpos hneg
-  case hnrel r v        => exact axL' r v hneg hpos
-  case hall φ ih        =>
-    have : T ⟹ ∼Rew.free.hom φ :: Rew.free.hom φ :: Δ⁺ := ih (by simp) (by simp)
-    have : T ⟹ (∼Rew.shift.hom φ)/[&0] :: Rew.free.hom φ :: Δ⁺ :=
-      Derivation.cast this (by simp[←Rew.hom_comp_app])
-    have : T ⟹ Rew.free.hom φ :: Δ⁺ := (ex &0 this).wk
-      (by simp; right;
-          have := mem_shifts_iff.mpr hneg
-          rwa [Rew.ex, Rew.q_shift, LogicalConnective.HomClass.map_neg] at this)
+  case verum           => exact verum' hpos
+  case falsum          => exact verum' hneg
+  case rel r v         => exact axL' r v hpos hneg
+  case nrel r v        => exact axL' r v hneg hpos
+  case all φ ih        =>
+    have : T ⟹ ∼Rewriting.free φ :: Rewriting.free φ :: Δ⁺ := ih (by simp) (by simp)
+    have : T ⟹ (∼Rewriting.shift φ)/[&0] :: Rewriting.free φ :: Δ⁺ :=
+      Derivation.cast this (by simp[←LawfulRewriting.comp_smul])
+    have : T ⟹ Rewriting.free φ :: Δ⁺ := (ex &0 this).wk
+      (by simp; right; simpa using mem_shifts_iff.mpr hneg)
     exact this.all.wk (by simp[hpos])
-  case hex φ ih         =>
-    have : T ⟹ Rew.free.hom φ :: ∼Rew.free.hom φ :: Δ⁺ := ih (by simp) (by simp)
-    have : T ⟹ (Rew.shift.hom φ)/[&0] :: ∼Rew.free.hom φ :: Δ⁺ :=
-      Derivation.cast this (by simp[←Rew.hom_comp_app])
-    have : T ⟹ Rew.free.hom (∼φ) :: Δ⁺ := (ex &0 this).wk
-      (by simp; right;
-          have := mem_shifts_iff.mpr hpos
-          rwa [Rew.ex, Rew.q_shift] at this)
+  case ex φ ih         =>
+    have : T ⟹ Rewriting.free φ :: ∼Rewriting.free φ :: Δ⁺ := ih (by simp) (by simp)
+    have : T ⟹ (Rewriting.shift φ)/[&0] :: ∼Rewriting.free φ :: Δ⁺ :=
+      Derivation.cast this (by simp[←LawfulRewriting.comp_smul])
+    have : T ⟹ Rewriting.free (∼φ) :: Δ⁺ := (ex &0 this).wk
+      (by simp; right; simpa using mem_shifts_iff.mpr hpos)
     exact this.all.wk (by simp[hneg])
-  case hand φ ψ ihp ihq =>
+  case and φ ψ ihp ihq =>
     have ihp : T ⟹ φ :: ∼φ :: ∼ψ :: Δ := ihp (by simp) (by simp)
     have ihq : T ⟹ ψ :: ∼φ :: ∼ψ :: Δ := ihq (by simp) (by simp)
     have : T ⟹ ∼φ :: ∼ψ :: Δ := (ihp.and ihq).wk (by simp[hpos])
     exact this.or.wk (by simp[hneg])
-  case hor φ ψ ihp ihq  =>
+  case or φ ψ ihp ihq  =>
     have ihp : T ⟹ ∼φ :: φ :: ψ :: Δ := ihp (by simp) (by simp)
     have ihq : T ⟹ ∼ψ :: φ :: ψ :: Δ := ihq (by simp) (by simp)
     have : T ⟹ φ :: ψ :: Δ := (ihp.and ihq).wk (by simp[hneg])
@@ -292,77 +289,77 @@ def specialize {φ : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
   Derivation.cut dp dn
 
 def specializes : {k : ℕ} → {φ : SyntacticSemiformula L k} → {Γ : Sequent L} → (v : Fin k → SyntacticTerm L) →
-    T ⟹ (∀* φ) :: Γ → T ⟹ (Rew.substs v).hom φ :: Γ
+    T ⟹ (∀* φ) :: Γ → T ⟹ (φ ⇜ v) :: Γ
   | 0,     φ, Γ, _, b => Derivation.cast b (by simp)
   | k + 1, φ, Γ, v, b =>
-    have : T ⟹ (∀' (Rew.substs (v ·.succ)).q.hom φ) :: Γ := by simpa using specializes (φ := ∀' φ) (v ·.succ) b
+    have : T ⟹ (∀' (Rew.substs (v ·.succ)).q • φ) :: Γ := by simpa using specializes (φ := ∀' φ) (v ·.succ) b
     Derivation.cast (specialize (v 0) this) (by
-      simp [←Rew.hom_comp_app]; congr 2
+      simp [←LawfulRewriting.comp_smul]; congr 2
       ext x <;> simp [Rew.comp_app]
       cases x using Fin.cases <;> simp)
 
 def instances : {k : ℕ} → {φ : SyntacticSemiformula L k} → {Γ : Sequent L} → {v : Fin k → SyntacticTerm L} →
-    T ⟹ (Rew.substs v).hom φ :: Γ → T ⟹ (∃* φ) :: Γ
-  | 0, φ, Γ, _, b => Derivation.cast b (by simp)
+    T ⟹ (φ ⇜ v) :: Γ → T ⟹ (∃* φ) :: Γ
+  | 0,     φ, Γ, _, b => Derivation.cast b (by simp)
   | k + 1, φ, Γ, v, b =>
-    have : T ⟹ (∃' (Rew.substs (v ·.succ)).q.hom φ) :: Γ :=
+    have : T ⟹ (∃' (Rew.substs (v ·.succ)).q • φ) :: Γ :=
       ex (v 0) <| Derivation.cast b <| by
-        simp [←Rew.hom_comp_app]; congr 2
+        unfold Rewriting.substitute; rw [←LawfulRewriting.comp_smul]; congr 2
         ext x <;> simp [Rew.comp_app]
         cases x using Fin.cases <;> simp
     instances (k := k) (v := (v ·.succ)) (Derivation.cast this (by simp))
 
-def allClosureFixitr {φ : SyntacticFormula L} (dp : T ⊢ φ) : (m : ℕ) → T ⊢ ∀* (Rew.fixitr 0 m).hom φ
+def allClosureFixitr {φ : SyntacticFormula L} (dp : T ⊢ φ) : (m : ℕ) → T ⊢ ∀* (@Rew.fixitr L 0 m) • φ
   | 0     => by simpa
   | m + 1 => by
-    simp only [allClosure_fixitr, Nat.reduceAdd]
+    simp only [LawfulRewriting.allClosure_fixitr, Nat.reduceAdd]
     apply all; simpa using allClosureFixitr dp m
 
-def toClose (b : T ⊢ φ) : T ⊢ ∀∀φ := allClosureFixitr b φ.upper
+def toClose (b : T ⊢ φ) : T ⊢ ∀∀φ := allClosureFixitr b φ.fvSup
 
 def toClose! (b : T ⊢! φ) : T ⊢! ∀∀φ := ⟨toClose b.get⟩
 
-def rewrite₁ (b : T ⊢ φ) (f : ℕ → SyntacticTerm L) : T ⊢ (Rew.rewrite f).hom φ :=
-  Derivation.cast (specializes (fun x ↦ f x) (allClosureFixitr b φ.upper)) (by simp)
+def rewrite₁ (b : T ⊢ φ) (f : ℕ → SyntacticTerm L) : T ⊢ (Rew.rewrite f) • φ :=
+  Derivation.cast (specializes (fun x ↦ f x) (allClosureFixitr b φ.fvSup)) (by simp)
 
-def rewrite : ∀ {Δ}, T ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), T ⟹ Δ.map (Rew.rewrite f).hom
-  | _, axL Δ r v,          f => by simp[Rew.rel, Rew.nrel]; exact axL _ _ _
-  | _, verum Δ,            f => Derivation.cast (verum (Δ.map ((Rew.rewrite f).hom))) (by simp)
-  | _, @or _ _ Δ φ ψ d,      f =>
-    have : T ⟹ (Rew.rewrite f).hom φ ⋎ (Rew.rewrite f).hom ψ :: Δ.map ((Rew.rewrite f).hom) :=
+def rewrite {Δ} : T ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), T ⟹ Δ.map fun φ ↦ Rew.rewrite f • φ
+  | axL Δ r v,            f => by simp[rew_rel, rew_nrel]; exact axL _ _ _
+  | verum Δ,              f => Derivation.cast (verum (Δ.map fun φ ↦ Rew.rewrite f • φ)) (by simp)
+  | @or _ _ Δ φ ψ d,      f =>
+    have : T ⟹ Rew.rewrite f • φ ⋎ Rew.rewrite f • ψ :: Δ.map fun φ ↦ Rew.rewrite f • φ :=
       or (Derivation.cast (rewrite d f) (by simp))
     Derivation.cast this (by simp)
-  | _, @and _ _ Δ φ ψ dp dq, f =>
-    have : T ⟹ (Rew.rewrite f).hom φ ⋏ (Rew.rewrite f).hom ψ :: Δ.map ((Rew.rewrite f).hom) :=
+  | @and _ _ Δ φ ψ dp dq, f =>
+    have : T ⟹ Rew.rewrite f • φ ⋏ Rew.rewrite f • ψ :: Δ.map fun φ ↦ Rew.rewrite f • φ :=
       and (Derivation.cast (rewrite dp f) (by simp)) (Derivation.cast (rewrite dq f) (by simp))
     Derivation.cast this (by simp)
-  | _, @all _ _ Δ φ d,       f =>
-    have : T ⟹ ((Rew.free.hom φ) :: Δ⁺).map (Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x))).hom :=
+  | @all _ _ Δ φ d,       f =>
+    have : T ⟹ ((Rewriting.free φ) :: Δ⁺).map fun φ ↦ Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x)) • φ :=
       rewrite d (&0 :>ₙ fun x => Rew.shift (f x))
-    have : T ⟹ (∀' (Rew.rewrite (Rew.bShift ∘ f)).hom φ) :: Δ.map ((Rew.rewrite f).hom) :=
+    have : T ⟹ (∀' Rew.rewrite (Rew.bShift ∘ f) • φ) :: Δ.map fun φ ↦ Rew.rewrite f • φ :=
       all (Derivation.cast this (by simp [free_rewrite_eq, shifts, shift_rewrite_eq, Finset.image_image, Function.comp_def]))
     Derivation.cast this (by simp[Rew.q_rewrite])
-  | _, @ex _ _ Δ φ t d,      f =>
-    have : T ⟹ (φ/[t] :: Δ).map ((Rew.rewrite f).hom) := rewrite d f
-    have : T ⟹ (∃' (Rew.rewrite (Rew.bShift ∘ f)).hom φ) :: Δ.map ((Rew.rewrite f).hom) :=
+  | @ex _ _ Δ φ t d,      f =>
+    have : T ⟹ (φ/[t] :: Δ).map fun φ ↦ Rew.rewrite f • φ := rewrite d f
+    have : T ⟹ (∃' Rew.rewrite (Rew.bShift ∘ f) • φ) :: Δ.map fun φ ↦ Rew.rewrite f • φ :=
       ex (Rew.rewrite f t) (Derivation.cast this (by simp[rewrite_subst_eq]))
     Derivation.cast this (by simp[Rew.q_rewrite])
-  | _, @wk _ _ Δ Γ d ss,     f => (rewrite d f).wk (List.map_subset _ ss)
-  | _, @cut _ _ Δ φ d dn,    f =>
-    have dΔ : T ⟹ ((Rew.rewrite f).hom φ) :: Δ.map ((Rew.rewrite f).hom) := Derivation.cast (rewrite d f) (by simp)
-    have dΓ : T ⟹ (∼(Rew.rewrite f).hom φ) :: Δ.map ((Rew.rewrite f).hom) := Derivation.cast (rewrite dn f) (by simp)
+  | @wk _ _ Δ Γ d ss,     f => (rewrite d f).wk (List.map_subset _ ss)
+  | @cut _ _ Δ φ d dn,    f =>
+    have dΔ : T ⟹ (Rew.rewrite f • φ) :: Δ.map fun φ ↦ Rew.rewrite f • φ := Derivation.cast (rewrite d f) (by simp)
+    have dΓ : T ⟹ ∼(Rew.rewrite f • φ) :: Δ.map fun φ ↦ Rew.rewrite f • φ := Derivation.cast (rewrite dn f) (by simp)
     Derivation.cast (cut dΔ dΓ) (by simp)
-  | _, root h,               f => rewrite₁ (root h) f
+  | root h,               f => rewrite₁ (root h) f
 
 protected def map {Δ : Sequent L} (d : T ⟹ Δ) (f : ℕ → ℕ) :
-    T ⟹ Δ.map (Rew.rewriteMap f).hom := rewrite d (fun x ↦ &(f x))
+    T ⟹ Δ.map fun φ ↦ @Rew.rewriteMap L ℕ ℕ 0 f • φ := rewrite d (fun x ↦ &(f x))
 
 protected def shift {Δ : Sequent L} (d : T ⟹ Δ) : T ⟹ Δ⁺ :=
   Derivation.cast (Derivation.map d Nat.succ) (by simp only [shifts, List.map_inj_left]; intro _ _; rfl)
 
 /-
 lemma CutRestricted.rewrite {C : Set (SyntacticFormula L)}
-    (hC : ∀ f : ℕ → SyntacticTerm L, ∀ φ, φ ∈ C → (Rew.rewrite f).hom φ ∈ C)
+    (hC : ∀ f : ℕ → SyntacticTerm L, ∀ φ, φ ∈ C → Rew.rewrite f • φ ∈ C)
     {Δ : Sequent L} (f : ℕ → SyntacticTerm L) {d : ⟹ Δ} :
     CutRestricted C d → CutRestricted C (rewrite d f) := by
   induction d generalizing f <;> simp[-List.map_cons, Derivation.rewrite, *]
@@ -406,7 +403,7 @@ instance : Tait.Axiomatized (SyntacticFormula L) (Theory L) where
 variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
 
 private def not_close' (φ) : T ⟹ [∼(∀∀φ), φ] :=
-  have : T ⟹ [∃* ∼(Rew.hom (Rew.fixitr 0 (upper φ))) φ, φ] := instances (v := fun x ↦ &x) (em (φ := φ) (by simp) (by simp))
+  have : T ⟹ [∃* ∼(@Rew.fixitr L 0 (fvSup φ) • φ), φ] := instances (v := fun x ↦ &x) (em (φ := φ) (by simp) (by simp))
   Derivation.cast this (by simp [close])
 
 def invClose (b : T ⊢ ∀∀φ) : T ⊢ φ := cut (wk b (by simp)) (not_close' φ)
@@ -494,20 +491,20 @@ lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : System.Inconsistent T₁ → S
 end Hom
 
 omit [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-private lemma map_subst_eq_free (φ : SyntacticSemiformula L 1) (h : ¬φ.fvar? m) :
-    (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom (φ/[&m]) = Rew.free.hom φ := by
-  simp[←Rew.hom_comp_app];
+private lemma map_subst_eq_free (φ : SyntacticSemiformula L 1) (h : ¬φ.FVar? m) :
+    (@Rew.rewriteMap L ℕ ℕ 0 (fun x ↦ if x = m then 0 else x + 1)) • (φ/[&m] : SyntacticFormula L) = Rewriting.free φ := by
+  simp[←LawfulRewriting.comp_smul];
   exact Semiformula.rew_eq_of_funEqOn (by simp[Rew.comp_app, Fin.eq_zero])
     (fun x hx => by simp[Rew.comp_app]; rintro rfl; contradiction)
 
-private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ.fvar? m) :
-    Δ.map (Rew.rewriteMap (fun x => if x = m then 0 else x + 1)).hom = Δ⁺ := by
+private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ.FVar? m) :
+    Δ.map (fun φ ↦ @Rew.rewriteMap L ℕ ℕ 0 (fun x ↦ if x = m then 0 else x + 1) • φ) = Δ⁺ := by
   apply List.map_congr_left
   intro φ hp; exact rew_eq_of_funEqOn₀ (by intro x hx; simp; rintro rfl; have := h φ hp; contradiction)
 
-def genelalizeByNewver {φ : SyntacticSemiformula L 1} (hp : ¬φ.fvar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.fvar? m)
+def genelalizeByNewver {φ : SyntacticSemiformula L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
     (d : T ⟹ φ/[&m] :: Δ) : T ⟹ (∀' φ) :: Δ := by
-  have : T ⟹ (Rew.free.hom φ) :: Δ⁺ :=
+  have : T ⟹ (Rewriting.free φ) :: Δ⁺ :=
     Derivation.cast (Derivation.map d (fun x => if x = m then 0 else x + 1))
     (by simp[map_subst_eq_free φ hp, map_rewriteMap_eq_shifts Δ hΔ])
   exact all this
@@ -558,7 +555,7 @@ abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬ σ
 
 infix:45 " ⊬. " => Unprovable₀
 
-instance (T : Theory.Alt L) : System.Classical T := System.Classical.ofEquiv T.thy T Rew.emb.hom (fun _ ↦ .refl _)
+instance (T : Theory.Alt L) : System.Classical T := System.Classical.ofEquiv T.thy T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
 
 variable {T : Theory L} {σ : Sentence L}
 

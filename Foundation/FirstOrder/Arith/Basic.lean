@@ -105,12 +105,12 @@ instance : Coe (Theory ℒₒᵣ) (Theory L) := ⟨(Semiformula.lMap Language.or
 
 @[simp] lemma oringEmb_eq (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
     Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (op(=).operator v) = op(=).operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
-  simp [lMap_rel, Rew.rel, Operator.operator, Operator.Eq.sentence_eq]
+  simp [lMap_rel, rew_rel, Operator.operator, Operator.Eq.sentence_eq]
   funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
 
 @[simp] lemma oringEmb_lt (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
     Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (op(<).operator v) = op(<).operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
-  simp [lMap_rel, Rew.rel, Operator.operator, Operator.LT.sentence_eq]
+  simp [lMap_rel, rew_rel, Operator.operator, Operator.LT.sentence_eq]
   funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
 
 end Semiformula
@@ -141,7 +141,7 @@ end Structure
 
 namespace Semiformula
 
-variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add] {ξ : Type*}
+variable {L : Language} [L.LT] [L.Zero] [L.One] [L.Add]
 
 def ballLTSucc (t : Semiterm L ξ n) (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n := φ.ballLT ‘!!t + 1’
 

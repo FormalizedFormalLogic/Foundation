@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Basic.Syntax.Language
+import Foundation.Logic.Predicate.Language
 
 /-!
 # Terms of first-order logic
@@ -75,6 +75,21 @@ instance : DecidableEq (Semiterm L ξ n) := hasDecEq
 
 end Decidable
 
+def complexity : Semiterm L ξ n → ℕ
+  | #_       => 0
+  | &_       => 0
+  | func _ v => Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1
+
+@[simp] lemma complexity_bvar (x : Fin n) : (#x : Semiterm L ξ n).complexity = 0 := rfl
+
+@[simp] lemma complexity_fvar (x : ξ) : (&x : Semiterm L ξ n).complexity = 0 := rfl
+
+lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).complexity = Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1 := rfl
+
+@[simp] lemma complexity_func_lt {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) (i) :
+    (v i).complexity < (func f v).complexity := by
+  simp [complexity_func, Nat.lt_add_one_iff]; exact Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
+
 abbrev func! (k) (f : L.Func k) (v : Fin k → Semiterm L ξ n) := func f v
 
 def bv : Semiterm L ξ n → Finset (Fin n)
@@ -106,59 +121,37 @@ end Positive
 lemma bv_eq_empty_of_positive {t : Semiterm L ξ 1} (ht : t.Positive) : t.bv = ∅ :=
   Finset.eq_empty_of_forall_not_mem <| by simp [Positive, Fin.eq_zero] at ht ⊢; assumption
 
-def fv [DecidableEq ξ] : Semiterm L ξ n → Finset ξ
+section freeVariables
+
+variable [DecidableEq ξ]
+
+def freeVariables : Semiterm L ξ n → Finset ξ
   | #_       => ∅
   | &x       => {x}
-  | func _ v => .biUnion .univ fun i ↦ fv (v i)
+  | func _ v => .biUnion .univ fun i ↦ freeVariables (v i)
 
-@[simp] lemma fv_bvar [DecidableEq ξ] : (#x : Semiterm L ξ n).fv = ∅ := rfl
+@[simp] lemma freeVariables_bvar : (#x : Semiterm L ξ n).freeVariables = ∅ := rfl
 
-@[simp] lemma fv_fvar [DecidableEq ξ] : (&x : Semiterm L ξ n).fv = {x} := rfl
+@[simp] lemma freeVariables_fvar : (&x : Semiterm L ξ n).freeVariables = {x} := rfl
 
-lemma fv_func [DecidableEq ξ] {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
-    (func f v).fv = .biUnion .univ fun i ↦ fv (v i) := rfl
+lemma freeVariables_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
+    (func f v).freeVariables = .biUnion .univ fun i ↦ (v i).freeVariables := rfl
 
-@[simp] lemma fv_constant [DecidableEq ξ] (f : L.Func 0) (v : Fin 0 → Semiterm L ξ n) : (func f v).fv = ∅ := rfl
+@[simp] lemma freeVariables_constant (f : L.Func 0) (v : Fin 0 → Semiterm L ξ n) : (func f v).freeVariables = ∅ := rfl
 
-def complexity : Semiterm L ξ n → ℕ
-  | #_       => 0
-  | &_       => 0
-  | func _ v => Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1
+@[simp] lemma freeVariables_empty {ο : Type*} [IsEmpty ο] {t : Semiterm L ο n} : t.freeVariables = ∅ := by
+  ext x; exact IsEmpty.elim inferInstance x
 
-@[simp] lemma complexity_bvar (x : Fin n) : (#x : Semiterm L ξ n).complexity = 0 := rfl
+abbrev FVar? (t : Semiterm L ξ n) (x : ξ) : Prop := x ∈ t.freeVariables
 
-@[simp] lemma complexity_fvar (x : ξ) : (&x : Semiterm L ξ n).complexity = 0 := rfl
+@[simp] lemma fvar?_bvar (x z) : ¬(#x : Semiterm L ξ n).FVar? z := by simp [FVar?]
 
-lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func f v).complexity = Finset.sup Finset.univ (fun i ↦ complexity (v i)) + 1 := rfl
+@[simp] lemma fvar?_fvar (x z) : (&x : Semiterm L ξ n).FVar? z ↔ x = z := by simp [FVar?, Eq.comm]
 
-@[simp] lemma complexity_func_lt {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) (i) :
-    (v i).complexity < (func f v).complexity := by
-  simp [complexity_func, Nat.lt_add_one_iff]; exact Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
-
-def fvarList : Semiterm L ξ n → List ξ
-  | #_       => []
-  | &x       => [x]
-  | func _ v => List.join $ Matrix.toList (fun i => fvarList (v i))
-
-abbrev fvar? (t : Semiterm L ξ n) (x : ξ) : Prop := x ∈ t.fvarList
-
-@[simp] lemma fvarList_bvar : fvarList (#x : Semiterm L ξ n) = [] := rfl
-@[simp] lemma fvarList_fvar : fvarList (&x : Semiterm L ξ n) = [x] := rfl
-@[simp] lemma mem_fvarList_func {k} {f : L.Func k} {v : Fin k → Semiterm L ξ n} :
-    x ∈ (func f v).fvarList ↔ ∃ i, x ∈ (v i).fvarList :=
-  by simp[fvarList]
-@[simp] lemma fvar?_bvar (x z) : ¬fvar? (#x : Semiterm L ξ n) z := by simp [fvar?]
-@[simp] lemma fvar?_fvar (x z) : fvar? (&x : Semiterm L ξ n) z ↔ x = z := by simp [fvar?, Eq.comm]
 @[simp] lemma fvar?_func (x) {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
-    fvar? (func f v) x ↔ ∃ i, fvar? (v i) x := by simp [fvar?]
+    (func f v).FVar? x ↔ ∃ i, (v i).FVar? x := by simp [FVar?, freeVariables_func]
 
-@[simp] lemma fvarList_empty {o : Type*} [e : IsEmpty o] {t : Semiterm L o n} : fvarList t = [] := by
-  induction t <;> simp[List.eq_nil_iff_forall_not_mem]
-  case fvar x => exact IsEmpty.elim e x
-
-@[simp] lemma fvarList_to_finset [DecidableEq ξ] (t : Semiterm L ξ n) : t.fvarList.toFinset = t.fv := by
-  induction t <;> try simp [fvarList, fv_func]
-  case func ih => ext x; simp [←ih]
+end freeVariables
 
 section lMap
 
@@ -174,31 +167,20 @@ def lMap (Φ : L₁ →ᵥ L₂) : Semiterm L₁ ξ n → Semiterm L₂ ξ n
 @[simp] lemma lMap_fvar (x : ξ) : (&x : Semiterm L₁ ξ n).lMap Φ = &x := rfl
 
 lemma lMap_func {k} (f : L₁.Func k) (v : Fin k → Semiterm L₁ ξ n) :
-    (func f v).lMap Φ = func (Φ.func f) (fun i => lMap Φ (v i)) := rfl
+    (func f v).lMap Φ = func (Φ.func f) (fun i ↦ lMap Φ (v i)) := rfl
 
 @[simp] lemma lMap_positive (t : Semiterm L₁ ξ (n + 1)) : (t.lMap Φ).Positive ↔ t.Positive := by
   induction t <;> simp [lMap_func, *]
 
-@[simp] lemma fvarList_lMap (Φ : L₁ →ᵥ L₂) (t : Semiterm L₁ ξ n) : fvarList (Semiterm.lMap Φ t) = fvarList t := by
-  induction t <;> simp [fvarList, *]
+@[simp] lemma freeVariables_lMap [DecidableEq ξ] (Φ : L₁ →ᵥ L₂) (t : Semiterm L₁ ξ n) :
+    (Semiterm.lMap Φ t).freeVariables = t.freeVariables := by
+  induction t
+  case bvar => simp
+  case fvar => simp
+  case func k f v ih =>
+    ext x; simp [lMap_func, freeVariables_func, ih]
 
 end lMap
-
-section fvEnum
-
-variable [DecidableEq ξ] [Inhabited ξ]
-
-def fvEnum (t : Semiterm L ξ n) : ξ → ℕ := t.fvarList.indexOf
-
-def fvEnumInv (t : Semiterm L ξ n) : ℕ → ξ :=
-  fun i ↦ if hi : i < t.fvarList.length then t.fvarList.get ⟨i, hi⟩ else default
-
-lemma fvEnumInv_fvEnum {t : Semiterm L ξ n} {x : ξ} (hx : x ∈ t.fvarList) :
-    fvEnumInv t (fvEnum t x) = x := by
-  simp [fvEnumInv, fvEnum]; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
-
-end fvEnum
 
 section
 

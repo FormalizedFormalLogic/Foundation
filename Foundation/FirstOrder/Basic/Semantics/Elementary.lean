@@ -164,14 +164,14 @@ variable {F : Type*} [FunLike F M₁ M₂] [EmbeddingClass F L M₁ M₂] (Θ : 
 variable {e₁ : Fin n → M₁} {ε₁ : ξ → M₁}
 
 omit [Nonempty M₁] [Nonempty M₂]
-lemma eval_hom_iff_of_open : ∀ {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n}, φ.Open →
+lemma eval_hom_iff_of_open {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} : {φ : Semiformula L ξ n} → φ.Open →
     (Eval s₁ e₁ ε₁ φ ↔ Eval s₂ (Θ ∘ e₁) (Θ ∘ ε₁) φ)
-  | _, e₁, ε₁, ⊤,        _ => by simp
-  | _, e₁, ε₁, ⊥,        _ => by simp
-  | _, e₁, ε₁, rel r v,  _ => by simp [Function.comp_def, eval_rel, ←EmbeddingClass.rel Θ, HomClass.val_term]
-  | _, e₁, ε₁, nrel r v, _ => by simp [Function.comp_def, eval_nrel, ←EmbeddingClass.rel Θ, HomClass.val_term]
-  | _, e₁, ε₁, φ ⋏ ψ,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
-  | _, e₁, ε₁, φ ⋎ ψ,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
+  | ⊤,        _ => by simp
+  | ⊥,        _ => by simp
+  | rel r v,  _ => by simp [Function.comp_def, eval_rel, ←EmbeddingClass.rel Θ, HomClass.val_term]
+  | nrel r v, _ => by simp [Function.comp_def, eval_nrel, ←EmbeddingClass.rel Θ, HomClass.val_term]
+  | φ ⋏ ψ,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
+  | φ ⋎ ψ,    h => by simp at h ⊢; simp [eval_hom_iff_of_open h.1, eval_hom_iff_of_open h.2]
 
 lemma eval_hom_univClosure {n} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n} (hp : φ.Open) :
     Evalf s₂ (Θ ∘ ε₁) (∀* φ) → Evalf s₁ ε₁ (∀* φ) := by

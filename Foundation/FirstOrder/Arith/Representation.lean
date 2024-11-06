@@ -244,14 +244,14 @@ def codeAux : {k : ℕ} → Nat.ArithPart₁.Code k → Formula ℒₒᵣ (Fin (
   | _, Code.equal i j => “(&i.succ = &j.succ ∧ &0 = 1) ∨ (&i.succ ≠ &j.succ ∧ &0 = 0)”
   | _, Code.lt i j    => “(&i.succ < &j.succ ∧ &0 = 1) ∨ (&i.succ ≮ &j.succ ∧ &0 = 0)”
   | _, Code.proj i    => “&0 = !!&i.succ”
-  | _, Code.comp c d  =>
-    exClosure (((Rew.bind ![] (&0 :> (#·))).hom (codeAux c)) ⋏
-      Matrix.conj fun i => (Rew.bind ![] (#i :> (&·.succ))).hom (codeAux (d i)))
-  | _, Code.rfind c   =>
-    (Rew.bind ![] (‘0’ :> &0 :> (&·.succ))).hom (codeAux c) ⋏
-    (∀[“z. z < &0”] ∃' “z. z ≠ 0” ⋏ (Rew.bind ![] (#0 :> #1 :> (&·.succ))).hom (codeAux c))
+  | k, @Code.comp _ n c d  =>
+    exClosure ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (n + 1)) ![] (&0 :> (#·)) • (codeAux c)) ⋏
+      Matrix.conj fun i ↦ Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#i :> (&·.succ)) • codeAux (d i))
+  | k, Code.rfind c   =>
+    (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (‘0’ :> &0 :> (&·.succ)) • codeAux c) ⋏
+    (∀[“z. z < &0”] ∃' “z. z ≠ 0” ⋏ ((Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1 + 1)) ![] (#0 :> #1 :> (&·.succ)) • codeAux c)))
 
-def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind ![] (#0 :> (#·.succ))).hom (codeAux c)
+def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind (L := ℒₒᵣ) (ξ₁ := Fin (k + 1)) ![] (#0 :> (#·.succ))) • (codeAux c)
 
 /-
 section model
@@ -367,14 +367,14 @@ lemma codeOfPartrec'_spec {k} {f : Vector ℕ k →. ℕ} (hf : Nat.Partrec' f) 
 
 open Classical
 
-noncomputable def codeOfRePred (φ : ℕ → Prop) : Semisentence ℒₒᵣ 1 :=
-  let f : ℕ →. Unit := fun a ↦ Part.assert (φ a) fun _ ↦ Part.some ()
+noncomputable def codeOfRePred (p : ℕ → Prop) : Semisentence ℒₒᵣ 1 :=
+  let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
   (codeOfPartrec' (fun v ↦ (f (v.get 0)).map fun _ ↦ 0))/[‘0’, #0]
 
-lemma codeOfRePred_spec {φ : ℕ → Prop} (hp : RePred φ) {x : ℕ} :
-    ℕ ⊧/![x] (codeOfRePred φ) ↔ φ x := by
-  let f : ℕ →. Unit := fun a ↦ Part.assert (φ a) fun _ ↦ Part.some ()
-  suffices ℕ ⊧/![x] ((codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0]) ↔ φ x from this
+lemma codeOfRePred_spec {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
+    ℕ ⊧/![x] (codeOfRePred p) ↔ p x := by
+  let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
+  suffices ℕ ⊧/![x] ((codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0]) ↔ p x from this
   have : Partrec fun v : Vector ℕ 1 ↦ (f (v.get 0)).map fun _ ↦ 0 := by
     refine Partrec.map (Partrec.comp hp (Primrec.to_comp <| Primrec.vector_get.comp .id (.const 0))) (Computable.const 0).to₂
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
@@ -382,8 +382,8 @@ lemma codeOfRePred_spec {φ : ℕ → Prop} (hp : RePred φ) {x : ℕ} :
 
 variable {T : Theory ℒₒᵣ} [𝐑₀ ≼ T] [Sigma1Sound T]
 
-lemma re_complete {φ : ℕ → Prop} (hp : RePred φ) {x : ℕ} :
-    φ x ↔ T ⊢! ↑((codeOfRePred φ)/[‘↑x’] : Sentence ℒₒᵣ) := Iff.trans
+lemma re_complete {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
+    p x ↔ T ⊢! ↑((codeOfRePred p)/[‘↑x’] : Sentence ℒₒᵣ) := Iff.trans
   (by simpa [models₀_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfRePred_spec hp (x := x)).symm)
   (sigma_one_completeness_iff (by simp [codeOfRePred, codeOfPartrec']))
 
