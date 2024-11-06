@@ -50,9 +50,9 @@ instance : LogicalConnective (Semiformulaᵢ L ξ n) where
 
 lemma neg_def (φ : Semiformulaᵢ L ξ n) : ∼φ = φ ➝ ⊥ := rfl
 
-instance : UnivQuantifier (Semiformulaᵢ L ξ) := ⟨all⟩
-
-instance : ExQuantifier (Semiformulaᵢ L ξ) := ⟨ex⟩
+instance : Quantifier (Semiformulaᵢ L ξ) where
+  univ := all
+  ex := ex
 
 section ToString
 
@@ -177,7 +177,7 @@ def rec' {C : ∀ n, Semiformulaᵢ L ξ n → Sort w}
 
 section Decidable
 
-variable [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] [DecidableEq ξ]
+variable [L.DecidableEq] [DecidableEq ξ]
 
 def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ = ψ)
   | _, ⊤,        ψ => by cases ψ using cases' <;>
@@ -193,8 +193,8 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ =
           | isTrue h  => by simp [h]; exact Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
           | isFalse h => isFalse (by simp [h])
         · exact isFalse (by simp [e])
-  | _, φ ⋏ ψ,    r => by
-      cases r using cases' <;> try { simp; exact isFalse not_false }
+  | _, φ ⋏ ψ,    χ => by
+      cases χ using cases' <;> try { simp; exact isFalse not_false }
       case hAnd φ' ψ' =>
         exact match hasDecEq φ φ' with
         | isTrue hp =>
@@ -202,8 +202,8 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ =
           | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
           | isFalse hq => isFalse (by simp [hp, hq])
         | isFalse hp => isFalse (by simp [hp])
-  | _, φ ⋎ ψ,    r => by
-      cases r using cases' <;> try { simp; exact isFalse not_false }
+  | _, φ ⋎ ψ,    χ => by
+      cases χ using cases' <;> try { simp; exact isFalse not_false }
       case hOr φ' ψ' =>
         exact match hasDecEq φ φ' with
         | isTrue hp =>
@@ -211,8 +211,8 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ =
           | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
           | isFalse hq => isFalse (by simp [hp, hq])
         | isFalse hp => isFalse (by simp [hp])
-  | _, φ ➝ ψ,    r => by
-      cases r using cases' <;> try { simp; exact isFalse not_false }
+  | _, φ ➝ ψ,    χ => by
+      cases χ using cases' <;> try { simp; exact isFalse not_false }
       case hImp φ' ψ' =>
         exact match hasDecEq φ φ' with
         | isTrue hp =>

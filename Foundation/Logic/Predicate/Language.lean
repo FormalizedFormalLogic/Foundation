@@ -346,6 +346,18 @@ def ORing.embedding (L : Language) [ORing L] : ℒₒᵣ →ᵥ L where
     | 2, LT.lt => LT.lt
 end Language
 
+class Language.DecidableEq (L : Language) where
+  func : (k : ℕ) → DecidableEq (L.Func k)
+  rel : (k : ℕ) → DecidableEq (L.Rel k)
+
+instance (L : Language) [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)] : L.DecidableEq := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+
+instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Func k) := Language.DecidableEq.func k
+
+instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
+
+instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
+
 end FirstOrder
 
 end LO
