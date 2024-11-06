@@ -201,21 +201,13 @@ macro_rules
   | `(⤫formula[ $_*       | $_*        | !!$φ:term                         ]) => `($φ)
   | `(⤫formula[ $binders* | $fbinders* | !$φ:term $vs:first_order_term*    ]) => do
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s => `(⤫term[ $binders* | $fbinders* | $a ] :> $s))
-    `(Rew.substs $v |>.hom $φ)
+    `($φ ⇜ $v)
   | `(⤫formula[ $binders* | $fbinders* | !$φ:term $vs:first_order_term* ⋯  ]) =>
     do
     let length := Syntax.mkNumLit (toString binders.size)
     let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s ↦ `(⤫term[ $binders* | $fbinders* | $a] :> $s))
-    `(Rew.substs $v |>.hom $φ)
-  | `(⤫formula[ $_*       | $_*        | .!!$φ:term ])                        => `(Rew.emb.hom $φ)
-  | `(⤫formula[ $binders* | $fbinders* | .!$φ:term $vs:first_order_term* ])   => do
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) (fun a s ↦ `(⤫term[ $binders* | $fbinders* | $a ] :> $s))
-    `(Rew.embSubsts $v |>.hom $φ)
-  | `(⤫formula[ $binders* | $fbinders* | .!$φ:term $vs:first_order_term* ⋯ ]) =>
-    do
-    let length := Syntax.mkNumLit (toString binders.size)
-    let v ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) (fun a s => `(⤫term[ $binders* | $fbinders* | $a ] :> $s))
-    `(Rew.embSubsts $v |>.hom $φ)
+    `($φ ⇜ $v)
+  | `(⤫formula[ $_*       | $_*        | .!!$φ:term ])                        => `(Rewriting.embedding $φ)
   | `(⤫formula[ $_*       | $_*        | ⊤                                 ]) => `(⊤)
   | `(⤫formula[ $_*       | $_*        | ⊥                                 ]) => `(⊥)
   | `(⤫formula[ $binders* | $fbinders* | $φ ∧ $ψ                           ]) => `(⤫formula[ $binders* | $fbinders* | $φ ] ⋏ ⤫formula[ $binders* | $fbinders* | $ψ ])
@@ -370,14 +362,14 @@ def unexpandEx : Unexpander
   | `($_ “ $φ:first_order_formula”) => `(“ ∃' $φ:first_order_formula ”)
   | _                                   => throw ()
 
-@[app_unexpander LogicalConnective.ball]
+@[app_unexpander ball]
 def unexpandBall : Unexpander
   | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∀[$φ] $ψ) ”)
   | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∀[$φ] !$u) ”)
   | `($_ $t:term                    “ $ψ:first_order_formula ”) => `(“ (∀[!$t] $ψ) ”)
   | _                                                           => throw ()
 
-@[app_unexpander LogicalConnective.bex]
+@[app_unexpander bex]
 def unexpandBex : Unexpander
   | `($_ “ $φ:first_order_formula ” “ $ψ:first_order_formula ”) => `(“ (∃[$φ] $ψ) ”)
   | `($_ “ $φ:first_order_formula ” $u:term                   ) => `(“ (∃[$φ] !$u) ”)

@@ -267,14 +267,14 @@ end ModelOfSatEq
 
 namespace Semiformula
 
-def existsUnique (φ : Semiformula L μ (n + 1)) : Semiformula L μ n :=
+def existsUnique {ξ} (φ : Semiformula L ξ (n + 1)) : Semiformula L ξ n :=
   “∃ y, !φ y ⋯ ∧ ∀ z, !φ z ⋯ → z = y”
 
 prefix:64 "∃'! " => existsUnique
 
 variable {M : Type*} [s : Structure L M] [Structure.Eq L M]
 
-@[simp] lemma eval_existsUnique {e ε} {φ : Semiformula L μ (n + 1)} :
+@[simp] lemma eval_existsUnique {e ε} {φ : Semiformula L ξ (n + 1)} :
     Eval s e ε (∃'! φ) ↔ ∃! x, Eval s (x :> e) ε φ := by
   simp [existsUnique, Semiformula.eval_substs, Matrix.comp_vecCons', ExistsUnique]
 

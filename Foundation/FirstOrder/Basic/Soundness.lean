@@ -34,7 +34,7 @@ lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ
     · exact ⟨r, by simp [hr], hhr⟩
   | @all _ _ Δ φ d => by
     have : (∀ a : M, Evalm M ![a] ε φ) ∨ ∃ ψ ∈ Δ, Evalfm M ε ψ := by
-      simpa[shifts, shiftEmb, Matrix.vecConsLast_vecEmpty, forall_or_right]
+      simpa[shifts, Matrix.vecConsLast_vecEmpty, forall_or_right]
         using fun a : M => sound M (a :>ₙ ε) d
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
     · exact ⟨∀' φ, by simp, hp⟩
@@ -45,7 +45,7 @@ lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
     · exact ⟨∃' φ, by simp, t.valm M ![] ε, hp⟩
     · exact ⟨ψ, by simp [hq], hhq⟩
-  | @wk _ _ Δ Γ d ss => by
+  | @wk _ _ Γ Δ d ss => by
     have : ∃ φ ∈ Δ, Evalfm M ε φ := sound M ε d
     rcases this with ⟨φ, hp, h⟩
     exact ⟨φ, ss hp, h⟩
