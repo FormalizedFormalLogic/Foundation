@@ -92,14 +92,14 @@ lemma val_not (φ : Formula α) : ℍ ⊧ ∼φ ↔ (ℍ ⊧ₕ φ) = ⊥ := by 
 @[simp] lemma val_or (φ ψ : Formula α) : ℍ ⊧ φ ⋎ ψ ↔ (ℍ ⊧ₕ φ) ⊔ (ℍ ⊧ₕ ψ) = ⊤ := by
   simp [val_def]; rfl
 
-def mod (H : Hilbert α) : Set (HeytingSemantics α) := Semantics.models (HeytingSemantics α) H.axiomSet
+def mod (H : Hilbert α) : Set (HeytingSemantics α) := Semantics.models (HeytingSemantics α) H.axioms
 
 variable {H : Hilbert α} [H.IncludeEFQ]
 
 instance : System.Intuitionistic H where
 
 lemma mod_models_iff {φ : Formula α} :
-    mod.{_,w} H ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* H.axiomSet → ℍ ⊧ φ := by
+    mod.{_,w} H ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* H.axioms → ℍ ⊧ φ := by
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
 lemma sound {φ : Formula α} (d : H ⊢! φ) : mod H ⊧ φ := by
@@ -157,11 +157,13 @@ instance : Complete H (lindenbaum H) := ⟨lindenbaum_complete_iff.mp⟩
 
 end
 
+open Hilbert.Deduction
+
 lemma complete {φ : Formula α} (h : mod.{_,u} H ⊧ φ) : H ⊢! φ := by
   wlog Con : System.Consistent H
   · exact System.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <|
-    mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hq ↦ lindenbaum_complete_iff.mpr <| Deduction.eaxm! hq⟩
+    mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hq ↦ lindenbaum_complete_iff.mpr <| eaxm! hq⟩
 
 instance : Complete H (mod.{_,u} H) := ⟨complete⟩
 
