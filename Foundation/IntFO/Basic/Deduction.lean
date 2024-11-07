@@ -113,7 +113,7 @@ def dneOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ �
     have : [∼ψ, φ, ∼∼(φ ➝ ψ)] ⊢[Λ] ⊥ := byAxm₂ ⨀ this
     have : [φ, ∼∼(φ ➝ ψ)] ⊢[Λ] ψ := (of ihψ) ⨀ (deduct this)
     deduct' (deduct this)
-  | ∀' φ, h =>
+  | ∀' φ,  h =>
     have ihφ : Λ ⊢ ∼∼(free φ) ➝ free φ := dneOfNegative (by simp [by simpa using h])
     have : [∀' shift φ, ∼(free φ), ∼∼(∀' shift φ)] ⊢[Λ] ⊥ :=
       have : [∀' shift φ, ∼(free φ), ∼∼(∀' shift φ)] ⊢[Λ] ∀' shift φ := byAxm₀
@@ -122,7 +122,8 @@ def dneOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ �
     implyAll (System.cast (by simp) (deduct' this))
   termination_by φ _ => φ.complexity
 
-def dnOfNegative {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ := System.andIntro (dneOfNegative h) System.dni
+def dnOfNegative {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ :=
+  System.andIntro (dneOfNegative h) System.dni
 
 end HilbertProofᵢ
 
