@@ -251,4 +251,39 @@ lemma add_def : T + U = T ∪ U := rfl
 
 end Theoryᵢ
 
+/-! Negative Formula -/
+namespace Semiformulaᵢ
+
+inductive IsNegative : Semiformulaᵢ L ξ n → Prop
+  | falsum : IsNegative ⊥
+  | and {φ ψ} : IsNegative φ → IsNegative ψ → IsNegative (φ ⋏ ψ)
+  | imply {φ ψ} : IsNegative ψ → IsNegative (φ ➝ ψ)
+  | all {φ} : IsNegative φ → IsNegative (∀' φ)
+
+attribute [simp] IsNegative.falsum
+
+namespace IsNegative
+
+@[simp] lemma and_iff {φ ψ : Semiformulaᵢ L ξ n} : (φ ⋏ ψ).IsNegative ↔ φ.IsNegative ∧ ψ.IsNegative :=
+  ⟨by rintro ⟨⟩; simp_all, by rintro ⟨hφ, hψ⟩; exact .and hφ hψ⟩
+
+@[simp] lemma imp_iff {φ ψ : Semiformulaᵢ L ξ n} : (φ ➝ ψ).IsNegative ↔ ψ.IsNegative :=
+  ⟨by rintro ⟨⟩; simp_all, by rintro h; exact .imply h⟩
+
+@[simp] lemma all_iff {φ : Semiformulaᵢ L ξ (n + 1)} : (∀' φ).IsNegative ↔ φ.IsNegative :=
+  ⟨by rintro ⟨⟩; simp_all, by rintro h; exact .all h⟩
+
+@[simp] lemma not_verum : ¬(⊤ : Semiformulaᵢ L ξ n).IsNegative := by rintro ⟨⟩
+
+@[simp] lemma not_or {φ ψ : Semiformulaᵢ L ξ n} : ¬(φ ⋎ ψ).IsNegative := by rintro ⟨⟩
+
+@[simp] lemma not_ex {φ : Semiformulaᵢ L ξ (n + 1)} : ¬(∃' φ).IsNegative := by rintro ⟨⟩
+
+@[simp] lemma not_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ¬(rel r v).IsNegative := by rintro ⟨⟩
+
+end IsNegative
+
+end Semiformulaᵢ
+
+
 end LO.FirstOrder

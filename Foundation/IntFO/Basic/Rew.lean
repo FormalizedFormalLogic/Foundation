@@ -70,6 +70,10 @@ instance : LawfulRewriting L (Semiformulaᵢ L) where
 @[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformulaᵢ L ξ₁ n₁) : (ω • φ).complexity = φ.complexity := by
   induction φ using rec' generalizing n₂ <;> simp [*, rew_rel]
 
+@[simp] lemma IsNegative.rew {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
+    (ω • φ).IsNegative ↔ φ.IsNegative := by
+  induction φ using rec' generalizing n₂ <;> simp [rew_rel, *]
+
 end Semiformulaᵢ
 
 end LO.FirstOrder
