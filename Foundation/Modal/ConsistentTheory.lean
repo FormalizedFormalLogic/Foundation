@@ -6,6 +6,7 @@ variable {α : Type*}
 variable {Λ : Hilbert α}
 
 open System
+open Hilbert.Deduction
 
 abbrev Theory.Consistent (Λ : Hilbert α) (T : Theory α) := T *⊬[Λ] ⊥
 
@@ -32,7 +33,7 @@ lemma self_consistent [Λ_consis : System.Consistent Λ] : Λ.axioms.Consistent 
   apply def_consistent.mpr;
   intro Γ hΓ;
   by_contra hC;
-  have : Λ ⊢! ψ := imp_trans''! hC efq! ⨀ (iff_provable_list_conj.mpr $ λ _ h => Deduction.maxm! $ hΓ _ h);
+  have : Λ ⊢! ψ := imp_trans''! hC efq! ⨀ (iff_provable_list_conj.mpr $ λ _ h => maxm! $ hΓ _ h);
   contradiction;
 
 lemma union_consistent : Theory.Consistent Λ (T₁ ∪ T₂) → T₁.Consistent Λ ∧ T₂.Consistent Λ := by
@@ -340,7 +341,7 @@ lemma subset_axiomset : Λ.axioms ⊆ Ω.theory := by
   intro φ hp;
   apply membership_iff.mpr;
   apply Context.of!;
-  exact Deduction.maxm! (by aesop);
+  exact maxm! (by aesop);
 
 @[simp] lemma not_mem_falsum : ⊥ ∉ Ω.theory := not_mem_falsum_of_consistent Ω.consistent
 

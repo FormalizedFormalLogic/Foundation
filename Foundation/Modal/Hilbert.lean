@@ -6,10 +6,11 @@ namespace LO.Modal
 
 variable {α : Type*}
 
+
 section
 
 /-- instance of inference rule -/
-structure InferenceRule (α : Type*) where
+structure Hilbert.InferenceRule (α : Type*) where
   antecedents : List (Formula α)
   consequence : Formula α
   /--
@@ -18,6 +19,8 @@ structure InferenceRule (α : Type*) where
   so more than one antecedent is required.
   -/
   antecedents_nonempty : antecedents ≠ [] := by simp
+
+namespace Hilbert.InferenceRule
 
 abbrev Necessitation (φ : Formula α) : InferenceRule α := ⟨[φ], □φ, by simp⟩
 abbrev Necessitation.set : Set (InferenceRule α) := { Necessitation φ | φ }
@@ -31,13 +34,17 @@ abbrev HenkinRule (φ : Formula α) : InferenceRule α := ⟨[□φ ⭤ φ], φ,
 abbrev HenkinRule.set : Set (InferenceRule α) := { HenkinRule φ | φ }
 notation "⟮Henkin⟯" => HenkinRule.set
 
+end Hilbert.InferenceRule
+
 end
+
 
 structure Hilbert (α : Type*) where
   axioms : Theory α
-  rules : Set (InferenceRule α)
+  rules : Set (Hilbert.InferenceRule α)
 
-inductive Deduction (Λ : Hilbert α) : (Formula α) → Type _
+
+inductive Hilbert.Deduction (Λ : Hilbert α) : (Formula α) → Type _
   | maxm {φ}     : φ ∈ Λ.axioms → Deduction Λ φ
   | rule {rl}    : rl ∈ Λ.rules → (∀ {φ}, φ ∈ rl.antecedents → Deduction Λ φ) → Deduction Λ rl.consequence
   | mdp {φ ψ}    : Deduction Λ (φ ➝ ψ) → Deduction Λ φ → Deduction Λ ψ
@@ -45,7 +52,7 @@ inductive Deduction (Λ : Hilbert α) : (Formula α) → Type _
   | imply₂ φ ψ χ : Deduction Λ $ Axioms.Imply₂ φ ψ χ
   | ec φ ψ       : Deduction Λ $ Axioms.ElimContra φ ψ
 
-namespace Deduction
+namespace Hilbert.Deduction
 
 variable {Λ Λ₁ Λ₂ : Hilbert α}
 
@@ -63,7 +70,7 @@ instance : System.HasDiaDuality Λ := inferInstance
 
 lemma maxm! {φ} (h : φ ∈ Λ.axioms) : Λ ⊢! φ := ⟨maxm h⟩
 
-end Deduction
+end Hilbert.Deduction
 
 
 namespace Hilbert
@@ -110,7 +117,7 @@ instance [IsNormal Λ] : System.K Λ where
 end Hilbert
 
 
-namespace Deduction
+namespace Hilbert.Deduction
 
 open Hilbert
 
@@ -170,7 +177,7 @@ macro_rules | `(tactic| trivial) => `(tactic|
   )
 macro_rules | `(tactic| trivial) => `(tactic | apply dne!)
 
-end Deduction
+end Hilbert.Deduction
 
 
 namespace Hilbert

@@ -292,6 +292,8 @@ def characterizability_union_frameclass_of_theory {T₁ T₂ : Theory α}
 abbrev FrameClassOfHilbert (Λ : Hilbert α) : FrameClass.Dep α := 𝔽(Λ.theorems)
 notation "𝔽(" Λ ")"  => FrameClassOfHilbert Λ
 
+open Hilbert.Deduction
+
 instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] : 𝔽(Hilbert.ExtK Ax).DefinedBy 𝔽 where
   define := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
@@ -301,9 +303,9 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] :
       apply defi.define.mp;
       constructor;
       intro φ hp;
-      exact h φ $ Deduction.maxm! $ by right; exact hp;
+      exact h φ $ maxm! $ by right; exact hp;
     . intro hF φ hp;
-      induction hp using Deduction.inducition_with_necOnly! with
+      induction hp using inducition_with_necOnly! with
       | hMaxm h =>
         simp at h;
         rcases h with (⟨_, _, rfl⟩ | hR);
@@ -323,7 +325,7 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 
   characterize := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F hF φ hp;
-    induction hp using Deduction.inducition_with_necOnly! with
+    induction hp using inducition_with_necOnly! with
     | hMaxm h =>
       simp at h;
       rcases h with (⟨_, _, rfl⟩ | hR);
@@ -352,9 +354,9 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).
       apply defi.define.mp;
       constructor;
       intro φ hp;
-      exact h φ $ Deduction.maxm! $ by right; exact hp;
+      exact h φ $ maxm! $ by right; exact hp;
     . intro hF φ hp;
-      induction hp using Deduction.inducition_with_necOnly! with
+      induction hp using inducition_with_necOnly! with
       | hMaxm h =>
         simp at h;
         rcases h with (⟨_, _, rfl⟩ | hR);
@@ -374,7 +376,7 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).C
   characterize := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F hF φ hp;
-    induction hp using Deduction.inducition_with_necOnly! with
+    induction hp using inducition_with_necOnly! with
     | hMaxm h =>
       simp at h;
       rcases h with (⟨_, _, rfl⟩ | hR);

@@ -79,7 +79,7 @@ end VerTranslation
 end Formula
 
 
-open Deduction
+open Hilbert.Deduction
 
 variable {φ : Formula α}
 

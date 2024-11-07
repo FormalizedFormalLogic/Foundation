@@ -7,6 +7,7 @@ open LO.Kripke
 open System
 open Formula
 open MaximalConsistentTheory
+open Hilbert.Deduction
 
 variable {α : Type u} [DecidableEq α]
 variable {Λ : Hilbert α} [Λ.IsNormal]
@@ -169,7 +170,7 @@ lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel Λ) ⊧* Λ.axio
   apply Semantics.realizeSet_iff.mpr;
   intro φ hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;
-  exact Deduction.maxm! (by assumption);
+  exact maxm! hp;
 
 lemma realize_theory_of_self_canonicalModel : (CanonicalModel Λ) ⊧* (System.theory Λ) := by
   apply Semantics.realizeSet_iff.mpr;

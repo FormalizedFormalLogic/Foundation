@@ -192,7 +192,7 @@ lemma N_defines : (Hilbert.N α).DefinesPLoNFrameClass (AllFrameClass α) := by
   intro F;
   simp [Hilbert.theorems, System.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
   intro φ hp;
-  induction hp using Deduction.inducition_with_necOnly! with
+  induction hp using Hilbert.Deduction.inducition_with_necOnly! with
   | hMaxm h => simp at h;
   | hMdp ihpq ihp =>
     intro V w;

@@ -18,6 +18,7 @@ class BoxdotProperty (Λ₁ Λ₂ : Hilbert α) where
 
 open System
 open Formula
+open Hilbert.Deduction
 
 variable {φ : Formula α}
 
@@ -25,7 +26,7 @@ theorem boxdotTranslated
   {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal]
   (h : ∀ φ ∈ Λ₁.axioms, Λ₂ ⊢! φᵇ) : Λ₁ ⊢! φ → Λ₂ ⊢! φᵇ := by
   intro d;
-  induction d using Deduction.inducition_with_necOnly! with
+  induction d using inducition_with_necOnly! with
   | hMaxm hs => exact h _ hs;
   | hNec ihp =>
     dsimp [BoxdotTranslation];
