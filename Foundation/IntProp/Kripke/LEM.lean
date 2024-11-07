@@ -7,11 +7,11 @@ import Foundation.IntProp.Kripke.Semantics
   - `noLEM`: LEM is not always valid in intuitionistic logic.
 -/
 
-namespace LO.IntProp.Kripke
+namespace LO.IntProp
 
 open System
-
 open Formula Formula.Kripke
+
 
 variable {α : Type u}
 
@@ -24,32 +24,38 @@ abbrev NoLEMFrame : Kripke.Frame where
     | .inl _, .inr _ => True
     | _, _ => False
 
-lemma NoLEMFrame.transitive : Transitive NoLEMFrame.Rel := by simp [Transitive];
+namespace NoLEMFrame
 
-lemma NoLEMFrame.reflexive : Reflexive NoLEMFrame.Rel := by simp [Reflexive];
+lemma is_transitive : Transitive NoLEMFrame.Rel := by simp [Transitive];
 
-lemma NoLEMFrame.confluent : Confluent NoLEMFrame.Rel := by simp [Confluent];
+lemma is_reflexive : Reflexive NoLEMFrame.Rel := by simp [Reflexive];
 
-lemma NoLEMFrame.connected : Connected NoLEMFrame.Rel := by simp [Connected];
+lemma is_confluent : Confluent NoLEMFrame.Rel := by simp [Confluent];
 
-lemma noLEM_on_frameclass [Inhabited α] : ∃ (φ : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐈𝐧𝐭) ⊧ φ ⋎ ∼φ) := by
+lemma is_connected : Connected NoLEMFrame.Rel := by simp [Connected];
+
+end NoLEMFrame
+
+
+lemma Kripke.noLEM_on_frameclass [Inhabited α] : ∃ (φ : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} (Hilbert.Int α)) ⊧ φ ⋎ ∼φ) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
   constructor;
   . apply Int_Characteraizable.characterize;
-    exact ⟨NoLEMFrame.reflexive, NoLEMFrame.transitive⟩;
+    exact ⟨NoLEMFrame.is_reflexive, NoLEMFrame.is_transitive⟩;
   . simp [ValidOnFrame];
     use (λ w _ => match w with | .inr _ => True | .inl _ => False);
     constructor;
     . simp;
     . simp [ValidOnModel, Satisfies];
 
+
 /--
   Law of Excluded Middle is not always provable in intuitionistic logic.
 -/
-theorem noLEM [Inhabited α] : ∃ (φ : Formula α), 𝐈𝐧𝐭 ⊬ φ ⋎ ∼φ := by
-  obtain ⟨φ, hp⟩ := noLEM_on_frameclass (α := α);
+theorem Hilbert.Int.noLEM [Inhabited α] : ∃ (φ : Formula α), (Hilbert.Int α) ⊬ φ ⋎ ∼φ := by
+  obtain ⟨φ, hp⟩ := Kripke.noLEM_on_frameclass (α := α);
   use φ;
   by_contra hC;
   have := @Kripke.sound _ _ _ hC;
@@ -58,47 +64,46 @@ theorem noLEM [Inhabited α] : ∃ (φ : Formula α), 𝐈𝐧𝐭 ⊬ φ ⋎ �
 /--
   Intuitionistic logic is proper weaker than classical logic.
 -/
-theorem Int_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (𝐈𝐧𝐭 : Hilbert α) <ₛ 𝐂𝐥 := by
+theorem Hilbert.Int_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (Hilbert.Int α) <ₛ (Hilbert.Cl α) := by
   constructor;
-  . exact Int_weaker_than_Cl;
+  . exact Hilbert.Int_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
     push_neg;
-    obtain ⟨φ, hp⟩ := noLEM (α := α);
+    obtain ⟨φ, hp⟩ := Hilbert.Int.noLEM (α := α);
     use (φ ⋎ ∼φ);
     constructor;
     . exact lem!;
     . assumption;
 
 
-
 section
 
-lemma noLEM_on_frameclass_KC [DecidableEq α] [Inhabited α]  : ∃ (φ : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐊𝐂) ⊧ φ ⋎ ∼φ) := by
+lemma Kripke.noLEM_on_frameclass_KC [DecidableEq α] [Inhabited α]  : ∃ (φ : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} (Hilbert.KC α)) ⊧ φ ⋎ ∼φ) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
   constructor;
-  . apply KC_Characteraizable.characterize;
-    exact ⟨NoLEMFrame.reflexive, NoLEMFrame.transitive, NoLEMFrame.confluent⟩;
+  . apply Kripke.KC_Characteraizable.characterize;
+    exact ⟨NoLEMFrame.is_reflexive, NoLEMFrame.is_transitive, NoLEMFrame.is_confluent⟩;
   . simp [ValidOnFrame];
     use (λ w _ => match w with | .inr _ => True | .inl _ => False);
     constructor;
     . simp;
     . simp [ValidOnModel, Satisfies];
 
-lemma noLEM_KC [DecidableEq α] [Inhabited α] : ∃ (φ : Formula α), 𝐊𝐂 ⊬ φ ⋎ ∼φ := by
-  obtain ⟨φ, hp⟩ := noLEM_on_frameclass_KC (α := α);
+lemma Hilbert.KC.noLEM [DecidableEq α] [Inhabited α] : ∃ (φ : Formula α), (Hilbert.KC α) ⊬ φ ⋎ ∼φ := by
+  obtain ⟨φ, hp⟩ := Kripke.noLEM_on_frameclass_KC (α := α);
   use φ;
   by_contra hC;
   have := @Kripke.sound _ _ _ hC;
   contradiction;
 
-theorem KC_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (𝐊𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
+theorem Hilbert.KC_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (Hilbert.KC α) <ₛ (Hilbert.Cl α) := by
   constructor;
-  . exact KC_weaker_than_Cl;
+  . exact Hilbert.KC_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
     push_neg;
-    obtain ⟨φ, hp⟩ := noLEM_KC (α := α);
+    obtain ⟨φ, hp⟩ := Hilbert.KC.noLEM (α := α);
     use (φ ⋎ ∼φ);
     constructor;
     . exact lem!;
@@ -109,32 +114,32 @@ end
 
 section
 
-lemma noLEM_on_frameclass_LC [Inhabited α] : ∃ (φ : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} 𝐋𝐂) ⊧ φ ⋎ ∼φ) := by
+lemma Kripke.noLEM_on_frameclass_LC [Inhabited α] : ∃ (φ : Formula α), ¬((Kripke.FrameClassOfHilbert.{u, 0} (Hilbert.LC α)) ⊧ φ ⋎ ∼φ) := by
   use (atom default);
   simp [Semantics.Realize];
   use NoLEMFrame;
   constructor;
   . apply LC_Characteraizable.characterize;
-    exact ⟨NoLEMFrame.reflexive, NoLEMFrame.transitive, NoLEMFrame.connected⟩;
+    exact ⟨NoLEMFrame.is_reflexive, NoLEMFrame.is_transitive, NoLEMFrame.is_connected⟩;
   . simp [ValidOnFrame];
     use (λ w _ => match w with | .inr _ => True | .inl _ => False);
     constructor;
     . simp;
     . simp [ValidOnModel, Satisfies];
 
-lemma noLEM_LC [Inhabited α] : ∃ (φ : Formula α), 𝐋𝐂 ⊬ φ ⋎ ∼φ := by
-  obtain ⟨φ, hp⟩ := noLEM_on_frameclass_LC (α := α);
+lemma Hilbert.LC.noLEM [Inhabited α] : ∃ (φ : Formula α), (Hilbert.LC α) ⊬ φ ⋎ ∼φ := by
+  obtain ⟨φ, hp⟩ := Kripke.noLEM_on_frameclass_LC (α := α);
   use φ;
   by_contra hC;
   have := @Kripke.sound _ _ _ hC;
   contradiction;
 
-theorem LC_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (𝐋𝐂 : Hilbert α) <ₛ 𝐂𝐥 := by
+theorem Hilbert.LC_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (Hilbert.LC α) <ₛ (Hilbert.Cl α) := by
   constructor;
-  . exact LC_weaker_than_Cl;
+  . exact Hilbert.LC_weaker_than_Cl;
   . apply weakerThan_iff.not.mpr;
     push_neg;
-    obtain ⟨φ, hp⟩ := noLEM_LC (α := α);
+    obtain ⟨φ, hp⟩ := Hilbert.LC.noLEM (α := α);
     use (φ ⋎ ∼φ);
     constructor;
     . exact lem!;
@@ -142,5 +147,4 @@ theorem LC_strictly_weaker_than_Cl [DecidableEq α] [Inhabited α] : (𝐋𝐂 :
 
 end
 
-
-end LO.IntProp.Kripke
+end LO.IntProp

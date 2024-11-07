@@ -178,8 +178,8 @@ instance axiomGrz_defineability : 𝔽((𝗚𝗿𝘇 : Theory α)).DefinedBy Ref
     simp [WeaklyConverseWellFounded, ConverseWellFounded, IrreflGen];
     apply WellFounded.trivial_wellfounded;
 
-instance : Sound (𝐆𝐫𝐳 : Hilbert α) (ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass#α) := inferInstance
-instance : System.Consistent (𝐆𝐫𝐳 : Hilbert α) := inferInstance
+instance : Sound (Hilbert.Grz α) (ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass#α) := inferInstance
+instance : System.Consistent (Hilbert.Grz α) := inferInstance
 
 instance axiomGrz_finite_defines : 𝔽ꟳ((𝗚𝗿𝘇 : Theory α)).DefinedBy ReflexiveTransitiveAntisymmetricFrameClassꟳ where
   define := by
@@ -199,7 +199,7 @@ instance axiomGrz_finite_defines : 𝔽ꟳ((𝗚𝗿𝘇 : Theory α)).DefinedBy
     use ⟨PUnit, λ _ _ => True⟩;
     refine ⟨?_, ?_, ?_⟩ <;> tauto;
 
-instance : Sound (𝐆𝐫𝐳 : Hilbert α) (ReflexiveTransitiveAntisymmetricFrameClassꟳ#α) := inferInstance
+instance : Sound (Hilbert.Grz α) (ReflexiveTransitiveAntisymmetricFrameClassꟳ#α) := inferInstance
 
 end Kripke
 

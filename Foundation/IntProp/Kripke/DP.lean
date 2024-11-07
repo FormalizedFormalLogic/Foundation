@@ -110,7 +110,7 @@ lemma satisfies_right_on_IntDPCounterexampleModel :
       exact ihq.mpr $ h (by simpa) $ ihp.mp hp;
   | _ => simp_all [IntDPCounterexampleModel, Satisfies.iff_models, Satisfies];
 
-theorem disjunctive_int [Inhabited α] [DecidableEq α] [Encodable α] : 𝐈𝐧𝐭 ⊢! φ ⋎ ψ → 𝐈𝐧𝐭 ⊢! φ ∨ 𝐈𝐧𝐭 ⊢! ψ := by
+theorem disjunctive_int [Inhabited α] [DecidableEq α] [Encodable α] : (Hilbert.Int α) ⊢! φ ⋎ ψ → (Hilbert.Int α) ⊢! φ ∨ (Hilbert.Int α) ⊢! ψ := by
   contrapose;
   intro hC; push_neg at hC;
   have ⟨hnp, hnq⟩ := hC;
@@ -140,7 +140,7 @@ theorem disjunctive_int [Inhabited α] [DecidableEq α] [Encodable α] : 𝐈�
           (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr wq) (by aesop))
         $ satisfies_right_on_IntDPCounterexampleModel |>.not.mp hq;
 
-instance [DecidableEq α] [Inhabited α] [Encodable α] : Disjunctive (𝐈𝐧𝐭 : Hilbert α) := ⟨disjunctive_int⟩
+instance [DecidableEq α] [Inhabited α] [Encodable α] : Disjunctive (Hilbert.Int α) := ⟨disjunctive_int⟩
 
 end Kripke
 

@@ -289,10 +289,12 @@ def characterizability_union_frameclass_of_theory {T₁ T₂ : Theory α}
     . simpa using char₂.characterize hF₂;
   nonempty := nonempty
 
-abbrev FrameClassOfHilbert (Λ : Hilbert α) : FrameClass.Dep α := 𝔽(Λ.theorems)
-notation "𝔽(" Λ ")"  => FrameClassOfHilbert Λ
+abbrev FrameClassOfHilbert (H : Hilbert α) : FrameClass.Dep α := 𝔽(H.theorems)
+notation "𝔽(" H ")"  => FrameClassOfHilbert H
 
-instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] : 𝔽(𝜿(Ax)).DefinedBy 𝔽 where
+open Hilbert.Deduction
+
+instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] : 𝔽(Hilbert.ExtK Ax).DefinedBy 𝔽 where
   define := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F;
@@ -301,9 +303,9 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] :
       apply defi.define.mp;
       constructor;
       intro φ hp;
-      exact h φ $ Deduction.maxm! $ by right; exact hp;
+      exact h φ $ maxm! $ by right; exact hp;
     . intro hF φ hp;
-      induction hp using Deduction.inducition_with_necOnly! with
+      induction hp using inducition_with_necOnly! with
       | hMaxm h =>
         simp at h;
         rcases h with (⟨_, _, rfl⟩ | hR);
@@ -319,11 +321,11 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [defi : 𝔽(Ax).DefinedBy 𝔽] :
         | exact Formula.Kripke.ValidOnFrame.elimContra;
   nonempty := defi.nonempty
 
-instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 𝔽] : 𝔽(𝜿(Ax)).Characteraizable 𝔽 where
+instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 𝔽] : 𝔽(Hilbert.ExtK Ax).Characteraizable 𝔽 where
   characterize := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F hF φ hp;
-    induction hp using Deduction.inducition_with_necOnly! with
+    induction hp using inducition_with_necOnly! with
     | hMaxm h =>
       simp at h;
       rcases h with (⟨_, _, rfl⟩ | hR);
@@ -340,10 +342,10 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 
   nonempty := char.nonempty
 
 
-abbrev FiniteFrameClassOfHilbert (Λ : Hilbert α) : FiniteFrameClass.Dep α := 𝔽(Λ)ꟳ
-notation "𝔽ꟳ(" Λ ")"  => FiniteFrameClassOfHilbert Λ
+abbrev FiniteFrameClassOfHilbert (H : Hilbert α) : FiniteFrameClass.Dep α := 𝔽(H)ꟳ
+notation "𝔽ꟳ(" H ")"  => FiniteFrameClassOfHilbert H
 
-instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).DefinedBy 𝔽] : 𝔽ꟳ(𝜿(Ax)).DefinedBy 𝔽 where
+instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).DefinedBy 𝔽] : 𝔽ꟳ(Hilbert.ExtK Ax).DefinedBy 𝔽 where
   define := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F;
@@ -352,9 +354,9 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).
       apply defi.define.mp;
       constructor;
       intro φ hp;
-      exact h φ $ Deduction.maxm! $ by right; exact hp;
+      exact h φ $ maxm! $ by right; exact hp;
     . intro hF φ hp;
-      induction hp using Deduction.inducition_with_necOnly! with
+      induction hp using inducition_with_necOnly! with
       | hMaxm h =>
         simp at h;
         rcases h with (⟨_, _, rfl⟩ | hR);
@@ -370,11 +372,11 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).
         | exact Formula.Kripke.ValidOnFrame.elimContra;
   nonempty := defi.nonempty
 
-instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).Characteraizable 𝔽] : 𝔽ꟳ(𝜿(Ax)).Characteraizable 𝔽 where
+instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).Characteraizable 𝔽] : 𝔽ꟳ(Hilbert.ExtK Ax).Characteraizable 𝔽 where
   characterize := by
     simp only [Hilbert.theorems, System.theory, Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff, Set.mem_setOf_eq];
     intro F hF φ hp;
-    induction hp using Deduction.inducition_with_necOnly! with
+    induction hp using inducition_with_necOnly! with
     | hMaxm h =>
       simp at h;
       rcases h with (⟨_, _, rfl⟩ | hR);
@@ -393,22 +395,22 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).C
 section sound
 
 variable {α : Type u}
-variable {Λ : Hilbert α} {φ : Formula α}
+variable {H : Hilbert α} {φ : Formula α}
 
-lemma sound : Λ ⊢! φ → 𝔽(Λ) ⊧ φ := by
+lemma sound : H ⊢! φ → 𝔽(H) ⊧ φ := by
   intro hp F hF;
   simp [Hilbert.theorems, System.theory] at hF;
   exact hF φ hp;
-instance : Sound Λ 𝔽(Λ) := ⟨sound⟩
+instance : Sound H 𝔽(H) := ⟨sound⟩
 
-lemma sound_finite : Λ ⊢! φ → 𝔽ꟳ(Λ) ⊧ φ := by
+lemma sound_finite : H ⊢! φ → 𝔽ꟳ(H) ⊧ φ := by
   intro hp F hF;
   simp [Hilbert.theorems, System.theory] at hF;
   obtain ⟨FF, hFF₁, rfl⟩ := hF;
   exact hFF₁ φ hp;
-instance : Sound Λ 𝔽ꟳ(Λ) := ⟨sound_finite⟩
+instance : Sound H 𝔽ꟳ(H) := ⟨sound_finite⟩
 
-lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
+lemma unprovable_bot (hc : 𝔽(H).Nonempty) : H ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -416,9 +418,9 @@ lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
   constructor;
   . exact hF;
   . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
-instance (hc : 𝔽(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot hc
+instance (hc : 𝔽(H).Nonempty) : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot hc
 
-lemma unprovable_bot_finite (hc : 𝔽ꟳ(Λ).Nonempty) : Λ ⊬ ⊥ := by
+lemma unprovable_bot_finite (hc : 𝔽ꟳ(H).Nonempty) : H ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound_finite (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -426,17 +428,17 @@ lemma unprovable_bot_finite (hc : 𝔽ꟳ(Λ).Nonempty) : Λ ⊬ ⊥ := by
   constructor;
   . exact hF;
   . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
-instance (hc : 𝔽ꟳ(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot_finite hc
+instance (hc : 𝔽ꟳ(H).Nonempty) : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot_finite hc
 
-lemma sound_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).Characteraizable 𝔽]
-  : Λ ⊢! φ → 𝔽#α ⊧ φ := by
+lemma sound_of_characterizability {𝔽 : FrameClass} [char : 𝔽(H).Characteraizable 𝔽]
+  : H ⊢! φ → 𝔽#α ⊧ φ := by
   intro h F hF;
   apply sound h;
   apply char.characterize hF;
-instance {𝔽 : FrameClass} [𝔽(Λ).Characteraizable 𝔽] : Sound Λ 𝔽#α := ⟨sound_of_characterizability⟩
+instance {𝔽 : FrameClass} [𝔽(H).Characteraizable 𝔽] : Sound H 𝔽#α := ⟨sound_of_characterizability⟩
 
-lemma sound_of_finite_characterizability {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Λ).Characteraizable 𝔽]
-  : Λ ⊢! φ → 𝔽#α ⊧ φ := by
+lemma sound_of_finite_characterizability {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(H).Characteraizable 𝔽]
+  : H ⊢! φ → 𝔽#α ⊧ φ := by
   intro h F hF;
   apply sound_finite h;
   obtain ⟨FF, hFF, rfl⟩ := hF;
@@ -444,22 +446,22 @@ lemma sound_of_finite_characterizability {𝔽 : FiniteFrameClass} [char : 𝔽�
   constructor;
   . exact char.characterize hFF;
   . rfl;
-instance {𝔽 : FiniteFrameClass} [𝔽ꟳ(Λ).Characteraizable 𝔽] : Sound Λ 𝔽#α := ⟨sound_of_finite_characterizability⟩
+instance {𝔽 : FiniteFrameClass} [𝔽ꟳ(H).Characteraizable 𝔽] : Sound H 𝔽#α := ⟨sound_of_finite_characterizability⟩
 
-lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).Characteraizable 𝔽] : Λ ⊬ ⊥ := by
+lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(H).Characteraizable 𝔽] : H ⊬ ⊥ := by
   apply unprovable_bot;
   obtain ⟨F, hF⟩ := char.nonempty;
   use F;
   apply char.characterize hF;
-instance [FrameClass.Characteraizable.{u} 𝔽(Λ) 𝔽] : System.Consistent Λ
+instance [FrameClass.Characteraizable.{u} 𝔽(H) 𝔽] : System.Consistent H
   := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
 
-lemma unprovable_bot_of_finite_characterizability {𝔽 : FiniteFrameClass}  [char : 𝔽ꟳ(Λ).Characteraizable 𝔽] : Λ ⊬ ⊥ := by
+lemma unprovable_bot_of_finite_characterizability {𝔽 : FiniteFrameClass}  [char : 𝔽ꟳ(H).Characteraizable 𝔽] : H ⊬ ⊥ := by
   apply unprovable_bot_finite;
   obtain ⟨F, hF⟩ := char.nonempty;
   use F;
   apply char.characterize hF;
-instance {𝔽 : FiniteFrameClass} [FiniteFrameClass.Characteraizable.{u} 𝔽ꟳ(Λ) 𝔽] : System.Consistent Λ
+instance {𝔽 : FiniteFrameClass} [FiniteFrameClass.Characteraizable.{u} 𝔽ꟳ(H) 𝔽] : System.Consistent H
   := System.Consistent.of_unprovable $ unprovable_bot_of_finite_characterizability
 
 end sound
@@ -468,15 +470,15 @@ instance empty_axiom_definability : 𝔽((∅ : Theory α)).DefinedBy AllFrameCl
   define := by simp;
   nonempty :=  ⟨⟨PUnit,  λ _ _ => True⟩, trivial⟩
 
-private instance K_definability' : 𝔽((𝜿(∅) : Hilbert α)).DefinedBy AllFrameClass := inferInstance
+private instance K_definability' : 𝔽(((Hilbert.ExtK ∅) : Hilbert α)).DefinedBy AllFrameClass := inferInstance
 
-instance K_definability : 𝔽((𝐊 : Hilbert α)).DefinedBy AllFrameClass := by
+instance K_definability : 𝔽(Hilbert.K α).DefinedBy AllFrameClass := by
   convert K_definability';
-  exact K_is_extK_of_empty;
+  exact Hilbert.ExtK.K_is_extK_of_empty;
 
-instance K_sound : Sound 𝐊 (AllFrameClass#α) := inferInstance
+instance K_sound : Sound (Hilbert.K α) (AllFrameClass#α) := inferInstance
 
-instance K_consistent : System.Consistent (𝐊 : Hilbert α) := inferInstance
+instance K_consistent : System.Consistent (Hilbert.K α) := inferInstance
 
 
 lemma restrict_finite : 𝔽#α ⊧ φ → 𝔽ꟳ#α ⊧ φ := by
@@ -484,21 +486,24 @@ lemma restrict_finite : 𝔽#α ⊧ φ → 𝔽ꟳ#α ⊧ φ := by
   obtain ⟨FF, hFF₁, rfl⟩ := hF;
   exact h (by simpa)
 
-instance {Λ : Hilbert α} [sound : Sound Λ 𝔽#α] : Sound Λ 𝔽ꟳ#α := ⟨by
+instance {H : Hilbert α} [sound : Sound H 𝔽#α] : Sound H 𝔽ꟳ#α := ⟨by
   intro φ h;
   exact restrict_finite $ sound.sound h;
 ⟩
 
-instance : Sound 𝐊 (AllFrameClassꟳ#α) := inferInstance
+instance : Sound (Hilbert.K α) (AllFrameClassꟳ#α) := inferInstance
 
 lemma exists_finite_frame : ¬𝔽ꟳ#α ⊧ φ ↔ ∃ F ∈ 𝔽ꟳ, ¬F#α ⊧ φ := by simp;
 
-class FiniteFrameProperty (Λ : Hilbert α) (𝔽 : FrameClass) where
-  [complete : Complete Λ 𝔽ꟳ#α]
-  [sound : Sound Λ 𝔽ꟳ#α]
+class FiniteFrameProperty (H : Hilbert α) (𝔽 : FrameClass) where
+  [complete : Complete H 𝔽ꟳ#α]
+  [sound : Sound H 𝔽ꟳ#α]
 
 end Kripke
 
+
+
+namespace Hilbert
 
 section
 
@@ -506,8 +511,7 @@ open Formula (atom)
 open Formula.Kripke
 open Kripke (K_sound)
 
-
-theorem K_strictlyWeakerThan_KD [DecidableEq α] [Inhabited α] : (𝐊 : Hilbert α) <ₛ 𝐊𝐃 := by
+theorem K_strictlyWeakerThan_KD [DecidableEq α] [Inhabited α] : (Hilbert.K α) <ₛ (Hilbert.KD α) := by
   constructor;
   . apply K_weakerThan_KD;
   . simp [weakerThan_iff];
@@ -519,7 +523,7 @@ theorem K_strictlyWeakerThan_KD [DecidableEq α] [Inhabited α] : (𝐊 : Hilber
       use ⟨Fin 1, λ _ _ => False⟩, (λ w _ => w = 0), 0;
       simp [Satisfies];
 
-theorem K_strictlyWeakerThan_KB [DecidableEq α] [Inhabited α] : (𝐊 : Hilbert α) <ₛ 𝐊𝐁 := by
+theorem K_strictlyWeakerThan_KB [DecidableEq α] [Inhabited α] : (Hilbert.K α) <ₛ (Hilbert.KB α) := by
   constructor;
   . apply K_weakerThan_KB;
   . simp [weakerThan_iff];
@@ -532,7 +536,7 @@ theorem K_strictlyWeakerThan_KB [DecidableEq α] [Inhabited α] : (𝐊 : Hilber
       simp [Satisfies];
       use 1;
 
-theorem K_strictlyWeakerThan_K4 [DecidableEq α] [Inhabited α] : (𝐊 : Hilbert α) <ₛ 𝐊𝟒 := by
+theorem K_strictlyWeakerThan_K4 [DecidableEq α] [Inhabited α] : (Hilbert.K α) <ₛ (Hilbert.K4 α) := by
   constructor;
   . apply K_weakerThan_K4;
   . simp [weakerThan_iff];
@@ -553,7 +557,7 @@ theorem K_strictlyWeakerThan_K4 [DecidableEq α] [Inhabited α] : (𝐊 : Hilber
         . aesop;
         . use 0; aesop;
 
-theorem K_strictlyWeakerThan_K5 [DecidableEq α] [Inhabited α] : (𝐊 : Hilbert α) <ₛ 𝐊𝟓 := by
+theorem K_strictlyWeakerThan_K5 [DecidableEq α] [Inhabited α] : (Hilbert.K α) <ₛ (Hilbert.K5 α)  := by
   constructor;
   . apply K_weakerThan_K5;
   . simp [weakerThan_iff];
@@ -567,14 +571,17 @@ theorem K_strictlyWeakerThan_K5 [DecidableEq α] [Inhabited α] : (𝐊 : Hilber
       use 1;
       simp;
 
+end
+
 
 section
 
 variable {Ax₁ Ax₂ : Theory α} (𝔽₁ 𝔽₂ : FrameClass)
 
 lemma weakerThan_of_subset_FrameClass
-  [sound₁ : Sound 𝜿Ax₁ 𝔽₁#α] [complete₂ : Complete 𝜿Ax₂ 𝔽₂#α]
-  (h𝔽 : 𝔽₂ ⊆ 𝔽₁) : 𝜿Ax₁ ≤ₛ 𝜿Ax₂ := by
+  [sound₁ : Sound (Hilbert.ExtK Ax₁) 𝔽₁#α] [complete₂ : Complete (Hilbert.ExtK Ax₂) 𝔽₂#α]
+  (h𝔽 : 𝔽₂ ⊆ 𝔽₁)
+  : (Hilbert.ExtK Ax₁) ≤ₛ (Hilbert.ExtK Ax₂) := by
   apply System.weakerThan_iff.mpr;
   intro φ hp;
   apply complete₂.complete;
@@ -582,9 +589,9 @@ lemma weakerThan_of_subset_FrameClass
   exact sound₁.sound hp $ h𝔽 hF;
 
 lemma equiv_of_eq_FrameClass
-  [sound₁ : Sound 𝜿Ax₁ 𝔽₁#α] [sound₂ : Sound 𝜿Ax₂ 𝔽₂#α]
-  [complete₁ : Complete 𝜿Ax₁ 𝔽₁#α] [complete₂ : Complete 𝜿Ax₂ 𝔽₂#α]
-  (h𝔽 : 𝔽₁ = 𝔽₂) : 𝜿Ax₁ =ₛ 𝜿Ax₂ := by
+  [sound₁ : Sound (Hilbert.ExtK Ax₁) 𝔽₁#α] [sound₂ : Sound (Hilbert.ExtK Ax₂) 𝔽₂#α]
+  [complete₁ : Complete (Hilbert.ExtK Ax₁) 𝔽₁#α] [complete₂ : Complete (Hilbert.ExtK Ax₂) 𝔽₂#α]
+  (h𝔽 : 𝔽₁ = 𝔽₂) : (Hilbert.ExtK Ax₁) =ₛ (Hilbert.ExtK Ax₂) := by
   apply System.Equiv.antisymm_iff.mpr;
   constructor;
   . apply weakerThan_of_subset_FrameClass 𝔽₁ 𝔽₂; subst_vars; rfl;
@@ -592,9 +599,6 @@ lemma equiv_of_eq_FrameClass
 
 end
 
+end Hilbert
 
-end
-
-end Modal
-
-end LO
+end LO.Modal

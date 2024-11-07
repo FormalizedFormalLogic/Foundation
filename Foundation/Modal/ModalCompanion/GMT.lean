@@ -4,15 +4,16 @@ import Foundation.Modal.ModalCompanion.Basic
 
 namespace LO.Modal
 
+open IntProp
 open LO.Kripke
 open Modal.Kripke
 
 variable {α : Type u} [DecidableEq α] [Inhabited α] [Encodable α]
 
-variable {iΛ : IntProp.Hilbert α} {mΛ : Modal.Hilbert α}
+variable {iH : IntProp.Hilbert α} {mH : Modal.Hilbert α}
 variable {φ ψ χ : IntProp.Formula α}
 
-lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! φᵍ) → (𝐈𝐧𝐭 ⊢! φ) := by
+lemma provable_S4_of_provable_efq : ((Hilbert.S4 α) ⊢! φᵍ) → ((Hilbert.Int α) ⊢! φ) := by
   contrapose;
   intro h;
 
@@ -49,7 +50,7 @@ lemma provable_S4_of_provable_efq : (𝐒𝟒 ⊢! φᵍ) → (𝐈𝐧𝐭 ⊢!
   use F;
   exact ⟨⟨F_refl, F_trans⟩, by use V, w⟩;
 
-theorem provable_efq_iff_provable_S4 : 𝐈𝐧𝐭 ⊢! φ ↔ 𝐒𝟒 ⊢! φᵍ := ⟨provable_efq_of_provable_S4, provable_S4_of_provable_efq⟩
-instance : ModalCompanion (α := α) 𝐈𝐧𝐭 𝐒𝟒 := ⟨provable_efq_iff_provable_S4⟩
+theorem provable_efq_iff_provable_S4 : (Hilbert.Int α) ⊢! φ ↔ (Hilbert.S4 α) ⊢! φᵍ := ⟨provable_efq_of_provable_S4, provable_S4_of_provable_efq⟩
+instance : ModalCompanion (Hilbert.Int α) (Hilbert.S4 α) := ⟨provable_efq_iff_provable_S4⟩
 
 end LO.Modal

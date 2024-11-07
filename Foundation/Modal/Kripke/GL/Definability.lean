@@ -88,8 +88,8 @@ instance axiomL_definability : 𝔽((𝗟 : Theory α)).DefinedBy (TransitiveCon
     simp [Transitive, ConverseWellFounded];
     apply WellFounded.trivial_wellfounded;
 
-instance : Sound (𝐆𝐋 : Hilbert α) (TransitiveConverseWellFoundedFrameClass#α) := inferInstance
-instance : System.Consistent (𝐆𝐋 : Hilbert α) := inferInstance
+instance : Sound (Hilbert.GL α) (TransitiveConverseWellFoundedFrameClass#α) := inferInstance
+instance : System.Consistent (Hilbert.GL α) := inferInstance
 
 instance axiomL_finite_definability : 𝔽ꟳ((𝗟 : Theory α)).DefinedBy (TransitiveIrreflexiveFrameClassꟳ) where
   define := by
@@ -111,7 +111,7 @@ instance axiomL_finite_definability : 𝔽ꟳ((𝗟 : Theory α)).DefinedBy (Tra
     use ⟨PUnit,  λ _ _ => False⟩;
     refine ⟨?_, ?_⟩ <;> tauto;
 
-instance GL_finite_sound : Sound 𝐆𝐋 (TransitiveIrreflexiveFrameClassꟳ#α) := inferInstance
+instance GL_finite_sound : Sound (Hilbert.GL α) (TransitiveIrreflexiveFrameClassꟳ#α) := inferInstance
 
 end Kripke
 

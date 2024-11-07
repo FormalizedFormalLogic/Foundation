@@ -180,7 +180,7 @@ theorem filteration {x : M.World} {φ : Formula α} (hs : φ ∈ T := by trivial
 
 end
 
-instance K_finite_complete [DecidableEq α] : Complete 𝐊 (AllFrameClass.{u}ꟳ#α) := ⟨by
+instance K_finite_complete [DecidableEq α] : Complete (Hilbert.K α) (AllFrameClass.{u}ꟳ#α) := ⟨by
   intro φ hp;
   apply K_complete.complete;
   intro F _ V x;
@@ -195,10 +195,10 @@ instance K_finite_complete [DecidableEq α] : Complete 𝐊 (AllFrameClass.{u}�
   ) FM.Valuation
 ⟩
 
-instance  [DecidableEq α] : FiniteFrameProperty (α := α) 𝐊 AllFrameClass where
+instance  [DecidableEq α] : FiniteFrameProperty (Hilbert.K α) AllFrameClass where
 
 
-instance KTB_finite_complete [DecidableEq α] [Inhabited α] : Complete 𝐊𝐓𝐁 (ReflexiveSymmetricFrameClass.{u}ꟳ#α) := ⟨by
+instance KTB_finite_complete [DecidableEq α] [Inhabited α] : Complete (Hilbert.KTB α) (ReflexiveSymmetricFrameClass.{u}ꟳ#α) := ⟨by
   intro φ hp;
   apply KTB_complete.complete;
   intro F ⟨F_refl, F_symm⟩ V x;
@@ -219,7 +219,7 @@ instance KTB_finite_complete [DecidableEq α] [Inhabited α] : Complete 𝐊𝐓
   ) FM.Valuation
 ⟩
 
-instance [DecidableEq α] [Inhabited α] : FiniteFrameProperty (α := α) 𝐊𝐓𝐁 ReflexiveSymmetricFrameClass where
+instance [DecidableEq α] [Inhabited α] : FiniteFrameProperty (Hilbert.KTB α) ReflexiveSymmetricFrameClass where
 
 section
 
@@ -272,7 +272,7 @@ end FinestFilterationTransitiveClosureModel
 end
 
 open FinestFilterationTransitiveClosureModel in
-instance S4_finite_complete [Inhabited α] [DecidableEq α] : Complete 𝐒𝟒 (PreorderFrameClass.{u}ꟳ#α) := ⟨by
+instance S4_finite_complete [Inhabited α] [DecidableEq α] : Complete (Hilbert.S4 α) (PreorderFrameClass.{u}ꟳ#α) := ⟨by
   intro φ hp;
   apply S4_complete.complete;
   intro F ⟨F_refl, F_trans⟩ V x;
@@ -291,11 +291,11 @@ instance S4_finite_complete [Inhabited α] [DecidableEq α] : Complete 𝐒𝟒 
     exact F_trans;
 ⟩
 
-instance [Inhabited α] [DecidableEq α] : FiniteFrameProperty (α := α) 𝐒𝟒 PreorderFrameClass where
+instance [Inhabited α] [DecidableEq α] : FiniteFrameProperty (Hilbert.S4 α) PreorderFrameClass where
 
 
 open FinestFilterationTransitiveClosureModel in
-instance KT4B_finite_complete [Inhabited α] [DecidableEq α] : Complete 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass.{u}ꟳ#α) := ⟨by
+instance KT4B_finite_complete [Inhabited α] [DecidableEq α] : Complete (Hilbert.KT4B α) (EquivalenceFrameClass.{u}ꟳ#α) := ⟨by
   intro φ hp;
   apply KT4B_complete.complete;
   intro F ⟨F_refl, F_trans, F_symm⟩ V x;
@@ -315,7 +315,7 @@ instance KT4B_finite_complete [Inhabited α] [DecidableEq α] : Complete 𝐊�
     exact F_trans;
 ⟩
 
-instance [Inhabited α] [DecidableEq α] : FiniteFrameProperty (α := α) 𝐊𝐓𝟒𝐁 EquivalenceFrameClass where
+instance [Inhabited α] [DecidableEq α] : FiniteFrameProperty (Hilbert.KT4B α) EquivalenceFrameClass where
 -- MEMO: `𝐒𝟓 =ₛ 𝐊𝐓𝟒𝐁`だから決定可能性という面では`𝐒𝟓`も決定可能．
 
 end Kripke

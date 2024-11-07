@@ -260,22 +260,22 @@ namespace Kripke
 abbrev FrameClassOfTheory (T : Theory α) : FrameClass.Dep α := { F | F#α ⊧* T }
 notation "𝔽(" T ")" => FrameClassOfTheory T
 
-abbrev FrameClassOfHilbert (Λ : Hilbert α) : FrameClass.Dep α := 𝔽((System.theory Λ))
-notation "𝔽(" Λ ")" => FrameClassOfHilbert Λ
+abbrev FrameClassOfHilbert (H : Hilbert α) : FrameClass.Dep α := 𝔽((System.theory H))
+notation "𝔽(" H ")" => FrameClassOfHilbert H
 
 section Soundness
 
-variable {Λ : Hilbert α}
+variable {H : Hilbert α}
          {φ : Formula α}
 
-lemma sound : Λ ⊢! φ → 𝔽(Λ) ⊧ φ := by
+lemma sound : H ⊢! φ → 𝔽(H) ⊧ φ := by
   intro hp F hF;
   simp [System.theory] at hF;
   exact hF φ hp;
 
-instance : Sound Λ 𝔽(Λ) := ⟨sound⟩
+instance : Sound H 𝔽(H) := ⟨sound⟩
 
-lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
+lemma unprovable_bot (hc : 𝔽(H).Nonempty) : H ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -284,23 +284,23 @@ lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
   . exact hF;
   . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
 
-instance (hc : 𝔽(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot hc
+instance (hc : 𝔽(H).Nonempty) : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot hc
 
 
-lemma sound_of_characterizability [characterizability : 𝔽(Λ).Characteraizable 𝔽₂] : Λ ⊢! φ → 𝔽₂#α ⊧ φ := by
+lemma sound_of_characterizability [characterizability : 𝔽(H).Characteraizable 𝔽₂] : H ⊢! φ → 𝔽₂#α ⊧ φ := by
   intro h F hF;
   apply sound h;
   apply characterizability.characterize hF;
 
-instance instSoundOfCharacterizability [𝔽(Λ).Characteraizable 𝔽₂] : Sound Λ (𝔽₂#α) := ⟨sound_of_characterizability⟩
+instance instSoundOfCharacterizability [𝔽(H).Characteraizable 𝔽₂] : Sound H (𝔽₂#α) := ⟨sound_of_characterizability⟩
 
-lemma unprovable_bot_of_characterizability [characterizability : 𝔽(Λ).Characteraizable 𝔽₂] : Λ ⊬ ⊥ := by
+lemma unprovable_bot_of_characterizability [characterizability : 𝔽(H).Characteraizable 𝔽₂] : H ⊬ ⊥ := by
   apply unprovable_bot;
   obtain ⟨F, hF⟩ := characterizability.nonempty;
   use F;
   apply characterizability.characterize hF;
 
-instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(Λ) 𝔽₂] : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
+instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(H) 𝔽₂] : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
 
 end Soundness
 
@@ -309,11 +309,11 @@ section
 
 variable {α : Type u}
 
-instance Int_Characteraizable : 𝔽((𝐈𝐧𝐭 : Hilbert α)).Characteraizable ReflexiveTransitiveFrameClass where
+instance Int_Characteraizable : 𝔽((Hilbert.Int α)).Characteraizable ReflexiveTransitiveFrameClass where
   characterize := by
     simp [System.theory];
     rintro F hTrans hRefl φ hp;
-    induction hp using Deduction.rec! with
+    induction hp using Hilbert.Deduction.rec! with
     | verum => apply ValidOnFrame.verum;
     | imply₁ => apply ValidOnFrame.imply₁; simpa;
     | imply₂ => apply ValidOnFrame.imply₂; simpa; simpa;
@@ -335,16 +335,16 @@ instance Int_Characteraizable : 𝔽((𝐈𝐧𝐭 : Hilbert α)).Characteraizab
     refine ⟨by simp [Reflexive], by simp [Transitive]⟩;
 
 
-instance Int_sound : Sound 𝐈𝐧𝐭 (ReflexiveTransitiveFrameClass#α) := inferInstance
+instance Int_sound : Sound (Hilbert.Int α) (ReflexiveTransitiveFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐈𝐧𝐭 : Hilbert α) := inferInstance
+instance : System.Consistent (Hilbert.Int α) := inferInstance
 
 
-instance Cl_Characteraizable : 𝔽((𝐂𝐥 : Hilbert α)).Characteraizable ReflexiveTransitiveSymmetricFrameClass#α where
+instance Cl_Characteraizable : 𝔽(Hilbert.Cl α).Characteraizable ReflexiveTransitiveSymmetricFrameClass#α where
   characterize := by
     simp [System.theory];
     rintro F hTrans hRefl hSymm φ hp;
-    induction hp using Deduction.rec! with
+    induction hp using Hilbert.Deduction.rec! with
     | verum => apply ValidOnFrame.verum;
     | imply₁ => apply ValidOnFrame.imply₁; simpa;
     | imply₂ => apply ValidOnFrame.imply₂; simpa; simpa;
@@ -366,18 +366,18 @@ instance Cl_Characteraizable : 𝔽((𝐂𝐥 : Hilbert α)).Characteraizable Re
     use { World := PUnit, Rel := λ _ _ => True };
     refine ⟨by simp [Reflexive], by simp [Transitive], by simp [Symmetric]⟩;
 
-instance : Sound 𝐂𝐥 (ReflexiveTransitiveSymmetricFrameClass#α) := inferInstance
+instance : Sound (Hilbert.Cl α) (ReflexiveTransitiveSymmetricFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐂𝐥 : Hilbert α) := inferInstance
+instance : System.Consistent (Hilbert.Cl α) := inferInstance
 
 
 
-instance KC_Characteraizable : 𝔽((𝐊𝐂 : Hilbert α)).Characteraizable ReflexiveTransitiveConfluentFrameClass where
+instance KC_Characteraizable : 𝔽(Hilbert.KC α).Characteraizable ReflexiveTransitiveConfluentFrameClass where
   characterize := by
     rintro F ⟨F_trans, F_refl, F_confl⟩;
     simp [System.theory];
     intro φ hp;
-    induction hp using Deduction.rec! with
+    induction hp using Hilbert.Deduction.rec! with
     | verum => apply ValidOnFrame.verum;
     | imply₁ => apply ValidOnFrame.imply₁; simpa;
     | imply₂ => apply ValidOnFrame.imply₂; simpa; simpa;
@@ -399,17 +399,17 @@ instance KC_Characteraizable : 𝔽((𝐊𝐂 : Hilbert α)).Characteraizable Re
     use { World := PUnit, Rel := λ _ _ => True };
     refine ⟨by simp [Reflexive], by simp [Transitive], by simp [Confluent]⟩;
 
-instance : Sound 𝐊𝐂 (ReflexiveTransitiveConfluentFrameClass#α) := inferInstance
+instance : Sound (Hilbert.KC α) (ReflexiveTransitiveConfluentFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐊𝐂 : Hilbert α) := inferInstance
+instance : System.Consistent (Hilbert.KC α) := inferInstance
 
 
-instance LC_Characteraizable : 𝔽((𝐋𝐂 : Hilbert α)).Characteraizable ReflexiveTransitiveConnectedFrameClass where
+instance LC_Characteraizable : 𝔽((Hilbert.LC α)).Characteraizable ReflexiveTransitiveConnectedFrameClass where
   characterize := by
     rintro F ⟨F_trans, F_refl, F_conn⟩;
     simp [System.theory];
     intro φ hp;
-    induction hp using Deduction.rec! with
+    induction hp using Hilbert.Deduction.rec! with
     | verum => apply ValidOnFrame.verum;
     | imply₁ => apply ValidOnFrame.imply₁; simpa;
     | imply₂ => apply ValidOnFrame.imply₂; simpa; simpa;
@@ -431,9 +431,9 @@ instance LC_Characteraizable : 𝔽((𝐋𝐂 : Hilbert α)).Characteraizable Re
     use { World := PUnit, Rel := λ _ _ => True };
     refine ⟨by simp [Reflexive], by simp [Transitive], by simp [Connected]⟩;
 
-instance : Sound 𝐋𝐂 (ReflexiveTransitiveConnectedFrameClass#α) := inferInstance
+instance : Sound (Hilbert.LC α) (ReflexiveTransitiveConnectedFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐋𝐂 : Hilbert α) := inferInstance
+instance : System.Consistent (Hilbert.LC α) := inferInstance
 
 end
 
@@ -473,18 +473,18 @@ namespace Kripke
 
 open Formula.Kripke (ClassicalSatisfies)
 
-lemma ValidOnClassicalFrame_iff : (Kripke.FrameClassOfHilbert.{u, 0} 𝐂𝐥) ⊧ φ → ∀ (V : ClassicalValuation α), V ⊧ φ := by
+lemma ValidOnClassicalFrame_iff : (Kripke.FrameClassOfHilbert.{u, 0} (Hilbert.Cl α)) ⊧ φ → ∀ (V : ClassicalValuation α), V ⊧ φ := by
   intro h V;
   refine @h (ClassicalFrame) ?_ (λ _ a => V a) (by simp [Valuation.atomic_hereditary]) ();
   . apply @Cl_Characteraizable α |>.characterize;
     refine ⟨ClassicalFrame.reflexive, ClassicalFrame.transitive, ClassicalFrame.symmetric⟩;
 
-lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ φ)) → ¬(Kripke.FrameClassOfHilbert.{u, 0} 𝐂𝐥) ⊧ φ := by
+lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ φ)) → ¬(Kripke.FrameClassOfHilbert.{u, 0} (Hilbert.Cl α)) ⊧ φ := by
   contrapose; push_neg;
   have := @ValidOnClassicalFrame_iff α φ;
   exact this;
 
-lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ φ)) : 𝐂𝐥 ⊬ φ := by
+lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ φ)) : (Hilbert.Cl α) ⊬ φ := by
   apply not_imp_not.mpr $ Kripke.sound.{u, 0};
   apply notClassicalValid_of_exists_ClassicalValuation;
   assumption;

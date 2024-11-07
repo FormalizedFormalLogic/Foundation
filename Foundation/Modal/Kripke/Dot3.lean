@@ -73,14 +73,14 @@ instance axiomS4Dot3_defines [Atleast 2 α] [Inhabited α] [DecidableEq α] : �
     simp [Reflexive, Transitive, Connected];
     refine ⟨⟨?_, ?_⟩, ?_⟩ <;> tauto;
 
-instance S4Dot3_defines [Inhabited α] [DecidableEq α] [Atleast 2 α] : 𝔽((𝐒𝟒.𝟑 : Hilbert α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := inferInstance
+instance S4Dot3_defines [Inhabited α] [DecidableEq α] [Atleast 2 α] : 𝔽((Hilbert.S4Dot3 α)).DefinedBy ReflexiveTransitiveConnectedFrameClass := inferInstance
 
-instance  [Inhabited α] [DecidableEq α] [Atleast 2 α] : System.Consistent (𝐒𝟒.𝟑 : Hilbert α) := inferInstance
+instance  [Inhabited α] [DecidableEq α] [Atleast 2 α] : System.Consistent (Hilbert.S4Dot3 α) := inferInstance
 
 open MaximalConsistentTheory in
 lemma connected_CanonicalFrame
   [Inhabited α] [DecidableEq α] [Atleast 2 α]
-  {Ax : Theory α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (𝜿Ax)] : Connected (CanonicalFrame 𝜿Ax) := by
+  {Ax : Theory α} (hAx : .𝟯 ⊆ Ax) [System.Consistent (Hilbert.ExtK Ax)] : Connected (CanonicalFrame (Hilbert.ExtK Ax)) := by
   dsimp only [Connected];
   intro X Y Z ⟨hXY, hXZ⟩;
   by_contra hC; push_neg at hC;
@@ -108,7 +108,7 @@ lemma connected_CanonicalFrame
 
 instance
   [Inhabited α] [DecidableEq α] [Atleast 2 α]
-  : Complete (𝐒𝟒.𝟑 : Hilbert α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame ReflexiveTransitiveConnectedFrameClass $ by
+  : Complete (Hilbert.S4Dot3 α) (ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame ReflexiveTransitiveConnectedFrameClass $ by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
   . simp [GeachConfluent.reflexive_def];
     apply geachConfluent_CanonicalFrame;

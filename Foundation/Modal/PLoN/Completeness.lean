@@ -6,26 +6,26 @@ namespace LO.Modal
 namespace PLoN
 
 variable {α : Type u} [DecidableEq α]
-variable {Λ : Hilbert α}
+variable {H : Hilbert α}
 
 open Formula
 open Theory
 open MaximalConsistentTheory
 
-abbrev CanonicalFrame (Λ : Hilbert α) [Nonempty (MCT Λ)] : PLoN.Frame α where
-  World := (MCT Λ)
+abbrev CanonicalFrame (H : Hilbert α) [Nonempty (MCT H)] : PLoN.Frame α where
+  World := (MCT H)
   Rel := λ φ Ω₁ Ω₂ => ∼(□φ) ∈ Ω₁.theory ∧ ∼φ ∈ Ω₂.theory
 
-abbrev CanonicalModel (Λ : Hilbert α) [Nonempty (MCT Λ)] : PLoN.Model α where
-  Frame := CanonicalFrame Λ
+abbrev CanonicalModel (H : Hilbert α) [Nonempty (MCT H)] : PLoN.Model α where
+  Frame := CanonicalFrame H
   Valuation Ω a := (atom a) ∈ Ω.theory
 
-instance CanonicalModel.instSatisfies [Nonempty (MCT Λ)] : Semantics (Formula α) ((CanonicalModel Λ).World) := Formula.PLoN.Satisfies.semantics (CanonicalModel Λ)
+instance CanonicalModel.instSatisfies [Nonempty (MCT H)] : Semantics (Formula α) ((CanonicalModel H).World) := Formula.PLoN.Satisfies.semantics (CanonicalModel H)
 
-variable {Λ : Hilbert α} [Nonempty (MCT Λ)] [Λ.HasNecessitation]
+variable {H : Hilbert α} [Nonempty (MCT H)] [H.HasNecessitation]
          {φ : Formula α}
 
-lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ φ ↔ (φ ∈ Ω.theory) := by
+lemma truthlemma : ∀ {Ω : (CanonicalModel H).World}, Ω ⊧ φ ↔ (φ ∈ Ω.theory) := by
   induction φ using Formula.rec' with
   | hbox φ ih =>
     intro Ω;
@@ -36,7 +36,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ φ ↔ (φ ∈ �
       simp [PLoN.Satisfies];
       constructor;
       . assumption;
-      . obtain ⟨Ω', hΩ'⟩ := lindenbaum (Λ := Λ) (T := {∼φ}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
+      . obtain ⟨Ω', hΩ'⟩ := lindenbaum (H := H) (T := {∼φ}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
         use Ω';
         constructor;
         . apply iff_mem_neg.mp;
@@ -50,15 +50,15 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel Λ).World}, Ω ⊧ φ ↔ (φ ∈ �
       simp_all only [PLoN.Satisfies.iff_models];
   | _ => simp_all [PLoN.Satisfies];
 
-lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame Λ ∈ 𝔽) : 𝔽 ⊧ φ → Λ ⊢! φ:= by
+lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame H ∈ 𝔽) : 𝔽 ⊧ φ → H ⊢! φ:= by
   simp [PLoN.ValidOnFrameClass, PLoN.ValidOnFrame, PLoN.ValidOnModel];
   contrapose; push_neg;
   intro h;
-  use (CanonicalFrame Λ);
+  use (CanonicalFrame H);
   constructor;
   . exact hFC;
-  . use (CanonicalModel Λ).Valuation;
-    obtain ⟨Ω, hΩ⟩ := lindenbaum (Λ := Λ) (T := {∼φ}) (by
+  . use (CanonicalModel H).Valuation;
+    obtain ⟨Ω, hΩ⟩ := lindenbaum (H := H) (T := {∼φ}) (by
       apply unprovable_iff_singleton_neg_consistent.mp;
       exact h;
     );
@@ -67,9 +67,9 @@ lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFram
     apply iff_mem_neg.mp;
     simp_all;
 
-lemma instComplete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete Λ 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
+lemma instComplete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame H ∈ 𝔽) : Complete H 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-instance : Complete 𝐍 (AllFrameClass.{u, u} α) := instComplete_of_mem_canonicalFrame (by simp)
+instance : Complete (Hilbert.N α) (AllFrameClass.{u, u} α) := instComplete_of_mem_canonicalFrame (by simp)
 
 end PLoN
 

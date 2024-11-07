@@ -119,16 +119,16 @@ end Kripke
 
 variable {X : Theory α} {φ₁ φ₂ : Formula α}
 
-lemma GL_MDP_Aux [Inhabited α] (h : (□''X) *⊢[𝐆𝐋]! □φ₁ ⋎ □φ₂) : (□''X) *⊢[𝐆𝐋]! □φ₁ ∨ (□''X) *⊢[𝐆𝐋]! □φ₂ := by
+lemma GL_MDP_Aux [Inhabited α] (h : (□''X) *⊢[(Hilbert.GL α)]! □φ₁ ⋎ □φ₂) : (□''X) *⊢[(Hilbert.GL α)]! □φ₁ ∨ (□''X) *⊢[(Hilbert.GL α)]! □φ₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
-  have : 𝐆𝐋 ⊢! ⋀□'Δ ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
-  have : 𝐆𝐋 ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := imp_trans''! (by simp) this;
+  have : (Hilbert.GL α) ⊢! ⋀□'Δ ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
+  have : (Hilbert.GL α) ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := imp_trans''! (by simp) this;
   generalize e : ⋀Δ = c at this;
 
-  have : (𝐆𝐋 ⊢! ⊡c ➝ φ₁) ⋎ (𝐆𝐋 ⊢! ⊡c ➝ φ₂) := by
+  have : ((Hilbert.GL α) ⊢! ⊡c ➝ φ₁) ⋎ ((Hilbert.GL α) ⊢! ⊡c ➝ φ₂) := by
     by_contra hC;
-    have ⟨h₁, h₂⟩ : (𝐆𝐋 ⊬ ⊡c ➝ φ₁) ∧ (𝐆𝐋 ⊬ ⊡c ➝ φ₂) := not_or.mp hC;
+    have ⟨h₁, h₂⟩ : ((Hilbert.GL α) ⊬ ⊡c ➝ φ₁) ∧ ((Hilbert.GL α) ⊬ ⊡c ➝ φ₂) := not_or.mp hC;
 
     obtain ⟨M₁, hM₁⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₁;
     obtain ⟨M₂, hM₂⟩ := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h₂;
@@ -175,7 +175,7 @@ lemma GL_MDP_Aux [Inhabited α] (h : (□''X) *⊢[𝐆𝐋]! □φ₁ ⋎ □φ
     tauto;
   };
 
-theorem GL_MDP [Inhabited α] (h : 𝐆𝐋 ⊢! □φ₁ ⋎ □φ₂) : 𝐆𝐋 ⊢! φ₁ ∨ 𝐆𝐋 ⊢! φ₂ := by
+theorem GL_MDP [Inhabited α] (h : (Hilbert.GL α) ⊢! □φ₁ ⋎ □φ₂) : (Hilbert.GL α) ⊢! φ₁ ∨ (Hilbert.GL α) ⊢! φ₂ := by
   have := GL_MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
   simp at this;
   rcases this with (h | h) <;> {
@@ -183,6 +183,6 @@ theorem GL_MDP [Inhabited α] (h : 𝐆𝐋 ⊢! □φ₁ ⋎ □φ₂) : 𝐆�
     tauto;
   }
 
-instance [Inhabited α] : System.ModalDisjunctive (𝐆𝐋 : Hilbert α) := ⟨GL_MDP⟩
+instance [Inhabited α] : System.ModalDisjunctive (Hilbert.GL α) := ⟨GL_MDP⟩
 
 end LO.Modal

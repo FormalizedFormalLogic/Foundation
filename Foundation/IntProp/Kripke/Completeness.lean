@@ -13,41 +13,40 @@ open Kripke
 
 namespace Kripke
 
--- variable [Inhabited α] [DecidableEq α] [Encodable α] [Λ.IncludeEFQ]
 variable {α : Type u}
-         {Λ : Hilbert α}
+         {H : Hilbert α}
 
 open SaturatedConsistentTableau
 
-def CanonicalFrame (Λ : Hilbert α) [Nonempty (SCT Λ)] : Kripke.Frame.Dep α where
-  World := SCT Λ
+def CanonicalFrame (H : Hilbert α) [Nonempty (SCT H)] : Kripke.Frame.Dep α where
+  World := SCT H
   Rel t₁ t₂ := t₁.tableau.1 ⊆ t₂.tableau.1
 
 namespace CanonicalFrame
 
-variable [Nonempty (SCT Λ)]
+variable [Nonempty (SCT H)]
 
-lemma reflexive : Reflexive (CanonicalFrame Λ) := by
+lemma reflexive : Reflexive (CanonicalFrame H) := by
   simp [CanonicalFrame];
   intro x;
   apply Set.Subset.refl;
 
-lemma antisymmetric : Antisymmetric (CanonicalFrame Λ) := by
+lemma antisymmetric : Antisymmetric (CanonicalFrame H) := by
   simp [CanonicalFrame];
   intro x y Rxy Ryx;
   exact equality_of₁ $ Set.Subset.antisymm Rxy Ryx;
 
-lemma transitive : Transitive (CanonicalFrame Λ) := by
+lemma transitive : Transitive (CanonicalFrame H) := by
   simp [CanonicalFrame];
   intro x y z;
   apply Set.Subset.trans;
 
 open Classical in
-lemma confluent [Encodable α] [Λ.IncludeEFQ] [HasAxiomWeakLEM Λ] : Confluent (CanonicalFrame Λ) := by
+lemma confluent [Encodable α] [H.IncludeEFQ] [HasAxiomWeakLEM H] : Confluent (CanonicalFrame H) := by
   simp [Confluent, CanonicalFrame];
   intro x y z Rxy Rxz;
-  suffices Tableau.Consistent Λ (y.tableau.1 ∪ z.tableau.1, ∅) by
-    obtain ⟨w, hw⟩ := lindenbaum (Λ := Λ) this;
+  suffices Tableau.Consistent H (y.tableau.1 ∪ z.tableau.1, ∅) by
+    obtain ⟨w, hw⟩ := lindenbaum (H := H) this;
     use w;
     simp_all;
 
@@ -78,17 +77,17 @@ lemma confluent [Encodable α] [Λ.IncludeEFQ] [HasAxiomWeakLEM Λ] : Confluent 
       intro φ hp;
       have := by simpa using List.of_mem_filter hp;
       exact this.1;
-    have : Λ ⊬ ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ∼⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
-    have : Λ ⊢! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := by simp;
+    have : H ⊬ ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ∼⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
+    have : H ⊢! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := by simp;
     contradiction;
 
-  have : Λ ⊢! (⋀Θx ⋏ (⋀Θy ⋏ ⋀Θz)) ➝ ⊥ := imp_trans''! (by
+  have : H ⊢! (⋀Θx ⋏ (⋀Θy ⋏ ⋀Θz)) ➝ ⊥ := imp_trans''! (by
     -- TODO: need more refactor
-    have d₁ : Λ ⊢! ⋀Θx ⋏ ⋀(Θy ++ Θz) ➝ ⋀(Θx ++ (Θy ++ Θz)) := and₂'! $ iff_concat_conj!;
-    have d₂ : Λ ⊢! ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θy ++ Θz) := and₂'! $ iff_concat_conj!;
-    have d₃ : Λ ⊢! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θx ++ (Θy ++ Θz)) := imp_trans''! (by
+    have d₁ : H ⊢! ⋀Θx ⋏ ⋀(Θy ++ Θz) ➝ ⋀(Θx ++ (Θy ++ Θz)) := and₂'! $ iff_concat_conj!;
+    have d₂ : H ⊢! ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θy ++ Θz) := and₂'! $ iff_concat_conj!;
+    have d₃ : H ⊢! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θx ++ (Θy ++ Θz)) := imp_trans''! (by
       apply deduct'!;
-      have : [⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz] ⊢[Λ]! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz := FiniteContext.by_axm!;
+      have : [⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz] ⊢[H]! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz := FiniteContext.by_axm!;
       apply and₃'!;
       . exact and₁'! this;
       . exact (FiniteContext.of'! d₂) ⨀ (and₂'! this);
@@ -113,9 +112,9 @@ lemma confluent [Encodable α] [Λ.IncludeEFQ] [HasAxiomWeakLEM Λ] : Confluent 
         . assumption;
         . exact hz₁ hz;
   ) h;
-  have : Λ ⊢! ⋀Θx ➝ ⋀Θy ➝ ∼⋀Θz := and_imply_iff_imply_imply'!.mp $
+  have : H ⊢! ⋀Θx ➝ ⋀Θy ➝ ∼⋀Θz := and_imply_iff_imply_imply'!.mp $
     (imp_trans''! (and_imply_iff_imply_imply'!.mp $ imp_trans''! (and₁'! and_assoc!) this) (and₂'! $ neg_equiv!));
-  have d : Λ ⊢! ⋀Θx ➝ ∼∼⋀Θz ➝ ∼⋀Θy := imp_trans''! this contra₀!;
+  have d : H ⊢! ⋀Θx ➝ ∼∼⋀Θz ➝ ∼⋀Θy := imp_trans''! this contra₀!;
 
   have mem_Θx_x : ⋀Θx ∈ x.tableau.1 := iff_mem₁_conj.mpr $ by
     intro φ hp;
@@ -133,7 +132,7 @@ lemma confluent [Encodable α] [Λ.IncludeEFQ] [HasAxiomWeakLEM Λ] : Confluent 
   exact mdp₁_mem mem_nnΘz_x $ mdp₁ mem_Θx_x d;
 
 
-lemma connected [DecidableEq α] [HasAxiomDummett Λ] : Connected (CanonicalFrame Λ) := by
+lemma connected [DecidableEq α] [HasAxiomDummett H] : Connected (CanonicalFrame H) := by
   simp [Connected, CanonicalFrame];
   intro x y z Rxy Ryz;
   apply or_iff_not_imp_left.mpr;
@@ -154,45 +153,45 @@ lemma connected [DecidableEq α] [HasAxiomDummett Λ] : Connected (CanonicalFram
 end CanonicalFrame
 
 
-def CanonicalModel (Λ : Hilbert α) [Nonempty (SCT Λ)] : Kripke.Model α where
-  Frame := CanonicalFrame Λ
+def CanonicalModel (H : Hilbert α) [Nonempty (SCT H)] : Kripke.Model α where
+  Frame := CanonicalFrame H
   Valuation t a := (atom a) ∈ t.tableau.1
   -- hereditary := by aesop;
 
 namespace CanonicalModel
 
-variable [Nonempty (SCT Λ)] {t t₁ t₂ : SCT Λ}
+variable [Nonempty (SCT H)] {t t₁ t₂ : SCT H}
 
-lemma hereditary : (CanonicalModel Λ).Valuation.atomic_hereditary := by
+lemma hereditary : (CanonicalModel H).Valuation.atomic_hereditary := by
   intros _ _;
   aesop;
 
 @[reducible]
-instance : Semantics (Formula α) (CanonicalModel Λ).World := Formula.Kripke.Satisfies.semantics (CanonicalModel Λ)
+instance : Semantics (Formula α) (CanonicalModel H).World := Formula.Kripke.Satisfies.semantics (CanonicalModel H)
 
-@[simp] lemma frame_def : (CanonicalModel Λ).Frame t₁ t₂ ↔ t₁.tableau.1 ⊆ t₂.tableau.1 := by rfl
-@[simp] lemma valuation_def {a : α} : (CanonicalModel Λ).Valuation t a ↔ (atom a) ∈ t.tableau.1 := by rfl
+@[simp] lemma frame_def : (CanonicalModel H).Frame t₁ t₂ ↔ t₁.tableau.1 ⊆ t₂.tableau.1 := by rfl
+@[simp] lemma valuation_def {a : α} : (CanonicalModel H).Valuation t a ↔ (atom a) ∈ t.tableau.1 := by rfl
 
 end CanonicalModel
 
 section
 
-variable [Nonempty (SCT Λ)]
+variable [Nonempty (SCT H)]
 
-variable {t : SCT Λ} {φ ψ : Formula α}
+variable {t : SCT H} {φ ψ : Formula α}
 
 private lemma truthlemma.himp
-  [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
-  {t : (CanonicalModel Λ).World}
-  (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ φ ↔ φ ∈ t.tableau.1)
-  (ihq : ∀ {t : (CanonicalModel Λ).World}, t ⊧ ψ ↔ ψ ∈ t.tableau.1)
+  [H.IncludeEFQ] [Encodable α] [DecidableEq α]
+  {t : (CanonicalModel H).World}
+  (ihp : ∀ {t : (CanonicalModel H).World}, t ⊧ φ ↔ φ ∈ t.tableau.1)
+  (ihq : ∀ {t : (CanonicalModel H).World}, t ⊧ ψ ↔ ψ ∈ t.tableau.1)
   : t ⊧ φ ➝ ψ ↔ φ ➝ ψ ∈ t.tableau.1 := by
   constructor;
   . contrapose;
     simp_all [Satisfies];
     intro h;
     replace h := not_mem₁_iff_mem₂.mp h;
-    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert φ t.tableau.1, {ψ})) $ by
+    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (H := H) (t₀ := (insert φ t.tableau.1, {ψ})) $ by
       simp only [Tableau.Consistent];
       intro Γ Δ hΓ hΔ;
       replace hΓ : ∀ χ, χ ∈ Γ.remove φ → χ ∈ t.tableau.1 := by
@@ -201,14 +200,14 @@ private lemma truthlemma.himp
         have := by simpa using hΓ χ hr₁;
         simp_all;
       by_contra hC;
-      have : Λ ⊢! ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
+      have : H ⊢! ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
         apply deduct'!;
         apply deduct!;
-        have : [φ, φ ➝ ⋁Δ] ⊢[Λ]! φ := by_axm!;
-        have : [φ, φ ➝ ⋁Δ] ⊢[Λ]! ⋁Δ := by_axm! ⨀ this;
+        have : [φ, φ ➝ ⋁Δ] ⊢[H]! φ := by_axm!;
+        have : [φ, φ ➝ ⋁Δ] ⊢[H]! ⋁Δ := by_axm! ⨀ this;
         exact disj_allsame'! (by simpa using hΔ) this;
       )
-      have : Λ ⊬ ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := by simpa using (t.consistent hΓ (show ∀ χ ∈ [φ ➝ ψ], χ ∈ t.tableau.2 by simp_all));
+      have : H ⊬ ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := by simpa using (t.consistent hΓ (show ∀ χ ∈ [φ ➝ ψ], χ ∈ t.tableau.2 by simp_all));
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
@@ -226,7 +225,7 @@ private lemma truthlemma.himp
     apply not_mem₂_iff_mem₁.mp;
     exact not_mem₂
       (by simp_all)
-      (show Λ ⊢! ⋀[φ, φ ➝ ψ] ➝ ψ by
+      (show H ⊢! ⋀[φ, φ ➝ ψ] ➝ ψ by
         simp;
         apply and_imply_iff_imply_imply'!.mpr;
         apply deduct'!;
@@ -235,16 +234,16 @@ private lemma truthlemma.himp
       );
 
 private lemma truthlemma.hneg
-  [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
-  {t : (CanonicalModel Λ).World}
-  (ihp : ∀ {t : (CanonicalModel Λ).World}, t ⊧ φ ↔ φ ∈ t.tableau.1)
+  [H.IncludeEFQ] [Encodable α] [DecidableEq α]
+  {t : (CanonicalModel H).World}
+  (ihp : ∀ {t : (CanonicalModel H).World}, t ⊧ φ ↔ φ ∈ t.tableau.1)
   : t ⊧ ∼φ ↔ ∼φ ∈ t.tableau.1 := by
   constructor;
   . contrapose;
     simp_all [Satisfies];
     intro h;
     replace h := not_mem₁_iff_mem₂.mp h;
-    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (Λ := Λ) (t₀ := (insert φ t.tableau.1, ∅)) $ by
+    obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (H := H) (t₀ := (insert φ t.tableau.1, ∅)) $ by
       simp only [Tableau.Consistent];
       intro Γ Δ hΓ hΔ;
       replace hΓ : ∀ ψ, ψ ∈ Γ.remove φ → ψ ∈ t.tableau.1 := by
@@ -254,8 +253,8 @@ private lemma truthlemma.hneg
         simp_all;
       replace hΔ : Δ = [] := List.nil_iff.mpr hΔ; subst hΔ;
       by_contra hC; simp at hC;
-      have : Λ ⊢! ⋀(Γ.remove φ) ➝ ∼φ := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
-      have : Λ ⊬ ⋀(Γ.remove φ) ➝ ∼φ := by simpa using t.consistent (Δ := [∼φ]) hΓ (by simpa);
+      have : H ⊢! ⋀(Γ.remove φ) ➝ ∼φ := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
+      have : H ⊬ ⋀(Γ.remove φ) ➝ ∼φ := by simpa using t.consistent (Δ := [∼φ]) hΓ (by simpa);
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
@@ -263,31 +262,31 @@ private lemma truthlemma.hneg
     intro ht t' htt';
     apply ihp.not.mpr;
     by_contra hC;
-    have : Λ ⊬ φ ⋏ ∼φ ➝ ⊥ := by simpa using t'.consistent (Γ := [φ, ∼φ]) (Δ := []) (by aesop) (by simp);
-    have : Λ ⊢! φ ⋏ ∼φ ➝ ⊥ := intro_bot_of_and!;
+    have : H ⊬ φ ⋏ ∼φ ➝ ⊥ := by simpa using t'.consistent (Γ := [φ, ∼φ]) (Δ := []) (by aesop) (by simp);
+    have : H ⊢! φ ⋏ ∼φ ➝ ⊥ := intro_bot_of_and!;
     contradiction;
 
 lemma truthlemma
-  [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
-  {t : (CanonicalModel Λ).World} : t ⊧ φ ↔ φ ∈ t.tableau.1 := by
+  [H.IncludeEFQ] [Encodable α] [DecidableEq α]
+  {t : (CanonicalModel H).World} : t ⊧ φ ↔ φ ∈ t.tableau.1 := by
   induction φ using Formula.rec' generalizing t with
   | himp φ ψ ihp ihq => exact truthlemma.himp ihp ihq
   | hneg φ ihp => exact truthlemma.hneg ihp;
   | _ => simp [Satisfies.iff_models, Satisfies, *];
 
 lemma deducible_of_validOnCanonicelModel
-  [Λ.IncludeEFQ] [Encodable α] [DecidableEq α]
-  : (CanonicalModel Λ) ⊧ φ ↔ Λ ⊢! φ := by
+  [H.IncludeEFQ] [Encodable α] [DecidableEq α]
+  : (CanonicalModel H) ⊧ φ ↔ H ⊢! φ := by
   constructor;
   . contrapose;
     intro h;
-    have : Tableau.Consistent Λ (∅, {φ}) := by
+    have : Tableau.Consistent H (∅, {φ}) := by
       simp only [Tableau.Consistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
       replace hΓ : Γ = [] := List.nil_iff.mpr hΓ;
       subst hΓ;
-      have : Λ ⊢! φ := disj_allsame'! hΔ (hC ⨀ verum!);
+      have : H ⊢! φ := disj_allsame'! hΔ (hC ⨀ verum!);
       contradiction;
     obtain ⟨t', ht'⟩ := lindenbaum this;
     simp [ValidOnModel.iff_models, ValidOnModel]
@@ -302,34 +301,34 @@ lemma deducible_of_validOnCanonicelModel
 
 section
 
-variable [System.Consistent Λ]
-variable [DecidableEq α] [Encodable α] [Λ.IncludeEFQ]
+variable [System.Consistent H]
+variable [DecidableEq α] [Encodable α] [H.IncludeEFQ]
 variable {𝔽 : Kripke.FrameClass}
 
-omit [Consistent Λ] in
-lemma complete (H : CanonicalFrame Λ ∈ 𝔽) {φ : Formula α} : 𝔽#α ⊧ φ → Λ ⊢! φ := by
+omit [Consistent H] in
+lemma complete (hC : CanonicalFrame H ∈ 𝔽) {φ : Formula α} : 𝔽#α ⊧ φ → H ⊢! φ := by
   intro h;
   apply deducible_of_validOnCanonicelModel.mp;
   apply h;
-  . exact H;
+  . exact hC;
   . exact CanonicalModel.hereditary;
 
-instance instComplete (H : CanonicalFrame Λ ∈ 𝔽) : Complete Λ (𝔽#α) := ⟨complete H⟩
+instance instComplete (hC : CanonicalFrame H ∈ 𝔽) : Complete H (𝔽#α) := ⟨complete hC⟩
 
-instance Int_complete : Complete 𝐈𝐧𝐭 (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
+instance Int_complete : Complete (Hilbert.Int α) (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
   refine ⟨
     CanonicalFrame.reflexive,
     CanonicalFrame.transitive,
   ⟩
 
-instance LC_complete : Complete 𝐋𝐂 (Kripke.ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete $ by
+instance LC_complete : Complete (Hilbert.LC α) (Kripke.ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete $ by
   refine ⟨
     CanonicalFrame.reflexive,
     CanonicalFrame.transitive,
     CanonicalFrame.connected
   ⟩;
 
-instance KC_complete : Complete 𝐊𝐂 (Kripke.ReflexiveTransitiveConfluentFrameClass.{u}#α) := instComplete $ by
+instance KC_complete : Complete (Hilbert.KC α) (Kripke.ReflexiveTransitiveConfluentFrameClass.{u}#α) := instComplete $ by
   refine ⟨
     CanonicalFrame.reflexive,
     CanonicalFrame.transitive,

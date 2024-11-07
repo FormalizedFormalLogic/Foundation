@@ -50,8 +50,7 @@ lemma dense_def : Dense R ↔ (GeachConfluent ⟨0, 1, 2, 0⟩ R) := by
   . rintro h x y z rfl Rxz; exact h Rxz;
   . intro h x y Rxy; exact h rfl Rxy;
 
-@[simp]
-lemma satisfies_eq : GeachConfluent (α := α) t (· = ·) := by simp [GeachConfluent];
+@[simp] lemma satisfies_eq : GeachConfluent (α := α) t (· = ·) := by simp [GeachConfluent];
 
 end GeachConfluent
 
@@ -144,44 +143,43 @@ variable {Ax : Theory α}
 
 open System
 
-protected abbrev Geach (l : List GeachTaple) : Hilbert α := 𝜿(𝗚𝗲(l))
-notation "𝐆𝐞(" l ")" => Modal.Geach l
+protected abbrev Hilbert.Geach (α) (l : List GeachTaple) : Hilbert α := Hilbert.ExtK (𝗚𝗲(l))
 
 namespace Geach
 
 end Geach
 
 protected class Hilbert.IsGeach (L : Hilbert α) (ts : List GeachTaple) where
-  char : L = 𝐆𝐞(ts) := by aesop;
+  char : L = Hilbert.Geach _ ts := by aesop;
 
 attribute [simp] Hilbert.IsGeach.char
 
 namespace IsGeach
 
-lemma ax {Λ : Hilbert α} [geach : Λ.IsGeach ts] : Λ.axioms = (𝗞 ∪ 𝗚𝗲(ts)) := by
+lemma ax {H : Hilbert α} [geach : H.IsGeach ts] : H.axioms = (𝗞 ∪ 𝗚𝗲(ts)) := by
   have e := geach.char;
-  simp [Modal.Geach] at e;
+  simp [Hilbert.Geach] at e;
   simp_all;
 
-instance : 𝐊.IsGeach (α := α) [] where
+instance : (Hilbert.K α).IsGeach [] where
 
-instance : 𝐊𝐃.IsGeach (α := α) [⟨0, 0, 1, 1⟩] where
+instance : (Hilbert.KD α).IsGeach [⟨0, 0, 1, 1⟩] where
 
-instance : 𝐊𝐓.IsGeach (α := α) [⟨0, 0, 1, 0⟩] where
+instance : (Hilbert.KT α).IsGeach [⟨0, 0, 1, 0⟩] where
 
-instance : 𝐊𝐓𝐁.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩] where
+instance : (Hilbert.KTB α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩] where
 
-instance : 𝐊𝟒.IsGeach (α := α) [⟨0, 2, 1, 0⟩] where
+instance : (Hilbert.K4 α).IsGeach [⟨0, 2, 1, 0⟩] where
 
-instance : 𝐒𝟒.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩] where
+instance : (Hilbert.S4 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩] where
 
-instance : 𝐒𝟒.𝟐.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩] where
+instance : (Hilbert.S4Dot2 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩] where
 
-instance : 𝐒𝟓.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩] where
+instance : (Hilbert.S5 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩] where
 
-instance : 𝐊𝐓𝟒𝐁.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩] where
+instance : (Hilbert.KT4B α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩] where
 
-instance : 𝐓𝐫𝐢𝐯.IsGeach (α := α) [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩] where
+instance : (Hilbert.Triv α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩] where
 
 end IsGeach
 
