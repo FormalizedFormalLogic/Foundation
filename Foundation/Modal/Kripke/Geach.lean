@@ -219,7 +219,7 @@ instance : System.Consistent (Hilbert.Geach α ts) := inferInstance
 
 
 instance instGeachLogicSound
-  {Λ : Hilbert α} {𝔽 : FrameClass} [logic_geach : Λ.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Sound Λ (𝔽#α) := by
+  {H : Hilbert α} {𝔽 : FrameClass} [logic_geach : H.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Sound H (𝔽#α) := by
   convert sound_Geach (α := α) (ts := ts);
   . exact logic_geach.char;
   . exact class_geach.equality;
@@ -251,7 +251,7 @@ variable {Ax : Theory α} [System.Consistent (Hilbert.ExtK Ax)] [DecidableEq α]
 lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame (Hilbert.ExtK Ax)).Rel := by
   rintro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
-  have ⟨Ω, hΩ⟩ := lindenbaum (Λ := (Hilbert.ExtK Ax)) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
+  have ⟨Ω, hΩ⟩ := lindenbaum (H := (Hilbert.ExtK Ax)) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
     apply intro_union_consistent;
     rintro Γ Δ ⟨hΓ, hΔ⟩ hC;
 
@@ -301,7 +301,7 @@ instance instMultiGeachComplete : Complete (Hilbert.ExtK (𝗚𝗲(ts))) ((Multi
     apply multiGeachConfluent_CanonicalFrame;
     tauto;
 
-instance {Λ : Hilbert α} {𝔽 : FrameClass.{u}} [logic_geach : Λ.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Complete Λ (𝔽#α) := by
+instance {H : Hilbert α} {𝔽 : FrameClass.{u}} [logic_geach : H.IsGeach ts] [class_geach : 𝔽.IsGeach ts] : Complete H (𝔽#α) := by
   convert instMultiGeachComplete (α := α) (ts := ts);
   . exact logic_geach.char;
   . exact class_geach.equality;

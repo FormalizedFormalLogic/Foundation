@@ -289,8 +289,8 @@ def characterizability_union_frameclass_of_theory {T₁ T₂ : Theory α}
     . simpa using char₂.characterize hF₂;
   nonempty := nonempty
 
-abbrev FrameClassOfHilbert (Λ : Hilbert α) : FrameClass.Dep α := 𝔽(Λ.theorems)
-notation "𝔽(" Λ ")"  => FrameClassOfHilbert Λ
+abbrev FrameClassOfHilbert (H : Hilbert α) : FrameClass.Dep α := 𝔽(H.theorems)
+notation "𝔽(" H ")"  => FrameClassOfHilbert H
 
 open Hilbert.Deduction
 
@@ -342,8 +342,8 @@ instance {Ax : Theory α} {𝔽 : FrameClass} [char : 𝔽(Ax).Characteraizable 
   nonempty := char.nonempty
 
 
-abbrev FiniteFrameClassOfHilbert (Λ : Hilbert α) : FiniteFrameClass.Dep α := 𝔽(Λ)ꟳ
-notation "𝔽ꟳ(" Λ ")"  => FiniteFrameClassOfHilbert Λ
+abbrev FiniteFrameClassOfHilbert (H : Hilbert α) : FiniteFrameClass.Dep α := 𝔽(H)ꟳ
+notation "𝔽ꟳ(" H ")"  => FiniteFrameClassOfHilbert H
 
 instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass}  [defi : 𝔽ꟳ(Ax).DefinedBy 𝔽] : 𝔽ꟳ(Hilbert.ExtK Ax).DefinedBy 𝔽 where
   define := by
@@ -395,22 +395,22 @@ instance {Ax : Set (Formula α)} {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Ax).C
 section sound
 
 variable {α : Type u}
-variable {Λ : Hilbert α} {φ : Formula α}
+variable {H : Hilbert α} {φ : Formula α}
 
-lemma sound : Λ ⊢! φ → 𝔽(Λ) ⊧ φ := by
+lemma sound : H ⊢! φ → 𝔽(H) ⊧ φ := by
   intro hp F hF;
   simp [Hilbert.theorems, System.theory] at hF;
   exact hF φ hp;
-instance : Sound Λ 𝔽(Λ) := ⟨sound⟩
+instance : Sound H 𝔽(H) := ⟨sound⟩
 
-lemma sound_finite : Λ ⊢! φ → 𝔽ꟳ(Λ) ⊧ φ := by
+lemma sound_finite : H ⊢! φ → 𝔽ꟳ(H) ⊧ φ := by
   intro hp F hF;
   simp [Hilbert.theorems, System.theory] at hF;
   obtain ⟨FF, hFF₁, rfl⟩ := hF;
   exact hFF₁ φ hp;
-instance : Sound Λ 𝔽ꟳ(Λ) := ⟨sound_finite⟩
+instance : Sound H 𝔽ꟳ(H) := ⟨sound_finite⟩
 
-lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
+lemma unprovable_bot (hc : 𝔽(H).Nonempty) : H ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -418,9 +418,9 @@ lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
   constructor;
   . exact hF;
   . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
-instance (hc : 𝔽(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot hc
+instance (hc : 𝔽(H).Nonempty) : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot hc
 
-lemma unprovable_bot_finite (hc : 𝔽ꟳ(Λ).Nonempty) : Λ ⊬ ⊥ := by
+lemma unprovable_bot_finite (hc : 𝔽ꟳ(H).Nonempty) : H ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound_finite (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -428,17 +428,17 @@ lemma unprovable_bot_finite (hc : 𝔽ꟳ(Λ).Nonempty) : Λ ⊬ ⊥ := by
   constructor;
   . exact hF;
   . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
-instance (hc : 𝔽ꟳ(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot_finite hc
+instance (hc : 𝔽ꟳ(H).Nonempty) : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot_finite hc
 
-lemma sound_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).Characteraizable 𝔽]
-  : Λ ⊢! φ → 𝔽#α ⊧ φ := by
+lemma sound_of_characterizability {𝔽 : FrameClass} [char : 𝔽(H).Characteraizable 𝔽]
+  : H ⊢! φ → 𝔽#α ⊧ φ := by
   intro h F hF;
   apply sound h;
   apply char.characterize hF;
-instance {𝔽 : FrameClass} [𝔽(Λ).Characteraizable 𝔽] : Sound Λ 𝔽#α := ⟨sound_of_characterizability⟩
+instance {𝔽 : FrameClass} [𝔽(H).Characteraizable 𝔽] : Sound H 𝔽#α := ⟨sound_of_characterizability⟩
 
-lemma sound_of_finite_characterizability {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(Λ).Characteraizable 𝔽]
-  : Λ ⊢! φ → 𝔽#α ⊧ φ := by
+lemma sound_of_finite_characterizability {𝔽 : FiniteFrameClass} [char : 𝔽ꟳ(H).Characteraizable 𝔽]
+  : H ⊢! φ → 𝔽#α ⊧ φ := by
   intro h F hF;
   apply sound_finite h;
   obtain ⟨FF, hFF, rfl⟩ := hF;
@@ -446,22 +446,22 @@ lemma sound_of_finite_characterizability {𝔽 : FiniteFrameClass} [char : 𝔽�
   constructor;
   . exact char.characterize hFF;
   . rfl;
-instance {𝔽 : FiniteFrameClass} [𝔽ꟳ(Λ).Characteraizable 𝔽] : Sound Λ 𝔽#α := ⟨sound_of_finite_characterizability⟩
+instance {𝔽 : FiniteFrameClass} [𝔽ꟳ(H).Characteraizable 𝔽] : Sound H 𝔽#α := ⟨sound_of_finite_characterizability⟩
 
-lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(Λ).Characteraizable 𝔽] : Λ ⊬ ⊥ := by
+lemma unprovable_bot_of_characterizability {𝔽 : FrameClass} [char : 𝔽(H).Characteraizable 𝔽] : H ⊬ ⊥ := by
   apply unprovable_bot;
   obtain ⟨F, hF⟩ := char.nonempty;
   use F;
   apply char.characterize hF;
-instance [FrameClass.Characteraizable.{u} 𝔽(Λ) 𝔽] : System.Consistent Λ
+instance [FrameClass.Characteraizable.{u} 𝔽(H) 𝔽] : System.Consistent H
   := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
 
-lemma unprovable_bot_of_finite_characterizability {𝔽 : FiniteFrameClass}  [char : 𝔽ꟳ(Λ).Characteraizable 𝔽] : Λ ⊬ ⊥ := by
+lemma unprovable_bot_of_finite_characterizability {𝔽 : FiniteFrameClass}  [char : 𝔽ꟳ(H).Characteraizable 𝔽] : H ⊬ ⊥ := by
   apply unprovable_bot_finite;
   obtain ⟨F, hF⟩ := char.nonempty;
   use F;
   apply char.characterize hF;
-instance {𝔽 : FiniteFrameClass} [FiniteFrameClass.Characteraizable.{u} 𝔽ꟳ(Λ) 𝔽] : System.Consistent Λ
+instance {𝔽 : FiniteFrameClass} [FiniteFrameClass.Characteraizable.{u} 𝔽ꟳ(H) 𝔽] : System.Consistent H
   := System.Consistent.of_unprovable $ unprovable_bot_of_finite_characterizability
 
 end sound
@@ -486,7 +486,7 @@ lemma restrict_finite : 𝔽#α ⊧ φ → 𝔽ꟳ#α ⊧ φ := by
   obtain ⟨FF, hFF₁, rfl⟩ := hF;
   exact h (by simpa)
 
-instance {Λ : Hilbert α} [sound : Sound Λ 𝔽#α] : Sound Λ 𝔽ꟳ#α := ⟨by
+instance {H : Hilbert α} [sound : Sound H 𝔽#α] : Sound H 𝔽ꟳ#α := ⟨by
   intro φ h;
   exact restrict_finite $ sound.sound h;
 ⟩
@@ -495,9 +495,9 @@ instance : Sound (Hilbert.K α) (AllFrameClassꟳ#α) := inferInstance
 
 lemma exists_finite_frame : ¬𝔽ꟳ#α ⊧ φ ↔ ∃ F ∈ 𝔽ꟳ, ¬F#α ⊧ φ := by simp;
 
-class FiniteFrameProperty (Λ : Hilbert α) (𝔽 : FrameClass) where
-  [complete : Complete Λ 𝔽ꟳ#α]
-  [sound : Sound Λ 𝔽ꟳ#α]
+class FiniteFrameProperty (H : Hilbert α) (𝔽 : FrameClass) where
+  [complete : Complete H 𝔽ꟳ#α]
+  [sound : Sound H 𝔽ꟳ#α]
 
 end Kripke
 

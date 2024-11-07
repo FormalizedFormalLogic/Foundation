@@ -11,36 +11,36 @@ structure Hilbert (α) where
 
 namespace Hilbert
 
-variable {Λ : Hilbert α}
+variable {H : Hilbert α}
 
 
 section
 
-class IncludeEFQ (Λ : Hilbert α) where
-  include_EFQ : 𝗘𝗙𝗤 ⊆ Λ.axioms := by simp
+class IncludeEFQ (H : Hilbert α) where
+  include_EFQ : 𝗘𝗙𝗤 ⊆ H.axioms := by simp
 
-class IncludeLEM (Λ : Hilbert α) where
-  include_LEM : 𝗟𝗘𝗠 ⊆ Λ.axioms := by simp
+class IncludeLEM (H : Hilbert α) where
+  include_LEM : 𝗟𝗘𝗠 ⊆ H.axioms := by simp
 
-class IncludeDNE (Λ : Hilbert α) where
-  include_DNE : 𝗗𝗡𝗘 ⊆ Λ.axioms := by simp
+class IncludeDNE (H : Hilbert α) where
+  include_DNE : 𝗗𝗡𝗘 ⊆ H.axioms := by simp
 
 end
 
 
-inductive Deduction (Λ : Hilbert α) : Formula α → Type _
-  | eaxm {φ}     : φ ∈ Λ.axioms → Deduction Λ φ
-  | mdp {φ ψ}    : Deduction Λ (φ ➝ ψ) → Deduction Λ φ → Deduction Λ ψ
-  | verum        : Deduction Λ $ ⊤
-  | imply₁ φ ψ   : Deduction Λ $ φ ➝ ψ ➝ φ
-  | imply₂ φ ψ χ : Deduction Λ $ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
-  | and₁ φ ψ     : Deduction Λ $ φ ⋏ ψ ➝ φ
-  | and₂ φ ψ     : Deduction Λ $ φ ⋏ ψ ➝ ψ
-  | and₃ φ ψ     : Deduction Λ $ φ ➝ ψ ➝ φ ⋏ ψ
-  | or₁ φ ψ      : Deduction Λ $ φ ➝ φ ⋎ ψ
-  | or₂ φ ψ      : Deduction Λ $ ψ ➝ φ ⋎ ψ
-  | or₃ φ ψ χ    : Deduction Λ $ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
-  | neg_equiv φ  : Deduction Λ $ Axioms.NegEquiv φ
+inductive Deduction (H : Hilbert α) : Formula α → Type _
+  | eaxm {φ}     : φ ∈ H.axioms → Deduction H φ
+  | mdp {φ ψ}    : Deduction H (φ ➝ ψ) → Deduction H φ → Deduction H ψ
+  | verum        : Deduction H $ ⊤
+  | imply₁ φ ψ   : Deduction H $ φ ➝ ψ ➝ φ
+  | imply₂ φ ψ χ : Deduction H $ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
+  | and₁ φ ψ     : Deduction H $ φ ⋏ ψ ➝ φ
+  | and₂ φ ψ     : Deduction H $ φ ⋏ ψ ➝ ψ
+  | and₃ φ ψ     : Deduction H $ φ ➝ ψ ➝ φ ⋏ ψ
+  | or₁ φ ψ      : Deduction H $ φ ➝ φ ⋎ ψ
+  | or₂ φ ψ      : Deduction H $ ψ ➝ φ ⋎ ψ
+  | or₃ φ ψ χ    : Deduction H $ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
+  | neg_equiv φ  : Deduction H $ Axioms.NegEquiv φ
 
 instance : System (Formula α) (Hilbert α) := ⟨Deduction⟩
 
@@ -49,7 +49,7 @@ open Hilbert
 
 section
 
-instance : System.Minimal Λ where
+instance : System.Minimal H where
   mdp := mdp
   verum := verum
   imply₁ := imply₁
@@ -62,25 +62,25 @@ instance : System.Minimal Λ where
   or₃ := or₃
   neg_equiv := neg_equiv
 
-instance [Λ.IncludeEFQ] : System.HasAxiomEFQ Λ where
+instance [H.IncludeEFQ] : System.HasAxiomEFQ H where
   efq _ := eaxm $ Set.mem_of_subset_of_mem IncludeEFQ.include_EFQ (by simp);
 
-instance [Λ.IncludeLEM] : System.HasAxiomLEM Λ where
+instance [H.IncludeLEM] : System.HasAxiomLEM H where
   lem _ := eaxm $ Set.mem_of_subset_of_mem IncludeLEM.include_LEM (by simp);
 
-instance [Λ.IncludeDNE] : System.HasAxiomDNE Λ where
+instance [H.IncludeDNE] : System.HasAxiomDNE H where
   dne _ := eaxm $ Set.mem_of_subset_of_mem IncludeDNE.include_DNE (by simp);
 
-instance [Λ.IncludeEFQ] : System.Intuitionistic Λ where
+instance [H.IncludeEFQ] : System.Intuitionistic H where
 
-instance [Λ.IncludeDNE] : System.Classical Λ where
+instance [H.IncludeDNE] : System.Classical H where
 
-instance [DecidableEq α] [Λ.IncludeEFQ] [Λ.IncludeLEM] : System.Classical Λ where
+instance [DecidableEq α] [H.IncludeEFQ] [H.IncludeLEM] : System.Classical H where
 
 end
 
 
-abbrev theorems (Λ : Hilbert α) : Set (Formula α) := System.theory Λ
+abbrev theorems (H : Hilbert α) : Set (Formula α) := System.theory H
 
 
 section systems
@@ -134,12 +134,12 @@ namespace Deduction
 
 open System
 
-lemma eaxm! {Λ : Hilbert α} {φ : Formula α} (h : φ ∈ Λ.axioms) : Λ ⊢! φ := ⟨eaxm h⟩
+lemma eaxm! {H : Hilbert α} {φ : Formula α} (h : φ ∈ H.axioms) : H ⊢! φ := ⟨eaxm h⟩
 
-noncomputable def rec! {α : Type u} {Λ : Hilbert α}
-  {motive : (a : Formula α) → Λ ⊢! a → Sort u_1}
-  (eaxm   : ∀ {φ}, (a : φ ∈ Λ.axioms) → motive φ ⟨eaxm a⟩)
-  (mdp    : ∀ {φ ψ}, {hpq : Λ ⊢! (φ ➝ ψ)} → {hp : Λ ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (hpq ⨀ hp))
+noncomputable def rec! {α : Type u} {H : Hilbert α}
+  {motive : (a : Formula α) → H ⊢! a → Sort u_1}
+  (eaxm   : ∀ {φ}, (a : φ ∈ H.axioms) → motive φ ⟨eaxm a⟩)
+  (mdp    : ∀ {φ ψ}, {hpq : H ⊢! (φ ➝ ψ)} → {hp : H ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (hpq ⨀ hp))
   (verum  : motive ⊤ verum!)
   (imply₁ : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ) imply₁!)
   (imply₂ : ∀ {φ ψ χ}, motive ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ) imply₂!)
@@ -150,7 +150,7 @@ noncomputable def rec! {α : Type u} {Λ : Hilbert α}
   (or₂    : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) or₂!)
   (or₃    : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) or₃!)
   (neg_equiv : ∀ {φ}, motive (Axioms.NegEquiv φ) neg_equiv!) :
-  {a : Formula α} → (t : Λ ⊢! a) → motive a t := by
+  {a : Formula α} → (t : H ⊢! a) → motive a t := by
   intro φ d;
   induction d.some with
   | eaxm h => exact eaxm h
@@ -164,8 +164,8 @@ open System
 
 section
 
-lemma weaker_than_of_subset_axiomset' {Λ₁ Λ₂ : Hilbert α} (hMaxm : ∀ {φ : Formula α}, φ ∈ Λ₁.axioms → Λ₂ ⊢! φ)
-  : Λ₁ ≤ₛ Λ₂ := by
+lemma weaker_than_of_subset_axiomset' {H₁ H₂ : Hilbert α} (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axioms → H₂ ⊢! φ)
+  : H₁ ≤ₛ H₂ := by
   apply System.weakerThan_iff.mpr;
   intro φ h;
   induction h using Deduction.rec! with
@@ -173,7 +173,7 @@ lemma weaker_than_of_subset_axiomset' {Λ₁ Λ₂ : Hilbert α} (hMaxm : ∀ {�
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | _ => simp;
 
-lemma weaker_than_of_subset_axiomset {Λ₁ Λ₂ : Hilbert α} (hSubset : Λ₁.axioms ⊆ Λ₂.axioms := by aesop) : Λ₁ ≤ₛ Λ₂ := by
+lemma weaker_than_of_subset_axiomset {H₁ H₂ : Hilbert α} (hSubset : H₁.axioms ⊆ H₂.axioms := by aesop) : H₁ ≤ₛ H₂ := by
   apply weaker_than_of_subset_axiomset';
   intro φ hp;
   apply eaxm! $ hSubset hp;

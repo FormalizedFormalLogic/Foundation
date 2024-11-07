@@ -12,8 +12,8 @@ def Formula.BoxdotTranslation : Formula α → Formula α
 postfix:90 "ᵇ" => Formula.BoxdotTranslation
 
 
-class BoxdotProperty (Λ₁ Λ₂ : Hilbert α) where
-  bdp {φ} : Λ₁ ⊢! φ ↔ Λ₂ ⊢! φᵇ
+class BoxdotProperty (H₁ H₂ : Hilbert α) where
+  bdp {φ} : H₁ ⊢! φ ↔ H₂ ⊢! φᵇ
 
 
 open System
@@ -23,8 +23,8 @@ open Hilbert.Deduction
 variable {φ : Formula α}
 
 theorem boxdotTranslated
-  {Λ₁ Λ₂ : Hilbert α} [Λ₁.IsNormal] [Λ₂.IsNormal]
-  (h : ∀ φ ∈ Λ₁.axioms, Λ₂ ⊢! φᵇ) : Λ₁ ⊢! φ → Λ₂ ⊢! φᵇ := by
+  {H₁ H₂ : Hilbert α} [H₁.IsNormal] [H₂.IsNormal]
+  (h : ∀ φ ∈ H₁.axioms, H₂ ⊢! φᵇ) : H₁ ⊢! φ → H₂ ⊢! φᵇ := by
   intro d;
   induction d using inducition_with_necOnly! with
   | hMaxm hs => exact h _ hs;

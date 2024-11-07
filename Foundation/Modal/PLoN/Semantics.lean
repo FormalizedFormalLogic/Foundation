@@ -175,7 +175,7 @@ protected lemma elim_contra : 𝔽 ⊧ (Axioms.ElimContra φ ψ) := by intro _ _
 end Formula.PLoN.ValidOnFrameClass
 
 
-def Hilbert.DefinesPLoNFrameClass (Λ : Hilbert α) (𝔽 : PLoN.FrameClass α) := ∀ {F : Frame α}, F ⊧* Λ.theorems ↔ F ∈ 𝔽
+def Hilbert.DefinesPLoNFrameClass (H : Hilbert α) (𝔽 : PLoN.FrameClass α) := ∀ {F : Frame α}, F ⊧* H.theorems ↔ F ∈ 𝔽
 
 namespace PLoN
 

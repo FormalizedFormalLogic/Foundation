@@ -124,7 +124,7 @@ lemma deducible_iff_verTranslation : (Hilbert.Ver α) ⊢! φ ⭤ φⱽ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-lemma of_classical {mΛ : Modal.Hilbert α} {φ : IntProp.Formula α} : ((Hilbert.Cl α) ⊢! φ) → (mΛ ⊢! φᴹ) := by
+lemma of_classical {mH : Modal.Hilbert α} {φ : IntProp.Formula α} : ((Hilbert.Cl α) ⊢! φ) → (mH ⊢! φᴹ) := by
   intro h;
   induction h.some with
   | eaxm ih =>

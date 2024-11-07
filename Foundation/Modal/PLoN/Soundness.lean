@@ -6,21 +6,21 @@ namespace PLoN
 
 open Formula
 
-variable {φ : Formula α} {Λ : Hilbert α}
+variable {φ : Formula α} {H : Hilbert α}
 
-lemma sound (defines : Λ.DefinesPLoNFrameClass 𝔽) (d : Λ ⊢! φ) : 𝔽 ⊧ φ := by
+lemma sound (defines : H.DefinesPLoNFrameClass 𝔽) (d : H ⊢! φ) : 𝔽 ⊧ φ := by
   intro F hF;
   have := defines.mpr hF;
   exact Semantics.RealizeSet.setOf_iff.mp this φ d;
 
-lemma sound_of_defines (defines : Λ.DefinesPLoNFrameClass 𝔽) : Sound Λ 𝔽 := ⟨sound defines⟩
+lemma sound_of_defines (defines : H.DefinesPLoNFrameClass 𝔽) : Sound H 𝔽 := ⟨sound defines⟩
 
-lemma unprovable_bot_of_nonempty_frameclass (defines : Λ.DefinesPLoNFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : Λ ⊬ ⊥ := by
+lemma unprovable_bot_of_nonempty_frameclass (defines : H.DefinesPLoNFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : H ⊬ ⊥ := by
   intro h;
   obtain ⟨⟨_, F⟩, hF⟩ := nonempty;
   simpa using sound defines h hF;
 
-lemma consistent_of_defines (defines : Λ.DefinesPLoNFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : System.Consistent Λ := by
+lemma consistent_of_defines (defines : H.DefinesPLoNFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : System.Consistent H := by
   apply System.Consistent.of_unprovable;
   exact unprovable_bot_of_nonempty_frameclass defines nonempty;
 

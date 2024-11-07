@@ -260,22 +260,22 @@ namespace Kripke
 abbrev FrameClassOfTheory (T : Theory α) : FrameClass.Dep α := { F | F#α ⊧* T }
 notation "𝔽(" T ")" => FrameClassOfTheory T
 
-abbrev FrameClassOfHilbert (Λ : Hilbert α) : FrameClass.Dep α := 𝔽((System.theory Λ))
-notation "𝔽(" Λ ")" => FrameClassOfHilbert Λ
+abbrev FrameClassOfHilbert (H : Hilbert α) : FrameClass.Dep α := 𝔽((System.theory H))
+notation "𝔽(" H ")" => FrameClassOfHilbert H
 
 section Soundness
 
-variable {Λ : Hilbert α}
+variable {H : Hilbert α}
          {φ : Formula α}
 
-lemma sound : Λ ⊢! φ → 𝔽(Λ) ⊧ φ := by
+lemma sound : H ⊢! φ → 𝔽(H) ⊧ φ := by
   intro hp F hF;
   simp [System.theory] at hF;
   exact hF φ hp;
 
-instance : Sound Λ 𝔽(Λ) := ⟨sound⟩
+instance : Sound H 𝔽(H) := ⟨sound⟩
 
-lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
+lemma unprovable_bot (hc : 𝔽(H).Nonempty) : H ⊬ ⊥ := by
   apply (not_imp_not.mpr (sound (α := α)));
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hc;
@@ -284,23 +284,23 @@ lemma unprovable_bot (hc : 𝔽(Λ).Nonempty) : Λ ⊬ ⊥ := by
   . exact hF;
   . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
 
-instance (hc : 𝔽(Λ).Nonempty) : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot hc
+instance (hc : 𝔽(H).Nonempty) : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot hc
 
 
-lemma sound_of_characterizability [characterizability : 𝔽(Λ).Characteraizable 𝔽₂] : Λ ⊢! φ → 𝔽₂#α ⊧ φ := by
+lemma sound_of_characterizability [characterizability : 𝔽(H).Characteraizable 𝔽₂] : H ⊢! φ → 𝔽₂#α ⊧ φ := by
   intro h F hF;
   apply sound h;
   apply characterizability.characterize hF;
 
-instance instSoundOfCharacterizability [𝔽(Λ).Characteraizable 𝔽₂] : Sound Λ (𝔽₂#α) := ⟨sound_of_characterizability⟩
+instance instSoundOfCharacterizability [𝔽(H).Characteraizable 𝔽₂] : Sound H (𝔽₂#α) := ⟨sound_of_characterizability⟩
 
-lemma unprovable_bot_of_characterizability [characterizability : 𝔽(Λ).Characteraizable 𝔽₂] : Λ ⊬ ⊥ := by
+lemma unprovable_bot_of_characterizability [characterizability : 𝔽(H).Characteraizable 𝔽₂] : H ⊬ ⊥ := by
   apply unprovable_bot;
   obtain ⟨F, hF⟩ := characterizability.nonempty;
   use F;
   apply characterizability.characterize hF;
 
-instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(Λ) 𝔽₂] : System.Consistent Λ := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
+instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(H) 𝔽₂] : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
 
 end Soundness
 
