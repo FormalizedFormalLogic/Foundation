@@ -183,7 +183,7 @@ end Saturated
 
 variable [Λ.IncludeEFQ]
 
-lemma self_consistent [h : System.Consistent Λ] : Tableau.Consistent Λ (Ax(Λ), ∅) := by
+lemma self_consistent [h : System.Consistent Λ] : Tableau.Consistent Λ (Λ.axioms, ∅) := by
   intro Γ Δ hΓ hΔ;
   replace hΔ : Δ = [] := List.nil_iff.mpr hΔ;
   obtain ⟨ψ, hq⟩ := h.exists_unprovable;
@@ -193,7 +193,8 @@ lemma self_consistent [h : System.Consistent Λ] : Tableau.Consistent Λ (Ax(Λ)
     simp at hC;
     exact imp_trans''! hC efq! ⨀ (by
       apply iff_provable_list_conj.mpr;
-      exact λ _ hp => ⟨Deduction.eaxm $ hΓ _ hp⟩;
+      intro φ hφ;
+      exact Hilbert.Deduction.eaxm! $ hΓ _ hφ;
     );
   contradiction;
 

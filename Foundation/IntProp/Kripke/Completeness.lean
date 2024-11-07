@@ -13,7 +13,6 @@ open Kripke
 
 namespace Kripke
 
--- variable [Inhabited α] [DecidableEq α] [Encodable α] [Λ.IncludeEFQ]
 variable {α : Type u}
          {Λ : Hilbert α}
 
@@ -316,20 +315,20 @@ lemma complete (H : CanonicalFrame Λ ∈ 𝔽) {φ : Formula α} : 𝔽#α ⊧ 
 
 instance instComplete (H : CanonicalFrame Λ ∈ 𝔽) : Complete Λ (𝔽#α) := ⟨complete H⟩
 
-instance Int_complete : Complete 𝐈𝐧𝐭 (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
+instance Int_complete : Complete (Hilbert.Int α) (Kripke.ReflexiveTransitiveFrameClass.{u}#α) := instComplete $ by
   refine ⟨
     CanonicalFrame.reflexive,
     CanonicalFrame.transitive,
   ⟩
 
-instance LC_complete : Complete 𝐋𝐂 (Kripke.ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete $ by
+instance LC_complete : Complete (Hilbert.LC α) (Kripke.ReflexiveTransitiveConnectedFrameClass.{u}#α) := instComplete $ by
   refine ⟨
     CanonicalFrame.reflexive,
     CanonicalFrame.transitive,
     CanonicalFrame.connected
   ⟩;
 
-instance KC_complete : Complete 𝐊𝐂 (Kripke.ReflexiveTransitiveConfluentFrameClass.{u}#α) := instComplete $ by
+instance KC_complete : Complete (Hilbert.KC α) (Kripke.ReflexiveTransitiveConfluentFrameClass.{u}#α) := instComplete $ by
   refine ⟨
     CanonicalFrame.reflexive,
     CanonicalFrame.transitive,

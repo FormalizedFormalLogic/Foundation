@@ -7,24 +7,29 @@ namespace LO.IntProp
 variable {α : Type u}
 
 structure Hilbert (α) where
-  axiomSet : Theory α
-notation "Ax(" Λ ")" => Hilbert.axiomSet Λ
+  axioms : Theory α
 
 namespace Hilbert
 
+variable {Λ : Hilbert α}
+
+
+section
+
 class IncludeEFQ (Λ : Hilbert α) where
-  include_EFQ : 𝗘𝗙𝗤 ⊆ Ax(Λ) := by simp
+  include_EFQ : 𝗘𝗙𝗤 ⊆ Λ.axioms := by simp
 
 class IncludeLEM (Λ : Hilbert α) where
-  include_LEM : 𝗟𝗘𝗠 ⊆ Ax(Λ) := by simp
+  include_LEM : 𝗟𝗘𝗠 ⊆ Λ.axioms := by simp
 
 class IncludeDNE (Λ : Hilbert α) where
-  include_DNE : 𝗗𝗡𝗘 ⊆ Ax(Λ) := by simp
+  include_DNE : 𝗗𝗡𝗘 ⊆ Λ.axioms := by simp
 
-end Hilbert
+end
+
 
 inductive Deduction (Λ : Hilbert α) : Formula α → Type _
-  | eaxm {φ}     : φ ∈ Ax(Λ) → Deduction Λ φ
+  | eaxm {φ}     : φ ∈ Λ.axioms → Deduction Λ φ
   | mdp {φ ψ}    : Deduction Λ (φ ➝ ψ) → Deduction Λ φ → Deduction Λ ψ
   | verum        : Deduction Λ $ ⊤
   | imply₁ φ ψ   : Deduction Λ $ φ ➝ ψ ➝ φ
@@ -42,7 +47,7 @@ instance : System (Formula α) (Hilbert α) := ⟨Deduction⟩
 open Deduction
 open Hilbert
 
-variable {Λ : Hilbert α}
+section
 
 instance : System.Minimal Λ where
   mdp := mdp
@@ -72,61 +77,68 @@ instance [Λ.IncludeDNE] : System.Classical Λ where
 
 instance [DecidableEq α] [Λ.IncludeEFQ] [Λ.IncludeLEM] : System.Classical Λ where
 
-lemma Deduction.eaxm! {Λ : Hilbert α} {φ : Formula α} (h : φ ∈ Ax(Λ)) : Λ ⊢! φ := ⟨eaxm h⟩
+end
 
-
-namespace Hilbert
 
 abbrev theorems (Λ : Hilbert α) : Set (Formula α) := System.theory Λ
 
+
+section systems
+
+variable (α)
+
 protected abbrev Minimal : Hilbert α := ⟨∅⟩
 
-protected abbrev Intuitionistic : Hilbert α := ⟨𝗘𝗙𝗤⟩
-notation "𝐈𝐧𝐭" => Hilbert.Intuitionistic
-instance : IncludeEFQ (α := α) 𝐈𝐧𝐭 where
-instance : System.Intuitionistic (𝐈𝐧𝐭 : Hilbert α) where
+protected abbrev Int : Hilbert α := ⟨𝗘𝗙𝗤⟩
+instance : IncludeEFQ (Hilbert.Int α) where
+instance : System.Intuitionistic (Hilbert.Int α) where
 
-protected abbrev Classical : Hilbert α := ⟨𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠⟩
-notation "𝐂𝐥" => Hilbert.Classical
-instance : IncludeLEM (α := α) 𝐂𝐥 where
-instance : IncludeEFQ (α := α) 𝐂𝐥 where
+protected abbrev Cl : Hilbert α := ⟨𝗘𝗙𝗤 ∪ 𝗟𝗘𝗠⟩
+instance : IncludeLEM (α := α) (Hilbert.Cl α) where
+instance : IncludeEFQ (α := α) (Hilbert.Cl α) where
 
--- `𝐊𝐂` from chagrov & zakharyaschev (1997)
+/--
+  `KC` from Chagrov & Zakharyaschev (1997)
+-/
 protected abbrev KC : Hilbert α := ⟨𝗘𝗙𝗤 ∪ 𝗪𝗟𝗘𝗠⟩
-notation "𝐊𝐂" => Hilbert.KC
-instance : IncludeEFQ (α := α) 𝐊𝐂 where
-instance : System.HasAxiomWeakLEM (𝐊𝐂 : Hilbert α) where
+instance : IncludeEFQ (α := α) (Hilbert.KC α) where
+instance : System.HasAxiomWeakLEM (Hilbert.KC α) where
   wlem φ := by apply eaxm; aesop;
 
--- `𝐋𝐂` from chagrov & zakharyaschev (1997)
+/--
+  `LC` from Chagrov & Zakharyaschev (1997)
+-/
 protected abbrev LC : Hilbert α := ⟨𝗘𝗙𝗤 ∪ 𝗗𝘂𝗺⟩
-notation "𝐋𝐂" => Hilbert.LC
-instance : IncludeEFQ (α := α) 𝐋𝐂 where
-instance : System.HasAxiomDummett (𝐋𝐂 : Hilbert α) where
+instance : IncludeEFQ (α := α) (Hilbert.LC α) where
+instance : System.HasAxiomDummett (Hilbert.LC α) where
   dummett φ ψ := by apply eaxm; aesop;
 
-/- MEMO:
-  Term `WeakMinimal` and `WeakClassical` are from Ariola (2007)
-  Minimal <ₛ WeakMinimal <ₛ WeakClassical <ₛ Classical
--/
+-- MEMO: Minimal <ₛ WeakMinimal <ₛ WeakClassical <ₛ Classical
 
+/--
+  `WeakMinimal` from Ariola (2007)
+-/
 protected abbrev WeakMinimal : Hilbert α := ⟨𝗟𝗘𝗠⟩
 
+
+/--
+  `WeakClassical` from Ariola (2007)
+-/
 protected abbrev WeakClassical : Hilbert α := ⟨𝗣𝗲⟩
 
+end systems
 
-end Hilbert
 
 
 namespace Deduction
 
-variable {Λ : Hilbert α}
-
 open System
+
+lemma eaxm! {Λ : Hilbert α} {φ : Formula α} (h : φ ∈ Λ.axioms) : Λ ⊢! φ := ⟨eaxm h⟩
 
 noncomputable def rec! {α : Type u} {Λ : Hilbert α}
   {motive : (a : Formula α) → Λ ⊢! a → Sort u_1}
-  (eaxm   : ∀ {φ}, (a : φ ∈ Ax(Λ)) → motive φ ⟨eaxm a⟩)
+  (eaxm   : ∀ {φ}, (a : φ ∈ Λ.axioms) → motive φ ⟨eaxm a⟩)
   (mdp    : ∀ {φ ψ}, {hpq : Λ ⊢! (φ ➝ ψ)} → {hp : Λ ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (hpq ⨀ hp))
   (verum  : motive ⊤ verum!)
   (imply₁ : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ) imply₁!)
@@ -150,9 +162,9 @@ end Deduction
 
 open System
 
-variable {Λ₁ Λ₂ : Hilbert α}
+section
 
-lemma weaker_than_of_subset_axiomset' (hMaxm : ∀ {φ : Formula α}, φ ∈ Ax(Λ₁) → Λ₂ ⊢! φ)
+lemma weaker_than_of_subset_axiomset' {Λ₁ Λ₂ : Hilbert α} (hMaxm : ∀ {φ : Formula α}, φ ∈ Λ₁.axioms → Λ₂ ⊢! φ)
   : Λ₁ ≤ₛ Λ₂ := by
   apply System.weakerThan_iff.mpr;
   intro φ h;
@@ -161,30 +173,30 @@ lemma weaker_than_of_subset_axiomset' (hMaxm : ∀ {φ : Formula α}, φ ∈ Ax(
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | _ => simp;
 
-lemma weaker_than_of_subset_axiomset (hSubset : Ax(Λ₁) ⊆ Ax(Λ₂) := by aesop) : Λ₁ ≤ₛ Λ₂ := by
+lemma weaker_than_of_subset_axiomset {Λ₁ Λ₂ : Hilbert α} (hSubset : Λ₁.axioms ⊆ Λ₂.axioms := by aesop) : Λ₁ ≤ₛ Λ₂ := by
   apply weaker_than_of_subset_axiomset';
   intro φ hp;
   apply eaxm! $ hSubset hp;
 
-lemma Int_weaker_than_Cl : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐂𝐥 := weaker_than_of_subset_axiomset
+lemma Int_weaker_than_Cl : (Hilbert.Int α) ≤ₛ (Hilbert.Cl α) := weaker_than_of_subset_axiomset
 
-lemma Int_weaker_than_KC : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐊𝐂 := weaker_than_of_subset_axiomset
+lemma Int_weaker_than_KC : (Hilbert.Int α) ≤ₛ (Hilbert.KC α) := weaker_than_of_subset_axiomset
 
-lemma Int_weaker_than_LC : (𝐈𝐧𝐭 : Hilbert α) ≤ₛ 𝐋𝐂 := weaker_than_of_subset_axiomset
+lemma Int_weaker_than_LC : (Hilbert.Int α) ≤ₛ (Hilbert.LC α) := weaker_than_of_subset_axiomset
 
-lemma KC_weaker_than_Cl : (𝐊𝐂 : Hilbert α) ≤ₛ 𝐂𝐥 := by
+lemma KC_weaker_than_Cl : (Hilbert.KC α) ≤ₛ (Hilbert.Cl α) := weaker_than_of_subset_axiomset' $ by
+  rintro φ (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
+
+lemma LC_weaker_than_Cl [DecidableEq α] : (Hilbert.LC α) ≤ₛ (Hilbert.Cl α) := by
   apply weaker_than_of_subset_axiomset';
-  intro φ hp;
-  rcases hp with (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
+  rintro φ (⟨_, rfl⟩ | ⟨_, _, rfl⟩) <;> simp;
 
-lemma LC_weaker_than_Cl [DecidableEq α] : (𝐋𝐂 : Hilbert α) ≤ₛ 𝐂𝐥 := by
-  apply weaker_than_of_subset_axiomset';
-  intro φ hp;
-  rcases hp with (⟨_, rfl⟩ | ⟨_, _, rfl⟩) <;> simp;
+end
 
-variable {φ : Formula α}
 
-theorem iff_provable_dn_efq_dne_provable [DecidableEq α] : 𝐈𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂𝐥 ⊢! φ := by
+section Glivenko
+
+theorem iff_provable_dn_efq_dne_provable [DecidableEq α] : (Hilbert.Int α) ⊢! ∼∼φ ↔ (Hilbert.Cl α) ⊢! φ := by
   constructor;
   . intro d; exact dne'! $ Int_weaker_than_Cl d;
   . intro d;
@@ -199,7 +211,7 @@ theorem iff_provable_dn_efq_dne_provable [DecidableEq α] : 𝐈𝐧𝐭 ⊢! �
         subst hq;
         apply neg_equiv'!.mpr;
         apply FiniteContext.deduct'!;
-        have : [∼(ψ ⋎ ∼ψ)] ⊢[𝐈𝐧𝐭]! ∼ψ ⋏ ∼∼ψ := demorgan₃'! $ FiniteContext.id!;
+        have : [∼(ψ ⋎ ∼ψ)] ⊢[Hilbert.Int α]! ∼ψ ⋏ ∼∼ψ := demorgan₃'! $ FiniteContext.id!;
         exact neg_mdp! (and₂'! this) (and₁'! this);
     | @mdp φ ψ h₁ h₂ ih₁ ih₂ =>
       exact (dn_distribute_imply'! $ ih₁ ⟨h₁⟩) ⨀ ih₂ ⟨h₂⟩;
@@ -207,9 +219,14 @@ theorem iff_provable_dn_efq_dne_provable [DecidableEq α] : 𝐈𝐧𝐭 ⊢! �
 
 alias glivenko := iff_provable_dn_efq_dne_provable
 
-theorem iff_provable_neg_efq_provable_neg_efq [DecidableEq α] : 𝐈𝐧𝐭 ⊢! ∼φ ↔ 𝐂𝐥 ⊢! ∼φ := by
+theorem iff_provable_neg_efq_provable_neg_efq [DecidableEq α] : (Hilbert.Int α) ⊢! ∼φ ↔ (Hilbert.Cl α) ⊢! ∼φ := by
   constructor;
   . intro d; exact glivenko.mp $ dni'! d;
   . intro d; exact tne'! $ glivenko.mpr d;
+
+end Glivenko
+
+
+end Hilbert
 
 end LO.IntProp

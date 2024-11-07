@@ -124,7 +124,7 @@ lemma deducible_iff_verTranslation : (Hilbert.Ver α) ⊢! φ ⭤ φⱽ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-lemma of_classical {mΛ : Modal.Hilbert α} {φ : IntProp.Formula α} : (𝐂𝐥 ⊢! φ) → (mΛ ⊢! φᴹ) := by
+lemma of_classical {mΛ : Modal.Hilbert α} {φ : IntProp.Formula α} : ((Hilbert.Cl α) ⊢! φ) → (mΛ ⊢! φᴹ) := by
   intro h;
   induction h.some with
   | eaxm ih =>
@@ -137,7 +137,7 @@ lemma of_classical {mΛ : Modal.Hilbert α} {φ : IntProp.Formula α} : (𝐂�
     exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
   | _ => dsimp [IntProp.Formula.toModalFormula]; trivial;
 
-lemma iff_Triv_classical : Hilbert.Triv α ⊢! φ ↔ 𝐂𝐥 ⊢! φᵀᴾ := by
+lemma iff_Triv_classical : Hilbert.Triv α ⊢! φ ↔ (Hilbert.Cl α) ⊢! φᵀᴾ := by
   constructor;
   . intro h;
     induction h using Deduction.inducition_with_necOnly! with
@@ -154,7 +154,7 @@ lemma iff_Triv_classical : Hilbert.Triv α ⊢! φ ↔ 𝐂𝐥 ⊢! φᵀᴾ :=
     have d₂ : Hilbert.Triv α ⊢! φᵀ := by simpa only [TrivTranslation.back] using of_classical h;
     exact d₁ ⨀ d₂;
 
-lemma iff_Ver_classical : (Hilbert.Ver α) ⊢! φ ↔ 𝐂𝐥 ⊢! φⱽᴾ := by
+lemma iff_Ver_classical : (Hilbert.Ver α) ⊢! φ ↔ (Hilbert.Cl α) ⊢! φⱽᴾ := by
   constructor;
   . intro h;
     induction h using Deduction.inducition_with_necOnly! with
@@ -171,13 +171,13 @@ lemma iff_Ver_classical : (Hilbert.Ver α) ⊢! φ ↔ 𝐂𝐥 ⊢! φⱽᴾ :=
     have d₂ : (Hilbert.Ver α) ⊢! φⱽ := by simpa using of_classical h;
     exact d₁ ⨀ d₂;
 
-lemma trivTranslated_of_K4 : (Hilbert.K4 α) ⊢! φ → 𝐂𝐥 ⊢! φᵀᴾ := by
+lemma trivTranslated_of_K4 : (Hilbert.K4 α) ⊢! φ → (Hilbert.Cl α) ⊢! φᵀᴾ := by
   intro h;
   apply iff_Triv_classical.mp;
   exact System.weakerThan_iff.mp Hilbert.K4_weakerThan_Triv h;
 
 
-lemma verTranslated_of_GL : (Hilbert.GL α) ⊢! φ → 𝐂𝐥 ⊢! φⱽᴾ := by
+lemma verTranslated_of_GL : (Hilbert.GL α) ⊢! φ → (Hilbert.Cl α) ⊢! φⱽᴾ := by
   intro h;
   induction h using Deduction.inducition_with_necOnly! with
     | hMaxm a =>

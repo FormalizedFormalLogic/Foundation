@@ -73,7 +73,7 @@ private lemma provable_efq_of_provable_S4.case_neg_equiv [System.K4 mΛ] : mΛ �
 instance [System.S4 mΛ] : System.K4 mΛ where
 
 open provable_efq_of_provable_S4 in
-lemma provable_efq_of_provable_S4 [DecidableEq α] (h : 𝐈𝐧𝐭 ⊢! φ) : (Hilbert.S4 α) ⊢! φᵍ := by
+lemma provable_efq_of_provable_S4 [DecidableEq α] (h : (Hilbert.Int α) ⊢! φ) : (Hilbert.S4 α) ⊢! φᵍ := by
   induction h.some with
   | eaxm ih =>
     simp_all only [Set.mem_setOf_eq];
