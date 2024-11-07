@@ -765,8 +765,7 @@ abbrev free (φ : F ℕ (n + 1)) : F ℕ n := @Rew.free L n • φ
 
 abbrev fix (φ : F ℕ n) : F ℕ (n + 1) := @Rew.fix L n • φ
 
-def shifts (Γ : List (F ℕ n)) :
-  List (F ℕ n) := Γ.map Rewriting.shift
+def shifts (Γ : List (F ℕ n)) : List (F ℕ n) := Γ.map Rewriting.shift
 
 scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
 
@@ -881,13 +880,12 @@ lemma fix_allClosure (φ : F ℕ n) :
 lemma allClosure_fixitr (φ : F ℕ 0) : ∀* @fixitr L 0 (m + 1) • φ = ∀' @fix L 0 • (∀* @Rew.fixitr L 0 m • φ) := by
   simp [Rew.fixitr_succ, fix_allClosure, comp_smul]
 
-
 @[simp] lemma mem_shifts_iff {φ : F ℕ n} {Γ : List (F ℕ n)} :
     Rewriting.shift φ ∈ Γ⁺ ↔ φ ∈ Γ :=
   List.mem_map_of_injective LawfulRewriting.smul_shift_injective
 
-@[simp] lemma shifts_ss (Γ Γ : List (F ℕ n)) :
-    Γ⁺ ⊆ Γ⁺ ↔ Γ ⊆ Γ := List.map_subset_iff _ LawfulRewriting.smul_shift_injective
+@[simp] lemma shifts_ss (Γ Δ : List (F ℕ n)) :
+    Γ⁺ ⊆ Δ⁺ ↔ Γ ⊆ Δ := List.map_subset_iff _ LawfulRewriting.smul_shift_injective
 
 @[simp] lemma shifts_cons (φ : F ℕ n) (Γ : List (F ℕ n)) :
     (φ :: Γ)⁺ = Rewriting.shift φ :: Γ⁺ := by simp [shifts]

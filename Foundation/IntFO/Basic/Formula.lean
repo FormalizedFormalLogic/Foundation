@@ -281,6 +281,8 @@ namespace IsNegative
 
 @[simp] lemma not_rel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : ¬(rel r v).IsNegative := by rintro ⟨⟩
 
+@[simp] lemma neg (φ : Semiformulaᵢ L ξ n) : (∼φ).IsNegative := .imply .falsum
+
 end IsNegative
 
 end Semiformulaᵢ

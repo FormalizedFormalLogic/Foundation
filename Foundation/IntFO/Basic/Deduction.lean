@@ -18,20 +18,24 @@ instance : SetLike (Hilbertᵢ L) (SyntacticFormulaᵢ L) where
 
 namespace Hilbertᵢ
 
-variable (L)
-
 def Minimal : Hilbertᵢ L := ⟨∅, by simp⟩
 
+notation "𝐌𝐢𝐧¹" => Minimal
+
 def Intuitionistic : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ}, by rintro _ ⟨φ, rfl⟩; exact ⟨Rewriting.shift φ, by simp⟩⟩
+
+notation "𝐈𝐧𝐭¹" => Intuitionistic
 
 def Classical : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ} ∪ {φ ⋎ ∼φ | φ}, by
   rintro _ (⟨φ, rfl⟩ | ⟨φ, rfl⟩)
   · exact Or.inl ⟨Rewriting.shift φ, by simp⟩
   · exact Or.inr ⟨Rewriting.shift φ, by simp⟩⟩
 
-lemma minimal_le (Λ : Hilbertᵢ L) : Minimal L ≤ Λ := by rintro _ ⟨⟩
+notation "𝐂𝐥¹" => Classical
 
-lemma intuitionistic_le_classical : Intuitionistic L ≤ Classical L := by rintro _ ⟨φ, rfl⟩; exact .inl ⟨φ, rfl⟩
+lemma minimal_le (Λ : Hilbertᵢ L) : (Minimal : Hilbertᵢ L) ≤ Λ := by rintro _ ⟨⟩
+
+lemma intuitionistic_le_classical : (Intuitionistic : Hilbertᵢ L) ≤ Classical := by rintro _ ⟨φ, rfl⟩; exact .inl ⟨φ, rfl⟩
 
 end Hilbertᵢ
 
@@ -96,9 +100,24 @@ def genOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ] free φ) : Γ ⊢[Λ] ∀' �
 def specializeOverContext {Γ φ} (b : Γ ⊢[Λ] ∀' φ) (t) : Γ ⊢[Λ] φ/[t] :=
   ofDef <| System.impTrans'' (toDef b) (all₁ φ t)
 
+def allImplyAllOfAllImply (φ ψ) : Λ ⊢ ∀' (φ ➝ ψ) ➝ ∀' φ ➝ ∀' ψ := by
+  apply deduct'
+  apply deduct
+  apply genOverFiniteContext
+  have b₁ : [∀' shift φ, ∀' (shift φ ➝ shift ψ)] ⊢[Λ] free φ ➝ free ψ :=
+    System.cast (by simp) (specializeOverContext (nthAxm 1) &0)
+  have b₂ : [∀' shift φ, ∀' (shift φ ➝ shift ψ)] ⊢[Λ] free φ :=
+    System.cast (by simp) (specializeOverContext (nthAxm 0) &0)
+  have : [∀' φ, ∀' (φ ➝ ψ)]⁺ ⊢[Λ] free ψ := cast (by simp) (b₁ ⨀ b₂)
+  exact this
+
+def allIffAllOfIff {φ ψ} (b : Λ ⊢ free φ ⭤ free ψ) : Λ ⊢ ∀' φ ⭤ ∀' ψ := System.andIntro
+  (allImplyAllOfAllImply φ ψ ⨀ gen (System.cast (by simp) (System.andLeft b)))
+  (allImplyAllOfAllImply ψ φ ⨀ gen (System.cast (by simp) (System.andRight b)))
+
 set_option profiler true in
 def dneOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ∼∼φ ➝ φ
-  | ⊥,     _ => System.falsumDN
+  | ⊥,     _ => System.falsumDNE
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢ ∼∼φ ➝ φ := dneOfNegative (by simp [by simpa using h])
     have ihψ : Λ ⊢ ∼∼ψ ➝ ψ := dneOfNegative (by simp [by simpa using h])
@@ -122,9 +141,30 @@ def dneOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ �
     implyAll (System.cast (by simp) (deduct' this))
   termination_by φ _ => φ.complexity
 
+def ofDNOfNegative {φ : SyntacticFormulaᵢ L} {Γ} (b : Γ ⊢[Λ] ∼∼φ) (h : φ.IsNegative) : Γ ⊢[Λ] φ :=
+  System.impTrans'' (toDef b) (dneOfNegative h)
+
 def dnOfNegative {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ :=
   System.andIntro (dneOfNegative h) System.dni
 
+def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ⊥ ➝ φ
+  | ⊥,     _ => System.impId ⊥
+  | φ ⋏ ψ, h =>
+    have ihφ : Λ ⊢ ⊥ ➝ φ := efqOfNegative (by simp [by simpa using h])
+    have ihψ : Λ ⊢ ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
+    System.implyAnd ihφ ihψ
+  | φ ➝ ψ, h =>
+    have ihψ : Λ ⊢ ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
+    System.impTrans'' ihψ System.imply₁
+  | ∀' φ,  h =>
+    have ihφ : Λ ⊢ ⊥ ➝ free φ := efqOfNegative (by simp [by simpa using h])
+    implyAll <| System.cast (by simp) ihφ
+  termination_by φ _ => φ.complexity
+
+def iffnegOfNegIff {φ ψ : SyntacticFormulaᵢ L} (h : φ.IsNegative) (b : Λ ⊢ ∼φ ⭤ ψ) : Λ ⊢ φ ⭤ ∼ψ :=
+  System.iffTrans'' (System.iffComm' <| dnOfNegative h) (System.negReplaceIff' b)
+
 end HilbertProofᵢ
+
 
 end LO.FirstOrder
