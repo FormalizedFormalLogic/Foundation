@@ -2,9 +2,9 @@ import Foundation.Modal.Hilbert
 import Foundation.IntProp.Kripke.Semantics
 
 /-!
-  # Maximality of `𝐓𝐫𝐢𝐯` and `𝐕𝐞𝐫`
+  # Maximality of `Hilbert.Triv α` and `𝐕𝐞𝐫`
 
-  `𝐓𝐫𝐢𝐯` and `𝐕𝐞𝐫` are maximal in normal modal Foundation.
+  `Hilbert.Triv α` and `𝐕𝐞𝐫` are maximal in normal modal Foundation.
 -/
 
 namespace LO.IntProp
@@ -85,6 +85,7 @@ variable {φ : Formula α}
 
 open System
 open Formula
+open Hilbert
 
 macro_rules | `(tactic| trivial) => `(tactic|
     first
@@ -104,7 +105,7 @@ macro_rules | `(tactic| trivial) => `(tactic|
     | apply imp_id!;
   )
 
-lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! φ ⭤ φᵀ := by
+lemma deducible_iff_trivTranslation : (Hilbert.Triv α) ⊢! φ ⭤ φᵀ := by
   induction φ using Formula.rec' with
   | hbox φ ih =>
     simp [TrivTranslation];
@@ -114,7 +115,7 @@ lemma deducible_iff_trivTranslation : 𝐓𝐫𝐢𝐯 ⊢! φ ⭤ φᵀ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-lemma deducible_iff_verTranslation : 𝐕𝐞𝐫 ⊢! φ ⭤ φⱽ := by
+lemma deducible_iff_verTranslation : (Hilbert.Ver α) ⊢! φ ⭤ φⱽ := by
   induction φ using Formula.rec' with
   | hbox =>
     apply iff_intro!;
@@ -136,7 +137,7 @@ lemma of_classical {mΛ : Modal.Hilbert α} {φ : IntProp.Formula α} : (𝐂�
     exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
   | _ => dsimp [IntProp.Formula.toModalFormula]; trivial;
 
-lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! φ ↔ 𝐂𝐥 ⊢! φᵀᴾ := by
+lemma iff_Triv_classical : Hilbert.Triv α ⊢! φ ↔ 𝐂𝐥 ⊢! φᵀᴾ := by
   constructor;
   . intro h;
     induction h using Deduction.inducition_with_necOnly! with
@@ -149,11 +150,11 @@ lemma iff_Triv_classical : 𝐓𝐫𝐢𝐯 ⊢! φ ↔ 𝐂𝐥 ⊢! φᵀᴾ :
     | hNec ih => dsimp [TrivTranslation]; trivial;
     | _ => dsimp [TrivTranslation]; trivial;
   . intro h;
-    have d₁ : 𝐓𝐫𝐢𝐯 ⊢! φᵀ ➝ φ := and₂'! deducible_iff_trivTranslation;
-    have d₂ : 𝐓𝐫𝐢𝐯 ⊢! φᵀ := by simpa only [TrivTranslation.back] using of_classical h;
+    have d₁ : Hilbert.Triv α ⊢! φᵀ ➝ φ := and₂'! deducible_iff_trivTranslation;
+    have d₂ : Hilbert.Triv α ⊢! φᵀ := by simpa only [TrivTranslation.back] using of_classical h;
     exact d₁ ⨀ d₂;
 
-lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! φ ↔ 𝐂𝐥 ⊢! φⱽᴾ := by
+lemma iff_Ver_classical : (Hilbert.Ver α) ⊢! φ ↔ 𝐂𝐥 ⊢! φⱽᴾ := by
   constructor;
   . intro h;
     induction h using Deduction.inducition_with_necOnly! with
@@ -166,17 +167,17 @@ lemma iff_Ver_classical : 𝐕𝐞𝐫 ⊢! φ ↔ 𝐂𝐥 ⊢! φⱽᴾ := by
     | hNec => dsimp [VerTranslation]; trivial;
     | _ => dsimp [VerTranslation]; trivial;
   . intro h;
-    have d₁ : 𝐕𝐞𝐫 ⊢! φⱽ ➝ φ := and₂'! deducible_iff_verTranslation;
-    have d₂ : 𝐕𝐞𝐫 ⊢! φⱽ := by simpa using of_classical h;
+    have d₁ : (Hilbert.Ver α) ⊢! φⱽ ➝ φ := and₂'! deducible_iff_verTranslation;
+    have d₂ : (Hilbert.Ver α) ⊢! φⱽ := by simpa using of_classical h;
     exact d₁ ⨀ d₂;
 
-lemma trivTranslated_of_K4 : 𝐊𝟒 ⊢! φ → 𝐂𝐥 ⊢! φᵀᴾ := by
+lemma trivTranslated_of_K4 : (Hilbert.K4 α) ⊢! φ → 𝐂𝐥 ⊢! φᵀᴾ := by
   intro h;
   apply iff_Triv_classical.mp;
-  exact System.weakerThan_iff.mp K4_weakerThan_Triv h;
+  exact System.weakerThan_iff.mp Hilbert.K4_weakerThan_Triv h;
 
 
-lemma verTranslated_of_GL : 𝐆𝐋 ⊢! φ → 𝐂𝐥 ⊢! φⱽᴾ := by
+lemma verTranslated_of_GL : (Hilbert.GL α) ⊢! φ → 𝐂𝐥 ⊢! φⱽᴾ := by
   intro h;
   induction h using Deduction.inducition_with_necOnly! with
     | hMaxm a =>
@@ -193,21 +194,21 @@ open IntProp.Kripke (unprovable_classical_of_exists_ClassicalValuation)
 
 variable [Inhabited α]
 
-example : 𝐓𝐫𝐢𝐯 ⊬ Axioms.L (atom default : Formula α) := by
+example : Hilbert.Triv α ⊬ Axioms.L (atom default : Formula α) := by
   apply iff_Triv_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
   simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
   tauto;
 
-lemma unprovable_AxiomL_K4 : 𝐊𝟒 ⊬ Axioms.L (atom default : Formula α) := by
+lemma unprovable_AxiomL_K4 : Hilbert.K4 α ⊬ Axioms.L (atom default : Formula α) := by
   apply not_imp_not.mpr trivTranslated_of_K4;
   apply unprovable_classical_of_exists_ClassicalValuation;
   simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
   tauto;
 
-theorem K4_strictReducible_GL : (𝐊𝟒 : Hilbert α) <ₛ 𝐆𝐋 := by
+theorem K4_strictReducible_GL : (Hilbert.K4 α) <ₛ (Hilbert.GL α) := by
   dsimp [StrictlyWeakerThan];
   constructor;
   . apply K4_weakerThan_GL;
@@ -217,7 +218,7 @@ theorem K4_strictReducible_GL : (𝐊𝟒 : Hilbert α) <ₛ 𝐆𝐋 := by
     . exact axiomL!;
     . exact unprovable_AxiomL_K4;
 
-lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬ Axioms.T (atom default : Formula α) := by
+lemma unprovable_AxiomT_GL : (Hilbert.GL α) ⊬ Axioms.T (atom default : Formula α) := by
   apply not_imp_not.mpr verTranslated_of_GL;
   apply unprovable_classical_of_exists_ClassicalValuation;
   simp [Axioms.T, VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
@@ -225,13 +226,13 @@ lemma unprovable_AxiomT_GL : 𝐆𝐋 ⊬ Axioms.T (atom default : Formula α) :
   tauto;
 
 
-instance instGLConsistencyViaUnprovableAxiomT : System.Consistent (𝐆𝐋 : Hilbert α) := by
+instance instGLConsistencyViaUnprovableAxiomT : System.Consistent (Hilbert.GL α) := by
   apply consistent_iff_exists_unprovable.mpr;
   existsi (Axioms.T (atom default));
   apply unprovable_AxiomT_GL;
 
 
-theorem not_S4_weakerThan_GL : ¬(𝐒𝟒 : Hilbert α) ≤ₛ 𝐆𝐋 := by
+theorem not_S4_weakerThan_GL : ¬(Hilbert.S4 α) ≤ₛ (Hilbert.GL α) := by
   apply System.not_weakerThan_iff.mpr;
   existsi (Axioms.T (atom default));
   constructor;
@@ -239,7 +240,7 @@ theorem not_S4_weakerThan_GL : ¬(𝐒𝟒 : Hilbert α) ≤ₛ 𝐆𝐋 := by
   . exact unprovable_AxiomT_GL;
 
 
-example : 𝐕𝐞𝐫 ⊬ (∼(□⊥) : Formula α) := by
+example : (Hilbert.Ver α) ⊬ (∼(□⊥) : Formula α) := by
   apply iff_Ver_classical.not.mpr;
   apply unprovable_classical_of_exists_ClassicalValuation;
   dsimp [VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];

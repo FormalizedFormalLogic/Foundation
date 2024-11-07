@@ -211,11 +211,11 @@ instance axiomMultiGeach_definability : 𝔽((𝗚𝗲(ts) : Theory α)).Defined
   define := axiomMultiGeach_defines;
   nonempty := MultiGeachConfluentFrameClass.nonempty
 
-instance Geach_definability : 𝔽((𝐆𝐞(ts) : Hilbert α)).DefinedBy (MultiGeachConfluentFrameClass ts) := inferInstance
+instance Geach_definability : 𝔽(Hilbert.Geach α ts).DefinedBy (MultiGeachConfluentFrameClass ts) := inferInstance
 
-instance sound_Geach : Sound 𝐆𝐞(ts) ((MultiGeachConfluentFrameClass ts)#α) := inferInstance
+instance sound_Geach : Sound (Hilbert.Geach α ts) ((MultiGeachConfluentFrameClass ts)#α) := inferInstance
 
-instance : System.Consistent (𝐆𝐞(ts) : Hilbert α) := inferInstance
+instance : System.Consistent (Hilbert.Geach α ts) := inferInstance
 
 
 instance instGeachLogicSound
@@ -224,21 +224,21 @@ instance instGeachLogicSound
   . exact logic_geach.char;
   . exact class_geach.equality;
 
-instance KD_sound : Sound 𝐊𝐃 (SerialFrameClass#α) := inferInstance
+instance KD_sound : Sound (Hilbert.KD α) (SerialFrameClass#α) := inferInstance
 
-instance KT_sound : Sound 𝐊𝐓 (ReflexiveFrameClass#α) := inferInstance
+instance KT_sound : Sound (Hilbert.KT α) (ReflexiveFrameClass#α) := inferInstance
 
-instance KTB_sound : Sound 𝐊𝐓𝐁 (ReflexiveSymmetricFrameClass#α) := inferInstance
+instance KTB_sound : Sound (Hilbert.KTB α) (ReflexiveSymmetricFrameClass#α) := inferInstance
 
-instance K4_sound : Sound 𝐊𝟒 (TransitiveFrameClass#α) := inferInstance
+instance K4_sound : Sound (Hilbert.K4 α) (TransitiveFrameClass#α) := inferInstance
 
-instance S4_sound : Sound 𝐒𝟒 (PreorderFrameClass#α) := inferInstance
+instance S4_sound : Sound (Hilbert.S4 α) (PreorderFrameClass#α) := inferInstance
 
-@[deprecated] lemma S4_sound_aux : 𝐒𝟒 ⊢! φ → (PreorderFrameClass#α) ⊧ φ := S4_sound.sound
+@[deprecated] lemma S4_sound_aux : (Hilbert.S4 α) ⊢! φ → (PreorderFrameClass#α) ⊧ φ := S4_sound.sound
 
-instance S5_sound : Sound 𝐒𝟓 (ReflexiveEuclideanFrameClass#α) := inferInstance
+instance S5_sound : Sound (Hilbert.S5 α) (ReflexiveEuclideanFrameClass#α) := inferInstance
 
-instance KT4B_sound : Sound 𝐊𝐓𝟒𝐁 (EquivalenceFrameClass#α) := inferInstance
+instance KT4B_sound : Sound (Hilbert.KT4B α) (EquivalenceFrameClass#α) := inferInstance
 
 end
 
@@ -246,12 +246,12 @@ end
 open System
 open Theory MaximalConsistentTheory CanonicalFrame
 
-variable {Ax : Theory α} [System.Consistent (𝜿Ax)] [DecidableEq α]
+variable {Ax : Theory α} [System.Consistent (Hilbert.ExtK Ax)] [DecidableEq α]
 
-lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame 𝜿Ax).Rel := by
+lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (CanonicalFrame (Hilbert.ExtK Ax)).Rel := by
   rintro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
-  have ⟨Ω, hΩ⟩ := lindenbaum (Λ := 𝜿Ax) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
+  have ⟨Ω, hΩ⟩ := lindenbaum (Λ := (Hilbert.ExtK Ax)) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
     apply intro_union_consistent;
     rintro Γ Δ ⟨hΓ, hΔ⟩ hC;
 
@@ -262,17 +262,17 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
     have : □^[t.n]⋀Δ ∈ Ω₃.theory := iff_mem_multibox_conj.mpr hΔ;
 
     have : □^[t.j](◇^[t.n]⋀Γ) ∈ Ω₁.theory := iff_mem_imp.mp
-      (membership_iff.mpr $ Context.of! $ Normal.maxm! (by aesop))
+      (membership_iff.mpr $ Context.of! $ Hilbert.ExtK.maxm! (by aesop))
       (multirel_def_multidia.mp r₁₂ hΓconj)
     have : ◇^[t.n]⋀Γ ∈ Ω₃.theory := multirel_def_multibox.mp r₁₃ this;
 
-    have : 𝜿Ax ⊢! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by {
+    have : (Hilbert.ExtK Ax) ⊢! □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by {
       apply and_imply_iff_imply_imply'!.mpr;
       exact imp_trans''!
-        (show 𝜿Ax ⊢! □^[t.n]⋀Δ ➝ □^[t.n](∼⋀Γ) by exact imply_multibox_distribute'! $ contra₁'! $ imp_trans''! (and_imply_iff_imply_imply'!.mp hC) (and₂'! neg_equiv!))
-        (show 𝜿Ax ⊢! □^[t.n](∼⋀Γ) ➝ (◇^[t.n]⋀Γ) ➝ ⊥ by exact imp_trans''! (contra₁'! $ and₁'! $ multidia_duality!) (and₁'! neg_equiv!));
+        (show _ ⊢! □^[t.n]⋀Δ ➝ □^[t.n](∼⋀Γ) by exact imply_multibox_distribute'! $ contra₁'! $ imp_trans''! (and_imply_iff_imply_imply'!.mp hC) (and₂'! neg_equiv!))
+        (show _ ⊢! □^[t.n](∼⋀Γ) ➝ (◇^[t.n]⋀Γ) ➝ ⊥ by exact imp_trans''! (contra₁'! $ and₁'! $ multidia_duality!) (and₁'! neg_equiv!));
     }
-    have : 𝜿Ax ⊬ □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by simpa using (def_consistent.mp Ω₃.consistent) (Γ := [□^[t.n]⋀Δ, ◇^[t.n]⋀Γ]) (by simp_all)
+    have : (Hilbert.ExtK Ax) ⊬ □^[t.n]⋀Δ ⋏ ◇^[t.n]⋀Γ ➝ ⊥ := by simpa using (def_consistent.mp Ω₃.consistent) (Γ := [□^[t.n]⋀Δ, ◇^[t.n]⋀Γ]) (by simp_all)
 
     contradiction;
 
@@ -281,7 +281,7 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
   . apply multirel_def_multibox.mpr; apply hΩ.1;
   . apply multirel_def_multibox.mpr; apply hΩ.2;
 
-lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (CanonicalFrame 𝜿Ax).Rel := by
+lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (CanonicalFrame (Hilbert.ExtK Ax)).Rel := by
   induction ts using List.induction_with_singleton with
   | hnil => simp [MultiGeachConfluent];
   | hsingle t =>
@@ -296,7 +296,7 @@ lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachC
 
 variable [Inhabited α]
 
-instance instMultiGeachComplete : Complete 𝜿(𝗚𝗲(ts)) ((MultiGeachConfluentFrameClass.{u} ts)#α) :=
+instance instMultiGeachComplete : Complete (Hilbert.ExtK (𝗚𝗲(ts))) ((MultiGeachConfluentFrameClass.{u} ts)#α) :=
   instComplete_of_mem_canonicalFrame (MultiGeachConfluentFrameClass ts) $ by
     apply multiGeachConfluent_CanonicalFrame;
     tauto;
@@ -307,22 +307,22 @@ instance {Λ : Hilbert α} {𝔽 : FrameClass.{u}} [logic_geach : Λ.IsGeach ts]
   . exact class_geach.equality;
 
 
-instance KT_complete : Complete 𝐊𝐓 ReflexiveFrameClass.{u}#α := inferInstance
+instance KT_complete : Complete (Hilbert.KT α) ReflexiveFrameClass.{u}#α := inferInstance
 
-instance KTB_complete : Complete 𝐊𝐓𝐁 ReflexiveSymmetricFrameClass.{u}#α := inferInstance
+instance KTB_complete : Complete (Hilbert.KTB α) ReflexiveSymmetricFrameClass.{u}#α := inferInstance
 
-instance S4_complete : Complete 𝐒𝟒 PreorderFrameClass.{u}#α := inferInstance
+instance S4_complete : Complete (Hilbert.S4 α) PreorderFrameClass.{u}#α := inferInstance
 
-instance K4_complete : Complete 𝐊𝟒 TransitiveFrameClass.{u}#α := inferInstance
+instance K4_complete : Complete (Hilbert.K4 α) TransitiveFrameClass.{u}#α := inferInstance
 
-instance KT4B_complete : Complete 𝐊𝐓𝟒𝐁 EquivalenceFrameClass.{u}#α := inferInstance
+instance KT4B_complete : Complete (Hilbert.KT4B α) EquivalenceFrameClass.{u}#α := inferInstance
 
-instance S5_complete : Complete 𝐒𝟓 ReflexiveEuclideanFrameClass.{u}#α := inferInstance
+instance S5_complete : Complete (Hilbert.S5 α) ReflexiveEuclideanFrameClass.{u}#α := inferInstance
 
 end Kripke
 
 
-section
+namespace Hilbert
 
 open System
 open LO.Kripke
@@ -332,11 +332,11 @@ open Formula.Kripke
 
 variable [Inhabited α] [DecidableEq α]
 
-lemma KD_weakerThan_KT : (𝐊𝐃 : Hilbert α) ≤ₛ 𝐊𝐓 := by
+lemma KD_weakerThan_KT : (Hilbert.KD α) ≤ₛ (Hilbert.KT α) := by
   apply weakerThan_of_subset_FrameClass SerialFrameClass ReflexiveFrameClass;
   intro F hF; apply serial_of_refl hF;
 
-theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : Hilbert α) <ₛ 𝐊𝐓 := by
+theorem KD_strictlyWeakerThan_KT : (Hilbert.KD α) <ₛ (Hilbert.KT α) := by
   constructor;
   . apply KD_weakerThan_KT;
   . simp [weakerThan_iff];
@@ -352,9 +352,9 @@ theorem KD_strictlyWeakerThan_KT : (𝐊𝐃 : Hilbert α) <ₛ 𝐊𝐓 := by
         use (λ w _ => w = 1), 0;
         simp [Satisfies];
 
-theorem K_strictlyWeakerThan_KT : (𝐊 : Hilbert α) <ₛ 𝐊𝐓 := strictlyWeakerThan.trans K_strictlyWeakerThan_KD KD_strictlyWeakerThan_KT
+theorem K_strictlyWeakerThan_KT : (Hilbert.K α) <ₛ (Hilbert.KT α) := strictlyWeakerThan.trans K_strictlyWeakerThan_KD KD_strictlyWeakerThan_KT
 
-theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : Hilbert α) <ₛ 𝐒𝟒 := by
+theorem K4_strictlyWeakerThan_S4 : (Hilbert.K4 α) <ₛ (Hilbert.S4 α) := by
   constructor;
   . apply K4_weakerThan_S4;
   . simp [weakerThan_iff]
@@ -370,12 +370,12 @@ theorem K4_strictlyWeakerThan_S4 : (𝐊𝟒 : Hilbert α) <ₛ 𝐒𝟒 := by
         use (λ w _ => w = 1), 0;
         simp [Satisfies];
 
-lemma S4_weakerThan_S5 : (𝐒𝟒 : Hilbert α) ≤ₛ 𝐒𝟓 := by
+lemma S4_weakerThan_S5 : (Hilbert.S4 α) ≤ₛ (Hilbert.S5 α) := by
   apply weakerThan_of_subset_FrameClass PreorderFrameClass ReflexiveEuclideanFrameClass;
   rintro _ ⟨F_refl, F_eucl⟩;
   refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl⟩;
 
-theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : Hilbert α) <ₛ 𝐒𝟓 := by
+theorem S4_strictlyWeakerThan_S5 : (Hilbert.S4 α) <ₛ (Hilbert.S5 α) := by
   constructor;
   . apply S4_weakerThan_S5;
   . simp [weakerThan_iff];
@@ -395,7 +395,7 @@ theorem S4_strictlyWeakerThan_S5 : (𝐒𝟒 : Hilbert α) <ₛ 𝐒𝟓 := by
         . omega;
         . use 1; omega;
 
-theorem equiv_S5_KT4B : (𝐒𝟓 : Hilbert α) =ₛ 𝐊𝐓𝟒𝐁 := by
+theorem equiv_S5_KT4B : (Hilbert.S5 α) =ₛ (Hilbert.KT4B α) := by
   apply equiv_of_eq_FrameClass ReflexiveEuclideanFrameClass EquivalenceFrameClass;
   apply Set.eq_of_subset_of_subset;
   . rintro F ⟨F_refl, F_eucl⟩;
@@ -403,6 +403,6 @@ theorem equiv_S5_KT4B : (𝐒𝟓 : Hilbert α) =ₛ 𝐊𝐓𝟒𝐁 := by
   . rintro F ⟨F_refl, F_eucl, F_symm⟩;
     refine ⟨F_refl, eucl_of_symm_trans F_symm F_eucl⟩;
 
-end
+end Hilbert
 
 end LO.Modal

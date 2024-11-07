@@ -188,7 +188,7 @@ lemma AllFrameClass.nonempty : (AllFrameClass.{_, 0} α).Nonempty := by
 
 open Formula
 
-lemma N_defines : 𝐍.DefinesPLoNFrameClass (AllFrameClass α) := by
+lemma N_defines : (Hilbert.N α).DefinesPLoNFrameClass (AllFrameClass α) := by
   intro F;
   simp [Hilbert.theorems, System.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
   intro φ hp;

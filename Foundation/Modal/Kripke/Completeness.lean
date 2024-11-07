@@ -192,9 +192,9 @@ lemma complete_of_mem_canonicalFrame [Nonempty (MCT Λ)] {𝔽 : FrameClass} (hF
 
 instance instComplete_of_mem_canonicalFrame [Nonempty (MCT Λ)] (𝔽 : FrameClass) (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete (Λ) (𝔽#α) := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-instance K_complete : Complete 𝐊 (AllFrameClass.{u}#α) := by
+instance K_complete : Complete (Hilbert.K α) (AllFrameClass.{u}#α) := by
   convert instComplete_of_mem_canonicalFrame (α := α) AllFrameClass trivial;
-  rw [K_is_extK_of_empty];
+  rw [Hilbert.ExtK.K_is_extK_of_empty];
   . tauto;
   . infer_instance;
 

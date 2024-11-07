@@ -105,13 +105,13 @@ variable {φ : Formula α}
 
 open Formula (BoxdotTranslation)
 open System in
-lemma boxdotTranslatedGL_of_Grz : 𝐆𝐫𝐳 ⊢! φ → 𝐆𝐋 ⊢! φᵇ := boxdotTranslated $ by
+lemma boxdotTranslatedGL_of_Grz : (Hilbert.Grz α) ⊢! φ → (Hilbert.GL α) ⊢! φᵇ := boxdotTranslated $ by
   intro φ hp;
   rcases hp with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
   . dsimp [BoxdotTranslation]; exact boxdot_axiomK!;
   . dsimp [BoxdotTranslation]; exact boxdot_Grz_of_L!
 
-lemma Grz_of_boxdotTranslatedGL [Inhabited α] : 𝐆𝐋 ⊢! φᵇ → 𝐆𝐫𝐳 ⊢! φ := by
+lemma Grz_of_boxdotTranslatedGL [Inhabited α] : (Hilbert.GL α) ⊢! φᵇ → (Hilbert.Grz α) ⊢! φ := by
   contrapose;
   intro h;
   apply (not_imp_not.mpr $ Kripke.GL_finite_sound.sound);
@@ -134,11 +134,11 @@ lemma Grz_of_boxdotTranslatedGL [Inhabited α] : 𝐆𝐋 ⊢! φᵇ → 𝐆�
     use V, x;
     exact iff_reflexivize_irreflexivize FF_refl |>.not.mp h;
 
-theorem iff_Grz_boxdotTranslatedGL [Inhabited α] : 𝐆𝐫𝐳 ⊢! φ ↔ 𝐆𝐋 ⊢! φᵇ := by
+theorem iff_Grz_boxdotTranslatedGL [Inhabited α] : (Hilbert.Grz α) ⊢! φ ↔ (Hilbert.GL α) ⊢! φᵇ := by
   constructor;
   . apply boxdotTranslatedGL_of_Grz;
   . apply Grz_of_boxdotTranslatedGL;
 
-instance [Inhabited α] : BoxdotProperty (α := α) 𝐆𝐫𝐳 𝐆𝐋 := ⟨iff_Grz_boxdotTranslatedGL⟩
+instance [Inhabited α] : BoxdotProperty (Hilbert.Grz α) (Hilbert.GL α) := ⟨iff_Grz_boxdotTranslatedGL⟩
 
 end LO.Modal

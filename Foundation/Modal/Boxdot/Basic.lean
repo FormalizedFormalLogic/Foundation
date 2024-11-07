@@ -37,7 +37,7 @@ theorem boxdotTranslated
     dsimp only [BoxdotTranslation];
     trivial;
 
-lemma boxdotTranslatedK4_of_S4 : 𝐒𝟒 ⊢! φ → 𝐊𝟒 ⊢! φᵇ := boxdotTranslated $ by
+lemma boxdotTranslatedK4_of_S4 : (Hilbert.S4 α) ⊢! φ → (Hilbert.K4 α) ⊢! φᵇ := boxdotTranslated $ by
   intro φ hp;
   simp at hp;
   rcases hp with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
@@ -45,19 +45,19 @@ lemma boxdotTranslatedK4_of_S4 : 𝐒𝟒 ⊢! φ → 𝐊𝟒 ⊢! φᵇ := box
   . dsimp [BoxdotTranslation]; exact boxdot_axiomT!;
   . dsimp [BoxdotTranslation]; exact boxdot_axiomFour!
 
-lemma iff_boxdotTranslation_S4 : 𝐒𝟒 ⊢! φ ⭤ φᵇ := by
+lemma iff_boxdotTranslation_S4 : (Hilbert.S4 α) ⊢! φ ⭤ φᵇ := by
   induction φ using Formula.rec' with
   | hbox φ ihp => exact iff_trans''! (box_iff! ihp) iff_box_boxdot!;
   | himp φ ψ ihp ihq => exact imp_replace_iff! ihp ihq;
   | _ => exact iff_id!;
 
-lemma S4_of_boxdotTranslatedK4 (h : 𝐊𝟒 ⊢! φᵇ) : 𝐒𝟒 ⊢! φ := by
-  exact (and₂'! iff_boxdotTranslation_S4) ⨀ (weakerThan_iff.mp $ K4_weakerThan_S4) h
+lemma S4_of_boxdotTranslatedK4 (h : (Hilbert.K4 α) ⊢! φᵇ) : (Hilbert.S4 α) ⊢! φ := by
+  exact (and₂'! iff_boxdotTranslation_S4) ⨀ (weakerThan_iff.mp $ Hilbert.K4_weakerThan_S4) h
 
-theorem iff_S4_boxdotTranslatedK4 : 𝐒𝟒 ⊢! φ ↔ 𝐊𝟒 ⊢! φᵇ := by
+theorem iff_S4_boxdotTranslatedK4 : (Hilbert.S4 α) ⊢! φ ↔ (Hilbert.K4 α) ⊢! φᵇ := by
   constructor;
   . apply boxdotTranslatedK4_of_S4;
   . apply S4_of_boxdotTranslatedK4;
-instance : BoxdotProperty (𝐒𝟒 : Hilbert α) 𝐊𝟒 := ⟨iff_S4_boxdotTranslatedK4⟩
+instance : BoxdotProperty (Hilbert.S4 α) (Hilbert.K4 α) := ⟨iff_S4_boxdotTranslatedK4⟩
 
 end LO.Modal

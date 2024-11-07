@@ -25,9 +25,9 @@ lemma consistent_of_defines (defines : Λ.DefinesPLoNFrameClass 𝔽) (nonempty 
   exact unprovable_bot_of_nonempty_frameclass defines nonempty;
 
 
-instance : Sound 𝐍 (AllFrameClass α) := sound_of_defines N_defines
+instance : Sound (Hilbert.N α) (AllFrameClass α) := sound_of_defines N_defines
 
-instance : System.Consistent (𝐍 : Hilbert α) := consistent_of_defines N_defines AllFrameClass.nonempty
+instance : System.Consistent (Hilbert.N α) := consistent_of_defines N_defines AllFrameClass.nonempty
 
 end PLoN
 

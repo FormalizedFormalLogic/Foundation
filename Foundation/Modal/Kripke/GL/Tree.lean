@@ -48,7 +48,7 @@ lemma valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTra
   exact H ⟨(F.FiniteTransitiveTreeUnravelling F_trans F_irrefl r), (M.FiniteTransitiveTreeUnravelling r).Valuation⟩;
 
 variable [Inhabited α] [DecidableEq α]
-theorem iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊢! φ ↔ (∀ M : FiniteTransitiveTreeModel.{u, u} α, M.root ⊧ φ) := by
+theorem iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree : (Hilbert.GL α) ⊢! φ ↔ (∀ M : FiniteTransitiveTreeModel.{u, u} α, M.root ⊧ φ) := by
   constructor;
   . intro h M;
     have : TransitiveIrreflexiveFrameClassꟳ#α ⊧ φ := GL_finite_sound.sound h;
@@ -59,15 +59,13 @@ theorem iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊢
     intro F hF V;
     apply valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree h hF;
 
-lemma iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree : 𝐆𝐋 ⊬ φ ↔ ∃ M : FiniteTransitiveTreeModel.{u, u} α, ¬M.root ⊧ φ := by
+lemma iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree : (Hilbert.GL α) ⊬ φ ↔ ∃ M : FiniteTransitiveTreeModel.{u, u} α, ¬M.root ⊧ φ := by
   constructor;
   . contrapose; simp; apply iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree.mpr;
   . contrapose; simp; apply iff_provable_GL_satisfies_at_root_on_FiniteTransitiveTree.mp;
 
 end
 
-
-#check Finite
 
 def FiniteTransitiveTree.SimpleExtension (F : FiniteTransitiveTree) : Kripke.FiniteTransitiveTree where
   World := (Fin 1) ⊕ F.World
@@ -171,7 +169,7 @@ variable {φ ψ : Formula α}
   - `System.imply_boxdot_axiomT_of_imply_boxdot_boxdot`
   - `System.imply_box_box_of_imply_boxdot_axiomT`
 -/
-lemma GL_imply_boxdot_plain_of_imply_box_box : 𝐆𝐋 ⊢! □φ ➝ □ψ → 𝐆𝐋 ⊢! ⊡φ ➝ ψ := by
+lemma GL_imply_boxdot_plain_of_imply_box_box : (Hilbert.GL α) ⊢! □φ ➝ □ψ → (Hilbert.GL α) ⊢! ⊡φ ➝ ψ := by
   contrapose;
   intro h;
   have := iff_unprovable_GL_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h;
@@ -199,13 +197,13 @@ lemma GL_imply_boxdot_plain_of_imply_box_box : 𝐆𝐋 ⊢! □φ ➝ □ψ →
   use M↧;
   exact _root_.not_imp.mpr ⟨hbp, hbq⟩;
 
-theorem GL_unnecessitation! : 𝐆𝐋 ⊢! □φ → 𝐆𝐋 ⊢! φ := by
+theorem GL_unnecessitation! : (Hilbert.GL α) ⊢! □φ → (Hilbert.GL α) ⊢! φ := by
   intro h;
-  have : 𝐆𝐋 ⊢! □⊤ ➝ □φ := imply₁'! (ψ := □⊤) h;
-  have : 𝐆𝐋 ⊢! ⊡⊤ ➝ φ := GL_imply_boxdot_plain_of_imply_box_box this;
+  have : (Hilbert.GL α) ⊢! □⊤ ➝ □φ := imply₁'! (ψ := □⊤) h;
+  have : (Hilbert.GL α) ⊢! ⊡⊤ ➝ φ := GL_imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 
-noncomputable instance : System.Unnecessitation (𝐆𝐋 : Hilbert α) where
+noncomputable instance : System.Unnecessitation (Hilbert.GL α) where
   unnec := λ h => GL_unnecessitation! ⟨h⟩ |>.some
 
 end Unnecessitation

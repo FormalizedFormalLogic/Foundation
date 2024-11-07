@@ -69,7 +69,7 @@ lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFram
 
 lemma instComplete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame Λ ∈ 𝔽) : Complete Λ 𝔽 := ⟨complete_of_mem_canonicalFrame hFC⟩
 
-instance : Complete 𝐍 (AllFrameClass.{u, u} α) := instComplete_of_mem_canonicalFrame (by simp)
+instance : Complete (Hilbert.N α) (AllFrameClass.{u, u} α) := instComplete_of_mem_canonicalFrame (by simp)
 
 end PLoN
 

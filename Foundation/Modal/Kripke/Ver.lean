@@ -30,20 +30,20 @@ instance axiomVer_definability : 𝔽((𝗩𝗲𝗿 : Theory α)).DefinedBy (Iso
     use ⟨PUnit,  λ _ _ => False⟩
     tauto;
 
-instance Ver_definability : 𝔽((𝐕𝐞𝐫 : Hilbert α)).DefinedBy (IsolatedFrameClass) := inferInstance
+instance Ver_definability : 𝔽(Hilbert.Ver α).DefinedBy (IsolatedFrameClass) := inferInstance
 
-instance : Sound 𝐕𝐞𝐫 (IsolatedFrameClass#α) := inferInstance
+instance : Sound (Hilbert.Ver α) (IsolatedFrameClass#α) := inferInstance
 
-instance : System.Consistent (𝐕𝐞𝐫 : Hilbert α) := inferInstance
+instance : System.Consistent (Hilbert.Ver α) := inferInstance
 
 variable [DecidableEq α]
 
-lemma isolated_CanonicalFrame {Ax : Theory α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent 𝜿Ax] : Isolated (CanonicalFrame 𝜿Ax) := by
+lemma isolated_CanonicalFrame {Ax : Theory α} (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent (Hilbert.ExtK Ax)] : Isolated (CanonicalFrame (Hilbert.ExtK Ax)) := by
   intro x y rxy;
-  have : (CanonicalModel 𝜿Ax) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ Normal.maxm! (by aesop);
+  have : (CanonicalModel (Hilbert.ExtK Ax)) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ (Hilbert.ExtK.maxm!) (by apply h; simp);
   exact this x _ rxy;
 
-instance : Complete 𝐕𝐞𝐫 (IsolatedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame IsolatedFrameClass $ by
+instance : Complete (Hilbert.Ver α) (IsolatedFrameClass.{u}#α) := instComplete_of_mem_canonicalFrame IsolatedFrameClass $ by
   apply isolated_CanonicalFrame;
   tauto;
 
