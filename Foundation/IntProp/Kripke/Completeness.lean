@@ -24,7 +24,7 @@ def canonicalFrameOf (H : Hilbert α) [Nonempty (SCT H)] : Kripke.Frame.Dep α w
   World := SCT H
   Rel t₁ t₂ := t₁.tableau.1 ⊆ t₂.tableau.1
   refl_Rel := by simp [Reflexive];
-  trans_Rel := by
+  rel_trans := by
     simp [Transitive];
     intro x y z;
     exact Set.Subset.trans;
@@ -34,8 +34,8 @@ namespace canonicalFrame
 variable {H : Hilbert α}
 variable [Nonempty (SCT H)]
 
-lemma is_reflexive : Reflexive (Kripke.canonicalFrameOf H) := Kripke.canonicalFrameOf H |>.refl_Rel
-lemma is_transitive : Transitive (Kripke.canonicalFrameOf H) := Kripke.canonicalFrameOf H |>.trans_Rel
+lemma is_reflexive : Reflexive (Kripke.canonicalFrameOf H) := Kripke.canonicalFrameOf H |>.rel_refl
+lemma is_transitive : Transitive (Kripke.canonicalFrameOf H) := Kripke.canonicalFrameOf H |>.rel_trans
 lemma is_antisymmetric : Antisymmetric (Kripke.canonicalFrameOf H) := by
   simp [Antisymmetric];
   intro x y Rxy Ryx;

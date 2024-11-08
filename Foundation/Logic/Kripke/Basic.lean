@@ -216,7 +216,7 @@ namespace ClassicalFrame
 
 @[simp] lemma symmetric : Symmetric ClassicalFrame := by simp [Symmetric];
 
-@[simp] lemma extensive : Extensive ClassicalFrame := by simp [Extensive];
+@[simp] lemma extensive : Coreflexive ClassicalFrame := by simp [Coreflexive];
 
 @[simp] lemma universal : Universal ClassicalFrame := by simp [Universal];
 

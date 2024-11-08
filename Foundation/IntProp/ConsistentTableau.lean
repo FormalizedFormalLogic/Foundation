@@ -183,7 +183,7 @@ end Saturated
 
 variable [H.IncludeEFQ]
 
-lemma self_consistent [h : System.Consistent H] : Tableau.Consistent H (H.axioms, ∅) := by
+lemma self_consistent [h : H.Consistent] : Tableau.Consistent H (H.axioms, ∅) := by
   intro Γ Δ hΓ hΔ;
   replace hΔ : Δ = [] := List.nil_iff.mpr hΔ;
   obtain ⟨ψ, hq⟩ := h.exists_unprovable;
@@ -339,7 +339,7 @@ lemma lindenbaum [H.IncludeEFQ] [Encodable α] (hCon : Tableau.Consistent H t₀
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
   exact ⟨⟨t, hMax, hCon⟩, ht⟩;
 
-instance [System.Consistent H] [H.IncludeEFQ] [Encodable α] : Nonempty (SCT H) := ⟨lindenbaum Tableau.self_consistent |>.choose⟩
+instance [H.Consistent] [H.IncludeEFQ] [Encodable α] : Nonempty (SCT H) := ⟨lindenbaum Tableau.self_consistent |>.choose⟩
 
 variable {t : SCT H}
 

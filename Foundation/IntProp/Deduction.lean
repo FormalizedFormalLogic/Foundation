@@ -129,6 +129,8 @@ protected abbrev WeakClassical : Hilbert α := ⟨𝗣𝗲⟩
 end systems
 
 
+abbrev Consistent (H : Hilbert α) := System.Consistent H
+
 
 namespace Deduction
 
