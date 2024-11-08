@@ -112,13 +112,13 @@ def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹
     have : ((∼φ)ᴺ ⋏ (∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ :=
       System.FiniteContext.weakening (by simp) this ⨀ (andRight (nthAxm 0)) ⨀ (andLeft (nthAxm 0))
     this
-  | @all _ _ Γ φ d =>
+  | @all _ _ Γ φ d       =>
     have eΓ : (∼Γ⁺)ᴺ = ((∼Γ)ᴺ)⁺ := by
       simp [Sequent.doubleNegation, Rewriting.shifts, Sequent.neg_def, Semiformula.rew_doubleNegation]
     have : ((∼Γ)ᴺ)⁺ ⊢[𝐌𝐢𝐧¹] free (∼(∼φ)ᴺ) :=
       FiniteContext.cast (deduct (goedelGentzen d)) eΓ (by simp [Semiformula.rew_doubleNegation]; rfl)
     deductInv <| dni' <| genOverFiniteContext this
-  | @ex _ _ Γ φ t d =>
+  | @ex _ _ Γ φ t d      =>
     have ih : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼((∼φ)ᴺ/[t]) :=
       System.cast (by simp [Semiformula.rew_doubleNegation]; rfl) <| deduct (goedelGentzen d)
     have : ((∀' (∼φ)ᴺ) :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] (∼φ)ᴺ/[t] := specializeOverContext (nthAxm 0) t
@@ -129,7 +129,7 @@ def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹
     have b₁ : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼∼φᴺ := System.impTrans'' (of <| System.andLeft (negDoubleNegation φ)) (deduct ihp)
     have b₂ : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼φᴺ := deduct ihn
     b₁ ⨀ b₂
-  | @wk _ _ Γ Δ d h => FiniteContext.weakening (by simpa using List.map_subset _ h) (goedelGentzen d)
+  | @wk _ _ Γ Δ d h      => FiniteContext.weakening (by simpa using List.map_subset _ h) (goedelGentzen d)
 
 end Derivation
 

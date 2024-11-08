@@ -115,6 +115,7 @@ def allIffAllOfIff {φ ψ} (b : Λ ⊢ free φ ⭤ free ψ) : Λ ⊢ ∀' φ ⭤
   (allImplyAllOfAllImply φ ψ ⨀ gen (System.cast (by simp) (System.andLeft b)))
   (allImplyAllOfAllImply ψ φ ⨀ gen (System.cast (by simp) (System.andRight b)))
 
+set_option diagnostics true in
 set_option profiler true in
 def dneOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ∼∼φ ➝ φ
   | ⊥,     _ => System.falsumDNE

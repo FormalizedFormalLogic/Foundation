@@ -24,6 +24,8 @@ structure Struc (L : Language) where
 
 abbrev SmallStruc (L : Language.{u}) := Struc.{u, u} L
 
+instance : CoeSort (Struc L) (Type _) := ⟨Struc.Dom⟩
+
 namespace Structure
 
 instance [n : Nonempty M] : Nonempty (Structure L M) := by
