@@ -2,13 +2,12 @@ import Foundation.IntProp.ConsistentTableau
 import Foundation.IntProp.Kripke.Semantics
 
 set_option autoImplicit false
-universe u v
+universe u
 
 namespace LO.IntProp
 
-variable {α : Type u}
-variable {H : Hilbert α}
-variable {t t₁ t₂ : SCT H} {φ ψ : Formula α}
+variable {H : Hilbert ℕ}
+variable {t t₁ t₂ : SCT H} {φ ψ : Formula ℕ}
 
 open System System.FiniteContext
 open Formula (atom)
@@ -20,29 +19,21 @@ namespace Hilbert
 
 namespace Kripke
 
-def canonicalFrameOf (H : Hilbert α) [Nonempty (SCT H)] : Kripke.Frame.Dep α where
+def canonicalFrameOf (H : Hilbert ℕ) [H.Consistent] [H.IncludeEFQ] : Kripke.Frame where
   World := SCT H
   Rel t₁ t₂ := t₁.tableau.1 ⊆ t₂.tableau.1
-  refl_Rel := by simp [Reflexive];
-  rel_trans := by
-    simp [Transitive];
-    intro x y z;
-    exact Set.Subset.trans;
+  rel_po := {
+    refl := by simp;
+    trans := fun x y z Sxy Syz => Set.Subset.trans Sxy Syz
+    antisymm := fun x y Sxy Syx => equality_of₁ (Set.Subset.antisymm Sxy Syx)
+  }
 
 namespace canonicalFrame
 
-variable {H : Hilbert α}
-variable [Nonempty (SCT H)]
-
-lemma is_reflexive : Reflexive (Kripke.canonicalFrameOf H) := Kripke.canonicalFrameOf H |>.rel_refl
-lemma is_transitive : Transitive (Kripke.canonicalFrameOf H) := Kripke.canonicalFrameOf H |>.rel_trans
-lemma is_antisymmetric : Antisymmetric (Kripke.canonicalFrameOf H) := by
-  simp [Antisymmetric];
-  intro x y Rxy Ryx;
-  exact equality_of₁ $ Set.Subset.antisymm Rxy Ryx;
+variable {H : Hilbert ℕ} [H.IncludeEFQ] [H.Consistent]
 
 open Classical in
-lemma is_confluent [Encodable α] [H.IncludeEFQ] [HasAxiomWeakLEM H] : Confluent (Kripke.canonicalFrameOf H) := by
+lemma is_confluent [HasAxiomWeakLEM H] : Confluent (Kripke.canonicalFrameOf H) := by
   simp [Confluent, Kripke.canonicalFrameOf];
   intro x y z Rxy Rxz;
   suffices Tableau.Consistent H (y.tableau.1 ∪ z.tableau.1, ∅) by
@@ -131,7 +122,7 @@ lemma is_confluent [Encodable α] [H.IncludeEFQ] [HasAxiomWeakLEM H] : Confluent
 
   exact mdp₁_mem mem_nnΘz_x $ mdp₁ mem_Θx_x d;
 
-lemma is_connected [DecidableEq α] [HasAxiomDummett H] : Connected (Kripke.canonicalFrameOf H) := by
+lemma is_connected [HasAxiomDummett H] : Connected (Kripke.canonicalFrameOf H) := by
   simp [Connected, Kripke.canonicalFrameOf];
   intro x y z Rxy Ryz;
   apply or_iff_not_imp_left.mpr;
@@ -152,11 +143,11 @@ lemma is_connected [DecidableEq α] [HasAxiomDummett H] : Connected (Kripke.cano
 end canonicalFrame
 
 
-def canonicalModelOf (H : Hilbert α) [Nonempty (SCT H)] : Kripke.Model α where
+def canonicalModelOf (H : Hilbert ℕ) [H.Consistent] [H.IncludeEFQ] : Kripke.Model where
   toFrame := Kripke.canonicalFrameOf H
-  Valuation t a := (atom a) ∈ t.tableau.1
-  hereditary := by aesop;
+  Val := ⟨λ t a => (atom a) ∈ t.tableau.1, by aesop⟩
 
+/-
 namespace canonicalModelOf
 
 variable [Nonempty (SCT H)]
@@ -168,13 +159,11 @@ instance : Semantics (Formula α) (Kripke.canonicalFrameOf H).World := Formula.K
 @[simp] lemma valuation_def {a : α} : (Kripke.canonicalModelOf H).Valuation t a ↔ (atom a) ∈ t.tableau.1 := by rfl
 
 end canonicalModelOf
-
+-/
 
 section lemmata
 
-variable [Encodable α] [DecidableEq α]
-variable [H.IncludeEFQ]
-variable [Nonempty (SCT H)]
+variable [H.IncludeEFQ] [H.Consistent]
 variable {C : Kripke.FrameClass}
 
 section truthlemma
@@ -211,7 +200,7 @@ private lemma truthlemma.himp
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
     constructor;
-    . simp_all only [Set.singleton_subset_iff];
+    . assumption;
     . constructor;
       . assumption;
       . apply not_mem₁_iff_mem₂.mpr;
@@ -255,6 +244,7 @@ private lemma truthlemma.hneg
       contradiction;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
     use t';
+    constructor <;> assumption;
   . simp;
     intro ht t' htt';
     apply ihp.not.mpr;
@@ -265,6 +255,7 @@ private lemma truthlemma.hneg
 
 lemma truthlemma : t ⊧ φ ↔ φ ∈ t.tableau.1 := by
   induction φ using Formula.rec' generalizing t with
+  | hatom => tauto;
   | himp φ ψ ihp ihq => exact truthlemma.himp ihp ihq
   | hneg φ ihp => exact truthlemma.hneg ihp;
   | _ => simp [Satisfies.iff_models, Satisfies, *];
@@ -293,13 +284,13 @@ lemma deducible_of_validOnCanonicelModel : (Kripke.canonicalModelOf H) ⊧ φ �
     suffices φ ∈ t.tableau.1 by exact truthlemma.mpr this;
     exact mem₁_of_provable h;
 
-lemma complete_of_canonical (hC : (Kripke.canonicalFrameOf H) ∈ C) : C#α ⊧ φ → H ⊢! φ := by
+lemma complete_of_canonical (hC : (Kripke.canonicalFrameOf H) ∈ C) : C ⊧ φ → H ⊢! φ := by
   intro h;
   apply deducible_of_validOnCanonicelModel.mp;
   apply h;
   exact hC;
 
-instance instCompleteOfCanonical (hC : (Kripke.canonicalFrameOf H) ∈ C) : Complete H (C#α) := ⟨complete_of_canonical hC⟩
+instance instCompleteOfCanonical (hC : (Kripke.canonicalFrameOf H) ∈ C) : Complete H C := ⟨complete_of_canonical hC⟩
 
 end lemmata
 
@@ -308,18 +299,19 @@ end Kripke
 
 section completeness
 
-variable [Encodable α] [DecidableEq α]
 
-instance Int.Kripke.complete : Complete (Hilbert.Int α) (Set.univ#α : Kripke.FrameClass.{u}) := by
-  exact @Hilbert.Kripke.instCompleteOfCanonical α (Hilbert.Int α) _ _ _ (by sorry) (Set.univ) (by simp);
+set_option pp.universes true
 
-instance KC.Kripke.complete : Complete (Hilbert.KC α) (ConfluentFrameClass#α : Kripke.FrameClass.{u}) := by
-  exact @Hilbert.Kripke.instCompleteOfCanonical α (Hilbert.KC α) _ _ _ (by sorry) (ConfluentFrameClass) $ by
-    exact @Hilbert.Kripke.canonicalFrame.is_confluent α (Hilbert.KC α) (by sorry) _ _ _;
+instance Int.Kripke.complete : Complete (Hilbert.Int ℕ) (AllFrameClass.{0}) :=
+  Hilbert.Kripke.instCompleteOfCanonical (H := Hilbert.Int ℕ) (C := AllFrameClass.{0}) (by simp)
 
-instance LC.Kripke.complete : Complete (Hilbert.LC α) (ConnectedFrameClass#α : Kripke.FrameClass.{u}) := by
-  exact @Hilbert.Kripke.instCompleteOfCanonical α (Hilbert.LC α) _ _ _ (by sorry) (ConnectedFrameClass) $ by
-    exact @Hilbert.Kripke.canonicalFrame.is_connected α (Hilbert.LC α) (by sorry) _ _;
+instance KC.Kripke.complete : Complete (Hilbert.KC ℕ) (ConfluentFrameClass.{0}) :=
+  Hilbert.Kripke.instCompleteOfCanonical (H := Hilbert.KC ℕ) (C := ConfluentFrameClass.{0}) $ by
+    apply Kripke.canonicalFrame.is_confluent;
+
+instance LC.Kripke.complete : Complete (Hilbert.LC ℕ) (ConnectedFrameClass.{0}) :=
+  Hilbert.Kripke.instCompleteOfCanonical (H := Hilbert.LC ℕ) (C := ConnectedFrameClass.{0}) $ by
+    apply Kripke.canonicalFrame.is_connected;
 
 end completeness
 
