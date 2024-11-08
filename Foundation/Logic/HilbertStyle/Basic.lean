@@ -320,6 +320,15 @@ instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : D
 section Conjunction
 
 variable [System.Minimal 𝓢]
+
+def conj₂Nth : (Γ : List F) → (n : ℕ) → (hn : n < Γ.length) → 𝓢 ⊢ ⋀Γ ➝ Γ[n]
+  | [],          _,     hn => by simp at hn
+  | [ψ],         0,     _  => impId ψ
+  | φ :: ψ :: Γ, 0,     _  => and₁
+  | φ :: ψ :: Γ, n + 1, hn => impTrans'' (and₂ (φ := φ)) (conj₂Nth (ψ :: Γ) n (Nat.succ_lt_succ_iff.mp hn))
+
+def conj₂_nth! (Γ : List F) (n : ℕ) (hn : n < Γ.length) : 𝓢 ⊢! ⋀Γ ➝ Γ[n] := ⟨conj₂Nth Γ n hn⟩
+
 variable [DecidableEq F]
 variable {Γ Δ : List F}
 
@@ -347,15 +356,9 @@ def implyConj (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ
 def conjImplyConj (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := implyConj _ _ (fun _ hq ↦ generalConj (h hq))
 
 def generalConj' {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ ➝ φ :=
-  match Γ with
-  | []     => by simp at h
-  | [ψ]    => by simp_all; exact impId ψ;
-  | ψ :: χ :: Γ => by
-    simp;
-    by_cases e : φ = ψ;
-    . rw [←e]; exact and₁;
-    . have : φ ∈ (χ :: Γ) := by simpa [e] using h;
-      exact impTrans'' and₂ (generalConj' this);
+  have : Γ.indexOf φ < Γ.length := List.indexOf_lt_length.mpr h
+  have : Γ[Γ.indexOf φ] = φ := List.getElem_indexOf this
+  cast (by rw[this]) <| conj₂Nth Γ (Γ.indexOf φ) (by assumption)
 lemma generate_conj'! (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := ⟨generalConj' h⟩
 
 def conjIntro' (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢ φ) : 𝓢 ⊢ ⋀Γ :=

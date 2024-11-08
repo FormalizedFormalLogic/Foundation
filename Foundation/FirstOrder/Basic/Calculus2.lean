@@ -39,7 +39,7 @@ scoped infix: 45 " ⊢₂.! " => Derivable2SingleConseq
 variable {T : Theory L}
 
 lemma shifts_toFinset_eq_image_shift (Δ : Sequent L) :
-    (shifts Δ).toFinset = Δ.toFinset.image Rewriting.shift := by ext φ; simp [shifts]
+    (Rewriting.shifts Δ).toFinset = Δ.toFinset.image Rewriting.shift := by ext φ; simp [Rewriting.shifts]
 
 def Derivation.toDerivation2 T : {Γ : Sequent L} → T ⟹ Γ → T ⊢₂ Γ.toFinset
   | _, Derivation.axL Δ R v            => Derivation2.closed _ (Semiformula.rel R v) (by simp) (by simp)
@@ -78,13 +78,13 @@ noncomputable def Derivation2.toDerivation : {Γ : Finset (SyntacticFormula L)} 
   | _, Derivation2.or (φ := φ) (ψ := ψ) h dpq    =>
     Tait.or' (φ := φ) (ψ := ψ) (by simp [h]) (Tait.wk dpq.toDerivation <| by intro x; simp)
   | _, Derivation2.all (φ := φ) h d              =>
-    Derivation.all' (φ := φ) (by simp [h]) (Tait.wk d.toDerivation <| by intro x; simp [shifts])
+    Derivation.all' (φ := φ) (by simp [h]) (Tait.wk d.toDerivation <| by intro x; simp [Rewriting.shifts])
   | _, Derivation2.ex (φ := φ) h t d             =>
-    Derivation.ex' (φ := φ) (by simp [h]) t (Tait.wk d.toDerivation <| by intro x; simp [shifts])
+    Derivation.ex' (φ := φ) (by simp [h]) t (Tait.wk d.toDerivation <| by intro x; simp [Rewriting.shifts])
   | _, Derivation2.wk d h                        =>
     Tait.wk d.toDerivation (by intro x; simp; exact @h x)
   | _, Derivation2.shift d                       =>
-    Tait.wk (Derivation.shift d.toDerivation) <| by intro x; simp [shifts]
+    Tait.wk (Derivation.shift d.toDerivation) <| by intro x; simp [Rewriting.shifts]
   | _, Derivation2.cut (φ := φ) d dn             =>
     Tait.cut (φ := φ)
       (Tait.wk d.toDerivation <| by intro x; simp)

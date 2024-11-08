@@ -34,7 +34,7 @@ lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ
     · exact ⟨r, by simp [hr], hhr⟩
   | @all _ _ Δ φ d => by
     have : (∀ a : M, Evalm M ![a] ε φ) ∨ ∃ ψ ∈ Δ, Evalfm M ε ψ := by
-      simpa[shifts, Matrix.vecConsLast_vecEmpty, forall_or_right]
+      simpa [Rewriting.shifts, Matrix.vecConsLast_vecEmpty, forall_or_right]
         using fun a : M => sound M (a :>ₙ ε) d
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
     · exact ⟨∀' φ, by simp, hp⟩

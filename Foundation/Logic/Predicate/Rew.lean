@@ -4,14 +4,14 @@ import Foundation.Logic.Predicate.Quantifier
 /-!
 # Rewriting System
 
-term/formula morphisms such as rewritings, substitutions, and embeddings are handled by the structure `LO.FirstOrder.Rew`.
-- `LO.FirstOrder.Rew.rewrite f` is a rewriting of the free variables occurring in the term by `f : ξ₁ → Semiterm L ξ₂ n`.
+term/formula morphisms such as Rewritings, substitutions, and embeddings are handled by the structure `LO.FirstOrder.Rew`.
+- `LO.FirstOrder.Rew.rewrite f` is a Rewriting of the free variables occurring in the term by `f : ξ₁ → Semiterm L ξ₂ n`.
 - `LO.FirstOrder.Rew.substs v` is a substitution of the bounded variables occurring in the term by `v : Fin n → Semiterm L ξ n'`.
 - `LO.FirstOrder.Rew.bShift` is a transformation of the bounded variables occurring in the term by `#x ↦ #(Fin.succ x)`.
 - `LO.FirstOrder.Rew.shift` is a transformation of the free variables occurring in the term by `&x ↦ &(x + 1)`.
 - `LO.FirstOrder.Rew.emb` is a embedding of the term with no free variables.
 
-Rewritings `LO.FirstOrder.Rew` is naturally converted to formula rewritings by `LO.FirstOrder.Rew.hom`.
+Rewritings `LO.FirstOrder.Rew` is naturally converted to formula Rewritings by `LO.FirstOrder.Rew.hom`.
 
 -/
 
@@ -765,6 +765,10 @@ abbrev free (φ : F ℕ (n + 1)) : F ℕ n := @Rew.free L n • φ
 
 abbrev fix (φ : F ℕ n) : F ℕ (n + 1) := @Rew.fix L n • φ
 
+def shifts (Γ : List (F ℕ n)) : List (F ℕ n) := Γ.map Rewriting.shift
+
+scoped[LO.FirstOrder] postfix:max "⁺" => FirstOrder.Rewriting.shifts
+
 end Rewriting
 
 section Notation
@@ -857,6 +861,9 @@ lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (φ : F ℕ 1) :
     rewrite f • φ/[t] = (rewrite (bShift ∘ f) • φ)/[rewrite f t] := by
   simpa [←comp_smul] using smul_ext' (by ext x <;> simp[Rew.comp_app])
 
+@[simp] lemma free_substs_nil (φ : F ℕ 0) : free (φ/[]) = shift φ := by
+  simpa [←comp_smul] using smul_ext' (by { ext x <;> simp [Rew.comp_app]; { exact Fin.elim0 x } })
+
 def shiftEmb : F ℕ n ↪ F ℕ n where
   toFun := shift
   inj' := smul_shift_injective
@@ -872,6 +879,36 @@ lemma fix_allClosure (φ : F ℕ n) :
 
 lemma allClosure_fixitr (φ : F ℕ 0) : ∀* @fixitr L 0 (m + 1) • φ = ∀' @fix L 0 • (∀* @Rew.fixitr L 0 m • φ) := by
   simp [Rew.fixitr_succ, fix_allClosure, comp_smul]
+
+@[simp] lemma mem_shifts_iff {φ : F ℕ n} {Γ : List (F ℕ n)} :
+    Rewriting.shift φ ∈ Γ⁺ ↔ φ ∈ Γ :=
+  List.mem_map_of_injective LawfulRewriting.smul_shift_injective
+
+@[simp] lemma shifts_ss (Γ Δ : List (F ℕ n)) :
+    Γ⁺ ⊆ Δ⁺ ↔ Γ ⊆ Δ := List.map_subset_iff _ LawfulRewriting.smul_shift_injective
+
+@[simp] lemma shifts_cons (φ : F ℕ n) (Γ : List (F ℕ n)) :
+    (φ :: Γ)⁺ = Rewriting.shift φ :: Γ⁺ := by simp [shifts]
+
+@[simp] lemma shifts_nil : ([] : List (F ℕ n))⁺ = [] := by rfl
+
+lemma shifts_union (Γ Δ : List (F ℕ n)) :
+    (Γ ++ Δ)⁺ = Γ⁺ ++ Δ⁺ := by simp [shifts]
+
+lemma shifts_neg (Γ : List (F ℕ n)) :
+    (Γ.map (∼·))⁺ = (Γ⁺).map (∼·) := by simp [shifts]
+
+@[simp] lemma shifts_emb {ο} [IsEmpty ο] (Γ : List (F ο n)) :
+    (Γ.map (Rewriting.embedding (ξ := ℕ)))⁺ = Γ.map (Rewriting.embedding (ξ := ℕ)) := by
+  simp [shifts, Function.comp_def, ←LawfulRewriting.comp_smul]
+
+lemma shift_conj₂ (Γ : List (F ℕ n)) : shift (⋀Γ) = ⋀Γ⁺ := by
+  induction Γ using List.induction_with_singleton
+  case hnil => simp
+  case hsingle => simp
+  case hcons φ Γ hΓ ih =>
+    have : Γ⁺ ≠ [] := by intro H; have : Γ = [] := List.map_eq_nil_iff.mp H; contradiction
+    simp [hΓ, this, ih]
 
 end LawfulRewriting
 

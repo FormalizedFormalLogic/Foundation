@@ -250,10 +250,16 @@ lemma dni_or'! (d : 𝓢 ⊢! φ ⋎ ψ) : 𝓢 ⊢! ∼∼φ ⋎ ∼∼ψ := �
 def dniAnd' (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ∼∼φ ⋏ ∼∼ψ := and₃' (dni' $ and₁' d) (dni' $ and₂' d)
 lemma dni_and'! (d : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! ∼∼φ ⋏ ∼∼ψ := ⟨dniAnd' d.some⟩
 
+def falsumDNE : 𝓢 ⊢ ∼∼⊥ ➝ ⊥ := by
+  apply deduct'
+  have d₁ : [∼∼⊥] ⊢[𝓢] ∼⊥ ➝ ⊥ := neg_equiv'.mp byAxm₀
+  have d₂ : [∼∼⊥] ⊢[𝓢] ∼⊥ := neg_equiv'.mpr (impId ⊥)
+  exact d₁ ⨀ d₂
+
+def falsumDN : 𝓢 ⊢ ∼∼⊥ ⭤ ⊥ := andIntro falsumDNE dni
 
 def dn [HasAxiomDNE 𝓢] : 𝓢 ⊢ φ ⭤ ∼∼φ := iffIntro dni dne
 @[simp] lemma dn! [HasAxiomDNE 𝓢] : 𝓢 ⊢! φ ⭤ ∼∼φ := ⟨dn⟩
-
 
 
 def contra₀ : 𝓢 ⊢ (φ ➝ ψ) ➝ (∼ψ ➝ ∼φ) := by
@@ -339,6 +345,8 @@ def tne : 𝓢 ⊢ ∼(∼∼φ) ➝ ∼φ := contra₀' dni
 
 def tne' (b : 𝓢 ⊢ ∼(∼∼φ)) : 𝓢 ⊢ ∼φ := tne ⨀ b
 lemma tne'! (b : 𝓢 ⊢! ∼(∼∼φ)) : 𝓢 ⊢! ∼φ := ⟨tne' b.some⟩
+
+def tneIff : 𝓢 ⊢ ∼∼∼φ ⭤ ∼φ := andIntro tne dni
 
 def implyLeftReplace (h : 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) := by
   apply deduct';

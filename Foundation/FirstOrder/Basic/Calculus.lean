@@ -10,33 +10,6 @@ abbrev Sequent (L : Language) := List (SyntacticFormula L)
 open Semiformula
 variable {L : Language} {T : Theory L}
 
-def shifts (Δ : List (SyntacticSemiformula L n)) :
-  List (SyntacticSemiformula L n) := Δ.map Rewriting.shift
-
-scoped postfix:max "⁺" => shifts
-
-@[simp] lemma mem_shifts_iff {φ : SyntacticSemiformula L n} {Δ : List (SyntacticSemiformula L n)} :
-    Rewriting.shift φ ∈ Δ⁺ ↔ φ ∈ Δ :=
-  List.mem_map_of_injective LawfulRewriting.smul_shift_injective
-
-@[simp] lemma shifts_ss (Δ Γ : List (SyntacticSemiformula L n)) :
-    Δ⁺ ⊆ Γ⁺ ↔ Δ ⊆ Γ := List.map_subset_iff _ LawfulRewriting.smul_shift_injective
-
-@[simp] lemma shifts_cons (φ : SyntacticSemiformula L n) (Δ : List (SyntacticSemiformula L n)) :
-    (φ :: Δ)⁺ = Rewriting.shift φ :: Δ⁺ := by simp [shifts]
-
-@[simp] lemma shifts_nil : ([] : Sequent L)⁺ = [] := by rfl
-
-lemma shifts_union (Δ Γ : List (SyntacticSemiformula L n)) :
-    (Δ ++ Γ)⁺ = Δ⁺ ++ Γ⁺ := by simp [shifts]
-
-lemma shifts_neg (Γ : List (SyntacticSemiformula L n)) :
-    (Γ.map (∼·))⁺ = (Γ⁺).map (∼·) := by simp [shifts]
-
-@[simp] lemma shifts_emb (Γ : List (Semisentence L n)) :
-    (Γ.map (Rewriting.embedding (ξ := ℕ)))⁺ = Γ.map (Rewriting.embedding (ξ := ℕ)) := by
-  simp [shifts, Function.comp_def, ←LawfulRewriting.comp_smul]
-
 inductive Derivation (T : Theory L) : Sequent L → Type _
 | axL (Γ) {k} (r : L.Rel k) (v) : Derivation T (rel r v :: nrel r v :: Γ)
 | verum (Γ)    : Derivation T (⊤ :: Γ)
@@ -337,7 +310,7 @@ def rewrite {Δ} : T ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), T ⟹ Δ.map 
     have : T ⟹ ((Rewriting.free φ) :: Δ⁺).map fun φ ↦ Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x)) • φ :=
       rewrite d (&0 :>ₙ fun x => Rew.shift (f x))
     have : T ⟹ (∀' Rew.rewrite (Rew.bShift ∘ f) • φ) :: Δ.map fun φ ↦ Rew.rewrite f • φ :=
-      all (Derivation.cast this (by simp [free_rewrite_eq, shifts, shift_rewrite_eq, Finset.image_image, Function.comp_def]))
+      all (Derivation.cast this (by simp [free_rewrite_eq, Rewriting.shifts, shift_rewrite_eq, Finset.image_image, Function.comp_def]))
     Derivation.cast this (by simp[Rew.q_rewrite])
   | @ex _ _ Δ φ t d,      f =>
     have : T ⟹ (φ/[t] :: Δ).map fun φ ↦ Rew.rewrite f • φ := rewrite d f
@@ -355,7 +328,7 @@ protected def map {Δ : Sequent L} (d : T ⟹ Δ) (f : ℕ → ℕ) :
     T ⟹ Δ.map fun φ ↦ @Rew.rewriteMap L ℕ ℕ 0 f • φ := rewrite d (fun x ↦ &(f x))
 
 protected def shift {Δ : Sequent L} (d : T ⟹ Δ) : T ⟹ Δ⁺ :=
-  Derivation.cast (Derivation.map d Nat.succ) (by simp only [shifts, List.map_inj_left]; intro _ _; rfl)
+  Derivation.cast (Derivation.map d Nat.succ) (by simp only [Rewriting.shifts, List.map_inj_left]; intro _ _; rfl)
 
 /-
 lemma CutRestricted.rewrite {C : Set (SyntacticFormula L)}
@@ -443,8 +416,8 @@ section Hom
 variable {L₁ : Language} {L₂ : Language} {T₁ : Theory L₁} {Δ₁ : Sequent L₁}
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (SyntacticFormula L₁)} :
-     (Δ.map $ .lMap Φ)⁺ = ((Δ⁺).map (.lMap Φ)) :=
-  by simp[shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp_def, Semiformula.lMap_shift]
+     (Δ.map <| Semiformula.lMap Φ)⁺ = (Δ⁺.map <| Semiformula.lMap Φ) := by
+  simp [Rewriting.shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp_def, Semiformula.lMap_shift]
 
 def lMap (Φ : L₁ →ᵥ L₂) : ∀ {Δ}, T₁ ⟹ Δ → T₁.lMap Φ ⟹ Δ.map (.lMap Φ)
   | _, axL Δ r v          =>
@@ -491,6 +464,7 @@ lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : System.Inconsistent T₁ → S
 end Hom
 
 omit [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
+
 private lemma map_subst_eq_free (φ : SyntacticSemiformula L 1) (h : ¬φ.FVar? m) :
     (@Rew.rewriteMap L ℕ ℕ 0 (fun x ↦ if x = m then 0 else x + 1)) • (φ/[&m] : SyntacticFormula L) = Rewriting.free φ := by
   simp[←LawfulRewriting.comp_smul];

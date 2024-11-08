@@ -77,6 +77,7 @@ lemma toₛ! (b : Γ ⊢[𝓢]! φ) : 𝓢 ⊢! ⋀Γ ➝ φ := b
 
 lemma provable_iff {φ : F} : Γ ⊢[𝓢]! φ ↔ 𝓢 ⊢! ⋀Γ ➝ φ := iff_of_eq rfl
 
+def cast {Γ φ} (d : Γ ⊢[𝓢] φ) (eΓ : Γ = Γ') (eφ : φ = φ') : Γ' ⊢[𝓢] φ' := eΓ ▸ eφ ▸ d
 
 section
 
@@ -92,6 +93,9 @@ instance : Compact (FiniteContext F 𝓢) where
   φPrf := id
   φ_subset := by simp
   φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
+
+def nthAxm {Γ} (n : ℕ) (h : n < Γ.length := by simp) : Γ ⊢[𝓢] Γ[n] := conj₂Nth Γ n h
+lemma nth_axm! {Γ} (n : ℕ) (h : n < Γ.length := by simp) : Γ ⊢[𝓢]! Γ[n] := ⟨nthAxm n h⟩
 
 def byAxm [DecidableEq F] {φ} (h : φ ∈ Γ := by simp) : Γ ⊢[𝓢] φ := Axiomatized.prfAxm (by simpa)
 
@@ -110,17 +114,17 @@ def provable_iff_provable {φ : F} : 𝓢 ⊢! φ ↔ [] ⊢[𝓢]! φ :=
 
 lemma of'! [DecidableEq F] (h : 𝓢 ⊢! φ) : Γ ⊢[𝓢]! φ := weakening! (by simp) $ provable_iff_provable.mp h
 
-def id [DecidableEq F] : [φ] ⊢[𝓢] φ := byAxm
-@[simp] lemma id! [DecidableEq F] : [φ] ⊢[𝓢]! φ := by_axm!
+def id : [φ] ⊢[𝓢] φ := nthAxm 0
+@[simp] lemma id! : [φ] ⊢[𝓢]! φ := nth_axm! 0
 
-def byAxm₀ [DecidableEq F] : (φ :: Γ) ⊢[𝓢] φ := byAxm
-lemma by_axm₀! [DecidableEq F] : (φ :: Γ) ⊢[𝓢]! φ := by_axm!
+def byAxm₀ : (φ :: Γ) ⊢[𝓢] φ := nthAxm 0
+lemma by_axm₀! : (φ :: Γ) ⊢[𝓢]! φ := nth_axm! 0
 
-def byAxm₁ [DecidableEq F] : (φ :: ψ :: Γ) ⊢[𝓢] ψ := byAxm
-lemma by_axm₁! [DecidableEq F] : (φ :: ψ :: Γ) ⊢[𝓢]! ψ := by_axm!
+def byAxm₁ : (φ :: ψ :: Γ) ⊢[𝓢] ψ := nthAxm 1
+lemma by_axm₁! : (φ :: ψ :: Γ) ⊢[𝓢]! ψ := nth_axm! 1
 
-def byAxm₂ [DecidableEq F] : (φ :: ψ :: χ :: Γ) ⊢[𝓢] χ := byAxm
-lemma by_axm₂! [DecidableEq F] : (φ :: ψ :: χ :: Γ) ⊢[𝓢]! χ := by_axm!
+def byAxm₂ : (φ :: ψ :: χ :: Γ) ⊢[𝓢] χ := nthAxm 2
+lemma by_axm₂! : (φ :: ψ :: χ :: Γ) ⊢[𝓢]! χ := nth_axm! 2
 
 instance (Γ : FiniteContext F 𝓢) : System.ModusPonens Γ := ⟨mdp₁⟩
 

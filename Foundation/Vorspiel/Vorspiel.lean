@@ -690,6 +690,7 @@ lemma remove_map_substet_map_remove [DecidableEq β] (f : α → β) (l : List �
 
 end remove
 
+@[elab_as_elim]
 lemma induction_with_singleton
   {motive : List F → Prop}
   (hnil : motive [])
