@@ -299,19 +299,11 @@ end Kripke
 
 section completeness
 
+instance Int.Kripke.complete : Complete (Hilbert.Int ℕ) AllFrameClass := Hilbert.Kripke.instCompleteOfCanonical $ by tauto
 
-set_option pp.universes true
+instance KC.Kripke.complete : Complete (Hilbert.KC ℕ) ConfluentFrameClass := Hilbert.Kripke.instCompleteOfCanonical $ Kripke.canonicalFrame.is_confluent
 
-instance Int.Kripke.complete : Complete (Hilbert.Int ℕ) (AllFrameClass.{0}) :=
-  Hilbert.Kripke.instCompleteOfCanonical (H := Hilbert.Int ℕ) (C := AllFrameClass.{0}) (by simp)
-
-instance KC.Kripke.complete : Complete (Hilbert.KC ℕ) (ConfluentFrameClass.{0}) :=
-  Hilbert.Kripke.instCompleteOfCanonical (H := Hilbert.KC ℕ) (C := ConfluentFrameClass.{0}) $ by
-    apply Kripke.canonicalFrame.is_confluent;
-
-instance LC.Kripke.complete : Complete (Hilbert.LC ℕ) (ConnectedFrameClass.{0}) :=
-  Hilbert.Kripke.instCompleteOfCanonical (H := Hilbert.LC ℕ) (C := ConnectedFrameClass.{0}) $ by
-    apply Kripke.canonicalFrame.is_connected;
+instance LC.Kripke.complete : Complete (Hilbert.LC ℕ) ConnectedFrameClass := Hilbert.Kripke.instCompleteOfCanonical $ Kripke.canonicalFrame.is_connected
 
 end completeness
 

@@ -451,7 +451,7 @@ lemma sound_of_equiv_frameclass_hilbert (definedBy : C.DefinedBy T) (heq : (⟨�
   apply sound_hilbert_of_frameclass (T := T) (definedBy);
   exact Equiv.iff.mp heq φ |>.mpr hφ;
 
-lemma sound (definedBy : C.DefinedBy T) (heq : (⟨𝗘𝗙𝗤 ∪ T⟩ : Hilbert ℕ) =ₛ H) : Sound H C := ⟨sound_of_equiv_frameclass_hilbert definedBy heq⟩
+protected instance instSound (definedBy : C.DefinedBy T) (heq : (⟨𝗘𝗙𝗤 ∪ T⟩ : Hilbert ℕ) =ₛ H) : Sound H C := ⟨sound_of_equiv_frameclass_hilbert definedBy heq⟩
 
 lemma unprovable_bot [sound : Sound H C] (hNonempty : C.Nonempty) : H ⊬ ⊥ := by
   apply not_imp_not.mpr sound.sound;
@@ -469,7 +469,7 @@ end Kripke
 
 namespace Int
 
-instance : Sound (Hilbert.Int ℕ) (AllFrameClass) := Kripke.sound AllFrameClass.defined_by_EFQ $ by simp
+instance Kripke.sound : Sound (Hilbert.Int ℕ) (AllFrameClass) := Kripke.instSound AllFrameClass.defined_by_EFQ $ by simp
 
 instance : (Hilbert.Int ℕ).Consistent := Kripke.consistent (C := AllFrameClass) $ by
   use Frame.point;
@@ -480,7 +480,7 @@ end Int
 
 namespace KC
 
-instance : Sound (Hilbert.KC ℕ) (ConfluentFrameClass) := Kripke.sound ConfluentFrameClass.defined_by_WLEM $ by simp
+instance Kripke.sound : Sound (Hilbert.KC ℕ) (ConfluentFrameClass) := Kripke.instSound ConfluentFrameClass.defined_by_WLEM $ by simp
 
 instance : (Hilbert.KC ℕ).Consistent := Kripke.consistent (C := ConfluentFrameClass) $ by
   use Frame.point;
@@ -491,7 +491,7 @@ end KC
 
 namespace LC
 
-instance : Sound (Hilbert.LC ℕ) (ConnectedFrameClass) := Kripke.sound ConnectedFrameClass.defined_by_Dummett $ by simp
+instance Kripke.sound : Sound (Hilbert.LC ℕ) (ConnectedFrameClass) := Kripke.instSound ConnectedFrameClass.defined_by_Dummett $ by simp
 
 instance : (Hilbert.LC ℕ).Consistent := Kripke.consistent (C := ConnectedFrameClass) $ by
   use Frame.point;
@@ -502,7 +502,7 @@ end LC
 
 namespace Cl
 
-instance : Sound (Hilbert.Cl ℕ) (EuclideanFrameClass) := Kripke.sound EuclideanFrameClass.defined_by_LEM $ by simp
+instance Kripke.sound : Sound (Hilbert.Cl ℕ) (EuclideanFrameClass) := Kripke.instSound EuclideanFrameClass.defined_by_LEM $ by simp
 
 instance : (Hilbert.Cl ℕ).Consistent := Kripke.consistent (C := EuclideanFrameClass) $ by
   use Frame.point;
