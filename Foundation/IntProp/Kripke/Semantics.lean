@@ -12,12 +12,12 @@ open System
 namespace Kripke
 
 structure Frame where
-  World : Type u
+  World : Type
   Rel : Rel World World
   [world_nonempty : Nonempty World]
   [rel_po : IsPartialOrder _ Rel]
 
-instance : CoeSort Frame (Type u) := ⟨Frame.World⟩
+instance : CoeSort Frame (Type) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 instance {F : Frame} : IsPartialOrder _ F.Rel := F.rel_po
@@ -30,27 +30,19 @@ namespace Frame
 variable {F : Frame}
 
 @[trans] lemma rel_trans {x y z : F.World} : x ≺ y → y ≺ z → x ≺ z := IsTrans.trans x y z
+lemma rel_trans' : Transitive F.Rel := by apply rel_trans;
 
 @[refl, simp] lemma rel_refl {x : F.World} : x ≺ x := IsRefl.refl x
+lemma rel_refl' : Reflexive F.Rel := by apply rel_refl
 
 @[simp] lemma rel_antisymm {x y : F.World} : x ≺ y → y ≺ x → x = y := IsAntisymm.antisymm x y
-
+lemma rel_antisymm' : Antisymmetric F.Rel := by apply rel_antisymm
 
 end Frame
 
-abbrev pointframe : Frame where
+protected abbrev Frame.point : Frame where
   World := PUnit
   Rel := fun _ _ => True
-
-namespace pointframe
-
-lemma is_symmetric : Symmetric pointframe.Rel := by simp [Symmetric]
-
-lemma is_connected : Connected pointframe.Rel := by simp [Connected];
-
-lemma is_confluent : Confluent pointframe.Rel := by simp [Confluent];
-
-end pointframe
 
 
 abbrev FrameClass := Set (Frame)
@@ -64,6 +56,8 @@ abbrev SymmetricFrameClass : FrameClass := { F : Kripke.Frame | Symmetric F }
 abbrev ConfluentFrameClass : FrameClass := { F : Kripke.Frame | Confluent F }
 
 abbrev ConnectedFrameClass : FrameClass := { F : Kripke.Frame | Connected F }
+
+abbrev EuclideanFrameClass : FrameClass := { F : Kripke.Frame | Euclidean F }
 
 end
 
@@ -312,7 +306,6 @@ end ValidOnFrameClass
 
 end Formula.Kripke
 
-
 namespace Kripke
 
 /--
@@ -320,57 +313,27 @@ namespace Kripke
 -/
 def Frame.theorems (F : Kripke.Frame) : Set (Formula ℕ) := { φ | F ⊧ φ }
 
-namespace Frame.theorems
+@[mk_iff iff_definedBy]
+class FrameClass.DefinedBy (C : FrameClass) (T : Set (Formula ℕ)) : Prop where
+  defined : ∀ F, F ∈ C ↔ F ⊧* T
+
+section definability
 
 variable {F : Kripke.Frame}
 
-lemma subset_efq : Axioms.EFQ.set ⊆ F.theorems := by
-  rintro _ ⟨φ, rfl⟩ V;
-  exact Formula.Kripke.ValidOnFrame.efq;
+instance : AllFrameClass.DefinedBy 𝗘𝗙𝗤 := by
+  apply FrameClass.iff_definedBy _ _ |>.mpr
+  simp [Semantics.RealizeSet];
+  intro F φ;
+  apply Formula.Kripke.ValidOnFrame.efq;
 
-
-section
-
-private lemma euclidean_of_subset_lem : (𝗟𝗘𝗠 ⊆ F.theorems) → Euclidean F := by
-  simp [Frame.theorems];
-  rintro h x y z Rxy Rxz;
-  let M : Kripke.Model := ⟨F, λ v _ => z ≺ v, by simp; intro w v _ _; trans w <;> assumption⟩;
-  suffices Kripke.Satisfies M y (atom default) by simpa [Kripke.Satisfies] using this;
-  apply M.Val.hereditary Rxy;
-  have := @h (atom default) M.Val x;
-  simp only [Axioms.LEM, Semantics.Realize, Kripke.Satisfies, or_iff_not_imp_right] at this;
-  apply this;
-  push_neg;
-  use z;
+instance : ConfluentFrameClass.DefinedBy 𝗪𝗟𝗘𝗠 := by
+  apply FrameClass.iff_definedBy _ _ |>.mpr;
+  simp [Semantics.RealizeSet];
+  intro F;
   constructor;
-  . exact Rxz;
-  . simp [Kripke.Satisfies];
-
-/-
-private lemma subset_lem_of_equality : Equality F → 𝗟𝗘𝗠 ⊆ F.theorems := by
-  intro hEq φ V x;
-  induction φ using Formula.rec' with
-  | hatom a =>
-    simp [Axioms.LEM, Kripke.ValidOnModel, Semantics.Realize, Kripke.Satisfies, or_iff_not_imp_right, Model.Val];
-    intro y;
-    have := hEq.mp Rxy; subst this;
-    assumption;
-  | _ => simp_all [Axioms.LEM, Kripke.ValidOnModel, Semantics.Realize, Kripke.Satisfies, Equality]; try tauto;
-
-lemma subset_lem_iff_euclidean [Inhabited ℕ] : 𝗟𝗘𝗠 ⊆ F.theorems (α) ↔ Euclidean F := by
-  constructor;
-  . exact euclidean_of_subset_lem;
-  . intro hEucl;
-    exact subset_lem_of_equality $ equality_of_refl_assym_eucl (F.rel_refl) (F.rel_antisymm) hEucl;
--/
-
-end
-
-/-
-section
-
-lemma subset_wlem_iff_confluent : 𝗪𝗟𝗘𝗠 ⊆ F.theorems ↔ Confluent F := by
-  constructor;
+  . rintro hCon φ V;
+    exact Kripke.ValidOnModel.wlem hCon;
   . rintro h x y z ⟨Rxy, Rxz⟩;
     let M : Kripke.Model := ⟨F, λ {v _} => y ≺ v, by simp; intro w _ _ _; trans w <;> assumption⟩;
     have : ¬Kripke.Satisfies M x (∼(atom default)) := by
@@ -387,64 +350,138 @@ lemma subset_wlem_iff_confluent : 𝗪𝗟𝗘𝗠 ⊆ F.theorems ↔ Confluent 
     have := this Rxz; simp [Semantics.Realize, Kripke.Satisfies] at this;
     obtain ⟨w, ⟨Rzw, hw⟩⟩ := this;
     use w;
-  . intro hCon φ V Vherd x;
-    induction φ using Formula.rec' with
-    | hatom a =>
-      simp [Axioms.WeakLEM, Kripke.ValidOnModel, Semantics.Realize, Kripke.Satisfies, or_iff_not_imp_left];
-      intro y Rxy hy z Rxz;
-      obtain ⟨w, ⟨Ryw, Rzw⟩⟩ := hCon ⟨Rxy, Rxz⟩;
-      use w;
-      constructor;
-      . exact Rzw;
-      . exact Vherd Ryw hy;
-    | hverum => sorry
-    | hand => sorry;
-    | hor φ ψ hφ hψ => sorry;
-    | _ => sorry;
 
-end
--/
+instance : ConnectedFrameClass.DefinedBy 𝗗𝘂𝗺 := by
+  apply FrameClass.iff_definedBy _ _ |>.mpr;
+  simp [Semantics.RealizeSet];
+  intro F;
+  constructor;
+  . rintro hCon _ φ ψ rfl;
+    exact Kripke.ValidOnModel.dum hCon;
+  . rintro h x y z ⟨Rxy, Rxz⟩;
+    let M : Kripke.Model := ⟨F, ⟨λ {v a} => match a with | 0 => y ≺ v | 1 => z ≺ v | _ => True, by
+      intro w v Rwv a ha;
+      split at ha;
+      . exact F.rel_trans ha Rwv;
+      . exact F.rel_trans ha Rwv;
+      . tauto;
+    ⟩⟩;
+    rcases Kripke.Satisfies.or_def.mp $ @h (Axioms.Dummett (atom 0) (atom 1)) (atom 0) (atom 1) rfl M.Val x with (hi | hi);
+    . have := Kripke.Satisfies.imp_def.mp hi Rxy;
+      simp [Semantics.Realize, Kripke.Satisfies] at this;
+      tauto;
+    . have := Kripke.Satisfies.imp_def.mp hi Rxz;
+      simp [Semantics.Realize, Kripke.Satisfies] at this;
+      tauto;
 
-/-
 section
 
-lemma subset_dum_iff_connected [Inhabited ℕ] : 𝗗𝘂𝗺 ⊆ F.theorems (α) ↔ Connected F := by
+private lemma euclidean_of_subset_lem_frameTheorems : (𝗟𝗘𝗠 ⊆ F.theorems) → Euclidean F := by
   simp [Frame.theorems];
+  rintro h x y z Rxy Rxz;
+  let M : Kripke.Model := ⟨F, λ v _ => z ≺ v, by simp; intro w v _ _; trans w <;> assumption⟩;
+  suffices Kripke.Satisfies M y (atom default) by simpa [Kripke.Satisfies] using this;
+  apply M.Val.hereditary Rxy;
+  have := @h (atom default) M.Val x;
+  simp only [Axioms.LEM, Semantics.Realize, Kripke.Satisfies, or_iff_not_imp_right] at this;
+  apply this;
+  push_neg;
+  use z;
   constructor;
-  . rintro h x y z ⟨Rxy, Rxz⟩;
-    sorry;
-    -- let V : Valuation F ℕ := λ {v _} => y ≺ v;
-    -- let M : Kripke.Model := ⟨F, V, by simp [V]; intro _ _ R₁ R₂; exact F.rel_trans R₂ R₁⟩;
-  . sorry;
+  . exact Rxz;
+  . simp [Kripke.Satisfies];
+
+private lemma subset_lem_frameTheorems_of_symmetric : Symmetric F → 𝗟𝗘𝗠 ⊆ F.theorems := by
+  simp [Frame.theorems];
+  rintro hSym φ _ V;
+  apply Kripke.ValidOnModel.lem hSym;
+
+private lemma subset_lem_frameTheorems_iff_euclidean : 𝗟𝗘𝗠 ⊆ F.theorems ↔ Euclidean F := by
+  constructor;
+  . exact euclidean_of_subset_lem_frameTheorems;
+  . intro hEucl;
+    apply subset_lem_frameTheorems_of_symmetric;
+    apply symm_of_refl_eucl;
+    . exact F.rel_refl';
+    . assumption;
+
+instance : EuclideanFrameClass.DefinedBy 𝗟𝗘𝗠 := by
+  apply FrameClass.iff_definedBy _ _ |>.mpr;
+  simp [Semantics.RealizeSet];
+  intro F;
+  constructor;
+  . intro hEucl;
+    simpa [Frame.theorems] using subset_lem_frameTheorems_iff_euclidean.mpr hEucl;
+  . intro h;
+    apply subset_lem_frameTheorems_iff_euclidean.mp;
+    simpa [Frame.theorems] using h;
 
 end
--/
 
-end Frame.theorems
+end definability
+
+
+section
+
+def FrameClass.Hilbert (C : FrameClass) (T : Set (Formula ℕ)) [C.DefinedBy T] : Hilbert ℕ := ⟨𝗘𝗙𝗤 ∪ T⟩
+
+abbrev AllFrameClass.hilbert : Hilbert ℕ := AllFrameClass.Hilbert (T := 𝗘𝗙𝗤)
+lemma AllFrameClass.eq_hilbert : AllFrameClass.hilbert =ₛ Hilbert.Int ℕ := by simp [FrameClass.Hilbert]
+
+abbrev ConfluentFrameClass.hilbert : Hilbert ℕ := ConfluentFrameClass.Hilbert (T := 𝗪𝗟𝗘𝗠)
+lemma ConfluentFrameClass.eq_hilbert : ConfluentFrameClass.hilbert =ₛ Hilbert.KC ℕ := by rfl
+
+abbrev ConnectedFrameClass.hilbert : Hilbert ℕ := ConnectedFrameClass.Hilbert (T := 𝗗𝘂𝗺)
+lemma ConnectedFrameClass.eq_hilbert : ConnectedFrameClass.hilbert =ₛ Hilbert.LC ℕ := by rfl
+
+abbrev EuclideanFrameClass.hilbert : Hilbert ℕ := EuclideanFrameClass.Hilbert (T := 𝗟𝗘𝗠)
+lemma EuclideanFrameClass.eq_hilbert : EuclideanFrameClass.hilbert =ₛ Hilbert.Cl ℕ := by rfl
+
+end
 
 end Kripke
 
 
 namespace Hilbert
 
-open Formula.Kripke
-
-variable {C : Kripke.FrameClass}
-variable {H : Hilbert ℕ} {φ : Formula ℕ}
-
 namespace Kripke
 
-abbrev frameclassOf (H : Hilbert ℕ) : FrameClass := { F | F ⊧* H.theorems }
+open Formula.Kripke
 
-lemma sound : H ⊢! φ → (frameclassOf H) ⊧ φ := by
+variable {H : Hilbert ℕ} {φ : Formula ℕ}
+variable {C : FrameClass} {T : Set (Formula ℕ)}
+variable [definedBy : C.DefinedBy T]
+
+lemma sound_hilbert_of_frameclass : (C.Hilbert (T := T)) ⊢! φ → C ⊧ φ := by
   intro hφ F hF;
-  simp [System.theory] at hF;
-  exact hF φ hφ;
+  induction hφ using Hilbert.Deduction.rec! with
+  | verum => apply ValidOnFrame.verum;
+  | imply₁ => apply ValidOnFrame.imply₁;
+  | imply₂ => apply ValidOnFrame.imply₂;
+  | and₁ => apply ValidOnFrame.andElim₁;
+  | and₂ => apply ValidOnFrame.andElim₂;
+  | and₃ => apply ValidOnFrame.andInst₃;
+  | or₁ => apply ValidOnFrame.orInst₁;
+  | or₂ => apply ValidOnFrame.orInst₂;
+  | or₃ => apply ValidOnFrame.orElim;
+  | neg_equiv => apply ValidOnFrame.neg_equiv;
+  | mdp => exact ValidOnFrame.mdp (by assumption) (by assumption);
+  | eaxm hi =>
+    simp [FrameClass.Hilbert] at hi;
+    rcases hi with (⟨_, rfl⟩ | h);
+    . apply ValidOnFrame.efq;
+    . apply Semantics.realizeSet_iff.mp (definedBy.defined F |>.mp hF);
+      assumption;
 
-instance : Sound H (frameclassOf H) := ⟨sound⟩
+lemma sound_of_equiv_frameclass_hilbert (heq : (C.Hilbert (T := T)) =ₛ H) : H ⊢! φ → C ⊧ φ := by
+  intro hφ;
+  apply sound_hilbert_of_frameclass (T := T) (definedBy := definedBy);
+  exact Equiv.iff.mp heq φ |>.mpr hφ;
 
-lemma unprovable_bot (hNonempty : (frameclassOf H).Nonempty) : H ⊬ ⊥ := by
-  apply not_imp_not.mpr sound;
+lemma sound (heq : (C.Hilbert (T := T)) =ₛ H) : Sound H C := ⟨sound_of_equiv_frameclass_hilbert heq⟩
+
+lemma unprovable_bot [sound : Sound H C] (hNonempty : C.Nonempty) : H ⊬ ⊥ := by
+  apply not_imp_not.mpr sound.sound;
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hNonempty;
   use F;
@@ -452,137 +489,55 @@ lemma unprovable_bot (hNonempty : (frameclassOf H).Nonempty) : H ⊬ ⊥ := by
   . exact hF;
   . exact Semantics.Bot.realize_bot (F := Formula ℕ) (M := Frame) F;
 
-instance (h_nonempty : (frameclassOf H).Nonempty) : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot h_nonempty
-
-class Characterize (H : Hilbert ℕ) (C : Kripke.FrameClass) where
-  characterize : C ⊆ (frameclassOf H)
-  nonempty : C.Nonempty
-
-lemma sound_of_subset [Characterize H C] : H ⊢! φ → C ⊧ φ := by
-  intro h F hF;
-  apply sound h;
-  exact Characterize.characterize hF;
-
-instance instSoundOfSubset [Characterize H C] : Sound H C := ⟨sound_of_subset⟩
-
--- TODO: change to `instance`
-lemma instConsistentOf [Characterize H C] : H.Consistent := by
-  apply System.Consistent.of_unprovable;
-  apply Sound.not_provable_of_countermodel (𝓢 := H) (𝓜 := C) (F := Formula ℕ) (φ := ⊥);
-  exact Kripke.ValidOnFrameClass.bot $ Characterize.nonempty H;
+lemma consistent [Sound H C] (h_nonempty : C.Nonempty) : H.Consistent := System.Consistent.of_unprovable $ unprovable_bot h_nonempty
 
 end Kripke
 
 
-open Kripke
-
-macro_rules | `(tactic| trivial) => `(tactic|
-    first
-    | apply ValidOnFrame.verum;
-    | apply ValidOnFrame.imply₁;
-    | apply ValidOnFrame.imply₂;
-    | apply ValidOnFrame.andElim₁;
-    | apply ValidOnFrame.andElim₂;
-    | apply ValidOnFrame.andInst₃;
-    | apply ValidOnFrame.orInst₁;
-    | apply ValidOnFrame.orInst₂;
-    | apply ValidOnFrame.orElim;
-    | apply ValidOnFrame.neg_equiv;
-    | exact ValidOnFrame.mdp (by assumption) (by assumption);
-  )
-
-
 namespace Int
 
-lemma Kripke.subset_univ : Set.univ ⊆ frameclassOf (Hilbert.Int ℕ) := by
-  intro F _;
-  simp [Hilbert.theorems, System.theory];
-  intro φ hφ;
-  induction hφ using Hilbert.Deduction.rec! with
-  | eaxm h => obtain ⟨_, rfl⟩ := h; exact ValidOnFrame.efq;
-  | _ => trivial;
+instance : Sound (Hilbert.Int ℕ) (AllFrameClass) := Kripke.sound (AllFrameClass.eq_hilbert)
 
-instance Kripke.characterize : Characterize (Hilbert.Int ℕ) (Set.univ) := ⟨Kripke.subset_univ, ⟨Kripke.pointframe, by tauto⟩⟩
-
-instance Kripke.sound : Sound (Hilbert.Int ℕ) (AllFrameClass) := instSoundOfSubset (H := Hilbert.Int ℕ) (C := AllFrameClass)
-
-instance Kripke.consistent : (Hilbert.Int ℕ).Consistent := instConsistentOf.{u} (H := Hilbert.Int ℕ) (C := AllFrameClass)
+instance : (Hilbert.Int ℕ).Consistent := Kripke.consistent (C := AllFrameClass) $ by
+  use Frame.point;
+  tauto;
 
 end Int
 
 
-namespace Cl
-
-lemma Kripke.subset_symmetric : SymmetricFrameClass ⊆ frameclassOf (Hilbert.Cl ℕ) := by
-  intro F hF;
-  simp at hF;
-  simp [Hilbert.theorems, System.theory];
-  intro φ hφ;
-  induction hφ using Hilbert.Deduction.rec! with
-  | eaxm h =>
-    rcases h with (⟨_, rfl⟩ | ⟨_, rfl⟩);
-    . apply ValidOnFrame.efq;
-    . apply ValidOnFrame.lem; exact hF;
-  | _ => trivial;
-
-instance Kripke.characterize : Characterize (Hilbert.Cl ℕ) (SymmetricFrameClass) := ⟨subset_symmetric, ⟨pointframe, pointframe.is_symmetric⟩⟩
-
-instance Kripke.sound : Sound (Hilbert.Cl ℕ) (SymmetricFrameClass) := instSoundOfSubset (H := Hilbert.Cl ℕ) (C := SymmetricFrameClass)
-
-instance Kripke.consistent : (Hilbert.Cl ℕ).Consistent := instConsistentOf.{u} (H := Hilbert.Cl ℕ) (C := SymmetricFrameClass)
-
-end Cl
-
-
 namespace KC
 
-lemma Kripke.subset_concluent : ConfluentFrameClass ⊆ (frameclassOf (Hilbert.KC ℕ)) := by
-  intro F hF;
-  simp at hF;
-  simp [Hilbert.theorems, System.theory];
-  intro φ hφ;
-  induction hφ using Hilbert.Deduction.rec! with
-  | eaxm h =>
-    rcases h with (⟨_, rfl⟩ | ⟨_, _, rfl⟩);
-    . apply ValidOnFrame.efq;
-    . apply ValidOnFrame.wlem; exact hF;
-  | _ => trivial;
+instance : Sound (Hilbert.KC ℕ) (ConfluentFrameClass) := Kripke.sound (ConfluentFrameClass.eq_hilbert)
 
-instance Kripke.characterize : Characterize (Hilbert.KC ℕ) (ConfluentFrameClass) := ⟨subset_concluent, ⟨pointframe, pointframe.is_confluent⟩⟩
-
-instance Kripke.sound : Sound (Hilbert.KC ℕ) (ConfluentFrameClass) := instSoundOfSubset (H := Hilbert.KC ℕ) (C := ConfluentFrameClass)
-
-instance Kripke.consistent : (Hilbert.KC ℕ).Consistent := instConsistentOf.{u} (H := Hilbert.KC ℕ) (C := ConfluentFrameClass)
+instance : (Hilbert.KC ℕ).Consistent := Kripke.consistent (C := ConfluentFrameClass) $ by
+  use Frame.point;
+  simp [Confluent]
 
 end KC
 
 
 namespace LC
 
-lemma Kripke.subset_connected : ConnectedFrameClass ⊆ frameclassOf (Hilbert.LC ℕ) := by
-  intro F hF;
-  simp at hF;
-  simp [Hilbert.theorems, System.theory];
-  intro φ hφ;
-  induction hφ using Hilbert.Deduction.rec! with
-  | eaxm h =>
-    rcases h with (⟨_, rfl⟩ | ⟨_, _, rfl⟩);
-    . apply ValidOnFrame.efq;
-    . apply ValidOnFrame.dum; exact hF;
-  | _ => trivial;
+instance : Sound (Hilbert.LC ℕ) (ConnectedFrameClass) := Kripke.sound (ConnectedFrameClass.eq_hilbert)
 
-instance Kripke.characterize : Characterize (Hilbert.LC ℕ) (ConnectedFrameClass) := ⟨subset_connected, ⟨pointframe, pointframe.is_connected⟩⟩
-
-instance Kripke.sound : Sound (Hilbert.LC ℕ) (ConnectedFrameClass) := instSoundOfSubset (H := Hilbert.LC ℕ) (C := ConnectedFrameClass)
-
-instance Kripke.consistent : (Hilbert.LC ℕ).Consistent := instConsistentOf.{u} (H := Hilbert.LC ℕ) (C := ConnectedFrameClass)
+instance : (Hilbert.LC ℕ).Consistent := Kripke.consistent (C := ConnectedFrameClass) $ by
+  use Frame.point;
+  simp [Connected]
 
 end LC
 
+
+namespace Cl
+
+instance : Sound (Hilbert.Cl ℕ) (EuclideanFrameClass) := Kripke.sound (EuclideanFrameClass.eq_hilbert)
+
+instance : (Hilbert.Cl ℕ).Consistent := Kripke.consistent (C := EuclideanFrameClass) $ by
+  use Frame.point;
+  simp [Euclidean]
+
+end Cl
+
 end Hilbert
-
-
-
 
 
 /-
