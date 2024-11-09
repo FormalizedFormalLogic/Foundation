@@ -313,24 +313,20 @@ namespace Kripke
 -/
 def Frame.theorems (F : Kripke.Frame) : Set (Formula ℕ) := { φ | F ⊧ φ }
 
-@[mk_iff iff_definedBy]
-class FrameClass.DefinedBy (C : FrameClass) (T : Set (Formula ℕ)) : Prop where
-  defined : ∀ F, F ∈ C ↔ F ⊧* T
+def FrameClass.DefinedBy (C : FrameClass) (T : Set (Formula ℕ)) : Prop := ∀ F, F ∈ C ↔ F ⊧* T
 
 section definability
 
 variable {F : Kripke.Frame}
 
-instance : AllFrameClass.DefinedBy 𝗘𝗙𝗤 := by
-  apply FrameClass.iff_definedBy _ _ |>.mpr
+instance AllFrameClass.defined_by_EFQ : AllFrameClass.DefinedBy 𝗘𝗙𝗤 := by
+  intro F;
   simp [Semantics.RealizeSet];
-  intro F φ;
   apply Formula.Kripke.ValidOnFrame.efq;
 
-instance : ConfluentFrameClass.DefinedBy 𝗪𝗟𝗘𝗠 := by
-  apply FrameClass.iff_definedBy _ _ |>.mpr;
-  simp [Semantics.RealizeSet];
+instance ConfluentFrameClass.defined_by_WLEM : ConfluentFrameClass.DefinedBy 𝗪𝗟𝗘𝗠 := by
   intro F;
+  simp [Semantics.RealizeSet];
   constructor;
   . rintro hCon φ V;
     exact Kripke.ValidOnModel.wlem hCon;
@@ -351,10 +347,9 @@ instance : ConfluentFrameClass.DefinedBy 𝗪𝗟𝗘𝗠 := by
     obtain ⟨w, ⟨Rzw, hw⟩⟩ := this;
     use w;
 
-instance : ConnectedFrameClass.DefinedBy 𝗗𝘂𝗺 := by
-  apply FrameClass.iff_definedBy _ _ |>.mpr;
-  simp [Semantics.RealizeSet];
+instance ConnectedFrameClass.defined_by_Dummett : ConnectedFrameClass.DefinedBy 𝗗𝘂𝗺 := by
   intro F;
+  simp [Semantics.RealizeSet];
   constructor;
   . rintro hCon _ φ ψ rfl;
     exact Kripke.ValidOnModel.dum hCon;
@@ -405,10 +400,9 @@ private lemma subset_lem_frameTheorems_iff_euclidean : 𝗟𝗘𝗠 ⊆ F.theore
     . exact F.rel_refl';
     . assumption;
 
-instance : EuclideanFrameClass.DefinedBy 𝗟𝗘𝗠 := by
-  apply FrameClass.iff_definedBy _ _ |>.mpr;
-  simp [Semantics.RealizeSet];
+instance EuclideanFrameClass.defined_by_LEM : EuclideanFrameClass.DefinedBy 𝗟𝗘𝗠 := by
   intro F;
+  simp [Semantics.RealizeSet];
   constructor;
   . intro hEucl;
     simpa [Frame.theorems] using subset_lem_frameTheorems_iff_euclidean.mpr hEucl;
@@ -419,25 +413,6 @@ instance : EuclideanFrameClass.DefinedBy 𝗟𝗘𝗠 := by
 end
 
 end definability
-
-
-section
-
-def FrameClass.Hilbert (C : FrameClass) (T : Set (Formula ℕ)) [C.DefinedBy T] : Hilbert ℕ := ⟨𝗘𝗙𝗤 ∪ T⟩
-
-abbrev AllFrameClass.hilbert : Hilbert ℕ := AllFrameClass.Hilbert (T := 𝗘𝗙𝗤)
-lemma AllFrameClass.eq_hilbert : AllFrameClass.hilbert =ₛ Hilbert.Int ℕ := by simp [FrameClass.Hilbert]
-
-abbrev ConfluentFrameClass.hilbert : Hilbert ℕ := ConfluentFrameClass.Hilbert (T := 𝗪𝗟𝗘𝗠)
-lemma ConfluentFrameClass.eq_hilbert : ConfluentFrameClass.hilbert =ₛ Hilbert.KC ℕ := by rfl
-
-abbrev ConnectedFrameClass.hilbert : Hilbert ℕ := ConnectedFrameClass.Hilbert (T := 𝗗𝘂𝗺)
-lemma ConnectedFrameClass.eq_hilbert : ConnectedFrameClass.hilbert =ₛ Hilbert.LC ℕ := by rfl
-
-abbrev EuclideanFrameClass.hilbert : Hilbert ℕ := EuclideanFrameClass.Hilbert (T := 𝗟𝗘𝗠)
-lemma EuclideanFrameClass.eq_hilbert : EuclideanFrameClass.hilbert =ₛ Hilbert.Cl ℕ := by rfl
-
-end
 
 end Kripke
 
@@ -450,9 +425,8 @@ open Formula.Kripke
 
 variable {H : Hilbert ℕ} {φ : Formula ℕ}
 variable {C : FrameClass} {T : Set (Formula ℕ)}
-variable [definedBy : C.DefinedBy T]
 
-lemma sound_hilbert_of_frameclass : (C.Hilbert (T := T)) ⊢! φ → C ⊧ φ := by
+lemma sound_hilbert_of_frameclass (definedBy : C.DefinedBy T) : (⟨𝗘𝗙𝗤 ∪ T⟩ : Hilbert ℕ) ⊢! φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.Deduction.rec! with
   | verum => apply ValidOnFrame.verum;
@@ -467,18 +441,17 @@ lemma sound_hilbert_of_frameclass : (C.Hilbert (T := T)) ⊢! φ → C ⊧ φ :=
   | neg_equiv => apply ValidOnFrame.neg_equiv;
   | mdp => exact ValidOnFrame.mdp (by assumption) (by assumption);
   | eaxm hi =>
-    simp [FrameClass.Hilbert] at hi;
     rcases hi with (⟨_, rfl⟩ | h);
     . apply ValidOnFrame.efq;
-    . apply Semantics.realizeSet_iff.mp (definedBy.defined F |>.mp hF);
+    . apply Semantics.realizeSet_iff.mp (definedBy F |>.mp hF);
       assumption;
 
-lemma sound_of_equiv_frameclass_hilbert (heq : (C.Hilbert (T := T)) =ₛ H) : H ⊢! φ → C ⊧ φ := by
+lemma sound_of_equiv_frameclass_hilbert (definedBy : C.DefinedBy T) (heq : (⟨𝗘𝗙𝗤 ∪ T⟩ : Hilbert ℕ) =ₛ H) : H ⊢! φ → C ⊧ φ := by
   intro hφ;
-  apply sound_hilbert_of_frameclass (T := T) (definedBy := definedBy);
+  apply sound_hilbert_of_frameclass (T := T) (definedBy);
   exact Equiv.iff.mp heq φ |>.mpr hφ;
 
-lemma sound (heq : (C.Hilbert (T := T)) =ₛ H) : Sound H C := ⟨sound_of_equiv_frameclass_hilbert heq⟩
+lemma sound (definedBy : C.DefinedBy T) (heq : (⟨𝗘𝗙𝗤 ∪ T⟩ : Hilbert ℕ) =ₛ H) : Sound H C := ⟨sound_of_equiv_frameclass_hilbert definedBy heq⟩
 
 lemma unprovable_bot [sound : Sound H C] (hNonempty : C.Nonempty) : H ⊬ ⊥ := by
   apply not_imp_not.mpr sound.sound;
@@ -496,7 +469,7 @@ end Kripke
 
 namespace Int
 
-instance : Sound (Hilbert.Int ℕ) (AllFrameClass) := Kripke.sound (AllFrameClass.eq_hilbert)
+instance : Sound (Hilbert.Int ℕ) (AllFrameClass) := Kripke.sound AllFrameClass.defined_by_EFQ $ by simp
 
 instance : (Hilbert.Int ℕ).Consistent := Kripke.consistent (C := AllFrameClass) $ by
   use Frame.point;
@@ -507,7 +480,7 @@ end Int
 
 namespace KC
 
-instance : Sound (Hilbert.KC ℕ) (ConfluentFrameClass) := Kripke.sound (ConfluentFrameClass.eq_hilbert)
+instance : Sound (Hilbert.KC ℕ) (ConfluentFrameClass) := Kripke.sound ConfluentFrameClass.defined_by_WLEM $ by simp
 
 instance : (Hilbert.KC ℕ).Consistent := Kripke.consistent (C := ConfluentFrameClass) $ by
   use Frame.point;
@@ -518,7 +491,7 @@ end KC
 
 namespace LC
 
-instance : Sound (Hilbert.LC ℕ) (ConnectedFrameClass) := Kripke.sound (ConnectedFrameClass.eq_hilbert)
+instance : Sound (Hilbert.LC ℕ) (ConnectedFrameClass) := Kripke.sound ConnectedFrameClass.defined_by_Dummett $ by simp
 
 instance : (Hilbert.LC ℕ).Consistent := Kripke.consistent (C := ConnectedFrameClass) $ by
   use Frame.point;
@@ -529,7 +502,7 @@ end LC
 
 namespace Cl
 
-instance : Sound (Hilbert.Cl ℕ) (EuclideanFrameClass) := Kripke.sound (EuclideanFrameClass.eq_hilbert)
+instance : Sound (Hilbert.Cl ℕ) (EuclideanFrameClass) := Kripke.sound EuclideanFrameClass.defined_by_LEM $ by simp
 
 instance : (Hilbert.Cl ℕ).Consistent := Kripke.consistent (C := EuclideanFrameClass) $ by
   use Frame.point;
