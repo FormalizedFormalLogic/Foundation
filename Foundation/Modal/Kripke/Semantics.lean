@@ -43,14 +43,6 @@ section
 
 abbrev AllFrameClass : FrameClass := Set.univ
 
-abbrev SymmetricFrameClass : FrameClass := { F : Kripke.Frame | Symmetric F }
-
-abbrev ConfluentFrameClass : FrameClass := { F : Kripke.Frame | Confluent F }
-
-abbrev ConnectedFrameClass : FrameClass := { F : Kripke.Frame | Connected F }
-
-abbrev EuclideanFrameClass : FrameClass := { F : Kripke.Frame | Euclidean F }
-
 end
 
 abbrev Valuation (F : Frame) := F.World → ℕ → Prop

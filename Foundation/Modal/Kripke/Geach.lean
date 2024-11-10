@@ -180,6 +180,18 @@ lemma MultiGeachConfluentFrameClass.isDefinedBy {ts : List GeachConfluent.Taple}
         simpa using ht;
       . apply ih.mpr hts;
 
+lemma ReflexiveFrameClass.isDefinedBy : (ReflexiveFrameClass).DefinedBy 𝗧 := by
+  rw [ReflexiveFrameClass.is_geach, Axioms.T.is_geach];
+  apply GeachConfluentFrameClass.isDefinedBy;
+
+lemma SerialFrameClass.isDefinedBy : (SerialFrameClass).DefinedBy 𝗗 := by
+  rw [SerialFrameClass.is_geach, Axioms.D.is_geach];
+  apply GeachConfluentFrameClass.isDefinedBy;
+
+lemma TransitiveFrameClass.isDefinedBy : (TransitiveFrameClass).DefinedBy 𝟰 := by
+  rw [TransitiveFrameClass.is_geach, Axioms.Four.is_geach];
+  apply GeachConfluentFrameClass.isDefinedBy;
+
 end definability
 
 end Kripke
@@ -270,9 +282,11 @@ open System
 open Theory MaximalConsistentTheory
 open canonicalFrame
 
+namespace canonicalFrame
+
 variable {Ax : Theory ℕ} [(Hilbert.ExtK Ax).Consistent]
 
-lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (canonicalFrame (Hilbert.ExtK Ax)).Rel := by
+lemma is_geachConfluent_of_subset_Geach (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t (canonicalFrame (Hilbert.ExtK Ax)).Rel := by
   rintro Ω₁ Ω₂ Ω₃ h;
   have ⟨r₁₂, r₁₃⟩ := h; clear h;
   have ⟨Ω, hΩ⟩ := lindenbaum (H := (Hilbert.ExtK Ax)) (T := □''⁻¹^[t.m]Ω₂.theory ∪ □''⁻¹^[t.n]Ω₃.theory) $ by
@@ -305,17 +319,44 @@ lemma geachConfluent_CanonicalFrame (h : 𝗴𝗲(t) ⊆ Ax) : GeachConfluent t 
   . apply multirel_def_multibox.mpr; apply hΩ.1;
   . apply multirel_def_multibox.mpr; apply hΩ.2;
 
-lemma multiGeachConfluent_CanonicalFrame (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (canonicalFrame (Hilbert.ExtK Ax)).Rel := by
+lemma is_multiGeachConfluent_of_subset_MultiGeach (h : 𝗚𝗲(ts) ⊆ Ax) : MultiGeachConfluent ts (canonicalFrame (Hilbert.ExtK Ax)).Rel := by
   induction ts using List.induction_with_singleton with
   | hnil => simp [MultiGeachConfluent];
   | hsingle t =>
     simp [MultiGeachConfluent.iff_singleton] at h;
-    exact geachConfluent_CanonicalFrame h;
+    exact is_geachConfluent_of_subset_Geach h;
   | hcons t ts ts_nil ih =>
     simp [(MultiGeachConfluent.iff_cons ts_nil)];
     constructor;
-    . apply geachConfluent_CanonicalFrame; simp_all;
+    . apply is_geachConfluent_of_subset_Geach; simp_all;
     . apply ih; simp_all;
+
+lemma is_reflexive_of_subset_T (h : 𝗧 ⊆ Ax) : Reflexive (canonicalFrame (Hilbert.ExtK Ax)).Rel := by
+  rw [GeachConfluent.reflexive_def, Axioms.T.is_geach] at *
+  apply is_geachConfluent_of_subset_Geach;
+  exact h;
+
+lemma is_serial_of_subset_D (h : 𝗗 ⊆ Ax) : Serial (canonicalFrame (Hilbert.ExtK Ax)).Rel := by
+  rw [GeachConfluent.serial_def, Axioms.D.is_geach] at *
+  apply is_geachConfluent_of_subset_Geach;
+  exact h;
+
+lemma is_transitive_of_subset_Four (h : 𝟰 ⊆ Ax) : Transitive (canonicalFrame (Hilbert.ExtK Ax)).Rel := by
+  rw [GeachConfluent.transitive_def, Axioms.Four.is_geach] at *
+  apply is_geachConfluent_of_subset_Geach;
+  exact h;
+
+lemma is_euclidean_of_subset_Five (h : 𝟱 ⊆ Ax) : Euclidean (canonicalFrame (Hilbert.ExtK Ax)).Rel := by
+  rw [GeachConfluent.euclidean_def, Axioms.Five.is_geach] at *
+  apply is_geachConfluent_of_subset_Geach;
+  exact h;
+
+lemma is_symmetric_of_subset_B (h : 𝗕 ⊆ Ax) : Symmetric (canonicalFrame (Hilbert.ExtK Ax)).Rel := by
+  rw [GeachConfluent.symmetric_def, Axioms.B.is_geach] at *
+  apply is_geachConfluent_of_subset_Geach;
+  exact h;
+
+end canonicalFrame
 
 end Kripke
 
@@ -324,32 +365,32 @@ section completeness
 
 instance KT_complete : Complete (Hilbert.KT ℕ) ReflexiveFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveFrameClass.is_geach];
-  apply Kripke.multiGeachConfluent_CanonicalFrame;
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.T.is_geach];
 
 instance KTB_complete : Complete (Hilbert.KTB ℕ) ReflexiveSymmetricFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveSymmetricFrameClass.is_geach];
-  apply Kripke.multiGeachConfluent_CanonicalFrame;
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.MultiGeach.def_two, Axioms.T.is_geach, Axioms.B.is_geach];
 
 instance K4_complete : Complete (Hilbert.K4 ℕ) TransitiveFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [TransitiveFrameClass.is_geach];
-  apply Kripke.multiGeachConfluent_CanonicalFrame;
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp;
 
 instance S4_complete : Complete (Hilbert.S4 ℕ) ReflexiveTransitiveFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveTransitiveFrameClass.is_geach];
-  apply Kripke.multiGeachConfluent_CanonicalFrame;
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.T.is_geach, Axioms.Four.is_geach, Axioms.MultiGeach.def_two];
 
 instance KT4B_complete : Complete (Hilbert.KT4B ℕ) ReflexiveTransitiveSymmetricFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveTransitiveSymmetricFrameClass.is_geach];
-  apply Kripke.multiGeachConfluent_CanonicalFrame;
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.T.is_geach, Axioms.Four.is_geach, Axioms.B.is_geach, Axioms.MultiGeach.def_three];
 
 instance S5_complete : Complete (Hilbert.S5 ℕ) ReflexiveEuclideanFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveEuclideanFrameClass.is_geach];
-  apply Kripke.multiGeachConfluent_CanonicalFrame;
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.T.is_geach, Axioms.Five.is_geach, Axioms.MultiGeach.def_two];
 
 end completeness

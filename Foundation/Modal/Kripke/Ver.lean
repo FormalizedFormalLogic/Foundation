@@ -26,13 +26,13 @@ instance Ver.consistent : System.Consistent (Hilbert.Ver ℕ) := Kripke.instCons
   use Kripke.irreflexivePointFrame;
   tauto;
 
-lemma Kripke.isolated_CanonicalFrame (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent (Hilbert.ExtK Ax)] : Isolated (canonicalFrame (Hilbert.ExtK Ax)) := by
+lemma Kripke.canonicalFrame.is_isolated_of_subset_Ver (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent (Hilbert.ExtK Ax)] : Isolated (canonicalFrame (Hilbert.ExtK Ax)) := by
   intro x y Rxy;
   have : (canonicalModel (Hilbert.ExtK Ax)) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr $ (Hilbert.ExtK.maxm!) (by apply h; simp);
   exact this x _ Rxy;
 
 instance Ver.Kripke.complete : Complete (Hilbert.Ver ℕ) (Kripke.IsolatedFrameClass) := Kripke.instCompleteOfCanonical (C := Kripke.IsolatedFrameClass) $ by
-  apply Kripke.isolated_CanonicalFrame;
+  apply Kripke.canonicalFrame.is_isolated_of_subset_Ver;
   tauto;
 
 end Hilbert
