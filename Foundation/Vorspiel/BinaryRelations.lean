@@ -21,7 +21,9 @@ def Functional := ∀ ⦃x y z⦄, x ≺ y ∧ x ≺ z → y = z
 
 def RightConvergent := ∀ ⦃x y z⦄, x ≺ y ∧ x ≺ z → y ≺ z ∨ z ≺ y ∨ y = z
 
-def Extensive := ∀ ⦃x y⦄, x ≺ y → x = y
+def Coreflexive := ∀ ⦃x y⦄, x ≺ y → x = y
+
+def Equality := ∀ ⦃x y⦄, x ≺ y ↔ x = y
 
 def Antisymmetric := ∀ ⦃x y⦄, x ≺ y → y ≺ x → x = y
 
@@ -94,11 +96,29 @@ lemma Finite.converseWellFounded_of_trans_irrefl'
 end ConverseWellFounded
 
 
-lemma extensive_of_reflex_antisymm_eucl (hRefl : Reflexive rel) (hAntisymm : Antisymmetric rel) (hEucl : Euclidean rel) : Extensive rel := by
-  intro x y rxy;
-  have rxx := hRefl x;
-  exact hAntisymm rxy (hEucl rxx rxy);
+lemma corefl_of_refl_assym_eucl (hRefl : Reflexive rel) (hAntisymm : Antisymmetric rel) (hEucl : Euclidean rel) : Coreflexive rel := by
+  intro x y Rxy;
+  have Ryx := hEucl (hRefl x) Rxy;
+  exact hAntisymm Rxy Ryx;
 
+lemma equality_of_refl_corefl (hRefl : Reflexive rel) (hCorefl : Coreflexive rel) : Equality rel := by
+  intro x y;
+  constructor;
+  . apply hCorefl;
+  . rintro rfl; apply hRefl;
+
+lemma equality_of_refl_assym_eucl (hRefl : Reflexive rel) (hAntisymm : Antisymmetric rel) (hEucl : Euclidean rel) : Equality rel := by
+  apply equality_of_refl_corefl;
+  . assumption;
+  . exact corefl_of_refl_assym_eucl hRefl hAntisymm hEucl;
+
+lemma refl_of_equality (h : Equality rel) : Reflexive rel := by
+  intro x;
+  exact h.mpr rfl;
+
+lemma corefl_of_equality (h : Equality rel) : Coreflexive rel := by
+  intro x y Rxy;
+  apply h.mp Rxy;
 
 lemma irreflexive_of_assymetric (hAssym : Assymetric rel) : Irreflexive rel := by
   intro x Rxx;
@@ -111,6 +131,7 @@ lemma refl_of_universal (h : Universal rel) : Reflexive rel := by
 
 lemma eucl_of_universal (h : Universal rel) : Euclidean rel := by
   rintro x y z _ _; exact @h z y;
+
 
 @[simp]
 lemma WellFounded.trivial_wellfounded : WellFounded (α := α) (λ _ _ => False) := by

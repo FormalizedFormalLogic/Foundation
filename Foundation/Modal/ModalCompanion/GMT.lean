@@ -4,31 +4,31 @@ import Foundation.Modal.ModalCompanion.Basic
 
 namespace LO.Modal
 
-open IntProp
+open LO.IntProp
 open LO.Kripke
 open Modal.Kripke
 
-variable {α : Type u} [DecidableEq α] [Inhabited α] [Encodable α]
+variable {iH : IntProp.Hilbert ℕ} {mH : Modal.Hilbert ℕ}
+variable {φ ψ χ : IntProp.Formula ℕ}
 
-variable {iH : IntProp.Hilbert α} {mH : Modal.Hilbert α}
-variable {φ ψ χ : IntProp.Formula α}
-
-lemma provable_S4_of_provable_efq : ((Hilbert.S4 α) ⊢! φᵍ) → ((Hilbert.Int α) ⊢! φ) := by
+lemma provable_S4_of_provable_efq : ((Hilbert.S4 ℕ) ⊢! φᵍ) → ((Hilbert.Int ℕ) ⊢! φ) := by
   contrapose;
   intro h;
 
-  replace h := (not_imp_not.mpr $ IntProp.Kripke.Int_complete.complete) h;
+  replace h := (not_imp_not.mpr $ Hilbert.Int.Kripke.complete.complete) h;
   simp [IntProp.Formula.Kripke.ValidOnFrame, IntProp.Formula.Kripke.ValidOnModel] at h;
-  obtain ⟨F, F_refl, F_trans, V, V_hered, w, hp⟩ := h;
+  obtain ⟨F, V, w, hp⟩ := h;
 
-  have h₁ : ∀ ψ x, IntProp.Formula.Kripke.Satisfies ⟨F, V⟩ x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨F, V⟩ x (ψᵍ)) := by
+  have h₁ : ∀ ψ x, IntProp.Formula.Kripke.Satisfies ⟨F, V⟩ x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ x (ψᵍ)) := by
     intro ψ x;
     induction ψ using IntProp.Formula.rec' generalizing x with
     | hatom a =>
       simp [GoedelTranslation];
       constructor;
-      . intro _ _ h; exact V_hered h (by assumption);
-      . intro h; exact h x (F_refl x);
+      . intro _ _ h;
+        exact V.hereditary h $ by assumption;
+      . intro h;
+        exact h x (F.rel_refl' x);
     | hor φ ψ ihp ihq =>
       simp only [GoedelTranslation];
       constructor;
@@ -43,14 +43,18 @@ lemma provable_S4_of_provable_efq : ((Hilbert.S4 α) ⊢! φᵍ) → ((Hilbert.I
         . right; exact ihq x |>.mpr hq;
     | _ =>
       simp_all [IntProp.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
-  have : ¬(Modal.Formula.Kripke.Satisfies ⟨F, V⟩ w (φᵍ)) := (h₁ φ w).not.mp hp;
+  have : ¬(Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ w (φᵍ)) := (h₁ φ w).not.mp hp;
 
   apply not_imp_not.mpr $ S4_sound_aux;
   simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
-  use F;
-  exact ⟨⟨F_refl, F_trans⟩, by use V, w⟩;
+  use ⟨F.World, F.Rel⟩;
+  constructor;
+  . constructor;
+    . exact F.rel_refl';
+    . exact F.rel_trans';
+  . use V, w;
 
-theorem provable_efq_iff_provable_S4 : (Hilbert.Int α) ⊢! φ ↔ (Hilbert.S4 α) ⊢! φᵍ := ⟨provable_efq_of_provable_S4, provable_S4_of_provable_efq⟩
-instance : ModalCompanion (Hilbert.Int α) (Hilbert.S4 α) := ⟨provable_efq_iff_provable_S4⟩
+theorem provable_efq_iff_provable_S4 : (Hilbert.Int ℕ) ⊢! φ ↔ (Hilbert.S4 ℕ) ⊢! φᵍ := ⟨provable_efq_of_provable_S4, provable_S4_of_provable_efq⟩
+instance : ModalCompanion (Hilbert.Int ℕ) (Hilbert.S4 ℕ) := ⟨provable_efq_iff_provable_S4⟩
 
 end LO.Modal

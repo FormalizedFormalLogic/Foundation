@@ -1,17 +1,88 @@
-import Foundation.Logic.Kripke.Basic
+import Foundation.Vorspiel.BinaryRelations
 import Foundation.IntProp.Deduction
+
+set_option autoImplicit false
+universe u v
 
 namespace LO.IntProp
 
 open System
+
+
+namespace Kripke
+
+structure Frame where
+  World : Type
+  Rel : Rel World World
+  [world_nonempty : Nonempty World]
+  [rel_po : IsPartialOrder _ Rel]
+
+instance : CoeSort Frame (Type) := ⟨Frame.World⟩
+instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
+instance {F : Frame} : Nonempty F.World := F.world_nonempty
+instance {F : Frame} : IsPartialOrder _ F.Rel := F.rel_po
+
+abbrev Frame.Rel' {F : Frame} (x y : F.World) := F.Rel x y
+infix:45 " ≺ " => Frame.Rel'
+
+namespace Frame
+
+variable {F : Frame}
+
+@[trans] lemma rel_trans {x y z : F.World} : x ≺ y → y ≺ z → x ≺ z := IsTrans.trans x y z
+lemma rel_trans' : Transitive F.Rel := by apply rel_trans;
+
+@[refl, simp] lemma rel_refl {x : F.World} : x ≺ x := IsRefl.refl x
+lemma rel_refl' : Reflexive F.Rel := by apply rel_refl
+
+@[simp] lemma rel_antisymm {x y : F.World} : x ≺ y → y ≺ x → x = y := IsAntisymm.antisymm x y
+lemma rel_antisymm' : Antisymmetric F.Rel := by apply rel_antisymm
+
+end Frame
+
+abbrev pointFrame : Frame where
+  World := Unit
+  Rel := fun _ _ => True
+
+
+abbrev FrameClass := Set (Frame)
+
+section
+
+abbrev AllFrameClass : FrameClass := Set.univ
+
+abbrev SymmetricFrameClass : FrameClass := { F : Kripke.Frame | Symmetric F }
+
+abbrev ConfluentFrameClass : FrameClass := { F : Kripke.Frame | Confluent F }
+
+abbrev ConnectedFrameClass : FrameClass := { F : Kripke.Frame | Connected F }
+
+abbrev EuclideanFrameClass : FrameClass := { F : Kripke.Frame | Euclidean F }
+
+end
+
+
+structure Valuation (F : Frame) where
+  Val : F.World → ℕ → Prop
+  hereditary : ∀ {w₁ w₂ : F.World}, (w₁ ≺ w₂) → ∀ {a}, (Val w₁ a) → (Val w₂ a)
+instance {F : Frame} : CoeFun (Valuation F) (λ _ => F.World → ℕ → Prop) := ⟨Valuation.Val⟩
+
+structure Model extends Frame where
+  Val : Valuation toFrame
+instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
+
+end Kripke
+
+
 open Kripke
 
-variable {α : Type u}
+
+open Formula
 
 namespace Formula.Kripke
 
-def Satisfies (M : Kripke.Model.{u, v} α) (w : M.World) : Formula α → Prop
-  | atom a => M.Valuation w a
+def Satisfies (M : Kripke.Model) (w : M.World) : Formula ℕ → Prop
+  | atom a => M w a
   | ⊤      => True
   | ⊥      => False
   | φ ⋏ ψ  => Satisfies M w φ ∧ Satisfies M w ψ
@@ -21,13 +92,13 @@ def Satisfies (M : Kripke.Model.{u, v} α) (w : M.World) : Formula α → Prop
 
 namespace Satisfies
 
-instance semantics (M : Kripke.Model.{u, v} α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
+instance semantics (M : Kripke.Model) : Semantics (Formula ℕ) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
-variable {M : Model α} {w : M.World} {φ ψ χ : Formula α}
+variable {M : Kripke.Model} {w w' : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 
 @[simp] protected lemma iff_models : w ⊧ φ ↔ Formula.Kripke.Satisfies M w φ := iff_of_eq rfl
 
-@[simp] lemma atom_def : w ⊧ atom a ↔ M.Valuation w a := by simp [Satisfies];
+@[simp] lemma atom_def : w ⊧ atom a ↔ M w a := by simp [Satisfies];
 @[simp] lemma top_def  : w ⊧ ⊤ ↔ True := by simp [Satisfies];
 @[simp] lemma bot_def  : w ⊧ ⊥ ↔ False := by simp [Satisfies];
 @[simp] lemma and_def  : w ⊧ φ ⋏ ψ ↔ w ⊧ φ ∧ w ⊧ ψ := by simp [Satisfies];
@@ -48,22 +119,21 @@ instance : Semantics.Or M.World where
   realize_or := by simp [Satisfies];
 
 lemma formula_hereditary
-  (herditary : M.Valuation.atomic_hereditary)
-  (F_trans : Transitive M.Frame.Rel)
   (hw : w ≺ w') : w ⊧ φ → w' ⊧ φ := by
   induction φ using Formula.rec' with
-  | hatom => apply herditary hw;
+  | hatom => apply M.Val.hereditary hw;
   | himp =>
     intro hpq v hv;
-    exact hpq $ F_trans hw hv;
+    exact hpq $ M.rel_trans hw hv;
   | hneg =>
     intro hp v hv;
-    exact hp $ F_trans hw hv;
+    exact hp $ M.rel_trans hw hv;
   | hor => simp_all [Satisfies]; tauto;
   | _ => simp_all [Satisfies];
 
 
 lemma neg_equiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies];
+
 
 end Satisfies
 
@@ -71,62 +141,55 @@ end Satisfies
 open Satisfies
 
 
-def ValidOnModel (M : Model α) (φ : Formula α) := ∀ w : M.World, w ⊧ φ
+def ValidOnModel (M : Kripke.Model) (φ : Formula ℕ) := ∀ w : M.World, w ⊧ φ
 
 namespace ValidOnModel
 
-instance semantics : Semantics (Formula α) (Model α) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
+instance semantics : Semantics (Formula ℕ) (Model) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
-variable {M : Model α} {φ ψ χ : Formula α}
+variable {M : Model} {φ ψ χ : Formula ℕ}
 
 @[simp] protected lemma iff_models : M ⊧ φ ↔ Formula.Kripke.ValidOnModel M φ := iff_of_eq rfl
 
 protected lemma verum : M ⊧ ⊤ := by simp_all [ValidOnModel];
 
-protected lemma and₁ : M ⊧ φ ⋏ ψ ➝ φ := by simp_all [ValidOnModel, Satisfies];
+protected lemma andElim₁ : M ⊧ φ ⋏ ψ ➝ φ := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma and₂ : M ⊧ φ ⋏ ψ ➝ ψ := by simp_all [ValidOnModel, Satisfies];
+protected lemma andElim₂ : M ⊧ φ ⋏ ψ ➝ ψ := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma and₃
-  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
-  (F_trans : Transitive M.Frame.Rel)
-  : M ⊧ φ ➝ ψ ➝ φ ⋏ ψ := by
+protected lemma andInst₃ : M ⊧ φ ➝ ψ ➝ φ ⋏ ψ := by
   intro x y _ hp z Ryz hq;
-  replace hp : Satisfies M z φ := formula_hereditary atom_hereditary F_trans Ryz hp;
+  replace hp : Satisfies M z φ := formula_hereditary Ryz hp;
   exact ⟨hp, hq⟩;
 
-protected lemma or₁ : M ⊧ φ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
+protected lemma orInst₁ : M ⊧ φ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma or₂ : M ⊧ ψ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
+protected lemma orInst₂ : M ⊧ ψ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
 
-protected lemma or₃
-  (F_trans : Transitive M.Frame.Rel)
-  : M ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
+protected lemma orElim : M ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
   simp_all only [ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, Satisfies.imp_def, Satisfies.or_def];
   intro w₁ w₂ _ hpr w₃ hw₂₃ hqr w₄ hw₃₄ hpq;
   cases hpq with
-  | inl hp => exact hpr (F_trans hw₂₃ hw₃₄) hp;
+  | inl hp => exact hpr (M.rel_trans hw₂₃ hw₃₄) hp;
   | inr hq => exact hqr hw₃₄ hq;
 
-protected lemma imply₁
-  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
-  (F_trans : Transitive M.Frame.Rel)
-  : M ⊧ φ ➝ ψ ➝ φ := by
+protected lemma imply₁ : M ⊧ φ ➝ ψ ➝ φ := by
   intro x y _ hp z Ryz _;
-  exact formula_hereditary atom_hereditary F_trans Ryz hp;
+  exact formula_hereditary Ryz hp;
 
-protected lemma imply₂
-  (F_trans : Transitive M.Frame.Rel)
-  (F_refl : Reflexive M.Frame.Rel)
-  : M ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := by
+protected lemma imply₂ : M ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := by
   intro x y _ hpqr z Ryz hpq w Rzw hp;
-  have Ryw := F_trans Ryz Rzw;
-  have Rww := F_refl w;
+  have Ryw : y ≺ w := by trans z <;> assumption;
+  have Rww : w ≺ w := by simp;
   exact hpqr Ryw hp Rww (hpq Rzw hp);
 
-protected lemma mdp (F_refl : Reflexive M.Frame.Rel) (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
+protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro w;
-  exact hpq w (F_refl w) $ hp w;
+  exact hpq w Frame.rel_refl $ hp w;
+
+protected lemma bot : ¬M ⊧ ⊥ := by simp [ValidOnModel, Satisfies];
+
+instance : Semantics.Bot (Kripke.Model) := ⟨λ _ => ValidOnModel.bot⟩
 
 protected lemma efq : M ⊧ Axioms.EFQ φ := by simp [ValidOnModel, Satisfies];
 
@@ -137,10 +200,7 @@ protected lemma neg_equiv : M ⊧ Axioms.NegEquiv φ := by
   . intro x _ h y rxy hyp; exact h rxy hyp;
   . intro x _ h y rxy; exact h rxy;
 
-protected lemma lem
-  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
-  (F_trans : Transitive M.Frame.Rel)
-  : Symmetric M.Frame.Rel → M ⊧ Axioms.LEM φ := by
+protected lemma lem : Symmetric M.Rel → M ⊧ Axioms.LEM φ := by
   simp_all [ValidOnModel, Satisfies, Symmetric];
   contrapose; push_neg;
   rintro ⟨x, nhxp, ⟨y, Rxy, hyp⟩⟩;
@@ -148,29 +208,23 @@ protected lemma lem
   constructor;
   . exact Rxy;
   . by_contra Ryx;
-    have := formula_hereditary atom_hereditary F_trans Ryx hyp;
+    have := formula_hereditary Ryx hyp;
     contradiction;
 
-protected lemma dum
-  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
-  (F_trans : Transitive M.Frame.Rel)
-  : Connected M.Frame.Rel → M ⊧ Axioms.GD φ ψ := by
+protected lemma dum : Connected M.Rel → M ⊧ Axioms.Dummett φ ψ := by
   simp [ValidOnModel, Satisfies, Connected];
   contrapose; push_neg;
   rintro ⟨x, ⟨y, Rxy, hyp, nhyq⟩, ⟨z, Ryz, hzq, nhyp⟩⟩;
   use x, y, z;
   refine ⟨Rxy, Ryz, ?_, ?_⟩;
   . by_contra Ryz;
-    have := formula_hereditary atom_hereditary F_trans Ryz hyp;
+    have := formula_hereditary Ryz hyp;
     contradiction;
   . by_contra Rzy;
-    have := formula_hereditary atom_hereditary F_trans Rzy hzq;
+    have := formula_hereditary Rzy hzq;
     contradiction;
 
-protected lemma wlem
-  (atom_hereditary : ∀ {w₁ w₂ : M.World}, (w₁ ≺ w₂) → ∀ {a}, (M.Valuation w₁ a) → (M.Valuation w₂ a))
-  (F_trans : Transitive M.Frame.Rel)
-  : Confluent M.Frame.Rel → M ⊧ Axioms.WeakLEM φ := by
+protected lemma wlem : Confluent M.Rel → M ⊧ Axioms.WeakLEM φ := by
   simp [ValidOnModel, Satisfies, Confluent];
   contrapose; push_neg;
   rintro ⟨x, ⟨y, Rxy, hyp⟩, ⟨z, Rxz, hz⟩⟩;
@@ -178,320 +232,290 @@ protected lemma wlem
   refine ⟨Rxy, Rxz, ?_⟩;
   rintro w Ryw;
   by_contra Rzw;
-  have := formula_hereditary atom_hereditary F_trans Ryw hyp;
+  have := formula_hereditary Ryw hyp;
   have := hz w Rzw;
   contradiction;
 
 end ValidOnModel
 
 
-def ValidOnFrame (F : Frame) (φ : Formula α) := ∀ {V : Valuation F α}, (_ : V.atomic_hereditary) → (⟨F, V⟩ : Kripke.Model α) ⊧ φ
+def ValidOnFrame (F : Frame) (φ : Formula ℕ) := ∀ {V}, (⟨F, V⟩ : Kripke.Model) ⊧ φ
 
 
 namespace ValidOnFrame
 
-instance semantics : Semantics (Formula α) (Frame.Dep α) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
+instance semantics : Semantics (Formula ℕ) (Frame) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
 
-variable {F : Frame.Dep α}
+variable {F : Frame} {φ ψ χ : Formula ℕ}
 
-@[simp] protected lemma models_iff : F ⊧ f ↔ ValidOnFrame F f := iff_of_eq rfl
+@[simp] protected lemma models_iff : F ⊧ φ ↔ ValidOnFrame F φ := iff_of_eq rfl
 
-variable {F : Frame.Dep α} {φ ψ χ : Formula α}
+protected lemma verum : F ⊧ ⊤ := ValidOnModel.verum
 
-protected lemma verum : F ⊧ ⊤ := fun _ => ValidOnModel.verum
+protected lemma andElim₁ : F ⊧ φ ⋏ ψ ➝ φ := ValidOnModel.andElim₁
 
-protected lemma and₁ : F ⊧ φ ⋏ ψ ➝ φ := fun _ => ValidOnModel.and₁
+protected lemma andElim₂ : F ⊧ φ ⋏ ψ ➝ ψ := ValidOnModel.andElim₂
 
-protected lemma and₂ : F ⊧ φ ⋏ ψ ➝ ψ := fun _ => ValidOnModel.and₂
+protected lemma andInst₃ : F ⊧ φ ➝ ψ ➝ φ ⋏ ψ := ValidOnModel.andInst₃
 
-protected lemma and₃ (F_trans : Transitive F) : F ⊧ φ ➝ ψ ➝ φ ⋏ ψ := fun hV => ValidOnModel.and₃ hV F_trans
+protected lemma orInst₁ : F ⊧ φ ➝ φ ⋎ ψ := ValidOnModel.orInst₁
 
-protected lemma or₁ : F ⊧ φ ➝ φ ⋎ ψ := fun _ => ValidOnModel.or₁
+protected lemma orInst₂ : F ⊧ ψ ➝ φ ⋎ ψ := ValidOnModel.orInst₂
 
-protected lemma or₂ : F ⊧ ψ ➝ φ ⋎ ψ := fun _ => ValidOnModel.or₂
+protected lemma orElim : F ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := ValidOnModel.orElim
 
-protected lemma or₃ (F_trans : Transitive F) : F ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := fun _ => ValidOnModel.or₃ F_trans
+protected lemma imply₁ : F ⊧ φ ➝ ψ ➝ φ := ValidOnModel.imply₁
 
-protected lemma imply₁ (F_trans : Transitive F) : F ⊧ φ ➝ ψ ➝ φ := fun hV => ValidOnModel.imply₁ hV F_trans
+protected lemma imply₂ : F ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := ValidOnModel.imply₂
 
-protected lemma imply₂ (F_trans : Transitive F) (F_refl : Reflexive F) : F ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := fun _ => ValidOnModel.imply₂ F_trans F_refl
+protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := ValidOnModel.mdp hpq hp
 
-protected lemma mdp (F_refl : Reflexive F) (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := fun hV => ValidOnModel.mdp F_refl (hpq hV) (hp hV)
+protected lemma efq : F ⊧ Axioms.EFQ φ := ValidOnModel.efq
 
-protected lemma efq : F ⊧ Axioms.EFQ φ := fun _ => ValidOnModel.efq
+protected lemma neg_equiv : F ⊧ Axioms.NegEquiv φ := ValidOnModel.neg_equiv
 
-protected lemma neg_equiv : F ⊧ Axioms.NegEquiv φ := fun _ => ValidOnModel.neg_equiv
+protected lemma lem (F_symm : Symmetric F.Rel) : F ⊧ Axioms.LEM φ := ValidOnModel.lem F_symm
 
-protected lemma lem (F_trans : Transitive F)  (F_symm : Symmetric F.Rel) : F ⊧ Axioms.LEM φ := fun hV => ValidOnModel.lem hV F_trans F_symm
+protected lemma dum (F_conn : Connected F.Rel) : F ⊧ Axioms.Dummett φ ψ := ValidOnModel.dum F_conn
 
-protected lemma dum (F_trans : Transitive F) (F_conn : Connected F.Rel) : F ⊧ Axioms.GD φ ψ := fun hV => ValidOnModel.dum hV F_trans F_conn
+protected lemma wlem (F_conf : Confluent F.Rel) : F ⊧ Axioms.WeakLEM φ := ValidOnModel.wlem F_conf
 
-protected lemma wlem (F_trans : Transitive F) (F_conf : Confluent F.Rel) : F ⊧ Axioms.WeakLEM φ := fun hV => ValidOnModel.wlem hV F_trans F_conf
+protected lemma top : F ⊧ ⊤ := by
+  simp [ValidOnFrame.models_iff, ValidOnFrame];
+  tauto;
+instance : Semantics.Top (Frame) := ⟨λ _ => ValidOnFrame.top⟩
 
-instance : Semantics.Bot (Frame.Dep α) where
-  realize_bot _ := by
-    simp [ValidOnModel, ValidOnFrame];
-    existsi (λ _ _ => True);
-    simp_all [Satisfies, Valuation.atomic_hereditary];
+protected lemma bot : ¬F ⊧ ⊥ := by
+  simp [ValidOnFrame.models_iff, ValidOnFrame];
+  use ⟨(λ _ _ => True), by tauto⟩;
+instance : Semantics.Bot (Frame) := ⟨λ _ => ValidOnFrame.bot⟩
+
 
 end ValidOnFrame
 
 
-@[simp] def ValidOnFrameClass (𝔽 : FrameClass) (φ : Formula α) := ∀ {F : Frame}, F ∈ 𝔽 → F#α ⊧ φ
+@[simp] def ValidOnFrameClass (C : FrameClass) (φ : Formula ℕ) := ∀ F, F ∈ C → F ⊧ φ
 
 namespace ValidOnFrameClass
 
-instance semantics : Semantics (Formula α) (FrameClass.Dep α) := ⟨fun 𝔽 ↦ Kripke.ValidOnFrameClass 𝔽⟩
+variable {C : FrameClass} {φ ψ χ : Formula ℕ}
 
-variable {𝔽 : FrameClass.Dep α}
+instance semantics : Semantics (Formula ℕ) (FrameClass) := ⟨fun C ↦ Kripke.ValidOnFrameClass C⟩
 
-@[simp] protected lemma models_iff : 𝔽 ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass 𝔽 φ := iff_of_eq rfl
+@[simp] protected lemma models_iff : C ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass C φ := iff_of_eq rfl
+
+protected lemma bot (h_nonempty : C.Nonempty) : ¬C ⊧ ⊥ := by
+  simp [ValidOnFrameClass.models_iff, ValidOnFrameClass];
+  exact h_nonempty;
 
 end ValidOnFrameClass
 
 end Formula.Kripke
 
-
-open Formula.Kripke
-open Formula.Kripke.Satisfies (formula_hereditary)
-
 namespace Kripke
 
-abbrev FrameClassOfTheory (T : Theory α) : FrameClass.Dep α := { F | F#α ⊧* T }
-notation "𝔽(" T ")" => FrameClassOfTheory T
+/--
+  A set of formula that valid on frame `F`.
+-/
+def Frame.theorems (F : Kripke.Frame) : Set (Formula ℕ) := { φ | F ⊧ φ }
 
-abbrev FrameClassOfHilbert (H : Hilbert α) : FrameClass.Dep α := 𝔽((System.theory H))
-notation "𝔽(" H ")" => FrameClassOfHilbert H
+def FrameClass.DefinedBy (C : FrameClass) (T : Set (Formula ℕ)) : Prop := ∀ F, F ∈ C ↔ F ⊧* T
 
-section Soundness
+section definability
 
-variable {H : Hilbert α}
-         {φ : Formula α}
+variable {F : Kripke.Frame}
 
-lemma sound : H ⊢! φ → 𝔽(H) ⊧ φ := by
-  intro hp F hF;
-  simp [System.theory] at hF;
-  exact hF φ hp;
+instance AllFrameClass.defined_by_EFQ : AllFrameClass.DefinedBy 𝗘𝗙𝗤 := by
+  intro F;
+  simp [Semantics.RealizeSet];
+  apply Formula.Kripke.ValidOnFrame.efq;
 
-instance : Sound H 𝔽(H) := ⟨sound⟩
-
-lemma unprovable_bot (hc : 𝔽(H).Nonempty) : H ⊬ ⊥ := by
-  apply (not_imp_not.mpr (sound (α := α)));
-  simp [Semantics.Realize];
-  obtain ⟨F, hF⟩ := hc;
-  use F;
+instance ConfluentFrameClass.defined_by_WLEM : ConfluentFrameClass.DefinedBy 𝗪𝗟𝗘𝗠 := by
+  intro F;
+  simp [Semantics.RealizeSet];
   constructor;
-  . exact hF;
-  . exact Semantics.Bot.realize_bot (F := Formula α) (M := Frame.Dep α) F;
+  . rintro hCon φ V;
+    exact Kripke.ValidOnModel.wlem hCon;
+  . rintro h x y z ⟨Rxy, Rxz⟩;
+    let M : Kripke.Model := ⟨F, λ {v _} => y ≺ v, by simp; intro w _ _ _; trans w <;> assumption⟩;
+    have : ¬Kripke.Satisfies M x (∼(atom default)) := by
+      simp [Kripke.Satisfies];
+      use y;
+      constructor;
+      . exact Rxy;
+      . apply F.rel_refl;
+    have : Kripke.Satisfies M x (∼∼(atom default)) := by
+      have := @h (atom default) M.Val x;
+      simp only [Axioms.WeakLEM, Semantics.Realize] at this;
+      apply or_iff_not_imp_left.mp $ Kripke.Satisfies.or_def.mp this;
+      assumption;
+    have := this Rxz; simp [Semantics.Realize, Kripke.Satisfies] at this;
+    obtain ⟨w, ⟨Rzw, hw⟩⟩ := this;
+    use w;
 
-instance (hc : 𝔽(H).Nonempty) : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot hc
-
-
-lemma sound_of_characterizability [characterizability : 𝔽(H).Characteraizable 𝔽₂] : H ⊢! φ → 𝔽₂#α ⊧ φ := by
-  intro h F hF;
-  apply sound h;
-  apply characterizability.characterize hF;
-
-instance instSoundOfCharacterizability [𝔽(H).Characteraizable 𝔽₂] : Sound H (𝔽₂#α) := ⟨sound_of_characterizability⟩
-
-lemma unprovable_bot_of_characterizability [characterizability : 𝔽(H).Characteraizable 𝔽₂] : H ⊬ ⊥ := by
-  apply unprovable_bot;
-  obtain ⟨F, hF⟩ := characterizability.nonempty;
-  use F;
-  apply characterizability.characterize hF;
-
-instance instConsistentOfCharacterizability [FrameClass.Characteraizable.{u} 𝔽(H) 𝔽₂] : System.Consistent H := System.Consistent.of_unprovable $ unprovable_bot_of_characterizability
-
-end Soundness
-
+instance ConnectedFrameClass.defined_by_Dummett : ConnectedFrameClass.DefinedBy 𝗗𝘂𝗺 := by
+  intro F;
+  simp [Semantics.RealizeSet];
+  constructor;
+  . rintro hCon _ φ ψ rfl;
+    exact Kripke.ValidOnModel.dum hCon;
+  . rintro h x y z ⟨Rxy, Rxz⟩;
+    let M : Kripke.Model := ⟨F, ⟨λ {v a} => match a with | 0 => y ≺ v | 1 => z ≺ v | _ => True, by
+      intro w v Rwv a ha;
+      split at ha;
+      . exact F.rel_trans ha Rwv;
+      . exact F.rel_trans ha Rwv;
+      . tauto;
+    ⟩⟩;
+    rcases Kripke.Satisfies.or_def.mp $ @h (Axioms.Dummett (atom 0) (atom 1)) (atom 0) (atom 1) rfl M.Val x with (hi | hi);
+    . have := Kripke.Satisfies.imp_def.mp hi Rxy;
+      simp [Semantics.Realize, Kripke.Satisfies] at this;
+      tauto;
+    . have := Kripke.Satisfies.imp_def.mp hi Rxz;
+      simp [Semantics.Realize, Kripke.Satisfies] at this;
+      tauto;
 
 section
 
-variable {α : Type u}
+private lemma euclidean_of_subset_lem_frameTheorems : (𝗟𝗘𝗠 ⊆ F.theorems) → Euclidean F := by
+  simp [Frame.theorems];
+  rintro h x y z Rxy Rxz;
+  let M : Kripke.Model := ⟨F, λ v _ => z ≺ v, by simp; intro w v _ _; trans w <;> assumption⟩;
+  suffices Kripke.Satisfies M y (atom default) by simpa [Kripke.Satisfies] using this;
+  apply M.Val.hereditary Rxy;
+  have := @h (atom default) M.Val x;
+  simp only [Axioms.LEM, Semantics.Realize, Kripke.Satisfies, or_iff_not_imp_right] at this;
+  apply this;
+  push_neg;
+  use z;
+  constructor;
+  . exact Rxz;
+  . simp [Kripke.Satisfies];
 
-instance Int_Characteraizable : 𝔽((Hilbert.Int α)).Characteraizable ReflexiveTransitiveFrameClass where
-  characterize := by
-    simp [System.theory];
-    rintro F hTrans hRefl φ hp;
-    induction hp using Hilbert.Deduction.rec! with
-    | verum => apply ValidOnFrame.verum;
-    | imply₁ => apply ValidOnFrame.imply₁; simpa;
-    | imply₂ => apply ValidOnFrame.imply₂; simpa; simpa;
-    | and₁ => apply ValidOnFrame.and₁;
-    | and₂ => apply ValidOnFrame.and₂;
-    | and₃ => apply ValidOnFrame.and₃; simpa;
-    | or₁ => apply ValidOnFrame.or₁;
-    | or₂ => apply ValidOnFrame.or₂;
-    | or₃ => apply ValidOnFrame.or₃; simpa;
-    | neg_equiv => apply ValidOnFrame.neg_equiv;
-    | mdp ihpq ihp =>
-      apply ValidOnFrame.mdp;
-      repeat simpa only [ValidOnFrame.models_iff];
-    | eaxm h =>
-      obtain ⟨_, rfl⟩ := h;
-      apply ValidOnFrame.efq;
-  nonempty := by
-    use { World := PUnit, Rel := λ _ _ => True };
-    refine ⟨by simp [Reflexive], by simp [Transitive]⟩;
+private lemma subset_lem_frameTheorems_of_symmetric : Symmetric F → 𝗟𝗘𝗠 ⊆ F.theorems := by
+  simp [Frame.theorems];
+  rintro hSym φ _ V;
+  apply Kripke.ValidOnModel.lem hSym;
 
+private lemma subset_lem_frameTheorems_iff_euclidean : 𝗟𝗘𝗠 ⊆ F.theorems ↔ Euclidean F := by
+  constructor;
+  . exact euclidean_of_subset_lem_frameTheorems;
+  . intro hEucl;
+    apply subset_lem_frameTheorems_of_symmetric;
+    apply symm_of_refl_eucl;
+    . exact F.rel_refl';
+    . assumption;
 
-instance Int_sound : Sound (Hilbert.Int α) (ReflexiveTransitiveFrameClass#α) := inferInstance
-
-instance : System.Consistent (Hilbert.Int α) := inferInstance
-
-
-instance Cl_Characteraizable : 𝔽(Hilbert.Cl α).Characteraizable ReflexiveTransitiveSymmetricFrameClass#α where
-  characterize := by
-    simp [System.theory];
-    rintro F hTrans hRefl hSymm φ hp;
-    induction hp using Hilbert.Deduction.rec! with
-    | verum => apply ValidOnFrame.verum;
-    | imply₁ => apply ValidOnFrame.imply₁; simpa;
-    | imply₂ => apply ValidOnFrame.imply₂; simpa; simpa;
-    | and₁ => apply ValidOnFrame.and₁;
-    | and₂ => apply ValidOnFrame.and₂;
-    | and₃ => apply ValidOnFrame.and₃; simpa;
-    | or₁ => apply ValidOnFrame.or₁;
-    | or₂ => apply ValidOnFrame.or₂;
-    | or₃ => apply ValidOnFrame.or₃; simpa;
-    | neg_equiv => apply ValidOnFrame.neg_equiv;
-    | mdp ihpq ihp =>
-      apply ValidOnFrame.mdp;
-      repeat simpa;
-    | eaxm h =>
-      rcases h with (⟨_, rfl⟩ | ⟨_, rfl⟩);
-      . apply ValidOnFrame.efq;
-      . apply ValidOnFrame.lem; simpa; simpa;
-  nonempty := by
-    use { World := PUnit, Rel := λ _ _ => True };
-    refine ⟨by simp [Reflexive], by simp [Transitive], by simp [Symmetric]⟩;
-
-instance : Sound (Hilbert.Cl α) (ReflexiveTransitiveSymmetricFrameClass#α) := inferInstance
-
-instance : System.Consistent (Hilbert.Cl α) := inferInstance
-
-
-
-instance KC_Characteraizable : 𝔽(Hilbert.KC α).Characteraizable ReflexiveTransitiveConfluentFrameClass where
-  characterize := by
-    rintro F ⟨F_trans, F_refl, F_confl⟩;
-    simp [System.theory];
-    intro φ hp;
-    induction hp using Hilbert.Deduction.rec! with
-    | verum => apply ValidOnFrame.verum;
-    | imply₁ => apply ValidOnFrame.imply₁; simpa;
-    | imply₂ => apply ValidOnFrame.imply₂; simpa; simpa;
-    | and₁ => apply ValidOnFrame.and₁;
-    | and₂ => apply ValidOnFrame.and₂;
-    | and₃ => apply ValidOnFrame.and₃; simpa;
-    | or₁ => apply ValidOnFrame.or₁;
-    | or₂ => apply ValidOnFrame.or₂;
-    | or₃ => apply ValidOnFrame.or₃; simpa;
-    | neg_equiv => apply ValidOnFrame.neg_equiv;
-    | mdp ihpq ihp =>
-      apply ValidOnFrame.mdp;
-      repeat simpa;
-    | eaxm h =>
-      rcases h with (⟨_, rfl⟩ | ⟨_, _, rfl⟩);
-      . apply ValidOnFrame.efq;
-      . apply ValidOnFrame.wlem; simpa; simpa;
-  nonempty := by
-    use { World := PUnit, Rel := λ _ _ => True };
-    refine ⟨by simp [Reflexive], by simp [Transitive], by simp [Confluent]⟩;
-
-instance : Sound (Hilbert.KC α) (ReflexiveTransitiveConfluentFrameClass#α) := inferInstance
-
-instance : System.Consistent (Hilbert.KC α) := inferInstance
-
-
-instance LC_Characteraizable : 𝔽((Hilbert.LC α)).Characteraizable ReflexiveTransitiveConnectedFrameClass where
-  characterize := by
-    rintro F ⟨F_trans, F_refl, F_conn⟩;
-    simp [System.theory];
-    intro φ hp;
-    induction hp using Hilbert.Deduction.rec! with
-    | verum => apply ValidOnFrame.verum;
-    | imply₁ => apply ValidOnFrame.imply₁; simpa;
-    | imply₂ => apply ValidOnFrame.imply₂; simpa; simpa;
-    | and₁ => apply ValidOnFrame.and₁;
-    | and₂ => apply ValidOnFrame.and₂;
-    | and₃ => apply ValidOnFrame.and₃; simpa;
-    | or₁ => apply ValidOnFrame.or₁;
-    | or₂ => apply ValidOnFrame.or₂;
-    | or₃ => apply ValidOnFrame.or₃; simpa;
-    | neg_equiv => apply ValidOnFrame.neg_equiv;
-    | mdp ihpq ihp =>
-      apply ValidOnFrame.mdp;
-      repeat simpa;
-    | eaxm h =>
-      rcases h with (⟨_, rfl⟩ | ⟨_, _, rfl⟩);
-      . apply ValidOnFrame.efq;
-      . apply ValidOnFrame.dum; simpa; simpa;
-  nonempty := by
-    use { World := PUnit, Rel := λ _ _ => True };
-    refine ⟨by simp [Reflexive], by simp [Transitive], by simp [Connected]⟩;
-
-instance : Sound (Hilbert.LC α) (ReflexiveTransitiveConnectedFrameClass#α) := inferInstance
-
-instance : System.Consistent (Hilbert.LC α) := inferInstance
+instance EuclideanFrameClass.defined_by_LEM : EuclideanFrameClass.DefinedBy 𝗟𝗘𝗠 := by
+  intro F;
+  simp [Semantics.RealizeSet];
+  constructor;
+  . intro hEucl;
+    simpa [Frame.theorems] using subset_lem_frameTheorems_iff_euclidean.mpr hEucl;
+  . intro h;
+    apply subset_lem_frameTheorems_iff_euclidean.mp;
+    simpa [Frame.theorems] using h;
 
 end
 
+end definability
+
 end Kripke
 
 
-section Classical
-
-open LO.Kripke
-
-namespace Formula.Kripke
-
-abbrev ClassicalSatisfies (V : ClassicalValuation α) (φ : Formula α) : Prop := Satisfies (ClassicalModel V) () φ
-
-instance : Semantics (Formula α) (ClassicalValuation α) := ⟨ClassicalSatisfies⟩
-
-namespace ClassicalSatisfies
-
-variable {V : ClassicalValuation α}
-
-@[simp] lemma atom_def : V ⊧ atom a ↔ V a := by simp only [Semantics.Realize, Satisfies]
-
-instance : Semantics.Tarski (ClassicalValuation α) where
-  realize_top := by simp [Semantics.Realize, ClassicalSatisfies, Satisfies];
-  realize_bot := by simp [Semantics.Realize, ClassicalSatisfies, Satisfies];
-  realize_or  := by simp [Semantics.Realize, ClassicalSatisfies, Satisfies];
-  realize_and := by simp [Semantics.Realize, ClassicalSatisfies, Satisfies];
-  realize_imp := by simp [Semantics.Realize, Satisfies]; tauto;
-  realize_not := by simp [Semantics.Realize, Satisfies]; tauto;
-
-end ClassicalSatisfies
-
-end Formula.Kripke
-
+namespace Hilbert
 
 namespace Kripke
 
-open Formula.Kripke (ClassicalSatisfies)
+open Formula.Kripke
 
-lemma ValidOnClassicalFrame_iff : (Kripke.FrameClassOfHilbert.{u, 0} (Hilbert.Cl α)) ⊧ φ → ∀ (V : ClassicalValuation α), V ⊧ φ := by
-  intro h V;
-  refine @h (ClassicalFrame) ?_ (λ _ a => V a) (by simp [Valuation.atomic_hereditary]) ();
-  . apply @Cl_Characteraizable α |>.characterize;
-    refine ⟨ClassicalFrame.reflexive, ClassicalFrame.transitive, ClassicalFrame.symmetric⟩;
+variable {H : Hilbert ℕ} {φ : Formula ℕ}
+variable {C : FrameClass} {T : Set (Formula ℕ)}
 
-lemma notClassicalValid_of_exists_ClassicalValuation : (∃ (V : ClassicalValuation α), ¬(V ⊧ φ)) → ¬(Kripke.FrameClassOfHilbert.{u, 0} (Hilbert.Cl α)) ⊧ φ := by
-  contrapose; push_neg;
-  have := @ValidOnClassicalFrame_iff α φ;
-  exact this;
+lemma sound_hilbert_of_frameclass (definedBy : C.DefinedBy T) : (⟨𝗘𝗙𝗤 ∪ T⟩ : Hilbert ℕ) ⊢! φ → C ⊧ φ := by
+  intro hφ F hF;
+  induction hφ using Hilbert.Deduction.rec! with
+  | verum => apply ValidOnFrame.verum;
+  | imply₁ => apply ValidOnFrame.imply₁;
+  | imply₂ => apply ValidOnFrame.imply₂;
+  | and₁ => apply ValidOnFrame.andElim₁;
+  | and₂ => apply ValidOnFrame.andElim₂;
+  | and₃ => apply ValidOnFrame.andInst₃;
+  | or₁ => apply ValidOnFrame.orInst₁;
+  | or₂ => apply ValidOnFrame.orInst₂;
+  | or₃ => apply ValidOnFrame.orElim;
+  | neg_equiv => apply ValidOnFrame.neg_equiv;
+  | mdp => exact ValidOnFrame.mdp (by assumption) (by assumption);
+  | eaxm hi =>
+    rcases hi with (⟨_, rfl⟩ | h);
+    . apply ValidOnFrame.efq;
+    . apply Semantics.realizeSet_iff.mp (definedBy F |>.mp hF);
+      assumption;
 
-lemma unprovable_classical_of_exists_ClassicalValuation (h : ∃ (V : ClassicalValuation α), ¬(V ⊧ φ)) : (Hilbert.Cl α) ⊬ φ := by
-  apply not_imp_not.mpr $ Kripke.sound.{u, 0};
-  apply notClassicalValid_of_exists_ClassicalValuation;
-  assumption;
+lemma sound_of_equiv_frameclass_hilbert (definedBy : C.DefinedBy T) (heq : (⟨𝗘𝗙𝗤 ∪ T⟩ : Hilbert ℕ) =ₛ H) : H ⊢! φ → C ⊧ φ := by
+  intro hφ;
+  apply sound_hilbert_of_frameclass (T := T) (definedBy);
+  exact Equiv.iff.mp heq φ |>.mpr hφ;
+
+protected instance instSound (definedBy : C.DefinedBy T) (heq : (⟨𝗘𝗙𝗤 ∪ T⟩ : Hilbert ℕ) =ₛ H) : Sound H C := ⟨sound_of_equiv_frameclass_hilbert definedBy heq⟩
+
+lemma unprovable_bot [sound : Sound H C] (hNonempty : C.Nonempty) : H ⊬ ⊥ := by
+  apply not_imp_not.mpr sound.sound;
+  simp [Semantics.Realize];
+  obtain ⟨F, hF⟩ := hNonempty;
+  use F;
+  constructor;
+  . exact hF;
+  . exact Semantics.Bot.realize_bot (F := Formula ℕ) (M := Frame) F;
+
+lemma consistent [Sound H C] (h_nonempty : C.Nonempty) : H.Consistent := System.Consistent.of_unprovable $ unprovable_bot h_nonempty
 
 end Kripke
 
-end Classical
 
+namespace Int
+
+instance Kripke.sound : Sound (Hilbert.Int ℕ) (AllFrameClass) := Kripke.instSound AllFrameClass.defined_by_EFQ $ by simp
+
+instance : (Hilbert.Int ℕ).Consistent := Kripke.consistent (C := AllFrameClass) $ by
+  use pointFrame;
+  tauto;
+
+end Int
+
+
+namespace KC
+
+instance Kripke.sound : Sound (Hilbert.KC ℕ) (ConfluentFrameClass) := Kripke.instSound ConfluentFrameClass.defined_by_WLEM $ by simp
+
+instance : (Hilbert.KC ℕ).Consistent := Kripke.consistent (C := ConfluentFrameClass) $ by
+  use pointFrame;
+  simp [Confluent]
+
+end KC
+
+
+namespace LC
+
+instance Kripke.sound : Sound (Hilbert.LC ℕ) (ConnectedFrameClass) := Kripke.instSound ConnectedFrameClass.defined_by_Dummett $ by simp
+
+instance : (Hilbert.LC ℕ).Consistent := Kripke.consistent (C := ConnectedFrameClass) $ by
+  use pointFrame;
+  simp [Connected]
+
+end LC
+
+
+namespace Cl
+
+instance Kripke.sound : Sound (Hilbert.Cl ℕ) (EuclideanFrameClass) := Kripke.instSound EuclideanFrameClass.defined_by_LEM $ by simp
+
+instance : (Hilbert.Cl ℕ).Consistent := Kripke.consistent (C := EuclideanFrameClass) $ by
+  use pointFrame;
+  simp [Euclidean]
+
+end Cl
+
+end Hilbert
 
 end LO.IntProp

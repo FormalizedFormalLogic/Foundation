@@ -34,8 +34,8 @@ lemma euclidean_def : Euclidean R ↔ (GeachConfluent ⟨1, 1, 0, 1⟩ R) := by 
 
 lemma confluent_def : Confluent R ↔ (GeachConfluent ⟨1, 1, 1, 1⟩ R) := by simp [GeachConfluent, Confluent];
 
-lemma extensive_def : Extensive R ↔ (GeachConfluent ⟨0, 1, 0, 0⟩ R) := by
-  simp [GeachConfluent, Extensive];
+lemma extensive_def : Coreflexive R ↔ (GeachConfluent ⟨0, 1, 0, 0⟩ R) := by
+  simp [GeachConfluent, Coreflexive];
   constructor;
   . rintro h x y z rfl Rxz; have := h Rxz; tauto;
   . intro h x y Rxy; have := h rfl Rxy; tauto;

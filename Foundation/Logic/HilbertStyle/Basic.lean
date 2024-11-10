@@ -155,10 +155,10 @@ def wlem [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢ ∼φ ⋎ ∼∼φ := HasAxiomWeakLEM
 
 
 class HasAxiomDummett (𝓢 : S) where
-  dummett (φ ψ : F) : 𝓢 ⊢ Axioms.GD φ ψ
+  dummett (φ ψ : F) : 𝓢 ⊢ Axioms.Dummett φ ψ
 
 def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (φ ➝ ψ) ⋎ (ψ ➝ φ) := HasAxiomDummett.dummett φ ψ
-@[simp] lemma dummett! [HasAxiomDummett 𝓢] : 𝓢 ⊢! Axioms.GD φ ψ := ⟨dummett⟩
+@[simp] lemma dummett! [HasAxiomDummett 𝓢] : 𝓢 ⊢! Axioms.Dummett φ ψ := ⟨dummett⟩
 
 
 class HasAxiomPeirce (𝓢 : S) where
