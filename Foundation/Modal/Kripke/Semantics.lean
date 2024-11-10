@@ -272,7 +272,7 @@ section definability
 variable {F : Kripke.Frame}
 
 instance AllFrameClass.isDefinedBy : AllFrameClass.DefinedBy 𝗞 := by
-  intro φ;
+  intro F;
   simp [Frame.theorems];
   rintro _ φ ψ rfl;
   exact Formula.Kripke.ValidOnFrame.axiomK;
