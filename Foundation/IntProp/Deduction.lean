@@ -113,6 +113,7 @@ instance : IncludeEFQ (α := α) (Hilbert.LC α) where
 instance : System.HasAxiomDummett (Hilbert.LC α) where
   dummett φ ψ := by apply eaxm; aesop;
 
+
 -- MEMO: Minimal <ₛ WeakMinimal <ₛ WeakClassical <ₛ Classical
 
 /--
@@ -191,7 +192,11 @@ lemma KC_weaker_than_Cl : (Hilbert.KC α) ≤ₛ (Hilbert.Cl α) := weaker_than_
 
 lemma LC_weaker_than_Cl [DecidableEq α] : (Hilbert.LC α) ≤ₛ (Hilbert.Cl α) := by
   apply weaker_than_of_subset_axiomset';
-  rintro φ (⟨_, rfl⟩ | ⟨_, _, rfl⟩) <;> simp;
+  rintro φ (⟨_, rfl⟩ | ⟨_, _, rfl⟩) <;> simp [efq!, dummett!];
+
+lemma KC_weaker_than_LC [DecidableEq α] : (Hilbert.KC α) ≤ₛ (Hilbert.LC α) := by
+  apply weaker_than_of_subset_axiomset';
+  rintro φ (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp [efq!, wlem!];
 
 end
 

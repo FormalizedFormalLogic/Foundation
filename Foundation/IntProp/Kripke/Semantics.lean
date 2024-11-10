@@ -286,6 +286,8 @@ protected lemma bot : ¬F ⊧ ⊥ := by
 
 instance : Semantics.Bot (Frame) := ⟨λ _ => ValidOnFrame.bot⟩
 
+lemma subst (h : F ⊧ φ) (s : ℕ → Formula ℕ) : F ⊧ φ.subst s := by sorry;
+
 /-
 lemma subst (h : F ⊧ φ) {s : ℕ → Formula ℕ} : F ⊧ φ.subst s := by
   induction φ using Formula.rec' with

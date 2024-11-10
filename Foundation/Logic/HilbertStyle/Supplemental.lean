@@ -537,6 +537,29 @@ instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDummett 𝓢 where
     have d₂ : 𝓢 ⊢ ∼φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := impTrans'' efq_imply_not₁ or₁;
     exact or₃''' d₁ d₂ lem;
 
+instance [HasAxiomEFQ 𝓢] [HasAxiomDummett 𝓢] : HasAxiomWeakLEM 𝓢 where
+  wlem φ := by
+    haveI : 𝓢 ⊢ (φ ➝ ∼φ) ⋎ (∼φ ➝ φ) := dummett;
+    exact or₃''' (by
+      apply deduct';
+      apply or₁';
+      apply neg_equiv'.mpr;
+      apply deduct;
+      haveI d₁ : [φ, φ ➝ ∼φ] ⊢[𝓢] φ := FiniteContext.byAxm;
+      haveI d₂ : [φ, φ ➝ ∼φ] ⊢[𝓢] φ ➝ ∼φ := FiniteContext.byAxm;
+      have := neg_equiv'.mp $ d₂ ⨀ d₁;
+      exact this ⨀ d₁;
+    ) (by
+      apply deduct';
+      apply or₂';
+      apply neg_equiv'.mpr;
+      apply deduct;
+      haveI d₁ : [∼φ, ∼φ ➝ φ] ⊢[𝓢] ∼φ := FiniteContext.byAxm;
+      haveI d₂ : [∼φ, ∼φ ➝ φ] ⊢[𝓢] ∼φ ➝ φ := FiniteContext.byAxm;
+      haveI := d₂ ⨀ d₁;
+      exact (neg_equiv'.mp d₁) ⨀ this;
+    ) this;
+
 noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomPeirce 𝓢 where
   peirce φ ψ := by
     refine or₃''' imply₁ ?_ lem;

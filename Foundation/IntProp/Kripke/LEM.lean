@@ -5,45 +5,6 @@ namespace LO.IntProp
 open System
 open Formula Formula.Kripke
 
-namespace Kripke
-
-/--
-  ```
-    3
-   / \
-  1   2
-   \ /
-    0
-  ```
--/
-abbrev diaFrame : Kripke.Frame where
-  World := Fin 4
-  Rel := λ x y =>
-    match x, y with
-    | 0, _ => True
-    | 1, 3 => True
-    | 2, 3 => True
-    | x, y => x ≤ y
-  rel_po := {
-    refl := by sorry
-    antisymm := λ x y =>
-      match x, y with
-      | 1, 2 => by simp;
-      | x, y => by
-        intro Rxy Ryx;
-        apply LE.le.antisymm;
-        . aesop;
-        . aesop;
-    trans := λ x y z => sorry
-  }
-lemma dia.confluent : Confluent diaFrame := by
-  simp [Confluent];
-  intro x y z Rxy Rxz;
-  sorry;
-
-end Kripke
-
-
 namespace Hilbert
 
 open Kripke
@@ -52,7 +13,6 @@ variable {a b : ℕ}
 
 theorem Int.no_WeakLEM : ∃ a, (Hilbert.Int ℕ) ⊬ Axioms.WeakLEM (atom a) := by
   by_contra hC; simp at hC;
-  -- have : Kripke.AllFrameClass ⊧ Axioms.WeakLEM (atom a) := Sound.sound hC; simp at this;
   let F : Kripke.Frame := {
     World := Fin 3
     Rel := λ x y =>
@@ -65,22 +25,14 @@ theorem Int.no_WeakLEM : ∃ a, (Hilbert.Int ℕ) ⊬ Axioms.WeakLEM (atom a) :=
       trans := by aesop;
     }
   }
-  -- have : F ⊧ Axioms.WeakLEM (atom a) := this F;
   have : Confluent F := by
     apply @Kripke.ConfluentFrameClass.defined_by_WLEM F |>.mpr;
-    simp;
+    simp [Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff];
     intro φ;
-    induction φ using Formula.rec' with
-    | hatom a =>
-      apply (Hilbert.Int.Kripke.sound.sound $ hC a) F;
-      tauto;
-    | hfalsum => simp [ValidOnFrame, ValidOnModel, Axioms.WeakLEM, Semantics.Realize, Satisfies];
-    | hverum => simp [ValidOnFrame, ValidOnModel, Axioms.WeakLEM, Semantics.Realize, Satisfies]; sorry;
-    | hneg φ ih =>
-      intro V x;
-      apply Formula.Kripke.Satisfies.or_def.mpr;
-      sorry;
-    | _ => sorry;
+    suffices ValidOnFrame F (Axioms.WeakLEM (atom 0))
+      from @Formula.Kripke.ValidOnFrame.subst F (Axioms.WeakLEM (atom 0)) this (λ a => match a with | 0 => φ | _ => atom a);
+    apply (Hilbert.Int.Kripke.sound.sound $ hC 0) F;
+    tauto;
   have : ¬Confluent F := by
     simp only [Confluent]; push_neg;
     use 0, 1, 2;
@@ -90,53 +42,91 @@ theorem Int.no_WeakLEM : ∃ a, (Hilbert.Int ℕ) ⊬ Axioms.WeakLEM (atom a) :=
 theorem Int_strictly_weaker_than_LC : (Hilbert.Int ℕ) <ₛ (Hilbert.KC ℕ) := by
   constructor;
   . exact Hilbert.Int_weaker_than_KC;
-  . apply weakerThan_iff.not.mpr;
+  . obtain ⟨a, h⟩ := Int.no_WeakLEM;
+    apply weakerThan_iff.not.mpr;
     push_neg;
-    use ∼(atom default) ⋎ ∼∼(atom default);
+    use ∼(atom a) ⋎ ∼∼(atom a);
     constructor;
     . exact wlem!;
-    . exact Int.no_WeakLEM;
+    . exact h;
 
-theorem KC.no_Dummett : (Hilbert.KC ℕ) ⊬ Axioms.Dummett (atom a) (atom b) := by
-  by_contra hC;
-  have : Kripke.ConfluentFrameClass ⊧ Axioms.Dummett (atom a) (atom b) := Sound.sound hC; simp at this;
-  have : Kripke.diaFrame ⊧ Axioms.Dummett (atom a) (atom b) := this Kripke.diaFrame $ by
-    sorry;
-    /-
+theorem KC.no_Dummett : ∃ a b, (Hilbert.KC ℕ) ⊬ Axioms.Dummett (atom a) (atom b) := by
+  by_contra hC; simp at hC;
+  let F : Kripke.Frame := {
+    World := Fin 4
+    Rel := λ x y =>
+      match x, y with
+      | 1, 2 => False
+      | x, y => x ≤ y
+    rel_po := {
+      refl := by simp only [le_refl, implies_true];
+      trans := by
+        intro x y z Rxy Ryx;
+        split at Rxy;
+        . contradiction;
+        . split at Ryx;
+          . contradiction;
+          . split;
+            . simp_all; omega;
+            . omega;
+      antisymm := by
+        intro x y Rxy Ryx;
+        split at Rxy;
+        . contradiction;
+        . split at Ryx;
+          . contradiction;
+          . exact LE.le.antisymm Rxy Ryx;
+    }
+  };
+  have : Connected F := by
+    apply @Kripke.ConnectedFrameClass.defined_by_Dummett F |>.mpr;
+    simp [Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff];
+    rintro _ φ ψ rfl;
+    suffices ValidOnFrame F (Axioms.Dummett (atom 0) (atom 1))
+      from @Formula.Kripke.ValidOnFrame.subst F (Axioms.Dummett (atom 0) (atom 1)) this (λ a => match a with | 0 => φ | 1 => ψ | _ => atom a);
+    apply (Hilbert.KC.Kripke.sound.sound $ hC 0 1) F;
     simp [Confluent];
     intro x y z Rxy Ryz;
-    match x, y, z with
-    | 0, 1, 2 => use 3;
-    | 0, 2, 1 => use 3;
-    | 1, 3, 2 => use 0;
-    | _, _, _ => sorry;
-    -/
-  have : Connected Kripke.diaFrame := by sorry;
-  have : ¬Connected Kripke.diaFrame := by
+    use 3;
+    split at Rxy;
+    . contradiction;
+    . split at Ryz;
+      . contradiction;
+      . constructor;
+        . simp_all; omega;
+        . simp_all; omega;
+  have : ¬Connected F := by
     simp only [Connected]; push_neg;
     use 0, 1, 2;
-    sorry; -- simp;
+    simp;
   contradiction;
 
 theorem KC_strictly_weaker_than_LC : (Hilbert.KC ℕ) <ₛ (Hilbert.LC ℕ) := by
   constructor;
-  . sorry;
-  . apply weakerThan_iff.not.mpr;
+  . exact Hilbert.KC_weaker_than_LC;
+  . obtain ⟨a, b, h⟩ := KC.no_Dummett;
+    apply weakerThan_iff.not.mpr;
     push_neg;
-    use Axioms.Dummett (atom 0) (atom 1);
+    use Axioms.Dummett (atom a) (atom b);
     constructor;
     . exact dummett!;
-    . exact KC.no_Dummett;
+    . exact h;
 
-theorem LC.no_LEM : (Hilbert.LC ℕ) ⊬ Axioms.LEM (atom a) := by
-  by_contra hC;
-  have : Kripke.ConnectedFrameClass ⊧ Axioms.LEM (atom a) := Sound.sound hC; simp at this;
+theorem LC.no_LEM : ∃ a, (Hilbert.LC ℕ) ⊬ Axioms.LEM (atom a) := by
+  by_contra hC; simp at hC;
   let F : Kripke.Frame := {
     World := Fin 2
     Rel := λ x y => x ≤ y
   };
-  have : F ⊧ Axioms.LEM (atom a) := this _ $ by simp [Connected]; omega;
-  have : Euclidean F := by sorry;
+  have : Euclidean F := by
+    apply @Kripke.EuclideanFrameClass.defined_by_LEM F |>.mpr;
+    simp [Semantics.RealizeSet.setOf_iff, ValidOnFrame.models_iff];
+    intro φ;
+    suffices ValidOnFrame F (Axioms.LEM (atom 0))
+      from @Formula.Kripke.ValidOnFrame.subst F (Axioms.LEM (atom 0)) this (λ a => match a with | 0 => φ | _ => atom a);
+    apply (Hilbert.LC.Kripke.sound.sound $ hC 0) F;
+    simp [Connected];
+    omega;
   have : ¬Euclidean F := by
     simp only [Euclidean]; push_neg;
     use 0, 0, 1;
@@ -146,12 +136,13 @@ theorem LC.no_LEM : (Hilbert.LC ℕ) ⊬ Axioms.LEM (atom a) := by
 theorem LC_strictly_weaker_than_Cl : (Hilbert.LC ℕ) <ₛ (Hilbert.Cl ℕ) := by
   constructor;
   . exact Hilbert.LC_weaker_than_Cl;
-  . apply weakerThan_iff.not.mpr;
+  . obtain ⟨a, h⟩ := LC.no_LEM;
+    apply weakerThan_iff.not.mpr;
     push_neg;
-    use Axioms.LEM (atom 0);
+    use Axioms.LEM (atom a);
     constructor;
     . exact lem!;
-    . exact LC.no_LEM;
+    . exact h;
 
 theorem Int_strictly_weaker_than_Cl : (Hilbert.Int ℕ) <ₛ (Hilbert.Cl ℕ) :=
   strictlyWeakerThan.trans Int_strictly_weaker_than_LC $ strictlyWeakerThan.trans KC_strictly_weaker_than_LC LC_strictly_weaker_than_Cl
