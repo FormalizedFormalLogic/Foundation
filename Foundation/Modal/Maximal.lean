@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert
-import Foundation.IntProp.Kripke.Semantics
+import Foundation.IntProp.Kripke.Classical
 
 /-!
   # Maximality of `Hilbert.Triv α` and `𝐕𝐞𝐫`
@@ -190,59 +190,57 @@ lemma verTranslated_of_GL : (Hilbert.GL α) ⊢! φ → (Hilbert.Cl α) ⊢! φ�
     | _ => dsimp [VerTranslation]; trivial;
 
 
-open IntProp.Kripke (unprovable_classical_of_exists_ClassicalValuation)
+-- open IntProp.Kripke (unprovable_classical_of_exists_ClassicalValuation)
 
-variable [Inhabited α]
-
-example : Hilbert.Triv α ⊬ Axioms.L (atom default : Formula α) := by
+example (a : ℕ) : Hilbert.Triv ℕ ⊬ Axioms.L (atom a : Formula ℕ) := by
   apply iff_Triv_classical.not.mpr;
-  apply unprovable_classical_of_exists_ClassicalValuation;
+  apply IntProp.Hilbert.Cl.unprovable_of_exists_classicalValuation;
   simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
   tauto;
 
-lemma unprovable_AxiomL_K4 : Hilbert.K4 α ⊬ Axioms.L (atom default : Formula α) := by
+lemma unprovable_AxiomL_K4 {a : ℕ} : Hilbert.K4 ℕ ⊬ Axioms.L (atom a : Formula ℕ) := by
   apply not_imp_not.mpr trivTranslated_of_K4;
-  apply unprovable_classical_of_exists_ClassicalValuation;
+  apply IntProp.Hilbert.Cl.unprovable_of_exists_classicalValuation;
   simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
   tauto;
 
-theorem K4_strictReducible_GL : (Hilbert.K4 α) <ₛ (Hilbert.GL α) := by
+theorem K4_strictReducible_GL : (Hilbert.K4 ℕ) <ₛ (Hilbert.GL ℕ) := by
   dsimp [StrictlyWeakerThan];
   constructor;
   . apply K4_weakerThan_GL;
   . simp [System.not_weakerThan_iff];
-    existsi (Axioms.L (atom default))
+    use (Axioms.L (atom 0));
     constructor;
     . exact axiomL!;
     . exact unprovable_AxiomL_K4;
 
-lemma unprovable_AxiomT_GL : (Hilbert.GL α) ⊬ Axioms.T (atom default : Formula α) := by
+lemma unprovable_AxiomT_GL {a : ℕ} : (Hilbert.GL ℕ) ⊬ Axioms.T (atom a : Formula ℕ) := by
   apply not_imp_not.mpr verTranslated_of_GL;
-  apply unprovable_classical_of_exists_ClassicalValuation;
+  apply IntProp.Hilbert.Cl.unprovable_of_exists_classicalValuation;
   simp [Axioms.T, VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => False);
   tauto;
 
 
-instance instGLConsistencyViaUnprovableAxiomT : System.Consistent (Hilbert.GL α) := by
+instance instGLConsistencyViaUnprovableAxiomT : System.Consistent (Hilbert.GL ℕ) := by
   apply consistent_iff_exists_unprovable.mpr;
-  existsi (Axioms.T (atom default));
+  use (Axioms.T (atom 0));
   apply unprovable_AxiomT_GL;
 
 
-theorem not_S4_weakerThan_GL : ¬(Hilbert.S4 α) ≤ₛ (Hilbert.GL α) := by
+theorem not_S4_weakerThan_GL : ¬(Hilbert.S4 ℕ) ≤ₛ (Hilbert.GL ℕ) := by
   apply System.not_weakerThan_iff.mpr;
-  existsi (Axioms.T (atom default));
+  existsi (Axioms.T (atom 0));
   constructor;
   . exact axiomT!;
   . exact unprovable_AxiomT_GL;
 
 
-example : (Hilbert.Ver α) ⊬ (∼(□⊥) : Formula α) := by
+example : (Hilbert.Ver ℕ) ⊬ (∼(□⊥) : Formula ℕ) := by
   apply iff_Ver_classical.not.mpr;
-  apply unprovable_classical_of_exists_ClassicalValuation;
+  apply IntProp.Hilbert.Cl.unprovable_of_exists_classicalValuation;
   dsimp [VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
   use (λ _ => True);
   simp;

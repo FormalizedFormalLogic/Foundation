@@ -1,35 +1,86 @@
 import Foundation.IntProp.Kripke.Semantics
 
-/-!
-  # Counterexample to the Law of Excluded Middle in Intuitionistic Logic
-
-  ## Theorems
-  - `noLEM`: LEM is not always valid in intuitionistic logic.
--/
-
 namespace LO.IntProp
 
 open System
 open Formula Formula.Kripke
 
+namespace Kripke
+
+/--
+  ```
+    3
+   / \
+  1   2
+   \ /
+    0
+  ```
+-/
+abbrev diaFrame : Kripke.Frame where
+  World := Fin 4
+  Rel := λ x y =>
+    match x, y with
+    | 0, _ => True
+    | 1, 3 => True
+    | 2, 3 => True
+    | x, y => x ≤ y
+  rel_po := {
+    refl := by sorry
+    antisymm := λ x y =>
+      match x, y with
+      | 1, 2 => by simp;
+      | x, y => by
+        intro Rxy Ryx;
+        apply LE.le.antisymm;
+        . aesop;
+        . aesop;
+    trans := λ x y z => sorry
+  }
+lemma dia.confluent : Confluent diaFrame := by
+  simp [Confluent];
+  intro x y z Rxy Rxz;
+  sorry;
+
+end Kripke
+
+
 namespace Hilbert
 
-theorem Int.no_WeakLEM : (Hilbert.Int ℕ) ⊬ Axioms.WeakLEM (atom a) := by
-  by_contra hC;
+open Kripke
+
+variable {a b : ℕ}
+
+theorem Int.no_WeakLEM : ∃ a, (Hilbert.Int ℕ) ⊬ Axioms.WeakLEM (atom a) := by
+  by_contra hC; simp at hC;
+  -- have : Kripke.AllFrameClass ⊧ Axioms.WeakLEM (atom a) := Sound.sound hC; simp at this;
   let F : Kripke.Frame := {
-    World := Fin 3,
+    World := Fin 3
     Rel := λ x y =>
       match x, y with
-      | 0, x => True
-      | x, y => x = y,
+      | 0, _ => True
+      | x, y => x = y
     rel_po := {
       refl := by aesop;
       antisymm := by aesop;
       trans := by aesop;
     }
-  };
-  have : F ⊧ Axioms.WeakLEM (atom a) := Kripke.sound.sound hC F $ by tauto;
-  have : Confluent F := by sorry;
+  }
+  -- have : F ⊧ Axioms.WeakLEM (atom a) := this F;
+  have : Confluent F := by
+    apply @Kripke.ConfluentFrameClass.defined_by_WLEM F |>.mpr;
+    simp;
+    intro φ;
+    induction φ using Formula.rec' with
+    | hatom a =>
+      apply (Hilbert.Int.Kripke.sound.sound $ hC a) F;
+      tauto;
+    | hfalsum => simp [ValidOnFrame, ValidOnModel, Axioms.WeakLEM, Semantics.Realize, Satisfies];
+    | hverum => simp [ValidOnFrame, ValidOnModel, Axioms.WeakLEM, Semantics.Realize, Satisfies]; sorry;
+    | hneg φ ih =>
+      intro V x;
+      apply Formula.Kripke.Satisfies.or_def.mpr;
+      sorry;
+    | _ => sorry;
   have : ¬Confluent F := by
     simp only [Confluent]; push_neg;
     use 0, 1, 2;
@@ -46,36 +97,12 @@ theorem Int_strictly_weaker_than_LC : (Hilbert.Int ℕ) <ₛ (Hilbert.KC ℕ) :=
     . exact wlem!;
     . exact Int.no_WeakLEM;
 
-/-
-theorem KC.no_Dummet : (Hilbert.KC ℕ) ⊬ Axioms.GD (atom a) (atom b) := by
+theorem KC.no_Dummett : (Hilbert.KC ℕ) ⊬ Axioms.Dummett (atom a) (atom b) := by
   by_contra hC;
-  let F : Kripke.Frame := {
-    World := Fin 4,
-    Rel := λ x y =>
-      match x, y with
-      | 1, 2 => False
-      | x, y => x ≤ y
-    rel_po := {
-      refl := by aesop;
-      antisymm := by sorry;
-      trans := by
-        intro x y z;
-        aesop;
-        match y with
-        | 0 => simp; rintro rfl; tauto;
-        | 1 =>
-          match x with
-          | 0 => sorry;
-          | 1 => aesop;
-          | _ => sorry;
-        | 2 => sorry;
-        | 3 => simp; rintro _ rfl; tauto;
-        -- match (x, y, z) with
-        -- | 0, 1, 2 => simp;
-        -- | _ => sorry;
-    }
-  };
-  have : F ⊧ Axioms.GD (atom a) (atom b) := Kripke.sound.sound hC F $ by
+  have : Kripke.ConfluentFrameClass ⊧ Axioms.Dummett (atom a) (atom b) := Sound.sound hC; simp at this;
+  have : Kripke.diaFrame ⊧ Axioms.Dummett (atom a) (atom b) := this Kripke.diaFrame $ by
+    sorry;
+    /-
     simp [Confluent];
     intro x y z Rxy Ryz;
     match x, y, z with
@@ -83,26 +110,13 @@ theorem KC.no_Dummet : (Hilbert.KC ℕ) ⊬ Axioms.GD (atom a) (atom b) := by
     | 0, 2, 1 => use 3;
     | 1, 3, 2 => use 0;
     | _, _, _ => sorry;
--/
-
-/-
-theorem KC.noLEM : (Hilbert.KC α) ⊬ (atom a) ⋎ ∼(atom a) := by
-  by_contra hC;
-  apply Kripke.twopoints.noLEM;
-  apply Kripke.sound.sound hC;
-  exact Kripke.twopoints.is_confluent;
-
-theorem KC_strictly_weaker_than_Cl [Inhabited α] : (Hilbert.KC α) <ₛ (Hilbert.Cl α) := by
-  constructor;
-  . exact Hilbert.KC_weaker_than_Cl;
-  . apply weakerThan_iff.not.mpr;
-    push_neg;
-    use (atom default) ⋎ ∼(atom default);
-    constructor;
-    . exact lem!;
-    . exact KC.noLEM;
--/
-lemma KC.no_dummett : (Hilbert.KC ℕ) ⊬ Axioms.Dummett (atom a) (atom b) := by sorry;
+    -/
+  have : Connected Kripke.diaFrame := by sorry;
+  have : ¬Connected Kripke.diaFrame := by
+    simp only [Connected]; push_neg;
+    use 0, 1, 2;
+    sorry; -- simp;
+  contradiction;
 
 theorem KC_strictly_weaker_than_LC : (Hilbert.KC ℕ) <ₛ (Hilbert.LC ℕ) := by
   constructor;
@@ -112,17 +126,16 @@ theorem KC_strictly_weaker_than_LC : (Hilbert.KC ℕ) <ₛ (Hilbert.LC ℕ) := b
     use Axioms.Dummett (atom 0) (atom 1);
     constructor;
     . exact dummett!;
-    . exact KC.no_dummett;
+    . exact KC.no_Dummett;
 
 theorem LC.no_LEM : (Hilbert.LC ℕ) ⊬ Axioms.LEM (atom a) := by
   by_contra hC;
+  have : Kripke.ConnectedFrameClass ⊧ Axioms.LEM (atom a) := Sound.sound hC; simp at this;
   let F : Kripke.Frame := {
-    World := Fin 2,
+    World := Fin 2
     Rel := λ x y => x ≤ y
   };
-  have : F ⊧ Axioms.LEM (atom a) := Kripke.sound.sound hC F $ by
-    simp [Connected];
-    omega;
+  have : F ⊧ Axioms.LEM (atom a) := this _ $ by simp [Connected]; omega;
   have : Euclidean F := by sorry;
   have : ¬Euclidean F := by
     simp only [Euclidean]; push_neg;

@@ -40,8 +40,8 @@ lemma rel_antisymm' : Antisymmetric F.Rel := by apply rel_antisymm
 
 end Frame
 
-protected abbrev Frame.point : Frame where
-  World := PUnit
+abbrev pointFrame : Frame where
+  World := Unit
   Rel := fun _ _ => True
 
 
@@ -133,6 +133,7 @@ lemma formula_hereditary
 
 
 lemma neg_equiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies];
+
 
 end Satisfies
 
@@ -284,6 +285,40 @@ protected lemma bot : ¬F ⊧ ⊥ := by
   use ⟨(λ _ _ => True), by tauto⟩;
 
 instance : Semantics.Bot (Frame) := ⟨λ _ => ValidOnFrame.bot⟩
+
+/-
+lemma subst (h : F ⊧ φ) {s : ℕ → Formula ℕ} : F ⊧ φ.subst s := by
+  induction φ using Formula.rec' with
+  | hatom =>
+    intro V x;
+    refine h (V := ⟨λ x a => Satisfies ⟨F, V⟩ x (s a), ?_⟩) x;
+    intro x y Rxy a;
+    exact formula_hereditary Rxy;
+  | hand _ _ hφ hψ =>
+    intro V x;
+    apply Satisfies.and_def.mp;
+    constructor;
+    . apply hφ;
+      intro V x;
+      exact h x |>.1;
+    . apply hψ;
+      intro V x;
+      exact h x |>.2;
+  | hor _ _ hφ hψ =>
+    intro V x;
+    rcases Satisfies.or_def.mp $ h x with (hl | hr);
+    . left; apply hφ; intro V y; sorry;
+    . sorry;;
+  | hneg => simp_all;
+  | himp _ _ hφ hψ =>
+    simp;
+    intro x Rwx hx;
+    apply hψ;
+    apply h;
+    . exact Rwx;
+    . sorry;
+  | _ => simp;
+-/
 
 end ValidOnFrame
 
@@ -472,7 +507,7 @@ namespace Int
 instance Kripke.sound : Sound (Hilbert.Int ℕ) (AllFrameClass) := Kripke.instSound AllFrameClass.defined_by_EFQ $ by simp
 
 instance : (Hilbert.Int ℕ).Consistent := Kripke.consistent (C := AllFrameClass) $ by
-  use Frame.point;
+  use pointFrame;
   tauto;
 
 end Int
@@ -483,7 +518,7 @@ namespace KC
 instance Kripke.sound : Sound (Hilbert.KC ℕ) (ConfluentFrameClass) := Kripke.instSound ConfluentFrameClass.defined_by_WLEM $ by simp
 
 instance : (Hilbert.KC ℕ).Consistent := Kripke.consistent (C := ConfluentFrameClass) $ by
-  use Frame.point;
+  use pointFrame;
   simp [Confluent]
 
 end KC
@@ -494,7 +529,7 @@ namespace LC
 instance Kripke.sound : Sound (Hilbert.LC ℕ) (ConnectedFrameClass) := Kripke.instSound ConnectedFrameClass.defined_by_Dummett $ by simp
 
 instance : (Hilbert.LC ℕ).Consistent := Kripke.consistent (C := ConnectedFrameClass) $ by
-  use Frame.point;
+  use pointFrame;
   simp [Connected]
 
 end LC
@@ -505,7 +540,7 @@ namespace Cl
 instance Kripke.sound : Sound (Hilbert.Cl ℕ) (EuclideanFrameClass) := Kripke.instSound EuclideanFrameClass.defined_by_LEM $ by simp
 
 instance : (Hilbert.Cl ℕ).Consistent := Kripke.consistent (C := EuclideanFrameClass) $ by
-  use Frame.point;
+  use pointFrame;
   simp [Euclidean]
 
 end Cl
