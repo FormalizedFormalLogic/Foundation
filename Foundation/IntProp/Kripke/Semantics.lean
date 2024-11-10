@@ -280,47 +280,16 @@ protected lemma dum (F_conn : Connected F.Rel) : F ⊧ Axioms.Dummett φ ψ := V
 
 protected lemma wlem (F_conf : Confluent F.Rel) : F ⊧ Axioms.WeakLEM φ := ValidOnModel.wlem F_conf
 
+protected lemma top : F ⊧ ⊤ := by
+  simp [ValidOnFrame.models_iff, ValidOnFrame];
+  tauto;
+instance : Semantics.Top (Frame) := ⟨λ _ => ValidOnFrame.top⟩
+
 protected lemma bot : ¬F ⊧ ⊥ := by
   simp [ValidOnFrame.models_iff, ValidOnFrame];
   use ⟨(λ _ _ => True), by tauto⟩;
-
 instance : Semantics.Bot (Frame) := ⟨λ _ => ValidOnFrame.bot⟩
 
-lemma subst (h : F ⊧ φ) (s : ℕ → Formula ℕ) : F ⊧ φ.subst s := by sorry;
-
-/-
-lemma subst (h : F ⊧ φ) {s : ℕ → Formula ℕ} : F ⊧ φ.subst s := by
-  induction φ using Formula.rec' with
-  | hatom =>
-    intro V x;
-    refine h (V := ⟨λ x a => Satisfies ⟨F, V⟩ x (s a), ?_⟩) x;
-    intro x y Rxy a;
-    exact formula_hereditary Rxy;
-  | hand _ _ hφ hψ =>
-    intro V x;
-    apply Satisfies.and_def.mp;
-    constructor;
-    . apply hφ;
-      intro V x;
-      exact h x |>.1;
-    . apply hψ;
-      intro V x;
-      exact h x |>.2;
-  | hor _ _ hφ hψ =>
-    intro V x;
-    rcases Satisfies.or_def.mp $ h x with (hl | hr);
-    . left; apply hφ; intro V y; sorry;
-    . sorry;;
-  | hneg => simp_all;
-  | himp _ _ hφ hψ =>
-    simp;
-    intro x Rwx hx;
-    apply hψ;
-    apply h;
-    . exact Rwx;
-    . sorry;
-  | _ => simp;
--/
 
 end ValidOnFrame
 

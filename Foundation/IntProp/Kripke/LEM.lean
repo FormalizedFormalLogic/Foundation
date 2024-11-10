@@ -1,9 +1,59 @@
 import Foundation.IntProp.Kripke.Semantics
 
+-- TODO: prove `Formula.Kripke.ValidOnFrame.subst`
+
 namespace LO.IntProp
 
 open System
 open Formula Formula.Kripke
+
+-- TODO: 成り立つのか？
+lemma Formula.Kripke.ValidOnFrame.subst {F : Kripke.Frame} {φ : Formula ℕ} (h : F ⊧ φ) (s : ℕ → Formula ℕ) : F ⊧ φ.subst s := by sorry;
+  /-
+  induction φ using Formula.rec' with
+  | hatom =>
+    intro V x;
+    refine h (V := ⟨λ x a => Satisfies ⟨F, V⟩ x (s a), ?_⟩) x;
+    intro x y Rxy a;
+    exact formula_hereditary Rxy;
+  | hverum => simp;
+  | hfalsum => simp at h;
+  | hand _ _ hφ hψ =>
+    intro V x;
+    apply Satisfies.and_def.mp;
+    constructor;
+    . apply hφ;
+      intro V x;
+      exact h x |>.1;
+    . apply hψ;
+      intro V x;
+      exact h x |>.2;
+  | himp φ ψ hφ hψ =>
+    apply Satisfies.imp_def.mp;
+    intro y Rxy hy;
+    apply hψ;
+    intro V' z;
+    have := @h V x;
+    have := @Satisfies.imp_def ⟨F, V⟩ x φ ψ |>.mp this Rxy;
+    apply h;
+    . sorry;
+    . sorry;
+    sorry;
+  | hor φ ψ hφ hψ =>
+    intro V x;
+    rcases Satisfies.or_def.mp $ h x with (hl | hr);
+    . left;
+      apply hφ;
+      intro V' y;
+      sorry;
+    . sorry;
+  | hneg φ hφ =>
+    intro V x;
+    apply Satisfies.neg_def.mpr;
+    intro y Rxy hyφ;
+    have := @h V y;
+    apply hφ;
+  -/
 
 namespace Hilbert
 
