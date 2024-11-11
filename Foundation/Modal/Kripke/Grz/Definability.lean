@@ -6,17 +6,18 @@ namespace Modal
 
 namespace Kripke
 
-open LO.Kripke
 open System
 open Kripke
 open Formula (atom)
 open Formula.Kripke
 open Relation (IrreflGen)
 
-variable {α : Type u}
+abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel }
+abbrev ReflexiveTransitiveAntisymmetricFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ Antisymmetric F.Rel }
+
 variable {F : Kripke.Frame}
 
-private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F#α ⊧* 𝗚𝗿𝘇 := by
+private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F ⊧* 𝗚𝗿𝘇 := by
   rintro ⟨hRefl, hTrans, hWCWF⟩;
   simp [Axioms.Grz];
   intro φ V;
@@ -67,37 +68,35 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
       . exact Rwx;
 
 
-variable [DecidableEq α]
-
-private lemma valid_on_frame_T_and_Four_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* ({□φ ➝ (φ ⋏ (□φ ➝ □□φ)) | (φ : Formula α)}) := by
+private lemma valid_on_frame_T_and_Four_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧* ({□φ ➝ (φ ⋏ (□φ ➝ □□φ)) | (φ : Formula ℕ)}) := by
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro φ V x;
   let ψ := φ ⋏ (□φ ➝ □□φ);
-  have h₁ : Satisfies ⟨F#α, V⟩ x (□φ ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := K_sound.sound lemma_Grz₁! (by simp) V x;
-  have h₂ : Satisfies ⟨F#α, V⟩ x (□(□(ψ ➝ □ψ) ➝ ψ) ➝ ψ)  := h ψ V x;
+  have h₁ : Satisfies ⟨F, V⟩ x (□φ ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := Hilbert.K.Kripke.sound.sound lemma_Grz₁! (by simp) V x;
+  have h₂ : Satisfies ⟨F, V⟩ x (□(□(ψ ➝ □ψ) ➝ ψ) ➝ ψ)  := h ψ V x;
   exact λ f => h₂ (h₁ f);
 
-private lemma valid_on_frame_T_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* 𝗧 := by
+private lemma valid_on_frame_T_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧* 𝗧 := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro φ V x hx;
   exact Satisfies.and_def.mp (this φ V x hx) |>.1
 
-private lemma valid_on_frame_Four_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : F#α ⊧* 𝟰 := by
+private lemma valid_on_frame_Four_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧* 𝟰 := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro φ V x hx;
   exact (Satisfies.and_def.mp (this φ V x hx) |>.2) hx;
 
-variable [Inhabited α]
+private lemma refl_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : Reflexive F := by
+  apply ReflexiveFrameClass.isDefinedBy F |>.mpr;
+  apply valid_on_frame_T_of_Grz h;
 
-private lemma refl_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : Reflexive F := by
-  exact axiomT_defines.define.mp $ valid_on_frame_T_of_Grz h;
+private lemma trans_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : Transitive F := by
+  apply TransitiveFrameClass.isDefinedBy F |>.mpr;
+  apply valid_on_frame_Four_of_Grz h;
 
-private lemma trans_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : Transitive F := by
-  exact axiomFour_defines.define.mp $ valid_on_frame_Four_of_Grz h;
-
-private lemma WCWF_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : WCWF F := by
+private lemma WCWF_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : WCWF F := by
   have F_trans : Transitive F := trans_of_Grz h;
   have F_refl : Reflexive F := refl_of_Grz h;
 
@@ -110,10 +109,8 @@ private lemma WCWF_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : WCWF F := by
   obtain ⟨f, hf⟩ := dependent_choice hWCWF; clear hWCWF;
   simp [IrreflGen] at hf;
 
-  apply iff_not_validOnFrame.mpr;
-  use (Axioms.Grz (atom default));
-  constructor;
-  . simp;
+  simp [Semantics.Realize, ValidOnFrame, ValidOnModel];
+  use (atom default);
   . by_cases H : ∀ j₁ j₂, (j₁ < j₂ → f j₂ ≠ f j₁)
     . use (λ v _ => ∀ i, v ≠ f (2 * i)), (f 0);
       apply Classical.not_imp.mpr
@@ -133,11 +130,12 @@ private lemma WCWF_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : WCWF F := by
           . apply @H _ _ ?_ |>.symm; omega;
         . apply hf _ |>.2;
         . use (j + 1); rfl;
-      . simp [Satisfies]; use 0;
+      . simp [Satisfies];
+        use 0;
     . push_neg at H;
       obtain ⟨j, k, ljk, ejk⟩ := H;
-      let V : Valuation F α := (λ v _ => v ≠ f j);
-      use (λ v _ => v ≠ f j), (f j);
+      let V : Valuation F := (λ v _ => v ≠ f j);
+      use V, (f j);
       apply Classical.not_imp.mpr;
       constructor;
       . have : Satisfies ⟨F, V⟩ (f (j + 1)) (∼((atom default) ➝ □(atom default))) := by
@@ -165,42 +163,46 @@ private lemma WCWF_of_Grz (h : F#α ⊧* 𝗚𝗿𝘇) : WCWF F := by
         exact this _ hx;
       . simp [Satisfies, V];
 
-instance axiomGrz_defineability : 𝔽((𝗚𝗿𝘇 : Theory α)).DefinedBy ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass where
-  define := by
-    intro F;
-    constructor;
-    . intro h;
-      refine ⟨refl_of_Grz h, trans_of_Grz h, WCWF_of_Grz h⟩;
-    . exact Grz_of_wcwf;
-  nonempty := by
-    use ⟨PUnit,  λ _ _ => True⟩;
-    refine ⟨by tauto, by tauto, ?_⟩;
-    simp [WeaklyConverseWellFounded, ConverseWellFounded, IrreflGen];
-    apply WellFounded.trivial_wellfounded;
+lemma ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.is_defined_by_Grz : ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.DefinedBy 𝗚𝗿𝘇 := by
+  intro F;
+  constructor;
+  . rintro ⟨hRefl, hTrans, hWCWF⟩;
+    apply Grz_of_wcwf;
+    exact ⟨hRefl, hTrans, hWCWF⟩;
+  . rintro h;
+    refine ⟨refl_of_Grz h, trans_of_Grz h, WCWF_of_Grz h⟩;
 
-instance : Sound (Hilbert.Grz α) (ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass#α) := inferInstance
-instance : System.Consistent (Hilbert.Grz α) := inferInstance
-
-instance axiomGrz_finite_defines : 𝔽ꟳ((𝗚𝗿𝘇 : Theory α)).DefinedBy ReflexiveTransitiveAntisymmetricFrameClassꟳ where
-  define := by
-    intro F;
-    constructor;
-    . rintro h;
-      obtain ⟨F_refl, F_trans, hCWF⟩ := axiomGrz_defineability.define.mp h;
-      refine ⟨F_refl, F_trans, antisymm_of_WCWF hCWF⟩;
-    . rintro ⟨F_Refl, F_trans, F_antisymm⟩;
-      apply axiomGrz_defineability.define.mpr;
-      refine ⟨F_Refl, F_trans, ?_⟩;
-      apply WCWF_of_finite_trans_antisymm;
-      . exact F.World_finite;
-      . assumption;
-      . assumption;
-  nonempty := by
-    use ⟨PUnit, λ _ _ => True⟩;
-    refine ⟨?_, ?_, ?_⟩ <;> tauto;
-
-instance : Sound (Hilbert.Grz α) (ReflexiveTransitiveAntisymmetricFrameClassꟳ#α) := inferInstance
+lemma ReflexiveTransitiveAntisymmetricFiniteFrameClass.is_defined_by_Grz : ReflexiveTransitiveAntisymmetricFiniteFrameClass.DefinedBy 𝗚𝗿𝘇 := by
+  intro F;
+  constructor;
+  . rintro ⟨hRefl, hTrans, hAntisymm⟩;
+    apply Grz_of_wcwf;
+    refine ⟨hRefl, hTrans, ?_⟩;
+    apply WCWF_of_finite_trans_antisymm;
+    . exact F.world_finite;
+    . assumption;
+    . assumption;
+  . rintro h;
+    refine ⟨refl_of_Grz h, trans_of_Grz h, antisymm_of_WCWF $ WCWF_of_Grz h⟩;
 
 end Kripke
+
+
+namespace Hilbert
+
+open Modal.Kripke
+open Hilbert.Kripke
+
+instance Grz.Kripke.sound : Sound (Hilbert.Grz ℕ) (ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass) :=
+  instSound_of_frameClass_definedBy ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.is_defined_by_Grz rfl
+
+instance Grz.Kripke.finite_sound : Sound (Hilbert.Grz ℕ) (ReflexiveTransitiveAntisymmetricFiniteFrameClass) :=
+  instSound_of_finiteFrameClass_definedBy ReflexiveTransitiveAntisymmetricFiniteFrameClass.is_defined_by_Grz rfl
+
+instance Grz.consistent : System.Consistent (Hilbert.Grz ℕ) := Kripke.instConsistent_of_nonempty_finiteFrameclass (FC := ReflexiveTransitiveAntisymmetricFiniteFrameClass) $ by
+  use reflexivePointFrame;
+  simp [Transitive, Reflexive, Antisymmetric];
+
+end Hilbert
 
 end LO.Modal

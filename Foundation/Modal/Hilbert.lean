@@ -184,6 +184,7 @@ namespace Hilbert
 
 abbrev theorems (H : Hilbert α) := System.theory H
 
+abbrev Consistent (H : Hilbert α) := System.Consistent H
 
 section K
 

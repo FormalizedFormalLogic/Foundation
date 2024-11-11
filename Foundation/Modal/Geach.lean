@@ -1,127 +1,54 @@
 import Foundation.Modal.Hilbert
-import Foundation.Logic.Kripke.RelItr
-import Foundation.Vorspiel.BinaryRelations
-
-structure GeachTaple where
-  i : ℕ
-  j : ℕ
-  m : ℕ
-  n : ℕ
-
-def GeachConfluent (t : GeachTaple) (R : Rel α α) := ∀ {x y z : α}, (R.iterate t.i x y) ∧ (R.iterate t.j x z) → ∃ u, (R.iterate t.m y u) ∧ (R.iterate t.n z u)
-
-namespace GeachConfluent
-
-variable {R : Rel α α}
-
-lemma serial_def : Serial R ↔ (GeachConfluent ⟨0, 0, 1, 1⟩ R) := by simp [GeachConfluent, Serial];
-
-lemma reflexive_def : Reflexive R ↔ (GeachConfluent ⟨0, 0, 1, 0⟩ R) := by simp [GeachConfluent, Reflexive];
-
-lemma symmetric_def : Symmetric R ↔ (GeachConfluent ⟨0, 1, 0, 1⟩ R) := by
-  simp [GeachConfluent, Symmetric];
-  constructor;
-  . rintro h x y z rfl Rxz; exact h Rxz;
-  . intro h x y Rxy; exact h rfl Rxy;
-
-lemma transitive_def : Transitive R ↔ (GeachConfluent ⟨0, 2, 1, 0⟩ R) := by
-  simp [GeachConfluent, Transitive];
-  constructor;
-  . rintro h x y z rfl w Rxw Rwz; exact h Rxw Rwz;
-  . intro h x y z Rxy Ryz; exact h rfl y Rxy Ryz
-
-lemma euclidean_def : Euclidean R ↔ (GeachConfluent ⟨1, 1, 0, 1⟩ R) := by simp [GeachConfluent, Euclidean];
-
-lemma confluent_def : Confluent R ↔ (GeachConfluent ⟨1, 1, 1, 1⟩ R) := by simp [GeachConfluent, Confluent];
-
-lemma extensive_def : Coreflexive R ↔ (GeachConfluent ⟨0, 1, 0, 0⟩ R) := by
-  simp [GeachConfluent, Coreflexive];
-  constructor;
-  . rintro h x y z rfl Rxz; have := h Rxz; tauto;
-  . intro h x y Rxy; have := h rfl Rxy; tauto;
-
-lemma functional_def : Functional R ↔ (GeachConfluent ⟨1, 1, 0, 0⟩ R) := by
-  simp [GeachConfluent, Functional];
-  constructor <;> tauto;
-
-lemma dense_def : Dense R ↔ (GeachConfluent ⟨0, 1, 2, 0⟩ R) := by
-  simp [GeachConfluent, Dense];
-  constructor;
-  . rintro h x y z rfl Rxz; exact h Rxz;
-  . intro h x y Rxy; exact h rfl Rxy;
-
-@[simp] lemma satisfies_eq : GeachConfluent (α := α) t (· = ·) := by simp [GeachConfluent];
-
-end GeachConfluent
-
-
-def MultiGeachConfluent (ts : List GeachTaple) (R : Rel α α) : Prop :=
-  match ts with
-  | [] => True
-  | [t] => (GeachConfluent t R)
-  | t :: ts => (GeachConfluent t R) ∧ (MultiGeachConfluent ts R)
-
-namespace MultiGeachConfluent
-
-@[simp] lemma iff_nil : MultiGeachConfluent [] R := by simp [MultiGeachConfluent];
-
-@[simp] lemma iff_singleton : MultiGeachConfluent [t] R ↔ (GeachConfluent t R) := by simp [MultiGeachConfluent];
-
-lemma iff_cons (h : ts ≠ []) : MultiGeachConfluent (t :: ts) R ↔ (GeachConfluent t R) ∧ (MultiGeachConfluent ts R) := by simp [MultiGeachConfluent];
-
-@[simp]
-lemma satisfies_eq : MultiGeachConfluent (α := α) ts (· = ·) := by induction ts using List.induction_with_singleton <;> simp_all [MultiGeachConfluent];
-
-end MultiGeachConfluent
-
-
+import Foundation.Vorspiel.Geach
 
 namespace LO.Axioms
 
 variable {F : Type*} [LogicalConnective F] [BasicModalLogicalConnective F]
 
-protected abbrev Geach (t : GeachTaple) (φ : F) := ◇^[t.i](□^[t.m]φ) ➝ □^[t.j](◇^[t.n]φ)
-abbrev Geach.set (t : GeachTaple) : Set F := { Axioms.Geach t φ | (φ) }
+protected abbrev Geach (t : GeachConfluent.Taple) (φ : F) := ◇^[t.i](□^[t.m]φ) ➝ □^[t.j](◇^[t.n]φ)
+abbrev Geach.set (t : GeachConfluent.Taple) : Set F := { Axioms.Geach t φ | (φ) }
 notation:max "𝗴𝗲(" t ")" => Geach.set t
 
-namespace Geach
 
-lemma T_def    : 𝗴𝗲(⟨0, 0, 1, 0⟩) = (𝗧 : Set F) := rfl
-lemma B_def    : 𝗴𝗲(⟨0, 1, 0, 1⟩) = (𝗕 : Set F) := rfl
-lemma D_def    : 𝗴𝗲(⟨0, 0, 1, 1⟩) = (𝗗 : Set F) := rfl
-lemma Four_def : 𝗴𝗲(⟨0, 2, 1, 0⟩) = (𝟰 : Set F) := rfl
-lemma Five_def : 𝗴𝗲(⟨1, 1, 0, 1⟩) = (𝟱 : Set F) := rfl
-lemma Dot2_def : 𝗴𝗲(⟨1, 1, 1, 1⟩) = (.𝟮 : Set F) := rfl
-lemma C4_def   : 𝗴𝗲(⟨0, 1, 2, 0⟩) = (𝗖𝟰 : Set F) := rfl
-lemma CD_def   : 𝗴𝗲(⟨1, 1, 0, 0⟩) = (𝗖𝗗 : Set F) := rfl
-lemma Tc_def   : 𝗴𝗲(⟨0, 1, 0, 0⟩) = (𝗧𝗰 : Set F) := rfl
+section
 
-end Geach
+lemma T.is_geach : (𝗧 : Set F) = 𝗴𝗲(⟨0, 0, 1, 0⟩) := rfl
 
-class IsGeach (Ax : Set F) where
-  taple : GeachTaple
-  char : Ax = 𝗴𝗲(taple) := by rfl
+lemma B.is_geach : (𝗕 : Set F) = 𝗴𝗲(⟨0, 1, 0, 1⟩) := rfl
 
-instance : IsGeach (𝗧 : Set F)  where taple := ⟨0, 0, 1, 0⟩;
-instance : IsGeach (𝗕 : Set F)  where taple := ⟨0, 1, 0, 1⟩;
-instance : IsGeach (𝗗 : Set F)  where taple := ⟨0, 0, 1, 1⟩;
-instance : IsGeach (𝟰 : Set F)  where taple := ⟨0, 2, 1, 0⟩;
-instance : IsGeach (𝟱 : Set F)  where taple := ⟨1, 1, 0, 1⟩;
-instance : IsGeach (.𝟮 : Set F) where taple := ⟨1, 1, 1, 1⟩;
-instance : IsGeach (𝗖𝟰 : Set F) where taple := ⟨0, 1, 2, 0⟩;
-instance : IsGeach (𝗖𝗗 : Set F) where taple := ⟨1, 1, 0, 0⟩;
-instance : IsGeach (𝗧𝗰 : Set F) where taple := ⟨0, 1, 0, 0⟩;
+lemma D.is_geach : (𝗗 : Set F) = 𝗴𝗲(⟨0, 0, 1, 1⟩) := rfl
 
-def MultiGeach : List GeachTaple → Set F
+lemma Four.is_geach : (𝟰 : Set F) = 𝗴𝗲(⟨0, 2, 1, 0⟩) := rfl
+
+lemma Five.is_geach : (𝟱 : Set F) = 𝗴𝗲(⟨1, 1, 0, 1⟩) := rfl
+
+lemma Dot2.is_geach : (.𝟮 : Set F) = 𝗴𝗲(⟨1, 1, 1, 1⟩) := rfl
+
+lemma C4.is_geach : (𝗖𝟰 : Set F) = 𝗴𝗲(⟨0, 1, 2, 0⟩) := rfl
+
+lemma CD.is_geach : (𝗖𝗗 : Set F) = 𝗴𝗲(⟨1, 1, 0, 0⟩) := rfl
+
+lemma Tc.is_geach : (𝗧𝗰 : Set F) = 𝗴𝗲(⟨0, 1, 0, 0⟩) := rfl
+
+end
+
+
+def MultiGeach.set : List (GeachConfluent.Taple) → Set F
   | [] => ∅
-  | t :: ts => 𝗴𝗲(t) ∪ (MultiGeach ts)
-notation:max "𝗚𝗲(" ts ")" => MultiGeach ts
+  | t :: ts => 𝗴𝗲(t) ∪ (MultiGeach.set ts)
+notation:max "𝗚𝗲(" ts ")" => MultiGeach.set ts
 
 namespace MultiGeach
 
-@[simp] lemma def_nil : 𝗚𝗲([]) = (∅ : Set F) := by simp [MultiGeach]
+@[simp] lemma def_nil : 𝗚𝗲([]) = (∅ : Set F) := by simp [MultiGeach.set]
 
-@[simp] lemma iff_cons : 𝗚𝗲(x :: l) = (𝗴𝗲(x) : Set F) ∪ 𝗚𝗲(l) := by simp only [MultiGeach];
+lemma def_one {t : GeachConfluent.Taple} : (𝗚𝗲([t]) : Set F) = 𝗴𝗲(t) := by simp [MultiGeach.set]
+
+lemma def_two {t₁ t₂ : GeachConfluent.Taple} : (𝗚𝗲([t₁, t₂]) : Set F) = 𝗴𝗲(t₁) ∪ 𝗴𝗲(t₂) := by simp [MultiGeach.set]
+
+lemma def_three {t₁ t₂ t₃ : GeachConfluent.Taple} : (𝗚𝗲([t₁, t₂, t₃]) : Set F) = 𝗴𝗲(t₁) ∪ 𝗴𝗲(t₂) ∪ 𝗴𝗲(t₃) := by simp [MultiGeach.set, Set.union_assoc];
+
+@[simp] lemma iff_cons : 𝗚𝗲(x :: l) = (𝗴𝗲(x) : Set F) ∪ 𝗚𝗲(l) := by simp only [MultiGeach.set];
 
 lemma mem (h : x ∈ l) : (𝗴𝗲(x) : Set F) ⊆ 𝗚𝗲(l) := by
   induction l with
@@ -143,44 +70,40 @@ variable {Ax : Theory α}
 
 open System
 
-protected abbrev Hilbert.Geach (α) (l : List GeachTaple) : Hilbert α := Hilbert.ExtK (𝗚𝗲(l))
+protected abbrev Hilbert.Geach (α) (l : List GeachConfluent.Taple) : Hilbert α := Hilbert.ExtK (𝗚𝗲(l))
 
-namespace Geach
+abbrev Hilbert.IsGeach (L : Hilbert α) (ts : List GeachConfluent.Taple) : Prop := L = Hilbert.Geach _ ts
 
-end Geach
 
-protected class Hilbert.IsGeach (L : Hilbert α) (ts : List GeachTaple) where
-  char : L = Hilbert.Geach _ ts := by aesop;
+namespace Hilbert.IsGeach
 
-attribute [simp] Hilbert.IsGeach.char
+lemma ax {H : Hilbert α} (geach : H.IsGeach ts) : H.axioms = (𝗞 ∪ 𝗚𝗲(ts)) := by simp_all;
 
-namespace IsGeach
+end Hilbert.IsGeach
 
-lemma ax {H : Hilbert α} [geach : H.IsGeach ts] : H.axioms = (𝗞 ∪ 𝗚𝗲(ts)) := by
-  have e := geach.char;
-  simp [Hilbert.Geach] at e;
-  simp_all;
 
-instance : (Hilbert.K α).IsGeach [] where
+instance Hilbert.K.is_geach : (Hilbert.K α).IsGeach [] := by simp;
 
-instance : (Hilbert.KD α).IsGeach [⟨0, 0, 1, 1⟩] where
+instance Hilbert.KD.is_geach : (Hilbert.KD α).IsGeach [⟨0, 0, 1, 1⟩] := by simp [Axioms.D.is_geach];
 
-instance : (Hilbert.KT α).IsGeach [⟨0, 0, 1, 0⟩] where
+instance Hilbert.KT.is_geach : (Hilbert.KT α).IsGeach [⟨0, 0, 1, 0⟩] := by simp [Axioms.T.is_geach];
 
-instance : (Hilbert.KTB α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩] where
+instance Hilbert.KTB.is_geach : (Hilbert.KTB α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩] := by simp [Axioms.T.is_geach, Axioms.B.is_geach];
 
-instance : (Hilbert.K4 α).IsGeach [⟨0, 2, 1, 0⟩] where
+instance Hilbert.K4.is_geach : (Hilbert.K4 α).IsGeach [⟨0, 2, 1, 0⟩] := by simp [Axioms.Four.is_geach];
 
-instance : (Hilbert.S4 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩] where
+instance Hilbert.S4.is_geach : (Hilbert.S4 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩] := by simp [Axioms.T.is_geach, Axioms.Four.is_geach];
 
-instance : (Hilbert.S4Dot2 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩] where
+instance Hilbert.S4Dot2.is_geach : (Hilbert.S4Dot2 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩] := by
+  simp [Axioms.T.is_geach, Axioms.Four.is_geach, Axioms.Dot2.is_geach, Set.union_assoc];
 
-instance : (Hilbert.S5 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩] where
+instance Hilbert.S5.is_geach : (Hilbert.S5 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩] := by
+  simp [Axioms.T.is_geach, Axioms.Five.is_geach];
 
-instance : (Hilbert.KT4B α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩] where
+instance Hilbert.KT4B.is_geach : (Hilbert.KT4B α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩] := by
+  simp [Axioms.T.is_geach, Axioms.Four.is_geach, Axioms.B.is_geach, Set.union_assoc];
 
-instance : (Hilbert.Triv α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩] where
-
-end IsGeach
+instance Hilbert.Triv.is_geach : (Hilbert.Triv α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩] := by
+  simp [Axioms.T.is_geach, Axioms.Tc.is_geach];
 
 end LO.Modal

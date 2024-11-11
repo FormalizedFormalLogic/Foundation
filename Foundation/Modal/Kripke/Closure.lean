@@ -1,17 +1,23 @@
-import Foundation.Logic.Kripke.Basic
+import Foundation.Vorspiel.BinaryRelations
+import Foundation.Modal.Kripke.Semantics
 
-namespace LO.Kripke
+namespace LO.Modal
+
+namespace Kripke
+
+variable {F : Frame} {x y z : F.World}
 
 open Relation
 
-abbrev Frame.RelReflTransGen {F : Frame} : _root_.Rel F.World F.World:= ReflTransGen (· ≺ ·)
+
+section refltrans
+
+abbrev Frame.RelReflTransGen : _root_.Rel F.World F.World := ReflTransGen (· ≺ ·)
 infix:45 " ≺^* " => Frame.RelReflTransGen
 
 namespace Frame.RelReflTransGen
 
-variable {F : Frame}
-
-@[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^* y := ReflTransGen.single hxy
+@[simp] lemma single (hxy : x ≺ y) : x ≺^* y := ReflTransGen.single hxy
 
 @[simp] lemma reflexive : Reflexive F.RelReflTransGen := Relation.reflexive_reflTransGen
 
@@ -31,9 +37,7 @@ postfix:95 "^*" => Frame.TransitiveReflexiveClosure
 
 namespace Frame.TransitiveReflexiveClosure
 
-variable {F : Frame}
-
-lemma single {x y : F.World} (hxy : x ≺ y) : F^*.Rel x y := ReflTransGen.single hxy
+lemma single (hxy : x ≺ y) : F^*.Rel x y := ReflTransGen.single hxy
 
 lemma rel_reflexive : Reflexive (F^*.Rel) := by intro x; exact ReflTransGen.refl;
 
@@ -43,16 +47,17 @@ lemma rel_symmetric : Symmetric F.Rel → Symmetric (F^*) := ReflTransGen.symmet
 
 end Frame.TransitiveReflexiveClosure
 
+end refltrans
 
+
+section trans
 
 abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := TransGen (· ≺ ·)
 infix:45 " ≺^+ " => Frame.RelTransGen
 
 namespace Frame.RelTransGen
 
-variable {F : Frame}
-
-@[simp] lemma single {x y : F.World} (hxy : x ≺ y) : x ≺^+ y := TransGen.single hxy
+@[simp] lemma single (hxy : x ≺ y) : x ≺^+ y := TransGen.single hxy
 
 @[simp]
 lemma transitive : Transitive F.RelTransGen := λ _ _ _ => TransGen.trans
@@ -74,9 +79,7 @@ postfix:95 "^+" => Frame.TransitiveClosure
 
 namespace Frame.TransitiveClosure
 
-variable {F : Frame}
-
-lemma single {x y : F.World} (hxy : x ≺ y) : F^+.Rel x y := TransGen.single hxy
+lemma single (hxy : x ≺ y) : F^+.Rel x y := TransGen.single hxy
 
 lemma rel_transitive : Transitive (F^+) := by simp;
 
@@ -84,8 +87,12 @@ lemma rel_symmetric (hSymm : Symmetric F.Rel) : Symmetric (F^+) := by simp_all
 
 end Frame.TransitiveClosure
 
+end trans
 
-protected abbrev Frame.RelReflGen {F : Frame} : _root_.Rel F.World F.World := ReflGen (· ≺ ·)
+
+section refl
+
+protected abbrev Frame.RelReflGen : _root_.Rel F.World F.World := ReflGen (· ≺ ·)
 scoped infix:45 " ≺^= " => Frame.RelReflGen
 
 abbrev Frame.ReflexiveClosure (F : Frame) : Frame where
@@ -93,13 +100,15 @@ abbrev Frame.ReflexiveClosure (F : Frame) : Frame where
   Rel := (· ≺^= ·)
 postfix:95 "^=" => Frame.ReflexiveClosure
 
+end refl
 
-protected abbrev Frame.RelIrreflGen {F : Frame} : _root_.Rel F.World F.World := IrreflGen (· ≺ ·)
+
+section irrefl
+
+protected abbrev Frame.RelIrreflGen : _root_.Rel F.World F.World := IrreflGen (· ≺ ·)
 scoped infix:45 " ≺^≠ " => Frame.RelIrreflGen
 
 namespace Frame.RelIrreflGen
-
-variable {F : Frame}
 
 @[simp] lemma rel_irreflexive : Irreflexive F.RelIrreflGen := by simp [Irreflexive, Frame.RelIrreflGen, IrreflGen]
 
@@ -117,4 +126,9 @@ namespace Frame.IrreflexiveClosure
 
 end Frame.IrreflexiveClosure
 
-end LO.Kripke
+end irrefl
+
+
+end Kripke
+
+end LO.Modal

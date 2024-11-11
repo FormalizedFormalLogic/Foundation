@@ -1,6 +1,7 @@
 import Foundation.Vorspiel.Vorspiel
 import Mathlib.Data.Finite.Basic
 
+
 section
 
 variable {α : Type u} (rel : α → α → Prop)
@@ -37,64 +38,40 @@ abbrev ConverseWellFounded := WellFounded $ flip (· ≺ ·)
 
 end
 
+
 section
 
 variable {α : Type u}
 variable {rel : α → α → Prop}
 
--- T → D
+
 lemma serial_of_refl (hRefl : Reflexive rel) : Serial rel := by
   rintro w;
   existsi w;
   exact hRefl w;
 
--- B + 4 → 5
 lemma eucl_of_symm_trans (hSymm : Symmetric rel) (hTrans : Transitive rel) : Euclidean rel := by
   intro x y z Rxy Rxz;
   have Ryx := hSymm Rxy;
   exact hSymm $ hTrans Ryx Rxz;
 
--- B + 5 → 4
 lemma trans_of_symm_eucl (hSymm : Symmetric rel) (hEucl : Euclidean rel) : Transitive rel := by
   rintro x y z Rxy Ryz;
   exact hSymm $ hEucl (hSymm Rxy) Ryz;
 
--- T + 5 → B
 lemma symm_of_refl_eucl (hRefl : Reflexive rel) (hEucl : Euclidean rel) : Symmetric rel := by
   intro x y Rxy;
   exact hEucl (hRefl x) Rxy;
 
--- T + 5 → 4
 lemma trans_of_refl_eucl (hRefl : Reflexive rel) (hEucl : Euclidean rel) : Transitive rel := by
   have hSymm := symm_of_refl_eucl hRefl hEucl;
   exact trans_of_symm_eucl hSymm hEucl;
 
--- B + D + 5 → T
 lemma refl_of_symm_serial_eucl (hSymm : Symmetric rel) (hSerial : Serial rel) (hEucl : Euclidean rel) : Reflexive rel := by
   rintro x;
   obtain ⟨y, Rxy⟩ := hSerial x;
   have Ryx := hSymm Rxy;
   exact trans_of_symm_eucl hSymm hEucl Rxy Ryx;
-
-
-section ConverseWellFounded
-
-lemma ConverseWellFounded.iff_has_max : ConverseWellFounded r ↔ (∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(r m x)) := by
-  simp [ConverseWellFounded, WellFounded.wellFounded_iff_has_min, flip]
-
-lemma Finite.converseWellFounded_of_trans_irrefl [Finite α] [IsTrans α rel] [IsIrrefl α rel] : ConverseWellFounded rel := by
-  apply @Finite.wellFounded_of_trans_of_irrefl _ _ _
-    ⟨by intro a b c rba rcb; exact IsTrans.trans c b a rcb rba⟩
-    ⟨by simp [flip, IsIrrefl.irrefl]⟩
-
-lemma Finite.converseWellFounded_of_trans_irrefl'
-    (hFinite : Finite α) (hTrans : Transitive rel) (hIrrefl : Irreflexive rel) : ConverseWellFounded rel :=
-  @Finite.wellFounded_of_trans_of_irrefl _ _ _
-    ⟨by simp [flip]; intro a b c ba cb; exact hTrans cb ba;⟩
-    ⟨by simp [flip]; exact hIrrefl⟩
-
-end ConverseWellFounded
-
 
 lemma corefl_of_refl_assym_eucl (hRefl : Reflexive rel) (hAntisymm : Antisymmetric rel) (hEucl : Euclidean rel) : Coreflexive rel := by
   intro x y Rxy;
@@ -125,12 +102,30 @@ lemma irreflexive_of_assymetric (hAssym : Assymetric rel) : Irreflexive rel := b
   have := hAssym Rxx;
   contradiction;
 
-
 lemma refl_of_universal (h : Universal rel) : Reflexive rel := by
   intro x; exact @h x x;
 
 lemma eucl_of_universal (h : Universal rel) : Euclidean rel := by
   rintro x y z _ _; exact @h z y;
+
+
+section ConverseWellFounded
+
+lemma ConverseWellFounded.iff_has_max : ConverseWellFounded r ↔ (∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(r m x)) := by
+  simp [ConverseWellFounded, WellFounded.wellFounded_iff_has_min, flip]
+
+lemma Finite.converseWellFounded_of_trans_irrefl [Finite α] [IsTrans α rel] [IsIrrefl α rel] : ConverseWellFounded rel := by
+  apply @Finite.wellFounded_of_trans_of_irrefl _ _ _
+    ⟨by intro a b c rba rcb; exact IsTrans.trans c b a rcb rba⟩
+    ⟨by simp [flip, IsIrrefl.irrefl]⟩
+
+lemma Finite.converseWellFounded_of_trans_irrefl'
+    (hFinite : Finite α) (hTrans : Transitive rel) (hIrrefl : Irreflexive rel) : ConverseWellFounded rel :=
+  @Finite.wellFounded_of_trans_of_irrefl _ _ _
+    ⟨by simp [flip]; intro a b c ba cb; exact hTrans cb ba;⟩
+    ⟨by simp [flip]; exact hIrrefl⟩
+
+end ConverseWellFounded
 
 
 @[simp]
@@ -141,8 +136,10 @@ lemma WellFounded.trivial_wellfounded : WellFounded (α := α) (λ _ _ => False)
 
 def Relation.IrreflGen (R : α → α → Prop) := λ x y => x ≠ y ∧ R x y
 
+
 abbrev WeaklyConverseWellFounded (R : α → α → Prop) := ConverseWellFounded (Relation.IrreflGen R)
 alias WCWF := WeaklyConverseWellFounded
+
 
 section
 
