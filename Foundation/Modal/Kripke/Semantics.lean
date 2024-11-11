@@ -261,18 +261,27 @@ variable {C : Kripke.FrameClass}
 end ValidOnFrameClass
 
 
-@[simp] def ValidOnFiniteFrameClass (C : Kripke.FiniteFrameClass) (φ : Formula ℕ) := ∀ {F}, F ∈ C → F.toFrame ⊧ φ
+@[simp] def ValidOnFiniteFrameClass (FC : Kripke.FiniteFrameClass) (φ : Formula ℕ) := ∀ {F}, F ∈ FC → F.toFrame ⊧ φ
 
 namespace ValidOnFiniteFrameClass
 
 protected instance semantics : Semantics (Formula ℕ) (Kripke.FiniteFrameClass) := ⟨fun C ↦ Kripke.ValidOnFrameClass C⟩
 
-variable {C : Kripke.FiniteFrameClass}
+variable {FC : Kripke.FiniteFrameClass}
 
-@[simp] protected lemma models_iff : C ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass C φ := iff_of_eq rfl
+@[simp] protected lemma models_iff : FC ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass FC φ := iff_of_eq rfl
 
 end ValidOnFiniteFrameClass
 
+
+lemma notValidOnFiniteFrameClass_of_exists_finite_frame {FC : Kripke.FiniteFrameClass} (h : ∃ F ∈ FC, ¬F.toFrame ⊧ φ) : ¬FC ⊧ φ := by
+  simp only [ValidOnFiniteFrameClass.models_iff, ValidOnFrameClass];
+  push_neg;
+  obtain ⟨F, hF, h⟩ := h;
+  use F.toFrame;
+  constructor;
+  . use F;
+  . assumption;
 
 end Formula.Kripke
 
