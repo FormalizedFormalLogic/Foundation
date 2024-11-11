@@ -1,7 +1,11 @@
-import Foundation.Logic.Kripke.RelItr
 import Foundation.Logic.Semantics
 import Foundation.Logic.System
 import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.RelItr
+
+/-
+  DEPRECATED!!
+-/
 
 universe u v
 -- set_option autoImplicit false
@@ -23,42 +27,6 @@ infix:45 " ≺ " => Frame.Rel'
 
 protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) := F.Rel.iterate n
 notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
-
--- TODO: `Rel.iterate`上で示せるはず
-namespace Frame.RelItr'
-
-lemma congr {F : Frame} {x y : F.World} {n m : ℕ} (h : x ≺^[n] y) (he : n = m := by omega) : x ≺^[m] y := by
-  subst_vars; exact h;
-
-lemma forward {F : Frame} {x y : F.World} : x ≺^[n + 1] y ↔ ∃ z, x ≺^[n] z ∧ z ≺ y := Rel.iterate.forward
-
-lemma comp {F : Frame} {x y : F.World} {n m : ℕ} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := by
-  constructor;
-  . rintro ⟨z, hzx, hzy⟩;
-    induction n generalizing x with
-    | zero => simp_all;
-    | succ n ih =>
-      suffices x ≺^[(n + m + 1)] y by apply congr this;
-      obtain ⟨w, hxw, hwz⟩ := hzx;
-      use w;
-      constructor;
-      . exact hxw;
-      . exact @ih w hwz;
-  . rintro h;
-    induction n generalizing x with
-    | zero => simp_all;
-    | succ n ih =>
-      have rxy : x ≺^[n + m + 1] y := congr h;
-      obtain ⟨w, rxw, rwy⟩ := rxy;
-      obtain ⟨u, rwu, ruy⟩ := @ih w rwy;
-      use u;
-      constructor;
-      . use w;
-      . assumption;
-
-lemma comp' {F : Frame} {x y : F.World} {n m : ℕ+} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := comp
-
-end Frame.RelItr'
 
 
 noncomputable abbrev Frame.default {F : Frame} : F.World := Classical.choice F.World_nonempty
@@ -196,8 +164,8 @@ structure Model (α) where
   Frame : Frame
   Valuation : Valuation Frame α
 
-abbrev Model.World (M : Model α) := M.Frame.World
-instance : CoeSort (Model α) (Type u) := ⟨Model.World⟩
+abbrev Model.World (M : Model) := M.Frame.World
+instance : CoeSort (Model) (Type u) := ⟨Model.World⟩
 
 
 section Classical
@@ -224,7 +192,7 @@ end ClassicalFrame
 
 abbrev ClassicalValuation (α : Type*) := α → Prop
 
-abbrev ClassicalModel (V : ClassicalValuation α) : Kripke.Model α where
+abbrev ClassicalModel (V : ClassicalValuation α) : Kripke.Model where
   Frame := ClassicalFrame
   Valuation _ a := V a
 

@@ -1,5 +1,4 @@
 import Foundation.Logic.System
-import Foundation.Logic.Init
 
 namespace LO.Axioms
 

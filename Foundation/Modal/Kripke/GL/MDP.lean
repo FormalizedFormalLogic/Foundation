@@ -176,7 +176,7 @@ lemma MDP_Aux (h : (□''X) *⊢[(Hilbert.GL ℕ)]! □φ₁ ⋎ □φ₂) : (�
     tauto;
   };
 
-theorem MDP (h : (Hilbert.GL ℕ) ⊢! □φ₁ ⋎ □φ₂) : (Hilbert.GL ℕ) ⊢! φ₁ ∨ (Hilbert.GL ℕ) ⊢! φ₂ := by
+theorem modal_disjunctive (h : (Hilbert.GL ℕ) ⊢! □φ₁ ⋎ □φ₂) : (Hilbert.GL ℕ) ⊢! φ₁ ∨ (Hilbert.GL ℕ) ⊢! φ₂ := by
   have := MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
   simp at this;
   rcases this with (h | h) <;> {
@@ -184,6 +184,6 @@ theorem MDP (h : (Hilbert.GL ℕ) ⊢! □φ₁ ⋎ □φ₂) : (Hilbert.GL ℕ)
     tauto;
   }
 
-instance : System.ModalDisjunctive (Hilbert.GL ℕ) := ⟨MDP⟩
+instance : System.ModalDisjunctive (Hilbert.GL ℕ) := ⟨modal_disjunctive⟩
 
 end LO.Modal.GL

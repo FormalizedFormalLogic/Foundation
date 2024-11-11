@@ -41,8 +41,8 @@ structure Model (α) where
   Frame : PLoN.Frame α
   Valuation : PLoN.Valuation Frame α
 
-abbrev Model.World (M : PLoN.Model) := M.Frame.World
-instance : CoeSort (PLoN.Model) (Type _) := ⟨Model.World⟩
+abbrev Model.World (M : PLoN.Model α) := M.Frame.World
+instance : CoeSort (PLoN.Model α) (Type _) := ⟨Model.World⟩
 
 end PLoN
 
@@ -50,7 +50,7 @@ variable {α : Type*}
 
 open PLoN
 
-def Formula.PLoN.Satisfies (M : PLoN.Model) (w : M.World) : Formula α → Prop
+def Formula.PLoN.Satisfies (M : PLoN.Model α) (w : M.World) : Formula α → Prop
   | atom a  => M.Valuation w a
   | falsum  => False
   | φ ➝ ψ => (PLoN.Satisfies M w φ) → (PLoN.Satisfies M w ψ)
@@ -59,9 +59,9 @@ def Formula.PLoN.Satisfies (M : PLoN.Model) (w : M.World) : Formula α → Prop
 
 namespace Formula.PLoN.Satisfies
 
-protected instance semantics (M : PLoN.Model) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.PLoN.Satisfies M w⟩
+protected instance semantics (M : PLoN.Model α) : Semantics (Formula α) (M.World) := ⟨fun w ↦ Formula.PLoN.Satisfies M w⟩
 
-variable {M : PLoN.Model} {x : M.World} {φ ψ : Formula α}
+variable {M : PLoN.Model α} {x : M.World} {φ ψ : Formula α}
 
 @[simp] protected lemma iff_models : x ⊧ φ ↔ PLoN.Satisfies M x φ := by rfl
 
@@ -88,22 +88,22 @@ instance : Semantics.Tarski M.World where
 end Formula.PLoN.Satisfies
 
 
-def Formula.PLoN.ValidOnModel (M : PLoN.Model) (φ : Formula α) : Prop := ∀ w : M.World, w ⊧ φ
+def Formula.PLoN.ValidOnModel (M : PLoN.Model α) (φ : Formula α) : Prop := ∀ w : M.World, w ⊧ φ
 
 namespace Formula.PLoN.ValidOnModel
 
-instance : Semantics (Formula α) (PLoN.Model) := ⟨fun M ↦ Formula.PLoN.ValidOnModel M⟩
+instance : Semantics (Formula α) (PLoN.Model α) := ⟨fun M ↦ Formula.PLoN.ValidOnModel M⟩
 
 @[simp]
-protected lemma iff_models {M : PLoN.Model} {φ : Formula α}
+protected lemma iff_models {M : PLoN.Model α} {φ : Formula α}
 : M ⊧ φ ↔ Formula.PLoN.ValidOnModel M φ := by rfl
 
-instance : Semantics.Bot (PLoN.Model) where
+instance : Semantics.Bot (PLoN.Model α) where
   realize_bot _ := by
     simp [Formula.PLoN.ValidOnModel];
     use ﹫;
 
-variable {M : PLoN.Model}
+variable {M : PLoN.Model α}
 
 protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
 

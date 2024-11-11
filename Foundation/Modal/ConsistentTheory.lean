@@ -225,6 +225,7 @@ lemma exists_maximal_consistent_theory
     . assumption;
 protected alias lindenbaum := exists_maximal_consistent_theory
 
+omit [DecidableEq α] in
 open Classical in
 lemma intro_union_consistent
   (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ T₁) ∧ (∀ φ ∈ Γ₂, φ ∈ T₂) → H ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥) : Theory.Consistent H (T₁ ∪ T₂) := by
