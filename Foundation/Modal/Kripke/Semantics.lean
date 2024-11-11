@@ -303,6 +303,7 @@ lemma FiniteFrameClass.definedBy_of_definedBy_frameclass (h : C.DefinedBy Ax) (e
   rw [e];
   exact FiniteFrameClass.definedBy_of_definedBy_frameclass_aux h;
 
+
 lemma AllFrameClass.isDefinedBy : AllFrameClass.DefinedBy 𝗞 := by
   intro F;
   simp;
@@ -407,6 +408,18 @@ lemma instConsistent_of_nonempty_finiteFrameclass [Sound H FC] (h_nonempty : FC.
 
 end
 
+lemma instFiniteSound_of_instSound {C : FrameClass} {FC : FiniteFrameClass} (heq : C.restrictFinite = FC) [sound : Sound H C] : Sound H FC := ⟨by
+  intro φ hφ F hF;
+  apply sound.sound (f := φ) hφ;
+  rw [←heq] at hF;
+  simp [FrameClass.restrictFinite, FiniteFrameClass.toFrameClass] at hF;
+  obtain ⟨F, hF, rfl⟩ := hF;
+  exact hF;
+⟩
+
+class FiniteFrameProperty (H : Hilbert ℕ) (FC : FiniteFrameClass) where
+  sound : Sound H FC
+  complete : Complete H FC
 
 end Kripke
 
