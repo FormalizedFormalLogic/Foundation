@@ -3,7 +3,6 @@ import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Fin.VecNotation
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Data.Finset.Basic
-import Mathlib.Data.Finset.Lattice
 import Mathlib.Data.Finset.Preimage
 import Mathlib.Data.Finset.Sort
 import Mathlib.Data.W.Basic
@@ -565,7 +564,8 @@ lemma bind_toList_some {f : β → Option α} {g : β → α} {bs : List β} (h 
   bs.bind (fun i => (f i).toList) = bs.map g := by
   have : bs.bind (fun i => (f i).toList) = bs.bind (pure ∘ g) :=
     List.bind_congr (by simp; intro m hm; simp[h _ hm])
-  rw[this, List.bind_pure_eq_map]
+  rw[this]
+  apply flatMap_pure_eq_map;
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 

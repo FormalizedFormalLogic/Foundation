@@ -47,10 +47,12 @@ abbrev counterexampleDPModel (M₁ : Kripke.Model) (M₂ : Kripke.Model) (w₁ :
       | Sum.inr $ Sum.inr w => M₂ w a
       | _ => False,
     by
-      simp only [Sum.forall, imp_false, not_false_eq_true, implies_true, imp_self, false_implies, and_self, and_true, true_and];
+      simp;
       constructor;
-      . intro _ _; apply M₁.Val.hereditary;
-      . intro _ _; apply M₂.Val.hereditary;
+      . intro _ _;
+        apply M₁.Val.hereditary;
+      . intro _ _;
+        apply M₂.Val.hereditary;
   ⟩
 
 variable {M₁ : Kripke.Model} {M₂ : Kripke.Model}
