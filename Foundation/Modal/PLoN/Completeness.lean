@@ -16,7 +16,7 @@ abbrev CanonicalFrame (H : Hilbert α) [Nonempty (MCT H)] : PLoN.Frame α where
   World := (MCT H)
   Rel := λ φ Ω₁ Ω₂ => ∼(□φ) ∈ Ω₁.theory ∧ ∼φ ∈ Ω₂.theory
 
-abbrev CanonicalModel (H : Hilbert α) [Nonempty (MCT H)] : PLoN.Model α where
+abbrev CanonicalModel (H : Hilbert α) [Nonempty (MCT H)] : PLoN.Model where
   Frame := CanonicalFrame H
   Valuation Ω a := (atom a) ∈ Ω.theory
 
