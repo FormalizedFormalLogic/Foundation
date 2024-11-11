@@ -363,32 +363,32 @@ end Kripke
 
 section completeness
 
-instance KT_complete : Complete (Hilbert.KT ℕ) ReflexiveFrameClass := Kripke.instCompleteOfCanonical $ by
+instance KT.Kripke.complete : Complete (Hilbert.KT ℕ) ReflexiveFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveFrameClass.is_geach];
   apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.T.is_geach];
 
-instance KTB_complete : Complete (Hilbert.KTB ℕ) ReflexiveSymmetricFrameClass := Kripke.instCompleteOfCanonical $ by
+instance KTB.Kripke.complete : Complete (Hilbert.KTB ℕ) ReflexiveSymmetricFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveSymmetricFrameClass.is_geach];
   apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.MultiGeach.def_two, Axioms.T.is_geach, Axioms.B.is_geach];
 
-instance K4_complete : Complete (Hilbert.K4 ℕ) TransitiveFrameClass := Kripke.instCompleteOfCanonical $ by
+instance K4.Kripke.complete : Complete (Hilbert.K4 ℕ) TransitiveFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [TransitiveFrameClass.is_geach];
   apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp;
 
-instance S4_complete : Complete (Hilbert.S4 ℕ) ReflexiveTransitiveFrameClass := Kripke.instCompleteOfCanonical $ by
+instance S4.Kripke.complete : Complete (Hilbert.S4 ℕ) ReflexiveTransitiveFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveTransitiveFrameClass.is_geach];
   apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.T.is_geach, Axioms.Four.is_geach, Axioms.MultiGeach.def_two];
 
-instance KT4B_complete : Complete (Hilbert.KT4B ℕ) ReflexiveTransitiveSymmetricFrameClass := Kripke.instCompleteOfCanonical $ by
+instance KT4B.Kripke.complete : Complete (Hilbert.KT4B ℕ) ReflexiveTransitiveSymmetricFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveTransitiveSymmetricFrameClass.is_geach];
   apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.T.is_geach, Axioms.Four.is_geach, Axioms.B.is_geach, Axioms.MultiGeach.def_three];
 
-instance S5_complete : Complete (Hilbert.S5 ℕ) ReflexiveEuclideanFrameClass := Kripke.instCompleteOfCanonical $ by
+instance S5.Kripke.complete : Complete (Hilbert.S5 ℕ) ReflexiveEuclideanFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveEuclideanFrameClass.is_geach];
   apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
   simp [Axioms.T.is_geach, Axioms.Five.is_geach, Axioms.MultiGeach.def_two];
