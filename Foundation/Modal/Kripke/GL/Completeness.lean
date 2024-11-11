@@ -3,26 +3,26 @@ import Foundation.Modal.Kripke.GL.Definability
 
 namespace LO.Modal
 
-open LO.Kripke
-
-variable {α : Type u} [Inhabited α] [DecidableEq α]
-variable {φ ψ : Formula α}
-
-namespace Kripke
+namespace Hilbert.GL.Kripke
 
 open Formula
+open System System.FiniteContext
+open Formula.Kripke
+open ComplementaryClosedConsistentFormulae
 
-abbrev GLCompleteFrame (φ : Formula α) : Kripke.FiniteFrame where
-  World := CCF (Hilbert.GL α) φ.subformulae
+variable {φ ψ : Formula ℕ}
+
+abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.FiniteFrame where
+  World := CCF (Hilbert.GL ℕ) φ.subformulae
   Rel X Y :=
     (∀ ψ ∈ □''⁻¹φ.subformulae, □ψ ∈ X.formulae → (ψ ∈ Y.formulae ∧ □ψ ∈ Y.formulae)) ∧
     (∃ χ ∈ □''⁻¹φ.subformulae, □χ ∉ X.formulae ∧ □χ ∈ Y.formulae)
 
 namespace GLCompleteFrame
 
-lemma irreflexive : Irreflexive (GLCompleteFrame φ).Rel := by simp [Irreflexive];
+lemma irreflexive : Irreflexive (miniCanonicalFrame φ).Rel := by simp [Irreflexive];
 
-lemma transitive : Transitive (GLCompleteFrame φ).Rel := by
+lemma transitive : Transitive (miniCanonicalFrame φ).Rel := by
   simp;
   rintro X Y Z ⟨RXY, ⟨χ, _, _, _⟩⟩ ⟨RYZ, _⟩;
   constructor;
@@ -35,17 +35,13 @@ lemma transitive : Transitive (GLCompleteFrame φ).Rel := by
 end GLCompleteFrame
 
 
-abbrev GLCompleteModel (φ : Formula α) : Kripke.Model α where
-  Frame := GLCompleteFrame φ
-  Valuation X a := (atom a) ∈ X.formulae
+abbrev miniCanonicalModel (φ : Formula ℕ) : Kripke.Model where
+  toFrame := miniCanonicalFrame φ |>.toFrame
+  Val X a := (atom a) ∈ X.formulae
 
-open System System.FiniteContext
-open Formula.Kripke
-open ComplementaryClosedConsistentFormulae
 
-omit [Inhabited α] in
-private lemma GL_truthlemma.lemma1
-  {X : CCF (Hilbert.GL α) φ.subformulae} (hq : □ψ ∈ φ.subformulae)
+lemma truthlemma.lemma1
+  {X : CCF (Hilbert.GL ℕ) φ.subformulae} (hq : □ψ ∈ φ.subformulae)
   : ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□ψ, -ψ}) ⊆ φ.subformulae⁻ := by
   simp only [Formulae.complementary];
   intro χ hr;
@@ -66,10 +62,9 @@ private lemma GL_truthlemma.lemma1
     . exact subformulae.mem_box hq;
     . rfl;
 
-omit [Inhabited α] in
-private lemma GL_truthlemma.lemma2
-  {X : CCF (Hilbert.GL α) φ.subformulae} (hq₁ : □ψ ∈ φ.subformulae) (hq₂ : □ψ ∉ X.formulae)
-  : Formulae.Consistent (Hilbert.GL α) ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□ψ, -ψ}) := by
+lemma truthlemma.lemma2
+  {X : CCF (Hilbert.GL ℕ) φ.subformulae} (hq₁ : □ψ ∈ φ.subformulae) (hq₂ : □ψ ∉ X.formulae)
+  : Formulae.Consistent (Hilbert.GL ℕ) ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□ψ, -ψ}) := by
   apply Formulae.intro_union_consistent;
   rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
 
@@ -80,13 +75,13 @@ private lemma GL_truthlemma.lemma2
   by_contra hC;
   have : Γ₁ ⊢[_]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
   have : Γ₁ ⊢[_]! (□ψ ⋏ -ψ) ➝ ⊥ := imp_trans''! (by
-    suffices Γ₁ ⊢[(Hilbert.GL α)]! ⋀[□ψ, -ψ] ➝ ⋀Γ₂ by
+    suffices Γ₁ ⊢[(Hilbert.GL ℕ)]! ⋀[□ψ, -ψ] ➝ ⋀Γ₂ by
       simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
     apply conjconj_subset!;
     simpa using hΓ₂;
   ) this;
   have : Γ₁ ⊢[_]! □ψ ➝ -ψ ➝ ⊥ := and_imply_iff_imply_imply'!.mp this;
-  have : Γ₁ ⊢[(Hilbert.GL α)]! □ψ ➝ ψ := by
+  have : Γ₁ ⊢[(Hilbert.GL ℕ)]! □ψ ➝ ψ := by
     rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
     . rw [hp] at this;
       exact imp_trans''! this dne!;
@@ -111,7 +106,7 @@ private lemma GL_truthlemma.lemma2
       apply FiniteContext.by_axm!;
       simpa;
   )) this;
-  have : X.formulae *⊢[(Hilbert.GL α)]! □ψ := by
+  have : X.formulae *⊢[(Hilbert.GL ℕ)]! □ψ := by
     apply Context.provable_iff.mpr;
     use □'X.formulae.prebox.toList;
     constructor;
@@ -120,8 +115,8 @@ private lemma GL_truthlemma.lemma2
   have : □ψ ∈ X.formulae := membership_iff hq₁ |>.mpr this;
   contradiction;
 
-lemma GL_truthlemma {X : (GLCompleteModel φ)} (q_sub : ψ ∈ φ.subformulae) :
-  Satisfies (GLCompleteModel φ) X ψ ↔ ψ ∈ X.formulae := by
+lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformulae) :
+  Satisfies (miniCanonicalModel φ) X ψ ↔ ψ ∈ X.formulae := by
   induction ψ using Formula.rec' generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
@@ -149,7 +144,7 @@ lemma GL_truthlemma {X : (GLCompleteModel φ)} (q_sub : ψ ∈ φ.subformulae) :
     constructor;
     . contrapose;
       intro h;
-      obtain ⟨Y, hY₁⟩ := lindenbaum (S := φ.subformulae) (GL_truthlemma.lemma1 q_sub) (GL_truthlemma.lemma2 q_sub h);
+      obtain ⟨Y, hY₁⟩ := lindenbaum (S := φ.subformulae) (truthlemma.lemma1 q_sub) (truthlemma.lemma2 q_sub h);
       simp only [Finset.union_subset_iff] at hY₁;
       simp [Satisfies];
       use Y;
@@ -169,11 +164,14 @@ lemma GL_truthlemma {X : (GLCompleteModel φ)} (q_sub : ψ ∈ φ.subformulae) :
       refine RXY.1 ψ ?_ h |>.1;
       assumption;
 
-private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ#α ⊧ φ → (Hilbert.GL α) ⊢! φ := by
+open Modal.Kripke
+
+instance complete : Complete (Hilbert.GL ℕ) TransitiveIrreflexiveFiniteFrameClass := ⟨by
+  intro φ;
   contrapose;
   intro h;
-  apply exists_finite_frame.mpr;
-  use (GLCompleteFrame φ);
+  apply notValidOnFiniteFrameClass_of_exists_finite_frame;
+  use (miniCanonicalFrame φ);
   constructor;
   . exact ⟨GLCompleteFrame.transitive, GLCompleteFrame.irreflexive⟩;
   . simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
@@ -183,17 +181,18 @@ private lemma GL_completeAux : TransitiveIrreflexiveFrameClass.{u}ꟳ#α ⊧ φ 
         right; use φ; constructor <;> simp;
       )
       (Formulae.unprovable_iff_singleton_compl_consistent.mp h);
-    use (GLCompleteModel φ).Valuation, X;
-    apply GL_truthlemma (by simp) |>.not.mpr;
+    use (miniCanonicalModel φ).Val, X;
+    apply truthlemma (by simp) |>.not.mpr;
     exact iff_mem_compl (by simp) |>.not.mpr $ by
       simp;
       apply hX₁;
       tauto;
+⟩
 
-instance GL_complete : Complete (Hilbert.GL α) TransitiveIrreflexiveFrameClass.{u}ꟳ#α := ⟨GL_completeAux⟩
+instance ffp : Kripke.FiniteFrameProperty (Hilbert.GL ℕ) TransitiveIrreflexiveFiniteFrameClass where
+  complete := complete
+  sound := finite_sound
 
-instance : FiniteFrameProperty (Hilbert.GL α) TransitiveIrreflexiveFrameClass where
-
-end Kripke
+end Hilbert.GL.Kripke
 
 end LO.Modal

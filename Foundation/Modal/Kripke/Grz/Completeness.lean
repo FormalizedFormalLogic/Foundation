@@ -41,7 +41,7 @@ end subformulaeGrz
 end Formula
 
 
-namespace Hilbert
+namespace Hilbert.Grz.Kripke
 
 open Formula
 open System System.FiniteContext
@@ -49,10 +49,6 @@ open Formula.Kripke
 open ComplementaryClosedConsistentFormulae
 
 variable {φ ψ : Formula ℕ}
-
-namespace Grz
-
-namespace Kripke
 
 abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.FiniteFrame where
   World := CCF (Hilbert.Grz ℕ) (φ.subformulaeGrz)
@@ -259,7 +255,10 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       have : ↑Y.formulae *⊢[(Hilbert.Grz ℕ)]! ψ := this ⨀ (membership_iff (by simp; left; trivial) |>.mp (RXY.1 ψ (by simp; tauto) h));
       exact membership_iff (by simp; left; exact subformulae.mem_box q_sub) |>.mpr this;
 
-private lemma completeAux {φ : Formula ℕ} : Kripke.ReflexiveTransitiveAntisymmetricFiniteFrameClass ⊧ φ → (Hilbert.Grz ℕ) ⊢! φ := by
+open Modal.Kripke
+
+instance complete : Complete (Hilbert.Grz ℕ) (ReflexiveTransitiveAntisymmetricFiniteFrameClass) := ⟨by
+  intro φ;
   contrapose;
   intro h;
   apply notValidOnFiniteFrameClass_of_exists_finite_frame;
@@ -277,19 +276,12 @@ private lemma completeAux {φ : Formula ℕ} : Kripke.ReflexiveTransitiveAntisym
       simp;
       apply hX₁;
       tauto;
-
-open Modal.Kripke
-
-instance complete : Complete (Hilbert.Grz ℕ) (ReflexiveTransitiveAntisymmetricFiniteFrameClass) := ⟨completeAux⟩
+⟩
 
 instance ffp : Kripke.FiniteFrameProperty (Hilbert.Grz ℕ) ReflexiveTransitiveAntisymmetricFiniteFrameClass where
   complete := complete
   sound := finite_sound
 
-end Kripke
-
-end Grz
-
-end Hilbert
+end Hilbert.Grz.Kripke
 
 end LO.Modal
