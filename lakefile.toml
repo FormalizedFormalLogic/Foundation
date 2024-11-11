@@ -1,6 +1,9 @@
 name = "foundation"
 defaultTargets = ["Foundation"]
 
+[leanOptions]
+linter.flexible = true
+
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
