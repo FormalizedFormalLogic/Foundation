@@ -6,8 +6,9 @@ package foundation {
 }
 
 @[default_target]
-lean_lib Foundation {
-  -- add library configuration options here
-}
+lean_lib Foundation where
+  leanOptions := #[
+    ⟨`linter.flexible, true⟩
+  ]
 
 require "leanprover-community" / "mathlib" @ git "master"
