@@ -6,7 +6,7 @@ def Rel.iterate (R : Rel α α) : ℕ → α → α → Prop
 
 namespace Rel.iterate
 
-variable {R : Rel α α} {n : ℕ}
+variable {R : Rel α α} {n m : ℕ}
 
 @[simp]
 lemma iff_zero {x y : α} : R.iterate 0 x y ↔ x = y := iff_of_eq rfl
@@ -42,5 +42,36 @@ lemma true_any (h : x = y) : Rel.iterate (λ _ _ => True) n x y := by
   induction n with
   | zero => simpa;
   | succ n ih => use x;
+
+lemma congr (h : R.iterate n x y) (he : n = m) : R.iterate m x y := by
+  subst he;
+  exact h;
+
+lemma comp : (∃ z, R.iterate n x z ∧ R.iterate m z y) ↔ R.iterate (n + m) x y := by
+  constructor;
+  . rintro ⟨z, hzx, hzy⟩;
+    induction n generalizing x with
+    | zero => simp_all;
+    | succ n ih =>
+      suffices R.iterate (n + m + 1) x y by apply congr this (by omega);
+      obtain ⟨w, hxw, hwz⟩ := hzx;
+      use w;
+      constructor;
+      . exact hxw;
+      . exact @ih w hwz;
+  . rintro h;
+    induction n generalizing x with
+    | zero => simp_all;
+    | succ n ih =>
+      have rxy : R.iterate (n + m + 1) x y := congr h (by omega);
+      obtain ⟨w, rxw, rwy⟩ := rxy;
+      obtain ⟨u, rwu, ruy⟩ := @ih w rwy;
+      use u;
+      constructor;
+      . use w;
+      . assumption;
+
+
+-- lemma comp' {n m : ℕ+} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := comp
 
 end Rel.iterate
