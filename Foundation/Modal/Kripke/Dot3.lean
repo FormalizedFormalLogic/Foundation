@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.Geach
 
-
 namespace LO.Modal
 
 namespace Kripke
@@ -74,12 +73,14 @@ end Kripke
 
 namespace Hilbert
 
+open Modal.Kripke
+open Hilbert.Kripke
 
 instance S4Dot3.Kripke.sound : Sound (Hilbert.S4Dot3 ℕ) (Kripke.ReflexiveTransitiveConnectedFrameClass)
-  := Kripke.instSound (Kripke.ReflexiveTransitiveConnectedFrameClass.is_defined_by_T_Four_Dot3) rfl
+  := instSound_of_frameClass_definedBy (Kripke.ReflexiveTransitiveConnectedFrameClass.is_defined_by_T_Four_Dot3) rfl
 
-instance S4Dot3.consistent : System.Consistent (Hilbert.S4Dot3 ℕ) := Kripke.instConsistent (C := Kripke.ReflexiveTransitiveConnectedFrameClass) $ by
-  use Kripke.reflexivePointFrame;
+instance S4Dot3.consistent : System.Consistent (Hilbert.S4Dot3 ℕ) := instConsistent_of_nonempty_frameclass (C := Kripke.ReflexiveTransitiveConnectedFrameClass) $ by
+  use reflexivePointFrame.toFrame;
   simp [Reflexive, Transitive, Connected];
 
 

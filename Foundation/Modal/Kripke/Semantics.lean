@@ -1,4 +1,3 @@
-import Foundation.Vorspiel.BinaryRelations
 import Foundation.Vorspiel.RelItr
 import Foundation.Logic.System
 import Foundation.Modal.Formula
@@ -26,24 +25,43 @@ infix:45 " ≺ " => Frame.Rel'
 protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) := F.Rel.iterate n
 notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
-def Frame.isFinite (F : Frame) := Finite F.World
 
-abbrev reflexivePointFrame : Frame where
+structure FiniteFrame extends Frame where
+  [world_finite : Finite toFrame.World]
+instance {F : FiniteFrame} : Finite F.World := F.world_finite
+
+def Frame.toFinite (F : Frame) [Finite F.World] : FiniteFrame where
+  toFrame := F
+
+
+abbrev reflexivePointFrame : FiniteFrame where
   World := Unit
   Rel := fun _ _ => True
 
-abbrev irreflexivePointFrame : Frame where
+abbrev irreflexivePointFrame : FiniteFrame where
   World := Unit
   Rel := fun _ _ => False
 
 
 abbrev FrameClass := Set Frame
 
+abbrev FiniteFrameClass := Set FiniteFrame
+
+def FrameClass.restrictFinite (C : FrameClass) : FiniteFrameClass := { F : FiniteFrame | F.toFrame ∈ C }
+
+def FiniteFrameClass.toFrameClass (C : FiniteFrameClass) : FrameClass := C.image (·.toFrame)
+
+instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
+
+
 section
 
 abbrev AllFrameClass : FrameClass := Set.univ
 
+abbrev AllFiniteFrameClass : FiniteFrameClass := Set.univ
+
 end
+
 
 abbrev Valuation (F : Frame) := F.World → ℕ → Prop
 
@@ -229,6 +247,7 @@ protected lemma axiomK_set : F ⊧* 𝗞 := by
 end ValidOnFrame
 
 
+
 @[simp] def ValidOnFrameClass (C : Kripke.FrameClass) (φ : Formula ℕ) := ∀ {F}, F ∈ C → F ⊧ φ
 
 namespace ValidOnFrameClass
@@ -239,16 +258,21 @@ variable {C : Kripke.FrameClass}
 
 @[simp] protected lemma models_iff : C ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass C φ := iff_of_eq rfl
 
-protected lemma nec (h : C ⊧ φ) : C ⊧ □φ := by
-  intro _ hF;
-  apply Kripke.ValidOnFrame.nec;
-  exact h hF;
-
-protected lemma mdp (hpq : C ⊧ φ ➝ ψ) (hp : C ⊧ φ) : C ⊧ ψ := by
-  intro _ hF;
-  exact Kripke.ValidOnFrame.mdp (hpq hF) (hp hF)
-
 end ValidOnFrameClass
+
+
+@[simp] def ValidOnFiniteFrameClass (C : Kripke.FiniteFrameClass) (φ : Formula ℕ) := ∀ {F}, F ∈ C → F.toFrame ⊧ φ
+
+namespace ValidOnFiniteFrameClass
+
+protected instance semantics : Semantics (Formula ℕ) (Kripke.FiniteFrameClass) := ⟨fun C ↦ Kripke.ValidOnFrameClass C⟩
+
+variable {C : Kripke.FiniteFrameClass}
+
+@[simp] protected lemma models_iff : C ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass C φ := iff_of_eq rfl
+
+end ValidOnFiniteFrameClass
+
 
 end Formula.Kripke
 
@@ -257,19 +281,38 @@ namespace Kripke
 
 def Frame.theorems (F : Kripke.Frame) : Theory ℕ := { φ | F ⊧ φ }
 
+
 def FrameClass.DefinedBy (C : Kripke.FrameClass) (T : Theory ℕ) := ∀ F, F ∈ C ↔ F ⊧* T
+
+def FiniteFrameClass.DefinedBy (C : Kripke.FiniteFrameClass) (T : Theory ℕ) := ∀ F : FiniteFrame, F ∈ C ↔ F.toFrame ⊧* T
+
 
 section definability
 
-variable {F : Kripke.Frame}
+variable {C : Kripke.FrameClass} {FC : Kripke.FiniteFrameClass} {Ax : Theory ℕ}
 
-instance AllFrameClass.isDefinedBy : AllFrameClass.DefinedBy 𝗞 := by
+lemma FiniteFrameClass.definedBy_of_definedBy_frameclass_aux (h : C.DefinedBy Ax) : (C.restrictFinite).DefinedBy Ax := by
   intro F;
-  simp [Frame.theorems];
+  constructor;
+  . intro hF;
+    apply h F.toFrame |>.mp hF;
+  . intro hF;
+    apply h F.toFrame |>.mpr hF;
+
+lemma FiniteFrameClass.definedBy_of_definedBy_frameclass (h : C.DefinedBy Ax) (e : FC = C.restrictFinite) : FC.DefinedBy Ax := by
+  rw [e];
+  exact FiniteFrameClass.definedBy_of_definedBy_frameclass_aux h;
+
+lemma AllFrameClass.isDefinedBy : AllFrameClass.DefinedBy 𝗞 := by
+  intro F;
+  simp;
   rintro _ φ ψ rfl;
   exact Formula.Kripke.ValidOnFrame.axiomK;
 
+lemma AllFiniteFrameClass.isDefinedBy : AllFiniteFrameClass.DefinedBy 𝗞 := FiniteFrameClass.definedBy_of_definedBy_frameclass AllFrameClass.isDefinedBy $ by rfl
+
 end definability
+
 
 end Kripke
 
@@ -281,11 +324,15 @@ open Kripke
 namespace Kripke
 
 variable {H : Hilbert ℕ} {φ : Formula ℕ}
-variable {C : FrameClass} {T : Theory ℕ}
+variable {T : Theory ℕ}
 
 open Formula.Kripke
 
-lemma sound_hilbert_of_frameclass (definedBy : C.DefinedBy T) : (Hilbert.ExtK T : Hilbert ℕ) ⊢! φ → C ⊧ φ := by
+section
+
+variable {C : FrameClass}
+
+lemma instSound_of_frameClass_definedBy_aux (definedBy : C.DefinedBy T) : (Hilbert.ExtK T : Hilbert ℕ) ⊢! φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.Deduction.inducition_with_necOnly! with
   | hImply₁ => apply ValidOnFrame.imply₁;
@@ -300,14 +347,13 @@ lemma sound_hilbert_of_frameclass (definedBy : C.DefinedBy T) : (Hilbert.ExtK T 
     . apply Semantics.realizeSet_iff.mp (definedBy F |>.mp hF);
       assumption;
 
-lemma sound_of_equiv_frameclass_hilbert (definedBy : C.DefinedBy T) (heq : H =ₛ (Hilbert.ExtK T)) : H ⊢! φ → C ⊧ φ := by
-  intro hφ;
-  apply sound_hilbert_of_frameclass (T := T) (definedBy);
+lemma instSound_of_frameClass_definedBy (definedBy : C.DefinedBy T) (heq : H =ₛ (Hilbert.ExtK T)) : Sound H C := ⟨by
+  intro φ hφ;
+  apply instSound_of_frameClass_definedBy_aux definedBy;
   exact Equiv.iff.mp heq φ |>.mp hφ;
+⟩
 
-lemma instSound (definedBy : C.DefinedBy T) (heq : H =ₛ (Hilbert.ExtK T)) : Sound H C := ⟨sound_of_equiv_frameclass_hilbert definedBy heq⟩
-
-lemma unprovable_bot [sound : Sound H C] (hNonempty : C.Nonempty) : H ⊬ ⊥ := by
+lemma instConsistent_of_nonempty_frameclass_aux [sound : Sound H C] (hNonempty : C.Nonempty) : H ⊬ ⊥ := by
   apply not_imp_not.mpr sound.sound;
   simp [Semantics.Realize];
   obtain ⟨F, hF⟩ := hNonempty;
@@ -316,17 +362,61 @@ lemma unprovable_bot [sound : Sound H C] (hNonempty : C.Nonempty) : H ⊬ ⊥ :=
   . exact hF;
   . exact Semantics.Bot.realize_bot (F := Formula ℕ) (M := Kripke.Frame) F;
 
-lemma instConsistent [Sound H C] (h_nonempty : C.Nonempty) : H.Consistent := System.Consistent.of_unprovable $ unprovable_bot h_nonempty
+lemma instConsistent_of_nonempty_frameclass [Sound H C] (h_nonempty : C.Nonempty) : H.Consistent := System.Consistent.of_unprovable $ instConsistent_of_nonempty_frameclass_aux h_nonempty
+
+end
+
+
+section
+
+variable {FC : FiniteFrameClass}
+
+lemma instSound_of_finiteFrameClass_definedBy_aux (definedBy : FC.DefinedBy T) : (Hilbert.ExtK T : Hilbert ℕ) ⊢! φ → FC ⊧ φ := by
+  intro hφ F hF;
+  obtain ⟨F, hF, rfl⟩ := hF;
+  induction hφ using Hilbert.Deduction.inducition_with_necOnly! with
+  | hImply₁ => apply ValidOnFrame.imply₁;
+  | hImply₂ => apply ValidOnFrame.imply₂;
+  | hElimContra => apply ValidOnFrame.elimContra;
+  | hMdp ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
+  | hNec ih => exact ValidOnFrame.nec ih;
+  | hMaxm h =>
+    simp at h;
+    rcases h with (⟨_, _, rfl⟩ | hR);
+    . exact Formula.Kripke.ValidOnFrame.axiomK;
+    . apply Semantics.realizeSet_iff.mp (definedBy F |>.mp hF);
+      assumption;
+
+lemma instSound_of_finiteFrameClass_definedBy (definedBy : FC.DefinedBy T) (heq : H =ₛ (Hilbert.ExtK T)) : Sound H FC := ⟨by
+  intro φ hφ;
+  apply instSound_of_finiteFrameClass_definedBy_aux definedBy;
+  exact Equiv.iff.mp heq φ |>.mp hφ;
+⟩
+
+lemma instConsistent_of_nonempty_finiteFrameclass_aux [sound : Sound H FC] (hNonempty : FC.Nonempty) : H ⊬ ⊥ := by
+  apply not_imp_not.mpr sound.sound;
+  simp [Semantics.Realize];
+  obtain ⟨F, hF⟩ := hNonempty;
+  use F.toFrame;
+  constructor;
+  . use F;
+  . exact Semantics.Bot.realize_bot (F := Formula ℕ) (M := Kripke.Frame) F.toFrame;
+
+lemma instConsistent_of_nonempty_finiteFrameclass [Sound H FC] (h_nonempty : FC.Nonempty) : H.Consistent :=
+  System.Consistent.of_unprovable $ instConsistent_of_nonempty_finiteFrameclass_aux h_nonempty
+
+end
+
 
 end Kripke
 
 
 namespace K
 
-instance Kripke.sound : Sound (Hilbert.K ℕ) (AllFrameClass) := Kripke.instSound (definedBy := Kripke.AllFrameClass.isDefinedBy) (heq := by simp [ExtK.K_is_extK_of_AxiomK])
+instance Kripke.sound : Sound (Hilbert.K ℕ) (AllFrameClass) := Kripke.instSound_of_frameClass_definedBy (definedBy := Kripke.AllFrameClass.isDefinedBy) (heq := by simp [ExtK.K_is_extK_of_AxiomK])
 
-instance consistent : System.Consistent (Hilbert.K ℕ) := Kripke.instConsistent (C := AllFrameClass) $ by
-  use reflexivePointFrame;
+instance consistent : System.Consistent (Hilbert.K ℕ) := Kripke.instConsistent_of_nonempty_frameclass (C := AllFrameClass) $ by
+  use reflexivePointFrame.toFrame;
   tauto;
 
 end K

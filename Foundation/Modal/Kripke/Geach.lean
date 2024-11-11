@@ -10,7 +10,7 @@ namespace Kripke
 abbrev GeachConfluentFrameClass (t : GeachConfluent.Taple) : FrameClass := { F | (GeachConfluent t) F.Rel }
 
 instance GeachConfluentFrameClass.nonempty : (GeachConfluentFrameClass t).Nonempty := by
-  use reflexivePointFrame;
+  use reflexivePointFrame.toFrame;
   intros x _ _ _; use x;
   constructor <;> { apply Rel.iterate.true_any; tauto; }
 
@@ -204,72 +204,74 @@ open Modal.Kripke
 
 section soundness
 
+open Hilbert.Kripke
+
 instance KD.Kripke.sound : Sound (Hilbert.KD ℕ) (SerialFrameClass) :=
-  Kripke.instSound
+  instSound_of_frameClass_definedBy
   (by rw [SerialFrameClass.is_geach]; apply GeachConfluentFrameClass.isDefinedBy)
   (by simp [is_geach, Hilbert.Geach, Axioms.MultiGeach.def_one])
 
-instance KD.consistent : System.Consistent (Hilbert.KD ℕ) := Kripke.instConsistent (C := SerialFrameClass) $ by
+instance KD.consistent : System.Consistent (Hilbert.KD ℕ) := instConsistent_of_nonempty_frameclass (C := SerialFrameClass) $ by
   rw [SerialFrameClass.is_geach];
   simp;
 
 
 instance KT.Kripke.sound : Sound (Hilbert.KT ℕ) (ReflexiveFrameClass) :=
-  Kripke.instSound
+  instSound_of_frameClass_definedBy
   (by rw [ReflexiveFrameClass.is_geach]; apply GeachConfluentFrameClass.isDefinedBy)
   (by simp [is_geach, Hilbert.Geach, Axioms.MultiGeach.def_one])
 
-instance KT.consistent : System.Consistent (Hilbert.KT ℕ) := Kripke.instConsistent (C := ReflexiveFrameClass) $ by
+instance KT.consistent : System.Consistent (Hilbert.KT ℕ) := instConsistent_of_nonempty_frameclass (C := ReflexiveFrameClass) $ by
   rw [ReflexiveFrameClass.is_geach];
   simp;
 
 
 instance KTB.Kripke.sound : Sound (Hilbert.KTB ℕ) (ReflexiveSymmetricFrameClass) :=
-  Kripke.instSound
+  instSound_of_frameClass_definedBy
   (by rw [ReflexiveSymmetricFrameClass.is_geach]; apply MultiGeachConfluentFrameClass.isDefinedBy)
   (by simp [is_geach, Hilbert.Geach])
 
-instance KTB.consistent : System.Consistent (Hilbert.KTB ℕ) := Kripke.instConsistent (C := ReflexiveSymmetricFrameClass) $ by
+instance KTB.consistent : System.Consistent (Hilbert.KTB ℕ) := instConsistent_of_nonempty_frameclass (C := ReflexiveSymmetricFrameClass) $ by
   rw [ReflexiveSymmetricFrameClass.is_geach];
   simp;
 
 
 instance K4.Kripke.sound : Sound (Hilbert.K4 ℕ) (TransitiveFrameClass) :=
-  Kripke.instSound
+  instSound_of_frameClass_definedBy
   (by rw [TransitiveFrameClass.is_geach]; apply MultiGeachConfluentFrameClass.isDefinedBy)
   (by simp [is_geach, Hilbert.Geach])
 
-instance K4.consistent : System.Consistent (Hilbert.K4 ℕ) := Kripke.instConsistent (C := TransitiveFrameClass) $ by
+instance K4.consistent : System.Consistent (Hilbert.K4 ℕ) := instConsistent_of_nonempty_frameclass (C := TransitiveFrameClass) $ by
   rw [TransitiveFrameClass.is_geach];
   simp;
 
 
 instance S4.Kripke.sound : Sound (Hilbert.S4 ℕ) (ReflexiveTransitiveFrameClass) :=
-  Kripke.instSound
+  instSound_of_frameClass_definedBy
   (by rw [ReflexiveTransitiveFrameClass.is_geach]; apply MultiGeachConfluentFrameClass.isDefinedBy)
   (by simp [is_geach, Hilbert.Geach])
 
-instance S4.consistent : System.Consistent (Hilbert.S4 ℕ) := Kripke.instConsistent (C := ReflexiveTransitiveFrameClass) $ by
+instance S4.consistent : System.Consistent (Hilbert.S4 ℕ) := instConsistent_of_nonempty_frameclass (C := ReflexiveTransitiveFrameClass) $ by
   rw [ReflexiveTransitiveFrameClass.is_geach];
   simp;
 
 
 instance S5.Kripke.sound : Sound (Hilbert.S5 ℕ) (ReflexiveEuclideanFrameClass) :=
-  Kripke.instSound
+  instSound_of_frameClass_definedBy
   (by rw [ReflexiveEuclideanFrameClass.is_geach]; apply MultiGeachConfluentFrameClass.isDefinedBy)
   (by simp [is_geach, Hilbert.Geach])
 
-instance S5.consistent : System.Consistent (Hilbert.S5 ℕ) := Kripke.instConsistent (C := ReflexiveEuclideanFrameClass) $ by
+instance S5.consistent : System.Consistent (Hilbert.S5 ℕ) := instConsistent_of_nonempty_frameclass (C := ReflexiveEuclideanFrameClass) $ by
   rw [ReflexiveEuclideanFrameClass.is_geach];
   simp;
 
 
 instance KT4B.Kripke.sound : Sound (Hilbert.KT4B ℕ) (ReflexiveTransitiveSymmetricFrameClass) :=
-  Kripke.instSound
+  instSound_of_frameClass_definedBy
   (by rw [ReflexiveTransitiveSymmetricFrameClass.is_geach]; apply MultiGeachConfluentFrameClass.isDefinedBy)
   (by simp [is_geach, Hilbert.Geach])
 
-instance KT4B.consistent : System.Consistent (Hilbert.KT4B ℕ) := Kripke.instConsistent (C := ReflexiveTransitiveSymmetricFrameClass) $ by
+instance KT4B.consistent : System.Consistent (Hilbert.KT4B ℕ) := instConsistent_of_nonempty_frameclass (C := ReflexiveTransitiveSymmetricFrameClass) $ by
   rw [ReflexiveTransitiveSymmetricFrameClass.is_geach];
   simp;
 

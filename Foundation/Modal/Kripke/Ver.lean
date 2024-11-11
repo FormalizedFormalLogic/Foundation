@@ -21,10 +21,12 @@ end Kripke
 
 namespace Hilbert
 
-instance Ver.Kripke.sound : Sound (Hilbert.Ver ℕ) (Kripke.IsolatedFrameClass) := Kripke.instSound Kripke.IsolatedFrameClass.is_defined_by_Ver rfl
+open Modal.Kripke
 
-instance Ver.consistent : System.Consistent (Hilbert.Ver ℕ) := Kripke.instConsistent (C := Kripke.IsolatedFrameClass) $ by
-  use Kripke.irreflexivePointFrame;
+instance Ver.Kripke.sound : Sound (Hilbert.Ver ℕ) (Kripke.IsolatedFrameClass) := Kripke.instSound_of_frameClass_definedBy Kripke.IsolatedFrameClass.is_defined_by_Ver rfl
+
+instance Ver.consistent : System.Consistent (Hilbert.Ver ℕ) := Kripke.instConsistent_of_nonempty_frameclass (C := Kripke.IsolatedFrameClass) $ by
+  use irreflexivePointFrame.toFrame;
   tauto;
 
 lemma Kripke.canonicalFrame.is_isolated_of_subset_Ver (h : 𝗩𝗲𝗿 ⊆ Ax) [System.Consistent (Hilbert.ExtK Ax)] : Isolated (canonicalFrame (Hilbert.ExtK Ax)) := by
