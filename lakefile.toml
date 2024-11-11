@@ -1,0 +1,10 @@
+name = "foundation"
+defaultTargets = ["Foundation"]
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+version = "git#master"
+
+[[lean_lib]]
+name = "Foundation"
