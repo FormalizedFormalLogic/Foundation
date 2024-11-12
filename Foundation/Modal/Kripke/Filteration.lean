@@ -212,7 +212,7 @@ section
 variable {M : Model} {T : Theory ℕ} [T.SubformulaClosed]
          (FM : Model) (filterOf : FilterOf FM M T)
 
-theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by trivial) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
+theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
   induction φ using Formula.rec' generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;
@@ -222,16 +222,16 @@ theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by trivia
     . intro h Qy rQxQy;
       obtain ⟨y, ey⟩ := Quotient.exists_rep (cast (filterOf.def_world) Qy);
       have this := filterOf.def_box rQxQy; simp [←ey] at this;
-      simpa [ey] using ihp (by trivial) |>.mp $ @this φ hs h;
+      simpa [ey] using ihp (Theory.SubformulaClosed.mem_box hs) |>.mp $ @this φ hs h;
     . intro h y rxy;
       have rQxQy := filterOf.def_rel₁ rxy;
-      exact ihp (by trivial) |>.mpr $ h _ rQxQy;
+      exact ihp (Theory.SubformulaClosed.mem_box hs) |>.mpr $ h _ rQxQy;
   | himp φ ψ ihp ihq =>
     constructor;
     . rintro hxy hp;
-      exact (ihq (by trivial) |>.mp $ hxy (ihp (by trivial) |>.mpr hp));
+      exact (ihq (by trivial) |>.mp $ hxy (ihp (Theory.SubformulaClosed.mem_imp₁ hs) |>.mpr hp));
     . rintro hxy hp;
-      exact (ihq (by trivial) |>.mpr $ hxy (ihp (by trivial) |>.mp hp));
+      exact (ihq (by trivial) |>.mpr $ hxy (ihp (Theory.SubformulaClosed.mem_imp₁ hs) |>.mp hp));
   | _ => trivial
 
 end

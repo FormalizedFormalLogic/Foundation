@@ -28,15 +28,12 @@ theorem boxdotTranslated
   intro d;
   induction d using inducition_with_necOnly! with
   | hMaxm hs => exact h _ hs;
-  | hNec ihp =>
-    dsimp [BoxdotTranslation];
-    exact boxdot_nec! $ ihp;
-  | hMdp ihpq ihp =>
-    dsimp only [BoxdotTranslation] at ihpq;
-    exact ihpq ⨀ ihp;
-  | _ =>
-    dsimp only [BoxdotTranslation];
-    trivial;
+  | hNec ihp => exact boxdot_nec! $ ihp;
+  | hMdp ihpq ihp => exact ihpq ⨀ ihp;
+  | hElimContra => exact elim_contra!;
+  | hImply₂ => exact imply₂!;
+  | hImply₁ => exact imply₁!;
+
 
 lemma boxdotTranslatedK4_of_S4 : (Hilbert.S4 α) ⊢! φ → (Hilbert.K4 α) ⊢! φᵇ := boxdotTranslated $ by
   intro φ hp;

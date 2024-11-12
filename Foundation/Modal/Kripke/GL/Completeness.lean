@@ -146,7 +146,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       intro h;
       obtain ⟨Y, hY₁⟩ := lindenbaum (S := φ.subformulae) (truthlemma.lemma1 q_sub) (truthlemma.lemma2 q_sub h);
       simp only [Finset.union_subset_iff] at hY₁;
-      simp [Satisfies];
+      simp [Satisfies, Kripke.Frame.Rel'];
       use Y;
       constructor;
       . intro χ _ hr_sub;

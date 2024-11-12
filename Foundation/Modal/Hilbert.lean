@@ -166,17 +166,6 @@ noncomputable def inducition_with_necOnly! [H.HasNecOnly]
   | hImply₂ => exact hImply₂
   | hElimContra => exact hElimContra
 
-open System in
-macro_rules | `(tactic| trivial) => `(tactic|
-    first
-    | apply verum!
-    | apply imply₁!
-    | apply imply₂!
-    | apply elim_contra!
-    | apply elim_contra_neg!
-  )
-macro_rules | `(tactic| trivial) => `(tactic | apply dne!)
-
 end Hilbert.Deduction
 
 
@@ -352,7 +341,9 @@ lemma normal_weakerThan_of_maxm {H₁ H₂ : Hilbert α} [H₁.IsNormal] [H₂.I
   | hMaxm hp => exact hMaxm hp;
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
   | hNec ihp => exact nec! ihp;
-  | _ => trivial;
+  | hImply₁ => exact imply₁!;
+  | hImply₂ => exact imply₂!;
+  | hElimContra => exact elim_contra!
 
 lemma normal_weakerThan_of_subset {H₁ H₂ : Hilbert α} [H₁.IsNormal] [H₂.IsNormal] (hSubset : H₁.axioms ⊆ H₂.axioms)
   : H₁ ≤ₛ H₂ := by
@@ -413,7 +404,9 @@ lemma GL_weakerThan_K4Loeb : (Hilbert.GL α) ≤ₛ (Hilbert.K4Loeb α) := by
     . obtain ⟨_, rfl⟩ := hL; exact axiomL!;
   | hMdp ihpq ihp => exact ihpq ⨀ ihp;
   | hNec ihp => exact nec! ihp;
-  | _ => trivial;
+  | hImply₁ => exact imply₁!;
+  | hImply₂ => exact imply₂!;
+  | hElimContra => exact elim_contra!
 
 lemma K4Loeb_weakerThan_K4Henkin : (Hilbert.K4Loeb α) ≤ₛ (Hilbert.K4Henkin α) := by
   apply System.weakerThan_iff.mpr;
@@ -428,7 +421,9 @@ lemma K4Loeb_weakerThan_K4Henkin : (Hilbert.K4Loeb α) ≤ₛ (Hilbert.K4Henkin 
     rcases hrl with (hNec | hLoeb);
     . obtain ⟨φ, rfl⟩ := hNec; exact nec! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
     . obtain ⟨φ, rfl⟩ := hLoeb; exact loeb! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
-  | _ => trivial;
+  | hImply₁ => exact imply₁!;
+  | hImply₂ => exact imply₂!;
+  | hElimContra => exact elim_contra!
 
 lemma K4Henkin_weakerThan_K4H : (Hilbert.K4Henkin α) ≤ₛ (Hilbert.K4H α) := by
   apply System.weakerThan_iff.mpr;
@@ -443,7 +438,9 @@ lemma K4Henkin_weakerThan_K4H : (Hilbert.K4Henkin α) ≤ₛ (Hilbert.K4H α) :=
     rcases hrl with (hNec | hHenkin);
     . obtain ⟨φ, rfl⟩ := hNec; exact nec! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
     . obtain ⟨φ, rfl⟩ := hHenkin; exact henkin! $ ihp $ by simp_all only [List.mem_singleton, forall_eq];
-  | _ => trivial;
+  | hImply₁ => exact imply₁!;
+  | hImply₂ => exact imply₂!;
+  | hElimContra => exact elim_contra!
 
 lemma K4Henkin_weakerThan_GL : (Hilbert.K4H α) ≤ₛ (Hilbert.GL α) := by
   apply normal_weakerThan_of_maxm;
