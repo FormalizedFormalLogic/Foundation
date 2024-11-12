@@ -231,14 +231,12 @@ variable {L : Language}
 @[simp] lemma complexity_add [L.Add] (t u : Semiterm L ξ n) :
     (Operator.Add.add.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.const, Operator.operator, Operator.numeral, Operator.Add.term_eq, complexity_func, Rew.func]
-  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
-  simp [sup_eq_max]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
 
 @[simp] lemma complexity_mul [L.Mul] (t u : Semiterm L ξ n) :
     (Operator.Mul.mul.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.const, Operator.operator, Operator.numeral, Operator.Mul.term_eq, complexity_func, Rew.func]
-  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
-  simp [sup_eq_max]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
 
 end complexity
 
