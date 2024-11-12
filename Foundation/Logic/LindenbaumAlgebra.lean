@@ -46,10 +46,10 @@ instance : Top (LindenbaumAlgebra 𝓢) := ⟨⟦⊤⟧⟩
 
 instance : Bot (LindenbaumAlgebra 𝓢) := ⟨⟦⊥⟧⟩
 
-instance [DecidableEq F] : Inf (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ⋏ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
+instance [DecidableEq F] : Min (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ⋏ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
   simpa only [Quotient.eq] using and_replace_iff! hp hq⟩
 
-instance [DecidableEq F] : Sup (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ⋎ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
+instance [DecidableEq F] : Max (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ⋎ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
   simpa only [Quotient.eq] using or_replace_iff! hp hq⟩
 
 instance [DecidableEq F] : HImp (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ➝ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
@@ -71,6 +71,8 @@ lemma himp_def [DecidableEq F] (φ ψ : F) : (⟦φ⟧ : LindenbaumAlgebra 𝓢)
 lemma compl_def [DecidableEq F] (φ : F) : (⟦φ⟧ : LindenbaumAlgebra 𝓢)ᶜ = ⟦∼φ⟧ := rfl
 
 instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) where
+  sup := Max.max
+  inf := Min.min
   le_refl φ := by
     induction' φ using Quotient.ind with φ
     simp [le_def]
