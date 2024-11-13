@@ -15,21 +15,21 @@ abbrev TransitiveIrreflexiveFiniteFrameClass : FiniteFrameClass := { F | Transit
 
 private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
-  simp [Axioms.L];
-  intro φ V w;
+  apply Semantics.RealizeSet.setOf_iff.mpr;
+  rintro _ ⟨φ, rfl⟩ V w;
   apply Satisfies.imp_def.mpr;
   contrapose;
-  intro h; simp [Kripke.Satisfies] at h;
+  intro h;
   obtain ⟨x, Rwx, h⟩ := by simpa using Kripke.Satisfies.box_def.not.mp h;
   obtain ⟨m, ⟨⟨rwm, hm⟩, hm₂⟩⟩ := hWF.has_min ({ x | (F.Rel w x) ∧ ¬(Kripke.Satisfies ⟨F, V⟩ x φ) }) $ by use x; tauto;
+  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x φ → ¬m ≺ x := by simpa using hm₂;
   apply Satisfies.box_def.not.mpr; push_neg;
   use m;
   constructor;
   . exact rwm;
   . apply Satisfies.imp_def.not.mpr; push_neg;
     constructor;
-    . simp [flip] at hm₂;
-      intro n rmn;
+    . intro n rmn;
       apply not_imp_not.mp $ hm₂ n (hTrans rwm rmn);
       exact rmn;
     . exact hm;
