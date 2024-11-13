@@ -87,8 +87,9 @@ protected instance semantics {M : Kripke.Model} : Semantics (Formula ℕ) (M.Wor
 
 variable {M : Kripke.Model} {x : M.World} {φ ψ : Formula ℕ}
 
-@[simp]
-protected lemma iff_models : x ⊧ φ ↔ Kripke.Satisfies M x φ := iff_of_eq rfl
+@[simp] protected lemma iff_models : x ⊧ φ ↔ Kripke.Satisfies M x φ := iff_of_eq rfl
+
+@[simp] lemma atom_def : x ⊧ atom a ↔ M x a := by simp [Satisfies];
 
 lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺ y → y ⊧ φ := by simp [Kripke.Satisfies];
 
@@ -218,6 +219,12 @@ variable {F : Kripke.Frame}
 
 @[simp] protected lemma models_iff : F ⊧ φ ↔ Kripke.ValidOnFrame F φ := iff_of_eq rfl
 
+lemma models_set_iff : F ⊧* Φ ↔ ∀ φ ∈ Φ, F ⊧ φ := by simp [Semantics.realizeSet_iff];
+
+lemma not_valid_iff_exists_valuation_world : ¬F ⊧ φ ↔ ∃ V : Kripke.Valuation F, ∃ x : F.World, ¬Satisfies ⟨F, V⟩ x φ := by
+  simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Realize];
+
+
 instance : Semantics.Bot (Kripke.Frame) where
   realize_bot _ := by simp [Kripke.ValidOnFrame];
 
@@ -243,6 +250,7 @@ protected lemma axiomK_set : F ⊧* 𝗞 := by
   simp [Semantics.realizeSet_iff];
   rintro f x y rfl;
   exact ValidOnFrame.axiomK;
+
 
 end ValidOnFrame
 

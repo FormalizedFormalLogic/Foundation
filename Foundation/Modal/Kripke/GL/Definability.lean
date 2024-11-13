@@ -15,73 +15,81 @@ abbrev TransitiveIrreflexiveFiniteFrameClass : FiniteFrameClass := { F | Transit
 
 private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
-  simp [Axioms.L];
-  intro φ V w;
+  apply Semantics.RealizeSet.setOf_iff.mpr;
+  rintro _ ⟨φ, rfl⟩ V w;
   apply Satisfies.imp_def.mpr;
   contrapose;
-  intro h; simp [Kripke.Satisfies] at h;
+  intro h;
   obtain ⟨x, Rwx, h⟩ := by simpa using Kripke.Satisfies.box_def.not.mp h;
   obtain ⟨m, ⟨⟨rwm, hm⟩, hm₂⟩⟩ := hWF.has_min ({ x | (F.Rel w x) ∧ ¬(Kripke.Satisfies ⟨F, V⟩ x φ) }) $ by use x; tauto;
+  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x φ → ¬m ≺ x := by simpa using hm₂;
   apply Satisfies.box_def.not.mpr; push_neg;
   use m;
   constructor;
   . exact rwm;
   . apply Satisfies.imp_def.not.mpr; push_neg;
     constructor;
-    . simp [flip] at hm₂;
-      intro n rmn;
+    . intro n rmn;
       apply not_imp_not.mp $ hm₂ n (hTrans rwm rmn);
       exact rmn;
     . exact hm;
 
 private lemma trans_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → Transitive F.Rel := by
   contrapose;
-  intro hT; simp [Transitive] at hT;
-  obtain ⟨w, v, Rwv, u, Rvu, nRwu⟩ := hT;
-  simp [ValidOnFrame, ValidOnModel];
-  use (atom 0), (λ w _ => w ≠ v ∧ w ≠ u), w;
-  apply Satisfies.imp_def.not.mpr; push_neg;
+  intro hT;
+  obtain ⟨w, v, Rwv, u, Rvu, nRwu⟩ := by simpa [Transitive] using hT;
+  apply ValidOnFrame.models_set_iff.not.mpr; push_neg;
+  use Axioms.L (atom 0);
   constructor;
-  . intro x Rwx hx;
-    by_cases exv : x = v;
-    . rw [exv] at hx;
-      simpa [Satisfies] using @hx u Rvu
-    . simp [Satisfies];
+  . tauto;
+  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
+    use (λ w _ => w ≠ v ∧ w ≠ u), w;
+    apply Satisfies.imp_def.not.mpr; push_neg;
+    constructor;
+    . intro x Rwx hx;
+      by_cases exv : x = v;
+      . subst x;
+        simpa using Satisfies.atom_def.mp $ @hx u Rvu;
+      . apply Satisfies.atom_def.mpr;
+        constructor;
+        . assumption;
+        . by_contra hC;
+          subst x;
+          contradiction;
+    . apply Satisfies.box_def.not.mpr;
+      push_neg;
+      use v;
       constructor;
       . assumption;
-      . by_contra hC;
-        rw [hC] at Rwx;
-        contradiction;
-  . apply Satisfies.box_def.not.mpr;
-    push_neg;
-    use v;
-    constructor;
-    . assumption;
-    . simp [Semantics.Realize, Kripke.Satisfies];
+      . simp [Semantics.Realize, Kripke.Satisfies];
 
 private lemma cwf_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → ConverseWellFounded F.Rel := by
   contrapose;
   intro hCF;
   obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
-  simp [ValidOnFrame, ValidOnModel];
-  use (atom 0), (λ w _ => w ∉ X), x;
-  apply Satisfies.imp_def.not.mpr; push_neg;
+  apply ValidOnFrame.models_set_iff.not.mpr; push_neg;
+  use Axioms.L (atom 0);
   constructor;
-  . intro y _;
-    by_cases hys : y ∈ X
-    . obtain ⟨z, _, Rxz⟩ := hX₂ y hys;
-      intro hy;
-      have := hy z Rxz;
-      simp [Satisfies] at this;
-      contradiction;
-    . intro _;
-      simpa [Satisfies];
-  . obtain ⟨y, _, _⟩ := hX₂ x (by assumption);
-    apply Satisfies.box_def.not.mpr; push_neg;
-    use y;
+  . tauto;
+  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
+    use (λ w _ => w ∉ X), x;
+    apply Satisfies.imp_def.not.mpr; push_neg;
     constructor;
-    . assumption;
-    . simpa [Semantics.Realize, Kripke.Satisfies];
+    . intro y _;
+      by_cases hys : y ∈ X
+      . obtain ⟨z, _, Rxz⟩ := hX₂ y hys;
+        intro hy;
+        have : z ∉ X := by simpa using Satisfies.atom_def.mp $ hy z Rxz;
+        contradiction;
+      . intro _;
+        apply Satisfies.atom_def.mpr;
+        simpa;
+    . obtain ⟨y, _, _⟩ := hX₂ x (by assumption);
+      apply Satisfies.box_def.not.mpr; push_neg;
+      use y;
+      constructor;
+      . assumption;
+      . simpa [Semantics.Realize, Kripke.Satisfies];
 
 lemma TransitiveConverseWellFoundedFrameClass.is_defined_by_L : TransitiveConverseWellFoundedFrameClass.DefinedBy 𝗟 := by
   intro F;
