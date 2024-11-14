@@ -288,6 +288,10 @@ protected abbrev Grz : Hilbert α := Hilbert.ExtK $ 𝗚𝗿𝘇
 instance : System.Grz (Hilbert.Grz α) where
   Grz _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
 
+protected abbrev KH : Hilbert α := Hilbert.ExtK $ 𝗛
+instance : System.KH (Hilbert.KH α) where
+  H _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)
+
 protected abbrev K4H : Hilbert α := Hilbert.ExtK $ 𝟰 ∪ 𝗛
 instance : System.K4H (Hilbert.K4H α) where
   Four _ := Deduction.maxm $ Set.mem_of_subset_of_mem (by rfl) (by simp)

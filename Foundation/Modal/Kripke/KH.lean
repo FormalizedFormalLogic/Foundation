@@ -1,67 +1,102 @@
-import Logic.Modal.Standard.Kripke.Semantics
+import Foundation.Modal.Kripke.Semantics
+import Foundation.Modal.Kripke.GL.Definability
 
-namespace LO.Modal.Standard
+namespace Set
 
-variable [DecidableEq α] [Inhabited α]
+variable {s t : Set α}
 
-namespace Kripke
+abbrev Cofinite (s : Set α) := sᶜ.Finite
+
+lemma cofinite_compl : sᶜ.Cofinite ↔ s.Finite := by simp [Set.Cofinite];
+
+lemma comp_finite : s.Finite → sᶜ.Cofinite := by
+  intro h;
+  simpa [Set.Cofinite];
+
+end Set
+
+
+namespace LO.Modal
 
 open System
 open Kripke
-open Formula Formula.Kripke
+open Formula
+open Formula.Kripke
 
-variable (a : α) {F : Kripke.Frame}
 
-lemma valid_H_of_valid_L : F# ⊧ Axioms.L (atom a) → F# ⊧ Axioms.H (atom a) := by
-  simp [Axioms.L, Axioms.H];
+namespace Kripke
+
+variable {F : Kripke.Frame} {a : ℕ}
+
+lemma valid_atomic_H_of_valid_atomic_L : F ⊧ (Axioms.L (atom a)) → F ⊧ (Axioms.H (atom a)) := by
   intro h V x hx;
-  have : Satisfies ⟨F, V⟩ x (□(□a ⟶ a)) := by intro y Rxy; exact hx Rxy |>.1;
+  have : Satisfies ⟨F, V⟩ x (□(□a ➝ a)) := by
+    intro y Rxy;
+    exact (Satisfies.and_def.mp $ @hx y Rxy) |>.1;
   exact @h V x this;
 
-
-lemma valid_L_of_valid_H : F# ⊧ Axioms.H (atom a) → F# ⊧ Axioms.L (atom a) := by
-  simp [Axioms.L, Axioms.H];
+lemma valid_atomic_L_of_valid_atomic_H : F ⊧ Axioms.H (atom a) → F ⊧ Axioms.L (atom a) := by
   intro hH V x hx;
 
-  let M : Kripke.Model α := ⟨F#, V⟩;
-  let V' : Valuation F α := λ w a => ∀ n : ℕ, Satisfies ⟨F#, V⟩ w (□^[n] a);
+  let V' : Valuation F := λ w a => ∀ n : ℕ, Satisfies ⟨F, V⟩ w (□^[n] a);
 
-  let M' : Kripke.Model α := ⟨F, V'⟩;
-
-  have h₁ : Satisfies M' x (□(□a ⟷ a)) := by
+  have h₁ : Satisfies ⟨F, V'⟩ x (□(□a ⭤ a)) := by
     intro y Rxy;
-    have : Satisfies M' y a ↔ Satisfies M' y (□a) := calc
-      _ ↔ ∀ n, Satisfies M y (□^[n] a) := by simp [Satisfies];
-      _ ↔ ∀ n, Satisfies M y (□^[(n + 1)]a) := by
+    have : Satisfies ⟨F, V'⟩ y a ↔ Satisfies ⟨F, V'⟩ y (□a) := calc
+      _ ↔ ∀ n, Satisfies ⟨F, V⟩ y (□^[n] a) := by simp [Satisfies];
+      _ ↔ ∀ n, Satisfies ⟨F, V⟩ y (□^[(n + 1)]a) := by
         constructor;
         . intro h n; apply h;
         . intro h n;
-          have h₁ : Satisfies M y (□□^[n](atom a) ⟶ □^[n](atom a)) := by
+          have h₁ : Satisfies ⟨F, V⟩ y (□□^[n](atom a) ➝ □^[n](atom a)) := by
             induction n with
-            | zero => apply hx Rxy;
+            | zero => apply @hx y Rxy;
             | succ n => intro _; apply h;
           apply h₁;
           simpa using h n;
-      _ ↔ ∀ n, ∀ z, y ≺ z → Satisfies M z (□^[n] a) := by simp [Satisfies];
-      _ ↔ ∀ z, y ≺ z → ∀ n : ℕ, Satisfies M z (□^[n]a) := by aesop;
-      _ ↔ ∀ z, y ≺ z → Satisfies M' z (atom a) := by simp [Satisfies];
-      _ ↔ Satisfies M' y (□(atom a)) := by simp [Satisfies];
-    exact ⟨this.2, this.1⟩;
+      _ ↔ ∀ n, ∀ z, y ≺ z → Satisfies ⟨F, V⟩ z (□^[n] a) := by simp [Satisfies];
+      _ ↔ ∀ z, y ≺ z → ∀ n : ℕ, Satisfies ⟨F, V⟩ z (□^[n]a) := by aesop;
+      _ ↔ ∀ z, y ≺ z → Satisfies ⟨F, V'⟩ z (atom a) := by simp [Satisfies];
+      _ ↔ Satisfies ⟨F, V'⟩ y (□(atom a)) := by simp [Satisfies];
+    apply Satisfies.iff_def.mpr;
+    exact this.symm;
 
-  have H : Satisfies M' x (□atom a) := @hH M'.Valuation x h₁;
+  have h₂ : Satisfies ⟨F, V'⟩ x (□atom a) := @hH V' x h₁;
 
-  intro w hxw;
-  exact H hxw 0;
+  intro w Rxw;
+  exact @h₂ w Rxw 0;
 
-lemma iff_valid_L_valid_H : F# ⊧ Axioms.L (atom a) ↔ F# ⊧ Axioms.H (atom a) := by
+lemma valid_atomic_L_iff_valid_atomic_H : F ⊧ Axioms.L (atom a) ↔ F ⊧ Axioms.H (atom a) := by
   constructor;
-  . exact valid_H_of_valid_L a;
-  . exact valid_L_of_valid_H a;
+  . exact valid_atomic_H_of_valid_atomic_L;
+  . exact valid_atomic_L_of_valid_atomic_H;
+
+lemma valid_on_frame_Four_of_L (h : F ⊧* 𝗟) : F ⊧* 𝟰 := by
+  have trans := trans_of_L h;
+  simp_all [Axioms.L, Axioms.Four];
+  intro φ V x hx y Rxy;
+  apply h φ V y;
+  intro z Ryz h₂;
+  apply hx;
+  exact trans Rxy Ryz;
+
+lemma valid_atomic_Four_of_valid_atomic_H : F ⊧ Axioms.H (atom a) → F ⊧ Axioms.Four (atom a) := by
+  intro h V x h₂ y Rxy z Ryz;
+  have := valid_atomic_L_iff_valid_atomic_H.mpr h V x;
+  sorry;
+
+end Kripke
 
 
-section
+namespace Hilbert.KH.Kripke
 
-abbrev CresswellFrame : Kripke.Frame where
+/--
+  `0♯ ≺ 1♯ ≺ 2# ≺ ⋯ ≺ n♯ ≺ ⋯ ≺ n♭ ⋯ ≺ 2♭ ≺ 1♭ ≺ 0♭`
+
+  - reflexive in `♯`
+  - irreflexive in `♭`
+-/
+abbrev cresswellFrame : Kripke.Frame where
   World := ℕ × Bool
   Rel n m :=
     match n, m with
@@ -70,221 +105,203 @@ abbrev CresswellFrame : Kripke.Frame where
     | (_, true), (_, false) => True
     | _, _ => False
 
-namespace CresswellFrame
+namespace cresswellFrame
 
-variable {n m : ℕ}
+abbrev SharpWorld := { w : cresswellFrame.World // w.2 = true }
+-- instance : LE cresswellFrame.SharpWorld := ⟨λ x y => x.1 ≤ y.1⟩
 
 @[match_pattern]
-abbrev sharp (n : ℕ) : CresswellFrame.World := (n, true)
+abbrev sharp (n : ℕ) : SharpWorld := ⟨(n, true), rfl⟩
 postfix:max "♯" => sharp
 
-abbrev SharpWorld := { w : CresswellFrame.World // w.2 = true }
-instance : LE CresswellFrame.SharpWorld := ⟨λ x y => x.1 ≤ y.1⟩
-
-
-@[match_pattern]
-abbrev flat (n : ℕ) : CresswellFrame.World := (n, false)
-postfix:max "♭" => flat
-
-abbrev FlatWorld := { w : CresswellFrame.World // w.2 = false }
-instance : LE CresswellFrame.SharpWorld := ⟨λ x y => x.1 ≤ y.1⟩
-
-
-lemma sharp_cresc (h : n ≤ m) : n♯ ≺ m♯ := by omega;
-
-lemma sharp_refl : n♯ ≺ n♯ := by omega;
-
-lemma flat_irrefl : ¬(n♭ ≺ n♭) := by omega;
-
-lemma flat_iff : n > m ↔ n♭ ≺ m♭ := by omega;
-
-
-lemma bridge : n♯ ≺ m♭ := by simp [Frame.Rel'];
-
-/-
-  `0♯ ≺ 1♯ ≺ 2# ≺ ⋯ ≺ n♯ ≺ ⋯ ≺ n♭ ⋯ ≺ 2♭ ≺ 1♭ ≺ 0♭`
-
-  - reflexive in `♯`
-  - irreflexive in `♭`
--/
-
-end CresswellFrame
-
-abbrev CresswellModel (α) : Kripke.Model α := ⟨CresswellFrame, λ w _ => w ≠ 0♯⟩
-
-namespace CresswellModel
-
-@[reducible]
-instance : Semantics (Formula α) (CresswellModel α).World := Formula.Kripke.Satisfies.semantics (M := CresswellModel α)
-
-lemma not_satisfies_Four : ¬(Satisfies (CresswellModel α) 2♯ (Axioms.Four (atom a))) := by
-  simp [Satisfies, Axioms.Four];
-  constructor;
-  . intro x h;
-    by_contra hC; subst hC;
-    simp [Frame.Rel'] at h;
-  . use 1;
-
-abbrev Truthset (p : Formula α) := { w : (CresswellModel α).World | w ⊧ p }
-scoped prefix:80 "𝒯 " => CresswellModel.Truthset
-
-namespace Truthset
-
-variable (p q : Formula α)
-
-@[simp] lemma top : 𝒯 (⊤ : Formula α) = Set.univ := by simp [Truthset, Satisfies];
-@[simp] lemma bot : 𝒯 (⊥ : Formula α) = ∅ := by simp [Truthset, Satisfies];
-@[simp] lemma and : 𝒯 (p ⋏ q) = 𝒯 p ∩ 𝒯 q := by simp [Truthset]; rfl;
-@[simp] lemma or  : 𝒯 (p ⋎ q) = 𝒯 p ∪ 𝒯 q := by simp [Truthset]; rfl;
-@[simp] lemma neg : 𝒯 (~p) = (𝒯 p)ᶜ := by simp [Truthset, Satisfies]; aesop;
-@[simp] lemma imp : 𝒯 (p ⟶ q) = (𝒯 p)ᶜ ∪ 𝒯 q := by simp_all [Truthset, Satisfies, imp_iff_not_or]; rfl;
-
-end Truthset
-
-
-abbrev _root_.Set.Cofinite (s : Set α) := sᶜ.Finite
+lemma sharp_iff {n m : SharpWorld} : n.1 ≺ m.1 ↔ n.1.1 ≤ m.1.1 + 1 := by aesop;
 
 @[simp]
-lemma _root_.Set.cofinite_compl (s : Set α) : sᶜ.Cofinite ↔ s.Finite := by simp [Set.Cofinite];
+lemma sharp_refl {n : SharpWorld} : n.1 ≺ n.1 := by
+  obtain ⟨⟨n, _⟩, ⟨_, rfl⟩⟩ := n;
+  simp [Frame.Rel'];
 
-lemma _root_.Set.comp_finite (s : Set α) : s.Finite → sᶜ.Cofinite := by
-  intro h;
-  simp [Set.Cofinite];
-  exact h;
 
-lemma either_finite_cofinite (p : Formula α) : (𝒯 p).Finite ∨ (𝒯 p)ᶜ.Finite := by
-  induction p using Formula.rec' with
-  | hatom a => simp [Truthset, Satisfies];
-  | hverum => simp;
-  | hfalsum => simp;
-  | hneg p ih => rcases ih with (_ | _) <;> simp_all;
-  | hor p q ihp ihq =>
-    simp [Set.compl_union];
-    rcases ihp with (_ | _) <;> rcases ihq with (_ | _);
-    . left; simp_all;
-    . right; apply Set.Finite.inter_of_right; assumption;
-    . right; apply Set.Finite.inter_of_left; assumption;
-    . right; apply Set.Finite.inter_of_left; assumption;
-  | hand p q ihp ihq =>
-    simp [Set.compl_inter];
-    rcases ihp with (_ | _) <;> rcases ihq with (_ | _);
-    . left; apply Set.Finite.inter_of_left; assumption;
-    . left; apply Set.Finite.inter_of_left; assumption;
-    . left; apply Set.Finite.inter_of_right; assumption;
-    . right; simp_all;
-  | himp p q ihp ihq =>
-    simp [Set.compl_union];
-    rcases ihp with (_ | _) <;> rcases ihq with (_ | _);
-    . right; apply Set.Finite.inter_of_left; assumption;
-    . right; apply Set.Finite.inter_of_left; assumption;
-    . left; simp_all;
-    . right; apply Set.Finite.inter_of_right; assumption;
-  | hbox p ih =>
-    by_cases H : ∀ n, Satisfies (CresswellModel α) n♭ p;
-    . have : ¬((𝒯 p).Finite) := by
-        simp [Truthset];
-        sorry;
-      have : (𝒯 p)ᶜ.Finite := by aesop;
-      sorry;
-    . push_neg at H;
-      obtain ⟨n, h⟩ := H;
-      have h_sharp : ∀ m : ℕ, ¬Satisfies (CresswellModel α) m♯ (□p) := by
+abbrev FlatWorld := { w : cresswellFrame.World // w.2 = false }
+-- instance : LE cresswellFrame.SharpWorld := ⟨λ x y => x.1 ≤ y.1⟩
+
+@[match_pattern]
+abbrev flat (n : ℕ) : FlatWorld := ⟨(n, false), rfl⟩
+postfix:max "♭" => flat
+
+lemma flat_iff {n m : FlatWorld} : n.1 ≺ m.1 ↔ n.1.1 > m.1.1 := by aesop;
+
+@[simp]
+lemma flat_irrefl {n : FlatWorld} : ¬(n.1 ≺ n.1) := by
+  obtain ⟨⟨n, _⟩, ⟨_, rfl⟩⟩ := n;
+  simp [Frame.Rel'];
+
+
+@[simp]
+lemma bridge {n : SharpWorld} {m : FlatWorld} : n.1 ≺ m.1 := by
+  obtain ⟨⟨n, _⟩, ⟨_, rfl⟩⟩ := n;
+  obtain ⟨⟨m, _⟩, ⟨_, rfl⟩⟩ := m;
+  simp [Frame.Rel'];
+
+-- @[simp] lemma cannot_back : ¬(n♭ ≺ m♯) := by simp [Frame.Rel'];
+
+-- lemma sharp_cresc (h : n ≤ m) : n♯ ≺ m♯ := by omega;
+
+end cresswellFrame
+
+
+abbrev cresswellModel : Kripke.Model := ⟨cresswellFrame, λ w _ => w ≠ 0♯⟩
+
+@[reducible]
+instance : Semantics (Formula ℕ) cresswellModel.World := Formula.Kripke.Satisfies.semantics (M := cresswellModel)
+
+lemma not_satisfies_atomic_Four_on_cresswellModel : ¬(Satisfies (cresswellModel) 2♯ (Axioms.Four (atom a))) := by
+  apply Satisfies.imp_def.not.mpr;
+  push_neg;
+  constructor;
+  . intro x h;
+    match x with
+    | x♯ =>
+      apply Satisfies.atom_def.mpr;
+      have : 1 ≤ x := by simpa using cresswellFrame.sharp_iff.mp h;
+      suffices x ≠ 0 by simpa;
+      omega;
+    | x♭ =>
+      apply Satisfies.atom_def.mpr;
+      simp;
+  . apply Satisfies.box_def.not.mpr; push_neg;
+    use 1♯;
+    constructor;
+    . apply cresswellFrame.sharp_iff.mpr;
+      tauto;
+    . apply Satisfies.box_def.not.mpr; push_neg;
+      use 0♯;
+      constructor;
+      . apply cresswellFrame.sharp_iff.mpr;
+        tauto;
+      . apply Satisfies.atom_def.not.mpr;
+        simp;
+
+lemma not_valid_Four_on_cresswellFrame : ¬(cresswellFrame) ⊧* 𝟰 := by
+  apply Semantics.RealizeSet.setOf_iff.not.mpr; push_neg;
+  use Axioms.Four (atom 0);
+  constructor;
+  . tauto;
+  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
+    use (cresswellModel), 2♯;
+    exact not_satisfies_atomic_Four_on_cresswellModel;
+
+abbrev cresswellModel.truthset (φ) := { w : cresswellModel.World | Satisfies _ w φ }
+
+namespace cresswellModel.truthset
+
+variable {φ ψ : Formula ℕ}
+
+lemma def_top : truthset ⊤ = Set.univ := by simp [truthset, Satisfies];
+
+lemma def_bot : truthset ⊥ = ∅ := by tauto;
+
+lemma def_imp : truthset (φ ➝ ψ) = (truthset φ)ᶜ ∪ truthset ψ := by
+  simp_all [truthset, Satisfies, imp_iff_not_or];
+  rfl;
+
+lemma either_finite_cofinite : (truthset φ).Finite ∨ (truthset φ).Cofinite := by
+  induction φ using Formula.rec' with
+  | hatom a =>
+    right;
+    simp [truthset, cresswellModel, Set.Cofinite, Satisfies];
+  | hfalsum => simp [def_bot];
+  | himp φ ψ ihφ ihψ =>
+    rw [def_imp];
+    rcases ihφ with (_ | _) <;> rcases ihψ with (_ | _);
+    . right;
+      simp only [Set.Cofinite, Set.compl_union, compl_compl];
+      apply Set.Finite.inter_of_left;
+      assumption;
+    . right;
+      simp_all only [Set.Cofinite, Set.compl_union, compl_compl];
+      apply Set.Finite.inter_of_left;
+      assumption;
+    . left;
+      simp_all [Set.Cofinite, Set.compl_union, compl_compl];
+    . right;
+      simp_all only [Set.Cofinite, Set.compl_union, compl_compl];
+      apply Set.Finite.inter_of_right;
+      assumption;
+  | hbox φ ihφ =>
+    by_cases h : ∃ n : cresswellFrame.FlatWorld, ¬Satisfies cresswellModel n φ;
+    . obtain ⟨n, h⟩ := h;
+      -- ..., (n+2)♭, (n+1)♭ ∉ truthset φ.
+      have h₁ : ∀ m : cresswellFrame.FlatWorld, m.1 ≺ n → ¬Satisfies cresswellModel m (□φ) := by
+        intro m hm;
+        apply Satisfies.box_def.not.mpr; push_neg;
+        use n;
+        constructor;
+        . assumption;
+        . exact h;
+      -- 0♯, 1♯, ... ∉ truthset φ.
+      have h₂ : ∀ m : cresswellFrame.SharpWorld, ¬Satisfies cresswellModel m (□φ) := by
         intro m;
-        simp only [Satisfies]; push_neg;
-        use n♭;
-      have h_flat : ∀ m : ℕ, m > n → ¬Satisfies (CresswellModel α) m♭ (□p) := by
-        intro m hmn;
-        simp only [Satisfies]; push_neg;
-        use n♭;
-      have : ∀ w, w ≺ n♭ → ¬Satisfies (CresswellModel α) w (□p) := by
-        intro w hmn;
-        match w with
-        | w♯ => apply h_sharp;
-        | w♭ =>
-          apply h_flat;
-          apply CresswellFrame.flat_iff.mpr;
-          assumption;
+        apply Satisfies.box_def.not.mpr; push_neg;
+        use n;
+        constructor;
+        . exact cresswellFrame.bridge;
+        . exact h;
+      -- so, only n♭, (n-1)♭, ..., 0♭ ∈ truthset φ.
       left;
-      simp [Truthset, Set.Finite];
       sorry;
-
-open CresswellFrame
-
-lemma valid_H : (CresswellModel α) ⊧* (𝗛 : AxiomSet α) := by
-  simp; intro p;
-
-  wlog H : ∃ w, ¬(Satisfies (CresswellModel α) w p);
-  case inr =>
-    simp at H;
-    intro x h₁ y Rxy;
-    apply h₁ Rxy |>.1;
-    intro z Ryz;
-    match z with
-    | z♯ => exact H z |>.2;
-    | z♭ => exact H z |>.1;
-
-  by_cases h : ∀ n, n♭ ∈ (𝒯 p);
-  . have : ¬((𝒯 p).Finite) := by
-      simp [Truthset];
+    . push_neg at h;
+      replace ihφ : (truthset φ).Cofinite := by
+        apply or_iff_not_imp_left.mp ihφ;
+        sorry;
+        /-
+        apply Set.Infinite.of_image;
+        by_contra hC;
+        obtain ⟨m, hm⟩ := Set.Finite.exists_not_mem hC;
+        sorry;
+        -/
+      -- obtain ⟨m, hm⟩ := Set.Finite.exists_not_mem ihφ;
+      -- take maximal n♯ ¬⊧ φ
       sorry;
-    have : (𝒯 p).Cofinite := by
-      have := @either_finite_cofinite α p
-      aesop;
+      /-
+      obtain ⟨m, hm⟩ : ∃ m : cresswellFrame.SharpWorld, m.1 ∈ truthset φ := by
+        obtain ⟨m, hm⟩ := Set.Finite.exists_not_mem ihφ;
+        use ⟨m, ?_⟩;
+        . simp_all;
+        . by_contra hC;
+          have := h ⟨(m.1, false), by simp⟩;
+          simp at hm;
+          contradiction;
+      simp at hm;
+      -/
+
+end cresswellModel.truthset
+
+lemma valid_H_on_cresswellModel : (cresswellModel) ⊧* 𝗛 := by sorry;
+
+lemma not_provable_atomic_Four : (Hilbert.KH ℕ) ⊬ (Axioms.Four (atom a)) := by
+  have := @Kripke.instSound_of_frameClass_definedBy_aux (Axioms.Four a) 𝗛 { F | F ⊧* 𝗛 } (by tauto);
+  apply not_imp_not.mpr this;
+  simp [ValidOnFrameClass];
+  use cresswellModel.toFrame;
+  constructor;
+  . intro φ;
     sorry;
-  . sorry;
+  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
+    use cresswellModel.Val, 2♯;
+    exact @not_satisfies_atomic_Four_on_cresswellModel a;
 
-
-end CresswellModel
-
-lemma _root_.LO.Modal.Standard.KH_not_Four : 𝐊𝐇 ⊬! Axioms.Four (atom a) := by
-  sorry;
-
-lemma _root_.LO.Modal.Standard.KH_not_Loeb : 𝐊𝐇 ⊬! Axioms.L (atom a) := by
+-- Incompleteness of KH
+theorem not_exists_complete_frameclass : ¬∃ C : FrameClass, ∀ φ : Formula ℕ, (Hilbert.KH ℕ) ⊢! φ ↔ C ⊧ φ := by
   by_contra hC;
-  have : System.HasAxiomL 𝐊𝐇 := ⟨by
-    intro p;
-    simpa [subst] using KH_deduct_substitution a p hC |>.some;
-  ⟩;
-  have : 𝐊𝐇 ⊢! Axioms.Four (atom a) := axiomFour!;
-  exact KH_not_Four a this;
+  obtain ⟨C, hC⟩ := hC;
+  have : C ⊧ Axioms.H (atom 0) := hC (Axioms.H (atom 0)) |>.mp axiomH!;
+  have : C ⊧ Axioms.Four (atom 0) := by
+    intro F hF;
+    exact Kripke.valid_atomic_Four_of_valid_atomic_H $ @this F hF;
+  have : Hilbert.KH ℕ ⊢! Axioms.Four (atom 0) := hC (Axioms.Four (atom 0)) |>.mpr this;
+  exact not_provable_atomic_Four this;
 
-end
+end Hilbert.KH.Kripke
 
-notation "Thm(" Λ:90 ")" => System.theory Λ
-
-/-- Set of frame that every theorems of `Λ` are valid on. -/
-abbrev TheoremsFrameClass (Λ : DeductionParameter α) : FrameClass.Dep α := { F : Frame | F# ⊧* Thm(Λ) }
-notation "𝔽(" Λ:90 ")" => TheoremsFrameClass Λ
-
-variable [Inhabited α]
-
-lemma KH_incompleteAux (𝔽 : FrameClass) (hFH : 𝔽# ⊧* (𝗛 : AxiomSet α)) : ∃ p : Formula α, (𝔽# ⊧ p ∧ 𝐊𝐇 ⊬! p) := by
-  by_contra hC;
-  push_neg at hC;
-  have := hC (Axioms.L (atom default)) ?h;
-  have := KH_not_Loeb (α := α) default;
-  contradiction;
-
-  intro F hF;
-  apply iff_valid_L_valid_H (default) |>.mpr;
-  simp at hFH;
-  exact hFH _ hF;
-
-theorem KH_incomplete : ∃ p : Formula α, 𝔽(𝐊𝐇) ⊧ p ∧ 𝐊𝐇 ⊬! p := by
-  obtain ⟨p, hs, hp⟩ := KH_incompleteAux (α := α) 𝔽(𝐊𝐇) $ by
-    simp;
-    intro p F hp;
-    exact Semantics.realizeSet_iff.mp hp (by simp [System.theory]);
-  use p;
-
-/--
-  Type class for _"`Λ` is incomplete for Kripke semantics"_
--/
-class Incomplete (Λ : DeductionParameter α) : Prop where
-  incomplete : ∃ p, 𝔽(Λ) ⊧ p ∧ Λ ⊬! p
-
-instance : Incomplete (α := α) 𝐊𝐇 := ⟨KH_incomplete⟩
-
-end Kripke
-
-end LO.Modal.Standard
+end LO.Modal

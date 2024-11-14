@@ -385,6 +385,8 @@ instance [System.Triv 𝓢] : System.KTc 𝓢 where
 
 protected class Ver extends System.K 𝓢, HasAxiomVer 𝓢
 
+protected class KH extends System.K 𝓢, HasAxiomH 𝓢
+
 protected class K4H extends System.K4 𝓢, HasAxiomH 𝓢
 
 protected class K4Loeb extends System.K4 𝓢, LoebRule 𝓢
@@ -897,6 +899,7 @@ instance : LoebRule 𝓢 where
 instance : System.K4Loeb 𝓢 where
 
 end K4Henkin
+
 
 
 section K4H
