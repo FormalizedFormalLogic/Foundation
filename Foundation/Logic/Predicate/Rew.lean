@@ -149,7 +149,7 @@ lemma eq_bind (ω : Rew L ξ₁ n₁ ξ₂ n₂) : ω = bind (ω ∘ bvar) (ω �
   ext t; induction t ;simp [Rew.func'']; simp [*]
 
 @[simp] lemma bind_eq_id_of_zero (f : Fin 0 → Semiterm L ξ₂ 0) : bind f fvar = Rew.id := by
-  ext x <;> simp; exact Fin.elim0 x
+  ext x <;> simp only [bind_bvar, bind_fvar, id_app]; exact Fin.elim0 x
 
 end bind
 
@@ -165,7 +165,7 @@ variable (b : Fin n₁ → Fin n₂) (e : ξ₁ → ξ₂)
 
 lemma map_inj {b : Fin n₁ → Fin n₂} {e : ξ₁ → ξ₂} (hb : Function.Injective b) (he : Function.Injective e) :
     Function.Injective $ map (L := L) b e
-  | #x,                    t => by cases t <;> simp[Rew.func]; intro h; exact hb h
+  | #x,                    t => by cases t <;> simp [Rew.func]; intro h; exact hb h
   | &x,                    t => by cases t <;> simp[Rew.func]; intro h; exact he h
   | func (arity := k) f v, t => by
     cases t <;> simp[*, Rew.func]
@@ -862,7 +862,7 @@ lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (φ : F 1) :
   simpa [←comp_smul] using smul_ext' (by ext x <;> simp[Rew.comp_app])
 
 @[simp] lemma free_substs_nil (φ : F 0) : free (φ/[]) = shift φ := by
-  simpa [←comp_smul] using smul_ext' (by { ext x <;> simp [Rew.comp_app]; { exact Fin.elim0 x } })
+  simpa [←comp_smul] using smul_ext' (by { ext x <;> simp only [comp_app, substs_fvar, free_fvar, shift_fvar]; { exact Fin.elim0 x } })
 
 def shiftEmb : F n ↪ F n where
   toFun := shift

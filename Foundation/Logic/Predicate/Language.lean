@@ -346,7 +346,7 @@ def ORing.embedding (L : Language) [ORing L] : ℒₒᵣ →ᵥ L where
     | 2, LT.lt => LT.lt
 end Language
 
-class Language.DecidableEq (L : Language) where
+protected class Language.DecidableEq (L : Language) where
   func : (k : ℕ) → DecidableEq (L.Func k)
   rel : (k : ℕ) → DecidableEq (L.Rel k)
 

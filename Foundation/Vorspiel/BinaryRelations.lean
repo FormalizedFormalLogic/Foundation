@@ -1,5 +1,4 @@
 import Foundation.Vorspiel.Vorspiel
-import Mathlib.Data.Finite.Basic
 
 
 section
