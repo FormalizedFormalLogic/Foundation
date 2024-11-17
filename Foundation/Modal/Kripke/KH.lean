@@ -9,9 +9,7 @@ abbrev Cofinite (s : Set α) := sᶜ.Finite
 
 lemma cofinite_compl : sᶜ.Cofinite ↔ s.Finite := by simp [Set.Cofinite];
 
-lemma comp_finite : s.Finite → sᶜ.Cofinite := by
-  intro h;
-  simpa [Set.Cofinite];
+lemma comp_finite : s.Finite → sᶜ.Cofinite := cofinite_compl.mpr
 
 end Set
 
@@ -71,6 +69,17 @@ lemma valid_atomic_L_iff_valid_atomic_H : F ⊧ Axioms.L (atom a) ↔ F ⊧ Axio
   . exact valid_atomic_H_of_valid_atomic_L;
   . exact valid_atomic_L_of_valid_atomic_H;
 
+lemma valid_atomic_4_of_valid_atomic_L (F_trans : Transitive F) : F ⊧ Axioms.L (atom a) → F ⊧ Axioms.Four (atom a) := by
+  intro h V x h₂ y Rxy z Ryz;
+  refine h₂ z ?_;
+  exact F_trans Rxy Ryz;
+
+lemma valid_atomic_4_of_valid_atomic_H (F_trans : Transitive F) : F ⊧ Axioms.H (atom a) → F ⊧ Axioms.Four (atom a) := by
+  intro h;
+  apply valid_atomic_4_of_valid_atomic_L;
+  . assumption;
+  . exact valid_atomic_L_of_valid_atomic_H h;
+
 lemma valid_on_frame_Four_of_L (h : F ⊧* 𝗟) : F ⊧* 𝟰 := by
   have trans := trans_of_L h;
   simp_all [Axioms.L, Axioms.Four];
@@ -97,48 +106,48 @@ namespace Hilbert.KH.Kripke
   - irreflexive in `♭`
 -/
 abbrev cresswellFrame : Kripke.Frame where
-  World := ℕ × Bool
+  World := ℕ × Fin 2
   Rel n m :=
     match n, m with
-    | (n, true), (m, true) => n ≤ m + 1
-    | (n, false), (m, false) => n > m
-    | (_, true), (_, false) => True
+    | (n, 0), (m, 0) => n ≤ m + 1
+    | (n, 1), (m, 1) => n > m
+    | (_, 0), (_, 1) => True
     | _, _ => False
 
 namespace cresswellFrame
 
-abbrev SharpWorld := { w : cresswellFrame.World // w.2 = true }
+abbrev Sharp := { w : cresswellFrame.World // w.2 = 0 }
 -- instance : LE cresswellFrame.SharpWorld := ⟨λ x y => x.1 ≤ y.1⟩
 
 @[match_pattern]
-abbrev sharp (n : ℕ) : SharpWorld := ⟨(n, true), rfl⟩
+abbrev sharp (n : ℕ) : Sharp := ⟨(n, 0), rfl⟩
 postfix:max "♯" => sharp
 
-lemma sharp_iff {n m : SharpWorld} : n.1 ≺ m.1 ↔ n.1.1 ≤ m.1.1 + 1 := by aesop;
+lemma sharp_iff {n m : Sharp} : n.1 ≺ m.1 ↔ n.1.1 ≤ m.1.1 + 1 := by aesop;
 
 @[simp]
-lemma sharp_refl {n : SharpWorld} : n.1 ≺ n.1 := by
+lemma sharp_refl {n : Sharp} : n.1 ≺ n.1 := by
   obtain ⟨⟨n, _⟩, ⟨_, rfl⟩⟩ := n;
   simp [Frame.Rel'];
 
 
-abbrev FlatWorld := { w : cresswellFrame.World // w.2 = false }
+abbrev Flat := { w : cresswellFrame.World // w.2 = 1 }
 -- instance : LE cresswellFrame.SharpWorld := ⟨λ x y => x.1 ≤ y.1⟩
 
 @[match_pattern]
-abbrev flat (n : ℕ) : FlatWorld := ⟨(n, false), rfl⟩
+abbrev flat (n : ℕ) : Flat := ⟨(n, 1), rfl⟩
 postfix:max "♭" => flat
 
-lemma flat_iff {n m : FlatWorld} : n.1 ≺ m.1 ↔ n.1.1 > m.1.1 := by aesop;
+lemma flat_iff {n m : Flat} : n.1 ≺ m.1 ↔ n.1.1 > m.1.1 := by aesop;
 
 @[simp]
-lemma flat_irrefl {n : FlatWorld} : ¬(n.1 ≺ n.1) := by
+lemma flat_irrefl {n : Flat} : ¬(n.1 ≺ n.1) := by
   obtain ⟨⟨n, _⟩, ⟨_, rfl⟩⟩ := n;
   simp [Frame.Rel'];
 
 
 @[simp]
-lemma bridge {n : SharpWorld} {m : FlatWorld} : n.1 ≺ m.1 := by
+lemma bridge {n : Sharp} {m : Flat} : n.1 ≺ m.1 := by
   obtain ⟨⟨n, _⟩, ⟨_, rfl⟩⟩ := n;
   obtain ⟨⟨m, _⟩, ⟨_, rfl⟩⟩ := m;
   simp [Frame.Rel'];
@@ -146,6 +155,18 @@ lemma bridge {n : SharpWorld} {m : FlatWorld} : n.1 ≺ m.1 := by
 -- @[simp] lemma cannot_back : ¬(n♭ ≺ m♯) := by simp [Frame.Rel'];
 
 -- lemma sharp_cresc (h : n ≤ m) : n♯ ≺ m♯ := by omega;
+
+lemma is_transitive : Transitive cresswellFrame.Rel := by
+  rintro x y z Rxy Ryz;
+  match x, y, z with
+  | x♯, y♯, z♯ => sorry;
+  | x♯, y♯, z♭ => simp;
+  | x♯, y♭, z♯ => trivial;
+  | x♯, y♭, z♭ => trivial;
+  | x♭, y♯, z♯ => trivial;
+  | x♭, y♯, z♭ => trivial;
+  | x♭, y♭, z♯ => trivial;
+  | x♭, y♭, z♭ => omega;
 
 end cresswellFrame
 
@@ -229,10 +250,10 @@ lemma either_finite_cofinite : (truthset φ).Finite ∨ (truthset φ).Cofinite :
       apply Set.Finite.inter_of_right;
       assumption;
   | hbox φ ihφ =>
-    by_cases h : ∃ n : cresswellFrame.FlatWorld, ¬Satisfies cresswellModel n φ;
+    by_cases h : ∃ n : cresswellFrame.Flat, ¬Satisfies cresswellModel n φ;
     . obtain ⟨n, h⟩ := h;
       -- ..., (n+2)♭, (n+1)♭ ∉ truthset φ.
-      have h₁ : ∀ m : cresswellFrame.FlatWorld, m.1 ≺ n → ¬Satisfies cresswellModel m (□φ) := by
+      have h₁ : ∀ m : cresswellFrame.Flat, m.1 ≺ n.1 → ¬Satisfies cresswellModel m (□φ) := by
         intro m hm;
         apply Satisfies.box_def.not.mpr; push_neg;
         use n;
@@ -240,7 +261,7 @@ lemma either_finite_cofinite : (truthset φ).Finite ∨ (truthset φ).Cofinite :
         . assumption;
         . exact h;
       -- 0♯, 1♯, ... ∉ truthset φ.
-      have h₂ : ∀ m : cresswellFrame.SharpWorld, ¬Satisfies cresswellModel m (□φ) := by
+      have h₂ : ∀ m : cresswellFrame.Sharp, ¬Satisfies cresswellModel m (□φ) := by
         intro m;
         apply Satisfies.box_def.not.mpr; push_neg;
         use n;
@@ -277,7 +298,26 @@ lemma either_finite_cofinite : (truthset φ).Finite ∨ (truthset φ).Cofinite :
 
 end cresswellModel.truthset
 
-lemma valid_H_on_cresswellModel : (cresswellModel) ⊧* 𝗛 := by sorry;
+lemma valid_H_on_cresswellModel : (cresswellModel) ⊧* 𝗛 := by
+  simp only [Semantics.RealizeSet.setOf_iff, ValidOnModel.iff_models, forall_exists_index, forall_apply_eq_imp_iff];
+  intro φ;
+  wlog h : ∃ w : cresswellModel.World, ¬Satisfies cresswellModel w φ;
+  . intro x _ y Rxy;
+    push_neg at h;
+    exact h y;
+  obtain ⟨w, h⟩ := h;
+  by_cases h : ∃ n, w = n♭;
+  . obtain ⟨n, h⟩ := h;
+    sorry;
+  . push_neg at h;
+    have : (cresswellModel.truthset φ).Infinite := by sorry
+    have : (cresswellModel.truthset φ).Cofinite := by
+      have := cresswellModel.truthset.either_finite_cofinite (φ := φ);
+      apply or_iff_not_imp_left.mp this;
+      apply Set.not_infinite.not.mp;
+      push_neg;
+      sorry;
+    sorry;
 
 lemma not_provable_atomic_Four : (Hilbert.KH ℕ) ⊬ (Axioms.Four (atom a)) := by
   have := @Kripke.instSound_of_frameClass_definedBy_aux (Axioms.Four a) 𝗛 { F | F ⊧* 𝗛 } (by tauto);
