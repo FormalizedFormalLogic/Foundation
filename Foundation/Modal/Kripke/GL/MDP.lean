@@ -1,5 +1,5 @@
 import Foundation.Modal.MDP
-import Foundation.Modal.Kripke.GL.Tree
+import Foundation.Modal.Kripke.GL.Unnec
 
 namespace LO.Modal.GL
 
@@ -28,7 +28,6 @@ abbrev MDPCounterexampleFrame (F₁ F₂ : FiniteTransitiveTree) : FiniteTransit
     | .inr _ => simp [Frame.Rel'];
   rel_assymetric := by
     intro x y hxy;
-    simp at x y;
     match x, y with
     | .inr (.inl x), .inr (.inl y) => apply F₁.rel_assymetric hxy;
     | .inr (.inr x), .inr (.inr y) => apply F₂.rel_assymetric hxy;
@@ -36,7 +35,6 @@ abbrev MDPCounterexampleFrame (F₁ F₂ : FiniteTransitiveTree) : FiniteTransit
     | .inl x, .inr y => simp;
   rel_transitive := by
     intro x y z hxy hyz;
-    simp at x y z;
     match x, y, z with
     | .inr (.inl x), .inr (.inl y), .inr (.inl z) => apply F₁.rel_transitive hxy hyz;
     | .inr (.inr x), .inr (.inr y), .inr (.inr z) => apply F₂.rel_transitive hxy hyz;
@@ -177,8 +175,7 @@ lemma MDP_Aux (h : (□''X) *⊢[(Hilbert.GL ℕ)]! □φ₁ ⋎ □φ₂) : (�
   };
 
 theorem modal_disjunctive (h : (Hilbert.GL ℕ) ⊢! □φ₁ ⋎ □φ₂) : (Hilbert.GL ℕ) ⊢! φ₁ ∨ (Hilbert.GL ℕ) ⊢! φ₂ := by
-  have := MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
-  simp at this;
+  have : ∅ *⊢[Hilbert.GL ℕ]! □φ₁ ∨ ∅ *⊢[Hilbert.GL ℕ]! □φ₂ := by simpa using MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
   rcases this with (h | h) <;> {
     have := unnec! $ Context.emptyPrf! h;
     tauto;
