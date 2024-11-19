@@ -13,10 +13,8 @@ open Modal.Kripke
 open Formula.Kripke
 
 lemma valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameClass (h : TransitiveIrreflexiveFiniteFrameClass ⊧ φ) : ∀ T : FiniteTransitiveTree, T.toFrame ⊧ φ := by
-  simp at h;
   intro T;
   apply @h T.toFrame;
-  simp [FiniteFrameClass.toFrameClass];
   use T.toFiniteFrame;
   refine ⟨⟨?_, ?_⟩, rfl⟩;
   . exact T.rel_transitive;
@@ -46,9 +44,9 @@ theorem provable_iff_satisfies_at_root_on_FiniteTransitiveTree : (Hilbert.GL ℕ
     apply valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree h hF;
 
 lemma unprovable_iff_exists_unsatisfies_at_root_on_FiniteTransitiveTree : (Hilbert.GL ℕ) ⊬ φ ↔ ∃ M : FiniteTransitiveTreeModel, ¬Satisfies M.toModel M.root φ := by
-  constructor;
-  . contrapose; simp; apply provable_iff_satisfies_at_root_on_FiniteTransitiveTree.mpr;
-  . contrapose; simp; apply provable_iff_satisfies_at_root_on_FiniteTransitiveTree.mp;
+  apply Iff.not_left;
+  push_neg;
+  exact provable_iff_satisfies_at_root_on_FiniteTransitiveTree;
 
 end Hilbert.GL.Kripke
 
@@ -65,18 +63,15 @@ def FiniteTransitiveTree.SimpleExtension (F : FiniteTransitiveTree) : Kripke.Fin
   root := .inl ()
   root_rooted := by
     intro w;
-    simp at w;
     match w with
     | .inl _ => simp;
     | .inr x => simp [Frame.Rel]
   rel_assymetric := by
-    simp_all;
     intro x y hxy;
     match x, y with
     | .inl x, _ => simp;
     | .inr x, .inr y => exact F.rel_assymetric hxy;
   rel_transitive := by
-    simp_all;
     intro x y z hxy hyz;
     match x, y, z with
     | .inl _, .inr _, .inr _ => simp;
@@ -102,7 +97,7 @@ def p_morphism : T.toFrame →ₚ (T↧.toFrame) where
   back {x y} h := by
     match y with
     | .inl r => simp [Frame.Rel', SimpleExtension] at h;
-    | .inr y => use y; simp; exact h;
+    | .inr y => use y; simpa using h;
 
 lemma through_original_root {x : T↧.World} (h : T↧.root ≺ x) : x = T.root ∨ (Sum.inr T.root ≺ x) := by
   match x with
@@ -135,68 +130,9 @@ instance : Coe (M.World) (M↧.World) := ⟨Sum.inr⟩
 def p_morphism : M.toModel →ₚ (M↧.toModel) := Model.PseudoEpimorphism.mkAtomic (FiniteTransitiveTree.SimpleExtension.p_morphism) $ by
   simp [FiniteTransitiveTree.SimpleExtension.p_morphism];
 
-lemma modal_equivalence_original_world {x : M.toModel.World} : ModalEquivalent (M₁ := M.toModel) (M₂ := (M↧).toModel) x x := by
+lemma modal_equivalence_original_world {x : M.toModel.World} : ModalEquivalent (M₁ := M.toModel) (M₂ := (M↧).toModel) x (Sum.inr x) := by
   apply Model.PseudoEpimorphism.modal_equivalence p_morphism;
 
 end FiniteTransitiveTreeModel.SimpleExtension
 
 end Kripke
-
-
-namespace Hilbert.GL
-
-open System
-open Formula.Kripke (Satisfies)
-open Kripke
-open Kripke.FiniteTransitiveTreeModel
-
-variable {φ ψ : Formula ℕ}
-
-/-
-  逆は以下を順に辿って構文論的に証明できる．
-  - `System.imply_boxdot_boxdot_of_imply_boxdot_plain`
-  - `System.imply_boxdot_axiomT_of_imply_boxdot_boxdot`
-  - `System.imply_box_box_of_imply_boxdot_axiomT`
--/
-lemma imply_boxdot_plain_of_imply_box_box : (Hilbert.GL ℕ) ⊢! □φ ➝ □ψ → (Hilbert.GL ℕ) ⊢! ⊡φ ➝ ψ := by
-  contrapose;
-  intro h;
-  have := Kripke.unprovable_iff_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mp h;
-  obtain ⟨M, hs⟩ := this;
-  have hs : Satisfies M.toModel M.root (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies, Semantics.Realize];
-  replace hs := @SimpleExtension.modal_equivalence_original_world M M.root (⊡φ ⋏ ∼ψ) |>.mp hs;
-
-  simp [Satisfies, Semantics.Realize] at hs;
-  have ⟨hs₁, hs₂, hs₃⟩ := hs;
-
-  have hbp : Satisfies M↧.toModel (M↧.root) (□φ) := by
-    intro x hx;
-    rcases @Kripke.FiniteTransitiveTree.SimpleExtension.through_original_root M.toFiniteTransitiveTree x hx with (rfl | hr);
-    . assumption;
-    . apply hs₂;
-      exact hr;
-  have hbq : ¬(Satisfies M↧.toModel (M↧.root) (□ψ)) := by
-    simp [Satisfies];
-    use M.root;
-    constructor;
-    . apply M↧.toRootedFrame.root_rooted M.root;
-      simp [SimpleExtension, Kripke.FiniteTransitiveTree.SimpleExtension]; -- TODO: extract lemma
-    . assumption;
-
-  apply Kripke.unprovable_iff_exists_unsatisfies_at_root_on_FiniteTransitiveTree.mpr;
-  use M↧;
-  exact _root_.not_imp.mpr ⟨hbp, hbq⟩;
-
-theorem unnecessitation! : (Hilbert.GL ℕ) ⊢! □φ → (Hilbert.GL ℕ) ⊢! φ := by
-  intro h;
-  have : (Hilbert.GL ℕ) ⊢! □⊤ ➝ □φ := imply₁'! (ψ := □⊤) h;
-  have : (Hilbert.GL ℕ) ⊢! ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
-  exact this ⨀ boxdotverum!;
-
-noncomputable instance : System.Unnecessitation (Hilbert.GL ℕ) where
-  unnec := λ h => Hilbert.GL.unnecessitation! ⟨h⟩ |>.some
-
-end Hilbert.GL
-
-
-end LO.Modal

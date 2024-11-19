@@ -92,10 +92,8 @@ variable {M : Kripke.Model} {x : M.World} {φ ψ : Formula ℕ}
 @[simp] lemma atom_def : x ⊧ atom a ↔ M x a := by simp [Satisfies];
 
 lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
-instance : Semantics.Top (M.World) := ⟨λ _ => top_def⟩
 
 lemma bot_def : ¬(x ⊧ ⊥) := by simp [Satisfies];
-instance : Semantics.Bot (M.World) := ⟨λ _ => bot_def⟩
 
 lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺ y → y ⊧ φ := by simp [Kripke.Satisfies];
 
@@ -104,22 +102,24 @@ lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Kripke.S
 lemma not_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by
   induction φ using Formula.rec' generalizing x with
   | _ => simp_all [Satisfies];
-instance : Semantics.Not (M.World) := ⟨not_def⟩
 
 lemma imp_def : x ⊧ φ ➝ ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;
-instance : Semantics.Imp (M.World) := ⟨imp_def⟩
 
 lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies]; tauto;
-instance : Semantics.Or (M.World) := ⟨or_def⟩
 
 lemma and_def : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies];
-instance : Semantics.And (M.World) := ⟨and_def⟩
 
 lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by
   simp [Satisfies];
   tauto;
 
 protected instance : Semantics.Tarski (M.World) where
+  realize_top := λ _ => top_def;
+  realize_bot := λ _ => bot_def;
+  realize_imp := imp_def;
+  realize_not := not_def;
+  realize_or := or_def;
+  realize_and := and_def;
 
 lemma negneg_def : x ⊧ ∼∼φ ↔ x ⊧ φ := by simp [Satisfies];
 
@@ -128,15 +128,14 @@ lemma multibox_def : x ⊧ □^[n]φ ↔ ∀ {y}, x ≺^[n] y → y ⊧ φ := by
   | zero => aesop;
   | succ n ih =>
     constructor;
-    . intro h y Rxy;
-      simp [Kripke.Satisfies] at h;
-      obtain ⟨u, Rxu, Ruy⟩ := Rxy;
-      exact (ih.mp $ h _ Rxu) Ruy;
-    . simp;
+    . rintro h y ⟨z, Rxz, Rzy⟩;
+      replace h : ∀ y, x ≺ y → y ⊧ □^[n]φ := box_def.mp $ by simpa using h;
+      exact (ih.mp $ h _ Rxz) Rzy;
+    . suffices (∀ {y z}, x ≺ z → z ≺^[n] y → Satisfies M y φ) → x ⊧ (□□^[n]φ) by simpa;
       intro h y Rxy;
       apply ih.mpr;
-      intro u Ryu;
-      exact h _ Rxy Ryu;
+      intro z Ryz;
+      exact h Rxy Ryz;
 
 lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
   induction n generalizing x with
@@ -145,20 +144,18 @@ lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
     constructor;
     . intro h;
       replace h : x ⊧ (◇◇^[n]φ) := by simpa using h;
-      obtain ⟨v, hwv, hv⟩ := dia_def.mp h;
-      obtain ⟨x, hvx, hx⟩ := ih.mp hv;
+      obtain ⟨y, Rxy, hv⟩ := dia_def.mp h;
+      obtain ⟨x, Ryx, hx⟩ := ih.mp hv;
       use x;
       constructor;
-      . use v;
+      . use y;
       . assumption;
-    . intro h;
-      obtain ⟨y, Rxy, hy⟩ := h;
-      obtain ⟨u, Rxu, Ruy⟩ := Rxy;
-      simp;
+    . rintro ⟨y, ⟨z, Rxz, Rzy⟩, hy⟩;
+      suffices x ⊧ ◇◇^[n]φ by simpa;
       apply dia_def.mpr;
-      use u;
+      use z;
       constructor;
-      . exact Rxu;
+      . assumption;
       . apply ih.mpr;
         use y;
 

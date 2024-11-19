@@ -18,12 +18,11 @@ abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.FiniteFrame where
     (∀ ψ ∈ □''⁻¹φ.subformulae, □ψ ∈ X.formulae → (ψ ∈ Y.formulae ∧ □ψ ∈ Y.formulae)) ∧
     (∃ χ ∈ □''⁻¹φ.subformulae, □χ ∉ X.formulae ∧ □χ ∈ Y.formulae)
 
-namespace GLCompleteFrame
+namespace miniCanonicalFrame
 
-lemma irreflexive : Irreflexive (miniCanonicalFrame φ).Rel := by simp [Irreflexive];
+lemma is_irreflexive : Irreflexive (miniCanonicalFrame φ).Rel := by simp [Irreflexive];
 
-lemma transitive : Transitive (miniCanonicalFrame φ).Rel := by
-  simp;
+lemma is_transitive : Transitive (miniCanonicalFrame φ).Rel := by
   rintro X Y Z ⟨RXY, ⟨χ, _, _, _⟩⟩ ⟨RYZ, _⟩;
   constructor;
   . rintro ψ hq₁ hq₂;
@@ -32,7 +31,7 @@ lemma transitive : Transitive (miniCanonicalFrame φ).Rel := by
     refine ⟨by assumption, by assumption, ?_⟩;
     exact RYZ χ (by assumption) (by assumption) |>.2;
 
-end GLCompleteFrame
+end miniCanonicalFrame
 
 
 abbrev miniCanonicalModel (φ : Formula ℕ) : Kripke.Model where
@@ -43,9 +42,8 @@ abbrev miniCanonicalModel (φ : Formula ℕ) : Kripke.Model where
 lemma truthlemma.lemma1
   {X : CCF (Hilbert.GL ℕ) φ.subformulae} (hq : □ψ ∈ φ.subformulae)
   : ((X.formulae.prebox ∪ X.formulae.prebox.box) ∪ {□ψ, -ψ}) ⊆ φ.subformulae⁻ := by
-  simp only [Formulae.complementary];
   intro χ hr;
-  simp [Finset.mem_union] at hr;
+  replace hr : χ = □ψ ∨ □χ ∈ X.formulae ∨ (∃ a, □a ∈ X.formulae ∧ □a = χ) ∨ χ = -ψ := by simpa using hr;
   rcases hr with (rfl | hp | ⟨χ, hr, rfl⟩ | rfl);
   . apply Finset.mem_union.mpr;
     tauto;
@@ -56,11 +54,12 @@ lemma truthlemma.lemma1
     exact subformulae.mem_box this;
   . exact X.closed.subset hr;
   . apply Finset.mem_union.mpr;
-    right; simp;
+    right;
+    apply Finset.mem_image.mpr;
     use ψ;
     constructor;
     . exact subformulae.mem_box hq;
-    . rfl;
+    . tauto;
 
 lemma truthlemma.lemma2
   {X : CCF (Hilbert.GL ℕ) φ.subformulae} (hq₁ : □ψ ∈ φ.subformulae) (hq₂ : □ψ ∉ X.formulae)
@@ -90,16 +89,13 @@ lemma truthlemma.lemma2
   have : (□'Γ₁) ⊢[_]! □ψ := axiomL! ⨀ this;
   have : _ ⊢! ⋀□'Γ₁ ➝ □ψ := provable_iff.mp this;
   have : _ ⊢! ⋀□'(X.formulae.prebox ∪ X.formulae.prebox.box |>.toList) ➝ □ψ := imp_trans''! (conjconj_subset! (by
-    simp;
+    suffices ∀ χ ∈ Γ₁, □χ ∈ X.formulae ∨ ∃ χ', □χ' ∈ X.formulae ∧ □χ' = χ by simpa;
     intro χ hr;
-    have := hΓ₁ _ hr; simp at this;
-    tauto;
+    simpa using hΓ₁ _ hr;
   )) this;
   have : _ ⊢! ⋀□'(X.formulae.prebox.toList) ➝ □ψ := imp_trans''! (conjconj_provable! (by
-    intro ψ hq;
-    simp at hq;
-    obtain ⟨χ, hr, rfl⟩ := hq;
-    rcases hr with (hr | ⟨χ, hr, rfl⟩);
+    suffices ∀ χ, (□χ ∈ X.formulae ∨ ∃ χ', □χ' ∈ X.formulae ∧ □χ' = χ) → (□'^[1](Finset.premultibox 1 X.formulae).toList) ⊢[Hilbert.GL ℕ]! □χ by simpa;
+    rintro χ (hχ | ⟨χ, hχ, rfl⟩);
     . apply FiniteContext.by_axm!;
       simpa;
     . apply axiomFour'!;
@@ -124,7 +120,8 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
     constructor;
     . contrapose;
       intro h;
-      simp [Satisfies];
+      apply Satisfies.imp_def.not.mpr;
+      push_neg;
       constructor;
       . apply ihq (subformulae.mem_imp₁ q_sub) |>.mpr;
         exact iff_not_mem_imp q_sub (subformulae.mem_imp₁ q_sub) (subformulae.mem_imp₂ q_sub) |>.mp h |>.1;
@@ -132,10 +129,11 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
         have := iff_not_mem_imp q_sub (subformulae.mem_imp₁ q_sub) (subformulae.mem_imp₂ q_sub) |>.mp h |>.2;
         exact iff_mem_compl (subformulae.mem_imp₂ q_sub) |>.not.mpr (by simpa using this);
     . contrapose;
-      intro h; simp [Satisfies] at h;
+      intro h;
+      replace h := Satisfies.imp_def.not.mp h; push_neg at h;
       obtain ⟨hq, hr⟩ := h;
-      replace hq := ihq (subformulae.mem_imp₁ q_sub) |>.mp hq;
-      replace hr := ihr (subformulae.mem_imp₂ q_sub) |>.not.mp hr;
+      replace hq : ψ ∈ X.formulae := ihq (subformulae.mem_imp₁ q_sub) |>.mp hq;
+      replace hr : χ ∉ X.formulae := ihr (subformulae.mem_imp₂ q_sub) |>.not.mp hr;
       apply iff_not_mem_imp q_sub (subformulae.mem_imp₁ q_sub) (subformulae.mem_imp₂ q_sub) |>.mpr;
       constructor;
       . assumption;
@@ -146,21 +144,21 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       intro h;
       obtain ⟨Y, hY₁⟩ := lindenbaum (S := φ.subformulae) (truthlemma.lemma1 q_sub) (truthlemma.lemma2 q_sub h);
       simp only [Finset.union_subset_iff] at hY₁;
-      simp [Satisfies, Kripke.Frame.Rel'];
+      apply Satisfies.box_def.not.mpr;
+      push_neg;
       use Y;
       constructor;
-      . intro χ _ hr_sub;
-        constructor;
-        . apply hY₁.1.1; simpa;
-        . apply hY₁.1.2; simpa;
-      . use ψ;
-        refine ⟨q_sub, h, ?_, ?_⟩;
-        . apply hY₁.2; simp;
-        . apply ih (subformulae.mem_box q_sub) |>.not.mpr;
-          exact iff_mem_compl (subformulae.mem_box q_sub) |>.not.mpr $ by simp; apply hY₁.2; simp;
+      . constructor;
+        . aesop;
+        . aesop;
+      . apply ih ?_ |>.not.mpr;
+        . apply iff_mem_compl (subformulae.mem_box q_sub) |>.not.mpr;
+          push_neg;
+          apply hY₁.2;
+          simp;
+        . exact subformulae.mem_box q_sub;
     . intro h Y RXY;
       apply ih (subformulae.mem_box q_sub) |>.mpr;
-      simp at RXY;
       refine RXY.1 ψ ?_ h |>.1;
       assumption;
 
@@ -173,18 +171,20 @@ instance complete : Complete (Hilbert.GL ℕ) TransitiveIrreflexiveFiniteFrameCl
   apply notValidOnFiniteFrameClass_of_exists_finite_frame;
   use (miniCanonicalFrame φ);
   constructor;
-  . exact ⟨GLCompleteFrame.transitive, GLCompleteFrame.irreflexive⟩;
-  . simp [Formula.Kripke.ValidOnFrame, Formula.Kripke.ValidOnModel];
+  . exact ⟨miniCanonicalFrame.is_transitive, miniCanonicalFrame.is_irreflexive⟩;
+  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
     obtain ⟨X, hX₁⟩ := lindenbaum (S := φ.subformulae) (X := {-φ})
       (by
-        simp [Formulae.complementary];
-        right; use φ; constructor <;> simp;
+        simp only [Formulae.complementary, Finset.singleton_subset_iff, Finset.mem_union, Finset.mem_image];
+        right;
+        use φ;
+        constructor <;> simp;
       )
       (Formulae.unprovable_iff_singleton_compl_consistent.mp h);
     use (miniCanonicalModel φ).Val, X;
     apply truthlemma (by simp) |>.not.mpr;
     exact iff_mem_compl (by simp) |>.not.mpr $ by
-      simp;
+      push_neg;
       apply hX₁;
       tauto;
 ⟩
