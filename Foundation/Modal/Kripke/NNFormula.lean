@@ -100,7 +100,128 @@ protected instance : Semantics.Tarski (M.World) where
 end Satisfies
 
 
+def ValidOnModel (M : Kripke.Model) := λ φ => ∀ x, Satisfies M x φ
+
+namespace ValidOnModel
+
+instance semantics : Semantics (NNFormula ℕ) (Kripke.Model) := ⟨λ M ↦ ValidOnModel M⟩
+
+@[simp] protected lemma iff_models : M ⊧ φ ↔ ValidOnModel M φ := iff_of_eq rfl
+
+end ValidOnModel
+
+
+def ValidOnFrame (F : Kripke.Frame) := λ φ => ∀ V, (⟨F, V⟩ : Kripke.Model) ⊧ φ
+
+namespace ValidOnFrame
+
+instance semantics : Semantics (NNFormula ℕ) (Kripke.Frame) := ⟨λ F ↦ ValidOnFrame F⟩
+
+@[simp] protected lemma iff_models : F ⊧ φ ↔ ValidOnFrame F φ := iff_of_eq rfl
+
+end ValidOnFrame
+
+
+def ValidOnFrameClass (C : Kripke.FrameClass) := λ φ => ∀ F, F ∈ C → ValidOnFrame F φ
+
+namespace ValidOnFrameClass
+
+instance semantics : Semantics (NNFormula ℕ) (Kripke.FrameClass) := ⟨λ C ↦ ValidOnFrameClass C⟩
+
+@[simp] protected lemma iff_models : C ⊧ φ ↔ ValidOnFrameClass C φ := iff_of_eq rfl
+
+end ValidOnFrameClass
 
 end NNFormula.Kripke
+
+
+namespace NNFormula.Kripke
+
+lemma Satisfies.toFormula {φ : NNFormula ℕ} : NNFormula.Kripke.Satisfies M x φ ↔ Formula.Kripke.Satisfies M x φ.toFormula := by
+  induction φ using NNFormula.rec' generalizing x with
+  | hOr φ ψ ihφ ihψ =>
+    constructor;
+    . rintro (hφ | hψ);
+      . apply Formula.Kripke.Satisfies.or_def.mpr;
+        left;
+        exact ihφ.mp hφ;
+      . apply Formula.Kripke.Satisfies.or_def.mpr;
+        right;
+        exact ihψ.mp hψ;
+    . rintro h;
+      rcases Formula.Kripke.Satisfies.or_def.mp h with (hφ | hψ);
+      . left; exact ihφ.mpr hφ;
+      . right; exact ihψ.mpr hψ;
+  | hAnd φ ψ ihφ ihψ =>
+    constructor;
+    . rintro ⟨hφ, hψ⟩;
+      apply Formula.Kripke.Satisfies.and_def.mpr;
+      constructor;
+      . exact ihφ.mp hφ;
+      . exact ihψ.mp hψ;
+    . rintro h;
+      replace ⟨hφ, hψ⟩ := Formula.Kripke.Satisfies.and_def.mp h;
+      constructor;
+      . apply ihφ.mpr hφ;
+      . apply ihψ.mpr hψ;
+  | hBox φ ihφ =>
+    constructor;
+    . intro h y Rxy;
+      apply ihφ.mp;
+      exact h y Rxy;
+    . intro h y Rxy;
+      apply ihφ.mpr;
+      exact h y Rxy;
+  | hDia φ ihφ =>
+    constructor;
+    . rintro ⟨y, Rxy, hy⟩;
+      apply Formula.Kripke.Satisfies.dia_def.mpr;
+      use y;
+      constructor;
+      . exact Rxy;
+      . apply ihφ.mp;
+        exact hy;
+    . rintro h;
+      obtain ⟨y, Rxy, hy⟩ := Formula.Kripke.Satisfies.dia_def.mp h;
+      use y;
+      constructor;
+      . exact Rxy;
+      . apply ihφ.mpr;
+        exact hy;
+  | _ => simp [NNFormula.Kripke.Satisfies, Formula.Kripke.Satisfies];
+
+end NNFormula.Kripke
+
+
+namespace Formula.Kripke
+
+lemma Satisfies.toNNFormula {φ : Formula ℕ} : Formula.Kripke.Satisfies M x φ ↔ NNFormula.Kripke.Satisfies M x φ.toNNFormula := by
+  induction φ using Formula.rec' generalizing x with
+  | hbox φ ihφ =>
+    constructor;
+    . intro h y Rxy;
+      apply ihφ.mp;
+      exact h y Rxy;
+    . intro h y Rxy;
+      apply ihφ.mpr;
+      exact h y Rxy;
+  | himp φ ψ ihφ ihψ =>
+    constructor;
+    . rintro h;
+      apply NNFormula.Kripke.Satisfies.imp_def.mpr;
+      intro hφ;
+      apply ihψ.mp;
+      apply h;
+      apply ihφ.mpr;
+      exact hφ;
+    . intro h hφ;
+      apply ihψ.mpr;
+      apply NNFormula.Kripke.Satisfies.imp_def.mp h;
+      apply ihφ.mp;
+      exact hφ;
+  | _ => simp [Formula.Kripke.Satisfies, NNFormula.Kripke.Satisfies];
+
+end Formula.Kripke
+
 
 end LO.Modal
