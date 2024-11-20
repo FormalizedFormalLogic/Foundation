@@ -532,6 +532,7 @@ instance : (Hilbert.GL α).axioms.SubstClosed := inferInstance
 
 instance : (Hilbert.Grz α).axioms.SubstClosed := inferInstance
 
+instance : (Hilbert.KH α).axioms.SubstClosed := inferInstance
 
 end
 
