@@ -122,7 +122,7 @@ instance semantics : Semantics (NNFormula ℕ) (Kripke.Frame) := ⟨λ F ↦ Val
 end ValidOnFrame
 
 
-def ValidOnFrameClass (C : Kripke.FrameClass) := λ φ => ∀ F, F ∈ C → ValidOnFrame F φ
+def ValidOnFrameClass (C : Kripke.FrameClass) := λ φ => ∀ {F}, F ∈ C → ValidOnFrame F φ
 
 namespace ValidOnFrameClass
 
@@ -137,7 +137,9 @@ end NNFormula.Kripke
 
 namespace NNFormula.Kripke
 
-lemma Satisfies.toFormula {φ : NNFormula ℕ} : NNFormula.Kripke.Satisfies M x φ ↔ Formula.Kripke.Satisfies M x φ.toFormula := by
+variable {φ : NNFormula ℕ}
+
+lemma Satisfies.toFormula : NNFormula.Kripke.Satisfies M x φ ↔ Formula.Kripke.Satisfies M x φ.toFormula := by
   induction φ using NNFormula.rec' generalizing x with
   | hOr φ ψ ihφ ihψ =>
     constructor;
@@ -190,12 +192,28 @@ lemma Satisfies.toFormula {φ : NNFormula ℕ} : NNFormula.Kripke.Satisfies M x 
         exact hy;
   | _ => simp [NNFormula.Kripke.Satisfies, Formula.Kripke.Satisfies];
 
+lemma ValidOnModel.toFormula : NNFormula.Kripke.ValidOnModel M φ ↔ Formula.Kripke.ValidOnModel M φ.toFormula := by
+  simp only [NNFormula.Kripke.ValidOnModel, Formula.Kripke.ValidOnModel, Satisfies.toFormula];
+  exact ⟨λ h x => h x, λ h x => h x⟩;
+
+lemma ValidOnFrame.toFormula : NNFormula.Kripke.ValidOnFrame F φ ↔ Formula.Kripke.ValidOnFrame F φ.toFormula := ⟨
+  λ h V => ValidOnModel.toFormula.mp (h V),
+  λ h V => ValidOnModel.toFormula.mpr (h V)
+⟩
+
+lemma ValidOnFrameClass.toFormula : NNFormula.Kripke.ValidOnFrameClass C φ ↔ Formula.Kripke.ValidOnFrameClass C φ.toFormula := ⟨
+  λ h _ hF => ValidOnFrame.toFormula.mp (h hF),
+  λ h _ hF => ValidOnFrame.toFormula.mpr (h hF)
+⟩
+
 end NNFormula.Kripke
 
 
 namespace Formula.Kripke
 
-lemma Satisfies.toNNFormula {φ : Formula ℕ} : Formula.Kripke.Satisfies M x φ ↔ NNFormula.Kripke.Satisfies M x φ.toNNFormula := by
+variable {φ : Formula ℕ}
+
+lemma Satisfies.toNNFormula : Formula.Kripke.Satisfies M x φ ↔ NNFormula.Kripke.Satisfies M x φ.toNNFormula := by
   induction φ using Formula.rec' generalizing x with
   | hbox φ ihφ =>
     constructor;
@@ -220,6 +238,21 @@ lemma Satisfies.toNNFormula {φ : Formula ℕ} : Formula.Kripke.Satisfies M x φ
       apply ihφ.mp;
       exact hφ;
   | _ => simp [Formula.Kripke.Satisfies, NNFormula.Kripke.Satisfies];
+
+lemma ValidOnModel.toNNFormula : Formula.Kripke.ValidOnModel M φ ↔ NNFormula.Kripke.ValidOnModel M φ.toNNFormula := ⟨
+  fun h x => Satisfies.toNNFormula.mp (h x),
+  fun h x => Satisfies.toNNFormula.mpr (h x)
+⟩
+
+lemma ValidOnFrame.toNNFormula : Formula.Kripke.ValidOnFrame F φ ↔ NNFormula.Kripke.ValidOnFrame F φ.toNNFormula := ⟨
+  fun h V => ValidOnModel.toNNFormula.mp (h V),
+  fun h V => ValidOnModel.toNNFormula.mpr (h V)
+⟩
+
+lemma ValidOnFrameClass.toNNFormula : Formula.Kripke.ValidOnFrameClass C φ ↔ NNFormula.Kripke.ValidOnFrameClass C φ.toNNFormula := ⟨
+  fun h _ hF => ValidOnFrame.toNNFormula.mp (h hF),
+  fun h _ hF => ValidOnFrame.toNNFormula.mpr (h hF)
+⟩
 
 end Formula.Kripke
 
