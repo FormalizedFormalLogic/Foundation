@@ -29,7 +29,7 @@ def neg : NNFormula α → NNFormula α
   | box φ   => dia (neg φ)
   | dia φ   => box (neg φ)
 
-abbrev imp (φ ψ : NNFormula α) : NNFormula α := or (neg φ) ψ
+def imp (φ ψ : NNFormula α) : NNFormula α := or (neg φ) ψ
 
 instance : BasicModalLogicalConnective (NNFormula α) where
   tilde := neg
@@ -47,15 +47,17 @@ lemma and_eq : and φ ψ = φ ⋏ ψ := rfl
 
 lemma imp_eq : imp φ ψ = φ ➝ ψ := rfl
 
-lemma neg_eq : neg φ = ∼φ := rfl
-
 lemma box_eq : box φ = □φ := rfl
 
 lemma dia_eq : dia φ = ◇φ := rfl
 
-lemma iff_eq : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := rfl
+@[simp] lemma imp_eq' : φ ➝ ψ = ∼φ ⋎ ψ := rfl
+
+@[simp] lemma iff_eq : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := rfl
 
 lemma falsum_eq : (falsum : NNFormula α) = ⊥ := rfl
+
+lemma verum_eq : (verum : NNFormula α) = ⊤ := rfl
 
 @[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Wedge.wedge]
 
@@ -65,6 +67,33 @@ lemma falsum_eq : (falsum : NNFormula α) = ⊥ := rfl
 
 @[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
 
+lemma neg_eq : neg φ = ∼φ := rfl
+
+lemma negneg : ∼∼φ = φ := by
+  induction φ with
+  | and φ ψ ihφ ihψ =>
+    simp only [←neg_eq, neg, and.injEq];
+    exact ⟨ihφ, ihψ⟩;
+  | or φ ψ ihφ ihψ =>
+    simp only [←neg_eq, neg, or.injEq];
+    exact ⟨ihφ, ihψ⟩;
+  | box φ ihφ =>
+    simp only [←neg_eq, neg, box.injEq];
+    exact ihφ;
+  | dia φ ihφ =>
+    simp only [←neg_eq, neg, dia.injEq];
+    exact ihφ;
+  | _ => tauto;
+
+instance : ModalDeMorgan (NNFormula α) where
+  verum := by tauto;
+  falsum := by tauto;
+  and := by tauto;
+  or := by tauto;
+  box := by tauto;
+  dia := by tauto;
+  neg := λ _ => negneg
+  imply := by tauto;
 
 section toString
 
