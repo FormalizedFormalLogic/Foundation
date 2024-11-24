@@ -548,7 +548,7 @@ def construction : VecRec.Construction V blueprint where
   nil _ := 0
   cons _ _ _ ih := ih + 1
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by intro v; simp [blueprint]; rfl
+  cons_defined := by intro v; simp [blueprint]
 
 end Len
 
@@ -680,7 +680,7 @@ def construction : VecRec.Construction V blueprint where
   nil _ := 0
   cons _ x _ ih := max x ih
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by intro v; simp [blueprint]; rfl
+  cons_defined := by intro v; simp [blueprint]
 
 end ListMax
 
@@ -857,7 +857,7 @@ def construction : VecRec.Construction V blueprint where
   cons (_ x _ ih) := x ∷ ih
   nil_defined := by intro v; simp [blueprint]
   cons_defined := by
-    intro v; simp [blueprint, Fin.isValue]; rfl
+    intro v; simp [blueprint, Fin.isValue]
 
 end Concat
 
@@ -1020,7 +1020,7 @@ def repeatVec.construction : PR.Construction V repeatVec.blueprint where
   zero := fun _ ↦ 0
   succ := fun x _ ih ↦ x 0 ∷ ih
   zero_defined := by intro v; simp [blueprint]
-  succ_defined := by intro v; simp [blueprint]; rfl
+  succ_defined := by intro v; simp [blueprint]
 
 /-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0`-/
 def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k
@@ -1084,7 +1084,7 @@ def construction : VecRec.Construction V blueprint where
   nil _ := ∅
   cons (_ x _ ih) := insert x ih
   nil_defined := by intro v; simp [blueprint, emptyset_def]
-  cons_defined := by intro v; simp [blueprint]; rfl
+  cons_defined := by intro v; simp [blueprint]
 
 end VecToSet
 
