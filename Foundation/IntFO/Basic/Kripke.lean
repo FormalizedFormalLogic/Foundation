@@ -101,7 +101,7 @@ lemma wire_val (t : Semiterm L ξ n) {v : 𝓚} (hwv : w ≺ v) :
   induction t <;> simp [Semiterm.val_func, wire_func, *]
 
 @[simp] lemma val_rew {bv : Fin n₂ → Domain w} {fv : ξ₂ → Domain w} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
-    w ⊩[bv|fv] (ω • φ) ↔
+    w ⊩[bv|fv] (ω ▹ φ) ↔
     w ⊩[fun x ↦ (ω #x).val (Domain w).struc bv fv|fun x ↦ (ω &x).val (Domain w).struc bv fv] φ := by
   induction φ using Semiformulaᵢ.rec' generalizing n₂ w
   case hRel k R t =>

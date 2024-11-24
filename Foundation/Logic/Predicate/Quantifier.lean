@@ -44,7 +44,7 @@ def alt : Polarity → Polarity
 
 end Polarity
 
-inductive SigmaPiDelta := | sigma | pi | delta
+inductive SigmaPiDelta where | sigma | pi | delta
 
 namespace SigmaPiDelta
 
@@ -81,8 +81,6 @@ end SigmaPiDelta
 @[notation_class] class ExQuantifier (α : ℕ → Type*) where
   ex : ∀ {n}, α (n + 1) → α n
 
-class Quantifier (α : ℕ → Type*) extends UnivQuantifier α, ExQuantifier α
-
 prefix:64 "∀' " => UnivQuantifier.univ
 
 prefix:64 "∃' " => ExQuantifier.ex
@@ -90,6 +88,17 @@ prefix:64 "∃' " => ExQuantifier.ex
 attribute [match_pattern]
   UnivQuantifier.univ
   ExQuantifier.ex
+
+class Quantifier (α : ℕ → Type*) extends UnivQuantifier α, ExQuantifier α
+
+/-- Logical Connectives with Quantifiers. -/
+class LCWQ (α : ℕ → Type*) extends Quantifier α where
+  connectives : (n : ℕ) → LogicalConnective (α n)
+
+instance (α : ℕ → Type*) [LCWQ α] (n : ℕ) : LogicalConnective (α n) := LCWQ.connectives n
+
+instance (α : ℕ → Type*) [Quantifier α] [(n : ℕ) → LogicalConnective (α n)] : LCWQ α where
+  connectives := inferInstance
 
 section
 
@@ -163,11 +172,11 @@ end ExQuantifier
 
 section quantifier
 
-variable {α : ℕ → Type*} [(i : ℕ) → LogicalConnective (α i)] [UnivQuantifier α] [ExQuantifier α]
+variable {α : ℕ → Type*}
 
-def ball (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀' (φ ➝ ψ)
+def ball [UnivQuantifier α] [Arrow (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∀' (φ ➝ ψ)
 
-def bex (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃' (φ ⋏ ψ)
+def bex [ExQuantifier α] [Wedge (α (n + 1))] (φ : α (n + 1)) (ψ : α (n + 1)) : α n := ∃' (φ ⋏ ψ)
 
 notation:64 "∀[" φ "] " ψ => ball φ ψ
 

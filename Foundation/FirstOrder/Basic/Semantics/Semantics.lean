@@ -337,13 +337,13 @@ section rew
 variable {ε : ξ → M} {ε₂ : ξ₂ → M}
 
 lemma eval_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) :
-    Eval s e₂ ε₂ (ω • φ) ↔ Eval s (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.bvar) (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.fvar) φ := by
+    Eval s e₂ ε₂ (ω ▹ φ) ↔ Eval s (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.bvar) (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.fvar) φ := by
   induction φ using rec' generalizing n₂ <;> simp [*, Semiterm.val_rew, eval_rel, eval_nrel, rew_rel, rew_nrel]
   case hall => simp [Function.comp_def]; exact iff_of_eq <| forall_congr fun x ↦ by congr; funext i; cases i using Fin.cases <;> simp
   case hex => simp [Function.comp_def]; exact exists_congr fun x ↦ iff_of_eq $ by congr; funext i; cases i using Fin.cases <;> simp
 
 lemma eval_rew_q {ε₂ : ξ₂ → M} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ (n₁ + 1)) :
-    Eval s (x :> e₂) ε₂ (ω.q • φ) ↔
+    Eval s (x :> e₂) ε₂ (ω.q ▹ φ) ↔
     Eval s
       (x :> Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.bvar)
       (Semiterm.val s e₂ ε₂ ∘ ω ∘ Semiterm.fvar) φ := by
@@ -353,27 +353,27 @@ lemma eval_rew_q {ε₂ : ξ₂ → M} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : 
     cases x using Fin.cases <;> simp
 
 lemma eval_map (b : Fin n₁ → Fin n₂) (f : ξ₁ → ξ₂) (e : Fin n₂ → M) (ε : ξ₂ → M) (φ : Semiformula L ξ₁ n₁) :
-    Eval s e ε ((Rew.map (L := L) b f) • φ) ↔ Eval s (e ∘ b) (ε ∘ f) φ := by
+    Eval s e ε ((Rew.map (L := L) b f) ▹ φ) ↔ Eval s (e ∘ b) (ε ∘ f) φ := by
   simp [eval_rew, Function.comp_def]
 
 lemma eval_rewrite (f : ξ₁ → Semiterm L ξ₂ n) (φ : Semiformula L ξ₁ n) :
-    Eval s e ε₂ (Rew.rewrite f • φ) ↔ Eval s e (fun x ↦ (f x).val s e ε₂) φ := by
+    Eval s e ε₂ (Rew.rewrite f ▹ φ) ↔ Eval s e (fun x ↦ (f x).val s e ε₂) φ := by
   simp [eval_rew, Function.comp_def]
 
 lemma eval_rewriteMap (f : ξ₁ → ξ₂) (φ : Semiformula L ξ₁ n) :
-    Eval s e ε₂ (Rew.rewriteMap (L := L) (n := n) f • φ) ↔ Eval s e (fun x ↦ ε₂ (f x)) φ := by
+    Eval s e ε₂ (Rew.rewriteMap (L := L) (n := n) f ▹ φ) ↔ Eval s e (fun x ↦ ε₂ (f x)) φ := by
   simp [eval_rew, Function.comp_def]
 
 @[simp] lemma eval_castLE (h : n₁ ≤ n₂) (φ : Semiformula L ξ n₁) :
-    Eval s e₂ ε (@Rew.castLE L ξ _ _ h • φ) ↔ Eval s (fun x ↦ e₂ (x.castLE h)) ε φ := by
+    Eval s e₂ ε (@Rew.castLE L ξ _ _ h ▹ φ) ↔ Eval s (fun x ↦ e₂ (x.castLE h)) ε φ := by
   simp [eval_rew, Function.comp_def]
 
 @[simp] lemma eval_bShift (φ : Semiformula L ξ n) :
-    Eval s (x :> e) ε (@Rew.bShift L ξ n • φ) ↔ Eval s e ε φ := by
+    Eval s (x :> e) ε (@Rew.bShift L ξ n ▹ φ) ↔ Eval s e ε φ := by
   simp [eval_rew, Function.comp_def]
 
 lemma eval_bShift' (φ : Semiformula L ξ n) :
-    Eval s e' ε (@Rew.bShift L ξ n • φ) ↔ Eval s (e' ·.succ) ε φ := by
+    Eval s e' ε (@Rew.bShift L ξ n ▹ φ) ↔ Eval s (e' ·.succ) ε φ := by
   simp [eval_rew, Function.comp_def]
 
 lemma eval_substs {k} (w : Fin k → Semiterm L ξ n) (φ : Semiformula L ξ k) :
@@ -385,16 +385,16 @@ lemma eval_substs {k} (w : Fin k → Semiterm L ξ n) (φ : Semiformula L ξ k) 
   simp [eval_rew, Function.comp_def]; apply iff_of_eq; congr; funext x; contradiction
 
 @[simp] lemma eval_empty [h : IsEmpty o] (φ : Formula L o) :
-    Eval s e ε (@Rew.empty L o _ ξ n • φ) ↔ Eval s ![] h.elim φ := by
+    Eval s e ε (@Rew.empty L o _ ξ n ▹ φ) ↔ Eval s ![] h.elim φ := by
   simp [eval_rew, Function.comp_def, Matrix.empty_eq]
   apply iff_of_eq; congr; funext x; exact h.elim' x
 
 @[simp] lemma eval_toS {e : Fin n → M} {ε} (φ : Formula L (Fin n)) :
-    Eval s e ε (@Rew.toS L n • φ) ↔ Eval s ![] e φ := by
+    Eval s e ε (@Rew.toS L n ▹ φ) ↔ Eval s ![] e φ := by
   simp [Rew.toS, eval_rew, Function.comp_def, Matrix.empty_eq]
 
 lemma eval_embSubsts {ξ} {ε : ξ → M} {k} (w : Fin k → Semiterm L ξ n) (σ : Semisentence L k) :
-    Eval s e ε ((@Rew.embSubsts L ξ n k w) • σ) ↔ Evalb s (fun x ↦ (w x).val s e ε) σ := by
+    Eval s e ε ((@Rew.embSubsts L ξ n k w) ▹ σ) ↔ Evalb s (fun x ↦ (w x).val s e ε) σ := by
   simp [eval_rew, Function.comp_def, Empty.eq_elim]
 
 section Syntactic
@@ -402,11 +402,11 @@ section Syntactic
 variable (ε : ℕ → M)
 
 @[simp] lemma eval_free (φ : SyntacticSemiformula L (n + 1)) :
-    Eval s e (a :>ₙ ε) (@Rew.free L n • φ) ↔ Eval s (e <: a) ε φ := by
+    Eval s e (a :>ₙ ε) (@Rew.free L n ▹ φ) ↔ Eval s (e <: a) ε φ := by
   simp [eval_rew, Function.comp_def]; apply iff_of_eq; congr; funext x; cases x using Fin.lastCases <;> simp
 
 @[simp] lemma eval_shift (φ : SyntacticSemiformula L n) :
-    Eval s e (a :>ₙ ε) (@Rew.shift L n • φ) ↔ Eval s e ε φ := by
+    Eval s e (a :>ₙ ε) (@Rew.shift L n ▹ φ) ↔ Eval s e ε φ := by
   simp [eval_rew, Function.comp_def]
 
 end Syntactic

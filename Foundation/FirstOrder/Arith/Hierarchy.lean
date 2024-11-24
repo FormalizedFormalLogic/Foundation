@@ -241,7 +241,7 @@ lemma sigma_of_sigma_ex {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚺 s (∃'
 @[simp] lemma sigma_iff {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚺 (s + 1) (∃' φ) ↔ Hierarchy 𝚺 (s + 1) φ :=
   ⟨sigma_of_sigma_ex, ex⟩
 
-lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} : Hierarchy Γ s φ → Hierarchy Γ s (ω • φ) := by
+lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} : Hierarchy Γ s φ → Hierarchy Γ s (ω ▹ φ) := by
   intro h; induction h generalizing n₂ <;> try simp [*, Semiformula.rew_rel, Semiformula.rew_nrel]
   case sigma ih => exact (ih _).accum _
   case pi ih => exact (ih _).accum _
@@ -249,9 +249,9 @@ lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} : H
   case dummy_sigma ih => exact (ih _).dummy_sigma
 
 @[simp] lemma rew_iff {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformula L ξ₁ n₁} :
-    Hierarchy Γ s (ω • φ) ↔ Hierarchy Γ s φ := by
+    Hierarchy Γ s (ω ▹ φ) ↔ Hierarchy Γ s φ := by
   constructor
-  · generalize eq : ω • φ = ψ
+  · generalize eq : ω ▹ φ = ψ
     intro hq
     induction hq generalizing φ n₁
       <;> try simp [Semiformula.eq_rel_iff,
