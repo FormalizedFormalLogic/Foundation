@@ -65,10 +65,12 @@ lemma induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
   induction (P := P) (C := Hierarchy Γ m) (by
     rcases hP with ⟨φ, hp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
-    exact ⟨φ.val.fvEnumInv, (Rew.rewriteMap φ.val.fvEnum).hom φ.val, by simp [hp],
+
+    exact ⟨φ.val.fvarEnumInv, (Rew.rewriteMap φ.val.fvarEnum) ▹ φ.val, by simp [hp],
       by  intro x; simp [Semiformula.eval_rewriteMap]
-          have : (Semiformula.Evalm V ![x] fun x => φ.val.fvEnumInv (φ.val.fvEnum x)) φ.val ↔ (Semiformula.Evalm V ![x] id) φ.val :=
-            Semiformula.eval_iff_of_funEqOn _ (by intro x hx; simp [Semiformula.fvEnumInv_fvEnum hx])
+          have : (Semiformula.Evalm V ![x] fun x ↦ φ.val.fvarEnumInv (φ.val.fvarEnum x)) φ.val ↔ (Semiformula.Evalm V ![x] id) φ.val :=
+            Semiformula.eval_iff_of_funEqOn _ (by
+              intro x hx; simp [Semiformula.fvarEnumInv_fvarEnum (Semiformula.mem_fvarList_iff_fvar?.mpr hx)])
           simp [this, hp.df.iff]⟩)
     zero succ
 
@@ -126,7 +128,7 @@ lemma models_indScheme_alt : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarc
       ∀ x, Semiformula.Evalm V ![x] v φ := by
     simpa using
       neg_induction_h Γ m (P := λ x ↦ ¬Semiformula.Evalm V ![x] v φ)
-        (.mkPolarity (∼(Rew.rewriteMap v).hom φ) (by simpa using hp)
+        (.mkPolarity (∼(Rew.rewriteMap v ▹ φ)) (by simpa using hp)
         (by intro x; simp [←Matrix.constant_eq_singleton', Semiformula.eval_rewriteMap]))
   exact this H0 Hsucc x
 

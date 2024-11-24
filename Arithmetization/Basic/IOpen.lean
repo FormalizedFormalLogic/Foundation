@@ -20,9 +20,11 @@ lemma open_induction {P : V → Prop}
   induction (C := Semiformula.Open)
     (by rcases hP with ⟨p, hp, hhp⟩
         haveI : Inhabited V := Classical.inhabited_of_nonempty'
-        exact ⟨p.fvEnumInv, (Rew.rewriteMap p.fvEnum).hom p, by simp[hp],
+        exact ⟨p.fvarEnumInv, Rew.rewriteMap p.fvarEnum ▹ p, by simp[hp],
           by  intro x; simp [Semiformula.eval_rewriteMap, hhp]
-              exact Semiformula.eval_iff_of_funEqOn p (by intro z hz; simp [Semiformula.fvEnumInv_fvEnum hz])⟩) zero succ
+              exact Semiformula.eval_iff_of_funEqOn p (by
+                intro z hz
+                simp [Semiformula.fvarEnumInv_fvarEnum (Semiformula.mem_fvarList_iff_fvar?.mpr hz)])⟩) zero succ
 
 lemma open_leastNumber {P : V → Prop}
     (hP : ∃ p : Semiformula ℒₒᵣ V 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] id p)
@@ -601,7 +603,7 @@ lemma pi₁_defined : 𝚺₀-Function₁ (pi₁ : V → V) via pi₁Def := by
   intro v; simp [pi₁Def]
   constructor
   · intro h; exact ⟨π₂ v 1, by simp [←le_iff_lt_succ],  by simp [h]⟩
-  · rintro ⟨a, _, e⟩; simp [e]
+  · rintro ⟨a, _, e⟩; simp [show v 1 = ⟪v 0, a⟫ from e]
 
 @[simp] lemma pi₁_defined_iff (v) :
     Semiformula.Evalbm V v pi₁Def.val ↔ v 0 = π₁ (v 1) := pi₁_defined.df.iff v
@@ -612,7 +614,7 @@ lemma pi₂_defined : 𝚺₀-Function₁ (pi₂ : V → V) via pi₂Def := by
   intro v; simp [pi₂Def]
   constructor
   · intro h; exact ⟨π₁ v 1, by simp [←le_iff_lt_succ], by simp [h]⟩
-  · rintro ⟨a, _, e⟩; simp [e]
+  · rintro ⟨a, _, e⟩; simp [show v 1 = ⟪a, v 0⟫ from e]
 
 @[simp] lemma pi₂_defined_iff (v) :
     Semiformula.Evalbm V v pi₂Def.val ↔ v 0 = π₂ (v 1) := pi₂_defined.df.iff v
@@ -680,8 +682,24 @@ def _root_.LO.FirstOrder.Arith.pair₅Def : 𝚺₀.Semisentence 6 :=
 def _root_.LO.FirstOrder.Arith.pair₆Def : 𝚺₀.Semisentence 7 :=
   .mkSigma “p a b c d e f. ∃ bcdef <⁺ p, !pair₅Def bcdef b c d e f ∧ !pairDef p a bcdef” (by simp)
 
+theorem fegergreg (v : Fin 4 → ℕ) : v (0 : Fin (Nat.succ 1)).succ.succ = v 2 := by { simp only [Nat.succ_eq_add_one,
+  Nat.reduceAdd, Fin.isValue, Fin.succ_zero_eq_one, Fin.succ_one_eq_two] }
+
+axiom P : Fin 3 → Prop
+
+theorem fin4 {n} : (2 : Fin (n + 3)).succ = 3 := rfl
+
+@[simp] theorem Fin.succ_zero_eq_one'' {n} : (0 : Fin (n + 1)).succ = 1 := rfl
+
+@[simp] theorem Fin.succ_two_eq_three {n} : (2 : Fin (n + 3)).succ = 3 := rfl
+
+example (v : Fin 4 → ℕ) : v (2 : Fin 3).succ = v 3 := by { simp [fin4] }
+
+theorem ss (v : Fin 4 → ℕ) : v (Fin.succ (0 : Fin (Nat.succ 1))).succ = v 2 := by { simp [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Fin.succ_zero_eq_one, Fin.succ_one_eq_two] }
+
 lemma pair₃_defined : 𝚺₀-Function₃ ((⟪·, ·, ·⟫) : V → V → V → V) via pair₃Def := by
-  intro v; simp [pair₃Def]; rintro h; simp [h]
+  intro v; simp [pair₃Def]
+  rintro h; simp [h]
 
 @[simp] lemma eval_pair₃Def (v) :
     Semiformula.Evalbm V v pair₃Def.val ↔ v 0 = ⟪v 1, v 2, v 3⟫ := pair₃_defined.df.iff v

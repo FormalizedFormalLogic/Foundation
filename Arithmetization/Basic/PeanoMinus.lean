@@ -161,7 +161,8 @@ def _root_.LO.FirstOrder.Arith.dvd : 𝚺₀.Semisentence 2 :=
   .mkSigma “x y. ∃ z <⁺ y, y = x * z” (by simp)
 
 lemma dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd :=
-  fun v ↦ by simp [dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, dvd]
+  fun v ↦ by
+    simp [dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, dvd]
 
 @[simp] lemma dvd_defined_iff (v) :
     Semiformula.Evalbm V v dvd.val ↔ v 0 ∣ v 1 := dvd_defined.df.iff v
