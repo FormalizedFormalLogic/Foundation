@@ -29,13 +29,13 @@ instance : Rewriting L (Semiformulaᵢ L) where
   app_ex (_ _) := rfl
 
 lemma rew_rel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) :
-    ω • rel r v = rel r fun i ↦ ω (v i) := rfl
+    ω ▹ rel r v = rel r fun i ↦ ω (v i) := rfl
 
 lemma rew_rel' (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} {r : L.Rel k} {v : Fin k → Semiterm L ξ₁ n₁} :
-    ω • rel r v = rel r (ω ∘ v) := rfl
+    ω ▹ rel r v = rel r (ω ∘ v) := rfl
 
 private lemma map_inj {n₁ n₂} {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ₂}
-    (hb : Function.Injective b) (hf : Function.Injective f) : Function.Injective fun φ : Semiformulaᵢ L ξ₁ n₁ ↦ @Rew.map L ξ₁ ξ₂ n₁ n₂ b f • φ
+    (hb : Function.Injective b) (hf : Function.Injective f) : Function.Injective fun φ : Semiformulaᵢ L ξ₁ n₁ ↦ @Rew.map L ξ₁ ξ₂ n₁ n₂ b f ▹ φ
   | ⊤,        φ => by cases φ using cases' <;> simp [rew_rel]
   | ⊥,        φ => by cases φ using cases' <;> simp [rew_rel]
   | rel r v,  φ => by
@@ -67,11 +67,11 @@ instance : LawfulRewriting L (Semiformulaᵢ L) where
     induction φ using rec' generalizing n₂ n₃ <;> simp [rew_rel, Rew.comp_app, Rew.q_comp, *]
   smul_map_injective {n₁ n₂ ξ₁ ξ₂ b f hb hf} := map_inj hb hf
 
-@[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformulaᵢ L ξ₁ n₁) : (ω • φ).complexity = φ.complexity := by
+@[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformulaᵢ L ξ₁ n₁) : (ω ▹ φ).complexity = φ.complexity := by
   induction φ using rec' generalizing n₂ <;> simp [*, rew_rel]
 
 @[simp] lemma IsNegative.rew {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
-    (ω • φ).IsNegative ↔ φ.IsNegative := by
+    (ω ▹ φ).IsNegative ↔ φ.IsNegative := by
   induction φ using rec' generalizing n₂ <;> simp [rew_rel, *]
 
 end Semiformulaᵢ

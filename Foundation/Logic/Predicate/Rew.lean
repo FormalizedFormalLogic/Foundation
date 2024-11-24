@@ -747,7 +747,7 @@ variable [LCWQ F] [LCWQ G] [Rewriting L ξ F ζ G]
 
 attribute [simp] app_all app_ex
 
-infixr:65 " ▹ " => app
+infixr:73 " ▹ " => app
 
 lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : F n₁} : ω₁ ▹ φ = ω₂ ▹ φ := by rw [h]
 
