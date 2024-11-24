@@ -5,17 +5,17 @@ namespace LO.FirstOrder.Arith
 
 end Arith
 
-def Defined {k} (R : (Fin k → V) → Prop) [Structure L V] (p : Semisentence L k) : Prop :=
-  ∀ v, R v ↔ Semiformula.Evalbm V v p
+def Defined {k} (R : (Fin k → V) → Prop) [Structure L V] (φ : Semisentence L k) : Prop :=
+  ∀ v, R v ↔ Semiformula.Evalbm V v φ
 
-def DefinedWithParam {k} (R : (Fin k → V) → Prop) [Structure L V] (p : Semiformula L V k) : Prop :=
-  ∀ v, R v ↔ Semiformula.Evalm V v id p
+def DefinedWithParam {k} (R : (Fin k → V) → Prop) [Structure L V] (φ : Semiformula L V k) : Prop :=
+  ∀ v, R v ↔ Semiformula.Evalm V v id φ
 
-lemma Defined.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {p : Semisentence L k} (h : Defined R p) (v) :
-    Semiformula.Evalbm V v p ↔ R v := (h v).symm
+lemma Defined.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {φ : Semisentence L k} (h : Defined R φ) (v) :
+    Semiformula.Evalbm V v φ ↔ R v := (h v).symm
 
-lemma DefinedWithParam.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {p : Semiformula L V k} (h : DefinedWithParam R p) (v) :
-    Semiformula.Evalm V v id p ↔ R v := (h v).symm
+lemma DefinedWithParam.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {φ : Semiformula L V k} (h : DefinedWithParam R φ) (v) :
+    Semiformula.Evalm V v id φ ↔ R v := (h v).symm
 
 namespace Arith.HierarchySymbol
 
@@ -26,14 +26,14 @@ open LO.Arith
 variable {V : Type*} [ORingStruc V]
 
 def Defined (R : (Fin k → V) → Prop) : {ℌ : HierarchySymbol} → ℌ.Semisentence k → Prop
-  | 𝚺-[_], p => FirstOrder.Defined R p.val
-  | 𝚷-[_], p => FirstOrder.Defined R p.val
-  | 𝚫-[_], p => p.ProperOn V ∧ FirstOrder.Defined R p.val
+  | 𝚺-[_], φ => FirstOrder.Defined R φ.val
+  | 𝚷-[_], φ => FirstOrder.Defined R φ.val
+  | 𝚫-[_], φ => φ.ProperOn V ∧ FirstOrder.Defined R φ.val
 
 def DefinedWithParam (R : (Fin k → V) → Prop) : {ℌ : HierarchySymbol} → ℌ.Semiformula V k → Prop
-  | 𝚺-[_], p => FirstOrder.DefinedWithParam R p.val
-  | 𝚷-[_], p => FirstOrder.DefinedWithParam R p.val
-  | 𝚫-[_], p => p.ProperWithParamOn V ∧ FirstOrder.DefinedWithParam R p.val
+  | 𝚺-[_], φ => FirstOrder.DefinedWithParam R φ.val
+  | 𝚷-[_], φ => FirstOrder.DefinedWithParam R φ.val
+  | 𝚫-[_], φ => φ.ProperWithParamOn V ∧ FirstOrder.DefinedWithParam R φ.val
 
 variable {ℌ : HierarchySymbol} {Γ : SigmaPiDelta}
 
@@ -42,47 +42,47 @@ section
 variable (ℌ)
 
 class Lightface {k} (P : (Fin k → V) → Prop) : Prop where
-  definable : ∃ p : ℌ.Semisentence k, Defined P p
+  definable : ∃ φ : ℌ.Semisentence k, Defined P φ
 
 class Boldface {k} (P : (Fin k → V) → Prop) : Prop where
-  definable : ∃ p : ℌ.Semiformula V k, DefinedWithParam P p
+  definable : ∃ φ : ℌ.Semiformula V k, DefinedWithParam P φ
 
-abbrev DefinedPred (P : V → Prop) (p : ℌ.Semisentence 1) : Prop :=
-  Defined (λ v ↦ P (v 0)) p
+abbrev DefinedPred (P : V → Prop) (φ : ℌ.Semisentence 1) : Prop :=
+  Defined (λ v ↦ P (v 0)) φ
 
-abbrev DefinedRel (R : V → V → Prop) (p : ℌ.Semisentence 2) : Prop :=
-  Defined (λ v ↦ R (v 0) (v 1)) p
+abbrev DefinedRel (R : V → V → Prop) (φ : ℌ.Semisentence 2) : Prop :=
+  Defined (λ v ↦ R (v 0) (v 1)) φ
 
-abbrev DefinedRel₃ (R : V → V → V → Prop) (p : ℌ.Semisentence 3) : Prop :=
-  Defined (λ v ↦ R (v 0) (v 1) (v 2)) p
+abbrev DefinedRel₃ (R : V → V → V → Prop) (φ : ℌ.Semisentence 3) : Prop :=
+  Defined (λ v ↦ R (v 0) (v 1) (v 2)) φ
 
-abbrev DefinedRel₄ (R : V → V → V → V → Prop) (p : ℌ.Semisentence 4) : Prop :=
-  Defined (λ v ↦ R (v 0) (v 1) (v 2) (v 3)) p
+abbrev DefinedRel₄ (R : V → V → V → V → Prop) (φ : ℌ.Semisentence 4) : Prop :=
+  Defined (λ v ↦ R (v 0) (v 1) (v 2) (v 3)) φ
 
 variable {ℌ}
 
-abbrev DefinedFunction {k} (f : (Fin k → V) → V) (p : ℌ.Semisentence (k + 1)) : Prop :=
-  Defined (fun v => v 0 = f (v ·.succ)) p
+abbrev DefinedFunction {k} (f : (Fin k → V) → V) (φ : ℌ.Semisentence (k + 1)) : Prop :=
+  Defined (fun v => v 0 = f (v ·.succ)) φ
 
 variable (ℌ)
 
-abbrev DefinedFunction₀ (c : V) (p : ℌ.Semisentence 1) : Prop :=
-  DefinedFunction (fun _ => c) p
+abbrev DefinedFunction₀ (c : V) (φ : ℌ.Semisentence 1) : Prop :=
+  DefinedFunction (fun _ => c) φ
 
-abbrev DefinedFunction₁ (f : V → V) (p : ℌ.Semisentence 2) : Prop :=
-  DefinedFunction (fun v => f (v 0)) p
+abbrev DefinedFunction₁ (f : V → V) (φ : ℌ.Semisentence 2) : Prop :=
+  DefinedFunction (fun v => f (v 0)) φ
 
-abbrev DefinedFunction₂ (f : V → V → V) (p : ℌ.Semisentence 3) : Prop :=
-  DefinedFunction (fun v => f (v 0) (v 1)) p
+abbrev DefinedFunction₂ (f : V → V → V) (φ : ℌ.Semisentence 3) : Prop :=
+  DefinedFunction (fun v => f (v 0) (v 1)) φ
 
-abbrev DefinedFunction₃ (f : V → V → V → V) (p : ℌ.Semisentence 4) : Prop :=
-  DefinedFunction (fun v => f (v 0) (v 1) (v 2)) p
+abbrev DefinedFunction₃ (f : V → V → V → V) (φ : ℌ.Semisentence 4) : Prop :=
+  DefinedFunction (fun v => f (v 0) (v 1) (v 2)) φ
 
-abbrev DefinedFunction₄ (f : V → V → V → V → V) (p : ℌ.Semisentence 5) : Prop :=
-  DefinedFunction (fun v => f (v 0) (v 1) (v 2) (v 3)) p
+abbrev DefinedFunction₄ (f : V → V → V → V → V) (φ : ℌ.Semisentence 5) : Prop :=
+  DefinedFunction (fun v => f (v 0) (v 1) (v 2) (v 3)) φ
 
-abbrev DefinedFunction₅ (f : V → V → V → V → V → V) (p : ℌ.Semisentence 6) : Prop :=
-  DefinedFunction (fun v => f (v 0) (v 1) (v 2) (v 3) (v 4)) p
+abbrev DefinedFunction₅ (f : V → V → V → V → V → V) (φ : ℌ.Semisentence 6) : Prop :=
+  DefinedFunction (fun v => f (v 0) (v 1) (v 2) (v 3) (v 4)) φ
 
 abbrev BoldfacePred (P : V → Prop) : Prop := ℌ.Boldface (k := 1) (fun v ↦ P (v 0))
 
@@ -112,25 +112,25 @@ abbrev BoldfaceFunction₅ (f : V → V → V → V → V → V) : Prop := ℌ.B
 
 variable {ℌ}
 
-notation Γ "-Predicate " P " via " p => DefinedPred Γ P p
+notation Γ "-Predicate " P " via " φ => DefinedPred Γ P φ
 
-notation Γ "-Relation " P " via " p => DefinedRel Γ P p
+notation Γ "-Relation " P " via " φ => DefinedRel Γ P φ
 
-notation Γ "-Relation₃ " P " via " p => DefinedRel₃ Γ P p
+notation Γ "-Relation₃ " P " via " φ => DefinedRel₃ Γ P φ
 
-notation Γ "-Relation₄ " P " via " p => DefinedRel₄ Γ P p
+notation Γ "-Relation₄ " P " via " φ => DefinedRel₄ Γ P φ
 
-notation Γ "-Function₀ " c " via " p => DefinedFunction₀ Γ c p
+notation Γ "-Function₀ " c " via " φ => DefinedFunction₀ Γ c φ
 
-notation Γ "-Function₁ " f " via " p => DefinedFunction₁ Γ f p
+notation Γ "-Function₁ " f " via " φ => DefinedFunction₁ Γ f φ
 
-notation Γ "-Function₂ " f " via " p => DefinedFunction₂ Γ f p
+notation Γ "-Function₂ " f " via " φ => DefinedFunction₂ Γ f φ
 
-notation Γ "-Function₃ " f " via " p => DefinedFunction₃ Γ f p
+notation Γ "-Function₃ " f " via " φ => DefinedFunction₃ Γ f φ
 
-notation Γ "-Function₄ " f " via " p => DefinedFunction₄ Γ f p
+notation Γ "-Function₄ " f " via " φ => DefinedFunction₄ Γ f φ
 
-notation Γ "-Function₅ " f " via " p => DefinedFunction₅ Γ f p
+notation Γ "-Function₅ " f " via " φ => DefinedFunction₅ Γ f φ
 
 notation Γ "-Predicate " P => BoldfacePred Γ P
 
@@ -159,44 +159,44 @@ variable {k} {P Q : (Fin k → V) → Prop}
 
 namespace Defined
 
-lemma df {R : (Fin k → V) → Prop} {p : ℌ.Semisentence k} (h : Defined R p) : FirstOrder.Defined R p.val :=
+lemma df {R : (Fin k → V) → Prop} {φ : ℌ.Semisentence k} (h : Defined R φ) : FirstOrder.Defined R φ.val :=
   match ℌ with
   | 𝚺-[_] => h
   | 𝚷-[_] => h
   | 𝚫-[_] => h.2
 
-lemma proper {R : (Fin k → V) → Prop} {m} {p : 𝚫-[m].Semisentence k} (h : Defined R p) : p.ProperOn V := h.1
+lemma proper {R : (Fin k → V) → Prop} {m} {φ : 𝚫-[m].Semisentence k} (h : Defined R φ) : φ.ProperOn V := h.1
 
-lemma of_zero {R : (Fin k → V) → Prop} {p : 𝚺₀.Semisentence k} (h : Defined R p) : Defined R (p.ofZero ℌ) :=
+lemma of_zero {R : (Fin k → V) → Prop} {φ : 𝚺₀.Semisentence k} (h : Defined R φ) : Defined R (φ.ofZero ℌ) :=
   match ℌ with
   | 𝚺-[m] => by intro _; simp [h.iff]
   | 𝚷-[m] => by intro _; simp [h.iff]
   | 𝚫-[m] => ⟨by simp, by intro _; simp [h.iff]⟩
 
-lemma emb {R : (Fin k → V) → Prop} {p : ℌ.Semisentence k} (h : Defined R p) : Defined R p.emb :=
+lemma emb {R : (Fin k → V) → Prop} {φ : ℌ.Semisentence k} (h : Defined R φ) : Defined R φ.emb :=
   match ℌ with
   | 𝚺-[m] => by intro _; simp [h.iff]
   | 𝚷-[m] => by intro _; simp [h.iff]
   | 𝚫-[m] => ⟨by simpa using h.proper, by intro _; simp [h.df.iff]⟩
 
-lemma of_iff {P Q : (Fin k → V) → Prop} (h : ∀ x, P x ↔ Q x) {p : ℌ.Semisentence k} (H : Defined Q p) : Defined P p := by
+lemma of_iff {P Q : (Fin k → V) → Prop} (h : ∀ x, P x ↔ Q x) {φ : ℌ.Semisentence k} (H : Defined Q φ) : Defined P φ := by
   rwa [show P = Q from by funext v; simp [h]]
 
-lemma to_definable (p : ℌ.Semisentence k) (hP : Defined P p) : ℌ.Boldface P := ⟨p.rew Rew.emb, by
+lemma to_definable (φ : ℌ.Semisentence k) (hP : Defined P φ) : ℌ.Boldface P := ⟨φ.rew Rew.emb, by
   match ℌ with
   | 𝚺-[_] => intro; simp [hP.iff]
   | 𝚷-[_] => intro; simp [hP.iff]
   | 𝚫-[_] => exact ⟨
-    fun v ↦ by rcases p; simpa [HierarchySymbol.Semiformula.rew] using hP.proper.rew Rew.emb v,
+    fun v ↦ by rcases φ; simpa [HierarchySymbol.Semiformula.rew] using hP.proper.rew Rew.emb v,
     by intro; simp [hP.df.iff]⟩⟩
 
-lemma to_definable₀ {p : 𝚺₀.Semisentence k} (hP : Defined P p) :
-    ℌ.Boldface P := Defined.to_definable (p.ofZero ℌ) hP.of_zero
+lemma to_definable₀ {φ : 𝚺₀.Semisentence k} (hP : Defined P φ) :
+    ℌ.Boldface P := Defined.to_definable (φ.ofZero ℌ) hP.of_zero
 
-lemma to_definable_oRing (p : ℌ.Semisentence k) (hP : Defined P p) :
-    ℌ.Boldface P := Defined.to_definable p.emb hP.emb
+lemma to_definable_oRing (φ : ℌ.Semisentence k) (hP : Defined P φ) :
+    ℌ.Boldface P := Defined.to_definable φ.emb hP.emb
 
-lemma to_definable_oRing₀ (p : 𝚺₀.Semisentence k) (hP : Defined P p) :
+lemma to_definable_oRing₀ (φ : 𝚺₀.Semisentence k) (hP : Defined P φ) :
     ℌ.Boldface P := Defined.to_definable₀ hP.emb
 
 end Defined
@@ -204,11 +204,11 @@ end Defined
 namespace DefinedFunction
 
 lemma of_eq {f g : (Fin k → V) → V} (h : ∀ x, f x = g x)
-    {p : ℌ.Semisentence (k + 1)} (H : DefinedFunction f p) : DefinedFunction g p :=
+    {φ : ℌ.Semisentence (k + 1)} (H : DefinedFunction f φ) : DefinedFunction g φ :=
   Defined.of_iff (by intro; simp [h]) H
 
-lemma graph_delta {f : (Fin k → V) → V} {p : 𝚺-[m].Semisentence (k + 1)}
-    (h : DefinedFunction f p) : DefinedFunction f p.graphDelta :=
+lemma graph_delta {f : (Fin k → V) → V} {φ : 𝚺-[m].Semisentence (k + 1)}
+    (h : DefinedFunction f φ) : DefinedFunction f φ.graphDelta :=
   ⟨by cases' m with m <;> simp [HierarchySymbol.Semiformula.graphDelta]
       intro e; simp [Empty.eq_elim, h.df.iff]
       rw [eq_comm],
@@ -218,49 +218,49 @@ end DefinedFunction
 
 namespace DefinedWithParam
 
-lemma df {R : (Fin k → V) → Prop} {p : ℌ.Semiformula V k} (h : DefinedWithParam R p) : FirstOrder.DefinedWithParam R p.val :=
+lemma df {R : (Fin k → V) → Prop} {φ : ℌ.Semiformula V k} (h : DefinedWithParam R φ) : FirstOrder.DefinedWithParam R φ.val :=
   match ℌ with
   | 𝚺-[_] => h
   | 𝚷-[_] => h
   | 𝚫-[_] => h.2
 
-lemma proper {R : (Fin k → V) → Prop} {m} {p : 𝚫-[m].Semiformula V k} (h : DefinedWithParam R p) : p.ProperWithParamOn V := h.1
+lemma proper {R : (Fin k → V) → Prop} {m} {φ : 𝚫-[m].Semiformula V k} (h : DefinedWithParam R φ) : φ.ProperWithParamOn V := h.1
 
-lemma of_zero {R : (Fin k → V) → Prop} {Γ'} {p : Γ'-[0].Semiformula V k}
-    (h : DefinedWithParam R p) {Γ} : DefinedWithParam R (p.ofZero Γ) :=
+lemma of_zero {R : (Fin k → V) → Prop} {Γ'} {φ : Γ'-[0].Semiformula V k}
+    (h : DefinedWithParam R φ) {Γ} : DefinedWithParam R (φ.ofZero Γ) :=
   match Γ with
   | 𝚺-[m] => by intro _; simp [h.df.iff]
   | 𝚷-[m] => by intro _; simp [h.df.iff]
   | 𝚫-[m] => ⟨by simp , by intro _; simp [h.df.iff]⟩
 
-lemma of_deltaOne {R : (Fin k → V) → Prop} {Γ m} {p : 𝚫₁.Semiformula V k}
-    (h : DefinedWithParam R p) : DefinedWithParam R (p.ofDeltaOne Γ m) :=
+lemma of_deltaOne {R : (Fin k → V) → Prop} {Γ m} {φ : 𝚫₁.Semiformula V k}
+    (h : DefinedWithParam R φ) : DefinedWithParam R (φ.ofDeltaOne Γ m) :=
   match Γ with
   | 𝚺 => by intro _; simp [HierarchySymbol.Semiformula.ofDeltaOne, h.df.iff, HierarchySymbol.Semiformula.val_sigma]
   | 𝚷 => by intro _; simp [HierarchySymbol.Semiformula.ofDeltaOne, h.df.iff, h.proper.iff']
   | 𝚫 => ⟨by intro _; simp [HierarchySymbol.Semiformula.ofDeltaOne, h.df.iff, HierarchySymbol.Semiformula.val_sigma, h.proper.iff'],
     by intro _; simp [HierarchySymbol.Semiformula.ofDeltaOne, h.df.iff, HierarchySymbol.Semiformula.val_sigma]⟩
 
-lemma emb {R : (Fin k → V) → Prop} {p : ℌ.Semiformula V k} (h : DefinedWithParam R p) : DefinedWithParam R p.emb :=
+lemma emb {R : (Fin k → V) → Prop} {φ : ℌ.Semiformula V k} (h : DefinedWithParam R φ) : DefinedWithParam R φ.emb :=
   match ℌ with
   | 𝚺-[m] => by intro _; simp [h.iff]
   | 𝚷-[m] => by intro _; simp [h.iff]
   | 𝚫-[m] => ⟨by simpa using h.proper, by intro _; simp [h.df.iff]⟩
 
 lemma of_iff {P Q : (Fin k → V) → Prop} (h : ∀ x, P x ↔ Q x)
-    {p : ℌ.Semiformula V k} (H : DefinedWithParam Q p) : DefinedWithParam P p := by
+    {φ : ℌ.Semiformula V k} (H : DefinedWithParam Q φ) : DefinedWithParam P φ := by
   rwa [show P = Q from by funext v; simp [h]]
 
-lemma to_definable {p : ℌ.Semiformula V k} (h : DefinedWithParam P p) : ℌ.Boldface P := ⟨p, h⟩
+lemma to_definable {φ : ℌ.Semiformula V k} (h : DefinedWithParam P φ) : ℌ.Boldface P := ⟨φ, h⟩
 
-lemma to_definable₀ {p : Γ'-[0].Semiformula V k}
-    (h : DefinedWithParam P p) : ℌ.Boldface P := ⟨p.ofZero ℌ, h.of_zero⟩
+lemma to_definable₀ {φ : Γ'-[0].Semiformula V k}
+    (h : DefinedWithParam P φ) : ℌ.Boldface P := ⟨φ.ofZero ℌ, h.of_zero⟩
 
-lemma to_definable_deltaOne {p : 𝚫₁.Semiformula V k} {Γ m}
-    (h : DefinedWithParam P p) : Γ-[m + 1].Boldface P := ⟨p.ofDeltaOne Γ m, h.of_deltaOne⟩
+lemma to_definable_deltaOne {φ : 𝚫₁.Semiformula V k} {Γ m}
+    (h : DefinedWithParam P φ) : Γ-[m + 1].Boldface P := ⟨φ.ofDeltaOne Γ m, h.of_deltaOne⟩
 
-lemma retraction {p : ℌ.Semiformula V k} (hp : DefinedWithParam P p) (f : Fin k → Fin l) :
-    DefinedWithParam (fun v ↦ P fun i ↦ v (f i)) (p.rew <| Rew.substs fun x ↦ #(f x)) :=
+lemma retraction {φ : ℌ.Semiformula V k} (hp : DefinedWithParam P φ) (f : Fin k → Fin l) :
+    DefinedWithParam (fun v ↦ P fun i ↦ v (f i)) (φ.rew <| Rew.substs fun x ↦ #(f x)) :=
   match ℌ with
   | 𝚺-[_] => by intro; simp [hp.df.iff]
   | 𝚷-[_] => by intro; simp [hp.df.iff]
@@ -278,58 +278,58 @@ lemma retraction {p : ℌ.Semiformula V k} (hp : DefinedWithParam P p) (f : Fin 
   | 𝚷-[m] => by intro v; simp
   | 𝚫-[m] => ⟨by simp, by intro v; simp⟩
 
-lemma and {p q : ℌ.Semiformula V k} (hp : DefinedWithParam P p) (hq : DefinedWithParam Q q) :
-    DefinedWithParam (fun x ↦ P x ∧ Q x) (p ⋏ q) :=
+lemma and {φ ψ : ℌ.Semiformula V k} (hp : DefinedWithParam P φ) (hq : DefinedWithParam Q ψ) :
+    DefinedWithParam (fun x ↦ P x ∧ Q x) (φ ⋏ ψ) :=
   match ℌ with
   | 𝚺-[m] => by intro v; simp [hp.iff, hq.iff]
   | 𝚷-[m] => by intro v; simp [hp.iff, hq.iff]
   | 𝚫-[m] => ⟨hp.proper.and hq.proper, by intro v; simp [hp.df.iff, hq.df.iff]⟩
 
-lemma or {p q : ℌ.Semiformula V k} (hp : DefinedWithParam P p) (hq : DefinedWithParam Q q) :
-    DefinedWithParam (fun x ↦ P x ∨ Q x) (p ⋎ q) :=
+lemma or {φ ψ : ℌ.Semiformula V k} (hp : DefinedWithParam P φ) (hq : DefinedWithParam Q ψ) :
+    DefinedWithParam (fun x ↦ P x ∨ Q x) (φ ⋎ ψ) :=
   match ℌ with
   | 𝚺-[m] => by intro v; simp [hp.iff, hq.iff]
   | 𝚷-[m] => by intro v; simp [hp.iff, hq.iff]
   | 𝚫-[m] => ⟨hp.proper.or hq.proper, by intro v; simp [hp.df.iff, hq.df.iff]⟩
 
-lemma negSigma {p : 𝚺-[m].Semiformula V k} (hp : DefinedWithParam P p) :
-    DefinedWithParam (fun x ↦ ¬P x) p.negSigma := by intro v; simp [hp.iff]
+lemma negSigma {φ : 𝚺-[m].Semiformula V k} (hp : DefinedWithParam P φ) :
+    DefinedWithParam (fun x ↦ ¬P x) φ.negSigma := by intro v; simp [hp.iff]
 
-lemma negPi {p : 𝚷-[m].Semiformula V k} (hp : DefinedWithParam P p) :
-    DefinedWithParam (fun x ↦ ¬P x) p.negPi := by intro v; simp [hp.iff]
+lemma negPi {φ : 𝚷-[m].Semiformula V k} (hp : DefinedWithParam P φ) :
+    DefinedWithParam (fun x ↦ ¬P x) φ.negPi := by intro v; simp [hp.iff]
 
-lemma not {p : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P p) :
-    DefinedWithParam (fun x ↦ ¬P x) (∼p) := ⟨hp.proper.neg, by intro v; simp [hp.proper.eval_neg, hp.df.iff]⟩
+lemma not {φ : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P φ) :
+    DefinedWithParam (fun x ↦ ¬P x) (∼φ) := ⟨hp.proper.neg, by intro v; simp [hp.proper.eval_neg, hp.df.iff]⟩
 
-lemma imp {p q : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P p) (hq : DefinedWithParam Q q) :
-    DefinedWithParam (fun x ↦ P x → Q x) (p ➝ q) := (hp.not.or hq).of_iff (by intro x; simp [imp_iff_not_or])
+lemma imp {φ ψ : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P φ) (hq : DefinedWithParam Q ψ) :
+    DefinedWithParam (fun x ↦ P x → Q x) (φ ➝ ψ) := (hp.not.or hq).of_iff (by intro x; simp [imp_iff_not_or])
 
-lemma iff {p q : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P p) (hq : DefinedWithParam Q q) :
-    DefinedWithParam (fun x ↦ P x ↔ Q x) (p ⭤ q) := ((hp.imp hq).and (hq.imp hp)).of_iff <| by intro v; simp [iff_iff_implies_and_implies]
+lemma iff {φ ψ : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P φ) (hq : DefinedWithParam Q ψ) :
+    DefinedWithParam (fun x ↦ P x ↔ Q x) (φ ⭤ ψ) := ((hp.imp hq).and (hq.imp hp)).of_iff <| by intro v; simp [iff_iff_implies_and_implies]
 
-lemma ball {P : (Fin (k + 1) → V) → Prop} {p : ℌ.Semiformula V (k + 1)}
-    (hp : DefinedWithParam P p) (t : Semiterm ℒₒᵣ V k) :
-    DefinedWithParam (fun v ↦ ∀ x < t.valm V v id, P (x :> v)) (HierarchySymbol.Semiformula.ball t p) :=
+lemma ball {P : (Fin (k + 1) → V) → Prop} {φ : ℌ.Semiformula V (k + 1)}
+    (hp : DefinedWithParam P φ) (t : Semiterm ℒₒᵣ V k) :
+    DefinedWithParam (fun v ↦ ∀ x < t.valm V v id, P (x :> v)) (HierarchySymbol.Semiformula.ball t φ) :=
   match ℌ with
   | 𝚺-[m] => by intro v; simp [hp.df.iff]
   | 𝚷-[m] => by intro v; simp [hp.df.iff]
   | 𝚫-[m] => ⟨hp.proper.ball, by intro v; simp [hp.df.iff]⟩
 
-lemma bex {P : (Fin (k + 1) → V) → Prop} {p : ℌ.Semiformula V (k + 1)}
-    (hp : DefinedWithParam P p) (t : Semiterm ℒₒᵣ V k) :
-    DefinedWithParam (fun v ↦ ∃ x < t.valm V v id, P (x :> v)) (HierarchySymbol.Semiformula.bex t p) :=
+lemma bex {P : (Fin (k + 1) → V) → Prop} {φ : ℌ.Semiformula V (k + 1)}
+    (hp : DefinedWithParam P φ) (t : Semiterm ℒₒᵣ V k) :
+    DefinedWithParam (fun v ↦ ∃ x < t.valm V v id, P (x :> v)) (HierarchySymbol.Semiformula.bex t φ) :=
   match ℌ with
   | 𝚺-[m] => by intro v; simp [hp.df.iff]
   | 𝚷-[m] => by intro v; simp [hp.df.iff]
   | 𝚫-[m] => ⟨hp.proper.bex, by intro v; simp [hp.df.iff]⟩
 
-lemma ex {P : (Fin (k + 1) → V) → Prop} {p : 𝚺-[m + 1].Semiformula V (k + 1)}
-    (hp : DefinedWithParam P p) :
-    DefinedWithParam (fun v ↦ ∃ x, P (x :> v)) p.ex := by intro _; simp [hp.df.iff]
+lemma ex {P : (Fin (k + 1) → V) → Prop} {φ : 𝚺-[m + 1].Semiformula V (k + 1)}
+    (hp : DefinedWithParam P φ) :
+    DefinedWithParam (fun v ↦ ∃ x, P (x :> v)) φ.ex := by intro _; simp [hp.df.iff]
 
-lemma all {P : (Fin (k + 1) → V) → Prop} {p : 𝚷-[m + 1].Semiformula V (k + 1)}
-    (hp : DefinedWithParam P p) :
-    DefinedWithParam (fun v ↦ ∀ x, P (x :> v)) p.all := by intro _; simp [hp.df.iff]
+lemma all {P : (Fin (k + 1) → V) → Prop} {φ : 𝚷-[m + 1].Semiformula V (k + 1)}
+    (hp : DefinedWithParam P φ) :
+    DefinedWithParam (fun v ↦ ∀ x, P (x :> v)) φ.all := by intro _; simp [hp.df.iff]
 
 end DefinedWithParam
 
@@ -365,23 +365,23 @@ end BoldfaceFunction₂
 namespace Boldface
 
 lemma mkPolarity {P : (Fin k → V) → Prop} {Γ : Polarity}
-    (p : Semiformula ℒₒᵣ V k) (hp : Hierarchy Γ m p) (hP : ∀ v, P v ↔ Semiformula.Evalm V v id p) : Γ-[m].Boldface P :=
+    (φ : Semiformula ℒₒᵣ V k) (hp : Hierarchy Γ m φ) (hP : ∀ v, P v ↔ Semiformula.Evalm V v id φ) : Γ-[m].Boldface P :=
   match Γ with
-  | 𝚺 => ⟨.mkSigma p hp, by intro v; simp [hP]⟩
-  | 𝚷 => ⟨.mkPi p hp, by intro v; simp [hP]⟩
+  | 𝚺 => ⟨.mkSigma φ hp, by intro v; simp [hP]⟩
+  | 𝚷 => ⟨.mkPi φ hp, by intro v; simp [hP]⟩
 
 lemma of_iff (H : ℌ.Boldface Q) (h : ∀ x, P x ↔ Q x) : ℌ.Boldface P := by
   rwa [show P = Q from by funext v; simp [h]]
 
 lemma of_oRing (h : ℌ.Boldface P) : ℌ.Boldface P := by
-  rcases h with ⟨p, hP⟩; exact ⟨p.emb, hP.emb⟩
+  rcases h with ⟨φ, hP⟩; exact ⟨φ.emb, hP.emb⟩
 
 lemma of_delta (h : 𝚫-[m].Boldface P) : Γ-[m].Boldface P := by
-  rcases h with ⟨p, h⟩
+  rcases h with ⟨φ, h⟩
   match Γ with
-  | 𝚺 => exact ⟨p.sigma, by intro v; simp [HierarchySymbol.Semiformula.val_sigma, h.df.iff]⟩
-  | 𝚷 => exact ⟨p.pi, by intro v; simp [←h.proper v, HierarchySymbol.Semiformula.val_sigma, h.df.iff]⟩
-  | 𝚫 => exact ⟨p, h⟩
+  | 𝚺 => exact ⟨φ.sigma, by intro v; simp [HierarchySymbol.Semiformula.val_sigma, h.df.iff]⟩
+  | 𝚷 => exact ⟨φ.pi, by intro v; simp [←h.proper v, HierarchySymbol.Semiformula.val_sigma, h.df.iff]⟩
+  | 𝚫 => exact ⟨φ, h⟩
 
 instance [𝚫-[m].Boldface P] (Γ) : Γ-[m].Boldface P := of_delta inferInstance
 
@@ -390,21 +390,21 @@ lemma of_sigma_of_pi (hσ : 𝚺-[m].Boldface P) (hπ : 𝚷-[m].Boldface P) : �
   | 𝚺 => hσ
   | 𝚷 => hπ
   | 𝚫 => by
-    rcases hσ with ⟨p, hp⟩; rcases hπ with ⟨q, hq⟩
-    exact ⟨.mkDelta p q, by intro v; simp [hp.df.iff, hq.df.iff], by intro v; simp [hp.df.iff]⟩
+    rcases hσ with ⟨φ, hp⟩; rcases hπ with ⟨ψ, hq⟩
+    exact ⟨.mkDelta φ ψ, by intro v; simp [hp.df.iff, hq.df.iff], by intro v; simp [hp.df.iff]⟩
 
 lemma of_zero (h : Γ'-[0].Boldface P) : ℌ.Boldface P := by
-  rcases h with ⟨⟨p, hp⟩⟩; exact hp.to_definable₀
+  rcases h with ⟨⟨φ, hp⟩⟩; exact hp.to_definable₀
 
 lemma of_deltaOne (h : 𝚫₁.Boldface P) {Γ m} : Γ-[m + 1].Boldface P := by
-  rcases h with ⟨⟨p, hp⟩⟩; exact hp.to_definable_deltaOne
+  rcases h with ⟨⟨φ, hp⟩⟩; exact hp.to_definable_deltaOne
 
 instance [𝚺₀.Boldface P] (ℌ : HierarchySymbol) : ℌ.Boldface P := Boldface.of_zero (Γ' := 𝚺) (ℌ := ℌ) inferInstance
 
 lemma retraction (h : ℌ.Boldface P) {n} (f : Fin k → Fin n) :
     ℌ.Boldface fun v ↦ P (fun i ↦ v (f i)) := by
-  rcases h with ⟨p, h⟩
-  exact ⟨p.rew (Rew.substs (fun i ↦ #(f i))),
+  rcases h with ⟨φ, h⟩
+  exact ⟨φ.rew (Rew.substs (fun i ↦ #(f i))),
   match ℌ with
   | 𝚺-[_] => by intro; simp [h.df.iff]
   | 𝚷-[_] => by intro; simp [h.df.iff]
@@ -412,8 +412,8 @@ lemma retraction (h : ℌ.Boldface P) {n} (f : Fin k → Fin n) :
 
 lemma retractiont (h : ℌ.Boldface P) (f : Fin k → Semiterm ℒₒᵣ V n) :
     ℌ.Boldface fun v ↦ P (fun i ↦ Semiterm.valm V v id (f i)) := by
-  rcases h with ⟨p, h⟩
-  exact ⟨p.rew (Rew.substs f),
+  rcases h with ⟨φ, h⟩
+  exact ⟨φ.rew (Rew.substs f),
   match ℌ with
   | 𝚺-[_] => by intro; simp [h.df.iff]
   | 𝚷-[_] => by intro; simp [h.df.iff]
@@ -455,9 +455,9 @@ lemma or (h₁ : ℌ.Boldface P) (h₂ : ℌ.Boldface Q) :
 lemma not (h : Γ.alt-[m].Boldface P) :
     Γ-[m].Boldface (fun v ↦ ¬P v) := by
   match Γ with
-  | 𝚺 => rcases h with ⟨p, h⟩; exact ⟨p.negPi, h.negPi⟩
-  | 𝚷 => rcases h with ⟨p, h⟩; exact ⟨p.negSigma, h.negSigma⟩
-  | 𝚫 => rcases h with ⟨p, h⟩; exact ⟨p.negDelta, h.not⟩
+  | 𝚺 => rcases h with ⟨φ, h⟩; exact ⟨φ.negPi, h.negPi⟩
+  | 𝚷 => rcases h with ⟨φ, h⟩; exact ⟨φ.negSigma, h.negSigma⟩
+  | 𝚫 => rcases h with ⟨φ, h⟩; exact ⟨φ.negDelta, h.not⟩
 
 lemma imp (h₁ : Γ.alt-[m].Boldface P) (h₂ : Γ-[m].Boldface Q) :
     Γ-[m].Boldface (fun v ↦ P v → Q v) := by
@@ -473,17 +473,17 @@ lemma imp (h₁ : Γ.alt-[m].Boldface P) (h₂ : Γ-[m].Boldface Q) :
 
 lemma iff (h₁ : 𝚫-[m].Boldface P) (h₂ : 𝚫-[m].Boldface Q) {Γ} :
     Γ-[m].Boldface (fun v ↦ P v ↔ Q v) :=
-  .of_delta (by rcases h₁ with ⟨p, hp⟩; rcases h₂ with ⟨q, hq⟩; exact ⟨p ⭤ q, hp.iff hq⟩)
+  .of_delta (by rcases h₁ with ⟨φ, hp⟩; rcases h₂ with ⟨ψ, hq⟩; exact ⟨φ ⭤ ψ, hp.iff hq⟩)
 
 lemma all {P : (Fin k → V) → V → Prop} (h : 𝚷-[s + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     𝚷-[s + 1].Boldface (fun v ↦ ∀ x, P v x) := by
-  rcases h with ⟨p, hp⟩
-  exact ⟨.mkPi (∀' p.val) (by simp), by intro v; simp [hp.df.iff]⟩
+  rcases h with ⟨φ, hp⟩
+  exact ⟨.mkPi (∀' φ.val) (by simp), by intro v; simp [hp.df.iff]⟩
 
 lemma ex {P : (Fin k → V) → V → Prop} (h : 𝚺-[s + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     𝚺-[s + 1].Boldface (fun v ↦ ∃ x, P v x) := by
-  rcases h with ⟨p, hp⟩
-  exact ⟨.mkSigma (∃' p.val) (by simp), by intro v; simp [hp.df.iff]⟩
+  rcases h with ⟨φ, hp⟩
+  exact ⟨.mkSigma (∃' φ.val) (by simp), by intro v; simp [hp.df.iff]⟩
 
 lemma equal' (i j : Fin k) : ℌ.Boldface fun v : Fin k → V ↦ v i = v j := by
   simpa using retraction BoldfaceRel.eq ![i, j]
@@ -677,8 +677,8 @@ variable {ℌ : HierarchySymbol}
 
 lemma graph_delta {k} {f : (Fin k → V) → V}
     (h : 𝚺-[m].BoldfaceFunction f) : 𝚫-[m].BoldfaceFunction f := by
-  rcases h with ⟨p, h⟩
-  exact ⟨p.graphDelta, by
+  rcases h with ⟨φ, h⟩
+  exact ⟨φ.graphDelta, by
     cases' m with m <;> simp [HierarchySymbol.Semiformula.graphDelta]
     intro e; simp [Empty.eq_elim, h.df.iff]
     exact eq_comm, by
@@ -812,38 +812,38 @@ lemma ball_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Boldface (fun v ↦ ∀ x < f v, P v x) := by
   rcases hf with ⟨bf, hbf⟩
-  rcases h with ⟨p, hp⟩
+  rcases h with ⟨φ, hp⟩
   match Γ with
   | 𝚺 => exact
-    ⟨ .mkSigma (∃' (bf.val ⋏ (∀[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.val))) (by simp),
+    ⟨ .mkSigma (∃' (bf.val ⋏ (∀[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀' (bf.val ➝ (∀[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.val))) (by simp),
+    ⟨ .mkPi (∀' (bf.val ➝ (∀[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
-      ⟨ .mkSigma (∃' (bf.val ⋏ (∀[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.sigma.val))) (by simp),
+      ⟨ .mkSigma (∃' (bf.val ⋏ (∀[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀' (bf.val ➝ (∀[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.pi.val))) (by simp),
+      ⟨ .mkPi (∀' (bf.val ➝ (∀[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 lemma bex_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Boldface (fun v ↦ ∃ x < f v, P v x) := by
   rcases hf with ⟨bf, hbf⟩
-  rcases h with ⟨p, hp⟩
+  rcases h with ⟨φ, hp⟩
   match Γ with
   | 𝚺 => exact
-    ⟨ .mkSigma (∃' (bf.val ⋏ (∃[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.val))) (by simp),
+    ⟨ .mkSigma (∃' (bf.val ⋏ (∃[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚷 => exact
-    ⟨ .mkPi (∀' (bf.val ➝ (∃[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.val))) (by simp),
+    ⟨ .mkPi (∀' (bf.val ➝ (∃[“#0 < #1”] φ.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
       by intro v; simp [hbf.df.iff, hp.df.iff] ⟩
   | 𝚫 =>
     exact .of_sigma_of_pi
-      ⟨ .mkSigma (∃' (bf.val ⋏ (∃[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.sigma.val))) (by simp),
+      ⟨ .mkSigma (∃' (bf.val ⋏ (∃[“#0 < #1”] φ.sigma.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
           by intro v; simp [hbf.df.iff, hp.df.iff, HierarchySymbol.Semiformula.val_sigma] ⟩
-      ⟨ .mkPi (∀' (bf.val ➝ (∃[“#0 < #1”] Rew.substs (#0 :> (#·.succ.succ)) |>.hom p.pi.val))) (by simp),
+      ⟨ .mkPi (∀' (bf.val ➝ (∃[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
 lemma ball_le [V ⊧ₘ* 𝐏𝐀⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}

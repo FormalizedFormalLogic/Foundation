@@ -4,54 +4,54 @@ namespace LO.FirstOrder.Arith
 
 open LO.Arith
 
-lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {p : Semisentence ℒₒᵣ k} :
-    ℕ ⊧/v p ↔ ℕ ⊧ₘ₀ (Rew.substs (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i)) |>.hom p) := by
+lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence ℒₒᵣ k} :
+    ℕ ⊧/v φ ↔ ℕ ⊧ₘ₀ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
   simp [models_iff]
 
 variable (V : Type*) [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
 
-lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {p : Semisentence ℒₒᵣ k} :
-    V ⊧/(v ·) p ↔ V ⊧ₘ₀ (Rew.substs (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i)) |>.hom p) := by
+lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence ℒₒᵣ k} :
+    V ⊧/(v ·) φ ↔ V ⊧ₘ₀ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
   simp [models_iff, numeral_eq_natCast]
 
-lemma shigmaZero_absolute {k} (p : 𝚺₀.Semisentence k) (v : Fin k → ℕ) :
-    ℕ ⊧/v p.val ↔ V ⊧/(v ·) p.val :=
+lemma shigmaZero_absolute {k} (φ : 𝚺₀.Semisentence k) (v : Fin k → ℕ) :
+    ℕ ⊧/v φ.val ↔ V ⊧/(v ·) φ.val :=
   ⟨by simp [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]; exact nat_extention_sigmaOne V (by simp),
    by simp [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]; exact nat_extention_piOne V (by simp)⟩
 
-lemma Defined.shigmaZero_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop} {p : 𝚺₀.Semisentence k}
-    (hR : 𝚺₀.Defined R p) (hR' : 𝚺₀.Defined R' p) (v : Fin k → ℕ) :
+lemma Defined.shigmaZero_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop} {φ : 𝚺₀.Semisentence k}
+    (hR : 𝚺₀.Defined R φ) (hR' : 𝚺₀.Defined R' φ) (v : Fin k → ℕ) :
     R v ↔ R' (fun i ↦ (v i : V)) := by
-  simpa [hR.iff, hR'.iff] using Arith.shigmaZero_absolute V p v
+  simpa [hR.iff, hR'.iff] using Arith.shigmaZero_absolute V φ v
 
-lemma DefinedFunction.shigmaZero_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V} {p : 𝚺₀.Semisentence (k + 1)}
-    (hf : 𝚺₀.DefinedFunction f p) (hf' : 𝚺₀.DefinedFunction f' p) (v : Fin k → ℕ) :
+lemma DefinedFunction.shigmaZero_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V} {φ : 𝚺₀.Semisentence (k + 1)}
+    (hf : 𝚺₀.DefinedFunction f φ) (hf' : 𝚺₀.DefinedFunction f' φ) (v : Fin k → ℕ) :
     (f v : V) = f' (fun i ↦ (v i)) := by
   simpa using Defined.shigmaZero_absolute V hf hf' (f v :> v)
 
-lemma sigmaOne_upward_absolute {k} (p : 𝚺₁.Semisentence k) (v : Fin k → ℕ) :
-    ℕ ⊧/v p.val → V ⊧/(v ·) p.val := by
+lemma sigmaOne_upward_absolute {k} (φ : 𝚺₁.Semisentence k) (v : Fin k → ℕ) :
+    ℕ ⊧/v φ.val → V ⊧/(v ·) φ.val := by
   simp [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]
   exact nat_extention_sigmaOne V (by simp)
 
-lemma piOne_downward_absolute {k} (p : 𝚷₁.Semisentence k) (v : Fin k → ℕ) :
-    V ⊧/(v ·) p.val → ℕ ⊧/v p.val := by
+lemma piOne_downward_absolute {k} (φ : 𝚷₁.Semisentence k) (v : Fin k → ℕ) :
+    V ⊧/(v ·) φ.val → ℕ ⊧/v φ.val := by
   simp [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]
   exact nat_extention_piOne V (by simp)
 
-lemma deltaOne_absolute {k} (p : 𝚫₁.Semisentence k)
-    (properNat : p.ProperOn ℕ) (proper : p.ProperOn V) (v : Fin k → ℕ) :
-    ℕ ⊧/v p.val ↔ V ⊧/(v ·) p.val :=
-  ⟨by simpa [HierarchySymbol.Semiformula.val_sigma] using sigmaOne_upward_absolute V p.sigma v,
-   by simpa [proper.iff', properNat.iff'] using piOne_downward_absolute V p.pi v⟩
+lemma deltaOne_absolute {k} (φ : 𝚫₁.Semisentence k)
+    (properNat : φ.ProperOn ℕ) (proper : φ.ProperOn V) (v : Fin k → ℕ) :
+    ℕ ⊧/v φ.val ↔ V ⊧/(v ·) φ.val :=
+  ⟨by simpa [HierarchySymbol.Semiformula.val_sigma] using sigmaOne_upward_absolute V φ.sigma v,
+   by simpa [proper.iff', properNat.iff'] using piOne_downward_absolute V φ.pi v⟩
 
-lemma Defined.shigmaOne_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop} {p : 𝚫₁.Semisentence k}
-    (hR : 𝚫₁.Defined R p) (hR' : 𝚫₁.Defined R' p) (v : Fin k → ℕ) :
+lemma Defined.shigmaOne_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop} {φ : 𝚫₁.Semisentence k}
+    (hR : 𝚫₁.Defined R φ) (hR' : 𝚫₁.Defined R' φ) (v : Fin k → ℕ) :
     R v ↔ R' (fun i ↦ (v i : V)) := by
-  simpa [hR.df.iff, hR'.df.iff] using deltaOne_absolute V p hR.proper hR'.proper v
+  simpa [hR.df.iff, hR'.df.iff] using deltaOne_absolute V φ hR.proper hR'.proper v
 
-lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V} {p : 𝚺₁.Semisentence (k + 1)}
-    (hf : 𝚺₁.DefinedFunction f p) (hf' : 𝚺₁.DefinedFunction f' p) (v : Fin k → ℕ) :
+lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V} {φ : 𝚺₁.Semisentence (k + 1)}
+    (hf : 𝚺₁.DefinedFunction f φ) (hf' : 𝚺₁.DefinedFunction f' φ) (v : Fin k → ℕ) :
     (f v : V) = f' (fun i ↦ (v i)) := by
   simpa using Defined.shigmaOne_absolute V hf.graph_delta hf'.graph_delta (f v :> v)
 
@@ -82,28 +82,28 @@ variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ≼ T] [Sigma1Sound T]
 noncomputable instance : 𝐑₀ ≼ T := System.Subtheory.comp (𝓣 := 𝐏𝐀⁻) inferInstance inferInstance
 
 theorem sigma_one_completeness_iff_param {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 1 σ) {e : Fin n → ℕ} :
-    ℕ ⊧/e σ ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := Iff.trans
+    ℕ ⊧/e σ ↔ T ⊢!. (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := Iff.trans
   (by simp [models_iff, Semiformula.eval_substs])
   (sigma_one_completeness_iff (T := T) (by simp [hσ]))
 
 lemma models_iff_provable_of_Sigma0_param [V ⊧ₘ* T] {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 0 σ) {e : Fin n → ℕ} :
-    V ⊧/(e ·) σ ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := by
+    V ⊧/(e ·) σ ↔ T ⊢!. (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := by
   calc
     V ⊧/(e ·) σ ↔ ℕ ⊧/e σ        := by
       simp [models_iff_of_Sigma0 hσ]
-  _             ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := by
+  _             ↔ T ⊢!. (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := by
       apply sigma_one_completeness_iff_param (by simp [Hierarchy.of_zero hσ])
 
 lemma models_iff_provable_of_Delta1_param [V ⊧ₘ* T] {σ : 𝚫₁.Semisentence n} (hσ : σ.ProperOn ℕ) (hσV : σ.ProperOn V) {e : Fin n → ℕ} :
-    V ⊧/(e ·) σ.val ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ := by
+    V ⊧/(e ·) σ.val ↔ T ⊢!. (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := by
   calc
     V ⊧/(e ·) σ.val ↔ ℕ ⊧/e σ.val        := by
       simp [models_iff_of_Delta1 hσ hσV]
   _                 ↔ ℕ ⊧/e σ.sigma.val  := by
       simp [HierarchySymbol.Semiformula.val_sigma]
-  _                 ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ.sigma.val := by
+  _                 ↔ T ⊢!. (σ.sigma.val ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := by
       apply sigma_one_completeness_iff_param (by simp)
-  _                 ↔ T ⊢!. (Rew.substs fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)).hom σ.val       := by
+  _                 ↔ T ⊢!. (σ.val ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x))       := by
       simp [HierarchySymbol.Semiformula.val_sigma]
 
 end Arith

@@ -7,8 +7,8 @@ notation "exp " x:90 => Exp.exp x
 
 namespace Matrix
 
-lemma forall_iff {n : ℕ} (p : (Fin (n + 1) → α) → Prop) :
-    (∀ v, p v) ↔ (∀ a, ∀ v, p (a :> v)) :=
+lemma forall_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
+    (∀ v, φ v) ↔ (∀ a, ∀ v, φ (a :> v)) :=
   ⟨fun h a v ↦ h (a :> v), fun h v ↦ by simpa [←eq_vecCons v] using h (v 0) (v ∘ Fin.succ)⟩
 
 lemma comp_vecCons₂' (g : β → γ) (f : α → β) (a : α) (s : Fin n → α) :
@@ -33,14 +33,13 @@ namespace Matrix
 lemma fun_eq_vec₃ {v : Fin 3 → α} : v = ![v 0, v 1, v 2] := by
   funext x
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
-  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
+  cases' x using Fin.cases with x <;> simp [Fin.eq_zero] <;> try rfl
 
 lemma fun_eq_vec₄ {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
   funext x
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
-  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
-  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
-  rfl
+  cases' x using Fin.cases with x <;> simp [Fin.eq_zero] <;> try rfl
+  cases' x using Fin.cases with x <;> simp [Fin.eq_zero] <;> try rfl
 
 @[simp] lemma cons_app_four {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ → α) : (a :> s) 4 = s 3 := rfl
 
@@ -175,12 +174,12 @@ def formulaToStr : ∀ {n}, Semiformula ℒₒᵣ μ n → String
   | _, rel Language.LT.lt v          => termToStr (v 0) ++ " < " ++ termToStr (v 1)
   | _, nrel Language.Eq.eq v         => termToStr (v 0) ++ " \\not = " ++ termToStr (v 1)
   | _, nrel Language.LT.lt v         => termToStr (v 0) ++ " \\not < " ++ termToStr (v 1)
-  | _, p ⋏ q                         => "[" ++ formulaToStr p ++ "]" ++ " \\land " ++ "[" ++ formulaToStr q ++ "]"
-  | _, p ⋎ q                         => "[" ++ formulaToStr p ++ "]" ++ " \\lor "  ++ "[" ++ formulaToStr q ++ "]"
-  | n, ∀' (rel Language.LT.lt v ➝ p) => "(\\forall x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr p ++ "]"
-  | n, ∃' (rel Language.LT.lt v ⋏ p) => "(\\exists x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr p  ++ "]"
-  | n, ∀' p                          => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr p ++ "]"
-  | n, ∃' p                          => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr p ++ "]"
+  | _, φ ⋏ ψ                         => "[" ++ formulaToStr φ ++ "]" ++ " \\land " ++ "[" ++ formulaToStr ψ ++ "]"
+  | _, φ ⋎ ψ                         => "[" ++ formulaToStr φ ++ "]" ++ " \\lor "  ++ "[" ++ formulaToStr ψ ++ "]"
+  | n, ∀' (rel Language.LT.lt v ➝ φ) => "(\\forall x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr φ ++ "]"
+  | n, ∃' (rel Language.LT.lt v ⋏ φ) => "(\\exists x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr φ  ++ "]"
+  | n, ∀' φ                          => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr φ ++ "]"
+  | n, ∃' φ                          => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr φ ++ "]"
 
 instance : Repr (Semiformula ℒₒᵣ μ n) := ⟨fun t _ => formulaToStr t⟩
 
@@ -229,7 +228,7 @@ variable {M : Type*} [Nonempty M] [Structure L M]
 
 abbrev Semiterm.Rlz (t : Semiterm L M n) (e : Fin n → M) : M := t.valm M e id
 
-abbrev Semiformula.Rlz (p : Semiformula L M n) (e : Fin n → M) : Prop := Evalm M e id p
+abbrev Semiformula.Rlz (φ : Semiformula L M n) (e : Fin n → M) : Prop := Evalm M e id φ
 
 @[simp] lemma models₀_not_iff (σ : Sentence L) : M ⊧ₘ₀ (∼σ) ↔ ¬M ⊧ₘ₀ σ := by simp [models₀_iff]
 
@@ -247,14 +246,14 @@ section
 variable {L : FirstOrder.Language} [L.LT] {μ : Type v}
 
 @[simp]
-lemma exItr {n} : {k : ℕ} → {p : Semiformula L μ (n + k)} → Hierarchy 𝚺 (s + 1) (∃^[k] p) ↔ Hierarchy 𝚺 (s + 1) p
-  | 0,     p => by simp
-  | k + 1, p => by simp [LO.exItr_succ, exItr]
+lemma exItr {n} : {k : ℕ} → {φ : Semiformula L μ (n + k)} → Hierarchy 𝚺 (s + 1) (∃^[k] φ) ↔ Hierarchy 𝚺 (s + 1) φ
+  | 0,     φ => by simp
+  | k + 1, φ => by simp [LO.exItr_succ, exItr]
 
 @[simp]
-lemma univItr {n} : {k : ℕ} → {p : Semiformula L μ (n + k)} → Hierarchy 𝚷 (s + 1) (∀^[k] p) ↔ Hierarchy 𝚷 (s + 1) p
-  | 0,     p => by simp
-  | k + 1, p => by simp [LO.univItr_succ, univItr]
+lemma univItr {n} : {k : ℕ} → {φ : Semiformula L μ (n + k)} → Hierarchy 𝚷 (s + 1) (∀^[k] φ) ↔ Hierarchy 𝚷 (s + 1) φ
+  | 0,     φ => by simp
+  | k + 1, φ => by simp [LO.univItr_succ, univItr]
 
 end
 
@@ -287,7 +286,7 @@ variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐑₀]
 
 lemma bold_sigma_one_completeness' {n} {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 1 σ) {e} :
     Semiformula.Evalbm ℕ e σ → Semiformula.Evalbm M (fun x ↦ numeral (e x)) σ := fun h ↦ by
-  simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (p := σ) hσ (f := Empty.elim) (e := e) h
+  simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (φ := σ) hσ (f := Empty.elim) (e := e) h
 
 end LO.Arith
 
