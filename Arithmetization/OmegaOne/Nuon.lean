@@ -506,7 +506,6 @@ def segmentDef : 𝚺₀.Semisentence 7 := .mkSigma
 
 lemma segmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ Segment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5) (v 6)) segmentDef := by
   intro v; simp [Segment, segmentDef, ext_defined.df.iff, isSegmentDef_defined.df.iff, @Eq.comm _ (v 5), @Eq.comm _ (v 6)]
-  rfl
 
 def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
   “U I L A iter T.
@@ -530,7 +529,7 @@ lemma isSerieDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSeries (v 0) (v 
   intro v; simp [IsSeries, isSeriesDef, length_defined.df.iff, ext_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
   apply forall₂_congr; intro x _
   rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]
-  simp; rfl
+  simp
 
 
 def seriesDef : 𝚺₀.Semisentence 6 := .mkSigma
@@ -557,7 +556,7 @@ lemma seriesSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ SeriesSegmen
     length_defined.df.iff, div_defined.df.iff, rem_defined.df.iff, seriesDef_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
   apply exists_congr; intro nₖ
   apply and_congr_right; intros
-  rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp; rfl
+  rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp
 
 def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
   “A k n.

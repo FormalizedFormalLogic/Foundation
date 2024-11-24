@@ -98,7 +98,6 @@ lemma succ_defined : 𝚺₁.DefinedFunction (fun v : Fin (k + 2) → V ↦ c.su
   intro v
   simp [Blueprint.succDef, succ_graph, HierarchySymbol.Semiformula.val_sigma, c.eval_formula,
     c.defined.proper.iff', -and_imp, ←iff_iff_implies_and_implies]
-  rfl
 
 lemma eval_succDef (v) :
     Semiformula.Evalbm V v φ.succDef.val ↔ v 0 = c.succ (v ·.succ.succ.succ) (v 2) (v 1) := c.succ_defined.df.iff v

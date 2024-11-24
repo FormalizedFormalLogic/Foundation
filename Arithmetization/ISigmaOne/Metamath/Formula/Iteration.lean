@@ -36,7 +36,7 @@ def construction : VecRec.Construction V blueprint where
   nil _ := ^⊤
   cons _ p _ ih := p ^⋏ ih
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by intro v; simp [blueprint]; rfl
+  cons_defined := by intro v; simp [blueprint]
 
 end QQConj
 
@@ -105,7 +105,7 @@ def construction : VecRec.Construction V blueprint where
   nil _ := ^⊥
   cons _ p _ ih := p ^⋎ ih
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by intro v; simp [blueprint]; rfl
+  cons_defined := by intro v; simp [blueprint]
 
 end QQDisj
 
@@ -188,7 +188,7 @@ section
 def _root_.LO.FirstOrder.Arith.substItrDef : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.substs ![#0, #3, #1, #2])
 
 lemma substItr_defined : 𝚺₁-Function₃ (substItr : V → V → V → V) via substItrDef :=
-  fun v ↦ by simp [construction.result_defined_iff, substItrDef, substItr]; rfl
+  fun v ↦ by simp [construction.result_defined_iff, substItrDef, substItr]
 
 @[simp] lemma substItr_defined_iff (v) :
     Semiformula.Evalbm V v substItrDef.val ↔ v 0 = substItr (v 1) (v 2) (v 3) := substItr_defined.df.iff v

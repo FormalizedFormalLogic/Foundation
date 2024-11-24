@@ -46,8 +46,8 @@ def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   falsum_defined := by intro v; simp [blueprint]
   and_defined := by intro v; simp [blueprint]; rfl
   or_defined := by intro v; simp [blueprint]; rfl
-  all_defined := by intro v; simp [blueprint]; rfl
-  ex_defined := by intro v; simp [blueprint]; rfl
+  all_defined := by intro v; simp [blueprint]
+  ex_defined := by intro v; simp [blueprint]
   allChanges_defined := by intro v; simp [blueprint]
   exChanges_defined := by intro v; simp [blueprint]
 
@@ -271,8 +271,8 @@ def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   falsum_defined := by intro v; simp [blueprint]
   and_defined := by intro v; simp [blueprint]; rfl
   or_defined := by intro v; simp [blueprint]; rfl
-  all_defined := by intro v; simp [blueprint]; rfl
-  ex_defined := by intro v; simp [blueprint]; rfl
+  all_defined := by intro v; simp [blueprint]
+  ex_defined := by intro v; simp [blueprint]
   allChanges_defined := by intro v; simp [blueprint]
   exChanges_defined := by intro v; simp [blueprint]
 
@@ -434,8 +434,8 @@ def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   falsum_defined := by intro v; simp [blueprint]
   and_defined := by intro v; simp [blueprint]; rfl
   or_defined := by intro v; simp [blueprint]; rfl
-  all_defined := by intro v; simp [blueprint]; rfl
-  ex_defined := by intro v; simp [blueprint]; rfl
+  all_defined := by intro v; simp [blueprint]
+  ex_defined := by intro v; simp [blueprint]
   allChanges_defined := by intro v; simp [blueprint, L.qVec_defined.df.iff]
   exChanges_defined := by intro v; simp [blueprint, L.qVec_defined.df.iff]
 

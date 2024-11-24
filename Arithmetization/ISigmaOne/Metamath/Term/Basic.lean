@@ -383,7 +383,7 @@ def construction : Fixpoint.Construction V β.blueprint where
         c.func_defined.iff, c.func_defined.graph_delta.proper.iff']
       -/
       simp only [Nat.succ_eq_add_one, Blueprint.blueprint, Nat.reduceAdd, HierarchySymbol.Semiformula.val_sigma,
-        BinderNotation.finSuccItr_one, Nat.add_zero, HierarchySymbol.Semiformula.sigma_mkDelta,
+        Nat.add_zero, HierarchySymbol.Semiformula.sigma_mkDelta,
         HierarchySymbol.Semiformula.val_mkSigma, Semiformula.eval_bexLTSucc', Semiterm.val_bvar,
         Matrix.cons_val_one, Matrix.vecHead, LogicalConnective.HomClass.map_and,
         Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.cons_val_two, Matrix.vecTail,
@@ -408,7 +408,7 @@ def construction : Fixpoint.Construction V β.blueprint where
           c.bvar_defined.iff, c.fvar_defined.iff, c.func_defined.iff]
         using c.phi_iff _ _ _
         -/
-        simpa only [Nat.succ_eq_add_one, BinderNotation.finSuccItr_one, Blueprint.blueprint,
+        simpa only [Nat.succ_eq_add_one, Blueprint.blueprint,
           Nat.reduceAdd, HierarchySymbol.Semiformula.val_sigma,
           HierarchySymbol.Semiformula.val_mkDelta, HierarchySymbol.Semiformula.val_mkSigma,
           Semiformula.eval_bexLTSucc', Semiterm.val_bvar, Matrix.cons_val_one, Matrix.vecHead,

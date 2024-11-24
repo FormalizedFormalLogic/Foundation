@@ -1,14 +1,14 @@
 import Foundation.FirstOrder.Arith.Representation
 import Foundation.FirstOrder.Arith.PeanoMinus
-
+import Mathlib.Data.Fin.Basic
 instance [Zero α] : Nonempty α := ⟨0⟩
 
 notation "exp " x:90 => Exp.exp x
 
 namespace Matrix
 
-lemma forall_iff {n : ℕ} (p : (Fin (n + 1) → α) → Prop) :
-    (∀ v, p v) ↔ (∀ a, ∀ v, p (a :> v)) :=
+lemma forall_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
+    (∀ v, φ v) ↔ (∀ a, ∀ v, φ (a :> v)) :=
   ⟨fun h a v ↦ h (a :> v), fun h v ↦ by simpa [←eq_vecCons v] using h (v 0) (v ∘ Fin.succ)⟩
 
 lemma comp_vecCons₂' (g : β → γ) (f : α → β) (a : α) (s : Fin n → α) :
@@ -145,6 +145,56 @@ end SigmaPiDelta
 
 namespace FirstOrder
 
+namespace Semiterm
+
+def fvarList : Semiterm L ξ n → List ξ
+  | #_       => []
+  | &x       => [x]
+  | func _ v => List.flatten <| Matrix.toList fun i ↦ fvarList (v i)
+
+def fvarEnum [DecidableEq ξ] (t : Semiterm L ξ n) : ξ → ℕ := t.fvarList.indexOf
+
+def fvarEnumInv [Inhabited ξ] (t : Semiterm L ξ n) : ℕ → ξ :=
+  fun i ↦ if hi : i < t.fvarList.length then t.fvarList.get ⟨i, hi⟩ else default
+
+lemma fvarEnumInv_fvarEnum [DecidableEq ξ] [Inhabited ξ] {t : Semiterm L ξ n} {x : ξ} (hx : x ∈ t.fvarList) :
+    fvarEnumInv t (fvarEnum t x) = x := by
+  simp [fvarEnumInv, fvarEnum]; intro h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+
+lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {t : Semiterm L ξ n} : x ∈ t.fvarList ↔ t.FVar? x:= by
+  induction t <;> simp [fvarList, *]
+  case fvar x => simp [eq_comm]
+
+end Semiterm
+
+namespace Semiformula
+
+def fvarList {n : ℕ} : Semiformula L ξ n → List ξ
+  | ⊤        => []
+  | ⊥        => []
+  | rel _ v  => List.flatten <| Matrix.toList fun i ↦ (v i).fvarList
+  | nrel _ v => List.flatten <| Matrix.toList fun i ↦ (v i).fvarList
+  | p ⋏ q    => p.fvarList ++ q.fvarList
+  | p ⋎ q    => p.fvarList ++ q.fvarList
+  | ∀' p     => p.fvarList
+  | ∃' p     => p.fvarList
+
+def fvarEnum [DecidableEq ξ] (φ : Semiformula L ξ n) : ξ → ℕ := φ.fvarList.indexOf
+
+def fvarEnumInv [Inhabited ξ] (φ : Semiformula L ξ n) : ℕ → ξ :=
+  fun i ↦ if hi : i < φ.fvarList.length then φ.fvarList.get ⟨i, hi⟩ else default
+
+lemma fvarEnumInv_fvarEnum [DecidableEq ξ] [Inhabited ξ] {φ : Semiformula L ξ n} {x : ξ} (hx : x ∈ φ.fvarList) :
+    fvarEnumInv φ (fvarEnum φ x) = x := by
+  simp [fvarEnumInv, fvarEnum]; intro h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr hx) h
+
+lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {φ : Semiformula L ξ n} : x ∈ φ.fvarList ↔ φ.FVar? x := by
+  induction φ using rec' <;> simp [fvarList, Semiterm.mem_fvarList_iff_fvar?, *]
+
+end Semiformula
+
 namespace Arith
 
 attribute [simp] Semiformula.eval_substs Semiformula.eval_embSubsts
@@ -175,12 +225,12 @@ def formulaToStr : ∀ {n}, Semiformula ℒₒᵣ μ n → String
   | _, rel Language.LT.lt v          => termToStr (v 0) ++ " < " ++ termToStr (v 1)
   | _, nrel Language.Eq.eq v         => termToStr (v 0) ++ " \\not = " ++ termToStr (v 1)
   | _, nrel Language.LT.lt v         => termToStr (v 0) ++ " \\not < " ++ termToStr (v 1)
-  | _, p ⋏ q                         => "[" ++ formulaToStr p ++ "]" ++ " \\land " ++ "[" ++ formulaToStr q ++ "]"
-  | _, p ⋎ q                         => "[" ++ formulaToStr p ++ "]" ++ " \\lor "  ++ "[" ++ formulaToStr q ++ "]"
-  | n, ∀' (rel Language.LT.lt v ➝ p) => "(\\forall x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr p ++ "]"
-  | n, ∃' (rel Language.LT.lt v ⋏ p) => "(\\exists x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr p  ++ "]"
-  | n, ∀' p                          => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr p ++ "]"
-  | n, ∃' p                          => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr p ++ "]"
+  | _, φ ⋏ ψ                         => "[" ++ formulaToStr φ ++ "]" ++ " \\land " ++ "[" ++ formulaToStr ψ ++ "]"
+  | _, φ ⋎ ψ                         => "[" ++ formulaToStr φ ++ "]" ++ " \\lor "  ++ "[" ++ formulaToStr ψ ++ "]"
+  | n, ∀' (rel Language.LT.lt v ➝ φ) => "(\\forall x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr φ ++ "]"
+  | n, ∃' (rel Language.LT.lt v ⋏ φ) => "(\\exists x_{" ++ toString n ++ "} < " ++ termToStr (v 1) ++ ") " ++ "[" ++ formulaToStr φ  ++ "]"
+  | n, ∀' φ                          => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr φ ++ "]"
+  | n, ∃' φ                          => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ formulaToStr φ ++ "]"
 
 instance : Repr (Semiformula ℒₒᵣ μ n) := ⟨fun t _ => formulaToStr t⟩
 
@@ -229,7 +279,7 @@ variable {M : Type*} [Nonempty M] [Structure L M]
 
 abbrev Semiterm.Rlz (t : Semiterm L M n) (e : Fin n → M) : M := t.valm M e id
 
-abbrev Semiformula.Rlz (p : Semiformula L M n) (e : Fin n → M) : Prop := Evalm M e id p
+abbrev Semiformula.Rlz (φ : Semiformula L M n) (e : Fin n → M) : Prop := Evalm M e id φ
 
 @[simp] lemma models₀_not_iff (σ : Sentence L) : M ⊧ₘ₀ (∼σ) ↔ ¬M ⊧ₘ₀ σ := by simp [models₀_iff]
 
@@ -247,14 +297,14 @@ section
 variable {L : FirstOrder.Language} [L.LT] {μ : Type v}
 
 @[simp]
-lemma exItr {n} : {k : ℕ} → {p : Semiformula L μ (n + k)} → Hierarchy 𝚺 (s + 1) (∃^[k] p) ↔ Hierarchy 𝚺 (s + 1) p
-  | 0,     p => by simp
-  | k + 1, p => by simp [LO.exItr_succ, exItr]
+lemma exItr {n} : {k : ℕ} → {φ : Semiformula L μ (n + k)} → Hierarchy 𝚺 (s + 1) (∃^[k] φ) ↔ Hierarchy 𝚺 (s + 1) φ
+  | 0,     φ => by simp
+  | k + 1, φ => by simp [LO.exItr_succ, exItr]
 
 @[simp]
-lemma univItr {n} : {k : ℕ} → {p : Semiformula L μ (n + k)} → Hierarchy 𝚷 (s + 1) (∀^[k] p) ↔ Hierarchy 𝚷 (s + 1) p
-  | 0,     p => by simp
-  | k + 1, p => by simp [LO.univItr_succ, univItr]
+lemma univItr {n} : {k : ℕ} → {φ : Semiformula L μ (n + k)} → Hierarchy 𝚷 (s + 1) (∀^[k] φ) ↔ Hierarchy 𝚷 (s + 1) φ
+  | 0,     φ => by simp
+  | k + 1, φ => by simp [LO.univItr_succ, univItr]
 
 end
 
@@ -287,7 +337,7 @@ variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐑₀]
 
 lemma bold_sigma_one_completeness' {n} {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 1 σ) {e} :
     Semiformula.Evalbm ℕ e σ → Semiformula.Evalbm M (fun x ↦ numeral (e x)) σ := fun h ↦ by
-  simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (p := σ) hσ (f := Empty.elim) (e := e) h
+  simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (φ := σ) hσ (f := Empty.elim) (e := e) h
 
 end LO.Arith
 

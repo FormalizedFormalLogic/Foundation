@@ -25,7 +25,7 @@ def construction : Language.TermRec.Construction V L (blueprint pL) where
   bvar (param z)        := (param 1).[z]
   fvar (_     x)        := ^&x
   func (_     k f _ v') := ^func k f v'
-  bvar_defined := by intro v; simp [blueprint]; rfl
+  bvar_defined := by intro v; simp [blueprint]
   fvar_defined := by intro v; simp [blueprint]
   func_defined := by intro v; simp [blueprint]; rfl
 

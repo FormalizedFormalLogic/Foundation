@@ -1285,8 +1285,8 @@ def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
   nrel := .mkSigma “y param k R v. ∃ M, !pL.termBVVecDef M k v ∧ !listMaxDef y M” (by simp)
   verum := .mkSigma “y param. y = 0” (by simp)
   falsum := .mkSigma “y param. y = 0” (by simp)
-  and := .mkSigma “y param p₁ p₂ y₁ y₂. !max y y₁ y₂” (by simp)
-  or := .mkSigma “y param p₁ p₂ y₁ y₂. !max y y₁ y₂” (by simp)
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. !Arith.max y y₁ y₂” (by simp)
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. !Arith.max y y₁ y₂” (by simp)
   all := .mkSigma “y param p₁ y₁. !subDef y y₁ 1” (by simp)
   ex := .mkSigma “y param p₁ y₁. !subDef y y₁ 1” (by simp)
   allChanges := .mkSigma “param' param. param' = 0” (by simp)
@@ -1311,8 +1311,8 @@ def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   falsum_defined := by intro v; simp [blueprint]
   and_defined := by intro v; simp [blueprint]; rfl
   or_defined := by intro v; simp [blueprint]; rfl
-  all_defined := by intro v; simp [blueprint]; rfl
-  ex_defined := by intro v; simp [blueprint]; rfl
+  all_defined := by intro v; simp [blueprint]
+  ex_defined := by intro v; simp [blueprint]
   allChanges_defined := by intro v; simp [blueprint]
   exChanges_defined := by intro v; simp [blueprint]
 

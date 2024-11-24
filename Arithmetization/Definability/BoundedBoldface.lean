@@ -143,10 +143,10 @@ lemma ball_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Boldface fun v ↦ ∀ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨p, hp⟩
+  rcases h with ⟨φ, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y < x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.ball (#0) (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i ↦ #i.succ.succ)) p))) := by
+      (f_graph ⋏ HierarchySymbol.Semiformula.ball (#0) (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i ↦ #i.succ.succ)) φ))) := by
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball #0)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
@@ -156,10 +156,10 @@ lemma bex_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Boldface fun v ↦ ∃ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨p, hp⟩
+  rcases h with ⟨φ, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y < x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.bex (#0) (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
+      (f_graph ⋏ HierarchySymbol.Semiformula.bex (#0) (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) φ))) := by
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex #0)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
@@ -168,10 +168,10 @@ lemma ball_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Boldface fun v ↦ ∀ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨p, hp⟩
+  rcases h with ⟨φ, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y ≤ x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.ball ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
+      (f_graph ⋏ HierarchySymbol.Semiformula.ball ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) φ))) := by
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball ‘x. x + 1’)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
@@ -180,10 +180,10 @@ lemma bex_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     ℌ.Boldface fun v ↦ ∃ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
   rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨p, hp⟩
+  rcases h with ⟨φ, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y ≤ x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.bex ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) p))) := by
+      (f_graph ⋏ HierarchySymbol.Semiformula.bex ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) φ))) := by
     simpa [←le_iff_lt_succ] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex ‘x. x + 1’)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
@@ -203,9 +203,9 @@ lemma bex_ble_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : BoldfaceBoundedFunction f) (h : Γ-[0].Boldface fun w ↦ P (w ·.succ) (w 0)) :
     Γ-[0].Boldface fun v ↦ ∃ x ≤ f v, P v x := bex_ble hf h
 
-lemma bex_vec_le_boldfaceBoundedFunction {k} {p : Fin l → (Fin k → V) → V} {P : (Fin k → V) → (Fin l → V) → Prop}
-    (pp : ∀ i, BoldfaceBoundedFunction (p i)) (hP : ℌ.Boldface fun w : Fin (k + l) → V ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
-    ℌ.Boldface fun v ↦ ∃ w ≤ (p · v), P v w := by
+lemma bex_vec_le_boldfaceBoundedFunction {k} {φ : Fin l → (Fin k → V) → V} {P : (Fin k → V) → (Fin l → V) → Prop}
+    (pp : ∀ i, BoldfaceBoundedFunction (φ i)) (hP : ℌ.Boldface fun w : Fin (k + l) → V ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
+    ℌ.Boldface fun v ↦ ∃ w ≤ (φ · v), P v w := by
   induction l generalizing k
   case zero => simpa [Matrix.empty_eq (α := V)] using hP
   case succ l ih =>
