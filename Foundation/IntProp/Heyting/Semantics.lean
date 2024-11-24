@@ -4,7 +4,7 @@ import Foundation.Logic.LindenbaumAlgebra
 
 namespace LO.IntProp
 
-variable {α : Type u} [DecidableEq α]
+variable {α : Type u}
 
 namespace Formula
 
@@ -94,9 +94,9 @@ lemma val_not (φ : Formula α) : ℍ ⊧ ∼φ ↔ (ℍ ⊧ₕ φ) = ⊥ := by 
 
 def mod (H : Hilbert α) : Set (HeytingSemantics α) := Semantics.models (HeytingSemantics α) H.axioms
 
-variable {H : Hilbert α} [H.IncludeEFQ]
+variable {H : Hilbert α}
 
-instance : System.Intuitionistic H where
+instance [H.IncludeEFQ] : System.Intuitionistic H where
 
 lemma mod_models_iff {φ : Formula α} :
     mod.{_,w} H ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* H.axioms → ℍ ⊧ φ := by
@@ -129,8 +129,7 @@ section
 
 open System.LindenbaumAlgebra
 
-variable (H)
-variable [System.Consistent H]
+variable [DecidableEq α] (H) [H.IncludeEFQ] [System.Consistent H]
 
 def lindenbaum : HeytingSemantics α where
   Algebra := System.LindenbaumAlgebra H
@@ -159,12 +158,12 @@ end
 
 open Hilbert.Deduction
 
-lemma complete {φ : Formula α} (h : mod.{_,u} H ⊧ φ) : H ⊢! φ := by
+lemma complete [DecidableEq α] {φ : Formula α} [H.IncludeEFQ] (h : mod.{_,u} H ⊧ φ) : H ⊢! φ := by
   wlog Con : System.Consistent H
   · exact System.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <|
     mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hq ↦ lindenbaum_complete_iff.mpr <| eaxm! hq⟩
 
-instance : Complete H (mod.{_,u} H) := ⟨complete⟩
+instance [DecidableEq α] [H.IncludeEFQ] : Complete H (mod.{_,u} H) := ⟨complete⟩
 
 end HeytingSemantics
