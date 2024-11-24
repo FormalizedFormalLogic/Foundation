@@ -23,7 +23,7 @@ def rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : Semiformulaᵢ L ξ₁ n₁ →ˡ�
   map_or' := fun _ _ ↦ rfl
   map_imply' := fun _ _ ↦ rfl
 
-instance : Rewriting L (Semiformulaᵢ L) where
+instance : Rewriting L ξ (Semiformulaᵢ L ξ) ζ (Semiformulaᵢ L ζ) where
   app := rew
   app_all (_ _) := rfl
   app_ex (_ _) := rfl
@@ -61,11 +61,17 @@ private lemma map_inj {n₁ n₂} {b : Fin n₁ → Fin n₂} {f : ξ₁ → ξ�
     intro h; exact map_inj (b := 0 :> Fin.succ ∘ b)
       (Matrix.injective_vecCons ((Fin.succ_injective _).comp hb) (fun _ ↦ (Fin.succ_ne_zero _).symm)) hf h
 
-instance : LawfulRewriting L (Semiformulaᵢ L) where
-  id_smul (φ) := by induction φ using rec' <;> simp [rew_rel, *]
-  comp_smul {ξ₁ n₁ ξ₂ n₂ ξ₃ n₃ ω₁₂ ω₂₃ φ} := by
+instance : ReflectiveRewriting L ξ (Semiformulaᵢ L ξ) where
+  id_app (φ) := by induction φ using rec' <;> simp [rew_rel, *]
+
+instance : TransitiveRewriting L ξ₁ (Semiformulaᵢ L ξ₁) ξ₂ (Semiformulaᵢ L ξ₂) ξ₃ (Semiformulaᵢ L ξ₃) where
+  comp_app {n₁ n₂ n₃ ω₁₂ ω₂₃ φ} := by
     induction φ using rec' generalizing n₂ n₃ <;> simp [rew_rel, Rew.comp_app, Rew.q_comp, *]
-  smul_map_injective {n₁ n₂ ξ₁ ξ₂ b f hb hf} := map_inj hb hf
+
+instance : InjMapRewriting L ξ (Semiformulaᵢ L ξ) ζ (Semiformulaᵢ L ζ) where
+  smul_map_injective := map_inj
+
+instance : LawfulSyntacticRewriting L (SyntacticSemiformulaᵢ L) where
 
 @[simp] lemma complexity_rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformulaᵢ L ξ₁ n₁) : (ω ▹ φ).complexity = φ.complexity := by
   induction φ using rec' generalizing n₂ <;> simp [*, rew_rel]
