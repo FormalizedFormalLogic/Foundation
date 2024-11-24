@@ -10,10 +10,6 @@ abbrev finSuccItr {n} (i : Fin n) : (m : ℕ) → Fin (n + m)
   | 0     => i
   | m + 1 => (finSuccItr i m).succ
 
-@[simp] lemma finSuccItr_one {x : Fin n} : BinderNotation.finSuccItr x 1 = x.succ := rfl
-
-@[simp] lemma finSuccItr_two {x : Fin n} : BinderNotation.finSuccItr x 2 = x.succ.succ := rfl
-
 open Semiterm Semiformula
 
 declare_syntax_cat first_order_term
