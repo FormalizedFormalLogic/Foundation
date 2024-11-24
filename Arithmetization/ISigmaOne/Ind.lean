@@ -56,16 +56,15 @@ lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
       apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
         apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
-        · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
-        · simp_all only [zero_add, HierarchySymbol.BoldfaceFunction.const]
-      · simp_all only [Fin.isValue]
-        apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.or
+        · simp [Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
+        · simp [HierarchySymbol.BoldfaceFunction.const]
+      · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.or
         · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
-          · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
-          · simp_all only [zero_add, HierarchySymbol.BoldfaceFunction.const]
+          · simp [Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
+          · simp [HierarchySymbol.BoldfaceFunction.const]
         · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
-          · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
-          · simp_all only [zero_add, HierarchySymbol.BoldfaceFunction.const]
+          · simp [Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
+          · simp [HierarchySymbol.BoldfaceFunction.const]
     case ind z ih =>
       have : P z ∨ Q z :=
         ind z (fun y hy ↦ by
