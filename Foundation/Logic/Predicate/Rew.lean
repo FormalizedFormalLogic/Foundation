@@ -893,19 +893,17 @@ lemma allClosure_fixitr (φ : S 0) : ∀* Rew.fixitr 0 (m + 1) ▹ φ = ∀' Rew
 
 end LawfulSyntacticRewriting
 
-
-
-section LawfulRewriting
+namespace Rewriting
 
 variable {ο ξ : Type*} [IsEmpty ο] {O F : ℕ → Type*} [LCWQ O] [LCWQ F]
 
-open Rewriting ReflectiveRewriting TransitiveRewriting InjMapRewriting
+open ReflectiveRewriting TransitiveRewriting InjMapRewriting
 
 lemma smul_emb_injective [Rewriting L ο O ξ F] [InjMapRewriting L ο O ξ F] : Function.Injective fun φ : O n ↦ (embedding (ξ := ξ) φ : F n) :=
   smul_map_injective Function.injective_id (IsEmpty.elim inferInstance)
 
-@[simp] protected lemma emb_univClosure [Rewriting L ο O ξ F] {σ : O n} :
-    (embedding (ξ := ξ) (∀* σ) : F 0) = ∀* (embedding (ξ := ξ) σ : F n) := by induction n <;> simp [*, univClosure_succ]
+@[simp] lemma emb_univClosure [Rewriting L ο O ξ F] {σ : O n} :
+    (embedding (ξ := ξ) (∀* σ)) = ∀* (embedding (ξ := ξ) σ) := by induction n <;> simp [*, univClosure_succ]
 
 /-- `coe_substs_eq_substs_coe` -/
 lemma enbedding_substitute_eq_substitute_embedding
@@ -913,7 +911,7 @@ lemma enbedding_substitute_eq_substitute_embedding
     [TransitiveRewriting L ο O ο O ξ F]
     [TransitiveRewriting L ο O ξ F ξ F]
     (φ : O k) (v : Fin k → Semiterm L ο n) :
-    (embedding (ξ := ξ) (φ ⇜ v) : F n) = Rewriting.substitute (ξ := ξ) (embedding (ξ := ξ) φ : F k) (fun i ↦ Rew.emb (v i)) := by
+    (embedding (ξ := ξ) (φ ⇜ v)) = Rewriting.substitute (ξ := ξ) (embedding (ξ := ξ) φ) (fun i ↦ Rew.emb (v i)) := by
   unfold embedding substitute
   rw [←comp_smul, ←comp_smul]
   congr 2
@@ -922,14 +920,27 @@ lemma enbedding_substitute_eq_substitute_embedding
   · exact IsEmpty.elim inferInstance x
 
 /-- `coe_substs_eq_substs_coe₁` -/
-lemma coe_substs_eq_substs_coe₁
+lemma embedding_substs_eq_substs_coe₁
     [Rewriting L ο O ο O] [Rewriting L ο O ξ F] [Rewriting L ξ F ξ F]
     [TransitiveRewriting L ο O ο O ξ F]
     [TransitiveRewriting L ο O ξ F ξ F]
     (φ : O 1) (t : Semiterm L ο n) :
-    (embedding (ξ := ξ) (φ/[t]) : F n) = (embedding (ξ := ξ) φ : F 1)/[(Rew.emb t : Semiterm L ξ n)] := by
+    (embedding (ξ := ξ) (φ/[t])) = (embedding (ξ := ξ) φ)/[(Rew.emb t : Semiterm L ξ n)] := by
   simpa [Matrix.constant_eq_singleton] using enbedding_substitute_eq_substitute_embedding φ ![t]
 
-end LawfulRewriting
+variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S] [LawfulSyntacticRewriting L S]
+
+@[simp] lemma shifts_emb
+    [Rewriting L ο O ℕ F] [Rewriting L ℕ F ℕ F]
+    [TransitiveRewriting L ο O ℕ F ℕ F]
+    (Γ : List (O n)) :
+    (Γ.map (Rewriting.embedding (ξ := ℕ)))⁺ = Γ.map (Rewriting.embedding (ξ := ℕ)) := by
+  suffices ∀ a ∈ Γ, shift (embedding (ξ := ℕ) a) = embedding (ξ := ℕ) a by simp [shifts, Function.comp_def, ← comp_smul]
+  intro j hj
+  unfold embedding shift
+  rw [←comp_smul]; congr 2
+  ext x <;> simp
+
+end Rewriting
 
 end LO.FirstOrder
