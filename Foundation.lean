@@ -49,3 +49,8 @@ import Foundation.FirstOrder.Arith.Nonstandard
 
 import Foundation.IntProp.IntProp
 import Foundation.Modal.Modal
+
+-- IntFO
+
+import Foundation.IntFO.Basic
+import Foundation.IntFO.Translation
