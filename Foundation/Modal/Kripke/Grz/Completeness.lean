@@ -1,6 +1,6 @@
 import Foundation.Modal.Hilbert.Complemental
 import Foundation.Modal.Kripke.Grz.Definability
-
+import Foundation.Modal.Hilbert.WeakerThan.KT_Grz
 
 namespace LO.Modal
 

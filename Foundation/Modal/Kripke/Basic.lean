@@ -1,7 +1,7 @@
 import Foundation.Vorspiel.RelItr
 import Foundation.Logic.System
 import Foundation.Modal.Formula
-import Foundation.Modal.Hilbert.Strength
+import Foundation.Modal.Hilbert.Systems
 
 namespace LO.Modal
 
@@ -451,75 +451,6 @@ instance consistent : System.Consistent (Hilbert.K ℕ) := Kripke.instConsistent
   tauto;
 
 end K
-
-
-section
-
-open Formula (atom)
-open Formula.Kripke
-
-lemma K_strictlyWeakerThan_KD : (Hilbert.K ℕ) <ₛ (Hilbert.KD ℕ) := by
-  constructor;
-  . simp;
-  . simp [weakerThan_iff];
-    use (□(atom 0) ➝ ◇(atom 0));
-    constructor;
-    . exact axiomD!;
-    . apply K.Kripke.sound.not_provable_of_countermodel;
-      simp [ValidOnModel, ValidOnFrame, Satisfies];
-      use ⟨Fin 1, λ _ _ => False⟩, (λ w _ => w = 0), 0;
-      simp [Semantics.Realize, Satisfies];
-
-theorem K_strictlyWeakerThan_KB : (Hilbert.K ℕ) <ₛ (Hilbert.KB ℕ) := by
-  constructor;
-  . simp;
-  . simp [weakerThan_iff];
-    use ((atom 0) ➝ □◇(atom 0));
-    constructor;
-    . exact axiomB!;
-    . apply K.Kripke.sound.not_provable_of_countermodel;
-      simp [ValidOnModel, ValidOnFrame, Satisfies];
-      use ⟨Fin 2, λ x y => x = 0 ∧ y = 1⟩, (λ w _ => w = 0), 0;
-      simp [Semantics.Realize, Satisfies];
-      use 1;
-      tauto;
-
-theorem K_strictlyWeakerThan_K4 : (Hilbert.K ℕ) <ₛ (Hilbert.K4 ℕ) := by
-  constructor;
-  . simp;
-  . simp [weakerThan_iff];
-    use (□(atom 0) ➝ □□(atom 0));
-    constructor;
-    . exact axiomFour!;
-    . apply K.Kripke.sound.not_provable_of_countermodel;
-      simp [ValidOnModel, ValidOnFrame, Satisfies];
-      use ⟨Fin 2, λ x y => x ≠ y⟩, (λ w _ => w = 1), 0;
-      simp [Semantics.Realize, Satisfies];
-      constructor;
-      . intro x;
-        match x with
-        | 0 => tauto;
-        | 1 => tauto;
-      . use 1;
-        constructor;
-        . tauto;
-        . use 0; tauto;
-
-theorem K_strictlyWeakerThan_K5 : (Hilbert.K ℕ) <ₛ (Hilbert.K5 ℕ) := by
-  constructor;
-  . simp;
-  . simp [weakerThan_iff];
-    use (◇(atom default) ➝ □◇(atom default));
-    constructor;
-    . exact axiomFive!;
-    . apply K.Kripke.sound.not_provable_of_countermodel;
-      simp [ValidOnModel, ValidOnFrame, Satisfies];
-      use ⟨Fin 2, λ x _ => x = 0⟩, (λ w _ => w = 0), 0;
-      simp [Semantics.Realize, Satisfies];
-      use 1;
-      tauto;
-
-end
 
 
 section

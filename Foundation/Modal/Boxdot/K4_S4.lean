@@ -1,5 +1,5 @@
 import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Hilbert.Strength
+import Foundation.Modal.Hilbert.WeakerThan.K4_S4
 import Foundation.Modal.System.S4
 
 namespace LO.Modal

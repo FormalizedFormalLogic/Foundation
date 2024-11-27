@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert.Maximal.Basic
-import Foundation.Modal.Hilbert.Strength
+import Foundation.Modal.Hilbert.WeakerThan.K4_Triv
 import Foundation.IntProp.Kripke.Classical
 
 namespace LO.Modal
@@ -55,16 +55,6 @@ lemma unprovable_AxiomL : Hilbert.K4 ℕ ⊬ (Axioms.L (.atom a)) := by
 
 end K4
 
-theorem K4_strictReducible_GL : (Hilbert.K4 ℕ) <ₛ (Hilbert.GL ℕ) := by
-  dsimp [StrictlyWeakerThan];
-  constructor;
-  . exact K4_weakerThan_GL;
-  . apply System.not_weakerThan_iff.mpr;
-    use (Axioms.L (atom 0));
-    constructor;
-    . exact axiomL!;
-    . exact K4.unprovable_AxiomL;
-
 
 namespace GL
 
@@ -85,6 +75,11 @@ lemma unprovable_AxiomT : (Hilbert.GL ℕ) ⊬ Axioms.T (.atom a) := by
   apply IntProp.Hilbert.Cl.unprovable_of_exists_classicalValuation;
   use (λ _ => False);
   simp [Axioms.T, VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
+
+instance : System.Consistent (Hilbert.GL ℕ) := by
+  apply consistent_iff_exists_unprovable.mpr;
+  use (Axioms.T (atom 0));
+  apply unprovable_AxiomT;
 
 end GL
 

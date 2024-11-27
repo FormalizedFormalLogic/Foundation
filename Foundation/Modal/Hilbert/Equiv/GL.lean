@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.Strength
+import Foundation.Modal.Hilbert.WeakerThan.K4_GL
 
 
 namespace LO.System
