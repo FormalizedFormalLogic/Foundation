@@ -1,5 +1,5 @@
-import Foundation.IntProp.ConsistentTableau
-import Foundation.IntProp.Kripke.Semantics
+import Foundation.IntProp.Kripke.Basic
+import Foundation.IntProp.Hilbert.ConsistentTableau
 
 set_option autoImplicit false
 universe u

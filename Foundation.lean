@@ -47,8 +47,19 @@ import Foundation.FirstOrder.Arith.Nonstandard
 
 -- import Foundation.FirstOrder.Arith.EA.Basic
 
-import Foundation.IntProp.IntProp
+-- IntProp
+import Foundation.IntProp.Hilbert.Glivenko
 
+import Foundation.IntProp.Kripke.Classical
+import Foundation.IntProp.Kripke.Completeness
+import Foundation.IntProp.Kripke.DP
+
+import Foundation.IntProp.Heyting.Semantics
+
+import Foundation.IntProp.Dialectica.Basic
+
+
+-- Modal
 
 import Foundation.Modal.Hilbert.Subst
 import Foundation.Modal.Hilbert.GLAlternatives

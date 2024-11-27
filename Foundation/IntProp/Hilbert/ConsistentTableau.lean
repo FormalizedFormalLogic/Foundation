@@ -1,4 +1,4 @@
-import Foundation.IntProp.Deduction
+import Foundation.IntProp.Hilbert.Basic
 
 set_option autoImplicit false
 universe u v

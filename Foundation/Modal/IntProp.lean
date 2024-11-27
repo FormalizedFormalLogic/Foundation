@@ -1,4 +1,4 @@
-import Foundation.IntProp.Kripke.Classical
+import Foundation.IntProp.Formula
 import Foundation.Modal.Formula
 
 namespace LO.IntProp

@@ -1,4 +1,4 @@
-import Foundation.IntProp.Deduction
+import Foundation.IntProp.Hilbert.Basic
 import Foundation.Vorspiel.Order
 import Foundation.Logic.LindenbaumAlgebra
 

@@ -1,3 +1,4 @@
+import Foundation.IntProp.Kripke.Classical
 import Foundation.Modal.Hilbert.Systems
 import Foundation.Modal.IntProp
 
