@@ -1,4 +1,4 @@
-import Foundation.Modal.ConsistentTheory
+import Foundation.Modal.Hilbert.ConsistentTheory
 import Foundation.Modal.PLoN.Soundness
 
 namespace LO.Modal

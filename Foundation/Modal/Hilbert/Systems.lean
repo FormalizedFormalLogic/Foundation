@@ -1,5 +1,5 @@
-import Foundation.Modal.Hilbert.Preliminaries
-import Foundation.Modal.System.Preliminaries
+import Foundation.Modal.Hilbert.Basic
+import Foundation.Modal.System.Basic
 
 namespace LO.Modal.Hilbert
 

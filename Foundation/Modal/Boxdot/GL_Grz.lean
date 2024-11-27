@@ -1,4 +1,4 @@
-import Foundation.Modal.Boxdot.Preliminaries
+import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Kripke.Closure
 import Foundation.Modal.Kripke.Grz.Completeness
 import Foundation.Modal.Kripke.GL.Completeness

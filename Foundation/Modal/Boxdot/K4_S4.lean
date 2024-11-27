@@ -1,4 +1,4 @@
-import Foundation.Modal.Boxdot.Preliminaries
+import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Hilbert.Strength
 import Foundation.Modal.System.S4
 
