@@ -1,48 +1,16 @@
-import Foundation.Modal.Hilbert.Strength
 import Foundation.IntProp.Kripke.Classical
-
-/-!
-  # Maximality of `Hilbert.Triv α` and `𝐕𝐞𝐫`
-
-  `Hilbert.Triv α` and `𝐕𝐞𝐫` are maximal in normal modal Foundation.
--/
-
-namespace LO.IntProp
-
-def Formula.toModalFormula : Formula α → Modal.Formula α
-  | .atom a => Modal.Formula.atom a
-  | ⊤ => ⊤
-  | ⊥ => ⊥
-  | ∼φ => ∼(toModalFormula φ)
-  | φ ➝ ψ => (toModalFormula φ) ➝ (toModalFormula ψ)
-  | φ ⋏ ψ => (toModalFormula φ) ⋏ (toModalFormula ψ)
-  | φ ⋎ ψ => (toModalFormula φ) ⋎ (toModalFormula ψ)
-postfix:75 "ᴹ" => Formula.toModalFormula
-
-end LO.IntProp
-
+import Foundation.Modal.IntProp
+import Foundation.Modal.Hilbert.Strength
 
 namespace LO.Modal
+
 
 open IntProp
 
 variable {α} [DecidableEq α]
 
+
 namespace Formula
-
-def toPropFormula (φ : Formula α) (_ : φ.degree = 0 := by simp_all [Formula.degree, Formula.degree_neg, Formula.degree_imp]) : IntProp.Formula α :=
-  match φ with
-  | atom a => IntProp.Formula.atom a
-  | ⊥ => ⊥
-  | φ ➝ ψ => φ.toPropFormula ➝ ψ.toPropFormula
-postfix:75 "ᴾ" => Formula.toPropFormula
-
-namespace toPropFormula
-
-open System
-variable {φ ψ : Formula α} (hp : φ.degree = 0 := by simpa) (hq : ψ.degree = 0 := by simpa)
-
-end toPropFormula
 
 def TrivTranslation : Formula α → Formula α
   | atom a => atom a
@@ -135,7 +103,9 @@ lemma of_classical {mH : Modal.Hilbert α} {φ : IntProp.Formula α} : ((Hilbert
   | mdp h₁ h₂ ih₁ ih₂ =>
     dsimp only [IntProp.Formula.toModalFormula] at ih₁ ih₂;
     exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
-  | _ => dsimp [IntProp.Formula.toModalFormula]; trivial;
+  | _ =>
+    dsimp [IntProp.Formula.toModalFormula];
+    trivial;
 
 lemma iff_Triv_classical : Hilbert.Triv α ⊢! φ ↔ (Hilbert.Cl α) ⊢! φᵀᴾ := by
   constructor;

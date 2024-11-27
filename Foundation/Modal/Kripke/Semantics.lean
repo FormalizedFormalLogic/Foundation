@@ -1,7 +1,7 @@
 import Foundation.Vorspiel.RelItr
 import Foundation.Logic.System
 import Foundation.Modal.Formula
-import Foundation.Modal.Hilbert
+import Foundation.Modal.Hilbert.Strength
 
 namespace LO.Modal
 
@@ -460,7 +460,7 @@ open Formula.Kripke
 
 lemma K_strictlyWeakerThan_KD : (Hilbert.K ℕ) <ₛ (Hilbert.KD ℕ) := by
   constructor;
-  . apply K_weakerThan_KD;
+  . simp;
   . simp [weakerThan_iff];
     use (□(atom 0) ➝ ◇(atom 0));
     constructor;
@@ -472,7 +472,7 @@ lemma K_strictlyWeakerThan_KD : (Hilbert.K ℕ) <ₛ (Hilbert.KD ℕ) := by
 
 theorem K_strictlyWeakerThan_KB : (Hilbert.K ℕ) <ₛ (Hilbert.KB ℕ) := by
   constructor;
-  . apply K_weakerThan_KB;
+  . simp;
   . simp [weakerThan_iff];
     use ((atom 0) ➝ □◇(atom 0));
     constructor;
@@ -486,7 +486,7 @@ theorem K_strictlyWeakerThan_KB : (Hilbert.K ℕ) <ₛ (Hilbert.KB ℕ) := by
 
 theorem K_strictlyWeakerThan_K4 : (Hilbert.K ℕ) <ₛ (Hilbert.K4 ℕ) := by
   constructor;
-  . apply K_weakerThan_K4;
+  . simp;
   . simp [weakerThan_iff];
     use (□(atom 0) ➝ □□(atom 0));
     constructor;
@@ -507,7 +507,7 @@ theorem K_strictlyWeakerThan_K4 : (Hilbert.K ℕ) <ₛ (Hilbert.K4 ℕ) := by
 
 theorem K_strictlyWeakerThan_K5 : (Hilbert.K ℕ) <ₛ (Hilbert.K5 ℕ) := by
   constructor;
-  . apply K_weakerThan_K5;
+  . simp;
   . simp [weakerThan_iff];
     use (◇(atom default) ➝ □◇(atom default));
     constructor;

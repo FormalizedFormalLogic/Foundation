@@ -17,7 +17,7 @@ abbrev ReflexiveTransitiveAntisymmetricFiniteFrameClass : FiniteFrameClass := { 
 
 variable {F : Kripke.Frame}
 
-private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F ⊧* 𝗚𝗿𝘇 := by
+lemma Grz_of_WCWF : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel) → F ⊧* 𝗚𝗿𝘇 := by
   rintro ⟨hRefl, hTrans, hWCWF⟩;
   simp [Axioms.Grz];
   intro φ V;
@@ -68,7 +68,7 @@ private lemma Grz_of_wcwf : (Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConv
       . exact Rwx;
 
 
-private lemma valid_on_frame_T_and_Four_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧* ({□φ ➝ (φ ⋏ (□φ ➝ □□φ)) | (φ : Formula ℕ)}) := by
+lemma valid_on_frame_T_and_Four_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧* ({□φ ➝ (φ ⋏ (□φ ➝ □□φ)) | (φ : Formula ℕ)}) := by
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro φ V x;
   let ψ := φ ⋏ (□φ ➝ □□φ);
@@ -76,27 +76,27 @@ private lemma valid_on_frame_T_and_Four_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧
   have h₂ : Satisfies ⟨F, V⟩ x (□(□(ψ ➝ □ψ) ➝ ψ) ➝ ψ)  := h ψ V x;
   exact λ f => h₂ (h₁ f);
 
-private lemma valid_on_frame_T_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧* 𝗧 := by
+lemma valid_on_frame_T_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧* 𝗧 := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro φ V x hx;
   exact Satisfies.and_def.mp (this φ V x hx) |>.1
 
-private lemma valid_on_frame_Four_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧* 𝟰 := by
+lemma valid_on_frame_Four_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : F ⊧* 𝟰 := by
   have := valid_on_frame_T_and_Four_of_Grz h;
   simp_all [ValidOnFrame, ValidOnModel, Axioms.T, Axioms.Grz];
   intro φ V x hx;
   exact (Satisfies.and_def.mp (this φ V x hx) |>.2) hx;
 
-private lemma refl_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : Reflexive F := by
+lemma refl_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : Reflexive F := by
   apply ReflexiveFrameClass.isDefinedBy F |>.mpr;
   apply valid_on_frame_T_of_Grz h;
 
-private lemma trans_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : Transitive F := by
+lemma trans_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : Transitive F := by
   apply TransitiveFrameClass.isDefinedBy F |>.mpr;
   apply valid_on_frame_Four_of_Grz h;
 
-private lemma WCWF_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : WCWF F := by
+lemma WCWF_of_Grz (h : F ⊧* 𝗚𝗿𝘇) : WCWF F := by
   have F_trans : Transitive F := trans_of_Grz h;
   have F_refl : Reflexive F := refl_of_Grz h;
 
@@ -167,7 +167,7 @@ lemma ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.is_defined_by_Grz :
   intro F;
   constructor;
   . rintro ⟨hRefl, hTrans, hWCWF⟩;
-    apply Grz_of_wcwf;
+    apply Grz_of_WCWF;
     exact ⟨hRefl, hTrans, hWCWF⟩;
   . rintro h;
     refine ⟨refl_of_Grz h, trans_of_Grz h, WCWF_of_Grz h⟩;
@@ -176,7 +176,7 @@ lemma ReflexiveTransitiveAntisymmetricFiniteFrameClass.is_defined_by_Grz : Refle
   intro F;
   constructor;
   . rintro ⟨hRefl, hTrans, hAntisymm⟩;
-    apply Grz_of_wcwf;
+    apply Grz_of_WCWF;
     refine ⟨hRefl, hTrans, ?_⟩;
     apply WCWF_of_finite_trans_antisymm;
     . exact F.world_finite;

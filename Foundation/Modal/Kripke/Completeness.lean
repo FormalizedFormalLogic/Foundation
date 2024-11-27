@@ -1,4 +1,4 @@
-import Foundation.Modal.ConsistentTheory
+import Foundation.Modal.Hilbert.ConsistentTheory
 import Foundation.Modal.Kripke.Semantics
 
 namespace LO.Modal

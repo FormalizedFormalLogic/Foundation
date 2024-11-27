@@ -1,7 +1,6 @@
 import Foundation.Logic.Disjunctive
 import Foundation.IntProp.Deduction
-import Foundation.Modal.Hilbert
-import Foundation.Modal.MDP
+import Foundation.Modal.Hilbert.Systems
 
 namespace LO.Modal
 
@@ -69,8 +68,6 @@ private lemma provable_efq_of_provable_S4.case_neg_equiv [System.K4 mH] : mH ⊢
   apply and₃'!;
   . exact nec! $ axiomK'! $ nec! $ and₁'! neg_equiv!;
   . exact nec! $ axiomK'! $ nec! $ and₂'! neg_equiv!;
-
-instance [System.S4 mH] : System.K4 mH where
 
 open provable_efq_of_provable_S4 in
 lemma provable_efq_of_provable_S4 [DecidableEq α] (h : (Hilbert.Int α) ⊢! φ) : (Hilbert.S4 α) ⊢! φᵍ := by

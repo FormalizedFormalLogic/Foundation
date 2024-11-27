@@ -1,6 +1,6 @@
 import Foundation.IntProp.Kripke.Completeness
 import Foundation.Modal.Kripke.Geach
-import Foundation.Modal.ModalCompanion.Basic
+import Foundation.Modal.ModalCompanion.Preliminaries
 
 namespace LO.Modal
 

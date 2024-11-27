@@ -1,4 +1,4 @@
-import Foundation.Modal.Complemental
+import Foundation.Modal.Hilbert.Complemental
 import Foundation.Modal.Kripke.GL.Definability
 
 namespace LO.Modal

@@ -1,4 +1,4 @@
-import Foundation.Modal.Complemental
+import Foundation.Modal.Hilbert.Complemental
 import Foundation.Modal.Kripke.Grz.Definability
 
 
@@ -278,7 +278,7 @@ instance complete : Complete (Hilbert.Grz ℕ) (ReflexiveTransitiveAntisymmetric
       tauto;
 ⟩
 
-instance ffp : Kripke.FiniteFrameProperty (Hilbert.Grz ℕ) ReflexiveTransitiveAntisymmetricFiniteFrameClass where
+instance : Kripke.FiniteFrameProperty (Hilbert.Grz ℕ) ReflexiveTransitiveAntisymmetricFiniteFrameClass where
   complete := complete
   sound := finite_sound
 

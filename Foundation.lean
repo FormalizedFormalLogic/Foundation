@@ -48,7 +48,18 @@ import Foundation.FirstOrder.Arith.Nonstandard
 -- import Foundation.FirstOrder.Arith.EA.Basic
 
 import Foundation.IntProp.IntProp
-import Foundation.Modal.Modal
+
+import Foundation.Modal.Hilbert.Subst
+import Foundation.Modal.Hilbert.GLAlternatives
+import Foundation.Modal.Hilbert.S5Grz_Triv
+import Foundation.Modal.Kripke.Ver
+import Foundation.Modal.Kripke.Dot3
+import Foundation.Modal.Kripke.S5
+import Foundation.Modal.Kripke.GL.GL
+import Foundation.Modal.Kripke.Grz.Completeness
+import Foundation.Modal.ModalCompanion.GMT
+import Foundation.Modal.Boxdot.K4_S4
+import Foundation.Modal.Boxdot.GL_Grz
 
 -- IntFO
 

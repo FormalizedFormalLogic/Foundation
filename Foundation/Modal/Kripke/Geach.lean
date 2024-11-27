@@ -1,6 +1,6 @@
 import Foundation.Vorspiel.BinaryRelations
-import Foundation.Modal.Geach
 import Foundation.Modal.Kripke.Completeness
+import Foundation.Modal.Hilbert.Geach
 
 
 namespace LO.Modal
