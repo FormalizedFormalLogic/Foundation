@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert
+import Foundation.Modal.Hilbert.Systems
 
 universe u v
 

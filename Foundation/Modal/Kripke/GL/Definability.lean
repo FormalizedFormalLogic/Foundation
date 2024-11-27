@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Semantics
+import Foundation.Modal.Kripke.Basic
 import Foundation.Vorspiel.BinaryRelations
 
 namespace LO.Modal

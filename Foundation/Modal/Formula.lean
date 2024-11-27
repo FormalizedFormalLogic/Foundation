@@ -1,6 +1,6 @@
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Vorspiel.Collection
-import Foundation.Modal.System
+import Foundation.Modal.LogicSymbol
 
 namespace LO.Modal
 

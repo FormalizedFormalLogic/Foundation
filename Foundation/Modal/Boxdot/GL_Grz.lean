@@ -3,6 +3,43 @@ import Foundation.Modal.Kripke.Closure
 import Foundation.Modal.Kripke.Grz.Completeness
 import Foundation.Modal.Kripke.GL.Completeness
 
+
+namespace LO.System
+
+open FiniteContext
+
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
+variable {𝓢 : S}
+variable [System.GL 𝓢]
+
+noncomputable def lem₁_boxdot_Grz_of_L : 𝓢 ⊢ (⊡(⊡(φ ➝ ⊡φ) ➝ φ)) ➝ (□(φ ➝ ⊡φ) ➝ φ) := by
+  have : 𝓢 ⊢ (□(φ ➝ ⊡φ) ⋏ ∼φ) ➝ ⊡(φ ➝ ⊡φ) := by
+    apply deduct';
+    apply and₃';
+    . exact (of efq_imply_not₁) ⨀ and₂;
+    . exact (of (impId _)) ⨀ and₁;
+  have : 𝓢 ⊢ ∼⊡(φ ➝ ⊡φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := impTrans'' (contra₀' this) $ impTrans'' demorgan₄ (orReplaceRight dne);
+  have : 𝓢 ⊢ (∼⊡(φ ➝ ⊡φ) ⋎ φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := or₃'' this or₂;
+  have : 𝓢 ⊢ ∼⊡(φ ➝ ⊡φ) ⋎ φ ➝ □(φ ➝ ⊡φ) ➝ φ := impTrans'' this implyOfNotOr;
+  have : 𝓢 ⊢ (⊡(φ ➝ ⊡φ) ➝ φ) ➝ (□(φ ➝ ⊡φ) ➝ φ) := impTrans'' NotOrOfImply this;
+  exact impTrans'' boxdotAxiomT this;
+
+noncomputable def boxdot_Grz_of_L : 𝓢 ⊢ ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ φ := by
+  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □⊡(φ ➝ ⊡φ) ➝ □φ := axiomK;
+  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) ➝ □φ := impTrans'' this $ implyLeftReplace $ imply_Box_BoxBoxdot;
+  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ) := by
+    apply deduct'; apply deduct; apply deduct;
+    exact and₃' FiniteContext.byAxm $ (of this) ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+  have : 𝓢 ⊢ □□(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(□(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ)) := implyBoxDistribute' this;
+  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(□(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ)) := impTrans'' axiomFour this;
+  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) := impTrans'' this axiomL;
+  have : 𝓢 ⊢ ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) := impTrans'' boxdotBox this;
+  exact mdp₁ lem₁_boxdot_Grz_of_L this;
+@[simp] lemma boxdot_Grz_of_L! : 𝓢 ⊢! ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ φ := ⟨boxdot_Grz_of_L⟩
+
+end LO.System
+
+
 namespace LO.Modal
 
 namespace Kripke
@@ -139,12 +176,12 @@ lemma Grz_of_boxdotTranslatedGL : (Hilbert.GL ℕ) ⊢! φᵇ → (Hilbert.Grz �
     use V, x;
     exact iff_reflexivize_irreflexivize FF_refl |>.not.mp h;
 
-theorem iff_Grz_boxdotTranslatedGL : (Hilbert.Grz ℕ) ⊢! φ ↔ (Hilbert.GL ℕ) ⊢! φᵇ := by
+theorem iff_Grz_boxdotTranslatedGL : (Hilbert.GL ℕ) ⊢! φᵇ ↔ (Hilbert.Grz ℕ) ⊢! φ := by
   constructor;
-  . apply boxdotTranslatedGL_of_Grz;
   . apply Grz_of_boxdotTranslatedGL;
+  . apply boxdotTranslatedGL_of_Grz;
 
-instance : BoxdotProperty (Hilbert.Grz ℕ) (Hilbert.GL ℕ) := ⟨iff_Grz_boxdotTranslatedGL⟩
+instance : BoxdotProperty (Hilbert.GL ℕ) (Hilbert.Grz ℕ) := ⟨iff_Grz_boxdotTranslatedGL⟩
 
 end Hilbert
 

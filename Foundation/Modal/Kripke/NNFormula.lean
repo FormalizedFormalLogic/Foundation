@@ -1,5 +1,5 @@
 import Foundation.Modal.NNFormula
-import Foundation.Modal.Kripke.Semantics
+import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
 

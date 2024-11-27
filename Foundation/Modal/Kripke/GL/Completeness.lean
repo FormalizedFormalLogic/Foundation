@@ -1,5 +1,6 @@
-import Foundation.Modal.Complemental
+import Foundation.Modal.Hilbert.Complemental
 import Foundation.Modal.Kripke.GL.Definability
+import Foundation.Modal.Hilbert.WeakerThan.K4_GL
 
 namespace LO.Modal
 

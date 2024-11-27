@@ -1,4 +1,4 @@
-import Foundation.IntProp.Kripke.Semantics
+import Foundation.IntProp.Kripke.Basic
 
 namespace LO.IntProp
 
