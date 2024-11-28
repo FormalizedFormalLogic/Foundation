@@ -1,29 +1,28 @@
-import Foundation.Modal.ConsistentTheory
-import Foundation.Modal.Kripke.Semantics
+import Foundation.Modal.Hilbert.ConsistentTheory
+import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
 
-open LO.Kripke
 open System
 open Formula
 open MaximalConsistentTheory
 open Hilbert.Deduction
+open Kripke
 
-variable {α : Type u} [DecidableEq α]
-variable {H : Hilbert α} [H.IsNormal]
+variable {H : Hilbert ℕ} [H.IsNormal] [H.Consistent]
+
+namespace Hilbert
 
 namespace Kripke
 
-abbrev CanonicalFrame (H : Hilbert α) [Nonempty (MCT H)] : Kripke.Frame where
+abbrev canonicalFrame (H : Hilbert ℕ) [H.IsNormal] [H.Consistent] : Kripke.Frame where
   World := MCT H
   Rel Ω₁ Ω₂ := □''⁻¹Ω₁.theory ⊆ Ω₂.theory
 
-namespace CanonicalFrame
+namespace canonicalFrame
 
-variable [Nonempty (MCT H)]
-variable {Ω₁ Ω₂ : (CanonicalFrame H).World}
+variable {Ω₁ Ω₂ : (canonicalFrame H).World}
 
-omit [DecidableEq α] [H.IsNormal] in
 @[simp] lemma rel_def_box: Ω₁ ≺ Ω₂ ↔ ∀ {φ}, □φ ∈ Ω₁.theory → φ ∈ Ω₂.theory := by simp [Frame.Rel']; aesop;
 
 lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {φ}, □^[n]φ ∈ Ω₁.theory → φ ∈ Ω₂.theory := by
@@ -90,32 +89,22 @@ lemma multirel_def_multidia : Ω₁ ≺^[n] Ω₂ ↔ ∀ {φ}, (φ ∈ Ω₂.th
 
 lemma rel_def_dia : Ω₁ ≺ Ω₂ ↔ ∀ {φ}, φ ∈ Ω₂.theory → ◇φ ∈ Ω₁.theory := by simpa using multirel_def_multidia (n := 1) (Ω₁ := Ω₁) (Ω₂ := Ω₂)
 
-end CanonicalFrame
+end canonicalFrame
 
 
-abbrev CanonicalModel (H : Hilbert α) [Nonempty (MCT H)]  : Model α where
-  Frame := CanonicalFrame H
-  Valuation Ω a := (atom a) ∈ Ω.theory
-
-
-namespace CanonicalModel
-
-variable [Nonempty (MCT H)]
+abbrev canonicalModel (H : Hilbert ℕ) [H.IsNormal] [H.Consistent] : Model where
+  toFrame := canonicalFrame H
+  Val Ω a := (atom a) ∈ Ω.theory
 
 @[reducible]
-instance : Semantics (Formula α) (CanonicalModel H).World := Formula.Kripke.Satisfies.semantics (M := CanonicalModel H)
-
--- @[simp] lemma frame_def : (CanonicalModel Ax).Rel' Ω₁ Ω₂ ↔ (□''⁻¹Ω₁.theory : Theory α) ⊆ Ω₂.theory := by rfl
--- @[simp] lemma val_def : (CanonicalModel Ax).Valuation Ω a ↔ (atom a) ∈ Ω.theory := by rfl
-
-end CanonicalModel
+instance : Semantics (Formula ℕ) (canonicalModel H).World := Formula.Kripke.Satisfies.semantics (M := canonicalModel H)
 
 
-section
+section lemmata
 
-variable [Nonempty (MCT H)] {φ : Formula α}
+variable {φ ψ : Formula ℕ}
 
-lemma truthlemma : ∀ {Ω : (CanonicalModel H).World}, Ω ⊧ φ ↔ (φ ∈ Ω.theory) := by
+lemma truthlemma : ∀ {Ω : (canonicalModel H).World}, Ω ⊧ φ ↔ (φ ∈ Ω.theory) := by
   induction φ using Formula.rec' with
   | hbox φ ih =>
     intro Ω;
@@ -127,7 +116,7 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel H).World}, Ω ⊧ φ ↔ (φ ∈ Ω
       exact h Ω' hΩ';
     . intro h Ω' hΩ';
       apply ih.mpr;
-      exact CanonicalFrame.rel_def_box.mp hΩ' h;
+      exact canonicalFrame.rel_def_box.mp hΩ' h;
   | himp φ ψ ihp ihq =>
     intro Ω;
     constructor;
@@ -139,12 +128,10 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel H).World}, Ω ⊧ φ ↔ (φ ∈ Ω
       have := iff_mem_imp.mp h;
       intro hp; replace hp := ihp.mp hp;
       exact ihq.mpr $ this hp
-  | hatom a =>
-    simp_all [Kripke.Satisfies];
-  | _ => simp_all [Kripke.Satisfies];
+  | _ => simp_all [Semantics.Realize, Kripke.Satisfies];
 
 
-lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel H) ⊧ φ ↔ H ⊢! φ := by
+lemma iff_valid_on_canonicalModel_deducible : (canonicalModel H) ⊧ φ ↔ H ⊢! φ := by
   constructor;
   . contrapose;
     intro h;
@@ -166,39 +153,42 @@ lemma iff_valid_on_canonicalModel_deducible : (CanonicalModel H) ⊧ φ ↔ H �
     have : Γ ⊬[H] ⊥ := Theory.def_consistent.mp Ω.consistent _ hΓ₁;
     contradiction;
 
-lemma realize_axiomset_of_self_canonicalModel : (CanonicalModel H) ⊧* H.axioms := by
+lemma realize_axiomset_of_self_canonicalModel : (canonicalModel H) ⊧* H.axioms := by
   apply Semantics.realizeSet_iff.mpr;
   intro φ hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;
   exact maxm! hp;
 
-lemma realize_theory_of_self_canonicalModel : (CanonicalModel H) ⊧* (System.theory H) := by
+lemma realize_theory_of_self_canonicalModel : (canonicalModel H) ⊧* (System.theory H) := by
   apply Semantics.realizeSet_iff.mpr;
   intro φ hp;
   apply iff_valid_on_canonicalModel_deducible.mpr;
   simpa [System.theory] using hp;
 
-end
-
-lemma complete_of_mem_canonicalFrame [Nonempty (MCT H)] {𝔽 : FrameClass} (hFC : CanonicalFrame H ∈ 𝔽) : 𝔽#α ⊧ φ → (H) ⊢! φ := by
+lemma complete_of_canonical {C : FrameClass} (hFC : canonicalFrame H ∈ C) : C ⊧ φ → H ⊢! φ := by
   simp [Semantics.Realize, Kripke.ValidOnFrame];
   contrapose;
   push_neg;
   intro h;
-  use (CanonicalFrame H);
+  use (canonicalFrame H);
   constructor;
   . assumption;
-  . use (CanonicalModel H).Valuation;
+  . use (canonicalModel H).Val;
     exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
-instance instComplete_of_mem_canonicalFrame [Nonempty (MCT H)] (𝔽 : FrameClass) (hFC : CanonicalFrame H ∈ 𝔽) : Complete (H) (𝔽#α) := ⟨complete_of_mem_canonicalFrame hFC⟩
+lemma instCompleteOfCanonical {C : FrameClass} (hC : (Kripke.canonicalFrame H) ∈ C) : Complete H C := ⟨complete_of_canonical hC⟩
 
-instance K_complete : Complete (Hilbert.K α) (AllFrameClass.{u}#α) := by
-  convert instComplete_of_mem_canonicalFrame (α := α) AllFrameClass trivial;
-  rw [Hilbert.ExtK.K_is_extK_of_empty];
-  . tauto;
-  . infer_instance;
+end lemmata
 
 end Kripke
+
+
+namespace K
+
+instance Kripke.complete : Complete (Hilbert.K ℕ) (Kripke.AllFrameClass) := Hilbert.Kripke.instCompleteOfCanonical (C := Kripke.AllFrameClass) $ by tauto
+
+end K
+
+end Hilbert
 
 end LO.Modal

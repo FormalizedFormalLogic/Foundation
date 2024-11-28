@@ -1,26 +1,28 @@
-import Foundation.Modal.Kripke.Semantics
+import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal.Kripke
 
-def ComplexityLimitedFrame (F : Kripke.Frame) (r : F.World) (φ : Formula α) : Kripke.Frame where
+def complexityLimitedFrame (F : Kripke.Frame) (r : F.World) (φ : Formula ℕ) : Kripke.Frame where
   World := { x | ∃ n ≤ φ.complexity, r ≺^[n] x }
-  World_nonempty := ⟨r, by use 0; simp⟩
   Rel x y := x.1 ≺ y.1
+  world_nonempty := ⟨r, by use 0; simp⟩
 
-def ComplexityLimitedModel (M : Kripke.Model α) (w : M.World) (φ : Formula α) : Kripke.Model α where
-  Frame := ComplexityLimitedFrame M.Frame w φ
-  Valuation x a := M.Valuation x.1 a
+def complexityLimitedModel (M : Kripke.Model) (w : M.World) (φ : Formula ℕ) : Kripke.Model where
+  toFrame := complexityLimitedFrame M.toFrame w φ
+  Val x a := M.Val x.1 a
 
-variable [DecidableEq α]
-         {M : Kripke.Model α} {r x : M.World} {φ ψ : Formula α}
+
+section
+
+variable {M : Kripke.Model} {r x : M.World} {φ ψ : Formula ℕ}
 
 open Formula.Kripke
 open Formula.subformulae
 
-lemma iff_satisfy_complexity_limit_modelAux
+lemma iff_satisfy_complexityLimitedModel_aux
   (hq : ψ ∈ φ.subformulae)
   (hx : ∃ n ≤ φ.complexity - ψ.complexity, r ≺^[n] x)
-  : x ⊧ ψ ↔ Satisfies (ComplexityLimitedModel M r φ) ⟨x, (by obtain ⟨n, _, _⟩ := hx; use n; exact ⟨by omega, by assumption⟩)⟩ ψ := by
+  : x ⊧ ψ ↔ Satisfies (complexityLimitedModel M r φ) ⟨x, (by obtain ⟨n, _, _⟩ := hx; use n; exact ⟨by omega, by assumption⟩)⟩ ψ := by
   induction ψ using Formula.rec' generalizing x φ with
   | hbox ψ ihq =>
     obtain ⟨n, hn, hx⟩ := hx;
@@ -35,7 +37,7 @@ lemma iff_satisfy_complexity_limit_modelAux
       . use (n + 1);
         constructor;
         . assumption;
-        . apply Kripke.Frame.RelItr'.forward.mpr;
+        . apply Rel.iterate.forward.mpr;
           use x; constructor; assumption; exact Rxy;
     . rintro h y Rxy;
       apply ihq (mem_box (by assumption)) ?_ |>.mpr;
@@ -43,7 +45,7 @@ lemma iff_satisfy_complexity_limit_modelAux
       . use (n + 1);
         constructor;
         . assumption;
-        . apply Kripke.Frame.RelItr'.forward.mpr;
+        . apply Rel.iterate.forward.mpr;
           use x;
   | himp ψ₁ ψ₂ ihq₁ ihq₂ =>
     obtain ⟨n, hn, hx⟩ := hx;
@@ -61,24 +63,27 @@ lemma iff_satisfy_complexity_limit_modelAux
       apply ihq₁ (mem_imp (by assumption) |>.1) ?_ |>.mp hq₂;
       use n; constructor; omega; assumption;
       use n; constructor; omega; assumption;
-  | _ => simp [Satisfies, ComplexityLimitedModel];
+  | _ => simp [Satisfies, complexityLimitedModel];
 
-lemma iff_satisfy_complexity_limit_model : r ⊧ φ ↔ Satisfies (ComplexityLimitedModel M r φ) ⟨r, (by use 0; simp)⟩ φ := by
-  apply iff_satisfy_complexity_limit_modelAux (show φ ∈ φ.subformulae by simp);
+lemma iff_satisfy_complexityLimitedModel : r ⊧ φ ↔ Satisfies (complexityLimitedModel M r φ) ⟨r, (by use 0; simp)⟩ φ := by
+  apply iff_satisfy_complexityLimitedModel_aux (show φ ∈ φ.subformulae by simp);
   use 0; simp;
 
-lemma complexity_limit_model_subformula_closedAux {ψ₁ ψ₂ : Formula α} (hq₁ : φ ∈ ψ₁.subformulae) (hq₂ : φ ∈ ψ₂.subformulae)
-  : Satisfies (ComplexityLimitedModel M r ψ₁) ⟨r, (by use 0; simp)⟩ φ → Satisfies (ComplexityLimitedModel M r ψ₂) ⟨r, (by use 0; simp)⟩ φ := by
+lemma complexityLimitedModel_subformula_closedAux {ψ₁ ψ₂ : Formula ℕ} (hq₁ : φ ∈ ψ₁.subformulae) (hq₂ : φ ∈ ψ₂.subformulae)
+  : Satisfies (complexityLimitedModel M r ψ₁) ⟨r, (by use 0; simp)⟩ φ → Satisfies (complexityLimitedModel M r ψ₂) ⟨r, (by use 0; simp)⟩ φ := by
   intro h;
-  apply @iff_satisfy_complexity_limit_modelAux α _ M r r ψ₂ φ (by assumption) ?_ |>.mp;
-  apply @iff_satisfy_complexity_limit_modelAux α _ M r r ψ₁ φ (by assumption) ?_ |>.mpr h;
-  use 0; simp;
-  use 0; simp;
+  apply @iff_satisfy_complexityLimitedModel_aux M r r ψ₂ φ hq₂ ?_ |>.mp;
+  apply @iff_satisfy_complexityLimitedModel_aux M r r ψ₁ φ hq₁ ?_ |>.mpr h;
+  . use 0; simp;
+  . use 0; simp;
 
-lemma complexity_limit_model_subformula_closed (hq : φ ∈ ψ.subformulae)
-  : Satisfies (ComplexityLimitedModel M r φ) ⟨r, (by use 0; simp)⟩ φ ↔ Satisfies (ComplexityLimitedModel M r ψ) ⟨r, (by use 0; simp)⟩ φ := by
+lemma complexityLimitedModel_subformula_closed (hq : φ ∈ ψ.subformulae)
+  : Satisfies (complexityLimitedModel M r φ) ⟨r, (by use 0; simp)⟩ φ ↔ Satisfies (complexityLimitedModel M r ψ) ⟨r, (by use 0; simp)⟩ φ := by
   constructor;
-  . apply complexity_limit_model_subformula_closedAux <;> simp_all;
-  . apply complexity_limit_model_subformula_closedAux <;> simp_all;
+  . apply complexityLimitedModel_subformula_closedAux <;> simp_all;
+  . apply complexityLimitedModel_subformula_closedAux <;> simp_all;
+
+end
+
 
 end LO.Modal.Kripke

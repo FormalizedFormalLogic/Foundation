@@ -22,7 +22,7 @@ lemma DeltaZero.of_open {φ : Semiformula L μ n} : φ.Open → DeltaZero φ := 
 namespace StrictHierarchy
 
 lemma rew {φ : Semiformula L μ₁ n₁} (h : StrictHierarchy Γ s φ) (ω : Rew L μ₁ n₁ μ₂ n₂) :
-    StrictHierarchy Γ s (ω • φ) := by
+    StrictHierarchy Γ s (ω ▹ φ) := by
   induction h generalizing μ₂ n₂ <;> try simp
   case zero h => exact zero <| (Hierarchy.rew_iff (ω := ω)).mpr h
   case sigma ih => exact (ih ω.q).sigma
@@ -31,9 +31,9 @@ lemma rew {φ : Semiformula L μ₁ n₁} (h : StrictHierarchy Γ s φ) (ω : Re
   case all ih => exact (ih ω.q).all
 
 lemma rew_iff {φ : Semiformula L μ₁ n₁} (ω : Rew L μ₁ n₁ μ₂ n₂) :
-    StrictHierarchy Γ s (ω • φ) ↔ StrictHierarchy Γ s φ :=
+    StrictHierarchy Γ s (ω ▹ φ) ↔ StrictHierarchy Γ s φ :=
   ⟨by
-    generalize hq : ω • φ = ψ
+    generalize hq : ω ▹ φ = ψ
     intro h;
     induction h generalizing n₁ <;> try
       simp [Semiformula.eq_ball_iff, Semiformula.eq_bex_iff, Semiformula.eq_all_iff, Semiformula.eq_ex_iff] at hq ⊢

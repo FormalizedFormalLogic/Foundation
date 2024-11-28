@@ -1,5 +1,4 @@
 import Foundation.Logic.System
-import Foundation.Logic.Init
 
 namespace LO.Axioms
 
@@ -53,9 +52,9 @@ protected abbrev WeakLEM := ∼φ ⋎ ∼∼φ
 abbrev WeakLEM.set : Set F := { Axioms.WeakLEM φ | (φ) }
 notation "𝗪𝗟𝗘𝗠" => WeakLEM.set
 
-protected abbrev GD := (φ ➝ ψ) ⋎ (ψ ➝ φ)
-abbrev GD.set : Set F := { Axioms.GD φ ψ | (φ) (ψ) }
-notation "𝗗𝘂𝗺" => GD.set
+protected abbrev Dummett := (φ ➝ ψ) ⋎ (ψ ➝ φ)
+abbrev Dummett.set : Set F := { Axioms.Dummett φ ψ | (φ) (ψ) }
+notation "𝗗𝘂𝗺" => Dummett.set
 
 protected abbrev DNE := ∼∼φ ➝ φ
 abbrev DNE.set : Set F := { Axioms.DNE φ | (φ) }

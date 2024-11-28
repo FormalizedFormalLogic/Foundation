@@ -1,6 +1,6 @@
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Vorspiel.Collection
-import Foundation.Modal.System
+import Foundation.Modal.LogicSymbol
 
 namespace LO.Modal
 
@@ -514,5 +514,98 @@ end Encodable
 
 end Formula
 
+
+
+section subst
+
+namespace Formula
+
+variable {φ ψ : Formula α}
+variable {σ : α → Formula α}
+
+def subst (σ : α → Formula α) : Formula α → Formula α
+  | atom a  => σ a
+  | ⊥       => ⊥
+  | □φ      => □(φ.subst σ)
+  | φ ➝ ψ   => φ.subst σ ➝ ψ.subst σ
+
+@[simp] lemma subst_atom {a : α} : (atom a).subst σ = σ a := rfl
+
+@[simp] lemma subst_bot : (⊥ : Formula α).subst σ = ⊥ := rfl
+
+@[simp] lemma subst_imp : (φ ➝ ψ).subst σ = φ.subst σ ➝ ψ.subst σ := rfl
+
+@[simp] lemma subst_neg : (∼φ).subst σ = ∼(φ.subst σ) := rfl
+
+@[simp] lemma subst_and : (φ ⋏ ψ).subst σ = φ.subst σ ⋏ ψ.subst σ := rfl
+
+@[simp] lemma subst_or : (φ ⋎ ψ).subst σ = φ.subst σ ⋎ ψ.subst σ := rfl
+
+@[simp] lemma subst_iff : (φ ⭤ ψ).subst σ = (φ.subst σ ⭤ ψ.subst σ) := rfl
+
+@[simp] lemma subst_box : (□φ).subst σ = □(φ.subst σ) := rfl
+
+@[simp] lemma subst_dia : (◇φ).subst σ = ◇(φ.subst σ) := rfl
+
+
+end Formula
+
+namespace Theory
+
+open Formula
+variable {T : Theory α}
+
+class SubstClosed (T : Theory α) : Prop where
+  closed : ∀ {φ}, φ ∈ T → ∀ {σ}, φ.subst σ ∈ T
+
+def instSubstClosed
+  (hAtom : ∀ a : α, (atom a) ∈ T → ∀ {σ}, (atom a).subst σ ∈ T)
+  (hImp : ∀ {φ ψ}, φ ➝ ψ ∈ T → ∀ {σ}, (φ ➝ ψ).subst σ ∈ T)
+  (hBox : ∀ {φ}, □φ ∈ T → ∀ {σ}, (□φ).subst σ ∈ T)
+  : T.SubstClosed := ⟨
+  by
+    intro φ hφ σ;
+    induction φ using Formula.cases' with
+    | hatom a => apply hAtom; assumption;
+    | hfalsum => apply hφ;
+    | himp φ ψ => apply hImp; assumption;
+    | hbox φ => apply hBox; assumption;
+⟩
+
+namespace SubstClosed
+
+variable [T.SubstClosed]
+
+lemma mem_atom (h : atom a ∈ T) : (atom a).subst σ ∈ T := SubstClosed.closed h
+
+lemma mem_bot (h : ⊥ ∈ T) : (⊥ : Formula α).subst σ ∈ T := SubstClosed.closed h
+
+lemma mem_imp (h : φ ➝ ψ ∈ T) : (φ ➝ ψ).subst σ ∈ T := SubstClosed.closed h
+
+lemma mem_neg (h : ∼φ ∈ T) : (∼φ).subst σ ∈ T := SubstClosed.closed h
+
+lemma mem_and (h : φ ⋏ ψ ∈ T) : (φ ⋏ ψ).subst σ ∈ T := SubstClosed.closed h
+
+lemma mem_or (h : φ ⋎ ψ ∈ T) : (φ ⋎ ψ).subst σ ∈ T := SubstClosed.closed h
+
+lemma mem_box (h : □φ ∈ T) : (□φ).subst σ ∈ T := SubstClosed.closed h
+
+instance union {T₁ T₂ : Theory α} [T₁_closed : T₁.SubstClosed] [T₂_closed : T₂.SubstClosed] : (T₁ ∪ T₂).SubstClosed := by
+  refine instSubstClosed ?_ ?_ ?_;
+  . rintro a (ha₁ | ha₂) σ;
+    . left; apply mem_atom ha₁;
+    . right; apply mem_atom ha₂;
+  . rintro φ ψ (h₁ | h₂) σ;
+    . left; apply mem_imp h₁;
+    . right; apply mem_imp h₂;
+  . rintro φ (h₁ | h₂) σ;
+    . left; apply mem_box h₁;
+    . right; apply mem_box h₂;
+
+end SubstClosed
+
+end Theory
+
+end subst
 
 end LO.Modal

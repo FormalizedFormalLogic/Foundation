@@ -3,25 +3,26 @@ import Foundation.Modal.Kripke.Preservation
 
 namespace LO.Modal
 
-open LO.Kripke
 
 namespace Kripke
 
-variable {α : Type u}
+abbrev UniversalFrameClass : FrameClass := { F | Universal F }
 
-lemma iff_Universal_ReflexiveEuclidean_validOnFrameClass : UniversalFrameClass.{u}#α ⊧ φ ↔ ReflexiveEuclideanFrameClass.{u}#α ⊧ φ := by
+lemma iff_Universal_ReflexiveEuclidean_validOnFrameClass : UniversalFrameClass ⊧ φ ↔ ReflexiveEuclideanFrameClass ⊧ φ := by
   constructor;
   . intro h F hF V r;
-    apply modal_equivalent_at_root_on_generated_model ⟨F, V⟩ (by apply trans_of_refl_eucl hF.1 hF.2) r |>.mp;
-    apply @h (F↾r).toFrame (Frame.PointGenerated.rel_universal hF.1 hF.2) ((⟨F, V⟩)↾r).Valuation;
+    let M : Model := ⟨F, V⟩;
+    apply Model.PointGenerated.modal_equivalent_at_root  (M := M) (by apply trans_of_refl_eucl hF.1 hF.2) r |>.mp;
+    apply @h (F↾r).toFrame (Frame.PointGenerated.rel_universal hF.1 hF.2) (M↾r).Val;
   . rintro h F F_univ;
     exact @h F (⟨refl_of_universal F_univ, eucl_of_universal F_univ⟩);
 
-instance S5_complete_universal [Inhabited α] [DecidableEq α] : Complete (Hilbert.S5 α) (UniversalFrameClass.{u}#α) := ⟨by
-  intro φ hF;
-  exact S5_complete.complete $ iff_Universal_ReflexiveEuclidean_validOnFrameClass.mp hF;
-⟩
-
 end Kripke
+
+
+instance Hilbert.S5.Kripke.complete_universal : Complete (Hilbert.S5 ℕ) (Kripke.UniversalFrameClass) := ⟨by
+  intro φ hF;
+  exact S5.Kripke.complete.complete $ Kripke.iff_Universal_ReflexiveEuclidean_validOnFrameClass.mp hF;
+⟩
 
 end LO.Modal

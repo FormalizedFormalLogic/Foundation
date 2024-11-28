@@ -1,4 +1,4 @@
-import Foundation.IntProp.Deduction
+import Foundation.IntProp.Hilbert.Basic
 
 /-!
   # A Toy Model of Dialectica Interpretation for Intuitionistic Propositional Logic

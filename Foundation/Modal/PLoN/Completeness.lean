@@ -1,4 +1,4 @@
-import Foundation.Modal.ConsistentTheory
+import Foundation.Modal.Hilbert.ConsistentTheory
 import Foundation.Modal.PLoN.Soundness
 
 namespace LO.Modal
@@ -34,20 +34,19 @@ lemma truthlemma : ∀ {Ω : (CanonicalModel H).World}, Ω ⊧ φ ↔ (φ ∈ Ω
       by_contra hC;
       suffices ¬Ω ⊧ □φ by contradiction;
       simp [PLoN.Satisfies];
+      obtain ⟨Ω', hΩ'⟩ := lindenbaum (H := H) (T := {∼φ}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
+      use Ω';
       constructor;
-      . assumption;
-      . obtain ⟨Ω', hΩ'⟩ := lindenbaum (H := H) (T := {∼φ}) (not_singleton_consistent Ω.consistent (iff_mem_neg.mpr hC));
-        use Ω';
-        constructor;
-        . apply iff_mem_neg.mp;
-          simp_all;
-        . apply ih.not.mpr;
-          apply iff_mem_neg.mp;
-          simp_all;
-    . intro h;
-      by_contra hC;
-      simp [PLoN.Satisfies] at hC;
-      simp_all only [PLoN.Satisfies.iff_models];
+      . constructor;
+        . simpa;
+        . apply hΩ';
+          tauto;
+      . apply ih.not.mpr;
+        apply iff_mem_neg.mp;
+        simp_all;
+    . intro h Ω' RΩΩ';
+      have : □φ ∉ Ω.theory := by simpa using RΩΩ'.1;
+      contradiction;
   | _ => simp_all [PLoN.Satisfies];
 
 lemma complete_of_mem_canonicalFrame {𝔽 : FrameClass α} (hFC : CanonicalFrame H ∈ 𝔽) : 𝔽 ⊧ φ → H ⊢! φ:= by

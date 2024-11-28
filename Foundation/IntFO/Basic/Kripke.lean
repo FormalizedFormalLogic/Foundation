@@ -1,32 +1,35 @@
-import Foundation.Logic.Kripke.Basic
 import Foundation.IntFO.Basic.Deduction
 
-namespace LO.Kripke
+namespace LO.FirstOrder
 
 open Frame
 
-structure PreOrderFrame extends Frame, IsPreorder World Rel
+structure PreorderFrame where
+  World : Type u
+  Rel : World → World → Prop
+  [world_nonempty : Nonempty World]
+  [preorder : IsPreorder World Rel]
 
-namespace PreOrderFrame
+namespace PreorderFrame
 
-instance : CoeSort PreOrderFrame (Type u) := ⟨fun F ↦ PreOrderFrame.toFrame F⟩
+instance : CoeSort PreorderFrame (Type u) := ⟨fun F ↦ PreorderFrame.World F⟩
 
-instance (F : PreOrderFrame) : IsPreorder F (· ≺ ·) := F.toIsPreorder
+scoped infix:45 " ≺ " => Rel _
 
-variable {F : PreOrderFrame}
+instance (F : PreorderFrame) : IsPreorder F (· ≺ ·) := F.preorder
+
+variable {F : PreorderFrame}
 
 @[refl, simp] lemma rel_refl (w : F) : w ≺ w := IsRefl.refl w
 
 @[trans] lemma rel_trans {w v z : F} : w ≺ v → v ≺ z → w ≺ z := IsTrans.trans w v z
 
-end PreOrderFrame
+end PreorderFrame
 
-end LO.Kripke
-
-namespace LO.FirstOrder
+open PreorderFrame
 
 structure KripkeModel (L : Language) where
-  Frame : Kripke.PreOrderFrame
+  Frame : PreorderFrame
   Dom : Frame → Struc L
   wire (w v : Frame) : w ≺ v → Dom w ↪ Dom v
   wire_refl (w : Frame) : wire w w (IsRefl.refl _) = Function.Embedding.refl _
@@ -101,7 +104,7 @@ lemma wire_val (t : Semiterm L ξ n) {v : 𝓚} (hwv : w ≺ v) :
   induction t <;> simp [Semiterm.val_func, wire_func, *]
 
 @[simp] lemma val_rew {bv : Fin n₂ → Domain w} {fv : ξ₂ → Domain w} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
-    w ⊩[bv|fv] (ω • φ) ↔
+    w ⊩[bv|fv] (ω ▹ φ) ↔
     w ⊩[fun x ↦ (ω #x).val (Domain w).struc bv fv|fun x ↦ (ω &x).val (Domain w).struc bv fv] φ := by
   induction φ using Semiformulaᵢ.rec' generalizing n₂ w
   case hRel k R t =>
@@ -109,7 +112,7 @@ lemma wire_val (t : Semiterm L ξ n) {v : 𝓚} (hwv : w ≺ v) :
     apply iff_of_eq; congr; funext x
     simp [Semiterm.val_rew ω (t x), Function.comp_def]
   case hImp φ ψ ihφ ihψ =>
-    simp only [Rewriting.smul_imp, val_imply, Function.comp_apply, wire_val]
+    simp only [val_imply, Function.comp_apply, wire_val]
     constructor
     · intro h v hwv hφ
       simpa [Function.comp_def] using ihψ.mp <| h v hwv (ihφ.mpr <| by simpa [Function.comp_def, wire_val] using hφ)
@@ -121,19 +124,19 @@ lemma wire_val (t : Semiterm L ξ n) {v : 𝓚} (hwv : w ≺ v) :
   case hFalsum => simp
   case hAll φ ih =>
     constructor
-    · simp only [Rewriting.smul_all, val_all, Nat.succ_eq_add_one, wire_val]
+    · simp only [val_all, Nat.succ_eq_add_one, wire_val]
       intro h v hwv x
       exact cast (by congr; { funext x; cases x using Fin.cases <;> simp }; { simp }) <| ih.mp <| h v hwv x
-    · simp only [val_all, Nat.succ_eq_add_one, wire_val, Rewriting.smul_all]
+    · simp only [val_all, Nat.succ_eq_add_one, wire_val]
       intro h v hwv x
       apply ih.mpr
       exact cast (by congr; { funext x; cases x using Fin.cases <;> simp }; { simp }) <| h v hwv x
   case hEx φ ih =>
     constructor
-    · simp only [Rewriting.smul_ex, val_ex, Nat.succ_eq_add_one, forall_exists_index]
+    · simp only [Rewriting.app_ex, val_ex, Nat.succ_eq_add_one, forall_exists_index]
       intro x h
       exact ⟨x, cast (by congr; { funext x; cases x using Fin.cases <;> simp }; { simp }) (ih.mp h)⟩
-    · simp only [val_ex, Nat.succ_eq_add_one, Rewriting.smul_ex, forall_exists_index]
+    · simp only [val_ex, Nat.succ_eq_add_one, forall_exists_index]
       intro x h
       exact ⟨x, ih.mpr <| cast (by congr; { funext x; cases x using Fin.cases <;> simp }; { simp }) h⟩
 

@@ -1,118 +1,139 @@
+import Foundation.Modal.Kripke.Basic
 import Foundation.Vorspiel.BinaryRelations
-import Foundation.Modal.Kripke.Semantics
 
 namespace LO.Modal
 
 namespace Kripke
 
-open LO.Kripke
 open System
 open Kripke
 open Formula
+open Formula.Kripke
 
-variable {α : Type u}
+abbrev TransitiveConverseWellFoundedFrameClass : FrameClass := { F | Transitive F.Rel ∧ ConverseWellFounded F.Rel }
+abbrev TransitiveIrreflexiveFiniteFrameClass : FiniteFrameClass := { F | Transitive F.Rel ∧ Irreflexive F.Rel }
 
-private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F#α ⊧* 𝗟 := by
+private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
-  simp [Axioms.L];
-  intro φ V w;
-  apply Kripke.Satisfies.imp_def.mpr;
+  apply Semantics.RealizeSet.setOf_iff.mpr;
+  rintro _ ⟨φ, rfl⟩ V w;
+  apply Satisfies.imp_def.mpr;
   contrapose;
-  intro h; simp [Kripke.Satisfies] at h;
-  obtain ⟨x, Rwx, h⟩ := h;
+  intro h;
+  obtain ⟨x, Rwx, h⟩ := by simpa using Kripke.Satisfies.box_def.not.mp h;
   obtain ⟨m, ⟨⟨rwm, hm⟩, hm₂⟩⟩ := hWF.has_min ({ x | (F.Rel w x) ∧ ¬(Kripke.Satisfies ⟨F, V⟩ x φ) }) $ by use x; tauto;
-  simp [Kripke.Satisfies];
+  replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x φ → ¬m ≺ x := by simpa using hm₂;
+  apply Satisfies.box_def.not.mpr; push_neg;
   use m;
   constructor;
   . exact rwm;
-  . constructor;
-    . simp [flip] at hm₂;
-      intro n rmn;
+  . apply Satisfies.imp_def.not.mpr; push_neg;
+    constructor;
+    . intro n rmn;
       apply not_imp_not.mp $ hm₂ n (hTrans rwm rmn);
       exact rmn;
     . exact hm;
 
-private lemma trans_of_L  [Inhabited α] {F : Kripke.Frame} : F#α ⊧* 𝗟 → Transitive F.Rel := by
+private lemma trans_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → Transitive F.Rel := by
   contrapose;
-  intro hT; simp [Transitive] at hT;
-  obtain ⟨w₁, w₂, r₁₂, w₃, r₂₃, nr₁₃⟩ := hT;
-  apply iff_not_validOnFrame.mpr;
-  use (Axioms.L (atom default));
+  intro hT;
+  obtain ⟨w, v, Rwv, u, Rvu, nRwu⟩ := by simpa [Transitive] using hT;
+  apply ValidOnFrame.models_set_iff.not.mpr; push_neg;
+  use Axioms.L (atom 0);
   constructor;
-  . simp;
-  . use (λ w' _ => w' ≠ w₂ ∧ w' ≠ w₃), w₁;
-    simp only [Kripke.Satisfies]; simp;
+  . tauto;
+  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
+    use (λ w _ => w ≠ v ∧ w ≠ u), w;
+    apply Satisfies.imp_def.not.mpr; push_neg;
     constructor;
-    . intro x hx h;
-      by_cases hx₂ : x = w₂;
-      . subst hx₂;
-        simpa using h _ r₂₃;
-      . by_cases hx₃ : x = w₃ <;> simp_all [Kripke.Satisfies, hx₃];
-    . existsi w₂; simpa [Kripke.Satisfies];
+    . intro x Rwx hx;
+      by_cases exv : x = v;
+      . subst x;
+        simpa using Satisfies.atom_def.mp $ @hx u Rvu;
+      . apply Satisfies.atom_def.mpr;
+        constructor;
+        . assumption;
+        . by_contra hC;
+          subst x;
+          contradiction;
+    . apply Satisfies.box_def.not.mpr;
+      push_neg;
+      use v;
+      constructor;
+      . assumption;
+      . simp [Semantics.Realize, Kripke.Satisfies];
 
-variable [Inhabited α]
-
-private lemma cwf_of_L {F : Kripke.Frame} : F#α ⊧* 𝗟 → ConverseWellFounded F.Rel := by
+private lemma cwf_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → ConverseWellFounded F.Rel := by
   contrapose;
   intro hCF;
   obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
-  apply iff_not_validOnFrame.mpr;
-  use (Axioms.L (atom default));
+  apply ValidOnFrame.models_set_iff.not.mpr; push_neg;
+  use Axioms.L (atom 0);
   constructor;
-  . simp;
-  . use (λ w _ => w ∉ X), x;
-    simp only [Kripke.Satisfies]; simp;
+  . tauto;
+  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
+    use (λ w _ => w ∉ X), x;
+    apply Satisfies.imp_def.not.mpr; push_neg;
     constructor;
     . intro y _;
       by_cases hys : y ∈ X
       . obtain ⟨z, _, Rxz⟩ := hX₂ y hys;
-        simp_all;
-        use z;
-      . intros;
-        simp_all only [not_false_eq_true];
+        intro hy;
+        have : z ∉ X := by simpa using Satisfies.atom_def.mp $ hy z Rxz;
+        contradiction;
+      . intro _;
+        apply Satisfies.atom_def.mpr;
+        simpa;
     . obtain ⟨y, _, _⟩ := hX₂ x (by assumption);
+      apply Satisfies.box_def.not.mpr; push_neg;
       use y;
-
-instance axiomL_definability : 𝔽((𝗟 : Theory α)).DefinedBy (TransitiveConverseWellFoundedFrameClass) where
-  define := by
-    intro F;
-    constructor;
-    . intro h;
       constructor;
-      . exact trans_of_L h;
-      . exact cwf_of_L h;
-    . exact L_of_trans_and_cwf;
-  nonempty := by
-    use ⟨PUnit,  λ _ _ => False⟩;
-    refine ⟨by tauto, ?_⟩;
-    simp [Transitive, ConverseWellFounded];
-    apply WellFounded.trivial_wellfounded;
+      . assumption;
+      . simpa [Semantics.Realize, Kripke.Satisfies];
 
-instance : Sound (Hilbert.GL α) (TransitiveConverseWellFoundedFrameClass#α) := inferInstance
-instance : System.Consistent (Hilbert.GL α) := inferInstance
-
-instance axiomL_finite_definability : 𝔽ꟳ((𝗟 : Theory α)).DefinedBy (TransitiveIrreflexiveFrameClassꟳ) where
-  define := by
-    intro F;
+lemma TransitiveConverseWellFoundedFrameClass.is_defined_by_L : TransitiveConverseWellFoundedFrameClass.DefinedBy 𝗟 := by
+  intro F;
+  constructor;
+  . apply L_of_trans_and_cwf;
+  . intro h;
     constructor;
-    . rintro h;
-      obtain ⟨hTrans, hCWF⟩ := axiomL_definability.define.mp h;
-      refine ⟨hTrans, ?irreflexive⟩;
-      intro w;
-      simpa using ConverseWellFounded.iff_has_max.mp hCWF {w} (by simp);
-    . rintro ⟨hTrans, hIrrefl⟩;
-      apply axiomL_definability.define.mpr;
-      refine ⟨hTrans, ?_⟩;
-      apply Finite.converseWellFounded_of_trans_irrefl';
-      . infer_instance;
-      . assumption;
-      . assumption;
-  nonempty := by
-    use ⟨PUnit,  λ _ _ => False⟩;
-    refine ⟨?_, ?_⟩ <;> tauto;
+    . exact trans_of_L h;
+    . exact cwf_of_L h;
 
-instance GL_finite_sound : Sound (Hilbert.GL α) (TransitiveIrreflexiveFrameClassꟳ#α) := inferInstance
+lemma FiniteIrreflexiveFrameClass.is_finite_defined_by_L : TransitiveIrreflexiveFiniteFrameClass.DefinedBy 𝗟 := by
+  intro F;
+  constructor;
+  . rintro ⟨hTrans, hIrrefl⟩;
+    apply L_of_trans_and_cwf;
+    constructor
+    . assumption;
+    . apply Finite.converseWellFounded_of_trans_irrefl';
+      . exact F.world_finite;
+      . assumption;
+      . assumption
+  . rintro h;
+    refine ⟨?_, ?_⟩;
+    . exact trans_of_L h;
+    . intro w;
+      simpa using ConverseWellFounded.iff_has_max.mp (cwf_of_L h) {w} (by simp);
 
 end Kripke
+
+
+namespace Hilbert
+
+open Modal.Kripke
+
+instance GL.Kripke.sound : Sound (Hilbert.GL ℕ) (TransitiveConverseWellFoundedFrameClass) :=
+  Kripke.instSound_of_frameClass_definedBy (C := TransitiveConverseWellFoundedFrameClass) Kripke.TransitiveConverseWellFoundedFrameClass.is_defined_by_L rfl
+
+instance GL.Kripke.finite_sound : Sound (Hilbert.GL ℕ) (TransitiveIrreflexiveFiniteFrameClass) :=
+  Kripke.instSound_of_finiteFrameClass_definedBy FiniteIrreflexiveFrameClass.is_finite_defined_by_L rfl
+
+instance GL.consistent : System.Consistent (Hilbert.GL ℕ) := Kripke.instConsistent_of_nonempty_finiteFrameclass (FC := TransitiveIrreflexiveFiniteFrameClass) $ by
+  use irreflexivePointFrame;
+  simp [Transitive, Irreflexive];
+
+end Hilbert
 
 end LO.Modal

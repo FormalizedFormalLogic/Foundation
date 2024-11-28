@@ -47,7 +47,7 @@ scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 @[simp] lemma doubleNegation_isNegative (φ : Semiformula L ξ n) : φᴺ.IsNegative := by
   induction φ using rec' <;> simp [*]
 
-lemma rew_doubleNegation (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : ω • φᴺ = (ω • φ)ᴺ := by
+lemma rew_doubleNegation (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : ω ▹ φᴺ = (ω ▹ φ)ᴺ := by
   induction φ using rec' generalizing n₂ <;> simp [rew_rel, rew_nrel, Semiformulaᵢ.rew_rel, *]
 
 end Semiformula

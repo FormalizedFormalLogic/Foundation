@@ -231,14 +231,12 @@ variable {L : Language}
 @[simp] lemma complexity_add [L.Add] (t u : Semiterm L ξ n) :
     (Operator.Add.add.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.const, Operator.operator, Operator.numeral, Operator.Add.term_eq, complexity_func, Rew.func]
-  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
-  simp [sup_eq_max]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
 
 @[simp] lemma complexity_mul [L.Mul] (t u : Semiterm L ξ n) :
     (Operator.Mul.mul.operator ![t, u]).complexity = max t.complexity u.complexity + 1 := by
   simp [Operator.const, Operator.operator, Operator.numeral, Operator.Mul.term_eq, complexity_func, Rew.func]
-  rw [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
-  simp [sup_eq_max]
+  simp [show (Finset.univ : Finset (Fin 2)) = {0, 1} from by ext i; cases i using Fin.cases <;> simp [Fin.eq_zero]]
 
 end complexity
 
@@ -301,8 +299,8 @@ def comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) : Operator L l
 lemma operator_comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) (v : Fin l → Semiterm L ξ n) :
   (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
     unfold operator Rewriting.embedding Rewriting.substitute comp
-    simp only [operator, ← LawfulRewriting.comp_smul, Rew.emb_eq_id, Rew.comp_id];
-    congr 1
+    simp only [operator, ← TransitiveRewriting.comp_app, Rew.emb_eq_id, Rew.comp_id];
+    congr 2
     ext <;> simp [Rew.comp_app]
     · congr
     · contradiction
@@ -461,33 +459,33 @@ protected lemma operator' (o : Semiterm.Operator L k) (v : Fin k → Semiterm L 
   by simp [Semiterm.Operator.const, Empty.eq_elim]
 
 lemma hom_operator (o : Semiformula.Operator L k) (v : Fin k → Semiterm L ξ₁ n₁) :
-    ω • o.operator v = o.operator fun i ↦ ω (v i) := by
+    ω ▹ o.operator v = o.operator fun i ↦ ω (v i) := by
   unfold Semiformula.Operator.operator Rewriting.substitute Rewriting.embedding
-  simp only [← LawfulRewriting.comp_smul]; congr 1
+  simp only [← TransitiveRewriting.comp_app]; congr 2
   ext <;> simp [Rew.comp_app]; contradiction
 
 lemma hom_operator' (o : Semiformula.Operator L k) (v : Fin k → Semiterm L ξ₁ n₁) :
-    ω • o.operator v = o.operator (ω ∘ v) := ω.hom_operator o v
+    ω ▹ o.operator v = o.operator (ω ∘ v) := ω.hom_operator o v
 
 @[simp] lemma hom_finitary0 (o : Semiformula.Operator L 0) (v : Fin 0 → Semiterm L ξ₁ n₁) :
-    ω • (o.operator v) = o.operator ![] := by simp [ω.hom_operator', Matrix.empty_eq]
+    ω ▹ (o.operator v) = o.operator ![] := by simp [ω.hom_operator', Matrix.empty_eq]
 
 @[simp] lemma hom_finitary1 (o : Semiformula.Operator L 1) (t : Semiterm L ξ₁ n₁) :
-    ω • (o.operator ![t]) = o.operator ![ω t] := by simp [ω.hom_operator']
+    ω ▹ (o.operator ![t]) = o.operator ![ω t] := by simp [ω.hom_operator']
 
 @[simp] lemma hom_finitary2 (o : Semiformula.Operator L 2) (t₁ t₂ : Semiterm L ξ₁ n₁) :
-    ω • (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp [ω.hom_operator']
+    ω ▹ (o.operator ![t₁, t₂]) = o.operator ![ω t₁, ω t₂] := by simp [ω.hom_operator']
 
 @[simp] lemma hom_finitary3 (o : Semiformula.Operator L 3) (t₁ t₂ t₃ : Semiterm L ξ₁ n₁) :
-    ω • (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp [ω.hom_operator']
+    ω ▹ (o.operator ![t₁, t₂, t₃]) = o.operator ![ω t₁, ω t₂, ω t₃] := by simp [ω.hom_operator']
 
-@[simp] lemma hom_const : ω • (Semiformula.Operator.const c : Semiformula L ξ₁ n₁) = Semiformula.Operator.const c := by
+@[simp] lemma hom_const : ω ▹ (Semiformula.Operator.const c : Semiformula L ξ₁ n₁) = Semiformula.Operator.const c := by
   simp [Semiformula.Operator.const, ω.hom_operator']
 
 open Semiformula
 
 lemma eq_equal_iff [L.Eq] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n₂} :
-    ω • φ = Operator.Eq.eq.operator ![t, u] ↔ ∃ t' u', ω t' = t ∧ ω u' = u ∧ φ = Operator.Eq.eq.operator ![t', u'] := by
+    ω ▹ φ = Operator.Eq.eq.operator ![t, u] ↔ ∃ t' u', ω t' = t ∧ ω u' = u ∧ φ = Operator.Eq.eq.operator ![t', u'] := by
   cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel, Operator.operator, Operator.Eq.sentence_eq]
   case hrel k' r' v =>
     by_cases hk : k' = 2 <;> simp [hk]; rcases hk with rfl; simp
@@ -497,7 +495,7 @@ lemma eq_equal_iff [L.Eq] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ�
     · rintro ⟨t', rfl, u', rfl, H⟩; intro i; cases i using Fin.cases <;> simp [H, Fin.eq_zero]
 
 lemma eq_lt_iff [L.LT] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n₂} :
-    ω • φ = Operator.LT.lt.operator ![t, u] ↔
+    ω ▹ φ = Operator.LT.lt.operator ![t, u] ↔
     ∃ t' u', ω t' = t ∧ ω u' = u ∧ φ = Operator.LT.lt.operator ![t', u'] := by
   cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel, Operator.operator, Operator.LT.sentence_eq]
   case hrel k' r' v =>

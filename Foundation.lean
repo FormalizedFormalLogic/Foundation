@@ -47,5 +47,63 @@ import Foundation.FirstOrder.Arith.Nonstandard
 
 -- import Foundation.FirstOrder.Arith.EA.Basic
 
-import Foundation.IntProp.IntProp
-import Foundation.Modal.Modal
+-- IntProp
+import Foundation.IntProp.Hilbert.Glivenko
+
+import Foundation.IntProp.Kripke.Classical
+import Foundation.IntProp.Kripke.Completeness
+import Foundation.IntProp.Kripke.DP
+
+import Foundation.IntProp.Heyting.Semantics
+
+import Foundation.IntProp.Dialectica.Basic
+
+
+-- Modal
+
+import Foundation.Modal.Hilbert.Subst
+import Foundation.Modal.Hilbert.Maximal.Unprovability
+
+import Foundation.Modal.Hilbert.WeakerThan.GL_GLS
+import Foundation.Modal.Hilbert.WeakerThan.K_K4
+import Foundation.Modal.Hilbert.WeakerThan.K_K5
+import Foundation.Modal.Hilbert.WeakerThan.K_KB
+import Foundation.Modal.Hilbert.WeakerThan.K_KD
+import Foundation.Modal.Hilbert.WeakerThan.K4_GL
+import Foundation.Modal.Hilbert.WeakerThan.K4_Grz
+import Foundation.Modal.Hilbert.WeakerThan.K4_S4
+import Foundation.Modal.Hilbert.WeakerThan.K4_Triv
+import Foundation.Modal.Hilbert.WeakerThan.KD_KT
+import Foundation.Modal.Hilbert.WeakerThan.KT_Grz
+import Foundation.Modal.Hilbert.WeakerThan.KT_S4
+import Foundation.Modal.Hilbert.WeakerThan.S4_S5
+
+import Foundation.Modal.Hilbert.Equiv.GL
+import Foundation.Modal.Hilbert.Equiv.KD_KP
+import Foundation.Modal.Hilbert.Equiv.S5_KT4B
+import Foundation.Modal.Hilbert.Equiv.S5Grz_Triv
+
+import Foundation.Modal.ModalCompanion.GMT
+
+import Foundation.Modal.Boxdot.K4_S4
+import Foundation.Modal.Boxdot.GL_Grz
+
+import Foundation.Modal.Kripke.NNFormula
+import Foundation.Modal.Kripke.Filteration
+import Foundation.Modal.Kripke.ComplexityLimited
+import Foundation.Modal.Kripke.Ver
+import Foundation.Modal.Kripke.Dot3
+import Foundation.Modal.Kripke.S5
+
+import Foundation.Modal.Kripke.GL.Tree
+import Foundation.Modal.Kripke.GL.Unnec
+import Foundation.Modal.Kripke.GL.MDP
+
+import Foundation.Modal.Kripke.Grz.Completeness
+
+import Foundation.Modal.PLoN.Completeness
+
+-- IntFO
+
+import Foundation.IntFO.Basic
+import Foundation.IntFO.Translation
