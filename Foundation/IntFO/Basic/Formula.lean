@@ -251,7 +251,7 @@ lemma add_def : T + U = T ∪ U := rfl
 
 end Theoryᵢ
 
-/-! Negative Formula -/
+/-! (Weak) Negative Formula -/
 namespace Semiformulaᵢ
 
 inductive IsNegative : Semiformulaᵢ L ξ n → Prop
