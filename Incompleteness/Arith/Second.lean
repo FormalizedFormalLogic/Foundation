@@ -12,7 +12,7 @@ open LO.FirstOrder LO.FirstOrder.Arith
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-def substNumeral (p x : V) : V := ⌜ℒₒᵣ⌝.substs₁ (numeral x) p
+def substNumeral (φ x : V) : V := ⌜ℒₒᵣ⌝.substs₁ (numeral x) φ
 
 lemma substNumeral_app_quote (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
     substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[‘↑n’] : Sentence ℒₒᵣ)⌝ := by
@@ -25,10 +25,10 @@ lemma substNumeral_app_quote_quote (σ π : Semisentence ℒₒᵣ 1) :
     substNumeral (⌜σ⌝ : V) ⌜π⌝ = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
   simpa [coe_quote, quote_eq_encode] using substNumeral_app_quote σ ⌜π⌝
 
-def substNumerals (p : V) (v : Fin k → V) : V := ⌜ℒₒᵣ⌝.substs ⌜fun i ↦ numeral (v i)⌝ p
+def substNumerals (φ : V) (v : Fin k → V) : V := ⌜ℒₒᵣ⌝.substs ⌜fun i ↦ numeral (v i)⌝ φ
 
 lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ) :
-    (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.substs (fun i ↦ ‘↑(v i)’)).hom σ : Sentence ℒₒᵣ)⌝ := by
+    (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.substs (fun i ↦ ‘↑(v i)’)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
   dsimp [substNumerals]
   let w : Fin k → Semiterm ℒₒᵣ Empty 0 := fun i ↦ ‘↑(v i)’
   have : ⌜fun i ↦ numeral (v i : V)⌝ = (⌜fun i : Fin k ↦ ⌜w i⌝⌝ : V) := by
@@ -38,7 +38,7 @@ lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ
   rw [this, quote_substs' (L := ℒₒᵣ)]
 
 lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k → Semisentence ℒₒᵣ k) :
-    substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) = ⌜((Rew.substs (fun i ↦ ⌜π i⌝)).hom σ : Sentence ℒₒᵣ)⌝ := by
+    substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) = ⌜((Rew.substs (fun i ↦ ⌜π i⌝)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
   simpa [coe_quote, quote_eq_encode] using substNumerals_app_quote σ (fun i ↦ ⌜π i⌝)
 
 section
@@ -92,11 +92,11 @@ def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 := “x. ∀
 def fixpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
 
 lemma substs_diag (θ σ : Semisentence ℒₒᵣ 1) :
-    “!(diag θ) !!(⌜σ⌝ : Semiterm ℒₒᵣ Empty 0)” = “∀ x, !ssnum x !!⌜σ⌝ !!⌜σ⌝ → !θ x” := by
-  simp [goedelNumber'_def, diag, Rew.q_substs, ←Rew.hom_comp_app, Rew.substs_comp_substs]
+    “!(diag θ) !!(⌜σ⌝ : Semiterm ℒₒᵣ Empty 0)” = (“∀ x, !ssnum x !!⌜σ⌝ !!⌜σ⌝ → !θ x” : Sentence ℒₒᵣ) := by
+  simp [goedelNumber'_def, diag, Rew.q_substs, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs]
 
 lemma fixpoint_eq (θ : Semisentence ℒₒᵣ 1) :
-    fixpoint θ = “∀ x, !ssnum x !!⌜diag θ⌝ !!⌜diag θ⌝ → !θ x” := by
+    fixpoint θ = (“∀ x, !ssnum x !!⌜diag θ⌝ !!⌜diag θ⌝ → !θ x” : Sentence ℒₒᵣ) := by
   simp [fixpoint, substs_diag]
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
@@ -118,13 +118,13 @@ section Multidiagonalization
 /-- $\mathrm{diag}_i(\vec{x}) := (\forall \vec{y})\left[ \left(\bigwedge_j \mathrm{ssnums}(y_j, x_j, \vec{x})\right) \to \theta_i(\vec{y}) \right]$ -/
 def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒₒᵣ k :=
   ∀^[k] (
-    (Matrix.conj fun j : Fin k ↦ (Rew.substs <| #(j.addCast k) :> #(j.addNat k) :> fun l ↦ #(l.addNat k)).hom ssnums.val) ➝
-    (Rew.substs fun j ↦ #(j.addCast k)).hom θ)
+    (Matrix.conj fun j : Fin k ↦ (Rew.substs <| #(j.addCast k) :> #(j.addNat k) :> fun l ↦ #(l.addNat k)) ▹ ssnums.val) ➝
+    (Rew.substs fun j ↦ #(j.addCast k)) ▹ θ)
 
-def multifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.substs fun j ↦ ⌜multidiag (θ j)⌝).hom (multidiag (θ i))
+def multifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.substs fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
 
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
-    T ⊢!. multifixpoint θ i ⭤ (Rew.substs fun j ↦ ⌜multifixpoint θ j⌝).hom (θ i) :=
+    T ⊢!. multifixpoint θ i ⭤ (Rew.substs fun j ↦ ⌜multifixpoint θ j⌝) ▹ (θ i) :=
   haveI : 𝐄𝐐 ≼ T := System.Subtheory.comp (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance inferInstance
@@ -134,7 +134,7 @@ theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
       intro i; simp [t, multifixpoint, substNumerals_app_quote_quote]
     calc
       V ⊧/![] (multifixpoint θ i) ↔ V ⊧/t (multidiag (θ i))                 := by simp [multifixpoint]
-      _                      ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ←Function.funext_iff]
+      _                      ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
       _                      ↔ V ⊧/(fun i ↦ ⌜multifixpoint θ i⌝) (θ i) := by simp [ht]
 
 end Multidiagonalization

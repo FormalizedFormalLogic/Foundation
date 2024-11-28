@@ -138,7 +138,7 @@ local notation "γ" => 𝔅.goedel
 
 lemma goedel_spec : T₀ ⊢!. γ ⭤ ∼𝔅 γ := by
   convert (diag (T := T₀) “x. ¬!𝔅.prov x”);
-  simp [goedel, ←Rew.hom_comp_app, Rew.substs_comp_substs];
+  simp [goedel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
   rfl;
 
 variable [T₀ ≼ T]
@@ -255,7 +255,7 @@ local notation "κ(" σ ")" => 𝔅.kreisel σ
 
 lemma kreisel_spec (σ : Sentence L) : T₀ ⊢!. κ(σ) ⭤ (𝔅 (κ(σ)) ➝ σ) := by
   convert (diag (T := T₀) “x. !𝔅.prov x → !σ”);
-  simp [kreisel, ←Rew.hom_comp_app, Rew.substs_comp_substs];
+  simp [kreisel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
   rfl;
 
 private lemma kreisel_specAux₁ [T₀ ≼ T] (σ : Sentence L) : T₀ ⊢!. 𝔅 κ(σ) ➝ (𝔅 σ) := (imp_trans''! (D2 ⨀ (D1 (Subtheory.prf! <| and₁'! (kreisel_spec σ)))) D2) ⨀₁ D3

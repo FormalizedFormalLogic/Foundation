@@ -11,25 +11,25 @@ lemma re_iff_sigma1 {P : ℕ → Prop} : RePred P ↔ 𝚺₁-Predicate P := by
   · intro h
     exact ⟨.mkSigma (codeOfRePred P) (by simp [codeOfRePred, codeOfPartrec']), by
       intro v; symm; simp; simpa [←Matrix.constant_eq_singleton'] using codeOfRePred_spec h (x := v 0)⟩
-  · rintro ⟨p, hp⟩
-    have := (sigma1_re id (p.sigma_prop)).comp
+  · rintro ⟨φ, hφ⟩
+    have := (sigma1_re id (φ.sigma_prop)).comp
       (f := fun x : ℕ ↦ x ::ᵥ Mathlib.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
-    exact this.of_eq <| by intro x; symm; simpa [Mathlib.Vector.cons_get] using hp ![x]
+    exact this.of_eq <| by intro x; symm; simpa [Mathlib.Vector.cons_get] using hφ ![x]
 
 variable (T : Theory ℒₒᵣ) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Delta1Definable]
 
 /-- Gödel's First Incompleteness Theorem-/
 theorem goedel_first_incompleteness : ¬System.Complete T := by
-  let D : ℕ → Prop := fun n : ℕ ↦ ∃ p : SyntacticSemiformula ℒₒᵣ 1, n = ⌜p⌝ ∧ T ⊢! ∼p/[⌜p⌝]
+  let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : SyntacticSemiformula ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
   have D_re : RePred D := by
-    have : 𝚺₁-Predicate fun p : ℕ ↦
-      ⌜ℒₒᵣ⌝.IsSemiformula 1 p ∧ (T.codeIn ℕ).Provable (⌜ℒₒᵣ⌝.neg <| ⌜ℒₒᵣ⌝.substs ?[numeral p] p) := by definability
+    have : 𝚺₁-Predicate fun φ : ℕ ↦
+      ⌜ℒₒᵣ⌝.IsSemiformula 1 φ ∧ (T.codeIn ℕ).Provable (⌜ℒₒᵣ⌝.neg <| ⌜ℒₒᵣ⌝.substs ?[numeral φ] φ) := by definability
     exact (re_iff_sigma1.mpr this).of_eq <| by
-      intro p; constructor
-      · rintro ⟨hp, b⟩
-        rcases hp.sound with ⟨p, rfl⟩
-        refine ⟨p, rfl, Language.Theory.Provable.sound (by simpa)⟩
-      · rintro ⟨p, rfl, b⟩
+      intro φ; constructor
+      · rintro ⟨hφ, b⟩
+        rcases hφ.sound with ⟨φ, rfl⟩
+        refine ⟨φ, rfl, Language.Theory.Provable.sound (by simpa)⟩
+      · rintro ⟨φ, rfl, b⟩
         exact ⟨by simp, by simpa using provable_of_provable (V := ℕ) b⟩
   let σ : SyntacticSemiformula ℒₒᵣ 1 := codeOfRePred (D)
   let ρ : SyntacticFormula ℒₒᵣ := σ/[⌜σ⌝]

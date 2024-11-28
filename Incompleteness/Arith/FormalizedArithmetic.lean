@@ -35,7 +35,7 @@ variable {V}
 
 class R₀Theory (T : LOR.TTheory (V := V)) where
   refl : T ⊢ (#'0 =' #'0).all
-  replace (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) : T ⊢ (#'1 =' #'0 ➝ p^/[(#'1).sing] ➝ p^/[(#'0).sing]).all.all
+  replace (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) : T ⊢ (#'1 =' #'0 ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all
   add (n m : V) : T ⊢ (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n + m)
   mul (n m : V) : T ⊢ (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n * m)
   ne {n m : V} : n ≠ m → T ⊢ ↑n ≠' ↑m
@@ -70,14 +70,14 @@ def eqRefl (t : ⌜ℒₒᵣ⌝.Term) : T ⊢ t =' t := by
 
 lemma eq_refl! (t : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' t := ⟨eqRefl T t⟩
 
-noncomputable def replace (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢ t =' u ➝ p^/[t.sing] ➝ p^/[u.sing] := by
-  have : T ⊢ (#'1 =' #'0 ➝ p^/[(#'1).sing] ➝ p^/[(#'0).sing]).all.all := R₀Theory.replace p
+noncomputable def replace (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
+    T ⊢ t =' u ➝ φ^/[t.sing] ➝ φ^/[u.sing] := by
+  have : T ⊢ (#'1 =' #'0 ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all := R₀Theory.replace φ
   have := by simpa using specialize this t
   simpa [Language.SemitermVec.q_of_pos, Language.Semiformula.substs₁,
     Language.TSemifromula.substs_substs] using specialize this u
 
-lemma replace! (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' u ➝ p^/[t.sing] ➝ p^/[u.sing] := ⟨replace T p t u⟩
+lemma replace! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' u ➝ φ^/[t.sing] ➝ φ^/[u.sing] := ⟨replace T φ t u⟩
 
 def eqSymm (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ t₂ =' t₁ := by
   apply deduct'
@@ -209,19 +209,19 @@ noncomputable def nltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
 
 lemma nlt_ext (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ ≮' u₁ ➝ t₂ ≮' u₂ := ⟨nltExt T t₁ t₂ u₁ u₂⟩
 
-noncomputable def ballReplace (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢ t =' u ➝ p.ball t ➝ p.ball u := by
-  simpa [Language.TSemifromula.substs_substs] using replace T ((p^/[(#'0).sing]).ball #'0) t u
+noncomputable def ballReplace (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
+    T ⊢ t =' u ➝ φ.ball t ➝ φ.ball u := by
+  simpa [Language.TSemifromula.substs_substs] using replace T ((φ^/[(#'0).sing]).ball #'0) t u
 
-lemma ball_replace! (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢! t =' u ➝ p.ball t ➝ p.ball u := ⟨ballReplace T p t u⟩
+lemma ball_replace! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
+    T ⊢! t =' u ➝ φ.ball t ➝ φ.ball u := ⟨ballReplace T φ t u⟩
 
-noncomputable def bexReplace (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢ t =' u ➝ p.bex t ➝ p.bex u := by
-  simpa [Language.TSemifromula.substs_substs] using replace T ((p^/[(#'0).sing]).bex #'0) t u
+noncomputable def bexReplace (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
+    T ⊢ t =' u ➝ φ.bex t ➝ φ.bex u := by
+  simpa [Language.TSemifromula.substs_substs] using replace T ((φ^/[(#'0).sing]).bex #'0) t u
 
-lemma bex_replace! (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
-    T ⊢! t =' u ➝ p.bex t ➝ p.bex u := ⟨bexReplace T p t u⟩
+lemma bex_replace! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
+    T ⊢! t =' u ➝ φ.bex t ➝ φ.bex u := ⟨bexReplace T φ t u⟩
 
 def eqComplete {n m : V} (h : n = m) : T ⊢ ↑n =' ↑m := by
   rcases h; exact eqRefl T _
@@ -267,39 +267,39 @@ noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := 
 
 lemma nlt_complete {n m : V} (h : m ≤ n) : T ⊢! ↑n ≮' ↑m := ⟨nltComplete T h⟩
 
-noncomputable def ballIntro (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
-    (bs : ∀ i < n, T ⊢ p ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
-    T ⊢ p.ball ↑n := by
+noncomputable def ballIntro (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
+    (bs : ∀ i < n, T ⊢ φ ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
+    T ⊢ φ.ball ↑n := by
   apply all
-  suffices T ⊢ &'0 ≮' ↑n ⋎ p.shift^/[(&'0).sing] by
+  suffices T ⊢ &'0 ≮' ↑n ⋎ φ.shift^/[(&'0).sing] by
     simpa [Language.Semiformula.free, Language.Semiformula.substs₁]
-  have : T ⊢ (tSubstItr (&'0).sing (#'1 ≠' #'0) n).conj ⋎ p.shift^/[(&'0).sing] := by
+  have : T ⊢ (tSubstItr (&'0).sing (#'1 ≠' #'0) n).conj ⋎ φ.shift^/[(&'0).sing] := by
     apply conjOr'
     intro i hi
     have hi : i < n := by simpa using hi
     let Γ := [&'0 =' typedNumeral 0 i]
-    suffices Γ ⊢[T] p.shift^/[(&'0).sing] by
+    suffices Γ ⊢[T] φ.shift^/[(&'0).sing] by
       simpa [nth_tSubstItr', hi, Language.Semiformula.imp_def] using deduct' this
     have e : Γ ⊢[T] ↑i =' &'0 := of (eqSymm T &'0 ↑i) ⨀ (FiniteContext.byAxm <| by simp [Γ])
-    have : T ⊢ p.shift^/[(i : ⌜ℒₒᵣ⌝.Term).sing] := by
+    have : T ⊢ φ.shift^/[(i : ⌜ℒₒᵣ⌝.Term).sing] := by
       simpa [Language.TSemifromula.shift_substs] using shift (bs i hi)
-    exact of (replace T p.shift ↑i &'0) ⨀ e ⨀ of this
+    exact of (replace T φ.shift ↑i &'0) ⨀ e ⨀ of this
   exact orReplaceLeft' this (andRight (nltNumeral T (&'0) n))
 
-lemma ball_intro! (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
-    (bs : ∀ i < n, T ⊢! p ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
-    T ⊢! p.ball ↑n := ⟨ballIntro T p n fun i hi ↦ (bs i hi).get⟩
+lemma ball_intro! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
+    (bs : ∀ i < n, T ⊢! φ ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
+    T ⊢! φ.ball ↑n := ⟨ballIntro T φ n fun i hi ↦ (bs i hi).get⟩
 
-noncomputable def bexIntro (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V) {i}
-    (hi : i < n) (b : T ⊢ p ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
-    T ⊢ p.bex ↑n := by
+noncomputable def bexIntro (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V) {i}
+    (hi : i < n) (b : T ⊢ φ ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
+    T ⊢ φ.bex ↑n := by
   apply ex i
-  suffices T ⊢ i <' n ⋏ p^/[(i : ⌜ℒₒᵣ⌝.Term).sing] by simpa
+  suffices T ⊢ i <' n ⋏ φ^/[(i : ⌜ℒₒᵣ⌝.Term).sing] by simpa
   exact System.andIntro (ltComplete T hi) b
 
-lemma bex_intro! (p : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V) {i}
-    (hi : i < n) (b : T ⊢! p ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
-    T ⊢! p.bex ↑n := ⟨bexIntro T p n hi b.get⟩
+lemma bex_intro! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V) {i}
+    (hi : i < n) (b : T ⊢! φ ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
+    T ⊢! φ.bex ↑n := ⟨bexIntro T φ n hi b.get⟩
 
 end R₀Theory
 

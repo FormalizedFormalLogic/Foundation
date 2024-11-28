@@ -40,9 +40,9 @@ def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).SemitermVec n
 
 @[simp] lemma len_semitermvec {L : Arith.Language V} {pL} [L.Defined pL] (v : L.SemitermVec k n) : len v.val = k := v.prop.lh
 
-@[simp] lemma cast_substs_numVec (p : Semisentence ℒₒᵣ (n + 1)) :
-    ((.cast (V := V) (n := ↑(n + 1)) (n' := ↑n + 1) ⌜Rew.embs.hom p⌝ (by simp)) ^/[(toNumVec e).q.substs (typedNumeral 0 x).sing]) =
-    ⌜Rew.embs.hom p⌝ ^/[toNumVec (x :> e)] := by
+@[simp] lemma cast_substs_numVec (φ : Semisentence ℒₒᵣ (n + 1)) :
+    ((.cast (V := V) (n := ↑(n + 1)) (n' := ↑n + 1) ⌜Rew.embs ▹ φ⌝ (by simp)) ^/[(toNumVec e).q.substs (typedNumeral 0 x).sing]) =
+    ⌜Rew.embs ▹ φ⌝ ^/[toNumVec (x :> e)] := by
   have : (toNumVec e).q.substs (typedNumeral 0 x).sing = x ∷ᵗ toNumVec e := by
     ext; simp
     apply nth_ext' ((↑n : V) + 1)
@@ -92,8 +92,8 @@ lemma termEq_complete! {n : ℕ} (e : Fin n → V) (t : Semiterm ℒₒᵣ Empty
 
 open FirstOrder.Arith
 
-theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarchy 𝚺 1 p) {e} :
-    V ⊧/e p → T ⊢! ⌜Rew.embs.hom p⌝^/[toNumVec e] := by
+theorem bold_sigma₁_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierarchy 𝚺 1 φ) {e} :
+    V ⊧/e φ → T ⊢! ⌜Rew.embs ▹ φ⌝^/[toNumVec e] := by
   revert e
   apply sigma₁_induction' hp
   case hVerum => intro n; simp
@@ -105,7 +105,7 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     intro n t₁ t₂ e h
     have : t₁.valbm V e = t₂.valbm V e := by simpa using h
     suffices T ⊢! ⌜Rew.embs t₁⌝^ᵗ/[toNumVec e] =' ⌜Rew.embs t₂⌝^ᵗ/[toNumVec e] by
-      simpa only [Rew.rel2, Semiformula.codeIn'_eq, Fin.isValue, Matrix.cons_val_zero,
+      simpa only [Semiformula.rew_rel2, Semiformula.codeIn'_eq, Fin.isValue, Matrix.cons_val_zero,
         Matrix.cons_val_one, Matrix.vecHead, Matrix.cons_val_fin_one, substs_equals] using this
     refine eq_ext T _ _ _ _ ⨀ ?_ ⨀ ?_ ⨀ eq_complete! T this
     · exact eq_symm'! _ <| termEq_complete! T e t₁
@@ -114,7 +114,7 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     intro n t₁ t₂ e h
     have : t₁.valbm V e ≠ t₂.valbm V e := by simpa using h
     suffices T ⊢! ⌜Rew.embs t₁⌝^ᵗ/[toNumVec e] ≠' ⌜Rew.embs t₂⌝^ᵗ/[toNumVec e] by
-      simpa only [Rew.nrel2, Semiformula.codeIn'_neq, Fin.isValue, Matrix.cons_val_zero,
+      simpa only [Semiformula.rew_nrel2, Semiformula.codeIn'_neq, Fin.isValue, Matrix.cons_val_zero,
         Matrix.cons_val_one, Matrix.vecHead, Matrix.cons_val_fin_one, substs_notEquals] using this
     refine ne_ext T _ _ _ _ ⨀ ?_ ⨀ ?_ ⨀ ne_complete! T this
     · exact eq_symm'! _ <| termEq_complete! T e t₁
@@ -123,7 +123,7 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     intro n t₁ t₂ e h
     have : t₁.valbm V e < t₂.valbm V e := by simpa using h
     suffices T ⊢! ⌜Rew.embs t₁⌝^ᵗ/[toNumVec e] <' ⌜Rew.embs t₂⌝^ᵗ/[toNumVec e] by
-      simpa only [Rew.rel2, Semiformula.codeIn'_lt, Fin.isValue, Matrix.cons_val_zero,
+      simpa only [Semiformula.rew_rel2, Semiformula.codeIn'_lt, Fin.isValue, Matrix.cons_val_zero,
         Matrix.cons_val_one, Matrix.vecHead, Matrix.cons_val_fin_one, substs_lessThan] using this
     refine lt_ext! T _ _ _ _ ⨀ ?_ ⨀ ?_ ⨀ lt_complete! T this
     · exact eq_symm'! _ <| termEq_complete! T e t₁
@@ -132,40 +132,40 @@ theorem bold_sigma₁_complete {n} {p : Semisentence ℒₒᵣ n} (hp : Hierarch
     intro n t₁ t₂ e h
     have : t₂.valbm V e ≤ t₁.valbm V e := by simpa using h
     suffices T ⊢! ⌜Rew.embs t₁⌝^ᵗ/[toNumVec e] ≮' ⌜Rew.embs t₂⌝^ᵗ/[toNumVec e] by
-      simpa only [Rew.nrel2, Semiformula.codeIn'_nlt, Fin.isValue, Matrix.cons_val_zero,
+      simpa only [Semiformula.rew_nrel2, Semiformula.codeIn'_nlt, Fin.isValue, Matrix.cons_val_zero,
         Matrix.cons_val_one, Matrix.vecHead, Matrix.cons_val_fin_one, substs_notLessThan] using this
     refine nlt_ext T _ _ _ _ ⨀ ?_ ⨀ ?_ ⨀ nlt_complete T this
     · exact eq_symm'! _ <| termEq_complete! T e t₁
     · exact eq_symm'! _ <| termEq_complete! T e t₂
   case hAnd =>
-    intro n p q _ _ ihp ihq e h
-    have h : Semiformula.Evalbm V e p ∧ Semiformula.Evalbm V e q := by simpa using h
+    intro n φ ψ _ _ ihp ihq e h
+    have h : Semiformula.Evalbm V e φ ∧ Semiformula.Evalbm V e ψ := by simpa using h
     simpa only [LogicalConnective.HomClass.map_and, Semiformula.codeIn'_and,
       Language.Semiformula.substs_and] using and_intro! (ihp h.1) (ihq h.2)
   case hOr =>
-    intro n p q _ _ ihp ihq e h
-    have : Semiformula.Evalbm V e p ∨ Semiformula.Evalbm V e q := by simpa using h
+    intro n φ ψ _ _ ihp ihq e h
+    have : Semiformula.Evalbm V e φ ∨ Semiformula.Evalbm V e ψ := by simpa using h
     rcases this with (h | h)
     · simpa only [LogicalConnective.HomClass.map_or, Semiformula.codeIn'_or,
       Language.Semiformula.substs_or] using or₁'! (ihp h)
     · simpa only [LogicalConnective.HomClass.map_or, Semiformula.codeIn'_or,
       Language.Semiformula.substs_or] using or₂'! (ihq h)
   case hBall =>
-    intro n t p _ ihp e h
-    simp only [Rew.ball, Rew.q_emb, Rew.hom_finitary2, Rew.emb_bvar, ← Rew.emb_bShift_term,
-      Semiformula.codeIn'_ball, substs_ball]
+    intro n t φ _ ihp e h
+    suffices T ⊢! Language.Semiformula.ball (⌜Rew.emb t⌝^ᵗ/[toNumVec e]) ((_)^/[(toNumVec e).q]) by
+      simpa only [Rewriting.smul_ball, Rew.q_emb, Rew.hom_finitary2, Rew.emb_bvar, ← Rew.emb_bShift_term,
+        Semiformula.codeIn'_ball, substs_ball]
     apply ball_replace! T _ _ _ ⨀ (eq_symm! T _ _ ⨀ termEq_complete! T e t) ⨀ ?_
     apply ball_intro!
     intro x hx
-    suffices T ⊢! ⌜Rew.embs.hom p⌝^/[toNumVec (x :> e)]  by
-      simpa [Language.TSemifromula.substs_substs]
-    have : Semiformula.Evalbm V (x :> e) p := by
+    suffices T ⊢! ⌜Rew.embs ▹ φ⌝^/[toNumVec (x :> e)] by simpa [Language.TSemifromula.substs_substs]
+    have : Semiformula.Evalbm V (x :> e) φ := by
       simp at h; exact h x hx
     exact ihp this
   case hEx =>
-    intro n p _ ihp e h
-    simp only [Rew.ex, Rew.q_emb, Semiformula.codeIn'_ex, Language.Semiformula.substs_ex]
-    have : ∃ x, Semiformula.Evalbm V (x :> e) p := by simpa using h
+    intro n φ _ ihp e h
+    simp only [Rewriting.app_ex, Rew.q_emb, Semiformula.codeIn'_ex, Language.Semiformula.substs_ex]
+    have : ∃ x, Semiformula.Evalbm V (x :> e) φ := by simpa using h
     rcases this with ⟨x, hx⟩
     apply ex! x
     simpa [Language.TSemifromula.substs_substs] using ihp hx
