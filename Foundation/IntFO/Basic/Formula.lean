@@ -285,62 +285,6 @@ namespace IsNegative
 
 end IsNegative
 
-inductive Isomorphic {L : Language} {ξ ζ : Type*} : {n m : ℕ} → Semiformulaᵢ L ξ n → Semiformulaᵢ L ζ m → Type _ where
-  | verum : Isomorphic (⊤ : Semiformulaᵢ L ξ n) (⊤ : Semiformulaᵢ L ζ m)
-  | falsum : Isomorphic (⊥ : Semiformulaᵢ L ξ n) (⊥ : Semiformulaᵢ L ζ m)
-  | rel {k} (R : L.Rel k) (v w) : Isomorphic (rel R v) (rel R w)
-  | and {φ₁ φ₂ : Semiformulaᵢ L ξ n} {ψ₁ ψ₂ : Semiformulaᵢ L ζ m} :
-    Isomorphic φ₁ ψ₁ → Isomorphic φ₂ ψ₂ → Isomorphic (φ₁ ⋏ φ₂) (ψ₁ ⋏ ψ₂)
-  | or {φ₁ φ₂ : Semiformulaᵢ L ξ n} {ψ₁ ψ₂ : Semiformulaᵢ L ζ m} :
-    Isomorphic φ₁ ψ₁ → Isomorphic φ₂ ψ₂ → Isomorphic (φ₁ ⋎ φ₂) (ψ₁ ⋎ ψ₂)
-  | imply {φ₁ φ₂ : Semiformulaᵢ L ξ n} {ψ₁ ψ₂ : Semiformulaᵢ L ζ m} :
-    Isomorphic φ₁ ψ₁ → Isomorphic φ₂ ψ₂ → Isomorphic (φ₁ ➝ φ₂) (ψ₁ ➝ ψ₂)
-  | all {φ : Semiformulaᵢ L ξ (n + 1)} {ψ : Semiformulaᵢ L ζ (m + 1)} :
-    Isomorphic φ ψ → Isomorphic (∀' φ) (∀' ψ)
-  | ex {φ : Semiformulaᵢ L ξ (n + 1)} {ψ : Semiformulaᵢ L ζ (m + 1)} :
-    Isomorphic φ ψ → Isomorphic (∃' φ) (∃' ψ)
-
-scoped infix:30 " ≅ " => Isomorphic
-
-namespace Isomorphic
-
-def neg {φ : Semiformulaᵢ L ξ n} {ψ : Semiformulaᵢ L ζ m} :
-    φ ≅ ψ → ∼φ ≅ ∼ψ := fun i ↦ imply i falsum
-
-@[simp] protected def refl : (φ : Semiformulaᵢ L ξ n) → φ ≅ φ
-  | ⊤        => verum
-  | ⊥        => falsum
-  | .rel R v => rel R v v
-  | φ ⋏ ψ    => and (Isomorphic.refl φ) (Isomorphic.refl ψ)
-  | φ ⋎ ψ    => or (Isomorphic.refl φ) (Isomorphic.refl ψ)
-  | φ ➝ ψ    => imply (Isomorphic.refl φ) (Isomorphic.refl ψ)
-  | ∀' φ     => all (Isomorphic.refl φ)
-  | ∃' φ     => ex (Isomorphic.refl φ)
-
-def ofEq {φ ψ : Semiformulaᵢ L ξ n} (e : φ = ψ) : φ ≅ ψ := e ▸ Isomorphic.refl φ
-
-@[symm] def symm {φ : Semiformulaᵢ L ξ n} {ψ : Semiformulaᵢ L ζ m} : φ ≅ ψ → ψ ≅ φ
-  | verum     => verum
-  | falsum    => falsum
-  | rel R v w => rel R w v
-  | and b d   => and b.symm d.symm
-  | or b d    => or b.symm d.symm
-  | imply b d => imply b.symm d.symm
-  | all b     => all b.symm
-  | ex b      => ex b.symm
-
-@[trans] def trans {φ : Semiformulaᵢ L ξ n} {ψ : Semiformulaᵢ L ζ m} {χ : Semiformulaᵢ L π k} : φ ≅ ψ → ψ ≅ χ → φ ≅ χ
-  | verum,       verum       => verum
-  | falsum,      falsum      => falsum
-  | rel R v w,   rel _ _ u   => rel R v u
-  | and i₁ i₂,   and j₁ j₂   => and (i₁.trans j₁) (i₂.trans j₂)
-  | or i₁ i₂,    or j₁ j₂    => or (i₁.trans j₁) (i₂.trans j₂)
-  | imply i₁ i₂, imply j₁ j₂ => imply (i₁.trans j₁) (i₂.trans j₂)
-  | all i,       all j       => all (i.trans j)
-  | ex i,        ex j        => ex (i.trans j)
-
-end Isomorphic
-
 end Semiformulaᵢ
 
 

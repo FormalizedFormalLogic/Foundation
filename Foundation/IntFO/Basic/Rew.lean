@@ -80,16 +80,6 @@ instance : LawfulSyntacticRewriting L (SyntacticSemiformulaᵢ L) where
     (ω ▹ φ).IsNegative ↔ φ.IsNegative := by
   induction φ using rec' generalizing n₂ <;> simp [rew_rel, *]
 
-def Isomorphic.rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) : (φ : Semiformulaᵢ L ξ₁ n₁) → φ ≅ ω ▹ φ
-  | ⊤        => .verum
-  | ⊥        => .falsum
-  | .rel R _ => .rel R _ _
-  | φ ⋏ ψ    => .and (Isomorphic.rew ω φ) (Isomorphic.rew ω ψ)
-  | φ ⋎ ψ    => .or (Isomorphic.rew ω φ) (Isomorphic.rew ω ψ)
-  | φ ➝ ψ    => .imply (Isomorphic.rew ω φ) (Isomorphic.rew ω ψ)
-  | ∀' φ     => .all (Isomorphic.rew ω.q φ)
-  | ∃' φ     => .ex (Isomorphic.rew ω.q φ)
-
 end Semiformulaᵢ
 
 end LO.FirstOrder
