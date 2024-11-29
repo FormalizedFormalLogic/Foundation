@@ -8,7 +8,7 @@ Main reference: Jeremy Avigad, Algebraic proofs of cut elimination, The Journal 
 
 namespace LO.FirstOrder
 
-variable {L : Language}
+variable {L : Language.{u}}
 
 namespace Derivation
 
@@ -40,6 +40,16 @@ variable {Γ Δ : Sequent L}
 
 @[simp] lemma isCutFree_wk_iff {d : ⊢ᵀ Δ} {ss : Δ ⊆ Γ} :
     IsCutFree (d.wk ss) ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .wk _⟩
+
+@[simp] lemma IsCutFree.cast {d : ⊢ᵀ Γ} {e : Γ = Δ} :
+    IsCutFree (.cast d e) ↔ IsCutFree d := by rcases e; rfl
+
+@[simp] lemma IsCutFree.not_cut (dp : ⊢ᵀ φ :: Γ) (dn : ⊢ᵀ ∼φ :: Γ) : ¬IsCutFree (dp.cut dn) := by rintro ⟨⟩
+
+@[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᵀ Γ} :
+    IsCutFree (rewrite d f) ↔ IsCutFree d := by
+  induction d generalizing f <;> simp [rewrite, *]
+  case root => contradiction
 
 end Derivation
 
@@ -83,12 +93,14 @@ def graft {Ξ Γ : Sequent L} (b : ⊢ᵀ Ξ) : Ξ ⟶⁺ Γ → ⊢ᵀ Γ
   | wk d h  => .wk (d.graft b) h
   | .id     => b
 
-lemma graft_isCutFree_of_isCutFree (b : ⊢ᵀ Ξ) (d : Ξ ⟶⁺ Γ) (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
+lemma graft_isCutFree_of_isCutFree {b : ⊢ᵀ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
   induction d <;> simp [graft, *]
 
 end PositiveDerivationFrom
 
 namespace Hauptsatz
+
+open Semiformulaᵢ
 
 local notation "ℙ" => Sequent L
 
@@ -107,7 +119,140 @@ def ofSubset {q p : ℙ} (h : q ⊇ p) : q ≼ p := ⟨.ofSubset <| List.map_sub
 
 def and {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ φ :: ψ :: p := ⟨.or .id⟩
 
+def all {p : ℙ} (φ : SyntacticSemiformula L 1) (t) : (∀' φ) :: p ≼ φ/[t] :: p := ⟨.ex t (by simpa [← Semiformula.neg_eq] using .id)⟩
+
 end StrongerThan
+
+abbrev Forces (p : ℙ) : SyntacticFormulaᵢ L → Type u
+  | ⊤        => PUnit.{u+1}
+  | ⊥        => { b : ⊢ᵀ ∼p // Derivation.IsCutFree b }
+  | .rel R v => { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b }
+  | φ ⋏ ψ    => Forces p φ × Forces p ψ
+  | φ ⋎ ψ    => Forces p φ ⊕ Forces p ψ
+  | φ ➝ ψ    => (q : ℙ) → q ≼ p → Forces q φ → Forces q ψ
+  | ∀' φ     => (t : SyntacticTerm L) → Forces p (φ/[t])
+  | ∃' φ     => (t : SyntacticTerm L) × Forces p (φ/[t])
+  termination_by φ => φ.complexity
+
+scoped infix:45 " ⊩ " => Forces
+
+abbrev allForces (φ : SyntacticFormulaᵢ L) := (p : ℙ) → p ⊩ φ
+
+scoped prefix:45 "⊩ " => allForces
+
+namespace Forces
+
+def verumEquiv : p ⊩ ⊤ ≃ PUnit := .refl _
+
+def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᵀ ∼p // Derivation.IsCutFree b} := .refl _
+
+def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b } := .refl _
+
+def andEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ⋏ ψ ≃ (p ⊩ φ) × (p ⊩ ψ) := .refl _
+
+def orEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ⋎ ψ ≃ (p ⊩ φ) ⊕ (p ⊩ ψ) := .refl _
+
+def implyEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ➝ ψ ≃ ((q : ℙ) → q ≼ p → q ⊩ φ → q ⊩ ψ) := .refl _
+
+def allEquiv {φ} : p ⊩ ∀' φ ≃ ((t : SyntacticTerm L) → Forces p (φ/[t])) := .refl _
+
+def exEquiv {φ} : p ⊩ ∃' φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])) := .refl _
+
+def monotone {q p : ℙ} (s : q ≼ p) : {φ : SyntacticFormulaᵢ L} → p ⊩ φ → q ⊩ φ
+  | ⊤,        _ => PUnit.unit
+  | ⊥,        b =>
+    let ⟨d, hd⟩ := b.falsumEquiv
+    falsumEquiv.symm ⟨s.val.graft d, PositiveDerivationFrom.graft_isCutFree_of_isCutFree hd⟩
+  | .rel R v, b =>
+    let ⟨d, hd⟩ := b.relEquiv
+    relEquiv.symm ⟨s.val.cons (.rel R v) |>.graft d, PositiveDerivationFrom.graft_isCutFree_of_isCutFree hd⟩
+  | φ ⋏ ψ,    b => andEquiv.symm ⟨monotone s b.andEquiv.1, monotone s b.andEquiv.2⟩
+  | φ ⋎ ψ,    b => orEquiv.symm <| b.orEquiv.rec (fun b ↦ .inl <| b.monotone s) (fun b ↦ .inr <| b.monotone s)
+  | φ ➝ ψ,    b => implyEquiv.symm fun r srq bφ ↦ b.implyEquiv r (srq.trans s) bφ
+  | ∀' φ,     b => allEquiv.symm fun t ↦ (b.allEquiv t).monotone s
+  | ∃' φ,     b =>
+    let ⟨t, d⟩ : (t : SyntacticTerm L) × p ⊩ φ/[t] := b.exEquiv
+    exEquiv.symm ⟨t, d.monotone s⟩
+  termination_by φ => φ.complexity
+
+def explosion {p : ℙ} (b : p ⊩ ⊥) : (φ : SyntacticFormulaᵢ L) → p ⊩ φ
+  | ⊤        => PUnit.unit
+  | ⊥        => b
+  | .rel R v =>
+    let ⟨d, hd⟩ := b.falsumEquiv
+    relEquiv.symm ⟨.wk d (by simp), by simp [hd]⟩
+  | φ ⋏ ψ    => andEquiv.symm ⟨b.explosion φ, b.explosion ψ⟩
+  | φ ⋎ ψ    => orEquiv.symm <| .inl <| b.explosion φ
+  | φ ➝ ψ    => implyEquiv.symm fun q sqp dφ ↦ (b.monotone sqp).explosion ψ
+  | ∀' φ     => allEquiv.symm fun t ↦ b.explosion (φ/[t])
+  | ∃' φ     => exEquiv.symm ⟨default, b.explosion (φ/[default])⟩
+  termination_by φ => φ.complexity
+
+def efq (φ : SyntacticFormulaᵢ L) : ⊩ ⊥ ➝ φ := fun _ ↦ implyEquiv.symm fun _ _ d ↦ d.explosion φ
+
+open LawfulSyntacticRewriting
+
+noncomputable
+def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝐌𝐢𝐧¹ ⊢ φ → ⊩ φ
+  | .mdp (φ := ψ) b d => fun p ↦
+    let b : p ⊩ ψ ➝ φ := ofMinimalProof b p
+    let d : p ⊩ ψ := ofMinimalProof d p
+    b.implyEquiv p (StrongerThan.refl p) d
+  | .gen (φ := φ) b => fun p ↦ allEquiv.symm fun t ↦
+    let d : 𝐌𝐢𝐧¹ ⊢ φ/[t] :=
+      HilbertProofᵢ.cast (HilbertProofᵢ.rewrite (t :>ₙ fun x ↦ &x) b) (by simp [rewrite_free_eq_subst])
+    ofMinimalProof d p
+  | .verum => fun p ↦ PUnit.unit
+  | .imply₁ φ ψ => fun p ↦ implyEquiv.symm fun q sqp bφ ↦ implyEquiv.symm fun r srq bψ ↦ bφ.monotone srq
+  | .imply₂ φ ψ χ => fun p ↦
+    implyEquiv.symm fun q sqp b₁ ↦
+      implyEquiv.symm fun r srq b₂ ↦
+        implyEquiv.symm fun s ssr b₃ ↦
+          let d₁ : s ⊩ ψ ➝ χ := b₁.implyEquiv s (ssr.trans srq) b₃
+          let d₂ : s ⊩ ψ := b₂.implyEquiv s ssr b₃
+          d₁.implyEquiv s (StrongerThan.refl s) d₂
+  | .and₁ φ ψ => fun p ↦
+    implyEquiv.symm fun q sqp b ↦
+    let ⟨dφ, dψ⟩ : q ⊩ φ × q ⊩ ψ := b.andEquiv
+    dφ
+  | .and₂ φ ψ => fun p ↦
+    implyEquiv.symm fun q sqp b ↦
+    let ⟨dφ, dψ⟩ : q ⊩ φ × q ⊩ ψ := b.andEquiv
+    dψ
+  | .and₃ φ ψ => fun p ↦
+    implyEquiv.symm fun q sqp bφ ↦
+      implyEquiv.symm fun r srq bψ ↦
+        andEquiv.symm ⟨bφ.monotone srq, bψ⟩
+  | .or₁ φ ψ => fun p ↦
+    implyEquiv.symm fun q sqp bφ ↦ orEquiv.symm <| .inl bφ
+  | .or₂ φ ψ => fun p ↦
+    implyEquiv.symm fun q sqp bψ ↦ orEquiv.symm <| .inr bψ
+  | .or₃ φ ψ χ => fun p ↦
+    implyEquiv.symm fun q sqp bφχ ↦
+      implyEquiv.symm fun r srq bψχ ↦
+        implyEquiv.symm fun s ssr b ↦
+          let d : s ⊩ φ ⊕ s ⊩ ψ := b.orEquiv
+          d.rec
+            (fun dφ ↦ bφχ.implyEquiv s (ssr.trans srq) dφ)
+            (fun dψ ↦ bψχ.implyEquiv s ssr dψ)
+  | .all₁ φ t => fun p ↦ implyEquiv.symm fun q sqp b ↦ b.allEquiv t
+  | .all₂ φ ψ => fun p ↦
+    implyEquiv.symm fun q sqp b ↦
+      implyEquiv.symm fun r srq bφ ↦
+        allEquiv.symm fun t ↦
+      let d : q ⊩ φ ➝ ψ/[t] := by simpa using (b.allEquiv t)
+      d.implyEquiv r srq bφ
+  | .ex₁ t φ => fun p ↦
+    implyEquiv.symm fun q sqp bφ ↦ exEquiv.symm ⟨t, bφ⟩
+  | .ex₂ φ ψ => fun p ↦
+    implyEquiv.symm fun q sqp b ↦
+      implyEquiv.symm fun r srq bφ ↦
+        let ⟨t, dt⟩ : (t : SyntacticTerm L) × r ⊩ φ/[t] := bφ.exEquiv
+        let d : q ⊩ φ/[t] ➝ ψ := by simpa using b.allEquiv t
+      d.implyEquiv r srq dt
+  termination_by b => HilbertProofᵢ.depth b
+
+end Forces
 
 end Hauptsatz
 
