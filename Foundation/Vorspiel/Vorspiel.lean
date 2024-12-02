@@ -1,4 +1,3 @@
-import Mathlib.Order.BoundedOrder
 import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Fin.VecNotation
 import Mathlib.Data.Fintype.Basic
