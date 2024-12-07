@@ -213,6 +213,25 @@ instance Kripke.complete : Complete (Hilbert.KB4 ℕ) SymmetricTransitiveFrameCl
 end KB4
 
 
+namespace KB5
+
+instance Kripke.sound : Sound (Hilbert.KB5 ℕ) (SymmetricEuclideanFrameClass) :=
+  instSound_of_frameClass_definedBy
+  (by rw [SymmetricEuclideanFrameClass.is_geach]; apply MultiGeachConfluentFrameClass.isDefinedBy)
+  (by simp [is_geach, Hilbert.Geach])
+
+instance consistent : System.Consistent (Hilbert.KB5 ℕ) := instConsistent_of_nonempty_frameclass (C := SymmetricEuclideanFrameClass) $ by
+  rw [SymmetricEuclideanFrameClass.is_geach];
+  exact MultiGeachConfluentFrameClass.nonempty;
+
+instance Kripke.complete : Complete (Hilbert.KB5 ℕ) SymmetricEuclideanFrameClass := Kripke.instCompleteOfCanonical $ by
+  rw [SymmetricEuclideanFrameClass.is_geach];
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
+  simp;
+
+end KB5
+
+
 namespace KDB
 
 instance Kripke.sound : Sound (Hilbert.KDB ℕ) (SerialSymmetricFrameClass) :=

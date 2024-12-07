@@ -77,6 +77,7 @@ lemma TransitiveFrameClass.is_geach : TransitiveFrameClass.IsGeach ([⟨0, 2, 1,
   simp only [FrameClass.IsGeach, TransitiveFrameClass, GeachConfluent.transitive_def,
     MultiGeachConfluentFrameClass.def_one, GeachConfluentFrameClass];
 
+/-- Frame class of `Hilbert.K5` -/
 abbrev EuclideanFrameClass : FrameClass := { F | Euclidean F.Rel }
 lemma EuclideanFrameClass.is_geach : EuclideanFrameClass.IsGeach ([⟨1, 1, 0, 1⟩]) := by
   simp only [FrameClass.IsGeach, EuclideanFrameClass, GeachConfluent.euclidean_def,
@@ -133,6 +134,13 @@ abbrev SymmetricTransitiveFrameClass : FrameClass := { F | Symmetric F ∧ Trans
 lemma SymmetricTransitiveFrameClass.is_geach : SymmetricTransitiveFrameClass.IsGeach ([⟨0, 1, 0, 1⟩, ⟨0, 2, 1, 0⟩]) := by
   simp only [FrameClass.IsGeach, SymmetricTransitiveFrameClass,
     GeachConfluent.symmetric_def, GeachConfluent.transitive_def,
+    MultiGeachConfluentFrameClass, MultiGeachConfluent];
+
+/-- Frame class of `Hilbert.KB5` -/
+abbrev SymmetricEuclideanFrameClass : FrameClass := { F | Symmetric F ∧ Euclidean F }
+lemma SymmetricEuclideanFrameClass.is_geach : SymmetricEuclideanFrameClass.IsGeach ([⟨0, 1, 0, 1⟩, ⟨1, 1, 0, 1⟩]) := by
+  simp only [FrameClass.IsGeach, SymmetricEuclideanFrameClass,
+    GeachConfluent.symmetric_def, GeachConfluent.euclidean_def,
     MultiGeachConfluentFrameClass, MultiGeachConfluent];
 
 /-- Frame class of `Hilbert.KDB` -/

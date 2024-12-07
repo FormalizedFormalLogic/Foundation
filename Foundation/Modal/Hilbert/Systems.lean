@@ -64,6 +64,8 @@ protected abbrev K45 : Hilbert α := Hilbert.ExtK $ 𝟰 ∪ 𝟱
 
 protected abbrev KB4 : Hilbert α := Hilbert.ExtK $ 𝗕 ∪ 𝟰
 
+protected abbrev KB5 : Hilbert α := Hilbert.ExtK $ 𝗕 ∪ 𝟱
+
 protected abbrev KDB : Hilbert α := Hilbert.ExtK $ 𝗗 ∪ 𝗕
 
 protected abbrev KD4 : Hilbert α := Hilbert.ExtK $ 𝗗 ∪ 𝟰
