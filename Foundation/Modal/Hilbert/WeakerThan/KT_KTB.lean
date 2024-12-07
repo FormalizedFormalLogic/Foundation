@@ -7,10 +7,7 @@ open Modal.Kripke
 open Formula (atom)
 open Formula.Kripke
 
-lemma KT_weakerThan_KTB : (Hilbert.KT ℕ) ≤ₛ (Hilbert.KTB ℕ) := by
-  apply Kripke.weakerThan_of_subset_FrameClass ReflexiveFrameClass ReflexiveSymmetricFrameClass;
-  intro F hF;
-  exact hF.1;
+lemma KT_weakerThan_KTB : (Hilbert.KT α) ≤ₛ (Hilbert.KTB α) := normal_weakerThan_of_subset $ by intro; aesop;
 
 theorem KT_strictlyWeakerThan_KTB : (Hilbert.KT ℕ) <ₛ (Hilbert.KTB ℕ) := by
   constructor;
