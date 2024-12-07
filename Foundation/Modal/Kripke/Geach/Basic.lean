@@ -77,6 +77,11 @@ lemma TransitiveFrameClass.is_geach : TransitiveFrameClass.IsGeach ([⟨0, 2, 1,
   simp only [FrameClass.IsGeach, TransitiveFrameClass, GeachConfluent.transitive_def,
     MultiGeachConfluentFrameClass.def_one, GeachConfluentFrameClass];
 
+abbrev EuclideanFrameClass : FrameClass := { F | Euclidean F.Rel }
+lemma EuclideanFrameClass.is_geach : EuclideanFrameClass.IsGeach ([⟨1, 1, 0, 1⟩]) := by
+  simp only [FrameClass.IsGeach, EuclideanFrameClass, GeachConfluent.euclidean_def,
+    MultiGeachConfluentFrameClass, MultiGeachConfluent];
+
 /-- Frame class of `Hilbert.S5` -/
 abbrev ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Euclidean F.Rel }
 lemma ReflexiveEuclideanFrameClass.is_geach : ReflexiveEuclideanFrameClass.IsGeach ([⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩]) := by

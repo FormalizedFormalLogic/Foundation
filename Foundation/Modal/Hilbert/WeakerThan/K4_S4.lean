@@ -16,12 +16,14 @@ theorem K4_strictlyWeakerThan_S4 : (Hilbert.K4 ℕ) <ₛ (Hilbert.S4 ℕ) := by
     push_neg;
     use (□(atom 0) ➝ (atom 0));
     constructor;
-    . exact Deduction.maxm! (by simp)
+    . exact Deduction.maxm! $ by simp;
     . apply K4.Kripke.sound.not_provable_of_countermodel;
-      simp [ValidOnModel, ValidOnFrame, Satisfies];
+      suffices ∃ F : Frame, Transitive F.Rel ∧ ∃ V : Valuation F, ∃ w : F.World, ¬(Satisfies ⟨F, V⟩ w _) by
+        simp [ValidOnModel, ValidOnFrame, Satisfies];
+        tauto;
       use ⟨Fin 3, λ _ y => y = 1⟩;
       constructor;
-      . intro _ _ _; simp_all;
+      . simp [Transitive];
       . use (λ w _ => w = 1), 0;
         simp [Semantics.Realize, Satisfies];
 

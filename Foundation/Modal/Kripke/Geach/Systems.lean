@@ -79,6 +79,25 @@ instance Kripke.complete : Complete (Hilbert.K4 ℕ) TransitiveFrameClass := Kri
 end K4
 
 
+namespace K5
+
+instance Kripke.sound : Sound (Hilbert.K5 ℕ) (EuclideanFrameClass) :=
+  instSound_of_frameClass_definedBy
+  (by rw [EuclideanFrameClass.is_geach]; apply MultiGeachConfluentFrameClass.isDefinedBy)
+  (by simp [is_geach, Hilbert.Geach])
+
+instance consistent : System.Consistent (Hilbert.K5 ℕ) := instConsistent_of_nonempty_frameclass (C := EuclideanFrameClass) $ by
+  rw [EuclideanFrameClass.is_geach];
+  exact MultiGeachConfluentFrameClass.nonempty;
+
+instance Kripke.complete : Complete (Hilbert.K5 ℕ) EuclideanFrameClass := Kripke.instCompleteOfCanonical $ by
+  rw [EuclideanFrameClass.is_geach];
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
+  simp;
+
+end K5
+
+
 namespace S4
 
 instance Kripke.sound : Sound (Hilbert.S4 ℕ) (ReflexiveTransitiveFrameClass) :=

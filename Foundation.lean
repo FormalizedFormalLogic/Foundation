@@ -71,13 +71,16 @@ import Foundation.Modal.Hilbert.WeakerThan.K_KB
 import Foundation.Modal.Hilbert.WeakerThan.K_KD
 import Foundation.Modal.Hilbert.WeakerThan.K4_GL
 import Foundation.Modal.Hilbert.WeakerThan.K4_Grz
+import Foundation.Modal.Hilbert.WeakerThan.K4_K45
 import Foundation.Modal.Hilbert.WeakerThan.K4_S4
 import Foundation.Modal.Hilbert.WeakerThan.K4_Triv
+import Foundation.Modal.Hilbert.WeakerThan.K5_K45
 import Foundation.Modal.Hilbert.WeakerThan.KD_KT
+import Foundation.Modal.Hilbert.WeakerThan.KDB_KTB
 import Foundation.Modal.Hilbert.WeakerThan.KT_Grz
+import Foundation.Modal.Hilbert.WeakerThan.KT_KTB
 import Foundation.Modal.Hilbert.WeakerThan.KT_S4
 import Foundation.Modal.Hilbert.WeakerThan.S4_S5
-import Foundation.Modal.Hilbert.WeakerThan.KT_KTB
 
 import Foundation.Modal.Hilbert.Equiv.GL
 import Foundation.Modal.Hilbert.Equiv.KD_KP
