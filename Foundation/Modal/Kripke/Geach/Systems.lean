@@ -270,6 +270,44 @@ instance Kripke.complete : Complete (Hilbert.KDB ℕ) SerialSymmetricFrameClass 
 end KDB
 
 
+namespace KD4
+
+instance Kripke.sound : Sound (Hilbert.KD4 ℕ) (SerialTransitiveFrameClass) :=
+  instSound_of_frameClass_definedBy
+  (by rw [SerialTransitiveFrameClass.is_geach]; apply MultiGeachConfluentFrameClass.isDefinedBy)
+  (by simp [is_geach, Hilbert.Geach])
+
+instance consistent : System.Consistent (Hilbert.KD4 ℕ) := instConsistent_of_nonempty_frameclass (C := SerialTransitiveFrameClass) $ by
+  rw [SerialTransitiveFrameClass.is_geach];
+  exact MultiGeachConfluentFrameClass.nonempty;
+
+instance Kripke.complete : Complete (Hilbert.KD4 ℕ) SerialTransitiveFrameClass := Kripke.instCompleteOfCanonical $ by
+  rw [SerialTransitiveFrameClass.is_geach];
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
+  simp;
+
+end KD4
+
+
+namespace KD5
+
+instance Kripke.sound : Sound (Hilbert.KD5 ℕ) (SerialEuclideanFrameClass) :=
+  instSound_of_frameClass_definedBy
+  (by rw [SerialEuclideanFrameClass.is_geach]; apply MultiGeachConfluentFrameClass.isDefinedBy)
+  (by simp [is_geach, Hilbert.Geach])
+
+instance consistent : System.Consistent (Hilbert.KD5 ℕ) := instConsistent_of_nonempty_frameclass (C := SerialEuclideanFrameClass) $ by
+  rw [SerialEuclideanFrameClass.is_geach];
+  exact MultiGeachConfluentFrameClass.nonempty;
+
+instance Kripke.complete : Complete (Hilbert.KD5 ℕ) SerialEuclideanFrameClass := Kripke.instCompleteOfCanonical $ by
+  rw [SerialEuclideanFrameClass.is_geach];
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
+  simp;
+
+end KD5
+
+
 end Hilbert
 
 end LO.Modal
