@@ -73,6 +73,7 @@ import Foundation.Modal.Hilbert.WeakerThan.K4_GL
 import Foundation.Modal.Hilbert.WeakerThan.K4_Grz
 import Foundation.Modal.Hilbert.WeakerThan.K4_K45
 import Foundation.Modal.Hilbert.WeakerThan.K4_S4
+import Foundation.Modal.Hilbert.WeakerThan.K45_KB4
 import Foundation.Modal.Hilbert.WeakerThan.K4_Triv
 import Foundation.Modal.Hilbert.WeakerThan.K5_K45
 import Foundation.Modal.Hilbert.WeakerThan.KD_KT
