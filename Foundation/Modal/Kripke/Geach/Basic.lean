@@ -71,6 +71,12 @@ lemma SerialFrameClass.is_geach : SerialFrameClass.IsGeach [⟨0, 0, 1, 1⟩] :=
   simp only [FrameClass.IsGeach, SerialFrameClass, GeachConfluent.serial_def,
     MultiGeachConfluentFrameClass.def_one, GeachConfluentFrameClass];
 
+/-- Frame class of `Hilbert.KB` -/
+abbrev SymmetricFrameClass : FrameClass := { F | Symmetric F.Rel }
+lemma SymmetricFrameClass.is_geach : SymmetricFrameClass.IsGeach [⟨0, 1, 0, 1⟩] := by
+  simp only [FrameClass.IsGeach, SymmetricFrameClass, GeachConfluent.symmetric_def,
+    MultiGeachConfluentFrameClass.def_one, GeachConfluentFrameClass];
+
 /-- Frame class of `Hilbert.K4` -/
 abbrev TransitiveFrameClass : FrameClass := { F | Transitive F.Rel }
 lemma TransitiveFrameClass.is_geach : TransitiveFrameClass.IsGeach ([⟨0, 2, 1, 0⟩]) := by

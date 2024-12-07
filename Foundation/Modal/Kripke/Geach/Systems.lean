@@ -41,6 +41,25 @@ instance Kripke.complete : Complete (Hilbert.KT ℕ) ReflexiveFrameClass := Krip
 end KT
 
 
+namespace KB
+
+instance Kripke.sound : Sound (Hilbert.KB ℕ) (SymmetricFrameClass) :=
+  instSound_of_frameClass_definedBy
+  (by rw [SymmetricFrameClass.is_geach]; apply GeachConfluentFrameClass.isDefinedBy)
+  (by simp [is_geach, Hilbert.Geach, Axioms.MultiGeach.def_one])
+
+instance consistent : System.Consistent (Hilbert.KB ℕ) := instConsistent_of_nonempty_frameclass (C := SymmetricFrameClass) $ by
+  rw [SymmetricFrameClass.is_geach];
+  exact MultiGeachConfluentFrameClass.nonempty;
+
+instance Kripke.complete : Complete (Hilbert.KB ℕ) SymmetricFrameClass := Kripke.instCompleteOfCanonical $ by
+  rw [SymmetricFrameClass.is_geach];
+  apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
+  simp;
+
+end KB
+
+
 namespace KTB
 
 instance Kripke.sound : Sound (Hilbert.KTB ℕ) (ReflexiveSymmetricFrameClass) :=

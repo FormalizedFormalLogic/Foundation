@@ -35,6 +35,8 @@ instance KB5.is_geach : (Hilbert.KB5 α).IsGeach [⟨0, 1, 0, 1⟩, ⟨1, 1, 0, 
 
 instance KD.is_geach : (Hilbert.KD α).IsGeach [⟨0, 0, 1, 1⟩] := by simp;
 
+instance KB.is_geach : (Hilbert.KB α).IsGeach [⟨0, 1, 0, 1⟩] := by simp;
+
 instance KD4.is_geach : (Hilbert.KD4 α).IsGeach [⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩] := by simp;
 
 instance KD45.is_geach : (Hilbert.KD45 α).IsGeach [⟨0, 0, 1, 1⟩,  ⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩] := by simp [Set.union_assoc];
