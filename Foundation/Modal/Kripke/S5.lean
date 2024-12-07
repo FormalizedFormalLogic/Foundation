@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Geach
+import Foundation.Modal.Kripke.Geach.Systems
 import Foundation.Modal.Kripke.Preservation
 
 namespace LO.Modal

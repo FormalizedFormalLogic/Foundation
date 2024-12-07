@@ -106,23 +106,23 @@ notation:max "𝗴𝗲(" t ")" => Geach.set t
 
 section
 
-lemma T.is_geach : (𝗧 : Set F) = 𝗴𝗲(⟨0, 0, 1, 0⟩) := rfl
+@[simp] lemma T.is_geach : (𝗧 : Set F) = 𝗴𝗲(⟨0, 0, 1, 0⟩) := rfl
 
-lemma B.is_geach : (𝗕 : Set F) = 𝗴𝗲(⟨0, 1, 0, 1⟩) := rfl
+@[simp] lemma B.is_geach : (𝗕 : Set F) = 𝗴𝗲(⟨0, 1, 0, 1⟩) := rfl
 
-lemma D.is_geach : (𝗗 : Set F) = 𝗴𝗲(⟨0, 0, 1, 1⟩) := rfl
+@[simp] lemma D.is_geach : (𝗗 : Set F) = 𝗴𝗲(⟨0, 0, 1, 1⟩) := rfl
 
-lemma Four.is_geach : (𝟰 : Set F) = 𝗴𝗲(⟨0, 2, 1, 0⟩) := rfl
+@[simp] lemma Four.is_geach : (𝟰 : Set F) = 𝗴𝗲(⟨0, 2, 1, 0⟩) := rfl
 
-lemma Five.is_geach : (𝟱 : Set F) = 𝗴𝗲(⟨1, 1, 0, 1⟩) := rfl
+@[simp] lemma Five.is_geach : (𝟱 : Set F) = 𝗴𝗲(⟨1, 1, 0, 1⟩) := rfl
 
-lemma Dot2.is_geach : (.𝟮 : Set F) = 𝗴𝗲(⟨1, 1, 1, 1⟩) := rfl
+@[simp] lemma Dot2.is_geach : (.𝟮 : Set F) = 𝗴𝗲(⟨1, 1, 1, 1⟩) := rfl
 
-lemma C4.is_geach : (𝗖𝟰 : Set F) = 𝗴𝗲(⟨0, 1, 2, 0⟩) := rfl
+@[simp] lemma C4.is_geach : (𝗖𝟰 : Set F) = 𝗴𝗲(⟨0, 1, 2, 0⟩) := rfl
 
-lemma CD.is_geach : (𝗖𝗗 : Set F) = 𝗴𝗲(⟨1, 1, 0, 0⟩) := rfl
+@[simp] lemma CD.is_geach : (𝗖𝗗 : Set F) = 𝗴𝗲(⟨1, 1, 0, 0⟩) := rfl
 
-lemma Tc.is_geach : (𝗧𝗰 : Set F) = 𝗴𝗲(⟨0, 1, 0, 0⟩) := rfl
+@[simp] lemma Tc.is_geach : (𝗧𝗰 : Set F) = 𝗴𝗲(⟨0, 1, 0, 0⟩) := rfl
 
 end
 
@@ -148,9 +148,8 @@ lemma mem (h : x ∈ l) : (𝗴𝗲(x) : Set F) ⊆ 𝗚𝗲(l) := by
   induction l with
   | nil => contradiction;
   | cons a as ih =>
-    simp_all;
     cases h;
-    . subst_vars; tauto;
+    . tauto;
     . apply Set.subset_union_of_subset_right $ ih (by assumption);
 
 end MultiGeach

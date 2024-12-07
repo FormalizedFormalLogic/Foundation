@@ -378,6 +378,20 @@ protected class KT extends System.K 𝓢, HasAxiomT 𝓢
 
 protected class KTc extends System.K 𝓢, HasAxiomTc 𝓢
 
+protected class KTB extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomB 𝓢
+
+protected class KD45 extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
+
+protected class KB4 extends System.K 𝓢, HasAxiomB 𝓢, HasAxiomFour 𝓢
+
+protected class KDB extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomB 𝓢
+
+protected class KD4 extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢
+
+protected class KD5 extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomFive 𝓢
+
+protected class K45 extends System.K 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
+
 protected class Triv extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
 instance [System.Triv 𝓢] : System.KT 𝓢 where
 instance [System.Triv 𝓢] : System.KTc 𝓢 where

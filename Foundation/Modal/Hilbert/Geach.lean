@@ -19,33 +19,46 @@ lemma ax {H : Hilbert α} (geach : H.IsGeach ts) : H.axioms = (𝗞 ∪ 𝗚𝗲
 end Hilbert.IsGeach
 
 
-instance Hilbert.K.is_geach : (Hilbert.K α).IsGeach [] := by simp;
+namespace Hilbert
 
-instance Hilbert.KD.is_geach : (Hilbert.KD α).IsGeach [⟨0, 0, 1, 1⟩] := by
-  simp [Axioms.D.is_geach];
+instance K.is_geach : (Hilbert.K α).IsGeach [] := by simp;
 
-instance Hilbert.KT.is_geach : (Hilbert.KT α).IsGeach [⟨0, 0, 1, 0⟩] := by
-  simp [Axioms.T.is_geach];
+instance K4.is_geach : (Hilbert.K4 α).IsGeach [⟨0, 2, 1, 0⟩] := by simp;
 
-instance Hilbert.KTB.is_geach : (Hilbert.KTB α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩] := by
-  simp [Axioms.T.is_geach, Axioms.B.is_geach];
+instance K45.is_geach : (Hilbert.K45 α).IsGeach [⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩] := by simp;
 
-instance Hilbert.K4.is_geach : (Hilbert.K4 α).IsGeach [⟨0, 2, 1, 0⟩] := by
-  simp [Axioms.Four.is_geach];
+instance K5.is_geach : (Hilbert.K5 α).IsGeach [⟨1, 1, 0, 1⟩] := by simp;
 
-instance Hilbert.S4.is_geach : (Hilbert.S4 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩] := by
-  simp [Axioms.T.is_geach, Axioms.Four.is_geach];
+instance KB4.is_geach : (Hilbert.KB4 α).IsGeach [⟨0, 1, 0, 1⟩, ⟨0, 2, 1, 0⟩] := by simp;
 
-instance Hilbert.S4Dot2.is_geach : (Hilbert.S4Dot2 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩] := by
-  simp [Axioms.T.is_geach, Axioms.Four.is_geach, Axioms.Dot2.is_geach, Set.union_assoc];
+instance KB5.is_geach : (Hilbert.KB5 α).IsGeach [⟨0, 1, 0, 1⟩, ⟨1, 1, 0, 1⟩] := by simp;
 
-instance Hilbert.S5.is_geach : (Hilbert.S5 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩] := by
-  simp [Axioms.T.is_geach, Axioms.Five.is_geach];
+instance KD.is_geach : (Hilbert.KD α).IsGeach [⟨0, 0, 1, 1⟩] := by simp;
 
-instance Hilbert.KT4B.is_geach : (Hilbert.KT4B α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩] := by
-  simp [Axioms.T.is_geach, Axioms.Four.is_geach, Axioms.B.is_geach, Set.union_assoc];
+instance KB.is_geach : (Hilbert.KB α).IsGeach [⟨0, 1, 0, 1⟩] := by simp;
 
-instance Hilbert.Triv.is_geach : (Hilbert.Triv α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩] := by
-  simp [Axioms.T.is_geach, Axioms.Tc.is_geach];
+instance KD4.is_geach : (Hilbert.KD4 α).IsGeach [⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩] := by simp;
+
+instance KD45.is_geach : (Hilbert.KD45 α).IsGeach [⟨0, 0, 1, 1⟩,  ⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩] := by simp [Set.union_assoc];
+
+instance KD5.is_geach : (Hilbert.KD5 α).IsGeach [⟨0, 0, 1, 1⟩, ⟨1, 1, 0, 1⟩] := by simp;
+
+instance KDB.is_geach : (Hilbert.KDB α).IsGeach [⟨0, 0, 1, 1⟩, ⟨0, 1, 0, 1⟩] := by simp;
+
+instance KT.is_geach : (Hilbert.KT α).IsGeach [⟨0, 0, 1, 0⟩] := by simp;
+
+instance KT4B.is_geach : (Hilbert.KT4B α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩] := by simp [Set.union_assoc];
+
+instance KTB.is_geach : (Hilbert.KTB α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩] := by simp;
+
+instance S4.is_geach : (Hilbert.S4 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩] := by simp;
+
+instance S4Dot2.is_geach : (Hilbert.S4Dot2 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩] := by simp [Set.union_assoc];
+
+instance S5.is_geach : (Hilbert.S5 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩] := by simp;
+
+instance Triv.is_geach : (Hilbert.Triv α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩] := by simp;
+
+end Hilbert
 
 end LO.Modal
