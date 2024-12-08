@@ -61,7 +61,7 @@ instance : System (SyntacticFormulaᵢ L) (Hilbertᵢ L) := ⟨HilbertProofᵢ�
 
 namespace HilbertProofᵢ
 
-open System.FiniteContext Rewriting LawfulRewriting
+open System.FiniteContext Rewriting LawfulSyntacticRewriting
 
 variable (Λ : Hilbertᵢ L)
 
@@ -166,6 +166,5 @@ def iffnegOfNegIff {φ ψ : SyntacticFormulaᵢ L} (h : φ.IsNegative) (b : Λ �
   System.iffTrans'' (System.iffComm' <| dnOfNegative h) (System.negReplaceIff' b)
 
 end HilbertProofᵢ
-
 
 end LO.FirstOrder

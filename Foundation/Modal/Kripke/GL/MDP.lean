@@ -1,4 +1,3 @@
-import Foundation.Modal.MDP
 import Foundation.Modal.Kripke.GL.Unnec
 
 namespace LO.Modal.GL

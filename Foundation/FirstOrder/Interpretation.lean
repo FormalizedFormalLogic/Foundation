@@ -25,7 +25,7 @@ variable (ι : Interpretation T L')
 def varEquals {n : ℕ} : Semiterm L' Empty n → Semisentence L (n + 1)
   | #x                => “z. z = #x.succ”
   | Semiterm.func f v =>
-      Rew.toS •
+      Rew.toS ▹
         <| ∀* ((Matrix.conj fun i ↦ (Rew.embSubsts ![#i]).hom ι.domain ⋏ (Rew.embSubsts (#i :> (& ·.succ))).hom (varEquals <| v i)) ➝
           (Rew.embSubsts (&0 :> (# ·))).hom (ι.func f))
 
