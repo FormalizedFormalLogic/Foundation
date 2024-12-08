@@ -152,10 +152,11 @@ def minLeLeft (p q : ℙ) : p ⊓ q ≼ p := ofSubset (by simp [inf_def])
 
 def minLeRight (p q : ℙ) : p ⊓ q ≼ q := ofSubset (by simp [inf_def])
 
-def leInf (s : q ≼ p) : q ≼ p ⊓ q := ⟨
-  let dnq : ∼q ⟶⁺ ∼q := .id
-  let d : ∼p ++ ∼q ⟶⁺ ∼q := .wk (s.val.add dnq) (by simp)
+def leMinOfle (srp : r ≼ p) (srq : r ≼ q) : r ≼ p ⊓ q := ⟨
+  let d : ∼p ++ ∼q ⟶⁺ ∼r := .wk (srp.val.add srq.val) (by simp)
   neg_inf_p_eq _ _ ▸ d⟩
+
+def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMinOfle s (.refl q)
 
 end StrongerThan
 
@@ -229,7 +230,7 @@ def efq (φ : SyntacticFormulaᵢ L) : ⊩ ⊥ ➝ φ := fun _ ↦ implyEquiv.sy
 def implyOf {φ ψ : SyntacticFormulaᵢ L} (b : (q : ℙ) → q ⊩ φ → p ⊓ q ⊩ ψ) :
     p ⊩ φ ➝ ψ := implyEquiv.symm fun q sqp fφ ↦
   let fψ : p ⊓ q ⊩ ψ := b q fφ
-  fψ.monotone (StrongerThan.leInf sqp)
+  fψ.monotone (StrongerThan.leMinRightOfLe sqp)
 
 open LawfulSyntacticRewriting
 
@@ -364,5 +365,7 @@ def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᵀ Γ → {d : ⊢ᵀ Γ // Deri
   ⟨Derivation.cast b (Sequent.neg_neg_eq Γ), by simp [hb]⟩
 
 end Hauptsatz
+
+alias hauptsatz := Hauptsatz.main
 
 end LO.FirstOrder
