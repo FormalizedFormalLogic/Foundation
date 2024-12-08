@@ -12,6 +12,8 @@ instance : Tilde (List (Semiformula L ξ n)) := ⟨fun Γ ↦ Γ.map (∼·)⟩
 
 @[simp] lemma neg_cons (Γ : List (Semiformula L ξ n)) (φ) : ∼(φ :: Γ) = ∼φ :: ∼Γ := rfl
 
+@[simp] lemma neg_neg_eq (Γ : List (Semiformula L ξ n)) : ∼∼Γ = Γ := by simp [Function.comp_def]
+
 end Sequent
 
 namespace Semiformula
@@ -49,6 +51,8 @@ scoped[LO.FirstOrder] postfix:max "ᴺ" => Semiformula.doubleNegation
 
 lemma rew_doubleNegation (ω : Rew L ξ₁ n₁ ξ₂ n₂) (φ : Semiformula L ξ₁ n₁) : ω ▹ φᴺ = (ω ▹ φ)ᴺ := by
   induction φ using rec' generalizing n₂ <;> simp [rew_rel, rew_nrel, Semiformulaᵢ.rew_rel, *]
+
+lemma substitute_doubleNegation (φ : Semiformula L ξ n₁) (v : Fin n₁ → Semiterm L ξ n₂) : φᴺ ⇜ v = (φ ⇜ v)ᴺ := rew_doubleNegation _ _
 
 end Semiformula
 
