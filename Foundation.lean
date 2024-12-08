@@ -45,7 +45,12 @@ import Foundation.FirstOrder.Arith.PeanoMinus
 import Foundation.FirstOrder.Arith.Representation
 import Foundation.FirstOrder.Arith.Nonstandard
 
--- import Foundation.FirstOrder.Arith.EA.Basic
+import Foundation.FirstOrder.Hauptsatz
+
+-- IntFO
+
+import Foundation.IntFO.Basic
+import Foundation.IntFO.Translation
 
 -- IntProp
 import Foundation.IntProp.Hilbert.Glivenko
@@ -57,7 +62,6 @@ import Foundation.IntProp.Kripke.DP
 import Foundation.IntProp.Heyting.Semantics
 
 import Foundation.IntProp.Dialectica.Basic
-
 
 -- Modal
 
@@ -116,8 +120,3 @@ import Foundation.Modal.Kripke.GL.MDP
 import Foundation.Modal.Kripke.Grz.Completeness
 
 import Foundation.Modal.PLoN.Completeness
-
--- IntFO
-
-import Foundation.IntFO.Basic
-import Foundation.IntFO.Translation
