@@ -552,6 +552,12 @@ lemma rewrite_comp_fix_eq_substs (t) :
     ((rewrite (t :>ₙ (&·))).comp free : SyntacticRew L 1 0) = substs ![t] := by
   ext x <;> simp[comp_app, Fin.eq_zero]
 
+lemma bShift_eq_rewrite :
+    (Rew.bShift : SyntacticRew L 0 1) = Rew.substs ![] := by
+  ext x
+  · exact x.elim0
+  · simp
+
 section ψ
 
 variable (ω : SyntacticRew L n₁ n₂)
@@ -871,8 +877,27 @@ lemma rewrite_subst_eq (f : ℕ → SyntacticTerm L) (t) (φ : S 1) :
   simpa [←comp_app] using smul_ext' <| by ext x <;> simp[Rew.comp_app]
 
 @[simp] lemma free_substs_nil (φ : S 0) : free (Rewriting.substitute (ξ := ℕ) φ ![]) = shift φ := by
-  simpa [←comp_app] using smul_ext' (by {
-    ext x <;> simp only [Rew.comp_app, Rew.substs_fvar, Rew.free_fvar, Rew.shift_fvar]; { exact Fin.elim0 x } })
+  simpa [←comp_app] using smul_ext' <| by
+    ext x <;> simp only [Rew.comp_app, Rew.substs_fvar, Rew.free_fvar, Rew.shift_fvar]; { exact Fin.elim0 x }
+
+lemma rewrite_substs_nil (f : ℕ → SyntacticTerm L) (φ : S 0) :
+    Rew.rewrite (Rew.bShift ∘ f) ▹ (Rewriting.substitute (ξ := ℕ) φ ![]) =
+    Rewriting.substitute (ξ := ℕ) (Rew.rewrite f ▹ φ) ![] := by
+  simpa [←comp_app] using smul_ext' <| by
+    ext x
+    · exact x.elim0
+    · simp [Rew.comp_app, Rew.bShift_eq_rewrite]
+
+@[simp] lemma cast_substs_eq (t : SyntacticTerm L) (φ : S 0) :
+    (Rewriting.substitute (ξ := ℕ) φ ![])/[t] = φ := by
+  suffices (Rewriting.substitute (ξ := ℕ) φ ![])/[t] = Rew.id ▹ φ by rwa [ReflectiveRewriting.id_app] at this
+  simpa [←comp_app, -id_app] using smul_ext' <| by
+    ext x <;> simp only [Rew.comp_app, Rew.substs_bvar, Rew.substs_fvar, Rew.id_app]
+    exact x.elim0
+
+lemma rewrite_free_eq_subst (t : SyntacticTerm L) (φ : S 1) :
+    Rew.rewrite (t :>ₙ fun x ↦ &x) ▹ free φ = φ/[t] := by
+  simpa [←comp_app] using smul_ext' <| by ext x <;> simp [Rew.comp_app, Fin.fin_one_eq_zero]
 
 def shiftEmb : S n ↪ S n where
   toFun := shift

@@ -10,7 +10,7 @@ variable {L : Language} {T : Theory L}
 
 structure Hilbertᵢ (L : Language) where
   axiomSet : Set (SyntacticFormulaᵢ L)
-  shift_closed {φ : SyntacticFormulaᵢ L} : φ ∈ axiomSet → Rewriting.shift φ ∈ axiomSet
+  rewrite_closed {φ : SyntacticFormulaᵢ L} : φ ∈ axiomSet → ∀ f : ℕ → SyntacticTerm L, Rew.rewrite f ▹ φ ∈ axiomSet
 
 instance : SetLike (Hilbertᵢ L) (SyntacticFormulaᵢ L) where
   coe := Hilbertᵢ.axiomSet
@@ -22,14 +22,14 @@ def Minimal : Hilbertᵢ L := ⟨∅, by simp⟩
 
 notation "𝐌𝐢𝐧¹" => Minimal
 
-def Intuitionistic : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ}, by rintro _ ⟨φ, rfl⟩; exact ⟨Rewriting.shift φ, by simp⟩⟩
+def Intuitionistic : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ}, by rintro _ ⟨φ, rfl⟩ f; exact ⟨Rew.rewrite f ▹ φ, by simp⟩⟩
 
 notation "𝐈𝐧𝐭¹" => Intuitionistic
 
 def Classical : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ} ∪ {φ ⋎ ∼φ | φ}, by
-  rintro _ (⟨φ, rfl⟩ | ⟨φ, rfl⟩)
-  · exact Or.inl ⟨Rewriting.shift φ, by simp⟩
-  · exact Or.inr ⟨Rewriting.shift φ, by simp⟩⟩
+  rintro _ (⟨φ, rfl⟩ | ⟨φ, rfl⟩) f
+  · exact Or.inl ⟨Rew.rewrite f ▹ φ, by simp⟩
+  · exact Or.inr ⟨Rew.rewrite f ▹ φ, by simp⟩⟩
 
 notation "𝐂𝐥¹" => Classical
 
@@ -86,7 +86,37 @@ instance : System.Minimal Λ where
   or₃ := or₃
   neg_equiv _ := System.iffId _
 
-variable {Λ} [L.DecidableEq]
+variable {Λ}
+
+protected def cast {φ ψ} (b : Λ ⊢ φ) (e : φ = ψ) : Λ ⊢ ψ := e ▸ b
+
+def depth {φ} : Λ ⊢ φ → ℕ
+  | mdp b d => max (depth b) (depth d) + 1
+  | gen b   => depth b + 1
+  | _       => 0
+
+scoped notation "‖" d "‖" => depth d
+
+@[simp] lemma depth_eaxm (h : φ ∈ Λ) : ‖eaxm h‖ = 0 := rfl
+@[simp] lemma depth_mdp (b : Λ ⊢ φ ➝ ψ) (d : Λ ⊢ φ) : ‖mdp b d‖ = max ‖b‖ ‖d‖ + 1 := rfl
+@[simp] lemma depth_gen (b : Λ ⊢ Rewriting.free φ) : ‖gen b‖ = ‖b‖ + 1 := rfl
+@[simp] lemma depth_verum : ‖(verum : Λ ⊢ ⊤)‖ = 0 := rfl
+@[simp] lemma depth_imply₁ (φ ψ) : ‖imply₁ (Λ := Λ) φ ψ‖ = 0 := rfl
+@[simp] lemma depth_imply₂ (φ ψ χ) : ‖imply₂ (Λ := Λ) φ ψ χ‖ = 0 := rfl
+@[simp] lemma depth_and₁ (φ ψ) : ‖and₁ (Λ := Λ) φ ψ‖ = 0 := rfl
+@[simp] lemma depth_and₂ (φ ψ) : ‖and₂ (Λ := Λ) φ ψ‖ = 0 := rfl
+@[simp] lemma depth_and₃ (φ ψ) : ‖and₃ (Λ := Λ) φ ψ‖ = 0 := rfl
+@[simp] lemma depth_or₁ (φ ψ) : ‖or₁ (Λ := Λ) φ ψ‖ = 0 := rfl
+@[simp] lemma depth_or₂ (φ ψ) : ‖or₂ (Λ := Λ) φ ψ‖ = 0 := rfl
+@[simp] lemma depth_or₃ (φ ψ χ) : ‖or₃ (Λ := Λ) φ ψ χ‖ = 0 := rfl
+@[simp] lemma depth_all₁ (φ t) : ‖all₁ (Λ := Λ) φ t‖ = 0 := rfl
+@[simp] lemma depth_all₂ (φ ψ) : ‖all₂ (Λ := Λ) φ ψ‖ = 0 := rfl
+@[simp] lemma depth_ex₁ (t φ) : ‖ex₁ (Λ := Λ) t φ‖ = 0 := rfl
+@[simp] lemma depth_ex₂ (φ ψ) : ‖ex₂ (Λ := Λ) φ ψ‖ = 0 := rfl
+
+@[simp] lemma depth_cast (b : Λ ⊢ φ) (e : φ = ψ) : ‖HilbertProofᵢ.cast b e‖ = ‖b‖ := by rcases e; rfl
+
+@[simp] lemma depth_mdp' (b : Λ ⊢ φ ➝ ψ) (d : Λ ⊢ φ) : ‖b ⨀ d‖ = max ‖b‖ ‖d‖ + 1 := rfl
 
 def specialize {φ} (b : Λ ⊢ ∀' φ) (t) : Λ ⊢ φ/[t] := all₁ φ t ⨀ b
 
@@ -117,7 +147,7 @@ def allIffAllOfIff {φ ψ} (b : Λ ⊢ free φ ⭤ free ψ) : Λ ⊢ ∀' φ ⭤
 
 set_option diagnostics true in
 set_option profiler true in
-def dneOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ∼∼φ ➝ φ
+def dneOfNegative [L.DecidableEq] : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ∼∼φ ➝ φ
   | ⊥,     _ => System.falsumDNE
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢ ∼∼φ ➝ φ := dneOfNegative (by simp [by simpa using h])
@@ -142,10 +172,10 @@ def dneOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ �
     implyAll (System.cast (by simp) (deduct' this))
   termination_by φ _ => φ.complexity
 
-def ofDNOfNegative {φ : SyntacticFormulaᵢ L} {Γ} (b : Γ ⊢[Λ] ∼∼φ) (h : φ.IsNegative) : Γ ⊢[Λ] φ :=
+def ofDNOfNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} {Γ} (b : Γ ⊢[Λ] ∼∼φ) (h : φ.IsNegative) : Γ ⊢[Λ] φ :=
   System.impTrans'' (toDef b) (dneOfNegative h)
 
-def dnOfNegative {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ :=
+def dnOfNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ :=
   System.andIntro (dneOfNegative h) System.dni
 
 def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ⊥ ➝ φ
@@ -162,8 +192,41 @@ def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ �
     implyAll <| System.cast (by simp) ihφ
   termination_by φ _ => φ.complexity
 
-def iffnegOfNegIff {φ ψ : SyntacticFormulaᵢ L} (h : φ.IsNegative) (b : Λ ⊢ ∼φ ⭤ ψ) : Λ ⊢ φ ⭤ ∼ψ :=
+def iffnegOfNegIff [L.DecidableEq] {φ ψ : SyntacticFormulaᵢ L} (h : φ.IsNegative) (b : Λ ⊢ ∼φ ⭤ ψ) : Λ ⊢ φ ⭤ ∼ψ :=
   System.iffTrans'' (System.iffComm' <| dnOfNegative h) (System.negReplaceIff' b)
+
+def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢ φ → Λ ⊢ Rew.rewrite f ▹ φ
+  | mdp b d        => rewrite f b ⨀ rewrite f d
+  | gen (φ := φ) b =>
+    let d : Λ ⊢ free ((Rew.rewrite f).q ▹ φ) :=
+      HilbertProofᵢ.cast (rewrite (&0 :>ₙ fun x ↦ Rew.shift (f x)) b)
+        (by simp [Rew.q_rewrite, Function.comp_def, free_rewrite_eq])
+    gen d
+  | eaxm h         => eaxm (Λ.rewrite_closed h f)
+  | verum          => verum
+  | imply₁ _ _     => imply₁ _ _
+  | imply₂ _ _ _   => imply₂ _ _ _
+  | and₁ _ _       => and₁ _ _
+  | and₂ _ _       => and₂ _ _
+  | and₃ _ _       => and₃ _ _
+  | or₁ _ _        => or₁ _ _
+  | or₂ _ _        => or₂ _ _
+  | or₃ _ _ _      => or₃ _ _ _
+  | all₁ φ t       => HilbertProofᵢ.cast
+    (all₁ (Rew.rewrite (⇑Rew.bShift ∘ f) ▹ φ) (Rew.rewrite f t))
+    (by simp [Rew.q_rewrite, rewrite_subst_eq])
+  | all₂ φ ψ       => HilbertProofᵢ.cast
+    (all₂ (Rew.rewrite f ▹ φ) (Rew.rewrite (⇑Rew.bShift ∘ f) ▹ ψ))
+    (by simp [Rew.q_rewrite, rewrite_substs_nil])
+  | ex₁ t φ        => HilbertProofᵢ.cast
+    (ex₁ (Rew.rewrite f t) (Rew.rewrite (⇑Rew.bShift ∘ f) ▹ φ))
+    (by simp [Rew.q_rewrite, rewrite_subst_eq])
+  | ex₂ φ ψ        => HilbertProofᵢ.cast
+    (ex₂ (Rew.rewrite (⇑Rew.bShift ∘ f) ▹ φ) (Rew.rewrite f ▹ ψ))
+    (by simp [Rew.q_rewrite, rewrite_substs_nil])
+
+@[simp] lemma depth_rewrite (f : ℕ → SyntacticTerm L) (b : Λ ⊢ φ) : ‖rewrite f b‖ = ‖b‖ := by
+  induction b generalizing f <;> simp [rewrite, *]
 
 end HilbertProofᵢ
 
