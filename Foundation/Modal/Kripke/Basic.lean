@@ -91,6 +91,10 @@ variable {M : Kripke.Model} {x : M.World} {φ ψ : Formula ℕ}
 
 @[simp] lemma atom_def : x ⊧ atom a ↔ M x a := by simp [Satisfies];
 
+lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
+
+lemma bot_def : ¬(x ⊧ ⊥) := by simp [Satisfies];
+
 lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺ y → y ⊧ φ := by simp [Kripke.Satisfies];
 
 lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Kripke.Satisfies];
@@ -105,9 +109,9 @@ lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies];
 
 lemma and_def : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies];
 
-lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
-
-lemma bot_def : ¬x ⊧ ⊥ := by simp [Satisfies];
+lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by
+  simp [Satisfies];
+  tauto;
 
 protected instance : Semantics.Tarski (M.World) where
   realize_top := λ _ => top_def;

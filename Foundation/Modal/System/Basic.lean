@@ -418,6 +418,8 @@ protected class GL extends System.K 𝓢, HasAxiomL 𝓢
 
 protected class Grz extends System.K 𝓢, HasAxiomGrz 𝓢
 
+protected class KH extends System.K 𝓢, HasAxiomH 𝓢
+
 end
 
 
