@@ -184,15 +184,15 @@ end BinderNotation
 namespace Arith
 
 class SoundOn {L : Language} [Structure L ℕ]
-    (T : Theory L) (F : SyntacticFormula L → Prop) where
-  sound : ∀ {φ}, F φ → T ⊢! φ → ℕ ⊧ₘ φ
+    (T : Theory L) (F : Sentence L → Prop) where
+  sound : ∀ {σ}, F σ → T ⊢! ↑σ → ℕ ⊧ₘ₀ σ
 
 section
 
-variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (SyntacticFormula L))
+variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
 
 lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : System.Consistent T :=
-  System.consistent_iff_unprovable_bot.mpr fun b ↦ by simpa using SoundOn.sound (F := F) hF b
+  System.consistent_iff_unprovable_bot.mpr fun b ↦ by simpa [Models₀] using SoundOn.sound (F := F) hF b
 
 end
 
