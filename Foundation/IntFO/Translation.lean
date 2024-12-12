@@ -72,8 +72,8 @@ open Rewriting System System.FiniteContext HilbertProofᵢ
 
 noncomputable
 def negDoubleNegation : (φ : SyntacticFormula L) → 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ
-  | .rel r v  => System.tneIff (φ := .rel r v)
-  | .nrel r v => System.iffId (φ := ∼∼(.rel r v))
+  | .rel r v  => System.tneIff (φ := Semiformulaᵢ.rel r v)
+  | .nrel r v => System.iffId (φ := ∼∼(Semiformulaᵢ.rel r v))
   | ⊤         => System.falsumDN
   | ⊥         => System.iffId (φ := ∼⊥)
   | φ ⋏ ψ     =>
