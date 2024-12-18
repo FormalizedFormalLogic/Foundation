@@ -43,9 +43,9 @@ syntax:67  "exp " first_order_term:68 : first_order_term
 macro_rules
   | `(⤫term[ $binders* | $fbinders* | ($e)    ]) => `(⤫term[ $binders* | $fbinders* | $e ])
   | `(⤫term[ $binders* | $fbinders* | $x:ident]) => do
-    match binders.getIdx? x with
+    match binders.indexOf? x with
     | none =>
-      match fbinders.getIdx? x with
+      match fbinders.indexOf? x with
       | none => Macro.throwErrorAt x "error: variable did not found."
       | some x =>
         let i := Syntax.mkNumLit (toString x)
@@ -55,8 +55,8 @@ macro_rules
       `(#$i)
   | `(⤫term[ $_*       | $_*        | #$x:term   ]) => `(#$x)
   | `(⤫term[ $_*       | $_*        | &$x:term   ]) => `(&$x)
-  | `(⤫term[ $_*       | $_*        | $m:num     ]) => `(@Semiterm.Operator.const _ _ _ (Operator.numeral _ $m))
-  | `(⤫term[ $_*       | $_*        | ↑$m:term   ]) => `(@Semiterm.Operator.const _ _ _ (Operator.numeral _ $m))
+  | `(⤫term[ $_*       | $_*        | $m:num     ]) => `(Semiterm.numeral $m)
+  | `(⤫term[ $_*       | $_*        | ↑$m:term   ]) => `(Semiterm.numeral $m)
   | `(⤫term[ $_*       | $_*        | ⌜$x:term⌝  ]) => `(⌜$x⌝)
   | `(⤫term[ $_*       | $_*        | ⋆          ]) => `(Operator.const Operator.Star.star)
   | `(⤫term[ $binders* | $fbinders* | $e₁ + $e₂  ]) => `(Semiterm.Operator.Add.add.operator ![⤫term[ $binders* | $fbinders* | $e₁ ], ⤫term[ $binders* | $fbinders* | $e₂ ]])
@@ -118,42 +118,52 @@ def unexpsnderAdd : Unexpander
 def unexpsnderMul : Unexpander
   | `($_) => `(op(*))
 
+/-
+
+
+-/
+
 @[app_unexpander Semiterm.Operator.operator]
 def unexpandFuncArith : Unexpander
-  | `($_ op(+) ![‘ $t:first_order_term ’, ‘ $u:first_order_term ’]) => `(‘ ($t    + $u  ) ’)
-  | `($_ op(+) ![‘ $t:first_order_term ’, #$x   ]) => `(‘ ($t    + #$x ) ’)
-  | `($_ op(+) ![‘ $t:first_order_term ’, &$x   ]) => `(‘ ($t    + &$x ) ’)
-  | `($_ op(+) ![‘ $t:first_order_term ’, $u    ]) => `(‘ ($t    + !!$u) ’)
-  | `($_ op(+) ![#$x,    ‘ $u:first_order_term ’]) => `(‘ (#$x   + $u  ) ’)
-  | `($_ op(+) ![#$x,    #$y   ]) => `(‘ (#$x   + #$y ) ’)
-  | `($_ op(+) ![#$x,    &$y   ]) => `(‘ (#$x   + &$y ) ’)
-  | `($_ op(+) ![#$x,    $u    ]) => `(‘ (#$x   + !!$u) ’)
-  | `($_ op(+) ![&$x,    ‘ $u:first_order_term ’]) => `(‘ (&$x   + $u  ) ’)
-  | `($_ op(+) ![&$x,    #$y   ]) => `(‘ (&$x   + #$y ) ’)
-  | `($_ op(+) ![&$x,    &$y   ]) => `(‘ (&$x   + &$y ) ’)
-  | `($_ op(+) ![&$x,    $u    ]) => `(‘ (&$x   + !!$u) ’)
-  | `($_ op(+) ![$t,     ‘ $u:first_order_term ’]) => `(‘ (!!$t + $u   ) ’)
-  | `($_ op(+) ![$t,     #$y   ]) => `(‘ (!!$t + #$y  ) ’)
-  | `($_ op(+) ![$t,     &$y   ]) => `(‘ (!!$t + &$y  ) ’)
-  | `($_ op(+) ![$t,     $u    ]) => `(‘ (!!$t + !!$u ) ’)
+  | `($_ op(+) ![‘$t:first_order_term’,   ‘$u:first_order_term’   ]) => `(‘($t     + $u    )’)
+  | `($_ op(+) ![‘$t:first_order_term’,   #$x                     ]) => `(‘($t     + #$x   )’)
+  | `($_ op(+) ![‘$t:first_order_term’,   &$x                     ]) => `(‘($t     + &$x   )’)
+  | `($_ op(+) ![‘$t:first_order_term’,   $u                      ]) => `(‘($t     + !!$u  )’)
+  | `($_ op(+) ![#$x,                     ‘$u:first_order_term’   ]) => `(‘(#$x    + $u    )’)
+  | `($_ op(+) ![#$x,                     #$y                     ]) => `(‘(#$x    + #$y   )’)
+  | `($_ op(+) ![#$x,                     &$y                     ]) => `(‘(#$x    + &$y   )’)
+  | `($_ op(+) ![#$x,                     $u                      ]) => `(‘(#$x    + !!$u  )’)
+  | `($_ op(+) ![&$x,                     ‘$u:first_order_term’   ]) => `(‘(&$x    + $u    )’)
+  | `($_ op(+) ![&$x,                     #$y                     ]) => `(‘(&$x    + #$y   )’)
+  | `($_ op(+) ![&$x,                     &$y                     ]) => `(‘(&$x    + &$y   )’)
+  | `($_ op(+) ![&$x,                     $u                      ]) => `(‘(&$x    + !!$u  )’)
+  | `($_ op(+) ![$t,                      ‘$u:first_order_term’   ]) => `(‘(!!$t   + $u    )’)
+  | `($_ op(+) ![$t,                      #$y                     ]) => `(‘(!!$t   + #$y   )’)
+  | `($_ op(+) ![$t,                      &$y                     ]) => `(‘(!!$t   + &$y   )’)
+  | `($_ op(+) ![$t,                      $u                      ]) => `(‘(!!$t   + !!$u  )’)
 
-  | `($_ op(*) ![‘ $t:first_order_term ’, ‘ $u:first_order_term ’]) => `(‘ ($t    * $u  ) ’)
-  | `($_ op(*) ![‘ $t:first_order_term ’, #$x   ]) => `(‘ ($t    * #$x ) ’)
-  | `($_ op(*) ![‘ $t:first_order_term ’, &$x   ]) => `(‘ ($t    * &$x ) ’)
-  | `($_ op(*) ![‘ $t:first_order_term ’, $u    ]) => `(‘ ($t    * !!$u) ’)
-  | `($_ op(*) ![#$x,    ‘ $u:first_order_term ’]) => `(‘ (#$x   * $u  ) ’)
-  | `($_ op(*) ![#$x,    #$y   ]) => `(‘ (#$x   * #$y ) ’)
-  | `($_ op(*) ![#$x,    &$y   ]) => `(‘ (#$x   * &$y ) ’)
-  | `($_ op(*) ![#$x,    $u    ]) => `(‘ (#$x   * !!$u) ’)
-  | `($_ op(*) ![&$x,    ‘ $u:first_order_term ’]) => `(‘ (&$x   * $u  ) ’)
-  | `($_ op(*) ![&$x,    #$y   ]) => `(‘ (&$x   * #$y ) ’)
-  | `($_ op(*) ![&$x,    &$y   ]) => `(‘ (&$x   * &$y ) ’)
-  | `($_ op(*) ![&$x,    $u    ]) => `(‘ (&$x   * !!$u) ’)
-  | `($_ op(*) ![$t,     ‘ $u:first_order_term ’]) => `(‘ (!!$t * $u   ) ’)
-  | `($_ op(*) ![$t,     #$y   ]) => `(‘ (!!$t * #$y  ) ’)
-  | `($_ op(*) ![$t,     &$y   ]) => `(‘ (!!$t * &$y  ) ’)
-  | `($_ op(*) ![$t,     $u    ]) => `(‘ (!!$t * !!$u ) ’)
+  | `($_ op(*) ![‘$t:first_order_term’,   ‘$u:first_order_term’   ]) => `(‘($t     * $u    )’)
+  | `($_ op(*) ![‘$t:first_order_term’,   #$x                     ]) => `(‘($t     * #$x   )’)
+  | `($_ op(*) ![‘$t:first_order_term’,   &$x                     ]) => `(‘($t     * &$x   )’)
+  | `($_ op(*) ![‘$t:first_order_term’,   $u                      ]) => `(‘($t     * !!$u  )’)
+  | `($_ op(*) ![#$x,                     ‘$u:first_order_term’   ]) => `(‘(#$x    * $u    )’)
+  | `($_ op(*) ![#$x,                     #$y                     ]) => `(‘(#$x    * #$y   )’)
+  | `($_ op(*) ![#$x,                     &$y                     ]) => `(‘(#$x    * &$y   )’)
+  | `($_ op(*) ![#$x,                     $u                      ]) => `(‘(#$x    * !!$u  )’)
+  | `($_ op(*) ![&$x,                     ‘$u:first_order_term’   ]) => `(‘(&$x    * $u    )’)
+  | `($_ op(*) ![&$x,                     #$y                     ]) => `(‘(&$x    * #$y   )’)
+  | `($_ op(*) ![&$x,                     &$y                     ]) => `(‘(&$x    * &$y   )’)
+  | `($_ op(*) ![&$x,                     $u                      ]) => `(‘(&$x    * !!$u  )’)
+  | `($_ op(*) ![$t,                      ‘$u:first_order_term’   ]) => `(‘(!!$t   * $u    )’)
+  | `($_ op(*) ![$t,                      #$y                     ]) => `(‘(!!$t   * #$y   )’)
+  | `($_ op(*) ![$t,                      &$y                     ]) => `(‘(!!$t   * &$y   )’)
+  | `($_ op(*) ![$t,                      $u                      ]) => `(‘(!!$t   * !!$u  )’)
   | _                             => throw ()
+
+@[app_unexpander Semiterm.numeral]
+def unexpandNumeral : Unexpander
+  | `($_ $n:num) => `(‘$n:num’)
+  | _            => throw ()
 
 #check ‘ x | &4 + ((4 + 2) * #0 + #1)’
 
@@ -220,7 +230,7 @@ macro_rules
     let binders' : TSyntaxArray `ident ← xs.foldrM
       (fun z binders' ↦ do
         if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
-        return binders'.insertAt 0 z)
+        return binders'.insertIdx 0 z)
       binders
     let s : TSyntax `term ← xs.size.rec `(⤫formula[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∀' $ψ))
     return s
@@ -229,25 +239,25 @@ macro_rules
     let binders' : TSyntaxArray `ident ← xs.foldrM
       (fun z binders' ↦ do
         if binders.elem z then Macro.throwErrorAt z "error: variable is duplicated." else
-        return binders'.insertAt 0 z)
+        return binders'.insertIdx 0 z)
       binders
     let s : TSyntax `term ← xs.size.rec `(⤫formula[ $binders'* | $fbinders* | $φ ]) (fun _ ψ ↦ ψ >>= fun ψ ↦ `(∃' $ψ))
     return s
   | `(⤫formula[ $binders* | $fbinders* | ∀' $φ ])                            => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
-    let binders' := binders.insertAt 0 v
+    let binders' := binders.insertIdx 0 v
     `(∀' ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | ∃' $φ ])                            => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
-    let binders' := binders.insertAt 0 v
+    let binders' := binders.insertIdx 0 v
     `(∃' ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | ∀[ $φ ] $ψ ])                       => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
-    let binders' := binders.insertAt 0 v
+    let binders' := binders.insertIdx 0 v
     `(∀[⤫formula[ $binders'* | $fbinders* | $φ ]] ⤫formula[ $binders'* | $fbinders* | $ψ ])
   | `(⤫formula[ $binders* | $fbinders* | ∃[ $φ ] $ψ ])                       => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
-    let binders' := binders.insertAt 0 v
+    let binders' := binders.insertIdx 0 v
     `(∃[⤫formula[ $binders'* | $fbinders* | $φ ]] ⤫formula[ $binders'* | $fbinders* | $ψ ])
 
 syntax "“" ident* "| "  first_order_formula:0 "”" : term
@@ -281,27 +291,27 @@ syntax:max "∃ " ident " ∈ " first_order_term ", " first_order_formula:0 : fi
 macro_rules
   | `(⤫formula[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(Semiformula.ballLT ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | ∀ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(Semiformula.ballLE ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | ∀ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(Semiformula.ballMem ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | ∃ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(Semiformula.bexLT ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | ∃ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(Semiformula.bexLE ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | ∃ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(Semiformula.bexMem ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term = $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.Eq.eq ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]])
   | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) => `(Semiformula.Operator.operator Operator.LT.lt ![⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]])

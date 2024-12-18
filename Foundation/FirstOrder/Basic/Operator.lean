@@ -27,7 +27,7 @@ def equiv : Operator L n ≃ Semiterm L Empty n where
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L ξ n) : Semiterm L ξ n :=
   Rew.substs v (Rew.emb o.term)
 
-abbrev const (c : Const L) : Semiterm L ξ n := c.operator ![]
+@[coe] abbrev const (c : Const L) : Semiterm L ξ n := c.operator ![]
 
 instance : Coe (Const L) (Semiterm L ξ n) := ⟨Operator.const⟩
 
@@ -165,19 +165,19 @@ protected abbrev encode (L : Language) [Operator.Zero L] [Operator.One L] [Opera
 end numeral
 
 @[simp] lemma Add.positive_iff [L.Add] (t u : Semiterm L ξ (n + 1)) :
-    (Operator.Add.add.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
+    (add.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
   simp [positive_operator_iff, Add.term_eq, bv_func]
   exact ⟨by intro h; exact ⟨h 0, h 1⟩,
     by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
 
 @[simp] lemma Mul.positive_iff [L.Mul] (t u : Semiterm L ξ (n + 1)) :
-    (Operator.Mul.mul.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
+    (mul.operator ![t, u]).Positive ↔ t.Positive ∧ u.Positive := by
   simp [positive_operator_iff, Mul.term_eq, bv_func]
   exact ⟨by intro h; exact ⟨h 0, h 1⟩,
     by intro h i; cases i using Fin.cases <;> simp [Fin.eq_zero, *]⟩
 
 @[simp] lemma Exp.positive_iff [L.Exp] (t : Semiterm L ξ (n + 1)) :
-    (Operator.Exp.exp.operator ![t]).Positive ↔ t.Positive := by
+    (exp.operator ![t]).Positive ↔ t.Positive := by
   simp [positive_operator_iff, Exp.term_eq, bv_func]
 
 section npow
@@ -289,7 +289,7 @@ namespace Operator
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L ξ n) : Semiformula L ξ n :=
   Rewriting.embedding o.sentence ⇜ v
 
-def const (c : Const L) : Semiformula L ξ n := c.operator ![]
+@[coe] def const (c : Const L) : Semiformula L ξ n := c.operator ![]
 
 instance : Coe (Const L) (Semiformula L ξ n) := ⟨Operator.const⟩
 
@@ -489,7 +489,7 @@ lemma eq_equal_iff [L.Eq] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ�
   cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel, Operator.operator, Operator.Eq.sentence_eq]
   case hrel k' r' v =>
     by_cases hk : k' = 2 <;> simp [hk]; rcases hk with rfl; simp
-    by_cases hr : r' = Language.Eq.eq <;> simp [hr, Function.funext_iff]
+    by_cases hr : r' = Language.Eq.eq <;> simp [hr, funext_iff]
     constructor
     · rintro H; exact ⟨v 0, H 0, v 1, H 1, by intro i; cases i using Fin.cases <;> simp [Fin.eq_zero]⟩
     · rintro ⟨t', rfl, u', rfl, H⟩; intro i; cases i using Fin.cases <;> simp [H, Fin.eq_zero]
@@ -500,7 +500,7 @@ lemma eq_lt_iff [L.LT] {φ : Semiformula L ξ₁ n₁} {t u : Semiterm L ξ₂ n
   cases φ using Semiformula.rec' <;> simp [rew_rel, rew_nrel, Operator.operator, Operator.LT.sentence_eq]
   case hrel k' r' v =>
     by_cases hk : k' = 2 <;> simp [hk]; rcases hk with rfl; simp
-    by_cases hr : r' = Language.LT.lt <;> simp [hr, Function.funext_iff]
+    by_cases hr : r' = Language.LT.lt <;> simp [hr, funext_iff]
     constructor
     · rintro H; exact ⟨v 0, H 0, v 1, H 1, by intro i; cases i using Fin.cases <;> simp [Fin.eq_zero]⟩
     · rintro ⟨t', rfl, u', rfl, H⟩; intro i; cases i using Fin.cases <;> simp [H, Fin.eq_zero]
@@ -617,6 +617,16 @@ variable {t : Semiterm L ξ n} {φ : Semiformula L ξ (n + 1)}
     Eval s e ε (φ.bexMem t) ↔ ∃ x ∈ t.val s e ε, Eval s (x :> e) ε φ := by simp [bexMem]
 
 end Semiformula
+
+namespace Semiterm
+
+variable [L.Zero] [L.One] [L.Add]
+
+@[coe] abbrev numeral (k : ℕ) : Semiterm L ξ n := Operator.numeral L k
+
+instance : Coe ℕ (Semiterm L ξ n) := ⟨numeral⟩
+
+end Semiterm
 
 end FirstOrder
 
