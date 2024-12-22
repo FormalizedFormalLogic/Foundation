@@ -1,3 +1,4 @@
+import Mathlib.Data.Vector.Basic
 import Mathlib.Data.Fin.Basic
 import Mathlib.Data.Fin.VecNotation
 import Mathlib.Data.Fintype.Basic
@@ -706,11 +707,11 @@ lemma induction_with_singleton
 
 end List
 
-namespace Mathlib.Vector
+namespace List.Vector
 
 variable {α : Type*}
 
-lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : get (⟨l, h⟩ : Vector α n) i = l.get (i.cast h.symm) := rfl
+lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : List.Vector.get (⟨l, h⟩ : List.Vector α n) i = l.get (i.cast h.symm) := rfl
 
 lemma get_one {α : Type*} {n} (v : Vector α (n + 2)) : v.get 1 = v.tail.head := by
   rw[←Vector.get_zero, Vector.get_tail_succ]; rfl
@@ -719,7 +720,7 @@ lemma ofFn_vecCons (a : α) (v : Fin n → α) :
     ofFn (a :> v) = a ::ᵥ ofFn v := by
   ext i; cases i using Fin.cases <;> simp
 
-end Mathlib.Vector
+end List.Vector
 
 namespace Finset
 
@@ -775,11 +776,11 @@ end Denumerable
 
 namespace Part
 
-@[simp] lemma mem_vector_mOfFn : ∀ {n : ℕ} {w : Mathlib.Vector α n} {v : Fin n →. α},
-    w ∈ Mathlib.Vector.mOfFn v ↔ ∀ i, w.get i ∈ v i
-  | 0,     _, _ => by simp[Mathlib.Vector.mOfFn, Mathlib.Vector.eq_nil]
+@[simp] lemma mem_vector_mOfFn : ∀ {n : ℕ} {w : List.Vector α n} {v : Fin n →. α},
+    w ∈ List.Vector.mOfFn v ↔ ∀ i, w.get i ∈ v i
+  | 0,     _, _ => by simp[List.Vector.mOfFn, List.Vector.eq_nil]
   | n + 1, w, v => by
-    simp[Mathlib.Vector.mOfFn, @mem_vector_mOfFn _ n]
+    simp[List.Vector.mOfFn, @mem_vector_mOfFn _ n]
     exact ⟨by rintro ⟨a, ha, v, hv, rfl⟩ i; cases i using Fin.cases <;> simp[ha, hv],
       by intro h; exact ⟨w.head, by simpa using h 0, w.tail, fun i => by simpa using h i.succ, by simp⟩⟩
 
