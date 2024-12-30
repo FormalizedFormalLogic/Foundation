@@ -348,9 +348,12 @@ lemma quote_termShiftVec {k n} (v : Fin k → SyntacticSemiterm L n) :
     cases' k with k
     · simp
     · calc
-        ⌜(‘↑(k + 1 + 1)’ : SyntacticSemiterm ℒₒᵣ n)⌝ = numeral ((k + 1 : ℕ) : V) ^+ ↑𝟏 := by
+        ⌜(‘↑(k + 1 + 1)’ : SyntacticSemiterm ℒₒᵣ n)⌝
+        _ = ⌜(Operator.operator (Operator.numeral ℒₒᵣ (k + 1)) ![] : SyntacticSemiterm ℒₒᵣ n)⌝
+          ^+ ⌜(Operator.operator op(1) ![] : SyntacticSemiterm ℒₒᵣ n)⌝ := by
           unfold Semiterm.numeral
-          simp [Operator.numeral_succ, Matrix.fun_eq_vec₂, ←quote_one']
+          simp [Operator.numeral_succ, Matrix.fun_eq_vec₂]
+        _ = numeral ((k + 1 : ℕ) : V) ^+ ↑𝟏 := by
           rw [←quote_one']
           congr
         _ = numeral ((k : V) + 1) ^+ ↑𝟏 := by rfl
