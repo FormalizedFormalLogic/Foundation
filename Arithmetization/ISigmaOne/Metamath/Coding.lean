@@ -347,9 +347,15 @@ lemma quote_termShiftVec {k n} (v : Fin k → SyntacticSemiterm L n) :
     simp only [Nat.cast_add, Nat.cast_one]
     cases' k with k
     · simp
-    · simp [Operator.numeral_succ, Matrix.comp_vecCons']
-      rw [Matrix.fun_eq_vec₂ (v := fun x : Fin 2 ↦ (![Operator.numeral ℒₒᵣ (k + 1), op(1)] x).operator ![])]
-      simp [ih]; congr; apply quote_one'
+    · calc
+        ⌜(‘↑(k + 1 + 1)’ : SyntacticSemiterm ℒₒᵣ n)⌝ = numeral ((k + 1 : ℕ) : V) ^+ ↑𝟏 := by
+          unfold Semiterm.numeral
+          simp [Operator.numeral_succ, Matrix.fun_eq_vec₂, ←quote_one']
+          rw [←quote_one']
+          congr
+        _ = numeral ((k : V) + 1) ^+ ↑𝟏 := by rfl
+        _ = numeral ((k + 1 : V) + 1) := by
+          simp [Operator.numeral_succ, Matrix.comp_vecCons']
 
 omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
 lemma quote_eterm_eq_quote_emb (t : Semiterm L Empty n) : (⌜t⌝ : V) = (⌜Rew.embs t⌝ : V) := by
