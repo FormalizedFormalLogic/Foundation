@@ -1,5 +1,17 @@
 import Incompleteness.Arith.D1
 
+
+namespace List.Vector
+
+variable {α : Type*}
+
+lemma cons_get {x : α} : (x ::ᵥ List.Vector.nil).get = ![x] := by
+  ext i;
+  simp;
+
+end List.Vector
+
+
 namespace LO.FirstOrder
 
 namespace Arith
@@ -13,8 +25,8 @@ lemma re_iff_sigma1 {P : ℕ → Prop} : RePred P ↔ 𝚺₁-Predicate P := by
       intro v; symm; simp; simpa [←Matrix.constant_eq_singleton'] using codeOfRePred_spec h (x := v 0)⟩
   · rintro ⟨φ, hφ⟩
     have := (sigma1_re id (φ.sigma_prop)).comp
-      (f := fun x : ℕ ↦ x ::ᵥ Mathlib.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
-    exact this.of_eq <| by intro x; symm; simpa [Mathlib.Vector.cons_get] using hφ ![x]
+      (f := fun x : ℕ ↦ x ::ᵥ List.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
+    exact this.of_eq <| by intro x; symm; simpa [List.Vector.cons_get] using hφ ![x];
 
 variable (T : Theory ℒₒᵣ) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Delta1Definable]
 
