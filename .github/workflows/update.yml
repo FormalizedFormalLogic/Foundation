@@ -19,4 +19,3 @@ jobs:
       - uses: oliver-butterley/lean-update@v1-alpha
         with:
           on_update_succeeds: pr
-          on_update_fails: issue
