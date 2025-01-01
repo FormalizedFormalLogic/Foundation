@@ -25,8 +25,6 @@ def Coreflexive := ∀ ⦃x y⦄, x ≺ y → x = y
 
 def Equality := ∀ ⦃x y⦄, x ≺ y ↔ x = y
 
-def Antisymmetric := ∀ ⦃x y⦄, x ≺ y → y ≺ x → x = y
-
 def Isolated := ∀ ⦃x y⦄, ¬(x ≺ y)
 
 def Assymetric := ∀ ⦃x y⦄, (x ≺ y) → ¬(y ≺ x)
@@ -72,7 +70,7 @@ lemma refl_of_symm_serial_eucl (hSymm : Symmetric rel) (hSerial : Serial rel) (h
   have Ryx := hSymm Rxy;
   exact trans_of_symm_eucl hSymm hEucl Rxy Ryx;
 
-lemma corefl_of_refl_assym_eucl (hRefl : Reflexive rel) (hAntisymm : Antisymmetric rel) (hEucl : Euclidean rel) : Coreflexive rel := by
+lemma corefl_of_refl_assym_eucl (hRefl : Reflexive rel) (hAntisymm : AntiSymmetric rel) (hEucl : Euclidean rel) : Coreflexive rel := by
   intro x y Rxy;
   have Ryx := hEucl (hRefl x) Rxy;
   exact hAntisymm Rxy Ryx;
@@ -83,7 +81,7 @@ lemma equality_of_refl_corefl (hRefl : Reflexive rel) (hCorefl : Coreflexive rel
   . apply hCorefl;
   . rintro rfl; apply hRefl;
 
-lemma equality_of_refl_assym_eucl (hRefl : Reflexive rel) (hAntisymm : Antisymmetric rel) (hEucl : Euclidean rel) : Equality rel := by
+lemma equality_of_refl_assym_eucl (hRefl : Reflexive rel) (hAntisymm : AntiSymmetric rel) (hEucl : Euclidean rel) : Equality rel := by
   apply equality_of_refl_corefl;
   . assumption;
   . exact corefl_of_refl_assym_eucl hRefl hAntisymm hEucl;
@@ -163,9 +161,9 @@ lemma Finite.exists_ne_map_eq_of_infinite_lt {α β} [LinearOrder α] [Infinite 
     . contradiction;
     . use j, i; simp [hij, e];
 
-lemma antisymm_of_WCWF {R : α → α → Prop} : WCWF R → Antisymmetric R := by
+lemma antisymm_of_WCWF {R : α → α → Prop} : WCWF R → AntiSymmetric R := by
   contrapose;
-  simp [Antisymmetric];
+  simp [AntiSymmetric];
   intro x y Rxy Ryz hxy;
   apply ConverseWellFounded.iff_has_max.not.mpr;
   push_neg;
@@ -178,7 +176,7 @@ lemma antisymm_of_WCWF {R : α → α → Prop} : WCWF R → Antisymmetric R := 
     . use x; simp_all [Relation.IrreflGen];
 
 lemma WCWF_of_finite_trans_antisymm {R : α → α → Prop} (hFin : Finite α) (R_trans : Transitive R)
-  : Antisymmetric R → WCWF R := by
+  : AntiSymmetric R → WCWF R := by
     contrapose;
     intro hWCWF;
     replace hWCWF := ConverseWellFounded.iff_has_max.not.mp hWCWF;
@@ -186,7 +184,7 @@ lemma WCWF_of_finite_trans_antisymm {R : α → α → Prop} (hFin : Finite α) 
     obtain ⟨f, hf⟩ := dependent_choice hWCWF; clear hWCWF;
     simp [Relation.IrreflGen] at hf;
 
-    simp [Antisymmetric];
+    simp [AntiSymmetric];
     obtain ⟨i, j, hij, e⟩ := Finite.exists_ne_map_eq_of_infinite_lt f;
     use (f i), (f (i + 1));
     have ⟨hi₁, hi₂⟩ := hf i;

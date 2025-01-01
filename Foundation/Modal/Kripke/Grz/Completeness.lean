@@ -76,7 +76,7 @@ lemma transitive : Transitive (miniCanonicalFrame φ).Rel := by
     subst_vars;
     tauto;
 
-lemma antisymm : Antisymmetric (miniCanonicalFrame φ).Rel := by
+lemma antisymm : AntiSymmetric (miniCanonicalFrame φ).Rel := by
   rintro X Y ⟨_, h₁⟩ ⟨h₂, _⟩;
   exact h₁ h₂;
 
@@ -257,7 +257,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
 
 open Modal.Kripke
 
-instance complete : Complete (Hilbert.Grz ℕ) (ReflexiveTransitiveAntisymmetricFiniteFrameClass) := ⟨by
+instance complete : Complete (Hilbert.Grz ℕ) (ReflexiveTransitiveAntiSymmetricFiniteFrameClass) := ⟨by
   intro φ;
   contrapose;
   intro h;
@@ -278,7 +278,7 @@ instance complete : Complete (Hilbert.Grz ℕ) (ReflexiveTransitiveAntisymmetric
       tauto;
 ⟩
 
-instance : Kripke.FiniteFrameProperty (Hilbert.Grz ℕ) ReflexiveTransitiveAntisymmetricFiniteFrameClass where
+instance : Kripke.FiniteFrameProperty (Hilbert.Grz ℕ) ReflexiveTransitiveAntiSymmetricFiniteFrameClass where
   complete := complete
   sound := finite_sound
 
