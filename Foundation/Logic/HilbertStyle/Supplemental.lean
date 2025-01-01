@@ -58,6 +58,7 @@ omit [DecidableEq F] in lemma neg_mdp! (hnp : 𝓢 ⊢! ∼φ) (hn : 𝓢 ⊢! �
 -- infixl:90 "⨀" => neg_mdp!
 
 def dneOr [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢ φ ⋎ ψ := or₃''' (impTrans'' dne or₁) (impTrans'' dne or₂) d
+omit [DecidableEq F] in lemma dne_or! [HasAxiomDNE 𝓢] (d : 𝓢 ⊢! ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢! φ ⋎ ψ := ⟨dneOr d.some⟩
 
 def implyLeftOr' (h : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ➝ (χ ⋎ ψ) := by
   apply deduct';
