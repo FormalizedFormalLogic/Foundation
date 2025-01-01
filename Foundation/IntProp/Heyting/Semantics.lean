@@ -87,7 +87,10 @@ instance : Semantics.And (HeytingSemantics α) := ⟨fun {ℍ φ ψ} ↦ by simp
 @[simp] lemma val_iff {φ ψ : Formula α} : ℍ ⊧ φ ⭤ ψ ↔ (ℍ ⊧ₕ φ) = (ℍ ⊧ₕ ψ) := by
   simp [LogicalConnective.iff, antisymm_iff]
 
-lemma val_not (φ : Formula α) : ℍ ⊧ ∼φ ↔ (ℍ ⊧ₕ φ) = ⊥ := by simp [val_def]; rw [←HeytingAlgebra.himp_bot, himp_eq_top_iff, le_bot_iff]; rfl
+lemma val_not (φ : Formula α) : ℍ ⊧ ∼φ ↔ (ℍ ⊧ₕ φ) = ⊥ := by
+  simp only [val_def, Formula.hVal_neg];
+  rw [←HeytingAlgebra.himp_bot, himp_eq_top_iff, le_bot_iff];
+  rfl
 
 @[simp] lemma val_or (φ ψ : Formula α) : ℍ ⊧ φ ⋎ ψ ↔ (ℍ ⊧ₕ φ) ⊔ (ℍ ⊧ₕ ψ) = ⊤ := by
   simp [val_def]; rfl
@@ -95,8 +98,6 @@ lemma val_not (φ : Formula α) : ℍ ⊧ ∼φ ↔ (ℍ ⊧ₕ φ) = ⊥ := by 
 def mod (H : Hilbert α) : Set (HeytingSemantics α) := Semantics.models (HeytingSemantics α) H.axioms
 
 variable {H : Hilbert α}
-
-instance [H.IncludeEFQ] : System.Intuitionistic H where
 
 lemma mod_models_iff {φ : Formula α} :
     mod.{_,w} H ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* H.axioms → ℍ ⊧ φ := by
@@ -136,17 +137,16 @@ def lindenbaum : HeytingSemantics α where
   valAtom a := ⟦.atom a⟧
 
 lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
-  induction φ using Formula.rec' <;> try simp [top_def, bot_def]
-  case hatom => rfl
-  case hverum => rfl
-  case hfalsum => rfl
-  case hand ihp ihq => simp [ihp, ihq]; rw [inf_def]
-  case hor ihp ihq => simp [ihp, ihq]; rw [sup_def]
-  case himp ihp ihq => simp [ihp, ihq]; rw [himp_def]
-  case hneg ih => simp [ih]; rw [compl_def]
+  induction φ using Formula.rec' with
+  | hand _ _ ihp ihq => simp only [hVal_and, ihp, ihq]; rw [inf_def];
+  | hor _ _ ihp ihq => simp only [hVal_or, ihp, ihq]; rw [sup_def];
+  | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def];
+  | hneg _ ih => simp only [hVal_not, ih]; rw [compl_def];
+  | _ => rfl
 
 variable {H}
 
+omit [System.Consistent H] in
 lemma lindenbaum_complete_iff [System.Consistent H] {φ : Formula α} : lindenbaum H ⊧ φ ↔ H ⊢! φ := by
   simp [val_def', lindenbaum_val_eq, provable_iff_eq_top]
 
