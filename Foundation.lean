@@ -65,6 +65,7 @@ import Foundation.IntProp.Dialectica.Basic
 
 -- Modal
 
+import Foundation.Modal.Hilbert.GL_Independency
 import Foundation.Modal.Hilbert.Subst
 import Foundation.Modal.Hilbert.Maximal.Unprovability
 
