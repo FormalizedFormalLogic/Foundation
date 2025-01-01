@@ -136,7 +136,7 @@ lemma provable_iff_eq_top {φ : F} : 𝓢 ⊢! φ ↔ (⟦φ⟧ : LindenbaumAlge
   simp [top_def, provable_iff_provablyEquivalent_verum]; rfl
 
 lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ φ : LindenbaumAlgebra 𝓢, φ = ⊤) := by
-  simp [Inconsistent, provable_iff_eq_top]
+  simp only [Inconsistent, provable_iff_eq_top]
   constructor
   · intro h φ;
     induction φ using Quotient.ind
@@ -145,7 +145,7 @@ lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ φ : LindenbaumAlgeb
 
 lemma consistent_iff_nontrivial : Consistent 𝓢 ↔ Nontrivial (LindenbaumAlgebra 𝓢) := by
   apply not_iff_not.mp
-  simp [not_consistent_iff_inconsistent, nontrivial_iff, inconsistent_iff_trivial]
+  simp only [not_consistent_iff_inconsistent, inconsistent_iff_trivial, nontrivial_iff, ne_eq, not_exists, not_not]
   constructor
   · intro h φ ψ; simp [h]
   · intro h φ; exact h φ ⊤
@@ -167,7 +167,7 @@ instance LindenbaumAlgebra.heyting [DecidableEq F] : HeytingAlgebra (LindenbaumA
     exact efq!
   himp_bot φ := by
     induction' φ using Quotient.ind with φ
-    simp [bot_def, himp_def, compl_def]
+    simp only [bot_def, himp_def, compl_def, Quotient.eq]
     exact iff_comm! ⨀ neg_equiv!
 
 end intuitionistic
@@ -184,7 +184,7 @@ instance LindenbaumAlgebra.boolean [DecidableEq F] : BooleanAlgebra (LindenbaumA
     simp only [compl_def, inf_def, bot_def, le_def, intro_bot_of_and!]
   top_le_sup_compl φ := by
     induction' φ using Quotient.ind with φ
-    simp [compl_def, sup_def, top_def, le_def]
+    simp only [top_def, compl_def, sup_def, le_def]
     apply imply₁'! lem!
   le_top φ := by
     induction' φ using Quotient.ind with φ
@@ -198,7 +198,7 @@ instance LindenbaumAlgebra.boolean [DecidableEq F] : BooleanAlgebra (LindenbaumA
     induction' φ using Quotient.ind with φ
     induction' ψ using Quotient.ind with ψ
     rw [sup_comm]
-    simp [himp_def, compl_def, sup_def]
+    simp only [himp_def, compl_def, sup_def, Quotient.eq]
     exact imply_iff_not_or!
 
 end classical
