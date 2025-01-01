@@ -47,7 +47,7 @@ namespace Kripke
 open Relation (ReflGen)
 open Formula.Kripke
 
-lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ TransitiveIrreflexiveFiniteFrameClass) : ⟨F.toFrame^=⟩ ∈ ReflexiveTransitiveAntisymmetricFiniteFrameClass := by
+lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ TransitiveIrreflexiveFiniteFrameClass) : ⟨F.toFrame^=⟩ ∈ ReflexiveTransitiveAntiSymmetricFiniteFrameClass := by
   obtain ⟨F_trans, F_irrefl⟩ := hF;
   refine ⟨?F_refl, ?F_trans, ?F_antisymm⟩;
   . intro x; apply ReflGen.refl;
@@ -65,7 +65,7 @@ lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ 
       have := F_irrefl x;
       contradiction;
 
-lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ ReflexiveTransitiveAntisymmetricFiniteFrameClass) : ⟨F.toFrame^≠⟩ ∈ TransitiveIrreflexiveFiniteFrameClass := by
+lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ ReflexiveTransitiveAntiSymmetricFiniteFrameClass) : ⟨F.toFrame^≠⟩ ∈ TransitiveIrreflexiveFiniteFrameClass := by
   obtain ⟨_, F_trans, F_antisymm⟩ := hF;
   refine ⟨?F_trans, ?F_irrefl⟩;
   . rintro x y z ⟨nexy, Rxy⟩ ⟨_, Ryz⟩;

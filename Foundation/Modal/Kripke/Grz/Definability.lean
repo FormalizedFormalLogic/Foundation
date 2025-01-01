@@ -13,7 +13,7 @@ open Formula.Kripke
 open Relation (IrreflGen)
 
 abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel }
-abbrev ReflexiveTransitiveAntisymmetricFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ Antisymmetric F.Rel }
+abbrev ReflexiveTransitiveAntiSymmetricFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel }
 
 variable {F : Kripke.Frame}
 
@@ -172,7 +172,7 @@ lemma ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.is_defined_by_Grz :
   . rintro h;
     refine ⟨refl_of_Grz h, trans_of_Grz h, WCWF_of_Grz h⟩;
 
-lemma ReflexiveTransitiveAntisymmetricFiniteFrameClass.is_defined_by_Grz : ReflexiveTransitiveAntisymmetricFiniteFrameClass.DefinedBy 𝗚𝗿𝘇 := by
+lemma ReflexiveTransitiveAntiSymmetricFiniteFrameClass.is_defined_by_Grz : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.DefinedBy 𝗚𝗿𝘇 := by
   intro F;
   constructor;
   . rintro ⟨hRefl, hTrans, hAntisymm⟩;
@@ -196,12 +196,12 @@ open Hilbert.Kripke
 instance Grz.Kripke.sound : Sound (Hilbert.Grz ℕ) (ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass) :=
   instSound_of_frameClass_definedBy ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.is_defined_by_Grz rfl
 
-instance Grz.Kripke.finite_sound : Sound (Hilbert.Grz ℕ) (ReflexiveTransitiveAntisymmetricFiniteFrameClass) :=
-  instSound_of_finiteFrameClass_definedBy ReflexiveTransitiveAntisymmetricFiniteFrameClass.is_defined_by_Grz rfl
+instance Grz.Kripke.finite_sound : Sound (Hilbert.Grz ℕ) (ReflexiveTransitiveAntiSymmetricFiniteFrameClass) :=
+  instSound_of_finiteFrameClass_definedBy ReflexiveTransitiveAntiSymmetricFiniteFrameClass.is_defined_by_Grz rfl
 
-instance Grz.consistent : System.Consistent (Hilbert.Grz ℕ) := Kripke.instConsistent_of_nonempty_finiteFrameclass (FC := ReflexiveTransitiveAntisymmetricFiniteFrameClass) $ by
+instance Grz.consistent : System.Consistent (Hilbert.Grz ℕ) := Kripke.instConsistent_of_nonempty_finiteFrameclass (FC := ReflexiveTransitiveAntiSymmetricFiniteFrameClass) $ by
   use reflexivePointFrame;
-  simp [Transitive, Reflexive, Antisymmetric];
+  simp [Transitive, Reflexive, AntiSymmetric];
 
 end Hilbert
 

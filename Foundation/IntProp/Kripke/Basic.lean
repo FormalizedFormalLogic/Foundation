@@ -36,7 +36,7 @@ lemma rel_trans' : Transitive F.Rel := by apply rel_trans;
 lemma rel_refl' : Reflexive F.Rel := by apply rel_refl
 
 @[simp] lemma rel_antisymm {x y : F.World} : x ≺ y → y ≺ x → x = y := IsAntisymm.antisymm x y
-lemma rel_antisymm' : Antisymmetric F.Rel := by apply rel_antisymm
+lemma rel_antisymm' : AntiSymmetric F.Rel := by apply rel_antisymm
 
 end Frame
 

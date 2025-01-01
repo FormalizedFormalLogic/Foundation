@@ -124,7 +124,7 @@ abbrev TransitiveIrreflexiveFrameClass : FrameClass := { F | Transitive F ∧ Ir
 abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ WeaklyConverseWellFounded F }
 
 /-- FrameClass for `𝐆𝐫𝐳` (Finite version) -/
-abbrev ReflexiveTransitiveAntisymmetricFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ Antisymmetric F }
+abbrev ReflexiveTransitiveAntiSymmetricFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ AntiSymmetric F }
 
 end
 
