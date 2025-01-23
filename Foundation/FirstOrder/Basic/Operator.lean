@@ -153,7 +153,7 @@ lemma numeral_succ (hz : z ≠ 0) : numeral L (z + 1) = Operator.Add.add.comp ![
   simp [numeral]
   cases' z with z
   · simp at hz
-  · simp [Operator.foldr]
+  · rfl
 
 lemma numeral_add_two : numeral L (z + 2) = Operator.Add.add.comp ![numeral L (z + 1), One.one] :=
   numeral_succ (by simp)
@@ -190,7 +190,7 @@ variable [Operator.One L] [Operator.Mul L]
 
 lemma npow_zero : npow L 0 = One.one.comp ![] := rfl
 
-lemma npow_succ : npow L (n + 1) = Operator.Mul.mul.comp ![npow L n, bvar 0] := by simp [npow, foldr]
+lemma npow_succ : npow L (n + 1) = Operator.Mul.mul.comp ![npow L n, bvar 0] := rfl
 
 end npow
 

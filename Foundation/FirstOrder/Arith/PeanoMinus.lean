@@ -130,14 +130,15 @@ scoped instance : LinearOrderedCommSemiring M where
   le_total := le_total
   decidableLE := fun _ _ => Classical.dec _
 
-scoped instance : CanonicallyOrderedAddCommMonoid M where
-  bot := 0
-  bot_le := by simp
+scoped instance : CanonicallyOrderedAdd M where
   exists_add_of_le := by
     rintro x y (rfl | h)
     · exact ⟨0, by simp⟩
     · simpa[eq_comm] using add_eq_of_lt x y h
   le_self_add := by intro x y; simp
+
+scoped instance : OrderedAddCommMonoid M where
+  add_le_add_left _ _ h z := (add_le_add_iff_left z).mpr h
 
 lemma numeral_eq_natCast : (n : ℕ) → (ORingStruc.numeral n : M) = n
   | 0     => rfl
