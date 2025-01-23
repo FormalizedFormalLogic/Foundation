@@ -7,7 +7,7 @@ structure GeachConfluent.Taple where
   m : ℕ
   n : ℕ
 
-def GeachConfluent (t : GeachConfluent.Taple) (R : Rel α α) := ∀ {x y z : α}, (R.Iterate t.i x y) ∧ (R.Iterate t.j x z) → ∃ u, (R.Iterate t.m y u) ∧ (R.Iterate t.n z u)
+def GeachConfluent (t : GeachConfluent.Taple) (R : Rel α α) := ∀ {x y z : α}, (R.iterate t.i x y) ∧ (R.iterate t.j x z) → ∃ u, (R.iterate t.m y u) ∧ (R.iterate t.n z u)
 
 
 namespace GeachConfluent
