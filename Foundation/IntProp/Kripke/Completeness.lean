@@ -44,7 +44,7 @@ lemma is_confluent [HasAxiomWeakLEM H] : Confluent (Kripke.canonicalFrameOf H) :
   intro Γ Δ;
   intro hΓ hΔ h;
   simp_all;
-  have := List.nil_iff.mpr hΔ; subst this; simp at h; clear hΔ;
+  have := List.eq_nil_iff_forall_not_mem.mpr hΔ; subst this; simp at h; clear hΔ;
 
   have hΓy : ¬(∀ w, w ∈ Γ → w ∈ y.tableau.1) := by
     by_contra hC;
@@ -237,7 +237,7 @@ private lemma truthlemma.hneg
         have ⟨hq₁, hq₂⟩ := List.mem_remove_iff.mp hq;
         have := by simpa using hΓ ψ hq₁;
         simp_all;
-      replace hΔ : Δ = [] := List.nil_iff.mpr hΔ; subst hΔ;
+      replace hΔ : Δ = [] := List.eq_nil_iff_forall_not_mem.mpr hΔ; subst hΔ;
       by_contra hC; simp at hC;
       have : H ⊢! ⋀(Γ.remove φ) ➝ ∼φ := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (and₂'! neg_equiv!);
       have : H ⊬ ⋀(Γ.remove φ) ➝ ∼φ := by simpa using t.consistent (Δ := [∼φ]) hΓ (by simpa);
@@ -270,7 +270,7 @@ lemma deducible_of_validOnCanonicelModel : (Kripke.canonicalModelOf H) ⊧ φ �
       simp only [Tableau.Consistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
-      replace hΓ : Γ = [] := List.nil_iff.mpr hΓ;
+      replace hΓ : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr hΓ;
       subst hΓ;
       have : H ⊢! φ := disj_allsame'! hΔ (hC ⨀ verum!);
       contradiction;

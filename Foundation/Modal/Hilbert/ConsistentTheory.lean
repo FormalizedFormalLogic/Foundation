@@ -49,7 +49,7 @@ lemma emptyset_consistent [H_consis : System.Consistent H] : Theory.Consistent H
   obtain ⟨f, hf⟩ := H_consis.exists_unprovable;
   apply def_consistent.mpr;
   intro Γ hΓ; by_contra hC;
-  replace hΓ := List.nil_iff.mpr hΓ; subst hΓ;
+  replace hΓ := List.eq_nil_iff_forall_not_mem.mpr hΓ; subst hΓ;
   have : H ⊢! f := efq'! $ hC ⨀ verum!;
   contradiction;
 

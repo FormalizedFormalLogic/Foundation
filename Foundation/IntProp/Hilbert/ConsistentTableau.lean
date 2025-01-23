@@ -185,7 +185,7 @@ variable [H.IncludeEFQ]
 
 lemma self_consistent [h : H.Consistent] : Tableau.Consistent H (H.axioms, ∅) := by
   intro Γ Δ hΓ hΔ;
-  replace hΔ : Δ = [] := List.nil_iff.mpr hΔ;
+  replace hΔ : Δ = [] := List.eq_nil_iff_forall_not_mem.mpr hΔ;
   obtain ⟨ψ, hq⟩ := h.exists_unprovable;
   by_contra hC;
   have : H ⊢! ψ := by
