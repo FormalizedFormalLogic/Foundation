@@ -203,7 +203,7 @@ def emb : {Γ : HierarchySymbol} → Γ.Semiformula ξ n → Γ.Semiformula ξ n
   | 𝚫-[_], mkDelta φ ψ  => mkDelta φ.emb ψ.emb
 
 @[simp] lemma val_emb {Γ : HierarchySymbol} (φ : Γ.Semiformula ξ n) : φ.emb.val = Semiformula.lMap Language.oringEmb φ.val := by
-  rcases Γ with ⟨Γ, m⟩; rcases φ with (_ | _ | ⟨⟨p, _⟩, ⟨q, _⟩⟩) <;> simp [rew, val]
+  rcases Γ with ⟨Γ, m⟩; rcases φ with (_ | _ | ⟨⟨p, _⟩, ⟨q, _⟩⟩) <;> simp [rew, val, emb]
 
 @[simp] lemma pi_emb (φ : 𝚫-[m].Semiformula ξ n) : φ.emb.pi = φ.pi.emb := by cases φ; rfl
 
@@ -330,36 +330,38 @@ def substSigma (φ : 𝚺-[m + 1].Semiformula ξ 1) (F : 𝚺-[m + 1].Semiformul
     𝚺-[m + 1].Semiformula ξ n := (F ⋏ φ.rew (Rew.substs ![#0])).ex
 
 @[simp] lemma val_verum : (⊤ : Γ.Semiformula ξ n).val = ⊤ := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val]
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val] <;> rfl
 
 @[simp] lemma sigma_verum {m} : (⊤ : 𝚫-[m].Semiformula ξ n).sigma = ⊤ := by simp [Top.top, verum]
 
 @[simp] lemma pi_verum {m} : (⊤ : 𝚫-[m].Semiformula ξ n).pi = ⊤ := by simp [Top.top, verum]
 
 @[simp] lemma val_falsum : (⊥ : Γ.Semiformula ξ n).val = ⊥ := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val]
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val] <;> rfl
 
 @[simp] lemma sigma_falsum {m} : (⊥ : 𝚫-[m].Semiformula ξ n).sigma = ⊥ := by simp [Bot.bot, falsum]
 
 @[simp] lemma pi_falsum {m} : (⊥ : 𝚫-[m].Semiformula ξ n).pi = ⊥ := by simp [Bot.bot, falsum]
 
 @[simp] lemma val_and (φ ψ : Γ.Semiformula ξ n) : (φ ⋏ ψ).val = φ.val ⋏ ψ.val := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val, val_sigma]
+  suffices (φ.and ψ).val = φ.val ⋏ ψ.val from this
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [and, val, val_sigma]
 
 @[simp] lemma sigma_and (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋏ ψ).sigma = φ.sigma ⋏ ψ.sigma := by simp [Wedge.wedge, and]
 
 @[simp] lemma pi_and (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋏ ψ).pi = φ.pi ⋏ ψ.pi := by simp [Wedge.wedge, and]
 
 @[simp] lemma val_or (φ ψ : Γ.Semiformula ξ n) : (φ ⋎ ψ).val = φ.val ⋎ ψ.val := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val, val_sigma]
+  suffices (φ.or ψ).val = φ.val ⋎ ψ.val from this
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [or, val, val_sigma]
 
 @[simp] lemma sigma_or (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋎ ψ).sigma = φ.sigma ⋎ ψ.sigma := by simp [Vee.vee, or]
 
 @[simp] lemma pi_or (φ ψ : 𝚫-[m].Semiformula ξ n) : (φ ⋎ ψ).pi = φ.pi ⋎ ψ.pi := by simp [Vee.vee, or]
 
-@[simp] lemma val_negSigma {m} (φ : 𝚺-[m].Semiformula ξ n) : φ.negSigma.val = ∼φ.val := by simp [val, val_sigma]
+@[simp] lemma val_negSigma {m} (φ : 𝚺-[m].Semiformula ξ n) : φ.negSigma.val = ∼φ.val := by simp [negSigma, val, val_sigma]
 
-@[simp] lemma val_negPi {m} (φ : 𝚷-[m].Semiformula ξ n) : φ.negPi.val = ∼φ.val := by simp [val, val_sigma]
+@[simp] lemma val_negPi {m} (φ : 𝚷-[m].Semiformula ξ n) : φ.negPi.val = ∼φ.val := by simp [negPi, val, val_sigma]
 
 lemma val_negDelta {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).val = ∼φ.pi.val := by simp [Tilde.tilde, negDelta]
 
@@ -368,10 +370,10 @@ lemma val_negDelta {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).val = ∼φ.pi
 @[simp] lemma sigma_negPi {m} (φ : 𝚫-[m].Semiformula ξ n) : (∼φ).pi = φ.sigma.negSigma := by simp [Tilde.tilde, negDelta]
 
 @[simp] lemma val_ball (t : Semiterm ℒₒᵣ ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (ball t φ).val = ∀[“#0 < !!(Rew.bShift t)”] φ.val := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val, val_sigma]
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [ball, val, val_sigma]
 
 @[simp] lemma val_bex (t : Semiterm ℒₒᵣ ξ n) (φ : Γ.Semiformula ξ (n + 1)) : (bex t φ).val = ∃[“#0 < !!(Rew.bShift t)”] φ.val := by
-  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [val, val_sigma]
+  rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp [bex, val, val_sigma]
 
 @[simp] lemma val_exSigma {m} (φ : 𝚺-[m + 1].Semiformula ξ (n + 1)) : (ex φ).val = ∃' φ.val := rfl
 

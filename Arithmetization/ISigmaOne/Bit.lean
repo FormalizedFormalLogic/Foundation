@@ -114,11 +114,11 @@ syntax:max "∃ " ident " ∈' " first_order_term ", " first_order_formula:0 : f
 macro_rules
   | `(⤫formula[ $binders* | $fbinders* | ∀ $x ∈' $t, $p]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(ballIn ⤫term[ $binders* | $fbinders* | $t] ⤫formula[$binders'* | $fbinders* | $p])
   | `(⤫formula[ $binders* | $fbinders* | ∃ $x ∈' $t, $p]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(bexIn ⤫term[$binders* | $fbinders* | $t] ⤫formula[$binders'* | $fbinders* | $p])
 
 syntax:45 first_order_term:45 " ∼[" first_order_term "]" first_order_term:0 : first_order_formula

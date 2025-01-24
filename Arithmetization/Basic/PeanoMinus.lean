@@ -61,7 +61,7 @@ lemma sub_add_self_of_le (h : b ≤ a) : a - b + b = a := by symm; rw [add_comm]
 lemma add_tsub_self_of_le (h : b ≤ a) : b + (a - b) = a := by symm; exact sub_spec_of_ge h
 
 @[simp] lemma add_sub_self : (a + b) - b = a := by
-  symm; simpa [add_comm b] using sub_spec_of_ge (@le_add_self _ _ b a)
+  symm; simpa [add_comm b] using sub_spec_of_ge (show b ≤ a + b from le_add_self)
 
 @[simp] lemma add_sub_self' : (b + a) - b = a := by simp [add_comm]
 

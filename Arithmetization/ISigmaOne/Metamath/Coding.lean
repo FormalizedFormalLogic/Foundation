@@ -530,7 +530,8 @@ lemma quote_substs' {n m} (w : Fin n → Semiterm L Empty m) (σ : Semisentence 
   rw [quote_sentence_eq_quote_emb, this, ←quote_substs, quote_sentence_eq_quote_emb]
   congr 1
   simp [← TransitiveRewriting.comp_app]; congr 2;
-  ext x <;> simp [Rew.comp_app]; contradiction
+  ext x <;> simp [w', Rew.comp_app]
+  · contradiction
 
 @[simp] lemma free_quote (φ : SyntacticSemiformula L 1) :
     ⌜Rewriting.free φ⌝ = (L.codeIn V).free ⌜φ⌝ := by

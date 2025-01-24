@@ -27,7 +27,7 @@ def construction : Language.TermRec.Construction V L (blueprint pL) where
   func (_     k f _ v') := ^func k f v'
   bvar_defined := by intro v; simp [blueprint]
   fvar_defined := by intro v; simp [blueprint]
-  func_defined := by intro v; simp [blueprint]; rfl
+  func_defined := by intro v; simp [blueprint]
 
 end TermSubst
 
@@ -176,7 +176,7 @@ def construction : Language.TermRec.Construction V L (blueprint pL) where
   func (_ k f _ v') := ^func k f v'
   bvar_defined := by intro v; simp [blueprint]
   fvar_defined := by intro v; simp [blueprint]
-  func_defined := by intro v; simp [blueprint]; rfl
+  func_defined := by intro v; simp [blueprint]
 
 end TermShift
 
@@ -315,7 +315,7 @@ def construction : Language.TermRec.Construction V L (blueprint pL) where
   func (_ k f _ v') := ^func k f v'
   bvar_defined := by intro v; simp [blueprint]
   fvar_defined := by intro v; simp [blueprint]
-  func_defined := by intro v; simp [blueprint]; rfl
+  func_defined := by intro v; simp [blueprint]
 
 end TermBShift
 

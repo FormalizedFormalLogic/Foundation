@@ -1,6 +1,8 @@
 import Foundation.FirstOrder.Arith.Representation
 import Foundation.FirstOrder.Arith.PeanoMinus
 import Mathlib.Data.Fin.Basic
+import Mathlib.Algebra.Order.Sub.Basic
+
 instance [Zero α] : Nonempty α := ⟨0⟩
 
 notation "exp " x:90 => Exp.exp x
@@ -40,7 +42,6 @@ lemma fun_eq_vec₄ {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
-  rfl
 
 @[simp] lemma cons_app_four {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ → α) : (a :> s) 4 = s 3 := rfl
 
@@ -160,7 +161,7 @@ def fvarEnumInv [Inhabited ξ] (t : Semiterm L ξ n) : ℕ → ξ :=
 lemma fvarEnumInv_fvarEnum [DecidableEq ξ] [Inhabited ξ] {t : Semiterm L ξ n} {x : ξ} (hx : x ∈ t.fvarList) :
     fvarEnumInv t (fvarEnum t x) = x := by
   simp [fvarEnumInv, fvarEnum]; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr $ hx) h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length_iff.mpr $ hx) h
 
 lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {t : Semiterm L ξ n} : x ∈ t.fvarList ↔ t.FVar? x:= by
   induction t <;> simp [fvarList, *]
@@ -188,7 +189,7 @@ def fvarEnumInv [Inhabited ξ] (φ : Semiformula L ξ n) : ℕ → ξ :=
 lemma fvarEnumInv_fvarEnum [DecidableEq ξ] [Inhabited ξ] {φ : Semiformula L ξ n} {x : ξ} (hx : x ∈ φ.fvarList) :
     fvarEnumInv φ (fvarEnum φ x) = x := by
   simp [fvarEnumInv, fvarEnum]; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length.mpr hx) h
+  exact False.elim <| not_le.mpr (List.indexOf_lt_length_iff.mpr hx) h
 
 lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {φ : Semiformula L ξ n} : x ∈ φ.fvarList ↔ φ.FVar? x := by
   induction φ using rec' <;> simp [fvarList, Semiterm.mem_fvarList_iff_fvar?, *]
