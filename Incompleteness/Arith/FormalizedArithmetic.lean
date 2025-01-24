@@ -250,7 +250,7 @@ noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t ≮' �
 def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
   have : T ⊢ ↑n <' ↑m ⭤ _ := ltNumeral T n m
   apply andRight this ⨀ ?_
-  apply disj (i := m - (n + 1)) _ (by simpa using sub_succ_lt_self (by simp [h]))
+  apply disj (i := m - (n + 1)) _ (by simpa using sub_succ_lt_self h)
   simpa [nth_tSubstItr', h] using eqRefl T ↑n
 
 lemma lt_complete! {n m : V} (h : n < m) : T ⊢! ↑n <' ↑m := ⟨ltComplete T h⟩

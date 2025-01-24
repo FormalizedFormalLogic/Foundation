@@ -18,7 +18,7 @@ lemma substNumeral_app_quote (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
     substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[‘↑n’] : Sentence ℒₒᵣ)⌝ := by
   dsimp [substNumeral]
   let w : Fin 1 → Semiterm ℒₒᵣ Empty 0 := ![‘↑n’]
-  have : ?[numeral (n : V)] = (⌜fun i : Fin 1 ↦ ⌜w i⌝⌝ : V) := nth_ext' 1 (by simp) (by simp) (by simp)
+  have : ?[numeral (n : V)] = (⌜fun i : Fin 1 ↦ ⌜w i⌝⌝ : V) := nth_ext' 1 (by simp) (by simp) (by simp [w])
   rw [Language.substs₁, this, quote_substs' (L := ℒₒᵣ)]
 
 lemma substNumeral_app_quote_quote (σ π : Semisentence ℒₒᵣ 1) :
@@ -108,7 +108,7 @@ theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     let Θ : V → Prop := fun x ↦ Semiformula.Evalbm V ![x] θ
     calc
       V ⊧/![] (fixpoint θ)
-      ↔ Θ (substNumeral ⌜diag θ⌝ ⌜diag θ⌝) := by simp [fixpoint_eq]
+      ↔ Θ (substNumeral ⌜diag θ⌝ ⌜diag θ⌝) := by simp [Θ, fixpoint_eq]
     _ ↔ Θ ⌜fixpoint θ⌝                     := by simp [substNumeral_app_quote_quote]; rfl
 
 end Diagonalization
@@ -133,7 +133,7 @@ theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     have ht : ∀ i, substNumerals (t i) t = ⌜multifixpoint θ i⌝ := by
       intro i; simp [t, multifixpoint, substNumerals_app_quote_quote]
     calc
-      V ⊧/![] (multifixpoint θ i) ↔ V ⊧/t (multidiag (θ i))                 := by simp [multifixpoint]
+      V ⊧/![] (multifixpoint θ i) ↔ V ⊧/t (multidiag (θ i))                 := by simp [t, multifixpoint]
       _                      ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
       _                      ↔ V ⊧/(fun i ↦ ⌜multifixpoint θ i⌝) (θ i) := by simp [ht]
 
