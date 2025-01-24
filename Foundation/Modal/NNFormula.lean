@@ -69,6 +69,10 @@ lemma verum_eq : (verum : NNFormula α) = ⊤ := rfl
 
 lemma neg_eq : neg φ = ∼φ := rfl
 
+@[simp] lemma neg_atom (a : α) : ∼atom a = natom a := by rfl
+
+@[simp] lemma neg_natom (a : α) : ∼natom a = atom a := by rfl
+
 lemma negneg : ∼∼φ = φ := by
   induction φ with
   | and φ ψ ihφ ihψ =>
@@ -124,6 +128,14 @@ def toFormula : NNFormula α → Formula α
   | □φ      => □(φ.toFormula)
   | ◇φ      => ◇(φ.toFormula)
 instance : Coe (NNFormula α) (Formula α) := ⟨toFormula⟩
+
+@[simp] lemma toFormula_atom (a : α) : toFormula  (.atom a) = Formula.atom a := rfl
+
+@[simp] lemma toFormula_natom (a : α) : toFormula (.natom a) = ∼Formula.atom a := rfl
+
+@[simp] lemma toFormula_falsum : toFormula ⊥ = (⊥ : Formula α) := rfl
+
+@[simp] lemma toFormula_verum : toFormula ⊤ = (⊤ : Formula α) := rfl
 
 end toFormula
 
@@ -253,6 +265,10 @@ def toNNFormula : Formula α → NNFormula α
   | φ ➝ ψ   => φ.toNNFormula.neg ⋎ ψ.toNNFormula
   | □φ      => □φ.toNNFormula
 instance : Coe (Formula α) (NNFormula α) := ⟨toNNFormula⟩
+
+@[simp] lemma toNNFormula_atom (a : α) : toNNFormula (atom a) = .atom a := rfl
+
+@[simp] lemma toNNFormula_falsum : toNNFormula ⊥ = (⊥ : NNFormula α) := rfl
 
 end Formula
 

@@ -26,8 +26,8 @@ theorem KD5_strictlyWeakerThan_KD45 : (Hilbert.KD5 ℕ) <ₛ (Hilbert.KD45 ℕ) 
         λ x y =>
           match x, y with
           | 0, 1 => True
-          | 1, 2 => True
           | 1, 1 => True
+          | 1, 2 => True
           | 2, 1 => True
           | 2, 2 => True
           | _, _ => False
@@ -55,6 +55,6 @@ theorem KD5_strictlyWeakerThan_KD45 : (Hilbert.KD5 ℕ) <ₛ (Hilbert.KD45 ℕ) 
           . use 2;
             constructor;
             . tauto;
-            . simp;
+            . aesop;
 
 end LO.Modal.Hilbert

@@ -27,6 +27,12 @@ protected instance semantics : Semantics (NNFormula ℕ) (M.World) := ⟨λ x �
 
 protected lemma iff_models : x ⊧ φ ↔ Satisfies M x φ := iff_of_eq rfl
 
+@[simp]
+protected lemma atom_def (a : ℕ) : x ⊧ (atom a) ↔ M x a := by simp [Satisfies.iff_models, Satisfies];
+
+@[simp]
+protected lemma natom_def (a : ℕ) : x ⊧ (natom a) ↔ ¬M x a := by simp [Satisfies.iff_models, Satisfies];
+
 protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies.iff_models, Satisfies];
 
 protected lemma bot_def : ¬x ⊧ ⊥ := by simp [Satisfies.iff_models, Satisfies];

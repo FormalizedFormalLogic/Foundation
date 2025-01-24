@@ -53,6 +53,6 @@ theorem KT_strictlyWeakerThan_S4 : (Hilbert.KT ℕ) <ₛ (Hilbert.S4 ℕ) := by
           . use 2;
             constructor;
             . tauto;
-            . simp;
+            . aesop
 
 end LO.Modal.Hilbert

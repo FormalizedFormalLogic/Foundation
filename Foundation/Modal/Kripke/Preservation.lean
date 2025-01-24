@@ -343,7 +343,8 @@ theorem undefinable_irreflexive : ¬∃ Ax : Theory ℕ, IrreflexiveFrameClass.D
 
   let f : F₁ →ₚ F₂ := {
     toFun := λ _ => 0,
-    forth := by simp [Frame.Rel'],
+    forth := by
+      simp [Frame.Rel'],
     back := by
       simp [Frame.Rel'];
       intro x;

@@ -34,7 +34,8 @@ theorem KTB_strictlyWeakerThan_S5 : (Hilbert.KTB ℕ) <ₛ (Hilbert.S5 ℕ) := b
       ⟩;
       use F;
       refine ⟨?_, ?_, ?_⟩;
-      . simp [Reflexive];
+      . unfold Reflexive;
+        aesop;
       . unfold Symmetric;
         aesop;
       . use (λ w _ => w = 1), 0;
