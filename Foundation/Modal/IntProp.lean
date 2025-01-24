@@ -13,6 +13,24 @@ def Formula.toModalFormula : Formula α → Modal.Formula α
   | φ ⋎ ψ => (toModalFormula φ) ⋎ (toModalFormula ψ)
 postfix:75 "ᴹ" => Formula.toModalFormula
 
+namespace Formula.toModalFormula
+
+@[simp] lemma def_top : (⊤ : Formula α)ᴹ = ⊤ := by rfl
+
+@[simp] lemma def_bot : (⊥ : Formula α)ᴹ = ⊥ := by rfl
+
+@[simp] lemma def_atom (a : α) : (atom a)ᴹ = .atom a := by rfl
+
+@[simp] lemma def_not (φ : Formula α) : (∼φ)ᴹ = ∼(φᴹ) := by rfl
+
+@[simp] lemma def_imp (φ ψ : Formula α) : (φ ➝ ψ)ᴹ = (φᴹ) ➝ (ψᴹ) := by rfl
+
+@[simp] lemma def_and (φ ψ : Formula α) : (φ ⋏ ψ)ᴹ = (φᴹ) ⋏ (ψᴹ) := by rfl
+
+@[simp] lemma def_or (φ ψ : Formula α) : (φ ⋎ ψ)ᴹ = (φᴹ) ⋎ (ψᴹ) := by rfl
+
+end Formula.toModalFormula
+
 end LO.IntProp
 
 

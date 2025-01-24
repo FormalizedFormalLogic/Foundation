@@ -1,3 +1,4 @@
+import Mathlib.Data.Set.Finite.Powerset
 import Foundation.Modal.Kripke.Geach.Systems
 import Foundation.Modal.Kripke.Closure
 

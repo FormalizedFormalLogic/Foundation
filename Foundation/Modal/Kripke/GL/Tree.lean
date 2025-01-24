@@ -1,6 +1,6 @@
-import Mathlib.Data.Finite.Sum
 import Foundation.Modal.Kripke.GL.Completeness
 import Foundation.Modal.Kripke.Tree
+import Mathlib.Data.Finite.Sum
 
 namespace LO.Modal
 

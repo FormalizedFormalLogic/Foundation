@@ -202,11 +202,12 @@ abbrev FiniteFrame.FiniteTransitiveTreeUnravelling
     rel_assymetric := Frame.TransitiveTreeUnravelling.rel_asymmetric
     root_rooted := Frame.TransitiveTreeUnravelling.rooted
     world_finite := by
-      have := F.world_finite;
-      simp [Frame.TreeUnravelling];
       suffices h : Finite { x // List.Chain' (F.PointGenerated r).Rel x } by
-        exact Finite.of_injective (β := { x // List.Chain' (F.PointGenerated r).Rel x })
-          (fun x => ⟨x.1, x.2.2⟩) (by simp [Function.Injective]);
+        exact
+          Finite.of_injective
+          (β := { x // List.Chain' (F.PointGenerated r).Rel x })
+          (fun x => ⟨x.1, x.2.2⟩)
+          (by rintro ⟨x, hx⟩ ⟨y, hy⟩; simp_all);
       exact List.chains_finite (Frame.PointGenerated.rel_transitive F_trans) (Frame.PointGenerated.rel_irreflexive F_irrefl)
   }
 

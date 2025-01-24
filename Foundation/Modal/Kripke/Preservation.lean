@@ -183,7 +183,7 @@ lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_s
     toFun := f,
     forth := f.forth,
     back := f.back,
-    atomic := by simp_all
+    atomic := by aesop;
   } w₁ |>.not.mpr h;
 
 lemma iff_theory_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧* T → F₂ ⊧* T := by
@@ -343,10 +343,9 @@ theorem undefinable_irreflexive : ¬∃ Ax : Theory ℕ, IrreflexiveFrameClass.D
 
   let f : F₁ →ₚ F₂ := {
     toFun := λ _ => 0,
-    forth := by
-      simp [Frame.Rel'],
+    forth := by aesop;
     back := by
-      simp [Frame.Rel'];
+      simp [Frame.Rel', F₂];
       intro x;
       use 1 - x;
       omega;
@@ -358,8 +357,10 @@ theorem undefinable_irreflexive : ¬∃ Ax : Theory ℕ, IrreflexiveFrameClass.D
   have : Irreflexive F₂ := by
     apply h F₂ |>.mpr;
     apply iff_theory_valid_on_frame_surjective_morphism f f_surjective;
-    exact h F₁ |>.mp $ by simp [Irreflexive, Frame.Rel'];
-  have : ¬Irreflexive F₂ := by simp [Irreflexive];
+    exact h F₁ |>.mp $ by
+      simp [Irreflexive, Frame.Rel', F₁];
+  have : ¬Irreflexive F₂ := by
+    simp [Irreflexive, F₂];
   contradiction;
 
 

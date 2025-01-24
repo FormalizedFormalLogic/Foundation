@@ -369,10 +369,10 @@ instance ConnectedFrameClass.defined_by_Dummett : ConnectedFrameClass.DefinedBy 
     ⟩⟩;
     rcases Kripke.Satisfies.or_def.mp $ @h (Axioms.Dummett (atom 0) (atom 1)) (atom 0) (atom 1) rfl M.Val x with (hi | hi);
     . have := Kripke.Satisfies.imp_def.mp hi Rxy;
-      simp [Semantics.Realize, Kripke.Satisfies] at this;
+      simp [Semantics.Realize, Kripke.Satisfies, M] at this;
       tauto;
     . have := Kripke.Satisfies.imp_def.mp hi Rxz;
-      simp [Semantics.Realize, Kripke.Satisfies] at this;
+      simp [Semantics.Realize, Kripke.Satisfies, M] at this;
       tauto;
 
 section
@@ -390,7 +390,7 @@ private lemma euclidean_of_subset_lem_frameTheorems : (𝗟𝗘𝗠 ⊆ F.theore
   use z;
   constructor;
   . exact Rxz;
-  . simp [Kripke.Satisfies];
+  . simp [Kripke.Satisfies, M];
 
 private lemma subset_lem_frameTheorems_of_symmetric : Symmetric F → 𝗟𝗘𝗠 ⊆ F.theorems := by
   simp [Frame.theorems];

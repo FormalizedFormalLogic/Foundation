@@ -1,4 +1,4 @@
-import Foundation.IntProp.Kripke.Classical
+import Foundation.IntProp.Hilbert.Basic
 import Foundation.Modal.Hilbert.Systems
 import Foundation.Modal.IntProp
 
@@ -26,7 +26,14 @@ postfix:75 "ᵀ" => TrivTranslation
 namespace TrivTranslation
 
 @[simp] lemma degree_zero : φᵀ.degree = 0 := by induction φ <;> simp [TrivTranslation, degree, *];
-@[simp] lemma back : φᵀᴾᴹ = φᵀ := by induction φ using rec' <;> simp [IntProp.Formula.toModalFormula, TrivTranslation, *];
+
+@[simp]
+lemma back : φᵀᴾᴹ = φᵀ := by
+  induction φ using rec' with
+  | himp => simp [TrivTranslation, toPropFormula, IntProp.Formula.toModalFormula, *];
+  | hbox => simp [TrivTranslation, *];
+  | _ => rfl;
+  -- simp_all [IntProp.Formula.toModalFormula, TrivTranslation];
 
 end TrivTranslation
 
@@ -40,7 +47,12 @@ postfix:75 "ⱽ" => VerTranslation
 
 namespace VerTranslation
 
-@[simp] lemma degree_zero : φⱽ.degree = 0 := by induction φ <;> simp [degree, *];
+@[simp]
+lemma degree_zero : φⱽ.degree = 0 := by
+  induction φ using rec' with
+  | himp => simp [VerTranslation, degree, *];
+  | _ => rfl;
+
 @[simp] lemma back  : φⱽᴾᴹ = φⱽ := by
   induction φ using rec' with
   | himp => simp [VerTranslation, toPropFormula, IntProp.Formula.toModalFormula, *];
@@ -153,5 +165,3 @@ end Ver
 end Hilbert
 
 end LO.Modal
-
-#min_imports

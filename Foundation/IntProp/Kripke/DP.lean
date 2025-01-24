@@ -108,10 +108,10 @@ theorem disjunctive : (Hilbert.Int ℕ) ⊢! φ ⋎ ψ → (Hilbert.Int ℕ) ⊢
   apply Formula.Kripke.Satisfies.or_def.not.mpr;
   push_neg;
   constructor;
-  . have := not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inl w₁) φ (by simp);
+  . have := not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inl w₁) φ (by aesop);
     apply this;
     exact Kripke.satisfies_left_on_counterexampleDPModel.not.mp hφ;
-  . have := not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr w₂) ψ (by simp);
+  . have := not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr w₂) ψ (by aesop);
     apply this;
     exact Kripke.satisfies_right_on_counterexampleDPModel.not.mp hψ;
 
