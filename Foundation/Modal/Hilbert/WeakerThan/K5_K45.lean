@@ -40,9 +40,9 @@ theorem K5_strictlyWeakerThan_K45 : (Hilbert.K5 ℕ) <ₛ (Hilbert.K45 ℕ) := b
         constructor;
         . intro y R0y;
           match y with
-          | 0 => simpa;
+          | 0 => tauto;
           | 1 => tauto;
-          | 2 => simpa;
+          | 2 => tauto;
         . use 1;
           constructor;
           . tauto;

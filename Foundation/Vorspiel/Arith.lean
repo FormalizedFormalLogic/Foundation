@@ -44,7 +44,7 @@ def and (n m : ℕ) : ℕ := isLtNat 0 (n * m)
 
 def or (n m : ℕ) : ℕ := isLtNat 0 (n + m)
 
-lemma and_eq (n m : ℕ) : and n m = if 0 < n ∧ 0 < m then 1 else 0 := by simp[and, isLtNat]
+lemma and_eq (n m : ℕ) : and n m = if 0 < n ∧ 0 < m then 1 else 0 := by simp [mul_pos_iff, and, isLtNat]
 
 lemma and_eq_one (n m : ℕ) : and n m = 1 ↔ 0 < n ∧ 0 < m := by simp[and_eq, imp_false, Nat.pos_iff_ne_zero]
 

@@ -24,8 +24,9 @@ theorem KD4_strictlyWeakerThan_KD45 : (Hilbert.KD4 ℕ) <ₛ (Hilbert.KD45 ℕ) 
       let F : Frame := ⟨Fin 2, λ x y => x = y ∨ x < y⟩;
       use F;
       refine ⟨?_, ?_, ?_⟩;
-      . simp [Serial];
-      . simp [Transitive];
+      . unfold Serial;
+        aesop;
+      . unfold Transitive;
         omega;
       . use (λ w _ => w = 0), 0;
         suffices (0 : F.World) ≺ 0 ∧ ∃ x : F.World, (0 : F.World) ≺ x ∧ ¬x ≺ 0 by

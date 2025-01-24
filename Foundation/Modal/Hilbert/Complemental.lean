@@ -1,3 +1,4 @@
+import Mathlib.Data.Set.Finite.Powerset
 import Foundation.Modal.Hilbert.ConsistentTheory
 
 namespace LO.Modal

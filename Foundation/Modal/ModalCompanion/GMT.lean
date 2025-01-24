@@ -28,6 +28,7 @@ lemma provable_S4_of_provable_efq : (Hilbert.S4 ℕ) ⊢! φᵍ → (Hilbert.Int
         exact V.hereditary h $ by assumption;
       . intro h;
         exact h x (F.rel_refl' x);
+    | hfalsum => simp [GoedelTranslation]; rfl;
     | hor φ ψ ihp ihq =>
       simp only [GoedelTranslation];
       constructor;
@@ -40,8 +41,8 @@ lemma provable_S4_of_provable_efq : (Hilbert.S4 ℕ) ⊢! φᵍ → (Hilbert.Int
         rcases Formula.Kripke.Satisfies.or_def.mp h with (hp | hq)
         . left; exact ihp x |>.mpr hp;
         . right; exact ihq x |>.mpr hq;
-    | _ =>
-      simp_all [IntProp.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
+    | _ => simp_all [GoedelTranslation, IntProp.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
+
   have : ¬(Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ w (φᵍ)) := (h₁ φ w).not.mp hp;
 
   apply not_imp_not.mpr $ Hilbert.S4.Kripke.sound.sound;

@@ -320,7 +320,7 @@ lemma by_axm! [DecidableEq F] (h : φ ∈ Γ) : Γ *⊢[𝓢]! φ := System.by_a
 
 def emptyPrf {φ : F} : ∅ *⊢[𝓢] φ → 𝓢 ⊢ φ := by
   rintro ⟨Γ, hΓ, h⟩;
-  have := List.nil_iff.mpr hΓ;
+  have := List.eq_nil_iff_forall_not_mem.mpr hΓ;
   subst this;
   exact FiniteContext.emptyPrf h;
 

@@ -80,7 +80,14 @@ variable {φ : Formula ℕ}
 
 lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (φᵇ)) ↔ (Satisfies ⟨F^=, V⟩ x φ) := by
   induction φ using Formula.rec' generalizing x with
-  | hatom φ => simp [Satisfies];
+  | himp φ ψ ihp ihq =>
+    constructor;
+    . intro h hp;
+      apply ihq.mp;
+      exact h $ ihp.mpr hp;
+    . intro h hp;
+      apply ihq.mpr;
+      exact h $ ihp.mp hp;
   | hbox φ ih =>
     simp [Formula.BoxdotTranslation, Box.boxdot, Satisfies];
     constructor;
@@ -95,7 +102,7 @@ lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (φᵇ)) ↔ (Satis
       . intro y Rxy;
         apply ih.mpr;
         exact @h y (ReflGen.single Rxy);
-  | _ => simp_all [Satisfies];
+  | _ => rfl;
 
 lemma iff_frame_boxdot_reflexive_closure {F : Frame} : (F ⊧ (φᵇ)) ↔ ((F^=) ⊧ φ) := by
   constructor;

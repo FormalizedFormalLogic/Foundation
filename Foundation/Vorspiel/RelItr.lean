@@ -1,4 +1,4 @@
-import Mathlib.Data.Rel
+import Foundation.Vorspiel.Vorspiel
 
 def Rel.iterate (R : Rel α α) : ℕ → α → α → Prop
   | 0 => (· = ·)
@@ -70,8 +70,5 @@ lemma comp : (∃ z, R.iterate n x z ∧ R.iterate m z y) ↔ R.iterate (n + m) 
       constructor;
       . use w;
       . assumption;
-
-
--- lemma comp' {n m : ℕ+} : (∃ z, x ≺^[n] z ∧ z ≺^[m] y) ↔ x ≺^[n + m] y := comp
 
 end Rel.iterate

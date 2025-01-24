@@ -27,10 +27,17 @@ theorem KD45_strictlyWeakerThan_S5 : (Hilbert.KD45 ℕ) <ₛ (Hilbert.S5 ℕ) :=
       let F : Frame := ⟨Fin 2, λ x y => y = 1⟩;
       use F;
       refine ⟨?_, ?_, ?_, ?_⟩;
-      . simp [Serial];
-      . simp [Transitive];
-      . simp [Euclidean];
+      . unfold Serial;
+        aesop;
+      . unfold Transitive;
+        omega;
+      . unfold Euclidean;
+        aesop;
       . use (λ w _ => w = 1), 0;
-        simp [Semantics.Realize, Satisfies];
+        suffices (∀ y, (0 : F.World) ≺ y → y = 1) ∧ ¬(0 : F.World) = 1 by
+          simpa [Semantics.Realize, Satisfies];
+        constructor;
+        . aesop;
+        . trivial;
 
 end LO.Modal.Hilbert
