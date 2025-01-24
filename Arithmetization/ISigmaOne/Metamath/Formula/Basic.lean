@@ -1305,12 +1305,12 @@ def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   ex {_} := fun _ y₁ ↦ y₁ - 1
   allChanges := fun _ ↦ 0
   exChanges := fun _ ↦ 0
-  rel_defined := by intro v; simp [blueprint, L.termBVVec_defined.df.iff]; rfl
-  nrel_defined := by intro v; simp [blueprint, L.termBVVec_defined.df.iff]; rfl
+  rel_defined := by intro v; simp [blueprint, L.termBVVec_defined.df.iff]
+  nrel_defined := by intro v; simp [blueprint, L.termBVVec_defined.df.iff]
   verum_defined := by intro v; simp [blueprint]
   falsum_defined := by intro v; simp [blueprint]
-  and_defined := by intro v; simp [blueprint]; rfl
-  or_defined := by intro v; simp [blueprint]; rfl
+  and_defined := by intro v; simp [blueprint]
+  or_defined := by intro v; simp [blueprint]
   all_defined := by intro v; simp [blueprint]
   ex_defined := by intro v; simp [blueprint]
   allChanges_defined := by intro v; simp [blueprint]

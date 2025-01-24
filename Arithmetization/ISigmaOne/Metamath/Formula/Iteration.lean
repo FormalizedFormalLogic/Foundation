@@ -171,7 +171,7 @@ def construction : PR.Construction V blueprint where
   zero _ := 0
   succ param k ih := (⌜ℒₒᵣ⌝.substs (numeral k ∷ param 0) (param 1)) ∷ ih
   zero_defined := by intro v; simp [blueprint]
-  succ_defined := by intro v; simp [blueprint, ⌜ℒₒᵣ⌝.substs_defined.df.iff]; rfl
+  succ_defined := by intro v; simp [blueprint, ⌜ℒₒᵣ⌝.substs_defined.df.iff]
 
 end SubstItr
 

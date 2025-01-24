@@ -77,7 +77,7 @@ lemma lt_mul_div_succ (a : V) (h : 0 < b) : a < b * (a / b + 1) := ((Classical.c
 
 lemma eq_mul_div_add_of_pos (a : V) {b} (hb : 0 < b) : ∃ r < b, a = b * (a / b) + r := by
   let r := a - b * (a / b)
-  have e : a = b * (a / b) + r := by simp [add_tsub_self_of_le (mul_div_le_pos a hb)]
+  have e : a = b * (a / b) + r := by simp [r, add_tsub_self_of_le (mul_div_le_pos a hb)]
   exact ⟨r, by
     by_contra A
     have hyv : b ≤ r := by simpa using A
