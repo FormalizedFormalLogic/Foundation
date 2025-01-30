@@ -10,18 +10,14 @@ namespace Formula
 
 def hVal {ℍ : Type*} [HeytingAlgebra ℍ] (v : α → ℍ) : Formula α → ℍ
   | atom a => v a
-  | ⊤      => ⊤
   | ⊥      => ⊥
   | φ ⋏ ψ  => φ.hVal v ⊓ ψ.hVal v
   | φ ⋎ ψ  => φ.hVal v ⊔ ψ.hVal v
   | φ ➝ ψ  => φ.hVal v ⇨ ψ.hVal v
-  | ∼φ     => (φ.hVal v)ᶜ
 
 variable {ℍ : Type*} [HeytingAlgebra ℍ] (v : α → ℍ)
 
 @[simp] lemma hVal_atom (a : α) : (atom a).hVal v = v a := rfl
-
-@[simp] lemma hVal_verum : (⊤ : Formula α).hVal v = ⊤ := rfl
 
 @[simp] lemma hVal_falsum : (⊥ : Formula α).hVal v = ⊥ := rfl
 
@@ -31,7 +27,9 @@ variable {ℍ : Type*} [HeytingAlgebra ℍ] (v : α → ℍ)
 
 @[simp] lemma hVal_imp (φ ψ : Formula α) : (φ ➝ ψ).hVal v = φ.hVal v ⇨ ψ.hVal v := rfl
 
-@[simp] lemma hVal_neg (φ : Formula α) : (∼φ).hVal v = (φ.hVal v)ᶜ := rfl
+@[simp] lemma hVal_verum : (⊤ : Formula α).hVal v = ⊤ := by simp;
+
+@[simp] lemma hVal_neg (φ : Formula α) : (∼φ).hVal v = (φ.hVal v)ᶜ := by simp;
 
 end Formula
 
@@ -55,8 +53,6 @@ def hVal (ℍ : HeytingSemantics α) (φ : Formula α) : ℍ := φ.hVal ℍ.valA
 
 scoped [LO.IntProp] infix:45 " ⊧ₕ " => LO.IntProp.HeytingSemantics.hVal
 
-@[simp] lemma hVal_verum : (ℍ ⊧ₕ ⊤) = ⊤ := rfl
-
 @[simp] lemma hVal_falsum : (ℍ ⊧ₕ ⊥) = ⊥ := rfl
 
 @[simp] lemma hVal_and (φ ψ : Formula α) : (ℍ ⊧ₕ φ ⋏ ψ) = (ℍ ⊧ₕ φ) ⊓ (ℍ ⊧ₕ ψ) := rfl
@@ -67,7 +63,9 @@ scoped [LO.IntProp] infix:45 " ⊧ₕ " => LO.IntProp.HeytingSemantics.hVal
 
 @[simp] lemma hVal_iff (φ ψ : Formula α) : (ℍ ⊧ₕ φ ⭤ ψ) = bihimp (ℍ ⊧ₕ φ) (ℍ ⊧ₕ ψ) := by simp [LogicalConnective.iff, bihimp, inf_comm]
 
-@[simp] lemma hVal_not (φ : Formula α) : (ℍ ⊧ₕ ∼φ) = (ℍ ⊧ₕ φ)ᶜ := rfl
+@[simp] lemma hVal_verum : (ℍ ⊧ₕ ⊤) = ⊤ := by simp;
+
+@[simp] lemma hVal_not (φ : Formula α) : (ℍ ⊧ₕ ∼φ) = (ℍ ⊧ₕ φ)ᶜ := by simp;
 
 instance : Semantics (Formula α) (HeytingSemantics α) := ⟨fun ℍ φ ↦ (ℍ ⊧ₕ φ) = ⊤⟩
 
@@ -121,8 +119,6 @@ lemma sound {φ : Formula α} (d : H ⊢! φ) : mod H ⊧ φ := by
   case or₁ => simp
   case or₂ => simp
   case or₃ => simp [himp_inf_himp_inf_sup_le]
-  case neg_equiv φ =>
-    simp [Axioms.NegEquiv]
 
 instance : Sound H (mod H) := ⟨sound⟩
 
@@ -141,7 +137,6 @@ lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
   | hand _ _ ihp ihq => simp only [hVal_and, ihp, ihq]; rw [inf_def];
   | hor _ _ ihp ihq => simp only [hVal_or, ihp, ihq]; rw [sup_def];
   | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def];
-  | hneg _ ih => simp only [hVal_not, ih]; rw [compl_def];
   | _ => rfl
 
 variable {H}

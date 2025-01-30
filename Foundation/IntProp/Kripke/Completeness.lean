@@ -69,7 +69,7 @@ lemma is_confluent [HasAxiomWeakLEM H] : Confluent (Kripke.canonicalFrameOf H) :
       have := by simpa using List.of_mem_filter hp;
       exact this.1;
     have : H ⊬ ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ∼⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
-    have : H ⊢! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := by simp;
+    have : H ⊢! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := intro_bot_of_and!;
     contradiction;
 
   have : H ⊢! (⋀Θx ⋏ (⋀Θy ⋏ ⋀Θz)) ➝ ⊥ := imp_trans''! (by
@@ -256,8 +256,7 @@ private lemma truthlemma.hneg
 lemma truthlemma : t ⊧ φ ↔ φ ∈ t.tableau.1 := by
   induction φ using Formula.rec' generalizing t with
   | hatom => tauto;
-  | himp φ ψ ihp ihq => exact truthlemma.himp ihp ihq
-  | hneg φ ihp => exact truthlemma.hneg ihp;
+  | himp φ ψ ihp ihq => exact truthlemma.himp ihp ihq;
   | _ => simp [Satisfies.iff_models, Satisfies, *];
 
 end truthlemma

@@ -1,5 +1,4 @@
 import Foundation.Logic.HilbertStyle.Basic
-import Foundation.Logic.HilbertStyle.Supplemental
 import Foundation.IntProp.Formula
 
 namespace LO.IntProp
@@ -40,7 +39,6 @@ inductive Deduction (H : Hilbert α) : Formula α → Type _
   | or₁ φ ψ      : Deduction H $ φ ➝ φ ⋎ ψ
   | or₂ φ ψ      : Deduction H $ ψ ➝ φ ⋎ ψ
   | or₃ φ ψ χ    : Deduction H $ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
-  | neg_equiv φ  : Deduction H $ Axioms.NegEquiv φ
 
 instance : System (Formula α) (Hilbert α) := ⟨Deduction⟩
 
@@ -49,18 +47,23 @@ open Hilbert
 
 section
 
+instance : System.ModusPonens H := ⟨mdp⟩
+
+instance : System.HasAxiomImply₁ H := ⟨imply₁⟩
+
+instance : System.HasAxiomImply₂ H := ⟨imply₂⟩
+
+instance : System.HasAxiomAndInst H := ⟨and₃⟩
+
 instance : System.Minimal H where
   mdp := mdp
   verum := verum
-  imply₁ := imply₁
-  imply₂ := imply₂
   and₁ := and₁
   and₂ := and₂
   and₃ := and₃
   or₁ := or₁
   or₂ := or₂
   or₃ := or₃
-  neg_equiv := neg_equiv
 
 instance [H.IncludeEFQ] : System.HasAxiomEFQ H where
   efq _ := eaxm $ Set.mem_of_subset_of_mem IncludeEFQ.include_EFQ (by simp);
@@ -76,6 +79,7 @@ instance [H.IncludeEFQ] : System.Intuitionistic H where
 instance [H.IncludeDNE] : System.Classical H where
 
 instance [DecidableEq α] [H.IncludeEFQ] [H.IncludeLEM] : System.Classical H where
+  dne := by sorry;
 
 end
 
@@ -151,8 +155,7 @@ noncomputable def rec! {α : Type u} {H : Hilbert α}
   (and₃   : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) and₃!)
   (or₁    : ∀ {φ ψ},   motive (φ ➝ φ ⋎ ψ) or₁!)
   (or₂    : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) or₂!)
-  (or₃    : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) or₃!)
-  (neg_equiv : ∀ {φ}, motive (Axioms.NegEquiv φ) neg_equiv!) :
+  (or₃    : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) or₃!) :
   {a : Formula α} → (t : H ⊢! a) → motive a t := by
   intro φ d;
   induction d.some with
@@ -190,6 +193,7 @@ lemma Int_weaker_than_LC : (Hilbert.Int α) ≤ₛ (Hilbert.LC α) := weaker_tha
 lemma KC_weaker_than_Cl : (Hilbert.KC α) ≤ₛ (Hilbert.Cl α) := weaker_than_of_subset_axiomset' $ by
   rintro φ (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
 
+/-
 lemma LC_weaker_than_Cl [DecidableEq α] : (Hilbert.LC α) ≤ₛ (Hilbert.Cl α) := by
   apply weaker_than_of_subset_axiomset';
   rintro φ (⟨_, rfl⟩ | ⟨_, _, rfl⟩) <;> simp [efq!, dummett!];
@@ -197,6 +201,7 @@ lemma LC_weaker_than_Cl [DecidableEq α] : (Hilbert.LC α) ≤ₛ (Hilbert.Cl α
 lemma KC_weaker_than_LC [DecidableEq α] : (Hilbert.KC α) ≤ₛ (Hilbert.LC α) := by
   apply weaker_than_of_subset_axiomset';
   rintro φ (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp [efq!, wlem!];
+-/
 
 end
 

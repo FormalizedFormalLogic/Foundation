@@ -1,4 +1,5 @@
 import Foundation.IntProp.Hilbert.Basic
+import Foundation.Logic.HilbertStyle.Supplemental
 
 set_option autoImplicit false
 universe u v
@@ -398,7 +399,7 @@ lemma iff_mem₁_and : φ ⋏ ψ ∈ t.tableau.1 ↔ φ ∈ t.tableau.1 ∧ ψ �
 
 lemma iff_mem₁_conj {Γ : List (Formula α)} : ⋀Γ ∈ t.tableau.1 ↔ ∀ φ ∈ Γ, φ ∈ t.tableau.1 := by
   induction Γ using List.induction_with_singleton with
-  | hnil => simp;
+  | hnil => simp [-top_def];
   | hsingle φ => simp;
   | hcons φ Γ Γ_nil ih =>
     simp only [(List.conj₂_cons_nonempty Γ_nil), List.mem_cons];
@@ -429,7 +430,7 @@ lemma not_mem₁_neg_of_mem₁ [DecidableEq α] : φ ∈ t.tableau.1 → ∼φ �
   intro hp;
   by_contra hnp;
   have := iff_mem₁_and.mpr ⟨hp, hnp⟩;
-  have : ⊥ ∈ t.tableau.1 := mdp₁ (ψ := ⊥) this (by simp);
+  have : ⊥ ∈ t.tableau.1 := mdp₁ this intro_bot_of_and!;
   have : ⊥ ∉ t.tableau.1 := not_mem₁_falsum
   contradiction;
 

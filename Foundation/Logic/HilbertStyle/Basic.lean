@@ -185,7 +185,6 @@ class HasAxiomElimContra (𝓢 : S)  where
 def elim_contra [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((∼ψ) ➝ (∼φ)) ➝ (φ ➝ ψ) := HasAxiomElimContra.elim_contra _ _
 @[simp] lemma elim_contra! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! (∼ψ ➝ ∼φ) ➝ (φ ➝ ψ)  := ⟨elim_contra⟩
 
-
 protected class Minimal (𝓢 : S) extends
               ModusPonens 𝓢,
               NegationEquiv 𝓢,

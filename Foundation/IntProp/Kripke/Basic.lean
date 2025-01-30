@@ -83,11 +83,9 @@ namespace Formula.Kripke
 
 def Satisfies (M : Kripke.Model) (w : M.World) : Formula ℕ → Prop
   | atom a => M w a
-  | ⊤      => True
   | ⊥      => False
   | φ ⋏ ψ  => Satisfies M w φ ∧ Satisfies M w ψ
   | φ ⋎ ψ  => Satisfies M w φ ∨ Satisfies M w ψ
-  | ∼φ     => ∀ {w' : M.World}, (w ≺ w') → ¬Satisfies M w' φ
   | φ ➝ ψ => ∀ {w' : M.World}, (w ≺ w') → (Satisfies M w' φ → Satisfies M w' ψ)
 
 namespace Satisfies
@@ -99,11 +97,17 @@ variable {M : Kripke.Model} {w w' : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 @[simp] protected lemma iff_models : w ⊧ φ ↔ Formula.Kripke.Satisfies M w φ := iff_of_eq rfl
 
 @[simp] lemma atom_def : w ⊧ atom a ↔ M w a := by simp [Satisfies];
+
 @[simp] lemma top_def  : w ⊧ ⊤ ↔ True := by simp [Satisfies];
+
 @[simp] lemma bot_def  : w ⊧ ⊥ ↔ False := by simp [Satisfies];
+
 @[simp] lemma and_def  : w ⊧ φ ⋏ ψ ↔ w ⊧ φ ∧ w ⊧ ψ := by simp [Satisfies];
+
 @[simp] lemma or_def   : w ⊧ φ ⋎ ψ ↔ w ⊧ φ ∨ w ⊧ ψ := by simp [Satisfies];
+
 @[simp] lemma imp_def  : w ⊧ φ ➝ ψ ↔ ∀ {w' : M.World}, (w ≺ w') → (w' ⊧ φ → w' ⊧ ψ) := by simp [Satisfies, imp_iff_not_or];
+
 @[simp] lemma neg_def  : w ⊧ ∼φ ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ φ) := by simp [Satisfies];
 
 instance : Semantics.Top M.World where
@@ -125,9 +129,6 @@ lemma formula_hereditary
   | himp =>
     intro hpq v hv;
     exact hpq $ M.rel_trans hw hv;
-  | hneg =>
-    intro hp v hv;
-    exact hp $ M.rel_trans hw hv;
   | hor => simp_all [Satisfies]; tauto;
   | _ => simp_all [Satisfies];
 
@@ -151,7 +152,7 @@ variable {M : Model} {φ ψ χ : Formula ℕ}
 
 @[simp] protected lemma iff_models : M ⊧ φ ↔ Formula.Kripke.ValidOnModel M φ := iff_of_eq rfl
 
-protected lemma verum : M ⊧ ⊤ := by simp_all [ValidOnModel];
+@[simp] protected lemma verum : M ⊧ ⊤ := by simp [ValidOnModel, Satisfies];
 
 protected lemma andElim₁ : M ⊧ φ ⋏ ψ ➝ φ := by simp_all [ValidOnModel, Satisfies];
 
@@ -444,7 +445,6 @@ lemma sound_hilbert_of_frameclass (definedBy : C.DefinedBy T) : (⟨𝗘𝗙𝗤
   | or₁ => apply ValidOnFrame.orInst₁;
   | or₂ => apply ValidOnFrame.orInst₂;
   | or₃ => apply ValidOnFrame.orElim;
-  | neg_equiv => apply ValidOnFrame.neg_equiv;
   | mdp => exact ValidOnFrame.mdp (by assumption) (by assumption);
   | eaxm hi =>
     rcases hi with (⟨_, rfl⟩ | h);
