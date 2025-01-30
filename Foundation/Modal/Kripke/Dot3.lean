@@ -15,7 +15,7 @@ open Formula.Kripke
 
 variable {F : Kripke.Frame}
 
-private lemma connected_of_dot3 : F ⊧* .𝟯 → Connected F := by
+lemma connected_of_dot3 : F ⊧* .𝟯 → Connected F := by
   contrapose;
   intro hCon; simp [Connected] at hCon;
   obtain ⟨x, y, Rxy, z, Ryz, nRyz, nRzy⟩ := hCon;
@@ -35,7 +35,7 @@ private lemma connected_of_dot3 : F ⊧* .𝟯 → Connected F := by
     . assumption;
     . simp_all [Semantics.Realize, Satisfies];
 
-private lemma dot3_of_connected : Connected F → F ⊧* .𝟯 := by
+lemma dot3_of_connected : Connected F → F ⊧* .𝟯 := by
   intro hCon;
   simp [ValidOnFrame, ValidOnModel, Axioms.Dot3];
   rintro _ φ ψ rfl V x;
@@ -117,9 +117,9 @@ open Kripke.canonicalFrame
 instance S4Dot3.complete : Complete (Hilbert.S4Dot3 ℕ) (Kripke.ReflexiveTransitiveConnectedFrameClass)
   := Kripke.instCompleteOfCanonical (C := Kripke.ReflexiveTransitiveConnectedFrameClass) $ by
   refine ⟨?reflexive, ?transitive, ?connective⟩;
-  . apply is_reflexive_of_subset_T; simp;
-  . apply is_transitive_of_subset_Four; simp;
-  . apply is_connected_of_subset_Dot3; simp;
+  . apply is_reflexive_of_subset_T; tauto_set;
+  . apply is_transitive_of_subset_Four; tauto_set;
+  . apply is_connected_of_subset_Dot3; tauto_set;
 
 end Hilbert
 

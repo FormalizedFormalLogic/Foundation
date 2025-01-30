@@ -23,9 +23,9 @@ def canonicalFrameOf (H : Hilbert ℕ) [H.Consistent] [H.IncludeEFQ] : Kripke.Fr
   World := SCT H
   Rel t₁ t₂ := t₁.tableau.1 ⊆ t₂.tableau.1
   rel_po := {
-    refl := by simp;
-    trans := fun x y z Sxy Syz => Set.Subset.trans Sxy Syz
-    antisymm := fun x y Sxy Syx => equality_of₁ (Set.Subset.antisymm Sxy Syx)
+    refl := by tauto_set;
+    trans := by tauto_set;
+    antisymm := fun x y Sxy Syx => equality_of₁ $ by tauto_set;
   }
 
 namespace canonicalFrame

@@ -74,7 +74,7 @@ def id : F →ₚ F where
 def TransitiveClosure (f : F₁ →ₚ F₂) (F₂_trans : Transitive F₂) : F₁^+ →ₚ F₂ where
   toFun := f.toFun
   forth := by
-    intro x y hxy; simp at x y;
+    intro x y hxy;
     induction hxy with
     | single hxy => exact f.forth hxy;
     | @tail z y _ Rzy Rxz =>
@@ -95,12 +95,12 @@ def comp (f : F₁ →ₚ F₂) (g : F₂ →ₚ F₃) : F₁ →ₚ F₃ where
     exact g.forth $ f.forth hxy;
   back := by
     intro x w hxw;
-    simp at hxw;
     obtain ⟨y, ⟨hyz, hxy⟩⟩ := g.back hxw;
     obtain ⟨u, ⟨hgu, hfu⟩⟩ := f.back hxy;
     use u;
     constructor;
-    . subst_vars; simp;
+    . subst_vars;
+      simp;
     . assumption;
 
 end Frame.PseudoEpimorphism

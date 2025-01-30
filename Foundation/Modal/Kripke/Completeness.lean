@@ -28,7 +28,7 @@ variable {Ω₁ Ω₂ : (canonicalFrame H).World}
 lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {φ}, □^[n]φ ∈ Ω₁.theory → φ ∈ Ω₂.theory := by
   induction n generalizing Ω₁ Ω₂ with
   | zero =>
-    simp_all;
+    simp_all only [Rel.iterate.iff_zero, Function.iterate_zero, id_eq];
     constructor;
     . intro h; subst h; tauto;
     . intro h; apply intro_equality; simpa;
@@ -142,9 +142,9 @@ lemma iff_valid_on_canonicalModel_deducible : (canonicalModel H) ⊧ φ ↔ H �
       have : H ⊢! φ := dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj! hΓ hC;
       contradiction;
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
-    simp [Kripke.ValidOnModel];
+    apply not_validOnModel_of_exists_world;
     use Ω;
-    exact truthlemma.not.mpr $ iff_mem_neg.mp (show ∼φ ∈ Ω.theory by simp_all);
+    exact truthlemma.not.mpr $ iff_mem_neg.mp (by tauto_set);
   . intro h Ω;
     suffices φ ∈ Ω.theory by exact truthlemma.mpr this;
     by_contra hC;
@@ -166,15 +166,13 @@ lemma realize_theory_of_self_canonicalModel : (canonicalModel H) ⊧* (System.th
   simpa [System.theory] using hp;
 
 lemma complete_of_canonical {C : FrameClass} (hFC : canonicalFrame H ∈ C) : C ⊧ φ → H ⊢! φ := by
-  simp [Semantics.Realize, Kripke.ValidOnFrame];
   contrapose;
-  push_neg;
   intro h;
-  use (canonicalFrame H);
+  apply not_validOnFrameClass_of_exists_model;
+  use (canonicalModel H);
   constructor;
   . assumption;
-  . use (canonicalModel H).Val;
-    exact iff_valid_on_canonicalModel_deducible.not.mpr h;
+  . exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 
 lemma instCompleteOfCanonical {C : FrameClass} (hC : (Kripke.canonicalFrame H) ∈ C) : Complete H C := ⟨complete_of_canonical hC⟩
 
