@@ -170,7 +170,10 @@ instance consistent : System.Consistent (Hilbert.KT4B ℕ) := instConsistent_of_
 instance Kripke.complete : Complete (Hilbert.KT4B ℕ) ReflexiveTransitiveSymmetricFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [ReflexiveTransitiveSymmetricFrameClass.is_geach];
   apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
-  simp;
+  simp only [Axioms.MultiGeach.iff_cons, Axioms.MultiGeach.def_nil, Set.union_empty,
+    Axioms.T.is_geach, Axioms.Four.is_geach, Axioms.B.is_geach, Set.union_subset_iff,
+    Set.subset_union_right, and_true];
+  tauto_set;
 
 end KT4B
 
@@ -189,7 +192,10 @@ instance consistent : System.Consistent (Hilbert.KD45 ℕ) := instConsistent_of_
 instance Kripke.complete : Complete (Hilbert.KD45 ℕ) SerialTransitiveEuclideanFrameClass := Kripke.instCompleteOfCanonical $ by
   rw [SerialTransitiveEuclideanFrameClass.is_geach];
   apply Kripke.canonicalFrame.is_multiGeachConfluent_of_subset_MultiGeach;
-  simp;
+  simp only [Axioms.MultiGeach.iff_cons, Axioms.MultiGeach.def_nil, Set.union_empty,
+    Axioms.D.is_geach, Axioms.Four.is_geach, Axioms.Five.is_geach, Set.union_subset_iff,
+    Set.subset_union_right, and_true];
+  tauto_set;
 
 end KD45
 

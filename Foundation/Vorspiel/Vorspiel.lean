@@ -12,6 +12,7 @@ import Mathlib.Computability.Partrec
 import Mathlib.Data.Finset.Sort
 import Mathlib.Data.List.GetD
 import Mathlib.Data.Set.Finite.Range
+import Mathlib.Tactic.TautoSet
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -707,33 +708,6 @@ end Set
 class Exp (α : Type*) where
   exp : α → α
 export Exp (exp)
-
-namespace Set
-
-variable (s₁ s₂ s₃ s₄ : Set F)
-
-@[simp] lemma subset_triunion₁ : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans Set.subset_union_left Set.subset_union_left
-
-@[simp] lemma subset_triunion₂ : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃) := Set.Subset.trans Set.subset_union_right Set.subset_union_left
-
-@[simp] lemma subset_triunion₃ : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃) := by simp [Set.subset_union_right]
-
-
-@[simp] lemma subset_tetraunion₁ : s₁ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
-  Set.Subset.trans
-    Set.subset_union_left
-    $ Set.Subset.trans Set.subset_union_left Set.subset_union_left
-
-@[simp]
-lemma subset_tetraunion₂ : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
-  Set.Subset.trans
-    Set.subset_union_right
-    $ Set.Subset.trans Set.subset_union_left Set.subset_union_left
-
-@[simp] lemma subset_tetraunion₃ : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [subset_triunion₂]
-@[simp] lemma subset_tetraunion₄ : s₄ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [Set.subset_union_right]
-
-end Set
 
 /-- Class for `α` has at least `n` elements -/
 class Atleast (n : ℕ+) (α) where

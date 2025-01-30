@@ -51,7 +51,6 @@ def p_morphism₁ : F₁.toFrame →ₚ (MDPCounterexampleFrame F₁ F₂).toFra
   toFun x := .inr (.inl x)
   forth := by intro x y hxy; exact hxy;
   back {x y} h := by
-    simp [MDPCounterexampleFrame] at y;
     match y with
     | .inr (.inl y) => use y;
 
@@ -60,7 +59,6 @@ def p_morphism₂ : F₂.toFrame →ₚ (MDPCounterexampleFrame F₁ F₂).toFra
   forth := by
     intro x y hxy; exact hxy;
   back {x y} h := by
-    simp [MDPCounterexampleFrame] at y;
     match y with
     | .inr (.inr y) => use y;
 
@@ -68,7 +66,6 @@ lemma through_original_root {x : (MDPCounterexampleFrame F₁ F₂).World} (h : 
   : (x = F₁.root ∨ (Sum.inr (Sum.inl F₁.root) ≺ x)) ∨ (x = F₂.root ∨ (Sum.inr (Sum.inr F₂.root) ≺ x)) := by
   match x with
   | .inl x =>
-    simp [FiniteTransitiveTree.SimpleExtension.root_eq] at h;
     have := (MDPCounterexampleFrame F₁ F₂).rel_irreflexive _ h;
     contradiction;
   | .inr (.inl x) =>

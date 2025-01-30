@@ -364,9 +364,9 @@ lemma iff_mem_neg : (∼φ ∈ Ω.theory) ↔ (φ ∉ Ω.theory) := by
   . intro hp;
     have := provable_iff_insert_neg_not_consistent.not.mp $ membership_iff.not.mp hp;
     have := (not_imp_not.mpr $ Ω.maximal (U := insert (∼φ) Ω.theory)) this;
-    simp [Set.ssubset_def] at this;
+    have : insert (∼φ) Ω.theory ⊆ Ω.theory := by simpa [Set.ssubset_def] using this;
     apply this;
-    simp;
+    tauto_set;
 
 lemma iff_mem_negneg : (∼∼φ ∈ Ω.theory) ↔ (φ ∈ Ω.theory) := by
   simp only [membership_iff];
@@ -409,7 +409,8 @@ lemma iff_mem_or : ((φ ⋎ ψ) ∈ Ω.theory) ↔ (φ ∈ Ω.theory) ∨ (ψ �
   constructor;
   . intro hpq;
     replace hpq := membership_iff.mp hpq;
-    by_contra hC; simp [not_or] at hC;
+    by_contra hC;
+    push_neg at hC;
     have ⟨hp, hq⟩ := hC;
     replace hp := membership_iff.mp $ iff_mem_neg.mpr hp;
     replace hq := membership_iff.mp $ iff_mem_neg.mpr hq;
@@ -479,19 +480,18 @@ lemma iff_mem_multibox : (□^[n]φ ∈ Ω.theory) ↔ (∀ {Ω' : MCT H}, (□'
         push_neg at this;
         have : H ⊬ ⋀□'^[n]Γ ➝ □^[n]φ := FiniteContext.provable_iff.not.mp $ this (□'^[n]Γ) (by
           intro ψ hq;
-          obtain ⟨χ, hr₁, hr₂⟩ := by simpa using hq;
-          subst hr₂;
+          obtain ⟨χ, hr₁, rfl⟩ := by simpa using hq;
           simpa using hΓ₁ χ hr₁;
         );
         revert this;
         contrapose;
-        simp [neg_neg];
+        simp only [not_not];
         exact imp_trans''! collect_multibox_conj!;
       contradiction;
     );
     existsi Ω';
     constructor;
-    . exact Set.Subset.trans (by simp_all) hΩ';
+    . exact Set.Subset.trans (by tauto_set) hΩ';
     . apply iff_mem_neg.mp;
       apply hΩ';
       simp only [Set.mem_insert_iff, true_or]
@@ -505,19 +505,19 @@ lemma multibox_dn_iff : (□^[n](∼∼φ) ∈ Ω.theory) ↔ (□^[n]φ ∈ Ω.
 lemma box_dn_iff : (□(∼∼φ) ∈ Ω.theory) ↔ (□φ ∈ Ω.theory) := multibox_dn_iff (n := 1)
 
 lemma mem_multibox_dual : □^[n]φ ∈ Ω.theory ↔ ∼(◇^[n](∼φ)) ∈ Ω.theory := by
-  simp [membership_iff];
+  simp only [membership_iff];
   constructor;
   . intro h;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
     apply Context.provable_iff.mpr;
-    existsi Γ;
+    use Γ;
     constructor;
     . assumption;
     . exact FiniteContext.provable_iff.mpr $ imp_trans''! (FiniteContext.provable_iff.mp hΓ₂) (and₁'! multibox_duality!);
   . intro h;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
     apply Context.provable_iff.mpr;
-    existsi Γ;
+    use Γ;
     constructor;
     . assumption;
     . exact FiniteContext.provable_iff.mpr $ imp_trans''! (FiniteContext.provable_iff.mp hΓ₂) (and₂'! multibox_duality!);
@@ -528,7 +528,7 @@ lemma mem_box_dual : □φ ∈ Ω.theory ↔ (∼(◇(∼φ)) ∈ Ω.theory) := 
 -- lemma dia_dn_iff : (◇(∼∼φ) ∈ Ω.theory) ↔ (◇φ) ∈ Ω.theory := neg_iff box_dn_iff -- TODO: multidia_dn_iff (n := 1)
 
 lemma mem_multidia_dual : ◇^[n]φ ∈ Ω.theory ↔ ∼(□^[n](∼φ)) ∈ Ω.theory := by
-  simp [membership_iff];
+  simp only [membership_iff];
   constructor;
   . intro h;
     obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;

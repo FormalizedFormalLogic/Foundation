@@ -60,35 +60,29 @@ variable {φ ψ : Formula α}
 lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! φ) (hcp : 𝓢 ⊢! -φ) : 𝓢 ⊢! ⊥ := by
   induction φ using Formula.cases_neg with
   | hfalsum => assumption;
-  | hatom a =>
-    simp [Formula.complement] at hcp;
-    exact hcp ⨀ hp;
-  | hneg =>
-    simp [Formula.complement] at hcp;
-    exact hp ⨀ hcp;
+  | hatom a => unfold Formula.complement at hcp; exact hcp ⨀ hp;
+  | hneg => unfold Formula.complement at hcp; exact hp ⨀ hcp;
+  | hbox φ => unfold Formula.complement at hcp; exact hcp ⨀ hp;
   | himp φ ψ h =>
-    simp [Formula.complement.imp_def₁ h] at hcp;
-    exact hcp ⨀ hp;
-  | hbox φ =>
-    simp [Formula.complement] at hcp;
+    simp only [Formula.complement.imp_def₁ h] at hcp;
     exact hcp ⨀ hp;
 
 lemma neg_complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! ∼φ) (hcp : 𝓢 ⊢! ∼(-φ)) : 𝓢 ⊢! ⊥ := by
   induction φ using Formula.cases_neg with
   | hfalsum =>
-    simp [Formula.complement] at hcp;
+    unfold Formula.complement at hcp;
     exact hcp ⨀ hp;
   | hatom a =>
-    simp [Formula.complement] at hcp;
+    unfold Formula.complement at hcp;
     exact hcp ⨀ hp;
   | hneg =>
-    simp [Formula.complement] at hcp;
+    unfold Formula.complement at hcp;
     exact hp ⨀ hcp;
   | himp φ ψ h =>
-    simp [Formula.complement.imp_def₁ h] at hcp;
+    simp only [Formula.complement.imp_def₁ h] at hcp;
     exact hcp ⨀ hp;
   | hbox φ =>
-    simp [Formula.complement] at hcp;
+    unfold Formula.complement at hcp;
     exact hcp ⨀ hp;
 
 end
@@ -104,14 +98,12 @@ postfix:80 "⁻" => Formulae.complementary
 variable {P P₁ P₂ : Formulae α} {φ ψ χ: Formula α}
 
 lemma complementary_mem (h : φ ∈ P) : φ ∈ P⁻ := by simp [complementary]; tauto;
-macro_rules | `(tactic| trivial) => `(tactic| apply complementary_mem $ by assumption)
 
 lemma complementary_comp (h : φ ∈ P) : -φ ∈ P⁻ := by simp [complementary]; tauto;
-macro_rules | `(tactic| trivial) => `(tactic| apply complementary_comp $ by assumption)
 
 lemma complementary_mem_box (hi : ∀ {ψ χ}, ψ ➝ χ ∈ P → ψ ∈ P := by trivial) : □φ ∈ P⁻ → □φ ∈ P := by
-  simp [complementary];
   intro h;
+  simp [complementary] at h;
   rcases h with (h | ⟨ψ, hq, eq⟩);
   . assumption;
   . replace eq := Formula.complement.resort_box eq;
@@ -283,7 +275,7 @@ lemma exists_consistent_complementary_closed
   refine ⟨?_, ?_, ?_, ?_⟩;
   . apply enum_subset;
   . exact enum_consistent H P_consis;
-  . simp [Formulae.complementary];
+  . simp only [Formulae.complementary];
     intro φ hp;
     simp only [Finset.mem_union, Finset.mem_image];
     rcases subset H hp with (h | h | ⟨ψ, hq₁, hq₂⟩);
@@ -291,7 +283,8 @@ lemma exists_consistent_complementary_closed
       simp [complementary] at h;
       rcases h with (_ | ⟨a, b, rfl⟩);
       . tauto;
-      . right; use a;
+      . right;
+        use a;
     . left; exact Finset.mem_toList.mp h;
     . right;
       use ψ;

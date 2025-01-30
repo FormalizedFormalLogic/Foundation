@@ -173,7 +173,7 @@ instance complete : Complete (Hilbert.GL ℕ) TransitiveIrreflexiveFiniteFrameCl
   use (miniCanonicalFrame φ);
   constructor;
   . exact ⟨miniCanonicalFrame.is_transitive, miniCanonicalFrame.is_irreflexive⟩;
-  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
+  . apply not_validOnFrame_of_exists_model_world;
     obtain ⟨X, hX₁⟩ := lindenbaum (S := φ.subformulae) (X := {-φ})
       (by
         simp only [Formulae.complementary, Finset.singleton_subset_iff, Finset.mem_union, Finset.mem_image];
@@ -182,12 +182,14 @@ instance complete : Complete (Hilbert.GL ℕ) TransitiveIrreflexiveFiniteFrameCl
         constructor <;> simp;
       )
       (Formulae.unprovable_iff_singleton_compl_consistent.mp h);
-    use (miniCanonicalModel φ).Val, X;
-    apply truthlemma (by simp) |>.not.mpr;
-    exact iff_mem_compl (by simp) |>.not.mpr $ by
-      push_neg;
-      apply hX₁;
-      tauto;
+    use (miniCanonicalModel φ), X;
+    constructor;
+    . tauto;
+    . apply truthlemma (by simp) |>.not.mpr;
+      exact iff_mem_compl (by simp) |>.not.mpr $ by
+        push_neg;
+        apply hX₁;
+        tauto;
 ⟩
 
 instance ffp : Kripke.FiniteFrameProperty (Hilbert.GL ℕ) TransitiveIrreflexiveFiniteFrameClass where

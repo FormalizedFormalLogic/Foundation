@@ -44,7 +44,8 @@ lemma FilterEqvQuotient.finite (T_finite : T.Finite) : Finite (FilterEqvQuotient
   have : Finite (𝒫 T) := Set.Finite.powerset T_finite
   let f : FilterEqvQuotient M T → 𝒫 T :=
     λ (Qx : FilterEqvQuotient M T) => Quotient.lift (λ x => ⟨{ φ ∈ T | x ⊧ φ }, (by simp_all)⟩) (by
-      intro x y hxy; simp;
+      intro x y hxy;
+      suffices {φ | φ ∈ T ∧ Satisfies M x φ} = {φ | φ ∈ T ∧ Satisfies M y φ} by simpa;
       apply Set.eq_of_subset_of_subset;
       . rintro φ ⟨hp, hx⟩; exact ⟨hp, (hxy φ hp).mp hx⟩;
       . rintro φ ⟨hp, hy⟩; exact ⟨hp, (hxy φ hp).mpr hy⟩;
@@ -58,10 +59,11 @@ lemma FilterEqvQuotient.finite (T_finite : T.Finite) : Finite (FilterEqvQuotient
     intro φ hp;
     constructor;
     . intro hpx;
-      have := h.subset; simp at this;
+      have : ∀ a ∈ T, x ⊧ a → a ∈ T ∧ y ⊧ a := by simpa using h.subset;
       exact this φ hp hpx |>.2;
     . intro hpy;
-      have := h.symm.subset; simp at this;
+      have := h.symm.subset;
+      simp only [Set.setOf_subset_setOf, and_imp, f] at this;
       exact this φ hp hpy |>.2;
   exact Finite.of_injective f hf
 
@@ -72,14 +74,15 @@ class FilterOf (FM : Model) (M : Model) (T : Theory ℕ) [T.SubformulaClosed] : 
   def_rel₁ : ∀ {x y : M.toFrame}, x ≺ y → Frame.Rel' (cast def_world.symm ⟦x⟧) (cast def_world.symm ⟦y⟧) := by tauto;
   def_box : ∀ {Qx Qy : FM.World}, Qx ≺ Qy → Quotient.lift₂ (λ x y => ∀ φ, □φ ∈ T → (x ⊧ □φ → y ⊧ φ)) (by
     intro x₁ y₁ x₂ y₂ hx hy;
-    simp;
+    apply eq_iff_iff.mpr;
     constructor;
     . intro h φ hp sp₂; exact hy φ |>.mp $ h φ hp $ hx (□φ) hp |>.mpr sp₂;
     . intro h φ hp sp₁; exact hy φ |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
   ) (cast def_world Qx) (cast def_world Qy)
   def_valuation Qx a : (ha : (atom a) ∈ T := by trivial) →
     FM Qx a ↔ Quotient.lift (λ x => M x a) (by
-      simp; intro x y h;
+      intro x y h;
+      apply eq_iff_iff.mpr;
       constructor;
       . intro hx; exact h a ha |>.mp hx;
       . intro hy; exact h a ha |>.mpr hy;
@@ -108,7 +111,8 @@ end
 
 
 abbrev standardFilterationValuation (Qx : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M x a) (by
-  simp; intro x y h;
+  intro x y h;
+  apply eq_iff_iff.mpr;
   constructor;
   . intro hx; exact h a ha |>.mp hx;
   . intro hy; exact h a ha |>.mpr hy;
@@ -120,7 +124,7 @@ abbrev coarsestFilterationFrame (M : Model) (T : Theory ℕ) [T.SubformulaClosed
   Rel Qx Qy :=
     Quotient.lift₂ (λ x y => ∀ φ, □φ ∈ T → (x ⊧ □φ → y ⊧ φ)) (by
       intro x₁ y₁ x₂ y₂ hx hy;
-      simp;
+      apply eq_iff_iff.mpr;
       constructor;
       . intro h φ hp sp₂; exact hy φ |>.mp $ h φ hp $ hx (□φ) hp |>.mpr sp₂;
       . intro h φ hp sp₁; exact hy φ |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
@@ -155,8 +159,8 @@ instance filterOf [T.SubformulaClosed] : FilterOf (finestFilterationModel M T) M
 lemma symmetric_of_symmetric (hSymm : Symmetric M.toFrame) : Symmetric (finestFilterationModel M T).Rel := by
   intro Qx Qy RQxQy;
   obtain ⟨x, y, hx, hy, h⟩ := RQxQy; subst_vars;
-  use y, x; simp;
-  exact hSymm h;
+  use y, x;
+  refine ⟨by trivial, by trivial, hSymm h⟩;
 
 end finestFilterationModel
 
@@ -255,7 +259,7 @@ instance K.Kripke.finite_complete : Complete (Hilbert.K ℕ) (AllFiniteFrameClas
   apply filteration FM (coarsestFilterationModel.filterOf) (by aesop) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M φ.subformulae) by
-      simp [AllFiniteFrameClass, FiniteFrameClass.toFrameClass];
+      simp only [FiniteFrameClass.toFrameClass, AllFiniteFrameClass, Set.image_univ, Set.mem_range];
       use ⟨FM.toFrame⟩;
     apply FilterEqvQuotient.finite;
     simp;
@@ -276,7 +280,7 @@ instance KTB.Kripke.finite_complete : Complete (Hilbert.KTB ℕ) (ReflexiveSymme
   apply filteration FM (finestFilterationModel.filterOf) (by aesop) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M φ.subformulae) by
-      simp [ReflexiveSymmetricFiniteFrameClass, FiniteFrameClass.toFrameClass];
+      simp only [FiniteFrameClass.toFrameClass, ReflexiveSymmetricFiniteFrameClass, Set.mem_image, Set.mem_setOf_eq];
       use ⟨FM.toFrame⟩;
       refine ⟨⟨?_, ?_⟩, ?_⟩;
       . apply reflexive_filterOf_of_reflexive (finestFilterationModel.filterOf);
@@ -304,7 +308,7 @@ instance S4.Kripke.finite_complete : Complete (Hilbert.S4 ℕ) (ReflexiveTransit
   apply @filteration M φ.subformulae _ FM ?filterOf x φ (by simp) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M φ.subformulae) by
-      simp [ReflexiveSymmetricFiniteFrameClass, FiniteFrameClass.toFrameClass];
+      simp only [FiniteFrameClass.toFrameClass];
       use ⟨FM.toFrame⟩;
       refine ⟨⟨?_, transitive⟩, rfl⟩;
       . exact reflexive_of_transitive_reflexive (by apply F_trans) F_refl;
@@ -330,7 +334,7 @@ instance KT4B.Kripke.finite_complete : Complete (Hilbert.KT4B ℕ) (ReflexiveTra
   apply @filteration M φ.subformulae _ FM ?filterOf x φ (by simp) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M φ.subformulae) by
-      simp [ReflexiveSymmetricFiniteFrameClass, FiniteFrameClass.toFrameClass];
+      simp only [FiniteFrameClass.toFrameClass, Set.mem_image, Set.mem_setOf_eq];
       use ⟨FM.toFrame⟩;
       refine ⟨⟨?refl, transitive, ?symm⟩, rfl⟩;
       . exact reflexive_of_transitive_reflexive (by apply F_trans) F_refl;

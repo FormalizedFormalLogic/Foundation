@@ -13,7 +13,7 @@ open Formula.Kripke
 abbrev TransitiveConverseWellFoundedFrameClass : FrameClass := { F | Transitive F.Rel ∧ ConverseWellFounded F.Rel }
 abbrev TransitiveIrreflexiveFiniteFrameClass : FiniteFrameClass := { F | Transitive F.Rel ∧ Irreflexive F.Rel }
 
-private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F ⊧* 𝗟 := by
+lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ ConverseWellFounded F.Rel) → F ⊧* 𝗟 := by
   rintro ⟨hTrans, hWF⟩;
   apply Semantics.RealizeSet.setOf_iff.mpr;
   rintro _ ⟨φ, rfl⟩ V w;
@@ -34,7 +34,7 @@ private lemma L_of_trans_and_cwf {F : Kripke.Frame} : (Transitive F.Rel ∧ Conv
       exact rmn;
     . exact hm;
 
-private lemma trans_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → Transitive F.Rel := by
+lemma trans_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → Transitive F.Rel := by
   contrapose;
   intro hT;
   obtain ⟨w, v, Rwv, u, Rvu, nRwu⟩ := by simpa [Transitive] using hT;
@@ -42,9 +42,10 @@ private lemma trans_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → Transitive F.Rel :
   use Axioms.L (atom 0);
   constructor;
   . tauto;
-  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
+  . apply not_validOnFrame_of_exists_valuation_world;
     use (λ w _ => w ≠ v ∧ w ≠ u), w;
-    apply Satisfies.imp_def.not.mpr; push_neg;
+    apply Satisfies.imp_def.not.mpr;
+    push_neg;
     constructor;
     . intro x Rwx hx;
       by_cases exv : x = v;
@@ -63,7 +64,7 @@ private lemma trans_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → Transitive F.Rel :
       . assumption;
       . simp [Semantics.Realize, Kripke.Satisfies];
 
-private lemma cwf_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → ConverseWellFounded F.Rel := by
+lemma cwf_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → ConverseWellFounded F.Rel := by
   contrapose;
   intro hCF;
   obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
@@ -71,9 +72,10 @@ private lemma cwf_of_L {F : Kripke.Frame} : F ⊧* 𝗟 → ConverseWellFounded 
   use Axioms.L (atom 0);
   constructor;
   . tauto;
-  . apply ValidOnFrame.not_valid_iff_exists_valuation_world.mpr;
+  . apply not_validOnFrame_of_exists_valuation_world;
     use (λ w _ => w ∉ X), x;
-    apply Satisfies.imp_def.not.mpr; push_neg;
+    apply Satisfies.imp_def.not.mpr;
+    push_neg;
     constructor;
     . intro y _;
       by_cases hys : y ∈ X

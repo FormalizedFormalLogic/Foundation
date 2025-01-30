@@ -210,6 +210,14 @@ protected lemma axiomK : M ⊧ (Axioms.K φ ψ)  := by
 end ValidOnModel
 
 
+lemma iff_not_validOnModel_of_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_world_of_not_validOnModel_of, not_validOnModel_of_exists_world⟩ := iff_not_validOnModel_of_exists_world
+
+
 def ValidOnFrame (F : Kripke.Frame) (φ : Formula ℕ) := ∀ V, (⟨F, V⟩ : Kripke.Model) ⊧ φ
 
 namespace ValidOnFrame
@@ -221,10 +229,6 @@ variable {F : Kripke.Frame}
 @[simp] protected lemma models_iff : F ⊧ φ ↔ Kripke.ValidOnFrame F φ := iff_of_eq rfl
 
 lemma models_set_iff : F ⊧* Φ ↔ ∀ φ ∈ Φ, F ⊧ φ := by simp [Semantics.realizeSet_iff];
-
-lemma not_valid_iff_exists_valuation_world : ¬F ⊧ φ ↔ ∃ V : Kripke.Valuation F, ∃ x : F.World, ¬Satisfies ⟨F, V⟩ x φ := by
-  simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Realize];
-
 
 instance : Semantics.Bot (Kripke.Frame) where
   realize_bot _ := by simp [Kripke.ValidOnFrame];
@@ -252,10 +256,24 @@ protected lemma axiomK_set : F ⊧* 𝗞 := by
   rintro f x y rfl;
   exact ValidOnFrame.axiomK;
 
-
 end ValidOnFrame
 
 
+lemma iff_not_validOnFrame_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ∃ x : (⟨F, V⟩ : Kripke.Model).World, ¬Satisfies _ x φ) := by
+  simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Realize];
+
+alias ⟨exists_valuation_world_of_not_validOnFrame_of, not_validOnFrame_of_exists_valuation_world⟩ := iff_not_validOnFrame_exists_valuation_world
+
+lemma iff_not_validOnFrame_exists_model_world :  (¬F ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame = F ∧ ¬(x ⊧ φ)) := by
+  constructor;
+  . intro h;
+    obtain ⟨V, x, h⟩ := iff_not_validOnFrame_exists_valuation_world.mp h;
+    use ⟨F, V⟩, x;
+    tauto;
+  . rintro ⟨M, x, rfl, h⟩;
+    exact iff_not_validOnFrame_exists_valuation_world.mpr ⟨M.Val, x, h⟩;
+
+alias ⟨exists_model_world_of_not_validOnFrame_of, not_validOnFrame_of_exists_model_world⟩ := iff_not_validOnFrame_exists_model_world
 
 @[simp] def ValidOnFrameClass (C : Kripke.FrameClass) (φ : Formula ℕ) := ∀ {F}, F ∈ C → F ⊧ φ
 
@@ -268,6 +286,21 @@ variable {C : Kripke.FrameClass}
 @[simp] protected lemma models_iff : C ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass C φ := iff_of_eq rfl
 
 end ValidOnFrameClass
+
+lemma iff_not_validOnFrameClass_exists_frame {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_frame_of_not_validOnFrameClass_of, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
+
+
+lemma iff_not_validOnFrameClass_of_exists_model {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_model_of_not_validOnFrameClass_of, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_of_exists_model
 
 
 @[simp] def ValidOnFiniteFrameClass (FC : Kripke.FiniteFrameClass) (φ : Formula ℕ) := ∀ {F}, F ∈ FC → F.toFrame ⊧ φ
