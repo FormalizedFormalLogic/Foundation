@@ -212,30 +212,34 @@ end Encodable
 
 section subst
 
-def subst  (s : α → Formula α): Formula α → Formula α
+abbrev _root_.LO.IntProp.Substitution (α : Type u) := α → Formula α
+
+def subst (s : Substitution α): Formula α → Formula α
   | atom a => s a
   | ⊥      => ⊥
   | φ ➝ ψ  => φ.subst s ➝ ψ.subst s
   | φ ⋏ ψ  => φ.subst s ⋏ ψ.subst s
   | φ ⋎ ψ  => φ.subst s ⋎ ψ.subst s
 
+notation φ "⟦" s "⟧" => subst s φ
+
 section
 
-variable {s : α → Formula α} {φ ψ : Formula α}
+variable {s : Substitution α} {φ ψ : Formula α}
 
-@[simp] lemma subst_atom {a : α} : (atom a).subst s = s a := rfl
+@[simp] lemma subst_atom {a : α} : (atom a)⟦s⟧ = s a := rfl
 
-@[simp] lemma subst_and : (φ ⋏ ψ).subst s = φ.subst s ⋏ ψ.subst s := rfl
+@[simp] lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
 
-@[simp] lemma subst_or : (φ ⋎ ψ).subst s = φ.subst s ⋎ ψ.subst s := rfl
+@[simp] lemma subst_or : (φ ⋎ ψ)⟦s⟧ = φ⟦s⟧ ⋎ ψ⟦s⟧ := rfl
 
-@[simp] lemma subst_imp : (φ ➝ ψ).subst s = φ.subst s ➝ ψ.subst s := rfl
+@[simp] lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
 
-@[simp] lemma subst_neg : (∼φ).subst s = ∼(φ.subst s) := rfl
+@[simp] lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
 
-@[simp] lemma subst_top : (⊤ : Formula α).subst s = ⊤ := rfl
+@[simp] lemma subst_top : ⊤⟦s⟧ = ⊤ := rfl
 
-@[simp] lemma subst_bot : (⊥ : Formula α).subst s = ⊥ := rfl
+@[simp] lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
 
 end
 
