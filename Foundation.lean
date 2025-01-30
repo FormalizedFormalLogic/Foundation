@@ -113,6 +113,7 @@ import Foundation.Modal.Kripke.ComplexityLimited
 import Foundation.Modal.Kripke.Ver
 import Foundation.Modal.Kripke.Dot3
 import Foundation.Modal.Kripke.S5
+import Foundation.Modal.Kripke.Undefinability
 
 import Foundation.Modal.Kripke.GL.Tree
 import Foundation.Modal.Kripke.GL.Unnec

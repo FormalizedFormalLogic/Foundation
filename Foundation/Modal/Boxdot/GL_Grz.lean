@@ -3,43 +3,6 @@ import Foundation.Modal.Kripke.Closure
 import Foundation.Modal.Kripke.Grz.Completeness
 import Foundation.Modal.Kripke.GL.Completeness
 
-
-namespace LO.System
-
-open FiniteContext
-
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
-variable {𝓢 : S}
-variable [System.GL 𝓢]
-
-noncomputable def lem₁_boxdot_Grz_of_L : 𝓢 ⊢ (⊡(⊡(φ ➝ ⊡φ) ➝ φ)) ➝ (□(φ ➝ ⊡φ) ➝ φ) := by
-  have : 𝓢 ⊢ (□(φ ➝ ⊡φ) ⋏ ∼φ) ➝ ⊡(φ ➝ ⊡φ) := by
-    apply deduct';
-    apply and₃';
-    . exact (of efq_imply_not₁) ⨀ and₂;
-    . exact (of (impId _)) ⨀ and₁;
-  have : 𝓢 ⊢ ∼⊡(φ ➝ ⊡φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := impTrans'' (contra₀' this) $ impTrans'' demorgan₄ (orReplaceRight dne);
-  have : 𝓢 ⊢ (∼⊡(φ ➝ ⊡φ) ⋎ φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := or₃'' this or₂;
-  have : 𝓢 ⊢ ∼⊡(φ ➝ ⊡φ) ⋎ φ ➝ □(φ ➝ ⊡φ) ➝ φ := impTrans'' this implyOfNotOr;
-  have : 𝓢 ⊢ (⊡(φ ➝ ⊡φ) ➝ φ) ➝ (□(φ ➝ ⊡φ) ➝ φ) := impTrans'' NotOrOfImply this;
-  exact impTrans'' boxdotAxiomT this;
-
-noncomputable def boxdot_Grz_of_L : 𝓢 ⊢ ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ φ := by
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □⊡(φ ➝ ⊡φ) ➝ □φ := axiomK;
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) ➝ □φ := impTrans'' this $ implyLeftReplace $ imply_Box_BoxBoxdot;
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ) := by
-    apply deduct'; apply deduct; apply deduct;
-    exact and₃' FiniteContext.byAxm $ (of this) ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
-  have : 𝓢 ⊢ □□(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(□(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ)) := implyBoxDistribute' this;
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(□(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ)) := impTrans'' axiomFour this;
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) := impTrans'' this axiomL;
-  have : 𝓢 ⊢ ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) := impTrans'' boxdotBox this;
-  exact mdp₁ lem₁_boxdot_Grz_of_L this;
-@[simp] lemma boxdot_Grz_of_L! : 𝓢 ⊢! ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ φ := ⟨boxdot_Grz_of_L⟩
-
-end LO.System
-
-
 namespace LO.Modal
 
 namespace Kripke
@@ -56,8 +19,7 @@ lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ 
     . apply ReflGen.single Ryz;
     . apply ReflGen.single Rxy;
     . apply ReflGen.single $ F_trans Rxy Ryz;
-  . simp;
-    rintro x y (rfl | Rxy) (rfl | Ryx);
+  . rintro x y (rfl | Rxy) (rfl | Ryx);
     . rfl;
     . rfl;
     . rfl;
@@ -173,8 +135,9 @@ lemma Grz_of_boxdotTranslatedGL : (Hilbert.GL ℕ) ⊢! φᵇ → (Hilbert.Grz �
     simp [Transitive];
     rintro x y z ⟨hxy, Rxy⟩ ⟨hyz, Ryz⟩;
     constructor;
-    . by_contra hC; subst hC;
-      have :=FF_antisymm Rxy Ryz;
+    . by_contra hC;
+      subst hC;
+      have := FF_antisymm Rxy Ryz;
       contradiction;
     . exact FF_trans Rxy Ryz;
   . apply Kripke.iff_frame_boxdot_reflexive_closure.not.mpr;
