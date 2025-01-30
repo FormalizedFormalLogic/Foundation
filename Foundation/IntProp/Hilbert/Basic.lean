@@ -1,4 +1,4 @@
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Logic.HilbertStyle.Basic
 import Foundation.IntProp.Formula
 
 namespace LO.IntProp
@@ -190,13 +190,15 @@ lemma Int_weaker_than_LC : (Hilbert.Int α) ≤ₛ (Hilbert.LC α) := weaker_tha
 lemma KC_weaker_than_Cl : (Hilbert.KC α) ≤ₛ (Hilbert.Cl α) := weaker_than_of_subset_axiomset' $ by
   rintro φ (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
 
+/-
 lemma LC_weaker_than_Cl [DecidableEq α] : (Hilbert.LC α) ≤ₛ (Hilbert.Cl α) := by
   apply weaker_than_of_subset_axiomset';
   rintro φ (⟨_, rfl⟩ | ⟨_, _, rfl⟩) <;> simp;
 
 lemma KC_weaker_than_LC [DecidableEq α] : (Hilbert.KC α) ≤ₛ (Hilbert.LC α) := by
   apply weaker_than_of_subset_axiomset';
-  rintro φ (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
+  rintro φ (⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp [efq!, wlem!];
+-/
 
 end
 
