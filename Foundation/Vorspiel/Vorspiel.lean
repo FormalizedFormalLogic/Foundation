@@ -730,11 +730,25 @@ lemma subset_tetraunion₂ : s₂ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) :=
     Set.subset_union_right
     $ Set.Subset.trans Set.subset_union_left Set.subset_union_left
 
-@[simp] lemma subset_tetraunion₃ : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [subset_triunion₂]
+@[simp] lemma subset_tetraunion₃ : s₃ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by tautoset;
 @[simp] lemma subset_tetraunion₄ : s₄ ⊆ (s₁ ∪ s₂ ∪ s₃ ∪ s₄) := by simp only [Set.subset_union_right]
 
 end Set
 
-/-- Class for `α` has at least `n` elements -/
-class Atleast (n : ℕ+) (α) where
-  mapping : ∃ f : Fin n → α, Function.HasLeftInverse f
+
+class HasElements (n : ℕ+) (α : Type u) where
+  fn : Fin n → α
+  fn_injective : Function.Injective fn
+
+
+namespace HasElements
+
+variable [HasElements n α]
+
+def map (i : Fin n) : α := fn i
+local notation "[" i "]" => map i
+
+lemma distinct {i j : Fin n} (h : i ≠ j) : ([i] : α) ≠ ([j] : α) := by
+  exact Function.Injective.ne fn_injective h;
+
+end HasElements
