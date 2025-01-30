@@ -41,7 +41,7 @@ end
 
 
 structure Hilbert (α : Type*) where
-  axioms : Theory α
+  axioms : FormulaSet α
   rules : Set (Hilbert.InferenceRule α)
 
 
