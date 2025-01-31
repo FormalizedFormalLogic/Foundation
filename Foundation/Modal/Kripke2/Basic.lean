@@ -166,6 +166,33 @@ lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Satisfies];
 
 lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Satisfies];
 
+lemma iff_subst_self {x : F.World} :
+  letI U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧);
+  Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
+  induction φ using Formula.rec' generalizing x with
+  | hatom a => simp [Satisfies];
+  | hfalsum => simp [Satisfies];
+  | hbox φ ih =>
+    constructor;
+    . intro hbφ y Rxy;
+      apply ih.mp;
+      exact hbφ y Rxy;
+    . intro hbφ y Rxy;
+      apply ih.mpr;
+      exact hbφ y Rxy;
+  | himp φ ψ ihφ ihψ =>
+    constructor;
+    . intro hφψ hφ;
+      apply ihψ.mp;
+      apply hφψ;
+      apply ihφ.mpr;
+      exact hφ;
+    . intro hφψs hφ;
+      apply ihψ.mpr;
+      apply hφψs;
+      apply ihφ.mp;
+      exact hφ;
+
 end Satisfies
 
 
@@ -271,38 +298,12 @@ protected lemma nec (h : F ⊧ φ) : F ⊧ □φ := by
   intro V x y _;
   exact h V y;
 
--- TODO: これ成り立つのか？
 protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
   by_contra hC;
   replace hC := iff_not_exists_valuation_world.mp hC;
   obtain ⟨V, ⟨x, hx⟩⟩ := hC;
-  let U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧);
-  have : ∀ x : F.World, Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
-    intro y;
-    induction φ using Formula.rec' generalizing y with
-    | hatom a => simp [Satisfies, U];
-    | hfalsum => simp [Satisfies, U];
-    | hbox φ ih =>
-      constructor;
-      . intro h₂ z Ryz;
-        sorry;
-      . intro h₂ z Ryz;
-        sorry;
-    | himp φ ψ ihφ ihψ =>
-      have ⟨hφs, hnψs⟩ := Satisfies.and_def.mp $ Satisfies.not_imp.mp hx;
-      constructor;
-      . intro hφψ hφs;
-        apply ihψ ?_ hnψs y |>.mp;
-        refine Satisfies.mdp hφψ ?_;
-        . refine ihφ ?_ ?_ y |>.mpr hφs;
-          . sorry;
-          . sorry;
-        . sorry;
-      . intro hφψs hφ;
-        exact h U y hφ;
-  have : ¬Satisfies ⟨F, U⟩ x φ := this x |>.not.mpr hx;
-  have : Satisfies ⟨F, U⟩ x φ := h U x;
-  contradiction;
+  apply Satisfies.iff_subst_self.not.mpr hx;
+  exact h (λ w a => Satisfies ⟨F, V⟩ w (atom a⟦s⟧)) x;
 
 protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by intro V; exact ValidOnModel.imply₁ (M := ⟨F, V⟩);
 

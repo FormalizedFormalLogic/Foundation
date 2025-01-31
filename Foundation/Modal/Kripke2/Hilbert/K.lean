@@ -4,8 +4,8 @@ import Foundation.Modal.Kripke2.Completeness
 
 namespace LO.Modal
 
-instance : Kripke.AllFrameClass.DefinedBy (Hilbert.K.axiomInstances) := ⟨by
-  suffices ∀ F, ∀ φ ∈ Hilbert.K.axiomInstances, Formula.Kripke.ValidOnFrame F φ by simpa;
+instance : Kripke.AllFrameClass.DefinedBy (Hilbert.K.axioms) := ⟨by
+  suffices ∀ F, ∀ φ ∈ Hilbert.K.axioms, Formula.Kripke.ValidOnFrame F φ by simpa;
   rintro F _ ⟨ψ, ⟨_, rfl⟩, ⟨s, rfl⟩⟩;
   apply Formula.Kripke.ValidOnFrame.axiomK;
 ⟩

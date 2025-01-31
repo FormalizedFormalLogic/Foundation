@@ -43,7 +43,7 @@ instance [defs : C.DefinedBy H.axioms] : C.DefinedBy H.axiomInstances := ⟨by
       simp;
 ⟩
 
-instance [C.DefinedBy H.axiomInstances] : Sound H C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩
+-- instance [C.DefinedBy H.axiomInstances] : Sound H C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩
 
 instance [C.DefinedBy H.axioms] : Sound H C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩
 
