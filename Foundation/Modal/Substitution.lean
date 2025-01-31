@@ -41,6 +41,12 @@ end Formula
 
 @[simp] lemma subst_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ using Formula.rec' <;> simp_all;
 
+def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
+infixr:80 " ∘ " => Substitution.comp
+
+@[simp]
+lemma subst_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
+  induction φ using Formula.rec' <;> simp_all [Substitution.comp];
 
 class SubstitutionClosed (S : Set (Formula α)) where
   closed : ∀ φ ∈ S, (∀ s : Substitution α, φ⟦s⟧ ∈ S)

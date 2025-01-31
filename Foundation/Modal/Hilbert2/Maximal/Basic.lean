@@ -91,15 +91,14 @@ lemma iff_trivTranslated : (Hilbert.Triv) ⊢! φ ⭤ φᵀ := by
 protected theorem classical_reducible : Hilbert.Triv ⊢! φ ↔ (IntProp.Hilbert.Cl _) ⊢! φᵀᴾ := by
   constructor;
   . intro h;
-    induction h using Deduction.inducition! with
-    | hMaxm a =>
-      rcases a with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp [TrivTranslation, Formula.toPropFormula];
-    | hMdp ih₁ ih₂ =>
+    induction h using Deduction.rec! with
+    | maxm a =>
+      rcases a with ⟨_, (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩), ⟨_, rfl⟩⟩
+      <;> simp [TrivTranslation, Formula.toPropFormula];
+    | mdp ih₁ ih₂ =>
       dsimp [TrivTranslation] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
-    | hNec ih => exact ih;
-    | hSubst s ih =>
-      sorry;
+    | nec ih => exact ih;
     | _ => simp [TrivTranslation, Formula.toPropFormula];
   . intro h;
     have d₁ : Hilbert.Triv ⊢! φᵀ ➝ φ := and₂'! iff_trivTranslated;
@@ -110,8 +109,6 @@ end Triv
 
 
 namespace Ver
-
-variable [HasElements 2 α]
 
 lemma iff_verTranslated : (Hilbert.Ver) ⊢! φ ⭤ φⱽ := by
   induction φ using Formula.rec' with
@@ -125,13 +122,13 @@ lemma iff_verTranslated : (Hilbert.Ver) ⊢! φ ⭤ φⱽ := by
 protected lemma classical_reducible : (Hilbert.Ver) ⊢! φ ↔ (IntProp.Hilbert.Cl _) ⊢! φⱽᴾ := by
   constructor;
   . intro h;
-    induction h using Deduction.inducition! with
-    | hMaxm a =>
-      rcases a with (⟨_, _, rfl⟩ | ⟨_, rfl⟩) <;> simp [VerTranslation, Formula.toPropFormula];
-    | hMdp ih₁ ih₂ =>
+    induction h using Deduction.rec! with
+    | maxm a =>
+      rcases a with ⟨_, (⟨_, _, rfl⟩ | ⟨_, rfl⟩), ⟨_, rfl⟩⟩
+      <;> simp [VerTranslation, Formula.toPropFormula];
+    | mdp ih₁ ih₂ =>
       dsimp [VerTranslation] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
-    | @hSubst φ s ih => sorry;
     | _ => simp [VerTranslation, Formula.toPropFormula];
   . intro h;
     have d₁ : Hilbert.Ver ⊢! φⱽ ➝ φ := and₂'! iff_verTranslated;

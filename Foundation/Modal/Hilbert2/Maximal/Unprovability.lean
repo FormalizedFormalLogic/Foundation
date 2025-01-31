@@ -57,13 +57,13 @@ namespace GL
 
 lemma provable_CL_verTranslated : (Hilbert.GL) ⊢! φ → (Hilbert.Cl _) ⊢! φⱽᴾ := by
   intro h;
-  induction h using Deduction.inducition! with
-    | hMaxm a =>
-      rcases a with (⟨_, _, rfl⟩ | ⟨_, rfl⟩) <;> simp [VerTranslation, toPropFormula];
-    | hMdp ih₁ ih₂ =>
+  induction h using Deduction.rec! with
+    | maxm a =>
+      rcases a with ⟨_, (⟨_, _, rfl⟩ | ⟨_, rfl⟩), ⟨_, rfl⟩⟩
+      <;> simp [VerTranslation, toPropFormula];
+    | mdp ih₁ ih₂ =>
       dsimp [VerTranslation] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
-    | hSubst s ih => sorry;
     | _ => simp [VerTranslation, toPropFormula];
 
 lemma unprovable_AxiomT : (Hilbert.GL) ⊬ Axioms.T (.atom a) := by

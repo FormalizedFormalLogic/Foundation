@@ -271,29 +271,38 @@ protected lemma nec (h : F ⊧ φ) : F ⊧ □φ := by
   intro V x y _;
   exact h V y;
 
-protected lemma subst {s : Substitution ℕ} : F ⊧ φ → F ⊧ (φ⟦s⟧) := by
-  contrapose;
-  simp only [iff_not_exists_valuation_world]
-  rintro ⟨V, ⟨x, hx⟩⟩;
-  use (λ x a => x ⊧ a), x;
-  induction φ using Formula.rec' generalizing x with
-  | hatom a => simp_all [Satisfies];
-  | hfalsum => simp [Satisfies];
-  | himp φ ψ ih₁ ih₂ =>
-    apply Satisfies.not_imp.mpr;
-    apply Satisfies.and_def.mpr;
-    have ⟨hφ, hψ⟩ := Satisfies.and_def.mp $ Satisfies.not_imp.mp hx;
-    constructor;
-    . sorry;
-    . apply ih₂;
-      exact hψ;
-  | hbox ψ ih =>
-    simp_all [Satisfies];
-    obtain ⟨y, Rxy, hy⟩ := hx;
-    use y;
-    constructor;
-    . assumption
-    exact ih y hy;
+-- TODO: これ成り立つのか？
+protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
+  by_contra hC;
+  replace hC := iff_not_exists_valuation_world.mp hC;
+  obtain ⟨V, ⟨x, hx⟩⟩ := hC;
+  let U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧);
+  have : ∀ x : F.World, Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
+    intro y;
+    induction φ using Formula.rec' generalizing y with
+    | hatom a => simp [Satisfies, U];
+    | hfalsum => simp [Satisfies, U];
+    | hbox φ ih =>
+      constructor;
+      . intro h₂ z Ryz;
+        sorry;
+      . intro h₂ z Ryz;
+        sorry;
+    | himp φ ψ ihφ ihψ =>
+      have ⟨hφs, hnψs⟩ := Satisfies.and_def.mp $ Satisfies.not_imp.mp hx;
+      constructor;
+      . intro hφψ hφs;
+        apply ihψ ?_ hnψs y |>.mp;
+        refine Satisfies.mdp hφψ ?_;
+        . refine ihφ ?_ ?_ y |>.mpr hφs;
+          . sorry;
+          . sorry;
+        . sorry;
+      . intro hφψs hφ;
+        exact h U y hφ;
+  have : ¬Satisfies ⟨F, U⟩ x φ := this x |>.not.mpr hx;
+  have : Satisfies ⟨F, U⟩ x φ := h U x;
+  contradiction;
 
 protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by intro V; exact ValidOnModel.imply₁ (M := ⟨F, V⟩);
 
