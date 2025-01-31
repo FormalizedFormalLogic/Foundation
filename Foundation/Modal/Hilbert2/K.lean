@@ -1,5 +1,4 @@
 import Foundation.Modal.Hilbert2.Basic
-import Foundation.Vorspiel.HasElements
 
 namespace LO.Modal.Hilbert
 
