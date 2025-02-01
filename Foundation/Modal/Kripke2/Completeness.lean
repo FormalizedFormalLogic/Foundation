@@ -145,7 +145,7 @@ lemma iff_valid_on_canonicalModel_deducible : (canonicalModel 𝓢) ⊧ φ ↔ �
       have : 𝓢 ⊢! φ := dne'! $ neg_equiv'!.mpr $ replace_imply_left_conj! hΓ hC;
       contradiction;
     obtain ⟨Ω, hΩ⟩ := lindenbaum this;
-    apply not_validOnModel_of_exists_world;
+    apply ValidOnModel.not_of_exists_world;
     use Ω;
     exact truthlemma.not.mpr $ iff_mem_neg.mp (by tauto_set);
   . intro h Ω;
@@ -173,7 +173,7 @@ lemma realize_theory_of_self_canonicalModel : (canonicalModel 𝓢) ⊧* (System
 lemma complete_of_canonical {C : FrameClass} (hFC : canonicalFrame 𝓢 ∈ C) : C ⊧ φ → 𝓢 ⊢! φ := by
   contrapose;
   intro h;
-  apply not_validOnFrameClass_of_exists_model;
+  apply ValidOnFrameClass.not_of_exists_model;
   use (canonicalModel 𝓢);
   constructor;
   . assumption;

@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Closure
+import Foundation.Modal.Kripke2.Closure
 
 
 namespace LO.Modal
@@ -171,10 +171,10 @@ variable {F₁ F₂ : Kripke.Frame} {M₁ M₂ : Kripke.Model}
 lemma validOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧ φ → F₂ ⊧ φ := by
   contrapose;
   intro h;
-  obtain ⟨V₂, w₂, h⟩ := exists_valuation_world_of_not_validOnFrame_of h;
+  obtain ⟨V₂, w₂, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
   obtain ⟨w₁, rfl⟩ := f_surjective w₂;
 
-  apply not_validOnFrame_of_exists_valuation_world;
+  apply ValidOnFrame.not_of_exists_valuation_world;
   let V₁ := λ w a => V₂ (f w) a;
   use V₁, w₁;
 

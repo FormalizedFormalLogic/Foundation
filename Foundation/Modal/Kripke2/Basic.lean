@@ -216,6 +216,15 @@ instance : Semantics.Bot (Kripke.Model) where
 instance : Semantics.Top (Kripke.Model) where
   realize_top := λ _ => ValidOnModel.top_def;
 
+
+lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
+
+
 protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro x;
   exact (Satisfies.imp_def.mp $ hpq x) (hp x);
@@ -265,18 +274,15 @@ instance : Semantics.Top (Kripke.Frame) where
 instance : Semantics.Bot (Kripke.Frame) where
   realize_bot _ := ValidOnFrame.bot_def
 
-
 lemma iff_not_exists_valuation : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ¬(⟨F, V⟩ : Kripke.Model) ⊧ φ) := by
   simp [ValidOnFrame];
 
 alias ⟨exists_valuation_of_not, not_of_exists_valuation⟩ := iff_not_exists_valuation
 
-
 lemma iff_not_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ∃ x : (⟨F, V⟩ : Kripke.Model).World, ¬Satisfies _ x φ) := by
   simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Realize];
 
 alias ⟨exists_valuation_world_of_not, not_of_exists_valuation_world⟩ := iff_not_exists_valuation_world
-
 
 lemma iff_not_exists_model_world :  (¬F ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame = F ∧ ¬(x ⊧ φ)) := by
   constructor;
@@ -326,12 +332,28 @@ variable {C : Kripke.FrameClass}
 
 @[simp] protected lemma models_iff : C ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass C φ := iff_of_eq rfl
 
+
 protected lemma top_def : C ⊧ ⊤ := by simp [ValidOnFrameClass];
 
 instance : Semantics.Top (Kripke.FrameClass) where
   realize_top := λ _ => ValidOnFrameClass.top_def
 
 protected lemma bot_def (h : Set.Nonempty C) : ¬C ⊧ ⊥ := by simpa [ValidOnFrameClass];
+
+
+lemma iff_not_exists_frame {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_frame_of_not, not_of_exists_frame⟩ := iff_not_exists_frame
+
+lemma iff_not_exists_model {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
 
 end ValidOnFrameClass
 
@@ -354,30 +376,6 @@ end Formula.Kripke
 namespace Kripke
 
 open Formula.Kripke
-
-lemma iff_not_validOnModel_of_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_world_of_not_validOnModel_of, not_validOnModel_of_exists_world⟩ := iff_not_validOnModel_of_exists_world
-
-
-
-lemma iff_not_validOnFrameClass_exists_frame {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_frame_of_not_validOnFrameClass_of, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
-
-lemma iff_not_validOnFrameClass_of_exists_model {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_model_of_not_validOnFrameClass_of, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_of_exists_model
-
 
 lemma notValidOnFiniteFrameClass_of_exists_finite_frame {FC : Kripke.FiniteFrameClass} (h : ∃ F ∈ FC, ¬F.toFrame ⊧ φ) : ¬FC ⊧ φ := by
   simp only [ValidOnFiniteFrameClass.models_iff, ValidOnFrameClass];
