@@ -65,15 +65,15 @@ lemma complementary_mem (h : φ ∈ P) : φ ∈ P⁻ := by simp_all [complementa
 
 lemma complementary_comp (h : φ ∈ P) : -φ ∈ P⁻ := by simp [complementary]; tauto;
 
+lemma mem_of (h : φ ∈ P⁻) : φ ∈ P ∨ ∃ ψ ∈ P, -ψ = φ := by simpa [complementary] using h;
+
 lemma complementary_mem_box (hi : ∀ {ψ χ}, ψ ➝ χ ∈ P → ψ ∈ P := by trivial) : □φ ∈ P⁻ → □φ ∈ P := by
   intro h;
-  simp [complementary] at h;
-  rcases h with (h | ⟨ψ, hq, eq⟩);
+  rcases (mem_of h) with (h | ⟨ψ, hq, eq⟩);
   . assumption;
   . replace eq := Formula.complement.resort_box eq;
     subst eq;
     exact hi hq;
-
 
 
 class ComplementaryClosed (P : FormulaFinset α) (S : FormulaFinset α) : Prop where

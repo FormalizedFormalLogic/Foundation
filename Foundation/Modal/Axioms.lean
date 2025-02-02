@@ -17,10 +17,12 @@ protected abbrev K := □(φ ➝ ψ) ➝ □φ ➝ □ψ
 abbrev K.set : Set F := { Axioms.K φ ψ | (φ) (ψ) }
 notation:max "𝗞" => K.set
 
+/-- Axiom for reflexive -/
 protected abbrev T := □φ ➝ φ
 abbrev T.set : Set F := { Axioms.T φ | (φ) }
 notation:max "𝗧" => T.set
 
+/-- Axiom for symmetric -/
 protected abbrev B [Dia F] := φ ➝ □◇φ
 abbrev B.set [Dia F] : Set F := { Axioms.B φ | (φ) }
 notation:max "𝗕" => B.set
@@ -30,6 +32,7 @@ protected abbrev B₂ := □φ ➝ □(∼□(∼φ))
 abbrev B₂.set : Set F := { Axioms.B₂ φ | (φ) }
 notation:max "𝗕(□)" => B₂.set
 
+/-- Axiom for serial -/
 protected abbrev D [Dia F] := □φ ➝ ◇φ
 abbrev D.set [Dia F] : Set F := { Axioms.D φ | (φ) }
 notation:max "𝗗" => D.set
@@ -40,11 +43,12 @@ abbrev P.set : Set F := { Axioms.P | }
 notation:max "𝗣" => P.set
 @[simp] lemma P.set.def : 𝗣 = {(∼(□⊥) : F)} := by ext; simp;
 
-
+/-- Axiom for transivity -/
 protected abbrev Four := □φ ➝ □□φ
 abbrev Four.set : Set F := { Axioms.Four φ | (φ) }
 notation:max "𝟰" => Four.set
 
+/-- Axiom for euclidean -/
 protected abbrev Five [Dia F] := ◇φ ➝ □◇φ
 abbrev Five.set [Dia F] : Set F := { Axioms.Five φ | (φ) }
 notation:max "𝟱" => Five.set
@@ -54,18 +58,22 @@ protected abbrev Five₂ := ∼□φ ➝ □(∼□(∼φ))
 abbrev Five₂.set : Set F := { Axioms.Five₂ φ | (φ) }
 notation:max "𝟱(□)" => Five₂.set
 
+/-- Axiom for confluency -/
 protected abbrev Dot2 [Dia F] := ◇□φ ➝ □◇φ
 abbrev Dot2.set [Dia F] : Set F := { Axioms.Dot2 φ | (φ) }
 notation:max ".𝟮" => Dot2.set
 
+/-- Axiom for density -/
 protected abbrev C4 := □□φ ➝ □φ
 abbrev C4.set : Set F := { Axioms.C4 φ | (φ) }
 notation:max "𝗖𝟰" => C4.set
 
+/-- Axiom for functionality -/
 protected abbrev CD [Dia F] := ◇φ ➝ □φ
 abbrev CD.set [Dia F] : Set F := { Axioms.CD φ | (φ) }
 notation:max "𝗖𝗗" => CD.set
 
+/-- Axiom for coreflexivity -/
 protected abbrev Tc := φ ➝ □φ
 abbrev Tc.set : Set F := { Axioms.Tc φ | (φ) }
 notation:max "𝗧𝗰" => Tc.set

@@ -25,41 +25,14 @@ protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) := F.Rel.iterate n
 notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
 
-structure FiniteFrame extends Frame where
-  [world_finite : Finite toFrame.World]
-instance {F : FiniteFrame} : Finite F.World := F.world_finite
-
-def Frame.toFinite (F : Frame) [Finite F.World] : FiniteFrame where
-  toFrame := F
-
-
-abbrev reflexivePointFrame : FiniteFrame where
-  World := Unit
-  Rel := fun _ _ => True
-
-abbrev irreflexivePointFrame : FiniteFrame where
-  World := Unit
-  Rel := fun _ _ => False
-
-
 abbrev FrameClass := Set Frame
 
-abbrev FiniteFrameClass := Set FiniteFrame
-
 abbrev FrameClass.nonempty (C : FrameClass) := ∃ F, F ∈ C
-
-def FrameClass.restrictFinite (C : FrameClass) : FiniteFrameClass := { F : FiniteFrame | F.toFrame ∈ C }
-
-def FiniteFrameClass.toFrameClass (C : FiniteFrameClass) : FrameClass := C.image (·.toFrame)
-
-instance : Coe (FiniteFrameClass) (FrameClass) := ⟨FiniteFrameClass.toFrameClass⟩
 
 
 section
 
 abbrev AllFrameClass : FrameClass := Set.univ
-
-abbrev AllFiniteFrameClass : FiniteFrameClass := Set.univ
 
 end
 
@@ -106,9 +79,9 @@ protected lemma not_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by simp [Satisfies];
 
 protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
 
-protected lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺ y → y ⊧ φ := by simp [Satisfies];
+@[simp] protected lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺ y → y ⊧ φ := by simp [Satisfies];
 
-protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Satisfies];
+@[simp] protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
   realize_top := λ _ => Satisfies.top_def;
@@ -166,7 +139,7 @@ lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Satisfies];
 
 lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Satisfies];
 
-lemma iff_subst_self {x : F.World} :
+lemma iff_subst_self {x : F.World} (s) :
   letI U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧);
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
   induction φ using Formula.rec' generalizing x with
@@ -308,7 +281,7 @@ protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
   by_contra hC;
   replace hC := iff_not_exists_valuation_world.mp hC;
   obtain ⟨V, ⟨x, hx⟩⟩ := hC;
-  apply Satisfies.iff_subst_self.not.mpr hx;
+  apply Satisfies.iff_subst_self s |>.not.mpr hx;
   exact h (λ w a => Satisfies ⟨F, V⟩ w (atom a⟦s⟧)) x;
 
 protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by intro V; exact ValidOnModel.imply₁ (M := ⟨F, V⟩);
@@ -357,36 +330,28 @@ alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
 
 end ValidOnFrameClass
 
-
-@[simp] def ValidOnFiniteFrameClass (FC : Kripke.FiniteFrameClass) (φ : Formula ℕ) := ∀ {F}, F ∈ FC → F.toFrame ⊧ φ
-
-namespace ValidOnFiniteFrameClass
-
-protected instance semantics : Semantics (Formula ℕ) (Kripke.FiniteFrameClass) := ⟨fun C ↦ Kripke.ValidOnFrameClass C⟩
-
-variable {FC : Kripke.FiniteFrameClass}
-
-@[simp] protected lemma models_iff : FC ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass FC φ := iff_of_eq rfl
-
-end ValidOnFiniteFrameClass
-
 end Formula.Kripke
 
 
-namespace Kripke
+namespace Kripke.FrameClass
 
-open Formula.Kripke
+class DefinedBy (C : Kripke.FrameClass) (Γ : Set (Formula ℕ)) where
+  defines : ∀ F, F ∈ C ↔ (∀ φ ∈ Γ, F ⊧ φ)
 
-lemma notValidOnFiniteFrameClass_of_exists_finite_frame {FC : Kripke.FiniteFrameClass} (h : ∃ F ∈ FC, ¬F.toFrame ⊧ φ) : ¬FC ⊧ φ := by
-  simp only [ValidOnFiniteFrameClass.models_iff, ValidOnFrameClass];
-  push_neg;
-  obtain ⟨F, hF, h⟩ := h;
-  use F.toFrame;
+class FiniteDefinedBy (C Γ) extends FrameClass.DefinedBy C Γ where
+  finite : Set.Finite Γ
+
+
+abbrev DefinedByFormula (C : Kripke.FrameClass) (φ : Formula ℕ) := FrameClass.DefinedBy C {φ}
+
+lemma definedByFormula_of_iff_mem_validate (h : ∀ F, F ∈ C ↔ F ⊧ φ) : DefinedByFormula C φ := by
   constructor;
-  . use F;
-  . assumption;
+  simpa;
 
-end Kripke
+class IsNonempty (C : Kripke.FrameClass) where
+  nonempty : Nonempty C
+
+end Kripke.FrameClass
 
 
 end LO.Modal

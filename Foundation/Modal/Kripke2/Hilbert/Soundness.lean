@@ -1,7 +1,10 @@
 import Foundation.Modal.Hilbert2.Basic
-import Foundation.Modal.Kripke2.Definability
+import Foundation.Modal.Kripke2.Basic
 
 namespace LO.Modal
+
+open Kripke
+open Formula.Kripke
 
 namespace Kripke.Hilbert
 
@@ -9,7 +12,6 @@ variable {C : Kripke.FrameClass}
 variable {H : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 
 open Formula
-open Formula.Kripke
 
 lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy H.axiomInstances] : H ⊢! φ → C ⊧ φ := by
   intro hφ F hF;
@@ -49,7 +51,7 @@ instance [C.DefinedBy H.axioms] : Sound H C := ⟨fun {_} => soundness_of_define
 
 lemma instConsistent_aux [sound : Sound H C] (hNonempty : C.Nonempty) : H ⊬ ⊥ := by
   apply not_imp_not.mpr sound.sound;
-  apply not_validOnFrameClass_of_exists_frame;
+  apply ValidOnFrameClass.not_of_exists_frame;
   obtain ⟨F, hF⟩ := hNonempty;
   use F;
   constructor;

@@ -122,14 +122,13 @@ def id : M →ₚ M where
   back := by simp;
   atomic := by simp;
 
-def mkAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ w a) ↔ (M₂ (f w) a)) : M₁ →ₚ M₂ := {
-  toFun := f,
-  forth := f.forth,
-  back := f.back,
-  atomic := atomic,
-}
+def ofAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ w a) ↔ (M₂ (f w) a)) : M₁ →ₚ M₂ where
+  toFun := f
+  forth := f.forth
+  back := f.back
+  atomic := atomic
 
-def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := mkAtomic (f.toPseudoEpimorphism.comp (g.toPseudoEpimorphism)) $ by
+def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := ofAtomic (f.toPseudoEpimorphism.comp (g.toPseudoEpimorphism)) $ by
   intro x φ;
   constructor;
   . intro h;
@@ -141,8 +140,8 @@ def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := mkA
     apply g.atomic.mpr;
     assumption;
 
-def bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
-  toRel := Function.graph f,
+def bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ where
+  toRel := Function.graph f
   atomic := by
     rintro x₁ x₂ a rfl;
     constructor;
@@ -157,7 +156,6 @@ def bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
     rintro x₁ x₂ y₂ rfl rx₂y₂;
     obtain ⟨y₁, ⟨rfl, _⟩⟩ := f.back rx₂y₂;
     use y₁;
-}
 
 lemma modal_equivalence (f : M₁ →ₚ M₂) (w : M₁.World) : w ↭ (f w) := by
   apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.bisimulation f;
