@@ -515,7 +515,7 @@ end Encodable
 end Formula
 
 
-
+/-
 section subst
 
 namespace Formula
@@ -607,5 +607,6 @@ end SubstClosed
 end Theory
 
 end subst
+-/
 
 end LO.Modal
