@@ -31,8 +31,6 @@ abbrev irreflexivePointFrame : FiniteFrame where
   World := Unit
   Rel := fun _ _ => False
 
-abbrev AllFiniteFrameClass : FiniteFrameClass := Set.univ
-
 end Kripke
 
 
@@ -94,6 +92,7 @@ end ValidOnFiniteFrameClass
 end Formula.Kripke
 
 
+
 namespace Kripke
 
 namespace FiniteFrameClass
@@ -110,6 +109,10 @@ class IsNonempty (C : Kripke.FiniteFrameClass) where
   nonempty : Nonempty C
 
 end FiniteFrameClass
+
+
+abbrev AllFiniteFrameClass : FrameClass := Set.univ
+
 
 end Kripke
 

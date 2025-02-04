@@ -1,5 +1,4 @@
 import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Modal.Kripke2.AxiomGeach
 import Foundation.Modal.Kripke2.Closure
 import Foundation.Modal.Subformulas
 
@@ -11,18 +10,7 @@ namespace Kripke
 
 open Formula (atom)
 open Formula.Kripke
-
-/-
-section
-
-abbrev ReflexiveSymmetricFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Symmetric F.Rel }
-
-abbrev ReflexiveTransitiveFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel }
-
-abbrev ReflexiveTransitiveSymmetricFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ Symmetric F.Rel }
-
-end
--/
+open FormulaSet.SubformulaClosed
 
 
 section
@@ -79,8 +67,8 @@ class FilterOf (FM : Model) (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed
     intro x₁ y₁ x₂ y₂ hx hy;
     apply eq_iff_iff.mpr;
     constructor;
-    . intro h φ hp sp₂; exact hy φ (by sorry) |>.mp $ h φ hp $ hx (□φ) hp |>.mpr sp₂;
-    . intro h φ hp sp₁; exact hy φ (by sorry) |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
+    . intro h φ hp sp₂; exact hy φ (FormulaSet.SubformulaClosed.mem_box hp) |>.mp $ h φ hp $ hx (□φ) hp |>.mpr sp₂;
+    . intro h φ hp sp₁; exact hy φ (FormulaSet.SubformulaClosed.mem_box hp) |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
   ) (cast def_world Qx) (cast def_world Qy)
   def_valuation Qx a : (ha : (atom a) ∈ T := by trivial) →
     FM Qx a ↔ Quotient.lift (λ x => M x a) (by
@@ -129,8 +117,8 @@ abbrev coarsestFilterationFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaCl
       intro x₁ y₁ x₂ y₂ hx hy;
       apply eq_iff_iff.mpr;
       constructor;
-      . intro h φ hp sp₂; exact hy φ (by sorry) |>.mp $ h φ hp $ hx (□φ) hp |>.mpr sp₂;
-      . intro h φ hp sp₁; exact hy φ (by sorry) |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
+      . intro h φ hp sp₂; exact hy φ (FormulaSet.SubformulaClosed.mem_box hp) |>.mp $ h φ hp $ hx (□φ) hp |>.mpr sp₂;
+      . intro h φ hp sp₁; exact hy φ (FormulaSet.SubformulaClosed.mem_box hp) |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
     ) Qx Qy
 
 abbrev coarsestFilterationModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
@@ -237,122 +225,13 @@ theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T) : x ⊧ φ 
   | himp φ ψ ihp ihq =>
     constructor;
     . rintro hxy hp;
-      exact ihq (by sorry) |>.mp $ hxy (ihp (FormulaSet.SubformulaClosed.mem_imp₁ hs) |>.mpr hp);
+      exact ihq (FormulaSet.SubformulaClosed.mem_imp₂ hs) |>.mp $ hxy (ihp (FormulaSet.SubformulaClosed.mem_imp₁ hs) |>.mpr hp);
     . rintro hxy hp;
-      exact ihq (by sorry) |>.mpr $ hxy (ihp (FormulaSet.SubformulaClosed.mem_imp₁ hs) |>.mp hp);
+      exact ihq (FormulaSet.SubformulaClosed.mem_imp₂ hs) |>.mpr $ hxy (ihp (FormulaSet.SubformulaClosed.mem_imp₁ hs) |>.mp hp);
   | _ => trivial
 
 end
 
 end Kripke
-
-/-
-namespace Hilbert
-
-open Modal.Kripke
-
-instance K.Kripke.finite_complete : Complete (Hilbert.K ℕ) (AllFiniteFrameClass) := ⟨by
-  intro φ hp;
-  apply Hilbert.K.Kripke.complete.complete;
-  intro F _ V x;
-  let M : Kripke.Model := ⟨F, V⟩;
-  let FM := coarsestFilterationModel M ↑φ.subformulae;
-
-  apply filteration FM (coarsestFilterationModel.filterOf) (by aesop) |>.mpr;
-  apply hp (by
-    suffices Finite (FilterEqvQuotient M φ.subformulae) by
-      simp only [FiniteFrameClass.toFrameClass, AllFiniteFrameClass, Set.image_univ, Set.mem_range];
-      use ⟨FM.toFrame⟩;
-    apply FilterEqvQuotient.finite;
-    simp;
-  ) FM.Val
-⟩
-
-instance K.Kripke.ffp : FiniteFrameProperty (Hilbert.K ℕ) AllFiniteFrameClass where
-  complete := K.Kripke.finite_complete
-  sound := Kripke.instFiniteSound_of_instSound (C := AllFrameClass) (FC := AllFiniteFrameClass) rfl
-
-
-instance KTB.Kripke.finite_complete : Complete (Hilbert.KTB ℕ) (ReflexiveSymmetricFiniteFrameClass) := ⟨by
-  intro φ hp;
-  apply Hilbert.KTB.Kripke.complete.complete;
-  intro F ⟨F_refl, F_symm⟩ V x;
-  let M : Kripke.Model := ⟨F, V⟩;
-  let FM := finestFilterationModel M φ.subformulae;
-  apply filteration FM (finestFilterationModel.filterOf) (by aesop) |>.mpr;
-  apply hp (by
-    suffices Finite (FilterEqvQuotient M φ.subformulae) by
-      simp only [FiniteFrameClass.toFrameClass, ReflexiveSymmetricFiniteFrameClass, Set.mem_image, Set.mem_setOf_eq];
-      use ⟨FM.toFrame⟩;
-      refine ⟨⟨?_, ?_⟩, ?_⟩;
-      . apply reflexive_filterOf_of_reflexive (finestFilterationModel.filterOf);
-        exact F_refl;
-      . apply finestFilterationModel.symmetric_of_symmetric;
-        exact F_symm;
-      . rfl;
-    apply FilterEqvQuotient.finite;
-    simp;
-  ) FM.Val
-⟩
-
-instance KTB.Kripke.ffp : FiniteFrameProperty (Hilbert.KTB ℕ) ReflexiveSymmetricFiniteFrameClass where
-  complete := KTB.Kripke.finite_complete
-  sound := Kripke.instFiniteSound_of_instSound (C := ReflexiveSymmetricFrameClass) (FC := ReflexiveSymmetricFiniteFrameClass) rfl
-
-
-open finestFilterationTransitiveClosureModel in
-instance S4.Kripke.finite_complete : Complete (Hilbert.S4 ℕ) (ReflexiveTransitiveFiniteFrameClass) := ⟨by
-  intro φ hp;
-  apply Hilbert.S4.Kripke.complete.complete;
-  intro F ⟨F_refl, F_trans⟩ V x;
-  let M : Kripke.Model := ⟨F, V⟩;
-  let FM := finestFilterationTransitiveClosureModel M φ.subformulae;
-  apply @filteration M φ.subformulae _ FM ?filterOf x φ (by simp) |>.mpr;
-  apply hp (by
-    suffices Finite (FilterEqvQuotient M φ.subformulae) by
-      simp only [FiniteFrameClass.toFrameClass];
-      use ⟨FM.toFrame⟩;
-      refine ⟨⟨?_, transitive⟩, rfl⟩;
-      . exact reflexive_of_transitive_reflexive (by apply F_trans) F_refl;
-    apply FilterEqvQuotient.finite;
-    simp;
-  ) FM.Val;
-  . apply finestFilterationTransitiveClosureModel.filterOf;
-    exact F_trans;
-⟩
-
-instance S4.Kripke.ffp : FiniteFrameProperty (Hilbert.S4 ℕ) ReflexiveTransitiveFiniteFrameClass where
-  complete := S4.Kripke.finite_complete
-  sound := Kripke.instFiniteSound_of_instSound (C := ReflexiveTransitiveFrameClass) (FC := ReflexiveTransitiveFiniteFrameClass) rfl
-
-
-open finestFilterationTransitiveClosureModel in
-instance KT4B.Kripke.finite_complete : Complete (Hilbert.KT4B ℕ) (ReflexiveTransitiveSymmetricFiniteFrameClass) := ⟨by
-  intro φ hp;
-  apply Hilbert.KT4B.Kripke.complete.complete;
-  intro F ⟨F_refl, F_trans, F_symm⟩ V x;
-  let M : Kripke.Model := ⟨F, V⟩;
-  let FM := finestFilterationTransitiveClosureModel M φ.subformulae;
-  apply @filteration M φ.subformulae _ FM ?filterOf x φ (by simp) |>.mpr;
-  apply hp (by
-    suffices Finite (FilterEqvQuotient M φ.subformulae) by
-      simp only [FiniteFrameClass.toFrameClass, Set.mem_image, Set.mem_setOf_eq];
-      use ⟨FM.toFrame⟩;
-      refine ⟨⟨?refl, transitive, ?symm⟩, rfl⟩;
-      . exact reflexive_of_transitive_reflexive (by apply F_trans) F_refl;
-      . exact symmetric_of_symmetric F_symm;
-    apply FilterEqvQuotient.finite;
-    simp;
-  ) FM.Val;
-  . apply finestFilterationTransitiveClosureModel.filterOf
-    exact F_trans;
-⟩
-
-instance KT4B.Kripke.ffp : FiniteFrameProperty (Hilbert.KT4B ℕ) ReflexiveTransitiveSymmetricFiniteFrameClass where
-  complete := KT4B.Kripke.finite_complete
-  sound := Kripke.instFiniteSound_of_instSound (C := ReflexiveTransitiveSymmetricFrameClass) (FC := ReflexiveTransitiveSymmetricFiniteFrameClass) rfl
-
-end Hilbert
--/
 
 end LO.Modal

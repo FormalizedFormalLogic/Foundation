@@ -1,5 +1,6 @@
 import Foundation.Modal.Kripke2.Geach
 import Foundation.Modal.Kripke2.Preservation
+import Foundation.Modal.Kripke2.KT4B
 
 namespace LO.Modal
 
@@ -10,11 +11,11 @@ abbrev Kripke.ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F ∧
 
 namespace Hilbert.S5
 
-instance Kripke.Consistent : System.Consistent (Hilbert.S5) := by
+instance Kripke.consistent : System.Consistent (Hilbert.S5) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
   exact eq_Geach;
 
-instance Kripke.Complete : Complete (Hilbert.S5) (Kripke.ReflexiveEuclideanFrameClass) := by
+instance Kripke.complete : Complete (Hilbert.S5) (Kripke.ReflexiveEuclideanFrameClass) := by
   convert Hilbert.Geach.Kripke.Complete (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
   . exact eq_Geach;
   . unfold ReflexiveEuclideanFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
@@ -41,13 +42,28 @@ end Kripke
 
 namespace Hilbert.S5
 
-instance Hilbert.S5.Kripke.CompleteUniversal : Complete (Hilbert.S5) (Kripke.UniversalFrameClass) := ⟨by
+instance Hilbert.S5.Kripke.completeUniversal : Complete (Hilbert.S5) (Kripke.UniversalFrameClass) := ⟨by
   intro φ hF;
-  apply Kripke.Complete.complete;
+  apply Kripke.complete.complete;
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mp;
   exact hF;
 ⟩
 
 end Hilbert.S5
+
+
+abbrev Kripke.ReflexiveEuclideanFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Euclidean F.Rel }
+
+lemma Kripke.eq_ReflexiveTransitiveSymmetricFiniteFrameClass_ReflexiveEuclideanFiniteFrameClass : ReflexiveTransitiveSymmetricFiniteFrameClass = ReflexiveEuclideanFiniteFrameClass := by
+  ext F;
+  constructor;
+  . rintro ⟨hRefl, hTrans, hSymm⟩;
+    constructor;
+    . assumption;
+    . exact eucl_of_symm_trans hSymm hTrans;
+  . rintro ⟨hRefl, hEucl⟩;
+    refine ⟨hRefl, ?_, ?_⟩;
+    . exact trans_of_refl_eucl hRefl hEucl;
+    . exact symm_of_refl_eucl hRefl hEucl;
 
 end LO.Modal

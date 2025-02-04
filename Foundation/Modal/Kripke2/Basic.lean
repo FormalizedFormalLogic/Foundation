@@ -30,12 +30,6 @@ abbrev FrameClass := Set Frame
 abbrev FrameClass.nonempty (C : FrameClass) := ∃ F, F ∈ C
 
 
-section
-
-abbrev AllFrameClass : FrameClass := Set.univ
-
-end
-
 
 abbrev Valuation (F : Frame) := F.World → ℕ → Prop
 
@@ -44,7 +38,6 @@ structure Model extends Frame where
 instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
 
 end Kripke
-
 
 
 namespace Formula.Kripke
@@ -399,6 +392,8 @@ class IsNonempty (C : Kripke.FrameClass) : Prop where
 
 end FrameClass
 
+
+abbrev AllFrameClass : FrameClass := Set.univ
 
 instance AllFrameClass.DefinedBy : AllFrameClass.DefinedByFormula (Axioms.K (.atom 0) (.atom 1)) :=
   FrameClass.definedByFormula_of_iff_mem_validate $ by
