@@ -1,12 +1,6 @@
-import Foundation.Modal.ComplementClosedConsistentFinset
-import Foundation.Modal.Hilbert2.WellKnown
-import Foundation.Modal.Kripke2.AxiomL
-import Foundation.Modal.Kripke2.KT
-import Foundation.Modal.Kripke2.Soundness
-import Foundation.Modal.System.Grz
+import Foundation.Modal.Kripke2.Grz.Soundness
 
 namespace LO.Modal
-
 
 namespace Formula
 
@@ -39,11 +33,13 @@ macro_rules | `(tactic| trivial) => `(tactic|
     | apply mem_imp₂  $ by assumption
   )
 
-lemma mem_left (h : ψ ∈ φ.subformulas := by aesop) : ψ ∈ φ.subformulasGrz := by
+lemma mem_left (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by
   unfold subformulasGrz;
   simp only [Finset.mem_union];
   left;
   tauto;
+
+
 
 end subformulasGrz
 
@@ -51,21 +47,13 @@ end Formula
 
 
 
-namespace Hilbert.Grz
+namespace Hilbert.Grz.Kripke
 
 open Formula
 open Formula.Kripke
 open System
 open System.Context
 open ComplementClosedConsistentFinset
-
-
-instance Kripke.consistent : System.Consistent (Hilbert.Grz) := by
-  -- haveI := FrameClass.definedBy_with_axiomK TransitiveIrreflexiveFiniteFrameClass.DefinedByL
-  sorry;
-
-
-namespace Kripke
 
 variable {φ ψ : Formula ℕ}
 
@@ -132,15 +120,15 @@ lemma truthlemma_lemma1
 
 lemma truthlemma_lemma2
   {X : ComplementClosedConsistentFinset (Hilbert.Grz) (φ.subformulasGrz)} (hq₁ : □ψ ∈ φ.subformulas) (hq₂ : □ψ ∉ X)
-  : FormulaSet.Consistent (Hilbert.Grz) ((X.1.prebox.box) ∪ {□(ψ ➝ □ψ), -ψ}) := by
-    apply FormulaSet.intro_union_consistent;
+  : FormulaFinset.Consistent (Hilbert.Grz) ((X.1.prebox.box) ∪ {□(ψ ➝ □ψ), -ψ}) := by
+    apply FormulaFinset.intro_union_consistent;
     rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
     replace hΓ₂ : ∀ χ ∈ Γ₂, χ = □(ψ ➝ □ψ) ∨ χ = -ψ := by
       intro χ hr;
       simpa using hΓ₂ χ hr;
 
     by_contra hC;
-    have : Γ₁ ⊢[(Hilbert.Grz)]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
+    have : Γ₁ ⊢[(Hilbert.Grz)]! ⋀Γ₂ ➝ ⊥ := and_imply_iff_imply_imply'!.mp hC;
     have : Γ₁ ⊢[(Hilbert.Grz)]! (□(ψ ➝ □ψ) ⋏ -ψ) ➝ ⊥ := imp_trans''! (by
       suffices Γ₁ ⊢[(Hilbert.Grz)]! ⋀[□(ψ ➝ □ψ), -ψ] ➝ ⋀Γ₂ by
         simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
@@ -155,9 +143,7 @@ lemma truthlemma_lemma2
       . simpa only [complement] using this;
     have : (□'Γ₁) ⊢[(Hilbert.Grz)]! □(□(ψ ➝ □ψ) ➝ ψ) := contextual_nec! this;
     have : (□'Γ₁) ⊢[(Hilbert.Grz)]! ψ := axiomGrz! ⨀ this;
-    have : (□'□'Γ₁) ⊢[(Hilbert.Grz)]! □ψ := contextual_nec! this;
-    -- TODO: `contextual_axiomFour`
-    have : (Hilbert.Grz) ⊢! ⋀□'□'Γ₁ ➝ □ψ := provable_iff.mp this;
+    have : (Hilbert.Grz) ⊢! ⋀□'□'Γ₁ ➝ □ψ := contextual_nec! this;
     have : (Hilbert.Grz) ⊢! □□⋀Γ₁ ➝ □ψ := imp_trans''! (imp_trans''! (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (by simp)) this;
     have : (Hilbert.Grz) ⊢! □⋀Γ₁ ➝ □ψ := imp_trans''! axiomFour! this;
     have : (Hilbert.Grz) ⊢! ⋀□'Γ₁ ➝ □ψ := imp_trans''! collect_box_conj! this;
@@ -186,7 +172,8 @@ lemma truthlemma_lemma2
     contradiction;
 
 -- TODO: syntactical proof
-lemma truthlemma_lemma3 : (Hilbert.KT) ⊢! (φ ⋏ □(φ ➝ □φ)) ➝ □φ := by
+lemma truthlemma_lemma3 : (Hilbert.Grz) ⊢! (φ ⋏ □(φ ➝ □φ)) ➝ □φ := by
+  apply KT_weakerThan_Grz;
   by_contra hC;
   have := (not_imp_not.mpr $ Hilbert.KT.Kripke.complete |>.complete) hC;
   simp at this;
@@ -203,41 +190,43 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>
+    have := subformulas.mem_imp₁ q_sub;
+    have := subformulas.mem_imp₂ q_sub;
     constructor;
     . contrapose;
       intro h;
       apply Satisfies.not_imp.mpr;
       apply Satisfies.and_def.mpr;
       constructor;
-      . apply ihq (by aesop) |>.mpr;
+      . apply ihq (subformulas.mem_imp₁ q_sub) |>.mpr;
         exact iff_not_mem_imp
           (hsub_qr := subformulasGrz.mem_origin q_sub)
-          (hsub_q := subformulasGrz.mem_left)
-          (hsub_r := subformulasGrz.mem_left)
+          (hsub_q := subformulasGrz.mem_left (by assumption))
+          (hsub_r := subformulasGrz.mem_left (by assumption))
           |>.mp h |>.1;
-      . apply ihr (by aesop) |>.not.mpr;
+      . apply ihr (subformulas.mem_imp₂ q_sub) |>.not.mpr;
         have := iff_not_mem_imp
           (hsub_qr := subformulasGrz.mem_origin q_sub)
-          (hsub_q := subformulasGrz.mem_left)
-          (hsub_r := subformulasGrz.mem_left)
+          (hsub_q := subformulasGrz.mem_left (by assumption))
+          (hsub_r := subformulasGrz.mem_left (by assumption))
           |>.mp h |>.2;
-        exact iff_mem_compl (subformulasGrz.mem_left) |>.not.mpr (by simpa using this);
+        exact iff_mem_compl (subformulasGrz.mem_left (by assumption)) |>.not.mpr (by simpa using this);
     . contrapose;
       intro h;
       replace h := Satisfies.and_def.mp $ Satisfies.not_imp.mp h;
       obtain ⟨hq, hr⟩ := h;
-      replace hq := ihq (by aesop) |>.mp hq;
-      replace hr := ihr (by aesop) |>.not.mp hr;
+      replace hq := ihq (by assumption) |>.mp hq;
+      replace hr := ihr (by assumption) |>.not.mp hr;
       apply iff_not_mem_imp
         (hsub_qr := subformulasGrz.mem_origin q_sub)
-        (hsub_q := subformulasGrz.mem_left)
-        (hsub_r := subformulasGrz.mem_left)
+        (hsub_q := subformulasGrz.mem_left (by assumption))
+        (hsub_r := subformulasGrz.mem_left (by assumption))
         |>.mpr;
       constructor;
       . assumption;
-      . sorry;
-        -- simpa using iff_mem_compl (subformulasGrz.mem_left) |>.not.mp (by assumption);
+      . simpa using iff_mem_compl (subformulasGrz.mem_left (by assumption)) |>.not.mp (by assumption);
   | hbox ψ ih =>
+    have := subformulas.mem_box q_sub;
     constructor;
     . contrapose;
       by_cases w : ψ ∈ X;
@@ -258,9 +247,9 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
             . simp_all;
             . apply hY.2; simp;
             . by_contra hC;
-              have : ↑X *⊢[(Hilbert.Grz)]! ψ := membership_iff (subformulasGrz.mem_left) |>.mp w;
+              have : ↑X *⊢[Hilbert.Grz]! ψ := membership_iff (subformulasGrz.mem_left (by assumption)) |>.mp w;
               have : ↑X *⊢[(Hilbert.Grz)]! □(ψ ➝ □ψ) := membership_iff (by simp; right; assumption) |>.mp hC;
-              have : ↑X *⊢[(Hilbert.Grz)]! (ψ ⋏ □(ψ ➝ □ψ)) ➝ □ψ := Context.of! $ Hilbert.KT_weakerThan_Grz truthlemma.lemma3;
+              have : ↑X *⊢[(Hilbert.Grz)]! (ψ ⋏ □(ψ ➝ □ψ)) ➝ □ψ := Context.of! $ truthlemma_lemma3;
               have : ↑X *⊢[(Hilbert.Grz)]! □ψ := this ⨀ and₃'! (by assumption) (by assumption);
               have : □ψ ∈ X := membership_iff (subformulasGrz.mem_origin (by assumption)) |>.mpr this;
               contradiction;
@@ -282,19 +271,22 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
         (membership_iff (by apply subformulasGrz.mem_left; assumption) |>.mp (RXY.1 ψ (by apply subformulasGrz.mem_left; tauto) h));
       exact membership_iff (by apply subformulasGrz.mem_left; exact subformulas.mem_box q_sub) |>.mpr this;
 
-instance complete : Complete (Hilbert.Grz) (ReflexiveTransitiveAntiSymmetricFiniteFrameClass) := ⟨by
+instance : Complete (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass) := ⟨by
   intro φ;
   contrapose;
   intro h;
-  apply notValidOnFiniteFrameClass_of_exists_finite_frame;
+  apply ValidOnFiniteFrameClass.not_of_exists_frame;
   use (miniCanonicalFrame φ);
   constructor;
   . refine ⟨miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm⟩;
-  . simp only [ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models];
-    push_neg;
-    obtain ⟨X, hX₁⟩ := lindenbaum (S := φ.subformulasGrz) (X := {-φ})
-      (by simp only [Finset.singleton_subset_iff]; apply Formulae.complementary_comp; exact subformulasGrz.mem_self)
-      (Formulae.unprovable_iff_singleton_compl_consistent.mp h);
+  . apply ValidOnFiniteFrame.not_of_exists_valuation_world;
+    obtain ⟨X, hX₁⟩ := lindenbaum (𝓢 := Hilbert.Grz) (Φ := {-φ}) (Ψ := φ.subformulasGrz)
+      (by
+        simp only [Finset.singleton_subset_iff];
+        apply FormulaFinset.complementary_comp;
+        exact subformulasGrz.mem_self
+      )
+      (FormulaFinset.unprovable_iff_singleton_compl_consistent.mpr h);
     use (miniCanonicalModel φ).Val, X;
     apply truthlemma (by simp) |>.not.mpr;
     exact iff_mem_compl (by simp) |>.not.mpr $ by
@@ -303,8 +295,6 @@ instance complete : Complete (Hilbert.Grz) (ReflexiveTransitiveAntiSymmetricFini
       tauto;
 ⟩
 
-end Kripke
-
-end Hilbert.Grz
+end Hilbert.Grz.Kripke
 
 end LO.Modal

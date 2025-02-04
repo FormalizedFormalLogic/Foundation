@@ -1,6 +1,9 @@
 import Foundation.Modal.Hilbert2.K
+import Foundation.Modal.System.Grz
 
 namespace LO.Modal
+
+open System
 
 namespace Hilbert
 
@@ -233,6 +236,8 @@ instance : (Hilbert.Grz).HasK where p := 0; q := 1;
 instance : (Hilbert.Grz).HasGrz where p := 0
 instance : System.Grz (Hilbert.Grz) where
 
+lemma KT_weakerThan_Grz : Hilbert.KT ≤ₛ Hilbert.Grz := weakerThan_of_dominate_axioms $ by simp;
+
 
 protected abbrev Ver : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Ver (.atom 0)}⟩
 instance : (Hilbert.Ver).HasK where p := 0; q := 1;
@@ -246,7 +251,7 @@ instance : (Hilbert.Triv).HasT where p := 0
 instance : (Hilbert.Triv).HasTc where p := 0
 instance : System.Triv (Hilbert.Triv) where
 
-@[simp] lemma K4_weakerThan_Triv : Hilbert.K4 ≤ₛ Hilbert.Triv := weakerThan_of_dominate_axioms $ by simp;
+lemma K4_weakerThan_Triv : Hilbert.K4 ≤ₛ Hilbert.Triv := weakerThan_of_dominate_axioms $ by simp;
 
 protected abbrev N : Hilbert ℕ := ⟨{}⟩
 

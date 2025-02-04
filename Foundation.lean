@@ -123,7 +123,9 @@ import Foundation.Modal.Kripke2.Ver
 import Foundation.Modal.Kripke2.GL.Unnecessitation
 import Foundation.Modal.Kripke2.GL.MDP
 
--- import Foundation.Modal.Kripke2.Grz
+import Foundation.Modal.Kripke2.Grz.Completeness
+
+import Foundation.Modal.Kripke2.NNFormula
 import Foundation.Modal.Kripke2.ComplexityLimited
 import Foundation.Modal.Kripke2.Undefinability
 

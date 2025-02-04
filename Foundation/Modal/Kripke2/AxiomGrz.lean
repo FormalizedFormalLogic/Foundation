@@ -1,7 +1,7 @@
 import Foundation.Vorspiel.BinaryRelations
 import Foundation.Modal.Kripke2.FiniteFrame
 import Foundation.Modal.Kripke2.K
-import Foundation.Modal.Kripke2.AxiomGeach
+import Foundation.Modal.Kripke2.Geach
 
 namespace LO.Modal
 
@@ -14,7 +14,6 @@ open Relation (IrreflGen)
 
 abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel }
 abbrev ReflexiveTransitiveAntiSymmetricFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel }
-
 
 variable {F : Kripke.Frame}
 
@@ -56,7 +55,10 @@ lemma validate_Grz_of_refl_trans_wcwf
       . simp [Satisfies];
         use y;
     . constructor;
-      . sorry;
+      . by_contra hC;
+        subst hC;
+        simp [Satisfies] at hw₂;
+        contradiction;
       . assumption;
   . obtain ⟨x, Rwx, hx⟩ := by simpa [Satisfies] using hw₂;
     use x;
@@ -66,7 +68,10 @@ lemma validate_Grz_of_refl_trans_wcwf
       . intro y Rxy hy;
         exact hw₁ _ (hTrans Rwx Rxy) hy;
     . constructor;
-      . sorry;
+      . by_contra hC;
+        subst hC;
+        simp [Satisfies] at hw₃
+        contradiction;
       . assumption;
 
 
@@ -82,7 +87,7 @@ lemma validate_T_Four_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ �
     . exact h₂.1;
     . exact h₂.2 h₁;
   intro h₁;
-  have h₂ : Satisfies ⟨F, V⟩ x (□(.atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := by sorry; -- by soundness of K and lemmaGrz!
+  have h₂ : Satisfies ⟨F, V⟩ x (□(.atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := @Hilbert.K.Kripke.sound.sound (□(.atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) lemma_Grz₁! F (by trivial) V x;
   have h₃ : Satisfies ⟨F, V⟩ x (□(□(ψ ➝ □ψ) ➝ ψ) ➝ ψ) := Satisfies.iff_subst_self (s := λ a => if a = 0 then ψ else a) |>.mp $ h _ _;
   exact h₃ $ h₂ $ h₁;
 
@@ -139,7 +144,7 @@ lemma WCWF_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by
       . apply hf _ |>.2;
       . use (j + 1);
         rfl;
-    . simp [Satisfies];
+    . suffices ∃ x, f 0 = f (2 * x) by simpa [Satisfies];
       use 0;
   . push_neg at H;
     obtain ⟨j, k, ljk, ejk⟩ := H;
@@ -148,7 +153,7 @@ lemma WCWF_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by
     apply Classical.not_imp.mpr;
     constructor;
     . have : Satisfies ⟨F, V⟩ (f (j + 1)) (∼((.atom 0) ➝ □(.atom 0))) := by
-        simp_all [Satisfies, V];
+        suffices f (j + 1) ≠ f j ∧ f (j + 1) ≺ f j by simp_all [Satisfies, V];
         constructor;
         . exact Ne.symm $ (hf j).1;
         . rw [←ejk];
@@ -162,18 +167,18 @@ lemma WCWF_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by
             apply F_refl;
           . have : j + 1 < k := by omega;
             exact H this;
+      intro x hx;
+      contrapose;
       have : Satisfies ⟨F, V⟩ (f j) (□(∼(.atom 0) ➝ ∼□((.atom 0) ➝ □(.atom 0)))) := by
         simp_all [Satisfies, V];
         rintro x hx rfl;
         use f (j + 1);
         refine ⟨(hf j).2, Ne.symm $ (hf j).1, this.2⟩;
-      intro x hx;
-      contrapose;
       exact this _ hx;
     . simp [Satisfies, V];
 
-instance ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.is_defined_by_Grz
-  : ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.DefinedBy {Axioms.Grz (.atom 0)} := ⟨by
+instance ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.definedByAxiomGrz
+  : ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.DefinedByFormula (Axioms.Grz (.atom 0)) := ⟨by
   intro F;
   constructor;
   . rintro ⟨hRefl, hTrans, hWCWF⟩;
@@ -187,7 +192,9 @@ instance ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.is_defined_by_Gr
     . exact WCWF_of_validate_Grz h;
 ⟩
 
-instance : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.DefinedBy {Axioms.Grz (.atom 0)} := ⟨by
+instance
+  ReflexiveTransitiveAntiSymmetricFiniteFrameClass.definedByAxiomGrz
+  : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.DefinedByFormula (Axioms.Grz (.atom 0)) := ⟨by
   intro F;
   constructor;
   . rintro ⟨hRefl, hTrans, hAntisymm⟩;

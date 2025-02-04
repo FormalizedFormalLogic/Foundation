@@ -10,6 +10,8 @@ open Kripke
 
 namespace Hilbert.K
 
+instance Kripke.sound : Sound (Hilbert.K) AllFrameClass := inferInstance
+
 instance : System.Consistent (Hilbert.K) := Hilbert.instConsistent AllFrameClass
 
 instance : Kripke.Canonical (Hilbert.K) (AllFrameClass) := ⟨by trivial⟩
