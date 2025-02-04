@@ -8,13 +8,13 @@ variable {H : Hilbert α}
 open System
 open Hilbert.Deduction
 
-abbrev Theory.Consistent (H : Hilbert α) (T : Theory α) := T *⊬[H] ⊥
+abbrev FormulaSet.Consistent (H : Hilbert α) (T : FormulaSet α) := T *⊬[H] ⊥
 
-abbrev Theory.Inconsistent (H : Hilbert α) (T : Theory α) := ¬(T.Consistent H)
+abbrev FormulaSet.Inconsistent (H : Hilbert α) (T : FormulaSet α) := ¬(T.Consistent H)
 
-namespace Theory
+namespace FormulaSet
 
-variable {T : Theory α} (T_consis : T.Consistent H)
+variable {T : FormulaSet α} (T_consis : T.Consistent H)
 
 lemma def_consistent : T.Consistent H ↔ ∀ (Γ : List (Formula α)), (∀ ψ ∈ Γ, ψ ∈ T) → Γ ⊬[H] ⊥ := by
   constructor;
@@ -36,16 +36,16 @@ lemma self_consistent [H_consis : System.Consistent H] : H.axioms.Consistent H :
   have : H ⊢! ψ := imp_trans''! hC efq! ⨀ (iff_provable_list_conj.mpr $ λ _ h => maxm! $ hΓ _ h);
   contradiction;
 
-lemma union_consistent : Theory.Consistent H (T₁ ∪ T₂) → T₁.Consistent H ∧ T₂.Consistent H := by
+lemma union_consistent : FormulaSet.Consistent H (T₁ ∪ T₂) → T₁.Consistent H ∧ T₂.Consistent H := by
   intro h;
   replace h := def_consistent.mp h;
   constructor <;> { apply def_consistent.mpr; intro Γ hΓ; exact h Γ (by simp_all); }
 
-lemma union_not_consistent : ¬T₁.Consistent H ∨ ¬T₂.Consistent H → ¬(Theory.Consistent H (T₁ ∪ T₂)) := by
+lemma union_not_consistent : ¬T₁.Consistent H ∨ ¬T₂.Consistent H → ¬(FormulaSet.Consistent H (T₁ ∪ T₂)) := by
   contrapose; push_neg;
   exact union_consistent;
 
-lemma emptyset_consistent [H_consis : System.Consistent H] : Theory.Consistent H ∅ := by
+lemma emptyset_consistent [H_consis : System.Consistent H] : FormulaSet.Consistent H ∅ := by
   obtain ⟨f, hf⟩ := H_consis.exists_unprovable;
   apply def_consistent.mpr;
   intro Γ hΓ; by_contra hC;
@@ -55,7 +55,7 @@ lemma emptyset_consistent [H_consis : System.Consistent H] : Theory.Consistent H
 
 variable [DecidableEq α]
 
-lemma iff_insert_consistent : Theory.Consistent H (insert φ T) ↔ ∀ {Γ : List (Formula α)}, (∀ ψ ∈ Γ, ψ ∈ T) → H ⊬ φ ⋏ ⋀Γ ➝ ⊥ := by
+lemma iff_insert_consistent : FormulaSet.Consistent H (insert φ T) ↔ ∀ {Γ : List (Formula α)}, (∀ ψ ∈ Γ, ψ ∈ T) → H ⊬ φ ⋏ ⋀Γ ➝ ⊥ := by
   constructor;
   . intro h Γ hΓ;
     by_contra hC;
@@ -87,7 +87,7 @@ lemma iff_insert_inconsistent : ¬(insert φ T).Consistent H ↔ ∃ Γ : List (
   . contrapose; push_neg; apply iff_insert_consistent.mpr;
   . contrapose; push_neg; apply iff_insert_consistent.mp;
 
-lemma provable_iff_insert_neg_not_consistent : T *⊢[H]! φ ↔ ¬Theory.Consistent H (insert (∼φ) T) := by
+lemma provable_iff_insert_neg_not_consistent : T *⊢[H]! φ ↔ ¬FormulaSet.Consistent H (insert (∼φ) T) := by
   constructor;
   . intro h;
     apply iff_insert_inconsistent.mpr;
@@ -107,16 +107,16 @@ lemma provable_iff_insert_neg_not_consistent : T *⊢[H]! φ ↔ ¬Theory.Consis
     . have : Γ ⊢[H]! ∼φ ➝ ⊥ := imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂;
       exact dne'! $ neg_equiv'!.mpr this;
 
-lemma unprovable_iff_insert_neg_consistent : T *⊬[H] φ ↔ Theory.Consistent H (insert (∼φ) T) := by
+lemma unprovable_iff_insert_neg_consistent : T *⊬[H] φ ↔ FormulaSet.Consistent H (insert (∼φ) T) := by
   simpa [not_not] using provable_iff_insert_neg_not_consistent.not;
 
-lemma unprovable_iff_singleton_neg_consistent : H ⊬ φ ↔ Theory.Consistent H {∼φ} := by
-  have e : insert (∼φ) ∅ = ({∼φ} : Theory α) := by aesop;
+lemma unprovable_iff_singleton_neg_consistent : H ⊬ φ ↔ FormulaSet.Consistent H {∼φ} := by
+  have e : insert (∼φ) ∅ = ({∼φ} : FormulaSet α) := by aesop;
   have H := unprovable_iff_insert_neg_consistent (H := H) (T := ∅) (φ := φ);
   rw [e] at H;
   exact Iff.trans Context.provable_iff_provable.not H;
 
-lemma neg_provable_iff_insert_not_consistent : T *⊢[H]! ∼φ ↔ ¬Theory.Consistent H (insert (φ) T) := by
+lemma neg_provable_iff_insert_not_consistent : T *⊢[H]! ∼φ ↔ ¬FormulaSet.Consistent H (insert (φ) T) := by
   constructor;
   . intro h;
     apply iff_insert_inconsistent.mpr;
@@ -136,11 +136,11 @@ lemma neg_provable_iff_insert_not_consistent : T *⊢[H]! ∼φ ↔ ¬Theory.Con
     . apply neg_equiv'!.mpr;
       exact imp_swap'! $ and_imply_iff_imply_imply'!.mp hΓ₂;
 
-lemma neg_unprovable_iff_insert_consistent : T *⊬[H] ∼φ ↔ Theory.Consistent H (insert (φ) T) := by
+lemma neg_unprovable_iff_insert_consistent : T *⊬[H] ∼φ ↔ FormulaSet.Consistent H (insert (φ) T) := by
   simpa [not_not] using neg_provable_iff_insert_not_consistent.not;
 
-lemma unprovable_iff_singleton_consistent : H ⊬ ∼φ ↔ Theory.Consistent H {φ} := by
-  have e : insert (φ) ∅ = ({φ} : Theory α) := by aesop;
+lemma unprovable_iff_singleton_consistent : H ⊬ ∼φ ↔ FormulaSet.Consistent H {φ} := by
+  have e : insert (φ) ∅ = ({φ} : FormulaSet α) := by aesop;
   have H := neg_unprovable_iff_insert_consistent (H := H) (T := ∅) (φ := φ);
   rw [e] at H;
   exact Iff.trans Context.provable_iff_provable.not H;
@@ -165,7 +165,7 @@ lemma not_mem_falsum_of_consistent (T_consis : T.Consistent H) : ⊥ ∉ T := by
   have : H ⊢! ⊥ ➝ ⊥ := efq!;
   contradiction;
 
-lemma not_singleton_consistent [H.HasNecessitation] (T_consis : T.Consistent H) (h : ∼□φ ∈ T) : Theory.Consistent H {∼φ} := by
+lemma not_singleton_consistent [H.HasNecessitation] (T_consis : T.Consistent H) (h : ∼□φ ∈ T) : FormulaSet.Consistent H {∼φ} := by
   apply def_consistent.mpr;
   intro Γ hΓ;
   simp only [Set.mem_singleton_iff] at hΓ;
@@ -174,7 +174,7 @@ lemma not_singleton_consistent [H.HasNecessitation] (T_consis : T.Consistent H) 
   have : H ⊬ ∼(□φ) ➝ ⊥ := def_consistent.mp T_consis (Γ := [∼(□φ)]) (by aesop)
   contradiction;
 
-lemma either_consistent (T_consis : T.Consistent H) (φ) : Theory.Consistent H (insert φ T) ∨ Theory.Consistent H (insert (∼φ) T) := by
+lemma either_consistent (T_consis : T.Consistent H) (φ) : FormulaSet.Consistent H (insert φ T) ∨ FormulaSet.Consistent H (insert (∼φ) T) := by
   by_contra hC; push_neg at hC;
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := iff_insert_inconsistent.mp hC.1;
   obtain ⟨Δ, hΔ₁, hΔ₂⟩ := iff_insert_inconsistent.mp hC.2;
@@ -191,8 +191,8 @@ lemma either_consistent (T_consis : T.Consistent H) (φ) : Theory.Consistent H (
 
 lemma exists_maximal_consistent_theory
   (T_consis : T.Consistent H)
-  : ∃ Z, Theory.Consistent H Z ∧ T ⊆ Z ∧ ∀ U, Theory.Consistent H U → Z ⊆ U → U = Z := by
-  obtain ⟨Z, h₁, ⟨h₂, h₃⟩⟩ := zorn_subset_nonempty { T : Theory α | T.Consistent H } (by
+  : ∃ Z, FormulaSet.Consistent H Z ∧ T ⊆ Z ∧ ∀ U, FormulaSet.Consistent H U → Z ⊆ U → U = Z := by
+  obtain ⟨Z, h₁, ⟨h₂, h₃⟩⟩ := zorn_subset_nonempty { T : FormulaSet α | T.Consistent H } (by
     intro c hc chain hnc;
     existsi (⋃₀ c);
     simp only [Set.mem_setOf_eq, Set.mem_sUnion];
@@ -204,8 +204,8 @@ lemma exists_maximal_consistent_theory
           (s := ↑Γ.toFinset) (by simp)
           (by intro φ hp; simp_all);
       simp [List.coe_toFinset] at hUs;
-      have : Theory.Consistent H U := hc hUc;
-      have : ¬Theory.Consistent H U := by
+      have : FormulaSet.Consistent H U := hc hUc;
+      have : ¬FormulaSet.Consistent H U := by
         apply def_inconsistent.mpr;
         use Γ;
         constructor;
@@ -228,7 +228,7 @@ protected alias lindenbaum := exists_maximal_consistent_theory
 omit [DecidableEq α] in
 open Classical in
 lemma intro_union_consistent
-  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ T₁) ∧ (∀ φ ∈ Γ₂, φ ∈ T₂) → H ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥) : Theory.Consistent H (T₁ ∪ T₂) := by
+  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ T₁) ∧ (∀ φ ∈ Γ₂, φ ∈ T₂) → H ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥) : FormulaSet.Consistent H (T₁ ∪ T₂) := by
   apply def_consistent.mpr;
   intro Δ hΔ;
   let Δ₁ := (Δ.filter (· ∈ T₁));
@@ -246,7 +246,7 @@ lemma intro_union_consistent
 open Classical in
 lemma intro_triunion_consistent
   (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ T₁) ∧ (∀ φ ∈ Γ₂, φ ∈ T₂) ∧ (∀ φ ∈ Γ₃, φ ∈ T₃) → H ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
-  : Theory.Consistent H (T₁ ∪ T₂ ∪ T₃) := by
+  : FormulaSet.Consistent H (T₁ ∪ T₂ ∪ T₃) := by
   apply intro_union_consistent;
   rintro Γ₁₂ Γ₃ ⟨h₁₂, h₃⟩;
   simp at h₁₂;
@@ -275,26 +275,26 @@ lemma intro_triunion_consistent
 
 lemma not_mem_of_mem_neg (T_consis : T.Consistent H) (h : ∼φ ∈ T) : φ ∉ T := by
   by_contra hC;
-  have : [φ, ∼φ] ⊬[H] ⊥ := (Theory.def_consistent.mp T_consis) [φ, ∼φ] (by simp_all);
+  have : [φ, ∼φ] ⊬[H] ⊥ := (FormulaSet.def_consistent.mp T_consis) [φ, ∼φ] (by simp_all);
   have : [φ, ∼φ] ⊢[H]! ⊥ := System.bot_of_mem_either! (φ := φ) (Γ := [φ, ∼φ]) (by simp) (by simp);
   contradiction;
 
 lemma not_mem_neg_of_mem (T_consis : T.Consistent H) (h : φ ∈ T) : ∼φ ∉ T := by
   by_contra hC;
-  have : [φ, ∼φ] ⊬[H] ⊥ := (Theory.def_consistent.mp T_consis) [φ, ∼φ] (by simp_all);
+  have : [φ, ∼φ] ⊬[H] ⊥ := (FormulaSet.def_consistent.mp T_consis) [φ, ∼φ] (by simp_all);
   have : [φ, ∼φ] ⊢[H]! ⊥ := System.bot_of_mem_either! (φ := φ) (Γ := [φ, ∼φ]) (by simp) (by simp);
   contradiction;
-end Theory
+end FormulaSet
 
-structure MaximalConsistentTheory (H : Hilbert α) where
-  theory : Theory α
+structure MaximalConsistentFormulaSet (H : Hilbert α) where
+  theory : FormulaSet α
   consistent : theory.Consistent H
-  maximal : ∀ {U}, theory ⊂ U → ¬Theory.Consistent H U
-alias MCT := MaximalConsistentTheory
+  maximal : ∀ {U}, theory ⊂ U → ¬FormulaSet.Consistent H U
+alias MCT := MaximalConsistentFormulaSet
 
-namespace MaximalConsistentTheory
+namespace MaximalConsistentFormulaSet
 
-open Theory
+open FormulaSet
 
 variable [DecidableEq α]
 variable {H : Hilbert α}
@@ -302,7 +302,7 @@ variable {Ω Ω₁ Ω₂ : MCT H}
 variable {φ : Formula α}
 
 lemma exists_maximal_Lconsistented_theory (consisT : T.Consistent H) : ∃ Ω : MCT H, (T ⊆ Ω.theory) := by
-  have ⟨Ω, hΩ₁, hΩ₂, hΩ₃⟩ := Theory.lindenbaum consisT;
+  have ⟨Ω, hΩ₁, hΩ₂, hΩ₃⟩ := FormulaSet.lindenbaum consisT;
   use {
     theory := Ω,
     consistent := hΩ₁,
@@ -325,7 +325,7 @@ lemma either_mem (Ω : MCT H) (φ) : φ ∈ Ω.theory ∨ ∼φ ∈ Ω.theory :=
   | inr h => have := Ω.maximal (Set.ssubset_insert hC.2); contradiction;
 
 omit [DecidableEq α] in
-lemma maximal' {φ : Formula α} (hp : φ ∉ Ω.theory) : ¬Theory.Consistent H (insert φ Ω.theory) := Ω.maximal (Set.ssubset_insert hp)
+lemma maximal' {φ : Formula α} (hp : φ ∉ Ω.theory) : ¬FormulaSet.Consistent H (insert φ Ω.theory) := Ω.maximal (Set.ssubset_insert hp)
 
 lemma membership_iff : (φ ∈ Ω.theory) ↔ (Ω.theory *⊢[H]! φ) := by
   constructor;
@@ -605,6 +605,6 @@ lemma iff_mem_box_conj : (□⋀Γ ∈ Ω.theory) ↔ (∀ φ ∈ Γ, □φ ∈ 
 
 end Normal
 
-end MaximalConsistentTheory
+end MaximalConsistentFormulaSet
 
 end LO.Modal

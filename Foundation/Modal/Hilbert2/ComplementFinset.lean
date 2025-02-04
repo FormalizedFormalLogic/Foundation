@@ -1,63 +1,16 @@
 import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Modal.Hilbert.ConsistentTheory
+import Foundation.Modal.Complement
+import Foundation.Modal.Hilbert2.MaximalConsistentSet
 
 namespace LO.Modal
 
-variable {H : Hilbert α}
-
-namespace Formula
-
-def complement : Formula α → Formula α
-  | ∼φ => φ
-  | φ  => ∼φ
-prefix:80 "-" => complement
-
-namespace complement
-
-variable {φ ψ : Formula α}
-
-@[simp] lemma neg_def : -(∼φ) = φ := by
-  induction φ using Formula.rec' <;> simp_all [complement]
-
-@[simp] lemma bot_def : -(⊥ : Formula α) = ∼(⊥) := by simp only [complement, imp_inj, and_true]; rfl;
-
-@[simp] lemma box_def : -(□φ) = ∼(□φ) := by simp only [complement, imp_inj, and_true]; rfl;
-
-lemma imp_def₁ (hq : ψ ≠ ⊥) : -(φ ➝ ψ) = ∼(φ ➝ ψ) := by
-  simp only [complement];
-  split;
-  . rename_i h; simp [imp_eq, falsum_eq, hq] at h;
-  . rfl;
-
-lemma imp_def₂ (hq : ψ = ⊥) : -(φ ➝ ψ) = φ := by
-  subst_vars;
-  apply neg_def;
-
-lemma resort_box (h : -φ = □ψ) : φ = ∼□ψ := by
-  simp [complement] at h;
-  split at h;
-  . subst_vars; rfl;
-  . contradiction;
-
-lemma or [DecidableEq α] (φ : Formula α) : -φ = ∼φ ∨ ∃ ψ, ∼ψ = φ := by
-  induction φ using Formula.cases_neg with
-  | himp _ _ hn => simp [imp_def₁ hn];
-  | hfalsum => simp;
-  | hneg => simp;
-  | hatom a => simp [complement];
-  | hbox φ => simp [complement]; rfl;
-
-end complement
-
-end Formula
 
 section
 
-variable [System (Formula α) S] {𝓢 : S}
-variable [System.ModusPonens 𝓢]
+variable {H : Hilbert α}
 variable {φ ψ : Formula α}
 
-lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! φ) (hcp : 𝓢 ⊢! -φ) : 𝓢 ⊢! ⊥ := by
+lemma complement_derive_bot [DecidableEq α] (hp : H ⊢! φ) (hcp : H ⊢! -φ) : H ⊢! ⊥ := by
   induction φ using Formula.cases_neg with
   | hfalsum => assumption;
   | hatom a => unfold Formula.complement at hcp; exact hcp ⨀ hp;
@@ -67,7 +20,7 @@ lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! φ) (hcp : 𝓢 ⊢
     simp only [Formula.complement.imp_def₁ h] at hcp;
     exact hcp ⨀ hp;
 
-lemma neg_complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! ∼φ) (hcp : 𝓢 ⊢! ∼(-φ)) : 𝓢 ⊢! ⊥ := by
+lemma neg_complement_derive_bot [DecidableEq α] (hp : H ⊢! ∼φ) (hcp : H ⊢! ∼(-φ)) : H ⊢! ⊥ := by
   induction φ using Formula.cases_neg with
   | hfalsum =>
     unfold Formula.complement at hcp;
@@ -88,74 +41,44 @@ lemma neg_complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! ∼φ) (hcp : �
 end
 
 
-namespace FormulaFinset
+def FormulaFinset.Consistent (H : Hilbert α) (P : FormulaFinset α) : Prop := P *⊬[H] ⊥
 
-variable [DecidableEq α]
+variable {P : FormulaFinset α} {φ : Formula α}
 
-def complementary (P : FormulaFinset α) : FormulaFinset α := P ∪ (P.image (Formula.complement))
-postfix:80 "⁻" => FormulaFinset.complementary
-
-variable {P P₁ P₂ : FormulaFinset α} {φ ψ χ: Formula α}
-
-lemma complementary_mem (h : φ ∈ P) : φ ∈ P⁻ := by simp [complementary]; tauto;
-
-lemma complementary_comp (h : φ ∈ P) : -φ ∈ P⁻ := by simp [complementary]; tauto;
-
-lemma complementary_mem_box (hi : ∀ {ψ χ}, ψ ➝ χ ∈ P → ψ ∈ P := by trivial) : □φ ∈ P⁻ → □φ ∈ P := by
-  intro h;
-  simp [complementary] at h;
-  rcases h with (h | ⟨ψ, hq, eq⟩);
-  . assumption;
-  . replace eq := Formula.complement.resort_box eq;
-    subst eq;
-    exact hi hq;
-
-class ComplementaryClosed (P : FormulaFinset α) (S : FormulaFinset α) : Prop where
-  subset : P ⊆ S⁻
-  either : ∀ φ ∈ S, φ ∈ P ∨ -φ ∈ P
-
-def SubformulaeComplementaryClosed (P : FormulaFinset α) (φ : Formula α) : Prop := P.ComplementaryClosed φ.subformulas
-
-
-
-section Consistent
-
-def Consistent (H : Hilbert α) (P : FormulaFinset α) : Prop := P *⊬[H] ⊥
-
-open FormulaSet
-
-omit [DecidableEq α] in
+/-
 @[simp]
-lemma iff_theory_consistent_formulae_consistent {P : FormulaFinset α} : FormulaSet.Consistent H P ↔ FormulaFinset.Consistent H P := by
-  simp [Consistent, FormulaSet.Consistent]
+lemma iff_theory_consistent_formulae_consistent {P : FormulaFinset α} : Theory.Consistent H P ↔ FormulaFinset.Consistent H P := by
+  simp [Consistent, Theory.Consistent]
+-/
 
-omit [DecidableEq α] in
+/-
 @[simp]
 lemma empty_conisistent [System.Consistent H] : FormulaFinset.Consistent H ∅ := by
   rw [←iff_theory_consistent_formulae_consistent];
-  convert FormulaSet.emptyset_consistent (α := α);
+  convert Theory.emptyset_consistent (α := α);
   . simp;
   . assumption;
+-/
 
-lemma provable_iff_insert_neg_not_consistent : ↑P *⊢[H]! φ ↔ ¬(FormulaFinset.Consistent H (insert (∼φ) P)) := by
+lemma provable_iff_insert_neg_not_consistent : P *⊢[H]! φ ↔ ¬(FormulaFinset.Consistent H (insert (∼φ) P)) := by
   rw [←iff_theory_consistent_formulae_consistent];
-  simpa only [Finset.coe_insert, not_not] using FormulaSet.provable_iff_insert_neg_not_consistent;
+  simpa only [Finset.coe_insert, not_not] using Theory.provable_iff_insert_neg_not_consistent;
 
 lemma neg_provable_iff_insert_not_consistent : ↑P *⊢[H]! ∼φ ↔ ¬(FormulaFinset.Consistent H (insert (φ) P)) := by
   rw [←iff_theory_consistent_formulae_consistent];
-  simpa only [Finset.coe_insert, not_not] using FormulaSet.neg_provable_iff_insert_not_consistent;
+  simpa only [Finset.coe_insert, not_not] using Theory.neg_provable_iff_insert_not_consistent;
 
 lemma unprovable_iff_singleton_neg_consistent : H ⊬ φ ↔ FormulaFinset.Consistent H ({∼φ}) := by
   rw [←iff_theory_consistent_formulae_consistent];
-  simpa using FormulaSet.unprovable_iff_singleton_neg_consistent;
+  simpa using Theory.unprovable_iff_singleton_neg_consistent;
 
 lemma unprovable_iff_singleton_compl_consistent : H ⊬ φ ↔ FormulaFinset.Consistent H ({-φ}) := by
   rcases (Formula.complement.or φ) with (hp | ⟨ψ, rfl⟩);
   . rw [hp];
-    convert FormulaSet.unprovable_iff_singleton_neg_consistent (H := H) (φ := φ);
+    convert Theory.unprovable_iff_singleton_neg_consistent (H := H) (φ := φ);
     simp;
   . simp only [Formula.complement];
-    convert FormulaSet.unprovable_iff_singleton_consistent (H := H) (φ := ψ);
+    convert Theory.unprovable_iff_singleton_consistent (H := H) (φ := ψ);
     simp;
 
 lemma provable_iff_singleton_compl_inconsistent : H ⊢! φ ↔ ¬(FormulaFinset.Consistent H ({-φ})) := by
@@ -167,13 +90,13 @@ lemma intro_union_consistent
   (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ P₁) ∧ (∀ φ ∈ Γ₂, φ ∈ P₂) → H ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥)
   : FormulaFinset.Consistent H (P₁ ∪ P₂) := by
   rw [←iff_theory_consistent_formulae_consistent];
-  simpa using FormulaSet.intro_union_consistent h;
+  simpa using Theory.intro_union_consistent h;
 
 lemma intro_triunion_consistent
   (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ P₁) ∧ (∀ φ ∈ Γ₂, φ ∈ P₂) ∧ (∀ φ ∈ Γ₃, φ ∈ P₃) → H ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
   : FormulaFinset.Consistent H (P₁ ∪ P₂ ∪ P₃) := by
   rw [←iff_theory_consistent_formulae_consistent];
-  convert FormulaSet.intro_triunion_consistent h;
+  convert Theory.intro_triunion_consistent h;
   ext;
   constructor;
   . simp only [Finset.coe_union, Set.mem_union, Finset.mem_coe];
@@ -216,7 +139,7 @@ lemma next_consistent
     contradiction;
 
 lemma enum_consistent
-  (P_consis : FormulaFinset.Consistent H P)
+  (P_consis : P.Consistent H )
   {l : List (Formula α)}
   : FormulaFinset.Consistent H (P[l]) := by
   induction l with
@@ -354,7 +277,7 @@ lemma mem_verum (h : ⊤ ∈ S) : ⊤ ∈ X.formulae := by
   exact verum!;
 
 @[simp]
-lemma mem_falsum : ⊥ ∉ X.formulae := FormulaSet.not_mem_falsum_of_consistent X.consistent
+lemma mem_falsum : ⊥ ∉ X.formulae := Theory.not_mem_falsum_of_consistent X.consistent
 
 lemma iff_mem_compl (hq_sub : ψ ∈ S) : (ψ ∈ X.formulae) ↔ (-ψ ∉ X.formulae) := by
   constructor;

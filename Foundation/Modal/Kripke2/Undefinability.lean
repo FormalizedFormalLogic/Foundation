@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Preservation
+import Foundation.Modal.Kripke2.Preservation
 
 namespace LO.Modal
 
@@ -6,16 +6,17 @@ namespace Kripke
 
 abbrev IrreflexiveFrameClass : FrameClass := { F | Irreflexive F }
 
-theorem undefinable_irreflexive : ¬∃ Ax : Theory ℕ, IrreflexiveFrameClass.DefinedBy Ax := by
+theorem undefinable_irreflexive : ¬∃ φ, IrreflexiveFrameClass.DefinedByFormula φ := by
   by_contra hC;
-  obtain ⟨Ax, h⟩ := hC;
+  obtain ⟨φ, ⟨h⟩⟩ := hC;
+  replace h : ∀ F : Frame, Irreflexive F ↔ F ⊧ φ := by simpa using h;
 
-  let F₁ : Frame := { World := Fin 2, Rel := (· ≠ ·) };
-  let F₂ : Frame := { World := Fin 1, Rel := (· = ·) };
+  let F₁ : Frame := ⟨Fin 2, (· ≠ ·)⟩;
+  let F₂ : Frame := ⟨Fin 1, (· = ·)⟩;
 
   let f : F₁ →ₚ F₂ := {
     toFun := λ _ => 0,
-    forth := by aesop;
+    forth := by omega;
     back := by
       intro x y h;
       use 1 - x;
@@ -30,7 +31,7 @@ theorem undefinable_irreflexive : ¬∃ Ax : Theory ℕ, IrreflexiveFrameClass.D
   have : Irreflexive F₁ := by simp [Irreflexive, F₁];
   have : Irreflexive F₂ := by
     apply h F₂ |>.mpr;
-    apply theory_ValidOnFrame_of_surjective_pseudoMorphism f f_surjective;
+    apply validOnFrame_of_surjective_pseudoMorphism f f_surjective;
     exact h F₁ |>.mp $ by simpa;
   have : ¬Irreflexive F₂ := by simp [Irreflexive, F₂];
   contradiction;

@@ -65,6 +65,7 @@ import Foundation.IntProp.Dialectica.Basic
 
 -- Modal
 
+/-
 import Foundation.Modal.Hilbert.GL_Independency
 import Foundation.Modal.Hilbert.Subst
 import Foundation.Modal.Hilbert.Maximal.Unprovability
@@ -106,19 +107,26 @@ import Foundation.Modal.ModalCompanion.GMT
 
 import Foundation.Modal.Boxdot.K4_S4
 import Foundation.Modal.Boxdot.GL_Grz
+-/
 
-import Foundation.Modal.Kripke.NNFormula
-import Foundation.Modal.Kripke.Filteration
-import Foundation.Modal.Kripke.ComplexityLimited
-import Foundation.Modal.Kripke.Ver
-import Foundation.Modal.Kripke.Dot3
-import Foundation.Modal.Kripke.S5
-import Foundation.Modal.Kripke.Undefinability
+import Foundation.Modal.Kripke2.Hilbert.K
+import Foundation.Modal.Kripke2.Hilbert.KT
+import Foundation.Modal.Kripke2.Hilbert.KTB
+import Foundation.Modal.Kripke2.Hilbert.KT4B
+import Foundation.Modal.Kripke2.Hilbert.S4
+import Foundation.Modal.Kripke2.Hilbert.S4Dot2
+import Foundation.Modal.Kripke2.Hilbert.S4Dot3
+import Foundation.Modal.Kripke2.Hilbert.S5
+import Foundation.Modal.Kripke2.Hilbert.Triv
+import Foundation.Modal.Kripke2.Hilbert.Ver
 
-import Foundation.Modal.Kripke.GL.Tree
-import Foundation.Modal.Kripke.GL.Unnec
-import Foundation.Modal.Kripke.GL.MDP
+import Foundation.Modal.Kripke2.Hilbert.GL.Unnecessitation
+import Foundation.Modal.Kripke2.Hilbert.GL.MDP
 
-import Foundation.Modal.Kripke.Grz.Completeness
+import Foundation.Modal.Kripke2.Hilbert.Grz.Completeness
 
-import Foundation.Modal.PLoN.Completeness
+import Foundation.Modal.Kripke2.NNFormula
+import Foundation.Modal.Kripke2.ComplexityLimited
+import Foundation.Modal.Kripke2.Undefinability
+
+import Foundation.Modal.PLoN.Hilbert.N
