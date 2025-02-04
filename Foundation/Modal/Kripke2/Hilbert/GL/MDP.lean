@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke2.GL.Unnecessitation
+import Foundation.Modal.Kripke2.Hilbert.GL.Unnecessitation
 
 namespace LO.Modal
 

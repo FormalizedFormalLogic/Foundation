@@ -1,7 +1,7 @@
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Hilbert2.WellKnown
 import Foundation.Modal.Kripke2.AxiomGrz
-import Foundation.Modal.Kripke2.KT
+import Foundation.Modal.Kripke2.Hilbert.KT
 import Foundation.Modal.Kripke2.Hilbert.Soundness
 import Foundation.Modal.System.Grz
 

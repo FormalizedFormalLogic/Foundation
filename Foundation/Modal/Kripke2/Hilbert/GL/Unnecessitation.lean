@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke2.GL.Tree
+import Foundation.Modal.Kripke2.Hilbert.GL.Tree
 import Foundation.Modal.Kripke2.SimpleExtension
 
 namespace LO.Modal

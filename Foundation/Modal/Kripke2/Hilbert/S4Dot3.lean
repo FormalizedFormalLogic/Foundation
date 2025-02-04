@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke2.Geach
+import Foundation.Modal.Kripke2.Hilbert.Geach
 import Foundation.Modal.Kripke2.AxiomDot3
 
 namespace LO.Modal

@@ -1,6 +1,6 @@
 import Foundation.Modal.System.GL
 import Foundation.Modal.ComplementClosedConsistentFinset
-import Foundation.Modal.Kripke2.GL.Soundness
+import Foundation.Modal.Kripke2.Hilbert.GL.Soundness
 
 namespace LO.Modal.Hilbert.GL.Kripke
 

@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke2.Grz.Soundness
+import Foundation.Modal.Kripke2.Hilbert.Grz.Soundness
 
 namespace LO.Modal
 

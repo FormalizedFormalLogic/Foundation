@@ -1,7 +1,7 @@
 import Foundation.Vorspiel.BinaryRelations
 import Foundation.Modal.Kripke2.FiniteFrame
-import Foundation.Modal.Kripke2.K
-import Foundation.Modal.Kripke2.Geach
+import Foundation.Modal.Kripke2.Hilbert.K
+import Foundation.Modal.Kripke2.Hilbert.Geach
 
 namespace LO.Modal
 

@@ -1,6 +1,6 @@
-import Foundation.Modal.Kripke2.Geach
+import Foundation.Modal.Kripke2.Hilbert.Geach
 import Foundation.Modal.Kripke2.Preservation
-import Foundation.Modal.Kripke2.KT4B
+import Foundation.Modal.Kripke2.Hilbert.KT4B
 
 namespace LO.Modal
 

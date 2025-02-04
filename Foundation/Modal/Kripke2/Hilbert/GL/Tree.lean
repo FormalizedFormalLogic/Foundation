@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke2.GL.Completeness
+import Foundation.Modal.Kripke2.Hilbert.GL.Completeness
 import Foundation.Modal.Kripke2.Tree
 
 namespace LO.Modal
