@@ -20,6 +20,8 @@ lemma S4Dot2.eq_Geach : Hilbert.S4Dot2 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 
 
 lemma S5.eq_Geach : Hilbert.S5 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by aesop;
 
+lemma Triv.eq_Geach : Hilbert.Triv = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩} := by aesop;
+
 instance HasT_of_mem_0_0_1_0 (h : ⟨0, 0, 1, 0⟩ ∈ G) : HasT (Hilbert.Geach G) where
   p := 0
   mem_T := by

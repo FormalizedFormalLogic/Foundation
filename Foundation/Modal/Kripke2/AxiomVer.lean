@@ -9,6 +9,10 @@ namespace Kripke
 
 abbrev IsolatedFrameClass : FrameClass := { F | Isolated F }
 
+instance : IsolatedFrameClass.IsNonempty := by
+  use ⟨Unit, λ _ _ => False⟩;
+  tauto;
+
 instance IsolatedFrameClass.DefinedByAxiomVer : IsolatedFrameClass.DefinedByFormula (Axioms.Ver (.atom 0)) :=
   FrameClass.definedByFormula_of_iff_mem_validate $ by
   intro F;
