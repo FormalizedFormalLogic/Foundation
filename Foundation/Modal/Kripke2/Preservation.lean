@@ -1,12 +1,10 @@
 import Foundation.Modal.Kripke2.Closure
 
-
 namespace LO.Modal
 
 namespace Kripke
 
 open Formula.Kripke
-
 
 section Bisimulation
 

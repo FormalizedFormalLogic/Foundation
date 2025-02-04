@@ -96,14 +96,20 @@ end Formula.Kripke
 
 namespace Kripke
 
-class FiniteFrameClass.DefinedBy (C : Kripke.FiniteFrameClass) (Γ : Set (Formula ℕ)) where
+namespace FiniteFrameClass
+
+class DefinedBy (C : Kripke.FiniteFrameClass) (Γ : Set (Formula ℕ)) where
   defines : ∀ F, F ∈ C ↔ (∀ φ ∈ Γ, F ⊧ φ)
 
-class FiniteFrameClass.FiniteDefinedBy (C Γ) extends FiniteFrameClass.DefinedBy C Γ where
+class FiniteDefinedBy (C Γ) extends FiniteFrameClass.DefinedBy C Γ where
   finite : Set.Finite Γ
 
-class FiniteFrameClass.IsNonempty (C : Kripke.FiniteFrameClass) where
+abbrev DefinedByFormula (C) (φ : Formula ℕ) := FiniteFrameClass.DefinedBy C {φ}
+
+class IsNonempty (C : Kripke.FiniteFrameClass) where
   nonempty : Nonempty C
+
+end FiniteFrameClass
 
 end Kripke
 

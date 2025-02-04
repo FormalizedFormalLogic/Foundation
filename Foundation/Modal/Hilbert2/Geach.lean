@@ -6,10 +6,19 @@ namespace Hilbert
 
 variable (α) [DecidableEq α]
 
-protected def Geach (G : Set (GeachConfluent.Taple)) : Hilbert ℕ := ⟨
+protected abbrev Geach (G : Set (Geachean.Taple)) : Hilbert ℕ := ⟨
   {Axioms.K (.atom 0) (.atom 1)}
   ∪ G.image (λ t => Axioms.Geach t (.atom 0))
 ⟩
+
+instance : HasK (Hilbert.Geach G) where p := 0; q := 1
+instance : System.K (Hilbert.Geach G) where
+
+lemma S4.eq_Geach : Hilbert.S4 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩} := by aesop;
+
+lemma S4Dot2.eq_Geach : Hilbert.S4Dot2 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩} := by aesop;
+
+lemma S5.eq_Geach : Hilbert.S5 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by aesop;
 
 instance HasT_of_mem_0_0_1_0 (h : ⟨0, 0, 1, 0⟩ ∈ G) : HasT (Hilbert.Geach G) where
   p := 0

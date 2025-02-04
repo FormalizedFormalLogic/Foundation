@@ -14,7 +14,7 @@ variable {𝓢 : S} [System.Consistent 𝓢] [System.K 𝓢]
 namespace Kripke
 
 abbrev canonicalFrame (𝓢 : S) [System.Consistent 𝓢] [System.K 𝓢] : Kripke.Frame where
-  World := MCS 𝓢
+  World := MaximalConsistentSet 𝓢
   Rel X Y := □''⁻¹X.1 ⊆ Y.1
 
 namespace canonicalFrame
@@ -151,47 +151,26 @@ lemma iff_valid_on_canonicalModel_deducible : (canonicalModel 𝓢) ⊧ φ ↔ �
   . intro h Ω;
     suffices φ ∈ Ω.1 by exact truthlemma.mpr this;
     by_contra hC;
-    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := FormulaSet.iff_insert_inconsistent.mp $ (MaximalConsistentSet.maximal' hC);
+    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := FormulaSet.iff_insert_inconsistent.mp $ (Ω.maximal' hC);
     have : Γ ⊢[𝓢]! ⊥ := FiniteContext.provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hΓ₂ ⨀ h;
-    have : Γ ⊬[𝓢] ⊥ := FormulaSet.def_consistent.mp (MaximalConsistentSet.consistent) _ hΓ₁;
+    have : Γ ⊬[𝓢] ⊥ := FormulaSet.def_consistent.mp (Ω.consistent) _ hΓ₁;
     contradiction;
 
-/-
-lemma realize_axiomset_of_self_canonicalModel : (canonicalModel 𝓢) ⊧* H.axioms := by
-  apply Semantics.realizeSet_iff.mpr;
-  intro φ hp;
-  apply iff_valid_on_canonicalModel_deducible.mpr;
-  exact maxm! hp;
+end lemmata
 
-lemma realize_theory_of_self_canonicalModel : (canonicalModel 𝓢) ⊧* (System.1 H) := by
-  apply Semantics.realizeSet_iff.mpr;
-  intro φ hp;
-  apply iff_valid_on_canonicalModel_deducible.mpr;
-  simpa [System.1] using hp;
--/
+class Canonical (𝓢 : S) [System.Consistent 𝓢] [System.K 𝓢] (C : FrameClass) : Prop where
+  canonical : (Kripke.canonicalFrame 𝓢) ∈ C
 
-lemma complete_of_canonical {C : FrameClass} (hFC : canonicalFrame 𝓢 ∈ C) : C ⊧ φ → 𝓢 ⊢! φ := by
+instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
   contrapose;
   intro h;
   apply ValidOnFrameClass.not_of_exists_model;
   use (canonicalModel 𝓢);
   constructor;
-  . assumption;
+  . exact Canonical.canonical;
   . exact iff_valid_on_canonicalModel_deducible.not.mpr h;
-
-lemma instCompleteOfCanonical {C : FrameClass} (hC : (Kripke.canonicalFrame 𝓢) ∈ C) : Complete 𝓢 C := ⟨complete_of_canonical hC⟩
-
-end lemmata
+⟩
 
 end Kripke
-
-
-/-
-namespace K
-
-instance Kripke.complete : Complete (Hilbert.K ℕ) (Kripke.AllFrameClass) := Hilbert.Kripke.instCompleteOfCanonical (C := Kripke.AllFrameClass) $ by tauto
-
-end K
--/
 
 end LO.Modal

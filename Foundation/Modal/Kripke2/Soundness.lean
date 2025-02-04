@@ -45,22 +45,20 @@ instance [defs : C.DefinedBy H.axioms] : C.DefinedBy H.axiomInstances := ⟨by
       simp;
 ⟩
 
--- instance [C.DefinedBy H.axiomInstances] : Sound H C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩
-
 instance [C.DefinedBy H.axioms] : Sound H C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩
 
-lemma instConsistent_aux [sound : Sound H C] (hNonempty : C.Nonempty) : H ⊬ ⊥ := by
+lemma instConsistent_aux [nonempty : C.IsNonempty] [sound : Sound H C] : H ⊬ ⊥ := by
   apply not_imp_not.mpr sound.sound;
   apply ValidOnFrameClass.not_of_exists_frame;
-  obtain ⟨F, hF⟩ := hNonempty;
+  obtain ⟨F, hF⟩ := nonempty;
   use F;
   constructor;
-  . exact hF;
+  . assumption;
   . simp;
 
-lemma instConsistent [Sound H C] (hNonempty : C.Nonempty) : System.Consistent H := by
+lemma instConsistent (C : Kripke.FrameClass) [C.IsNonempty] [Sound H C] : System.Consistent H := by
   apply System.Consistent.of_unprovable;
-  exact instConsistent_aux hNonempty
+  exact instConsistent_aux (C := C);
 
 end Kripke.Hilbert
 

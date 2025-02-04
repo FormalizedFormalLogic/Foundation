@@ -85,7 +85,7 @@ lemma cwf_of_validate_L : F ⊧ (Axioms.L (.atom 0)) → ConverseWellFounded F.R
     . assumption;
     . simpa [Semantics.Realize, Satisfies];
 
-instance TransitiveConverseWellFoundedFrameClass.DefinedByL : TransitiveConverseWellFoundedFrameClass.DefinedBy {(Axioms.L (.atom 0))} := ⟨by
+instance TransitiveConverseWellFoundedFrameClass.DefinedByL : TransitiveConverseWellFoundedFrameClass.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
   intro F;
   constructor;
   . simpa using validate_L_of_trans_and_cwf;
@@ -95,7 +95,7 @@ instance TransitiveConverseWellFoundedFrameClass.DefinedByL : TransitiveConverse
     . apply cwf_of_validate_L; simp_all;
 ⟩
 
-instance TransitiveIrreflexiveFiniteFrameClass.DefinedByL : TransitiveIrreflexiveFiniteFrameClass.DefinedBy {(Axioms.L (.atom 0))} := ⟨by
+instance TransitiveIrreflexiveFiniteFrameClass.DefinedByL : TransitiveIrreflexiveFiniteFrameClass.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
   intro F;
   constructor;
   . rintro ⟨hTrans, hIrrefl⟩ φ ⟨_, rfl⟩;

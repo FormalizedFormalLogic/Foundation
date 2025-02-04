@@ -1,6 +1,6 @@
 import Foundation.Vorspiel.BinaryRelations
 import Foundation.Modal.Kripke2.FiniteFrame
-import Foundation.Modal.Kripke2.Hilbert.K
+import Foundation.Modal.Kripke2.K
 import Foundation.Modal.Kripke2.AxiomGeach
 
 namespace LO.Modal
@@ -91,7 +91,7 @@ lemma validate_T_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Axiom
   exact Satisfies.and_def.mp (validate_T_Four_of_validate_Grz h V x hx) |>.1;
 
 lemma reflexive_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : Reflexive F := by
-  apply ReflexiveFrameClass.isDefinedBy.defines F |>.mpr;
+  apply reflexive_of_validate_AxiomT;
   simpa using validate_T_of_validate_Grz h;
 
 lemma validate_Four_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Axioms.Four (.atom 0))  := by
@@ -99,7 +99,7 @@ lemma validate_Four_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Ax
   exact Satisfies.and_def.mp (validate_T_Four_of_validate_Grz h V x hx) |>.2;
 
 lemma transitive_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : Transitive F := by
-  apply TransitiveFrameClass.isDefinedBy.defines F |>.mpr;
+  apply transitive_of_validate_AxiomFour;
   simpa using validate_Four_of_validate_Grz h;
 
 lemma WCWF_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by

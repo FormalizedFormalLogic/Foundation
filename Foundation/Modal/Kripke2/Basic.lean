@@ -333,7 +333,9 @@ end ValidOnFrameClass
 end Formula.Kripke
 
 
-namespace Kripke.FrameClass
+namespace Kripke
+
+namespace FrameClass
 
 class DefinedBy (C : Kripke.FrameClass) (Γ : Set (Formula ℕ)) where
   defines : ∀ F, F ∈ C ↔ (∀ φ ∈ Γ, F ⊧ φ)
@@ -341,17 +343,83 @@ class DefinedBy (C : Kripke.FrameClass) (Γ : Set (Formula ℕ)) where
 class FiniteDefinedBy (C Γ) extends FrameClass.DefinedBy C Γ where
   finite : Set.Finite Γ
 
-
 abbrev DefinedByFormula (C : Kripke.FrameClass) (φ : Formula ℕ) := FrameClass.DefinedBy C {φ}
 
 lemma definedByFormula_of_iff_mem_validate (h : ∀ F, F ∈ C ↔ F ⊧ φ) : DefinedByFormula C φ := by
   constructor;
   simpa;
 
-class IsNonempty (C : Kripke.FrameClass) where
+-- variable (C₁ C₂ C₃ : Kripke.FrameClass) (φ₁ φ₂ φ₃ : Formula ℕ) (Γ₁ Γ₂ Γ₃ : Set (Formula ℕ))
+
+instance definedBy_inter
+  (C₁ Γ₁) [h₁ : DefinedBy C₁ Γ₁]
+  (C₂ Γ₂) [h₂ : DefinedBy C₂ Γ₂]
+  : DefinedBy (C₁ ∩ C₂) (Γ₁ ∪ Γ₂) := ⟨by
+  rintro F;
+  constructor
+  . rintro ⟨hF₁, hF₂⟩;
+    rintro φ (hφ₁ | hφ₂);
+    . exact h₁.defines F |>.mp hF₁ _ hφ₁;
+    . exact h₂.defines F |>.mp hF₂ _ hφ₂;
+  . intro h;
+    constructor;
+    . apply h₁.defines F |>.mpr;
+      intro φ hφ;
+      apply h;
+      left;
+      assumption;
+    . apply h₂.defines F |>.mpr;
+      intro φ hφ;
+      apply h;
+      right;
+      assumption;
+⟩
+
+instance definedByFormula_inter
+  (C₁ φ₁) [DefinedByFormula C₁ φ₁]
+  (C₂ φ₂) [DefinedByFormula C₂ φ₂]
+  : DefinedBy (C₁ ∩ C₂) {φ₁, φ₂} := definedBy_inter C₁ {φ₁} C₂ {φ₂}
+
+lemma definedBy_triinter
+  (C₁ Γ₁) [DefinedBy C₁ Γ₁]
+  (C₂ Γ₂) [DefinedBy C₂ Γ₂]
+  (C₃ Γ₃) [DefinedBy C₃ Γ₃]
+  : DefinedBy (C₁ ∩ C₂ ∩ C₃) (Γ₁ ∪ Γ₂ ∪ Γ₃) := definedBy_inter (C₁ ∩ C₂) (Γ₁ ∪ Γ₂) C₃ Γ₃
+
+lemma definedByFormula_triinter
+  (C₁ φ₁) [DefinedByFormula C₁ φ₁]
+  (C₂ φ₂) [DefinedByFormula C₂ φ₂]
+  (C₃ φ₃) [DefinedByFormula C₃ φ₃]
+  : DefinedBy (C₁ ∩ C₂ ∩ C₃) {φ₁, φ₂, φ₃} := by
+  simpa [show ({φ₁, φ₂, φ₃} : Set (Formula ℕ)) = {φ₁} ∪ {φ₂} ∪ {φ₃} by aesop]
+  using definedBy_triinter C₁ {φ₁} C₂ {φ₂} C₃ {φ₃}
+
+class IsNonempty (C : Kripke.FrameClass) : Prop where
   nonempty : Nonempty C
 
-end Kripke.FrameClass
+end FrameClass
 
+
+instance AllFrameClass.DefinedBy : AllFrameClass.DefinedByFormula (Axioms.K (.atom 0) (.atom 1)) :=
+  FrameClass.definedByFormula_of_iff_mem_validate $ by
+    simp only [Set.mem_univ, true_iff];
+    intro F;
+    exact Formula.Kripke.ValidOnFrame.axiomK;
+
+instance AllFrameClass.IsNonempty : AllFrameClass.IsNonempty := by
+  use ⟨Unit, λ _ _ => True⟩;
+  simp;
+
+namespace FrameClass
+
+variable {C : Kripke.FrameClass}
+
+instance definedBy_with_axiomK (defines : C.DefinedBy Γ) : DefinedBy C (insert (Axioms.K (.atom 0) (.atom 1)) Γ) := by
+  convert definedBy_inter AllFrameClass {Axioms.K (.atom 0) (.atom 1)} C Γ
+  simp;
+
+end FrameClass
+
+end Kripke
 
 end LO.Modal

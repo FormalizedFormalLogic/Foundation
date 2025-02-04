@@ -168,26 +168,17 @@ instance [DecidableEq α] [hVer : H.HasVer] : System.HasAxiomVer H where
 end
 
 
-protected abbrev Ver : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Ver (.atom 0)}⟩
-instance : (Hilbert.Ver).HasK where p := 0; q := 1;
-instance : (Hilbert.Ver).HasVer where p := 0
-
-
-protected abbrev Triv : Hilbert ℕ := ⟨{ Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Tc (.atom 0)}⟩
-instance : (Hilbert.Triv).HasK where p := 0; q := 1;
-instance : (Hilbert.Triv).HasT where p := 0
-instance : (Hilbert.Triv).HasTc where p := 0
-
-
 protected abbrev K4 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
 instance : (Hilbert.K4).HasK where p := 0; q := 1;
 instance : (Hilbert.K4).HasFour where p := 0
+instance : System.K4 (Hilbert.K4) where
 
 
 protected abbrev S4 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0)}⟩
 instance : (Hilbert.S4).HasK where p := 0; q := 1;
 instance : (Hilbert.S4).HasT where p := 0
 instance : (Hilbert.S4).HasFour where p := 0
+instance : System.S4 (Hilbert.S4) where
 
 
 protected abbrev S4Dot2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dot2 (.atom 0)}⟩
@@ -195,6 +186,7 @@ instance : (Hilbert.S4Dot2).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Dot2).HasT where p := 0
 instance : (Hilbert.S4Dot2).HasFour where p := 0
 instance : (Hilbert.S4Dot2).HasDot2 where p := 0
+instance : System.S4Dot2 (Hilbert.S4Dot2) where
 
 
 protected abbrev S4Dot3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dot3 (.atom 0) (.atom 1)}⟩
@@ -202,23 +194,39 @@ instance : (Hilbert.S4Dot3).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Dot3).HasT where p := 0
 instance : (Hilbert.S4Dot3).HasFour where p := 0
 instance : (Hilbert.S4Dot3).HasDot3 where p := 0; q := 1;
+instance : System.S4Dot3 (Hilbert.S4Dot3) where
 
 
 protected abbrev S5 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0)}⟩
 instance : (Hilbert.S5).HasK where p := 0; q := 1;
 instance : (Hilbert.S5).HasT where p := 0
 instance : (Hilbert.S5).HasFive where p := 0
+instance : System.S5 (Hilbert.S5) where
 
 
 protected abbrev GL : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0)}⟩
 instance : (Hilbert.GL).HasK where p := 0; q := 1;
 instance : (Hilbert.GL).HasL where p := 0
+instance : System.GL (Hilbert.GL) where
 
 
 protected abbrev Grz : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0)}⟩
 instance : (Hilbert.Grz).HasK where p := 0; q := 1;
 instance : (Hilbert.Grz).HasGrz where p := 0
+instance : System.Grz (Hilbert.Grz) where
 
+
+protected abbrev Ver : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Ver (.atom 0)}⟩
+instance : (Hilbert.Ver).HasK where p := 0; q := 1;
+instance : (Hilbert.Ver).HasVer where p := 0
+instance : System.Ver (Hilbert.Ver) where
+
+
+protected abbrev Triv : Hilbert ℕ := ⟨{ Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Tc (.atom 0)}⟩
+instance : (Hilbert.Triv).HasK where p := 0; q := 1;
+instance : (Hilbert.Triv).HasT where p := 0
+instance : (Hilbert.Triv).HasTc where p := 0
+instance : System.Triv (Hilbert.Triv) where
 
 @[simp] lemma K4_weakerThan_Triv : Hilbert.K4 ≤ₛ Hilbert.Triv := weakerThan_of_dominate_axioms $ by simp;
 

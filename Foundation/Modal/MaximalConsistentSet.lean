@@ -300,20 +300,18 @@ open FormulaSet
 
 abbrev MaximalConsistentSet (𝓢 : S) := { T : FormulaSet α // (Consistent 𝓢 T) ∧ (∀ {U}, T ⊂ U → Inconsistent 𝓢 U)}
 
-alias MCS := MaximalConsistentSet
-
 namespace MaximalConsistentSet
 
-variable {Ω Ω₁ Ω₂ : MCS 𝓢}
+variable {Ω Ω₁ Ω₂ : MaximalConsistentSet 𝓢}
 variable {φ : Formula α}
 
-instance : Membership (Formula α) (MCS 𝓢) := ⟨λ Ω φ => φ ∈ Ω.1⟩
+instance : Membership (Formula α) (MaximalConsistentSet 𝓢) := ⟨λ Ω φ => φ ∈ Ω.1⟩
 
-lemma consistent : Consistent 𝓢 Ω.1 := Ω.2.1
+lemma consistent (Ω : MaximalConsistentSet 𝓢) : Consistent 𝓢 Ω.1 := Ω.2.1
 
-lemma maximal : Ω.1 ⊂ U → Inconsistent 𝓢 U := Ω.2.2
+lemma maximal (Ω : MaximalConsistentSet 𝓢) : Ω.1 ⊂ U → Inconsistent 𝓢 U := Ω.2.2
 
-lemma maximal' {φ : Formula α} (hp : φ ∉ Ω) : Inconsistent 𝓢 (insert φ Ω.1) := maximal (Set.ssubset_insert hp)
+lemma maximal' (Ω : MaximalConsistentSet 𝓢) {φ : Formula α} (hp : φ ∉ Ω) : Inconsistent 𝓢 (insert φ Ω.1) := Ω.maximal (Set.ssubset_insert hp)
 
 lemma equality_def : Ω₁ = Ω₂ ↔ Ω₁.1 = Ω₂.1 := by
   constructor;
@@ -322,7 +320,7 @@ lemma equality_def : Ω₁ = Ω₂ ↔ Ω₁.1 = Ω₂.1 := by
 
 variable [DecidableEq α]
 
-lemma exists_of_consistent (consisT : Consistent 𝓢 T) : ∃ Ω : MCS 𝓢, (T ⊆ Ω.1) := by
+lemma exists_of_consistent (consisT : Consistent 𝓢 T) : ∃ Ω : MaximalConsistentSet 𝓢, (T ⊆ Ω.1) := by
   have ⟨Ω, hΩ₁, hΩ₂, hΩ₃⟩ := FormulaSet.lindenbaum consisT;
   use ⟨Ω, ?_, ?_⟩;
   . assumption;
@@ -336,14 +334,14 @@ alias lindenbaum := exists_of_consistent
 
 variable [System.Classical 𝓢]
 
-instance [System.Consistent 𝓢] : Nonempty (MCS 𝓢) := ⟨lindenbaum emptyset_consistent |>.choose⟩
+instance [System.Consistent 𝓢] : Nonempty (MaximalConsistentSet 𝓢) := ⟨lindenbaum emptyset_consistent |>.choose⟩
 
-lemma either_mem (Ω : MCS 𝓢) (φ) : φ ∈ Ω ∨ ∼φ ∈ Ω := by
+lemma either_mem (Ω : MaximalConsistentSet 𝓢) (φ) : φ ∈ Ω ∨ ∼φ ∈ Ω := by
   by_contra hC;
   push_neg at hC;
-  rcases either_consistent (𝓢 := 𝓢) consistent φ;
-  . have := maximal (Set.ssubset_insert hC.1); contradiction;
-  . have := maximal (Set.ssubset_insert hC.2); contradiction;
+  rcases either_consistent (𝓢 := 𝓢) (Ω.consistent) φ;
+  . have := Ω.maximal (Set.ssubset_insert hC.1); contradiction;
+  . have := Ω.maximal (Set.ssubset_insert hC.2); contradiction;
 
 lemma membership_iff : (φ ∈ Ω) ↔ (Ω.1 *⊢[𝓢]! φ) := by
   constructor;
@@ -353,7 +351,7 @@ lemma membership_iff : (φ ∈ Ω) ↔ (Ω.1 *⊢[𝓢]! φ) := by
     by_contra hC;
     have hnp : Ω.1 *⊢[𝓢]! ∼φ := Context.by_axm! hC;
     have : Ω.1 *⊢[𝓢]! ⊥ := neg_mdp! hnp hp;
-    have : Ω.1 *⊬[𝓢] ⊥ := consistent;
+    have : Ω.1 *⊬[𝓢] ⊥ := Ω.consistent;
     contradiction;
 
 /-
@@ -367,7 +365,7 @@ lemma subset_axiomset : H.axioms ⊆ Ω.1 := by
 -/
 
 @[simp]
-lemma not_mem_falsum : ⊥ ∉ Ω := not_mem_falsum_of_consistent consistent
+lemma not_mem_falsum : ⊥ ∉ Ω := not_mem_falsum_of_consistent Ω.consistent
 
 @[simp]
 lemma mem_verum : ⊤ ∈ Ω := by apply membership_iff.mpr; apply verum!;
@@ -380,7 +378,7 @@ lemma iff_mem_neg : (∼φ ∈ Ω) ↔ (φ ∉ Ω) := by
     replace hp := membership_iff.mp hp;
     replace hnp := membership_iff.mp hnp;
     have : Ω.1 *⊢[𝓢]! ⊥ := neg_mdp! hnp hp;
-    have : Ω.1 *⊬[𝓢] ⊥ := consistent;
+    have : Ω.1 *⊬[𝓢] ⊥ := Ω.consistent;
     contradiction;
   . intro hp;
     have : Consistent 𝓢 (insert (∼φ) Ω.1) := by
@@ -439,7 +437,7 @@ lemma iff_mem_or : ((φ ⋎ ψ) ∈ Ω) ↔ (φ ∈ Ω) ∨ (ψ ∈ Ω) := by
     replace hp := membership_iff.mp $ iff_mem_neg.mpr hp;
     replace hq := membership_iff.mp $ iff_mem_neg.mpr hq;
     have : Ω.1 *⊢[𝓢]! ⊥ := or₃'''! (neg_equiv'!.mp hp) (neg_equiv'!.mp hq) hpq;
-    have : Ω.1 *⊬[𝓢] ⊥ := consistent;
+    have : Ω.1 *⊬[𝓢] ⊥ := Ω.consistent;
     contradiction;
   . rintro (hp | hq);
     . apply membership_iff.mpr;
@@ -482,7 +480,7 @@ section
 
 variable [System.K 𝓢]
 
-lemma iff_mem_multibox : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MCS 𝓢}, (□''⁻¹^[n]Ω.1 ⊆ Ω'.1) → (φ ∈ Ω')) := by
+lemma iff_mem_multibox : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, (□''⁻¹^[n]Ω.1 ⊆ Ω'.1) → (φ ∈ Ω')) := by
   constructor;
   . intro hp Ω' hΩ'; apply hΩ'; simpa;
   . contrapose;
@@ -514,7 +512,7 @@ lemma iff_mem_multibox : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MCS 𝓢}, (□''⁻
       apply hΩ';
       simp only [Set.mem_insert_iff, true_or]
 
-lemma iff_mem_box : (□φ ∈ Ω) ↔ (∀ {Ω' : MCS 𝓢}, (□''⁻¹Ω.1 ⊆ Ω'.1) → (φ ∈ Ω')) := iff_mem_multibox (n := 1)
+lemma iff_mem_box : (□φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, (□''⁻¹Ω.1 ⊆ Ω'.1) → (φ ∈ Ω')) := iff_mem_multibox (n := 1)
 
 
 lemma multibox_dn_iff : (□^[n](∼∼φ) ∈ Ω) ↔ (□^[n]φ ∈ Ω) := by
@@ -567,7 +565,7 @@ lemma mem_multidia_dual : ◇^[n]φ ∈ Ω ↔ ∼(□^[n](∼φ)) ∈ Ω := by
     . exact FiniteContext.provable_iff.mpr $ imp_trans''! (FiniteContext.provable_iff.mp hΓ₂) (and₂'! multidia_duality!);
 lemma mem_dia_dual : ◇φ ∈ Ω ↔ (∼(□(∼φ)) ∈ Ω) := mem_multidia_dual (n := 1)
 
-lemma iff_mem_multidia : (◇^[n]φ ∈ Ω) ↔ (∃ Ω' : MCS 𝓢, (□''⁻¹^[n]Ω.1 ⊆ Ω'.1) ∧ (φ ∈ Ω'.1)) := by
+lemma iff_mem_multidia : (◇^[n]φ ∈ Ω) ↔ (∃ Ω' : MaximalConsistentSet 𝓢, (□''⁻¹^[n]Ω.1 ⊆ Ω'.1) ∧ (φ ∈ Ω'.1)) := by
   constructor;
   . intro h;
     have := mem_multidia_dual.mp h;
@@ -588,7 +586,7 @@ lemma iff_mem_multidia : (◇^[n]φ ∈ Ω) ↔ (∃ Ω' : MCS 𝓢, (□''⁻¹
     constructor;
     . exact h₁;
     . exact iff_mem_neg.mp $ iff_mem_negneg.mpr h₂;
-lemma iff_mem_dia : (◇φ ∈ Ω) ↔ (∃ Ω' : MCS 𝓢, (□''⁻¹Ω.1 ⊆ Ω'.1) ∧ (φ ∈ Ω'.1)) := iff_mem_multidia (n := 1)
+lemma iff_mem_dia : (◇φ ∈ Ω) ↔ (∃ Ω' : MaximalConsistentSet 𝓢, (□''⁻¹Ω.1 ⊆ Ω'.1) ∧ (φ ∈ Ω'.1)) := iff_mem_multidia (n := 1)
 
 lemma multibox_multidia : (∀ {φ : Formula α}, (□^[n]φ ∈ Ω₁.1 → φ ∈ Ω₂.1)) ↔ (∀ {φ : Formula α}, (φ ∈ Ω₂.1 → ◇^[n]φ ∈ Ω₁.1)) := by
   constructor;

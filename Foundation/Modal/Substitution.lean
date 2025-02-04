@@ -34,7 +34,17 @@ notation:80 φ "⟦" s "⟧" => Formula.subst s φ
 
 @[simp] lemma subst_box : (□φ)⟦s⟧ = □(φ⟦s⟧) := rfl
 
+@[simp] lemma subst_multibox : (□^[n]φ)⟦s⟧ = □^[n](φ⟦s⟧) := by
+  induction n with
+  | zero => rfl
+  | succ n ih => simp [ih]
+
 @[simp] lemma subst_dia : (◇φ)⟦s⟧ = ◇(φ⟦s⟧) := rfl
+
+@[simp] lemma subst_multidia : (◇^[n]φ)⟦s⟧ = ◇^[n](φ⟦s⟧) := by
+  induction n with
+  | zero => rfl
+  | succ n ih => simp [ih]
 
 end Formula
 
