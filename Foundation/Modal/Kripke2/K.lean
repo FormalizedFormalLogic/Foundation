@@ -8,7 +8,9 @@ namespace Hilbert.K
 
 instance : System.Consistent (Hilbert.K) := Kripke.Hilbert.instConsistent Kripke.AllFrameClass
 
-instance : Complete (Hilbert.K) (Kripke.AllFrameClass) := Kripke.instCompleteOfCanonical trivial
+instance : Kripke.Canonical (Hilbert.K) (Kripke.AllFrameClass) := ⟨by trivial⟩
+
+instance : Complete (Hilbert.K) (Kripke.AllFrameClass) := inferInstance
 
 end Hilbert.K
 
