@@ -1,6 +1,6 @@
 import Foundation.Modal.Hilbert2.Geach
 import Foundation.Modal.Kripke2.Completeness
-import Foundation.Modal.Kripke2.Soundness
+import Foundation.Modal.Kripke2.Hilbert.Soundness
 
 namespace LO.Modal
 
@@ -125,7 +125,7 @@ namespace Hilbert.Geach
 
 open Kripke
 
-instance Kripke.Consistent : System.Consistent (Hilbert.Geach G) := Kripke.Hilbert.instConsistent (Kripke.MultiGeacheanConfluentFrameClass G)
+instance Kripke.Consistent : System.Consistent (Hilbert.Geach G) := Kripke.Hilbert.consistent_of_FrameClass (Kripke.MultiGeacheanConfluentFrameClass G)
 
 instance Kripke.Canonical : Canonical (Hilbert.Geach G) (MultiGeacheanConfluentFrameClass G) := ⟨by
   apply canonicalFrame.multigeachean_of_provable_geach;

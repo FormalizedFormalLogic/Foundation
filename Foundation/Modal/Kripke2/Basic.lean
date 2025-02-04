@@ -415,6 +415,8 @@ instance definedBy_with_axiomK (defines : C.DefinedBy Γ) : DefinedBy C (insert 
 
 end FrameClass
 
+
+
 end Kripke
 
 end LO.Modal

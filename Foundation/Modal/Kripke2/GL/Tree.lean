@@ -1,4 +1,3 @@
-import Foundation.Modal.Kripke2.GL.Soundness
 import Foundation.Modal.Kripke2.GL.Completeness
 import Foundation.Modal.Kripke2.Tree
 

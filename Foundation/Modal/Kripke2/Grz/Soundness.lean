@@ -2,22 +2,32 @@ import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Hilbert2.WellKnown
 import Foundation.Modal.Kripke2.AxiomGrz
 import Foundation.Modal.Kripke2.KT
-import Foundation.Modal.Kripke2.Soundness
+import Foundation.Modal.Kripke2.Hilbert.Soundness
 import Foundation.Modal.System.Grz
 
 namespace LO.Modal
-
-namespace Hilbert.Grz
 
 open Formula
 open Formula.Kripke
 open System
 open System.Context
-open ComplementClosedConsistentFinset
+open Kripke
 
-instance Kripke.consistent : System.Consistent (Hilbert.Grz) := by
-  -- haveI := FrameClass.definedBy_with_axiomK TransitiveIrreflexiveFiniteFrameClass.DefinedByL
-  sorry;
+namespace Kripke
+
+instance : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0)} :=
+  FiniteFrameClass.definedBy_with_axiomK ReflexiveTransitiveAntiSymmetricFiniteFrameClass.definedByAxiomGrz
+
+instance : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.IsNonempty := by
+  use ⟨Unit, λ _ _ => True⟩;
+  simp [Reflexive, Transitive, AntiSymmetric];
+
+end Kripke
+
+namespace Hilbert.Grz
+
+instance Kripke.consistent : System.Consistent (Hilbert.Grz) :=
+  Kripke.Hilbert.consistent_of_FiniteFrameClass ReflexiveTransitiveAntiSymmetricFiniteFrameClass
 
 end Hilbert.Grz
 

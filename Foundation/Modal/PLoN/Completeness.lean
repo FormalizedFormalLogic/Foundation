@@ -1,5 +1,5 @@
 import Foundation.Modal.MaximalConsistentSet
-import Foundation.Modal.PLoN.Soundness
+import Foundation.Modal.PLoN.Basic
 
 namespace LO.Modal
 
@@ -22,8 +22,7 @@ abbrev canonicalModel (𝓢 : S) [System.Consistent 𝓢] [System.Classical 𝓢
 
 @[reducible] instance : Semantics (Formula ℕ) (canonicalModel 𝓢).World := Formula.PLoN.Satisfies.semantics (M := canonicalModel 𝓢)
 
-variable {H : Hilbert ℕ} [Nonempty (MaximalConsistentSet H)]
-         {φ : Formula ℕ}
+variable {φ : Formula ℕ}
 
 lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊧ φ ↔ (φ ∈ X) := by
   induction φ using Formula.rec' with

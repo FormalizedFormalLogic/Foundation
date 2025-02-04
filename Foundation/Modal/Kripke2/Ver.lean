@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke2.AxiomVer
-import Foundation.Modal.Kripke2.Soundness
+import Foundation.Modal.Kripke2.Hilbert.Soundness
 import Foundation.Modal.Hilbert2.WellKnown
 
 namespace LO.Modal
@@ -26,7 +26,7 @@ namespace Hilbert.Ver
 
 instance Kripke.Consistent : System.Consistent (Hilbert.Ver) :=
   haveI := FrameClass.definedBy_with_axiomK IsolatedFrameClass.DefinedByAxiomVer
-  Kripke.Hilbert.instConsistent IsolatedFrameClass
+  Kripke.Hilbert.consistent_of_FrameClass IsolatedFrameClass
 
 instance Kripke.Complete : Complete (Hilbert.Ver) IsolatedFrameClass := inferInstance
 

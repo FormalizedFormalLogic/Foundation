@@ -1,15 +1,16 @@
 import Foundation.Modal.Hilbert2.Basic
-import Foundation.Modal.Kripke2.Basic
+import Foundation.Modal.PLoN.Basic
 
 namespace LO.Modal
 
-open Kripke
+open PLoN
 open Formula
-open Formula.Kripke
+open Formula.PLoN
 
-namespace Kripke.Hilbert
+namespace PLoN.Hilbert
 
-variable {C : Kripke.FrameClass}
+open Formula
+variable {C : PLoN.FrameClass}
 variable {H : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 
 lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy H.axiomInstances] : H ⊢! φ → C ⊧ φ := by
@@ -26,27 +27,11 @@ lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy H.axiomInsta
   | nec ih => exact ValidOnFrame.nec ih;
   | imply₁ => exact ValidOnFrame.imply₁;
   | imply₂ => exact ValidOnFrame.imply₂;
-  | ec => exact ValidOnFrame.elimContra;
+  | ec => exact ValidOnFrame.elim_contra;
 
-instance [defs : C.DefinedBy H.axioms] : C.DefinedBy H.axiomInstances := ⟨by
-  intro F;
-  constructor;
-  . rintro hF φ ⟨ψ, hψ, ⟨s, rfl⟩⟩;
-    exact ValidOnFrame.subst $ defs.defines F |>.mp hF ψ hψ;
-  . intro h;
-    apply defs.defines F |>.mpr;
-    intro φ hφ;
-    apply h;
-    use φ;
-    constructor;
-    . assumption;
-    . use .id;
-      simp;
-⟩
+instance [C.DefinedBy H.axiomInstances] : Sound H C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩
 
-instance [C.DefinedBy H.axioms] : Sound H C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩
-
-lemma instConsistent_aux [nonempty : C.IsNonempty] [sound : Sound H C] : H ⊬ ⊥ := by
+lemma consistent_of_FrameClass_aux [nonempty : C.IsNonempty] [sound : Sound H C] : H ⊬ ⊥ := by
   apply not_imp_not.mpr sound.sound;
   apply ValidOnFrameClass.not_of_exists_frame;
   obtain ⟨F, hF⟩ := nonempty;
@@ -55,10 +40,10 @@ lemma instConsistent_aux [nonempty : C.IsNonempty] [sound : Sound H C] : H ⊬ �
   . assumption;
   . simp;
 
-lemma instConsistent (C : Kripke.FrameClass) [C.IsNonempty] [Sound H C] : System.Consistent H := by
+lemma consistent_of_FrameClass (C : PLoN.FrameClass) [C.IsNonempty] [Sound H C] : System.Consistent H := by
   apply System.Consistent.of_unprovable;
-  exact instConsistent_aux (C := C);
+  exact consistent_of_FrameClass_aux (C := C);
 
-end Kripke.Hilbert
+end PLoN.Hilbert
 
 end LO.Modal

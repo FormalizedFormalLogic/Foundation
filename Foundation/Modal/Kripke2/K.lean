@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert2.K
-import Foundation.Modal.Kripke2.Soundness
+import Foundation.Modal.Kripke2.Hilbert.Soundness
 import Foundation.Modal.Kripke2.Completeness
 import Foundation.Modal.Kripke2.Filteration
 import Foundation.Modal.Kripke2.FiniteFrame
@@ -12,7 +12,7 @@ namespace Hilbert.K
 
 instance Kripke.sound : Sound (Hilbert.K) AllFrameClass := inferInstance
 
-instance : System.Consistent (Hilbert.K) := Hilbert.instConsistent AllFrameClass
+instance : System.Consistent (Hilbert.K) := Hilbert.consistent_of_FrameClass AllFrameClass
 
 instance : Kripke.Canonical (Hilbert.K) (AllFrameClass) := ⟨by trivial⟩
 
@@ -28,8 +28,8 @@ instance Kripke.CompleteAllFinite : Complete (Hilbert.K) (AllFiniteFrameClass) :
   apply filteration FM (coarsestFilterationModel.filterOf) (by aesop) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M φ.subformulas) by
-      simp only [FiniteFrameClass.toFrameClass, AllFiniteFrameClass, Set.image_univ, Set.mem_range];
-      tauto;
+      use ⟨FM.toFrame⟩;
+      simp [FiniteFrameClass.toFrameClass];
     apply FilterEqvQuotient.finite;
     simp;
   ) FM.Val

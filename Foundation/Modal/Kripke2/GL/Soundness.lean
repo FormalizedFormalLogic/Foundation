@@ -1,20 +1,34 @@
 import Foundation.Modal.Kripke2.AxiomL
-import Foundation.Modal.Kripke2.Soundness
+import Foundation.Modal.Kripke2.Hilbert.Soundness
 import Foundation.Modal.Hilbert2.WellKnown
 
-namespace LO.Modal.Hilbert.GL.Kripke
+namespace LO.Modal
 
-open Kripke
+open Formula
+open Formula.Kripke
 open System
+open System.Context
+open Kripke
 
-instance finiteSound : Sound Hilbert.GL Kripke.TransitiveIrreflexiveFiniteFrameClass := by
-  -- haveI := FrameClass.definedBy_with_axiomK TransitiveIrreflexiveFiniteFrameClass.DefinedByL
-  sorry;
+namespace Kripke
 
-instance consistent : System.Consistent Hilbert.GL := by
-  -- haveI := FrameClass.definedBy_with_axiomK TransitiveIrreflexiveFiniteFrameClass.DefinedByL
-  sorry;
+instance : TransitiveIrreflexiveFiniteFrameClass.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.L (atom 0)} :=
+  FiniteFrameClass.definedBy_with_axiomK TransitiveIrreflexiveFiniteFrameClass.DefinedByL
 
-end LO.Modal.Hilbert.GL.Kripke
+instance : TransitiveIrreflexiveFiniteFrameClass.IsNonempty := by
+  use ⟨Unit, λ _ _ => False⟩;
+  simp [Irreflexive , Transitive];
 
-#min_imports
+end Kripke
+
+
+namespace Hilbert.GL
+
+instance Kripke.finiteSound : Sound (Hilbert.GL) TransitiveIrreflexiveFiniteFrameClass := inferInstance
+
+instance Kripke.consistent : System.Consistent (Hilbert.GL) :=
+  Kripke.Hilbert.consistent_of_FiniteFrameClass TransitiveIrreflexiveFiniteFrameClass
+
+end Hilbert.GL
+
+end LO.Modal

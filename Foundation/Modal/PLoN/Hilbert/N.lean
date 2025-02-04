@@ -1,4 +1,4 @@
-import Foundation.Modal.PLoN.Soundness
+import Foundation.Modal.PLoN.Hilbert.Soundness
 import Foundation.Modal.PLoN.Completeness
 import Foundation.Modal.Hilbert2.WellKnown
 
@@ -20,7 +20,7 @@ namespace Hilbert.N
 
 instance : AllFrameClass.DefinedBy Hilbert.N.axiomInstances := ⟨by simp_all [Hilbert.axiomInstances]⟩
 
-instance : System.Consistent Hilbert.N := PLoN.Hilbert.instConsistent PLoN.AllFrameClass
+instance : System.Consistent Hilbert.N := PLoN.Hilbert.consistent_of_FrameClass PLoN.AllFrameClass
 
 instance : Canonical (Hilbert.N) (PLoN.AllFrameClass) := ⟨by tauto⟩
 
