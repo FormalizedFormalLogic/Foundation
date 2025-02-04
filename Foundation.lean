@@ -110,12 +110,21 @@ import Foundation.Modal.Boxdot.GL_Grz
 -/
 
 import Foundation.Modal.Kripke2.K
+import Foundation.Modal.Kripke2.KT
+import Foundation.Modal.Kripke2.KTB
+import Foundation.Modal.Kripke2.KT4B
 import Foundation.Modal.Kripke2.S4
 import Foundation.Modal.Kripke2.S4Dot2
 import Foundation.Modal.Kripke2.S4Dot3
 import Foundation.Modal.Kripke2.S5
 import Foundation.Modal.Kripke2.Triv
 import Foundation.Modal.Kripke2.Ver
+
+import Foundation.Modal.Kripke2.GL.Unnecessitation
+import Foundation.Modal.Kripke2.GL.MDP
+
+-- import Foundation.Modal.Kripke2.Grz
 import Foundation.Modal.Kripke2.ComplexityLimited
 import Foundation.Modal.Kripke2.Undefinability
+
 import Foundation.Modal.PLoN.N

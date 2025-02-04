@@ -80,10 +80,45 @@ class ComplementaryClosed (P : FormulaFinset α) (S : FormulaFinset α) : Prop w
   subset : P ⊆ S⁻
   either : ∀ φ ∈ S, φ ∈ P ∨ -φ ∈ P
 
-
 def SubformulaeComplementaryClosed (P : FormulaFinset α) (φ : Formula α) : Prop := P.ComplementaryClosed φ.subformulas
 
-
 end FormulaFinset
+
+
+section
+
+variable {α : Type*}
+variable {S} [System (Formula α) S]
+variable {𝓢 : S} [System.ModusPonens 𝓢]
+
+lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! φ) (hcp : 𝓢 ⊢! -φ) : 𝓢 ⊢! ⊥ := by
+  induction φ using Formula.cases_neg with
+  | hfalsum => assumption;
+  | hatom a => unfold Formula.complement at hcp; exact hcp ⨀ hp;
+  | hneg => unfold Formula.complement at hcp; exact hp ⨀ hcp;
+  | hbox φ => unfold Formula.complement at hcp; exact hcp ⨀ hp;
+  | himp φ ψ h =>
+    simp only [Formula.complement.imp_def₁ h] at hcp;
+    exact hcp ⨀ hp;
+
+lemma neg_complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! ∼φ) (hcp : 𝓢 ⊢! ∼(-φ)) : 𝓢 ⊢! ⊥ := by
+  induction φ using Formula.cases_neg with
+  | hfalsum =>
+    unfold Formula.complement at hcp;
+    exact hcp ⨀ hp;
+  | hatom a =>
+    unfold Formula.complement at hcp;
+    exact hcp ⨀ hp;
+  | hneg =>
+    unfold Formula.complement at hcp;
+    exact hp ⨀ hcp;
+  | himp φ ψ h =>
+    simp only [Formula.complement.imp_def₁ h] at hcp;
+    exact hcp ⨀ hp;
+  | hbox φ =>
+    unfold Formula.complement at hcp;
+    exact hcp ⨀ hp;
+
+end
 
 end LO.Modal

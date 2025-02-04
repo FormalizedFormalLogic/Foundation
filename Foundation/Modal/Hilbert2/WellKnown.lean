@@ -167,6 +167,11 @@ instance [DecidableEq α] [hVer : H.HasVer] : System.HasAxiomVer H where
 
 end
 
+protected abbrev KT : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}⟩
+instance : (Hilbert.KT).HasK where p := 0; q := 1;
+instance : (Hilbert.KT).HasT where p := 0
+instance : System.KT (Hilbert.KT) where
+
 
 protected abbrev KTB : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.B (.atom 0)}⟩
 instance : (Hilbert.KTB).HasK where p := 0; q := 1;
