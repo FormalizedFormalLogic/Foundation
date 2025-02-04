@@ -4,14 +4,13 @@ import Foundation.Modal.Kripke2.Basic
 namespace LO.Modal
 
 open Kripke
+open Formula
 open Formula.Kripke
 
 namespace Kripke.Hilbert
 
 variable {C : Kripke.FrameClass}
 variable {H : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
-
-open Formula
 
 lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy H.axiomInstances] : H ⊢! φ → C ⊧ φ := by
   intro hφ F hF;

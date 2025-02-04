@@ -117,5 +117,4 @@ import Foundation.Modal.Kripke2.S4
 import Foundation.Modal.Kripke2.S4Dot2
 import Foundation.Modal.Kripke2.S4Dot3
 import Foundation.Modal.Kripke2.S5
-
-import Foundation.Modal.PLoN.Completeness
+import Foundation.Modal.PLoN.N

@@ -1,34 +1,49 @@
-import Foundation.Modal.PLoN.Semantics
+import Foundation.Modal.Hilbert2.Basic
+import Foundation.Modal.PLoN.Basic
 
 namespace LO.Modal
 
-namespace PLoN
+open PLoN
+open Formula
+open Formula.PLoN
+
+namespace PLoN.Hilbert
 
 open Formula
+variable {C : PLoN.FrameClass}
+variable {H : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 
-variable {φ : Formula α} {H : Hilbert α}
+lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy H.axiomInstances] : H ⊢! φ → C ⊧ φ := by
+  intro hφ F hF;
+  induction hφ using Hilbert.Deduction.rec! with
+  | maxm h =>
+    obtain ⟨ψ, h, ⟨s, rfl⟩⟩ := h;
+    apply defined.defines F |>.mp hF (ψ⟦s⟧);
+    use ψ;
+    constructor;
+    . assumption;
+    . use s;
+  | mdp ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
+  | nec ih => exact ValidOnFrame.nec ih;
+  | imply₁ => exact ValidOnFrame.imply₁;
+  | imply₂ => exact ValidOnFrame.imply₂;
+  | ec => exact ValidOnFrame.elim_contra;
 
-lemma sound (defines : H.DefinesPLoNFrameClass 𝔽) (d : H ⊢! φ) : 𝔽 ⊧ φ := by
-  intro F hF;
-  have := defines.mpr hF;
-  exact Semantics.RealizeSet.setOf_iff.mp this φ d;
+instance [C.DefinedBy H.axiomInstances] : Sound H C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩
 
-lemma sound_of_defines (defines : H.DefinesPLoNFrameClass 𝔽) : Sound H 𝔽 := ⟨sound defines⟩
+lemma instConsistent_aux [nonempty : C.IsNonempty] [sound : Sound H C] : H ⊬ ⊥ := by
+  apply not_imp_not.mpr sound.sound;
+  apply ValidOnFrameClass.not_of_exists_frame;
+  obtain ⟨F, hF⟩ := nonempty;
+  use F;
+  constructor;
+  . assumption;
+  . simp;
 
-lemma unprovable_bot_of_nonempty_frameclass (defines : H.DefinesPLoNFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : H ⊬ ⊥ := by
-  intro h;
-  obtain ⟨⟨_, F⟩, hF⟩ := nonempty;
-  simpa using sound defines h hF;
-
-lemma consistent_of_defines (defines : H.DefinesPLoNFrameClass 𝔽) (nonempty : 𝔽.Nonempty) : System.Consistent H := by
+lemma instConsistent (C : PLoN.FrameClass) [C.IsNonempty] [Sound H C] : System.Consistent H := by
   apply System.Consistent.of_unprovable;
-  exact unprovable_bot_of_nonempty_frameclass defines nonempty;
+  exact instConsistent_aux (C := C);
 
-
-instance : Sound (Hilbert.N α) (AllFrameClass α) := sound_of_defines N_defines
-
-instance : System.Consistent (Hilbert.N α) := consistent_of_defines N_defines AllFrameClass.nonempty
-
-end PLoN
+end PLoN.Hilbert
 
 end LO.Modal

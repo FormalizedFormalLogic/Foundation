@@ -230,6 +230,7 @@ instance : System.Triv (Hilbert.Triv) where
 
 @[simp] lemma K4_weakerThan_Triv : Hilbert.K4 ≤ₛ Hilbert.Triv := weakerThan_of_dominate_axioms $ by simp;
 
+protected abbrev N : Hilbert ℕ := ⟨{}⟩
 
 end Hilbert
 
