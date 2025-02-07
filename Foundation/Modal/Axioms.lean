@@ -78,6 +78,8 @@ protected abbrev Tc := φ ➝ □φ
 abbrev Tc.set : Set F := { Axioms.Tc φ | (φ) }
 notation:max "𝗧𝗰" => Tc.set
 
+protected abbrev DiaT := ◇φ ➝ φ
+
 protected abbrev Ver := □φ
 abbrev Ver.set : Set F := { Axioms.Ver φ | (φ) }
 notation:max "𝗩𝗲𝗿" => Ver.set

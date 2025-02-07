@@ -254,13 +254,11 @@ instance (Γ : Context F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ Context.of axiomL�
 
 end
 
-
 class HasAxiomDot2 [Dia F] (𝓢 : S) where
   Dot2 (φ : F) : 𝓢 ⊢ Axioms.Dot2 φ
 
 class HasAxiomDot3 (𝓢 : S) where
   Dot3 (φ ψ : F) : 𝓢 ⊢ Axioms.Dot3 φ ψ
-
 
 class HasAxiomGrz (𝓢 : S) where
   Grz (φ : F) : 𝓢 ⊢ Axioms.Grz φ
@@ -297,6 +295,26 @@ instance (Γ : Context F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ Context.of axiomT
 
 end
 
+
+class HasAxiomDiaT (𝓢 : S) where
+  diaT (φ : F) : 𝓢 ⊢ Axioms.DiaT φ
+
+section
+
+variable [HasAxiomDiaT 𝓢]
+
+def diaT : 𝓢 ⊢ ◇φ ➝ φ := HasAxiomDiaT.diaT _
+@[simp] lemma diaT! : 𝓢 ⊢! ◇φ ➝ φ := ⟨diaT⟩
+
+variable [System.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDiaT Γ := ⟨fun _ ↦ FiniteContext.of diaT⟩
+instance (Γ : Context F 𝓢) : HasAxiomDiaT Γ := ⟨fun _ ↦ Context.of diaT⟩
+
+def diaT' (h : 𝓢 ⊢ ◇φ) : 𝓢 ⊢ φ := diaT ⨀ h
+lemma diaT'! (h : 𝓢 ⊢! ◇φ) : 𝓢 ⊢! φ := ⟨diaT' h.some⟩
+
+end
 
 
 class HasAxiomVer (𝓢 : S) where
@@ -377,6 +395,7 @@ protected class KB extends System.K 𝓢, HasAxiomB 𝓢
 protected class KT extends System.K 𝓢, HasAxiomT 𝓢
 
 protected class KTc extends System.K 𝓢, HasAxiomTc 𝓢
+protected class KTc' extends System.K 𝓢, HasAxiomDiaT 𝓢
 
 protected class KTB extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomB 𝓢
 
