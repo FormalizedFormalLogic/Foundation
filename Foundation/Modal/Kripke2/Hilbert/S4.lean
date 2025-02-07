@@ -12,6 +12,12 @@ abbrev Kripke.ReflexiveTransitiveFiniteFrameClass : FiniteFrameClass := { F | Re
 
 namespace Hilbert.S4
 
+instance Kripke.sound : Sound (Hilbert.S4) (Kripke.ReflexiveTransitiveFrameClass) := by
+  convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩});
+  exact eq_Geach;
+  . unfold ReflexiveTransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
+    simp [Geachean.reflexive_def, Geachean.transitive_def];
+
 instance Kripke.consistent : System.Consistent (Hilbert.S4) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩});
   exact eq_Geach;

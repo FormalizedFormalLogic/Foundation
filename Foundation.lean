@@ -135,3 +135,5 @@ import Foundation.Modal.Kripke2.ComplexityLimited
 import Foundation.Modal.Kripke2.Undefinability
 
 import Foundation.Modal.PLoN.Hilbert.N
+
+import Foundation.Modal.ModalCompanion.GMT

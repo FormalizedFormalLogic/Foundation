@@ -125,6 +125,8 @@ namespace Hilbert.Geach
 
 open Kripke
 
+instance Kripke.sound : Sound (Hilbert.Geach G) (MultiGeacheanConfluentFrameClass G) := inferInstance
+
 instance Kripke.Consistent : System.Consistent (Hilbert.Geach G) := Kripke.Hilbert.consistent_of_FrameClass (Kripke.MultiGeacheanConfluentFrameClass G)
 
 instance Kripke.Canonical : Canonical (Hilbert.Geach G) (MultiGeacheanConfluentFrameClass G) := ⟨by
