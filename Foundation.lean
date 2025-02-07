@@ -109,6 +109,8 @@ import Foundation.Modal.Boxdot.K4_S4
 import Foundation.Modal.Boxdot.GL_Grz
 -/
 
+import Foundation.Modal.Hilbert2.GL_Alternatives
+
 import Foundation.Modal.Kripke2.Hilbert.K
 import Foundation.Modal.Kripke2.Hilbert.KT
 import Foundation.Modal.Kripke2.Hilbert.KTB

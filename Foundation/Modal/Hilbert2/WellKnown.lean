@@ -168,6 +168,20 @@ instance [DecidableEq α] [hVer : H.HasVer] : System.HasAxiomVer H where
     . use (λ b => if hVer.p = b then φ else (.atom b));
       simp;
 
+
+class HasH (H : Hilbert α) where
+  p : α
+  mem_H : Axioms.H (.atom p) ∈ H.axioms := by tauto;
+
+instance [hH : H.HasH] : System.HasAxiomH H where
+  H φ := by
+    apply maxm;
+    use Axioms.H (.atom hH.p);
+    constructor;
+    . exact hH.mem_H;
+    . use (λ b => if hH.p = b then φ else (.atom b));
+      simp;
+
 end
 
 protected abbrev KT : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}⟩

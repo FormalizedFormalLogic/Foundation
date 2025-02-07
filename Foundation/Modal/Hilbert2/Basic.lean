@@ -16,7 +16,7 @@ namespace Hilbert
 
 variable {H H₁ H₂ : Hilbert α}
 
-def axiomInstances (H : Hilbert α) : Set (Formula α) := { φ⟦s⟧ | (φ ∈ H.axioms) (s : Substitution α) }
+abbrev axiomInstances (H : Hilbert α) : Set (Formula α) := { φ⟦s⟧ | (φ ∈ H.axioms) (s : Substitution α) }
 
 lemma mem_axiomInstances_of_mem_axioms {φ} (h : φ ∈ H.axioms) : φ ∈ H.axiomInstances := by
   use φ;
@@ -64,7 +64,7 @@ namespace Deduction
 
 noncomputable def rec!
   {motive      : (φ : Formula α) → H ⊢! φ → Sort*}
-  (maxm       : ∀ {φ}, (h : φ ∈ H.axiomInstances) → motive φ ⟨maxm h⟩)
+  (maxm       : ∀ {φ}, (h : φ ∈ H.axiomInstances) → motive φ (maxm! h))
   (mdp        : ∀ {φ ψ}, {hpq : H ⊢! φ ➝ ψ} → {hp : H ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (mdp! hpq hp))
   (nec        : ∀ {φ}, {hp : H ⊢! φ} → (ihp : motive φ hp) → motive (□φ) (nec! hp))
   (imply₁     : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ ⟨imply₁ φ ψ⟩)

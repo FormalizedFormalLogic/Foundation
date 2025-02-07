@@ -42,7 +42,7 @@ namespace K4
 lemma provable_Cl_trivTranslated : (Hilbert.K4) ⊢! φ → (Hilbert.Cl _) ⊢! φᵀᴾ := by
   intro h;
   apply Hilbert.Triv.classical_reducible.mp;
-  exact System.weakerThan_iff.mp (by simp) h;
+  exact System.weakerThan_iff.mp K4_weakerThan_Triv h;
 
 lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
   apply not_imp_not.mpr provable_Cl_trivTranslated;
