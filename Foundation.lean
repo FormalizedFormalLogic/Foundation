@@ -65,50 +65,6 @@ import Foundation.IntProp.Dialectica.Basic
 
 -- Modal
 
-/-
-import Foundation.Modal.Hilbert.GL_Independency
-import Foundation.Modal.Hilbert.Subst
-import Foundation.Modal.Hilbert.Maximal.Unprovability
-
-import Foundation.Modal.Hilbert.WeakerThan.GL_GLS
-import Foundation.Modal.Hilbert.WeakerThan.K_K4
-import Foundation.Modal.Hilbert.WeakerThan.K_K5
-import Foundation.Modal.Hilbert.WeakerThan.K_KB
-import Foundation.Modal.Hilbert.WeakerThan.K_KD
-import Foundation.Modal.Hilbert.WeakerThan.K4_GL
-import Foundation.Modal.Hilbert.WeakerThan.K4_Grz
-import Foundation.Modal.Hilbert.WeakerThan.K4_K45
-import Foundation.Modal.Hilbert.WeakerThan.K4_KD4
-import Foundation.Modal.Hilbert.WeakerThan.K4_S4
-import Foundation.Modal.Hilbert.WeakerThan.K4_Triv
-import Foundation.Modal.Hilbert.WeakerThan.K45_KB4
-import Foundation.Modal.Hilbert.WeakerThan.K5_K45
-import Foundation.Modal.Hilbert.WeakerThan.K5_KD5
-import Foundation.Modal.Hilbert.WeakerThan.KB_KDB
-import Foundation.Modal.Hilbert.WeakerThan.KB5_S5
-import Foundation.Modal.Hilbert.WeakerThan.KD_KDB
-import Foundation.Modal.Hilbert.WeakerThan.KD_KT
-import Foundation.Modal.Hilbert.WeakerThan.KD4_KD45
-import Foundation.Modal.Hilbert.WeakerThan.KD45_S5
-import Foundation.Modal.Hilbert.WeakerThan.KD5_KD45
-import Foundation.Modal.Hilbert.WeakerThan.KDB_KTB
-import Foundation.Modal.Hilbert.WeakerThan.KT_Grz
-import Foundation.Modal.Hilbert.WeakerThan.KT_KTB
-import Foundation.Modal.Hilbert.WeakerThan.KT_S4
-import Foundation.Modal.Hilbert.WeakerThan.KTB_S5
-import Foundation.Modal.Hilbert.WeakerThan.S4_S5
-
-import Foundation.Modal.Hilbert.Equiv.GL
-import Foundation.Modal.Hilbert.Equiv.KD_KP
-import Foundation.Modal.Hilbert.Equiv.S5_KT4B
-import Foundation.Modal.Hilbert.Equiv.S5Grz_Triv
-
-import Foundation.Modal.ModalCompanion.GMT
-
-import Foundation.Modal.Boxdot.K4_S4
-import Foundation.Modal.Boxdot.GL_Grz
--/
-
 import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Hilbert.GL.Alternatives
