@@ -1,5 +1,5 @@
 import Foundation.IntProp.Kripke.Completeness
-import Foundation.Modal.Kripke2.Hilbert.S4
+import Foundation.Modal.Kripke.Hilbert.S4
 import Foundation.Modal.ModalCompanion.Basic
 
 namespace LO.Modal

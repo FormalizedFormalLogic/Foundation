@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert2.Basic
+import Foundation.Modal.Hilbert.Basic
 import Foundation.Modal.PLoN.Basic
 
 namespace LO.Modal

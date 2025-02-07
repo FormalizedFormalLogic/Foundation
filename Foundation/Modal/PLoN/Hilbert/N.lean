@@ -1,6 +1,6 @@
 import Foundation.Modal.PLoN.Hilbert.Soundness
 import Foundation.Modal.PLoN.Completeness
-import Foundation.Modal.Hilbert2.WellKnown
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 

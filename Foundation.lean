@@ -109,30 +109,30 @@ import Foundation.Modal.Boxdot.K4_S4
 import Foundation.Modal.Boxdot.GL_Grz
 -/
 
-import Foundation.Modal.Hilbert2.KP
-import Foundation.Modal.Hilbert2.S5Grz
-import Foundation.Modal.Hilbert2.GL.Alternatives
-import Foundation.Modal.Hilbert2.GL.Independency
+import Foundation.Modal.Hilbert.KP
+import Foundation.Modal.Hilbert.S5Grz
+import Foundation.Modal.Hilbert.GL.Alternatives
+import Foundation.Modal.Hilbert.GL.Independency
 
-import Foundation.Modal.Kripke2.Hilbert.K
-import Foundation.Modal.Kripke2.Hilbert.KT
-import Foundation.Modal.Kripke2.Hilbert.KTB
-import Foundation.Modal.Kripke2.Hilbert.KT4B
-import Foundation.Modal.Kripke2.Hilbert.S4
-import Foundation.Modal.Kripke2.Hilbert.S4Dot2
-import Foundation.Modal.Kripke2.Hilbert.S4Dot3
-import Foundation.Modal.Kripke2.Hilbert.S5
-import Foundation.Modal.Kripke2.Hilbert.Triv
-import Foundation.Modal.Kripke2.Hilbert.Ver
+import Foundation.Modal.Kripke.Hilbert.K
+import Foundation.Modal.Kripke.Hilbert.KT
+import Foundation.Modal.Kripke.Hilbert.KTB
+import Foundation.Modal.Kripke.Hilbert.KT4B
+import Foundation.Modal.Kripke.Hilbert.S4
+import Foundation.Modal.Kripke.Hilbert.S4Dot2
+import Foundation.Modal.Kripke.Hilbert.S4Dot3
+import Foundation.Modal.Kripke.Hilbert.S5
+import Foundation.Modal.Kripke.Hilbert.Triv
+import Foundation.Modal.Kripke.Hilbert.Ver
 
-import Foundation.Modal.Kripke2.Hilbert.GL.Unnecessitation
-import Foundation.Modal.Kripke2.Hilbert.GL.MDP
+import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
+import Foundation.Modal.Kripke.Hilbert.GL.MDP
 
-import Foundation.Modal.Kripke2.Hilbert.Grz.Completeness
+import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 
-import Foundation.Modal.Kripke2.NNFormula
-import Foundation.Modal.Kripke2.ComplexityLimited
-import Foundation.Modal.Kripke2.Undefinability
+import Foundation.Modal.Kripke.NNFormula
+import Foundation.Modal.Kripke.ComplexityLimited
+import Foundation.Modal.Kripke.Undefinability
 
 import Foundation.Modal.PLoN.Hilbert.N
 

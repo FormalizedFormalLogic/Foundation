@@ -1,6 +1,6 @@
 import Foundation.Logic.Disjunctive
 import Foundation.IntProp.Hilbert.Basic
-import Foundation.Modal.Hilbert2.WellKnown
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 

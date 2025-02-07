@@ -1,11 +1,35 @@
 import Foundation.Vorspiel.Chain
 import Foundation.Modal.Kripke.Preservation
+import Foundation.Modal.Kripke.FiniteFrame
 
 namespace LO.Modal
+
+
+structure Kripke.FiniteTransitiveTree extends Kripke.FiniteFrame, Kripke.RootedFrame where
+  rel_assymetric : Assymetric Rel
+  rel_transitive : Transitive Rel
+
+namespace Kripke.FiniteTransitiveTree
+
+lemma rel_irreflexive (T : FiniteTransitiveTree) : Irreflexive T.Rel := irreflexive_of_assymetric $ T.rel_assymetric
+
+end Kripke.FiniteTransitiveTree
+
+
+def Formula.Kripke.ValidOnFiniteTransitiveTreeFrame (T : Kripke.FiniteTransitiveTree) (φ : Formula ℕ) := T.toFrame ⊧ φ
+
+namespace ValidOnFiniteTransitiveTreeFrame
+
+instance semantics : Semantics (Formula ℕ) (Kripke.FiniteFrame) := ⟨fun F ↦ Formula.Kripke.ValidOnFiniteFrame F⟩
+
+end ValidOnFiniteTransitiveTreeFrame
+
 
 namespace Kripke
 
 open Relation (TransGen)
+
+structure FiniteTransitiveTreeModel extends FiniteTransitiveTree, Model where
 
 variable {F : Frame} {r : F.World}
 
@@ -110,7 +134,8 @@ lemma rel_def {x y : (F.TransitiveTreeUnravelling r).World} : x ≺ y ↔ (x.1.l
   . replace ⟨xs, ⟨ws, hw⟩, hx₂⟩ := x;
     replace ⟨ys, ⟨vs, hv⟩, hy₂⟩ := y;
     subst hw hv;
-    rintro ⟨hl, ⟨zs, hzs⟩⟩; simp at hzs;
+    rintro ⟨hl, ⟨zs, hzs⟩⟩;
+    simp at hzs;
     induction zs using List.induction_with_singleton generalizing ws vs with
     | hnil => simp_all;
     | hsingle z =>
@@ -140,7 +165,7 @@ lemma rooted : (F.TransitiveTreeUnravelling r).isRooted ⟨[r], by tauto⟩ := b
     simp_all;
   . use zs;
 
-def pMorphism (F : Frame) (F_trans : Transitive F.Rel) (r : F) : (F.TransitiveTreeUnravelling r) →ₚ F := (Frame.TreeUnravelling.PMorphism F r).TransitiveClosure F_trans
+abbrev pMorphism (F : Frame) (F_trans : Transitive F.Rel) (r : F) : (F.TransitiveTreeUnravelling r) →ₚ F := (Frame.TreeUnravelling.PMorphism F r).TransitiveClosure F_trans
 
 end Frame.TransitiveTreeUnravelling
 
@@ -154,7 +179,7 @@ namespace Model.TreeUnravelling
 variable {M : Kripke.Model} {r : M.World}
 
 def pMorphism (M : Kripke.Model) (r : M.World) : M.TreeUnravelling r →ₚ M :=
-  Model.PseudoEpimorphism.mkAtomic (Frame.TreeUnravelling.PMorphism M.toFrame r) $ by aesop;
+  PseudoEpimorphism.ofAtomic (Frame.TreeUnravelling.PMorphism M.toFrame r) $ by aesop;
 
 end Model.TreeUnravelling
 
@@ -165,8 +190,8 @@ def Model.TransitiveTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Mo
 
 namespace Model.TransitiveTreeUnravelling
 
-def pMorphism (M : Kripke.Model) (M_trans : Transitive M.Rel) (r : M.World) : M.TransitiveTreeUnravelling r →ₚ M :=
-  Model.PseudoEpimorphism.mkAtomic (Frame.TransitiveTreeUnravelling.pMorphism M.toFrame M_trans r) $ by aesop;
+abbrev pMorphism (M : Kripke.Model) (M_trans : Transitive M.Rel) (r : M.World) : M.TransitiveTreeUnravelling r →ₚ M :=
+  PseudoEpimorphism.ofAtomic (Frame.TransitiveTreeUnravelling.pMorphism M.toFrame M_trans r) $ by aesop;
 
 lemma modal_equivalence_at_root (M : Kripke.Model) (M_trans : Transitive M.Rel) (r : M.World)
   : ModalEquivalent (M₁ := M.TransitiveTreeUnravelling r) (M₂ := M) ⟨[r], by simp⟩ r
@@ -175,22 +200,7 @@ lemma modal_equivalence_at_root (M : Kripke.Model) (M_trans : Transitive M.Rel) 
 end Model.TransitiveTreeUnravelling
 
 
-structure FiniteTransitiveTree extends Kripke.FiniteFrame, Kripke.RootedFrame where
-  rel_assymetric : Assymetric Rel
-  rel_transitive : Transitive Rel
-
-namespace FiniteTransitiveTree
-
-lemma rel_irreflexive (T : FiniteTransitiveTree) : Irreflexive T.Rel := irreflexive_of_assymetric $ T.rel_assymetric
-
-end FiniteTransitiveTree
-
-
 abbrev Model.FiniteTransitiveTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model := (M↾r).TransitiveTreeUnravelling ⟨r, by tauto⟩
-
-
-structure FiniteTransitiveTreeModel extends FiniteTransitiveTree, Model where
-
 
 abbrev FiniteFrame.FiniteTransitiveTreeUnravelling
   (F : FiniteFrame) [DecidableEq F.World] (F_trans : Transitive F.toFrame) (F_irrefl : Irreflexive F.toFrame) (r : F.World) : FiniteTransitiveTree :=
