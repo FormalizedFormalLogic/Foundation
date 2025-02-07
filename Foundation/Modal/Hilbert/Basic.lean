@@ -1,4 +1,5 @@
 import Foundation.Modal.Formula
+import Foundation.Modal.Substitution
 import Foundation.Modal.System.K
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 
@@ -8,54 +9,35 @@ open System
 
 variable {α : Type*}
 
-section
-
-/-- instance of inference rule -/
-structure Hilbert.InferenceRule (α : Type*) where
-  antecedents : List (Formula α)
-  consequence : Formula α
-  /--
-  Empty antecedent rule can be simply regarded as axiom rule.
-  However, union of all these rules including to `Hilbert.rules` would be too complex for implementation and induction,
-  so more than one antecedent is required.
-  -/
-  antecedents_nonempty : antecedents ≠ [] := by simp
-
-namespace Hilbert.InferenceRule
-
-abbrev Necessitation (φ : Formula α) : InferenceRule α := ⟨[φ], □φ, by simp⟩
-abbrev Necessitation.set : Set (InferenceRule α) := { Necessitation φ | φ }
-notation "⟮Nec⟯" => Necessitation.set
-
-abbrev LoebRule (φ : Formula α) : InferenceRule α := ⟨[□φ ➝ φ], φ, by simp⟩
-abbrev LoebRule.set : Set (InferenceRule α) := { LoebRule φ | φ }
-notation "⟮Loeb⟯" => LoebRule.set
-
-abbrev HenkinRule (φ : Formula α) : InferenceRule α := ⟨[□φ ⭤ φ], φ, by simp⟩
-abbrev HenkinRule.set : Set (InferenceRule α) := { HenkinRule φ | φ }
-notation "⟮Henkin⟯" => HenkinRule.set
-
-end Hilbert.InferenceRule
-
-end
-
-
 structure Hilbert (α : Type*) where
-  axioms : Theory α
-  rules : Set (Hilbert.InferenceRule α)
+  axioms : Set (Formula α)
 
+namespace Hilbert
 
 variable {H H₁ H₂ : Hilbert α}
 
-inductive Hilbert.Deduction (H : Hilbert α) : (Formula α) → Type _
-  | maxm {φ}     : φ ∈ H.axioms → Deduction H φ
-  | rule {rl}    : rl ∈ H.rules → (∀ {φ}, φ ∈ rl.antecedents → Deduction H φ) → Deduction H rl.consequence
-  | mdp {φ ψ}    : Deduction H (φ ➝ ψ) → Deduction H φ → Deduction H ψ
-  | imply₁ φ ψ   : Deduction H $ Axioms.Imply₁ φ ψ
-  | imply₂ φ ψ χ : Deduction H $ Axioms.Imply₂ φ ψ χ
-  | ec φ ψ       : Deduction H $ Axioms.ElimContra φ ψ
+abbrev axiomInstances (H : Hilbert α) : Set (Formula α) := { φ⟦s⟧ | (φ ∈ H.axioms) (s : Substitution α) }
 
-namespace Hilbert.Deduction
+lemma mem_axiomInstances_of_mem_axioms {φ} (h : φ ∈ H.axioms) : φ ∈ H.axiomInstances := by
+  use φ;
+  constructor;
+  . assumption;
+  . use Substitution.id;
+    simp;
+
+class FiniteAxiomatizable (H : Hilbert α) where
+  axioms_fin : Set.Finite H.axioms := by aesop
+
+
+inductive Deduction (H : Hilbert α) : (Formula α) → Type _
+  | maxm {φ}      : φ ∈ H.axiomInstances → Deduction H φ
+  | mdp {φ ψ}     : Deduction H (φ ➝ ψ) → Deduction H φ → Deduction H ψ
+  | nec {φ}       : Deduction H φ → Deduction H (□φ)
+  | imply₁ φ ψ    : Deduction H $ Axioms.Imply₁ φ ψ
+  | imply₂ φ ψ χ  : Deduction H $ Axioms.Imply₂ φ ψ χ
+  | ec φ ψ        : Deduction H $ Axioms.ElimContra φ ψ
+
+namespace Deduction
 
 instance : System (Formula α) (Hilbert α) := ⟨Deduction⟩
 
@@ -69,127 +51,82 @@ instance : System.Classical H where
 
 instance : System.HasDiaDuality H := inferInstance
 
-lemma maxm! {φ} (h : φ ∈ H.axioms) : H ⊢! φ := ⟨maxm h⟩
+instance : System.Necessitation H := ⟨nec⟩
 
-end Hilbert.Deduction
-
-
-namespace Hilbert
-
-open Deduction
-
-class HasNecessitation (H : Hilbert α) where
-  has_necessitation : ⟮Nec⟯ ⊆ H.rules := by aesop
-
-instance [HasNecessitation H] : System.Necessitation H where
-  nec := @λ φ d => rule (show { antecedents := [φ], consequence := □φ } ∈ H.rules by apply HasNecessitation.has_necessitation; simp_all) (by aesop);
-
-
-class HasLoebRule (H : Hilbert α) where
-  has_loeb : ⟮Loeb⟯ ⊆ H.rules := by aesop
-
-instance [HasLoebRule H] : System.LoebRule H where
-  loeb := @λ φ d => rule (show { antecedents := [□φ ➝ φ], consequence := φ } ∈ H.rules by apply HasLoebRule.has_loeb; simp_all) (by aesop);
-
-
-class HasHenkinRule (H : Hilbert α) where
-  has_henkin : ⟮Henkin⟯ ⊆ H.rules := by aesop
-
-instance [HasHenkinRule H] : System.HenkinRule H where
-  henkin := @λ φ d => rule (show { antecedents := [□φ ⭤ φ], consequence := φ } ∈ H.rules by apply HasHenkinRule.has_henkin; simp_all) (by aesop);
-
-
-class HasNecOnly (H : Hilbert α) where
-  has_necessitation_only : H.rules = ⟮Nec⟯ := by rfl
-
-instance [h : HasNecOnly H] : H.HasNecessitation where
-  has_necessitation := by rw [h.has_necessitation_only]
-
-
-class HasAxiomK (H : Hilbert α) where
-  has_axiomK : 𝗞 ⊆ H.axioms := by aesop
-
-instance [HasAxiomK H] : System.HasAxiomK H where
-  K _ _ := maxm (by apply HasAxiomK.has_axiomK; simp_all)
-
-class IsNormal (H : Hilbert α) extends H.HasNecOnly, H.HasAxiomK where
-
-instance {H : Hilbert α} [H.IsNormal] : System.K H where
-
-
-namespace Deduction
-
-variable {H : Hilbert α}
-
-noncomputable def inducition!
-  {motive  : (φ : Formula α) → H ⊢! φ → Sort*}
-  (hRules  : (r : InferenceRule α) → (hr : r ∈ H.rules) →
-             (hant : ∀ {φ}, φ ∈ r.antecedents → H ⊢! φ) →
-             (ih : ∀ {φ}, (hp : φ ∈ r.antecedents) →
-             motive φ (hant hp)) → motive r.consequence ⟨rule hr (λ hp => (hant hp).some)⟩)
-  (hMaxm     : ∀ {φ}, (h : φ ∈ H.axioms) → motive φ ⟨maxm h⟩)
-  (hMdp      : ∀ {φ ψ}, {hpq : H ⊢! φ ➝ ψ} → {hp : H ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ ⟨mdp hpq.some hp.some⟩)
-  (hImply₁     : ∀ {φ ψ}, motive (φ ➝ ψ ➝ φ) $ ⟨imply₁ φ ψ⟩)
-  (hImply₂     : ∀ {φ ψ χ}, motive ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ) $ ⟨imply₂ φ ψ χ⟩)
-  (hElimContra : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ ⟨ec φ ψ⟩)
-  : ∀ {φ}, (d : H ⊢! φ) → motive φ d := by
-  intro φ d;
-  induction d.some with
-  | maxm h => exact hMaxm h
-  | mdp hpq hp ihpq ihp => exact hMdp (ihpq ⟨hpq⟩) (ihp ⟨hp⟩)
-  | rule hr h ih => apply hRules _ hr; intro φ hp; exact ih hp ⟨h hp⟩;
-  | imply₁ => exact hImply₁
-  | imply₂ => exact hImply₂
-  | ec => exact hElimContra
-
-/-- Useful induction for normal modal logic. -/
-noncomputable def inducition_with_necOnly! [H.HasNecOnly]
-  {motive  : (φ : Formula α) → H ⊢! φ → Prop}
-  (hMaxm   : ∀ {φ}, (h : φ ∈ H.axioms) → motive φ ⟨maxm h⟩)
-  (hMdp    : ∀ {φ ψ}, {hpq : H ⊢! φ ➝ ψ} → {hp : H ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (hpq ⨀ hp))
-  (hNec    : ∀ {φ}, {hp : H ⊢! φ} → (ihp : motive φ hp) → motive (□φ) (System.nec! hp))
-  (hImply₁   : ∀ {φ ψ}, motive (φ ➝ ψ ➝ φ) $ ⟨imply₁ φ ψ⟩)
-  (hImply₂   : ∀ {φ ψ χ}, motive ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ) $ ⟨imply₂ φ ψ χ⟩)
-  (hElimContra : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ ⟨ec φ ψ⟩)
-  : ∀ {φ}, (d : H ⊢! φ) → motive φ d := by
-  intro φ d;
-  induction d using Deduction.inducition! with
-  | hMaxm h => exact hMaxm h
-  | hMdp ihpq ihp => exact hMdp (ihpq) (ihp);
-  | hRules rl hrl hant ih =>
-    rw [HasNecOnly.has_necessitation_only] at hrl;
-    obtain ⟨φ, rfl⟩ := hrl;
-    exact @hNec φ (hant (by simp)) $ ih (by simp);
-  | hImply₁ => exact hImply₁
-  | hImply₂ => exact hImply₂
-  | hElimContra => exact hElimContra
+lemma maxm! {φ} (h : φ ∈ H.axiomInstances) : H ⊢! φ := ⟨maxm h⟩
 
 end Deduction
 
-variable {H H₁ H₂ : Hilbert α}
+
+open Deduction
+
+namespace Deduction
+
+noncomputable def rec!
+  {motive      : (φ : Formula α) → H ⊢! φ → Sort*}
+  (maxm       : ∀ {φ}, (h : φ ∈ H.axiomInstances) → motive φ (maxm! h))
+  (mdp        : ∀ {φ ψ}, {hpq : H ⊢! φ ➝ ψ} → {hp : H ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (mdp! hpq hp))
+  (nec        : ∀ {φ}, {hp : H ⊢! φ} → (ihp : motive φ hp) → motive (□φ) (nec! hp))
+  (imply₁     : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ ⟨imply₁ φ ψ⟩)
+  (imply₂     : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ ⟨imply₂ φ ψ χ⟩)
+  (ec : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ ⟨ec φ ψ⟩)
+  : ∀ {φ}, (d : H ⊢! φ) → motive φ d := by
+  intro φ d;
+  induction d.some with
+  | maxm h => exact maxm h
+  | mdp hpq hp ihpq ihp => exact mdp (ihpq ⟨hpq⟩) (ihp ⟨hp⟩)
+  | nec hp ih => exact nec (ih ⟨hp⟩)
+  | _ => aesop;
+
+def subst! {φ} (s) (h : H ⊢! φ) : H ⊢! φ⟦s⟧ := by
+  induction h using Deduction.rec! with
+  | imply₁ => simp;
+  | imply₂ => simp;
+  | ec => simp;
+  | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+  | nec ihφ => exact nec! ihφ;
+  | maxm h =>
+    obtain ⟨ψ, h, ⟨s', rfl⟩⟩ := h;
+    apply maxm!;
+    use ψ;
+    constructor;
+    . assumption;
+    . use s' ∘ s;
+      exact subst_comp;
+
+end Deduction
+
 
 abbrev theorems (H : Hilbert α) := System.theory H
 
-abbrev Consistent (H : Hilbert α) := System.Consistent H
+lemma of_subset (hs : H₁.axioms ⊆ H₂.axioms) : H₁ ⊢! φ → H₂ ⊢! φ := by
+  intro h;
+  induction h using Deduction.rec! with
+  | maxm h =>
+    obtain ⟨ψ, h, ⟨s, rfl⟩⟩ := h;
+    apply maxm!;
+    use ψ;
+    constructor;
+    . exact hs h;
+    . use s;
+  | mdp ih₁ ih₂ => exact mdp! ih₁ ih₂;
+  | nec ih => exact nec! ih;
+  | _ => simp;
 
-lemma normal_weakerThan_of_maxm [H₁.IsNormal] [H₂.IsNormal]
-  (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axioms → H₂ ⊢! φ)
-  : H₁ ≤ₛ H₂ := by
+lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axiomInstances → H₂ ⊢! φ) : H₁ ≤ₛ H₂ := by
   apply System.weakerThan_iff.mpr;
   intro φ h;
-  induction h using Deduction.inducition_with_necOnly! with
-  | hMaxm hp => exact hMaxm hp;
-  | hMdp ihpq ihp => exact ihpq ⨀ ihp;
-  | hNec ihp => exact nec! ihp;
-  | hImply₁ => exact imply₁!;
-  | hImply₂ => exact imply₂!;
-  | hElimContra => exact elim_contra!
+  induction h using Deduction.rec! with
+  | maxm h => apply hMaxm h;
+  | mdp ih₁ ih₂ => exact mdp! ih₁ ih₂;
+  | nec ih => exact nec! ih;
+  | _ => simp;
 
-lemma normal_weakerThan_of_subset [H₁.IsNormal] [H₂.IsNormal] (hSubset : H₁.axioms ⊆ H₂.axioms)
-  : H₁ ≤ₛ H₂ := by
-  apply normal_weakerThan_of_maxm;
-  intro φ hp;
-  exact ⟨Deduction.maxm $ hSubset hp⟩;
+lemma weakerThan_of_dominate_axioms (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axioms → H₂ ⊢! φ) : H₁ ≤ₛ H₂ := by
+  apply weakerThan_of_dominate_axiomInstances;
+  rintro φ ⟨ψ, hψ, ⟨s, rfl⟩⟩;
+  apply subst!;
+  apply hMaxm hψ;
 
 end Hilbert
 

@@ -1,63 +1,81 @@
-import Foundation.Modal.Hilbert.Systems
-
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
-variable {Ax : Theory α}
-
-open System
-
-protected abbrev Hilbert.Geach (α) (l : List GeachConfluent.Taple) : Hilbert α := Hilbert.ExtK (𝗚𝗲(l))
-
-abbrev Hilbert.IsGeach (L : Hilbert α) (ts : List GeachConfluent.Taple) : Prop := L = Hilbert.Geach _ ts
-
-
-namespace Hilbert.IsGeach
-
-lemma ax {H : Hilbert α} (geach : H.IsGeach ts) : H.axioms = (𝗞 ∪ 𝗚𝗲(ts)) := by simp_all;
-
-end Hilbert.IsGeach
-
-
 namespace Hilbert
 
-instance K.is_geach : (Hilbert.K α).IsGeach [] := by simp;
+variable (α) [DecidableEq α]
 
-instance K4.is_geach : (Hilbert.K4 α).IsGeach [⟨0, 2, 1, 0⟩] := by simp;
+protected abbrev Geach (G : Set (Geachean.Taple)) : Hilbert ℕ := ⟨
+  {Axioms.K (.atom 0) (.atom 1)}
+  ∪ G.image (λ t => Axioms.Geach t (.atom 0))
+⟩
 
-instance K45.is_geach : (Hilbert.K45 α).IsGeach [⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩] := by simp;
+instance : HasK (Hilbert.Geach G) where p := 0; q := 1
+instance : System.K (Hilbert.Geach G) where
 
-instance K5.is_geach : (Hilbert.K5 α).IsGeach [⟨1, 1, 0, 1⟩] := by simp;
+lemma KT.eq_Geach : Hilbert.KT = Hilbert.Geach {⟨0, 0, 1, 0⟩} := by aesop;
 
-instance KB4.is_geach : (Hilbert.KB4 α).IsGeach [⟨0, 1, 0, 1⟩, ⟨0, 2, 1, 0⟩] := by simp;
+lemma KTB.eq_Geach : Hilbert.KTB = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩} := by aesop;
 
-instance KB5.is_geach : (Hilbert.KB5 α).IsGeach [⟨0, 1, 0, 1⟩, ⟨1, 1, 0, 1⟩] := by simp;
+lemma KT4B.eq_Geach : Hilbert.KT4B = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩} := by aesop;
 
-instance KD.is_geach : (Hilbert.KD α).IsGeach [⟨0, 0, 1, 1⟩] := by simp;
+lemma S4.eq_Geach : Hilbert.S4 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩} := by aesop;
 
-instance KB.is_geach : (Hilbert.KB α).IsGeach [⟨0, 1, 0, 1⟩] := by simp;
+lemma S4Dot2.eq_Geach : Hilbert.S4Dot2 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩} := by aesop;
 
-instance KD4.is_geach : (Hilbert.KD4 α).IsGeach [⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩] := by simp;
+lemma S5.eq_Geach : Hilbert.S5 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by aesop;
 
-instance KD45.is_geach : (Hilbert.KD45 α).IsGeach [⟨0, 0, 1, 1⟩,  ⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩] := by simp [Set.union_assoc];
+lemma Triv.eq_Geach : Hilbert.Triv = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩} := by aesop;
 
-instance KD5.is_geach : (Hilbert.KD5 α).IsGeach [⟨0, 0, 1, 1⟩, ⟨1, 1, 0, 1⟩] := by simp;
+instance HasT_of_mem_0_0_1_0 (h : ⟨0, 0, 1, 0⟩ ∈ G) : HasT (Hilbert.Geach G) where
+  p := 0
+  mem_T := by
+    simp [Hilbert.Geach];
+    use ⟨0, 0, 1, 0⟩;
+    simpa;
 
-instance KDB.is_geach : (Hilbert.KDB α).IsGeach [⟨0, 0, 1, 1⟩, ⟨0, 1, 0, 1⟩] := by simp;
+instance HasB_of_mem_0_1_0_1 (h : ⟨0, 1, 0, 1⟩ ∈ G) : HasB (Hilbert.Geach G) where
+  p := 0
+  mem_B := by
+    simp [Hilbert.Geach];
+    use ⟨0, 1, 0, 1⟩;
+    simpa;
 
-instance KT.is_geach : (Hilbert.KT α).IsGeach [⟨0, 0, 1, 0⟩] := by simp;
+instance HasD_of_mem_0_0_1_1 (h : ⟨0, 0, 1, 1⟩ ∈ G) : HasD (Hilbert.Geach G) where
+  p := 0
+  mem_D := by
+    simp [Hilbert.Geach];
+    use ⟨0, 0, 1, 1⟩;
+    simpa;
 
-instance KT4B.is_geach : (Hilbert.KT4B α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩] := by simp [Set.union_assoc];
+instance HasFour_of_mem_0_2_1_0 (h : ⟨0, 2, 1, 0⟩ ∈ G) : HasFour (Hilbert.Geach G) where
+  p := 0
+  mem_Four := by
+    simp [Hilbert.Geach];
+    use ⟨0, 2, 1, 0⟩;
+    simpa;
 
-instance KTB.is_geach : (Hilbert.KTB α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩] := by simp;
+instance HasFive_of_mem_1_1_0_1 (h : ⟨1, 1, 0, 1⟩ ∈ G) : HasFive (Hilbert.Geach G) where
+  p := 0
+  mem_Five := by
+    simp [Hilbert.Geach];
+    use ⟨1, 1, 0, 1⟩;
+    simpa;
 
-instance S4.is_geach : (Hilbert.S4 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩] := by simp;
+instance HasDot2_of_mem_1_1_1_1 (h : ⟨1, 1, 1, 1⟩ ∈ G) : HasDot2 (Hilbert.Geach G) where
+  p := 0
+  mem_Dot2 := by
+    simp [Hilbert.Geach];
+    use ⟨1, 1, 1, 1⟩;
+    simpa;
 
-instance S4Dot2.is_geach : (Hilbert.S4Dot2 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩] := by simp [Set.union_assoc];
-
-instance S5.is_geach : (Hilbert.S5 α).IsGeach [⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩] := by simp;
-
-instance Triv.is_geach : (Hilbert.Triv α).IsGeach [⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩] := by simp;
+instance HasTc_of_mem_0_1_0_0 (h : ⟨0, 1, 0, 0⟩ ∈ G) : HasTc (Hilbert.Geach G) where
+  p := 0
+  mem_Tc := by
+    simp [Hilbert.Geach];
+    use ⟨0, 1, 0, 0⟩;
+    simpa;
 
 end Hilbert
 
