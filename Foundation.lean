@@ -109,6 +109,7 @@ import Foundation.Modal.Boxdot.K4_S4
 import Foundation.Modal.Boxdot.GL_Grz
 -/
 
+import Foundation.Modal.Hilbert2.KP
 import Foundation.Modal.Hilbert2.S5Grz
 import Foundation.Modal.Hilbert2.GL.Alternatives
 import Foundation.Modal.Hilbert2.GL.Independency

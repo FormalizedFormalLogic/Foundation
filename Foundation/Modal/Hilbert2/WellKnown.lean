@@ -190,6 +190,12 @@ instance : (Hilbert.KT).HasT where p := 0
 instance : System.KT (Hilbert.KT) where
 
 
+protected abbrev KD : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0)}⟩
+instance : (Hilbert.KD).HasK where p := 0; q := 1;
+instance : (Hilbert.KD).HasD where p := 0
+instance : System.KD (Hilbert.KD) where
+
+
 protected abbrev KTB : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.B (.atom 0)}⟩
 instance : (Hilbert.KTB).HasK where p := 0; q := 1;
 instance : (Hilbert.KTB).HasT where p := 0
