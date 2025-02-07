@@ -221,6 +221,7 @@ instance : (Hilbert.S4).HasT where p := 0
 instance : (Hilbert.S4).HasFour where p := 0
 instance : System.S4 (Hilbert.S4) where
 
+lemma K4_weakerThan_S4 : Hilbert.K4 ≤ₛ Hilbert.S4 := weakerThan_of_dominate_axioms $ by simp;
 
 protected abbrev S4Dot2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dot2 (.atom 0)}⟩
 instance : (Hilbert.S4Dot2).HasK where p := 0; q := 1;

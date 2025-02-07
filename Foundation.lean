@@ -137,3 +137,6 @@ import Foundation.Modal.Kripke2.Undefinability
 import Foundation.Modal.PLoN.Hilbert.N
 
 import Foundation.Modal.ModalCompanion.GMT
+
+import Foundation.Modal.Boxdot.K4_S4
+import Foundation.Modal.Boxdot.GL_Grz
