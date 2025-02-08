@@ -61,7 +61,8 @@ import Foundation.IntProp.Kripke.DP
 
 import Foundation.IntProp.Heyting.Semantics
 
-import Foundation.IntProp.Dialectica.Basic
+-- TODO:
+-- import Foundation.IntProp.Dialectica.Basic
 
 -- Modal
 
