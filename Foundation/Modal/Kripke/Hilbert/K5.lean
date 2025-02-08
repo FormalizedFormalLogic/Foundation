@@ -1,6 +1,4 @@
 import Foundation.Modal.Kripke.Hilbert.Geach
-import Foundation.Modal.Kripke.Filteration
-import Foundation.Modal.Kripke.FiniteFrame
 
 namespace LO.Modal
 

@@ -12,6 +12,12 @@ abbrev Kripke.ReflexiveSymmetricFiniteFrameClass : FiniteFrameClass := { F | Ref
 
 namespace Hilbert.KTB
 
+instance Kripke.sound : Sound (Hilbert.KTB) (Kripke.ReflexiveSymmetricFrameClass) := by
+  convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩});
+  . exact eq_Geach;
+  . unfold ReflexiveSymmetricFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
+    simp [Geachean.reflexive_def, Geachean.symmetric_def];
+
 instance Kripke.consistent : System.Consistent (Hilbert.KTB) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩});
   exact eq_Geach;

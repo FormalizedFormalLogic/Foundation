@@ -424,6 +424,8 @@ protected class KD45 extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, H
 
 protected class KB4 extends System.K 𝓢, HasAxiomB 𝓢, HasAxiomFour 𝓢
 
+protected class KB5 extends System.K 𝓢, HasAxiomB 𝓢, HasAxiomFive 𝓢
+
 protected class KDB extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomB 𝓢
 
 protected class KD4 extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢

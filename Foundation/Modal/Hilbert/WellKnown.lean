@@ -196,6 +196,12 @@ instance : (Hilbert.KD).HasD where p := 0
 instance : System.KD (Hilbert.KD) where
 
 
+protected abbrev KB : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.B (.atom 0)}⟩
+instance : (Hilbert.KB).HasK where p := 0; q := 1;
+instance : (Hilbert.KB).HasB where p := 0
+instance : System.KB (Hilbert.KB) where
+
+
 protected abbrev KDB : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.B (.atom 0)}⟩
 instance : (Hilbert.KDB).HasK where p := 0; q := 1;
 instance : (Hilbert.KDB).HasD where p := 0
@@ -220,6 +226,49 @@ protected abbrev KT4B : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.
 instance : (Hilbert.KT4B).HasK where p := 0; q := 1;
 instance : (Hilbert.KT4B).HasT where p := 0
 instance : (Hilbert.KT4B).HasFour where p := 0
+
+
+protected abbrev K45 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Five (.atom 0)}⟩
+instance : (Hilbert.K45).HasK where p := 0; q := 1;
+instance : (Hilbert.K45).HasFour where p := 0
+instance : (Hilbert.K45).HasFive where p := 0
+instance : System.K45 (Hilbert.K45) where
+
+
+protected abbrev KD4 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Four (.atom 0)}⟩
+instance : (Hilbert.KD4).HasK where p := 0; q := 1;
+instance : (Hilbert.KD4).HasD where p := 0
+instance : (Hilbert.KD4).HasFour where p := 0
+instance : System.KD4 (Hilbert.KD4) where
+
+
+protected abbrev KD5 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Five (.atom 0)}⟩
+instance : (Hilbert.KD5).HasK where p := 0; q := 1;
+instance : (Hilbert.KD5).HasD where p := 0
+instance : (Hilbert.KD5).HasFive where p := 0
+instance : System.KD5 (Hilbert.KD5) where
+
+
+protected abbrev KD45 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Four (.atom 0), Axioms.Five (.atom 0)}⟩
+instance : (Hilbert.KD45).HasK where p := 0; q := 1;
+instance : (Hilbert.KD45).HasD where p := 0
+instance : (Hilbert.KD45).HasFour where p := 0
+instance : (Hilbert.KD45).HasFive where p := 0
+instance : System.KD45 (Hilbert.KD45) where
+
+
+protected abbrev KB4 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.B (.atom 0), Axioms.Four (.atom 0)}⟩
+instance : (Hilbert.KB4).HasK where p := 0; q := 1;
+instance : (Hilbert.KB4).HasB where p := 0
+instance : (Hilbert.KB4).HasFour where p := 0
+instance : System.KB4 (Hilbert.KB4) where
+
+
+protected abbrev KB5 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.B (.atom 0), Axioms.Five (.atom 0)}⟩
+instance : (Hilbert.KB5).HasK where p := 0; q := 1;
+instance : (Hilbert.KB5).HasB where p := 0
+instance : (Hilbert.KB5).HasFive where p := 0
+instance : System.KB5 (Hilbert.KB5) where
 
 
 protected abbrev S4 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0)}⟩
