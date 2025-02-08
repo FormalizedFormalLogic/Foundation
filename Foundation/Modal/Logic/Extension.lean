@@ -32,11 +32,11 @@ instance : Membership (Formula ℕ) (QuasiNormalExtension L₀) := ⟨λ L φ =>
 
 lemma mem_of_mem_base (h : φ ∈ L₀) : φ ∈ L := L.property.1 h
 
-lemma mem_of_mem_LogicK (h : φ ∈ Logic.K) : φ ∈ L := L.property.2.1 h
+lemma mem_of_mem_LogicK (h : φ ∈ Logic.K) : φ ∈ L := L.property.2.subset_K h
 
-lemma mdp (hφψ : φ ➝ ψ ∈ L) (hφ : φ ∈ L) : ψ ∈ L := L.property.2.2 hφψ hφ
+lemma mdp (hφψ : φ ➝ ψ ∈ L) (hφ : φ ∈ L) : ψ ∈ L := L.property.2.mdp_closed hφψ hφ
 
-lemma subst (hφ : φ ∈ L) : φ⟦s⟧ ∈ L := L.property.2.3 hφ s
+lemma subst (hφ : φ ∈ L) : φ⟦s⟧ ∈ L := L.property.2.subst_closed hφ s
 
 def add (L₁ L₂ : QuasiNormalExtension L₀) : QuasiNormalExtension L₀ where
   val := Logic.sumQuasiNormal L₁.1 L₂.1

@@ -6,26 +6,39 @@ namespace LO.Modal
 
 abbrev Logic := Set (Modal.Formula ℕ)
 
-
 abbrev Hilbert.logic (H : Hilbert ℕ) : Logic := { φ | H ⊢! φ }
 
 protected abbrev Logic.K : Logic := Hilbert.K.logic
 
 
-class Logic.QuasiNormal (L : Logic) where
-  subset_K : Logic.K ⊆ L
-  mdp_closed {φ ψ} : (φ ➝ ψ) ∈ L → φ ∈ L → ψ ∈ L
-  subst_closed {φ} : φ ∈ L → (∀ s, φ⟦s⟧ ∈ L)
+namespace Logic
 
-class Logic.Normal (L : Logic) extends QuasiNormal L where
+class NecessitationClosed (L : Logic) where
+
+class UnnecessitationClosed (L : Logic) where
+  unnec_closed {φ} : □φ ∈ L → φ ∈ L
+
+class ModalDisjunctiveClosed (L : Logic) where
+  modal_disjunctive_closed {φ ψ} : □φ ⋎ □ψ ∈ L → φ ∈ L ∨ ψ ∈ L
+
+class QuasiNormal (L : Logic) where
+  subset_K : Logic.K ⊆ L
+  mdp_closed {φ ψ} : φ ➝ ψ ∈ L → φ ∈ L → ψ ∈ L
+  subst_closed {φ} : φ ∈ L → ∀ s, φ⟦s⟧ ∈ L
+
+class Normal (L : Logic) extends L.QuasiNormal where
   nec_closed {φ} : φ ∈ L → □φ ∈ L
+
+end Logic
 
 
 namespace Hilbert
 
 open System
 
-instance normal {H : Hilbert ℕ} [H.HasK] : (H.logic).Normal where
+variable {H : Hilbert ℕ}
+
+instance normal [H.HasK] : (H.logic).Normal where
   subset_K := by
     intro φ hφ;
     induction hφ using Hilbert.Deduction.rec! with
@@ -43,6 +56,10 @@ instance normal {H : Hilbert ℕ} [H.HasK] : (H.logic).Normal where
   nec_closed := by
     intro φ hφ;
     exact System.nec! hφ;
+
+instance [System.Unnecessitation H] : H.logic.UnnecessitationClosed := ⟨fun {_} h => unnec! h⟩
+
+instance [System.ModalDisjunctive H] : H.logic.ModalDisjunctiveClosed := ⟨fun {_ _} h => modal_disjunctive h⟩
 
 end Hilbert
 
