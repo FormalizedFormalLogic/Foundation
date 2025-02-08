@@ -11,9 +11,7 @@ open IntProp
 /-- Gödel Translation -/
 def GoedelTranslation : IntProp.Formula α → Modal.Formula α
   | .atom a  => □(Formula.atom a)
-  | ⊤ => ⊤
   | ⊥ => ⊥
-  | ∼φ => □(∼(GoedelTranslation φ))
   | φ ⋏ ψ => (GoedelTranslation φ) ⋏ (GoedelTranslation ψ)
   | φ ⋎ ψ => (GoedelTranslation φ) ⋎ (GoedelTranslation ψ)
   | φ ➝ ψ => □((GoedelTranslation φ) ➝ (GoedelTranslation ψ))
@@ -27,7 +25,6 @@ variable {φ ψ χ : IntProp.Formula ℕ}
 
 lemma axiomTc_GTranslate! [System.K4 mH] : mH ⊢! φᵍ ➝ □φᵍ := by
   induction φ using IntProp.Formula.rec' with
-  | hverum => exact imply₁'! (nec! verum!);
   | hfalsum => simp only [GoedelTranslation, efq!];
   | hand φ ψ ihp ihq =>
     simp only [GoedelTranslation];
@@ -77,16 +74,15 @@ lemma provable_efq_of_provable_S4 (h : (Hilbert.Int _) ⊢! φ) : (Hilbert.S4) �
     exact nec! efq!;
   | mdp hpq hp ihpq ihp =>
     exact axiomT'! $ axiomK''! (by simpa using ihpq ⟨hpq⟩) $ nec! $ ihp ⟨hp⟩;
-  | and₁ => simp only [GoedelTranslation]; exact nec! and₁!;
-  | and₂ => simp only [GoedelTranslation]; exact nec! and₂!;
-  | or₁ => simp only [GoedelTranslation]; exact nec! or₁!;
-  | or₂ => simp only [GoedelTranslation]; exact nec! or₂!;
-  | verum => apply verum!;
+  | and₁ => exact nec! and₁!;
+  | and₂ => exact nec! and₂!;
+  | or₁ => exact nec! or₁!;
+  | or₂ => exact nec! or₂!;
+  | verum => exact nec! imp_id!;
   | imply₁ => exact case_imply₁;
   | imply₂ => exact case_imply₂;
   | and₃ => exact case_and₃;
   | or₃ => exact case_or₃;
-  | neg_equiv => exact case_neg_equiv;
 
 end
 

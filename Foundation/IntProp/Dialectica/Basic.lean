@@ -16,7 +16,7 @@ inductive Player
   | c : Player
 
 abbrev Argument : Player → Formula α → Type
-  | _, ⊤        => Unit
+  -- | _, ⊤        => Unit
   | _, ⊥        => Unit
   | .w, .atom _ => Unit
   | .c, .atom _ => Unit
@@ -24,8 +24,8 @@ abbrev Argument : Player → Formula α → Type
   | .c, φ ⋏ ψ   => Argument .c φ ⊕ Argument .c ψ
   | .w, φ ⋎ ψ   => Argument .w φ ⊕ Argument .w ψ
   | .c, φ ⋎ ψ   => Argument .c φ × Argument .c ψ
-  | .w, ∼φ      => Argument .w φ → Argument .c φ
-  | .c, ∼φ      => Argument .w φ
+  -- | .w, ∼φ      => Argument .w φ → Argument .c φ
+  -- | .c, ∼φ      => Argument .w φ
   | .w, φ ➝ ψ   => (Argument .w φ → Argument .w ψ) × (Argument .w φ → Argument .c ψ → Argument .c φ)
   | .c, φ ➝ ψ   => Argument .w φ × Argument .c ψ
 
@@ -34,14 +34,14 @@ abbrev Witness (φ : Formula α) := Argument .w φ
 abbrev Counter (φ : Formula α) := Argument .c φ
 
 def Interpret (V : α → Prop) : (φ : Formula α) → Witness φ → Counter φ → Prop
-  | ⊤,       (),       ()      => True
+  --| ⊤,       (),       ()      => True
   | ⊥,       (),       ()      => False
   | .atom a, (),       ()      => V a
   | φ ⋏ _,   ⟨θ₁, _⟩,  .inl π₁ => Interpret V φ θ₁ π₁
   | _ ⋏ ψ,   ⟨_, θ₂⟩,  .inr π₂ => Interpret V ψ θ₂ π₂
   | φ ⋎ _,   .inl θ₁,  ⟨π₁, _⟩ => Interpret V φ θ₁ π₁
   | _ ⋎ ψ,   .inr θ₂,  ⟨_, π₂⟩ => Interpret V ψ θ₂ π₂
-  | ∼φ,      f,        θ       => ¬Interpret V φ θ (f θ)
+  -- | ∼φ,      f,        θ       => ¬Interpret V φ θ (f θ)
   | φ ➝ ψ,   ⟨f, g⟩,   ⟨θ, π⟩  => Interpret V φ θ (g θ π) → Interpret V ψ (f θ) π
 
 scoped notation:80 "⟦" w " | " c "⟧⊩[" V "] " φ:46 => Interpret V φ w c
@@ -56,8 +56,6 @@ scoped notation "⊮ " φ => NotValid φ
 
 lemma not_valid_iff_notValid {φ : Formula α} : (¬⊩ φ) ↔ (⊮ φ) := by
   simp [Valid, NotValid]
-
-@[simp] lemma interpret_verum {w c V} : ⟦w | c⟧⊩[V] (⊤ : Formula α) := trivial
 
 @[simp] lemma interpret_falsum {w c V} : ¬⟦w | c⟧⊩[V] (⊥ : Formula α) := id
 
@@ -75,11 +73,12 @@ lemma not_valid_iff_notValid {φ : Formula α} : (¬⊩ φ) ↔ (⊮ φ) := by
 @[simp] lemma interpret_or_right {φ ψ : Formula α} {V θ π} :
     ⟦.inr θ | π⟧⊩[V] φ ⋎ ψ ↔ ⟦θ | π.2⟧⊩[V] ψ := Eq.to_iff rfl
 
-@[simp] lemma interpret_not {φ : Formula α} {V θ f} :
-    ⟦f | θ⟧⊩[V] ∼φ ↔ ¬⟦θ | f θ⟧⊩[V] φ := Eq.to_iff rfl
-
 @[simp] lemma interpret_imply {φ ψ : Formula α} {V f π} :
     ⟦f | π⟧⊩[V] φ ➝ ψ ↔ (⟦π.1 | f.2 π.1 π.2⟧⊩[V] φ → ⟦f.1 π.1 | π.2⟧⊩[V] ψ) := Eq.to_iff rfl
+
+@[simp] lemma interpret_verum {w c V} : ⟦w | c⟧⊩[V] (⊤ : Formula α) := by simp;
+
+@[simp] lemma interpret_not {φ : Formula α} {V θ f} : ⟦f | θ⟧⊩[V] ∼φ ↔ ¬⟦θ | f θ⟧⊩[V] φ := Eq.to_iff rfl
 
 protected lemma Valid.refl (φ : Formula α) : ⊩ φ ➝ φ := ⟨⟨id, fun _ π ↦ π⟩, by rintro V ⟨θ, π⟩; simp⟩
 
