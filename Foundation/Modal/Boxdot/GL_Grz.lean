@@ -2,6 +2,7 @@ import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Kripke.Closure
 import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.Hilbert.GL.Completeness
+import Foundation.Modal.Logic.WellKnown
 
 namespace LO.Modal
 
@@ -107,16 +108,16 @@ open Kripke
 open Formula.Kripke
 open Formula (BoxdotTranslation)
 open Modal.Kripke
+open System
 
 
-open System in
-lemma boxdotTranslatedGL_of_Grz : (Hilbert.Grz) ⊢! φ → (Hilbert.GL) ⊢! φᵇ := boxdotTranslated $ by
+lemma provable_boxdotTranslated_GL_of_Grz : (Hilbert.Grz) ⊢! φ → (Hilbert.GL) ⊢! φᵇ := boxdotTranslated_of_dominate $ by
   intro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
   . exact boxdot_Grz_of_L!
 
-lemma Grz_of_boxdotTranslatedGL : (Hilbert.GL) ⊢! φᵇ → (Hilbert.Grz) ⊢! φ := by
+lemma provable_Grz_of_boxdotTranslated_GL : (Hilbert.GL) ⊢! φᵇ → (Hilbert.Grz) ⊢! φ := by
   contrapose;
   intro h;
   apply (not_imp_not.mpr $ Hilbert.GL.Kripke.finiteSound.sound);
@@ -140,13 +141,13 @@ lemma Grz_of_boxdotTranslatedGL : (Hilbert.GL) ⊢! φᵇ → (Hilbert.Grz) ⊢!
     use V, w;
     exact iff_reflexivize_irreflexivize F_refl |>.not.mp h;
 
-theorem iff_Grz_boxdotTranslatedGL : (Hilbert.GL) ⊢! φᵇ ↔ (Hilbert.Grz) ⊢! φ := by
-  constructor;
-  . apply Grz_of_boxdotTranslatedGL;
-  . apply boxdotTranslatedGL_of_Grz;
-
-instance : BoxdotProperty (Hilbert.GL) (Hilbert.Grz) := ⟨iff_Grz_boxdotTranslatedGL⟩
+theorem iff_boxdotTranslatedGL_Grz : (Hilbert.GL) ⊢! φᵇ ↔ (Hilbert.Grz) ⊢! φ := ⟨
+  provable_Grz_of_boxdotTranslated_GL,
+  provable_boxdotTranslated_GL_of_Grz
+⟩
 
 end Hilbert
+
+instance : BoxdotProperty (Logic.GL) (Logic.Grz) := ⟨Hilbert.iff_boxdotTranslatedGL_Grz⟩
 
 end LO.Modal
