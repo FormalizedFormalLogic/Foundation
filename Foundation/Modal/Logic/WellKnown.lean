@@ -15,6 +15,7 @@ import Foundation.Modal.Kripke.Hilbert.KDB
 import Foundation.Modal.Kripke.Hilbert.KT
 import Foundation.Modal.Kripke.Hilbert.KTB
 import Foundation.Modal.Kripke.Hilbert.S4
+import Foundation.Modal.Kripke.Hilbert.S4Dot2
 import Foundation.Modal.Kripke.Hilbert.S5
 import Foundation.Modal.Kripke.Hilbert.Triv
 import Foundation.Modal.Kripke.Hilbert.Ver
@@ -92,6 +93,11 @@ lemma KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic : Logic.KTB = Kripke.Refle
 
 protected abbrev S4 : Logic := Hilbert.S4.logic
 lemma S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic : Logic.S4 = Kripke.ReflexiveTransitiveFrameClass.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+
+protected abbrev S4Dot2 : Logic := Hilbert.S4Dot2.logic
+lemma S4Dot2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic : Logic.S4Dot2 = Kripke.ReflexiveTransitiveConfluentFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
@@ -691,6 +697,35 @@ theorem S4_ssubset_Triv : Logic.S4 ⊂ Logic.Triv := by
         constructor;
         . omega;
         . trivial;
+
+theorem S4_ssubset_S4Dot2 : Logic.S4 ⊂ Logic.S4Dot2 := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . suffices ∃ φ, Hilbert.S4Dot2 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+    use Axioms.Dot2 (.atom 0)
+    constructor;
+    . exact axiomDot2!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = y) ⟩, λ w _ => w = 1⟩;
+      use M, 0;
+      constructor;
+      . constructor;
+        . simp [M, Reflexive];
+        . unfold Transitive;
+          omega;
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, x ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
+          simpa [M, Semantics.Realize, Satisfies];
+        use 1;
+        refine ⟨by omega, ?_, ?_⟩;
+        . intro y;
+          match y with
+          | 0 => omega;
+          | 1 => tauto;
+          | 2 => omega;
+        . use 2;
+          constructor;
+          . omega;
+          . omega;
 
 end Logic
 

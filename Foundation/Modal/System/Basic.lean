@@ -277,6 +277,21 @@ end
 class HasAxiomDot2 [Dia F] (𝓢 : S) where
   Dot2 (φ : F) : 𝓢 ⊢ Axioms.Dot2 φ
 
+section
+
+variable [HasAxiomDot2 𝓢]
+
+def axiomDot2 : 𝓢 ⊢ ◇□φ ➝ □◇φ := HasAxiomDot2.Dot2 _
+@[simp] lemma axiomDot2! : 𝓢 ⊢! ◇□φ ➝ □◇φ := ⟨axiomDot2⟩
+
+variable [System.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDot2 Γ := ⟨fun _ ↦ FiniteContext.of axiomDot2⟩
+instance (Γ : Context F 𝓢) : HasAxiomDot2 Γ := ⟨fun _ ↦ Context.of axiomDot2⟩
+
+end
+
+
 class HasAxiomDot3 (𝓢 : S) where
   Dot3 (φ ψ : F) : 𝓢 ⊢ Axioms.Dot3 φ ψ
 
