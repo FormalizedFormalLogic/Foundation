@@ -1,4 +1,6 @@
 import Foundation.Modal.Hilbert.K
+import Foundation.Modal.Kripke.Hilbert.K
+
 
 namespace LO.Modal
 
@@ -6,7 +8,6 @@ abbrev Logic := Set (Modal.Formula ℕ)
 
 
 abbrev Hilbert.logic (H : Hilbert ℕ) : Logic := { φ | H ⊢! φ }
-
 
 protected abbrev Logic.K : Logic := Hilbert.K.logic
 
@@ -45,8 +46,41 @@ instance normal {H : Hilbert ℕ} [H.HasK] : (H.logic).Normal where
 
 end Hilbert
 
-
 instance : (Logic.K).Normal := Hilbert.normal
+
+
+
+section
+
+open Kripke
+
+abbrev Kripke.FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
+
+abbrev Kripke.FiniteFrameClass.logic (C : FiniteFrameClass) : Logic := { φ | C ⊧ φ }
+
+lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic
+  {H : Hilbert ℕ} {C : FrameClass}
+  [sound : Sound H C] [complete : Complete H C]
+  : H.logic = C.logic := by
+  ext φ;
+  constructor;
+  . exact sound.sound;
+  . exact complete.complete;
+
+lemma Logic.eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
+  {H : Hilbert ℕ} {C : FiniteFrameClass}
+  [sound : Sound H C] [complete : Complete H C]
+  : H.logic = C.logic := by
+  ext φ;
+  constructor;
+  . exact sound.sound;
+  . exact complete.complete;
+
+lemma Logic.K.eq_AllKripkeFrameClass_Logic : Logic.K = AllFrameClass.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+lemma Logic.K.eq_AllKripkeFiniteFrameClass_Logic : Logic.K = AllFiniteFrameClass.logic := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
+
+end
 
 
 end LO.Modal

@@ -117,6 +117,12 @@ lemma multibox_duality'! : 𝓢 ⊢! □^[n]φ ↔ 𝓢 ⊢! ∼(◇^[n](∼φ))
 
 lemma box_duality'! : 𝓢 ⊢! □φ ↔ 𝓢 ⊢! ∼(◇(∼φ)) := multibox_duality'! (n := 1)
 
+def box_dni : 𝓢 ⊢ □φ ➝ □(∼∼φ) := axiomK' $ nec dni
+@[simp] lemma box_dni! : 𝓢 ⊢! □φ ➝ □(∼∼φ) := ⟨box_dni⟩
+
+def box_dni' (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ □(∼∼φ) := box_dni ⨀ h
+lemma box_dni'! (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! □(∼∼φ) := ⟨box_dni' h.some⟩
+
 def box_dne : 𝓢 ⊢ □(∼∼φ) ➝ □φ := axiomK' $ nec dne
 omit [DecidableEq F] in @[simp] lemma box_dne! : 𝓢 ⊢! □(∼∼φ) ➝ □φ := ⟨box_dne⟩
 

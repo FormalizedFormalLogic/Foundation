@@ -133,6 +133,26 @@ def axiomT' (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ φ := axiomT ⨀ h
 
 end
 
+class HasAxiomDiaTc (𝓢 : S) where
+  diaTc (φ : F) : 𝓢 ⊢ Axioms.DiaTc φ
+
+section
+
+variable [HasAxiomDiaTc 𝓢]
+
+def diaTc : 𝓢 ⊢ φ ➝ ◇φ := HasAxiomDiaTc.diaTc _
+@[simp] lemma diaTc! : 𝓢 ⊢! φ ➝ ◇φ := ⟨diaTc⟩
+
+variable [System.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDiaTc Γ := ⟨fun _ ↦ FiniteContext.of diaTc⟩
+instance (Γ : Context F 𝓢) : HasAxiomDiaTc Γ := ⟨fun _ ↦ Context.of diaTc⟩
+
+def diaTc' (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ◇φ := diaTc ⨀ h
+lemma diaTc'! (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ◇φ := ⟨diaTc' h.some⟩
+
+end
+
 
 class HasAxiomD [Dia F] (𝓢 : S) where
   D (φ : F) : 𝓢 ⊢ Axioms.D φ
@@ -393,6 +413,7 @@ protected class KP extends System.K 𝓢, HasAxiomP 𝓢
 protected class KB extends System.K 𝓢, HasAxiomB 𝓢
 
 protected class KT extends System.K 𝓢, HasAxiomT 𝓢
+protected class KT' extends System.K 𝓢, HasAxiomDiaTc 𝓢
 
 protected class KTc extends System.K 𝓢, HasAxiomTc 𝓢
 protected class KTc' extends System.K 𝓢, HasAxiomDiaT 𝓢

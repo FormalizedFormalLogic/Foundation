@@ -22,6 +22,8 @@ protected abbrev T := □φ ➝ φ
 abbrev T.set : Set F := { Axioms.T φ | (φ) }
 notation:max "𝗧" => T.set
 
+protected abbrev DiaTc := φ ➝ ◇φ
+
 /-- Axiom for symmetric -/
 protected abbrev B [Dia F] := φ ➝ □◇φ
 abbrev B.set [Dia F] : Set F := { Axioms.B φ | (φ) }

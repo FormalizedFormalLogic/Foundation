@@ -24,11 +24,15 @@ end Kripke
 
 namespace Hilbert.Ver
 
-instance Kripke.Consistent : System.Consistent (Hilbert.Ver) :=
-  haveI := FrameClass.definedBy_with_axiomK IsolatedFrameClass.DefinedByAxiomVer
+instance Kripke.sound : Sound (Hilbert.Ver) IsolatedFrameClass := by
+  have := FrameClass.definedBy_with_axiomK IsolatedFrameClass.DefinedByAxiomVer;
+  infer_instance;
+
+instance Kripke.consistent : System.Consistent (Hilbert.Ver) :=
+  have := FrameClass.definedBy_with_axiomK IsolatedFrameClass.DefinedByAxiomVer;
   Kripke.Hilbert.consistent_of_FrameClass IsolatedFrameClass
 
-instance Kripke.Complete : Complete (Hilbert.Ver) IsolatedFrameClass := inferInstance
+instance Kripke.complete : Complete (Hilbert.Ver) IsolatedFrameClass := inferInstance
 
 end Hilbert.Ver
 

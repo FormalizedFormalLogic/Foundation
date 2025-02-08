@@ -16,11 +16,11 @@ instance : System.Consistent (Hilbert.K) := Hilbert.consistent_of_FrameClass All
 
 instance : Kripke.Canonical (Hilbert.K) (AllFrameClass) := ⟨by trivial⟩
 
-instance Kripke.CompleteAll : Complete (Hilbert.K) (AllFrameClass) := inferInstance
+instance Kripke.completeAll : Complete (Hilbert.K) (AllFrameClass) := inferInstance
 
-instance Kripke.CompleteAllFinite : Complete (Hilbert.K) (AllFiniteFrameClass) := ⟨by
+instance Kripke.completeAllFinite : Complete (Hilbert.K) (AllFiniteFrameClass) := ⟨by
   intro φ hp;
-  apply Kripke.CompleteAll.complete;
+  apply Kripke.completeAll.complete;
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFilterationModel M ↑φ.subformulas;

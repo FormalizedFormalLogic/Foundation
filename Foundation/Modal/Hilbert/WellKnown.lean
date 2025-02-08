@@ -196,6 +196,13 @@ instance : (Hilbert.KD).HasD where p := 0
 instance : System.KD (Hilbert.KD) where
 
 
+protected abbrev KDB : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.B (.atom 0)}⟩
+instance : (Hilbert.KDB).HasK where p := 0; q := 1;
+instance : (Hilbert.KDB).HasD where p := 0
+instance : (Hilbert.KDB).HasB where p := 0
+instance : System.KDB (Hilbert.KDB) where
+
+
 protected abbrev KTB : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.B (.atom 0)}⟩
 instance : (Hilbert.KTB).HasK where p := 0; q := 1;
 instance : (Hilbert.KTB).HasT where p := 0

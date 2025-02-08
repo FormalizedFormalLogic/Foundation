@@ -96,3 +96,6 @@ import Foundation.Modal.ModalCompanion.GMT
 
 import Foundation.Modal.Boxdot.K4_S4
 import Foundation.Modal.Boxdot.GL_Grz
+
+import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Logic.Extension
