@@ -338,7 +338,7 @@ def elim_contra_neg [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((ψ ➝ ⊥) ➝ (φ �
   refine impTrans'' ?_ elim_contra;
   apply deduct';
   exact impTrans'' (impTrans'' (and₁' neg_equiv) FiniteContext.byAxm) (and₂' neg_equiv);
-lemma elim_contra_neg! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! ((ψ ➝ ⊥) ➝ (φ ➝ ⊥)) ➝ (φ ➝ ψ) := ⟨elim_contra_neg⟩
+@[simp] lemma elim_contra_neg! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! ((ψ ➝ ⊥) ➝ (φ ➝ ⊥)) ➝ (φ ➝ ψ) := ⟨elim_contra_neg⟩
 
 
 def tne : 𝓢 ⊢ ∼(∼∼φ) ➝ ∼φ := contra₀' dni

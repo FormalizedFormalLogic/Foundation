@@ -1,3 +1,4 @@
+import Foundation.Modal.Subformulas
 import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal.Kripke
@@ -11,18 +12,19 @@ def complexityLimitedModel (M : Kripke.Model) (w : M.World) (φ : Formula ℕ) :
   toFrame := complexityLimitedFrame M.toFrame w φ
   Val x a := M.Val x.1 a
 
-
 section
 
 variable {M : Kripke.Model} {r x : M.World} {φ ψ : Formula ℕ}
 
 open Formula.Kripke
-open Formula.subformulae
+open Formula.subformulas
 
 lemma iff_satisfy_complexityLimitedModel_aux
-  (hq : ψ ∈ φ.subformulae)
+  (hq : ψ ∈ φ.subformulas)
   (hx : ∃ n ≤ φ.complexity - ψ.complexity, r ≺^[n] x)
-  : x ⊧ ψ ↔ Satisfies (complexityLimitedModel M r φ) ⟨x, (by obtain ⟨n, _, _⟩ := hx; use n; exact ⟨by omega, by assumption⟩)⟩ ψ := by
+  :
+  haveI : x ∈ {y | ∃ n ≤ φ.complexity, r ≺^[n] y} := by obtain ⟨n, _, _⟩ := hx; use n; exact ⟨by omega, by assumption⟩;
+  x ⊧ ψ ↔ Satisfies (complexityLimitedModel M r φ) ⟨x, this⟩ ψ := by
   induction ψ using Formula.rec' generalizing x φ with
   | hbox ψ ihq =>
     obtain ⟨n, hn, hx⟩ := hx;
@@ -66,10 +68,10 @@ lemma iff_satisfy_complexityLimitedModel_aux
   | _ => simp [Satisfies, complexityLimitedModel];
 
 lemma iff_satisfy_complexityLimitedModel : r ⊧ φ ↔ Satisfies (complexityLimitedModel M r φ) ⟨r, (by use 0; simp)⟩ φ := by
-  apply iff_satisfy_complexityLimitedModel_aux (show φ ∈ φ.subformulae by simp);
+  apply iff_satisfy_complexityLimitedModel_aux (show φ ∈ φ.subformulas by simp);
   use 0; simp;
 
-lemma complexityLimitedModel_subformula_closedAux {ψ₁ ψ₂ : Formula ℕ} (hq₁ : φ ∈ ψ₁.subformulae) (hq₂ : φ ∈ ψ₂.subformulae)
+lemma complexityLimitedModel_subformula_closedAux {ψ₁ ψ₂ : Formula ℕ} (hq₁ : φ ∈ ψ₁.subformulas) (hq₂ : φ ∈ ψ₂.subformulas)
   : Satisfies (complexityLimitedModel M r ψ₁) ⟨r, (by use 0; simp)⟩ φ → Satisfies (complexityLimitedModel M r ψ₂) ⟨r, (by use 0; simp)⟩ φ := by
   intro h;
   apply @iff_satisfy_complexityLimitedModel_aux M r r ψ₂ φ hq₂ ?_ |>.mp;
@@ -77,7 +79,7 @@ lemma complexityLimitedModel_subformula_closedAux {ψ₁ ψ₂ : Formula ℕ} (h
   . use 0; simp;
   . use 0; simp;
 
-lemma complexityLimitedModel_subformula_closed (hq : φ ∈ ψ.subformulae)
+lemma complexityLimitedModel_subformula_closed (hq : φ ∈ ψ.subformulas)
   : Satisfies (complexityLimitedModel M r φ) ⟨r, (by use 0; simp)⟩ φ ↔ Satisfies (complexityLimitedModel M r ψ) ⟨r, (by use 0; simp)⟩ φ := by
   constructor;
   . apply complexityLimitedModel_subformula_closedAux <;> simp_all;

@@ -1,12 +1,10 @@
 import Foundation.Modal.Kripke.Closure
 
-
 namespace LO.Modal
 
 namespace Kripke
 
 open Formula.Kripke
-
 
 section Bisimulation
 
@@ -74,7 +72,7 @@ def id : F →ₚ F where
 def TransitiveClosure (f : F₁ →ₚ F₂) (F₂_trans : Transitive F₂) : F₁^+ →ₚ F₂ where
   toFun := f.toFun
   forth := by
-    intro x y hxy; simp at x y;
+    intro x y hxy;
     induction hxy with
     | single hxy => exact f.forth hxy;
     | @tail z y _ Rzy Rxz =>
@@ -95,12 +93,11 @@ def comp (f : F₁ →ₚ F₂) (g : F₂ →ₚ F₃) : F₁ →ₚ F₃ where
     exact g.forth $ f.forth hxy;
   back := by
     intro x w hxw;
-    simp at hxw;
-    obtain ⟨y, ⟨hyz, hxy⟩⟩ := g.back hxw;
-    obtain ⟨u, ⟨hgu, hfu⟩⟩ := f.back hxy;
+    obtain ⟨y, ⟨rfl, hxy⟩⟩ := g.back hxw;
+    obtain ⟨u, ⟨rfl, hfu⟩⟩ := f.back hxy;
     use u;
     constructor;
-    . subst_vars; simp;
+    . simp_all;
     . assumption;
 
 end Frame.PseudoEpimorphism
@@ -123,14 +120,13 @@ def id : M →ₚ M where
   back := by simp;
   atomic := by simp;
 
-def mkAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ w a) ↔ (M₂ (f w) a)) : M₁ →ₚ M₂ := {
-  toFun := f,
-  forth := f.forth,
-  back := f.back,
-  atomic := atomic,
-}
+def ofAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ w a) ↔ (M₂ (f w) a)) : M₁ →ₚ M₂ where
+  toFun := f
+  forth := f.forth
+  back := f.back
+  atomic := atomic
 
-def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := mkAtomic (f.toPseudoEpimorphism.comp (g.toPseudoEpimorphism)) $ by
+def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := ofAtomic (f.toPseudoEpimorphism.comp (g.toPseudoEpimorphism)) $ by
   intro x φ;
   constructor;
   . intro h;
@@ -142,23 +138,22 @@ def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := mkA
     apply g.atomic.mpr;
     assumption;
 
-def bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ := {
-  toRel := Function.graph f,
+def bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ where
+  toRel := Function.graph f
   atomic := by
-    intro x₁ x₂ a e; subst e;
+    rintro x₁ x₂ a rfl;
     constructor;
     . apply f.atomic.mp;
     . apply f.atomic.mpr;
   forth := by
-    simp;
+    simp only [Function.graph_def, exists_eq_left', forall_eq'];
     intro x₁ y₁ rx₁y₁;
     exact f.forth rx₁y₁;
   back := by
-    simp;
-    intro x₁ x₂ y₂ e rx₂y₂; subst e;
-    obtain ⟨y₁, _⟩ := f.back rx₂y₂;
+    simp only [Function.graph_def];
+    rintro x₁ x₂ y₂ rfl rx₂y₂;
+    obtain ⟨y₁, ⟨rfl, _⟩⟩ := f.back rx₂y₂;
     use y₁;
-}
 
 lemma modal_equivalence (f : M₁ →ₚ M₂) (w : M₁.World) : w ↭ (f w) := by
   apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.bisimulation f;
@@ -169,13 +164,13 @@ end Model.PseudoEpimorphism
 
 variable {F₁ F₂ : Kripke.Frame} {M₁ M₂ : Kripke.Model}
 
-lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧ φ → F₂ ⊧ φ := by
+lemma validOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧ φ → F₂ ⊧ φ := by
   contrapose;
   intro h;
-  obtain ⟨V₂, w₂, h⟩ := by simpa [ValidOnFrame, ValidOnModel] using h;
-  simp [ValidOnFrame, ValidOnModel];
+  obtain ⟨V₂, w₂, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
+  obtain ⟨w₁, rfl⟩ := f_surjective w₂;
 
-  obtain ⟨w₁, e⟩ := f_surjective w₂; subst e;
+  apply ValidOnFrame.not_of_exists_valuation_world;
   let V₁ := λ w a => V₂ (f w) a;
   use V₁, w₁;
 
@@ -186,10 +181,10 @@ lemma iff_formula_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_s
     atomic := by aesop;
   } w₁ |>.not.mpr h;
 
-lemma iff_theory_valid_on_frame_surjective_morphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧* T → F₂ ⊧* T := by
+lemma theory_ValidOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧* T → F₂ ⊧* T := by
   simp only [Semantics.realizeSet_iff];
   intro h φ hp;
-  exact iff_formula_valid_on_frame_surjective_morphism f f_surjective (h hp);
+  exact validOnFrame_of_surjective_pseudoMorphism f f_surjective (h hp);
 
 end PseudoEpimorphism
 
@@ -236,7 +231,7 @@ lemma rel_universal (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F
   . apply F_symm $ F_eucl hx hy;
 
 instance [Finite F.World] : Finite (F↾r).World := by
-  simp [Frame.PointGenerated];
+  unfold Frame.PointGenerated;
   apply Subtype.finite;
 
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := by
@@ -330,38 +325,6 @@ postfix:100 "↓" => Frame.proper_immediate_predeccsors
 
 end Frame
 -/
-
-
-abbrev IrreflexiveFrameClass : FrameClass := { F | Irreflexive F }
-
-theorem undefinable_irreflexive : ¬∃ Ax : Theory ℕ, IrreflexiveFrameClass.DefinedBy Ax := by
-  by_contra hC;
-  obtain ⟨Ax, h⟩ := hC;
-
-  let F₁ : Frame := { World := Fin 2, Rel := (· ≠ ·) };
-  let F₂ : Frame := { World := Fin 1, Rel := (· = ·) };
-
-  let f : F₁ →ₚ F₂ := {
-    toFun := λ _ => 0,
-    forth := by aesop;
-    back := by
-      simp [Frame.Rel', F₂];
-      intro x;
-      use 1 - x;
-      omega;
-  };
-  have f_surjective : Function.Surjective f := by
-    simp [Function.Surjective];
-    aesop;
-
-  have : Irreflexive F₂ := by
-    apply h F₂ |>.mpr;
-    apply iff_theory_valid_on_frame_surjective_morphism f f_surjective;
-    exact h F₁ |>.mp $ by
-      simp [Irreflexive, Frame.Rel', F₁];
-  have : ¬Irreflexive F₂ := by
-    simp [Irreflexive, F₂];
-  contradiction;
 
 
 end Kripke

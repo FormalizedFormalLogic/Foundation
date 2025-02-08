@@ -1,44 +1,7 @@
 import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Kripke.Grz.Completeness
-import Foundation.Modal.Kripke.GL.Completeness
-
-
-namespace LO.System
-
-open FiniteContext
-
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
-variable {𝓢 : S}
-variable [System.GL 𝓢]
-
-noncomputable def lem₁_boxdot_Grz_of_L : 𝓢 ⊢ (⊡(⊡(φ ➝ ⊡φ) ➝ φ)) ➝ (□(φ ➝ ⊡φ) ➝ φ) := by
-  have : 𝓢 ⊢ (□(φ ➝ ⊡φ) ⋏ ∼φ) ➝ ⊡(φ ➝ ⊡φ) := by
-    apply deduct';
-    apply and₃';
-    . exact (of efq_imply_not₁) ⨀ and₂;
-    . exact (of (impId _)) ⨀ and₁;
-  have : 𝓢 ⊢ ∼⊡(φ ➝ ⊡φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := impTrans'' (contra₀' this) $ impTrans'' demorgan₄ (orReplaceRight dne);
-  have : 𝓢 ⊢ (∼⊡(φ ➝ ⊡φ) ⋎ φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := or₃'' this or₂;
-  have : 𝓢 ⊢ ∼⊡(φ ➝ ⊡φ) ⋎ φ ➝ □(φ ➝ ⊡φ) ➝ φ := impTrans'' this implyOfNotOr;
-  have : 𝓢 ⊢ (⊡(φ ➝ ⊡φ) ➝ φ) ➝ (□(φ ➝ ⊡φ) ➝ φ) := impTrans'' NotOrOfImply this;
-  exact impTrans'' boxdotAxiomT this;
-
-noncomputable def boxdot_Grz_of_L : 𝓢 ⊢ ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ φ := by
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □⊡(φ ➝ ⊡φ) ➝ □φ := axiomK;
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) ➝ □φ := impTrans'' this $ implyLeftReplace $ imply_Box_BoxBoxdot;
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ) := by
-    apply deduct'; apply deduct; apply deduct;
-    exact and₃' FiniteContext.byAxm $ (of this) ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
-  have : 𝓢 ⊢ □□(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(□(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ)) := implyBoxDistribute' this;
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(□(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ)) := impTrans'' axiomFour this;
-  have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) := impTrans'' this axiomL;
-  have : 𝓢 ⊢ ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) := impTrans'' boxdotBox this;
-  exact mdp₁ lem₁_boxdot_Grz_of_L this;
-@[simp] lemma boxdot_Grz_of_L! : 𝓢 ⊢! ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ φ := ⟨boxdot_Grz_of_L⟩
-
-end LO.System
-
+import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
+import Foundation.Modal.Kripke.Hilbert.GL.Completeness
 
 namespace LO.Modal
 
@@ -56,8 +19,7 @@ lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ 
     . apply ReflGen.single Ryz;
     . apply ReflGen.single Rxy;
     . apply ReflGen.single $ F_trans Rxy Ryz;
-  . simp;
-    rintro x y (rfl | Rxy) (rfl | Ryx);
+  . rintro x y (rfl | Rxy) (rfl | Ryx);
     . rfl;
     . rfl;
     . rfl;
@@ -75,8 +37,6 @@ lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F �
       contradiction;
     . exact F_trans Rxy Ryz;
   . simp;
-
-variable {φ : Formula ℕ}
 
 lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (φᵇ)) ↔ (Satisfies ⟨F^=, V⟩ x φ) := by
   induction φ using Formula.rec' generalizing x with
@@ -146,49 +106,46 @@ namespace Hilbert
 open Kripke
 open Formula.Kripke
 open Formula (BoxdotTranslation)
-open Hilbert.Kripke
 open Modal.Kripke
 
 
-variable {φ : Formula ℕ}
-
 open System in
-lemma boxdotTranslatedGL_of_Grz : (Hilbert.Grz ℕ) ⊢! φ → (Hilbert.GL ℕ) ⊢! φᵇ := boxdotTranslated $ by
+lemma boxdotTranslatedGL_of_Grz : (Hilbert.Grz) ⊢! φ → (Hilbert.GL) ⊢! φᵇ := boxdotTranslated $ by
   intro φ hp;
-  rcases hp with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
-  . dsimp [BoxdotTranslation]; exact boxdot_axiomK!;
-  . dsimp [BoxdotTranslation]; exact boxdot_Grz_of_L!
+  rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
+  . exact boxdot_axiomK!;
+  . exact boxdot_Grz_of_L!
 
-lemma Grz_of_boxdotTranslatedGL : (Hilbert.GL ℕ) ⊢! φᵇ → (Hilbert.Grz ℕ) ⊢! φ := by
+lemma Grz_of_boxdotTranslatedGL : (Hilbert.GL) ⊢! φᵇ → (Hilbert.Grz) ⊢! φ := by
   contrapose;
   intro h;
-  apply (not_imp_not.mpr $ Hilbert.GL.Kripke.finite_sound.sound);
+  apply (not_imp_not.mpr $ Hilbert.GL.Kripke.finiteSound.sound);
   have := (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
-  simp [FiniteFrameClass.toFrameClass] at this;
-  obtain ⟨F, FF, ⟨FF_refl, FF_trans, FF_antisymm, rfl, hFF⟩⟩ := this;
-  simp;
-  use FF.toFrame^≠;
+  obtain ⟨F, ⟨F_refl, F_trans, F_antisymm⟩, this⟩ := Formula.Kripke.ValidOnFiniteFrameClass.exists_frame_of_not this;
+  obtain ⟨V, w, h⟩ := Formula.Kripke.ValidOnFiniteFrame.exists_valuation_world_of_not this;
+  apply Formula.Kripke.ValidOnFrameClass.not_of_exists_frame;
+  use F.toFrame^≠;
   constructor;
-  . use ⟨FF.toFrame^≠⟩;
-    simp [Transitive];
+  . use ⟨F.toFrame^≠⟩;
+    suffices ∀ ⦃x y z⦄, x ≺^≠ y → y ≺^≠ z → x ≺^≠ z by simpa [Transitive];
     rintro x y z ⟨hxy, Rxy⟩ ⟨hyz, Ryz⟩;
     constructor;
-    . by_contra hC; subst hC;
-      have :=FF_antisymm Rxy Ryz;
+    . by_contra hC;
+      subst hC;
+      have := F_antisymm Rxy Ryz;
       contradiction;
-    . exact FF_trans Rxy Ryz;
+    . exact F_trans Rxy Ryz;
   . apply Kripke.iff_frame_boxdot_reflexive_closure.not.mpr;
-    simp_all [ValidOnFrame, ValidOnModel];
-    obtain ⟨V, x, h⟩ := hFF;
-    use V, x;
-    exact iff_reflexivize_irreflexivize FF_refl |>.not.mp h;
+    apply Formula.Kripke.ValidOnFrame.not_of_exists_valuation_world;
+    use V, w;
+    exact iff_reflexivize_irreflexivize F_refl |>.not.mp h;
 
-theorem iff_Grz_boxdotTranslatedGL : (Hilbert.GL ℕ) ⊢! φᵇ ↔ (Hilbert.Grz ℕ) ⊢! φ := by
+theorem iff_Grz_boxdotTranslatedGL : (Hilbert.GL) ⊢! φᵇ ↔ (Hilbert.Grz) ⊢! φ := by
   constructor;
   . apply Grz_of_boxdotTranslatedGL;
   . apply boxdotTranslatedGL_of_Grz;
 
-instance : BoxdotProperty (Hilbert.GL ℕ) (Hilbert.Grz ℕ) := ⟨iff_Grz_boxdotTranslatedGL⟩
+instance : BoxdotProperty (Hilbert.GL) (Hilbert.Grz) := ⟨iff_Grz_boxdotTranslatedGL⟩
 
 end Hilbert
 
