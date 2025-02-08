@@ -34,6 +34,13 @@ variable {F : Frame} {x y z : F.World}
 end Frame
 
 
+abbrev pointFrame : Frame where
+  World := Unit
+  Rel := fun _ _ => True
+  rel_refl := by simp [Reflexive]
+  rel_trans := by simp [Transitive]
+
+
 abbrev FrameClass := Set (Frame)
 
 
@@ -439,7 +446,7 @@ instance AllFrameClass.DefinedBy : AllFrameClass.DefinedByFormula (Axioms.EFQ (.
     exact Formula.Kripke.ValidOnFrame.efq;
 
 instance AllFrameClass.IsNonempty : AllFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True, by simp [Reflexive], by simp [Transitive]⟩
+  use pointFrame;
   trivial;
 
 

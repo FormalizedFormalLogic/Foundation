@@ -212,8 +212,8 @@ end Encodable
 end Formula
 
 
-abbrev Theory (α : Type u) := Set (Formula α)
+abbrev FormulaSet (α : Type u) := Set (Formula α)
 
-abbrev Context (α : Type u) := Finset (Formula α)
+abbrev FormulaFinset (α : Type u) := Finset (Formula α)
 
 end LO.IntProp
