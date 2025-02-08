@@ -2,7 +2,9 @@ import Foundation.Modal.Hilbert.Maximal.Unprovability
 import Foundation.Modal.Kripke.Hilbert.GL.Completeness
 import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.Hilbert.K4
+import Foundation.Modal.Kripke.Hilbert.K5
 import Foundation.Modal.Kripke.Hilbert.KD
+import Foundation.Modal.Kripke.Hilbert.KT
 import Foundation.Modal.Kripke.Hilbert.S4
 import Foundation.Modal.Kripke.Hilbert.S5
 import Foundation.Modal.Kripke.Hilbert.Triv
@@ -30,12 +32,19 @@ lemma KD.eq_SerialKripkeFrameClass_Logic : Logic.KD = Kripke.SerialFrameClass.lo
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
-
 protected abbrev KT : Logic := Hilbert.KT.logic
 
 instance : (Logic.KT).Normal := Hilbert.normal
 
 lemma KT.eq_TransitiveKripkeFrameClass_Logic : Logic.KT = Kripke.ReflexiveFrameClass.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+
+protected abbrev K5 : Logic := Hilbert.K5.logic
+
+instance : (Logic.K5).Normal := Hilbert.normal
+
+lemma K5.eq_EuclideanKripkeFrameClass_Logic : Logic.K5 = Kripke.EuclideanFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
@@ -97,7 +106,7 @@ open Formula
 open System
 open Kripke
 
-theorem K_ssubset_KD : (Logic.K) ⊂ (Logic.KD) := by
+theorem K_ssubset_KD : Logic.K ⊂ Logic.KD := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!];
   . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
@@ -111,7 +120,7 @@ theorem K_ssubset_KD : (Logic.K) ⊂ (Logic.KD) := by
       . tauto;
       . simp [Semantics.Realize, Satisfies];
 
-theorem KD_ssubset_KT : (Logic.KD) ⊂ (Logic.KT) := by
+theorem KD_ssubset_KT : Logic.KD ⊂ Logic.KT := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!, axiomD!];
   . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬SerialFrameClass ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
@@ -124,12 +133,12 @@ theorem KD_ssubset_KT : (Logic.KD) ⊂ (Logic.KT) := by
       . tauto;
       . simp [Semantics.Realize, Satisfies];
 
-theorem K_ssubset_KT : (Logic.K) ⊂ (Logic.KT) := by
+theorem K_ssubset_KT : Logic.K ⊂ Logic.KT := by
   trans;
   . exact K_ssubset_KD;
   . exact KD_ssubset_KT;
 
-theorem K_ssubset_K4 : (Logic.K) ⊂ (Logic.K4) := by
+theorem K_ssubset_K4 : Logic.K ⊂ Logic.K4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!];
   . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
@@ -156,7 +165,23 @@ theorem K_ssubset_K4 : (Logic.K) ⊂ (Logic.K4) := by
             . omega;
             . trivial;
 
-theorem KT_ssubset_S4 : (Logic.KT) ⊂ (Logic.S4) := by
+theorem K_ssubset_K5 : Logic.K ⊂ Logic.K5 := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!];
+  . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+    use (Axioms.Five (.atom 0));
+    constructor;
+    . exact axiomFive!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x _ => x = 0⟩, λ w _ => w = 0⟩;
+      use M, 0;
+      constructor;
+      . tauto;
+      . suffices ∃ (x : M.World), ¬x = 0 by simpa [Semantics.Realize, Satisfies, M];
+        use 1;
+        trivial;
+
+theorem KT_ssubset_S4 : Logic.KT ⊂ Logic.S4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!, axiomT!];
   . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬ReflexiveFrameClass ⊧ φ by simpa [KT.eq_TransitiveKripkeFrameClass_Logic];
@@ -199,7 +224,7 @@ theorem KT_ssubset_S4 : (Logic.KT) ⊂ (Logic.S4) := by
           . use 2;
             refine ⟨by tauto, by trivial, by trivial⟩;
 
-theorem K4_ssubset_S4 : (Logic.K4) ⊂ (Logic.S4) := by
+theorem K4_ssubset_S4 : Logic.K4 ⊂ Logic.S4 := by
   constructor;
   . apply Hilbert.K4_weakerThan_S4;
   . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
@@ -212,7 +237,7 @@ theorem K4_ssubset_S4 : (Logic.K4) ⊂ (Logic.S4) := by
       . simp [Transitive];
       . simp [Semantics.Realize, Satisfies];
 
-theorem K4_ssubset_GL : (Logic.K4) ⊂ (Logic.GL) := by
+theorem K4_ssubset_GL : Logic.K4 ⊂ Logic.GL := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!, axiomFour!];
   . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.K4 ⊢! φ by simpa;
@@ -221,7 +246,7 @@ theorem K4_ssubset_GL : (Logic.K4) ⊂ (Logic.GL) := by
     . exact axiomL!;
     . exact Hilbert.K4.unprovable_AxiomL;
 
-theorem S4_ssubset_Triv : (Logic.S4) ⊂ (Logic.Triv) := by
+theorem S4_ssubset_Triv : Logic.S4 ⊂ Logic.Triv := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!, axiomT!, axiomTc!];
   . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
@@ -229,7 +254,6 @@ theorem S4_ssubset_Triv : (Logic.S4) ⊂ (Logic.Triv) := by
     constructor;
     . exact axiomTc!;
     . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
-      unfold Axioms.Tc;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -243,6 +267,31 @@ theorem S4_ssubset_Triv : (Logic.S4) ⊂ (Logic.Triv) := by
         constructor;
         . omega;
         . trivial;
+
+theorem S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
+  constructor;
+  . rw [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
+    rintro φ hφ F ⟨F_refl, F_eucl⟩;
+    apply hφ;
+    refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl⟩;
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+    use Axioms.Five (.atom 0);
+    constructor;
+    . exact axiomFive!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 3, λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ w _ => w = 2)⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨?_, ?_⟩;
+        . tauto;
+        . simp [Transitive];
+          omega;
+      . suffices (0 : M.World) ≺ 2 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
+          simpa [M, Semantics.Realize, Satisfies];
+        constructor;
+        . tauto;
+        . use 1;
+          constructor <;> omega;
 
 end Logic
 

@@ -22,6 +22,8 @@ lemma KT4B.eq_Geach : Hilbert.KT4B = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1
 
 lemma K4.eq_Geach : Hilbert.K4 = Hilbert.Geach {⟨0, 2, 1, 0⟩} := by aesop;
 
+lemma K5.eq_Geach : Hilbert.K5 = Hilbert.Geach {⟨1, 1, 0, 1⟩} := by aesop;
+
 lemma KD.eq_Geach : Hilbert.KD = Hilbert.Geach {⟨0, 0, 1, 1⟩} := by aesop;
 
 lemma KDB.eq_Geach : Hilbert.KDB = Hilbert.Geach {⟨0, 0, 1, 1⟩, ⟨0, 1, 0, 1⟩} := by aesop;

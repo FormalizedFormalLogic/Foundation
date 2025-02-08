@@ -246,6 +246,12 @@ instance : (Hilbert.S4Dot3).HasDot3 where p := 0; q := 1;
 instance : System.S4Dot3 (Hilbert.S4Dot3) where
 
 
+protected abbrev K5 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Five (.atom 0)}⟩
+instance : (Hilbert.K5).HasK where p := 0; q := 1;
+instance : (Hilbert.K5).HasFive where p := 0
+instance : System.K5 (Hilbert.K5) where
+
+
 protected abbrev S5 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0)}⟩
 instance : (Hilbert.S5).HasK where p := 0; q := 1;
 instance : (Hilbert.S5).HasT where p := 0
