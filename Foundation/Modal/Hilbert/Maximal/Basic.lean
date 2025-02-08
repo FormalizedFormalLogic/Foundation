@@ -69,9 +69,6 @@ lemma provable_of_classical_provable {mH : Modal.Hilbert α} {φ : IntProp.Formu
   | mdp h₁ h₂ ih₁ ih₂ =>
     dsimp only [IntProp.Formula.toModalFormula] at ih₁ ih₂;
     exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
-  | neg_equiv =>
-    dsimp only [IntProp.Formula.toModalFormula];
-    exact iff_id!;
   | _ =>
     dsimp [IntProp.Formula.toModalFormula];
     simp;
