@@ -377,6 +377,14 @@ lemma iff_not_exists_model {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ M : K
 
 alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
 
+
+lemma iff_not_exists_model_world {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C ∧ ¬(x ⊧ φ)) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
+
 end ValidOnFrameClass
 
 end Formula.Kripke

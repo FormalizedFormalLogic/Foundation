@@ -55,8 +55,12 @@ import Foundation.IntFO.Translation
 -- IntProp
 import Foundation.IntProp.Hilbert2.Glivenko
 
-import Foundation.IntProp.Kripke2.Hilbert.Int
-import Foundation.IntProp.Kripke2.Hilbert.Cl
+import Foundation.IntProp.Kripke2.Hilbert.Int.Basic
+import Foundation.IntProp.Kripke2.Hilbert.Int.DP
+
+import Foundation.IntProp.Kripke2.Hilbert.Cl.Basic
+import Foundation.IntProp.Kripke2.Hilbert.Cl.Classical
+
 import Foundation.IntProp.Kripke2.Hilbert.LC
 import Foundation.IntProp.Kripke2.Hilbert.KC
 
