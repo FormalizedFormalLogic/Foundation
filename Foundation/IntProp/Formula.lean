@@ -54,9 +54,9 @@ end ToString
 @[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp[Tilde.tilde]
 
 
-@[simp] lemma neg_def (φ : Formula α) : ∼φ = φ ➝ ⊥ := rfl
+lemma neg_def (φ : Formula α) : ∼φ = φ ➝ ⊥ := rfl
 
-@[simp] lemma top_def : (⊤ : Formula α) = ⊥ ➝ ⊥ := rfl
+lemma top_def : (⊤ : Formula α) = ⊥ ➝ ⊥ := rfl
 
 
 lemma iff_def (φ ψ : Formula α) : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := by rfl

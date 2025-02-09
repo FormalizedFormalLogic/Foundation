@@ -9,7 +9,7 @@ open Formula.Kripke
 
 abbrev Kripke.EuclideanFrameClass : FrameClass := { F | Euclidean F }
 
-instance : Kripke.EuclideanFrameClass.DefinedByFormula (Axioms.LEM (.atom 0)) := ⟨by
+instance Kripke.EuclideanFrameClass.definedByLEM : Kripke.EuclideanFrameClass.DefinedByFormula (Axioms.LEM (.atom 0)) := ⟨by
   rintro F;
   constructor;
   . rintro hEucl _ ⟨_, rfl⟩;

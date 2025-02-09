@@ -13,8 +13,6 @@ protected abbrev Logic.K : Logic := Hilbert.K.logic
 
 namespace Logic
 
-class NecessitationClosed (L : Logic) where
-
 class UnnecessitationClosed (L : Logic) where
   unnec_closed {φ} : □φ ∈ L → φ ∈ L
 

@@ -55,16 +55,10 @@ import Foundation.IntFO.Translation
 -- IntProp
 import Foundation.IntProp.Hilbert.Glivenko
 
-import Foundation.IntProp.Kripke.Hilbert.Int.Basic
-import Foundation.IntProp.Kripke.Hilbert.Int.DP
-
-import Foundation.IntProp.Kripke.Hilbert.Cl.Basic
-import Foundation.IntProp.Kripke.Hilbert.Cl.Classical
-
-import Foundation.IntProp.Kripke.Hilbert.LC
-import Foundation.IntProp.Kripke.Hilbert.KC
-
 import Foundation.IntProp.Heyting.Semantics
+
+import Foundation.IntProp.Logic.Disjunctive
+import Foundation.IntProp.Logic.WellKnown
 
 -- TODO:
 -- import Foundation.IntProp.Dialectica.Basic
