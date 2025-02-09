@@ -1,4 +1,4 @@
-import Foundation.IntProp.Kripke.Completeness
+import Foundation.IntProp.Kripke.Hilbert.Int.Basic
 import Foundation.Modal.Kripke.Hilbert.S4
 import Foundation.Modal.ModalCompanion.Basic
 
@@ -10,24 +10,23 @@ open Modal.Kripke
 variable {iH : IntProp.Hilbert ℕ} {mH : Modal.Hilbert ℕ}
 variable {φ ψ χ : IntProp.Formula ℕ}
 
-lemma provable_S4_of_provable_efq : (Hilbert.S4) ⊢! φᵍ → (Hilbert.Int ℕ) ⊢! φ := by
+lemma provable_S4_of_provable_efq : (Hilbert.S4) ⊢! φᵍ → (Hilbert.Int) ⊢! φ := by
   contrapose;
   intro h;
 
   replace h := (not_imp_not.mpr $ Hilbert.Int.Kripke.complete.complete) h;
-  simp [IntProp.Formula.Kripke.ValidOnFrame, IntProp.Formula.Kripke.ValidOnModel] at h;
-  obtain ⟨F, V, w, hp⟩ := h;
+  obtain ⟨M, w, hM, hp⟩ := IntProp.Formula.Kripke.ValidOnFrameClass.exists_model_world_of_not h;
 
-  have h₁ : ∀ ψ x, IntProp.Formula.Kripke.Satisfies ⟨F, V⟩ x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ x (ψᵍ)) := by
+  have h₁ : ∀ ψ x, IntProp.Formula.Kripke.Satisfies M x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨M.World, M.Rel⟩, M.Val⟩ x (ψᵍ)) := by
     intro ψ x;
     induction ψ using IntProp.Formula.rec' generalizing x with
     | hatom a =>
       unfold GoedelTranslation;
       constructor;
       . intro _ _ h;
-        exact V.hereditary h $ by assumption;
+        exact M.Val.hereditary h $ by assumption;
       . intro h;
-        exact h x (F.rel_refl' x);
+        exact h x (M.rel_refl x);
     | hfalsum => simp [GoedelTranslation]; rfl;
     | hor φ ψ ihp ihq =>
       simp only [GoedelTranslation];
@@ -45,17 +44,17 @@ lemma provable_S4_of_provable_efq : (Hilbert.S4) ⊢! φᵍ → (Hilbert.Int ℕ
 
   apply not_imp_not.mpr $ Hilbert.S4.Kripke.sound.sound;
   apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model;
-  use {World := F.World, Rel := F.Rel, Val := V};
+  use {World := M.World, Rel := M.Rel, Val := M.Val};
   constructor;
   . constructor;
-    . exact F.rel_refl';
-    . exact F.rel_trans';
+    . exact M.rel_refl;
+    . exact M.rel_trans;
   . apply Formula.Kripke.ValidOnModel.not_of_exists_world;
     use w;
     exact (h₁ φ w).not.mp hp;
 
-theorem iff_provable_Int_provable_S4 : (Hilbert.Int ℕ) ⊢! φ ↔ (Hilbert.S4) ⊢! φᵍ := ⟨provable_efq_of_provable_S4, provable_S4_of_provable_efq⟩
+theorem iff_provable_Int_provable_S4 : (Hilbert.Int) ⊢! φ ↔ (Hilbert.S4) ⊢! φᵍ := ⟨provable_efq_of_provable_S4, provable_S4_of_provable_efq⟩
 
-instance : ModalCompanion (Hilbert.Int ℕ) (Hilbert.S4) := ⟨iff_provable_Int_provable_S4⟩
+instance : ModalCompanion (Hilbert.Int) (Hilbert.S4) := ⟨iff_provable_Int_provable_S4⟩
 
 end LO.Modal

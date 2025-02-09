@@ -55,13 +55,19 @@ import Foundation.IntFO.Translation
 -- IntProp
 import Foundation.IntProp.Hilbert.Glivenko
 
-import Foundation.IntProp.Kripke.Classical
-import Foundation.IntProp.Kripke.Completeness
-import Foundation.IntProp.Kripke.DP
+import Foundation.IntProp.Kripke.Hilbert.Int.Basic
+import Foundation.IntProp.Kripke.Hilbert.Int.DP
+
+import Foundation.IntProp.Kripke.Hilbert.Cl.Basic
+import Foundation.IntProp.Kripke.Hilbert.Cl.Classical
+
+import Foundation.IntProp.Kripke.Hilbert.LC
+import Foundation.IntProp.Kripke.Hilbert.KC
 
 import Foundation.IntProp.Heyting.Semantics
 
-import Foundation.IntProp.Dialectica.Basic
+-- TODO:
+-- import Foundation.IntProp.Dialectica.Basic
 
 -- Modal
 

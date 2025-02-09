@@ -5,9 +5,7 @@ namespace LO.IntProp
 
 def Formula.toModalFormula : Formula α → Modal.Formula α
   | .atom a => Modal.Formula.atom a
-  | ⊤ => ⊤
   | ⊥ => ⊥
-  | ∼φ => ∼(toModalFormula φ)
   | φ ➝ ψ => (toModalFormula φ) ➝ (toModalFormula ψ)
   | φ ⋏ ψ => (toModalFormula φ) ⋏ (toModalFormula ψ)
   | φ ⋎ ψ => (toModalFormula φ) ⋎ (toModalFormula ψ)

@@ -1,6 +1,11 @@
-import Foundation.IntProp.Kripke.Basic
+import Foundation.IntProp.Hilbert.WellKnown
+import Foundation.IntProp.Kripke.Hilbert.Soundness
+import Foundation.IntProp.Kripke.Hilbert.Cl.Basic
 
 namespace LO.IntProp
+
+open Kripke
+open Formula.Kripke
 
 
 namespace Kripke
@@ -14,7 +19,7 @@ namespace Formula.Kripke
 
 open IntProp.Kripke
 
-abbrev ClassicalSatisfies (V : ClassicalValuation) (φ : Formula ℕ) : Prop := Satisfies (⟨Kripke.pointFrame, ⟨λ _ => V, by tauto⟩⟩) () φ
+abbrev ClassicalSatisfies (V : ClassicalValuation) (φ : Formula ℕ) : Prop := Satisfies (⟨pointFrame, ⟨λ _ => V, by tauto⟩⟩) () φ
 
 namespace ClassicalSatisfies
 
@@ -37,21 +42,19 @@ end ClassicalSatisfies
 end Formula.Kripke
 
 
-open IntProp.Kripke
-open Formula.Kripke (ClassicalSatisfies)
-
 namespace Hilbert.Cl
 
-lemma classical_sound : (Hilbert.Cl ℕ) ⊢! φ → (∀ V : ClassicalValuation, V ⊧ φ) := by
+lemma classical_sound : (Hilbert.Cl) ⊢! φ → (∀ V : ClassicalValuation, V ⊧ φ) := by
   intro h V;
   apply Hilbert.Cl.Kripke.sound.sound h Kripke.pointFrame;
   simp [Euclidean];
 
-lemma unprovable_of_exists_classicalValuation : (∃ V : ClassicalValuation, ¬(V ⊧ φ)) → (Hilbert.Cl ℕ) ⊬ φ := by
+lemma unprovable_of_exists_classicalValuation : (∃ V : ClassicalValuation, ¬(V ⊧ φ)) → (Hilbert.Cl) ⊬ φ := by
   contrapose;
   simp;
   apply classical_sound;
 
 end Hilbert.Cl
+
 
 end LO.IntProp

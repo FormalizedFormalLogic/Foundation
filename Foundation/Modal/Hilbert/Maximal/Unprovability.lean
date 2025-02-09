@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert.Maximal.Basic
-import Foundation.IntProp.Kripke.Classical
+import Foundation.IntProp.Kripke.Hilbert.Cl.Classical
 
 namespace LO.Modal
 
@@ -39,7 +39,7 @@ end Ver
 
 namespace K4
 
-lemma provable_Cl_trivTranslated : (Hilbert.K4) ⊢! φ → (Hilbert.Cl _) ⊢! φᵀᴾ := by
+lemma provable_Cl_trivTranslated : (Hilbert.K4) ⊢! φ → (Hilbert.Cl) ⊢! φᵀᴾ := by
   intro h;
   apply Hilbert.Triv.classical_reducible.mp;
   exact System.weakerThan_iff.mp K4_weakerThan_Triv h;
@@ -55,7 +55,7 @@ end K4
 
 namespace GL
 
-lemma provable_CL_verTranslated : (Hilbert.GL) ⊢! φ → (Hilbert.Cl _) ⊢! φⱽᴾ := by
+lemma provable_CL_verTranslated : (Hilbert.GL) ⊢! φ → (Hilbert.Cl) ⊢! φⱽᴾ := by
   intro h;
   induction h using Deduction.rec! with
     | maxm a =>
