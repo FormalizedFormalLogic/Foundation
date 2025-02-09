@@ -13,10 +13,10 @@ protected abbrev Logic.K : Logic := Hilbert.K.logic
 
 namespace Logic
 
-class UnnecessitationClosed (L : Logic) where
+protected class Unnecessitation (L : Logic) where
   unnec_closed {φ} : □φ ∈ L → φ ∈ L
 
-class ModalDisjunctiveClosed (L : Logic) where
+protected class ModalDisjunctive (L : Logic) where
   modal_disjunctive_closed {φ ψ} : □φ ⋎ □ψ ∈ L → φ ∈ L ∨ ψ ∈ L
 
 class QuasiNormal (L : Logic) where
@@ -55,9 +55,9 @@ instance normal [H.HasK] : (H.logic).Normal where
     intro φ hφ;
     exact System.nec! hφ;
 
-instance [System.Unnecessitation H] : H.logic.UnnecessitationClosed := ⟨fun {_} h => unnec! h⟩
+instance [System.Unnecessitation H] : H.logic.Unnecessitation := ⟨fun {_} h => unnec! h⟩
 
-instance [System.ModalDisjunctive H] : H.logic.ModalDisjunctiveClosed := ⟨fun {_ _} h => modal_disjunctive h⟩
+instance [System.ModalDisjunctive H] : H.logic.ModalDisjunctive := ⟨fun {_ _} h => modal_disjunctive h⟩
 
 end Hilbert
 

@@ -12,12 +12,17 @@ inductive sumQuasiNormal (L₁ L₂ : Logic) : Logic
   | mdp  {φ ψ}  : sumQuasiNormal L₁ L₂ (φ ➝ ψ) → sumQuasiNormal L₁ L₂ φ → sumQuasiNormal L₁ L₂ ψ
   | subst {φ s} : sumQuasiNormal L₁ L₂ φ → sumQuasiNormal L₁ L₂ (φ⟦s⟧)
 
+abbrev addQuasiNormal (L : Logic) (φ : Formula ℕ) : Logic := sumQuasiNormal L {φ}
+
+
 inductive sumNormal (L₁ L₂ : Logic) : Logic
   | mem₁ {φ}    : φ ∈ L₁ → sumNormal L₁ L₂ φ
   | mem₂ {φ}    : φ ∈ L₂ → sumNormal L₁ L₂ φ
   | mdp  {φ ψ}  : sumNormal L₁ L₂ (φ ➝ ψ) → sumNormal L₁ L₂ φ → sumNormal L₁ L₂ ψ
   | subst {φ s} : sumNormal L₁ L₂ φ → sumNormal L₁ L₂ (φ⟦s⟧)
   | nec {φ}     : sumNormal L₁ L₂ φ → sumNormal L₁ L₂ (□φ)
+
+abbrev addNormal (L : Logic) (φ : Formula ℕ) : Logic := sumNormal L {φ}
 
 end Logic
 

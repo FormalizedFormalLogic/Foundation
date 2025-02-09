@@ -295,6 +295,21 @@ end
 class HasAxiomDot3 (𝓢 : S) where
   Dot3 (φ ψ : F) : 𝓢 ⊢ Axioms.Dot3 φ ψ
 
+section
+
+variable [HasAxiomDot3 𝓢]
+
+def axiomDot3 : 𝓢 ⊢ □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := HasAxiomDot3.Dot3 _ _
+@[simp] lemma axiomDot3! : 𝓢 ⊢! □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := ⟨axiomDot3⟩
+
+variable [System.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomDot3⟩
+instance (Γ : Context F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ Context.of axiomDot3⟩
+
+end
+
+
 class HasAxiomGrz (𝓢 : S) where
   Grz (φ : F) : 𝓢 ⊢ Axioms.Grz φ
 
