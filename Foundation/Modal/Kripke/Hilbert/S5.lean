@@ -11,6 +11,12 @@ abbrev Kripke.ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F ∧
 
 namespace Hilbert.S5
 
+instance Kripke.sound : Sound (Hilbert.S5) (Kripke.ReflexiveEuclideanFrameClass) := by
+  convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
+  exact eq_Geach;
+  . unfold ReflexiveEuclideanFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
+    simp [Geachean.reflexive_def, Geachean.euclidean_def];
+
 instance Kripke.consistent : System.Consistent (Hilbert.S5) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
   exact eq_Geach;

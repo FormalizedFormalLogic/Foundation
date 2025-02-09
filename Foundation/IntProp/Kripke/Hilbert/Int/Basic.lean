@@ -1,4 +1,4 @@
-import Foundation.IntProp.Hilbert.Int
+import Foundation.IntProp.Hilbert.WellKnown
 import Foundation.IntProp.Kripke.Completeness
 import Foundation.IntProp.Kripke.Hilbert.Soundness
 

@@ -9,7 +9,7 @@ open Formula.Kripke
 
 abbrev Kripke.ConnectedFrameClass : FrameClass := { F | Connected F }
 
-instance : Kripke.ConnectedFrameClass.DefinedByFormula (Axioms.Dummett (.atom 0) (.atom 1)) := ⟨by
+instance Kripke.ConfluentFrameClass.definedByDummett : Kripke.ConnectedFrameClass.DefinedByFormula (Axioms.Dummett (.atom 0) (.atom 1)) := ⟨by
   rintro F;
   constructor;
   . rintro h φ ⟨_, rfl⟩;

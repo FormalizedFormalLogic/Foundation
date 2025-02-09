@@ -23,6 +23,8 @@ notation:80 φ "⟦" s "⟧" => Formula.subst s φ
 
 @[simp] lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
 
+@[simp] lemma subst_top : ⊤⟦s⟧ = ⊤ := rfl
+
 @[simp] lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
 
 @[simp] lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl

@@ -9,7 +9,7 @@ open Formula.Kripke
 
 abbrev Kripke.ConfluentFrameClass : FrameClass := { F | Confluent F }
 
-instance : Kripke.ConfluentFrameClass.DefinedByFormula (Axioms.WeakLEM (.atom 0)) := ⟨by
+instance Kripke.ConfluentFrameClass.definedByWeakLEM : Kripke.ConfluentFrameClass.DefinedByFormula (Axioms.WeakLEM (.atom 0)) := ⟨by
   rintro F;
   constructor;
   . rintro h φ ⟨_, rfl⟩;

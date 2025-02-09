@@ -133,6 +133,26 @@ def axiomT' (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ φ := axiomT ⨀ h
 
 end
 
+class HasAxiomDiaTc (𝓢 : S) where
+  diaTc (φ : F) : 𝓢 ⊢ Axioms.DiaTc φ
+
+section
+
+variable [HasAxiomDiaTc 𝓢]
+
+def diaTc : 𝓢 ⊢ φ ➝ ◇φ := HasAxiomDiaTc.diaTc _
+@[simp] lemma diaTc! : 𝓢 ⊢! φ ➝ ◇φ := ⟨diaTc⟩
+
+variable [System.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDiaTc Γ := ⟨fun _ ↦ FiniteContext.of diaTc⟩
+instance (Γ : Context F 𝓢) : HasAxiomDiaTc Γ := ⟨fun _ ↦ Context.of diaTc⟩
+
+def diaTc' (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ◇φ := diaTc ⨀ h
+lemma diaTc'! (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ◇φ := ⟨diaTc' h.some⟩
+
+end
+
 
 class HasAxiomD [Dia F] (𝓢 : S) where
   D (φ : F) : 𝓢 ⊢ Axioms.D φ
@@ -257,8 +277,38 @@ end
 class HasAxiomDot2 [Dia F] (𝓢 : S) where
   Dot2 (φ : F) : 𝓢 ⊢ Axioms.Dot2 φ
 
+section
+
+variable [HasAxiomDot2 𝓢]
+
+def axiomDot2 : 𝓢 ⊢ ◇□φ ➝ □◇φ := HasAxiomDot2.Dot2 _
+@[simp] lemma axiomDot2! : 𝓢 ⊢! ◇□φ ➝ □◇φ := ⟨axiomDot2⟩
+
+variable [System.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDot2 Γ := ⟨fun _ ↦ FiniteContext.of axiomDot2⟩
+instance (Γ : Context F 𝓢) : HasAxiomDot2 Γ := ⟨fun _ ↦ Context.of axiomDot2⟩
+
+end
+
+
 class HasAxiomDot3 (𝓢 : S) where
   Dot3 (φ ψ : F) : 𝓢 ⊢ Axioms.Dot3 φ ψ
+
+section
+
+variable [HasAxiomDot3 𝓢]
+
+def axiomDot3 : 𝓢 ⊢ □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := HasAxiomDot3.Dot3 _ _
+@[simp] lemma axiomDot3! : 𝓢 ⊢! □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := ⟨axiomDot3⟩
+
+variable [System.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomDot3⟩
+instance (Γ : Context F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ Context.of axiomDot3⟩
+
+end
+
 
 class HasAxiomGrz (𝓢 : S) where
   Grz (φ : F) : 𝓢 ⊢ Axioms.Grz φ
@@ -393,6 +443,7 @@ protected class KP extends System.K 𝓢, HasAxiomP 𝓢
 protected class KB extends System.K 𝓢, HasAxiomB 𝓢
 
 protected class KT extends System.K 𝓢, HasAxiomT 𝓢
+protected class KT' extends System.K 𝓢, HasAxiomDiaTc 𝓢
 
 protected class KTc extends System.K 𝓢, HasAxiomTc 𝓢
 protected class KTc' extends System.K 𝓢, HasAxiomDiaT 𝓢
@@ -402,6 +453,8 @@ protected class KTB extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomB 𝓢
 protected class KD45 extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
 
 protected class KB4 extends System.K 𝓢, HasAxiomB 𝓢, HasAxiomFour 𝓢
+
+protected class KB5 extends System.K 𝓢, HasAxiomB 𝓢, HasAxiomFive 𝓢
 
 protected class KDB extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomB 𝓢
 

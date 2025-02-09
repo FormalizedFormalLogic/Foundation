@@ -14,18 +14,25 @@ protected abbrev Geach (G : Set (Geachean.Taple)) : Hilbert ℕ := ⟨
 instance : HasK (Hilbert.Geach G) where p := 0; q := 1
 instance : System.K (Hilbert.Geach G) where
 
-lemma KT.eq_Geach : Hilbert.KT = Hilbert.Geach {⟨0, 0, 1, 0⟩} := by aesop;
-
-lemma KTB.eq_Geach : Hilbert.KTB = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩} := by aesop;
+lemma K4.eq_Geach   : Hilbert.K4   = Hilbert.Geach {⟨0, 2, 1, 0⟩} := by aesop;
+lemma K45.eq_Geach  : Hilbert.K45  = Hilbert.Geach {⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by aesop;
+lemma K5.eq_Geach   : Hilbert.K5   = Hilbert.Geach {⟨1, 1, 0, 1⟩} := by aesop;
+lemma KB.eq_Geach   : Hilbert.KB   = Hilbert.Geach {⟨0, 1, 0, 1⟩} := by aesop;
+lemma KB4.eq_Geach  : Hilbert.KB4  = Hilbert.Geach {⟨0, 1, 0, 1⟩, ⟨0, 2, 1, 0⟩} := by aesop;
+lemma KB5.eq_Geach  : Hilbert.KB5  = Hilbert.Geach {⟨0, 1, 0, 1⟩, ⟨1, 1, 0, 1⟩} := by aesop;
+lemma KD.eq_Geach   : Hilbert.KD   = Hilbert.Geach {⟨0, 0, 1, 1⟩} := by aesop;
+lemma KD4.eq_Geach  : Hilbert.KD4  = Hilbert.Geach {⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩} := by aesop;
+lemma KD45.eq_Geach : Hilbert.KD45 = Hilbert.Geach {⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by aesop;
+lemma KD5.eq_Geach  : Hilbert.KD5  = Hilbert.Geach {⟨0, 0, 1, 1⟩, ⟨1, 1, 0, 1⟩} := by aesop;
+lemma KDB.eq_Geach  : Hilbert.KDB  = Hilbert.Geach {⟨0, 0, 1, 1⟩, ⟨0, 1, 0, 1⟩} := by aesop;
+lemma KT.eq_Geach   : Hilbert.KT   = Hilbert.Geach {⟨0, 0, 1, 0⟩} := by aesop;
+lemma KTB.eq_Geach  : Hilbert.KTB  = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩} := by aesop;
+lemma S4.eq_Geach   : Hilbert.S4   = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩} := by aesop;
+lemma S5.eq_Geach   : Hilbert.S5   = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by aesop;
 
 lemma KT4B.eq_Geach : Hilbert.KT4B = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩} := by aesop;
 
-lemma S4.eq_Geach : Hilbert.S4 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩} := by aesop;
-
 lemma S4Dot2.eq_Geach : Hilbert.S4Dot2 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩} := by aesop;
-
-lemma S5.eq_Geach : Hilbert.S5 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by aesop;
-
 lemma Triv.eq_Geach : Hilbert.Triv = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩} := by aesop;
 
 instance HasT_of_mem_0_0_1_0 (h : ⟨0, 0, 1, 0⟩ ∈ G) : HasT (Hilbert.Geach G) where
