@@ -14,7 +14,7 @@ class HasLEM (H : Hilbert α) where
 
 instance [DecidableEq α] [hLEM : H.HasLEM] : System.HasAxiomLEM H where
   lem φ := by
-    apply eaxm;
+    apply maxm;
     use Axioms.LEM (.atom hLEM.p);
     constructor;
     . exact hLEM.mem_lem;
@@ -28,7 +28,7 @@ class HasDNE (H : Hilbert α) where
 
 instance [DecidableEq α] [hDNE : H.HasDNE] : System.HasAxiomDNE H where
   dne φ := by
-    apply eaxm;
+    apply maxm;
     use Axioms.DNE (.atom hDNE.p);
     constructor;
     . exact hDNE.mem_dne;
@@ -42,7 +42,7 @@ class HasWeakLEM (H : Hilbert α) where
 
 instance [DecidableEq α] [hWLEM : H.HasWeakLEM] : System.HasAxiomWeakLEM H where
   wlem φ := by
-    apply eaxm;
+    apply maxm;
     use Axioms.WeakLEM (.atom hWLEM.p);
     constructor;
     . exact hWLEM.mem_wlem;
@@ -58,7 +58,7 @@ class HasDummett (H : Hilbert α) where
 
 instance [DecidableEq α] [hDummett : H.HasDummett] : System.HasAxiomDummett H where
   dummett φ ψ := by
-    apply eaxm;
+    apply maxm;
     use Axioms.Dummett (.atom hDummett.p) (.atom hDummett.q);
     constructor;
     . exact hDummett.mem_dummet;

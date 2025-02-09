@@ -18,7 +18,7 @@ class FiniteAxiomatizable (H : Hilbert α) where
 variable {H : Hilbert α}
 
 inductive Deduction (H : Hilbert α) : Formula α → Type _
-  | eaxm {φ}      : φ ∈ H.axiomInstances → Deduction H φ
+  | maxm {φ}      : φ ∈ H.axiomInstances → Deduction H φ
   | mdp {φ ψ}     : Deduction H (φ ➝ ψ) → Deduction H φ → Deduction H ψ
   | verum         : Deduction H $ ⊤
   | implyS φ ψ    : Deduction H $ φ ➝ ψ ➝ φ
@@ -57,13 +57,13 @@ instance : System.Minimal H where
 
 namespace Deduction
 
-lemma eaxm! {φ} (h : φ ∈ H.axiomInstances) : H ⊢! φ := ⟨eaxm h⟩
+lemma maxm! {φ} (h : φ ∈ H.axiomInstances) : H ⊢! φ := ⟨maxm h⟩
 
 open System
 
 noncomputable def rec!
   {motive      : (φ : Formula α) → H ⊢! φ → Sort*}
-  (maxm       : ∀ {φ}, (h : φ ∈ H.axiomInstances) → motive φ (eaxm! h))
+  (maxm       : ∀ {φ}, (h : φ ∈ H.axiomInstances) → motive φ (maxm! h))
   (mdp        : ∀ {φ ψ}, {hpq : H ⊢! φ ➝ ψ} → {hp : H ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (mdp! hpq hp))
   (verum      : motive ⊤ verum!)
   (implyS     : ∀ {φ ψ},   motive (Axioms.Imply₁ φ ψ) $ ⟨implyS φ ψ⟩)
@@ -77,7 +77,7 @@ noncomputable def rec!
   : ∀ {φ}, (d : H ⊢! φ) → motive φ d := by
   intro φ d;
   induction d.some with
-  | eaxm h => exact maxm h
+  | maxm h => exact maxm h
   | mdp hpq hp ihpq ihp => exact mdp (ihpq ⟨hpq⟩) (ihp ⟨hp⟩)
   | _ => aesop
 
@@ -86,7 +86,7 @@ def subst! {φ} (s) (h : H ⊢! φ) : H ⊢! φ⟦s⟧ := by
   | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
   | maxm h =>
     obtain ⟨ψ, h, ⟨s', rfl⟩⟩ := h;
-    apply eaxm!;
+    apply maxm!;
     use ψ;
     constructor;
     . assumption;
@@ -119,7 +119,7 @@ lemma weakerThan_of_subset_axioms (hSubset : H₁.axioms ⊆ H₂.axioms)
   : H₁ ≤ₛ H₂ := by
   apply weakerThan_of_dominate_axiomInstances;
   rintro φ ⟨ψ, hs, ⟨s, rfl⟩⟩;
-  apply eaxm!;
+  apply maxm!;
   use ψ;
   constructor;
   . exact hSubset hs;

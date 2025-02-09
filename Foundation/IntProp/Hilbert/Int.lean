@@ -14,7 +14,7 @@ class HasEFQ (H : Hilbert α) where
 
 instance [DecidableEq α] [hEfq : H.HasEFQ] : System.HasAxiomEFQ H where
   efq φ := by
-    apply eaxm;
+    apply maxm;
     use Axioms.EFQ (Formula.atom hEfq.p);
     constructor;
     . exact hEfq.mem_efq;

@@ -105,7 +105,7 @@ lemma sound {φ : Formula α} (d : H ⊢! φ) : mod H ⊧ φ := by
   rcases d with ⟨d⟩
   apply mod_models_iff.mpr fun ℍ hℍ ↦ ?_
   induction d
-  case eaxm φ hφ => exact hℍ.RealizeSet hφ;
+  case maxm φ hφ => exact hℍ.RealizeSet hφ;
   case mdp φ ψ _ _ ihpq ihp =>
     have : (ℍ ⊧ₕ φ) ≤ (ℍ ⊧ₕ ψ) := by simpa using ihpq
     simpa [val_def'.mp ihp] using this
@@ -157,7 +157,7 @@ lemma complete [DecidableEq α] {φ : Formula α} [H.HasEFQ] (h : mod.{_,u} H �
   wlog Con : System.Consistent H
   · exact System.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <|
-    mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hq ↦ lindenbaum_complete_iff.mpr <| eaxm! hq⟩
+    mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hq ↦ lindenbaum_complete_iff.mpr <| maxm! hq⟩
 
 instance [DecidableEq α] [H.HasEFQ] : Complete H (mod.{_,u} H) := ⟨complete⟩
 
