@@ -209,43 +209,11 @@ instance : Encodable (Formula α) where
 
 end Encodable
 
-
-section subst
-
-def subst  (s : α → Formula α): Formula α → Formula α
-  | atom a => s a
-  | ⊥      => ⊥
-  | φ ➝ ψ  => φ.subst s ➝ ψ.subst s
-  | φ ⋏ ψ  => φ.subst s ⋏ ψ.subst s
-  | φ ⋎ ψ  => φ.subst s ⋎ ψ.subst s
-
-section
-
-variable {s : α → Formula α} {φ ψ : Formula α}
-
-@[simp] lemma subst_atom {a : α} : (atom a).subst s = s a := rfl
-
-@[simp] lemma subst_and : (φ ⋏ ψ).subst s = φ.subst s ⋏ ψ.subst s := rfl
-
-@[simp] lemma subst_or : (φ ⋎ ψ).subst s = φ.subst s ⋎ ψ.subst s := rfl
-
-@[simp] lemma subst_imp : (φ ➝ ψ).subst s = φ.subst s ➝ ψ.subst s := rfl
-
-@[simp] lemma subst_neg : (∼φ).subst s = ∼(φ.subst s) := rfl
-
-@[simp] lemma subst_top : (⊤ : Formula α).subst s = ⊤ := rfl
-
-@[simp] lemma subst_bot : (⊥ : Formula α).subst s = ⊥ := rfl
-
-end
-
-end subst
-
 end Formula
 
 
-abbrev Theory (α : Type u) := Set (Formula α)
+abbrev FormulaSet (α : Type u) := Set (Formula α)
 
-abbrev Context (α : Type u) := Finset (Formula α)
+abbrev FormulaFinset (α : Type u) := Finset (Formula α)
 
 end LO.IntProp

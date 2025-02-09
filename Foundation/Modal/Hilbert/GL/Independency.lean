@@ -22,7 +22,7 @@ lemma unprovable_notbox : Hilbert.GL ⊬ ∼□φ := by
   by_contra hC;
   have : Hilbert.GL ⊢! ∼□φ ➝ ∼□⊥ := contra₀'! (imply_box_distribute'! efq!)
   have : Hilbert.GL ⊢! ∼□⊥ := this ⨀ hC;
-  have : Hilbert.Cl ℕ ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using provable_CL_verTranslated this;
+  have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using provable_CL_verTranslated this;
   simpa using Hilbert.Cl.classical_sound this;
 
 lemma unprovable_independency : Hilbert.GL ⊬ independency φ := by
