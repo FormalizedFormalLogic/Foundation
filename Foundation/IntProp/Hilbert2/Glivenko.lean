@@ -21,9 +21,8 @@ theorem iff_provable_dn_efq_dne_provable : (Hilbert.Int) ⊢! ∼∼φ ↔ (Hilb
       . generalize (s 0) = ψ;
         apply neg_equiv'!.mpr;
         apply FiniteContext.deduct'!;
-        sorry;
-        -- have : [∼(ψ ⋎ ∼ψ)] ⊢[Hilbert.Int]! ∼ψ ⋏ ∼∼ψ := demorgan₃'! $ FiniteContext.id!;
-        -- exact neg_mdp! (and₂'! this) (and₁'! this);
+        have : [∼(ψ ⋎ (ψ ➝ ⊥))] ⊢[Hilbert.Int]! ∼ψ ⋏ ∼(ψ ➝ ⊥) := demorgan₃'! $ FiniteContext.id!;
+        exact (neg_equiv'!.mp $ and₂'! this) ⨀ (neg_equiv'!.mp $ and₁'! this);
     | mdp ihφψ ihφ => exact dn_distribute_imply'! ihφψ ⨀ ihφ;
     | _ => apply dni'!; simp;
 

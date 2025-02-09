@@ -53,7 +53,7 @@ import Foundation.IntFO.Basic
 import Foundation.IntFO.Translation
 
 -- IntProp
--- import Foundation.IntProp.Hilbert.Glivenko
+import Foundation.IntProp.Hilbert2.Glivenko
 
 import Foundation.IntProp.Kripke2.Hilbert.Int
 import Foundation.IntProp.Kripke2.Hilbert.Cl
