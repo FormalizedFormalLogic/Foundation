@@ -20,6 +20,7 @@ instance [DecidableEq α] [hEfq : H.HasEFQ] : System.HasAxiomEFQ H where
     . exact hEfq.mem_efq;
     . use (λ b => if hEfq.p = b then φ else (.atom b));
       simp;
+instance [DecidableEq α] [H.HasEFQ] : System.Intuitionistic H where
 
 end
 
@@ -29,7 +30,6 @@ section
 protected abbrev Int : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0)}⟩
 instance : Hilbert.Int.FiniteAxiomatizable where
 instance : Hilbert.Int.HasEFQ where p := 0;
-instance : System.Intuitionistic (Hilbert.Int) where
 
 end
 
