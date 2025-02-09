@@ -1,5 +1,5 @@
 import Foundation.Logic.Disjunctive
-import Foundation.IntProp.Kripke2.Hilbert.Int.Basic
+import Foundation.IntProp.Kripke.Hilbert.Int.Basic
 
 namespace LO.IntProp
 

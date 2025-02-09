@@ -1,6 +1,6 @@
-import Foundation.IntProp.Hilbert2.WellKnown
-import Foundation.IntProp.Kripke2.Hilbert.Soundness
-import Foundation.IntProp.Kripke2.Hilbert.Cl.Basic
+import Foundation.IntProp.Hilbert.WellKnown
+import Foundation.IntProp.Kripke.Hilbert.Soundness
+import Foundation.IntProp.Kripke.Hilbert.Cl.Basic
 
 namespace LO.IntProp
 

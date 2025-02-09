@@ -1,4 +1,4 @@
-import Foundation.IntProp.Hilbert.Basic
+import Foundation.IntProp.Hilbert.WellKnown
 import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.IntProp
 
@@ -25,7 +25,6 @@ lemma back : φᵀᴾᴹ = φᵀ := by
   | himp => simp [TrivTranslation, toPropFormula, IntProp.Formula.toModalFormula, *];
   | hbox => simp [TrivTranslation, *];
   | _ => rfl;
-  -- simp_all [IntProp.Formula.toModalFormula, TrivTranslation];
 
 end TrivTranslation
 
@@ -59,16 +58,14 @@ open Formula (TrivTranslation VerTranslation)
 
 namespace Hilbert
 
-lemma provable_of_classical_provable {mH : Modal.Hilbert α} {φ : IntProp.Formula α} : ((IntProp.Hilbert.Cl α) ⊢! φ) → (mH ⊢! φᴹ) := by
+lemma provable_of_classical_provable {mH : Modal.Hilbert ℕ} {φ : IntProp.Formula ℕ} : ((IntProp.Hilbert.Cl) ⊢! φ) → (mH ⊢! φᴹ) := by
   intro h;
-  induction h.some with
-  | eaxm ih =>
-    rcases ih with (⟨_, rfl⟩ | ⟨_, rfl⟩);
+  induction h using IntProp.Hilbert.Deduction.rec! with
+  | maxm ih =>
+    rcases (by simpa using ih) with (⟨_, rfl⟩ | ⟨_, rfl⟩);
     . exact efq!;
     . exact lem!;
-  | mdp h₁ h₂ ih₁ ih₂ =>
-    dsimp only [IntProp.Formula.toModalFormula] at ih₁ ih₂;
-    exact (ih₁ ⟨h₁⟩) ⨀ (ih₂ ⟨h₂⟩);
+  | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
   | _ =>
     dsimp [IntProp.Formula.toModalFormula];
     simp;
@@ -85,7 +82,7 @@ lemma iff_trivTranslated : (Hilbert.Triv) ⊢! φ ⭤ φᵀ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-protected theorem classical_reducible : Hilbert.Triv ⊢! φ ↔ (IntProp.Hilbert.Cl _) ⊢! φᵀᴾ := by
+protected theorem classical_reducible : Hilbert.Triv ⊢! φ ↔ (IntProp.Hilbert.Cl) ⊢! φᵀᴾ := by
   constructor;
   . intro h;
     induction h using Deduction.rec! with
@@ -116,7 +113,7 @@ lemma iff_verTranslated : (Hilbert.Ver) ⊢! φ ⭤ φⱽ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-protected lemma classical_reducible : (Hilbert.Ver) ⊢! φ ↔ (IntProp.Hilbert.Cl _) ⊢! φⱽᴾ := by
+protected lemma classical_reducible : (Hilbert.Ver) ⊢! φ ↔ (IntProp.Hilbert.Cl) ⊢! φⱽᴾ := by
   constructor;
   . intro h;
     induction h using Deduction.rec! with

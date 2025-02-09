@@ -53,16 +53,16 @@ import Foundation.IntFO.Basic
 import Foundation.IntFO.Translation
 
 -- IntProp
-import Foundation.IntProp.Hilbert2.Glivenko
+import Foundation.IntProp.Hilbert.Glivenko
 
-import Foundation.IntProp.Kripke2.Hilbert.Int.Basic
-import Foundation.IntProp.Kripke2.Hilbert.Int.DP
+import Foundation.IntProp.Kripke.Hilbert.Int.Basic
+import Foundation.IntProp.Kripke.Hilbert.Int.DP
 
-import Foundation.IntProp.Kripke2.Hilbert.Cl.Basic
-import Foundation.IntProp.Kripke2.Hilbert.Cl.Classical
+import Foundation.IntProp.Kripke.Hilbert.Cl.Basic
+import Foundation.IntProp.Kripke.Hilbert.Cl.Classical
 
-import Foundation.IntProp.Kripke2.Hilbert.LC
-import Foundation.IntProp.Kripke2.Hilbert.KC
+import Foundation.IntProp.Kripke.Hilbert.LC
+import Foundation.IntProp.Kripke.Hilbert.KC
 
 -- import Foundation.IntProp.Heyting.Semantics
 

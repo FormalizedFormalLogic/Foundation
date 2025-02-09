@@ -1,4 +1,4 @@
-import Foundation.IntProp.Hilbert2.Int
+import Foundation.IntProp.Hilbert.Int
 
 namespace LO.IntProp.Hilbert
 

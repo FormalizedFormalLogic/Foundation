@@ -1,5 +1,5 @@
-import Foundation.IntProp.Hilbert2.Basic
-import Foundation.IntProp.Kripke2.Basic
+import Foundation.IntProp.Hilbert.Basic
+import Foundation.IntProp.Kripke.Basic
 
 namespace LO.IntProp
 
