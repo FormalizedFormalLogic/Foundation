@@ -33,8 +33,9 @@ class Sublogic (L₁ L₂ : Logic) where
 class ProperSublogic (L₁ L₂ : Logic) : Prop where
   ssubset : L₁ ⊂ L₂
 
-
-variable {L : Logic} {φ ψ : Formula ℕ}
+class Consistent (L : Logic) : Prop where
+  consis : L ≠ Set.univ
+attribute [simp] Consistent.consis
 
 
 section
