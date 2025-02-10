@@ -105,7 +105,7 @@ lemma S4Dot2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic : Logic.S4Dot
 
 protected abbrev S4Dot3 : Logic := Hilbert.S4Dot3.logic
 lemma S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic : Logic.S4Dot3 = Kripke.ReflexiveTransitiveConnectedFrameClass.logic
-  := by sorry;
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev S5 : Logic := Hilbert.S5.logic
 lemma S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic : Logic.S5 = Kripke.ReflexiveEuclideanFrameClass.logic
