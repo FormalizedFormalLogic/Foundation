@@ -173,31 +173,6 @@ theorem KTB_ssubset_S5 : Logic.KTB ⊂ Logic.S5 := by
         . use 2;
           constructor <;> omega;
 
-theorem S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
-  constructor;
-  . rw [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨F_refl, F_eucl⟩;
-    apply hφ;
-    refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
-    use Axioms.Five (.atom 0);
-    constructor;
-    . exact axiomFive!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ w _ => w = 2)⟩;
-      use M, 0;
-      constructor;
-      . refine ⟨?_, ?_⟩;
-        . tauto;
-        . simp [Transitive];
-          omega;
-      . suffices (0 : M.World) ≺ 2 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
-          simpa [M, Semantics.Realize, Satisfies];
-        constructor;
-        . tauto;
-        . use 1;
-          constructor <;> omega;
-
 theorem KD45_ssubset_S5 : Logic.KD45 ⊂ Logic.S5 := by
   constructor;
   . rw [KD45.eq_SerialTransitiveEuclideanKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
@@ -776,6 +751,43 @@ theorem S4Dot2_ssubset_S4Dot3 : Logic.S4Dot2 ⊂ Logic.S4Dot3 := by
           simp [Satisfies, Semantics.Realize, M];
           constructor <;> omega;
 
+theorem S4Dot3_ssubset_S5 : Logic.S4Dot3 ⊂ Logic.S5 := by
+  constructor;
+  . rw [S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic, S5.eq_UniversalKripkeFrameClass_Logic];
+    rintro φ hφ F F_univ;
+    apply hφ;
+    refine ⟨?_, ?_, ?_⟩;
+    . unfold Reflexive; intros; apply F_univ;
+    . unfold Transitive; intros; apply F_univ;
+    . unfold Connected; intros; constructor; apply F_univ;
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬ReflexiveTransitiveConnectedFrameClass ⊧ φ by
+      simpa [S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+    use Axioms.Five (.atom 0);
+    constructor;
+    . exact axiomFive!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w a => (w = 0)⟩;
+      use M, 0;
+      constructor;
+      . simp only [Set.mem_setOf_eq];
+        refine ⟨?_, ?_, ?_⟩;
+        . simp [M, Reflexive];
+        . simp [M, Transitive]; omega;
+        . rintro x y z ⟨Rxy, Ryz⟩; omega;
+      . suffices (0 : M.World) ≺ 0 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
+          simpa [M, Semantics.Realize, Satisfies];
+        constructor;
+        . omega;
+        . use 1;
+          constructor <;> omega;
+
+lemma S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
+  trans Logic.S4Dot2;
+  . exact S4_ssubset_S4Dot2;
+  . trans Logic.S4Dot3;
+    . exact S4Dot2_ssubset_S4Dot3;
+    . exact S4Dot3_ssubset_S5;
+
 theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
@@ -806,7 +818,7 @@ theorem S5_ssubset_Triv : Logic.S5 ⊂ Logic.Triv := by
   convert S5_ssubset_S5Grz;
   exact S5Grz_eq_Triv.symm;
 
--- TODO: more refactor
+-- TODO: more refactor for operating finite frame
 lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
