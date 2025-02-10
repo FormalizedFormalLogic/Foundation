@@ -19,6 +19,7 @@ import Foundation.Modal.Kripke.Hilbert.S4Dot2
 import Foundation.Modal.Kripke.Hilbert.S5
 import Foundation.Modal.Kripke.Hilbert.Triv
 import Foundation.Modal.Kripke.Hilbert.Ver
+import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Logic.Basic
 import Foundation.Modal.System.KT
 
@@ -107,6 +108,10 @@ protected abbrev S4Dot3 : Logic := Hilbert.S4Dot3.logic
 protected abbrev S5 : Logic := Hilbert.S5.logic
 lemma S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic : Logic.S5 = Kripke.ReflexiveEuclideanFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma S5.eq_UniversalKripkeFrameClass_Logic : Logic.S5 = Kripke.UniversalFrameClass.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+protected abbrev S5Grz : Logic := Hilbert.S5Grz.logic
 
 
 protected abbrev GL : Logic := Hilbert.GL.logic
@@ -740,6 +745,25 @@ theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by
     . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
       simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
+
+lemma S5Grz_eq_Triv : Logic.S5Grz = Logic.Triv := by
+  ext φ;
+  exact Hilbert.iff_provable_S5Grz_provable_Triv;
+
+lemma S5_ssubset_S5Grz : Logic.S5 ⊂ Logic.S5Grz := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬UniversalFrameClass ⊧ φ by simpa [S5.eq_UniversalKripkeFrameClass_Logic];
+    use Axioms.Grz (.atom 0)
+    constructor;
+    . exact axiomGrz!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      simp [Universal, Semantics.Realize, Satisfies];
+
+theorem S5_ssubset_Triv : Logic.S5 ⊂ Logic.Triv := by
+  convert S5_ssubset_S5Grz;
+  exact S5Grz_eq_Triv.symm;
 
 end Logic
 

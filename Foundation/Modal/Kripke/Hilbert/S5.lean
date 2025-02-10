@@ -48,7 +48,13 @@ end Kripke
 
 namespace Hilbert.S5
 
-instance Hilbert.S5.Kripke.completeUniversal : Complete (Hilbert.S5) (Kripke.UniversalFrameClass) := ⟨by
+instance Kripke.soundUniversal : Sound (Hilbert.S5) (Kripke.UniversalFrameClass) := ⟨by
+  intro φ hF;
+  apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mpr;
+  exact Kripke.sound.sound hF;
+⟩
+
+instance Kripke.completeUniversal : Complete (Hilbert.S5) (Kripke.UniversalFrameClass) := ⟨by
   intro φ hF;
   apply Kripke.complete.complete;
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mp;
