@@ -730,6 +730,13 @@ theorem S4_ssubset_S4Dot2 : Logic.S4 ⊂ Logic.S4Dot2 := by
           . omega;
           . omega;
 
+lemma KD_ssubset_Triv : Logic.KD ⊂ Logic.Triv := by
+  trans Logic.KD4;
+  . exact KD_ssubset_KD4;
+  . trans Logic.S4;
+    . exact KD4_ssubset_S4;
+    . exact S4_ssubset_Triv;
+
 end Logic
 
 end LO.Modal

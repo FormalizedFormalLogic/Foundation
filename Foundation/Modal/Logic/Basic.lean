@@ -27,7 +27,42 @@ class QuasiNormal (L : Logic) where
 class Normal (L : Logic) extends L.QuasiNormal where
   nec_closed {φ} : φ ∈ L → □φ ∈ L
 
+class Consistent (L : Logic) : Prop where
+  consis : L ≠ Set.univ
+attribute [simp] Consistent.consis
+
+
+section
+
+variable {L : Logic} {φ ψ : Formula ℕ}
+variable [L.QuasiNormal]
+
+protected lemma mdp (hφψ : φ ➝ ψ ∈ L) (hφ : φ ∈ L) : ψ ∈ L := QuasiNormal.mdp_closed hφψ hφ
+
+protected lemma efq (h : ⊥ ∈ L) : ∀ {φ}, φ ∈ L := by
+  intro φ;
+  have : ⊥ ➝ φ ∈ L := by apply QuasiNormal.subset_K; simp;
+  exact Logic.mdp this h;
+
+@[simp]
+protected lemma no_bot [L.Consistent] : ¬(⊥ ∈ L) := by
+  intro h;
+  exact Consistent.consis $ Set.eq_univ_of_univ_subset $ by
+    intro φ _;
+    apply Logic.efq h;
+
+lemma no_either_not [L.Consistent] : (φ ∉ L) ∨ (∼φ ∉ L) := by
+  apply or_iff_not_imp_left.mpr;
+  intro hφ hnφ;
+  push_neg at hφ;
+  exact Logic.no_bot $ Logic.mdp hnφ hφ;
+
+end
+
+
 end Logic
+
+
 
 
 namespace Hilbert
