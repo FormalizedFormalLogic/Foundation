@@ -16,6 +16,7 @@ import Foundation.Modal.Kripke.Hilbert.KT
 import Foundation.Modal.Kripke.Hilbert.KTB
 import Foundation.Modal.Kripke.Hilbert.S4
 import Foundation.Modal.Kripke.Hilbert.S4Dot2
+import Foundation.Modal.Kripke.Hilbert.S4Dot3
 import Foundation.Modal.Kripke.Hilbert.S5
 import Foundation.Modal.Kripke.Hilbert.Triv
 import Foundation.Modal.Kripke.Hilbert.Ver
@@ -103,7 +104,8 @@ lemma S4Dot2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic : Logic.S4Dot
 
 
 protected abbrev S4Dot3 : Logic := Hilbert.S4Dot3.logic
-
+lemma S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic : Logic.S4Dot3 = Kripke.ReflexiveTransitiveConnectedFrameClass.logic
+  := by sorry;
 
 protected abbrev S5 : Logic := Hilbert.S5.logic
 lemma S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic : Logic.S5 = Kripke.ReflexiveEuclideanFrameClass.logic
@@ -734,6 +736,45 @@ theorem S4_ssubset_S4Dot2 : Logic.S4 ⊂ Logic.S4Dot2 := by
           constructor;
           . omega;
           . omega;
+
+theorem S4Dot2_ssubset_S4Dot3 : Logic.S4Dot2 ⊂ Logic.S4Dot3 := by
+  constructor;
+  . rw [S4Dot2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic, S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+    rintro φ hφ F ⟨F_refl, F_trans, F_conn⟩;
+    apply hφ;
+    refine ⟨?_, ?_, ?_⟩;
+    . exact F_refl;
+    . exact F_trans;
+    . exact confluent_of_refl_connected F_refl F_conn;
+  . suffices ∃ φ, Hilbert.S4Dot3 ⊢! φ ∧ ¬ReflexiveTransitiveConfluentFrameClass ⊧ φ by
+      simpa [S4Dot2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
+    use Axioms.Dot3 (.atom 0) (.atom 1);
+    constructor;
+    . exact axiomDot3!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 4, λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)⟩, λ w a => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))⟩;
+      use M, 0;
+      constructor;
+      . simp only [Set.mem_setOf_eq];
+        refine ⟨?_, ?_, ?_⟩;
+        . simp [M, Reflexive]; omega;
+        . simp [M, Transitive]; omega;
+        . rintro x y z ⟨Rxy, Ryz⟩;
+          use 3;
+          constructor <;> omega;
+      . apply Kripke.Satisfies.or_def.not.mpr;
+        push_neg;
+        constructor;
+        . apply Kripke.Satisfies.box_def.not.mpr;
+          push_neg;
+          use 1;
+          simp [Satisfies, Semantics.Realize, M];
+          constructor <;> omega;
+        . apply Kripke.Satisfies.box_def.not.mpr;
+          push_neg;
+          use 2;
+          simp [Satisfies, Semantics.Realize, M];
+          constructor <;> omega;
 
 theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by
   constructor;
