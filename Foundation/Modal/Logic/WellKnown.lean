@@ -730,6 +730,17 @@ theorem S4_ssubset_S4Dot2 : Logic.S4 ⊂ Logic.S4Dot2 := by
           . omega;
           . omega;
 
+theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+    use Axioms.Grz (.atom 0)
+    constructor;
+    . exact axiomGrz!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
+
 end Logic
 
 end LO.Modal
