@@ -159,6 +159,13 @@ protected abbrev KTc : Logic := Hilbert.KTc.logic
 lemma KTc.eq_CoreflexiveKripkeFrameClass_Logic : Logic.KTc = Kripke.CoreflexiveFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
+lemma KD_ssubset_Triv : Logic.KD ⊂ Logic.Triv := by
+  trans Logic.KD4;
+  . exact KD_ssubset_KD4;
+  . trans Logic.S4;
+    . exact KD4_ssubset_S4;
+    . exact S4_ssubset_Triv;
+
 end Logic
 
 end LO.Modal
