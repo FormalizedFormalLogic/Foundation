@@ -105,6 +105,17 @@ lemma refl_of_universal (h : Universal rel) : Reflexive rel := by
 lemma eucl_of_universal (h : Universal rel) : Euclidean rel := by
   rintro x y z _ _; exact @h z y;
 
+lemma confluent_of_refl_connected (hRefl : Reflexive rel) (hConfl : Connected rel) : Confluent rel := by
+  rintro x y z ⟨Rxy, Rxz⟩;
+  rcases @hConfl x y z ⟨Rxy, Rxz⟩ with (Ryz | Rzy);
+  . use z;
+    constructor;
+    . assumption;
+    . apply hRefl;
+  . use y;
+    constructor;
+    . apply hRefl;
+    . assumption;
 
 section ConverseWellFounded
 

@@ -26,6 +26,8 @@ end Kripke
 
 namespace Hilbert.Grz
 
+instance Kripke.sound : Sound (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass) := inferInstance
+
 instance Kripke.consistent : System.Consistent (Hilbert.Grz) :=
   Kripke.Hilbert.consistent_of_FiniteFrameClass ReflexiveTransitiveAntiSymmetricFiniteFrameClass
 
