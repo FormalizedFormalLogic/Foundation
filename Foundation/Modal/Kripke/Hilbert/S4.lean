@@ -10,6 +10,12 @@ open Geachean
 abbrev Kripke.ReflexiveTransitiveFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
 abbrev Kripke.ReflexiveTransitiveFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel }
 
+instance : ReflexiveTransitiveFrameClass.DefinedBy Hilbert.S4.axioms := by
+  convert MultiGeacheanFrameClass.isDefinedByGeachHilbertAxioms {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩};
+  . unfold ReflexiveTransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
+    simp [Geachean.reflexive_def, Geachean.transitive_def];
+  . exact Hilbert.S4.eq_Geach;
+
 namespace Hilbert.S4
 
 instance Kripke.sound : Sound (Hilbert.S4) (Kripke.ReflexiveTransitiveFrameClass) := by
