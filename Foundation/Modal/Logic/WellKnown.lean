@@ -765,6 +765,36 @@ theorem S5_ssubset_Triv : Logic.S5 ⊂ Logic.Triv := by
   convert S5_ssubset_S5Grz;
   exact S5Grz_eq_Triv.symm;
 
+-- TODO: more refactor
+lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬ReflexiveTransitiveAntiSymmetricFiniteFrameClass ⊧ φ by simpa [Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
+    use Axioms.Five (.atom 0)
+    constructor;
+    . exact axiomFive!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_frame;
+      let F : FiniteFrame := ⟨Fin 2, λ x y => x ≤ y⟩;
+      use F.toFrame;
+      constructor;
+      . use F;
+        refine ⟨⟨?_, ?_, ?_⟩, rfl⟩;
+        . simp [F, Reflexive];
+        . simp [F, Transitive]; omega;
+        . simp [F, AntiSymmetric]; omega;
+      . apply ValidOnFrame.not_of_exists_valuation_world;
+        use (λ w _ => w = 0), 0;
+        suffices (0 : F.World) ≺ 0 ∧ ∃ x, (0 : F.World) ≺ x ∧ ¬x ≺ 0 by
+          simpa [Semantics.Realize, Satisfies, ValidOnFrame];
+        constructor;
+        . omega;
+        . use 1;
+          constructor <;> omega;
+
+theorem Grz_ssubset_Triv : Logic.Grz ⊂ Logic.Triv := by
+  convert Grz_ssubset_S5Grz;
+  exact S5Grz_eq_Triv.symm;
+
 end Logic
 
 end LO.Modal
