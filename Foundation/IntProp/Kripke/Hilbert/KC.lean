@@ -47,11 +47,11 @@ instance : ConfluentFrameClass.DefinedBy (Hilbert.KC.axioms) := FrameClass.defin
 
 instance sound : Sound Hilbert.KC ConfluentFrameClass := inferInstance
 
-instance consistent : System.Consistent Hilbert.KC := Kripke.Hilbert.consistent_of_FrameClass ConfluentFrameClass
+instance consistent : Entailment.Consistent Hilbert.KC := Kripke.Hilbert.consistent_of_FrameClass ConfluentFrameClass
 
 open
-  System
-  System.FiniteContext
+  Entailment
+  Entailment.FiniteContext
   Classical
   SaturatedConsistentTableau
 in

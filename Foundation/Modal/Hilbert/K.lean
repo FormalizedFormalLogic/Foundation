@@ -14,7 +14,7 @@ class HasK (H : Hilbert α) where
   ne_pq : p ≠ q := by trivial;
   mem_K : Axioms.K (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [DecidableEq α] [hK : H.HasK] : System.HasAxiomK H where
+instance [DecidableEq α] [hK : H.HasK] : Entailment.HasAxiomK H where
   K φ ψ := by
     apply maxm;
     use Axioms.K (.atom hK.p) (.atom hK.q);
@@ -31,7 +31,7 @@ section
 protected abbrev K : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1)}⟩
 instance : Hilbert.K.FiniteAxiomatizable where
 instance : Hilbert.K.HasK where p := 0; q := 1
-instance : System.K (Hilbert.K) where
+instance : Entailment.K (Hilbert.K) where
 
 end
 

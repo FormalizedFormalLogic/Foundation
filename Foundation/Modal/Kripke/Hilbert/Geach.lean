@@ -74,10 +74,10 @@ end Kripke
 
 namespace Kripke
 
-variable {S} [System (Formula ℕ) S]
-variable {𝓢 : S} [System.Consistent 𝓢] [System.K 𝓢]
+variable {S} [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
-open System
+open Entailment
 open FormulaSet
 open canonicalFrame
 open MaximalConsistentSet
@@ -127,7 +127,7 @@ open Kripke
 
 instance Kripke.sound : Sound (Hilbert.Geach G) (MultiGeacheanConfluentFrameClass G) := inferInstance
 
-instance Kripke.Consistent : System.Consistent (Hilbert.Geach G) := Kripke.Hilbert.consistent_of_FrameClass (Kripke.MultiGeacheanConfluentFrameClass G)
+instance Kripke.Consistent : Entailment.Consistent (Hilbert.Geach G) := Kripke.Hilbert.consistent_of_FrameClass (Kripke.MultiGeacheanConfluentFrameClass G)
 
 instance Kripke.Canonical : Canonical (Hilbert.Geach G) (MultiGeacheanConfluentFrameClass G) := ⟨by
   apply canonicalFrame.multigeachean_of_provable_geach;

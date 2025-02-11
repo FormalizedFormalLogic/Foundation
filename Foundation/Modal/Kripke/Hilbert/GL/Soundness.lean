@@ -6,8 +6,8 @@ namespace LO.Modal
 
 open Formula
 open Formula.Kripke
-open System
-open System.Context
+open Entailment
+open Entailment.Context
 open Kripke
 
 namespace Kripke
@@ -26,7 +26,7 @@ namespace Hilbert.GL
 
 instance Kripke.finiteSound : Sound (Hilbert.GL) TransitiveIrreflexiveFiniteFrameClass := inferInstance
 
-instance Kripke.consistent : System.Consistent (Hilbert.GL) :=
+instance Kripke.consistent : Entailment.Consistent (Hilbert.GL) :=
   Kripke.Hilbert.consistent_of_FiniteFrameClass TransitiveIrreflexiveFiniteFrameClass
 
 end Hilbert.GL

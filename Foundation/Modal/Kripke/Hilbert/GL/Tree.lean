@@ -4,7 +4,7 @@ import Foundation.Modal.Kripke.Tree
 namespace LO.Modal
 
 open Kripke
-open System
+open Entailment
 open Formula.Kripke
 
 

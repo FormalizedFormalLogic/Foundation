@@ -5,13 +5,13 @@ namespace LO.IntProp
 
 namespace Hilbert
 
-open System
+open Entailment
 
 variable [DecidableEq α]
 
 theorem iff_provable_dn_efq_dne_provable : (Hilbert.Int) ⊢! ∼∼φ ↔ (Hilbert.Cl) ⊢! φ := by
   constructor;
-  . intro d; exact dne'! $ Int_weakerThan_Cl d;
+  . intro d; exact dne'! $ Int_weakerThan_Cl.subset d;
   . intro d;
     induction d using Deduction.rec! with
     | maxm hp =>

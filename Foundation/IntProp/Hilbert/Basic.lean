@@ -30,22 +30,22 @@ inductive Deduction (H : Hilbert α) : Formula α → Type _
   | orIntroR φ ψ  : Deduction H $ ψ ➝ φ ⋎ ψ
   | orElim φ ψ χ  : Deduction H $ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
 
-instance : System (Formula α) (Hilbert α) := ⟨Deduction⟩
+instance : Entailment (Formula α) (Hilbert α) := ⟨Deduction⟩
 
 open Deduction
 open Hilbert
 
 section
 
-instance : System.ModusPonens H := ⟨mdp⟩
+instance : Entailment.ModusPonens H := ⟨mdp⟩
 
-instance : System.HasAxiomImply₁ H := ⟨implyS⟩
+instance : Entailment.HasAxiomImply₁ H := ⟨implyS⟩
 
-instance : System.HasAxiomImply₂ H := ⟨implyK⟩
+instance : Entailment.HasAxiomImply₂ H := ⟨implyK⟩
 
-instance : System.HasAxiomAndInst H := ⟨andIntro⟩
+instance : Entailment.HasAxiomAndInst H := ⟨andIntro⟩
 
-instance : System.Minimal H where
+instance : Entailment.Minimal H where
   mdp := mdp
   verum := verum
   and₁ := andElimL
@@ -59,7 +59,7 @@ namespace Deduction
 
 lemma maxm! {φ} (h : φ ∈ H.axiomInstances) : H ⊢! φ := ⟨maxm h⟩
 
-open System
+open Entailment
 
 noncomputable def rec!
   {motive      : (φ : Formula α) → H ⊢! φ → Sort*}
@@ -102,21 +102,20 @@ end
 
 section
 
-open System
+open Entailment
 
 variable {H₁ H₂ : Hilbert α}
 
 lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axiomInstances → H₂ ⊢! φ)
-  : H₁ ≤ₛ H₂ := by
-  apply System.weakerThan_iff.mpr;
+  : H₁ ⪯ H₂ := by
+  apply Entailment.weakerThan_iff.mpr;
   intro φ h;
   induction h using Deduction.rec! with
   | maxm hp => apply hMaxm hp;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | _ => simp;
 
-lemma weakerThan_of_subset_axioms (hSubset : H₁.axioms ⊆ H₂.axioms)
-  : H₁ ≤ₛ H₂ := by
+lemma weakerThan_of_subset_axioms (hSubset : H₁.axioms ⊆ H₂.axioms) : H₁ ⪯ H₂ := by
   apply weakerThan_of_dominate_axiomInstances;
   rintro φ ⟨ψ, hs, ⟨s, rfl⟩⟩;
   apply maxm!;

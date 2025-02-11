@@ -4,7 +4,7 @@ import Foundation.IntProp.Kripke.Hilbert.Int.Basic
 namespace LO.IntProp
 
 open Kripke
-open System
+open Entailment
 open Formula Formula.Kripke
 
 namespace Hilbert.Int

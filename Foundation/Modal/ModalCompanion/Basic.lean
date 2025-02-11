@@ -4,7 +4,7 @@ import Foundation.Modal.Logic.Extension
 
 namespace LO
 
-open System FiniteContext
+open Entailment FiniteContext
 open Necessitation
 open IntProp
 
@@ -27,14 +27,14 @@ def IntProp.Logic.minimamMC (IL : IntProp.Logic) : Modal.Logic := Modal.Logic.su
 def IntProp.Logic.maximalMC (IL : IntProp.Logic) : Modal.Logic := Modal.Logic.addNormal IL.minimamMC (Axioms.Grz (.atom 0))
 
 /-
-lemma dp_of_mdp [ModalDisjunctive mH] [ModalCompanion iH mH] [System.S4 mH] : iH ⊢! φ ⋎ ψ → iH ⊢! φ ∨ iH ⊢! ψ := by
+lemma dp_of_mdp [ModalDisjunctive mH] [ModalCompanion iH mH] [Entailment.S4 mH] : iH ⊢! φ ⋎ ψ → iH ⊢! φ ∨ iH ⊢! ψ := by
     intro hpq;
     have : mH ⊢! □φᵍ ⋎ □ψᵍ := or₃'''! (imply_left_or'! axiomTc_GTranslate!) (imply_right_or'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
     cases ModalDisjunctive.modal_disjunctive this with
     | inl h => left; exact ModalCompanion.companion.mpr h;
     | inr h => right; exact ModalCompanion.companion.mpr h;
 
-theorem disjunctive_of_modalDisjunctive [ModalDisjunctive mH] [ModalCompanion iH mH] [System.S4 mH] : Disjunctive iH := ⟨dp_of_mdp (iH := iH) (mH := mH)⟩
+theorem disjunctive_of_modalDisjunctive [ModalDisjunctive mH] [ModalCompanion iH mH] [Entailment.S4 mH] : Disjunctive iH := ⟨dp_of_mdp (iH := iH) (mH := mH)⟩
 -/
 
 end LO

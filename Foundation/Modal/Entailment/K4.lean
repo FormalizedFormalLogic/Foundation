@@ -1,11 +1,11 @@
-import Foundation.Modal.System.K
+import Foundation.Modal.Entailment.K
 
-namespace LO.System
+namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
-variable {𝓢 : S} [System.K4 𝓢]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {𝓢 : S} [Entailment.K4 𝓢]
 
 def imply_BoxBoxdot_Box: 𝓢 ⊢  □⊡φ ➝ □φ := by
   exact impTrans'' distribute_box_and and₁
@@ -39,4 +39,4 @@ def iff_Boxdot_BoxdotBoxdot : 𝓢 ⊢ ⊡φ ⭤ ⊡⊡φ := by
 def boxdotAxiomFour : 𝓢 ⊢ ⊡φ ➝ ⊡⊡φ := and₁' iff_Boxdot_BoxdotBoxdot
 @[simp] lemma boxdot_axiomFour! : 𝓢 ⊢! ⊡φ ➝ ⊡⊡φ := ⟨boxdotAxiomFour⟩
 
-end LO.System
+end LO.Entailment

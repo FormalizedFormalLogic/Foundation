@@ -1,9 +1,9 @@
-import Foundation.Logic.System
+import Foundation.Logic.Entailment
 import Foundation.Logic.HilbertStyle.Basic
 
 namespace LO
 
-namespace System
+namespace Entailment
 
 variable (F : Type*) {S : Type*}
 
@@ -43,9 +43,9 @@ instance : Collection F (FiniteContext F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Cons.cons, mem_def]
 
-variable [System F S] [LogicalConnective F]
+variable [Entailment F S] [LogicalConnective F]
 
-instance (𝓢 : S) : System F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢ ·.conj ➝ ·)⟩
+instance (𝓢 : S) : Entailment F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢ ·.conj ➝ ·)⟩
 
 abbrev Prf (𝓢 : S) (Γ : List F) (φ : F) : Type _ := (Γ : FiniteContext F 𝓢) ⊢ φ
 
@@ -67,7 +67,7 @@ notation Γ:45 " ⊢[" 𝓢 "]* " s:46 => PrfSet 𝓢 Γ s
 
 notation Γ:45 " ⊢[" 𝓢 "]*! " s:46 => ProvableSet 𝓢 Γ s
 
-lemma system_def (Γ : FiniteContext F 𝓢) (φ : F) : (Γ ⊢ φ) = (𝓢 ⊢ Γ.conj ➝ φ) := rfl
+lemma entailment_def (Γ : FiniteContext F 𝓢) (φ : F) : (Γ ⊢ φ) = (𝓢 ⊢ Γ.conj ➝ φ) := rfl
 
 def ofDef {Γ : List F} {φ : F} (b : 𝓢 ⊢ ⋀Γ ➝ φ) : Γ ⊢[𝓢] φ := b
 
@@ -82,7 +82,7 @@ def cast {Γ φ} (d : Γ ⊢[𝓢] φ) (eΓ : Γ = Γ') (eφ : φ = φ') : Γ' �
 section
 
 variable {Γ Δ E : List F}
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance [DecidableEq F] : Axiomatized (FiniteContext F 𝓢) where
   prfAxm := fun hp ↦ generalConj' hp
@@ -103,7 +103,8 @@ lemma by_axm! [DecidableEq F] {φ} (h : φ ∈ Γ := by simp) : Γ ⊢[𝓢]! φ
 
 def weakening [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢] φ → Δ ⊢[𝓢] φ := Axiomatized.weakening (by simpa)
 
-lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢]! φ → Δ ⊢[𝓢]! φ := fun h ↦ Axiomatized.le_of_subset (by simpa) h
+lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢]! φ → Δ ⊢[𝓢]! φ := fun h ↦
+  (Axiomatized.le_of_subset (by simpa)).subset h
 
 def of {φ : F} (b : 𝓢 ⊢ φ) : Γ ⊢[𝓢] φ := imply₁' (ψ := ⋀Γ) b
 
@@ -126,25 +127,25 @@ lemma by_axm₁! : (φ :: ψ :: Γ) ⊢[𝓢]! ψ := nth_axm! 1
 def byAxm₂ : (φ :: ψ :: χ :: Γ) ⊢[𝓢] χ := nthAxm 2
 lemma by_axm₂! : (φ :: ψ :: χ :: Γ) ⊢[𝓢]! χ := nth_axm! 2
 
-instance (Γ : FiniteContext F 𝓢) : System.ModusPonens Γ := ⟨mdp₁⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.ModusPonens Γ := ⟨mdp₁⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomVerum Γ := ⟨of verum⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomVerum Γ := ⟨of verum⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomImply₁ Γ := ⟨fun _ _ ↦ of imply₁⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomImply₁ Γ := ⟨fun _ _ ↦ of imply₁⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomImply₂ Γ := ⟨fun _ _ _ ↦ of imply₂⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomImply₂ Γ := ⟨fun _ _ _ ↦ of imply₂⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomAndElim Γ := ⟨fun _ _ ↦ of and₁, fun _ _ ↦ of and₂⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomAndElim Γ := ⟨fun _ _ ↦ of and₁, fun _ _ ↦ of and₂⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomAndInst Γ := ⟨fun _ _ ↦ of and₃⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomAndInst Γ := ⟨fun _ _ ↦ of and₃⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomOrInst Γ := ⟨fun _ _ ↦ of or₁, fun _ _ ↦ of or₂⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomOrInst Γ := ⟨fun _ _ ↦ of or₁, fun _ _ ↦ of or₂⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.HasAxiomOrElim Γ := ⟨fun _ _ _ ↦ of or₃⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomOrElim Γ := ⟨fun _ _ _ ↦ of or₃⟩
 
-instance (Γ : FiniteContext F 𝓢) : System.NegationEquiv Γ := ⟨fun _ ↦ of neg_equiv⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.NegationEquiv Γ := ⟨fun _ ↦ of neg_equiv⟩
 
-instance [System.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : System.Minimal Γ where
+instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Minimal Γ where
 
 
 def mdp' [DecidableEq F] (bΓ : Γ ⊢[𝓢] φ ➝ ψ) (bΔ : Δ ⊢[𝓢] φ) : (Γ ++ Δ) ⊢[𝓢] ψ := wk (by simp) bΓ ⨀ wk (by simp) bΔ
@@ -186,10 +187,10 @@ instance [DecidableEq F] : StrongCut (FiniteContext F 𝓢) (FiniteContext F �
 instance [HasAxiomEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomEFQ Γ := ⟨fun _ ↦ of efq⟩
 
 instance [HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
-instance [System.Intuitionistic 𝓢] (Γ : FiniteContext F 𝓢) : System.Intuitionistic Γ where
+instance [Entailment.Intuitionistic 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Intuitionistic Γ where
 
 instance [HasAxiomDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomDNE Γ := ⟨fun φ ↦ of (HasAxiomDNE.dne φ)⟩
-instance [System.Classical 𝓢] (Γ : FiniteContext F 𝓢) : System.Classical Γ where
+instance [Entailment.Classical 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Classical Γ where
 
 end
 
@@ -231,14 +232,14 @@ instance : Collection F (Context F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Cons.cons, mem_def]
 
-variable [LogicalConnective F] [System F S]
+variable [LogicalConnective F] [Entailment F S]
 
 structure Proof (Γ : Context F 𝓢) (φ : F) where
   ctx : List F
   subset : ∀ ψ ∈ ctx, ψ ∈ Γ
   prf : ctx ⊢[𝓢] φ
 
-instance (𝓢 : S) : System F (Context F 𝓢) := ⟨Proof⟩
+instance (𝓢 : S) : Entailment F (Context F 𝓢) := ⟨Proof⟩
 
 variable (𝓢)
 
@@ -271,7 +272,7 @@ lemma provable_iff {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : List F, (∀ ψ ∈
 
 section minimal
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance [DecidableEq F] : Axiomatized (Context F 𝓢) where
   prfAxm := fun {Γ φ} hp ↦ ⟨[φ], by simpa using hp, byAxm (by simp [Collection.set])⟩
@@ -316,7 +317,7 @@ def mdp [DecidableEq F] {Γ : Set F} (bpq : Γ *⊢[𝓢] φ ➝ ψ) (bp : Γ *�
     · exact bp.subset χ hr,
     FiniteContext.mdp' bpq.prf bp.prf ⟩
 
-lemma by_axm! [DecidableEq F] (h : φ ∈ Γ) : Γ *⊢[𝓢]! φ := System.by_axm _ (by simpa)
+lemma by_axm! [DecidableEq F] (h : φ ∈ Γ) : Γ *⊢[𝓢]! φ := Entailment.by_axm _ (by simpa)
 
 def emptyPrf {φ : F} : ∅ *⊢[𝓢] φ → 𝓢 ⊢ φ := by
   rintro ⟨Γ, hΓ, h⟩;
@@ -328,7 +329,7 @@ lemma emptyPrf! {φ : F} : ∅ *⊢[𝓢]! φ → 𝓢 ⊢! φ := fun h ↦ ⟨e
 
 lemma provable_iff_provable {φ : F} : 𝓢 ⊢! φ ↔ ∅ *⊢[𝓢]! φ := ⟨of!, emptyPrf!⟩
 
-instance minimal [DecidableEq F] (Γ : Context F 𝓢) : System.Minimal Γ where
+instance minimal [DecidableEq F] (Γ : Context F 𝓢) : Entailment.Minimal Γ where
   mdp := mdp
   verum := of verum
   imply₁ := fun _ _ ↦ of imply₁
@@ -349,14 +350,14 @@ instance [HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := infer
 
 end minimal
 
-instance [DecidableEq F] [System.Intuitionistic 𝓢] (Γ : Context F 𝓢) : System.Intuitionistic Γ where
+instance [DecidableEq F] [Entailment.Intuitionistic 𝓢] (Γ : Context F 𝓢) : Entailment.Intuitionistic Γ where
 
-instance [DecidableEq F] [System.Classical 𝓢] (Γ : Context F 𝓢) : System.Classical Γ where
+instance [DecidableEq F] [Entailment.Classical 𝓢] (Γ : Context F 𝓢) : Entailment.Classical Γ where
 
 end
 
 end Context
 
-end System
+end Entailment
 
 end LO

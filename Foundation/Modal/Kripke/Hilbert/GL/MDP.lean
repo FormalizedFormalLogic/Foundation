@@ -3,7 +3,7 @@ import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
 namespace LO.Modal
 
 open Kripke
-open System
+open Entailment
 open Formula.Kripke
 
 namespace Hilbert.GL

@@ -217,7 +217,7 @@ notation "𝐓𝐀" => Theory.TrueArith
 instance Standard.models_trueArith : ℕ ⊧ₘ* 𝐓𝐀 :=
   modelsTheory_iff.mpr fun {φ} ↦ by simp
 
-variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
+variable (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T]
 
 lemma oRing_consequence_of (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊨ φ := consequence_of T φ fun M _ s _ _ ↦ by
@@ -230,10 +230,10 @@ namespace Theory
 
 open Arith
 
-instance CobhamR0.consistent : System.Consistent 𝐑₀ :=
+instance CobhamR0.consistent : Entailment.Consistent 𝐑₀ :=
   Sound.consistent_of_satisfiable ⟨_, Standard.models_CobhamR0⟩
 
-instance Peano.consistent : System.Consistent 𝐏𝐀 :=
+instance Peano.consistent : Entailment.Consistent 𝐏𝐀 :=
   Sound.consistent_of_satisfiable ⟨_, Standard.models_peano⟩
 
 end Theory

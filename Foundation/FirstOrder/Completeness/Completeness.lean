@@ -53,9 +53,9 @@ theorem complete {φ : SyntacticFormula L} :
       rw[←image_u']
       simpa using (satisfiable_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
     contradiction
-  have : System.Inconsistent (u' : Theory (languageFinset u)) := Complete.inconsistent_of_unsatisfiable this
-  have : System.Inconsistent (u : Theory L) := by rw[←image_u']; simpa using Derivation.inconsistent_lMap L.ofSubLanguage this
-  have : System.Inconsistent (insert (∼∀∀φ) T) := this.of_supset ssu
+  have : Entailment.Inconsistent (u' : Theory (languageFinset u)) := Complete.inconsistent_of_unsatisfiable this
+  have : Entailment.Inconsistent (u : Theory L) := by rw[←image_u']; simpa using Derivation.inconsistent_lMap L.ofSubLanguage this
+  have : Entailment.Inconsistent (insert (∼∀∀φ) T) := this.of_supset ssu
   exact Derivation.provable_iff_inconsistent.mpr this
 
 theorem complete_iff : T ⊨ φ ↔ T ⊢! φ :=
@@ -63,17 +63,17 @@ theorem complete_iff : T ⊨ φ ↔ T ⊢! φ :=
 
 instance (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨complete⟩
 
-lemma satisfiable_of_consistent' (h : System.Consistent T) : Semantics.Satisfiable (SmallStruc L) T :=
+lemma satisfiable_of_consistent' (h : Entailment.Consistent T) : Semantics.Satisfiable (SmallStruc L) T :=
   Complete.satisfiable_of_consistent h
 
-lemma satisfiable_of_consistent (h : System.Consistent T) : Semantics.Satisfiable (Struc.{max u w} L) T := by
+lemma satisfiable_of_consistent (h : Entailment.Consistent T) : Semantics.Satisfiable (Struc.{max u w} L) T := by
   let ⟨M, _, _, h⟩ := satisfiable_iff.mp (satisfiable_of_consistent' h)
   exact satisfiable_iff.mpr ⟨ULift.{w} M, inferInstance, inferInstance, ((uLift_elementaryEquiv L M).modelsTheory).mpr h⟩
 
-lemma satisfiable_iff_consistent' : Semantics.Satisfiable (Struc.{max u w} L) T ↔ System.Consistent T :=
+lemma satisfiable_iff_consistent' : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Entailment.Consistent T :=
   ⟨consistent_of_satidfiable, satisfiable_of_consistent.{u, w}⟩
 
-lemma satisfiable_iff_consistent : Satisfiable T ↔ System.Consistent T := satisfiable_iff_consistent'.{u, u}
+lemma satisfiable_iff_consistent : Satisfiable T ↔ Entailment.Consistent T := satisfiable_iff_consistent'.{u, u}
 
 lemma satidfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T ↔ Satisfiable T := by
   simp [satisfiable_iff_consistent'.{u, w}, satisfiable_iff_consistent]

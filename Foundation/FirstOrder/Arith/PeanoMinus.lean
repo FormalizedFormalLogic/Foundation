@@ -173,13 +173,13 @@ namespace FirstOrder.Arith
 
 open LO.Arith
 
-variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ≼ T]
+variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ⪯ T]
 
-instance CobhamR0.subTheoryPAMinus : 𝐑₀ ≼ 𝐏𝐀⁻ := System.Subtheory.ofAxm! <| by
+instance CobhamR0.subTheoryPAMinus : 𝐑₀ ⪯ 𝐏𝐀⁻ := Entailment.WeakerThan.ofAxm! <| by
   intro φ h
   rcases h
   case equal h =>
-    exact System.by_axm _ (Theory.PAMinus.equal _ h)
+    exact Entailment.by_axm _ (Theory.PAMinus.equal _ h)
   case Ω₁ n m =>
     apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff, numeral_eq_natCast]
   case Ω₂ n m =>

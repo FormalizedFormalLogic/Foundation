@@ -7,7 +7,7 @@ namespace LO.Modal
 
 namespace Kripke
 
-open System
+open Entailment
 open Kripke
 open Formula.Kripke
 open Relation (IrreflGen)

@@ -88,8 +88,8 @@ end FormulaFinset
 section
 
 variable {α : Type*}
-variable {S} [System (Formula α) S]
-variable {𝓢 : S} [System.ModusPonens 𝓢]
+variable {S} [Entailment (Formula α) S]
+variable {𝓢 : S} [Entailment.ModusPonens 𝓢]
 
 lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! φ) (hcp : 𝓢 ⊢! -φ) : 𝓢 ⊢! ⊥ := by
   induction φ using Formula.cases_neg with

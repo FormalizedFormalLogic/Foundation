@@ -15,7 +15,7 @@ instance [LogicalConnective F] [LukasiewiczAbbrev F] : NegAbbrev F := ⟨Lukasie
 end
 
 
-namespace System
+namespace Entailment
 
 attribute [local simp]
   LukasiewiczAbbrev.top
@@ -23,7 +23,7 @@ attribute [local simp]
   LukasiewiczAbbrev.or
   LukasiewiczAbbrev.and
 
-variable {S F : Type*} [LogicalConnective F] [LukasiewiczAbbrev F] [System F S]
+variable {S F : Type*} [LogicalConnective F] [LukasiewiczAbbrev F] [Entailment F S]
 
 variable (𝓢 : S)
 
@@ -37,7 +37,7 @@ namespace Lukasiewicz
 
 variable {𝓢 : S} {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ s t : F}
 
-variable [System.Lukasiewicz 𝓢]
+variable [Entailment.Lukasiewicz 𝓢]
 
 def verum : 𝓢 ⊢ ⊤ := by simp [LukasiewiczAbbrev.top]; exact impId ⊥;
 instance : HasAxiomVerum 𝓢 := ⟨Lukasiewicz.verum⟩
@@ -182,10 +182,10 @@ def orElim : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
 
 instance : HasAxiomOrElim 𝓢 := ⟨λ φ ψ χ => Lukasiewicz.orElim (φ := φ) (ψ := ψ) (χ := χ)⟩
 
-instance : System.Classical 𝓢 where
+instance : Entailment.Classical 𝓢 where
 
 end Lukasiewicz
 
-end System
+end Entailment
 
 end LO

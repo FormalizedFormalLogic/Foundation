@@ -1,20 +1,20 @@
 import Foundation.Modal.Hilbert.WellKnown
-import Foundation.Modal.System.GL
+import Foundation.Modal.Entailment.GL
 import Mathlib.Tactic.TFAE
 
 
-namespace LO.System
+namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
 variable {𝓢 : S}
 
-protected class K4Loeb (𝓢 : S) extends System.K4 𝓢, LoebRule 𝓢
+protected class K4Loeb (𝓢 : S) extends Entailment.K4 𝓢, LoebRule 𝓢
 
 namespace K4Loeb
 
-variable [System.K4Loeb 𝓢]
+variable [Entailment.K4Loeb 𝓢]
 
 protected def axiomL : 𝓢 ⊢ Axioms.L φ := by
   dsimp [Axioms.L];
@@ -31,11 +31,11 @@ instance : HasAxiomL 𝓢 := ⟨fun _ ↦ K4Loeb.axiomL⟩
 end K4Loeb
 
 
-protected class K4Henkin (𝓢 : S) extends System.K4 𝓢, HenkinRule 𝓢
+protected class K4Henkin (𝓢 : S) extends Entailment.K4 𝓢, HenkinRule 𝓢
 
 namespace K4Henkin
 
-variable [System.K4Henkin 𝓢]
+variable [Entailment.K4Henkin 𝓢]
 
 instance : LoebRule 𝓢 where
   loeb h := h ⨀ (henkin $ iffIntro (axiomK' $ nec h) axiomFour);
@@ -43,18 +43,18 @@ instance : LoebRule 𝓢 where
 end K4Henkin
 
 
-protected class K4H (𝓢 : S) extends System.K4 𝓢, HasAxiomH 𝓢
+protected class K4H (𝓢 : S) extends Entailment.K4 𝓢, HasAxiomH 𝓢
 
 namespace K4H
 
-variable [System.K4H 𝓢]
+variable [Entailment.K4H 𝓢]
 
 instance : HenkinRule 𝓢 where
   henkin h := (and₁' h) ⨀ (axiomH ⨀ nec h);
 
 end K4H
 
-end LO.System
+end LO.Entailment
 
 
 
@@ -62,7 +62,7 @@ namespace LO.Modal
 
 namespace Hilbert
 
-open System
+open Entailment
 
 variable {α : Type*}
 
@@ -86,21 +86,21 @@ namespace Deduction
 
 variable {H H₁ H₂ : Hilbert.WithLoebRule α}
 
-instance : System (Formula α) (Hilbert.WithLoebRule α) := ⟨Deduction⟩
+instance : Entailment (Formula α) (Hilbert.WithLoebRule α) := ⟨Deduction⟩
 
-instance : System.Lukasiewicz H where
+instance : Entailment.Lukasiewicz H where
   mdp := mdp
   imply₁ := imply₁
   imply₂ := imply₂
   elim_contra := ec
 
-instance : System.Classical H where
+instance : Entailment.Classical H where
 
-instance : System.HasDiaDuality H := inferInstance
+instance : Entailment.HasDiaDuality H := inferInstance
 
-instance : System.Necessitation H := ⟨nec⟩
+instance : Entailment.Necessitation H := ⟨nec⟩
 
-instance : System.LoebRule H := ⟨loeb⟩
+instance : Entailment.LoebRule H := ⟨loeb⟩
 
 lemma maxm! {φ} (h : φ ∈ H.axiomInstances) : H ⊢! φ := ⟨maxm h⟩
 
@@ -154,7 +154,7 @@ class HasK (H : Hilbert.WithLoebRule α) where
   ne_pq : p ≠ q := by trivial;
   mem_K : Axioms.K (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [hK : H.HasK] : System.HasAxiomK H where
+instance [hK : H.HasK] : Entailment.HasAxiomK H where
   K φ ψ := by
     apply maxm;
     use Axioms.K (.atom hK.p) (.atom hK.q);
@@ -167,7 +167,7 @@ class HasFour (H : Hilbert.WithLoebRule α) where
   p : α
   mem_Four : Axioms.Four (.atom p) ∈ H.axioms := by tauto;
 
-instance [hFour : H.HasFour] : System.HasAxiomFour H where
+instance [hFour : H.HasFour] : Entailment.HasAxiomFour H where
   Four φ := by
     apply maxm;
     use Axioms.Four (.atom hFour.p);
@@ -201,21 +201,21 @@ namespace Deduction
 
 variable {H H₁ H₂ : Hilbert.WithHenkinRule α}
 
-instance : System (Formula α) (Hilbert.WithHenkinRule α) := ⟨Deduction⟩
+instance : Entailment (Formula α) (Hilbert.WithHenkinRule α) := ⟨Deduction⟩
 
-instance : System.Lukasiewicz H where
+instance : Entailment.Lukasiewicz H where
   mdp := mdp
   imply₁ := imply₁
   imply₂ := imply₂
   elim_contra := ec
 
-instance : System.Classical H where
+instance : Entailment.Classical H where
 
-instance : System.HasDiaDuality H := inferInstance
+instance : Entailment.HasDiaDuality H := inferInstance
 
-instance : System.Necessitation H := ⟨nec⟩
+instance : Entailment.Necessitation H := ⟨nec⟩
 
-instance : System.HenkinRule H := ⟨henkin⟩
+instance : Entailment.HenkinRule H := ⟨henkin⟩
 
 lemma maxm! {φ} (h : φ ∈ H.axiomInstances) : H ⊢! φ := ⟨maxm h⟩
 
@@ -268,7 +268,7 @@ class HasK (H : Hilbert.WithHenkinRule α) where
   ne_pq : p ≠ q := by trivial;
   mem_K : Axioms.K (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [hK : H.HasK] : System.HasAxiomK H where
+instance [hK : H.HasK] : Entailment.HasAxiomK H where
   K φ ψ := by
     apply maxm;
     use Axioms.K (.atom hK.p) (.atom hK.q);
@@ -281,7 +281,7 @@ class HasFour (H : Hilbert.WithHenkinRule α) where
   p : α
   mem_Four : Axioms.Four (.atom p) ∈ H.axioms := by tauto;
 
-instance [hFour : H.HasFour] : System.HasAxiomFour H where
+instance [hFour : H.HasFour] : Entailment.HasAxiomFour H where
   Four φ := by
     apply maxm;
     use Axioms.Four (.atom hFour.p);
@@ -299,17 +299,17 @@ protected abbrev K4H : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.F
 instance : (Hilbert.K4H).HasK where p := 0; q := 1;
 instance : (Hilbert.K4H).HasFour where p := 0
 instance : (Hilbert.K4H).HasH where p := 0
-instance : System.K4H (Hilbert.K4H) where
+instance : Entailment.K4H (Hilbert.K4H) where
 
 protected abbrev K4Loeb : Hilbert.WithLoebRule ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
 instance : (Hilbert.K4Loeb).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Loeb).HasFour where p := 0
-instance : System.K4Loeb (Hilbert.K4Loeb) where
+instance : Entailment.K4Loeb (Hilbert.K4Loeb) where
 
 protected abbrev K4Henkin : Hilbert.WithHenkinRule ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
 instance : (Hilbert.K4Henkin).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Henkin).HasFour where p := 0
-instance : System.K4Henkin (Hilbert.K4Henkin) where
+instance : Entailment.K4Henkin (Hilbert.K4Henkin) where
 
 theorem provable_GL_TFAE : [
     Hilbert.GL ⊢! φ,

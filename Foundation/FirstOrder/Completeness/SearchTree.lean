@@ -7,7 +7,7 @@ namespace FirstOrder
 
 namespace Completeness
 
-open Semiformula Encodable System
+open Semiformula Encodable Entailment
 variable {L : Language.{u}}
 variable {T : Theory L} {Γ : Sequent L}
 

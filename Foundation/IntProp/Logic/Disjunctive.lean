@@ -9,9 +9,9 @@ protected class Logic.Disjunctive (L : Logic) where
 
 namespace Hilbert
 
-open System
+open Entailment
 
-instance {H : Hilbert ℕ} [System.Disjunctive H] : H.logic.Disjunctive  := ⟨fun {_ _} h => disjunctive h⟩
+instance {H : Hilbert ℕ} [Entailment.Disjunctive H] : H.logic.Disjunctive  := ⟨fun {_ _} h => disjunctive h⟩
 
 end Hilbert
 

@@ -12,7 +12,7 @@ protected abbrev Geach (G : Set (Geachean.Taple)) : Hilbert ℕ := ⟨
 ⟩
 
 instance : HasK (Hilbert.Geach G) where p := 0; q := 1
-instance : System.K (Hilbert.Geach G) where
+instance : Entailment.K (Hilbert.Geach G) where
 
 lemma K4.eq_Geach   : Hilbert.K4   = Hilbert.Geach {⟨0, 2, 1, 0⟩} := by aesop;
 lemma K45.eq_Geach  : Hilbert.K45  = Hilbert.Geach {⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by aesop;

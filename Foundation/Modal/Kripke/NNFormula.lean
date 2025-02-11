@@ -3,7 +3,7 @@ import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
 
-open System
+open Entailment
 
 variable {φ ψ : NNFormula ℕ}
 

@@ -57,23 +57,23 @@ inductive HilbertProofᵢ (Λ : Hilbertᵢ L) : SyntacticFormulaᵢ L → Type _
   | ex₁ t φ      : HilbertProofᵢ Λ <| φ/[t] ➝ ∃' φ
   | ex₂ φ ψ      : HilbertProofᵢ Λ <| ∀' (φ ➝ ψ/[]) ➝ ∃' φ ➝ ψ
 
-instance : System (SyntacticFormulaᵢ L) (Hilbertᵢ L) := ⟨HilbertProofᵢ⟩
+instance : Entailment (SyntacticFormulaᵢ L) (Hilbertᵢ L) := ⟨HilbertProofᵢ⟩
 
 namespace HilbertProofᵢ
 
-open System.FiniteContext Rewriting LawfulSyntacticRewriting
+open Entailment.FiniteContext Rewriting LawfulSyntacticRewriting
 
 variable (Λ : Hilbertᵢ L)
 
-instance : System.ModusPonens Λ := ⟨mdp⟩
+instance : Entailment.ModusPonens Λ := ⟨mdp⟩
 
-instance : System.HasAxiomAndInst Λ := ⟨and₃⟩
+instance : Entailment.HasAxiomAndInst Λ := ⟨and₃⟩
 
-instance : System.HasAxiomImply₁ Λ := ⟨imply₁⟩
+instance : Entailment.HasAxiomImply₁ Λ := ⟨imply₁⟩
 
-instance : System.HasAxiomImply₂ Λ := ⟨imply₂⟩
+instance : Entailment.HasAxiomImply₂ Λ := ⟨imply₂⟩
 
-instance : System.Minimal Λ where
+instance : Entailment.Minimal Λ where
   mdp := mdp
   verum := verum
   imply₁ := imply₁
@@ -84,7 +84,7 @@ instance : System.Minimal Λ where
   or₁ := or₁
   or₂ := or₂
   or₃ := or₃
-  neg_equiv _ := System.iffId _
+  neg_equiv _ := Entailment.iffId _
 
 variable {Λ}
 
@@ -128,35 +128,35 @@ def genOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ] free φ) : Γ ⊢[Λ] ∀' �
   ofDef <| implyAll <| by simpa [shift_conj₂] using toDef b
 
 def specializeOverContext {Γ φ} (b : Γ ⊢[Λ] ∀' φ) (t) : Γ ⊢[Λ] φ/[t] :=
-  ofDef <| System.impTrans'' (toDef b) (all₁ φ t)
+  ofDef <| Entailment.impTrans'' (toDef b) (all₁ φ t)
 
 def allImplyAllOfAllImply (φ ψ) : Λ ⊢ ∀' (φ ➝ ψ) ➝ ∀' φ ➝ ∀' ψ := by
   apply deduct'
   apply deduct
   apply genOverFiniteContext
   have b₁ : [∀' shift φ, ∀' (shift φ ➝ shift ψ)] ⊢[Λ] free φ ➝ free ψ :=
-    System.cast (by simp) (specializeOverContext (nthAxm 1) &0)
+    Entailment.cast (by simp) (specializeOverContext (nthAxm 1) &0)
   have b₂ : [∀' shift φ, ∀' (shift φ ➝ shift ψ)] ⊢[Λ] free φ :=
-    System.cast (by simp) (specializeOverContext (nthAxm 0) &0)
+    Entailment.cast (by simp) (specializeOverContext (nthAxm 0) &0)
   have : [∀' φ, ∀' (φ ➝ ψ)]⁺ ⊢[Λ] free ψ := cast (by simp) (b₁ ⨀ b₂)
   exact this
 
-def allIffAllOfIff {φ ψ} (b : Λ ⊢ free φ ⭤ free ψ) : Λ ⊢ ∀' φ ⭤ ∀' ψ := System.andIntro
-  (allImplyAllOfAllImply φ ψ ⨀ gen (System.cast (by simp) (System.andLeft b)))
-  (allImplyAllOfAllImply ψ φ ⨀ gen (System.cast (by simp) (System.andRight b)))
+def allIffAllOfIff {φ ψ} (b : Λ ⊢ free φ ⭤ free ψ) : Λ ⊢ ∀' φ ⭤ ∀' ψ := Entailment.andIntro
+  (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (by simp) (Entailment.andLeft b)))
+  (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (by simp) (Entailment.andRight b)))
 
 set_option diagnostics true in
 set_option profiler true in
 def dneOfNegative [L.DecidableEq] : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ∼∼φ ➝ φ
-  | ⊥,     _ => System.falsumDNE
+  | ⊥,     _ => Entailment.falsumDNE
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢ ∼∼φ ➝ φ := dneOfNegative (by simp [by simpa using h])
     have ihψ : Λ ⊢ ∼∼ψ ➝ ψ := dneOfNegative (by simp [by simpa using h])
-    have : Λ ⊢ ∼φ ➝ ∼(φ ⋏ ψ) := System.contra₀' System.and₁
+    have : Λ ⊢ ∼φ ➝ ∼(φ ⋏ ψ) := Entailment.contra₀' Entailment.and₁
     have dφ : [∼∼(φ ⋏ ψ)] ⊢[Λ] φ := of ihφ ⨀ (deduct <| byAxm₁ ⨀ (of this ⨀ byAxm₀))
-    have : Λ ⊢ ∼ψ ➝ ∼(φ ⋏ ψ) := System.contra₀' System.and₂
+    have : Λ ⊢ ∼ψ ➝ ∼(φ ⋏ ψ) := Entailment.contra₀' Entailment.and₂
     have dψ : [∼∼(φ ⋏ ψ)] ⊢[Λ] ψ := of ihψ ⨀ (deduct <| byAxm₁ ⨀ (of this ⨀ byAxm₀))
-    deduct' (System.andIntro dφ dψ)
+    deduct' (Entailment.andIntro dφ dψ)
   | φ ➝ ψ, h =>
     let ihψ : Λ ⊢ ∼∼ψ ➝ ψ := dneOfNegative (by simp [by simpa using h])
     have : [∼ψ, φ, ∼∼(φ ➝ ψ)] ⊢[Λ] ∼(φ ➝ ψ) := deduct <| byAxm₁ ⨀ (byAxm₀ ⨀ byAxm₂)
@@ -167,33 +167,33 @@ def dneOfNegative [L.DecidableEq] : {φ : SyntacticFormulaᵢ L} → φ.IsNegati
     have ihφ : Λ ⊢ ∼∼(free φ) ➝ free φ := dneOfNegative (by simp [by simpa using h])
     have : [∀' shift φ, ∼(free φ), ∼∼(∀' shift φ)] ⊢[Λ] ⊥ :=
       have : [∀' shift φ, ∼(free φ), ∼∼(∀' shift φ)] ⊢[Λ] ∀' shift φ := byAxm₀
-      byAxm₁ ⨀ System.cast (by simp) (specializeOverContext this &0)
+      byAxm₁ ⨀ Entailment.cast (by simp) (specializeOverContext this &0)
     have : [∼∼(∀' shift φ)] ⊢[Λ] free φ := of ihφ ⨀ deduct (byAxm₁ ⨀ deduct this)
-    implyAll (System.cast (by simp) (deduct' this))
+    implyAll (Entailment.cast (by simp) (deduct' this))
   termination_by φ _ => φ.complexity
 
 def ofDNOfNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} {Γ} (b : Γ ⊢[Λ] ∼∼φ) (h : φ.IsNegative) : Γ ⊢[Λ] φ :=
-  System.impTrans'' (toDef b) (dneOfNegative h)
+  Entailment.impTrans'' (toDef b) (dneOfNegative h)
 
 def dnOfNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ :=
-  System.andIntro (dneOfNegative h) System.dni
+  Entailment.andIntro (dneOfNegative h) Entailment.dni
 
 def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ⊥ ➝ φ
-  | ⊥,     _ => System.impId ⊥
+  | ⊥,     _ => Entailment.impId ⊥
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢ ⊥ ➝ φ := efqOfNegative (by simp [by simpa using h])
     have ihψ : Λ ⊢ ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
-    System.implyAnd ihφ ihψ
+    Entailment.implyAnd ihφ ihψ
   | φ ➝ ψ, h =>
     have ihψ : Λ ⊢ ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
-    System.impTrans'' ihψ System.imply₁
+    Entailment.impTrans'' ihψ Entailment.imply₁
   | ∀' φ,  h =>
     have ihφ : Λ ⊢ ⊥ ➝ free φ := efqOfNegative (by simp [by simpa using h])
-    implyAll <| System.cast (by simp) ihφ
+    implyAll <| Entailment.cast (by simp) ihφ
   termination_by φ _ => φ.complexity
 
 def iffnegOfNegIff [L.DecidableEq] {φ ψ : SyntacticFormulaᵢ L} (h : φ.IsNegative) (b : Λ ⊢ ∼φ ⭤ ψ) : Λ ⊢ φ ⭤ ∼ψ :=
-  System.iffTrans'' (System.iffComm' <| dnOfNegative h) (System.negReplaceIff' b)
+  Entailment.iffTrans'' (Entailment.iffComm' <| dnOfNegative h) (Entailment.negReplaceIff' b)
 
 def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢ φ → Λ ⊢ Rew.rewrite f ▹ φ
   | mdp b d        => rewrite f b ⨀ rewrite f d

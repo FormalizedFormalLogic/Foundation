@@ -1,11 +1,11 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Substitution
-import Foundation.Modal.System.K
+import Foundation.Modal.Entailment.K
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 
 namespace LO.Modal
 
-open System
+open Entailment
 
 variable {α : Type*}
 
@@ -39,19 +39,19 @@ inductive Deduction (H : Hilbert α) : (Formula α) → Type _
 
 namespace Deduction
 
-instance : System (Formula α) (Hilbert α) := ⟨Deduction⟩
+instance : Entailment (Formula α) (Hilbert α) := ⟨Deduction⟩
 
-instance : System.Lukasiewicz H where
+instance : Entailment.Lukasiewicz H where
   mdp := mdp
   imply₁ := imply₁
   imply₂ := imply₂
   elim_contra := ec
 
-instance : System.Classical H where
+instance : Entailment.Classical H where
 
-instance : System.HasDiaDuality H := inferInstance
+instance : Entailment.HasDiaDuality H := inferInstance
 
-instance : System.Necessitation H := ⟨nec⟩
+instance : Entailment.Necessitation H := ⟨nec⟩
 
 lemma maxm! {φ} (h : φ ∈ H.axiomInstances) : H ⊢! φ := ⟨maxm h⟩
 
@@ -97,7 +97,7 @@ def subst! {φ} (s) (h : H ⊢! φ) : H ⊢! φ⟦s⟧ := by
 end Deduction
 
 
-abbrev theorems (H : Hilbert α) := System.theory H
+abbrev theorems (H : Hilbert α) := Entailment.theory H
 
 lemma of_subset (hs : H₁.axioms ⊆ H₂.axioms) : H₁ ⊢! φ → H₂ ⊢! φ := by
   intro h;
@@ -113,8 +113,8 @@ lemma of_subset (hs : H₁.axioms ⊆ H₂.axioms) : H₁ ⊢! φ → H₂ ⊢! 
   | nec ih => exact nec! ih;
   | _ => simp;
 
-lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axiomInstances → H₂ ⊢! φ) : H₁ ≤ₛ H₂ := by
-  apply System.weakerThan_iff.mpr;
+lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axiomInstances → H₂ ⊢! φ) : H₁ ⪯ H₂ := by
+  apply Entailment.weakerThan_iff.mpr;
   intro φ h;
   induction h using Deduction.rec! with
   | maxm h => apply hMaxm h;
@@ -122,7 +122,7 @@ lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ �
   | nec ih => exact nec! ih;
   | _ => simp;
 
-lemma weakerThan_of_dominate_axioms (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axioms → H₂ ⊢! φ) : H₁ ≤ₛ H₂ := by
+lemma weakerThan_of_dominate_axioms (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axioms → H₂ ⊢! φ) : H₁ ⪯ H₂ := by
   apply weakerThan_of_dominate_axiomInstances;
   rintro φ ⟨ψ, hψ, ⟨s, rfl⟩⟩;
   apply subst!;

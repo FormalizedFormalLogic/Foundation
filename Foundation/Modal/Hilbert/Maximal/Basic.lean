@@ -53,7 +53,7 @@ end VerTranslation
 
 end Formula
 
-open System
+open Entailment
 open Formula (TrivTranslation VerTranslation)
 
 namespace Hilbert

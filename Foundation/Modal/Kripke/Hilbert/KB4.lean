@@ -15,7 +15,7 @@ instance Kripke.sound : Sound (Hilbert.KB4) (Kripke.SymmetricTransitiveFrameClas
   . unfold SymmetricTransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
     simp [Geachean.symmetric_def, Geachean.transitive_def];
 
-instance Kripke.consistent : System.Consistent (Hilbert.KB4) := by
+instance Kripke.consistent : Entailment.Consistent (Hilbert.KB4) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 1, 0, 1⟩, ⟨0, 2, 1, 0⟩});
   exact eq_Geach;
 

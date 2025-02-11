@@ -1,9 +1,9 @@
-import Foundation.Logic.System
+import Foundation.Logic.Entailment
 import Foundation.Logic.Axioms
 
-namespace LO.System
+namespace LO.Entailment
 
-variable {S F : Type*} [LogicalConnective F] [System F S]
+variable {S F : Type*} [LogicalConnective F] [Entailment F S]
 variable {𝓢 : S} {φ ψ χ : F}
 
 
@@ -193,9 +193,9 @@ protected class Minimal (𝓢 : S) extends
               HasAxiomAndElim 𝓢, HasAxiomAndInst 𝓢,
               HasAxiomOrInst 𝓢, HasAxiomOrElim 𝓢
 
-protected class Intuitionistic (𝓢 : S) extends System.Minimal 𝓢, HasAxiomEFQ 𝓢
+protected class Intuitionistic (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomEFQ 𝓢
 
-protected class Classical (𝓢 : S) extends System.Minimal 𝓢, HasAxiomDNE 𝓢
+protected class Classical (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomDNE 𝓢
 
 
 section
@@ -221,7 +221,7 @@ def impId [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ : F) : 𝓢 ⊢ φ
 def iffId [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ : F) : 𝓢 ⊢ φ ⭤ φ := and₃' (impId φ) (impId φ)
 @[simp] def iff_id! [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! φ ⭤ φ := ⟨iffId φ⟩
 
-instance [NegAbbrev F] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [HasAxiomAndInst 𝓢] : System.NegationEquiv 𝓢 where
+instance [NegAbbrev F] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
   neg_equiv := by intro φ; simp [Axioms.NegEquiv, NegAbbrev.neg]; apply iffId;
 
 
@@ -318,7 +318,7 @@ instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : D
 
 section Conjunction
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 def conj₂Nth : (Γ : List F) → (n : ℕ) → (hn : n < Γ.length) → 𝓢 ⊢ ⋀Γ ➝ Γ[n]
   | [],          _,     hn => by simp at hn
@@ -390,9 +390,9 @@ end
 
 section
 
-variable {G T : Type*} [System G T] [LogicalConnective G] {𝓣 : T}
+variable {G T : Type*} [Entailment G T] [LogicalConnective G] {𝓣 : T}
 
-def Minimal.ofEquiv (𝓢 : S) [System.Minimal 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢ f φ ≃ 𝓣 ⊢ φ) : System.Minimal 𝓣 where
+def Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢ f φ ≃ 𝓣 ⊢ φ) : Entailment.Minimal 𝓣 where
   mdp {φ ψ dpq dp} := (e ψ) (
     let d : 𝓢 ⊢ f φ ➝ f ψ := by simpa using (e (φ ➝ ψ)).symm dpq
     d ⨀ ((e φ).symm dp))
@@ -407,7 +407,7 @@ def Minimal.ofEquiv (𝓢 : S) [System.Minimal 𝓢] (𝓣 : T) (f : G →ˡᶜ 
   or₂ φ ψ := e _ (by simpa using or₂)
   or₃ φ ψ χ := e _ (by simpa using or₃)
 
-def Classical.ofEquiv (𝓢 : S) [System.Classical 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢ f φ ≃ 𝓣 ⊢ φ) : System.Classical 𝓣 where
+def Classical.ofEquiv (𝓢 : S) [Entailment.Classical 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢ f φ ≃ 𝓣 ⊢ φ) : Entailment.Classical 𝓣 where
   mdp {φ ψ dpq dp} := (e ψ) (
     let d : 𝓢 ⊢ f φ ➝ f ψ := by simpa using (e (φ ➝ ψ)).symm dpq
     d ⨀ ((e φ).symm dp))
@@ -425,4 +425,4 @@ def Classical.ofEquiv (𝓢 : S) [System.Classical 𝓢] (𝓣 : T) (f : G →ˡ
 
 end
 
-end LO.System
+end LO.Entailment

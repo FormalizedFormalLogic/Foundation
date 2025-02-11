@@ -191,14 +191,14 @@ section
 
 variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
 
-lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : System.Consistent T :=
-  System.consistent_iff_unprovable_bot.mpr fun b ↦ by simpa [Models₀] using SoundOn.sound (F := F) hF b
+lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : Entailment.Consistent T :=
+  Entailment.consistent_iff_unprovable_bot.mpr fun b ↦ by simpa [Models₀] using SoundOn.sound (F := F) hF b
 
 end
 
 section
 
-variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T]
+variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ⪯ T]
 
 lemma consequence_of (φ : SyntacticFormula L)
   (H : ∀ (M : Type (max u w))
@@ -246,13 +246,14 @@ notation "𝐄𝐐'" => EQ'
 
 variable (T : Theory L)
 
-noncomputable instance EQ'.subTheoryOfEQ : (𝐄𝐐' : Theory L) ≼ 𝐄𝐐 := System.Subtheory.ofAxm! <| by
+noncomputable instance EQ'.subTheoryOfEQ : (𝐄𝐐' : Theory L) ⪯ 𝐄𝐐 := Entailment.WeakerThan.ofAxm! <| by
   rintro φ h
   rcases (show 𝐄𝐐' φ from h)
   case refl =>
-    apply System.by_axm _ (by simpa using eqAxiom.refl)
+    apply Entailment.by_axm _ (by simpa using eqAxiom.refl)
   case replace φ =>
-    apply complete <| EQ.provOf.{0, 0} _ ?_
+    apply complete ?_
+    apply EQ.provOf.{_, 0} _ ?_
     intro M _ s _ _
     simp [models_iff, Semiformula.eval_substs]
 

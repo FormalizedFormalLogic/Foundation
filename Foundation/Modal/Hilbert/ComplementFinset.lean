@@ -53,7 +53,7 @@ lemma iff_theory_consistent_formulae_consistent {P : FormulaFinset α} : Theory.
 
 /-
 @[simp]
-lemma empty_conisistent [System.Consistent H] : FormulaFinset.Consistent H ∅ := by
+lemma empty_conisistent [Entailment.Consistent H] : FormulaFinset.Consistent H ∅ := by
   rw [←iff_theory_consistent_formulae_consistent];
   convert Theory.emptyset_consistent (α := α);
   . simp;
@@ -232,7 +232,7 @@ alias CCF := ComplementaryClosedConsistentFormulaFinset
 
 namespace ComplementaryClosedConsistentFormulaFinset
 
-open System
+open Entailment
 open Formula (atom)
 variable {H : Hilbert α}
 
@@ -243,7 +243,7 @@ lemma lindenbaum
   obtain ⟨X', ⟨X'_sub, x, b⟩⟩ := FormulaFinset.exists_consistent_complementary_closed S X_sub X_consis;
   use ⟨X', (by assumption), (by assumption)⟩;
 
-noncomputable instance [System.Consistent H] : Inhabited (CCF H S) := ⟨lindenbaum (X := ∅) S (by simp) (by simp) |>.choose⟩
+noncomputable instance [Entailment.Consistent H] : Inhabited (CCF H S) := ⟨lindenbaum (X := ∅) S (by simp) (by simp) |>.choose⟩
 
 variable {S} {X X₁ X₂ : CCF H S}
 

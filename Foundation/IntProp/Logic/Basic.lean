@@ -21,7 +21,7 @@ end Logic
 
 namespace Hilbert
 
-open System
+open Entailment
 
 variable {H : Hilbert ℕ}
 

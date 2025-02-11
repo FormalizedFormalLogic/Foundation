@@ -3,11 +3,11 @@ import Foundation.IntProp.ConsistentTableau
 
 namespace LO.IntProp
 
-variable {S} [System (Formula ℕ) S]
-variable {𝓢 : S} [System.Consistent 𝓢] [System.Intuitionistic 𝓢]
+variable {S} [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Intuitionistic 𝓢]
 variable {t t₁ t₂ : SaturatedConsistentTableau 𝓢} {φ ψ : Formula ℕ}
 
-open System System.FiniteContext
+open Entailment Entailment.FiniteContext
 open Formula (atom)
 open Formula.Kripke (Satisfies ValidOnModel)
 open Kripke
@@ -15,7 +15,7 @@ open SaturatedConsistentTableau
 
 namespace Kripke
 
-def canonicalFrame (𝓢 : S) [System.Consistent 𝓢] [System.Intuitionistic 𝓢] : Kripke.Frame where
+def canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Intuitionistic 𝓢] : Kripke.Frame where
   World := SaturatedConsistentTableau 𝓢
   Rel t₁ t₂ := t₁.1.1 ⊆ t₂.1.1
   rel_refl := by tauto_set
@@ -24,18 +24,18 @@ def canonicalFrame (𝓢 : S) [System.Consistent 𝓢] [System.Intuitionistic �
 
 namespace canonicalFrame
 
-variable [System.Consistent 𝓢] [System.Intuitionistic 𝓢]
+variable [Entailment.Consistent 𝓢] [Entailment.Intuitionistic 𝓢]
 
 end canonicalFrame
 
 
-def canonicalModel (𝓢 : S) [System.Consistent 𝓢] [System.Intuitionistic 𝓢] : Kripke.Model where
+def canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Intuitionistic 𝓢] : Kripke.Model where
   toFrame := Kripke.canonicalFrame 𝓢
   Val := ⟨λ t a => (atom a) ∈ t.1.1, by aesop⟩
 
 namespace canonicalModel
 
-variable [System.Consistent 𝓢] [System.Intuitionistic 𝓢]
+variable [Entailment.Consistent 𝓢] [Entailment.Intuitionistic 𝓢]
 
 end canonicalModel
 
@@ -128,7 +128,7 @@ lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ �
 end truthlemma
 
 
-class Canonical (𝓢 : S) [System.Consistent 𝓢] [System.Intuitionistic 𝓢] (C : FrameClass) : Prop where
+class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Intuitionistic 𝓢] (C : FrameClass) : Prop where
   canonical : (Kripke.canonicalFrame 𝓢) ∈ C
 
 instance instCompleteOfCanonical [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by

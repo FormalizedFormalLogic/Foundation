@@ -9,11 +9,11 @@ This file defines a characterization of the system/proof/provability/calculus of
 Also defines soundness and completeness.
 
 ## Main Definitions
-* `LO.System F S`: a general framework of deductive system `S` for formulae `F`.
-* `LO.System.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
-* `LO.System.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
-* `LO.System.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
-* `LO.System.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
+* `LO.Entailment F S`: a general framework of deductive system `S` for formulae `F`.
+* `LO.Entailment.Inconsistent 𝓢`: a proposition that states that all formulae in `F` is provable from `𝓢`.
+* `LO.Entailment.Consistent 𝓢`: a proposition that states that `𝓢` is not inconsistent.
+* `LO.Entailment.Sound 𝓢 𝓜`: provability from `𝓢` implies satisfiability on `𝓜`.
+* `LO.Entailment.Complete 𝓢 𝓜`: satisfiability on `𝓜` implies provability from `𝓢`.
 
 ## Notation
 * `𝓢 ⊢ φ`: a type of formalized proofs of `φ : F` from deductive system `𝓢 : S`.
@@ -26,14 +26,14 @@ Also defines soundness and completeness.
 
 namespace LO
 
-class System (F : outParam Type*) (S : Type*) where
+class Entailment (F : outParam Type*) (S : Type*) where
   Prf : S → F → Type*
 
-infix:45 " ⊢ " => System.Prf
+infix:45 " ⊢ " => Entailment.Prf
 
-namespace System
+namespace Entailment
 
-variable {F : Type*} {S T U : Type*} [System F S] [System F T] [System F U]
+variable {F : Type*} {S T U : Type*} [Entailment F S] [Entailment F T] [Entailment F U]
 
 section
 
@@ -72,37 +72,46 @@ lemma provableSet_iff {𝓢 : S} {s : Set F} :
 noncomputable def ProvableSet.get {𝓢 : S} {s : Set F} (h : 𝓢 ⊢!* s) : 𝓢 ⊢* s :=
   Classical.choice (α := 𝓢 ⊢* s) (provableSet_iff.mp h : Nonempty (𝓢 ⊢* s))
 
-def WeakerThan (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 ⊆ theory 𝓣
+class WeakerThan (𝓢 : S) (𝓣 : T) : Prop where
+  subset : theory 𝓢 ⊆ theory 𝓣
 
-infix:40 " ≤ₛ " => WeakerThan
+infix:40 " ⪯ " => WeakerThan
 
-def StrictlyWeakerThan (𝓢 : S) (𝓣 : T) : Prop := 𝓢 ≤ₛ 𝓣 ∧ ¬𝓣 ≤ₛ 𝓢
+class StrictlyWeakerThan (𝓢 : S) (𝓣 : T) : Prop where
+   weakerThan : 𝓢 ⪯ 𝓣
+   notWT : ¬𝓣 ⪯ 𝓢
 
-infix:40 " <ₛ " => StrictlyWeakerThan
+infix:40 " ⪱ " => StrictlyWeakerThan
 
-def Equiv (𝓢 : S) (𝓣 : T) : Prop := theory 𝓢 = theory 𝓣
+class Equiv (𝓢 : S) (𝓣 : T) : Prop where
+  eq : theory 𝓢 = theory 𝓣
 
-infix:40 " =ₛ " => Equiv
+infix:40 " ≊ " => Equiv
 
-section
+section WeakerThan
 
 variable {𝓢 : S} {𝓣 : T} {𝓤 : U}
 
-@[simp, refl] protected lemma WeakerThan.refl (𝓢 : S) : 𝓢 ≤ₛ 𝓢 := Set.Subset.refl _
+@[instance, simp, refl] protected lemma WeakerThan.refl (𝓢 : S) : 𝓢 ⪯ 𝓢 := ⟨Set.Subset.refl _⟩
 
-@[trans] lemma WeakerThan.trans : 𝓢 ≤ₛ 𝓣 → 𝓣 ≤ₛ 𝓤 → 𝓢 ≤ₛ 𝓤 := Set.Subset.trans
+lemma WeakerThan.pbl [h : 𝓢 ⪯ 𝓣] {φ} : 𝓢 ⊢! φ → 𝓣 ⊢! φ := @h.subset φ
 
-lemma weakerThan_iff : 𝓢 ≤ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) :=
-  ⟨fun h _ hf ↦ h hf, fun h _ hf ↦ h hf⟩
+@[trans] lemma WeakerThan.trans : 𝓢 ⪯ 𝓣 → 𝓣 ⪯ 𝓤 → 𝓢 ⪯ 𝓤 := fun w₁ w₂ ↦ ⟨Set.Subset.trans w₁.subset w₂.subset⟩
 
-lemma not_weakerThan_iff : ¬𝓢 ≤ₛ 𝓣 ↔ (∃ f, 𝓢 ⊢! f ∧ 𝓣 ⊬ f) := by simp [weakerThan_iff, Unprovable];
+lemma weakerThan_iff : 𝓢 ⪯ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) :=
+  ⟨fun h _ hf ↦ h.subset hf, fun h ↦ ⟨fun _ hf ↦ h hf⟩⟩
 
-lemma strictlyWeakerThan_iff : 𝓢 <ₛ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) ∧ (∃ f, 𝓢 ⊬ f ∧ 𝓣 ⊢! f) := by
-  simp [StrictlyWeakerThan, weakerThan_iff]; intro _
-  exact exists_congr (fun _ ↦ by simp [and_comm])
+lemma not_weakerThan_iff : ¬𝓢 ⪯ 𝓣 ↔ (∃ f, 𝓢 ⊢! f ∧ 𝓣 ⊬ f) := by simp [weakerThan_iff, Unprovable];
+
+lemma strictlyWeakerThan_iff : 𝓢 ⪱ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) ∧ (∃ f, 𝓢 ⊬ f ∧ 𝓣 ⊢! f) := by
+  constructor
+  · rintro ⟨wt, nwt⟩
+    exact ⟨weakerThan_iff.mp wt, by rcases not_weakerThan_iff.mp nwt with ⟨φ, ht, hs⟩; exact ⟨φ, hs, ht⟩⟩
+  · rintro ⟨h, φ, hs, ht⟩
+    exact ⟨weakerThan_iff.mpr h, not_weakerThan_iff.mpr ⟨φ, ht, hs⟩⟩
 
 @[trans]
-lemma strictlyWeakerThan.trans : 𝓢 <ₛ 𝓣 → 𝓣 <ₛ 𝓤 → 𝓢 <ₛ 𝓤 := by
+lemma strictlyWeakerThan.trans : 𝓢 ⪱ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := by
   rintro ⟨h₁, nh₁⟩ ⟨h₂, _⟩;
   constructor;
   . exact WeakerThan.trans h₁ h₂;
@@ -114,60 +123,29 @@ lemma strictlyWeakerThan.trans : 𝓢 <ₛ 𝓣 → 𝓣 <ₛ 𝓤 → 𝓢 <ₛ
       assumption;
     . assumption;
 
-lemma weakening (h : 𝓢 ≤ₛ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := weakerThan_iff.mp h
+lemma weakening (h : 𝓢 ⪯ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := weakerThan_iff.mp h
 
-lemma Equiv.iff : 𝓢 =ₛ 𝓣 ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓣 ⊢! f) := by simp [Equiv, Set.ext_iff, theory]
+lemma Equiv.iff : 𝓢 ≊ 𝓣 ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓣 ⊢! f) :=
+  ⟨fun e ↦ by simpa [Set.ext_iff, theory] using e.eq, fun e ↦ ⟨by simpa [Set.ext_iff, theory] using e⟩⟩
 
-@[simp, refl] protected lemma Equiv.refl (𝓢 : S) : 𝓢 =ₛ 𝓢 := rfl
+@[instance, simp, refl] protected lemma Equiv.refl (𝓢 : S) : 𝓢 ≊ 𝓢 := ⟨rfl⟩
 
-@[symm] lemma Equiv.symm : 𝓢 =ₛ 𝓣 → 𝓣 =ₛ 𝓢 := Eq.symm
+@[symm] lemma Equiv.symm : 𝓢 ≊ 𝓣 → 𝓣 ≊ 𝓢 := fun e ↦ ⟨Eq.symm e.eq⟩
 
-@[trans] lemma Equiv.trans : 𝓢 =ₛ 𝓣 → 𝓣 =ₛ 𝓤 → 𝓢 =ₛ 𝓤 := Eq.trans
+@[trans] lemma Equiv.trans : 𝓢 ≊ 𝓣 → 𝓣 ≊ 𝓤 → 𝓢 ≊ 𝓤 := fun e₁ e₂ ↦ ⟨Eq.trans e₁.eq e₂.eq⟩
 
-lemma Equiv.antisymm_iff : 𝓢 =ₛ 𝓣 ↔ 𝓢 ≤ₛ 𝓣 ∧ 𝓣 ≤ₛ 𝓢 := Set.Subset.antisymm_iff
+lemma Equiv.antisymm_iff : 𝓢 ≊ 𝓣 ↔ 𝓢 ⪯ 𝓣 ∧ 𝓣 ⪯ 𝓢 := by
+  constructor
+  · intro e
+    exact ⟨⟨Set.Subset.antisymm_iff.mp e.eq |>.1⟩, ⟨Set.Subset.antisymm_iff.mp e.eq |>.2⟩⟩
+  · rintro ⟨w₁, w₂⟩
+    exact ⟨Set.Subset.antisymm w₁.subset w₂.subset⟩
 
 alias ⟨_, Equiv.antisymm⟩ := Equiv.antisymm_iff
 
-lemma Equiv.le : 𝓢 =ₛ 𝓣 → 𝓢 ≤ₛ 𝓣 := by simp [Equiv, WeakerThan]; intro e; rw [e]
+lemma Equiv.le : 𝓢 ≊ 𝓣 → 𝓢 ⪯ 𝓣 := fun e ↦ ⟨by rw [e.eq]⟩
 
-end
-
-variable (S)
-
-instance equiv : Setoid S where
-  r := (· =ₛ ·)
-  iseqv := { refl := fun _ ↦ rfl, symm := Eq.symm, trans := Eq.trans }
-
-abbrev Logic := Quotient (equiv S)
-
-variable {S}
-
-lemma equiv_def {𝓢 𝓣 : S} : 𝓢 ≈ 𝓣 ↔ theory 𝓢 = theory 𝓣 := iff_of_eq rfl
-
-namespace Logic
-
-@[simp] lemma of_eq_of {𝓢 𝓣 : S} : (⟦𝓢⟧ : Logic S) = ⟦𝓣⟧ ↔ 𝓢 ≈ 𝓣 := Quotient.eq
-
-instance : LE (Logic S) :=
-  ⟨Quotient.lift₂ (· ≤ₛ ·) (fun 𝓢₁ 𝓣₁ 𝓢₂ 𝓣₂ h𝓢 h𝓣 ↦ by simp [WeakerThan, equiv_def.mp h𝓢, equiv_def.mp h𝓣])⟩
-
-@[simp] lemma le_iff {𝓢 𝓣 : S} : (⟦𝓢⟧ : Logic S) ≤ ⟦𝓣⟧ ↔ 𝓢 ≤ₛ 𝓣 := iff_of_eq rfl
-
-instance : PartialOrder (Logic S) where
-  le_refl := fun Λ ↦ by induction Λ using Quotient.ind; simp
-  le_trans := fun Λ₁ Λ₂ Λ₃ ↦ by
-    induction Λ₁ using Quotient.ind
-    induction Λ₂ using Quotient.ind
-    induction Λ₃ using Quotient.ind
-    simp; exact WeakerThan.trans
-  le_antisymm := fun Λ₁ Λ₂ ↦ by
-    induction Λ₁ using Quotient.ind
-    induction Λ₂ using Quotient.ind
-    simp; exact le_antisymm
-
-@[simp] lemma lt_iff {𝓢 𝓣 : S} : (⟦𝓢⟧ : Logic S) < ⟦𝓣⟧ ↔ 𝓢 <ₛ 𝓣 := iff_of_eq rfl
-
-end Logic
+end WeakerThan
 
 @[simp] lemma provableSet_theory (𝓢 : S) : 𝓢 ⊢!* theory 𝓢 := fun hf ↦ hf
 
@@ -208,36 +186,19 @@ lemma inconsistent_iff_theory_eq_univ {𝓢 : S} :
 
 alias ⟨Inconsistent.theory_eq, _⟩ := inconsistent_iff_theory_eq_univ
 
-lemma Inconsistent.equiv {𝓢 𝓣 : S} (h : Inconsistent 𝓢) (h' : Inconsistent 𝓣) : 𝓢 ≈ 𝓣 :=
-  Set.ext fun f ↦ by simp [h.theory_eq, h'.theory_eq]
+lemma Inconsistent.of_ge {𝓢 : S} {𝓣 : T} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ⪯ 𝓣) : Inconsistent 𝓣 :=
+  fun f ↦ h.subset (h𝓢 f)
 
-lemma Inconsistent.of_ge {𝓢 : S} {𝓣 : T} (h𝓢 : Inconsistent 𝓢) (h : 𝓢 ≤ₛ 𝓣) : Inconsistent 𝓣 :=
-  fun f ↦ h (h𝓢 f)
-
-lemma Consistent.of_le {𝓢 : S} {𝓣 : T} (h𝓢 : Consistent 𝓢) (h : 𝓣 ≤ₛ 𝓢) : Consistent 𝓣 :=
+lemma Consistent.of_le {𝓢 : S} {𝓣 : T} (h𝓢 : Consistent 𝓢) (h : 𝓣 ⪯ 𝓢) : Consistent 𝓣 :=
   ⟨fun H ↦ not_consistent_iff_inconsistent.mpr (H.of_ge h) h𝓢⟩
 
-namespace Logic
-
-protected def Inconsistent (Λ : Logic S) : Prop :=
-  Quotient.lift Inconsistent (fun 𝓢 𝓣 h ↦ by simp [inconsistent_iff_theory_eq, equiv_def.mp h]) Λ
-
-@[simp] lemma inconsistent_mk (𝓢 : S) : Logic.Inconsistent (⟦𝓢⟧ : Logic S) ↔ Inconsistent 𝓢 := iff_of_eq rfl
-
-protected def Consistent (Λ : Logic S) : Prop :=
-  Quotient.lift Consistent (fun 𝓢 𝓣 h ↦ by simp [←not_inconsistent_iff_consistent, inconsistent_iff_theory_eq, equiv_def.mp h]) Λ
-
-@[simp] lemma consistent_mk (𝓢 : S) : Logic.Consistent (⟦𝓢⟧ : Logic S) ↔ Consistent 𝓢 := iff_of_eq rfl
-
-end Logic
-
-@[ext] structure Translation {S S' F F'} [System F S] [System F' S'] (𝓢 : S) (𝓣 : S') where
+@[ext] structure Translation {S S' F F'} [Entailment F S] [Entailment F' S'] (𝓢 : S) (𝓣 : S') where
   toFun : F → F'
   prf {f} : 𝓢 ⊢ f → 𝓣 ⊢ toFun f
 
 infix:40 " ↝ " => Translation
 
-@[ext] structure Bitranslation {S S' F F'} [System F S] [System F' S'] (𝓢 : S) (𝓣 : S') where
+@[ext] structure Bitranslation {S S' F F'} [Entailment F S] [Entailment F' S'] (𝓢 : S) (𝓣 : S') where
   r : 𝓢 ↝ 𝓣
   l : 𝓣 ↝ 𝓢
   r_l : r.toFun ∘ l.toFun = id
@@ -245,14 +206,14 @@ infix:40 " ↝ " => Translation
 
 infix:40 " ↭ " => Bitranslation
 
-@[ext] structure FaithfulTranslation {S S' F F'} [System F S] [System F' S'] (𝓢 : S) (𝓣 : S') extends 𝓢 ↝ 𝓣 where
+@[ext] structure FaithfulTranslation {S S' F F'} [Entailment F S] [Entailment F' S'] (𝓢 : S) (𝓣 : S') extends 𝓢 ↝ 𝓣 where
   prfInv {f} : 𝓣 ⊢ toFun f → 𝓢 ⊢ f
 
 infix:40 " ↝¹ " => FaithfulTranslation
 
 namespace Translation
 
-variable {S S' S'' : Type*} {F F' F'' : Type*} [System F S] [System F' S'] [System F'' S'']
+variable {S S' S'' : Type*} {F F' F'' : Type*} [Entailment F S] [Entailment F' S'] [Entailment F'' S'']
 
 instance (𝓢 : S) (𝓣 : S') : CoeFun (𝓢 ↝ 𝓣) (fun _ ↦ F → F') := ⟨Translation.toFun⟩
 
@@ -275,7 +236,7 @@ end Translation
 
 namespace Bitranslation
 
-variable {S S' S'' : Type*} {F F' F'' : Type*} [System F S] [System F' S'] [System F'' S'']
+variable {S S' S'' : Type*} {F F' F'' : Type*} [Entailment F S] [Entailment F' S'] [Entailment F'' S'']
 
 @[simp] lemma r_l_app {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↭ 𝓣) (φ : F') : f.r (f.l φ) = φ := congr_fun f.r_l φ
 
@@ -303,7 +264,7 @@ end Bitranslation
 
 namespace FaithfulTranslation
 
-variable {S S' S'' : Type*} {F F' F'' : Type*} [System F S] [System F' S'] [System F'' S'']
+variable {S S' S'' : Type*} {F F' F'' : Type*} [Entailment F S] [Entailment F' S'] [Entailment F'' S'']
 
 instance (𝓢 : S) (𝓣 : S') : CoeFun (𝓢 ↝¹ 𝓣) (fun _ ↦ F → F') := ⟨fun t ↦ t.toFun⟩
 
@@ -329,29 +290,6 @@ lemma provable_iff {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↝¹ 𝓣) {φ} : 𝓣 ⊢!
 
 end FaithfulTranslation
 
-class Subtheory (𝓢 𝓣 : S) where
-  prf {f} : 𝓢 ⊢ f → 𝓣 ⊢ f
-
-infix:40 " ≼ " => Subtheory
-
-namespace Subtheory
-
-variable {𝓢 𝓣 𝓤 : S}
-
-protected instance id : 𝓢 ≼ 𝓢 := ⟨id⟩
-
-def comp (t' : 𝓣 ≼ 𝓤) (t : 𝓢 ≼ 𝓣) : 𝓢 ≼ 𝓤 := ⟨t'.prf ∘ t.prf⟩
-
-def translation [𝓢 ≼ 𝓣] : 𝓢 ↝ 𝓣 where
-  toFun := id
-  prf := prf
-
-def ofTranslation (t : 𝓢 ↝ 𝓣) (h : ∀ φ, t φ = φ) : 𝓢 ≼ 𝓣 := ⟨fun {φ} b ↦ h φ ▸ (t.prf b)⟩
-
-lemma prf! [𝓢 ≼ 𝓣] {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := λ ⟨φ⟩ ↦ ⟨Subtheory.prf φ⟩
-
-end Subtheory
-
 section
 
 variable [LogicalConnective F]
@@ -365,7 +303,7 @@ def Undecidable (f : F) : Prop := 𝓢 ⊬ f ∧ 𝓢 ⊬ ∼f
 end
 
 lemma incomplete_iff_exists_undecidable [LogicalConnective F] {𝓢 : S} :
-    ¬System.Complete 𝓢 ↔ ∃ f, Undecidable 𝓢 f := by simp [Complete, Undecidable, not_or]
+    ¬Entailment.Complete 𝓢 ↔ ∃ f, Undecidable 𝓢 f := by simp [Complete, Undecidable, not_or]
 
 variable (S T)
 
@@ -391,11 +329,11 @@ variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
 lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
-lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ≤ₛ 𝓣 := by rintro f ⟨b⟩; exact ⟨weakening h b⟩
+lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro f ⟨b⟩; exact ⟨weakening h b⟩⟩
 
 lemma weakening! (h : 𝓢 ⊆ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := by rintro ⟨b⟩; exact ⟨weakening h b⟩
 
-def subtheoryOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ≼ 𝓣 := ⟨weakening h⟩
+def weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening! h⟩
 
 def translation (h : 𝓢 ⊆ 𝓣) : 𝓢 ↝ 𝓣 where
   toFun := id
@@ -410,7 +348,7 @@ section axiomatized
 
 variable [Collection F S] [Collection F T] [Axiomatized S]
 
-def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, Collection.Finite 𝓕 ∧ 𝓕 ≈ 𝓢
+def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, Collection.Finite 𝓕 ∧ 𝓕 ≊ 𝓢
 
 lemma Consistent.of_subset {𝓢 𝓣 : S} (h𝓢 : Consistent 𝓢) (h : 𝓣 ⊆ 𝓢) : Consistent 𝓣 :=
   h𝓢.of_le (Axiomatized.le_of_subset h)
@@ -433,11 +371,10 @@ def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣
 
 end StrongCut
 
-def Subtheory.ofAxm [Collection F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B b⟩
+noncomputable def WeakerThan.ofAxm! [Collection F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢!* Collection.set 𝓢₁) :
+    𝓢₁ ⪯ 𝓢₂ := ⟨fun _ b ↦ StrongCut.cut! B b⟩
 
-noncomputable def Subtheory.ofAxm! [Collection F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢!* Collection.set 𝓢₁) : 𝓢₁ ≼ 𝓢₂ := ⟨fun b ↦ StrongCut.cut B.get b⟩
-
-def Subtheory.ofSubset [Collection F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ≼ 𝓣 := ⟨wk h⟩
+def WeakerThan.ofSubset [Collection F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ wk! h⟩
 
 variable (S)
 
@@ -461,11 +398,11 @@ end Compact
 
 end Axiomatized
 
-end System
+end Entailment
 
-namespace System
+namespace Entailment
 
-variable {S : Type*} {F : Type*} [LogicalConnective F] [System F S]
+variable {S : Type*} {F : Type*} [LogicalConnective F] [Entailment F S]
 
 variable (S)
 
@@ -535,11 +472,11 @@ lemma deduction_iff : cons φ 𝓢 ⊢! ψ ↔ 𝓢 ⊢! φ ➝ ψ := ⟨deducti
 
 end deduction
 
-end System
+end Entailment
 
 section
 
-variable {S : Type*} {F : Type*} [System F S] {M : Type*} [Semantics F M]
+variable {S : Type*} {F : Type*} [Entailment F S] {M : Type*} [Semantics F M]
 
 class Sound (𝓢 : S) (𝓜 : M) : Prop where
   sound : ∀ {f : F}, 𝓢 ⊢! f → 𝓜 ⊧ f
@@ -556,10 +493,10 @@ variable {𝓢 𝓣 : S} {𝓜 𝓝 : M} [Sound 𝓢 𝓜] [Sound 𝓣 𝓝]
 lemma not_provable_of_countermodel {φ : F} (hp : ¬𝓜 ⊧ φ) : 𝓢 ⊬ φ :=
   fun b ↦ hp (Sound.sound b)
 
-lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → System.Consistent 𝓢 :=
+lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → Entailment.Consistent 𝓢 :=
   fun H ↦ ⟨fun h ↦ by rcases H with ⟨f, hf⟩; exact hf (Sound.sound (h f))⟩
 
-lemma consistent_of_model [LogicalConnective F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] : System.Consistent 𝓢 :=
+lemma consistent_of_model [LogicalConnective F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] : Entailment.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
 lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢!* T) : 𝓜 ⊧* T :=
@@ -573,7 +510,7 @@ variable {𝓢 : S} {T : Set F} [Sound 𝓢 (Semantics.models M T)]
 
 lemma consequence_of_provable {f : F} : 𝓢 ⊢! f → T ⊨[M] f := sound
 
-lemma consistent_of_satisfiable [LogicalConnective F] [∀ 𝓜 : M, Semantics.Meaningful 𝓜] : Semantics.Satisfiable M T → System.Consistent 𝓢 :=
+lemma consistent_of_satisfiable [LogicalConnective F] [∀ 𝓜 : M, Semantics.Meaningful 𝓜] : Semantics.Satisfiable M T → Entailment.Consistent 𝓢 :=
   fun H ↦ consistent_of_meaningful (Semantics.meaningful_iff_satisfiableSet.mp H)
 
 end
@@ -586,10 +523,11 @@ section
 
 variable {𝓢 : S} {𝓜 : M} [Complete 𝓢 𝓜]
 
-lemma meaningful_of_consistent : System.Consistent 𝓢 → Semantics.Meaningful 𝓜 := by
-  contrapose; intro h
-  simp [Semantics.not_meaningful_iff, System.not_consistent_iff_inconsistent] at h ⊢
-  intro f; exact Complete.complete (h f)
+lemma meaningful_of_consistent : Entailment.Consistent 𝓢 → Semantics.Meaningful 𝓜 := by
+  contrapose
+  suffices (∀ (f : F), 𝓜 ⊧ f) → Entailment.Inconsistent 𝓢 by
+    simpa [Semantics.not_meaningful_iff, Entailment.not_consistent_iff_inconsistent]
+  exact fun h f ↦ Complete.complete (h f)
 
 end
 
@@ -604,14 +542,14 @@ lemma provable_iff_consequence [Sound 𝓢 (Semantics.models M T)] {f : F} : T �
 variable [LogicalConnective F] [∀ 𝓜 : M, Semantics.Meaningful 𝓜]
 
 lemma satisfiable_of_consistent :
-    System.Consistent 𝓢 → Semantics.Satisfiable M T :=
+    Entailment.Consistent 𝓢 → Semantics.Satisfiable M T :=
   fun H ↦ Semantics.meaningful_iff_satisfiableSet.mpr (meaningful_of_consistent H)
 
 lemma inconsistent_of_unsatisfiable :
-    ¬Semantics.Satisfiable M T → System.Inconsistent 𝓢 := by
-  contrapose; simpa [←System.not_consistent_iff_inconsistent] using satisfiable_of_consistent
+    ¬Semantics.Satisfiable M T → Entailment.Inconsistent 𝓢 := by
+  contrapose; simpa [←Entailment.not_consistent_iff_inconsistent] using satisfiable_of_consistent
 
-lemma consistent_iff_satisfiable [Sound 𝓢 (Semantics.models M T)] : System.Consistent 𝓢 ↔ Semantics.Satisfiable M T :=
+lemma consistent_iff_satisfiable [Sound 𝓢 (Semantics.models M T)] : Entailment.Consistent 𝓢 ↔ Semantics.Satisfiable M T :=
   ⟨satisfiable_of_consistent, Sound.consistent_of_satisfiable⟩
 
 end

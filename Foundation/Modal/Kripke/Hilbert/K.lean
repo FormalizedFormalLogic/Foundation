@@ -12,7 +12,7 @@ namespace Hilbert.K
 
 instance Kripke.sound : Sound (Hilbert.K) AllFrameClass := inferInstance
 
-instance : System.Consistent (Hilbert.K) := Hilbert.consistent_of_FrameClass AllFrameClass
+instance : Entailment.Consistent (Hilbert.K) := Hilbert.consistent_of_FrameClass AllFrameClass
 
 instance : Kripke.Canonical (Hilbert.K) (AllFrameClass) := ⟨by trivial⟩
 

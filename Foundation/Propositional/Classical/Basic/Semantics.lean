@@ -1,5 +1,5 @@
 import Foundation.Propositional.Classical.Basic.Formula
-import Foundation.Logic.System
+import Foundation.Logic.Entailment
 
 namespace LO
 

@@ -4,7 +4,7 @@ import Foundation.Modal.Logic.WellKnown
 
 namespace LO.Modal
 
-open System FiniteContext
+open Entailment FiniteContext
 open IntProp
 open IntProp.Formula (goedelTranslate)
 open Modal
@@ -16,7 +16,7 @@ variable {IL : IntProp.Logic} {ML : Modal.Logic}
 variable {IH : IntProp.Hilbert ℕ} {MH : Modal.Hilbert ℕ}
 variable {φ ψ χ : IntProp.Formula ℕ}
 
-variable [System.S4 MH]
+variable [Entailment.S4 MH]
 
 lemma goedelTranslated_axiomTc : MH ⊢! φᵍ ➝ □φᵍ := by
   induction φ using IntProp.Formula.rec' with
@@ -45,7 +45,7 @@ lemma goedelTranslated_OrElim : MH ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ �
   exact nec! $ imp_trans''! axiomFour! $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! $ or₃!) axiomK!;
 
 lemma provable_GoedelTranslated_Modal_of_provable_Superint
-  (IH : IntProp.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [System.S4 MH]
+  (IH : IntProp.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [Entailment.S4 MH]
   (hAx : ∀ φ ∈ IH.axiomInstances, MH ⊢! φᵍ)
   : IH ⊢! φ → MH ⊢! φᵍ := by
   intro h;

@@ -2,9 +2,9 @@ import Foundation.Logic.Disjunctive
 import Foundation.Logic.HilbertStyle.Supplemental
 import Foundation.Modal.Axioms
 
-namespace LO.System
+namespace LO.Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [System F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
 variable {𝓢 : S}
 
 
@@ -99,7 +99,7 @@ variable [HasAxiomK 𝓢]
 def axiomK : 𝓢 ⊢ □(φ ➝ ψ) ➝ □φ ➝ □ψ := HasAxiomK.K _ _
 @[simp] lemma axiomK! : 𝓢 ⊢! □(φ ➝ ψ) ➝ □φ ➝ □ψ := ⟨axiomK⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomK Γ := ⟨fun _ _ ↦ FiniteContext.of axiomK⟩
 instance (Γ : Context F 𝓢) : HasAxiomK Γ := ⟨fun _ _ ↦ Context.of axiomK⟩
@@ -123,7 +123,7 @@ variable [HasAxiomT 𝓢]
 def axiomT : 𝓢 ⊢ □φ ➝ φ := HasAxiomT.T _
 @[simp] lemma axiomT! : 𝓢 ⊢! □φ ➝ φ := ⟨axiomT⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomT Γ := ⟨fun _ ↦ FiniteContext.of axiomT⟩
 instance (Γ : Context F 𝓢) : HasAxiomT Γ := ⟨fun _ ↦ Context.of axiomT⟩
@@ -143,7 +143,7 @@ variable [HasAxiomDiaTc 𝓢]
 def diaTc : 𝓢 ⊢ φ ➝ ◇φ := HasAxiomDiaTc.diaTc _
 @[simp] lemma diaTc! : 𝓢 ⊢! φ ➝ ◇φ := ⟨diaTc⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomDiaTc Γ := ⟨fun _ ↦ FiniteContext.of diaTc⟩
 instance (Γ : Context F 𝓢) : HasAxiomDiaTc Γ := ⟨fun _ ↦ Context.of diaTc⟩
@@ -165,7 +165,7 @@ def axiomD : 𝓢 ⊢ □φ ➝ ◇φ := HasAxiomD.D _
 @[simp] lemma axiomD! : 𝓢 ⊢! □φ ➝ ◇φ := ⟨axiomD⟩
 
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ FiniteContext.of axiomD⟩
 instance (Γ : Context F 𝓢) : HasAxiomD Γ := ⟨fun _ ↦ Context.of axiomD⟩
@@ -187,7 +187,7 @@ variable [HasAxiomP 𝓢]
 def axiomP : 𝓢 ⊢ ∼□⊥  := HasAxiomP.P
 @[simp] lemma axiomP! : 𝓢 ⊢! ∼□⊥ := ⟨axiomP⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomP Γ := ⟨FiniteContext.of axiomP⟩
 instance (Γ : Context F 𝓢) : HasAxiomP Γ := ⟨Context.of axiomP⟩
@@ -206,7 +206,7 @@ variable [Dia F] [HasAxiomB 𝓢]
 def axiomB : 𝓢 ⊢ φ ➝ □◇φ := HasAxiomB.B _
 @[simp] lemma axiomB! : 𝓢 ⊢! φ ➝ □◇φ := ⟨axiomB⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomB Γ := ⟨fun _ ↦ FiniteContext.of axiomB⟩
 instance (Γ : Context F 𝓢) : HasAxiomB Γ := ⟨fun _ ↦ Context.of axiomB⟩
@@ -227,7 +227,7 @@ variable [HasAxiomFour 𝓢]
 def axiomFour : 𝓢 ⊢ □φ ➝ □□φ := HasAxiomFour.Four _
 @[simp] lemma axiomFour! : 𝓢 ⊢! □φ ➝ □□φ := ⟨axiomFour⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomFour Γ := ⟨fun _ ↦ FiniteContext.of axiomFour⟩
 instance (Γ : Context F 𝓢) : HasAxiomFour Γ := ⟨fun _ ↦ Context.of axiomFour⟩
@@ -248,7 +248,7 @@ variable [Dia F] [HasAxiomFive 𝓢]
 def axiomFive : 𝓢 ⊢ ◇φ ➝ □◇φ := HasAxiomFive.Five _
 @[simp] lemma axiomFive! : 𝓢 ⊢! ◇φ ➝ □◇φ := ⟨axiomFive⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ FiniteContext.of axiomFive⟩
 instance (Γ : Context F 𝓢) : HasAxiomFive Γ := ⟨fun _ ↦ Context.of axiomFive⟩
@@ -267,7 +267,7 @@ variable [HasAxiomL 𝓢]
 def axiomL : 𝓢 ⊢ □(□φ ➝ φ) ➝ □φ := HasAxiomL.L _
 @[simp] lemma axiomL! : 𝓢 ⊢! □(□φ ➝ φ) ➝ □φ := ⟨axiomL⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ FiniteContext.of axiomL⟩
 instance (Γ : Context F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ Context.of axiomL⟩
@@ -284,7 +284,7 @@ variable [HasAxiomDot2 𝓢]
 def axiomDot2 : 𝓢 ⊢ ◇□φ ➝ □◇φ := HasAxiomDot2.Dot2 _
 @[simp] lemma axiomDot2! : 𝓢 ⊢! ◇□φ ➝ □◇φ := ⟨axiomDot2⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomDot2 Γ := ⟨fun _ ↦ FiniteContext.of axiomDot2⟩
 instance (Γ : Context F 𝓢) : HasAxiomDot2 Γ := ⟨fun _ ↦ Context.of axiomDot2⟩
@@ -302,7 +302,7 @@ variable [HasAxiomDot3 𝓢]
 def axiomDot3 : 𝓢 ⊢ □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := HasAxiomDot3.Dot3 _ _
 @[simp] lemma axiomDot3! : 𝓢 ⊢! □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := ⟨axiomDot3⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomDot3⟩
 instance (Γ : Context F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ Context.of axiomDot3⟩
@@ -320,7 +320,7 @@ variable [HasAxiomGrz 𝓢]
 def axiomGrz : 𝓢 ⊢ □(□(φ ➝ □φ) ➝ φ) ➝ φ := HasAxiomGrz.Grz _
 @[simp] lemma axiomGrz! : 𝓢 ⊢! □(□(φ ➝ □φ) ➝ φ) ➝ φ := ⟨axiomGrz⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ FiniteContext.of axiomGrz⟩
 instance (Γ : Context F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ Context.of axiomGrz⟩
@@ -338,7 +338,7 @@ variable [HasAxiomTc 𝓢]
 def axiomTc : 𝓢 ⊢ φ ➝ □φ := HasAxiomTc.Tc _
 @[simp] lemma axiomTc! : 𝓢 ⊢! φ ➝ □φ := ⟨axiomTc⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ FiniteContext.of axiomTc⟩
 instance (Γ : Context F 𝓢) : HasAxiomTc Γ := ⟨fun _ ↦ Context.of axiomTc⟩
@@ -356,7 +356,7 @@ variable [HasAxiomDiaT 𝓢]
 def diaT : 𝓢 ⊢ ◇φ ➝ φ := HasAxiomDiaT.diaT _
 @[simp] lemma diaT! : 𝓢 ⊢! ◇φ ➝ φ := ⟨diaT⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomDiaT Γ := ⟨fun _ ↦ FiniteContext.of diaT⟩
 instance (Γ : Context F 𝓢) : HasAxiomDiaT Γ := ⟨fun _ ↦ Context.of diaT⟩
@@ -377,7 +377,7 @@ variable [HasAxiomVer 𝓢]
 def axiomVer : 𝓢 ⊢ □φ := HasAxiomVer.Ver _
 @[simp] lemma axiomVer! : 𝓢 ⊢! □φ := ⟨axiomVer⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ FiniteContext.of axiomVer⟩
 instance (Γ : Context F 𝓢) : HasAxiomVer Γ := ⟨fun _ ↦ Context.of axiomVer⟩
@@ -396,7 +396,7 @@ variable [HasAxiomH 𝓢]
 def axiomH : 𝓢 ⊢ □(□φ ⭤ φ) ➝ □φ := HasAxiomH.H _
 @[simp] lemma axiomH! : 𝓢 ⊢! □(□φ ⭤ φ) ➝ □φ := ⟨axiomH⟩
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ FiniteContext.of axiomH⟩
 instance (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH⟩
@@ -410,13 +410,13 @@ variable [BasicModalLogicalConnective F] [DecidableEq F]
 variable {φ ψ χ : F} {Γ Δ : List F}
 variable {𝓢 : S}
 
-instance [System.Minimal 𝓢] [ModalDeMorgan F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
+instance [Entailment.Minimal 𝓢] [ModalDeMorgan F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
   intro φ;
   simp only [Axioms.DiaDuality, ModalDeMorgan.box, DeMorgan.neg];
   apply iffId;
 ⟩
 
-instance [System.Minimal 𝓢] [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
+instance [Entailment.Minimal 𝓢] [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
   intro φ;
   simp only [Axioms.DiaDuality, DiaAbbrev.dia_abbrev];
   apply iffId;
@@ -434,61 +434,61 @@ section
 
 variable (𝓢 : S)
 
-protected class K extends System.Classical 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
+protected class K extends Entailment.Classical 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
 
-protected class KD extends System.K 𝓢, HasAxiomD 𝓢
+protected class KD extends Entailment.K 𝓢, HasAxiomD 𝓢
 
-protected class KP extends System.K 𝓢, HasAxiomP 𝓢
+protected class KP extends Entailment.K 𝓢, HasAxiomP 𝓢
 
-protected class KB extends System.K 𝓢, HasAxiomB 𝓢
+protected class KB extends Entailment.K 𝓢, HasAxiomB 𝓢
 
-protected class KT extends System.K 𝓢, HasAxiomT 𝓢
-protected class KT' extends System.K 𝓢, HasAxiomDiaTc 𝓢
+protected class KT extends Entailment.K 𝓢, HasAxiomT 𝓢
+protected class KT' extends Entailment.K 𝓢, HasAxiomDiaTc 𝓢
 
-protected class KTc extends System.K 𝓢, HasAxiomTc 𝓢
-protected class KTc' extends System.K 𝓢, HasAxiomDiaT 𝓢
+protected class KTc extends Entailment.K 𝓢, HasAxiomTc 𝓢
+protected class KTc' extends Entailment.K 𝓢, HasAxiomDiaT 𝓢
 
-protected class KTB extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomB 𝓢
+protected class KTB extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomB 𝓢
 
-protected class KD45 extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
+protected class KD45 extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
 
-protected class KB4 extends System.K 𝓢, HasAxiomB 𝓢, HasAxiomFour 𝓢
+protected class KB4 extends Entailment.K 𝓢, HasAxiomB 𝓢, HasAxiomFour 𝓢
 
-protected class KB5 extends System.K 𝓢, HasAxiomB 𝓢, HasAxiomFive 𝓢
+protected class KB5 extends Entailment.K 𝓢, HasAxiomB 𝓢, HasAxiomFive 𝓢
 
-protected class KDB extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomB 𝓢
+protected class KDB extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomB 𝓢
 
-protected class KD4 extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢
+protected class KD4 extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢
 
-protected class KD5 extends System.K 𝓢, HasAxiomD 𝓢, HasAxiomFive 𝓢
+protected class KD5 extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFive 𝓢
 
-protected class K45 extends System.K 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
+protected class K45 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
 
-protected class Triv extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
-instance [System.Triv 𝓢] : System.KT 𝓢 where
-instance [System.Triv 𝓢] : System.KTc 𝓢 where
+protected class Triv extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
+instance [Entailment.Triv 𝓢] : Entailment.KT 𝓢 where
+instance [Entailment.Triv 𝓢] : Entailment.KTc 𝓢 where
 
-protected class Ver extends System.K 𝓢, HasAxiomVer 𝓢
+protected class Ver extends Entailment.K 𝓢, HasAxiomVer 𝓢
 
-protected class K4 extends System.K 𝓢, HasAxiomFour 𝓢
+protected class K4 extends Entailment.K 𝓢, HasAxiomFour 𝓢
 
-protected class K5 extends System.K 𝓢, HasAxiomFive 𝓢
+protected class K5 extends Entailment.K 𝓢, HasAxiomFive 𝓢
 
-protected class S4 extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢
-instance [System.S4 𝓢] : System.K4 𝓢 where
-instance [System.S4 𝓢] : System.KT 𝓢 where
+protected class S4 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢
+instance [Entailment.S4 𝓢] : Entailment.K4 𝓢 where
+instance [Entailment.S4 𝓢] : Entailment.KT 𝓢 where
 
-protected class S4Dot2 extends System.S4 𝓢, HasAxiomDot2 𝓢
+protected class S4Dot2 extends Entailment.S4 𝓢, HasAxiomDot2 𝓢
 
-protected class S4Dot3 extends System.S4 𝓢, HasAxiomDot3 𝓢
+protected class S4Dot3 extends Entailment.S4 𝓢, HasAxiomDot3 𝓢
 
-protected class S5 extends System.K 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢
-instance [System.S5 𝓢] : System.KT 𝓢 where
-instance [System.S5 𝓢] : System.K5 𝓢 where
+protected class S5 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢
+instance [Entailment.S5 𝓢] : Entailment.KT 𝓢 where
+instance [Entailment.S5 𝓢] : Entailment.K5 𝓢 where
 
-protected class GL extends System.K 𝓢, HasAxiomL 𝓢
+protected class GL extends Entailment.K 𝓢, HasAxiomL 𝓢
 
-protected class Grz extends System.K 𝓢, HasAxiomGrz 𝓢
+protected class Grz extends Entailment.K 𝓢, HasAxiomGrz 𝓢
 
 end
 
@@ -500,7 +500,7 @@ class ModalDisjunctive (𝓢 : S) : Prop where
 
 alias modal_disjunctive := ModalDisjunctive.modal_disjunctive
 
-variable {𝓢 : S} [System.Minimal 𝓢]
+variable {𝓢 : S} [Entailment.Minimal 𝓢]
 
 instance [Disjunctive 𝓢] [Unnecessitation 𝓢] : ModalDisjunctive 𝓢 where
   modal_disjunctive h := by
@@ -517,4 +517,4 @@ noncomputable instance unnecessitation_of_modalDisjunctive [ModalDisjunctive �
 
 end
 
-end LO.System
+end LO.Entailment

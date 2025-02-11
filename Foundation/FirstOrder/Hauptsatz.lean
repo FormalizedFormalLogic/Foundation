@@ -356,7 +356,7 @@ end Forces
 
 noncomputable
 def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᵀ Γ → {d : ⊢ᵀ Γ // Derivation.IsCutFree d} := fun d ↦
-  let d : 𝐌𝐢𝐧¹ ⊢ ⋀(∼Γ)ᴺ ➝ ⊥ := System.FiniteContext.toDef (Derivation.goedelGentzen d)
+  let d : 𝐌𝐢𝐧¹ ⊢ ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.goedelGentzen d)
   let ff : ∼Γ ⊩ ⋀(∼Γ)ᴺ ➝ ⊥ := Forces.ofMinimalProof d (∼Γ)
   let fc : ∼Γ ⊩ ⋀(∼Γ)ᴺ := Forces.conj' fun φ hφ ↦
     (Forces.refl φ).monotone (StrongerThan.ofSubset <| List.cons_subset.mpr ⟨hφ, by simp⟩)

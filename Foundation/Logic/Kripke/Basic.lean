@@ -1,5 +1,5 @@
 import Foundation.Logic.Semantics
-import Foundation.Logic.System
+import Foundation.Logic.Entailment
 import Foundation.Vorspiel.BinaryRelations
 import Foundation.Vorspiel.RelItr
 

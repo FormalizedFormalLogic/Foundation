@@ -106,7 +106,7 @@ def compact {Γ : Sequent α} : T ⟹ Γ → (s : { s : Finset (Formula α) // �
   | root (φ := φ) h =>
     ⟨⟨{φ}, by simp [h]⟩, root (by simp)⟩
 
-instance : System.Compact (Theory α) where
+instance : Entailment.Compact (Theory α) where
   φ b := (compact b).1
   φPrf b := (compact b).2
   φ_subset b := by simpa using (compact b).1.prop
@@ -127,26 +127,26 @@ def deductionAux {Γ : Sequent α} {φ} : T ⟹ Γ → T \ {φ} ⟹ ∼φ :: Γ
 def deduction {Γ : Sequent α} {φ} (d : insert φ T ⟹ Γ) : T ⟹ ∼φ :: Γ := Tait.ofAxiomSubset (by simp) (deductionAux d)
 
 lemma inconsistent_iff_provable :
-    System.Inconsistent (insert φ T) ↔ T ⊢! ∼φ := by
+    Entailment.Inconsistent (insert φ T) ↔ T ⊢! ∼φ := by
   constructor
   · intro h; exact ⟨deduction (Tait.inconsistent_iff_provable.mp h).get⟩
   · rintro b
-    exact System.inconsistent_of_provable_of_unprovable (φ := φ) (System.by_axm _ <| by simp) (System.wk! (by simp) b)
+    exact Entailment.inconsistent_of_provable_of_unprovable (φ := φ) (Entailment.by_axm _ <| by simp) (Entailment.wk! (by simp) b)
 
 lemma consistent_iff_unprovable :
-    System.Consistent (insert φ T) ↔ T ⊬ ∼φ := by simp [←System.not_inconsistent_iff_consistent, inconsistent_iff_provable]
+    Entailment.Consistent (insert φ T) ↔ T ⊬ ∼φ := by simp [←Entailment.not_inconsistent_iff_consistent, inconsistent_iff_provable]
 
 omit [DecidableEq α]
 @[simp] lemma inconsistent_theory_iff :
-    System.Inconsistent (System.theory T) ↔ System.Inconsistent T := by
+    Entailment.Inconsistent (Entailment.theory T) ↔ Entailment.Inconsistent T := by
   constructor
   · intro h
-    exact System.inconsistent_iff_provable_bot.mpr
-      <| System.StrongCut.cut! (by simp) <| System.inconsistent_iff_provable_bot.mp h
-  · intro h; exact h.of_supset (by simpa using System.Axiomatized.axm_subset T)
+    exact Entailment.inconsistent_iff_provable_bot.mpr
+      <| Entailment.StrongCut.cut! (by simp) <| Entailment.inconsistent_iff_provable_bot.mp h
+  · intro h; exact h.of_supset (by simpa using Entailment.Axiomatized.axm_subset T)
 
 @[simp] lemma consistent_theory_iff :
-    System.Consistent (System.theory T) ↔ System.Consistent T := by simp [←System.not_inconsistent_iff_consistent, inconsistent_theory_iff]
+    Entailment.Consistent (Entailment.theory T) ↔ Entailment.Consistent T := by simp [←Entailment.not_inconsistent_iff_consistent, inconsistent_theory_iff]
 
 end Derivation
 

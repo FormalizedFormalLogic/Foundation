@@ -15,7 +15,7 @@ instance Kripke.sound : Sound (Hilbert.KD5) (Kripke.SerialEuclideanFrameClass) :
   . unfold SerialEuclideanFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
     simp [Geachean.serial_def, Geachean.euclidean_def];
 
-instance Kripke.consistent : System.Consistent (Hilbert.KD5) := by
+instance Kripke.consistent : Entailment.Consistent (Hilbert.KD5) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 1⟩, ⟨1, 1, 0, 1⟩});
   exact eq_Geach;
 

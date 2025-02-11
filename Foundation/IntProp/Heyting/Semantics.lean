@@ -123,12 +123,12 @@ instance : Sound H (mod H) := ⟨sound⟩
 
 section
 
-open System.LindenbaumAlgebra
+open Entailment.LindenbaumAlgebra
 
-variable [DecidableEq α] (H : Hilbert α) [H.HasEFQ] [System.Consistent H]
+variable [DecidableEq α] (H : Hilbert α) [H.HasEFQ] [Entailment.Consistent H]
 
 def lindenbaum : HeytingSemantics α where
-  Algebra := System.LindenbaumAlgebra H
+  Algebra := Entailment.LindenbaumAlgebra H
   valAtom a := ⟦.atom a⟧
 
 
@@ -141,8 +141,8 @@ lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
 
 variable {H}
 
-omit [System.Consistent H] in
-lemma lindenbaum_complete_iff [System.Consistent H] {φ : Formula α} : lindenbaum H ⊧ φ ↔ H ⊢! φ := by
+omit [Entailment.Consistent H] in
+lemma lindenbaum_complete_iff [Entailment.Consistent H] {φ : Formula α} : lindenbaum H ⊧ φ ↔ H ⊢! φ := by
   simp [val_def', lindenbaum_val_eq, provable_iff_eq_top]
 
 instance : Sound H (lindenbaum H) := ⟨lindenbaum_complete_iff.mpr⟩
@@ -154,8 +154,8 @@ end
 open Hilbert.Deduction
 
 lemma complete [DecidableEq α] {φ : Formula α} [H.HasEFQ] (h : mod.{_,u} H ⊧ φ) : H ⊢! φ := by
-  wlog Con : System.Consistent H
-  · exact System.not_consistent_iff_inconsistent.mp Con φ
+  wlog Con : Entailment.Consistent H
+  · exact Entailment.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <|
     mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hq ↦ lindenbaum_complete_iff.mpr <| maxm! hq⟩
 

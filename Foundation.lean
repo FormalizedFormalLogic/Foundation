@@ -4,7 +4,7 @@ import Foundation.Vorspiel.Order
 
 import Foundation.Logic.LogicSymbol
 import Foundation.Logic.Semantics
-import Foundation.Logic.System
+import Foundation.Logic.Entailment
 
 -- AutoProver
 

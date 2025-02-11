@@ -3,17 +3,17 @@ import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
 
-open System
+open Entailment
 open Formula
 open Kripke
 open MaximalConsistentSet
 
-variable {S} [System (Formula ℕ) S]
-variable {𝓢 : S} [System.Consistent 𝓢] [System.K 𝓢]
+variable {S} [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 namespace Kripke
 
-abbrev canonicalFrame (𝓢 : S) [System.Consistent 𝓢] [System.K 𝓢] : Kripke.Frame where
+abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Kripke.Frame where
   World := MaximalConsistentSet 𝓢
   Rel X Y := □''⁻¹X.1 ⊆ Y.1
 
@@ -92,7 +92,7 @@ lemma rel_def_dia : Ω₁ ≺ Ω₂ ↔ ∀ {φ}, φ ∈ Ω₂.1 → ◇φ ∈ �
 end canonicalFrame
 
 
-abbrev canonicalModel (𝓢 : S) [System.Consistent 𝓢] [System.K 𝓢] : Model where
+abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Model where
   toFrame := canonicalFrame 𝓢
   Val Ω a := (atom a) ∈ Ω.1
 
@@ -158,7 +158,7 @@ lemma iff_valid_on_canonicalModel_deducible : (canonicalModel 𝓢) ⊧ φ ↔ �
 
 end lemmata
 
-class Canonical (𝓢 : S) [System.Consistent 𝓢] [System.K 𝓢] (C : FrameClass) : Prop where
+class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] (C : FrameClass) : Prop where
   canonical : (Kripke.canonicalFrame 𝓢) ∈ C
 
 instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by

@@ -217,7 +217,7 @@ open Formula
 
 lemma N_defines : (Hilbert.N).DefinesPLoNFrameClass (AllFrameClass α) := by
   intro F;
-  simp [Hilbert.theorems, System.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
+  simp [Hilbert.theorems, Entailment.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
   intro φ hp;
   induction hp using Hilbert.Deduction.inducition_with_necOnly! with
   | hMaxm h => simp at h;

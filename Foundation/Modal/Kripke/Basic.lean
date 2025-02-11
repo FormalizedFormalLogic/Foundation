@@ -4,7 +4,7 @@ import Foundation.Modal.Substitution
 
 namespace LO.Modal
 
-open System
+open Entailment
 
 
 namespace Kripke

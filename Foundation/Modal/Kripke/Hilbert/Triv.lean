@@ -31,7 +31,7 @@ instance Kripke.soundEquality : Sound (Hilbert.Triv) (Kripke.EqualityFrameClass)
   rw [eq_EqualityFrameClass_ReflexiveCoreflexiveFrameClass];
   exact Kripke.soundReflCorefl;
 
-instance Kripke.consistent : System.Consistent (Hilbert.Triv) := by
+instance Kripke.consistent : Entailment.Consistent (Hilbert.Triv) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩});
   exact eq_Geach;
 
