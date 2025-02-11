@@ -173,9 +173,9 @@ namespace FirstOrder.Arith
 
 open LO.Arith
 
-variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ≼ T]
+variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ⪯ T]
 
-instance CobhamR0.subTheoryPAMinus : 𝐑₀ ≼ 𝐏𝐀⁻ := System.Subtheory.ofAxm! <| by
+instance CobhamR0.subTheoryPAMinus : 𝐑₀ ⪯ 𝐏𝐀⁻ := System.WeakerThan.ofAxm! <| by
   intro φ h
   rcases h
   case equal h =>

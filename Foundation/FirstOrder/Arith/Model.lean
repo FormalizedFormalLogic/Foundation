@@ -217,7 +217,7 @@ notation "𝐓𝐀" => Theory.TrueArith
 instance Standard.models_trueArith : ℕ ⊧ₘ* 𝐓𝐀 :=
   modelsTheory_iff.mpr fun {φ} ↦ by simp
 
-variable (T : Theory ℒₒᵣ) [𝐄𝐐 ≼ T]
+variable (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T]
 
 lemma oRing_consequence_of (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊨ φ := consequence_of T φ fun M _ s _ _ ↦ by

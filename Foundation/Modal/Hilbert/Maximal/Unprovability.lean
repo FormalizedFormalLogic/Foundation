@@ -79,7 +79,7 @@ instance : System.Consistent (Hilbert.GL) := by
 
 end GL
 
-theorem not_S4_weakerThan_GL : ¬(Hilbert.S4) ≤ₛ (Hilbert.GL) := by
+theorem not_S4_weakerThan_GL : ¬(Hilbert.S4) ⪯ (Hilbert.GL) := by
   apply System.not_weakerThan_iff.mpr;
   existsi (Axioms.T (atom 0));
   constructor;

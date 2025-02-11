@@ -65,8 +65,9 @@ variable {φ : SyntacticFormula L}
 
 theorem sound : T ⊢ φ → T ⊨[Struc.{v, u} L] φ := fun b s hT f ↦ by
   haveI : s.Dom ⊧ₘ* T := hT
-  rcases Derivation.sound s.Dom f b with ⟨φ, hp, h⟩
-  simp at hp; rcases hp with rfl
+  rcases Derivation.sound s.Dom f b with ⟨ψ, hp, h⟩
+  have : ψ = φ := by simpa using hp
+  rcases this
   exact h
 
 theorem sound! : T ⊢! φ → T ⊨[Struc.{v, u} L] φ := fun ⟨b⟩ ↦ sound b
@@ -77,10 +78,10 @@ theorem sound₀! : T ⊢! φ → T ⊨ φ := sound!
 
 instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨sound!⟩
 
-lemma models_of_subtheory {T U : Theory L} [U ≼ T] {M : Type*} [Structure L M] [Nonempty M] (hM : M ⊧ₘ* T) : M ⊧ₘ* U :=
+lemma models_of_subtheory {T U : Theory L} [U ⪯ T] {M : Type*} [Structure L M] [Nonempty M] (hM : M ⊧ₘ* T) : M ⊧ₘ* U :=
   ⟨ fun {φ} hp ↦ by
-    have : T ⊢ φ := System.Subtheory.prf (System.byAxm hp)
-    exact sound this hM ⟩
+    have : T ⊢! φ := (inferInstanceAs (U ⪯ T)).pbl (System.by_axm _ hp)
+    exact sound! this hM ⟩
 
 lemma consistent_of_satidfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : System.Consistent T :=
   Sound.consistent_of_satisfiable h

@@ -63,9 +63,9 @@ instance : System.KTc' (Hilbert.S5Grz) where
 
 theorem iff_provable_S5Grz_provable_Triv : (Hilbert.S5Grz ⊢! φ) ↔ (Hilbert.Triv ⊢! φ) := by
   constructor;
-  . apply weakerThan_of_dominate_axioms;
+  . apply fun h ↦ (weakerThan_of_dominate_axioms @h).subset;
     simp;
-  . apply weakerThan_of_dominate_axioms;
+  . apply fun h ↦ (weakerThan_of_dominate_axioms @h).subset;
     rintro φ (⟨_, _, rfl⟩ | (⟨_, rfl⟩ | ⟨_, rfl⟩)) <;> simp;
 
 end LO.Modal.Hilbert

@@ -96,18 +96,18 @@ namespace FirstOrder.Arith
 
 open LO.Arith
 
-variable {T : Theory ℒₒᵣ} [𝐑₀ ≼ T]
+variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ₀ σ → T ⊢! ↑σ := fun H =>
-  haveI : 𝐄𝐐 ≼ T := System.Subtheory.comp (𝓣 := 𝐑₀) inferInstance inferInstance
+  haveI : 𝐄𝐐 ⪯ T := System.WeakerThan.trans (𝓣 := 𝐑₀) inferInstance inferInstance
   complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by
-    haveI : M ⊧ₘ* 𝐑₀ := ModelsTheory.of_provably_subtheory M 𝐑₀ T inferInstance (by assumption)
+    haveI : M ⊧ₘ* 𝐑₀ := ModelsTheory.of_provably_subtheory M 𝐑₀ T inferInstance
     exact LO.Arith.sigma_one_completeness hσ H
 
 theorem sigma_one_completeness_iff [ss : Sigma1Sound T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ₀ σ ↔ T ⊢! ↑σ :=
-  haveI : 𝐑₀ ≼ T := System.Subtheory.comp (𝓣 := T) inferInstance inferInstance
+  haveI : 𝐑₀ ⪯ T := System.WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   ⟨fun h ↦ sigma_one_completeness (T := T) hσ h, fun h ↦ ss.sound (by simp [hσ]) h⟩
 
 end FirstOrder.Arith

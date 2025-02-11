@@ -81,7 +81,7 @@ instance : Hilbert.Cl.HasEFQ where p := 0;
 instance : Hilbert.Cl.HasLEM where p := 0;
 instance : System.Classical (Hilbert.Cl) where
 
-lemma Int_weakerThan_Cl : (Hilbert.Int) ≤ₛ (Hilbert.Cl) := by
+lemma Int_weakerThan_Cl : (Hilbert.Int) ⪯ (Hilbert.Cl) := by
   apply weakerThan_of_subset_axioms;
   tauto;
 

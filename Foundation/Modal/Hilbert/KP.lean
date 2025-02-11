@@ -31,9 +31,9 @@ instance : System.KP (Hilbert.KP) where
 open System in
 theorem iff_provable_KP_provable_KD : (Hilbert.KP ⊢! φ) ↔ (Hilbert.KD ⊢! φ) := by
   constructor;
-  . apply weakerThan_of_dominate_axioms;
+  . apply fun h ↦ (weakerThan_of_dominate_axioms @h).subset;
     rintro φ (⟨_, _, rfl⟩ | ⟨_, rfl⟩) <;> simp only [axiomK!, axiomP!];
-  . apply weakerThan_of_dominate_axioms;
+  . apply fun h ↦ (weakerThan_of_dominate_axioms @h).subset;
     rintro φ (⟨_, _, rfl⟩ | (⟨_, rfl⟩)) <;> simp only [axiomK!, axiomD!];
 
 end LO.Modal.Hilbert

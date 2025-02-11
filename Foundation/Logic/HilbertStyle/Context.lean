@@ -103,7 +103,8 @@ lemma by_axm! [DecidableEq F] {φ} (h : φ ∈ Γ := by simp) : Γ ⊢[𝓢]! φ
 
 def weakening [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢] φ → Δ ⊢[𝓢] φ := Axiomatized.weakening (by simpa)
 
-lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢]! φ → Δ ⊢[𝓢]! φ := fun h ↦ Axiomatized.le_of_subset (by simpa) h
+lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢]! φ → Δ ⊢[𝓢]! φ := fun h ↦
+  (Axiomatized.le_of_subset (by simpa)).subset h
 
 def of {φ : F} (b : 𝓢 ⊢ φ) : Γ ⊢[𝓢] φ := imply₁' (ψ := ⋀Γ) b
 

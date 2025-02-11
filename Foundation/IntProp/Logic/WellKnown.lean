@@ -31,7 +31,7 @@ open Formula.Kripke
 
 theorem Int_ssubset_KC : Logic.Int ⊂ Logic.KC := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . exact (Hilbert.weakerThan_of_subset_axioms (by simp)).subset;
   . suffices ∃ φ, Hilbert.KC ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [Int.eq_AllKripkeFrameClass_Logic];
     use Axioms.WeakLEM (.atom 0);
     constructor;
@@ -56,8 +56,8 @@ theorem Int_ssubset_KC : Logic.Int ⊂ Logic.KC := by
 
 theorem KC_ssubset_LC : Logic.KC ⊂ Logic.LC := by
   constructor;
-  . apply Hilbert.weakerThan_of_dominate_axiomInstances $ by
-      rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp [efq!, wlem!];
+  . exact (Hilbert.weakerThan_of_dominate_axiomInstances
+      (by rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp [efq!, wlem!])).subset
   . suffices ∃ φ, Hilbert.LC ⊢! φ ∧ ¬ConfluentFrameClass ⊧ φ by simpa [KC.eq_ConfluentKripkeFrameClass_Logic];
     use Axioms.Dummett (.atom 0) (.atom 1);
     constructor;
@@ -85,8 +85,8 @@ theorem KC_ssubset_LC : Logic.KC ⊂ Logic.LC := by
 
 theorem LC_ssubset_Cl : Logic.LC ⊂ Logic.Cl := by
   constructor;
-  . apply Hilbert.weakerThan_of_dominate_axiomInstances $ by
-      rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp [efq!, dummett!];
+  . apply (Hilbert.weakerThan_of_dominate_axiomInstances
+      (by rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp [efq!, dummett!])).subset;
   . suffices ∃ φ, Hilbert.Cl ⊢! φ ∧ ¬ConnectedFrameClass ⊧ φ by simpa [LC.eq_ConnectedKripkeFrameClass_Logic];
     use Axioms.LEM (.atom 0);
     constructor;

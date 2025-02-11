@@ -132,7 +132,7 @@ instance [Tait.Axiomatized F K] : System.Axiomatized K where
 lemma provable_bot_iff_derivable_nil [Tait.Cut F K] : 𝓚 ⟹! [] ↔ 𝓚 ⊢! ⊥ :=
   ⟨fun b ↦ wk! b (by simp), fun b ↦ cut! b (by simpa using verum! _ _)⟩
 
-lemma waekerThan_of_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ≤ₛ 𝓛 := fun _ ↦ System.Axiomatized.weakening! h
+lemma waekerThan_of_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⪯ 𝓛 := ⟨fun _ ↦ System.Axiomatized.weakening! h⟩
 
 instance [Tait.Axiomatized F K] : System.StrongCut K K where
   cut {_ _ _ bs b} := Tait.Axiomatized.trans (fun _ hq ↦ bs hq) b

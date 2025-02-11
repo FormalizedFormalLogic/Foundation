@@ -198,7 +198,7 @@ end
 
 section
 
-variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ≼ T]
+variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ⪯ T]
 
 lemma consequence_of (φ : SyntacticFormula L)
   (H : ∀ (M : Type (max u w))
@@ -246,13 +246,14 @@ notation "𝐄𝐐'" => EQ'
 
 variable (T : Theory L)
 
-noncomputable instance EQ'.subTheoryOfEQ : (𝐄𝐐' : Theory L) ≼ 𝐄𝐐 := System.Subtheory.ofAxm! <| by
+noncomputable instance EQ'.subTheoryOfEQ : (𝐄𝐐' : Theory L) ⪯ 𝐄𝐐 := System.WeakerThan.ofAxm! <| by
   rintro φ h
   rcases (show 𝐄𝐐' φ from h)
   case refl =>
     apply System.by_axm _ (by simpa using eqAxiom.refl)
   case replace φ =>
-    apply complete <| EQ.provOf.{0, 0} _ ?_
+    apply complete ?_
+    apply EQ.provOf.{_, 0} _ ?_
     intro M _ s _ _
     simp [models_iff, Semiformula.eval_substs]
 

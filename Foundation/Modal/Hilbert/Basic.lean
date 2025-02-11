@@ -113,7 +113,7 @@ lemma of_subset (hs : H₁.axioms ⊆ H₂.axioms) : H₁ ⊢! φ → H₂ ⊢! 
   | nec ih => exact nec! ih;
   | _ => simp;
 
-lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axiomInstances → H₂ ⊢! φ) : H₁ ≤ₛ H₂ := by
+lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axiomInstances → H₂ ⊢! φ) : H₁ ⪯ H₂ := by
   apply System.weakerThan_iff.mpr;
   intro φ h;
   induction h using Deduction.rec! with
@@ -122,7 +122,7 @@ lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ �
   | nec ih => exact nec! ih;
   | _ => simp;
 
-lemma weakerThan_of_dominate_axioms (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axioms → H₂ ⊢! φ) : H₁ ≤ₛ H₂ := by
+lemma weakerThan_of_dominate_axioms (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axioms → H₂ ⊢! φ) : H₁ ⪯ H₂ := by
   apply weakerThan_of_dominate_axiomInstances;
   rintro φ ⟨ψ, hψ, ⟨s, rfl⟩⟩;
   apply subst!;

@@ -107,7 +107,7 @@ open System
 variable {H₁ H₂ : Hilbert α}
 
 lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axiomInstances → H₂ ⊢! φ)
-  : H₁ ≤ₛ H₂ := by
+  : H₁ ⪯ H₂ := by
   apply System.weakerThan_iff.mpr;
   intro φ h;
   induction h using Deduction.rec! with
@@ -115,8 +115,7 @@ lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ �
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | _ => simp;
 
-lemma weakerThan_of_subset_axioms (hSubset : H₁.axioms ⊆ H₂.axioms)
-  : H₁ ≤ₛ H₂ := by
+lemma weakerThan_of_subset_axioms (hSubset : H₁.axioms ⊆ H₂.axioms) : H₁ ⪯ H₂ := by
   apply weakerThan_of_dominate_axiomInstances;
   rintro φ ⟨ψ, hs, ⟨s, rfl⟩⟩;
   apply maxm!;

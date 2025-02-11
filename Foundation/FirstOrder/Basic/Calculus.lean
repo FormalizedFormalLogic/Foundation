@@ -422,9 +422,9 @@ end Derivation
 
 namespace Theory
 
-instance {T U : Theory L} : T ≼ T + U := System.Axiomatized.subtheoryOfSubset (by simp [add_def])
+instance {T U : Theory L} : T ⪯ T + U := System.Axiomatized.weakerThanOfSubset (by simp [add_def])
 
-instance {T U : Theory L} : U ≼ T + U := System.Axiomatized.subtheoryOfSubset (by simp [add_def])
+instance {T U : Theory L} : U ⪯ T + U := System.Axiomatized.weakerThanOfSubset (by simp [add_def])
 
 end Theory
 

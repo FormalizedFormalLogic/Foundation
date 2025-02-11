@@ -88,15 +88,15 @@ lemma coe_indH_subset_indH : (indScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theo
   exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) φ, Hierarchy.oringEmb Hp,
     by simp [succInd, Semiformula.lMap_substs]⟩
 
-instance PAMinus.subtheoryOfIndH : 𝐏𝐀⁻ ≼ 𝐈𝐍𝐃Γ n := System.Subtheory.ofSubset (by simp [indH, Theory.add_def])
+instance PAMinus.subtheoryOfIndH : 𝐏𝐀⁻ ⪯ 𝐈𝐍𝐃Γ n := System.WeakerThan.ofSubset (by simp [indH, Theory.add_def])
 
-instance EQ.subtheoryOfCobhamR0 : 𝐄𝐐 ≼ 𝐑₀ := System.Subtheory.ofSubset <| fun φ hp ↦ CobhamR0.equal φ hp
+instance EQ.subtheoryOfCobhamR0 : 𝐄𝐐 ⪯ 𝐑₀ := System.WeakerThan.ofSubset <| fun φ hp ↦ CobhamR0.equal φ hp
 
-instance EQ.subtheoryOfPAMinus : 𝐄𝐐 ≼ 𝐏𝐀⁻ := System.Subtheory.ofSubset <| fun φ hp ↦ PAMinus.equal φ hp
+instance EQ.subtheoryOfPAMinus : 𝐄𝐐 ⪯ 𝐏𝐀⁻ := System.WeakerThan.ofSubset <| fun φ hp ↦ PAMinus.equal φ hp
 
-instance EQ.subtheoryOfIndH : 𝐄𝐐 ≼ 𝐈𝐍𝐃Γ n := System.Subtheory.comp PAMinus.subtheoryOfIndH EQ.subtheoryOfPAMinus
+instance EQ.subtheoryOfIndH : 𝐄𝐐 ⪯ 𝐈𝐍𝐃Γ n := System.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
-instance EQ.subtheoryOfIOpen : 𝐄𝐐 ≼ 𝐈open := System.Subtheory.comp inferInstance EQ.subtheoryOfPAMinus
+instance EQ.subtheoryOfIOpen : 𝐄𝐐 ⪯ 𝐈open := System.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
 end Theory
 

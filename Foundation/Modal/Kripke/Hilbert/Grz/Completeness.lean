@@ -173,7 +173,7 @@ lemma truthlemma_lemma2
 
 -- TODO: syntactical proof
 lemma truthlemma_lemma3 : (Hilbert.Grz) ⊢! (φ ⋏ □(φ ➝ □φ)) ➝ □φ := by
-  apply KT_weakerThan_Grz;
+  apply KT_weakerThan_Grz.pbl;
   by_contra hC;
   have := (not_imp_not.mpr $ Hilbert.KT.Kripke.complete |>.complete) hC;
   simp at this;

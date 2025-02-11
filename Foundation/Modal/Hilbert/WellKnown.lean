@@ -277,7 +277,7 @@ instance : (Hilbert.S4).HasT where p := 0
 instance : (Hilbert.S4).HasFour where p := 0
 instance : System.S4 (Hilbert.S4) where
 
-lemma K4_weakerThan_S4 : Hilbert.K4 ≤ₛ Hilbert.S4 := weakerThan_of_dominate_axioms $ by simp;
+lemma K4_weakerThan_S4 : Hilbert.K4 ⪯ Hilbert.S4 := weakerThan_of_dominate_axioms $ by simp;
 
 protected abbrev S4Dot2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dot2 (.atom 0)}⟩
 instance : (Hilbert.S4Dot2).HasK where p := 0; q := 1;
@@ -319,7 +319,7 @@ instance : (Hilbert.Grz).HasK where p := 0; q := 1;
 instance : (Hilbert.Grz).HasGrz where p := 0
 instance : System.Grz (Hilbert.Grz) where
 
-lemma KT_weakerThan_Grz : Hilbert.KT ≤ₛ Hilbert.Grz := weakerThan_of_dominate_axioms $ by simp;
+lemma KT_weakerThan_Grz : Hilbert.KT ⪯ Hilbert.Grz := weakerThan_of_dominate_axioms $ by simp;
 
 
 protected abbrev Ver : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Ver (.atom 0)}⟩
@@ -334,7 +334,7 @@ instance : (Hilbert.Triv).HasT where p := 0
 instance : (Hilbert.Triv).HasTc where p := 0
 instance : System.Triv (Hilbert.Triv) where
 
-lemma K4_weakerThan_Triv : Hilbert.K4 ≤ₛ Hilbert.Triv := weakerThan_of_dominate_axioms $ by simp;
+lemma K4_weakerThan_Triv : Hilbert.K4 ⪯ Hilbert.Triv := weakerThan_of_dominate_axioms $ by simp;
 
 protected abbrev N : Hilbert ℕ := ⟨{}⟩
 

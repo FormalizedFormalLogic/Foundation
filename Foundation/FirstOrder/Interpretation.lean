@@ -7,7 +7,7 @@ import Foundation.Vorspiel.ExistsUnique
 namespace LO.FirstOrder
 
 @[ext]
-structure Interpretation {L : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (L' : Language) where
+structure Interpretation {L : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ⪯ T] (L' : Language) where
   domain : Semisentence L 1
   rel {k} : L'.Rel k → Semisentence L k
   func {k} : L'.Func k → Semisentence L (k + 1)
@@ -18,7 +18,7 @@ structure Interpretation {L : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (
 
 namespace Interpretation
 
-variable {L L' : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ≼ T]
+variable {L L' : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ⪯ T]
 
 variable (ι : Interpretation T L')
 
@@ -172,7 +172,7 @@ protected def id : Interpretation T L where
 
 end Interpretation
 
-class TheoryInterpretation {L L' : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ≼ T] (U : Theory L') where
+class TheoryInterpretation {L L' : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ⪯ T] (U : Theory L') where
   interpretation : Interpretation T L'
   interpret_theory : ∀ φ ∈ U, T ⊨ Rewriting.embedding (interpretation.translation (∀∀₀φ))
 
@@ -182,7 +182,7 @@ namespace TheoryInterpretation
 
 open Interpretation
 
-variable {L L' : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ≼ T] {U : Theory L'} (ι : T ⊳ U)
+variable {L L' : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ⪯ T] {U : Theory L'} (ι : T ⊳ U)
 
 abbrev translation (φ : Semisentence L' n) : Semisentence L n := ι.interpretation.translation φ
 

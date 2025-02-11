@@ -41,8 +41,8 @@ lemma satisfiable_union_trueArithWithStarUnbounded :
   (Compact.compact_cumulative trueArithWithStarUnbounded.cumulative).mpr
     satisfiable_trueArithWithStarUnbounded
 
-instance trueArithWithStarUnbounded.eqTheory : 𝐄𝐐 ≼ (⋃ c, trueArithWithStarUnbounded c) :=
-  System.Subtheory.ofSubset <|
+instance trueArithWithStarUnbounded.eqTheory : 𝐄𝐐 ⪯ (⋃ c, trueArithWithStarUnbounded c) :=
+  System.WeakerThan.ofSubset <|
     Set.subset_iUnion_of_subset 0 (Set.subset_union_of_subset_left (by simp) _)
 
 abbrev Nonstandard : Type := ModelOfSatEq satisfiable_union_trueArithWithStarUnbounded

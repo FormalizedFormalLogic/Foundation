@@ -217,7 +217,7 @@ theorem KB4_ssubset_S5 : Logic.KB4 ⊂ Logic.S5 := by
 
 theorem KT_ssubset_KTB : Logic.KT ⊂ Logic.KTB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬ReflexiveFrameClass ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
     use (Axioms.B (.atom 0));
     constructor;
@@ -259,7 +259,7 @@ theorem KDB_ssubset_KTB : Logic.KDB ⊂ Logic.KTB := by
 
 theorem KT_ssubset_S4 : Logic.KT ⊂ Logic.S4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!, axiomT!];
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomT!]) |>.subset;
   . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬ReflexiveFrameClass ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
     use Axioms.Four (.atom 0);
     constructor;
@@ -288,7 +288,7 @@ theorem KT_ssubset_S4 : Logic.KT ⊂ Logic.S4 := by
 
 theorem KD4_ssubset_S4 : Logic.KD4 ⊂ Logic.S4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬SerialTransitiveFrameClass ⊧ φ by simpa [KD4.eq_SerialTransitiveKripkeFrameClass_Logic];
     use Axioms.T (.atom 0);
     constructor;
@@ -303,7 +303,7 @@ theorem KD4_ssubset_S4 : Logic.KD4 ⊂ Logic.S4 := by
 
 theorem KD4_ssubset_KD45 : Logic.KD4 ⊂ Logic.KD45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬SerialTransitiveFrameClass ⊧ φ by simpa [KD4.eq_SerialTransitiveKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
@@ -328,7 +328,7 @@ theorem KD4_ssubset_KD45 : Logic.KD4 ⊂ Logic.KD45 := by
 
 theorem KD5_ssubset_KD45 : Logic.KD5 ⊂ Logic.KD45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬SerialEuclideanFrameClass ⊧ φ by simpa [KD5.eq_SerialEuclideanKripkeFrameClass_Logic];
     use (Axioms.Four (.atom 0));
     constructor;
@@ -362,7 +362,7 @@ theorem KD5_ssubset_KD45 : Logic.KD5 ⊂ Logic.KD45 := by
 
 theorem K45_ssubset_KD45 : Logic.K45 ⊂ Logic.KD45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬TransitiveEuclideanFrameClass ⊧ φ by simpa [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
     use Axioms.D (.atom 0);
     constructor;
@@ -395,7 +395,7 @@ theorem K45_ssubset_KB4 : Logic.K45 ⊂ Logic.KB4 := by
 
 theorem KB_ssubset_KB4 : Logic.KB ⊂ Logic.KB4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬SymmetricFrameClass ⊧ φ by simpa [KB.eq_SymmetricKripkeFrameClass_Logic];
     use Axioms.Four (.atom 0);
     constructor;
@@ -410,7 +410,7 @@ theorem KB_ssubset_KB4 : Logic.KB ⊂ Logic.KB4 := by
 
 theorem KD_ssubset_KT : Logic.KD ⊂ Logic.KT := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!, axiomD!];
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomD!]) |>.subset;
   . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬SerialFrameClass ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
     use (Axioms.T (.atom 0));
     constructor;
@@ -423,7 +423,7 @@ theorem KD_ssubset_KT : Logic.KD ⊂ Logic.KT := by
 
 theorem KD_ssubset_KDB : Logic.KD ⊂ Logic.KDB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬SerialFrameClass ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
     use Axioms.B (.atom 0);
     constructor;
@@ -443,7 +443,7 @@ theorem KD_ssubset_KDB : Logic.KD ⊂ Logic.KDB := by
 
 theorem KB_ssubset_KDB : Logic.KB ⊂ Logic.KDB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬SymmetricFrameClass ⊧ φ by simpa [KB.eq_SymmetricKripkeFrameClass_Logic];
     use Axioms.D (.atom 0);
     constructor;
@@ -456,7 +456,7 @@ theorem KB_ssubset_KDB : Logic.KB ⊂ Logic.KDB := by
 
 theorem KD_ssubset_KD4 : Logic.KD ⊂ Logic.KD4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬SerialFrameClass ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
     use Axioms.Four (.atom 0);
     constructor;
@@ -471,7 +471,7 @@ theorem KD_ssubset_KD4 : Logic.KD ⊂ Logic.KD4 := by
 
 theorem K4_ssubset_KD4 : Logic.K4 ⊂ Logic.KD4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
     use (Axioms.D (.atom 0));
     constructor;
@@ -493,7 +493,7 @@ lemma K4_ssubset_S4 : Logic.K4 ⊂ Logic.S4 := by
 
 theorem KD_ssubset_KD5 : Logic.KD ⊂ Logic.KD5 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬SerialFrameClass ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
     use (Axioms.Five (.atom 0));
     constructor;
@@ -512,7 +512,7 @@ theorem KD_ssubset_KD5 : Logic.KD ⊂ Logic.KD5 := by
 
 theorem K5_ssubset_KD5 : Logic.K5 ⊂ Logic.KD5 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬EuclideanFrameClass ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
     use (Axioms.D (.atom 0));
     constructor;
@@ -529,7 +529,7 @@ theorem K5_ssubset_KD5 : Logic.K5 ⊂ Logic.KD5 := by
 
 theorem K4_ssubset_K45 : Logic.K4 ⊂ Logic.K45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
     use (Axioms.Five (.atom 0));
     constructor;
@@ -552,7 +552,7 @@ theorem K4_ssubset_K45 : Logic.K4 ⊂ Logic.K45 := by
 
 theorem K5_ssubset_K45 : Logic.K5 ⊂ Logic.K45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬EuclideanFrameClass ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
     use (Axioms.Four (.atom 0));
     constructor;
@@ -576,7 +576,7 @@ theorem K5_ssubset_K45 : Logic.K5 ⊂ Logic.K45 := by
 
 theorem K_ssubset_KD : Logic.K ⊂ Logic.KD := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!];
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.D (.atom 0));
     constructor;
@@ -590,7 +590,7 @@ theorem K_ssubset_KD : Logic.K ⊂ Logic.KD := by
 
 theorem K_ssubset_K4 : Logic.K ⊂ Logic.K4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!];
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.Four (.atom 0));
     constructor;
@@ -617,7 +617,7 @@ theorem K_ssubset_K4 : Logic.K ⊂ Logic.K4 := by
 
 theorem K_ssubset_K5 : Logic.K ⊂ Logic.K5 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!];
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.Five (.atom 0));
     constructor;
@@ -633,7 +633,7 @@ theorem K_ssubset_K5 : Logic.K ⊂ Logic.K5 := by
 
 theorem K_ssubset_KB : Logic.K ⊂ Logic.KB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!];
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.B (.atom 0));
     constructor;
@@ -654,7 +654,7 @@ lemma K_ssubset_KT : Logic.K ⊂ Logic.KT := by
 
 theorem K4_ssubset_GL : Logic.K4 ⊂ Logic.GL := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!, axiomFour!];
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.K4 ⊢! φ by simpa;
     use (Axioms.L (.atom 0));
     constructor;
@@ -663,7 +663,7 @@ theorem K4_ssubset_GL : Logic.K4 ⊂ Logic.GL := by
 
 theorem S4_ssubset_Triv : Logic.S4 ⊂ Logic.Triv := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp [axiomK!, axiomT!, axiomTc!];
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use Axioms.Tc (.atom 0)
     constructor;
@@ -685,7 +685,7 @@ theorem S4_ssubset_Triv : Logic.S4 ⊂ Logic.Triv := by
 
 theorem S4_ssubset_S4Dot2 : Logic.S4 ⊂ Logic.S4Dot2 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S4Dot2 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use Axioms.Dot2 (.atom 0)
     constructor;
@@ -790,7 +790,7 @@ lemma S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
 
 theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use Axioms.Grz (.atom 0)
     constructor;
@@ -805,7 +805,7 @@ lemma S5Grz_eq_Triv : Logic.S5Grz = Logic.Triv := by
 
 lemma S5_ssubset_S5Grz : Logic.S5 ⊂ Logic.S5Grz := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬UniversalFrameClass ⊧ φ by simpa [S5.eq_UniversalKripkeFrameClass_Logic];
     use Axioms.Grz (.atom 0)
     constructor;
@@ -821,7 +821,7 @@ theorem S5_ssubset_Triv : Logic.S5 ⊂ Logic.Triv := by
 -- TODO: more refactor for operating finite frame
 lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms $ by simp;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬ReflexiveTransitiveAntiSymmetricFiniteFrameClass ⊧ φ by simpa [Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0)
     constructor;
