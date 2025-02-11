@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert.Maximal.Unprovability
-import Foundation.Modal.Kripke.Hilbert.GL.Completeness
+import Foundation.Modal.Kripke.Hilbert.GL.MDP
 import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.Hilbert.K4
 import Foundation.Modal.Kripke.Hilbert.K45
@@ -119,7 +119,7 @@ protected abbrev S5Grz : Logic := Hilbert.S5Grz.logic
 protected abbrev GL : Logic := Hilbert.GL.logic
 lemma GL.eq_TransitiveIrreflexiveFiniteKripkeFrameClass_Logic : Logic.GL = Kripke.TransitiveIrreflexiveFiniteFrameClass.logic
   := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
-
+instance : (Logic.GL).Unnecessitation := inferInstance
 
 protected abbrev Grz : Logic := Hilbert.Grz.logic
 lemma Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic : Logic.Grz = Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass.logic
@@ -847,6 +847,18 @@ lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
 theorem Grz_ssubset_Triv : Logic.Grz ⊂ Logic.Triv := by
   convert Grz_ssubset_S5Grz;
   exact S5Grz_eq_Triv.symm;
+
+theorem GL_ssubset_Ver : Logic.GL ⊂ Logic.Ver := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬Hilbert.GL ⊢! φ by simpa;
+    use (Axioms.Ver ⊥);
+    constructor;
+    . exact axiomVer!;
+    . by_contra hC;
+      have := unnec! hC;
+      have := Hilbert.GL.Kripke.consistent.not_bot;
+      contradiction
 
 end Logic
 
