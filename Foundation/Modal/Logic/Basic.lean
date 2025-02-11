@@ -32,7 +32,7 @@ end Logic
 
 namespace Hilbert
 
-open System
+open Entailment
 
 variable {H : Hilbert ℕ}
 
@@ -53,11 +53,11 @@ instance normal [H.HasK] : (H.logic).Normal where
     exact Hilbert.Deduction.subst! s hφ;
   nec_closed := by
     intro φ hφ;
-    exact System.nec! hφ;
+    exact Entailment.nec! hφ;
 
-instance [System.Unnecessitation H] : H.logic.Unnecessitation := ⟨fun {_} h => unnec! h⟩
+instance [Entailment.Unnecessitation H] : H.logic.Unnecessitation := ⟨fun {_} h => unnec! h⟩
 
-instance [System.ModalDisjunctive H] : H.logic.ModalDisjunctive := ⟨fun {_ _} h => modal_disjunctive h⟩
+instance [Entailment.ModalDisjunctive H] : H.logic.ModalDisjunctive := ⟨fun {_ _} h => modal_disjunctive h⟩
 
 end Hilbert
 

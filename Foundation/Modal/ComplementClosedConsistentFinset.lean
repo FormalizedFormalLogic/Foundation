@@ -4,10 +4,10 @@ import Foundation.Modal.Complement
 
 namespace LO.Modal
 
-open System
+open Entailment
 
 variable {α : Type*} [DecidableEq α]
-variable {S} [System (Formula α) S]
+variable {S} [Entailment (Formula α) S]
 variable {𝓢 : S}
 
 namespace FormulaFinset
@@ -28,10 +28,10 @@ lemma iff_inconsistent_inconsistent {Φ : FormulaFinset α} : FormulaSet.Inconsi
 
 section
 
-variable [System.Classical 𝓢]
+variable [Entailment.Classical 𝓢]
 
 @[simp]
-lemma empty_conisistent [System.Consistent 𝓢] : FormulaFinset.Consistent 𝓢 ∅ := by
+lemma empty_conisistent [Entailment.Consistent 𝓢] : FormulaFinset.Consistent 𝓢 ∅ := by
   convert FormulaSet.emptyset_consistent (α := α) <;> simpa;
 
 lemma provable_iff_insert_neg_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (∼φ) Φ) ↔ ↑Φ *⊢[𝓢]! φ := by
@@ -105,7 +105,7 @@ noncomputable def enum (𝓢 : S) (Φ : FormulaFinset α) : (List (Formula α)) 
   | ψ :: qs => next 𝓢 ψ (enum 𝓢 Φ qs)
 local notation:max t"[" l "]" => enum 𝓢 t l
 
-lemma next_consistent [System.Classical 𝓢]
+lemma next_consistent [Entailment.Classical 𝓢]
   (Φ_consis : FormulaFinset.Consistent 𝓢 Φ) (φ : Formula α)
   : FormulaFinset.Consistent 𝓢 (next 𝓢 φ Φ) := by
   simp only [next];
@@ -120,7 +120,7 @@ lemma next_consistent [System.Classical 𝓢]
     have : ↑Φ *⊢[𝓢]! ⊥ := neg_complement_derive_bot h₁ h₂;
     contradiction;
 
-lemma enum_consistent [System.Classical 𝓢]
+lemma enum_consistent [Entailment.Classical 𝓢]
   (Φ_consis : Φ.Consistent 𝓢) {l : List (Formula α)} : FormulaFinset.Consistent 𝓢 (Φ[l]) := by
   induction l with
   | nil => exact Φ_consis;
@@ -172,7 +172,7 @@ end exists_consistent_complementary_closed
 
 open exists_consistent_complementary_closed in
 lemma exists_consistent_complementary_closed
-  [System.Classical 𝓢]
+  [Entailment.Classical 𝓢]
   {S : FormulaFinset α}
   (h_sub : P ⊆ S⁻) (P_consis : FormulaFinset.Consistent 𝓢 P)
   : ∃ P', P ⊆ P' ∧ FormulaFinset.Consistent 𝓢 P' ∧ P'.ComplementaryClosed S := by
@@ -205,7 +205,7 @@ end FormulaFinset
 
 section
 
-open System
+open Entailment
 open Formula (atom)
 open FormulaFinset
 
@@ -240,7 +240,7 @@ lemma equality_def : X₁ = X₂ ↔ X₁.1 = X₂.1 := by
   . intro h; cases h; rfl;
   . intro h; cases X₁; cases X₂; simp_all;
 
-variable [System.Classical 𝓢]
+variable [Entailment.Classical 𝓢]
 
 lemma lindenbaum
   {Φ Ψ : FormulaFinset α}
@@ -249,7 +249,7 @@ lemma lindenbaum
   obtain ⟨Y, ⟨_, _, _⟩⟩ := FormulaFinset.exists_consistent_complementary_closed X_sub X_consis;
   use ⟨Y, (by assumption), (by assumption)⟩;
 
-noncomputable instance [System.Consistent 𝓢] : Inhabited (ComplementClosedConsistentFinset 𝓢 Ψ) := ⟨lindenbaum (Φ := ∅) (Ψ := Ψ) (by simp) (FormulaFinset.empty_conisistent) |>.choose⟩
+noncomputable instance [Entailment.Consistent 𝓢] : Inhabited (ComplementClosedConsistentFinset 𝓢 Ψ) := ⟨lindenbaum (Φ := ∅) (Ψ := Ψ) (by simp) (FormulaFinset.empty_conisistent) |>.choose⟩
 
 lemma membership_iff (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) := by
   constructor;

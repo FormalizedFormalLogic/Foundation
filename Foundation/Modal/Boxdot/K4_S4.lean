@@ -1,10 +1,10 @@
 import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.System.S4
+import Foundation.Modal.Entailment.S4
 import Foundation.Modal.Logic.WellKnown
 
 namespace LO.Modal
 
-open System
+open Entailment
 open Formula
 open Hilbert.Deduction
 

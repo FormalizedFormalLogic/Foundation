@@ -2,7 +2,7 @@ import Foundation.Modal.Logic.Basic
 
 namespace LO.Modal
 
-open System
+open Entailment
 open Formula
 open Hilbert.Deduction
 
@@ -20,7 +20,7 @@ class BoxdotProperty (L₁ L₂ : Logic) where
   bdp {φ} : φᵇ ∈ L₁ ↔ φ ∈ L₂
 
 
-theorem Hilbert.boxdotTranslated_of_dominate {H₁ H₂ : Hilbert α} [System.K H₂]
+theorem Hilbert.boxdotTranslated_of_dominate {H₁ H₂ : Hilbert α} [Entailment.K H₂]
   (h : ∀ φ ∈ H₁.axiomInstances, H₂ ⊢! φᵇ) : H₁ ⊢! φ → H₂ ⊢! φᵇ := by
   intro d;
   induction d using Hilbert.Deduction.rec! with

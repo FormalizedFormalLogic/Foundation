@@ -51,8 +51,8 @@ namespace Hilbert.Grz.Kripke
 
 open Formula
 open Formula.Kripke
-open System
-open System.Context
+open Entailment
+open Entailment.Context
 open ComplementClosedConsistentFinset
 
 variable {φ ψ : Formula ℕ}

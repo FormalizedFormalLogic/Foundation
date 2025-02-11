@@ -1,12 +1,12 @@
 import Foundation.Modal.Formula
-import Foundation.Modal.System.K
+import Foundation.Modal.Entailment.K
 
 namespace LO.Modal
 
-open System
+open Entailment
 
 variable {α : Type*}
-variable {S} [System (Formula α) S]
+variable {S} [Entailment (Formula α) S]
 variable {𝓢 : S}
 
 namespace FormulaSet
@@ -42,9 +42,9 @@ lemma union_consistent : Consistent 𝓢 (T₁ ∪ T₂) → (Consistent 𝓢 T�
     exact h Γ $ by tauto_set;
   }
 
-variable [System.Classical 𝓢]
+variable [Entailment.Classical 𝓢]
 
-lemma emptyset_consistent [DecidableEq α] [H_consis : System.Consistent 𝓢] : Consistent 𝓢 ∅ := by
+lemma emptyset_consistent [DecidableEq α] [H_consis : Entailment.Consistent 𝓢] : Consistent 𝓢 ∅ := by
   obtain ⟨f, hf⟩ := H_consis.exists_unprovable;
   apply def_consistent.mpr;
   intro Γ hΓ; by_contra hC;
@@ -57,13 +57,13 @@ variable [DecidableEq α]
 lemma not_mem_of_mem_neg (T_consis : Consistent 𝓢 T) (h : ∼φ ∈ T) : φ ∉ T := by
   by_contra hC;
   have : [φ, ∼φ] ⊬[𝓢] ⊥ := (def_consistent.mp T_consis) [φ, ∼φ] (by simp_all);
-  have : [φ, ∼φ] ⊢[𝓢]! ⊥ := System.bot_of_mem_either! (φ := φ) (Γ := [φ, ∼φ]) (by simp) (by simp);
+  have : [φ, ∼φ] ⊢[𝓢]! ⊥ := Entailment.bot_of_mem_either! (φ := φ) (Γ := [φ, ∼φ]) (by simp) (by simp);
   contradiction;
 
 lemma not_mem_neg_of_mem (T_consis : Consistent 𝓢 T) (h : φ ∈ T) : ∼φ ∉ T := by
   by_contra hC;
   have : [φ, ∼φ] ⊬[𝓢] ⊥ := (def_consistent.mp T_consis) [φ, ∼φ] (by simp_all);
-  have : [φ, ∼φ] ⊢[𝓢]! ⊥ := System.bot_of_mem_either! (φ := φ) (Γ := [φ, ∼φ]) (by simp) (by simp);
+  have : [φ, ∼φ] ⊢[𝓢]! ⊥ := Entailment.bot_of_mem_either! (φ := φ) (Γ := [φ, ∼φ]) (by simp) (by simp);
   contradiction;
 
 lemma iff_insert_consistent : Consistent 𝓢 (insert φ T) ↔ ∀ {Γ : List (Formula α)}, (∀ ψ ∈ Γ, ψ ∈ T) → 𝓢 ⊬ φ ⋏ ⋀Γ ➝ ⊥ := by
@@ -180,7 +180,7 @@ lemma not_mem_falsum_of_consistent (T_consis : Consistent 𝓢 T) : ⊥ ∉ T :=
   have : 𝓢 ⊢! ⊥ ➝ ⊥ := efq!;
   contradiction;
 
-lemma not_singleton_consistent [System.Necessitation 𝓢] (T_consis : Consistent 𝓢 T) (h : ∼□φ ∈ T) : Consistent 𝓢 {∼φ} := by
+lemma not_singleton_consistent [Entailment.Necessitation 𝓢] (T_consis : Consistent 𝓢 T) (h : ∼□φ ∈ T) : Consistent 𝓢 {∼φ} := by
   apply def_consistent.mpr;
   intro Γ hΓ;
   simp only [Set.mem_singleton_iff] at hΓ;
@@ -255,7 +255,7 @@ lemma intro_triunion_consistent
         simpa using List.of_mem_filter hp;
       . assumption;
 
-omit [System.Classical 𝓢] in
+omit [Entailment.Classical 𝓢] in
 lemma exists_consistent_maximal_of_consistent (T_consis : Consistent 𝓢 T)
   : ∃ Z, Consistent 𝓢 Z ∧ T ⊆ Z ∧ ∀ U, U *⊬[𝓢] ⊥ → Z ⊆ U → U = Z := by
   obtain ⟨Z, h₁, ⟨h₂, h₃⟩⟩ := zorn_subset_nonempty { T : FormulaSet α | Consistent 𝓢 T} (by
@@ -332,9 +332,9 @@ lemma exists_of_consistent (consisT : Consistent 𝓢 T) : ∃ Ω : MaximalConsi
 
 alias lindenbaum := exists_of_consistent
 
-variable [System.Classical 𝓢]
+variable [Entailment.Classical 𝓢]
 
-instance [System.Consistent 𝓢] : Nonempty (MaximalConsistentSet 𝓢) := ⟨lindenbaum emptyset_consistent |>.choose⟩
+instance [Entailment.Consistent 𝓢] : Nonempty (MaximalConsistentSet 𝓢) := ⟨lindenbaum emptyset_consistent |>.choose⟩
 
 lemma either_mem (Ω : MaximalConsistentSet 𝓢) (φ) : φ ∈ Ω ∨ ∼φ ∈ Ω := by
   by_contra hC;
@@ -478,7 +478,7 @@ lemma iff_mem_conj : (⋀Γ ∈ Ω) ↔ (∀ φ ∈ Γ, φ ∈ Ω) := by simp [m
 
 section
 
-variable [System.K 𝓢]
+variable [Entailment.K 𝓢]
 
 lemma iff_mem_multibox : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, (□''⁻¹^[n]Ω.1 ⊆ Ω'.1) → (φ ∈ Ω')) := by
   constructor;

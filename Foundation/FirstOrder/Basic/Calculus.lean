@@ -313,18 +313,18 @@ private def deductionAux {Γ : Sequent L} : T ⟹ Γ → T \ {φ} ⟹ ∼(∀∀
 
 def deduction (d : insert φ T ⟹ Γ) : T ⟹ ∼(∀∀φ) :: Γ := Tait.ofAxiomSubset (by intro x; simp; tauto) (deductionAux d (φ := φ))
 
-def provable_iff_inconsistent : T ⊢! φ ↔ System.Inconsistent (insert (∼∀∀φ) T) := by
+def provable_iff_inconsistent : T ⊢! φ ↔ Entailment.Inconsistent (insert (∼∀∀φ) T) := by
   constructor
   · rintro b
-    exact System.inconsistent_of_provable_of_unprovable
-      (System.wk! (by simp) (toClose! b)) (System.by_axm _ (by simp))
+    exact Entailment.inconsistent_of_provable_of_unprovable
+      (Entailment.wk! (by simp) (toClose! b)) (Entailment.by_axm _ (by simp))
   · intro h
     rcases Tait.inconsistent_iff_provable.mp h with ⟨d⟩
     have : T ⊢ ∀∀φ :=  Derivation.cast (deduction d) (by rw [close_eq_self_of (∼∀∀φ) (by simp)]; simp)
     exact ⟨invClose this⟩
 
-def unprovable_iff_consistent : T ⊬ φ ↔ System.Consistent (insert (∼∀∀φ) T) := by
-  simp [←System.not_inconsistent_iff_consistent, ←provable_iff_inconsistent]
+def unprovable_iff_consistent : T ⊬ φ ↔ Entailment.Consistent (insert (∼∀∀φ) T) := by
+  simp [←Entailment.not_inconsistent_iff_consistent, ←provable_iff_inconsistent]
 
 section Hom
 
@@ -363,8 +363,8 @@ def lMap (Φ : L₁ →ᵥ L₂) {Δ} : T₁ ⟹ Δ → T₁.lMap Φ ⟹ Δ.map 
     Derivation.cast this (by simp[Finset.image_union])
   | root h               => root (Set.mem_image_of_mem _ h)
 
-lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : System.Inconsistent T₁ → System.Inconsistent (T₁.lMap Φ) := by
-  simp only [System.inconsistent_iff_provable_bot]; intro ⟨b⟩; exact ⟨by simpa using lMap Φ b⟩
+lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : Entailment.Inconsistent T₁ → Entailment.Inconsistent (T₁.lMap Φ) := by
+  simp only [Entailment.inconsistent_iff_provable_bot]; intro ⟨b⟩; exact ⟨by simpa using lMap Φ b⟩
 
 end Hom
 
@@ -422,9 +422,9 @@ end Derivation
 
 namespace Theory
 
-instance {T U : Theory L} : T ⪯ T + U := System.Axiomatized.weakerThanOfSubset (by simp [add_def])
+instance {T U : Theory L} : T ⪯ T + U := Entailment.Axiomatized.weakerThanOfSubset (by simp [add_def])
 
-instance {T U : Theory L} : U ⪯ T + U := System.Axiomatized.weakerThanOfSubset (by simp [add_def])
+instance {T U : Theory L} : U ⪯ T + U := Entailment.Axiomatized.weakerThanOfSubset (by simp [add_def])
 
 end Theory
 
@@ -440,7 +440,7 @@ variable {L}
 
 alias Theory.alt := Theory.Alt.mk
 
-instance : System (Sentence L) (Theory.Alt L) := ⟨fun T σ ↦ T.thy ⊢ ↑σ⟩
+instance : Entailment (Sentence L) (Theory.Alt L) := ⟨fun T σ ↦ T.thy ⊢ ↑σ⟩
 
 @[simp] lemma Theory.alt_thy (T : Theory L) : T.alt.thy = T := rfl
 
@@ -454,7 +454,7 @@ abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬ σ
 
 infix:45 " ⊬. " => Unprovable₀
 
-instance (T : Theory.Alt L) : System.Classical T := System.Classical.ofEquiv T.thy T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
+instance (T : Theory.Alt L) : Entailment.Classical T := Entailment.Classical.ofEquiv T.thy T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
 
 variable {T : Theory L} {σ : Sentence L}
 

@@ -7,7 +7,7 @@ namespace FirstOrder
 open Semiformula
 variable {L : Language.{u}}
 
-namespace System
+namespace Entailment
 
 inductive Code (L : Language.{u})
   | axL : {k : ℕ} → (r : L.Rel k) → (v : Fin k → SyntacticTerm L) → Code L
@@ -54,7 +54,7 @@ instance [∀ k, DecidableEq (L.Func k)] [∀ k, DecidableEq (L.Rel k)] [∀ k, 
   haveI : Encodable Empty := IsEmpty.toEncodable
   Encodable.ofEquiv _ (Code.equiv L)
 
-end System
+end Entailment
 
 end FirstOrder
 

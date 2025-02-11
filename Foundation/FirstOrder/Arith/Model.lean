@@ -230,10 +230,10 @@ namespace Theory
 
 open Arith
 
-instance CobhamR0.consistent : System.Consistent 𝐑₀ :=
+instance CobhamR0.consistent : Entailment.Consistent 𝐑₀ :=
   Sound.consistent_of_satisfiable ⟨_, Standard.models_CobhamR0⟩
 
-instance Peano.consistent : System.Consistent 𝐏𝐀 :=
+instance Peano.consistent : Entailment.Consistent 𝐏𝐀 :=
   Sound.consistent_of_satisfiable ⟨_, Standard.models_peano⟩
 
 end Theory

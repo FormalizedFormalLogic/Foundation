@@ -1,13 +1,13 @@
-import Foundation.Modal.System.GL
+import Foundation.Modal.Entailment.GL
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Hilbert.GL.Soundness
 
 namespace LO.Modal.Hilbert.GL.Kripke
 
 open Kripke
-open System
+open Entailment
 open Formula
-open System System.FiniteContext
+open Entailment Entailment.FiniteContext
 open Formula.Kripke
 open ComplementClosedConsistentFinset
 

@@ -68,37 +68,37 @@ namespace Derivation
 
 variable {L : Language} [L.DecidableEq] {T : Theory L}
 
-open Rewriting System System.FiniteContext HilbertProofᵢ
+open Rewriting Entailment Entailment.FiniteContext HilbertProofᵢ
 
 noncomputable
 def negDoubleNegation : (φ : SyntacticFormula L) → 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ
-  | .rel r v  => System.tneIff (φ := Semiformulaᵢ.rel r v)
-  | .nrel r v => System.iffId (φ := ∼∼(Semiformulaᵢ.rel r v))
-  | ⊤         => System.falsumDN
-  | ⊥         => System.iffId (φ := ∼⊥)
+  | .rel r v  => Entailment.tneIff (φ := Semiformulaᵢ.rel r v)
+  | .nrel r v => Entailment.iffId (φ := ∼∼(Semiformulaᵢ.rel r v))
+  | ⊤         => Entailment.falsumDN
+  | ⊥         => Entailment.iffId (φ := ∼⊥)
   | φ ⋏ ψ     =>
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
     have ihψ : 𝐌𝐢𝐧¹ ⊢ ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
     have : 𝐌𝐢𝐧¹ ⊢ φᴺ ⋏ ψᴺ ⭤ ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ :=
-      System.andReplaceIff (iffnegOfNegIff (by simp) ihφ) (iffnegOfNegIff (by simp) ihψ)
-    System.negReplaceIff' this
+      Entailment.andReplaceIff (iffnegOfNegIff (by simp) ihφ) (iffnegOfNegIff (by simp) ihψ)
+    Entailment.negReplaceIff' this
   | φ ⋎ ψ     =>
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
     have ihψ : 𝐌𝐢𝐧¹ ⊢ ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
-    have : 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⋏ ∼ψᴺ ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := System.andReplaceIff ihφ ihψ
-    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∼φᴺ ⋏ ∼ψᴺ) ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := System.iffTrans'' (dnOfNegative (by simp)) this
+    have : 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⋏ ∼ψᴺ ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.andReplaceIff ihφ ihψ
+    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∼φᴺ ⋏ ∼ψᴺ) ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.iffTrans'' (dnOfNegative (by simp)) this
     this
   | ∀' φ      =>
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
     have : 𝐌𝐢𝐧¹ ⊢ (free φ)ᴺ ⭤ (∼(∼(free φ))ᴺ) := iffnegOfNegIff (by simp) ihφ
     have : 𝐌𝐢𝐧¹ ⊢ ∀' φᴺ ⭤ ∀' ∼(∼φ)ᴺ :=
-      allIffAllOfIff <| System.cast (by simp [Semiformula.rew_doubleNegation]) this
-    System.negReplaceIff' this
+      allIffAllOfIff <| Entailment.cast (by simp [Semiformula.rew_doubleNegation]) this
+    Entailment.negReplaceIff' this
   | ∃' φ      =>
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
     have : 𝐌𝐢𝐧¹ ⊢ ∀' ∼φᴺ ⭤ ∀' (∼φ)ᴺ :=
-      allIffAllOfIff <| System.cast (by simp [Semiformula.rew_doubleNegation]) ihφ
-    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∀' ∼φᴺ) ⭤ ∀' (∼φ)ᴺ := System.iffTrans'' (dnOfNegative (by simp)) this
+      allIffAllOfIff <| Entailment.cast (by simp [Semiformula.rew_doubleNegation]) ihφ
+    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∀' ∼φᴺ) ⭤ ∀' (∼φ)ᴺ := Entailment.iffTrans'' (dnOfNegative (by simp)) this
     this
   termination_by φ => φ.complexity
 
@@ -109,12 +109,12 @@ def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹
   | @and _ _ Γ φ ψ dφ dψ =>
     have ihφ : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ := goedelGentzen dφ
     have ihψ : ((∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ := goedelGentzen dψ
-    have : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ := System.andIntro (deduct ihφ) (deduct ihψ)
-    deductInv (System.dni' this)
+    have : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ := Entailment.andIntro (deduct ihφ) (deduct ihψ)
+    deductInv (Entailment.dni' this)
   | @or _ _ Γ φ ψ d      =>
     have : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] (∼ψ)ᴺ ➝ (∼φ)ᴺ ➝ ⊥ := deduct <| deduct  <| goedelGentzen d
     have : ((∼φ)ᴺ ⋏ (∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ :=
-      System.FiniteContext.weakening (by simp) this ⨀ (andRight (nthAxm 0)) ⨀ (andLeft (nthAxm 0))
+      Entailment.FiniteContext.weakening (by simp) this ⨀ (andRight (nthAxm 0)) ⨀ (andLeft (nthAxm 0))
     this
   | @all _ _ Γ φ d       =>
     have eΓ : (∼Γ⁺)ᴺ = ((∼Γ)ᴺ)⁺ := by
@@ -124,13 +124,13 @@ def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹
     deductInv <| dni' <| genOverFiniteContext this
   | @ex _ _ Γ φ t d      =>
     have ih : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼((∼φ)ᴺ/[t]) :=
-      System.cast (by simp [Semiformula.rew_doubleNegation]; rfl) <| deduct (goedelGentzen d)
+      Entailment.cast (by simp [Semiformula.rew_doubleNegation]; rfl) <| deduct (goedelGentzen d)
     have : ((∀' (∼φ)ᴺ) :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] (∼φ)ᴺ/[t] := specializeOverContext (nthAxm 0) t
     (FiniteContext.weakening (by simp) ih) ⨀ this
   | @cut _ _ Γ φ dp dn   =>
     have ihp : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ := goedelGentzen dp
     have ihn : (φᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ := cast (by simp) (goedelGentzen dn)
-    have b₁ : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼∼φᴺ := System.impTrans'' (of <| System.andLeft (negDoubleNegation φ)) (deduct ihp)
+    have b₁ : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼∼φᴺ := Entailment.impTrans'' (of <| Entailment.andLeft (negDoubleNegation φ)) (deduct ihp)
     have b₂ : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼φᴺ := deduct ihn
     b₁ ⨀ b₂
   | @wk _ _ Γ Δ d h      => FiniteContext.weakening (by simpa using List.map_subset _ h) (goedelGentzen d)

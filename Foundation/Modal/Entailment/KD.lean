@@ -1,11 +1,11 @@
-import Foundation.Modal.System.K
+import Foundation.Modal.Entailment.K
 
-namespace LO.System
+namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
-variable {𝓢 : S} [System.KD 𝓢]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {𝓢 : S} [Entailment.KD 𝓢]
 
 namespace KD
 
@@ -17,4 +17,4 @@ instance : HasAxiomP 𝓢 := ⟨KD.axiomP⟩
 
 end KD
 
-end LO.System
+end LO.Entailment

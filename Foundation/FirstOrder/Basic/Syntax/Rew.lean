@@ -2,7 +2,7 @@ import Foundation.Logic.Predicate.Rew
 import Foundation.FirstOrder.Basic.Syntax.Formula
 
 /-!
-# Rewriting System
+# Rewriting Entailment
 
 term/formula morphisms such as Rewritings, substitutions, and embeddings are handled by the structure `LO.FirstOrder.Rew`.
 - `LO.FirstOrder.Rew.rewrite f` is a Rewriting of the free variables occurring in the term by `f : ξ₁ → Semiterm L ξ₂ n`.

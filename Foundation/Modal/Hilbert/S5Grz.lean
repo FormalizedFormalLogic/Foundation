@@ -1,18 +1,18 @@
 import Foundation.Modal.Hilbert.WellKnown
-import Foundation.Modal.System.S5
-import Foundation.Modal.System.KTc
-import Foundation.Modal.System.Triv
+import Foundation.Modal.Entailment.S5
+import Foundation.Modal.Entailment.KTc
+import Foundation.Modal.Entailment.Triv
 
-namespace LO.System
+namespace LO.Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [System F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
 variable {𝓢 : S}
 
 
 section S5
 
 variable [DecidableEq F]
-variable [System.S5 𝓢]
+variable [Entailment.S5 𝓢]
 
 def lem₁_diaT_of_S5Grz : 𝓢 ⊢ (∼□(∼φ) ➝ ∼□(∼□φ)) ➝ (◇φ ➝ ◇□φ) := impTrans'' (rev_dhyp_imp' diaDuality_mp) (dhyp_imp' diaDuality_mpr)
 
@@ -21,12 +21,12 @@ def lem₂_diaT_of_S5Grz : 𝓢 ⊢ (◇φ ➝ ◇□φ) ➝ (◇φ ➝ φ) := d
 end S5
 
 
-protected class S5Grz (𝓢 : S) extends System.S5 𝓢, HasAxiomGrz 𝓢
+protected class S5Grz (𝓢 : S) extends Entailment.S5 𝓢, HasAxiomGrz 𝓢
 
 namespace S5Grz
 
 variable [DecidableEq F]
-variable [System.S5Grz 𝓢]
+variable [Entailment.S5Grz 𝓢]
 
 protected def diaT : 𝓢 ⊢ ◇φ ➝ φ := by
   have : 𝓢 ⊢ (φ ➝ □φ) ➝ (∼□φ ➝ ∼φ) := contra₀;
@@ -42,24 +42,24 @@ protected def diaT : 𝓢 ⊢ ◇φ ➝ φ := by
   exact impTrans'' axiomFive this;
 
 instance : HasAxiomDiaT 𝓢 := ⟨fun _ ↦ S5Grz.diaT⟩
-instance : System.KTc' 𝓢 where
+instance : Entailment.KTc' 𝓢 where
 
 end S5Grz
 
-end LO.System
+end LO.Entailment
 
 
 namespace LO.Modal.Hilbert
 
-open System
+open Entailment
 
 protected abbrev S5Grz : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0), Axioms.Grz (.atom 0)}⟩
 instance : (Hilbert.S5Grz).HasK where p := 0; q := 1;
 instance : (Hilbert.S5Grz).HasT where p := 0
 instance : (Hilbert.S5Grz).HasFive where p := 0
 instance : (Hilbert.S5Grz).HasGrz where p := 0
-instance : System.S5Grz (Hilbert.S5Grz) where
-instance : System.KTc' (Hilbert.S5Grz) where
+instance : Entailment.S5Grz (Hilbert.S5Grz) where
+instance : Entailment.KTc' (Hilbert.S5Grz) where
 
 theorem iff_provable_S5Grz_provable_Triv : (Hilbert.S5Grz ⊢! φ) ↔ (Hilbert.Triv ⊢! φ) := by
   constructor;

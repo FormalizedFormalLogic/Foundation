@@ -1,11 +1,11 @@
-import Foundation.Modal.System.K
+import Foundation.Modal.Entailment.K
 
-namespace LO.System
+namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
-variable {𝓢 : S} [System.Grz 𝓢]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {𝓢 : S} [Entailment.Grz 𝓢]
 
 namespace Grz
 
@@ -19,4 +19,4 @@ noncomputable instance : HasAxiomT 𝓢 := ⟨fun _ ↦ Grz.axiomT⟩
 
 end Grz
 
-end LO.System
+end LO.Entailment

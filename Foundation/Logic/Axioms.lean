@@ -1,4 +1,4 @@
-import Foundation.Logic.System
+import Foundation.Logic.Entailment
 
 namespace LO.Axioms
 

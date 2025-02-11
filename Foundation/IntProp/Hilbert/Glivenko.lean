@@ -5,7 +5,7 @@ namespace LO.IntProp
 
 namespace Hilbert
 
-open System
+open Entailment
 
 variable [DecidableEq α]
 

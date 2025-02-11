@@ -359,7 +359,7 @@ variable {L : Language} [L.LT] [Structure L ℕ]
 abbrev Sigma1Sound (T : Theory L) := SoundOn T (Hierarchy 𝚺 1)
 
 lemma consistent_of_sigma1Sound (T : Theory L) [Sigma1Sound T] :
-    System.Consistent T := consistent_of_sound T (Hierarchy 𝚺 1) (by simp [Set.mem_def])
+    Entailment.Consistent T := consistent_of_sound T (Hierarchy 𝚺 1) (by simp [Set.mem_def])
 
 end
 

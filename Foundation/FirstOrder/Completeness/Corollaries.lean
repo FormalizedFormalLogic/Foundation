@@ -8,7 +8,7 @@ variable {L : Language.{u}} (M : Type w) [Nonempty M] [Structure L M] (T U V : T
 
 lemma of_provably_subtheory [T ⪯ U] (h : M ⊧ₘ* U) : M ⊧ₘ* T := ⟨by
   intro φ hp
-  have : U ⊢! φ := (inferInstanceAs (T ⪯ U)).pbl (System.by_axm _ hp)
+  have : U ⊢! φ := (inferInstanceAs (T ⪯ U)).pbl (Entailment.by_axm _ hp)
   exact consequence_iff'.{u, w}.mp (sound! this) M⟩
 
 lemma of_provably_subtheory' [T ⪯ U] [M ⊧ₘ* U] : M ⊧ₘ* T := of_provably_subtheory M T U inferInstance

@@ -64,8 +64,8 @@ lemma consistent_of_FrameClass_aux [nonempty : C.IsNonempty] [sound : Sound H C]
   . assumption;
   . simp;
 
-lemma consistent_of_FrameClass (C : Kripke.FrameClass) [C.IsNonempty] [Sound H C] : System.Consistent H := by
-  apply System.Consistent.of_unprovable;
+lemma consistent_of_FrameClass (C : Kripke.FrameClass) [C.IsNonempty] [Sound H C] : Entailment.Consistent H := by
+  apply Entailment.Consistent.of_unprovable;
   exact consistent_of_FrameClass_aux (C := C);
 
 end

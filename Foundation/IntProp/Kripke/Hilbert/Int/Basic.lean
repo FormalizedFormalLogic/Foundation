@@ -12,7 +12,7 @@ namespace Hilbert.Int.Kripke
 
 instance sound : Sound Hilbert.Int AllFrameClass := inferInstance
 
-instance consistent : System.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass AllFrameClass
+instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass AllFrameClass
 
 instance canonical : Canonical Hilbert.Int AllFrameClass := by tauto;
 

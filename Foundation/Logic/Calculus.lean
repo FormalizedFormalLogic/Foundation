@@ -1,4 +1,4 @@
-import Foundation.Logic.System
+import Foundation.Logic.Entailment
 import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!
@@ -60,7 +60,7 @@ end OneSided
 
 namespace Tait
 
-open System
+open Entailment
 
 variable [DeMorgan F] [Tait F K]
 
@@ -123,25 +123,25 @@ def ofAxiomSubset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → �
 
 lemma of_axiom_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹! Γ → 𝓛 ⟹! Γ := fun b ↦ ⟨ofAxiomSubset h b.get⟩
 
-instance system : System F K := ⟨(· ⟹. ·)⟩
+instance system : Entailment F K := ⟨(· ⟹. ·)⟩
 
-instance [Tait.Axiomatized F K] : System.Axiomatized K where
+instance [Tait.Axiomatized F K] : Entailment.Axiomatized K where
   prfAxm := fun hf ↦ Tait.Axiomatized.root <| hf
   weakening := Tait.ofAxiomSubset
 
 lemma provable_bot_iff_derivable_nil [Tait.Cut F K] : 𝓚 ⟹! [] ↔ 𝓚 ⊢! ⊥ :=
   ⟨fun b ↦ wk! b (by simp), fun b ↦ cut! b (by simpa using verum! _ _)⟩
 
-lemma waekerThan_of_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⪯ 𝓛 := ⟨fun _ ↦ System.Axiomatized.weakening! h⟩
+lemma waekerThan_of_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⪯ 𝓛 := ⟨fun _ ↦ Entailment.Axiomatized.weakening! h⟩
 
-instance [Tait.Axiomatized F K] : System.StrongCut K K where
+instance [Tait.Axiomatized F K] : Entailment.StrongCut K K where
   cut {_ _ _ bs b} := Tait.Axiomatized.trans (fun _ hq ↦ bs hq) b
 
 instance [Tait.Cut F K] : DeductiveExplosion K where
   dexp {𝓚 b φ} := wk (Tait.Cut.cut b (by simpa using verum _ _)) (by simp)
 
 /-
-instance : System.Deduction K where
+instance : Entailment.Deduction K where
   ofInsert {φ ψ 𝓚 b} := by {  }
   inv {φ ψ 𝓚 b} :=
     let h : cons φ 𝓚 ⟹ [∼φ ⋎ ψ, ψ] :=
@@ -175,14 +175,14 @@ lemma refutable_iff_inconsistent {φ} :
     𝓚 ⊢! ∼φ ↔ Inconsistent (cons φ 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (φ := ∼φ)
 
 lemma consistent_insert_iff_not_refutable {φ}  :
-    System.Consistent (cons φ 𝓚) ↔ 𝓚 ⊬ ∼φ := by
-  simp [System.Unprovable, refutable_iff_inconsistent, System.not_inconsistent_iff_consistent]
+    Entailment.Consistent (cons φ 𝓚) ↔ 𝓚 ⊬ ∼φ := by
+  simp [Entailment.Unprovable, refutable_iff_inconsistent, Entailment.not_inconsistent_iff_consistent]
 
 lemma inconsistent_of_provable_and_refutable {φ} (bp : 𝓚 ⊢! φ) (br : 𝓚 ⊢! ∼φ) : Inconsistent 𝓚 :=
   inconsistent_iff_provable.mpr <| cut! bp br
 -/
 
-instance [Tait.Cut F K] : System.Classical 𝓚 where
+instance [Tait.Cut F K] : Entailment.Classical 𝓚 where
   mdp {φ ψ dpq dp} :=
     let dpq : 𝓚 ⟹ [∼φ ⋎ ψ, ψ] := wk dpq (by simp [DeMorgan.imply])
     let dnq : 𝓚 ⟹ [∼(∼φ ⋎ ψ), ψ] :=

@@ -25,7 +25,7 @@ lemma Cl.eq_EuclideanKripkeFrameClass_Logic : Logic.Cl = Kripke.EuclideanFrameCl
 
 section
 
-open System
+open Entailment
 open Kripke
 open Formula.Kripke
 

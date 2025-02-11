@@ -42,7 +42,7 @@ lemma satisfiable_union_trueArithWithStarUnbounded :
     satisfiable_trueArithWithStarUnbounded
 
 instance trueArithWithStarUnbounded.eqTheory : 𝐄𝐐 ⪯ (⋃ c, trueArithWithStarUnbounded c) :=
-  System.WeakerThan.ofSubset <|
+  Entailment.WeakerThan.ofSubset <|
     Set.subset_iUnion_of_subset 0 (Set.subset_union_of_subset_left (by simp) _)
 
 abbrev Nonstandard : Type := ModelOfSatEq satisfiable_union_trueArithWithStarUnbounded

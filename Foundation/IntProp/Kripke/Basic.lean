@@ -3,7 +3,7 @@ import Foundation.IntProp.Hilbert.Basic
 
 namespace LO.IntProp
 
-open System
+open Entailment
 
 
 namespace Kripke

@@ -1,11 +1,11 @@
-import Foundation.Modal.System.Basic
+import Foundation.Modal.Entailment.Basic
 
-namespace LO.System
+namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
-variable {𝓢 : S} [System.K 𝓢]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {𝓢 : S} [Entailment.K 𝓢]
 
 def multibox_axiomK : 𝓢 ⊢ □^[n](φ ➝ ψ) ➝ □^[n]φ ➝ □^[n]ψ := by
   induction n with
@@ -401,4 +401,4 @@ lemma provable_iff_boxed : (□''X) *⊢[𝓢]! φ ↔ ∃ Δ : List F, (∀ ψ 
 
 end Context
 
-end LO.System
+end LO.Entailment

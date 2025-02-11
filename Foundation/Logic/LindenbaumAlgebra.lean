@@ -2,9 +2,9 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 namespace LO
 
-variable {F S : Type*} [LogicalConnective F] [System F S]
+variable {F S : Type*} [LogicalConnective F] [Entailment F S]
 
-namespace System
+namespace Entailment
 
 variable (𝓢 : S)
 
@@ -12,28 +12,28 @@ def ProvablyEquivalent (φ ψ : F) : Prop := 𝓢 ⊢! φ ⭤ ψ
 
 local infix:45 " ≡ " => ProvablyEquivalent 𝓢
 
-protected lemma ProvablyEquivalent.refl [System.Minimal 𝓢] (φ : F) : φ ≡ φ := iff_id!
+protected lemma ProvablyEquivalent.refl [Entailment.Minimal 𝓢] (φ : F) : φ ≡ φ := iff_id!
 
 variable {𝓢}
 
-protected lemma ProvablyEquivalent.symm [System.Minimal 𝓢] {φ ψ : F} : φ ≡ ψ → ψ ≡ φ := iff_comm'!
+protected lemma ProvablyEquivalent.symm [Entailment.Minimal 𝓢] {φ ψ : F} : φ ≡ ψ → ψ ≡ φ := iff_comm'!
 
-protected lemma ProvablyEquivalent.trans [System.Minimal 𝓢] {φ ψ χ : F} : φ ≡ ψ → ψ ≡ χ → φ ≡ χ := iff_trans''!
+protected lemma ProvablyEquivalent.trans [Entailment.Minimal 𝓢] {φ ψ χ : F} : φ ≡ ψ → ψ ≡ χ → φ ≡ χ := iff_trans''!
 
-lemma provable_iff_provablyEquivalent_verum [System.Minimal 𝓢] {φ : F} : 𝓢 ⊢! φ ↔ φ ≡ ⊤ :=
+lemma provable_iff_provablyEquivalent_verum [Entailment.Minimal 𝓢] {φ : F} : 𝓢 ⊢! φ ↔ φ ≡ ⊤ :=
   ⟨fun h ↦ iff_intro! imply_left_verum! (imply₁'! h), fun h ↦ (and_right! h) ⨀ verum!⟩
 
 variable (𝓢)
 
-def ProvablyEquivalent.setoid [System.Minimal 𝓢] : Setoid F where
+def ProvablyEquivalent.setoid [Entailment.Minimal 𝓢] : Setoid F where
   r := (· ≡ ·)
   iseqv := { refl := .refl _, symm := .symm, trans := .trans }
 
-abbrev LindenbaumAlgebra [System.Minimal 𝓢] := Quotient (ProvablyEquivalent.setoid 𝓢)
+abbrev LindenbaumAlgebra [Entailment.Minimal 𝓢] := Quotient (ProvablyEquivalent.setoid 𝓢)
 
 namespace LindenbaumAlgebra
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 lemma of_eq_of {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦ψ⟧ ↔ φ ≡ ψ := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
 
@@ -158,7 +158,7 @@ section intuitionistic
 
 open LindenbaumAlgebra
 
-variable [System.Intuitionistic 𝓢]
+variable [Entailment.Intuitionistic 𝓢]
 
 instance LindenbaumAlgebra.heyting [DecidableEq F] : HeytingAlgebra (LindenbaumAlgebra 𝓢) where
   bot_le φ := by
@@ -176,7 +176,7 @@ section classical
 
 open LindenbaumAlgebra
 
-variable [System.Classical 𝓢]
+variable [Entailment.Classical 𝓢]
 
 instance LindenbaumAlgebra.boolean [DecidableEq F] : BooleanAlgebra (LindenbaumAlgebra 𝓢) where
   inf_compl_le_bot φ := by
@@ -203,6 +203,6 @@ instance LindenbaumAlgebra.boolean [DecidableEq F] : BooleanAlgebra (LindenbaumA
 
 end classical
 
-end System
+end Entailment
 
 end LO

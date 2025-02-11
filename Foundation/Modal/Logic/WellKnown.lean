@@ -22,7 +22,7 @@ import Foundation.Modal.Kripke.Hilbert.Triv
 import Foundation.Modal.Kripke.Hilbert.Ver
 import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Logic.Basic
-import Foundation.Modal.System.KT
+import Foundation.Modal.Entailment.KT
 
 namespace LO.Modal
 
@@ -144,7 +144,7 @@ end Logic
 namespace Logic
 
 open Formula
-open System
+open Entailment
 open Kripke
 
 theorem KTB_ssubset_S5 : Logic.KTB ⊂ Logic.S5 := by

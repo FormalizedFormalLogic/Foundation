@@ -3,11 +3,11 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 namespace LO.IntProp
 
-open System FiniteContext
+open Entailment FiniteContext
 open Formula
 
 variable {α : Type*}
-variable {S} [System (Formula α) S]
+variable {S} [Entailment (Formula α) S]
 variable {𝓢 : S}
 
 
@@ -38,7 +38,7 @@ lemma not_mem₂ (hCon : t.Consistent 𝓢) {Γ : List (Formula α)} (hΓ : ∀ 
 
 section
 
-variable [System.Intuitionistic 𝓢]
+variable [Entailment.Intuitionistic 𝓢]
 
 lemma disjoint_of_consistent (hCon : t.Consistent 𝓢) : Disjoint t.1 t.2 := by
   by_contra h;
@@ -131,7 +131,7 @@ abbrev Saturated (t : Tableau α) := ∀ φ : Formula α, φ ∈ t.1 ∨ φ ∈ 
 
 section Saturated
 
-variable [System.Intuitionistic 𝓢]
+variable [Entailment.Intuitionistic 𝓢]
 variable {t : Tableau α}
 
 lemma mem₂_of_not_mem₁ (hMat : Saturated t) : φ ∉ t.1 → φ ∈ t.2 := by
@@ -182,7 +182,7 @@ lemma saturated_duality
 
 end Saturated
 
-lemma emptyset_consistent [System.Intuitionistic 𝓢] [DecidableEq α] [H_consis : System.Consistent 𝓢] : Consistent 𝓢 ⟨∅, ∅⟩ := by
+lemma emptyset_consistent [Entailment.Intuitionistic 𝓢] [DecidableEq α] [H_consis : Entailment.Consistent 𝓢] : Consistent 𝓢 ⟨∅, ∅⟩ := by
   intro Γ Δ hΓ hΔ;
   replace hΓ : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr hΓ;
   replace hΔ : Δ = [] := List.eq_nil_iff_forall_not_mem.mpr hΔ;
@@ -219,7 +219,7 @@ local notation:max t"∞" => lindenbaum_maximal 𝓢 t
 
 variable {𝓢}
 
-lemma next_parametericConsistent [System.Intuitionistic 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
+lemma next_parametericConsistent [Entailment.Intuitionistic 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
   simp [lindenbaum_next];
   split;
   . simpa;
@@ -229,7 +229,7 @@ lemma next_parametericConsistent [System.Intuitionistic 𝓢] (consistent : t.Co
 
 variable [Encodable α]
 
-lemma lindenbaum_next_indexed_parametricConsistent_succ [System.Intuitionistic 𝓢] {i : ℕ} : Consistent 𝓢 t[i] → Consistent 𝓢 t[i + 1] := by
+lemma lindenbaum_next_indexed_parametricConsistent_succ [Entailment.Intuitionistic 𝓢] {i : ℕ} : Consistent 𝓢 t[i] → Consistent 𝓢 t[i + 1] := by
   simp [lindenbaum_next_indexed];
   split;
   . intro h;
@@ -243,7 +243,7 @@ lemma mem_lindenbaum_next_indexed (t) (φ : Formula α) : φ ∈ t[(encode φ) +
   . left; tauto;
   . right; tauto;
 
-lemma lindenbaum_next_indexed_parametricConsistent [System.Intuitionistic 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
+lemma lindenbaum_next_indexed_parametricConsistent [Entailment.Intuitionistic 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
   induction i with
   | zero => simpa;
   | succ i ih => apply lindenbaum_next_indexed_parametricConsistent_succ; assumption;
@@ -268,7 +268,7 @@ lemma lindenbaum_next_indexed_subset₂_of_lt (h : m ≤ n) : t[m].2 ⊆ t[n].2 
     . split <;> tauto;
     . tauto;
 
-lemma exists_parametricConsistent_saturated_tableau [System.Intuitionistic 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (Tableau.Consistent 𝓢 u) ∧ (Saturated u) := by
+lemma exists_parametricConsistent_saturated_tableau [Entailment.Intuitionistic 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (Tableau.Consistent 𝓢 u) ∧ (Saturated u) := by
   use t∞;
   refine ⟨?subset, ?consistent, ?saturated⟩;
   case subset => constructor <;> apply Set.subset_iUnion_of_subset 0 (by simp);
@@ -330,17 +330,17 @@ lemma saturated (t : SaturatedConsistentTableau 𝓢) : Saturated t.1 := t.2.1
 
 variable {t₀ : Tableau α} {φ ψ : Formula α}
 
-lemma lindenbaum [System.Intuitionistic 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : SaturatedConsistentTableau 𝓢), t₀ ⊆ t.1 := by
+lemma lindenbaum [Entailment.Intuitionistic 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : SaturatedConsistentTableau 𝓢), t₀ ⊆ t.1 := by
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
   exact ⟨⟨t, hMax, hCon⟩, ht⟩;
 
-instance [System.Consistent 𝓢] [System.Intuitionistic 𝓢] [DecidableEq α] [Encodable α] : Nonempty (SaturatedConsistentTableau 𝓢) := ⟨lindenbaum Tableau.emptyset_consistent |>.choose⟩
+instance [Entailment.Consistent 𝓢] [Entailment.Intuitionistic 𝓢] [DecidableEq α] [Encodable α] : Nonempty (SaturatedConsistentTableau 𝓢) := ⟨lindenbaum Tableau.emptyset_consistent |>.choose⟩
 
 variable {t t₁ t₂ : SaturatedConsistentTableau 𝓢}
 
 lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ φ ∈ Γ, φ ∈ t.1.1) (h : 𝓢 ⊢! ⋀Γ ➝ ψ) : ψ ∉ t.1.2 := t.1.not_mem₂ t.consistent hΓ h
 
-variable [System.Intuitionistic 𝓢]
+variable [Entailment.Intuitionistic 𝓢]
 
 @[simp] lemma disjoint : Disjoint t.1.1 t.1.2 := t.1.disjoint_of_consistent t.2.2
 

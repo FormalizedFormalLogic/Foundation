@@ -1,15 +1,15 @@
-import Foundation.Modal.System.K
+import Foundation.Modal.Entailment.K
 
-namespace LO.System
+namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
 variable {𝓢 : S}
 
 namespace KTc
 
-variable [System.KTc 𝓢]
+variable [Entailment.KTc 𝓢]
 
 protected def axiomFour : 𝓢 ⊢ Axioms.Four φ := axiomTc
 instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ KTc.axiomFour⟩
@@ -28,7 +28,7 @@ end KTc
 
 namespace KTc'
 
-variable [System.KTc' 𝓢]
+variable [Entailment.KTc' 𝓢]
 
 protected def axiomTc : 𝓢 ⊢ φ ➝ □φ := impTrans'' (contra₃' (impTrans'' (and₂' diaDuality) diaT)) box_dne
 instance : HasAxiomTc 𝓢 := ⟨fun _ ↦ KTc'.axiomTc⟩
@@ -36,4 +36,4 @@ instance : HasAxiomTc 𝓢 := ⟨fun _ ↦ KTc'.axiomTc⟩
 end KTc'
 
 
-end LO.System
+end LO.Entailment

@@ -1,12 +1,12 @@
-import Foundation.Modal.System.KT
-import Foundation.Modal.System.KTc
+import Foundation.Modal.Entailment.KT
+import Foundation.Modal.Entailment.KTc
 
-namespace LO.System
+namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
-variable {𝓢 : S} [System.Triv 𝓢]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {𝓢 : S} [Entailment.Triv 𝓢]
 
 namespace Triv
 
@@ -20,4 +20,4 @@ instance : HasAxiomGrz 𝓢 := ⟨fun _ ↦ Triv.axiomGrz⟩
 
 end Triv
 
-end LO.System
+end LO.Entailment

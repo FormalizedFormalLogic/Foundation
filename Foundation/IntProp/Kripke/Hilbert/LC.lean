@@ -44,10 +44,10 @@ instance : ConnectedFrameClass.DefinedBy (Hilbert.LC.axioms) := FrameClass.defin
 
 instance sound : Sound Hilbert.LC ConnectedFrameClass := inferInstance
 
-instance consistent : System.Consistent Hilbert.LC := Kripke.Hilbert.consistent_of_FrameClass ConnectedFrameClass
+instance consistent : Entailment.Consistent Hilbert.LC := Kripke.Hilbert.consistent_of_FrameClass ConnectedFrameClass
 
 open
-  System
+  Entailment
   SaturatedConsistentTableau
 in
 instance canonical : Canonical Hilbert.LC ConnectedFrameClass := by

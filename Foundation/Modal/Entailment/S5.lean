@@ -1,12 +1,12 @@
-import Foundation.Modal.System.KT
-import Foundation.Modal.System.K5
+import Foundation.Modal.Entailment.KT
+import Foundation.Modal.Entailment.K5
 
-namespace LO.System
+namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
-variable {𝓢 : S} [System.S5 𝓢]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {𝓢 : S} [Entailment.S5 𝓢]
 
 -- MEMO: need more simple proof
 def diabox_box : 𝓢 ⊢ ◇□φ ➝ □φ := by
@@ -32,4 +32,4 @@ def rm_diabox : 𝓢 ⊢ ◇□φ ➝ φ := impTrans'' diabox_box axiomT
 def rm_diabox' (h : 𝓢 ⊢ ◇□φ) : 𝓢 ⊢ φ := rm_diabox ⨀ h
 lemma rm_diabox'! (h : 𝓢 ⊢! ◇□φ) : 𝓢 ⊢! φ := ⟨rm_diabox' h.some⟩
 
-end LO.System
+end LO.Entailment

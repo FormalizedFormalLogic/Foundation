@@ -20,7 +20,7 @@ namespace Hilbert.N
 
 instance : AllFrameClass.DefinedBy Hilbert.N.axiomInstances := ⟨by simp_all [Hilbert.axiomInstances]⟩
 
-instance : System.Consistent Hilbert.N := PLoN.Hilbert.consistent_of_FrameClass PLoN.AllFrameClass
+instance : Entailment.Consistent Hilbert.N := PLoN.Hilbert.consistent_of_FrameClass PLoN.AllFrameClass
 
 instance : Canonical (Hilbert.N) (PLoN.AllFrameClass) := ⟨by tauto⟩
 

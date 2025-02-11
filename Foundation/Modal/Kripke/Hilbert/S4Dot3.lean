@@ -25,7 +25,7 @@ namespace Hilbert.S4Dot3
 
 instance Kripke.sound : Sound (Hilbert.S4Dot3) ReflexiveTransitiveConnectedFrameClass := inferInstance
 
-instance Kripke.consistent : System.Consistent (Hilbert.S4Dot3) :=
+instance Kripke.consistent : Entailment.Consistent (Hilbert.S4Dot3) :=
   Kripke.Hilbert.consistent_of_FrameClass Kripke.ReflexiveTransitiveConnectedFrameClass
 
 
@@ -64,7 +64,7 @@ instance Kripke.canonical : Canonical (Hilbert.S4Dot3) ReflexiveTransitiveConnec
     have : (□(□φ ➝ ψ) ⋎ □(□ψ ➝ φ)) ∉ X := by apply iff_mem_or.not.mpr; push_neg; exact ⟨hpqX, hqpX⟩;
     have : □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) ∈ X := by
       apply membership_iff.mpr;
-      exact System.axiomDot3!;
+      exact Entailment.axiomDot3!;
     contradiction;
 
 instance Kripke.complete : Complete (Hilbert.S4Dot3) ReflexiveTransitiveConnectedFrameClass := inferInstance

@@ -12,7 +12,7 @@ abbrev Kripke.ReflexiveTransitiveSymmetricFiniteFrameClass : FiniteFrameClass :=
 
 namespace Hilbert.KT4B
 
-instance Kripke.consistent : System.Consistent (Hilbert.KT4B) := by
+instance Kripke.consistent : Entailment.Consistent (Hilbert.KT4B) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩});
   exact eq_Geach;
 

@@ -15,7 +15,7 @@ instance Kripke.sound : Sound (Hilbert.KT) (Kripke.ReflexiveFrameClass) := by
   . unfold ReflexiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
     simp [Geachean.reflexive_def];
 
-instance Kripke.consistent : System.Consistent (Hilbert.KT) := by
+instance Kripke.consistent : Entailment.Consistent (Hilbert.KT) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩});
   exact eq_Geach;
 

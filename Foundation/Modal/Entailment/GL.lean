@@ -1,11 +1,11 @@
-import Foundation.Modal.System.K4
+import Foundation.Modal.Entailment.K4
 
-namespace LO.System
+namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [System F S]
-variable {𝓢 : S} [System.GL 𝓢]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {𝓢 : S} [Entailment.GL 𝓢]
 
 def goedel2 : 𝓢 ⊢ (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := by
   apply negReplaceIff';
@@ -34,7 +34,7 @@ protected def axiomFour : 𝓢 ⊢ Axioms.Four φ := by
   have : 𝓢 ⊢ φ ➝ (□⊡φ ➝ ⊡φ) := impTrans'' this (implyLeftReplace BoxBoxdot_BoxDotbox);
   exact impTrans'' (impTrans'' (implyBoxDistribute' this) axiomL) (implyBoxDistribute' $ and₂);
 instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ GL.axiomFour⟩
-instance : System.K4 𝓢 where
+instance : Entailment.K4 𝓢 where
 
 protected def axiomH : 𝓢 ⊢ Axioms.H φ := impTrans'' (implyBoxDistribute' and₁) axiomL
 instance : HasAxiomH 𝓢 := ⟨fun _ ↦ GL.axiomH⟩
@@ -93,4 +93,4 @@ lemma imply_box_box_of_imply_boxdot_axiomT! (h : 𝓢 ⊢! ⊡φ ➝ (□ψ ➝ 
 lemma imply_box_box_of_imply_boxdot_plain! (h : 𝓢 ⊢! ⊡φ ➝ ψ) : 𝓢 ⊢! □φ ➝ □ψ := by
   exact imply_box_box_of_imply_boxdot_axiomT! $ imply_boxdot_axiomT_of_imply_boxdot_boxdot! $ imply_boxdot_boxdot_of_imply_boxdot_plain! h
 
-end LO.System
+end LO.Entailment

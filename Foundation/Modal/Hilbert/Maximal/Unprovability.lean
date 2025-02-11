@@ -3,7 +3,7 @@ import Foundation.IntProp.Kripke.Hilbert.Cl.Classical
 
 namespace LO.Modal
 
-open System
+open Entailment
 
 open IntProp
 
@@ -42,7 +42,7 @@ namespace K4
 lemma provable_Cl_trivTranslated : (Hilbert.K4) ⊢! φ → (Hilbert.Cl) ⊢! φᵀᴾ := by
   intro h;
   apply Hilbert.Triv.classical_reducible.mp;
-  exact System.weakerThan_iff.mp K4_weakerThan_Triv h;
+  exact Entailment.weakerThan_iff.mp K4_weakerThan_Triv h;
 
 lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
   apply not_imp_not.mpr provable_Cl_trivTranslated;
@@ -72,7 +72,7 @@ lemma unprovable_AxiomT : (Hilbert.GL) ⊬ Axioms.T (.atom a) := by
   use (λ _ => False);
   simp [Axioms.T, VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
 
-instance : System.Consistent (Hilbert.GL) := by
+instance : Entailment.Consistent (Hilbert.GL) := by
   apply consistent_iff_exists_unprovable.mpr;
   use (Axioms.T (atom 0));
   apply unprovable_AxiomT;
@@ -80,7 +80,7 @@ instance : System.Consistent (Hilbert.GL) := by
 end GL
 
 theorem not_S4_weakerThan_GL : ¬(Hilbert.S4) ⪯ (Hilbert.GL) := by
-  apply System.not_weakerThan_iff.mpr;
+  apply Entailment.not_weakerThan_iff.mpr;
   existsi (Axioms.T (atom 0));
   constructor;
   . exact axiomT!;

@@ -108,7 +108,7 @@ open Kripke
 open Formula.Kripke
 open Formula (BoxdotTranslation)
 open Modal.Kripke
-open System
+open Entailment
 
 
 lemma provable_boxdotTranslated_GL_of_Grz : (Hilbert.Grz) ⊢! φ → (Hilbert.GL) ⊢! φᵇ := boxdotTranslated_of_dominate $ by

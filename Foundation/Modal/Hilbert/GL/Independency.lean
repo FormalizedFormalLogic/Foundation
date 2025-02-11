@@ -3,7 +3,7 @@ import Foundation.Modal.Kripke.Hilbert.GL.MDP
 
 namespace LO.Modal
 
-open System
+open Entailment
 open IntProp
 
 variable [DecidableEq α]

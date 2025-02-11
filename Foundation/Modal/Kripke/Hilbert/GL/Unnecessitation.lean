@@ -3,7 +3,7 @@ import Foundation.Modal.Kripke.SimpleExtension
 
 namespace LO.Modal
 
-open System
+open Entailment
 open Kripke
 open Formula.Kripke
 
@@ -45,7 +45,7 @@ theorem unnecessitation! : Hilbert.GL ⊢! □φ → Hilbert.GL ⊢! φ := by
   have : Hilbert.GL ⊢! ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 
-noncomputable instance : System.Unnecessitation Hilbert.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩
+noncomputable instance : Entailment.Unnecessitation Hilbert.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩
 
 end Hilbert.GL
 

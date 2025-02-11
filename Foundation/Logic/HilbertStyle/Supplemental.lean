@@ -1,11 +1,11 @@
-import Foundation.Logic.System
+import Foundation.Logic.Entailment
 import Foundation.Logic.HilbertStyle.Context
 
-namespace LO.System
+namespace LO.Entailment
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [System F S]
-         {𝓢 : S} [System.Minimal 𝓢]
+         {S : Type*} [Entailment F S]
+         {𝓢 : S} [Entailment.Minimal 𝓢]
          {φ ψ χ : F}
          {Γ Δ : List F}
 
@@ -321,7 +321,7 @@ lemma iff_neg_right_to_left'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ∼φ ⭤ ψ) : 
 
 section NegationEquiv
 
-variable [System.NegationEquiv 𝓢]
+variable [Entailment.NegationEquiv 𝓢]
 
 def negneg_equiv : 𝓢 ⊢ ∼∼φ ⭤ ((φ ➝ ⊥) ➝ ⊥) := by
   apply iffIntro;
@@ -817,4 +817,4 @@ lemma inconsistent_of_provable_of_unprovable {φ : F}
 
 end consistency
 
-end LO.System
+end LO.Entailment

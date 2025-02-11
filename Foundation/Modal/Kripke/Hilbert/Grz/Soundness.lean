@@ -3,14 +3,14 @@ import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.AxiomGrz
 import Foundation.Modal.Kripke.Hilbert.KT
 import Foundation.Modal.Kripke.Hilbert.Soundness
-import Foundation.Modal.System.Grz
+import Foundation.Modal.Entailment.Grz
 
 namespace LO.Modal
 
 open Formula
 open Formula.Kripke
-open System
-open System.Context
+open Entailment
+open Entailment.Context
 open Kripke
 
 namespace Kripke
@@ -28,7 +28,7 @@ namespace Hilbert.Grz
 
 instance Kripke.sound : Sound (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass) := inferInstance
 
-instance Kripke.consistent : System.Consistent (Hilbert.Grz) :=
+instance Kripke.consistent : Entailment.Consistent (Hilbert.Grz) :=
   Kripke.Hilbert.consistent_of_FiniteFrameClass ReflexiveTransitiveAntiSymmetricFiniteFrameClass
 
 end Hilbert.Grz

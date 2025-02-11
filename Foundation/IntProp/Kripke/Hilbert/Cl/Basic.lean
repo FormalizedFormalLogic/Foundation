@@ -46,7 +46,7 @@ instance : EuclideanFrameClass.DefinedBy (Hilbert.Cl.axioms) := FrameClass.defin
 
 instance sound : Sound Hilbert.Cl EuclideanFrameClass := inferInstance
 
-instance consistent : System.Consistent Hilbert.Cl := Kripke.Hilbert.consistent_of_FrameClass EuclideanFrameClass
+instance consistent : Entailment.Consistent Hilbert.Cl := Kripke.Hilbert.consistent_of_FrameClass EuclideanFrameClass
 
 end Hilbert.Cl.Kripke
 
