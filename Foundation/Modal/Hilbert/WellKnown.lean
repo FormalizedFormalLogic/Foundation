@@ -313,6 +313,9 @@ instance : (Hilbert.GL).HasK where p := 0; q := 1;
 instance : (Hilbert.GL).HasL where p := 0
 instance : Entailment.GL (Hilbert.GL) where
 
+protected abbrev KH : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.H (.atom 0)}⟩
+instance : (Hilbert.KH).HasK where p := 0; q := 1;
+instance : (Hilbert.KH).HasH where p := 0
 
 protected abbrev Grz : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0)}⟩
 instance : (Hilbert.Grz).HasK where p := 0; q := 1;
