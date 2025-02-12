@@ -87,7 +87,8 @@ lemma bold_sigma_one_completeness {n} {φ : Semiformula ℒₒᵣ ξ n} (hp : Hi
 
 lemma sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ₀ σ → M ⊧ₘ₀ σ := by
-  simp [models₀_iff]; intro h
+  suffices Semiformula.Evalbm ℕ ![] σ → Semiformula.Evalbm M ![] σ by simpa [models₀_iff]
+  intro h
   simpa [Matrix.empty_eq, Empty.eq_elim] using bold_sigma_one_completeness hσ h
 
 end Arith
@@ -109,6 +110,90 @@ theorem sigma_one_completeness_iff [ss : Sigma1Sound T] {σ : Sentence ℒₒᵣ
     ℕ ⊧ₘ₀ σ ↔ T ⊢! ↑σ :=
   haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   ⟨fun h ↦ sigma_one_completeness (T := T) hσ h, fun h ↦ ss.sound (by simp [hσ]) h⟩
+
+/-!
+## Unprovable theorems of $\mathsf{R}_0$
+
+$\omega + 1$ (the structure of order type $\omega + 1$) is a models of $\mathsf{R}_0$.
+-/
+
+/-! ω + 1 models 𝐑₀ -/
+namespace Countermodel
+
+def OmegaAddOne := Option ℕ
+
+namespace OmegaAddOne
+
+instance : NatCast OmegaAddOne := ⟨fun i ↦ .some i⟩
+
+instance (n : ℕ) : OfNat OmegaAddOne n := ⟨.some n⟩
+
+instance : Top OmegaAddOne := ⟨.none⟩
+
+instance : ORingStruc OmegaAddOne where
+  add a b :=
+    match a, b with
+    | .some i, .some j => i + j
+    |   .none, _       => 0
+    |       _,   .none => 0
+  mul a b :=
+    match a, b with
+    | .some i, .some j => (i * j)
+    |   .none, _       => 0
+    |       _,   .none => 0
+  lt a b :=
+    match a, b with
+    | .some i, .some j => i < j
+    |   .none, _       => False
+    | .some _,   .none => True
+
+@[simp] lemma coe_zero : (↑(0 : ℕ) : OmegaAddOne) = 0 := rfl
+
+@[simp] lemma coe_one : (↑(1 : ℕ) : OmegaAddOne) = 1 := rfl
+
+@[simp] lemma coe_add (a b : ℕ) : ↑(a + b) = ((↑a + ↑b) : OmegaAddOne) := rfl
+
+@[simp] lemma coe_mul (a b : ℕ) : ↑(a * b) = ((↑a * ↑b) : OmegaAddOne) := rfl
+
+@[simp] lemma lt_coe_iff (n m : ℕ) : (n : OmegaAddOne) < (m : OmegaAddOne) ↔ n < m := by rfl
+
+@[simp] lemma not_top_lt (n : ℕ) : ¬⊤ < (n : OmegaAddOne) := by rintro ⟨⟩
+
+@[simp] lemma lt_top (n : ℕ) : (n : OmegaAddOne) < ⊤ := by trivial
+
+@[simp] lemma top_add_zero : (⊤ : OmegaAddOne) + 0 = 0 := by rfl
+
+@[simp] lemma numeral_eq (n : ℕ) : (ORingStruc.numeral n : OmegaAddOne) = n :=
+  match n with
+  |     0 => rfl
+  |     1 => rfl
+  | n + 2 => by simp [ORingStruc.numeral, numeral_eq (n + 1)]; rfl
+
+@[simp] lemma coe_inj_iff (n m : ℕ) : (↑n : OmegaAddOne) = (↑m : OmegaAddOne) ↔ n = m := Option.some_inj
+
+def cases' {P : OmegaAddOne → Sort*}
+    (nat : (n : ℕ) → P n)
+    (top : P ⊤) : ∀ x : OmegaAddOne, P x
+  | .some n => nat n
+  |   .none => top
+
+instance : OmegaAddOne ⊧ₘ* 𝐑₀ := ⟨by
+  intro σ h
+  rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
+  case equal h =>
+    have : OmegaAddOne ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    exact modelsTheory_iff.mp this h
+  case Ω₃ h => exact h
+  case Ω₄ n =>
+    intro x
+    cases x using cases' <;> simp⟩
+
+end OmegaAddOne
+
+end Countermodel
+
+lemma R₀_unprovable_add_zero : 𝐑₀ ⊬ “x | x + 0 = x” :=
+  unprovable_of_countermodel (M := Countermodel.OmegaAddOne) (fun _ ↦ ⊤) _ (by simp)
 
 end FirstOrder.Arith
 

@@ -96,14 +96,14 @@ variable {L : Language} [L.ORing] [s : Structure L M]
 
 lemma standardModel_lMap_oringEmb_eq_standardModel : s.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) = standardModel M := by
   apply standardModel_unique' M _
-  · exact @Structure.Zero.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (by simp [Semiterm.Operator.val, ←Semiterm.val_lMap]; exact Structure.Zero.zero)
-  · exact @Structure.One.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (by simp [Semiterm.Operator.val, ←Semiterm.val_lMap]; exact Structure.One.one)
-  · exact @Structure.Add.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (fun a b ↦ by simp [Semiterm.Operator.val, ←Semiterm.val_lMap]; exact Structure.Add.add a b)
-  · exact @Structure.Mul.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (fun a b ↦ by simp [Semiterm.Operator.val, ←Semiterm.val_lMap]; exact Structure.Mul.mul a b)
+  · exact @Structure.Zero.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (by simpa [Semiterm.Operator.val, ←Semiterm.val_lMap] using Structure.Zero.zero)
+  · exact @Structure.One.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (by simpa [Semiterm.Operator.val, ←Semiterm.val_lMap] using Structure.One.one)
+  · exact @Structure.Add.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (fun a b ↦ by simpa [Semiterm.Operator.val, ←Semiterm.val_lMap] using Structure.Add.add a b)
+  · exact @Structure.Mul.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (fun a b ↦ by simpa [Semiterm.Operator.val, ←Semiterm.val_lMap] using Structure.Mul.mul a b)
   · exact @Structure.Eq.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ (fun a b ↦ by
-      simp [Semiformula.Operator.val, ←Semiformula.eval_lMap]; exact Structure.Eq.eq a b)
+      simpa [Semiformula.Operator.val, ←Semiformula.eval_lMap] using Structure.Eq.eq a b)
   · exact @Structure.LT.mk ℒₒᵣ M (s.lMap Language.oringEmb) _ _ (fun a b ↦ by
-      simp [Semiformula.Operator.val, ←Semiformula.eval_lMap]; exact Structure.LT.lt a b)
+      simpa [Semiformula.Operator.val, ←Semiformula.eval_lMap] using Structure.LT.lt a b)
 
 variable {M} {e : Fin n → M} {ε : ξ → M}
 
@@ -154,11 +154,12 @@ variable {ξ : Type v} (e : Fin n → ℕ) (ε : ξ → ℕ)
 
 instance models_CobhamR0 : ℕ ⊧ₘ* 𝐑₀ := ⟨by
   intro σ h
-  rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
+  rcases h <;> try { simp [models_def, ←le_iff_eq_or_lt]; done }
   case equal h =>
     have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
-    exact modelsTheory_iff.mp this h
-  case Ω₃ h => exact h⟩
+    simpa [models_def] using modelsTheory_iff.mp this h
+  case Ω₃ h =>
+    simpa [models_def, ←le_iff_eq_or_lt] using h⟩
 
 instance models_PAMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   intro σ h
@@ -178,7 +179,7 @@ instance models_PAMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
     exact modelsTheory_iff.mp this h⟩
 
 lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ := by
-  simp[Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
+  simp [Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
     Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
@@ -217,6 +218,15 @@ notation "𝐓𝐀" => Theory.TrueArith
 instance Standard.models_trueArith : ℕ ⊧ₘ* 𝐓𝐀 :=
   modelsTheory_iff.mpr fun {φ} ↦ by simp
 
+lemma trueArith_provable_iff {φ : SyntacticFormula ℒₒᵣ} :
+    𝐓𝐀 ⊢! φ ↔ ℕ ⊧ₘ φ :=
+  ⟨fun h ↦ consequence_iff'.mp (sound₀! h) ℕ, fun h ↦ Entailment.by_axm _ h⟩
+
+instance (T : Theory ℒₒᵣ) [ℕ ⊧ₘ* T] : T ⪯ 𝐓𝐀 := ⟨by
+  rintro φ h
+  have : ℕ ⊧ₘ φ := consequence_iff'.mp (sound₀! h) ℕ
+  exact trueArith_provable_iff.mpr this⟩
+
 variable (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T]
 
 lemma oRing_consequence_of (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
@@ -231,10 +241,13 @@ namespace Theory
 open Arith
 
 instance CobhamR0.consistent : Entailment.Consistent 𝐑₀ :=
-  Sound.consistent_of_satisfiable ⟨_, Standard.models_CobhamR0⟩
+  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐑₀)⟩
 
 instance Peano.consistent : Entailment.Consistent 𝐏𝐀 :=
-  Sound.consistent_of_satisfiable ⟨_, Standard.models_peano⟩
+  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐏𝐀)⟩
+
+instance TrueArith.consistent : Entailment.Consistent 𝐓𝐀 :=
+  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐓𝐀)⟩
 
 end Theory
 

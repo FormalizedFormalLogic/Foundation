@@ -94,6 +94,8 @@ variable {𝓢 : S} {𝓣 : T} {𝓤 : U}
 
 @[instance, simp, refl] protected lemma WeakerThan.refl (𝓢 : S) : 𝓢 ⪯ 𝓢 := ⟨Set.Subset.refl _⟩
 
+lemma WeakerThan.wk (h : 𝓢 ⪯ 𝓣) {φ} : 𝓢 ⊢! φ → 𝓣 ⊢! φ := @h.subset φ
+
 lemma WeakerThan.pbl [h : 𝓢 ⪯ 𝓣] {φ} : 𝓢 ⊢! φ → 𝓣 ⊢! φ := @h.subset φ
 
 @[trans] lemma WeakerThan.trans : 𝓢 ⪯ 𝓣 → 𝓣 ⪯ 𝓤 → 𝓢 ⪯ 𝓤 := fun w₁ w₂ ↦ ⟨Set.Subset.trans w₁.subset w₂.subset⟩
@@ -124,6 +126,9 @@ lemma strictlyWeakerThan.trans : 𝓢 ⪱ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ �
     . assumption;
 
 lemma weakening (h : 𝓢 ⪯ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := weakerThan_iff.mp h
+
+lemma StrictlyWeakerThan.of_unprovable_provable {𝓢 : S} {𝓣 : T} [𝓢 ⪯ 𝓣] {φ : F}
+    (hS : 𝓢 ⊬ φ) (hT : 𝓣 ⊢! φ) : 𝓢 ⪱ 𝓣 := ⟨inferInstance, fun h ↦ hS (h.wk hT)⟩
 
 lemma Equiv.iff : 𝓢 ≊ 𝓣 ↔ (∀ f, 𝓢 ⊢! f ↔ 𝓣 ⊢! f) :=
   ⟨fun e ↦ by simpa [Set.ext_iff, theory] using e.eq, fun e ↦ ⟨by simpa [Set.ext_iff, theory] using e⟩⟩
