@@ -158,7 +158,7 @@ section ProvablyProperOn
 
 variable (T : Theory ℒₒᵣ)
 
-lemma ProvablyProperOn.ofProperOn [𝐄𝐐 ≼ T] {φ : 𝚫-[m].Semisentence n}
+lemma ProvablyProperOn.ofProperOn [𝐄𝐐 ⪯ T] {φ : 𝚫-[m].Semisentence n}
     (h : ∀ (M : Type w) [ORingStruc M] [M ⊧ₘ* T], φ.ProperOn M) : φ.ProvablyProperOn T := by
   apply complete (T := T) <| FirstOrder.Arith.oRing_consequence_of.{w} T _ ?_
   intro M _ _

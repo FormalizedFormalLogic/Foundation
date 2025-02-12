@@ -241,7 +241,7 @@ end ToString
 
 section model
 
-variable {T : Theory ℒₒᵣ} [𝐄𝐐 ≼ T]
+variable {T : Theory ℒₒᵣ} [𝐄𝐐 ⪯ T]
 
 variable (M : Type*) [ORingStruc M] [M ⊧ₘ* T]
 

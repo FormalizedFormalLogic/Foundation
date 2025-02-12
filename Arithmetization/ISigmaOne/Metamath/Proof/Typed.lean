@@ -139,7 +139,7 @@ scoped infix:45 " ⊢¹ " => Language.Theory.TDerivation
 
 def Language.Theory.TProof (T : Language.TTheory L) (p : L.Formula) := T ⊢¹ insert p ∅
 
-instance : System L.Formula L.TTheory := ⟨Language.Theory.TProof⟩
+instance : Entailment L.Formula L.TTheory := ⟨Language.Theory.TProof⟩
 
 instance : HasSubset L.TTheory := ⟨fun T U ↦ T.thy ⊆ U.thy⟩
 
@@ -274,9 +274,9 @@ def ofSubset (h : T ⊆ U) {p : L.Formula} : T ⊢ p → U ⊢ p := TDerivation.
 lemma of_subset (h : T ⊆ U) {p : L.Formula} : T ⊢! p → U ⊢! p := by
   rintro ⟨b⟩; exact ⟨ofSubset h b⟩
 
-instance : System.ModusPonens T := ⟨modusPonens⟩
+instance : Entailment.ModusPonens T := ⟨modusPonens⟩
 
-instance : System.NegationEquiv T where
+instance : Entailment.NegationEquiv T where
   neg_equiv p := by
     simp [Axioms.NegEquiv, LO.LogicalConnective.iff, Semiformula.imp_def]
     apply TDerivation.and
@@ -289,7 +289,7 @@ instance : System.NegationEquiv T where
       · exact TDerivation.em p
       · exact TDerivation.verum
 
-instance : System.Minimal T where
+instance : Entailment.Minimal T where
   verum := TDerivation.toTProof <| TDerivation.verum
   imply₁ (p q) := by
     simp only [Axioms.Imply₁, Semiformula.imp_def]
@@ -361,7 +361,7 @@ instance : System.Minimal T where
       · exact TDerivation.em q
       · exact TDerivation.em r
 
-instance : System.Classical T where
+instance : Entailment.Classical T where
   dne p := by
     simp [Axioms.DNE, Semiformula.imp_def]
     apply TDerivation.or
@@ -413,9 +413,9 @@ lemma conj_shift (Γ : List L.Formula) : (⋀Γ).shift = ⋀(Γ.map .shift) := b
       simp [hps, ih]
 
 def generalize {Γ} {p : L.Semiformula (0 + 1)} (d : Γ.map .shift ⊢[T] p.free) : Γ ⊢[T] p.all := by
-  apply System.FiniteContext.ofDef
+  apply Entailment.FiniteContext.ofDef
   apply generalizeAux
-  simpa [conj_shift] using System.FiniteContext.toDef d
+  simpa [conj_shift] using Entailment.FiniteContext.toDef d
 
 lemma generalize! {Γ} {p : L.Semiformula (0 + 1)} (d : Γ.map .shift ⊢[T]! p.free) : Γ ⊢[T]! p.all := ⟨generalize d.get⟩
 
