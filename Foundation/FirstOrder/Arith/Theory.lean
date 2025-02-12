@@ -88,15 +88,33 @@ lemma coe_indH_subset_indH : (indScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theo
   exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) φ, Hierarchy.oringEmb Hp,
     by simp [succInd, Semiformula.lMap_substs]⟩
 
-instance PAMinus.subtheoryOfIndH : 𝐏𝐀⁻ ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.ofSubset (by simp [indH, Theory.add_def])
+lemma indScheme_subset (h : ∀ {φ : Semiformula ℒₒᵣ ℕ 1},  C φ → C' φ) : indScheme ℒₒᵣ C ⊆ indScheme ℒₒᵣ C' := by
+  intro _; simp [indScheme]; rintro φ hp rfl; exact ⟨φ, h hp, rfl⟩
 
-instance EQ.subtheoryOfCobhamR0 : 𝐄𝐐 ⪯ 𝐑₀ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ CobhamR0.equal φ hp
+lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ 𝐈𝚺 s₂ :=
+  Set.union_subset_union_right _ (indScheme_subset (fun H ↦ H.mono h))
 
-instance EQ.subtheoryOfPAMinus : 𝐄𝐐 ⪯ 𝐏𝐀⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PAMinus.equal φ hp
+instance : 𝐏𝐀⁻ ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.ofSubset (by simp [indH, Theory.add_def])
 
-instance EQ.subtheoryOfIndH : 𝐄𝐐 ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
+instance : 𝐄𝐐 ⪯ 𝐑₀ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ CobhamR0.equal φ hp
 
-instance EQ.subtheoryOfIOpen : 𝐄𝐐 ⪯ 𝐈open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
+instance : 𝐄𝐐 ⪯ 𝐏𝐀⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PAMinus.equal φ hp
+
+instance : 𝐄𝐐 ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
+
+instance : 𝐄𝐐 ⪯ 𝐈open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
+
+instance (i) : 𝐈open ⪯ 𝐈𝚺i :=
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| indScheme_subset Hierarchy.of_open
+
+lemma iSigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⪯ 𝐈𝚺 s₂ :=
+  Entailment.WeakerThan.ofSubset (iSigma_subset_mono h)
+
+instance : 𝐈𝚺₀ ⪯ 𝐈𝚺₁ :=
+  iSigma_weakerThan_of_le (by decide)
+
+instance (i) : 𝐈𝚺i ⪯ 𝐏𝐀 :=
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| indScheme_subset (by intros; trivial)
 
 end Theory
 

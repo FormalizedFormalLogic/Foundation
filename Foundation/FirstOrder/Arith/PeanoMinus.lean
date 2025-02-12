@@ -193,6 +193,11 @@ instance CobhamR0.subTheoryPAMinus : 𝐑₀ ⪯ 𝐏𝐀⁻ := Entailment.Weake
       · intro hx; rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩; exact ⟨x, by simpa using hx, by simp⟩
       · rintro ⟨i, hi, rfl⟩; simp [hi]
 
+instance : 𝐑₀ ⪱ 𝐏𝐀⁻ :=
+  Entailment.StrictlyWeakerThan.of_unprovable_provable
+    R₀_unprovable_add_zero
+    (Entailment.by_axm _ Theory.PAMinus.addZero)
+
 end FirstOrder.Arith
 
 end LO
