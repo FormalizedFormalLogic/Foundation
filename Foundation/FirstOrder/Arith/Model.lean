@@ -241,10 +241,13 @@ namespace Theory
 open Arith
 
 instance CobhamR0.consistent : Entailment.Consistent 𝐑₀ :=
-  Sound.consistent_of_satisfiable ⟨_, Standard.models_CobhamR0⟩
+  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐑₀)⟩
 
 instance Peano.consistent : Entailment.Consistent 𝐏𝐀 :=
-  Sound.consistent_of_satisfiable ⟨_, Standard.models_peano⟩
+  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐏𝐀)⟩
+
+instance TrueArith.consistent : Entailment.Consistent 𝐓𝐀 :=
+  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐓𝐀)⟩
 
 end Theory
 
