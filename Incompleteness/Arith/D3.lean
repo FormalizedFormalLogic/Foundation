@@ -63,7 +63,7 @@ def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).SemitermVec n
 
 namespace TProof
 
-open Language.Theory.TProof System
+open Language.Theory.TProof Entailment
 
 variable (T)
 

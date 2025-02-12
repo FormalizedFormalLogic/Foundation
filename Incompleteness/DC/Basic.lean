@@ -8,9 +8,9 @@ namespace Theory.Alt
 
 variable {L : Language} {T U : Theory L}
 
-instance [s : T ≼ U] : T ≼ U.alt.thy := s
+instance [s : T ⪯ U] : T ⪯ U.alt.thy := s
 
-instance [s : T ≼ U] : T.alt ≼ U.alt := ⟨fun b ↦ s.prf b⟩
+instance [s : T ⪯ U] : T.alt ⪯ U.alt := ⟨fun _ b ↦ s.pbl b⟩
 
 end Theory.Alt
 
@@ -62,10 +62,10 @@ class Rosser (𝔅 : ProvabilityPredicate T₀ T) where
 
 section
 
-open LO.System
+open LO.Entailment
 
 variable [L.DecidableEq]
-         {T₀ T : Theory L} [T₀ ≼ T]
+         {T₀ T : Theory L} [T₀ ⪯ T]
          {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL]
          {σ τ : Sentence L}
 
@@ -78,22 +78,22 @@ alias Ro := Rosser.Ro
 
 def D1_shift : T ⊢!. σ → T ⊢!. (𝔅 σ) := by
   intro h;
-  apply System.Subtheory.prf! (𝓢 := T₀);
+  apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
   apply D1 h;
 
 def D2_shift [𝔅.HBL2] : T ⊢!. 𝔅 (σ ➝ τ) ➝ (𝔅 σ) ➝ (𝔅 τ) := by
-  apply System.Subtheory.prf! (𝓢 := T₀);
+  apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
   apply D2;
 
 def D3_shift [𝔅.HBL3] : T ⊢!. (𝔅 σ) ➝ 𝔅 (𝔅 σ) := by
-  apply System.Subtheory.prf! (𝓢 := T₀);
+  apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
   apply D3;
 
 def FLT_shift [𝔅.FormalizedLoeb] : T ⊢!. 𝔅 ((𝔅 σ) ➝ σ) ➝ (𝔅 σ) := by
-  apply System.Subtheory.prf! (𝓢 := T₀);
+  apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
   apply 𝔅.FLT;
 
-def D2' [𝔅.HBL2] [System.ModusPonens T] : T₀ ⊢!. 𝔅 (σ ➝ τ) → T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := by
+def D2' [𝔅.HBL2] [Entailment.ModusPonens T] : T₀ ⊢!. 𝔅 (σ ➝ τ) → T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := by
   intro h;
   exact D2 ⨀ h;
 
@@ -123,7 +123,7 @@ end ProvabilityPredicate
 
 variable {T₀ T : Theory L} {𝔅 : ProvabilityPredicate T₀ T}
 
-open LO.System
+open LO.Entailment
 open Diagonalization
 open ProvabilityPredicate
 
@@ -141,9 +141,9 @@ lemma goedel_spec : T₀ ⊢!. γ ⭤ ∼𝔅 γ := by
   simp [goedel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
   rfl;
 
-variable [T₀ ≼ T]
+variable [T₀ ⪯ T]
 
-private lemma goedel_specAux₁ : T ⊢!. γ ⭤ ∼𝔅 γ := Subtheory.prf! (𝓢 := T₀) goedel_spec
+private lemma goedel_specAux₁ : T ⊢!. γ ⭤ ∼𝔅 γ := WeakerThan.pbl (𝓢 := T₀.alt) goedel_spec
 
 private lemma goedel_specAux₂ [L.DecidableEq] : T ⊢!. ∼γ ➝ 𝔅 γ := contra₂'! $ and₂'! goedel_specAux₁
 
@@ -156,11 +156,11 @@ open GoedelSound
 
 section First
 
-variable [T₀ ≼ T] [Diagonalization T₀]
+variable [T₀ ⪯ T] [Diagonalization T₀]
 
 local notation "γ" => 𝔅.goedel
 
-variable [System.Consistent T]
+variable [Entailment.Consistent T]
 
 theorem unprovable_goedel : T ⊬. γ := by
   intro h;
@@ -179,14 +179,14 @@ theorem unrefutable_goedel [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) →
     inconsistent_iff_provable_bot.mpr (by simpa [provable₀_iff] using this);
   contradiction;
 
-theorem goedel_independent [L.DecidableEq] [𝔅.GoedelSound] : System.Undecidable T ↑γ := by
-  suffices T ⊬. γ ∧ T ⊬. ∼γ by simpa [System.Undecidable, not_or, unprovable₀_iff] using this
+theorem goedel_independent [L.DecidableEq] [𝔅.GoedelSound] : Entailment.Undecidable T ↑γ := by
+  suffices T ⊬. γ ∧ T ⊬. ∼γ by simpa [Entailment.Undecidable, not_or, unprovable₀_iff] using this
   constructor
   . apply unprovable_goedel
   . apply unrefutable_goedel
 
 theorem first_incompleteness [L.DecidableEq] [𝔅.GoedelSound]
-  : ¬System.Complete T := System.incomplete_iff_exists_undecidable.mpr ⟨γ, goedel_independent⟩
+  : ¬Entailment.Complete T := Entailment.incomplete_iff_exists_undecidable.mpr ⟨γ, goedel_independent⟩
 
 end First
 
@@ -198,14 +198,14 @@ local notation "γ" => 𝔅.goedel
 
 lemma formalized_consistent_of_existance_unprovable : T₀ ⊢!. ∼(𝔅 σ) ➝ 𝔅.con := contra₀'! $ 𝔅.D2 ⨀ (D1 efq!)
 
-private lemma consistency_lemma_1 [T₀ ≼ U] : (U ⊢!. 𝔅.con ➝ ∼(𝔅 σ)) ↔ (U ⊢!. (𝔅 σ) ➝ 𝔅 (∼σ)) := by
+private lemma consistency_lemma_1 [T₀ ⪯ U] : (U ⊢!. 𝔅.con ➝ ∼(𝔅 σ)) ↔ (U ⊢!. (𝔅 σ) ➝ 𝔅 (∼σ)) := by
   constructor;
   . intro H;
-    exact contra₃'! $ imp_trans''! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) H;
+    exact contra₃'! $ imp_trans''! (WeakerThan.pbl (𝓢 := T₀.alt) formalized_consistent_of_existance_unprovable) H;
   . intro H
     apply contra₀'!
     have : T₀ ⊢!. (𝔅 σ) ⋏ 𝔅 (∼σ) ➝ 𝔅 ⊥ := imp_trans''! prov_collect_and $ prov_distribute_imply lac!;
-    have : U ⊢!. (𝔅 σ) ➝ 𝔅 (∼σ) ➝ 𝔅 ⊥ := Subtheory.prf! $ and_imply_iff_imply_imply'!.mp $ this;
+    have : U ⊢!. (𝔅 σ) ➝ 𝔅 (∼σ) ➝ 𝔅 ⊥ := WeakerThan.pbl $ and_imply_iff_imply_imply'!.mp $ this;
     exact this ⨀₁ H;
 
 private lemma consistency_lemma_2 : T₀ ⊢!. ((𝔅 σ) ➝ 𝔅 (∼σ)) ➝ (𝔅 σ) ➝ 𝔅 ⊥ := by
@@ -220,22 +220,22 @@ private lemma consistency_lemma_2 : T₀ ⊢!. ((𝔅 σ) ➝ 𝔅 (∼σ)) ➝ 
   have d₃ : [(𝔅 σ), (𝔅 σ) ➝ 𝔅 (∼σ)] ⊢[T₀.alt]! 𝔅 (∼σ) := d₂ ⨀ d₁;
   exact ((FiniteContext.of'! this) ⨀ d₁) ⨀ d₃;
 
-variable [T₀ ≼ T] [Diagonalization T₀]
+variable [T₀ ⪯ T] [Diagonalization T₀]
 
 /-- Formalized First Incompleteness Theorem -/
 theorem formalized_unprovable_goedel : T ⊢!. 𝔅.con ➝ ∼𝔅 γ := by
   have h₁ : T₀ ⊢!. 𝔅 γ ➝ 𝔅 (𝔅 γ) := D3;
-  have h₂ : T ⊢!. 𝔅 γ ➝ ∼γ := Subtheory.prf! $ contra₁'! $ and₁'! goedel_spec;
+  have h₂ : T ⊢!. 𝔅 γ ➝ ∼γ := WeakerThan.pbl $ contra₁'! $ and₁'! goedel_spec;
   have h₃ : T₀ ⊢!. 𝔅 (𝔅 γ) ➝ 𝔅 (∼γ) := prov_distribute_imply h₂;
-  exact Subtheory.prf! $ contra₀'! $ consistency_lemma_2 ⨀ (imp_trans''! h₁ h₃);
+  exact WeakerThan.pbl $ contra₀'! $ consistency_lemma_2 ⨀ (imp_trans''! h₁ h₃);
 
 theorem iff_goedel_consistency : T ⊢!. γ ⭤ 𝔅.con :=
-  iff_trans''! goedel_specAux₁ $ iff_intro! (Subtheory.prf! (𝓢 := T₀) formalized_consistent_of_existance_unprovable) formalized_unprovable_goedel
+  iff_trans''! goedel_specAux₁ $ iff_intro! (WeakerThan.pbl (𝓢 := T₀.alt) formalized_consistent_of_existance_unprovable) formalized_unprovable_goedel
 
-theorem unprovable_consistency [System.Consistent T] : T ⊬. 𝔅.con :=
+theorem unprovable_consistency [Entailment.Consistent T] : T ⊬. 𝔅.con :=
   unprovable_iff! iff_goedel_consistency |>.mp $ unprovable_goedel
 
-theorem unrefutable_consistency [System.Consistent T] [𝔅.GoedelSound] : T ⊬. ∼𝔅.con :=
+theorem unrefutable_consistency [Entailment.Consistent T] [𝔅.GoedelSound] : T ⊬. ∼𝔅.con :=
   unprovable_iff! (neg_replace_iff'! $ iff_goedel_consistency) |>.mp $ unrefutable_goedel
 
 end Second
@@ -258,7 +258,7 @@ lemma kreisel_spec (σ : Sentence L) : T₀ ⊢!. κ(σ) ⭤ (𝔅 (κ(σ)) ➝ 
   simp [kreisel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
   rfl;
 
-private lemma kreisel_specAux₁ [T₀ ≼ T] (σ : Sentence L) : T₀ ⊢!. 𝔅 κ(σ) ➝ (𝔅 σ) := (imp_trans''! (D2 ⨀ (D1 (Subtheory.prf! <| and₁'! (kreisel_spec σ)))) D2) ⨀₁ D3
+private lemma kreisel_specAux₁ [T₀ ⪯ T] (σ : Sentence L) : T₀ ⊢!. 𝔅 κ(σ) ➝ (𝔅 σ) := (imp_trans''! (D2 ⨀ (D1 (WeakerThan.pbl <| and₁'! (kreisel_spec σ)))) D2) ⨀₁ D3
 
 private lemma kreisel_specAux₂ (σ : Sentence L) : T₀ ⊢!. (𝔅 κ(σ) ➝ σ) ➝ κ(σ) := and₂'! (kreisel_spec σ)
 
@@ -266,13 +266,13 @@ end KrieselSentence
 
 section LoebTheorem
 
-variable [T₀ ≼ T] [Diagonalization T₀] [𝔅.HBL]
+variable [T₀ ⪯ T] [Diagonalization T₀] [𝔅.HBL]
 
 local notation "κ(" σ ")" => 𝔅.kreisel σ
 
 theorem loeb_theorm (H : T ⊢!. (𝔅 σ) ➝ σ) : T ⊢!. σ := by
-  have d₁ : T ⊢!. 𝔅 (𝔅.kreisel σ) ➝ σ := imp_trans''! (Subtheory.prf! (kreisel_specAux₁ σ)) H;
-  have d₂ : T ⊢!. 𝔅 (𝔅.kreisel σ)     := Subtheory.prf! (𝓢 := T₀) (D1 $ Subtheory.prf! (kreisel_specAux₂ σ) ⨀ d₁);
+  have d₁ : T ⊢!. 𝔅 (𝔅.kreisel σ) ➝ σ := imp_trans''! (WeakerThan.pbl (kreisel_specAux₁ σ)) H;
+  have d₂ : T ⊢!. 𝔅 (𝔅.kreisel σ)     := WeakerThan.pbl (𝓢 := T₀.alt) (D1 $ WeakerThan.pbl (kreisel_specAux₂ σ) ⨀ d₁);
   exact d₁ ⨀ d₂;
 
 instance : 𝔅.Loeb := ⟨loeb_theorm (T := T)⟩
@@ -280,14 +280,14 @@ instance : 𝔅.Loeb := ⟨loeb_theorm (T := T)⟩
 theorem formalized_loeb_theorem [L.DecidableEq] : T₀ ⊢!. 𝔅 ((𝔅 σ) ➝ σ) ➝ (𝔅 σ) := by
   have hκ₁ : T₀ ⊢!. 𝔅 (κ(σ)) ➝ (𝔅 σ) := kreisel_specAux₁ σ;
   have : T₀ ⊢!. ((𝔅 σ) ➝ σ) ➝ (𝔅 κ(σ) ➝ σ) := replace_imply_left! hκ₁;
-  have : T ⊢!. ((𝔅 σ) ➝ σ) ➝ κ(σ) := Subtheory.prf! (𝓢 := T₀) $ imp_trans''! this (kreisel_specAux₂ σ);
+  have : T ⊢!. ((𝔅 σ) ➝ σ) ➝ κ(σ) := WeakerThan.pbl (𝓢 := T₀.alt) $ imp_trans''! this (kreisel_specAux₂ σ);
   exact imp_trans''! (D2 ⨀ (D1 this)) hκ₁;
 
 instance [L.DecidableEq] : 𝔅.FormalizedLoeb := ⟨formalized_loeb_theorem (T := T)⟩
 
 end LoebTheorem
 
-variable [System.Consistent T]
+variable [Entailment.Consistent T]
 
 lemma unprovable_consistency_via_loeb [𝔅.Loeb] : T ⊬. 𝔅.con := by
   by_contra hC;
@@ -295,7 +295,7 @@ lemma unprovable_consistency_via_loeb [𝔅.Loeb] : T ⊬. 𝔅.con := by
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr (by simpa [provable₀_iff] using this)
   contradiction
 
-variable [L.DecidableEq] [Diagonalization T₀] [T₀ ≼ T] [𝔅.HBL] [𝔅.GoedelSound]
+variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL] [𝔅.GoedelSound]
 
 lemma formalized_unprovable_not_consistency
   : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
@@ -308,7 +308,7 @@ lemma formalized_unrefutable_goedel
   : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.goedel) := by
   by_contra hC;
   have : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con)  := formalized_unprovable_not_consistency;
-  have : T ⊢!. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := imp_trans''! hC $ Subtheory.prf! $ and₁'! $ neg_replace_iff'! $ prov_distribute_iff $ neg_replace_iff'! iff_goedel_consistency;
+  have : T ⊢!. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := imp_trans''! hC $ WeakerThan.pbl $ and₁'! $ neg_replace_iff'! $ prov_distribute_iff $ neg_replace_iff'! iff_goedel_consistency;
   contradiction;
 
 end Loeb
@@ -326,13 +326,13 @@ variable [Diagonalization T₀] [𝔅.Rosser]
 
 lemma rosser_spec : T₀ ⊢!. ρ ⭤ ∼(𝔅 ρ) := goedel_spec
 
-private lemma rosser_specAux₁ [T₀ ≼ T] : T ⊢!. ρ ⭤ ∼(𝔅 ρ) := goedel_specAux₁
+private lemma rosser_specAux₁ [T₀ ⪯ T] : T ⊢!. ρ ⭤ ∼(𝔅 ρ) := goedel_specAux₁
 
 end RosserSentence
 
 section
 
-variable [Diagonalization T₀] [T₀ ≼ T] [System.Consistent T] [𝔅.Rosser]
+variable [Diagonalization T₀] [T₀ ⪯ T] [Entailment.Consistent T] [𝔅.Rosser]
 
 local notation "ρ" => 𝔅.rosser
 
@@ -340,25 +340,25 @@ lemma unprovable_rosser : T ⊬. ρ := unprovable_goedel
 
 theorem unrefutable_rosser : T ⊬. ∼ρ := by
   intro hnρ;
-  have hρ : T ⊢!. ρ := Subtheory.prf! $ (and₂'! rosser_spec) ⨀ (Ro hnρ);
+  have hρ : T ⊢!. ρ := WeakerThan.pbl $ (and₂'! rosser_spec) ⨀ (Ro hnρ);
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr <|
     by simpa [provable₀_iff] using (neg_equiv'!.mp hnρ) ⨀ hρ;
   contradiction
 
-theorem rosser_independent : System.Undecidable T ↑ρ := by
-  suffices T ⊬. ρ ∧ T ⊬. ∼ρ by simpa [System.Undecidable, not_or, unprovable₀_iff] using this;
+theorem rosser_independent : Entailment.Undecidable T ↑ρ := by
+  suffices T ⊬. ρ ∧ T ⊬. ∼ρ by simpa [Entailment.Undecidable, not_or, unprovable₀_iff] using this;
   constructor
   . apply unprovable_rosser
   . apply unrefutable_rosser
 
-theorem rosser_first_incompleteness (𝔅 : ProvabilityPredicate T₀ T) [𝔅.Rosser] : ¬System.Complete T :=
-  System.incomplete_iff_exists_undecidable.mpr ⟨𝔅.rosser, rosser_independent  ⟩
+theorem rosser_first_incompleteness (𝔅 : ProvabilityPredicate T₀ T) [𝔅.Rosser] : ¬Entailment.Complete T :=
+  Entailment.incomplete_iff_exists_undecidable.mpr ⟨𝔅.rosser, rosser_independent  ⟩
 
 omit [Diagonalization T₀] [Consistent T]
 /-- If `𝔅` satisfies Rosser provability condition, then `𝔅.con` is provable in `T`. -/
 theorem kriesel_remark : T ⊢!. 𝔅.con := by
   have : T₀ ⊢!. ∼𝔅 ⊥ := Ro (neg_equiv'!.mpr (by simp));
-  exact Subtheory.prf! $ this;
+  exact WeakerThan.pbl $ this;
 
 end
 

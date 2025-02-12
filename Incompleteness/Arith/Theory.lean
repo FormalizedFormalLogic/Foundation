@@ -89,7 +89,7 @@ lemma mul_ext {a₁ a₂ b₁ b₂ : M} (ha : eql a₁ a₂) (hb : eql b₁ b₂
   have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.CobhamR0'.replace “x. &0 * &1 = &2 * x”) (a₁ :>ₙ b₁ :>ₙ fun _ ↦ a₂)
   exact this b₁ b₂ hb e
 
-noncomputable instance : 𝐄𝐐 ≼ 𝐑₀' := System.Subtheory.ofAxm! <| by {
+noncomputable instance : 𝐄𝐐 ⪯ 𝐑₀' := Entailment.WeakerThan.ofAxm! <| by {
   intro φ hp
   cases hp
   · apply complete (consequence_iff.mpr fun M _ _ s f ↦ ?_)
@@ -141,29 +141,29 @@ noncomputable instance : 𝐄𝐐 ≼ 𝐑₀' := System.Subtheory.ofAxm! <| by 
 
 open LO.Arith
 
-noncomputable instance CobhamR0'.subtheoryOfCobhamR0 : 𝐑₀' ≼ 𝐑₀ := System.Subtheory.ofAxm! <| by
+noncomputable instance CobhamR0'.subtheoryOfCobhamR0 : 𝐑₀' ⪯ 𝐑₀ := Entailment.WeakerThan.ofAxm! <| by
   intro φ hp
   rcases hp
   · apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff]
   · apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff]
-  case Ω₁ n m => exact System.by_axm _ (Theory.CobhamR0.Ω₁ n m)
-  case Ω₂ n m => exact System.by_axm _ (Theory.CobhamR0.Ω₂ n m)
-  case Ω₃ n m h => exact System.by_axm _ (Theory.CobhamR0.Ω₃ n m h)
-  case Ω₄ n => exact System.by_axm _ (Theory.CobhamR0.Ω₄ n)
+  case Ω₁ n m => exact Entailment.by_axm _ (Theory.CobhamR0.Ω₁ n m)
+  case Ω₂ n m => exact Entailment.by_axm _ (Theory.CobhamR0.Ω₂ n m)
+  case Ω₃ n m h => exact Entailment.by_axm _ (Theory.CobhamR0.Ω₃ n m h)
+  case Ω₄ n => exact Entailment.by_axm _ (Theory.CobhamR0.Ω₄ n)
 
-variable {T : Theory ℒₒᵣ} [𝐑₀ ≼ T]
+variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T]
 
 lemma add_cobhamR0' {φ} : T ⊢! φ ↔ T + 𝐑₀' ⊢! φ := by
   constructor
-  · intro h; exact System.wk! (by simp [Theory.add_def]) h
+  · intro h; exact Entailment.wk! (by simp [Theory.add_def]) h
   · intro h
-    exact System.StrongCut.cut!
+    exact Entailment.StrongCut.cut!
       (by
         rintro φ (hp | hp)
-        · exact System.by_axm _ hp
-        · have : 𝐑₀' ⊢! φ := System.by_axm _ hp
-          have : 𝐑₀ ⊢! φ := System.Subtheory.prf! this
-          exact System.Subtheory.prf! this) h
+        · exact Entailment.by_axm _ hp
+        · have : 𝐑₀' ⊢! φ := Entailment.by_axm _ hp
+          have : 𝐑₀ ⊢! φ := Entailment.WeakerThan.pbl this
+          exact Entailment.WeakerThan.pbl this) h
 
 end Arith
 

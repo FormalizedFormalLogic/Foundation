@@ -10,9 +10,9 @@ namespace LO.FirstOrder.Arith
 
 open LO.Arith LO.Arith.Formalized
 
-variable (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T]
+variable (T : Theory ℒₒᵣ) [𝐈𝚺₁ ⪯ T]
 
-variable (U : Theory ℒₒᵣ) [U.Delta1Definable] [ℕ ⊧ₘ* U] [𝐑₀ ≼ U]
+variable (U : Theory ℒₒᵣ) [U.Delta1Definable] [ℕ ⊧ₘ* U] [𝐑₀ ⪯ U]
 
 instance : Diagonalization T where
   fixpoint := fixpoint

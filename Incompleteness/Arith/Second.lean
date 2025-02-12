@@ -83,7 +83,7 @@ namespace LO.FirstOrder.Arith
 
 open LO.Arith LO.Arith.Formalized
 
-variable {T : Theory ℒₒᵣ} [𝐈𝚺₁ ≼ T]
+variable {T : Theory ℒₒᵣ} [𝐈𝚺₁ ⪯ T]
 
 section Diagonalization
 
@@ -101,9 +101,9 @@ lemma fixpoint_eq (θ : Semisentence ℒₒᵣ 1) :
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝] :=
-  haveI : 𝐄𝐐 ≼ T := System.Subtheory.comp (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+  haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance inferInstance
+    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance
     simp [models_iff]
     let Θ : V → Prop := fun x ↦ Semiformula.Evalbm V ![x] θ
     calc
@@ -125,9 +125,9 @@ def multifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Senten
 
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢!. multifixpoint θ i ⭤ (Rew.substs fun j ↦ ⌜multifixpoint θ j⌝) ▹ (θ i) :=
-  haveI : 𝐄𝐐 ≼ T := System.Subtheory.comp (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+  haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance inferInstance
+    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance
     suffices V ⊧/![] (multifixpoint θ i) ↔ V ⊧/(fun i ↦ ⌜multifixpoint θ i⌝) (θ i) by simpa [models_iff]
     let t : Fin k → V := fun i ↦ ⌜multidiag (θ i)⌝
     have ht : ∀ i, substNumerals (t i) t = ⌜multifixpoint θ i⌝ := by
@@ -157,24 +157,24 @@ variable {U : Theory ℒₒᵣ} [U.Delta1Definable]
 
 theorem provableₐ_D1 {σ} : U ⊢!. σ → T ⊢!. U.bewₐ σ := by
   intro h
-  haveI : 𝐄𝐐 ≼ T := System.Subtheory.comp (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+  haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   apply complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance inferInstance
+    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
     simpa [models_iff] using provableₐ_of_provable (T := U) (V := V) h
 
 theorem provableₐ_D2 {σ π} : T ⊢!. U.bewₐ (σ ➝ π) ➝ U.bewₐ σ ➝ U.bewₐ π :=
-  haveI : 𝐄𝐐 ≼ T := System.Subtheory.comp (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+  haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance inferInstance
+    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
     simp [models_iff]
     intro hσπ hσ
     exact provableₐ_iff.mpr <| (by simpa using provableₐ_iff.mp hσπ) ⨀ provableₐ_iff.mp hσ
 
 lemma provableₐ_sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     T ⊢!. σ ➝ U.bewₐ σ :=
-  haveI : 𝐄𝐐 ≼ T := System.Subtheory.comp (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+  haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance inferInstance
+    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
     simpa [models_iff] using sigma₁_complete (T := U) (V := V) hσ
 
 theorem provableₐ_D3 {σ : Sentence ℒₒᵣ} :
@@ -183,16 +183,16 @@ theorem provableₐ_D3 {σ : Sentence ℒₒᵣ} :
 lemma goedel_iff_unprovable_goedel : T ⊢!. U.goedelₐ ⭤ ∼U.bewₐ U.goedelₐ := by
   simpa [Theory.goedelₐ, Theory.bewₐ] using diagonal (∼U.provableₐ)
 
-open LO.System LO.System.FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext
 
 lemma provableₐ_D2_context {Γ σ π} (hσπ : Γ ⊢[T.alt]! (U.bewₐ (σ ➝ π))) (hσ : Γ ⊢[T.alt]! U.bewₐ σ) :
     Γ ⊢[T.alt]! U.bewₐ π := of'! provableₐ_D2 ⨀ hσπ ⨀ hσ
 
 lemma provableₐ_D3_context {Γ σ} (hσπ : Γ ⊢[T.alt]! U.bewₐ σ) : Γ ⊢[T.alt]! U.bewₐ (U.bewₐ σ) := of'! provableₐ_D3 ⨀ hσπ
 
-variable [ℕ ⊧ₘ* T] [𝐑₀ ≼ U]
+variable [ℕ ⊧ₘ* T] [𝐑₀ ⪯ U]
 
-omit [𝐈𝚺₁ ≼ T] in
+omit [𝐈𝚺₁ ⪯ T] in
 lemma provableₐ_sound {σ} : T ⊢!. U.bewₐ σ → U ⊢! ↑σ := by
   intro h
   have : U.Provableₐ (⌜σ⌝ : ℕ) := by simpa [models₀_iff] using consequence_iff.mp (sound! (T := T) h) ℕ inferInstance
@@ -209,7 +209,7 @@ variable (T)
 
 variable [T.Delta1Definable]
 
-open LO.System LO.System.FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext
 
 local notation "𝗚" => T.goedelₐ
 
@@ -217,15 +217,15 @@ local notation "𝗖𝗼𝗻" => T.consistentₐ
 
 local prefix:max "□" => T.bewₐ
 
-lemma goedel_unprovable [System.Consistent T] : T ⊬ ↑𝗚 := by
+lemma goedel_unprovable [Entailment.Consistent T] : T ⊬ ↑𝗚 := by
   intro h
   have hp : T ⊢! ↑□𝗚 := provableₐ_D1 h
   have hn : T ⊢! ∼↑□𝗚 := by simpa [provable₀_iff] using and_left! goedel_iff_unprovable_goedel ⨀ h
   exact not_consistent_iff_inconsistent.mpr (inconsistent_of_provable_of_unprovable hp hn) inferInstance
 
 lemma not_goedel_unprovable [ℕ ⊧ₘ* T] : T ⊬ ∼↑𝗚 := fun h ↦ by
-  haveI : 𝐑₀ ≼ T := System.Subtheory.comp (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  have : T ⊢!. □𝗚 := System.contra₂'! (and_right! goedel_iff_unprovable_goedel) ⨀ (by simpa [provable₀_iff] using h)
+  haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+  have : T ⊢!. □𝗚 := Entailment.contra₂'! (and_right! goedel_iff_unprovable_goedel) ⨀ (by simpa [provable₀_iff] using h)
   have : T ⊢! ↑𝗚 := provableₐ_sound this
   exact not_consistent_iff_inconsistent.mpr (inconsistent_of_provable_of_unprovable this h)
     (Sound.consistent_of_satisfiable ⟨_, (inferInstance : ℕ ⊧ₘ* T)⟩)
@@ -248,13 +248,13 @@ lemma consistent_iff_goedel : T ⊢! ↑𝗖𝗼𝗻 ⭤ ↑𝗚 := by
     simpa [provable₀_iff] using  contra₁'! (deduct'! this)
 
 /-- Gödel's Second Incompleteness Theorem-/
-theorem goedel_second_incompleteness [System.Consistent T] : T ⊬ ↑𝗖𝗼𝗻 := fun h ↦
+theorem goedel_second_incompleteness [Entailment.Consistent T] : T ⊬ ↑𝗖𝗼𝗻 := fun h ↦
   goedel_unprovable T <| and_left! (consistent_iff_goedel T) ⨀ h
 
 theorem inconsistent_unprovable [ℕ ⊧ₘ* T] : T ⊬ ∼↑𝗖𝗼𝗻 := fun h ↦
   not_goedel_unprovable T <| contra₀'! (and_right! (consistent_iff_goedel T)) ⨀ h
 
-theorem inconsistent_undecidable [ℕ ⊧ₘ* T] : System.Undecidable T ↑𝗖𝗼𝗻 := by
+theorem inconsistent_undecidable [ℕ ⊧ₘ* T] : Entailment.Undecidable T ↑𝗖𝗼𝗻 := by
   haveI : Consistent T := Sound.consistent_of_satisfiable ⟨_, (inferInstance : ℕ ⊧ₘ* T)⟩
   constructor
   · exact goedel_second_incompleteness T
