@@ -84,6 +84,8 @@ protected instance : Semantics.Tarski (M.World) where
   realize_or := Satisfies.or_def;
   realize_and := Satisfies.and_def;
 
+lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp [Satisfies];
+
 @[simp] lemma negneg_def : x ⊧ ∼∼φ ↔ x ⊧ φ := by simp;
 
 lemma multibox_def : x ⊧ □^[n]φ ↔ ∀ {y}, x ≺^[n] y → y ⊧ φ := by
