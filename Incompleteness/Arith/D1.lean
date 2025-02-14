@@ -150,7 +150,7 @@ lemma quote_image_shift [L.DecidableEq] (Γ : Finset (SyntacticFormula L)) : (L.
   case root Δ φ hT hp =>
     apply Language.Theory.Derivation.root (by simp)
       (by simp [Sequent.mem_codeIn_iff, hp])
-      (mem_coded_theory_iff.mpr hT)
+      (by simp [hT])
   case verum Δ h =>
     exact Language.Theory.Derivation.verumIntro (by simp)
       (by simpa [quote_verum] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
@@ -361,7 +361,7 @@ lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation 
     refine ⟨Derivation2.cut b₁ b₂⟩
   · rcases by simpa using hΓ
     rcases Sequent.mem_codeIn hs with ⟨φ, hφ, rfl⟩
-    refine ⟨Derivation2.root φ (mem_coded_theory_iff.mp hT) hφ⟩
+    refine ⟨Derivation2.root φ (by simpa using hT) hφ⟩
 
 lemma Language.Theory.Provable.sound2 {φ : SyntacticFormula L} (h : (T.codeIn ℕ).Provable ⌜φ⌝) : T ⊢₂.! φ := by
   rcases h with ⟨d, hp, hd⟩
@@ -383,5 +383,13 @@ lemma Language.Theory.Provable.sound₀ {σ : Sentence L} (h : (T.codeIn ℕ).Pr
 lemma Language.Theory.Provable.complete {φ : SyntacticFormula L} :
     T.tCodeIn ℕ ⊢! ⌜φ⌝ ↔ T ⊢! φ :=
   ⟨by simpa [Language.Theory.TProvable.iff_provable] using Language.Theory.Provable.sound, tprovable_of_provable⟩
+
+lemma Language.Theory.Provable.complete₀ {σ : Sentence L} :
+    T.tCodeIn ℕ ⊢! ⌜σ⌝ ↔ T ⊢! ↑σ :=
+  ⟨by simpa [Language.Theory.TProvable.iff_provable] using Language.Theory.Provable.sound₀, tprovable_of_provable⟩
+
+@[simp] lemma provableₐ_iff_provable₀ {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐑₀ ⪯ T] {σ : Sentence ℒₒᵣ} :
+    T.Provableₐ (⌜σ⌝ : ℕ) ↔ T ⊢! ↑σ := by
+  simpa [provableₐ_iff, Language.Theory.Provable.complete₀] using FirstOrder.Arith.add_cobhamR0'.symm
 
 end LO.Arith

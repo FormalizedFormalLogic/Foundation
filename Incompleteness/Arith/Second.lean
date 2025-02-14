@@ -147,6 +147,14 @@ abbrev _root_.LO.FirstOrder.Theory.bewₐ (σ : Sentence ℒₒᵣ) : Sentence �
 
 abbrev _root_.LO.FirstOrder.Theory.consistentₐ : Sentence ℒₒᵣ := ∼U.bewₐ ⊥
 
+abbrev _root_.LO.FirstOrder.Theory.Consistentₐ : Theory ℒₒᵣ := {↑U.consistentₐ}
+
+notation "𝐂𝐨𝐧[" U "]" => LO.FirstOrder.Theory.Consistentₐ U
+
+abbrev _root_.LO.FirstOrder.Theory.Inconsistentₐ : Theory ℒₒᵣ := {∼↑U.consistentₐ}
+
+notation "¬𝐂𝐨𝐧[" U "]" => LO.FirstOrder.Theory.Inconsistentₐ U
+
 def _root_.LO.FirstOrder.Theory.goedelₐ : Sentence ℒₒᵣ := fixpoint (∼U.provableₐ)
 
 end
@@ -196,8 +204,7 @@ omit [𝐈𝚺₁ ⪯ T] in
 lemma provableₐ_sound {σ} : T ⊢!. U.bewₐ σ → U ⊢! ↑σ := by
   intro h
   have : U.Provableₐ (⌜σ⌝ : ℕ) := by simpa [models₀_iff] using consequence_iff.mp (sound! (T := T) h) ℕ inferInstance
-  have : U + 𝐑₀' ⊢! ↑σ := Language.Theory.Provable.sound₀ this
-  exact add_cobhamR0'.mpr this
+  simpa using this
 
 lemma provableₐ_complete {σ} : U ⊢! ↑σ ↔ T ⊢!. U.bewₐ σ := ⟨provableₐ_D1, provableₐ_sound⟩
 
@@ -259,6 +266,27 @@ theorem inconsistent_undecidable [ℕ ⊧ₘ* T] : Entailment.Undecidable T ↑�
   constructor
   · exact goedel_second_incompleteness T
   · exact inconsistent_unprovable T
+
+instance [Entailment.Consistent T] : T ⪱ T + 𝐂𝐨𝐧[T] :=
+  Entailment.StrictlyWeakerThan.of_unprovable_provable (φ := ↑𝗖𝗼𝗻)
+    (goedel_second_incompleteness T) (Entailment.by_axm _ (by simp))
+
+instance [Entailment.Consistent T] : ℕ ⊧ₘ* 𝐂𝐨𝐧[T] := by
+  suffices ℕ ⊧ₘ₀ T.consistentₐ by simpa [Models₀] using this
+  suffices ¬T.Provableₐ ⌜⊥⌝ by simpa [models₀_iff] using  this
+  intro H
+  haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+  have : T ⊢! ⊥ := Arith.provableₐ_iff_provable₀.mp H
+  have : Entailment.Inconsistent T := inconsistent_iff_provable_bot.mpr this
+  exact Consistent.not_inconsistent this
+
+instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T + 𝐂𝐨𝐧[T] :=
+  haveI : Entailment.Consistent T := Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* T)⟩
+  ModelsTheory.add_iff.mpr ⟨inferInstance, inferInstance⟩
+
+instance [ℕ ⊧ₘ* T] : T ⪱ T + ¬𝐂𝐨𝐧[T] :=
+  Entailment.StrictlyWeakerThan.of_unprovable_provable (φ := ∼↑𝗖𝗼𝗻)
+    (inconsistent_unprovable T) (Entailment.by_axm _ (by simp))
 
 end
 

@@ -254,6 +254,9 @@ def replace :
       Language.TermRec.Construction.cons_app_9, Matrix.cons_app_eight,
       LogicalConnective.Prop.and_eq, exists_eq_left]
     constructor
+    · rintro ⟨x, _, hx, h⟩
+      rcases hx.sound with ⟨q, rfl⟩
+      exact ⟨q, by symm; apply (quote_inj_iff (V := ℕ)).mp; simpa using h⟩
     · rintro ⟨q, rfl⟩
       exact ⟨⌜q⌝, by
         simp [subst_eq_self₁]
@@ -261,9 +264,6 @@ def replace :
         refine lt_trans ?_ (lt_forall _)
         refine lt_trans ?_ (lt_or_right _ _)
         exact lt_or_right _ _, by simp⟩
-    · rintro ⟨x, _, hx, h⟩
-      rcases hx.sound with ⟨q, rfl⟩
-      exact ⟨q, by symm; apply (quote_inj_iff (V := ℕ)).mp; simpa using h⟩
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
@@ -322,6 +322,9 @@ def Ω₁ :
       Matrix.cons_val_four, Fin.succ_one_eq_two, Matrix.cons_val_succ, Structure.Add.add,
       Matrix.cons_app_six, eval_qqEQDef, LogicalConnective.Prop.and_eq, exists_eq_left]
     constructor
+    · rintro ⟨n, _, m, _, h⟩
+      use n; use m
+      exact (quote_inj_iff (V := ℕ)).mp (by simpa using h)
     · rintro ⟨n, m, rfl⟩
       refine ⟨n, by
           simp
@@ -331,9 +334,6 @@ def Ω₁ :
           simp
           apply lt_trans ?_ (lt_qqEQ_left _ _)
           apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqAdd_right _ _), by simp⟩
-    · rintro ⟨n, _, m, _, h⟩
-      use n; use m
-      exact (quote_inj_iff (V := ℕ)).mp (by simpa using h)
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
@@ -385,6 +385,9 @@ def Ω₂ :
       Matrix.cons_val_four, Fin.succ_one_eq_two, Matrix.cons_val_succ, Structure.Mul.mul,
       Matrix.cons_app_six, eval_qqEQDef, LogicalConnective.Prop.and_eq, exists_eq_left]
     constructor
+    · rintro ⟨n, _, m, _, h⟩
+      use n; use m
+      exact (quote_inj_iff (V := ℕ)).mp (by simpa using h)
     · rintro ⟨n, m, rfl⟩
       refine ⟨n, by
           simp
@@ -394,9 +397,6 @@ def Ω₂ :
           simp
           apply lt_trans ?_ (lt_qqEQ_left _ _)
           apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqMul_right _ _), by simp⟩
-    · rintro ⟨n, _, m, _, h⟩
-      use n; use m
-      exact (quote_inj_iff (V := ℕ)).mp (by simpa using h)
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
@@ -442,6 +442,9 @@ def Ω₃ :
       Fin.succ_one_eq_two, Matrix.cons_val_succ, eval_qqNEQDef, LogicalConnective.Prop.and_eq,
       exists_eq_left]
     constructor
+    · rintro ⟨n, _, m, _, ne, h⟩
+      refine ⟨n, m, ne, ?_⟩
+      exact (quote_inj_iff (V := ℕ)).mp (by simp; rw [neg_eq (by simp) (by simp)]; simpa using h)
     · rintro ⟨n, m, ne, rfl⟩
       refine ⟨n, by
           simp
@@ -452,9 +455,6 @@ def Ω₃ :
           rw [neg_eq (by simp) (by simp)]
           exact lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqNEQ_right _ _), ne, ?_⟩
       simp; rw [neg_eq (by simp) (by simp)]
-    · rintro ⟨n, _, m, _, ne, h⟩
-      refine ⟨n, m, ne, ?_⟩
-      exact (quote_inj_iff (V := ℕ)).mp (by simp; rw [neg_eq (by simp) (by simp)]; simpa using h)
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by simp
 
 private lemma quote_disjLt_eq (n : ℕ) :
@@ -510,6 +510,10 @@ def Ω₄ :
       Language.TermRec.Construction.cons_app_10, Language.TermRec.Construction.cons_app_9,
       Matrix.cons_app_eight, eval_qqAllDef, LogicalConnective.Prop.and_eq, exists_eq_left]
     constructor
+    · rintro ⟨n, _, h⟩
+      use n
+      symm;
+      exact (quote_inj_iff (V := ℕ)).mp (by simpa [quote_disjLt_eq] using h)
     · rintro ⟨n, rfl⟩
       refine ⟨n, by
         simp
@@ -517,10 +521,6 @@ def Ω₄ :
         apply lt_trans ?_ (lt_iff_left _ _)
         apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqLT_right _ _), ?_⟩
       simp [quote_disjLt_eq]
-    · rintro ⟨n, _, h⟩
-      use n
-      symm;
-      exact (quote_inj_iff (V := ℕ)).mp (by simpa [quote_disjLt_eq] using h)
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
