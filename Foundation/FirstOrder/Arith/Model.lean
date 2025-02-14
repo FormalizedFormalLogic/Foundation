@@ -137,12 +137,12 @@ instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_lef
 instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* Theory.indScheme ℒₒᵣ Semiformula.Open :=
   ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
-def models_PAMinus_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
+def models_PeanoMinus_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
 
 def models_indScheme_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) :=
   ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
 
-instance models_PAMinus_of_models_peano [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
+instance models_PeanoMinus_of_models_peano [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
 
 end
 
@@ -161,7 +161,7 @@ instance models_CobhamR0 : ℕ ⊧ₘ* 𝐑₀ := ⟨by
   case Ω₃ h =>
     simpa [models_def, ←le_iff_eq_or_lt] using h⟩
 
-instance models_PAMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
+instance models_PeanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   intro σ h
   rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro f; exact add_assoc _ _ _
@@ -186,14 +186,14 @@ lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ 
   · exact hsucc x ih
 
 instance models_iSigma (Γ k) : ℕ ⊧ₘ* 𝐈𝐍𝐃Γ k := by
-  simp [Theory.indScheme, models_PAMinus]; rintro _ φ _ rfl; simp [models_succInd]
+  simp [Theory.indScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
 
 instance models_iSigmaZero : ℕ ⊧ₘ* 𝐈𝚺₀ := inferInstance
 
 instance models_iSigmaOne : ℕ ⊧ₘ* 𝐈𝚺₁ := inferInstance
 
 instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
-  simp [Theory.peano, Theory.indScheme, models_PAMinus]; rintro _ φ _ rfl; simp [models_succInd]
+  simp [Theory.peano, Theory.indScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
 
 end Standard
 

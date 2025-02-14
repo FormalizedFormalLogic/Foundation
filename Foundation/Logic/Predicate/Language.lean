@@ -162,6 +162,50 @@ instance (k) : Encodable (oRing.Rel k) where
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
 
+def funcEquivFinFour : (k : ℕ) × oRing.Func k ≃ Fin 4 where
+  toFun f :=
+    match f with
+    | ⟨0, Func.zero⟩ => 0
+    | ⟨0,  Func.one⟩ => 1
+    | ⟨2,  Func.add⟩ => 2
+    | ⟨2,  Func.mul⟩ => 3
+  invFun x :=
+    match x with
+    | 0 => ⟨0, Func.zero⟩
+    | 1 => ⟨0,  Func.one⟩
+    | 2 => ⟨2,  Func.add⟩
+    | 3 => ⟨2,  Func.mul⟩
+  left_inv f :=
+    match f with
+    | ⟨0, Func.zero⟩ => rfl
+    | ⟨0,  Func.one⟩ => rfl
+    | ⟨2,  Func.add⟩ => rfl
+    | ⟨2,  Func.mul⟩ => rfl
+  right_inv x :=
+    match x with
+    | 0 => rfl
+    | 1 => rfl
+    | 2 => rfl
+    | 3 => rfl
+
+def relEquivFinTwo : (k : ℕ) × oRing.Rel k ≃ Fin 2 where
+  toFun f :=
+    match f with
+    | ⟨2, Rel.eq⟩ => 0
+    | ⟨2, Rel.lt⟩ => 1
+  invFun x :=
+    match x with
+    | 0 => ⟨2, Rel.eq⟩
+    | 1 => ⟨2, Rel.lt⟩
+  left_inv f :=
+    match f with
+    | ⟨2, Rel.eq⟩ => rfl
+    | ⟨2, Rel.lt⟩ => rfl
+  right_inv x :=
+    match x with
+    | 0 => rfl
+    | 1 => rfl
+
 end ORing
 
 namespace Constant
@@ -357,6 +401,14 @@ instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Func k) := La
 instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
 
 instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
+
+class Language.Finite (L : Language) where
+  func : Fintype ((k : ℕ) × L.Func k)
+  rel : Fintype ((k : ℕ) × L.Rel k)
+
+instance : Language.Finite ℒₒᵣ where
+  func := Fintype.ofEquiv (Fin 4) Language.ORing.funcEquivFinFour.symm
+  rel := Fintype.ofEquiv (Fin 2) Language.ORing.relEquivFinTwo.symm
 
 end FirstOrder
 

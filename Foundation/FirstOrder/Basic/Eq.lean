@@ -23,16 +23,56 @@ class Sub (T U : Theory L) where
 
 section Eq
 
+variable (L)
+
+abbrev Eq.refl : SyntacticFormula L := “x | x = x”
+
+abbrev Eq.symm : SyntacticFormula L := “x y | x = y → y = x”
+
+abbrev Eq.trans : SyntacticFormula L := “x y z | x = y → y = z → x = z”
+
+variable {L}
+
+abbrev Eq.funcExt {k} (f : L.Func k) : SyntacticFormula L :=
+  (Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ➝ op(=).operator ![Semiterm.func f (fun i ↦ &i), Semiterm.func f (fun i ↦ &(k + i))]
+
+abbrev Eq.relExt {k} (r : L.Rel k) : SyntacticFormula L :=
+  (Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ➝ Semiformula.rel r (fun i ↦ &i) ➝ Semiformula.rel r (fun i ↦ &(k + i))
+
 inductive eqAxiom : Theory L
-  | refl : eqAxiom “x | x = x”
-  | symm : eqAxiom “x y | x = y → y = x”
-  | trans : eqAxiom “x y z | x = y → y = z → x = z”
-  | funcExt {k} (f : L.Func k) :
-    eqAxiom ((Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ➝ op(=).operator ![Semiterm.func f (fun i ↦ &i), Semiterm.func f (fun i ↦ &(k + i))])
-  | relExt {k} (r : L.Rel k) :
-    eqAxiom ((Matrix.conj fun i : Fin k ↦ “&i = &(k + i)”) ➝ Semiformula.rel r (fun i ↦ &i) ➝ Semiformula.rel r (fun i ↦ &(k + i)))
+  | refl : eqAxiom (Eq.refl L)
+  | symm : eqAxiom (Eq.symm L)
+  | trans : eqAxiom (Eq.trans L)
+  | funcExt {k} (f : L.Func k) : eqAxiom (Eq.funcExt f)
+  | relExt {k} (r : L.Rel k) : eqAxiom (Eq.relExt r)
 
 notation "𝐄𝐐" => eqAxiom
+
+lemma Eq.defeq :
+    𝐄𝐐 = {Eq.refl L, Eq.symm L, Eq.trans L}
+      ∪ Set.range (fun f : (k : ℕ) × L.Func k ↦ Eq.funcExt f.2)
+      ∪ Set.range (fun f : (k : ℕ) × L.Rel k ↦ Eq.relExt f.2) := by
+  ext φ; constructor
+  · rintro ⟨⟩
+    case refl => simp
+    case symm => simp
+    case trans => simp
+    case funcExt k f =>
+      left; right; exact ⟨⟨k, f⟩, rfl⟩
+    case relExt k r =>
+      right; exact ⟨⟨k, r⟩, rfl⟩
+  · rintro (((rfl | rfl | rfl) | ⟨f, rfl⟩) | ⟨r, rfl⟩)
+    · exact eqAxiom.refl
+    · exact eqAxiom.symm
+    · exact eqAxiom.trans
+    · exact eqAxiom.funcExt _
+    · exact eqAxiom.relExt _
+
+@[simp] lemma EqAxiom.finite [L.Finite] : Set.Finite (𝐄𝐐 : Theory L) := by
+  haveI : Fintype ((k : ℕ) × L.Func k) := Language.Finite.func
+  haveI : Fintype ((k : ℕ) × L.Rel k) := Language.Finite.rel
+  rw [Eq.defeq]
+  simp [Set.finite_range]
 
 end Eq
 
@@ -44,11 +84,7 @@ namespace Eq
 
 @[simp] lemma models_eqAxiom {M : Type u} [Nonempty M] [Structure L M] [Structure.Eq L M] : M ⊧ₘ* (𝐄𝐐 : Theory L) := ⟨by
   intro σ h
-  cases h <;> simp [models_def, Semiterm.val_func, Semiformula.eval_rel]
-  case symm => intros; simp_all
-  case trans => intros; simp_all
-  case funcExt f => intro m e; simp [e]
-  case relExt r => intro m e; simp [e]⟩
+  cases h <;> try { simp [models_def, Semiterm.val_func, Semiformula.eval_rel, *]; try simp_all }⟩
 
 variable (L)
 
@@ -290,11 +326,11 @@ syntax:max "∃! " ident ", " first_order_formula:0 : first_order_formula
 macro_rules
   | `(⤫formula[ $binders* | $fbinders* | ∃! $φ:first_order_formula ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
-    let binders' := binders.insertAt 0 v
+    let binders' := binders.insertIdx 0 v
     `(∃'! ⤫formula[ $binders'* | $fbinders* | $φ])
   | `(⤫formula[ $binders* | $fbinders* | ∃! $x, $φ ])                 => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(∃'! ⤫formula[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation

@@ -27,27 +27,49 @@ inductive CobhamR0 : Theory ℒₒᵣ
 
 notation "𝐑₀" => CobhamR0
 
-inductive PAMinus : Theory ℒₒᵣ
-  | equal         : ∀ φ ∈ 𝐄𝐐, PAMinus φ
-  | addZero       : PAMinus “x | x + 0 = x”
-  | addAssoc      : PAMinus “x y z | (x + y) + z = x + (y + z)”
-  | addComm       : PAMinus “x y | x + y = y + x”
-  | addEqOfLt     : PAMinus “x y | x < y → ∃ z, x + z = y”
-  | zeroLe        : PAMinus “x | 0 ≤ x”
-  | zeroLtOne     : PAMinus “0 < 1”
-  | oneLeOfZeroLt : PAMinus “x | 0 < x → 1 ≤ x”
-  | addLtAdd      : PAMinus “x y z | x < y → x + z < y + z”
-  | mulZero       : PAMinus “x | x * 0 = 0”
-  | mulOne        : PAMinus “x | x * 1 = x”
-  | mulAssoc      : PAMinus “x y z | (x * y) * z = x * (y * z)”
-  | mulComm       : PAMinus “x y | x * y = y * x”
-  | mulLtMul      : PAMinus “x y z | x < y ∧ 0 < z → x * z < y * z”
-  | distr         : PAMinus “x y z | x * (y + z) = x * y + x * z”
-  | ltIrrefl      : PAMinus “x | x ≮ x”
-  | ltTrans       : PAMinus “x y z | x < y ∧ y < z → x < z”
-  | ltTri         : PAMinus “x y | x < y ∨ x = y ∨ x > y”
+variable {L}
 
-notation "𝐏𝐀⁻" => PAMinus
+abbrev       Arith.addZero : SyntacticFormula L := “x | x + 0 = x”
+abbrev      Arith.addAssoc : SyntacticFormula L := “x y z | (x + y) + z = x + (y + z)”
+abbrev       Arith.addComm : SyntacticFormula L := “x y | x + y = y + x”
+abbrev     Arith.addEqOfLt : SyntacticFormula L := “x y | x < y → ∃ z, x + z = y”
+abbrev        Arith.zeroLe : SyntacticFormula L := “x | 0 ≤ x”
+abbrev     Arith.zeroLtOne : SyntacticFormula L := “0 < 1”
+abbrev Arith.oneLeOfZeroLt : SyntacticFormula L := “x | 0 < x → 1 ≤ x”
+abbrev      Arith.addLtAdd : SyntacticFormula L := “x y z | x < y → x + z < y + z”
+abbrev       Arith.mulZero : SyntacticFormula L := “x | x * 0 = 0”
+abbrev        Arith.mulOne : SyntacticFormula L := “x | x * 1 = x”
+abbrev      Arith.mulAssoc : SyntacticFormula L := “x y z | (x * y) * z = x * (y * z)”
+abbrev       Arith.mulComm : SyntacticFormula L := “x y | x * y = y * x”
+abbrev      Arith.mulLtMul : SyntacticFormula L := “x y z | x < y ∧ 0 < z → x * z < y * z”
+abbrev         Arith.distr : SyntacticFormula L := “x y z | x * (y + z) = x * y + x * z”
+abbrev      Arith.ltIrrefl : SyntacticFormula L := “x | x ≮ x”
+abbrev       Arith.ltTrans : SyntacticFormula L := “x y z | x < y ∧ y < z → x < z”
+abbrev         Arith.ltTri : SyntacticFormula L := “x y | x < y ∨ x = y ∨ x > y”
+
+inductive PeanoMinus : Theory ℒₒᵣ
+  | equal         : ∀ φ ∈ 𝐄𝐐, PeanoMinus φ
+  | addZero       : PeanoMinus Arith.addZero
+  | addAssoc      : PeanoMinus Arith.addAssoc
+  | addComm       : PeanoMinus Arith.addComm
+  | addEqOfLt     : PeanoMinus Arith.addEqOfLt
+  | zeroLe        : PeanoMinus Arith.zeroLe
+  | zeroLtOne     : PeanoMinus Arith.zeroLtOne
+  | oneLeOfZeroLt : PeanoMinus Arith.oneLeOfZeroLt
+  | addLtAdd      : PeanoMinus Arith.addLtAdd
+  | mulZero       : PeanoMinus Arith.mulZero
+  | mulOne        : PeanoMinus Arith.mulOne
+  | mulAssoc      : PeanoMinus Arith.mulAssoc
+  | mulComm       : PeanoMinus Arith.mulComm
+  | mulLtMul      : PeanoMinus Arith.mulLtMul
+  | distr         : PeanoMinus Arith.distr
+  | ltIrrefl      : PeanoMinus Arith.ltIrrefl
+  | ltTrans       : PeanoMinus Arith.ltTrans
+  | ltTri         : PeanoMinus Arith.ltTri
+
+notation "𝐏𝐀⁻" => PeanoMinus
+
+variable (L)
 
 def indScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
   { ψ | ∃ φ : Semiformula L ℕ 1, Γ φ ∧ ψ = succInd φ }
@@ -98,7 +120,7 @@ instance : 𝐏𝐀⁻ ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.ofSubset (b
 
 instance : 𝐄𝐐 ⪯ 𝐑₀ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ CobhamR0.equal φ hp
 
-instance : 𝐄𝐐 ⪯ 𝐏𝐀⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PAMinus.equal φ hp
+instance : 𝐄𝐐 ⪯ 𝐏𝐀⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PeanoMinus.equal φ hp
 
 instance : 𝐄𝐐 ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
@@ -115,6 +137,86 @@ instance : 𝐈𝚺₀ ⪯ 𝐈𝚺₁ :=
 
 instance (i) : 𝐈𝚺i ⪯ 𝐏𝐀 :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| indScheme_subset (by intros; trivial)
+
+example (a b : ℕ) : Set.Finite {a, b} := by simp only [Set.finite_singleton, Set.Finite.insert]
+
+@[simp] lemma PeanoMinus.finite : Set.Finite 𝐏𝐀⁻ := by
+  have : 𝐏𝐀⁻ =
+    𝐄𝐐 ∪
+    { Arith.addZero,
+      Arith.addAssoc,
+      Arith.addComm,
+      Arith.addEqOfLt,
+      Arith.zeroLe,
+      Arith.zeroLtOne,
+      Arith.oneLeOfZeroLt,
+      Arith.addLtAdd,
+      Arith.mulZero,
+      Arith.mulOne,
+      Arith.mulAssoc,
+      Arith.mulComm,
+      Arith.mulLtMul,
+      Arith.distr,
+      Arith.ltIrrefl,
+      Arith.ltTrans,
+      Arith.ltTri } := by
+    ext φ; constructor
+    · rintro ⟨⟩
+      case equal => left; assumption
+      case addZero => tauto
+      case addAssoc => tauto
+      case addComm => tauto
+      case addEqOfLt => tauto
+      case zeroLe => tauto
+      case zeroLtOne => tauto
+      case oneLeOfZeroLt => tauto
+      case addLtAdd => tauto
+      case mulZero => tauto
+      case mulOne => tauto
+      case mulAssoc => tauto
+      case mulComm => tauto
+      case mulLtMul => tauto
+      case distr => tauto
+      case ltIrrefl => tauto
+      case ltTrans => tauto
+      case ltTri => tauto
+    · rintro (h | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl | rfl)
+      · exact equal _ h
+      · exact addZero
+      · exact addAssoc
+      · exact addComm
+      · exact addEqOfLt
+      · exact zeroLe
+      · exact zeroLtOne
+      · exact oneLeOfZeroLt
+      · exact addLtAdd
+      · exact mulZero
+      · exact mulOne
+      · exact mulAssoc
+      · exact mulComm
+      · exact mulLtMul
+      · exact distr
+      · exact ltIrrefl
+      · exact ltTrans
+      · exact ltTri
+  rw [this]; simp only [Set.finite_union, EqAxiom.finite, true_and]
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.Finite.insert
+  apply Set.finite_singleton
 
 end Theory
 
