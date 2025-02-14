@@ -2,25 +2,25 @@ import Arithmetization.ISigmaZero.Exponential.Log
 
 namespace LO.Arith
 
-open FirstOrder FirstOrder.Arith
+open FirstOrder FirstOrder.Arith FirstOrder.Theory
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
-def omegaOneAxiom : SyntacticFormula ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
+def _root_.LO.FirstOrder.Theory.OmegaOneAxiom : SyntacticFormula ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
 
-inductive Theory.omegaOne : Theory ℒₒᵣ where
-  | omega : Theory.omegaOne omegaOneAxiom
+inductive _root_.LO.FirstOrder.Theory.OmegaOne : Theory ℒₒᵣ where
+  | omega : OmegaOne OmegaOneAxiom
 
-notation "𝛀₁" => Theory.omegaOne
+notation "𝛀₁" => Theory.OmegaOne
 
-@[simp] lemma omegaOne.mem_iff {σ} : σ ∈ 𝛀₁ ↔ σ = omegaOneAxiom :=
-  ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Theory.omegaOne.omega⟩
+@[simp] lemma _root_.LO.FirstOrder.Theory.OmegaOne.mem_iff {σ} : σ ∈ 𝛀₁ ↔ σ = OmegaOneAxiom :=
+  ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Theory.OmegaOne.omega⟩
 
 noncomputable section
 
 variable {V : Type*} [ORingStruc V]
 
-lemma models_Omega₁_iff [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ omegaOneAxiom ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
-  simp [models_def, omegaOneAxiom, length_defined.df.iff, Exponential.defined.df.iff, sq, ←le_iff_lt_succ]
+lemma models_Omega₁_iff [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ OmegaOneAxiom ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
+  simp [models_def, OmegaOneAxiom, length_defined.df.iff, Exponential.defined.df.iff, sq, ←le_iff_lt_succ]
   constructor
   · intro h x
     rcases h x with ⟨y, _, _, rfl, h⟩; exact ⟨y, h⟩
@@ -28,7 +28,7 @@ lemma models_Omega₁_iff [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ omegaOneAxiom ↔ �
     rcases h x with ⟨y, h⟩
     exact ⟨y, ‖x‖, by simp, rfl, h⟩
 
-lemma sigma₁_omega₁ [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ omegaOneAxiom := models_Omega₁_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
+lemma sigma₁_omega₁ [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ OmegaOneAxiom := models_Omega₁_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
 
 instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁ :=
   ModelsTheory.add_iff.mpr ⟨inferInstance, ⟨by intro _; simp; rintro rfl; exact sigma₁_omega₁⟩⟩
@@ -40,7 +40,7 @@ instance : V ⊧ₘ* 𝐈𝚺₀ := ModelsTheory.of_add_left V 𝐈𝚺₀ 𝛀�
 instance : V ⊧ₘ* 𝛀₁ := ModelsTheory.of_add_right V 𝐈𝚺₀ 𝛀₁
 
 lemma exists_exponential_sq_length (x : V) : ∃ y, Exponential (‖x‖^2) y :=
-  models_Omega₁_iff.mp (ModelsTheory.models V Theory.omegaOne.omega) x
+  models_Omega₁_iff.mp (ModelsTheory.models V Theory.OmegaOne.omega) x
 
 lemma exists_unique_exponential_sq_length (x : V) : ∃! y, Exponential (‖x‖^2) y := by
   rcases exists_exponential_sq_length x with ⟨y, h⟩
@@ -126,3 +126,13 @@ lemma hash_two_mul_le_sq_hash (a b : V) : a # (2 * b) ≤ (a # b) ^ 2 := by
 end
 
 end LO.Arith
+
+namespace LO.FirstOrder.Arith
+
+instance : 𝐈𝚺₀ ⪯ 𝐈𝚺₀ + 𝛀₁ := inferInstance
+
+instance : 𝐈𝚺₀ + 𝛀₁ ⪯ 𝐈𝚺₁ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
+
+instance : ℕ ⊧ₘ* 𝐈𝚺₀ + 𝛀₁ := inferInstance
+
+end LO.FirstOrder.Arith

@@ -215,11 +215,11 @@ instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈open := mod_IOpen_of_mod_indH �
 instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
 instance [V ⊧ₘ* 𝐈𝚺 n] : V ⊧ₘ* 𝐈𝚷 n :=
-  haveI : V ⊧ₘ* 𝐏𝐀⁻ := models_PAMinus_of_models_indH 𝚺 n
+  haveI : V ⊧ₘ* 𝐏𝐀⁻ := models_PeanoMinus_of_models_indH 𝚺 n
   inferInstance
 
 instance [V ⊧ₘ* 𝐈𝚷 n] : V ⊧ₘ* 𝐈𝚺 n :=
-  haveI : V ⊧ₘ* 𝐏𝐀⁻ := Arith.models_PAMinus_of_models_indH 𝚷 n
+  haveI : V ⊧ₘ* 𝐏𝐀⁻ := Arith.models_PeanoMinus_of_models_indH 𝚷 n
   by simp [*]; simpa [Theory.iPi] using models_indScheme_alt (V := V) 𝚷 n
 
 lemma models_ISigma_iff_models_IPi {n} : V ⊧ₘ* 𝐈𝚺 n ↔ V ⊧ₘ* 𝐈𝚷 n :=
