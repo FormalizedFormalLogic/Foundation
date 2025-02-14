@@ -538,24 +538,33 @@ end
 
 section
 
-variable {𝓢 : S} {T : Set F} [Complete 𝓢 (Semantics.models M T)]
+variable {𝓢 : S} {s : Set F} [Complete 𝓢 (Semantics.models M s)]
 
-lemma provable_of_consequence {f : F} : T ⊨[M] f → 𝓢 ⊢! f := complete
+lemma provable_of_consequence {f : F} : s ⊨[M] f → 𝓢 ⊢! f := complete
 
-lemma provable_iff_consequence [Sound 𝓢 (Semantics.models M T)] {f : F} : T ⊨[M] f ↔ 𝓢 ⊢! f := ⟨complete, Sound.sound⟩
+lemma provable_iff_consequence [Sound 𝓢 (Semantics.models M s)] {f : F} : s ⊨[M] f ↔ 𝓢 ⊢! f := ⟨complete, Sound.sound⟩
+
+
+section
 
 variable [LogicalConnective F] [∀ 𝓜 : M, Semantics.Meaningful 𝓜]
 
 lemma satisfiable_of_consistent :
-    Entailment.Consistent 𝓢 → Semantics.Satisfiable M T :=
+    Entailment.Consistent 𝓢 → Semantics.Satisfiable M s :=
   fun H ↦ Semantics.meaningful_iff_satisfiableSet.mpr (meaningful_of_consistent H)
 
 lemma inconsistent_of_unsatisfiable :
-    ¬Semantics.Satisfiable M T → Entailment.Inconsistent 𝓢 := by
+    ¬Semantics.Satisfiable M s → Entailment.Inconsistent 𝓢 := by
   contrapose; simpa [←Entailment.not_consistent_iff_inconsistent] using satisfiable_of_consistent
 
-lemma consistent_iff_satisfiable [Sound 𝓢 (Semantics.models M T)] : Entailment.Consistent 𝓢 ↔ Semantics.Satisfiable M T :=
+lemma consistent_iff_satisfiable [Sound 𝓢 (Semantics.models M s)] : Entailment.Consistent 𝓢 ↔ Semantics.Satisfiable M s :=
   ⟨satisfiable_of_consistent, Sound.consistent_of_satisfiable⟩
+
+end
+
+lemma weakerthan_of_models {𝓣 : S} {t : Set F} [Sound 𝓣 (Semantics.models M t)]
+    (H : ∀ 𝓜 : M, 𝓜 ⊧* s → 𝓜 ⊧* t) : 𝓣 ⪯ 𝓢 :=
+  Entailment.weakerThan_iff.mpr <| fun h ↦ provable_of_consequence <| fun 𝓜 h𝓜 ↦ Sound.consequence_of_provable (M := M) (T := t) h (H 𝓜 h𝓜)
 
 end
 

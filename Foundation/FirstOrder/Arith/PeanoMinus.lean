@@ -167,6 +167,24 @@ lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
     · exact ⟨n, rfl⟩
     · exact eq_nat_of_lt_nat hx
 
+instance qq : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
+  intro φ h
+  rcases h
+  case equal h =>
+    have : M ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    exact modelsTheory_iff.mp this h
+  case Ω₁ n m =>
+    simp [models_iff, numeral_eq_natCast]
+  case Ω₂ n m =>
+    simp [models_iff, numeral_eq_natCast]
+  case Ω₃ n m h =>
+    simp [models_iff, numeral_eq_natCast, h]
+  case Ω₄ n =>
+      simp [models_iff, numeral_eq_natCast]; intro x
+      constructor
+      · intro hx; rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩; exact ⟨x, by simpa using hx, by simp⟩
+      · rintro ⟨i, hi, rfl⟩; simp [hi]
+
 end Arith
 
 namespace FirstOrder.Arith
@@ -175,23 +193,7 @@ open LO.Arith
 
 variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ⪯ T]
 
-instance CobhamR0.subTheoryPeanoMinus : 𝐑₀ ⪯ 𝐏𝐀⁻ := Entailment.WeakerThan.ofAxm! <| by
-  intro φ h
-  rcases h
-  case equal h =>
-    exact Entailment.by_axm _ (Theory.PeanoMinus.equal _ h)
-  case Ω₁ n m =>
-    apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff, numeral_eq_natCast]
-  case Ω₂ n m =>
-    apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff, numeral_eq_natCast]
-  case Ω₃ n m h =>
-    apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff, numeral_eq_natCast, h]
-  case Ω₄ n =>
-    apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by
-      simp [models_iff, numeral_eq_natCast]; intro x
-      constructor
-      · intro hx; rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩; exact ⟨x, by simpa using hx, by simp⟩
-      · rintro ⟨i, hi, rfl⟩; simp [hi]
+instance : 𝐑₀ ⪯ 𝐏𝐀⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
 
 instance : 𝐑₀ ⪱ 𝐏𝐀⁻ :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable

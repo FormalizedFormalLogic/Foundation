@@ -227,12 +227,17 @@ instance (T : Theory ℒₒᵣ) [ℕ ⊧ₘ* T] : T ⪯ 𝐓𝐀 := ⟨by
   have : ℕ ⊧ₘ φ := consequence_iff'.mp (sound₀! h) ℕ
   exact trueArith_provable_iff.mpr this⟩
 
-variable (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T]
-
-lemma oRing_consequence_of (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+lemma oRing_consequence_of (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊨ φ := consequence_of T φ fun M _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M
+
+lemma oRing_weakerThan_of (T S : Theory ℒₒᵣ) [𝐄𝐐 ⪯ S]
+    (H : ∀ (M : Type*)
+           [ORingStruc M]
+           [M ⊧ₘ* S],
+           M ⊧ₘ* T) : T ⪯ S :=
+  Entailment.weakerThan_iff.mpr fun h ↦ complete <| oRing_consequence_of _ _ fun M _ _ ↦ sound! h (H M)
 
 end Arith
 

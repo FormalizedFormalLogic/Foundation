@@ -198,9 +198,9 @@ end
 
 section
 
-variable {L : Language.{u}} [L.ORing] (T : Theory L) [𝐄𝐐 ⪯ T]
+variable {L : Language.{u}} [L.ORing] (T : Theory L)
 
-lemma consequence_of (φ : SyntacticFormula L)
+lemma consequence_of [𝐄𝐐 ⪯ T] (φ : SyntacticFormula L)
   (H : ∀ (M : Type (max u w))
          [ORingStruc M]
          [Structure L M]
