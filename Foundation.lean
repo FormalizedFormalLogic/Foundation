@@ -99,3 +99,4 @@ import Foundation.Modal.Boxdot.GL_Grz
 
 import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.Sublogic
