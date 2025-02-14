@@ -1,4 +1,5 @@
 import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.KH_Incompleteness
 
 namespace LO.Modal.Logic
 
@@ -773,5 +774,15 @@ theorem GL_ssubset_Ver : Logic.GL ⊂ Logic.Ver := by
       have := Hilbert.GL.Kripke.consistent.not_bot;
       contradiction
 instance : ProperSublogic Logic.GL Logic.Ver := ⟨GL_ssubset_Ver⟩
+
+theorem KH_ssubset_GL : Logic.KH ⊂ Logic.GL := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.KH ⊢! φ by simpa;
+    use (Axioms.Four (.atom 0));
+    constructor;
+    . exact axiomFour!;
+    . exact KH_unprov_axiomFour;
+instance : ProperSublogic Logic.KH Logic.GL := ⟨KH_ssubset_GL⟩
 
 end LO.Modal.Logic
