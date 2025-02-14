@@ -177,6 +177,28 @@ lemma exists_max_sharp (h₁ : ∀ n, n♭ ∈ ‖φ‖) (h₂ : ‖φ‖ᶜ.Fin
     );
     simp at this;
 
+-- TODO: need golf
+open Classical in
+lemma exists_min_flat (h₁ : ∃ n, n♭ ∉ ‖φ‖) :
+  ∃ n, n♭ ∉ ‖φ‖ ∧ (∀ m < n, m♭ ∈ ‖φ‖) := by
+  obtain ⟨n, hn⟩ := h₁;
+  let s := Finset.Icc 0 n |>.filter (λ k => k♭ ∉ ‖φ‖);
+  have hse : s.Nonempty := by use n; simpa [s];
+  use (s.min' hse);
+  have ⟨h₁, h₂⟩ := Finset.mem_filter |>.mp $ @Finset.min'_mem (s := s) _ _ hse;
+  constructor;
+  . exact h₂;
+  . intro m hm;
+    by_contra hC;
+    have := Finset.lt_min'_iff _ _ |>.mp hm m $ by
+      simp only [Set.mem_setOf_eq, Finset.mem_filter, Finset.mem_Icc, zero_le, true_and, s];
+      constructor;
+      . simp only [Finset.lt_min'_iff, s] at hm;
+        have := hm n $ by simpa [s];
+        omega;
+      . exact hC;
+    simp at this;
+
 lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
   induction φ using Formula.rec' with
   | hatom a => simp [truthset, Satisfies];
@@ -199,8 +221,8 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
           intro x y Rxy;
           match x, y with
           | m♯, k♯ =>
-            simp [Set.compl_empty, Set.Nonempty] at tsφc_ne;
-            apply tsφc_ne;
+            have : ∀ x, Satisfies cresswellModel x φ := by simpa [Set.compl_empty, Set.Nonempty] using tsφc_ne;
+            apply this;
           | m♭, k♯ => simp at Rxy;
           | m♯, k♭ => apply h;
           | m♭, k♭ => apply h;
@@ -248,9 +270,9 @@ lemma valid_axiomH_in_cresswellModel : cresswellModel ⊧ □(□φ ⭤ φ) ➝ 
     wlog tsφc_ne : ‖φ‖ᶜ.Nonempty;
     . apply Satisfies.imp_def₂.mpr;
       right;
-      simp [Set.compl_empty, Set.Nonempty] at tsφc_ne;
       intro y Rxy;
-      apply tsφc_ne;
+      have : ∀ x, Satisfies cresswellModel x φ := by simpa [Set.compl_empty, Set.Nonempty] using tsφc_ne;
+      apply this;
     obtain ⟨n, hn, hn_max⟩ := truthset.exists_max_sharp h tsφc_fin tsφc_ne;
     match x with
     | m♭ =>
@@ -285,47 +307,7 @@ lemma valid_axiomH_in_cresswellModel : cresswellModel ⊧ □(□φ ⭤ φ) ➝ 
           apply Satisfies.iff_def.not.mpr;
           tauto;
   . push_neg at h;
-    obtain ⟨n, hn⟩ := h;
-    wlog hn_max : ∀ m < n, m♭ ∈ ‖φ‖;
-    . push_neg at hn_max;
-      obtain ⟨m, hmn, hm⟩ := hn_max;
-      let M := (Finset.Icc 0 m) |>.filter (λ k => k♭ ∉ ‖φ‖ ∧ (∀ l < k, l♭ ∈ ‖φ‖));
-      have hM : M.Nonempty := by
-        sorry;
-        -- TODO: find recursively by 0♭, 1♭, 2♭, ..., m♭;
-        /-
-        let rec find (x : ℕ) := -- (hx₁ : x ≤ m) (hx₂ : ∀ y < x, y♭ ∈ ‖φ‖) :=
-          if h : x♭ ∈ ‖φ‖
-          then find (x + 1);
-          /-
-            (by
-              by_contra hC;
-              simp at hC;
-              have : x = m := by omega;
-              rw [this] at h;
-              contradiction
-            )
-            (by
-              intro y hy;
-              rcases (Nat.lt_succ_iff_lt_or_eq.mp hy) with (h | rfl);
-              . exact hx₂ _ h;
-              . assumption;
-            )
-          -/
-
-          else x;
-        exact ⟨
-          find 0 (by simp) (by omega),
-          by
-            simp [M];
-            refine ⟨?_, ?_, ?_⟩;
-            . sorry;
-            . sorry;
-            . sorry;
-        ⟩
-        -/
-      obtain ⟨h, hx, hy⟩ := Finset.mem_filter.mp $ Finset.min'_mem M $ hM;
-      exact this x (M.min' _) hx hy;
+    obtain ⟨n, hn, hn_max⟩ := truthset.exists_min_flat h;
     have hn₁ : Satisfies cresswellModel n♭ (□φ) := by
       intro x Rnx;
       obtain ⟨m, ⟨rfl, hnm⟩⟩ := exists_flat_of_from_flat Rnx;
