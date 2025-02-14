@@ -151,10 +151,31 @@ lemma infinite_of_all_flat (h : ∀ n, n♭ ∈ ‖φ‖) : (‖φ‖.Infinite) 
   apply Set.infinite_coe_iff.mp;
   exact Infinite.of_injective (λ n => ⟨n♭, h n⟩) $ by simp [Function.Injective]
 
--- might be add `‖φ‖ᶜ.Nonempty`
-lemma exists_max_sharp (h₁ : ∀ n, n♭ ∈ ‖φ‖) (h₂ : ‖φ‖ᶜ.Finite) :
+-- TODO: need golf
+lemma exists_max_sharp (h₁ : ∀ n, n♭ ∈ ‖φ‖) (h₂ : ‖φ‖ᶜ.Finite) (h₃ : ‖φ‖ᶜ.Nonempty) :
   ∃ n, n♯ ∉ ‖φ‖ ∧ (∀ m > n, m♯ ∈ ‖φ‖) := by
-  sorry;
+  obtain ⟨s, hs⟩ := Set.Finite.exists_finset (s := (λ x => x.1) '' ‖φ‖ᶜ) $ Set.Finite.image _ h₂;
+  have se : s.Nonempty := by
+    let ⟨x, hx⟩ := h₃;
+    use x.1;
+    apply hs _ |>.mpr;
+    use x;
+  use (s.max' se);
+  constructor;
+  . obtain ⟨f, hx₁⟩ := by simpa using @hs _ |>.mp $ Finset.max'_mem _ se;
+    match f with
+    | 0 => exact hx₁;
+    | 1 =>
+      have := hx₁ $ h₁ _;
+      contradiction;
+  . intro m hm;
+    by_contra hC;
+    have : m < m := Finset.max'_lt_iff (H := se) |>.mp hm m (by
+      apply hs m |>.mpr;
+      use m♯;
+      simpa;
+    );
+    simp at this;
 
 lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
   induction φ using Formula.rec' with
@@ -171,8 +192,21 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
     . right; apply Set.Finite.inter_of_right; assumption;
   | hbox φ ihφ =>
     by_cases h : ∀ n, n♭ ∈ ‖φ‖;
-    . have : ‖φ‖ᶜ.Finite := or_iff_not_imp_left.mp ihφ $ truthset.infinite_of_all_flat h;
-      obtain ⟨n, hn, hn_max⟩ := exists_max_sharp h this;
+    . have tsφc_finite : ‖φ‖ᶜ.Finite := or_iff_not_imp_left.mp ihφ $ truthset.infinite_of_all_flat h;
+      wlog tsφc_ne : ‖φ‖ᶜ.Nonempty;
+      . have : ‖□φ‖ᶜ = ∅ := by
+          simp only [Set.compl_empty_iff, Set.eq_univ_iff_forall, Set.mem_setOf_eq];
+          intro x y Rxy;
+          match x, y with
+          | m♯, k♯ =>
+            simp [Set.compl_empty, Set.Nonempty] at tsφc_ne;
+            apply tsφc_ne;
+          | m♭, k♯ => simp at Rxy;
+          | m♯, k♭ => apply h;
+          | m♭, k♭ => apply h;
+        rw [this];
+        simp;
+      obtain ⟨n, hn, hn_max⟩ := exists_max_sharp h tsφc_finite tsφc_ne;
       right;
       apply @Set.Finite.subset (s := (·♯) '' Set.Icc 0 (n + 1));
       . apply Set.toFinite
@@ -210,8 +244,14 @@ open Classical in
 lemma valid_axiomH_in_cresswellModel : cresswellModel ⊧ □(□φ ⭤ φ) ➝ □φ := by
   rintro x;
   by_cases h : ∀ n, n♭ ∈ ‖φ‖;
-  . have : ‖φ‖ᶜ.Finite := or_iff_not_imp_left.mp truthset.either_finite_cofinite $ truthset.infinite_of_all_flat h;
-    obtain ⟨n, hn, hn_max⟩ := truthset.exists_max_sharp h this;
+  . have tsφc_fin : ‖φ‖ᶜ.Finite := or_iff_not_imp_left.mp truthset.either_finite_cofinite $ truthset.infinite_of_all_flat h;
+    wlog tsφc_ne : ‖φ‖ᶜ.Nonempty;
+    . apply Satisfies.imp_def₂.mpr;
+      right;
+      simp [Set.compl_empty, Set.Nonempty] at tsφc_ne;
+      intro y Rxy;
+      apply tsφc_ne;
+    obtain ⟨n, hn, hn_max⟩ := truthset.exists_max_sharp h tsφc_fin tsφc_ne;
     match x with
     | m♭ =>
       apply Satisfies.imp_def₂.mpr;
