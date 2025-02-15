@@ -27,6 +27,12 @@ protected class QuasiNormal (L : Logic) where
 protected class Normal (L : Logic) extends L.QuasiNormal where
   nec_closed {φ} : φ ∈ L → □φ ∈ L
 
+class Sublogic (L₁ L₂ : Logic) where
+  subset : L₁ ⊆ L₂
+
+class ProperSublogic (L₁ L₂ : Logic) : Prop where
+  ssubset : L₁ ⊂ L₂
+
 end Logic
 
 namespace Hilbert
