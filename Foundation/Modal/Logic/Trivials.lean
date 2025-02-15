@@ -1,5 +1,4 @@
 import Foundation.Modal.Logic.WellKnown
-import Batteries.Tactic.Instances
 
 namespace LO.Modal.Logic
 
