@@ -7,12 +7,6 @@ open Formula
 open Entailment
 open Kripke
 
-class Sublogic (L₁ L₂ : Logic) where
-  subset : L₁ ⊆ L₂
-
-class ProperSublogic (L₁ L₂ : Logic) where
-  ssubset : L₁ ⊂ L₂
-
 theorem KTB_ssubset_S5 : Logic.KTB ⊂ Logic.S5 := by
   constructor;
   . rw [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
@@ -774,5 +768,6 @@ theorem K_ssubset_KH : Logic.K ⊂ Logic.KH := by
       simp [Satisfies, Semantics.Realize];
       constructor <;> tauto;
 instance : ProperSublogic Logic.K Logic.KH := ⟨K_ssubset_KH⟩
+
 
 end LO.Modal.Logic
