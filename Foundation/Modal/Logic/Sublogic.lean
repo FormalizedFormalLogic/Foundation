@@ -775,4 +775,5 @@ theorem K_ssubset_KH : Logic.K ⊂ Logic.KH := by
       constructor <;> tauto;
 instance : ProperSublogic Logic.K Logic.KH := ⟨K_ssubset_KH⟩
 
+
 end LO.Modal.Logic
