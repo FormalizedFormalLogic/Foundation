@@ -19,16 +19,15 @@ protected class Unnecessitation (L : Logic) where
 protected class ModalDisjunctive (L : Logic) where
   modal_disjunctive_closed {φ ψ} : □φ ⋎ □ψ ∈ L → φ ∈ L ∨ ψ ∈ L
 
-class QuasiNormal (L : Logic) where
+protected class QuasiNormal (L : Logic) where
   subset_K : Logic.K ⊆ L
   mdp_closed {φ ψ} : φ ➝ ψ ∈ L → φ ∈ L → ψ ∈ L
   subst_closed {φ} : φ ∈ L → ∀ s, φ⟦s⟧ ∈ L
 
-class Normal (L : Logic) extends L.QuasiNormal where
+protected class Normal (L : Logic) extends L.QuasiNormal where
   nec_closed {φ} : φ ∈ L → □φ ∈ L
 
 end Logic
-
 
 namespace Hilbert
 
@@ -59,10 +58,9 @@ instance [Entailment.Unnecessitation H] : H.logic.Unnecessitation := ⟨fun {_} 
 
 instance [Entailment.ModalDisjunctive H] : H.logic.ModalDisjunctive := ⟨fun {_ _} h => modal_disjunctive h⟩
 
-end Hilbert
-
 instance : (Logic.K).Normal := Hilbert.normal
 
+end Hilbert
 
 
 section
