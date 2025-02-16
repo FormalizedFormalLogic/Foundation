@@ -339,6 +339,13 @@ instance : Entailment.Triv (Hilbert.Triv) where
 
 lemma K4_weakerThan_Triv : Hilbert.K4 ⪯ Hilbert.Triv := weakerThan_of_dominate_axioms $ by simp;
 
+
+protected abbrev KTc : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Tc (.atom 0)}⟩
+instance : (Hilbert.KTc).HasK where p := 0; q := 1;
+instance : (Hilbert.KTc).HasTc where p := 0
+instance : Entailment.KTc (Hilbert.KTc) where
+
+
 protected abbrev N : Hilbert ℕ := ⟨{}⟩
 
 end Hilbert

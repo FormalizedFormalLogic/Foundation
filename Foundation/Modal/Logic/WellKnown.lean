@@ -20,6 +20,7 @@ import Foundation.Modal.Kripke.Hilbert.S4Dot3
 import Foundation.Modal.Kripke.Hilbert.S5
 import Foundation.Modal.Kripke.Hilbert.Triv
 import Foundation.Modal.Kripke.Hilbert.Ver
+import Foundation.Modal.Kripke.Hilbert.KTc
 import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Logic.Basic
 import Foundation.Modal.Entailment.KT
@@ -139,6 +140,11 @@ lemma Triv.eq_EqualityKripkeFrameClass_Logic : Logic.Triv = Kripke.EqualityFrame
 protected abbrev Ver : Logic := Hilbert.Ver.logic
 instance : (Logic.Ver).Normal := Hilbert.normal
 lemma Ver.eq_IsolatedFrameClass_Logic : Logic.Ver = Kripke.IsolatedFrameClass.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+
+protected abbrev KTc : Logic := Hilbert.KTc.logic
+lemma KTc.eq_CoreflexiveKripkeFrameClass_Logic : Logic.KTc = Kripke.CoreflexiveFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 end Logic
