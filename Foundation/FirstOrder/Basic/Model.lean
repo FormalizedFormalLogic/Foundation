@@ -7,7 +7,7 @@ namespace FirstOrder
 
 namespace Structure
 
-structure Model (L : Language) (M : Type*) :=
+structure Model (L : Language) (M : Type*) where
   intro : M
 
 namespace Model
