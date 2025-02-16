@@ -770,4 +770,39 @@ theorem K_ssubset_KH : Logic.K ⊂ Logic.KH := by
 instance : ProperSublogic Logic.K Logic.KH := ⟨K_ssubset_KH⟩
 
 
+instance : ProperSublogic Logic.KTc Logic.Triv := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬CoreflexiveFrameClass ⊧ φ by
+      simpa [KTc.eq_CoreflexiveKripkeFrameClass_Logic];
+    use (Axioms.T (.atom 0));
+    constructor;
+    . exact axiomT!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => False⟩, λ w _ => False⟩, 0;
+      constructor;
+      . simp [Coreflexive];
+      . simp [Satisfies, Semantics.Realize];
+⟩
+
+instance : ProperSublogic Logic.KTc Logic.Ver := ⟨by
+  constructor;
+  . rw [KTc.eq_CoreflexiveKripkeFrameClass_Logic, Ver.eq_IsolatedFrameClass_Logic];
+    rintro φ hφ F F_corefl;
+    apply hφ;
+    simp_all [Coreflexive, Isolated];
+  . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬CoreflexiveFrameClass ⊧ φ by
+      simpa [KTc.eq_CoreflexiveKripkeFrameClass_Logic];
+    use (Axioms.Ver ⊥);
+    constructor;
+    . exact axiomVer!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩;
+      use M, 0;
+      constructor;
+      . simp [M, Coreflexive]; aesop;
+      . suffices ∃ x, (0 : M.World) ≺ x by simpa [Satisfies, Semantics.Realize];
+        use 0;
+⟩
+
 end LO.Modal.Logic
