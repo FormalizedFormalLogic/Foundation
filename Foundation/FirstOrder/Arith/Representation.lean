@@ -110,45 +110,45 @@ lemma projection {f : α → β →. γ} (hf : Partrec₂ f) (unif : ∀ {a b₁
 
 end Partrec
 
-namespace RePred
+namespace REPred
 
 variable {α β : Type*} [Primcodable α] [Primcodable β] {p q : α → Prop}
 
-@[simp] protected lemma const (p : Prop) : RePred fun _ : α ↦ p := by
+@[simp] protected lemma const (p : Prop) : REPred fun _ : α ↦ p := by
   by_cases h : p <;> simp [h]
   · simpa using Partrec.some.dom_re
   · simpa using (Partrec.none (α := α) (σ := α)).dom_re
 
-lemma iff : RePred p ↔ ∃ f : α →. Unit, Partrec f ∧ p = fun x ↦ (f x).Dom :=
+lemma iff : REPred p ↔ ∃ f : α →. Unit, Partrec f ∧ p = fun x ↦ (f x).Dom :=
   ⟨fun h ↦ ⟨_, h, by ext x; simp [Part.assert]⟩, by rintro ⟨f, hf, rfl⟩; exact hf.dom_re⟩
 
-lemma iff' : RePred p ↔ ∃ f : α →. Unit, Partrec f ∧ ∀ x, p x ↔ (f x).Dom :=
+lemma iff' : REPred p ↔ ∃ f : α →. Unit, Partrec f ∧ ∀ x, p x ↔ (f x).Dom :=
   ⟨fun h ↦ ⟨_, h, by intro x; simp [Part.assert]⟩, by rintro ⟨f, hf, H⟩; exact hf.dom_re.of_eq (by simp [H])⟩
 
-lemma and (hp : RePred p) (hq : RePred q) : RePred fun x ↦ p x ∧ q x := by
-  rcases RePred.iff.mp hp with ⟨f, hf, rfl⟩
-  rcases RePred.iff.mp hq with ⟨g, hg, rfl⟩
+lemma and (hp : REPred p) (hq : REPred q) : REPred fun x ↦ p x ∧ q x := by
+  rcases REPred.iff.mp hp with ⟨f, hf, rfl⟩
+  rcases REPred.iff.mp hq with ⟨g, hg, rfl⟩
   let h : α →. Unit := fun x ↦ (f x).bind fun _ ↦ (g x).map fun _ ↦ ()
   have : Partrec h := Partrec.bind hf <| Partrec.to₂ <| Partrec.map (hg.comp Computable.fst) (Computable.const ()).to₂
-  exact RePred.iff.mpr ⟨_, this, by funext x; simp [h]⟩
+  exact REPred.iff.mpr ⟨_, this, by funext x; simp [h]⟩
 
-lemma or (hp : RePred p) (hq : RePred q) : RePred fun x ↦ p x ∨ q x := by
-  rcases RePred.iff.mp hp with ⟨f, hf, rfl⟩
-  rcases RePred.iff.mp hq with ⟨g, hg, rfl⟩
+lemma or (hp : REPred p) (hq : REPred q) : REPred fun x ↦ p x ∨ q x := by
+  rcases REPred.iff.mp hp with ⟨f, hf, rfl⟩
+  rcases REPred.iff.mp hq with ⟨g, hg, rfl⟩
   rcases hf.merge hg (by intro a x; simp) with ⟨k, hk, h⟩
-  exact RePred.iff.mpr ⟨k, hk, by funext x; simp [Part.unit_dom_iff, h]⟩
+  exact REPred.iff.mpr ⟨k, hk, by funext x; simp [Part.unit_dom_iff, h]⟩
 
-lemma projection {p : α × β → Prop} (hp : RePred p) : RePred fun x ↦ ∃ y, p (x, y) := by
-  rcases RePred.iff.mp hp with ⟨f, hf, rfl⟩
+lemma projection {p : α × β → Prop} (hp : REPred p) : REPred fun x ↦ ∃ y, p (x, y) := by
+  rcases REPred.iff.mp hp with ⟨f, hf, rfl⟩
   have : Partrec₂ fun a b ↦ f (a, b) := hf.comp <| Computable.pair .fst .snd
   obtain ⟨g, hg, Hg⟩ := Partrec.projection this (by simp)
-  exact RePred.iff.mpr ⟨g, hg, by funext x; simp [Part.unit_dom_iff, Hg]⟩
+  exact REPred.iff.mpr ⟨g, hg, by funext x; simp [Part.unit_dom_iff, Hg]⟩
 
-protected lemma comp {f : α → β} (hf : Computable f) {p : β → Prop} (hp : RePred p) : RePred fun x ↦ p (f x) := by
-  rcases RePred.iff.mp hp with ⟨p, pp, rfl⟩
-  exact RePred.iff'.mpr ⟨_, pp.comp hf, by intro x; simp⟩
+protected lemma comp {f : α → β} (hf : Computable f) {p : β → Prop} (hp : REPred p) : REPred fun x ↦ p (f x) := by
+  rcases REPred.iff.mp hp with ⟨p, pp, rfl⟩
+  exact REPred.iff'.mpr ⟨_, pp.comp hf, by intro x; simp⟩
 
-end RePred
+end REPred
 
 namespace LO.FirstOrder.Arith
 
@@ -167,7 +167,7 @@ lemma term_primrec {k f} : (t : Semiterm ℒₒᵣ ξ k) → Primrec (fun v : Li
     simpa [Semiterm.val_func] using Primrec.nat_mul.comp (term_primrec (v 0)) (term_primrec (v 1))
 
 lemma sigma1_re (ε : ξ → ℕ) {k} {φ : Semiformula ℒₒᵣ ξ k} (hp : Hierarchy 𝚺 1 φ) :
-    RePred fun v : List.Vector ℕ k ↦ Semiformula.Evalm ℕ v.get ε φ := by
+    REPred fun v : List.Vector ℕ k ↦ Semiformula.Evalm ℕ v.get ε φ := by
   apply sigma₁_induction' hp
   case hVerum => simp
   case hFalsum => simp
@@ -204,13 +204,13 @@ lemma sigma1_re (ε : ξ → ℕ) {k} {φ : Semiformula ℒₒᵣ ξ k} (hp : Hi
     exact REPred.of_eq (ihp.or ihq) fun v ↦ by simp
   case hBall =>
     intro n t φ _ ih
-    rcases RePred.iff'.mp ih with ⟨f, hf, H⟩
+    rcases REPred.iff'.mp ih with ⟨f, hf, H⟩
     let g : List.Vector ℕ n →. Unit := fun v ↦
       Nat.rec (.some ()) (fun x ih ↦ ih.bind fun _ ↦ f (x ::ᵥ v)) (t.valm ℕ v.get ε)
     have : Partrec g :=
       Partrec.nat_rec (term_primrec t).to_comp (Computable.const ())
         (Partrec.to₂ <| hf.comp (Primrec.to_comp <| Primrec.vector_cons.comp (Primrec.fst.comp .snd) .fst))
-    refine RePred.iff.mpr ⟨_, this, ?_⟩
+    refine REPred.iff.mpr ⟨_, this, ?_⟩
     funext v; simp [g]
     suffices ∀ k : ℕ, (∀ x < k, Semiformula.Evalm ℕ (x :> v.get) ε φ) ↔
       Part.Dom (Nat.rec (.some ()) (fun x ih ↦ ih.bind fun _ ↦ f (x ::ᵥ v)) k) from this _
@@ -228,8 +228,8 @@ lemma sigma1_re (ε : ξ → ℕ) {k} {φ : Semiformula ℒₒᵣ ξ k} (hp : Hi
         · simpa [List.Vector.cons_get] using (H (x ::ᵥ v)).mpr hd
   case hEx =>
     intro n φ _ ih
-    rcases RePred.iff'.mp ih with ⟨f, _, _⟩
-    have : RePred fun vx : List.Vector ℕ n × ℕ ↦ Semiformula.Evalm ℕ (vx.2 :> vx.1.get) ε φ := by
+    rcases REPred.iff'.mp ih with ⟨f, _, _⟩
+    have : REPred fun vx : List.Vector ℕ n × ℕ ↦ Semiformula.Evalm ℕ (vx.2 :> vx.1.get) ε φ := by
       simpa [List.Vector.cons_get] using ih.comp (Primrec.to_comp <| Primrec.vector_cons.comp .snd .fst)
     simpa using this.projection
 
@@ -368,12 +368,12 @@ lemma codeOfPartrec'_spec {k} {f : List.Vector ℕ k →. ℕ} (hf : Nat.Partrec
 
 open Classical
 
-noncomputable def codeOfRePred (p : ℕ → Prop) : Semisentence ℒₒᵣ 1 :=
+noncomputable def codeOfREPred (p : ℕ → Prop) : Semisentence ℒₒᵣ 1 :=
   let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
   (codeOfPartrec' (fun v ↦ (f (v.get 0)).map fun _ ↦ 0))/[‘0’, #0]
 
-lemma codeOfRePred_spec {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
-    ℕ ⊧/![x] (codeOfRePred p) ↔ p x := by
+lemma codeOfREPred_spec {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
+    ℕ ⊧/![x] (codeOfREPred p) ↔ p x := by
   let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
   suffices ℕ ⊧/![x] ((codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0]) ↔ p x from this
   have : Partrec fun v : List.Vector ℕ 1 ↦ (f (v.get 0)).map fun _ ↦ 0 := by
@@ -383,10 +383,10 @@ lemma codeOfRePred_spec {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
 
 variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T] [Sigma1Sound T]
 
-lemma re_complete {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
-    p x ↔ T ⊢! ↑((codeOfRePred p)/[‘↑x’] : Sentence ℒₒᵣ) := Iff.trans
-  (by simpa [models₀_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfRePred_spec hp (x := x)).symm)
-  (sigma_one_completeness_iff (by simp [codeOfRePred, codeOfPartrec']))
+lemma re_complete {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
+    p x ↔ T ⊢! ↑((codeOfREPred p)/[‘↑x’] : Sentence ℒₒᵣ) := Iff.trans
+  (by simpa [models₀_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
+  (sigma_one_completeness_iff (by simp [codeOfREPred, codeOfPartrec']))
 
 end Arith
 
