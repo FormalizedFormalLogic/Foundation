@@ -20,7 +20,7 @@ notation "𝚫" => DeltaSymbol.delta
 
 attribute [match_pattern] SigmaSymbol.sigma PiSymbol.pi DeltaSymbol.delta
 
-inductive Polarity := | sigma | pi
+inductive Polarity where | sigma | pi
 
 namespace Polarity
 

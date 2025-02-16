@@ -43,9 +43,9 @@ syntax:67  "exp " first_order_term:68 : first_order_term
 macro_rules
   | `(⤫term[ $binders* | $fbinders* | ($e)    ]) => `(⤫term[ $binders* | $fbinders* | $e ])
   | `(⤫term[ $binders* | $fbinders* | $x:ident]) => do
-    match binders.indexOf? x with
+    match binders.idxOf? x with
     | none =>
-      match fbinders.indexOf? x with
+      match fbinders.idxOf? x with
       | none => Macro.throwErrorAt x "error: variable did not found."
       | some x =>
         let i := Syntax.mkNumLit (toString x)

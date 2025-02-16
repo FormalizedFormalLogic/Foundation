@@ -172,11 +172,11 @@ syntax:max "∃ " ident " <⁺ " first_order_term ", " first_order_formula:0 : f
 macro_rules
   | `(⤫formula[ $binders* | $fbinders* | ∀ $x <⁺ $t, $φ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(Semiformula.ballLTSucc ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
   | `(⤫formula[ $binders* | $fbinders* | ∃ $x <⁺ $t, $φ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    let binders' := binders.insertAt 0 x
+    let binders' := binders.insertIdx 0 x
     `(Semiformula.bexLTSucc ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation

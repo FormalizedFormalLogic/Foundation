@@ -356,7 +356,7 @@ def conjImplyConj (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := implyConj _ 
 
 def generalConj' {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ ➝ φ :=
   have : Γ.idxOf φ < Γ.length := List.idxOf_lt_length h
-  have : Γ[Γ.idxOf φ] = φ := List.getElem_indexOf this
+  have : Γ[Γ.idxOf φ] = φ := List.getElem_idxOf this
   cast (by rw[this]) <| conj₂Nth Γ (Γ.idxOf φ) (by assumption)
 lemma generate_conj'! (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := ⟨generalConj' h⟩
 
