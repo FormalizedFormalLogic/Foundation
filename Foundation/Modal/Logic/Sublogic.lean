@@ -834,4 +834,10 @@ instance : ProperSublogic Logic.KB4 Logic.KTc := ⟨by
         aesop;
 ⟩
 
+instance : ProperSublogic Logic.Grz Logic.GrzDot2 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . sorry;
+⟩
+
 end LO.Modal.Logic
