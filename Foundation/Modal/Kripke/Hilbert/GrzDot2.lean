@@ -51,10 +51,45 @@ end Kripke
 
 namespace Hilbert.GrzDot2
 
+open Kripke.Grz
+
 instance Kripke.sound : Sound (Hilbert.GrzDot2) (Kripke.ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass) := inferInstance
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.GrzDot2) :=
   Kripke.Hilbert.consistent_of_FiniteFrameClass ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass
+
+instance complete : Complete (Hilbert.GrzDot2) (Kripke.ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass) :=
+  Kripke.Grz.complete_of_mem_miniCanonicalFrame Kripke.ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass $ by
+    intro φ;
+    refine ⟨miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm, ?_⟩;
+    intro X Y Z ⟨⟨RXY₁, RXY₂⟩, ⟨RXZ₁, RXZ₂⟩⟩;
+    obtain ⟨U, hU⟩ := ComplementClosedConsistentFinset.lindenbaum (𝓢 := Hilbert.GrzDot2) (Φ := Y.1 ∪ Z.1) (Ψ := φ.subformulasGrz)
+      (by
+        apply Finset.union_subset_iff.mpr;
+        constructor;
+        . intro ψ hψ; exact Y.2.2 |>.subset hψ;
+        . intro ψ hψ; exact Z.2.2 |>.subset hψ;
+      )
+      (by
+        simp [FormulaFinset.Consistent];
+        sorry;
+      );
+    use U;
+    constructor;
+    . constructor;
+      . intro ψ _ hψY; exact hU $ Finset.mem_union.mpr (by tauto);
+      . intro h;
+        ext ξ;
+        constructor;
+        . intro hξY; exact hU $ Finset.mem_union.mpr (by tauto);
+        . sorry;
+    . constructor;
+      . intro ψ _ hψZ; exact hU $ Finset.mem_union.mpr (by tauto);
+      . intro h;
+        ext ξ;
+        constructor;
+        . intro hξZ; exact hU $ Finset.mem_union.mpr (by tauto);
+        . sorry;
 
 end Hilbert.GrzDot2
 

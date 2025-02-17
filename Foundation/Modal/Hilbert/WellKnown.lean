@@ -370,11 +370,13 @@ protected abbrev GrzDot2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axio
 instance : (Hilbert.GrzDot2).HasK where p := 0; q := 1;
 instance : (Hilbert.GrzDot2).HasGrz where p := 0
 instance : (Hilbert.GrzDot2).HasDot2 where p := 0
+instance : Entailment.Grz (Hilbert.GrzDot2) where
 
 protected abbrev GrzDot3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Dot3 (.atom 0) (.atom 1)}⟩
 instance : (Hilbert.GrzDot3).HasK where p := 0; q := 1;
 instance : (Hilbert.GrzDot3).HasGrz where p := 0
 instance : (Hilbert.GrzDot3).HasDot3 where p := 0; q := 1;
+instance : Entailment.Grz (Hilbert.GrzDot3) where
 
 lemma KT_weakerThan_Grz : Hilbert.KT ⪯ Hilbert.Grz := weakerThan_of_dominate_axioms $ by simp;
 

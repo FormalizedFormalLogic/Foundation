@@ -17,8 +17,10 @@ import Foundation.Modal.Kripke.Hilbert.KDB
 import Foundation.Modal.Kripke.Hilbert.KT
 import Foundation.Modal.Kripke.Hilbert.KTB
 import Foundation.Modal.Kripke.Hilbert.S4
-import Foundation.Modal.Kripke.Hilbert.S4Point2
-import Foundation.Modal.Kripke.Hilbert.S4Point3
+import Foundation.Modal.Kripke.Hilbert.S4Dot2
+import Foundation.Modal.Kripke.Hilbert.S4Dot3
+import Foundation.Modal.Kripke.Hilbert.GrzDot2
+import Foundation.Modal.Kripke.Hilbert.GrzDot3
 import Foundation.Modal.Kripke.Hilbert.S5
 import Foundation.Modal.Kripke.Hilbert.Triv
 import Foundation.Modal.Kripke.Hilbert.Ver
@@ -147,6 +149,13 @@ protected abbrev Grz : Logic := Hilbert.Grz.logic
 lemma Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic : Logic.Grz = Kripke.FrameClass.finite_strict_preorder.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
+protected abbrev GrzDot2 : Logic := Hilbert.GrzDot2.logic
+lemma GrzDot2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic : Logic.GrzDot2 = Kripke.ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass.logic
+  := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
+
+protected abbrev GrzDot3 : Logic := Hilbert.GrzDot3.logic
+lemma GrzDot3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic : Logic.GrzDot3 = Kripke.ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass.logic
+  := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
 
 protected abbrev Triv : Logic := Hilbert.Triv.logic
 lemma Triv.eq_EqualityKripkeFrameClass_Logic : Logic.Triv = Kripke.FrameClass.equality.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
