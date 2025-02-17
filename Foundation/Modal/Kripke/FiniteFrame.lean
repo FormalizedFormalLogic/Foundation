@@ -162,6 +162,17 @@ instance definedBy_with_axiomK (defines : C.DefinedBy Γ) : DefinedBy C (insert 
 
 end FiniteFrameClass
 
+lemma restrictFin_definability (Γ) (C : FrameClass) (hDef : C.DefinedBy Γ) : C.restrictFinite.DefinedBy Γ := by
+  constructor;
+  intro F;
+  constructor;
+  . intro hF φ hφ V x;
+    exact hDef.defines F.toFrame |>.mp hF _ hφ V x;
+  . intro h₂;
+    apply hDef.defines F.toFrame |>.mpr;
+    intro φ hφ V x;
+    exact h₂ φ hφ V x;
+
 end Kripke
 
 end LO.Modal
