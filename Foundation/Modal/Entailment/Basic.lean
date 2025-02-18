@@ -461,6 +461,21 @@ instance (Γ : Context F 𝓢) : HasAxiomZ Γ := ⟨fun _ ↦ Context.of axiomZ�
 end
 
 
+class HasAxiomM (𝓢 : S) where
+  M (φ : F) : 𝓢 ⊢ Axioms.M φ
+
+section
+
+variable [HasAxiomM 𝓢]
+
+def axiomM : 𝓢 ⊢ □◇φ ➝ ◇□φ := HasAxiomM.M _
+@[simp] lemma axiomM! : 𝓢 ⊢! □◇φ ➝ ◇□φ := ⟨axiomM⟩
+
+variable [Entailment.Minimal 𝓢]
+instance (Γ : FiniteContext F 𝓢) : HasAxiomM Γ := ⟨fun _ ↦ FiniteContext.of axiomM⟩
+instance (Γ : Context F 𝓢) : HasAxiomM Γ := ⟨fun _ ↦ Context.of axiomM⟩
+
+end
 
 section
 
@@ -529,8 +544,8 @@ instance [Entailment.Modal.Triv 𝓢] : Entailment.Modal.KT 𝓢 where
 instance [Entailment.Modal.Triv 𝓢] : Entailment.Modal.KTc 𝓢 where
 
 protected class Ver extends Entailment.Modal.K 𝓢, HasAxiomVer 𝓢
-
 protected class K4 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢
+protected class K4Point1 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomM 𝓢
 protected class K4Point2 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint2 𝓢
 protected class K4Point3 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢
 protected class KD4Point3Z extends Entailment.Modal.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢, HasAxiomZ 𝓢
@@ -540,6 +555,8 @@ protected class K5 extends Entailment.Modal.K 𝓢, HasAxiomFive 𝓢
 protected class S4 extends Entailment.Modal.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢
 instance [Entailment.Modal.S4 𝓢] : Entailment.Modal.K4 𝓢 where
 instance [Entailment.Modal.S4 𝓢] : Entailment.Modal.KT 𝓢 where
+
+protected class S4Point1 extends Entailment.Modal.S4 𝓢, HasAxiomM 𝓢
 
 protected class S4Point2 extends Entailment.Modal.S4 𝓢, HasAxiomPoint2 𝓢
 
