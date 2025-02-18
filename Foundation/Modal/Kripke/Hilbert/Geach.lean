@@ -52,19 +52,32 @@ instance MultiGeacheanFrameClass.isDefinedByGeachHilbertAxioms (ts)
 
 section
 
+abbrev ReflexiveFrameClass : FrameClass := { F | Reflexive F }
+instance ReflexiveFrameClass.definedByAxiomT : ReflexiveFrameClass.DefinedBy {Axioms.T (.atom 0)} := ⟨by
+  convert MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 0, 1, 0⟩} |>.defines;
+  . ext F; simp [Axioms.Geach, MultiGeachean, ←Geachean.reflexive_def];
+  . simp;
+⟩
+
+abbrev TransitiveFrameClass : FrameClass := { F | Transitive F }
+instance TransitiveFrameClass.definedByAxiomFour : TransitiveFrameClass.DefinedBy {Axioms.Four (.atom 0)} := ⟨by
+  convert MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 2, 1, 0⟩} |>.defines;
+  . ext F; simp [Axioms.Geach, MultiGeachean, ←Geachean.transitive_def];
+  . simp;
+⟩
+
 variable {F : Frame}
 
-lemma reflexive_of_validate_AxiomT (h : F ⊧ (Axioms.T (.atom 0))) : Reflexive F.Rel := by
-  have : ValidOnFrame F (Axioms.T (.atom 0)) → Reflexive F.Rel := by
-    simpa [Axioms.Geach, MultiGeachean, ←Geachean.reflexive_def] using
-    MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 0, 1, 0⟩} |>.defines F |>.mpr;
-  exact this h;
+lemma iff_reflexive_validate_AxiomT : Reflexive F.Rel ↔ F ⊧ (Axioms.T (.atom 0)) := by
+  simpa using ReflexiveFrameClass.definedByAxiomT.defines F;
 
-lemma transitive_of_validate_AxiomFour (h : F ⊧ (Axioms.Four (.atom 0))) : Transitive F.Rel := by
-  have : ValidOnFrame F (Axioms.Four (.atom 0)) → Transitive F.Rel := by
-    simpa [Axioms.Geach, MultiGeachean, ←Geachean.transitive_def] using
-    MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 2, 1, 0⟩} |>.defines F |>.mpr;
-  exact this h;
+alias ⟨_, reflexive_of_validate_AxiomT⟩ := iff_reflexive_validate_AxiomT
+
+
+lemma iff_transitive_validate_AxiomFour : Transitive F.Rel ↔ F ⊧ (Axioms.Four (.atom 0)) := by
+  simpa using TransitiveFrameClass.definedByAxiomFour.defines F;
+
+alias ⟨_, transitive_of_validate_AxiomFour⟩ := iff_transitive_validate_AxiomFour
 
 end
 

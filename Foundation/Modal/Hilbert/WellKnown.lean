@@ -182,6 +182,20 @@ instance [hH : H.HasH] : Entailment.HasAxiomH H where
     . use (λ b => if hH.p = b then φ else (.atom b));
       simp;
 
+class HasM (H : Hilbert α) where
+  p : α
+  mem_M : Axioms.M (.atom p) ∈ H.axioms := by tauto;
+
+instance [hM : H.HasM] : Entailment.HasAxiomM H where
+  M φ := by
+    apply maxm;
+    use Axioms.M (.atom hM.p);
+    constructor;
+    . exact hM.mem_M;
+    . use (λ b => if hM.p = b then φ else (.atom b));
+      simp;
+
+
 end
 
 protected abbrev KT : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}⟩
@@ -345,6 +359,18 @@ instance : (Hilbert.KTc).HasK where p := 0; q := 1;
 instance : (Hilbert.KTc).HasTc where p := 0
 instance : Entailment.KTc (Hilbert.KTc) where
 
+protected abbrev K4Dot1 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
+instance : (Hilbert.K4Dot1).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Dot1).HasFour where p := 0
+instance : (Hilbert.K4Dot1).HasM where p := 0
+instance : Entailment.K4Dot1 (Hilbert.K4Dot1) where
+
+protected abbrev S4Dot1 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
+instance : (Hilbert.S4Dot1).HasK where p := 0; q := 1;
+instance : (Hilbert.S4Dot1).HasT where p := 0
+instance : (Hilbert.S4Dot1).HasFour where p := 0
+instance : (Hilbert.S4Dot1).HasM where p := 0
+instance : Entailment.S4Dot1 (Hilbert.S4Dot1) where
 
 protected abbrev N : Hilbert ℕ := ⟨{}⟩
 

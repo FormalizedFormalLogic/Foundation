@@ -7,16 +7,13 @@ namespace LO.Modal
 open Kripke
 open Geachean
 
-abbrev Kripke.TransitiveFrameClass : FrameClass := { F | Transitive F }
 abbrev Kripke.TransitiveFiniteFrameClass : FiniteFrameClass := { F | Transitive F.Rel }
 
 namespace Hilbert.K4
 
 instance Kripke.sound : Sound (Hilbert.K4) (Kripke.TransitiveFrameClass) := by
-  convert Hilbert.Geach.Kripke.sound (G := {⟨0, 2, 1, 0⟩});
-  exact eq_Geach;
-  . unfold TransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.transitive_def];
+  have := FrameClass.definedBy_with_axiomK TransitiveFrameClass.definedByAxiomFour;
+  infer_instance
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.K4) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 2, 1, 0⟩});
