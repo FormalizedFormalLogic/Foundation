@@ -36,7 +36,7 @@ lemma not_mem₂ (hCon : t.Consistent 𝓢) {Γ : List (Formula α)} (hΓ : ∀ 
 
 section
 
-variable [Entailment.Intuitionistic 𝓢]
+variable [Entailment.K 𝓢]
 
 lemma disjoint_of_consistent (hCon : t.Consistent 𝓢) : Disjoint t.1 t.2 := by
   by_contra h;
@@ -98,6 +98,29 @@ lemma iff_consistent_insert₂ : Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ 
     have : 𝓢 ⊢! ⋀Γ ➝ φ ⋎ ⋁(Δ.remove φ) := imp_trans''! hC $ forthback_disj_remove;
     contradiction;
 
+lemma iff_consistent_empty_singleton₂ : Tableau.Consistent 𝓢 (∅, {φ}) ↔ 𝓢 ⊬ φ := by
+  convert iff_consistent_insert₂ (𝓢 := 𝓢) (T := ∅) (U := ∅) (φ := φ);
+  . simp;
+  . constructor;
+    . contrapose;
+      push_neg;
+      rintro ⟨Γ, Δ, hΓ, hΔ, h⟩;
+      have : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr hΓ;
+      have : Δ = [] := List.eq_nil_iff_forall_not_mem.mpr hΔ;
+      subst Γ Δ;
+      simp at h;
+      sorry;
+      -- exact or_cases! (χ := φ) (by simp) (by simp) (h ⨀ (by simp))
+    . contrapose;
+      push_neg;
+      intro h;
+      use [], [];
+      refine ⟨by tauto, by tauto, ?_⟩;
+      simp only [List.conj₂_nil, List.disj₂_nil, not_not];
+      apply imply₁'!;
+      apply or₁'! (by simpa using h);
+
+
 lemma iff_not_consistent_insert₂ : Tableau.Inconsistent 𝓢 (T, (insert φ U)) ↔ ∃ Γ Δ : List (Formula α), (∀ φ ∈ Γ, φ ∈ T) ∧ (∀ φ ∈ Δ, φ ∈ U) ∧ 𝓢 ⊢! ⋀Γ ➝ φ ⋎ ⋁Δ := by
   unfold Tableau.Inconsistent;
   constructor;
@@ -132,7 +155,7 @@ def Saturated (t : Tableau α) := ∀ φ : Formula α, φ ∈ t.1 ∨ φ ∈ t.2
 
 section Saturated
 
-variable [Entailment.Intuitionistic 𝓢]
+variable [Entailment.K 𝓢]
 variable {t : Tableau α}
 
 lemma mem₂_of_not_mem₁ (hSat : Saturated t) : φ ∉ t.1 → φ ∈ t.2 := by
@@ -182,7 +205,7 @@ lemma saturated_duality
 
 end Saturated
 
-lemma consistent_empty [Entailment.Intuitionistic 𝓢] [DecidableEq α] [H_consis : Entailment.Consistent 𝓢] : Consistent 𝓢 ⟨∅, ∅⟩ := by
+lemma consistent_empty [Entailment.K 𝓢] [DecidableEq α] [H_consis : Entailment.Consistent 𝓢] : Consistent 𝓢 ⟨∅, ∅⟩ := by
   intro Γ Δ hΓ hΔ;
   replace hΓ : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr hΓ;
   replace hΔ : Δ = [] := List.eq_nil_iff_forall_not_mem.mpr hΔ;
@@ -221,7 +244,7 @@ variable {𝓢}
 
 @[simp] lemma eq_lindenbaum_indexed_zero [Encodable α] {t : Tableau α} : t[0] = t := by simp [lindenbaum_indexed]
 
-lemma consistent_lindenbaum_next [Entailment.Intuitionistic 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
+lemma consistent_lindenbaum_next [Entailment.K 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
   unfold lindenbaum_next;
   split;
   . assumption;
@@ -231,7 +254,7 @@ lemma consistent_lindenbaum_next [Entailment.Intuitionistic 𝓢] (consistent : 
 
 variable [Encodable α]
 
-lemma consistent_lindenbaum_indexed_succ [Entailment.Intuitionistic 𝓢] {i : ℕ} : Consistent 𝓢 t[i] → Consistent 𝓢 t[i + 1] := by
+lemma consistent_lindenbaum_indexed_succ [Entailment.K 𝓢] {i : ℕ} : Consistent 𝓢 t[i] → Consistent 𝓢 t[i + 1] := by
   simp only [lindenbaum_indexed];
   split;
   . intro h;
@@ -243,7 +266,7 @@ lemma either_mem_lindenbaum_indexed (t) (φ : Formula α) : φ ∈ t[(encode φ)
   simp only [lindenbaum_indexed, encodek, lindenbaum_next];
   split <;> tauto;
 
-lemma consistent_lindenbaum_indexed [Entailment.Intuitionistic 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
+lemma consistent_lindenbaum_indexed [Entailment.K 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
   induction i with
   | zero => simpa;
   | succ i ih => apply consistent_lindenbaum_indexed_succ; assumption;
@@ -268,7 +291,7 @@ lemma subset₂_lindenbaum_indexed_of_lt (h : m ≤ n) : t[m].2 ⊆ t[n].2 := by
     . split <;> tauto;
     . tauto;
 
-lemma exists_consistent_saturated_tableau [Entailment.Intuitionistic 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (Tableau.Consistent 𝓢 u) ∧ (Saturated u) := by
+lemma exists_consistent_saturated_tableau [Entailment.K 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (Tableau.Consistent 𝓢 u) ∧ (Saturated u) := by
   use t∞;
   refine ⟨?subset, ?consistent, ?saturated⟩;
   case subset => constructor <;> apply Set.subset_iUnion_of_subset 0 (by simp);
@@ -330,17 +353,17 @@ lemma saturated (t : SaturatedConsistentTableau 𝓢) : Saturated t.1 := t.2.1
 
 variable {t₀ : Tableau α} {φ ψ : Formula α}
 
-lemma lindenbaum [Entailment.Intuitionistic 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : SaturatedConsistentTableau 𝓢), t₀ ⊆ t.1 := by
+lemma lindenbaum [Entailment.K 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : SaturatedConsistentTableau 𝓢), t₀ ⊆ t.1 := by
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
   exact ⟨⟨t, hMax, hCon⟩, ht⟩;
 
-instance [Entailment.Consistent 𝓢] [Entailment.Intuitionistic 𝓢] [DecidableEq α] [Encodable α] : Nonempty (SaturatedConsistentTableau 𝓢) := ⟨lindenbaum consistent_empty |>.choose⟩
+instance [Entailment.Consistent 𝓢] [Entailment.K 𝓢] [DecidableEq α] [Encodable α] : Nonempty (SaturatedConsistentTableau 𝓢) := ⟨lindenbaum consistent_empty |>.choose⟩
 
 variable {t t₁ t₂ : SaturatedConsistentTableau 𝓢}
 
 lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ φ ∈ Γ, φ ∈ t.1.1) (h : 𝓢 ⊢! ⋀Γ ➝ ψ) : ψ ∉ t.1.2 := t.1.not_mem₂ t.consistent hΓ h
 
-variable [Entailment.Intuitionistic 𝓢]
+variable [Entailment.K 𝓢]
 
 lemma disjoint : Disjoint t.1.1 t.1.2 := t.1.disjoint_of_consistent t.2.2
 
@@ -348,7 +371,13 @@ lemma iff_not_mem₁_mem₂ : φ ∉ t.1.1 ↔ φ ∈ t.1.2 := Tableau.iff_not_m
 
 lemma iff_not_mem₂_mem₁ : φ ∉ t.1.2 ↔ φ ∈ t.1.1 := Tableau.iff_not_mem₂_mem₁ t.consistent t.saturated
 
-lemma saturated_duality: t₁.1.1 = t₂.1.1 ↔ t₁.1.2 = t₂.1.2 := Tableau.saturated_duality t₁.consistent t₂.consistent t₁.saturated t₂.saturated
+@[simp]
+lemma neither : ¬(φ ∈ t.1.1 ∧ φ ∈ t.1.2) := by
+  push_neg;
+  intro h;
+  exact iff_not_mem₂_mem₁.mpr h;
+
+lemma saturated_duality: t.1.1 = t₂.1.1 ↔ t.1.2 = t₂.1.2 := Tableau.saturated_duality t.consistent t₂.consistent t.saturated t₂.saturated
 
 lemma equality_of₁ (e₁ : t₁.1.1 = t₂.1.1) : t₁ = t₂ := by
   have e := Tableau.equality_def.mpr ⟨e₁, (saturated_duality.mp e₁)⟩;
@@ -359,13 +388,13 @@ lemma equality_of₁ (e₁ : t₁.1.1 = t₂.1.1) : t₁ = t₂ := by
 
 lemma equality_of₂ (e₂ : t₁.1.2 = t₂.1.2) : t₁ = t₂ := equality_of₁ $ saturated_duality.mpr e₂
 
-lemma mdp₁ (hp₁ : φ ∈ t.1.1) (h : 𝓢 ⊢! φ ➝ ψ) : ψ ∈ t.1.1 := by
+lemma mdp_mem₁ (hp₁ : φ ∈ t.1.1) (h : 𝓢 ⊢! φ ➝ ψ) : ψ ∈ t.1.1 := by
   apply iff_not_mem₂_mem₁.mp;
   by_contra hq₂;
   have : 𝓢 ⊬ φ ➝ ψ := by simpa using t.consistent (Γ := [φ]) (Δ := [ψ]) (by simpa) (by simpa);
   contradiction;
 
-lemma mdp₁_mem [DecidableEq α] (hp : φ ∈ t.1.1) (h : φ ➝ ψ ∈ t.1.1) : ψ ∈ t.1.1 := by
+lemma mdp_mem₁Aux [DecidableEq α] (h : φ ➝ ψ ∈ t.1.1) (hp : φ ∈ t.1.1) : ψ ∈ t.1.1 := by
   apply iff_not_mem₂_mem₁.mp;
   by_contra hC;
   have : 𝓢 ⊬ (φ ⋏ (φ ➝ ψ)) ➝ ψ := t.consistent (Γ := [φ, φ ➝ ψ]) (Δ := [ψ]) (by aesop) (by simpa);
@@ -381,6 +410,11 @@ lemma mem₁_verum : ⊤ ∈ t.1.1 := by
   contradiction;
 
 @[simp]
+lemma not_mem₂_verum : ⊤ ∉ t.1.2 := by
+  apply iff_not_mem₂_mem₁.mpr;
+  exact mem₁_verum;
+
+@[simp]
 lemma not_mem₁_falsum : ⊥ ∉ t.1.1 := by
   by_contra hC;
   have : 𝓢 ⊬ ⋀[⊥] ➝ ⋁[] := t.consistent (by simpa) (by simp);
@@ -388,15 +422,198 @@ lemma not_mem₁_falsum : ⊥ ∉ t.1.1 := by
   contradiction;
 
 @[simp]
+lemma mem₂_falsum : ⊥ ∈ t.1.2 := by
+  apply iff_not_mem₁_mem₂.mp;
+  exact not_mem₁_falsum;
+
+lemma mem₁_of_provable : 𝓢 ⊢! φ → φ ∈ t.1.1 := by
+  intro h;
+  exact mdp_mem₁ mem₁_verum $ imply₁'! h;
+
+lemma iff_mem₁_neg [DecidableEq α] : ∼φ ∈ t.1.1 ↔ φ ∈ t.1.2 := by
+  constructor;
+  . intro hnφ;
+    by_contra hφ;
+    replace hφ := iff_not_mem₂_mem₁.mp hφ;
+    exact not_mem₁_falsum $ mdp_mem₁Aux hnφ hφ;
+  . intro hφ;
+    by_contra hnφ;
+    replace hnφ := iff_not_mem₁_mem₂.mp hnφ;
+    have := t.consistent (Γ := []) (Δ := [φ, ∼φ]) (by simp) (by simp_all);
+    have : 𝓢 ⊢! ⊤ ➝ ⋁[φ, ∼φ] := imply₁'! lem!
+    contradiction;
+
+lemma iff_mem₂_neg [DecidableEq α] : ∼φ ∈ t.1.2 ↔ φ ∈ t.1.1 := by
+  constructor;
+  . intro h;
+    apply iff_not_mem₂_mem₁.mp;
+    apply iff_mem₁_neg.not.mp;
+    apply iff_not_mem₁_mem₂.mpr;
+    exact h;
+  . intro h;
+    apply iff_not_mem₁_mem₂.mp;
+    apply iff_mem₁_neg.not.mpr;
+    apply iff_not_mem₂_mem₁.mpr;
+    exact h;
+
+lemma of_mem₁_imp [DecidableEq α] : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
+  intro h;
+  by_contra hC;
+  push_neg at hC;
+  have : ψ ∈ t.1.1 := mdp_mem₁Aux h $ iff_not_mem₂_mem₁.mp hC.1;
+  have : ψ ∉ t.1.1 := iff_not_mem₁_mem₂.mpr $ iff_not_mem₁_mem₂.mp hC.2;
+  contradiction;
+
+lemma of_mem₂_imp [DecidableEq α] : φ ➝ ψ ∈ t.1.2 → (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
+  contrapose;
+  intro h;
+  replace h := not_and_or.mp h;
+  rcases h with (hφ | hψ);
+  . sorry;
+  . sorry;
+
+lemma iff_mem₁_imp' [DecidableEq α] : φ ➝ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 → ψ ∈ t.1.1) := by
+  constructor;
+  . intro h;
+    by_contra hC;
+    push_neg at hC;
+    have : ψ ∈ t.1.1 := mdp_mem₁Aux h hC.1;
+    have : ψ ∉ t.1.1 := iff_not_mem₁_mem₂.mpr $ iff_not_mem₁_mem₂.mp hC.2;
+    contradiction
+  . intro h;
+    replace h := imp_iff_or_not.mp h;
+    rcases h with (hψ | hφ);
+    . exact mdp_mem₁ hψ imply₁!;
+    . sorry;
+
+lemma iff_mem₁_imp [DecidableEq α] : φ ➝ ψ ∈ t.1.1 ↔ φ ∈ t.1.2 ∨ ψ ∈ t.1.1 := by
+  constructor;
+  . intro h;
+    by_contra hC;
+    push_neg at hC;
+    have : φ ∈ t.1.1 := iff_not_mem₂_mem₁.mp hC.1;
+    have : ψ ∈ t.1.1 := mdp_mem₁Aux h this;
+    have : ψ ∉ t.1.1 := iff_not_mem₁_mem₂.mpr $ iff_not_mem₁_mem₂.mp hC.2;
+    contradiction
+  . rintro (hφ | hψ);
+    . sorry;
+    . exact mdp_mem₁ hψ imply₁!;
+
+lemma iff_mem₂_imp [DecidableEq α] : φ ➝ ψ ∈ t.1.2 ↔ φ ∈ t.1.1 ∧ ψ ∈ t.1.2 := by
+  constructor;
+  . contrapose;
+    suffices (φ ∉ t.1.1 ∨ ψ ∉ t.1.2) → φ ➝ ψ ∉ t.1.2 by tauto;
+    rintro (hφ | hψ);
+    . apply iff_not_mem₂_mem₁.mpr;
+      apply iff_mem₁_imp.mpr;
+      left;
+      exact iff_not_mem₁_mem₂.mp hφ;
+    . apply iff_not_mem₂_mem₁.mpr;
+      apply iff_mem₁_imp.mpr;
+      right;
+      exact iff_not_mem₂_mem₁.mp hψ;
+  . contrapose;
+    push_neg;
+    intro hφψ hφ;
+    apply iff_not_mem₂_mem₁.mpr;
+    replace hφψ := iff_not_mem₂_mem₁.mp hφψ;
+    exact mdp_mem₁Aux hφψ hφ;
+
+/-
+lemma iff_mem₁_neg [DecidableEq α] : ∼φ ∈ t.1.1 ↔ φ ∈ t.1.2 := by
+  constructor;
+  . intro h;
+    rcases iff_mem₁_imp.mp h with (h | h);
+    . assumption;
+    . exfalso;
+      exact not_mem₁_falsum h;
+  . intro h;
+    apply iff_mem₁_imp.mpr;
+    left;
+    exact h;
+
+lemma iff_mem₂_neg [DecidableEq α] : ∼φ ∈ t.1.2 ↔ φ ∈ t.1.1 := by
+  constructor;
+  . intro h;
+    apply iff_not_mem₂_mem₁.mp;
+    apply iff_mem₁_neg.not.mp;
+    apply iff_not_mem₁_mem₂.mpr;
+    exact h;
+  . intro h;
+    apply iff_not_mem₁_mem₂.mp;
+    apply iff_mem₁_neg.not.mpr;
+    apply iff_not_mem₂_mem₁.mpr;
+    exact h;
+-/
+
+@[simp]
 lemma iff_mem₁_and : φ ⋏ ψ ∈ t.1.1 ↔ φ ∈ t.1.1 ∧ ψ ∈ t.1.1 := by
   constructor;
-  . intro h; constructor <;> exact mdp₁ h (by simp)
+  . intro h; constructor <;> exact mdp_mem₁ h (by simp)
   . rintro ⟨hp, hq⟩;
     apply iff_not_mem₂_mem₁.mp;
     by_contra hC;
     have : 𝓢 ⊢! ⋀[φ, ψ] ➝ ⋁[φ ⋏ ψ] := by simp;
     have : 𝓢 ⊬ ⋀[φ, ψ] ➝ ⋁[φ ⋏ ψ] := t.consistent (by simp_all) (by simp_all);
     contradiction;
+
+@[simp]
+lemma iff_mem₂_and : φ ⋏ ψ ∈ t.1.2 ↔ φ ∈ t.1.2 ∨ ψ ∈ t.1.2 := by
+  constructor;
+  . contrapose;
+    push_neg;
+    rintro ⟨hφ, hψ⟩;
+    apply iff_not_mem₂_mem₁.mpr;
+    apply iff_mem₁_and.mpr;
+    constructor;
+    . exact iff_not_mem₂_mem₁.mp hφ;
+    . exact iff_not_mem₂_mem₁.mp hψ;
+  . contrapose;
+    push_neg;
+    intro h;
+    constructor;
+    . apply iff_not_mem₂_mem₁.mpr;
+      exact iff_mem₁_and.mp (iff_not_mem₂_mem₁.mp h) |>.1;
+    . apply iff_not_mem₂_mem₁.mpr;
+      exact iff_mem₁_and.mp (iff_not_mem₂_mem₁.mp h) |>.2;
+
+@[simp]
+lemma iff_mem₁_or : φ ⋎ ψ ∈ t.1.1 ↔ φ ∈ t.1.1 ∨ ψ ∈ t.1.1 := by
+  constructor;
+  . intro h;
+    by_contra hC; push_neg at hC;
+    have : φ ∈ t.1.2 := iff_not_mem₁_mem₂.mp hC.1;
+    have : ψ ∈ t.1.2 := iff_not_mem₁_mem₂.mp hC.2;
+    have : 𝓢 ⊢! ⋀[φ ⋎ ψ] ➝ ⋁[φ, ψ] := by simp;
+    have : 𝓢 ⊬ ⋀[φ ⋎ ψ] ➝ ⋁[φ, ψ] := t.consistent (by simp_all) (by simp_all);
+    contradiction;
+  . intro h;
+    cases h with
+    | inl h => exact mdp_mem₁ h or₁!
+    | inr h => exact mdp_mem₁ h or₂!
+
+@[simp]
+lemma iff_mem₂_or : φ ⋎ ψ ∈ t.1.2 ↔ φ ∈ t.1.2 ∧ ψ ∈ t.1.2 := by
+  constructor;
+  . contrapose;
+    suffices (φ ∉ t.1.2 ∨ ψ ∉ t.1.2) → φ ⋎ ψ ∉ t.1.2 by tauto;
+    rintro (hφ | hψ);
+    . apply iff_not_mem₂_mem₁.mpr;
+      apply iff_mem₁_or.mpr;
+      left;
+      exact iff_not_mem₂_mem₁.mp hφ;
+    . apply iff_not_mem₂_mem₁.mpr;
+      apply iff_mem₁_or.mpr;
+      right;
+      exact iff_not_mem₂_mem₁.mp hψ;
+  . contrapose;
+    intro h;
+    suffices φ ∉ t.1.2 ∨ ψ ∉ t.1.2 by tauto;
+    rcases iff_mem₁_or.mp $ iff_not_mem₂_mem₁.mp h with (hφ | hψ);
+    . left;
+      exact iff_not_mem₂_mem₁.mpr hφ;
+    . right;
+      exact iff_not_mem₂_mem₁.mpr hψ;
 
 @[simp]
 lemma iff_mem₁_conj {Γ : List (Formula α)} : ⋀Γ ∈ t.1.1 ↔ ∀ φ ∈ Γ, φ ∈ t.1.1 := by
@@ -413,26 +630,11 @@ lemma iff_mem₁_conj {Γ : List (Formula α)} : ⋀Γ ∈ t.1.1 ↔ ∀ φ ∈ 
       apply iff_mem₁_and.mpr;
       simp_all;
 
-@[simp]
-lemma iff_mem₁_or : φ ⋎ ψ ∈ t.1.1 ↔ φ ∈ t.1.1 ∨ ψ ∈ t.1.1 := by
-  constructor;
-  . intro h;
-    by_contra hC; push_neg at hC;
-    have : φ ∈ t.1.2 := iff_not_mem₁_mem₂.mp hC.1;
-    have : ψ ∈ t.1.2 := iff_not_mem₁_mem₂.mp hC.2;
-    have : 𝓢 ⊢! ⋀[φ ⋎ ψ] ➝ ⋁[φ, ψ] := by simp;
-    have : 𝓢 ⊬ ⋀[φ ⋎ ψ] ➝ ⋁[φ, ψ] := t.consistent (by simp_all) (by simp_all);
-    contradiction;
-  . intro h;
-    cases h with
-    | inl h => exact mdp₁ h or₁!
-    | inr h => exact mdp₁ h or₂!
-
 lemma not_mem₁_neg_of_mem₁ [DecidableEq α] : φ ∈ t.1.1 → ∼φ ∉ t.1.1 := by
   intro hp;
   by_contra hnp;
   have := iff_mem₁_and.mpr ⟨hp, hnp⟩;
-  have : ⊥ ∈ t.1.1 := mdp₁ this intro_bot_of_and!;
+  have : ⊥ ∈ t.1.1 := mdp_mem₁ this intro_bot_of_and!;
   have : ⊥ ∉ t.1.1 := not_mem₁_falsum
   contradiction;
 
@@ -440,9 +642,33 @@ lemma mem₂_neg_of_mem₁ [DecidableEq α] : φ ∈ t.1.1 → ∼φ ∈ t.1.2 :
   intro h;
   exact iff_not_mem₁_mem₂ (φ := ∼φ) (t := t) |>.mp $ not_mem₁_neg_of_mem₁ h;
 
-lemma mem₁_of_provable : 𝓢 ⊢! φ → φ ∈ t.1.1 := by
-  intro h;
-  exact mdp₁ mem₁_verum $ imply₁'! h;
+
+variable [Encodable α]
+
+lemma iff_multibox_mem₁ : (□^[n]φ ∈ t.1.1) ↔ (∀ {t' : SaturatedConsistentTableau 𝓢}, (□''⁻¹^[n]t.1.1 ⊆ t'.1.1) → (φ ∈ t'.1.1)) := by
+  constructor;
+  . intro h t' ht';
+    apply ht';
+    tauto;
+  . contrapose;
+    push_neg;
+    intro h;
+    obtain ⟨t', ht'⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹^[n]t.1.1, {φ}⟩) $ by
+      intro Γ Δ hΓ hΔ;
+      by_contra hC;
+      sorry;
+    use t';
+    constructor;
+    . exact ht'.1;
+    . apply iff_not_mem₁_mem₂.mpr;
+      apply ht'.2;
+      tauto_set;
+
+lemma iff_box_mem₁ : (□φ ∈ t.1.1) ↔ (∀ {t' : SaturatedConsistentTableau 𝓢}, (□''⁻¹t.1.1 ⊆ t'.1.1) → (φ ∈ t'.1.1)) := iff_multibox_mem₁ (n := 1)
+
+lemma of_box_mem₁ : (□φ ∈ t.1.1) → (∀ {t' : SaturatedConsistentTableau 𝓢}, (□''⁻¹t.1.1 ⊆ t'.1.1) → (φ ∈ t'.1.1)) := iff_multibox_mem₁ (n := 1) |>.mp
+
+lemma of_box_mem₂ : (□φ ∈ t.1.2) → (∃ t' : SaturatedConsistentTableau 𝓢, (□''⁻¹t.1.1 ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := by sorry;
 
 end SaturatedConsistentTableau
 
