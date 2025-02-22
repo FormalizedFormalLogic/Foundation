@@ -73,7 +73,7 @@ lemma multirel_def_multibox : Ω₁ ≺^[n] Ω₂ ↔ ∀ {φ}, □^[n]φ ∈ Ω
       constructor;
       . intro φ hp;
         apply hΩ;
-        simp_all;
+        simp_all?;
       . apply ih.mpr;
         apply multibox_multidia.mpr;
         intro φ hp;
