@@ -1,4 +1,4 @@
-import Foundation.Modal.SaturatedConsistentTableau
+import Foundation.Modal.Tableau
 import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
@@ -6,7 +6,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open SaturatedConsistentTableau
+open MaximalConsistentTableau
 
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
@@ -17,7 +17,7 @@ namespace Kripke
 section
 
 abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Kripke.Frame where
-  World := SaturatedConsistentTableau 𝓢
+  World := MaximalConsistentTableau 𝓢
   Rel t₁ t₂ := □''⁻¹t₁.1.1 ⊆ t₂.1.1
 
 abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Model where
@@ -30,73 +30,18 @@ instance : Semantics (Formula ℕ) (canonicalModel 𝓢).World := Formula.Kripke
 end
 
 
-namespace canonicalFrame
-
-variable {t₁ t₂ : (canonicalFrame 𝓢).World}
-
-@[simp] lemma rel_def_box: t₁ ≺ t₂ ↔ ∀ {φ}, □φ ∈ t₁.1.1 → φ ∈ t₂.1.1 := by simp [Frame.Rel']; aesop;
-
-lemma multirel_def_multibox : t₁ ≺^[n] t₂ ↔ ∀ {φ}, □^[n]φ ∈ t₁.1.1 → φ ∈ t₂.1.1 := by
-  induction n generalizing t₁ t₂ with
-  | zero =>
-    simp_all only [Rel.iterate.iff_zero, Function.iterate_zero, id_eq];
-    constructor;
-    . intro h; tauto_set;
-    . intro h;
-      apply equality_of₁;
-      sorry;
-      -- apply equality_of₁;
-      -- tauto_set;
-  | succ n ih =>
-    constructor;
-    . intro h φ hp;
-      obtain ⟨⟨t₃, _⟩, R₁₃, R₃₂⟩ := h;
-      apply ih.mp R₃₂ $ rel_def_box.mp R₁₃ (by simpa using hp);
-    . intro h;
-      obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹{ φ | t₁ ⊧ φ }, □''^[n]{ ψ | ¬t₂ ⊧ ψ }⟩) $ by
-        sorry;
-      use t;
-      constructor;
-      . intro φ hφ;
-        apply ht.1;
-        intro t₃ ht₁₃;
-        sorry;
-      . apply ih.mpr;
-        intro φ hφ;
-        sorry;
-
-lemma multirel_def_multibox' : t₁ ≺^[n] t₂ ↔ ∀ {φ}, φ ∈ (□''⁻¹^[n]t₁.1.1) → φ ∈ t₂.1.1 := by
-  constructor;
-  . intro h φ hp;
-    exact multirel_def_multibox.mp h hp;
-  . intro h;
-    apply multirel_def_multibox.mpr;
-    assumption;
-
-lemma multirel_def_multidia : t₁ ≺^[n] t₂ ↔ ∀ {φ}, (φ ∈ t₂.1.1 → ◇^[n]φ ∈ t₁.1.1):= by
-  sorry;
-
-lemma rel_def_dia : t₁ ≺ t₂ ↔ ∀ {φ}, φ ∈ t₂.1.1 → ◇φ ∈ t₁.1.1 := by
-  convert multirel_def_multidia (n := 1);
-  simp;
-  tauto;
-
-end canonicalFrame
-
-
-
 section lemmata
 
 variable {φ ψ : Formula ℕ}
+variable {t : (canonicalModel 𝓢).World}
 
-lemma truthlemma : ∀ {t : (canonicalModel 𝓢).World}, ((φ ∈ t.1.1) → t ⊧ φ) ∧ ((φ ∈ t.1.2) → ¬t ⊧ φ) := by
+lemma truthlemmaAux : ∀ {t : (canonicalModel 𝓢).World}, ((φ ∈ t.1.1) → t ⊧ φ) ∧ ((φ ∈ t.1.2) → ¬t ⊧ φ) := by
   induction φ using Formula.rec' with
   | hatom =>
     simp_all only [Semantics.Realize, Satisfies, implies_true, true_and];
     intro t h₁;
     exact iff_not_mem₁_mem₂.mpr h₁;
-  | hfalsum =>
-    simp [Semantics.Realize, Satisfies, false_iff];
+  | hfalsum => simp [Semantics.Realize, Satisfies];
   | himp φ ψ ihφ ihψ =>
     intro t;
     constructor;
@@ -117,15 +62,38 @@ lemma truthlemma : ∀ {t : (canonicalModel 𝓢).World}, ((φ ∈ t.1.1) → t 
     constructor;
     . intro h t' Rtt';
       apply ihφ.1;
-      apply of_box_mem₁ h Rtt';
+      apply MaximalConsistentTableau.of_mem₁_box h Rtt';
     . intro h;
       apply Satisfies.box_def.not.mpr;
       push_neg;
-      obtain ⟨t', Rtt', ht'⟩ := of_box_mem₂ h;
+      obtain ⟨t', Rtt', ht'⟩ := MaximalConsistentTableau.of_mem₂_box h;
       use t';
       constructor;
       . exact Rtt';
       . apply ihφ.2 ht';
+
+lemma truthlemmaAux₁ : (φ ∈ t.1.1) → t ⊧ φ := truthlemmaAux (t := t) |>.1
+
+lemma truthlemmaAux₂ : (φ ∈ t.1.2) → ¬t ⊧ φ := truthlemmaAux (t := t) |>.2
+
+lemma truthlemma₁ : (φ ∈ t.1.1) ↔ t ⊧ φ := by
+  constructor;
+  . apply truthlemmaAux₁;
+  . intro h;
+    induction φ using Formula.rec' with
+    | hatom => simpa [Semantics.Realize, Satisfies] using h;
+    | hfalsum => simpa;
+    | himp φ ψ ihφ ihψ =>
+      sorry;
+    | hbox φ ih =>
+      sorry;
+
+lemma truthlemma₂ : (φ ∈ t.1.2) ↔ ¬t ⊧ φ := by
+  constructor;
+  . intro h;
+    exact truthlemmaAux₂ h;
+  . intro h;
+    exact iff_not_mem₁_mem₂.mp $ truthlemma₁.not.mpr h;
 
 lemma iff_valid_on_canonicalModel_deducible : (canonicalModel 𝓢) ⊧ φ ↔ 𝓢 ⊢! φ := by
   constructor;
@@ -137,12 +105,11 @@ lemma iff_valid_on_canonicalModel_deducible : (canonicalModel 𝓢) ⊧ φ ↔ �
     obtain ⟨t, ht⟩ := lindenbaum this;
     apply ValidOnModel.not_of_exists_world;
     use t;
-    apply truthlemma.2;
+    apply truthlemma₂.mp;
     apply ht.2;
     tauto_set;
   . intro h t;
-    suffices φ ∈ t.1.1 by exact truthlemma.1 this;
-    exact SaturatedConsistentTableau.mem₁_of_provable h;
+    exact truthlemma₁.mp $ MaximalConsistentTableau.iff_provable_mem₁.mp h t;
 
 end lemmata
 
@@ -159,6 +126,66 @@ instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
   . exact Canonical.canonical;
   . exact iff_valid_on_canonicalModel_deducible.not.mpr h;
 ⟩
+
+
+namespace canonicalModel
+
+open Formula.Kripke.Satisfies
+
+variable {x y : (canonicalModel 𝓢).World}
+
+lemma def_rel_box : x ≺ y ↔ ∀ {φ}, □φ ∈ x.1.1 → φ ∈ y.1.1 := by simp [Frame.Rel']; aesop;
+
+lemma def_multirel_multibox : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ → y ⊧ φ) := by
+  constructor;
+  . intro h φ hφ;
+    exact Satisfies.multibox_def.mp hφ h;
+  . induction n generalizing x y with
+    | zero =>
+      simp_all only [Rel.iterate.iff_zero, Function.iterate_zero, id_eq];
+      sorry;
+    | succ n ih =>
+      sorry;
+
+lemma def_multirel_multibox_mem₁ : x ≺^[n] y ↔ (∀ {φ}, □^[n]φ ∈ x.1.1 → φ ∈ y.1.1) := ⟨
+  fun h _ hφ => truthlemma₁.mpr $ def_multirel_multibox.mp h $ truthlemma₁.mp hφ,
+  fun h => def_multirel_multibox.mpr fun hφ => truthlemma₁.mp (h $ truthlemma₁.mpr hφ)
+⟩
+
+lemma def_multirel_multidia : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x ⊧ ◇^[n]φ) := by
+  constructor;
+  . intro h φ hφ;
+    apply Formula.Kripke.Satisfies.multidia_def.mpr;
+    use y;
+  . intro h;
+    apply def_multirel_multibox.mpr;
+    intro φ;
+    contrapose;
+    intro hφ;
+    have := h (φ := ∼φ) (Satisfies.not_def.mp hφ);
+    sorry;
+
+lemma def_multirel_multidia_mem₁ : x ≺^[n] y ↔ (∀ {φ}, φ ∈ y.1.1 → ◇^[n]φ ∈ x.1.1) := ⟨
+  fun h _ hφ => truthlemma₁.mpr $ def_multirel_multidia.mp h (truthlemma₁.mp hφ),
+  fun h => def_multirel_multidia.mpr fun hφ => truthlemma₁.mp $ h (truthlemma₁.mpr hφ)
+⟩
+
+lemma def_multirel_multidia_mem₂ : x ≺^[n] y ↔ (∀ {φ}, ◇^[n]φ ∈ x.1.2 → φ ∈ y.1.2) := by
+  constructor;
+  . intro Rxy φ;
+    contrapose;
+    intro hφ;
+    apply iff_not_mem₂_mem₁.mpr;
+    apply def_multirel_multidia_mem₁.mp Rxy;
+    exact iff_not_mem₂_mem₁.mp hφ;
+  . intro H;
+    apply def_multirel_multidia_mem₁.mpr;
+    intro φ;
+    contrapose;
+    intro hφ;
+    exact iff_not_mem₁_mem₂.mpr $ @H φ (iff_not_mem₁_mem₂.mp hφ);
+
+end canonicalModel
 
 end Kripke
 
