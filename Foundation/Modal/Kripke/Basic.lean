@@ -128,9 +128,42 @@ lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ :=
 
 lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
 
+lemma neg_congr (h : x ⊧ φ ↔ x ⊧ ψ) : x ⊧ ∼φ ↔ x ⊧ ∼ψ := by
+  simp [Satisfies];
+  tauto;
+
+lemma box_congr (h : ∀ y : M.World, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ □φ ↔ x ⊧ □ψ := by
+  constructor;
+  . intro H y Rxy; exact h y Rxy |>.mp $ H y Rxy;
+  . intro H y Rxy; exact h y Rxy |>.mpr $ H y Rxy;
+
+lemma dia_congr (h : ∀ y : M.World, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ ◇φ ↔ x ⊧ ◇ψ := by
+  apply neg_congr;
+  apply box_congr;
+  intro y Rxy;
+  apply neg_congr;
+  apply h y Rxy;
+
 lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Satisfies];
 
+lemma multidia_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
+  induction n generalizing φ with
+  | zero => simp;
+  | succ n ih =>
+    -- suffices x ⊧ ◇(◇^[n]φ) ↔ x ⊧ ∼□(□^[n](∼φ)) by simpa;
+    constructor;
+    . intro h;
+      suffices x ⊧ ∼□^[n](□(∼φ)) by sorry;
+      have := ih (φ := ◇φ) |>.mp (by sorry);
+      sorry;
+    . intro h;
+      suffices x ⊧ ◇^[n](◇φ) by sorry;
+      apply ih.mpr;
+      sorry;
+
 lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Satisfies];
+
+lemma multibox_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by sorry;
 
 lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Satisfies];
 
