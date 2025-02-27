@@ -537,7 +537,6 @@ lemma iff_mem₂_conj {Γ : List _} : ⋀Γ ∈ t.1.2 ↔ (∃ φ ∈ Γ, φ ∈
         exact ⟨ψ, by simpa, hψ₂⟩;
   | _ => simp;
 
-
 omit [DecidableEq α] [Encodable α] in
 private lemma of_mem₁_or : φ ⋎ ψ ∈ t.1.1 → (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) := by
   intro h;
@@ -618,7 +617,6 @@ lemma iff_mem₂_disj {Γ : List _} : ⋁Γ ∈ t.1.2 ↔ (∀ φ ∈ Γ, φ ∈
         tauto;
   | _ => simp;
 
-
 omit [Encodable α] in
 private lemma of_mem₁_imp : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   intro h;
@@ -660,7 +658,6 @@ lemma iff_mem₂_imp : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) :
     rcases of_mem₁_imp $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₁_mem₂.mpr hφ; contradiction;
     . exact iff_not_mem₂_mem₁.mpr hψ;
-
 
 omit [Encodable α] in
 private lemma of_mem₁_neg : ∼φ ∈ t.1.1 → (φ ∈ t.1.2) := by
