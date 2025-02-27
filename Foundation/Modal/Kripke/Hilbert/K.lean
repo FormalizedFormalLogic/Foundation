@@ -1,6 +1,6 @@
 import Foundation.Modal.Hilbert.K
 import Foundation.Modal.Kripke.Hilbert.Soundness
-import Foundation.Modal.Kripke.Completeness
+import Foundation.Modal.Kripke.Completeness2
 import Foundation.Modal.Kripke.Filteration
 import Foundation.Modal.Kripke.FiniteFrame
 
