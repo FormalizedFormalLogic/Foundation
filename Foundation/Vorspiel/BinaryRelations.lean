@@ -13,9 +13,13 @@ def Serial := ∀ x, ∃ y, x ≺ y
 
 def Confluent := ∀ ⦃x y z⦄, ((x ≺ y ∧ x ≺ z) → ∃ w, (y ≺ w ∧ z ≺ w))
 
+def WeakConfluent := ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z ∧ y ≠ z) → (∃ w, y ≺ w ∧ z ≺ w)
+
 def Dense := ∀ ⦃x y⦄, x ≺ y → ∃z, x ≺ z ∧ z ≺ y
 
-def Connected := ∀ ⦃x y z⦄, x ≺ y ∧ x ≺ z → y ≺ z ∨ z ≺ y
+def Connected := ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z) → (y ≺ z ∨ z ≺ y)
+
+def WeakConnected := ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z ∧ y ≠ z) → (y ≺ z ∨ z ≺ y)
 
 def Functional := ∀ ⦃x y z⦄, x ≺ y ∧ x ≺ z → y = z
 

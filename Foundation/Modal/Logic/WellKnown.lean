@@ -3,6 +3,8 @@ import Foundation.Modal.Kripke.Hilbert.GL.MDP
 import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.Hilbert.K4
 import Foundation.Modal.Kripke.Hilbert.K45
+import Foundation.Modal.Kripke.Hilbert.K4Dot2
+import Foundation.Modal.Kripke.Hilbert.K4Dot3
 import Foundation.Modal.Kripke.Hilbert.K5
 import Foundation.Modal.Kripke.Hilbert.KB
 import Foundation.Modal.Kripke.Hilbert.KB4
@@ -32,6 +34,16 @@ namespace Logic
 
 protected abbrev K4 : Logic := Hilbert.K4.logic
 lemma K4.eq_TransitiveKripkeFrameClass_Logic : Logic.K4 = Kripke.TransitiveFrameClass.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+
+protected abbrev K4Dot2 : Logic := Hilbert.K4Dot2.logic
+lemma K4Dot2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic : Logic.K4Dot2 = Kripke.TransitiveWeakConfluentFrameClass.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+
+protected abbrev K4Dot3 : Logic := Hilbert.K4Dot3.logic
+lemma K4Dot3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic : Logic.K4Dot3 = Kripke.TransitiveWeakConnectedFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 

@@ -10,13 +10,15 @@ open Geachean
 abbrev Kripke.TransitiveFrameClass : FrameClass := { F | Transitive F }
 abbrev Kripke.TransitiveFiniteFrameClass : FiniteFrameClass := { F | Transitive F.Rel }
 
+instance : TransitiveFrameClass.DefinedBy Hilbert.K4.axioms := by
+  convert MultiGeacheanFrameClass.isDefinedByGeachHilbertAxioms {⟨0, 2, 1, 0⟩};
+  . unfold TransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
+    simp [Geachean.transitive_def];
+  . exact Hilbert.K4.eq_Geach;
+
 namespace Hilbert.K4
 
-instance Kripke.sound : Sound (Hilbert.K4) (Kripke.TransitiveFrameClass) := by
-  convert Hilbert.Geach.Kripke.sound (G := {⟨0, 2, 1, 0⟩});
-  exact eq_Geach;
-  . unfold TransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.transitive_def];
+instance Kripke.sound : Sound (Hilbert.K4) (Kripke.TransitiveFrameClass) := inferInstance
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.K4) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 2, 1, 0⟩});

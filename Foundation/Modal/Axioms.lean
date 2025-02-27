@@ -65,6 +65,8 @@ protected abbrev Dot2 [Dia F] := ◇□φ ➝ □◇φ
 abbrev Dot2.set [Dia F] : Set F := { Axioms.Dot2 φ | (φ) }
 notation:max ".𝟮" => Dot2.set
 
+protected abbrev WeakDot2 := ◇(φ ⋏ □ψ) ➝ □(φ ⋏ ◇ψ)
+
 /-- Axiom for density -/
 protected abbrev C4 := □□φ ➝ □φ
 abbrev C4.set : Set F := { Axioms.C4 φ | (φ) }
@@ -88,7 +90,8 @@ notation:max "𝗩𝗲𝗿" => Ver.set
 
 protected abbrev Dot3 := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ)
 abbrev Dot3.set : Set F := { Axioms.Dot3 φ ψ | (φ) (ψ) }
-notation:max ".𝟯" => Dot3.set
+
+protected abbrev WeakDot3 := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ)
 
 protected abbrev Grz := □(□(φ ➝ □φ) ➝ φ) ➝ φ
 abbrev Grz.set : Set F := { Axioms.Grz φ | (φ) }
