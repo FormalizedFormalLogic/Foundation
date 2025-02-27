@@ -464,6 +464,8 @@ protected class KD5 extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFive 𝓢
 
 protected class K45 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
 
+protected class KT4B extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢, HasAxiomB 𝓢
+
 protected class Triv extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
 instance [Entailment.Triv 𝓢] : Entailment.KT 𝓢 where
 instance [Entailment.Triv 𝓢] : Entailment.KTc 𝓢 where

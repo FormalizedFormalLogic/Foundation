@@ -19,11 +19,9 @@ instance Kripke.consistent : Entailment.Consistent (Hilbert.KD45) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩});
   exact eq_Geach;
 
-instance Kripke.complete : Complete (Hilbert.KD45) (Kripke.SerialTransitiveEuclideanFrameClass) := by
-  convert Hilbert.Geach.Kripke.Complete (G := {⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 0, 1⟩});
-  . exact eq_Geach;
-  . unfold SerialTransitiveEuclideanFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.serial_def, Geachean.euclidean_def, Geachean.transitive_def];
+instance Kripke.canonical : Canonical (Hilbert.KD45) (SerialTransitiveEuclideanFrameClass) := ⟨⟨Canonical.serial, Canonical.transitive, Canonical.euclidean⟩⟩
+
+instance Kripke.complete : Complete (Hilbert.KD45) (SerialTransitiveEuclideanFrameClass) := inferInstance
 
 end Hilbert.KD45
 

@@ -226,7 +226,8 @@ protected abbrev KT4B : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.
 instance : (Hilbert.KT4B).HasK where p := 0; q := 1;
 instance : (Hilbert.KT4B).HasT where p := 0
 instance : (Hilbert.KT4B).HasFour where p := 0
-
+instance : (Hilbert.KT4B).HasB where p := 0
+instance : Entailment.KT4B (Hilbert.KT4B) where
 
 protected abbrev K45 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Five (.atom 0)}⟩
 instance : (Hilbert.K45).HasK where p := 0; q := 1;

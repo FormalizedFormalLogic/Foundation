@@ -22,11 +22,9 @@ instance Kripke.consistent : Entailment.Consistent (Hilbert.K4) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 2, 1, 0⟩});
   exact eq_Geach;
 
-instance Kripke.complete : Complete (Hilbert.K4) (Kripke.TransitiveFrameClass) := by
-  convert Hilbert.Geach.Kripke.Complete (G := {⟨0, 2, 1, 0⟩});
-  . exact eq_Geach;
-  . unfold TransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.transitive_def];
+instance Kripke.canonical : Canonical (Hilbert.K4) (TransitiveFrameClass) := ⟨Canonical.transitive⟩
+
+instance Kripke.complete : Complete (Hilbert.K4) (TransitiveFrameClass) := inferInstance
 
 open finestFilterationTransitiveClosureModel in
 instance Kripke.finiteComplete : Complete (Hilbert.K4) (TransitiveFiniteFrameClass) := ⟨by
