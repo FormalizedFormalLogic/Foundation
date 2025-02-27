@@ -442,7 +442,14 @@ lemma mdp_mem₁ (hφψ : φ ➝ ψ ∈ t.1.1) (hφ : φ ∈ t.1.1) : ψ ∈ t.1
   have : 𝓢 ⊢! ⋀[φ, φ ➝ ψ] ➝ ⋁[ψ] := mdp_in!
   contradiction;
 
-lemma mdp_mem₁Aux (hφψ : 𝓢 ⊢! φ ➝ ψ) (hφ : φ ∈ t.1.1) : ψ ∈ t.1.1 := mdp_mem₁ (iff_provable_mem₁.mp hφψ t) hφ
+lemma mdp_mem₁_provable (hφψ : 𝓢 ⊢! φ ➝ ψ) (hφ : φ ∈ t.1.1) : ψ ∈ t.1.1 := mdp_mem₁ (iff_provable_mem₁.mp hφψ t) hφ
+
+lemma mdp_mem₂_provable (hφψ : 𝓢 ⊢! φ ➝ ψ) : ψ ∈ t.1.2 → φ ∈ t.1.2 := by
+  contrapose;
+  intro hφ;
+  apply iff_not_mem₂_mem₁.mpr;
+  apply mdp_mem₁_provable hφψ;
+  apply iff_not_mem₂_mem₁.mp hφ;
 
 
 @[simp] lemma mem₁_verum : ⊤ ∈ t.1.1 := iff_provable_mem₁.mp verum! t
@@ -459,7 +466,7 @@ omit [Encodable α] [DecidableEq α] in
 
 private lemma of_mem₁_and : φ ⋏ ψ ∈ t.1.1 → (φ ∈ t.1.1 ∧ ψ ∈ t.1.1) := by
   intro h;
-  constructor <;> exact mdp_mem₁Aux (by simp) h;
+  constructor <;> exact mdp_mem₁_provable (by simp) h;
 
 private lemma of_mem₂_and : φ ⋏ ψ ∈ t.1.2 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.2) := by
   contrapose;
@@ -468,7 +475,7 @@ private lemma of_mem₂_and : φ ⋏ ψ ∈ t.1.2 → (φ ∈ t.1.2 ∨ ψ ∈ t
   push_neg at hφψ;
   have hφ := iff_not_mem₂_mem₁.mp hφψ.1;
   have hψ := iff_not_mem₂_mem₁.mp hφψ.2;
-  exact mdp_mem₁ (mdp_mem₁Aux and₃! hφ) hψ;
+  exact mdp_mem₁ (mdp_mem₁_provable and₃! hφ) hψ;
 
 lemma iff_mem₁_and : φ ⋏ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.1) := by
   constructor;
@@ -489,6 +496,48 @@ lemma iff_mem₂_and : φ ⋏ ψ ∈ t.1.2 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.2) :
     rcases of_mem₁_and $ iff_not_mem₂_mem₁.mp hφψ with ⟨hφ, hψ⟩;
     constructor <;> { apply iff_not_mem₂_mem₁.mpr; assumption; };
 
+lemma iff_mem₁_conj {Γ : List _} : ⋀Γ ∈ t.1.1 ↔ (∀ φ ∈ Γ, φ ∈ t.1.1) := by
+  induction Γ using List.induction_with_singleton with
+  | hcons φ Γ hΓ ih =>
+    rw [List.conj₂_cons_nonempty hΓ]
+    constructor;
+    . intro h;
+      rcases iff_mem₁_and.mp h with ⟨hφ, hΓ⟩;
+      rintro ψ (hψ | hψ);
+      . assumption;
+      . apply ih.mp hΓ ψ;
+        assumption;
+    . intro h;
+      apply iff_mem₁_and.mpr;
+      constructor;
+      . apply h; tauto;
+      . apply ih.mpr;
+        intro ψ hψ;
+        apply h;
+        tauto;
+  | _ => simp;
+
+lemma iff_mem₂_conj {Γ : List _} : ⋀Γ ∈ t.1.2 ↔ (∃ φ ∈ Γ, φ ∈ t.1.2) := by
+  induction Γ using List.induction_with_singleton with
+  | hcons φ Γ hΓ ih =>
+    rw [List.conj₂_cons_nonempty hΓ];
+    constructor;
+    . intro h;
+      rcases iff_mem₂_and.mp h with (hφ | hΓ);
+      . exact ⟨φ, by tauto, hφ⟩;
+      . obtain ⟨ψ, hψ₁, hψ₂⟩ := ih.mp hΓ;
+        exact ⟨ψ, by tauto, hψ₂⟩;
+    . rintro ⟨ψ, (hψ₁ | hψ₁), hψ₂⟩;
+      . apply iff_mem₂_and.mpr;
+        left;
+        assumption;
+      . apply iff_mem₂_and.mpr;
+        right;
+        apply ih.mpr;
+        exact ⟨ψ, by simpa, hψ₂⟩;
+  | _ => simp;
+
+
 omit [DecidableEq α] [Encodable α] in
 private lemma of_mem₁_or : φ ⋎ ψ ∈ t.1.1 → (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) := by
   intro h;
@@ -505,9 +554,9 @@ private lemma of_mem₂_or : φ ⋎ ψ ∈ t.1.2 → (φ ∈ t.1.2 ∧ ψ ∈ t.
   suffices (φ ∉ t.1.2 ∨ ψ ∉ t.1.2) → φ ⋎ ψ ∉ t.1.2 by tauto;
   rintro (hφ | hψ);
   . apply iff_not_mem₂_mem₁.mpr;
-    exact mdp_mem₁Aux or₁! $ iff_not_mem₂_mem₁.mp hφ;
+    exact mdp_mem₁_provable or₁! $ iff_not_mem₂_mem₁.mp hφ;
   . apply iff_not_mem₂_mem₁.mpr;
-    exact mdp_mem₁Aux or₂! $ iff_not_mem₂_mem₁.mp hψ;
+    exact mdp_mem₁_provable or₂! $ iff_not_mem₂_mem₁.mp hψ;
 
 lemma iff_mem₁_or : φ ⋎ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) := by
   constructor;
@@ -527,6 +576,48 @@ lemma iff_mem₂_or : φ ⋎ ψ ∈ t.1.2 ↔ (φ ∈ t.1.2 ∧ ψ ∈ t.1.2) :=
     rcases of_mem₁_or $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₂_mem₁.mpr hφ; contradiction;
     . exact iff_not_mem₂_mem₁.mpr hψ;
+
+lemma iff_mem₁_disj  {Γ : List _} : ⋁Γ ∈ t.1.1 ↔ (∃ φ ∈ Γ, φ ∈ t.1.1) := by
+  induction Γ using List.induction_with_singleton with
+  | hcons φ Γ hΓ ih =>
+    rw [List.disj₂_cons_nonempty hΓ];
+    constructor;
+    . intro h;
+      rcases iff_mem₁_or.mp h with (hφ | hΓ);
+      . exact ⟨φ, by tauto, hφ⟩;
+      . obtain ⟨ψ, hψ₁, hψ₂⟩ := ih.mp hΓ;
+        exact ⟨ψ, by tauto, hψ₂⟩;
+    . rintro ⟨ψ, (hψ₁ | hψ₁), hψ₂⟩;
+      . apply iff_mem₁_or.mpr;
+        left;
+        assumption;
+      . apply iff_mem₁_or.mpr;
+        right;
+        apply ih.mpr;
+        exact ⟨ψ, by simpa, hψ₂⟩;
+  | _ => simp;
+
+lemma iff_mem₂_disj {Γ : List _} : ⋁Γ ∈ t.1.2 ↔ (∀ φ ∈ Γ, φ ∈ t.1.2) := by
+  induction Γ using List.induction_with_singleton with
+  | hcons φ Γ hΓ ih =>
+    rw [List.disj₂_cons_nonempty hΓ];
+    constructor;
+    . intro h;
+      rcases iff_mem₂_or.mp h with ⟨hφ, hΓ⟩;
+      rintro ψ (hψ | hΓ);
+      . assumption;
+      . apply ih.mp hΓ;
+        assumption;
+    . intro h;
+      apply iff_mem₂_or.mpr;
+      constructor;
+      . apply h; tauto;
+      . apply ih.mpr;
+        intro ψ hψ;
+        apply h;
+        tauto;
+  | _ => simp;
+
 
 omit [Encodable α] in
 private lemma of_mem₁_imp : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
@@ -569,6 +660,7 @@ lemma iff_mem₂_imp : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) :
     rcases of_mem₁_imp $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₁_mem₂.mpr hφ; contradiction;
     . exact iff_not_mem₂_mem₁.mpr hψ;
+
 
 omit [Encodable α] in
 private lemma of_mem₁_neg : ∼φ ∈ t.1.1 → (φ ∈ t.1.2) := by

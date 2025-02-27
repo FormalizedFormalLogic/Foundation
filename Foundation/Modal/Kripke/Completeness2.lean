@@ -173,7 +173,7 @@ lemma def_multirel_multibox_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]
         intro Γ Δ hΓ hΔ;
         by_contra hC;
         have : 𝓢 ⊢! □⋀Γ ➝ □⋁Δ := imply_box_distribute'! hC;
-        have : □⋁Δ ∈ x.1.1 := mdp_mem₁Aux this $ by
+        have : □⋁Δ ∈ x.1.1 := mdp_mem₁_provable this $ by
           apply truthlemma₁.mpr;
           intro y Rxy;
           apply Satisfies.conj_def.mpr;

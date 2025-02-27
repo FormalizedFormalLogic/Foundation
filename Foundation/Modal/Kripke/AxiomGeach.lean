@@ -19,20 +19,25 @@ lemma geachean_canonicalFrame_of_provable_geach_axiom
   have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹^[g.m]y.1.1, ◇''⁻¹^[g.n]z.1.2⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra hC;
-    replace hΓ : ∀ φ ∈ Γ, □^[g.m]φ ∈ y.1.1 := by simpa using hΓ;
-    replace hΔ : ∀ φ ∈ Δ, ◇^[g.n]φ ∈ z.1.2 := by simpa using hΔ;
-    have : ⋀□'^[g.m]Γ ∈ y.1.1 := by
-      sorry;
-    have : ⋁◇'^[g.n]Δ ∈ z.1.2 := by
-      sorry;
-    have : □^[g.m]⋀Γ ∈ y.1.1 := by sorry;
-    have : ◇^[g.n]⋀Δ ∈ y.1.1 := by sorry;
-    obtain ⟨γ, δ, hγ, hδ, hC⟩ : ∃ γ δ, □^[g.m]γ ∈ y.1.1 ∧ ◇^[g.n]δ ∈ z.1.2 ∧ 𝓢 ⊢! γ ➝ δ := by
-      sorry;
+
+    replace hΓ : ∀ φ ∈ □'^[g.m]Γ, φ ∈ y.1.1 := by
+      intro φ hφ;
+      obtain ⟨ψ, hψ, rfl⟩ := by simpa using hφ;
+      exact hΓ _ hψ;
+    have hγ : □^[g.m](⋀Γ) ∈ y.1.1 := mdp_mem₁_provable collect_multibox_conj! $ iff_mem₁_conj.mpr hΓ
+    generalize ⋀Γ = γ at hγ hC;
+
+    replace hΔ : ∀ φ ∈ ◇'^[g.n]Δ, φ ∈ z.1.2 := by
+      intro φ hφ;
+      obtain ⟨ψ, hψ, rfl⟩ := by simpa using hφ;
+      exact hΔ _ hψ;
+    have hδ : ◇^[g.n](⋁Δ) ∈ z.1.2 := mdp_mem₂_provable collect_multidia_disj! $ iff_mem₂_disj.mpr hΔ;
+    generalize ⋁Δ = δ at hδ hC;
+
     have : 𝓢 ⊢! □^[g.m]γ ➝ □^[g.m]δ := imply_multibox_distribute'! hC;
-    have : □^[g.m]δ ∈ y.1.1 := mdp_mem₁Aux this hγ;
+    have : □^[g.m]δ ∈ y.1.1 := mdp_mem₁_provable this hγ;
     have : ◇^[g.i](□^[g.m]δ) ∈ x.1.1 := def_multirel_multidia_mem₁.mp Rxy this;
-    have : □^[g.j](◇^[g.n]δ) ∈ x.1.1 := mdp_mem₁Aux hG this;
+    have : □^[g.j](◇^[g.n]δ) ∈ x.1.1 := mdp_mem₁_provable hG this;
     have : ◇^[g.n]δ ∈ z.1.1 := def_multirel_multibox_mem₁.mp Rxz this;
     have : ◇^[g.n]δ ∉ z.1.2 := iff_not_mem₂_mem₁.mpr this;
     contradiction;
