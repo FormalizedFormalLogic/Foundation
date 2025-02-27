@@ -35,65 +35,76 @@ section lemmata
 variable {φ ψ : Formula ℕ}
 variable {t : (canonicalModel 𝓢).World}
 
-lemma truthlemmaAux : ∀ {t : (canonicalModel 𝓢).World}, ((φ ∈ t.1.1) → t ⊧ φ) ∧ ((φ ∈ t.1.2) → ¬t ⊧ φ) := by
-  induction φ using Formula.rec' with
+lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧ φ) := by
+  induction φ using Formula.rec' generalizing t with
   | hatom =>
     simp_all only [Semantics.Realize, Satisfies, implies_true, true_and];
-    intro t h₁;
-    exact iff_not_mem₁_mem₂.mpr h₁;
+    exact iff_not_mem₁_mem₂.symm;
   | hfalsum => simp [Semantics.Realize, Satisfies];
   | himp φ ψ ihφ ihψ =>
-    intro t;
     constructor;
-    . intro h _;
-      rcases of_mem₁_imp h with (hφ | hψ);
-      . have := ihφ.2 hφ;
-        contradiction;
-      . exact ihψ.1 hψ;
-    . intro h;
-      replace h := of_mem₂_imp h;
-      apply Satisfies.imp_def₂.not.mpr;
-      push_neg;
-      constructor;
-      . apply ihφ.1; exact h.1;
-      . apply ihψ.2; exact h.2;
+    . constructor;
+      . intro hφψ hφ;
+        rcases iff_mem₁_imp.mp hφψ with (hφ | hψ);
+        . have := ihφ.2.1 hφ; contradiction;
+        . exact ihψ.1.1 hψ;
+      . intro hφψ;
+        rcases Satisfies.imp_def₂.mp hφψ with (hφ | hψ);
+        . apply iff_mem₁_imp.mpr;
+          left;
+          exact ihφ.2.2 hφ;
+        . apply iff_mem₁_imp.mpr;
+          right;
+          exact ihψ.1.2 hψ;
+    . constructor;
+      . intro hφψ;
+        rcases iff_mem₂_imp.mp hφψ with ⟨hφ, hψ⟩;
+        apply Satisfies.imp_def₂.not.mpr;
+        push_neg;
+        constructor;
+        . exact ihφ.1.mp hφ;
+        . exact ihψ.2.mp hψ;
+      . intro hφψ;
+        apply iff_mem₂_imp.mpr;
+        replace hφψ := Satisfies.imp_def₂.not.mp hφψ;
+        push_neg at hφψ;
+        rcases hφψ with ⟨hφ, hψ⟩;
+        constructor;
+        . exact ihφ.1.mpr hφ;
+        . exact ihψ.2.mpr hψ;
   | hbox φ ihφ =>
-    intro t;
     constructor;
-    . intro h t' Rtt';
-      apply ihφ.1;
-      apply MaximalConsistentTableau.of_mem₁_box h Rtt';
-    . intro h;
-      apply Satisfies.box_def.not.mpr;
-      push_neg;
-      obtain ⟨t', Rtt', ht'⟩ := MaximalConsistentTableau.of_mem₂_box h;
-      use t';
-      constructor;
-      . exact Rtt';
-      . apply ihφ.2 ht';
+    . constructor;
+      . intro h t' Rtt';
+        apply ihφ.1.1;
+        exact iff_mem₁_box.mp h Rtt';
+      . intro h;
+        apply iff_mem₁_box.mpr;
+        intro t' Rtt';
+        apply ihφ.1.2;
+        exact h t' Rtt';
+    . constructor;
+      . intro h;
+        apply Satisfies.box_def.not.mpr;
+        push_neg;
+        obtain ⟨t', Rtt', ht'⟩ := iff_mem₂_box.mp h;
+        use t';
+        constructor;
+        . exact Rtt';
+        . exact ihφ.2.mp ht';
+      . intro h;
+        apply iff_mem₂_box.mpr;
+        replace h := Satisfies.box_def.not.mp h;
+        push_neg at h;
+        obtain ⟨t', Rtt', ht'⟩ := h;
+        use t';
+        constructor;
+        . exact Rtt';
+        . exact ihφ.2.mpr ht';
 
-lemma truthlemmaAux₁ : (φ ∈ t.1.1) → t ⊧ φ := truthlemmaAux (t := t) |>.1
+lemma truthlemma₁ : (φ ∈ t.1.1) ↔ t ⊧ φ := truthlemma.1
 
-lemma truthlemmaAux₂ : (φ ∈ t.1.2) → ¬t ⊧ φ := truthlemmaAux (t := t) |>.2
-
-lemma truthlemma₁ : (φ ∈ t.1.1) ↔ t ⊧ φ := by
-  constructor;
-  . apply truthlemmaAux₁;
-  . intro h;
-    induction φ using Formula.rec' with
-    | hatom => simpa [Semantics.Realize, Satisfies] using h;
-    | hfalsum => simpa;
-    | himp φ ψ ihφ ihψ =>
-      sorry;
-    | hbox φ ih =>
-      sorry;
-
-lemma truthlemma₂ : (φ ∈ t.1.2) ↔ ¬t ⊧ φ := by
-  constructor;
-  . intro h;
-    exact truthlemmaAux₂ h;
-  . intro h;
-    exact iff_not_mem₁_mem₂.mp $ truthlemma₁.not.mpr h;
+lemma truthlemma₂ : (φ ∈ t.1.2) ↔ ¬t ⊧ φ := truthlemma.2
 
 lemma iff_valid_on_canonicalModel_deducible : (canonicalModel 𝓢) ⊧ φ ↔ 𝓢 ⊢! φ := by
   constructor;
@@ -134,22 +145,71 @@ open Formula.Kripke.Satisfies
 
 variable {x y : (canonicalModel 𝓢).World}
 
-lemma def_rel_box : x ≺ y ↔ ∀ {φ}, □φ ∈ x.1.1 → φ ∈ y.1.1 := by simp [Frame.Rel']; aesop;
+lemma def_rel_box_mem₁ : x ≺ y ↔ ∀ {φ}, □φ ∈ x.1.1 → φ ∈ y.1.1 := by simp [Frame.Rel']; aesop;
 
-lemma def_multirel_multibox : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ → y ⊧ φ) := by
+lemma def_rel_box_satisfies : x ≺ y ↔ ∀ {φ}, x ⊧ □φ → y ⊧ φ := by
+  constructor;
+  . intro h φ hφ;
+    exact truthlemma₁.mp $  def_rel_box_mem₁.mp h (truthlemma₁.mpr hφ);
+  . intro h;
+    apply def_rel_box_mem₁.mpr;
+    intro φ hφ;
+    exact truthlemma₁.mpr $ h $ truthlemma₁.mp hφ
+
+lemma def_multirel_multibox_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]φ → y ⊧ φ) := by
   constructor;
   . intro h φ hφ;
     exact Satisfies.multibox_def.mp hφ h;
   . induction n generalizing x y with
     | zero =>
-      simp_all only [Rel.iterate.iff_zero, Function.iterate_zero, id_eq];
-      sorry;
+      suffices (∀ {φ : Formula ℕ}, x ⊧ φ → y ⊧ φ) → x = y by simpa;
+      intro h;
+      apply intro_equality;
+      . intro φ hφ; exact truthlemma₁.mpr $ h $ truthlemma₁.mp hφ;
+      . intro φ hφ; exact truthlemma₂.mpr $ h $ Satisfies.not_def.mpr $ truthlemma₂.mp hφ;
     | succ n ih =>
-      sorry;
+      intro h;
+      obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, □''^[n]{ φ | ¬y ⊧ φ }⟩) $ by
+        intro Γ Δ hΓ hΔ;
+        by_contra hC;
+        have : 𝓢 ⊢! □⋀Γ ➝ □⋁Δ := imply_box_distribute'! hC;
+        have : □⋁Δ ∈ x.1.1 := mdp_mem₁Aux this $ by
+          apply truthlemma₁.mpr;
+          intro y Rxy;
+          apply Satisfies.conj_def.mpr;
+          intro φ hφ;
+          exact hΓ φ hφ y Rxy;
+        have : x ⊧ □⋁Δ := truthlemma₁.mp this;
+        have : x ⊧ □^[(n + 1)](⋁□'⁻¹^[n]Δ) := by
+          suffices x ⊧ □□^[n]⋁□'⁻¹^[n]Δ by simpa;
+          intro y Rxy;
+          apply multibox_def.mpr;
+          intro z Ryz;
+          obtain ⟨ψ, hψ₁, hψ₂⟩ := disj_def.mp $ this y Rxy;
+          obtain ⟨ξ, _, rfl⟩ := by simpa using (hΔ ψ hψ₁);
+          apply disj_def.mpr;
+          use ξ;
+          constructor;
+          . simpa;
+          . exact Satisfies.multibox_def.mp hψ₂ Ryz;
+        have : y ⊧ ⋁□'⁻¹^[n]Δ := h this;
+        obtain ⟨ψ, hψ₁, hψ₂⟩ := disj_def.mp this;
+        have : ¬y ⊧ ψ := by
+          have := hΔ _ (by simpa using hψ₁);
+          simpa using this;
+        contradiction;
+      use t;
+      constructor;
+      . intro φ hφ;
+        apply ht.1;
+        exact truthlemma₁.mp hφ;
+      . apply ih;
+        intro φ hφ;
+        simpa using (Set.compl_subset_compl.mpr ht.2) $ iff_not_mem₂_mem₁.mpr $ truthlemma₁.mpr hφ
 
 lemma def_multirel_multibox_mem₁ : x ≺^[n] y ↔ (∀ {φ}, □^[n]φ ∈ x.1.1 → φ ∈ y.1.1) := ⟨
-  fun h _ hφ => truthlemma₁.mpr $ def_multirel_multibox.mp h $ truthlemma₁.mp hφ,
-  fun h => def_multirel_multibox.mpr fun hφ => truthlemma₁.mp (h $ truthlemma₁.mpr hφ)
+  fun h _ hφ => truthlemma₁.mpr $ def_multirel_multibox_satisfies.mp h $ truthlemma₁.mp hφ,
+  fun h => def_multirel_multibox_satisfies.mpr fun hφ => truthlemma₁.mp (h $ truthlemma₁.mpr hφ)
 ⟩
 
 lemma def_multirel_multidia : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x ⊧ ◇^[n]φ) := by
@@ -158,12 +218,17 @@ lemma def_multirel_multidia : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x ⊧ ◇^
     apply Formula.Kripke.Satisfies.multidia_def.mpr;
     use y;
   . intro h;
-    apply def_multirel_multibox.mpr;
+    apply def_multirel_multibox_satisfies.mpr;
     intro φ;
     contrapose;
     intro hφ;
-    have := h (φ := ∼φ) (Satisfies.not_def.mp hφ);
-    sorry;
+    apply Satisfies.not_def.mp;
+    have : x ⊧ ∼□^[n](∼∼φ) := multidia_dual.mp $ h (φ := ∼φ) (Satisfies.not_def.mp hφ);
+    revert this;
+    apply intro_neg_semiequiv;
+    apply intro_multibox_semiequiv;
+    intro _ _;
+    apply negneg_def.mpr;
 
 lemma def_multirel_multidia_mem₁ : x ≺^[n] y ↔ (∀ {φ}, φ ∈ y.1.1 → ◇^[n]φ ∈ x.1.1) := ⟨
   fun h _ hφ => truthlemma₁.mpr $ def_multirel_multidia.mp h (truthlemma₁.mp hφ),

@@ -124,25 +124,108 @@ lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
       . apply ih.mpr;
         use y;
 
+lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by
+  induction Γ using List.induction_with_singleton with
+  | hcons φ Γ hΓ ih =>
+    suffices x ⊧ φ ∨ x ⊧ ⋁Γ ↔ x ⊧ φ ∨ ∃ a ∈ Γ, x ⊧ a by simpa [List.disj₂_cons_nonempty hΓ];
+    constructor;
+    . rintro (_ | h)
+      . tauto;
+      . right; exact ih.mp h;
+    . rintro (_ | h);
+      . tauto;
+      . right; exact ih.mpr h;
+  | _ => simp;
+
+lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by
+  induction Γ using List.induction_with_singleton with
+  | hcons φ Γ hΓ ih =>
+    suffices (x ⊧ φ ∧ x ⊧ ⋀Γ) ↔ (x ⊧ φ ∧ ∀ φ ∈ Γ, x ⊧ φ) by simpa [List.conj₂_cons_nonempty hΓ];
+    constructor;
+    . intro ⟨_, hΓ⟩;
+      constructor;
+      . assumption;
+      . exact ih.mp hΓ;
+    . intro ⟨_, hΓ⟩;
+      constructor;
+      . assumption;
+      . apply ih.mpr hΓ;
+  | _ => simp;
+
+example {Γ : List _} : (∀ φ ∈ Γ, x ⊧ □φ) → x ⊧ □⋀Γ := by
+  intro h y Rxy;
+  apply conj_def.mpr;
+  intro φ hφ;
+  exact h φ hφ y Rxy;
+
 lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 
 lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
 
-lemma neg_congr (h : x ⊧ φ ↔ x ⊧ ψ) : x ⊧ ∼φ ↔ x ⊧ ∼ψ := by
-  simp [Satisfies];
-  tauto;
 
-lemma box_congr (h : ∀ y : M.World, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ □φ ↔ x ⊧ □ψ := by
+lemma intro_neg_semiequiv (h : x ⊧ φ → x ⊧ ψ) : x ⊧ ∼ψ → x ⊧ ∼φ := by
+  contrapose;
+  simp_all [Satisfies];
+
+lemma intro_multibox_semiequiv (h : ∀ y, x ≺^[n] y → y ⊧ φ → y ⊧ ψ) : x ⊧ □^[n]φ → x ⊧ □^[n]ψ := by
+  induction n generalizing x with
+  | zero => simp_all;
+  | succ n ih =>
+    intro hφ;
+    apply Satisfies.multibox_def.mpr;
+    rintro y ⟨z, Rxz, Rzy⟩;
+    replace hφ : x ⊧ □□^[n]φ := by simpa using hφ;
+    refine Satisfies.multibox_def.mp (@ih z ?_ (Satisfies.box_def.mp hφ z Rxz)) Rzy;
+    . intro w Rzw;
+      apply h w;
+      use z;
+
+lemma intro_box_semiequiv (h : ∀ y, x ≺ y → y ⊧ φ → y ⊧ ψ) : x ⊧ □φ → x ⊧ □ψ := by
+  apply intro_multibox_semiequiv (n := 1);
+  simpa;
+
+lemma intro_multidia_semiequiv (h : ∀ y, x ≺^[n] y → y ⊧ φ → y ⊧ ψ) : x ⊧ ◇^[n]φ → x ⊧ ◇^[n]ψ := by
+  induction n generalizing x with
+  | zero => simp_all;
+  | succ n ih =>
+    simp only [Dia.multidia_succ];
+    apply intro_neg_semiequiv;
+    apply intro_box_semiequiv;
+    intro y Rxy;
+    apply intro_neg_semiequiv;
+    apply ih;
+    intro z Ryz;
+    apply h;
+    use y;
+
+lemma intro_dia_semiequiv (h : ∀ y, x ≺ y → y ⊧ φ → y ⊧ ψ) : x ⊧ ◇φ → x ⊧ ◇ψ := by
+  apply intro_multidia_semiequiv (n := 1);
+  simpa;
+
+
+lemma intro_neg_equiv (h : x ⊧ φ ↔ x ⊧ ψ) : x ⊧ ∼φ ↔ x ⊧ ∼ψ := by
   constructor;
-  . intro H y Rxy; exact h y Rxy |>.mp $ H y Rxy;
-  . intro H y Rxy; exact h y Rxy |>.mpr $ H y Rxy;
+  . apply intro_neg_semiequiv $ h.mpr;
+  . apply intro_neg_semiequiv $ h.mp;
 
-lemma dia_congr (h : ∀ y : M.World, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ ◇φ ↔ x ⊧ ◇ψ := by
-  apply neg_congr;
-  apply box_congr;
-  intro y Rxy;
-  apply neg_congr;
-  apply h y Rxy;
+lemma intro_multibox_equiv (h : ∀ y, x ≺^[n] y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ □^[n]φ ↔ x ⊧ □^[n]ψ := by
+  constructor;
+  . apply intro_multibox_semiequiv; intro y Rxy; apply h y Rxy |>.mp;
+  . apply intro_multibox_semiequiv; intro y Rxy; apply h y Rxy |>.mpr;
+
+lemma intro_box_equiv (h : ∀ y, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ □φ ↔ x ⊧ □ψ := by
+  apply intro_multibox_equiv (n := 1);
+  simpa;
+
+lemma intro_multidia_equiv (h : ∀ y, x ≺^[n] y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ ◇^[n]φ ↔ x ⊧ ◇^[n]ψ := by
+  constructor;
+  . apply intro_multidia_semiequiv; intro y Rxy; apply h y Rxy |>.mp;
+  . apply intro_multidia_semiequiv; intro y Rxy; apply h y Rxy |>.mpr;
+
+lemma intro_dia_equiv (h : ∀ y, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ ◇φ ↔ x ⊧ ◇ψ := by
+  apply intro_multidia_equiv (n := 1);
+  simpa;
+
 
 lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Satisfies];
 
