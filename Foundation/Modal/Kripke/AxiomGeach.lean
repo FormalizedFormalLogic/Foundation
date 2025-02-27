@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Completeness2
+import Foundation.Modal.Kripke.Completeness
 
 namespace LO.Modal
 

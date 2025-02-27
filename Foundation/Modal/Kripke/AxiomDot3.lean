@@ -1,10 +1,13 @@
-import Foundation.Modal.Kripke.Basic
+import Foundation.Modal.Kripke.Completeness
 
 namespace LO.Modal
 
-open Formula.Kripke
-
 namespace Kripke
+
+
+section definability
+
+open Formula.Kripke
 
 variable {F : Kripke.Frame}
 
@@ -40,6 +43,55 @@ instance ConnectedFrameClass.DefinedByDot3 : ConnectedFrameClass.DefinedBy {Axio
   . simpa using connected_of_validate_dot3;
   . simpa using validate_dot3_of_connected;
 ⟩
+
+end definability
+
+
+section canonicality
+
+variable {S} [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
+
+open Formula.Kripke
+open Entailment
+open MaximalConsistentTableau
+open canonicalModel
+
+namespace Canonical
+
+lemma connected [Entailment.HasAxiomDot3 𝓢] : Connected (canonicalFrame 𝓢).Rel := by
+  rintro x y z ⟨Rxy, Rxz⟩;
+  by_contra hC;
+  push_neg at hC;
+  rcases hC with ⟨nRyz, nRzy⟩;
+  obtain ⟨φ, hφy, hφz⟩ := Set.not_subset.mp nRyz;
+  obtain ⟨ψ, hψz, hψy⟩ := Set.not_subset.mp nRzy;
+  apply x.neither (φ := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ));
+  constructor;
+  . exact iff_provable_mem₁.mp axiomDot3! x;
+  . apply iff_mem₂_or.mpr;
+    constructor;
+    . apply iff_mem₂_box.mpr;
+      use y;
+      constructor;
+      . exact Rxy;
+      . apply iff_mem₂_imp.mpr;
+        constructor;
+        . simpa using hφy;
+        . exact iff_not_mem₁_mem₂.mp hψy;
+    . apply iff_mem₂_box.mpr;
+      use z;
+      constructor;
+      . exact Rxz;
+      . apply iff_mem₂_imp.mpr;
+        constructor;
+        . simpa using hψz;
+        . exact iff_not_mem₁_mem₂.mp hφz;
+
+end Canonical
+
+end canonicality
+
 
 end Kripke
 
