@@ -48,6 +48,11 @@ lemma multimop_injective' : □^[n]φ = □^[n]ψ ↔ φ = ψ := by
   . apply multibox_injective;
   . simp_all;
 
+lemma add : □^[n](□^[m]φ) = □^[(n + m)]φ := by
+  induction n with
+  | zero => simp;
+  | succ n ih => rw [(show n + 1 + m = n + m + 1 by omega)]; simpa;
+
 end Box
 
 
@@ -94,6 +99,11 @@ lemma multidia_injective' : ◇^[n]φ = ◇^[n]ψ ↔ φ = ψ := by
   constructor;
   . apply multidia_injective;
   . simp_all;
+
+lemma add : ◇^[n](◇^[m]φ) = ◇^[(n + m)]φ := by
+  induction n with
+  | zero => simp;
+  | succ n ih => rw [(show n + 1 + m = n + m + 1 by omega)]; simpa;
 
 end Dia
 
@@ -426,6 +436,8 @@ section
 
 variable [Box F]
 
+@[simp] lemma eq_multibox_zero : □'^[0]l = l := by induction l <;> simp_all;
+
 @[simp] lemma eq_box_multibox_one : □'l = □'^[1]l := by rfl
 
 @[simp] lemma eq_prebox_premultibox_one : □'⁻¹l = □'⁻¹^[1]l := by rfl
@@ -491,6 +503,25 @@ lemma mem_decancel_multibox_premultibox (h : □^[n]φ ∈ l) : (□^[n]φ) ∈ 
   simpa;
 
 lemma mem_decancel_box_prebox (h : □φ ∈ l) : □φ ∈ □'□'⁻¹l := by simpa using mem_decancel_multibox_premultibox h
+
+lemma mem_multibox_add : φ ∈ □'^[n]□'^[m]l ↔ φ ∈ □'^[(n + m)]l := by
+  induction l with
+  | nil => simp_all;
+  | cons ψ l ih =>
+    simp only [mem_cons, LO.Box.add];
+    constructor;
+    . intro h;
+      rcases h with (rfl | h);
+      . tauto;
+      . right;
+        apply ih.mp;
+        exact h;
+    . intro h;
+      rcases h with (rfl | h);
+      . tauto;
+      . right;
+        apply ih.mpr;
+        exact h;
 
 /-
 lemma multibox_cons (hl : φ ∉ l) : □'^[n](φ :: l) ~ □^[n]φ :: □'^[n]l := by
@@ -572,6 +603,24 @@ lemma mem_decancel_multidia_premultidia (h : ◇^[n]φ ∈ l) : (◇^[n]φ) ∈ 
 
 lemma mem_decancel_dia_predia (h : ◇φ ∈ l) : ◇φ ∈ ◇'◇'⁻¹l := by simpa using mem_decancel_multidia_premultidia h
 
+lemma mem_multidia_add : φ ∈ ◇'^[n]◇'^[m]l ↔ φ ∈ ◇'^[(n + m)]l := by
+  induction l with
+  | nil => simp_all;
+  | cons ψ l ih =>
+    simp only [mem_cons, LO.Dia.add];
+    constructor;
+    . intro h;
+      rcases h with (rfl | h);
+      . tauto;
+      . right;
+        apply ih.mp;
+        exact h;
+    . intro h;
+      rcases h with (rfl | h);
+      . tauto;
+      . right;
+        apply ih.mpr;
+        exact h;
 
 /-
 lemma multidia_cons (hl : φ ∉ l) : ◇'^[n](φ :: l) ~ ◇^[n]φ :: ◇'^[n]l := by

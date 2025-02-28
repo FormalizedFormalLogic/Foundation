@@ -94,24 +94,31 @@ lemma truthlemma_lemma2
   have : (□'Γ₁) ⊢[_]! □ψ := axiomL! ⨀ this;
   have : _ ⊢! ⋀□'Γ₁ ➝ □ψ := provable_iff.mp this;
   have : _ ⊢! ⋀□'(X.1.prebox ∪ X.1.prebox.box |>.toList) ➝ □ψ := imp_trans''! (conjconj_subset! (by
-    suffices ∀ χ ∈ Γ₁, □χ ∈ X ∨ ∃ χ', □χ' ∈ X ∧ □χ' = χ by simpa;
-    intro χ hr;
-    simpa using hΓ₁ _ hr;
+    intro χ hχ;
+    obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hχ;
+    apply List.box_mem_of;
+    simp_all;
   )) this;
   have : _ ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := imp_trans''! (conjconj_provable! (by
-    suffices ∀ χ, (□χ ∈ X ∨ ∃ χ', □χ' ∈ X ∧ □χ' = χ) → (□'^[1](Finset.premultibox 1 X).toList) ⊢[Hilbert.GL]! □χ by simpa;
-    rintro χ (hχ | ⟨χ, hχ, rfl⟩);
+    intro χ hχ;
+    obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hχ;
+    replace hξ : □ξ ∈ ↑X ∨ ∃ a, □a ∈ ↑X ∧ □a = ξ := by simpa using hξ;
+    rcases hξ with (hξ | ⟨ξ, hξ, rfl⟩);
     . apply FiniteContext.by_axm!;
+      apply List.box_mem_of;
       simpa;
     . apply axiomFour'!;
       apply FiniteContext.by_axm!;
+      apply List.box_mem_of;
       simpa;
   )) this;
   have : X *⊢[Hilbert.GL]! □ψ := by
     apply Context.provable_iff.mpr;
     use □'X.1.prebox.toList;
     constructor;
-    . simp;
+    . intro ψ hψ;
+      obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
+      simp_all;
     . assumption;
   have : □ψ ∈ X := membership_iff hq₁ |>.mpr this;
   contradiction;
