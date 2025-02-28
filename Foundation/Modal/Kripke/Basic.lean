@@ -88,6 +88,38 @@ lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp [Satisfie
 
 @[simp] lemma negneg_def : x ⊧ ∼∼φ ↔ x ⊧ φ := by simp;
 
+lemma multibox_dn : x ⊧ □^[n](∼∼φ) ↔ x ⊧ □^[n]φ := by
+  induction n generalizing x with
+  | zero => simp;
+  | succ n ih =>
+    suffices x ⊧ (□□^[n](∼∼φ)) ↔ x ⊧ (□□^[n]φ) by simpa;
+    constructor;
+    . intro h y Rxy;
+      exact ih.mp $ (h y Rxy);
+    . intro h y Rxy;
+      exact ih.mpr $ (h y Rxy);
+
+lemma multidia_dn : x ⊧ ◇^[n](∼∼φ) ↔ x ⊧ ◇^[n]φ := by
+  induction n generalizing x with
+  | zero => simp;
+  | succ n ih =>
+    suffices x ⊧ (◇◇^[n](∼∼φ)) ↔ x ⊧ (◇◇^[n]φ) by simpa;
+    constructor;
+    . intro h;
+      obtain ⟨y, Rxy, h⟩ := Satisfies.dia_def.mp h;
+      apply Satisfies.dia_def.mpr;
+      use y;
+      constructor;
+      . exact Rxy;
+      . exact ih.mp h;
+    . intro h;
+      obtain ⟨y, Rxy, h⟩ := Satisfies.dia_def.mp h;
+      apply Satisfies.dia_def.mpr;
+      use y;
+      constructor;
+      . exact Rxy;
+      . exact ih.mpr h;
+
 lemma multibox_def : x ⊧ □^[n]φ ↔ ∀ {y}, x ≺^[n] y → y ⊧ φ := by
   induction n generalizing x with
   | zero => simp;
@@ -230,23 +262,55 @@ lemma intro_dia_equiv (h : ∀ y, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ �
 lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Satisfies];
 
 lemma multidia_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
-  induction n generalizing φ with
+  induction n generalizing x with
   | zero => simp;
   | succ n ih =>
-    -- suffices x ⊧ ◇(◇^[n]φ) ↔ x ⊧ ∼□(□^[n](∼φ)) by simpa;
     constructor;
     . intro h;
-      suffices x ⊧ ∼□^[n](□(∼φ)) by sorry;
-      have := ih (φ := ◇φ) |>.mp (by sorry);
-      sorry;
+      replace h : x ⊧ ◇◇^[n]φ := by simpa using h;
+      obtain ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp h;
+      suffices ¬x ⊧ (□□^[n](∼φ)) by simpa;
+      apply Satisfies.box_def.not.mpr;
+      push_neg;
+      use y;
+      constructor;
+      . exact Rxy;
+      . apply Satisfies.not_def.mp;
+        apply ih.mp;
+        exact hy;
     . intro h;
-      suffices x ⊧ ◇^[n](◇φ) by sorry;
-      apply ih.mpr;
-      sorry;
+      replace h : ¬x ⊧ (□□^[n](∼φ)) := by simpa using h;
+      suffices x ⊧ ◇◇^[n]φ by simpa;
+      apply Satisfies.dia_def.mpr;
+      have := Satisfies.box_def.not.mp h;
+      push_neg at this;
+      obtain ⟨y, Rxy, hy⟩ := this;
+      use y;
+      constructor;
+      . exact Rxy;
+      . apply ih.mpr;
+        exact Satisfies.not_def.mpr hy;
 
 lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Satisfies];
 
-lemma multibox_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by sorry;
+lemma multibox_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by
+  constructor;
+  . contrapose;
+    intro h;
+    exact
+      multibox_dn.not.mp
+      $ Satisfies.not_def.mp
+      $ multidia_dual.mp
+      $ negneg_def.mp
+      $ Satisfies.not_def.mpr h
+  . contrapose;
+    intro h;
+    apply Satisfies.not_def.mp;
+    apply negneg_def.mpr;
+    apply multidia_dual.mpr;
+    apply Satisfies.not_def.mpr;
+    apply multibox_dn.not.mpr;
+    exact h;
 
 lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Satisfies];
 
