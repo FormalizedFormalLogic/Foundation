@@ -1,4 +1,3 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
 import Foundation.Modal.Kripke.Preservation
 import Foundation.Modal.Kripke.Hilbert.KT4B
 
@@ -21,11 +20,9 @@ instance Kripke.consistent : Entailment.Consistent (Hilbert.S5) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
   exact eq_Geach;
 
-instance Kripke.complete : Complete (Hilbert.S5) (Kripke.ReflexiveEuclideanFrameClass) := by
-  convert Hilbert.Geach.Kripke.Complete (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
-  . exact eq_Geach;
-  . unfold ReflexiveEuclideanFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.euclidean_def];
+instance Kripke.canonical : Canonical (Hilbert.S5) (ReflexiveEuclideanFrameClass) := ⟨⟨Canonical.reflexive, Canonical.euclidean⟩⟩
+
+instance Kripke.complete : Complete (Hilbert.S5) (ReflexiveEuclideanFrameClass) := inferInstance
 
 end Hilbert.S5
 

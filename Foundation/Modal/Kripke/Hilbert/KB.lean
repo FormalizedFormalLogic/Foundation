@@ -19,11 +19,9 @@ instance Kripke.consistent : Entailment.Consistent (Hilbert.KB) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 1, 0, 1⟩});
   exact eq_Geach;
 
-instance Kripke.complete : Complete (Hilbert.KB) (Kripke.SymmetricFrameClass) := by
-  convert Hilbert.Geach.Kripke.Complete (G := {⟨0, 1, 0, 1⟩});
-  . exact eq_Geach;
-  . unfold SymmetricFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.symmetric_def];
+instance Kripke.canonical : Canonical (Hilbert.KB) (SymmetricFrameClass) := ⟨Canonical.symmetric⟩
+
+instance Kripke.complete : Complete (Hilbert.KB) (SymmetricFrameClass) := inferInstance
 
 end Hilbert.KB
 

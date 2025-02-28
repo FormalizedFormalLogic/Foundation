@@ -19,11 +19,9 @@ instance Kripke.consistent : Entailment.Consistent (Hilbert.KTc) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 1, 0, 0⟩});
   exact eq_Geach;
 
-instance Kripke.complete : Complete (Hilbert.KTc) (Kripke.CoreflexiveFrameClass) := by
-  convert Hilbert.Geach.Kripke.Complete (G := {⟨0, 1, 0, 0⟩});
-  . exact eq_Geach;
-  . unfold CoreflexiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.coreflexive_def];
+instance Kripke.canonical : Canonical (Hilbert.KTc) (CoreflexiveFrameClass) := ⟨Canonical.coreflexive⟩
+
+instance Kripke.complete : Complete (Hilbert.KTc) (CoreflexiveFrameClass) := inferInstance
 
 end Hilbert.KTc
 

@@ -16,11 +16,9 @@ instance Kripke.consistent : Entailment.Consistent (Hilbert.KT4B) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩});
   exact eq_Geach;
 
-instance Kripke.complete : Complete (Hilbert.KT4B) (Kripke.ReflexiveTransitiveSymmetricFrameClass) := by
-  convert Hilbert.Geach.Kripke.Complete (G := {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩});
-  . exact eq_Geach;
-  . unfold ReflexiveTransitiveSymmetricFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.symmetric_def, Geachean.transitive_def];
+instance Kripke.canonical : Canonical (Hilbert.KT4B) (ReflexiveTransitiveSymmetricFrameClass) := ⟨⟨Canonical.reflexive, Canonical.transitive, Canonical.symmetric⟩⟩
+
+instance Kripke.complete : Complete (Hilbert.KT4B) (ReflexiveTransitiveSymmetricFrameClass) := inferInstance
 
 open finestFilterationTransitiveClosureModel in
 instance Kripke.finiteComplete : Complete (Hilbert.KT4B) (ReflexiveTransitiveSymmetricFiniteFrameClass) := ⟨by

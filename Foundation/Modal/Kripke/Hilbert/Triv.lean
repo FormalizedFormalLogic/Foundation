@@ -35,11 +35,9 @@ instance Kripke.consistent : Entailment.Consistent (Hilbert.Triv) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩});
   exact eq_Geach;
 
-instance Kripke.completeReflCorefl : Complete (Hilbert.Triv) (Kripke.ReflexiveCoreflexiveFrameClass) := by
-  convert Hilbert.Geach.Kripke.Complete (G := {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩});
-  . exact eq_Geach;
-  . unfold ReflexiveCoreflexiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.coreflexive_def];
+instance Kripke.canonicalReflCorefl : Canonical (Hilbert.Triv) (ReflexiveCoreflexiveFrameClass) := ⟨⟨Canonical.reflexive, Canonical.coreflexive⟩⟩
+
+instance Kripke.completeReflCorefl : Complete (Hilbert.Triv) (ReflexiveCoreflexiveFrameClass) := inferInstance
 
 instance Kripke.completeEquality : Complete (Hilbert.Triv) (Kripke.EqualityFrameClass) := by
   rw [eq_EqualityFrameClass_ReflexiveCoreflexiveFrameClass];

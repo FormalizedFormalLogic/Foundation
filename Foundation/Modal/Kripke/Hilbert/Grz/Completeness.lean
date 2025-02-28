@@ -144,29 +144,31 @@ lemma truthlemma_lemma2
     have : (□'Γ₁) ⊢[(Hilbert.Grz)]! □(□(ψ ➝ □ψ) ➝ ψ) := contextual_nec! this;
     have : (□'Γ₁) ⊢[(Hilbert.Grz)]! ψ := axiomGrz! ⨀ this;
     have : (Hilbert.Grz) ⊢! ⋀□'□'Γ₁ ➝ □ψ := contextual_nec! this;
-    have : (Hilbert.Grz) ⊢! □□⋀Γ₁ ➝ □ψ := imp_trans''! (imp_trans''! (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (by simp)) this;
+    have : (Hilbert.Grz) ⊢! □□⋀Γ₁ ➝ □ψ := imp_trans''! (imp_trans''! (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (λ _ => List.mem_multibox_add.mp)) this;
     have : (Hilbert.Grz) ⊢! □⋀Γ₁ ➝ □ψ := imp_trans''! axiomFour! this;
     have : (Hilbert.Grz) ⊢! ⋀□'Γ₁ ➝ □ψ := imp_trans''! collect_box_conj! this;
     have : (Hilbert.Grz) ⊢! ⋀□'(X.1.prebox.box |>.toList) ➝ □ψ := imp_trans''! (conjconj_subset! (by
-      simp;
-      intro χ hr;
-      have := hΓ₁ _ hr;
-      simp at this;
-      tauto;
+      intro ξ hξ;
+      obtain ⟨χ, hχ, rfl⟩ := List.exists_of_box hξ;
+      apply List.box_mem_of;
+      simpa using hΓ₁ χ hχ;
     )) this;
     have : (Hilbert.Grz) ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := imp_trans''! (conjconj_provable! (by
-      intro ψ hq;
-      simp at hq;
-      obtain ⟨χ, hr, rfl⟩ := hq;
+      intro ψ hψ;
+      obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
+      obtain ⟨χ, hχ, rfl⟩ := by simpa using hξ;
       apply axiomFour'!;
       apply FiniteContext.by_axm!;
+      apply List.box_mem_of;
       simpa;
     )) this;
     have : X *⊢[(Hilbert.Grz)]! □ψ := by
       apply Context.provable_iff.mpr;
       use □'X.1.prebox.toList;
       constructor;
-      . simp;
+      . intro ψ hψ;
+        obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
+        simp_all;
       . assumption;
     have : □ψ ∈ X := membership_iff (by trivial) |>.mpr this;
     contradiction;

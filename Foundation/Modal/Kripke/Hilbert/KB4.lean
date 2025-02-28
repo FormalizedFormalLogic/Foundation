@@ -19,11 +19,10 @@ instance Kripke.consistent : Entailment.Consistent (Hilbert.KB4) := by
   convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 1, 0, 1⟩, ⟨0, 2, 1, 0⟩});
   exact eq_Geach;
 
-instance Kripke.complete : Complete (Hilbert.KB4) (Kripke.SymmetricTransitiveFrameClass) := by
-  convert Hilbert.Geach.Kripke.Complete (G := {⟨0, 1, 0, 1⟩, ⟨0, 2, 1, 0⟩});
-  . exact eq_Geach;
-  . unfold SymmetricTransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.symmetric_def, Geachean.transitive_def];
+instance Kripke.canonical : Canonical (Hilbert.KB4) (SymmetricTransitiveFrameClass) := ⟨⟨Canonical.symmetric, Canonical.transitive⟩⟩
+
+instance Kripke.complete : Complete (Hilbert.KB4) (SymmetricTransitiveFrameClass) := inferInstance
+
 
 end Hilbert.KB4
 
