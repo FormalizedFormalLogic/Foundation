@@ -90,16 +90,16 @@ lemma geachean
 
     replace hΓ : ∀ φ ∈ □'^[g.m]Γ, φ ∈ y.1.1 := by
       intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := by simpa using hφ;
+      obtain ⟨ψ, hψ, rfl⟩ := List.exists_of_multibox hφ;
       exact hΓ _ hψ;
     have hγ : □^[g.m](⋀Γ) ∈ y.1.1 := mdp_mem₁_provable collect_multibox_conj! $ iff_mem₁_conj.mpr hΓ
     generalize ⋀Γ = γ at hγ hC;
 
     replace hΔ : ∀ φ ∈ ◇'^[g.n]Δ, φ ∈ z.1.2 := by
       intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := by simpa using hφ;
+      obtain ⟨ψ, hψ, rfl⟩ := List.exists_of_multidia hφ;
       exact hΔ _ hψ;
-    have hδ : ◇^[g.n](⋁Δ) ∈ z.1.2 := mdp_mem₂_provable collect_multidia_disj! $ iff_mem₂_disj.mpr hΔ;
+    have hδ : ◇^[g.n](⋁Δ) ∈ z.1.2 := mdp_mem₂_provable distribute_multidia_disj! $ iff_mem₂_disj.mpr hΔ;
     generalize ⋁Δ = δ at hδ hC;
 
     have : 𝓢 ⊢! □^[g.m]γ ➝ □^[g.m]δ := imply_multibox_distribute'! hC;

@@ -366,10 +366,14 @@ section
 
 variable [DecidableEq F]
 
-protected noncomputable abbrev List.multibox [Box F] (n : ℕ) : List F → List F := λ l => Finset.multibox n l.toFinset |>.toList
+protected noncomputable abbrev List.multibox [Box F] (n : ℕ) : List F → List F
+  | [] => []
+  | φ :: l => □^[n]φ :: List.multibox n l
 notation "□'^[" n:90 "]" l:80 => List.multibox n l
 
-protected noncomputable abbrev List.multidia [Dia F] (n : ℕ) : List F → List F := λ l => Finset.multidia n l.toFinset |>.toList
+protected noncomputable abbrev List.multidia [Dia F] (n : ℕ) : List F → List F
+  | [] => []
+  | φ :: l => ◇^[n]φ :: List.multidia n l
 notation "◇'^[" n:90 "]" l:80 => List.multidia n l
 
 protected noncomputable abbrev List.box [Box F] : List F → List F := List.multibox (n := 1)
@@ -441,13 +445,60 @@ variable [Box F]
 
 @[simp] lemma box_single : (□'[φ]) = [□φ] := by simp;
 
+lemma multibox_mem_of (h : φ ∈ l) : □^[n]φ ∈ □'^[n]l := by
+  induction l with
+  | nil => simp at h;
+  | cons ψ l ih =>
+    rcases (by simpa using h) with (rfl | h);
+    . tauto;
+    . tauto;
 
+lemma box_mem_of (h : φ ∈ l) : □φ ∈ □'l := by simpa using multibox_mem_of h
+
+lemma multibox_nonempty (h : l ≠ []) : □'^[n]l ≠ [] := by
+  induction l <;> simp_all;
+
+lemma box_nonempty (h : l ≠ []) : □'l ≠ [] := by simpa using multibox_nonempty h
+
+lemma exists_of_multibox (h : φ ∈ □'^[n]l) : ∃ ψ ∈ l, φ = □^[n]ψ := by
+  induction l with
+  | nil => simp at h;
+  | cons ψ l ih =>
+    simp only [mem_cons] at h;
+    rcases h with (h | h);
+    . use ψ; tauto;
+    . obtain ⟨ξ, hξ₁, hξ₂⟩ := ih h;
+      use ξ;
+      constructor <;> tauto;
+
+lemma exists_of_box (h : φ ∈ □'l) : ∃ ψ ∈ l, φ = □ψ := by simpa using exists_of_multibox h
+
+lemma mem_cancel_multibox_premultibox (h : φ ∈ □'^[n]□'⁻¹^[n]l) : φ ∈ l := by
+  induction l with
+  | nil => simp at h;
+  | cons ψ l ih =>
+    obtain ⟨ξ, hξ, rfl⟩ := exists_of_multibox h;
+    clear h;
+    simp only [Finset.mem_toList, toFinset_cons, Finset.mem_preimage, Finset.mem_insert, mem_toFinset] at hξ;
+    rcases hξ with (hξ | hξ);
+    . subst hξ; tauto;
+    . tauto;
+
+lemma mem_cancel_box_prebox (h : φ ∈ □'□'⁻¹l) : φ ∈ l := by simpa using mem_cancel_multibox_premultibox h
+
+lemma mem_decancel_multibox_premultibox (h : □^[n]φ ∈ l) : (□^[n]φ) ∈ □'^[n]□'⁻¹^[n]l := by
+  apply multibox_mem_of;
+  simpa;
+
+lemma mem_decancel_box_prebox (h : □φ ∈ l) : □φ ∈ □'□'⁻¹l := by simpa using mem_decancel_multibox_premultibox h
+
+/-
 lemma multibox_cons (hl : φ ∉ l) : □'^[n](φ :: l) ~ □^[n]φ :: □'^[n]l := by
   simp [List.multibox];
   apply Finset.toList_insert;
   simp_all;
 lemma box_cons (hl : φ ∉ l) : □'(φ :: l) ~ □φ :: □'l := by simpa using multibox_cons hl
-
+-/
 
 end
 
@@ -474,12 +525,62 @@ variable [Dia F]
 
 @[simp] lemma dia_single : (◇'[φ]) = [◇φ] := by simp;
 
+lemma multidia_mem_of (h : φ ∈ l) : ◇^[n]φ ∈ ◇'^[n]l := by
+  induction l with
+  | nil => simp at h;
+  | cons ψ l ih =>
+    rcases (by simpa using h) with (rfl | h);
+    . tauto;
+    . tauto;
+
+lemma dia_mem_of (h : φ ∈ l) : ◇φ ∈ ◇'l := by simpa using multidia_mem_of h
+
+lemma multidia_nonempty (h : l ≠ []) : ◇'^[n]l ≠ [] := by
+  induction l <;> simp_all;
+
+lemma dia_nonempty (h : l ≠ []) : ◇'l ≠ [] := by simpa using multidia_nonempty h
+
+lemma exists_of_multidia (h : φ ∈ ◇'^[n]l) : ∃ ψ ∈ l, φ = ◇^[n]ψ := by
+  induction l with
+  | nil => simp at h;
+  | cons ψ l ih =>
+    simp only [mem_cons] at h;
+    rcases h with (h | h);
+    . use ψ; tauto;
+    . obtain ⟨ξ, hξ₁, hξ₂⟩ := ih h;
+      use ξ;
+      constructor <;> tauto;
+
+lemma exists_of_dia (h : φ ∈ ◇'l) : ∃ ψ ∈ l, φ = ◇ψ := by simpa using exists_of_multidia h
+
+lemma mem_cancel_multidia_premultidia (h : φ ∈ ◇'^[n]◇'⁻¹^[n]l) : φ ∈ l := by
+  induction l with
+  | nil => simp at h;
+  | cons ψ l ih =>
+    obtain ⟨ξ, hξ, rfl⟩ := exists_of_multidia h;
+    clear h;
+    simp only [Finset.mem_toList, toFinset_cons, Finset.mem_preimage, Finset.mem_insert, mem_toFinset] at hξ;
+    rcases hξ with (hξ | hξ);
+    . subst hξ; tauto;
+    . tauto;
+
+lemma mem_cancel_dia_predia (h : φ ∈ ◇'◇'⁻¹l) : φ ∈ l := by simpa using mem_cancel_multidia_premultidia h
+
+lemma mem_decancel_multidia_premultidia (h : ◇^[n]φ ∈ l) : (◇^[n]φ) ∈ ◇'^[n]◇'⁻¹^[n]l := by
+  apply multidia_mem_of;
+  simpa;
+
+lemma mem_decancel_dia_predia (h : ◇φ ∈ l) : ◇φ ∈ ◇'◇'⁻¹l := by simpa using mem_decancel_multidia_premultidia h
+
+
+/-
 lemma multidia_cons (hl : φ ∉ l) : ◇'^[n](φ :: l) ~ ◇^[n]φ :: ◇'^[n]l := by
   simp [List.multidia];
   apply Finset.toList_insert;
   simp_all;
 
 lemma dia_cons (hl : φ ∉ l) : ◇'(φ :: l) ~ ◇φ :: ◇'l := by simpa using multidia_cons hl
+-/
 
 end
 

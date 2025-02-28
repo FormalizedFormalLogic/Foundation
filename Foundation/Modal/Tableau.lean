@@ -705,10 +705,9 @@ private lemma of_mem₂_multibox : (□^[n]φ ∈ t.1.2) → (∃ t' : MaximalCo
     have : 𝓢 ⊢! ⋀□'^[n]Γ ➝ □^[n]φ := imp_trans''! h₁ (imply_multibox_distribute'! $ imp_trans''! hC (disj_allsame! hΔ));
     have : 𝓢 ⊬ ⋀□'^[n]Γ ➝ ⋁[□^[n]φ] := t.consistent (Γ := □'^[n]Γ) (Δ := [□^[n]φ]) ?_ ?_;
     contradiction;
-    . suffices ∀ ψ ∈ Γ, □^[n]ψ ∈ t.1.1 by simpa;
-      rintro ψ hψ;
-      have := hΓ ψ hψ;
-      simpa;
+    . rintro ψ hψ;
+      obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_multibox hψ;
+      exact hΓ ξ hξ;
     . simpa;
   use t';
   constructor;
