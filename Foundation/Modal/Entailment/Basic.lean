@@ -300,8 +300,8 @@ section
 
 variable [HasAxiomWeakDot2 𝓢]
 
-def axiomWeakDot2 : 𝓢 ⊢ ◇(φ ⋏ □ψ) ➝ □(φ ⋏ ◇ψ) := HasAxiomWeakDot2.WeakDot2 _ _
-@[simp] lemma axiomWeakDot2! : 𝓢 ⊢! ◇(φ ⋏ □ψ) ➝ □(φ ⋏ ◇ψ) := ⟨axiomWeakDot2⟩
+def axiomWeakDot2 : 𝓢 ⊢ ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := HasAxiomWeakDot2.WeakDot2 _ _
+@[simp] lemma axiomWeakDot2! : 𝓢 ⊢! ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := ⟨axiomWeakDot2⟩
 
 variable [Entailment.Minimal 𝓢]
 
