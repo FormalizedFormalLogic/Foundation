@@ -368,6 +368,119 @@ lemma K4_ssubset_S4 : Logic.K4 ⊂ Logic.S4 := by
   . exact K4_ssubset_KD4
   . exact KD4_ssubset_S4
 
+instance : ProperSublogic Logic.K4 Logic.K4Dot2 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.K4Dot2 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+    use (Axioms.WeakDot2 (.atom 0) (.atom 1));
+    constructor;
+    . exact axiomWeakDot2!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 2, λ x y => x = 0⟩,
+        λ w a => if a = 0 then True else w = 0
+      ⟩;
+      use M, 0;
+      constructor;
+      . simp [Transitive, M];
+      . suffices ∃ (x : M.World), (∀ y, ¬x ≺ y) ∧ x ≠ 0 by
+          simpa [M, Semantics.Realize, Satisfies];
+        use 1;
+        constructor;
+        . omega;
+        . trivial;
+⟩
+
+instance : ProperSublogic Logic.K4Dot2 Logic.S4Dot2 := ⟨by
+  constructor;
+  . rw [K4Dot2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic, S4Dot2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
+    rintro φ hφ F ⟨F_refl, F_trans, F_conn⟩;
+    apply hφ;
+    refine ⟨F_trans, ?_⟩;
+    . rintro x y z ⟨Rxy, Ryz, _⟩;
+      exact F_conn ⟨Rxy, Ryz⟩;
+  . suffices ∃ φ, Hilbert.S4Dot2 ⊢! φ ∧ ¬TransitiveWeakConfluentFrameClass ⊧ φ by simpa [K4Dot2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic];
+    use (Axioms.Dot2 (.atom 0));
+    constructor;
+    . exact axiomDot2!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 2, λ x y => x < y⟩,
+        λ w a => False
+      ⟩;
+      use M, 0;
+      constructor;
+      . unfold M;
+        constructor;
+        . simp [Transitive]; omega;
+        . simp [WeakConfluent]; omega;
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x by
+          simpa [M, Semantics.Realize, Satisfies];
+        use 1;
+        refine ⟨?_, ?_, ?_⟩;
+        . omega;
+        . omega;
+        . use 1; omega;
+⟩
+
+instance : ProperSublogic Logic.K4 Logic.K4Dot3 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.K4Dot3 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+    use (Axioms.WeakDot3 (.atom 0) (.atom 1));
+    constructor;
+    . exact axiomWeakDot3!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 3, λ x y => x = 0 ∧ y ≠ 0⟩,
+        λ w a => if a = 0 then w = 1 else w = 2
+      ⟩;
+      use M, 0;
+      constructor;
+      . simp [M, Transitive];
+        omega;
+      . suffices
+          ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 1 ∧ (∀ y, x ≺ y → y = 1) ∧ ¬x = 2 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 2 ∧ (∀ z : M.World, x ≺ z → z = 2) ∧ x ≠ 1
+          by simpa [M, Semantics.Realize, Satisfies];
+        refine ⟨1, ?_, rfl, ?_, ?_, 2, ?_, rfl, ?_, ?_⟩;
+        . trivial;
+        . omega;
+        . trivial;
+        . omega;
+        . trivial;
+        . trivial;
+⟩
+
+instance : ProperSublogic Logic.K4Dot3 Logic.S4Dot3 := ⟨by
+  constructor;
+  . rw [K4Dot3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic, S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+    rintro φ hφ F ⟨F_refl, F_trans, F_conn⟩;
+    apply hφ;
+    refine ⟨F_trans, ?_⟩;
+    . rintro x y z ⟨Rxy, Ryz, _⟩;
+      exact F_conn ⟨Rxy, Ryz⟩;
+  . suffices ∃ φ, Hilbert.S4Dot3 ⊢! φ ∧ ¬TransitiveWeakConnectedFrameClass ⊧ φ by simpa [K4Dot3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
+    use (Axioms.Dot3 (.atom 0) (.atom 1));
+    constructor;
+    . exact axiomDot3!;
+    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 2, λ x y => x < y⟩,
+        λ w a => False
+      ⟩;
+      use M, 0;
+      constructor;
+      . unfold M;
+        constructor;
+        . simp [Transitive]; omega;
+        . simp [WeakConnected];
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∀ y, ¬x ≺ y by
+          simpa [M, Semantics.Realize, Satisfies];
+        use 1;
+        refine ⟨?_, ?_, ⟨1, ?_, ?_⟩⟩;
+        repeat omega;
+⟩
+
 theorem KD_ssubset_KD5 : Logic.KD ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;

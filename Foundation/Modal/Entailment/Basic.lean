@@ -274,6 +274,7 @@ instance (Γ : Context F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ Context.of axiomL�
 
 end
 
+
 class HasAxiomDot2 [Dia F] (𝓢 : S) where
   Dot2 (φ : F) : 𝓢 ⊢ Axioms.Dot2 φ
 
@@ -292,6 +293,24 @@ instance (Γ : Context F 𝓢) : HasAxiomDot2 Γ := ⟨fun _ ↦ Context.of axio
 end
 
 
+class HasAxiomWeakDot2 [Dia F] (𝓢 : S) where
+  WeakDot2 (φ ψ : F) : 𝓢 ⊢ Axioms.WeakDot2 φ ψ
+
+section
+
+variable [HasAxiomWeakDot2 𝓢]
+
+def axiomWeakDot2 : 𝓢 ⊢ ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := HasAxiomWeakDot2.WeakDot2 _ _
+@[simp] lemma axiomWeakDot2! : 𝓢 ⊢! ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := ⟨axiomWeakDot2⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakDot2 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomWeakDot2⟩
+instance (Γ : Context F 𝓢) : HasAxiomWeakDot2 Γ := ⟨fun _ _ ↦ Context.of axiomWeakDot2⟩
+
+end
+
+
 class HasAxiomDot3 (𝓢 : S) where
   Dot3 (φ ψ : F) : 𝓢 ⊢ Axioms.Dot3 φ ψ
 
@@ -306,6 +325,24 @@ variable [Entailment.Minimal 𝓢]
 
 instance (Γ : FiniteContext F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomDot3⟩
 instance (Γ : Context F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ Context.of axiomDot3⟩
+
+end
+
+
+class HasAxiomWeakDot3 [Dia F] (𝓢 : S) where
+  WeakDot3 (φ ψ : F) : 𝓢 ⊢ Axioms.WeakDot3 φ ψ
+
+section
+
+variable [HasAxiomWeakDot3 𝓢]
+
+def axiomWeakDot3 : 𝓢 ⊢ □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := HasAxiomWeakDot3.WeakDot3 _ _
+@[simp] lemma axiomWeakDot3! : 𝓢 ⊢! □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := ⟨axiomWeakDot3⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakDot3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomWeakDot3⟩
+instance (Γ : Context F 𝓢) : HasAxiomWeakDot3 Γ := ⟨fun _ _ ↦ Context.of axiomWeakDot3⟩
 
 end
 
@@ -473,6 +510,8 @@ instance [Entailment.Triv 𝓢] : Entailment.KTc 𝓢 where
 protected class Ver extends Entailment.K 𝓢, HasAxiomVer 𝓢
 
 protected class K4 extends Entailment.K 𝓢, HasAxiomFour 𝓢
+protected class K4Dot2 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakDot2 𝓢
+protected class K4Dot3 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakDot3 𝓢
 
 protected class K5 extends Entailment.K 𝓢, HasAxiomFive 𝓢
 
