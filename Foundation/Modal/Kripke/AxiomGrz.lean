@@ -96,7 +96,7 @@ lemma validate_T_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Axiom
   exact Satisfies.and_def.mp (validate_T_Four_of_validate_Grz h V x hx) |>.1;
 
 lemma reflexive_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : Reflexive F := by
-  apply reflexive_of_validate_AxiomT;
+  apply reflexive_of_validate_axiomT;
   simpa using validate_T_of_validate_Grz h;
 
 lemma validate_Four_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Axioms.Four (.atom 0))  := by
@@ -104,7 +104,7 @@ lemma validate_Four_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Ax
   exact Satisfies.and_def.mp (validate_T_Four_of_validate_Grz h V x hx) |>.2;
 
 lemma transitive_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : Transitive F := by
-  apply transitive_of_validate_AxiomFour;
+  apply transitive_of_validate_axiomFour;
   simpa using validate_Four_of_validate_Grz h;
 
 lemma WCWF_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by

@@ -109,6 +109,8 @@ protected abbrev H := □(□φ ⭤ φ) ➝ □φ
 abbrev H.set : Set F := { Axioms.H φ | (φ) }
 notation:max "𝗛" => H.set
 
+protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
+
 end Basic
 
 protected abbrev Geach (t : Geachean.Taple) (φ : F) := ◇^[t.i](□^[t.m]φ) ➝ □^[t.j](◇^[t.n]φ)

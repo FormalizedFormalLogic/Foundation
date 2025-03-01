@@ -51,17 +51,20 @@ section
 
 variable {F : Frame}
 
-lemma reflexive_of_validate_AxiomT (h : F ⊧ (Axioms.T (.atom 0))) : Reflexive F.Rel := by
-  have : ValidOnFrame F (Axioms.T (.atom 0)) → Reflexive F.Rel := by
-    simpa [Axioms.Geach, MultiGeachean, ←Geachean.reflexive_def] using
-    MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 0, 1, 0⟩} |>.defines F |>.mpr;
-  exact this h;
+lemma defines_reflexive : Reflexive F.Rel ↔ F ⊧ (Axioms.T (.atom 0)) := by
+  simpa [MultiGeachean, ←Geachean.reflexive_def, Axioms.Geach] using
+    MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 0, 1, 0⟩} |>.defines F
+alias ⟨validate_axiomT_of_reflexive, reflexive_of_validate_axiomT⟩ := defines_reflexive
 
-lemma transitive_of_validate_AxiomFour (h : F ⊧ (Axioms.Four (.atom 0))) : Transitive F.Rel := by
-  have : ValidOnFrame F (Axioms.Four (.atom 0)) → Transitive F.Rel := by
-    simpa [Axioms.Geach, MultiGeachean, ←Geachean.transitive_def] using
-    MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 2, 1, 0⟩} |>.defines F |>.mpr;
-  exact this h;
+lemma deines_transitive : Transitive F.Rel ↔ F ⊧ (Axioms.Four (.atom 0)) := by
+  simpa [MultiGeachean, ←Geachean.transitive_def, Axioms.Geach] using
+    MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 2, 1, 0⟩} |>.defines F
+alias ⟨validate_axiomFour_of_transitive, transitive_of_validate_axiomFour⟩ := deines_transitive
+
+lemma defines_serial : Serial F.Rel ↔ F ⊧ (Axioms.D (.atom 0)) := by
+  simpa [MultiGeachean, ←Geachean.serial_def, Axioms.Geach] using
+    MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 0, 1, 1⟩} |>.defines F
+alias ⟨validate_axiomD_of_serial, serial_of_validate_axiomD⟩ := defines_serial
 
 end
 

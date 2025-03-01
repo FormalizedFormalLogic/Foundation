@@ -12,7 +12,7 @@ open Formula.Kripke
 
 variable {F : Kripke.Frame}
 
-lemma weakConnected_of_validate_WeakDot3 (hCon : WeakConnected F) : F ⊧ (Axioms.WeakDot3 (.atom 0) (.atom 1)) := by
+lemma validate_WeakDot3_of_weakConnected (hCon : WeakConnected F) : F ⊧ (Axioms.WeakDot3 (.atom 0) (.atom 1)) := by
   rintro V x;
   apply Satisfies.or_def.mpr;
   suffices
@@ -30,7 +30,7 @@ lemma weakConnected_of_validate_WeakDot3 (hCon : WeakConnected F) : F ⊧ (Axiom
   . have := hz _ Ryz; contradiction;
   . have := hy _ Rzy; contradiction;
 
-lemma validate_WeakDot3_of_weakConnected : F ⊧ (Axioms.WeakDot3 (.atom 0) (.atom 1)) → WeakConnected F := by
+lemma weakConnected_of_validate_WeakDot3 : F ⊧ (Axioms.WeakDot3 (.atom 0) (.atom 1)) → WeakConnected F := by
   contrapose;
   intro hCon;
   obtain ⟨x, y, Rxy, z, Rxz, nyz, nRyz, nRzy⟩ := by simpa [WeakConnected] using hCon;
@@ -64,8 +64,8 @@ instance : WeakConnectedFrameClass.IsNonempty := by
 instance WeakConnectedFrameClass.DefinedByWeakDot3 : WeakConnectedFrameClass.DefinedBy {Axioms.WeakDot3 (.atom 0) (.atom 1)} := ⟨by
   intro F;
   constructor;
-  . simpa using weakConnected_of_validate_WeakDot3;
   . simpa using validate_WeakDot3_of_weakConnected;
+  . simpa using weakConnected_of_validate_WeakDot3;
 ⟩
 
 end definability

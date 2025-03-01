@@ -441,6 +441,23 @@ instance (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH�
 end
 
 
+class HasAxiomZ (𝓢 : S) where
+  Z (φ : F) : 𝓢 ⊢ Axioms.Z φ
+
+section
+
+variable [HasAxiomZ 𝓢]
+
+def axiomZ : 𝓢 ⊢ □(□φ ➝ φ) ➝ (◇□φ ➝ □φ) := HasAxiomZ.Z _
+@[simp] lemma axiomZ! : 𝓢 ⊢! □(□φ ➝ φ) ➝ (◇□φ ➝ □φ) := ⟨axiomZ⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomZ Γ := ⟨fun _ ↦ FiniteContext.of axiomZ⟩
+instance (Γ : Context F 𝓢) : HasAxiomZ Γ := ⟨fun _ ↦ Context.of axiomZ⟩
+
+end
+
 section
 
 variable [BasicModalLogicalConnective F] [DecidableEq F]
@@ -512,6 +529,8 @@ protected class Ver extends Entailment.K 𝓢, HasAxiomVer 𝓢
 protected class K4 extends Entailment.K 𝓢, HasAxiomFour 𝓢
 protected class K4Dot2 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakDot2 𝓢
 protected class K4Dot3 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakDot3 𝓢
+
+protected class KD4Point3Z extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomWeakDot3 𝓢, HasAxiomZ 𝓢
 
 protected class K5 extends Entailment.K 𝓢, HasAxiomFive 𝓢
 
