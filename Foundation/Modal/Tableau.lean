@@ -371,7 +371,7 @@ lemma equality_of₁ (e₁ : t₁.1.1 = t₂.1.1) : t₁ = t₂ := by
   calc
     t₁ = ⟨t₁.1, t₁.maximal, t₁.consistent⟩ := by rfl;
     _  = ⟨t₂.1, t₂.maximal, t₂.consistent⟩ := by simp [e];
-    _  = t₂                                  := by rfl;
+    _  = t₂                                := by rfl;
 
 lemma equality_of₂ (e₂ : t₁.1.2 = t₂.1.2) : t₁ = t₂ := equality_of₁ $ maximal_duality.mpr e₂
 
@@ -746,9 +746,54 @@ lemma iff_mem₂_multibox : (□^[n]φ ∈ t.1.2) ↔ (∃ t' : MaximalConsisten
 
 lemma iff_mem₂_box : (□φ ∈ t.1.2) ↔ (∃ t' : MaximalConsistentTableau 𝓢, (□''⁻¹t.1.1 ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := iff_mem₂_multibox (n := 1)
 
-
-
 end Saturated
+
+
+section
+
+lemma _root_.Set.exists_of_ne {s t : Set α} (h : s ≠ t) : ∃ x, ((x ∈ s ∧ x ∉ t) ∨ (x ∉ s ∧ x ∈ t)) := by
+  revert h;
+  contrapose;
+  push_neg;
+  intro h;
+  ext x;
+  rcases h x with ⟨h₁, h₂⟩;
+  constructor;
+  . assumption;
+  . tauto;
+
+variable [DecidableEq α] [Encodable α]
+
+lemma exists₁₂_of_ne {y z : MaximalConsistentTableau 𝓢} (eyz : y ≠ z) : ∃ φ₂, φ₂ ∈ y.1.1 ∧ φ₂ ∈ z.1.2 := by
+  obtain ⟨ξ, hξ⟩ := Set.exists_of_ne $ ne₁_of_ne eyz;
+  rcases hξ with (⟨hξy₁, hξy₂⟩ | ⟨hξz₁, hξy₂⟩);
+  . use ξ;
+    constructor;
+    . exact hξy₁;
+    . exact iff_not_mem₁_mem₂.mp hξy₂;
+  . use ∼ξ;
+    constructor;
+    . apply iff_mem₁_neg.mpr;
+      exact iff_not_mem₁_mem₂.mp hξz₁;
+    . apply iff_mem₂_neg.mpr;
+      exact hξy₂;
+
+lemma exists₂₁_of_ne {y z : MaximalConsistentTableau 𝓢} (eyz : y ≠ z) : ∃ φ₁, φ₁ ∈ y.1.2 ∧ φ₁ ∈ z.1.1 := by
+  obtain ⟨ξ, hξ⟩ := Set.exists_of_ne $ ne₂_of_ne eyz;
+  rcases hξ with (⟨hξy₁, hξy₂⟩ | ⟨hξz₁, hξy₂⟩);
+  . use ξ;
+    constructor;
+    . exact hξy₁;
+    . exact iff_not_mem₂_mem₁.mp hξy₂;
+  . use ∼ξ;
+    constructor;
+    . apply iff_mem₂_neg.mpr;
+      exact iff_not_mem₂_mem₁.mp hξz₁;
+    . apply iff_mem₁_neg.mpr;
+      exact hξy₂;
+
+end
+
 
 end MaximalConsistentTableau
 

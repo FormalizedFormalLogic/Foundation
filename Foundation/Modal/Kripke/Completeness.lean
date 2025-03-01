@@ -212,7 +212,7 @@ lemma def_multirel_multibox_mem₁ : x ≺^[n] y ↔ (∀ {φ}, □^[n]φ ∈ x.
   fun h => def_multirel_multibox_satisfies.mpr fun hφ => truthlemma₁.mp (h $ truthlemma₁.mpr hφ)
 ⟩
 
-lemma def_multirel_multidia : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x ⊧ ◇^[n]φ) := by
+lemma def_multirel_multidia_satisfies : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x ⊧ ◇^[n]φ) := by
   constructor;
   . intro h φ hφ;
     apply Formula.Kripke.Satisfies.multidia_def.mpr;
@@ -231,9 +231,12 @@ lemma def_multirel_multidia : x ≺^[n] y ↔ (∀ {φ}, y ⊧ φ → x ⊧ ◇^
     apply negneg_def.mpr;
 
 lemma def_multirel_multidia_mem₁ : x ≺^[n] y ↔ (∀ {φ}, φ ∈ y.1.1 → ◇^[n]φ ∈ x.1.1) := ⟨
-  fun h _ hφ => truthlemma₁.mpr $ def_multirel_multidia.mp h (truthlemma₁.mp hφ),
-  fun h => def_multirel_multidia.mpr fun hφ => truthlemma₁.mp $ h (truthlemma₁.mpr hφ)
+  fun h _ hφ => truthlemma₁.mpr $ def_multirel_multidia_satisfies.mp h (truthlemma₁.mp hφ),
+  fun h => def_multirel_multidia_satisfies.mpr fun hφ => truthlemma₁.mp $ h (truthlemma₁.mpr hφ)
 ⟩
+
+lemma def_rel_dia_mem₁ : x ≺ y ↔ (∀ {φ}, φ ∈ y.1.1 → ◇φ ∈ x.1.1) := by
+  simpa using def_multirel_multidia_mem₁ (n := 1);
 
 lemma def_multirel_multidia_mem₂ : x ≺^[n] y ↔ (∀ {φ}, ◇^[n]φ ∈ x.1.2 → φ ∈ y.1.2) := by
   constructor;
@@ -249,6 +252,9 @@ lemma def_multirel_multidia_mem₂ : x ≺^[n] y ↔ (∀ {φ}, ◇^[n]φ ∈ x.
     contrapose;
     intro hφ;
     exact iff_not_mem₁_mem₂.mpr $ @H φ (iff_not_mem₁_mem₂.mp hφ);
+
+lemma def_rel_dia_mem₂ : x ≺ y ↔ (∀ {φ}, ◇φ ∈ x.1.2 → φ ∈ y.1.2) := by
+  simpa using def_multirel_multidia_mem₂ (n := 1);
 
 end canonicalModel
 

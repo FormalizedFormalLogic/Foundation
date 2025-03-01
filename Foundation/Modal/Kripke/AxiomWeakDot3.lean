@@ -1,9 +1,10 @@
 import Foundation.Modal.Kripke.Completeness
 
+
+
 namespace LO.Modal
 
 namespace Kripke
-
 
 section definability
 
@@ -34,13 +35,25 @@ lemma validate_WeakDot3_of_weakConnected : F ⊧ (Axioms.WeakDot3 (.atom 0) (.at
   intro hCon;
   obtain ⟨x, y, Rxy, z, Rxz, nyz, nRyz, nRzy⟩ := by simpa [WeakConnected] using hCon;
   apply ValidOnFrame.not_of_exists_valuation_world;
-  use (λ w a => match a with | 0 => y ≺ w | 1 => z ≺ w | _ => False), x;
-  simp [Semantics.Realize, Satisfies];
-  refine ⟨y, Rxy, ?_, ?_, nRzy, z, Rxz, ?_, ?_, nRyz⟩;
-  . sorry;
-  . sorry;
-  . sorry;
-  . sorry;
+  use (λ w a => match a with | 0 => w = y ∨ y ≺ w | 1 => w = z ∨ z ≺ w | _ => True), x;
+  suffices
+    ∃ w, x ≺ w ∧ (w = y ∨ y ≺ w) ∧ (∀ (v : F.World), w ≺ v → ¬v = y → y ≺ v) ∧ ¬w = z ∧ ¬z ≺ w ∧
+    ∃ w, x ≺ w ∧ (w = z ∨ z ≺ w) ∧ (∀ (v : F.World), w ≺ v → ¬v = z → z ≺ v) ∧ ¬w = y ∧ ¬y ≺ w by
+    simpa [Semantics.Realize, Satisfies];
+  refine ⟨
+    _,
+    Rxy,
+    by tauto,
+    by tauto,
+    by tauto,
+    nRzy,
+    _,
+    Rxz,
+    by tauto,
+    by tauto,
+    by tauto,
+    nRyz
+  ⟩;
 
 abbrev WeakConnectedFrameClass : FrameClass := { F | WeakConnected F }
 
@@ -79,13 +92,13 @@ lemma weakConnected [Entailment.HasAxiomWeakDot3 𝓢] : WeakConnected (canonica
   obtain ⟨φ₁, hφ₁y, hφ₁z⟩ := Set.not_subset.mp nRyz;
   replace hφ₁y : □φ₁ ∈ y.1.1 := by simpa using hφ₁y;
   replace hφ₁z : φ₁ ∈ z.1.2 := iff_not_mem₁_mem₂.mp hφ₁z;
-  obtain ⟨φ₂, hφ₂y, hφ₂z⟩ : ∃ φ₂, φ₂ ∈ y.1.1 ∧ φ₂ ∈ z.1.2 := by sorry;
+  obtain ⟨φ₂, hφ₂y, hφ₂z⟩ := exists₁₂_of_ne eyz;
   let φ := φ₁ ⋎ φ₂;
 
   obtain ⟨ψ₁, hψz, hψy⟩ := Set.not_subset.mp nRzy;
   replace hψ₁z : □ψ₁ ∈ z.1.1 := by simpa using hψz;
   replace hψ₁y : ψ₁ ∈ y.1.2 := iff_not_mem₁_mem₂.mp hψy;
-  obtain ⟨ψ₂, hψ₂z, hψ₂y⟩ : ∃ ψ₂, ψ₂ ∈ z.1.1 ∧ ψ₂ ∈ y.1.2 := by sorry;
+  obtain ⟨ψ₂, hψ₂z, hψ₂y⟩ := exists₂₁_of_ne eyz;
   let ψ := ψ₁ ⋎ ψ₂;
 
   apply x.neither (φ := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ));
