@@ -101,3 +101,5 @@ import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Logic.Extension
 import Foundation.Modal.Logic.Sublogic
 import Foundation.Modal.Logic.Trivials
+
+import Foundation.Modal.Maximal.Makinson

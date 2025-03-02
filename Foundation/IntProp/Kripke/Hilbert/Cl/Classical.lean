@@ -37,6 +37,12 @@ instance : Semantics.Tarski (ClassicalValuation) where
   realize_imp := by simp [Semantics.Realize, Satisfies]; tauto;
   realize_not := by simp [Semantics.Realize, Satisfies]; tauto;
 
+@[simp] lemma bot_def : ¬V ⊧ ⊥ := by tauto
+
+lemma imp_def : (V ⊧ φ ➝ ψ) ↔ (V ⊧ φ → V ⊧ ψ) := by tauto;
+
+lemma imp_def₂ : (V ⊧ φ ➝ ψ) ↔ (¬V ⊧ φ ∨ V ⊧ ψ) := by tauto;
+
 end ClassicalSatisfies
 
 end Formula.Kripke
