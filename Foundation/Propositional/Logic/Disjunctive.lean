@@ -1,5 +1,5 @@
 import Foundation.Propositional.Logic.Basic
-import Foundation.Propositional.Kripke.Hilbert.Int.DP
+import Foundation.Propositional.Kripke.Hilbert.Int
 
 namespace LO.Propositional
 
@@ -15,6 +15,8 @@ instance {H : Hilbert ℕ} [Entailment.Disjunctive H] : H.logic.Disjunctive  := 
 
 end Hilbert
 
+
 instance : (Logic.Int).Disjunctive := inferInstance
+
 
 end LO.Propositional

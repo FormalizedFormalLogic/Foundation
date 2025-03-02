@@ -19,6 +19,7 @@ import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Heyting.Semantics
 import Foundation.Propositional.Logic.Disjunctive
 import Foundation.Propositional.Logic.WellKnown
+import Foundation.Propositional.Logic.Sublogic
 
 -- FirstOrder
 

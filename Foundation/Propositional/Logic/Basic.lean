@@ -1,5 +1,5 @@
 import Foundation.Propositional.Hilbert.Int
-import Foundation.Propositional.Kripke.Hilbert.Int.Basic
+import Foundation.Propositional.Kripke.Hilbert.Int
 
 namespace LO.Propositional
 
@@ -28,7 +28,7 @@ open Entailment
 
 variable {H : Hilbert ℕ}
 
-instance normal [H.HasEFQ] : (H.logic).Superintuitionistic where
+protected instance superintuitionistic [H.HasEFQ] : (H.logic).Superintuitionistic where
   subset_Int := by
     intro φ hφ;
     induction hφ using Hilbert.Deduction.rec! with
@@ -45,7 +45,8 @@ instance normal [H.HasEFQ] : (H.logic).Superintuitionistic where
 
 end Hilbert
 
-instance : (Logic.Int).Superintuitionistic := Hilbert.normal
+instance : (Logic.Int).Superintuitionistic := Hilbert.superintuitionistic
+
 
 
 section

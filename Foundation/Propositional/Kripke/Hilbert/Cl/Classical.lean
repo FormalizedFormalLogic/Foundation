@@ -1,6 +1,6 @@
 import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.Hilbert.Soundness
-import Foundation.Propositional.Kripke.Hilbert.Cl.Basic
+import Foundation.Propositional.Kripke.Hilbert.Cl
 
 namespace LO.Propositional
 

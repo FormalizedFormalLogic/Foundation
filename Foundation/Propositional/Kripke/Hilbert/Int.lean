@@ -1,15 +1,27 @@
+import Foundation.Propositional.Hilbert.WellKnown
+import Foundation.Propositional.Kripke.Completeness
+import Foundation.Propositional.Kripke.Hilbert.Soundness
 import Foundation.Logic.Disjunctive
-import Foundation.Propositional.Kripke.Hilbert.Int.Basic
 
 namespace LO.Propositional
 
+open Formula.Kripke
+
 open Kripke
-open Entailment
-open Formula Formula.Kripke
 
-namespace Hilbert.Int
 
-variable {φ ψ : Formula ℕ}
+namespace Hilbert.Int.Kripke
+
+instance sound : Sound Hilbert.Int AllFrameClass := inferInstance
+
+instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass AllFrameClass
+
+instance canonical : Canonical Hilbert.Int AllFrameClass := by tauto;
+
+instance complete: Complete Hilbert.Int AllFrameClass := inferInstance
+
+
+section DP
 
 abbrev counterexampleDPFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ : F₁.World) (w₂ : F₂.World) : Kripke.Frame where
   World := Unit ⊕ F₁.World ⊕ F₂.World;
@@ -61,7 +73,7 @@ variable {M₁ : Kripke.Model} {M₂ : Kripke.Model}
 
 lemma satisfies_left_on_counterexampleDPModel :
   w ⊧ φ ↔ (Satisfies (counterexampleDPModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inl w) φ) := by
-  induction φ using rec' generalizing w with
+  induction φ using Formula.rec' generalizing w with
   | himp φ ψ ihp ihq =>
     constructor;
     . intro hpq X hWX hp;
@@ -78,7 +90,7 @@ lemma satisfies_left_on_counterexampleDPModel :
 
 lemma satisfies_right_on_counterexampleDPModel :
   w ⊧ φ ↔ (Satisfies (counterexampleDPModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inr w) φ) := by
-  induction φ using rec' generalizing w with
+  induction φ using Formula.rec' generalizing w with
   | himp φ ψ ihp ihq =>
     constructor;
     . intro h X hWX hp;
@@ -115,8 +127,11 @@ theorem disjunctive : (Hilbert.Int) ⊢! φ ⋎ ψ → (Hilbert.Int) ⊢! φ ∨
       apply this;
       exact satisfies_right_on_counterexampleDPModel.not.mp hψ;
 
-instance : Disjunctive (Hilbert.Int) := ⟨disjunctive⟩
+instance : Entailment.Disjunctive (Hilbert.Int) := ⟨disjunctive⟩
 
-end Hilbert.Int
+end DP
+
+end Hilbert.Int.Kripke
+
 
 end LO.Propositional
