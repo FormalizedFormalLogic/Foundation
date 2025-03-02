@@ -1,11 +1,11 @@
 import Foundation.Modal.Hilbert.Maximal.Basic
-import Foundation.IntProp.Kripke.Hilbert.Cl.Classical
+import Foundation.Propositional.Kripke.Hilbert.Cl.Classical
 
 namespace LO.Modal
 
 open Entailment
 
-open IntProp
+open Propositional
 
 open Hilbert
 open Hilbert.Deduction
@@ -17,10 +17,10 @@ namespace Hilbert
 namespace Triv
 
 lemma unprovable_AxiomL : Hilbert.Triv ⊬ (Axioms.L (.atom a)) := by
-  apply Hilbert.Triv.classical_reducible.not.mpr;
-  apply IntProp.Hilbert.Cl.unprovable_of_exists_classicalValuation;
+  apply Hilbert.Triv.iff_provable_Cl.not.mpr;
+  apply Propositional.Hilbert.Cl.unprovable_of_exists_classicalValuation;
   use (λ _ => False);
-  simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
+  simp [Axioms.L, trivTranslate, toPropFormula, Propositional.Formula.Kripke.Satisfies];
 
 end Triv
 
@@ -28,9 +28,9 @@ end Triv
 namespace Ver
 
 lemma unprovable_AxiomP : (Hilbert.Ver) ⊬ Axioms.P := by
-  apply Hilbert.Ver.classical_reducible.not.mpr;
-  apply IntProp.Hilbert.Cl.unprovable_of_exists_classicalValuation;
-  dsimp [VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
+  apply Hilbert.Ver.iff_provable_Cl.not.mpr;
+  apply Propositional.Hilbert.Cl.unprovable_of_exists_classicalValuation;
+  dsimp [verTranslate, toPropFormula, Propositional.Formula.Kripke.Satisfies];
   use (λ _ => True);
   simp;
 
@@ -39,38 +39,40 @@ end Ver
 
 namespace K4
 
-lemma provable_Cl_trivTranslated : (Hilbert.K4) ⊢! φ → (Hilbert.Cl) ⊢! φᵀᴾ := by
+lemma provable_trivTranslated_Cl : (Hilbert.K4) ⊢! φ → (Hilbert.Cl) ⊢! φᵀ.toPropFormula := by
   intro h;
-  apply Hilbert.Triv.classical_reducible.mp;
+  apply Hilbert.Triv.iff_provable_Cl.mp;
   exact Entailment.weakerThan_iff.mp K4_weakerThan_Triv h;
 
 lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
-  apply not_imp_not.mpr provable_Cl_trivTranslated;
-  apply IntProp.Hilbert.Cl.unprovable_of_exists_classicalValuation;
+  apply not_imp_not.mpr provable_trivTranslated_Cl;
+  apply Propositional.Hilbert.Cl.unprovable_of_exists_classicalValuation;
+  dsimp [trivTranslate, toPropFormula, Propositional.Formula.Kripke.Satisfies];
   use (λ _ => False);
-  simp [Axioms.L, TrivTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
+  simp;
 
 end K4
 
 
 namespace GL
 
-lemma provable_CL_verTranslated : (Hilbert.GL) ⊢! φ → (Hilbert.Cl) ⊢! φⱽᴾ := by
+lemma provable_verTranslated_Cl : (Hilbert.GL) ⊢! φ → (Hilbert.Cl) ⊢! φⱽ.toPropFormula := by
   intro h;
   induction h using Deduction.rec! with
     | maxm a =>
       rcases a with ⟨_, (⟨_, _, rfl⟩ | ⟨_, rfl⟩), ⟨_, rfl⟩⟩
-      <;> simp [VerTranslation, toPropFormula];
+      <;> simp [verTranslate, Formula.toPropFormula];
     | mdp ih₁ ih₂ =>
-      dsimp [VerTranslation] at ih₁ ih₂;
+      dsimp [verTranslate] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
-    | _ => simp [VerTranslation, toPropFormula];
+    | _ => simp [verTranslate, Formula.toPropFormula];
 
 lemma unprovable_AxiomT : (Hilbert.GL) ⊬ Axioms.T (.atom a) := by
-  apply not_imp_not.mpr provable_CL_verTranslated;
-  apply IntProp.Hilbert.Cl.unprovable_of_exists_classicalValuation;
+  apply not_imp_not.mpr provable_verTranslated_Cl;
+  apply Propositional.Hilbert.Cl.unprovable_of_exists_classicalValuation;
+  dsimp [verTranslate, toPropFormula, Propositional.Formula.Kripke.Satisfies];
   use (λ _ => False);
-  simp [Axioms.T, VerTranslation, toPropFormula, IntProp.Formula.Kripke.Satisfies];
+  simp;
 
 instance : Entailment.Consistent (Hilbert.GL) := by
   apply consistent_iff_exists_unprovable.mpr;
@@ -79,9 +81,10 @@ instance : Entailment.Consistent (Hilbert.GL) := by
 
 end GL
 
+
 theorem not_S4_weakerThan_GL : ¬(Hilbert.S4) ⪯ (Hilbert.GL) := by
   apply Entailment.not_weakerThan_iff.mpr;
-  existsi (Axioms.T (atom 0));
+  use (Axioms.T (atom 0));
   constructor;
   . exact axiomT!;
   . exact GL.unprovable_AxiomT;

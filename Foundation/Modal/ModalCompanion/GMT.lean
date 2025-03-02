@@ -1,25 +1,25 @@
 import Foundation.Modal.ModalCompanion.Basic
-import Foundation.IntProp.Logic.WellKnown
+import Foundation.Propositional.Logic.WellKnown
 import Foundation.Modal.Logic.WellKnown
 
 namespace LO.Modal
 
 open Entailment FiniteContext
-open IntProp
-open IntProp.Formula (goedelTranslate)
+open Propositional
+open Propositional.Formula (goedelTranslate)
 open Modal
 open Modal.Kripke
 
 namespace Hilbert
 
-variable {IL : IntProp.Logic} {ML : Modal.Logic}
-variable {IH : IntProp.Hilbert ℕ} {MH : Modal.Hilbert ℕ}
-variable {φ ψ χ : IntProp.Formula ℕ}
+variable {IL : Propositional.Logic} {ML : Modal.Logic}
+variable {IH : Propositional.Hilbert ℕ} {MH : Modal.Hilbert ℕ}
+variable {φ ψ χ : Propositional.Formula ℕ}
 
 variable [Entailment.S4 MH]
 
 lemma goedelTranslated_axiomTc : MH ⊢! φᵍ ➝ □φᵍ := by
-  induction φ using IntProp.Formula.rec' with
+  induction φ using Propositional.Formula.rec' with
   | hfalsum => simp only [goedelTranslate, efq!];
   | hand φ ψ ihp ihq => exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
   | hor φ ψ ihp ihq => exact imp_trans''! (or₃''! (imply_left_or'! ihp) (imply_right_or'! ihq)) collect_box_or!
@@ -45,11 +45,11 @@ lemma goedelTranslated_OrElim : MH ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ �
   exact nec! $ imp_trans''! axiomFour! $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! $ or₃!) axiomK!;
 
 lemma provable_GoedelTranslated_Modal_of_provable_Superint
-  (IH : IntProp.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [Entailment.S4 MH]
+  (IH : Propositional.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [Entailment.S4 MH]
   (hAx : ∀ φ ∈ IH.axiomInstances, MH ⊢! φᵍ)
   : IH ⊢! φ → MH ⊢! φᵍ := by
   intro h;
-  induction h using IntProp.Hilbert.Deduction.rec! with
+  induction h using Propositional.Hilbert.Deduction.rec! with
   | maxm ih => apply hAx; assumption;
   | mdp ihpq ihp =>
     exact axiomT'! $ axiomK''! (ihpq) $ nec! $ ihp;
@@ -75,10 +75,10 @@ theorem Logic.Int_of_gS4 : φᵍ ∈ Logic.S4 → φ ∈ Logic.Int := by
   contrapose;
   rw [Logic.Int.eq_AllKripkeFrameClass_Logic, Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
   intro h;
-  obtain ⟨M, w, hM, hp⟩ := IntProp.Formula.Kripke.ValidOnFrameClass.exists_model_world_of_not h;
-  have h₁ : ∀ ψ x, IntProp.Formula.Kripke.Satisfies M x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨M.World, M.Rel⟩, M.Val⟩ x (ψᵍ)) := by
+  obtain ⟨M, w, hM, hp⟩ := Propositional.Formula.Kripke.ValidOnFrameClass.exists_model_world_of_not h;
+  have h₁ : ∀ ψ x, Propositional.Formula.Kripke.Satisfies M x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨M.World, M.Rel⟩, M.Val⟩ x (ψᵍ)) := by
     intro ψ x;
-    induction ψ using IntProp.Formula.rec' generalizing x with
+    induction ψ using Propositional.Formula.rec' generalizing x with
     | hatom a =>
       unfold goedelTranslate;
       constructor;
@@ -99,7 +99,7 @@ theorem Logic.Int_of_gS4 : φᵍ ∈ Logic.S4 → φ ∈ Logic.Int := by
         rcases Formula.Kripke.Satisfies.or_def.mp h with (hp | hq)
         . left; exact ihp x |>.mpr hp;
         . right; exact ihq x |>.mpr hq;
-    | _ => simp_all [goedelTranslate, IntProp.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
+    | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
   apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model;
   use {World := M.World, Rel := M.Rel, Val := M.Val};
   constructor;

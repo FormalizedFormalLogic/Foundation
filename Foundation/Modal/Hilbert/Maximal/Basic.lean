@@ -1,6 +1,6 @@
-import Foundation.IntProp.Hilbert.WellKnown
+import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Modal.Hilbert.WellKnown
-import Foundation.Modal.IntProp
+import Foundation.Modal.Propositional
 
 namespace LO.Modal
 
@@ -8,70 +8,72 @@ variable {α} [DecidableEq α]
 
 namespace Formula
 
-def TrivTranslation : Formula α → Formula α
+def trivTranslate : Formula α → Formula α
   | .atom a => atom a
-  | □φ => φ.TrivTranslation
+  | □φ => φ.trivTranslate
   | ⊥ => ⊥
-  | φ ➝ ψ => (φ.TrivTranslation) ➝ (ψ.TrivTranslation)
-postfix:75 "ᵀ" => TrivTranslation
+  | φ ➝ ψ => (φ.trivTranslate) ➝ (ψ.trivTranslate)
+postfix:75 "ᵀ" => trivTranslate
 
-namespace TrivTranslation
-
-@[simp] lemma degree_zero : φᵀ.degree = 0 := by induction φ <;> simp [TrivTranslation, degree, *];
+namespace trivTranslate
 
 @[simp]
-lemma back : φᵀᴾᴹ = φᵀ := by
+lemma degree_zero : φᵀ.degree = 0 := by induction φ <;> simp [trivTranslate, degree, *];
+
+@[simp]
+lemma toIP : φᵀ.toPropFormula = φᵀ := by
   induction φ using rec' with
-  | himp => simp [TrivTranslation, toPropFormula, IntProp.Formula.toModalFormula, *];
-  | hbox => simp [TrivTranslation, *];
+  | hbox => simp [trivTranslate, *];
+  | himp => simp [trivTranslate, toPropFormula, *];
   | _ => rfl;
 
-end TrivTranslation
+end trivTranslate
 
 
-def VerTranslation : Formula α → Formula α
+def verTranslate : Formula α → Formula α
   | atom a => atom a
   | □_ => ⊤
   | ⊥ => ⊥
-  | φ ➝ ψ => (φ.VerTranslation) ➝ (ψ.VerTranslation)
-postfix:75 "ⱽ" => VerTranslation
+  | φ ➝ ψ => (φ.verTranslate) ➝ (ψ.verTranslate)
+postfix:75 "ⱽ" => verTranslate
 
-namespace VerTranslation
+namespace verTranslate
 
 @[simp]
 lemma degree_zero : φⱽ.degree = 0 := by
   induction φ using rec' with
-  | himp => simp [VerTranslation, degree, *];
+  | himp => simp [verTranslate, degree, *];
   | _ => rfl;
 
-@[simp] lemma back  : φⱽᴾᴹ = φⱽ := by
+@[simp]
+lemma toIP : φⱽ.toPropFormula = φⱽ := by
   induction φ using rec' with
-  | himp => simp [VerTranslation, toPropFormula, IntProp.Formula.toModalFormula, *];
+  | himp => simp [verTranslate, toPropFormula, *];
   | _ => rfl;
 
-end VerTranslation
+end verTranslate
 
 end Formula
 
+
 open Entailment
-open Formula (TrivTranslation VerTranslation)
+open Formula (trivTranslate verTranslate)
 
 namespace Hilbert
 
-lemma provable_of_classical_provable {mH : Modal.Hilbert ℕ} {φ : IntProp.Formula ℕ} : ((IntProp.Hilbert.Cl) ⊢! φ) → (mH ⊢! φᴹ) := by
+lemma provable_of_classical_provable {H : Modal.Hilbert ℕ} {φ : Propositional.Formula ℕ} : ((Propositional.Hilbert.Cl) ⊢! φ) → (H ⊢! φ.toModalFormula) := by
   intro h;
-  induction h using IntProp.Hilbert.Deduction.rec! with
+  induction h using Propositional.Hilbert.Deduction.rec! with
   | maxm ih =>
     rcases (by simpa using ih) with (⟨_, rfl⟩ | ⟨_, rfl⟩);
     . exact efq!;
     . exact lem!;
   | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
   | _ =>
-    dsimp [IntProp.Formula.toModalFormula];
+    dsimp [Propositional.Formula.toModalFormula];
     simp;
 
 namespace Triv
-
 
 lemma iff_trivTranslated : (Hilbert.Triv) ⊢! φ ⭤ φᵀ := by
   induction φ using Formula.rec' with
@@ -82,21 +84,21 @@ lemma iff_trivTranslated : (Hilbert.Triv) ⊢! φ ⭤ φᵀ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-protected theorem classical_reducible : Hilbert.Triv ⊢! φ ↔ (IntProp.Hilbert.Cl) ⊢! φᵀᴾ := by
+protected theorem iff_provable_Cl : Hilbert.Triv ⊢! φ ↔ (Propositional.Hilbert.Cl) ⊢! φᵀ.toPropFormula := by
   constructor;
   . intro h;
     induction h using Deduction.rec! with
     | maxm a =>
       rcases a with ⟨_, (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩), ⟨_, rfl⟩⟩
-      <;> simp [TrivTranslation, Formula.toPropFormula];
+      <;> simp [trivTranslate, Formula.toPropFormula];
     | mdp ih₁ ih₂ =>
-      dsimp [TrivTranslation] at ih₁ ih₂;
+      dsimp [trivTranslate] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
     | nec ih => exact ih;
-    | _ => simp [TrivTranslation, Formula.toPropFormula];
+    | _ => simp [trivTranslate, Formula.toPropFormula];
   . intro h;
     have d₁ : Hilbert.Triv ⊢! φᵀ ➝ φ := and₂'! iff_trivTranslated;
-    have d₂ : Hilbert.Triv ⊢! φᵀ := by simpa only [TrivTranslation.back] using provable_of_classical_provable h;
+    have d₂ : Hilbert.Triv ⊢! φᵀ := by simpa only [trivTranslate.toIP] using provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
 end Triv
@@ -113,17 +115,17 @@ lemma iff_verTranslated : (Hilbert.Ver) ⊢! φ ⭤ φⱽ := by
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
   | _ => apply iff_id!
 
-protected lemma classical_reducible : (Hilbert.Ver) ⊢! φ ↔ (IntProp.Hilbert.Cl) ⊢! φⱽᴾ := by
+protected lemma iff_provable_Cl : (Hilbert.Ver) ⊢! φ ↔ (Propositional.Hilbert.Cl) ⊢! φⱽ.toPropFormula := by
   constructor;
   . intro h;
     induction h using Deduction.rec! with
     | maxm a =>
       rcases a with ⟨_, (⟨_, _, rfl⟩ | ⟨_, rfl⟩), ⟨_, rfl⟩⟩
-      <;> simp [VerTranslation, Formula.toPropFormula];
+      <;> simp [verTranslate, Formula.toPropFormula];
     | mdp ih₁ ih₂ =>
-      dsimp [VerTranslation] at ih₁ ih₂;
+      dsimp [verTranslate] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
-    | _ => simp [VerTranslation, Formula.toPropFormula];
+    | _ => simp [verTranslate, Formula.toPropFormula];
   . intro h;
     have d₁ : Hilbert.Ver ⊢! φⱽ ➝ φ := and₂'! iff_verTranslated;
     have d₂ : Hilbert.Ver ⊢! φⱽ := by simpa using provable_of_classical_provable h;
