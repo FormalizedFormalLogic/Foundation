@@ -1,42 +1,11 @@
 import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.Hilbert.Soundness
+import Foundation.Propositional.Kripke.AxiomLEM
 
 namespace LO.Propositional
 
 open Kripke
 open Formula.Kripke
-
-
-abbrev Kripke.EuclideanFrameClass : FrameClass := { F | Euclidean F }
-
-instance Kripke.EuclideanFrameClass.definedByLEM : Kripke.EuclideanFrameClass.DefinedByFormula (Axioms.LEM (.atom 0)) := ⟨by
-  rintro F;
-  constructor;
-  . rintro hEucl _ ⟨_, rfl⟩;
-    apply ValidOnFrame.lem;
-    apply symm_of_refl_eucl;
-    . exact F.rel_refl;
-    . assumption;
-  . rintro h x y z Rxy Rxz;
-    let V : Kripke.Valuation F := ⟨λ {v a} => z ≺ v, by
-      intro w v Rwv a Rzw;
-      exact F.rel_trans' Rzw Rwv;
-    ⟩;
-    suffices Satisfies ⟨F, V⟩ y (.atom 0) by simpa [Satisfies] using this;
-    apply V.hereditary Rxy;
-    simp at h;
-    have := @h V x;
-    simp [Semantics.Realize, Satisfies, V, or_iff_not_imp_right] at this;
-    apply this z;
-    . exact Rxz;
-    . apply F.rel_refl;
-⟩
-
-instance : Kripke.EuclideanFrameClass.IsNonempty := ⟨by
-  use pointFrame;
-  simp [Euclidean];
-⟩
-
 
 open Kripke
 
