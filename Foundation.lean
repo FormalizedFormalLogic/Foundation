@@ -13,11 +13,10 @@ import Foundation.Logic.Entailment
 
 -- Propositional
 
-import Foundation.Propositional.Classical.Basic.Formula
-import Foundation.Propositional.Classical.Basic.Calculus
-import Foundation.Propositional.Classical.Basic.Semantics
-import Foundation.Propositional.Classical.Basic.Completeness
-import Foundation.Propositional.Classical.Basic
+import Foundation.Propositional.Classical.Formula
+import Foundation.Propositional.Classical.Calculus
+import Foundation.Propositional.Classical.Semantics
+import Foundation.Propositional.Classical.Completeness
 
 -- import Foundation.Propositional.Translation
 
@@ -52,16 +51,16 @@ import Foundation.FirstOrder.Hauptsatz
 import Foundation.IntFO.Basic
 import Foundation.IntFO.Translation
 
--- IntProp
-import Foundation.IntProp.Hilbert.Glivenko
+-- Propositional
+import Foundation.Propositional.Hilbert.Glivenko
 
-import Foundation.IntProp.Heyting.Semantics
+import Foundation.Propositional.Heyting.Semantics
 
-import Foundation.IntProp.Logic.Disjunctive
-import Foundation.IntProp.Logic.WellKnown
+import Foundation.Propositional.Logic.Disjunctive
+import Foundation.Propositional.Logic.WellKnown
 
 -- TODO:
--- import Foundation.IntProp.Dialectica.Basic
+-- import Foundation.Propositional.Dialectica.Basic
 
 -- Modal
 
