@@ -24,7 +24,7 @@ theorem Int_ssubset_KC : Logic.Int ⊂ Logic.KC := by
       constructor;
       . tauto;
       . apply (show ¬Confluent F.Rel → ¬ValidOnFrame F (Axioms.WeakLEM (.atom 0)) by
-          simpa using Kripke.ConfluentFrameClass.definedByWeakLEM.defines F |>.not.mp
+          simpa using Kripke.ConfluentFrameClass.DefinedByAxiomWeakLEM.defines F |>.not.mp
         );
         unfold Confluent;
         push_neg;
@@ -53,7 +53,7 @@ theorem KC_ssubset_LC : Logic.KC ⊂ Logic.LC := by
         use 3;
         omega;
       . apply (show ¬Connected F.Rel → ¬ValidOnFrame F (Axioms.Dummett (.atom 0) (.atom 1)) by
-          simpa using Kripke.ConfluentFrameClass.definedByDummett.defines F |>.not.mp
+          simpa using Kripke.ConnectedFrameClass.DefinedByAxiomDummett.defines F |>.not.mp
         );
         unfold Connected;
         push_neg;
@@ -79,7 +79,7 @@ theorem LC_ssubset_Cl : Logic.LC ⊂ Logic.Cl := by
       constructor;
       . simp [F, Connected]; omega;
       . apply (show ¬Euclidean F.Rel → ¬ValidOnFrame F (Axioms.LEM (.atom 0)) by
-          simpa using Kripke.EuclideanFrameClass.definedByLEM.defines F |>.not.mp
+          simpa using Kripke.EuclideanFrameClass.DefinedByAxiomLEM.defines F |>.not.mp
         );
         unfold Euclidean;
         push_neg;
