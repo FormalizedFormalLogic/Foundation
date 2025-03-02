@@ -91,6 +91,8 @@ import Foundation.Modal.Logic.Sublogic.S4
 import Foundation.Modal.Logic.Sublogic.S5Grz
 import Foundation.Modal.Logic.Sublogic.Trivials
 
+import Foundation.Modal.Maximal.Makinson
+
 -- Arithmetization
 import Foundation.Arithmetization.Vorspiel.Vorspiel
 import Foundation.Arithmetization.Vorspiel.Graph
