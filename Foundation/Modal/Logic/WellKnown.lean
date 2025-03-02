@@ -81,6 +81,7 @@ protected abbrev KD4 : Logic := Hilbert.KD4.logic
 lemma KD4.eq_SerialTransitiveKripkeFrameClass_Logic : Logic.KD4 = Kripke.SerialTransitiveFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
+protected abbrev KD4Point3Z : Logic := Hilbert.KD4Point3Z.logic
 
 protected abbrev KD45 : Logic := Hilbert.KD45.logic
 lemma KD45.eq_SerialTransitiveEuclideanKripkeFrameClass_Logic : Logic.KD45 = Kripke.SerialTransitiveEuclideanFrameClass.logic

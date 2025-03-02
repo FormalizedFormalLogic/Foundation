@@ -80,6 +80,7 @@ import Foundation.Modal.Kripke.Hilbert.S4Dot3
 import Foundation.Modal.Kripke.Hilbert.S5
 import Foundation.Modal.Kripke.Hilbert.Triv
 import Foundation.Modal.Kripke.Hilbert.Ver
+import Foundation.Modal.Kripke.Hilbert.KD4Point3Z
 
 import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
 import Foundation.Modal.Kripke.Hilbert.GL.MDP
