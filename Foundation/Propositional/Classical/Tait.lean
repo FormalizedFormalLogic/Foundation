@@ -1,5 +1,5 @@
-import Foundation.Propositional.Classical.Semantics
-import Foundation.Propositional.Classical.Calculus
+import Foundation.Propositional.Classical.Basic
+import Foundation.Propositional.Tait.Calculus
 
 namespace LO.Propositional
 

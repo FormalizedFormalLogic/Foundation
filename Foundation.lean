@@ -12,9 +12,8 @@ import Foundation.Logic.Entailment
 -- import Foundation.AutoProver.Prover
 
 -- Propositional
-import Foundation.Propositional.Classical.Calculus
-import Foundation.Propositional.Classical.Semantics
-import Foundation.Propositional.Classical.Completeness
+import Foundation.Propositional.Classical.Tait
+import Foundation.Propositional.Classical.Hilbert
 import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Heyting.Semantics
 import Foundation.Propositional.Logic.Disjunctive

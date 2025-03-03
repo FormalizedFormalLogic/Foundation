@@ -153,7 +153,7 @@ lemma confluent [Entailment.HasAxiomWeakLEM 𝓢] : Confluent (canonicalFrame �
   have nmem_nΘz_x : ∼⋀Θz ∉ x.1.1 := Set.not_mem_subset Rxz nmem_nΘz_z;
   have mem_nnΘz_x : ∼∼⋀Θz ∈ x.1.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nmem_nΘz_x;
 
-  exact mdp₁_mem mem_nnΘz_x $ mdp₁ mem_Θx_x d;
+  exact mdp₁_mem mem_nnΘz_x $ mdp_mem₁_provable d mem_Θx_x;
 
 end Canonical
 

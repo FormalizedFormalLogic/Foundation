@@ -1,13 +1,49 @@
+import Foundation.Propositional.Formula
 import Foundation.Propositional.NNFormula
-import Foundation.Logic.Entailment
+import Foundation.Logic.Semantics
 
-namespace LO
-
-namespace Propositional
+namespace LO.Propositional
 
 variable {α : Type*}
 
+structure Classical.Valuation (α : Type*) where
+  val : α → Prop
+
+instance : CoeFun (Classical.Valuation α) (fun _ ↦ α → Prop) := ⟨Classical.Valuation.val⟩
+
+
+namespace Formula
+
+def val (v : Classical.Valuation α) : Formula α → Prop
+  | atom a  => v a
+  | ⊥       => False
+  | φ ➝ ψ   => φ.val v → ψ.val v
+  | φ ⋏ ψ   => φ.val v ∧ ψ.val v
+  | φ ⋎ ψ   => φ.val v ∨ ψ.val v
+
+variable {v : Classical.Valuation α} {φ ψ : Formula α}
+
+instance semantics : Semantics (Formula α) (Classical.Valuation α) := ⟨fun v ↦ Formula.val v⟩
+
+lemma models_iff_val : v ⊧ φ ↔ φ.val v := iff_of_eq rfl
+
+instance : Semantics.Tarski (Classical.Valuation α) where
+  realize_top := by simp [models_iff_val, val]
+  realize_bot := by simp [models_iff_val, val]
+  realize_and := by simp [models_iff_val, val]
+  realize_or  := by simp [models_iff_val, val]
+  realize_not := by simp [models_iff_val, val]
+  realize_imp := by simp [models_iff_val, val]
+
+@[simp] protected lemma realize_atom : v ⊧ (.atom a) ↔ v a := iff_of_eq rfl
+
+end Formula
+
+
+
+
 namespace NNFormula
+
 
 section val
 
@@ -40,15 +76,8 @@ def val : NNFormula α →ˡᶜ F where
 
 end val
 
-end NNFormula
 
-
-structure Classical.Valuation (α : Type*) where
-  val : α → Prop
-
-instance : CoeFun (Classical.Valuation α) (fun _ ↦ α → Prop) := ⟨Classical.Valuation.val⟩
-
-namespace NNFormula
+section semantics
 
 variable {v : Classical.Valuation α}
 
@@ -64,9 +93,11 @@ instance : Semantics.Tarski (Classical.Valuation α) where
   realize_not := by simp [models_iff_val]
   realize_imp := by simp [models_iff_val]
 
-@[simp] protected lemma realize_atom : v ⊧ NNFormula.atom a ↔ v a := iff_of_eq rfl
+@[simp] protected lemma realize_atom : v ⊧ .atom a ↔ v a := iff_of_eq rfl
 
-@[simp] protected lemma realize_natom : v ⊧ NNFormula.natom a ↔ ¬v a := iff_of_eq rfl
+@[simp] protected lemma realize_natom : v ⊧ .natom a ↔ ¬v a := iff_of_eq rfl
+
+end semantics
 
 end NNFormula
 

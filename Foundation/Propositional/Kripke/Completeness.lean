@@ -54,7 +54,7 @@ private lemma truthlemma.himp
   . contrapose;
     simp_all [Satisfies];
     intro h;
-    replace h := not_mem₁_iff_mem₂.mp h;
+    replace h := iff_not_mem₁_mem₂.mp h;
     obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := (insert φ t.1.1, {ψ})) $ by
       simp only [Tableau.Consistent];
       intro Γ Δ hΓ hΔ;
@@ -79,14 +79,14 @@ private lemma truthlemma.himp
     . assumption;
     . constructor;
       . assumption;
-      . apply not_mem₁_iff_mem₂.mpr;
+      . apply iff_not_mem₁_mem₂.mpr;
         simp_all only [Set.singleton_subset_iff];
   . simp [Satisfies.imp_def];
     intro h t' htt' hp;
     replace hp := ihp.mp hp;
     have hpq := htt' h;
     apply ihq.mpr;
-    apply not_mem₂_iff_mem₁.mp;
+    apply iff_not_mem₂_mem₁.mp;
     exact not_mem₂
       (by simp_all)
       (show 𝓢 ⊢! ⋀[φ, φ ➝ ψ] ➝ ψ by
@@ -100,8 +100,10 @@ private lemma truthlemma.himp
 lemma truthlemma : t ⊧ φ ↔ φ ∈ t.1.1 := by
   induction φ using Formula.rec' generalizing t with
   | hatom => tauto;
+  | hfalsum => simp only [Semantics.Bot.realize_bot, not_mem₁_falsum];
   | himp φ ψ ihp ihq => exact truthlemma.himp ihp ihq;
-  | _ => simp [Satisfies.iff_models, Satisfies, *];
+  | hand φ ψ ihp ihq => simp [SaturatedConsistentTableau.iff_mem₁_and, *];
+  | hor φ ψ ihp ihq => simp [SaturatedConsistentTableau.iff_mem₁_or, *];
 
 lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ φ ↔ 𝓢 ⊢! φ := by
   constructor;
@@ -119,7 +121,7 @@ lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ �
     simp [ValidOnModel.iff_models, ValidOnModel]
     existsi t';
     apply truthlemma.not.mpr;
-    apply not_mem₁_iff_mem₂.mpr;
+    apply iff_not_mem₁_mem₂.mpr;
     simp_all;
   . intro h t;
     suffices φ ∈ t.1.1 by exact truthlemma.mpr this;
