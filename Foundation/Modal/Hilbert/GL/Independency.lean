@@ -4,7 +4,7 @@ import Foundation.Modal.Kripke.Hilbert.GL.MDP
 namespace LO.Modal
 
 open Entailment
-open IntProp
+open Propositional
 
 variable [DecidableEq α]
 
@@ -22,8 +22,8 @@ lemma unprovable_notbox : Hilbert.GL ⊬ ∼□φ := by
   by_contra hC;
   have : Hilbert.GL ⊢! ∼□φ ➝ ∼□⊥ := contra₀'! (imply_box_distribute'! efq!)
   have : Hilbert.GL ⊢! ∼□⊥ := this ⨀ hC;
-  have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using provable_CL_verTranslated this;
-  simpa using Hilbert.Cl.classical_sound this;
+  have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using provable_verTranslated_Cl this;
+  simpa [Formula.val] using Hilbert.Cl.Classical.soundness this ⟨(λ _ => False)⟩;
 
 lemma unprovable_independency : Hilbert.GL ⊬ independency φ := by
   by_contra hC;

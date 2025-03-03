@@ -12,14 +12,13 @@ import Foundation.Logic.Entailment
 -- import Foundation.AutoProver.Prover
 
 -- Propositional
-
-import Foundation.Propositional.Classical.Basic.Formula
-import Foundation.Propositional.Classical.Basic.Calculus
-import Foundation.Propositional.Classical.Basic.Semantics
-import Foundation.Propositional.Classical.Basic.Completeness
-import Foundation.Propositional.Classical.Basic
-
--- import Foundation.Propositional.Translation
+import Foundation.Propositional.Classical.Tait
+import Foundation.Propositional.Classical.Hilbert
+import Foundation.Propositional.Hilbert.Glivenko
+import Foundation.Propositional.Heyting.Semantics
+import Foundation.Propositional.Logic.Disjunctive
+import Foundation.Propositional.Logic.WellKnown
+import Foundation.Propositional.Logic.Sublogic
 
 -- FirstOrder
 
@@ -52,16 +51,8 @@ import Foundation.FirstOrder.Hauptsatz
 import Foundation.IntFO.Basic
 import Foundation.IntFO.Translation
 
--- IntProp
-import Foundation.IntProp.Hilbert.Glivenko
-
-import Foundation.IntProp.Heyting.Semantics
-
-import Foundation.IntProp.Logic.Disjunctive
-import Foundation.IntProp.Logic.WellKnown
-
 -- TODO:
--- import Foundation.IntProp.Dialectica.Basic
+-- import Foundation.Propositional.Dialectica.Basic
 
 -- Modal
 
@@ -69,17 +60,6 @@ import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Hilbert.GL.Alternatives
 import Foundation.Modal.Hilbert.GL.Independency
-
-import Foundation.Modal.Kripke.Hilbert.K
-import Foundation.Modal.Kripke.Hilbert.KT
-import Foundation.Modal.Kripke.Hilbert.KTB
-import Foundation.Modal.Kripke.Hilbert.KT4B
-import Foundation.Modal.Kripke.Hilbert.S4
-import Foundation.Modal.Kripke.Hilbert.S4Dot2
-import Foundation.Modal.Kripke.Hilbert.S4Dot3
-import Foundation.Modal.Kripke.Hilbert.S5
-import Foundation.Modal.Kripke.Hilbert.Triv
-import Foundation.Modal.Kripke.Hilbert.Ver
 
 import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
 import Foundation.Modal.Kripke.Hilbert.GL.MDP

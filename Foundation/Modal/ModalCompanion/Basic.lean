@@ -1,4 +1,4 @@
-import Foundation.IntProp.Logic.Basic
+import Foundation.Propositional.Logic.Basic
 import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Logic.Extension
 
@@ -6,25 +6,25 @@ namespace LO
 
 open Entailment FiniteContext
 open Necessitation
-open IntProp
+open Propositional
 
-def IntProp.Formula.goedelTranslate : IntProp.Formula α → Modal.Formula α
+def Propositional.Formula.goedelTranslate : Propositional.Formula α → Modal.Formula α
   | .atom a  => □(.atom a)
   | ⊥ => ⊥
   | φ ⋏ ψ => (goedelTranslate φ) ⋏ (goedelTranslate ψ)
   | φ ⋎ ψ => (goedelTranslate φ) ⋎ (goedelTranslate ψ)
   | φ ➝ ψ => □((goedelTranslate φ) ➝ (goedelTranslate ψ))
-postfix:90 "ᵍ" => IntProp.Formula.goedelTranslate
+postfix:90 "ᵍ" => Propositional.Formula.goedelTranslate
 
-class Modal.ModalCompanion (IL : IntProp.Logic) (ML : Modal.Logic) where
+class Modal.ModalCompanion (IL : Propositional.Logic) (ML : Modal.Logic) where
   companion : ∀ {φ}, φ ∈ IL ↔ φᵍ ∈ ML
 
 lemma Modal.instModalCompanion (h₁ : ∀ {φ}, φ ∈ IL → φᵍ ∈ ML) (h₂ : ∀ {φ}, φᵍ ∈ ML → φ ∈ IL) : Modal.ModalCompanion IL ML := ⟨λ {_} => ⟨h₁, h₂⟩⟩
 
 
-def IntProp.Logic.minimamMC (IL : IntProp.Logic) : Modal.Logic := Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ IL }
+def Propositional.Logic.minimamMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ IL }
 
-def IntProp.Logic.maximalMC (IL : IntProp.Logic) : Modal.Logic := Modal.Logic.addNormal IL.minimamMC (Axioms.Grz (.atom 0))
+def Propositional.Logic.maximalMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.minimamMC (Axioms.Grz (.atom 0))
 
 /-
 lemma dp_of_mdp [ModalDisjunctive mH] [ModalCompanion iH mH] [Entailment.S4 mH] : iH ⊢! φ ⋎ ψ → iH ⊢! φ ∨ iH ⊢! ψ := by
