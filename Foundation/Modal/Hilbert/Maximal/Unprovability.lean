@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert.Maximal.Basic
-import Foundation.Propositional.Kripke.Hilbert.Cl.Classical
+import Foundation.Propositional.Classical.Hilbert
 
 namespace LO.Modal
 
@@ -18,9 +18,10 @@ namespace Triv
 
 lemma unprovable_AxiomL : Hilbert.Triv ⊬ (Axioms.L (.atom a)) := by
   apply Hilbert.Triv.iff_provable_Cl.not.mpr;
-  apply Propositional.Hilbert.Cl.unprovable_of_exists_classicalValuation;
-  use (λ _ => False);
-  simp [Axioms.L, trivTranslate, toPropFormula, Propositional.Formula.Kripke.Satisfies];
+  apply not_imp_not.mpr Hilbert.Cl.Classical.soundness;
+  push_neg;
+  use ⟨(λ _ => False)⟩;
+  tauto;
 
 end Triv
 
@@ -29,10 +30,10 @@ namespace Ver
 
 lemma unprovable_AxiomP : (Hilbert.Ver) ⊬ Axioms.P := by
   apply Hilbert.Ver.iff_provable_Cl.not.mpr;
-  apply Propositional.Hilbert.Cl.unprovable_of_exists_classicalValuation;
-  dsimp [verTranslate, toPropFormula, Propositional.Formula.Kripke.Satisfies];
-  use (λ _ => True);
-  simp;
+  apply not_imp_not.mpr Hilbert.Cl.Classical.soundness;
+  push_neg;
+  use ⟨(λ _ => False)⟩;
+  tauto;
 
 end Ver
 
@@ -46,10 +47,10 @@ lemma provable_trivTranslated_Cl : (Hilbert.K4) ⊢! φ → (Hilbert.Cl) ⊢! φ
 
 lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
   apply not_imp_not.mpr provable_trivTranslated_Cl;
-  apply Propositional.Hilbert.Cl.unprovable_of_exists_classicalValuation;
-  dsimp [trivTranslate, toPropFormula, Propositional.Formula.Kripke.Satisfies];
-  use (λ _ => False);
-  simp;
+  apply not_imp_not.mpr Hilbert.Cl.Classical.soundness;
+  push_neg;
+  use ⟨(λ _ => False)⟩;
+  tauto;
 
 end K4
 
@@ -69,10 +70,10 @@ lemma provable_verTranslated_Cl : (Hilbert.GL) ⊢! φ → (Hilbert.Cl) ⊢! φ�
 
 lemma unprovable_AxiomT : (Hilbert.GL) ⊬ Axioms.T (.atom a) := by
   apply not_imp_not.mpr provable_verTranslated_Cl;
-  apply Propositional.Hilbert.Cl.unprovable_of_exists_classicalValuation;
-  dsimp [verTranslate, toPropFormula, Propositional.Formula.Kripke.Satisfies];
-  use (λ _ => False);
-  simp;
+  apply not_imp_not.mpr Hilbert.Cl.Classical.soundness;
+  push_neg;
+  use ⟨(λ _ => False)⟩;
+  tauto;
 
 instance : Entailment.Consistent (Hilbert.GL) := by
   apply consistent_iff_exists_unprovable.mpr;
