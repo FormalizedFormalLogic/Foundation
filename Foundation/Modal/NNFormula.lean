@@ -253,6 +253,90 @@ instance : Encodable (NNFormula α) where
 
 end Encodable
 
+def isPrebox : NNFormula α → Prop
+  | □_ => true
+  | _   => false
+
+def isPredia : NNFormula α → Prop
+  | ◇_ => true
+  | _   => false
+
+def degree : NNFormula α → Nat
+  | ⊤       => 0
+  | ⊥       => 0
+  | atom _  => 0
+  | natom _ => 0
+  | φ ⋏ ψ   => max φ.degree ψ.degree
+  | φ ⋎ ψ   => max φ.degree ψ.degree
+  | □φ      => φ.degree + 1
+  | ◇φ      => φ.degree + 1
+
+def isModalCNFPart : NNFormula α → Prop
+  | φ ⋎ ψ  => (φ.isModalCNFPart) ∧ (ψ.isModalCNFPart)
+  | φ      => φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0
+
+namespace isModalCNFPart
+
+lemma of_degree_zero {φ : NNFormula α} (h : φ.degree = 0) : isModalCNFPart φ := by
+  induction φ using rec' with
+  | hOr φ ψ ihφ ihψ =>
+    constructor;
+    . apply ihφ; simp_all [degree];
+    . apply ihψ; simp_all [degree];
+  | _ => tauto;
+
+end isModalCNFPart
+
+
+def isModalCNF : NNFormula α → Prop
+  | φ ⋏ ψ => φ.isModalCNF ∧ ψ.isModalCNF
+  | φ => φ.isModalCNFPart
+
+namespace isModalCNF
+
+@[simp] lemma def_atom {a : α} : isModalCNF (.atom a) := by simp[isModalCNF, isModalCNFPart, degree]
+@[simp] lemma def_natom {a : α} : isModalCNF (.natom a) := by simp[isModalCNF, isModalCNFPart, degree]
+@[simp] lemma def_falsum : isModalCNF (⊥ : NNFormula α) := by simp[isModalCNF, isModalCNFPart, degree]
+@[simp] lemma def_verum : isModalCNF (⊤ : NNFormula α) := by simp[isModalCNF, isModalCNFPart, degree]
+@[simp] lemma def_box {φ : NNFormula α} : isModalCNF (□φ) := by simp[isModalCNF, isPrebox, isModalCNFPart]
+@[simp] lemma def_dia {φ : NNFormula α} : isModalCNF (◇φ) := by simp[isModalCNF, isPredia, isModalCNFPart]
+
+end isModalCNF
+
+
+def isModalDNFPart : NNFormula α → Prop
+  | φ ⋏ ψ  => (φ.isModalDNFPart) ∧ (ψ.isModalDNFPart)
+  | φ      => φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0
+
+
+namespace isModalDNFPart
+
+lemma of_degree_zero {φ : NNFormula α} (h : φ.degree = 0) : isModalDNFPart φ := by
+  induction φ using rec' with
+  | hAnd φ ψ ihφ ihψ =>
+    constructor;
+    . apply ihφ; simp_all [degree];
+    . apply ihψ; simp_all [degree];
+  | _ => tauto;
+
+end isModalDNFPart
+
+
+def isModalDNF : NNFormula α → Prop
+  | φ ⋎ ψ => φ.isModalDNF ∧ ψ.isModalDNF
+  | φ => φ.isModalDNFPart
+
+namespace isModalDNF
+
+@[simp] lemma def_atom {a : α} : isModalDNF (.atom a) := by simp[isModalDNF, isModalDNFPart, degree]
+@[simp] lemma def_natom {a : α} : isModalDNF (.natom a) := by simp[isModalDNF, isModalDNFPart, degree]
+@[simp] lemma def_falsum : isModalDNF (⊥ : NNFormula α) := by simp[isModalDNF, isModalDNFPart, degree]
+@[simp] lemma def_verum : isModalDNF (⊤ : NNFormula α) := by simp[isModalDNF, isModalDNFPart, degree]
+@[simp] lemma def_box {φ : NNFormula α} : isModalDNF (□φ) := by simp[isModalDNF, isPrebox, isModalDNFPart]
+@[simp] lemma def_dia {φ : NNFormula α} : isModalDNF (◇φ) := by simp[isModalDNF, isPredia, isModalDNFPart]
+
+
+end isModalDNF
 
 end NNFormula
 

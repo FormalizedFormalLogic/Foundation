@@ -1,5 +1,6 @@
 import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Hilbert.Maximal.Basic
+import Foundation.Modal.Hilbert.KP
 import Foundation.Propositional.Classical.Hilbert
 import Foundation.Propositional.Classical.ZeroSubst
 
@@ -63,8 +64,31 @@ class TrivFamily (L : Logic) : Prop where
 
 section
 
-lemma KD_subset_of_not_subset_Ver (h : ¬L.VerFamily) : Logic.KD ⊆ L := by
+lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : φ ∈ L) (hV : φ ∉ Logic.Ver) : ∃ ψ, ◇ψ ∈ L := by
+  have : ∃ Γ: List (Formula ℕ), φ ⭤ ⋀Γ ∈ L := by sorry;
+  simp at hV;
   sorry;
+
+open Entailment in
+lemma KD_subset_of_not_subset_Ver (hV : ¬L ⊆ Logic.Ver) : Logic.KD ⊆ L := by
+  intro φ hφ;
+  replace hφ := Hilbert.iff_provable_KP_provable_KD.mpr hφ;
+  induction hφ using Hilbert.Deduction.rec! with
+  | maxm h =>
+    rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩);
+    . apply Logic.subset_K; simp;
+    . obtain ⟨ψ, hψ₁, hψ₂⟩ := Set.not_subset_iff_exists_mem_not_mem.mp hV;
+      obtain ⟨ξ, hξ⟩ := KD_subset_of_not_subset_Ver.lemma₁ hψ₁ hψ₂;
+      apply Logic.mdp (φ := ◇ξ);
+      . exact Logic.subset_K $ contra₀'! $ axiomK'! $ nec! $ efq!;
+      . exact hξ;
+  | mdp hφψ hφ => exact Logic.mdp hφψ hφ;
+  | nec hφ => exact Logic.nec hφ;
+  | _ => apply Logic.subset_K; simp;
+
+lemma KD_subset_of_not_VerFamily (h : ¬L.VerFamily) : Logic.KD ⊆ L := by
+  apply KD_subset_of_not_subset_Ver;
+  tauto;
 
 end
 
@@ -137,7 +161,6 @@ private lemma subset_Triv_of_KD_subset.lemma₁
     | hand => unfold Propositional.Formula.letterless at hψ; simp_all [trivTranslate, toPropFormula];
     | himp => unfold Propositional.Formula.letterless at hψ; simp_all [trivTranslate, toPropFormula];
     | hor => unfold Propositional.Formula.letterless at hψ; simp_all [trivTranslate, toPropFormula]; tauto;
-
   | _ => simp_all [trivTranslate, toPropFormula];
 
 lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _}
@@ -172,10 +195,10 @@ end
 theorem makinson : (L.VerFamily ∨ L.TrivFamily) ∧ ¬(L.VerFamily ∧ L.TrivFamily) := by
   constructor;
   . apply or_iff_not_imp_left.mpr;
-    intro h;
+    rintro h;
     constructor;
-    . exact KD_subset_of_not_subset_Ver h;
-    . exact subset_Triv_of_KD_subset $ KD_subset_of_not_subset_Ver h;
+    . exact KD_subset_of_not_VerFamily h;
+    . exact subset_Triv_of_KD_subset $ KD_subset_of_not_VerFamily h;
   . by_contra hC;
     have ⟨⟨hVer⟩, ⟨hKD, hTriv⟩⟩ := hC;
     have h₁ : ∼□⊥ ∈ Logic.Ver := by apply hVer; apply hKD; simp;

@@ -201,11 +201,6 @@ instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
-
-def isBox : Formula α → Bool
-  | box _ => true
-  | _  => false
-
 end Formula
 
 
