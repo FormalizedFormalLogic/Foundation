@@ -64,6 +64,14 @@ variable [L.Normal]
 
 protected lemma nec (hφ : φ ∈ L) : □φ ∈ L := Normal.nec_closed hφ
 
+lemma not_neg_mem_of_mem [L.Consistent] : φ ∈ L → ∼φ ∉ L := by
+  have := no_either_not (φ := φ) (L := L);
+  tauto;
+
+lemma not_mem_of_neg_mem [L.Consistent] : ∼φ ∈ L → φ ∉ L := by
+  have := no_either_not (φ := φ) (L := L);
+  tauto;
+
 end
 
 

@@ -43,4 +43,8 @@ def Formula.toPropFormula (φ : Formula α) (_ : φ.degree = 0 := by simp_all [F
   | ⊥ => ⊥
   | φ ➝ ψ => φ.toPropFormula ➝ ψ.toPropFormula
 
+abbrev PropositionalFormula (α) := { φ : Formula α // φ.degree = 0 }
+
+instance : Coe (PropositionalFormula α) (Propositional.Formula α) := ⟨fun ⟨φ, hφ⟩ => φ.toPropFormula hφ⟩
+
 end LO.Modal

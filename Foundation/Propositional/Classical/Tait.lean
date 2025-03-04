@@ -1,4 +1,4 @@
-import Foundation.Propositional.Classical.Basic
+import Foundation.Propositional.Classical.NNFormula
 import Foundation.Propositional.Tait.Calculus
 
 namespace LO.Propositional

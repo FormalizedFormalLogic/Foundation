@@ -1,6 +1,7 @@
 import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Hilbert.Maximal.Basic
-import Foundation.IntProp.Kripke.Hilbert.Cl.Classical
+import Foundation.Propositional.Classical.Hilbert
+import Foundation.Propositional.Classical.ZeroSubst
 
 
 namespace LO.Modal
@@ -31,6 +32,22 @@ end letterless
 
 end Formula
 
+lemma Formula.toModalFormula.letterless {φ : Propositional.Formula α} (h : φ.letterless) : φ.toModalFormula.letterless := by
+  induction φ using Propositional.Formula.rec' <;> simp_all [Propositional.Formula.letterless, Formula.letterless];
+
+def ZeroSubstitution (α) := {s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
+
+lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
+  induction φ using Formula.rec' <;> simp [Formula.letterless, *];
+  case hatom => exact s.2;
+
+instance : Coe (Propositional.ZeroSubstitution α) (Modal.ZeroSubstitution α) := ⟨fun s =>
+  ⟨
+    λ φ => s.1 φ,
+    by intro a; apply Formula.toModalFormula.letterless; exact @s.2 a;
+  ⟩
+⟩
+
 
 namespace Logic
 
@@ -56,28 +73,27 @@ section
 
 open Entailment
 open Formula
-open IntProp.Formula.Kripke (ClassicalSatisfies)
+
+variable {v : Propositional.Classical.Valuation ℕ}
 
 lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
-  ((ClassicalSatisfies V (φᵀᴾ)) → Hilbert.KD ⊢! φ) ∧
-  (¬(ClassicalSatisfies V (φᵀᴾ)) → Hilbert.KD ⊢! ∼φ)
+  (v ⊧ (φᵀ.toPropFormula) → Hilbert.KD ⊢! φ) ∧
+  (¬(v ⊧ (φᵀ.toPropFormula)) → Hilbert.KD ⊢! ∼φ)
   := by
   induction φ using Formula.rec' with
   | hatom => simp at hl;
-  | hfalsum =>
-    simp [TrivTranslation, toPropFormula, ClassicalSatisfies, IntProp.Formula.Kripke.Satisfies];
+  | hfalsum => simp [trivTranslate, toPropFormula];
   | himp φ ψ ihφ ihψ =>
     constructor;
     . intro h;
-      simp only [TrivTranslation, toPropFormula] at h;
-      rcases IntProp.Formula.Kripke.ClassicalSatisfies.imp_def₂.mp h with (hφ | hψ);
+      simp only [trivTranslate, toPropFormula] at h;
+      rcases imp_iff_not_or.mp h with (hφ | hψ);
       . exact efq_of_neg! $ ihφ (letterless.def_imp₁ hl) |>.2 hφ;
       . exact imply₁'! $ ihψ (letterless.def_imp₂ hl) |>.1 hψ;
     . intro h;
-      simp only [TrivTranslation, toPropFormula] at h;
-      have := IntProp.Formula.Kripke.ClassicalSatisfies.imp_def₂.not.mp h;
-      push_neg at this;
-      rcases this with ⟨hφ, hψ⟩;
+      simp only [trivTranslate, toPropFormula, Semantics.Realize, Propositional.Formula.Classical.val] at h;
+      push_neg at h;
+      rcases h with ⟨hφ, hψ⟩;
       replace hφ := ihφ (letterless.def_imp₁ hl) |>.1 hφ;
       replace hψ := ihψ (letterless.def_imp₂ hl) |>.2 hψ;
       -- TODO: need golf
@@ -95,19 +111,60 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
       have : Hilbert.KD ⊢! □(∼φ) := nec! $ ihφ (letterless.def_box hl) |>.2 $ by tauto;
       exact negbox_dne'! $ dia_duality'!.mp $ axiomD'! this;
 
-lemma provable_KD_of_classical_satisfiability (hl : φ.letterless) : (ClassicalSatisfies V (φᵀᴾ)) → Hilbert.KD ⊢! φ :=
+lemma provable_KD_of_classical_satisfiability (hl : φ.letterless) : (v ⊧ φᵀ.toPropFormula) → Hilbert.KD ⊢! φ :=
   KD_provability_of_classical_satisfiability hl |>.1
 
-lemma provable_not_KD_of_classical_unsatisfiable (hl : φ.letterless) : (¬(ClassicalSatisfies V (φᵀᴾ))) → Hilbert.KD ⊢! ∼φ :=
+lemma provable_not_KD_of_classical_unsatisfiable (hl : φ.letterless) : (¬(v ⊧ φᵀ.toPropFormula)) → Hilbert.KD ⊢! ∼φ :=
   KD_provability_of_classical_satisfiability hl |>.2
 
-lemma subset_Triv_of_KD_subset (h : Logic.KD ⊆ L) : L ⊆ Logic.Triv := by
+private lemma subset_Triv_of_KD_subset.lemma₁
+  {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _} {v : Propositional.Classical.Valuation α} :
+  v ⊧ (((φᵀ.toPropFormula)⟦s.1⟧)) ↔
+  v ⊧ ((φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula)
+  := by
+  induction φ using Formula.rec' with
+  | hatom a =>
+    suffices v ⊧ (s.1 a) ↔ v ⊧ (s.1 a).toModalFormulaᵀ.toPropFormula by
+      simpa [trivTranslate, toPropFormula, Formula.subst_atom];
+    generalize eψ : s.1 a = ψ;
+    have hψ : ψ.letterless := by
+      rw [←eψ];
+      exact s.2;
+    clear eψ;
+    induction ψ using Propositional.Formula.rec' with
+    | hatom => simp at hψ;
+    | hfalsum => tauto;
+    | hand => unfold Propositional.Formula.letterless at hψ; simp_all [trivTranslate, toPropFormula];
+    | himp => unfold Propositional.Formula.letterless at hψ; simp_all [trivTranslate, toPropFormula];
+    | hor => unfold Propositional.Formula.letterless at hψ; simp_all [trivTranslate, toPropFormula]; tauto;
+
+  | _ => simp_all [trivTranslate, toPropFormula];
+
+lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _}
+  :
+  Semantics.Valid (Propositional.Classical.Valuation α) (∼((φᵀ.toPropFormula)⟦s.1⟧)) ↔
+  Semantics.Valid (Propositional.Classical.Valuation α) ((∼φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula)
+  := by
+  constructor;
+  . intro h v hφ;
+    apply h v ?_;
+    exact lemma₁.mpr hφ;
+  . intro h v; exact lemma₁ (φ := ∼φ).mpr $ h v;
+
+theorem subset_Triv_of_KD_subset (hS : Logic.KD ⊆ L) : L ⊆ Logic.Triv := by
   by_contra hC;
   obtain ⟨φ, hφ₁, hφ₂⟩ := Set.not_subset.mp hC;
-  have := Hilbert.Triv.classical_reducible.not.mp hφ₂;
-  -- TODO: need 0-subst,
-  obtain ⟨V, hV⟩ : ∃ V, ¬(ClassicalSatisfies V (φᵀᴾ)) := by sorry;
-  sorry;
+  have := Hilbert.Triv.iff_provable_Cl.not.mp hφ₂;
+  have := (not_imp_not.mpr Propositional.Hilbert.Cl.Classical.completeness) this;
+  obtain ⟨s, h⟩ := Propositional.Classical.tautology_neg_zero_subst_instance_of_not_tautology this;
+  let ψ := φ⟦(s : Modal.ZeroSubstitution _).1⟧;
+  have : Semantics.Valid (Propositional.Classical.Valuation ℕ) (∼(ψᵀ.toPropFormula)) := subset_Triv_of_KD_subset.lemma₂.mp h;
+  have : Hilbert.KD ⊢! ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.letterless_zeroSubst
+    $ Semantics.Not.realize_not.mp
+    $ this ⟨(λ _ => True)⟩;
+  have : ∼ψ ∈ L := hS this;
+  have : ∼ψ ∉ L := Modal.Logic.not_neg_mem_of_mem $ Modal.Logic.subst hφ₁;
+  contradiction
 
 end
 

@@ -1,5 +1,5 @@
 import Foundation.Propositional.Formula
-import Foundation.Propositional.NNFormula
+import Foundation.Propositional.Substitution
 import Foundation.Logic.Semantics
 
 namespace LO.Propositional
@@ -12,20 +12,20 @@ structure Classical.Valuation (α : Type*) where
 instance : CoeFun (Classical.Valuation α) (fun _ ↦ α → Prop) := ⟨Classical.Valuation.val⟩
 
 
-namespace Formula
+namespace Formula.Classical
 
 def val (v : Classical.Valuation α) : Formula α → Prop
   | atom a  => v a
   | ⊥       => False
-  | φ ➝ ψ   => φ.val v → ψ.val v
-  | φ ⋏ ψ   => φ.val v ∧ ψ.val v
-  | φ ⋎ ψ   => φ.val v ∨ ψ.val v
+  | φ ➝ ψ   => val v φ → val v ψ
+  | φ ⋏ ψ   => val v φ ∧ val v ψ
+  | φ ⋎ ψ   => val v φ ∨ val v ψ
 
 variable {v : Classical.Valuation α} {φ ψ : Formula α}
 
-instance semantics : Semantics (Formula α) (Classical.Valuation α) := ⟨fun v ↦ Formula.val v⟩
+instance semantics : Semantics (Formula α) (Classical.Valuation α) := ⟨fun v ↦ val v⟩
 
-lemma models_iff_val : v ⊧ φ ↔ φ.val v := iff_of_eq rfl
+lemma models_iff_val : v ⊧ φ ↔ val v φ := iff_of_eq rfl
 
 instance : Semantics.Tarski (Classical.Valuation α) where
   realize_top := by simp [models_iff_val, val]
@@ -37,69 +37,62 @@ instance : Semantics.Tarski (Classical.Valuation α) where
 
 @[simp] protected lemma realize_atom : v ⊧ (.atom a) ↔ v a := iff_of_eq rfl
 
-end Formula
+lemma eq_fml_of_eq_atom {v u : Classical.Valuation α} (h : ∀ {a : α}, v a ↔ u a) : (∀ {φ : Formula α}, v ⊧ φ ↔ u ⊧ φ) := by
+  intro φ;
+  induction φ using Formula.rec' with
+  | hatom => apply h;
+  | _ => simp [*]
+
+lemma iff_subst_self (s) :
+  (⟨(λ a => val v ((.atom a)⟦s⟧))⟩ : Classical.Valuation α) ⊧ φ ↔ v ⊧ (φ⟦s⟧) := by
+  induction φ using Formula.rec' with
+  | hatom a => simp [val, models_iff_val];
+  | hfalsum => simp [val];
+  | himp φ ψ ihφ ihψ =>
+    constructor;
+    . intro hφψ hφ;
+      apply ihψ.mp;
+      apply hφψ;
+      apply ihφ.mpr;
+      exact hφ;
+    . intro hφψs hφ;
+      apply ihψ.mpr;
+      apply hφψs;
+      apply ihφ.mp;
+      exact hφ;
+  | hand φ ψ ihφ ihψ =>
+    constructor;
+    . rintro ⟨hφ, hψ⟩;
+      constructor;
+      . apply ihφ.mp hφ;
+      . apply ihψ.mp hψ;
+    . rintro ⟨hφ, hψ⟩;
+      constructor;
+      . apply ihφ.mpr hφ;
+      . apply ihψ.mpr hψ;
+  | hor φ ψ ihφ ihψ =>
+    constructor;
+    . rintro (hφ | hψ);
+      . left; apply ihφ.mp hφ;
+      . right; apply ihψ.mp hψ;
+    . rintro (hφ | hψ);
+      . left; apply ihφ.mpr hφ;
+      . right; apply ihψ.mpr hψ;
+
+end Formula.Classical
 
 
+namespace Classical
 
+variable {v : Classical.Valuation α} {φ ψ : Formula α}
 
-namespace NNFormula
+open Semantics (Valid)
 
+lemma tautology_subst_instance (h : Valid (Valuation _) φ) : ∀ s, Valid (Valuation _) (φ⟦s⟧) := by
+  intro s v;
+  apply Formula.Classical.iff_subst_self s |>.mp;
+  apply h;
 
-section val
-
-variable {F : Type*} [LogicalConnective F] [DeMorgan F] (v : α → F)
-
-def valAux : NNFormula α → F
-  | .atom a  => v a
-  | .natom a => ∼v a
-  | ⊤       => ⊤
-  | ⊥       => ⊥
-  | φ ⋏ ψ   => φ.valAux ⋏ ψ.valAux
-  | φ ⋎ ψ   => φ.valAux ⋎ ψ.valAux
-
-lemma valAux_neg (φ : NNFormula α) :
-    valAux v (∼φ) = ∼(valAux v φ) :=
-  by induction φ using rec' <;> simp[*, valAux, ←neg_eq, or_iff_not_imp_left]
-
-def val : NNFormula α →ˡᶜ F where
-  toTr := valAux v
-  map_top' := rfl
-  map_bot' := rfl
-  map_and' := fun _ _ => rfl
-  map_or' := fun _ _ => rfl
-  map_imply' := fun _ _ => by simp[DeMorgan.imply, valAux, ←neg_eq, valAux_neg]
-  map_neg' := fun _ => by simp[valAux, ←neg_eq, valAux_neg]
-
-@[simp] lemma val_atom : val v (atom a) = v a := rfl
-
-@[simp] lemma val_natom : val v (natom a) = ∼v a := rfl
-
-end val
-
-
-section semantics
-
-variable {v : Classical.Valuation α}
-
-instance semantics : Semantics (NNFormula α) (Classical.Valuation α) := ⟨fun v ↦ NNFormula.val v⟩
-
-lemma models_iff_val {v : Classical.Valuation α} {f : NNFormula α} : v ⊧ f ↔ NNFormula.val v f := iff_of_eq rfl
-
-instance : Semantics.Tarski (Classical.Valuation α) where
-  realize_top := by simp [models_iff_val]
-  realize_bot := by simp [models_iff_val]
-  realize_and := by simp [models_iff_val]
-  realize_or := by simp [models_iff_val]
-  realize_not := by simp [models_iff_val]
-  realize_imp := by simp [models_iff_val]
-
-@[simp] protected lemma realize_atom : v ⊧ .atom a ↔ v a := iff_of_eq rfl
-
-@[simp] protected lemma realize_natom : v ⊧ .natom a ↔ ¬v a := iff_of_eq rfl
-
-end semantics
-
-end NNFormula
-
+end Classical
 
 end LO.Propositional
