@@ -11,7 +11,7 @@ open Formula.Kripke
 
 variable {F : Kripke.Frame}
 
-lemma weakConnected_of_validate_WeakDot2 (hCon : WeakConfluent F) : F ⊧ (Axioms.WeakDot2 (.atom 0) (.atom 1)) := by
+lemma weakConnected_of_validate_WeakPoint2 (hCon : WeakConfluent F) : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1)) := by
   rintro V x;
   apply Satisfies.imp_def.mpr;
   suffices
@@ -29,7 +29,7 @@ lemma weakConnected_of_validate_WeakDot2 (hCon : WeakConfluent F) : F ⊧ (Axiom
   have : ¬V u 0 := h₂ _ Rzu;
   contradiction;
 
-lemma validate_WeakDot2_of_weakConfluent : F ⊧ (Axioms.WeakDot2 (.atom 0) (.atom 1)) → WeakConfluent F := by
+lemma validate_WeakPoint2_of_weakConfluent : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1)) → WeakConfluent F := by
   contrapose;
   intro hCon;
   obtain ⟨x, y, Rxy, z, Rxz, nyz, hu⟩ := by simpa [WeakConfluent] using hCon;
@@ -50,11 +50,11 @@ instance : WeakConfluentFrameClass.IsNonempty := by
   use ⟨Unit, λ _ _ => True⟩;
   simp [WeakConfluent];
 
-instance WeakConfluentFrameClass.DefinedByWeakDot2 : WeakConfluentFrameClass.DefinedBy {Axioms.WeakDot2 (.atom 0) (.atom 1)} := ⟨by
+instance WeakConfluentFrameClass.DefinedByWeakPoint2 : WeakConfluentFrameClass.DefinedBy {Axioms.WeakPoint2 (.atom 0) (.atom 1)} := ⟨by
   intro F;
   constructor;
-  . simpa using weakConnected_of_validate_WeakDot2;
-  . simpa using validate_WeakDot2_of_weakConfluent;
+  . simpa using weakConnected_of_validate_WeakPoint2;
+  . simpa using validate_WeakPoint2_of_weakConfluent;
 ⟩
 
 end definability
@@ -72,7 +72,7 @@ open canonicalModel
 
 namespace Canonical
 
-lemma weakConfluent [Entailment.HasAxiomWeakDot2 𝓢] : WeakConfluent (canonicalFrame 𝓢).Rel := by
+lemma weakConfluent [Entailment.HasAxiomWeakPoint2 𝓢] : WeakConfluent (canonicalFrame 𝓢).Rel := by
   rintro x y z ⟨Rxy, Rxz, eyz⟩;
   have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹y.1.1, ◇''⁻¹z.1.2⟩) $ by
     rintro Γ Δ hΓ hΔ;
@@ -97,7 +97,7 @@ lemma weakConfluent [Entailment.HasAxiomWeakDot2 𝓢] : WeakConfluent (canonica
     have : □δ₁ ⋏ δ₂ ∈ y.1.1 := mdp_mem₁_provable this $ by
       apply iff_mem₁_and.mpr; constructor <;> assumption;
     have : ◇(□δ₁ ⋏ δ₂) ∈ x.1.1 := def_rel_dia_mem₁.mp Rxy this;
-    have : □(◇δ₁ ⋎ δ₂) ∈ x.1.1 := mdp_mem₁_provable axiomWeakDot2! this;
+    have : □(◇δ₁ ⋎ δ₂) ∈ x.1.1 := mdp_mem₁_provable axiomWeakPoint2! this;
     have : ◇δ₁ ⋎ δ₂ ∈ z.1.1 := def_rel_box_mem₁.mp Rxz this;
     rcases iff_mem₁_or.mp this with (hδ₁ | hδ₂);
     . have : ◇δ₁ ∉ z.1.2 := iff_not_mem₂_mem₁.mpr hδ₁;

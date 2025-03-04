@@ -368,13 +368,13 @@ lemma K4_ssubset_S4 : Logic.K4 ⊂ Logic.S4 := by
   . exact K4_ssubset_KD4
   . exact KD4_ssubset_S4
 
-instance : ProperSublogic Logic.K4 Logic.K4Dot2 := ⟨by
+instance : ProperSublogic Logic.K4 Logic.K4Point2 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Dot2 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
-    use (Axioms.WeakDot2 (.atom 0) (.atom 1));
+  . suffices ∃ φ, Hilbert.K4Point2 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+    use (Axioms.WeakPoint2 (.atom 0) (.atom 1));
     constructor;
-    . exact axiomWeakDot2!;
+    . exact axiomWeakPoint2!;
     . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x = 0⟩,
@@ -391,18 +391,18 @@ instance : ProperSublogic Logic.K4 Logic.K4Dot2 := ⟨by
         . trivial;
 ⟩
 
-instance : ProperSublogic Logic.K4Dot2 Logic.S4Dot2 := ⟨by
+instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
   constructor;
-  . rw [K4Dot2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic, S4Dot2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
+  . rw [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic, S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
     rintro φ hφ F ⟨F_refl, F_trans, F_conn⟩;
     apply hφ;
     refine ⟨F_trans, ?_⟩;
     . rintro x y z ⟨Rxy, Ryz, _⟩;
       exact F_conn ⟨Rxy, Ryz⟩;
-  . suffices ∃ φ, Hilbert.S4Dot2 ⊢! φ ∧ ¬TransitiveWeakConfluentFrameClass ⊧ φ by simpa [K4Dot2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic];
-    use (Axioms.Dot2 (.atom 0));
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬TransitiveWeakConfluentFrameClass ⊧ φ by simpa [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic];
+    use (Axioms.Point2 (.atom 0));
     constructor;
-    . exact axiomDot2!;
+    . exact axiomPoint2!;
     . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x < y⟩,
@@ -423,13 +423,13 @@ instance : ProperSublogic Logic.K4Dot2 Logic.S4Dot2 := ⟨by
         . use 1; omega;
 ⟩
 
-instance : ProperSublogic Logic.K4 Logic.K4Dot3 := ⟨by
+instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Dot3 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
-    use (Axioms.WeakDot3 (.atom 0) (.atom 1));
+  . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+    use (Axioms.WeakPoint3 (.atom 0) (.atom 1));
     constructor;
-    . exact axiomWeakDot3!;
+    . exact axiomWeakPoint3!;
     . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x = 0 ∧ y ≠ 0⟩,
@@ -451,18 +451,18 @@ instance : ProperSublogic Logic.K4 Logic.K4Dot3 := ⟨by
         . trivial;
 ⟩
 
-instance : ProperSublogic Logic.K4Dot3 Logic.S4Dot3 := ⟨by
+instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
   constructor;
-  . rw [K4Dot3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic, S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+  . rw [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic, S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
     rintro φ hφ F ⟨F_refl, F_trans, F_conn⟩;
     apply hφ;
     refine ⟨F_trans, ?_⟩;
     . rintro x y z ⟨Rxy, Ryz, _⟩;
       exact F_conn ⟨Rxy, Ryz⟩;
-  . suffices ∃ φ, Hilbert.S4Dot3 ⊢! φ ∧ ¬TransitiveWeakConnectedFrameClass ⊧ φ by simpa [K4Dot3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
-    use (Axioms.Dot3 (.atom 0) (.atom 1));
+  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬TransitiveWeakConnectedFrameClass ⊧ φ by simpa [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
+    use (Axioms.Point3 (.atom 0) (.atom 1));
     constructor;
-    . exact axiomDot3!;
+    . exact axiomPoint3!;
     . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x < y⟩,
@@ -670,13 +670,13 @@ theorem K4_ssubset_GL : Logic.K4 ⊂ Logic.GL := by
 instance : ProperSublogic Logic.K4 Logic.GL := ⟨K4_ssubset_GL⟩
 
 
-theorem S4_ssubset_S4Dot2 : Logic.S4 ⊂ Logic.S4Dot2 := by
+theorem S4_ssubset_S4Point2 : Logic.S4 ⊂ Logic.S4Point2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Dot2 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
-    use Axioms.Dot2 (.atom 0)
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+    use Axioms.Point2 (.atom 0)
     constructor;
-    . exact axiomDot2!;
+    . exact axiomPoint2!;
     . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = y) ⟩, λ w _ => w = 1⟩;
       use M, 0;
@@ -698,23 +698,23 @@ theorem S4_ssubset_S4Dot2 : Logic.S4 ⊂ Logic.S4Dot2 := by
           constructor;
           . omega;
           . omega;
-instance : ProperSublogic Logic.S4 Logic.S4Dot2 := ⟨S4_ssubset_S4Dot2⟩
+instance : ProperSublogic Logic.S4 Logic.S4Point2 := ⟨S4_ssubset_S4Point2⟩
 
 
-theorem S4Dot2_ssubset_S4Dot3 : Logic.S4Dot2 ⊂ Logic.S4Dot3 := by
+theorem S4Point2_ssubset_S4Point3 : Logic.S4Point2 ⊂ Logic.S4Point3 := by
   constructor;
-  . rw [S4Dot2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic, S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+  . rw [S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic, S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
     rintro φ hφ F ⟨F_refl, F_trans, F_conn⟩;
     apply hφ;
     refine ⟨?_, ?_, ?_⟩;
     . exact F_refl;
     . exact F_trans;
     . exact confluent_of_refl_connected F_refl F_conn;
-  . suffices ∃ φ, Hilbert.S4Dot3 ⊢! φ ∧ ¬ReflexiveTransitiveConfluentFrameClass ⊧ φ by
-      simpa [S4Dot2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
-    use Axioms.Dot3 (.atom 0) (.atom 1);
+  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬ReflexiveTransitiveConfluentFrameClass ⊧ φ by
+      simpa [S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
+    use Axioms.Point3 (.atom 0) (.atom 1);
     constructor;
-    . exact axiomDot3!;
+    . exact axiomPoint3!;
     . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
       let M : Model := ⟨⟨Fin 4, λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)⟩, λ w a => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))⟩;
       use M, 0;
@@ -739,12 +739,12 @@ theorem S4Dot2_ssubset_S4Dot3 : Logic.S4Dot2 ⊂ Logic.S4Dot3 := by
           use 2;
           simp [Satisfies, Semantics.Realize, M];
           constructor <;> omega;
-instance : ProperSublogic Logic.S4Dot2 Logic.S4Dot3 := ⟨S4Dot2_ssubset_S4Dot3⟩
+instance : ProperSublogic Logic.S4Point2 Logic.S4Point3 := ⟨S4Point2_ssubset_S4Point3⟩
 
 
-theorem S4Dot3_ssubset_S5 : Logic.S4Dot3 ⊂ Logic.S5 := by
+theorem S4Point3_ssubset_S5 : Logic.S4Point3 ⊂ Logic.S5 := by
   constructor;
-  . rw [S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic, S5.eq_UniversalKripkeFrameClass_Logic];
+  . rw [S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic, S5.eq_UniversalKripkeFrameClass_Logic];
     rintro φ hφ F F_univ;
     apply hφ;
     refine ⟨?_, ?_, ?_⟩;
@@ -752,7 +752,7 @@ theorem S4Dot3_ssubset_S5 : Logic.S4Dot3 ⊂ Logic.S5 := by
     . unfold Transitive; intros; apply F_univ;
     . unfold Connected; intros; constructor; apply F_univ;
   . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬ReflexiveTransitiveConnectedFrameClass ⊧ φ by
-      simpa [S4Dot3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+      simpa [S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
@@ -771,15 +771,15 @@ theorem S4Dot3_ssubset_S5 : Logic.S4Dot3 ⊂ Logic.S5 := by
         . omega;
         . use 1;
           constructor <;> omega;
-instance : ProperSublogic Logic.S4Dot3 Logic.S5 := ⟨S4Dot3_ssubset_S5⟩
+instance : ProperSublogic Logic.S4Point3 Logic.S5 := ⟨S4Point3_ssubset_S5⟩
 
 
 lemma S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
-  trans Logic.S4Dot2;
-  . exact S4_ssubset_S4Dot2;
-  . trans Logic.S4Dot3;
-    . exact S4Dot2_ssubset_S4Dot3;
-    . exact S4Dot3_ssubset_S5;
+  trans Logic.S4Point2;
+  . exact S4_ssubset_S4Point2;
+  . trans Logic.S4Point3;
+    . exact S4Point2_ssubset_S4Point3;
+    . exact S4Point3_ssubset_S5;
 
 
 theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by

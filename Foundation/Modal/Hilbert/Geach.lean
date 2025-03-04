@@ -30,7 +30,7 @@ lemma KT4B.eq_Geach   : Hilbert.KT4B   = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 
 lemma KTB.eq_Geach    : Hilbert.KTB    = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩} := by aesop;
 lemma KTc.eq_Geach    : Hilbert.KTc    = Hilbert.Geach {⟨0, 1, 0, 0⟩} := by aesop;
 lemma S4.eq_Geach     : Hilbert.S4     = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩} := by aesop;
-lemma S4Dot2.eq_Geach : Hilbert.S4Dot2 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩} := by aesop;
+lemma S4Point2.eq_Geach : Hilbert.S4Point2 = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨1, 1, 1, 1⟩} := by aesop;
 lemma S5.eq_Geach     : Hilbert.S5     = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by aesop;
 lemma Triv.eq_Geach   : Hilbert.Triv   = Hilbert.Geach {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 0⟩} := by aesop;
 
@@ -69,9 +69,9 @@ instance HasFive_of_mem_1_1_0_1 (h : ⟨1, 1, 0, 1⟩ ∈ G) : HasFive (Hilbert.
     use ⟨1, 1, 0, 1⟩;
     simpa;
 
-instance HasDot2_of_mem_1_1_1_1 (h : ⟨1, 1, 1, 1⟩ ∈ G) : HasDot2 (Hilbert.Geach G) where
+instance HasPoint2_of_mem_1_1_1_1 (h : ⟨1, 1, 1, 1⟩ ∈ G) : HasPoint2 (Hilbert.Geach G) where
   p := 0
-  mem_Dot2 := by
+  mem_Point2 := by
     simp [Hilbert.Geach];
     use ⟨1, 1, 1, 1⟩;
     simpa;

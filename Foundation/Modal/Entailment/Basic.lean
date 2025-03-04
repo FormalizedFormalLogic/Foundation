@@ -275,74 +275,74 @@ instance (Γ : Context F 𝓢) : HasAxiomL Γ := ⟨fun _ ↦ Context.of axiomL�
 end
 
 
-class HasAxiomDot2 [Dia F] (𝓢 : S) where
-  Dot2 (φ : F) : 𝓢 ⊢ Axioms.Dot2 φ
+class HasAxiomPoint2 [Dia F] (𝓢 : S) where
+  Point2 (φ : F) : 𝓢 ⊢ Axioms.Point2 φ
 
 section
 
-variable [HasAxiomDot2 𝓢]
+variable [HasAxiomPoint2 𝓢]
 
-def axiomDot2 : 𝓢 ⊢ ◇□φ ➝ □◇φ := HasAxiomDot2.Dot2 _
-@[simp] lemma axiomDot2! : 𝓢 ⊢! ◇□φ ➝ □◇φ := ⟨axiomDot2⟩
+def axiomPoint2 : 𝓢 ⊢ ◇□φ ➝ □◇φ := HasAxiomPoint2.Point2 _
+@[simp] lemma axiomPoint2! : 𝓢 ⊢! ◇□φ ➝ □◇φ := ⟨axiomPoint2⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomDot2 Γ := ⟨fun _ ↦ FiniteContext.of axiomDot2⟩
-instance (Γ : Context F 𝓢) : HasAxiomDot2 Γ := ⟨fun _ ↦ Context.of axiomDot2⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomPoint2 Γ := ⟨fun _ ↦ FiniteContext.of axiomPoint2⟩
+instance (Γ : Context F 𝓢) : HasAxiomPoint2 Γ := ⟨fun _ ↦ Context.of axiomPoint2⟩
 
 end
 
 
-class HasAxiomWeakDot2 [Dia F] (𝓢 : S) where
-  WeakDot2 (φ ψ : F) : 𝓢 ⊢ Axioms.WeakDot2 φ ψ
+class HasAxiomWeakPoint2 [Dia F] (𝓢 : S) where
+  WeakPoint2 (φ ψ : F) : 𝓢 ⊢ Axioms.WeakPoint2 φ ψ
 
 section
 
-variable [HasAxiomWeakDot2 𝓢]
+variable [HasAxiomWeakPoint2 𝓢]
 
-def axiomWeakDot2 : 𝓢 ⊢ ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := HasAxiomWeakDot2.WeakDot2 _ _
-@[simp] lemma axiomWeakDot2! : 𝓢 ⊢! ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := ⟨axiomWeakDot2⟩
+def axiomWeakPoint2 : 𝓢 ⊢ ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := HasAxiomWeakPoint2.WeakPoint2 _ _
+@[simp] lemma axiomWeakPoint2! : 𝓢 ⊢! ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ) := ⟨axiomWeakPoint2⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakDot2 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomWeakDot2⟩
-instance (Γ : Context F 𝓢) : HasAxiomWeakDot2 Γ := ⟨fun _ _ ↦ Context.of axiomWeakDot2⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakPoint2 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomWeakPoint2⟩
+instance (Γ : Context F 𝓢) : HasAxiomWeakPoint2 Γ := ⟨fun _ _ ↦ Context.of axiomWeakPoint2⟩
 
 end
 
 
-class HasAxiomDot3 (𝓢 : S) where
-  Dot3 (φ ψ : F) : 𝓢 ⊢ Axioms.Dot3 φ ψ
+class HasAxiomPoint3 (𝓢 : S) where
+  Point3 (φ ψ : F) : 𝓢 ⊢ Axioms.Point3 φ ψ
 
 section
 
-variable [HasAxiomDot3 𝓢]
+variable [HasAxiomPoint3 𝓢]
 
-def axiomDot3 : 𝓢 ⊢ □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := HasAxiomDot3.Dot3 _ _
-@[simp] lemma axiomDot3! : 𝓢 ⊢! □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := ⟨axiomDot3⟩
+def axiomPoint3 : 𝓢 ⊢ □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := HasAxiomPoint3.Point3 _ _
+@[simp] lemma axiomPoint3! : 𝓢 ⊢! □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ) := ⟨axiomPoint3⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomDot3⟩
-instance (Γ : Context F 𝓢) : HasAxiomDot3 Γ := ⟨fun _ _ ↦ Context.of axiomDot3⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomPoint3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomPoint3⟩
+instance (Γ : Context F 𝓢) : HasAxiomPoint3 Γ := ⟨fun _ _ ↦ Context.of axiomPoint3⟩
 
 end
 
 
-class HasAxiomWeakDot3 [Dia F] (𝓢 : S) where
-  WeakDot3 (φ ψ : F) : 𝓢 ⊢ Axioms.WeakDot3 φ ψ
+class HasAxiomWeakPoint3 [Dia F] (𝓢 : S) where
+  WeakPoint3 (φ ψ : F) : 𝓢 ⊢ Axioms.WeakPoint3 φ ψ
 
 section
 
-variable [HasAxiomWeakDot3 𝓢]
+variable [HasAxiomWeakPoint3 𝓢]
 
-def axiomWeakDot3 : 𝓢 ⊢ □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := HasAxiomWeakDot3.WeakDot3 _ _
-@[simp] lemma axiomWeakDot3! : 𝓢 ⊢! □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := ⟨axiomWeakDot3⟩
+def axiomWeakPoint3 : 𝓢 ⊢ □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := HasAxiomWeakPoint3.WeakPoint3 _ _
+@[simp] lemma axiomWeakPoint3! : 𝓢 ⊢! □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ) := ⟨axiomWeakPoint3⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakDot3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomWeakDot3⟩
-instance (Γ : Context F 𝓢) : HasAxiomWeakDot3 Γ := ⟨fun _ _ ↦ Context.of axiomWeakDot3⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomWeakPoint3 Γ := ⟨fun _ _ ↦ FiniteContext.of axiomWeakPoint3⟩
+instance (Γ : Context F 𝓢) : HasAxiomWeakPoint3 Γ := ⟨fun _ _ ↦ Context.of axiomWeakPoint3⟩
 
 end
 
@@ -510,8 +510,8 @@ instance [Entailment.Triv 𝓢] : Entailment.KTc 𝓢 where
 protected class Ver extends Entailment.K 𝓢, HasAxiomVer 𝓢
 
 protected class K4 extends Entailment.K 𝓢, HasAxiomFour 𝓢
-protected class K4Dot2 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakDot2 𝓢
-protected class K4Dot3 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakDot3 𝓢
+protected class K4Point2 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint2 𝓢
+protected class K4Point3 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢
 
 protected class K5 extends Entailment.K 𝓢, HasAxiomFive 𝓢
 
@@ -519,9 +519,9 @@ protected class S4 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢
 instance [Entailment.S4 𝓢] : Entailment.K4 𝓢 where
 instance [Entailment.S4 𝓢] : Entailment.KT 𝓢 where
 
-protected class S4Dot2 extends Entailment.S4 𝓢, HasAxiomDot2 𝓢
+protected class S4Point2 extends Entailment.S4 𝓢, HasAxiomPoint2 𝓢
 
-protected class S4Dot3 extends Entailment.S4 𝓢, HasAxiomDot3 𝓢
+protected class S4Point3 extends Entailment.S4 𝓢, HasAxiomPoint3 𝓢
 
 protected class S5 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢
 instance [Entailment.S5 𝓢] : Entailment.KT 𝓢 where

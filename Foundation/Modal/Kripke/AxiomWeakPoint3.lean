@@ -12,7 +12,7 @@ open Formula.Kripke
 
 variable {F : Kripke.Frame}
 
-lemma weakConnected_of_validate_WeakDot3 (hCon : WeakConnected F) : F ⊧ (Axioms.WeakDot3 (.atom 0) (.atom 1)) := by
+lemma weakConnected_of_validate_WeakPoint3 (hCon : WeakConnected F) : F ⊧ (Axioms.WeakPoint3 (.atom 0) (.atom 1)) := by
   rintro V x;
   apply Satisfies.or_def.mpr;
   suffices
@@ -30,7 +30,7 @@ lemma weakConnected_of_validate_WeakDot3 (hCon : WeakConnected F) : F ⊧ (Axiom
   . have := hz _ Ryz; contradiction;
   . have := hy _ Rzy; contradiction;
 
-lemma validate_WeakDot3_of_weakConnected : F ⊧ (Axioms.WeakDot3 (.atom 0) (.atom 1)) → WeakConnected F := by
+lemma validate_WeakPoint3_of_weakConnected : F ⊧ (Axioms.WeakPoint3 (.atom 0) (.atom 1)) → WeakConnected F := by
   contrapose;
   intro hCon;
   obtain ⟨x, y, Rxy, z, Rxz, nyz, nRyz, nRzy⟩ := by simpa [WeakConnected] using hCon;
@@ -61,11 +61,11 @@ instance : WeakConnectedFrameClass.IsNonempty := by
   use ⟨Unit, λ _ _ => True⟩;
   simp [WeakConnected];
 
-instance WeakConnectedFrameClass.DefinedByWeakDot3 : WeakConnectedFrameClass.DefinedBy {Axioms.WeakDot3 (.atom 0) (.atom 1)} := ⟨by
+instance WeakConnectedFrameClass.DefinedByWeakPoint3 : WeakConnectedFrameClass.DefinedBy {Axioms.WeakPoint3 (.atom 0) (.atom 1)} := ⟨by
   intro F;
   constructor;
-  . simpa using weakConnected_of_validate_WeakDot3;
-  . simpa using validate_WeakDot3_of_weakConnected;
+  . simpa using weakConnected_of_validate_WeakPoint3;
+  . simpa using validate_WeakPoint3_of_weakConnected;
 ⟩
 
 end definability
@@ -83,7 +83,7 @@ open canonicalModel
 
 namespace Canonical
 
-lemma weakConnected [Entailment.HasAxiomWeakDot3 𝓢] : WeakConnected (canonicalFrame 𝓢).Rel := by
+lemma weakConnected [Entailment.HasAxiomWeakPoint3 𝓢] : WeakConnected (canonicalFrame 𝓢).Rel := by
   rintro x y z ⟨Rxy, Rxz, eyz⟩;
   by_contra hC;
   push_neg at hC;
@@ -103,7 +103,7 @@ lemma weakConnected [Entailment.HasAxiomWeakDot3 𝓢] : WeakConnected (canonica
 
   apply x.neither (φ := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ));
   constructor;
-  . exact iff_provable_mem₁.mp axiomWeakDot3! x;
+  . exact iff_provable_mem₁.mp axiomWeakPoint3! x;
   . apply iff_mem₂_or.mpr;
     constructor;
     . apply iff_mem₂_box.mpr;

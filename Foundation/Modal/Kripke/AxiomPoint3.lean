@@ -11,7 +11,7 @@ open Formula.Kripke
 
 variable {F : Kripke.Frame}
 
-lemma connected_of_validate_dot3 (hCon : Connected F) : F ⊧ (Axioms.Dot3 (.atom 0) (.atom 1)) := by
+lemma validate_Point3_of_connected (hCon : Connected F) : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1)) := by
   rintro V x;
   apply Satisfies.or_def.mpr;
   suffices
@@ -25,7 +25,7 @@ lemma connected_of_validate_dot3 (hCon : Connected F) : F ⊧ (Axioms.Dot3 (.ato
   | inl Ryz => have := hp z Ryz; contradiction;
   | inr Rzy => have := hq y Rzy; contradiction;
 
-lemma validate_dot3_of_connected : F ⊧ (Axioms.Dot3 (.atom 0) (.atom 1)) → Connected F := by
+lemma connected_of_validate_Point3 : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1)) → Connected F := by
   contrapose;
   intro hCon;
   obtain ⟨x, y, Rxy, z, Ryz, nRyz, nRzy⟩ := by simpa [Connected] using hCon;
@@ -37,11 +37,11 @@ lemma validate_dot3_of_connected : F ⊧ (Axioms.Dot3 (.atom 0) (.atom 1)) → C
 
 abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
 
-instance ConnectedFrameClass.DefinedByDot3 : ConnectedFrameClass.DefinedBy {Axioms.Dot3 (.atom 0) (.atom 1)} := ⟨by
+instance ConnectedFrameClass.DefinedByPoint3 : ConnectedFrameClass.DefinedBy {Axioms.Point3 (.atom 0) (.atom 1)} := ⟨by
   intro F;
   constructor;
-  . simpa using connected_of_validate_dot3;
-  . simpa using validate_dot3_of_connected;
+  . simpa using validate_Point3_of_connected;
+  . simpa using connected_of_validate_Point3;
 ⟩
 
 end definability
@@ -59,7 +59,7 @@ open canonicalModel
 
 namespace Canonical
 
-lemma connected [Entailment.HasAxiomDot3 𝓢] : Connected (canonicalFrame 𝓢).Rel := by
+lemma connected [Entailment.HasAxiomPoint3 𝓢] : Connected (canonicalFrame 𝓢).Rel := by
   rintro x y z ⟨Rxy, Rxz⟩;
   by_contra hC;
   push_neg at hC;
@@ -68,7 +68,7 @@ lemma connected [Entailment.HasAxiomDot3 𝓢] : Connected (canonicalFrame 𝓢)
   obtain ⟨ψ, hψz, hψy⟩ := Set.not_subset.mp nRzy;
   apply x.neither (φ := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ));
   constructor;
-  . exact iff_provable_mem₁.mp axiomDot3! x;
+  . exact iff_provable_mem₁.mp axiomPoint3! x;
   . apply iff_mem₂_or.mpr;
     constructor;
     . apply iff_mem₂_box.mpr;

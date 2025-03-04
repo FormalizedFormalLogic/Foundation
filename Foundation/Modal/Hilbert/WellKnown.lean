@@ -83,64 +83,64 @@ instance [hFive : H.HasFive] : Entailment.HasAxiomFive H where
       simp;
 
 
-class HasDot2 (H : Hilbert α) where
+class HasPoint2 (H : Hilbert α) where
   p : α
-  mem_Dot2 : Axioms.Dot2 (.atom p) ∈ H.axioms := by tauto;
+  mem_Point2 : Axioms.Point2 (.atom p) ∈ H.axioms := by tauto;
 
-instance [hDot2 : H.HasDot2] : Entailment.HasAxiomDot2 H where
-  Dot2 φ := by
+instance [hPoint2 : H.HasPoint2] : Entailment.HasAxiomPoint2 H where
+  Point2 φ := by
     apply maxm;
-    use Axioms.Dot2 (.atom hDot2.p);
+    use Axioms.Point2 (.atom hPoint2.p);
     constructor;
-    . exact hDot2.mem_Dot2;
-    . use (λ b => if hDot2.p = b then φ else (.atom b));
+    . exact hPoint2.mem_Point2;
+    . use (λ b => if hPoint2.p = b then φ else (.atom b));
       simp;
 
 
-class HasWeakDot2 (H : Hilbert α) where
+class HasWeakPoint2 (H : Hilbert α) where
   p : α
   q : α
   ne_pq : p ≠ q := by trivial;
-  mem_WeakDot2 : Axioms.WeakDot2 (.atom p) (.atom q) ∈ H.axioms := by tauto;
+  mem_WeakPoint2 : Axioms.WeakPoint2 (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [hDotWeak2 : H.HasWeakDot2] : Entailment.HasAxiomWeakDot2 H where
-  WeakDot2 φ ψ := by
+instance [hDotWeak2 : H.HasWeakPoint2] : Entailment.HasAxiomWeakPoint2 H where
+  WeakPoint2 φ ψ := by
     apply maxm;
-    use Axioms.WeakDot2 (.atom hDotWeak2.p) (.atom hDotWeak2.q);
+    use Axioms.WeakPoint2 (.atom hDotWeak2.p) (.atom hDotWeak2.q);
     constructor;
-    . exact hDotWeak2.mem_WeakDot2;
+    . exact hDotWeak2.mem_WeakPoint2;
     . use (λ b => if hDotWeak2.p = b then φ else if hDotWeak2.q = b then ψ else (.atom b));
       simp [hDotWeak2.ne_pq];
 
 
-class HasDot3 (H : Hilbert α) where
+class HasPoint3 (H : Hilbert α) where
   p : α
   q : α
   ne_pq : p ≠ q := by trivial;
-  mem_Dot3 : Axioms.Dot3 (.atom p) (.atom q) ∈ H.axioms := by tauto;
+  mem_Point3 : Axioms.Point3 (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [hDot3 : H.HasDot3] : Entailment.HasAxiomDot3 H where
-  Dot3 φ ψ := by
+instance [hPoint3 : H.HasPoint3] : Entailment.HasAxiomPoint3 H where
+  Point3 φ ψ := by
     apply maxm;
-    use Axioms.Dot3 (.atom hDot3.p) (.atom hDot3.q);
+    use Axioms.Point3 (.atom hPoint3.p) (.atom hPoint3.q);
     constructor;
-    . exact hDot3.mem_Dot3;
-    . use (λ b => if hDot3.p = b then φ else if hDot3.q = b then ψ else (.atom b));
-      simp [hDot3.ne_pq];
+    . exact hPoint3.mem_Point3;
+    . use (λ b => if hPoint3.p = b then φ else if hPoint3.q = b then ψ else (.atom b));
+      simp [hPoint3.ne_pq];
 
 
-class HasWeakDot3 (H : Hilbert α) where
+class HasWeakPoint3 (H : Hilbert α) where
   p : α
   q : α
   ne_pq : p ≠ q := by trivial;
-  mem_WeakDot3 : Axioms.WeakDot3 (.atom p) (.atom q) ∈ H.axioms := by tauto;
+  mem_WeakPoint3 : Axioms.WeakPoint3 (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [hDotWeak3 : H.HasWeakDot3] : Entailment.HasAxiomWeakDot3 H where
-  WeakDot3 φ ψ := by
+instance [hDotWeak3 : H.HasWeakPoint3] : Entailment.HasAxiomWeakPoint3 H where
+  WeakPoint3 φ ψ := by
     apply maxm;
-    use Axioms.WeakDot3 (.atom hDotWeak3.p) (.atom hDotWeak3.q);
+    use Axioms.WeakPoint3 (.atom hDotWeak3.p) (.atom hDotWeak3.q);
     constructor;
-    . exact hDotWeak3.mem_WeakDot3;
+    . exact hDotWeak3.mem_WeakPoint3;
     . use (λ b => if hDotWeak3.p = b then φ else if hDotWeak3.q = b then ψ else (.atom b));
       simp [hDotWeak3.ne_pq];
 
@@ -253,17 +253,17 @@ instance : (Hilbert.K4).HasK where p := 0; q := 1;
 instance : (Hilbert.K4).HasFour where p := 0
 instance : Entailment.K4 (Hilbert.K4) where
 
-protected abbrev K4Dot2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.WeakDot2 (.atom 0) (.atom 1)}⟩
-instance : (Hilbert.K4Dot2).HasK where p := 0; q := 1;
-instance : (Hilbert.K4Dot2).HasFour where p := 0
-instance : (Hilbert.K4Dot2).HasWeakDot2 where p := 0; q := 1;
-instance : Entailment.K4Dot2 (Hilbert.K4Dot2) where
+protected abbrev K4Point2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}⟩
+instance : (Hilbert.K4Point2).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Point2).HasFour where p := 0
+instance : (Hilbert.K4Point2).HasWeakPoint2 where p := 0; q := 1;
+instance : Entailment.K4Point2 (Hilbert.K4Point2) where
 
-protected abbrev K4Dot3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.WeakDot3 (.atom 0) (.atom 1)}⟩
-instance : (Hilbert.K4Dot3).HasK where p := 0; q := 1;
-instance : (Hilbert.K4Dot3).HasFour where p := 0
-instance : (Hilbert.K4Dot3).HasWeakDot3 where p := 0; q := 1;
-instance : Entailment.K4Dot3 (Hilbert.K4Dot3) where
+protected abbrev K4Point3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}⟩
+instance : (Hilbert.K4Point3).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Point3).HasFour where p := 0
+instance : (Hilbert.K4Point3).HasWeakPoint3 where p := 0; q := 1;
+instance : Entailment.K4Point3 (Hilbert.K4Point3) where
 
 protected abbrev KT4B : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.B (.atom 0)}⟩
 instance : (Hilbert.KT4B).HasK where p := 0; q := 1;
@@ -323,20 +323,20 @@ instance : Entailment.S4 (Hilbert.S4) where
 
 lemma K4_weakerThan_S4 : Hilbert.K4 ⪯ Hilbert.S4 := weakerThan_of_dominate_axioms $ by simp;
 
-protected abbrev S4Dot2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dot2 (.atom 0)}⟩
-instance : (Hilbert.S4Dot2).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Dot2).HasT where p := 0
-instance : (Hilbert.S4Dot2).HasFour where p := 0
-instance : (Hilbert.S4Dot2).HasDot2 where p := 0
-instance : Entailment.S4Dot2 (Hilbert.S4Dot2) where
+protected abbrev S4Point2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point2 (.atom 0)}⟩
+instance : (Hilbert.S4Point2).HasK where p := 0; q := 1;
+instance : (Hilbert.S4Point2).HasT where p := 0
+instance : (Hilbert.S4Point2).HasFour where p := 0
+instance : (Hilbert.S4Point2).HasPoint2 where p := 0
+instance : Entailment.S4Point2 (Hilbert.S4Point2) where
 
 
-protected abbrev S4Dot3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dot3 (.atom 0) (.atom 1)}⟩
-instance : (Hilbert.S4Dot3).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Dot3).HasT where p := 0
-instance : (Hilbert.S4Dot3).HasFour where p := 0
-instance : (Hilbert.S4Dot3).HasDot3 where p := 0; q := 1;
-instance : Entailment.S4Dot3 (Hilbert.S4Dot3) where
+protected abbrev S4Point3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
+instance : (Hilbert.S4Point3).HasK where p := 0; q := 1;
+instance : (Hilbert.S4Point3).HasT where p := 0
+instance : (Hilbert.S4Point3).HasFour where p := 0
+instance : (Hilbert.S4Point3).HasPoint3 where p := 0; q := 1;
+instance : Entailment.S4Point3 (Hilbert.S4Point3) where
 
 
 protected abbrev K5 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Five (.atom 0)}⟩
