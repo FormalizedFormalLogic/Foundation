@@ -159,7 +159,7 @@ class HasAxiomD [Dia F] (𝓢 : S) where
 
 section
 
-variable [Dia F] [HasAxiomD 𝓢]
+variable [HasAxiomD 𝓢]
 
 def axiomD : 𝓢 ⊢ □φ ➝ ◇φ := HasAxiomD.D _
 @[simp] lemma axiomD! : 𝓢 ⊢! □φ ➝ ◇φ := ⟨axiomD⟩
@@ -201,7 +201,7 @@ class HasAxiomB [Dia F] (𝓢 : S) where
 
 section
 
-variable [Dia F] [HasAxiomB 𝓢]
+variable [HasAxiomB 𝓢]
 
 def axiomB : 𝓢 ⊢ φ ➝ □◇φ := HasAxiomB.B _
 @[simp] lemma axiomB! : 𝓢 ⊢! φ ➝ □◇φ := ⟨axiomB⟩
@@ -243,7 +243,7 @@ class HasAxiomFive [Dia F] (𝓢 : S) where
 
 section
 
-variable [Dia F] [HasAxiomFive 𝓢]
+variable [HasAxiomFive 𝓢]
 
 def axiomFive : 𝓢 ⊢ ◇φ ➝ □◇φ := HasAxiomFive.Five _
 @[simp] lemma axiomFive! : 𝓢 ⊢! ◇φ ➝ □◇φ := ⟨axiomFive⟩
