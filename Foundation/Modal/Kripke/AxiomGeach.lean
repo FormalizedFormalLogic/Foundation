@@ -136,8 +136,8 @@ lemma symmetric [Entailment.HasAxiomB 𝓢] : Symmetric (canonicalFrame 𝓢).Re
 lemma coreflexive [Entailment.HasAxiomTc 𝓢] : Coreflexive (canonicalFrame 𝓢).Rel := by
   rw [Geachean.coreflexive_def]; apply geachean; simp [axiomTc!];
 
-lemma confluent [Entailment.HasAxiomDot2 𝓢] : Confluent (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.confluent_def]; apply geachean; simp [axiomDot2!];
+lemma confluent [Entailment.HasAxiomPoint2 𝓢] : Confluent (canonicalFrame 𝓢).Rel := by
+  rw [Geachean.confluent_def]; apply geachean; simp [axiomPoint2!];
 
 end Canonical
 

@@ -61,11 +61,11 @@ abbrev Five₂.set : Set F := { Axioms.Five₂ φ | (φ) }
 notation:max "𝟱(□)" => Five₂.set
 
 /-- Axiom for confluency -/
-protected abbrev Dot2 [Dia F] := ◇□φ ➝ □◇φ
-abbrev Dot2.set [Dia F] : Set F := { Axioms.Dot2 φ | (φ) }
-notation:max ".𝟮" => Dot2.set
+protected abbrev Point2 [Dia F] := ◇□φ ➝ □◇φ
+abbrev Point2.set [Dia F] : Set F := { Axioms.Point2 φ | (φ) }
+notation:max ".𝟮" => Point2.set
 
-protected abbrev WeakDot2 := ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ)
+protected abbrev WeakPoint2 := ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ)
 
 /-- Axiom for density -/
 protected abbrev C4 := □□φ ➝ □φ
@@ -88,10 +88,10 @@ protected abbrev Ver := □φ
 abbrev Ver.set : Set F := { Axioms.Ver φ | (φ) }
 notation:max "𝗩𝗲𝗿" => Ver.set
 
-protected abbrev Dot3 := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ)
-abbrev Dot3.set : Set F := { Axioms.Dot3 φ ψ | (φ) (ψ) }
+protected abbrev Point3 := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ)
+abbrev Point3.set : Set F := { Axioms.Point3 φ ψ | (φ) (ψ) }
 
-protected abbrev WeakDot3 := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ)
+protected abbrev WeakPoint3 := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ)
 
 protected abbrev Grz := □(□(φ ➝ □φ) ➝ φ) ➝ φ
 abbrev Grz.set : Set F := { Axioms.Grz φ | (φ) }
