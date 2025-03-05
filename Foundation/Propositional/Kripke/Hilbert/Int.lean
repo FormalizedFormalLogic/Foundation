@@ -1,6 +1,7 @@
 import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Kripke.Hilbert.Soundness
+import Foundation.Propositional.Kripke.Filteration
 import Foundation.Logic.Disjunctive
 
 namespace LO.Propositional
@@ -9,6 +10,7 @@ open Formula.Kripke
 
 open Kripke
 
+def Kripke.AllFiniteFrameClass : FiniteFrameClass := ⟨{ F : Kripke.Frame | Finite F.World }, by tauto⟩
 
 namespace Hilbert.Int.Kripke
 
@@ -19,6 +21,23 @@ instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consis
 instance canonical : Canonical Hilbert.Int AllFrameClass := by tauto;
 
 instance complete: Complete Hilbert.Int AllFrameClass := inferInstance
+
+
+section FFP
+
+instance complete_finite : Complete (Hilbert.Int) (AllFiniteFrameClass) := ⟨by
+  intro φ hφ;
+  apply Kripke.complete.complete;
+  intro F _ V x;
+  let M : Kripke.Model := ⟨F, V⟩;
+  let FM := coarsestFilterationModel M ↑φ.subformulas;
+  apply filteration FM (coarsestFilterationModel.filterOf) (by simp) |>.mpr;
+  apply hφ;
+  apply FilterEqvQuotient.finite;
+  simp;
+⟩
+
+end FFP
 
 
 section DP
