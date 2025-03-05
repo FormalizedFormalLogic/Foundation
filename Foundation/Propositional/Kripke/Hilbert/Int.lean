@@ -18,6 +18,11 @@ instance sound : Sound Hilbert.Int AllFrameClass := inferInstance
 
 instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass AllFrameClass
 
+instance sound_finite : Sound Hilbert.Int AllFiniteFrameClass := ⟨by
+  intro φ hφ F hF V x;
+  exact sound.sound hφ F trivial V x;
+⟩
+
 instance canonical : Canonical Hilbert.Int AllFrameClass := by tauto;
 
 instance complete: Complete Hilbert.Int AllFrameClass := inferInstance
@@ -63,13 +68,12 @@ abbrev counterexampleDPFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ :
     . constructor;
       . intro _ _ _; apply F₁.rel_trans;
       . intro _ _ _; apply F₂.rel_trans;
-  /-
   rel_antisymm := by
+    unfold AntiSymmetric;
     simp only [Sum.forall, imp_self, implies_true, reduceCtorEq, and_self, imp_false, false_implies, Sum.inr.injEq, true_and, Sum.inl.injEq, and_true];
     constructor;
     . intro _ _; apply F₁.rel_antisymm;
     . intro _ _; apply F₂.rel_antisymm;
-  -/
 
 abbrev counterexampleDPModel (M₁ : Kripke.Model) (M₂ : Kripke.Model) (w₁ : M₁.World) (w₂ : M₂.World) : Model where
   toFrame := counterexampleDPFrame M₁.toFrame M₂.toFrame w₁ w₂;

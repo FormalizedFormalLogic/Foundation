@@ -190,6 +190,15 @@ abbrev coarsestFilterationFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaCl
     obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
     obtain ⟨z, rfl⟩ := Quotient.exists_rep Qz;
     simp_all;
+  rel_antisymm := by
+    intro Qx Qy RQxQy RQyQx;
+    obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
+    obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
+    simp only [Quotient.eq];
+    intro φ hφ₁;
+    constructor;
+    . intro hφ₂; exact RQxQy φ hφ₁ hφ₂;
+    . intro hφ₂; exact RQyQx φ hφ₁ hφ₂;
 
 abbrev coarsestFilterationModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
   toFrame := coarsestFilterationFrame M T

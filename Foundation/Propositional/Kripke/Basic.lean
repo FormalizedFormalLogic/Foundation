@@ -13,6 +13,7 @@ structure Frame where
   Rel : Rel World World
   rel_refl : Reflexive Rel
   rel_trans : Transitive Rel
+  rel_antisymm : AntiSymmetric Rel
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
@@ -30,6 +31,8 @@ variable {F : Frame} {x y z : F.World}
 
 @[trans] lemma rel_trans' : x ≺ y → y ≺ z → x ≺ z := by apply F.rel_trans
 
+lemma rel_antisymm' : x ≺ y → y ≺ x → x = y := by apply F.rel_antisymm
+
 end Frame
 
 
@@ -38,6 +41,7 @@ abbrev pointFrame : Frame where
   Rel := fun _ _ => True
   rel_refl := by simp [Reflexive]
   rel_trans := by simp [Transitive]
+  rel_antisymm := by simp [AntiSymmetric]
 
 
 abbrev FrameClass := Set (Frame)

@@ -1,6 +1,7 @@
 import Foundation.Modal.ModalCompanion.Basic
 import Foundation.Propositional.Logic.WellKnown
 import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Logic.Sublogic
 
 namespace LO.Modal
 
@@ -66,12 +67,14 @@ lemma provable_GoedelTranslated_Modal_of_provable_Superint
 end Hilbert
 
 
-theorem Logic.gS4_of_Int : φ ∈ Logic.Int → φᵍ ∈ Logic.S4 := by
+section S4
+
+lemma Logic.gS4_of_Int : φ ∈ Logic.Int → φᵍ ∈ Logic.S4 := by
   apply Hilbert.provable_GoedelTranslated_Modal_of_provable_Superint Hilbert.Int Hilbert.S4;
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
 
-theorem Logic.Int_of_gS4 : φᵍ ∈ Logic.S4 → φ ∈ Logic.Int := by
+lemma Logic.Int_of_gS4 : φᵍ ∈ Logic.S4 → φ ∈ Logic.Int := by
   contrapose;
   rw [Logic.Int.eq_AllKripkeFrameClass_Logic, Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
   intro h;
@@ -111,5 +114,62 @@ theorem Logic.Int_of_gS4 : φᵍ ∈ Logic.S4 → φ ∈ Logic.Int := by
     exact (h₁ φ w).not.mp hp;
 
 instance : ModalCompanion Logic.Int Logic.S4 := Modal.instModalCompanion Logic.gS4_of_Int Logic.Int_of_gS4
+
+end S4
+
+
+
+section Grz
+
+lemma Logic.gGrz_of_Int : φ ∈ Logic.Int → φᵍ ∈ Logic.Grz := by
+  intro h;
+  exact S4_ssubset_Grz.1 $ Logic.gS4_of_Int h;
+
+lemma Logic.Int_of_gGrz : φᵍ ∈ Logic.Grz → φ ∈ Logic.Int := by
+  contrapose;
+  rw [Logic.Int.eq_AllFiniteKripkeFrameClass_Logic, Logic.Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
+  intro h;
+  obtain ⟨M, w, hM, hp⟩ := Propositional.Formula.Kripke.ValidOnFrameClass.exists_model_world_of_not h;
+  have h₁ : ∀ ψ x, Propositional.Formula.Kripke.Satisfies M x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨M.World, M.Rel⟩, M.Val⟩ x (ψᵍ)) := by
+    intro ψ x;
+    induction ψ using Propositional.Formula.rec' generalizing x with
+    | hatom a =>
+      unfold goedelTranslate;
+      constructor;
+      . intro _ _ h;
+        exact M.Val.hereditary h $ by assumption;
+      . intro h;
+        exact h x (M.rel_refl x);
+    | hfalsum =>  rfl;
+    | hor φ ψ ihp ihq =>
+      unfold goedelTranslate;
+      constructor;
+      . rintro (hp | hq);
+        . apply Formula.Kripke.Satisfies.or_def.mpr; left;
+          exact ihp x |>.mp hp;
+        . apply Formula.Kripke.Satisfies.or_def.mpr; right;
+          exact ihq x |>.mp hq;
+      . intro h;
+        rcases Formula.Kripke.Satisfies.or_def.mp h with (hp | hq)
+        . left; exact ihp x |>.mpr hp;
+        . right; exact ihq x |>.mpr hq;
+    | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
+  apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model;
+  use {World := M.World, Rel := M.Rel, Val := M.Val};
+  constructor;
+  . simp [ReflexiveTransitiveAntiSymmetricFiniteFrameClass, FiniteFrameClass.toFrameClass];
+    use ({ World := M.World, Rel := M.Rel, world_finite := by tauto; });
+    simp;
+    refine ⟨?_, ?_, ?_⟩;
+    . exact M.rel_refl;
+    . exact M.rel_trans;
+    . exact M.rel_antisymm;
+  . apply Formula.Kripke.ValidOnModel.not_of_exists_world;
+    use w;
+    exact (h₁ φ w).not.mp hp;
+
+instance : ModalCompanion Logic.Int Logic.Grz := Modal.instModalCompanion Logic.gGrz_of_Int Logic.Int_of_gGrz
+
+end Grz
 
 end LO.Modal
