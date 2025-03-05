@@ -32,6 +32,10 @@ namespace LO.Modal
 
 namespace Logic
 
+protected abbrev Empty : Logic := ∅
+
+protected abbrev Univ : Logic := Set.univ
+
 protected abbrev K4 : Logic := Hilbert.K4.logic
 lemma K4.eq_TransitiveKripkeFrameClass_Logic : Logic.K4 = Kripke.TransitiveFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic

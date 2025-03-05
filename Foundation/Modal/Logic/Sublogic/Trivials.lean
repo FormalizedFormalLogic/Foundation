@@ -1,11 +1,6 @@
 import Foundation.Modal.Logic.WellKnown
-import Batteries.Tactic.Instances
 
 namespace LO.Modal.Logic
-
-protected abbrev Empty : Logic := ∅
-
-protected abbrev Univ : Logic := Set.univ
 
 instance : ProperSublogic Logic.Empty Logic.K := ⟨by
   constructor;
