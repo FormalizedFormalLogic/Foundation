@@ -92,6 +92,7 @@ lemma exists_of_provable {φ} (h : Hilbert.K ⊢! φ) : ∃ ψ : NNFormula _, Hi
   use ψ;
   exact and₁'! h₂ ⨀ h;
 
+/-
 lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
   : ∃ Γ : List { φ : NNFormula ℕ // φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0 }, Hilbert.K ⊢! φ.toFormula ⭤ ⋁(Γ.map (·.1)) := by
   induction φ using NNFormula.rec' with
@@ -157,7 +158,9 @@ lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
     obtain ⟨Γ, hΓ⟩ := ihφ hφ;
     obtain ⟨Δ, hΔ⟩ := ihψ hψ;
     sorry;
+-/
 
+/-
 lemma exists_CNF_list {φ : NNFormula _} (φ_CNF : φ.isModalCNF)
   : ∃ Γ : List { φ : NNFormula ℕ // φ.isModalCNFPart }, Hilbert.K ⊢! (φ.toFormula ⭤ ⋀(Γ.map (·.1))) := by
   induction φ using NNFormula.rec' with
@@ -173,10 +176,9 @@ lemma exists_CNF_list {φ : NNFormula _} (φ_CNF : φ.isModalCNF)
     use Γ ++ Δ;
     sorry;
   | hOr φ ψ ihφ ihψ =>
-    obtain ⟨hφ, hψ⟩ := φ_CNF;
-    obtain ⟨Γ, hΓ⟩ := exists_CNFPart_list hφ;
-    obtain ⟨Δ, hΔ⟩ := exists_CNFPart_list hψ;
-    have := ihφ;
+    obtain ⟨Γ, hΓ⟩ : ∃ Γ : NNFormula.ModalCNFPartList ℕ, (φ ⋎ ψ) = ⋁(Γ.map (·.1)) := φ_CNF;
+    rw [hΓ];
+
     sorry;
 
 
@@ -223,14 +225,15 @@ theorem exists_CNF_DNF {φ : NNFormula _}
         . apply or_replace!;
           . exact and₂'! hφ₂;
           . exact and₂'! hψ₂;
+-/
 
-lemma exists_CNF {φ : NNFormula _}
+lemma exists_CNF (φ : NNFormula _)
   : ∃ ψ : NNFormula _, ψ.isModalCNF ∧ Hilbert.K ⊢! φ.toFormula ⭤ ψ.toFormula
-  := exists_CNF_DNF.1
+  := by sorry; -- exists_CNF_DNF.1
 
-lemma exists_DNF {φ : NNFormula _}
+lemma exists_DNF (φ : NNFormula _)
   : ∃ ψ : NNFormula _, ψ.isModalDNF ∧ Hilbert.K ⊢! φ.toFormula ⭤ ψ.toFormula
-  := exists_CNF_DNF.2
+  := by sorry; -- exists_CNF_DNF.2
 
 end NNFormula
 

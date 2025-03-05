@@ -1,5 +1,6 @@
 import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Hilbert.Maximal.Basic
+import Foundation.Modal.Hilbert.NNFormula
 import Foundation.Modal.Hilbert.KP
 import Foundation.Propositional.Classical.Hilbert
 import Foundation.Propositional.Classical.ZeroSubst
@@ -64,12 +65,28 @@ class TrivFamily (L : Logic) : Prop where
 
 section
 
+open Entailment
+
 lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : φ ∈ L) (hV : φ ∉ Logic.Ver) : ∃ ψ, ◇ψ ∈ L := by
+  obtain ⟨ψ, ⟨Γ, rfl⟩, h⟩ := Hilbert.NNFormula.exists_CNF φ;
+  generalize eγ : (⋀Γ.unattach).toFormula = γ at h;
+  have : φ.toNNFormula.toFormula ⭤ γ ∈ L := Logic.of_mem_K h;
+
+  have hγL : γ ∈ L := by sorry;
+  have hγV : γ ∉ Logic.Ver := by sorry;
+
+  obtain ⟨⟨_, ⟨Δ, rfl⟩⟩, hδΓ, hδL, hδV⟩ : ∃ δ, δ ∈ Γ ∧ δ.1.toFormula ∈ L ∧ δ.1.toFormula ∉ Logic.Ver := by
+    sorry;
+  have hΔ₁ : ∀ ψ ∈ Δ, ¬ψ.1.isPrebox := by
+    rintro ⟨ψ, _⟩ hψ₁ hψ₂;
+    obtain ⟨ξ, rfl⟩ := NNFormula.exists_isPrebox hψ₂;
+    have : □ξ.toFormula ∈ Logic.Ver := by simp;
+    sorry;
+
   have : ∃ Γ: List (Formula ℕ), φ ⭤ ⋀Γ ∈ L := by sorry;
   simp at hV;
   sorry;
 
-open Entailment in
 lemma KD_subset_of_not_subset_Ver (hV : ¬L ⊆ Logic.Ver) : Logic.KD ⊆ L := by
   intro φ hφ;
   replace hφ := Hilbert.iff_provable_KP_provable_KD.mpr hφ;
