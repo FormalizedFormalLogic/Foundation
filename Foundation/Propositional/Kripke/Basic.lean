@@ -42,6 +42,8 @@ abbrev pointFrame : Frame where
 
 abbrev FrameClass := Set (Frame)
 
+abbrev FiniteFrameClass := { C : FrameClass // ∀ F ∈ C, Finite F.World }
+
 
 structure Valuation (F : Frame) where
   Val : F.World → ℕ → Prop
@@ -348,6 +350,7 @@ protected lemma wlem (F_conf : Confluent F.Rel) : F ⊧ Axioms.WeakLEM φ := fun
 end ValidOnFrame
 
 
+
 @[simp] def ValidOnFrameClass (C : FrameClass) (φ : Formula ℕ) := ∀ F, F ∈ C → F ⊧ φ
 
 namespace ValidOnFrameClass
@@ -385,6 +388,42 @@ lemma iff_not_exists_model_world {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃
 alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
 
 end ValidOnFrameClass
+
+
+def ValidOnFiniteFrameClass (C : FiniteFrameClass) (φ : Formula ℕ) := C.1 ⊧ φ
+
+namespace ValidOnFiniteFrameClass
+
+variable {C : FiniteFrameClass} {φ ψ χ : Formula ℕ}
+
+instance semantics : Semantics (Formula ℕ) (FiniteFrameClass) := ⟨fun C ↦ Kripke.ValidOnFiniteFrameClass C⟩
+
+@[simp] protected lemma models_iff : C ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass C φ := iff_of_eq rfl
+
+lemma iff_not_exists_frame: (¬C ⊧ φ) ↔ (∃ F ∈ C.1, ¬F ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_frame_of_not, not_of_exists_frame⟩ := iff_not_exists_frame
+
+lemma iff_not_exists_model : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C.1 ∧ ¬M ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
+
+
+lemma iff_not_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C.1 ∧ ¬(x ⊧ φ)) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+
+alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
+
+end ValidOnFiniteFrameClass
+
 
 end Formula.Kripke
 

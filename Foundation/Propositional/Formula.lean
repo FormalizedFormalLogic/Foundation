@@ -208,11 +208,163 @@ instance : Encodable (Formula α) where
 
 end Encodable
 
+
 end Formula
 
 
-abbrev FormulaSet (α : Type u) := Set (Formula α)
+section Subformula
 
-abbrev FormulaFinset (α : Type u) := Finset (Formula α)
+variable [DecidableEq α]
+
+def Formula.subformulas : Formula α → Finset (Formula α)
+  | ⊥      => {⊥}
+  | atom a => {atom a}
+  | φ ➝ ψ  => insert (φ ➝ ψ) (φ.subformulas ∪ ψ.subformulas)
+  | φ ⋏ ψ  => insert (φ ⋏ ψ) (φ.subformulas ∪ ψ.subformulas)
+  | φ ⋎ ψ  => insert (φ ⋎ ψ) (φ.subformulas ∪ ψ.subformulas)
+
+namespace Formula
+
+variable {φ ψ χ : Formula α}
+
+@[simp] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> { simp [subformulas]; try tauto; }
+
+lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+  induction φ using Formula.rec' with
+  | himp =>
+    simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union];
+    rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
+  | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
+  | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
+  | _ => simp_all [subformulas];
+
+lemma mem_imp₁ (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas := mem_imp h |>.1
+
+lemma mem_imp₂ (h : (ψ ➝ χ) ∈ φ.subformulas) : χ ∈ φ.subformulas := mem_imp h |>.2
+
+lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+  induction φ using Formula.rec' with
+  | himp => simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union]; tauto;
+  | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
+  | hand =>
+    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
+    rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
+  | _ => simp_all [subformulas];
+
+lemma mem_and₁ (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas := mem_and h |>.1
+
+lemma mem_and₂ (h : (ψ ⋏ χ) ∈ φ.subformulas) : χ ∈ φ.subformulas := mem_and h |>.2
+
+lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+  induction φ using Formula.rec' with
+  | himp => simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union]; tauto;
+  | hor =>
+    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
+    rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
+  | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
+  | _ => simp_all [subformulas];
+
+lemma mem_or₁ (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas := mem_or h |>.1
+
+lemma mem_or₂ (h : (ψ ⋎ χ) ∈ φ.subformulas) : χ ∈ φ.subformulas := mem_or h |>.2
+
+
+@[simp] lemma subset_imp₁ : φ.subformulas ⊆ (φ ➝ ψ).subformulas := by intro ξ; simp_all [subformulas];
+
+@[simp] lemma subset_imp₂ : φ.subformulas ⊆ (ψ ➝ φ).subformulas := by intro ξ; simp_all [subformulas];
+
+@[simp] lemma subset_and₁ : φ.subformulas ⊆ (φ ⋏ ψ).subformulas := by intro ξ; simp_all [subformulas];
+
+@[simp] lemma subset_and₂ : φ.subformulas ⊆ (ψ ⋏ φ).subformulas := by intro ξ; simp_all [subformulas];
+
+@[simp] lemma subset_or₁ : φ.subformulas ⊆ (φ ⋎ ψ).subformulas := by intro ξ; simp_all [subformulas];
+
+@[simp] lemma subset_or₂ : φ.subformulas ⊆ (ψ ⋎ φ).subformulas := by intro ξ; simp_all [subformulas];
+
+end Formula
+
+
+abbrev FormulaSet (α) := Set (Formula α)
+
+abbrev FormulaFinset (α) := Finset (Formula α)
+
+
+class FormulaFinset.SubformulaClosed (Γ : FormulaFinset α) where
+  closed : ∀ φ ∈ Γ, φ.subformulas ⊆ Γ
+
+namespace FormulaFinset.SubformulaClosed
+
+variable {φ ψ χ : Formula α} {Γ : FormulaFinset α} [Γ.SubformulaClosed]
+
+lemma mem_and₁ (h : φ ⋏ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+lemma mem_and₂ (h : φ ⋏ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+lemma mem_or₁ (h : φ ⋎ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+lemma mem_or₂ (h : φ ⋎ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+lemma mem_imp₁ (h : φ ➝ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+lemma mem_imp₂ (h : φ ➝ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+
+instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : SubformulaClosed (φ.subformulas) := ⟨by
+  induction φ using Formula.rec' with
+  | hatom => simp [Formula.subformulas];
+  | hfalsum => simp [Formula.subformulas];
+  | himp φ ψ ihφ ihψ =>
+    rintro ξ hξ;
+    rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ);
+    . tauto;
+    . trans φ.subformulas;
+      . exact ihφ _ hξ;
+      . simp;
+    . trans ψ.subformulas;
+      . exact ihψ _ hξ;
+      . simp;
+  | hand φ ψ ihφ ihψ =>
+    rintro ξ hξ;
+    rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ);
+    . tauto;
+    . trans φ.subformulas;
+      . exact ihφ _ hξ;
+      . simp;
+    . trans ψ.subformulas;
+      . exact ihψ _ hξ;
+      . simp;
+  | hor φ ψ ihφ ihψ =>
+    rintro ξ hξ;
+    rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ);
+    . tauto;
+    . trans φ.subformulas;
+      . exact ihφ _ hξ;
+      . simp;
+    . trans ψ.subformulas;
+      . exact ihψ _ hξ;
+      . simp;
+⟩
+
+end FormulaFinset.SubformulaClosed
+
+
+class FormulaSet.SubformulaClosed (T : FormulaSet α) where
+  closed : ∀ φ ∈ T, ↑φ.subformulas ⊆ T
+
+
+namespace FormulaSet.SubformulaClosed
+
+variable {φ ψ χ : Formula α} {T : FormulaSet α} [T.SubformulaClosed]
+
+lemma mem_and₁ (h : φ ⋏ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+lemma mem_and₂ (h : φ ⋏ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+lemma mem_or₁ (h : φ ⋎ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+lemma mem_or₂ (h : φ ⋎ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+lemma mem_imp₁ (h : φ ➝ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+lemma mem_imp₂ (h : φ ➝ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+
+instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
+  simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;
+⟩
+
+end FormulaSet.SubformulaClosed
+
+
+end Subformula
+
 
 end LO.Propositional
