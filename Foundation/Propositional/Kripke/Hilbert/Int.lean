@@ -18,6 +18,11 @@ instance sound : Sound Hilbert.Int AllFrameClass := inferInstance
 
 instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass AllFrameClass
 
+instance sound_finite : Sound Hilbert.Int AllFiniteFrameClass := ⟨by
+  intro φ hφ F hF V x;
+  exact sound.sound hφ F trivial V x;
+⟩
+
 instance canonical : Canonical Hilbert.Int AllFrameClass := by tauto;
 
 instance complete: Complete Hilbert.Int AllFrameClass := inferInstance
