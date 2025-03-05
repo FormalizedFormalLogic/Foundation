@@ -20,7 +20,7 @@ def canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Intuition
   Rel t₁ t₂ := t₁.1.1 ⊆ t₂.1.1
   rel_refl := by tauto_set
   rel_trans := by tauto_set
-    -- antisymm := fun x y Sxy Syx => equality_of₁ $ by tauto_set;
+  rel_antisymm := fun x y Sxy Syx => equality_of₁ $ by tauto_set;
 
 namespace canonicalFrame
 

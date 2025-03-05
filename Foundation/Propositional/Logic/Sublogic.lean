@@ -19,6 +19,7 @@ theorem Int_ssubset_KC : Logic.Int ⊂ Logic.KC := by
         Rel := λ x y => x = 0 ∨ (x = y)
         rel_refl := by simp [Reflexive];
         rel_trans := by simp [Transitive]; omega;
+        rel_antisymm := by simp [AntiSymmetric]; omega;
       };
       use F;
       constructor;
@@ -45,6 +46,7 @@ theorem KC_ssubset_LC : Logic.KC ⊂ Logic.LC := by
         Rel := λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)
         rel_refl := by simp [Reflexive]; omega;
         rel_trans := by simp [Transitive]; omega;
+        rel_antisymm := by simp [AntiSymmetric]; omega;
       }
       use F;
       constructor;
@@ -74,6 +76,7 @@ theorem LC_ssubset_Cl : Logic.LC ⊂ Logic.Cl := by
         Rel := λ x y => x ≤ y
         rel_refl := by simp [Reflexive];
         rel_trans := by simp [Transitive]; omega;
+        rel_antisymm := by simp [AntiSymmetric]; omega;
       }
       use F;
       constructor;

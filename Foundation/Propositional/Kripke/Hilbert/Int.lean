@@ -63,13 +63,12 @@ abbrev counterexampleDPFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ :
     . constructor;
       . intro _ _ _; apply F₁.rel_trans;
       . intro _ _ _; apply F₂.rel_trans;
-  /-
   rel_antisymm := by
+    unfold AntiSymmetric;
     simp only [Sum.forall, imp_self, implies_true, reduceCtorEq, and_self, imp_false, false_implies, Sum.inr.injEq, true_and, Sum.inl.injEq, and_true];
     constructor;
     . intro _ _; apply F₁.rel_antisymm;
     . intro _ _; apply F₂.rel_antisymm;
-  -/
 
 abbrev counterexampleDPModel (M₁ : Kripke.Model) (M₂ : Kripke.Model) (w₁ : M₁.World) (w₂ : M₂.World) : Model where
   toFrame := counterexampleDPFrame M₁.toFrame M₂.toFrame w₁ w₂;
