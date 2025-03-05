@@ -1,7 +1,7 @@
 import Foundation.Modal.ModalCompanion.Basic
 import Foundation.Propositional.Logic.WellKnown
 import Foundation.Modal.Logic.WellKnown
-import Foundation.Modal.Logic.Sublogic
+import Foundation.Modal.Logic.Sublogic.Grz
 
 namespace LO.Modal
 
