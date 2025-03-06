@@ -33,7 +33,41 @@ class Sublogic (L₁ L₂ : Logic) where
 class ProperSublogic (L₁ L₂ : Logic) : Prop where
   ssubset : L₁ ⊂ L₂
 
+
+variable {L : Logic} {φ ψ : Formula ℕ}
+
+
+section
+
+variable [L.QuasiNormal]
+
+protected lemma subset_K : Logic.K ⊆ L := QuasiNormal.subset_K
+
+protected lemma of_mem_K : φ ∈ Logic.K → φ ∈ L := fun h => Logic.subset_K h
+
+protected lemma mdp (hφψ : φ ➝ ψ ∈ L) (hφ : φ ∈ L) : ψ ∈ L := QuasiNormal.mdp_closed hφψ hφ
+
+protected lemma subst (hφ : φ ∈ L) : φ⟦s⟧ ∈ L := QuasiNormal.subst_closed hφ s
+
+protected lemma efq (h : ⊥ ∈ L) : ∀ {φ}, φ ∈ L := by
+  intro φ;
+  have : ⊥ ➝ φ ∈ L := by apply QuasiNormal.subset_K; simp;
+  exact Logic.mdp this h;
+
+end
+
+
+section
+
+variable [L.Normal]
+
+protected lemma nec (hφ : φ ∈ L) : □φ ∈ L := Normal.nec_closed hφ
+
+end
+
+
 end Logic
+
 
 namespace Hilbert
 

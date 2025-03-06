@@ -22,9 +22,190 @@ class Modal.ModalCompanion (IL : Propositional.Logic) (ML : Modal.Logic) where
 lemma Modal.instModalCompanion (h₁ : ∀ {φ}, φ ∈ IL → φᵍ ∈ ML) (h₂ : ∀ {φ}, φᵍ ∈ ML → φ ∈ IL) : Modal.ModalCompanion IL ML := ⟨λ {_} => ⟨h₁, h₂⟩⟩
 
 
-def Propositional.Logic.minimamMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ IL }
+namespace Propositional.Logic
 
-def Propositional.Logic.maximalMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.minimamMC (Axioms.Grz (.atom 0))
+variable {IL : Propositional.Logic}
+
+def smallestMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ IL }
+
+lemma smallestMC.mdp_S4 (hφψ : Modal.Hilbert.S4 ⊢! φ ➝ ψ) (hφ : φ ∈ IL.smallestMC)
+  : ψ ∈ IL.smallestMC := Modal.Logic.sumNormal.mdp (Modal.Logic.sumNormal.mem₁ hφψ) hφ
+
+def largestMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.smallestMC (Axioms.Grz (.atom 0))
+
+end Propositional.Logic
+
+
+section
+
+open Propositional.Formula (goedelTranslate)
+
+lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
+  {IL : Propositional.Logic}
+  (IC : Propositional.Kripke.FrameClass) (hIL_complete : ∀ {φ}, φ ∈ IL ↔ φ ∈ IC.logic)
+  (MC : Modal.Kripke.FrameClass) (hML_complete : ∀ {φ}, φ ∈ IL.smallestMC ↔ φ ∈ MC.logic)
+  (hIC_MC : ∀ F ∈ IC, ⟨F.World, F.Rel⟩ ∈ MC)
+  : ModalCompanion IL (IL.smallestMC) := Modal.instModalCompanion
+  (by
+    intro φ hφ;
+    apply Modal.Logic.sumNormal.mem₂;
+    use φ;
+  )
+  (by
+    intro φ;
+    contrapose;
+    intro h;
+    have := hIL_complete.not.mp h;
+    obtain ⟨F, hF, hF₂⟩ := by simpa using this;
+    obtain ⟨V, x, hφ⟩ := Propositional.Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₂;
+    have h₁ : ∀ ψ x, Propositional.Formula.Kripke.Satisfies ⟨F, V⟩ x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ x (ψᵍ)) := by
+      intro ψ x;
+      induction ψ using Propositional.Formula.rec' generalizing x with
+      | hatom a =>
+        unfold goedelTranslate;
+        constructor;
+        . intro _ _ h;
+          exact V.hereditary h $ by assumption;
+        . intro h;
+          exact h x (F.rel_refl x);
+      | hfalsum =>  rfl;
+      | hor φ ψ ihp ihq =>
+        unfold goedelTranslate;
+        constructor;
+        . rintro (hp | hq);
+          . apply Modal.Formula.Kripke.Satisfies.or_def.mpr; left;
+            exact ihp x |>.mp hp;
+          . apply Modal.Formula.Kripke.Satisfies.or_def.mpr; right;
+            exact ihq x |>.mp hq;
+        . intro h;
+          rcases Modal.Formula.Kripke.Satisfies.or_def.mp h with (hp | hq)
+          . left; exact ihp x |>.mpr hp;
+          . right; exact ihq x |>.mpr hq;
+      | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
+    apply hML_complete.not.mpr;
+    apply Modal.Formula.Kripke.ValidOnFrameClass.not_of_exists_frame;
+    use { World := F.World, Rel := F.Rel };
+    constructor;
+    . apply hIC_MC;
+      exact hF;
+    . apply Modal.Formula.Kripke.ValidOnFrame.not_of_exists_valuation_world;
+      use V, x;
+      exact (h₁ φ x).not.mp hφ;
+  )
+
+lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
+  {IL : Propositional.Logic}
+  (IC : Propositional.Kripke.FrameClass) (hIL_complete : ∀ {φ}, φ ∈ IL ↔ φ ∈ IC.logic)
+  (MC : Modal.Kripke.FrameClass) (hML_complete : ∀ {φ}, φ ∈ IL.largestMC ↔ φ ∈ MC.logic)
+  (hIC_MC : ∀ F ∈ IC, ⟨F.World, F.Rel⟩ ∈ MC)
+  : ModalCompanion IL (IL.largestMC) := Modal.instModalCompanion
+  (by
+    intro φ hφ;
+    apply Modal.Logic.sumNormal.mem₁;
+    apply Modal.Logic.sumNormal.mem₂;
+    use φ;
+  )
+  (by
+    intro φ;
+    contrapose;
+    intro h;
+    have := hIL_complete.not.mp h;
+    obtain ⟨F, hF, hF₂⟩ := by simpa using this;
+    obtain ⟨V, x, hφ⟩ := Propositional.Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₂;
+    have h₁ : ∀ ψ x, Propositional.Formula.Kripke.Satisfies ⟨F, V⟩ x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ x (ψᵍ)) := by
+      intro ψ x;
+      induction ψ using Propositional.Formula.rec' generalizing x with
+      | hatom a =>
+        unfold goedelTranslate;
+        constructor;
+        . intro _ _ h;
+          exact V.hereditary h $ by assumption;
+        . intro h;
+          exact h x (F.rel_refl x);
+      | hfalsum =>  rfl;
+      | hor φ ψ ihp ihq =>
+        unfold goedelTranslate;
+        constructor;
+        . rintro (hp | hq);
+          . apply Modal.Formula.Kripke.Satisfies.or_def.mpr; left;
+            exact ihp x |>.mp hp;
+          . apply Modal.Formula.Kripke.Satisfies.or_def.mpr; right;
+            exact ihq x |>.mp hq;
+        . intro h;
+          rcases Modal.Formula.Kripke.Satisfies.or_def.mp h with (hp | hq)
+          . left; exact ihp x |>.mpr hp;
+          . right; exact ihq x |>.mpr hq;
+      | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
+    apply hML_complete.not.mpr;
+    apply Modal.Formula.Kripke.ValidOnFrameClass.not_of_exists_frame;
+    use { World := F.World, Rel := F.Rel };
+    constructor;
+    . apply hIC_MC;
+      exact hF;
+    . apply Modal.Formula.Kripke.ValidOnFrame.not_of_exists_valuation_world;
+      use V, x;
+      exact (h₁ φ x).not.mp hφ;
+  )
+
+end
+
+
+namespace Modal.Hilbert
+
+open Propositional.Formula (goedelTranslate)
+
+variable {IL : Propositional.Logic} {ML : Modal.Logic}
+variable {IH : Propositional.Hilbert ℕ} {MH : Modal.Hilbert ℕ}
+variable {φ ψ χ : Propositional.Formula ℕ}
+
+variable [Entailment.S4 MH]
+
+lemma goedelTranslated_axiomTc : MH ⊢! φᵍ ➝ □φᵍ := by
+  induction φ using Propositional.Formula.rec' with
+  | hfalsum => simp only [goedelTranslate, efq!];
+  | hand φ ψ ihp ihq => exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
+  | hor φ ψ ihp ihq => exact imp_trans''! (or₃''! (imply_left_or'! ihp) (imply_right_or'! ihq)) collect_box_or!
+  | _ => simp only [goedelTranslate, axiomFour!];
+
+lemma goedelTranslated_implyS : MH ⊢! (φ ➝ ψ ➝ φ)ᵍ := by
+  exact nec! $ imp_trans''! goedelTranslated_axiomTc $ axiomK'! $ nec! $ imply₁!;
+
+lemma goedelTranslated_implyK : MH ⊢! ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
+  apply nec! $ imp_trans''! (imp_trans''! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! imply₂!) axiomK!;
+  apply provable_iff_provable.mpr;
+  apply deduct_iff.mpr;
+  apply deduct_iff.mpr;
+  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[MH]! φᵍ := by_axm!;
+  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[MH]! (φᵍ ➝ □(ψᵍ ➝ χᵍ)) := by_axm!;
+  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[MH]! □(ψᵍ ➝ χᵍ) := (by assumption) ⨀ (by assumption);
+  exact axiomT'! this;
+
+lemma goedelTranslated_AndIntro : MH ⊢! (φ ➝ ψ ➝ φ ⋏ ψ)ᵍ := by
+  exact nec! $ imp_trans''! goedelTranslated_axiomTc $ axiomK'! $ nec! $ and₃!
+
+lemma goedelTranslated_OrElim : MH ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)))ᵍ := by
+  exact nec! $ imp_trans''! axiomFour! $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! $ or₃!) axiomK!;
+
+lemma provable_goedelTranslated_of_provable
+  (IH : Propositional.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [Entailment.S4 MH]
+  (hAx : ∀ φ ∈ IH.axiomInstances, MH ⊢! φᵍ)
+  : IH ⊢! φ → MH ⊢! φᵍ := by
+  intro h;
+  induction h using Propositional.Hilbert.Deduction.rec! with
+  | maxm ih => apply hAx; assumption;
+  | mdp ihpq ihp =>
+    exact axiomT'! $ axiomK''! (ihpq) $ nec! $ ihp;
+  | verum => exact nec! imp_id!;
+  | andElimL => exact nec! and₁!;
+  | andElimR => exact nec! and₂!;
+  | orIntroL => exact nec! or₁!;
+  | orIntroR => exact nec! or₂!;
+  | andIntro => exact goedelTranslated_AndIntro;
+  | orElim => exact goedelTranslated_OrElim;
+  | implyS => exact goedelTranslated_implyS;
+  | implyK => exact goedelTranslated_implyK;
+
+end Modal.Hilbert
 
 /-
 lemma dp_of_mdp [ModalDisjunctive mH] [ModalCompanion iH mH] [Entailment.S4 mH] : iH ⊢! φ ⋎ ψ → iH ⊢! φ ∨ iH ⊢! ψ := by
