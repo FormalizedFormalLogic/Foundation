@@ -77,6 +77,10 @@ theorem S4Point2_ssubset_S4Point3 : Logic.S4Point2 ⊂ Logic.S4Point3 := by
           constructor <;> omega;
 instance : ProperSublogic Logic.S4Point2 Logic.S4Point3 := ⟨S4Point2_ssubset_S4Point3⟩
 
+lemma S4_ssubset_S4Point3 : Logic.S4 ⊂ Logic.S4Point3 := by
+  transitivity Logic.S4Point2;
+  exact S4_ssubset_S4Point2;
+  exact S4Point2_ssubset_S4Point3;
 
 theorem S4Point3_ssubset_S5 : Logic.S4Point3 ⊂ Logic.S5 := by
   constructor;

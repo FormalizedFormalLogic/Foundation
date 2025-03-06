@@ -12,66 +12,10 @@ open Propositional.Formula (goedelTranslate)
 open Modal
 open Modal.Kripke
 
-namespace Hilbert
-
-variable {IL : Propositional.Logic} {ML : Modal.Logic}
-variable {IH : Propositional.Hilbert ℕ} {MH : Modal.Hilbert ℕ}
-variable {φ ψ χ : Propositional.Formula ℕ}
-
-variable [Entailment.S4 MH]
-
-lemma goedelTranslated_axiomTc : MH ⊢! φᵍ ➝ □φᵍ := by
-  induction φ using Propositional.Formula.rec' with
-  | hfalsum => simp only [goedelTranslate, efq!];
-  | hand φ ψ ihp ihq => exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
-  | hor φ ψ ihp ihq => exact imp_trans''! (or₃''! (imply_left_or'! ihp) (imply_right_or'! ihq)) collect_box_or!
-  | _ => simp only [goedelTranslate, axiomFour!];
-
-lemma goedelTranslated_implyS : MH ⊢! (φ ➝ ψ ➝ φ)ᵍ := by
-  exact nec! $ imp_trans''! goedelTranslated_axiomTc $ axiomK'! $ nec! $ imply₁!;
-
-lemma goedelTranslated_implyK : MH ⊢! ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
-  apply nec! $ imp_trans''! (imp_trans''! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! imply₂!) axiomK!;
-  apply provable_iff_provable.mpr;
-  apply deduct_iff.mpr;
-  apply deduct_iff.mpr;
-  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[MH]! φᵍ := by_axm!;
-  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[MH]! (φᵍ ➝ □(ψᵍ ➝ χᵍ)) := by_axm!;
-  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[MH]! □(ψᵍ ➝ χᵍ) := (by assumption) ⨀ (by assumption);
-  exact axiomT'! this;
-
-lemma goedelTranslated_AndIntro : MH ⊢! (φ ➝ ψ ➝ φ ⋏ ψ)ᵍ := by
-  exact nec! $ imp_trans''! goedelTranslated_axiomTc $ axiomK'! $ nec! $ and₃!
-
-lemma goedelTranslated_OrElim : MH ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)))ᵍ := by
-  exact nec! $ imp_trans''! axiomFour! $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! $ or₃!) axiomK!;
-
-lemma provable_GoedelTranslated_Modal_of_provable_Superint
-  (IH : Propositional.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [Entailment.S4 MH]
-  (hAx : ∀ φ ∈ IH.axiomInstances, MH ⊢! φᵍ)
-  : IH ⊢! φ → MH ⊢! φᵍ := by
-  intro h;
-  induction h using Propositional.Hilbert.Deduction.rec! with
-  | maxm ih => apply hAx; assumption;
-  | mdp ihpq ihp =>
-    exact axiomT'! $ axiomK''! (ihpq) $ nec! $ ihp;
-  | verum => exact nec! imp_id!;
-  | andElimL => exact nec! and₁!;
-  | andElimR => exact nec! and₂!;
-  | orIntroL => exact nec! or₁!;
-  | orIntroR => exact nec! or₂!;
-  | andIntro => exact goedelTranslated_AndIntro;
-  | orElim => exact goedelTranslated_OrElim;
-  | implyS => exact goedelTranslated_implyS;
-  | implyK => exact goedelTranslated_implyK;
-
-end Hilbert
-
-
 section S4
 
 lemma Logic.gS4_of_Int : φ ∈ Logic.Int → φᵍ ∈ Logic.S4 := by
-  apply Hilbert.provable_GoedelTranslated_Modal_of_provable_Superint Hilbert.Int Hilbert.S4;
+  apply Hilbert.provable_goedelTranslated_of_provable Hilbert.Int Hilbert.S4;
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
 
@@ -98,7 +42,7 @@ lemma Logic.S4.is_minimamMC_of_Int : Logic.S4 = Logic.Int.minimamMC := by
       rcases h with ⟨φ, hφ, rfl⟩;
       apply Logic.gS4_of_Int hφ;
 
-instance : ModalCompanion Logic.Int Logic.S4 := by
+instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
   rw [Logic.S4.is_minimamMC_of_Int];
   exact Modal.instModalCompanion_of_minimamMC_via_KripkeSemantics
     (IC := Propositional.Kripke.AllFrameClass)

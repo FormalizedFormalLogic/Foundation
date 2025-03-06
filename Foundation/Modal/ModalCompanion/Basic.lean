@@ -24,28 +24,14 @@ lemma Modal.instModalCompanion (h₁ : ∀ {φ}, φ ∈ IL → φᵍ ∈ ML) (h�
 
 namespace Propositional.Logic
 
+variable {IL : Propositional.Logic}
+
 def minimamMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ IL }
 
-def maximalMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.minimamMC (Axioms.Grz (.atom 0))
+lemma minimamMC.mdp_S4 (hφψ : Modal.Hilbert.S4 ⊢! φ ➝ ψ) (hφ : φ ∈ IL.minimamMC)
+  : ψ ∈ IL.minimamMC := Modal.Logic.sumNormal.mdp (Modal.Logic.sumNormal.mem₁ hφψ) hφ
 
-/-
-lemma minimanMC_Hilbert (H : Hilbert ℕ) : H.logic.minimamMC = Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ H.axiomInstances } := by
-  ext φ;
-  constructor;
-  . rintro h;
-    unfold Hilbert.logic minimamMC at h;
-    induction h with
-    | mem₁ h => exact Modal.Logic.sumNormal.mem₁ h;
-    | mdp hφ hψ ihφ ihψ => apply Modal.Logic.sumNormal.mdp ihφ ihψ;
-    | subst h ih => apply Modal.Logic.sumNormal.subst ih;
-    | nec h ih => apply Modal.Logic.sumNormal.nec ih;
-    | mem₂ h =>
-      apply Modal.Logic.sumNormal.mem₂;
-      obtain ⟨φ, hφ, rfl⟩ := h;
-      use φ;
-      simp at hφ;
-  . sorry;
--/
+def maximalMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.minimamMC (Axioms.Grz (.atom 0))
 
 end Propositional.Logic
 
@@ -162,6 +148,64 @@ lemma Modal.instModalCompanion_of_maximalMC_via_KripkeSemantics
   )
 
 end
+
+
+namespace Modal.Hilbert
+
+open Propositional.Formula (goedelTranslate)
+
+variable {IL : Propositional.Logic} {ML : Modal.Logic}
+variable {IH : Propositional.Hilbert ℕ} {MH : Modal.Hilbert ℕ}
+variable {φ ψ χ : Propositional.Formula ℕ}
+
+variable [Entailment.S4 MH]
+
+lemma goedelTranslated_axiomTc : MH ⊢! φᵍ ➝ □φᵍ := by
+  induction φ using Propositional.Formula.rec' with
+  | hfalsum => simp only [goedelTranslate, efq!];
+  | hand φ ψ ihp ihq => exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
+  | hor φ ψ ihp ihq => exact imp_trans''! (or₃''! (imply_left_or'! ihp) (imply_right_or'! ihq)) collect_box_or!
+  | _ => simp only [goedelTranslate, axiomFour!];
+
+lemma goedelTranslated_implyS : MH ⊢! (φ ➝ ψ ➝ φ)ᵍ := by
+  exact nec! $ imp_trans''! goedelTranslated_axiomTc $ axiomK'! $ nec! $ imply₁!;
+
+lemma goedelTranslated_implyK : MH ⊢! ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
+  apply nec! $ imp_trans''! (imp_trans''! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! imply₂!) axiomK!;
+  apply provable_iff_provable.mpr;
+  apply deduct_iff.mpr;
+  apply deduct_iff.mpr;
+  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[MH]! φᵍ := by_axm!;
+  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[MH]! (φᵍ ➝ □(ψᵍ ➝ χᵍ)) := by_axm!;
+  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[MH]! □(ψᵍ ➝ χᵍ) := (by assumption) ⨀ (by assumption);
+  exact axiomT'! this;
+
+lemma goedelTranslated_AndIntro : MH ⊢! (φ ➝ ψ ➝ φ ⋏ ψ)ᵍ := by
+  exact nec! $ imp_trans''! goedelTranslated_axiomTc $ axiomK'! $ nec! $ and₃!
+
+lemma goedelTranslated_OrElim : MH ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)))ᵍ := by
+  exact nec! $ imp_trans''! axiomFour! $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! $ or₃!) axiomK!;
+
+lemma provable_goedelTranslated_of_provable
+  (IH : Propositional.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [Entailment.S4 MH]
+  (hAx : ∀ φ ∈ IH.axiomInstances, MH ⊢! φᵍ)
+  : IH ⊢! φ → MH ⊢! φᵍ := by
+  intro h;
+  induction h using Propositional.Hilbert.Deduction.rec! with
+  | maxm ih => apply hAx; assumption;
+  | mdp ihpq ihp =>
+    exact axiomT'! $ axiomK''! (ihpq) $ nec! $ ihp;
+  | verum => exact nec! imp_id!;
+  | andElimL => exact nec! and₁!;
+  | andElimR => exact nec! and₂!;
+  | orIntroL => exact nec! or₁!;
+  | orIntroR => exact nec! or₂!;
+  | andIntro => exact goedelTranslated_AndIntro;
+  | orElim => exact goedelTranslated_OrElim;
+  | implyS => exact goedelTranslated_implyS;
+  | implyK => exact goedelTranslated_implyK;
+
+end Modal.Hilbert
 
 /-
 lemma dp_of_mdp [ModalDisjunctive mH] [ModalCompanion iH mH] [Entailment.S4 mH] : iH ⊢! φ ⋎ ψ → iH ⊢! φ ∨ iH ⊢! ψ := by
