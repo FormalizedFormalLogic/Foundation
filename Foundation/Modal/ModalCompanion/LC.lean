@@ -30,16 +30,16 @@ private lemma Hilbert.S4Point.lemma₁ : Hilbert.S4 ⊢! □(□φ ➝ □ψ) �
 
 namespace Logic
 
-lemma mem_gAxiomPoint3_minimamMC_of_LC : □(□(.atom 0) ➝ (.atom 1)) ⋎ □(□(.atom 1) ➝ (.atom 0)) ∈ Logic.LC.minimamMC := by
-  have : □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) ∈ Logic.LC.minimamMC := by
+lemma mem_gAxiomPoint3_smallestMC_of_LC : □(□(.atom 0) ➝ (.atom 1)) ⋎ □(□(.atom 1) ➝ (.atom 0)) ∈ Logic.LC.smallestMC := by
+  have : □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) ∈ Logic.LC.smallestMC := by
     apply Logic.sumNormal.mem₂;
     use Axioms.Dummett (.atom 0) (.atom 1);
     simp [Axioms.Dummett, goedelTranslate];
-  apply Propositional.Logic.minimamMC.mdp_S4 ?_ this;
+  apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
   apply or_replace!;
   repeat exact Hilbert.S4Point.lemma₁;
 
-lemma S4Point3.is_minimamMC_of_LC : Logic.S4Point3 = Logic.LC.minimamMC := by
+lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
   ext φ;
   constructor;
   . intro hφ;
@@ -49,7 +49,7 @@ lemma S4Point3.is_minimamMC_of_LC : Logic.S4Point3 = Logic.LC.minimamMC := by
       . apply Logic.sumNormal.mem₁; simp;
       . apply Logic.sumNormal.mem₁; simp;
       . apply Logic.sumNormal.mem₁; simp;
-      . exact Logic.sumNormal.subst $ mem_gAxiomPoint3_minimamMC_of_LC;
+      . exact Logic.sumNormal.subst $ mem_gAxiomPoint3_smallestMC_of_LC;
     | mdp => apply Logic.sumNormal.mdp <;> assumption;
     | nec => apply Logic.sumNormal.nec; assumption;
     | _ => apply Logic.sumNormal.mem₁; simp;
@@ -71,8 +71,8 @@ lemma S4Point3.is_minimamMC_of_LC : Logic.S4Point3 = Logic.LC.minimamMC := by
         repeat exact Hilbert.S4Point3.goedelTranslated_axiomDummett
 
 instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := by
-  rw [Logic.S4Point3.is_minimamMC_of_LC];
-  exact Modal.instModalCompanion_of_minimamMC_via_KripkeSemantics
+  rw [Logic.S4Point3.is_smallestMC_of_LC];
+  exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.ConnectedFrameClass)
     (MC := Modal.Kripke.ReflexiveTransitiveConnectedFrameClass)
     (by
@@ -82,7 +82,7 @@ instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := 
       . apply Propositional.Hilbert.LC.Kripke.complete.complete;
     )
     (by
-      rw [←Logic.S4Point3.is_minimamMC_of_LC];
+      rw [←Logic.S4Point3.is_smallestMC_of_LC];
       intro φ;
       constructor;
       . apply Modal.Hilbert.S4Point3.Kripke.sound.sound;

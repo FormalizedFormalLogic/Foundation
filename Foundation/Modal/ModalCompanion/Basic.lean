@@ -26,12 +26,12 @@ namespace Propositional.Logic
 
 variable {IL : Propositional.Logic}
 
-def minimamMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ IL }
+def smallestMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ IL }
 
-lemma minimamMC.mdp_S4 (hφψ : Modal.Hilbert.S4 ⊢! φ ➝ ψ) (hφ : φ ∈ IL.minimamMC)
-  : ψ ∈ IL.minimamMC := Modal.Logic.sumNormal.mdp (Modal.Logic.sumNormal.mem₁ hφψ) hφ
+lemma smallestMC.mdp_S4 (hφψ : Modal.Hilbert.S4 ⊢! φ ➝ ψ) (hφ : φ ∈ IL.smallestMC)
+  : ψ ∈ IL.smallestMC := Modal.Logic.sumNormal.mdp (Modal.Logic.sumNormal.mem₁ hφψ) hφ
 
-def maximalMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.minimamMC (Axioms.Grz (.atom 0))
+def largestMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.smallestMC (Axioms.Grz (.atom 0))
 
 end Propositional.Logic
 
@@ -40,12 +40,12 @@ section
 
 open Propositional.Formula (goedelTranslate)
 
-lemma Modal.instModalCompanion_of_minimamMC_via_KripkeSemantics
+lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
   {IL : Propositional.Logic}
   (IC : Propositional.Kripke.FrameClass) (hIL_complete : ∀ {φ}, φ ∈ IL ↔ φ ∈ IC.logic)
-  (MC : Modal.Kripke.FrameClass) (hML_complete : ∀ {φ}, φ ∈ IL.minimamMC ↔ φ ∈ MC.logic)
+  (MC : Modal.Kripke.FrameClass) (hML_complete : ∀ {φ}, φ ∈ IL.smallestMC ↔ φ ∈ MC.logic)
   (hIC_MC : ∀ F ∈ IC, ⟨F.World, F.Rel⟩ ∈ MC)
-  : ModalCompanion IL (IL.minimamMC) := Modal.instModalCompanion
+  : ModalCompanion IL (IL.smallestMC) := Modal.instModalCompanion
   (by
     intro φ hφ;
     apply Modal.Logic.sumNormal.mem₂;
@@ -93,12 +93,12 @@ lemma Modal.instModalCompanion_of_minimamMC_via_KripkeSemantics
       exact (h₁ φ x).not.mp hφ;
   )
 
-lemma Modal.instModalCompanion_of_maximalMC_via_KripkeSemantics
+lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
   {IL : Propositional.Logic}
   (IC : Propositional.Kripke.FrameClass) (hIL_complete : ∀ {φ}, φ ∈ IL ↔ φ ∈ IC.logic)
-  (MC : Modal.Kripke.FrameClass) (hML_complete : ∀ {φ}, φ ∈ IL.maximalMC ↔ φ ∈ MC.logic)
+  (MC : Modal.Kripke.FrameClass) (hML_complete : ∀ {φ}, φ ∈ IL.largestMC ↔ φ ∈ MC.logic)
   (hIC_MC : ∀ F ∈ IC, ⟨F.World, F.Rel⟩ ∈ MC)
-  : ModalCompanion IL (IL.maximalMC) := Modal.instModalCompanion
+  : ModalCompanion IL (IL.largestMC) := Modal.instModalCompanion
   (by
     intro φ hφ;
     apply Modal.Logic.sumNormal.mem₁;

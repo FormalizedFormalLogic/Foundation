@@ -19,7 +19,7 @@ lemma Logic.gS4_of_Int : φ ∈ Logic.Int → φᵍ ∈ Logic.S4 := by
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
 
-lemma Logic.S4.is_minimamMC_of_Int : Logic.S4 = Logic.Int.minimamMC := by
+lemma Logic.S4.is_smallestMC_of_Int : Logic.S4 = Logic.Int.smallestMC := by
   ext φ;
   constructor;
   . intro hφ;
@@ -43,8 +43,8 @@ lemma Logic.S4.is_minimamMC_of_Int : Logic.S4 = Logic.Int.minimamMC := by
       apply Logic.gS4_of_Int hφ;
 
 instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
-  rw [Logic.S4.is_minimamMC_of_Int];
-  exact Modal.instModalCompanion_of_minimamMC_via_KripkeSemantics
+  rw [Logic.S4.is_smallestMC_of_Int];
+  exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.AllFrameClass)
     (MC := Modal.Kripke.ReflexiveTransitiveFrameClass)
     (by
@@ -54,7 +54,7 @@ instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
       . apply Propositional.Hilbert.Int.Kripke.complete.complete;
     )
     (by
-      rw [←Logic.S4.is_minimamMC_of_Int];
+      rw [←Logic.S4.is_smallestMC_of_Int];
       intro φ;
       constructor;
       . apply Modal.Hilbert.S4.Kripke.sound.sound;
@@ -73,7 +73,7 @@ lemma Logic.gGrz_of_Int : φ ∈ Logic.Int → φᵍ ∈ Logic.Grz := by
   intro h;
   exact S4_ssubset_Grz.1 $ Logic.gS4_of_Int h;
 
-lemma Logic.Grz.is_maximalMC_of_Int : Logic.Grz = Logic.Int.maximalMC := by
+lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
   ext φ;
   constructor;
   . intro hφ;
@@ -93,7 +93,7 @@ lemma Logic.Grz.is_maximalMC_of_Int : Logic.Grz = Logic.Int.maximalMC := by
     induction hφ with
     | mem₁ h =>
       apply S4_ssubset_Grz.1;
-      rwa [Logic.S4.is_minimamMC_of_Int]
+      rwa [Logic.S4.is_smallestMC_of_Int]
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;
     | nec h ih => apply Modal.Logic.nec ih;
@@ -101,8 +101,8 @@ lemma Logic.Grz.is_maximalMC_of_Int : Logic.Grz = Logic.Int.maximalMC := by
       rcases h with ⟨φ, hφ, rfl⟩; simp;
 
 instance : ModalCompanion Logic.Int Logic.Grz := by
-  rw [Logic.Grz.is_maximalMC_of_Int];
-  exact Modal.instModalCompanion_of_maximalMC_via_KripkeSemantics
+  rw [Logic.Grz.is_largestMC_of_Int];
+  exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.AllFiniteFrameClass)
     (MC := Modal.Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass)
     (by
@@ -112,7 +112,7 @@ instance : ModalCompanion Logic.Int Logic.Grz := by
       . apply Propositional.Hilbert.Int.Kripke.complete_finite.complete;
     )
     (by
-      rw [←Logic.Grz.is_maximalMC_of_Int];
+      rw [←Logic.Grz.is_largestMC_of_Int];
       intro φ;
       constructor;
       . apply Modal.Hilbert.Grz.Kripke.sound.sound;
