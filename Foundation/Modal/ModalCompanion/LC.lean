@@ -68,7 +68,7 @@ lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
         simp;
       . suffices Hilbert.S4Point3 ⊢! □(s 0ᵍ ➝ s 1ᵍ) ⋎ □(s 1ᵍ ➝ s 0ᵍ) by simpa [goedelTranslate];
         apply or_replace'! axiomPoint3!;
-        repeat exact Hilbert.S4Point3.goedelTranslated_axiomDummett
+        repeat exact Hilbert.S4Point3.goedelTranslated_axiomDummett;
 
 instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := by
   rw [Logic.S4Point3.is_smallestMC_of_LC];
