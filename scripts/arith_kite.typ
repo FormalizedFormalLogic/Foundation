@@ -5,7 +5,7 @@
 
 #let Theory(T) = $upright(bold(#T))$
 
-#let arrows = json("./arith.json").map(((from, to, type)) => {
+#let arrows = json("./arith_kite.json").map(((from, to, type)) => {
   if type == "strict" {
     return strfmt("\"{}\" -> \"{}\"", from, to)
   } else if type == "weaker" {

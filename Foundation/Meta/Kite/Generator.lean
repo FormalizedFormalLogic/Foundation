@@ -1,5 +1,4 @@
-import Foundation
-import Lean.Data.Json
+import Mathlib.Data.List.Defs
 
 open Lean Meta
 

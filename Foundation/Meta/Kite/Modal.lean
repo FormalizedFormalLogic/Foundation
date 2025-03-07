@@ -1,9 +1,9 @@
-import Kite.Generator
+import Foundation.Meta.Kite.Generator
+import Foundation.Modal.Logic.Sublogic.S4
 
 namespace LO.Meta.Kite.Modal
 
 open Lean Qq
-open LO.FirstOrder
 open LO.Meta
 open LO.Modal (Logic)
 
