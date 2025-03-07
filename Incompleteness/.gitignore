@@ -1,0 +1,9 @@
+/build
+/lake-packages/*
+/.lake
+
+# import graph
+import_graph.*
+
+# VSCode
+.vscode/settings.json
