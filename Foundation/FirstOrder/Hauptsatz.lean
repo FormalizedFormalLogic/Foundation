@@ -195,6 +195,8 @@ def allEquiv {φ} : p ⊩ ∀' φ ≃ ((t : SyntacticTerm L) → Forces p (φ/[t
 
 def exEquiv {φ} : p ⊩ ∃' φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])) := .refl _
 
+def cast {p : ℙ} (f : p ⊩ φ) (s : φ = ψ) : p ⊩ ψ := s ▸ f
+
 def monotone {q p : ℙ} (s : q ≼ p) : {φ : SyntacticFormulaᵢ L} → p ⊩ φ → q ⊩ φ
   | ⊤,        _ => PUnit.unit
   | ⊥,        b =>
@@ -300,23 +302,11 @@ def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝐌𝐢𝐧¹ ⊢ φ → ⊩ 
 def relRefl {k} (R : L.Rel k) (v : Fin k → SyntacticTerm L) : [.rel R v] ⊩ rel R v :=
   relEquiv.symm ⟨Derivation.axL _ _ _, by simp⟩
 
-protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
-  | ⊤    => implyEquiv.symm fun q sqp dφ ↦ dφ
-  | ⊥    => falsumEquiv.symm ⟨Derivation.verum _, by simp⟩
-  | .rel R v => implyOf fun q dq ↦
-    let b : [.rel R v] ⊓ q ⊩ rel R v := (relRefl R v).monotone (StrongerThan.minLeLeft _ _)
-    dq.implyEquiv ([.rel R v] ⊓ q) (StrongerThan.minLeRight _ _) b
-  | .nrel R v => implyOf fun q dq ↦
-    let ⟨d, hd⟩ := dq.relEquiv
-    falsumEquiv.symm ⟨Derivation.cast d (by simp [inf_def]), by simp [hd]⟩
-  | φ ⋏ ψ =>
-    let ihφ : [φ] ⊩ φᴺ := Forces.refl φ
-    let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
-    andEquiv.symm ⟨ihφ.monotone (.andLeft φ ψ), ihψ.monotone (.andRight φ ψ)⟩
-  | φ ⋎ ψ => implyOf fun q dq ↦
+private def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ ψ] ⊩ (φ ⋎ ψ)ᴺ :=
+  implyOf fun q dq ↦
     let ⟨dφ, dψ⟩ : q ⊩ ∼φᴺ × q ⊩ ∼ψᴺ := dq.andEquiv
-    let ihφ : [φ] ⊩ φᴺ := Forces.refl φ
-    let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
+    let ihφ : [φ] ⊩ φᴺ := ihφ
+    let ihψ : [ψ] ⊩ ψᴺ := ihψ
     let bφ : [φ] ⊓ q ⊩ ⊥ := dφ.implyEquiv ([φ] ⊓ q) (.minLeRight _ _) (ihφ.monotone (.minLeLeft _ _))
     let bψ : [ψ] ⊓ q ⊩ ⊥ := dψ.implyEquiv ([ψ] ⊓ q) (.minLeRight _ _) (ihψ.monotone (.minLeLeft _ _))
     let ⟨bbφ, hbbφ⟩ := bφ.falsumEquiv
@@ -324,12 +314,11 @@ protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
     let band : ⊢ᵀ ∼φ ⋏ ∼ψ :: ∼q := Derivation.and
       (Derivation.cast bbφ (by simp [inf_def])) (Derivation.cast bbψ (by simp [inf_def]))
     falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]), by simp [band, hbbφ, hbbψ]⟩
-  | ∀' φ => allEquiv.symm fun t ↦
-    let b : [φ/[t]] ⊩ φᴺ/[t] := by simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
-    b.monotone (StrongerThan.all φ t)
-  | ∃' φ => implyOf fun q f ↦
+
+private def refl.ex (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃' φ] ⊩ (∃' φ)ᴺ :=
+  implyOf fun q f ↦
     let x := newVar ((∀' ∼φ) :: ∼q)
-    let ih : [φ/[&x]] ⊩ φᴺ/[&x] := by simpa [Semiformula.substitute_doubleNegation] using Forces.refl (φ/[&x])
+    let ih : [φ/[&x]] ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.substitute_doubleNegation])
     let b : [φ/[&x]] ⊓ q ⊩ ⊥ :=
       (f.allEquiv &x).implyEquiv ([φ/[&x]] ⊓ q) (StrongerThan.minLeRight _ _) (ih.monotone (StrongerThan.minLeLeft _ _))
     let ⟨b, hb⟩ := b.falsumEquiv
@@ -340,6 +329,25 @@ protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
         (fun ψ hψ ↦ not_fvar?_newVar (List.mem_cons_of_mem (∀' ∼φ) hψ))
         (Derivation.cast b (by simp [inf_def]))
     falsumEquiv.symm ⟨ba, by simp [ba, hb]⟩
+
+protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
+  |         ⊤ => implyEquiv.symm fun q sqp dφ ↦ dφ
+  |         ⊥ => falsumEquiv.symm ⟨Derivation.verum _, by simp⟩
+  |  .rel R v => implyOf fun q dq ↦
+    let b : [.rel R v] ⊓ q ⊩ rel R v := (relRefl R v).monotone (StrongerThan.minLeLeft _ _)
+    dq.implyEquiv ([.rel R v] ⊓ q) (StrongerThan.minLeRight _ _) b
+  | .nrel R v => implyOf fun q dq ↦
+    let ⟨d, hd⟩ := dq.relEquiv
+    falsumEquiv.symm ⟨Derivation.cast d (by simp [inf_def]), by simp [hd]⟩
+  |     φ ⋏ ψ =>
+    let ihφ : [φ] ⊩ φᴺ := Forces.refl φ
+    let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
+    andEquiv.symm ⟨ihφ.monotone (.andLeft φ ψ), ihψ.monotone (.andRight φ ψ)⟩
+  |     φ ⋎ ψ => refl.or (Forces.refl φ) (Forces.refl ψ)
+  |      ∀' φ => allEquiv.symm fun t ↦
+    let b : [φ/[t]] ⊩ φᴺ/[t] := by simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
+    b.monotone (StrongerThan.all φ t)
+  |      ∃' φ => refl.ex fun x ↦ Forces.refl (φ/[&x])
   termination_by φ => φ.complexity
 
 def conj : {Γ : Sequentᵢ L} → (b : (φ : SyntacticFormulaᵢ L) → φ ∈ Γ → p ⊩ φ) → p ⊩ ⋀Γ
