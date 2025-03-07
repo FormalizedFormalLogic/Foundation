@@ -32,6 +32,29 @@ jobs:
           lake build --keep-toolchain Foundation:docs
           cp -r .lake/build/doc ../pages/_output/doc
 
+      # Build doc
+      - name: Restore docbuild cache
+        id: cache-docbuild-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: docbuild/.lake
+          key: docbuild-lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+      - name: Build docbuild
+        working-directory: docbuild
+        run: lake build --keep-toolchain Foundation:docs
+      - name: Save docbuild cache
+        id: cache-docbuild-save
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            docbuild/.lake
+          key: ${{ steps.cache-docbuild-restore.outputs.cache-primary-key }}
+      - name: Copy docbuild to pages
+        working-directory: docbuild
+        run: cp -r .lake/build/doc ../pages/doc
+
       # Build book
       - name: Install mdbook
         uses: baptiste0928/cargo-install@v3
