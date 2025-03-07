@@ -23,8 +23,15 @@ jobs:
     steps:
       # We don't use https://github.com/leanprover/lean-action.
       # Because caching strategy is not suitable for our project.
-
       - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME"/.elan/bin/lean --version
+          "$HOME"/.elan/bin/lake --version
+
+      # Build project
       - name: Restore cache
         id: cache-restore
         uses: actions/cache/restore@v4
@@ -58,6 +65,15 @@ jobs:
           cp ./import_graph.png ./pages/src/assets
           cp ./import_graph.pdf ./pages/src/assets
           cp ./import_graph.html ./pages/src/assets
+
+      # Build kites
+      - uses: typst-community/setup-typst@v4
+      - name: Generate kites
+        run: |
+          lake exe generate_modal_kite
+      - name: Copy kites to pages
+        run: |
+          cp ./scripts/modal_kite.png ./pages/src/assets
 
       # Build doc
       - name: Build docbuild

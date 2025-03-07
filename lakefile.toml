@@ -11,3 +11,13 @@ version = "git#master"
 
 [[lean_lib]]
 name = "Foundation"
+
+[[lean_exe]]
+name = "generate_arith_kite"
+srcDir = "scripts"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "generate_modal_kite"
+srcDir = "scripts"
+supportInterpreter = true
