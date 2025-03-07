@@ -1,3 +1,0 @@
-# Foundation
-
-- [Documentation](./doc)
