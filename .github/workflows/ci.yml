@@ -23,7 +23,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: leanprover/lean-action@v1
+      # We don't use https://github.com/leanprover/lean-action.
+      # THe reason is that caching timing is early, it won't be work for generating kites.
+
+      # Build project
+      - name: Restore project cache
+        id: project-cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake
+          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+      - name: Build project
+        run: lake build --keep-toolchain
 
       # Build import-graph
       - uses: ts-graphviz/setup-graphviz@v2
@@ -49,9 +62,17 @@ jobs:
           cp ./scripts/arith_kite.png ./pages/src/assets
           cp ./scripts/modal_kite.png ./pages/src/assets
 
+      # Save cache
+      - name: Save project cache
+        id: project-cache-save
+        uses: actions/cache/save@v4
+        with:
+          path: .lake
+          key: ${{ steps.project-cache-restore.outputs.cache-primary-key }}
+
       # Build doc
       - name: Restore docbuild cache
-        id: cache-docbuild-restore
+        id: docbuild-cache-restore
         uses: actions/cache/restore@v4
         with:
           path: docbuild/.lake
@@ -62,12 +83,12 @@ jobs:
         working-directory: docbuild
         run: lake build --keep-toolchain Foundation:docs
       - name: Save docbuild cache
-        id: cache-docbuild-save
+        id: docbuild-cache-save
         uses: actions/cache/save@v4
         with:
           path: |
             docbuild/.lake
-          key: ${{ steps.cache-docbuild-restore.outputs.cache-primary-key }}
+          key: ${{ steps.docbuild-cache-restore.outputs.cache-primary-key }}
       - name: Copy docbuild to pages
         working-directory: docbuild
         run: cp -r .lake/build/doc ../pages/doc
