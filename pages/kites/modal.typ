@@ -6,7 +6,7 @@
 #let Logic(L) = $upright(bold(#L))$
 #let Axiom(A) = $upright(sans(#A))$
 
-#let arrows = json("./Modal.json").map(((from, to, type)) => {
+#let arrows = json("./modal.json").map(((from, to, type)) => {
   if type == "strict" {
     return strfmt("\"{}\" -> \"{}\"", from, to)
   } else if type == "weaker" {
