@@ -33,7 +33,7 @@ Kite of Modal Logics
 
     edge [
       style = solid
-      arrowhead = none
+      arrowhead = vee
     ];
 
     {rank = same; \"LO.Modal.Logic.Triv\"; \"LO.Modal.Logic.Ver\";}
@@ -96,5 +96,3 @@ Kite of Modal Logics
   ),
   width: 480pt,
 )
-
-Build on #datetime.today().year()/#datetime.today().month()/#datetime.today().day()

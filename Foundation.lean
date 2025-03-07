@@ -146,3 +146,7 @@ import Foundation.Incompleteness.Arith.DC
 import Foundation.Incompleteness.DC.Basic
 
 import Foundation.Incompleteness.ProvabilityLogic.Basic
+
+-- Meta
+import Foundation.Meta.Kite.Arith
+import Foundation.Meta.Kite.Modal

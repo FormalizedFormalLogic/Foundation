@@ -32,7 +32,7 @@ Kite of First-Order Arithmetics
 
     edge [
       style = solid
-      arrowhead = none
+      arrowhead = vee
     ];
   "
       + arrows.join("\n")
@@ -48,5 +48,3 @@ Kite of First-Order Arithmetics
   ),
   width: 360pt,
 )
-
-Build on #datetime.today().year()/#datetime.today().month()/#datetime.today().day()

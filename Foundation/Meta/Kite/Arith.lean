@@ -1,5 +1,6 @@
 import Foundation.Meta.Kite.Generator
-import Foundation.FirstOrder.Arith.CobhamR0
+import Foundation.FirstOrder.Arith.Theory
+import Foundation.FirstOrder.Arith.Model
 
 namespace LO.Meta.Kite.Arith
 

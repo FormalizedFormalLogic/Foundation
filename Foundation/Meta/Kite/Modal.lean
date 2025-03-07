@@ -1,5 +1,5 @@
 import Foundation.Meta.Kite.Generator
-import Foundation.Modal.Logic.Sublogic.S4
+import Foundation.Modal.Logic.WellKnown
 
 namespace LO.Meta.Kite.Modal
 

@@ -1,5 +1,5 @@
 name = "Foundation"
-defaultTargets = ["Foundation", "Kite"]
+defaultTargets = ["Foundation"]
 
 # [leanOptions]
 # linter.flexible = true
