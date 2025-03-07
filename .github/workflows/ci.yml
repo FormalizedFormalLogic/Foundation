@@ -23,7 +23,7 @@ jobs:
     steps:
       # We don't use https://github.com/leanprover/lean-action.
       # Because caching strategy is not suitable for our project.
-
+      - uses: actions/checkout@v4
       - name: Install elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
@@ -32,7 +32,6 @@ jobs:
           "$HOME"/.elan/bin/lake --version
 
       # Build project
-      - uses: actions/checkout@v4
       - name: Restore cache
         id: cache-restore
         uses: actions/cache/restore@v4
