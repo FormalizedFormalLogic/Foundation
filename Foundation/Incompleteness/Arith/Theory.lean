@@ -1,4 +1,4 @@
-import Incompleteness.Arith.FormalizedArithmetic
+import Foundation.Incompleteness.Arith.FormalizedArithmetic
 
 /-!
 

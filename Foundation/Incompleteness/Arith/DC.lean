@@ -1,6 +1,6 @@
-import Incompleteness.Arith.First
-import Incompleteness.Arith.Second
-import Incompleteness.DC.Basic
+import Foundation.Incompleteness.Arith.First
+import Foundation.Incompleteness.Arith.Second
+import Foundation.Incompleteness.DC.Basic
 
 noncomputable section
 

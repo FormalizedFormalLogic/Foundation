@@ -1,4 +1,4 @@
-import Incompleteness.Arith.Theory
+import Foundation.Incompleteness.Arith.Theory
 
 noncomputable section
 

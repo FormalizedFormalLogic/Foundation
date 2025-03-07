@@ -135,3 +135,14 @@ import Foundation.Arithmetization.ISigmaOne.Metamath.Proof.Typed
 
 import Foundation.Arithmetization.ISigmaOne.Metamath.Coding
 import Foundation.Arithmetization.ISigmaOne.Metamath.CodedTheory
+
+import Foundation.Incompleteness.Arith.FormalizedArithmetic
+import Foundation.Incompleteness.Arith.Theory
+import Foundation.Incompleteness.Arith.D1
+import Foundation.Incompleteness.Arith.D3
+import Foundation.Incompleteness.Arith.First
+import Foundation.Incompleteness.Arith.Second
+import Foundation.Incompleteness.Arith.DC
+import Foundation.Incompleteness.DC.Basic
+
+import Foundation.Incompleteness.ProvabilityLogic.Basic

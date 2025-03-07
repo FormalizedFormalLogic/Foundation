@@ -1,4 +1,4 @@
-import Arithmetization.ISigmaOne.Metamath
+import Foundation.Arithmetization.ISigmaOne.Metamath
 
 /-!
 

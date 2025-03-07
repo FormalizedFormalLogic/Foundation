@@ -1,5 +1,5 @@
-import Incompleteness.Arith.DC
-import Incompleteness.DC.Basic
+import Foundation.Incompleteness.Arith.DC
+import Foundation.Incompleteness.DC.Basic
 import Foundation.Modal.Logic.WellKnown
 
 namespace LO

@@ -1,6 +1,6 @@
-import Incompleteness.Arith.D3
+import Foundation.Incompleteness.Arith.D3
 import Foundation.Logic.HilbertStyle.Supplemental
-import Incompleteness.ToFoundation.Basic
+import Foundation.Incompleteness.ToFoundation.Basic
 
 noncomputable section
 
