@@ -33,8 +33,8 @@ jobs:
           lake exe graph ./import_graph.pdf
       - name: Copy import graph to pages
         run: |
-          cp ./import_graph.png ./pages/_output
-          cp ./import_graph.pdf ./pages/_output
+          cp ./import_graph.png ./pages/assets
+          cp ./import_graph.pdf ./pages/assets
 
       # Build doc
       - name: Restore docbuild cache
