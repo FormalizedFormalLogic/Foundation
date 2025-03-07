@@ -1,5 +1,6 @@
 import Mathlib.Data.Fintype.Card
 import Mathlib.Data.Fintype.List
+import Mathlib.Data.Fintype.EquivFin
 
 namespace List
 
