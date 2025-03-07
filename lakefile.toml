@@ -1,5 +1,5 @@
 name = "Foundation"
-defaultTargets = ["Foundation", "Arithmetization"]
+defaultTargets = ["Foundation"]
 
 [[require]]
 name = "mathlib"
@@ -8,6 +8,3 @@ version = "git#master"
 
 [[lean_lib]]
 name = "Foundation"
-
-[[lean_lib]]
-name = "Arithmetization"
