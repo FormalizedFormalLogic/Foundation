@@ -1,8 +1,8 @@
 name = "Foundation"
 defaultTargets = ["Foundation"]
 
-[leanOptions]
-linter.flexible = true
+# [leanOptions]
+# linter.flexible = true
 
 [[require]]
 name = "mathlib"

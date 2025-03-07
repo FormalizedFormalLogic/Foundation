@@ -200,7 +200,6 @@ attribute [simp] AndOrClosed.verum AndOrClosed.falsum
 
 end LogicalConnective
 
-/-
 section Subclosed
 
 class Tilde.Subclosed [Tilde F] (C : F → Prop) where
@@ -228,7 +227,6 @@ class LogicalConnective.Subclosed [LogicalConnective F] (C : F → Prop) extends
   Vee.Subclosed C
 
 end Subclosed
--/
 
 section conjdisj
 
