@@ -24,12 +24,11 @@ prefix:76 "⊡" => boxdot
 abbrev multibox (n : ℕ) : F → F := (□ ·)^[n]
 notation:76 "□^[" n:90 "]" φ:80 => multibox n φ
 
-/-
 class Subclosed (C : F → Prop) where
   box_closed : C (□φ) → C φ
 
 attribute [aesop safe 5 forward] Subclosed.box_closed
--/
+
 
 variable {φ ψ : F} {n : ℕ}
 
@@ -78,12 +77,10 @@ abbrev multidia (n : ℕ) : F → F := (◇ ·)^[n]
 
 notation:76 "◇^[" n:90 "]" φ:80 => multidia n φ
 
-/-
 class Subclosed [LogicalConnective F] (C : F → Prop)  where
   dia_closed : C (◇φ) → C φ
 
 attribute [aesop safe 5 forward] Subclosed.dia_closed
--/
 
 variable {φ ψ : F} {n : ℕ}
 
@@ -112,12 +109,10 @@ end Dia
 
 class BasicModalLogicalConnective (F : Type*) extends LogicalConnective F, Box F, Dia F
 
-/-
 class BasicModalLogicConnective.Subclosed [BasicModalLogicalConnective F] (C : F → Prop) extends
   LogicalConnective.Subclosed C,
   Box.Subclosed C,
   Dia.Subclosed C
--/
 
 class DiaAbbrev (F : Type*) [Box F] [Dia F] [Tilde F] where
   dia_abbrev {φ : F} : ◇φ =  ∼(□(∼φ))
