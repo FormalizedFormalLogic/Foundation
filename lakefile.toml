@@ -1,5 +1,5 @@
 name = "Foundation"
-defaultTargets = ["Foundation"]
+defaultTargets = ["Foundation", "Kite"]
 
 # [leanOptions]
 # linter.flexible = true
@@ -11,3 +11,11 @@ version = "git#master"
 
 [[lean_lib]]
 name = "Foundation"
+
+[[lean_lib]]
+name = "Kite"
+
+[[lean_exe]]
+name = "kite"
+root = "Kite"
+supportInterpreter = true
