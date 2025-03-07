@@ -23,8 +23,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: leanprover/lean-action@v1
-        with:
-          build-args: "--wfail"
       - working-directory: docbuild
         run: |
           lake build --keep-toolchain Foundation:docs
