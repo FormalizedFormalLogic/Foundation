@@ -22,14 +22,29 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: leanprover/lean-action@v1
-      - working-directory: docbuild
+
+      # Build doc
+      - name: Build documentation
+        working-directory: docbuild
         run: |
           lake build --keep-toolchain Foundation:docs
-          cp -r .lake/build/doc ../pages/doc
+          cp -r .lake/build/doc ../pages/_output/doc
+
+      # Build book
+      - name: Install mdbook
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: mdbook
+          version: "0.4.40"
+      - name: Build book
+        run: mdbook build
+        working-directory: pages
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: pages
+          path: pages/_output
 
   deploy:
     runs-on: ubuntu-latest
