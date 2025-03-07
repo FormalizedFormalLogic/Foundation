@@ -3,6 +3,7 @@
 Formalization of weak arithmetic and arithmetization of metamathematics. This project depends on [Foundation](https://github.com/FormalizedFormalLogic/Foundation).
 
 ## Table of Contents
+
 - [Arithmetization](#arithmetization)
   - [Table of Contents](#table-of-contents)
   - [Structure](#structure)
@@ -20,6 +21,7 @@ Formalization of weak arithmetic and arithmetization of metamathematics. This pr
 - **ISigmaOne**: Theory $\mathsf{I}\Sigma_1$
 
 ## References
+
 - P. Hájek, P. Pudlák, Metamathematics of First-Order Arithmetic
 - S. Cook, P. Nguyen, Logical Foundations of Proof Complexity
 

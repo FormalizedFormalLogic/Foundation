@@ -1,8 +1,5 @@
 name = "Foundation"
-defaultTargets = ["Foundation"]
-
-[leanOptions]
-linter.flexible = true
+defaultTargets = ["Foundation", "Arithmetization"]
 
 [[require]]
 name = "mathlib"
@@ -11,3 +8,6 @@ version = "git#master"
 
 [[lean_lib]]
 name = "Foundation"
+
+[[lean_lib]]
+name = "Arithmetization"
