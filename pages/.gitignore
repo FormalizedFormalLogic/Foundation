@@ -1,2 +1,4 @@
 _output/*
 !_output/index.html
+
+src/assets/import_graph.*

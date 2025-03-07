@@ -11,3 +11,4 @@ create-missing = false
 
 [output.html]
 git-repository-url = "https://github.com/FormalizedFormalLogic/book"
+site-url = "/Foundation/book/"
