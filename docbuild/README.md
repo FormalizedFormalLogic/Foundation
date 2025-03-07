@@ -1,5 +1,17 @@
 # doc-gen repository for Foundation
 
+## Build
+
+```shell
+lake build Foundation:docs
+```
+
+## Preview
+
+```shell
+miniserve .lake/build/doc
+```
+
 ## Update dependencies
 
 ```shell
