@@ -1,4 +1,4 @@
-name = "foundation"
+name = "Foundation"
 defaultTargets = ["Foundation"]
 
 [leanOptions]
