@@ -40,7 +40,7 @@ jobs:
           path: docbuild/.lake
           key: docbuild-lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
           restore-keys: |
-            lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+            docbuild-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
       - name: Build docbuild
         working-directory: docbuild
         run: lake build --keep-toolchain Foundation:docs
