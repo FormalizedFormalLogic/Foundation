@@ -105,6 +105,15 @@ jobs:
         with:
           crate: mdbook
           version: "0.4.40"
+      - name: Install mdbook-katex
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: mdbook-katex
+          version: "0.9.0"
+      - name: Print mdbook and plugins version
+        run: |
+          mdbook --version
+          mdbook-katex --version
       - name: Build book
         run: mdbook build
         working-directory: pages
