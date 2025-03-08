@@ -35,7 +35,7 @@ instance Kripke.finiteComplete : Complete (Hilbert.K4) (TransitiveFiniteFrameCla
   intro F F_trans V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply @filteration M φ.subformulas _ FM ?filterOf x φ (by simp) |>.mpr;
+  apply @filteration M φ.subformulas _ FM ?filterOf x φ (by subformula) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M φ.subformulas) by
       simp only [FiniteFrameClass.toFrameClass];
