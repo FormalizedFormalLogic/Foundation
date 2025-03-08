@@ -1,3 +1,4 @@
+import Foundation.Subformula
 import Foundation.Logic.LogicSymbol
 
 namespace LO.Propositional
@@ -382,16 +383,34 @@ namespace FormulaSet.SubformulaClosed
 
 variable {φ ψ χ : Formula α} {T : FormulaSet α} [T.SubformulaClosed]
 
-lemma mem_and₁ (h : φ ⋏ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-lemma mem_and₂ (h : φ ⋏ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-lemma mem_or₁ (h : φ ⋎ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-lemma mem_or₂ (h : φ ⋎ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-lemma mem_imp₁ (h : φ ➝ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-lemma mem_imp₂ (h : φ ➝ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+protected lemma mem_and₁ (h : φ ⋏ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+protected lemma mem_and₂ (h : φ ⋏ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+protected lemma mem_or₁ (h : φ ⋎ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+protected lemma mem_or₂ (h : φ ⋎ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+protected lemma mem_imp₁ (h : φ ➝ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+protected lemma mem_imp₂ (h : φ ➝ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+
+set_option linter.unusedTactic false in
+set_option linter.unreachableTactic false in
+add_subformula_rules safe 5 tactic [
+  (by exact FormulaSet.SubformulaClosed.mem_or₁ (by assumption)),
+  (by exact FormulaSet.SubformulaClosed.mem_or₂ (by assumption)),
+  (by exact FormulaSet.SubformulaClosed.mem_and₁ (by assumption)),
+  (by exact FormulaSet.SubformulaClosed.mem_and₂ (by assumption)),
+  (by exact FormulaSet.SubformulaClosed.mem_imp₁ (by assumption)),
+  (by exact FormulaSet.SubformulaClosed.mem_imp₂ (by assumption)),
+]
 
 instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
   simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;
 ⟩
+
+example {_ : φ ⋏ ψ ∈ T} : φ ∈ T := by subformula
+example {_ : φ ⋏ ψ ∈ T} : ψ ∈ T := by subformula
+example {_ : φ ⋎ ψ ∈ T} : φ ∈ T := by subformula
+example {_ : φ ⋎ ψ ∈ T} : ψ ∈ T := by subformula
+example {_ : φ ➝ ψ ∈ T} : φ ∈ T := by subformula
+example {_ : φ ➝ ψ ∈ T} : ψ ∈ T := by subformula
 
 end FormulaSet.SubformulaClosed
 

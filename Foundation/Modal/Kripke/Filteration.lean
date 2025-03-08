@@ -1,6 +1,5 @@
 import Mathlib.Data.Set.Finite.Powerset
 import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Subformulas
 
 universe u v
 
@@ -10,12 +9,11 @@ namespace Kripke
 
 open Formula (atom)
 open Formula.Kripke
-open FormulaSet.SubformulaClosed
 
 
 section
 
-def filterEquiv (M : Kripke.Model) (T : FormulaSet ℕ) [T.SubformulaClosed] (x y : M.World) := ∀ φ, (_ : φ ∈ T := by trivial) → x ⊧ φ ↔ y ⊧ φ
+def filterEquiv (M : Kripke.Model) (T : FormulaSet ℕ) [T.SubformulaClosed] (x y : M.World) := ∀ φ, (_ : φ ∈ T := by subformula) → x ⊧ φ ↔ y ⊧ φ
 
 variable (M : Kripke.Model) (T : FormulaSet ℕ) [T.SubformulaClosed]
 
@@ -67,8 +65,8 @@ structure FilterOf (FM : Model) (M : Model) (T : FormulaSet ℕ) [T.SubformulaCl
     intro x₁ y₁ x₂ y₂ hx hy;
     apply eq_iff_iff.mpr;
     constructor;
-    . intro h φ hp sp₂; exact hy φ (FormulaSet.SubformulaClosed.mem_box hp) |>.mp $ h φ hp $ hx (□φ) hp |>.mpr sp₂;
-    . intro h φ hp sp₁; exact hy φ (FormulaSet.SubformulaClosed.mem_box hp) |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
+    . intro h φ hp sp₂; exact hy φ |>.mp $ h φ hp $ hx (□φ) hp |>.mpr sp₂;
+    . intro h φ hp sp₁; exact hy φ |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
   ) (cast def_world Qx) (cast def_world Qy)
   def_valuation Qx a : (ha : (atom a) ∈ T := by trivial) →
     FM Qx a ↔ Quotient.lift (λ x => M x a) (by
@@ -87,7 +85,7 @@ section
 variable {M : Model} {T : FormulaSet ℕ} [T.SubformulaClosed]
          (FM : Model) (filterOf : FilterOf FM M T)
 
-theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
+theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subformula) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
   induction φ using Formula.rec' generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;
@@ -97,16 +95,16 @@ theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T) : x ⊧ φ 
     . intro h Qy rQxQy;
       obtain ⟨y, ey⟩ := Quotient.exists_rep (cast (filterOf.def_world) Qy);
       have this := filterOf.def_box rQxQy; simp [←ey] at this;
-      simpa [ey] using ihp (FormulaSet.SubformulaClosed.mem_box hs) |>.mp $ @this φ hs h;
+      simpa [ey] using ihp (by subformula) |>.mp $ @this φ hs h;
     . intro h y rxy;
       have rQxQy := filterOf.def_rel₁ rxy;
-      exact ihp (FormulaSet.SubformulaClosed.mem_box hs) |>.mpr $ h _ rQxQy;
+      exact ihp (by subformula) |>.mpr $ h _ rQxQy;
   | himp φ ψ ihp ihq =>
     constructor;
     . rintro hxy hp;
-      exact ihq (FormulaSet.SubformulaClosed.mem_imp₂ hs) |>.mp $ hxy (ihp (FormulaSet.SubformulaClosed.mem_imp₁ hs) |>.mpr hp);
+      exact ihq (by subformula) |>.mp $ hxy (ihp (by subformula) |>.mpr hp);
     . rintro hxy hp;
-      exact ihq (FormulaSet.SubformulaClosed.mem_imp₂ hs) |>.mpr $ hxy (ihp (FormulaSet.SubformulaClosed.mem_imp₁ hs) |>.mp hp);
+      exact ihq (by subformula) |>.mpr $ hxy (ihp (by subformula) |>.mp hp);
   | _ => trivial
 
 end

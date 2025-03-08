@@ -2,17 +2,25 @@ import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Vorspiel.Collection
 import Foundation.Modal.LogicSymbol
 import Foundation.Propositional.Classical.ZeroSubst
+import Foundation.Subformula
 
 namespace LO.Modal
 
-inductive Formula (α : Type u) : Type u where
+inductive Formula (α : Type*) where
   | atom   : α → Formula α
   | falsum : Formula α
   | imp    : Formula α → Formula α → Formula α
   | box    : Formula α → Formula α
   deriving DecidableEq
 
+abbrev FormulaSet (α) := Set (Formula α)
+
+abbrev FormulaFinset (α) := Finset (Formula α)
+
+
 namespace Formula
+
+variable {α} {φ ψ χ : Formula α}
 
 abbrev neg (φ : Formula α) : Formula α := imp φ falsum
 
@@ -25,8 +33,6 @@ abbrev or (φ ψ : Formula α) : Formula α := imp (neg φ) ψ
 abbrev and (φ ψ : Formula α) : Formula α := neg (imp φ (neg ψ))
 
 abbrev dia (φ : Formula α) : Formula α := neg (box (neg φ))
-
-variable {α : Type u}
 
 instance : BasicModalLogicalConnective (Formula α) where
   tilde := neg
@@ -202,114 +208,10 @@ instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
 
-end Formula
 
-
-abbrev FormulaSet (α) := Set (Formula α)
-
-abbrev FormulaFinset (α) := Finset (Formula α)
-
-
-/-
-
-
-lemma sub_of_top (h : φ ∈ 𝒮 ⊤) : φ = ⊤ := by simp_all [subformulae];
-lemma sub_of_bot (h : φ ∈ 𝒮 ⊥) : φ = ⊥ := by simp_all [subformulae];
-
--/
-
-/-
-class FormulaFinset.SubformulaClosed (X : FormulaFinset α) where
-  imp_closed : ∀ {φ ψ}, φ ➝ ψ ∈ X → φ ∈ X ∧ ψ ∈ X
-  box_closed : ∀ {φ}, □φ ∈ X → φ ∈ X
-
-namespace SubformulaClosed
-
-instance [DecidableEq α] {φ : Formula α} : FormulaFinset.SubformulaClosed (φ.subformulae) where
-  imp_closed hpq := ⟨Formula.subformulae.mem_imp₁ hpq, Formula.subformulae.mem_imp₂ hpq⟩
-  box_closed hp := Formula.subformulae.mem_box hp
-
-
-variable {φ : Formula α} {X : FormulaFinset α} [closed : X.SubformulaClosed]
-
-lemma mem_box (h : □φ ∈ X) : φ ∈ X := closed.box_closed h
-macro_rules | `(tactic| trivial) => `(tactic| apply mem_box $ by assumption)
-
-lemma mem_imp (h : φ ➝ ψ ∈ X) : φ ∈ X ∧ ψ ∈ X := closed.imp_closed h
-
-lemma mem_imp₁ (h : φ ➝ ψ ∈ X) : φ ∈ X := mem_imp h |>.1
-macro_rules | `(tactic| trivial) => `(tactic| apply mem_imp₁ $ by assumption)
-
-lemma mem_imp₂ (h : φ ➝ ψ ∈ X) : ψ ∈ X := mem_imp h |>.2
-macro_rules | `(tactic| trivial) => `(tactic| apply mem_imp₁ $ by assumption)
-
-attribute [aesop safe 5 forward]
-  mem_box
-  mem_imp₁
-  mem_imp₂
-
-end SubformulaClosed
-
-
-class FormulaSet.SubformulaClosed (T : FormulaSet α) where
-  imp_closed : ∀ {φ ψ}, φ ➝ ψ ∈ T → φ ∈ T ∧ ψ ∈ T
-  box_closed : ∀ {φ}, □φ ∈ T → φ ∈ T
-
-namespace FormulaSet.SubformulaClosed
-
-instance {φ : Formula α} [DecidableEq α] : FormulaSet.SubformulaClosed (φ.subformulae).toSet where
-  box_closed := FormulaFinset.SubformulaClosed.box_closed;
-  imp_closed := FormulaFinset.SubformulaClosed.imp_closed;
-
-variable {φ : Formula α} {T : FormulaSet α} [T_closed : T.SubformulaClosed]
-
-lemma mem_box (h : □φ ∈ T) : φ ∈ T := T_closed.box_closed h
-macro_rules | `(tactic| trivial) => `(tactic| apply mem_box $ by assumption)
-
-lemma mem_imp (h : φ ➝ ψ ∈ T) : φ ∈ T ∧ ψ ∈ T := T_closed.imp_closed h
-
-lemma mem_imp₁ (h : φ ➝ ψ ∈ T) : φ ∈ T := mem_imp h |>.1
-macro_rules | `(tactic| trivial) => `(tactic| apply mem_imp₁ $ by assumption)
-
-lemma mem_imp₂ (h : φ ➝ ψ ∈ T) : ψ ∈ T := mem_imp h |>.2
-macro_rules | `(tactic| trivial) => `(tactic| apply mem_imp₂ $ by assumption)
-
-end FormulaSet.SubformulaClosed
-
-end Subformula
--/
-
-/-
-section Atoms
-
-variable [DecidableEq α]
-
-namespace Formula
-
-def atoms : Formula α → Finset (α)
-  | .atom a => {a}
-  | ⊤      => ∅
-  | ⊥      => ∅
-  | ∼φ     => φ.atoms
-  | □φ  => φ.atoms
-  | φ ➝ ψ => φ.atoms ∪ ψ.atoms
-  | φ ⋏ ψ  => φ.atoms ∪ ψ.atoms
-  | φ ⋎ ψ  => φ.atoms ∪ ψ.atoms
-prefix:70 "𝒜 " => Formula.atoms
-
-@[simp]
-lemma mem_atoms_iff_mem_subformulae {a : α} {φ : Formula α} : a ∈ 𝒜 φ ↔ (atom a) ∈ φ.subformulae := by
-  induction φ using Formula.rec' <;> simp_all [subformulae, atoms];
-
-end Formula
-
-end Atoms
--/
-
-
-namespace Formula
-
-variable {φ ψ χ : Formula α}
+def isBox : Formula α → Bool
+  | box _ => true
+  | _  => false
 
 @[elab_as_elim]
 def cases_neg [DecidableEq α] {C : Formula α → Sort w}
@@ -387,6 +289,7 @@ def rec_negated [DecidableEq α] {C : Formula α → Sort w}
       . simpa [negated_imp]
 
 end negated
+
 
 section Encodable
 
@@ -505,6 +408,87 @@ end Modal
 namespace Modal
 
 section Substitution
+section Subformula
+
+def Formula.subformulas [DecidableEq α] : Formula α → FormulaFinset α
+  | atom a => {(atom a)}
+  | ⊥      => {⊥}
+  | φ ➝ ψ  => insert (φ ➝ ψ) (φ.subformulas ∪ ψ.subformulas)
+  | □φ     => insert (□φ) φ.subformulas
+
+namespace Formula.subformulas
+
+variable [DecidableEq α] {φ ψ χ : Formula α}
+
+@[simp] lemma mem_self {φ : Formula α} : φ ∈ φ.subformulas := by induction φ <;> { simp [subformulas]; try tauto; }
+
+protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+  induction φ using Formula.rec' with
+  | himp => simp_all [subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
+  | _ => simp_all [subformulas];
+
+protected lemma mem_imp₁ (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas := subformulas.mem_imp h |>.1
+protected lemma mem_imp₂ (h : (ψ ➝ χ) ∈ φ.subformulas) : χ ∈ φ.subformulas := subformulas.mem_imp h |>.2
+
+protected lemma mem_box (h : □ψ ∈ φ.subformulas) : ψ ∈ φ.subformulas := by
+  induction φ using Formula.rec' <;> {
+    simp_all [subformulas];
+    try rcases h with (hq | hr) <;> simp_all;
+  };
+
+@[simp]
+lemma complexity_lower (h : ψ ∈ φ.subformulas) : ψ.complexity ≤ φ.complexity  := by
+  induction φ using Formula.rec' with
+  | himp φ₁ φ₂ ihp₁ ihp₂ =>
+    simp_all [subformulas];
+    rcases h with _ | h₁ | h₂;
+    . subst_vars; simp [Formula.complexity];
+    . have := ihp₁ h₁; simp [Formula.complexity]; omega;
+    . have := ihp₂ h₂; simp [Formula.complexity]; omega;
+  | hbox φ ihp =>
+    simp_all [subformulas];
+    rcases h with _ | h₁;
+    . subst_vars; simp [Formula.complexity];
+    . have := ihp h₁; simp [Formula.complexity]; omega;
+  | hatom => simp_all [subformulas];
+  | hfalsum => simp_all [subformulas, Formula.complexity];
+
+end Formula.subformulas
+
+
+class FormulaSet.SubformulaClosed (P : FormulaSet α) where
+  imp_closed : ∀ {φ ψ}, φ ➝ ψ ∈ P → φ ∈ P ∧ ψ ∈ P
+  box_closed : ∀ {φ}, □φ ∈ P → φ ∈ P
+
+namespace FormulaSet.SubformulaClosed
+
+variable {φ ψ : Formula α} {P : FormulaSet α} [hP : P.SubformulaClosed]
+
+instance {φ : Formula α} [DecidableEq α] : FormulaSet.SubformulaClosed (φ.subformulas).toSet where
+  box_closed := by apply Formula.subformulas.mem_box;
+  imp_closed := by apply Formula.subformulas.mem_imp;
+
+protected lemma mem_imp₁ (h : φ ➝ ψ ∈ P) : φ ∈ P := hP.imp_closed h |>.1
+protected lemma mem_imp₂ (h : φ ➝ ψ ∈ P) : ψ ∈ P := hP.imp_closed h |>.2
+protected lemma mem_box (h : □φ ∈ P) : φ ∈ P := hP.box_closed h
+
+set_option linter.unusedTactic false in
+set_option linter.unreachableTactic false in
+add_subformula_rules safe 5 tactic [
+  (by exact FormulaSet.SubformulaClosed.mem_imp₁ (by assumption)),
+  (by exact FormulaSet.SubformulaClosed.mem_imp₂ (by assumption)),
+  (by exact FormulaSet.SubformulaClosed.mem_box (by assumption)),
+]
+
+example {hφ : φ ∈ P} : φ ∈ P := by subformula;
+example {hφ : φ ➝ ψ ∈ P} : φ ∈ P := by subformula
+example {hφ : φ ➝ ψ ∈ P} : ψ ∈ P := by subformula
+example {hφ : □φ ∈ P} : φ ∈ P := by subformula;
+
+end FormulaSet.SubformulaClosed
+
+end Subformula
+
 
 abbrev Substitution (α) := α → (Formula α)
 

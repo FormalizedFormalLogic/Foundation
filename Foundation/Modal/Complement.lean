@@ -1,5 +1,4 @@
 import Foundation.Modal.Formula
-import Foundation.Modal.Subformulas
 
 
 namespace LO.Modal
