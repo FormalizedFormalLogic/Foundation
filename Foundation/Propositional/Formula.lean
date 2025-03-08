@@ -11,6 +11,10 @@ inductive Formula (α : Type u) : Type u
   | imp    : Formula α → Formula α → Formula α
   deriving DecidableEq
 
+abbrev FormulaSet (α) := Set (Formula α)
+
+abbrev FormulaFinset (α) := Finset (Formula α)
+
 namespace Formula
 
 abbrev neg {α : Type u} (φ : Formula α) : Formula α := imp φ falsum
@@ -224,13 +228,14 @@ def Formula.subformulas : Formula α → Finset (Formula α)
   | φ ⋏ ψ  => insert (φ ⋏ ψ) (φ.subformulas ∪ ψ.subformulas)
   | φ ⋎ ψ  => insert (φ ⋎ ψ) (φ.subformulas ∪ ψ.subformulas)
 
-namespace Formula
+namespace Formula.subformulas
 
 variable {φ ψ χ : Formula α}
 
 @[simp] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> { simp [subformulas]; try tauto; }
 
-lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+@[subformula]
+protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ using Formula.rec' with
   | himp =>
     simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union];
@@ -239,11 +244,8 @@ lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ �
   | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | _ => simp_all [subformulas];
 
-lemma mem_imp₁ (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas := mem_imp h |>.1
-
-lemma mem_imp₂ (h : (ψ ➝ χ) ∈ φ.subformulas) : χ ∈ φ.subformulas := mem_imp h |>.2
-
-lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+@[subformula]
+protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ using Formula.rec' with
   | himp => simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union]; tauto;
   | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
@@ -252,11 +254,8 @@ lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ �
     rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
   | _ => simp_all [subformulas];
 
-lemma mem_and₁ (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas := mem_and h |>.1
-
-lemma mem_and₂ (h : (ψ ⋏ χ) ∈ φ.subformulas) : χ ∈ φ.subformulas := mem_and h |>.2
-
-lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+@[subformula]
+protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ using Formula.rec' with
   | himp => simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union]; tauto;
   | hor =>
@@ -265,29 +264,21 @@ lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ
   | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | _ => simp_all [subformulas];
 
-lemma mem_or₁ (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas := mem_or h |>.1
+@[subformula]
+protected lemma mem_neg (h : (∼ψ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ ⊥ ∈ φ.subformulas := by
+  rw [neg_def] at h;
+  subformula;
 
-lemma mem_or₂ (h : (ψ ⋎ χ) ∈ φ.subformulas) : χ ∈ φ.subformulas := mem_or h |>.2
+@[simp] protected lemma subset_imp₁ : φ.subformulas ⊆ (φ ➝ ψ).subformulas := by intro ξ; simp_all [subformulas];
+@[simp] protected lemma subset_imp₂ : φ.subformulas ⊆ (ψ ➝ φ).subformulas := by intro ξ; simp_all [subformulas];
 
+@[simp] protected lemma subset_and₁ : φ.subformulas ⊆ (φ ⋏ ψ).subformulas := by intro ξ; simp_all [subformulas];
+@[simp] protected lemma subset_and₂ : φ.subformulas ⊆ (ψ ⋏ φ).subformulas := by intro ξ; simp_all [subformulas];
 
-@[simp] lemma subset_imp₁ : φ.subformulas ⊆ (φ ➝ ψ).subformulas := by intro ξ; simp_all [subformulas];
+@[simp] protected lemma subset_or₁ : φ.subformulas ⊆ (φ ⋎ ψ).subformulas := by intro ξ; simp_all [subformulas];
+@[simp] protected lemma subset_or₂ : φ.subformulas ⊆ (ψ ⋎ φ).subformulas := by intro ξ; simp_all [subformulas];
 
-@[simp] lemma subset_imp₂ : φ.subformulas ⊆ (ψ ➝ φ).subformulas := by intro ξ; simp_all [subformulas];
-
-@[simp] lemma subset_and₁ : φ.subformulas ⊆ (φ ⋏ ψ).subformulas := by intro ξ; simp_all [subformulas];
-
-@[simp] lemma subset_and₂ : φ.subformulas ⊆ (ψ ⋏ φ).subformulas := by intro ξ; simp_all [subformulas];
-
-@[simp] lemma subset_or₁ : φ.subformulas ⊆ (φ ⋎ ψ).subformulas := by intro ξ; simp_all [subformulas];
-
-@[simp] lemma subset_or₂ : φ.subformulas ⊆ (ψ ⋎ φ).subformulas := by intro ξ; simp_all [subformulas];
-
-end Formula
-
-
-abbrev FormulaSet (α) := Set (Formula α)
-
-abbrev FormulaFinset (α) := Finset (Formula α)
+end Formula.subformulas
 
 
 class FormulaFinset.SubformulaClosed (Γ : FormulaFinset α) where
