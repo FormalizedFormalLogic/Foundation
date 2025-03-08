@@ -25,7 +25,7 @@ instance Kripke.completeAllFinite : Complete (Hilbert.K) (AllFiniteFrameClass) :
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFilterationModel M ↑φ.subformulas;
 
-  apply filteration FM (coarsestFilterationModel.filterOf) (by aesop) |>.mpr;
+  apply filteration FM (coarsestFilterationModel.filterOf) (by subformula) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M φ.subformulas) by
       use ⟨FM.toFrame⟩;

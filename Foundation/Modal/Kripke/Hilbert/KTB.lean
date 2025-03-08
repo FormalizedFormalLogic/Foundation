@@ -32,7 +32,7 @@ instance Kripke.finiteComplete : Complete (Hilbert.KTB) (ReflexiveSymmetricFinit
   intro F ⟨F_refl, F_symm⟩ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationModel M φ.subformulas;
-  apply filteration FM (finestFilterationModel.filterOf) (by aesop) |>.mpr;
+  apply filteration FM (finestFilterationModel.filterOf) (by subformula) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M φ.subformulas) by
       simp only [FiniteFrameClass.toFrameClass, ReflexiveSymmetricFiniteFrameClass, Set.mem_image, Set.mem_setOf_eq];

@@ -39,13 +39,13 @@ instance Kripke.finiteComplete : Complete (Hilbert.S4) (ReflexiveTransitiveFinit
   intro F ⟨F_refl, F_trans⟩ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply @filteration M φ.subformulas _ FM ?filterOf x φ (by simp) |>.mpr;
+  apply @filteration M φ.subformulas _ FM ?filterOf x φ (by subformula) |>.mpr;
   apply hp (by
     suffices Finite (FilterEqvQuotient M φ.subformulas) by
       simp only [FiniteFrameClass.toFrameClass];
       use ⟨FM.toFrame⟩;
       refine ⟨⟨?_, transitive⟩, rfl⟩;
-      . exact reflexive_of_transitive_reflexive (by apply F_trans) F_refl;
+      . exact reflexive_of_transitive_reflexive F_trans F_refl;
     apply FilterEqvQuotient.finite;
     simp;
   ) FM.Val;
