@@ -5,41 +5,23 @@ namespace LO.Modal
 namespace Formula
 
 variable {α : Type u} [DecidableEq α]
-variable {φ ψ : Formula ℕ}
+variable {φ ψ χ : Formula ℕ}
 
 noncomputable abbrev subformulasGrz (φ : Formula α) := φ.subformulas ∪ (φ.subformulas.prebox.image (λ ψ => □(ψ ➝ □ψ)))
 
 namespace subformulasGrz
 
-@[simp]
-lemma mem_self : φ ∈ φ.subformulasGrz := by simp [subformulasGrz, subformulas.mem_self]
+@[simp] lemma mem_self : φ ∈ φ.subformulasGrz := by simp [subformulasGrz, subformulas.mem_self]
 
 lemma mem_boximpbox (h : ψ ∈ φ.subformulas.prebox) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
 
-lemma mem_origin (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
+protected lemma mem_of_mem_subformula (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
+add_subformula_rules safe 10 tactic [
+  (by exact subformulasGrz.mem_of_mem_subformula (by subformula)),
+]
 
-lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by
-  simp_all [subformulasGrz];
-  aesop;
-
-lemma mem_imp₁ (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz := mem_imp h |>.1
-
-lemma mem_imp₂ (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : χ ∈ φ.subformulasGrz := mem_imp h |>.2
-
-macro_rules | `(tactic| trivial) => `(tactic|
-    first
-    | apply mem_origin $ by assumption
-    | apply mem_imp₁  $ by assumption
-    | apply mem_imp₂  $ by assumption
-  )
-
-lemma mem_left (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by
-  unfold subformulasGrz;
-  simp only [Finset.mem_union];
-  left;
-  tauto;
-
-
+@[subformula]
+protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by subformula;
 
 end subformulasGrz
 
@@ -109,7 +91,7 @@ lemma truthlemma_lemma1
     tauto;
   . have := X.closed.subset hr;
     left;
-    exact FormulaFinset.complementary_mem_box subformulasGrz.mem_imp₁ this;
+    exact FormulaFinset.complementary_mem_box (by subformula) this;
   . right;
     simp;
     use ψ;
@@ -170,7 +152,7 @@ lemma truthlemma_lemma2
         obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
         simp_all;
       . assumption;
-    have : □ψ ∈ X := membership_iff (by trivial) |>.mpr this;
+    have : □ψ ∈ X := membership_iff (by subformula) |>.mpr this;
     contradiction;
 
 -- TODO: syntactical proof
@@ -186,47 +168,37 @@ lemma truthlemma_lemma3 : (Hilbert.Grz) ⊢! (φ ⋏ □(φ ➝ □φ)) ➝ □�
   have := (this h₁) _ Rxy;
   contradiction;
 
+-- TODO: `subformula` tactic cannot handle, I don't know why.
 lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformulas) :
   Satisfies (miniCanonicalModel φ) X ψ ↔ ψ ∈ X := by
   induction ψ using Formula.rec' generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>
-    have := subformulas.mem_imp₁ q_sub;
-    have := subformulas.mem_imp₂ q_sub;
+    have := subformulas.mem_imp q_sub |>.1; -- TODO: remove
+    have := subformulas.mem_imp q_sub |>.2; -- TODO: remove
     constructor;
     . contrapose;
       intro h;
       apply Satisfies.not_imp.mpr;
       apply Satisfies.and_def.mpr;
       constructor;
-      . apply ihq (subformulas.mem_imp₁ q_sub) |>.mpr;
-        exact iff_not_mem_imp
-          (hsub_qr := subformulasGrz.mem_origin q_sub)
-          (hsub_q := subformulasGrz.mem_left (by assumption))
-          (hsub_r := subformulasGrz.mem_left (by assumption))
-          |>.mp h |>.1;
-      . apply ihr (subformulas.mem_imp₂ q_sub) |>.not.mpr;
-        have := iff_not_mem_imp
-          (hsub_qr := subformulasGrz.mem_origin q_sub)
-          (hsub_q := subformulasGrz.mem_left (by assumption))
-          (hsub_r := subformulasGrz.mem_left (by assumption))
-          |>.mp h |>.2;
-        exact iff_mem_compl (subformulasGrz.mem_left (by assumption)) |>.not.mpr (by simpa using this);
+      . apply ihq (by subformula) |>.mpr;
+        exact iff_not_mem_imp (by subformula) (by subformula) (by subformula) |>.mp h |>.1;
+      . apply ihr (by subformula) |>.not.mpr;
+        exact iff_mem_compl (by subformula) |>.not.mpr $ by
+          push_neg;
+          exact iff_not_mem_imp (by subformula) (by subformula) (by subformula) |>.mp h |>.2;
     . contrapose;
       intro h;
       replace h := Satisfies.and_def.mp $ Satisfies.not_imp.mp h;
       obtain ⟨hq, hr⟩ := h;
-      replace hq := ihq (by assumption) |>.mp hq;
-      replace hr := ihr (by assumption) |>.not.mp hr;
-      apply iff_not_mem_imp
-        (hsub_qr := subformulasGrz.mem_origin q_sub)
-        (hsub_q := subformulasGrz.mem_left (by assumption))
-        (hsub_r := subformulasGrz.mem_left (by assumption))
-        |>.mpr;
+      replace hq := ihq (by subformula) |>.mp hq;
+      replace hr := ihr (by subformula) |>.not.mp hr;
+      apply iff_not_mem_imp (by subformula) (by subformula) (by subformula) |>.mpr;
       constructor;
       . assumption;
-      . simpa using iff_mem_compl (subformulasGrz.mem_left (by assumption)) |>.not.mp (by assumption);
+      . simpa using iff_mem_compl (by subformula) |>.not.mp hr;
   | hbox ψ ih =>
     have := subformulas.mem_box q_sub;
     constructor;
@@ -249,14 +221,14 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
             . simp_all;
             . apply hY.2; simp;
             . by_contra hC;
-              have : ↑X *⊢[Hilbert.Grz]! ψ := membership_iff (subformulasGrz.mem_left (by assumption)) |>.mp w;
-              have : ↑X *⊢[(Hilbert.Grz)]! □(ψ ➝ □ψ) := membership_iff (by simp; right; assumption) |>.mp hC;
+              have : ↑X *⊢[Hilbert.Grz]! ψ := membership_iff (by subformula) |>.mp w;
+              have : ↑X *⊢[(Hilbert.Grz)]! □(ψ ➝ □ψ) := membership_iff (by subformula) |>.mp hC;
               have : ↑X *⊢[(Hilbert.Grz)]! (ψ ⋏ □(ψ ➝ □ψ)) ➝ □ψ := Context.of! $ truthlemma_lemma3;
               have : ↑X *⊢[(Hilbert.Grz)]! □ψ := this ⨀ and₃'! (by assumption) (by assumption);
-              have : □ψ ∈ X := membership_iff (subformulasGrz.mem_origin (by assumption)) |>.mpr this;
+              have : □ψ ∈ X := membership_iff (by subformula) |>.mpr this;
               contradiction;
-        . apply ih (by aesop) |>.not.mpr;
-          apply iff_mem_compl (subformulasGrz.mem_origin (by aesop)) |>.not.mpr;
+        . apply ih (by subformula) |>.not.mpr;
+          apply iff_mem_compl (by subformula) |>.not.mpr;
           push_neg;
           apply hY.2;
           simp;
@@ -265,13 +237,12 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
         use X;
         constructor;
         . exact miniCanonicalFrame.reflexive X;
-        . exact ih (by aesop) |>.not.mpr w;
+        . exact ih (by subformula) |>.not.mpr w;
     . intro h Y RXY;
       apply ih (subformulas.mem_box q_sub) |>.mpr;
       have : ↑Y *⊢[(Hilbert.Grz)]! □ψ ➝ ψ := Context.of! $ axiomT!;
-      have : ↑Y *⊢[(Hilbert.Grz)]! ψ := this ⨀
-        (membership_iff (by apply subformulasGrz.mem_left; assumption) |>.mp (RXY.1 ψ (by apply subformulasGrz.mem_left; tauto) h));
-      exact membership_iff (by apply subformulasGrz.mem_left; exact subformulas.mem_box q_sub) |>.mpr this;
+      have : ↑Y *⊢[(Hilbert.Grz)]! ψ := this ⨀ (membership_iff (by subformula) |>.mp (RXY.1 ψ (by subformula) h));
+      exact membership_iff (by subformula) |>.mpr this;
 
 instance complete : Complete (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass) := ⟨by
   intro φ;
@@ -286,12 +257,12 @@ instance complete : Complete (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmet
       (by
         simp only [Finset.singleton_subset_iff];
         apply FormulaFinset.complementary_comp;
-        exact subformulasGrz.mem_self
+        subformula;
       )
       (FormulaFinset.unprovable_iff_singleton_compl_consistent.mpr h);
     use (miniCanonicalModel φ).Val, X;
-    apply truthlemma (by simp) |>.not.mpr;
-    exact iff_mem_compl (by simp) |>.not.mpr $ by
+    apply truthlemma (by subformula) |>.not.mpr;
+    exact iff_mem_compl (by subformula) |>.not.mpr $ by
       push_neg;
       apply hX₁;
       tauto;

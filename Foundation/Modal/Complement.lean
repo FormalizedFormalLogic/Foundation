@@ -66,7 +66,7 @@ lemma complementary_comp (h : φ ∈ P) : -φ ∈ P⁻ := by simp [complementary
 
 lemma mem_of (h : φ ∈ P⁻) : φ ∈ P ∨ ∃ ψ ∈ P, -ψ = φ := by simpa [complementary] using h;
 
-lemma complementary_mem_box (hi : ∀ {ψ χ}, ψ ➝ χ ∈ P → ψ ∈ P := by trivial) : □φ ∈ P⁻ → □φ ∈ P := by
+lemma complementary_mem_box (hi : ∀ {ψ χ}, ψ ➝ χ ∈ P → ψ ∈ P := by subformula) : □φ ∈ P⁻ → □φ ∈ P := by
   intro h;
   rcases (mem_of h) with (h | ⟨ψ, hq, eq⟩);
   . assumption;

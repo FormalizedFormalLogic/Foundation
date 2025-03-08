@@ -299,7 +299,7 @@ lemma iff_mem_compl (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (-ψ ∉ X) := by
   . intro h; exact mem_of_not_mem_compl (by assumption) h;
 
 lemma iff_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ) (hsub_q : ψ ∈ Ψ := by trivial)  (hsub_r : χ ∈ Ψ := by trivial)
+  (hsub_qr : (ψ ➝ χ) ∈ Ψ) (hsub_q : ψ ∈ Ψ)  (hsub_r : χ ∈ Ψ)
   : ((ψ ➝ χ) ∈ X) ↔ (ψ ∈ X) → (-χ ∉ X) := by
   constructor;
   . intro hqr hq;
@@ -325,7 +325,7 @@ lemma iff_mem_imp
       exact imply₁'! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
 
 lemma iff_not_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ) (hsub_q : ψ ∈ Ψ := by trivial)  (hsub_r : χ ∈ Ψ := by trivial)
+  (hsub_qr : (ψ ➝ χ) ∈ Ψ) (hsub_q : ψ ∈ Ψ)  (hsub_r : χ ∈ Ψ)
   : ((ψ ➝ χ) ∉ X) ↔ (ψ ∈ X) ∧ (-χ ∈ X) := by
   simpa using @iff_mem_imp α (𝓢 := 𝓢) _ _ _ Ψ X _ ψ χ hsub_qr hsub_q hsub_r |>.not;
 
