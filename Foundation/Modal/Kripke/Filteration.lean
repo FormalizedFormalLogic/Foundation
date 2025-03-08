@@ -68,7 +68,7 @@ structure FilterOf (FM : Model) (M : Model) (T : FormulaSet ℕ) [T.SubformulaCl
     . intro h φ hp sp₂; exact hy φ |>.mp $ h φ hp $ hx (□φ) hp |>.mpr sp₂;
     . intro h φ hp sp₁; exact hy φ |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
   ) (cast def_world Qx) (cast def_world Qy)
-  def_valuation Qx a : (ha : (atom a) ∈ T := by trivial) →
+  def_valuation Qx a : (ha : (atom a) ∈ T := by subformula) →
     FM Qx a ↔ Quotient.lift (λ x => M x a) (by
       intro x y h;
       apply eq_iff_iff.mpr;
@@ -85,7 +85,7 @@ section
 variable {M : Model} {T : FormulaSet ℕ} [T.SubformulaClosed]
          (FM : Model) (filterOf : FilterOf FM M T)
 
-theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subformula) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
+theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
   induction φ using Formula.rec' generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;

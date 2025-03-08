@@ -17,7 +17,7 @@ section
 variable {M : Kripke.Model} {r x : M.World} {φ ψ : Formula ℕ}
 
 open Formula.Kripke
-open Formula.subformulas
+open Formula
 
 lemma iff_satisfy_complexityLimitedModel_aux
   (hq : ψ ∈ φ.subformulas)
@@ -30,11 +30,11 @@ lemma iff_satisfy_complexityLimitedModel_aux
     obtain ⟨n, hn, hx⟩ := hx;
     simp [Formula.complexity] at hn;
     have : n + 1 ≤ φ.complexity - ψ.complexity := by
-      have : ψ.complexity + 1 ≤ φ.complexity := by simpa using complexity_lower hq;
+      have : ψ.complexity + 1 ≤ φ.complexity := by simpa using subformulas.complexity_lower hq;
       omega;
     constructor;
     . rintro h ⟨y, hy⟩ Rxy;
-      apply ihq (mem_box (by assumption)) ?_ |>.mp;
+      apply ihq (subformulas.mem_box hq) ?_ |>.mp;
       . exact h _ Rxy;
       . use (n + 1);
         constructor;
@@ -42,7 +42,7 @@ lemma iff_satisfy_complexityLimitedModel_aux
         . apply Rel.iterate.forward.mpr;
           use x; constructor; assumption; exact Rxy;
     . rintro h y Rxy;
-      apply ihq (mem_box (by assumption)) ?_ |>.mpr;
+      apply ihq (subformulas.mem_box hq) ?_ |>.mpr;
       . exact h _ Rxy;
       . use (n + 1);
         constructor;
@@ -54,15 +54,15 @@ lemma iff_satisfy_complexityLimitedModel_aux
     simp [Formula.complexity] at hn;
     constructor;
     . rintro hq₁ hq₂;
-      apply ihq₂ (mem_imp (by assumption) |>.2) ?_ |>.mp;
+      apply ihq₂ (subformulas.mem_imp (by assumption) |>.2) ?_ |>.mp;
       apply hq₁;
-      apply ihq₁ (mem_imp (by assumption) |>.1) ?_ |>.mpr hq₂;
+      apply ihq₁ (subformulas.mem_imp (by assumption) |>.1) ?_ |>.mpr hq₂;
       use n; constructor; omega; assumption;
       use n; constructor; omega; assumption;
     . rintro hq₁ hq₂;
-      apply ihq₂ (mem_imp (by assumption) |>.2) ?_ |>.mpr;
+      apply ihq₂ (subformulas.mem_imp (by assumption) |>.2) ?_ |>.mpr;
       apply hq₁;
-      apply ihq₁ (mem_imp (by assumption) |>.1) ?_ |>.mp hq₂;
+      apply ihq₁ (subformulas.mem_imp (by assumption) |>.1) ?_ |>.mp hq₂;
       use n; constructor; omega; assumption;
       use n; constructor; omega; assumption;
   | _ => simp [Satisfies, complexityLimitedModel];

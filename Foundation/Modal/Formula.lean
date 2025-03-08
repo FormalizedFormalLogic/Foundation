@@ -422,19 +422,43 @@ variable [DecidableEq α] {φ ψ χ : Formula α}
 
 @[simp] lemma mem_self {φ : Formula α} : φ ∈ φ.subformulas := by induction φ <;> { simp [subformulas]; try tauto; }
 
+@[subformula]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ using Formula.rec' with
   | himp => simp_all [subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [subformulas];
 
-protected lemma mem_imp₁ (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas := subformulas.mem_imp h |>.1
-protected lemma mem_imp₂ (h : (ψ ➝ χ) ∈ φ.subformulas) : χ ∈ φ.subformulas := subformulas.mem_imp h |>.2
-
+@[subformula]
 protected lemma mem_box (h : □ψ ∈ φ.subformulas) : ψ ∈ φ.subformulas := by
   induction φ using Formula.rec' <;> {
     simp_all [subformulas];
     try rcases h with (hq | hr) <;> simp_all;
   };
+
+@[subformula]
+protected lemma mem_neg (h : (∼ψ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ ⊥ ∈ φ.subformulas := subformulas.mem_imp h
+
+@[subformula]
+protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+  rcases subformulas.mem_imp (subformulas.mem_imp h |>.1) with ⟨hψ, hχ⟩;
+  rw [neg_eq] at hχ;
+  constructor <;> subformula;
+
+@[subformula] protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+  rcases (subformulas.mem_imp h) with ⟨hψ, hχ⟩;
+  rw [neg_eq] at hψ;
+  constructor <;> subformula;
+
+example {_ : φ ∈ φ.subformulas} : φ ∈ φ.subformulas := by subformula;
+example {_ : ψ ➝ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
+example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
+example {_ : □ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
+example {_ : ∼ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
+example {_ : ∼ψ ∈ φ.subformulas} : ⊥ ∈ φ.subformulas := by subformula;
+example {_ : ψ ⋏ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
+example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
+example {_ : ψ ⋏ (ψ ⋎ □(□χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
+
 
 @[simp]
 lemma complexity_lower (h : ψ ∈ φ.subformulas) : ψ.complexity ≤ φ.complexity  := by
@@ -462,28 +486,33 @@ class FormulaSet.SubformulaClosed (P : FormulaSet α) where
 
 namespace FormulaSet.SubformulaClosed
 
-variable {φ ψ : Formula α} {P : FormulaSet α} [hP : P.SubformulaClosed]
+variable {φ ψ : Formula α} {P : FormulaSet α} [P.SubformulaClosed]
 
 instance {φ : Formula α} [DecidableEq α] : FormulaSet.SubformulaClosed (φ.subformulas).toSet where
   box_closed := by apply Formula.subformulas.mem_box;
   imp_closed := by apply Formula.subformulas.mem_imp;
 
-protected lemma mem_imp₁ (h : φ ➝ ψ ∈ P) : φ ∈ P := hP.imp_closed h |>.1
-protected lemma mem_imp₂ (h : φ ➝ ψ ∈ P) : ψ ∈ P := hP.imp_closed h |>.2
-protected lemma mem_box (h : □φ ∈ P) : φ ∈ P := hP.box_closed h
+protected lemma mem_imp₁ (h : φ ➝ ψ ∈ P) : φ ∈ P := SubformulaClosed.imp_closed h |>.1
+protected lemma mem_imp₂ (h : φ ➝ ψ ∈ P) : ψ ∈ P := SubformulaClosed.imp_closed h |>.2
+protected lemma mem_box (h : □φ ∈ P) : φ ∈ P := SubformulaClosed.box_closed h
 
 set_option linter.unusedTactic false in
 set_option linter.unreachableTactic false in
-add_subformula_rules safe 5 tactic [
+add_subformula_rules safe 10 tactic [
   (by exact FormulaSet.SubformulaClosed.mem_imp₁ (by assumption)),
   (by exact FormulaSet.SubformulaClosed.mem_imp₂ (by assumption)),
   (by exact FormulaSet.SubformulaClosed.mem_box (by assumption)),
 ]
 
-example {hφ : φ ∈ P} : φ ∈ P := by subformula;
-example {hφ : φ ➝ ψ ∈ P} : φ ∈ P := by subformula
-example {hφ : φ ➝ ψ ∈ P} : ψ ∈ P := by subformula
-example {hφ : □φ ∈ P} : φ ∈ P := by subformula;
+example {_ : φ ∈ P} : φ ∈ P := by subformula;
+example {_ : φ ➝ ψ ∈ P} : φ ∈ P := by subformula
+example {_ : φ ➝ ψ ∈ P} : ψ ∈ P := by subformula
+example {_ : □φ ∈ P} : φ ∈ P := by subformula;
+
+-- TODO: complex case cannot be solved by `subformula`
+example {h : (φ ➝ ψ) ➝ (□ψ ➝ χ) ∈ P} : ψ ∈ P := by
+  apply FormulaSet.SubformulaClosed.mem_imp₂;
+  subformula;
 
 end FormulaSet.SubformulaClosed
 
