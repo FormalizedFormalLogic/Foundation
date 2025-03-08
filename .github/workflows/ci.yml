@@ -42,12 +42,6 @@ jobs:
             lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
 
       # Build project
-      - name: Install elan
-        run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
-          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-          "$HOME"/.elan/bin/lean --version
-          "$HOME"/.elan/bin/lake --version
       - name: Get Mathlib cache
         run: lake exe cache get
       - name: Build project
@@ -76,9 +70,23 @@ jobs:
           cp ./scripts/modal_kite.png ./pages/src/assets
 
       # Build doc
+      - name: Restore docbuild cache
+        id: cache-docbuild-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: docbuild/.lake
+          key: docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}
       - name: Build docbuild
         working-directory: docbuild
         run: lake build --keep-toolchain Foundation:docs
+      - name: Save docbuild cache
+        id: cache-docbuild-save
+        uses: actions/cache/save@v4
+        with:
+          path: docbuild/.lake
+          key: ${{ steps.cache-docbuild-restore.outputs.cache-primary-key }}
       - name: Copy docbuild to pages
         working-directory: docbuild
         run: cp -r .lake/build/doc ../pages/_output/doc
