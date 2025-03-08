@@ -23,7 +23,7 @@ lemma log_exists_unique_pos {y : V} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ 
         2 * y', by simpa using gey, Exponential.exponential_succ_mul_two.mpr H, by simpa using lty⟩
     case odd y IH =>
       rcases (zero_le y : 0 ≤ y) with (rfl | pos)
-      · simp; exact ⟨1, by simp [one_lt_two]⟩
+      · simp
       · rcases (IH pos : ∃ x < y, ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') with ⟨x, hxy, y', gey, H, lty⟩
         exact ⟨x + 1, by simp; exact lt_of_lt_of_le hxy (by simp),
           2 * y', le_trans (by simpa using gey) le_self_add, Exponential.exponential_succ_mul_two.mpr H, two_mul_add_one_lt_two_mul_of_lt lty⟩
@@ -156,9 +156,6 @@ lemma length_graph {i a : V} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a
   rcases zero_le a with (rfl | pos)
   · simp
   · simp [length_of_pos, pos, pos_iff_ne_zero.mp pos]
-    constructor
-    · rintro rfl; exact ⟨log a, by simp⟩
-    · rintro ⟨_, _, rfl, rfl⟩; rfl
 
 def _root_.LO.FirstOrder.Arith.lengthDef : 𝚺₀.Semisentence 2 := .mkSigma
   “i a. (0 < a → ∃ k <⁺ a, !logDef k a ∧ i = k + 1) ∧ (a = 0 → i = 0)” (by simp)
@@ -420,9 +417,6 @@ def _root_.LO.FirstOrder.Arith.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
 
 lemma fbit_defined : 𝚺₀-Function₂ (fbit : V → V → V) via fbitDef := by
   intro v; simp [fbitDef, ←le_iff_lt_succ, fbit, numeral_eq_natCast]
-  constructor
-  · intro h; exact ⟨bexp (v 1) (v 2), by simp, rfl, _, by simp, rfl, h⟩
-  · rintro ⟨_, _, rfl, _, _, rfl, h⟩; exact h
 
 @[simp] lemma fbit_defined_iff (v) :
     Semiformula.Evalbm V v fbitDef.val ↔ v 0 = fbit (v 1) (v 2) := fbit_defined.df.iff v

@@ -141,9 +141,7 @@ def _root_.LO.FirstOrder.Arith.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
   “x s i. ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ∼[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)” (by simp)
 
 private lemma znth_graph {x s i : V} : x = znth s i ↔ ∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0) := by
-  simp [znth, Classical.choose!_eq_iff]; constructor
-  · rintro h; exact ⟨lh s, by simp, by simp, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  simp [znth, Classical.choose!_eq_iff]
 
 lemma znth_defined : 𝚺₀-Function₂ (znth : V → V → V) via znthDef := by
   intro v;

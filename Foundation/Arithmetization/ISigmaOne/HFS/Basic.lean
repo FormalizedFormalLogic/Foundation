@@ -597,10 +597,7 @@ def _root_.LO.FirstOrder.Arith.fstIdxDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “n p. ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₁Def n p'” (by simp)
 
 lemma fstIdx_defined : 𝚺₀-Function₁ (fstIdx : V → V) via fstIdxDef := by
-  intro v; simp [fstIdxDef]
-  constructor
-  · intro h; exact ⟨v 1 - 1, by simp, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp [fstIdxDef, fstIdx]
 
 @[simp] lemma eval_fstIdxDef (v) :
     Semiformula.Evalbm V v fstIdxDef.val ↔ v 0 = fstIdx (v 1) := fstIdx_defined.df.iff v
@@ -621,10 +618,7 @@ def _root_.LO.FirstOrder.Arith.sndIdxDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “n p. ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₂Def n p'” (by simp)
 
 lemma sndIdx_defined : 𝚺₀-Function₁ (sndIdx : V → V) via sndIdxDef := by
-  intro v; simp [sndIdxDef]
-  constructor
-  · intro h; exact ⟨v 1 - 1, by simp, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp [sndIdxDef, sndIdx]
 
 @[simp] lemma eval_sndIdxDef (v) :
     Semiformula.Evalbm V v sndIdxDef.val ↔ v 0 = sndIdx (v 1) := sndIdx_defined.df.iff v

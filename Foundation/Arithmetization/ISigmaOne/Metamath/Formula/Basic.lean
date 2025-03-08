@@ -69,52 +69,28 @@ def _root_.LO.FirstOrder.Arith.qqExDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “r p. ∃ r' < r, !pairDef r' 7 p ∧ r = r' + 1” (by simp)
 
 lemma qqRel_defined : 𝚺₀-Function₃ (qqRel : V → V → V → V) via qqRelDef := by
-  intro v; simp [qqRelDef]
-  constructor
-  · intro h; exact ⟨_, by simp [h, qqRel], rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp_all [qqRelDef, qqRel]
 
 lemma qqNRel_defined : 𝚺₀-Function₃ (qqNRel : V → V → V → V) via qqNRelDef := by
-  intro v; simp [qqNRelDef]
-  constructor
-  · intro h; exact ⟨_, by simpa [h, qqRel] using lt_add_one _, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp_all [qqNRelDef, qqNRel]
 
 lemma qqVerum_defined : 𝚺₀-Function₀ (qqVerum : V) via qqVerumDef := by
-  intro v; simp [qqVerumDef]
-  constructor
-  · intro h; exact ⟨_, by simpa [h, qqRel] using lt_add_one _, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp_all [qqVerumDef, qqVerum]
 
 lemma qqFalsum_defined : 𝚺₀-Function₀ (qqFalsum : V) via qqFalsumDef := by
-  intro v; simp [qqFalsumDef]
-  constructor
-  · intro h; exact ⟨_, by simpa [h, qqRel] using lt_add_one _, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp_all [qqFalsumDef, qqFalsum]
 
 lemma qqAnd_defined : 𝚺₀-Function₂ (qqAnd : V → V → V) via qqAndDef := by
-  intro v; simp [qqAndDef]
-  constructor
-  · intro h; exact ⟨_, by simpa [h, qqRel] using lt_add_one _, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp_all [qqAndDef, qqAnd]
 
 lemma qqOr_defined : 𝚺₀-Function₂ (qqOr : V → V → V) via qqOrDef := by
-  intro v; simp [qqOrDef, numeral_eq_natCast]
-  constructor
-  · intro h; exact ⟨_, by simpa [h] using lt_add_one _, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp_all [qqOrDef, numeral_eq_natCast, qqOr]
 
 lemma qqForall_defined : 𝚺₀-Function₁ (qqAll : V → V) via qqAllDef := by
-  intro v; simp [qqAllDef, numeral_eq_natCast]
-  constructor
-  · intro h; exact ⟨_, by simpa [h] using lt_add_one _, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp_all [qqAllDef, numeral_eq_natCast, qqAll]
 
 lemma qqExists_defined : 𝚺₀-Function₁ (qqEx : V → V) via qqExDef := by
-  intro v; simp [qqExDef, numeral_eq_natCast]
-  constructor
-  · intro h; exact ⟨_, by simpa [h] using lt_add_one _, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp_all [qqExDef, numeral_eq_natCast, qqEx]
 
 @[simp] lemma eval_qqRelDef (v) :
     Semiformula.Evalbm V v qqRelDef.val ↔ v 0 = ^rel (v 1) (v 2) (v 3) := qqRel_defined.df.iff v

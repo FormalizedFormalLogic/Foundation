@@ -21,12 +21,6 @@ variable {V : Type*} [ORingStruc V]
 
 lemma models_Omega₁_iff [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ OmegaOneAxiom ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
   simp [models_def, OmegaOneAxiom, length_defined.df.iff, Exponential.defined.df.iff, sq, ←le_iff_lt_succ]
-  constructor
-  · intro h x
-    rcases h x with ⟨y, _, _, rfl, h⟩; exact ⟨y, h⟩
-  · intro h x
-    rcases h x with ⟨y, h⟩
-    exact ⟨y, ‖x‖, by simp, rfl, h⟩
 
 lemma sigma₁_omega₁ [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ OmegaOneAxiom := models_Omega₁_iff.mpr (fun x ↦ Exponential.range_exists (‖x‖^2))
 
@@ -65,10 +59,10 @@ def hashDef : 𝚺₀.Semisentence 3 := .mkSigma
   “z x y. ∃ lx <⁺ x, ∃ ly <⁺ y, !lengthDef lx x ∧ !lengthDef ly y ∧ !exponentialDef (lx * ly) z” (by simp)
 
 lemma hash_defined : 𝚺₀-Function₂ (Hash.hash : V → V → V) via hashDef := by
-  intro v; simp[hashDef, length_defined.df.iff, Exponential.defined.df.iff, ←le_iff_lt_succ]
+  intro v; simp [hashDef, length_defined.df.iff, Exponential.defined.df.iff, ←le_iff_lt_succ]
   constructor
-  · intro h; exact ⟨‖v 1‖, by simp, ‖v 2‖, by simp, rfl, rfl, by rw [h]; exact exponential_hash _ _⟩
-  · rintro ⟨_, _, _, _, rfl, rfl, h⟩; exact h.uniq (exponential_hash (v 1) (v 2))
+  · intro h; simp [h, exponential_hash]
+  · rintro h; exact h.uniq (exponential_hash (v 1) (v 2))
 
 instance hash_definable : 𝚺₀-Function₂ (Hash.hash : V → V → V) := hash_defined.to_definable
 

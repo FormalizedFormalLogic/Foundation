@@ -48,16 +48,13 @@ lemma ext_graph (z S L i : V) : z = S{L}[i] ↔
   rw [ext_graph_aux]
   rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_lt _ _ with (le | lt)
   · simp [ext_eq_zero_of_lt le, le, not_lt.mpr le]
+  · suffices (∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % L # 1)
+      ↔ ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ ∃ hL ≤ 2 * L + 1, Exponential ‖L‖ hL ∧ z = S / b % hL
+    by simpa [lt, not_le.mpr lt]
     constructor
-    · rintro rfl; exact ⟨‖S‖, by simp, rfl, ‖L‖, by simp, rfl, by simp [not_lt.mpr le]⟩
-    · rintro ⟨_, _, rfl, _, _, rfl, h, _⟩; exact h le
-  · simp [lt, not_le.mpr lt]
-    constructor
-    · rintro ⟨b, hb, Hb, rfl⟩; refine ⟨‖S‖, by simp, rfl, ‖L‖, by simp, rfl, ?_⟩
-      simp [not_le.mpr lt, lt]
-      exact ⟨b, hb, Hb, L # 1, by simp, exponential_hash_one L, S / b, by simp, rfl, rfl⟩
-    · rintro ⟨_, _, rfl, _, _, rfl, _, h⟩
-      rcases h lt with ⟨b, hb, Hb, hL, _, HhL, _, _, rfl, rfl⟩
+    · rintro ⟨b, hb, Hb, rfl⟩;
+      refine ⟨b, hb, Hb, L # 1, by simp, exponential_hash_one L, rfl⟩
+    · rintro ⟨b, hb, Hb, hL, _, HhL, _, _, rfl, rfl⟩
       exact ⟨b, hb, Hb, by rw [HhL.uniq (exponential_hash_one L)]⟩
 
 def extDef : 𝚺₀.Semisentence 4 := .mkSigma
@@ -498,8 +495,8 @@ lemma isSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSegment (v 0) 
   intro v; simp [IsSegment, isSegmentDef, ext_defined.df.iff, fbit_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
   apply forall₂_congr; intro x _
   constructor
-  · intro h; exact ⟨_, by simp, rfl, _, by simp, rfl, _, by simp, rfl, h⟩
-  · rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, h⟩; exact h
+  · intro h; exact ⟨by simp [←h], h.symm⟩
+  · rintro ⟨_, h⟩; exact h.symm
 
 def segmentDef : 𝚺₀.Semisentence 7 := .mkSigma
   “U L A start intv nₛ nₑ. ∃ S < U, !isSegmentDef L A start intv S ∧ !extDef nₛ L S 0 ∧ !extDef nₑ L S intv” (by simp)
@@ -527,10 +524,6 @@ lemma bex_eq_lt_iff {p : V → Prop} {b : V} :
 
 lemma isSerieDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef := by
   intro v; simp [IsSeries, isSeriesDef, length_defined.df.iff, ext_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
-  apply forall₂_congr; intro x _
-  rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]
-  simp
-
 
 def seriesDef : 𝚺₀.Semisentence 6 := .mkSigma
   “U I L A iter n. ∃ T < U, !isSeriesDef U I L A iter T ∧ !extDef 0 L T 0 ∧ !extDef n L T iter” (by simp)
@@ -554,9 +547,6 @@ def seriesSegmentDef : 𝚺₀.Semisentence 6 := .mkSigma
 lemma seriesSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesSegmentDef := by
   intro v; simp [SeriesSegment, seriesSegmentDef,
     length_defined.df.iff, div_defined.df.iff, rem_defined.df.iff, seriesDef_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
-  apply exists_congr; intro nₖ
-  apply and_congr_right; intros
-  rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp
 
 def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
   “A k n.
@@ -569,7 +559,6 @@ def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
 lemma nuonAux_defined : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) via nuonAuxDef := by
   intro v; simp [NuonAux, polyU, polyI, polyL, nuonAuxDef,
     length_defined.df.iff, sqrt_defined.df.iff, bexp_defined.df.iff, seriesSegmentDef_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
-  rw [bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff, bex_eq_le_iff]; simp
 
 instance nuonAux_definable : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) := nuonAux_defined.to_definable
 
@@ -682,7 +671,6 @@ def _root_.LO.FirstOrder.Arith.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
 lemma nuon_defined : 𝚺₀-Function₁ (nuon : V → V) via nuonDef := by
   intro v; simp [Nuon.nuon_eq_iff, Nuon, nuonDef,
     length_defined.df.iff, Nuon.nuonAux_defined.df.iff, lt_succ_iff_le]
-  rw [Nuon.bex_eq_le_iff]; simp
 
 @[simp] lemma eval_nuon_iff (v) :
     Semiformula.Evalbm V v nuonDef.val ↔ v 0 = nuon (v 1) :=nuon_defined.df.iff v
