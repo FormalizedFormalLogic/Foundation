@@ -24,11 +24,6 @@ lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : V → Prop) via sppow2Def := 
   intro v
   simp [SPPow2, sppow2Def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.df.iff,
     pow2_defined.df.iff, sqrt_defined.df.iff, ←le_iff_lt_succ, sq, numeral_eq_natCast]
-  intro _ _; apply forall₂_congr; intro x _; apply imp_congr_right; intro _; apply imp_congr_right; intro _; apply iff_congr
-  · simp
-  · constructor
-    · intro h; exact ⟨√x, by simpa using h⟩
-    · rintro ⟨_, _, rfl, h⟩; exact h
 
 def PPow2 (i : V) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
@@ -36,7 +31,7 @@ def _root_.LO.FirstOrder.Arith.ppow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “i. !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m” (by simp)
 
 lemma ppow2_defined : 𝚺₀-Predicate (PPow2 : V → Prop) via ppow2Def := by
-  intro v; simp[PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail,
+  intro v; simp [PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail,
     lenbit_defined.df.iff, pow2_defined.df.iff, sppow2_defined.df.iff, numeral_eq_natCast]
 
 instance ppow2_definable : 𝚺₀-Predicate (PPow2 : V → Prop) := ppow2_defined.to_definable
@@ -78,7 +73,7 @@ lemma of_sqrt (hm : SPPow2 m) {i : V} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√
     exact (hm.lenbit_iff him pi this).mpr ⟨hsqi, hi⟩
 
 @[simp] lemma two : SPPow2 (2 : V) :=
-  ⟨by simp[LenBit.one], by simp, by
+  ⟨by simp [LenBit.one], by simp, by
     intro i hi pi
     rcases le_two_iff_eq_zero_or_one_or_two.mp hi with (rfl | rfl | rfl) <;> simp⟩
 

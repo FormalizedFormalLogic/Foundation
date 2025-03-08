@@ -50,10 +50,7 @@ lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :
 def _root_.LO.FirstOrder.Arith.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1” (by simp)
 
 lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := by
-  intro v; simp [qqBvarDef]
-  constructor
-  · intro h; exact ⟨⟪0, v 1⟫, by simp [qqBvar, h], rfl, h⟩
-  · rintro ⟨x, _, rfl, h⟩; exact h
+  intro v; simp_all [qqBvarDef, qqBvar]
 
 @[simp] lemma eval_qqBvarDef (v) :
     Semiformula.Evalbm V v qqBvarDef.val ↔ v 0 = ^#(v 1) := qqBvar_defined.df.iff v
@@ -61,10 +58,7 @@ lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := b
 def _root_.LO.FirstOrder.Arith.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1” (by simp)
 
 lemma qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef := by
-  intro v; simp [qqFvarDef]
-  constructor
-  · intro h; exact ⟨⟪1, v 1⟫, by simp [qqFvar, h], rfl, h⟩
-  · rintro ⟨x, _, rfl, h⟩; exact h
+  intro v; simp_all [qqFvarDef, qqFvar]
 
 @[simp] lemma eval_qqFvarDef (v) :
     Semiformula.Evalbm V v qqFvarDef.val ↔ v 0 = ^&(v 1) := qqFvar_defined.df.iff v
@@ -460,11 +454,7 @@ lemma Graph.case_iff {t y : V} :
 variable (c)
 
 lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph (v ·.succ.succ) (v 0) (v 1)) β.graph := by
-  intro v
-  simp [Blueprint.graph, c.construction.fixpoint_defined.iff]
-  constructor
-  · intro h; exact ⟨⟪v 0, v 1⟫, by simp, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp [Blueprint.graph, c.construction.fixpoint_defined.iff, Graph]
 
 @[simp] lemma eval_graphDef (v) :
     Semiformula.Evalbm V v β.graph.val ↔ c.Graph (v ·.succ.succ) (v 0) (v 1) := (graph_defined c).df.iff v

@@ -68,10 +68,7 @@ def _root_.LO.FirstOrder.Arith.consDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “w x v. ∃ xv < w, !pairDef xv x v ∧ w = xv + 1” (by simp)
 
 lemma cons_defined : 𝚺₀-Function₂ (cons : V → V → V) via consDef := by
-  intro v; simp [consDef]
-  constructor
-  · intro h; rw [h]; exact ⟨_, by simp [cons_def], rfl, rfl⟩
-  · intro ⟨_, _, rfl, h⟩; exact h
+  intro v; simp_all [consDef, cons_def]
 
 @[simp] lemma eval_cons (v) :
     Semiformula.Evalbm V v consDef.val ↔ v 0 = v 1 ∷ v 2 := cons_defined.df.iff v

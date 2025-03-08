@@ -252,9 +252,7 @@ def _root_.LO.FirstOrder.Arith.remDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “c a b. ∃ d <⁺ a, !divDef.val d a b ∧ !subDef.val c a (b * d)” (by simp)
 
 lemma rem_graph (a b c : V) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
-  simp [mod_def]; constructor
-  · rintro rfl; exact ⟨b / c, by simp, rfl, by rfl⟩
-  · rintro ⟨_, _, rfl, rfl⟩; simp
+  simp [mod_def]
 
 lemma rem_defined : 𝚺₀-Function₂ ((· % ·) : V → V → V) via remDef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, remDef, rem_graph, Semiformula.eval_substs, le_iff_lt_succ]
@@ -706,30 +704,21 @@ lemma pair₃_defined : 𝚺₀-Function₃ ((⟪·, ·, ·⟫) : V → V → V 
 
 lemma pair₄_defined : 𝚺₀-Function₄ ((⟪·, ·, ·, ·⟫) : V → V → V → V → V) via pair₄Def := by
   intro v; simp [pair₄Def]
-  constructor
-  · intro h; simp only [Fin.isValue, h, pair_ext_iff, true_and]
-    exact ⟨_, by simp, _, by simp, rfl, rfl, rfl⟩
-  · rintro ⟨_, _, _, _, h, rfl, rfl⟩; exact h
+  intro e; simp [e]
 
 @[simp] lemma eval_pair₄Def (v) :
     Semiformula.Evalbm V v pair₄Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4⟫ := pair₄_defined.df.iff v
 
 lemma pair₅_defined : 𝚺₀.DefinedFunction (fun v : Fin 5 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4⟫)) pair₅Def := by
   intro v; simp [pair₅Def]
-  constructor
-  · intro h; simp only [Fin.isValue, h, pair_ext_iff, true_and]
-    exact ⟨_, le_pair_right _ _, _, le_pair_right _ _, _, le_pair_right _ _, rfl, rfl, rfl, rfl⟩
-  · rintro ⟨_, _, _, _, _, _, h, rfl, rfl, rfl⟩; exact h
+  intro e; simp [e]
 
 @[simp] lemma eval_pair₅Def (v) :
     Semiformula.Evalbm V v pair₅Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4, v 5⟫ := pair₅_defined.df.iff v
 
 lemma pair₆_defined : 𝚺₀.DefinedFunction (fun v : Fin 6 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4, v 5⟫)) pair₆Def := by
   intro v; simp [pair₆Def]
-  constructor
-  · intro h; simp only [Fin.isValue, h, pair_ext_iff, true_and]
-    exact ⟨_, le_pair_right _ _, rfl, rfl⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  intro e; simp [e]
 
 @[simp] lemma eval_pair₆Def (v) :
     Semiformula.Evalbm V v pair₆Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4, v 5, v 6⟫ := pair₆_defined.df.iff v
@@ -767,9 +756,6 @@ lemma unNpair_defined {n} (i : Fin n) : 𝚺₀-Function₁ (unNpair i : V → V
     cases' i using Fin.cases with i
     · simp [unNpairDef, unNpair]
     · simp [unNpairDef, unNpair, (ih i).df.iff]
-      constructor
-      · intro h; exact ⟨π₂ (v 1), by simp, rfl, h⟩
-      · rintro ⟨x, _, rfl, h⟩; exact h
 
 @[simp] lemma eval_unNpairDef {n} (i : Fin n) (v) :
     Semiformula.Evalbm V v (unNpairDef i).val ↔ v 0 = unNpair i (v 1) := (unNpair_defined i).df.iff v

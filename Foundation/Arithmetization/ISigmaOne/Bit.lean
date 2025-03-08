@@ -21,8 +21,8 @@ def _root_.LO.FirstOrder.Arith.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) via bitDef := by
   intro v; simp [bitDef, ←le_iff_lt_succ]
   constructor
-  · intro h; exact ⟨exp (v 0), by simp [h.le], rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
+  · intro h; exact ⟨by simp [h.le], h⟩
+  · rintro ⟨_, h⟩; exact h
 
 @[simp] lemma bit_defined_iff (v) :
     Semiformula.Evalbm V v bitDef.val ↔ v 0 ∈ v 1 := bit_defined.df.iff v
@@ -82,7 +82,7 @@ def ballIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) 
 def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
 
 @[simp] lemma Hierarchy.bit {t u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t ∈ !!u” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def]
 
 @[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
@@ -138,10 +138,10 @@ macro_rules
 end
 
 @[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRelOpr]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRelOpr]
 
 @[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRel₃Opr]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRel₃Opr]
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -165,15 +165,9 @@ scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformul
 
 lemma memRel_defined : 𝚺₀-Relation₃ (fun r x y : V ↦ ⟪x, y⟫ ∈ r) via memRel := by
   intro v; simp [memRel, pair_defined.df.iff, lt_succ_iff_le]
-  constructor
-  · intro h; exact ⟨⟪v 1, v 2⟫, by simp, rfl, h⟩
-  · rintro ⟨_, _, rfl, h⟩; exact h
 
 lemma memRel₃_defined : 𝚺₀-Relation₄ (fun r x y z : V ↦ ⟪x, y, z⟫ ∈ r) via memRel₃ := by
   intro v; simp [memRel₃, pair_defined.df.iff, lt_succ_iff_le]
-  constructor
-  · intro h; exact ⟨⟪v 2, v 3⟫, by simp, rfl, ⟪v 1, v 2, v 3⟫, by simp, rfl, h⟩
-  · rintro ⟨_, _, rfl, _, _, rfl, h⟩; exact h
 
 @[simp] lemma eval_memRel {x y r : V} :
     memRelOpr.val ![r, x, y] ↔ ⟪x, y⟫ ∈ r := by

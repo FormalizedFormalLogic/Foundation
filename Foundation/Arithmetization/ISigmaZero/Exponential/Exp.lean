@@ -16,9 +16,7 @@ variable [V ⊧ₘ* 𝐈𝚺₀]
 def ext (u z : V) : V := z / u % u
 
 lemma ext_graph (a b c : V) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x % b := by
-  simp [ext]; constructor
-  · rintro rfl; exact ⟨c / b, by simp, rfl, by rfl⟩
-  · rintro ⟨_, _, rfl, rfl⟩; simp
+  simp [ext]
 
 def _root_.LO.FirstOrder.Arith.extDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “a b c. ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b” (by simp)

@@ -112,10 +112,7 @@ def _root_.LO.FirstOrder.Arith.lenbitDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “i a. ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z” (by simp)
 
 lemma lenbit_defined : 𝚺₀-Relation (LenBit : V → V → Prop) via lenbitDef := by
-  intro v; simp[sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail, LenBit, ←le_iff_lt_succ, numeral_eq_natCast]
-  constructor
-  · intro h; exact ⟨v 1 / v 0, by simp, rfl, h⟩
-  · rintro ⟨z, hz, rfl, h⟩; exact h
+  intro v; simp [sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail, LenBit, ←le_iff_lt_succ, numeral_eq_natCast]
 
 @[simp] lemma lenbit_defined_iff (v) :
     Semiformula.Evalbm V v lenbitDef.val ↔ LenBit (v 0) (v 1) := lenbit_defined.df.iff v
@@ -332,7 +329,7 @@ lemma LenBit.add_pow2_iff_of_lt {a i j : V} (pi : Pow2 i) (pj : Pow2 j) (h : a <
   · simp [LenBit.add_pow2 pi pj hij, hij.ne]
   · simp [LenBit.add_self h]
   · have : a + j < i := calc
-      a + j < 2 * j  := by simp[two_mul, h]
+      a + j < 2 * j  := by simp [two_mul, h]
       _     ≤ i      := (pj.lt_iff_two_mul_le pi).mp hij
     simp [not_lenbit_of_lt this, not_lenbit_of_lt (show a < i from lt_trans h hij), hij.ne.symm]
 
@@ -367,11 +364,11 @@ lemma lenbit_mul_add {i j a r : V} (pi : Pow2 i) (pj : Pow2 j) (hr : r < j) :
   by_cases h : LenBit i a <;> simp [h]
   · rcases (lenbit_iff_add_mul pi).mp h with ⟨a, b, hb, rfl⟩
     have : b * j + r < i * j :=
-      pj.mul_add_lt_of_mul_lt_of_pos (by simp[pi, pj]) ((mul_lt_mul_right pj.pos).mpr hb)  hr (lt_of_lt_of_le hr $ le_mul_of_pos_left $ pi.pos)
+      pj.mul_add_lt_of_mul_lt_of_pos (by simp [pi, pj]) ((mul_lt_mul_right pj.pos).mpr hb)  hr (lt_of_lt_of_le hr $ le_mul_of_pos_left $ pi.pos)
     exact (lenbit_iff_add_mul (by simp [pi, pj])).mpr ⟨a, b * j + r, this, by simp [add_mul, add_assoc, mul_assoc]⟩
   · rcases (not_lenbit_iff_add_mul pi).mp h with ⟨a, b, hb, rfl⟩
     have : b * j + r < i * j :=
-      pj.mul_add_lt_of_mul_lt_of_pos (by simp[pi, pj]) ((mul_lt_mul_right pj.pos).mpr hb) hr (lt_of_lt_of_le hr $ le_mul_of_pos_left $ pi.pos)
+      pj.mul_add_lt_of_mul_lt_of_pos (by simp [pi, pj]) ((mul_lt_mul_right pj.pos).mpr hb) hr (lt_of_lt_of_le hr $ le_mul_of_pos_left $ pi.pos)
     exact (not_lenbit_iff_add_mul (by simp [pi, pj])).mpr ⟨a, b * j + r, this, by simp [add_mul, add_assoc, mul_assoc]⟩
 
 lemma lenbit_add_pow2_iff_of_not_lenbit {a i j : V} (pi : Pow2 i) (pj : Pow2 j) (h : ¬LenBit j a) :
