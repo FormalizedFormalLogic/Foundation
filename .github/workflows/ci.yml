@@ -21,15 +21,97 @@ jobs:
     name: Build project
     runs-on: ubuntu-latest
     steps:
+      # We don't use https://github.com/leanprover/lean-action.
+      # Because caching strategy is not suitable for our project.
       - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
-      - working-directory: docbuild
+      - name: Install elan
         run: |
-          lake build --keep-toolchain Foundation:docs
-          cp -r .lake/build/doc ../pages/doc
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME"/.elan/bin/lean --version
+          "$HOME"/.elan/bin/lake --version
+
+      # Build project
+      - name: Restore cache
+        id: cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake
+          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+
+      # Build project
+      - name: Get Mathlib cache
+        run: lake exe cache get
+      - name: Build project
+        run: lake build --keep-toolchain
+
+      # Build import-graph
+      - uses: ts-graphviz/setup-graphviz@v2
+      - name: Generate import graph
+        run: |
+          lake exe graph ./import_graph.png
+          lake exe graph ./import_graph.pdf
+          lake exe graph ./import_graph.html
+      - name: Copy import graph to pages
+        run: |
+          cp ./import_graph.png ./pages/src/assets
+          cp ./import_graph.pdf ./pages/src/assets
+          cp ./import_graph.html ./pages/src/assets
+
+      # Build kites
+      - uses: typst-community/setup-typst@v4
+      - name: Generate kites
+        run: |
+          lake exe generate_modal_kite
+      - name: Copy kites to pages
+        run: |
+          cp ./scripts/modal_kite.png ./pages/src/assets
+
+      # Build doc
+      - name: Restore docbuild cache
+        id: cache-docbuild-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: docbuild/.lake
+          key: docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}
+      - name: Build docbuild
+        working-directory: docbuild
+        run: lake build --keep-toolchain Foundation:docs
+      - name: Save docbuild cache
+        id: cache-docbuild-save
+        uses: actions/cache/save@v4
+        with:
+          path: docbuild/.lake
+          key: ${{ steps.cache-docbuild-restore.outputs.cache-primary-key }}
+      - name: Copy docbuild to pages
+        working-directory: docbuild
+        run: cp -r .lake/build/doc ../pages/_output/doc
+
+      # Save cache
+      - name: Save project cache
+        id: cache-save
+        uses: actions/cache/save@v4
+        with:
+          path: .lake
+          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+
+      # Build book
+      - name: Install mdbook
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: mdbook
+          version: "0.4.40"
+      - name: Build book
+        run: mdbook build
+        working-directory: pages
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: pages
+          path: pages/_output
 
   deploy:
     runs-on: ubuntu-latest

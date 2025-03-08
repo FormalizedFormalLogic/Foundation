@@ -1,0 +1,5 @@
+_output/*
+!_output/index.html
+
+src/assets/import_graph.*
+src/assets/*_kite.png

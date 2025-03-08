@@ -2,10 +2,3 @@
 
 # VSCode
 .vscode/settings.json
-
-# Import-graph
-import_graph.*
-*.pdf
-
-# mdbook
-md/book
