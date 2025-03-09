@@ -17,6 +17,10 @@ instance sound : Sound Hilbert.Cl FrameClass.euclidean := inferInstance
 
 instance consistent : Entailment.Consistent Hilbert.Cl := Kripke.Hilbert.consistent_of_FrameClass FrameClass.euclidean (by simp)
 
+instance canonical : Canonical Hilbert.Cl FrameClass.euclidean := ⟨Canonical.euclidean⟩
+
+instance complete : Complete Hilbert.Cl FrameClass.euclidean := inferInstance
+
 end Hilbert.Cl.Kripke
 
 

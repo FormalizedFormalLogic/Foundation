@@ -17,6 +17,8 @@ lemma LC.Kripke.eq_connected : Logic.LC = Kripke.FrameClass.connected.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev Cl : Logic := Hilbert.Cl.logic
+lemma Cl.Kripke.eq_euclidean : Logic.Cl = Kripke.FrameClass.euclidean.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 end Logic
 
