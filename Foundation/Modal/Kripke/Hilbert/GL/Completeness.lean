@@ -174,11 +174,12 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       refine RXY.1 ψ ?_ h |>.1;
       assumption;
 
-instance finiteComplete : Complete Hilbert.GL Kripke.TransitiveIrreflexiveFiniteFrameClass := ⟨by
+instance finiteComplete : Complete Hilbert.GL Kripke.FiniteFrameClass.trans_irrefl := ⟨by
   intro φ;
   contrapose;
   intro h;
-  apply ValidOnFiniteFrameClass.not_of_exists_frame;
+  apply Semantics.set_models_iff.not.mpr;
+  push_neg;
   use (miniCanonicalFrame φ);
   constructor;
   . exact ⟨miniCanonicalFrame.is_transitive, miniCanonicalFrame.is_irreflexive⟩;

@@ -207,11 +207,6 @@ lemma ValidOnFrame.toFormula : NNFormula.Kripke.ValidOnFrame F φ ↔ Formula.Kr
   λ h V => ValidOnModel.toFormula.mpr (h V)
 ⟩
 
-lemma ValidOnFrameClass.toFormula : NNFormula.Kripke.ValidOnFrameClass C φ ↔ Formula.Kripke.ValidOnFrameClass C φ.toFormula := ⟨
-  λ h _ hF => ValidOnFrame.toFormula.mp (h hF),
-  λ h _ hF => ValidOnFrame.toFormula.mpr (h hF)
-⟩
-
 end NNFormula.Kripke
 
 
@@ -253,11 +248,6 @@ lemma ValidOnModel.toNNFormula : Formula.Kripke.ValidOnModel M φ ↔ NNFormula.
 lemma ValidOnFrame.toNNFormula : Formula.Kripke.ValidOnFrame F φ ↔ NNFormula.Kripke.ValidOnFrame F φ.toNNFormula := ⟨
   fun h V => ValidOnModel.toNNFormula.mp (h V),
   fun h V => ValidOnModel.toNNFormula.mpr (h V)
-⟩
-
-lemma ValidOnFrameClass.toNNFormula : Formula.Kripke.ValidOnFrameClass C φ ↔ NNFormula.Kripke.ValidOnFrameClass C φ.toNNFormula := ⟨
-  fun h _ hF => ValidOnFrame.toNNFormula.mp (h hF),
-  fun h _ hF => ValidOnFrame.toNNFormula.mpr (h hF)
 ⟩
 
 end Formula.Kripke

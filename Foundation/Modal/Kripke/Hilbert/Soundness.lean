@@ -1,16 +1,15 @@
 import Foundation.Modal.Hilbert.Basic
-import Foundation.Modal.Kripke.FiniteFrame
+import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
 
-open Kripke
 open Formula
+open Kripke
 open Formula.Kripke
 
 namespace Kripke.Hilbert
 
 variable {H : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
-
 
 section
 
@@ -50,20 +49,24 @@ instance [defs : C.DefinedBy H.axioms] : C.DefinedBy H.axiomInstances := ⟨by
 
 instance [C.DefinedBy H.axioms] : Sound H C := ⟨fun {_} => soundness_of_FrameClass_definedBy_axiomInstances⟩
 
-lemma consistent_of_FrameClass_aux [nonempty : C.IsNonempty] [sound : Sound H C] : H ⊬ ⊥ := by
+lemma consistent_of_FrameClass (C : Kripke.FrameClass) (C_nonempty: C.Nonempty := by simp) [sound : Sound H C] : Entailment.Consistent H := by
+  apply Entailment.Consistent.of_unprovable (f := ⊥);
   apply not_imp_not.mpr sound.sound;
-  apply ValidOnFrameClass.not_of_exists_frame;
-  obtain ⟨F, hF⟩ := nonempty;
+  apply Semantics.set_models_iff.not.mpr;
+  push_neg;
+  obtain ⟨F, hF⟩ := C_nonempty;
   use F;
   constructor;
   . assumption;
   . simp;
 
-lemma consistent_of_FrameClass (C : Kripke.FrameClass) [C.IsNonempty] [Sound H C] : Entailment.Consistent H := by
-  apply Entailment.Consistent.of_unprovable;
-  exact consistent_of_FrameClass_aux (C := C);
+lemma finite_sound_of_sound (sound : Sound H C) : Sound H ({ F | F ∈ C ∧ Finite F }) := ⟨by
+  rintro φ hφ F ⟨hF₁, _⟩;
+  exact sound.sound hφ hF₁;
+⟩
 
 end
+
 
 
 section
@@ -71,7 +74,7 @@ section
 variable {C : Kripke.FiniteFrameClass}
 
 lemma soundness_of_FiniteFrameClass_definedBy_axiomInstances [defined : C.DefinedBy H.axiomInstances] : H ⊢! φ → C ⊧ φ := by
-  rintro hφ _ ⟨F, ⟨hF, rfl⟩⟩;
+  rintro hφ F hF;
   induction hφ using Hilbert.Deduction.rec! with
   | maxm h =>
     obtain ⟨ψ, h, ⟨s, rfl⟩⟩ := h;
@@ -104,18 +107,16 @@ instance [defs : C.DefinedBy H.axioms] : C.DefinedBy H.axiomInstances := ⟨by
 
 instance [C.DefinedBy H.axioms] : Sound H C := ⟨fun {_} => soundness_of_FiniteFrameClass_definedBy_axiomInstances⟩
 
-lemma consistent_of_FiniteFrameClass_aux [nonempty : C.IsNonempty] [sound : Sound H C] : H ⊬ ⊥ := by
+lemma consistent_of_FiniteFrameClass (C : Kripke.FiniteFrameClass) (C_nonempty: C.Nonempty := by simp) [sound : Sound H C] : Entailment.Consistent H := by
+  apply Entailment.Consistent.of_unprovable (f := ⊥);
   apply not_imp_not.mpr sound.sound;
-  apply ValidOnFrameClass.not_of_exists_frame;
-  obtain ⟨F, hF⟩ := nonempty;
-  use F.toFrame;
+  apply Semantics.set_models_iff.not.mpr;
+  push_neg;
+  obtain ⟨F, hF⟩ := C_nonempty;
+  use F;
   constructor;
-  . use F;
+  . assumption;
   . simp;
-
-lemma consistent_of_FiniteFrameClass (C : Kripke.FiniteFrameClass) [C.IsNonempty] [Sound H C] : Entailment.Consistent H := by
-  apply Entailment.Consistent.of_unprovable;
-  exact consistent_of_FiniteFrameClass_aux (C := C);
 
 end
 

@@ -54,11 +54,13 @@ section
 open Kripke
 
 abbrev Kripke.FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
-
 abbrev Kripke.FiniteFrameClass.logic (C : FiniteFrameClass) : Logic := { φ | C ⊧ φ }
 
-lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic
-  {H : Hilbert ℕ} {C : FrameClass}
+@[simp]
+lemma Logic.eq_kripkeFiniteFrameClass_toFrameClas_logic {C : Kripke.FiniteFrameClass} : (C.toFrameClass.logic) = C.logic := by
+  simp [Kripke.FiniteFrameClass.logic, Kripke.FrameClass.logic, FiniteFrameClass.toFrameClass, Semantics.Realize]
+
+lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic {H : Hilbert ℕ} {C : FrameClass}
   [sound : Sound H C] [complete : Complete H C]
   : H.logic = C.logic := by
   ext φ;
@@ -66,8 +68,7 @@ lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic
   . exact sound.sound;
   . exact complete.complete;
 
-lemma Logic.eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
-  {H : Hilbert ℕ} {C : FiniteFrameClass}
+lemma Logic.eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic {H : Hilbert ℕ} {C : FiniteFrameClass}
   [sound : Sound H C] [complete : Complete H C]
   : H.logic = C.logic := by
   ext φ;
@@ -75,9 +76,9 @@ lemma Logic.eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
   . exact sound.sound;
   . exact complete.complete;
 
-lemma Logic.Int.eq_AllKripkeFrameClass_Logic : Logic.Int = AllFrameClass.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Logic.Int.Kripke.eq_all : Logic.Int = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
-lemma Logic.Int.eq_AllFiniteKripkeFrameClass_Logic : Logic.Int = AllFiniteFrameClass.logic := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
+lemma Logic.Int.Kripke.eq_all_finite : Logic.Int = Kripke.FiniteFrameClass.all.logic := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
 
 end
 

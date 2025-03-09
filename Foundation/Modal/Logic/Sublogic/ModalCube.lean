@@ -13,11 +13,11 @@ theorem KTB_ssubset_S5 : Logic.KTB ⊂ Logic.S5 := by
     rintro φ hφ F ⟨F_refl, F_eucl⟩;
     apply hφ;
     refine ⟨F_refl, symm_of_refl_eucl F_refl F_eucl⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬ReflexiveSymmetricFrameClass ⊧ φ by simpa [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.refl_symm ⊧ φ by simpa [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = 1 ∧ y ≠ 2) ∨ (x = 2 ∧ y ≠ 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
@@ -42,11 +42,11 @@ theorem KD45_ssubset_S5 : Logic.KD45 ⊂ Logic.S5 := by
     refine ⟨?_, ?_, F_eucl⟩;
     . exact serial_of_refl F_refl;
     . exact trans_of_refl_eucl F_refl F_eucl;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬SerialTransitiveEuclideanFrameClass ⊧ φ by simpa [KD45.eq_SerialTransitiveEuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.serial_trans_eucl ⊧ φ by simpa [KD45.eq_SerialTransitiveEuclideanKripkeFrameClass_Logic];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => (x = 0 ∧ y = 1) ∨ (x = 1 ∧ y = 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
@@ -67,11 +67,11 @@ theorem KB4_ssubset_S5 : Logic.KB4 ⊂ Logic.S5 := by
     rintro φ hφ F ⟨F_refl, F_eucl⟩;
     apply hφ;
     refine ⟨symm_of_refl_eucl F_refl F_eucl, trans_of_refl_eucl F_refl F_eucl⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬SymmetricTransitiveFrameClass ⊧ φ by simpa [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.symm_trans ⊧ φ by simpa [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ x _ => False⟩, 0;
       constructor;
       . simp [Transitive, Symmetric];
@@ -81,11 +81,11 @@ instance : ProperSublogic Logic.KB4 Logic.S5 := ⟨KB4_ssubset_S5⟩
 theorem KT_ssubset_KTB : Logic.KT ⊂ Logic.KTB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬ReflexiveFrameClass ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -102,11 +102,11 @@ theorem KDB_ssubset_KTB : Logic.KDB ⊂ Logic.KTB := by
     rintro φ hφ F ⟨F_refl, F_symm⟩;
     apply hφ;
     refine ⟨serial_of_refl F_refl, F_symm⟩;
-  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬SerialSymmetricFrameClass ⊧ φ by simpa [KDB.eq_SerialSymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬FrameClass.serial_symm ⊧ φ by simpa [KDB.eq_SerialSymmetricKripkeFrameClass_Logic];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Bool, λ x y => x ≠ y⟩,
           λ x _ => x = true
@@ -125,11 +125,11 @@ instance : ProperSublogic Logic.KDB Logic.KTB := ⟨KDB_ssubset_KTB⟩
 theorem KT_ssubset_S4 : Logic.KT ⊂ Logic.S4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomT!]) |>.subset;
-  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬ReflexiveFrameClass ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Fin 3, λ x y => (x = 0 ∧ y ≠ 2) ∨ (x = 1 ∧ y ≠ 0) ∨ (x = 2 ∧ y = 2)⟩,
           λ w _ => w = 0 ∨ w = 1
@@ -155,11 +155,11 @@ instance : ProperSublogic Logic.KT Logic.S4 := ⟨KT_ssubset_S4⟩
 theorem KD4_ssubset_S4 : Logic.KD4 ⊂ Logic.S4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬SerialTransitiveFrameClass ⊧ φ by simpa [KD4.eq_SerialTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by simpa [KD4.eq_SerialTransitiveKripkeFrameClass_Logic];
     use Axioms.T (.atom 0);
     constructor;
     . exact axiomT!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ _ y => y = 1⟩, (λ w _ => w = 1)⟩, 0;
       constructor;
       . refine ⟨?_, ?_⟩;
@@ -171,11 +171,11 @@ instance : ProperSublogic Logic.KD4 Logic.S4 := ⟨KD4_ssubset_S4⟩
 theorem KD4_ssubset_KD45 : Logic.KD4 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬SerialTransitiveFrameClass ⊧ φ by simpa [KD4.eq_SerialTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by simpa [KD4.eq_SerialTransitiveKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Fin 3, λ x y => x = y ∨ x < y⟩,
           λ w _ => w = 0
@@ -197,11 +197,11 @@ instance : ProperSublogic Logic.KD4 Logic.KD45 := ⟨KD4_ssubset_KD45⟩
 theorem KD5_ssubset_KD45 : Logic.KD5 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬SerialEuclideanFrameClass ⊧ φ by simpa [KD5.eq_SerialEuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_eucl ⊧ φ by simpa [KD5.eq_SerialEuclideanKripkeFrameClass_Logic];
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
@@ -232,11 +232,11 @@ instance : ProperSublogic Logic.KD5 Logic.KD45 := ⟨KD5_ssubset_KD45⟩
 theorem K45_ssubset_KD45 : Logic.K45 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬TransitiveEuclideanFrameClass ⊧ φ by simpa [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by simpa [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
     use Axioms.D (.atom 0);
     constructor;
     . exact axiomD!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 1, λ x y => False⟩, λ w _ => True⟩;
       use M, 0;
       constructor;
@@ -250,11 +250,11 @@ theorem K45_ssubset_KB4 : Logic.K45 ⊂ Logic.KB4 := by
     rintro φ hφ F ⟨F_symm, F_trans⟩;
     apply hφ;
     refine ⟨F_trans, eucl_of_symm_trans F_symm F_trans⟩;
-  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬TransitiveEuclideanFrameClass ⊧ φ by simpa [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by simpa [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
     use Axioms.B (.atom 0);
     constructor;
     . exact axiomB!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -267,11 +267,11 @@ instance : ProperSublogic Logic.K45 Logic.KB4 := ⟨K45_ssubset_KB4⟩
 theorem KB_ssubset_KB4 : Logic.KB ⊂ Logic.KB4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬SymmetricFrameClass ⊧ φ by simpa [KB.eq_SymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by simpa [KB.eq_SymmetricKripkeFrameClass_Logic];
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩;
       use M, false;
       constructor;
@@ -283,11 +283,11 @@ instance : ProperSublogic Logic.KB Logic.KB4 := ⟨KB_ssubset_KB4⟩
 theorem KD_ssubset_KT : Logic.KD ⊂ Logic.KT := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomD!]) |>.subset;
-  . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬SerialFrameClass ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩, 0;
       constructor;
       . tauto;
@@ -297,11 +297,11 @@ instance : ProperSublogic Logic.KD Logic.KT := ⟨KD_ssubset_KT⟩
 theorem KD_ssubset_KDB : Logic.KD ⊂ Logic.KDB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬SerialFrameClass ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
     use Axioms.B (.atom 0);
     constructor;
     . exact axiomB!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -318,11 +318,11 @@ instance : ProperSublogic Logic.KD Logic.KDB := ⟨KD_ssubset_KDB⟩
 theorem KB_ssubset_KDB : Logic.KB ⊂ Logic.KDB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬SymmetricFrameClass ⊧ φ by simpa [KB.eq_SymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by simpa [KB.eq_SymmetricKripkeFrameClass_Logic];
     use Axioms.D (.atom 0);
     constructor;
     . exact axiomD!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
       . simp [Symmetric];
@@ -332,11 +332,11 @@ instance : ProperSublogic Logic.KB Logic.KDB := ⟨KB_ssubset_KDB⟩
 theorem KD_ssubset_KD4 : Logic.KD ⊂ Logic.KD4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬SerialFrameClass ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩;
       use M, false;
       constructor;
@@ -348,11 +348,11 @@ instance : ProperSublogic Logic.KD Logic.KD4 := ⟨KD_ssubset_KD4⟩
 theorem K4_ssubset_KD4 : Logic.K4 ⊂ Logic.KD4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.trans ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Fin 1, λ x y => False⟩,
           λ w _ => w = 0
@@ -371,11 +371,11 @@ lemma K4_ssubset_S4 : Logic.K4 ⊂ Logic.S4 := by
 theorem KD_ssubset_KD5 : Logic.KD ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬SerialFrameClass ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -391,11 +391,11 @@ instance : ProperSublogic Logic.KD Logic.KD5 := ⟨KD_ssubset_KD5⟩
 theorem K5_ssubset_KD5 : Logic.K5 ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬EuclideanFrameClass ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Fin 1, λ x y => False⟩,
           λ w _ => w = 0
@@ -409,11 +409,11 @@ instance : ProperSublogic Logic.K5 Logic.KD5 := ⟨K5_ssubset_KD5⟩
 theorem K4_ssubset_K45 : Logic.K4 ⊂ Logic.K45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬FrameClass.trans ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Fin 2, λ x y => x < y⟩,
           λ w _ => w = 1
@@ -433,11 +433,11 @@ instance : ProperSublogic Logic.K4 Logic.K45 := ⟨K4_ssubset_K45⟩
 theorem K5_ssubset_K45 : Logic.K5 ⊂ Logic.K45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬EuclideanFrameClass ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
@@ -458,11 +458,11 @@ instance : ProperSublogic Logic.K5 Logic.K45 := ⟨K5_ssubset_K45⟩
 theorem K_ssubset_KD : Logic.K ⊂ Logic.KD := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩;
       use M, 0;
       constructor;
@@ -473,11 +473,11 @@ instance : ProperSublogic Logic.K Logic.KD := ⟨K_ssubset_KD⟩
 theorem K_ssubset_K4 : Logic.K ⊂ Logic.K4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor
@@ -501,11 +501,11 @@ instance : ProperSublogic Logic.K Logic.K4 := ⟨K_ssubset_K4⟩
 theorem K_ssubset_K5 : Logic.K ⊂ Logic.K5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x _ => x = 0⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -518,11 +518,11 @@ instance : ProperSublogic Logic.K Logic.K5 := ⟨K_ssubset_K5⟩
 theorem K_ssubset_KB : Logic.K ⊂ Logic.KB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x = 0 ∧ y = 1⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -538,11 +538,11 @@ theorem S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
     rintro φ hφ F ⟨F_refl, F_eucl⟩;
     apply hφ;
     refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ w _ => w = 2)⟩;
       use M, 0;
       constructor;

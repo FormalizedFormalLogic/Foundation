@@ -6,34 +6,37 @@ namespace LO.Modal
 open Kripke
 open Geachean
 
-abbrev Kripke.ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
+abbrev Kripke.FrameClass.connected_preorder : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
 
-instance Kripke.ReflexiveTransitiveConnectedFrameClass.DefinedByS4Point3Axioms
-  : FrameClass.DefinedBy Kripke.ReflexiveTransitiveConnectedFrameClass Hilbert.S4Point3.axioms := by
+namespace Kripke.ReflexiveTransitiveConnectedFrameClass
+
+instance : FrameClass.DefinedBy Kripke.FrameClass.connected_preorder Hilbert.S4Point3.axioms := by
   rw [
-    (show ReflexiveTransitiveConnectedFrameClass = ReflexiveTransitiveFrameClass ∩ ConnectedFrameClass by aesop),
+    (show Kripke.FrameClass.connected_preorder = FrameClass.preorder ∩ FrameClass.connected by aesop),
     (show Hilbert.S4Point3.axioms = Hilbert.S4.axioms ∪ {Axioms.Point3 (.atom 0) (.atom 1)} by aesop)
   ];
-  exact FrameClass.definedBy_inter Kripke.ReflexiveTransitiveFrameClass (Hilbert.S4.axioms) ConnectedFrameClass {Axioms.Point3 (.atom 0) (.atom 1)};
+  exact FrameClass.definedBy_inter FrameClass.preorder (Hilbert.S4.axioms) FrameClass.connected {Axioms.Point3 (.atom 0) (.atom 1)};
 
-instance : Kripke.ReflexiveTransitiveConnectedFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
+@[simp]
+protected lemma nonempty : Kripke.FrameClass.connected_preorder.Nonempty := by
+  use whitepoint.toFrame;
   simp [Reflexive, Transitive, Connected];
 
+end Kripke.ReflexiveTransitiveConnectedFrameClass
 
-namespace Hilbert.S4Point3
 
-instance Kripke.sound : Sound (Hilbert.S4Point3) ReflexiveTransitiveConnectedFrameClass := inferInstance
+namespace Hilbert.S4Point3.Kripke
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.S4Point3) :=
-  Kripke.Hilbert.consistent_of_FrameClass Kripke.ReflexiveTransitiveConnectedFrameClass
+instance sound : Sound (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder := inferInstance
 
-instance Kripke.canonical : Canonical (Hilbert.S4Point3) ReflexiveTransitiveConnectedFrameClass :=
+instance consistent : Entailment.Consistent (Hilbert.S4Point3) := Hilbert.consistent_of_FrameClass Kripke.FrameClass.connected_preorder
+
+instance canonical : Canonical (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder :=
   ⟨⟨Canonical.reflexive, Canonical.transitive, Canonical.connected⟩⟩
 
-instance Kripke.complete : Complete (Hilbert.S4Point3) ReflexiveTransitiveConnectedFrameClass := inferInstance
+instance complete : Complete (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder := inferInstance
 
-end Hilbert.S4Point3
+end Hilbert.S4Point3.Kripke
 
 
 end LO.Modal

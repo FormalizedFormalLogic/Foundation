@@ -5,23 +5,23 @@ namespace LO.Modal
 open Kripke
 open Geachean
 
-abbrev Kripke.ReflexiveFrameClass : FrameClass := { F | Reflexive F }
+protected abbrev Kripke.FrameClass.refl : FrameClass := { F | Reflexive F }
 
 namespace Hilbert.KT
 
-instance Kripke.sound : Sound (Hilbert.KT) (Kripke.ReflexiveFrameClass) := by
+instance Kripke.sound : Sound (Hilbert.KT) Kripke.FrameClass.refl := by
   convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 0⟩});
   . exact eq_Geach;
-  . unfold ReflexiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
+  . unfold Kripke.FrameClass.refl FrameClass.multiGeachean MultiGeachean;
     simp [Geachean.reflexive_def];
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.KT) := by
-  convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩});
+  convert Hilbert.Geach.Kripke.consistent (G := {⟨0, 0, 1, 0⟩});
   exact eq_Geach;
 
-instance Kripke.canonical : Canonical (Hilbert.KT) (ReflexiveFrameClass) := ⟨Canonical.reflexive⟩
+instance Kripke.canonical : Canonical (Hilbert.KT) Kripke.FrameClass.refl := ⟨Canonical.reflexive⟩
 
-instance Kripke.complete : Complete (Hilbert.KT) (ReflexiveFrameClass) := inferInstance
+instance Kripke.complete : Complete (Hilbert.KT) Kripke.FrameClass.refl := inferInstance
 
 end Hilbert.KT
 

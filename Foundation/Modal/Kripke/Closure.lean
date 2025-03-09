@@ -95,10 +95,16 @@ section refl
 protected abbrev Frame.RelReflGen : _root_.Rel F.World F.World := ReflGen (· ≺ ·)
 scoped infix:45 " ≺^= " => Frame.RelReflGen
 
-abbrev Frame.ReflexiveClosure (F : Frame) : Frame where
+def Frame.ReflexiveClosure (F : Frame) : Frame where
   World := F.World
   Rel := (· ≺^= ·)
 postfix:95 "^=" => Frame.ReflexiveClosure
+
+instance {F : FiniteFrame} : Finite (F.toFrame^=).World := by
+  simp [Frame.ReflexiveClosure];
+
+abbrev FiniteFrame.ReflexiveClosure (F : FiniteFrame) : FiniteFrame := ⟨F.toFrame^=⟩
+postfix:95 "^=" => FiniteFrame.ReflexiveClosure
 
 end refl
 
@@ -115,16 +121,24 @@ namespace Frame.RelIrreflGen
 end Frame.RelIrreflGen
 
 
-abbrev Frame.IrreflexiveClosure (F : Frame) : Frame where
+def Frame.IrreflexiveClosure (F : Frame) : Frame where
   World := F.World
   Rel := (· ≺^≠ ·)
 postfix:95 "^≠" => Frame.IrreflexiveClosure
 
 namespace Frame.IrreflexiveClosure
 
-@[simp] lemma rel_irreflexive : Irreflexive (F^≠.Rel) := by simp [Irreflexive, Frame.RelIrreflGen, IrreflGen]
+@[simp]
+lemma rel_irreflexive : Irreflexive (F^≠.Rel) := by
+  simp [Irreflexive, Frame.RelIrreflGen, IrreflGen, Frame.IrreflexiveClosure]
 
 end Frame.IrreflexiveClosure
+
+instance {F : FiniteFrame} : Finite (F.toFrame^≠).World := by
+  simp [Frame.IrreflexiveClosure]
+
+abbrev FiniteFrame.IrreflexiveClosure (F : FiniteFrame) : FiniteFrame := ⟨F.toFrame^≠⟩
+postfix:95 "^≠" => FiniteFrame.IrreflexiveClosure
 
 end irrefl
 

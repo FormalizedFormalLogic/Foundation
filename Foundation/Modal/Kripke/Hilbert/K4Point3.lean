@@ -7,29 +7,35 @@ open Kripke
 open Geachean
 
 
-abbrev Kripke.TransitiveWeakConnectedFrameClass : FrameClass := { F | Transitive F ∧ WeakConnected F }
+abbrev Kripke.FrameClass.trans_weakConnected : FrameClass := { F | Transitive F ∧ WeakConnected F }
 
-instance Kripke.TransitiveWeakConnectedFrameClass.DefinedByK4Point3Axioms
-  : FrameClass.DefinedBy Kripke.TransitiveWeakConnectedFrameClass Hilbert.K4Point3.axioms := by
+namespace Kripke.FrameClass.trans_weakConfluent
+
+protected instance definability_Hilbert
+  : FrameClass.DefinedBy Kripke.FrameClass.trans_weakConnected Hilbert.K4Point3.axioms := by
   rw [
-    (show TransitiveWeakConnectedFrameClass = TransitiveFrameClass ∩ WeakConnectedFrameClass by aesop),
+    (show Kripke.FrameClass.trans_weakConnected = FrameClass.trans ∩ FrameClass.weakConnected by rfl),
     (show Hilbert.K4Point3.axioms = Hilbert.K4.axioms ∪ {Axioms.WeakPoint3 (.atom 0) (.atom 1)} by aesop)
   ];
-  exact FrameClass.definedBy_inter Kripke.TransitiveFrameClass (Hilbert.K4.axioms) WeakConnectedFrameClass {Axioms.WeakPoint3 (.atom 0) (.atom 1)};
+  exact FrameClass.definedBy_inter FrameClass.trans (Hilbert.K4.axioms) FrameClass.weakConnected {Axioms.WeakPoint3 (.atom 0) (.atom 1)};
 
-instance : Kripke.TransitiveWeakConnectedFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
-  simp [Reflexive, Transitive, WeakConnected ];
+@[simp]
+protected lemma nonempty : Kripke.FrameClass.trans_weakConnected.Nonempty := by
+  use whitepoint.toFrame;
+  simp [Transitive, WeakConnected];
+
+end Kripke.FrameClass.trans_weakConfluent
+
 
 namespace Hilbert.K4Point3
 
-instance Kripke.sound : Sound (Hilbert.K4Point3) (TransitiveWeakConnectedFrameClass) := inferInstance
+instance Kripke.sound : Sound (Hilbert.K4Point3) Kripke.FrameClass.trans_weakConnected := inferInstance
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.K4Point3) := Hilbert.consistent_of_FrameClass TransitiveWeakConnectedFrameClass
+instance Kripke.consistent : Entailment.Consistent (Hilbert.K4Point3) := Hilbert.consistent_of_FrameClass Kripke.FrameClass.trans_weakConnected (by simp)
 
-instance Kripke.canonical : Canonical (Hilbert.K4Point3) (TransitiveWeakConnectedFrameClass) := ⟨Canonical.transitive, Canonical.weakConnected⟩
+instance Kripke.canonical : Canonical (Hilbert.K4Point3) Kripke.FrameClass.trans_weakConnected := ⟨Canonical.transitive, Canonical.weakConnected⟩
 
-instance Kripke.complete : Complete (Hilbert.K4Point3) (TransitiveWeakConnectedFrameClass) := inferInstance
+instance Kripke.complete : Complete (Hilbert.K4Point3) Kripke.FrameClass.trans_weakConnected := inferInstance
 
 end Hilbert.K4Point3
 

@@ -6,6 +6,9 @@ namespace LO.Modal.Kripke
 
 def FiniteTransitiveTree.SimpleExtension (F : FiniteTransitiveTree) : Kripke.FiniteTransitiveTree where
   World := Unit ⊕ F.World
+  world_finite := by
+    have := F.world_finite; -- TODO: remove
+    infer_instance;
   Rel x y :=
     match x, y with
     | .inr x, .inr y => x ≺ y
