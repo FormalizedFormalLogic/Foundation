@@ -13,7 +13,7 @@ theorem Int_ssubset_KC : Logic.Int ⊂ Logic.KC := by
     use Axioms.WeakLEM (.atom 0);
     constructor;
     . exact wlem!;
-    . apply Kripke.validOnFrameClass_not_of_exists_frame;
+    . apply not_validOnFrameClass_of_exists_frame;
       let F : Frame := {
         World := Fin 3
         Rel := λ x y => x = 0 ∨ (x = y)
@@ -40,7 +40,7 @@ theorem KC_ssubset_LC : Logic.KC ⊂ Logic.LC := by
     use Axioms.Dummett (.atom 0) (.atom 1);
     constructor;
     . exact dummett!;
-    . apply Kripke.validOnFrameClass_not_of_exists_frame;
+    . apply not_validOnFrameClass_of_exists_frame;
       let F : Frame := {
         World := Fin 4
         Rel := λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)
@@ -70,7 +70,7 @@ theorem LC_ssubset_Cl : Logic.LC ⊂ Logic.Cl := by
     use Axioms.LEM (.atom 0);
     constructor;
     . exact lem!;
-    . apply Kripke.validOnFrameClass_not_of_exists_frame;
+    . apply not_validOnFrameClass_of_exists_frame;
       let F : Frame := {
         World := Fin 2,
         Rel := λ x y => x ≤ y

@@ -124,7 +124,7 @@ lemma provable_Grz_of_boxdotTranslated_GL : (Hilbert.GL) ⊢! φᵇ → (Hilbert
   have := (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
   obtain ⟨F, ⟨F_refl, F_trans, F_antisymm⟩, this⟩ := exists_finiteFrame_of_not_validOnFiniteFrameClass this;
   obtain ⟨V, w, h⟩ := Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not this;
-  apply validOnFiniteFrameClass_not_of_exists_finiteFrame
+  apply Kripke.not_validOnFiniteFrameClass_of_exists_finiteFrame
   use F^≠;
   constructor;
   . suffices Transitive (F^≠).Rel by simpa

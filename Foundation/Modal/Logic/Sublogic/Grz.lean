@@ -18,7 +18,6 @@ theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by
       simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.S4 Logic.Grz := ⟨S4_ssubset_Grz⟩
 
--- TODO: more refactor for operating finite frame
 lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -26,7 +25,7 @@ lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
     use Axioms.Five (.atom 0)
     constructor;
     . exact axiomFive!;
-    . apply Kripke.validOnFiniteFrameClass_not_of_exists_finiteFrame;
+    . apply Kripke.not_validOnFiniteFrameClass_of_exists_finiteFrame;
       let F : FiniteFrame := ⟨Fin 2, λ x y => x ≤ y⟩;
       use F;
       constructor;

@@ -499,23 +499,23 @@ section
 
 variable {C : FrameClass} {φ ψ χ : Formula ℕ}
 
-lemma iff_validOnFrameClass_not_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
+lemma iff_not_validOnFrameClass_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
   apply not_iff_not.mp;
   push_neg;
   tauto;
-alias ⟨exists_frame_of_not_validOnFrameClass, validOnFrameClass_not_of_exists_frame⟩ := iff_validOnFrameClass_not_exists_frame
+alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
-lemma iff_validOnFrameClass_not_exists_model : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
+lemma iff_not_validOnFrameClass_exists_model : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
   apply not_iff_not.mp;
   push_neg;
   tauto;
-alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_validOnFrameClass_not_exists_model
+alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
 
-lemma iff_validOnFrameClass_not_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C ∧ ¬(x ⊧ φ)) := by
+lemma iff_not_validOnFrameClass_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C ∧ ¬(x ⊧ φ)) := by
   apply not_iff_not.mp;
   push_neg;
   tauto;
-alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_validOnFrameClass_not_exists_model_world
+alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
 
 end
 
@@ -535,11 +535,11 @@ lemma iff_validOnFiniteFrameClass_validOnModel : (C ⊧ φ) ↔ (∀ M : Model, 
 
 alias ⟨validOnModel_of_validOnFiniteFrameClass, validOnFiniteFrameClass_of_validOnModel⟩ := iff_validOnFiniteFrameClass_validOnModel
 
-lemma iff_validOnFiniteFrameClass_not_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
+lemma iff_not_validOnFiniteFrameClass_exists_finiteFrame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
   apply not_iff_not.mp;
   push_neg;
   tauto;
-alias ⟨exists_finiteFrame_of_not_validOnFiniteFrameClass, validOnFiniteFrameClass_not_of_exists_finiteFrame⟩ := iff_validOnFiniteFrameClass_not_exists_frame
+alias ⟨exists_finiteFrame_of_not_validOnFiniteFrameClass, not_validOnFiniteFrameClass_of_exists_finiteFrame⟩ := iff_not_validOnFiniteFrameClass_exists_finiteFrame
 
 end
 

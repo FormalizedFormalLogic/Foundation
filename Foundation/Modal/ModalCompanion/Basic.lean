@@ -82,7 +82,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
           . right; exact ihq x |>.mpr hq;
       | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
     apply hML_complete.not.mpr;
-    apply Modal.Kripke.validOnFrameClass_not_of_exists_frame;
+    apply Modal.Kripke.not_validOnFrameClass_of_exists_frame;
     use { World := F.World, Rel := F.Rel };
     constructor;
     . apply hIC_MC;
@@ -137,7 +137,7 @@ lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
           . right; exact ihq x |>.mpr hq;
       | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
     apply hML_complete.not.mpr;
-    apply Modal.Kripke.validOnFrameClass_not_of_exists_frame;
+    apply Modal.Kripke.not_validOnFrameClass_of_exists_frame;
     use { World := F.World, Rel := F.Rel };
     constructor;
     . apply hIC_MC;
