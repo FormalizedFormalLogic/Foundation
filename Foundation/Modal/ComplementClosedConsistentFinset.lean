@@ -32,7 +32,10 @@ variable [Entailment.Classical 𝓢]
 
 @[simp]
 lemma empty_conisistent [Entailment.Consistent 𝓢] : FormulaFinset.Consistent 𝓢 ∅ := by
-  convert FormulaSet.emptyset_consistent (α := α) <;> simpa;
+  convert FormulaSet.emptyset_consistent (α := α);
+  . simp;
+  . simpa;
+  . assumption;
 
 lemma provable_iff_insert_neg_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (∼φ) Φ) ↔ ↑Φ *⊢[𝓢]! φ := by
   convert @FormulaSet.provable_iff_insert_neg_not_consistent α _ _ _ _ (𝓢 := 𝓢) (T := ↑Φ) (φ := φ);

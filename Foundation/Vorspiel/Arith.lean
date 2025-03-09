@@ -432,7 +432,7 @@ lemma ball {φ : List.Vector ℕ n → ℕ → ℕ} (hp : @Arith₁ (n + 1) (fun
       mem_rfind, mem_some_iff, F]
     by_cases H : ∀ m < v.get i, 0 < φ v m
     · exact ⟨v.get i,
-        ⟨by symm; simp, by intro m hm; symm; simp[hm]; exact Nat.not_eq_zero_of_lt (H m hm)⟩,
+        ⟨by symm; simp, by intro m hm; symm; simp[hm]; exact Nat.ne_zero_of_lt (H m hm)⟩,
         by { simp[isEqNat]; symm; exact ball_pos_iff_eq_one.mpr (by simpa) }⟩
     · have : ∃ x < List.Vector.get v i, φ v x = 0 ∧ ∀ y < x, φ v y ≠ 0 := by
         simp at H; rcases least_number _ H with ⟨x, hx, hxl⟩

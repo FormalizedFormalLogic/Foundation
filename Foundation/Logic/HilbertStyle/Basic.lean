@@ -36,10 +36,10 @@ def imply₁ [HasAxiomImply₁ 𝓢] : 𝓢 ⊢ φ ➝ ψ ➝ φ := HasAxiomImpl
 @[simp] lemma imply₁! [HasAxiomImply₁ 𝓢] : 𝓢 ⊢! φ ➝ ψ ➝ φ := ⟨imply₁⟩
 
 def imply₁' [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ψ ➝ φ := imply₁ ⨀ h
+alias dhyp := imply₁'
+
 lemma imply₁'! [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (d : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ ➝ φ := ⟨imply₁' d.some⟩
-
-@[deprecated imply₁'] def dhyp [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (ψ : F) (b : 𝓢 ⊢ φ) : 𝓢 ⊢ ψ ➝ φ := imply₁' b
-
+alias dhyp! := imply₁'!
 
 class HasAxiomImply₂ (𝓢 : S)  where
   imply₂ (φ ψ χ : F) : 𝓢 ⊢ Axioms.Imply₂ φ ψ χ

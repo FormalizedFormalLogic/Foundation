@@ -435,8 +435,6 @@ lemma forall_dia_of_subset_dia [Dia F] (h : ∀ φ ∈ l, φ ∈ ◇''s) : ∀ �
   simpa using forall_multidia_of_subset_multidia (n := 1) h
 
 
-variable [DecidableEq F]
-
 section
 
 variable [Box F]
@@ -445,7 +443,7 @@ variable [Box F]
 
 @[simp] lemma eq_box_multibox_one : □'l = □'^[1]l := by rfl
 
-@[simp] lemma eq_prebox_premultibox_one : □'⁻¹l = □'⁻¹^[1]l := by rfl
+@[simp] lemma eq_prebox_premultibox_one [DecidableEq F] : □'⁻¹l = □'⁻¹^[1]l := by rfl
 
 
 @[simp] lemma multibox_nil : (□'^[n]([] :List F)) = [] := by simp;
@@ -453,9 +451,9 @@ variable [Box F]
 @[simp] lemma box_nil : (□'([] : List F)) = [] := by simp;
 
 
-@[simp] lemma premultibox_nil : (□'⁻¹^[n]([] :List F)) = [] := by simp;
+@[simp] lemma premultibox_nil [DecidableEq F] : (□'⁻¹^[n]([] :List F)) = [] := by simp;
 
-@[simp] lemma prebox_nil : (□'⁻¹([] : List F)) = [] := by simp;
+@[simp] lemma prebox_nil [DecidableEq F] : (□'⁻¹([] : List F)) = [] := by simp;
 
 
 @[simp] lemma multibox_single : (□'^[n][φ]) = [□^[n]φ] := by simp;
@@ -490,7 +488,7 @@ lemma exists_of_multibox (h : φ ∈ □'^[n]l) : ∃ ψ ∈ l, φ = □^[n]ψ :
 
 lemma exists_of_box (h : φ ∈ □'l) : ∃ ψ ∈ l, φ = □ψ := by simpa using exists_of_multibox h
 
-lemma mem_cancel_multibox_premultibox (h : φ ∈ □'^[n]□'⁻¹^[n]l) : φ ∈ l := by
+lemma mem_cancel_multibox_premultibox [DecidableEq F] (h : φ ∈ □'^[n]□'⁻¹^[n]l) : φ ∈ l := by
   induction l with
   | nil => simp at h;
   | cons ψ l ih =>
@@ -501,13 +499,13 @@ lemma mem_cancel_multibox_premultibox (h : φ ∈ □'^[n]□'⁻¹^[n]l) : φ �
     . subst hξ; tauto;
     . tauto;
 
-lemma mem_cancel_box_prebox (h : φ ∈ □'□'⁻¹l) : φ ∈ l := by simpa using mem_cancel_multibox_premultibox h
+lemma mem_cancel_box_prebox [DecidableEq F] (h : φ ∈ □'□'⁻¹l) : φ ∈ l := by simpa using mem_cancel_multibox_premultibox h
 
-lemma mem_decancel_multibox_premultibox (h : □^[n]φ ∈ l) : (□^[n]φ) ∈ □'^[n]□'⁻¹^[n]l := by
+lemma mem_decancel_multibox_premultibox [DecidableEq F] (h : □^[n]φ ∈ l) : (□^[n]φ) ∈ □'^[n]□'⁻¹^[n]l := by
   apply multibox_mem_of;
   simpa;
 
-lemma mem_decancel_box_prebox (h : □φ ∈ l) : □φ ∈ □'□'⁻¹l := by simpa using mem_decancel_multibox_premultibox h
+lemma mem_decancel_box_prebox [DecidableEq F] (h : □φ ∈ l) : □φ ∈ □'□'⁻¹l := by simpa using mem_decancel_multibox_premultibox h
 
 lemma mem_multibox_add : φ ∈ □'^[n]□'^[m]l ↔ φ ∈ □'^[(n + m)]l := by
   induction l with
@@ -544,7 +542,7 @@ variable [Dia F]
 
 @[simp] lemma eq_dia_multidia_one : ◇'l = ◇'^[1]l := by rfl
 
-@[simp] lemma eq_predia_premultidia_one : ◇'⁻¹l = ◇'⁻¹^[1]l := by rfl
+@[simp] lemma eq_predia_premultidia_one [DecidableEq F] : ◇'⁻¹l = ◇'⁻¹^[1]l := by rfl
 
 
 @[simp] lemma multidia_nil : (◇'^[n]([] :List F)) = [] := by simp;
@@ -552,9 +550,9 @@ variable [Dia F]
 @[simp] lemma dia_nil : (◇'([] : List F)) = [] := by simp;
 
 
-@[simp] lemma premultidia_nil : (◇'⁻¹^[n]([] :List F)) = [] := by simp;
+@[simp] lemma premultidia_nil [DecidableEq F] : (◇'⁻¹^[n]([] :List F)) = [] := by simp;
 
-@[simp] lemma predia_nil : (◇'⁻¹([] : List F)) = [] := by simp;
+@[simp] lemma predia_nil [DecidableEq F] : (◇'⁻¹([] : List F)) = [] := by simp;
 
 
 @[simp] lemma multidia_single : (◇'^[n][φ]) = [◇^[n]φ] := by simp;
@@ -589,7 +587,7 @@ lemma exists_of_multidia (h : φ ∈ ◇'^[n]l) : ∃ ψ ∈ l, φ = ◇^[n]ψ :
 
 lemma exists_of_dia (h : φ ∈ ◇'l) : ∃ ψ ∈ l, φ = ◇ψ := by simpa using exists_of_multidia h
 
-lemma mem_cancel_multidia_premultidia (h : φ ∈ ◇'^[n]◇'⁻¹^[n]l) : φ ∈ l := by
+lemma mem_cancel_multidia_premultidia [DecidableEq F] (h : φ ∈ ◇'^[n]◇'⁻¹^[n]l) : φ ∈ l := by
   induction l with
   | nil => simp at h;
   | cons ψ l ih =>
@@ -600,13 +598,13 @@ lemma mem_cancel_multidia_premultidia (h : φ ∈ ◇'^[n]◇'⁻¹^[n]l) : φ �
     . subst hξ; tauto;
     . tauto;
 
-lemma mem_cancel_dia_predia (h : φ ∈ ◇'◇'⁻¹l) : φ ∈ l := by simpa using mem_cancel_multidia_premultidia h
+lemma mem_cancel_dia_predia [DecidableEq F] (h : φ ∈ ◇'◇'⁻¹l) : φ ∈ l := by simpa using mem_cancel_multidia_premultidia h
 
-lemma mem_decancel_multidia_premultidia (h : ◇^[n]φ ∈ l) : (◇^[n]φ) ∈ ◇'^[n]◇'⁻¹^[n]l := by
+lemma mem_decancel_multidia_premultidia [DecidableEq F] (h : ◇^[n]φ ∈ l) : (◇^[n]φ) ∈ ◇'^[n]◇'⁻¹^[n]l := by
   apply multidia_mem_of;
   simpa;
 
-lemma mem_decancel_dia_predia (h : ◇φ ∈ l) : ◇φ ∈ ◇'◇'⁻¹l := by simpa using mem_decancel_multidia_premultidia h
+lemma mem_decancel_dia_predia [DecidableEq F] (h : ◇φ ∈ l) : ◇φ ∈ ◇'◇'⁻¹l := by simpa using mem_decancel_multidia_premultidia h
 
 lemma mem_multidia_add : φ ∈ ◇'^[n]◇'^[m]l ↔ φ ∈ ◇'^[(n + m)]l := by
   induction l with
