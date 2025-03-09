@@ -1,4 +1,3 @@
-import Foundation.Modal.Subformulas
 import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal.Kripke

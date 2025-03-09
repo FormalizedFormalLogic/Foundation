@@ -1,5 +1,4 @@
 import Foundation.Propositional.Formula
-import Foundation.Propositional.Substitution
 import Foundation.Logic.Semantics
 
 namespace LO.Propositional

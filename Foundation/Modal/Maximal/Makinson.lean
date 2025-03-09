@@ -8,49 +8,6 @@ import Foundation.Propositional.Classical.ZeroSubst
 
 namespace LO.Modal
 
-namespace Formula
-
-def letterless : Formula α → Prop
-  | atom _ => False
-  | ⊥ => True
-  | □φ => φ.letterless
-  | φ ➝ ψ => (φ.letterless) ∧ (ψ.letterless)
-
-namespace letterless
-
-variable {φ ψ : Formula α}
-
-@[simp] lemma not_atom : ¬(letterless (atom p)) := by simp [letterless]
-
-lemma def_imp : (φ ➝ ψ).letterless → φ.letterless ∧ ψ.letterless := by simp [letterless]
-
-lemma def_imp₁ : (φ ➝ ψ).letterless → φ.letterless := λ h => def_imp h |>.1
-
-lemma def_imp₂ : (φ ➝ ψ).letterless → ψ.letterless := λ h => def_imp h |>.2
-
-lemma def_box : (□φ).letterless → φ.letterless := by simp [letterless]
-
-end letterless
-
-end Formula
-
-lemma Formula.toModalFormula.letterless {φ : Propositional.Formula α} (h : φ.letterless) : φ.toModalFormula.letterless := by
-  induction φ using Propositional.Formula.rec' <;> simp_all [Propositional.Formula.letterless, Formula.letterless];
-
-def ZeroSubstitution (α) := {s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
-
-lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
-  induction φ using Formula.rec' <;> simp [Formula.letterless, *];
-  case hatom => exact s.2;
-
-instance : Coe (Propositional.ZeroSubstitution α) (Modal.ZeroSubstitution α) := ⟨fun s =>
-  ⟨
-    λ φ => s.1 φ,
-    by intro a; apply Formula.toModalFormula.letterless; exact @s.2 a;
-  ⟩
-⟩
-
-
 namespace Logic
 
 variable {L : Logic} [L.Normal] [L.Consistent] {φ ψ : Formula ℕ}
@@ -61,7 +18,6 @@ class VerFamily (L : Logic) : Prop where
 class TrivFamily (L : Logic) : Prop where
   KD_subset : Logic.KD ⊆ L
   subset_Triv : L ⊆ Logic.Triv
-
 
 section
 
@@ -166,7 +122,7 @@ private lemma subset_Triv_of_KD_subset.lemma₁
   induction φ using Formula.rec' with
   | hatom a =>
     suffices v ⊧ (s.1 a) ↔ v ⊧ (s.1 a).toModalFormulaᵀ.toPropFormula by
-      simpa [trivTranslate, toPropFormula, Formula.subst_atom];
+      simpa [trivTranslate, toPropFormula];
     generalize eψ : s.1 a = ψ;
     have hψ : ψ.letterless := by
       rw [←eψ];
