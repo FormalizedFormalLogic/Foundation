@@ -35,18 +35,32 @@ lemma rel_antisymm' : x ≺ y → y ≺ x → x = y := by apply F.rel_antisymm
 
 end Frame
 
+structure FiniteFrame extends Frame where
+  [world_finite : Finite World]
+attribute [simp] FiniteFrame.world_finite
 
-abbrev pointFrame : Frame where
+def Frame.toFinite (F : Frame) [Finite F.World] : FiniteFrame := ⟨F⟩
+
+section
+
+abbrev whitepoint : FiniteFrame where
   World := Unit
   Rel := fun _ _ => True
   rel_refl := by simp [Reflexive]
   rel_trans := by simp [Transitive]
   rel_antisymm := by simp [AntiSymmetric]
 
+end
+
 
 abbrev FrameClass := Set (Frame)
 
-abbrev FiniteFrameClass := { C : FrameClass // ∀ F ∈ C, Finite F.World }
+abbrev FiniteFrameClass := Set (FiniteFrame)
+
+def FiniteFrameClass.toFrameClass (C : FiniteFrameClass) : FrameClass := C.image (·.toFrame)
+
+lemma exists_finiteFrameClass_of_mem_toFrameClass {C : FiniteFrameClass} (hF : F ∈ C.toFrameClass) : ∃ F' ∈ C, F'.toFrame = F := by
+  simpa [FiniteFrameClass.toFrameClass] using hF;
 
 
 structure Valuation (F : Frame) where
@@ -228,50 +242,6 @@ protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
 
 protected lemma efq : M ⊧ Axioms.EFQ φ := by simp [ValidOnModel, Satisfies];
 
-protected lemma lem : Symmetric M.Rel → M ⊧ Axioms.LEM φ := by
-  unfold Symmetric Axioms.LEM;
-  contrapose;
-  push_neg;
-  intro h;
-  obtain ⟨x, ⟨hnxφ, ⟨y, Rxy, hyφ⟩⟩⟩ := by simpa [Satisfies] using exists_world_of_not h;
-  use x, y;
-  constructor;
-  . assumption;
-  . by_contra Ryx;
-    have : x ⊧ φ := formula_hereditary Ryx hyφ;
-    contradiction;
-
-protected lemma dum : Connected M.Rel → M ⊧ Axioms.Dummett φ ψ := by
-  unfold Connected Axioms.Dummett;
-  contrapose;
-  push_neg;
-  intro h;
-  obtain ⟨x, ⟨y, Rxy, hyφ, nhyψ⟩, ⟨z, Ryz, hzψ, nhyφ⟩⟩ := by
-    simpa [Satisfies] using exists_world_of_not h;
-  use x, y, z;
-  refine ⟨⟨Rxy, Ryz⟩, ?_, ?_⟩;
-  . by_contra Ryz;
-    have : z ⊧ φ := formula_hereditary Ryz hyφ;
-    contradiction;
-  . by_contra Rzy;
-    have : y ⊧ ψ := formula_hereditary Rzy hzψ;
-    contradiction;
-
-protected lemma wlem : Confluent M.Rel → M ⊧ Axioms.WeakLEM φ := by
-  unfold Confluent Axioms.WeakLEM;
-  contrapose;
-  push_neg;
-  intro h;
-  obtain ⟨x, ⟨y, Rxy, hyφ⟩, ⟨z, Rxz, hz⟩⟩ := by
-    simpa [Satisfies] using exists_world_of_not h;
-  use x, y, z;
-  refine ⟨⟨Rxy, Rxz⟩, ?_⟩;
-  . rintro w Ryw;
-    by_contra Rzw;
-    have : w ⊧ φ := formula_hereditary Ryw hyφ;
-    have : ¬w ⊧ φ := hz w Rzw;
-    contradiction;
-
 end ValidOnModel
 
 
@@ -345,95 +315,65 @@ protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := fun V 
 
 protected lemma efq : F ⊧ Axioms.EFQ φ := fun _ => ValidOnModel.efq
 
-protected lemma lem (F_symm : Symmetric F.Rel) : F ⊧ Axioms.LEM φ := fun _ => ValidOnModel.lem F_symm
-
-protected lemma dum (F_conn : Connected F.Rel) : F ⊧ Axioms.Dummett φ ψ := fun _ => ValidOnModel.dum F_conn
-
-protected lemma wlem (F_conf : Confluent F.Rel) : F ⊧ Axioms.WeakLEM φ := fun _ => ValidOnModel.wlem F_conf
-
 end ValidOnFrame
 
-
-
-@[simp] def ValidOnFrameClass (C : FrameClass) (φ : Formula ℕ) := ∀ F, F ∈ C → F ⊧ φ
-
-namespace ValidOnFrameClass
-
-variable {C : FrameClass} {φ ψ χ : Formula ℕ}
-
-instance semantics : Semantics (Formula ℕ) (FrameClass) := ⟨fun C ↦ Kripke.ValidOnFrameClass C⟩
-
-@[simp] protected lemma models_iff : C ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass C φ := iff_of_eq rfl
-
-protected lemma bot (h_nonempty : C.Nonempty) : ¬C ⊧ ⊥ := by
-  simp [ValidOnFrameClass.models_iff, ValidOnFrameClass];
-  exact h_nonempty;
-
-lemma iff_not_exists_frame {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_frame_of_not, not_of_exists_frame⟩ := iff_not_exists_frame
-
-lemma iff_not_exists_model {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
-
-
-lemma iff_not_exists_model_world {C : Kripke.FrameClass} : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C ∧ ¬(x ⊧ φ)) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
-
-end ValidOnFrameClass
-
-
-def ValidOnFiniteFrameClass (C : FiniteFrameClass) (φ : Formula ℕ) := C.1 ⊧ φ
-
-namespace ValidOnFiniteFrameClass
-
-variable {C : FiniteFrameClass} {φ ψ χ : Formula ℕ}
-
-instance semantics : Semantics (Formula ℕ) (FiniteFrameClass) := ⟨fun C ↦ Kripke.ValidOnFiniteFrameClass C⟩
-
-@[simp] protected lemma models_iff : C ⊧ φ ↔ Formula.Kripke.ValidOnFrameClass C φ := iff_of_eq rfl
-
-lemma iff_not_exists_frame: (¬C ⊧ φ) ↔ (∃ F ∈ C.1, ¬F ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_frame_of_not, not_of_exists_frame⟩ := iff_not_exists_frame
-
-lemma iff_not_exists_model : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C.1 ∧ ¬M ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
-
-
-lemma iff_not_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C.1 ∧ ¬(x ⊧ φ)) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
-
-alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
-
-end ValidOnFiniteFrameClass
-
+instance : Semantics (Formula ℕ) Kripke.FiniteFrame := ⟨fun F => Formula.Kripke.ValidOnFrame F.toFrame⟩
+@[simp] lemma ValidOnFiniteFrame.iff_ValidOnFrame {F : Kripke.FiniteFrame} : F ⊧ φ ↔ F.toFrame ⊧ φ := iff_of_eq rfl
 
 end Formula.Kripke
 
 
 
 namespace Kripke
+
+section
+
+variable {C : Kripke.FrameClass} {φ ψ χ : Formula ℕ}
+
+lemma iff_not_validOnFrameClass_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
+
+lemma iff_not_validOnFrameClass_exists_model : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
+
+lemma iff_not_validOnFrameClass_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C ∧ ¬(x ⊧ φ)) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
+
+end
+
+
+section
+
+variable {C : FiniteFrameClass} {φ ψ χ : Formula ℕ}
+
+lemma iff_validOnFiniteFrameClass_validOnModel : (C ⊧ φ) ↔ (∀ M : Model, ∀ x : M.World, (M_finite : Finite M.toFrame) → M.toFrame.toFinite ∈ C → x ⊧ φ) := by
+  constructor;
+  . intro hF M x M_fin M_C;
+    apply @hF M.toFrame.toFinite M_C;
+  . intro h F hF V x;
+    apply @h ⟨F.toFrame, V⟩ x ?_ ?_;
+    . exact F.world_finite;
+    . tauto;
+
+alias ⟨validOnModel_of_validOnFiniteFrameClass, validOnFiniteFrameClass_of_validOnModel⟩ := iff_validOnFiniteFrameClass_validOnModel
+
+lemma iff_not_validOnFiniteFrameClass_exists_finiteFrame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_finiteFrame_of_not_validOnFiniteFrameClass, not_validOnFiniteFrameClass_of_exists_finiteFrame⟩ := iff_not_validOnFiniteFrameClass_exists_finiteFrame
+
+end
+
 
 namespace FrameClass
 
@@ -442,14 +382,7 @@ variable {C : FrameClass} {φ ψ χ : Formula ℕ}
 class DefinedBy (C : Kripke.FrameClass) (Γ : Set (Formula ℕ)) where
   defines : ∀ F, F ∈ C ↔ (∀ φ ∈ Γ, F ⊧ φ)
 
-class FiniteDefinedBy (C Γ) extends FrameClass.DefinedBy C Γ where
-  finite : Set.Finite Γ
-
 abbrev DefinedByFormula (C : Kripke.FrameClass) (φ : Formula ℕ) := FrameClass.DefinedBy C {φ}
-
-lemma definedByFormula_of_iff_mem_validate (h : ∀ F, F ∈ C ↔ F ⊧ φ) : DefinedByFormula C φ := by
-  constructor;
-  simpa;
 
 instance definedBy_inter
   (C₁ Γ₁) [h₁ : DefinedBy C₁ Γ₁]
@@ -480,23 +413,73 @@ instance definedByFormula_inter
   (C₂ φ₂) [DefinedByFormula C₂ φ₂]
   : DefinedBy (C₁ ∩ C₂) {φ₁, φ₂} := definedBy_inter C₁ {φ₁} C₂ {φ₂}
 
-
-class IsNonempty (C : Kripke.FrameClass) : Prop where
-  nonempty : Nonempty C
-
 end FrameClass
 
 
-abbrev AllFrameClass : FrameClass := Set.univ
+namespace FiniteFrameClass
 
-instance AllFrameClass.DefinedBy : AllFrameClass.DefinedByFormula (Axioms.EFQ (.atom 0)) :=
-  FrameClass.definedByFormula_of_iff_mem_validate $ by
-    simp only [Set.mem_univ, true_iff];
-    intro F;
-    exact Formula.Kripke.ValidOnFrame.efq;
+class DefinedBy (C : Kripke.FiniteFrameClass) (Γ : Set (Formula ℕ)) where
+  defines : ∀ F, F ∈ C ↔ (∀ φ ∈ Γ, F ⊧ φ)
 
-instance AllFrameClass.IsNonempty : AllFrameClass.IsNonempty := by
-  use pointFrame;
+abbrev DefinedByFormula (C : Kripke.FiniteFrameClass) (φ : Formula ℕ) := FiniteFrameClass.DefinedBy C {φ}
+
+instance definedBy_inter
+  (C₁ Γ₁) [h₁ : DefinedBy C₁ Γ₁]
+  (C₂ Γ₂) [h₂ : DefinedBy C₂ Γ₂]
+  : DefinedBy (C₁ ∩ C₂) (Γ₁ ∪ Γ₂) := ⟨by
+  rintro F;
+  constructor
+  . rintro ⟨hF₁, hF₂⟩;
+    rintro φ (hφ₁ | hφ₂);
+    . exact h₁.defines F |>.mp hF₁ _ hφ₁;
+    . exact h₂.defines F |>.mp hF₂ _ hφ₂;
+  . intro h;
+    constructor;
+    . apply h₁.defines F |>.mpr;
+      intro φ hφ;
+      apply h;
+      left;
+      assumption;
+    . apply h₂.defines F |>.mpr;
+      intro φ hφ;
+      apply h;
+      right;
+      assumption;
+⟩
+
+instance definedByFormula_inter
+  (C₁ φ₁) [DefinedByFormula C₁ φ₁]
+  (C₂ φ₂) [DefinedByFormula C₂ φ₂]
+  : DefinedBy (C₁ ∩ C₂) {φ₁, φ₂} := definedBy_inter C₁ {φ₁} C₂ {φ₂}
+
+end FiniteFrameClass
+
+
+protected abbrev FrameClass.all : FrameClass := Set.univ
+
+instance : FrameClass.all.DefinedByFormula (Axioms.EFQ (.atom 0)) := ⟨by
+  simp only [Set.mem_univ, Set.mem_singleton_iff, Kripke.ValidOnFrame.models_iff, forall_eq, true_iff];
+  intro F;
+  exact Formula.Kripke.ValidOnFrame.efq;
+⟩
+
+@[simp]
+instance : FrameClass.all.Nonempty := by
+  use whitepoint.toFrame;
+  trivial;
+
+
+abbrev FiniteFrameClass.all : FiniteFrameClass := Set.univ
+
+instance : FiniteFrameClass.all.DefinedByFormula (Axioms.EFQ (.atom 0)) := ⟨by
+  simp only [Set.mem_univ, Set.mem_singleton_iff, Kripke.ValidOnFrame.models_iff, forall_eq, true_iff];
+  intro F;
+  exact Formula.Kripke.ValidOnFrame.efq;
+⟩
+
+@[simp]
+instance : FiniteFrameClass.all.Nonempty := by
+  use whitepoint;
   trivial;
 
 
@@ -505,7 +488,7 @@ namespace FrameClass
 variable {C : Kripke.FrameClass} {Γ : Set (Formula ℕ)}
 
 instance definedBy_with_axiomEFQ (defines : C.DefinedBy Γ) : DefinedBy C (insert (Axioms.EFQ (.atom 0)) Γ) := by
-  convert definedBy_inter AllFrameClass {Axioms.EFQ (.atom 0)} C Γ
+  convert definedBy_inter FrameClass.all {Axioms.EFQ (.atom 0)} C Γ
   tauto_set;
 
 end FrameClass

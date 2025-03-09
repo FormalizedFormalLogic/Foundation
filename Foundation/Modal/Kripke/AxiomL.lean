@@ -1,5 +1,5 @@
 import Foundation.Vorspiel.BinaryRelations
-import Foundation.Modal.Kripke.FiniteFrame
+import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
 
@@ -7,8 +7,8 @@ open Formula.Kripke
 
 namespace Kripke
 
-abbrev TransitiveConverseWellFoundedFrameClass : FrameClass := { F | Transitive F.Rel ∧ ConverseWellFounded F.Rel }
-abbrev TransitiveIrreflexiveFiniteFrameClass : FiniteFrameClass := { F | Transitive F.Rel ∧ Irreflexive F.Rel }
+abbrev FrameClass.trans_cwf : FrameClass := { F | Transitive F.Rel ∧ ConverseWellFounded F.Rel }
+abbrev FiniteFrameClass.trans_irrefl : FiniteFrameClass := { F | Transitive F.Rel ∧ Irreflexive F.Rel }
 
 variable {F : Frame}
 
@@ -85,7 +85,7 @@ lemma cwf_of_validate_L : F ⊧ (Axioms.L (.atom 0)) → ConverseWellFounded F.R
     . assumption;
     . simpa [Semantics.Realize, Satisfies];
 
-instance TransitiveConverseWellFoundedFrameClass.DefinedByL : TransitiveConverseWellFoundedFrameClass.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
+protected instance FrameClass.transitive_cwf.definability : FrameClass.trans_cwf.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
   intro F;
   constructor;
   . simpa using validate_L_of_trans_and_cwf;
@@ -95,20 +95,19 @@ instance TransitiveConverseWellFoundedFrameClass.DefinedByL : TransitiveConverse
     . apply cwf_of_validate_L; simp_all;
 ⟩
 
-instance TransitiveIrreflexiveFiniteFrameClass.DefinedByL : TransitiveIrreflexiveFiniteFrameClass.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
+protected instance FiniteFrameClass.trans_irrefl.definability : FiniteFrameClass.trans_irrefl.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
   intro F;
   constructor;
   . rintro ⟨hTrans, hIrrefl⟩ φ ⟨_, rfl⟩;
     apply validate_L_of_trans_and_cwf;
     . assumption;
-    . apply Finite.converseWellFounded_of_trans_irrefl'
+    . apply Finite.converseWellFounded_of_trans_irrefl';
       . exact F.world_finite;
       . assumption;
       . assumption;
   . intro h;
     refine ⟨?_, ?_⟩;
-    . apply trans_of_validate_L;
-      simpa using h;
+    . apply trans_of_validate_L; simpa using h;
     . intro w;
       simpa using ConverseWellFounded.iff_has_max.mp (cwf_of_validate_L (by simpa using h)) {w} (by simp);
 ⟩

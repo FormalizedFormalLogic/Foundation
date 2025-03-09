@@ -230,11 +230,11 @@ lemma rel_universal (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F
   . exact F_symm hx;
   . apply F_symm $ F_eucl hx hy;
 
-instance [Finite F.World] : Finite (F↾r).World := by
+instance world_finite [Finite F.World] : Finite (F↾r).World := by
   unfold Frame.PointGenerated;
   apply Subtype.finite;
 
-instance [DecidableEq F.World] : DecidableEq (F↾r).World := by
+instance world_decidable [DecidableEq F.World] : DecidableEq (F↾r).World := by
   apply Subtype.instDecidableEq (p := λ w => w = r ∨ r ≺ w);
 
 end Frame.PointGenerated

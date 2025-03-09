@@ -1,6 +1,5 @@
 import Foundation.Vorspiel.Chain
 import Foundation.Modal.Kripke.Preservation
-import Foundation.Modal.Kripke.FiniteFrame
 
 namespace LO.Modal
 
@@ -18,11 +17,12 @@ end Kripke.FiniteTransitiveTree
 
 def Formula.Kripke.ValidOnFiniteTransitiveTreeFrame (T : Kripke.FiniteTransitiveTree) (φ : Formula ℕ) := T.toFrame ⊧ φ
 
-namespace ValidOnFiniteTransitiveTreeFrame
+namespace Formula.Kripke.ValidOnFiniteTransitiveTreeFrame
 
-instance semantics : Semantics (Formula ℕ) (Kripke.FiniteFrame) := ⟨fun F ↦ Formula.Kripke.ValidOnFiniteFrame F⟩
+instance : Semantics (Formula ℕ) (Kripke.FiniteTransitiveTree) := ⟨fun F φ => F.toFrame ⊧ φ⟩
+@[simp] lemma iff_valid {F : Kripke.FiniteTransitiveTree} {φ : Formula ℕ} : F ⊧ φ ↔ F.toFrame ⊧ φ := by rfl
 
-end ValidOnFiniteTransitiveTreeFrame
+end Formula.Kripke.ValidOnFiniteTransitiveTreeFrame
 
 
 namespace Kripke
@@ -218,7 +218,10 @@ abbrev FiniteFrame.FiniteTransitiveTreeUnravelling
           (β := { x // List.Chain' (F.PointGenerated r).Rel x })
           (fun x => ⟨x.1, x.2.2⟩)
           (by rintro ⟨x, hx⟩ ⟨y, hy⟩; simp_all);
-      exact List.chains_finite (Frame.PointGenerated.rel_transitive F_trans) (Frame.PointGenerated.rel_irreflexive F_irrefl)
+      have := F.world_finite; -- TODO: remove?
+      apply List.chains_finite
+        (Frame.PointGenerated.rel_transitive (r := r) F_trans)
+        (Frame.PointGenerated.rel_irreflexive (r := r) F_irrefl);
   }
 
 end Kripke

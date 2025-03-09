@@ -12,22 +12,23 @@ open Kripke
 
 namespace Kripke
 
-instance : TransitiveIrreflexiveFiniteFrameClass.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.L (atom 0)} :=
-  FiniteFrameClass.definedBy_with_axiomK TransitiveIrreflexiveFiniteFrameClass.DefinedByL
+instance : FiniteFrameClass.trans_irrefl.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.L (atom 0)} :=
+  FiniteFrameClass.definedBy_with_axiomK FiniteFrameClass.trans_irrefl.definability
 
-instance : TransitiveIrreflexiveFiniteFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => False⟩;
-  simp [Irreflexive , Transitive];
+@[simp]
+instance : FiniteFrameClass.trans_irrefl.Nonempty := by
+  use blackpoint;
+  simp [Irreflexive, Transitive];
 
 end Kripke
 
 
 namespace Hilbert.GL
 
-instance Kripke.finiteSound : Sound (Hilbert.GL) TransitiveIrreflexiveFiniteFrameClass := inferInstance
+instance Kripke.finite_sound : Sound (Hilbert.GL) FiniteFrameClass.trans_irrefl := inferInstance
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.GL) :=
-  Kripke.Hilbert.consistent_of_FiniteFrameClass TransitiveIrreflexiveFiniteFrameClass
+  Kripke.Hilbert.consistent_of_FiniteFrameClass FiniteFrameClass.trans_irrefl
 
 end Hilbert.GL
 

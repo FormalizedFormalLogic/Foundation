@@ -9,16 +9,17 @@ section definability
 
 open Formula.Kripke
 
-abbrev MultiGeacheanConfluentFrameClass (G : Set Geachean.Taple) : FrameClass := { F | (MultiGeachean G) F.Rel }
+protected abbrev FrameClass.multiGeachean (G : Set Geachean.Taple) : FrameClass := { F | (MultiGeachean G) F.Rel }
 
-instance : (MultiGeacheanConfluentFrameClass G).IsNonempty := by
+@[simp]
+lemma FrameClass.multiGeachean.nonempty : (FrameClass.multiGeachean G).Nonempty := by
   use ⟨Unit, λ _ _ => True⟩;
   intros t ht x y z h;
   use x;
   constructor <;> { apply Rel.iterate.true_any; tauto; }
 
-instance MultiGeacheanFrameClass.isDefinedByGeachAxioms (G) : (MultiGeacheanConfluentFrameClass G).DefinedBy (G.image (λ t => Axioms.Geach t (.atom 0))) := by
-  unfold MultiGeacheanConfluentFrameClass MultiGeachean Axioms.Geach;
+instance FrameClass.multiGeachean.definability (G) : (FrameClass.multiGeachean G).DefinedBy (G.image (λ t => Axioms.Geach t (.atom 0))) := by
+  unfold FrameClass.multiGeachean MultiGeachean Axioms.Geach;
   constructor;
   intro F;
   constructor;
@@ -54,13 +55,13 @@ variable {F : Frame}
 lemma reflexive_of_validate_AxiomT (h : F ⊧ (Axioms.T (.atom 0))) : Reflexive F.Rel := by
   have : ValidOnFrame F (Axioms.T (.atom 0)) → Reflexive F.Rel := by
     simpa [Axioms.Geach, MultiGeachean, ←Geachean.reflexive_def] using
-    MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 0, 1, 0⟩} |>.defines F |>.mpr;
+    FrameClass.multiGeachean.definability {⟨0, 0, 1, 0⟩} |>.defines F |>.mpr;
   exact this h;
 
 lemma transitive_of_validate_AxiomFour (h : F ⊧ (Axioms.Four (.atom 0))) : Transitive F.Rel := by
   have : ValidOnFrame F (Axioms.Four (.atom 0)) → Transitive F.Rel := by
     simpa [Axioms.Geach, MultiGeachean, ←Geachean.transitive_def] using
-    MultiGeacheanFrameClass.isDefinedByGeachAxioms {⟨0, 2, 1, 0⟩} |>.defines F |>.mpr;
+    FrameClass.multiGeachean.definability {⟨0, 2, 1, 0⟩} |>.defines F |>.mpr;
   exact this h;
 
 end
@@ -80,7 +81,7 @@ open canonicalModel
 
 namespace Canonical
 
-lemma geachean
+protected lemma geachean
   (hG : ∀ {φ}, 𝓢 ⊢! ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ))
   : Geachean g (canonicalFrame 𝓢).Rel := by
   rintro x y z ⟨Rxy, Rxz⟩;
@@ -118,26 +119,26 @@ lemma geachean
     intro φ hφ;
     exact hu.2 hφ;
 
-lemma reflexive [Entailment.HasAxiomT 𝓢] : Reflexive (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.reflexive_def]; apply geachean; simp [axiomT!];
+protected lemma reflexive [Entailment.HasAxiomT 𝓢] : Reflexive (canonicalFrame 𝓢).Rel := by
+  rw [Geachean.reflexive_def]; apply Canonical.geachean; simp [axiomT!];
 
-lemma transitive [Entailment.HasAxiomFour 𝓢] : Transitive (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.transitive_def]; apply geachean; simp [axiomFour!];
+protected lemma transitive [Entailment.HasAxiomFour 𝓢] : Transitive (canonicalFrame 𝓢).Rel := by
+  rw [Geachean.transitive_def]; apply Canonical.geachean; simp [axiomFour!];
 
-lemma euclidean [Entailment.HasAxiomFive 𝓢] : Euclidean (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.euclidean_def]; apply geachean; simp [axiomFive!];
+protected lemma euclidean [Entailment.HasAxiomFive 𝓢] : Euclidean (canonicalFrame 𝓢).Rel := by
+  rw [Geachean.euclidean_def]; apply Canonical.geachean; simp [axiomFive!];
 
-lemma serial [Entailment.HasAxiomD 𝓢] : Serial (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.serial_def]; apply geachean; simp [axiomD!];
+protected lemma serial [Entailment.HasAxiomD 𝓢] : Serial (canonicalFrame 𝓢).Rel := by
+  rw [Geachean.serial_def]; apply Canonical.geachean; simp [axiomD!];
 
-lemma symmetric [Entailment.HasAxiomB 𝓢] : Symmetric (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.symmetric_def]; apply geachean; simp [axiomB!];
+protected lemma symmetric [Entailment.HasAxiomB 𝓢] : Symmetric (canonicalFrame 𝓢).Rel := by
+  rw [Geachean.symmetric_def]; apply Canonical.geachean; simp [axiomB!];
 
-lemma coreflexive [Entailment.HasAxiomTc 𝓢] : Coreflexive (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.coreflexive_def]; apply geachean; simp [axiomTc!];
+protected lemma coreflexive [Entailment.HasAxiomTc 𝓢] : Coreflexive (canonicalFrame 𝓢).Rel := by
+  rw [Geachean.coreflexive_def]; apply Canonical.geachean; simp [axiomTc!];
 
-lemma confluent [Entailment.HasAxiomPoint2 𝓢] : Confluent (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.confluent_def]; apply geachean; simp [axiomPoint2!];
+protected lemma confluent [Entailment.HasAxiomPoint2 𝓢] : Confluent (canonicalFrame 𝓢).Rel := by
+  rw [Geachean.confluent_def]; apply Canonical.geachean; simp [axiomPoint2!];
 
 end Canonical
 
