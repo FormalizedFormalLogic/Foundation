@@ -27,6 +27,7 @@ notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
 structure FiniteFrame extends Frame where
   [world_finite : Finite World]
+attribute [simp] FiniteFrame.world_finite
 
 def Frame.toFinite (F : Frame) [Finite F.World] : FiniteFrame := ⟨F⟩
 
@@ -42,6 +43,10 @@ abbrev FrameClass := Set (Frame)
 
 abbrev FiniteFrameClass := Set (FiniteFrame)
 
+def FiniteFrameClass.toFrameClass (C : FiniteFrameClass) : FrameClass := C.image (·.toFrame)
+
+lemma exists_finiteFrameClass_of_mem_toFrameClass {C : FiniteFrameClass} (hF : F ∈ C.toFrameClass) : ∃ F' ∈ C, F'.toFrame = F := by
+  simpa [FiniteFrameClass.toFrameClass] using hF;
 
 abbrev Valuation (F : Frame) := F.World → ℕ → Prop
 
@@ -482,6 +487,7 @@ protected lemma axiomK : F ⊧ (Axioms.K φ ψ) := by intro V; exact ValidOnMode
 end ValidOnFrame
 
 instance : Semantics (Formula ℕ) Kripke.FiniteFrame := ⟨fun F => Formula.Kripke.ValidOnFrame F.toFrame⟩
+@[simp] lemma ValidOnFiniteFrame.iff_ValidOnFrame {F : Kripke.FiniteFrame} : F ⊧ φ ↔ F.toFrame ⊧ φ := iff_of_eq rfl
 
 end Formula.Kripke
 
@@ -528,6 +534,12 @@ lemma iff_validOnFiniteFrameClass_validOnModel : (C ⊧ φ) ↔ (∀ M : Model, 
     . tauto;
 
 alias ⟨validOnModel_of_validOnFiniteFrameClass, validOnFiniteFrameClass_of_validOnModel⟩ := iff_validOnFiniteFrameClass_validOnModel
+
+lemma iff_validOnFiniteFrameClass_not_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_finiteFrame_of_not_validOnFiniteFrameClass, validOnFiniteFrameClass_not_of_exists_finiteFrame⟩ := iff_validOnFiniteFrameClass_not_exists_frame
 
 end
 

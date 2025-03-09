@@ -111,6 +111,10 @@ abbrev Kripke.FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
 
 abbrev Kripke.FiniteFrameClass.logic (C : FiniteFrameClass) : Logic := { φ | C ⊧ φ }
 
+@[simp]
+lemma Logic.eq_kripkeFiniteFrameClass_toFrameClas_logic {C : Kripke.FiniteFrameClass} : (C.toFrameClass.logic) = C.logic := by
+  simp [Kripke.FiniteFrameClass.logic, Kripke.FrameClass.logic, FiniteFrameClass.toFrameClass, Semantics.Realize]
+
 lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic
   {H : Hilbert ℕ} {C : FrameClass}
   [sound : Sound H C] [complete : Complete H C]
@@ -131,7 +135,7 @@ lemma Logic.eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
 
 lemma Logic.K.eq_AllKripkeFrameClass_Logic : Logic.K = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
-lemma Logic.K.eq_AllKripkeFiniteFrameClass_Logic : Logic.K = AllFiniteFrameClass.logic := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
+lemma Logic.K.eq_AllKripkeFiniteFrameClass_Logic : Logic.K = FiniteFrameClass.all.logic := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
 
 end
 

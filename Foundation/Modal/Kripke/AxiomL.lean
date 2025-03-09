@@ -7,8 +7,8 @@ open Formula.Kripke
 
 namespace Kripke
 
-abbrev FrameClass.transitive_cwf : FrameClass := { F | Transitive F.Rel ∧ ConverseWellFounded F.Rel }
-abbrev FrameClass.finite_transitive_irreflexive : FrameClass := { F | Finite F.World ∧ Transitive F.Rel ∧ Irreflexive F.Rel }
+abbrev FrameClass.trans_cwf : FrameClass := { F | Transitive F.Rel ∧ ConverseWellFounded F.Rel }
+abbrev FiniteFrameClass.trans_irrefl : FiniteFrameClass := { F | Transitive F.Rel ∧ Irreflexive F.Rel }
 
 variable {F : Frame}
 
@@ -85,7 +85,7 @@ lemma cwf_of_validate_L : F ⊧ (Axioms.L (.atom 0)) → ConverseWellFounded F.R
     . assumption;
     . simpa [Semantics.Realize, Satisfies];
 
-instance TransitiveConverseWellFoundedFrameClass.DefinedByL : FrameClass.transitive_cwf.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
+protected instance FrameClass.transitive_cwf.definability : FrameClass.trans_cwf.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
   intro F;
   constructor;
   . simpa using validate_L_of_trans_and_cwf;
@@ -95,18 +95,19 @@ instance TransitiveConverseWellFoundedFrameClass.DefinedByL : FrameClass.transit
     . apply cwf_of_validate_L; simp_all;
 ⟩
 
-instance TransitiveIrreflexiveFiniteFrameClass.DefinedByL : FrameClass.finite_transitive_irreflexive.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
+protected instance FiniteFrameClass.trans_irrefl.definability : FiniteFrameClass.trans_irrefl.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
   intro F;
   constructor;
-  . rintro ⟨_, hTrans, hIrrefl⟩ φ ⟨_, rfl⟩;
+  . rintro ⟨hTrans, hIrrefl⟩ φ ⟨_, rfl⟩;
     apply validate_L_of_trans_and_cwf;
     . assumption;
-    . apply Finite.converseWellFounded_of_trans_irrefl' <;> assumption;
+    . apply Finite.converseWellFounded_of_trans_irrefl';
+      . exact F.world_finite;
+      . assumption;
+      . assumption;
   . intro h;
-    refine ⟨?_, ?_, ?_⟩;
-    . sorry;
-    . apply trans_of_validate_L;
-      simpa using h;
+    refine ⟨?_, ?_⟩;
+    . apply trans_of_validate_L; simpa using h;
     . intro w;
       simpa using ConverseWellFounded.iff_has_max.mp (cwf_of_validate_L (by simpa using h)) {w} (by simp);
 ⟩

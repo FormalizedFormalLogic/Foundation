@@ -1,9 +1,4 @@
-import Foundation.Modal.ComplementClosedConsistentFinset
-import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.AxiomGrz
-import Foundation.Modal.Kripke.Hilbert.KT
-import Foundation.Modal.Kripke.Hilbert.Soundness
-import Foundation.Modal.Entailment.Grz
 
 namespace LO.Modal
 
@@ -15,21 +10,24 @@ open Kripke
 
 namespace Kripke
 
-instance : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0)} :=
-  FiniteFrameClass.definedBy_with_axiomK ReflexiveTransitiveAntiSymmetricFiniteFrameClass.definedByAxiomGrz
 
-instance : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
+instance : FiniteFrameClass.strict_preorder.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0)} :=
+  FiniteFrameClass.definedBy_with_axiomK FiniteFrameClass.strict_preorder.definability
+
+@[simp]
+instance : FiniteFrameClass.strict_preorder.Nonempty := by
+  use whitepoint;
   simp [Reflexive, Transitive, AntiSymmetric];
+
 
 end Kripke
 
 namespace Hilbert.Grz
 
-instance Kripke.sound : Sound (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass) := inferInstance
+instance Kripke.finite_sound : Sound (Hilbert.Grz) FiniteFrameClass.strict_preorder := inferInstance
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.Grz) :=
-  Kripke.Hilbert.consistent_of_FiniteFrameClass ReflexiveTransitiveAntiSymmetricFiniteFrameClass
+  Kripke.Hilbert.consistent_of_FiniteFrameClass FiniteFrameClass.strict_preorder
 
 end Hilbert.Grz
 

@@ -6,32 +6,15 @@ namespace LO.Modal
 open Kripke
 open Geachean
 
-abbrev Kripke.ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F ∧ Euclidean F }
-
-namespace Hilbert.S5
-
-instance Kripke.sound : Sound (Hilbert.S5) (Kripke.ReflexiveEuclideanFrameClass) := by
-  convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
-  exact eq_Geach;
-  . unfold ReflexiveEuclideanFrameClass FrameClass.multiGeachean MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.euclidean_def];
-
-instance Kripke.consistent : Entailment.Consistent (Hilbert.S5) := by
-  convert Hilbert.Geach.Kripke.consistent (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
-  exact eq_Geach;
-
-instance Kripke.canonical : Canonical (Hilbert.S5) (ReflexiveEuclideanFrameClass) := ⟨⟨Canonical.reflexive, Canonical.euclidean⟩⟩
-
-instance Kripke.complete : Complete (Hilbert.S5) (ReflexiveEuclideanFrameClass) := inferInstance
-
-end Hilbert.S5
-
-
 namespace Kripke
 
-abbrev UniversalFrameClass : FrameClass := { F | Universal F }
+protected abbrev FrameClass.refl_eucl : FrameClass := { F | Reflexive F ∧ Euclidean F }
 
-lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : UniversalFrameClass ⊧ φ ↔ ReflexiveEuclideanFrameClass ⊧ φ := by
+protected abbrev FrameClass.universal : FrameClass := { F | Universal F }
+
+protected abbrev FiniteFrameClass.refl_eucl : FiniteFrameClass := { F | Reflexive F.Rel ∧ Euclidean F.Rel }
+
+lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
   constructor;
   . intro h F hF V r;
     let M : Model := ⟨F, V⟩;
@@ -40,30 +23,7 @@ lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : Unive
   . rintro h F F_univ;
     exact @h F (⟨refl_of_universal F_univ, eucl_of_universal F_univ⟩);
 
-end Kripke
-
-
-namespace Hilbert.S5
-
-instance Kripke.soundUniversal : Sound (Hilbert.S5) (Kripke.UniversalFrameClass) := ⟨by
-  intro φ hF;
-  apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mpr;
-  exact Kripke.sound.sound hF;
-⟩
-
-instance Kripke.completeUniversal : Complete (Hilbert.S5) (Kripke.UniversalFrameClass) := ⟨by
-  intro φ hF;
-  apply Kripke.complete.complete;
-  apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mp;
-  exact hF;
-⟩
-
-end Hilbert.S5
-
-
-abbrev Kripke.ReflexiveEuclideanFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Euclidean F.Rel }
-
-lemma Kripke.eq_ReflexiveTransitiveSymmetricFiniteFrameClass_ReflexiveEuclideanFiniteFrameClass : Kripke.FiniteFrameClass.symm_preorder = ReflexiveEuclideanFiniteFrameClass := by
+lemma eq_ReflexiveTransitiveSymmetricFiniteFrameClass_ReflexiveEuclideanFiniteFrameClass : Kripke.FiniteFrameClass.symm_preorder = FiniteFrameClass.refl_eucl := by
   ext F;
   constructor;
   . rintro ⟨hRefl, hTrans, hSymm⟩;
@@ -74,5 +34,38 @@ lemma Kripke.eq_ReflexiveTransitiveSymmetricFiniteFrameClass_ReflexiveEuclideanF
     refine ⟨hRefl, ?_, ?_⟩;
     . exact trans_of_refl_eucl hRefl hEucl;
     . exact symm_of_refl_eucl hRefl hEucl;
+
+end Kripke
+
+namespace Hilbert.S5.Kripke
+
+instance sound_refl_eucl : Sound (Hilbert.S5) Kripke.FrameClass.refl_eucl := by
+  convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
+  exact eq_Geach;
+  . unfold Kripke.FrameClass.refl_eucl FrameClass.multiGeachean MultiGeachean;
+    simp [Geachean.reflexive_def, Geachean.euclidean_def];
+
+instance sound_universal : Sound (Hilbert.S5) FrameClass.universal := ⟨by
+  intro φ hF;
+  apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mpr;
+  exact sound_refl_eucl.sound hF;
+⟩
+
+instance consistent : Entailment.Consistent (Hilbert.S5) := by
+  convert Hilbert.Geach.Kripke.consistent (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
+  exact eq_Geach;
+
+instance canonical : Canonical (Hilbert.S5) Kripke.FrameClass.refl_eucl := ⟨⟨Canonical.reflexive, Canonical.euclidean⟩⟩
+
+instance complete : Complete (Hilbert.S5) Kripke.FrameClass.refl_eucl := inferInstance
+
+instance complete_universal : Complete (Hilbert.S5) FrameClass.universal := ⟨by
+  intro φ hF;
+  apply Kripke.complete.complete;
+  apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mp;
+  exact hF;
+⟩
+
+end Hilbert.S5.Kripke
 
 end LO.Modal

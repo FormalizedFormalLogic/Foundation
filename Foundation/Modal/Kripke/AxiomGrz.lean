@@ -11,8 +11,8 @@ open Kripke
 open Formula.Kripke
 open Relation (IrreflGen)
 
-abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel }
-abbrev ReflexiveTransitiveAntiSymmetricFiniteFrameClass : FrameClass := { F | Finite F.World ∧ Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel }
+protected abbrev FrameClass.trans_wcwf : FrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel }
+protected abbrev FiniteFrameClass.strict_preorder : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel }
 
 variable {F : Kripke.Frame}
 
@@ -176,8 +176,8 @@ lemma WCWF_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by
       exact this _ hx;
     . simp [Satisfies, V];
 
-instance ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.definedByAxiomGrz
-  : ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.DefinedByFormula (Axioms.Grz (.atom 0)) := ⟨by
+protected instance FrameClass.trans_wcwf.definability
+  : FrameClass.trans_wcwf.DefinedByFormula (Axioms.Grz (.atom 0)) := ⟨by
   intro F;
   constructor;
   . rintro ⟨hRefl, hTrans, hWCWF⟩;
@@ -191,13 +191,12 @@ instance ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass.definedByAxiomGr
     . exact WCWF_of_validate_Grz h;
 ⟩
 
-instance
-  ReflexiveTransitiveAntiSymmetricFiniteFrameClass.definedByAxiomGrz
-  : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.DefinedByFormula (Axioms.Grz (.atom 0)) := ⟨by
+protected instance FiniteFrameClass.strict_preorder.definability
+  : FiniteFrameClass.strict_preorder.DefinedByFormula (Axioms.Grz (.atom 0)) := ⟨by
   intro F;
   constructor;
   . rintro ⟨hRefl, hTrans, hAntisymm⟩;
-    suffices ValidOnFiniteFrame F (Axioms.Grz (.atom 0)) by simpa;
+    suffices F ⊧ (Axioms.Grz (.atom 0)) by simpa;
     apply validate_Grz_of_refl_trans_wcwf;
     . assumption;
     . assumption;
@@ -206,7 +205,7 @@ instance
       . assumption;
       . assumption;
   . rintro h;
-    replace h : ValidOnFiniteFrame F (Axioms.Grz (.atom 0)) := by simpa using h;
+    replace h : F ⊧ (Axioms.Grz (.atom 0)) := by simpa using h;
     refine ⟨?_, ?_, ?_⟩;
     . exact reflexive_of_validate_Grz h;
     . exact transitive_of_validate_Grz h;

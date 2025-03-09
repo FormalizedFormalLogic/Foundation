@@ -45,8 +45,8 @@ lemma Logic.S4.is_smallestMC_of_Int : Logic.S4 = Logic.Int.smallestMC := by
 instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
   rw [Logic.S4.is_smallestMC_of_Int];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-    (IC := Kripke.FrameClass.all)
-    (MC := Kripke.FrameClass.preorder)
+    (IC := Propositional.Kripke.FrameClass.all)
+    (MC := Modal.Kripke.FrameClass.preorder)
     (by
       intro φ;
       constructor;
@@ -103,8 +103,8 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
 instance : ModalCompanion Logic.Int Logic.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IC := Kripke.FrameClass.all_finite)
-    (MC := Modal.Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass)
+    (IC := Propositional.Kripke.FrameClass.all_finite)
+    (MC := Modal.Kripke.FiniteFrameClass.strict_preorder.toFrameClass)
     (by
       intro φ;
       constructor;
@@ -115,8 +115,14 @@ instance : ModalCompanion Logic.Int Logic.Grz := by
       rw [←Logic.Grz.is_largestMC_of_Int];
       intro φ;
       constructor;
-      . apply Modal.Hilbert.Grz.Kripke.sound.sound;
-      . apply Modal.Hilbert.Grz.Kripke.complete.complete;
+      . intro h F hF;
+        obtain ⟨F, hF, rfl⟩ := hF;
+        apply Modal.Hilbert.Grz.Kripke.finite_sound.sound h hF;
+      . intro hF;
+        apply Modal.Hilbert.Grz.Kripke.complete.complete;
+        rintro _ _;
+        apply hF;
+        tauto;
     )
     (by
       rintro F hF;

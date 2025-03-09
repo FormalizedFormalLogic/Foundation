@@ -1,4 +1,6 @@
 import Foundation.Modal.Kripke.Hilbert.Grz.Soundness
+import Foundation.Modal.Kripke.Hilbert.KT
+import Foundation.Modal.ComplementClosedConsistentFinset
 
 namespace LO.Modal
 
@@ -54,6 +56,7 @@ open Formula.Kripke
 open Entailment
 open Entailment.Context
 open ComplementClosedConsistentFinset
+open Kripke
 
 variable {φ ψ : Formula ℕ}
 
@@ -179,7 +182,7 @@ lemma truthlemma_lemma3 : (Hilbert.Grz) ⊢! (φ ⋏ □(φ ➝ □φ)) ➝ □�
   by_contra hC;
   have := (not_imp_not.mpr $ Hilbert.KT.Kripke.complete |>.complete) hC;
   simp at this;
-  obtain ⟨F, F_refl, hF⟩ := ValidOnFrameClass.exists_frame_of_not this;
+  obtain ⟨F, F_refl, hF⟩ := Kripke.exists_frame_of_not_validOnFrameClass this;
   simp [ValidOnFrame, ValidOnModel, Satisfies, Semantics.Realize] at hF;
   obtain ⟨V, x, h₁, h₂, ⟨y, Rxy, h₃⟩⟩ := hF;
   have := h₂ x (F_refl x);
@@ -273,15 +276,16 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
         (membership_iff (by apply subformulasGrz.mem_left; assumption) |>.mp (RXY.1 ψ (by apply subformulasGrz.mem_left; tauto) h));
       exact membership_iff (by apply subformulasGrz.mem_left; exact subformulas.mem_box q_sub) |>.mpr this;
 
-instance complete : Complete (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass) := ⟨by
+instance complete : Complete (Hilbert.Grz) Kripke.FiniteFrameClass.strict_preorder := ⟨by
   intro φ;
   contrapose;
   intro h;
-  apply ValidOnFiniteFrameClass.not_of_exists_frame;
+  apply Semantics.set_models_iff.not.mpr;
+  push_neg;
   use (miniCanonicalFrame φ);
   constructor;
   . refine ⟨miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm⟩;
-  . apply ValidOnFiniteFrame.not_of_exists_valuation_world;
+  . apply ValidOnFrame.not_of_exists_model_world;
     obtain ⟨X, hX₁⟩ := lindenbaum (𝓢 := Hilbert.Grz) (Φ := {-φ}) (Ψ := φ.subformulasGrz)
       (by
         simp only [Finset.singleton_subset_iff];
@@ -289,12 +293,14 @@ instance complete : Complete (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmet
         exact subformulasGrz.mem_self
       )
       (FormulaFinset.unprovable_iff_singleton_compl_consistent.mpr h);
-    use (miniCanonicalModel φ).Val, X;
-    apply truthlemma (by simp) |>.not.mpr;
-    exact iff_mem_compl (by simp) |>.not.mpr $ by
-      push_neg;
-      apply hX₁;
-      tauto;
+    use (miniCanonicalModel φ), X;
+    constructor;
+    . rfl;
+    . apply truthlemma (by simp) |>.not.mpr;
+      exact iff_mem_compl (by simp) |>.not.mpr $ by
+        push_neg;
+        apply hX₁;
+        tauto;
 ⟩
 
 end Hilbert.Grz.Kripke

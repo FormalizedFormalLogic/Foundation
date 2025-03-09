@@ -11,7 +11,7 @@ namespace Kripke
 open Relation (ReflGen)
 open Formula.Kripke
 
-lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ FrameClass.finite_transitive_irreflexive) : ⟨F.toFrame^=⟩ ∈ ReflexiveTransitiveAntiSymmetricFiniteFrameClass := by
+lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ FiniteFrameClass.trans_irrefl) : F^= ∈ FiniteFrameClass.strict_preorder := by
   obtain ⟨F_trans, F_irrefl⟩ := hF;
   refine ⟨?F_refl, ?F_trans, ?F_antisymm⟩;
   . intro x; apply ReflGen.refl;
@@ -28,7 +28,7 @@ lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ 
       have := F_irrefl x;
       contradiction;
 
-lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ ReflexiveTransitiveAntiSymmetricFiniteFrameClass) : ⟨F.toFrame^≠⟩ ∈ FrameClass.finite_transitive_irreflexive := by
+lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ FiniteFrameClass.strict_preorder) : F^≠ ∈ FiniteFrameClass.trans_irrefl := by
   obtain ⟨_, F_trans, F_antisymm⟩ := hF;
   refine ⟨?F_trans, ?F_irrefl⟩;
   . rintro x y z ⟨nexy, Rxy⟩ ⟨_, Ryz⟩;
@@ -120,15 +120,15 @@ lemma provable_boxdotTranslated_GL_of_Grz : (Hilbert.Grz) ⊢! φ → (Hilbert.G
 lemma provable_Grz_of_boxdotTranslated_GL : (Hilbert.GL) ⊢! φᵇ → (Hilbert.Grz) ⊢! φ := by
   contrapose;
   intro h;
-  apply (not_imp_not.mpr $ Hilbert.GL.Kripke.finiteSound.sound);
+  apply (not_imp_not.mpr $ Hilbert.GL.Kripke.finite_sound.sound);
   have := (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
-  obtain ⟨F, ⟨F_refl, F_trans, F_antisymm⟩, this⟩ := Formula.Kripke.ValidOnFiniteFrameClass.exists_frame_of_not this;
-  obtain ⟨V, w, h⟩ := Formula.Kripke.ValidOnFiniteFrame.exists_valuation_world_of_not this;
-  apply Formula.Kripke.ValidOnFrameClass.not_of_exists_frame;
-  use F.toFrame^≠;
+  obtain ⟨F, ⟨F_refl, F_trans, F_antisymm⟩, this⟩ := exists_finiteFrame_of_not_validOnFiniteFrameClass this;
+  obtain ⟨V, w, h⟩ := Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not this;
+  apply validOnFiniteFrameClass_not_of_exists_finiteFrame
+  use F^≠;
   constructor;
-  . use ⟨F.toFrame^≠⟩;
-    suffices ∀ ⦃x y z⦄, x ≺^≠ y → y ≺^≠ z → x ≺^≠ z by simpa [Transitive];
+  . suffices Transitive (F^≠).Rel by simpa
+      [Set.mem_setOf_eq, Frame.IrreflexiveClosure.rel_irreflexive, and_true];
     rintro x y z ⟨hxy, Rxy⟩ ⟨hyz, Ryz⟩;
     constructor;
     . by_contra hC;

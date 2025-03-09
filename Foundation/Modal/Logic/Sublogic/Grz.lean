@@ -13,7 +13,7 @@ theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by
     use Axioms.Grz (.atom 0)
     constructor;
     . exact axiomGrz!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
       simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.S4 Logic.Grz := ⟨S4_ssubset_Grz⟩
@@ -22,16 +22,15 @@ instance : ProperSublogic Logic.S4 Logic.Grz := ⟨S4_ssubset_Grz⟩
 lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬ReflexiveTransitiveAntiSymmetricFiniteFrameClass ⊧ φ by simpa [Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FiniteFrameClass.strict_preorder ⊧ φ by simpa [Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0)
     constructor;
     . exact axiomFive!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_frame;
+    . apply Kripke.validOnFiniteFrameClass_not_of_exists_finiteFrame;
       let F : FiniteFrame := ⟨Fin 2, λ x y => x ≤ y⟩;
-      use F.toFrame;
+      use F;
       constructor;
-      . use F;
-        refine ⟨⟨?_, ?_, ?_⟩, rfl⟩;
+      . refine ⟨?_, ?_, ?_⟩;
         . simp [F, Reflexive];
         . simp [F, Transitive]; omega;
         . simp [F, AntiSymmetric]; omega;

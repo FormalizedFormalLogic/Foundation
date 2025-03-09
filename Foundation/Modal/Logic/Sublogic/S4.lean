@@ -9,11 +9,11 @@ open Kripke
 theorem S4_ssubset_S4Point2 : Logic.S4 ⊂ Logic.S4Point2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use Axioms.Point2 (.atom 0)
     constructor;
     . exact axiomPoint2!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = y) ⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
@@ -46,12 +46,12 @@ theorem S4Point2_ssubset_S4Point3 : Logic.S4Point2 ⊂ Logic.S4Point3 := by
     . exact F_refl;
     . exact F_trans;
     . exact confluent_of_refl_connected F_refl F_conn;
-  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.partial_confluent ⊧ φ by
+  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬FrameClass.confluent_preorder ⊧ φ by
       simpa [S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
     use Axioms.Point3 (.atom 0) (.atom 1);
     constructor;
     . exact axiomPoint3!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 4, λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)⟩, λ w a => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))⟩;
       use M, 0;
       constructor;
@@ -91,12 +91,12 @@ theorem S4Point3_ssubset_S5 : Logic.S4Point3 ⊂ Logic.S5 := by
     . unfold Reflexive; intros; apply F_univ;
     . unfold Transitive; intros; apply F_univ;
     . unfold Connected; intros; constructor; apply F_univ;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.connected_preorder ⊧ φ by
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.connected_preorder ⊧ φ by
       simpa [S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w a => (w = 0)⟩;
       use M, 0;
       constructor;

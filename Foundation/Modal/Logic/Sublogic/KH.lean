@@ -13,7 +13,7 @@ theorem K_ssubset_KH : Logic.K ⊂ Logic.KH := by
     use (Axioms.H (.atom 0));
     constructor;
     . exact axiomH!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩, 0;
       simp [Satisfies, Semantics.Realize];
       constructor <;> tauto;

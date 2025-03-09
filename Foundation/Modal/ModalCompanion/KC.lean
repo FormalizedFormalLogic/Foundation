@@ -122,8 +122,8 @@ lemma S4Point2.is_smallestMC_of_KC : Logic.S4Point2 = Logic.KC.smallestMC := by
 instance : ModalCompanion Logic.KC Logic.S4Point2 := by
   rw [Logic.S4Point2.is_smallestMC_of_KC];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-    (IC := Kripke.FrameClass.confluent)
-    (MC := Kripke.FrameClass.partial_confluent)
+    (IC := Propositional.Kripke.FrameClass.confluent)
+    (MC := Modal.Kripke.FrameClass.confluent_preorder)
     (by
       intro φ;
       constructor;
