@@ -148,4 +148,8 @@ omit [DecidableEq α]
 
 end Derivation
 
+abbrev Sequent.Tautology (Γ : Sequent α) := (∅ : Theory α) ⟹ Γ
+
+abbrev NNFormula.Tautology (φ : NNFormula α) := Sequent.Tautology [φ]
+
 end LO.Propositional

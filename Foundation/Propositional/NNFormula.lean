@@ -92,16 +92,16 @@ instance : DeMorgan (NNFormula α) where
   neg := by simp
 
 def complexity : NNFormula α → ℕ
-| ⊤       => 0
-| ⊥       => 0
+| ⊤       => 1
+| ⊥       => 1
 | atom _  => 0
 | natom _ => 0
 | φ ⋏ ψ   => max φ.complexity ψ.complexity + 1
 | φ ⋎ ψ   => max φ.complexity ψ.complexity + 1
 
-@[simp] lemma complexity_top : complexity (⊤ : NNFormula α) = 0 := rfl
+@[simp] lemma complexity_top : complexity (⊤ : NNFormula α) = 1 := rfl
 
-@[simp] lemma complexity_bot : complexity (⊥ : NNFormula α) = 0 := rfl
+@[simp] lemma complexity_bot : complexity (⊥ : NNFormula α) = 1 := rfl
 
 @[simp] lemma complexity_atom (a : α) : complexity (atom a) = 0 := rfl
 
