@@ -17,7 +17,7 @@ instance : Kripke.Canonical (Hilbert.K) FrameClass.all := ⟨by trivial⟩
 
 instance Kripke.complete : Complete (Hilbert.K) FrameClass.all := inferInstance
 
-instance Kripke.complete_finiteAux : Complete (Hilbert.K) (FiniteFrameClass.all) := ⟨by
+instance Kripke.complete_finite : Complete (Hilbert.K) (FiniteFrameClass.all) := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   intro F _ V x;

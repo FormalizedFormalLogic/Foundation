@@ -10,17 +10,13 @@ open Formula.Kripke
 
 open Kripke
 
-abbrev Kripke.FrameClass.all_finite : FrameClass := { F : Kripke.Frame | Finite F.World }
-
 namespace Hilbert.Int.Kripke
 
 protected instance sound : Sound Hilbert.Int FrameClass.all := inferInstance
 
 protected instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass FrameClass.all (by simp)
 
-instance sound_finite : Sound Hilbert.Int Kripke.FrameClass.all_finite := by
-  convert Hilbert.finite_sound_of_sound Int.Kripke.sound;
-  tauto;
+instance sound_finite : Sound Hilbert.Int Kripke.FiniteFrameClass.all := inferInstance
 
 instance canonical : Canonical Hilbert.Int FrameClass.all := by tauto;
 
@@ -29,16 +25,18 @@ instance complete: Complete Hilbert.Int FrameClass.all := inferInstance
 
 section FFP
 
-instance complete_finite : Complete (Hilbert.Int) Kripke.FrameClass.all_finite := ⟨by
+instance complete_finite : Complete (Hilbert.Int) Kripke.FiniteFrameClass.all := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFilterationModel M ↑φ.subformulas;
+
   apply filteration FM (coarsestFilterationModel.filterOf) (by simp) |>.mpr;
-  apply hφ;
-  apply FilterEqvQuotient.finite;
-  simp;
+  apply validOnModel_of_validOnFiniteFrameClass hφ;
+  . tauto;
+  . apply FilterEqvQuotient.finite;
+    simp;
 ⟩
 
 end FFP

@@ -62,7 +62,7 @@ instance FrameClass.euclidean.definability : FrameClass.euclidean.DefinedByFormu
 
 @[simp]
 lemma FrameClass.euclidean.nonempty : FrameClass.euclidean.Nonempty := by
-  use pointFrame;
+  use whitepoint.toFrame;
   simp [Euclidean];
 
 end definability

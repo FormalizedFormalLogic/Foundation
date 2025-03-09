@@ -67,7 +67,7 @@ instance FrameClass.confluent.definability : FrameClass.confluent.DefinedBy {Axi
 
 @[simp]
 instance FrameClass.confluent.nonempty : FrameClass.confluent.Nonempty := by
-  use pointFrame;
+  use whitepoint.toFrame;
   simp [Confluent];
 
 end definability

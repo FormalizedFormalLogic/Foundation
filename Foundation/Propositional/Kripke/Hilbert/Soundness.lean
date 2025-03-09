@@ -73,6 +73,64 @@ lemma finite_sound_of_sound (sound : Sound H C) : Sound H ({ F | F ∈ C ∧ Fin
 
 end
 
+
+section
+
+variable {C : Kripke.FiniteFrameClass}
+
+lemma soundness_of_FiniteFrameClass_definedBy_axiomInstances [defined : C.DefinedBy H.axiomInstances] : H ⊢! φ → C ⊧ φ := by
+  intro hφ F hF;
+  induction hφ using Hilbert.Deduction.rec! with
+  | verum => apply ValidOnFrame.top;
+  | implyS => apply ValidOnFrame.imply₁;
+  | implyK => apply ValidOnFrame.imply₂;
+  | andElimL => apply ValidOnFrame.andElim₁;
+  | andElimR => apply ValidOnFrame.andElim₂;
+  | andIntro => apply ValidOnFrame.andInst₃;
+  | orIntroL => apply ValidOnFrame.orInst₁;
+  | orIntroR => apply ValidOnFrame.orInst₂;
+  | orElim => apply ValidOnFrame.orElim;
+  | mdp => exact ValidOnFrame.mdp (by assumption) (by assumption);
+  | maxm hi =>
+    obtain ⟨ψ, h, ⟨s, rfl⟩⟩ := hi;
+    apply defined.defines F |>.mp hF (ψ⟦s⟧);
+    use ψ;
+    constructor
+    . assumption;
+    . use s;
+
+instance [defs : C.DefinedBy H.axioms] : C.DefinedBy H.axiomInstances := ⟨by
+  intro F;
+  constructor;
+  . rintro hF φ ⟨ψ, hψ, ⟨s, rfl⟩⟩;
+    exact ValidOnFrame.subst $ defs.defines F |>.mp hF ψ hψ;
+  . intro h;
+    apply defs.defines F |>.mpr;
+    intro φ hφ;
+    apply h;
+    use φ;
+    constructor;
+    . assumption;
+    . use .id;
+      simp;
+⟩
+
+instance [C.DefinedBy H.axioms] : Sound H C := ⟨fun {_} => soundness_of_FiniteFrameClass_definedBy_axiomInstances⟩
+
+lemma consistent_of_FiniteFrameClass (C : Kripke.FiniteFrameClass) (C_nonempty: C.Nonempty := by simp) [sound : Sound H C] : Entailment.Consistent H := by
+  apply Entailment.Consistent.of_unprovable (f := ⊥);
+  apply not_imp_not.mpr sound.sound;
+  apply Semantics.set_models_iff.not.mpr;
+  push_neg;
+  obtain ⟨F, hF⟩ := C_nonempty;
+  use F;
+  constructor;
+  . assumption;
+  . simp;
+
+end
+
+
 end Kripke.Hilbert
 
 end LO.Propositional

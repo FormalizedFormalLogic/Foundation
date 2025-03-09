@@ -103,10 +103,11 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
 instance : ModalCompanion Logic.Int Logic.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.FrameClass.all_finite)
+    (IC := Propositional.Kripke.FiniteFrameClass.all.toFrameClass)
     (MC := Modal.Kripke.FiniteFrameClass.strict_preorder.toFrameClass)
     (by
       intro φ;
+      simp only [Propositional.Logic.eq_kripkeFiniteFrameClass_toFrameClas_logic];
       constructor;
       . apply Propositional.Hilbert.Int.Kripke.sound_finite.sound;
       . apply Propositional.Hilbert.Int.Kripke.complete_finite.complete;
@@ -114,19 +115,14 @@ instance : ModalCompanion Logic.Int Logic.Grz := by
     (by
       rw [←Logic.Grz.is_largestMC_of_Int];
       intro φ;
+      simp only [Modal.Logic.eq_kripkeFiniteFrameClass_toFrameClas_logic];
       constructor;
-      . intro h F hF;
-        obtain ⟨F, hF, rfl⟩ := hF;
-        apply Modal.Hilbert.Grz.Kripke.finite_sound.sound h hF;
-      . intro hF;
-        apply Modal.Hilbert.Grz.Kripke.complete.complete;
-        rintro _ _;
-        apply hF;
-        tauto;
+      . apply Modal.Hilbert.Grz.Kripke.finite_sound.sound;
+      . apply Modal.Hilbert.Grz.Kripke.complete.complete;
     )
     (by
-      rintro F hF;
-      use ({ World := F.World, Rel := F.Rel, world_finite := by tauto; });
+      rintro _ ⟨F, hF, rfl⟩;
+      use ({ World := F.World, Rel := F.Rel, world_finite := F.world_finite });
       simp only [Set.mem_setOf_eq, and_true];
       refine ⟨F.rel_refl, F.rel_trans, F.rel_antisymm⟩;
     )

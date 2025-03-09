@@ -69,7 +69,7 @@ instance FrameClass.connected.definability : FrameClass.connected.DefinedBy {Axi
 
 @[simp]
 instance FrameClass.connected.nonempty : FrameClass.connected.Nonempty := by
-  use pointFrame;
+  use whitepoint.toFrame;
   simp [Connected];
 
 end definability
