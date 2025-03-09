@@ -10,27 +10,26 @@ open Formula.Kripke
 
 open Kripke
 
-def Kripke.AllFiniteFrameClass : FiniteFrameClass := ⟨{ F : Kripke.Frame | Finite F.World }, by tauto⟩
+abbrev Kripke.FrameClass.all_finite : FrameClass := { F : Kripke.Frame | Finite F.World }
 
 namespace Hilbert.Int.Kripke
 
-instance sound : Sound Hilbert.Int AllFrameClass := inferInstance
+protected instance sound : Sound Hilbert.Int FrameClass.all := inferInstance
 
-instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass AllFrameClass
+protected instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass FrameClass.all (by simp)
 
-instance sound_finite : Sound Hilbert.Int AllFiniteFrameClass := ⟨by
-  intro φ hφ F hF V x;
-  exact sound.sound hφ F trivial V x;
-⟩
+instance sound_finite : Sound Hilbert.Int Kripke.FrameClass.all_finite := by
+  convert Hilbert.finite_sound_of_sound Int.Kripke.sound;
+  tauto;
 
-instance canonical : Canonical Hilbert.Int AllFrameClass := by tauto;
+instance canonical : Canonical Hilbert.Int FrameClass.all := by tauto;
 
-instance complete: Complete Hilbert.Int AllFrameClass := inferInstance
+instance complete: Complete Hilbert.Int FrameClass.all := inferInstance
 
 
 section FFP
 
-instance complete_finite : Complete (Hilbert.Int) (AllFiniteFrameClass) := ⟨by
+instance complete_finite : Complete (Hilbert.Int) Kripke.FrameClass.all_finite := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   intro F _ V x;
@@ -132,10 +131,19 @@ theorem disjunctive : (Hilbert.Int) ⊢! φ ⋎ ψ → (Hilbert.Int) ⊢! φ ∨
   contrapose;
   intro hC; push_neg at hC;
   have ⟨hnφ, hnψ⟩ := hC;
-  obtain ⟨F₁, V₁, w₁, hφ⟩ := by simpa [ValidOnFrame, ValidOnModel] using not_imp_not.mpr Int.Kripke.complete.complete hnφ;
-  obtain ⟨F₂, V₂, w₂, hψ⟩ := by simpa [ValidOnFrame, ValidOnModel] using not_imp_not.mpr Int.Kripke.complete.complete hnψ;
+
+  replace hnφ := Semantics.set_models_iff.not.mp $ (not_imp_not.mpr Int.Kripke.complete.complete) hnφ;
+  push_neg at hnφ;
+  obtain ⟨F₁, _, hF₁⟩ := hnφ;
+  obtain ⟨V₁, w₁, hφ⟩ := Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₁;
+
+  replace hnψ := Semantics.set_models_iff.not.mp $ (not_imp_not.mpr Int.Kripke.complete.complete) hnψ;
+  push_neg at hnψ;
+  obtain ⟨F₂, _, hF₂⟩ := hnψ;
+  obtain ⟨V₂, w₂, hψ⟩ := Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₂;
+
   apply (not_imp_not.mpr Int.Kripke.sound.sound);
-  apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+  apply not_validOnFrameClass_of_exists_model_world;
   let M := counterexampleDPModel ⟨F₁, V₁⟩ ⟨F₂, V₂⟩ w₁ w₂;
   use M, (Sum.inl ());
   constructor;
@@ -143,11 +151,9 @@ theorem disjunctive : (Hilbert.Int) ⊢! φ ⋎ ψ → (Hilbert.Int) ⊢! φ ∨
   . apply Formula.Kripke.Satisfies.or_def.not.mpr;
     push_neg;
     constructor;
-    . have := not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inl w₁) φ (by aesop);
-      apply this;
+    . apply not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inl w₁) φ (by aesop);
       exact satisfies_left_on_counterexampleDPModel.not.mp hφ;
-    . have := not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr w₂) ψ (by aesop);
-      apply this;
+    . apply not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr w₂) ψ (by aesop);
       exact satisfies_right_on_counterexampleDPModel.not.mp hψ;
 
 instance : Entailment.Disjunctive (Hilbert.Int) := ⟨disjunctive⟩

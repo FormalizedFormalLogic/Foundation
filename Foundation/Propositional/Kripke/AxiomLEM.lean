@@ -1,5 +1,3 @@
-import Foundation.Propositional.Hilbert.WellKnown
-import Foundation.Propositional.Kripke.Hilbert.Soundness
 import Foundation.Propositional.Kripke.Completeness
 
 namespace LO.Propositional
@@ -14,11 +12,29 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_LEM_of_euclidean (hEuc : Euclidean F) : F ⊧ (Axioms.LEM (.atom 0)) := by
-  apply ValidOnFrame.lem;
-  apply symm_of_refl_eucl;
-  . exact F.rel_refl;
+lemma validate_LEM_of_symmetric : Symmetric F → F ⊧ (Axioms.LEM (.atom 0)) := by
+  unfold Symmetric Axioms.LEM;
+  contrapose;
+  push_neg;
+  intro h;
+
+  obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
+  unfold Satisfies at h;
+  push_neg at h;
+  rcases h with ⟨h₁, h₂⟩;
+
+  replace h₂ := Satisfies.neg_def.not.mp h₂;
+  push_neg at h₂;
+  obtain ⟨y, Rxy, hy⟩ := h₂;
+
+  use x, y;
+  constructor;
   . assumption;
+  . by_contra Ryx;
+    exact h₁ $ Satisfies.formula_hereditary Ryx hy;
+
+lemma validate_LEM_of_euclidean (hEuc : Euclidean F) : F ⊧ (Axioms.LEM (.atom 0)) :=
+  validate_LEM_of_symmetric (symm_of_refl_eucl F.rel_refl hEuc)
 
 lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F := by
   rintro h x y z Rxy Rxz;
@@ -35,19 +51,19 @@ lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F :
   . exact Rxz;
   . apply F.rel_refl;
 
-abbrev EuclideanFrameClass : FrameClass := { F | Euclidean F }
+protected abbrev FrameClass.euclidean : FrameClass := { F | Euclidean F }
 
-instance EuclideanFrameClass.DefinedByAxiomLEM : EuclideanFrameClass.DefinedBy {Axioms.LEM (.atom 0)} := ⟨by
+instance FrameClass.euclidean.definability : FrameClass.euclidean.DefinedByFormula (Axioms.LEM (.atom 0)) := ⟨by
   intro F;
   constructor;
   . simpa using validate_LEM_of_euclidean;
   . simpa using euclidean_of_validate_LEM;
 ⟩
 
-instance : EuclideanFrameClass.IsNonempty := ⟨by
+@[simp]
+lemma FrameClass.euclidean.nonempty : FrameClass.euclidean.Nonempty := by
   use pointFrame;
   simp [Euclidean];
-⟩
 
 end definability
 

@@ -73,7 +73,7 @@ lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
 instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := by
   rw [Logic.S4Point3.is_smallestMC_of_LC];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.ConnectedFrameClass)
+    (IC := Kripke.FrameClass.connected)
     (MC := Modal.Kripke.ReflexiveTransitiveConnectedFrameClass)
     (by
       intro φ;

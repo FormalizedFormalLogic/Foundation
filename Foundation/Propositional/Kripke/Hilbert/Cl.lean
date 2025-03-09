@@ -11,11 +11,11 @@ open Kripke
 
 namespace Hilbert.Cl.Kripke
 
-instance : EuclideanFrameClass.DefinedBy (Hilbert.Cl.axioms) := FrameClass.definedBy_with_axiomEFQ inferInstance
+instance : FrameClass.euclidean.DefinedBy (Hilbert.Cl.axioms) := FrameClass.definedBy_with_axiomEFQ inferInstance
 
-instance sound : Sound Hilbert.Cl EuclideanFrameClass := inferInstance
+instance sound : Sound Hilbert.Cl FrameClass.euclidean := inferInstance
 
-instance consistent : Entailment.Consistent Hilbert.Cl := Kripke.Hilbert.consistent_of_FrameClass EuclideanFrameClass
+instance consistent : Entailment.Consistent Hilbert.Cl := Kripke.Hilbert.consistent_of_FrameClass FrameClass.euclidean (by simp)
 
 end Hilbert.Cl.Kripke
 

@@ -1,5 +1,3 @@
-import Foundation.Propositional.Hilbert.WellKnown
-import Foundation.Propositional.Kripke.Hilbert.Soundness
 import Foundation.Propositional.Kripke.Completeness
 
 namespace LO.Propositional
@@ -14,8 +12,30 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_WeakLEM_of_confluent (hCon : Confluent F) : F ⊧ (Axioms.WeakLEM (.atom 0)) := by
-  apply ValidOnFrame.wlem hCon;
+lemma validate_WeakLEM_of_confluent : Confluent F → F ⊧ (Axioms.WeakLEM (.atom 0)) := by
+  unfold Confluent Axioms.WeakLEM;
+  contrapose;
+  push_neg;
+  intro h;
+  obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
+  unfold Satisfies at h;
+  push_neg at h;
+  rcases h with ⟨h₁, h₂⟩;
+
+  replace h₁ := Satisfies.neg_def.not.mp h₁;
+  push_neg at h₁;
+  obtain ⟨y, Rxy, hy⟩ := h₁;
+
+  replace h₂ := Satisfies.neg_def.not.mp h₂;
+  push_neg at h₂;
+  obtain ⟨z, Rxz, hz⟩ := h₂;
+
+  use x, y, z;
+  constructor;
+  . constructor <;> assumption;
+  . intro u Ryu;
+    by_contra Rzu;
+    exact (Satisfies.neg_def.mp hz) Rzu $ Satisfies.formula_hereditary Ryu hy;
 
 lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confluent F := by
   rintro h x y z ⟨Rxy, Ryz⟩;
@@ -36,19 +56,19 @@ lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confl
   obtain ⟨w, Rzw, hw⟩ := by simpa [Satisfies] using @this z Ryz;
   use w;
 
-abbrev ConfluentFrameClass : FrameClass := { F | Confluent F }
+protected abbrev FrameClass.confluent : FrameClass := { F | Confluent F }
 
-instance ConfluentFrameClass.DefinedByAxiomWeakLEM : ConfluentFrameClass.DefinedBy {Axioms.WeakLEM (.atom 0)} := ⟨by
+instance FrameClass.confluent.definability : FrameClass.confluent.DefinedBy {Axioms.WeakLEM (.atom 0)} := ⟨by
   intro F;
   constructor;
   . simpa using validate_WeakLEM_of_confluent;
   . simpa using confluent_of_validate_WeakLEM;
 ⟩
 
-instance : ConfluentFrameClass.IsNonempty := ⟨by
+@[simp]
+instance FrameClass.confluent.nonempty : FrameClass.confluent.Nonempty := by
   use pointFrame;
   simp [Confluent];
-⟩
 
 end definability
 
@@ -67,7 +87,7 @@ open Classical
 
 namespace Canonical
 
-lemma confluent [Entailment.HasAxiomWeakLEM 𝓢] : Confluent (canonicalFrame 𝓢).Rel := by
+protected lemma confluent [Entailment.HasAxiomWeakLEM 𝓢] : Confluent (canonicalFrame 𝓢).Rel := by
   rintro x y z ⟨Rxy, Rxz⟩;
   suffices Tableau.Consistent 𝓢 (y.1.1 ∪ z.1.1, ∅) by
     obtain ⟨w, hw⟩ := lindenbaum (𝓢 := 𝓢) this;

@@ -55,8 +55,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     intro φ;
     contrapose;
     intro h;
-    have := hIL_complete.not.mp h;
-    obtain ⟨F, hF, hF₂⟩ := by simpa using this;
+    obtain ⟨F, hF, hF₂⟩ := Kripke.exists_frame_of_not_validOnFrameClass $ hIL_complete.not.mp h
     obtain ⟨V, x, hφ⟩ := Propositional.Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₂;
     have h₁ : ∀ ψ x, Propositional.Formula.Kripke.Satisfies ⟨F, V⟩ x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ x (ψᵍ)) := by
       intro ψ x;
@@ -109,8 +108,7 @@ lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     intro φ;
     contrapose;
     intro h;
-    have := hIL_complete.not.mp h;
-    obtain ⟨F, hF, hF₂⟩ := by simpa using this;
+    obtain ⟨F, hF, hF₂⟩ := Kripke.exists_frame_of_not_validOnFrameClass $ hIL_complete.not.mp h
     obtain ⟨V, x, hφ⟩ := Propositional.Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₂;
     have h₁ : ∀ ψ x, Propositional.Formula.Kripke.Satisfies ⟨F, V⟩ x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ x (ψᵍ)) := by
       intro ψ x;

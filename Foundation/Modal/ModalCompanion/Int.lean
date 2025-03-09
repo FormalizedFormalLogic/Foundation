@@ -45,7 +45,7 @@ lemma Logic.S4.is_smallestMC_of_Int : Logic.S4 = Logic.Int.smallestMC := by
 instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
   rw [Logic.S4.is_smallestMC_of_Int];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.AllFrameClass)
+    (IC := Kripke.FrameClass.all)
     (MC := Modal.Kripke.ReflexiveTransitiveFrameClass)
     (by
       intro φ;
@@ -103,7 +103,7 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
 instance : ModalCompanion Logic.Int Logic.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.AllFiniteFrameClass)
+    (IC := Kripke.FrameClass.all_finite)
     (MC := Modal.Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass)
     (by
       intro φ;

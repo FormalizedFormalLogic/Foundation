@@ -55,18 +55,21 @@ instance [defs : C.DefinedBy H.axioms] : C.DefinedBy H.axiomInstances := ⟨by
 
 instance [C.DefinedBy H.axioms] : Sound H C := ⟨fun {_} => soundness_of_FrameClass_definedBy_axiomInstances⟩
 
-lemma consistent_of_FrameClass_aux [nonempty : C.IsNonempty] [sound : Sound H C] : H ⊬ ⊥ := by
+lemma consistent_of_FrameClass (C : FrameClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
+  apply Entailment.Consistent.of_unprovable (f := ⊥);
   apply not_imp_not.mpr sound.sound;
-  apply ValidOnFrameClass.not_of_exists_frame;
-  obtain ⟨F, hF⟩ := nonempty;
+  apply Semantics.set_models_iff.not.mpr;
+  push_neg;
+  obtain ⟨F, hF⟩ := hC;
   use F;
   constructor;
   . assumption;
   . simp;
 
-lemma consistent_of_FrameClass (C : Kripke.FrameClass) [C.IsNonempty] [Sound H C] : Entailment.Consistent H := by
-  apply Entailment.Consistent.of_unprovable;
-  exact consistent_of_FrameClass_aux (C := C);
+lemma finite_sound_of_sound (sound : Sound H C) : Sound H ({ F | F ∈ C ∧ Finite F }) := ⟨by
+  rintro φ hφ F ⟨hF₁, _⟩;
+  exact sound.sound hφ hF₁;
+⟩
 
 end
 
