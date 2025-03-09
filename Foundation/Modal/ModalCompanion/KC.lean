@@ -123,7 +123,7 @@ instance : ModalCompanion Logic.KC Logic.S4Point2 := by
   rw [Logic.S4Point2.is_smallestMC_of_KC];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Kripke.FrameClass.confluent)
-    (MC := Modal.Kripke.ReflexiveTransitiveConfluentFrameClass)
+    (MC := Kripke.FrameClass.partial_confluent)
     (by
       intro φ;
       constructor;

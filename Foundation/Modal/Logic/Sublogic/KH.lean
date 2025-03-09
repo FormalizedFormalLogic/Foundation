@@ -9,7 +9,7 @@ open Kripke
 theorem K_ssubset_KH : Logic.K ⊂ Logic.KH := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KH ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KH ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.H (.atom 0));
     constructor;
     . exact axiomH!;

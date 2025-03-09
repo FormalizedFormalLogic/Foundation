@@ -131,7 +131,7 @@ class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] (C :
 instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
   contrapose;
   intro h;
-  apply ValidOnFrameClass.not_of_exists_model;
+  apply not_validOnFrameClass_of_exists_model;
   use (canonicalModel 𝓢);
   constructor;
   . exact Canonical.canonical;

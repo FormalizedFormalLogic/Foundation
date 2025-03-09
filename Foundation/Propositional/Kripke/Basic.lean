@@ -35,7 +35,6 @@ lemma rel_antisymm' : x ≺ y → y ≺ x → x = y := by apply F.rel_antisymm
 
 end Frame
 
-
 abbrev pointFrame : Frame where
   World := Unit
   Rel := fun _ _ => True
@@ -43,11 +42,7 @@ abbrev pointFrame : Frame where
   rel_trans := by simp [Transitive]
   rel_antisymm := by simp [AntiSymmetric]
 
-
 abbrev FrameClass := Set (Frame)
-
-abbrev FiniteFrameClass := { C : FrameClass // ∀ F ∈ C, Finite F.World }
-
 
 structure Valuation (F : Frame) where
   Val : F.World → ℕ → Prop

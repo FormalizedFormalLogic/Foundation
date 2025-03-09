@@ -12,7 +12,7 @@ namespace Kripke
 
 variable (T : Kripke.FiniteTransitiveTree)
 
-lemma valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameClass (h : Kripke.TransitiveIrreflexiveFiniteFrameClass ⊧ φ)
+lemma valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameClass (h : FrameClass.finite_transitive_irreflexive ⊧ φ)
   : ∀ T : Kripke.FiniteTransitiveTree, T.toFrame ⊧ φ := by
   intro T;
   apply @h T.toFrame;
@@ -27,7 +27,7 @@ lemma satisfies_at_root_on_FiniteTransitiveTree (h : ∀ T : FiniteTransitiveTre
 
 open Classical in
 lemma valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree
-  : (∀ M : FiniteTransitiveTreeModel, Satisfies M.toModel M.root φ) → TransitiveIrreflexiveFiniteFrameClass ⊧ φ := by
+  : (∀ M : FiniteTransitiveTreeModel, Satisfies M.toModel M.root φ) → FrameClass.finite_transitive_irreflexive ⊧ φ := by
   rintro H _ ⟨F, ⟨F_trans, F_irrefl⟩, rfl⟩ V r;
   let M : Kripke.Model := ⟨F.toFrame, V⟩;
   apply Model.PointGenerated.modal_equivalent_at_root F_trans r |>.mp;
@@ -42,7 +42,7 @@ namespace Hilbert.GL.Kripke
 theorem iff_provable_satisfies_FiniteTransitiveTree : Hilbert.GL ⊢! φ ↔ (∀ M : FiniteTransitiveTreeModel, Satisfies M.toModel M.root φ) := by
   constructor;
   . intro h M;
-    have : TransitiveIrreflexiveFiniteFrameClass ⊧ φ := Hilbert.GL.Kripke.finiteSound.sound h;
+    have : FrameClass.finite_transitive_irreflexive ⊧ φ := Hilbert.GL.Kripke.finiteSound.sound h;
     have := valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameClass this;
     exact satisfies_at_root_on_FiniteTransitiveTree this M;
   . intro h;

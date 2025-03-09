@@ -5,23 +5,23 @@ namespace LO.Modal
 open Kripke
 open Geachean
 
-abbrev Kripke.SerialTransitiveFrameClass : FrameClass := { F | Serial F ∧ Transitive F }
+abbrev Kripke.Frame.serial_trans : FrameClass := { F | Serial F ∧ Transitive F }
 
 namespace Hilbert.KD4
 
-instance Kripke.sound : Sound (Hilbert.KD4) (Kripke.SerialTransitiveFrameClass) := by
+instance Kripke.sound : Sound (Hilbert.KD4) Kripke.Frame.serial_trans := by
   convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩});
   . exact eq_Geach;
-  . unfold SerialTransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
+  . unfold Kripke.Frame.serial_trans FrameClass.multiGeachean MultiGeachean;
     simp [Geachean.serial_def, Geachean.transitive_def];
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.KD4) := by
-  convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩});
+  convert Hilbert.Geach.Kripke.consistent (G := {⟨0, 0, 1, 1⟩, ⟨0, 2, 1, 0⟩});
   exact eq_Geach;
 
-instance Kripke.canonical : Canonical (Hilbert.KD4) (SerialTransitiveFrameClass) := ⟨⟨Canonical.serial, Canonical.transitive⟩⟩
+instance Kripke.canonical : Canonical (Hilbert.KD4) Kripke.Frame.serial_trans := ⟨⟨Canonical.serial, Canonical.transitive⟩⟩
 
-instance Kripke.complete : Complete (Hilbert.KD4) (SerialTransitiveFrameClass) := inferInstance
+instance Kripke.complete : Complete (Hilbert.KD4) Kripke.Frame.serial_trans := inferInstance
 
 end Hilbert.KD4
 

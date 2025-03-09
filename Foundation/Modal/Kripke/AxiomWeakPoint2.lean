@@ -44,18 +44,23 @@ lemma validate_WeakPoint2_of_weakConfluent : F ⊧ (Axioms.WeakPoint2 (.atom 0) 
     intro Ryu;
     exact hu u Ryu;
 
-abbrev WeakConfluentFrameClass : FrameClass := { F | WeakConfluent F }
+abbrev FrameClass.weakConfluent : FrameClass := { F | WeakConfluent F }
 
-instance : WeakConfluentFrameClass.IsNonempty := by
+namespace FrameClass.weakConfluent
+
+@[simp]
+protected lemma nonempty : FrameClass.weakConfluent.Nonempty := by
   use ⟨Unit, λ _ _ => True⟩;
   simp [WeakConfluent];
 
-instance WeakConfluentFrameClass.DefinedByWeakPoint2 : WeakConfluentFrameClass.DefinedBy {Axioms.WeakPoint2 (.atom 0) (.atom 1)} := ⟨by
+protected instance definability : FrameClass.weakConfluent.DefinedByFormula (Axioms.WeakPoint2 (.atom 0) (.atom 1)) := ⟨by
   intro F;
   constructor;
   . simpa using weakConnected_of_validate_WeakPoint2;
   . simpa using validate_WeakPoint2_of_weakConfluent;
 ⟩
+
+end FrameClass.weakConfluent
 
 end definability
 
@@ -72,7 +77,7 @@ open canonicalModel
 
 namespace Canonical
 
-lemma weakConfluent [Entailment.HasAxiomWeakPoint2 𝓢] : WeakConfluent (canonicalFrame 𝓢).Rel := by
+protected lemma weakConfluent [Entailment.HasAxiomWeakPoint2 𝓢] : WeakConfluent (canonicalFrame 𝓢).Rel := by
   rintro x y z ⟨Rxy, Rxz, eyz⟩;
   have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹y.1.1, ◇''⁻¹z.1.2⟩) $ by
     rintro Γ Δ hΓ hΔ;

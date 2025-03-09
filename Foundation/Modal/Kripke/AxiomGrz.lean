@@ -1,5 +1,4 @@
 import Foundation.Vorspiel.BinaryRelations
-import Foundation.Modal.Kripke.FiniteFrame
 import Foundation.Modal.Kripke.Hilbert.K
 import Foundation.Modal.Kripke.Hilbert.Geach
 
@@ -13,7 +12,7 @@ open Formula.Kripke
 open Relation (IrreflGen)
 
 abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel }
-abbrev ReflexiveTransitiveAntiSymmetricFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel }
+abbrev ReflexiveTransitiveAntiSymmetricFiniteFrameClass : FrameClass := { F | Finite F.World ∧ Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel }
 
 variable {F : Kripke.Frame}
 

@@ -53,7 +53,7 @@ instance : ProperSublogic Logic.KB4 Logic.KTc := ⟨by
     . intro x y z Rxy Ryz;
       rw [F_corefl Rxy, F_corefl Ryz] at *;
       assumption;
-  . suffices ∃ φ, Hilbert.KTc ⊢! φ ∧ ¬SymmetricTransitiveFrameClass ⊧ φ by
+  . suffices ∃ φ, Hilbert.KTc ⊢! φ ∧ ¬Kripke.FrameClass.symm_trans ⊧ φ by
       simpa [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use (Axioms.Tc (.atom 0));
     constructor;

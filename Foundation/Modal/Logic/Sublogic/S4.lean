@@ -9,7 +9,7 @@ open Kripke
 theorem S4_ssubset_S4Point2 : Logic.S4 ⊂ Logic.S4Point2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use Axioms.Point2 (.atom 0)
     constructor;
     . exact axiomPoint2!;
@@ -46,7 +46,7 @@ theorem S4Point2_ssubset_S4Point3 : Logic.S4Point2 ⊂ Logic.S4Point3 := by
     . exact F_refl;
     . exact F_trans;
     . exact confluent_of_refl_connected F_refl F_conn;
-  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬ReflexiveTransitiveConfluentFrameClass ⊧ φ by
+  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.partial_confluent ⊧ φ by
       simpa [S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
     use Axioms.Point3 (.atom 0) (.atom 1);
     constructor;
@@ -91,7 +91,7 @@ theorem S4Point3_ssubset_S5 : Logic.S4Point3 ⊂ Logic.S5 := by
     . unfold Reflexive; intros; apply F_univ;
     . unfold Transitive; intros; apply F_univ;
     . unfold Connected; intros; constructor; apply F_univ;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬ReflexiveTransitiveConnectedFrameClass ⊧ φ by
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.connected_preorder ⊧ φ by
       simpa [S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;

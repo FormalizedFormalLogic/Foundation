@@ -7,15 +7,16 @@ open Formula.Kripke
 
 namespace Kripke
 
-abbrev IsolatedFrameClass : FrameClass := { F | Isolated F }
+abbrev FrameClass.isolated : FrameClass := { F | Isolated F }
 
-instance : IsolatedFrameClass.IsNonempty := by
+@[simp]
+lemma FrameClass.isolated.nonempty : FrameClass.isolated.Nonempty := by
   use ⟨Unit, λ _ _ => False⟩;
   tauto;
 
-instance IsolatedFrameClass.DefinedByAxiomVer : IsolatedFrameClass.DefinedByFormula (Axioms.Ver (.atom 0)) :=
-  FrameClass.definedByFormula_of_iff_mem_validate $ by
+instance FrameClass.isolated.definability : FrameClass.isolated.DefinedByFormula (Axioms.Ver (.atom 0)) := ⟨by
   intro F;
+  simp only [Set.mem_setOf_eq, Set.mem_singleton_iff, ValidOnFrame.models_iff, forall_eq];
   constructor;
   . intro h V x y Rxy;
     have := h Rxy;
@@ -23,6 +24,23 @@ instance IsolatedFrameClass.DefinedByAxiomVer : IsolatedFrameClass.DefinedByForm
   . intro h x y Rxy;
     have := h (λ _ _ => False) x y Rxy;
     simp [Formula.Kripke.Satisfies] at this;
+⟩
+
+end Kripke
+
+namespace Kripke
+
+
+open Entailment
+
+variable {S} [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢]
+
+instance [Entailment.Ver 𝓢] : Canonical 𝓢 FrameClass.isolated := ⟨by
+  intro x y Rxy;
+  have : (canonicalModel 𝓢) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr axiomVer!
+  exact this x _ Rxy;
+⟩
 
 end Kripke
 

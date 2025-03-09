@@ -13,7 +13,7 @@ theorem KTB_ssubset_S5 : Logic.KTB ⊂ Logic.S5 := by
     rintro φ hφ F ⟨F_refl, F_eucl⟩;
     apply hφ;
     refine ⟨F_refl, symm_of_refl_eucl F_refl F_eucl⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬ReflexiveSymmetricFrameClass ⊧ φ by simpa [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.refl_symm ⊧ φ by simpa [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
@@ -81,7 +81,7 @@ instance : ProperSublogic Logic.KB4 Logic.S5 := ⟨KB4_ssubset_S5⟩
 theorem KT_ssubset_KTB : Logic.KT ⊂ Logic.KTB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬ReflexiveFrameClass ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
@@ -125,7 +125,7 @@ instance : ProperSublogic Logic.KDB Logic.KTB := ⟨KDB_ssubset_KTB⟩
 theorem KT_ssubset_S4 : Logic.KT ⊂ Logic.S4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomT!]) |>.subset;
-  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬ReflexiveFrameClass ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
@@ -348,7 +348,7 @@ instance : ProperSublogic Logic.KD Logic.KD4 := ⟨KD_ssubset_KD4⟩
 theorem K4_ssubset_KD4 : Logic.K4 ⊂ Logic.KD4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬Kripke.FrameClass.transitive ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
@@ -391,7 +391,7 @@ instance : ProperSublogic Logic.KD Logic.KD5 := ⟨KD_ssubset_KD5⟩
 theorem K5_ssubset_KD5 : Logic.K5 ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬EuclideanFrameClass ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
@@ -409,7 +409,7 @@ instance : ProperSublogic Logic.K5 Logic.KD5 := ⟨K5_ssubset_KD5⟩
 theorem K4_ssubset_K45 : Logic.K4 ⊂ Logic.K45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.transitive ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
@@ -433,7 +433,7 @@ instance : ProperSublogic Logic.K4 Logic.K45 := ⟨K4_ssubset_K45⟩
 theorem K5_ssubset_K45 : Logic.K5 ⊂ Logic.K45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬EuclideanFrameClass ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
@@ -458,7 +458,7 @@ instance : ProperSublogic Logic.K5 Logic.K45 := ⟨K5_ssubset_K45⟩
 theorem K_ssubset_KD : Logic.K ⊂ Logic.KD := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
@@ -473,7 +473,7 @@ instance : ProperSublogic Logic.K Logic.KD := ⟨K_ssubset_KD⟩
 theorem K_ssubset_K4 : Logic.K ⊂ Logic.K4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
@@ -501,7 +501,7 @@ instance : ProperSublogic Logic.K Logic.K4 := ⟨K_ssubset_K4⟩
 theorem K_ssubset_K5 : Logic.K ⊂ Logic.K5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
@@ -518,7 +518,7 @@ instance : ProperSublogic Logic.K Logic.K5 := ⟨K_ssubset_K5⟩
 theorem K_ssubset_KB : Logic.K ⊂ Logic.KB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬AllFrameClass ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
@@ -538,7 +538,7 @@ theorem S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
     rintro φ hφ F ⟨F_refl, F_eucl⟩;
     apply hφ;
     refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;

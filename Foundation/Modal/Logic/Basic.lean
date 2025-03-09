@@ -129,7 +129,7 @@ lemma Logic.eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
   . exact sound.sound;
   . exact complete.complete;
 
-lemma Logic.K.eq_AllKripkeFrameClass_Logic : Logic.K = AllFrameClass.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Logic.K.eq_AllKripkeFrameClass_Logic : Logic.K = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 lemma Logic.K.eq_AllKripkeFiniteFrameClass_Logic : Logic.K = AllFiniteFrameClass.logic := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
 

@@ -37,22 +37,22 @@ protected abbrev Empty : Logic := ∅
 protected abbrev Univ : Logic := Set.univ
 
 protected abbrev K4 : Logic := Hilbert.K4.logic
-lemma K4.eq_TransitiveKripkeFrameClass_Logic : Logic.K4 = Kripke.TransitiveFrameClass.logic
+lemma K4.eq_TransitiveKripkeFrameClass_Logic : Logic.K4 = Kripke.FrameClass.transitive.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev K4Point2 : Logic := Hilbert.K4Point2.logic
-lemma K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic : Logic.K4Point2 = Kripke.TransitiveWeakConfluentFrameClass.logic
+lemma K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic : Logic.K4Point2 = Kripke.FrameClass.trans_weakConfluent.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev K4Point3 : Logic := Hilbert.K4Point3.logic
-lemma K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic : Logic.K4Point3 = Kripke.TransitiveWeakConnectedFrameClass.logic
+lemma K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic : Logic.K4Point3 = Kripke.FrameClass.trans_weakConnected.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev K45 : Logic := Hilbert.K45.logic
-lemma K45.eq_TransitiveEuclideanKripkeFrameClass_Logic : Logic.K45 = Kripke.TransitiveEuclideanFrameClass.logic
+lemma K45.eq_TransitiveEuclideanKripkeFrameClass_Logic : Logic.K45 = Kripke.FrameClass.trans_eucl.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
@@ -107,22 +107,22 @@ lemma KT.eq_ReflexiveKripkeFrameClass_Logic : Logic.KT = Kripke.ReflexiveFrameCl
 
 
 protected abbrev KTB : Logic := Hilbert.KTB.logic
-lemma KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic : Logic.KTB = Kripke.ReflexiveSymmetricFrameClass.logic
+lemma KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic : Logic.KTB = Kripke.FrameClass.refl_symm.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev S4 : Logic := Hilbert.S4.logic
-lemma S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic : Logic.S4 = Kripke.ReflexiveTransitiveFrameClass.logic
+lemma S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic : Logic.S4 = Kripke.FrameClass.preorder.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev S4Point2 : Logic := Hilbert.S4Point2.logic
-lemma S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic : Logic.S4Point2 = Kripke.ReflexiveTransitiveConfluentFrameClass.logic
+lemma S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic : Logic.S4Point2 = Kripke.FrameClass.partial_confluent.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev S4Point3 : Logic := Hilbert.S4Point3.logic
-lemma S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic : Logic.S4Point3 = Kripke.ReflexiveTransitiveConnectedFrameClass.logic
+lemma S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic : Logic.S4Point3 = Kripke.connected_preorder.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev S5 : Logic := Hilbert.S5.logic
@@ -135,7 +135,7 @@ protected abbrev S5Grz : Logic := Hilbert.S5Grz.logic
 
 
 protected abbrev GL : Logic := Hilbert.GL.logic
-lemma GL.eq_TransitiveIrreflexiveFiniteKripkeFrameClass_Logic : Logic.GL = Kripke.TransitiveIrreflexiveFiniteFrameClass.logic
+lemma GL.eq_TransitiveIrreflexiveFiniteKripkeFrameClass_Logic : Logic.GL = FrameClass.finite_transitive_irreflexive.logic
   := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
 instance : (Logic.GL).Unnecessitation := inferInstance
 
@@ -155,7 +155,7 @@ lemma Triv.eq_EqualityKripkeFrameClass_Logic : Logic.Triv = Kripke.EqualityFrame
 
 protected abbrev Ver : Logic := Hilbert.Ver.logic
 instance : (Logic.Ver).Normal := Hilbert.normal
-lemma Ver.eq_IsolatedFrameClass_Logic : Logic.Ver = Kripke.IsolatedFrameClass.logic
+lemma Ver.eq_IsolatedFrameClass_Logic : Logic.Ver = FrameClass.isolated.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 

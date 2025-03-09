@@ -174,7 +174,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       refine RXY.1 ψ ?_ h |>.1;
       assumption;
 
-instance finiteComplete : Complete Hilbert.GL Kripke.TransitiveIrreflexiveFiniteFrameClass := ⟨by
+instance finiteComplete : Complete Hilbert.GL FrameClass.finite_transitive_irreflexive := ⟨by
   intro φ;
   contrapose;
   intro h;

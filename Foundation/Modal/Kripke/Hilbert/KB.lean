@@ -5,23 +5,23 @@ namespace LO.Modal
 open Kripke
 open Geachean
 
-abbrev Kripke.SymmetricFrameClass : FrameClass := { F | Symmetric F }
+abbrev Kripke.FrameClass.symm : FrameClass := { F | Symmetric F }
 
 namespace Hilbert.KB
 
-instance Kripke.sound : Sound (Hilbert.KB) (Kripke.SymmetricFrameClass) := by
+instance Kripke.sound : Sound (Hilbert.KB) Kripke.FrameClass.symm := by
   convert Hilbert.Geach.Kripke.sound (G := {⟨0, 1, 0, 1⟩});
   . exact eq_Geach;
-  . unfold SymmetricFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
+  . unfold Kripke.FrameClass.symm FrameClass.multiGeachean MultiGeachean;
     simp [Geachean.symmetric_def];
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.KB) := by
-  convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 1, 0, 1⟩});
+  convert Hilbert.Geach.Kripke.consistent (G := {⟨0, 1, 0, 1⟩});
   exact eq_Geach;
 
-instance Kripke.canonical : Canonical (Hilbert.KB) (SymmetricFrameClass) := ⟨Canonical.symmetric⟩
+instance Kripke.canonical : Canonical (Hilbert.KB) Kripke.FrameClass.symm := ⟨Canonical.symmetric⟩
 
-instance Kripke.complete : Complete (Hilbert.KB) (SymmetricFrameClass) := inferInstance
+instance Kripke.complete : Complete (Hilbert.KB) Kripke.FrameClass.symm := inferInstance
 
 end Hilbert.KB
 

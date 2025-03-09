@@ -13,11 +13,11 @@ namespace Hilbert.S5
 instance Kripke.sound : Sound (Hilbert.S5) (Kripke.ReflexiveEuclideanFrameClass) := by
   convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
   exact eq_Geach;
-  . unfold ReflexiveEuclideanFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
+  . unfold ReflexiveEuclideanFrameClass FrameClass.multiGeachean MultiGeachean;
     simp [Geachean.reflexive_def, Geachean.euclidean_def];
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.S5) := by
-  convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
+  convert Hilbert.Geach.Kripke.consistent (G := {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩});
   exact eq_Geach;
 
 instance Kripke.canonical : Canonical (Hilbert.S5) (ReflexiveEuclideanFrameClass) := ⟨⟨Canonical.reflexive, Canonical.euclidean⟩⟩
@@ -63,7 +63,7 @@ end Hilbert.S5
 
 abbrev Kripke.ReflexiveEuclideanFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Euclidean F.Rel }
 
-lemma Kripke.eq_ReflexiveTransitiveSymmetricFiniteFrameClass_ReflexiveEuclideanFiniteFrameClass : ReflexiveTransitiveSymmetricFiniteFrameClass = ReflexiveEuclideanFiniteFrameClass := by
+lemma Kripke.eq_ReflexiveTransitiveSymmetricFiniteFrameClass_ReflexiveEuclideanFiniteFrameClass : Kripke.FiniteFrameClass.symm_preorder = ReflexiveEuclideanFiniteFrameClass := by
   ext F;
   constructor;
   . rintro ⟨hRefl, hTrans, hSymm⟩;
