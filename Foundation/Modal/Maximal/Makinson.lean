@@ -1,10 +1,6 @@
-import Foundation.Modal.Logic.WellKnown
-import Foundation.Modal.Hilbert.Maximal.Basic
-import Foundation.Modal.Hilbert.NNFormula
 import Foundation.Modal.Hilbert.KP
-import Foundation.Propositional.Classical.Hilbert
-import Foundation.Propositional.Classical.ZeroSubst
-
+import Foundation.Modal.Hilbert.NNFormula
+import Foundation.Modal.Logic.WellKnown
 
 namespace LO.Modal
 
@@ -188,10 +184,6 @@ lemma TrivFamily.notVerFamily [L.TrivFamily] : ¬L.VerFamily := by
   apply not_and'.mp $ makinson (L := L) |>.2;
   assumption;
 
-
 end Logic
-
-
-
 
 end LO.Modal
