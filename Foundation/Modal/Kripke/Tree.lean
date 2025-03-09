@@ -218,7 +218,6 @@ abbrev FiniteFrame.FiniteTransitiveTreeUnravelling
           (β := { x // List.Chain' (F.PointGenerated r).Rel x })
           (fun x => ⟨x.1, x.2.2⟩)
           (by rintro ⟨x, hx⟩ ⟨y, hy⟩; simp_all);
-      have := F.world_finite; -- TODO: remove?
       apply List.chains_finite
         (Frame.PointGenerated.rel_transitive (r := r) F_trans)
         (Frame.PointGenerated.rel_irreflexive (r := r) F_irrefl);

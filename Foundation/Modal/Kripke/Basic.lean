@@ -29,7 +29,10 @@ structure FiniteFrame extends Frame where
   [world_finite : Finite World]
 attribute [simp] FiniteFrame.world_finite
 
+instance {F : FiniteFrame} : Finite F.World := F.world_finite
+
 def Frame.toFinite (F : Frame) [Finite F.World] : FiniteFrame := ⟨F⟩
+
 
 section
 
@@ -37,7 +40,6 @@ abbrev whitepoint : FiniteFrame := ⟨Unit, λ _ _ => True⟩
 abbrev blackpoint : FiniteFrame := ⟨Unit, λ _ _ => False⟩
 
 end
-
 
 abbrev FrameClass := Set (Frame)
 
@@ -47,6 +49,7 @@ def FiniteFrameClass.toFrameClass (C : FiniteFrameClass) : FrameClass := C.image
 
 lemma exists_finiteFrameClass_of_mem_toFrameClass {C : FiniteFrameClass} (hF : F ∈ C.toFrameClass) : ∃ F' ∈ C, F'.toFrame = F := by
   simpa [FiniteFrameClass.toFrameClass] using hF;
+
 
 abbrev Valuation (F : Frame) := F.World → ℕ → Prop
 

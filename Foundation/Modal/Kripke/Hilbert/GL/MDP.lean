@@ -12,10 +12,6 @@ namespace Kripke
 
 abbrev MDPCounterexampleFrame (F₁ F₂ : FiniteTransitiveTree) : FiniteTransitiveTree where
   World := Unit ⊕ F₁.World ⊕ F₂.World
-  world_finite := by  -- TODO: remove
-    have := F₁.world_finite;
-    have := F₂.world_finite;
-    infer_instance;
   Rel := λ x y =>
     match x, y with
     | .inr (.inl x), .inr (.inl y) => x ≺ y -- M₁
