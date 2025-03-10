@@ -1,6 +1,7 @@
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Vorspiel.Collection
 import Foundation.Modal.LogicSymbol
+import Foundation.Propositional.Classical.ZeroSubst
 
 namespace LO.Modal
 
@@ -200,11 +201,6 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
 instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
-
-
-def isBox : Formula α → Bool
-  | box _ => true
-  | _  => false
 
 end Formula
 
@@ -438,69 +434,148 @@ instance : Encodable (Formula α) where
 
 end Encodable
 
+
+def letterless : Formula α → Prop
+  | atom _ => False
+  | ⊥ => True
+  | □φ => φ.letterless
+  | φ ➝ ψ => (φ.letterless) ∧ (ψ.letterless)
+
+namespace letterless
+
+variable {φ ψ : Formula α}
+
+@[simp] lemma not_atom : ¬(letterless (atom p)) := by simp [letterless]
+
+lemma def_imp : (φ ➝ ψ).letterless → φ.letterless ∧ ψ.letterless := by simp [letterless]
+lemma def_imp₁ : (φ ➝ ψ).letterless → φ.letterless := λ h => def_imp h |>.1
+lemma def_imp₂ : (φ ➝ ψ).letterless → ψ.letterless := λ h => def_imp h |>.2
+lemma def_box : (□φ).letterless → φ.letterless := by simp [letterless]
+
+end letterless
+
 end Formula
 
+end Modal
 
-/-
-end Formula
 
-namespace FormulaSet
+namespace Propositional
 
-open Formula
-variable {T : FormulaSet α}
+def Formula.toModalFormula : Formula α → Modal.Formula α
+  | .atom a => Modal.Formula.atom a
+  | ⊥ => ⊥
+  | φ ➝ ψ => (toModalFormula φ) ➝ (toModalFormula ψ)
+  | φ ⋏ ψ => (toModalFormula φ) ⋏ (toModalFormula ψ)
+  | φ ⋎ ψ => (toModalFormula φ) ⋎ (toModalFormula ψ)
 
-class SubstClosed (T : FormulaSet α) : Prop where
-  closed : ∀ {φ}, φ ∈ T → ∀ {σ}, φ.subst σ ∈ T
+namespace Formula.toModalFormula
 
-def instSubstClosed
-  (hAtom : ∀ a : α, (atom a) ∈ T → ∀ {σ}, (atom a).subst σ ∈ T)
-  (hImp : ∀ {φ ψ}, φ ➝ ψ ∈ T → ∀ {σ}, (φ ➝ ψ).subst σ ∈ T)
-  (hBox : ∀ {φ}, □φ ∈ T → ∀ {σ}, (□φ).subst σ ∈ T)
-  : T.SubstClosed := ⟨
-  by
-    intro φ hφ σ;
-    induction φ using Formula.cases' with
-    | hatom a => apply hAtom; assumption;
-    | hfalsum => apply hφ;
-    | himp φ ψ => apply hImp; assumption;
-    | hbox φ => apply hBox; assumption;
-⟩
+instance : Coe (Formula α) (Modal.Formula α) := ⟨Formula.toModalFormula⟩
 
-namespace SubstClosed
+variable {α} {a : α} {φ ψ : Formula α}
 
-variable [T.SubstClosed]
+@[simp] protected lemma def_atom : toModalFormula (atom a) = .atom a := by rfl
+@[simp] protected lemma def_top : toModalFormula (⊤ : Formula α) = ⊤ := by rfl
+@[simp] protected lemma def_bot : toModalFormula (⊥ : Formula α) = ⊥ := by rfl
+@[simp] protected lemma def_not : toModalFormula (∼φ) = ∼(φ.toModalFormula) := by rfl
+@[simp] protected lemma def_imp : toModalFormula (φ ➝ ψ) = (φ.toModalFormula) ➝ (ψ.toModalFormula) := by rfl
+@[simp] protected lemma def_and : toModalFormula (φ ⋏ ψ) = (φ.toModalFormula) ⋏ (ψ.toModalFormula) := by rfl
+@[simp] protected lemma def_or : toModalFormula (φ ⋎ ψ) = (φ.toModalFormula) ⋎ (ψ.toModalFormula) := by rfl
 
-lemma mem_atom (h : atom a ∈ T) : (atom a).subst σ ∈ T := SubstClosed.closed h
+end Formula.toModalFormula
 
-lemma mem_bot (h : ⊥ ∈ T) : (⊥ : Formula α).subst σ ∈ T := SubstClosed.closed h
+end Propositional
 
-lemma mem_imp (h : φ ➝ ψ ∈ T) : (φ ➝ ψ).subst σ ∈ T := SubstClosed.closed h
 
-lemma mem_neg (h : ∼φ ∈ T) : (∼φ).subst σ ∈ T := SubstClosed.closed h
+namespace Modal
 
-lemma mem_and (h : φ ⋏ ψ ∈ T) : (φ ⋏ ψ).subst σ ∈ T := SubstClosed.closed h
+def Formula.toPropFormula (φ : Formula α) (_ : φ.degree = 0 := by simp_all [Formula.degree, Formula.degree_neg, Formula.degree_imp]) : Propositional.Formula α :=
+  match φ with
+  | atom a => Propositional.Formula.atom a
+  | ⊥ => ⊥
+  | φ ➝ ψ => φ.toPropFormula ➝ ψ.toPropFormula
 
-lemma mem_or (h : φ ⋎ ψ ∈ T) : (φ ⋎ ψ).subst σ ∈ T := SubstClosed.closed h
+abbrev PropositionalFormula (α) := { φ : Formula α // φ.degree = 0 }
 
-lemma mem_box (h : □φ ∈ T) : (□φ).subst σ ∈ T := SubstClosed.closed h
+instance : Coe (PropositionalFormula α) (Propositional.Formula α) := ⟨fun ⟨φ, hφ⟩ => φ.toPropFormula hφ⟩
 
-instance union {T₁ T₂ : FormulaSet α} [T₁_closed : T₁.SubstClosed] [T₂_closed : T₂.SubstClosed] : (T₁ ∪ T₂).SubstClosed := by
-  refine instSubstClosed ?_ ?_ ?_;
-  . rintro a (ha₁ | ha₂) σ;
-    . left; apply mem_atom ha₁;
-    . right; apply mem_atom ha₂;
-  . rintro φ ψ (h₁ | h₂) σ;
-    . left; apply mem_imp h₁;
-    . right; apply mem_imp h₂;
-  . rintro φ (h₁ | h₂) σ;
-    . left; apply mem_box h₁;
-    . right; apply mem_box h₂;
+end Modal
 
-end SubstClosed
 
-end FormulaSet
+namespace Modal
 
-end subst
--/
+section Substitution
 
-end LO.Modal
+abbrev Substitution (α) := α → (Formula α)
+
+def Formula.subst (s : Substitution α) : Formula α → Formula α
+  | atom a  => (s a)
+  | ⊥       => ⊥
+  | □φ      => □(φ.subst s)
+  | φ ➝ ψ   => φ.subst s ➝ ψ.subst s
+
+notation:80 φ "⟦" s "⟧" => Modal.Formula.subst s φ
+
+namespace Formula.subst
+
+variable {s : Substitution α} {φ ψ ξ : Formula α}
+
+@[simp] lemma subst_atom {a} : (.atom a)⟦s⟧ = s a := rfl
+@[simp] lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
+@[simp] lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
+@[simp] lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
+@[simp] lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
+@[simp] lemma subst_or : (φ ⋎ ψ)⟦s⟧ = φ⟦s⟧ ⋎ ψ⟦s⟧ := rfl
+@[simp] lemma subst_iff : (φ ⭤ ψ)⟦s⟧ = (φ⟦s⟧ ⭤ ψ⟦s⟧) := rfl
+
+@[simp] lemma subst_box : (□φ)⟦s⟧ = □(φ⟦s⟧) := rfl
+
+@[simp] lemma subst_multibox : (□^[n]φ)⟦s⟧ = □^[n](φ⟦s⟧) := by
+  induction n with
+  | zero => rfl
+  | succ n ih => simp [ih]
+
+@[simp] lemma subst_dia : (◇φ)⟦s⟧ = ◇(φ⟦s⟧) := rfl
+
+@[simp] lemma subst_multidia : (◇^[n]φ)⟦s⟧ = ◇^[n](φ⟦s⟧) := by
+  induction n with
+  | zero => rfl
+  | succ n ih => simp [ih]
+
+end Formula.subst
+
+
+abbrev Substitution.id {α} : Substitution α := λ a => .atom a
+
+@[simp]
+lemma Formula.subst.def_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ using Formula.rec' <;> simp_all;
+
+
+def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
+infixr:80 " ∘ " => Substitution.comp
+
+@[simp]
+lemma Formula.subst.def_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
+  induction φ using Formula.rec' <;> simp_all [Substitution.comp];
+
+
+class SubstitutionClosed (S : Set (Formula α)) where
+  closed : ∀ φ ∈ S, (∀ s : Substitution α, φ⟦s⟧ ∈ S)
+
+
+def ZeroSubstitution (α) := {s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
+
+lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
+  induction φ using Formula.rec' <;> simp [Formula.letterless, *];
+  case hatom => exact s.2;
+
+lemma Formula.toModalFormula.letterless {φ : Propositional.Formula α} (h : φ.letterless) : φ.toModalFormula.letterless := by
+  induction φ using Propositional.Formula.rec' <;> simp_all [Propositional.Formula.letterless, Formula.letterless];
+
+instance : Coe (Propositional.ZeroSubstitution α) (Modal.ZeroSubstitution α) := ⟨λ ⟨s, p⟩ => ⟨λ φ => s φ, λ {_} => Formula.toModalFormula.letterless p⟩⟩
+
+end Substitution
+
+end Modal
+
+end LO

@@ -145,6 +145,15 @@ omit [DecidableEq F] in @[simp] lemma box_dne! : 𝓢 ⊢! □(∼∼φ) ➝ □
 def box_dne' (h : 𝓢 ⊢ □(∼∼φ)): 𝓢 ⊢ □φ := box_dne ⨀ h
 omit [DecidableEq F] in lemma box_dne'! (h : 𝓢 ⊢! □(∼∼φ)): 𝓢 ⊢! □φ := ⟨box_dne' h.some⟩
 
+@[simp] lemma negbox_dni! : 𝓢 ⊢! ∼□φ ➝ ∼□(∼∼φ) := by
+  apply contra₀'!;
+  exact box_dne!;
+lemma negbox_dni'! (h : 𝓢 ⊢! ∼□φ) : 𝓢 ⊢! ∼□(∼∼φ) := negbox_dni! ⨀ h
+
+@[simp] lemma negbox_dne! : 𝓢 ⊢! ∼□(∼∼φ) ➝ ∼□φ := by
+  apply contra₀'!;
+  exact box_dni!;
+lemma negbox_dne'! (h : 𝓢 ⊢! ∼□(∼∼φ)) : 𝓢 ⊢! ∼□φ := negbox_dne! ⨀ h
 
 def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
 omit [DecidableEq F] in @[simp] lemma multiboxverum! : 𝓢 ⊢! (□^[n]⊤ : F) := ⟨multiboxverum⟩

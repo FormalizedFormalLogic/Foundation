@@ -16,7 +16,7 @@ def Satisfies (M : Kripke.Model) (x : M.World) : NNFormula ℕ → Prop
   | ⊥       => False
   | φ ⋎ ψ   => Satisfies M x φ ∨ Satisfies M x ψ
   | φ ⋏ ψ   => Satisfies M x φ ∧ Satisfies M x ψ
-  | □φ      => ∀ y, x ≺ y → Satisfies M y φ
+  | □φ      => ∀ y, x ≺ y → (Satisfies M y φ)
   | ◇φ      => ∃ y, x ≺ y ∧ (Satisfies M y φ)
 
 namespace Satisfies
@@ -102,6 +102,8 @@ protected instance : Semantics.Tarski (M.World) where
   realize_and := Satisfies.and_def
   realize_imp := Satisfies.imp_def
   realize_not := Satisfies.neg_def
+
+
 
 end Satisfies
 

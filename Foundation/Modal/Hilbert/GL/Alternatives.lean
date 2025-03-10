@@ -137,7 +137,7 @@ def subst! {φ} (s) (h : H ⊢! φ) : H ⊢! φ⟦s⟧ := by
     constructor;
     . assumption;
     . use s' ∘ s;
-      exact subst_comp;
+      simp;
 
 end Deduction
 
@@ -252,7 +252,7 @@ lemma subst! {φ} (s) (h : H ⊢! φ) : H ⊢! φ⟦s⟧ := by
     constructor;
     . assumption;
     . use s' ∘ s;
-      exact subst_comp;
+      simp;
 
 end Deduction
 

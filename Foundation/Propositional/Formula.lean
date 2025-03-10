@@ -209,6 +209,38 @@ instance : Encodable (Formula α) where
 end Encodable
 
 
+def letterless : Formula α → Prop
+  | .atom _ => False
+  | ⊥ => True
+  | φ ➝ ψ => (φ.letterless) ∧ (ψ.letterless)
+  | φ ⋏ ψ => (φ.letterless) ∧ (ψ.letterless)
+  | φ ⋎ ψ => (φ.letterless) ∧ (ψ.letterless)
+
+namespace letterless
+
+variable {φ ψ : Formula α}
+
+@[simp] lemma not_atom : ¬(letterless (atom p)) := by simp [letterless]
+
+@[simp] lemma def_bot : (⊥ : Formula α).letterless := by simp [letterless]
+
+@[simp] lemma def_top : (⊤ : Formula α).letterless := by simp [letterless]
+
+
+lemma def_imp : (φ ➝ ψ).letterless → φ.letterless ∧ ψ.letterless := by simp [letterless]
+lemma def_imp₁ : (φ ➝ ψ).letterless → φ.letterless := λ h => def_imp h |>.1
+lemma def_imp₂ : (φ ➝ ψ).letterless → ψ.letterless := λ h => def_imp h |>.2
+
+lemma def_and : (φ ⋏ ψ).letterless → φ.letterless ∧ ψ.letterless := by simp [letterless]
+lemma def_and₁ : (φ ⋏ ψ).letterless → φ.letterless := λ h => def_and h |>.1
+lemma def_and₂ : (φ ⋏ ψ).letterless → ψ.letterless := λ h => def_and h |>.2
+
+lemma def_or : (φ ⋎ ψ).letterless → φ.letterless ∧ ψ.letterless := by simp [letterless]
+lemma def_or₁ : (φ ⋎ ψ).letterless → φ.letterless := λ h => def_or h |>.1
+lemma def_or₂ : (φ ⋎ ψ).letterless → ψ.letterless := λ h => def_or h |>.2
+
+end letterless
+
 end Formula
 
 
@@ -363,8 +395,73 @@ instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : Subfo
 
 end FormulaSet.SubformulaClosed
 
-
 end Subformula
+
+
+section Substitution
+
+abbrev Substitution (α) := α → (Formula α)
+
+abbrev Substitution.id {α} : Substitution α := λ a => .atom a
+
+namespace Formula
+
+variable {φ ψ : Formula α} {s : Substitution α}
+
+def subst (s : Substitution α) : Formula α → Formula α
+  | atom a  => (s a)
+  | ⊥       => ⊥
+  | φ ⋏ ψ   => φ.subst s ⋏ ψ.subst s
+  | φ ⋎ ψ   => φ.subst s ⋎ ψ.subst s
+  | φ ➝ ψ   => φ.subst s ➝ ψ.subst s
+
+notation:80 φ "⟦" s "⟧" => Formula.subst s φ
+
+namespace subst
+
+@[simp] protected lemma subst_atom {a} : (.atom a)⟦s⟧ = s a := rfl
+
+@[simp] protected lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
+
+@[simp] protected lemma subst_top : ⊤⟦s⟧ = ⊤ := rfl
+
+@[simp] protected lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
+
+@[simp] protected lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
+
+@[simp] protected lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
+
+@[simp] protected lemma subst_or : (φ ⋎ ψ)⟦s⟧ = φ⟦s⟧ ⋎ ψ⟦s⟧ := rfl
+
+@[simp] protected lemma subst_iff : (φ ⭤ ψ)⟦s⟧ = (φ⟦s⟧ ⭤ ψ⟦s⟧) := rfl
+
+end subst
+
+end Formula
+
+@[simp]
+lemma Formula.subst_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ using Formula.rec' <;> simp_all;
+
+def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
+infixr:80 " ∘ " => Substitution.comp
+
+@[simp]
+lemma Formula.subst_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
+  induction φ using Formula.rec' <;> simp_all [Substitution.comp];
+
+
+def ZeroSubstitution (α) := {s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
+
+lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
+  induction φ using Formula.rec' <;> simp [Formula.letterless, *];
+  case hatom => exact s.2;
+
+
+class SubstitutionClosed (S : Set (Formula α)) where
+  closed : ∀ φ ∈ S, (∀ s : Substitution α, φ⟦s⟧ ∈ S)
+
+end Substitution
+
 
 
 end LO.Propositional

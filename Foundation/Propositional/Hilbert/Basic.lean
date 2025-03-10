@@ -1,5 +1,5 @@
 import Foundation.Logic.HilbertStyle.Supplemental
-import Foundation.Propositional.Substitution
+import Foundation.Propositional.Formula
 
 namespace LO.Propositional
 
@@ -91,7 +91,7 @@ def subst! {φ} (s) (h : H ⊢! φ) : H ⊢! φ⟦s⟧ := by
     constructor;
     . assumption;
     . use s' ∘ s;
-      exact subst_comp;
+      exact Formula.subst_comp;
   | _ => simp;
 
 end Deduction

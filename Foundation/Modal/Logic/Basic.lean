@@ -8,6 +8,7 @@ abbrev Logic := Set (Modal.Formula ℕ)
 
 abbrev Hilbert.logic (H : Hilbert ℕ) : Logic := { φ | H ⊢! φ }
 
+
 protected abbrev Logic.K : Logic := Hilbert.K.logic
 
 
@@ -33,13 +34,18 @@ class Sublogic (L₁ L₂ : Logic) where
 class ProperSublogic (L₁ L₂ : Logic) : Prop where
   ssubset : L₁ ⊂ L₂
 
+class Consistent (L : Logic) : Prop where
+  consis : L ≠ Set.univ
+attribute [simp] Consistent.consis
 
-variable {L : Logic} {φ ψ : Formula ℕ}
 
+
+variable {L : Logic}
 
 section
 
 variable [L.QuasiNormal]
+variable {φ ψ χ : Formula ℕ}
 
 protected lemma subset_K : Logic.K ⊆ L := QuasiNormal.subset_K
 
@@ -53,6 +59,31 @@ protected lemma efq (h : ⊥ ∈ L) : ∀ {φ}, φ ∈ L := by
   intro φ;
   have : ⊥ ➝ φ ∈ L := by apply QuasiNormal.subset_K; simp;
   exact Logic.mdp this h;
+
+section
+
+variable [L.Consistent]
+
+@[simp]
+lemma no_bot : ⊥ ∉ L := by
+  by_contra hC;
+  obtain ⟨φ, hφ⟩ := Set.ne_univ_iff_exists_not_mem L |>.mp $ Consistent.consis;
+  have : φ ∈ L := Logic.efq hC;
+  contradiction;
+
+lemma no_either_no : ¬(φ ∈ L ∧ ∼φ ∈ L) := by
+  rintro ⟨h₁, h₂⟩;
+  exact no_bot $ Logic.mdp h₂ h₁;
+
+lemma not_neg_mem_of_mem : φ ∈ L → ∼φ ∉ L := by
+  have := no_either_no (φ := φ) (L := L);
+  tauto;
+
+lemma not_mem_of_neg_mem : ∼φ ∈ L → φ ∉ L := by
+  have := no_either_no (φ := φ) (L := L);
+  tauto;
+
+end
 
 end
 

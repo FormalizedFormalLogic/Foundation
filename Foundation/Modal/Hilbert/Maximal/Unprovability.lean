@@ -18,8 +18,7 @@ namespace Triv
 
 lemma unprovable_AxiomL : Hilbert.Triv ⊬ (Axioms.L (.atom a)) := by
   apply Hilbert.Triv.iff_provable_Cl.not.mpr;
-  apply not_imp_not.mpr Hilbert.Cl.Classical.soundness;
-  push_neg;
+  apply Hilbert.Cl.Classical.not_provable_of_exists_valuation;
   use ⟨(λ _ => False)⟩;
   tauto;
 
@@ -30,8 +29,7 @@ namespace Ver
 
 lemma unprovable_AxiomP : (Hilbert.Ver) ⊬ Axioms.P := by
   apply Hilbert.Ver.iff_provable_Cl.not.mpr;
-  apply not_imp_not.mpr Hilbert.Cl.Classical.soundness;
-  push_neg;
+  apply Hilbert.Cl.Classical.not_provable_of_exists_valuation;
   use ⟨(λ _ => False)⟩;
   tauto;
 
@@ -47,8 +45,7 @@ lemma provable_trivTranslated_Cl : (Hilbert.K4) ⊢! φ → (Hilbert.Cl) ⊢! φ
 
 lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
   apply not_imp_not.mpr provable_trivTranslated_Cl;
-  apply not_imp_not.mpr Hilbert.Cl.Classical.soundness;
-  push_neg;
+  apply Hilbert.Cl.Classical.not_provable_of_exists_valuation;
   use ⟨(λ _ => False)⟩;
   tauto;
 
@@ -70,8 +67,7 @@ lemma provable_verTranslated_Cl : (Hilbert.GL) ⊢! φ → (Hilbert.Cl) ⊢! φ�
 
 lemma unprovable_AxiomT : (Hilbert.GL) ⊬ Axioms.T (.atom a) := by
   apply not_imp_not.mpr provable_verTranslated_Cl;
-  apply not_imp_not.mpr Hilbert.Cl.Classical.soundness;
-  push_neg;
+  apply Hilbert.Cl.Classical.not_provable_of_exists_valuation;
   use ⟨(λ _ => False)⟩;
   tauto;
 

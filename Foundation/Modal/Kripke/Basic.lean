@@ -1,6 +1,6 @@
 import Foundation.Vorspiel.RelItr
 import Foundation.Modal.Axioms
-import Foundation.Modal.Substitution
+import Foundation.Modal.Formula
 
 namespace LO.Modal
 
@@ -334,8 +334,8 @@ lemma multibox_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by
 
 lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Satisfies];
 
-lemma iff_subst_self {x : F.World} (s) :
-  letI U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧);
+lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
+  letI U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
   induction φ using Formula.rec' generalizing x with
   | hatom a => simp [Satisfies];

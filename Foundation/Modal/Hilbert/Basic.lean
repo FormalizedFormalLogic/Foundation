@@ -1,5 +1,4 @@
 import Foundation.Modal.Formula
-import Foundation.Modal.Substitution
 import Foundation.Modal.Entailment.K
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 
@@ -92,7 +91,7 @@ def subst! {φ} (s) (h : H ⊢! φ) : H ⊢! φ⟦s⟧ := by
     constructor;
     . assumption;
     . use s' ∘ s;
-      exact subst_comp;
+      simp;
 
 end Deduction
 
