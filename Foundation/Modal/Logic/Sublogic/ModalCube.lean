@@ -294,6 +294,7 @@ theorem KD_ssubset_KT : Logic.KD ⊂ Logic.KT := by
       . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.KD Logic.KT := ⟨KD_ssubset_KT⟩
 
+
 theorem KD_ssubset_KDB : Logic.KD ⊂ Logic.KDB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -562,5 +563,10 @@ lemma K_ssubset_KT : Logic.K ⊂ Logic.KT := by
   trans;
   . exact K_ssubset_KD;
   . exact KD_ssubset_KT;
+
+lemma KD_ssubset_S4 : Logic.KD ⊂ Logic.S4 := by
+  trans Logic.KT;
+  . exact KD_ssubset_KT;
+  . exact KT_ssubset_S4;
 
 end LO.Modal.Logic

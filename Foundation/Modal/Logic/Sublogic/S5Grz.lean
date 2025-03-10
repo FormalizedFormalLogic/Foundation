@@ -1,4 +1,5 @@
 import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Logic.Sublogic.ModalCube
 
 namespace LO.Modal.Logic
 
@@ -27,5 +28,10 @@ theorem S5_ssubset_Triv : Logic.S5 ⊂ Logic.Triv := by
   exact S5Grz_eq_Triv.symm;
 instance : ProperSublogic Logic.S5 Logic.Triv := ⟨S5_ssubset_Triv⟩
 
+-- TODO: This result should be proved by Makinson's Theorem.
+lemma S4_ssubset_Triv : Logic.S4 ⊂ Logic.Triv := by
+  trans Logic.S5;
+  . exact S4_ssubset_S5;
+  . exact S5_ssubset_Triv;
 
 end LO.Modal.Logic

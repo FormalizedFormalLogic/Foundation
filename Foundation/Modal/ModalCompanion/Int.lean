@@ -3,6 +3,7 @@ import Foundation.Propositional.Logic.WellKnown
 import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Logic.Extension
 import Foundation.Modal.Logic.Sublogic.Grz
+import Foundation.Propositional.Hilbert.Glivenko
 
 namespace LO.Modal
 
@@ -128,5 +129,24 @@ instance : ModalCompanion Logic.Int Logic.Grz := by
     )
 
 end Grz
+
+
+section glivenko
+
+lemma Logic.iff_provable_Cl_provable_dia_gS4 : (φ ∈ Logic.Cl) ↔ (◇φᵍ ∈ (Logic.S4)) := by
+  constructor;
+  . intro h;
+    suffices □◇φᵍ ∈ Logic.S4 by exact axiomT'! this;
+    have := modalCompanion_Int_S4.companion.mp $ Hilbert.glivenko.mpr h;
+    rw [Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic] at this ⊢;
+    exact this;
+  . intro h;
+    apply Hilbert.glivenko.mp;
+    apply modalCompanion_Int_S4.companion.mpr;
+    have : □◇φᵍ ∈ Logic.S4 := nec! h;
+    rw [Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic] at this ⊢;
+    exact this;
+
+end glivenko
 
 end LO.Modal

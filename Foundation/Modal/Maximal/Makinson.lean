@@ -107,6 +107,9 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
 lemma provable_KD_of_classical_satisfiability (hl : φ.letterless) : (v ⊧ φᵀ.toPropFormula) → Hilbert.KD ⊢! φ :=
   KD_provability_of_classical_satisfiability hl |>.1
 
+lemma provable_KD_of_classical_tautology (hl : φ.letterless) (h : (Semantics.Valid (Propositional.Classical.Valuation ℕ) (φᵀ.toPropFormula)))
+  : Hilbert.KD ⊢! φ := provable_KD_of_classical_satisfiability hl (h ⟨(λ _ => True)⟩)
+
 lemma provable_not_KD_of_classical_unsatisfiable (hl : φ.letterless) : (¬(v ⊧ φᵀ.toPropFormula)) → Hilbert.KD ⊢! ∼φ :=
   KD_provability_of_classical_satisfiability hl |>.2
 
