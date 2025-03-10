@@ -1,3 +1,4 @@
+import Foundation.Vorspiel.RelItr
 import Foundation.Vorspiel.BinaryRelations
 import Foundation.Propositional.Hilbert.Basic
 
@@ -23,6 +24,9 @@ instance {F : Frame} : Nonempty F.World := F.world_nonempty
 abbrev Frame.Rel' {F : Frame} (x y : F.World) := F.Rel x y
 infix:45 " ≺ " => Frame.Rel'
 
+protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) := F.Rel.iterate n
+notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
+
 namespace Frame
 
 variable {F : Frame} {x y z : F.World}
@@ -34,6 +38,46 @@ variable {F : Frame} {x y z : F.World}
 lemma rel_antisymm' : x ≺ y → y ≺ x → x = y := by apply F.rel_antisymm
 
 end Frame
+
+
+section
+
+open Relation
+variable {F : Frame} {x y z : F.World}
+
+abbrev Frame.RelReflTransGen : _root_.Rel F.World F.World := ReflTransGen (· ≺ ·)
+infix:45 " ≺^* " => Frame.RelReflTransGen
+
+namespace Frame.RelReflTransGen
+
+@[simp] lemma single (hxy : x ≺ y) : x ≺^* y := ReflTransGen.single hxy
+
+@[simp] lemma reflexive : Reflexive F.RelReflTransGen := Relation.reflexive_reflTransGen
+
+@[simp] lemma refl {x : F.World} : x ≺^* x := reflexive x
+
+@[simp] lemma transitive : Transitive F.RelReflTransGen := Relation.transitive_reflTransGen
+
+end Frame.RelReflTransGen
+
+
+abbrev Frame.RelTransGen {F : Frame} : _root_.Rel F.World F.World := TransGen (· ≺ ·)
+infix:45 " ≺^+ " => Frame.RelTransGen
+
+namespace Frame.RelTransGen
+
+@[simp] lemma single (hxy : x ≺ y) : x ≺^+ y := TransGen.single hxy
+
+@[simp] lemma refl {x : F.World} : x ≺^+ x := single rel_refl'
+
+@[simp] lemma transitive : Transitive F.RelTransGen := Relation.transitive_transGen
+
+end Frame.RelTransGen
+
+
+end
+
+
 
 structure FiniteFrame extends Frame where
   [world_finite : Finite World]
@@ -492,6 +536,18 @@ instance definedBy_with_axiomEFQ (defines : C.DefinedBy Γ) : DefinedBy C (inser
   tauto_set;
 
 end FrameClass
+
+
+namespace FiniteFrameClass
+
+variable {C : Kripke.FiniteFrameClass} {Γ : Set (Formula ℕ)}
+
+instance definedBy_with_axiomEFQ (defines : C.DefinedBy Γ) : DefinedBy C (insert (Axioms.EFQ (.atom 0)) Γ) := by
+  convert definedBy_inter FiniteFrameClass.all {Axioms.EFQ (.atom 0)} C Γ
+  tauto_set;
+
+end FiniteFrameClass
+
 
 end Kripke
 

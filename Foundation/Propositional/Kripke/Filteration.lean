@@ -221,42 +221,63 @@ instance coarsestFilterationModel.filterOf {M} {T : FormulaSet ℕ} [T.Subformul
   def_rel_back := by tauto;
 
 
--- TODO: might be wrong, because finest filteration is not transitive?
-/-
-abbrev finestFilterationFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
+abbrev finestFilterationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
-  Rel Qx Qy := ∃ x y, Qx = ⟦x⟧ ∧ Qy = ⟦y⟧ ∧ x ≺ y
+  Rel := Relation.TransGen (λ Qx Qy => ∃ x y, Qx = ⟦x⟧ ∧ Qy = ⟦y⟧ ∧ x ≺ y)
   rel_refl := by
     intro Qx;
     obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
+    apply Relation.TransGen.single;
     use x, x;
     simp;
-  rel_trans := by
-    rintro Qx Qy Qz ⟨x, y, ⟨rfl, rfl, Rxy⟩⟩ ⟨w, z, ⟨hyw, rfl, Ryz⟩⟩;
-    use x, z;
-    refine ⟨by tauto, by tauto, ?_⟩;
-    sorry;
+  rel_trans := by apply Relation.TransGen.trans;
+  rel_antisymm := by
+    rintro Qx Qy RQxQy RQyQx;
+    induction RQxQy using Relation.TransGen.head_induction_on <;>
+    induction RQyQx using Relation.TransGen.head_induction_on;
+    case base.base Qx Qy RQxQy RQyQx =>
+      obtain ⟨x, y, rfl, rfl, Rxy⟩ := RQxQy;
+      obtain ⟨u, v, hyu, hxv, Ruv⟩ := RQyQx;
+      simp_all [Quotient.eq];
+      intro φ hφ;
+      constructor;
+      . rw [(hyu φ hφ), (hxv φ hφ)];
+        apply Formula.Kripke.Satisfies.formula_hereditary Ruv;
+      . apply Formula.Kripke.Satisfies.formula_hereditary Rxy;
+    case base.ih Qx Qy Qu R₁ ih₁ ih₂ ih₃ =>
+      sorry;
+    case ih.base =>
+      sorry;
+    case ih.ih =>
+      sorry;
 
-abbrev finestFilterationModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
-  toFrame := coarsestFilterationFrame M T
+abbrev finestFilterationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
+  toFrame := finestFilterationTransitiveClosureFrame M T
   Val := ⟨
     standardFilterationValuation M T,
     by
       intro Qx Qy RQxQy a hQx ha;
       obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
       obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
-      apply RQxQy (.atom a) ha;
-      tauto;
+      sorry;
   ⟩
 
-instance finestFilterationModel.filterOf {M} {T : FormulaSet ℕ} [T.SubformulaClosed] : FilterOf (finestFilterationModel M T) M T where
+instance finestFilterationTransitiveClosureModel.filterOf {M} {T : FormulaSet ℕ} [T.SubformulaClosed] : FilterOf (finestFilterationTransitiveClosureModel M T) M T where
   def_valuation := by tauto
-  def_rel_back := by tauto;
   def_rel_forth := by
     intro x y Rxy;
-    intro φ hφ;
-    apply Formula.Kripke.Satisfies.formula_hereditary Rxy;
--/
+    apply Relation.TransGen.single;
+    use x, y;
+    simpa;
+  def_rel_back := by
+    intro Qx Qy RQxQy;
+    induction RQxQy using Relation.TransGen.head_induction_on with
+    | base Rxy =>
+      obtain ⟨x, y, rfl, rfl, Rxy⟩ := Rxy;
+      intro φ _;
+      apply Formula.Kripke.Satisfies.formula_hereditary Rxy;
+    | @ih a b Rxy Ryz ih =>
+      sorry;
 
 end Kripke
 

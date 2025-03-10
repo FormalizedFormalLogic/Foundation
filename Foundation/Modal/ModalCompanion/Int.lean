@@ -111,7 +111,7 @@ instance : ModalCompanion Logic.Int Logic.Grz := by
       constructor;
       . apply Propositional.Hilbert.Int.Kripke.sound_finite.sound;
       . apply Propositional.Hilbert.Int.Kripke.complete_finite.complete;
-    )
+    )finite_complete
     (by
       rw [←Logic.Grz.is_largestMC_of_Int];
       intro φ;

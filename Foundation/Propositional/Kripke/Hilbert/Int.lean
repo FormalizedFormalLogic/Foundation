@@ -16,8 +16,6 @@ protected instance sound : Sound Hilbert.Int FrameClass.all := inferInstance
 
 protected instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass FrameClass.all (by simp)
 
-instance sound_finite : Sound Hilbert.Int Kripke.FiniteFrameClass.all := inferInstance
-
 instance canonical : Canonical Hilbert.Int FrameClass.all := by tauto;
 
 instance complete: Complete Hilbert.Int FrameClass.all := inferInstance
@@ -25,7 +23,9 @@ instance complete: Complete Hilbert.Int FrameClass.all := inferInstance
 
 section FFP
 
-instance complete_finite : Complete (Hilbert.Int) Kripke.FiniteFrameClass.all := ⟨by
+instance finite_sound : Sound Hilbert.Int Kripke.FiniteFrameClass.all := inferInstance
+
+instance finite_complete : Complete (Hilbert.Int) Kripke.FiniteFrameClass.all := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   intro F _ V x;
