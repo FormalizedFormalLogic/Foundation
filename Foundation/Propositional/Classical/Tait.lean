@@ -3,33 +3,34 @@ import Foundation.Propositional.Tait.Calculus
 
 namespace LO.Propositional
 
-namespace Classical
 
-variable {α : Type*} {T : Theory α} {Δ : Sequent α}
 
+variable {α : Type*} {T : Theory α} {Γ : Sequent α}
+
+open Propositional.Classical
 namespace Derivation
 
-theorem sound : T ⟹ Δ → T ⊨[Valuation α] Δ.disj := by
+theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
   intro d v hv
   induction d
-  case axL Δ a =>
+  case axL Γ a =>
     simp [List.map_disj]
     by_cases v a <;> simp [*]
   case verum => simp [List.map_disj]
-  case and Δ φ ψ _ _ ihp ihq =>
-    by_cases hv : v ⊧ Δ.disj
+  case and Γ φ ψ _ _ ihp ihq =>
+    by_cases hv : v ⊧ Γ.disj
     · simp [hv]
     · have : v ⊧ φ := by simpa[hv] using ihp
       have : v ⊧ ψ := by simpa[hv] using ihq
       simp [*]
-  case or Δ φ ψ d ih =>
+  case or Γ φ ψ d ih =>
     simpa [or_assoc] using ih
-  case wk Δ Γ _ ss ih =>
-    have : ∃ φ ∈ Δ, v ⊧ φ := by simpa [List.map_disj] using ih
+  case wk Γ Ξ _ ss ih =>
+    have : ∃ φ ∈ Γ, v ⊧ φ := by simpa [List.map_disj] using ih
     rcases this with ⟨φ, hp, hvp⟩
     simp [List.map_disj]; exact ⟨φ, ss hp, hvp⟩
-  case cut Δ φ _ _ ihp ihn =>
-    by_cases hv : v ⊧ Δ.disj
+  case cut Γ φ _ _ ihp ihn =>
+    by_cases hv : v ⊧ Γ.disj
     · simp [hv]
     · have : v ⊧ φ := by simpa[hv] using ihp
       have : ¬v ⊧ φ := by simpa[hv] using ihn
@@ -38,11 +39,13 @@ theorem sound : T ⟹ Δ → T ⊨[Valuation α] Δ.disj := by
     have : v ⊧* T := by simpa [Semantics.models] using hv
     simpa using Semantics.realizeSet_iff.mp hv h
 
+theorem sound! : T ⟹! Γ → T ⊨[Valuation α] Γ.disj := fun h ↦ sound h.get
+
 end Derivation
 
 lemma soundness {T : Theory α} {φ} : T ⊢! φ → T ⊨[Valuation α] φ := by
   rintro ⟨b⟩ v hv; simpa using Derivation.sound b hv
-
+namespace Classical
 instance (T : Theory α) : Sound T (Semantics.models (Valuation α) T)  := ⟨soundness⟩
 
 section complete
@@ -189,8 +192,22 @@ noncomputable def completeness : T ⊨[Valuation α] φ → T ⊢ φ :=
 instance (T : Theory α) : Complete T (Semantics.models (Valuation α) T)  where
   complete := completeness!
 
+
 end complete
 
-end Propositional.Classical
+end Classical
+
+theorem Derivation.complete : T ⊨[Valuation α] Γ.disj → T ⟹! Γ := fun h ↦
+  Tait.derivable_iff_provable_disj.mpr (completeness! h)
+
+theorem Derivation.complete_iff : T ⟹! Γ ↔ T ⊨[Valuation α] Γ.disj := ⟨sound!, complete⟩
+
+theorem Sequent.isTautology_iff : Γ.IsTautology ↔ ∀ v : Classical.Valuation α, ∃ φ ∈ Γ, v ⊧ φ := by
+  simp [Sequent.IsTautology, Derivation.complete_iff, Semantics.consequence_iff]
+
+theorem Sequent.notTautology_iff : ¬Γ.IsTautology ↔ ∃ v : Classical.Valuation α, ∀ φ ∈ Γ, ¬v ⊧ φ := by
+  simp [Sequent.isTautology_iff]
+
+end Propositional
 
 end LO
