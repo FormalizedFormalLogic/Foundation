@@ -113,10 +113,47 @@ abbrev Sequents (α : Type*) := List (Sequent α)
 
 namespace Sequents
 
-def weight (S : Sequents α) (h : S ≠ []) : ℕ := (S.map Sequent.weight).min?.get (by
-  have : ∃ x, x ∈ S := List.exists_mem_of_ne_nil S h
-  rcases this with ⟨x, hx⟩
-  exact List.isSome_min?_of_mem (a := x.weight) (List.mem_map_of_mem Sequent.weight hx))
+def weight (S : Sequents α) : ℕ := (S.map Sequent.weight).max?.casesOn 0 .succ
+
+variable {S S₁ S₂ : Sequents α}
+
+@[simp] lemma weight_nil : weight ([] : Sequents α) = 0 := rfl
+
+@[simp] lemma weight_eq_zero_iff_eq_nil : weight S = 0 ↔ S = [] := by
+  cases h : (List.map Sequent.weight S).max? <;> simp [weight, h]
+  · simpa using h
+  · rintro rfl; simp at h
+
+lemma weight_eq_succ_iff {S : Sequents α} :
+    S.weight = n + 1 ↔ ∃ Γ ∈ S, Γ.weight = n ∧ ∀ Δ ∈ S, Δ.weight ≤ n := by
+  match h : (List.map Sequent.weight S).max? with
+  |   .none => simp [show S = [] by simpa using h]
+  | .some a =>
+    have : (∃ Γ ∈ S, Γ.weight = a) ∧ ∀ Δ ∈ S, Δ.weight ≤ a := by simpa using List.max?_eq_some_iff'.mp h
+    rcases this with ⟨⟨Γ, hΓS, rfl⟩, hS⟩
+    have : S.weight = Γ.weight + 1 := by simp [Sequents.weight, h]
+    constructor
+    · intro e
+      have : n = Γ.weight := by simp [e] at this; simp_all
+      rcases this
+      exact ⟨Γ, by assumption, rfl, hS⟩
+    · rintro ⟨Γ', _, rfl, H⟩
+      have : Γ.weight ≤ Γ'.weight := H Γ (by assumption)
+      have : Γ'.weight ≤ Γ.weight := hS Γ' (by assumption)
+      simp [weight, h]; exact Nat.le_antisymm (by assumption) (by assumption)
+
+lemma weight_eq_of_mem_max (hm : m ∈ (S.map Sequent.weight).max?) :
+    S.weight = m + 1 := by simp [weight, show (S.map Sequent.weight).max? = .some m from hm]
+
+lemma weight_lt_weight_of {Γ} (hΓ : Γ ∈ S₂) (h : ∀ Δ ∈ S₁, Δ.weight < Γ.weight) : S₁.weight < S₂.weight := by
+  match hS₁ : S₁.weight, hS₂ : S₂.weight with
+  |      _,      0 => rcases weight_eq_zero_iff_eq_nil.mp hS₂; simp_all
+  |      0,  _ + 1 => simp
+  | n₁ + 1, n₂ + 1 =>
+    rcases weight_eq_succ_iff.mp hS₁ with ⟨Γ₁, hΓS₁, rfl, H₁⟩
+    rcases weight_eq_succ_iff.mp hS₂ with ⟨Γ₂, hΓS₂, rfl, H₂⟩
+    have : Γ₁.weight < Γ₂.weight := lt_of_lt_of_le (h Γ₁ hΓS₁) (H₂ Γ hΓ)
+    simpa
 
 end Sequents
 
@@ -323,7 +360,7 @@ lemma Derivation.toReduction {Γ : Sequent α} (hΓ : ¬Γ.IsAtomic)
 
 end
 
-abbrev Sequents.Refuted (S : Sequents α) : Prop := ∃ Γ ∈ S, Γ.IsAtomic ∧ ¬Γ.IsClosed
+abbrev Sequents.Refuted (S : Sequents α) : Prop := ∃ Γ ∈ S, Γ.IsOpen
 
 lemma Sequents.Refuted.not_iff {S : Sequents α} : ¬S.Refuted ↔ ∀ Γ ∈ S, Γ.IsAtomic → Γ.IsClosed := by
   simp [Refuted]
@@ -350,6 +387,48 @@ lemma Derivations.toReduction [DecidableEq α] {S : Sequents α}
   have : ∃ Δ ∈ S, ∃ (h : ¬Δ.IsAtomic), Γ ∈ Sequent.reduction h := by simpa [Sequents.reduction] using h
   rcases this with ⟨Δ, hΔS, hΔ, H⟩
   exact Derivation.toReduction hΔ (d Δ hΔS) Γ H
+
+
+lemma Sequents.reduction_weight_lt_weight [DecidableEq α] (S : Sequents α) (h : S ≠ []) : S.reduction.weight < S.weight := by
+  match hS : S.weight with
+  |     0 => simp at hS; contradiction
+  | n + 1 =>
+    rcases Sequents.weight_eq_succ_iff.mp hS with ⟨Γ, hΓS, rfl, HΓ⟩
+    have : S.reduction.weight < S.weight :=
+      Sequents.weight_lt_weight_of hΓS (S₁ := S.reduction) <| by
+        intro Δ hΔ
+        have : ∃ Ξ ∈ S, ∃ (h : ¬Ξ.IsAtomic), Δ ∈ Sequent.reduction h := by simpa [reduction] using hΔ
+        rcases this with ⟨Ξ, hΞS, hΞ, hΔΞ⟩
+        have : Δ.weight < Ξ.weight := Sequent.weight_lt_weight_of_mem_reduction hΔΞ
+        exact lt_of_lt_of_le this (HΓ Ξ hΞS)
+    simpa [hS] using this
+
+inductive Derivations.Dec : Sequents α → Type _ where
+  |   provable : Derivations ∅ S → Derivations.Dec S
+  | unprovable (Γ : Sequent α) : Γ ∈ S → ¬Sequent.IsTautology Γ → Derivations.Dec S
+
+def Derivations.Dec.ofReduction [DecidableEq α] {S : Sequents α} (hS : ¬S.Refuted) : Derivations.Dec S.reduction → Derivations.Dec S
+  |             .provable d => .provable <| LO.Propositional.Derivations.ofReduction hS d
+  | .unprovable Γ hΓSr hΓNT =>
+    let Δ := S.choose (fun Δ ↦ ∃ h : ¬Δ.IsAtomic, Γ ∈ Sequent.reduction h) (by simpa [Sequents.reduction] using hΓSr)
+    .unprovable Δ (S.choose_mem _ _) (by
+      intro hΔT
+      have : ∃ h : ¬Δ.IsAtomic, Γ ∈ Sequent.reduction h := S.choose_property (fun Δ ↦ ∃ h : ¬Δ.IsAtomic, Γ ∈ Sequent.reduction h) _
+      rcases this with ⟨hΔ, hΓr⟩
+      have : Γ.IsTautology := Derivation.toReduction hΔ hΔT Γ hΓr
+      contradiction)
+
+def Sequents.dec [DecidableEq α] : (S : Sequents α) → Derivations.Dec S := fun S ↦
+  if hS : S = [] then
+    .provable (by rw [hS]; exact Derivations.nil)
+  else if h : S.Refuted then
+    let ⟨Γ, hΓS, hΓ⟩ := S.chooseX Sequent.IsOpen h
+    .unprovable Γ hΓS (Sequent.IsOpen.not_tautology hΓ)
+  else
+    S.reduction.dec.ofReduction h
+  termination_by S => S.weight
+  decreasing_by
+    exact S.reduction_weight_lt_weight hS
 
 
 end LO.Propositional
