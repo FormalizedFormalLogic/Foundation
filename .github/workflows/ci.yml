@@ -31,15 +31,15 @@ jobs:
           "$HOME"/.elan/bin/lean --version
           "$HOME"/.elan/bin/lake --version
 
-      # Build project
+      # Restore project cache
       - name: Restore cache
         id: cache-restore
         uses: actions/cache/restore@v4
         with:
           path: .lake
-          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          key: lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}
           restore-keys: |
-            lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+            lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}
 
       # Build project
       - name: Get Mathlib cache
@@ -75,9 +75,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: docbuild/.lake
-          key: docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}-${{ github.sha }}
+          key: docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lake-manifest.json') }}
           restore-keys: |
-            docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}
+            docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lake-manifest.json') }}
       - name: Build docbuild
         working-directory: docbuild
         run: lake build --keep-toolchain Foundation:docs
@@ -91,7 +91,7 @@ jobs:
         working-directory: docbuild
         run: cp -r .lake/build/doc ../pages/_output/doc
 
-      # Save cache
+      # Save project cache
       - name: Save project cache
         id: cache-save
         uses: actions/cache/save@v4
