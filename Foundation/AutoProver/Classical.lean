@@ -328,7 +328,7 @@ lemma Derivation.toReduction {Γ : Sequent α} (hΓ : ¬Γ.IsAtomic)
       suffices T ⟹! List.remove ⊥ Γ by
         simp only [Sequent.reduction_falsum H]
         intro Γ; simp; rintro rfl; assumption
-      exact Tait.cut! (φ := ⊥) (Tait.wk! d <| by simp) (by simp [Tait.verum!])
+      exact ⟨Tait.cutFalsum <| (d.get).wk <| by simp⟩
     | φ ⋏ ψ =>
       suffices T ⟹! φ :: List.remove (φ ⋏ ψ) Γ ∧ T ⟹! ψ :: List.remove (φ ⋏ ψ) Γ by
         simp [Sequent.reduction_and H]
@@ -343,12 +343,7 @@ lemma Derivation.toReduction {Γ : Sequent α} (hΓ : ¬Γ.IsAtomic)
         simp [Sequent.reduction_or H]
         intro Γ; simp; rintro rfl
         exact Tait.wk! (by assumption)
-      have : T ⟹! φ ⋎ ψ :: List.remove (φ ⋎ ψ) Γ := Tait.wk! d
-      apply Tait.cut! (φ := φ ⋎ ψ)
-      · exact Tait.wk! this <|
-          List.cons_subset_cons _ <| List.subset_cons_of_subset _ <| by simp
-      · simp only [DeMorgan.or]
-        refine Tait.and! (Tait.em! (φ := φ) (by simp) (by simp)) (Tait.em! (φ := ψ) (by simp) (by simp))
+      exact ⟨Tait.orReversion <| (d.get).wk <| by simp⟩
 
 end
 

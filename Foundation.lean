@@ -147,6 +147,8 @@ import Foundation.Incompleteness.DC.Basic
 
 import Foundation.Incompleteness.ProvabilityLogic.Basic
 
+import Foundation.AutoProver.Classical
+
 -- Meta
 import Foundation.Meta.Kite.Arith
 import Foundation.Meta.Kite.Modal
