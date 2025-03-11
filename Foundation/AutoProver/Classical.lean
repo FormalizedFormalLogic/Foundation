@@ -3,14 +3,6 @@ import Foundation.Propositional.Tait.Calculus
 import Foundation.Propositional.Classical.Tait
 import Mathlib.Algebra.Order.BigOperators.Group.List
 
-namespace List
-
-def smin (l : List ℕ) : ℕ := l.min?.casesOn 0 .succ
-
-@[simp] lemma smin_nil : [].smin = 0 := rfl
-
-end List
-
 namespace LO.Propositional
 
 variable {α : Type*}
@@ -388,7 +380,6 @@ lemma Derivations.toReduction [DecidableEq α] {S : Sequents α}
   rcases this with ⟨Δ, hΔS, hΔ, H⟩
   exact Derivation.toReduction hΔ (d Δ hΔS) Γ H
 
-
 lemma Sequents.reduction_weight_lt_weight [DecidableEq α] (S : Sequents α) (h : S ≠ []) : S.reduction.weight < S.weight := by
   match hS : S.weight with
   |     0 => simp at hS; contradiction
@@ -430,5 +421,15 @@ def Sequents.dec [DecidableEq α] : (S : Sequents α) → Derivations.Dec S := f
   decreasing_by
     exact S.reduction_weight_lt_weight hS
 
+instance [DecidableEq α] : DecidablePred fun Γ : Sequent α ↦ Γ.IsTautology := fun Γ ↦
+  match Sequents.dec [Γ] with
+  |           .provable d => .isTrue ⟨d Γ (by simp)⟩
+  | .unprovable Δ hΔ hΔNT => .isFalse <| by
+    have : Δ = Γ := by simpa using hΔ
+    rcases this; assumption
+
+instance [DecidableEq α] : DecidablePred fun φ : NNFormula α ↦ φ.IsTautology := fun _ ↦ inferInstance
+
+#eval NNFormula.IsTautology <| ((.atom 0 ➝ .atom 1) ➝ .atom 0) ➝ .atom 0
 
 end LO.Propositional
