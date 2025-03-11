@@ -1,4 +1,5 @@
 import Foundation.Vorspiel.Vorspiel
+import Mathlib.Data.PNat.Basic
 
 def Rel.iterate (R : Rel α α) : ℕ → α → α → Prop
   | 0 => (· = ·)
@@ -72,3 +73,62 @@ lemma comp : (∃ z, R.iterate n x z ∧ R.iterate m z y) ↔ R.iterate (n + m) 
       . assumption;
 
 end Rel.iterate
+
+
+
+namespace Relation
+
+variable {R : Rel α α} {x y : α}
+
+lemma ReflTransGen.exists_iterate : ReflTransGen R x y ↔ ∃ n, R.iterate n x y := by
+  constructor;
+  . intro h;
+    induction h with
+    | refl => use 0;  simp;
+    | tail Rxy Ryz ih =>
+      obtain ⟨n, Rxy⟩ := ih;
+      use n + 1;
+      apply Rel.iterate.forward.mpr;
+      exact ⟨_, Rxy, Ryz⟩;
+  . rintro ⟨n, h⟩;
+    induction n generalizing x y with
+    | zero => subst h; apply ReflTransGen.refl;
+    | succ n ih =>
+      obtain ⟨z, Rxz, Rzy⟩ := h;
+      apply ReflTransGen.head;
+      . exact Rxz;
+      . apply ih;
+        exact Rzy;
+
+lemma TransGen.exists_iterate' : TransGen R x y ↔ ∃ n : ℕ+, R.iterate n x y := by
+  constructor;
+  . intro h;
+    induction h with
+    | single h => use 1; simpa;
+    | tail Rxy Ryz ih =>
+      obtain ⟨⟨n, hn⟩, Rxy⟩ := ih;
+      use ⟨n + 1, by omega⟩;
+      apply Rel.iterate.forward.mpr;
+      refine ⟨_, Rxy, Ryz⟩;
+  . rintro ⟨n, Rxy⟩;
+    induction n using PNat.recOn generalizing x with
+    | one =>
+      apply TransGen.single;
+      simpa using Rxy;
+    | succ n ih =>
+      obtain ⟨z, Rxz, Rzy⟩ := Rxy;
+      apply TransGen.head;
+      . exact Rxz;
+      . apply ih;
+        exact Rzy;
+
+lemma TransGen.exists_iterate : TransGen R x y ↔ ∃ n > 0, R.iterate n x y := by
+  constructor;
+  . intro h;
+    obtain ⟨⟨n, hn⟩, h⟩ := TransGen.exists_iterate'.mp h;
+    exact ⟨n, ⟨by omega, h⟩⟩;
+  . rintro ⟨n, ⟨_, Rxy⟩⟩;
+    apply TransGen.exists_iterate'.mpr;
+    exact ⟨⟨n, by omega⟩, Rxy⟩;
+
+end Relation
