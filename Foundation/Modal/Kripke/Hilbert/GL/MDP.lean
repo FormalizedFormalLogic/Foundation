@@ -76,15 +76,18 @@ lemma through_original_root {x : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).Wor
     by_cases e : x = r₁;
     . subst e; left; tauto;
     . left; right;
-      have := @pMorphism₁;
-      sorry;
-      -- exact p_morphism₁.forth $ F₁.root_rooted x h;
+      exact pMorphism₁.forth $ by
+        apply Frame.IsRooted.direct_rooted_of_trans;
+        . exact Frame.IsTree.rel_transitive (r := r₁);
+        . assumption;
   | .inr (.inr x) =>
     by_cases h : x = r₂;
     . subst h; right; tauto;
     . right; right;
-      sorry;
-      -- exact p_morphism₂.forth $ F₂.root_rooted x h;
+      exact pMorphism₂.forth $ by
+        apply Frame.IsRooted.direct_rooted_of_trans;
+        . exact Frame.IsTree.rel_transitive (r := r₂);
+        . assumption;
 
 end mdpCounterexmpleFrame
 

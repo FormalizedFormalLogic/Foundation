@@ -5,17 +5,17 @@ namespace LO.Modal
 namespace Kripke
 
 open Formula.Kripke
+open Relation
 
+class Frame.IsGenerated (F : Kripke.Frame) (R : Set F.World) (roots_nonempty : R.Nonempty := by tauto_set) where
+  roots_generates : ∀ w ∉ R, ∃ r ∈ R, r ≺^+ w
 
-class Frame.IsGenerated (F : Kripke.Frame) (roots : Set F.World) where
-  roots_generates : ∀ w ∉ roots, ∃ r ∈ roots, r ≺^+ w
-
-class Frame.IsRooted (F : Kripke.Frame) (root : F.World) where
-  root_generates : ∀ w ≠ root, root ≺^+ w
+class Frame.IsRooted (F : Kripke.Frame) (r : F.World) where
+  root_generates : ∀ w ≠ r, r ≺^+ w
 
 namespace Frame.IsRooted
 
-variable {F : Frame}
+variable {F : Frame} {r : F.World} [rooted : F.IsRooted r]
 
 instance [rooted : F.IsRooted r] : F.IsGenerated {r} where
   roots_generates := by
@@ -24,6 +24,11 @@ instance [rooted : F.IsRooted r] : F.IsGenerated {r} where
     constructor;
     . tauto;
     . exact rooted.root_generates x hx;
+
+lemma direct_rooted_of_trans (F_trans : Transitive F) : ∀ x ≠ r, r ≺ x := by
+  intro x hx;
+  obtain ⟨n, hn, Rrx⟩ := Relation.TransGen.exists_iterate.mp $ rooted.root_generates x hx;
+  exact Rel.iterate.unwrap_of_trans hn F_trans Rrx;
 
 end Frame.IsRooted
 
@@ -34,7 +39,7 @@ instance Frame.mkTransClosure.IsRooted {F : Frame} {r : F.World} [rooted : F.IsR
 
 namespace Frame
 
-/-
+
 def setGenerate (F : Kripke.Frame) (R : Set F.World) (R_nonempty : R.Nonempty := by tauto_set) : Kripke.Frame where
   World := { w // w ∈ R ∨ ∃ r ∈ R, r ≺^+ w }
   Rel x y := x.1 ≺ y.1
@@ -46,18 +51,50 @@ namespace setGenerate
 
 variable {F : Frame} {R : Set F.World} {R_nonempty : R.Nonempty}
 
-instance instGenerated : (F.setGenerate R R_nonempty).Generated where
-  roots := { r | r.1 ∈ R }
-  roots_isRooted := by
-    rintro ⟨x, (hr | ⟨r, hx₁, hx₂⟩)⟩ hw;
-    . simp at hw; contradiction;
-    . use ⟨r, by tauto⟩;
+protected abbrev roots : Set (F.setGenerate R R_nonempty) := { r | r.1 ∈ R }
+
+@[simp]
+lemma roots_nonempty : (setGenerate.roots (F := F) (R := R) (R_nonempty := R_nonempty)).Nonempty := by
+  obtain ⟨r, hr⟩ := R_nonempty;
+  use ⟨r, by tauto⟩;
+  tauto;
+
+lemma trans_rel_of_origin_trans_rel {hx : x ∈ R ∨ ∃ r ∈ R, r ≺^+ x} {hy : y ∈ R ∨ ∃ r ∈ R, r ≺^+ y} (Rxy : x ≺^+ y)
+  : (RelTransGen (F := F.setGenerate R R_nonempty) ⟨x, hx⟩ ⟨y, hy⟩) := by
+  induction Rxy using TransGen.head_induction_on with
+  | base h => exact Frame.RelTransGen.single h;
+  | @ih a c ha hb hc =>
+    let b : (F.setGenerate R R_nonempty).World := ⟨c, by
+      rcases hx with hx | ⟨r₁, hR₁, Rr₁a⟩ <;>
+      rcases hy with hy | ⟨r₂, hR₂, Rr₂b⟩;
+      . right; use a; constructor; assumption; exact TransGen.single ha;
+      . right; use a; constructor; assumption; exact TransGen.single ha;
+      . right;
+        use r₁;
+        constructor;
+        . assumption;
+        . exact TransGen.tail Rr₁a ha;
+      . right;
+        use r₁;
+        constructor;
+        . assumption;
+        . exact TransGen.tail Rr₁a ha;
+    ⟩;
+    apply Relation.TransGen.head (b := b);
+    . exact ha;
+    . apply hc;
+
+instance instGenerated : (F.setGenerate R R_nonempty).IsGenerated (setGenerate.roots) (by simp) where
+  roots_generates := by
+    rintro ⟨r, (hr | ⟨t, ht, Rtx⟩)⟩ _;
+    . simp_all;
+    . use ⟨t, by simp_all⟩;
       constructor;
-      . tauto;
-      . sorry;
+      . simpa;
+      . apply trans_rel_of_origin_trans_rel;
+        exact Rtx;
 
 end setGenerate
--/
 
 
 abbrev pointGenerate (F : Kripke.Frame) (r : F.World) : Kripke.Frame where
@@ -67,8 +104,6 @@ abbrev pointGenerate (F : Kripke.Frame) (r : F.World) : Kripke.Frame where
 infix:100 "↾" => Frame.pointGenerate
 
 namespace pointGenerate
-
-open Relation
 
 variable {F : Frame} {r : F.World}
 
@@ -119,12 +154,16 @@ lemma rel_irrefl (F_irrefl : Irreflexive F) : Irreflexive (F↾r).Rel := by
 
 lemma rel_universal_of_refl_eucl (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F↾r).Rel := by
   have F_symm := symm_of_refl_eucl F_refl F_eucl;
+  have F_trans := trans_of_refl_eucl F_refl F_eucl;
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
   . apply F_refl;
-  . sorry;
-  . apply F_symm;
-    sorry;
-  . sorry;
+  . have Rxy := TransGen.unwrap F_trans hy;
+    exact Rxy;
+  . have Ryx := TransGen.unwrap F_trans hx;
+    exact F_symm Ryx;
+  . have Rxy := TransGen.unwrap F_trans hx;
+    have Ryx := TransGen.unwrap F_trans hy;
+    exact F_eucl Ryx Rxy;
 
 def pMorphism : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x

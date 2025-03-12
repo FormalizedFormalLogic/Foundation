@@ -15,6 +15,8 @@ namespace Frame.extendRoot
 
 variable {F : Frame} {r : F.World} [F.IsRooted r] {x y : F.World}
 
+instance : Coe (F.World) ((F.extendRoot r).World) := ⟨Sum.inr⟩
+
 instance [f : F.IsFinite] : (F.extendRoot r).IsFinite := by
   unfold Frame.extendRoot;
   apply Frame.isFinite_iff _ |>.mpr;
@@ -29,23 +31,23 @@ instance instIsRooted : (F.extendRoot r).IsRooted extendRoot.root where
     | .inl _ => contradiction;
     | .inr x => apply Relation.TransGen.single; tauto;
 
-lemma rel_assymetric (F_assym : Assymetric F) : Assymetric (F.extendRoot r).Rel := by
+protected lemma rel_assymetric (F_assym : Assymetric F) : Assymetric (F.extendRoot r).Rel := by
   intro x y hxy;
   match x, y with
   | .inl x, _ => simp_all [Frame.extendRoot]
   | .inr x, .inr y => exact F_assym hxy;
 
-lemma rel_transitive (F_trans : Transitive F) : Transitive (F.extendRoot r).Rel := by
+protected lemma rel_transitive (F_trans : Transitive F) : Transitive (F.extendRoot r).Rel := by
   intro x y z hxy hyz;
   match x, y, z with
   | .inl _, .inr _, .inr _ => simp_all [Frame.extendRoot]
   | .inr x, .inr y, .inr z => exact F_trans hxy hyz;
 
-instance {r : F.World} [tree : F.IsTree r] : (F.extendRoot r).IsTree extendRoot.root where
-  rel_assymetric := rel_assymetric $ tree.rel_assymetric;
-  rel_transitive := rel_transitive $ tree.rel_transitive
+protected instance instIsTree {r : F.World} [F.IsTree r] : (F.extendRoot r).IsTree extendRoot.root where
+  rel_assymetric := extendRoot.rel_assymetric $ IsTree.rel_assymetric (F := F) (r := r)
+  rel_transitive := extendRoot.rel_transitive $ IsTree.rel_transitive (F := F) (r := r)
 
-instance [F.IsFiniteTree r] : (F.extendRoot r).IsFiniteTree (extendRoot.root) where
+protected instance instIsFiniteTree [F.IsFiniteTree r] : (F.extendRoot r).IsFiniteTree (extendRoot.root) where
 
 def pMorphism : F →ₚ (F.extendRoot r) where
   toFun := Sum.inr
@@ -55,22 +57,23 @@ def pMorphism : F →ₚ (F.extendRoot r) where
     | .inl r => simp [Frame.Rel', Frame.extendRoot] at h;
     | .inr y => use y; simpa using h;
 
-lemma through_original_root [F.IsTree r] {x : (F.extendRoot r).World} (h : extendRoot.root ≺ x) : x = extendRoot.root ∨ (Sum.inr r ≺^+ x) := by
+lemma through_original_root [F.IsTree r] {x : (F.extendRoot r).World} (h : extendRoot.root ≺ x) : x = r ∨ (Sum.inr r ≺^+ x) := by
   match x with
-  | .inl x => simp;
+  | .inl x =>
+    have := Frame.IsTree.rel_irreflexive (F := (F.extendRoot r)) (r := (extendRoot.root));
+    contradiction
   | .inr x =>
     by_cases e : x = r;
-    . subst e;
-      sorry;
+    . tauto;
     . right;
       apply Relation.TransGen.single;
       apply pMorphism (F := F).forth;
-      sorry;
+      exact IsRooted.root_generates x (by tauto) |>.unwrap $ IsTree.rel_transitive (r := r);
 
 end Frame.extendRoot
 
 
-abbrev Model.extendRoot (M : Kripke.Model) (r : M.World) [M.IsRooted r] : Kripke.Model where
+def Model.extendRoot (M : Kripke.Model) (r : M.World) [M.IsRooted r] : Kripke.Model where
   toFrame := M.toFrame.extendRoot r
   Val x a :=
     match x with
@@ -83,7 +86,7 @@ variable {M : Model} {r : M.World} [M.IsRooted r] {x y : M.World}
 
 protected abbrev root := Frame.extendRoot.root (F := M.toFrame) (r := r)
 
-def pMorphism : Model.PseudoEpimorphism M (M.extendRoot r) := Model.PseudoEpimorphism.ofAtomic (@Frame.extendRoot.pMorphism M.toFrame r inferInstance) $ by
+def pMorphism : Model.PseudoEpimorphism M (M.extendRoot r) := PseudoEpimorphism.ofAtomic (Frame.extendRoot.pMorphism (F := M.toFrame) (r := r)) $ by
   intros; rfl;
 
 lemma modal_equivalence_original_world {x : M.World} : ModalEquivalent (M₁ := M) (M₂ := M.extendRoot r) x (Sum.inr x) := by
