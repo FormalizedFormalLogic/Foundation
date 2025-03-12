@@ -18,6 +18,21 @@ infix:80 " ⇄ " => Model.Bisimulation
 
 instance : CoeFun (Model.Bisimulation M₁ M₂) (λ _ => M₁.World → M₂.World → Prop) := ⟨λ bi => bi.toRel⟩
 
+def Model.Bisimulation.symm (bi : M₁ ⇄ M₂) : M₂ ⇄ M₁ := {
+  toRel := λ a b => bi.toRel b a
+  atomic := by
+    intro x₂ x₁ a h;
+    exact (bi.atomic h).symm;
+  forth := by
+    intro x₂ y₂ x₁ hxy h;
+    obtain ⟨y₁, ⟨hy₁, hxy⟩⟩ := bi.back hxy h;
+    use y₁;
+  back := by
+    intro x₁ x₂ y₁ hxy h;
+    obtain ⟨y₂, ⟨hy₂, hxy⟩⟩ := bi.forth hxy h;
+    use y₂;
+}
+
 end Bisimulation
 
 
@@ -45,6 +60,8 @@ lemma modal_equivalent_of_bisimilar (Bi : M₁ ⇄ M₂) (bisx : Bi x₁ x₂) :
       obtain ⟨y₂, ⟨bisy, rx₂y₂⟩⟩ := Bi.forth bisx rx₁y₁;
       exact ih bisy |>.mpr (h _ rx₂y₂);
   | _ => simp_all;
+
+def ModalEquivalent.symm {M₁ M₂ : Model} {w₁ : M₁.World} {w₂ : M₂.World} (h : w₁ ↭ w₂) : w₂ ↭ w₁ := fun {_} => Iff.symm h
 
 end ModalEquivalent
 
@@ -162,24 +179,13 @@ lemma modal_equivalence (f : M₁ →ₚ M₂) (w : M₁.World) : w ↭ (f w) :=
 end Model.PseudoEpimorphism
 
 
-variable {F₁ F₂ : Kripke.Frame} {M₁ M₂ : Kripke.Model}
+variable {F₁ F₂ : Kripke.Frame} {M₁ M₂ : Kripke.Model} {φ : Formula ℕ} {T : FormulaSet ℕ}
 
 lemma validOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧ φ → F₂ ⊧ φ := by
-  contrapose;
-  intro h;
-  obtain ⟨V₂, w₂, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
-  obtain ⟨w₁, rfl⟩ := f_surjective w₂;
-
-  apply ValidOnFrame.not_of_exists_valuation_world;
-  let V₁ := λ w a => V₂ (f w) a;
-  use V₁, w₁;
-
-  exact Model.PseudoEpimorphism.modal_equivalence (M₁ := ⟨F₁, V₁⟩) (M₂ := ⟨F₂, V₂⟩) {
-    toFun := f,
-    forth := f.forth,
-    back := f.back,
-    atomic := by aesop;
-  } w₁ |>.not.mpr h;
+  intro h V₂ u;
+  obtain ⟨x, rfl⟩ := f_surjective u;
+  refine (Model.PseudoEpimorphism.ofAtomic (M₁ := ⟨F₁, λ w a => V₂ (f w) a⟩) (M₂ := ⟨F₂, V₂⟩) f ?_).modal_equivalence x |>.mp $ h _ x;
+  simp;
 
 lemma theory_ValidOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧* T → F₂ ⊧* T := by
   simp only [Semantics.realizeSet_iff];
@@ -189,112 +195,49 @@ lemma theory_ValidOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f
 end PseudoEpimorphism
 
 
-def Frame.isRooted (F : Frame) (r : F.World) : Prop := ∀ w ≠ r, r ≺ w
-
-structure RootedFrame extends Kripke.Frame where
-  root : World
-  root_rooted : Frame.isRooted _ root
-  default := root
-
-
-section PointGenerated
-
-def Frame.PointGenerated (F : Kripke.Frame) (r : F.World) : Kripke.RootedFrame where
-  World := { w | w = r ∨ r ≺ w }
-  Rel x y := x.1 ≺ y.1
-  world_nonempty := ⟨r, by tauto⟩
-  root := ⟨r, by tauto⟩
-  root_rooted := by
-    rintro ⟨x, (rfl | hx)⟩;
-    . intro h; contradiction;
-    . intro _; exact hx;
-infix:100 "↾" => Frame.PointGenerated
-
-namespace Frame.PointGenerated
-
-variable {F : Kripke.Frame} {r : F.World}
-
-lemma rel_transitive (F_trans : Transitive F) : Transitive (F↾r).Rel := by
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ hxy hyz;
-  all_goals aesop;
-
-lemma rel_irreflexive (F_irrefl : Irreflexive F) : Irreflexive (F↾r).Rel := by
-  rintro ⟨x, (rfl | hx)⟩ h;
-  all_goals aesop;
-
-lemma rel_universal (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F↾r).Rel := by
-  have F_symm := symm_of_refl_eucl F_refl F_eucl;
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
-  . apply F_refl;
-  . exact hy;
-  . exact F_symm hx;
-  . apply F_symm $ F_eucl hx hy;
-
-instance world_finite [Finite F.World] : Finite (F↾r).World := by
-  unfold Frame.PointGenerated;
-  apply Subtype.finite;
-
-instance world_decidable [DecidableEq F.World] : DecidableEq (F↾r).World := by
-  apply Subtype.instDecidableEq (p := λ w => w = r ∨ r ≺ w);
-
-end Frame.PointGenerated
-
-
-structure RootedModel extends Kripke.Model, Kripke.RootedFrame where
-
-
-def Model.PointGenerated (M : Kripke.Model) (r : M.World) : Kripke.RootedModel :=
-  letI rF := M.toFrame↾r;
-  {
-    toFrame := rF.toFrame
-    Val := λ w a => M.Val w.1 a
-    root := rF |>.root
-    root_rooted := rF.root_rooted
-  }
-infix:100 "↾" => Model.PointGenerated
-
-namespace Model.PointGenerated
-
-variable {M : Kripke.Model}
-
-def bisimulation_of_trans (M_trans : Transitive M.Rel) (r : M.World) : (M↾r).toModel ⇄ M where
-  toRel x y := x.1 = y
-  atomic := by
-    rintro x y a rfl;
-    simp [Model.PointGenerated];
-  forth := by
-    rintro x₁ y₁ x₂ rfl Rx₂y₁;
-    use y₁.1;
-    constructor;
-    . simp;
-    . exact Rx₂y₁;
-  back := by
-    rintro ⟨x₁, (rfl | hx₁)⟩ x₂ y₂ rfl Rx₂y₂;
-    . use ⟨y₂, by right; exact Rx₂y₂⟩;
-      constructor;
-      . simp;
-      . exact Rx₂y₂;
-    . use ⟨y₂, ?h₂⟩;
-      constructor;
-      . simp;
-      . exact Rx₂y₂;
-      right;
-      exact M_trans hx₁ Rx₂y₂;
-
-lemma modal_equivalent_at_root (M_trans : Transitive M.toFrame) (r : M.World) : ModalEquivalent (M₁ := (M↾r).toModel) (M₂ := M) ⟨r, by simp⟩ r
-  := modal_equivalent_of_bisimilar (bisimulation_of_trans M_trans r) $ by simp [bisimulation_of_trans];
-
-end Model.PointGenerated
-
-end PointGenerated
-
-
 section Generation
 
 structure Frame.GeneratedSub (F₁ F₂ : Kripke.Frame) extends F₁ →ₚ F₂ where
  monic : Function.Injective toFun
+infix:80 " ⥹ " => Frame.GeneratedSub
 
-infix:80 " ⊆ₚ " => Frame.GeneratedSub
+namespace Frame.GeneratedSub
+
+variable {F₁ F₂ : Kripke.Frame}
+
+end Frame.GeneratedSub
+
+
+structure Model.GeneratedSub (M₁ M₂ : Kripke.Model) extends M₁.toFrame ⥹ M₂.toFrame where
+  atomic : ∀ a, ∀ w, (M₁ w a) ↔ (M₂ (toFun w) a)
+infix:80 " ⥹ " => Model.GeneratedSub
+
+namespace Model.GeneratedSub
+
+variable {M₁ M₂ : Kripke.Model}
+
+def ofAtomic (g : M₁.toFrame ⥹ M₂.toFrame) (atomic : ∀ a w, M₁ w a ↔ M₂ (g.toFun w) a) : M₁ ⥹ M₂ where
+  toFun := g.toFun
+  forth := g.forth
+  back := g.back
+  monic := g.monic
+  atomic := atomic
+
+variable (g : M₁ ⥹ M₂)
+
+def pMorphism : M₁ →ₚ M₂ where
+  toFun := g.toFun
+  forth := g.forth
+  back := g.back
+  atomic := fun {a w} => (g.atomic a w)
+
+def bisimulation : M₁ ⇄ M₂ := Model.PseudoEpimorphism.bisimulation g.pMorphism
+
+def modal_equivalence (w : M₁.World) : w ↭ (g.toFun w) := Model.PseudoEpimorphism.modal_equivalence g.pMorphism w
+
+end Model.GeneratedSub
+
+variable {F₁ F₂ : Kripke.Frame} {M₁ M₂ : Kripke.Model} {φ : Formula ℕ} {T : FormulaSet ℕ}
 
 end Generation
 

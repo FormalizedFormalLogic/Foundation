@@ -6,7 +6,7 @@ namespace Frame
 
 open Relation
 
-variable {F : Frame} {x y : F.World}
+variable {F : Frame} {x y z : F.World}
 
 
 section trans_refl
@@ -58,6 +58,9 @@ protected lemma symmetric (hSymm : Symmetric F.Rel) : Symmetric F.RelTransGen :=
   | tail _ hyz ih => exact TransGen.trans (TransGen.single $ hSymm hyz) ih
 
 lemma exists_itr : x ≺^+ y ↔ ∃ n > 0, F.Rel.iterate n x y := TransGen.exists_iterate
+
+lemma head (Rxy : x ≺ y) (Ryz : y ≺^+ z) : x ≺^+ z := TransGen.head Rxy Ryz
+lemma tail (Rxy : x ≺^+ y) (Ryz : y ≺ z) : x ≺^+ z := TransGen.tail Rxy Ryz
 
 end RelTransGen
 
