@@ -243,6 +243,7 @@ end Generation
 
 
 /-
+
 namespace Frame
 
 variable {F : Kripke.Frame} (x : F.World)
@@ -267,8 +268,8 @@ def proper_immediate_predeccsors := { w | w ≠ x ∧ w ≺ x }
 postfix:100 "↓" => Frame.proper_immediate_predeccsors
 
 end Frame
--/
 
+-/
 
 end Kripke
 

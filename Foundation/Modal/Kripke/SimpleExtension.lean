@@ -1,5 +1,4 @@
 import Foundation.Modal.Kripke.Tree
-import Foundation.Modal.Kripke.Preservation
 import Mathlib.Data.Finite.Sum
 
 namespace LO.Modal.Kripke

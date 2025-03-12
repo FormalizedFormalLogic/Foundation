@@ -33,8 +33,8 @@ protected lemma exists_itr : x ≺^* y ↔ ∃ n, F.Rel.iterate n x y := ReflTra
 
 end RelReflTransGen
 
-abbrev TransitiveReflexiveClosure (F : Frame) : Frame := ⟨F.World, (· ≺^* ·)⟩
-postfix:95 "^*" => Frame.TransitiveReflexiveClosure
+abbrev mkTransReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^* ·)⟩
+postfix:95 "^*" => mkTransReflClosure
 
 end trans_refl
 
@@ -64,8 +64,8 @@ lemma tail (Rxy : x ≺^+ y) (Ryz : y ≺ z) : x ≺^+ z := TransGen.tail Rxy Ry
 
 end RelTransGen
 
-abbrev TransitiveClosure (F : Frame) : Frame := ⟨F.World, (· ≺^+ ·)⟩
-postfix:95 "^+" => Frame.TransitiveClosure
+abbrev mkTransClosure (F : Frame) : Frame := ⟨F.World, (· ≺^+ ·)⟩
+postfix:95 "^+" => mkTransClosure
 
 end trans
 
@@ -75,8 +75,8 @@ section refl
 abbrev RelReflGen : _root_.Rel F.World F.World := ReflGen (· ≺ ·)
 infix:45 " ≺^= " => Frame.RelReflGen
 
-def ReflexiveClosure (F : Frame) : Frame := ⟨F.World, (· ≺^= ·)⟩
-postfix:95 "^=" => Frame.ReflexiveClosure
+def mkReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^= ·)⟩
+postfix:95 "^=" => mkReflClosure
 
 end refl
 
@@ -86,16 +86,15 @@ section irrefl
 abbrev RelIrreflGen : _root_.Rel F.World F.World := IrreflGen (· ≺ ·)
 scoped infix:45 " ≺^≠ " => Frame.RelIrreflGen
 
-def IrreflexiveClosure (F : Frame) : Frame := ⟨F.World, (· ≺^≠ ·)⟩
-postfix:95 "^≠" => Frame.IrreflexiveClosure
+def mkIrreflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^≠ ·)⟩
+postfix:95 "^≠" => mkIrreflClosure
 
-namespace IrreflexiveClosure
+namespace irreflClosure
 
 @[simp]
-lemma rel_irreflexive : Irreflexive (F^≠.Rel) := by
-  simp [Irreflexive, Frame.RelIrreflGen, IrreflGen, Frame.IrreflexiveClosure]
+lemma rel_irreflexive : Irreflexive (F^≠.Rel) := by simp [Irreflexive, Frame.RelIrreflGen, IrreflGen, mkIrreflClosure]
 
-end IrreflexiveClosure
+end irreflClosure
 
 end irrefl
 
@@ -105,12 +104,12 @@ end Frame
 
 section
 
-instance {F : FiniteFrame} : Finite (F.toFrame^=).World := by simp [Frame.ReflexiveClosure];
+instance {F : FiniteFrame} : Finite (F.toFrame^=).World := by simp [Frame.mkReflClosure];
 
 abbrev FiniteFrame.ReflexiveClosure (F : FiniteFrame) : FiniteFrame := ⟨F.toFrame^=⟩
 postfix:95 "^=" => FiniteFrame.ReflexiveClosure
 
-instance {F : FiniteFrame} : Finite (F.toFrame^≠).World := by simp [Frame.IrreflexiveClosure]
+instance {F : FiniteFrame} : Finite (F.toFrame^≠).World := by simp [Frame.mkIrreflClosure]
 
 abbrev FiniteFrame.IrreflexiveClosure (F : FiniteFrame) : FiniteFrame := ⟨F.toFrame^≠⟩
 postfix:95 "^≠" => FiniteFrame.IrreflexiveClosure

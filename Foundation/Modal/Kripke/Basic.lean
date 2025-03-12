@@ -13,10 +13,16 @@ structure Frame where
   World : Type
   Rel : Rel World World
   [world_nonempty : Nonempty World]
+attribute [simp] Frame.world_nonempty
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
+
+
+class Frame.IsFinite (F : Frame) where
+  [world_finite : Finite F.World]
+attribute [simp] Frame.IsFinite.world_finite
 
 
 structure FiniteFrame extends Frame where

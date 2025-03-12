@@ -7,29 +7,34 @@ namespace Kripke
 open Formula.Kripke
 
 
-class Frame.Generated (F : Kripke.Frame) where
+class Frame.IsGenerated (F : Kripke.Frame) where
   roots : Set F.World
-  roots_isRooted : ∀ w ∉ roots, ∃ r ∈ roots, r ≺^+ w
+  roots_generates : ∀ w ∉ roots, ∃ r ∈ roots, r ≺^+ w
 
-class Frame.Rooted (F : Kripke.Frame) where
+class Frame.IsRooted (F : Kripke.Frame) where
   root : F.World
-  root_isPointRooted : ∀ w ≠ root, root ≺^+ w
+  root_generates : ∀ w ≠ root, root ≺^+ w
 
-namespace PointRootedFrame
-
+namespace Frame.IsRooted
 
 variable {F : Frame}
 
-instance [rooted : F.Rooted] : F.Generated where
+instance [rooted : F.IsRooted] : F.IsGenerated where
   roots := {rooted.root}
-  roots_isRooted := by
+  roots_generates := by
     rintro x hx;
     use rooted.root;
     constructor;
     . tauto;
-    . exact rooted.root_isPointRooted x hx;
+    . exact rooted.root_generates x hx;
 
-end PointRootedFrame
+end Frame.IsRooted
+
+instance Frame.mkTransClosure.IsRooted {F : Frame} [rooted : F.IsRooted] : F^+.IsRooted where
+  root := rooted.root
+  root_generates := by
+    intro x hx;
+    exact Relation.TransGen.single $ rooted.root_generates x hx;
 
 namespace Frame
 
@@ -93,16 +98,19 @@ lemma origin_trans_rel_of_trans_rel {u v : (F↾r).World} (Ruv : u ≺^+ v) : u.
   | base h => exact Frame.RelTransGen.single h;
   | ih a b c => exact TransGen.head a c;
 
--- set_option pp.proofs true in
-instance instPointRooted : (F↾r).Rooted where
+instance instPointRooted : (F↾r).IsRooted where
   root := ⟨r, by tauto⟩
-  root_isPointRooted := by
+  root_generates := by
     rintro ⟨w, (rfl | Rrw)⟩ hw;
     . simp at hw;
     . apply trans_rel_of_origin_trans_rel;
       exact Rrw;
 
 instance [Finite F.World] : Finite (F↾r).World := Subtype.finite
+
+instance [F.IsFinite] : Finite (F↾r).World := by
+  haveI : Finite F.World := IsFinite.world_finite; -- TODO: remove?
+  infer_instance;
 
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
@@ -143,7 +151,7 @@ end Frame
 
 
 class Model.Rooted (M : Kripke.Model) where
-  [frame_pointRooted : M.toFrame.Rooted]
+  [frame_rooted : M.toFrame.IsRooted]
 
 
 def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model where
@@ -156,7 +164,7 @@ namespace Model.pointGenerate
 variable {M : Kripke.Model} {r : M.World}
 
 instance : (M↾r).Rooted where
-  frame_pointRooted := Frame.pointGenerate.instPointRooted
+  frame_rooted := Frame.pointGenerate.instPointRooted
 
 instance : (M↾r) ⥹ M := by
   letI g := Frame.pointGenerate.generatedSub (F := M.toFrame) (r := r);
