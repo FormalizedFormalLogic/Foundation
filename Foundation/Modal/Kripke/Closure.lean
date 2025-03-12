@@ -89,12 +89,12 @@ scoped infix:45 " ≺^≠ " => Frame.RelIrreflGen
 def mkIrreflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^≠ ·)⟩
 postfix:95 "^≠" => mkIrreflClosure
 
-namespace irreflClosure
+namespace mkIrreflClosure
 
 @[simp]
 lemma rel_irreflexive : Irreflexive (F^≠.Rel) := by simp [Irreflexive, Frame.RelIrreflGen, IrreflGen, mkIrreflClosure]
 
-end irreflClosure
+end mkIrreflClosure
 
 end irrefl
 

@@ -1,7 +1,4 @@
 import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
-import Foundation.Modal.Kripke.Hilbert.GL.Completeness
 import Foundation.Modal.Logic.WellKnown
 
 namespace LO.Modal
@@ -127,8 +124,7 @@ lemma provable_Grz_of_boxdotTranslated_GL : (Hilbert.GL) ⊢! φᵇ → (Hilbert
   apply Kripke.not_validOnFiniteFrameClass_of_exists_finiteFrame
   use F^≠;
   constructor;
-  . suffices Transitive (F^≠).Rel by simpa
-      [Set.mem_setOf_eq, Frame.IrreflexiveClosure.rel_irreflexive, and_true];
+  . suffices Transitive (F^≠).Rel by simpa [Set.mem_setOf_eq, Frame.mkIrreflClosure.rel_irreflexive, and_true];
     rintro x y z ⟨hxy, Rxy⟩ ⟨hyz, Ryz⟩;
     constructor;
     . by_contra hC;

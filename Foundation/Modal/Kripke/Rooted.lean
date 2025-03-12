@@ -117,17 +117,14 @@ lemma rel_irrefl (F_irrefl : Irreflexive F) : Irreflexive (F↾r).Rel := by
   rintro ⟨x, (rfl | hx)⟩ h;
   all_goals aesop;
 
-/-
 lemma rel_universal_of_refl_eucl (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F↾r).Rel := by
   have F_symm := symm_of_refl_eucl F_refl F_eucl;
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
   . apply F_refl;
-  .
-    sorry;
+  . sorry;
   . apply F_symm;
     sorry;
   . sorry;
--/
 
 def pMorphism : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x
@@ -155,10 +152,6 @@ end pointGenerate
 end Frame
 
 
-class Model.IsRooted (M : Kripke.Model) (r : M.World) where
-  [frame_rooted : M.toFrame.IsRooted r]
-attribute [instance] Model.IsRooted.frame_rooted
-
 def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model := ⟨M.toFrame↾r, λ w a => M.Val w.1 a⟩
 infix:100 "↾" => Model.pointGenerate
 
@@ -167,9 +160,6 @@ namespace Model.pointGenerate
 variable {M : Kripke.Model} {r : M.World}
 
 protected abbrev root : (M↾r).World := ⟨r, by tauto⟩
-
-instance instIsRooted : (M↾r).IsRooted pointGenerate.root where
-  frame_rooted := Frame.pointGenerate.instIsRooted
 
 protected def pMorphism : (M↾r) →ₚ M := by
   apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism (F := M.toFrame) (r := r));
