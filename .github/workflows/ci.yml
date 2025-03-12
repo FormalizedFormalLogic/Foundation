@@ -23,13 +23,33 @@ jobs:
     steps:
       # We don't use https://github.com/leanprover/lean-action.
       # Because caching strategy is not suitable for our project.
+
       - uses: actions/checkout@v4
-      - name: Install elan
+      - name: Setup elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-          "$HOME"/.elan/bin/lean --version
-          "$HOME"/.elan/bin/lake --version
+      - name: Setup graphviz
+        uses: ts-graphviz/setup-graphviz@v2
+      - name: Setup typst
+        uses: typst-community/setup-typst@v4
+      - name: Setup mdbook
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: mdbook
+          version: "0.4.47"
+      - name: Setup mdbook-katex
+        uses: baptiste0928/cargo-install@v3
+        with:
+          crate: mdbook-katex
+          version: "0.9.3"
+      - name: Print tools version
+        run: |
+          lake --version
+          dot --version
+          typst --version
+          mdbook --version
+          mdbook-katex --version
 
       # Restore project cache
       - name: Restore cache
@@ -48,7 +68,6 @@ jobs:
         run: lake build --keep-toolchain
 
       # Build import-graph
-      - uses: ts-graphviz/setup-graphviz@v2
       - name: Generate import graph
         run: |
           lake exe graph ./import_graph.png
@@ -61,7 +80,6 @@ jobs:
           cp ./import_graph.html ./pages/src/assets
 
       # Build kites
-      - uses: typst-community/setup-typst@v4
       - name: Generate kites
         run: |
           lake exe generate_modal_kite
@@ -100,24 +118,11 @@ jobs:
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
       # Build book
-      - name: Install mdbook
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: mdbook
-          version: "0.4.40"
-      - name: Install mdbook-katex
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: mdbook-katex
-          version: "0.9.0"
-      - name: Print mdbook and plugins version
-        run: |
-          mdbook --version
-          mdbook-katex --version
       - name: Build book
         run: mdbook build
         working-directory: pages
 
+      # Upload pages artifact
       - uses: actions/upload-pages-artifact@v3
         with:
           path: pages/_output
