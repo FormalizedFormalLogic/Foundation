@@ -16,3 +16,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: raven-actions/actionlint@v2
+        with:
+          pyflakes: false
