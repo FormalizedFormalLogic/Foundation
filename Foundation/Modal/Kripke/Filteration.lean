@@ -167,7 +167,7 @@ variable {M T}
 instance filterOf (M_trans : Transitive M.Rel) : FilterOf (finestFilterationTransitiveClosureModel M T) M T where
   def_rel₁ := by
     intro x y hxy;
-    apply Frame.TransitiveClosure.single;
+    apply Relation.TransGen.single;
     tauto;
   def_box := by
     intro Qx Qy RQxQy;
@@ -190,10 +190,10 @@ instance filterOf (M_trans : Transitive M.Rel) : FilterOf (finestFilterationTran
         intro v ryv;
         exact hpx _ (M_trans rxy ryv);
 
-lemma transitive : Transitive (finestFilterationTransitiveClosureModel M T).Rel := Frame.TransitiveClosure.rel_transitive
+lemma transitive : Transitive (finestFilterationTransitiveClosureModel M T).Rel := Frame.RelTransGen.transitive
 
 lemma symmetric_of_symmetric (M_symm : Symmetric M.Rel) : Symmetric (finestFilterationTransitiveClosureModel M T).Rel :=
-  Frame.TransitiveClosure.rel_symmetric $ finestFilterationModel.symmetric_of_symmetric M_symm
+  Frame.RelTransGen.symmetric $ finestFilterationModel.symmetric_of_symmetric M_symm
 
 lemma reflexive_of_transitive_reflexive (M_trans : Transitive M.Rel) (M_refl : Reflexive M.Rel) : Reflexive (finestFilterationTransitiveClosureModel M T).Rel := by
   exact reflexive_filterOf_of_reflexive (filterOf M_trans) M_refl;

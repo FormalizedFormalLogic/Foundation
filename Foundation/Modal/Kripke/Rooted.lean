@@ -7,31 +7,27 @@ namespace Kripke
 open Formula.Kripke
 
 
-class Frame.IsGenerated (F : Kripke.Frame) where
-  roots : Set F.World
+class Frame.IsGenerated (F : Kripke.Frame) (roots : Set F.World) where
   roots_generates : ∀ w ∉ roots, ∃ r ∈ roots, r ≺^+ w
 
-class Frame.IsRooted (F : Kripke.Frame) where
-  root : F.World
+class Frame.IsRooted (F : Kripke.Frame) (root : F.World) where
   root_generates : ∀ w ≠ root, root ≺^+ w
 
 namespace Frame.IsRooted
 
 variable {F : Frame}
 
-instance [rooted : F.IsRooted] : F.IsGenerated where
-  roots := {rooted.root}
+instance [rooted : F.IsRooted r] : F.IsGenerated {r} where
   roots_generates := by
     rintro x hx;
-    use rooted.root;
+    use r;
     constructor;
     . tauto;
     . exact rooted.root_generates x hx;
 
 end Frame.IsRooted
 
-instance Frame.mkTransClosure.IsRooted {F : Frame} [rooted : F.IsRooted] : F^+.IsRooted where
-  root := rooted.root
+instance Frame.mkTransClosure.IsRooted {F : Frame} {r : F.World} [rooted : F.IsRooted r] : (F^+).IsRooted r where
   root_generates := by
     intro x hx;
     exact Relation.TransGen.single $ rooted.root_generates x hx;
@@ -98,8 +94,9 @@ lemma origin_trans_rel_of_trans_rel {u v : (F↾r).World} (Ruv : u ≺^+ v) : u.
   | base h => exact Frame.RelTransGen.single h;
   | ih a b c => exact TransGen.head a c;
 
-instance instPointRooted : (F↾r).IsRooted where
-  root := ⟨r, by tauto⟩
+protected abbrev root : (F↾r).World := ⟨r, by tauto⟩
+
+instance instIsRooted : (F↾r).IsRooted pointGenerate.root where
   root_generates := by
     rintro ⟨w, (rfl | Rrw)⟩ hw;
     . simp at hw;
@@ -108,9 +105,7 @@ instance instPointRooted : (F↾r).IsRooted where
 
 instance [Finite F.World] : Finite (F↾r).World := Subtype.finite
 
-instance [F.IsFinite] : Finite (F↾r).World := by
-  haveI : Finite F.World := IsFinite.world_finite; -- TODO: remove?
-  infer_instance;
+instance [F.IsFinite] : (F↾r).IsFinite := (isFinite_iff _).mpr inferInstance
 
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
@@ -134,6 +129,16 @@ lemma rel_universal_of_refl_eucl (F_refl : Reflexive F) (F_eucl : Euclidean F) :
   . sorry;
 -/
 
+def pMorphism : (F↾r) →ₚ F where
+  toFun := λ ⟨x, _⟩ => x
+  forth := by
+    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy;
+    repeat exact hxy;
+  back := by
+    rintro ⟨x, (rfl | hx)⟩ y Rwv;
+    . simp at Rwv; use ⟨y, by tauto⟩
+    . use ⟨y, by right; exact Frame.RelTransGen.tail hx Rwv⟩;
+
 def generatedSub : F↾r ⥹ F where
   toFun := λ ⟨x, _⟩ => x
   forth := by
@@ -150,21 +155,26 @@ end pointGenerate
 end Frame
 
 
-class Model.Rooted (M : Kripke.Model) where
-  [frame_rooted : M.toFrame.IsRooted]
+class Model.IsRooted (M : Kripke.Model) (r : M.World) where
+  [frame_rooted : M.toFrame.IsRooted r]
+attribute [instance] Model.IsRooted.frame_rooted
 
-
-def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model where
-  toFrame := M.toFrame↾r
-  Val := λ w a => M.Val w.1 a
+def Model.pointGenerate (M : Kripke.Model) (r : M.World) : Model := ⟨M.toFrame↾r, λ w a => M.Val w.1 a⟩
 infix:100 "↾" => Model.pointGenerate
 
 namespace Model.pointGenerate
 
 variable {M : Kripke.Model} {r : M.World}
 
-instance : (M↾r).Rooted where
-  frame_rooted := Frame.pointGenerate.instPointRooted
+protected abbrev root : (M↾r).World := ⟨r, by tauto⟩
+
+instance instIsRooted : (M↾r).IsRooted pointGenerate.root where
+  frame_rooted := Frame.pointGenerate.instIsRooted
+
+protected def pMorphism : (M↾r) →ₚ M := by
+  apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism (F := M.toFrame) (r := r));
+  simp only [pointGenerate, Frame.pointGenerate, Subtype.forall];
+  rintro p x (rfl | Rrx) <;> tauto;
 
 instance : (M↾r) ⥹ M := by
   letI g := Frame.pointGenerate.generatedSub (F := M.toFrame) (r := r);
@@ -178,30 +188,10 @@ instance : (M↾r) ⥹ M := by
       rintro p x (rfl | Rrx) <;> tauto;
   }
 
-def bisimulation_of_trans (r : M.World) : (M↾r) ⇄ M where
-  toRel x y := x.1 = y
-  atomic := by
-    rintro x y a rfl;
-    simp [Model.pointGenerate];
-  forth := by
-    rintro x₁ y₁ x₂ rfl Rx₂y₁;
-    use y₁.1;
-    constructor;
-    . simp;
-    . exact Rx₂y₁;
-  back := by
-    rintro ⟨x₁, (rfl | Rrx₁)⟩ x₂ y₂ rfl Rx₂y₂;
-    . use ⟨y₂, by right; exact Frame.RelTransGen.single Rx₂y₂⟩;
-      constructor;
-      . simp;
-      . exact Rx₂y₂;
-    . use ⟨y₂, (by right; exact Relation.TransGen.tail Rrx₁ Rx₂y₂;)⟩;
-      constructor;
-      . simp;
-      . exact Rx₂y₂;
+protected def bisimulation (r : M.World) : (M↾r) ⇄ M := Model.pointGenerate.pMorphism.bisimulation
 
 lemma modal_equivalent_at_root (r : M.World) : ModalEquivalent (M₁ := M↾r) (M₂ := M) ⟨r, by tauto⟩ r
-  := modal_equivalent_of_bisimilar (bisimulation_of_trans r) $ by simp [bisimulation_of_trans];
+  := PseudoEpimorphism.modal_equivalence (Model.pointGenerate.pMorphism) pointGenerate.root
 
 end Model.pointGenerate
 

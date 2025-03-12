@@ -10,35 +10,43 @@ open Formula.Kripke
 
 namespace Kripke
 
-variable (T : Kripke.FiniteTransitiveTree)
+variable (F : Kripke.Frame) {φ : Formula _}
 
 lemma valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameClass (h : FiniteFrameClass.trans_irrefl ⊧ φ)
-  : ∀ T : Kripke.FiniteTransitiveTree, T ⊧ φ := by
-  intro T;
-  apply @h T.toFiniteFrame;
-  refine ⟨?_, ?_⟩;
-  . exact T.rel_transitive;
-  . exact T.rel_irreflexive;
+  : ∀ F : Kripke.Frame, ∀ r, [F.IsFiniteTree r] → F ⊧ φ := by
+  intro T r hT;
+  apply @h (T.toFinite);
+  refine ⟨hT.rel_transitive, hT.rel_irreflexive⟩;
 
-lemma satisfies_at_root_on_FiniteTransitiveTree (h : ∀ T : FiniteTransitiveTree, T.toFrame ⊧ φ) : ∀ M : FiniteTransitiveTreeModel, Satisfies M.toModel M.root φ := by
-  intro M;
-  exact h M.toFiniteTransitiveTree M.Val M.root;
+lemma satisfies_at_root_on_FiniteTransitiveTree (h : ∀ F : Kripke.Frame, ∀ r, [F.IsFiniteTree r] → F ⊧ φ)
+  : ∀ M : Model, ∀ r, [M.IsFiniteTree r] → Satisfies M r φ := fun M r _ => h M.toFrame r M.Val r
 
-open Classical in
+open Model Classical in
 lemma valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree
-  : (∀ M : FiniteTransitiveTreeModel, Satisfies M.toModel M.root φ) → FiniteFrameClass.trans_irrefl ⊧ φ := by
+  : (∀ M : Model, ∀ r : M.World, (Frame.IsFiniteTree M.toFrame r) → Satisfies M r φ) → FiniteFrameClass.trans_irrefl ⊧ φ := by
   rintro H F ⟨F_trans, F_irrefl⟩ V r;
   let M : Kripke.Model := ⟨F.toFrame, V⟩;
-  apply Model.PointGenerated.modal_equivalent_at_root F_trans r |>.mp;
-  apply Model.TransitiveTreeUnravelling.modal_equivalence_at_root (M := (M↾r).toModel) (Frame.PointGenerated.rel_transitive F_trans) ⟨r, by tauto⟩ |>.mp;
-  exact H ⟨(F.FiniteTransitiveTreeUnravelling F_trans F_irrefl r), (M.FiniteTransitiveTreeUnravelling r).Val⟩;
+  have : Satisfies ((M↾r).mkTransTreeUnravelling pointGenerate.root) mkTransTreeUnravelling.root φ := H _ _ ?_;
+  have : Satisfies (M↾r) pointGenerate.root φ := mkTransTreeUnravelling.pMorphism (M↾r) (Frame.pointGenerate.rel_trans F_trans) _
+    |>.modal_equivalence _
+    |>.mp this;
+  exact pointGenerate.pMorphism.modal_equivalence _ |>.mp this;
+  . have := F.world_finite;
+    exact @Frame.mkTransTreeUnravelling.instIsTree (F := (M↾r).toFrame) _
+      (by
+        apply @Frame.isFinite_iff (M↾r).toFrame |>.mpr;
+        apply Subtype.finite;
+      )
+      pointGenerate.root
+      (Frame.pointGenerate.rel_trans F_trans)
+      (Frame.pointGenerate.rel_irrefl F_irrefl)
 
 end Kripke
 
 
 namespace Hilbert.GL.Kripke
 
-theorem iff_provable_satisfies_FiniteTransitiveTree : Hilbert.GL ⊢! φ ↔ (∀ M : FiniteTransitiveTreeModel, Satisfies M.toModel M.root φ) := by
+theorem iff_provable_satisfies_FiniteTransitiveTree : Hilbert.GL ⊢! φ ↔ (∀ M : Model, ∀ r, M.IsFiniteTree r → Satisfies M r φ) := by
   constructor;
   . intro h M;
     have : FiniteFrameClass.trans_irrefl ⊧ φ := Kripke.finite_sound.sound h;
@@ -50,7 +58,7 @@ theorem iff_provable_satisfies_FiniteTransitiveTree : Hilbert.GL ⊢! φ ↔ (�
     apply valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree h hF;
 
 lemma iff_unprovable_exists_unsatisfies_FiniteTransitiveTree
-  : Hilbert.GL ⊬ φ ↔ ∃ M : FiniteTransitiveTreeModel, ¬Satisfies M.toModel M.root φ := by
+  : Hilbert.GL ⊬ φ ↔ ∃ M : Model, ∃ r, M.IsFiniteTree r ∧ ¬Satisfies M r φ := by
   apply Iff.not_left;
   push_neg;
   exact iff_provable_satisfies_FiniteTransitiveTree;

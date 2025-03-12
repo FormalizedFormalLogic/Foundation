@@ -19,15 +19,14 @@ instance : CoeSort Frame (Type) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
-
+@[mk_iff]
 class Frame.IsFinite (F : Frame) where
   [world_finite : Finite F.World]
-attribute [simp] Frame.IsFinite.world_finite
-
+attribute [instance] Frame.IsFinite.world_finite
 
 structure FiniteFrame extends Frame where
   [world_finite : Finite World]
-attribute [simp] FiniteFrame.world_finite
+attribute [instance, simp] FiniteFrame.world_finite
 
 instance {F : FiniteFrame} : Finite F.World := F.world_finite
 
