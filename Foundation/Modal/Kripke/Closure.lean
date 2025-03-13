@@ -36,6 +36,15 @@ end RelReflTransGen
 abbrev mkTransReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^* ·)⟩
 postfix:95 "^*" => mkTransReflClosure
 
+namespace mkTransReflClosure
+
+instance [F.IsFinite] : IsFinite (F^*) := by
+  apply Frame.isFinite_iff _ |>.mpr;
+  simp [mkTransReflClosure]
+  exact IsFinite.world_finite;
+
+end mkTransReflClosure
+
 end trans_refl
 
 
@@ -67,6 +76,15 @@ end RelTransGen
 abbrev mkTransClosure (F : Frame) : Frame := ⟨F.World, (· ≺^+ ·)⟩
 postfix:95 "^+" => mkTransClosure
 
+namespace mkTransClosure
+
+instance [F.IsFinite] : IsFinite (F^+) := by
+  apply Frame.isFinite_iff _ |>.mpr;
+  simp [mkTransClosure]
+  exact IsFinite.world_finite;
+
+end mkTransClosure
+
 end trans
 
 
@@ -77,6 +95,15 @@ infix:45 " ≺^= " => Frame.RelReflGen
 
 def mkReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^= ·)⟩
 postfix:95 "^=" => mkReflClosure
+
+namespace mkReflClosure
+
+instance [F.IsFinite] : IsFinite (F^=) := by
+  apply Frame.isFinite_iff _ |>.mpr;
+  simp [mkReflClosure]
+  exact IsFinite.world_finite;
+
+end mkReflClosure
 
 end refl
 
@@ -91,6 +118,11 @@ postfix:95 "^≠" => mkIrreflClosure
 
 namespace mkIrreflClosure
 
+instance [F.IsFinite] : IsFinite (F^≠) := by
+  apply Frame.isFinite_iff _ |>.mpr;
+  simp [mkIrreflClosure]
+  exact IsFinite.world_finite;
+
 @[simp]
 lemma rel_irreflexive : Irreflexive (F^≠.Rel) := by simp [Irreflexive, Frame.RelIrreflGen, IrreflGen, mkIrreflClosure]
 
@@ -98,22 +130,7 @@ end mkIrreflClosure
 
 end irrefl
 
-
 end Frame
 
-
-section
-
-instance {F : FiniteFrame} : Finite (F.toFrame^=).World := by simp [Frame.mkReflClosure];
-
-abbrev FiniteFrame.ReflexiveClosure (F : FiniteFrame) : FiniteFrame := ⟨F.toFrame^=⟩
-postfix:95 "^=" => FiniteFrame.ReflexiveClosure
-
-instance {F : FiniteFrame} : Finite (F.toFrame^≠).World := by simp [Frame.mkIrreflClosure]
-
-abbrev FiniteFrame.IrreflexiveClosure (F : FiniteFrame) : FiniteFrame := ⟨F.toFrame^≠⟩
-postfix:95 "^≠" => FiniteFrame.IrreflexiveClosure
-
-end
 
 end LO.Modal.Kripke

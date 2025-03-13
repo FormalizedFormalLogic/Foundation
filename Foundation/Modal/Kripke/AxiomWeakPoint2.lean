@@ -4,14 +4,26 @@ namespace LO.Modal
 
 namespace Kripke
 
+open Formula.Kripke
+
+
+abbrev FrameClass.weakConfluent : FrameClass := { F | WeakConfluent F }
+
+namespace FrameClass.weakConfluent
+
+@[simp]
+protected lemma nonempty : FrameClass.weakConfluent.Nonempty := by
+  use ⟨Unit, λ _ _ => True⟩;
+  simp [WeakConfluent];
+
+end FrameClass.weakConfluent
+
 
 section definability
 
-open Formula.Kripke
-
 variable {F : Kripke.Frame}
 
-lemma weakConnected_of_validate_WeakPoint2 (hCon : WeakConfluent F) : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1)) := by
+lemma weakConfluent_of_validate_WeakPoint2 (hCon : WeakConfluent F) : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1)) := by
   rintro V x;
   apply Satisfies.imp_def.mpr;
   suffices
@@ -43,24 +55,6 @@ lemma validate_WeakPoint2_of_weakConfluent : F ⊧ (Axioms.WeakPoint2 (.atom 0) 
     push_neg;
     intro Ryu;
     exact hu u Ryu;
-
-abbrev FrameClass.weakConfluent : FrameClass := { F | WeakConfluent F }
-
-namespace FrameClass.weakConfluent
-
-@[simp]
-protected lemma nonempty : FrameClass.weakConfluent.Nonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
-  simp [WeakConfluent];
-
-protected instance definability : FrameClass.weakConfluent.DefinedByFormula (Axioms.WeakPoint2 (.atom 0) (.atom 1)) := ⟨by
-  intro F;
-  constructor;
-  . simpa using weakConnected_of_validate_WeakPoint2;
-  . simpa using validate_WeakPoint2_of_weakConfluent;
-⟩
-
-end FrameClass.weakConfluent
 
 end definability
 

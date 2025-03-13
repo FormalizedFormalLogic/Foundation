@@ -7,12 +7,9 @@ open Formula.Kripke
 
 namespace Kripke
 
-abbrev FrameClass.trans_cwf : FrameClass := { F | Transitive F.Rel ∧ ConverseWellFounded F.Rel }
-abbrev FiniteFrameClass.trans_irrefl : FiniteFrameClass := { F | Transitive F.Rel ∧ Irreflexive F.Rel }
-
 variable {F : Frame}
 
-lemma validate_L_of_trans_and_cwf (hTrans : Transitive F.Rel) (hCWF : ConverseWellFounded F.Rel) : F ⊧ (Axioms.L (.atom 0)) := by
+lemma validate_AxiomL_of_trans_cwf (hTrans : Transitive F.Rel) (hCWF : ConverseWellFounded F.Rel) : F ⊧ (Axioms.L (.atom 0)) := by
   rintro V w;
   apply Satisfies.imp_def.mpr;
   contrapose;
@@ -33,7 +30,11 @@ lemma validate_L_of_trans_and_cwf (hTrans : Transitive F.Rel) (hCWF : ConverseWe
       exact rmn;
     . assumption;
 
-lemma trans_of_validate_L : F ⊧ (Axioms.L (.atom 0)) → Transitive F.Rel := by
+lemma validate_AxiomL_of_finite_trans_irrefl [F.IsFinite] (hTrans : Transitive F.Rel) (hIrrefl : Irreflexive F.Rel) : F ⊧ (Axioms.L (.atom 0)) := by
+  apply validate_AxiomL_of_trans_cwf hTrans;
+  apply Finite.converseWellFounded_of_trans_irrefl' Frame.IsFinite.world_finite hTrans hIrrefl;
+
+lemma trans_of_validate_AxiomL : F ⊧ (Axioms.L (.atom 0)) → Transitive F.Rel := by
   contrapose;
   intro hT;
   obtain ⟨w, v, Rwv, u, Rvu, nRwu⟩ := by simpa [Transitive] using hT;
@@ -59,7 +60,7 @@ lemma trans_of_validate_L : F ⊧ (Axioms.L (.atom 0)) → Transitive F.Rel := b
     . assumption;
     . simp [Semantics.Realize, Satisfies];
 
-lemma cwf_of_validate_L : F ⊧ (Axioms.L (.atom 0)) → ConverseWellFounded F.Rel := by
+lemma cwf_of_validate_AxiomL : F ⊧ (Axioms.L (.atom 0)) → ConverseWellFounded F.Rel := by
   contrapose;
   intro hCF;
   obtain ⟨X, ⟨x, _⟩, hX₂⟩ := by simpa using ConverseWellFounded.iff_has_max.not.mp hCF;
@@ -85,6 +86,7 @@ lemma cwf_of_validate_L : F ⊧ (Axioms.L (.atom 0)) → ConverseWellFounded F.R
     . assumption;
     . simpa [Semantics.Realize, Satisfies];
 
+/-
 protected instance FrameClass.transitive_cwf.definability : FrameClass.trans_cwf.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
   intro F;
   constructor;
@@ -95,7 +97,7 @@ protected instance FrameClass.transitive_cwf.definability : FrameClass.trans_cwf
     . apply cwf_of_validate_L; simp_all;
 ⟩
 
-protected instance FiniteFrameClass.trans_irrefl.definability : FiniteFrameClass.trans_irrefl.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
+protected instance FrameClass.finite_trans_irrefl.definability : FrameClass.finite_trans_irrefl.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by
   intro F;
   constructor;
   . rintro ⟨hTrans, hIrrefl⟩ φ ⟨_, rfl⟩;
@@ -111,6 +113,7 @@ protected instance FiniteFrameClass.trans_irrefl.definability : FiniteFrameClass
     . intro w;
       simpa using ConverseWellFounded.iff_has_max.mp (cwf_of_validate_L (by simpa using h)) {w} (by simp);
 ⟩
+-/
 
 end Kripke
 

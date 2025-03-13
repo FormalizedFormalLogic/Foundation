@@ -58,20 +58,6 @@ lemma connected_of_validate_Dummett : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1))
   . left;
     simpa [Semantics.Realize, Satisfies, V] using hi Ryz;
 
-protected abbrev FrameClass.connected : FrameClass := { F | Connected F }
-
-instance FrameClass.connected.definability : FrameClass.connected.DefinedBy {Axioms.Dummett (.atom 0) (.atom 1)} := ⟨by
-  intro F;
-  constructor;
-  . simpa using validate_Dummett_of_connected;
-  . simpa using connected_of_validate_Dummett;
-⟩
-
-@[simp]
-instance FrameClass.connected.nonempty : FrameClass.connected.Nonempty := by
-  use whitepoint.toFrame;
-  simp [Connected];
-
 end definability
 
 

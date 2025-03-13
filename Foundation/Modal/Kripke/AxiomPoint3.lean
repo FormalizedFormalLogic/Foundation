@@ -4,14 +4,17 @@ namespace LO.Modal
 
 namespace Kripke
 
+open Formula.Kripke
+
+
+protected abbrev FrameClass.connected : FrameClass := { F | Connected F }
+
 
 section definability
 
-open Formula.Kripke
-
 variable {F : Kripke.Frame}
 
-lemma validate_Point3_of_connected (hCon : Connected F) : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1)) := by
+lemma validate_AxiomPoint3_of_connected (hCon : Connected F) : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1)) := by
   rintro V x;
   apply Satisfies.or_def.mpr;
   suffices
@@ -35,21 +38,15 @@ lemma connected_of_validate_Point3 : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1)) �
     simpa [Semantics.Realize, Satisfies];
   refine ⟨y, Rxy, by tauto, nRzy, z, Ryz, by tauto, nRyz⟩;
 
-abbrev FrameClass.connected : FrameClass := { F | Connected F }
 
 namespace FrameClass.connected
 
 @[simp]
-lemma FrameClass.connected.nonempty : FrameClass.connected.Nonempty := by
-  use whitepoint.toFrame;
-  simp [Connected];
+lemma nonempty : FrameClass.connected.Nonempty := by use whitepoint; simp [Connected];
 
-instance FrameClass.connected.definability : FrameClass.connected.DefinedBy {Axioms.Point3 (.atom 0) (.atom 1)} := ⟨by
-  intro F;
-  constructor;
-  . simpa using validate_Point3_of_connected;
-  . simpa using connected_of_validate_Point3;
-⟩
+lemma validates_axiomPoint3 : FrameClass.connected.ValidatesFormula (Axioms.Point3 (.atom 0) (.atom 1)) := by
+  suffices ∀ (F : Frame), Connected F → Formula.Kripke.ValidOnFrame F (Axioms.Point3 (.atom 0) (.atom 1)) by simpa [FrameClass.Validates];
+  apply validate_AxiomPoint3_of_connected;
 
 end FrameClass.connected
 

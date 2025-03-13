@@ -6,6 +6,7 @@ namespace LO.Modal
 
 open Formula.Kripke
 
+/-
 namespace Kripke
 
 instance FrameClass.multiGeachean.definability' (G)
@@ -13,17 +14,17 @@ instance FrameClass.multiGeachean.definability' (G)
   FrameClass.definedBy_with_axiomK (FrameClass.multiGeachean.definability G)
 
 end Kripke
-
+-/
 
 
 namespace Hilbert.Geach
 
 open Kripke
-open Kripke.Hilbert
+open Hilbert.Kripke
 
-instance Kripke.sound : Sound (Hilbert.Geach G) (FrameClass.multiGeachean G) := inferInstance
+-- instance Kripke.sound : Sound (Hilbert.Geach G) (FrameClass.multiGeachean G) := inferInstance
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.Geach G) := consistent_of_FrameClass (FrameClass.multiGeachean G) (by simp)
+-- instance Kripke.consistent : Entailment.Consistent (Hilbert.Geach G) := consistent_of_sound (FrameClass.multiGeachean G) (by simp)
 
 end Hilbert.Geach
 

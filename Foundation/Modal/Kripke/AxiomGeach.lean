@@ -4,20 +4,88 @@ namespace LO.Modal
 
 namespace Kripke
 
-
-section definability
-
 open Formula.Kripke
 
 protected abbrev FrameClass.multiGeachean (G : Set Geachean.Taple) : FrameClass := { F | (MultiGeachean G) F.Rel }
 
+
+section definability
+
+variable {F : Kripke.Frame} {g : Geachean.Taple}
+
+lemma validate_AxiomGeach_of_Geachean (hG : (Geachean g) F.Rel) : F ⊧ (Axioms.Geach g (.atom 0)) := by
+  rintro V x h;
+  apply Satisfies.multibox_def.mpr;
+  obtain ⟨y, Rxy, hbp⟩ := Satisfies.multidia_def.mp h;
+  intro z Rxz;
+  apply Satisfies.multidia_def.mpr;
+  obtain ⟨u, Ryu, Rzu⟩ := hG ⟨Rxy, Rxz⟩;
+  use u;
+  constructor;
+  . assumption;
+  . exact (Satisfies.multibox_def.mp hbp) Ryu;
+
+
+section
+
+lemma validate_AxiomT_of_reflexive (h : Reflexive F.Rel) : F ⊧ (Axioms.T (.atom 0)) := by
+  rw [Geachean.reflexive_def] at h;
+  exact validate_AxiomGeach_of_Geachean h;
+
+lemma validate_AxiomFour_of_transitive (h : Transitive F.Rel) : F ⊧ (Axioms.Four (.atom 0)) := by
+  rw [Geachean.transitive_def] at h;
+  exact validate_AxiomGeach_of_Geachean h;
+
+lemma validate_AxiomD_of_serial (h : Serial F.Rel) : F ⊧ (Axioms.D (.atom 0)) := by
+  rw [Geachean.serial_def] at h;
+  exact validate_AxiomGeach_of_Geachean h;
+
+lemma validate_AxiomFive_of_euclidean (h : Euclidean F.Rel) : F ⊧ (Axioms.Five (.atom 0)) := by
+  rw [Geachean.euclidean_def] at h;
+  exact validate_AxiomGeach_of_Geachean h;
+
+lemma validate_AxiomB_of_symmetric (h : Symmetric F.Rel) : F ⊧ (Axioms.B (.atom 0)) := by
+  rw [Geachean.symmetric_def] at h;
+  exact validate_AxiomGeach_of_Geachean h;
+
+lemma validate_AxiomPoint2_of_confluent (h : Confluent F.Rel) : F ⊧ (Axioms.Point2 (.atom 0)) := by
+  rw [Geachean.confluent_def] at h;
+  exact validate_AxiomGeach_of_Geachean h;
+
+lemma validate_AxiomTc_of_coreflexive (h : Coreflexive F.Rel) : F ⊧ (Axioms.Tc (.atom 0)) := by
+  rw [Geachean.coreflexive_def] at h;
+  exact validate_AxiomGeach_of_Geachean h;
+
+end
+
+
+lemma geachean_of_validate_AxiomGeach : F ⊧ (Axioms.Geach g (.atom 0)) → (Geachean g) F.Rel := by
+  rintro h x y z ⟨Rxy, Rxz⟩;
+  let V : Kripke.Valuation F := λ v _ => y ≺^[g.m] v;
+  have : Satisfies ⟨F, V⟩ x (◇^[g.i](□^[g.m](.atom 0))) := by
+    apply Satisfies.multidia_def.mpr;
+    use y;
+    constructor;
+    . assumption;
+    . apply Satisfies.multibox_def.mpr;
+      aesop;
+  have : Satisfies ⟨F, V⟩ x (□^[g.j](◇^[g.n]Formula.atom 0)) := h V x this;
+  have : Satisfies ⟨F, V⟩ z (◇^[g.n]Formula.atom 0) := Satisfies.multibox_def.mp this Rxz;
+  obtain ⟨u, Rzu, Ryu⟩ := Satisfies.multidia_def.mp this;
+  exact ⟨u, Ryu, Rzu⟩;
+
+namespace FrameClass.multiGeachean
+
 @[simp]
-lemma FrameClass.multiGeachean.nonempty : (FrameClass.multiGeachean G).Nonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
+lemma nonempty : (FrameClass.multiGeachean G).Nonempty := by
+  use whitepoint;
   intros t ht x y z h;
   use x;
   constructor <;> { apply Rel.iterate.true_any; tauto; }
 
+end FrameClass.multiGeachean
+
+/-
 instance FrameClass.multiGeachean.definability (G) : (FrameClass.multiGeachean G).DefinedBy (G.image (λ t => Axioms.Geach t (.atom 0))) := by
   unfold FrameClass.multiGeachean MultiGeachean Axioms.Geach;
   constructor;
@@ -46,23 +114,21 @@ instance FrameClass.multiGeachean.definability (G) : (FrameClass.multiGeachean G
     have : Satisfies ⟨F, V⟩ z (◇^[g.n]Formula.atom 0) := Satisfies.multibox_def.mp this Rxz;
     obtain ⟨u, Rzu, Ryu⟩ := Satisfies.multidia_def.mp this;
     exact ⟨u, Ryu, Rzu⟩;
-
+-/
 
 section
 
 variable {F : Frame}
 
 lemma reflexive_of_validate_AxiomT (h : F ⊧ (Axioms.T (.atom 0))) : Reflexive F.Rel := by
-  have : ValidOnFrame F (Axioms.T (.atom 0)) → Reflexive F.Rel := by
-    simpa [Axioms.Geach, MultiGeachean, ←Geachean.reflexive_def] using
-    FrameClass.multiGeachean.definability {⟨0, 0, 1, 0⟩} |>.defines F |>.mpr;
-  exact this h;
+  rw [Geachean.reflexive_def];
+  apply geachean_of_validate_AxiomGeach;
+  exact h;
 
 lemma transitive_of_validate_AxiomFour (h : F ⊧ (Axioms.Four (.atom 0))) : Transitive F.Rel := by
-  have : ValidOnFrame F (Axioms.Four (.atom 0)) → Transitive F.Rel := by
-    simpa [Axioms.Geach, MultiGeachean, ←Geachean.transitive_def] using
-    FrameClass.multiGeachean.definability {⟨0, 2, 1, 0⟩} |>.defines F |>.mpr;
-  exact this h;
+  rw [Geachean.transitive_def];
+  apply geachean_of_validate_AxiomGeach;
+  exact h;
 
 end
 

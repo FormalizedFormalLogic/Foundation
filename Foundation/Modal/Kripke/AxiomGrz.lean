@@ -11,12 +11,9 @@ open Kripke
 open Formula.Kripke
 open Relation (IrreflGen)
 
-protected abbrev FrameClass.trans_wcwf : FrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel }
-protected abbrev FiniteFrameClass.strict_preorder : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel }
-
 variable {F : Kripke.Frame}
 
-lemma validate_Grz_of_refl_trans_wcwf
+lemma validate_AxiomGrz_of_refl_trans_wcwf
   (hRefl : Reflexive F.Rel)
   (hTrans : Transitive F.Rel)
   (hWCWF : WeaklyConverseWellFounded F.Rel)
@@ -73,8 +70,17 @@ lemma validate_Grz_of_refl_trans_wcwf
         contradiction;
       . assumption;
 
+lemma validate_AxiomGrz_of_finite_strict_preorder
+  [F.IsFinite]
+  (hRefl : Reflexive F.Rel)
+  (hTrans : Transitive F.Rel)
+  (hAntisymm : AntiSymmetric F.Rel)
+  : F ⊧ (Axioms.Grz (.atom 0)) := by
+  apply validate_AxiomGrz_of_refl_trans_wcwf hRefl hTrans;
+  apply WCWF_of_finite_trans_antisymm Frame.IsFinite.world_finite hTrans hAntisymm;
 
-lemma validate_T_Four_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ □(.atom 0) ➝ ((.atom 0) ⋏ □□(.atom 0)) := by
+
+lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ □(.atom 0) ➝ ((.atom 0) ⋏ □□(.atom 0)) := by
   let ψ : Formula _ := (.atom 0) ⋏ (□(.atom 0) ➝ □□(.atom 0));
   intro V x;
   simp only [Axioms.Grz, ValidOnFrame.models_iff, ValidOnFrame, ValidOnModel.iff_models, ValidOnModel] at h;
@@ -90,25 +96,25 @@ lemma validate_T_Four_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ �
   have h₃ : Satisfies ⟨F, V⟩ x (□(□(ψ ➝ □ψ) ➝ ψ) ➝ ψ) := Satisfies.iff_subst_self (s := λ a => if a = 0 then ψ else a) |>.mp $ h _ _;
   exact h₃ $ h₂ $ h₁;
 
-lemma validate_T_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Axioms.T (.atom 0)) := by
+lemma validate_AxiomT_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Axioms.T (.atom 0)) := by
   intro V x hx;
-  exact Satisfies.and_def.mp (validate_T_Four_of_validate_Grz h V x hx) |>.1;
+  exact Satisfies.and_def.mp (validate_AxiomT_AxiomFour_of_validate_Grz h V x hx) |>.1;
 
-lemma reflexive_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : Reflexive F := by
+lemma reflexive_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : Reflexive F := by
   apply reflexive_of_validate_AxiomT;
-  simpa using validate_T_of_validate_Grz h;
+  simpa using validate_AxiomT_of_validate_AxiomGrz h;
 
-lemma validate_Four_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Axioms.Four (.atom 0))  := by
+lemma validate_AxiomFour_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ (Axioms.Four (.atom 0))  := by
   intro V x hx;
-  exact Satisfies.and_def.mp (validate_T_Four_of_validate_Grz h V x hx) |>.2;
+  exact Satisfies.and_def.mp (validate_AxiomT_AxiomFour_of_validate_Grz h V x hx) |>.2;
 
-lemma transitive_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : Transitive F := by
+lemma transitive_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : Transitive F := by
   apply transitive_of_validate_AxiomFour;
-  simpa using validate_Four_of_validate_Grz h;
+  apply validate_AxiomFour_of_validate_AxiomGrz h;
 
-lemma WCWF_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by
-  have F_trans : Transitive F := transitive_of_validate_Grz h;
-  have F_refl : Reflexive F := reflexive_of_validate_Grz h;
+lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by
+  have F_trans : Transitive F := transitive_of_validate_AxiomGrz h;
+  have F_refl : Reflexive F := reflexive_of_validate_AxiomGrz h;
 
   revert h;
   contrapose;
@@ -176,6 +182,7 @@ lemma WCWF_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by
       exact this _ hx;
     . simp [Satisfies, V];
 
+/-
 protected instance FrameClass.trans_wcwf.definability
   : FrameClass.trans_wcwf.DefinedByFormula (Axioms.Grz (.atom 0)) := ⟨by
   intro F;
@@ -191,8 +198,8 @@ protected instance FrameClass.trans_wcwf.definability
     . exact WCWF_of_validate_Grz h;
 ⟩
 
-protected instance FiniteFrameClass.strict_preorder.definability
-  : FiniteFrameClass.strict_preorder.DefinedByFormula (Axioms.Grz (.atom 0)) := ⟨by
+protected instance FrameClass.finite_strict_preorder.definability
+  : FrameClass.finite_strict_preorder.DefinedByFormula (Axioms.Grz (.atom 0)) := ⟨by
   intro F;
   constructor;
   . rintro ⟨hRefl, hTrans, hAntisymm⟩;
@@ -211,6 +218,7 @@ protected instance FiniteFrameClass.strict_preorder.definability
     . exact transitive_of_validate_Grz h;
     . exact antisymm_of_WCWF $ WCWF_of_validate_Grz h;
 ⟩
+-/
 
 end Kripke
 

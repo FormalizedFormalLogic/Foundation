@@ -51,20 +51,6 @@ lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F :
   . exact Rxz;
   . apply F.rel_refl;
 
-protected abbrev FrameClass.euclidean : FrameClass := { F | Euclidean F }
-
-instance FrameClass.euclidean.definability : FrameClass.euclidean.DefinedByFormula (Axioms.LEM (.atom 0)) := ⟨by
-  intro F;
-  constructor;
-  . simpa using validate_LEM_of_euclidean;
-  . simpa using euclidean_of_validate_LEM;
-⟩
-
-@[simp]
-lemma FrameClass.euclidean.nonempty : FrameClass.euclidean.Nonempty := by
-  use whitepoint.toFrame;
-  simp [Euclidean];
-
 end definability
 
 
