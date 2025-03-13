@@ -13,25 +13,40 @@ structure Frame where
   World : Type
   Rel : Rel World World
   [world_nonempty : Nonempty World]
+attribute [simp] Frame.world_nonempty
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
-abbrev Frame.Rel' {F : Frame} (x y : F.World) := F.Rel x y
-infix:45 " ≺ " => Frame.Rel'
-
-protected abbrev Frame.RelItr' {F : Frame} (n : ℕ) := F.Rel.iterate n
-notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
-
+@[mk_iff]
+class Frame.IsFinite (F : Frame) where
+  [world_finite : Finite F.World]
+attribute [instance] Frame.IsFinite.world_finite
 
 structure FiniteFrame extends Frame where
   [world_finite : Finite World]
-attribute [simp] FiniteFrame.world_finite
+attribute [instance, simp] FiniteFrame.world_finite
 
 instance {F : FiniteFrame} : Finite F.World := F.world_finite
 
 def Frame.toFinite (F : Frame) [Finite F.World] : FiniteFrame := ⟨F⟩
+
+
+namespace Frame
+
+open Relation
+
+variable {F : Frame} {x y : F.World}
+
+abbrev Rel' (x y : F.World) := F.Rel x y
+infix:45 " ≺ " => Frame.Rel'
+
+abbrev RelItr' (n : ℕ) := F.Rel.iterate n
+notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
+
+end Frame
+
 
 
 section
@@ -40,6 +55,7 @@ abbrev whitepoint : FiniteFrame := ⟨Unit, λ _ _ => True⟩
 abbrev blackpoint : FiniteFrame := ⟨Unit, λ _ _ => False⟩
 
 end
+
 
 abbrev FrameClass := Set (Frame)
 

@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Preservation
+import Foundation.Modal.Kripke.Rooted
 import Foundation.Modal.Kripke.Hilbert.KT4B
 
 namespace LO.Modal
@@ -16,10 +16,10 @@ protected abbrev FiniteFrameClass.refl_eucl : FiniteFrameClass := { F | Reflexiv
 
 lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
   constructor;
-  . intro h F hF V r;
-    let M : Model := ⟨F, V⟩;
-    apply Model.PointGenerated.modal_equivalent_at_root  (M := ⟨F, V⟩) (by apply trans_of_refl_eucl hF.1 hF.2) r |>.mp;
-    apply @h (F↾r).toFrame (Frame.PointGenerated.rel_universal hF.1 hF.2) (M↾r).Val;
+  . rintro h F ⟨F_refl, F_eucl⟩ V r;
+    apply @Model.pointGenerate.modal_equivalent_at_root _ _ |>.mp;
+    apply h;
+    exact Frame.pointGenerate.rel_universal_of_refl_eucl F_refl F_eucl;
   . rintro h F F_univ;
     exact @h F (⟨refl_of_universal F_univ, eucl_of_universal F_univ⟩);
 

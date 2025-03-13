@@ -1,4 +1,5 @@
 import Foundation.Vorspiel.Vorspiel
+import Mathlib.Data.PNat.Basic
 
 def Rel.iterate (R : Rel α α) : ℕ → α → α → Prop
   | 0 => (· = ·)
@@ -71,4 +72,101 @@ lemma comp : (∃ z, R.iterate n x z ∧ R.iterate m z y) ↔ R.iterate (n + m) 
       . use w;
       . assumption;
 
+lemma unwrap_of_trans' {n : ℕ+} (R_trans : Transitive R) (Rxy : R.iterate n x y) : R x y := by
+  induction n using PNat.recOn generalizing x with
+  | one => simpa using Rxy;
+  | succ n ih =>
+    obtain ⟨z, Rxz, Rzy⟩ := Rxy;
+    exact R_trans Rxz (ih Rzy);
+
+lemma unwrap_of_trans {x y} {n : ℕ} (hn : n > 0) (R_trans : Transitive R) (Rxy : R.iterate n x y) : R x y := by
+  apply unwrap_of_trans' (n := ⟨n, hn⟩) R_trans Rxy;
+
+lemma unwrap_of_refl_trans {x y} {n : ℕ} (R_refl : Reflexive R) (R_trans : Transitive R) (Rxy : R.iterate n x y) : R x y := by
+  induction n generalizing x with
+  | zero => subst Rxy; apply R_refl;
+  | succ n ih =>
+    obtain ⟨z, Rxz, Rzy⟩ := Rxy;
+    exact R_trans Rxz (ih Rzy);
+
 end Rel.iterate
+
+
+
+namespace Relation
+
+variable {R : Rel α α} {x y : α}
+
+open Rel.iterate
+
+lemma ReflTransGen.exists_iterate : ReflTransGen R x y ↔ ∃ n, R.iterate n x y := by
+  constructor;
+  . intro h;
+    induction h with
+    | refl => use 0;  simp;
+    | tail Rxy Ryz ih =>
+      obtain ⟨n, Rxy⟩ := ih;
+      use n + 1;
+      apply Rel.iterate.forward.mpr;
+      exact ⟨_, Rxy, Ryz⟩;
+  . rintro ⟨n, h⟩;
+    induction n generalizing x y with
+    | zero => subst h; apply ReflTransGen.refl;
+    | succ n ih =>
+      obtain ⟨z, Rxz, Rzy⟩ := h;
+      apply ReflTransGen.head;
+      . exact Rxz;
+      . apply ih;
+        exact Rzy;
+
+lemma ReflTransGen.remove_iterate (Rxy : Rel.iterate (ReflTransGen R) n x y) : (ReflTransGen R) x y := by
+  apply unwrap_of_refl_trans (n := n);
+  . tauto;
+  . apply ReflTransGen.trans;
+  . exact Rxy;
+
+lemma ReflTransGen.unwrap (R_refl : Reflexive R) (R_trans : Transitive R) (Rxy : (ReflTransGen R) x y) : R x y := by
+  obtain ⟨n, Rxy⟩ := ReflTransGen.exists_iterate.mp Rxy;
+  exact unwrap_of_refl_trans R_refl R_trans Rxy;
+
+lemma TransGen.exists_iterate' : TransGen R x y ↔ ∃ n : ℕ+, R.iterate n x y := by
+  constructor;
+  . intro h;
+    induction h with
+    | single h => use 1; simpa;
+    | tail Rxy Ryz ih =>
+      obtain ⟨⟨n, hn⟩, Rxy⟩ := ih;
+      use ⟨n + 1, by omega⟩;
+      apply Rel.iterate.forward.mpr;
+      refine ⟨_, Rxy, Ryz⟩;
+  . rintro ⟨n, Rxy⟩;
+    induction n using PNat.recOn generalizing x with
+    | one =>
+      apply TransGen.single;
+      simpa using Rxy;
+    | succ n ih =>
+      obtain ⟨z, Rxz, Rzy⟩ := Rxy;
+      apply TransGen.head;
+      . exact Rxz;
+      . apply ih;
+        exact Rzy;
+
+lemma TransGen.exists_iterate : TransGen R x y ↔ ∃ n > 0, R.iterate n x y := by
+  constructor;
+  . intro h;
+    obtain ⟨⟨n, hn⟩, h⟩ := TransGen.exists_iterate'.mp h;
+    exact ⟨n, ⟨by omega, h⟩⟩;
+  . rintro ⟨n, ⟨_, Rxy⟩⟩;
+    apply TransGen.exists_iterate'.mpr;
+    exact ⟨⟨n, by omega⟩, Rxy⟩;
+
+lemma TransGen.remove_iterate (hn : n > 0) (Rxy : Rel.iterate (TransGen R) n x y) : (TransGen R) x y := by
+  apply unwrap_of_trans hn;
+  . apply TransGen.trans;
+  . exact Rxy;
+
+lemma TransGen.unwrap (R_trans : Transitive R) (Rxy : (TransGen R) x y) : R x y := by
+  have ⟨n, hn, Rxy⟩ := TransGen.exists_iterate.mp Rxy;
+  exact unwrap_of_trans hn R_trans Rxy;
+
+end Relation
