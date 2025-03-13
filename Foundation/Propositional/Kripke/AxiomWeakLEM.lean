@@ -56,20 +56,6 @@ lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confl
   obtain ⟨w, Rzw, hw⟩ := by simpa [Satisfies] using @this z Ryz;
   use w;
 
-protected abbrev FrameClass.confluent : FrameClass := { F | Confluent F }
-
-instance FrameClass.confluent.definability : FrameClass.confluent.DefinedBy {Axioms.WeakLEM (.atom 0)} := ⟨by
-  intro F;
-  constructor;
-  . simpa using validate_WeakLEM_of_confluent;
-  . simpa using confluent_of_validate_WeakLEM;
-⟩
-
-@[simp]
-instance FrameClass.confluent.nonempty : FrameClass.confluent.Nonempty := by
-  use whitepoint.toFrame;
-  simp [Confluent];
-
 end definability
 
 

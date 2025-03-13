@@ -101,27 +101,14 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-#check Modal.Logic.Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic
-
 instance : ModalCompanion Logic.Int Logic.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.FiniteFrameClass.all.toFrameClass)
+    (IC := Propositional.Kripke.FrameClass.finite_all)
     (MC := Modal.Kripke.FrameClass.finite_strict_preorder)
-    (by
-      intro φ;
-      simp only [Propositional.Logic.eq_kripkeFiniteFrameClass_toFrameClas_logic];
-      constructor;
-      . apply Propositional.Hilbert.Int.Kripke.sound_finite.sound;
-      . apply Propositional.Hilbert.Int.Kripke.complete_finite.complete;
-    )
+    (by rw [Logic.Int.Kripke.eq_all_finite])
     (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic])
-    (by
-      rintro _ ⟨F, hF, rfl⟩;
-      refine ⟨?_, F.rel_refl, F.rel_trans, F.rel_antisymm⟩;
-      apply Modal.Kripke.Frame.isFinite_iff _ |>.mpr;
-      simp;
-    )
+    (by rintro F ⟨_⟩; refine ⟨by tauto, F.rel_refl, F.rel_trans, F.rel_antisymm⟩)
 
 end Grz
 

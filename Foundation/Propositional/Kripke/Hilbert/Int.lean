@@ -7,16 +7,19 @@ import Foundation.Logic.Disjunctive
 namespace LO.Propositional
 
 open Formula.Kripke
+open Hilbert.Kripke
 
 open Kripke
 
 namespace Hilbert.Int.Kripke
 
-protected instance sound : Sound Hilbert.Int FrameClass.all := inferInstance
+protected instance sound : Sound Hilbert.Int FrameClass.all :=
+  instSound_of_validates_axioms FrameClass.all.validates_AxiomEFQ
 
-protected instance consistent : Entailment.Consistent Hilbert.Int := Kripke.Hilbert.consistent_of_FrameClass FrameClass.all (by simp)
+protected instance consistent : Entailment.Consistent Hilbert.Int := consistent_of_sound_frameclass FrameClass.all (by simp)
 
-instance sound_finite : Sound Hilbert.Int Kripke.FiniteFrameClass.all := inferInstance
+instance sound_finite : Sound Hilbert.Int FrameClass.finite_all :=
+  instSound_of_validates_axioms FrameClass.finite_all.validates_AxiomEFQ
 
 instance canonical : Canonical Hilbert.Int FrameClass.all := by tauto;
 
@@ -25,7 +28,7 @@ instance complete: Complete Hilbert.Int FrameClass.all := inferInstance
 
 section FFP
 
-instance complete_finite : Complete (Hilbert.Int) Kripke.FiniteFrameClass.all := ⟨by
+instance complete_finite : Complete (Hilbert.Int) FrameClass.finite_all := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   intro F _ V x;
@@ -33,10 +36,10 @@ instance complete_finite : Complete (Hilbert.Int) Kripke.FiniteFrameClass.all :=
   let FM := coarsestFilterationModel M ↑φ.subformulas;
 
   apply filteration FM (coarsestFilterationModel.filterOf) (by simp) |>.mpr;
-  apply validOnModel_of_validOnFiniteFrameClass hφ;
-  . tauto;
-  . apply FilterEqvQuotient.finite;
-    simp;
+  apply hφ;
+  apply Frame.isFinite_iff _ |>.mpr
+  apply FilterEqvQuotient.finite;
+  simp;
 ⟩
 
 end FFP
