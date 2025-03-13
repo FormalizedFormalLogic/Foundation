@@ -59,7 +59,7 @@ lemma valid_atomic_L_iff_valid_atomic_H : F ⊧ Axioms.L (atom 0) ↔ F ⊧ Axio
 lemma valid_atomic_4_of_valid_atomic_L : F ⊧ Axioms.L (atom 0) → F ⊧ Axioms.Four (atom 0) := by
   intro h V x h₂ y Rxy z Ryz;
   refine h₂ z ?_;
-  apply @trans_of_validate_L F h x y z Rxy Ryz;
+  apply @trans_of_validate_AxiomL F h x y z Rxy Ryz;
 
 lemma valid_atomic_Four_of_valid_atomic_H : F ⊧ Axioms.H (atom 0) → F ⊧ Axioms.Four (atom 0) := by
   trans;

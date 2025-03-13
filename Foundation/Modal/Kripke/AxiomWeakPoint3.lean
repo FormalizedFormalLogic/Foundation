@@ -6,9 +6,22 @@ namespace LO.Modal
 
 namespace Kripke
 
-section definability
-
 open Formula.Kripke
+
+
+abbrev FrameClass.weakConnected : FrameClass := { F | WeakConnected F }
+
+namespace FrameClass.weakConnected
+
+@[simp]
+protected lemma nonempty : FrameClass.weakConnected.Nonempty := by
+  use whitepoint;
+  simp [WeakConnected];
+
+end FrameClass.weakConnected
+
+
+section definability
 
 variable {F : Kripke.Frame}
 
@@ -54,25 +67,6 @@ lemma validate_WeakPoint3_of_weakConnected : F ⊧ (Axioms.WeakPoint3 (.atom 0) 
     by tauto,
     nRyz
   ⟩;
-
-abbrev FrameClass.weakConnected : FrameClass := { F | WeakConnected F }
-
-namespace FrameClass.weakConnected
-
-@[simp]
-protected lemma nonempty : FrameClass.weakConnected.Nonempty := by
-  use whitepoint.toFrame;
-  simp [WeakConnected];
-
-protected instance definability : FrameClass.weakConnected.DefinedBy {Axioms.WeakPoint3 (.atom 0) (.atom 1)} := ⟨by
-  intro F;
-  constructor;
-  . simpa using weakConnected_of_validate_WeakPoint3;
-  . simpa using validate_WeakPoint3_of_weakConnected;
-⟩
-
-end FrameClass.weakConnected
-
 
 end definability
 

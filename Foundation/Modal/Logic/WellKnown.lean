@@ -136,7 +136,7 @@ protected abbrev S5Grz : Logic := Hilbert.S5Grz.logic
 
 
 protected abbrev GL : Logic := Hilbert.GL.logic
-lemma GL.eq_TransitiveIrreflexiveFiniteKripkeFrameClass_Logic : Logic.GL = Kripke.FiniteFrameClass.trans_irrefl.logic := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
+lemma GL.eq_TransitiveIrreflexiveFiniteKripkeFrameClass_Logic : Logic.GL = Kripke.FrameClass.finite_trans_irrefl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 instance : (Logic.GL).Unnecessitation := inferInstance
 
 
@@ -144,8 +144,8 @@ protected abbrev KH : Logic := Hilbert.KH.logic
 
 
 protected abbrev Grz : Logic := Hilbert.Grz.logic
-lemma Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic : Logic.Grz = Kripke.FiniteFrameClass.strict_preorder.logic
-  := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
+lemma Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic : Logic.Grz = Kripke.FrameClass.finite_strict_preorder.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev Triv : Logic := Hilbert.Triv.logic

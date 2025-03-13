@@ -60,13 +60,17 @@ open Kripke
 
 variable {φ ψ : Formula ℕ}
 
-abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.FiniteFrame where
+abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.Frame where
   World := ComplementClosedConsistentFinset (Hilbert.Grz) (φ.subformulasGrz)
   Rel X Y :=
     (∀ ψ ∈ □''⁻¹(φ.subformulasGrz), □ψ ∈ X → □ψ ∈ Y) ∧
     ((∀ ψ ∈ □''⁻¹(φ.subformulasGrz), □ψ ∈ Y → □ψ ∈ X) → X = Y)
 
 namespace miniCanonicalFrame
+
+instance : (miniCanonicalFrame φ).IsFinite := by
+  apply Kripke.Frame.isFinite_iff _ |>.mpr;
+  infer_instance;
 
 lemma reflexive : Reflexive (miniCanonicalFrame φ).Rel := by simp [Reflexive];
 
@@ -94,7 +98,7 @@ end miniCanonicalFrame
 
 
 abbrev miniCanonicalModel (φ : Formula ℕ) : Kripke.Model where
-  toFrame := miniCanonicalFrame φ |>.toFrame
+  toFrame := miniCanonicalFrame φ
   Val X a := (atom a) ∈ X
 
 
@@ -276,7 +280,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
         (membership_iff (by apply subformulasGrz.mem_left; assumption) |>.mp (RXY.1 ψ (by apply subformulasGrz.mem_left; tauto) h));
       exact membership_iff (by apply subformulasGrz.mem_left; exact subformulas.mem_box q_sub) |>.mpr this;
 
-instance complete : Complete (Hilbert.Grz) Kripke.FiniteFrameClass.strict_preorder := ⟨by
+instance complete : Complete (Hilbert.Grz) Kripke.FrameClass.finite_strict_preorder := ⟨by
   intro φ;
   contrapose;
   intro h;
@@ -284,7 +288,7 @@ instance complete : Complete (Hilbert.Grz) Kripke.FiniteFrameClass.strict_preord
   push_neg;
   use (miniCanonicalFrame φ);
   constructor;
-  . refine ⟨miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm⟩;
+  . refine ⟨inferInstance, miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm⟩;
   . apply ValidOnFrame.not_of_exists_model_world;
     obtain ⟨X, hX₁⟩ := lindenbaum (𝓢 := Hilbert.Grz) (Φ := {-φ}) (Ψ := φ.subformulasGrz)
       (by

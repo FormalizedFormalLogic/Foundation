@@ -9,26 +9,43 @@ open Formula.Kripke
 open Entailment
 open Entailment.Context
 open Kripke
+open Hilbert.Kripke
 
 namespace Kripke
 
-instance : FiniteFrameClass.trans_irrefl.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.L (atom 0)} :=
-  FiniteFrameClass.definedBy_with_axiomK FiniteFrameClass.trans_irrefl.definability
+abbrev FrameClass.trans_cwf : FrameClass := { F | Transitive F.Rel ∧ ConverseWellFounded F.Rel }
+
+abbrev FrameClass.finite_trans_irrefl: FrameClass := { F | F.IsFinite ∧ Transitive F.Rel ∧ Irreflexive F.Rel }
+
+namespace FrameClass.finite_trans_irrefl
 
 @[simp]
-instance : FiniteFrameClass.trans_irrefl.Nonempty := by
+lemma nonempty : FrameClass.finite_trans_irrefl.Nonempty := by
   use blackpoint;
   simp [Irreflexive, Transitive];
+  infer_instance;
+
+lemma validates_AxiomL : FrameClass.finite_trans_irrefl.ValidatesFormula (Axioms.L (.atom 0)) := by
+  simp [Validates];
+  intro F;
+  apply validate_AxiomL_of_finite_trans_irrefl;
+
+lemma validates_HilbertGL : Kripke.FrameClass.finite_trans_irrefl.Validates Hilbert.GL.axioms := by
+  apply FrameClass.Validates.withAxiomK;
+  apply validates_AxiomL;
+
+end FrameClass.finite_trans_irrefl
 
 end Kripke
 
 
 namespace Hilbert.GL
 
-instance Kripke.finite_sound : Sound (Hilbert.GL) FiniteFrameClass.trans_irrefl := inferInstance
+instance Kripke.finite_sound : Sound (Hilbert.GL) FrameClass.finite_trans_irrefl :=
+  instSound_of_validates_axioms FrameClass.finite_trans_irrefl.validates_HilbertGL
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.GL) :=
-  Kripke.Hilbert.consistent_of_FiniteFrameClass FiniteFrameClass.trans_irrefl
+  consistent_of_sound_frameclass FrameClass.finite_trans_irrefl (by simp)
 
 end Hilbert.GL
 
