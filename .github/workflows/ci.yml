@@ -57,9 +57,11 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: .lake
-          key: lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}
+          key: lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
           restore-keys: |
-            lake-${{ runner.os }}-${{ hashFiles('lake-manifest.json') }}
+            lake-${{ runner.os }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+
+      - run: find .lake -maxdepth 3
 
       # Build project
       - name: Get Mathlib cache
@@ -93,9 +95,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: docbuild/.lake
-          key: docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lake-manifest.json') }}
+          key: docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}
           restore-keys: |
-            docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lake-manifest.json') }}
+            docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}
       - name: Build docbuild
         working-directory: docbuild
         run: lake build --keep-toolchain Foundation:docs
