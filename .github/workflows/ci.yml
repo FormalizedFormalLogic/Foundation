@@ -46,7 +46,7 @@ jobs:
       - name: Print tools version
         run: |
           lake --version
-          dot --version
+          dot -V
           typst --version
           mdbook --version
           mdbook-katex --version
