@@ -32,6 +32,17 @@ instance validate_HilbertLC : FrameClass.connected.Validates (Hilbert.LC.axioms)
 
 end connected
 
+
+namespace finite_connected
+
+instance validate_HilbertLC : FrameClass.finite_connected.Validates (Hilbert.LC.axioms) := by
+  apply FrameClass.Validates.withAxiomEFQ;
+  rintro F ⟨_, _⟩ _ rfl;
+  apply FrameClass.connected.validate_HilbertLC;
+  repeat tauto;
+
+end finite_connected
+
 end Kripke.FrameClass
 
 
@@ -39,6 +50,9 @@ namespace Hilbert.LC.Kripke
 
 instance sound : Sound Hilbert.LC FrameClass.connected :=
   instSound_of_validates_axioms FrameClass.connected.validate_HilbertLC
+
+instance sound_finite : Sound Hilbert.LC FrameClass.finite_connected :=
+  instSound_of_validates_axioms FrameClass.finite_connected.validate_HilbertLC
 
 instance consistent : Entailment.Consistent Hilbert.LC := consistent_of_sound_frameclass FrameClass.connected (by simp)
 
