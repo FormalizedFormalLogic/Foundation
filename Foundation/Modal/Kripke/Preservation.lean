@@ -86,6 +86,20 @@ def id : F →ₚ F where
   forth := by simp;
   back := by simp;
 
+def comp (f : F₁ →ₚ F₂) (g : F₂ →ₚ F₃) : F₁ →ₚ F₃ where
+  toFun := g ∘ f
+  forth := by
+    intro x y hxy;
+    exact g.forth $ f.forth hxy;
+  back := by
+    intro x w hxw;
+    obtain ⟨y, ⟨rfl, hxy⟩⟩ := g.back hxw;
+    obtain ⟨u, ⟨rfl, hfu⟩⟩ := f.back hxy;
+    use u;
+    constructor;
+    . simp_all;
+    . assumption;
+
 def TransitiveClosure (f : F₁ →ₚ F₂) (F₂_trans : Transitive F₂) : F₁^+ →ₚ F₂ where
   toFun := f.toFun
   forth := by
@@ -103,20 +117,6 @@ def TransitiveClosure (f : F₁ →ₚ F₂) (F₂_trans : Transitive F₂) : F�
     . rfl;
     . exact Frame.RelTransGen.single hxu;
 
-def comp (f : F₁ →ₚ F₂) (g : F₂ →ₚ F₃) : F₁ →ₚ F₃ where
-  toFun := g ∘ f
-  forth := by
-    intro x y hxy;
-    exact g.forth $ f.forth hxy;
-  back := by
-    intro x w hxw;
-    obtain ⟨y, ⟨rfl, hxy⟩⟩ := g.back hxw;
-    obtain ⟨u, ⟨rfl, hfu⟩⟩ := f.back hxy;
-    use u;
-    constructor;
-    . simp_all;
-    . assumption;
-
 end Frame.PseudoEpimorphism
 
 
@@ -131,17 +131,17 @@ namespace Model.PseudoEpimorphism
 
 variable {M M₁ M₂ M₃ : Kripke.Model}
 
-def id : M →ₚ M where
-  toFun := _root_.id
-  forth := by simp;
-  back := by simp;
-  atomic := by simp;
-
 def ofAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ w a) ↔ (M₂ (f w) a)) : M₁ →ₚ M₂ where
   toFun := f
   forth := f.forth
   back := f.back
   atomic := atomic
+
+def id : M →ₚ M where
+  toFun := _root_.id
+  forth := by simp;
+  back := by simp;
+  atomic := by simp;
 
 def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := ofAtomic (f.toPseudoEpimorphism.comp (g.toPseudoEpimorphism)) $ by
   intro x φ;

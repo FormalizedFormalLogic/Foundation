@@ -150,7 +150,30 @@ lemma rel_trans (F_trans : Transitive F) : Transitive (F↾r).Rel := by
 
 lemma rel_irrefl (F_irrefl : Irreflexive F) : Irreflexive (F↾r).Rel := by
   rintro ⟨x, (rfl | hx)⟩ h;
-  all_goals aesop;
+  all_goals apply F_irrefl; exact h;
+
+lemma rel_refl (F_refl : Reflexive F) : Reflexive (F↾r).Rel := by
+  rintro ⟨x, (rfl | hx)⟩;
+  all_goals apply F_refl;
+
+lemma rel_confl (F_confl : Confluent F) : Confluent (F↾r).Rel := by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ ⟨Rxy, Rxz⟩;
+  . obtain ⟨w, _, _⟩ := @F_confl z z z (by tauto);
+    use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
+  . obtain ⟨w, _, _⟩ := @F_confl y y z (by tauto);
+    use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
+  . obtain ⟨w, _, _⟩ := @F_confl z y z (by tauto);
+    use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
+  . obtain ⟨w, _, _⟩ := @F_confl x y z (by tauto);
+    use ⟨w, by right; apply Relation.TransGen.tail hy $ by assumption⟩;
+  . obtain ⟨w, _, _⟩ := @F_confl x z z (by tauto);
+    use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
+  . obtain ⟨w, _, _⟩ := @F_confl x z y (by tauto);
+    use ⟨w, by right; apply Relation.TransGen.single $ by assumption⟩;
+  . obtain ⟨w, _, _⟩ := @F_confl x y z (by tauto);
+    use ⟨w, by right; apply Relation.TransGen.single $ by assumption⟩;
+  . obtain ⟨w, _, _⟩ := @F_confl x y z (by tauto);
+    use ⟨w, by right; apply Relation.TransGen.tail hy $ by assumption⟩;
 
 lemma rel_universal_of_refl_eucl (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F↾r).Rel := by
   have F_symm := symm_of_refl_eucl F_refl F_eucl;

@@ -1,4 +1,6 @@
 import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.Filteration
+import Foundation.Modal.Kripke.Rooted
 
 namespace LO.Modal
 
@@ -7,6 +9,7 @@ open Hilbert.Kripke
 open Geachean
 
 abbrev Kripke.FrameClass.confluent_preorder : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Confluent F  }
+abbrev Kripke.FrameClass.finite_confluent_preorder : FrameClass := { F | F.IsFinite ∧ Reflexive F ∧ Transitive F ∧ Confluent F  }
 
 namespace Kripke.FrameClass.confluent_preorder
 
@@ -27,18 +30,71 @@ lemma validates_HilbertS4Point2 : Kripke.FrameClass.confluent_preorder.Validates
 end Kripke.FrameClass.confluent_preorder
 
 
-namespace Hilbert.S4Point2
+namespace Hilbert.S4Point2.Kripke
 
-instance Kripke.sound : Sound (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder :=
+instance sound : Sound (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder :=
   instSound_of_validates_axioms FrameClass.confluent_preorder.validates_HilbertS4Point2
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.S4Point2) :=
+instance consistent : Entailment.Consistent (Hilbert.S4Point2) :=
   consistent_of_sound_frameclass FrameClass.confluent_preorder (by simp)
 
-instance Kripke.canonical : Canonical (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder := ⟨⟨Canonical.reflexive, Canonical.transitive, Canonical.confluent⟩⟩
+instance canonical : Canonical (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder := ⟨⟨Canonical.reflexive, Canonical.transitive, Canonical.confluent⟩⟩
 
-instance Kripke.complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder := inferInstance
+instance complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder := inferInstance
 
-end Hilbert.S4Point2
+
+section FFP
+
+open
+  finestFilterationTransitiveClosureModel
+  Relation
+
+instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_confluent_preorder := ⟨by
+  intro φ hφ;
+  apply Kripke.complete.complete;
+  rintro F ⟨F_refl, F_trans, F_con⟩ V r;
+  let M : Kripke.Model := ⟨F, V⟩;
+  let RM := M↾r;
+  have RM_refl : Reflexive RM.Rel := Frame.pointGenerate.rel_refl F_refl;
+  have RM_trans : Transitive RM.Rel := Frame.pointGenerate.rel_trans F_trans;
+
+  apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
+
+  let FRM := finestFilterationTransitiveClosureModel RM (φ.subformulas);
+  apply filteration FRM (finestFilterationTransitiveClosureModel.filterOf RM_trans) (by aesop) |>.mpr;
+  apply hφ;
+
+  refine ⟨?_, ?_, ?_, ?_⟩;
+  . apply Frame.isFinite_iff _ |>.mpr
+    apply FilterEqvQuotient.finite;
+    simp;
+  . exact reflexive_of_transitive_reflexive RM_trans RM_refl;
+  . exact finestFilterationTransitiveClosureModel.transitive;
+  . rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
+    . simp only [and_self];
+      use ⟦⟨z, by tauto⟩⟧;
+      apply Relation.TransGen.single; tauto;
+    . use ⟦⟨z, by tauto⟩⟧;
+      constructor;
+      . replace Rrz := TransGen.unwrap F_trans Rrz;
+        apply Relation.TransGen.single $ by tauto;
+      . apply Relation.TransGen.single $ by tauto;
+    . use ⟦⟨y, by tauto⟩⟧;
+      constructor;
+      . apply Relation.TransGen.single $ by tauto;
+      . replace Rry := TransGen.unwrap F_trans Rry;
+        apply Relation.TransGen.single $ by tauto;
+    . replace Rry := TransGen.unwrap F_trans Rry;
+      replace Rrz := TransGen.unwrap F_trans Rrz;
+      obtain ⟨u, Ruy, Ruz⟩ := F_con ⟨Rry, Rrz⟩;
+      use ⟦⟨u, by tauto⟩⟧;
+      constructor;
+      . apply Relation.TransGen.single $ by tauto;
+      . apply Relation.TransGen.single $ by tauto;
+⟩
+
+end FFP
+
+end Hilbert.S4Point2.Kripke
 
 end LO.Modal
