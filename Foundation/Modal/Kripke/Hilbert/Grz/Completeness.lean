@@ -60,13 +60,17 @@ variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Grz 𝓢]
 
 variable {φ ψ : Formula ℕ}
 
-abbrev miniCanonicalFrame (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.FiniteFrame where
+abbrev miniCanonicalFrame (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Frame where
   World := ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)
   Rel X Y :=
     (∀ ψ ∈ □''⁻¹(φ.subformulasGrz), □ψ ∈ X → □ψ ∈ Y) ∧
     ((∀ ψ ∈ □''⁻¹(φ.subformulasGrz), □ψ ∈ Y → □ψ ∈ X) → X = Y)
 
 namespace miniCanonicalFrame
+
+instance : (miniCanonicalFrame 𝓢 φ).IsFinite := by
+  apply Kripke.Frame.isFinite_iff _ |>.mpr;
+  infer_instance;
 
 lemma reflexive : Reflexive (miniCanonicalFrame 𝓢 φ).Rel := by simp [Reflexive];
 
@@ -94,7 +98,7 @@ end miniCanonicalFrame
 
 
 abbrev miniCanonicalModel (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Model where
-  toFrame := miniCanonicalFrame 𝓢 φ |>.toFrame
+  toFrame := miniCanonicalFrame 𝓢 φ
   Val X a := (atom a) ∈ X
 
 omit [Consistent 𝓢] [Entailment.Grz 𝓢] in
@@ -148,20 +152,19 @@ lemma truthlemma_lemma2
     have : (□'Γ₁) ⊢[𝓢]! □(□(ψ ➝ □ψ) ➝ ψ) := contextual_nec! this;
     have : (□'Γ₁) ⊢[𝓢]! ψ := axiomGrz! ⨀ this;
     have : 𝓢 ⊢! ⋀□'□'Γ₁ ➝ □ψ := contextual_nec! this;
-    have : 𝓢 ⊢! □□⋀Γ₁ ➝ □ψ := imp_trans''! (imp_trans''! (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (by simp)) this;
+    have : 𝓢 ⊢! □□⋀Γ₁ ➝ □ψ := imp_trans''! (imp_trans''! (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (λ _ => List.mem_multibox_add.mp)) this;
     have : 𝓢 ⊢! □⋀Γ₁ ➝ □ψ := imp_trans''! axiomFour! this;
     have : 𝓢 ⊢! ⋀□'Γ₁ ➝ □ψ := imp_trans''! collect_box_conj! this;
     have : 𝓢 ⊢! ⋀□'(X.1.prebox.box |>.toList) ➝ □ψ := imp_trans''! (conjconj_subset! (by
-      simp;
-      intro χ hr;
-      have := hΓ₁ _ hr;
-      simp at this;
-      tauto;
+      intro ξ hξ;
+      obtain ⟨χ, hχ, rfl⟩ := List.exists_of_box hξ;
+      apply List.box_mem_of;
+      simpa using hΓ₁ χ hχ;
     )) this;
     have : 𝓢 ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := imp_trans''! (conjconj_provable! (by
-      intro ψ hq;
-      simp at hq;
-      obtain ⟨χ, hr, rfl⟩ := hq;
+      intro ψ hψ;
+      obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
+      obtain ⟨χ, hχ, rfl⟩ := by simpa using hξ;
       apply axiomFour'!;
       apply FiniteContext.by_axm!;
       apply List.box_mem_of;
@@ -273,17 +276,18 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
       exact membership_iff (by apply subformulasGrz.mem_left; exact subformulas.mem_box q_sub) |>.mpr this;
 
 lemma complete_of_mem_miniCanonicalFrame
-  (C : Kripke.FiniteFrameClass)
+  (C : Kripke.FrameClass)
   (hC : ∀ {φ}, miniCanonicalFrame 𝓢 φ ∈ C)
   : Complete 𝓢 C := ⟨by
   intro φ;
   contrapose;
   intro h;
-  apply ValidOnFiniteFrameClass.not_of_exists_frame;
+  apply Semantics.set_models_iff.not.mpr;
+  push_neg;
   use (miniCanonicalFrame 𝓢 φ);
   constructor;
   . apply hC;
-  . apply ValidOnFiniteFrame.not_of_exists_valuation_world;
+  . apply ValidOnFrame.not_of_exists_valuation_world;
     obtain ⟨X, hX₁⟩ := lindenbaum (𝓢 := 𝓢) (Φ := {-φ}) (Ψ := φ.subformulasGrz)
       (by
         simp only [Finset.singleton_subset_iff];
@@ -306,9 +310,9 @@ namespace Hilbert.Grz.Kripke
 
 open Kripke.Grz
 
-instance complete : Complete (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass) :=
-  complete_of_mem_miniCanonicalFrame Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass $ by
-    refine ⟨miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm⟩;
+instance complete : Complete (Hilbert.Grz) FrameClass.finite_partial_order :=
+  complete_of_mem_miniCanonicalFrame FrameClass.finite_partial_order  $ by
+    refine ⟨inferInstance, miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm⟩;
 
 end Hilbert.Grz.Kripke
 

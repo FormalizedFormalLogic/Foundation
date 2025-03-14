@@ -144,18 +144,17 @@ instance : (Logic.GL).Unnecessitation := inferInstance
 
 protected abbrev KH : Logic := Hilbert.KH.logic
 
-
 protected abbrev Grz : Logic := Hilbert.Grz.logic
-lemma Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic : Logic.Grz = Kripke.FrameClass.finite_strict_preorder.logic
+lemma Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic : Logic.Grz = Kripke.FrameClass.finite_partial_order.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev GrzPoint2 : Logic := Hilbert.GrzPoint2.logic
-lemma GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic : Logic.GrzPoint2 = Kripke.ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass.logic
-  := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
+lemma GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic : Logic.GrzPoint2 = Kripke.FrameClass.finite_confluent_partial_order.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev GrzPoint3 : Logic := Hilbert.GrzPoint3.logic
-lemma GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic : Logic.GrzPoint3 = Kripke.ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass.logic
-  := eq_Hilbert_Logic_KripkeFiniteFrameClass_Logic
+lemma GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic : Logic.GrzPoint3 = Kripke.FrameClass.finite_connected_partial_order.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev Triv : Logic := Hilbert.Triv.logic
 lemma Triv.eq_EqualityKripkeFrameClass_Logic : Logic.Triv = Kripke.FrameClass.equality.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic

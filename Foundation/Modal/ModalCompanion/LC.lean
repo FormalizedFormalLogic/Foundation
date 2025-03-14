@@ -75,19 +75,8 @@ instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := 
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.connected)
     (MC := Modal.Kripke.FrameClass.connected_preorder)
-    (by
-      intro φ;
-      constructor;
-      . apply Propositional.Hilbert.LC.Kripke.sound.sound;
-      . apply Propositional.Hilbert.LC.Kripke.complete.complete;
-    )
-    (by
-      rw [←Logic.S4Point3.is_smallestMC_of_LC];
-      intro φ;
-      constructor;
-      . apply Modal.Hilbert.S4Point3.Kripke.sound.sound;
-      . apply Modal.Hilbert.S4Point3.Kripke.complete.complete;
-    )
+    (by rw [Propositional.Logic.LC.Kripke.eq_connected])
+    (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic])
     (by
       rintro F hF;
       refine ⟨F.rel_refl, F.rel_trans, hF⟩;

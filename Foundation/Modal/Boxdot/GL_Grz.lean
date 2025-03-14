@@ -8,7 +8,7 @@ namespace Kripke
 open Relation (ReflGen)
 open Formula.Kripke
 
-lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ FrameClass.finite_trans_irrefl) : F^= ∈ FrameClass.finite_strict_preorder := by
+lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ FrameClass.finite_trans_irrefl) : F^= ∈ FrameClass.finite_partial_order := by
   obtain ⟨_, F_trans, F_irrefl⟩ := hF;
   refine ⟨inferInstance, ?F_refl, ?F_trans, ?F_antisymm⟩;
   . intro x; apply ReflGen.refl;
@@ -25,7 +25,7 @@ lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ 
       have := F_irrefl x;
       contradiction;
 
-lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ FrameClass.finite_strict_preorder) : F^≠ ∈ FrameClass.finite_trans_irrefl := by
+lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ FrameClass.finite_partial_order) : F^≠ ∈ FrameClass.finite_trans_irrefl := by
   obtain ⟨_, _, F_trans, F_antisymm⟩ := hF;
   refine ⟨inferInstance, ?F_trans, ?F_irrefl⟩;
   . rintro x y z ⟨nexy, Rxy⟩ ⟨_, Ryz⟩;

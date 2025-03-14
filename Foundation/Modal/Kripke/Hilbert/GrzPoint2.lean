@@ -3,63 +3,51 @@ import Foundation.Modal.Kripke.Hilbert.S4Point2
 
 namespace LO.Modal
 
-open Formula
-open Formula.Kripke
 open Entailment
 open Entailment.Context
+open Formula
+open Formula.Kripke
+open Hilbert.Kripke
 open Kripke
 
 namespace Kripke
 
-abbrev ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel ∧ Confluent F.Rel }
+abbrev FrameClass.finite_confluent_partial_order : FrameClass := { F | F.IsFinite ∧ Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel ∧ Confluent F.Rel }
 
-instance : ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0), Axioms.Point2 (atom 0)} := by
-  have h₁ := restrictFin_definability {Axioms.Point2 (atom 0)} ({F | Confluent F}) $ by
-    convert MultiGeacheanFrameClass.isDefinedByGeachAxioms ({⟨1, 1, 1, 1⟩});
-    . ext;
-      simp only [MultiGeachean, Set.mem_singleton_iff, forall_eq];
-      apply Geachean.confluent_def;
-    . simp;
-  have := @FiniteFrameClass.definedBy_inter
-    ReflexiveTransitiveAntiSymmetricFiniteFrameClass
-    ({Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0)})
-    inferInstance
-    { F | Confluent F.Rel}
-    {Axioms.Point2 (atom 0)}
-    h₁;
-  have e₁ :
-    (ReflexiveTransitiveAntiSymmetricFiniteFrameClass ∩ {F | Confluent F.Rel}) =
-    (ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass) := by
-      ext F;
-      simp;
-      tauto;
-  have e₂ :
-    ({Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0)} ∪ {Axioms.Point2 (atom 0)}) =
-    ({Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0), Axioms.Point2 (atom 0)} : Set (Formula ℕ)) := by
-      ext φ;
-      constructor;
-      . rintro (⟨_, _⟩ | _) <;> tauto;
-      . rintro (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp_all;
-  rwa [e₁, e₂] at this;
+namespace FrameClass.finite_confluent_partial_order
 
-instance : ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
-  simp [Reflexive, Transitive, AntiSymmetric, Confluent];
+@[simp]
+lemma nonempty : FrameClass.finite_confluent_partial_order.Nonempty := by
+  use whitepoint;
+  simp [Reflexive, Transitive, AntiSymmetric, Confluent ];
+  infer_instance;
+
+lemma validates_HilbertGrzPoint2 : FrameClass.finite_confluent_partial_order.Validates Hilbert.GrzPoint2.axioms := by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _, _, _, _⟩ φ (rfl | rfl);
+  . apply validate_AxiomGrz_of_finite_strict_preorder;
+    . assumption;
+    . assumption;
+    . assumption;
+  . exact validate_AxiomPoint2_of_confluent $ by assumption;
+
+end FrameClass.finite_confluent_partial_order
 
 end Kripke
 
 
-namespace Hilbert.GrzPoint2
+namespace Hilbert.GrzPoint2.Kripke
 
-open Kripke.Grz
+instance finite_sound : Sound (Hilbert.GrzPoint2) FrameClass.finite_confluent_partial_order :=
+  instSound_of_validates_axioms FrameClass.finite_confluent_partial_order.validates_HilbertGrzPoint2
 
-instance Kripke.sound : Sound (Hilbert.GrzPoint2) (Kripke.ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass) := inferInstance
+instance consistent : Entailment.Consistent (Hilbert.GrzPoint2) :=
+  consistent_of_sound_frameclass FrameClass.finite_confluent_partial_order (by simp)
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.GrzPoint2) :=
-  Kripke.Hilbert.consistent_of_FiniteFrameClass ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass
-
-instance complete : Complete (Hilbert.GrzPoint2) (Kripke.ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass) :=
-  Kripke.Grz.complete_of_mem_miniCanonicalFrame Kripke.ReflexiveTransitiveAntiSymmetricConfluentFiniteFrameClass $ by
+instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_confluent_partial_order :=
+  Kripke.Grz.complete_of_mem_miniCanonicalFrame FrameClass.finite_confluent_partial_order $ by
+    sorry
+    /-
     intro φ;
     refine ⟨miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm, ?_⟩;
     intro X Y Z ⟨⟨RXY₁, RXY₂⟩, ⟨RXZ₁, RXZ₂⟩⟩;
@@ -90,7 +78,8 @@ instance complete : Complete (Hilbert.GrzPoint2) (Kripke.ReflexiveTransitiveAnti
         constructor;
         . intro hξZ; exact hU $ Finset.mem_union.mpr (by tauto);
         . sorry;
+    -/
 
-end Hilbert.GrzPoint2
+end Hilbert.GrzPoint2.Kripke
 
 end LO.Modal

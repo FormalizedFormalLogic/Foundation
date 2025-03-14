@@ -9,52 +9,52 @@ open Entailment
 open Entailment.Context
 open Kripke
 
+
+open Entailment
+open Entailment.Context
+open Formula
+open Formula.Kripke
+open Hilbert.Kripke
+open Kripke
+
 namespace Kripke
 
-abbrev ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel ∧ Connected F.Rel }
+abbrev FrameClass.finite_connected_partial_order : FrameClass := { F | F.IsFinite ∧ Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel ∧ Connected F.Rel }
 
-instance : ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0), Axioms.Point3 (atom 0) (atom 1)} := by
-  have h₁ := restrictFin_definability {Axioms.Point3 (atom 0) (atom 1)} ({F | Connected F}) $ ConnectedFrameClass.DefinedByPoint3
-  have := @FiniteFrameClass.definedBy_inter
-    ReflexiveTransitiveAntiSymmetricFiniteFrameClass
-    ({Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0)})
-    inferInstance
-    { F | Connected F.Rel}
-    {Axioms.Point3 (atom 0) (atom 1)}
-    h₁;
-  have e₁ :
-    (ReflexiveTransitiveAntiSymmetricFiniteFrameClass ∩ {F | Connected F.Rel}) =
-    (ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass) := by
-      ext F;
-      simp;
-      tauto;
-  have e₂ :
-    ({Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0)} ∪ {Axioms.Point3 (atom 0) (atom 1)}) =
-    ({Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0), Axioms.Point3 (atom 0) (atom 1)} : Set (Formula ℕ)) := by
-      ext φ;
-      constructor;
-      . rintro (⟨_, _⟩ | _) <;> tauto;
-      . rintro (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp_all;
-  rwa [e₁, e₂] at this;
+namespace FrameClass.finite_connected_partial_order
 
-instance : ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
+@[simp]
+lemma nonempty : FrameClass.finite_connected_partial_order.Nonempty := by
+  use whitepoint;
   simp [Reflexive, Transitive, AntiSymmetric, Connected];
+  infer_instance;
+
+lemma validates_HilbertGrzPoint3 : FrameClass.finite_connected_partial_order.Validates Hilbert.GrzPoint3.axioms := by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _, _, _, _⟩ φ (rfl | rfl);
+  . apply validate_AxiomGrz_of_finite_strict_preorder;
+    . assumption;
+    . assumption;
+    . assumption;
+  . exact validate_AxiomPoint3_of_connected $ by assumption;
+
+end FrameClass.finite_connected_partial_order
 
 end Kripke
 
 
-namespace Hilbert.GrzPoint3
+namespace Hilbert.GrzPoint3.Kripke
 
-open Kripke.Grz
+instance finite_sound : Sound (Hilbert.GrzPoint3) FrameClass.finite_connected_partial_order :=
+  instSound_of_validates_axioms FrameClass.finite_connected_partial_order.validates_HilbertGrzPoint3
 
-instance Kripke.sound : Sound (Hilbert.GrzPoint3) (Kripke.ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass) := inferInstance
+instance consistent : Entailment.Consistent (Hilbert.GrzPoint3) :=
+  consistent_of_sound_frameclass FrameClass.finite_connected_partial_order (by simp)
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.GrzPoint3) :=
-  Kripke.Hilbert.consistent_of_FiniteFrameClass ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass
-
-instance complete : Complete (Hilbert.GrzPoint3) (Kripke.ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass) :=
-  complete_of_mem_miniCanonicalFrame Kripke.ReflexiveTransitiveAntiSymmetricConnectedFiniteFrameClass $ by
+instance finite_complete : Complete (Hilbert.GrzPoint3) (FrameClass.finite_connected_partial_order) :=
+  Kripke.Grz.complete_of_mem_miniCanonicalFrame FrameClass.finite_connected_partial_order $ by
+    sorry;
+    /-
     intro φ;
     refine ⟨miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm, ?_⟩;
     intro x y z ⟨⟨Rxy₁, Rxy₂⟩, ⟨Rxz₁, Rxz₂⟩⟩;
@@ -82,7 +82,8 @@ instance complete : Complete (Hilbert.GrzPoint3) (Kripke.ReflexiveTransitiveAnti
       constructor;
       . sorry;
       . sorry;
+    -/
 
-end Hilbert.GrzPoint3
+end Hilbert.GrzPoint3.Kripke
 
 end LO.Modal

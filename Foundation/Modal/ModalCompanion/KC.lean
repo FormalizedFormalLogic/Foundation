@@ -123,20 +123,9 @@ instance : ModalCompanion Logic.KC Logic.S4Point2 := by
   rw [Logic.S4Point2.is_smallestMC_of_KC];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.confluent)
-    (MC := Modal.Kripke.FrameClass.confluent_preorder)
-    (by
-      intro φ;
-      constructor;
-      . apply Propositional.Hilbert.KC.Kripke.sound.sound;
-      . apply Propositional.Hilbert.KC.Kripke.complete.complete;
-    )
-    (by
-      rw [←Logic.S4Point2.is_smallestMC_of_KC];
-      intro φ;
-      constructor;
-      . apply Modal.Hilbert.S4Point2.Kripke.sound.sound;
-      . apply Modal.Hilbert.S4Point2.Kripke.complete.complete;
-    )
+    (MC := FrameClass.confluent_preorder)
+    (by rw [Propositional.Logic.KC.Kripke.eq_confluent])
+    (by rw [←Modal.Logic.S4Point2.is_smallestMC_of_KC, ←Modal.Logic.S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic])
     (by
       rintro F hF;
       refine ⟨F.rel_refl, F.rel_trans, hF⟩;

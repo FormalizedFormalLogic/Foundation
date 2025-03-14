@@ -48,19 +48,8 @@ instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.all)
     (MC := Modal.Kripke.FrameClass.preorder)
-    (by
-      intro φ;
-      constructor;
-      . apply Propositional.Hilbert.Int.Kripke.sound.sound;
-      . apply Propositional.Hilbert.Int.Kripke.complete.complete;
-    )
-    (by
-      rw [←Logic.S4.is_smallestMC_of_Int];
-      intro φ;
-      constructor;
-      . apply Modal.Hilbert.S4.Kripke.sound.sound;
-      . apply Modal.Hilbert.S4.Kripke.complete.complete;
-    )
+    (by rw [Logic.Int.Kripke.eq_all])
+    (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic])
     (fun F hF => ⟨F.rel_refl, F.rel_trans⟩);
 
 
@@ -105,7 +94,7 @@ instance : ModalCompanion Logic.Int Logic.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_all)
-    (MC := Modal.Kripke.FrameClass.finite_strict_preorder)
+    (MC := FrameClass.finite_partial_order)
     (by rw [Logic.Int.Kripke.eq_all_finite])
     (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic])
     (by rintro F ⟨_⟩; refine ⟨by tauto, F.rel_refl, F.rel_trans, F.rel_antisymm⟩)
