@@ -51,7 +51,40 @@ instance : ProperSublogic Logic.Grz Logic.Triv := ⟨Grz_ssubset_Triv⟩
 instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . sorry;
+  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by
+      simpa [Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
+    use Axioms.Point2 (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 3, λ x y => x = 0 ∨ x = y⟩,
+        λ x a => x = 1
+      ⟩;
+      use M, 0;
+      constructor;
+      . simp only [Fin.isValue, Set.mem_setOf_eq, M];
+        refine ⟨?_, ?_, ?_, ?_⟩;
+        . tauto;
+        . simp [Reflexive];
+        . simp [Transitive]; omega;
+        . simp [AntiSymmetric]; omega;
+      . apply Satisfies.imp_def₂.not.mpr;
+        push_neg;
+        constructor;
+        . apply Satisfies.dia_def.mpr;
+          use 1;
+          constructor;
+          . omega;
+          . intro y Rxy; simp_all [M, Semantics.Realize, Satisfies, Frame.Rel'];
+        . apply Satisfies.box_def.not.mpr;
+          push_neg;
+          use 2;
+          constructor;
+          . omega;
+          . apply Satisfies.dia_def.not.mpr;
+            push_neg;
+            simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
 ⟩
 
 instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
@@ -64,7 +97,7 @@ instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
       rcases F_conn ⟨Rxy, Ryz⟩ with (Ryz | Rzy);
       . use z; tauto;
       . use y; tauto
-  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.finite_confluent_partial_order ⊧ φ by
+  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_confluent_partial_order ⊧ φ by
       simpa [GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic];
     use Axioms.Point3 (.atom 0) (.atom 1);
     constructor;
