@@ -11,9 +11,13 @@ namespace Logic
 protected abbrev KC : Logic := Hilbert.KC.logic
 lemma KC.Kripke.eq_confluent : Logic.KC = Kripke.FrameClass.confluent.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma KC.Kripke.eq_finite_confluent : Logic.KC = Kripke.FrameClass.finite_confluent.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev LC : Logic := Hilbert.LC.logic
 lemma LC.Kripke.eq_connected : Logic.LC = Kripke.FrameClass.connected.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma LC.Kripke.eq_finite_connected : Logic.LC = Kripke.FrameClass.finite_connected.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev Cl : Logic := Hilbert.Cl.logic

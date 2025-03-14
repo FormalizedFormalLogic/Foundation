@@ -20,6 +20,8 @@ open Modal
 open Modal.Kripke
 
 
+section S4Point2
+
 open Formula.Kripke in
 lemma Hilbert.S4Point2.goedelTranslated_axiomWLEM : Hilbert.S4Point2 ⊢! □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
   suffices Hilbert.S4Point2 ⊢! □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
@@ -119,7 +121,7 @@ lemma S4Point2.is_smallestMC_of_KC : Logic.S4Point2 = Logic.KC.smallestMC := by
       . suffices Hilbert.S4Point2 ⊢! □(∼(s 0)ᵍ) ⋎ □(∼□(∼(s 0)ᵍ)) by simpa;
         exact Hilbert.S4Point2.goedelTranslated_axiomWLEM;
 
-instance : ModalCompanion Logic.KC Logic.S4Point2 := by
+instance modalCompanion_KC_S4Point2 : ModalCompanion Logic.KC Logic.S4Point2 := by
   rw [Logic.S4Point2.is_smallestMC_of_KC];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.confluent)
@@ -131,8 +133,58 @@ instance : ModalCompanion Logic.KC Logic.S4Point2 := by
       refine ⟨F.rel_refl, F.rel_trans, hF⟩;
     );
 
-
 end Logic
+
+end S4Point2
+
+
+section GrzPoint2
+
+lemma Logic.gGrzPoint2_of_KC : φ ∈ Logic.KC → φᵍ ∈ Logic.GrzPoint2 := by
+  intro h;
+  exact S4Point2_ssubset_GrzPoint2.1 $ modalCompanion_KC_S4Point2.companion.mp h;
+
+lemma Logic.GrzPoint2.is_largestMC_of_KC : Logic.GrzPoint2 = Logic.KC.largestMC := by
+  ext φ;
+  constructor;
+  . intro hφ;
+    induction hφ using Hilbert.Deduction.rec! with
+    | maxm h =>
+      rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
+      . apply Logic.sumNormal.mem₁;
+        apply Logic.sumNormal.mem₁;
+        simp;
+      . apply Logic.sumNormal.subst (φ := □(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) ➝ (.atom 0)) (s := s);
+        apply Logic.sumNormal.mem₂;
+        simp;
+      . apply Logic.sumNormal.subst (φ := ◇□(.atom 0) ➝ □◇(.atom 0)) (s := s);
+        apply Logic.sumNormal.mem₁;
+        rw [←Logic.S4Point2.is_smallestMC_of_KC]
+        simp;
+    | mdp => apply Logic.sumNormal.mdp <;> assumption;
+    | nec => apply Logic.sumNormal.nec; assumption;
+    | _ => apply Logic.sumNormal.mem₁; apply Logic.sumNormal.mem₁; simp;
+  . intro hφ;
+    induction hφ with
+    | mem₁ h =>
+      apply S4Point2_ssubset_GrzPoint2.1;
+      rwa [Logic.S4Point2.is_smallestMC_of_KC]
+    | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
+    | subst h ih => apply Modal.Logic.subst ih;
+    | nec h ih => apply Modal.Logic.nec ih;
+    | mem₂ h =>
+      rcases h with ⟨φ, hφ, rfl⟩; simp;
+
+instance modalCompanion_KC_GrzPoint2 : ModalCompanion Logic.KC Logic.GrzPoint2 := by
+  rw [Logic.GrzPoint2.is_largestMC_of_KC];
+  exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
+    (IC := Propositional.Kripke.FrameClass.finite_confluent)
+    (MC := FrameClass.finite_confluent_partial_order)
+    (by rw [Logic.KC.Kripke.eq_finite_confluent])
+    (by rw [←Logic.GrzPoint2.is_largestMC_of_KC, Modal.Logic.GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic])
+    (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, F.rel_refl, F.rel_trans, F.rel_antisymm, F_confl⟩)
+
+end GrzPoint2
 
 
 end LO.Modal

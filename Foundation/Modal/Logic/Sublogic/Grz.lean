@@ -87,6 +87,13 @@ instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
 ⟩
 
+theorem S4Point2_ssubset_GrzPoint2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . sorry;
+instance : ProperSublogic Logic.S4Point2 Logic.GrzPoint2 := ⟨S4Point2_ssubset_GrzPoint2⟩
+
+
 instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
   constructor;
   . rw [GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic, GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic];
@@ -142,5 +149,11 @@ instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
             . tauto;
             . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
 ⟩
+
+theorem S4Point3_ssubset_GrzPoint3 : Logic.S4Point3 ⊂ Logic.GrzPoint3 := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . sorry;
+instance : ProperSublogic Logic.S4Point3 Logic.GrzPoint3 := ⟨S4Point3_ssubset_GrzPoint3⟩
 
 end LO.Modal.Logic

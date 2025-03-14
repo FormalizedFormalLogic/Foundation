@@ -32,6 +32,17 @@ instance validate_HilbertKC : FrameClass.confluent.Validates (Hilbert.KC.axioms)
 
 end confluent
 
+
+namespace finite_confluent
+
+instance validate_HilbertKC : FrameClass.finite_confluent.Validates (Hilbert.KC.axioms) := by
+  apply FrameClass.Validates.withAxiomEFQ;
+  rintro F ⟨_, _⟩ _ rfl;
+  apply FrameClass.confluent.validate_HilbertKC;
+  repeat tauto;
+
+end finite_confluent
+
 end Kripke.FrameClass
 
 
@@ -39,6 +50,9 @@ namespace Hilbert.KC.Kripke
 
 instance sound : Sound Hilbert.KC FrameClass.confluent :=
   instSound_of_validates_axioms FrameClass.confluent.validate_HilbertKC
+
+instance sound_finite : Sound Hilbert.KC FrameClass.finite_confluent :=
+  instSound_of_validates_axioms FrameClass.finite_confluent.validate_HilbertKC
 
 instance consistent : Entailment.Consistent Hilbert.KC := consistent_of_sound_frameclass FrameClass.confluent (by simp)
 

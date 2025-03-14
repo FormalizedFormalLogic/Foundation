@@ -11,6 +11,9 @@ open Propositional.Formula (atom)
 open Modal
 open Modal.Kripke
 
+
+section S4Point3
+
 lemma Hilbert.S4Point3.goedelTranslated_axiomDummett : Hilbert.S4Point3 ⊢! □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
   apply axiomK'!;
   apply nec!;
@@ -83,6 +86,58 @@ instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := 
     );
 
 end Logic
+
+end S4Point3
+
+
+section GrzPoint3
+
+lemma Logic.gGrzPoint3_of_LC : φ ∈ Logic.LC → φᵍ ∈ Logic.GrzPoint3 := by
+  intro h;
+  exact S4Point3_ssubset_GrzPoint3.1 $ modalCompanion_LC_S4Point3.companion.mp h;
+
+lemma Logic.GrzPoint3.is_largestMC_of_LC : Logic.GrzPoint3 = Logic.LC.largestMC := by
+  ext φ;
+  constructor;
+  . intro hφ;
+    induction hφ using Hilbert.Deduction.rec! with
+    | maxm h =>
+      rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
+      . apply Logic.sumNormal.mem₁;
+        apply Logic.sumNormal.mem₁;
+        simp;
+      . apply Logic.sumNormal.subst (φ := □(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) ➝ (.atom 0)) (s := s);
+        apply Logic.sumNormal.mem₂;
+        simp;
+      . apply Logic.sumNormal.subst (φ := □(□(.atom 0) ➝ (.atom 1)) ⋎ □(□(.atom 1) ➝ (.atom 0))) (s := s);
+        apply Logic.sumNormal.mem₁;
+        rw [←Logic.S4Point3.is_smallestMC_of_LC]
+        simp;
+    | mdp => apply Logic.sumNormal.mdp <;> assumption;
+    | nec => apply Logic.sumNormal.nec; assumption;
+    | _ => apply Logic.sumNormal.mem₁; apply Logic.sumNormal.mem₁; simp;
+  . intro hφ;
+    induction hφ with
+    | mem₁ h =>
+      apply S4Point3_ssubset_GrzPoint3.1;
+      rwa [Logic.S4Point3.is_smallestMC_of_LC]
+    | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
+    | subst h ih => apply Modal.Logic.subst ih;
+    | nec h ih => apply Modal.Logic.nec ih;
+    | mem₂ h =>
+      rcases h with ⟨φ, hφ, rfl⟩; simp;
+
+instance modalCompanion_LC_GrzPoint3 : ModalCompanion Logic.LC Logic.GrzPoint3 := by
+  rw [Logic.GrzPoint3.is_largestMC_of_LC];
+  exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
+    (IC := Propositional.Kripke.FrameClass.finite_connected)
+    (MC := FrameClass.finite_connected_partial_order)
+    (by rw [Logic.LC.Kripke.eq_finite_connected])
+    (by rw [←Logic.GrzPoint3.is_largestMC_of_LC, Modal.Logic.GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic])
+    (by rintro F ⟨_, F_conn⟩; refine ⟨by tauto, F.rel_refl, F.rel_trans, F.rel_antisymm, F_conn⟩)
+
+end GrzPoint3
+
 
 
 end LO.Modal
