@@ -366,6 +366,18 @@ instance : (Hilbert.Grz).HasK where p := 0; q := 1;
 instance : (Hilbert.Grz).HasGrz where p := 0
 instance : Entailment.Grz (Hilbert.Grz) where
 
+protected abbrev GrzPoint2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Point2 (.atom 0)}⟩
+instance : (Hilbert.GrzPoint2).HasK where p := 0; q := 1;
+instance : (Hilbert.GrzPoint2).HasGrz where p := 0
+instance : (Hilbert.GrzPoint2).HasPoint2 where p := 0
+instance : Entailment.Grz (Hilbert.GrzPoint2) where
+
+protected abbrev GrzPoint3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
+instance : (Hilbert.GrzPoint3).HasK where p := 0; q := 1;
+instance : (Hilbert.GrzPoint3).HasGrz where p := 0
+instance : (Hilbert.GrzPoint3).HasPoint3 where p := 0; q := 1;
+instance : Entailment.Grz (Hilbert.GrzPoint3) where
+
 lemma KT_weakerThan_Grz : Hilbert.KT ⪯ Hilbert.Grz := weakerThan_of_dominate_axioms $ by simp;
 
 
