@@ -238,6 +238,8 @@ section
 open Relation
 open Formula.Kripke.Satisfies (formula_hereditary)
 
+variable {M T} [T.SubformulaClosed]
+
 abbrev finestFilterationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel := TransGen (λ X Y => ∃ x y, X = ⟦x⟧ ∧ Y = ⟦y⟧ ∧ x ≺ y)
