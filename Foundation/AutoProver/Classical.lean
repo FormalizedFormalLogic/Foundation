@@ -169,7 +169,6 @@ namespace Derivations!
 
 end Derivations!
 
-
 def Sequent.IsClosed (Γ : Sequent α) : Prop := ∃ φ ∈ Γ, ∼φ ∈ Γ
 
 lemma Sequent.IsClosed.cons_iff {Γ : Sequent α} :
@@ -222,8 +221,6 @@ lemma Sequent.IsOpen.not_tautology (h : Γ.IsOpen) : ¬Γ.IsTautology :=
 def Sequents.IsClosed (S : Sequents α) : Prop := ∀ Γ ∈ S, Γ.IsClosed
 
 instance [DecidableEq α] : DecidablePred (Sequents.IsClosed (α := α)) := List.decidableBAll Sequent.IsClosed
-
-variable {Γ Δ : Sequent α}
 
 def Sequent.reduction [DecidableEq α] {Γ : Sequent α} (h : ¬Γ.IsAtomic) : Sequents α :=
   match H : Γ.chooseNonAtomic h with
@@ -424,7 +421,5 @@ instance [DecidableEq α] : DecidablePred fun Γ : Sequent α ↦ Γ.IsTautology
     rcases this; assumption
 
 instance [DecidableEq α] : DecidablePred fun φ : NNFormula α ↦ φ.IsTautology := fun _ ↦ inferInstance
-
-#eval NNFormula.IsTautology <| ((.atom 0 ➝ .atom 1) ➝ .atom 0) ➝ .atom 0
 
 end LO.Propositional
