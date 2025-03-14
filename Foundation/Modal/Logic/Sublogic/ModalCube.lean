@@ -569,10 +569,4 @@ lemma KD_ssubset_S4 : Logic.KD ⊂ Logic.S4 := by
   . exact KD_ssubset_KT;
   . exact KT_ssubset_S4;
 
-instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
-  constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . sorry;
-⟩
-
 end LO.Modal.Logic
