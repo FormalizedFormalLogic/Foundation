@@ -169,4 +169,10 @@ lemma TransGen.unwrap (R_trans : Transitive R) (Rxy : (TransGen R) x y) : R x y 
   have ⟨n, hn, Rxy⟩ := TransGen.exists_iterate.mp Rxy;
   exact unwrap_of_trans hn R_trans Rxy;
 
+lemma TransGen.antisymm (R_trans : Transitive R) (R_antisymm : AntiSymmetric R) : AntiSymmetric (TransGen R) := by
+  intro x y Rxy Ryz;
+  have := Rxy.unwrap R_trans;
+  have := Ryz.unwrap R_trans;
+  exact R_antisymm (Rxy.unwrap R_trans) (Ryz.unwrap R_trans);
+
 end Relation
