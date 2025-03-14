@@ -175,6 +175,17 @@ lemma rel_confl (F_confl : Confluent F) : Confluent (F↾r).Rel := by
   . obtain ⟨w, _, _⟩ := @F_confl x y z (by tauto);
     use ⟨w, by right; apply Relation.TransGen.tail hy $ by assumption⟩;
 
+lemma rel_connected (F_connected : Connected F) : Connected (F↾r).Rel := by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ ⟨Rxy, Rxz⟩;
+  . tauto;
+  . tauto;
+  . tauto;
+  . have := @F_connected x y z (by tauto); tauto;
+  . have := @F_connected x z z (by tauto); tauto;
+  . have := @F_connected x z y (by tauto); tauto;
+  . have := @F_connected x y z (by tauto); tauto;
+  . have := @F_connected x y z (by tauto); tauto;
+
 lemma rel_universal_of_refl_eucl (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F↾r).Rel := by
   have F_symm := symm_of_refl_eucl F_refl F_eucl;
   have F_trans := trans_of_refl_eucl F_refl F_eucl;
