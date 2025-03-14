@@ -2,7 +2,7 @@ import Foundation.Modal.Entailment.GL
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Hilbert.GL.Soundness
 
-namespace LO.Modal.Hilbert.GL.Kripke
+namespace LO.Modal
 
 open Kripke
 open Entailment
@@ -11,15 +11,21 @@ open Entailment Entailment.FiniteContext
 open Formula.Kripke
 open ComplementClosedConsistentFinset
 
+namespace Hilbert.GL.Kripke
+
 variable {φ ψ : Formula ℕ}
 
-abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.FiniteFrame where
+abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.Frame where
   World := ComplementClosedConsistentFinset Hilbert.GL φ.subformulas
   Rel X Y :=
     (∀ ψ ∈ □''⁻¹φ.subformulas, □ψ ∈ X → (ψ ∈ Y ∧ □ψ ∈ Y)) ∧
     (∃ χ ∈ □''⁻¹φ.subformulas, □χ ∉ X ∧ □χ ∈ Y)
 
 namespace miniCanonicalFrame
+
+instance : (miniCanonicalFrame (φ : Formula ℕ)).IsFinite := by
+  apply Kripke.Frame.isFinite_iff _ |>.mpr;
+  infer_instance;
 
 lemma is_irreflexive : Irreflexive (miniCanonicalFrame φ).Rel := by
   simp [Irreflexive];
@@ -37,7 +43,7 @@ end miniCanonicalFrame
 
 
 abbrev miniCanonicalModel (φ : Formula ℕ) : Kripke.Model where
-  toFrame := miniCanonicalFrame φ |>.toFrame
+  toFrame := miniCanonicalFrame φ
   Val X a := (atom a) ∈ X
 
 
@@ -174,14 +180,15 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       refine RXY.1 ψ ?_ h |>.1;
       assumption;
 
-instance finiteComplete : Complete Hilbert.GL Kripke.TransitiveIrreflexiveFiniteFrameClass := ⟨by
+instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_trans_irrefl := ⟨by
   intro φ;
   contrapose;
   intro h;
-  apply ValidOnFiniteFrameClass.not_of_exists_frame;
+  apply Semantics.set_models_iff.not.mpr;
+  push_neg;
   use (miniCanonicalFrame φ);
   constructor;
-  . exact ⟨miniCanonicalFrame.is_transitive, miniCanonicalFrame.is_irreflexive⟩;
+  . exact ⟨inferInstance, miniCanonicalFrame.is_transitive, miniCanonicalFrame.is_irreflexive⟩;
   . apply ValidOnFrame.not_of_exists_model_world;
     obtain ⟨X, hX₁⟩ := lindenbaum (Φ := {-φ}) (Ψ := φ.subformulas)
       (by

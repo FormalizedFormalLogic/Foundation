@@ -153,7 +153,7 @@ def fvarList : Semiterm L ξ n → List ξ
   | &x       => [x]
   | func _ v => List.flatten <| Matrix.toList fun i ↦ fvarList (v i)
 
-def fvarEnum [DecidableEq ξ] (t : Semiterm L ξ n) : ξ → ℕ := t.fvarList.indexOf
+def fvarEnum [DecidableEq ξ] (t : Semiterm L ξ n) : ξ → ℕ := t.fvarList.idxOf
 
 def fvarEnumInv [Inhabited ξ] (t : Semiterm L ξ n) : ℕ → ξ :=
   fun i ↦ if hi : i < t.fvarList.length then t.fvarList.get ⟨i, hi⟩ else default
@@ -161,7 +161,7 @@ def fvarEnumInv [Inhabited ξ] (t : Semiterm L ξ n) : ℕ → ξ :=
 lemma fvarEnumInv_fvarEnum [DecidableEq ξ] [Inhabited ξ] {t : Semiterm L ξ n} {x : ξ} (hx : x ∈ t.fvarList) :
     fvarEnumInv t (fvarEnum t x) = x := by
   simp [fvarEnumInv, fvarEnum]; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length_iff.mpr $ hx) h
+  exact False.elim <| not_le.mpr (List.idxOf_lt_length_iff.mpr $ hx) h
 
 lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {t : Semiterm L ξ n} : x ∈ t.fvarList ↔ t.FVar? x:= by
   induction t <;> simp [fvarList, *]
@@ -181,7 +181,7 @@ def fvarList {n : ℕ} : Semiformula L ξ n → List ξ
   | ∀' p     => p.fvarList
   | ∃' p     => p.fvarList
 
-def fvarEnum [DecidableEq ξ] (φ : Semiformula L ξ n) : ξ → ℕ := φ.fvarList.indexOf
+def fvarEnum [DecidableEq ξ] (φ : Semiformula L ξ n) : ξ → ℕ := φ.fvarList.idxOf
 
 def fvarEnumInv [Inhabited ξ] (φ : Semiformula L ξ n) : ℕ → ξ :=
   fun i ↦ if hi : i < φ.fvarList.length then φ.fvarList.get ⟨i, hi⟩ else default
@@ -189,7 +189,7 @@ def fvarEnumInv [Inhabited ξ] (φ : Semiformula L ξ n) : ℕ → ξ :=
 lemma fvarEnumInv_fvarEnum [DecidableEq ξ] [Inhabited ξ] {φ : Semiformula L ξ n} {x : ξ} (hx : x ∈ φ.fvarList) :
     fvarEnumInv φ (fvarEnum φ x) = x := by
   simp [fvarEnumInv, fvarEnum]; intro h
-  exact False.elim <| not_le.mpr (List.indexOf_lt_length_iff.mpr hx) h
+  exact False.elim <| not_le.mpr (List.idxOf_lt_length_iff.mpr hx) h
 
 lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {φ : Semiformula L ξ n} : x ∈ φ.fvarList ↔ φ.FVar? x := by
   induction φ using rec' <;> simp [fvarList, Semiterm.mem_fvarList_iff_fvar?, *]

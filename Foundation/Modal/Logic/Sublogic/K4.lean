@@ -9,11 +9,11 @@ open Kripke
 instance : ProperSublogic Logic.K4 Logic.K4Point2 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point2 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
     use (Axioms.WeakPoint2 (.atom 0) (.atom 1));
     constructor;
     . exact axiomWeakPoint2!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x = 0⟩,
         λ w a => if a = 0 then True else w = 0
@@ -37,11 +37,11 @@ instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
     refine ⟨F_trans, ?_⟩;
     . rintro x y z ⟨Rxy, Ryz, _⟩;
       exact F_conn ⟨Rxy, Ryz⟩;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬TransitiveWeakConfluentFrameClass ⊧ φ by simpa [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConfluent ⊧ φ by simpa [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic];
     use (Axioms.Point2 (.atom 0));
     constructor;
     . exact axiomPoint2!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x < y⟩,
         λ w a => False
@@ -65,11 +65,11 @@ instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
 instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
     use (Axioms.WeakPoint3 (.atom 0) (.atom 1));
     constructor;
     . exact axiomWeakPoint3!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x = 0 ∧ y ≠ 0⟩,
         λ w a => if a = 0 then w = 1 else w = 2
@@ -98,11 +98,11 @@ instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
     refine ⟨F_trans, ?_⟩;
     . rintro x y z ⟨Rxy, Ryz, _⟩;
       exact F_conn ⟨Rxy, Ryz⟩;
-  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬TransitiveWeakConnectedFrameClass ⊧ φ by simpa [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by simpa [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
     use (Axioms.Point3 (.atom 0) (.atom 1));
     constructor;
     . exact axiomPoint3!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x < y⟩,
         λ w a => False

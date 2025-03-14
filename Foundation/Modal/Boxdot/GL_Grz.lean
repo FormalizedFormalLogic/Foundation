@@ -1,7 +1,4 @@
 import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Closure
-import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
-import Foundation.Modal.Kripke.Hilbert.GL.Completeness
 import Foundation.Modal.Logic.WellKnown
 
 namespace LO.Modal
@@ -11,9 +8,9 @@ namespace Kripke
 open Relation (ReflGen)
 open Formula.Kripke
 
-lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ TransitiveIrreflexiveFiniteFrameClass) : ⟨F.toFrame^=⟩ ∈ ReflexiveTransitiveAntiSymmetricFiniteFrameClass := by
-  obtain ⟨F_trans, F_irrefl⟩ := hF;
-  refine ⟨?F_refl, ?F_trans, ?F_antisymm⟩;
+lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ FrameClass.finite_trans_irrefl) : F^= ∈ FrameClass.finite_partial_order := by
+  obtain ⟨_, F_trans, F_irrefl⟩ := hF;
+  refine ⟨inferInstance, ?F_refl, ?F_trans, ?F_antisymm⟩;
   . intro x; apply ReflGen.refl;
   . rintro x y z (rfl | Rxy) (rfl | Ryz);
     . apply ReflGen.refl;
@@ -28,9 +25,9 @@ lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ 
       have := F_irrefl x;
       contradiction;
 
-lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ ReflexiveTransitiveAntiSymmetricFiniteFrameClass) : ⟨F.toFrame^≠⟩ ∈ TransitiveIrreflexiveFiniteFrameClass := by
-  obtain ⟨_, F_trans, F_antisymm⟩ := hF;
-  refine ⟨?F_trans, ?F_irrefl⟩;
+lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ FrameClass.finite_partial_order) : F^≠ ∈ FrameClass.finite_trans_irrefl := by
+  obtain ⟨_, _, F_trans, F_antisymm⟩ := hF;
+  refine ⟨inferInstance, ?F_trans, ?F_irrefl⟩;
   . rintro x y z ⟨nexy, Rxy⟩ ⟨_, Ryz⟩;
     constructor;
     . by_contra; subst_vars;
@@ -120,15 +117,12 @@ lemma provable_boxdotTranslated_GL_of_Grz : (Hilbert.Grz) ⊢! φ → (Hilbert.G
 lemma provable_Grz_of_boxdotTranslated_GL : (Hilbert.GL) ⊢! φᵇ → (Hilbert.Grz) ⊢! φ := by
   contrapose;
   intro h;
-  apply (not_imp_not.mpr $ Hilbert.GL.Kripke.finiteSound.sound);
-  have := (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
-  obtain ⟨F, ⟨F_refl, F_trans, F_antisymm⟩, this⟩ := Formula.Kripke.ValidOnFiniteFrameClass.exists_frame_of_not this;
-  obtain ⟨V, w, h⟩ := Formula.Kripke.ValidOnFiniteFrame.exists_valuation_world_of_not this;
-  apply Formula.Kripke.ValidOnFrameClass.not_of_exists_frame;
-  use F.toFrame^≠;
+  obtain ⟨F, ⟨_, F_refl, F_trans, F_antisymm⟩, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
+  apply not_imp_not.mpr $ Hilbert.GL.Kripke.finite_sound.sound;
+  apply iff_not_validOnFrameClass_exists_frame.mpr;
+  use F^≠;
   constructor;
-  . use ⟨F.toFrame^≠⟩;
-    suffices ∀ ⦃x y z⦄, x ≺^≠ y → y ≺^≠ z → x ≺^≠ z by simpa [Transitive];
+  . suffices Transitive (F^≠).Rel by refine ⟨inferInstance, by assumption, by simp⟩;
     rintro x y z ⟨hxy, Rxy⟩ ⟨hyz, Ryz⟩;
     constructor;
     . by_contra hC;
@@ -138,8 +132,9 @@ lemma provable_Grz_of_boxdotTranslated_GL : (Hilbert.GL) ⊢! φᵇ → (Hilbert
     . exact F_trans Rxy Ryz;
   . apply Kripke.iff_frame_boxdot_reflexive_closure.not.mpr;
     apply Formula.Kripke.ValidOnFrame.not_of_exists_valuation_world;
-    use V, w;
-    exact iff_reflexivize_irreflexivize F_refl |>.not.mp h;
+    obtain ⟨V, x, hx⟩ := Formula.Kripke.ValidOnFrame.iff_not_exists_valuation_world.mp h;
+    use V, x;
+    exact iff_reflexivize_irreflexivize F_refl |>.not.mp hx;
 
 theorem iff_boxdotTranslatedGL_Grz : (Hilbert.GL) ⊢! φᵇ ↔ (Hilbert.Grz) ⊢! φ := ⟨
   provable_Grz_of_boxdotTranslated_GL,

@@ -19,6 +19,7 @@ import Foundation.Propositional.Heyting.Semantics
 import Foundation.Propositional.Logic.Disjunctive
 import Foundation.Propositional.Logic.WellKnown
 import Foundation.Propositional.Logic.Sublogic
+import Foundation.Propositional.Logic.Letterless_Int_Cl
 
 -- FirstOrder
 
@@ -90,6 +91,8 @@ import Foundation.Modal.Logic.Sublogic.KTc
 import Foundation.Modal.Logic.Sublogic.S4
 import Foundation.Modal.Logic.Sublogic.S5Grz
 import Foundation.Modal.Logic.Sublogic.Trivials
+
+import Foundation.Modal.Maximal.Makinson
 
 -- Arithmetization
 import Foundation.Arithmetization.Vorspiel.Vorspiel

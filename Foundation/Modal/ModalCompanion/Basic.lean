@@ -55,8 +55,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     intro φ;
     contrapose;
     intro h;
-    have := hIL_complete.not.mp h;
-    obtain ⟨F, hF, hF₂⟩ := by simpa using this;
+    obtain ⟨F, hF, hF₂⟩ := Propositional.Kripke.exists_frame_of_not_validOnFrameClass $ hIL_complete.not.mp h
     obtain ⟨V, x, hφ⟩ := Propositional.Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₂;
     have h₁ : ∀ ψ x, Propositional.Formula.Kripke.Satisfies ⟨F, V⟩ x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ x (ψᵍ)) := by
       intro ψ x;
@@ -83,7 +82,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
           . right; exact ihq x |>.mpr hq;
       | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
     apply hML_complete.not.mpr;
-    apply Modal.Formula.Kripke.ValidOnFrameClass.not_of_exists_frame;
+    apply Modal.Kripke.not_validOnFrameClass_of_exists_frame;
     use { World := F.World, Rel := F.Rel };
     constructor;
     . apply hIC_MC;
@@ -109,8 +108,9 @@ lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     intro φ;
     contrapose;
     intro h;
-    have := hIL_complete.not.mp h;
-    obtain ⟨F, hF, hF₂⟩ := by simpa using this;
+    have := hIL_complete (φ := φ) |>.not.mp h;
+    simp at this;
+    obtain ⟨F, hF, hF₂⟩ := Propositional.Kripke.exists_frame_of_not_validOnFrameClass $ hIL_complete.not.mp h
     obtain ⟨V, x, hφ⟩ := Propositional.Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₂;
     have h₁ : ∀ ψ x, Propositional.Formula.Kripke.Satisfies ⟨F, V⟩ x ψ ↔ (Modal.Formula.Kripke.Satisfies ⟨⟨F.World, F.Rel⟩, V⟩ x (ψᵍ)) := by
       intro ψ x;
@@ -137,7 +137,7 @@ lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
           . right; exact ihq x |>.mpr hq;
       | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
     apply hML_complete.not.mpr;
-    apply Modal.Formula.Kripke.ValidOnFrameClass.not_of_exists_frame;
+    apply Modal.Kripke.not_validOnFrameClass_of_exists_frame;
     use { World := F.World, Rel := F.Rel };
     constructor;
     . apply hIC_MC;

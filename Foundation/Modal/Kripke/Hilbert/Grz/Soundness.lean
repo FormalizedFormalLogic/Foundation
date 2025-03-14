@@ -1,9 +1,4 @@
-import Foundation.Modal.ComplementClosedConsistentFinset
-import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.AxiomGrz
-import Foundation.Modal.Kripke.Hilbert.KT
-import Foundation.Modal.Kripke.Hilbert.Soundness
-import Foundation.Modal.Entailment.Grz
 
 namespace LO.Modal
 
@@ -12,24 +7,41 @@ open Formula.Kripke
 open Entailment
 open Entailment.Context
 open Kripke
+open Hilbert.Kripke
 
 namespace Kripke
 
-instance : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.DefinedBy {Axioms.K (atom 0) (atom 1), Axioms.Grz (atom 0)} :=
-  FiniteFrameClass.definedBy_with_axiomK ReflexiveTransitiveAntiSymmetricFiniteFrameClass.definedByAxiomGrz
+protected abbrev FrameClass.trans_wcwf : FrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel }
+protected abbrev FrameClass.finite_partial_order: FrameClass := { F | F.IsFinite ∧ Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel }
 
-instance : ReflexiveTransitiveAntiSymmetricFiniteFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
-  simp [Reflexive, Transitive, AntiSymmetric];
+namespace FrameClass.finite_strict_preorder
+
+@[simp]
+lemma nonempty : FrameClass.finite_partial_order.Nonempty := by
+  use whitepoint;
+  simp [Reflexive , Transitive, AntiSymmetric];
+  infer_instance;
+
+lemma validates_AxiomGrz : FrameClass.finite_partial_order.ValidatesFormula (Axioms.Grz (.atom 0)) := by
+  simp [Validates];
+  intro F;
+  apply validate_AxiomGrz_of_finite_strict_preorder;
+
+lemma validates_HilbertGrz : FrameClass.finite_partial_order.Validates Hilbert.Grz.axioms := by
+  apply FrameClass.Validates.withAxiomK;
+  apply validates_AxiomGrz;
+
+end FrameClass.finite_strict_preorder
 
 end Kripke
 
 namespace Hilbert.Grz
 
-instance Kripke.sound : Sound (Hilbert.Grz) (Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass) := inferInstance
+instance Kripke.finite_sound : Sound (Hilbert.Grz) FrameClass.finite_partial_order :=
+  instSound_of_validates_axioms FrameClass.finite_strict_preorder.validates_HilbertGrz
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.Grz) :=
-  Kripke.Hilbert.consistent_of_FiniteFrameClass ReflexiveTransitiveAntiSymmetricFiniteFrameClass
+  consistent_of_sound_frameclass FrameClass.finite_partial_order (by simp)
 
 end Hilbert.Grz
 

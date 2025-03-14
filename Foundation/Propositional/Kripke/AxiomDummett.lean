@@ -1,5 +1,3 @@
-import Foundation.Propositional.Hilbert.WellKnown
-import Foundation.Propositional.Kripke.Hilbert.Soundness
 import Foundation.Propositional.Kripke.Completeness
 
 namespace LO.Propositional
@@ -14,8 +12,35 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_Dummett_of_connected (hCon : Connected F) : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
-  apply ValidOnFrame.dum hCon;
+lemma validate_Dummett_of_connected : Connected F → F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
+  unfold Axioms.Dummett Connected;
+  contrapose;
+  push_neg;
+  intro h;
+
+  obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
+  unfold Satisfies at h;
+  push_neg at h;
+
+  rcases h with ⟨h₁, h₂⟩;
+
+  replace h₁ := Satisfies.imp_def.not.mp h₁;
+  push_neg at h₁;
+  obtain ⟨y, Rxy, ⟨hy0, nhy1⟩⟩ := h₁;
+
+  replace h₂ := Satisfies.imp_def.not.mp h₂;
+  push_neg at h₂;
+  obtain ⟨z, Ryz, ⟨hz1, nhz0⟩⟩ := h₂;
+
+  use x, y, z;
+  constructor;
+  . constructor <;> assumption;
+  . by_contra hC;
+    replace hC := not_and_or.mp hC;
+    push_neg at hC;
+    rcases hC with (Ryz | Rzy);
+    . exact nhz0 $ Satisfies.formula_hereditary Ryz hy0;
+    . exact nhy1 $ Satisfies.formula_hereditary Rzy hz1;
 
 lemma connected_of_validate_Dummett : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) → Connected F := by
   rintro h x y z ⟨Rxy, Ryz⟩;
@@ -32,20 +57,6 @@ lemma connected_of_validate_Dummett : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1))
     simpa [Semantics.Realize, Satisfies, V] using hi Rxy;
   . left;
     simpa [Semantics.Realize, Satisfies, V] using hi Ryz;
-
-abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
-
-instance ConnectedFrameClass.DefinedByAxiomDummett : ConnectedFrameClass.DefinedBy {Axioms.Dummett (.atom 0) (.atom 1)} := ⟨by
-  intro F;
-  constructor;
-  . simpa using validate_Dummett_of_connected;
-  . simpa using connected_of_validate_Dummett;
-⟩
-
-instance : ConnectedFrameClass.IsNonempty := ⟨by
-  use pointFrame;
-  simp [Connected];
-⟩
 
 end definability
 
@@ -64,7 +75,7 @@ open Classical
 
 namespace Canonical
 
-lemma connected [Entailment.HasAxiomDummett 𝓢] : Connected (canonicalFrame 𝓢).Rel := by
+protected lemma connected [Entailment.HasAxiomDummett 𝓢] : Connected (canonicalFrame 𝓢).Rel := by
   rintro x y z ⟨Rxy, Ryz⟩;
   apply or_iff_not_imp_left.mpr;
   intro nRyz;

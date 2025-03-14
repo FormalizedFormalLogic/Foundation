@@ -1,58 +1,62 @@
 import Foundation.Modal.Kripke.Hilbert.Geach
 import Foundation.Modal.Kripke.Filteration
-import Foundation.Modal.Kripke.FiniteFrame
 
 namespace LO.Modal
 
 open Kripke
+open Hilbert.Kripke
 open Geachean
 
-abbrev Kripke.ReflexiveTransitiveFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
-abbrev Kripke.ReflexiveTransitiveFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel }
+abbrev Kripke.FrameClass.preorder : FrameClass := { F | Reflexive F ∧ Transitive F }
+abbrev Kripke.FrameClass.finite_preorder: FrameClass := { F | F.IsFinite ∧ Reflexive F.Rel ∧ Transitive F.Rel }
 
-instance : ReflexiveTransitiveFrameClass.DefinedBy Hilbert.S4.axioms := by
-  convert MultiGeacheanFrameClass.isDefinedByGeachHilbertAxioms {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩};
-  . unfold ReflexiveTransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.transitive_def];
-  . exact Hilbert.S4.eq_Geach;
+namespace Kripke.FrameClass.preorder
 
-namespace Hilbert.S4
+lemma isMultiGeachean : FrameClass.preorder = FrameClass.multiGeachean {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩} := by
+  ext F;
+  simp [Geachean.reflexive_def, Geachean.transitive_def, MultiGeachean]
 
-instance Kripke.sound : Sound (Hilbert.S4) (Kripke.ReflexiveTransitiveFrameClass) := by
-  convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩});
-  exact eq_Geach;
-  . unfold ReflexiveTransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.transitive_def];
+@[simp]
+lemma nonempty : FrameClass.preorder.Nonempty := by simp [isMultiGeachean]
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.S4) := by
-  convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩});
-  exact eq_Geach;
+lemma validates_HilbertS4 : Kripke.FrameClass.preorder.Validates Hilbert.S4.axioms := by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨F_refl, F_trans⟩ φ (rfl | rfl);
+  . exact validate_AxiomT_of_reflexive F_refl;
+  . exact validate_AxiomFour_of_transitive F_trans;
 
-instance Kripke.canonical : Canonical (Hilbert.S4) (ReflexiveTransitiveFrameClass) := ⟨⟨Canonical.reflexive, Canonical.transitive⟩⟩
+end Kripke.FrameClass.preorder
 
-instance Kripke.complete : Complete (Hilbert.S4) (ReflexiveTransitiveFrameClass) := inferInstance
+
+namespace Hilbert.S4.Kripke
+
+instance sound : Sound (Hilbert.S4) Kripke.FrameClass.preorder :=
+  instSound_of_validates_axioms Kripke.FrameClass.preorder.validates_HilbertS4
+
+instance consistent : Entailment.Consistent (Hilbert.S4) :=
+  consistent_of_sound_frameclass Kripke.FrameClass.preorder (by simp)
+
+instance canonical : Canonical (Hilbert.S4) Kripke.FrameClass.preorder := ⟨⟨Canonical.reflexive, Canonical.transitive⟩⟩
+
+instance complete : Complete (Hilbert.S4) Kripke.FrameClass.preorder := inferInstance
 
 open finestFilterationTransitiveClosureModel in
-instance Kripke.finiteComplete : Complete (Hilbert.S4) (ReflexiveTransitiveFiniteFrameClass) := ⟨by
+instance finiteComplete : Complete (Hilbert.S4) Kripke.FrameClass.finite_preorder := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   intro F ⟨F_refl, F_trans⟩ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply @filteration M φ.subformulas _ FM ?filterOf x φ (by simp) |>.mpr;
-  apply hp (by
-    suffices Finite (FilterEqvQuotient M φ.subformulas) by
-      simp only [FiniteFrameClass.toFrameClass];
-      use ⟨FM.toFrame⟩;
-      refine ⟨⟨?_, transitive⟩, rfl⟩;
-      . exact reflexive_of_transitive_reflexive (by apply F_trans) F_refl;
+  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf F_trans) (by aesop) |>.mpr;
+  apply hp;
+  refine ⟨?_, ?_, ?_⟩;
+  . apply Frame.isFinite_iff _ |>.mpr
     apply FilterEqvQuotient.finite;
     simp;
-  ) FM.Val;
-  . apply finestFilterationTransitiveClosureModel.filterOf;
-    exact F_trans;
+  . exact reflexive_of_transitive_reflexive F_trans F_refl;
+  . exact finestFilterationTransitiveClosureModel.transitive;
 ⟩
 
-end Hilbert.S4
+end Hilbert.S4.Kripke
 
 end LO.Modal

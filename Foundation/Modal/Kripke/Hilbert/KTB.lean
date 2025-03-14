@@ -1,53 +1,63 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.Hilbert.KT
+import Foundation.Modal.Kripke.Hilbert.KB
 import Foundation.Modal.Kripke.Filteration
-import Foundation.Modal.Kripke.FiniteFrame
 
 namespace LO.Modal
 
 open Kripke
+open Hilbert.Kripke
 open Geachean
 
-abbrev Kripke.ReflexiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Symmetric F }
-abbrev Kripke.ReflexiveSymmetricFiniteFrameClass : FiniteFrameClass := { F | Reflexive F.Rel ∧ Symmetric F.Rel }
+abbrev Kripke.FrameClass.refl_symm : FrameClass := { F | Reflexive F ∧ Symmetric F }
 
-namespace Hilbert.KTB
+abbrev Kripke.FrameClass.finite_refl_symm: FrameClass := { F | F.IsFinite ∧ Reflexive F.Rel ∧ Symmetric F.Rel }
 
-instance Kripke.sound : Sound (Hilbert.KTB) (Kripke.ReflexiveSymmetricFrameClass) := by
-  convert Hilbert.Geach.Kripke.sound (G := {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩});
-  . exact eq_Geach;
-  . unfold ReflexiveSymmetricFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.reflexive_def, Geachean.symmetric_def];
+namespace Kripke.FrameClass.refl_symm
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.KTB) := by
-  convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩});
-  exact eq_Geach;
+lemma isMultiGeachean : FrameClass.refl_symm = FrameClass.multiGeachean {⟨0, 0, 1, 0⟩, ⟨0, 1, 0, 1⟩} := by
+  ext F;
+  simp [Geachean.reflexive_def, Geachean.symmetric_def, MultiGeachean]
 
-instance Kripke.canonical : Canonical (Hilbert.KTB) (ReflexiveSymmetricFrameClass) := ⟨⟨Canonical.reflexive, Canonical.symmetric⟩⟩
+@[simp]
+lemma nonempty : FrameClass.refl_symm.Nonempty := by simp [isMultiGeachean]
 
-instance Kripke.complete : Complete (Hilbert.KTB) (ReflexiveSymmetricFrameClass) := inferInstance
+lemma validates_HilbertKTB : Kripke.FrameClass.refl_symm.Validates Hilbert.KTB.axioms := by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨F_refl, F_symm⟩ φ (rfl | rfl);
+  . exact validate_AxiomT_of_reflexive $ by assumption;
+  . exact validate_AxiomB_of_symmetric $ by assumption;
 
-instance Kripke.finiteComplete : Complete (Hilbert.KTB) (ReflexiveSymmetricFiniteFrameClass) := ⟨by
+end Kripke.FrameClass.refl_symm
+
+
+namespace Hilbert.KTB.Kripke
+
+instance sound : Sound (Hilbert.KTB) Kripke.FrameClass.refl_symm :=
+  instSound_of_validates_axioms Kripke.FrameClass.refl_symm.validates_HilbertKTB
+
+instance consistent : Entailment.Consistent (Hilbert.KTB) :=
+  consistent_of_sound_frameclass Kripke.FrameClass.refl_symm (by simp)
+
+instance canonical : Canonical (Hilbert.KTB) Kripke.FrameClass.refl_symm := ⟨⟨Canonical.reflexive, Canonical.symmetric⟩⟩
+
+instance complete : Complete (Hilbert.KTB) Kripke.FrameClass.refl_symm := inferInstance
+
+instance finite_complete : Complete (Hilbert.KTB) Kripke.FrameClass.finite_refl_symm := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   intro F ⟨F_refl, F_symm⟩ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationModel M φ.subformulas;
   apply filteration FM (finestFilterationModel.filterOf) (by aesop) |>.mpr;
-  apply hp (by
-    suffices Finite (FilterEqvQuotient M φ.subformulas) by
-      simp only [FiniteFrameClass.toFrameClass, ReflexiveSymmetricFiniteFrameClass, Set.mem_image, Set.mem_setOf_eq];
-      use ⟨FM.toFrame⟩;
-      refine ⟨⟨?_, ?_⟩, ?_⟩;
-      . apply reflexive_filterOf_of_reflexive (finestFilterationModel.filterOf);
-        exact F_refl;
-      . apply finestFilterationModel.symmetric_of_symmetric;
-        exact F_symm;
-      . rfl;
+  apply hp;
+  refine ⟨?_, ?_, ?_⟩;
+  . apply Frame.isFinite_iff _ |>.mpr
     apply FilterEqvQuotient.finite;
     simp;
-  ) FM.Val
+  . apply reflexive_filterOf_of_reflexive (finestFilterationModel.filterOf) F_refl;
+  . exact finestFilterationModel.symmetric_of_symmetric F_symm;
 ⟩
 
-end Hilbert.KTB
+end Hilbert.KTB.Kripke
 
 end LO.Modal

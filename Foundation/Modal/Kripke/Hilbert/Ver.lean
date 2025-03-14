@@ -5,34 +5,45 @@ import Foundation.Modal.Hilbert.WellKnown
 namespace LO.Modal
 
 open Kripke
+open Hilbert.Kripke
+open Geachean
 
-namespace Kripke
+namespace Kripke.FrameClass
 
-open Entailment
+protected abbrev isolated : FrameClass := { F | Isolated F }
 
-variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢]
+namespace isolated
 
-instance [Entailment.Ver 𝓢] : Canonical 𝓢 IsolatedFrameClass := ⟨by
-  intro x y Rxy;
-  have : (canonicalModel 𝓢) ⊧ □⊥ := iff_valid_on_canonicalModel_deducible.mpr axiomVer!
-  exact this x _ Rxy;
-⟩
+@[simp]
+lemma nonempty : FrameClass.isolated.Nonempty := by
+  use ⟨Unit, λ _ _ => False⟩;
+  tauto;
 
-end Kripke
+lemma validates_AxiomVer : FrameClass.isolated.ValidatesFormula (Axioms.Ver (.atom 0)) := by
+  simp [Validates];
+  intro F;
+  apply validate_AxiomVer_of_isolated;
+
+lemma validates_HilbertVer : FrameClass.isolated.Validates Hilbert.Ver.axioms := by
+  apply FrameClass.Validates.withAxiomK;
+  apply validates_AxiomVer;
+
+end isolated
+
+end Kripke.FrameClass
 
 
 namespace Hilbert.Ver
 
-instance Kripke.sound : Sound (Hilbert.Ver) IsolatedFrameClass := by
-  have := FrameClass.definedBy_with_axiomK IsolatedFrameClass.DefinedByAxiomVer;
-  infer_instance;
+instance Kripke.sound : Sound (Hilbert.Ver) FrameClass.isolated :=
+  instSound_of_validates_axioms FrameClass.isolated.validates_HilbertVer
 
 instance Kripke.consistent : Entailment.Consistent (Hilbert.Ver) :=
-  have := FrameClass.definedBy_with_axiomK IsolatedFrameClass.DefinedByAxiomVer;
-  Kripke.Hilbert.consistent_of_FrameClass IsolatedFrameClass
+  consistent_of_sound_frameclass FrameClass.isolated (by simp)
 
-instance Kripke.complete : Complete (Hilbert.Ver) IsolatedFrameClass := inferInstance
+instance : Kripke.Canonical (Hilbert.Ver) FrameClass.isolated := ⟨Canonical.isolated⟩
+
+instance Kripke.complete : Complete (Hilbert.Ver) FrameClass.isolated := inferInstance
 
 end Hilbert.Ver
 

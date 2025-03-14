@@ -6,9 +6,22 @@ namespace LO.Modal
 
 namespace Kripke
 
-section definability
-
 open Formula.Kripke
+
+
+abbrev FrameClass.weakConnected : FrameClass := { F | WeakConnected F }
+
+namespace FrameClass.weakConnected
+
+@[simp]
+protected lemma nonempty : FrameClass.weakConnected.Nonempty := by
+  use whitepoint;
+  simp [WeakConnected];
+
+end FrameClass.weakConnected
+
+
+section definability
 
 variable {F : Kripke.Frame}
 
@@ -55,19 +68,6 @@ lemma validate_WeakPoint3_of_weakConnected : F ⊧ (Axioms.WeakPoint3 (.atom 0) 
     nRyz
   ⟩;
 
-abbrev WeakConnectedFrameClass : FrameClass := { F | WeakConnected F }
-
-instance : WeakConnectedFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
-  simp [WeakConnected];
-
-instance WeakConnectedFrameClass.DefinedByWeakPoint3 : WeakConnectedFrameClass.DefinedBy {Axioms.WeakPoint3 (.atom 0) (.atom 1)} := ⟨by
-  intro F;
-  constructor;
-  . simpa using weakConnected_of_validate_WeakPoint3;
-  . simpa using validate_WeakPoint3_of_weakConnected;
-⟩
-
 end definability
 
 
@@ -83,7 +83,7 @@ open canonicalModel
 
 namespace Canonical
 
-lemma weakConnected [Entailment.HasAxiomWeakPoint3 𝓢] : WeakConnected (canonicalFrame 𝓢).Rel := by
+protected lemma weakConnected [Entailment.HasAxiomWeakPoint3 𝓢] : WeakConnected (canonicalFrame 𝓢).Rel := by
   rintro x y z ⟨Rxy, Rxz, eyz⟩;
   by_contra hC;
   push_neg at hC;

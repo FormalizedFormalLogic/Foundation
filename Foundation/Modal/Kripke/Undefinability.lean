@@ -4,11 +4,11 @@ namespace LO.Modal
 
 namespace Kripke
 
-abbrev IrreflexiveFrameClass : FrameClass := { F | Irreflexive F }
+abbrev FrameClass.irrefl : FrameClass := { F | Irreflexive F }
 
-theorem undefinable_irreflexive : ¬∃ φ, IrreflexiveFrameClass.DefinedByFormula φ := by
+theorem undefinable_irreflexive : ¬∃ φ, ∀ F, F ∈ FrameClass.irrefl ↔ (F ⊧ φ) := by
   by_contra hC;
-  obtain ⟨φ, ⟨h⟩⟩ := hC;
+  obtain ⟨φ, h⟩ := hC;
   replace h : ∀ F : Frame, Irreflexive F ↔ F ⊧ φ := by simpa using h;
 
   let F₁ : Frame := ⟨Fin 2, (· ≠ ·)⟩;

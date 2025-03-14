@@ -347,7 +347,7 @@ private lemma models_codeAux {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc :
     simp [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons', ihf, List.Vector.ofFn_vecCons]
     constructor
     · rintro ⟨hy, h⟩; simp [Part.eq_some_iff]
-      exact ⟨by simpa using hy, by intro z hz; exact Nat.not_eq_zero_of_lt (h z hz)⟩
+      exact ⟨by simpa using hy, by intro z hz; exact Nat.ne_zero_of_lt (h z hz)⟩
     · intro h; simpa [pos_iff_ne_zero] using Nat.mem_rfind.mp (Part.eq_some_iff.mp h)
 
 lemma models_code {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :

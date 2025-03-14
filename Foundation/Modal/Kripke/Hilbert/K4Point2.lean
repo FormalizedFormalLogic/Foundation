@@ -1,36 +1,42 @@
 import Foundation.Modal.Kripke.AxiomWeakPoint2
-import Foundation.Modal.Kripke.Hilbert.K4
+import Foundation.Modal.Kripke.Hilbert.Geach
 
 namespace LO.Modal
 
 open Kripke
+open Hilbert.Kripke
 open Geachean
 
+abbrev Kripke.FrameClass.trans_weakConfluent : FrameClass := { F | Transitive F ∧ WeakConfluent F }
 
-abbrev Kripke.TransitiveWeakConfluentFrameClass : FrameClass := { F | Transitive F ∧ WeakConfluent F }
+namespace Kripke.FrameClass.trans_weakConfluent
 
-instance Kripke.TransitiveWeakConfluentFrameClass.DefinedByK4Point2Axioms
-  : FrameClass.DefinedBy Kripke.TransitiveWeakConfluentFrameClass Hilbert.K4Point2.axioms := by
-  rw [
-    (show TransitiveWeakConfluentFrameClass = TransitiveFrameClass ∩ WeakConfluentFrameClass by aesop),
-    (show Hilbert.K4Point2.axioms = Hilbert.K4.axioms ∪ {Axioms.WeakPoint2 (.atom 0) (.atom 1)} by aesop)
-  ];
-  exact FrameClass.definedBy_inter Kripke.TransitiveFrameClass (Hilbert.K4.axioms) WeakConfluentFrameClass {Axioms.WeakPoint2 (.atom 0) (.atom 1)};
+@[simp]
+protected lemma nonempty : Kripke.FrameClass.trans_weakConfluent.Nonempty := by
+  use whitepoint;
+  simp [Transitive, WeakConfluent];
 
-instance : Kripke.TransitiveWeakConfluentFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
-  simp [Reflexive, Transitive, WeakConfluent ];
+lemma validates_HilbertK4Point2 : Kripke.FrameClass.trans_weakConfluent.Validates Hilbert.K4Point2.axioms := by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨F_trans, F_wc⟩ φ (rfl | rfl);
+  . exact validate_AxiomFour_of_transitive $ by assumption;
+  . apply weakConfluent_of_validate_WeakPoint2 F_wc;
 
-namespace Hilbert.K4Point2
+end Kripke.FrameClass.trans_weakConfluent
 
-instance Kripke.sound : Sound (Hilbert.K4Point2) (TransitiveWeakConfluentFrameClass) := inferInstance
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.K4Point2) := Hilbert.consistent_of_FrameClass TransitiveWeakConfluentFrameClass
+namespace Hilbert.K4Point2.Kripke
 
-instance Kripke.canonical : Canonical (Hilbert.K4Point2) (TransitiveWeakConfluentFrameClass) := ⟨Canonical.transitive, Canonical.weakConfluent⟩
+instance sound : Sound (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent :=
+  instSound_of_validates_axioms FrameClass.trans_weakConfluent.validates_HilbertK4Point2
 
-instance Kripke.complete : Complete (Hilbert.K4Point2) (TransitiveWeakConfluentFrameClass) := inferInstance
+instance consistent : Entailment.Consistent (Hilbert.K4Point2) :=
+  consistent_of_sound_frameclass FrameClass.trans_weakConfluent (by simp)
 
-end Hilbert.K4Point2
+instance canonical : Canonical (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent := ⟨Canonical.transitive, Canonical.weakConfluent⟩
+
+instance complete : Complete (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent := inferInstance
+
+end Hilbert.K4Point2.Kripke
 
 end LO.Modal

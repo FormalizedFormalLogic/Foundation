@@ -9,14 +9,16 @@ namespace LO.Propositional
 namespace Logic
 
 protected abbrev KC : Logic := Hilbert.KC.logic
-lemma KC.eq_ConfluentKripkeFrameClass_Logic : Logic.KC = Kripke.ConfluentFrameClass.logic
+lemma KC.Kripke.eq_confluent : Logic.KC = Kripke.FrameClass.confluent.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev LC : Logic := Hilbert.LC.logic
-lemma LC.eq_ConnectedKripkeFrameClass_Logic : Logic.LC = Kripke.ConnectedFrameClass.logic
+lemma LC.Kripke.eq_connected : Logic.LC = Kripke.FrameClass.connected.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev Cl : Logic := Hilbert.Cl.logic
+lemma Cl.Kripke.eq_euclidean : Logic.Cl = Kripke.FrameClass.euclidean.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 end Logic
 

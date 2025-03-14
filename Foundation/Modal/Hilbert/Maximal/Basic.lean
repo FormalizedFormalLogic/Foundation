@@ -1,6 +1,5 @@
 import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Modal.Hilbert.WellKnown
-import Foundation.Modal.Propositional
 
 namespace LO.Modal
 

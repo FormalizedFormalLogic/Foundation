@@ -3,6 +3,7 @@ import Foundation.Propositional.Logic.WellKnown
 import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Logic.Extension
 import Foundation.Modal.Logic.Sublogic.Grz
+import Foundation.Propositional.Hilbert.Glivenko
 
 namespace LO.Modal
 
@@ -45,21 +46,10 @@ lemma Logic.S4.is_smallestMC_of_Int : Logic.S4 = Logic.Int.smallestMC := by
 instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
   rw [Logic.S4.is_smallestMC_of_Int];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.AllFrameClass)
-    (MC := Modal.Kripke.ReflexiveTransitiveFrameClass)
-    (by
-      intro φ;
-      constructor;
-      . apply Propositional.Hilbert.Int.Kripke.sound.sound;
-      . apply Propositional.Hilbert.Int.Kripke.complete.complete;
-    )
-    (by
-      rw [←Logic.S4.is_smallestMC_of_Int];
-      intro φ;
-      constructor;
-      . apply Modal.Hilbert.S4.Kripke.sound.sound;
-      . apply Modal.Hilbert.S4.Kripke.complete.complete;
-    )
+    (IC := Propositional.Kripke.FrameClass.all)
+    (MC := Modal.Kripke.FrameClass.preorder)
+    (by rw [Logic.Int.Kripke.eq_all])
+    (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic])
     (fun F hF => ⟨F.rel_refl, F.rel_trans⟩);
 
 
@@ -103,28 +93,31 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
 instance : ModalCompanion Logic.Int Logic.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.AllFiniteFrameClass)
-    (MC := Modal.Kripke.ReflexiveTransitiveAntiSymmetricFiniteFrameClass)
-    (by
-      intro φ;
-      constructor;
-      . apply Propositional.Hilbert.Int.Kripke.sound_finite.sound;
-      . apply Propositional.Hilbert.Int.Kripke.complete_finite.complete;
-    )
-    (by
-      rw [←Logic.Grz.is_largestMC_of_Int];
-      intro φ;
-      constructor;
-      . apply Modal.Hilbert.Grz.Kripke.sound.sound;
-      . apply Modal.Hilbert.Grz.Kripke.complete.complete;
-    )
-    (by
-      rintro F hF;
-      use ({ World := F.World, Rel := F.Rel, world_finite := by tauto; });
-      simp only [Set.mem_setOf_eq, and_true];
-      refine ⟨F.rel_refl, F.rel_trans, F.rel_antisymm⟩;
-    )
+    (IC := Propositional.Kripke.FrameClass.finite_all)
+    (MC := FrameClass.finite_partial_order)
+    (by rw [Logic.Int.Kripke.eq_all_finite])
+    (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic])
+    (by rintro F ⟨_⟩; refine ⟨by tauto, F.rel_refl, F.rel_trans, F.rel_antisymm⟩)
 
 end Grz
+
+
+section glivenko
+
+lemma Logic.iff_provable_Cl_provable_dia_gS4 : (φ ∈ Logic.Cl) ↔ (◇φᵍ ∈ (Logic.S4)) := by
+  constructor;
+  . intro h;
+    suffices □◇φᵍ ∈ Logic.S4 by exact axiomT'! this;
+    have := modalCompanion_Int_S4.companion.mp $ Hilbert.glivenko.mpr h;
+    rw [Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic] at this ⊢;
+    exact this;
+  . intro h;
+    apply Hilbert.glivenko.mp;
+    apply modalCompanion_Int_S4.companion.mpr;
+    have : □◇φᵍ ∈ Logic.S4 := nec! h;
+    rw [Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic] at this ⊢;
+    exact this;
+
+end glivenko
 
 end LO.Modal

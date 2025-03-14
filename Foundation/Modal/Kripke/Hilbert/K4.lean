@@ -1,54 +1,70 @@
 import Foundation.Modal.Kripke.Hilbert.Geach
 import Foundation.Modal.Kripke.Filteration
-import Foundation.Modal.Kripke.FiniteFrame
 
 namespace LO.Modal
 
 open Kripke
+open Hilbert.Kripke
 open Geachean
 
-abbrev Kripke.TransitiveFrameClass : FrameClass := { F | Transitive F }
-abbrev Kripke.TransitiveFiniteFrameClass : FiniteFrameClass := { F | Transitive F.Rel }
 
-instance : TransitiveFrameClass.DefinedBy Hilbert.K4.axioms := by
-  convert MultiGeacheanFrameClass.isDefinedByGeachHilbertAxioms {⟨0, 2, 1, 0⟩};
-  . unfold TransitiveFrameClass MultiGeacheanConfluentFrameClass MultiGeachean;
-    simp [Geachean.transitive_def];
-  . exact Hilbert.K4.eq_Geach;
+namespace Kripke.FrameClass
 
-namespace Hilbert.K4
+protected abbrev trans : FrameClass := { F | Transitive F }
 
-instance Kripke.sound : Sound (Hilbert.K4) (Kripke.TransitiveFrameClass) := inferInstance
+protected abbrev finite_trans : FrameClass := { F | F.IsFinite ∧ Transitive F.Rel }
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.K4) := by
-  convert Hilbert.Geach.Kripke.Consistent (G := {⟨0, 2, 1, 0⟩});
-  exact eq_Geach;
+namespace trans
 
-instance Kripke.canonical : Canonical (Hilbert.K4) (TransitiveFrameClass) := ⟨Canonical.transitive⟩
+lemma isMultiGeachean : FrameClass.trans = FrameClass.multiGeachean {⟨0, 2, 1, 0⟩} := by
+  ext F;
+  simp [Geachean.transitive_def, MultiGeachean]
 
-instance Kripke.complete : Complete (Hilbert.K4) (TransitiveFrameClass) := inferInstance
+@[simp]
+lemma nonempty : FrameClass.trans.Nonempty := by simp [trans.isMultiGeachean]
+
+lemma validates_AxiomFour : FrameClass.trans.ValidatesFormula (Axioms.Four (.atom 0)) := by
+  rintro F F_trans _ rfl;
+  apply validate_AxiomFour_of_transitive $ by assumption
+
+lemma validates_HilbertK4 : FrameClass.trans.Validates Hilbert.K4.axioms := by
+  apply FrameClass.Validates.withAxiomK;
+  apply validates_AxiomFour;
+
+end trans
+
+end Kripke.FrameClass
+
+
+
+namespace Hilbert.K4.Kripke
+
+instance sound : Sound (Hilbert.K4) Kripke.FrameClass.trans :=
+  instSound_of_validates_axioms FrameClass.trans.validates_HilbertK4
+
+instance consistent : Entailment.Consistent (Hilbert.K4) :=
+  consistent_of_sound_frameclass FrameClass.trans (by simp)
+
+instance canonical : Canonical (Hilbert.K4) Kripke.FrameClass.trans := ⟨Canonical.transitive⟩
+
+instance complete : Complete (Hilbert.K4) Kripke.FrameClass.trans := inferInstance
 
 open finestFilterationTransitiveClosureModel in
-instance Kripke.finiteComplete : Complete (Hilbert.K4) (TransitiveFiniteFrameClass) := ⟨by
+instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   intro F F_trans V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply @filteration M φ.subformulas _ FM ?filterOf x φ (by simp) |>.mpr;
-  apply hp (by
-    suffices Finite (FilterEqvQuotient M φ.subformulas) by
-      simp only [FiniteFrameClass.toFrameClass];
-      use ⟨FM.toFrame⟩;
-      refine ⟨?_, rfl⟩;
-      . exact transitive;
+  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf F_trans) (by aesop) |>.mpr;
+  apply hp;
+  refine ⟨?_, ?_⟩;
+  . apply Frame.isFinite_iff _ |>.mpr
     apply FilterEqvQuotient.finite;
     simp;
-  ) FM.Val;
-  . apply finestFilterationTransitiveClosureModel.filterOf;
-    exact F_trans;
+  . exact finestFilterationTransitiveClosureModel.transitive;
 ⟩
 
-end Hilbert.K4
+end Hilbert.K4.Kripke
 
 end LO.Modal
