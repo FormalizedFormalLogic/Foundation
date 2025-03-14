@@ -562,10 +562,15 @@ lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ 
 lemma remove_cons_of_ne (l : List α) {a b} (ne : a ≠ b) :
   (a :: l).remove b = a :: l.remove b := by simp_all [remove];
 
-lemma remove_subset (a) (l : List α) :
+@[simp] lemma remove_subset (a) (l : List α) :
     l.remove a ⊆ l := by
   simp only [subset_def, mem_remove_iff, ne_eq, and_imp]
   intros; simp [*]
+
+@[simp] lemma subset_cons_remove (a) (l : List α) :
+    l ⊆ a :: l.remove a := by
+  simp only [subset_def, mem_cons, mem_remove_iff, ne_eq]
+  intro b; tauto
 
 lemma remove_subset_remove (a) {l₁ l₂ : List α} (h : l₁ ⊆ l₂) :
     l₁.remove a ⊆ l₂.remove a := by
