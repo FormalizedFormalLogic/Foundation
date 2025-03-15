@@ -1,9 +1,10 @@
-import Foundation.Modal.ModalCompanion.Basic
-import Foundation.Propositional.Logic.WellKnown
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Boxdot.GL_Grz
 import Foundation.Modal.Logic.Extension
 import Foundation.Modal.Logic.Sublogic.Grz
+import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.ModalCompanion.Basic
 import Foundation.Propositional.Hilbert.Glivenko
+import Foundation.Propositional.Logic.WellKnown
 
 namespace LO.Modal
 
@@ -90,7 +91,7 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-instance : ModalCompanion Logic.Int Logic.Grz := by
+instance modalCompanion_Int_Grz : ModalCompanion Logic.Int Logic.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_all)
@@ -119,5 +120,17 @@ lemma Logic.iff_provable_Cl_provable_dia_gS4 : (φ ∈ Logic.Cl) ↔ (◇φᵍ �
     exact this;
 
 end glivenko
+
+
+section boxdot
+
+/--
+  Chagrov & Zakharyaschev 1997, Theorem 3.89
+-/
+theorem embedding_Int_GL {φ : Propositional.Formula ℕ} : φ ∈ Logic.Int ↔ φᵍᵇ ∈ Logic.GL := by
+  exact Iff.trans modalCompanion_Int_Grz.companion Hilbert.iff_boxdotTranslatedGL_Grz.symm
+
+end boxdot
+
 
 end LO.Modal
