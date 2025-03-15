@@ -251,7 +251,15 @@ namespace Model.pointGenerate
 
 variable {M : Kripke.Model} {r : M.World}
 
+instance [M.IsFinite] : (M↾r).IsFinite := by
+  simp [Model.pointGenerate];
+  infer_instance;
+
 protected abbrev root : (M↾r).World := ⟨r, by tauto⟩
+
+instance : (M↾r).IsRooted pointGenerate.root := by
+  simp [Model.pointGenerate];
+  infer_instance;
 
 protected def pMorphism : (M↾r) →ₚ M := by
   apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism (F := M.toFrame) (r := r));
