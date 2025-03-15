@@ -156,6 +156,10 @@ lemma rel_refl (F_refl : Reflexive F) : Reflexive (F↾r).Rel := by
   rintro ⟨x, (rfl | hx)⟩;
   all_goals apply F_refl;
 
+lemma rel_antisymm (F_antisymm : AntiSymmetric F) : AntiSymmetric (F↾r).Rel := by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy hyx;
+  all_goals aesop;
+
 lemma rel_confl (F_confl : Confluent F) : Confluent (F↾r).Rel := by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ ⟨Rxy, Rxz⟩;
   . obtain ⟨w, _, _⟩ := @F_confl z z z (by tauto);
@@ -232,7 +236,15 @@ namespace Model.pointGenerate
 
 variable {M : Kripke.Model} {r : M.World}
 
+instance [M.IsFinite] : (M↾r).IsFinite := by
+  simp [Model.pointGenerate];
+  infer_instance;
+
 protected abbrev root : (M↾r).World := ⟨r, by tauto⟩
+
+instance : (M↾r).IsRooted pointGenerate.root := by
+  simp [Model.pointGenerate];
+  infer_instance;
 
 protected def pMorphism : (M↾r) →ₚ M := by
   apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism (F := M.toFrame) (r := r));
