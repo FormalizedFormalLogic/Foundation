@@ -32,7 +32,7 @@ lemma validate_AxiomL_of_trans_cwf (hTrans : Transitive F.Rel) (hCWF : ConverseW
 
 lemma validate_AxiomL_of_finite_trans_irrefl [F.IsFinite] (hTrans : Transitive F.Rel) (hIrrefl : Irreflexive F.Rel) : F ⊧ (Axioms.L (.atom 0)) := by
   apply validate_AxiomL_of_trans_cwf hTrans;
-  apply Finite.converseWellFounded_of_trans_irrefl' Frame.IsFinite.world_finite hTrans hIrrefl;
+  apply Finite.converseWellFounded_of_trans_irrefl' inferInstance hTrans hIrrefl;
 
 lemma trans_of_validate_AxiomL : F ⊧ (Axioms.L (.atom 0)) → Transitive F.Rel := by
   contrapose;

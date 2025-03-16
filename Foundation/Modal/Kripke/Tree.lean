@@ -18,8 +18,8 @@ protected lemma rel_irreflexive [F.IsTree r] : Irreflexive F.Rel := irreflexive_
 
 end Frame.IsTree
 
-class Frame.IsFiniteTree (F : Kripke.Frame) (r : F.World) extends F.IsFinite, F.IsTree r where
 
+class Frame.IsFiniteTree (F : Kripke.Frame) (r : F.World) extends F.IsFinite, F.IsTree r where
 
 
 section TreeUnravelling
@@ -171,31 +171,38 @@ protected abbrev root : (F.mkTransTreeUnravelling r).World := treeUnravelling.ro
 
 instance instIsRooted : (F.mkTransTreeUnravelling r).IsRooted (mkTransTreeUnravelling.root) := inferInstance
 
-instance instIsTree {F : Frame} [DecidableEq F.World] [F.IsFinite] {r : F.World} (F_trans : Transitive F) (F_irrefl : Irreflexive F)
-  : (F.mkTransTreeUnravelling r).IsFiniteTree (mkTransTreeUnravelling.root) where
+instance instFinite [DecidableEq F.World] [Finite F] (F_trans : Transitive F) (F_irrefl : Irreflexive F) : Finite (F.mkTransTreeUnravelling r).World := by
+  suffices h : Finite { x // List.Chain' F.Rel x } by
+    exact
+     Finite.of_injective
+     (β := { x // List.Chain' F.Rel x })
+     (fun x => ⟨x.1, x.2.2⟩)
+     (by rintro ⟨x, hx⟩ ⟨y, hy⟩; simp_all);
+  apply List.chains_finite F_trans F_irrefl;
+
+instance instIsTree {F : Frame} {r : F.World}
+  : (F.mkTransTreeUnravelling r).IsTree (mkTransTreeUnravelling.root) where
   root_generates := by
     intro w;
     exact Frame.mkTransTreeUnravelling.instIsRooted.root_generates w;
   rel_transitive := mkTransTreeUnravelling.rel_transitive
   rel_assymetric := mkTransTreeUnravelling.rel_asymmetric
-  world_finite := by
-    suffices h : Finite { x // List.Chain' F.Rel x } by
-      exact
-       Finite.of_injective
-       (β := { x // List.Chain' F.Rel x })
-       (fun x => ⟨x.1, x.2.2⟩)
-       (by rintro ⟨x, hx⟩ ⟨y, hy⟩; simp_all);
-    apply List.chains_finite F_trans F_irrefl;
+
+instance instIsFiniteTree [DecidableEq F.World] [Finite F] (F_trans : Transitive F) (F_irrefl : Irreflexive F)
+  : (F.mkTransTreeUnravelling r).IsFiniteTree (mkTransTreeUnravelling.root) := by
+  have := @instFinite (F := F) r _ _ F_trans F_irrefl;
+  have := @instIsTree F r;
+  tauto;
 
 end Frame.mkTransTreeUnravelling
 
-
-instance {F : Frame} [DecidableEq F.World] [F.IsFinite] {r : F.World} (F_trans : Transitive F) (F_irrefl : Irreflexive F)
-  : ((F↾r).mkTransTreeUnravelling Frame.pointGenerate.root).IsFiniteTree (Frame.mkTransTreeUnravelling.root) :=
+/-
+instance {F : Frame} [DecidableEq F.World] [Finite F] {r : F.World} (F_trans : Transitive F) (F_irrefl : Irreflexive F)
+  : ((F↾r).mkTransTreeUnravelling Frame.pointGenerate.root).IsTree (Frame.mkTransTreeUnravelling.root) :=
     Frame.mkTransTreeUnravelling.instIsTree
     (Frame.pointGenerate.rel_trans F_trans)
     (Frame.pointGenerate.rel_irrefl F_irrefl)
-
+-/
 
 def Model.mkTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model := ⟨M.toFrame.mkTreeUnravelling r, λ c a => M.Val (c.1.getLast (by simp)) a⟩
 

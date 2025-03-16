@@ -44,7 +44,7 @@ instance instIsRooted : (F↾r).IsRooted pointGenerate.root where
 
 instance [Finite F.World] : Finite (F↾r).World := Subtype.finite
 
-instance [F.IsFinite] : (F↾r).IsFinite := (isFinite_iff _).mpr inferInstance
+instance [Finite F] : (F↾r).IsFinite := (isFinite_iff _).mpr inferInstance
 
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 

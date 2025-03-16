@@ -34,7 +34,7 @@ lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F �
       have := F_antisymm Rxy Ryz;
       contradiction;
     . exact F_trans Rxy Ryz;
-  . simp;
+  . exact Frame.mkIrreflClosure.rel_irreflexive;
 
 lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (φᵇ)) ↔ (Satisfies ⟨F^=, V⟩ x φ) := by
   induction φ using Formula.rec' generalizing x with
@@ -122,7 +122,7 @@ lemma provable_Grz_of_boxdotTranslated_GL : (Hilbert.GL) ⊢! φᵇ → (Hilbert
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use F^≠;
   constructor;
-  . suffices Transitive (F^≠).Rel by refine ⟨inferInstance, by assumption, by simp⟩;
+  . suffices Transitive (F^≠).Rel by refine ⟨inferInstance, by assumption, Frame.mkIrreflClosure.rel_irreflexive⟩;
     rintro x y z ⟨hxy, Rxy⟩ ⟨hyz, Ryz⟩;
     constructor;
     . by_contra hC;

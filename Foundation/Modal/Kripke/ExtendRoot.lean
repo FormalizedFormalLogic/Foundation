@@ -17,9 +17,8 @@ variable {F : Frame} {r : F.World} [F.IsRooted r] {x y : F.World}
 
 instance : Coe (F.World) ((F.extendRoot r).World) := ⟨Sum.inr⟩
 
-instance [f : F.IsFinite] : (F.extendRoot r).IsFinite := by
+instance [Finite F.World] : Finite (F.extendRoot r).World := by
   unfold Frame.extendRoot;
-  apply Frame.isFinite_iff _ |>.mpr;
   infer_instance;
 
 protected abbrev root : (F.extendRoot r).World := .inl ()
@@ -47,7 +46,9 @@ protected instance instIsTree {r : F.World} [F.IsTree r] : (F.extendRoot r).IsTr
   rel_assymetric := extendRoot.rel_assymetric $ IsTree.rel_assymetric (F := F) (r := r)
   rel_transitive := extendRoot.rel_transitive $ IsTree.rel_transitive (F := F) (r := r)
 
-protected instance instIsFiniteTree [F.IsFiniteTree r] : (F.extendRoot r).IsFiniteTree (extendRoot.root) where
+protected instance instIsFiniteTree [F.IsFinite] [F.IsTree r] : (F.extendRoot r).IsFiniteTree extendRoot.root := by
+  have := @extendRoot.instIsTree F r;
+  tauto;
 
 def pMorphism : F →ₚ (F.extendRoot r) where
   toFun := Sum.inr

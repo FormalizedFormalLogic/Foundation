@@ -13,7 +13,7 @@ open Formula.Kripke
 namespace Kripke.FrameClass
 
 protected abbrev confluent : FrameClass := { F | Confluent F }
-protected abbrev finite_confluent : FrameClass := { F | F.IsFinite ∧ Confluent F }
+protected abbrev finite_confluent : FrameClass := { F | Finite F ∧ Confluent F }
 
 namespace confluent
 
@@ -80,8 +80,7 @@ instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_confluent := 
   apply hφ;
 
   refine ⟨?_, ?_⟩;
-  . apply Frame.isFinite_iff _ |>.mpr
-    apply FilterEqvQuotient.finite;
+  . apply FilterEqvQuotient.finite;
     simp;
   . rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
     . simp only [exists_and_left, and_self];

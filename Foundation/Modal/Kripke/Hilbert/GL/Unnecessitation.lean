@@ -43,7 +43,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
 
   apply Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr;
   use M₀, r₀;
-  constructor;
+  refine ⟨?_, ?_⟩;
   . exact Frame.extendRoot.instIsFiniteTree (F := M.toFrame) (r := r);
   . tauto;
 

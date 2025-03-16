@@ -68,9 +68,7 @@ abbrev miniCanonicalFrame (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consisten
 
 namespace miniCanonicalFrame
 
-instance : (miniCanonicalFrame 𝓢 φ).IsFinite := by
-  apply Kripke.Frame.isFinite_iff _ |>.mpr;
-  infer_instance;
+instance : (miniCanonicalFrame 𝓢 φ).IsFinite := inferInstance
 
 lemma reflexive : Reflexive (miniCanonicalFrame 𝓢 φ).Rel := by simp [Reflexive];
 

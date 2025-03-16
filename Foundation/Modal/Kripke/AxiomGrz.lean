@@ -77,7 +77,7 @@ lemma validate_AxiomGrz_of_finite_strict_preorder
   (hAntisymm : AntiSymmetric F.Rel)
   : F ⊧ (Axioms.Grz (.atom 0)) := by
   apply validate_AxiomGrz_of_refl_trans_wcwf hRefl hTrans;
-  apply WCWF_of_finite_trans_antisymm Frame.IsFinite.world_finite hTrans hAntisymm;
+  apply WCWF_of_finite_trans_antisymm inferInstance hTrans hAntisymm;
 
 
 lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ □(.atom 0) ➝ ((.atom 0) ⋏ □□(.atom 0)) := by

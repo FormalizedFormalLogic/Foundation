@@ -13,7 +13,7 @@ open Formula.Kripke
 namespace Kripke.FrameClass
 
 protected abbrev connected : FrameClass := { F | Connected F }
-protected abbrev finite_connected : FrameClass := { F | F.IsFinite ∧ Connected F }
+protected abbrev finite_connected : FrameClass := { F | Finite F ∧ Connected F }
 
 namespace connected
 
@@ -80,8 +80,7 @@ instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_connected := 
   apply hφ;
 
   refine ⟨?_, ?_⟩;
-  . apply Frame.isFinite_iff _ |>.mpr
-    apply FilterEqvQuotient.finite;
+  . apply FilterEqvQuotient.finite;
     simp;
   . rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
     . simp;

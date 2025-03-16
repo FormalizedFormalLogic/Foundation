@@ -34,9 +34,10 @@ variable {F : Frame} {x y z : F.World}
 lemma rel_antisymm' : x ≺ y → y ≺ x → x = y := by apply F.rel_antisymm
 
 @[mk_iff]
-class IsFinite (F : Frame) where
-  [world_finite : Finite F.World]
+class IsFinite (F : Frame) : Prop where [world_finite : Finite F.World]
 attribute [instance] Frame.IsFinite.world_finite
+
+instance [Finite F.World] : F.IsFinite := ⟨⟩
 
 end Frame
 
@@ -48,7 +49,7 @@ abbrev whitepoint : Frame where
   rel_refl := by simp [Reflexive]
   rel_trans := by simp [Transitive]
   rel_antisymm := by simp [AntiSymmetric]
-instance : Frame.IsFinite whitepoint := ⟨⟩
+instance : Frame.IsFinite whitepoint := inferInstance
 
 end
 

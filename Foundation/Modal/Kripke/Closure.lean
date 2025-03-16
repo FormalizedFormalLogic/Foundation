@@ -38,10 +38,8 @@ postfix:95 "^*" => mkTransReflClosure
 
 namespace mkTransReflClosure
 
-instance [F.IsFinite] : IsFinite (F^*) := by
-  apply Frame.isFinite_iff _ |>.mpr;
-  simp [mkTransReflClosure]
-  exact IsFinite.world_finite;
+instance [Finite F] : Finite (F^*) := inferInstance
+instance [F.IsFinite] : (F^*).IsFinite := inferInstance
 
 end mkTransReflClosure
 
@@ -78,10 +76,8 @@ postfix:95 "^+" => mkTransClosure
 
 namespace mkTransClosure
 
-instance [F.IsFinite] : IsFinite (F^+) := by
-  apply Frame.isFinite_iff _ |>.mpr;
-  simp [mkTransClosure]
-  exact IsFinite.world_finite;
+instance [Finite F] : Finite (F^+) := inferInstance
+instance [F.IsFinite] : (F^+).IsFinite := inferInstance
 
 end mkTransClosure
 
@@ -93,15 +89,13 @@ section refl
 abbrev RelReflGen : _root_.Rel F.World F.World := ReflGen (· ≺ ·)
 infix:45 " ≺^= " => Frame.RelReflGen
 
-def mkReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^= ·)⟩
+abbrev mkReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^= ·)⟩
 postfix:95 "^=" => mkReflClosure
 
 namespace mkReflClosure
 
-instance [F.IsFinite] : IsFinite (F^=) := by
-  apply Frame.isFinite_iff _ |>.mpr;
-  simp [mkReflClosure]
-  exact IsFinite.world_finite;
+instance [Finite F] : Finite (F^=) := inferInstance
+instance [F.IsFinite] : (F^=).IsFinite := inferInstance
 
 end mkReflClosure
 
@@ -113,15 +107,13 @@ section irrefl
 abbrev RelIrreflGen : _root_.Rel F.World F.World := IrreflGen (· ≺ ·)
 scoped infix:45 " ≺^≠ " => Frame.RelIrreflGen
 
-def mkIrreflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^≠ ·)⟩
+abbrev mkIrreflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^≠ ·)⟩
 postfix:95 "^≠" => mkIrreflClosure
 
 namespace mkIrreflClosure
 
-instance [F.IsFinite] : IsFinite (F^≠) := by
-  apply Frame.isFinite_iff _ |>.mpr;
-  simp [mkIrreflClosure]
-  exact IsFinite.world_finite;
+instance [Finite F] : Finite (F^≠) := inferInstance
+instance [F.IsFinite] : (F^≠).IsFinite := inferInstance
 
 @[simp]
 lemma rel_irreflexive : Irreflexive (F^≠.Rel) := by simp [Irreflexive, Frame.RelIrreflGen, IrreflGen, mkIrreflClosure]

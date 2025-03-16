@@ -23,9 +23,7 @@ abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.Frame where
 
 namespace miniCanonicalFrame
 
-instance : (miniCanonicalFrame (φ : Formula ℕ)).IsFinite := by
-  apply Kripke.Frame.isFinite_iff _ |>.mpr;
-  infer_instance;
+instance : (miniCanonicalFrame φ).IsFinite := inferInstance
 
 lemma is_irreflexive : Irreflexive (miniCanonicalFrame φ).Rel := by
   simp [Irreflexive];

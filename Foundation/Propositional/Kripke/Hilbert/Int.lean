@@ -37,7 +37,8 @@ instance complete_finite : Complete (Hilbert.Int) FrameClass.finite_all := ⟨by
 
   apply filteration FM (coarsestFilterationModel.filterOf) (by simp) |>.mpr;
   apply hφ;
-  apply Frame.isFinite_iff _ |>.mpr
+
+  apply Frame.isFinite_iff _ |>.mpr;
   apply FilterEqvQuotient.finite;
   simp;
 ⟩

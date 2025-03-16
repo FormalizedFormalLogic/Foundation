@@ -32,10 +32,10 @@ abbrev RelItr' (n : ℕ) := F.Rel.iterate n
 notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
 @[mk_iff]
-class IsFinite (F : Frame) where
-  [world_finite : Finite F.World]
-attribute [instance] Frame.IsFinite.world_finite
+class IsFinite (F : Frame) : Prop where [world_finite : Finite F.World]
+attribute [simp, instance] IsFinite.world_finite
 
+instance [Finite F.World] : F.IsFinite := ⟨⟩
 
 end Frame
 
@@ -44,10 +44,10 @@ end Frame
 section
 
 abbrev whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
-instance : Frame.IsFinite whitepoint := ⟨⟩
+instance : whitepoint.IsFinite := inferInstance
 
 abbrev blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
-instance : Frame.IsFinite blackpoint := ⟨⟩
+instance : blackpoint.IsFinite := inferInstance
 
 end
 
@@ -569,13 +569,17 @@ lemma all.validates_axiomK : FrameClass.all.ValidatesFormula (Axioms.K (.atom 0)
 protected abbrev finite_all : FrameClass := { F | F.IsFinite }
 
 @[simp]
-lemma finite_all.nonempty : FrameClass.finite_all.Nonempty := by use whitepoint; tauto;
+lemma finite_all.nonempty : FrameClass.finite_all.Nonempty := by
+  use whitepoint;
+  simp only [Set.mem_setOf_eq];
+  infer_instance;
 
 lemma finite_all.validates_axiomK : FrameClass.finite_all.ValidatesFormula (Axioms.K (.atom 0) (.atom 1)) := by
-  suffices ∀ (F : Frame), F.IsFinite → Formula.Kripke.ValidOnFrame F (Axioms.K (.atom 0) (.atom 1)) by simpa [Validates];
+  suffices ∀ (F : Frame), [F.IsFinite] → Formula.Kripke.ValidOnFrame F (Axioms.K (.atom 0) (.atom 1)) by simpa [Validates];
   intro F _;
   apply FrameClass.all.validates_axiomK;
-  repeat tauto;
+  . tauto;
+  . tauto;
 
 lemma Validates.withAxiomK (hV : C.Validates Γ) : C.Validates (insert (Axioms.K (.atom 0) (.atom 1)) Γ) := by
   convert Validates.inter_of all.validates_axiomK hV;
