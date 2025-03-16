@@ -9,7 +9,6 @@ structure Geachean.Taple where
 
 def Geachean (t : Geachean.Taple) (R : Rel α α) := ∀ {x y z : α}, (R.iterate t.i x y) ∧ (R.iterate t.j x z) → ∃ u, (R.iterate t.m y u) ∧ (R.iterate t.n z u)
 
-
 namespace Geachean
 
 variable {rel : Rel α α}
@@ -54,6 +53,36 @@ lemma dense_def : Dense rel ↔ (Geachean ⟨0, 1, 2, 0⟩ rel) := by
 lemma satisfies_eq : Geachean (α := α) t (· = ·) := by simp [Geachean];
 
 end Geachean
+
+
+class IsGeachean (g : Geachean.Taple) (α) (R : Rel α α) where
+  geachean : ∀ {x y z : α}, (R.iterate g.i x y) ∧ (R.iterate g.j x z) → ∃ u, (R.iterate g.m y u) ∧ (R.iterate g.n z u)
+
+section
+
+variable {R : Rel α α}
+
+instance [IsGeachean ⟨0, 2, 1, 0⟩ _ R] : IsTrans _ R := ⟨by
+  intro a b c Rab Rac;
+  apply @Geachean.transitive_def α R |>.mpr IsGeachean.geachean Rab Rac;
+⟩
+instance [IsTrans _ R] : IsGeachean ⟨0, 2, 1, 0⟩ _ R := ⟨by
+  apply @Geachean.transitive_def α R |>.mp;
+  exact IsTrans.trans;
+⟩
+
+
+instance [IsGeachean ⟨0, 0, 1, 0⟩ _ R] : IsRefl _ R := ⟨by
+  intro a;
+  apply @Geachean.reflexive_def α R |>.mpr IsGeachean.geachean;
+⟩
+
+instance [IsRefl _ R] : IsGeachean ⟨0, 0, 1, 0⟩ _ R := ⟨by
+  apply @Geachean.reflexive_def α R |>.mp;
+  exact IsRefl.refl;
+⟩
+
+end
 
 
 def MultiGeachean (G : Set Geachean.Taple) (R : Rel α α) := ∀ g ∈ G, Geachean g R

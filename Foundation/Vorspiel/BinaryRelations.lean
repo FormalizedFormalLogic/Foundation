@@ -8,8 +8,12 @@ local infix:50 " ≺ " => rel
 
 -- NOTE: `x ≺ y → x ≺ z → y ≺ z`とする流儀もある
 def Euclidean := ∀ ⦃x y z⦄, x ≺ y → x ≺ z → z ≺ y
+class IsEuclidean (α : Sort*) (r : α → α → Prop) : Prop where
+  eucl : ∀ ⦃x y z⦄, x ≺ y → x ≺ z → z ≺ y
 
 def Serial := ∀ x, ∃ y, x ≺ y
+class IsSerial (α : Sort*) (r : α → α → Prop) : Prop where
+  serial : ∀ x, ∃ y, r x y
 
 def Confluent := ∀ ⦃x y z⦄, ((x ≺ y ∧ x ≺ z) → ∃ w, (y ≺ w ∧ z ≺ w))
 class IsConfluent (α : Sort*) (r : α → α → Prop) : Prop where

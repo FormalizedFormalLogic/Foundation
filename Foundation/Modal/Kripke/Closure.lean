@@ -55,14 +55,14 @@ namespace RelTransGen
 
 protected lemma single (hxy : x ≺ y) : x ≺^+ y := TransGen.single hxy
 
-@[simp]
-protected lemma transitive : Transitive F.RelTransGen := λ _ _ _ => TransGen.trans
+protected instance instIsTrans : IsTrans _ F.RelTransGen := ⟨λ _ _ _ => TransGen.trans⟩
 
-protected lemma symmetric (hSymm : Symmetric F.Rel) : Symmetric F.RelTransGen := by
+protected instance instIsSymm [IsSymm _ F.Rel] : IsSymm _ F.RelTransGen := ⟨by
   intro x y rxy;
   induction rxy with
-  | single h => exact TransGen.single $ hSymm h;
-  | tail _ hyz ih => exact TransGen.trans (TransGen.single $ hSymm hyz) ih
+  | single h => exact TransGen.single $ (IsSymm.symm _ _) h;
+  | tail _ hyz ih => exact TransGen.trans (TransGen.single $ (IsSymm.symm _ _) hyz) ih
+⟩
 
 lemma exists_itr : x ≺^+ y ↔ ∃ n > 0, F.Rel.iterate n x y := TransGen.exists_iterate
 

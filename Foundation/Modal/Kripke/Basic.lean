@@ -43,11 +43,18 @@ end Frame
 
 section
 
-abbrev whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
-instance : whitepoint.IsFinite := inferInstance
+def whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
 
-abbrev blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
-instance : blackpoint.IsFinite := inferInstance
+instance : whitepoint.IsFinite := by
+  dsimp [whitepoint];
+  infer_instance
+
+
+def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
+
+instance : blackpoint.IsFinite := by
+  dsimp [blackpoint];
+  infer_instance;
 
 end
 
@@ -529,9 +536,16 @@ open Formula (atom)
 
 namespace FrameClass
 
+variable {C : FrameClass} {Γ : FormulaSet ℕ} {φ ψ χ : Formula ℕ}
+
 def Validates (C : FrameClass) (Γ : FormulaSet ℕ) := ∀ F ∈ C, ∀ φ ∈ Γ, F ⊧ φ
 
 abbrev ValidatesFormula (C : FrameClass) (φ : Formula ℕ) := Validates C {φ}
+
+lemma ValidatesFormula_of (h : ∀ F ∈ C, F ⊧ φ) : C.ValidatesFormula φ := by
+  rintro F hF _ rfl;
+  apply h;
+  tauto;
 
 variable {C C₁ C₂ : FrameClass} {Γ Γ₁ Γ₂ : FormulaSet ℕ} {φ φ₁ φ₂ : Formula ℕ}
 

@@ -121,7 +121,7 @@ section
 variable [HasAxiomT 𝓢]
 
 def axiomT : 𝓢 ⊢ □φ ➝ φ := HasAxiomT.T _
-@[simp] lemma axiomT! : 𝓢 ⊢! □φ ➝ φ := ⟨axiomT⟩
+@[simp] lemma axiomT! {φ} : 𝓢 ⊢! □φ ➝ φ := ⟨axiomT⟩
 
 variable [Entailment.Minimal 𝓢]
 

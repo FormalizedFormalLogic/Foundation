@@ -6,29 +6,25 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-namespace Kripke.FrameClass
+namespace Kripke
 
-protected abbrev refl : FrameClass := { F | Reflexive F }
+variable {F : Frame}
 
+protected abbrev FrameClass.refl : FrameClass := { F | IsRefl _ F }
 
-namespace refl
+namespace FrameClass.refl
 
-lemma isMultiGeachean : FrameClass.refl = FrameClass.multiGeachean {⟨0, 0, 1, 0⟩} := by
-  ext F;
-  simp [Geachean.reflexive_def, MultiGeachean]
-
-@[simp]
-lemma nonempty : FrameClass.refl.Nonempty := by simp [refl.isMultiGeachean]
+@[simp] lemma nonempty : FrameClass.refl.Nonempty := by use whitepoint; tauto;
 
 lemma validates_AxiomT : FrameClass.refl.ValidatesFormula (Axioms.T (.atom 0)) := by
-  rintro F F_refl _ rfl;
-  apply validate_AxiomT_of_reflexive $ by assumption
+  apply ValidatesFormula_of;
+  apply Kripke.validate_AxiomT_of_reflexive;
 
 lemma validates_HilbertKT : FrameClass.refl.Validates Hilbert.KT.axioms := Validates.withAxiomK validates_AxiomT
 
-end refl
+end FrameClass.refl
 
-end Kripke.FrameClass
+end Kripke
 
 
 namespace Hilbert.KT

@@ -85,18 +85,21 @@ section
 
 variable {M T}
 
-lemma reflexive_filterOf_of_reflexive (h_filter : FilterOf FM M T) (hRefl : Reflexive M.toFrame) : Reflexive FM.Rel := by
+lemma reflexive_filterOf_of_reflexive (h_filter : FilterOf FM M T) [IsRefl _ M.toFrame] : IsRefl _ FM.Rel := ⟨by
   intro Qx;
   obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) Qx);
-  convert h_filter.def_rel₁ $ hRefl x <;> simp_all;
+  convert h_filter.def_rel₁ $ IsRefl.refl x <;> simp_all;
+⟩
 
-lemma serial_filterOf_of_serial (h_filter : FilterOf FM M T) (hSerial : Serial M.toFrame) : Serial FM.Rel := by
+/-
+lemma serial_filterOf_of_serial (h_filter : FilterOf FM M T) [IsSerial _ M.toFrame] : Serial FM.Rel := by
   intro Qx;
   obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) Qx);
-  obtain ⟨y, Rxy⟩ := hSerial x;
+  obtain ⟨y, Rxy⟩ := @IsSerial.serial x;
   use (cast (h_filter.def_world.symm) ⟦y⟧);
   convert h_filter.def_rel₁ $ Rxy;
   simp_all;
+-/
 
 end
 
@@ -147,11 +150,12 @@ instance filterOf [T.SubformulaClosed] : FilterOf (finestFilterationModel M T) M
     obtain ⟨x, y, rfl, rfl, _⟩ := rQxQy;
     simp_all [Satisfies];
 
-lemma symmetric_of_symmetric (hSymm : Symmetric M.toFrame) : Symmetric (finestFilterationModel M T).Rel := by
+instance symmetric_of_symmetric [IsSymm _ M.toFrame] : IsSymm _ (finestFilterationModel M T).Rel := ⟨by
   intro Qx Qy RQxQy;
   obtain ⟨x, y, hx, hy, h⟩ := RQxQy; subst_vars;
   use y, x;
-  refine ⟨by trivial, by trivial, hSymm h⟩;
+  refine ⟨by trivial, by trivial, IsSymm.symm _ _ h⟩;
+⟩
 
 end finestFilterationModel
 
@@ -164,7 +168,7 @@ namespace finestFilterationTransitiveClosureModel
 
 variable {M T}
 
-instance filterOf (M_trans : Transitive M.Rel) : FilterOf (finestFilterationTransitiveClosureModel M T) M T where
+instance filterOf [trans : IsTrans _ M.Rel] : FilterOf (finestFilterationTransitiveClosureModel M T) M T where
   def_rel₁ := by
     intro x y hxy;
     apply Relation.TransGen.single;
@@ -182,21 +186,23 @@ instance filterOf (M_trans : Transitive M.Rel) : FilterOf (finestFilterationTran
       . intro φ hp hpx;
         apply hyz φ hp;
         intro v ryv;
-        exact hpx _ (M_trans rxy ryv);
+        exact hpx _ (IsTrans.trans _ _ _ rxy ryv);
       . rename_i h;
         obtain ⟨w, z, rfl, rfl, _⟩ := h;
         intro φ hp hpx;
         apply hyz φ hp;
         intro v ryv;
-        exact hpx _ (M_trans rxy ryv);
+        exact hpx _ (IsTrans.trans _ _ _ rxy ryv);
 
-lemma transitive : Transitive (finestFilterationTransitiveClosureModel M T).Rel := Frame.RelTransGen.transitive
+instance : IsTrans _ (finestFilterationTransitiveClosureModel M T).Rel := inferInstance
 
-lemma symmetric_of_symmetric (M_symm : Symmetric M.Rel) : Symmetric (finestFilterationTransitiveClosureModel M T).Rel :=
-  Frame.RelTransGen.symmetric $ finestFilterationModel.symmetric_of_symmetric M_symm
+lemma symmetric_of_symmetric [IsSymm _ M.Rel] : IsSymm _ (finestFilterationTransitiveClosureModel M T).Rel := by
+  have := finestFilterationModel.symmetric_of_symmetric (M := M) (T := T);
+  -- Frame.RelTransGen.instIsSymm
+  sorry;
 
-lemma reflexive_of_transitive_reflexive (M_trans : Transitive M.Rel) (M_refl : Reflexive M.Rel) : Reflexive (finestFilterationTransitiveClosureModel M T).Rel := by
-  exact reflexive_filterOf_of_reflexive (filterOf M_trans) M_refl;
+instance reflexive_of_transitive_reflexive [IsTrans _ M.Rel] [IsRefl _ M.Rel] : IsRefl _ (finestFilterationTransitiveClosureModel M T).Rel := by
+  exact reflexive_filterOf_of_reflexive filterOf;
 
 end finestFilterationTransitiveClosureModel
 

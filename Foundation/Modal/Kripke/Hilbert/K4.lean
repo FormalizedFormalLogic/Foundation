@@ -7,34 +7,31 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
+namespace Kripke
 
-namespace Kripke.FrameClass
+variable {F : Frame}
 
-protected abbrev trans : FrameClass := { F | Transitive F }
+protected abbrev FrameClass.trans : FrameClass := { F | IsTrans _ F }
 
-protected abbrev finite_trans : FrameClass := { F | F.IsFinite ∧ Transitive F.Rel }
+namespace FrameClass.trans
 
-namespace trans
-
-lemma isMultiGeachean : FrameClass.trans = FrameClass.multiGeachean {⟨0, 2, 1, 0⟩} := by
-  ext F;
-  simp [Geachean.transitive_def, MultiGeachean]
-
-@[simp]
-lemma nonempty : FrameClass.trans.Nonempty := by simp [trans.isMultiGeachean]
+@[simp] lemma nonempty : FrameClass.trans.Nonempty := by
+  use whitepoint;
+  simp only [Set.mem_setOf_eq];
+  infer_instance;
 
 lemma validates_AxiomFour : FrameClass.trans.ValidatesFormula (Axioms.Four (.atom 0)) := by
-  rintro F F_trans _ rfl;
-  apply validate_AxiomFour_of_transitive $ by assumption
+  apply ValidatesFormula_of;
+  apply Kripke.validate_AxiomFour_of_transitive;
 
-lemma validates_HilbertK4 : FrameClass.trans.Validates Hilbert.K4.axioms := by
-  apply FrameClass.Validates.withAxiomK;
-  apply validates_AxiomFour;
+lemma validates_HilbertK4 : FrameClass.trans.Validates Hilbert.K4.axioms := Validates.withAxiomK validates_AxiomFour
 
-end trans
+end FrameClass.trans
 
-end Kripke.FrameClass
 
+protected abbrev FrameClass.finite_trans : FrameClass := { F | Finite F ∧ IsTrans _ F }
+
+end Kripke
 
 
 namespace Hilbert.K4.Kripke
@@ -56,13 +53,11 @@ instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans 
   intro F F_trans V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf F_trans) (by aesop) |>.mpr;
+  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf (trans := F_trans)) (by aesop) |>.mpr;
   apply hp;
-  refine ⟨?_, ?_⟩;
-  . apply Frame.isFinite_iff _ |>.mpr
-    apply FilterEqvQuotient.finite;
+  refine ⟨?_, inferInstance⟩;
+  . apply FilterEqvQuotient.finite;
     simp;
-  . exact finestFilterationTransitiveClosureModel.transitive;
 ⟩
 
 end Hilbert.K4.Kripke
