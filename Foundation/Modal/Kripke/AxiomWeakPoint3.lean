@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Supplemental
 
 namespace LO.Modal
 

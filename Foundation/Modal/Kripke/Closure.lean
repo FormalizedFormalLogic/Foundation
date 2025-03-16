@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Basic
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Vorspiel.Relation.WCWF
 
 namespace LO.Modal.Kripke
@@ -55,7 +55,7 @@ instance [IsRefl _ F.Rel] : IsRefl _ (F^+).Rel := ⟨fun a => TransGen.single (I
 
 instance [IsRefl _ F.Rel] : IsPreorder _ (F^+).Rel where
 
-instance [IsSymm _ F.Rel] : IsSymm _ (F^+).Rel := ⟨by
+protected instance isSymm [IsSymm _ F.Rel] : IsSymm _ (F^+).Rel := ⟨by
   intro x y rxy;
   induction rxy with
   | single h => exact TransGen.single $ (IsSymm.symm _ _) h;

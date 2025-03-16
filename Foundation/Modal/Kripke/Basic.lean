@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.RelItr
+import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
 

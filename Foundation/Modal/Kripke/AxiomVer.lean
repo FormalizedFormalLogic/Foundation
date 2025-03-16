@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Modal.Kripke.Completeness
 
 namespace LO.Modal

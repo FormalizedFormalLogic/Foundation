@@ -81,7 +81,7 @@ instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_
         exact TransGen.unwrap Rry;
     . replace Rry := TransGen.unwrap Rry;
       replace Rrz := TransGen.unwrap Rrz;
-      obtain ⟨u, Ruy, Ruz⟩ := IsConfluent.confl ⟨Rry, Rrz⟩;
+      obtain ⟨u, Ruy, Ruz⟩ := IsConfluent.confluent ⟨Rry, Rrz⟩;
       use ⟦⟨u, by
         right;
         apply Relation.TransGen.single;

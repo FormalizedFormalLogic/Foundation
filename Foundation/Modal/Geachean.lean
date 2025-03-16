@@ -1,5 +1,4 @@
-import Foundation.Vorspiel.RelItr
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Iterate
 
 structure Geachean.Taple where
   i : ℕ
@@ -113,7 +112,7 @@ instance [IsGeachean ⟨1, 1, 0, 1⟩ _ R] : IsEuclidean _ R := ⟨by
 
 instance [IsEuclidean _ R] : IsGeachean ⟨1, 1, 0, 1⟩ _ R := ⟨by
   apply @Geachean.euclidean_def α R |>.mp;
-  exact IsEuclidean.eucl;
+  exact IsEuclidean.euclidean;
 ⟩
 
 
@@ -125,7 +124,7 @@ instance [IsGeachean ⟨1, 1, 1, 1⟩ _ R] : IsConfluent _ R := ⟨by
 
 instance [IsConfluent _ R] : IsGeachean ⟨1, 1, 1, 1⟩ _ R := ⟨by
   apply @Geachean.confluent_def α R |>.mp;
-  exact IsConfluent.confl;
+  exact IsConfluent.confluent;
 ⟩
 
 
@@ -137,7 +136,7 @@ instance [IsGeachean ⟨0, 1, 0, 0⟩ _ R] : IsCoreflexive _ R := ⟨by
 
 instance [IsCoreflexive _ R] : IsGeachean ⟨0, 1, 0, 0⟩ _ R := ⟨by
   apply @Geachean.coreflexive_def α R |>.mp;
-  exact IsCoreflexive.corefl;
+  exact IsCoreflexive.coreflexive;
 ⟩
 
 end

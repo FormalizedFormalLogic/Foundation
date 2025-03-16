@@ -35,13 +35,9 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
     push_neg;
     use (Sum.inr r);
     constructor;
-    . sorry;
-      /-
-      have := @Frame.IsRooted.root_generates (F := M₀.toFrame) (r := r₀) (by sorry) (Sum.inr r) (by sorry);
-      apply TransGen.unwrap (Frame.extendRoot.rel_transitive (r := r) M_tree.rel_transitive);
-      apply Frame.IsRooted.root_generates;
-      tauto;
-      -/
+    . haveI : r₀ ≺^+ Sum.inr r := @Frame.IsRooted.root_generates (F := M₀.toFrame) (r := r₀) (Frame.extendRoot.instIsRooted) (Sum.inr r) (by tauto);
+      apply @this.unwrap;
+      exact Frame.extendRoot.isTrans (r := r);
     . assumption;
 
   apply Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr;

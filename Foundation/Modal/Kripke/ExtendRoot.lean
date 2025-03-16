@@ -39,7 +39,7 @@ instance [IsAsymm _ F.Rel] : IsAsymm _ (F.extendRoot r).Rel := ⟨by
     exact IsAsymm.asymm _ _ hxy;
 ⟩
 
-instance [IsTrans _ F.Rel] : IsTrans _ (F.extendRoot r).Rel := ⟨by
+instance isTrans [IsTrans _ F.Rel] : IsTrans _ (F.extendRoot r).Rel := ⟨by
   intro x y z hxy hyz;
   match x, y, z with
   | .inl _, .inr _, .inr _ => simp_all [Frame.extendRoot]

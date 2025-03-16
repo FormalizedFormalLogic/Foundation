@@ -1,8 +1,8 @@
-import Foundation.Vorspiel.Vorspiel
+import Mathlib.Data.Rel
 import Mathlib.Data.PNat.Basic
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Supplemental
 
-def Rel.iterate (R : Rel α α) : ℕ → α → α → Prop
+def Rel.iterate (R : Rel α α) : ℕ → Rel α α
   | 0 => (· = ·)
   | n + 1 => fun x y ↦ ∃ z, R x z ∧ R.iterate n z y
 
@@ -83,7 +83,7 @@ lemma unwrap_of_trans' {n : ℕ+} [IsTrans _ R] (Rxy : R.iterate n x y) : R x y 
 lemma unwrap_of_trans {x y} {n : ℕ} (hn : n > 0) [IsTrans _ R] (Rxy : R.iterate n x y) : R x y := by
   apply unwrap_of_trans' (n := ⟨n, hn⟩) Rxy;
 
-lemma unwrap_of_refl_trans {x y} {n : ℕ} [IsRefl _ R] [IsTrans _ R]  (Rxy : R.iterate n x y) : R x y := by
+lemma unwrap_of_refl_trans {x y} {n : ℕ} [IsRefl _ R] [IsTrans _ R] (Rxy : R.iterate n x y) : R x y := by
   induction n generalizing x with
   | zero => subst Rxy; apply IsRefl.refl;
   | succ n ih =>

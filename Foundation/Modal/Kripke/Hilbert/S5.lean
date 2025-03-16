@@ -15,49 +15,17 @@ protected abbrev FrameClass.universal : FrameClass := { F | IsUniversal _ F }
 
 protected abbrev FrameClass.finite_refl_eucl: FrameClass := { F | F.IsFinite ∧ IsRefl _ F ∧ IsEuclidean _ F }
 
-/-
-namespace FrameClass.refl_eucl
-
-lemma isMultiGeachean : FrameClass.refl_eucl = FrameClass.multiGeachean {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by
-  ext F;
-  simp [Geachean.reflexive_def, Geachean.euclidean_def, MultiGeachean]
-
-@[simp]
-lemma nonempty : FrameClass.refl_eucl.Nonempty := by simp [isMultiGeachean]
-
-lemma validates_HilbertS5 : Kripke.FrameClass.refl_eucl.Validates Hilbert.S5.axioms := by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
-  . exact validate_AxiomT_of_reflexive $ by assumption
-  . exact validate_AxiomFive_of_euclidean $ by assumption
-
-end FrameClass.refl_eucl
-
-
 lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
   constructor;
   . rintro h F ⟨F_refl, F_eucl⟩ V r;
     apply @Model.pointGenerate.modal_equivalent_at_root _ _ |>.mp;
     apply h;
-    exact Frame.pointGenerate.rel_universal_of_refl_eucl F_refl F_eucl;
+    apply Set.mem_setOf_eq.mpr;
+    exact Frame.pointGenerate.isUniversal (r := r) (refl := F_refl) (eucl := F_eucl);
   . rintro h F F_univ;
-    exact @h F (⟨refl_of_universal F_univ, eucl_of_universal F_univ⟩);
-
-lemma eq_finite_symm_preorder_finite_refl_eucl : Kripke.FrameClass.finite_symm_preorder = FrameClass.finite_refl_eucl := by
-  ext F;
-  constructor;
-  . rintro ⟨_, hRefl, hTrans, hSymm⟩;
-    refine ⟨inferInstance, ?_, ?_⟩;
-    . assumption;
-    . exact eucl_of_symm_trans hSymm hTrans;
-  . rintro ⟨_, hRefl, hEucl⟩;
-    refine ⟨inferInstance, hRefl, ?_, ?_⟩;
-    . exact trans_of_refl_eucl hRefl hEucl;
-    . exact symm_of_refl_eucl hRefl hEucl;
--/
-
-lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
-  sorry;
+    replace F_univ := Set.mem_setOf_eq.mp F_univ
+    apply h;
+    constructor <;> infer_instance;
 
 end Kripke
 

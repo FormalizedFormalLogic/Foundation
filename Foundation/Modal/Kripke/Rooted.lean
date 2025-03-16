@@ -201,16 +201,15 @@ instance isConnected (F_connected : Connected F) : Connected (F↾r).Rel := by
   . have := @F_connected x y z (by tauto); tauto;
 -/
 
-lemma rel_universal_of_refl_eucl [IsRefl _ F] [IsEuclidean _ F] : Universal (F↾r).Rel := by
-  -- have F_symm := symm_of_refl_eucl F_refl F_eucl;
-  -- have F_trans := trans_of_refl_eucl F_refl F_eucl;
-  have : IsSymm _ F := by sorry;
-  have : IsTrans _ F := by sorry;
+instance isUniversal [refl : IsRefl _ F] [eucl : IsEuclidean _ F] : IsUniversal _ (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
   . apply IsRefl.refl;
   . exact hy.unwrap;
-  . haveI : x ≺ y := IsSymm.symm _ _ hx.unwrap; exact this;
-  . haveI : x ≺ y := IsEuclidean.eucl hy.unwrap hx.unwrap; exact this;
+  . suffices x ≺ y by simpa;
+    exact IsSymm.symm _ _ hx.unwrap;
+  . suffices x ≺ y by simpa;
+    exact IsEuclidean.euclidean hy.unwrap hx.unwrap;
+⟩
 
 def pMorphism : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x

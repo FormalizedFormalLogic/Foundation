@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Supplemental
 
 namespace LO.Modal
 
@@ -26,7 +26,7 @@ lemma validate_WeakPoint2_of_weakConfluent [IsWeakConfluent _ F] : F ⊧ (Axioms
     by_contra hC;
     subst hC;
     contradiction;
-  obtain ⟨u, Ryu, Rzu⟩ := IsWeakConfluent.weak_confl ⟨Rxy, Rxz, nyz⟩;
+  obtain ⟨u, Ryu, Rzu⟩ := IsWeakConfluent.weak_confluent ⟨Rxy, Rxz, nyz⟩;
   have : V u 0 := h₁ _ Ryu;
   have : ¬V u 0 := h₂ _ Rzu;
   contradiction;

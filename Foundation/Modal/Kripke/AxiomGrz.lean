@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Vorspiel.Relation.WCWF
 import Foundation.Modal.Kripke.Hilbert.K
 import Foundation.Modal.Kripke.Hilbert.Geach

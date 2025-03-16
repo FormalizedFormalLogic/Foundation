@@ -125,7 +125,7 @@ lemma isRefl_of_filterOf (h_filter : FilterOf FM M T) [IsRefl _ M.Rel] : IsRefl 
 lemma isSerial_of_filterOf (h_filter : FilterOf FM M T) [IsSerial _ M.Rel] : IsSerial _ FM.Rel := ⟨by
   intro Qx;
   obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) Qx);
-  obtain ⟨y, Rxy⟩ := IsSerial.serial (r := M.Rel) (x := x);
+  obtain ⟨y, Rxy⟩ : ∃ y, x ≺ y := IsSerial.serial x;
   use (cast (h_filter.def_world.symm) ⟦y⟧);
   convert h_filter.def_rel₁ $ Rxy;
   simp_all;
@@ -247,13 +247,7 @@ instance isPreorder [preorder : IsPreorder _ M.Rel] : IsPreorder _ (finestFilter
 
 instance [IsSerial _ M.Rel] [IsTrans _ M.Rel] : IsSerial _ (finestFilterationTransitiveClosureModel M T).Rel := isSerial_of_filterOf filterOf
 
-instance [IsSymm _ M.Rel] : IsSymm _ (finestFilterationTransitiveClosureModel M T).Rel := by
-  sorry;
-  /-
-  have := finestFilterationModel.symmetric_of_symmetric (M := M) (T := T);
-  -- Frame.RelTransGen.instIsSymm
-  sorry;
-  -/
+instance [IsSymm _ M.Rel] : IsSymm _ (finestFilterationTransitiveClosureModel M T).Rel := Frame.mkTransClosure.isSymm
 
 instance isEquiv [IsEquiv _ M.Rel] : IsEquiv _ (finestFilterationTransitiveClosureModel M T).Rel where
 

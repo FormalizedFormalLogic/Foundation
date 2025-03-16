@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Propositional.Hilbert.Basic
 
 namespace LO.Propositional

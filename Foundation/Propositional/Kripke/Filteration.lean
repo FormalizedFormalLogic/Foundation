@@ -1,6 +1,6 @@
 import Mathlib.Data.Set.Finite.Powerset
+import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Propositional.Kripke.Preservation
-import Foundation.Vorspiel.RelItr
 
 universe u v
 
