@@ -1,5 +1,6 @@
 import Foundation.Modal.Kripke.Basic
 import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.WCWF
 
 namespace LO.Modal.Kripke
 

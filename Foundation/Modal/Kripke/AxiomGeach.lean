@@ -49,14 +49,6 @@ instance whitepoint.instIsGeachean (g) : IsGeachean g _ whitepoint.Rel := ⟨by
   . apply Rel.iterate.true_any; tauto;
 ⟩
 
-instance : IsRefl _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 0, 1, 0⟩); infer_instance;
-instance : IsTrans _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 2, 1, 0⟩); infer_instance;
-instance : IsEuclidean _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨1, 1, 0, 1⟩); infer_instance;
-instance : IsSymm _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 1, 0, 1⟩); infer_instance;
-instance : IsSerial _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 0, 1, 1⟩); infer_instance;
-instance : IsPreorder _ whitepoint.Rel where
-instance : IsEquiv _ whitepoint.Rel where
-
 open Formula.Kripke
 
 protected abbrev FrameClass.multiGeachean (G : Set Geachean.Taple) : FrameClass := { F | (MultiGeachean G) F.Rel }

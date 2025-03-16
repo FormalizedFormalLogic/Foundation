@@ -1,4 +1,5 @@
 import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.WCWF
 import Foundation.Modal.Kripke.Hilbert.K
 import Foundation.Modal.Kripke.Hilbert.Geach
 
@@ -8,27 +9,28 @@ namespace Kripke
 
 open Entailment
 open Kripke
+open Formula (atom)
 open Formula.Kripke
 open Relation (IrreflGen)
 
 variable {F : Kripke.Frame}
 
 lemma validate_AxiomGrz_of_refl_trans_wcwf
-  (hRefl : Reflexive F.Rel)
-  (hTrans : Transitive F.Rel)
-  (hWCWF : WeaklyConverseWellFounded F.Rel)
+  [IsRefl _ F.Rel]
+  [IsTrans _ F.Rel]
+  [IsWeaklyConverseWellFounded _ F.Rel]
   : F ⊧ (Axioms.Grz (.atom 0)) := by
   intro V;
-
-  let X := { x | Satisfies ⟨F, V⟩ x (□(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0))) ∧ ¬(Satisfies ⟨F, V⟩ x (.atom 0)) };
-  let Y := { x | Satisfies ⟨F, V⟩ x (□(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0))) ∧ ¬(Satisfies ⟨F, V⟩ x (□(.atom 0))) ∧ (Satisfies ⟨F, V⟩ x (.atom 0)) };
+  let M : Model := ⟨F, V⟩;
+  let X := { x | Satisfies M x (□(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0))) ∧ ¬(Satisfies M x (.atom 0)) };
+  let Y := { x | Satisfies M x (□(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0))) ∧ ¬(Satisfies M x (□(.atom 0))) ∧ (Satisfies ⟨F, V⟩ x (.atom 0)) };
   have : (X ∩ Y) = ∅ := by aesop;
 
   suffices ∀ x ∈ X ∪ Y, ∃ y ∈ X ∪ Y, (IrreflGen F.Rel) x y by
     have : (X ∪ Y) = ∅ := by
       by_contra hC;
       replace hC := Set.nonempty_iff_ne_empty.mpr hC;
-      obtain ⟨z, z_sub, hz⟩ := hWCWF.has_min (X ∪ Y) hC;
+      obtain ⟨z, z_sub, hz⟩ : ∃ a ∈ X ∪ Y, ∀ x ∈ X ∪ Y, ¬flip (IrreflGen F.Rel) x a := IsWeaklyConverseWellFounded.wcwf.has_min (X ∪ Y) hC;
       obtain ⟨x, x_sub, hx⟩ := this z z_sub;
       exact hz x x_sub hx;
     have : X = ∅ := by tauto_set;
@@ -39,15 +41,15 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf
     exact this;
 
   rintro w (⟨hw₁, hw₂⟩ | ⟨hw₁, hw₂, hw₃⟩);
-  . have := hw₁ _ (by apply hRefl);
-    have := not_imp_not.mpr this hw₂;
+  . have : Satisfies M w (□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) := hw₁ w (IsRefl.refl w);
+    have : ¬Satisfies M w (□(atom 0 ➝ □atom 0)) := not_imp_not.mpr this hw₂;
     obtain ⟨x, Rwx, hx, ⟨y, Rxy, hy⟩⟩ := by simpa [Satisfies] using this;
     use x;
     constructor;
     . right;
       refine ⟨?_, ?_, by assumption⟩;
       . intro z Rxz hz;
-        exact hw₁ z (hTrans Rwx Rxz) hz;
+        exact hw₁ z (IsTrans.trans _ _ _ Rwx Rxz) hz;
       . simp [Satisfies];
         use y;
     . constructor;
@@ -62,7 +64,7 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf
     . left;
       refine ⟨?_, (by assumption)⟩;
       . intro y Rxy hy;
-        exact hw₁ _ (hTrans Rwx Rxy) hy;
+        exact hw₁ _ (IsTrans.trans _ _ _ Rwx Rxy) hy;
     . constructor;
       . by_contra hC;
         subst hC;
@@ -70,14 +72,7 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf
         contradiction;
       . assumption;
 
-lemma validate_AxiomGrz_of_finite_strict_preorder
-  [F.IsFinite]
-  (hRefl : Reflexive F.Rel)
-  (hTrans : Transitive F.Rel)
-  (hAntisymm : AntiSymmetric F.Rel)
-  : F ⊧ (Axioms.Grz (.atom 0)) := by
-  apply validate_AxiomGrz_of_refl_trans_wcwf hRefl hTrans;
-  apply WCWF_of_finite_trans_antisymm inferInstance hTrans hAntisymm;
+lemma validate_AxiomGrz_of_finite_strict_preorder [F.IsFinite] [IsPartialOrder _ F.Rel] : F ⊧ (Axioms.Grz (.atom 0)) := validate_AxiomGrz_of_refl_trans_wcwf
 
 
 lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0)) : F ⊧ □(.atom 0) ➝ ((.atom 0) ⋏ □□(.atom 0)) := by
@@ -112,7 +107,7 @@ lemma transitive_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : Transit
   apply transitive_of_validate_AxiomFour;
   apply validate_AxiomFour_of_validate_AxiomGrz h;
 
-lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : WCWF F := by
+lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : WeaklyConverseWellFounded F := by
   have F_trans : Transitive F := transitive_of_validate_AxiomGrz h;
   have F_refl : Reflexive F := reflexive_of_validate_AxiomGrz h;
 

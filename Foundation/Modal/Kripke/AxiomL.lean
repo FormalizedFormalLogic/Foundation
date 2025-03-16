@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.CWF
 import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
@@ -9,17 +9,13 @@ namespace Kripke
 
 variable {F : Frame}
 
-instance : IsIrrefl _ blackpoint.Rel := by tauto
-
-instance : IsTrans _ blackpoint.Rel := ⟨by tauto⟩
-
 lemma validate_AxiomL_of_trans_cwf [IsTrans _ F.Rel] [cwf : IsConverseWellFounded _ F.Rel] : F ⊧ (Axioms.L (.atom 0)) := by
   rintro V w;
   apply Satisfies.imp_def.mpr;
   contrapose;
   intro h;
   obtain ⟨x, Rwx, h⟩ := by simpa using Satisfies.box_def.not.mp h;
-  obtain ⟨m, ⟨⟨rwm, hm⟩, hm₂⟩⟩ := cwf.converse_well_founded.has_min ({ x | (F.Rel w x) ∧ ¬(Satisfies ⟨F, V⟩ x (.atom 0)) }) $ by
+  obtain ⟨m, ⟨⟨rwm, hm⟩, hm₂⟩⟩ := cwf.cwf.has_min ({ x | (F.Rel w x) ∧ ¬(Satisfies ⟨F, V⟩ x (.atom 0)) }) $ by
     use x;
     tauto;
   replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x (.atom 0) → ¬m ≺ x := by simpa using hm₂;

@@ -6,7 +6,6 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open Geachean
 
 protected abbrev Kripke.FrameClass.isolated : FrameClass := { F | IsIsolated _ F }
 

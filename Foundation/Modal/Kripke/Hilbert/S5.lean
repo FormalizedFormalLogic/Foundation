@@ -9,8 +9,13 @@ open Geachean
 
 namespace Kripke
 
-protected abbrev FrameClass.refl_eucl : FrameClass := { F | Reflexive F ∧ Euclidean F }
+protected abbrev FrameClass.refl_eucl : FrameClass := { F | IsRefl _ F ∧ IsEuclidean _ F }
 
+protected abbrev FrameClass.universal : FrameClass := { F | IsUniversal _ F }
+
+protected abbrev FrameClass.finite_refl_eucl: FrameClass := { F | F.IsFinite ∧ IsRefl _ F ∧ IsEuclidean _ F }
+
+/-
 namespace FrameClass.refl_eucl
 
 lemma isMultiGeachean : FrameClass.refl_eucl = FrameClass.multiGeachean {⟨0, 0, 1, 0⟩, ⟨1, 1, 0, 1⟩} := by
@@ -28,10 +33,6 @@ lemma validates_HilbertS5 : Kripke.FrameClass.refl_eucl.Validates Hilbert.S5.axi
 
 end FrameClass.refl_eucl
 
-
-protected abbrev FrameClass.universal : FrameClass := { F | Universal F }
-
-protected abbrev FrameClass.finite_refl_eucl: FrameClass := { F | F.IsFinite ∧ Reflexive F.Rel ∧ Euclidean F.Rel }
 
 lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
   constructor;
@@ -53,14 +54,21 @@ lemma eq_finite_symm_preorder_finite_refl_eucl : Kripke.FrameClass.finite_symm_p
     refine ⟨inferInstance, hRefl, ?_, ?_⟩;
     . exact trans_of_refl_eucl hRefl hEucl;
     . exact symm_of_refl_eucl hRefl hEucl;
+-/
+
+lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
+  sorry;
 
 end Kripke
 
 
 namespace Hilbert.S5.Kripke
 
-instance sound_refl_eucl : Sound (Hilbert.S5) Kripke.FrameClass.refl_eucl :=
-  instSound_of_validates_axioms Kripke.FrameClass.refl_eucl.validates_HilbertS5
+instance sound_refl_eucl : Sound (Hilbert.S5) Kripke.FrameClass.refl_eucl := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomFive_of_euclidean;
 
 instance sound_universal : Sound (Hilbert.S5) FrameClass.universal := ⟨by
   intro φ hF;
@@ -68,10 +76,14 @@ instance sound_universal : Sound (Hilbert.S5) FrameClass.universal := ⟨by
   exact sound_refl_eucl.sound hF;
 ⟩
 
-instance consistent : Entailment.Consistent (Hilbert.S5) :=
-  consistent_of_sound_frameclass Kripke.FrameClass.refl_eucl (by simp)
+instance consistent : Entailment.Consistent (Hilbert.S5) := consistent_of_sound_frameclass Kripke.FrameClass.refl_eucl $ by
+  use whitepoint;
+  refine ⟨inferInstance, inferInstance⟩;
 
-instance canonical : Canonical (Hilbert.S5) Kripke.FrameClass.refl_eucl := ⟨⟨Canonical.reflexive, Canonical.euclidean⟩⟩
+instance canonical : Canonical (Hilbert.S5) Kripke.FrameClass.refl_eucl := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  constructor <;> infer_instance;
+⟩
 
 instance complete : Complete (Hilbert.S5) Kripke.FrameClass.refl_eucl := inferInstance
 

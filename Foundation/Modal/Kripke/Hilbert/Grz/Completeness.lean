@@ -70,9 +70,9 @@ namespace miniCanonicalFrame
 
 instance : (miniCanonicalFrame 𝓢 φ).IsFinite := inferInstance
 
-lemma reflexive : Reflexive (miniCanonicalFrame 𝓢 φ).Rel := by simp [Reflexive];
+instance : IsRefl _ (miniCanonicalFrame 𝓢 φ).Rel := ⟨by tauto_set⟩
 
-lemma transitive : Transitive (miniCanonicalFrame 𝓢 φ).Rel := by
+instance : IsTrans _ (miniCanonicalFrame 𝓢 φ).Rel := ⟨by
   simp only [Transitive];
   rintro X Y Z ⟨RXY₁, RXY₂⟩ ⟨RYZ₁, RYZ₂⟩;
   constructor;
@@ -87,10 +87,14 @@ lemma transitive : Transitive (miniCanonicalFrame 𝓢 φ).Rel := by
       exact RXY₁ ψ hs $ h ψ hs hq;
     subst_vars;
     tauto;
+⟩
 
-lemma antisymm : AntiSymmetric (miniCanonicalFrame 𝓢 φ).Rel := by
+instance : IsAntisymm _ (miniCanonicalFrame 𝓢 φ).Rel := ⟨by
   rintro X Y ⟨_, h₁⟩ ⟨h₂, _⟩;
   exact h₁ h₂;
+⟩
+
+instance : IsPartialOrder _ (miniCanonicalFrame 𝓢 φ).Rel where
 
 end miniCanonicalFrame
 
@@ -264,7 +268,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         simp only [Satisfies]; push_neg;
         use X;
         constructor;
-        . exact miniCanonicalFrame.reflexive X;
+        . exact IsRefl.refl X;
         . exact ih (by aesop) |>.not.mpr w;
     . intro h Y RXY;
       apply ih (subformulas.mem_box q_sub) |>.mpr;
@@ -309,8 +313,8 @@ namespace Hilbert.Grz.Kripke
 open Kripke.Grz
 
 instance complete : Complete (Hilbert.Grz) FrameClass.finite_partial_order :=
-  complete_of_mem_miniCanonicalFrame FrameClass.finite_partial_order  $ by
-    refine ⟨inferInstance, miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm⟩;
+  complete_of_mem_miniCanonicalFrame FrameClass.finite_partial_order $ by
+    refine ⟨inferInstance, inferInstance⟩;
 
 end Hilbert.Grz.Kripke
 
