@@ -34,13 +34,13 @@ lemma validate_LEM_of_symmetric : Symmetric F → F ⊧ (Axioms.LEM (.atom 0)) :
     exact h₁ $ Satisfies.formula_hereditary Ryx hy;
 
 lemma validate_LEM_of_euclidean (hEuc : Euclidean F) : F ⊧ (Axioms.LEM (.atom 0)) :=
-  validate_LEM_of_symmetric (symm_of_refl_eucl F.rel_refl hEuc)
+  validate_LEM_of_symmetric (symm_of_refl_eucl (by simp [Reflexive, Frame.refl]) hEuc)
 
 lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F := by
   rintro h x y z Rxy Rxz;
   let V : Kripke.Valuation F := ⟨λ {v a} => z ≺ v, by
     intro w v Rwv a Rzw;
-    exact F.rel_trans' Rzw Rwv;
+    exact F.trans Rzw Rwv;
   ⟩;
   suffices Satisfies ⟨F, V⟩ y (.atom 0) by simpa [Satisfies] using this;
   apply V.hereditary Rxy;
@@ -49,7 +49,7 @@ lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F :
   simp [Semantics.Realize, Satisfies, V, or_iff_not_imp_right] at this;
   apply this z;
   . exact Rxz;
-  . apply F.rel_refl;
+  . apply F.refl;
 
 end definability
 

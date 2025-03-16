@@ -16,21 +16,23 @@ abbrev pointGenerate (F : Kripke.Frame) (r : F.World) : Kripke.Frame where
   World := { w // w = r ∨ r ≺ w }
   Rel x y := x.1 ≺ y.1
   world_nonempty := ⟨r, by tauto⟩
-  rel_refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact F.rel_refl x;
-  rel_trans := by
-    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ Rxy Ryz;
-    any_goals assumption;
-    any_goals apply rel_refl';
-    any_goals apply rel_trans' Rxy Ryz;
-  rel_antisymm := by
-    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy Ryx;
-    . simp;
-    . simp_all only [Subtype.mk.injEq];
-      apply F.rel_antisymm' <;> assumption;
-    . simp_all only [Subtype.mk.injEq];
-      apply F.rel_antisymm' <;> assumption;
-    . simp_all only [Subtype.mk.injEq];
-      apply F.rel_antisymm' <;> assumption;
+  rel_partial_order := {
+    refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact F.refl;
+    trans := by
+      rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ Rxy Ryz;
+      any_goals assumption;
+      any_goals apply F.refl;
+      any_goals apply F.trans Rxy Ryz;
+    antisymm := by
+      rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy Ryx;
+      . simp;
+      . simp_all only [Subtype.mk.injEq];
+        apply F.rel_partial_order.antisymm <;> assumption;
+      . simp_all only [Subtype.mk.injEq];
+        apply F.rel_partial_order.antisymm <;> assumption;
+      . simp_all only [Subtype.mk.injEq];
+        apply F.rel_partial_order.antisymm <;> assumption;
+  }
 infix:100 "↾" => Frame.pointGenerate
 
 namespace pointGenerate
@@ -60,7 +62,7 @@ def pMorphism : (F↾r) →ₚ F where
   back := by
     rintro ⟨x, (rfl | hx)⟩ y Rwv;
     . simp at Rwv; use ⟨y, by tauto⟩
-    . use ⟨y, by right; exact rel_trans' hx Rwv⟩;
+    . use ⟨y, by right; exact F.trans hx Rwv⟩;
 
 end pointGenerate
 

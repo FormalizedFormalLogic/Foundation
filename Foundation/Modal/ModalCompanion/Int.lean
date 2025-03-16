@@ -51,7 +51,13 @@ instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
     (MC := Modal.Kripke.FrameClass.preorder)
     (by rw [Logic.Int.Kripke.eq_all])
     (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic])
-    (fun F hF => ⟨F.rel_refl, F.rel_trans⟩);
+    (by
+      rintro F _;
+      refine ⟨?_, ?_⟩;
+      . simp [Reflexive];
+      . intro x y z Rxy Ryz;
+        apply F.trans Rxy Ryz;
+    );
 
 
 end S4
@@ -98,7 +104,16 @@ instance modalCompanion_Int_Grz : ModalCompanion Logic.Int Logic.Grz := by
     (MC := FrameClass.finite_partial_order)
     (by rw [Logic.Int.Kripke.eq_all_finite])
     (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic])
-    (by rintro F ⟨_⟩; refine ⟨by tauto, F.rel_refl, F.rel_trans, F.rel_antisymm⟩)
+    (by
+      rintro F ⟨⟩;
+      refine ⟨?_, ?_, ?_, ?_⟩;
+      . tauto;
+      . simp [Reflexive];
+      . intro x y z Rxy Ryz;
+        apply F.trans Rxy Ryz;
+      . intro x y Rxy Ryx;
+        apply F.antisymm Rxy Ryx;
+    );
 
 end Grz
 

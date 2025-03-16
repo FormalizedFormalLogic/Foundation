@@ -91,7 +91,7 @@ instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_connected := 
       . use ⟨z, by tauto⟩;
         constructor;
         . tauto;
-        . exact F.rel_refl';
+        . exact F.refl;
     . left;
       apply Relation.TransGen.single;
       use ⟨y, by tauto⟩, ⟨z, by tauto⟩;

@@ -58,23 +58,23 @@ abbrev counterexampleDPFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ :
     | (Sum.inr $ Sum.inl x), (Sum.inr $ Sum.inl y) => F₁.Rel x y
     | (Sum.inr $ Sum.inr x), (Sum.inr $ Sum.inr y) => F₂.Rel x y
     | _, _ => False
-  rel_refl := by simp [Reflexive];
-  rel_trans := by
-    unfold Transitive;
-    simp only [Sum.forall, true_implies, imp_self, implies_true, true_and, false_implies, and_true, and_self, forall_const, imp_false];
-    constructor;
-    . constructor;
-      . intro _ _; apply F₁.rel_trans;
-      . intro _ _; apply F₂.rel_trans;
-    . constructor;
-      . intro _ _ _; apply F₁.rel_trans;
-      . intro _ _ _; apply F₂.rel_trans;
-  rel_antisymm := by
-    unfold AntiSymmetric;
-    simp only [Sum.forall, imp_self, implies_true, reduceCtorEq, and_self, imp_false, false_implies, Sum.inr.injEq, true_and, Sum.inl.injEq, and_true];
-    constructor;
-    . intro _ _; apply F₁.rel_antisymm;
-    . intro _ _; apply F₂.rel_antisymm;
+  rel_partial_order := {
+    refl := by simp [Reflexive];
+    trans := by
+      simp only [Sum.forall, true_implies, imp_self, implies_true, true_and, false_implies, and_true, and_self, forall_const, imp_false];
+      constructor;
+      . constructor;
+        . intro _ _; apply F₁.trans;
+        . intro _ _; apply F₂.trans;
+      . constructor;
+        . intro _ _ _; apply F₁.trans;
+        . intro _ _ _; apply F₂.trans;
+    antisymm := by
+      simp only [Sum.forall, imp_self, implies_true, reduceCtorEq, and_self, imp_false, false_implies, Sum.inr.injEq, true_and, Sum.inl.injEq, and_true];
+      constructor;
+      . intro _ _; apply F₁.antisymm;
+      . intro _ _; apply F₂.antisymm;
+  }
 
 abbrev counterexampleDPModel (M₁ : Kripke.Model) (M₂ : Kripke.Model) (w₁ : M₁.World) (w₂ : M₂.World) : Model where
   toFrame := counterexampleDPFrame M₁.toFrame M₂.toFrame w₁ w₂;
@@ -85,7 +85,7 @@ abbrev counterexampleDPModel (M₁ : Kripke.Model) (M₂ : Kripke.Model) (w₁ :
       | Sum.inr $ Sum.inr w => M₂ w a
       | _ => False,
     by
-      simp only [Sum.forall, imp_false, not_false_eq_true, implies_true, imp_self, IsEmpty.forall_iff, and_self, and_true, true_and];
+      simp only [counterexampleDPFrame, Sum.forall, imp_false, not_false_eq_true, implies_true, imp_self, IsEmpty.forall_iff, and_self, and_true, true_and];
       constructor;
       . intro _ _;
         apply M₁.Val.hereditary;
@@ -103,7 +103,7 @@ lemma satisfies_left_on_counterexampleDPModel :
     . intro hpq X hWX hp;
       obtain ⟨x, hx, ex⟩ : ∃ x, (M₁.Rel w x) ∧ (Sum.inr $ Sum.inl x) = X := by
         replace hWX : (counterexampleDPModel M₁ M₂ w₁ w₂).Rel _ X := hWX;
-        simp [counterexampleDPModel] at hWX;
+        simp only [counterexampleDPModel, counterexampleDPFrame] at hWX;
         split at hWX;
         all_goals simp_all;
       subst ex;
@@ -120,7 +120,7 @@ lemma satisfies_right_on_counterexampleDPModel :
     . intro h X hWX hp;
       obtain ⟨x, hx, ex⟩ : ∃ x, (M₂.Rel w x) ∧ (Sum.inr $ Sum.inr x) = X := by
         replace hWX : (counterexampleDPModel M₁ M₂ w₁ w₂).Rel _ X := hWX;
-        simp [counterexampleDPModel] at hWX;
+        simp only [counterexampleDPModel, counterexampleDPFrame] at hWX;
         split at hWX;
         all_goals simp_all;
       subst ex;
@@ -153,10 +153,12 @@ theorem disjunctive : (Hilbert.Int) ⊢! φ ⋎ ψ → (Hilbert.Int) ⊢! φ ∨
   . apply Formula.Kripke.Satisfies.or_def.not.mpr;
     push_neg;
     constructor;
-    . apply not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inl w₁) φ (by aesop);
-      exact satisfies_left_on_counterexampleDPModel.not.mp hφ;
-    . apply not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr w₂) ψ (by aesop);
-      exact satisfies_right_on_counterexampleDPModel.not.mp hψ;
+    . apply not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inl w₁) φ ?_;
+      . exact satisfies_left_on_counterexampleDPModel.not.mp hφ;
+      . apply F₁.refl;
+    . apply not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr w₂) ψ ?_;
+      . exact satisfies_right_on_counterexampleDPModel.not.mp hψ;
+      . apply F₂.refl;
 
 instance : Entailment.Disjunctive (Hilbert.Int) := ⟨disjunctive⟩
 

@@ -47,16 +47,18 @@ lemma connected_of_validate_Dummett : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1))
   let V : Kripke.Valuation F := ⟨λ {v a} => match a with | 0 => y ≺ v | 1 => z ≺ v | _ => True, by
     intro w v Rwv a ha;
     split at ha;
-    . exact F.rel_trans ha Rwv;
-    . exact F.rel_trans ha Rwv;
+    . apply F.trans ha Rwv
+    . apply F.trans ha Rwv
     . tauto;
   ⟩;
   replace h : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by simpa using h;
   rcases Formula.Kripke.Satisfies.or_def.mp $ @h V x with (hi | hi);
   . right;
-    simpa [Semantics.Realize, Satisfies, V] using hi Rxy;
+    apply hi Rxy;
+    apply F.refl;
   . left;
-    simpa [Semantics.Realize, Satisfies, V] using hi Ryz;
+    apply hi Ryz;
+    apply F.refl;
 
 end definability
 

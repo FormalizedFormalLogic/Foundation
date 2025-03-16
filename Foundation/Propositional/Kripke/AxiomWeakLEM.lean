@@ -41,7 +41,7 @@ lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confl
   rintro h x y z ⟨Rxy, Ryz⟩;
   let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
     intro w v Rwv a Ryw;
-    exact F.rel_trans Ryw Rwv;
+    apply F.trans Ryw Rwv;
   ⟩;
   replace h : F ⊧ (Axioms.WeakLEM (.atom 0)) := by simpa using h;
   have : ¬Satisfies ⟨F, V⟩ x (∼(.atom 0)) := by
@@ -49,7 +49,7 @@ lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confl
     use y;
     constructor;
     . exact Rxy;
-    . apply F.rel_refl;
+    . apply F.refl;
   have : Satisfies ⟨F, V⟩ x (∼∼(.atom 0)) := by
     apply or_iff_not_imp_left.mp $ Satisfies.or_def.mp $ @h V x;
     assumption;
