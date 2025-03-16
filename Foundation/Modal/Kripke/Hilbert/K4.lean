@@ -7,33 +7,11 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-namespace Kripke
-
 variable {F : Frame}
 
-protected abbrev FrameClass.trans : FrameClass := { F | IsTrans _ F }
+protected abbrev Kripke.FrameClass.trans : FrameClass := { F | IsTrans _ F }
 
-namespace FrameClass.trans
-
-@[simp]
-lemma nonempty : FrameClass.trans.Nonempty := by
-  use whitepoint;
-  simp only [Set.mem_setOf_eq];
-  infer_instance;
-
-lemma validates_AxiomFour : FrameClass.trans.ValidatesFormula (Axioms.Four (.atom 0)) := by
-  apply ValidatesFormula_of;
-  apply Kripke.validate_AxiomFour_of_transitive;
-
-lemma validates_HilbertK4 : FrameClass.trans.Validates Hilbert.K4.axioms := Validates.withAxiomK validates_AxiomFour
-
-end FrameClass.trans
-
-
-protected abbrev FrameClass.finite_trans : FrameClass := { F | Finite F ∧ IsTrans _ F }
-
-end Kripke
-
+protected abbrev Kripke.FrameClass.finite_trans : FrameClass := { F | Finite F ∧ IsTrans _ F }
 
 namespace Hilbert.K4.Kripke
 
@@ -60,9 +38,10 @@ instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans 
   intro φ hp;
   apply Kripke.complete.complete;
   intro F F_trans V x;
+  replace F_trans := Set.mem_setOf_eq.mp F_trans;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf (trans := F_trans)) (by aesop) |>.mpr;
+  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf) (by aesop) |>.mpr;
   apply hp;
   refine ⟨?_, inferInstance⟩;
   . apply FilterEqvQuotient.finite;

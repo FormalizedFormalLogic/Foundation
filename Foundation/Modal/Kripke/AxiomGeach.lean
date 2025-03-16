@@ -54,8 +54,8 @@ instance : IsTrans _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (�
 instance : IsEuclidean _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨1, 1, 0, 1⟩); infer_instance;
 instance : IsSymm _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 1, 0, 1⟩); infer_instance;
 instance : IsSerial _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 0, 1, 1⟩); infer_instance;
-instance : IsPreorder _ whitepoint.Rel := by constructor;
-instance : IsEquiv _ whitepoint.Rel := by constructor;
+instance : IsPreorder _ whitepoint.Rel where
+instance : IsEquiv _ whitepoint.Rel where
 
 open Formula.Kripke
 
@@ -248,8 +248,8 @@ instance [Entailment.HasAxiomD 𝓢] : IsSerial _ (canonicalFrame 𝓢).Rel := i
 instance [Entailment.HasAxiomB 𝓢] : IsSymm _ (canonicalFrame 𝓢).Rel := inferInstance
 instance [Entailment.HasAxiomTc 𝓢] : IsCoreflexive _ (canonicalFrame 𝓢).Rel := inferInstance
 instance [Entailment.HasAxiomPoint2 𝓢] : IsConfluent _ (canonicalFrame 𝓢).Rel := inferInstance
-instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] : IsPreorder _ (canonicalFrame 𝓢).Rel := by constructor
-instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] [Entailment.HasAxiomB 𝓢] : IsEquiv _ (canonicalFrame 𝓢).Rel := by constructor
+instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] : IsPreorder _ (canonicalFrame 𝓢).Rel where
+instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] [Entailment.HasAxiomB 𝓢] : IsEquiv _ (canonicalFrame 𝓢).Rel where
 
 end Canonical
 

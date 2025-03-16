@@ -41,48 +41,47 @@ open
   finestFilterationTransitiveClosureModel
   Relation
 
+#check isPreorder_iff
+
 instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_confluent_preorder := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   rintro F ⟨_, _⟩ V r;
   let M : Kripke.Model := ⟨F, V⟩;
   let RM := M↾r;
-  -- have RM_refl : Reflexive RM.Rel := Frame.pointGenerate.rel_refl F_refl;
-  -- have RM_trans : IsTrans _ RM.Rel := inferInstance;
-
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
   let FRM := finestFilterationTransitiveClosureModel (M↾r) (φ.subformulas);
-  apply filteration FRM (finestFilterationTransitiveClosureModel.filterOf) (by aesop) |>.mpr;
+  apply filteration FRM (finestFilterationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTrans)) (by aesop) |>.mpr;
   apply hφ;
 
-  refine ⟨?_, ?_, ?_, ?_⟩;
-  . apply Frame.isFinite_iff _ |>.mpr
-    apply FilterEqvQuotient.finite;
-    simp;
-  . exact reflexive_of_transitive_reflexive RM_trans RM_refl;
-  . exact finestFilterationTransitiveClosureModel.transitive;
-  . rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
+  refine ⟨?_, ?_, ?_⟩;
+  . apply FilterEqvQuotient.finite; simp;
+  . exact finestFilterationTransitiveClosureModel.isPreorder (preorder := Frame.pointGenerate.isPreorder);
+  . apply isConfluent_iff _ _ |>.mpr;
+    rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
     . simp only [and_self];
       use ⟦⟨z, by tauto⟩⟧;
-      apply Relation.TransGen.single; tauto;
+      apply Relation.TransGen.single;
+      sorry;
+      -- apply IsRefl.refl;
     . use ⟦⟨z, by tauto⟩⟧;
       constructor;
-      . replace Rrz := TransGen.unwrap F_trans Rrz;
+      . replace Rrz := TransGen.unwrap Rrz;
         apply Relation.TransGen.single $ by tauto;
-      . apply Relation.TransGen.single $ by tauto;
+      . apply Relation.TransGen.single $ by sorry;
     . use ⟦⟨y, by tauto⟩⟧;
       constructor;
-      . apply Relation.TransGen.single $ by tauto;
-      . replace Rry := TransGen.unwrap F_trans Rry;
+      . apply Relation.TransGen.single $ by sorry;
+      . replace Rry := TransGen.unwrap Rry;
         apply Relation.TransGen.single $ by tauto;
-    . replace Rry := TransGen.unwrap F_trans Rry;
-      replace Rrz := TransGen.unwrap F_trans Rrz;
-      obtain ⟨u, Ruy, Ruz⟩ := F_con ⟨Rry, Rrz⟩;
-      use ⟦⟨u, by tauto⟩⟧;
+    . replace Rry := TransGen.unwrap Rry;
+      replace Rrz := TransGen.unwrap Rrz;
+      obtain ⟨u, Ruy, Ruz⟩ := IsConfluent.confl ⟨Rry, Rrz⟩;
+      use ⟦⟨u, by sorry⟩⟧;
       constructor;
-      . apply Relation.TransGen.single $ by tauto;
-      . apply Relation.TransGen.single $ by tauto;
+      . exact Relation.TransGen.single $ by tauto;
+      . exact Relation.TransGen.single $ by tauto;
 ⟩
 
 end FFP

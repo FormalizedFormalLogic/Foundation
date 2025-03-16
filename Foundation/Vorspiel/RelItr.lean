@@ -1,5 +1,6 @@
 import Foundation.Vorspiel.Vorspiel
 import Mathlib.Data.PNat.Basic
+import Foundation.Vorspiel.BinaryRelations
 
 def Rel.iterate (R : Rel α α) : ℕ → α → α → Prop
   | 0 => (· = ·)
@@ -72,22 +73,22 @@ lemma comp : (∃ z, R.iterate n x z ∧ R.iterate m z y) ↔ R.iterate (n + m) 
       . use w;
       . assumption;
 
-lemma unwrap_of_trans' {n : ℕ+} (R_trans : Transitive R) (Rxy : R.iterate n x y) : R x y := by
+lemma unwrap_of_trans' {n : ℕ+} [IsTrans _ R] (Rxy : R.iterate n x y) : R x y := by
   induction n using PNat.recOn generalizing x with
   | one => simpa using Rxy;
   | succ n ih =>
     obtain ⟨z, Rxz, Rzy⟩ := Rxy;
-    exact R_trans Rxz (ih Rzy);
+    exact IsTrans.trans _ _ _ Rxz (ih Rzy);
 
-lemma unwrap_of_trans {x y} {n : ℕ} (hn : n > 0) (R_trans : Transitive R) (Rxy : R.iterate n x y) : R x y := by
-  apply unwrap_of_trans' (n := ⟨n, hn⟩) R_trans Rxy;
+lemma unwrap_of_trans {x y} {n : ℕ} (hn : n > 0) [IsTrans _ R] (Rxy : R.iterate n x y) : R x y := by
+  apply unwrap_of_trans' (n := ⟨n, hn⟩) Rxy;
 
-lemma unwrap_of_refl_trans {x y} {n : ℕ} (R_refl : Reflexive R) (R_trans : Transitive R) (Rxy : R.iterate n x y) : R x y := by
+lemma unwrap_of_refl_trans {x y} {n : ℕ} [IsRefl _ R] [IsTrans _ R]  (Rxy : R.iterate n x y) : R x y := by
   induction n generalizing x with
-  | zero => subst Rxy; apply R_refl;
+  | zero => subst Rxy; apply IsRefl.refl;
   | succ n ih =>
     obtain ⟨z, Rxz, Rzy⟩ := Rxy;
-    exact R_trans Rxz (ih Rzy);
+    exact IsTrans.trans _ _ _ Rxz (ih Rzy);
 
 end Rel.iterate
 
@@ -120,14 +121,11 @@ lemma ReflTransGen.exists_iterate : ReflTransGen R x y ↔ ∃ n, R.iterate n x 
         exact Rzy;
 
 lemma ReflTransGen.remove_iterate (Rxy : Rel.iterate (ReflTransGen R) n x y) : (ReflTransGen R) x y := by
-  apply unwrap_of_refl_trans (n := n);
-  . tauto;
-  . apply ReflTransGen.trans;
-  . exact Rxy;
+  apply unwrap_of_refl_trans (n := n) Rxy;
 
-lemma ReflTransGen.unwrap (R_refl : Reflexive R) (R_trans : Transitive R) (Rxy : (ReflTransGen R) x y) : R x y := by
+lemma ReflTransGen.unwrap [IsRefl _ R] [IsTrans _ R] (Rxy : (ReflTransGen R) x y) : R x y := by
   obtain ⟨n, Rxy⟩ := ReflTransGen.exists_iterate.mp Rxy;
-  exact unwrap_of_refl_trans R_refl R_trans Rxy;
+  exact unwrap_of_refl_trans Rxy;
 
 lemma TransGen.exists_iterate' : TransGen R x y ↔ ∃ n : ℕ+, R.iterate n x y := by
   constructor;
@@ -161,18 +159,15 @@ lemma TransGen.exists_iterate : TransGen R x y ↔ ∃ n > 0, R.iterate n x y :=
     exact ⟨⟨n, by omega⟩, Rxy⟩;
 
 lemma TransGen.remove_iterate (hn : n > 0) (Rxy : Rel.iterate (TransGen R) n x y) : (TransGen R) x y := by
-  apply unwrap_of_trans hn;
-  . apply TransGen.trans;
-  . exact Rxy;
+  apply unwrap_of_trans hn Rxy;
 
-lemma TransGen.unwrap (R_trans : Transitive R) (Rxy : (TransGen R) x y) : R x y := by
+lemma TransGen.unwrap [IsTrans _ R] (Rxy : (TransGen R) x y) : R x y := by
   have ⟨n, hn, Rxy⟩ := TransGen.exists_iterate.mp Rxy;
-  exact unwrap_of_trans hn R_trans Rxy;
+  exact unwrap_of_trans hn Rxy;
 
-lemma TransGen.antisymm (R_trans : Transitive R) (R_antisymm : AntiSymmetric R) : AntiSymmetric (TransGen R) := by
-  intro x y Rxy Ryz;
-  have := Rxy.unwrap R_trans;
-  have := Ryz.unwrap R_trans;
-  exact R_antisymm (Rxy.unwrap R_trans) (Ryz.unwrap R_trans);
+instance TransGen.antisymm [IsTrans _ R] [IsAntisymm _ R] : IsAntisymm _ (TransGen R) := by
+  apply isAntisymm_iff _ _ |>.mpr;
+  intro x y Rxy Ryx;
+  exact IsAntisymm.antisymm _ _ Rxy.unwrap Ryx.unwrap;
 
 end Relation

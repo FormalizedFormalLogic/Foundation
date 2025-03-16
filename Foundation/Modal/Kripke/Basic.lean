@@ -45,14 +45,14 @@ section
 
 def whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
 
-instance : whitepoint.IsFinite := by
+instance : Finite whitepoint.World := by
   dsimp [whitepoint];
   infer_instance
 
 
 def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
 
-instance : blackpoint.IsFinite := by
+instance : Finite blackpoint.World := by
   dsimp [blackpoint];
   infer_instance;
 

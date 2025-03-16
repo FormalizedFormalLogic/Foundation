@@ -45,9 +45,10 @@ instance finiteComplete : Complete (Hilbert.S4) Kripke.FrameClass.finite_preorde
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
   apply filteration FM (finestFilterationTransitiveClosureModel.filterOf) (by aesop) |>.mpr;
   apply hp;
-  refine ⟨?_, by sorry⟩;
+  refine ⟨?_, ?_⟩;
   . apply FilterEqvQuotient.finite;
     simp;
+  . sorry;
 ⟩
 
 end Hilbert.S4.Kripke

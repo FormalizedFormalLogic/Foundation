@@ -41,11 +41,9 @@ instance finite_complete : Complete (Hilbert.KTB) Kripke.FrameClass.finite_refl_
   apply filteration FM (finestFilterationModel.filterOf) (by aesop) |>.mpr;
   apply hp;
   refine ⟨?_, ?_, ?_⟩;
-  . apply Frame.isFinite_iff _ |>.mpr
-    apply FilterEqvQuotient.finite;
-    simp;
-  . apply reflexive_filterOf_of_reflexive (finestFilterationModel.filterOf) F_refl;
-  . exact finestFilterationModel.symmetric_of_symmetric F_symm;
+  . apply FilterEqvQuotient.finite; simp;
+  . apply Kripke.finestFilterationModel.isRefl;
+  . apply Kripke.finestFilterationModel.isSymm;
 ⟩
 
 end Hilbert.KTB.Kripke

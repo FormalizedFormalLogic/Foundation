@@ -3,61 +3,70 @@ import Mathlib.Data.Fintype.Pigeonhole
 
 section
 
-variable {α : Type u} (rel : α → α → Prop)
+variable {α : Sort*} (rel : α → α → Prop)
 local infix:50 " ≺ " => rel
 
 -- NOTE: `x ≺ y → x ≺ z → y ≺ z`とする流儀もある
 def Euclidean := ∀ ⦃x y z⦄, x ≺ y → x ≺ z → z ≺ y
-class IsEuclidean (α : Sort*) (r : α → α → Prop) : Prop where
-  eucl : ∀ ⦃x y z⦄, r x y → r x z → r z y
+class IsEuclidean (α : Sort*) (r : α → α → Prop) : Prop where eucl : Euclidean r
 
 def Serial := ∀ x, ∃ y, x ≺ y
-class IsSerial (α : Sort*) (r : α → α → Prop) : Prop where
-  serial : ∀ x, ∃ y, r x y
+class IsSerial (α : Sort*) (r : α → α → Prop) : Prop where serial : ∀ x, ∃ y, r x y
 
 def Confluent := ∀ ⦃x y z⦄, ((x ≺ y ∧ x ≺ z) → ∃ w, (y ≺ w ∧ z ≺ w))
-class IsConfluent (α : Sort*) (r : α → α → Prop) : Prop where
-  confl : ∀ ⦃x y z⦄, ((r x y ∧ r x z) → ∃ w, (r y w ∧ r z w))
+class IsConfluent (α : Sort*) (r : α → α → Prop) : Prop where confl : Confluent r
 
 def WeakConfluent := ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z ∧ y ≠ z) → (∃ w, y ≺ w ∧ z ≺ w)
-class IsWeakConfluent (α : Sort*) (r : α → α → Prop) : Prop where
-  weak_confl : ∀ ⦃x y z⦄, (r x y ∧ r x z ∧ y ≠ z) → (∃ w, r y w ∧ r z w)
+class IsWeakConfluent (α : Sort*) (r : α → α → Prop) : Prop where weak_confl : WeakConfluent r
 
 def Dense := ∀ ⦃x y⦄, x ≺ y → ∃z, x ≺ z ∧ z ≺ y
 
 def Connected := ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z) → (y ≺ z ∨ z ≺ y)
-class IsConnected (α : Sort*) (r : α → α → Prop) : Prop where
-  connected : ∀ ⦃x y z⦄, (r x y ∧ r x z) → (r y z ∨ r z y)
+class IsConnected (α : Sort*) (r : α → α → Prop) : Prop where connected : Connected r
 
 def WeakConnected := ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z ∧ y ≠ z) → (y ≺ z ∨ z ≺ y)
-class IsWeakConnected (α : Sort*) (r : α → α → Prop) : Prop where
-  weak_connected : ∀ ⦃x y z⦄, (r x y ∧ r x z ∧ y ≠ z) → (r y z ∨ r z y)
+class IsWeakConnected (α : Sort*) (r : α → α → Prop) : Prop where weak_connected : WeakConnected r
 
 def Functional := ∀ ⦃x y z⦄, x ≺ y ∧ x ≺ z → y = z
 
 def RightConvergent := ∀ ⦃x y z⦄, x ≺ y ∧ x ≺ z → y ≺ z ∨ z ≺ y ∨ y = z
 
 def Coreflexive := ∀ ⦃x y⦄, x ≺ y → x = y
-class IsCoreflexive (α : Sort*) (r : α → α → Prop) : Prop where
-  corefl : ∀ ⦃x y⦄, r x y → x = y
+class IsCoreflexive (α : Sort*) (r : α → α → Prop) : Prop where corefl : Coreflexive r
 
 def Equality := ∀ ⦃x y⦄, x ≺ y ↔ x = y
-class IsEquality (α : Sort*) (r : α → α → Prop) : Prop where
-  equal : ∀ ⦃x y⦄, r x y ↔ x = y
+class IsEquality (α : Sort*) (r : α → α → Prop) : Prop where equal : Equality r
 
 def Isolated := ∀ ⦃x y⦄, ¬(x ≺ y)
-class IsIsolated (α : Sort*) (r : α → α → Prop) : Prop where
-  isolated : ∀ ⦃x y⦄, ¬(r x y)
+class IsIsolated (α : Sort*) (r : α → α → Prop) : Prop where isolated : Isolated r
 
-def Assymetric := ∀ ⦃x y⦄, (x ≺ y) → ¬(y ≺ x)
+def Asymmetric := ∀ ⦃x y⦄, (x ≺ y) → ¬(y ≺ x)
 
 def Universal := ∀ ⦃x y⦄, x ≺ y
-class IsUniversal (α : Sort*) (r : α → α → Prop) : Prop where
-  universal : ∀ ⦃x y⦄, r x y
+class IsUniversal (α : Sort*) (r : α → α → Prop) : Prop where universal : Universal r
 
 abbrev ConverseWellFounded := WellFounded $ flip (· ≺ ·)
-class IsConverseWellFounded (α : Sort*) (r : α → α → Prop) : Prop where
-  converse_well_founded : WellFounded $ flip r
+class IsConverseWellFounded (α : Sort*) (r : α → α → Prop) : Prop where converse_well_founded : WellFounded $ flip r
+
+attribute [mk_iff]
+  IsRefl
+  IsSerial
+  IsSymm
+  IsTrans
+  IsEuclidean
+  IsConverseWellFounded
+  IsConfluent
+  IsWeakConfluent
+  IsConnected
+  IsWeakConnected
+  IsCoreflexive
+  IsEquality
+  IsUniversal
+  IsIsolated
+  IsPreorder
+  IsEquiv
+  IsAsymm
+  IsAntisymm
 
 end
 
@@ -120,7 +129,7 @@ lemma corefl_of_equality (h : Equality rel) : Coreflexive rel := by
   intro x y Rxy;
   apply h.mp Rxy;
 
-lemma irreflexive_of_assymetric (hAssym : Assymetric rel) : Irreflexive rel := by
+lemma irreflexive_of_assymetric (hAssym : Asymmetric rel) : Irreflexive rel := by
   intro x Rxx;
   have := hAssym Rxx;
   contradiction;
@@ -148,10 +157,11 @@ section ConverseWellFounded
 lemma ConverseWellFounded.iff_has_max : ConverseWellFounded r ↔ (∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(r m x)) := by
   simp [ConverseWellFounded, WellFounded.wellFounded_iff_has_min, flip]
 
-lemma Finite.converseWellFounded_of_trans_irrefl [Finite α] [IsTrans α rel] [IsIrrefl α rel] : ConverseWellFounded rel := by
+instance [Finite α] [IsTrans α rel] [IsIrrefl α rel] : IsConverseWellFounded _ rel := ⟨by
   apply @Finite.wellFounded_of_trans_of_irrefl _ _ _
     ⟨by intro a b c rba rcb; exact IsTrans.trans c b a rcb rba⟩
     ⟨by simp [flip, IsIrrefl.irrefl]⟩
+⟩
 
 lemma Finite.converseWellFounded_of_trans_irrefl'
     (hFinite : Finite α) (hTrans : Transitive rel) (hIrrefl : Irreflexive rel) : ConverseWellFounded rel :=

@@ -35,18 +35,15 @@ open finestFilterationTransitiveClosureModel in
 instance finite_complete : Complete (Hilbert.KT4B) Kripke.FrameClass.finite_symm_preorder := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
-  intro F ⟨F_refl, F_trans, F_symm⟩ V x;
+  intro F F_equiv V x;
+  replace F_equiv := Set.mem_setOf_eq.mp F_equiv;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf F_trans) (by aesop) |>.mpr;
+  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf) (by aesop) |>.mpr;
   apply hp;
-  refine ⟨?_, ?_, ?_, ?_⟩;
-  . apply Frame.isFinite_iff _ |>.mpr
-    apply FilterEqvQuotient.finite;
-    simp;
-  . exact reflexive_of_transitive_reflexive (by apply F_trans) F_refl;
-  . exact finestFilterationTransitiveClosureModel.transitive;
-  . exact symmetric_of_symmetric F_symm;
+  refine ⟨?_, ?_⟩;
+  . apply FilterEqvQuotient.finite; simp;
+  . exact finestFilterationTransitiveClosureModel.isEquiv;
 ⟩
 
 end Hilbert.KT4B.Kripke

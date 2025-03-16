@@ -1,4 +1,5 @@
 import Foundation.Modal.Kripke.Basic
+import Foundation.Vorspiel.BinaryRelations
 
 namespace LO.Modal.Kripke
 
@@ -11,35 +12,23 @@ variable {F : Frame} {x y z : F.World}
 
 section trans_refl
 
-abbrev RelReflTransGen : _root_.Rel F.World F.World := ReflTransGen (· ≺ ·)
-infix:45 " ≺^* " => Frame.RelReflTransGen
-
-namespace RelReflTransGen
-
-lemma single (hxy : x ≺ y) : x ≺^* y := ReflTransGen.single hxy
-
-@[simp]
-protected lemma reflexive : Reflexive F.RelReflTransGen := Relation.reflexive_reflTransGen
-
-@[simp]
-lemma refl {x : F.World} : x ≺^* x := RelReflTransGen.reflexive x
-
-@[simp]
-protected lemma transitive : Transitive F.RelReflTransGen := Relation.transitive_reflTransGen
-
-protected lemma symmetric : Symmetric F.Rel → Symmetric F.RelReflTransGen := ReflTransGen.symmetric
-
-protected lemma exists_itr : x ≺^* y ↔ ∃ n, F.Rel.iterate n x y := ReflTransGen.exists_iterate
-
-end RelReflTransGen
+abbrev RelReflTrans : _root_.Rel F.World F.World := ReflTransGen (· ≺ ·)
+infix:50 " ≺^* " => RelReflTrans
 
 abbrev mkTransReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^* ·)⟩
 postfix:95 "^*" => mkTransReflClosure
 
 namespace mkTransReflClosure
 
-instance [Finite F] : Finite (F^*) := inferInstance
-instance [F.IsFinite] : (F^*).IsFinite := inferInstance
+instance [Finite F.World] : Finite (F^*).World := inferInstance
+
+instance : IsPreorder _ (F^*).Rel where
+
+instance [IsSymm _ F.Rel] : IsSymm _ (F^*).Rel := ⟨by
+  apply ReflTransGen.symmetric;
+  exact IsSymm.symm
+⟩
+instance [IsSymm _ F.Rel] : IsEquiv _ (F^*).Rel where
 
 end mkTransReflClosure
 
@@ -48,28 +37,8 @@ end trans_refl
 
 section trans
 
-abbrev RelTransGen {F : Frame} : _root_.Rel F.World F.World := TransGen (· ≺ ·)
-infix:45 " ≺^+ " => Frame.RelTransGen
-
-namespace RelTransGen
-
-protected lemma single (hxy : x ≺ y) : x ≺^+ y := TransGen.single hxy
-
-protected instance instIsTrans : IsTrans _ F.RelTransGen := ⟨λ _ _ _ => TransGen.trans⟩
-
-protected instance instIsSymm [IsSymm _ F.Rel] : IsSymm _ F.RelTransGen := ⟨by
-  intro x y rxy;
-  induction rxy with
-  | single h => exact TransGen.single $ (IsSymm.symm _ _) h;
-  | tail _ hyz ih => exact TransGen.trans (TransGen.single $ (IsSymm.symm _ _) hyz) ih
-⟩
-
-lemma exists_itr : x ≺^+ y ↔ ∃ n > 0, F.Rel.iterate n x y := TransGen.exists_iterate
-
-lemma head (Rxy : x ≺ y) (Ryz : y ≺^+ z) : x ≺^+ z := TransGen.head Rxy Ryz
-lemma tail (Rxy : x ≺^+ y) (Ryz : y ≺ z) : x ≺^+ z := TransGen.tail Rxy Ryz
-
-end RelTransGen
+abbrev RelTrans : _root_.Rel F.World F.World := TransGen (· ≺ ·)
+infix:50 " ≺^+ " => RelTrans
 
 abbrev mkTransClosure (F : Frame) : Frame := ⟨F.World, (· ≺^+ ·)⟩
 postfix:95 "^+" => mkTransClosure
@@ -79,6 +48,19 @@ namespace mkTransClosure
 instance [Finite F] : Finite (F^+) := inferInstance
 instance [F.IsFinite] : (F^+).IsFinite := inferInstance
 
+instance : IsTrans _ (F^+).Rel := inferInstance
+
+instance [IsRefl _ F.Rel] : IsRefl _ (F^+).Rel := ⟨fun a => TransGen.single (IsRefl.refl a)⟩
+
+instance [IsRefl _ F.Rel] : IsPreorder _ (F^+).Rel where
+
+instance [IsSymm _ F.Rel] : IsSymm _ (F^+).Rel := ⟨by
+  intro x y rxy;
+  induction rxy with
+  | single h => exact TransGen.single $ (IsSymm.symm _ _) h;
+  | tail _ hyz ih => exact TransGen.trans (TransGen.single $ (IsSymm.symm _ _) hyz) ih
+⟩
+
 end mkTransClosure
 
 end trans
@@ -86,8 +68,8 @@ end trans
 
 section refl
 
-abbrev RelReflGen : _root_.Rel F.World F.World := ReflGen (· ≺ ·)
-infix:45 " ≺^= " => Frame.RelReflGen
+abbrev RelRefl : _root_.Rel F.World F.World := ReflGen (· ≺ ·)
+infix:50 " ≺^= " => RelRefl
 
 abbrev mkReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^= ·)⟩
 postfix:95 "^=" => mkReflClosure
@@ -97,6 +79,8 @@ namespace mkReflClosure
 instance [Finite F] : Finite (F^=) := inferInstance
 instance [F.IsFinite] : (F^=).IsFinite := inferInstance
 
+instance : IsRefl _ (F^=.Rel) := inferInstance
+
 end mkReflClosure
 
 end refl
@@ -104,8 +88,8 @@ end refl
 
 section irrefl
 
-abbrev RelIrreflGen : _root_.Rel F.World F.World := IrreflGen (· ≺ ·)
-scoped infix:45 " ≺^≠ " => Frame.RelIrreflGen
+abbrev RelIrrefl : _root_.Rel F.World F.World := IrreflGen (· ≺ ·)
+infix:50 " ≺^≠ " => RelIrrefl
 
 abbrev mkIrreflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^≠ ·)⟩
 postfix:95 "^≠" => mkIrreflClosure
@@ -115,8 +99,7 @@ namespace mkIrreflClosure
 instance [Finite F] : Finite (F^≠) := inferInstance
 instance [F.IsFinite] : (F^≠).IsFinite := inferInstance
 
-@[simp]
-lemma rel_irreflexive : Irreflexive (F^≠.Rel) := by simp [Irreflexive, Frame.RelIrreflGen, IrreflGen, mkIrreflClosure]
+instance : IsIrrefl _ (F^≠.Rel) := ⟨by simp [IrreflGen]⟩
 
 end mkIrreflClosure
 

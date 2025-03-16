@@ -16,7 +16,7 @@ lemma valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameC
   : ∀ F : Kripke.Frame, ∀ r, [F.IsFiniteTree r] → F ⊧ φ := by
   intro F r h_tree;
   apply h;
-  refine ⟨inferInstance, h_tree.rel_transitive, h_tree.rel_irreflexive⟩;
+  refine ⟨inferInstance, inferInstance, inferInstance⟩;
 
 lemma satisfies_at_root_on_FiniteTransitiveTree (h : ∀ F : Kripke.Frame, ∀ r, [Finite F.World] → [F.IsTree r] → F ⊧ φ)
   : ∀ M : Model, ∀ r, [M.IsFiniteTree r] → Satisfies M r φ := fun M r _ => h M.toFrame r M.Val r
@@ -26,15 +26,16 @@ lemma valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTra
   : (∀ M : Model, ∀ r : M.World, [M.IsFiniteTree r] → Satisfies M r φ) → FrameClass.finite_trans_irrefl ⊧ φ := by
   rintro H F ⟨_, F_trans, F_irrefl⟩ V r;
   let M : Kripke.Model := ⟨F, V⟩;
+  have : IsTrans (M↾r).World (M↾r).Rel := Frame.pointGenerate.isTrans (trans := F_trans);
   have : Satisfies ((M↾r).mkTransTreeUnravelling pointGenerate.root) mkTransTreeUnravelling.root φ := @H _ _ ?_;
-  have : Satisfies (M↾r) pointGenerate.root φ := mkTransTreeUnravelling.pMorphism (M↾r) (Frame.pointGenerate.rel_trans F_trans) _
+  have : Satisfies (M↾r) pointGenerate.root φ := mkTransTreeUnravelling.pMorphism (M↾r) _
     |>.modal_equivalence _
     |>.mp this;
   exact pointGenerate.pMorphism.modal_equivalence _ |>.mp this;
   . exact @Frame.mkTransTreeUnravelling.instIsFiniteTree (F := (M↾r).toFrame) (r := pointGenerate.root) _
       (Subtype.finite)
-      (Frame.pointGenerate.rel_trans F_trans)
-      (Frame.pointGenerate.rel_irrefl F_irrefl);
+      (Frame.pointGenerate.isTrans)
+      (Frame.pointGenerate.isIrrefl);
 
 end Kripke
 
