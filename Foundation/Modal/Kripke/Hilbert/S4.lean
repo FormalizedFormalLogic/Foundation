@@ -40,7 +40,8 @@ open finestFilterationTransitiveClosureModel in
 instance finiteComplete : Complete (Hilbert.S4) Kripke.FrameClass.finite_preorder := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
-  rintro F ⟨F_refl, F_trans⟩ V x;
+  rintro F F_preorder V x;
+  replace F_preorder := Set.mem_setOf_eq.mp F_preorder;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
   apply filteration FM (finestFilterationTransitiveClosureModel.filterOf) (by aesop) |>.mpr;
@@ -48,7 +49,7 @@ instance finiteComplete : Complete (Hilbert.S4) Kripke.FrameClass.finite_preorde
   refine ⟨?_, ?_⟩;
   . apply FilterEqvQuotient.finite;
     simp;
-  . sorry;
+  . exact finestFilterationTransitiveClosureModel.isPreorder;
 ⟩
 
 end Hilbert.S4.Kripke

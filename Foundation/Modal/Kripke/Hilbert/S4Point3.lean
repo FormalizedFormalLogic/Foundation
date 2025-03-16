@@ -78,20 +78,25 @@ instance finite_complete : Complete (Hilbert.S4Point3) Kripke.FrameClass.finite_
     rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
     . simp only [or_self];
       apply Relation.TransGen.single;
-      sorry;
+      suffices z ≺ z by tauto;
+      apply IsRefl.refl;
     . left;
       apply Relation.TransGen.single;
-      replace Rrz := Rrz.unwrap;
-      tauto;
+      suffices y ≺ z by tauto;
+      exact Rrz.unwrap;
     . right;
       apply Relation.TransGen.single;
-      replace Rry := Rry.unwrap;
-      tauto;
+      suffices z ≺ y by tauto;
+      exact Rry.unwrap;
     . replace Rry := Rry.unwrap;
       replace Rrz := Rrz.unwrap;
       rcases IsConnected.connected ⟨Rry, Rrz⟩ with (Ryz | Rrw);
-      . left; apply Relation.TransGen.single; tauto;
-      . right; apply Relation.TransGen.single; tauto;
+      . left;
+        apply Relation.TransGen.single;
+        tauto;
+      . right;
+        apply Relation.TransGen.single;
+        tauto;
 ⟩
 
 end FFP

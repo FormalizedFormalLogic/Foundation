@@ -41,8 +41,6 @@ open
   finestFilterationTransitiveClosureModel
   Relation
 
-#check isPreorder_iff
-
 instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_confluent_preorder := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
@@ -63,22 +61,32 @@ instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_
     . simp only [and_self];
       use ⟦⟨z, by tauto⟩⟧;
       apply Relation.TransGen.single;
-      sorry;
-      -- apply IsRefl.refl;
+      suffices z ≺ z by tauto;
+      apply IsRefl.refl;
     . use ⟦⟨z, by tauto⟩⟧;
       constructor;
-      . replace Rrz := TransGen.unwrap Rrz;
-        apply Relation.TransGen.single $ by tauto;
-      . apply Relation.TransGen.single $ by sorry;
+      . apply Relation.TransGen.single;
+        suffices y ≺ z by tauto;
+        exact TransGen.unwrap Rrz;
+      . apply Relation.TransGen.single;
+        suffices z ≺ z by tauto;
+        apply IsRefl.refl ;
     . use ⟦⟨y, by tauto⟩⟧;
       constructor;
-      . apply Relation.TransGen.single $ by sorry;
-      . replace Rry := TransGen.unwrap Rry;
-        apply Relation.TransGen.single $ by tauto;
+      . apply Relation.TransGen.single;
+        suffices y ≺ y by tauto;
+        apply IsRefl.refl;
+      . apply Relation.TransGen.single;
+        suffices z ≺ y by tauto;
+        exact TransGen.unwrap Rry;
     . replace Rry := TransGen.unwrap Rry;
       replace Rrz := TransGen.unwrap Rrz;
       obtain ⟨u, Ruy, Ruz⟩ := IsConfluent.confl ⟨Rry, Rrz⟩;
-      use ⟦⟨u, by sorry⟩⟧;
+      use ⟦⟨u, by
+        right;
+        apply Relation.TransGen.single;
+        exact IsTrans.trans _ _ _ Rry Ruy;
+      ⟩⟧;
       constructor;
       . exact Relation.TransGen.single $ by tauto;
       . exact Relation.TransGen.single $ by tauto;
