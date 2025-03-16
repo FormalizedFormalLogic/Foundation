@@ -15,7 +15,8 @@ protected abbrev FrameClass.trans : FrameClass := { F | IsTrans _ F }
 
 namespace FrameClass.trans
 
-@[simp] lemma nonempty : FrameClass.trans.Nonempty := by
+@[simp]
+lemma nonempty : FrameClass.trans.Nonempty := by
   use whitepoint;
   simp only [Set.mem_setOf_eq];
   infer_instance;
@@ -36,13 +37,21 @@ end Kripke
 
 namespace Hilbert.K4.Kripke
 
-instance sound : Sound (Hilbert.K4) Kripke.FrameClass.trans :=
-  instSound_of_validates_axioms FrameClass.trans.validates_HilbertK4
+instance sound : Sound (Hilbert.K4) Kripke.FrameClass.trans := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F F_trans φ rfl;
+  apply validate_AxiomFour_of_transitive (trans := F_trans);
 
 instance consistent : Entailment.Consistent (Hilbert.K4) :=
-  consistent_of_sound_frameclass FrameClass.trans (by simp)
+  consistent_of_sound_frameclass FrameClass.trans $ by
+    use whitepoint;
+    apply Set.mem_setOf_eq.mpr;
+    infer_instance;
 
-instance canonical : Canonical (Hilbert.K4) Kripke.FrameClass.trans := ⟨Canonical.transitive⟩
+instance canonical : Canonical (Hilbert.K4) Kripke.FrameClass.trans := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+⟩
 
 instance complete : Complete (Hilbert.K4) Kripke.FrameClass.trans := inferInstance
 

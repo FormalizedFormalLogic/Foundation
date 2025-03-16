@@ -82,6 +82,64 @@ instance [IsRefl _ R] : IsGeachean ⟨0, 0, 1, 0⟩ _ R := ⟨by
   exact IsRefl.refl;
 ⟩
 
+
+instance [IsGeachean ⟨0, 1, 0, 1⟩ _ R] : IsSymm _ R := ⟨by
+  intro a b Rab;
+  apply @Geachean.symmetric_def α R |>.mpr IsGeachean.geachean;
+  exact Rab;
+⟩
+
+instance [IsSymm _ R] : IsGeachean ⟨0, 1, 0, 1⟩ _ R := ⟨by
+  apply @Geachean.symmetric_def α R |>.mp;
+  exact IsSymm.symm;
+⟩
+
+
+instance [IsGeachean ⟨0, 0, 1, 1⟩ _ R] : IsSerial _ R := ⟨by
+  intro a;
+  apply @Geachean.serial_def α R |>.mpr IsGeachean.geachean;
+⟩
+
+instance [IsSerial _ R] : IsGeachean ⟨0, 0, 1, 1⟩ _ R := ⟨by
+  apply @Geachean.serial_def α R |>.mp;
+  exact IsSerial.serial;
+⟩
+
+
+instance [IsGeachean ⟨1, 1, 0, 1⟩ _ R] : IsEuclidean _ R := ⟨by
+  intro a b c Rab Rac;
+  apply @Geachean.euclidean_def α R |>.mpr IsGeachean.geachean Rab Rac;
+⟩
+
+instance [IsEuclidean _ R] : IsGeachean ⟨1, 1, 0, 1⟩ _ R := ⟨by
+  apply @Geachean.euclidean_def α R |>.mp;
+  exact IsEuclidean.eucl;
+⟩
+
+
+instance [IsGeachean ⟨1, 1, 1, 1⟩ _ R] : IsConfluent _ R := ⟨by
+  rintro a b c ⟨Rab, Rba⟩;
+  apply @Geachean.confluent_def α R |>.mpr IsGeachean.geachean;
+  exact ⟨Rab, Rba⟩;
+⟩
+
+instance [IsConfluent _ R] : IsGeachean ⟨1, 1, 1, 1⟩ _ R := ⟨by
+  apply @Geachean.confluent_def α R |>.mp;
+  exact IsConfluent.confl;
+⟩
+
+
+instance [IsGeachean ⟨0, 1, 0, 0⟩ _ R] : IsCoreflexive _ R := ⟨by
+  intro a b Rab;
+  apply @Geachean.coreflexive_def α R |>.mpr IsGeachean.geachean;
+  exact Rab;
+⟩
+
+instance [IsCoreflexive _ R] : IsGeachean ⟨0, 1, 0, 0⟩ _ R := ⟨by
+  apply @Geachean.coreflexive_def α R |>.mp;
+  exact IsCoreflexive.corefl;
+⟩
+
 end
 
 

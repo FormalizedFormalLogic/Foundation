@@ -1,4 +1,6 @@
 import Foundation.Modal.Kripke.Completeness
+import Foundation.Vorspiel.BinaryRelations
+import Foundation.Modal.Geachean
 
 namespace LO
 
@@ -22,12 +24,12 @@ variable {g} [HasAxiomGeach g 𝓢]
 def axiomGeach : 𝓢 ⊢ ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := HasAxiomGeach.Geach _
 @[simp] lemma axiomGeach! : 𝓢 ⊢! ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := ⟨axiomGeach⟩
 
-instance [Entailment.HasAxiomT 𝓢] : Entailment.HasAxiomGeach ⟨0, 0, 1, 0⟩ 𝓢 := ⟨fun _ => axiomT⟩
-instance [Entailment.HasAxiomB 𝓢] : Entailment.HasAxiomGeach ⟨0, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomB⟩
-instance [Entailment.HasAxiomD 𝓢] : Entailment.HasAxiomGeach ⟨0, 0, 1, 1⟩ 𝓢 := ⟨fun _ => axiomD⟩
-instance [Entailment.HasAxiomFour 𝓢] : Entailment.HasAxiomGeach ⟨0, 2, 1, 0⟩ 𝓢 := ⟨fun _ => axiomFour⟩
-instance [Entailment.HasAxiomFive 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomFive⟩
-instance [Entailment.HasAxiomTc 𝓢] : Entailment.HasAxiomGeach ⟨0, 1, 0, 0⟩ 𝓢 := ⟨fun _ => axiomTc⟩
+instance [Entailment.HasAxiomT 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 0⟩ 𝓢 := ⟨fun _ => axiomT⟩
+instance [Entailment.HasAxiomB 𝓢]      : Entailment.HasAxiomGeach ⟨0, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomB⟩
+instance [Entailment.HasAxiomD 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 1⟩ 𝓢 := ⟨fun _ => axiomD⟩
+instance [Entailment.HasAxiomFour 𝓢]   : Entailment.HasAxiomGeach ⟨0, 2, 1, 0⟩ 𝓢 := ⟨fun _ => axiomFour⟩
+instance [Entailment.HasAxiomFive 𝓢]   : Entailment.HasAxiomGeach ⟨1, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomFive⟩
+instance [Entailment.HasAxiomTc 𝓢]     : Entailment.HasAxiomGeach ⟨0, 1, 0, 0⟩ 𝓢 := ⟨fun _ => axiomTc⟩
 instance [Entailment.HasAxiomPoint2 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 1, 1⟩ 𝓢 := ⟨fun _ => axiomPoint2⟩
 
 end Entailment
@@ -39,7 +41,7 @@ namespace Modal
 
 namespace Kripke
 
-instance whitepoint.instIsGeachean : IsGeachean g _ whitepoint.Rel := ⟨by
+instance whitepoint.instIsGeachean (g) : IsGeachean g _ whitepoint.Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz⟩;
   use ();
   constructor;
@@ -47,13 +49,13 @@ instance whitepoint.instIsGeachean : IsGeachean g _ whitepoint.Rel := ⟨by
   . apply Rel.iterate.true_any; tauto;
 ⟩
 
-instance : IsRefl _ whitepoint.Rel := by
-  have := whitepoint.instIsGeachean (g := ⟨0, 0, 1, 0⟩);
-  infer_instance;
-
-instance : IsTrans _ whitepoint.Rel := by
-  have := whitepoint.instIsGeachean (g := ⟨0, 2, 1, 0⟩);
-  infer_instance;
+instance : IsRefl _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 0, 1, 0⟩); infer_instance;
+instance : IsTrans _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 2, 1, 0⟩); infer_instance;
+instance : IsEuclidean _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨1, 1, 0, 1⟩); infer_instance;
+instance : IsSymm _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 1, 0, 1⟩); infer_instance;
+instance : IsSerial _ whitepoint.Rel := by haveI := whitepoint.instIsGeachean (⟨0, 0, 1, 1⟩); infer_instance;
+instance : IsPreorder _ whitepoint.Rel := by constructor;
+instance : IsEquiv _ whitepoint.Rel := by constructor;
 
 open Formula.Kripke
 
@@ -62,7 +64,7 @@ protected abbrev FrameClass.multiGeachean (G : Set Geachean.Taple) : FrameClass 
 
 section definability
 
-variable {F : Kripke.Frame} {g : Geachean.Taple}
+variable {F : Kripke.Frame} (g : Geachean.Taple)
 
 lemma validate_AxiomGeach_of_Geachean [IsGeachean g _ F.Rel] : F ⊧ (Axioms.Geach g (.atom 0)) := by
   rintro V x h;
@@ -78,41 +80,13 @@ lemma validate_AxiomGeach_of_Geachean [IsGeachean g _ F.Rel] : F ⊧ (Axioms.Gea
 
 section
 
-lemma validate_AxiomT_of_reflexive [refl : IsRefl _ F] : F ⊧ (Axioms.T (.atom 0)) := by
-  exact validate_AxiomGeach_of_Geachean (g := ⟨0, 0, 1, 0⟩);
-
-lemma validate_AxiomFour_of_transitive [trans : IsTrans _ F] : F ⊧ (Axioms.Four (.atom 0)) := by
-  exact validate_AxiomGeach_of_Geachean (g := ⟨0, 2, 1, 0⟩);
-
-/-
-lemma validate_AxiomT_of_reflexive (h : Reflexive F.Rel) : F ⊧ (Axioms.T (.atom 0)) := by
-  rw [Geachean.reflexive_def] at h;
-  exact validate_AxiomGeach_of_Geachean h;
-
-lemma validate_AxiomFour_of_transitive (h : Transitive F.Rel) : F ⊧ (Axioms.Four (.atom 0)) := by
-  rw [Geachean.transitive_def] at h;
-  exact validate_AxiomGeach_of_Geachean h;
-
-lemma validate_AxiomD_of_serial (h : Serial F.Rel) : F ⊧ (Axioms.D (.atom 0)) := by
-  rw [Geachean.serial_def] at h;
-  exact validate_AxiomGeach_of_Geachean h;
-
-lemma validate_AxiomFive_of_euclidean (h : Euclidean F.Rel) : F ⊧ (Axioms.Five (.atom 0)) := by
-  rw [Geachean.euclidean_def] at h;
-  exact validate_AxiomGeach_of_Geachean h;
-
-lemma validate_AxiomB_of_symmetric (h : Symmetric F.Rel) : F ⊧ (Axioms.B (.atom 0)) := by
-  rw [Geachean.symmetric_def] at h;
-  exact validate_AxiomGeach_of_Geachean h;
-
-lemma validate_AxiomPoint2_of_confluent (h : Confluent F.Rel) : F ⊧ (Axioms.Point2 (.atom 0)) := by
-  rw [Geachean.confluent_def] at h;
-  exact validate_AxiomGeach_of_Geachean h;
-
-lemma validate_AxiomTc_of_coreflexive (h : Coreflexive F.Rel) : F ⊧ (Axioms.Tc (.atom 0)) := by
-  rw [Geachean.coreflexive_def] at h;
-  exact validate_AxiomGeach_of_Geachean h;
--/
+lemma validate_AxiomT_of_reflexive [refl : IsRefl _ F] : F ⊧ (Axioms.T (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 0, 1, 0⟩
+lemma validate_AxiomD_of_serial [ser : IsSerial _ F.Rel] : F ⊧ (Axioms.D (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 0, 1, 1⟩
+lemma validate_AxiomB_of_symmetric [sym : IsSymm _ F.Rel] : F ⊧ (Axioms.B (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 1, 0, 1⟩
+lemma validate_AxiomFour_of_transitive [trans : IsTrans _ F] : F ⊧ (Axioms.Four (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 2, 1, 0⟩
+lemma validate_AxiomFive_of_euclidean [eucl : IsEuclidean _ F.Rel] : F ⊧ (Axioms.Five (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨1, 1, 0, 1⟩
+lemma validate_AxiomPoint2_of_confluent [conf : IsConfluent _ F.Rel] : F ⊧ (Axioms.Point2 (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨1, 1, 1, 1⟩
+lemma validate_AxiomTc_of_coreflexive [corefl : IsCoreflexive _ F.Rel] : F ⊧ (Axioms.Tc (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 1, 0, 0⟩
 
 end
 
@@ -188,6 +162,31 @@ lemma transitive_of_validate_AxiomFour (h : F ⊧ (Axioms.Four (.atom 0))) : Tra
   apply geachean_of_validate_AxiomGeach;
   exact h;
 
+lemma euclidean_of_validate_AxiomFive (h : F ⊧ (Axioms.Five (.atom 0))) : Euclidean F.Rel := by
+  rw [Geachean.euclidean_def];
+  apply geachean_of_validate_AxiomGeach;
+  exact h;
+
+lemma symmetric_of_validate_AxiomB (h : F ⊧ (Axioms.B (.atom 0))) : Symmetric F.Rel := by
+  rw [Geachean.symmetric_def];
+  apply geachean_of_validate_AxiomGeach;
+  exact h;
+
+lemma serial_of_validate_AxiomD (h : F ⊧ (Axioms.D (.atom 0))) : Serial F.Rel := by
+  rw [Geachean.serial_def];
+  apply geachean_of_validate_AxiomGeach;
+  exact h;
+
+lemma coreflexive_of_validate_AxiomTc (h : F ⊧ (Axioms.Tc (.atom 0))) : Coreflexive F.Rel := by
+  rw [Geachean.coreflexive_def];
+  apply geachean_of_validate_AxiomGeach;
+  exact h;
+
+lemma confluent_of_validate_AxiomPoint2 (h : F ⊧ (Axioms.Point2 (.atom 0))) : Confluent F.Rel := by
+  rw [Geachean.confluent_def];
+  apply geachean_of_validate_AxiomGeach;
+  exact h;
+
 end
 
 end definability
@@ -205,7 +204,7 @@ open canonicalModel
 
 namespace Canonical
 
-protected lemma geachean [Entailment.HasAxiomGeach g 𝓢] : IsGeachean g _ (canonicalFrame 𝓢).Rel := ⟨by
+instance [Entailment.HasAxiomGeach g 𝓢] : IsGeachean g _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz⟩;
   have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹^[g.m]y.1.1, ◇''⁻¹^[g.n]z.1.2⟩) $ by
     rintro Γ Δ hΓ hΔ;
@@ -242,44 +241,15 @@ protected lemma geachean [Entailment.HasAxiomGeach g 𝓢] : IsGeachean g _ (can
     exact hu.2 hφ;
 ⟩
 
-protected lemma transitive [Entailment.HasAxiomFour 𝓢] : IsTrans _ (canonicalFrame 𝓢).Rel := by
-  have := Canonical.geachean (𝓢 := 𝓢) (g := ⟨0, 2, 1, 0⟩);
-  infer_instance;
-
-protected lemma reflexive [Entailment.HasAxiomT 𝓢] : IsRefl _ (canonicalFrame 𝓢).Rel := by
-  have := Canonical.geachean (𝓢 := 𝓢) (g := ⟨0, 0, 1, 0⟩);
-  infer_instance;
-
-
-/-
-protected lemma reflexive [Entailment.HasAxiomT 𝓢] : IsRefl _ (canonicalFrame 𝓢).Rel := ⟨by
-  have := @Canonical.geachean (g := ⟨0, 0, 1, 0⟩);
-  rw [←Geachean.reflexive_def] at this;
-  apply Canonical.geachean;
-  intro x;
-  simp [axiomT!];
-⟩
--/
-
-/-
-protected lemma transitive [Entailment.HasAxiomFour 𝓢] : Transitive (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.transitive_def]; apply Canonical.geachean; simp [axiomFour!];
-
-protected lemma euclidean [Entailment.HasAxiomFive 𝓢] : Euclidean (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.euclidean_def]; apply Canonical.geachean; simp [axiomFive!];
-
-protected lemma serial [Entailment.HasAxiomD 𝓢] : Serial (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.serial_def]; apply Canonical.geachean; simp [axiomD!];
-
-protected lemma symmetric [Entailment.HasAxiomB 𝓢] : Symmetric (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.symmetric_def]; apply Canonical.geachean; simp [axiomB!];
-
-protected lemma coreflexive [Entailment.HasAxiomTc 𝓢] : Coreflexive (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.coreflexive_def]; apply Canonical.geachean; simp [axiomTc!];
-
-protected lemma confluent [Entailment.HasAxiomPoint2 𝓢] : Confluent (canonicalFrame 𝓢).Rel := by
-  rw [Geachean.confluent_def]; apply Canonical.geachean; simp [axiomPoint2!];
--/
+instance [Entailment.HasAxiomFour 𝓢] : IsTrans _ (canonicalFrame 𝓢).Rel := inferInstance
+instance [Entailment.HasAxiomT 𝓢] : IsRefl _ (canonicalFrame 𝓢).Rel := inferInstance
+instance [Entailment.HasAxiomFive 𝓢] : IsEuclidean _ (canonicalFrame 𝓢).Rel := inferInstance
+instance [Entailment.HasAxiomD 𝓢] : IsSerial _ (canonicalFrame 𝓢).Rel := inferInstance
+instance [Entailment.HasAxiomB 𝓢] : IsSymm _ (canonicalFrame 𝓢).Rel := inferInstance
+instance [Entailment.HasAxiomTc 𝓢] : IsCoreflexive _ (canonicalFrame 𝓢).Rel := inferInstance
+instance [Entailment.HasAxiomPoint2 𝓢] : IsConfluent _ (canonicalFrame 𝓢).Rel := inferInstance
+instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] : IsPreorder _ (canonicalFrame 𝓢).Rel := by constructor
+instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] [Entailment.HasAxiomB 𝓢] : IsEquiv _ (canonicalFrame 𝓢).Rel := by constructor
 
 end Canonical
 

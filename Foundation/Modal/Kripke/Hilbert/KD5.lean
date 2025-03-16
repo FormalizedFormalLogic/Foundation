@@ -5,40 +5,27 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-abbrev Kripke.FrameClass.serial_eucl : FrameClass := { F | Serial F ∧ Euclidean F }
+abbrev Kripke.FrameClass.serial_eucl : FrameClass := { F | IsSerial _ F ∧ IsEuclidean _ F }
 
-namespace Kripke.FrameClass.serial_eucl
+namespace Hilbert.KD5.Kripke
 
-lemma isMultiGeachean : FrameClass.serial_eucl = FrameClass.multiGeachean {⟨0, 0, 1, 1⟩, ⟨1, 1, 0, 1⟩} := by
-  ext F;
-  simp [Geachean.serial_def, Geachean.euclidean_def, MultiGeachean]
-
-@[simp]
-lemma nonempty : FrameClass.serial_eucl.Nonempty := by simp [isMultiGeachean]
-
-lemma validates_HilbertKD5 : Kripke.FrameClass.serial_eucl.Validates Hilbert.KD5.axioms := by
+instance sound : Sound (Hilbert.KD5) Kripke.FrameClass.serial_eucl := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨F_serial, F_eucl⟩ φ (rfl | rfl);
-  . exact validate_AxiomD_of_serial $ by assumption;
-  . exact validate_AxiomFive_of_euclidean $ by assumption;
+  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  . exact validate_AxiomD_of_serial;
+  . exact validate_AxiomFive_of_euclidean;
 
-end Kripke.FrameClass.serial_eucl
+instance consistent : Entailment.Consistent (Hilbert.KD5) := consistent_of_sound_frameclass Kripke.FrameClass.serial_eucl $ by
+  use whitepoint;
+  constructor <;> infer_instance;
 
+instance canonical : Canonical (Hilbert.KD5) Kripke.FrameClass.serial_eucl := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  constructor <;> infer_instance;
+⟩
 
+instance complete : Complete (Hilbert.KD5) Kripke.FrameClass.serial_eucl := inferInstance
 
-namespace Hilbert.KD5
-
-instance Kripke.sound : Sound (Hilbert.KD5) Kripke.FrameClass.serial_eucl :=
-  instSound_of_validates_axioms Kripke.FrameClass.serial_eucl.validates_HilbertKD5
-
-instance Kripke.consistent : Entailment.Consistent (Hilbert.KD5) :=
-  consistent_of_sound_frameclass Kripke.FrameClass.serial_eucl (by simp)
-
-instance Kripke.canonical : Canonical (Hilbert.KD5) Kripke.FrameClass.serial_eucl := ⟨⟨Canonical.serial, Canonical.euclidean⟩⟩
-
-instance Kripke.complete : Complete (Hilbert.KD5) Kripke.FrameClass.serial_eucl := inferInstance
-
-
-end Hilbert.KD5
+end Hilbert.KD5.Kripke
 
 end LO.Modal

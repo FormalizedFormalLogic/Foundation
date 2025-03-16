@@ -1,4 +1,5 @@
 import Foundation.Modal.Kripke.Completeness
+import Foundation.Vorspiel.BinaryRelations
 
 namespace LO.Modal
 
@@ -7,14 +8,15 @@ namespace Kripke
 open Formula.Kripke
 
 
-protected abbrev FrameClass.connected : FrameClass := { F | Connected F }
+-- protected abbrev FrameClass.connected : FrameClass := { F | Connected F }
 
+instance : IsConnected _ whitepoint.Rel := ⟨by tauto⟩
 
 section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_AxiomPoint3_of_connected (hCon : Connected F) : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1)) := by
+lemma validate_AxiomPoint3_of_connected [IsConnected _ F] : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1)) := by
   rintro V x;
   apply Satisfies.or_def.mpr;
   suffices
@@ -24,7 +26,7 @@ lemma validate_AxiomPoint3_of_connected (hCon : Connected F) : F ⊧ (Axioms.Poi
   by_contra hC;
   push_neg at hC;
   obtain ⟨⟨y, Rxy, hp, hnq⟩, ⟨z, Rxz, hq, hnp⟩⟩ := hC;
-  cases hCon ⟨Rxy, Rxz⟩ with
+  cases IsConnected.connected ⟨Rxy, Rxz⟩ with
   | inl Ryz => have := hp z Ryz; contradiction;
   | inr Rzy => have := hq y Rzy; contradiction;
 
@@ -38,7 +40,7 @@ lemma connected_of_validate_Point3 : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1)) �
     simpa [Semantics.Realize, Satisfies];
   refine ⟨y, Rxy, by tauto, nRzy, z, Ryz, by tauto, nRyz⟩;
 
-
+/-
 namespace FrameClass.connected
 
 @[simp]
@@ -49,6 +51,7 @@ lemma validates_axiomPoint3 : FrameClass.connected.ValidatesFormula (Axioms.Poin
   apply validate_AxiomPoint3_of_connected;
 
 end FrameClass.connected
+-/
 
 end definability
 
@@ -65,7 +68,7 @@ open canonicalModel
 
 namespace Canonical
 
-protected lemma connected [Entailment.HasAxiomPoint3 𝓢] : Connected (canonicalFrame 𝓢).Rel := by
+instance [Entailment.HasAxiomPoint3 𝓢] : IsConnected _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz⟩;
   by_contra hC;
   push_neg at hC;
@@ -93,6 +96,7 @@ protected lemma connected [Entailment.HasAxiomPoint3 𝓢] : Connected (canonica
         constructor;
         . simpa using hψz;
         . exact iff_not_mem₁_mem₂.mp hφz;
+⟩
 
 end Canonical
 

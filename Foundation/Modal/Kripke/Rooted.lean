@@ -142,17 +142,30 @@ instance [Finite F] : Finite (F↾r) := inferInstance
 
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
+instance [IsTrans _ F] : IsTrans _ (F↾r) := ⟨by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ hxy hyz;
+  all_goals sorry;
+⟩
+
+instance [IsRefl _ F] : IsRefl _ (F↾r) := ⟨by
+  rintro ⟨x, (rfl | hx)⟩;
+  all_goals sorry;
+⟩
+
+/-
 lemma rel_trans (F_trans : Transitive F) : Transitive (F↾r).Rel := by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ hxy hyz;
   all_goals aesop;
 
-lemma rel_irrefl (F_irrefl : Irreflexive F) : Irreflexive (F↾r).Rel := by
-  rintro ⟨x, (rfl | hx)⟩ h;
-  all_goals apply F_irrefl; exact h;
-
 lemma rel_refl (F_refl : Reflexive F) : Reflexive (F↾r).Rel := by
   rintro ⟨x, (rfl | hx)⟩;
   all_goals apply F_refl;
+
+-/
+
+lemma rel_irrefl (F_irrefl : Irreflexive F) : Irreflexive (F↾r).Rel := by
+  rintro ⟨x, (rfl | hx)⟩ h;
+  all_goals apply F_irrefl; exact h;
 
 lemma rel_confl (F_confl : Confluent F) : Confluent (F↾r).Rel := by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ ⟨Rxy, Rxz⟩;

@@ -7,37 +7,27 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-abbrev Kripke.FrameClass.symm_preorder : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
-abbrev Kripke.FrameClass.finite_symm_preorder: FrameClass := { F | F.IsFinite ∧ Reflexive F.Rel ∧ Transitive F.Rel ∧ Symmetric F.Rel }
-
-namespace Kripke.FrameClass.symm_preorder
-
-lemma isMultiGeachean : FrameClass.symm_preorder = FrameClass.multiGeachean {⟨0, 0, 1, 0⟩, ⟨0, 2, 1, 0⟩, ⟨0, 1, 0, 1⟩} := by
-  ext F;
-  simp [Geachean.reflexive_def, Geachean.transitive_def, Geachean.symmetric_def, MultiGeachean]
-
-@[simp]
-lemma nonempty : FrameClass.symm_preorder.Nonempty := by simp [isMultiGeachean]
-
-lemma validates_HilbertKT4B : Kripke.FrameClass.symm_preorder.Validates Hilbert.KT4B.axioms := by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
-  . exact validate_AxiomT_of_reflexive $ by assumption;
-  . exact validate_AxiomFour_of_transitive $ by assumption;
-  . exact validate_AxiomB_of_symmetric $ by assumption;
-
-end Kripke.FrameClass.symm_preorder
-
+abbrev Kripke.FrameClass.symm_preorder : FrameClass := { F | IsEquiv _ F.Rel }
+abbrev Kripke.FrameClass.finite_symm_preorder: FrameClass := { F | Finite F.World ∧ IsEquiv _ F.Rel }
 
 namespace Hilbert.KT4B.Kripke
 
-instance sound : Sound (Hilbert.KT4B) Kripke.FrameClass.symm_preorder :=
-  instSound_of_validates_axioms Kripke.FrameClass.symm_preorder.validates_HilbertKT4B
+instance sound : Sound (Hilbert.KT4B) Kripke.FrameClass.symm_preorder := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨⟩ _ (rfl | rfl | rfl);
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomFour_of_transitive;
+  . exact validate_AxiomB_of_symmetric;
 
-instance consistent : Entailment.Consistent (Hilbert.KT4B) :=
-  consistent_of_sound_frameclass Kripke.FrameClass.symm_preorder (by simp)
+instance consistent : Entailment.Consistent (Hilbert.KT4B) := consistent_of_sound_frameclass Kripke.FrameClass.symm_preorder $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
 
-instance canonical : Canonical (Hilbert.KT4B) Kripke.FrameClass.symm_preorder := ⟨⟨Canonical.reflexive, Canonical.transitive, Canonical.symmetric⟩⟩
+instance canonical : Canonical (Hilbert.KT4B) Kripke.FrameClass.symm_preorder := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+⟩
 
 instance complete : Complete (Hilbert.KT4B) Kripke.FrameClass.symm_preorder := inferInstance
 

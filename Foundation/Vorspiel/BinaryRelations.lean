@@ -9,7 +9,7 @@ local infix:50 " ≺ " => rel
 -- NOTE: `x ≺ y → x ≺ z → y ≺ z`とする流儀もある
 def Euclidean := ∀ ⦃x y z⦄, x ≺ y → x ≺ z → z ≺ y
 class IsEuclidean (α : Sort*) (r : α → α → Prop) : Prop where
-  eucl : ∀ ⦃x y z⦄, x ≺ y → x ≺ z → z ≺ y
+  eucl : ∀ ⦃x y z⦄, r x y → r x z → r z y
 
 def Serial := ∀ x, ∃ y, x ≺ y
 class IsSerial (α : Sort*) (r : α → α → Prop) : Prop where
@@ -17,33 +17,47 @@ class IsSerial (α : Sort*) (r : α → α → Prop) : Prop where
 
 def Confluent := ∀ ⦃x y z⦄, ((x ≺ y ∧ x ≺ z) → ∃ w, (y ≺ w ∧ z ≺ w))
 class IsConfluent (α : Sort*) (r : α → α → Prop) : Prop where
-  confl : ∀ ⦃x y z⦄, ((x ≺ y ∧ x ≺ z) → ∃ w, (y ≺ w ∧ z ≺ w))
+  confl : ∀ ⦃x y z⦄, ((r x y ∧ r x z) → ∃ w, (r y w ∧ r z w))
 
 def WeakConfluent := ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z ∧ y ≠ z) → (∃ w, y ≺ w ∧ z ≺ w)
+class IsWeakConfluent (α : Sort*) (r : α → α → Prop) : Prop where
+  weak_confl : ∀ ⦃x y z⦄, (r x y ∧ r x z ∧ y ≠ z) → (∃ w, r y w ∧ r z w)
 
 def Dense := ∀ ⦃x y⦄, x ≺ y → ∃z, x ≺ z ∧ z ≺ y
 
 def Connected := ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z) → (y ≺ z ∨ z ≺ y)
 class IsConnected (α : Sort*) (r : α → α → Prop) : Prop where
-  connected : ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z) → (y ≺ z ∨ z ≺ y)
+  connected : ∀ ⦃x y z⦄, (r x y ∧ r x z) → (r y z ∨ r z y)
 
 def WeakConnected := ∀ ⦃x y z⦄, (x ≺ y ∧ x ≺ z ∧ y ≠ z) → (y ≺ z ∨ z ≺ y)
+class IsWeakConnected (α : Sort*) (r : α → α → Prop) : Prop where
+  weak_connected : ∀ ⦃x y z⦄, (r x y ∧ r x z ∧ y ≠ z) → (r y z ∨ r z y)
 
 def Functional := ∀ ⦃x y z⦄, x ≺ y ∧ x ≺ z → y = z
 
 def RightConvergent := ∀ ⦃x y z⦄, x ≺ y ∧ x ≺ z → y ≺ z ∨ z ≺ y ∨ y = z
 
 def Coreflexive := ∀ ⦃x y⦄, x ≺ y → x = y
+class IsCoreflexive (α : Sort*) (r : α → α → Prop) : Prop where
+  corefl : ∀ ⦃x y⦄, r x y → x = y
 
 def Equality := ∀ ⦃x y⦄, x ≺ y ↔ x = y
+class IsEquality (α : Sort*) (r : α → α → Prop) : Prop where
+  equal : ∀ ⦃x y⦄, r x y ↔ x = y
 
 def Isolated := ∀ ⦃x y⦄, ¬(x ≺ y)
+class IsIsolated (α : Sort*) (r : α → α → Prop) : Prop where
+  isolated : ∀ ⦃x y⦄, ¬(r x y)
 
 def Assymetric := ∀ ⦃x y⦄, (x ≺ y) → ¬(y ≺ x)
 
 def Universal := ∀ ⦃x y⦄, x ≺ y
+class IsUniversal (α : Sort*) (r : α → α → Prop) : Prop where
+  universal : ∀ ⦃x y⦄, r x y
 
 abbrev ConverseWellFounded := WellFounded $ flip (· ≺ ·)
+class IsConverseWellFounded (α : Sort*) (r : α → α → Prop) : Prop where
+  converse_well_founded : WellFounded $ flip r
 
 end
 

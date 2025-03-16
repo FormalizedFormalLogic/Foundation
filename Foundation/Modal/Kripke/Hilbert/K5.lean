@@ -6,42 +6,24 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-namespace Kripke.FrameClass
-
-abbrev eucl : FrameClass := { F | Euclidean F }
--- abbrev Kripke.EuclideanFiniteFrameClass: FrameClass := { F | Euclidean F.Rel }
-
-namespace eucl
-
-lemma isMultiGeachean : FrameClass.eucl = FrameClass.multiGeachean {⟨1, 1, 0, 1⟩} := by
-  ext F;
-  simp [Geachean.euclidean_def, MultiGeachean]
-
-@[simp]
-lemma nonempty : FrameClass.eucl.Nonempty := by simp [eucl.isMultiGeachean]
-
-lemma validates_AxiomFive : FrameClass.eucl.ValidatesFormula (Axioms.Five (.atom 0)) := by
-  rintro F F_eucl _ rfl;
-  apply validate_AxiomFive_of_euclidean $ by assumption
-
-lemma validates_HilbertK5 : FrameClass.eucl.Validates Hilbert.K5.axioms := by
-  apply FrameClass.Validates.withAxiomK;
-  apply validates_AxiomFive;
-
-end eucl
-
-end Kripke.FrameClass
-
+protected abbrev Kripke.FrameClass.eucl : FrameClass := { F | IsEuclidean _ F }
 
 namespace Hilbert.K5.Kripke
 
-instance sound : Sound (Hilbert.K5) Kripke.FrameClass.eucl :=
-  instSound_of_validates_axioms Kripke.FrameClass.eucl.validates_HilbertK5
+instance sound : Sound (Hilbert.K5) Kripke.FrameClass.eucl := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F F_eucl _ rfl;
+  exact validate_AxiomFive_of_euclidean (eucl := F_eucl);
 
-instance consistent : Entailment.Consistent (Hilbert.K5) :=
-  consistent_of_sound_frameclass Kripke.FrameClass.eucl (by simp)
+instance consistent : Entailment.Consistent (Hilbert.K5) := consistent_of_sound_frameclass FrameClass.eucl $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
 
-instance canonical : Canonical (Hilbert.K5) Kripke.FrameClass.eucl := ⟨Canonical.euclidean⟩
+instance canonical : Canonical (Hilbert.K5) Kripke.FrameClass.eucl := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+⟩
 
 instance complete : Complete (Hilbert.K5) Kripke.FrameClass.eucl := inferInstance
 

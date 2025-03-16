@@ -9,9 +9,10 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-abbrev Kripke.FrameClass.connected_preorder : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
+abbrev Kripke.FrameClass.connected_preorder : FrameClass := { F | IsPreorder _ F ∧ IsConnected _ F }
 abbrev Kripke.FrameClass.finite_connected_preorder : FrameClass := { F | F.IsFinite ∧ Reflexive F ∧ Transitive F ∧ Connected F }
 
+/-
 namespace Kripke.FrameClass.connected_preorder
 
 @[simp]
@@ -27,18 +28,26 @@ lemma validates_HilbertS4Point3 : Kripke.FrameClass.connected_preorder.Validates
   . exact validate_AxiomPoint3_of_connected $ by assumption;
 
 end Kripke.FrameClass.connected_preorder
-
+-/
 
 namespace Hilbert.S4Point3.Kripke
 
-instance sound : Sound (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder :=
-  instSound_of_validates_axioms FrameClass.connected_preorder.validates_HilbertS4Point3
+instance sound : Sound (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomFour_of_transitive;
+  . exact validate_AxiomPoint3_of_connected;
 
 instance consistent : Entailment.Consistent (Hilbert.S4Point3) :=
-  consistent_of_sound_frameclass FrameClass.connected_preorder (by simp)
+  consistent_of_sound_frameclass FrameClass.connected_preorder $ by
+    use whitepoint;
+    refine ⟨inferInstance, inferInstance⟩;
 
-instance canonical : Canonical (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder :=
-  ⟨⟨Canonical.reflexive, Canonical.transitive, Canonical.connected⟩⟩
+instance canonical : Canonical (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  constructor <;> infer_instance;
+⟩
 
 instance complete : Complete (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder := inferInstance
 

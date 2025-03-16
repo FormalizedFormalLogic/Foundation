@@ -9,7 +9,7 @@ namespace Kripke
 
 variable {F : Frame}
 
-lemma validate_AxiomL_of_trans_cwf (hTrans : Transitive F.Rel) (hCWF : ConverseWellFounded F.Rel) : F ⊧ (Axioms.L (.atom 0)) := by
+lemma validate_AxiomL_of_trans_cwf [IsTrans _ F.Rel] [IsConverseWellFounded _ F.Rel] : F ⊧ (Axioms.L (.atom 0)) := by
   rintro V w;
   apply Satisfies.imp_def.mpr;
   contrapose;
@@ -26,7 +26,7 @@ lemma validate_AxiomL_of_trans_cwf (hTrans : Transitive F.Rel) (hCWF : ConverseW
     push_neg;
     constructor;
     . intro n rmn;
-      apply not_imp_not.mp $ hm₂ n (hTrans rwm rmn);
+      apply not_imp_not.mp $ hm₂ n (IsTrans.trans _ _ _ rwm rmn);
       exact rmn;
     . assumption;
 

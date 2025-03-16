@@ -1,5 +1,4 @@
 import Foundation.Modal.LogicSymbol
-import Foundation.Modal.Geachean
 
 namespace LO.Axioms
 
