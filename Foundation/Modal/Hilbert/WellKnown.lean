@@ -357,6 +357,12 @@ instance : (Hilbert.GL).HasK where p := 0; q := 1;
 instance : (Hilbert.GL).HasL where p := 0
 instance : Entailment.GL (Hilbert.GL) where
 
+protected abbrev GLPoint3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}⟩
+instance : (Hilbert.GLPoint3).HasK where p := 0; q := 1;
+instance : (Hilbert.GLPoint3).HasL where p := 0
+instance : (Hilbert.GLPoint3).HasWeakPoint3 where p := 0; q := 1;
+instance : Entailment.GLPoint3 (Hilbert.GLPoint3) where
+
 protected abbrev KH : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.H (.atom 0)}⟩
 instance : (Hilbert.KH).HasK where p := 0; q := 1;
 instance : (Hilbert.KH).HasH where p := 0

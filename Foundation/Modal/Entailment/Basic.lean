@@ -528,6 +528,8 @@ instance [Entailment.S5 𝓢] : Entailment.KT 𝓢 where
 instance [Entailment.S5 𝓢] : Entailment.K5 𝓢 where
 
 protected class GL extends Entailment.K 𝓢, HasAxiomL 𝓢
+protected class GLPoint2 extends Entailment.GL 𝓢, HasAxiomWeakPoint2 𝓢
+protected class GLPoint3 extends Entailment.GL 𝓢, HasAxiomWeakPoint3 𝓢
 
 protected class Grz extends Entailment.K 𝓢, HasAxiomGrz 𝓢
 

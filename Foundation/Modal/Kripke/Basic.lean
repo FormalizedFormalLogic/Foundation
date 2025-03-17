@@ -65,7 +65,8 @@ instance : Finite blackpoint.World := by
   infer_instance;
 instance : IsIrrefl _ blackpoint.Rel := by tauto
 instance : IsTrans _ blackpoint.Rel := ⟨by tauto⟩
-
+instance : IsStrictOrder _ blackpoint.Rel where
+instance : IsConnected _ blackpoint.Rel := ⟨by tauto⟩
 
 end
 
