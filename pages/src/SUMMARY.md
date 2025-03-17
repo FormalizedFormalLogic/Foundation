@@ -2,6 +2,10 @@
 
 [Introduction](README.md)
 
+[References](./references.md)
+
+[Related Works](./related_works.md)
+
 [First-Order Logic](./first_order/README.md)
 
 - [Term and Formula](./first_order/syntax.md)
