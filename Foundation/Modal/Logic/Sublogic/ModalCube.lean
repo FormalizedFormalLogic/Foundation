@@ -10,9 +10,9 @@ open Kripke
 theorem KTB_ssubset_S5 : Logic.KTB ⊂ Logic.S5 := by
   constructor;
   . rw [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨F_refl, F_eucl⟩;
+    rintro φ hφ F ⟨_, _⟩;
     apply hφ;
-    refine ⟨F_refl, symm_of_refl_eucl F_refl F_eucl⟩;
+    refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.refl_symm ⊧ φ by simpa [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
@@ -21,11 +21,7 @@ theorem KTB_ssubset_S5 : Logic.KTB ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = 1 ∧ y ≠ 2) ∨ (x = 2 ∧ y ≠ 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨?_, ?_⟩;
-        . unfold Reflexive;
-          omega;
-        . unfold Symmetric;
-          omega;
+      . refine ⟨⟨by omega⟩, ⟨by omega⟩⟩;
       . suffices (0 : M.World) ≺ 1 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -37,11 +33,9 @@ instance : ProperSublogic Logic.KTB Logic.S5 := ⟨KTB_ssubset_S5⟩
 theorem KD45_ssubset_S5 : Logic.KD45 ⊂ Logic.S5 := by
   constructor;
   . rw [KD45.eq_SerialTransitiveEuclideanKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨F_refl, F_eucl⟩;
+    rintro φ hφ F ⟨_, _⟩;
     apply hφ;
-    refine ⟨?_, ?_, F_eucl⟩;
-    . exact serial_of_refl F_refl;
-    . exact trans_of_refl_eucl F_refl F_eucl;
+    refine ⟨inferInstance, inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.serial_trans_eucl ⊧ φ by simpa [KD45.eq_SerialTransitiveEuclideanKripkeFrameClass_Logic];
     use (Axioms.T (.atom 0));
     constructor;
@@ -50,13 +44,11 @@ theorem KD45_ssubset_S5 : Logic.KD45 ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 2, λ x y => (x = 0 ∧ y = 1) ∨ (x = 1 ∧ y = 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨?_, ?_, ?_⟩;
+      . refine ⟨⟨?_⟩, ⟨by omega⟩, ⟨by unfold Euclidean; omega⟩⟩;
         . intro x;
           match x with
           | 0 => use 1; tauto;
           | 1 => use 1; tauto;
-        . unfold Transitive; omega;
-        . unfold Euclidean; omega;
       . simp [Semantics.Realize, Satisfies, M];
         tauto;
 instance : ProperSublogic Logic.KD45 Logic.S5 := ⟨KD45_ssubset_S5⟩
@@ -64,9 +56,9 @@ instance : ProperSublogic Logic.KD45 Logic.S5 := ⟨KD45_ssubset_S5⟩
 theorem KB4_ssubset_S5 : Logic.KB4 ⊂ Logic.S5 := by
   constructor;
   . rw [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨F_refl, F_eucl⟩;
+    rintro φ hφ F ⟨_, _⟩;
     apply hφ;
-    refine ⟨symm_of_refl_eucl F_refl F_eucl, trans_of_refl_eucl F_refl F_eucl⟩;
+    refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.symm_trans ⊧ φ by simpa [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use (Axioms.T (.atom 0));
     constructor;
@@ -74,7 +66,7 @@ theorem KB4_ssubset_S5 : Logic.KB4 ⊂ Logic.S5 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ x _ => False⟩, 0;
       constructor;
-      . simp [Transitive, Symmetric];
+      . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
       . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.KB4 Logic.S5 := ⟨KB4_ssubset_S5⟩
 
@@ -99,26 +91,21 @@ instance : ProperSublogic Logic.KT Logic.KTB := ⟨KT_ssubset_KTB⟩
 theorem KDB_ssubset_KTB : Logic.KDB ⊂ Logic.KTB := by
   constructor;
   . rw [KDB.eq_SerialSymmetricKripkeFrameClass_Logic, KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨F_refl, F_symm⟩;
+    rintro φ hφ F ⟨_, _⟩;
     apply hφ;
-    refine ⟨serial_of_refl F_refl, F_symm⟩;
+    refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬FrameClass.serial_symm ⊧ φ by simpa [KDB.eq_SerialSymmetricKripkeFrameClass_Logic];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨
-          ⟨Bool, λ x y => x ≠ y⟩,
-          λ x _ => x = true
-        ⟩;
-      use M, false;
+      use ⟨⟨Bool, λ x y => x ≠ y⟩, λ x _ => x = true⟩, false;
       constructor;
-      . refine ⟨?_, ?_⟩;
+      . refine ⟨⟨?_⟩, ⟨by tauto⟩⟩;
         . intro x;
           use !x;
-          simp [M];
-        . simp_all [Symmetric, M]
-      . simp [Semantics.Realize, Satisfies, M];
+          simp;
+      . simp [Semantics.Realize, Satisfies];
         tauto;
 instance : ProperSublogic Logic.KDB Logic.KTB := ⟨KDB_ssubset_KTB⟩
 
@@ -136,7 +123,7 @@ theorem KT_ssubset_S4 : Logic.KT ⊂ Logic.S4 := by
         ⟩;
       use M, 0;
       constructor;
-      . intro x; omega;
+      . refine ⟨by omega⟩;
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 0 ∨ y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 0 ∧ y ≠ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -162,9 +149,7 @@ theorem KD4_ssubset_S4 : Logic.KD4 ⊂ Logic.S4 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ _ y => y = 1⟩, (λ w _ => w = 1)⟩, 0;
       constructor;
-      . refine ⟨?_, ?_⟩;
-        . simp [Serial]
-        . simp [Transitive];
+      . refine ⟨⟨by tauto⟩, ⟨by omega⟩⟩;
       . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.KD4 Logic.S4 := ⟨KD4_ssubset_S4⟩
 
@@ -182,10 +167,7 @@ theorem KD4_ssubset_KD45 : Logic.KD4 ⊂ Logic.KD45 := by
         ⟩;
       use M, 0;
       constructor;
-      . refine ⟨?_, ?_⟩;
-        . tauto;
-        . unfold Transitive;
-          omega;
+      . refine ⟨⟨by tauto⟩, ⟨by omega⟩⟩;
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -205,13 +187,12 @@ theorem KD5_ssubset_KD45 : Logic.KD5 ⊂ Logic.KD45 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨?_, ?_⟩;
+      . refine ⟨⟨?_⟩, ⟨by unfold Euclidean; omega⟩⟩;
         . intro x;
           match x with
           | 0 => use 1; tauto;
           | 1 => use 1; omega;
           | 2 => use 2; omega;
-        . unfold Euclidean; omega;
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -237,31 +218,27 @@ theorem K45_ssubset_KD45 : Logic.K45 ⊂ Logic.KD45 := by
     constructor;
     . exact axiomD!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 1, λ x y => False⟩, λ w _ => True⟩;
-      use M, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => True⟩, 0;
       constructor;
-      . simp [Transitive, Euclidean];
-      . simp [M, Semantics.Realize, Satisfies];
+      . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
+      . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.K45 Logic.KD45 := ⟨K45_ssubset_KD45⟩
 
 theorem K45_ssubset_KB4 : Logic.K45 ⊂ Logic.KB4 := by
   constructor;
   . rw [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic, KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨F_symm, F_trans⟩;
+    rintro φ hφ F ⟨_, _⟩;
     apply hφ;
-    refine ⟨F_trans, eucl_of_symm_trans F_symm F_trans⟩;
+    refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by simpa [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
     use Axioms.B (.atom 0);
     constructor;
     . exact axiomB!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 0⟩;
-      use M, 0;
+      use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . refine ⟨?_, ?_⟩;
-        . tauto;
-        . unfold Euclidean; tauto;
-      . simp [M, Semantics.Realize, Satisfies];
+      . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
+      . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.K45 Logic.KB4 := ⟨K45_ssubset_KB4⟩
 
 theorem KB_ssubset_KB4 : Logic.KB ⊂ Logic.KB4 := by
@@ -272,11 +249,10 @@ theorem KB_ssubset_KB4 : Logic.KB ⊂ Logic.KB4 := by
     constructor;
     . exact axiomFour!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩;
-      use M, false;
+      use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
       constructor;
-      . simp [Symmetric, M];
-      . simp [M, Semantics.Realize, Satisfies];
+      . refine ⟨by simp⟩;
+      . simp [Semantics.Realize, Satisfies];
         tauto;
 instance : ProperSublogic Logic.KB Logic.KB4 := ⟨KB_ssubset_KB4⟩
 
@@ -290,7 +266,7 @@ theorem KD_ssubset_KT : Logic.KD ⊂ Logic.KT := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩, 0;
       constructor;
-      . tauto;
+      . refine ⟨by tauto⟩;
       . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.KD Logic.KT := ⟨KD_ssubset_KT⟩
 
@@ -306,12 +282,12 @@ theorem KD_ssubset_KDB : Logic.KD ⊂ Logic.KDB := by
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
-      . intro x;
+      . refine ⟨?_⟩;
+        intro x;
         match x with
         | 0 => use 1; tauto;
         | 1 => use 1;
-      . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Realize, Satisfies];
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [M, Semantics.Realize, Satisfies];
         use 1;
         constructor <;> omega;
 instance : ProperSublogic Logic.KD Logic.KDB := ⟨KD_ssubset_KDB⟩
@@ -326,7 +302,7 @@ theorem KB_ssubset_KDB : Logic.KB ⊂ Logic.KDB := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . simp [Symmetric];
+      . refine ⟨by tauto⟩;
       . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.KB Logic.KDB := ⟨KB_ssubset_KDB⟩
 
@@ -338,11 +314,10 @@ theorem KD_ssubset_KD4 : Logic.KD ⊂ Logic.KD4 := by
     constructor;
     . exact axiomFour!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩;
-      use M, false;
+      use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
       constructor;
-      . simp [Serial, M];
-      . simp [M, Semantics.Realize, Satisfies];
+      . refine ⟨by simp [Serial]⟩;
+      . simp [Semantics.Realize, Satisfies];
         tauto;
 instance : ProperSublogic Logic.KD Logic.KD4 := ⟨KD_ssubset_KD4⟩
 
@@ -354,14 +329,10 @@ theorem K4_ssubset_KD4 : Logic.K4 ⊂ Logic.KD4 := by
     constructor;
     . exact axiomD!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨
-          ⟨Fin 1, λ x y => False⟩,
-          λ w _ => w = 0
-        ⟩;
-      use M, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . tauto;
-      . simp [M, Semantics.Realize, Satisfies];
+      . refine ⟨by tauto⟩;
+      . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.K4 Logic.KD4 := ⟨K4_ssubset_KD4⟩
 
 lemma K4_ssubset_S4 : Logic.K4 ⊂ Logic.S4 := by
@@ -397,14 +368,10 @@ theorem K5_ssubset_KD5 : Logic.K5 ⊂ Logic.KD5 := by
     constructor;
     . exact axiomD!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨
-          ⟨Fin 1, λ x y => False⟩,
-          λ w _ => w = 0
-        ⟩;
-      use M, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . tauto;
-      . simp [M, Semantics.Realize, Satisfies];
+      . refine ⟨by tauto⟩
+      . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.K5 Logic.KD5 := ⟨K5_ssubset_KD5⟩
 
 theorem K4_ssubset_K45 : Logic.K4 ⊂ Logic.K45 := by
@@ -421,8 +388,7 @@ theorem K4_ssubset_K45 : Logic.K4 ⊂ Logic.K45 := by
         ⟩;
       use M, 0;
       constructor;
-      . simp only [Set.mem_setOf_eq, Transitive];
-        omega;
+      . refine ⟨by omega⟩;
       . suffices (0 : M.World) ≺ 1 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -442,18 +408,12 @@ theorem K5_ssubset_K45 : Logic.K5 ⊂ Logic.K45 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
-      . simp only [Set.mem_setOf_eq, Euclidean]; omega;
+      . refine ⟨by unfold Euclidean; omega⟩;
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ z, x ≺ z ∧ ¬z = 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
         . intro y; tauto;
-        . use 1;
-          constructor;
-          . tauto;
-          . use 2;
-            constructor;
-            . omega;
-            . trivial;
+        . exact ⟨1, by omega, 2, by omega, by trivial⟩;
 instance : ProperSublogic Logic.K5 Logic.K45 := ⟨K5_ssubset_K45⟩
 
 theorem K_ssubset_KD : Logic.K ⊂ Logic.KD := by
@@ -464,10 +424,9 @@ theorem K_ssubset_KD : Logic.K ⊂ Logic.KD := by
     constructor;
     . exact axiomD!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩;
-      use M, 0;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
       constructor;
-      . tauto;
+      . trivial;
       . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.K Logic.KD := ⟨K_ssubset_KD⟩
 
@@ -482,7 +441,7 @@ theorem K_ssubset_K4 : Logic.K ⊂ Logic.K4 := by
       let M : Model := ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor
-      . tauto;
+      . trivial;
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 by
           simpa [Semantics.Realize, Satisfies];
         constructor;
@@ -490,13 +449,7 @@ theorem K_ssubset_K4 : Logic.K ⊂ Logic.K4 := by
           match x with
           | 0 => tauto;
           | 1 => tauto;
-        . use 1;
-          constructor;
-          . omega;
-          . use 0;
-            constructor;
-            . omega;
-            . trivial;
+        . exact ⟨1, by omega, 0, by omega, by trivial⟩;
 instance : ProperSublogic Logic.K Logic.K4 := ⟨K_ssubset_K4⟩
 
 theorem K_ssubset_K5 : Logic.K ⊂ Logic.K5 := by
@@ -510,7 +463,7 @@ theorem K_ssubset_K5 : Logic.K ⊂ Logic.K5 := by
       let M : Model := ⟨⟨Fin 2, λ x _ => x = 0⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
-      . tauto;
+      . trivial;
       . suffices ∃ (x : M.World), ¬x = 0 by simpa [Semantics.Realize, Satisfies, M];
         use 1;
         trivial;
@@ -527,7 +480,7 @@ theorem K_ssubset_KB : Logic.K ⊂ Logic.KB := by
       let M : Model := ⟨⟨Fin 2, λ x y => x = 0 ∧ y = 1⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
-      . tauto;
+      . trivial;
       . suffices ∃ (x : M.World), (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [Semantics.Realize, Satisfies, M];
         use 1;
         trivial;
@@ -536,9 +489,9 @@ instance : ProperSublogic Logic.K Logic.KB := ⟨K_ssubset_KB⟩
 theorem S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
   constructor;
   . rw [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨F_refl, F_eucl⟩;
+    rintro φ hφ F ⟨_, _⟩;
     apply hφ;
-    refine ⟨F_refl, trans_of_refl_eucl F_refl F_eucl⟩;
+    refine ⟨⟩;
   . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
@@ -547,16 +500,15 @@ theorem S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ w _ => w = 2)⟩;
       use M, 0;
       constructor;
-      . refine ⟨?_, ?_⟩;
-        . tauto;
-        . simp [Transitive];
-          omega;
+      . apply Set.mem_setOf_eq.mpr;
+        apply isPreorder_iff _ _ |>.mpr;
+        refine ⟨⟨by tauto⟩, ⟨by omega⟩⟩
       . suffices (0 : M.World) ≺ 2 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
         . tauto;
         . use 1;
-          constructor <;> omega;
+          omega;
 instance : ProperSublogic Logic.S4 Logic.S5 := ⟨S4_ssubset_S5⟩
 
 lemma K_ssubset_KT : Logic.K ⊂ Logic.KT := by

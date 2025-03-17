@@ -12,8 +12,8 @@ open Formula.Kripke
 
 namespace Kripke.FrameClass
 
-protected abbrev confluent : FrameClass := { F | Confluent F }
-protected abbrev finite_confluent : FrameClass := { F | Finite F ∧ Confluent F }
+protected abbrev confluent : FrameClass := { F | IsConfluent _ F }
+protected abbrev finite_confluent : FrameClass := { F | Finite F ∧ IsConfluent _ F }
 
 namespace confluent
 
@@ -48,8 +48,7 @@ end Kripke.FrameClass
 
 namespace Hilbert.KC.Kripke
 
-instance sound : Sound Hilbert.KC FrameClass.confluent :=
-  instSound_of_validates_axioms FrameClass.confluent.validate_HilbertKC
+instance sound : Sound Hilbert.KC FrameClass.confluent := instSound_of_validates_axioms FrameClass.confluent.validate_HilbertKC
 
 instance sound_finite : Sound Hilbert.KC FrameClass.finite_confluent :=
   instSound_of_validates_axioms FrameClass.finite_confluent.validate_HilbertKC

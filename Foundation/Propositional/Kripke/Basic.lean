@@ -16,7 +16,7 @@ structure Frame where
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
--- instance {F : Frame} : IsPartialOrder _ F.Rel := F.rel_po
+instance {F : Frame} : IsPartialOrder F.World F.Rel := F.rel_partial_order
 
 abbrev Frame.Rel' {F : Frame} (x y : F.World) := F.Rel x y
 infix:45 " ≺ " => Frame.Rel'

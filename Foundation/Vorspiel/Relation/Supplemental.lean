@@ -1,6 +1,5 @@
 import Mathlib.Logic.Relation
 
-attribute [mk_iff] IsAntisymm
 
 section
 
@@ -34,6 +33,17 @@ def Equality := ∀ ⦃x y⦄, x ≺ y ↔ x = y
 def Isolated := ∀ ⦃x y⦄, ¬(x ≺ y)
 
 def Universal := ∀ ⦃x y⦄, x ≺ y
+
+end
+
+
+section
+
+attribute [mk_iff] IsAntisymm
+attribute [mk_iff] IsPreorder
+attribute [mk_iff] IsPartialOrder
+
+lemma IsTrans.transitive [IsTrans α rel] : Transitive rel := IsTrans.trans
 
 end
 
@@ -155,14 +165,48 @@ lemma irreflexive_of_assymetric (hAssym : Asymmetric rel) : Irreflexive rel := b
 instance [IsAsymm α rel] : IsIrrefl α rel := ⟨irreflexive_of_assymetric IsAsymm.asymm⟩
 
 
-lemma refl_of_universal (h : Universal rel) : Reflexive rel := by intro x; exact @h x x;
+lemma symmetric_of_coreflexive (hCorefl : Coreflexive rel) : Symmetric rel := by
+  intro x y Rxy;
+  rwa [hCorefl Rxy] at *;
+instance [IsCoreflexive α rel] : IsSymm α rel := ⟨symmetric_of_coreflexive IsCoreflexive.coreflexive⟩
 
+lemma transitive_of_coreflexive (hCorefl : Coreflexive rel) : Transitive rel := by
+  rintro x y z Rxy Ryz;
+  rwa [hCorefl Rxy, hCorefl Ryz] at *;
+instance [IsCoreflexive α rel] : IsTrans α rel := ⟨transitive_of_coreflexive IsCoreflexive.coreflexive⟩
+
+
+lemma coreflexive_of_isolated (h : Isolated rel) : Coreflexive rel := by
+  intro x y Rxy;
+  exfalso;
+  exact h Rxy;
+instance [IsIsolated α rel] : IsCoreflexive α rel := ⟨coreflexive_of_isolated IsIsolated.isolated⟩
+
+
+lemma refl_of_universal (h : Universal rel) : Reflexive rel := by intro x; exact @h x x;
 instance [IsUniversal α rel] : IsRefl α rel := ⟨refl_of_universal IsUniversal.universal⟩
 
-
 lemma eucl_of_universal (h : Universal rel) : Euclidean rel := by rintro x y z _ _; exact @h z y;
-
 instance [IsUniversal α rel] : IsEuclidean α rel := ⟨eucl_of_universal IsUniversal.universal⟩
+
+instance [IsUniversal α rel] : IsTrans α rel := inferInstance
+instance [IsUniversal α rel] : IsPreorder α rel where
+
+lemma connected_of_universal (h : Universal rel) : Connected rel := by simp_all [Connected, Universal];
+instance [IsUniversal α rel] : IsConnected α rel := ⟨connected_of_universal IsUniversal.universal⟩
+
+
+lemma weakConfluent_of_confluent (hConfl : Confluent rel) : WeakConfluent rel := by
+  rintro x y z ⟨Rxy, Rxz, _⟩;
+  obtain ⟨w, Rwy, Rwz⟩ := hConfl ⟨Rxy, Rxz⟩;
+  use w;
+instance [IsConfluent α rel] : IsWeakConfluent α rel := ⟨weakConfluent_of_confluent IsConfluent.confluent⟩
+
+
+lemma weakConnected_of_connected (hConnected : Connected rel) : WeakConnected rel := by
+  rintro x y z ⟨Rxy, Rxz, _⟩;
+  rcases hConnected ⟨Rxy, Rxz⟩ with (Ryz | Rzy) <;> simp_all;
+instance [IsConnected α rel] : IsWeakConnected α rel := ⟨weakConnected_of_connected IsConnected.connected⟩
 
 
 lemma confluent_of_refl_connected (hRefl : Reflexive rel) (hConfl : Connected rel) : Confluent rel := by
