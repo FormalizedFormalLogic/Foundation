@@ -162,7 +162,15 @@ instance isTrans [trans : IsTrans _ F] : IsTrans (F↾r).World (F↾r).Rel := �
   . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
 ⟩
 
+lemma rel_antisymm (F_antisymm : AntiSymmetric F) : AntiSymmetric (F↾r).Rel := by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy hyx;
+  all_goals aesop;
+
+instance isAntisymm [IsAntisymm _ F] : IsAntisymm _ (F↾r).Rel := ⟨rel_antisymm IsAntisymm.antisymm⟩
+
 instance isPreorder [IsPreorder _ F] : IsPreorder _ (F↾r) where
+
+instance isPartialOrder [IsPartialOrder _ F] : IsPartialOrder _ (F↾r) where
 
 instance isIrrefl [IsIrrefl _ F] : IsIrrefl _ (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ h;
