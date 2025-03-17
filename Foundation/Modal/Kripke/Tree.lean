@@ -6,20 +6,20 @@ namespace LO.Modal
 namespace Kripke
 
 
-class Frame.IsTree (F : Kripke.Frame) (r : F.World) extends F.IsRooted r where
-  protected rel_assymetric : Assymetric F.Rel
-  protected rel_transitive : Transitive F.Rel
+class Frame.IsTree (F : Kripke.Frame) (r : F.World) extends F.IsRooted r, IsAsymm _ F.Rel, IsTrans _ F.Rel where
 
 namespace Frame.IsTree
 
 variable {F : Frame} {r : F.World}
 
-protected lemma rel_irreflexive [F.IsTree r] : Irreflexive F.Rel := irreflexive_of_assymetric (IsTree.rel_assymetric r)
+attribute [instance] IsAsymm.isIrrefl -- TODO: move
+
+protected lemma rel_irreflexive {r} [F.IsTree r] : IsIrrefl _ F.Rel := inferInstance
 
 end Frame.IsTree
 
-class Frame.IsFiniteTree (F : Kripke.Frame) (r : F.World) extends F.IsFinite, F.IsTree r where
 
+class Frame.IsFiniteTree (F : Kripke.Frame) (r : F.World) extends F.IsFinite, F.IsTree r where
 
 
 section TreeUnravelling
@@ -87,7 +87,7 @@ lemma transrel_def : X ≺^+ Y ↔ ∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.Chain'
 protected lemma rel_irreflexive : Irreflexive (F.mkTreeUnravelling r).Rel := by
   intro x; simp [Frame.mkTreeUnravelling];
 
-protected lemma rel_assymetric : Assymetric (F.mkTreeUnravelling r).Rel := by
+protected lemma rel_assymetric : Asymmetric (F.mkTreeUnravelling r).Rel := by
   rintro x y hxy;
   by_contra hyx;
   replace hxy := rel_length hxy;
@@ -154,48 +154,51 @@ lemma rel_length (Rxy : X ≺ Y) : X.1.length < Y.1.length := by
   | single Rxy => exact treeUnravelling.rel_length Rxy;
   | tail _ h ih => have := treeUnravelling.rel_length h; omega;
 
-protected lemma rel_transitive : Transitive (F.mkTransTreeUnravelling r) := Frame.RelTransGen.transitive
+instance : IsTrans _ (F.mkTransTreeUnravelling r) := inferInstance
 
-protected lemma rel_asymmetric : Assymetric (F.mkTransTreeUnravelling r) := by
+instance : IsAsymm _ (F.mkTransTreeUnravelling r) := ⟨by
   rintro x y hxy;
   by_contra hyx;
   replace hxy := rel_length hxy;
   replace hyx := rel_length hyx;
   exact hxy.not_lt hyx;
+⟩
 
 lemma rel_def : X ≺ Y ↔ (∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.Chain' F.Rel (X.1 ++ l))) := treeUnravelling.transrel_def
 
-abbrev pMorphism (F : Frame) (F_trans : Transitive F.Rel) (r : F) : (F.mkTransTreeUnravelling r) →ₚ F := (treeUnravelling.pMorphism F r).TransitiveClosure F_trans
+abbrev pMorphism (F : Frame) [IsTrans _ F.Rel] (r : F) : (F.mkTransTreeUnravelling r) →ₚ F := (treeUnravelling.pMorphism F r).TransitiveClosure
 
 protected abbrev root : (F.mkTransTreeUnravelling r).World := treeUnravelling.root
 
 instance instIsRooted : (F.mkTransTreeUnravelling r).IsRooted (mkTransTreeUnravelling.root) := inferInstance
 
-instance instIsTree {F : Frame} [DecidableEq F.World] [F.IsFinite] {r : F.World} (F_trans : Transitive F) (F_irrefl : Irreflexive F)
-  : (F.mkTransTreeUnravelling r).IsFiniteTree (mkTransTreeUnravelling.root) where
+instance instFinite [DecidableEq F.World] [Finite F] [IsTrans _ F] [IsIrrefl _ F] : Finite (F.mkTransTreeUnravelling r).World := by
+  suffices h : Finite { x // List.Chain' F.Rel x } by
+    exact
+     Finite.of_injective
+     (β := { x // List.Chain' F.Rel x })
+     (fun x => ⟨x.1, x.2.2⟩)
+     (by rintro ⟨x, hx⟩ ⟨y, hy⟩; simp_all);
+  apply List.chains_finite;
+
+instance instIsTree {F : Frame} {r : F.World}
+  : (F.mkTransTreeUnravelling r).IsTree (mkTransTreeUnravelling.root) where
   root_generates := by
     intro w;
     exact Frame.mkTransTreeUnravelling.instIsRooted.root_generates w;
-  rel_transitive := mkTransTreeUnravelling.rel_transitive
-  rel_assymetric := mkTransTreeUnravelling.rel_asymmetric
-  world_finite := by
-    suffices h : Finite { x // List.Chain' F.Rel x } by
-      exact
-       Finite.of_injective
-       (β := { x // List.Chain' F.Rel x })
-       (fun x => ⟨x.1, x.2.2⟩)
-       (by rintro ⟨x, hx⟩ ⟨y, hy⟩; simp_all);
-    apply List.chains_finite F_trans F_irrefl;
+
+instance instIsFiniteTree [DecidableEq F.World] [Finite F] [IsTrans _ F.Rel] [IsIrrefl _ F.Rel]
+  : (F.mkTransTreeUnravelling r).IsFiniteTree (mkTransTreeUnravelling.root) where
 
 end Frame.mkTransTreeUnravelling
 
-
-instance {F : Frame} [DecidableEq F.World] [F.IsFinite] {r : F.World} (F_trans : Transitive F) (F_irrefl : Irreflexive F)
-  : ((F↾r).mkTransTreeUnravelling Frame.pointGenerate.root).IsFiniteTree (Frame.mkTransTreeUnravelling.root) :=
+/-
+instance {F : Frame} [DecidableEq F.World] [Finite F] {r : F.World} (F_trans : Transitive F) (F_irrefl : Irreflexive F)
+  : ((F↾r).mkTransTreeUnravelling Frame.pointGenerate.root).IsTree (Frame.mkTransTreeUnravelling.root) :=
     Frame.mkTransTreeUnravelling.instIsTree
     (Frame.pointGenerate.rel_trans F_trans)
     (Frame.pointGenerate.rel_irrefl F_irrefl)
-
+-/
 
 def Model.mkTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model := ⟨M.toFrame.mkTreeUnravelling r, λ c a => M.Val (c.1.getLast (by simp)) a⟩
 
@@ -207,14 +210,14 @@ def Model.mkTransTreeUnravelling (M : Kripke.Model) (r : M.World) : Kripke.Model
 
 namespace Model.mkTransTreeUnravelling
 
-protected def pMorphism (M : Kripke.Model) (M_trans : Transitive M.toFrame.Rel) (r : M.World) : M.mkTransTreeUnravelling r →ₚ M :=
-  PseudoEpimorphism.ofAtomic (Frame.mkTransTreeUnravelling.pMorphism M.toFrame M_trans r) $ by rfl;
+protected def pMorphism (M : Kripke.Model) (r : M.World) [IsTrans _ M.Rel] : M.mkTransTreeUnravelling r →ₚ M :=
+  PseudoEpimorphism.ofAtomic (Frame.mkTransTreeUnravelling.pMorphism M.toFrame r) $ by rfl;
 
 protected abbrev root {M : Kripke.Model} {r : M.World} : (M.mkTransTreeUnravelling r).World := Frame.mkTransTreeUnravelling.root
 
-protected lemma modal_equivalence_at_root (M : Kripke.Model) (M_trans : Transitive M.toFrame.Rel) (r : M.World)
+protected lemma modal_equivalence_at_root (M : Kripke.Model) (r : M.World) [IsTrans _ M.Rel]
   : ModalEquivalent (M₁ := M.mkTransTreeUnravelling r) (M₂ := M) (mkTransTreeUnravelling.root) r
-  := Model.PseudoEpimorphism.modal_equivalence (Model.mkTransTreeUnravelling.pMorphism M M_trans r) (mkTransTreeUnravelling.root)
+  := Model.PseudoEpimorphism.modal_equivalence (Model.mkTransTreeUnravelling.pMorphism M r) (mkTransTreeUnravelling.root)
 
 end Model.mkTransTreeUnravelling
 

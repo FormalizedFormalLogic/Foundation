@@ -1,5 +1,4 @@
-import Foundation.Vorspiel.RelItr
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Iterate
 
 structure Geachean.Taple where
   i : ℕ
@@ -8,7 +7,6 @@ structure Geachean.Taple where
   n : ℕ
 
 def Geachean (t : Geachean.Taple) (R : Rel α α) := ∀ {x y z : α}, (R.iterate t.i x y) ∧ (R.iterate t.j x z) → ∃ u, (R.iterate t.m y u) ∧ (R.iterate t.n z u)
-
 
 namespace Geachean
 
@@ -54,6 +52,94 @@ lemma dense_def : Dense rel ↔ (Geachean ⟨0, 1, 2, 0⟩ rel) := by
 lemma satisfies_eq : Geachean (α := α) t (· = ·) := by simp [Geachean];
 
 end Geachean
+
+
+class IsGeachean (g : Geachean.Taple) (α) (R : Rel α α) where
+  geachean : ∀ {x y z : α}, (R.iterate g.i x y) ∧ (R.iterate g.j x z) → ∃ u, (R.iterate g.m y u) ∧ (R.iterate g.n z u)
+
+section
+
+variable {R : Rel α α}
+
+instance [IsGeachean ⟨0, 2, 1, 0⟩ _ R] : IsTrans _ R := ⟨by
+  intro a b c Rab Rac;
+  apply @Geachean.transitive_def α R |>.mpr IsGeachean.geachean Rab Rac;
+⟩
+instance [IsTrans _ R] : IsGeachean ⟨0, 2, 1, 0⟩ _ R := ⟨by
+  apply @Geachean.transitive_def α R |>.mp;
+  exact IsTrans.trans;
+⟩
+
+
+instance [IsGeachean ⟨0, 0, 1, 0⟩ _ R] : IsRefl _ R := ⟨by
+  intro a;
+  apply @Geachean.reflexive_def α R |>.mpr IsGeachean.geachean;
+⟩
+
+instance [IsRefl _ R] : IsGeachean ⟨0, 0, 1, 0⟩ _ R := ⟨by
+  apply @Geachean.reflexive_def α R |>.mp;
+  exact IsRefl.refl;
+⟩
+
+
+instance [IsGeachean ⟨0, 1, 0, 1⟩ _ R] : IsSymm _ R := ⟨by
+  intro a b Rab;
+  apply @Geachean.symmetric_def α R |>.mpr IsGeachean.geachean;
+  exact Rab;
+⟩
+
+instance [IsSymm _ R] : IsGeachean ⟨0, 1, 0, 1⟩ _ R := ⟨by
+  apply @Geachean.symmetric_def α R |>.mp;
+  exact IsSymm.symm;
+⟩
+
+
+instance [IsGeachean ⟨0, 0, 1, 1⟩ _ R] : IsSerial _ R := ⟨by
+  intro a;
+  apply @Geachean.serial_def α R |>.mpr IsGeachean.geachean;
+⟩
+
+instance [IsSerial _ R] : IsGeachean ⟨0, 0, 1, 1⟩ _ R := ⟨by
+  apply @Geachean.serial_def α R |>.mp;
+  exact IsSerial.serial;
+⟩
+
+
+instance [IsGeachean ⟨1, 1, 0, 1⟩ _ R] : IsEuclidean _ R := ⟨by
+  intro a b c Rab Rac;
+  apply @Geachean.euclidean_def α R |>.mpr IsGeachean.geachean Rab Rac;
+⟩
+
+instance [IsEuclidean _ R] : IsGeachean ⟨1, 1, 0, 1⟩ _ R := ⟨by
+  apply @Geachean.euclidean_def α R |>.mp;
+  exact IsEuclidean.euclidean;
+⟩
+
+
+instance [IsGeachean ⟨1, 1, 1, 1⟩ _ R] : IsConfluent _ R := ⟨by
+  rintro a b c ⟨Rab, Rba⟩;
+  apply @Geachean.confluent_def α R |>.mpr IsGeachean.geachean;
+  exact ⟨Rab, Rba⟩;
+⟩
+
+instance [IsConfluent _ R] : IsGeachean ⟨1, 1, 1, 1⟩ _ R := ⟨by
+  apply @Geachean.confluent_def α R |>.mp;
+  exact IsConfluent.confluent;
+⟩
+
+
+instance [IsGeachean ⟨0, 1, 0, 0⟩ _ R] : IsCoreflexive _ R := ⟨by
+  intro a b Rab;
+  apply @Geachean.coreflexive_def α R |>.mpr IsGeachean.geachean;
+  exact Rab;
+⟩
+
+instance [IsCoreflexive _ R] : IsGeachean ⟨0, 1, 0, 0⟩ _ R := ⟨by
+  apply @Geachean.coreflexive_def α R |>.mp;
+  exact IsCoreflexive.coreflexive;
+⟩
+
+end
 
 
 def MultiGeachean (G : Set Geachean.Taple) (R : Rel α α) := ∀ g ∈ G, Geachean g R

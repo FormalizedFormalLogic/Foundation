@@ -12,7 +12,7 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_WeakLEM_of_confluent : Confluent F → F ⊧ (Axioms.WeakLEM (.atom 0)) := by
+lemma validate_WeakLEM_of_confluent' : Confluent F → F ⊧ (Axioms.WeakLEM (.atom 0)) := by
   unfold Confluent Axioms.WeakLEM;
   contrapose;
   push_neg;
@@ -37,11 +37,17 @@ lemma validate_WeakLEM_of_confluent : Confluent F → F ⊧ (Axioms.WeakLEM (.at
     by_contra Rzu;
     exact (Satisfies.neg_def.mp hz) Rzu $ Satisfies.formula_hereditary Ryu hy;
 
+
+lemma validate_WeakLEM_of_confluent [IsConfluent _ F] : F ⊧ (Axioms.WeakLEM (.atom 0)) := by
+  apply validate_WeakLEM_of_confluent';
+  exact IsConfluent.confluent;
+
+
 lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confluent F := by
   rintro h x y z ⟨Rxy, Ryz⟩;
   let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
     intro w v Rwv a Ryw;
-    exact F.rel_trans Ryw Rwv;
+    apply F.trans Ryw Rwv;
   ⟩;
   replace h : F ⊧ (Axioms.WeakLEM (.atom 0)) := by simpa using h;
   have : ¬Satisfies ⟨F, V⟩ x (∼(.atom 0)) := by
@@ -49,7 +55,7 @@ lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confl
     use y;
     constructor;
     . exact Rxy;
-    . apply F.rel_refl;
+    . apply F.refl;
   have : Satisfies ⟨F, V⟩ x (∼∼(.atom 0)) := by
     apply or_iff_not_imp_left.mp $ Satisfies.or_def.mp $ @h V x;
     assumption;
@@ -73,7 +79,7 @@ open Classical
 
 namespace Canonical
 
-protected lemma confluent [Entailment.HasAxiomWeakLEM 𝓢] : Confluent (canonicalFrame 𝓢).Rel := by
+instance [Entailment.HasAxiomWeakLEM 𝓢] : IsConfluent _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz⟩;
   suffices Tableau.Consistent 𝓢 (y.1.1 ∪ z.1.1, ∅) by
     obtain ⟨w, hw⟩ := lindenbaum (𝓢 := 𝓢) this;
@@ -160,6 +166,7 @@ protected lemma confluent [Entailment.HasAxiomWeakLEM 𝓢] : Confluent (canonic
   have mem_nnΘz_x : ∼∼⋀Θz ∈ x.1.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nmem_nΘz_x;
 
   exact mdp₁_mem mem_nnΘz_x $ mdp_mem₁_provable d mem_Θx_x;
+⟩
 
 end Canonical
 

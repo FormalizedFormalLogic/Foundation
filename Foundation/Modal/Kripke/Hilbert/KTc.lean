@@ -6,42 +6,27 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-namespace Kripke.FrameClass
+protected abbrev Kripke.FrameClass.corefl : FrameClass := { F | IsCoreflexive _ F.Rel }
 
-protected abbrev corefl : FrameClass := { F | Coreflexive F }
+namespace Hilbert.KTc.Kripke
 
-namespace corefl
-
-lemma isMultiGeachean : FrameClass.corefl = FrameClass.multiGeachean {⟨0, 1, 0, 0⟩} := by
-  ext F;
-  simp [Geachean.coreflexive_def, MultiGeachean]
-
-@[simp]
-lemma nonempty : FrameClass.corefl.Nonempty := by simp [corefl.isMultiGeachean]
-
-lemma validates_AxiomTc : FrameClass.corefl.ValidatesFormula (Axioms.Tc (.atom 0)) := by
+instance sound : Sound (Hilbert.KTc) Kripke.FrameClass.corefl := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
   rintro F F_corefl _ rfl;
-  apply validate_AxiomTc_of_coreflexive F_corefl;
+  exact Kripke.validate_AxiomTc_of_coreflexive (corefl := F_corefl);
 
-lemma validates_HilbertKTc : FrameClass.corefl.Validates Hilbert.KTc.axioms := Validates.withAxiomK validates_AxiomTc
+instance consistent : Entailment.Consistent (Hilbert.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.corefl $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
 
-end corefl
+instance canonical : Canonical (Hilbert.KTc) FrameClass.corefl := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+⟩
 
-end Kripke.FrameClass
+instance complete : Complete (Hilbert.KTc) FrameClass.corefl := inferInstance
 
-namespace Hilbert.KTc
-
-instance Kripke.sound : Sound (Hilbert.KTc) Kripke.FrameClass.corefl :=
-  instSound_of_validates_axioms Kripke.FrameClass.corefl.validates_HilbertKTc
-
-instance Kripke.consistent : Entailment.Consistent (Hilbert.KTc) :=
-  consistent_of_sound_frameclass Kripke.FrameClass.corefl (by simp)
-
-instance Kripke.canonical : Canonical (Hilbert.KTc) FrameClass.corefl := ⟨Canonical.coreflexive⟩
-
-instance Kripke.complete : Complete (Hilbert.KTc) FrameClass.corefl := inferInstance
-
-end Hilbert.KTc
-
+end Hilbert.KTc.Kripke
 
 end LO.Modal

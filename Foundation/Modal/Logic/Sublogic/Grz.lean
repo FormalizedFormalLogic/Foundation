@@ -15,7 +15,9 @@ theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by
     . exact axiomGrz!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
-      simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
+      constructor;
+      . refine {refl := by tauto, trans := by tauto};
+      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.S4 Logic.Grz := ⟨S4_ssubset_Grz⟩
 
 lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
@@ -25,18 +27,17 @@ lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
     use Axioms.Five (.atom 0)
     constructor;
     . exact axiomFive!;
-    . apply Kripke.not_validOnFrameClass_of_exists_frame;
-      let F : Frame := ⟨Fin 2, λ x y => x ≤ y⟩;
-      use F;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
+      use M, 0;
       constructor;
-      . refine ⟨by tauto, ?_, ?_, ?_⟩;
-        . simp [F, Reflexive];
-        . simp [F, Transitive]; omega;
-        . simp [F, AntiSymmetric]; omega;
-      . apply ValidOnFrame.not_of_exists_valuation_world;
-        use (λ w _ => w = 0), 0;
-        suffices (0 : F.World) ≺ 0 ∧ ∃ x, (0 : F.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [Semantics.Realize, Satisfies, ValidOnFrame];
+      . refine ⟨by tauto, {
+          refl := by omega,
+          trans := by omega;
+          antisymm := by simp [M]; omega;
+        }⟩;
+      . suffices (0 : M.World) ≺ 0 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
+          simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
         constructor;
         . omega;
         . use 1;
@@ -63,12 +64,11 @@ instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
       ⟩;
       use M, 0;
       constructor;
-      . simp only [Fin.isValue, Set.mem_setOf_eq, M];
-        refine ⟨?_, ?_, ?_, ?_⟩;
-        . tauto;
-        . simp [Reflexive];
-        . simp [Transitive]; omega;
-        . simp [AntiSymmetric]; omega;
+      . refine ⟨by tauto, {
+          refl := by omega
+          trans := by omega
+          antisymm := by simp [M]; omega;
+        }⟩;
       . apply Satisfies.imp_def₂.not.mpr;
         push_neg;
         constructor;
@@ -97,13 +97,9 @@ instance : ProperSublogic Logic.S4Point2 Logic.GrzPoint2 := ⟨S4Point2_ssubset_
 instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
   constructor;
   . rw [GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic, GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨_, F_refl, F_trans, F_antisymm, F_conn⟩;
+    rintro φ hφ F ⟨_, _, _⟩;
     apply hφ;
-    refine ⟨inferInstance, F_refl, F_trans, F_antisymm, ?_⟩;
-    . rintro x y z ⟨Rxy, Ryz⟩;
-      rcases F_conn ⟨Rxy, Ryz⟩ with (Ryz | Rzy);
-      . use z; tauto;
-      . use y; tauto
+    refine ⟨by tauto, inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_confluent_partial_order ⊧ φ by
       simpa [GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic];
     use Axioms.Point3 (.atom 0) (.atom 1);
@@ -117,12 +113,11 @@ instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
       ⟩;
       use M, 0;
       constructor;
-      . simp only [Fin.isValue, Set.mem_setOf_eq, M, F];
-        refine ⟨?_, ?_, ?_, ?_, ?_⟩;
-        . tauto;
-        . simp [Reflexive];
-        . simp [Transitive]; omega;
-        . simp [AntiSymmetric]; omega;;
+      . refine ⟨by tauto, {
+          refl := by omega,
+          trans := by omega,
+          antisymm := by simp [M, F]; omega,
+        }, ⟨?_⟩⟩;
         . rintro x y z ⟨(_ | _ | Rxy), (_ | _ | Rxy)⟩;
           repeat { use 3; tauto; }
       . apply Satisfies.or_def.not.mpr

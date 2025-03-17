@@ -7,44 +7,27 @@ open Hilbert.Kripke
 open Geachean
 
 
-namespace Kripke.FrameClass
+protected abbrev Kripke.FrameClass.symm : FrameClass := { F | IsSymm _ F }
 
-protected abbrev symm : FrameClass := { F | Symmetric F }
+namespace Hilbert.KB.Kripke
 
-namespace symm
-
-lemma isMultiGeachean : FrameClass.symm = FrameClass.multiGeachean {⟨0, 1, 0, 1⟩} := by
-  ext F;
-  simp [Geachean.symmetric_def, MultiGeachean]
-
-@[simp]
-lemma nonempty : FrameClass.symm.Nonempty := by simp [isMultiGeachean]
-
-lemma validates_AxiomB : FrameClass.symm.ValidatesFormula (Axioms.B (.atom 0)) := by
-  rintro F F_symm _ rfl;
-  apply validate_AxiomB_of_symmetric $ by assumption
-
-lemma validates_HilbertKB : FrameClass.symm.Validates Hilbert.KB.axioms := by
+instance sound : Sound (Hilbert.KB) Kripke.FrameClass.symm := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
-  apply validates_AxiomB;
+  rintro F F_symm _ rfl;
+  exact validate_AxiomB_of_symmetric (sym := F_symm);
 
-end symm
+instance consistent : Entailment.Consistent (Hilbert.KB) := consistent_of_sound_frameclass FrameClass.symm $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
 
-end Kripke.FrameClass
+instance canonical : Canonical (Hilbert.KB) Kripke.FrameClass.symm := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+⟩
 
+instance complete : Complete (Hilbert.KB) Kripke.FrameClass.symm := inferInstance
 
-namespace Hilbert.KB
-
-instance Kripke.sound : Sound (Hilbert.KB) Kripke.FrameClass.symm :=
-  instSound_of_validates_axioms FrameClass.symm.validates_HilbertKB
-
-instance Kripke.consistent : Entailment.Consistent (Hilbert.KB) :=
-  consistent_of_sound_frameclass FrameClass.symm (by simp)
-
-instance Kripke.canonical : Canonical (Hilbert.KB) Kripke.FrameClass.symm := ⟨Canonical.symmetric⟩
-
-instance Kripke.complete : Complete (Hilbert.KB) Kripke.FrameClass.symm := inferInstance
-
-end Hilbert.KB
+end Hilbert.KB.Kripke
 
 end LO.Modal

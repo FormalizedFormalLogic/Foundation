@@ -100,7 +100,7 @@ def comp (f : F₁ →ₚ F₂) (g : F₂ →ₚ F₃) : F₁ →ₚ F₃ where
     . simp_all;
     . assumption;
 
-def TransitiveClosure (f : F₁ →ₚ F₂) (F₂_trans : Transitive F₂) : F₁^+ →ₚ F₂ where
+def TransitiveClosure (f : F₁ →ₚ F₂) [IsTrans _ F₂] : F₁^+ →ₚ F₂ where
   toFun := f.toFun
   forth := by
     intro x y hxy;
@@ -108,14 +108,14 @@ def TransitiveClosure (f : F₁ →ₚ F₂) (F₂_trans : Transitive F₂) : F�
     | single hxy => exact f.forth hxy;
     | @tail z y _ Rzy Rxz =>
       replace Rzy := f.forth Rzy;
-      exact F₂_trans Rxz Rzy;
+      exact IsTrans.trans _ _ _ Rxz Rzy;
   back := by
     intro x w hxw;
     obtain ⟨u, ⟨rfl, hxu⟩⟩ := f.back hxw;
     use u;
     constructor;
     . rfl;
-    . exact Frame.RelTransGen.single hxu;
+    . exact Relation.TransGen.single hxu;
 
 end Frame.PseudoEpimorphism
 

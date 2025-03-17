@@ -1,4 +1,5 @@
 import Foundation.Modal.Kripke.Completeness
+import Foundation.Vorspiel.Relation.Supplemental
 
 namespace LO.Modal
 
@@ -6,24 +7,13 @@ namespace Kripke
 
 open Formula.Kripke
 
-
-abbrev FrameClass.weakConfluent : FrameClass := { F | WeakConfluent F }
-
-namespace FrameClass.weakConfluent
-
-@[simp]
-protected lemma nonempty : FrameClass.weakConfluent.Nonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
-  simp [WeakConfluent];
-
-end FrameClass.weakConfluent
-
+instance : IsWeakConfluent _ whitepoint.Rel := ⟨by tauto⟩
 
 section definability
 
 variable {F : Kripke.Frame}
 
-lemma weakConfluent_of_validate_WeakPoint2 (hCon : WeakConfluent F) : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1)) := by
+lemma validate_WeakPoint2_of_weakConfluent [IsWeakConfluent _ F] : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1)) := by
   rintro V x;
   apply Satisfies.imp_def.mpr;
   suffices
@@ -36,12 +26,12 @@ lemma weakConfluent_of_validate_WeakPoint2 (hCon : WeakConfluent F) : F ⊧ (Axi
     by_contra hC;
     subst hC;
     contradiction;
-  obtain ⟨u, Ryu, Rzu⟩ := hCon ⟨Rxy, Rxz, nyz⟩;
+  obtain ⟨u, Ryu, Rzu⟩ := IsWeakConfluent.weak_confluent ⟨Rxy, Rxz, nyz⟩;
   have : V u 0 := h₁ _ Ryu;
   have : ¬V u 0 := h₂ _ Rzu;
   contradiction;
 
-lemma validate_WeakPoint2_of_weakConfluent : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1)) → WeakConfluent F := by
+lemma weakConfluent_of_validate_WeakPoint2 : F ⊧ (Axioms.WeakPoint2 (.atom 0) (.atom 1)) → WeakConfluent F := by
   contrapose;
   intro hCon;
   obtain ⟨x, y, Rxy, z, Rxz, nyz, hu⟩ := by simpa [WeakConfluent] using hCon;
@@ -71,7 +61,7 @@ open canonicalModel
 
 namespace Canonical
 
-protected lemma weakConfluent [Entailment.HasAxiomWeakPoint2 𝓢] : WeakConfluent (canonicalFrame 𝓢).Rel := by
+instance [Entailment.HasAxiomWeakPoint2 𝓢] : IsWeakConfluent _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz, eyz⟩;
   have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹y.1.1, ◇''⁻¹z.1.2⟩) $ by
     rintro Γ Δ hΓ hΔ;
@@ -111,6 +101,7 @@ protected lemma weakConfluent [Entailment.HasAxiomWeakPoint2 𝓢] : WeakConflue
   . apply def_rel_dia_mem₂.mpr;
     intro φ hφ;
     apply hu.2 hφ;
+⟩
 
 end Canonical
 

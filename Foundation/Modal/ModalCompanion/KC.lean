@@ -38,7 +38,7 @@ lemma Hilbert.S4Point2.goedelTranslated_axiomWLEM : Hilbert.S4Point2 ⊢! □(�
       apply contra₀'!;
       exact axiomT!
   apply Hilbert.S4Point2.Kripke.complete.complete;
-  intro F ⟨F_refl, F_trans, F_conn⟩ V x;
+  rintro F ⟨_, _⟩ V x;
   apply Formula.Kripke.Satisfies.or_def.mpr;
   by_contra hC;
   push_neg at hC;
@@ -50,13 +50,13 @@ lemma Hilbert.S4Point2.goedelTranslated_axiomWLEM : Hilbert.S4Point2 ⊢! □(�
   replace h₂ := Formula.Kripke.Satisfies.dia_def.mp h₂;
   obtain ⟨z, Rxz, h₂⟩ := h₂;
 
-  obtain ⟨u, Ryu, Rzu⟩ := F_conn ⟨Rxy, Rxz⟩;
+  obtain ⟨u, Ryu, Rzu⟩ := IsConfluent.confluent ⟨Rxy, Rxz⟩;
 
   have := Formula.Kripke.Satisfies.box_def.not.mp $ h₂ u Rzu;
   push_neg at this;
   obtain ⟨v, Ruv, h⟩ := this;
 
-  have := h₁ v $ F_trans Ryu Ruv
+  have := h₁ v $ IsTrans.trans _ _ _ Ryu Ruv
   contradiction;
 
 namespace Logic
@@ -73,7 +73,7 @@ lemma mem_gAxiomPoint2_smallestMC_of_KC : (Axioms.Point2 (.atom 0)) ∈ Logic.KC
   apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
   apply Hilbert.S4.Kripke.complete.complete;
 
-  intro F ⟨F_refl, F_trans⟩ V x h₁ h₂ y Rxy;
+  rintro F ⟨_, _⟩ V x h₁ h₂ y Rxy;
   replace h₁ := Satisfies.or_def.mp h₁;
   replace h₂ := Satisfies.dia_def.mp h₂;
   obtain ⟨z, Rxz, h₂⟩ := h₂;
@@ -89,7 +89,7 @@ lemma mem_gAxiomPoint2_smallestMC_of_KC : (Axioms.Point2 (.atom 0)) ∈ Logic.KC
     constructor;
     . assumption;
     . apply Satisfies.negneg_def.mp h u
-      apply F_refl;
+      apply IsRefl.refl;
 
 lemma S4Point2.is_smallestMC_of_KC : Logic.S4Point2 = Logic.KC.smallestMC := by
   ext φ;
@@ -128,10 +128,7 @@ instance modalCompanion_KC_S4Point2 : ModalCompanion Logic.KC Logic.S4Point2 := 
     (MC := FrameClass.confluent_preorder)
     (by rw [Propositional.Logic.KC.Kripke.eq_confluent])
     (by rw [←Modal.Logic.S4Point2.is_smallestMC_of_KC, ←Modal.Logic.S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic])
-    (by
-      rintro F hF;
-      refine ⟨F.rel_refl, F.rel_trans, hF⟩;
-    );
+    (by rintro F hF; replace hF := Set.mem_setOf_eq.mp hF; apply Set.mem_setOf_eq.mpr; refine ⟨inferInstance, inferInstance⟩);
 
 end Logic
 
@@ -182,7 +179,7 @@ instance modalCompanion_KC_GrzPoint2 : ModalCompanion Logic.KC Logic.GrzPoint2 :
     (MC := FrameClass.finite_confluent_partial_order)
     (by rw [Logic.KC.Kripke.eq_finite_confluent])
     (by rw [←Logic.GrzPoint2.is_largestMC_of_KC, Modal.Logic.GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic])
-    (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, F.rel_refl, F.rel_trans, F.rel_antisymm, F_confl⟩)
+    (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, inferInstance, inferInstance⟩)
 
 end GrzPoint2
 

@@ -66,7 +66,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
         . intro _ _ h;
           exact V.hereditary h $ by assumption;
         . intro h;
-          exact h x (F.rel_refl x);
+          exact h x F.refl;
       | hfalsum =>  rfl;
       | hor φ ψ ihp ihq =>
         unfold goedelTranslate;
@@ -121,7 +121,7 @@ lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
         . intro _ _ h;
           exact V.hereditary h $ by assumption;
         . intro h;
-          exact h x (F.rel_refl x);
+          exact h x F.refl;
       | hfalsum =>  rfl;
       | hor φ ψ ihp ihq =>
         unfold goedelTranslate;

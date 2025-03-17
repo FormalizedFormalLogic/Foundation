@@ -7,33 +7,28 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-abbrev Kripke.FrameClass.trans_weakConfluent : FrameClass := { F | Transitive F ∧ WeakConfluent F }
-
-namespace Kripke.FrameClass.trans_weakConfluent
-
-@[simp]
-protected lemma nonempty : Kripke.FrameClass.trans_weakConfluent.Nonempty := by
-  use whitepoint;
-  simp [Transitive, WeakConfluent];
-
-lemma validates_HilbertK4Point2 : Kripke.FrameClass.trans_weakConfluent.Validates Hilbert.K4Point2.axioms := by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨F_trans, F_wc⟩ φ (rfl | rfl);
-  . exact validate_AxiomFour_of_transitive $ by assumption;
-  . apply weakConfluent_of_validate_WeakPoint2 F_wc;
-
-end Kripke.FrameClass.trans_weakConfluent
-
+abbrev Kripke.FrameClass.trans_weakConfluent : FrameClass := { F | IsTrans _ F ∧ IsWeakConfluent _ F }
 
 namespace Hilbert.K4Point2.Kripke
 
-instance sound : Sound (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent :=
-  instSound_of_validates_axioms FrameClass.trans_weakConfluent.validates_HilbertK4Point2
+instance sound : Sound (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  . exact validate_AxiomFour_of_transitive;
+  . exact validate_WeakPoint2_of_weakConfluent;
 
 instance consistent : Entailment.Consistent (Hilbert.K4Point2) :=
-  consistent_of_sound_frameclass FrameClass.trans_weakConfluent (by simp)
+  consistent_of_sound_frameclass FrameClass.trans_weakConfluent $ by
+    use whitepoint;
+    apply Set.mem_setOf_eq.mpr;
+    constructor;
+    . infer_instance;
+    . infer_instance;
 
-instance canonical : Canonical (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent := ⟨Canonical.transitive, Canonical.weakConfluent⟩
+instance canonical : Canonical (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent :=  ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  constructor <;> infer_instance;
+⟩
 
 instance complete : Complete (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent := inferInstance
 

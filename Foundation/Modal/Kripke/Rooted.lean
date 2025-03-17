@@ -25,10 +25,10 @@ instance [rooted : F.IsRooted r] : F.IsGenerated {r} where
     . tauto;
     . exact rooted.root_generates x hx;
 
-lemma direct_rooted_of_trans (F_trans : Transitive F) : ∀ x ≠ r, r ≺ x := by
+lemma direct_rooted_of_trans [IsTrans _ F.Rel] : ∀ x ≠ r, r ≺ x := by
   intro x hx;
   obtain ⟨n, hn, Rrx⟩ := Relation.TransGen.exists_iterate.mp $ rooted.root_generates x hx;
-  exact Rel.iterate.unwrap_of_trans hn F_trans Rrx;
+  exact Rel.iterate.unwrap_of_trans hn Rrx;
 
 end Frame.IsRooted
 
@@ -60,9 +60,9 @@ lemma roots_nonempty : (setGenerate.roots (F := F) (R := R) (R_nonempty := R_non
   tauto;
 
 lemma trans_rel_of_origin_trans_rel {hx : x ∈ R ∨ ∃ r ∈ R, r ≺^+ x} {hy : y ∈ R ∨ ∃ r ∈ R, r ≺^+ y} (Rxy : x ≺^+ y)
-  : (RelTransGen (F := F.setGenerate R R_nonempty) ⟨x, hx⟩ ⟨y, hy⟩) := by
+  : (RelTrans (F := F.setGenerate R R_nonempty) ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
-  | base h => exact Frame.RelTransGen.single h;
+  | base h => exact Relation.TransGen.single h;
   | @ih a c ha hb hc =>
     let b : (F.setGenerate R R_nonempty).World := ⟨c, by
       rcases hx with hx | ⟨r₁, hR₁, Rr₁a⟩ <;>
@@ -108,9 +108,9 @@ namespace pointGenerate
 variable {F : Frame} {r : F.World}
 
 lemma trans_rel_of_origin_trans_rel {hx : x = r ∨ r ≺^+ x} {hy : y = r ∨ r ≺^+ y} (Rxy : x ≺^+ y)
-  : (RelTransGen (F := F↾r) ⟨x, hx⟩ ⟨y, hy⟩) := by
+  : (RelTrans (F := F↾r) ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
-  | base h => exact Frame.RelTransGen.single h;
+  | base h => exact Relation.TransGen.single h;
   | @ih a c ha hb hc =>
     let b : (F↾r).World := ⟨c, by
       rcases hx with rfl | Rra <;>
@@ -126,7 +126,7 @@ lemma trans_rel_of_origin_trans_rel {hx : x = r ∨ r ≺^+ x} {hy : y = r ∨ r
 
 lemma origin_trans_rel_of_trans_rel {u v : (F↾r).World} (Ruv : u ≺^+ v) : u.1 ≺^+ v.1 := by
   induction Ruv using TransGen.head_induction_on with
-  | base h => exact Frame.RelTransGen.single h;
+  | base h => exact Relation.TransGen.single h;
   | ih a b c => exact TransGen.head a c;
 
 protected abbrev root : (F↾r).World := ⟨r, by tauto⟩
@@ -138,44 +138,58 @@ instance instIsRooted : (F↾r).IsRooted pointGenerate.root where
     . apply trans_rel_of_origin_trans_rel;
       exact Rrw;
 
-instance [Finite F.World] : Finite (F↾r).World := Subtype.finite
-
-instance [F.IsFinite] : (F↾r).IsFinite := (isFinite_iff _).mpr inferInstance
+instance [Finite F] : Finite (F↾r) := inferInstance
 
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
-lemma rel_trans (F_trans : Transitive F) : Transitive (F↾r).Rel := by
+instance isRefl [IsRefl _ F] : IsRefl (F↾r).World (F↾r).Rel := ⟨by
+  rintro ⟨x, (rfl | hx)⟩ <;>
+  . have : x ≺ x := IsRefl.refl x;
+    exact this;
+⟩
+
+instance isTrans [trans : IsTrans _ F] : IsTrans (F↾r).World (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ hxy hyz;
-  all_goals aesop;
+  . assumption;
+  . assumption;
+  . have : z ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+  . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+  . assumption;
+  . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+  . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+  . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+⟩
 
-lemma rel_irrefl (F_irrefl : Irreflexive F) : Irreflexive (F↾r).Rel := by
+instance isPreorder [IsPreorder _ F] : IsPreorder _ (F↾r) where
+
+instance isIrrefl [IsIrrefl _ F] : IsIrrefl _ (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ h;
-  all_goals apply F_irrefl; exact h;
+  . exact IsIrrefl.irrefl _ $ by simpa using h;
+  . exact IsIrrefl.irrefl _ $ by simpa using h;
+⟩
 
-lemma rel_refl (F_refl : Reflexive F) : Reflexive (F↾r).Rel := by
-  rintro ⟨x, (rfl | hx)⟩;
-  all_goals apply F_refl;
-
-lemma rel_confl (F_confl : Confluent F) : Confluent (F↾r).Rel := by
+/-
+instance isConfluent [IsConfluent _ F] : IsConfluent _ (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ ⟨Rxy, Rxz⟩;
-  . obtain ⟨w, _, _⟩ := @F_confl z z z (by tauto);
+  . obtain ⟨w, _, _⟩ := IsConfluent.confl (x := z) (y := z) (z := z) (by tauto);
     use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
-  . obtain ⟨w, _, _⟩ := @F_confl y y z (by tauto);
+  . obtain ⟨w, _, _⟩ := @IsConfluent.confl y y z (by tauto);
     use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
-  . obtain ⟨w, _, _⟩ := @F_confl z y z (by tauto);
+  . obtain ⟨w, _, _⟩ := @IsConfluent.confl z y z (by tauto);
     use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
-  . obtain ⟨w, _, _⟩ := @F_confl x y z (by tauto);
+  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x y z (by tauto);
     use ⟨w, by right; apply Relation.TransGen.tail hy $ by assumption⟩;
-  . obtain ⟨w, _, _⟩ := @F_confl x z z (by tauto);
+  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x z z (by tauto);
     use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
-  . obtain ⟨w, _, _⟩ := @F_confl x z y (by tauto);
+  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x z y (by tauto);
     use ⟨w, by right; apply Relation.TransGen.single $ by assumption⟩;
-  . obtain ⟨w, _, _⟩ := @F_confl x y z (by tauto);
+  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x y z (by tauto);
     use ⟨w, by right; apply Relation.TransGen.single $ by assumption⟩;
-  . obtain ⟨w, _, _⟩ := @F_confl x y z (by tauto);
+  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x y z (by tauto);
     use ⟨w, by right; apply Relation.TransGen.tail hy $ by assumption⟩;
+⟩
 
-lemma rel_connected (F_connected : Connected F) : Connected (F↾r).Rel := by
+instance isConnected (F_connected : Connected F) : Connected (F↾r).Rel := by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ ⟨Rxy, Rxz⟩;
   . tauto;
   . tauto;
@@ -185,19 +199,17 @@ lemma rel_connected (F_connected : Connected F) : Connected (F↾r).Rel := by
   . have := @F_connected x z y (by tauto); tauto;
   . have := @F_connected x y z (by tauto); tauto;
   . have := @F_connected x y z (by tauto); tauto;
+-/
 
-lemma rel_universal_of_refl_eucl (F_refl : Reflexive F) (F_eucl : Euclidean F) : Universal (F↾r).Rel := by
-  have F_symm := symm_of_refl_eucl F_refl F_eucl;
-  have F_trans := trans_of_refl_eucl F_refl F_eucl;
+instance isUniversal [refl : IsRefl _ F] [eucl : IsEuclidean _ F] : IsUniversal _ (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
-  . apply F_refl;
-  . have Rxy := TransGen.unwrap F_trans hy;
-    exact Rxy;
-  . have Ryx := TransGen.unwrap F_trans hx;
-    exact F_symm Ryx;
-  . have Rxy := TransGen.unwrap F_trans hx;
-    have Ryx := TransGen.unwrap F_trans hy;
-    exact F_eucl Ryx Rxy;
+  . apply IsRefl.refl;
+  . exact hy.unwrap;
+  . suffices x ≺ y by simpa;
+    exact IsSymm.symm _ _ hx.unwrap;
+  . suffices x ≺ y by simpa;
+    exact IsEuclidean.euclidean hy.unwrap hx.unwrap;
+⟩
 
 def pMorphism : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x
@@ -207,7 +219,7 @@ def pMorphism : (F↾r) →ₚ F where
   back := by
     rintro ⟨x, (rfl | hx)⟩ y Rwv;
     . simp at Rwv; use ⟨y, by tauto⟩
-    . use ⟨y, by right; exact Frame.RelTransGen.tail hx Rwv⟩;
+    . use ⟨y, by right; exact Relation.TransGen.tail hx Rwv⟩;
 
 def generatedSub : F↾r ⥹ F where
   toFun := λ ⟨x, _⟩ => x
@@ -217,7 +229,7 @@ def generatedSub : F↾r ⥹ F where
   back := by
     rintro ⟨x, (rfl | hx)⟩ y Rwv;
     . simp at Rwv; use ⟨y, by tauto⟩
-    . use ⟨y, by right; exact Frame.RelTransGen.tail hx Rwv⟩;
+    . use ⟨y, by right; exact Relation.TransGen.tail hx Rwv⟩;
   monic := by simp;
 
 end pointGenerate

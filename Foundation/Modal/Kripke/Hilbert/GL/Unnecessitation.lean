@@ -29,22 +29,21 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
     intro x hx;
     rcases Frame.extendRoot.through_original_root (F := M.toFrame) (x := x) hx with (rfl | hr);
     . tauto;
-    . apply hs₂;
-      exact TransGen.unwrap (Frame.extendRoot.rel_transitive (r := r) M_tree.rel_transitive) hr;
+    . apply hs₂; exact hr.unwrap;
   have hbq : ¬(Satisfies M₀ r₀ (□ψ)) := by
     apply Satisfies.box_def.not.mpr;
     push_neg;
     use (Sum.inr r);
     constructor;
-    . apply TransGen.unwrap (Frame.extendRoot.rel_transitive (r := r) M_tree.rel_transitive);
-      apply Frame.IsRooted.root_generates;
-      tauto;
+    . haveI : r₀ ≺^+ Sum.inr r := @Frame.IsRooted.root_generates (F := M₀.toFrame) (r := r₀) (Frame.extendRoot.instIsRooted) (Sum.inr r) (by tauto);
+      apply @this.unwrap;
+      exact Frame.extendRoot.isTrans (r := r);
     . assumption;
 
   apply Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr;
   use M₀, r₀;
-  constructor;
-  . exact Frame.extendRoot.instIsFiniteTree (F := M.toFrame) (r := r);
+  refine ⟨?_, ?_⟩;
+  . exact Frame.extendRoot.instIsFiniteTree;
   . tauto;
 
 theorem unnecessitation! : Hilbert.GL ⊢! □φ → Hilbert.GL ⊢! φ := by

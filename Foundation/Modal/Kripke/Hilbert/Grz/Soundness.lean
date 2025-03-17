@@ -11,38 +11,25 @@ open Hilbert.Kripke
 
 namespace Kripke
 
-protected abbrev FrameClass.trans_wcwf : FrameClass := { F | Reflexive F.Rel ∧ Transitive F.Rel ∧ WeaklyConverseWellFounded F.Rel }
-protected abbrev FrameClass.finite_partial_order: FrameClass := { F | F.IsFinite ∧ Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel }
-
-namespace FrameClass.finite_strict_preorder
-
-@[simp]
-lemma nonempty : FrameClass.finite_partial_order.Nonempty := by
-  use whitepoint;
-  simp [Reflexive , Transitive, AntiSymmetric];
-  infer_instance;
-
-lemma validates_AxiomGrz : FrameClass.finite_partial_order.ValidatesFormula (Axioms.Grz (.atom 0)) := by
-  simp [Validates];
-  intro F;
-  apply validate_AxiomGrz_of_finite_strict_preorder;
-
-lemma validates_HilbertGrz : FrameClass.finite_partial_order.Validates Hilbert.Grz.axioms := by
-  apply FrameClass.Validates.withAxiomK;
-  apply validates_AxiomGrz;
-
-end FrameClass.finite_strict_preorder
+protected abbrev FrameClass.trans_wcwf : FrameClass := { F | IsPreorder _ F.Rel ∧ IsWeaklyConverseWellFounded _ F.Rel }
+protected abbrev FrameClass.finite_partial_order: FrameClass := { F | F.IsFinite ∧ IsPartialOrder _ F.Rel }
 
 end Kripke
 
-namespace Hilbert.Grz
 
-instance Kripke.finite_sound : Sound (Hilbert.Grz) FrameClass.finite_partial_order :=
-  instSound_of_validates_axioms FrameClass.finite_strict_preorder.validates_HilbertGrz
+namespace Hilbert.Grz.Kripke
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.Grz) :=
-  consistent_of_sound_frameclass FrameClass.finite_partial_order (by simp)
+instance finite_sound : Sound (Hilbert.Grz) FrameClass.finite_partial_order := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _⟩ _ rfl;
+  exact validate_AxiomGrz_of_refl_trans_wcwf;
 
-end Hilbert.Grz
+instance consistent : Entailment.Consistent (Hilbert.Grz) :=
+  consistent_of_sound_frameclass FrameClass.finite_partial_order $ by
+    use whitepoint;
+    apply Set.mem_setOf_eq.mpr;
+    exact ⟨inferInstance, inferInstance⟩
+
+end Hilbert.Grz.Kripke
 
 end LO.Modal

@@ -37,18 +37,18 @@ instance
     | .inr _ =>
       apply Relation.TransGen.single;
       tauto;
-  rel_assymetric := by
+  asymm := by
     intro x y hxy;
     match x, y with
-    | .inr (.inl x), .inr (.inl y) => exact tree₁.rel_assymetric hxy;
-    | .inr (.inr x), .inr (.inr y) => apply tree₂.rel_assymetric hxy;
+    | .inr (.inl x), .inr (.inl y) => exact tree₁.asymm _ _ hxy;
+    | .inr (.inr x), .inr (.inr y) => apply tree₂.asymm _ _ hxy;
     | .inl x, .inl y => contradiction;
     | .inl x, .inr y => simp;
-  rel_transitive := by
+  trans := by
     intro x y z hxy hyz;
     match x, y, z with
-    | .inr (.inl x), .inr (.inl y), .inr (.inl z) => apply tree₁.rel_transitive hxy hyz;
-    | .inr (.inr x), .inr (.inr y), .inr (.inr z) => apply tree₂.rel_transitive hxy hyz;
+    | .inr (.inl x), .inr (.inl y), .inr (.inl z) => apply tree₁.trans _ _ _ hxy hyz;
+    | .inr (.inr x), .inr (.inr y), .inr (.inr z) => apply tree₂.trans _ _ _ hxy hyz;
     | .inl _, .inr (.inr _), .inr (.inr _) => simp;
     | .inl _, .inr (.inl _), .inr (.inl _) => simp;
 
@@ -76,18 +76,12 @@ lemma through_original_root {x : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).Wor
     by_cases e : x = r₁;
     . subst e; left; tauto;
     . left; right;
-      exact pMorphism₁.forth $ by
-        apply Frame.IsRooted.direct_rooted_of_trans;
-        . exact Frame.IsTree.rel_transitive (r := r₁);
-        . assumption;
+      exact pMorphism₁.forth $ Frame.IsRooted.direct_rooted_of_trans x e
   | .inr (.inr x) =>
     by_cases h : x = r₂;
     . subst h; right; tauto;
     . right; right;
-      exact pMorphism₂.forth $ by
-        apply Frame.IsRooted.direct_rooted_of_trans;
-        . exact Frame.IsTree.rel_transitive (r := r₂);
-        . assumption;
+      exact pMorphism₂.forth $ Frame.IsRooted.direct_rooted_of_trans x h
 
 end mdpCounterexmpleFrame
 

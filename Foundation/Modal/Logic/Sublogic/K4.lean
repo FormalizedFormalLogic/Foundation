@@ -20,7 +20,7 @@ instance : ProperSublogic Logic.K4 Logic.K4Point2 := ⟨by
       ⟩;
       use M, 0;
       constructor;
-      . simp [Transitive, M];
+      . refine ⟨by tauto⟩;
       . suffices ∃ (x : M.World), (∀ y, ¬x ≺ y) ∧ x ≠ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;
@@ -32,11 +32,9 @@ instance : ProperSublogic Logic.K4 Logic.K4Point2 := ⟨by
 instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
   constructor;
   . rw [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic, S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨F_refl, F_trans, F_conn⟩;
+    rintro φ hφ F ⟨_, _⟩;
     apply hφ;
-    refine ⟨F_trans, ?_⟩;
-    . rintro x y z ⟨Rxy, Ryz, _⟩;
-      exact F_conn ⟨Rxy, Ryz⟩;
+    refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConfluent ⊧ φ by simpa [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic];
     use (Axioms.Point2 (.atom 0));
     constructor;
@@ -48,10 +46,8 @@ instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
       ⟩;
       use M, 0;
       constructor;
-      . unfold M;
-        constructor;
-        . simp [Transitive]; omega;
-        . simp [WeakConfluent]; omega;
+      . refine ⟨⟨by omega⟩, ⟨?_⟩⟩;
+        . simp [M, WeakConfluent]; omega;
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;
@@ -76,8 +72,7 @@ instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
       ⟩;
       use M, 0;
       constructor;
-      . simp [M, Transitive];
-        omega;
+      . refine ⟨by omega⟩
       . suffices
           ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 1 ∧ (∀ y, x ≺ y → y = 1) ∧ ¬x = 2 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 2 ∧ (∀ z : M.World, x ≺ z → z = 2) ∧ x ≠ 1
           by simpa [M, Semantics.Realize, Satisfies];
@@ -93,11 +88,9 @@ instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
 instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
   constructor;
   . rw [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic, S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
-    rintro φ hφ F ⟨F_refl, F_trans, F_conn⟩;
+    rintro φ hφ F ⟨_, _⟩;
     apply hφ;
-    refine ⟨F_trans, ?_⟩;
-    . rintro x y z ⟨Rxy, Ryz, _⟩;
-      exact F_conn ⟨Rxy, Ryz⟩;
+    refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by simpa [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
     use (Axioms.Point3 (.atom 0) (.atom 1));
     constructor;
@@ -109,10 +102,7 @@ instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
       ⟩;
       use M, 0;
       constructor;
-      . unfold M;
-        constructor;
-        . simp [Transitive]; omega;
-        . simp [WeakConnected];
+      . refine ⟨⟨by omega⟩, ⟨by simp [M, WeakConnected]⟩⟩
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∀ y, ¬x ≺ y by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;

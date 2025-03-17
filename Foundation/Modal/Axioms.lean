@@ -1,5 +1,4 @@
 import Foundation.Modal.LogicSymbol
-import Foundation.Modal.Geachean
 
 namespace LO.Axioms
 
@@ -79,10 +78,5 @@ protected abbrev M := (□◇φ ➝ ◇□φ)
 protected abbrev L := □(□φ ➝ φ) ➝ □φ
 
 protected abbrev H := □(□φ ⭤ φ) ➝ □φ
-
-/--
-  Axiom for Geach confluency.
--/
-protected abbrev Geach (t : Geachean.Taple) (φ : F) := ◇^[t.i](□^[t.m]φ) ➝ □^[t.j](◇^[t.n]φ)
 
 end LO.Axioms

@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.RelItr
+import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
 
@@ -32,10 +32,10 @@ abbrev RelItr' (n : ℕ) := F.Rel.iterate n
 notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
 @[mk_iff]
-class IsFinite (F : Frame) where
-  [world_finite : Finite F.World]
-attribute [instance] Frame.IsFinite.world_finite
+class IsFinite (F : Frame) : Prop where [world_finite : Finite F.World]
+attribute [simp, instance] IsFinite.world_finite
 
+instance [Finite F.World] : F.IsFinite := ⟨⟩
 
 end Frame
 
@@ -43,11 +43,29 @@ end Frame
 
 section
 
-abbrev whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
-instance : Frame.IsFinite whitepoint := ⟨⟩
+def whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
 
-abbrev blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
-instance : Frame.IsFinite blackpoint := ⟨⟩
+instance : Finite whitepoint.World := by
+  dsimp [whitepoint];
+  infer_instance
+instance : IsRefl _ whitepoint.Rel := ⟨by tauto⟩
+instance : IsTrans _ whitepoint.Rel := ⟨by tauto⟩
+instance : IsEuclidean _ whitepoint.Rel := ⟨by tauto⟩
+instance : IsSymm _ whitepoint.Rel := ⟨by tauto⟩
+instance : IsSerial _ whitepoint.Rel := ⟨by tauto⟩
+instance : IsAntisymm _ whitepoint.Rel := ⟨by tauto⟩
+instance : IsPreorder _ whitepoint.Rel where
+instance : IsEquiv _ whitepoint.Rel where
+instance : IsPartialOrder _ whitepoint.Rel where
+
+def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
+
+instance : Finite blackpoint.World := by
+  dsimp [blackpoint];
+  infer_instance;
+instance : IsIrrefl _ blackpoint.Rel := by tauto
+instance : IsTrans _ blackpoint.Rel := ⟨by tauto⟩
+
 
 end
 
@@ -529,9 +547,16 @@ open Formula (atom)
 
 namespace FrameClass
 
+variable {C : FrameClass} {Γ : FormulaSet ℕ} {φ ψ χ : Formula ℕ}
+
 def Validates (C : FrameClass) (Γ : FormulaSet ℕ) := ∀ F ∈ C, ∀ φ ∈ Γ, F ⊧ φ
 
 abbrev ValidatesFormula (C : FrameClass) (φ : Formula ℕ) := Validates C {φ}
+
+lemma ValidatesFormula_of (h : ∀ F ∈ C, F ⊧ φ) : C.ValidatesFormula φ := by
+  rintro F hF _ rfl;
+  apply h;
+  tauto;
 
 variable {C C₁ C₂ : FrameClass} {Γ Γ₁ Γ₂ : FormulaSet ℕ} {φ φ₁ φ₂ : Formula ℕ}
 
@@ -569,13 +594,17 @@ lemma all.validates_axiomK : FrameClass.all.ValidatesFormula (Axioms.K (.atom 0)
 protected abbrev finite_all : FrameClass := { F | F.IsFinite }
 
 @[simp]
-lemma finite_all.nonempty : FrameClass.finite_all.Nonempty := by use whitepoint; tauto;
+lemma finite_all.nonempty : FrameClass.finite_all.Nonempty := by
+  use whitepoint;
+  simp only [Set.mem_setOf_eq];
+  infer_instance;
 
 lemma finite_all.validates_axiomK : FrameClass.finite_all.ValidatesFormula (Axioms.K (.atom 0) (.atom 1)) := by
-  suffices ∀ (F : Frame), F.IsFinite → Formula.Kripke.ValidOnFrame F (Axioms.K (.atom 0) (.atom 1)) by simpa [Validates];
+  suffices ∀ (F : Frame), [F.IsFinite] → Formula.Kripke.ValidOnFrame F (Axioms.K (.atom 0) (.atom 1)) by simpa [Validates];
   intro F _;
   apply FrameClass.all.validates_axiomK;
-  repeat tauto;
+  . tauto;
+  . tauto;
 
 lemma Validates.withAxiomK (hV : C.Validates Γ) : C.Validates (insert (Axioms.K (.atom 0) (.atom 1)) Γ) := by
   convert Validates.inter_of all.validates_axiomK hV;

@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Propositional.Hilbert.Basic
 
 namespace LO.Propositional
@@ -9,16 +9,14 @@ namespace Kripke
 
 structure Frame where
   World : Type
-  [world_nonempty : Nonempty World]
   Rel : Rel World World
-  rel_refl : Reflexive Rel
-  rel_trans : Transitive Rel
-  rel_antisymm : AntiSymmetric Rel
+  [world_nonempty : Nonempty World]
+  [rel_partial_order : IsPartialOrder _ Rel]
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
 instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
--- instance {F : Frame} : IsPartialOrder _ F.Rel := F.rel_po
+instance {F : Frame} : IsPartialOrder F.World F.Rel := F.rel_partial_order
 
 abbrev Frame.Rel' {F : Frame} (x y : F.World) := F.Rel x y
 infix:45 " ≺ " => Frame.Rel'
@@ -27,16 +25,15 @@ namespace Frame
 
 variable {F : Frame} {x y z : F.World}
 
-@[refl, simp] lemma rel_refl' : x ≺ x := F.rel_refl x
-
-@[trans] lemma rel_trans' : x ≺ y → y ≺ z → x ≺ z := by apply F.rel_trans
-
-lemma rel_antisymm' : x ≺ y → y ≺ x → x = y := by apply F.rel_antisymm
-
 @[mk_iff]
-class IsFinite (F : Frame) where
-  [world_finite : Finite F.World]
+class IsFinite (F : Frame) : Prop where [world_finite : Finite F.World]
 attribute [instance] Frame.IsFinite.world_finite
+
+instance [Finite F.World] : F.IsFinite := ⟨⟩
+
+@[simp, refl] lemma refl (F : Frame) {x : F.World} : x ≺ x := F.rel_partial_order.refl x
+@[trans] lemma trans (F : Frame) {x y z : F.World} : x ≺ y → y ≺ z → x ≺ z := F.rel_partial_order.trans x y z
+lemma antisymm (F : Frame) {x y : F.World} : x ≺ y → y ≺ x → x = y := F.rel_partial_order.antisymm x y
 
 end Frame
 
@@ -45,10 +42,9 @@ section
 abbrev whitepoint : Frame where
   World := Unit
   Rel := fun _ _ => True
-  rel_refl := by simp [Reflexive]
-  rel_trans := by simp [Transitive]
-  rel_antisymm := by simp [AntiSymmetric]
-instance : Frame.IsFinite whitepoint := ⟨⟩
+  rel_partial_order := ⟨⟩
+instance : Frame.IsFinite whitepoint := inferInstance
+instance : IsUniversal _ whitepoint := ⟨by tauto⟩
 
 end
 
@@ -122,7 +118,7 @@ lemma formula_hereditary
   | hatom => apply M.Val.hereditary hw;
   | himp =>
     intro hpq v hv;
-    exact hpq $ M.rel_trans hw hv;
+    exact hpq $ M.trans hw hv;
   | hor => simp_all [Satisfies]; tauto;
   | _ => simp_all [Satisfies];
 
@@ -216,7 +212,7 @@ protected lemma orInst₂ : M ⊧ ψ ➝ φ ⋎ ψ := by simp_all [ValidOnModel,
 protected lemma orElim : M ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
   intro w₁ w₂ _ hpr w₃ hw₂₃ hqr w₄ hw₃₄ hpq;
   cases hpq with
-  | inl hp => exact hpr (M.rel_trans hw₂₃ hw₃₄) hp;
+  | inl hp => exact hpr (M.trans hw₂₃ hw₃₄) hp;
   | inr hq => exact hqr hw₃₄ hq;
 
 protected lemma imply₁ : M ⊧ φ ➝ ψ ➝ φ := by
@@ -225,13 +221,13 @@ protected lemma imply₁ : M ⊧ φ ➝ ψ ➝ φ := by
 
 protected lemma imply₂ : M ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := by
   intro x y _ hpqr z Ryz hpq w Rzw hp;
-  have Ryw : y ≺ w := Frame.rel_trans' Ryz Rzw;
-  have Rww : w ≺ w := Frame.rel_refl';
+  have Ryw : y ≺ w := M.trans Ryz Rzw;
+  have Rww : w ≺ w := M.refl;
   exact hpqr Ryw hp Rww (hpq Rzw hp);
 
 protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro w;
-  exact hpq w Frame.rel_refl' $ hp w;
+  exact hpq w M.refl $ hp w;
 
 protected lemma efq : M ⊧ Axioms.EFQ φ := by simp [ValidOnModel, Satisfies];
 

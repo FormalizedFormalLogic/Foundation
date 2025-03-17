@@ -12,37 +12,23 @@ open Kripke
 
 namespace Kripke
 
-abbrev FrameClass.finite_confluent_partial_order : FrameClass := { F | F.IsFinite ∧ Reflexive F.Rel ∧ Transitive F.Rel ∧ AntiSymmetric F.Rel ∧ Confluent F.Rel }
-
-namespace FrameClass.finite_confluent_partial_order
-
-@[simp]
-lemma nonempty : FrameClass.finite_confluent_partial_order.Nonempty := by
-  use whitepoint;
-  simp [Reflexive, Transitive, AntiSymmetric, Confluent ];
-  infer_instance;
-
-lemma validates_HilbertGrzPoint2 : FrameClass.finite_confluent_partial_order.Validates Hilbert.GrzPoint2.axioms := by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _, _, _, _⟩ φ (rfl | rfl);
-  . apply validate_AxiomGrz_of_finite_strict_preorder;
-    . assumption;
-    . assumption;
-    . assumption;
-  . exact validate_AxiomPoint2_of_confluent $ by assumption;
-
-end FrameClass.finite_confluent_partial_order
+abbrev FrameClass.finite_confluent_partial_order : FrameClass := { F | F.IsFinite ∧ IsPartialOrder _ F.Rel ∧ IsConfluent _ F.Rel }
 
 end Kripke
 
 
 namespace Hilbert.GrzPoint2.Kripke
 
-instance finite_sound : Sound (Hilbert.GrzPoint2) FrameClass.finite_confluent_partial_order :=
-  instSound_of_validates_axioms FrameClass.finite_confluent_partial_order.validates_HilbertGrzPoint2
+instance finite_sound : Sound (Hilbert.GrzPoint2) FrameClass.finite_confluent_partial_order := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _, _⟩ _ (rfl | rfl);
+  . exact validate_AxiomGrz_of_finite_strict_preorder;
+  . exact validate_AxiomPoint2_of_confluent;
 
 instance consistent : Entailment.Consistent (Hilbert.GrzPoint2) :=
-  consistent_of_sound_frameclass FrameClass.finite_confluent_partial_order (by simp)
+  consistent_of_sound_frameclass FrameClass.finite_confluent_partial_order $ by
+    use whitepoint;
+    refine ⟨inferInstance, inferInstance, inferInstance⟩;
 
 instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_confluent_partial_order :=
   Kripke.Grz.complete_of_mem_miniCanonicalFrame FrameClass.finite_confluent_partial_order $ by

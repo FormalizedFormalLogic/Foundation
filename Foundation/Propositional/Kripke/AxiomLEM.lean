@@ -12,7 +12,7 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_LEM_of_symmetric : Symmetric F → F ⊧ (Axioms.LEM (.atom 0)) := by
+lemma validate_LEM_of_symmetric' : Symmetric F → F ⊧ (Axioms.LEM (.atom 0)) := by
   unfold Symmetric Axioms.LEM;
   contrapose;
   push_neg;
@@ -33,14 +33,15 @@ lemma validate_LEM_of_symmetric : Symmetric F → F ⊧ (Axioms.LEM (.atom 0)) :
   . by_contra Ryx;
     exact h₁ $ Satisfies.formula_hereditary Ryx hy;
 
-lemma validate_LEM_of_euclidean (hEuc : Euclidean F) : F ⊧ (Axioms.LEM (.atom 0)) :=
-  validate_LEM_of_symmetric (symm_of_refl_eucl F.rel_refl hEuc)
+lemma validate_LEM_of_euclidean [IsEuclidean _ F] : F ⊧ (Axioms.LEM (.atom 0)) := by
+  apply validate_LEM_of_symmetric';
+  exact IsSymm.symm;
 
 lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F := by
   rintro h x y z Rxy Rxz;
   let V : Kripke.Valuation F := ⟨λ {v a} => z ≺ v, by
     intro w v Rwv a Rzw;
-    exact F.rel_trans' Rzw Rwv;
+    exact F.trans Rzw Rwv;
   ⟩;
   suffices Satisfies ⟨F, V⟩ y (.atom 0) by simpa [Satisfies] using this;
   apply V.hereditary Rxy;
@@ -49,7 +50,7 @@ lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F :
   simp [Semantics.Realize, Satisfies, V, or_iff_not_imp_right] at this;
   apply this z;
   . exact Rxz;
-  . apply F.rel_refl;
+  . apply F.refl;
 
 end definability
 
@@ -68,7 +69,7 @@ open Classical
 
 namespace Canonical
 
-protected lemma euclidean [Entailment.HasAxiomLEM 𝓢] : Euclidean (canonicalFrame 𝓢).Rel := by
+instance [Entailment.HasAxiomLEM 𝓢] : IsEuclidean _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z;
   simp [canonicalFrame];
   intro Rxy;
@@ -82,6 +83,7 @@ protected lemma euclidean [Entailment.HasAxiomLEM 𝓢] : Euclidean (canonicalFr
     have : φ ∈ y.1.1:= Rxy $ (or_iff_not_imp_right.mp $ iff_mem₁_or.mp $ mem₁_of_provable (by simp)) hnφ;
     contradiction;
   . exact not_mem₁_neg_of_mem₁ hzφ;
+⟩
 
 end Canonical
 

@@ -16,7 +16,9 @@ lemma S5_ssubset_S5Grz : Logic.S5 ⊂ Logic.S5Grz := by
     . exact axiomGrz!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
-      simp [Universal, Semantics.Realize, Satisfies];
+      constructor;
+      . refine ⟨by simp [Universal]⟩;
+      . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.S5 Logic.S5Grz := ⟨S5_ssubset_S5Grz⟩
 
 lemma S5Grz_eq_Triv : Logic.S5Grz = Logic.Triv := by

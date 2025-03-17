@@ -9,9 +9,10 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-abbrev Kripke.FrameClass.connected_preorder : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
-abbrev Kripke.FrameClass.finite_connected_preorder : FrameClass := { F | F.IsFinite ∧ Reflexive F ∧ Transitive F ∧ Connected F }
+abbrev Kripke.FrameClass.connected_preorder : FrameClass := { F | IsPreorder _ F ∧ IsConnected _ F }
+abbrev Kripke.FrameClass.finite_connected_preorder : FrameClass := { F | F.IsFinite ∧ IsPreorder _ F ∧ IsConnected _ F }
 
+/-
 namespace Kripke.FrameClass.connected_preorder
 
 @[simp]
@@ -27,18 +28,26 @@ lemma validates_HilbertS4Point3 : Kripke.FrameClass.connected_preorder.Validates
   . exact validate_AxiomPoint3_of_connected $ by assumption;
 
 end Kripke.FrameClass.connected_preorder
-
+-/
 
 namespace Hilbert.S4Point3.Kripke
 
-instance sound : Sound (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder :=
-  instSound_of_validates_axioms FrameClass.connected_preorder.validates_HilbertS4Point3
+instance sound : Sound (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomFour_of_transitive;
+  . exact validate_AxiomPoint3_of_connected;
 
 instance consistent : Entailment.Consistent (Hilbert.S4Point3) :=
-  consistent_of_sound_frameclass FrameClass.connected_preorder (by simp)
+  consistent_of_sound_frameclass FrameClass.connected_preorder $ by
+    use whitepoint;
+    refine ⟨inferInstance, inferInstance⟩;
 
-instance canonical : Canonical (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder :=
-  ⟨⟨Canonical.reflexive, Canonical.transitive, Canonical.connected⟩⟩
+instance canonical : Canonical (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  constructor <;> infer_instance;
+⟩
 
 instance complete : Complete (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder := inferInstance
 
@@ -51,37 +60,43 @@ open
 instance finite_complete : Complete (Hilbert.S4Point3) Kripke.FrameClass.finite_connected_preorder := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
-  rintro F ⟨F_refl, F_trans, F_conn⟩ V r;
+  rintro F ⟨_, _⟩ V r;
   let M : Kripke.Model := ⟨F, V⟩;
   let RM := M↾r;
-  have RM_refl : Reflexive RM.Rel := Frame.pointGenerate.rel_refl F_refl;
-  have RM_trans : Transitive RM.Rel := Frame.pointGenerate.rel_trans F_trans;
-
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
   let FRM := finestFilterationTransitiveClosureModel RM (φ.subformulas);
-  apply filteration FRM (finestFilterationTransitiveClosureModel.filterOf RM_trans) (by aesop) |>.mpr;
+  apply filteration FRM (finestFilterationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTrans)) (by aesop) |>.mpr;
   apply hφ;
 
-  refine ⟨?_, ?_, ?_, ?_⟩;
+  refine ⟨?_, ?_, ?_⟩;
   . apply Frame.isFinite_iff _ |>.mpr
     apply FilterEqvQuotient.finite;
     simp;
-  . exact reflexive_of_transitive_reflexive RM_trans RM_refl;
-  . exact finestFilterationTransitiveClosureModel.transitive;
-  . rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
-    . simp only [or_self]; apply Relation.TransGen.single; tauto;
-    . replace Rrz := TransGen.unwrap F_trans Rrz;
-      left;
-      apply Relation.TransGen.single $ by tauto;
-    . replace Rry := TransGen.unwrap F_trans Rry;
-      right;
-      apply Relation.TransGen.single $ by tauto;
-    . replace Rry := TransGen.unwrap F_trans Rry;
-      replace Rrz := TransGen.unwrap F_trans Rrz;
-      rcases F_conn ⟨Rry, Rrz⟩ with (Ryz | Rrw);
-      . left; apply Relation.TransGen.single; tauto;
-      . right; apply Relation.TransGen.single; tauto;
+  . exact finestFilterationTransitiveClosureModel.isPreorder (preorder := Frame.pointGenerate.isPreorder);
+  . apply isConnected_iff _ _ |>.mpr;
+    rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
+    . simp only [or_self];
+      apply Relation.TransGen.single;
+      suffices z ≺ z by tauto;
+      apply IsRefl.refl;
+    . left;
+      apply Relation.TransGen.single;
+      suffices y ≺ z by tauto;
+      exact Rrz.unwrap;
+    . right;
+      apply Relation.TransGen.single;
+      suffices z ≺ y by tauto;
+      exact Rry.unwrap;
+    . replace Rry := Rry.unwrap;
+      replace Rrz := Rrz.unwrap;
+      rcases IsConnected.connected ⟨Rry, Rrz⟩ with (Ryz | Rrw);
+      . left;
+        apply Relation.TransGen.single;
+        tauto;
+      . right;
+        apply Relation.TransGen.single;
+        tauto;
 ⟩
 
 end FFP

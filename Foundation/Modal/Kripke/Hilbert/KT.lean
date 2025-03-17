@@ -6,40 +6,24 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-namespace Kripke.FrameClass
-
-protected abbrev refl : FrameClass := { F | Reflexive F }
-
-
-namespace refl
-
-lemma isMultiGeachean : FrameClass.refl = FrameClass.multiGeachean {⟨0, 0, 1, 0⟩} := by
-  ext F;
-  simp [Geachean.reflexive_def, MultiGeachean]
-
-@[simp]
-lemma nonempty : FrameClass.refl.Nonempty := by simp [refl.isMultiGeachean]
-
-lemma validates_AxiomT : FrameClass.refl.ValidatesFormula (Axioms.T (.atom 0)) := by
-  rintro F F_refl _ rfl;
-  apply validate_AxiomT_of_reflexive $ by assumption
-
-lemma validates_HilbertKT : FrameClass.refl.Validates Hilbert.KT.axioms := Validates.withAxiomK validates_AxiomT
-
-end refl
-
-end Kripke.FrameClass
-
+protected abbrev Kripke.FrameClass.refl : FrameClass := { F | IsRefl _ F }
 
 namespace Hilbert.KT
 
-instance Kripke.sound : Sound (Hilbert.KT) Kripke.FrameClass.refl :=
-  instSound_of_validates_axioms Kripke.FrameClass.refl.validates_HilbertKT
+instance Kripke.sound : Sound (Hilbert.KT) Kripke.FrameClass.refl := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F F_refl _ rfl;
+  exact Kripke.validate_AxiomT_of_reflexive (refl := F_refl);
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.KT) :=
-  consistent_of_sound_frameclass Kripke.FrameClass.refl (by simp)
+instance Kripke.consistent : Entailment.Consistent (Hilbert.KT) := consistent_of_sound_frameclass Kripke.FrameClass.refl $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
 
-instance Kripke.canonical : Canonical (Hilbert.KT) Kripke.FrameClass.refl := ⟨Canonical.reflexive⟩
+instance Kripke.canonical : Canonical (Hilbert.KT) Kripke.FrameClass.refl := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+⟩
 
 instance Kripke.complete : Complete (Hilbert.KT) Kripke.FrameClass.refl := inferInstance
 

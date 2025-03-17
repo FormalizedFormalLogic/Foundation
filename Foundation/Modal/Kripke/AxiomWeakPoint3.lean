@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.Completeness
-
-
+import Foundation.Vorspiel.Relation.Supplemental
 
 namespace LO.Modal
 
@@ -8,24 +7,14 @@ namespace Kripke
 
 open Formula.Kripke
 
-
-abbrev FrameClass.weakConnected : FrameClass := { F | WeakConnected F }
-
-namespace FrameClass.weakConnected
-
-@[simp]
-protected lemma nonempty : FrameClass.weakConnected.Nonempty := by
-  use whitepoint;
-  simp [WeakConnected];
-
-end FrameClass.weakConnected
+instance : IsWeakConnected _ whitepoint.Rel := ⟨by tauto⟩
 
 
 section definability
 
 variable {F : Kripke.Frame}
 
-lemma weakConnected_of_validate_WeakPoint3 (hCon : WeakConnected F) : F ⊧ (Axioms.WeakPoint3 (.atom 0) (.atom 1)) := by
+lemma validate_WeakPoint3_of_weakConnected [IsWeakConnected _ F] : F ⊧ (Axioms.WeakPoint3 (.atom 0) (.atom 1)) := by
   rintro V x;
   apply Satisfies.or_def.mpr;
   suffices
@@ -39,11 +28,11 @@ lemma weakConnected_of_validate_WeakPoint3 (hCon : WeakConnected F) : F ⊧ (Axi
     by_contra hC;
     subst hC;
     contradiction;
-  rcases hCon ⟨Rxy, Rxz, nyz⟩ with (Ryz | Rzy);
+  rcases IsWeakConnected.weak_connected ⟨Rxy, Rxz, nyz⟩ with (Ryz | Rzy);
   . have := hz _ Ryz; contradiction;
   . have := hy _ Rzy; contradiction;
 
-lemma validate_WeakPoint3_of_weakConnected : F ⊧ (Axioms.WeakPoint3 (.atom 0) (.atom 1)) → WeakConnected F := by
+lemma weakConnected_of_validate_WeakPoint3 : F ⊧ (Axioms.WeakPoint3 (.atom 0) (.atom 1)) → WeakConnected F := by
   contrapose;
   intro hCon;
   obtain ⟨x, y, Rxy, z, Rxz, nyz, nRyz, nRzy⟩ := by simpa [WeakConnected] using hCon;
@@ -83,7 +72,7 @@ open canonicalModel
 
 namespace Canonical
 
-protected lemma weakConnected [Entailment.HasAxiomWeakPoint3 𝓢] : WeakConnected (canonicalFrame 𝓢).Rel := by
+instance [Entailment.HasAxiomWeakPoint3 𝓢] : IsWeakConnected _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz, eyz⟩;
   by_contra hC;
   push_neg at hC;
@@ -142,6 +131,7 @@ protected lemma weakConnected [Entailment.HasAxiomWeakPoint3 𝓢] : WeakConnect
           constructor;
           . assumption;
           . assumption;
+⟩
 
 end Canonical
 

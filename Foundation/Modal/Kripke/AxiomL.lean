@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.BinaryRelations
+import Foundation.Vorspiel.Relation.CWF
 import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
@@ -9,13 +9,15 @@ namespace Kripke
 
 variable {F : Frame}
 
-lemma validate_AxiomL_of_trans_cwf (hTrans : Transitive F.Rel) (hCWF : ConverseWellFounded F.Rel) : F ⊧ (Axioms.L (.atom 0)) := by
+lemma validate_AxiomL_of_trans_cwf [IsTrans _ F.Rel] [cwf : IsConverseWellFounded _ F.Rel] : F ⊧ (Axioms.L (.atom 0)) := by
   rintro V w;
   apply Satisfies.imp_def.mpr;
   contrapose;
   intro h;
   obtain ⟨x, Rwx, h⟩ := by simpa using Satisfies.box_def.not.mp h;
-  obtain ⟨m, ⟨⟨rwm, hm⟩, hm₂⟩⟩ := hCWF.has_min ({ x | (F.Rel w x) ∧ ¬(Satisfies ⟨F, V⟩ x (.atom 0)) }) $ by use x; tauto;
+  obtain ⟨m, ⟨⟨rwm, hm⟩, hm₂⟩⟩ := cwf.cwf.has_min ({ x | (F.Rel w x) ∧ ¬(Satisfies ⟨F, V⟩ x (.atom 0)) }) $ by
+    use x;
+    tauto;
   replace hm₂ : ∀ x, w ≺ x → ¬Satisfies ⟨F, V⟩ x (.atom 0) → ¬m ≺ x := by simpa using hm₂;
   apply Satisfies.box_def.not.mpr;
   push_neg;
@@ -26,13 +28,12 @@ lemma validate_AxiomL_of_trans_cwf (hTrans : Transitive F.Rel) (hCWF : ConverseW
     push_neg;
     constructor;
     . intro n rmn;
-      apply not_imp_not.mp $ hm₂ n (hTrans rwm rmn);
+      apply not_imp_not.mp $ hm₂ n (IsTrans.trans _ _ _ rwm rmn);
       exact rmn;
     . assumption;
 
-lemma validate_AxiomL_of_finite_trans_irrefl [F.IsFinite] (hTrans : Transitive F.Rel) (hIrrefl : Irreflexive F.Rel) : F ⊧ (Axioms.L (.atom 0)) := by
-  apply validate_AxiomL_of_trans_cwf hTrans;
-  apply Finite.converseWellFounded_of_trans_irrefl' Frame.IsFinite.world_finite hTrans hIrrefl;
+lemma validate_AxiomL_of_finite_trans_irrefl [Finite F.World] [IsTrans _ F.Rel] [IsIrrefl _ F.Rel] : F ⊧ (Axioms.L (.atom 0)) :=
+  validate_AxiomL_of_trans_cwf
 
 lemma trans_of_validate_AxiomL : F ⊧ (Axioms.L (.atom 0)) → Transitive F.Rel := by
   contrapose;
