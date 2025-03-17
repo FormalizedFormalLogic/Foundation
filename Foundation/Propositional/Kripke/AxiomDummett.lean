@@ -12,7 +12,7 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_Dummett_of_connected : Connected F → F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
+lemma validate_Dummett_of_connected' : Connected F → F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
   unfold Axioms.Dummett Connected;
   contrapose;
   push_neg;
@@ -41,6 +41,10 @@ lemma validate_Dummett_of_connected : Connected F → F ⊧ (Axioms.Dummett (.at
     rcases hC with (Ryz | Rzy);
     . exact nhz0 $ Satisfies.formula_hereditary Ryz hy0;
     . exact nhy1 $ Satisfies.formula_hereditary Rzy hz1;
+
+lemma validate_Dummett_of_connected [IsConnected _ F] : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
+  apply validate_Dummett_of_connected';
+  exact IsConnected.connected;
 
 lemma connected_of_validate_Dummett : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) → Connected F := by
   rintro h x y z ⟨Rxy, Ryz⟩;
@@ -77,7 +81,7 @@ open Classical
 
 namespace Canonical
 
-protected lemma connected [Entailment.HasAxiomDummett 𝓢] : Connected (canonicalFrame 𝓢).Rel := by
+instance [Entailment.HasAxiomDummett 𝓢] : IsConnected _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Ryz⟩;
   apply or_iff_not_imp_left.mpr;
   intro nRyz;
@@ -93,6 +97,7 @@ protected lemma connected [Entailment.HasAxiomDummett 𝓢] : Connected (canonic
   have hpqy : φ ➝ ψ ∈ y.1.1 := Rxy hpqx;
   have : ψ ∈ y.1.1 := mdp₁_mem hyp hpqy;
   exact this;
+⟩
 
 end Canonical
 

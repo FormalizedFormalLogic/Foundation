@@ -10,24 +10,7 @@ open Formula.Kripke
 
 namespace Kripke.FrameClass
 
-protected abbrev euclidean : FrameClass := { F | Euclidean F }
-
-namespace euclidean
-
-@[simp]
-instance nonempty : FrameClass.euclidean.Nonempty := by
-  use whitepoint;
-  simp [Euclidean];
-
-lemma validates_AxiomLEM : FrameClass.euclidean.ValidatesFormula (Axioms.LEM (.atom 0)) := by
-  rintro F _ _ rfl;
-  apply validate_LEM_of_euclidean $ by assumption
-
-instance validate_HilbertLC : FrameClass.euclidean.Validates (Hilbert.Cl.axioms) := by
-  apply FrameClass.Validates.withAxiomEFQ;
-  apply validates_AxiomLEM;
-
-end euclidean
+protected abbrev euclidean : FrameClass := { F | IsEuclidean _ F }
 
 end Kripke.FrameClass
 
@@ -35,11 +18,21 @@ end Kripke.FrameClass
 namespace Hilbert.Cl.Kripke
 
 instance sound : Sound Hilbert.Cl FrameClass.euclidean :=
-  instSound_of_validates_axioms FrameClass.euclidean.validate_HilbertLC
+  instSound_of_validates_axioms $ by
+    apply FrameClass.Validates.withAxiomEFQ;
+    rintro F hF _ rfl;
+    replace hF := Set.mem_setOf_eq.mp hF;
+    apply validate_LEM_of_euclidean;
 
-instance consistent : Entailment.Consistent Hilbert.Cl := consistent_of_sound_frameclass FrameClass.euclidean (by simp)
+instance consistent : Entailment.Consistent Hilbert.Cl := consistent_of_sound_frameclass FrameClass.euclidean $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance
 
-instance canonical : Canonical Hilbert.Cl FrameClass.euclidean := ⟨Canonical.euclidean⟩
+instance canonical : Canonical Hilbert.Cl FrameClass.euclidean :=  ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+⟩
 
 instance complete : Complete Hilbert.Cl FrameClass.euclidean := inferInstance
 

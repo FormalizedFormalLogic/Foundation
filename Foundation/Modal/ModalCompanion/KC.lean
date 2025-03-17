@@ -128,11 +128,7 @@ instance modalCompanion_KC_S4Point2 : ModalCompanion Logic.KC Logic.S4Point2 := 
     (MC := FrameClass.confluent_preorder)
     (by rw [Propositional.Logic.KC.Kripke.eq_confluent])
     (by rw [←Modal.Logic.S4Point2.is_smallestMC_of_KC, ←Modal.Logic.S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic])
-    (by
-      rintro F hF;
-      replace hF := Set.mem_setOf_eq.mp hF;
-      refine ⟨F.rel_refl, F.rel_trans, hF⟩;
-    );
+    (by rintro F hF; replace hF := Set.mem_setOf_eq.mp hF; apply Set.mem_setOf_eq.mpr; refine ⟨inferInstance, inferInstance⟩);
 
 end Logic
 
@@ -183,7 +179,7 @@ instance modalCompanion_KC_GrzPoint2 : ModalCompanion Logic.KC Logic.GrzPoint2 :
     (MC := FrameClass.finite_confluent_partial_order)
     (by rw [Logic.KC.Kripke.eq_finite_confluent])
     (by rw [←Logic.GrzPoint2.is_largestMC_of_KC, Modal.Logic.GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic])
-    (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, F.rel_refl, F.rel_trans, F.rel_antisymm, F_confl⟩)
+    (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, inferInstance, inferInstance⟩)
 
 end GrzPoint2
 

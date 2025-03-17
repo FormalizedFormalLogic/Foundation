@@ -15,47 +15,33 @@ namespace Kripke.FrameClass
 protected abbrev confluent : FrameClass := { F | IsConfluent _ F }
 protected abbrev finite_confluent : FrameClass := { F | Finite F ∧ IsConfluent _ F }
 
-namespace confluent
-
-@[simp]
-instance nonempty : FrameClass.confluent.Nonempty := by
-  use whitepoint;
-  simp [Confluent];
-
-lemma validates_AxiomWLEM : FrameClass.confluent.ValidatesFormula (Axioms.WeakLEM (.atom 0)) := by
-  rintro F _ _ rfl;
-  apply validate_WeakLEM_of_confluent $ by assumption
-
-instance validate_HilbertKC : FrameClass.confluent.Validates (Hilbert.KC.axioms) := by
-  apply FrameClass.Validates.withAxiomEFQ;
-  apply validates_AxiomWLEM;
-
-end confluent
-
-
-namespace finite_confluent
-
-instance validate_HilbertKC : FrameClass.finite_confluent.Validates (Hilbert.KC.axioms) := by
-  apply FrameClass.Validates.withAxiomEFQ;
-  rintro F ⟨_, _⟩ _ rfl;
-  apply FrameClass.confluent.validate_HilbertKC;
-  repeat tauto;
-
-end finite_confluent
-
 end Kripke.FrameClass
 
 
 namespace Hilbert.KC.Kripke
 
-instance sound : Sound Hilbert.KC FrameClass.confluent := instSound_of_validates_axioms FrameClass.confluent.validate_HilbertKC
+instance sound : Sound Hilbert.KC FrameClass.confluent :=
+  instSound_of_validates_axioms $ by
+    apply FrameClass.Validates.withAxiomEFQ;
+    rintro F hF _ rfl;
+    replace hF := Set.mem_setOf_eq.mp hF;
+    apply validate_WeakLEM_of_confluent
 
 instance sound_finite : Sound Hilbert.KC FrameClass.finite_confluent :=
-  instSound_of_validates_axioms FrameClass.finite_confluent.validate_HilbertKC
+  instSound_of_validates_axioms $ by
+    apply FrameClass.Validates.withAxiomEFQ;
+    rintro F ⟨_, hF⟩ _ rfl;
+    apply validate_WeakLEM_of_confluent
 
-instance consistent : Entailment.Consistent Hilbert.KC := consistent_of_sound_frameclass FrameClass.confluent (by simp)
+instance consistent : Entailment.Consistent Hilbert.KC := consistent_of_sound_frameclass FrameClass.confluent $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance
 
-instance canonical : Canonical Hilbert.KC FrameClass.confluent := ⟨Canonical.confluent⟩
+instance canonical : Canonical Hilbert.KC FrameClass.confluent := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+⟩
 
 instance complete : Complete Hilbert.KC FrameClass.confluent := inferInstance
 
@@ -69,6 +55,7 @@ instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_confluent := 
   intro φ hφ;
   apply Kripke.complete.complete;
   rintro F F_con V r;
+  replace F_con := Set.mem_setOf_eq.mp F_con;
   let M : Kripke.Model := ⟨F, V⟩;
   let RM := M↾r;
 
@@ -79,40 +66,48 @@ instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_confluent := 
   apply hφ;
 
   refine ⟨?_, ?_⟩;
-  . apply FilterEqvQuotient.finite;
-    simp;
-  . rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
+  . apply FilterEqvQuotient.finite; simp;
+  . apply isConfluent_iff _ _ |>.mpr;
+    rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
     . simp only [exists_and_left, and_self];
-      use ⟦⟨z, by tauto⟩⟧;
+      let Z : RM.World := ⟨z, by tauto⟩;
+      use ⟦Z⟧;
       apply Relation.TransGen.single;
-      use ⟨z, by tauto⟩;
+      use Z;
       constructor;
       . tauto;
-      . use ⟨z, by tauto⟩;
+      . use Z;
         constructor;
         . tauto;
         . apply F.refl;
-    . use ⟦⟨z, by tauto⟩⟧;
+    . let Y : RM.World := ⟨y, by tauto⟩;
+      let Z : RM.World := ⟨z, by tauto⟩;
+      use ⟦Z⟧;
       constructor;
       . apply TransGen.single;
-        use ⟨y, by tauto⟩, ⟨z, by tauto⟩;
+        use Y, Z;
         tauto;
       . apply Frame.refl;
-    . use ⟦⟨y, by tauto⟩⟧;
+    . let Y : RM.World := ⟨y, by tauto⟩;
+      let Z : RM.World := ⟨z, by tauto⟩;
+      use ⟦Y⟧;
       constructor;
       . apply Frame.refl;
       . apply TransGen.single;
-        use ⟨z, by tauto⟩, ⟨y, by tauto⟩;
+        use Z, Y;
         tauto;
-    . obtain ⟨u, Ryu, Rzu⟩ := F_con ⟨Rry, Rrz⟩;
+    . obtain ⟨u, Ryu, Rzu⟩ := IsConfluent.confluent ⟨Rry, Rrz⟩;
       have : r ≺ u := F.trans Rry Ryu;
-      use ⟦⟨u, by tauto⟩⟧;
+      let Y : RM.World := ⟨y, by tauto⟩;
+      let Z : RM.World := ⟨z, by tauto⟩;
+      let U : RM.World := ⟨u, by tauto⟩;
+      use ⟦U⟧;
       constructor;
       . apply TransGen.single;
-        use ⟨y, by tauto⟩, ⟨u, by tauto⟩;
+        use Y, U;
         tauto;
       . apply TransGen.single;
-        use ⟨z, by tauto⟩, ⟨u, by tauto⟩;
+        use Z, U;
         tauto;
 ⟩
 

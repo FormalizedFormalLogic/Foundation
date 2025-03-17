@@ -52,7 +52,8 @@ theorem KC_ssubset_LC : Logic.KC ⊂ Logic.LC := by
       }
       use F;
       constructor;
-      . simp [F, Confluent];
+      . apply isConfluent_iff _ _ |>.mpr
+        simp [F, Confluent];
         intros;
         use 3;
         omega;
@@ -82,7 +83,9 @@ theorem LC_ssubset_Cl : Logic.LC ⊂ Logic.Cl := by
       }
       use F;
       constructor;
-      . simp [F, Connected]; omega;
+      . apply isConnected_iff _ _ |>.mpr
+        simp [F, Connected];
+        omega;
       . apply not_imp_not.mpr $ Kripke.euclidean_of_validate_LEM;
         unfold Euclidean;
         push_neg;

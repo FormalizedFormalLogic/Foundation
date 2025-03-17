@@ -27,9 +27,9 @@ lemma Hilbert.S4Point3.goedelTranslated_axiomDummett : Hilbert.S4Point3 ⊢! □
 
 private lemma Hilbert.S4Point.lemma₁ : Hilbert.S4 ⊢! □(□φ ➝ □ψ) ➝ □(□φ ➝ ψ) := by
   apply Hilbert.S4.Kripke.complete.complete;
-  intro F ⟨F_refl, _⟩ V x h₁ y Rxy h₂;
+  rintro F ⟨_, _⟩ V x h₁ y Rxy h₂;
   apply @h₁ y Rxy h₂;
-  apply F_refl;
+  apply IsRefl.refl;
 
 namespace Logic
 
@@ -80,10 +80,7 @@ instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := 
     (MC := Modal.Kripke.FrameClass.connected_preorder)
     (by rw [Propositional.Logic.LC.Kripke.eq_connected])
     (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic])
-    (by
-      rintro F hF;
-      refine ⟨F.rel_refl, F.rel_trans, hF⟩;
-    );
+    (by rintro F hF; replace hF := Set.mem_setOf_eq.mp hF; apply Set.mem_setOf_eq.mpr; refine ⟨inferInstance, inferInstance⟩);
 
 end Logic
 
@@ -134,7 +131,7 @@ instance modalCompanion_LC_GrzPoint3 : ModalCompanion Logic.LC Logic.GrzPoint3 :
     (MC := FrameClass.finite_connected_partial_order)
     (by rw [Logic.LC.Kripke.eq_finite_connected])
     (by rw [←Logic.GrzPoint3.is_largestMC_of_LC, Modal.Logic.GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic])
-    (by rintro F ⟨_, F_conn⟩; refine ⟨by tauto, F.rel_refl, F.rel_trans, F.rel_antisymm, F_conn⟩)
+    (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, inferInstance, inferInstance⟩)
 
 end GrzPoint3
 

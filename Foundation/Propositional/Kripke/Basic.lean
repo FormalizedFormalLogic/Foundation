@@ -44,6 +44,7 @@ abbrev whitepoint : Frame where
   Rel := fun _ _ => True
   rel_partial_order := ⟨⟩
 instance : Frame.IsFinite whitepoint := inferInstance
+instance : IsUniversal _ whitepoint := ⟨by tauto⟩
 
 end
 

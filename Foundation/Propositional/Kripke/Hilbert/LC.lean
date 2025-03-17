@@ -12,51 +12,35 @@ open Formula.Kripke
 
 namespace Kripke.FrameClass
 
-protected abbrev connected : FrameClass := { F | Connected F }
-protected abbrev finite_connected : FrameClass := { F | Finite F ∧ Connected F }
-
-namespace connected
-
-@[simp]
-instance nonempty : FrameClass.connected.Nonempty := by
-  use whitepoint;
-  simp [Connected];
-
-lemma validates_AxiomWLEM : FrameClass.connected.ValidatesFormula (Axioms.Dummett (.atom 0) (.atom 1)) := by
-  rintro F _ _ rfl;
-  apply validate_Dummett_of_connected $ by assumption
-
-instance validate_HilbertLC : FrameClass.connected.Validates (Hilbert.LC.axioms) := by
-  apply FrameClass.Validates.withAxiomEFQ;
-  apply validates_AxiomWLEM;
-
-end connected
-
-
-namespace finite_connected
-
-instance validate_HilbertLC : FrameClass.finite_connected.Validates (Hilbert.LC.axioms) := by
-  apply FrameClass.Validates.withAxiomEFQ;
-  rintro F ⟨_, _⟩ _ rfl;
-  apply FrameClass.connected.validate_HilbertLC;
-  repeat tauto;
-
-end finite_connected
+protected abbrev connected : FrameClass := { F | IsConnected _ F }
+protected abbrev finite_connected : FrameClass := { F | Finite F ∧ IsConnected _ F }
 
 end Kripke.FrameClass
 
 
 namespace Hilbert.LC.Kripke
 
-instance sound : Sound Hilbert.LC FrameClass.connected :=
-  instSound_of_validates_axioms FrameClass.connected.validate_HilbertLC
+instance sound : Sound Hilbert.LC FrameClass.connected := instSound_of_validates_axioms $ by
+    apply FrameClass.Validates.withAxiomEFQ;
+    rintro F hF _ rfl;
+    replace hF := Set.mem_setOf_eq.mp hF;
+    apply validate_Dummett_of_connected
 
 instance sound_finite : Sound Hilbert.LC FrameClass.finite_connected :=
-  instSound_of_validates_axioms FrameClass.finite_connected.validate_HilbertLC
+  instSound_of_validates_axioms $ by
+    apply FrameClass.Validates.withAxiomEFQ;
+    rintro F ⟨_, hF⟩ _ rfl;
+    apply validate_Dummett_of_connected
 
-instance consistent : Entailment.Consistent Hilbert.LC := consistent_of_sound_frameclass FrameClass.connected (by simp)
+instance consistent : Entailment.Consistent Hilbert.LC := consistent_of_sound_frameclass FrameClass.connected $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance
 
-instance canonical : Canonical Hilbert.LC FrameClass.connected := ⟨Canonical.connected⟩
+instance canonical : Canonical Hilbert.LC FrameClass.connected := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+⟩
 
 instance complete : Complete Hilbert.LC FrameClass.connected := inferInstance
 
@@ -70,6 +54,7 @@ instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_connected := 
   intro φ hφ;
   apply Kripke.complete.complete;
   rintro F F_conn V r;
+  replace F_conn := Set.mem_setOf_eq.mp F_conn;
   let M : Kripke.Model := ⟨F, V⟩;
   let RM := M↾r;
 
@@ -82,8 +67,9 @@ instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_connected := 
   refine ⟨?_, ?_⟩;
   . apply FilterEqvQuotient.finite;
     simp;
-  . rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
-    . simp;
+  . apply isConnected_iff _ _ |>.mpr;
+    rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
+    . simp only [exists_and_left, or_self];
       apply Relation.TransGen.single
       use ⟨z, by tauto⟩;
       constructor;
@@ -100,14 +86,16 @@ instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_connected := 
       apply Relation.TransGen.single;
       use ⟨z, by tauto⟩, ⟨y, by tauto⟩;
       tauto;
-    . rcases F_conn ⟨Rry, Rrz⟩ with (Ryz | Rrw);
+    . let Y : RM.World := ⟨y, by tauto⟩;
+      let Z : RM.World := ⟨z, by tauto⟩;
+      rcases IsConnected.connected ⟨Rry, Rrz⟩ with (Ryz | Rrw);
       . left;
         apply Relation.TransGen.single;
-        use ⟨y, by tauto⟩, ⟨z, by tauto⟩;
+        use Y, Z;
         tauto;
       . right;
         apply Relation.TransGen.single;
-        use ⟨z, by tauto⟩, ⟨y, by tauto⟩;
+        use Z, Y;
         tauto;
 ⟩
 
