@@ -128,8 +128,8 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
   have RM_rooted : ∀ (w : RM.World), r' ≺ w := by
     intro w;
     by_cases e : r' = w;
-    . subst e; apply Frame.pointGenerate.rel_refl M_refl;
-    . exact TransGen.unwrap (Frame.pointGenerate.rel_trans M_trans) (Frame.IsRooted.root_generates w (by tauto));
+    . subst e; apply Frame.pointGenerate.isRefl.refl;
+    . exact Frame.IsRooted.root_generates w (by tauto) |>.unwrap (trans := Frame.pointGenerate.isTrans)
 
   replace hΓφ : ¬(r' ⊧ ⋀Γ → r' ⊧ φ) := Satisfies.imp_def.not.mp $ Model.pointGenerate.modal_equivalent_at_root (r := r) |>.not.mpr hΓφ;
   push_neg at hΓφ;
@@ -149,30 +149,34 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
   };
   apply not_validOnFrameClass_of_exists_model_world;
   use M', (Sum.inl r');
-  constructor;
-  . refine ⟨?_, ?_, ?_, ?_, ?_⟩;
-    . apply Frame.isFinite_iff _ |>.mpr;
-      infer_instance;
-    . intro x;
-      match x with
-      | Sum.inl x => apply M_refl;
-      | Sum.inr x => simp_all [M'];
-    . intro x y z Rxy Ryz;
-      match x, y, z with
-      | Sum.inl x, Sum.inl y, Sum.inl z => exact Frame.pointGenerate.rel_trans M_trans Rxy Ryz;
-      | _, _, Sum.inr z => simp_all [M'];
-      | _, Sum.inr y, Sum.inl z => simp_all [M'];
-    . intro x y Rxy Ryz;
-      match x, y with
-      | Sum.inl x, Sum.inl y =>
-        simp only [Sum.inl.injEq, M'];
-        exact Frame.pointGenerate.rel_antisymm M_antisymm Rxy Ryz;
-      | Sum.inl x, Sum.inr y => simp_all [M'];
-      | Sum.inr x, Sum.inr y => simp_all [M'];
-      | Sum.inr x, Sum.inl y => simp_all [M'];
-    . rintro x y z ⟨Rxy, Ryz⟩;
-      use (Sum.inr ());
-      simp [M'];
+  refine ⟨⟨?_, ?_, ⟨?_⟩⟩, ?_⟩;
+  . apply Frame.isFinite_iff _ |>.mpr;
+    infer_instance;
+  . exact {
+      refl := by
+        intro x;
+        match x with
+        | Sum.inl x => apply (Frame.pointGenerate.isRefl).refl;
+        | Sum.inr x => simp_all [M'];
+      trans := by
+        intro x y z Rxy Ryz;
+        match x, y, z with
+        | Sum.inl x, Sum.inl y, Sum.inl z => exact Frame.pointGenerate.isTrans.transitive Rxy Ryz;
+        | _, _, Sum.inr z => simp_all [M'];
+        | _, Sum.inr y, Sum.inl z => simp_all [M'];
+      antisymm := by
+        intro x y Rxy Ryz;
+        match x, y with
+        | Sum.inl x, Sum.inl y =>
+          simp only [Sum.inl.injEq, M'];
+          exact Frame.pointGenerate.isAntisymm.antisymm _ _ Rxy Ryz;
+        | Sum.inl x, Sum.inr y => simp_all [M'];
+        | Sum.inr x, Sum.inr y => simp_all [M'];
+        | Sum.inr x, Sum.inl y => simp_all [M'];
+    };
+  . rintro x y z ⟨Rxy, Ryz⟩;
+    use (Sum.inr ());
+    simp [M'];
   . have H₁ : ∀ a ∈ φ.atoms, ∀ t ∈ RM.toFrame.terminals, ∀ t' ∈ RM.toFrame.terminals, RM t a → RM t' a := by
       intro a ha t t_terminal t' t'_terminal hy;
       by_contra hy';
@@ -225,7 +229,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
           | Sum.inr _ =>
             apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mp;
             apply ht;
-            apply Frame.pointGenerate.rel_refl M_refl;
+            apply Frame.pointGenerate.isRefl.refl;
         . intro ht u Rtu;
           have := t_terminal Rtu; subst this;
           apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mpr;
