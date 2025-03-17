@@ -1,6 +1,7 @@
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.Logic.Sublogic.S4
 import Foundation.Propositional.Kripke.Hilbert.LC
+import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
 
 namespace LO.Modal
 
@@ -135,6 +136,13 @@ instance modalCompanion_LC_GrzPoint3 : ModalCompanion Logic.LC Logic.GrzPoint3 :
 
 end GrzPoint3
 
+
+section boxdot
+
+theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : φ ∈ Logic.LC ↔ φᵍᵇ ∈ Logic.GLPoint3 := by
+  exact Iff.trans modalCompanion_LC_GrzPoint3.companion Hilbert.iff_boxdotTranslatedGLPoint3_GrzPoint3.symm
+
+end boxdot
 
 
 end LO.Modal

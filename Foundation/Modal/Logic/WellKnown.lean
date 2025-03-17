@@ -21,6 +21,7 @@ import Foundation.Modal.Kripke.Hilbert.S4Point2
 import Foundation.Modal.Kripke.Hilbert.S4Point3
 import Foundation.Modal.Kripke.Hilbert.GrzPoint2
 import Foundation.Modal.Kripke.Hilbert.GrzPoint3
+import Foundation.Modal.Kripke.Hilbert.GLPoint3
 import Foundation.Modal.Kripke.Hilbert.S5
 import Foundation.Modal.Kripke.Hilbert.Triv
 import Foundation.Modal.Kripke.Hilbert.Ver
@@ -141,6 +142,8 @@ protected abbrev GL : Logic := Hilbert.GL.logic
 lemma GL.eq_TransitiveIrreflexiveFiniteKripkeFrameClass_Logic : Logic.GL = Kripke.FrameClass.finite_trans_irrefl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 instance : (Logic.GL).Unnecessitation := inferInstance
 
+protected abbrev GLPoint3 : Logic := Hilbert.GLPoint3.logic
+lemma GLPoint3.Kripke.eq_finiteStrictLinearOrder_logic : Logic.GLPoint3 = Kripke.FrameClass.finite_strict_linear_order.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev KH : Logic := Hilbert.KH.logic
 
