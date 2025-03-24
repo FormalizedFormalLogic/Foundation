@@ -39,6 +39,7 @@ end
 
 section
 
+attribute [mk_iff] IsSymm
 attribute [mk_iff] IsAntisymm
 attribute [mk_iff] IsPreorder
 attribute [mk_iff] IsPartialOrder

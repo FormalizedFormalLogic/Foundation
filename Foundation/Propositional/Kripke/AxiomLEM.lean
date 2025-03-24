@@ -33,9 +33,11 @@ lemma validate_LEM_of_symmetric' : Symmetric F → F ⊧ (Axioms.LEM (.atom 0)) 
   . by_contra Ryx;
     exact h₁ $ Satisfies.formula_hereditary Ryx hy;
 
-lemma validate_LEM_of_euclidean [IsEuclidean _ F] : F ⊧ (Axioms.LEM (.atom 0)) := by
+lemma validate_LEM_of_symmetric [IsSymm _ F] : F ⊧ (Axioms.LEM (.atom 0)) := by
   apply validate_LEM_of_symmetric';
   exact IsSymm.symm;
+
+lemma validate_LEM_of_euclidean [IsEuclidean _ F] : F ⊧ (Axioms.LEM (.atom 0)) := validate_LEM_of_symmetric
 
 lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F := by
   rintro h x y z Rxy Rxz;
