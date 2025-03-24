@@ -136,7 +136,14 @@ lemma S5.eq_UniversalKripkeFrameClass_Logic : Logic.S5 = Kripke.FrameClass.unive
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev S5Grz : Logic := Hilbert.S5Grz.logic
-
+abbrev _root_.LO.Modal.Kripke.FrameClass.symmetric_partial_order : Kripke.FrameClass
+  := { F | F.IsFinite ∧ IsPartialOrder _ F.Rel ∧ IsSymm _ F.Rel  }
+abbrev _root_.LO.Modal.Kripke.FrameClass.euclidean_partial_order : Kripke.FrameClass
+  := { F | F.IsFinite ∧ IsPartialOrder _ F.Rel ∧ IsEuclidean _ F.Rel  }
+lemma S5Grz.Kripke.eq_symmetric_partial_order : Logic.S5Grz = Kripke.FrameClass.symmetric_partial_order.logic
+  := by sorry
+lemma S5Grz.Kripke.eq_euclidean_partial_order : Logic.S5Grz = Kripke.FrameClass.euclidean_partial_order.logic
+  := by sorry
 
 protected abbrev GL : Logic := Hilbert.GL.logic
 lemma GL.eq_TransitiveIrreflexiveFiniteKripkeFrameClass_Logic : Logic.GL = Kripke.FrameClass.finite_trans_irrefl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic

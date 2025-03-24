@@ -147,11 +147,12 @@ lemma Logic.S5Grz.is_largestMC_of_Cl : Logic.S5Grz = Logic.Cl.largestMC := by
 instance modalCompanion_Cl_S5Grz : ModalCompanion Logic.Cl Logic.S5Grz := by
   rw [Logic.S5Grz.is_largestMC_of_Cl];
   apply Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.FrameClass.finite_symmetric);
-  . sorry;
-  . sorry;
-  . sorry;
-  . sorry;
+    (IC := Propositional.Kripke.FrameClass.finite_symmetric)
+    (MC := Modal.Kripke.FrameClass.symmetric_partial_order);
+  . rw [Logic.Cl.Kripke.eq_finite_symmetric]
+  . rw [←Logic.S5Grz.is_largestMC_of_Cl, ←Logic.S5Grz.Kripke.eq_symmetric_partial_order]
+  . rintro F ⟨_, _⟩;
+    refine ⟨inferInstance, inferInstance, inferInstance⟩;
 
 instance modalCompanion_Cl_Triv : ModalCompanion Logic.Cl Logic.Triv := by
   convert modalCompanion_Cl_S5Grz;
