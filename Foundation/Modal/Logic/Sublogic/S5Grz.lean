@@ -21,9 +21,14 @@ lemma S5_ssubset_S5Grz : Logic.S5 ⊂ Logic.S5Grz := by
       . simp [Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.S5 Logic.S5Grz := ⟨S5_ssubset_S5Grz⟩
 
+
 lemma S5Grz_eq_Triv : Logic.S5Grz = Logic.Triv := by
   ext φ;
   exact Hilbert.iff_provable_S5Grz_provable_Triv;
+
+lemma S5Grz.Kripke.eq_finite_equality_logic : Logic.S5Grz = Kripke.FrameClass.finite_equality.logic := by
+  rw [S5Grz_eq_Triv, Triv.Kripke.eq_finite_equality_logic]
+
 
 theorem S5_ssubset_Triv : Logic.S5 ⊂ Logic.Triv := by
   convert S5_ssubset_S5Grz;

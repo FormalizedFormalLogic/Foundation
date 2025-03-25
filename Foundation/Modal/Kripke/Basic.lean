@@ -57,6 +57,7 @@ instance : IsAntisymm _ whitepoint.Rel := ⟨by tauto⟩
 instance : IsPreorder _ whitepoint.Rel where
 instance : IsEquiv _ whitepoint.Rel where
 instance : IsPartialOrder _ whitepoint.Rel where
+instance : IsEquality _ whitepoint.Rel := ⟨by tauto⟩
 
 def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
 

@@ -137,7 +137,6 @@ lemma S5.eq_UniversalKripkeFrameClass_Logic : Logic.S5 = Kripke.FrameClass.unive
 
 protected abbrev S5Grz : Logic := Hilbert.S5Grz.logic
 
-
 protected abbrev GL : Logic := Hilbert.GL.logic
 lemma GL.eq_TransitiveIrreflexiveFiniteKripkeFrameClass_Logic : Logic.GL = Kripke.FrameClass.finite_trans_irrefl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 instance : (Logic.GL).Unnecessitation := inferInstance
@@ -161,7 +160,7 @@ lemma GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameCla
 
 protected abbrev Triv : Logic := Hilbert.Triv.logic
 lemma Triv.eq_EqualityKripkeFrameClass_Logic : Logic.Triv = Kripke.FrameClass.equality.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
+lemma Triv.Kripke.eq_finite_equality_logic : Logic.Triv = Kripke.FrameClass.finite_equality.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev Ver : Logic := Hilbert.Ver.logic
 instance : (Logic.Ver).Normal := Hilbert.normal

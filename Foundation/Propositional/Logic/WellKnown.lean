@@ -23,6 +23,10 @@ lemma LC.Kripke.eq_finite_connected : Logic.LC = Kripke.FrameClass.finite_connec
 protected abbrev Cl : Logic := Hilbert.Cl.logic
 lemma Cl.Kripke.eq_euclidean : Logic.Cl = Kripke.FrameClass.euclidean.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Cl.Kripke.eq_finite_euclidean : Logic.Cl = Kripke.FrameClass.finite_euclidean.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Cl.Kripke.eq_finite_symmetric : Logic.Cl = Kripke.FrameClass.finite_symmetric.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 end Logic
 
