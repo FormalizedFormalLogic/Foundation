@@ -478,7 +478,7 @@ lemma iff_mem_conj : (⋀Γ ∈ Ω) ↔ (∀ φ ∈ Γ, φ ∈ Ω) := by simp [m
 
 section
 
-variable [Entailment.K 𝓢]
+variable [Entailment.Modal.K 𝓢]
 
 lemma iff_mem_multibox : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, (□''⁻¹^[n]Ω.1 ⊆ Ω'.1) → (φ ∈ Ω')) := by
   constructor;

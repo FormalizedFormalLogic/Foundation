@@ -31,7 +31,7 @@ section
 protected abbrev K : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1)}⟩
 instance : Hilbert.K.FiniteAxiomatizable where
 instance : Hilbert.K.HasK where p := 0; q := 1
-instance : Entailment.K (Hilbert.K) where
+instance : Entailment.Modal.K (Hilbert.K) where
 
 end
 

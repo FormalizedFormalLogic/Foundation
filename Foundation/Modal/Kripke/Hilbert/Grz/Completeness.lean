@@ -56,11 +56,11 @@ open Kripke
 namespace Kripke.Grz
 
 variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Grz 𝓢]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Modal.Grz 𝓢]
 
 variable {φ ψ : Formula ℕ}
 
-abbrev miniCanonicalFrame (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Frame where
+abbrev miniCanonicalFrame (𝓢 : S) [Entailment.Modal.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Frame where
   World := ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)
   Rel X Y :=
     (∀ ψ ∈ □''⁻¹(φ.subformulasGrz), □ψ ∈ X → □ψ ∈ Y) ∧
@@ -99,11 +99,11 @@ instance : IsPartialOrder _ (miniCanonicalFrame 𝓢 φ).Rel where
 end miniCanonicalFrame
 
 
-abbrev miniCanonicalModel (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Model where
+abbrev miniCanonicalModel (𝓢 : S) [Entailment.Modal.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Model where
   toFrame := miniCanonicalFrame 𝓢 φ
   Val X a := (atom a) ∈ X
 
-omit [Consistent 𝓢] [Entailment.Grz 𝓢] in
+omit [Consistent 𝓢] [Entailment.Modal.Grz 𝓢] in
 lemma truthlemma_lemma1
   {X : ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)} (hq : □ψ ∈ φ.subformulas)
   : ((X.1.prebox.box) ∪ {□(ψ ➝ □ψ), -ψ}) ⊆ (φ.subformulasGrz)⁻ := by

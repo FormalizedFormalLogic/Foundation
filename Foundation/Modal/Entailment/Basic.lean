@@ -1,5 +1,6 @@
 import Foundation.Logic.Disjunctive
 import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Propositional.Entailment.Cl
 import Foundation.Modal.Axioms
 
 namespace LO.Entailment
@@ -467,73 +468,73 @@ instance [ModusPonens 𝓢] [HasAxiomT 𝓢] : Unnecessitation 𝓢 := ⟨by
 end
 
 
-section
+namespace Modal
 
 variable (𝓢 : S)
 
 protected class K extends Entailment.Classical 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
 
-protected class KD extends Entailment.K 𝓢, HasAxiomD 𝓢
+protected class KD extends Entailment.Modal.K 𝓢, HasAxiomD 𝓢
 
-protected class KP extends Entailment.K 𝓢, HasAxiomP 𝓢
+protected class KP extends Entailment.Modal.K 𝓢, HasAxiomP 𝓢
 
-protected class KB extends Entailment.K 𝓢, HasAxiomB 𝓢
+protected class KB extends Entailment.Modal.K 𝓢, HasAxiomB 𝓢
 
-protected class KT extends Entailment.K 𝓢, HasAxiomT 𝓢
-protected class KT' extends Entailment.K 𝓢, HasAxiomDiaTc 𝓢
+protected class KT extends Entailment.Modal.K 𝓢, HasAxiomT 𝓢
+protected class KT' extends Entailment.Modal.K 𝓢, HasAxiomDiaTc 𝓢
 
-protected class KTc extends Entailment.K 𝓢, HasAxiomTc 𝓢
-protected class KTc' extends Entailment.K 𝓢, HasAxiomDiaT 𝓢
+protected class KTc extends Entailment.Modal.K 𝓢, HasAxiomTc 𝓢
+protected class KTc' extends Entailment.Modal.K 𝓢, HasAxiomDiaT 𝓢
 
-protected class KTB extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomB 𝓢
+protected class KTB extends Entailment.Modal.K 𝓢, HasAxiomT 𝓢, HasAxiomB 𝓢
 
-protected class KD45 extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
+protected class KD45 extends Entailment.Modal.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
 
-protected class KB4 extends Entailment.K 𝓢, HasAxiomB 𝓢, HasAxiomFour 𝓢
+protected class KB4 extends Entailment.Modal.K 𝓢, HasAxiomB 𝓢, HasAxiomFour 𝓢
 
-protected class KB5 extends Entailment.K 𝓢, HasAxiomB 𝓢, HasAxiomFive 𝓢
+protected class KB5 extends Entailment.Modal.K 𝓢, HasAxiomB 𝓢, HasAxiomFive 𝓢
 
-protected class KDB extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomB 𝓢
+protected class KDB extends Entailment.Modal.K 𝓢, HasAxiomD 𝓢, HasAxiomB 𝓢
 
-protected class KD4 extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢
+protected class KD4 extends Entailment.Modal.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢
 
-protected class KD5 extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFive 𝓢
+protected class KD5 extends Entailment.Modal.K 𝓢, HasAxiomD 𝓢, HasAxiomFive 𝓢
 
-protected class K45 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
+protected class K45 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomFive 𝓢
 
-protected class KT4B extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢, HasAxiomB 𝓢
+protected class KT4B extends Entailment.Modal.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢, HasAxiomB 𝓢
 
-protected class Triv extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
-instance [Entailment.Triv 𝓢] : Entailment.KT 𝓢 where
-instance [Entailment.Triv 𝓢] : Entailment.KTc 𝓢 where
+protected class Triv extends Entailment.Modal.K 𝓢, HasAxiomT 𝓢, HasAxiomTc 𝓢
+instance [Entailment.Modal.Triv 𝓢] : Entailment.Modal.KT 𝓢 where
+instance [Entailment.Modal.Triv 𝓢] : Entailment.Modal.KTc 𝓢 where
 
-protected class Ver extends Entailment.K 𝓢, HasAxiomVer 𝓢
+protected class Ver extends Entailment.Modal.K 𝓢, HasAxiomVer 𝓢
 
-protected class K4 extends Entailment.K 𝓢, HasAxiomFour 𝓢
-protected class K4Point2 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint2 𝓢
-protected class K4Point3 extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢
+protected class K4 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢
+protected class K4Point2 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint2 𝓢
+protected class K4Point3 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢
 
-protected class K5 extends Entailment.K 𝓢, HasAxiomFive 𝓢
+protected class K5 extends Entailment.Modal.K 𝓢, HasAxiomFive 𝓢
 
-protected class S4 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢
-instance [Entailment.S4 𝓢] : Entailment.K4 𝓢 where
-instance [Entailment.S4 𝓢] : Entailment.KT 𝓢 where
+protected class S4 extends Entailment.Modal.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢
+instance [Entailment.Modal.S4 𝓢] : Entailment.Modal.K4 𝓢 where
+instance [Entailment.Modal.S4 𝓢] : Entailment.Modal.KT 𝓢 where
 
-protected class S4Point2 extends Entailment.S4 𝓢, HasAxiomPoint2 𝓢
+protected class S4Point2 extends Entailment.Modal.S4 𝓢, HasAxiomPoint2 𝓢
 
-protected class S4Point3 extends Entailment.S4 𝓢, HasAxiomPoint3 𝓢
+protected class S4Point3 extends Entailment.Modal.S4 𝓢, HasAxiomPoint3 𝓢
 
-protected class S5 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢
-instance [Entailment.S5 𝓢] : Entailment.KT 𝓢 where
-instance [Entailment.S5 𝓢] : Entailment.K5 𝓢 where
+protected class S5 extends Entailment.Modal.K 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢
+instance [Entailment.Modal.S5 𝓢] : Entailment.Modal.KT 𝓢 where
+instance [Entailment.Modal.S5 𝓢] : Entailment.Modal.K5 𝓢 where
 
-protected class GL extends Entailment.K 𝓢, HasAxiomL 𝓢
-protected class GLPoint2 extends Entailment.GL 𝓢, HasAxiomWeakPoint2 𝓢
-protected class GLPoint3 extends Entailment.GL 𝓢, HasAxiomWeakPoint3 𝓢
+protected class GL extends Entailment.Modal.K 𝓢, HasAxiomL 𝓢
+protected class GLPoint2 extends Entailment.Modal.GL 𝓢, HasAxiomWeakPoint2 𝓢
+protected class GLPoint3 extends Entailment.Modal.GL 𝓢, HasAxiomWeakPoint3 𝓢
 
-protected class Grz extends Entailment.K 𝓢, HasAxiomGrz 𝓢
+protected class Grz extends Entailment.Modal.K 𝓢, HasAxiomGrz 𝓢
 
-end
+end Modal
 
 
 section

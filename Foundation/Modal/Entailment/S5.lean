@@ -6,7 +6,7 @@ namespace LO.Entailment
 open FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.S5 𝓢]
+variable {𝓢 : S} [Entailment.Modal.S5 𝓢]
 
 -- MEMO: need more simple proof
 def diabox_box : 𝓢 ⊢ ◇□φ ➝ □φ := by
