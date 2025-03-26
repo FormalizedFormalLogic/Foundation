@@ -87,6 +87,8 @@ namespace Model.extendRoot
 
 variable {M : Model} {r : M.World} [M.IsRooted r] {x y : M.World}
 
+instance : Coe (M.World) ((M.extendRoot r).World) := ⟨Sum.inr⟩
+
 protected abbrev root := Frame.extendRoot.root (F := M.toFrame) (r := r)
 
 def pMorphism : Model.PseudoEpimorphism M (M.extendRoot r) := PseudoEpimorphism.ofAtomic (Frame.extendRoot.pMorphism (F := M.toFrame) (r := r)) $ by
