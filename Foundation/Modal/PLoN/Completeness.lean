@@ -4,7 +4,7 @@ import Foundation.Modal.PLoN.Basic
 namespace LO.Modal
 
 variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Classical 𝓢] [Entailment.Necessitation 𝓢]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢] [Entailment.Necessitation 𝓢]
 
 namespace PLoN
 
@@ -12,11 +12,11 @@ open Formula
 open FormulaSet
 open MaximalConsistentSet
 
-abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Classical 𝓢] : PLoN.Frame where
+abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢] : PLoN.Frame where
   World := MaximalConsistentSet 𝓢
   Rel := λ φ Ω₁ Ω₂ => ∼(□φ) ∈ Ω₁ ∧ ∼φ ∈ Ω₂
 
-abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Classical 𝓢] : PLoN.Model where
+abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢] : PLoN.Model where
   toFrame := canonicalFrame 𝓢
   Valuation Ω a := (atom a) ∈ Ω
 
@@ -65,7 +65,7 @@ lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊧ φ ↔ (φ ∈ X
       have : □φ ∉ X := iff_mem_neg.mp RXY.1;
       contradiction;
 
-class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Classical 𝓢] (C : FrameClass) : Prop where
+class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢] (C : FrameClass) : Prop where
   canonical : (canonicalFrame 𝓢) ∈ C
 
 instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
