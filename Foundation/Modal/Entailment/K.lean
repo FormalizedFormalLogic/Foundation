@@ -5,7 +5,7 @@ namespace LO.Entailment
 open FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.K 𝓢]
+variable {𝓢 : S} [Entailment.Modal.K 𝓢]
 
 def multibox_axiomK : 𝓢 ⊢ □^[n](φ ➝ ψ) ➝ □^[n]φ ➝ □^[n]ψ := by
   induction n with

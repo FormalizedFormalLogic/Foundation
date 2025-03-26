@@ -9,7 +9,7 @@ variable {𝓢 : S}
 
 namespace KTc
 
-variable [Entailment.KTc 𝓢]
+variable [Entailment.Modal.KTc 𝓢]
 
 protected def axiomFour : 𝓢 ⊢ Axioms.Four φ := axiomTc
 instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ KTc.axiomFour⟩
@@ -28,7 +28,7 @@ end KTc
 
 namespace KTc'
 
-variable [Entailment.KTc' 𝓢]
+variable [Entailment.Modal.KTc' 𝓢]
 
 protected def axiomTc : 𝓢 ⊢ φ ➝ □φ := impTrans'' (contra₃' (impTrans'' (and₂' diaDuality) diaT)) box_dne
 instance : HasAxiomTc 𝓢 := ⟨fun _ ↦ KTc'.axiomTc⟩

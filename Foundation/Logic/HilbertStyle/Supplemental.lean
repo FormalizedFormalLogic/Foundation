@@ -519,17 +519,7 @@ def andIffAndOfIff {φ ψ φ' ψ' : F} (bp : 𝓢 ⊢ φ ⭤ φ') (bq : 𝓢 ⊢
   iffIntro (andImplyAndOfImply (andLeft bp) (andLeft bq)) (andImplyAndOfImply (andRight bp) (andRight bq))
 
 
-section Instantinate
-
-instance [HasAxiomDNE 𝓢] : HasAxiomEFQ 𝓢 where
-  efq φ := by
-    apply contra₃';
-    exact impTrans'' (and₁' neg_equiv) $ impTrans'' (impSwap' imply₁) (and₂' neg_equiv);
-
-
--- TODO: Actually this can be computable but it's too slow.
-noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomLEM 𝓢 where
-  lem _ := dneOr $ NotOrOfImply' dni
+section
 
 instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
   dne φ := by
@@ -541,46 +531,19 @@ instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
       exact efq' $ nnp ⨀ np;
     ) $ of lem;;
 
-instance [HasAxiomLEM 𝓢] : HasAxiomWeakLEM 𝓢 where
-  wlem φ := lem (φ := ∼φ);
+end
 
-instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDummett 𝓢 where
-  dummett φ ψ := by
-    have d₁ : 𝓢 ⊢ φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := impTrans'' imply₁ or₂;
-    have d₂ : 𝓢 ⊢ ∼φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := impTrans'' efq_imply_not₁ or₁;
-    exact or₃''' d₁ d₂ lem;
 
-instance [HasAxiomEFQ 𝓢] [HasAxiomDummett 𝓢] : HasAxiomWeakLEM 𝓢 where
-  wlem φ := by
-    haveI : 𝓢 ⊢ (φ ➝ ∼φ) ⋎ (∼φ ➝ φ) := dummett;
-    exact or₃''' (by
-      apply deduct';
-      apply or₁';
-      apply neg_equiv'.mpr;
-      apply deduct;
-      haveI d₁ : [φ, φ ➝ ∼φ] ⊢[𝓢] φ := FiniteContext.byAxm;
-      haveI d₂ : [φ, φ ➝ ∼φ] ⊢[𝓢] φ ➝ ∼φ := FiniteContext.byAxm;
-      have := neg_equiv'.mp $ d₂ ⨀ d₁;
-      exact this ⨀ d₁;
-    ) (by
-      apply deduct';
-      apply or₂';
-      apply neg_equiv'.mpr;
-      apply deduct;
-      haveI d₁ : [∼φ, ∼φ ➝ φ] ⊢[𝓢] ∼φ := FiniteContext.byAxm;
-      haveI d₂ : [∼φ, ∼φ ➝ φ] ⊢[𝓢] ∼φ ➝ φ := FiniteContext.byAxm;
-      haveI := d₂ ⨀ d₁;
-      exact (neg_equiv'.mp d₁) ⨀ this;
-    ) this;
+section
 
-noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomPeirce 𝓢 where
-  peirce φ ψ := by
-    refine or₃''' imply₁ ?_ lem;
-    apply deduct';
-    apply deduct;
-    refine (FiniteContext.byAxm (φ := (φ ➝ ψ) ➝ φ)) ⨀ ?_;
-    apply deduct;
-    apply efq_of_mem_either (by aesop) (by aesop)
+-- TODO: Actually this can be computable but it's too slow.
+noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomLEM 𝓢 where
+  lem _ := dneOr $ NotOrOfImply' dni
+
+instance [HasAxiomDNE 𝓢] : HasAxiomEFQ 𝓢 where
+  efq φ := by
+    apply contra₃';
+    exact impTrans'' (and₁' neg_equiv) $ impTrans'' (impSwap' imply₁) (and₂' neg_equiv);
 
 instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
   elim_contra φ ψ := by
@@ -588,7 +551,8 @@ instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
     have : [∼ψ ➝ ∼φ] ⊢[𝓢] ∼ψ ➝ ∼φ := FiniteContext.byAxm;
     exact contra₃' this;
 
-end Instantinate
+end
+
 
 noncomputable def implyIffNotOr [HasAxiomDNE 𝓢] : 𝓢 ⊢ (φ ➝ ψ) ⭤ (∼φ ⋎ ψ) := iffIntro
   NotOrOfImply (deduct' (orCases efq_imply_not₁ imply₁ byAxm₀))

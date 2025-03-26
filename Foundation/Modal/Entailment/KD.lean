@@ -5,7 +5,7 @@ namespace LO.Entailment
 open FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.KD 𝓢]
+variable {𝓢 : S} [Entailment.Modal.KD 𝓢]
 
 namespace KD
 

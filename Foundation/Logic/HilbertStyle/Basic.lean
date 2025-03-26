@@ -146,28 +146,6 @@ def dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ ➝ φ := HasAxiomDNE.dne _
 def dne' [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := dne ⨀ b
 lemma dne'! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := ⟨dne' h.some⟩
 
-
-class HasAxiomWeakLEM (𝓢 : S) where
-  wlem (φ : F) : 𝓢 ⊢ Axioms.WeakLEM φ
-
-def wlem [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢ ∼φ ⋎ ∼∼φ := HasAxiomWeakLEM.wlem φ
-@[simp] lemma wlem! [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢! ∼φ ⋎ ∼∼φ := ⟨wlem⟩
-
-
-class HasAxiomDummett (𝓢 : S) where
-  dummett (φ ψ : F) : 𝓢 ⊢ Axioms.Dummett φ ψ
-
-def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (φ ➝ ψ) ⋎ (ψ ➝ φ) := HasAxiomDummett.dummett φ ψ
-@[simp] lemma dummett! [HasAxiomDummett 𝓢] : 𝓢 ⊢! Axioms.Dummett φ ψ := ⟨dummett⟩
-
-
-class HasAxiomPeirce (𝓢 : S) where
-  peirce (φ ψ : F) : 𝓢 ⊢ Axioms.Peirce φ ψ
-
-def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((φ ➝ ψ) ➝ φ) ➝ φ := HasAxiomPeirce.peirce _ _
-@[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((φ ➝ ψ) ➝ φ) ➝ φ := ⟨peirce⟩
-
-
 /--
   Negation `∼φ` is equivalent to `φ ➝ ⊥` on **system**.
 

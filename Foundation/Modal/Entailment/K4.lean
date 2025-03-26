@@ -5,7 +5,7 @@ namespace LO.Entailment
 open FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.K4 𝓢]
+variable {𝓢 : S} [Entailment.Modal.K4 𝓢]
 
 def imply_BoxBoxdot_Box: 𝓢 ⊢  □⊡φ ➝ □φ := by
   exact impTrans'' distribute_box_and and₁
