@@ -187,7 +187,7 @@ scoped instance : Inter V := ⟨inter⟩
 @[simp] lemma mem_inter_iff {a b c : V} : a ∈ b ∩ c ↔ a ∈ b ∧ a ∈ c := by
   simp [Inter.inter, inter, mem_sInter_iff_of_pos (s := {b, c}) (nonempty_iff.mpr ⟨b, by simp⟩)]
 
-lemma inter_comm (a b : V) : a ∩ b = b ∩ a := mem_ext (by simp [and_comm])
+lemma inter_comm (a b : V) : a ∩ b = b ∩ a := mem_ext (by simp [k!_symm])
 
 lemma inter_eq_self_of_subset {a b : V} (h : a ⊆ b) :
   a ∩ b = a := mem_ext (by simp; intro i hi; exact h hi)

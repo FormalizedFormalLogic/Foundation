@@ -277,7 +277,7 @@ lemma of_subset (h : T ⊆ U) {p : L.Formula} : T ⊢! p → U ⊢! p := by
 instance : Entailment.ModusPonens T := ⟨modusPonens⟩
 
 instance : Entailment.NegationEquiv T where
-  neg_equiv p := by
+  negEquiv p := by
     simp [Axioms.NegEquiv, LO.LogicalConnective.iff, Semiformula.imp_def]
     apply TDerivation.and
     · apply TDerivation.or

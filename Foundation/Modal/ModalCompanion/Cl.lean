@@ -23,8 +23,8 @@ lemma Logic.Cl.smallestMC.mem_diabox_box : (◇□(.atom 0) ➝ □(.atom 0)) �
     . simp;
     . tauto;
   apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
-  apply imp_trans''! ?_ imply_of_not_or!;
-  apply imp_trans''! ?_ or_comm!;
+  apply c!_trans ?_ imply_of_not_or!;
+  apply c!_trans ?_ or_comm!;
   apply or_replace!;
   . simp;
   . apply contra₁'!;
@@ -34,9 +34,9 @@ lemma Logic.Cl.smallestMC.mem_AxiomFive : (◇(.atom 0) ➝ □◇(.atom 0)) ∈
   have := Logic.sumNormal.subst (s := λ _ => ∼(.atom 0)) $ mem_diabox_box;
   apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
   simp;
-  apply imp_trans''! ?_ imply_of_not_or!;
-  apply imp_trans''! not_or_of_imply! ?_;
-  apply imp_trans''! ?_ or_comm!;
+  apply c!_trans ?_ imply_of_not_or!;
+  apply c!_trans not_or_of_imply! ?_;
+  apply c!_trans ?_ or_comm!;
   apply or_replace!;
   . apply contra₂'!;
     exact diaDuality_mp!;

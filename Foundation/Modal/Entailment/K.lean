@@ -9,8 +9,8 @@ variable {𝓢 : S} [Entailment.Modal.K 𝓢]
 
 def multibox_axiomK : 𝓢 ⊢ □^[n](φ ➝ ψ) ➝ □^[n]φ ➝ □^[n]ψ := by
   induction n with
-  | zero => apply impId;
-  | succ n ih => simpa using impTrans'' (axiomK' $ nec ih) (by apply axiomK);
+  | zero => apply cId;
+  | succ n ih => simpa using cTrans (axiomK' $ nec ih) (by apply axiomK);
 omit [DecidableEq F] in @[simp] lemma multibox_axiomK! : 𝓢 ⊢! □^[n](φ ➝ ψ) ➝ □^[n]φ ➝ □^[n]ψ := ⟨multibox_axiomK⟩
 
 def multibox_axiomK' (h : 𝓢 ⊢ □^[n](φ ➝ ψ)) : 𝓢 ⊢ □^[n]φ ➝ □^[n]ψ := multibox_axiomK ⨀ h
@@ -21,9 +21,9 @@ alias multiboxed_imply_distribute! := multibox_axiomK'!
 
 
 def boxIff' (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ (□φ ⭤ □ψ) := by
-  apply iffIntro;
-  . exact axiomK' $ nec $ and₁' h;
-  . exact axiomK' $ nec $ and₂' h;
+  apply eIntro;
+  . exact axiomK' $ nec $ φOfKφψ h;
+  . exact axiomK' $ nec $ ψOfKφψ h;
 omit [DecidableEq F] in @[simp] lemma box_iff! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □φ ⭤ □ψ := ⟨boxIff' h.some⟩
 
 def multiboxIff' (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ □^[n]φ ⭤ □^[n]ψ := by
@@ -33,14 +33,14 @@ def multiboxIff' (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ □^[n]φ ⭤ □^[n]ψ := 
 omit [DecidableEq F] in @[simp] lemma multibox_iff! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □^[n]φ ⭤ □^[n]ψ := ⟨multiboxIff' h.some⟩
 
 
-def diaDuality_mp : 𝓢 ⊢ ◇φ ➝ ∼(□(∼φ)) := and₁' diaDuality
+def diaDuality_mp : 𝓢 ⊢ ◇φ ➝ ∼(□(∼φ)) := φOfKφψ diaDuality
 omit [DecidableEq F] in @[simp] lemma diaDuality_mp! : 𝓢 ⊢! ◇φ ➝ ∼(□(∼φ)) := ⟨diaDuality_mp⟩
 
-def diaDuality_mpr : 𝓢 ⊢ ∼(□(∼φ)) ➝ ◇φ := and₂' diaDuality
+def diaDuality_mpr : 𝓢 ⊢ ∼(□(∼φ)) ➝ ◇φ := ψOfKφψ diaDuality
 omit [DecidableEq F] in @[simp] lemma diaDuality_mpr! : 𝓢 ⊢! ∼(□(∼φ)) ➝ ◇φ := ⟨diaDuality_mpr⟩
 
-def diaDuality'.mp (h : 𝓢 ⊢ ◇φ) : 𝓢 ⊢ ∼(□(∼φ)) := (and₁' diaDuality) ⨀ h
-def diaDuality'.mpr (h : 𝓢 ⊢ ∼(□(∼φ))) : 𝓢 ⊢ ◇φ := (and₂' diaDuality) ⨀ h
+def diaDuality'.mp (h : 𝓢 ⊢ ◇φ) : 𝓢 ⊢ ∼(□(∼φ)) := (φOfKφψ diaDuality) ⨀ h
+def diaDuality'.mpr (h : 𝓢 ⊢ ∼(□(∼φ))) : 𝓢 ⊢ ◇φ := (ψOfKφψ diaDuality) ⨀ h
 
 omit [DecidableEq F] in
 lemma dia_duality'! : 𝓢 ⊢! ◇φ ↔ 𝓢 ⊢! ∼(□(∼φ)) := ⟨
@@ -53,22 +53,22 @@ def multiDiaDuality : 𝓢 ⊢ ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := by
   | zero => simp; apply dn;
   | succ n ih =>
     simp;
-    apply iffTrans'' $ diaDuality (φ := ◇^[n]φ);
+    apply eTrans $ diaDuality (φ := ◇^[n]φ);
     apply negReplaceIff';
     apply boxIff';
-    apply iffIntro;
-    . exact contra₂' $ and₂' ih;
-    . exact contra₁' $ and₁' ih;
+    apply eIntro;
+    . exact contra₂' $ ψOfKφψ ih;
+    . exact contra₁' $ φOfKφψ ih;
 lemma multidia_duality! : 𝓢 ⊢! ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := ⟨multiDiaDuality⟩
 
 lemma multidia_duality'! : 𝓢 ⊢! ◇^[n]φ ↔ 𝓢 ⊢! ∼(□^[n](∼φ)) := by
   constructor;
-  . intro h; exact (and₁'! multidia_duality!) ⨀ h;
-  . intro h; exact (and₂'! multidia_duality!) ⨀ h;
+  . intro h; exact (φ!_of_kφψ! multidia_duality!) ⨀ h;
+  . intro h; exact (ψ!_of_kφψ! multidia_duality!) ⨀ h;
 
 def diaK' (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ ◇φ ➝ ◇ψ := by
-  apply impTrans'' ?_ diaDuality_mpr;
-  apply impTrans'' diaDuality_mp ?_;
+  apply cTrans ?_ diaDuality_mpr;
+  apply cTrans diaDuality_mp ?_;
   apply contra₀';
   apply axiomK';
   apply nec;
@@ -77,13 +77,13 @@ def diaK' (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ ◇φ ➝ ◇ψ := by
 lemma diaK'! (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ◇φ ➝ ◇ψ := ⟨diaK' h.some⟩
 
 def diaIff' (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ (◇φ ⭤ ◇ψ) := by
-  apply iffTrans'' diaDuality;
-  apply andComm';
-  apply iffTrans'' diaDuality;
+  apply eTrans diaDuality;
+  apply kSymm;
+  apply eTrans diaDuality;
   apply negReplaceIff';
   apply boxIff';
   apply negReplaceIff';
-  apply andComm';
+  apply kSymm;
   assumption;
 @[simp] lemma dia_iff! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ◇φ ⭤ ◇ψ := ⟨diaIff' h.some⟩
 
@@ -99,27 +99,27 @@ def multiboxDuality : 𝓢 ⊢ □^[n]φ ⭤ ∼(◇^[n](∼φ)) := by
   | zero => simp; apply dn;
   | succ n ih =>
     simp;
-    apply iffTrans'' (boxIff' ih);
+    apply eTrans (boxIff' ih);
     apply iffNegRightToLeft';
-    exact iffComm' $ diaDuality;
+    exact eSymm $ diaDuality;
 @[simp] lemma multibox_duality! : 𝓢 ⊢! □^[n]φ ⭤ ∼(◇^[n](∼φ)) := ⟨multiboxDuality⟩
 
-@[simp] lemma multibox_duality_mp! : 𝓢 ⊢! □^[n]φ ➝ ∼(◇^[n](∼φ)) := and₁'! multibox_duality!
+@[simp] lemma multibox_duality_mp! : 𝓢 ⊢! □^[n]φ ➝ ∼(◇^[n](∼φ)) := φ!_of_kφψ! multibox_duality!
 lemma multibox_duality_mp'! (h : 𝓢 ⊢! □^[n]φ) : 𝓢 ⊢! ∼(◇^[n](∼φ)) := multibox_duality_mp! ⨀ h
 
-@[simp] lemma multibox_duality_mpr! : 𝓢 ⊢! ∼(◇^[n](∼φ)) ➝ □^[n]φ := and₂'! multibox_duality!
+@[simp] lemma multibox_duality_mpr! : 𝓢 ⊢! ∼(◇^[n](∼φ)) ➝ □^[n]φ := ψ!_of_kφψ! multibox_duality!
 lemma multibox_duality_mpr'! (h : 𝓢 ⊢! ∼(◇^[n](∼φ))) : 𝓢 ⊢! □^[n]φ := multibox_duality_mpr! ⨀ h
 
 def boxDuality : 𝓢 ⊢ □φ ⭤ ∼(◇(∼φ)) := multiboxDuality (n := 1)
 @[simp] lemma box_duality! : 𝓢 ⊢! □φ ⭤ ∼(◇(∼φ)) := ⟨boxDuality⟩
 
-def boxDuality_mp : 𝓢 ⊢ □φ ➝ ∼(◇(∼φ)) := and₁' boxDuality
+def boxDuality_mp : 𝓢 ⊢ □φ ➝ ∼(◇(∼φ)) := φOfKφψ boxDuality
 @[simp] lemma boxDuality_mp! : 𝓢 ⊢! □φ ➝ ∼(◇(∼φ)) := ⟨boxDuality_mp⟩
 
 def boxDuality_mp' (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ ∼(◇(∼φ)) := boxDuality_mp ⨀ h
 lemma boxDuality_mp'! (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! ∼(◇(∼φ)) := ⟨boxDuality_mp' h.some⟩
 
-def boxDuality_mpr : 𝓢 ⊢ ∼(◇(∼φ)) ➝ □φ := and₂' boxDuality
+def boxDuality_mpr : 𝓢 ⊢ ∼(◇(∼φ)) ➝ □φ := ψOfKφψ boxDuality
 @[simp] lemma boxDuality_mpr! : 𝓢 ⊢! ∼(◇(∼φ)) ➝ □φ := ⟨boxDuality_mpr⟩
 
 def boxDuality_mpr' (h : 𝓢 ⊢ ∼(◇(∼φ))) : 𝓢 ⊢ □φ := boxDuality_mpr ⨀ h
@@ -127,8 +127,8 @@ lemma boxDuality_mpr'! (h : 𝓢 ⊢! ∼(◇(∼φ))) : 𝓢 ⊢! □φ := ⟨b
 
 lemma multibox_duality'! : 𝓢 ⊢! □^[n]φ ↔ 𝓢 ⊢! ∼(◇^[n](∼φ)) := by
   constructor;
-  . intro h; exact (and₁'! multibox_duality!) ⨀ h;
-  . intro h; exact (and₂'! multibox_duality!) ⨀ h;
+  . intro h; exact (φ!_of_kφψ! multibox_duality!) ⨀ h;
+  . intro h; exact (ψ!_of_kφψ! multibox_duality!) ⨀ h;
 
 lemma box_duality'! : 𝓢 ⊢! □φ ↔ 𝓢 ⊢! ∼(◇(∼φ)) := multibox_duality'! (n := 1)
 
@@ -161,7 +161,7 @@ omit [DecidableEq F] in @[simp] lemma multiboxverum! : 𝓢 ⊢! (□^[n]⊤ : F
 def boxverum : 𝓢 ⊢ (□⊤ : F) := multiboxverum (n := 1)
 omit [DecidableEq F] in @[simp] lemma boxverum! : 𝓢 ⊢! (□⊤ : F) := ⟨boxverum⟩
 
-def boxdotverum : 𝓢 ⊢ (⊡⊤ : F) := andIntro verum boxverum
+def boxdotverum : 𝓢 ⊢ (⊡⊤ : F) := kIntro verum boxverum
 omit [DecidableEq F] in @[simp] lemma boxdotverum! : 𝓢 ⊢! (⊡⊤ : F) := ⟨boxdotverum⟩
 
 def implyMultiboxDistribute' (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ □^[n]φ ➝ □^[n]ψ := multibox_axiomK' $ multinec h
@@ -187,7 +187,7 @@ lemma conj_cons! : 𝓢 ⊢! (φ ⋏ ⋀Γ) ⭤ ⋀(φ :: Γ) := by
   induction Γ using List.induction_with_singleton with
   | hnil =>
     simp;
-    apply iff_intro!;
+    apply e!_intro;
     . simp;
     . exact imply_right_and! (by simp) (by simp);
   | _ => simp;
@@ -200,9 +200,9 @@ lemma distribute_multibox_conj! : 𝓢 ⊢! □^[n]⋀Γ ➝ ⋀□'^[n]Γ := by
   | hcons φ Γ h ih =>
     simp only [ne_eq, not_false_eq_true, List.conj₂_cons_nonempty h];
     have h₁ : 𝓢 ⊢! □^[n](φ ⋏ ⋀Γ) ➝ □^[n]φ := imply_multibox_distribute'! $ and₁!;
-    have h₂ : 𝓢 ⊢! □^[n](φ ⋏ ⋀Γ) ➝ ⋀□'^[n]Γ := imp_trans''! (imply_multibox_distribute'! $ and₂!) ih;
+    have h₂ : 𝓢 ⊢! □^[n](φ ⋏ ⋀Γ) ➝ ⋀□'^[n]Γ := c!_trans (imply_multibox_distribute'! $ and₂!) ih;
     have := imply_right_and! h₁ h₂;
-    exact imp_trans''! this $ by
+    exact c!_trans this $ by
       apply imply_conj'!;
       intro ψ hψ;
       simp only [List.mem_cons] at hψ;
@@ -217,7 +217,7 @@ lemma distribute_multibox_conj! : 𝓢 ⊢! □^[n]⋀Γ ➝ ⋀□'^[n]Γ := by
 def collect_multibox_and : 𝓢 ⊢ □^[n]φ ⋏ □^[n]ψ ➝ □^[n](φ ⋏ ψ) := by
   have d₁ : 𝓢 ⊢ □^[n]φ ➝ □^[n](ψ ➝ φ ⋏ ψ) := implyMultiboxDistribute' and₃;
   have d₂ : 𝓢 ⊢ □^[n](ψ ➝ φ ⋏ ψ) ➝ (□^[n]ψ ➝ □^[n](φ ⋏ ψ)) := multibox_axiomK;
-  exact (and₂' (andImplyIffImplyImply _ _ _)) ⨀ (impTrans'' d₁ d₂);
+  exact (ψOfKφψ (eckφψχcφcψχ _ _ _)) ⨀ (cTrans d₁ d₂);
 omit [DecidableEq F] in @[simp] lemma collect_multibox_and! : 𝓢 ⊢! □^[n]φ ⋏ □^[n]ψ ➝ □^[n](φ ⋏ ψ) := ⟨collect_multibox_and⟩
 
 def collect_box_and : 𝓢 ⊢ □φ ⋏ □ψ ➝ □(φ ⋏ ψ) := collect_multibox_and (n := 1)
@@ -238,10 +238,10 @@ lemma multiboxConj'_iff! : 𝓢 ⊢! □^[n]⋀Γ ↔ ∀ φ ∈ Γ, 𝓢 ⊢! �
     . intro h;
       have := distribute_multibox_and'! h;
       constructor;
-      . exact and₁'! this;
-      . exact ih.mp (and₂'! this);
+      . exact φ!_of_kφψ! this;
+      . exact ih.mp (ψ!_of_kφψ! this);
     . rintro ⟨h₁, h₂⟩;
-      exact collect_multibox_and'! $ and₃'! h₁ (ih.mpr h₂);
+      exact collect_multibox_and'! $ kφψ!_of_φ!_of_ψ! h₁ (ih.mpr h₂);
   | _ => simp_all;
 lemma boxConj'_iff! : 𝓢 ⊢! □⋀Γ ↔ ∀ φ ∈ Γ, 𝓢 ⊢! □φ := multiboxConj'_iff! (n := 1)
 
@@ -269,11 +269,11 @@ lemma multibox_cons_conj! :  𝓢 ⊢! ⋀(□'^[n](φ :: Γ)) ➝ ⋀□'^[n]Γ
 @[simp]
 lemma collect_multibox_conj! : 𝓢 ⊢! ⋀□'^[n]Γ ➝ □^[n]⋀Γ := by
   induction Γ using List.induction_with_singleton with
-  | hnil => simpa using imply₁'! multiboxverum!;
+  | hnil => simpa using cψφ!_of_φ! multiboxverum!;
   | hsingle => simp;
   | hcons φ Γ h ih =>
     simp_all only [ne_eq, not_false_eq_true, List.conj₂_cons_nonempty];
-    refine imp_trans''! (imply_right_and! (generalConj'! ?_) (imp_trans''! ?_ ih)) collect_multibox_and!;
+    refine c!_trans (imply_right_and! (generalConj'! ?_) (c!_trans ?_ ih)) collect_multibox_and!;
     . simp;
     . simp [List.multibox, List.multibox_nonempty h];
 
@@ -281,7 +281,7 @@ lemma collect_multibox_conj! : 𝓢 ⊢! ⋀□'^[n]Γ ➝ □^[n]⋀Γ := by
 lemma collect_box_conj! : 𝓢 ⊢! ⋀(□'Γ) ➝ □(⋀Γ) := collect_multibox_conj! (n := 1)
 
 
-def collect_multibox_or : 𝓢 ⊢ □^[n]φ ⋎ □^[n]ψ ➝ □^[n](φ ⋎ ψ) := or₃'' (multibox_axiomK' $ multinec or₁) (multibox_axiomK' $ multinec or₂)
+def collect_multibox_or : 𝓢 ⊢ □^[n]φ ⋎ □^[n]ψ ➝ □^[n](φ ⋎ ψ) := cAφψχOfCφχOfCψχ (multibox_axiomK' $ multinec or₁) (multibox_axiomK' $ multinec or₂)
 omit [DecidableEq F] in @[simp] lemma collect_multibox_or! : 𝓢 ⊢! □^[n]φ ⋎ □^[n]ψ ➝ □^[n](φ ⋎ ψ) := ⟨collect_multibox_or⟩
 
 def collect_box_or : 𝓢 ⊢ □φ ⋎ □ψ ➝ □(φ ⋎ ψ) := collect_multibox_or (n := 1)
@@ -295,8 +295,8 @@ omit [DecidableEq F] in lemma collect_box_or'! (h : 𝓢 ⊢! □φ ⋎ □ψ) :
 
 
 def diaOrInst₁ : 𝓢 ⊢ ◇φ ➝ ◇(φ ⋎ ψ) := by
-  apply impTrans'' (and₁' diaDuality);
-  apply impTrans'' ?h (and₂' diaDuality);
+  apply cTrans (φOfKφψ diaDuality);
+  apply cTrans ?h (ψOfKφψ diaDuality);
   apply contra₀';
   apply axiomK';
   apply nec;
@@ -310,8 +310,8 @@ def diaOrInst₁ : 𝓢 ⊢ ◇φ ➝ ◇(φ ⋎ ψ) := by
   | zero => simp;
   | succ n ih =>
     suffices 𝓢 ⊢! ◇◇^[n]φ ➝ ◇◇^[n](φ ⋎ ψ) by simpa;
-    apply imp_trans''! (and₁'! dia_duality!);
-    apply imp_trans''! ?_ (and₂'! dia_duality!);
+    apply c!_trans (φ!_of_kφψ! dia_duality!);
+    apply c!_trans ?_ (ψ!_of_kφψ! dia_duality!);
     apply contra₀'!;
     apply axiomK'!;
     apply nec!;
@@ -319,8 +319,8 @@ def diaOrInst₁ : 𝓢 ⊢ ◇φ ➝ ◇(φ ⋎ ψ) := by
     exact ih;
 
 def diaOrInst₂ : 𝓢 ⊢ ◇ψ ➝ ◇(φ ⋎ ψ) := by
-  apply impTrans'' (and₁' diaDuality);
-  apply impTrans'' ?h (and₂' diaDuality);
+  apply cTrans (φOfKφψ diaDuality);
+  apply cTrans ?h (ψOfKφψ diaDuality);
   apply contra₀';
   apply axiomK';
   apply nec;
@@ -334,22 +334,22 @@ def diaOrInst₂ : 𝓢 ⊢ ◇ψ ➝ ◇(φ ⋎ ψ) := by
   | zero => simp;
   | succ n ih =>
     suffices 𝓢 ⊢! ◇◇^[n]ψ ➝ ◇◇^[n](φ ⋎ ψ) by simpa;
-    apply imp_trans''! (and₁'! dia_duality!);
-    apply imp_trans''! ?_ (and₂'! dia_duality!);
+    apply c!_trans (φ!_of_kφψ! dia_duality!);
+    apply c!_trans ?_ (ψ!_of_kφψ! dia_duality!);
     apply contra₀'!;
     apply axiomK'!;
     apply nec!;
     apply contra₀'!;
     exact ih;
 
-def collect_dia_or : 𝓢 ⊢ ◇φ ⋎ ◇ψ ➝ ◇(φ ⋎ ψ) := or₃'' diaOrInst₁ diaOrInst₂
+def collect_dia_or : 𝓢 ⊢ ◇φ ⋎ ◇ψ ➝ ◇(φ ⋎ ψ) := cAφψχOfCφχOfCψχ diaOrInst₁ diaOrInst₂
 @[simp] lemma collect_dia_or! : 𝓢 ⊢! ◇φ ⋎ ◇ψ ➝ ◇(φ ⋎ ψ) := ⟨collect_dia_or⟩
 
 def collect_dia_or' (h : 𝓢 ⊢ ◇φ ⋎ ◇ψ) : 𝓢 ⊢ ◇(φ ⋎ ψ) := collect_dia_or ⨀ h
 @[simp] lemma collect_dia_or'! (h : 𝓢 ⊢! ◇φ ⋎ ◇ψ) : 𝓢 ⊢! ◇(φ ⋎ ψ) := ⟨collect_dia_or' h.some⟩
 
 -- TODO: collectMultidiaOr
-def collect_multidia_or! : 𝓢 ⊢! ◇^[n]φ ⋎ ◇^[n]ψ ➝ ◇^[n](φ ⋎ ψ) := or₃''! multidia_or_inst₁! multidia_or_inst₂!
+def collect_multidia_or! : 𝓢 ⊢! ◇^[n]φ ⋎ ◇^[n]ψ ➝ ◇^[n](φ ⋎ ψ) := caφψχ!_of_cφχ!_of_cψχ! multidia_or_inst₁! multidia_or_inst₂!
 
 @[simp]
 lemma distribute_multidia_or! : 𝓢 ⊢! ◇^[n](φ ⋎ ψ) ➝ ◇^[n]φ ⋎ ◇^[n]ψ := by
@@ -357,22 +357,22 @@ lemma distribute_multidia_or! : 𝓢 ⊢! ◇^[n](φ ⋎ ψ) ➝ ◇^[n]φ ⋎ �
   | zero => simp;
   | succ n ih =>
     suffices 𝓢 ⊢! ◇◇^[n](φ ⋎ ψ) ➝ ◇◇^[n]φ ⋎ ◇◇^[n]ψ by simpa [Dia.multidia_succ];
-    apply imp_trans''! (and₁'! dia_duality!);
+    apply c!_trans (φ!_of_kφψ! dia_duality!);
     apply contra₂'!;
-    apply imp_trans''! demorgan₃!;
+    apply c!_trans demorgan₃!;
     suffices 𝓢 ⊢! □(∼◇^[n]φ ⋏ ∼◇^[n]ψ) ➝ □(∼◇^[n](φ ⋎ ψ)) by
-      apply imp_trans''! ?_ this;
-      apply imp_trans''! ?_ collect_box_and!;
+      apply c!_trans ?_ this;
+      apply c!_trans ?_ collect_box_and!;
       apply and_replace!;
       repeat {
-        apply imp_trans''! ?_ (and₂'! $ box_duality!);
+        apply c!_trans ?_ (ψ!_of_kφψ! $ box_duality!);
         apply contra₀'!;
         apply diaK'!;
         exact dne!;
       };
     apply axiomK'!;
     apply nec!;
-    apply imp_trans''! demorgan₂! ?_;
+    apply c!_trans demorgan₂! ?_;
     apply contra₀'!;
     exact ih;
 
@@ -381,16 +381,16 @@ lemma distribute_dia_or! : 𝓢 ⊢! ◇(φ ⋎ ψ) ➝ ◇φ ⋎ ◇ψ := distr
 -- TODO: move
 omit [DecidableEq F] in
 lemma iff_top_left'! (h : 𝓢 ⊢! φ) : 𝓢 ⊢! φ ⭤ ⊤ := by
-  apply iff_intro!;
+  apply e!_intro;
   . simp;
-  . exact imply₁'! h;
+  . exact cψφ!_of_φ! h;
 
 -- TODO: move
 omit [DecidableEq F] in
 lemma iff_symm'! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ψ ⭤ φ := by
-  apply iff_intro!;
-  . exact and₂'! h;
-  . exact and₁'! h;
+  apply e!_intro;
+  . exact ψ!_of_kφψ! h;
+  . exact φ!_of_kφψ! h;
 
 -- TODO: move
 omit [DecidableEq F] in
@@ -399,15 +399,15 @@ lemma iff_top_right! (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ⊤ ⭤ φ := iff_symm'! $ i
 -- TODO: move
 @[simp]
 lemma iff_not_bot_top! : 𝓢 ⊢! ∼⊤ ⭤ ⊥ := by
-  apply iff_intro!;
+  apply e!_intro;
   . apply contra₂'!;
-    apply imply₁'!;
+    apply cψφ!_of_φ!;
     simp;
   . exact efq!;
 
 @[simp]
 lemma not_dia_bot : 𝓢 ⊢! ∼◇^[n]⊥ := by
-  refine contra₀'! (and₂'! $ multidia_iff! iff_not_bot_top!) ⨀ ?_;
+  refine contra₀'! (ψ!_of_kφψ! $ multidia_iff! iff_not_bot_top!) ⨀ ?_;
   . apply multibox_duality'!.mp multiboxverum!;
 
 @[simp]
@@ -418,7 +418,7 @@ lemma distribute_multidia_disj! : 𝓢 ⊢! ◇^[n]⋁Γ ➝ ⋁◇'^[n]Γ := by
   | hcons φ Γ h ih =>
     suffices 𝓢 ⊢! ◇^[n](φ ⋎ ⋁Γ) ➝ (◇^[n]φ ⋎ ⋁◇'^[n]Γ) by
       simpa [List.multidia, List.disj₂_cons_nonempty h, List.disj₂_cons_nonempty (List.multidia_nonempty h)];
-    exact imp_trans''! distribute_multidia_or! $ or_replace_right! ih;
+    exact c!_trans distribute_multidia_or! $ or_replace_right! ih;
 
 @[simp]
 lemma distribute_dia_disj! : 𝓢 ⊢! ◇⋁Γ ➝ ⋁◇'Γ := by simpa using distribute_multidia_disj! (n := 1)
@@ -426,12 +426,12 @@ lemma distribute_dia_disj! : 𝓢 ⊢! ◇⋁Γ ➝ ⋁◇'Γ := by simpa using 
 -- TODO: `distributeMultidiaAnd!` is computable but it's too slow, so leave it.
 @[simp] lemma distribute_multidia_and!: 𝓢 ⊢! ◇^[n](φ ⋏ ψ) ➝ ◇^[n]φ ⋏ ◇^[n]ψ := by
   suffices h : 𝓢 ⊢! ∼(□^[n](∼(φ ⋏ ψ))) ➝ ∼(□^[n](∼φ)) ⋏ ∼(□^[n](∼ψ)) by
-    exact imp_trans''! (imp_trans''! (and₁'! multidia_duality!) h) $ and_replace! (and₂'! multidia_duality!) (and₂'! multidia_duality!);
+    exact c!_trans (c!_trans (φ!_of_kφψ! multidia_duality!) h) $ and_replace! (ψ!_of_kφψ! multidia_duality!) (ψ!_of_kφψ! multidia_duality!);
   apply FiniteContext.deduct'!;
   apply demorgan₃'!;
   apply FiniteContext.deductInv'!;
   apply contra₀'!;
-  apply imp_trans''! collect_multibox_or! (imply_multibox_distribute'! demorgan₁!)
+  apply c!_trans collect_multibox_or! (imply_multibox_distribute'! demorgan₁!)
 
 @[simp] lemma distribute_dia_and! : 𝓢 ⊢! ◇(φ ⋏ ψ) ➝ ◇φ ⋏ ◇ψ := distribute_multidia_and! (n := 1)
 
@@ -440,15 +440,15 @@ lemma distribute_dia_disj! : 𝓢 ⊢! ◇⋁Γ ➝ ⋁◇'Γ := by simpa using 
   induction Γ using List.induction_with_singleton with
   | hcons φ Γ h ih =>
     simp_all only [ne_eq, not_false_eq_true, List.conj₂_cons_nonempty];
-    exact imp_trans''! distribute_multidia_and! $ by
+    exact c!_trans distribute_multidia_and! $ by
       apply deduct'!;
       apply iff_provable_list_conj.mpr;
       intro ψ hq;
       simp only [List.mem_cons] at hq;
       rcases hq with (rfl | hψ);
-      . exact and₁'! id!;
+      . exact φ!_of_kφψ! id!;
       . obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_multidia hψ;
-        exact (iff_provable_list_conj.mp $ (of'! ih) ⨀ (and₂'! $ id!)) _ hψ;
+        exact (iff_provable_list_conj.mp $ (of'! ih) ⨀ (ψ!_of_kφψ! $ id!)) _ hψ;
   | _ => simp
 
 -- def distributeDiaAnd' (h : 𝓢 ⊢ ◇(φ ⋏ ψ)) : 𝓢 ⊢ ◇φ ⋏ ◇ψ := distributeDiaAnd ⨀ h
@@ -458,20 +458,20 @@ def boxdotAxiomK : 𝓢 ⊢ ⊡(φ ➝ ψ) ➝ (⊡φ ➝ ⊡ψ) := by
   apply deduct';
   apply deduct;
   have d : [φ ⋏ □φ, (φ ➝ ψ) ⋏ □(φ ➝ ψ)] ⊢[𝓢] (φ ➝ ψ) ⋏ □(φ ➝ ψ) := FiniteContext.byAxm;
-  exact and₃' ((and₁' d) ⨀ (and₁' (ψ := □φ) (FiniteContext.byAxm))) <|
-    (axiomK' $ and₂' d) ⨀ (and₂' (φ := φ) (FiniteContext.byAxm));
+  exact kφψOfφOfψ ((φOfKφψ d) ⨀ (φOfKφψ (ψ := □φ) (FiniteContext.byAxm))) <|
+    (axiomK' $ ψOfKφψ d) ⨀ (ψOfKφψ (φ := φ) (FiniteContext.byAxm));
 @[simp] lemma boxdot_axiomK! : 𝓢 ⊢! ⊡(φ ➝ ψ) ➝ (⊡φ ➝ ⊡ψ) := ⟨boxdotAxiomK⟩
 
 def boxdotAxiomT : 𝓢 ⊢ ⊡φ ➝ φ := by exact and₁;
 omit [DecidableEq F] in @[simp] lemma boxdot_axiomT! : 𝓢 ⊢! ⊡φ ➝ φ := ⟨boxdotAxiomT⟩
 
-def boxdotNec (d : 𝓢 ⊢ φ) : 𝓢 ⊢ ⊡φ := and₃' d (nec d)
+def boxdotNec (d : 𝓢 ⊢ φ) : 𝓢 ⊢ ⊡φ := kφψOfφOfψ d (nec d)
 omit [DecidableEq F] in lemma boxdot_nec! (d : 𝓢 ⊢! φ) : 𝓢 ⊢! ⊡φ := ⟨boxdotNec d.some⟩
 
 def boxdotBox : 𝓢 ⊢ ⊡φ ➝ □φ := by exact and₂;
 omit [DecidableEq F] in lemma boxdot_box! : 𝓢 ⊢! ⊡φ ➝ □φ := ⟨boxdotBox⟩
 
-def BoxBoxdot_BoxDotbox : 𝓢 ⊢ □⊡φ ➝ ⊡□φ := impTrans'' distribute_box_and (impId _)
+def BoxBoxdot_BoxDotbox : 𝓢 ⊢ □⊡φ ➝ ⊡□φ := cTrans distribute_box_and (cId _)
 lemma boxboxdot_boxdotbox : 𝓢 ⊢! □⊡φ ➝ ⊡□φ := ⟨BoxBoxdot_BoxDotbox⟩
 
 
@@ -479,20 +479,20 @@ noncomputable def lemma_Grz₁ : 𝓢 ⊢ □φ ➝ □(□((φ ⋏ (□φ ➝ �
   let ψ := φ ⋏ (□φ ➝ □□φ);
   have    : 𝓢 ⊢ ((□φ ➝ □□φ) ➝ □φ) ➝ □φ := peirce
   have    : 𝓢 ⊢ (φ ➝ ((□φ ➝ □□φ) ➝ □φ)) ➝ (φ ➝ □φ) := dhyp_imp' this;
-  have d₁ : 𝓢 ⊢ (ψ ➝ □φ) ➝ φ ➝ □φ := impTrans'' (and₁' $ andImplyIffImplyImply φ (□φ ➝ □□φ) (□φ)) this;
+  have d₁ : 𝓢 ⊢ (ψ ➝ □φ) ➝ φ ➝ □φ := cTrans (φOfKφψ $ eckφψχcφcψχ φ (□φ ➝ □□φ) (□φ)) this;
   have    : 𝓢 ⊢ ψ ➝ φ := and₁;
   have    : 𝓢 ⊢ □ψ ➝ □φ := implyBoxDistribute' this;
   have d₂ : 𝓢 ⊢ (ψ ➝ □ψ) ➝ (ψ ➝ □φ) := dhyp_imp' this;
-  have    : 𝓢 ⊢ (ψ ➝ □ψ) ➝ φ ➝ □φ := impTrans'' d₂ d₁;
+  have    : 𝓢 ⊢ (ψ ➝ □ψ) ➝ φ ➝ □φ := cTrans d₂ d₁;
   have    : 𝓢 ⊢ □(ψ ➝ □ψ) ➝ □(φ ➝ □φ) := implyBoxDistribute' this;
-  have    : 𝓢 ⊢ □(ψ ➝ □ψ) ➝ (□φ ➝ □□φ) := impTrans'' this axiomK;
+  have    : 𝓢 ⊢ □(ψ ➝ □ψ) ➝ (□φ ➝ □□φ) := cTrans this axiomK;
   have    : 𝓢 ⊢ (φ ➝ □(ψ ➝ □ψ)) ➝ (φ ➝ (□φ ➝ □□φ)) := dhyp_imp' this;
   have    : 𝓢 ⊢ φ ➝ (□(ψ ➝ □ψ) ➝ (φ ⋏ (□φ ➝ □□φ))) := by
     apply deduct';
     apply deduct;
-    apply and₃';
+    apply kφψOfφOfψ;
     . exact FiniteContext.byAxm;
-    . exact (of this) ⨀ (imply₁' FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+    . exact (of this) ⨀ (cψφOfφ FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
   have    : 𝓢 ⊢ φ ➝ (□(ψ ➝ □ψ) ➝ ψ) := this;
   exact implyBoxDistribute' this;
 
@@ -500,7 +500,7 @@ lemma lemma_Grz₁! : 𝓢 ⊢! (□φ ➝ □(□((φ ⋏ (□φ ➝ □□φ))
 
 
 lemma contextual_nec! (h : Γ ⊢[𝓢]! φ) : (□'Γ) ⊢[𝓢]! □φ :=
-  provable_iff.mpr $ imp_trans''! collect_box_conj! $ imply_box_distribute'! $ provable_iff.mp h
+  provable_iff.mpr $ c!_trans collect_box_conj! $ imply_box_distribute'! $ provable_iff.mp h
 
 
 namespace Context
@@ -518,7 +518,7 @@ lemma provable_iff_boxed : (□''X) *⊢[𝓢]! φ ↔ ∃ Δ : List F, (∀ ψ 
       obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
       exact List.mem_cancel_multibox_premultibox hψ;
     . apply FiniteContext.provable_iff.mpr;
-      apply imp_trans''! ?_ (FiniteContext.provable_iff.mp hΓ);
+      apply c!_trans ?_ (FiniteContext.provable_iff.mp hΓ);
       apply conjconj_subset!;
       intro ψ hψ;
       obtain ⟨ξ, hξ, rfl⟩ := sΓ ψ hψ;

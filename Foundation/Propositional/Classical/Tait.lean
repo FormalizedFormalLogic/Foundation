@@ -144,7 +144,7 @@ lemma mem_maximalConsistentTheory_or {φ ψ} (h : φ ⋎ ψ ∈ maximalConsisten
     simpa [not_or, not_mem_maximalConsistentTheory_iff] using A
   have : Inconsistent (maximalConsistentTheory consisT) :=
     Entailment.inconsistent_of_provable
-      (or₃'''! (neg_equiv'!.mp b.1) (neg_equiv'!.mp b.2) (mem_maximalConsistentTheory_iff.mp h))
+      (χ!_of_cφχ!_of_cψχ!_of_aφψ! (nφ!_iff_cφo!.mp b.1) (nφ!_iff_cφo!.mp b.2) (mem_maximalConsistentTheory_iff.mp h))
   have := this.not_con
   simp_all
 

@@ -15,7 +15,7 @@ protected def axiomGrz : 𝓢 ⊢ □(□(φ ➝ □φ) ➝ φ) ➝ φ := by
   have d₁ := nec this;
   have d₂ : 𝓢 ⊢ □(φ ➝ □φ) ➝ ((□(φ ➝ □φ)) ➝ φ) ➝ φ := p_pq_q;
   have := d₂ ⨀ d₁;
-  exact impTrans'' axiomT this;
+  exact cTrans axiomT this;
 instance : HasAxiomGrz 𝓢 := ⟨fun _ ↦ Triv.axiomGrz⟩
 
 end Triv

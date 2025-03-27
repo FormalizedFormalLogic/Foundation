@@ -238,7 +238,7 @@ lemma not_goedel_unprovable [ℕ ⊧ₘ* T] : T ⊬ ∼↑𝗚 := fun h ↦ by
     (Sound.consistent_of_satisfiable ⟨_, (inferInstance : ℕ ⊧ₘ* T)⟩)
 
 lemma consistent_iff_goedel : T ⊢! ↑𝗖𝗼𝗻 ⭤ ↑𝗚 := by
-  apply iff_intro!
+  apply e!_intro
   · have bew_G : [∼𝗚] ⊢[T.alt]! □𝗚 := deductInv'! <| contra₂'! <| and_right! goedel_iff_unprovable_goedel
     have bew_not_bew_G : [∼𝗚] ⊢[T.alt]! □(∼□𝗚) := by
       have : T ⊢!. □(𝗚 ➝ ∼□𝗚) := provableₐ_D1 <| and_left! goedel_iff_unprovable_goedel

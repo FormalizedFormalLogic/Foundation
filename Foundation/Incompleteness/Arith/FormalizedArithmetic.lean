@@ -295,7 +295,7 @@ noncomputable def bexIntro (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V) {i
     T ⊢ φ.bex ↑n := by
   apply ex i
   suffices T ⊢ i <' n ⋏ φ^/[(i : ⌜ℒₒᵣ⌝.Term).sing] by simpa
-  exact Entailment.andIntro (ltComplete T hi) b
+  exact Entailment.kIntro (ltComplete T hi) b
 
 lemma bex_intro! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V) {i}
     (hi : i < n) (b : T ⊢! φ ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :

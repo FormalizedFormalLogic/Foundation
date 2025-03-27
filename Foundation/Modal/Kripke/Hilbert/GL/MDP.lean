@@ -126,7 +126,7 @@ lemma MDP_Aux (h : (□''X) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) : (□''X) 
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
   have : Hilbert.GL ⊢! ⋀□'Δ ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
-  have : Hilbert.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := imp_trans''! (by simp) this;
+  have : Hilbert.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := c!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
   have : (Hilbert.GL ⊢! ⊡c ➝ φ₁) ⋎ (Hilbert.GL ⊢! ⊡c ➝ φ₂) := by
@@ -179,7 +179,7 @@ lemma MDP_Aux (h : (□''X) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) : (□''X) 
   rcases this with (h | h) <;> {
     subst e;
     have := imply_box_box_of_imply_boxdot_plain! h;
-    have := imp_trans''! collect_box_conj! this;
+    have := c!_trans collect_box_conj! this;
     have := FiniteContext.provable_iff.mpr this;
     have := Context.provable_iff.mpr $ by use □'Δ;
     tauto;

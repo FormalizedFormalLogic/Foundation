@@ -135,7 +135,7 @@ def axL (s p : V) : V := ⟪s, 0, p⟫ + 1
 
 def verumIntro (s : V) : V := ⟪s, 1, 0⟫ + 1
 
-def andIntro (s p q dp dq : V) : V := ⟪s, 2, p, q, dp, dq⟫ + 1
+def kIntro (s p q dp dq : V) : V := ⟪s, 2, p, q, dp, dq⟫ + 1
 
 def orIntro (s p q d : V) : V := ⟪s, 3, p, q, d⟫ + 1
 
@@ -171,14 +171,14 @@ lemma verumIntro_defined : 𝚺₀-Function₁ (verumIntro : V → V) via verumI
 @[simp] lemma eval_verumIntroDef (v) :
     Semiformula.Evalbm V v verumIntroDef.val ↔ v 0 = verumIntro (v 1) := verumIntro_defined.df.iff v
 
-def _root_.LO.FirstOrder.Arith.andIntroDef : 𝚺₀.Semisentence 6 :=
+def _root_.LO.FirstOrder.Arith.kIntroDef : 𝚺₀.Semisentence 6 :=
   .mkSigma “y s p q dp dq. ∃ y' < y, !pair₆Def y' s 2 p q dp dq ∧ y = y' + 1” (by simp)
 
-lemma andIntro_defined : 𝚺₀-Function₅ (andIntro : V → V → V → V → V → V) via andIntroDef := by
-  intro v; simp_all [andIntroDef, andIntro]
+lemma kIntro_defined : 𝚺₀-Function₅ (kIntro : V → V → V → V → V → V) via kIntroDef := by
+  intro v; simp_all [kIntroDef, kIntro]
 
-@[simp] lemma eval_andIntroDef (v) :
-    Semiformula.Evalbm V v andIntroDef.val ↔ v 0 = andIntro (v 1) (v 2) (v 3) (v 4) (v 5) := andIntro_defined.df.iff v
+@[simp] lemma eval_kIntroDef (v) :
+    Semiformula.Evalbm V v kIntroDef.val ↔ v 0 = kIntro (v 1) (v 2) (v 3) (v 4) (v 5) := kIntro_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arith.orIntroDef : 𝚺₀.Semisentence 5 :=
   .mkSigma “y s p q d. ∃ y' < y, !pair₅Def y' s 3 p q d ∧ y = y' + 1” (by simp)
@@ -249,14 +249,14 @@ lemma root_defined : 𝚺₀-Function₂ (root : V → V → V) via rootDef := b
 
 @[simp] lemma seq_lt_verumIntro (s : V) : s < verumIntro s := le_iff_lt_succ.mp <| le_pair_left _ _
 
-@[simp] lemma seq_lt_andIntro (s p q dp dq : V) : s < andIntro s p q dp dq := le_iff_lt_succ.mp <| le_pair_left _ _
-@[simp] lemma p_lt_andIntro (s p q dp dq : V) : p < andIntro s p q dp dq :=
+@[simp] lemma seq_lt_kIntro (s p q dp dq : V) : s < kIntro s p q dp dq := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma p_lt_kIntro (s p q dp dq : V) : p < kIntro s p q dp dq :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _
-@[simp] lemma q_lt_andIntro (s p q dp dq : V) : q < andIntro s p q dp dq :=
+@[simp] lemma q_lt_kIntro (s p q dp dq : V) : q < kIntro s p q dp dq :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_left _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
-@[simp] lemma dp_lt_andIntro (s p q dp dq : V) : dp < andIntro s p q dp dq :=
+@[simp] lemma dp_lt_kIntro (s p q dp dq : V) : dp < kIntro s p q dp dq :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_trans (by simp) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
-@[simp] lemma dq_lt_andIntro (s p q dp dq : V) : dq < andIntro s p q dp dq :=
+@[simp] lemma dq_lt_kIntro (s p q dp dq : V) : dq < kIntro s p q dp dq :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_trans (by simp) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
 @[simp] lemma seq_lt_orIntro (s p q d : V) : s < orIntro s p q d := le_iff_lt_succ.mp <| le_pair_left _ _
@@ -300,7 +300,7 @@ lemma root_defined : 𝚺₀-Function₂ (root : V → V → V) via rootDef := b
 
 @[simp] lemma fstIdx_axL (s p : V) : fstIdx (axL s p) = s := by simp [fstIdx, axL]
 @[simp] lemma fstIdx_verumIntro (s : V) : fstIdx (verumIntro s) = s := by simp [fstIdx, verumIntro]
-@[simp] lemma fstIdx_andIntro (s p q dp dq : V) : fstIdx (andIntro s p q dp dq) = s := by simp [fstIdx, andIntro]
+@[simp] lemma fstIdx_kIntro (s p q dp dq : V) : fstIdx (kIntro s p q dp dq) = s := by simp [fstIdx, kIntro]
 @[simp] lemma fstIdx_orIntro (s p q dpq : V) : fstIdx (orIntro s p q dpq) = s := by simp [fstIdx, orIntro]
 @[simp] lemma fstIdx_allIntro (s p d : V) : fstIdx (allIntro s p d) = s := by simp [fstIdx, allIntro]
 @[simp] lemma fstIdx_exIntro (s p t d : V) : fstIdx (exIntro s p t d) = s := by simp [fstIdx, exIntro]
@@ -321,7 +321,7 @@ def Phi (C : Set V) (d : V) : Prop :=
   L.IsFormulaSet (fstIdx d) ∧
   ( (∃ s p, d = axL s p ∧ p ∈ s ∧ L.neg p ∈ s) ∨
     (∃ s, d = verumIntro s ∧ ^⊤ ∈ s) ∨
-    (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ (fstIdx dp = insert p s ∧ dp ∈ C) ∧ (fstIdx dq = insert q s ∧ dq ∈ C)) ∨
+    (∃ s p q dp dq, d = kIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ (fstIdx dp = insert p s ∧ dp ∈ C) ∧ (fstIdx dq = insert q s ∧ dq ∈ C)) ∨
     (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ fstIdx dpq = insert p (insert q s) ∧ dpq ∈ C) ∨
     (∃ s p dp, d = allIntro s p dp ∧ ^∀ p ∈ s ∧ fstIdx dp = insert (L.free p) (L.setShift s) ∧ dp ∈ C) ∨
     (∃ s p t dp, d = exIntro s p t dp ∧ ^∃ p ∈ s ∧ L.IsTerm t ∧ fstIdx dp = insert (L.substs₁ t p) s ∧ dp ∈ C) ∨
@@ -336,7 +336,7 @@ private lemma phi_iff (C d : V) :
     ( (∃ s < d, ∃ p < d, d = axL s p ∧ p ∈ s ∧ L.neg p ∈ s) ∨
       (∃ s < d, d = verumIntro s ∧ ^⊤ ∈ s) ∨
       (∃ s < d, ∃ p < d, ∃ q < d, ∃ dp < d, ∃ dq < d,
-        d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ (fstIdx dp = insert p s ∧ dp ∈ C) ∧ (fstIdx dq = insert q s ∧ dq ∈ C)) ∨
+        d = kIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ (fstIdx dp = insert p s ∧ dp ∈ C) ∧ (fstIdx dq = insert q s ∧ dq ∈ C)) ∨
       (∃ s < d, ∃ p < d, ∃ q < d, ∃ dpq < d,
         d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ fstIdx dpq = insert p (insert q s) ∧ dpq ∈ C) ∨
       (∃ s < d, ∃ p < d, ∃ dp < d,
@@ -388,7 +388,7 @@ def blueprint {pL : LDef} (pT : pL.TDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
     ( (∃ s < d, ∃ p < d, !axLDef d s p ∧ p ∈ s ∧ ∃ np, !pL.negDef np p ∧ np ∈ s) ∨
       (∃ s < d, !verumIntroDef d s ∧ ∃ vrm, !qqVerumDef vrm ∧ vrm ∈ s) ∨
       (∃ s < d, ∃ p < d, ∃ q < d, ∃ dp < d, ∃ dq < d,
-        !andIntroDef d s p q dp dq ∧ (∃ and, !qqAndDef and p q ∧ and ∈ s) ∧
+        !kIntroDef d s p q dp dq ∧ (∃ and, !qqAndDef and p q ∧ and ∈ s) ∧
           (∃ c, !fstIdxDef c dp ∧ !insertDef c p s ∧ dp ∈ C) ∧
           (∃ c, !fstIdxDef c dq ∧ !insertDef c q s ∧ dq ∈ C)) ∨
       (∃ s < d, ∃ p < d, ∃ q < d, ∃ dpq < d,
@@ -417,7 +417,7 @@ def blueprint {pL : LDef} (pT : pL.TDef) : Fixpoint.Blueprint 0 := ⟨.mkDelta
     ( (∃ s < d, ∃ p < d, !axLDef d s p ∧ p ∈ s ∧ ∀ np, !pL.negDef np p → np ∈ s) ∨
       (∃ s < d, !verumIntroDef d s ∧ ∀ vrm, !qqVerumDef vrm → vrm ∈ s) ∨
       (∃ s < d, ∃ p < d, ∃ q < d, ∃ dp < d, ∃ dq < d,
-        !andIntroDef d s p q dp dq ∧ (∀ and, !qqAndDef and p q → and ∈ s) ∧
+        !kIntroDef d s p q dp dq ∧ (∀ and, !qqAndDef and p q → and ∈ s) ∧
           (∀ c, !fstIdxDef c dp → !insertDef c p s ∧ dp ∈ C) ∧
           (∀ c, !fstIdxDef c dq → !insertDef c q s ∧ dq ∈ C)) ∨
       (∃ s < d, ∃ p < d, ∃ q < d, ∃ dpq < d,
@@ -470,7 +470,7 @@ def construction : Fixpoint.Construction V (blueprint pT) where
       Fin.succ_zero_eq_one, eval_axLDef, Semiformula.eval_operator₂, Structure.Mem.mem,
       L.neg_defined.df.iff, eval_verumIntroDef, eval_qqVerumDef, Matrix.cons_val_three,
       Fin.succ_one_eq_two, Matrix.cons_val_four, Matrix.cons_val_succ, Matrix.cons_app_five,
-      eval_andIntroDef, eval_qqAndDef, insert_defined_iff, Matrix.cons_app_seven,
+      eval_kIntroDef, eval_qqAndDef, insert_defined_iff, Matrix.cons_app_seven,
       Matrix.cons_app_six, eval_orIntroDef, eval_qqOrDef, eval_allIntroDef, eval_qqAllDef,
       L.free_defined.df.iff, L.setShift_defined.df.iff, eval_exIntroDef, eval_qqExDef,
       Semiterm.val_operator₀, Structure.numeral_eq_numeral, ORingStruc.zero_eq_zero,
@@ -507,7 +507,7 @@ def construction : Fixpoint.Construction V (blueprint pT) where
       Fin.succ_zero_eq_one, eval_axLDef, Semiformula.eval_operator₂, Structure.Mem.mem,
       L.neg_defined.df.iff, eval_verumIntroDef, eval_qqVerumDef, Matrix.cons_val_three,
       Fin.succ_one_eq_two, Matrix.cons_val_four, Matrix.cons_val_succ, Matrix.cons_app_five,
-      eval_andIntroDef, eval_qqAndDef, insert_defined_iff, Matrix.cons_app_seven,
+      eval_kIntroDef, eval_qqAndDef, insert_defined_iff, Matrix.cons_app_seven,
       Matrix.cons_app_six, eval_orIntroDef, eval_qqOrDef, eval_allIntroDef, eval_qqAllDef,
       L.free_defined.df.iff, L.setShift_defined.df.iff, eval_exIntroDef, eval_qqExDef,
       Semiterm.val_operator₀, Structure.numeral_eq_numeral, ORingStruc.zero_eq_zero,
@@ -617,7 +617,7 @@ lemma Language.Theory.Derivation.case_iff {d : V} :
     L.IsFormulaSet (fstIdx d) ∧
     ( (∃ s p, d = axL s p ∧ p ∈ s ∧ L.neg p ∈ s) ∨
       (∃ s, d = verumIntro s ∧ ^⊤ ∈ s) ∨
-      (∃ s p q dp dq, d = andIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ T.DerivationOf dp (insert p s) ∧ T.DerivationOf dq (insert q s)) ∨
+      (∃ s p q dp dq, d = kIntro s p q dp dq ∧ p ^⋏ q ∈ s ∧ T.DerivationOf dp (insert p s) ∧ T.DerivationOf dq (insert q s)) ∨
       (∃ s p q dpq, d = orIntro s p q dpq ∧ p ^⋎ q ∈ s ∧ T.DerivationOf dpq (insert p (insert q s))) ∨
       (∃ s p dp, d = allIntro s p dp ∧ ^∀ p ∈ s ∧ T.DerivationOf dp (insert (L.free p) (L.setShift s))) ∨
       (∃ s p t dp, d = exIntro s p t dp ∧ ^∃ p ∈ s ∧ L.IsTerm t ∧ T.DerivationOf dp (insert (L.substs₁ t p) s)) ∨
@@ -634,7 +634,7 @@ lemma Language.Theory.Derivation.induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-P
     (hAxL : ∀ s, L.IsFormulaSet s → ∀ p ∈ s, L.neg p ∈ s → P (axL s p))
     (hVerumIntro : ∀ s, L.IsFormulaSet s → ^⊤ ∈ s → P (verumIntro s))
     (hAnd : ∀ s, L.IsFormulaSet s → ∀ p q dp dq, p ^⋏ q ∈ s → T.DerivationOf dp (insert p s) → T.DerivationOf dq (insert q s) →
-      P dp → P dq → P (andIntro s p q dp dq))
+      P dp → P dq → P (kIntro s p q dp dq))
     (hOr : ∀ s, L.IsFormulaSet s → ∀ p q d, p ^⋎ q ∈ s → T.DerivationOf d (insert p (insert q s)) →
       P d → P (orIntro s p q d))
     (hAll : ∀ s, L.IsFormulaSet s → ∀ p d, ^∀ p ∈ s → T.DerivationOf d (insert (L.free p) (L.setShift s)) →
@@ -679,9 +679,9 @@ lemma Language.Theory.Derivation.verumIntro {s : V} (hs : L.IsFormulaSet s) (h :
     T.Derivation (verumIntro s) :=
   Language.Theory.Derivation.mk ⟨by simpa using hs, Or.inr <| Or.inl ⟨s, rfl, h⟩⟩
 
-lemma Language.Theory.Derivation.andIntro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
+lemma Language.Theory.Derivation.kIntro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
     (hdp : T.DerivationOf dp (insert p s)) (hdq : T.DerivationOf dq (insert q s)) :
-    T.Derivation (andIntro s p q dp dq) :=
+    T.Derivation (kIntro s p q dp dq) :=
   Language.Theory.Derivation.mk ⟨by simp; intro r hr; exact hdp.isFormulaSet r (by simp [hr]),
     Or.inr <| Or.inr <| Or.inl ⟨s, p, q, dp, dq, rfl, h, hdp, hdq⟩⟩
 
@@ -740,7 +740,7 @@ lemma Language.Theory.Derivation.of_ss (h : T ⊆ U) {d : V} : T.Derivation d �
   · intro s hs p hp hn; apply axL hs hp hn
   · intro s hs hv; apply verumIntro hs hv
   · intro s _ p q dp dq hpq hdp hdq ihp ihq
-    apply andIntro hpq ⟨hdp.1, ihp⟩ ⟨hdq.1, ihq⟩
+    apply kIntro hpq ⟨hdp.1, ihp⟩ ⟨hdq.1, ihq⟩
   · intro s _ p q d hpq hd ih
     apply orIntro hpq ⟨hd.1, ih⟩
   · intro s _ p d hp hd ih
@@ -771,7 +771,7 @@ lemma verum {s : V} (hs : L.IsFormulaSet s) (h : ^⊤ ∈ s) :
 lemma and_m {s p q : V} (h : p ^⋏ q ∈ s) (hp : T.Derivable (insert p s)) (hq : T.Derivable (insert q s)) :
     T.Derivable s := by
   rcases hp with ⟨dp, hdp⟩; rcases hq with ⟨dq, hdq⟩
-  exact ⟨andIntro s p q dp dq, by simp, Language.Theory.Derivation.andIntro h hdp hdq⟩
+  exact ⟨kIntro s p q dp dq, by simp, Language.Theory.Derivation.kIntro h hdp hdq⟩
 
 lemma or_m {s p q : V} (h : p ^⋎ q ∈ s) (hpq : T.Derivable (insert p (insert q s))) :
     T.Derivable s := by

@@ -11,7 +11,7 @@ namespace KD
 
 protected def axiomP : 𝓢 ⊢ Axioms.P := by
   have : 𝓢 ⊢ ∼∼□(∼⊥) := dni' $ nec notbot;
-  have : 𝓢 ⊢ ∼◇⊥ := (contra₀' $ and₁' diaDuality) ⨀ this;
+  have : 𝓢 ⊢ ∼◇⊥ := (contra₀' $ φOfKφψ diaDuality) ⨀ this;
   exact (contra₀' axiomD) ⨀ this;
 instance : HasAxiomP 𝓢 := ⟨KD.axiomP⟩
 

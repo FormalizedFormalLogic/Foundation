@@ -82,7 +82,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
       simp only [trivTranslate, toPropFormula] at h;
       rcases imp_iff_not_or.mp h with (hφ | hψ);
       . exact efq_of_neg! $ ihφ (letterless.def_imp₁ hl) |>.2 hφ;
-      . exact imply₁'! $ ihψ (letterless.def_imp₂ hl) |>.1 hψ;
+      . exact cψφ!_of_φ! $ ihψ (letterless.def_imp₂ hl) |>.1 hψ;
     . intro h;
       simp only [trivTranslate, toPropFormula, Semantics.Realize, Propositional.Formula.Classical.val] at h;
       push_neg at h;

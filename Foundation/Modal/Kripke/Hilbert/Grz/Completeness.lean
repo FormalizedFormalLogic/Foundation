@@ -139,7 +139,7 @@ lemma truthlemma_lemma2
 
     by_contra hC;
     have : Γ₁ ⊢[𝓢]! ⋀Γ₂ ➝ ⊥ := and_imply_iff_imply_imply'!.mp hC;
-    have : Γ₁ ⊢[𝓢]! (□(ψ ➝ □ψ) ⋏ -ψ) ➝ ⊥ := imp_trans''! (by
+    have : Γ₁ ⊢[𝓢]! (□(ψ ➝ □ψ) ⋏ -ψ) ➝ ⊥ := c!_trans (by
       suffices Γ₁ ⊢[𝓢]! ⋀[□(ψ ➝ □ψ), -ψ] ➝ ⋀Γ₂ by
         simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
       apply conjconj_subset!;
@@ -149,21 +149,21 @@ lemma truthlemma_lemma2
     have : Γ₁ ⊢[𝓢]! □(ψ ➝ □ψ) ➝ ψ := by
       rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
       . rw [hp] at this;
-        exact imp_trans''! this dne!;
+        exact c!_trans this dne!;
       . simpa only [complement] using this;
     have : (□'Γ₁) ⊢[𝓢]! □(□(ψ ➝ □ψ) ➝ ψ) := contextual_nec! this;
     have : (□'Γ₁) ⊢[𝓢]! ψ := axiomGrz! ⨀ this;
     have : 𝓢 ⊢! ⋀□'□'Γ₁ ➝ □ψ := contextual_nec! this;
-    have : 𝓢 ⊢! □□⋀Γ₁ ➝ □ψ := imp_trans''! (imp_trans''! (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (λ _ => List.mem_multibox_add.mp)) this;
-    have : 𝓢 ⊢! □⋀Γ₁ ➝ □ψ := imp_trans''! axiomFour! this;
-    have : 𝓢 ⊢! ⋀□'Γ₁ ➝ □ψ := imp_trans''! collect_box_conj! this;
-    have : 𝓢 ⊢! ⋀□'(X.1.prebox.box |>.toList) ➝ □ψ := imp_trans''! (conjconj_subset! (by
+    have : 𝓢 ⊢! □□⋀Γ₁ ➝ □ψ := c!_trans (c!_trans (distribute_multibox_conj! (n := 2)) $ conjconj_subset! (λ _ => List.mem_multibox_add.mp)) this;
+    have : 𝓢 ⊢! □⋀Γ₁ ➝ □ψ := c!_trans axiomFour! this;
+    have : 𝓢 ⊢! ⋀□'Γ₁ ➝ □ψ := c!_trans collect_box_conj! this;
+    have : 𝓢 ⊢! ⋀□'(X.1.prebox.box |>.toList) ➝ □ψ := c!_trans (conjconj_subset! (by
       intro ξ hξ;
       obtain ⟨χ, hχ, rfl⟩ := List.exists_of_box hξ;
       apply List.box_mem_of;
       simpa using hΓ₁ χ hχ;
     )) this;
-    have : 𝓢 ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := imp_trans''! (conjconj_provable! (by
+    have : 𝓢 ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := c!_trans (conjconj_provable! (by
       intro ψ hψ;
       obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
       obtain ⟨χ, hχ, rfl⟩ := by simpa using hξ;
@@ -185,7 +185,7 @@ lemma truthlemma_lemma2
 
 omit [Consistent 𝓢] in
 lemma truthlemma_lemma3 : 𝓢 ⊢! (φ ⋏ □(φ ➝ □φ)) ➝ □φ := by
-  refine imp_trans''! ?_ $ mdp_in! (𝓢 := 𝓢) (φ := φ) (ψ := □φ);
+  refine c!_trans ?_ $ mdp_in! (𝓢 := 𝓢) (φ := φ) (ψ := □φ);
   apply and_replace_right!;
   exact axiomT!;
 
@@ -256,7 +256,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
               have : ↑X *⊢[𝓢]! ψ := membership_iff (subformulasGrz.mem_left (by assumption)) |>.mp w;
               have : ↑X *⊢[𝓢]! □(ψ ➝ □ψ) := membership_iff (by simp; right; assumption) |>.mp hC;
               have : ↑X *⊢[𝓢]! (ψ ⋏ □(ψ ➝ □ψ)) ➝ □ψ := Context.of! $ truthlemma_lemma3;
-              have : ↑X *⊢[𝓢]! □ψ := this ⨀ and₃'! (by assumption) (by assumption);
+              have : ↑X *⊢[𝓢]! □ψ := this ⨀ kφψ!_of_φ!_of_ψ! (by assumption) (by assumption);
               have : □ψ ∈ X := membership_iff (subformulasGrz.mem_origin (by assumption)) |>.mpr this;
               contradiction;
         . apply ih (by aesop) |>.not.mpr;

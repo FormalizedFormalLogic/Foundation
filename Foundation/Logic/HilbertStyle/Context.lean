@@ -86,7 +86,7 @@ variable [Entailment.Minimal 𝓢]
 
 instance [DecidableEq F] : Axiomatized (FiniteContext F 𝓢) where
   prfAxm := fun hp ↦ generalConj' hp
-  weakening := fun H b ↦ impTrans'' (conjImplyConj' H) b
+  weakening := fun H b ↦ cTrans (conjImplyConj' H) b
 
 instance : Compact (FiniteContext F 𝓢) where
   φ := fun {Γ} _ _ ↦ Γ
@@ -106,7 +106,7 @@ def weakening [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢] φ → Δ ⊢[
 lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢]! φ → Δ ⊢[𝓢]! φ := fun h ↦
   (Axiomatized.le_of_subset (by simpa)).subset h
 
-def of {φ : F} (b : 𝓢 ⊢ φ) : Γ ⊢[𝓢] φ := imply₁' (ψ := ⋀Γ) b
+def of {φ : F} (b : 𝓢 ⊢ φ) : Γ ⊢[𝓢] φ := cψφOfφ (ψ := ⋀Γ) b
 
 def emptyPrf {φ : F} : [] ⊢[𝓢] φ → 𝓢 ⊢ φ := fun b ↦ b ⨀ verum
 
@@ -143,7 +143,7 @@ instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomOrInst Γ := ⟨fun _ 
 
 instance (Γ : FiniteContext F 𝓢) : Entailment.HasAxiomOrElim Γ := ⟨fun _ _ _ ↦ of or₃⟩
 
-instance (Γ : FiniteContext F 𝓢) : Entailment.NegationEquiv Γ := ⟨fun _ ↦ of neg_equiv⟩
+instance (Γ : FiniteContext F 𝓢) : Entailment.NegationEquiv Γ := ⟨fun _ ↦ of negEquiv⟩
 
 instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Minimal Γ where
 
@@ -151,14 +151,14 @@ instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Mini
 def mdp' [DecidableEq F] (bΓ : Γ ⊢[𝓢] φ ➝ ψ) (bΔ : Δ ⊢[𝓢] φ) : (Γ ++ Δ) ⊢[𝓢] ψ := wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
 def deduct {φ ψ : F} : {Γ : List F} → (φ :: Γ) ⊢[𝓢] ψ → Γ ⊢[𝓢] φ ➝ ψ
-  | .nil => fun b ↦ ofDef <| imply₁' (toDef b)
-  | .cons _ _ => fun b ↦ ofDef <| andImplyIffImplyImply'.mp (impTrans'' (andComm _ _) (toDef b))
+  | .nil => fun b ↦ ofDef <| cψφOfφ (toDef b)
+  | .cons _ _ => fun b ↦ ofDef <| cφcψχOfCkφψχ (cTrans (ckφψkψφ _ _) (toDef b))
 
 lemma deduct! (h : (φ :: Γ) ⊢[𝓢]! ψ) :  Γ ⊢[𝓢]! φ ➝ ψ  := ⟨FiniteContext.deduct h.some⟩
 
 def deductInv {φ ψ : F} : {Γ : List F} → Γ ⊢[𝓢] φ ➝ ψ → (φ :: Γ) ⊢[𝓢] ψ
   | .nil => λ b => ofDef <| (toDef b) ⨀ verum
-  | .cons _ _ => λ b => ofDef <| (impTrans'' (andComm _ _) (andImplyIffImplyImply'.mpr (toDef b)))
+  | .cons _ _ => λ b => ofDef <| (cTrans (ckφψkψφ _ _) (ckφψχOfCφcψχ (toDef b)))
 
 lemma deductInv! (h : Γ ⊢[𝓢]! φ ➝ ψ) : (φ :: Γ) ⊢[𝓢]! ψ := ⟨FiniteContext.deductInv h.some⟩
 
@@ -182,7 +182,7 @@ instance deduction : Deduction (FiniteContext F 𝓢) where
 instance [DecidableEq F] : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
   ⟨fun {Γ Δ _} bΓ bΔ ↦
     have : Γ ⊢ Δ.conj := conjIntro' _ (fun _ hp ↦ bΓ hp)
-    ofDef <| impTrans'' (toDef this) (toDef bΔ)⟩
+    ofDef <| cTrans (toDef this) (toDef bΔ)⟩
 
 instance [HasAxiomEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomEFQ Γ := ⟨fun _ ↦ of efq⟩
 
@@ -340,7 +340,7 @@ instance minimal [DecidableEq F] (Γ : Context F 𝓢) : Entailment.Minimal Γ w
   or₁ := fun _ _ ↦ of or₁
   or₂ := fun _ _ ↦ of or₂
   or₃ := fun _ _ _ ↦ of or₃
-  neg_equiv := fun _ ↦ of neg_equiv
+  negEquiv := fun _ ↦ of negEquiv
 
 instance [HasAxiomEFQ 𝓢] (Γ : Context F 𝓢) : HasAxiomEFQ Γ := ⟨fun _ ↦ of efq⟩
 
