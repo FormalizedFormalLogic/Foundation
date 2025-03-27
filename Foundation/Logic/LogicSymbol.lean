@@ -473,7 +473,10 @@ section
 
 open Lean PrettyPrinter Delaborator SubExpr
 
-syntax (name := bigiConj) "⩕ " Parser.Term.funBinder (" : " term)? ", " term:67 : term
+/--
+`⩕ i, φ i` is notation for `iConj fun i ↦ φ i`
+-/
+syntax (name := bigiConj) "⩕ " Parser.Term.funBinder (" : " term)? ", " term:0 : term
 
 macro_rules (kind := bigiConj)
   | `(⩕ $i:ident : $ι, $v) => `(iConj fun $i : $ι ↦ $v)
@@ -484,6 +487,9 @@ def iConjUnexpsnder : Unexpander
   | `($_ fun $i ↦ $v) => `(⩕ $i, $v)
   |                 _ => throw ()
 
+/--
+`⩖ i, φ i` is notation for `iDisj fun i ↦ φ i`
+-/
 syntax (name := bigiDisj) "⩖ " Parser.Term.funBinder (" : " term)? ", " term:67 : term
 
 macro_rules (kind := bigiDisj)
