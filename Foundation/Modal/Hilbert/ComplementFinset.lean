@@ -331,7 +331,7 @@ lemma iff_mem_imp
         simp only [Formula.complement.imp_def₁ h] at hq;
         exact efq_of_neg! $ Context.by_axm! (by simpa using hq);
     . apply membership_iff (by assumption) |>.mpr;
-      exact cψφ!_of_φ! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
+      exact c!_of_conseq! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
 
 lemma iff_not_mem_imp
   (hsub_qr : (ψ ➝ χ) ∈ S) (hsub_q : ψ ∈ S := by trivial)  (hsub_r : χ ∈ S := by trivial)

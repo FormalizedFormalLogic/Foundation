@@ -14,12 +14,12 @@ def goedel2 : 𝓢 ⊢ (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := by
     exact efq;
   . exact cTrans (by
       apply implyBoxDistribute';
-      exact φOfKφψ negEquiv;
+      exact ofKLeft negEquiv;
     ) axiomL;
 lemma goedel2! : 𝓢 ⊢! (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := ⟨goedel2⟩
 
-def goedel2'.mp : 𝓢 ⊢ (∼(□⊥) : F) → 𝓢 ⊢ ∼(□(∼(□⊥)) : F) := by intro h; exact (φOfKφψ goedel2) ⨀ h;
-def goedel2'.mpr : 𝓢 ⊢ ∼(□(∼(□⊥)) : F) → 𝓢 ⊢ (∼(□⊥) : F) := by intro h; exact (ψOfKφψ goedel2) ⨀ h;
+def goedel2'.mp : 𝓢 ⊢ (∼(□⊥) : F) → 𝓢 ⊢ ∼(□(∼(□⊥)) : F) := by intro h; exact (ofKLeft goedel2) ⨀ h;
+def goedel2'.mpr : 𝓢 ⊢ ∼(□(∼(□⊥)) : F) → 𝓢 ⊢ (∼(□⊥) : F) := by intro h; exact (ofKRight goedel2) ⨀ h;
 lemma goedel2'! : 𝓢 ⊢! (∼(□⊥) : F) ↔ 𝓢 ⊢! ∼(□(∼(□⊥)) : F) := ⟨λ ⟨h⟩ ↦ ⟨goedel2'.mp h⟩, λ ⟨h⟩ ↦ ⟨goedel2'.mpr h⟩⟩
 
 
@@ -30,7 +30,7 @@ protected def axiomFour : 𝓢 ⊢ Axioms.Four φ := by
   have : 𝓢 ⊢ φ ➝ (⊡□φ ➝ ⊡φ) := by
     apply deduct';
     apply deduct;
-    exact kφψOfφOfψ (FiniteContext.byAxm) (φOfKφψ (ψ := □□φ) $ FiniteContext.byAxm);
+    exact kIntro (FiniteContext.byAxm) (ofKLeft (ψ := □□φ) $ FiniteContext.byAxm);
   have : 𝓢 ⊢ φ ➝ (□⊡φ ➝ ⊡φ) := cTrans this (implyLeftReplace BoxBoxdot_BoxDotbox);
   exact cTrans (cTrans (implyBoxDistribute' this) axiomL) (implyBoxDistribute' $ and₂);
 instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ GL.axiomFour⟩
@@ -44,11 +44,11 @@ end GL
 private noncomputable def lem_boxdot_Grz_of_L : 𝓢 ⊢ (⊡(⊡(φ ➝ ⊡φ) ➝ φ)) ➝ (□(φ ➝ ⊡φ) ➝ φ) := by
   have : 𝓢 ⊢ (□(φ ➝ ⊡φ) ⋏ ∼φ) ➝ ⊡(φ ➝ ⊡φ) := by
     apply deduct';
-    apply kφψOfφOfψ;
+    apply kIntro;
     . exact (of efq_imply_not₁) ⨀ and₂;
     . exact (of (cId _)) ⨀ and₁;
   have : 𝓢 ⊢ ∼⊡(φ ➝ ⊡φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := cTrans (contra₀' this) $ cTrans demorgan₄ (orReplaceRight dne);
-  have : 𝓢 ⊢ (∼⊡(φ ➝ ⊡φ) ⋎ φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := cAφψχOfCφχOfCψχ this or₂;
+  have : 𝓢 ⊢ (∼⊡(φ ➝ ⊡φ) ⋎ φ) ➝ (∼□(φ ➝ ⊡φ) ⋎ φ) := cAOfCOfC this or₂;
   have : 𝓢 ⊢ ∼⊡(φ ➝ ⊡φ) ⋎ φ ➝ □(φ ➝ ⊡φ) ➝ φ := cTrans this implyOfNotOr;
   have : 𝓢 ⊢ (⊡(φ ➝ ⊡φ) ➝ φ) ➝ (□(φ ➝ ⊡φ) ➝ φ) := cTrans NotOrOfImply this;
   exact cTrans boxdotAxiomT this;
@@ -58,7 +58,7 @@ noncomputable def boxdot_Grz_of_L : 𝓢 ⊢ ⊡(⊡(φ ➝ ⊡φ) ➝ φ) ➝ �
   have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) ➝ □φ := cTrans this $ implyLeftReplace $ imply_Box_BoxBoxdot;
   have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ) := by
     apply deduct'; apply deduct; apply deduct;
-    exact kφψOfφOfψ FiniteContext.byAxm $ (of this) ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
+    exact kIntro FiniteContext.byAxm $ (of this) ⨀ (FiniteContext.byAxm) ⨀ (FiniteContext.byAxm);
   have : 𝓢 ⊢ □□(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(□(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ)) := implyBoxDistribute' this;
   have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(□(φ ➝ ⊡φ) ➝ (φ ➝ ⊡φ)) := cTrans axiomFour this;
   have : 𝓢 ⊢ □(⊡(φ ➝ ⊡φ) ➝ φ) ➝ □(φ ➝ ⊡φ) := cTrans this axiomL;
@@ -79,7 +79,7 @@ def imply_boxdot_axiomT_of_imply_boxdot_boxdot (h : 𝓢 ⊢ ⊡φ ➝ ⊡ψ) : 
   apply deduct';
   apply deduct;
   have : [□ψ, ⊡φ] ⊢[𝓢] ⊡ψ := (FiniteContext.of h) ⨀ (FiniteContext.byAxm);
-  exact φOfKφψ this;
+  exact ofKLeft this;
 lemma imply_boxdot_axiomT_of_imply_boxdot_boxdot! (h : 𝓢 ⊢! ⊡φ ➝ ⊡ψ) : 𝓢 ⊢! ⊡φ ➝ (□ψ ➝ ψ) := ⟨imply_boxdot_axiomT_of_imply_boxdot_boxdot h.some⟩
 
 

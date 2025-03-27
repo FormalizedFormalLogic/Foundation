@@ -183,7 +183,7 @@ def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ �
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢ ⊥ ➝ φ := efqOfNegative (by simp [by simpa using h])
     have ihψ : Λ ⊢ ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
-    Entailment.cφKψχOfCφψOfCφχ ihφ ihψ
+    Entailment.cKOfCOfC ihφ ihψ
   | φ ➝ ψ, h =>
     have ihψ : Λ ⊢ ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
     Entailment.cTrans ihψ Entailment.imply₁

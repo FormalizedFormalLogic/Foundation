@@ -164,7 +164,7 @@ lemma goedelTranslated_axiomTc : MH ⊢! φᵍ ➝ □φᵍ := by
   induction φ using Propositional.Formula.rec' with
   | hfalsum => simp only [goedelTranslate, efq!];
   | hand φ ψ ihp ihq => exact c!_trans (and_replace! ihp ihq) collect_box_and!
-  | hor φ ψ ihp ihq => exact c!_trans (caφψχ!_of_cφχ!_of_cψχ! (imply_left_or'! ihp) (imply_right_or'! ihq)) collect_box_or!
+  | hor φ ψ ihp ihq => exact c!_trans (cA!_of_c!_of_c! (imply_left_or'! ihp) (imply_right_or'! ihq)) collect_box_or!
   | _ => simp only [goedelTranslate, axiomFour!];
 
 lemma goedelTranslated_implyS : MH ⊢! (φ ➝ ψ ➝ φ)ᵍ := by
@@ -210,7 +210,7 @@ end Modal.Hilbert
 /-
 lemma dp_of_mdp [ModalDisjunctive mH] [ModalCompanion iH mH] [Entailment.S4 mH] : iH ⊢! φ ⋎ ψ → iH ⊢! φ ∨ iH ⊢! ψ := by
     intro hpq;
-    have : mH ⊢! □φᵍ ⋎ □ψᵍ := χ!_of_cφχ!_of_cψχ!_of_aφψ! (imply_left_or'! axiomTc_GTranslate!) (imply_right_or'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
+    have : mH ⊢! □φᵍ ⋎ □ψᵍ := of_c!_of_c!_of_a! (imply_left_or'! axiomTc_GTranslate!) (imply_right_or'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
     cases ModalDisjunctive.modal_disjunctive this with
     | inl h => left; exact ModalCompanion.companion.mpr h;
     | inr h => right; exact ModalCompanion.companion.mpr h;

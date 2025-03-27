@@ -50,7 +50,7 @@ namespace K4H
 variable [Entailment.Modal.K4H 𝓢]
 
 instance : HenkinRule 𝓢 where
-  henkin h := (φOfKφψ h) ⨀ (axiomH ⨀ nec h);
+  henkin h := (ofKLeft h) ⨀ (axiomH ⨀ nec h);
 
 end K4H
 

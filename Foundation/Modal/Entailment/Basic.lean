@@ -553,7 +553,7 @@ instance [Disjunctive 𝓢] [Unnecessitation 𝓢] : ModalDisjunctive 𝓢 where
     . right; exact unnec! h;
 
 private lemma unnec_of_mdp_aux [ModalDisjunctive 𝓢] (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! φ := by
-    have : 𝓢 ⊢! □φ ⋎ □φ := aφψ!_of_φ! h;
+    have : 𝓢 ⊢! □φ ⋎ □φ := a!_of_left h;
     rcases modal_disjunctive this with (h | h) <;> tauto;
 
 noncomputable instance unnecessitation_of_modalDisjunctive [ModalDisjunctive 𝓢] : Unnecessitation 𝓢 where

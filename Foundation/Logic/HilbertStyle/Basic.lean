@@ -1,6 +1,18 @@
 import Foundation.Logic.Entailment
 import Foundation.Logic.Axioms
 
+/-!
+# Basic Lemmata of Hilbert-Style Deduction System.
+
+## Naming Convention
+
+The names of the formalized proofs are determined by the following steps. (e.g. `𝓢 ⊢! (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ)`):
+1. Convert the formula to Łukasiewicz's notation (`ECKφψχCφCψχ`).
+2. Remove meta variables (`ECKCC`).
+3. Make it lowerCamelCase (`eCKCC`).
+4. Postfix `!` if it is a proposition (`eCKCC!`).
+-/
+
 namespace LO.Entailment
 
 variable {S F : Type*} [LogicalConnective F] [Entailment F S]
@@ -35,21 +47,17 @@ class HasAxiomImply₁ (𝓢 : S)  where
 def imply₁ [HasAxiomImply₁ 𝓢] : 𝓢 ⊢ φ ➝ ψ ➝ φ := HasAxiomImply₁.imply₁ _ _
 @[simp] lemma imply₁! [HasAxiomImply₁ 𝓢] : 𝓢 ⊢! φ ➝ ψ ➝ φ := ⟨imply₁⟩
 
-def cψφOfφ [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ψ ➝ φ := imply₁ ⨀ h
-alias dhyp := cψφOfφ
+def cOfConseq [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ψ ➝ φ := imply₁ ⨀ h
+alias dhyp := cOfConseq
 
-lemma cψφ!_of_φ! [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (d : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ ➝ φ := ⟨cψφOfφ d.some⟩
-alias dhyp! := cψφ!_of_φ!
+lemma c!_of_conseq! [ModusPonens 𝓢] [HasAxiomImply₁ 𝓢] (d : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ ➝ φ := ⟨cOfConseq d.some⟩
+alias dhyp! := c!_of_conseq!
 
 class HasAxiomImply₂ (𝓢 : S)  where
   imply₂ (φ ψ χ : F) : 𝓢 ⊢ Axioms.Imply₂ φ ψ χ
 
 def imply₂ [HasAxiomImply₂ 𝓢] : 𝓢 ⊢ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := HasAxiomImply₂.imply₂ _ _ _
 @[simp] lemma imply₂! [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := ⟨imply₂⟩
-
-def χOfCφCψχOfCφψOfφ [ModusPonens 𝓢] [HasAxiomImply₂ 𝓢] (d₁ : 𝓢 ⊢ φ ➝ ψ ➝ χ) (d₂ : 𝓢 ⊢ φ ➝ ψ) (d₃ : 𝓢 ⊢ φ) : 𝓢 ⊢ χ := imply₂ ⨀ d₁ ⨀ d₂ ⨀ d₃
-lemma χ!_of_cφcψχ!_of_cφψ!_of_φ! [ModusPonens 𝓢] [HasAxiomImply₂ 𝓢] (d₁ : 𝓢 ⊢! φ ➝ ψ ➝ χ) (d₂ : 𝓢 ⊢! φ ➝ ψ) (d₃ : 𝓢 ⊢! φ) : 𝓢 ⊢! χ := ⟨χOfCφCψχOfCφψOfφ d₁.some d₂.some d₃.some⟩
-
 
 class HasAxiomAndElim (𝓢 : S)  where
   and₁ (φ ψ : F) : 𝓢 ⊢ Axioms.AndElim₁ φ ψ
@@ -58,20 +66,20 @@ class HasAxiomAndElim (𝓢 : S)  where
 def and₁ [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ ⋏ ψ ➝ φ := HasAxiomAndElim.and₁ _ _
 @[simp] lemma and₁! [HasAxiomAndElim 𝓢] : 𝓢 ⊢! φ ⋏ ψ ➝ φ := ⟨and₁⟩
 
-def φOfKφψ [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ φ := and₁ ⨀ d
-alias andLeft := φOfKφψ
+def ofKLeft [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ φ := and₁ ⨀ d
+alias andLeft := ofKLeft
 
-lemma φ!_of_kφψ! [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢! (φ ⋏ ψ)) : 𝓢 ⊢! φ := ⟨φOfKφψ d.some⟩
-alias and_left! := φ!_of_kφψ!
+lemma of_k!_left [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢! (φ ⋏ ψ)) : 𝓢 ⊢! φ := ⟨ofKLeft d.some⟩
+alias and_left := of_k!_left
 
 def and₂ [HasAxiomAndElim 𝓢] : 𝓢 ⊢ φ ⋏ ψ ➝ ψ := HasAxiomAndElim.and₂ _ _
 @[simp] lemma and₂! [HasAxiomAndElim 𝓢] : 𝓢 ⊢! φ ⋏ ψ ➝ ψ := ⟨and₂⟩
 
-def ψOfKφψ [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ := and₂ ⨀ d
-alias andRight := ψOfKφψ
+def ofKRight [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ := and₂ ⨀ d
+alias andRight := ofKRight
 
-lemma ψ!_of_kφψ!  [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢! (φ ⋏ ψ)) : 𝓢 ⊢! ψ := ⟨ψOfKφψ d.some⟩
-alias and_right! := ψ!_of_kφψ!
+lemma of_k_right [ModusPonens 𝓢] [HasAxiomAndElim 𝓢] (d : 𝓢 ⊢! (φ ⋏ ψ)) : 𝓢 ⊢! ψ := ⟨ofKRight d.some⟩
+alias and_right := of_k_right
 
 
 class HasAxiomAndInst (𝓢 : S) where
@@ -80,11 +88,9 @@ class HasAxiomAndInst (𝓢 : S) where
 def and₃ [HasAxiomAndInst 𝓢] : 𝓢 ⊢ φ ➝ ψ ➝ φ ⋏ ψ := HasAxiomAndInst.and₃ _ _
 @[simp] lemma and₃! [HasAxiomAndInst 𝓢] : 𝓢 ⊢! φ ➝ ψ ➝ φ ⋏ ψ := ⟨and₃⟩
 
-def kφψOfφOfψ [ModusPonens 𝓢] [HasAxiomAndInst 𝓢] (d₁ : 𝓢 ⊢ φ) (d₂: 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋏ ψ := and₃ ⨀ d₁ ⨀ d₂
-alias kIntro := kφψOfφOfψ
+def kIntro [ModusPonens 𝓢] [HasAxiomAndInst 𝓢] (d₁ : 𝓢 ⊢ φ) (d₂: 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋏ ψ := and₃ ⨀ d₁ ⨀ d₂
 
-lemma kφψ!_of_φ!_of_ψ!  [ModusPonens 𝓢] [HasAxiomAndInst 𝓢] (d₁ : 𝓢 ⊢! φ) (d₂: 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ⋏ ψ := ⟨kφψOfφOfψ d₁.some d₂.some⟩
-alias k!_intro := kφψ!_of_φ!_of_ψ!
+lemma k!_intro  [ModusPonens 𝓢] [HasAxiomAndInst 𝓢] (d₁ : 𝓢 ⊢! φ) (d₂: 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ⋏ ψ := ⟨kIntro d₁.some d₂.some⟩
 
 
 class HasAxiomOrInst (𝓢 : S) where
@@ -94,14 +100,14 @@ class HasAxiomOrInst (𝓢 : S) where
 def or₁  [HasAxiomOrInst 𝓢] : 𝓢 ⊢ φ ➝ φ ⋎ ψ := HasAxiomOrInst.or₁ _ _
 @[simp] lemma or₁! [HasAxiomOrInst 𝓢] : 𝓢 ⊢! φ ➝ φ ⋎ ψ := ⟨or₁⟩
 
-def aφψOfφ [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ φ) : 𝓢 ⊢ φ ⋎ ψ := or₁ ⨀ d
-lemma aφψ!_of_φ! [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢! φ) : 𝓢 ⊢! φ ⋎ ψ := ⟨aφψOfφ d.some⟩
+def aOfLeft [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ φ) : 𝓢 ⊢ φ ⋎ ψ := or₁ ⨀ d
+lemma a!_of_left [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢! φ) : 𝓢 ⊢! φ ⋎ ψ := ⟨aOfLeft d.some⟩
 
 def or₂ [HasAxiomOrInst 𝓢] : 𝓢 ⊢ ψ ➝ φ ⋎ ψ := HasAxiomOrInst.or₂ _ _
 @[simp] lemma or₂! [HasAxiomOrInst 𝓢] : 𝓢 ⊢! ψ ➝ φ ⋎ ψ := ⟨or₂⟩
 
-def aφψOfψ [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋎ ψ := or₂ ⨀ d
-lemma aφψ!_of_ψ! [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ⋎ ψ := ⟨aφψOfψ d.some⟩
+def aOfRight [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋎ ψ := or₂ ⨀ d
+lemma a!_of_right [HasAxiomOrInst 𝓢] [ModusPonens 𝓢] (d : 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ⋎ ψ := ⟨aOfRight d.some⟩
 
 
 class HasAxiomOrElim (𝓢 : S) where
@@ -110,14 +116,14 @@ class HasAxiomOrElim (𝓢 : S) where
 def or₃ [HasAxiomOrElim 𝓢] : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ) ➝ χ := HasAxiomOrElim.or₃ _ _ _
 @[simp] lemma or₃! [HasAxiomOrElim 𝓢] : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ) ➝ χ := ⟨or₃⟩
 
-def cAφψχOfCφχOfCψχ [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢ φ ➝ χ) (d₂ : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋎ ψ ➝ χ := or₃ ⨀ d₁ ⨀ d₂
-lemma caφψχ!_of_cφχ!_of_cψχ! [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢! φ ➝ χ) (d₂ : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ⋎ ψ ➝ χ := ⟨cAφψχOfCφχOfCψχ d₁.some d₂.some⟩
+def cAOfCOfC [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢ φ ➝ χ) (d₂ : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋎ ψ ➝ χ := or₃ ⨀ d₁ ⨀ d₂
+lemma cA!_of_c!_of_c! [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢! φ ➝ χ) (d₂ : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ⋎ ψ ➝ χ := ⟨cAOfCOfC d₁.some d₂.some⟩
 
-def χOfCφχOfCψχOfAφψ [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢ φ ➝ χ) (d₂ : 𝓢 ⊢ ψ ➝ χ) (d₃ : 𝓢 ⊢ φ ⋎ ψ) : 𝓢 ⊢ χ := or₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
-alias orCases := χOfCφχOfCψχOfAφψ
+def ofCOfCOfA [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢ φ ➝ χ) (d₂ : 𝓢 ⊢ ψ ➝ χ) (d₃ : 𝓢 ⊢ φ ⋎ ψ) : 𝓢 ⊢ χ := or₃ ⨀ d₁ ⨀ d₂ ⨀ d₃
+alias orCases := ofCOfCOfA
 
-lemma χ!_of_cφχ!_of_cψχ!_of_aφψ! [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢! φ ➝ χ) (d₂ : 𝓢 ⊢! ψ ➝ χ) (d₃ : 𝓢 ⊢! φ ⋎ ψ) : 𝓢 ⊢! χ := ⟨χOfCφχOfCψχOfAφψ d₁.some d₂.some d₃.some⟩
-alias or_cases! := χ!_of_cφχ!_of_cψχ!_of_aφψ!
+lemma of_c!_of_c!_of_a! [HasAxiomOrElim 𝓢] [ModusPonens 𝓢] (d₁ : 𝓢 ⊢! φ ➝ χ) (d₂ : 𝓢 ⊢! ψ ➝ χ) (d₃ : 𝓢 ⊢! φ ⋎ ψ) : 𝓢 ⊢! χ := ⟨ofCOfCOfA d₁.some d₂.some d₃.some⟩
+alias or_cases! := of_c!_of_c!_of_a!
 
 
 class HasAxiomEFQ (𝓢 : S) where
@@ -126,8 +132,8 @@ class HasAxiomEFQ (𝓢 : S) where
 def efq [HasAxiomEFQ 𝓢] : 𝓢 ⊢ ⊥ ➝ φ := HasAxiomEFQ.efq _
 @[simp] lemma efq! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⊥ ➝ φ := ⟨efq⟩
 
-def φOfO [ModusPonens 𝓢] [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ⊥) : 𝓢 ⊢ φ := efq ⨀ b
-lemma φ!_of_o! [ModusPonens 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! ⊥) : 𝓢 ⊢! φ := ⟨φOfO h.some⟩
+def ofO [ModusPonens 𝓢] [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ⊥) : 𝓢 ⊢ φ := efq ⨀ b
+lemma of_o! [ModusPonens 𝓢] [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! ⊥) : 𝓢 ⊢! φ := ⟨ofO h.some⟩
 
 
 class HasAxiomLEM (𝓢 : S) where
@@ -143,8 +149,8 @@ class HasAxiomDNE (𝓢 : S) where
 def dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ ➝ φ := HasAxiomDNE.dne _
 @[simp] lemma dne! [HasAxiomDNE 𝓢] : 𝓢 ⊢! ∼∼φ ➝ φ := ⟨dne⟩
 
-def φOfNnφ [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := dne ⨀ b
-lemma φ!_of_nnφ! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := ⟨φOfNnφ h.some⟩
+def ofNn [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := dne ⨀ b
+lemma of_nn! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := ⟨ofNn h.some⟩
 
 /--
   Negation `∼φ` is equivalent to `φ ➝ ⊥` on **system**.
@@ -180,31 +186,31 @@ section
 
 variable [ModusPonens 𝓢]
 
-def cφoOfNφ [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢ ∼φ → 𝓢 ⊢ φ ➝ ⊥ := λ h => (φOfKφψ negEquiv) ⨀ h
-def nφOfCφO [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢ φ ➝ ⊥ → 𝓢 ⊢ ∼φ := λ h => (ψOfKφψ negEquiv) ⨀ h
-lemma nφ!_iff_cφo! [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! ∼φ ↔ 𝓢 ⊢! φ ➝ ⊥ := ⟨λ ⟨h⟩ => ⟨cφoOfNφ h⟩, λ ⟨h⟩ => ⟨nφOfCφO h⟩⟩
+def cOOfN [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢ ∼φ → 𝓢 ⊢ φ ➝ ⊥ := λ h => (ofKLeft negEquiv) ⨀ h
+def nOfCO [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢ φ ➝ ⊥ → 𝓢 ⊢ ∼φ := λ h => (ofKRight negEquiv) ⨀ h
+lemma n!_iff_cO! [HasAxiomAndElim 𝓢] [NegationEquiv 𝓢] : 𝓢 ⊢! ∼φ ↔ 𝓢 ⊢! φ ➝ ⊥ := ⟨λ ⟨h⟩ => ⟨cOOfN h⟩, λ ⟨h⟩ => ⟨nOfCO h⟩⟩
 
 def eIntro [HasAxiomAndInst 𝓢] (b₁ : 𝓢 ⊢ φ ➝ ψ) (b₂ : 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ φ ⭤ ψ := kIntro b₁ b₂
 def e!_intro [HasAxiomAndInst 𝓢] (h₁ : 𝓢 ⊢! φ ➝ ψ) (h₂ : 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! φ ⭤ ψ := ⟨kIntro h₁.some h₂.some⟩
 
-lemma k!_intro_iff [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! φ ⋏ ψ ↔ 𝓢 ⊢! φ ∧ 𝓢 ⊢! ψ := ⟨fun h ↦ ⟨and_left! h, and_right! h⟩, fun h ↦ k!_intro h.1 h.2⟩
+lemma k!_intro_iff [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! φ ⋏ ψ ↔ 𝓢 ⊢! φ ∧ 𝓢 ⊢! ψ := ⟨fun h ↦ ⟨and_left h, and_right h⟩, fun h ↦ k!_intro h.1 h.2⟩
 
-lemma e!_intro_iff [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! φ ⭤ ψ ↔ 𝓢 ⊢! φ ➝ ψ ∧ 𝓢 ⊢! ψ ➝ φ := ⟨fun h ↦ ⟨and_left! h, and_right! h⟩, fun h ↦ k!_intro h.1 h.2⟩
+lemma e!_intro_iff [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! φ ⭤ ψ ↔ 𝓢 ⊢! φ ➝ ψ ∧ 𝓢 ⊢! ψ ➝ φ := ⟨fun h ↦ ⟨and_left h, and_right h⟩, fun h ↦ k!_intro h.1 h.2⟩
 
-lemma provable_iff_of_e!  [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! φ ↔ 𝓢 ⊢! ψ := ⟨fun hp ↦ and_left! h ⨀ hp, fun hq ↦ and_right! h ⨀ hq⟩
+lemma provable_iff_of_e!  [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! φ ↔ 𝓢 ⊢! ψ := ⟨fun hp ↦ and_left h ⨀ hp, fun hq ↦ and_right h ⨀ hq⟩
 
 def cId [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ : F) : 𝓢 ⊢ φ ➝ φ := imply₂ (φ := φ) (ψ := (φ ➝ φ)) (χ := φ) ⨀ imply₁ ⨀ imply₁
 @[simp] def c!_id [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! φ ➝ φ := ⟨cId φ⟩
 
-def eId [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ : F) : 𝓢 ⊢ φ ⭤ φ := kφψOfφOfψ (cId φ) (cId φ)
+def eId [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ : F) : 𝓢 ⊢ φ ⭤ φ := kIntro (cId φ) (cId φ)
 @[simp] def e!_id [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! φ ⭤ φ := ⟨eId φ⟩
 
 instance [NegAbbrev F] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
   negEquiv := by intro φ; simp [Axioms.NegEquiv, NegAbbrev.neg]; apply eId;
 
 
-def notbot [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ ∼⊥ := nφOfCφO (cId ⊥)
-@[simp] lemma notbot! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! ∼⊥ := ⟨notbot⟩
+def nO [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ ∼⊥ := nOfCO (cId ⊥)
+@[simp] lemma nO! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! ∼⊥ := ⟨nO⟩
 
 def mdp₁ [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ φ ➝ ψ ➝ χ) (bq : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ χ := imply₂ ⨀ bqr ⨀ bq
 lemma mdp₁! [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢! φ ➝ ψ ➝ χ) (hq : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ χ := ⟨mdp₁ hqr.some hq.some⟩
@@ -212,24 +218,24 @@ lemma mdp₁! [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢! φ ➝ ψ ➝ χ) (hq : �
 infixl:90 "⨀₁" => mdp₁
 infixl:90 "⨀₁" => mdp₁!
 
-def mdp₂ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s) (bq : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ➝ s := cψφOfφ (imply₂) ⨀₁ bqr ⨀₁ bq
+def mdp₂ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s) (bq : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ➝ s := cOfConseq (imply₂) ⨀₁ bqr ⨀₁ bq
 lemma mdp₂! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s) (hq : 𝓢 ⊢! φ ➝ ψ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ➝ s := ⟨mdp₂ hqr.some hq.some⟩
 
 infixl:90 "⨀₂" => mdp₂
 infixl:90 "⨀₂" => mdp₂!
 
-def mdp₃ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t) (bq : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ t := (cψφOfφ <| cψφOfφ <| imply₂) ⨀₂ bqr ⨀₂ bq
+def mdp₃ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t) (bq : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ t := (cOfConseq <| cOfConseq <| imply₂) ⨀₂ bqr ⨀₂ bq
 lemma mdp₃! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ t) (hq : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ t := ⟨mdp₃ hqr.some hq.some⟩
 
 infixl:90 "⨀₃" => mdp₃
 infixl:90 "⨀₃" => mdp₃!
 
-def mdp₄ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t ➝ u) (bq : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ u := (cψφOfφ <| cψφOfφ <| cψφOfφ <| imply₂) ⨀₃ bqr ⨀₃ bq
+def mdp₄ [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bqr : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t ➝ u) (bq : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ t) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s ➝ u := (cOfConseq <| cOfConseq <| cOfConseq <| imply₂) ⨀₃ bqr ⨀₃ bq
 lemma mdp₄! [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hqr : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ t ➝ u) (hq : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ t) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ s ➝ u := ⟨mdp₄ hqr.some hq.some⟩
 infixl:90 "⨀₄" => mdp₄
 infixl:90 "⨀₄" => mdp₄!
 
-def cTrans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bpq : 𝓢 ⊢ φ ➝ ψ) (bqr : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ➝ χ := imply₂ ⨀ cψφOfφ bqr ⨀ bpq
+def cTrans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bpq : 𝓢 ⊢ φ ➝ ψ) (bqr : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ➝ χ := imply₂ ⨀ cOfConseq bqr ⨀ bpq
 lemma c!_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢! φ ➝ ψ) (hqr : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ➝ χ := ⟨cTrans hpq.some hqr.some⟩
 
 lemma unprovable_c!_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊬ φ ➝ χ → 𝓢 ⊬ ψ ➝ χ := by
@@ -238,130 +244,122 @@ lemma unprovable_c!_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq :
 
 def eTrans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢ φ ⭤ ψ) (h₂ : 𝓢 ⊢ ψ ⭤ χ) : 𝓢 ⊢ φ ⭤ χ := by
   apply eIntro;
-  . exact cTrans (φOfKφψ h₁) (φOfKφψ h₂);
-  . exact cTrans (ψOfKφψ h₂) (ψOfKφψ h₁);
+  . exact cTrans (ofKLeft h₁) (ofKLeft h₂);
+  . exact cTrans (ofKRight h₂) (ofKRight h₁);
 lemma e!_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢]  (h₁ : 𝓢 ⊢! φ ⭤ ψ) (h₂ : 𝓢 ⊢! ψ ⭤ χ) : 𝓢 ⊢! φ ⭤ χ := ⟨eTrans h₁.some h₂.some⟩
 
 lemma unprovable_iff_of_e! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (H : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊬ φ ↔ 𝓢 ⊬ ψ := by
   constructor;
-  . intro hp hq; have := ψ!_of_kφψ! H ⨀ hq; contradiction;
-  . intro hq hp; have := φ!_of_kφψ! H ⨀ hp; contradiction;
+  . intro hp hq; have := of_k_right H ⨀ hq; contradiction;
+  . intro hq hp; have := of_k!_left H ⨀ hp; contradiction;
 
-def cφcψcχcφ [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ φ := cTrans imply₁ imply₁
-@[simp] lemma cφcψcχcφ! [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ φ := ⟨cφcψcχcφ φ ψ χ⟩
+def cCCC [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ φ := cTrans imply₁ imply₁
+@[simp] lemma cCCC! [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ φ := ⟨cCCC φ ψ χ⟩
 
--- lemma generalConjFinset! [DecidableEq F] {Γ : Finset F} (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := by simp [Finset.conj, (general_conj! (Finset.mem_toList.mpr h))];
-
-def cφKψχOfCφψOfCφχ [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢]
-    (bq : 𝓢 ⊢ φ ➝ ψ) (br : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ⋏ χ := cψφOfφ and₃ ⨀₁ bq ⨀₁ br
-lemma cφkψχ!_of_cφψ!_of_cφχ! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hq : 𝓢 ⊢! φ ➝ ψ) (hr : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ⋏ χ := ⟨cφKψχOfCφψOfCφχ hq.some hr.some⟩
+def cKOfCOfC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢]
+    (bq : 𝓢 ⊢ φ ➝ ψ) (br : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ⋏ χ := cOfConseq and₃ ⨀₁ bq ⨀₁ br
+lemma cK!_of_c!_of_c! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hq : 𝓢 ⊢! φ ➝ ψ) (hr : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ⋏ χ := ⟨cKOfCOfC hq.some hr.some⟩
 
 
-def ckφψkψφ [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ : F) : 𝓢 ⊢ φ ⋏ ψ ➝ ψ ⋏ φ := cφKψχOfCφψOfCφχ and₂ and₁
-lemma ckφψkψφ! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! φ ⋏ ψ ➝ ψ ⋏ φ := ⟨ckφψkψφ φ ψ⟩
+def cKK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ : F) : 𝓢 ⊢ φ ⋏ ψ ➝ ψ ⋏ φ := cKOfCOfC and₂ and₁
+lemma cKK! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! φ ⋏ ψ ➝ ψ ⋏ φ := ⟨cKK φ ψ⟩
 
-def kSymm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ ⋏ φ := ckφψkψφ _ _ ⨀ h
+def kSymm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ψ ⋏ φ := cKK _ _ ⨀ h
 lemma k!_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! ψ ⋏ φ := ⟨kSymm h.some⟩
 
 
-def ceφψeψφ [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ : F) : 𝓢 ⊢ (φ ⭤ ψ) ➝ (ψ ⭤ φ) := ckφψkψφ _ _
-lemma ceφψeψφ!  [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! (φ ⭤ ψ) ➝ (ψ ⭤ φ) := ⟨ceφψeψφ φ ψ⟩
+def cEE [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ : F) : 𝓢 ⊢ (φ ⭤ ψ) ➝ (ψ ⭤ φ) := cKK _ _
+lemma cEE!  [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! (φ ⭤ ψ) ➝ (ψ ⭤ φ) := ⟨cEE φ ψ⟩
 
-def eSymm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ⭤ φ := ceφψeψφ _ _ ⨀ h
+def eSymm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ⭤ φ := cEE _ _ ⨀ h
 lemma e!_symm [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ψ ⭤ φ := ⟨eSymm h.some⟩
 
 
-def eckφψχcφcψχ [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢ (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ) := by
+def eCKCC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢ (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ) := by
   let b₁ : 𝓢 ⊢ (φ ⋏ ψ ➝ χ) ➝ φ ➝ ψ ➝ χ :=
-    cφcψcχcφ (φ ⋏ ψ ➝ χ) φ ψ ⨀₃ cψφOfφ (ψ := φ ⋏ ψ ➝ χ) and₃
+    cCCC (φ ⋏ ψ ➝ χ) φ ψ ⨀₃ cOfConseq (ψ := φ ⋏ ψ ➝ χ) and₃
   let b₂ : 𝓢 ⊢ (φ ➝ ψ ➝ χ) ➝ φ ⋏ ψ ➝ χ :=
-    imply₁ ⨀₂ (cψφOfφ (ψ := φ ➝ ψ ➝ χ) and₁) ⨀₂ (cψφOfφ (ψ := φ ➝ ψ ➝ χ) and₂);
+    imply₁ ⨀₂ (cOfConseq (ψ := φ ➝ ψ ➝ χ) and₁) ⨀₂ (cOfConseq (ψ := φ ➝ ψ ➝ χ) and₂);
   exact eIntro b₁ b₂
-lemma eckφψχcφcψχ! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ) := ⟨eckφψχcφcψχ φ ψ χ⟩
+lemma eCKCC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ) := ⟨eCKCC φ ψ χ⟩
 
-def cφcψχOfCkφψχ [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ➝ χ := (φOfKφψ $ eckφψχcφcψχ φ ψ χ) ⨀ d
-def ckφψχOfCφcψχ [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (d : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ φ ⋏ ψ ➝ χ := (ψOfKφψ $ eckφψχcφcψχ φ ψ χ) ⨀ d
+def cCOfCK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (d : 𝓢 ⊢ φ ⋏ ψ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ➝ χ := (ofKLeft $ eCKCC φ ψ χ) ⨀ d
+def cKOfCC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (d : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ φ ⋏ ψ ➝ χ := (ofKRight $ eCKCC φ ψ χ) ⨀ d
 
-lemma and_imply_iff_imply_imply'! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢]: (𝓢 ⊢! φ ⋏ ψ ➝ χ) ↔ (𝓢 ⊢! φ ➝ ψ ➝ χ) := by
+lemma cK!_iff_cC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢]: (𝓢 ⊢! φ ⋏ ψ ➝ χ) ↔ (𝓢 ⊢! φ ➝ ψ ➝ χ) := by
   apply Iff.intro;
-  . intro ⟨h⟩; exact ⟨cφcψχOfCkφψχ h⟩
-  . intro ⟨h⟩; exact ⟨ckφψχOfCφcψχ h⟩
+  . intro ⟨h⟩; exact ⟨cCOfCK h⟩
+  . intro ⟨h⟩; exact ⟨cKOfCC h⟩
 
-def imply_left_verum [HasAxiomVerum 𝓢] [HasAxiomImply₁ 𝓢] : 𝓢 ⊢ φ ➝ ⊤ := cψφOfφ verum
-@[simp] lemma imply_left_verum! [HasAxiomImply₁ 𝓢] [HasAxiomVerum 𝓢] : 𝓢 ⊢! φ ➝ ⊤ := ⟨imply_left_verum⟩
-
-
+def cV [HasAxiomVerum 𝓢] [HasAxiomImply₁ 𝓢] : 𝓢 ⊢ φ ➝ ⊤ := cOfConseq verum
+@[simp] lemma cV! [HasAxiomImply₁ 𝓢] [HasAxiomVerum 𝓢] : 𝓢 ⊢! φ ➝ ⊤ := ⟨cV⟩
 
 instance [(𝓢 : S) → ModusPonens 𝓢] [(𝓢 : S) → HasAxiomEFQ 𝓢] : DeductiveExplosion S := ⟨fun b _ ↦ efq ⨀ b⟩
-
 
 section Conjunction
 
 variable [Entailment.Minimal 𝓢]
 
 def conj₂Nth : (Γ : List F) → (n : ℕ) → (hn : n < Γ.length) → 𝓢 ⊢ ⋀Γ ➝ Γ[n]
-  | [],          _,     hn => by simp at hn
-  | [ψ],         0,     _  => cId ψ
-  | φ :: ψ :: Γ, 0,     _  => and₁
+  |          [],     _, hn => by simp at hn
+  |         [ψ],     0, _  => cId ψ
+  | φ :: ψ :: Γ,     0, _  => and₁
   | φ :: ψ :: Γ, n + 1, hn => cTrans (and₂ (φ := φ)) (conj₂Nth (ψ :: Γ) n (Nat.succ_lt_succ_iff.mp hn))
 
 def conj₂_nth! (Γ : List F) (n : ℕ) (hn : n < Γ.length) : 𝓢 ⊢! ⋀Γ ➝ Γ[n] := ⟨conj₂Nth Γ n hn⟩
 
-variable [DecidableEq F]
 variable {Γ Δ : List F}
 
-def generalConj {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢ Γ.conj ➝ φ :=
+def cConj [DecidableEq F] {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢ Γ.conj ➝ φ :=
   match Γ with
-  | []     => by simp at h
+  |     [] => by simp at h
   | ψ :: Γ =>
     if e : φ = ψ
     then cast (by simp [e]) (and₁ (φ := φ) (ψ := Γ.conj))
     else
       have : φ ∈ Γ := by simpa [e] using h
-      cTrans and₂ (generalConj this)
-lemma general_conj! (h : φ ∈ Γ) : 𝓢 ⊢! Γ.conj ➝ φ := ⟨generalConj h⟩
+      cTrans and₂ (cConj this)
+lemma cConj!_of_mem [DecidableEq F] (h : φ ∈ Γ) : 𝓢 ⊢! Γ.conj ➝ φ := ⟨cConj h⟩
 
 def conjIntro (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢ φ) : 𝓢 ⊢ Γ.conj :=
   match Γ with
-  | []     => verum
+  |     [] => verum
   | ψ :: Γ => kIntro (b ψ (by simp)) (conjIntro Γ (fun ψ hq ↦ b ψ (by simp [hq])))
 
-def implyConj (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ Γ.conj :=
+def cConjOfC (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ Γ.conj :=
   match Γ with
-  | []     => cψφOfφ verum
-  | ψ :: Γ => cφKψχOfCφψOfCφχ (b ψ (by simp)) (implyConj φ Γ (fun ψ hq ↦ b ψ (by simp [hq])))
-def imply_conj! (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ Γ.conj := ⟨implyConj φ Γ fun ψ h ↦ (b ψ h).get⟩
+  |     [] => cOfConseq verum
+  | ψ :: Γ => cKOfCOfC (b ψ (by simp)) (cConjOfC φ Γ (fun ψ hq ↦ b ψ (by simp [hq])))
+def cConj!_of_c! (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ Γ.conj := ⟨cConjOfC φ Γ fun ψ h ↦ (b ψ h).get⟩
 
-def conjImplyConj (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := implyConj _ _ (fun _ hq ↦ generalConj (h hq))
+def cConjConj [DecidableEq F] (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := cConjOfC _ _ (fun _ hq ↦ cConj (h hq))
 
-def generalConj' {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ ➝ φ :=
+def cConj₂ [DecidableEq F] {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ ➝ φ :=
   have : Γ.idxOf φ < Γ.length := List.idxOf_lt_length h
   have : Γ[Γ.idxOf φ] = φ := List.getElem_idxOf this
   cast (by rw[this]) <| conj₂Nth Γ (Γ.idxOf φ) (by assumption)
-lemma generate_conj'! (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := ⟨generalConj' h⟩
+lemma cConj₂! [DecidableEq F] (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := ⟨cConj₂ h⟩
 
-def conjIntro' (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢ φ) : 𝓢 ⊢ ⋀Γ :=
+def conj₂Intro (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢ φ) : 𝓢 ⊢ ⋀Γ :=
   match Γ with
-  | []     => verum
-  | [ψ]    => by apply b; simp;
+  |          [] => verum
+  |         [ψ] => by apply b; simp;
   | ψ :: χ :: Γ => by
     simp;
-    exact kIntro (b ψ (by simp)) (conjIntro' _ (by aesop))
-omit [DecidableEq F] in
-lemma conj_intro'! (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢! φ) : 𝓢 ⊢! ⋀Γ := ⟨conjIntro' Γ (λ φ hp => (b φ hp).some)⟩
+    exact kIntro (b ψ (by simp)) (conj₂Intro _ (by aesop))
+lemma conj₂!_intro (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢! φ) : 𝓢 ⊢! ⋀Γ := ⟨conj₂Intro Γ (λ φ hp => (b φ hp).some)⟩
 
-def implyConj' (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ ⋀Γ :=
+def cConj₂OfC (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ ⋀Γ :=
   match Γ with
-  | []     => cψφOfφ verum
-  | [ψ]    => by apply b; simp;
+  |          [] => cOfConseq verum
+  |         [ψ] => by apply b; simp;
   | ψ :: χ :: Γ => by
     simp;
-    apply cφKψχOfCφψOfCφχ (b ψ (by simp)) (implyConj' φ _ (fun ψ hq ↦ b ψ (by simp [hq])));
-omit [DecidableEq F] in
-lemma imply_conj'! (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ ⋀Γ := ⟨implyConj' φ Γ (λ ψ hq => (b ψ hq).some)⟩
+    apply cKOfCOfC (b ψ (by simp)) (cConj₂OfC φ _ (fun ψ hq ↦ b ψ (by simp [hq])));
+lemma cConj₂!_of_c! (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ ⋀Γ := ⟨cConj₂OfC φ Γ (λ ψ hq => (b ψ hq).some)⟩
 
-def conjImplyConj' {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ ⋀Γ ➝ ⋀Δ :=
-  implyConj' _ _ (fun _ hq ↦ generalConj' (h hq))
+def cConj₂Conj₂ [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ ⋀Γ ➝ ⋀Δ :=
+  cConj₂OfC _ _ (fun _ hq ↦ cConj₂ (h hq))
 
 end Conjunction
 

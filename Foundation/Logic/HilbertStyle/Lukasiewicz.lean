@@ -43,9 +43,9 @@ def verum : 𝓢 ⊢ ⊤ := by simp [LukasiewiczAbbrev.top]; exact cId ⊥;
 instance : HasAxiomVerum 𝓢 := ⟨Lukasiewicz.verum⟩
 
 def dne : 𝓢 ⊢ ∼∼φ ➝ φ := by
-  have d₁ : 𝓢 ⊢ ∼∼φ ➝ (∼∼(∼∼φ) ➝ ∼∼φ) ➝ ∼φ ➝ ∼(∼∼φ) := cψφOfφ $ elimContra;
+  have d₁ : 𝓢 ⊢ ∼∼φ ➝ (∼∼(∼∼φ) ➝ ∼∼φ) ➝ ∼φ ➝ ∼(∼∼φ) := cOfConseq $ elimContra;
   have d₂ : 𝓢 ⊢ ∼∼φ ➝ ∼∼(∼∼φ) ➝ ∼∼φ := imply₁;
-  have d₃ : 𝓢 ⊢ ∼∼φ ➝ (∼φ ➝ ∼(∼∼φ)) ➝ ∼∼φ ➝ φ := cψφOfφ $ elimContra;
+  have d₃ : 𝓢 ⊢ ∼∼φ ➝ (∼φ ➝ ∼(∼∼φ)) ➝ ∼∼φ ➝ φ := cOfConseq $ elimContra;
   have d₄ : 𝓢 ⊢ ∼∼φ ➝ ∼φ ➝ ∼(∼∼φ) := d₁ ⨀₁ d₂;
   have d₅ : 𝓢 ⊢ ∼∼φ ➝ ∼∼φ ➝ φ := d₃ ⨀₁ d₄;
   have d₆ : 𝓢 ⊢ ∼∼φ ➝ ∼∼φ := cId _;
@@ -63,15 +63,15 @@ def explode (h₁ : 𝓢 ⊢ φ) (h₂ : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := by
   exact elimContra ⨀ this ⨀ h₁;
 
 def explodeHyp (h₁ : 𝓢 ⊢ φ ➝ ψ) (h₂ : 𝓢 ⊢ φ ➝ ∼ψ) : 𝓢 ⊢ φ ➝ χ := by
-  have : 𝓢 ⊢ φ ➝ ∼ψ ➝ ∼χ ➝ ∼ψ := cψφOfφ imply₁ (ψ := φ)
+  have : 𝓢 ⊢ φ ➝ ∼ψ ➝ ∼χ ➝ ∼ψ := cOfConseq imply₁ (ψ := φ)
   have : 𝓢 ⊢ φ ➝ ∼χ ➝ ∼ψ := this ⨀₁ h₂;
-  have : 𝓢 ⊢ φ ➝ ψ ➝ χ := (cψφOfφ elimContra (ψ := φ)) ⨀₁ this;
+  have : 𝓢 ⊢ φ ➝ ψ ➝ χ := (cOfConseq elimContra (ψ := φ)) ⨀₁ this;
   exact this ⨀₁ h₁;
 
 def explodeHyp₂ (h₁ : 𝓢 ⊢ φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢ φ ➝ ψ ➝ ∼χ) : 𝓢 ⊢ φ ➝ ψ ➝ s := by
-  have : 𝓢 ⊢ φ ➝ ψ ➝ ∼χ ➝ ∼s ➝ ∼χ := cψφOfφ (cψφOfφ imply₁ (ψ := ψ)) (ψ := φ)
+  have : 𝓢 ⊢ φ ➝ ψ ➝ ∼χ ➝ ∼s ➝ ∼χ := cOfConseq (cOfConseq imply₁ (ψ := ψ)) (ψ := φ)
   have : 𝓢 ⊢ φ ➝ ψ ➝ ∼(s) ➝ ∼χ := this ⨀₂ h₂;
-  have : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s := (cψφOfφ (cψφOfφ elimContra (ψ := ψ)) (ψ := φ)) ⨀₂ this;
+  have : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ s := (cOfConseq (cOfConseq elimContra (ψ := ψ)) (ψ := φ)) ⨀₂ this;
   exact this ⨀₂ h₁;
 
 def efq : 𝓢 ⊢ ⊥ ➝ φ := by
@@ -81,7 +81,7 @@ instance : HasAxiomEFQ 𝓢 := ⟨λ φ => Lukasiewicz.efq (φ := φ)⟩
 
 def impSwap (h : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ ψ ➝ φ ➝ χ := by
   refine mdp₂ (χ := ψ) ?_ ?_;
-  . exact cψφOfφ h;
+  . exact cOfConseq h;
   . exact imply₁;
 
 def mdpIn₁ : 𝓢 ⊢ (φ ➝ ψ) ➝ φ ➝ ψ := cId _
@@ -96,13 +96,13 @@ def cTrans'₁ (bpq : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ (ψ ➝ χ) ➝ (φ ➝ χ)
   apply impSwap;
   exact cTrans bpq mdpIn₂;
 
-def cTrans'₂ (bqr: 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ (φ ➝ ψ) ➝ (φ ➝ χ) := imply₂ ⨀ (cψφOfφ bqr)
+def cTrans'₂ (bqr: 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ (φ ➝ ψ) ➝ (φ ➝ χ) := imply₂ ⨀ (cOfConseq bqr)
 
-def cTrans₂ : 𝓢 ⊢ (ψ ➝ χ) ➝ (φ ➝ ψ) ➝ (φ ➝ χ) := cTrans (impSwap (cψφOfφ (cId (ψ ➝ χ)))) mdp₂In₁
+def cTrans₂ : 𝓢 ⊢ (ψ ➝ χ) ➝ (φ ➝ ψ) ➝ (φ ➝ χ) := cTrans (impSwap (cOfConseq (cId (ψ ➝ χ)))) mdp₂In₁
 
 def cTrans₁ : 𝓢 ⊢ (φ ➝ ψ) ➝ (ψ ➝ χ) ➝ (φ ➝ χ) := impSwap cTrans₂
 
-def dhypBoth (h : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ (φ ➝ ψ) ➝ (φ ➝ χ) := imply₂ ⨀ (cψφOfφ $ h)
+def dhypBoth (h : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ (φ ➝ ψ) ➝ (φ ➝ χ) := imply₂ ⨀ (cOfConseq $ h)
 
 def explode₂₁ : 𝓢 ⊢ ∼φ ➝ φ ➝ ψ := by
   simp;
@@ -127,23 +127,23 @@ def andElim₂ : 𝓢 ⊢ φ ⋏ ψ ➝ ψ := by
   exact cTrans this dne;
 instance : HasAxiomAndElim 𝓢 := ⟨λ φ ψ => Lukasiewicz.andElim₁ (φ := φ) (ψ := ψ), λ φ ψ => Lukasiewicz.andElim₂ (φ := φ) (ψ := ψ)⟩
 
-def andImplyLeft : 𝓢 ⊢ (φ₁ ➝ ψ) ➝ φ₁ ⋏ φ₂ ➝ ψ := (impSwap $ cψφOfφ (cId _)) ⨀₂ (cψφOfφ andElim₁)
+def andImplyLeft : 𝓢 ⊢ (φ₁ ➝ ψ) ➝ φ₁ ⋏ φ₂ ➝ ψ := (impSwap $ cOfConseq (cId _)) ⨀₂ (cOfConseq andElim₁)
 def andImplyLeft' (h : 𝓢 ⊢ (φ₁ ➝ ψ)) : 𝓢 ⊢ φ₁ ⋏ φ₂ ➝ ψ := andImplyLeft ⨀ h
 
-def andImplyRight : 𝓢 ⊢ (φ₂ ➝ ψ) ➝ φ₁ ⋏ φ₂ ➝ ψ := (impSwap $ cψφOfφ (cId _)) ⨀₂ (cψφOfφ andElim₂)
+def andImplyRight : 𝓢 ⊢ (φ₂ ➝ ψ) ➝ φ₁ ⋏ φ₂ ➝ ψ := (impSwap $ cOfConseq (cId _)) ⨀₂ (cOfConseq andElim₂)
 def andImplyRight' (h : 𝓢 ⊢ (φ₂ ➝ ψ)) : 𝓢 ⊢ φ₁ ⋏ φ₂ ➝ ψ := andImplyRight ⨀ h
 
 def andInst'' (hp : 𝓢 ⊢ φ) (hq : 𝓢 ⊢ ψ) : 𝓢 ⊢ φ ⋏ ψ := by
   simp only [LukasiewiczAbbrev.and];
   have : 𝓢 ⊢ (φ ➝ ∼ψ) ➝ φ ➝ ∼ψ := cId _
-  have : 𝓢 ⊢ (φ ➝ ∼ψ) ➝ ∼ψ := this ⨀₁ cψφOfφ hp;
+  have : 𝓢 ⊢ (φ ➝ ∼ψ) ➝ ∼ψ := this ⨀₁ cOfConseq hp;
   have : 𝓢 ⊢ ψ ➝ ∼(φ ➝ ∼ψ) := cTrans dni $ contraIntro' this;
   exact this ⨀ hq;
 
 def andInst : 𝓢 ⊢ φ ➝ ψ ➝ φ ⋏ ψ := by
-  have d₁ : 𝓢 ⊢ φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ φ ➝ ∼ψ := cψφOfφ <| cψφOfφ <| cId (φ ➝ ∼ψ);
-  have d₂ : 𝓢 ⊢ φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ φ := cφcψcχcφ (φ := φ) (ψ := ψ) (χ := (φ ➝ ∼ψ));
-  have d₃ : 𝓢 ⊢ φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ ψ := cψφOfφ <| imply₁;
+  have d₁ : 𝓢 ⊢ φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ φ ➝ ∼ψ := cOfConseq <| cOfConseq <| cId (φ ➝ ∼ψ);
+  have d₂ : 𝓢 ⊢ φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ φ := cCCC (φ := φ) (ψ := ψ) (χ := (φ ➝ ∼ψ));
+  have d₃ : 𝓢 ⊢ φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ ψ := cOfConseq <| imply₁;
   have d₄ : 𝓢 ⊢ φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ ∼ψ := d₁ ⨀₃ d₂;
   have d₄ : 𝓢 ⊢ φ ➝ ψ ➝ (φ ➝ ∼ψ) ➝ ψ ➝ ⊥ := by simpa using d₄;
   simpa using d₄ ⨀₃ d₃;
@@ -165,19 +165,19 @@ instance : HasAxiomOrInst 𝓢 := ⟨λ φ ψ => Lukasiewicz.orInst₁ (φ := φ
 def orElim : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
   simp only [LukasiewiczAbbrev.or];
   have d₁ : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ (φ ➝ χ) ➝ ∼χ ➝ ∼φ
-    := (cψφOfφ (ψ := φ ➝ χ) <| cψφOfφ (ψ := ψ ➝ χ) <| cψφOfφ (ψ := ∼φ ➝ ψ) <| contraIntro (φ := φ) (ψ := χ));
+    := (cOfConseq (ψ := φ ➝ χ) <| cOfConseq (ψ := ψ ➝ χ) <| cOfConseq (ψ := ∼φ ➝ ψ) <| contraIntro (φ := φ) (ψ := χ));
   have d₂ : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼χ ➝ ∼φ
-    := d₁ ⨀₃ (cφcψcχcφ (φ ➝ χ) (ψ ➝ χ) (∼φ ➝ ψ));
+    := d₁ ⨀₃ (cCCC (φ ➝ χ) (ψ ➝ χ) (∼φ ➝ ψ));
   have d₃ : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼χ ➝ ψ
-    := (cψφOfφ (ψ := φ ➝ χ) <| cψφOfφ (ψ := ψ ➝ χ) <| imply₁ (φ := ∼φ ➝ ψ) (ψ := ∼χ)) ⨀₄ d₂;
+    := (cOfConseq (ψ := φ ➝ χ) <| cOfConseq (ψ := ψ ➝ χ) <| imply₁ (φ := ∼φ ➝ ψ) (ψ := ∼χ)) ⨀₄ d₂;
   have d₄ : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼χ ➝ χ
-    := (cψφOfφ (ψ := φ ➝ χ) <| cφcψcχcφ (φ := ψ ➝ χ) (ψ := ∼φ ➝ ψ) (χ := ∼χ)) ⨀₄ d₃;
+    := (cOfConseq (ψ := φ ➝ χ) <| cCCC (φ := ψ ➝ χ) (ψ := ∼φ ➝ ψ) (χ := ∼χ)) ⨀₄ d₃;
   have d₅ : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼χ ➝ χ ➝ ⊥
-    := by simpa using cψφOfφ (ψ := φ ➝ χ) <| cψφOfφ (ψ := ψ ➝ χ) <| cψφOfφ (ψ := ∼φ ➝ ψ) <| cId (φ := ∼χ);
+    := by simpa using cOfConseq (ψ := φ ➝ χ) <| cOfConseq (ψ := ψ ➝ χ) <| cOfConseq (ψ := ∼φ ➝ ψ) <| cId (φ := ∼χ);
   have d₆ : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼∼χ
     := by simpa using d₅ ⨀₄ d₄;
   have d₇ : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (∼φ ➝ ψ) ➝ ∼∼χ ➝ χ
-    := cψφOfφ (ψ := φ ➝ χ) <| cψφOfφ (ψ := ψ ➝ χ) <| cψφOfφ (ψ := ∼φ ➝ ψ) <| dne (φ := χ);
+    := cOfConseq (ψ := φ ➝ χ) <| cOfConseq (ψ := ψ ➝ χ) <| cOfConseq (ψ := ∼φ ➝ ψ) <| dne (φ := χ);
   exact d₇ ⨀₃ d₆;
 
 instance : HasAxiomOrElim 𝓢 := ⟨λ φ ψ χ => Lukasiewicz.orElim (φ := φ) (ψ := ψ) (χ := χ)⟩

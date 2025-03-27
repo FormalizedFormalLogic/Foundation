@@ -121,7 +121,7 @@ lemma iff_consistent_insert₁
       | inr h => assumption;
     ) hΔ;
     by_contra hC;
-    have : 𝓢 ⊢! φ ⋏ ⋀(Γ.remove φ) ➝ ⋁Δ := c!_trans ckφψkψφ! $ imply_left_remove_conj! (φ := φ) hC;
+    have : 𝓢 ⊢! φ ⋏ ⋀(Γ.remove φ) ➝ ⋁Δ := c!_trans cKK! $ imply_left_remove_conj! (φ := φ) hC;
     contradiction;
 
 lemma iff_inconsistent_insert₁ : Tableau.Inconsistent 𝓢 ((insert φ T), U) ↔ ∃ Γ Δ : List (Formula α), (∀ φ ∈ Γ, φ ∈ T) ∧ (∀ φ ∈ Δ, φ ∈ U) ∧ 𝓢 ⊢! φ ⋏ ⋀Γ ➝ ⋁Δ := by
@@ -173,8 +173,8 @@ lemma iff_consistent_empty_singleton₂ : Tableau.Consistent 𝓢 (∅, {φ}) �
       use [], [];
       refine ⟨by tauto, by tauto, ?_⟩;
       simp only [List.conj₂_nil, List.disj₂_nil, not_not];
-      apply cψφ!_of_φ!;
-      apply aφψ!_of_φ! (by simpa using h);
+      apply c!_of_conseq!;
+      apply a!_of_left (by simpa using h);
 
 lemma iff_inconsistent_singleton₂ : Tableau.Inconsistent 𝓢 (∅, {φ}) ↔ 𝓢 ⊢! φ := by
   convert iff_consistent_empty_singleton₂ (𝓢 := 𝓢) (φ := φ) |>.not;
@@ -190,7 +190,7 @@ lemma either_expand_consistent_of_consistent (hCon : t.Consistent 𝓢) (φ : Fo
 
   replace h₁ := imply_left_k!_symm h₁;
 
-  have : 𝓢 ⊢! ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := c!_trans (φ!_of_kφψ! iff_concat_conj!) $ c!_trans (cut! h₁ h₂) (ψ!_of_kφψ! iff_concact_disj!);
+  have : 𝓢 ⊢! ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := c!_trans (of_k!_left iff_concat_conj!) $ c!_trans (cut! h₁ h₂) (of_k_right iff_concact_disj!);
   have : 𝓢 ⊬ ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := hCon
     (by simp; rintro ψ (hq₁ | hq₂); exact hΓ₁ ψ hq₁; exact hΓ₂ ψ hq₂)
     (by simp; rintro ψ (hq₁ | hq₂); exact hΔ₁ ψ hq₁; exact hΔ₂ ψ hq₂);
@@ -204,7 +204,7 @@ lemma consistent_empty [H_consis : Entailment.Consistent 𝓢] : Tableau.Consist
   by_contra hC;
   simp only [List.conj₂_nil, List.disj₂_nil] at hC;
   obtain ⟨ψ, hψ⟩ := H_consis.exists_unprovable;
-  have : 𝓢 ⊢! ψ := φ!_of_o! (hC ⨀ c!_id);
+  have : 𝓢 ⊢! ψ := of_o! (hC ⨀ c!_id);
   contradiction;
 
 end

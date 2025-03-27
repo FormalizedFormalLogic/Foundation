@@ -138,14 +138,14 @@ lemma truthlemma_lemma2
       simpa using hΓ₂ χ hr;
 
     by_contra hC;
-    have : Γ₁ ⊢[𝓢]! ⋀Γ₂ ➝ ⊥ := and_imply_iff_imply_imply'!.mp hC;
+    have : Γ₁ ⊢[𝓢]! ⋀Γ₂ ➝ ⊥ := cK!_iff_cC!.mp hC;
     have : Γ₁ ⊢[𝓢]! (□(ψ ➝ □ψ) ⋏ -ψ) ➝ ⊥ := c!_trans (by
       suffices Γ₁ ⊢[𝓢]! ⋀[□(ψ ➝ □ψ), -ψ] ➝ ⋀Γ₂ by
         simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
       apply conjconj_subset!;
       simpa using hΓ₂;
     ) this;
-    have : Γ₁ ⊢[𝓢]! □(ψ ➝ □ψ) ➝ -ψ ➝ ⊥ := and_imply_iff_imply_imply'!.mp this;
+    have : Γ₁ ⊢[𝓢]! □(ψ ➝ □ψ) ➝ -ψ ➝ ⊥ := cK!_iff_cC!.mp this;
     have : Γ₁ ⊢[𝓢]! □(ψ ➝ □ψ) ➝ ψ := by
       rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
       . rw [hp] at this;
@@ -256,7 +256,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
               have : ↑X *⊢[𝓢]! ψ := membership_iff (subformulasGrz.mem_left (by assumption)) |>.mp w;
               have : ↑X *⊢[𝓢]! □(ψ ➝ □ψ) := membership_iff (by simp; right; assumption) |>.mp hC;
               have : ↑X *⊢[𝓢]! (ψ ⋏ □(ψ ➝ □ψ)) ➝ □ψ := Context.of! $ truthlemma_lemma3;
-              have : ↑X *⊢[𝓢]! □ψ := this ⨀ kφψ!_of_φ!_of_ψ! (by assumption) (by assumption);
+              have : ↑X *⊢[𝓢]! □ψ := this ⨀ k!_intro (by assumption) (by assumption);
               have : □ψ ∈ X := membership_iff (subformulasGrz.mem_origin (by assumption)) |>.mpr this;
               contradiction;
         . apply ih (by aesop) |>.not.mpr;

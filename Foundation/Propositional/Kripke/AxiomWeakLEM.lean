@@ -120,14 +120,14 @@ instance [Entailment.HasAxiomWeakLEM 𝓢] : IsConfluent _ (canonicalFrame 𝓢)
 
   have : 𝓢 ⊢! (⋀Θx ⋏ (⋀Θy ⋏ ⋀Θz)) ➝ ⊥ := c!_trans (by
     -- TODO: need more refactor
-    have d₁ : 𝓢 ⊢! ⋀Θx ⋏ ⋀(Θy ++ Θz) ➝ ⋀(Θx ++ (Θy ++ Θz)) := ψ!_of_kφψ! $ iff_concat_conj!;
-    have d₂ : 𝓢 ⊢! ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θy ++ Θz) := ψ!_of_kφψ! $ iff_concat_conj!;
+    have d₁ : 𝓢 ⊢! ⋀Θx ⋏ ⋀(Θy ++ Θz) ➝ ⋀(Θx ++ (Θy ++ Θz)) := of_k_right $ iff_concat_conj!;
+    have d₂ : 𝓢 ⊢! ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θy ++ Θz) := of_k_right $ iff_concat_conj!;
     have d₃ : 𝓢 ⊢! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θx ++ (Θy ++ Θz)) := c!_trans (by
       apply deduct'!;
       have : [⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz] ⊢[𝓢]! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz := FiniteContext.by_axm!;
-      apply kφψ!_of_φ!_of_ψ!;
-      . exact φ!_of_kφψ! this;
-      . exact (FiniteContext.of'! d₂) ⨀ (ψ!_of_kφψ! this);
+      apply k!_intro;
+      . exact of_k!_left this;
+      . exact (FiniteContext.of'! d₂) ⨀ (of_k_right this);
     ) d₁;
     exact c!_trans d₃ $ conjconj_subset! $ by
       intro φ hp; simp;
@@ -149,8 +149,8 @@ instance [Entailment.HasAxiomWeakLEM 𝓢] : IsConfluent _ (canonicalFrame 𝓢)
         . assumption;
         . exact hz₁ hz;
   ) h;
-  have : 𝓢 ⊢! ⋀Θx ➝ ⋀Θy ➝ ∼⋀Θz := and_imply_iff_imply_imply'!.mp $
-    (c!_trans (and_imply_iff_imply_imply'!.mp $ c!_trans (φ!_of_kφψ! and_assoc!) this) (ψ!_of_kφψ! $ neg_equiv!));
+  have : 𝓢 ⊢! ⋀Θx ➝ ⋀Θy ➝ ∼⋀Θz := cK!_iff_cC!.mp $
+    (c!_trans (cK!_iff_cC!.mp $ c!_trans (of_k!_left and_assoc!) this) (of_k_right $ neg_equiv!));
   have d : 𝓢 ⊢! ⋀Θx ➝ ∼∼⋀Θz ➝ ∼⋀Θy := c!_trans this contra₀!;
 
   have mem_Θx_x : ⋀Θx ∈ x.1.1 := iff_mem₁_conj.mpr $ by

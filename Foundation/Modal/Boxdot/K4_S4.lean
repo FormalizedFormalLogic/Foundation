@@ -24,7 +24,7 @@ lemma provable_S4_iff_boxdotTranslated : Hilbert.S4 ⊢! φ ⭤ φᵇ := by
   | _ => exact e!_id;
 
 lemma provable_S4_of_provable_boxdotTranslated_K4 (h : Hilbert.K4 ⊢! φᵇ) : Hilbert.S4 ⊢! φ := by
-  exact (ψ!_of_kφψ! provable_S4_iff_boxdotTranslated) ⨀ ((weakerThan_iff.mp $ Hilbert.K4_weakerThan_S4) h)
+  exact (of_k_right provable_S4_iff_boxdotTranslated) ⨀ ((weakerThan_iff.mp $ Hilbert.K4_weakerThan_S4) h)
 
 theorem iff_boxdotTranslatedK4_S4 : Hilbert.K4 ⊢! φᵇ ↔ Hilbert.S4 ⊢! φ:= ⟨
   provable_S4_of_provable_boxdotTranslated_K4,

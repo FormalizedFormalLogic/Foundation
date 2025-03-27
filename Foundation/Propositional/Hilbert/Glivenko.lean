@@ -10,7 +10,7 @@ variable [DecidableEq α]
 
 theorem iff_provable_dn_efq_dne_provable : (Hilbert.Int) ⊢! ∼∼φ ↔ (Hilbert.Cl) ⊢! φ := by
   constructor;
-  . intro d; exact φ!_of_nnφ! $ Int_weakerThan_Cl.subset d;
+  . intro d; exact of_nn! $ Int_weakerThan_Cl.subset d;
   . intro d;
     induction d using Deduction.rec! with
     | maxm hp =>
@@ -18,10 +18,10 @@ theorem iff_provable_dn_efq_dne_provable : (Hilbert.Int) ⊢! ∼∼φ ↔ (Hilb
       . apply dni'!;
         exact efq!;
       . generalize (s 0) = ψ;
-        apply nφ!_iff_cφo!.mpr;
+        apply n!_iff_cO!.mpr;
         apply FiniteContext.deduct'!;
         have : [∼(ψ ⋎ (ψ ➝ ⊥))] ⊢[Hilbert.Int]! ∼ψ ⋏ ∼(ψ ➝ ⊥) := demorgan₃'! $ FiniteContext.id!;
-        exact (nφ!_iff_cφo!.mp $ ψ!_of_kφψ! this) ⨀ (nφ!_iff_cφo!.mp $ φ!_of_kφψ! this);
+        exact (n!_iff_cO!.mp $ of_k_right this) ⨀ (n!_iff_cO!.mp $ of_k!_left this);
     | mdp ihφψ ihφ => exact dn_distribute_imply'! ihφψ ⨀ ihφ;
     | _ => apply dni'!; simp;
 

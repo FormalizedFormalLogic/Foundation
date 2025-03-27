@@ -81,14 +81,14 @@ lemma truthlemma_lemma2
     simpa using hΓ₂ χ hr;
 
   by_contra hC;
-  have : Γ₁ ⊢[_]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
+  have : Γ₁ ⊢[_]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ cK!_iff_cC!.mp hC;
   have : Γ₁ ⊢[_]! (□ψ ⋏ -ψ) ➝ ⊥ := c!_trans (by
     suffices Γ₁ ⊢[Hilbert.GL]! ⋀[□ψ, -ψ] ➝ ⋀Γ₂ by
       simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
     apply conjconj_subset!;
     simpa using hΓ₂;
   ) this;
-  have : Γ₁ ⊢[_]! □ψ ➝ -ψ ➝ ⊥ := and_imply_iff_imply_imply'!.mp this;
+  have : Γ₁ ⊢[_]! □ψ ➝ -ψ ➝ ⊥ := cK!_iff_cC!.mp this;
   have : Γ₁ ⊢[Hilbert.GL]! □ψ ➝ ψ := by
     rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
     . rw [hp] at this;

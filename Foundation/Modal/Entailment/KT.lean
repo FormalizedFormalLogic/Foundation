@@ -14,11 +14,11 @@ namespace KT
 variable [Entailment.Modal.KT 𝓢]
 
 def axiomDiaTc : 𝓢 ⊢ φ ➝ ◇φ := by
-  apply cTrans ?_ (ψOfKφψ diaDuality);
+  apply cTrans ?_ (ofKRight diaDuality);
   exact cTrans dni $ contra₀' axiomT;
 instance : HasAxiomDiaTc 𝓢 := ⟨fun _ ↦ KT.axiomDiaTc⟩
 
-protected def axiomP : 𝓢 ⊢ ∼□⊥ := nφOfCφO axiomT
+protected def axiomP : 𝓢 ⊢ ∼□⊥ := nOfCO axiomT
 instance : HasAxiomP 𝓢 := ⟨KT.axiomP⟩
 instance : Entailment.Modal.KP 𝓢 where
 instance : Entailment.Modal.KD 𝓢 where

@@ -17,7 +17,7 @@ def iff_box_boxdot : 𝓢 ⊢ □φ ⭤ ⊡φ := by
 def iff_dia_diadot : 𝓢 ⊢ ◇φ ⭤ ⟐φ := by
   apply eIntro;
   . exact or₂;
-  . exact cAφψχOfCφχOfCψχ diaTc (cId _)
+  . exact cAOfCOfC diaTc (cId _)
 @[simp] lemma iff_dia_diadot! : 𝓢 ⊢! ◇φ ⭤ ⟐φ := ⟨iff_dia_diadot⟩
 
 end LO.Entailment

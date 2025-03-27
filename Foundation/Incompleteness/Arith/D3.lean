@@ -147,9 +147,9 @@ theorem bold_sigma₁_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierarc
     have : Semiformula.Evalbm V e φ ∨ Semiformula.Evalbm V e ψ := by simpa using h
     rcases this with (h | h)
     · simpa only [LogicalConnective.HomClass.map_or, Semiformula.codeIn'_or,
-      Language.Semiformula.substs_or] using aφψ!_of_φ! (ihp h)
+      Language.Semiformula.substs_or] using a!_of_left (ihp h)
     · simpa only [LogicalConnective.HomClass.map_or, Semiformula.codeIn'_or,
-      Language.Semiformula.substs_or] using aφψ!_of_ψ! (ihq h)
+      Language.Semiformula.substs_or] using a!_of_right (ihq h)
   case hBall =>
     intro n t φ _ ihp e h
     suffices T ⊢! Language.Semiformula.ball (⌜Rew.emb t⌝^ᵗ/[toNumVec e]) ((_)^/[(toNumVec e).q]) by

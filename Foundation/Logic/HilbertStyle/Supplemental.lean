@@ -22,13 +22,13 @@ lemma mdp_in! : 𝓢 ⊢! φ ⋏ (φ ➝ ψ) ➝ ψ := ⟨mdp_in⟩
 
 def bot_of_mem_either (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢] ⊥ := by
   have hp : Γ ⊢[𝓢] φ := FiniteContext.byAxm h₁;
-  have hnp : Γ ⊢[𝓢] φ ➝ ⊥ := cφoOfNφ $ FiniteContext.byAxm h₂;
+  have hnp : Γ ⊢[𝓢] φ ➝ ⊥ := cOOfN $ FiniteContext.byAxm h₂;
   exact hnp ⨀ hp
 
 @[simp] lemma bot_of_mem_either! (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢]! ⊥ := ⟨bot_of_mem_either h₁ h₂⟩
 
 
-def efq_of_mem_either [HasAxiomEFQ 𝓢] (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢] ψ := φOfO $ bot_of_mem_either h₁ h₂
+def efq_of_mem_either [HasAxiomEFQ 𝓢] (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢] ψ := ofO $ bot_of_mem_either h₁ h₂
 @[simp] lemma efq_of_mem_either! [HasAxiomEFQ 𝓢] (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ ⊢[𝓢]! ψ := ⟨efq_of_mem_either h₁ h₂⟩
 
 def efq_imply_not₁ [HasAxiomEFQ 𝓢] : 𝓢 ⊢ ∼φ ➝ φ ➝ ψ := by
@@ -46,30 +46,30 @@ def efq_imply_not₂ [HasAxiomEFQ 𝓢] : 𝓢 ⊢ φ ➝ ∼φ ➝ ψ := by
 lemma efq_of_neg! [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! φ ➝ ψ := by
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
-  have dnp : [φ] ⊢[𝓢]! φ ➝ ⊥ := of'! $ nφ!_iff_cφo!.mp h;
-  exact φ!_of_o! (dnp ⨀ FiniteContext.id!);
+  have dnp : [φ] ⊢[𝓢]! φ ➝ ⊥ := of'! $ n!_iff_cO!.mp h;
+  exact of_o! (dnp ⨀ FiniteContext.id!);
 
 lemma efq_of_neg₂! [HasAxiomEFQ 𝓢] (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ∼φ ➝ ψ := efq_imply_not₂! ⨀ h
 
-def neg_mdp (hnp : 𝓢 ⊢ ∼φ) (hn : 𝓢 ⊢ φ) : 𝓢 ⊢ ⊥ := (cφoOfNφ hnp) ⨀ hn
+def neg_mdp (hnp : 𝓢 ⊢ ∼φ) (hn : 𝓢 ⊢ φ) : 𝓢 ⊢ ⊥ := (cOOfN hnp) ⨀ hn
 -- infixl:90 "⨀" => neg_mdp
 
 omit [DecidableEq F] in lemma neg_mdp! (hnp : 𝓢 ⊢! ∼φ) (hn : 𝓢 ⊢! φ) : 𝓢 ⊢! ⊥ := ⟨neg_mdp hnp.some hn.some⟩
 -- infixl:90 "⨀" => neg_mdp!
 
-def dneOr [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢ φ ⋎ ψ := χOfCφχOfCψχOfAφψ (cTrans dne or₁) (cTrans dne or₂) d
+def dneOr [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢ φ ⋎ ψ := ofCOfCOfA (cTrans dne or₁) (cTrans dne or₂) d
 omit [DecidableEq F] in lemma dne_or! [HasAxiomDNE 𝓢] (d : 𝓢 ⊢! ∼∼φ ⋎ ∼∼ψ) : 𝓢 ⊢! φ ⋎ ψ := ⟨dneOr d.some⟩
 
 def implyLeftOr' (h : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ➝ (χ ⋎ ψ) := by
   apply deduct';
-  apply aφψOfφ;
+  apply aOfLeft;
   apply deductInv;
   exact of h;
 omit [DecidableEq F] in lemma imply_left_or'! (h : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! φ ➝ (χ ⋎ ψ) := ⟨implyLeftOr' h.some⟩
 
 def implyRightOr' (h : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ ψ ➝ (φ ⋎ χ) := by
   apply deduct';
-  apply aφψOfψ;
+  apply aOfRight;
   apply deductInv;
   exact of h;
 omit [DecidableEq F] in lemma imply_right_or'! (h : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! ψ ➝ (φ ⋎ χ) := ⟨implyRightOr' h.some⟩
@@ -79,26 +79,26 @@ def implyRightAnd (hq : 𝓢 ⊢ φ ➝ ψ) (hr : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢
   apply deduct';
   replace hq : [] ⊢[𝓢] φ ➝ ψ := of hq;
   replace hr : [] ⊢[𝓢] φ ➝ χ := of hr;
-  exact kφψOfφOfψ (mdp' hq FiniteContext.id) (mdp' hr FiniteContext.id)
+  exact kIntro (mdp' hq FiniteContext.id) (mdp' hr FiniteContext.id)
 lemma imply_right_and! (hq : 𝓢 ⊢! φ ➝ ψ) (hr : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ⋏ χ := ⟨implyRightAnd hq.some hr.some⟩
 
-omit [DecidableEq F] in lemma imply_left_k!_symm (d : 𝓢 ⊢! φ ⋏ ψ ➝ χ) : 𝓢 ⊢! ψ ⋏ φ ➝ χ := c!_trans ckφψkψφ! d
+omit [DecidableEq F] in lemma imply_left_k!_symm (d : 𝓢 ⊢! φ ⋏ ψ ➝ χ) : 𝓢 ⊢! ψ ⋏ φ ➝ χ := c!_trans cKK! d
 
-lemma dhyp_and_left! (h : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! (ψ ⋏ φ) ➝ χ := by
-  apply and_imply_iff_imply_imply'!.mpr;
+lemma dhyp_and_left (h : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! (ψ ⋏ φ) ➝ χ := by
+  apply cK!_iff_cC!.mpr;
   apply deduct'!;
   exact FiniteContext.of'! (Γ := [ψ]) h;
 
-lemma dhyp_and_right! (h : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! (φ ⋏ ψ) ➝ χ := c!_trans ckφψkψφ! (dhyp_and_left! h)
+lemma dhyp_and_right (h : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! (φ ⋏ ψ) ➝ χ := c!_trans cKK! (dhyp_and_left h)
 
 lemma cut! (d₁ : 𝓢 ⊢! φ₁ ⋏ c ➝ ψ₁) (d₂ : 𝓢 ⊢! φ₂ ➝ c ⋎ ψ₂) : 𝓢 ⊢! φ₁ ⋏ φ₂ ➝ ψ₁ ⋎ ψ₂ := by
   apply deduct'!;
-  exact χ!_of_cφχ!_of_cψχ!_of_aφψ! (imply_left_or'! $ of'! (and_imply_iff_imply_imply'!.mp d₁) ⨀ (φ!_of_kφψ! id!)) or₂! (of'! d₂ ⨀ ψ!_of_kφψ! id!);
+  exact of_c!_of_c!_of_a! (imply_left_or'! $ of'! (cK!_iff_cC!.mp d₁) ⨀ (of_k!_left id!)) or₂! (of'! d₂ ⨀ of_k_right id!);
 
 
 def orComm : 𝓢 ⊢ φ ⋎ ψ ➝ ψ ⋎ φ := by
   apply deduct';
-  exact χOfCφχOfCψχOfAφψ or₂ or₁ $ FiniteContext.id
+  exact ofCOfCOfA or₂ or₁ $ FiniteContext.id
 omit [DecidableEq F] in lemma or_comm! : 𝓢 ⊢! φ ⋎ ψ ➝ ψ ⋎ φ := ⟨orComm⟩
 
 def orComm' (h : 𝓢 ⊢ φ ⋎ ψ) : 𝓢 ⊢ ψ ⋎ φ := orComm ⨀ h
@@ -108,20 +108,20 @@ omit [DecidableEq F] in
 lemma or_assoc'! : 𝓢 ⊢! φ ⋎ (ψ ⋎ χ) ↔ 𝓢 ⊢! (φ ⋎ ψ) ⋎ χ := by
   constructor;
   . intro h;
-    exact χ!_of_cφχ!_of_cψχ!_of_aφψ!
+    exact of_c!_of_c!_of_a!
       (imply_left_or'! $ imply_left_or'! c!_id)
       (by
         apply provable_iff_provable.mpr;
         apply deduct_iff.mpr;
-        exact χ!_of_cφχ!_of_cψχ!_of_aφψ! (imply_left_or'! $ imply_right_or'! c!_id) (imply_right_or'! c!_id) id!;
+        exact of_c!_of_c!_of_a! (imply_left_or'! $ imply_right_or'! c!_id) (imply_right_or'! c!_id) id!;
       )
       h;
   . intro h;
-    exact χ!_of_cφχ!_of_cψχ!_of_aφψ!
+    exact of_c!_of_c!_of_a!
       (by
         apply provable_iff_provable.mpr;
         apply deduct_iff.mpr;
-        exact χ!_of_cφχ!_of_cψχ!_of_aφψ! (imply_left_or'! c!_id) (imply_right_or'! $ imply_left_or'! c!_id) id!;
+        exact of_c!_of_c!_of_a! (imply_left_or'! c!_id) (imply_right_or'! $ imply_left_or'! c!_id) id!;
       )
       (imply_right_or'! $ imply_right_or'! c!_id)
       h;
@@ -130,19 +130,19 @@ omit [DecidableEq F] in
 lemma and_assoc! : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ ⭤ φ ⋏ (ψ ⋏ χ) := by
   apply e!_intro;
   . apply FiniteContext.deduct'!;
-    have hp : [(φ ⋏ ψ) ⋏ χ] ⊢[𝓢]! φ := φ!_of_kφψ! $ φ!_of_kφψ! id!;
-    have hq : [(φ ⋏ ψ) ⋏ χ] ⊢[𝓢]! ψ := ψ!_of_kφψ! $ φ!_of_kφψ! id!;
-    have hr : [(φ ⋏ ψ) ⋏ χ] ⊢[𝓢]! χ := ψ!_of_kφψ! id!;
-    exact kφψ!_of_φ!_of_ψ! hp (kφψ!_of_φ!_of_ψ! hq hr);
+    have hp : [(φ ⋏ ψ) ⋏ χ] ⊢[𝓢]! φ := of_k!_left $ of_k!_left id!;
+    have hq : [(φ ⋏ ψ) ⋏ χ] ⊢[𝓢]! ψ := of_k_right $ of_k!_left id!;
+    have hr : [(φ ⋏ ψ) ⋏ χ] ⊢[𝓢]! χ := of_k_right id!;
+    exact k!_intro hp (k!_intro hq hr);
   . apply FiniteContext.deduct'!;
-    have hp : [φ ⋏ (ψ ⋏ χ)] ⊢[𝓢]! φ := φ!_of_kφψ! id!;
-    have hq : [φ ⋏ (ψ ⋏ χ)] ⊢[𝓢]! ψ := φ!_of_kφψ! $ ψ!_of_kφψ! id!;
-    have hr : [φ ⋏ (ψ ⋏ χ)] ⊢[𝓢]! χ := ψ!_of_kφψ! $ ψ!_of_kφψ! id!;
-    apply kφψ!_of_φ!_of_ψ!;
-    . exact kφψ!_of_φ!_of_ψ! hp hq;
+    have hp : [φ ⋏ (ψ ⋏ χ)] ⊢[𝓢]! φ := of_k!_left id!;
+    have hq : [φ ⋏ (ψ ⋏ χ)] ⊢[𝓢]! ψ := of_k!_left $ of_k_right id!;
+    have hr : [φ ⋏ (ψ ⋏ χ)] ⊢[𝓢]! χ := of_k_right $ of_k_right id!;
+    apply k!_intro;
+    . exact k!_intro hp hq;
     . exact hr;
 
-def andReplaceLeft' (hc : 𝓢 ⊢ φ ⋏ ψ) (h : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ χ ⋏ ψ := kφψOfφOfψ (h ⨀ φOfKφψ hc) (ψOfKφψ hc)
+def andReplaceLeft' (hc : 𝓢 ⊢ φ ⋏ ψ) (h : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ χ ⋏ ψ := kIntro (h ⨀ ofKLeft hc) (ofKRight hc)
 omit [DecidableEq F] in lemma and_replace_left'! (hc : 𝓢 ⊢! φ ⋏ ψ) (h : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! χ ⋏ ψ := ⟨andReplaceLeft' hc.some h.some⟩
 
 def andReplaceLeft (h : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ⋏ ψ ➝ χ ⋏ ψ := by
@@ -151,7 +151,7 @@ def andReplaceLeft (h : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ⋏ ψ ➝ χ ⋏ ψ :
 omit [DecidableEq F] in lemma and_replace_left! (h : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! φ ⋏ ψ ➝ χ ⋏ ψ := ⟨andReplaceLeft h.some⟩
 
 
-def andReplaceRight' (hc : 𝓢 ⊢ φ ⋏ ψ) (h : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋏ χ := kφψOfφOfψ (φOfKφψ hc) (h ⨀ ψOfKφψ hc)
+def andReplaceRight' (hc : 𝓢 ⊢ φ ⋏ ψ) (h : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋏ χ := kIntro (ofKLeft hc) (h ⨀ ofKRight hc)
 omit [DecidableEq F] in lemma andReplaceRight'! (hc : 𝓢 ⊢! φ ⋏ ψ) (h : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ⋏ χ := ⟨andReplaceRight' hc.some h.some⟩
 
 def andReplaceRight (h : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋏ ψ ➝ φ ⋏ χ := by
@@ -169,7 +169,7 @@ def andReplace (h₁ : 𝓢 ⊢ φ ➝ χ) (h₂ : 𝓢 ⊢ ψ ➝ ξ) : 𝓢 �
 omit [DecidableEq F] in lemma and_replace! (h₁ : 𝓢 ⊢! φ ➝ χ) (h₂ : 𝓢 ⊢! ψ ➝ ξ) : 𝓢 ⊢! φ ⋏ ψ ➝ χ ⋏ ξ := ⟨andReplace h₁.some h₂.some⟩
 
 
-def orReplaceLeft' (hc : 𝓢 ⊢ φ ⋎ ψ) (hp : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ χ ⋎ ψ := χOfCφχOfCψχOfAφψ (cTrans hp or₁) (or₂) hc
+def orReplaceLeft' (hc : 𝓢 ⊢ φ ⋎ ψ) (hp : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ χ ⋎ ψ := ofCOfCOfA (cTrans hp or₁) (or₂) hc
 omit [DecidableEq F] in lemma or_replace_left'! (hc : 𝓢 ⊢! φ ⋎ ψ) (hp : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! χ ⋎ ψ := ⟨orReplaceLeft' hc.some hp.some⟩
 
 def orReplaceLeft (hp : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ⋎ ψ ➝ χ ⋎ ψ := by
@@ -178,7 +178,7 @@ def orReplaceLeft (hp : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ⋎ ψ ➝ χ ⋎ ψ :
 omit [DecidableEq F] in lemma or_replace_left! (hp : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! φ ⋎ ψ ➝ χ ⋎ ψ := ⟨orReplaceLeft hp.some⟩
 
 
-def orReplaceRight' (hc : 𝓢 ⊢ φ ⋎ ψ) (hq : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋎ χ := χOfCφχOfCψχOfAφψ (or₁) (cTrans hq or₂) hc
+def orReplaceRight' (hc : 𝓢 ⊢ φ ⋎ ψ) (hq : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋎ χ := ofCOfCOfA (or₁) (cTrans hq or₂) hc
 omit [DecidableEq F] in lemma or_replace_right'! (hc : 𝓢 ⊢! φ ⋎ ψ) (hq : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! φ ⋎ χ := ⟨orReplaceRight' hc.some hq.some⟩
 
 def orReplaceRight (hq : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ φ ⋎ ψ ➝ φ ⋎ χ := by
@@ -198,8 +198,8 @@ omit [DecidableEq F] in lemma or_replace! (hp : 𝓢 ⊢! φ₁ ➝ φ₂) (hq :
 
 def orReplaceIff (hp : 𝓢 ⊢ φ₁ ⭤ φ₂) (hq : 𝓢 ⊢ ψ₁ ⭤ ψ₂) : 𝓢 ⊢ φ₁ ⋎ ψ₁ ⭤ φ₂ ⋎ ψ₂ := by
   apply eIntro;
-  . exact orReplace (φOfKφψ hp) (φOfKφψ hq);
-  . exact orReplace (ψOfKφψ hp) (ψOfKφψ hq);
+  . exact orReplace (ofKLeft hp) (ofKLeft hq);
+  . exact orReplace (ofKRight hp) (ofKRight hq);
 omit [DecidableEq F] in lemma or_replace_iff! (hp : 𝓢 ⊢! φ₁ ⭤ φ₂) (hq : 𝓢 ⊢! ψ₁ ⭤ ψ₂) : 𝓢 ⊢! φ₁ ⋎ ψ₁ ⭤ φ₂ ⋎ ψ₂ := ⟨orReplaceIff hp.some hq.some⟩
 
 omit [DecidableEq F] in
@@ -211,27 +211,27 @@ lemma or_assoc! : 𝓢 ⊢! φ ⋎ (ψ ⋎ χ) ⭤ (φ ⋎ ψ) ⋎ χ := by
 omit [DecidableEq F] in
 lemma or_replace_right_iff! (d : 𝓢 ⊢! ψ ⭤ χ) : 𝓢 ⊢! φ ⋎ ψ ⭤ φ ⋎ χ := by
   apply e!_intro;
-  . apply or_replace_right!; exact φ!_of_kφψ! d;
-  . apply or_replace_right!; exact ψ!_of_kφψ! d;
+  . apply or_replace_right!; exact of_k!_left d;
+  . apply or_replace_right!; exact of_k_right d;
 
 omit [DecidableEq F] in
 lemma or_replace_left_iff! (d : 𝓢 ⊢! φ ⭤ χ) : 𝓢 ⊢! φ ⋎ ψ ⭤ χ ⋎ ψ := by
   apply e!_intro;
-  . apply or_replace_left!; exact φ!_of_kφψ! d;
-  . apply or_replace_left!; exact ψ!_of_kφψ! d;
+  . apply or_replace_left!; exact of_k!_left d;
+  . apply or_replace_left!; exact of_k_right d;
 
 
 def andReplaceIff (hp : 𝓢 ⊢ φ₁ ⭤ φ₂) (hq : 𝓢 ⊢ ψ₁ ⭤ ψ₂) : 𝓢 ⊢ φ₁ ⋏ ψ₁ ⭤ φ₂ ⋏ ψ₂ := by
   apply eIntro;
-  . exact andReplace (φOfKφψ hp) (φOfKφψ hq);
-  . exact andReplace (ψOfKφψ hp) (ψOfKφψ hq);
+  . exact andReplace (ofKLeft hp) (ofKLeft hq);
+  . exact andReplace (ofKRight hp) (ofKRight hq);
 omit [DecidableEq F] in lemma and_replace_iff! (hp : 𝓢 ⊢! φ₁ ⭤ φ₂) (hq : 𝓢 ⊢! ψ₁ ⭤ ψ₂) : 𝓢 ⊢! φ₁ ⋏ ψ₁ ⭤ φ₂ ⋏ ψ₂ := ⟨andReplaceIff hp.some hq.some⟩
 
 
 def impReplaceIff (hp : 𝓢 ⊢ φ₁ ⭤ φ₂) (hq : 𝓢 ⊢ ψ₁ ⭤ ψ₂) : 𝓢 ⊢ (φ₁ ➝ ψ₁) ⭤ (φ₂ ➝ ψ₂) := by
   apply eIntro;
-  . apply deduct'; exact cTrans (of $ ψOfKφψ hp) $ cTrans (FiniteContext.id) (of $ φOfKφψ hq);
-  . apply deduct'; exact cTrans (of $ φOfKφψ hp) $ cTrans (FiniteContext.id) (of $ ψOfKφψ hq);
+  . apply deduct'; exact cTrans (of $ ofKRight hp) $ cTrans (FiniteContext.id) (of $ ofKLeft hq);
+  . apply deduct'; exact cTrans (of $ ofKLeft hp) $ cTrans (FiniteContext.id) (of $ ofKRight hq);
 omit [DecidableEq F] in lemma imp_replace_iff! (hp : 𝓢 ⊢! φ₁ ⭤ φ₂) (hq : 𝓢 ⊢! ψ₁ ⭤ ψ₂) : 𝓢 ⊢! (φ₁ ➝ ψ₁) ⭤ (φ₂ ➝ ψ₂) := ⟨impReplaceIff hp.some hq.some⟩
 
 omit [DecidableEq F] in
@@ -240,7 +240,7 @@ lemma imp_replace_iff!' (hp : 𝓢 ⊢! φ₁ ⭤ φ₂) (hq : 𝓢 ⊢! ψ₁ �
 
 def dni : 𝓢 ⊢ φ ➝ ∼∼φ := by
   apply deduct';
-  apply nφOfCφO;
+  apply nOfCO;
   apply deduct;
   exact bot_of_mem_either (φ := φ) (by simp) (by simp);
 @[simp] lemma dni! : 𝓢 ⊢! φ ➝ ∼∼φ := ⟨dni⟩
@@ -249,16 +249,16 @@ def dni' (b : 𝓢 ⊢ φ) : 𝓢 ⊢ ∼∼φ := dni ⨀ b
 lemma dni'! (b : 𝓢 ⊢! φ) : 𝓢 ⊢! ∼∼φ := ⟨dni' b.some⟩
 
 
-def dniOr' (d : 𝓢 ⊢ φ ⋎ ψ) : 𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ := χOfCφχOfCψχOfAφψ (cTrans dni or₁) (cTrans dni or₂) d
+def dniOr' (d : 𝓢 ⊢ φ ⋎ ψ) : 𝓢 ⊢ ∼∼φ ⋎ ∼∼ψ := ofCOfCOfA (cTrans dni or₁) (cTrans dni or₂) d
 lemma dni_or'! (d : 𝓢 ⊢! φ ⋎ ψ) : 𝓢 ⊢! ∼∼φ ⋎ ∼∼ψ := ⟨dniOr' d.some⟩
 
-def dniAnd' (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ∼∼φ ⋏ ∼∼ψ := kφψOfφOfψ (dni' $ φOfKφψ d) (dni' $ ψOfKφψ d)
+def dniAnd' (d : 𝓢 ⊢ φ ⋏ ψ) : 𝓢 ⊢ ∼∼φ ⋏ ∼∼ψ := kIntro (dni' $ ofKLeft d) (dni' $ ofKRight d)
 lemma dni_and'! (d : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! ∼∼φ ⋏ ∼∼ψ := ⟨dniAnd' d.some⟩
 
 def falsumDNE : 𝓢 ⊢ ∼∼⊥ ➝ ⊥ := by
   apply deduct'
-  have d₁ : [∼∼⊥] ⊢[𝓢] ∼⊥ ➝ ⊥ := cφoOfNφ byAxm₀
-  have d₂ : [∼∼⊥] ⊢[𝓢] ∼⊥ := nφOfCφO (cId ⊥)
+  have d₁ : [∼∼⊥] ⊢[𝓢] ∼⊥ ➝ ⊥ := cOOfN byAxm₀
+  have d₂ : [∼∼⊥] ⊢[𝓢] ∼⊥ := nOfCO (cId ⊥)
   exact d₁ ⨀ d₂
 
 def falsumDN : 𝓢 ⊢ ∼∼⊥ ⭤ ⊥ := kIntro falsumDNE dni
@@ -270,12 +270,12 @@ def dn [HasAxiomDNE 𝓢] : 𝓢 ⊢ φ ⭤ ∼∼φ := eIntro dni dne
 def contra₀ : 𝓢 ⊢ (φ ➝ ψ) ➝ (∼ψ ➝ ∼φ) := by
   apply deduct';
   apply deduct;
-  apply nφOfCφO;
+  apply nOfCO;
   apply deduct;
   have dp  : [φ, ∼ψ, φ ➝ ψ] ⊢[𝓢] φ := FiniteContext.byAxm;
   have dpq : [φ, ∼ψ, φ ➝ ψ] ⊢[𝓢] φ ➝ ψ := FiniteContext.byAxm;
   have dq  : [φ, ∼ψ, φ ➝ ψ] ⊢[𝓢] ψ := dpq ⨀ dp;
-  have dnq : [φ, ∼ψ, φ ➝ ψ] ⊢[𝓢] ψ ➝ ⊥ := cφoOfNφ $ FiniteContext.byAxm;
+  have dnq : [φ, ∼ψ, φ ➝ ψ] ⊢[𝓢] ψ ➝ ⊥ := cOOfN $ FiniteContext.byAxm;
   exact dnq ⨀ dq;
 @[simp] def contra₀! : 𝓢 ⊢! (φ ➝ ψ) ➝ (∼ψ ➝ ∼φ) := ⟨contra₀⟩
 
@@ -310,14 +310,14 @@ def contra₃ [HasAxiomDNE 𝓢] : 𝓢 ⊢ (∼φ ➝ ∼ψ) ➝ (ψ ➝ φ) :=
 @[simp] lemma contra₃! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (∼φ ➝ ∼ψ) ➝ (ψ ➝ φ) := ⟨contra₃⟩
 
 
-def negReplaceIff' (b : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ∼φ ⭤ ∼ψ := eIntro (contra₀' $ ψOfKφψ b) (contra₀' $ φOfKφψ b)
+def negReplaceIff' (b : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ∼φ ⭤ ∼ψ := eIntro (contra₀' $ ofKRight b) (contra₀' $ ofKLeft b)
 lemma neg_replace_iff'! (b : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ∼φ ⭤ ∼ψ := ⟨negReplaceIff' b.some⟩
 
 
 def iffNegLeftToRight' [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ φ ⭤ ∼ψ) : 𝓢 ⊢ ∼φ ⭤ ψ := by
   apply eIntro;
-  . apply contra₂' $  ψOfKφψ h;
-  . apply contra₁' $  φOfKφψ h;
+  . apply contra₂' $  ofKRight h;
+  . apply contra₁' $  ofKLeft h;
 lemma iff_neg_left_to_right'! [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! φ ⭤ ∼ψ) : 𝓢 ⊢! ∼φ ⭤ ψ := ⟨iffNegLeftToRight' h.some⟩
 
 def iffNegRightToLeft' [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ∼φ ⭤ ψ) : 𝓢 ⊢ φ ⭤ ∼ψ := eSymm $ iffNegLeftToRight' $ eSymm h
@@ -329,8 +329,8 @@ variable [Entailment.NegationEquiv 𝓢]
 
 def negnegEquiv : 𝓢 ⊢ ∼∼φ ⭤ ((φ ➝ ⊥) ➝ ⊥) := by
   apply eIntro;
-  . exact cTrans (by apply contra₀'; exact ψOfKφψ negEquiv) (φOfKφψ negEquiv)
-  . exact cTrans (ψOfKφψ negEquiv) (by apply contra₀'; exact φOfKφψ negEquiv)
+  . exact cTrans (by apply contra₀'; exact ofKRight negEquiv) (ofKLeft negEquiv)
+  . exact cTrans (ofKRight negEquiv) (by apply contra₀'; exact ofKLeft negEquiv)
 @[simp] lemma negneg_equiv! : 𝓢 ⊢! ∼∼φ ⭤ ((φ ➝ ⊥) ➝ ⊥) := ⟨negnegEquiv⟩
 
 def negnegEquiv_dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ φ ⭤ ((φ ➝ ⊥) ➝ ⊥) := eTrans dn negnegEquiv
@@ -341,7 +341,7 @@ end NegationEquiv
 def elimContra_neg [HasAxiomElimContra 𝓢] : 𝓢 ⊢ ((ψ ➝ ⊥) ➝ (φ ➝ ⊥)) ➝ (φ ➝ ψ) := by
   refine cTrans ?_ elimContra;
   apply deduct';
-  exact cTrans (cTrans (φOfKφψ negEquiv) FiniteContext.byAxm) (ψOfKφψ negEquiv);
+  exact cTrans (cTrans (ofKLeft negEquiv) FiniteContext.byAxm) (ofKRight negEquiv);
 @[simp] lemma elimContra_neg! [HasAxiomElimContra 𝓢] : 𝓢 ⊢! ((ψ ➝ ⊥) ➝ (φ ➝ ⊥)) ➝ (φ ➝ ψ) := ⟨elimContra_neg⟩
 
 
@@ -361,14 +361,14 @@ omit [DecidableEq F] in lemma replace_imply_left! (h : 𝓢 ⊢! ψ ➝ φ) : �
 omit [DecidableEq F] in
 lemma replace_imply_left_by_iff'! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! φ ➝ χ ↔ 𝓢 ⊢! ψ ➝ χ := by
   constructor;
-  . exact c!_trans $ ψ!_of_kφψ! h;
-  . exact c!_trans $ φ!_of_kφψ! h;
+  . exact c!_trans $ of_k_right h;
+  . exact c!_trans $ of_k!_left h;
 
 omit [DecidableEq F] in
 lemma replace_imply_right_by_iff'! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! χ ➝ φ ↔ 𝓢 ⊢! χ ➝ ψ := by
   constructor;
-  . intro hrp; exact c!_trans hrp $ φ!_of_kφψ! h;
-  . intro hrq; exact c!_trans hrq $ ψ!_of_kφψ! h;
+  . intro hrp; exact c!_trans hrp $ of_k!_left h;
+  . intro hrq; exact c!_trans hrq $ of_k_right h;
 
 
 def impSwap' (h : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ ψ ➝ φ ➝ χ := by
@@ -389,7 +389,7 @@ lemma ppq! (h : 𝓢 ⊢! φ ➝ φ ➝ ψ) : 𝓢 ⊢! φ ➝ ψ := ⟨ppq h.so
 def p_pq_q : 𝓢 ⊢ φ ➝ (φ ➝ ψ) ➝ ψ := impSwap' $ cId _
 lemma p_pq_q! : 𝓢 ⊢! φ ➝ (φ ➝ ψ) ➝ ψ := ⟨p_pq_q⟩
 
-def dhyp_imp' (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ (χ ➝ φ) ➝ (χ ➝ ψ) := imply₂ ⨀ (cψφOfφ h)
+def dhyp_imp' (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ (χ ➝ φ) ➝ (χ ➝ ψ) := imply₂ ⨀ (cOfConseq h)
 omit [DecidableEq F] in lemma dhyp_imp'! (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! (χ ➝ φ) ➝ (χ ➝ ψ) := ⟨dhyp_imp' h.some⟩
 
 def rev_dhyp_imp' (h : 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) := impSwap' $ cTrans h p_pq_q
@@ -406,7 +406,7 @@ noncomputable def dnDistributeImply' (b : 𝓢 ⊢ ∼∼(φ ➝ ψ)) : 𝓢 ⊢
 lemma dn_distribute_imply'! (b : 𝓢 ⊢! ∼∼(φ ➝ ψ)) : 𝓢 ⊢! ∼∼φ ➝ ∼∼ψ := ⟨dnDistributeImply' b.some⟩
 
 
-def introFalsumOfAnd' (h : 𝓢 ⊢ φ ⋏ ∼φ) : 𝓢 ⊢ ⊥ := (cφoOfNφ $ ψOfKφψ h) ⨀ (φOfKφψ h)
+def introFalsumOfAnd' (h : 𝓢 ⊢ φ ⋏ ∼φ) : 𝓢 ⊢ ⊥ := (cOOfN $ ofKRight h) ⨀ (ofKLeft h)
 omit [DecidableEq F] in lemma intro_falsum_of_and'! (h : 𝓢 ⊢! φ ⋏ ∼φ) : 𝓢 ⊢! ⊥ := ⟨introFalsumOfAnd' h.some⟩
 /-- Law of contradiction -/
 alias lac'! := intro_falsum_of_and'!
@@ -420,7 +420,7 @@ alias lac! := intro_bot_of_and!
 
 
 
-def implyOfNotOr [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (∼φ ⋎ ψ) ➝ (φ ➝ ψ) := cAφψχOfCφχOfCψχ (by
+def implyOfNotOr [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (∼φ ⋎ ψ) ➝ (φ ➝ ψ) := cAOfCOfC (by
     apply emptyPrf;
     apply deduct;
     apply deduct;
@@ -432,7 +432,7 @@ def implyOfNotOr' [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢ ∼φ ⋎ ψ) : 𝓢 ⊢ φ �
 lemma imply_of_not_or'! [HasAxiomEFQ 𝓢] (b : 𝓢 ⊢! ∼φ ⋎ ψ) : 𝓢 ⊢! φ ➝ ψ := ⟨implyOfNotOr' b.some⟩
 
 
-def demorgan₁ : 𝓢 ⊢ (∼φ ⋎ ∼ψ) ➝ ∼(φ ⋏ ψ) := cAφψχOfCφχOfCψχ (contra₀' and₁) (contra₀' and₂)
+def demorgan₁ : 𝓢 ⊢ (∼φ ⋎ ∼ψ) ➝ ∼(φ ⋏ ψ) := cAOfCOfC (contra₀' and₁) (contra₀' and₂)
 @[simp] lemma demorgan₁! : 𝓢 ⊢! (∼φ ⋎ ∼ψ) ➝ ∼(φ ⋏ ψ) := ⟨demorgan₁⟩
 
 def demorgan₁' (d : 𝓢 ⊢ ∼φ ⋎ ∼ψ) : 𝓢 ⊢ ∼(φ ⋏ ψ)  := demorgan₁ ⨀ d
@@ -440,12 +440,12 @@ lemma demorgan₁'! (d : 𝓢 ⊢! ∼φ ⋎ ∼ψ) : 𝓢 ⊢! ∼(φ ⋏ ψ) :
 
 
 def demorgan₂ : 𝓢 ⊢ (∼φ ⋏ ∼ψ) ➝ ∼(φ ⋎ ψ) := by
-  apply ckφψχOfCφcψχ;
+  apply cKOfCC;
   apply deduct';
   apply deduct;
-  apply nφOfCφO;
+  apply nOfCO;
   apply deduct;
-  exact χOfCφχOfCψχOfAφψ (cφoOfNφ FiniteContext.byAxm) (cφoOfNφ FiniteContext.byAxm) (FiniteContext.byAxm (φ := φ ⋎ ψ));
+  exact ofCOfCOfA (cOOfN FiniteContext.byAxm) (cOOfN FiniteContext.byAxm) (FiniteContext.byAxm (φ := φ ⋎ ψ));
 @[simp] lemma demorgan₂! : 𝓢 ⊢! ∼φ ⋏ ∼ψ ➝ ∼(φ ⋎ ψ) := ⟨demorgan₂⟩
 
 def demorgan₂' (d : 𝓢 ⊢ ∼φ ⋏ ∼ψ) : 𝓢 ⊢ ∼(φ ⋎ ψ) := demorgan₂ ⨀ d
@@ -454,7 +454,7 @@ lemma demorgan₂'! (d : 𝓢 ⊢! ∼φ ⋏ ∼ψ) : 𝓢 ⊢! ∼(φ ⋎ ψ) :
 
 def demorgan₃ : 𝓢 ⊢ ∼(φ ⋎ ψ) ➝ (∼φ ⋏ ∼ψ) := by
   apply deduct';
-  exact kφψOfφOfψ (deductInv $ contra₀' $ or₁) (deductInv $ contra₀' $ or₂)
+  exact kIntro (deductInv $ contra₀' $ or₁) (deductInv $ contra₀' $ or₂)
 @[simp] lemma demorgan₃! : 𝓢 ⊢! ∼(φ ⋎ ψ) ➝ (∼φ ⋏ ∼ψ) := ⟨demorgan₃⟩
 
 def demorgan₃' (b : 𝓢 ⊢ ∼(φ ⋎ ψ)) : 𝓢 ⊢ ∼φ ⋏ ∼ψ := demorgan₃ ⨀ b
@@ -473,12 +473,12 @@ lemma demorgan₄'! [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼(φ ⋏ ψ)) : 𝓢 ⊢
 
 -- TODO: Actually this can be computable but it's too slow.
 noncomputable def NotOrOfImply' [HasAxiomDNE 𝓢] (d : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ ∼φ ⋎ ψ := by
-  apply φOfNnφ;
-  apply nφOfCφO;
+  apply ofNn;
+  apply nOfCO;
   apply deduct';
   have d₁ : [∼(∼φ ⋎ ψ)] ⊢[𝓢] ∼∼φ ⋏ ∼ψ := demorgan₃' $ FiniteContext.id;
-  have d₂ : [∼(∼φ ⋎ ψ)] ⊢[𝓢] ∼φ ➝ ⊥ := cφoOfNφ $ φOfKφψ d₁;
-  have d₃ : [∼(∼φ ⋎ ψ)] ⊢[𝓢] ∼φ := (of (Γ := [∼(∼φ ⋎ ψ)]) $ contra₀' d) ⨀ (ψOfKφψ d₁);
+  have d₂ : [∼(∼φ ⋎ ψ)] ⊢[𝓢] ∼φ ➝ ⊥ := cOOfN $ ofKLeft d₁;
+  have d₃ : [∼(∼φ ⋎ ψ)] ⊢[𝓢] ∼φ := (of (Γ := [∼(∼φ ⋎ ψ)]) $ contra₀' d) ⨀ (ofKRight d₁);
   exact d₂ ⨀ d₃;
 lemma not_or_of_imply'! [HasAxiomDNE 𝓢] (d : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ∼φ ⋎ ψ := ⟨NotOrOfImply' d.some⟩
 
@@ -491,15 +491,15 @@ lemma not_or_of_imply! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (φ ➝ ψ) ➝ ∼φ ⋎ 
 -- TODO: Actually this can be computable but it's too slow.
 noncomputable def dnCollectImply [HasAxiomEFQ 𝓢] : 𝓢 ⊢ (∼∼φ ➝ ∼∼ψ) ➝ ∼∼(φ ➝ ψ) := by
   apply deduct';
-  apply nφOfCφO;
+  apply nOfCO;
   exact cTrans
     (by
       apply deductInv;
-      apply cφcψχOfCkφψχ;
+      apply cCOfCK;
       apply deduct;
-      have d₁ : [(∼∼φ ➝ ∼∼ψ) ⋏ ∼(φ ➝ ψ)] ⊢[𝓢] ∼∼φ ➝ ∼∼ψ := φOfKφψ (ψ := ∼(φ ➝ ψ)) $ FiniteContext.id;
-      have d₂ : [(∼∼φ ➝ ∼∼ψ) ⋏ ∼(φ ➝ ψ)] ⊢[𝓢] ∼∼φ ⋏ ∼ψ := demorgan₃' $ (contra₀' implyOfNotOr) ⨀ (ψOfKφψ (φ := (∼∼φ ➝ ∼∼ψ)) $ FiniteContext.id)
-      exact kφψOfφOfψ (ψOfKφψ d₂) (d₁ ⨀ (φOfKφψ d₂))
+      have d₁ : [(∼∼φ ➝ ∼∼ψ) ⋏ ∼(φ ➝ ψ)] ⊢[𝓢] ∼∼φ ➝ ∼∼ψ := ofKLeft (ψ := ∼(φ ➝ ψ)) $ FiniteContext.id;
+      have d₂ : [(∼∼φ ➝ ∼∼ψ) ⋏ ∼(φ ➝ ψ)] ⊢[𝓢] ∼∼φ ⋏ ∼ψ := demorgan₃' $ (contra₀' implyOfNotOr) ⨀ (ofKRight (φ := (∼∼φ ➝ ∼∼ψ)) $ FiniteContext.id)
+      exact kIntro (ofKRight d₂) (d₁ ⨀ (ofKLeft d₂))
     )
     (introFalsumOfAnd (φ := ∼ψ));
 
@@ -524,11 +524,11 @@ section
 instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
   dne φ := by
     apply deduct';
-    exact χOfCφχOfCψχOfAφψ (cId _) (by
+    exact ofCOfCOfA (cId _) (by
       apply deduct;
-      have nnp : [∼φ, ∼∼φ] ⊢[𝓢] ∼φ ➝ ⊥ := cφoOfNφ $ FiniteContext.byAxm;
+      have nnp : [∼φ, ∼∼φ] ⊢[𝓢] ∼φ ➝ ⊥ := cOOfN $ FiniteContext.byAxm;
       have np : [∼φ, ∼∼φ] ⊢[𝓢] ∼φ := FiniteContext.byAxm;
-      exact φOfO $ nnp ⨀ np;
+      exact ofO $ nnp ⨀ np;
     ) $ of lem;;
 
 end
@@ -543,7 +543,7 @@ noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomLEM 𝓢 where
 instance [HasAxiomDNE 𝓢] : HasAxiomEFQ 𝓢 where
   efq φ := by
     apply contra₃';
-    exact cTrans (φOfKφψ negEquiv) $ cTrans (impSwap' imply₁) (ψOfKφψ negEquiv);
+    exact cTrans (ofKLeft negEquiv) $ cTrans (impSwap' imply₁) (ofKRight negEquiv);
 
 instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
   elimContra φ ψ := by
@@ -569,16 +569,16 @@ omit [DecidableEq F] in @[simp] lemma conjIffConj! : 𝓢 ⊢! ⋀Γ ⭤ Γ.conj
 omit [DecidableEq F] in lemma implyLeft_conj_eq_conj! : 𝓢 ⊢! Γ.conj ➝ φ ↔ 𝓢 ⊢! ⋀Γ ➝ φ := replace_imply_left_by_iff'! $ e!_symm conjIffConj!
 
 
-lemma generalConj'! (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := replace_imply_left_by_iff'! conjIffConj! |>.mpr (general_conj! h)
-lemma generalConj'₂! (h : φ ∈ Γ) (d : 𝓢 ⊢! ⋀Γ) : 𝓢 ⊢! φ := (generalConj'! h) ⨀ d
+lemma cConj₂! (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := replace_imply_left_by_iff'! conjIffConj! |>.mpr (cConj!_of_mem h)
+lemma cConj₂₂! (h : φ ∈ Γ) (d : 𝓢 ⊢! ⋀Γ) : 𝓢 ⊢! φ := (cConj₂! h) ⨀ d
 
 section Conjunction
 
 omit [DecidableEq F] in
 lemma imply_finset_conj! (φ : F) (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ s.conj :=
-  imply_conj! φ s.toList fun ψ hψ ↦ b ψ (by simpa using hψ)
+  cConj!_of_c! φ s.toList fun ψ hψ ↦ b ψ (by simpa using hψ)
 
-lemma general_finset_conj! {s : Finset F} (h : φ ∈ s) : 𝓢 ⊢! s.conj ➝ φ := general_conj! <| by simp [h]
+lemma general_finset_conj! {s : Finset F} (h : φ ∈ s) : 𝓢 ⊢! s.conj ➝ φ := cConj!_of_mem <| by simp [h]
 
 omit [DecidableEq F] in
 lemma imply_finset_iConj! [Fintype ι] (φ : F) (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! φ ➝ ψ i) :
@@ -596,20 +596,20 @@ lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! ⋀Γ) ↔ (∀ φ ∈ �
     constructor;
     . intro h;
       constructor;
-      . exact φ!_of_kφψ! h;
-      . exact ih.mp (ψ!_of_kφψ! h);
+      . exact of_k!_left h;
+      . exact ih.mp (of_k_right h);
     . rintro ⟨h₁, h₂⟩;
-      exact kφψ!_of_φ!_of_ψ! h₁ (ih.mpr h₂);
+      exact k!_intro h₁ (ih.mpr h₂);
 
 lemma conjconj_subset! (h : ∀ φ, φ ∈ Γ → φ ∈ Δ) : 𝓢 ⊢! ⋀Δ ➝ ⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
-  | hsingle => simp_all; exact generalConj'! h;
-  | hcons φ Γ hne ih => simp_all; exact imply_right_and! (generalConj'! h.1) ih;
+  | hsingle => simp_all; exact cConj₂! h;
+  | hcons φ Γ hne ih => simp_all; exact imply_right_and! (cConj₂! h.1) ih;
 
 lemma conjconj_provable! (h : ∀ φ, φ ∈ Γ → Δ ⊢[𝓢]! φ) : 𝓢 ⊢! ⋀Δ ➝ ⋀Γ :=
   by induction Γ using List.induction_with_singleton with
-  | hnil => exact cψφ!_of_φ! verum!;
+  | hnil => exact c!_of_conseq! verum!;
   | hsingle => simp_all; exact provable_iff.mp h;
   | hcons φ Γ hne ih => simp_all; exact imply_right_and! (provable_iff.mp h.1) ih;
 
@@ -628,9 +628,9 @@ lemma replace_imply_left_conj! (he : ∀ g ∈ Γ, g = φ) (hd : 𝓢 ⊢! ⋀Γ
 lemma iff_imply_left_cons_conj'! : 𝓢 ⊢! ⋀(φ :: Γ) ➝ ψ ↔ 𝓢 ⊢! φ ⋏ ⋀Γ ➝ ψ := by
   induction Γ with
   | nil =>
-    simp [and_imply_iff_imply_imply'!];
+    simp [cK!_iff_cC!];
     constructor;
-    . intro h; apply imp_swap'!; exact cψφ!_of_φ! h;
+    . intro h; apply imp_swap'!; exact c!_of_conseq! h;
     . intro h; exact imp_swap'! h ⨀ verum!;
   | cons ψ ih => simp;
 
@@ -639,7 +639,7 @@ omit [DecidableEq F] in
   apply FiniteContext.deduct'!;
   have : [⋀(Γ ++ Δ)] ⊢[𝓢]! ⋀(Γ ++ Δ) := id!;
   have d := iff_provable_list_conj.mp this;
-  apply kφψ!_of_φ!_of_ψ!;
+  apply k!_intro;
   . apply iff_provable_list_conj.mpr;
     intro φ hp;
     exact d φ (by simp; left; exact hp);
@@ -653,8 +653,8 @@ lemma forthback_conj_remove! : 𝓢 ⊢! ⋀(Γ.remove φ) ⋏ φ ➝ ⋀Γ := b
   apply iff_provable_list_conj.mpr;
   intro ψ hq;
   by_cases e : ψ = φ;
-  . subst e; exact ψ!_of_kφψ! id!;
-  . exact iff_provable_list_conj.mp (φ!_of_kφψ! id!) ψ (by apply List.mem_remove_iff.mpr; simp_all);
+  . subst e; exact of_k_right id!;
+  . exact iff_provable_list_conj.mp (of_k!_left id!) ψ (by apply List.mem_remove_iff.mpr; simp_all);
 
 lemma imply_left_remove_conj! (b : 𝓢 ⊢! ⋀Γ ➝ ψ) : 𝓢 ⊢! ⋀(Γ.remove φ) ⋏ φ ➝ ψ := c!_trans forthback_conj_remove! b
 
@@ -663,7 +663,7 @@ lemma iff_concat_conj'! : 𝓢 ⊢! ⋀(Γ ++ Δ) ↔ 𝓢 ⊢! ⋀Γ ⋏ ⋀Δ 
   constructor;
   . intro h;
     replace h := iff_provable_list_conj.mp h;
-    apply kφψ!_of_φ!_of_ψ!;
+    apply k!_intro;
     . apply iff_provable_list_conj.mpr;
       intro φ hp; exact h φ (by simp only [List.mem_append]; left; simpa);
     . apply iff_provable_list_conj.mpr;
@@ -672,8 +672,8 @@ lemma iff_concat_conj'! : 𝓢 ⊢! ⋀(Γ ++ Δ) ↔ 𝓢 ⊢! ⋀Γ ⋏ ⋀Δ 
     apply iff_provable_list_conj.mpr;
     simp only [List.mem_append];
     rintro φ (hp₁ | hp₂);
-    . exact (iff_provable_list_conj.mp $ φ!_of_kφψ! h) φ hp₁;
-    . exact (iff_provable_list_conj.mp $ ψ!_of_kφψ! h) φ hp₂;
+    . exact (iff_provable_list_conj.mp $ of_k!_left h) φ hp₁;
+    . exact (iff_provable_list_conj.mp $ of_k_right h) φ hp₂;
 
 omit [DecidableEq F] in
 @[simp] lemma iff_concat_conj! : 𝓢 ⊢! ⋀(Γ ++ Δ) ⭤ ⋀Γ ⋏ ⋀Δ := by
@@ -684,8 +684,8 @@ omit [DecidableEq F] in
 omit [DecidableEq F] in
 lemma imply_left_conj_concat! : 𝓢 ⊢! ⋀(Γ ++ Δ) ➝ φ ↔ 𝓢 ⊢! (⋀Γ ⋏ ⋀Δ) ➝ φ := by
   constructor;
-  . intro h; exact c!_trans (ψ!_of_kφψ! iff_concat_conj!) h;
-  . intro h; exact c!_trans (φ!_of_kφψ! iff_concat_conj!) h;
+  . intro h; exact c!_trans (of_k_right iff_concat_conj!) h;
+  . intro h; exact c!_trans (of_k!_left iff_concat_conj!) h;
 
 end Conjunction
 
@@ -704,7 +704,7 @@ def imply_disj! (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! φ ➝ Γ.disj := ⟨i
 def disjImply [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ Γ.disj ➝ φ :=
   match Γ with
   |     [] => efq
-  | ψ :: Γ => cAφψχOfCφχOfCψχ (b ψ (by simp)) <| disjImply Γ fun ψ h ↦ b ψ (by simp [h])
+  | ψ :: Γ => cAOfCOfC (b ψ (by simp)) <| disjImply Γ fun ψ h ↦ b ψ (by simp [h])
 def disj_imply! [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! Γ.disj ➝ φ :=
   ⟨disjImply Γ fun ψ h ↦ (b ψ h).get⟩
 
@@ -727,27 +727,27 @@ lemma iff_concact_disj! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁(Γ ++ Δ) ⭤ ⋁Γ �
     simp_all;
     apply e!_intro;
     . simp;
-    . exact caφψχ!_of_cφχ!_of_cψχ! efq! efq!;
+    . exact cA!_of_c!_of_c! efq! efq!;
   case hnil.hsingle =>
     simp_all;
     apply e!_intro;
     . simp;
-    . exact caφψχ!_of_cφχ!_of_cψχ! efq! c!_id;
+    . exact cA!_of_c!_of_c! efq! c!_id;
   case hsingle.hnil =>
     simp_all;
     apply e!_intro;
     . simp;
-    . exact caφψχ!_of_cφχ!_of_cψχ! c!_id efq!;
+    . exact cA!_of_c!_of_c! c!_id efq!;
   case hcons.hnil =>
     simp_all;
     apply e!_intro;
     . simp;
-    . exact caφψχ!_of_cφχ!_of_cψχ! c!_id efq!;
+    . exact cA!_of_c!_of_c! c!_id efq!;
   case hnil.hcons =>
     simp_all;
     apply e!_intro;
     . simp;
-    . exact caφψχ!_of_cφχ!_of_cψχ! efq! c!_id;
+    . exact cA!_of_c!_of_c! efq! c!_id;
   case hsingle.hsingle => simp_all;
   case hsingle.hcons => simp_all;
   case hcons.hsingle φ ps hps ihp ψ =>
@@ -769,8 +769,8 @@ lemma iff_concact_disj! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁(Γ ++ Δ) ⭤ ⋁Γ �
 omit [DecidableEq F] in
 lemma iff_concact_disj'! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁(Γ ++ Δ) ↔ 𝓢 ⊢! ⋁Γ ⋎ ⋁Δ := by
   constructor;
-  . intro h; exact (φ!_of_kφψ! iff_concact_disj!) ⨀ h;
-  . intro h; exact (ψ!_of_kφψ! iff_concact_disj!) ⨀ h;
+  . intro h; exact (of_k!_left iff_concact_disj!) ⨀ h;
+  . intro h; exact (of_k_right iff_concact_disj!) ⨀ h;
 
 omit [DecidableEq F] in
 lemma implyRight_cons_disj! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! φ ➝ ⋁(ψ :: Γ) ↔ 𝓢 ⊢! φ ➝ ψ ⋎ ⋁Γ := by
@@ -779,7 +779,7 @@ lemma implyRight_cons_disj! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! φ ➝ ⋁(ψ :: Γ) 
     simp;
     constructor;
     . intro h; exact c!_trans h or₁!;
-    . intro h; exact c!_trans h $ caφψχ!_of_cφχ!_of_cψχ! c!_id efq!;
+    . intro h; exact c!_trans h $ cA!_of_c!_of_c! c!_id efq!;
   | cons ψ ih => simp;
 
 @[simp]
@@ -794,13 +794,13 @@ lemma forthback_disj_remove [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁Γ ➝ φ ⋎ ⋁(
   | hcons ψ Γ h ih =>
     simp_all;
     by_cases hpq : ψ = φ;
-    . simp_all only [ne_eq, List.remove_cons_self]; exact caφψχ!_of_cφχ!_of_cψχ! or₁! ih;
+    . simp_all only [ne_eq, List.remove_cons_self]; exact cA!_of_c!_of_c! or₁! ih;
     . simp_all [(List.remove_cons_of_ne Γ hpq)];
       by_cases hqΓ : Γ.remove φ = [];
       . simp_all;
-        exact caφψχ!_of_cφχ!_of_cψχ! or₂! (c!_trans ih $ or_replace_right! efq!);
+        exact cA!_of_c!_of_c! or₂! (c!_trans ih $ or_replace_right! efq!);
       . simp_all;
-        exact caφψχ!_of_cφχ!_of_cψχ! (c!_trans or₁! or₂!) (c!_trans ih (or_replace_right! or₂!));
+        exact cA!_of_c!_of_c! (c!_trans or₁! or₂!) (c!_trans ih (or_replace_right! or₂!));
 
 lemma disj_allsame! [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢! ⋁Γ ➝ φ := by
   induction Γ using List.induction_with_singleton with
@@ -809,7 +809,7 @@ lemma disj_allsame! [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢!
     have ⟨hd₁, hd₂⟩ := hd; subst hd₁;
     apply provable_iff_provable.mpr;
     apply deduct_iff.mpr;
-    exact χ!_of_cφχ!_of_cψχ!_of_aφψ! (by simp) (weakening! (by simp) $ provable_iff_provable.mp $ ih) id!
+    exact of_c!_of_c!_of_a! (by simp) (weakening! (by simp) $ provable_iff_provable.mp $ ih) id!
   | _ => simp_all;
 
 lemma disj_allsame'! [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 ⊢! ⋁Γ) : 𝓢 ⊢! φ := (disj_allsame! hd) ⨀ h
@@ -823,7 +823,7 @@ variable [HasAxiomEFQ 𝓢]
 omit [DecidableEq F] in
 lemma inconsistent_of_provable_of_unprovable {φ : F}
     (hp : 𝓢 ⊢! φ) (hn : 𝓢 ⊢! ∼φ) : Inconsistent 𝓢 := by
-  have : 𝓢 ⊢! φ ➝ ⊥ := nφ!_iff_cφo!.mp hn
+  have : 𝓢 ⊢! φ ➝ ⊥ := n!_iff_cO!.mp hn
   intro ψ; exact efq! ⨀ (this ⨀ hp)
 
 end consistency

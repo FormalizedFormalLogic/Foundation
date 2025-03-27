@@ -32,11 +32,11 @@ def iff_Box_BoxdotBox : 𝓢 ⊢ □φ ⭤ ⊡□φ := by
 
 def iff_Boxdot_BoxdotBoxdot : 𝓢 ⊢ ⊡φ ⭤ ⊡⊡φ := by
   apply eIntro;
-  . exact implyRightAnd (cId _) (cTrans boxdotBox (φOfKφψ iff_Box_BoxBoxdot));
+  . exact implyRightAnd (cId _) (cTrans boxdotBox (ofKLeft iff_Box_BoxBoxdot));
   . exact and₁;
 @[simp] lemma iff_boxdot_boxdotboxdot : 𝓢 ⊢! ⊡φ ⭤ ⊡⊡φ := ⟨iff_Boxdot_BoxdotBoxdot⟩
 
-def boxdotAxiomFour : 𝓢 ⊢ ⊡φ ➝ ⊡⊡φ := φOfKφψ iff_Boxdot_BoxdotBoxdot
+def boxdotAxiomFour : 𝓢 ⊢ ⊡φ ➝ ⊡⊡φ := ofKLeft iff_Boxdot_BoxdotBoxdot
 @[simp] lemma boxdot_axiomFour! : 𝓢 ⊢! ⊡φ ➝ ⊡⊡φ := ⟨boxdotAxiomFour⟩
 
 end LO.Entailment
