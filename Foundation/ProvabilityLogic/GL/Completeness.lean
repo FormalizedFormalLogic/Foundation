@@ -36,7 +36,10 @@ instance : CoeFun (SolovaySentences 𝔅 M₁ r₁) (λ _ => (M₁.extendRoot r�
 noncomputable def SolovaySentences.realization (σ : SolovaySentences 𝔅 M₁ r₁) : Realization L :=
   λ a =>
     letI ι := { i : (M₁.extendRoot r₁).World | i ⊧ (.atom a) };
-    haveI : Finite ↑ι := by sorry
+    haveI : Finite ↑ι := by
+      apply
+        @Subtype.finite (α := (M₁.extendRoot r₁).World)
+        $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
     (ι.toFinite.toFinset.image σ).disj
 
 variable {σ : SolovaySentences 𝔅 M₁ r₁}
