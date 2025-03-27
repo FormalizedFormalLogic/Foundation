@@ -329,18 +329,6 @@ lemma hom_disj' [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (
 
 end Matrix
 
-namespace Fintype
-
-variable {F : Type*} [LogicalConnective F]
-
-variable {ι : Type*} [Fintype ι]
-
-noncomputable def disj (f : ι → F) : F := Matrix.disj fun i ↦ f ((Fintype.equivFin ι).symm i)
-
-noncomputable def conj (f : ι → F) : F := Matrix.conj fun i ↦ f ((Fintype.equivFin ι).symm i)
-
-end Fintype
-
 namespace List
 
 variable {F : Type*} [LogicalConnective F]
@@ -417,8 +405,6 @@ end List
 
 namespace Finset
 
-section
-
 variable [LogicalConnective α]
 
 noncomputable def conj (s : Finset α) : α := s.toList.conj
@@ -457,6 +443,64 @@ lemma map_disj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.Hom
     . use a₁; simp_all;
     . use a₂; simp_all;
 
-end
+noncomputable def conj' (s : Finset ι) (p : ι → α) : α :=
+  letI : DecidableEq α := Classical.typeDecidableEq α
+  (s.image p).conj
+
+lemma map_conj' [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {s : Finset ι} {p : ι → α} :
+    f (s.conj' p) ↔ ∀ i ∈ s, f (p i) := by simp [conj', map_conj]
+
+noncomputable def disj' (s : Finset ι) (p : ι → α) : α :=
+  letI : DecidableEq α := Classical.typeDecidableEq α
+  (s.image p).disj
+
+lemma map_disj' [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {s : Finset ι} {p : ι → α} :
+    f (s.disj' p) ↔ ∃ i ∈ s, f (p i) := by simp [disj', map_disj]
 
 end Finset
+
+namespace LO.LogicalConnective
+
+variable [LogicalConnective α]
+
+variable {ι : Type*} [Fintype ι]
+
+noncomputable def iConj (p : ι → α) : α := (Finset.univ : Finset ι).conj' p
+
+noncomputable def iDisj (p : ι → α) : α := (Finset.univ : Finset ι).disj' p
+
+section
+
+open Lean PrettyPrinter Delaborator SubExpr
+
+syntax (name := bigiConj) "⩕ " Parser.Term.funBinder (" : " term)? ", " term:67 : term
+
+macro_rules (kind := bigiConj)
+  | `(⩕ $i:ident : $ι, $v) => `(iConj fun $i : $ι ↦ $v)
+  |      `(⩕ $i:ident, $v) => `(iConj fun $i ↦ $v)
+
+@[app_unexpander iConj]
+def iConjUnexpsnder : Unexpander
+  | `($_ fun $i ↦ $v) => `(⩕ $i, $v)
+  |                 _ => throw ()
+
+syntax (name := bigiDisj) "⩖ " Parser.Term.funBinder (" : " term)? ", " term:67 : term
+
+macro_rules (kind := bigiDisj)
+  | `(⩖ $i:ident : $ι, $v) => `(iDisj fun $i : $ι ↦ $v)
+  |      `(⩖ $i:ident, $v) => `(iDisj fun $i ↦ $v)
+
+@[app_unexpander iDisj]
+def iDisjUnexpsnder : Unexpander
+  | `($_ fun $i ↦ $v) => `(⩖ $i, $v)
+  |                 _ => throw ()
+
+end
+
+@[simp] lemma map_iConj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {p : ι → α} :
+    f (⩕ i, p i) ↔ ∀ i, f (p i) := by simp [iConj, Finset.map_conj']
+
+@[simp] lemma map_iDisj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {p : ι → α} :
+    f (⩖ i, p i) ↔ ∃ i, f (p i) := by simp [iDisj, Finset.map_disj']
+
+end LO.LogicalConnective
