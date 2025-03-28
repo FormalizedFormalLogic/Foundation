@@ -44,17 +44,17 @@ variable {α : Type u}
          {M₁ : Kripke.Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁]
          {A B : Modal.Formula _}
 
+local notation "𝐖" => Frame.World <| Model.toFrame <| M₁.extendRoot r₁
+
 -- TODO: cleanup
-noncomputable instance : Fintype (M₁.extendRoot r₁).World := @Fintype.ofFinite _ $ by
+noncomputable instance : Fintype 𝐖 := @Fintype.ofFinite _ $ by
   exact Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
 
-noncomputable instance {i : (M₁.extendRoot r₁).World} : Fintype (i↑ᵢ) := @Fintype.ofFinite _ $ by
-  apply @Subtype.finite (α := (M₁.extendRoot r₁).World)
-        $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
+noncomputable instance {i : 𝐖} : Fintype (i↑ᵢ) := @Fintype.ofFinite _ $ by
+  apply @Subtype.finite (α := 𝐖) $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
 
-noncomputable instance {φ} : Fintype { i : (M₁.extendRoot r₁).World // i ⊧ φ } := @Fintype.ofFinite _ $ by
-  apply @Subtype.finite (α := (M₁.extendRoot r₁).World)
-        $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
+noncomputable instance {φ} : Fintype { i : 𝐖 // i ⊧ φ } := @Fintype.ofFinite _ $ by
+  apply @Subtype.finite (α := 𝐖) $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
 
 structure SolovaySentences
   {T U : FirstOrder.Theory L}
@@ -65,15 +65,14 @@ structure SolovaySentences
   protected SC1 : ∀ i j, i ≠ j → T ⊢!. σ i ➝ ∼σ j
   protected SC2 : ∀ i j, i ≺ j → T ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
   protected SC3 : ∀ i, (Model.extendRoot.root (M := M₁) (r := r₁)) ≺ i →
-    letI σ' := λ j : (i↑ᵢ) => σ j.1;
-    T ⊢!. σ i ➝ 𝔅 (⩖ j, σ' j)
+    T ⊢!. σ i ➝ 𝔅 (⩖ j : (i↑ᵢ), σ j.1)
   protected SC4 : T ⊬. ∼(σ r₁)
 
-instance : CoeFun (SolovaySentences 𝔅 M₁ r₁) (λ _ => (M₁.extendRoot r₁).World → Sentence L) := ⟨λ σ => σ.σ⟩
+instance : CoeFun (SolovaySentences 𝔅 M₁ r₁) (λ _ => 𝐖 → Sentence L) := ⟨λ σ => σ.σ⟩
 
 noncomputable def SolovaySentences.realization (σ : SolovaySentences 𝔅 M₁ r₁) : Realization L :=
   λ a =>
-    letI ι := { i : (M₁.extendRoot r₁).World // i ⊧ (.atom a) };
+    letI ι := { i : 𝐖 // i ⊧ (.atom a) };
     letI σ' := λ j : ι => σ j.1;
     ⩖ i, σ' i
 
@@ -86,10 +85,9 @@ theorem mainlemma {i : M₁.World} :
   induction A using Formula.rec' generalizing i with
   | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
   | hatom a =>
-    simp [Realization.interpret, SolovaySentences.realization, Satisfies, SolovaySentences.realization];
     constructor;
     . intro h;
-      convert imply_iDisj (𝓢 := T.alt) (φ := λ j : { i : (M₁.extendRoot r₁).World // i ⊧ (.atom a) } => σ j.1) (i := ⟨i, by tauto⟩);
+      convert imply_iDisj (𝓢 := T.alt) (φ := λ j : { i : 𝐖 // i ⊧ (.atom a) } => σ j.1) (i := ⟨i, by tauto⟩);
     . intro h;
       apply contra₁'!;
       apply iDisj_imply!;
@@ -98,7 +96,7 @@ theorem mainlemma {i : M₁.World} :
       by_contra hC; subst hC;
       contradiction;
   | himp A B ihA ihB =>
-    simp [Realization.interpret];
+    simp only [Realization.interpret, Semantics.Imp.realize_imp, Classical.not_imp, and_imp];
     constructor;
     . intro h;
       rcases Satisfies.imp_def₂.mp h with (hA | hB);
@@ -107,7 +105,7 @@ theorem mainlemma {i : M₁.World} :
     . intro hA hB;
       exact not_imply_prem''! (ihA.1 hA) (ihB.2 hB);
   | hbox A ihA =>
-    simp [Realization.interpret];
+    simp only [Realization.interpret];
     constructor;
     . intro h;
       apply imp_trans''! $ σ.SC3 i $ Model.extendRoot.rooted_original

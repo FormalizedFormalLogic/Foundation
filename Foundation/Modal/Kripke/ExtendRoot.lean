@@ -3,7 +3,7 @@ import Mathlib.Data.Finite.Sum
 
 namespace LO.Modal.Kripke
 
-def Frame.extendRoot (F : Kripke.Frame) (r : F.World) [F.IsRooted r] : Kripke.Frame where
+def Frame.extendRoot (F : Kripke.Frame) (r : outParam F.World) [F.IsRooted r] : Kripke.Frame where
   World := Unit ⊕ F.World
   Rel x y :=
     match x, y with
