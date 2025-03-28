@@ -4,6 +4,7 @@ import Foundation.Modal.Kripke.ExtendRoot
 
 namespace LO
 
+
 namespace Entailment
 
 open Entailment
@@ -12,107 +13,36 @@ open FiniteContext
 variable {F : Type*} [LogicalConnective F] [DecidableEq F]
          {S : Type*} [Entailment F S]
          {𝓢 : S} [Entailment.Classical 𝓢]
-         {p q r : F}
+         {φ ψ ξ : F}
          {Γ Δ : List F}
+         {ι} [Fintype ι] {Φ : ι → F}
 
-lemma conj_disj_demorgan₂'! (h : 𝓢 ⊢! ⋀Γ.map (∼·)) : 𝓢 ⊢! ∼⋁Γ := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle q => simp_all;
-  | hcons q Γ hΓ ih =>
-    replace h : 𝓢 ⊢! ∼q ⋏ (⋀Γ.map (∼·)) := by
-      have e := List.conj₂_cons_nonempty (a := ∼q) (as := Γ.map (∼·)) (by simpa using hΓ);
-      simpa [←e] using h;
-    simp [List.disj₂_cons_nonempty (a := q) hΓ];
-    apply demorgan₂'!;
-    apply and₃'!;
-    . exact and₁'! h;
-    . exact ih $ and₂'! h
 
-lemma conj_disj_demorgan₂_suppl'! (h : 𝓢 ⊢! p ➝ ⋀Γ.map (∼·)) : 𝓢 ⊢! p ➝ ∼⋁Γ :=
-  deduct'! $ conj_disj_demorgan₂'! $ (of'! h) ⨀ by_axm!
-
-omit [DecidableEq F] in
-lemma disj_mem! (h : p ∈ Γ) : 𝓢 ⊢! p ➝ ⋁Γ := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp at h;
-  | hsingle q =>
-    replace h : p = q := by simpa using h;
-    subst h;
-    simp;
-  | hcons q Γ hΓ ih =>
-    replace h : p = q ∨ p ∈ Γ := by simpa using h;
-    simp [List.disj₂_cons_nonempty (a := q) hΓ];
-    rcases h with (rfl | h);
-    . exact or₁!;
-    . exact imply_right_or'! $ ih h
-
-lemma not_imply_prem''! (hpq : 𝓢 ⊢! p ➝ q) (hpnr : 𝓢 ⊢! p ➝ ∼r) : 𝓢 ⊢! p ➝ ∼(q ➝ r) :=
+lemma not_imply_prem''! (hpq : 𝓢 ⊢! φ ➝ ψ) (hpnr : 𝓢 ⊢! φ ➝ ∼ξ) : 𝓢 ⊢! φ ➝ ∼(ψ ➝ ξ) :=
   deduct'! $ (contra₀'! $ not_or_of_imply!) ⨀ (demorgan₂'! $ and₃'! (dni'! $ of'! hpq ⨀ (by_axm!)) (of'! hpnr ⨀ (by_axm!)))
 
-lemma disj_intro! (h : ∀ q ∈ Γ, 𝓢 ⊢! q ➝ p) : 𝓢 ⊢! ⋁Γ ➝ p := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle q => simp_all;
-  | hcons q Γ hΓ ih =>
-    simp [List.disj₂_cons_nonempty (a := q) hΓ];
-    obtain ⟨h₁, h₂⟩ := by simpa using h;
-    replace h₂ := ih h₂;
-    exact or₃''! h₁ h₂;
 
-lemma disj_intro'! (h : ∀ q ∈ Γ, 𝓢 ⊢! q ➝ p) : 𝓢 ⊢! ⋁Γ ➝ p := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle q => simp_all;
-  | hcons q Γ hΓ ih =>
-    simp [List.disj₂_cons_nonempty (a := q) hΓ];
-    obtain ⟨h₁, h₂⟩ := by simpa using h;
-    replace h₂ := ih h₂;
-    exact or₃''! h₁ h₂;
+lemma iConj_iDisj_demorgan₂'! (h : 𝓢 ⊢! ⩕ i, ∼Φ i) : 𝓢 ⊢! ∼⩖ j, Φ j := by
+  sorry
 
-lemma disj_outro! [Entailment.Consistent 𝓢]
-  (h₁ : 𝓢 ⊢! ⋁Γ) (h₂ : ∀ q ∈ Γ, 𝓢 ⊢! q ➝ p) : 𝓢 ⊢! p := by
-  induction Γ using List.induction_with_singleton with
-  | hnil =>
-    obtain ⟨f, hf⟩ := Consistent.exists_unprovable (𝓢 := 𝓢) (by assumption);
-    have : 𝓢 ⊢! f := efq'! $ by simpa using h₁;
-    contradiction;
-  | hsingle r =>
-    simp_all;
-    exact h₂ ⨀ h₁;
-  | hcons q Γ hΓ ih =>
-    simp_all;
-    have ⟨h₂₁, h₂₂⟩ := h₂;
-    apply or₃'''! (d₃ := h₁);
-    . exact h₂₁;
-    . apply disj_intro!;
-      exact h₂₂;
+lemma iConj_iDisj_demorgan₂! : 𝓢 ⊢! (⩕ i, ∼Φ i) ➝ (∼⩖ j, Φ j) :=
+  deduct'! $ iConj_iDisj_demorgan₂'! by_axm!
 
-lemma cancel_or_left! (hpq : 𝓢 ⊢! p ⋎ q) (hp : 𝓢 ⊢! ∼p) : 𝓢 ⊢! q := by
-  apply or₃'''! (𝓢 := 𝓢) (φ := p) (ψ := q) (χ := q);
-  . apply imply_of_not_or'!;
-    apply or₁'!;
-    apply hp;
-  . simp;
-  . assumption;
+lemma iConj_iDisj_demorgan₂_suppl'! (h : 𝓢 ⊢! φ ➝ (⩕ i, ∼Φ i)) : 𝓢 ⊢! φ ➝ (∼⩖ j, Φ j) := by
+  apply imp_trans''! h;
+  apply iConj_iDisj_demorgan₂!;
 
-lemma cancel_or_right! (hpq : 𝓢 ⊢! p ⋎ q) (hq : 𝓢 ⊢! ∼q) : 𝓢 ⊢! p := by
-  apply cancel_or_left! (p := q) (q := p);
-  . exact or_comm'! hpq;
-  . exact hq;
-
-lemma disj_tail! (Γ_nil : Γ.length > 0) (h₁ : 𝓢 ⊢! ⋁Γ) (h₂ : 𝓢 ⊢! ∼Γ[0]) : 𝓢 ⊢! ⋁(Γ.tail) := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp at Γ_nil;
-  | hsingle q =>
-    simp at h₁ h₂;
-    replace h₂ := neg_equiv'!.mp h₂;
-    exact efq'! $ h₂ ⨀ h₁
-  | hcons q Γ hΓ ih =>
-    simp_all;
-    exact cancel_or_left! h₁ h₂;
 
 end Entailment
+
+
+namespace Modal.Kripke
+
+def ImmediateSuccessors {F : Kripke.Frame} (x : F.World) := { y // x ≺ y }
+postfix:100 "↑ᵢ" => ImmediateSuccessors
+
+end Modal.Kripke
+
 
 namespace ProvabilityLogic
 
@@ -128,33 +58,41 @@ variable {α : Type u}
          {M₁ : Kripke.Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁]
          {A B : Modal.Formula _}
 
+noncomputable instance : Fintype (M₁.extendRoot r₁).World := @Fintype.ofFinite _ $ by
+  exact Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
+
+noncomputable instance {i : (M₁.extendRoot r₁).World} : Fintype (i↑ᵢ) := @Fintype.ofFinite _ $ by
+  apply @Subtype.finite (α := (M₁.extendRoot r₁).World)
+        $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
+
+noncomputable instance {φ} : Fintype { i : (M₁.extendRoot r₁).World // i ⊧ φ } := @Fintype.ofFinite _ $ by
+  apply @Subtype.finite (α := (M₁.extendRoot r₁).World)
+        $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
+
 structure SolovaySentences
   {T U : FirstOrder.Theory L}
   (𝔅 : ProvabilityPredicate T U) [𝔅.HBL]
   (M₁ : Kripke.Model) (r₁ : M₁.World) [M₁.IsFiniteTree r₁]
   where
   σ : (M₁.extendRoot r₁).World → Sentence L
-  SC1 : ∀ i j, i ≠ j → T ⊢!. σ i ➝ ∼σ j
-  SC2 : ∀ i j, i ≺ j → T ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
-  SC3 : ∀ i, (Model.extendRoot.root (M := M₁) (r := r₁)) ≺ i →
-    letI ι := { j | i ≺ j };
-    T ⊢!. σ i ➝ 𝔅 ((ι.toFinite.toFinset.image σ).disj)
-  SC4 : T ⊬. ∼(σ r₁)
+  protected SC1 : ∀ i j, i ≠ j → T ⊢!. σ i ➝ ∼σ j
+  protected SC2 : ∀ i j, i ≺ j → T ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
+  protected SC3 : ∀ i, (Model.extendRoot.root (M := M₁) (r := r₁)) ≺ i →
+    letI σ' := λ j : (i↑ᵢ) => σ j.1;
+    T ⊢!. σ i ➝ 𝔅 (⩖ j, σ' j)
+  protected SC4 : T ⊬. ∼(σ r₁)
 
 instance : CoeFun (SolovaySentences 𝔅 M₁ r₁) (λ _ => (M₁.extendRoot r₁).World → Sentence L) := ⟨λ σ => σ.σ⟩
 
 noncomputable def SolovaySentences.realization (σ : SolovaySentences 𝔅 M₁ r₁) : Realization L :=
   λ a =>
-    letI ι := { i : (M₁.extendRoot r₁).World | i ⊧ (.atom a) };
-    haveI : Finite ↑ι := by
-      apply
-        @Subtype.finite (α := (M₁.extendRoot r₁).World)
-        $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
-    (ι.toFinite.toFinset.image σ).disj
+    letI ι := { i : (M₁.extendRoot r₁).World // i ⊧ (.atom a) };
+    letI σ' := λ j : ι => σ j.1;
+    ⩖ i, σ' i
 
 variable {σ : SolovaySentences 𝔅 M₁ r₁}
 
-theorem mainlemma {i : (M₁.extendRoot r₁).World} :
+theorem mainlemma {i : M₁.World} :
   (i ⊧ A → T ⊢!. (σ i) ➝ (σ.realization.interpret 𝔅 A)) ∧
   (¬i ⊧ A → T ⊢!. (σ i) ➝ ∼(σ.realization.interpret 𝔅 A))
   := by
@@ -164,9 +102,14 @@ theorem mainlemma {i : (M₁.extendRoot r₁).World} :
     simp [Realization.interpret, SolovaySentences.realization, Satisfies, SolovaySentences.realization];
     constructor;
     . intro h;
-      sorry;
+      convert imply_iDisj (𝓢 := T.alt) (φ := λ j : { i : (M₁.extendRoot r₁).World // i ⊧ (.atom a) } => σ j.1) (i := ⟨i, by tauto⟩);
     . intro h;
-      sorry;
+      apply iConj_iDisj_demorgan₂_suppl'!;
+      apply imply_finset_iConj!;
+      rintro ⟨j, hj⟩;
+      apply σ.SC1;
+      by_contra hC; subst hC;
+      contradiction;
   | himp A B ihA ihB =>
     simp [Realization.interpret];
     constructor;
@@ -180,10 +123,13 @@ theorem mainlemma {i : (M₁.extendRoot r₁).World} :
     simp [Realization.interpret];
     constructor;
     . intro h;
-      apply imp_trans''! $ σ.SC3 i (by sorry);
+      apply imp_trans''! $ σ.SC3 i $ Model.extendRoot.rooted_original
       apply 𝔅.prov_distribute_imply;
-      -- apply disj_intro!;
-      sorry;
+      apply iDisj_imply!;
+      rintro ⟨j, Rij⟩;
+      match j with
+      | Sum.inl j => simp [Frame.Rel', Frame.extendRoot] at Rij
+      | Sum.inr j => exact ihA.1 $ h j Rij;
     . intro h;
       have := Satisfies.box_def.not.mp h;
       push_neg at this;
@@ -199,9 +145,7 @@ theorem arithmetical_completeness_GL : (∀ {f : Realization L}, T ⊢!. (f.inte
   let σ : SolovaySentences 𝔅 M₁ r₁ := by sorry; -- TODO: Sect 2.1
   use σ.realization;
 
-  have : T ⊢!. σ r₁ ➝ σ.realization.interpret 𝔅 (∼A) := mainlemma (σ := σ) (A := ∼A) (i := r₁) |>.1 $ by
-    apply Model.extendRoot.modal_equivalence_original_world.mp;
-    exact hA₁;
+  have : T ⊢!. σ r₁ ➝ σ.realization.interpret 𝔅 (∼A) := mainlemma (σ := σ) (A := ∼A) (i := r₁) |>.1 $ hA₁
   replace : T ⊢!. σ.realization.interpret 𝔅 A ➝ ∼(σ r₁) := by
     apply contra₁'!;
     apply imp_trans''! this;
