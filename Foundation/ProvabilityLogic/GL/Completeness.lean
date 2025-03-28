@@ -4,7 +4,6 @@ import Foundation.Modal.Kripke.ExtendRoot
 
 namespace LO
 
-
 namespace Entailment
 
 open Entailment
@@ -17,21 +16,8 @@ variable {F : Type*} [LogicalConnective F] [DecidableEq F]
          {Γ Δ : List F}
          {ι} [Fintype ι] {Φ : ι → F}
 
-
 lemma not_imply_prem''! (hpq : 𝓢 ⊢! φ ➝ ψ) (hpnr : 𝓢 ⊢! φ ➝ ∼ξ) : 𝓢 ⊢! φ ➝ ∼(ψ ➝ ξ) :=
   deduct'! $ (contra₀'! $ not_or_of_imply!) ⨀ (demorgan₂'! $ and₃'! (dni'! $ of'! hpq ⨀ (by_axm!)) (of'! hpnr ⨀ (by_axm!)))
-
-
-lemma iConj_iDisj_demorgan₂'! (h : 𝓢 ⊢! ⩕ i, ∼Φ i) : 𝓢 ⊢! ∼⩖ j, Φ j := by
-  sorry
-
-lemma iConj_iDisj_demorgan₂! : 𝓢 ⊢! (⩕ i, ∼Φ i) ➝ (∼⩖ j, Φ j) :=
-  deduct'! $ iConj_iDisj_demorgan₂'! by_axm!
-
-lemma iConj_iDisj_demorgan₂_suppl'! (h : 𝓢 ⊢! φ ➝ (⩕ i, ∼Φ i)) : 𝓢 ⊢! φ ➝ (∼⩖ j, Φ j) := by
-  apply imp_trans''! h;
-  apply iConj_iDisj_demorgan₂!;
-
 
 end Entailment
 
@@ -58,6 +44,7 @@ variable {α : Type u}
          {M₁ : Kripke.Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁]
          {A B : Modal.Formula _}
 
+-- TODO: cleanup
 noncomputable instance : Fintype (M₁.extendRoot r₁).World := @Fintype.ofFinite _ $ by
   exact Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
 
@@ -104,9 +91,9 @@ theorem mainlemma {i : M₁.World} :
     . intro h;
       convert imply_iDisj (𝓢 := T.alt) (φ := λ j : { i : (M₁.extendRoot r₁).World // i ⊧ (.atom a) } => σ j.1) (i := ⟨i, by tauto⟩);
     . intro h;
-      apply iConj_iDisj_demorgan₂_suppl'!;
-      apply imply_finset_iConj!;
-      rintro ⟨j, hj⟩;
+      apply contra₁'!;
+      apply iDisj_imply!;
+      rintro ⟨i, hi⟩;
       apply σ.SC1;
       by_contra hC; subst hC;
       contradiction;
