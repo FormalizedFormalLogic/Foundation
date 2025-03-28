@@ -1,5 +1,6 @@
-import Mathlib.Logic.Relation
 import Mathlib.Tactic.ByContra
+import Mathlib.Tactic.Tauto
+import Foundation.Vorspiel.Relation.Supplemental
 
 namespace Relation
 
@@ -29,6 +30,16 @@ instance [IsIrrefl _ r] [IsTrans _ r] : IsAntisymm α (ReflGen r) := ⟨by
 
 instance [IsTrans _ r] [IsIrrefl _ r] : IsPartialOrder α (ReflGen r) where
 
+instance [IsWeakConnected _ r] : IsConnected α (ReflGen r) := ⟨by
+  rintro a b c ⟨(rfl | Rab), (rfl | Rba)⟩;
+  . left; apply ReflGen.refl;
+  . left; apply ReflGen.single Rba;
+  . right; apply ReflGen.single Rab;
+  . rcases IsWeakConnected.weak_connected ⟨Rab, Rba, by sorry⟩ with (Rbc | Rbc);
+    . left; exact ReflGen.single Rbc;
+    . right; exact ReflGen.single Rbc;
+⟩
+
 end ReflGen
 
 
@@ -52,6 +63,15 @@ instance [IsTrans α r] [IsAntisymm α r] : IsTrans α (IrreflGen r) := ⟨by
     subst hC;
     exact hne $ IsAntisymm.antisymm a b Rab Rbc;
   . exact IsTrans.trans a b c Rab Rbc;
+⟩
+
+instance [IsPartialOrder _ r] : IsStrictOrder α (IrreflGen r) where
+
+instance [IsConnected α r] : IsWeakConnected α (IrreflGen r) := ⟨by
+  rintro a b c ⟨⟨ebc, Rab⟩, ⟨eac, Rac⟩, ebc⟩;
+  rcases IsConnected.connected ⟨Rab, Rac⟩ with (Rbc | Rcb);
+  . left;  exact ⟨by tauto, Rbc⟩;
+  . right; exact ⟨by tauto, Rcb⟩;
 ⟩
 
 end Irrefl

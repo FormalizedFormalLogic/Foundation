@@ -282,13 +282,12 @@ open LO
 
 namespace Matrix
 
-section And
-
 variable {α : Type*}
+
 variable [LogicalConnective α] [LogicalConnective β]
 
 def conj : {n : ℕ} → (Fin n → α) → α
-  | 0,     _ => ⊤
+  |     0, _ => ⊤
   | _ + 1, v => v 0 ⋏ conj (vecTail v)
 
 @[simp] lemma conj_nil (v : Fin 0 → α) : conj v = ⊤ := rfl
@@ -308,7 +307,7 @@ lemma hom_conj [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v
 lemma hom_conj₂ [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
 
 def disj : {n : ℕ} → (Fin n → α) → α
-  | 0,     _ => ⊥
+  |     0, _ => ⊥
   | _ + 1, v => v 0 ⋎ disj (vecTail v)
 
 @[simp] lemma disj_nil (v : Fin 0 → α) : disj v = ⊥ := rfl
@@ -328,55 +327,46 @@ lemma hom_disj [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v
 
 lemma hom_disj' [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (disj v) = disj fun i => f (v i) := hom_disj f v
 
-end And
-
 end Matrix
 
 namespace List
 
-section
+variable {F : Type*} [LogicalConnective F]
 
-variable {α : Type*} [LogicalConnective α]
+variable {φ ψ : F}
 
-def conj : List α → α
-  | []      => ⊤
+def conj : List F → F
+  |      [] => ⊤
   | a :: as => a ⋏ as.conj
 
-@[simp] lemma conj_nil : conj (α := α) [] = ⊤ := rfl
+@[simp] lemma conj_nil : conj (F := F) [] = ⊤ := rfl
 
-@[simp] lemma conj_cons {a : α} {as : List α} : conj (a :: as) = a ⋏ as.conj := rfl
+@[simp] lemma conj_cons {a : F} {as : List F} : conj (a :: as) = a ⋏ as.conj := rfl
 
-lemma map_conj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l : List α) : f l.conj ↔ ∀ a ∈ l, f a := by
+lemma map_conj [FunLike G F Prop] [LogicalConnective.HomClass G F Prop] (f : G) (l : List F) : f l.conj ↔ ∀ a ∈ l, f a := by
   induction l <;> simp[*]
 
-lemma map_conj_append [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l₁ l₂ : List α) : f (l₁ ++ l₂).conj ↔ f (l₁.conj ⋏ l₂.conj) := by
+lemma map_conj_append [FunLike G F Prop] [LogicalConnective.HomClass G F Prop] (f : G) (l₁ l₂ : List F) : f (l₁ ++ l₂).conj ↔ f (l₁.conj ⋏ l₂.conj) := by
   induction l₁ <;> induction l₂ <;> aesop;
 
-def disj : List α → α
-  | []      => ⊥
+def disj : List F → F
+  |      [] => ⊥
   | a :: as => a ⋎ as.disj
 
-@[simp] lemma disj_nil : disj (α := α) [] = ⊥ := rfl
+@[simp] lemma disj_nil : disj (F := F) [] = ⊥ := rfl
 
-@[simp] lemma disj_cons {a : α} {as : List α} : disj (a :: as) = a ⋎ as.disj := rfl
+@[simp] lemma disj_cons {a : F} {as : List F} : disj (a :: as) = a ⋎ as.disj := rfl
 
-lemma map_disj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l : List α) : f l.disj ↔ ∃ a ∈ l, f a := by
+lemma map_disj [FunLike α F Prop] [LogicalConnective.HomClass α F Prop] (f : α) (l : List F) : f l.disj ↔ ∃ a ∈ l, f a := by
   induction l <;> simp[*]
 
-lemma map_disj_append [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l₁ l₂ : List α) : f (l₁ ++ l₂).disj ↔ f (l₁.disj ⋎ l₂.disj) := by
+lemma map_disj_append [FunLike α F Prop] [LogicalConnective.HomClass α F Prop] (f : α) (l₁ l₂ : List F) : f (l₁ ++ l₂).disj ↔ f (l₁.disj ⋎ l₂.disj) := by
   induction l₁ <;> induction l₂ <;> aesop;
-
-end
-
-section
-
-variable {F : Type u} [LogicalConnective F]
-variable {φ ψ : F}
 
 /-- Remark: `[φ].conj₂ = φ ≠ φ ⋏ ⊤ = [φ].conj` -/
 def conj₂ : List F → F
-| [] => ⊤
-| [φ] => φ
+|           [] => ⊤
+|          [φ] => φ
 | φ :: ψ :: rs => φ ⋏ (ψ :: rs).conj₂
 
 prefix:80 "⋀" => List.conj₂
@@ -394,8 +384,8 @@ prefix:80 "⋀" => List.conj₂
 
 /-- Remark: `[φ].disj = φ ≠ φ ⋎ ⊥ = [φ].disj` -/
 def disj₂ : List F → F
-| [] => ⊥
-| [φ] => φ
+|           [] => ⊥
+|          [φ] => φ
 | φ :: ψ :: rs => φ ⋎ (ψ :: rs).disj₂
 
 prefix:80 "⋁" => disj₂
@@ -411,13 +401,9 @@ prefix:80 "⋁" => disj₂
   | nil => contradiction;
   | cons ψ rs => simp [disj₂]
 
-end
-
 end List
 
 namespace Finset
-
-section
 
 variable [LogicalConnective α]
 
@@ -457,6 +443,70 @@ lemma map_disj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.Hom
     . use a₁; simp_all;
     . use a₂; simp_all;
 
-end
+noncomputable def conj' (s : Finset ι) (p : ι → α) : α :=
+  letI : DecidableEq α := Classical.typeDecidableEq α
+  (s.image p).conj
+
+lemma map_conj' [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {s : Finset ι} {p : ι → α} :
+    f (s.conj' p) ↔ ∀ i ∈ s, f (p i) := by simp [conj', map_conj]
+
+noncomputable def disj' (s : Finset ι) (p : ι → α) : α :=
+  letI : DecidableEq α := Classical.typeDecidableEq α
+  (s.image p).disj
+
+lemma map_disj' [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {s : Finset ι} {p : ι → α} :
+    f (s.disj' p) ↔ ∃ i ∈ s, f (p i) := by simp [disj', map_disj]
 
 end Finset
+
+namespace LO.LogicalConnective
+
+variable [LogicalConnective α]
+
+variable {ι : Type*} [Fintype ι]
+
+noncomputable def iConj (p : ι → α) : α := (Finset.univ : Finset ι).conj' p
+
+noncomputable def iDisj (p : ι → α) : α := (Finset.univ : Finset ι).disj' p
+
+section
+
+open Lean PrettyPrinter Delaborator SubExpr
+
+/--
+`⩕ i, φ i` is notation for `iConj fun i ↦ φ i`
+-/
+syntax (name := bigiConj) "⩕ " Parser.Term.funBinder (" : " term)? ", " term:0 : term
+
+macro_rules (kind := bigiConj)
+  | `(⩕ $i:ident : $ι, $v) => `(iConj fun $i : $ι ↦ $v)
+  |      `(⩕ $i:ident, $v) => `(iConj fun $i ↦ $v)
+
+@[app_unexpander iConj]
+def iConjUnexpsnder : Unexpander
+  | `($_ fun $i ↦ $v) => `(⩕ $i, $v)
+  |                 _ => throw ()
+
+/--
+`⩖ i, φ i` is notation for `iDisj fun i ↦ φ i`
+-/
+syntax (name := bigiDisj) "⩖ " Parser.Term.funBinder (" : " term)? ", " term:67 : term
+
+macro_rules (kind := bigiDisj)
+  | `(⩖ $i:ident : $ι, $v) => `(iDisj fun $i : $ι ↦ $v)
+  |      `(⩖ $i:ident, $v) => `(iDisj fun $i ↦ $v)
+
+@[app_unexpander iDisj]
+def iDisjUnexpsnder : Unexpander
+  | `($_ fun $i ↦ $v) => `(⩖ $i, $v)
+  |                 _ => throw ()
+
+end
+
+@[simp] lemma map_iConj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {p : ι → α} :
+    f (⩕ i, p i) ↔ ∀ i, f (p i) := by simp [iConj, Finset.map_conj']
+
+@[simp] lemma map_iDisj [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] {f : F} {p : ι → α} :
+    f (⩖ i, p i) ↔ ∃ i, f (p i) := by simp [iDisj, Finset.map_disj']
+
+end LO.LogicalConnective

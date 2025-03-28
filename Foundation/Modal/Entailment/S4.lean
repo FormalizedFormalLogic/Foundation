@@ -6,7 +6,7 @@ namespace LO.Entailment
 open FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.S4 𝓢]
+variable {𝓢 : S} [Entailment.Modal.S4 𝓢]
 
 def iff_box_boxdot : 𝓢 ⊢ □φ ⭤ ⊡φ := by
   apply iffIntro;

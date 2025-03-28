@@ -57,6 +57,7 @@ instance : IsAntisymm _ whitepoint.Rel := ⟨by tauto⟩
 instance : IsPreorder _ whitepoint.Rel where
 instance : IsEquiv _ whitepoint.Rel where
 instance : IsPartialOrder _ whitepoint.Rel where
+instance : IsEquality _ whitepoint.Rel := ⟨by tauto⟩
 
 def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
 
@@ -65,7 +66,8 @@ instance : Finite blackpoint.World := by
   infer_instance;
 instance : IsIrrefl _ blackpoint.Rel := by tauto
 instance : IsTrans _ blackpoint.Rel := ⟨by tauto⟩
-
+instance : IsStrictOrder _ blackpoint.Rel where
+instance : IsConnected _ blackpoint.Rel := ⟨by tauto⟩
 
 end
 

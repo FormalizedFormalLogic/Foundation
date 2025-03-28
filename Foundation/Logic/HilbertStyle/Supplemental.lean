@@ -519,17 +519,7 @@ def andIffAndOfIff {φ ψ φ' ψ' : F} (bp : 𝓢 ⊢ φ ⭤ φ') (bq : 𝓢 ⊢
   iffIntro (andImplyAndOfImply (andLeft bp) (andLeft bq)) (andImplyAndOfImply (andRight bp) (andRight bq))
 
 
-section Instantinate
-
-instance [HasAxiomDNE 𝓢] : HasAxiomEFQ 𝓢 where
-  efq φ := by
-    apply contra₃';
-    exact impTrans'' (and₁' neg_equiv) $ impTrans'' (impSwap' imply₁) (and₂' neg_equiv);
-
-
--- TODO: Actually this can be computable but it's too slow.
-noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomLEM 𝓢 where
-  lem _ := dneOr $ NotOrOfImply' dni
+section
 
 instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
   dne φ := by
@@ -541,46 +531,19 @@ instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDNE 𝓢 where
       exact efq' $ nnp ⨀ np;
     ) $ of lem;;
 
-instance [HasAxiomLEM 𝓢] : HasAxiomWeakLEM 𝓢 where
-  wlem φ := lem (φ := ∼φ);
+end
 
-instance [HasAxiomEFQ 𝓢] [HasAxiomLEM 𝓢] : HasAxiomDummett 𝓢 where
-  dummett φ ψ := by
-    have d₁ : 𝓢 ⊢ φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := impTrans'' imply₁ or₂;
-    have d₂ : 𝓢 ⊢ ∼φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := impTrans'' efq_imply_not₁ or₁;
-    exact or₃''' d₁ d₂ lem;
 
-instance [HasAxiomEFQ 𝓢] [HasAxiomDummett 𝓢] : HasAxiomWeakLEM 𝓢 where
-  wlem φ := by
-    haveI : 𝓢 ⊢ (φ ➝ ∼φ) ⋎ (∼φ ➝ φ) := dummett;
-    exact or₃''' (by
-      apply deduct';
-      apply or₁';
-      apply neg_equiv'.mpr;
-      apply deduct;
-      haveI d₁ : [φ, φ ➝ ∼φ] ⊢[𝓢] φ := FiniteContext.byAxm;
-      haveI d₂ : [φ, φ ➝ ∼φ] ⊢[𝓢] φ ➝ ∼φ := FiniteContext.byAxm;
-      have := neg_equiv'.mp $ d₂ ⨀ d₁;
-      exact this ⨀ d₁;
-    ) (by
-      apply deduct';
-      apply or₂';
-      apply neg_equiv'.mpr;
-      apply deduct;
-      haveI d₁ : [∼φ, ∼φ ➝ φ] ⊢[𝓢] ∼φ := FiniteContext.byAxm;
-      haveI d₂ : [∼φ, ∼φ ➝ φ] ⊢[𝓢] ∼φ ➝ φ := FiniteContext.byAxm;
-      haveI := d₂ ⨀ d₁;
-      exact (neg_equiv'.mp d₁) ⨀ this;
-    ) this;
+section
 
-noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomPeirce 𝓢 where
-  peirce φ ψ := by
-    refine or₃''' imply₁ ?_ lem;
-    apply deduct';
-    apply deduct;
-    refine (FiniteContext.byAxm (φ := (φ ➝ ψ) ➝ φ)) ⨀ ?_;
-    apply deduct;
-    apply efq_of_mem_either (by aesop) (by aesop)
+-- TODO: Actually this can be computable but it's too slow.
+noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomLEM 𝓢 where
+  lem _ := dneOr $ NotOrOfImply' dni
+
+instance [HasAxiomDNE 𝓢] : HasAxiomEFQ 𝓢 where
+  efq φ := by
+    apply contra₃';
+    exact impTrans'' (and₁' neg_equiv) $ impTrans'' (impSwap' imply₁) (and₂' neg_equiv);
 
 instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
   elim_contra φ ψ := by
@@ -588,7 +551,8 @@ instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
     have : [∼ψ ➝ ∼φ] ⊢[𝓢] ∼ψ ➝ ∼φ := FiniteContext.byAxm;
     exact contra₃' this;
 
-end Instantinate
+end
+
 
 noncomputable def implyIffNotOr [HasAxiomDNE 𝓢] : 𝓢 ⊢ (φ ➝ ψ) ⭤ (∼φ ⋎ ψ) := iffIntro
   NotOrOfImply (deduct' (orCases efq_imply_not₁ imply₁ byAxm₀))
@@ -605,10 +569,22 @@ omit [DecidableEq F] in @[simp] lemma conjIffConj! : 𝓢 ⊢! ⋀Γ ⭤ Γ.conj
 omit [DecidableEq F] in lemma implyLeft_conj_eq_conj! : 𝓢 ⊢! Γ.conj ➝ φ ↔ 𝓢 ⊢! ⋀Γ ➝ φ := replace_imply_left_by_iff'! $ iff_comm'! conjIffConj!
 
 
-lemma generalConj'! (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := replace_imply_left_by_iff'! conjIffConj! |>.mpr (generalConj! h)
+lemma generalConj'! (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := replace_imply_left_by_iff'! conjIffConj! |>.mpr (general_conj! h)
 lemma generalConj'₂! (h : φ ∈ Γ) (d : 𝓢 ⊢! ⋀Γ) : 𝓢 ⊢! φ := (generalConj'! h) ⨀ d
 
 section Conjunction
+
+omit [DecidableEq F] in
+lemma imply_finset_conj! (φ : F) (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ s.conj :=
+  imply_conj! φ s.toList fun ψ hψ ↦ b ψ (by simpa using hψ)
+
+lemma general_finset_conj! {s : Finset F} (h : φ ∈ s) : 𝓢 ⊢! s.conj ➝ φ := general_conj! <| by simp [h]
+
+omit [DecidableEq F] in
+lemma imply_finset_iConj! [Fintype ι] (φ : F) (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! φ ➝ ψ i) :
+    𝓢 ⊢! φ ➝ ⩕ i, ψ i := imply_finset_conj! φ _ (by simpa using b)
+
+lemma general_finset_iConj! [Fintype ι] (φ : ι → F) (i) : 𝓢 ⊢! (⩕ i, φ i) ➝ φ i := general_finset_conj! <| by simp
 
 omit [DecidableEq F] in
 lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! ⋀Γ) ↔ (∀ φ ∈ Γ, 𝓢 ⊢! φ) := by
@@ -713,8 +689,36 @@ lemma imply_left_conj_concat! : 𝓢 ⊢! ⋀(Γ ++ Δ) ➝ φ ↔ 𝓢 ⊢! (�
 
 end Conjunction
 
-
 section disjunction
+
+def implyDisj (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ ➝ Γ.disj :=
+  match Γ with
+  |     [] => by simp at h
+  | ψ :: Γ =>
+    if e : φ = ψ then cast (by simp [e]) (or₁ : 𝓢 ⊢ φ ➝ φ ⋎ Γ.disj)
+    else
+      have : φ ∈ Γ := by simpa [e] using h
+      impTrans'' (implyDisj Γ this) or₂
+def imply_disj! (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! φ ➝ Γ.disj := ⟨implyDisj Γ h⟩
+
+def disjImply [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ Γ.disj ➝ φ :=
+  match Γ with
+  |     [] => efq
+  | ψ :: Γ => or₃'' (b ψ (by simp)) <| disjImply Γ fun ψ h ↦ b ψ (by simp [h])
+def disj_imply! [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! Γ.disj ➝ φ :=
+  ⟨disjImply Γ fun ψ h ↦ (b ψ h).get⟩
+
+lemma imply_finset_disj (s : Finset F) (h : φ ∈ s) : 𝓢 ⊢! φ ➝ s.disj := imply_disj! _ (by simp [h])
+
+omit [DecidableEq F] in
+lemma finset_disj_imply! [HasAxiomEFQ 𝓢] (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! s.disj ➝ φ :=
+  disj_imply! _ fun ψ h ↦ b ψ (by simpa using h)
+
+lemma imply_iDisj [Fintype ι] (φ : ι → F) : 𝓢 ⊢! φ i ➝ ⩖ j, φ j := imply_finset_disj _ (by simp)
+
+omit [DecidableEq F] in
+lemma iDisj_imply! [HasAxiomEFQ 𝓢] [Fintype ι] (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! (⩖ i, ψ i) ➝ φ :=
+  finset_disj_imply! _ (by simpa)
 
 omit [DecidableEq F] in
 lemma iff_concact_disj! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁(Γ ++ Δ) ⭤ ⋁Γ ⋎ ⋁Δ := by

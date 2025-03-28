@@ -146,28 +146,6 @@ def dne [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼∼φ ➝ φ := HasAxiomDNE.dne _
 def dne' [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼∼φ) : 𝓢 ⊢ φ := dne ⨀ b
 lemma dne'! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ∼∼φ) : 𝓢 ⊢! φ := ⟨dne' h.some⟩
 
-
-class HasAxiomWeakLEM (𝓢 : S) where
-  wlem (φ : F) : 𝓢 ⊢ Axioms.WeakLEM φ
-
-def wlem [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢ ∼φ ⋎ ∼∼φ := HasAxiomWeakLEM.wlem φ
-@[simp] lemma wlem! [HasAxiomWeakLEM 𝓢] : 𝓢 ⊢! ∼φ ⋎ ∼∼φ := ⟨wlem⟩
-
-
-class HasAxiomDummett (𝓢 : S) where
-  dummett (φ ψ : F) : 𝓢 ⊢ Axioms.Dummett φ ψ
-
-def dummett [HasAxiomDummett 𝓢] : 𝓢 ⊢ (φ ➝ ψ) ⋎ (ψ ➝ φ) := HasAxiomDummett.dummett φ ψ
-@[simp] lemma dummett! [HasAxiomDummett 𝓢] : 𝓢 ⊢! Axioms.Dummett φ ψ := ⟨dummett⟩
-
-
-class HasAxiomPeirce (𝓢 : S) where
-  peirce (φ ψ : F) : 𝓢 ⊢ Axioms.Peirce φ ψ
-
-def peirce [HasAxiomPeirce 𝓢] : 𝓢 ⊢ ((φ ➝ ψ) ➝ φ) ➝ φ := HasAxiomPeirce.peirce _ _
-@[simp] lemma peirce! [HasAxiomPeirce 𝓢] : 𝓢 ⊢! ((φ ➝ ψ) ➝ φ) ➝ φ := ⟨peirce⟩
-
-
 /--
   Negation `∼φ` is equivalent to `φ ➝ ⊥` on **system**.
 
@@ -272,7 +250,7 @@ lemma unprovable_iff! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImp
 def imply₁₁ [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ φ := impTrans'' imply₁ imply₁
 @[simp] lemma imply₁₁! [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ φ := ⟨imply₁₁ φ ψ χ⟩
 
--- lemma generalConjFinset! [DecidableEq F] {Γ : Finset F} (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := by simp [Finset.conj, (generalConj! (Finset.mem_toList.mpr h))];
+-- lemma generalConjFinset! [DecidableEq F] {Γ : Finset F} (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := by simp [Finset.conj, (general_conj! (Finset.mem_toList.mpr h))];
 
 def implyAnd [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (bq : 𝓢 ⊢ φ ➝ ψ) (br : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ⋏ χ := imply₁' and₃ ⨀₁ bq ⨀₁ br
 lemma imply_and! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hq : 𝓢 ⊢! φ ➝ ψ) (hr : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! φ ➝ ψ ⋏ χ := ⟨implyAnd hq.some hr.some⟩
@@ -340,7 +318,7 @@ def generalConj {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢ Γ.conj ➝ φ
     else
       have : φ ∈ Γ := by simpa [e] using h
       impTrans'' and₂ (generalConj this)
-lemma generalConj! (h : φ ∈ Γ) : 𝓢 ⊢! Γ.conj ➝ φ := ⟨generalConj h⟩
+lemma general_conj! (h : φ ∈ Γ) : 𝓢 ⊢! Γ.conj ➝ φ := ⟨generalConj h⟩
 
 def conjIntro (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢ φ) : 𝓢 ⊢ Γ.conj :=
   match Γ with
@@ -351,6 +329,7 @@ def implyConj (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ
   match Γ with
   | []     => imply₁' verum
   | ψ :: Γ => implyAnd (b ψ (by simp)) (implyConj φ Γ (fun ψ hq ↦ b ψ (by simp [hq])))
+def imply_conj! (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ Γ.conj := ⟨implyConj φ Γ fun ψ h ↦ (b ψ h).get⟩
 
 def conjImplyConj (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := implyConj _ _ (fun _ hq ↦ generalConj (h hq))
 

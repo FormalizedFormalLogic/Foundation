@@ -5,7 +5,7 @@ namespace LO.Entailment
 open FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.Ver 𝓢]
+variable {𝓢 : S} [Entailment.Modal.Ver 𝓢]
 
 def bot_of_dia : 𝓢 ⊢ ◇φ ➝ ⊥ := by
   have : 𝓢 ⊢ ∼◇φ ➝ (◇φ ➝ ⊥) := and₁' $ neg_equiv (𝓢 := 𝓢) (φ := ◇φ);

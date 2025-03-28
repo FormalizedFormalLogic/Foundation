@@ -20,7 +20,7 @@ instance : Diagonalization T where
 
 abbrev _root_.LO.FirstOrder.Theory.standardDP : ProvabilityPredicate T U where
   prov := U.provableₐ
-  spec := provableₐ_D1
+  D1 := provableₐ_D1
 
 instance : (Theory.standardDP T U).HBL2 := ⟨provableₐ_D2⟩
 instance : (Theory.standardDP T U).HBL3 := ⟨provableₐ_D3⟩

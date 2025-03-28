@@ -1,4 +1,6 @@
 import Foundation.Propositional.Hilbert.Int
+import Foundation.Propositional.Entailment.Basic
+
 
 namespace LO.Propositional.Hilbert
 
@@ -90,14 +92,14 @@ protected abbrev KC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.WeakLEM (.
 instance : Hilbert.KC.FiniteAxiomatizable where
 instance : Hilbert.KC.HasEFQ where p := 0;
 instance : Hilbert.KC.HasWeakLEM where p := 0;
-instance : Entailment.Intuitionistic (Hilbert.KC) where
+instance : Entailment.KC (Hilbert.KC) where
 
 
 protected abbrev LC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.Dummett (.atom 0) (.atom 1)}⟩
 instance : Hilbert.LC.FiniteAxiomatizable where
 instance : Hilbert.LC.HasEFQ where p := 0;
 instance : Hilbert.LC.HasDummett where p := 0; q := 1;
-instance : Entailment.Intuitionistic (Hilbert.LC) where
+instance : Entailment.LC (Hilbert.LC) where
 
 end
 

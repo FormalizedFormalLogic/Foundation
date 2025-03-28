@@ -75,6 +75,7 @@ import Foundation.Modal.PLoN.Hilbert.N
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.ModalCompanion.KC
 import Foundation.Modal.ModalCompanion.LC
+import Foundation.Modal.ModalCompanion.Cl
 
 import Foundation.Modal.Boxdot.K4_S4
 import Foundation.Modal.Boxdot.GL_Grz
@@ -148,7 +149,8 @@ import Foundation.Incompleteness.Arith.Second
 import Foundation.Incompleteness.Arith.DC
 import Foundation.Incompleteness.DC.Basic
 
-import Foundation.Incompleteness.ProvabilityLogic.Basic
+-- Provability Logic
+import Foundation.ProvabilityLogic.Soundness
 
 import Foundation.AutoProver.Classical
 

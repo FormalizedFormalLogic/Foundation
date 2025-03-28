@@ -21,7 +21,7 @@ variable [Semiterm.Operator.GoedelNumber L (Sentence L)]
 
 structure ProvabilityPredicate (T₀ : Theory L) (T : Theory L) where
   prov : Semisentence L 1
-  spec {σ : Sentence L} : T ⊢!. σ → T₀ ⊢!. prov/[⌜σ⌝]
+  protected D1 {σ : Sentence L} : T ⊢!. σ → T₀ ⊢!. prov/[⌜σ⌝]
 
 namespace ProvabilityPredicate
 
@@ -44,76 +44,74 @@ namespace ProvabilityPredicate
 variable {T₀ T : Theory L}
 
 class HBL2 (𝔅 : ProvabilityPredicate T₀ T) where
-  D2 {σ τ : Sentence L} : T₀ ⊢!. 𝔅 (σ ➝ τ) ➝ (𝔅 σ) ➝ (𝔅 τ)
+  protected D2 {σ τ : Sentence L} : T₀ ⊢!. 𝔅 (σ ➝ τ) ➝ (𝔅 σ) ➝ (𝔅 τ)
 
 class HBL3 (𝔅 : ProvabilityPredicate T₀ T) where
-  D3 {σ : Sentence L} : T₀ ⊢!. (𝔅 σ) ➝ 𝔅 (𝔅 σ)
+  protected D3 {σ : Sentence L} : T₀ ⊢!. (𝔅 σ) ➝ 𝔅 (𝔅 σ)
 
 class HBL (𝔅 : ProvabilityPredicate T₀ T) extends 𝔅.HBL2, 𝔅.HBL3
 
 class Loeb (𝔅 : ProvabilityPredicate T₀ T) where
-  LT {σ : Sentence L} : T ⊢!. (𝔅 σ) ➝ σ → T ⊢!. σ
+  protected LT {σ : Sentence L} : T ⊢!. (𝔅 σ) ➝ σ → T ⊢!. σ
 
 class FormalizedLoeb (𝔅 : ProvabilityPredicate T₀ T) where
-  FLT {σ : Sentence L} : T₀ ⊢!. 𝔅 ((𝔅 σ) ➝ σ) ➝ (𝔅 σ)
+  protected FLT {σ : Sentence L} : T₀ ⊢!. 𝔅 ((𝔅 σ) ➝ σ) ➝ (𝔅 σ)
 
 class Rosser (𝔅 : ProvabilityPredicate T₀ T) where
-  Ro {σ : Sentence L} : T ⊢!. ∼σ → T₀ ⊢!. ∼(𝔅 σ)
+  protected Ro {σ : Sentence L} : T ⊢!. ∼σ → T₀ ⊢!. ∼(𝔅 σ)
 
 section
 
 open LO.Entailment
 
-variable [L.DecidableEq]
-         {T₀ T : Theory L} [T₀ ⪯ T]
-         {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL]
+variable {T₀ T : Theory L}
+         {𝔅 : ProvabilityPredicate T₀ T}
          {σ τ : Sentence L}
 
-abbrev D1 : T ⊢!. σ → T₀ ⊢!. (𝔅 σ) := 𝔅.spec
-alias D2 := HBL2.D2
-alias D3 := HBL3.D3
-alias LT := Loeb.LT
-alias FLT := FormalizedLoeb.FLT
-alias Ro := Rosser.Ro
+protected alias D2 := HBL2.D2
+protected alias D3 := HBL3.D3
+protected alias LT := Loeb.LT
+protected alias FLT := FormalizedLoeb.FLT
+protected alias Ro := Rosser.Ro
 
-def D1_shift : T ⊢!. σ → T ⊢!. (𝔅 σ) := by
+lemma D1_shift [T₀ ⪯ T] : T ⊢!. σ → T ⊢!. (𝔅 σ) := by
   intro h;
   apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
-  apply D1 h;
+  apply 𝔅.D1 h;
 
-def D2_shift [𝔅.HBL2] : T ⊢!. 𝔅 (σ ➝ τ) ➝ (𝔅 σ) ➝ (𝔅 τ) := by
+lemma D2_shift [T₀ ⪯ T] [𝔅.HBL2] : T ⊢!. 𝔅 (σ ➝ τ) ➝ (𝔅 σ) ➝ (𝔅 τ) := by
   apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
-  apply D2;
+  apply 𝔅.D2;
 
-def D3_shift [𝔅.HBL3] : T ⊢!. (𝔅 σ) ➝ 𝔅 (𝔅 σ) := by
+lemma D3_shift [T₀ ⪯ T] [𝔅.HBL3] : T ⊢!. (𝔅 σ) ➝ 𝔅 (𝔅 σ) := by
   apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
-  apply D3;
+  apply 𝔅.D3;
 
-def FLT_shift [𝔅.FormalizedLoeb] : T ⊢!. 𝔅 ((𝔅 σ) ➝ σ) ➝ (𝔅 σ) := by
+lemma FLT_shift [T₀ ⪯ T] [𝔅.FormalizedLoeb] : T ⊢!. 𝔅 ((𝔅 σ) ➝ σ) ➝ (𝔅 σ) := by
   apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
   apply 𝔅.FLT;
 
-def D2' [𝔅.HBL2] [Entailment.ModusPonens T] : T₀ ⊢!. 𝔅 (σ ➝ τ) → T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := by
+lemma D2' [𝔅.HBL2] [Entailment.ModusPonens T] : T₀ ⊢!. 𝔅 (σ ➝ τ) → T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := by
   intro h;
-  exact D2 ⨀ h;
+  exact 𝔅.D2 ⨀ h;
 
-def prov_distribute_imply (h : T ⊢!. σ ➝ τ) : T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := D2' $ D1 h
+lemma prov_distribute_imply [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) : T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := 𝔅.D2' $ 𝔅.D1 h
 
-def prov_distribute_iff (h : T ⊢!. σ ⭤ τ) : T₀ ⊢!. (𝔅 σ) ⭤ (𝔅 τ) := by
+lemma prov_distribute_iff [𝔅.HBL2] (h : T ⊢!. σ ⭤ τ) : T₀ ⊢!. (𝔅 σ) ⭤ (𝔅 τ) := by
   apply iff_intro!;
   . exact prov_distribute_imply $ and₁'! h;
   . exact prov_distribute_imply $ and₂'! h;
 
-def prov_distribute_and : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ (𝔅 σ) ⋏ (𝔅 τ) := by
-  have h₁ : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ (𝔅 σ) := D2' <| D1 and₁!;
-  have h₂ : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ (𝔅 τ) := D2' <| D1 and₂!;
+lemma prov_distribute_and  [𝔅.HBL2] [DecidableEq (Sentence L)] : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ (𝔅 σ) ⋏ (𝔅 τ) := by
+  have h₁ : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ (𝔅 σ) := 𝔅.D2' <| 𝔅.D1 and₁!;
+  have h₂ : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ (𝔅 τ) := 𝔅.D2' <| 𝔅.D1 and₂!;
   exact imply_right_and! h₁ h₂;
 
-def prov_distribute_and' : T₀ ⊢!. 𝔅 (σ ⋏ τ) → T₀ ⊢!. (𝔅 σ) ⋏ (𝔅 τ) := λ h => prov_distribute_and ⨀ h
+def prov_distribute_and' [𝔅.HBL2] [DecidableEq (Sentence L)] : T₀ ⊢!. 𝔅 (σ ⋏ τ) → T₀ ⊢!. (𝔅 σ) ⋏ (𝔅 τ) := λ h => prov_distribute_and ⨀ h
 
-def prov_collect_and : T₀ ⊢!. (𝔅 σ) ⋏ (𝔅 τ) ➝ 𝔅 (σ ⋏ τ) := by
+def prov_collect_and [𝔅.HBL2] [DecidableEq (Sentence L)] : T₀ ⊢!. (𝔅 σ) ⋏ (𝔅 τ) ➝ 𝔅 (σ ⋏ τ) := by
   have h₁ : T₀ ⊢!. (𝔅 σ) ➝ 𝔅 (τ ➝ σ ⋏ τ) := prov_distribute_imply $ and₃!;
-  have h₂ : T₀ ⊢!. 𝔅 (τ ➝ σ ⋏ τ) ➝ (𝔅 τ) ➝ 𝔅 (σ ⋏ τ) := D2;
+  have h₂ : T₀ ⊢!. 𝔅 (τ ➝ σ ⋏ τ) ➝ (𝔅 τ) ➝ 𝔅 (σ ⋏ τ) := 𝔅.D2;
   apply and_imply_iff_imply_imply'!.mpr;
   exact imp_trans''! h₁ h₂;
 
@@ -196,7 +194,7 @@ variable [L.DecidableEq] [𝔅.HBL]
 
 local notation "γ" => 𝔅.goedel
 
-lemma formalized_consistent_of_existance_unprovable : T₀ ⊢!. ∼(𝔅 σ) ➝ 𝔅.con := contra₀'! $ 𝔅.D2 ⨀ (D1 efq!)
+lemma formalized_consistent_of_existance_unprovable : T₀ ⊢!. ∼(𝔅 σ) ➝ 𝔅.con := contra₀'! $ 𝔅.D2 ⨀ (𝔅.D1 efq!)
 
 private lemma consistency_lemma_1 [T₀ ⪯ U] : (U ⊢!. 𝔅.con ➝ ∼(𝔅 σ)) ↔ (U ⊢!. (𝔅 σ) ➝ 𝔅 (∼σ)) := by
   constructor;
@@ -211,7 +209,7 @@ private lemma consistency_lemma_1 [T₀ ⪯ U] : (U ⊢!. 𝔅.con ➝ ∼(𝔅 
 private lemma consistency_lemma_2 : T₀ ⊢!. ((𝔅 σ) ➝ 𝔅 (∼σ)) ➝ (𝔅 σ) ➝ 𝔅 ⊥ := by
   have : T ⊢!. σ ➝ ∼σ ➝ ⊥ := and_imply_iff_imply_imply'!.mp lac!
   have : T₀ ⊢!. (𝔅 σ) ➝ 𝔅 (∼σ ➝ ⊥)  := prov_distribute_imply this;
-  have : T₀ ⊢!. (𝔅 σ) ➝ (𝔅 (∼σ) ➝ 𝔅 ⊥) := imp_trans''! this D2;
+  have : T₀ ⊢!. (𝔅 σ) ➝ (𝔅 (∼σ) ➝ 𝔅 ⊥) := imp_trans''! this 𝔅.D2;
   -- TODO: more simple proof
   apply FiniteContext.deduct'!;
   apply FiniteContext.deduct!;
@@ -224,7 +222,7 @@ variable [T₀ ⪯ T] [Diagonalization T₀]
 
 /-- Formalized First Incompleteness Theorem -/
 theorem formalized_unprovable_goedel : T ⊢!. 𝔅.con ➝ ∼𝔅 γ := by
-  have h₁ : T₀ ⊢!. 𝔅 γ ➝ 𝔅 (𝔅 γ) := D3;
+  have h₁ : T₀ ⊢!. 𝔅 γ ➝ 𝔅 (𝔅 γ) := 𝔅.D3;
   have h₂ : T ⊢!. 𝔅 γ ➝ ∼γ := WeakerThan.pbl $ contra₁'! $ and₁'! goedel_spec;
   have h₃ : T₀ ⊢!. 𝔅 (𝔅 γ) ➝ 𝔅 (∼γ) := prov_distribute_imply h₂;
   exact WeakerThan.pbl $ contra₀'! $ consistency_lemma_2 ⨀ (imp_trans''! h₁ h₃);
@@ -251,18 +249,19 @@ section KrieselSentence
 
 variable {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [Diagonalization T₀]
 
-local notation "κ(" σ ")" => 𝔅.kreisel σ
+local prefix:80 "κ" => 𝔅.kreisel
 
 lemma kreisel_spec (σ : Sentence L) : T₀ ⊢!. κ(σ) ⭤ (𝔅 (κ(σ)) ➝ σ) := by
   convert (diag (T := T₀) “x. !𝔅.prov x → !σ”);
   simp [kreisel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
   rfl;
 
-private lemma kreisel_specAux₁ [T₀ ⪯ T] (σ : Sentence L) : T₀ ⊢!. 𝔅 κ(σ) ➝ (𝔅 σ) := (imp_trans''! (D2 ⨀ (D1 (WeakerThan.pbl <| and₁'! (kreisel_spec σ)))) D2) ⨀₁ D3
+private lemma kreisel_specAux₁ [T₀ ⪯ T] (σ : Sentence L) : T₀ ⊢!. 𝔅 (κ σ) ➝ (𝔅 σ) := (imp_trans''! (𝔅.D2 ⨀ (𝔅.D1 (WeakerThan.pbl <| and₁'! (kreisel_spec σ)))) 𝔅.D2) ⨀₁ 𝔅.D3
 
-private lemma kreisel_specAux₂ (σ : Sentence L) : T₀ ⊢!. (𝔅 κ(σ) ➝ σ) ➝ κ(σ) := and₂'! (kreisel_spec σ)
+private lemma kreisel_specAux₂ (σ : Sentence L) : T₀ ⊢!. (𝔅 (κ σ) ➝ σ) ➝ κ(σ) := and₂'! (kreisel_spec σ)
 
 end KrieselSentence
+
 
 section LoebTheorem
 
@@ -272,7 +271,7 @@ local notation "κ(" σ ")" => 𝔅.kreisel σ
 
 theorem loeb_theorm (H : T ⊢!. (𝔅 σ) ➝ σ) : T ⊢!. σ := by
   have d₁ : T ⊢!. 𝔅 (𝔅.kreisel σ) ➝ σ := imp_trans''! (WeakerThan.pbl (kreisel_specAux₁ σ)) H;
-  have d₂ : T ⊢!. 𝔅 (𝔅.kreisel σ)     := WeakerThan.pbl (𝓢 := T₀.alt) (D1 $ WeakerThan.pbl (kreisel_specAux₂ σ) ⨀ d₁);
+  have d₂ : T ⊢!. 𝔅 (𝔅.kreisel σ)     := WeakerThan.pbl (𝓢 := T₀.alt) (𝔅.D1 $ WeakerThan.pbl (kreisel_specAux₂ σ) ⨀ d₁);
   exact d₁ ⨀ d₂;
 
 instance : 𝔅.Loeb := ⟨loeb_theorm (T := T)⟩
@@ -281,11 +280,12 @@ theorem formalized_loeb_theorem [L.DecidableEq] : T₀ ⊢!. 𝔅 ((𝔅 σ) ➝
   have hκ₁ : T₀ ⊢!. 𝔅 (κ(σ)) ➝ (𝔅 σ) := kreisel_specAux₁ σ;
   have : T₀ ⊢!. ((𝔅 σ) ➝ σ) ➝ (𝔅 κ(σ) ➝ σ) := replace_imply_left! hκ₁;
   have : T ⊢!. ((𝔅 σ) ➝ σ) ➝ κ(σ) := WeakerThan.pbl (𝓢 := T₀.alt) $ imp_trans''! this (kreisel_specAux₂ σ);
-  exact imp_trans''! (D2 ⨀ (D1 this)) hκ₁;
+  exact imp_trans''! (𝔅.D2 ⨀ (𝔅.D1 this)) hκ₁;
 
 instance [L.DecidableEq] : 𝔅.FormalizedLoeb := ⟨formalized_loeb_theorem (T := T)⟩
 
 end LoebTheorem
+
 
 variable [Entailment.Consistent T]
 
@@ -340,7 +340,7 @@ lemma unprovable_rosser : T ⊬. ρ := unprovable_goedel
 
 theorem unrefutable_rosser : T ⊬. ∼ρ := by
   intro hnρ;
-  have hρ : T ⊢!. ρ := WeakerThan.pbl $ (and₂'! rosser_spec) ⨀ (Ro hnρ);
+  have hρ : T ⊢!. ρ := WeakerThan.pbl $ (and₂'! rosser_spec) ⨀ (𝔅.Ro hnρ);
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr <|
     by simpa [provable₀_iff] using (neg_equiv'!.mp hnρ) ⨀ hρ;
   contradiction
@@ -354,10 +354,10 @@ theorem rosser_independent : Entailment.Undecidable T ↑ρ := by
 theorem rosser_first_incompleteness (𝔅 : ProvabilityPredicate T₀ T) [𝔅.Rosser] : ¬Entailment.Complete T :=
   Entailment.incomplete_iff_exists_undecidable.mpr ⟨𝔅.rosser, rosser_independent  ⟩
 
-omit [Diagonalization T₀] [Consistent T]
+omit [Diagonalization T₀] [Consistent T] in
 /-- If `𝔅` satisfies Rosser provability condition, then `𝔅.con` is provable in `T`. -/
 theorem kriesel_remark : T ⊢!. 𝔅.con := by
-  have : T₀ ⊢!. ∼𝔅 ⊥ := Ro (neg_equiv'!.mpr (by simp));
+  have : T₀ ⊢!. ∼𝔅 ⊥ := 𝔅.Ro (neg_equiv'!.mpr (by simp));
   exact WeakerThan.pbl $ this;
 
 end

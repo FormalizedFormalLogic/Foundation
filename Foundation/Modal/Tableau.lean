@@ -35,7 +35,7 @@ instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t�
 
 section
 
-variable [Entailment.K 𝓢]
+variable [Entailment.Modal.K 𝓢]
 
 lemma equality_def {t₁ t₂ : Tableau α} : t₁ = t₂ ↔ t₁.1 = t₂.1 ∧ t₁.2 = t₂.2 := by
   constructor;
@@ -236,7 +236,7 @@ variable {𝓢}
 
 @[simp] lemma eq_lindenbaum_indexed_zero [Encodable α] {t : Tableau α} : t[0] = t := by simp [lindenbaum_indexed]
 
-lemma consistent_lindenbaum_next [Entailment.K 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
+lemma consistent_lindenbaum_next [Entailment.Modal.K 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
   unfold lindenbaum_next;
   split;
   . assumption;
@@ -246,7 +246,7 @@ lemma consistent_lindenbaum_next [Entailment.K 𝓢] (consistent : t.Consistent 
 
 variable [Encodable α]
 
-lemma consistent_lindenbaum_indexed_succ [Entailment.K 𝓢] {i : ℕ} : t[i].Consistent 𝓢 → t[i + 1].Consistent 𝓢 := by
+lemma consistent_lindenbaum_indexed_succ [Entailment.Modal.K 𝓢] {i : ℕ} : t[i].Consistent 𝓢 → t[i + 1].Consistent 𝓢 := by
   simp only [lindenbaum_indexed];
   split;
   . intro h; apply consistent_lindenbaum_next h;
@@ -256,7 +256,7 @@ lemma either_mem_lindenbaum_indexed (t) (φ : Formula α) : φ ∈ t[(encode φ)
   simp only [lindenbaum_indexed, encodek, lindenbaum_next];
   split <;> tauto;
 
-lemma consistent_lindenbaum_indexed [Entailment.K 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
+lemma consistent_lindenbaum_indexed [Entailment.Modal.K 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
   induction i with
   | zero => simpa;
   | succ i ih => apply consistent_lindenbaum_indexed_succ; assumption;
@@ -281,7 +281,7 @@ lemma subset₂_lindenbaum_indexed_of_lt (h : m ≤ n) : t[m].2 ⊆ t[n].2 := by
     . split <;> tauto;
     . tauto;
 
-lemma exists_consistent_saturated_tableau [Entailment.K 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (u.Consistent 𝓢) ∧ (u.Maximal) := by
+lemma exists_consistent_saturated_tableau [Entailment.Modal.K 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (u.Consistent 𝓢) ∧ (u.Maximal) := by
   use t∞;
   refine ⟨?subset, ?consistent, ?maximal⟩;
   case subset => constructor <;> apply Set.subset_iUnion_of_subset 0 (by simp);
@@ -342,15 +342,15 @@ variable {t t₁ t₂  : MaximalConsistentTableau 𝓢} {φ ψ : Formula α}
 
 @[simp] lemma consistent (t : MaximalConsistentTableau 𝓢) : t.1.Consistent 𝓢 := t.2.2
 
-lemma lindenbaum {t₀ : Tableau α} [Entailment.K 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : MaximalConsistentTableau 𝓢), t₀ ⊆ t.1 := by
+lemma lindenbaum {t₀ : Tableau α} [Entailment.Modal.K 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : MaximalConsistentTableau 𝓢), t₀ ⊆ t.1 := by
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
   exact ⟨⟨t, hMax, hCon⟩, ht⟩;
 
-instance [Entailment.Consistent 𝓢] [Entailment.K 𝓢] [DecidableEq α] [Encodable α] : Nonempty (MaximalConsistentTableau 𝓢) := ⟨lindenbaum consistent_empty |>.choose⟩
+instance [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢] [DecidableEq α] [Encodable α] : Nonempty (MaximalConsistentTableau 𝓢) := ⟨lindenbaum consistent_empty |>.choose⟩
 
 variable {t t₁ t₂ : MaximalConsistentTableau 𝓢}
 
-variable [Entailment.K 𝓢]
+variable [Entailment.Modal.K 𝓢]
 
 lemma disjoint : t.1.Disjoint := t.1.disjoint_of_consistent $ t.consistent
 
@@ -697,7 +697,7 @@ lemma iff_mem₂_neg : ∼φ ∈ t.1.2 ↔ φ ∈ t.1.1 := by
     exact iff_not_mem₁_mem₂.mpr $ of_mem₁_neg $ iff_not_mem₂_mem₁.mp h
 
 
-omit [Entailment.K 𝓢] [DecidableEq α] [Encodable α] in
+omit [Entailment.Modal.K 𝓢] [DecidableEq α] [Encodable α] in
 private lemma of_mem₁_multibox : (□^[n]φ ∈ t.1.1) → (∀ {t' : MaximalConsistentTableau 𝓢}, (□''⁻¹^[n]t.1.1 ⊆ t'.1.1) → (φ ∈ t'.1.1)) := by
   intro h t' ht';
   apply ht';

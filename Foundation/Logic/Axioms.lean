@@ -33,13 +33,7 @@ protected abbrev EFQ := ⊥ ➝ φ
 
 protected abbrev LEM := φ ⋎ ∼φ
 
-protected abbrev WeakLEM := ∼φ ⋎ ∼∼φ
-
-protected abbrev Dummett := (φ ➝ ψ) ⋎ (ψ ➝ φ)
-
 protected abbrev DNE := ∼∼φ ➝ φ
-
-protected abbrev Peirce := ((φ ➝ ψ) ➝ φ) ➝ φ
 
 end
 
