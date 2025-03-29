@@ -331,6 +331,11 @@ lemma all {P : (Fin (k + 1) → V) → Prop} {φ : 𝚷-[m + 1].Semiformula V (k
     (hp : DefinedWithParam P φ) :
     DefinedWithParam (fun v ↦ ∀ x, P (x :> v)) φ.all := by intro _; simp [hp.df.iff]
 
+/-
+lemma iAnd [Fintype ι] {R : ι → (Fin k → V) → Prop} {φ : ι → ℌ.Semiformula V k} (hR : ∀ i, DefinedWithParam (R i) (φ i)) :
+    DefinedWithParam (fun x ↦ ∀ i, R i x) (⩕ i, φ i) :=
+-/
+
 end DefinedWithParam
 
 namespace BoldfaceRel
