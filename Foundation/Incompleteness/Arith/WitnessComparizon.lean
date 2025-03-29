@@ -76,9 +76,16 @@ lemma antisymm : T.DerivabilityComparison Γ Δ → T.DerivabilityComparison Δ 
   have : fstIdx dΓ = Γ := dΓd.1
   simp_all
 
-lemma feegege [Fintype ι] (Γ : ι → V) (H : T.Derivable (Γ i)) : ∃ j, ∀ k, T.DerivabilityComparison (Γ j) (Γ k) := by {  }
+lemma find_minimal_proof_fintype [Fintype ι] (Γ : ι → V) (H : T.Derivable (Γ i)) :
+    ∃ j, ∀ k, T.DerivabilityComparison (Γ j) (Γ k) := by
+  rcases show ∃ dᵢ, T.DerivationOf dᵢ (Γ i)from H with ⟨dᵢ, Hdᵢ⟩
+  have : ∃ z, (∃ j, T.DerivationOf z (Γ j)) ∧ ∀ w < z, ∀ (x : ι), ¬T.DerivationOf w (Γ x) := by
+    simpa using
+      least_number_hh 𝚺 1 (P := fun z ↦ ∃ j, T.DerivationOf z (Γ j))
+        (HierarchySymbol.Boldface.fintype_ex fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
+  rcases this with ⟨z, ⟨j, hj⟩, H⟩
+  exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩
 
-/--/
 end Language.Theory.DerivabilityComparison
 
 namespace Language.Theory.ProvabilityComparison
@@ -90,6 +97,9 @@ lemma refl_iff_provable : T.ProvabilityComparison φ φ ↔ T.Provable φ := Lan
 lemma antisymm : T.ProvabilityComparison φ ψ → T.ProvabilityComparison ψ φ → φ = ψ :=
   fun h₁ h₂ ↦ by
     simpa using mem_ext_iff.mp (Language.Theory.DerivabilityComparison.antisymm h₁ h₂) φ
+
+lemma find_minimal_proof_fintype [Fintype ι] (φ : ι → V) (H : T.Provable (φ i)) :
+    ∃ j, ∀ k, T.ProvabilityComparison (φ j) (φ k) := DerivabilityComparison.find_minimal_proof_fintype _ H
 
 end Language.Theory.ProvabilityComparison
 
