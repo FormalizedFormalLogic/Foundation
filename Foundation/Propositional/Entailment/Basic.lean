@@ -76,13 +76,13 @@ section
 
 variable (𝓢 : S)
 
-protected class KC extends Entailment.Intuitionistic 𝓢, HasAxiomWeakLEM 𝓢
+protected class KC extends Entailment.Int 𝓢, HasAxiomWeakLEM 𝓢
 
-protected class LC extends Entailment.Intuitionistic 𝓢, HasAxiomDummett 𝓢
+protected class LC extends Entailment.Int 𝓢, HasAxiomDummett 𝓢
 
-protected class KP extends Entailment.Intuitionistic 𝓢, HasAxiomKrieselPutnam 𝓢
+protected class KP extends Entailment.Int 𝓢, HasAxiomKrieselPutnam 𝓢
 
-protected class Sc extends Entailment.Intuitionistic 𝓢, HasAxiomScott 𝓢
+protected class Sc extends Entailment.Int 𝓢, HasAxiomScott 𝓢
 
 end
 

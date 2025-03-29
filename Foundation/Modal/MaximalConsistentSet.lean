@@ -42,7 +42,7 @@ lemma union_consistent : Consistent 𝓢 (T₁ ∪ T₂) → (Consistent 𝓢 T�
     exact h Γ $ by tauto_set;
   }
 
-variable [Entailment.Classical 𝓢]
+variable [Entailment.Cl 𝓢]
 
 lemma emptyset_consistent [DecidableEq α] [H_consis : Entailment.Consistent 𝓢] : Consistent 𝓢 ∅ := by
   obtain ⟨f, hf⟩ := H_consis.exists_unprovable;
@@ -255,7 +255,7 @@ lemma intro_triunion_consistent
         simpa using List.of_mem_filter hp;
       . assumption;
 
-omit [Entailment.Classical 𝓢] in
+omit [Entailment.Cl 𝓢] in
 lemma exists_consistent_maximal_of_consistent (T_consis : Consistent 𝓢 T)
   : ∃ Z, Consistent 𝓢 Z ∧ T ⊆ Z ∧ ∀ U, U *⊬[𝓢] ⊥ → Z ⊆ U → U = Z := by
   obtain ⟨Z, h₁, ⟨h₂, h₃⟩⟩ := zorn_subset_nonempty { T : FormulaSet α | Consistent 𝓢 T} (by
@@ -332,7 +332,7 @@ lemma exists_of_consistent (consisT : Consistent 𝓢 T) : ∃ Ω : MaximalConsi
 
 alias lindenbaum := exists_of_consistent
 
-variable [Entailment.Classical 𝓢]
+variable [Entailment.Cl 𝓢]
 
 instance [Entailment.Consistent 𝓢] : Nonempty (MaximalConsistentSet 𝓢) := ⟨lindenbaum emptyset_consistent |>.choose⟩
 

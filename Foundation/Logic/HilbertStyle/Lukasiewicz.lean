@@ -182,7 +182,7 @@ def orElim : 𝓢 ⊢ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
 
 instance : HasAxiomOrElim 𝓢 := ⟨λ φ ψ χ => Lukasiewicz.orElim (φ := φ) (ψ := ψ) (χ := χ)⟩
 
-instance : Entailment.Classical 𝓢 where
+instance : Entailment.Cl 𝓢 where
 
 end Lukasiewicz
 

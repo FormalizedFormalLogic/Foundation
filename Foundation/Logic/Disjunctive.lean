@@ -15,7 +15,7 @@ lemma iff_disjunctive {𝓢 : S}  : (Disjunctive 𝓢) ↔ ∀ {φ ψ}, 𝓢 ⊢
   . apply Disjunctive.disjunctive;
   . exact λ d ↦ ⟨d⟩;
 
-lemma iff_complete_disjunctive [DecidableEq F] {𝓢 : S} [Entailment.Classical 𝓢] : (Entailment.Complete 𝓢) ↔ (Disjunctive 𝓢) := by
+lemma iff_complete_disjunctive [DecidableEq F] {𝓢 : S} [Entailment.Cl 𝓢] : (Entailment.Complete 𝓢) ↔ (Disjunctive 𝓢) := by
   constructor;
   . intro hComp;
     apply iff_disjunctive.mpr;

@@ -454,7 +454,7 @@ abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬ σ
 
 infix:45 " ⊬. " => Unprovable₀
 
-instance (T : Theory.Alt L) : Entailment.Classical T := Entailment.Classical.ofEquiv T.thy T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
+instance (T : Theory.Alt L) : Entailment.Cl T := Entailment.Cl.ofEquiv T.thy T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
 
 variable {T : Theory L} {σ : Sentence L}
 

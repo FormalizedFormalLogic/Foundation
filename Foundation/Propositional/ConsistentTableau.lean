@@ -37,7 +37,7 @@ lemma not_mem₂ (hCon : t.Consistent 𝓢) {Γ : List (Formula α)} (hΓ : ∀ 
 
 section
 
-variable [Entailment.Intuitionistic 𝓢]
+variable [Entailment.Int 𝓢]
 
 lemma disjoint_of_consistent (hCon : t.Consistent 𝓢) : Disjoint t.1 t.2 := by
   by_contra h;
@@ -130,7 +130,7 @@ abbrev Saturated (t : Tableau α) := ∀ φ : Formula α, φ ∈ t.1 ∨ φ ∈ 
 
 section Saturated
 
-variable [Entailment.Intuitionistic 𝓢]
+variable [Entailment.Int 𝓢]
 variable {t : Tableau α}
 
 lemma mem₂_of_not_mem₁ (hMat : Saturated t) : φ ∉ t.1 → φ ∈ t.2 := by
@@ -181,7 +181,7 @@ lemma saturated_duality
 
 end Saturated
 
-lemma emptyset_consistent [Entailment.Intuitionistic 𝓢] [DecidableEq α] [H_consis : Entailment.Consistent 𝓢] : Consistent 𝓢 ⟨∅, ∅⟩ := by
+lemma emptyset_consistent [Entailment.Int 𝓢] [DecidableEq α] [H_consis : Entailment.Consistent 𝓢] : Consistent 𝓢 ⟨∅, ∅⟩ := by
   intro Γ Δ hΓ hΔ;
   replace hΓ : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr hΓ;
   replace hΔ : Δ = [] := List.eq_nil_iff_forall_not_mem.mpr hΔ;
@@ -218,7 +218,7 @@ local notation:max t"∞" => lindenbaum_maximal 𝓢 t
 
 variable {𝓢}
 
-lemma next_parametericConsistent [Entailment.Intuitionistic 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
+lemma next_parametericConsistent [Entailment.Int 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
   simp [lindenbaum_next];
   split;
   . simpa;
@@ -228,7 +228,7 @@ lemma next_parametericConsistent [Entailment.Intuitionistic 𝓢] (consistent : 
 
 variable [Encodable α]
 
-lemma lindenbaum_next_indexed_parametricConsistent_succ [Entailment.Intuitionistic 𝓢] {i : ℕ} : Consistent 𝓢 t[i] → Consistent 𝓢 t[i + 1] := by
+lemma lindenbaum_next_indexed_parametricConsistent_succ [Entailment.Int 𝓢] {i : ℕ} : Consistent 𝓢 t[i] → Consistent 𝓢 t[i + 1] := by
   simp [lindenbaum_next_indexed];
   split;
   . intro h;
@@ -242,7 +242,7 @@ lemma mem_lindenbaum_next_indexed (t) (φ : Formula α) : φ ∈ t[(encode φ) +
   . left; tauto;
   . right; tauto;
 
-lemma lindenbaum_next_indexed_parametricConsistent [Entailment.Intuitionistic 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
+lemma lindenbaum_next_indexed_parametricConsistent [Entailment.Int 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
   induction i with
   | zero => simpa;
   | succ i ih => apply lindenbaum_next_indexed_parametricConsistent_succ; assumption;
@@ -267,7 +267,7 @@ lemma lindenbaum_next_indexed_subset₂_of_lt (h : m ≤ n) : t[m].2 ⊆ t[n].2 
     . split <;> tauto;
     . tauto;
 
-lemma exists_parametricConsistent_saturated_tableau [Entailment.Intuitionistic 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (Tableau.Consistent 𝓢 u) ∧ (Saturated u) := by
+lemma exists_parametricConsistent_saturated_tableau [Entailment.Int 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (Tableau.Consistent 𝓢 u) ∧ (Saturated u) := by
   use t∞;
   refine ⟨?subset, ?consistent, ?saturated⟩;
   case subset => constructor <;> apply Set.subset_iUnion_of_subset 0 (by simp);
@@ -329,17 +329,17 @@ lemma saturated (t : SaturatedConsistentTableau 𝓢) : Saturated t.1 := t.2.1
 
 variable {t₀ : Tableau α} {φ ψ : Formula α}
 
-lemma lindenbaum [Entailment.Intuitionistic 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : SaturatedConsistentTableau 𝓢), t₀ ⊆ t.1 := by
+lemma lindenbaum [Entailment.Int 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : SaturatedConsistentTableau 𝓢), t₀ ⊆ t.1 := by
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
   exact ⟨⟨t, hMax, hCon⟩, ht⟩;
 
-instance [Entailment.Consistent 𝓢] [Entailment.Intuitionistic 𝓢] [DecidableEq α] [Encodable α] : Nonempty (SaturatedConsistentTableau 𝓢) := ⟨lindenbaum Tableau.emptyset_consistent |>.choose⟩
+instance [Entailment.Consistent 𝓢] [Entailment.Int 𝓢] [DecidableEq α] [Encodable α] : Nonempty (SaturatedConsistentTableau 𝓢) := ⟨lindenbaum Tableau.emptyset_consistent |>.choose⟩
 
 variable {t t₁ t₂ : SaturatedConsistentTableau 𝓢}
 
 lemma not_mem₂ {Γ : List (Formula α)} (hΓ : ∀ φ ∈ Γ, φ ∈ t.1.1) (h : 𝓢 ⊢! ⋀Γ ➝ ψ) : ψ ∉ t.1.2 := t.1.not_mem₂ t.consistent hΓ h
 
-variable [Entailment.Intuitionistic 𝓢]
+variable [Entailment.Int 𝓢]
 
 @[simp] lemma disjoint : Disjoint t.1.1 t.1.2 := t.1.disjoint_of_consistent t.2.2
 
@@ -505,7 +505,7 @@ private lemma of_mem₁_imp [DecidableEq α] : φ ➝ ψ ∈ t.1.1 → (φ ∈ t
   push_neg at hC;
   exact hC.2 $ mdp_mem₁ h $ iff_not_mem₂_mem₁.mp hC.1
 
-private lemma of_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Classical 𝓢] : φ ➝ ψ ∈ t.1.2 → (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
+private lemma of_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ ➝ ψ ∈ t.1.2 → (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   intro h;
   by_contra hC;
   replace hC := not_and_or.mp hC;
@@ -519,7 +519,7 @@ private lemma of_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Classica
     have : φ ➝ ψ ∉ t.1.2 := iff_not_mem₂_mem₁.mpr $ mdp_mem₁ this (iff_not_mem₂_mem₁.mp hψ);
     contradiction;
 
-lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Classical 𝓢] : φ ➝ ψ ∈ t.1.1 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
+lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ ➝ ψ ∈ t.1.1 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   constructor;
   . apply of_mem₁_imp;
   . contrapose;
@@ -530,7 +530,7 @@ lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Classical 𝓢]
     . exact iff_not_mem₂_mem₁.mpr hφ;
     . exact iff_not_mem₁_mem₂.mpr hψ;
 
-lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Classical 𝓢] : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
+lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   constructor;
   . apply of_mem₂_imp;
   . contrapose;
