@@ -90,7 +90,17 @@ instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
 theorem S4Point2_ssubset_GrzPoint2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . sorry;
+  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_confluent_preorder ⊧ φ by
+      simpa [S4Point2.Kripke.eq_finite_confluent_preorder_Logic];
+    use Axioms.Grz (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      constructor;
+      . refine ⟨inferInstance, {refl := by simp, trans := by simp}, ⟨?_⟩⟩;
+        . rintro x y z ⟨Rxy, Ryz⟩; use 0;
+      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.S4Point2 Logic.GrzPoint2 := ⟨S4Point2_ssubset_GrzPoint2⟩
 
 
@@ -148,7 +158,16 @@ instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
 theorem S4Point3_ssubset_GrzPoint3 : Logic.S4Point3 ⊂ Logic.GrzPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . sorry;
+  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_connected_preorder ⊧ φ by
+      simpa [S4Point3.Kripke.eq_finite_connected_preorder_Logic];
+    use Axioms.Grz (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      constructor;
+      . refine ⟨inferInstance, {refl := by simp, trans := by simp}, ⟨by simp [Connected]⟩⟩;
+      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.S4Point3 Logic.GrzPoint3 := ⟨S4Point3_ssubset_GrzPoint3⟩
 
 end LO.Modal.Logic
