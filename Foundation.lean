@@ -151,6 +151,7 @@ import Foundation.Incompleteness.DC.Basic
 
 -- Provability Logic
 import Foundation.ProvabilityLogic.Soundness
+import Foundation.ProvabilityLogic.GL.Completeness
 
 import Foundation.AutoProver.Classical
 

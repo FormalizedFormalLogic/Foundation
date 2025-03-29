@@ -3,7 +3,7 @@ import Mathlib.Data.Finite.Sum
 
 namespace LO.Modal.Kripke
 
-def Frame.extendRoot (F : Kripke.Frame) (r : F.World) [F.IsRooted r] : Kripke.Frame where
+def Frame.extendRoot (F : Kripke.Frame) (r : outParam F.World) [F.IsRooted r] : Kripke.Frame where
   World := Unit ⊕ F.World
   Rel x y :=
     match x, y with
@@ -48,6 +48,10 @@ instance isTrans [IsTrans _ F.Rel] : IsTrans _ (F.extendRoot r).Rel := ⟨by
     assumption;
 ⟩
 
+lemma rooted_original [IsTrans _ F.Rel] {x : F.World} : (extendRoot.root (F := F) (r := r)) ≺ x := by
+  apply extendRoot.instIsRooted (F := F) (r := r) |>.direct_rooted_of_trans x;
+  tauto;
+
 instance [F.IsTree r] : (F.extendRoot r).IsTree extendRoot.root where
 
 instance instIsFiniteTree [F.IsFiniteTree r] : (F.extendRoot r).IsFiniteTree extendRoot.root where
@@ -87,7 +91,11 @@ namespace Model.extendRoot
 
 variable {M : Model} {r : M.World} [M.IsRooted r] {x y : M.World}
 
+instance : Coe (M.World) ((M.extendRoot r).World) := ⟨Sum.inr⟩
+
 protected abbrev root := Frame.extendRoot.root (F := M.toFrame) (r := r)
+
+lemma rooted_original [IsTrans _ M.Rel] : (extendRoot.root (M := M) (r := r)) ≺ (Sum.inr x) := Frame.extendRoot.rooted_original
 
 def pMorphism : Model.PseudoEpimorphism M (M.extendRoot r) := PseudoEpimorphism.ofAtomic (Frame.extendRoot.pMorphism (F := M.toFrame) (r := r)) $ by
   intros; rfl;

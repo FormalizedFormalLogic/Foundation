@@ -251,6 +251,9 @@ lemma of_iff {P Q : (Fin k → V) → Prop} (h : ∀ x, P x ↔ Q x)
     {φ : ℌ.Semiformula V k} (H : DefinedWithParam Q φ) : DefinedWithParam P φ := by
   rwa [show P = Q from by funext v; simp [h]]
 
+lemma transition {P Q : (Fin k → V) → Prop} (hP : DefinedWithParam P φ) (hQ : DefinedWithParam Q φ) :
+    ∀ x, P x → Q x := fun x ↦ by simp [hP.df x, hQ.df x]
+
 lemma to_definable {φ : ℌ.Semiformula V k} (h : DefinedWithParam P φ) : ℌ.Boldface P := ⟨φ, h⟩
 
 lemma to_definable₀ {φ : Γ'-[0].Semiformula V k}
@@ -304,7 +307,7 @@ lemma not {φ : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P φ) :
 lemma imp {φ ψ : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P φ) (hq : DefinedWithParam Q ψ) :
     DefinedWithParam (fun x ↦ P x → Q x) (φ ➝ ψ) := (hp.not.or hq).of_iff (by intro x; simp [imp_iff_not_or])
 
-lemma iff {φ ψ : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P φ) (hq : DefinedWithParam Q ψ) :
+lemma biconditional {φ ψ : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P φ) (hq : DefinedWithParam Q ψ) :
     DefinedWithParam (fun x ↦ P x ↔ Q x) (φ ⭤ ψ) := ((hp.imp hq).and (hq.imp hp)).of_iff <| by intro v; simp [iff_iff_implies_and_implies]
 
 lemma ball {P : (Fin (k + 1) → V) → Prop} {φ : ℌ.Semiformula V (k + 1)}
@@ -330,6 +333,47 @@ lemma ex {P : (Fin (k + 1) → V) → Prop} {φ : 𝚺-[m + 1].Semiformula V (k 
 lemma all {P : (Fin (k + 1) → V) → Prop} {φ : 𝚷-[m + 1].Semiformula V (k + 1)}
     (hp : DefinedWithParam P φ) :
     DefinedWithParam (fun v ↦ ∀ x, P (x :> v)) φ.all := by intro _; simp [hp.df.iff]
+
+lemma conj (Γ : List (ℌ.Semiformula V k)) {R : (φ : ℌ.Semiformula V k) → (Fin k → V) → Prop} (hR : ∀ φ ∈ Γ, DefinedWithParam (R φ) φ) :
+    DefinedWithParam (fun x ↦ ∀ φ ∈ Γ, R φ x) Γ.conj :=
+  match Γ with
+  |     [] => by simp
+  | φ :: Γ => by simpa using (hR φ (by simp)).and (conj Γ (R := R) (fun ψ hψ ↦ hR ψ (by simp [hψ])))
+
+lemma disj (Γ : List (ℌ.Semiformula V k)) {R : (φ : ℌ.Semiformula V k) → (Fin k → V) → Prop} (hR : ∀ φ ∈ Γ, DefinedWithParam (R φ) φ) :
+    DefinedWithParam (fun x ↦ ∃ φ ∈ Γ, R φ x) Γ.disj :=
+  match Γ with
+  |     [] => by simp
+  | φ :: Γ => by simpa using (hR φ (by simp)).or (disj Γ (R := R) (fun ψ hψ ↦ hR ψ (by simp [hψ])))
+
+open Classical in
+lemma fconj {s : Finset ι} {R : ι → (Fin k → V) → Prop} {φ : ι → ℌ.Semiformula V k} (hR : ∀ i ∈ s, DefinedWithParam (R i) (φ i)) :
+    DefinedWithParam (fun x ↦ ∀ i ∈ s, R i x) (⩕ i ∈ s, φ i) := by
+  suffices DefinedWithParam (fun x ↦ ∀ i ∈ s, R i x) (s.image φ).toList.conj by simpa [Finset.conj', Finset.conj]
+  have : DefinedWithParam (fun x ↦ ∀ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.image φ).toList.conj := by
+    simpa using conj (s.image φ).toList (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
+      suffices ∀ a ∈ s, DefinedWithParam (fun v => ∀ i ∈ s, φ a = φ i → R i v) (φ a) by simpa
+      intro i hi
+      exact (hR i hi).of_iff fun v ↦
+        ⟨fun h ↦ h i hi rfl, fun h j hj e ↦
+          (hR i hi).transition (show DefinedWithParam (R j) (φ i) from by simpa [e] using hR j hj) v h⟩)
+  exact this.of_iff fun x ↦ ⟨fun h i hi j hj e ↦ h j hj, fun h i hi ↦ h i hi i hi rfl⟩
+
+open Classical in
+lemma fdisj {s : Finset ι} {R : ι → (Fin k → V) → Prop} {φ : ι → ℌ.Semiformula V k} (hR : ∀ i ∈ s, DefinedWithParam (R i) (φ i)) :
+    DefinedWithParam (fun x ↦ ∃ i ∈ s, R i x) (⩖ i ∈ s, φ i) := by
+  suffices DefinedWithParam (fun x ↦ ∃ i ∈ s, R i x) (s.image φ).toList.disj by simpa [Finset.disj', Finset.disj]
+  have : DefinedWithParam (fun x ↦ ∃ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.image φ).toList.disj := by
+    simpa using disj (s.image φ).toList (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
+      suffices ∀ a ∈ s, DefinedWithParam (fun v => ∀ i ∈ s, φ a = φ i → R i v) (φ a) by simpa
+      intro i hi
+      exact (hR i hi).of_iff fun v ↦
+        ⟨fun h ↦ h i hi rfl, fun h j hj e ↦
+          (hR i hi).transition (show DefinedWithParam (R j) (φ i) from by simpa [e] using hR j hj) v h⟩)
+  exact this.of_iff fun x ↦
+    ⟨fun ⟨i, hi, h⟩ ↦
+      ⟨i, hi, fun j hj e ↦ (hR i hi).transition (show DefinedWithParam (R j) (φ i) from by simpa [e] using hR j hj) x h⟩,
+      fun ⟨i, hi, h⟩ ↦ ⟨i, hi, h i hi rfl⟩⟩
 
 end DefinedWithParam
 
@@ -429,23 +473,29 @@ lemma and (h₁ : ℌ.Boldface P) (h₂ : ℌ.Boldface Q) :
   rcases h₁ with ⟨p₁, h₁⟩; rcases h₂ with ⟨p₂, h₂⟩
   exact ⟨p₁ ⋏ p₂, h₁.and h₂⟩
 
-lemma conj {k l} {P : Fin l → (Fin k → V) → Prop}
+lemma fconj {P : ι → (Fin k → V) → Prop} (s : Finset ι)
+    (h : ∀ i, ℌ.Boldface fun w : Fin k → V ↦ P i w) :
+    ℌ.Boldface fun v : Fin k → V ↦ ∀ i ∈ s, P i v := by
+    have : ∀ i, ∃ φ, DefinedWithParam (P i) φ := fun i ↦ (h i).definable
+    rcases Classical.axiomOfChoice this with ⟨φ, H⟩
+    exact ⟨⟨_, DefinedWithParam.fconj fun i _ ↦ H i⟩⟩
+
+lemma fdisj {P : ι → (Fin k → V) → Prop} (s : Finset ι)
+    (h : ∀ i, ℌ.Boldface fun w : Fin k → V ↦ P i w) :
+    ℌ.Boldface fun v : Fin k → V ↦ ∃ i ∈ s, P i v := by
+    have : ∀ i, ∃ φ, DefinedWithParam (P i) φ := fun i ↦ (h i).definable
+    rcases Classical.axiomOfChoice this with ⟨φ, H⟩
+    exact ⟨⟨_, DefinedWithParam.fdisj fun i _ ↦ H i⟩⟩
+
+lemma fintype_all [Fintype ι] {P : ι → (Fin k → V) → Prop}
     (h : ∀ i, ℌ.Boldface fun w : Fin k → V ↦ P i w) :
     ℌ.Boldface fun v : Fin k → V ↦ ∀ i, P i v := by
-  induction l
-  case zero => simp
-  case succ l ih =>
-    suffices ℌ.Boldface fun v : Fin k → V ↦ P 0 v ∧ ∀ i : Fin l, P i.succ v by
-      apply of_iff this; intro x
-      constructor
-      · intro h
-        exact ⟨h 0, fun i ↦ h i.succ⟩
-      · rintro ⟨h0, hs⟩
-        intro i; cases' i using Fin.cases with i
-        · exact h0
-        · exact hs i
-    apply and (h 0); apply ih
-    intro i; exact h i.succ
+  simpa using fconj Finset.univ h
+
+lemma fintype_ex [Fintype ι] {P : ι → (Fin k → V) → Prop}
+    (h : ∀ i, ℌ.Boldface fun w : Fin k → V ↦ P i w) :
+    ℌ.Boldface fun v : Fin k → V ↦ ∃ i, P i v := by
+  simpa using fdisj Finset.univ h
 
 lemma or (h₁ : ℌ.Boldface P) (h₂ : ℌ.Boldface Q) :
     ℌ.Boldface (fun v ↦ P v ∨ Q v) := by
@@ -471,9 +521,9 @@ lemma imp (h₁ : Γ.alt-[m].Boldface P) (h₂ : Γ-[m].Boldface Q) :
   | 𝚫 =>
     rcases h₁ with ⟨p₁, h₁⟩; rcases h₂ with ⟨p₂, h₂⟩; exact ⟨p₁ ➝ p₂, h₁.imp h₂⟩
 
-lemma iff (h₁ : 𝚫-[m].Boldface P) (h₂ : 𝚫-[m].Boldface Q) {Γ} :
+lemma biconditional (h₁ : 𝚫-[m].Boldface P) (h₂ : 𝚫-[m].Boldface Q) {Γ} :
     Γ-[m].Boldface (fun v ↦ P v ↔ Q v) :=
-  .of_delta (by rcases h₁ with ⟨φ, hp⟩; rcases h₂ with ⟨ψ, hq⟩; exact ⟨φ ⭤ ψ, hp.iff hq⟩)
+  .of_delta (by rcases h₁ with ⟨φ, hp⟩; rcases h₂ with ⟨ψ, hq⟩; exact ⟨φ ⭤ ψ, hp.biconditional hq⟩)
 
 lemma all {P : (Fin k → V) → V → Prop} (h : 𝚷-[s + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     𝚷-[s + 1].Boldface (fun v ↦ ∀ x, P v x) := by
@@ -546,7 +596,7 @@ private lemma substitution_sigma {f : Fin k → (Fin l → V) → V} (hP : 𝚺-
     𝚺-[m+1].Boldface fun z ↦ P (fun i ↦ f i z) := by
   have : 𝚺-[m+1].Boldface fun z ↦ ∃ ys : Fin k → V, (∀ i, ys i = f i z) ∧ P ys := by
     apply exVec; apply and
-    · apply conj; intro i
+    · apply fintype_all; intro i
       simpa using retraction (of_sigma (hf i)) (i.natAdd l :> fun i ↦ i.castAdd k)
     · exact retraction hP (Fin.natAdd l)
   exact of_iff this <| by
@@ -562,7 +612,7 @@ private lemma substitution_pi {f : Fin k → (Fin l → V) → V} (hP : 𝚷-[m+
     𝚷-[m+1].Boldface fun z ↦ P (fun i ↦ f i z) := by
   have : 𝚷-[m+1].Boldface fun z ↦ ∀ ys : Fin k → V, (∀ i, ys i = f i z) → P ys := by
     apply allVec; apply imp
-    · apply conj; intro i
+    · apply fintype_all; intro i
       simpa using retraction (of_sigma (hf i)) (i.natAdd l :> fun i ↦ i.castAdd k)
     · exact retraction hP (Fin.natAdd l)
   exact of_iff this <| by
