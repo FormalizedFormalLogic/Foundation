@@ -68,4 +68,27 @@ theorem K4Point3_ssubset_GLPoint3 : Logic.K4Point3 ⊂ Logic.GLPoint3 := by
           omega;
 instance : ProperSublogic Logic.K4Point3 Logic.GLPoint3 := ⟨K4Point3_ssubset_GLPoint3⟩
 
+theorem GLPoint3_ssubset_Ver : Logic.GLPoint3 ⊂ Logic.Ver := by
+  constructor;
+  . rw [GLPoint3.Kripke.eq_finiteStrictLinearOrder_logic, Ver.Kripke.eq_finite_isolated_logic];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨by tauto, inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.finite_strict_linear_order ⊧ φ by
+      simpa [GLPoint3.Kripke.eq_finiteStrictLinearOrder_logic];
+    use (Axioms.Ver ⊥);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => x < y⟩, (λ w a => False)⟩, 0;
+      constructor;
+      . refine ⟨inferInstance, {irrefl := ?_, trans := ?_}, ⟨?_⟩⟩;
+        . omega;
+        . omega;
+        . simp [WeakConnected];
+      . simp only [Semantics.Realize, Satisfies, imp_false, not_forall, not_not];
+        use 1;
+        tauto;
+instance : ProperSublogic Logic.GLPoint3 Logic.Ver := ⟨GLPoint3_ssubset_Ver⟩
+
 end LO.Modal.Logic
