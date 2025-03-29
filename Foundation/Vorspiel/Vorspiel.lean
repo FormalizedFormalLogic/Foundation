@@ -13,6 +13,8 @@ import Mathlib.Data.Finset.Sort
 import Mathlib.Data.List.GetD
 import Mathlib.Data.Set.Finite.Range
 import Mathlib.Tactic.TautoSet
+import Mathlib.Data.Fintype.Sigma
+import Mathlib.Data.Fintype.Vector
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -606,7 +608,15 @@ lemma induction_with_singleton
     | nil => exact hsingle a;
     | cons b bs => exact hcons a (b :: bs) (by simp) ih;
 
-
+noncomputable instance Nodup.fintype [Fintype α] : Fintype {l : List α // l.Nodup} := by
+  let N := Fintype.card α + 1
+  have : Fintype ((i : Fin N) × Vector α i) := Sigma.instFintype
+  let f : {l : List α // l.Nodup} → ((i : Fin N) × Vector α i) := fun l ↦
+    ⟨⟨l.val.length, Nat.lt_add_one_of_le <| l.prop.length_le_card⟩, l, by simp⟩
+  have : Function.Injective f := by
+    intro ⟨l₁, hl₁⟩ ⟨l₂, hl₂⟩ H
+    simpa [f] using congrArg (fun p ↦ p.2.val) H
+  exact Fintype.ofInjective f this
 
 end List
 
