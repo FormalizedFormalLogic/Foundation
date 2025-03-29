@@ -581,6 +581,13 @@ lemma imply_finset_conj! (φ : F) (s : Finset F) (b : (ψ : F) → ψ ∈ s → 
 lemma general_finset_conj! {s : Finset F} (h : φ ∈ s) : 𝓢 ⊢! s.conj ➝ φ := general_conj! <| by simp [h]
 
 omit [DecidableEq F] in
+lemma imply_fconj! (s : Finset ι) (φ : F) (ψ : ι → F) (b : ∀ i ∈ s, 𝓢 ⊢! φ ➝ ψ i) :
+    𝓢 ⊢! φ ➝ ⩕ i ∈ s, ψ i := imply_finset_conj! φ _ (by simpa using b)
+
+lemma general_finset_fconj! (s : Finset ι) (φ : ι → F) {i} (hi : i ∈ s) : 𝓢 ⊢! (⩕ i ∈ s, φ i) ➝ φ i :=
+  general_finset_conj! <| by simp [hi]; exact Filter.frequently_principal.mp fun a ↦ a hi rfl
+
+omit [DecidableEq F] in
 lemma imply_finset_iConj! [Fintype ι] (φ : F) (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! φ ➝ ψ i) :
     𝓢 ⊢! φ ➝ ⩕ i, ψ i := imply_finset_conj! φ _ (by simpa using b)
 
@@ -713,6 +720,13 @@ lemma imply_finset_disj (s : Finset F) (h : φ ∈ s) : 𝓢 ⊢! φ ➝ s.disj 
 omit [DecidableEq F] in
 lemma finset_disj_imply! [HasAxiomEFQ 𝓢] (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! s.disj ➝ φ :=
   disj_imply! _ fun ψ h ↦ b ψ (by simpa using h)
+
+lemma imply_fdisj (s : Finset ι) (φ : ι → F) {i} (hi : i ∈ s) : 𝓢 ⊢! φ i ➝ ⩖ j ∈ s, φ j :=
+  imply_finset_disj _ (by simp; exact Filter.frequently_principal.mp fun a ↦ a hi rfl)
+
+omit [DecidableEq F] in
+lemma fdisj_imply! [HasAxiomEFQ 𝓢] (s : Finset ι) (ψ : ι → F) (b : ∀ i ∈ s, 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! (⩖ i ∈ s, ψ i) ➝ φ :=
+  finset_disj_imply! _ (by simpa)
 
 lemma imply_iDisj [Fintype ι] (φ : ι → F) : 𝓢 ⊢! φ i ➝ ⩖ j, φ j := imply_finset_disj _ (by simp)
 
