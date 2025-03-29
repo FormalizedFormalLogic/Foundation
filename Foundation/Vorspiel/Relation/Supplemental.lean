@@ -147,15 +147,37 @@ instance [IsRefl α rel] [IsCoreflexive α rel] : IsEquality α rel := ⟨equali
 lemma refl_of_equality (h : Equality rel) : Reflexive rel := by
   intro x;
   exact h.mpr rfl;
-
 instance [IsEquality α rel] : IsRefl α rel := ⟨refl_of_equality IsEquality.equality⟩
 
+lemma trans_of_equality (h : Equality rel) : Transitive rel := by
+  rintro x y z Rxy Ryz;
+  replace Rxy := h.mp Rxy; subst Rxy;
+  replace Ryz := h.mp Ryz; subst Ryz;
+  apply refl_of_equality h;
+instance [IsEquality α rel] : IsTrans α rel := ⟨trans_of_equality IsEquality.equality⟩
+
+lemma antisymm_of_equality (h : Equality rel) : AntiSymmetric rel := by
+  rintro x y Rxy Ryz;
+  replace Rxy := h.mp Rxy; subst Rxy;
+  rfl;
+instance [IsEquality α rel] : IsAntisymm α rel := ⟨antisymm_of_equality IsEquality.equality⟩
+
+instance [IsEquality α rel] : IsPartialOrder α rel where
 
 lemma corefl_of_equality (h : Equality rel) : Coreflexive rel := by
   intro x y Rxy;
   apply h.mp Rxy;
 
 instance [IsEquality α rel] : IsCoreflexive α rel := ⟨corefl_of_equality IsEquality.equality⟩
+
+
+lemma connected_of_equality (h : Equality rel) : Connected rel := by
+  rintro x y z ⟨Rxy, Ryz⟩;
+  replace Rxy := h.mp Rxy; subst Rxy;
+  replace Ryz := h.mp Ryz; subst Ryz;
+  left;
+  apply refl_of_equality h;
+instance [IsEquality α rel] : IsConnected α rel := ⟨connected_of_equality IsEquality.equality⟩
 
 
 lemma irreflexive_of_assymetric (hAssym : Asymmetric rel) : Irreflexive rel := by
@@ -195,6 +217,7 @@ instance [IsUniversal α rel] : IsPreorder α rel where
 
 lemma connected_of_universal (h : Universal rel) : Connected rel := by simp_all [Connected, Universal];
 instance [IsUniversal α rel] : IsConnected α rel := ⟨connected_of_universal IsUniversal.universal⟩
+
 
 
 lemma weakConfluent_of_confluent (hConfl : Confluent rel) : WeakConfluent rel := by
