@@ -38,7 +38,10 @@ def kite : Kite Vertex EdgeType where
   vertices := [
     ⟨q(Logic.Empty)⟩,
     ⟨q(Logic.GL)⟩,
+    ⟨q(Logic.GLPoint3)⟩,
     ⟨q(Logic.Grz)⟩,
+    ⟨q(Logic.GrzPoint2)⟩,
+    ⟨q(Logic.GrzPoint3)⟩,
     ⟨q(Logic.K)⟩,
     ⟨q(Logic.K4)⟩,
     ⟨q(Logic.K45)⟩,
