@@ -41,7 +41,7 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 
 variable {L} [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         {T U : Theory L} [T ⪯ U] (𝔅 : ProvabilityPredicate T T) [𝔅.HBL]
+         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL]
          (M₁ : Kripke.Model) (r₁ : M₁.World) [M₁.IsFiniteTree r₁]
          {A B : Modal.Formula _}
 
@@ -52,9 +52,9 @@ noncomputable instance : Fintype 𝐖 := @Fintype.ofFinite _ $ Frame.extendRoot.
 
 structure SolovaySentences where
   σ : (M₁.extendRoot r₁).World → Sentence L
-  protected SC1 : ∀ i j, i ≠ j → T ⊢!. σ i ➝ ∼σ j
-  protected SC2 : ∀ i j, i ≺ j → T ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
-  protected SC3 : ∀ i, Model.extendRoot.root ≺ i → T ⊢!. σ i ➝ 𝔅 (⩖ j ∈ { j : 𝐖 | i ≺ j }, σ j)
+  protected SC1 : ∀ i j, i ≠ j → T₀ ⊢!. σ i ➝ ∼σ j
+  protected SC2 : ∀ i j, i ≺ j → T₀ ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
+  protected SC3 : ∀ i, Model.extendRoot.root ≺ i → T₀ ⊢!. σ i ➝ 𝔅 (⩖ j ∈ { j : 𝐖 | i ≺ j }, σ j)
   protected SC4 : T ⊬. ∼(σ r₁)
 
 variable {𝔅 M₁ r₁}
@@ -68,8 +68,8 @@ noncomputable def realization (σ : SolovaySentences 𝔅 M₁ r₁) : Realizati
 variable {σ : SolovaySentences 𝔅 M₁ r₁}
 
 theorem mainlemma {i : M₁.World} :
-  (i ⊧ A → T ⊢!. (σ i) ➝ (σ.realization.interpret 𝔅 A)) ∧
-  (¬i ⊧ A → T ⊢!. (σ i) ➝ ∼(σ.realization.interpret 𝔅 A))
+  (i ⊧ A → T₀ ⊢!. (σ i) ➝ (σ.realization.interpret 𝔅 A)) ∧
+  (¬i ⊧ A → T₀ ⊢!. (σ i) ➝ ∼(σ.realization.interpret 𝔅 A))
   := by
   induction A using Formula.rec' generalizing i with
   | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
@@ -100,7 +100,7 @@ theorem mainlemma {i : M₁.World} :
     constructor;
     . intro h;
       apply imp_trans''! $ σ.SC3 i $ Model.extendRoot.rooted_original;
-      apply 𝔅.prov_distribute_imply;
+      apply 𝔅.prov_distribute_imply';
       apply fdisj_imply!;
       rintro j Rij;
       match j with
@@ -110,7 +110,8 @@ theorem mainlemma {i : M₁.World} :
       have := Satisfies.box_def.not.mp h;
       push_neg at this;
       obtain ⟨j, Rij, hA⟩ := this;
-      have : T ⊢!. ∼𝔅 (∼σ.σ j) ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) := contra₀'! $ 𝔅.prov_distribute_imply $ contra₁'! $ ihA.2 hA;
+      have := contra₁'! $ ihA.2 hA;
+      have : T₀ ⊢!. ∼𝔅 (∼σ.σ j) ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) := contra₀'! $ 𝔅.prov_distribute_imply' $ contra₁'! $ ihA.2 hA;
       exact imp_trans''! (σ.SC2 i j Rij) this;
 
 end SolovaySentences
@@ -123,11 +124,12 @@ theorem arithmetical_completeness_GL : (∀ {f : Realization L}, T ⊢!. (f.inte
   let σ : SolovaySentences 𝔅 M₁ r₁ := by sorry; -- TODO: Sect 2.1
   use σ.realization;
 
-  have : T ⊢!. σ r₁ ➝ σ.realization.interpret 𝔅 (∼A) := σ.mainlemma (A := ∼A) (i := r₁) |>.1 $ hA₁
-  replace : T ⊢!. σ.realization.interpret 𝔅 A ➝ ∼(σ r₁) := by
+  have : T₀ ⊢!. σ r₁ ➝ σ.realization.interpret 𝔅 (∼A) := σ.mainlemma (A := ∼A) (i := r₁) |>.1 $ hA₁
+  replace : T₀ ⊢!. σ.realization.interpret 𝔅 A ➝ ∼(σ r₁) := by
     apply contra₁'!;
     apply imp_trans''! this;
     apply and₂'! neg_equiv!;
+  replace : T ⊢!. σ.realization.interpret 𝔅 A ➝ ∼(σ r₁) := WeakerThan.pbl this;
 
   by_contra hC;
   have : T ⊢!. ∼(σ r₁) := this ⨀ hC;
