@@ -9,12 +9,12 @@ variable {𝓢 : S} [Entailment.Modal.Grz 𝓢]
 
 namespace Grz
 
-noncomputable def lemma_axiomFour_axiomT : 𝓢 ⊢ □φ ➝ (φ ⋏ (□φ ➝ □□φ)) := impTrans'' (lemma_Grz₁ (φ := φ)) axiomGrz
+noncomputable def lemma_axiomFour_axiomT : 𝓢 ⊢ □φ ➝ (φ ⋏ (□φ ➝ □□φ)) := cTrans (lemma_Grz₁ (φ := φ)) axiomGrz
 
-protected noncomputable def axiomFour : 𝓢 ⊢ □φ ➝ □□φ := ppq $ impTrans'' lemma_axiomFour_axiomT and₂
+protected noncomputable def axiomFour : 𝓢 ⊢ □φ ➝ □□φ := ppq $ cTrans lemma_axiomFour_axiomT and₂
 noncomputable instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ Grz.axiomFour⟩
 
-protected noncomputable def axiomT : 𝓢 ⊢ □φ ➝ φ := impTrans'' lemma_axiomFour_axiomT and₁
+protected noncomputable def axiomT : 𝓢 ⊢ □φ ➝ φ := cTrans lemma_axiomFour_axiomT and₁
 noncomputable instance : HasAxiomT 𝓢 := ⟨fun _ ↦ Grz.axiomT⟩
 
 end Grz

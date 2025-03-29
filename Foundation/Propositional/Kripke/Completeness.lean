@@ -66,7 +66,7 @@ private lemma truthlemma.himp
         have := by simpa using hΓ χ hr₁;
         simp_all;
       by_contra hC;
-      have : 𝓢 ⊢! ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
+      have : 𝓢 ⊢! ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := c!_trans (cK!_iff_cC!.mp $ imply_left_remove_conj! hC) (by
         apply deduct'!;
         apply deduct!;
         have : [φ, φ ➝ ⋁Δ] ⊢[𝓢]! φ := by_axm!;
@@ -93,7 +93,7 @@ private lemma truthlemma.himp
       (by simp_all)
       (show 𝓢 ⊢! ⋀[φ, φ ➝ ψ] ➝ ψ by
         simp;
-        apply and_imply_iff_imply_imply'!.mpr;
+        apply cK!_iff_cC!.mpr;
         apply deduct'!;
         apply deduct!;
         exact by_axm! ⨀ (by_axm! (φ := φ));

@@ -25,7 +25,7 @@ inductive Deduction (H : Hilbert α) : Formula α → Type _
   | implyK φ ψ χ  : Deduction H $ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
   | andElimL φ ψ  : Deduction H $ φ ⋏ ψ ➝ φ
   | andElimR φ ψ  : Deduction H $ φ ⋏ ψ ➝ ψ
-  | andIntro φ ψ  : Deduction H $ φ ➝ ψ ➝ φ ⋏ ψ
+  | kIntro φ ψ  : Deduction H $ φ ➝ ψ ➝ φ ⋏ ψ
   | orIntroL φ ψ  : Deduction H $ φ ➝ φ ⋎ ψ
   | orIntroR φ ψ  : Deduction H $ ψ ➝ φ ⋎ ψ
   | orElim φ ψ χ  : Deduction H $ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
@@ -43,14 +43,14 @@ instance : Entailment.HasAxiomImply₁ H := ⟨implyS⟩
 
 instance : Entailment.HasAxiomImply₂ H := ⟨implyK⟩
 
-instance : Entailment.HasAxiomAndInst H := ⟨andIntro⟩
+instance : Entailment.HasAxiomAndInst H := ⟨kIntro⟩
 
 instance : Entailment.Minimal H where
   mdp := mdp
   verum := verum
   and₁ := andElimL
   and₂ := andElimR
-  and₃ := andIntro
+  and₃ := kIntro
   or₁ := orIntroL
   or₂ := orIntroR
   or₃ := orElim
@@ -70,7 +70,7 @@ noncomputable def rec!
   (implyK     : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ ⟨implyK φ ψ χ⟩)
   (andElimL   : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ φ) $ ⟨andElimL φ ψ⟩)
   (andElimR   : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ ψ) $ ⟨andElimR φ ψ⟩)
-  (andIntro   : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) $ ⟨andIntro φ ψ⟩)
+  (kIntro   : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) $ ⟨kIntro φ ψ⟩)
   (orIntroL   : ∀ {φ ψ},   motive (φ ➝ φ ⋎ ψ) $ ⟨orIntroL φ ψ⟩)
   (orIntroR   : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) $ ⟨orIntroR φ ψ⟩)
   (orElim     : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) $ ⟨orElim φ ψ χ⟩)

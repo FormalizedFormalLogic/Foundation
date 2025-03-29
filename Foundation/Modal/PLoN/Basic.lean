@@ -110,7 +110,7 @@ protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnMode
 
 protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
 
-protected lemma elim_contra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
+protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
 
 end ValidOnModel
 
@@ -142,7 +142,7 @@ protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnFram
 
 protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnFrame]; tauto;
 
-protected lemma elim_contra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elim_contra;
+protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elimContra;
 
 end ValidOnFrame
 
@@ -171,7 +171,7 @@ protected lemma imply₁ : C ⊧ (Axioms.Imply₁ φ ψ) := by intro _ _; exact 
 
 protected lemma imply₂ : C ⊧ (Axioms.Imply₂ φ ψ χ) := by intro _ _; exact PLoN.ValidOnFrame.imply₂;
 
-protected lemma elim_contra : C ⊧ (Axioms.ElimContra φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.elim_contra;
+protected lemma elimContra : C ⊧ (Axioms.ElimContra φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.elimContra;
 
 
 lemma iff_not_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by

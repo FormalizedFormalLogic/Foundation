@@ -12,16 +12,16 @@ def ProvablyEquivalent (φ ψ : F) : Prop := 𝓢 ⊢! φ ⭤ ψ
 
 local infix:45 " ≡ " => ProvablyEquivalent 𝓢
 
-protected lemma ProvablyEquivalent.refl [Entailment.Minimal 𝓢] (φ : F) : φ ≡ φ := iff_id!
+protected lemma ProvablyEquivalent.refl [Entailment.Minimal 𝓢] (φ : F) : φ ≡ φ := e!_id
 
 variable {𝓢}
 
-protected lemma ProvablyEquivalent.symm [Entailment.Minimal 𝓢] {φ ψ : F} : φ ≡ ψ → ψ ≡ φ := iff_comm'!
+protected lemma ProvablyEquivalent.symm [Entailment.Minimal 𝓢] {φ ψ : F} : φ ≡ ψ → ψ ≡ φ := e!_symm
 
-protected lemma ProvablyEquivalent.trans [Entailment.Minimal 𝓢] {φ ψ χ : F} : φ ≡ ψ → ψ ≡ χ → φ ≡ χ := iff_trans''!
+protected lemma ProvablyEquivalent.trans [Entailment.Minimal 𝓢] {φ ψ χ : F} : φ ≡ ψ → ψ ≡ χ → φ ≡ χ := e!_trans
 
 lemma provable_iff_provablyEquivalent_verum [Entailment.Minimal 𝓢] {φ : F} : 𝓢 ⊢! φ ↔ φ ≡ ⊤ :=
-  ⟨fun h ↦ iff_intro! imply_left_verum! (imply₁'! h), fun h ↦ (and_right! h) ⨀ verum!⟩
+  ⟨fun h ↦ e!_intro cV! (c!_of_conseq! h), fun h ↦ (and_right h) ⨀ verum!⟩
 
 variable (𝓢)
 
@@ -81,12 +81,12 @@ instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) wh
     induction' ψ using Quotient.ind with ψ
     induction' χ using Quotient.ind with χ
     simp only [le_def]
-    exact imp_trans''!
+    exact c!_trans
   le_antisymm φ ψ := by
     induction' φ using Quotient.ind with φ
     induction' ψ using Quotient.ind with ψ
     simp only [le_def, of_eq_of]
-    intro hp hq; exact iff_intro! hp hq
+    intro hp hq; exact e!_intro hp hq
   inf_le_left φ ψ := by
     induction' φ using Quotient.ind with φ
     induction' ψ using Quotient.ind with ψ
@@ -118,17 +118,17 @@ instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) wh
     induction' ψ using Quotient.ind with ψ
     induction' χ using Quotient.ind with χ
     simp only [sup_def, le_def]
-    exact or₃''!
+    exact cA!_of_c!_of_c!
   le_top φ := by
     induction' φ using Quotient.ind with φ
     simp only [top_def, le_def]
-    exact imply_left_verum!
+    exact cV!
   le_himp_iff φ ψ χ := by
     induction' φ using Quotient.ind with φ
     induction' ψ using Quotient.ind with ψ
     induction' χ using Quotient.ind with χ
     simp only [himp_def, le_def, inf_def]
-    exact Iff.symm and_imply_iff_imply_imply'!
+    exact Iff.symm cK!_iff_cC!
 
 variable {𝓢}
 
@@ -168,7 +168,7 @@ instance LindenbaumAlgebra.heyting [DecidableEq F] : HeytingAlgebra (LindenbaumA
   himp_bot φ := by
     induction' φ using Quotient.ind with φ
     simp only [bot_def, himp_def, compl_def, Quotient.eq]
-    exact iff_comm! ⨀ neg_equiv!
+    exact cEE! ⨀ neg_equiv!
 
 end intuitionistic
 
@@ -185,11 +185,11 @@ instance LindenbaumAlgebra.boolean [DecidableEq F] : BooleanAlgebra (LindenbaumA
   top_le_sup_compl φ := by
     induction' φ using Quotient.ind with φ
     simp only [top_def, compl_def, sup_def, le_def]
-    apply imply₁'! lem!
+    apply c!_of_conseq! lem!
   le_top φ := by
     induction' φ using Quotient.ind with φ
     simp only [top_def, le_def]
-    exact imply_left_verum!
+    exact cV!
   bot_le φ := by
     induction' φ using Quotient.ind with φ
     simp only [bot_def, le_def]

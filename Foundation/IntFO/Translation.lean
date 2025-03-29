@@ -73,9 +73,9 @@ open Rewriting Entailment Entailment.FiniteContext HilbertProofᵢ
 noncomputable
 def negDoubleNegation : (φ : SyntacticFormula L) → 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ
   | .rel r v  => Entailment.tneIff (φ := Semiformulaᵢ.rel r v)
-  | .nrel r v => Entailment.iffId (φ := ∼∼(Semiformulaᵢ.rel r v))
+  | .nrel r v => Entailment.eId (φ := ∼∼(Semiformulaᵢ.rel r v))
   | ⊤         => Entailment.falsumDN
-  | ⊥         => Entailment.iffId (φ := ∼⊥)
+  | ⊥         => Entailment.eId (φ := ∼⊥)
   | φ ⋏ ψ     =>
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
     have ihψ : 𝐌𝐢𝐧¹ ⊢ ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
@@ -86,7 +86,7 @@ def negDoubleNegation : (φ : SyntacticFormula L) → 𝐌𝐢𝐧¹ ⊢ ∼φ�
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
     have ihψ : 𝐌𝐢𝐧¹ ⊢ ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
     have : 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⋏ ∼ψᴺ ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.andReplaceIff ihφ ihψ
-    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∼φᴺ ⋏ ∼ψᴺ) ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.iffTrans'' (dnOfNegative (by simp)) this
+    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∼φᴺ ⋏ ∼ψᴺ) ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.eTrans (dnOfNegative (by simp)) this
     this
   | ∀' φ      =>
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
@@ -98,7 +98,7 @@ def negDoubleNegation : (φ : SyntacticFormula L) → 𝐌𝐢𝐧¹ ⊢ ∼φ�
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
     have : 𝐌𝐢𝐧¹ ⊢ ∀' ∼φᴺ ⭤ ∀' (∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast (by simp [Semiformula.rew_doubleNegation]) ihφ
-    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∀' ∼φᴺ) ⭤ ∀' (∼φ)ᴺ := Entailment.iffTrans'' (dnOfNegative (by simp)) this
+    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∀' ∼φᴺ) ⭤ ∀' (∼φ)ᴺ := Entailment.eTrans (dnOfNegative (by simp)) this
     this
   termination_by φ => φ.complexity
 
@@ -109,7 +109,7 @@ def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹
   | @and _ _ Γ φ ψ dφ dψ =>
     have ihφ : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ := goedelGentzen dφ
     have ihψ : ((∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ := goedelGentzen dψ
-    have : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ := Entailment.andIntro (deduct ihφ) (deduct ihψ)
+    have : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ := Entailment.kIntro (deduct ihφ) (deduct ihψ)
     deductInv (Entailment.dni' this)
   | @or _ _ Γ φ ψ d      =>
     have : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] (∼ψ)ᴺ ➝ (∼φ)ᴺ ➝ ⊥ := deduct <| deduct  <| goedelGentzen d
@@ -130,7 +130,7 @@ def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹
   | @cut _ _ Γ φ dp dn   =>
     have ihp : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ := goedelGentzen dp
     have ihn : (φᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ := cast (by simp) (goedelGentzen dn)
-    have b₁ : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼∼φᴺ := Entailment.impTrans'' (of <| Entailment.andLeft (negDoubleNegation φ)) (deduct ihp)
+    have b₁ : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼∼φᴺ := Entailment.cTrans (of <| Entailment.andLeft (negDoubleNegation φ)) (deduct ihp)
     have b₂ : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ∼φᴺ := deduct ihn
     b₁ ⨀ b₂
   | @wk _ _ Γ Δ d h      => FiniteContext.weakening (by simpa using List.map_subset _ h) (goedelGentzen d)

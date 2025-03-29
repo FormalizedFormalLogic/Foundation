@@ -134,8 +134,8 @@ lemma not_mem_maximalConsistentTheory_iff :
 lemma mem_maximalConsistentTheory_and {φ ψ} (h : φ ⋏ ψ ∈ maximalConsistentTheory consisT) :
     φ ∈ maximalConsistentTheory consisT ∧ ψ ∈ maximalConsistentTheory consisT := by
   have : maximalConsistentTheory consisT ⊢! φ ⋏ ψ := mem_maximalConsistentTheory_iff.mp h
-  exact ⟨mem_maximalConsistentTheory_iff.mpr (and_left! this),
-         mem_maximalConsistentTheory_iff.mpr (and_right! this)⟩
+  exact ⟨mem_maximalConsistentTheory_iff.mpr (and_left this),
+         mem_maximalConsistentTheory_iff.mpr (and_right this)⟩
 
 lemma mem_maximalConsistentTheory_or {φ ψ} (h : φ ⋎ ψ ∈ maximalConsistentTheory consisT) :
     φ ∈ maximalConsistentTheory consisT ∨ ψ ∈ maximalConsistentTheory consisT := by
@@ -144,7 +144,7 @@ lemma mem_maximalConsistentTheory_or {φ ψ} (h : φ ⋎ ψ ∈ maximalConsisten
     simpa [not_or, not_mem_maximalConsistentTheory_iff] using A
   have : Inconsistent (maximalConsistentTheory consisT) :=
     Entailment.inconsistent_of_provable
-      (or₃'''! (neg_equiv'!.mp b.1) (neg_equiv'!.mp b.2) (mem_maximalConsistentTheory_iff.mp h))
+      (of_c!_of_c!_of_a! (n!_iff_cO!.mp b.1) (n!_iff_cO!.mp b.2) (mem_maximalConsistentTheory_iff.mp h))
   have := this.not_con
   simp_all
 
