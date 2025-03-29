@@ -205,6 +205,26 @@ lemma coreflexive_of_isolated (h : Isolated rel) : Coreflexive rel := by
   exact h Rxy;
 instance [IsIsolated α rel] : IsCoreflexive α rel := ⟨coreflexive_of_isolated IsIsolated.isolated⟩
 
+lemma irrefl_of_isolated (h : Isolated rel) : Irreflexive rel := by
+  intro x Rxx;
+  exfalso;
+  exact h Rxx;
+instance [IsIsolated α rel] : IsIrrefl α rel := ⟨irrefl_of_isolated IsIsolated.isolated⟩
+
+lemma transitive_of_isolated (h : Isolated rel) : Transitive rel := by
+  rintro x y z Rxy;
+  exfalso;
+  exact h Rxy;
+instance [IsIsolated α rel] : IsTrans α rel := ⟨transitive_of_isolated IsIsolated.isolated⟩
+
+instance [IsIsolated α rel] : IsStrictOrder α rel where
+
+lemma weakConnected_of_isolated (h : Isolated rel) : WeakConnected rel := by
+  rintro x y z ⟨Rxy, Ryz, _⟩;
+  exfalso;
+  exact h Rxy;
+instance [IsIsolated α rel] : IsWeakConnected α rel := ⟨weakConnected_of_isolated IsIsolated.isolated⟩
+
 
 lemma refl_of_universal (h : Universal rel) : Reflexive rel := by intro x; exact @h x x;
 instance [IsUniversal α rel] : IsRefl α rel := ⟨refl_of_universal IsUniversal.universal⟩
