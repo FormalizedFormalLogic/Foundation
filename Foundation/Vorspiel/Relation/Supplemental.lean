@@ -268,4 +268,11 @@ lemma confluent_of_refl_connected (hRefl : Reflexive rel) (hConfl : Connected re
 instance [IsRefl α rel] [IsConnected α rel] : IsConfluent α rel := ⟨confluent_of_refl_connected IsRefl.reflexive IsConnected.connected⟩
 
 
+instance weakConnected_of_euclidean (h : Euclidean rel) : WeakConnected rel := by
+  rintro x y z ⟨Rxy, Rxz, _⟩;
+  right;
+  exact h Rxy Rxz;
+
+instance [IsEuclidean α rel] : IsWeakConnected α rel := ⟨weakConnected_of_euclidean IsEuclidean.euclidean⟩
+
 end

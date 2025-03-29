@@ -110,4 +110,31 @@ instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
         repeat omega;
 ⟩
 
+instance : ProperSublogic Logic.K4Point3 Logic.K45 := ⟨by
+  constructor;
+  . rw [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic, K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by
+      simpa [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
+    use (Axioms.Five (.atom 0));
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 3, λ x y => x < y⟩,
+        λ w a => w = 2
+      ⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨⟨by omega⟩, ⟨by simp [M, WeakConnected]⟩⟩
+      . suffices (0 : M.World) ≺ 2 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
+          simpa [M, Semantics.Realize, Satisfies];
+        constructor;
+        . omega;
+        . use 2;
+          omega;
+⟩
+
 end LO.Modal.Logic
