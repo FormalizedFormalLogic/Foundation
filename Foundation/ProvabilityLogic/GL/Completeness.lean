@@ -65,16 +65,16 @@ structure SolovaySentences
   protected SC1 : ∀ i j, i ≠ j → T ⊢!. σ i ➝ ∼σ j
   protected SC2 : ∀ i j, i ≺ j → T ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
   protected SC3 : ∀ i, (Model.extendRoot.root (M := M₁) (r := r₁)) ≺ i →
-    T ⊢!. σ i ➝ 𝔅 (⩖ j : (i↑ᵢ), σ j.1)
+    letI s := { j | i ≺ j } |>.toFinite.toFinset;
+    T ⊢!. σ i ➝ 𝔅 (⩖ j ∈ s, σ j)
   protected SC4 : T ⊬. ∼(σ r₁)
 
 instance : CoeFun (SolovaySentences 𝔅 M₁ r₁) (λ _ => 𝐖 → Sentence L) := ⟨λ σ => σ.σ⟩
 
 noncomputable def SolovaySentences.realization (σ : SolovaySentences 𝔅 M₁ r₁) : Realization L :=
   λ a =>
-    letI ι := { i : 𝐖 // i ⊧ (.atom a) };
-    letI σ' := λ j : ι => σ j.1;
-    ⩖ i, σ' i
+    letI s := { i : 𝐖 | i ⊧ (.atom a) } |>.toFinite.toFinset;
+    ⩖ i ∈ s, σ i
 
 variable {σ : SolovaySentences 𝔅 M₁ r₁}
 
@@ -87,14 +87,16 @@ theorem mainlemma {i : M₁.World} :
   | hatom a =>
     constructor;
     . intro h;
-      convert imply_iDisj (𝓢 := T.alt) (φ := λ j : { i : 𝐖 // i ⊧ (.atom a) } => σ j.1) (i := ⟨i, by tauto⟩);
+      apply imply_fdisj;
+      simpa using h;
     . intro h;
       apply contra₁'!;
-      apply iDisj_imply!;
-      rintro ⟨i, hi⟩;
+      apply fdisj_imply!;
+      intro i hi;
       apply σ.SC1;
       by_contra hC; subst hC;
-      contradiction;
+      apply h;
+      simpa using hi;
   | himp A B ihA ihB =>
     simp only [Realization.interpret, Semantics.Imp.realize_imp, Classical.not_imp, and_imp];
     constructor;
@@ -108,13 +110,15 @@ theorem mainlemma {i : M₁.World} :
     simp only [Realization.interpret];
     constructor;
     . intro h;
-      apply imp_trans''! $ σ.SC3 i $ Model.extendRoot.rooted_original
+      apply imp_trans''! $ σ.SC3 i $ Model.extendRoot.rooted_original;
       apply 𝔅.prov_distribute_imply;
-      apply iDisj_imply!;
-      rintro ⟨j, Rij⟩;
+      apply fdisj_imply!;
+      rintro j Rij;
       match j with
       | Sum.inl j => simp [Frame.Rel', Frame.extendRoot] at Rij
-      | Sum.inr j => exact ihA.1 $ h j Rij;
+      | Sum.inr j =>
+        simp only [Set.Finite.mem_toFinset, Set.mem_setOf_eq] at Rij;
+        exact ihA.1 $ h j Rij;
     . intro h;
       have := Satisfies.box_def.not.mp h;
       push_neg at this;
