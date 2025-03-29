@@ -30,51 +30,40 @@ postfix:100 "↑ᵢ" => ImmediateSuccessors
 end Modal.Kripke
 
 
+
 namespace ProvabilityLogic
 
+open Classical
 open Entailment Entailment.FiniteContext
 open FirstOrder FirstOrder.DerivabilityCondition
 open Modal
 open Modal.Kripke
 open Modal.Formula.Kripke
 
-variable {α : Type u}
-         {L} [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         {T T : Theory L} {𝔅 : ProvabilityPredicate T T} [𝔅.HBL]
-         {M₁ : Kripke.Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁]
+variable {L} [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sentence L)]
+         {T U : Theory L} [T ⪯ U] (𝔅 : ProvabilityPredicate T T) [𝔅.HBL]
+         (M₁ : Kripke.Model) (r₁ : M₁.World) [M₁.IsFiniteTree r₁]
          {A B : Modal.Formula _}
 
 local notation "𝐖" => Frame.World <| Model.toFrame <| M₁.extendRoot r₁
 
 -- TODO: cleanup
-noncomputable instance : Fintype 𝐖 := @Fintype.ofFinite _ $ by
-  exact Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
+noncomputable instance : Fintype 𝐖 := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite
 
-noncomputable instance {i : 𝐖} : Fintype (i↑ᵢ) := @Fintype.ofFinite _ $ by
-  apply @Subtype.finite (α := 𝐖) $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
-
-noncomputable instance {φ} : Fintype { i : 𝐖 // i ⊧ φ } := @Fintype.ofFinite _ $ by
-  apply @Subtype.finite (α := 𝐖) $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite;
-
-structure SolovaySentences
-  {T U : FirstOrder.Theory L}
-  (𝔅 : ProvabilityPredicate T U) [𝔅.HBL]
-  (M₁ : Kripke.Model) (r₁ : M₁.World) [M₁.IsFiniteTree r₁]
-  where
+structure SolovaySentences where
   σ : (M₁.extendRoot r₁).World → Sentence L
   protected SC1 : ∀ i j, i ≠ j → T ⊢!. σ i ➝ ∼σ j
   protected SC2 : ∀ i j, i ≺ j → T ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
-  protected SC3 : ∀ i, (Model.extendRoot.root (M := M₁) (r := r₁)) ≺ i →
-    letI s := { j | i ≺ j } |>.toFinite.toFinset;
-    T ⊢!. σ i ➝ 𝔅 (⩖ j ∈ s, σ j)
+  protected SC3 : ∀ i, Model.extendRoot.root ≺ i → T ⊢!. σ i ➝ 𝔅 (⩖ j ∈ { j : 𝐖 | i ≺ j }, σ j)
   protected SC4 : T ⊬. ∼(σ r₁)
+
+variable {𝔅 M₁ r₁}
+
+namespace SolovaySentences
 
 instance : CoeFun (SolovaySentences 𝔅 M₁ r₁) (λ _ => 𝐖 → Sentence L) := ⟨λ σ => σ.σ⟩
 
-noncomputable def SolovaySentences.realization (σ : SolovaySentences 𝔅 M₁ r₁) : Realization L :=
-  λ a =>
-    letI s := { i : 𝐖 | i ⊧ (.atom a) } |>.toFinite.toFinset;
-    ⩖ i ∈ s, σ i
+noncomputable def realization (σ : SolovaySentences 𝔅 M₁ r₁) : Realization L := λ a => ⩖ i ∈ { i : 𝐖 | i ⊧ (.atom a) }, σ i
 
 variable {σ : SolovaySentences 𝔅 M₁ r₁}
 
@@ -116,15 +105,15 @@ theorem mainlemma {i : M₁.World} :
       rintro j Rij;
       match j with
       | Sum.inl j => simp [Frame.Rel', Frame.extendRoot] at Rij
-      | Sum.inr j =>
-        simp only [Set.Finite.mem_toFinset, Set.mem_setOf_eq] at Rij;
-        exact ihA.1 $ h j Rij;
+      | Sum.inr j => exact ihA.1 $ h j $ by simpa using Rij;
     . intro h;
       have := Satisfies.box_def.not.mp h;
       push_neg at this;
       obtain ⟨j, Rij, hA⟩ := this;
       have : T ⊢!. ∼𝔅 (∼σ.σ j) ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) := contra₀'! $ 𝔅.prov_distribute_imply $ contra₁'! $ ihA.2 hA;
       exact imp_trans''! (σ.SC2 i j Rij) this;
+
+end SolovaySentences
 
 theorem arithmetical_completeness_GL : (∀ {f : Realization L}, T ⊢!. (f.interpret 𝔅 A)) → A ∈ Logic.GL := by
   contrapose;
@@ -134,7 +123,7 @@ theorem arithmetical_completeness_GL : (∀ {f : Realization L}, T ⊢!. (f.inte
   let σ : SolovaySentences 𝔅 M₁ r₁ := by sorry; -- TODO: Sect 2.1
   use σ.realization;
 
-  have : T ⊢!. σ r₁ ➝ σ.realization.interpret 𝔅 (∼A) := mainlemma (σ := σ) (A := ∼A) (i := r₁) |>.1 $ hA₁
+  have : T ⊢!. σ r₁ ➝ σ.realization.interpret 𝔅 (∼A) := σ.mainlemma (A := ∼A) (i := r₁) |>.1 $ hA₁
   replace : T ⊢!. σ.realization.interpret 𝔅 A ➝ ∼(σ r₁) := by
     apply contra₁'!;
     apply imp_trans''! this;
