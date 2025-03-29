@@ -48,4 +48,24 @@ theorem GL_ssubset_GLPoint3 : Logic.GL ⊂ Logic.GLPoint3 := by
         all_goals omega;
 instance : ProperSublogic Logic.GL Logic.GLPoint3 := ⟨GL_ssubset_GLPoint3⟩
 
+theorem K4Point3_ssubset_GLPoint3 : Logic.K4Point3 ⊂ Logic.GLPoint3 := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by
+      simpa [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
+    use (Axioms.L (.atom 0));
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w a => False)⟩, 0;
+      constructor;
+      . refine ⟨⟨by omega⟩, ⟨by simp only [WeakConnected, ne_eq, and_imp]; omega⟩⟩;
+      . simp [Semantics.Realize, Satisfies, ValidOnFrame];
+        constructor;
+        . intro y Rxy;
+          use y;
+        . use 1;
+          omega;
+instance : ProperSublogic Logic.K4Point3 Logic.GLPoint3 := ⟨K4Point3_ssubset_GLPoint3⟩
+
 end LO.Modal.Logic
