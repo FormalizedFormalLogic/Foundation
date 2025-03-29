@@ -30,16 +30,6 @@ instance [IsIrrefl _ r] [IsTrans _ r] : IsAntisymm α (ReflGen r) := ⟨by
 
 instance [IsTrans _ r] [IsIrrefl _ r] : IsPartialOrder α (ReflGen r) where
 
-instance [IsWeakConnected _ r] : IsConnected α (ReflGen r) := ⟨by
-  rintro a b c ⟨(rfl | Rab), (rfl | Rba)⟩;
-  . left; apply ReflGen.refl;
-  . left; apply ReflGen.single Rba;
-  . right; apply ReflGen.single Rab;
-  . rcases IsWeakConnected.weak_connected ⟨Rab, Rba, by sorry⟩ with (Rbc | Rbc);
-    . left; exact ReflGen.single Rbc;
-    . right; exact ReflGen.single Rbc;
-⟩
-
 end ReflGen
 
 
