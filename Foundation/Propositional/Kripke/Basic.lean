@@ -122,7 +122,7 @@ lemma formula_hereditary
   | hor => simp_all [Satisfies]; tauto;
   | _ => simp_all [Satisfies];
 
-lemma neg_equiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies];
+lemma negEquiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies];
 
 lemma iff_subst_self {F : Frame} {V : Valuation F} {x : F.World} (s) :
   letI U : Kripke.Valuation F := ⟨

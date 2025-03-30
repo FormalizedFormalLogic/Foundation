@@ -77,11 +77,11 @@ namespace Triv
 lemma iff_trivTranslated : (Hilbert.Triv) ⊢! φ ⭤ φᵀ := by
   induction φ using Formula.rec' with
   | hbox φ ih =>
-    apply iff_intro!;
-    . exact imp_trans''! axiomT! (and₁'! ih)
-    . exact imp_trans''! (and₂'! ih) axiomTc!
+    apply e!_intro;
+    . exact c!_trans axiomT! (of_k!_left ih)
+    . exact c!_trans (of_k_right ih) axiomTc!
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
-  | _ => apply iff_id!
+  | _ => apply e!_id
 
 protected theorem iff_provable_Cl : Hilbert.Triv ⊢! φ ↔ (Propositional.Hilbert.Cl) ⊢! φᵀ.toPropFormula := by
   constructor;
@@ -96,7 +96,7 @@ protected theorem iff_provable_Cl : Hilbert.Triv ⊢! φ ↔ (Propositional.Hilb
     | nec ih => exact ih;
     | _ => simp [trivTranslate, Formula.toPropFormula];
   . intro h;
-    have d₁ : Hilbert.Triv ⊢! φᵀ ➝ φ := and₂'! iff_trivTranslated;
+    have d₁ : Hilbert.Triv ⊢! φᵀ ➝ φ := of_k_right iff_trivTranslated;
     have d₂ : Hilbert.Triv ⊢! φᵀ := by simpa only [trivTranslate.toIP] using provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
@@ -108,11 +108,11 @@ namespace Ver
 lemma iff_verTranslated : (Hilbert.Ver) ⊢! φ ⭤ φⱽ := by
   induction φ using Formula.rec' with
   | hbox =>
-    apply iff_intro!;
-    . exact imply₁'! verum!
-    . exact imply₁'! (by simp)
+    apply e!_intro;
+    . exact c!_of_conseq! verum!
+    . exact c!_of_conseq! (by simp)
   | himp _ _ ih₁ ih₂ => exact imp_replace_iff! ih₁ ih₂;
-  | _ => apply iff_id!
+  | _ => apply e!_id
 
 protected lemma iff_provable_Cl : (Hilbert.Ver) ⊢! φ ↔ (Propositional.Hilbert.Cl) ⊢! φⱽ.toPropFormula := by
   constructor;
@@ -126,7 +126,7 @@ protected lemma iff_provable_Cl : (Hilbert.Ver) ⊢! φ ↔ (Propositional.Hilbe
       exact ih₁ ⨀ ih₂;
     | _ => simp [verTranslate, Formula.toPropFormula];
   . intro h;
-    have d₁ : Hilbert.Ver ⊢! φⱽ ➝ φ := and₂'! iff_verTranslated;
+    have d₁ : Hilbert.Ver ⊢! φⱽ ➝ φ := of_k_right iff_verTranslated;
     have d₂ : Hilbert.Ver ⊢! φⱽ := by simpa using provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 

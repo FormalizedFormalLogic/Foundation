@@ -9,16 +9,16 @@ variable {𝓢 : S} [Entailment.Classical 𝓢]
 
 noncomputable instance : HasAxiomDummett 𝓢 where
   dummett φ ψ := by
-    have d₁ : 𝓢 ⊢ φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := impTrans'' imply₁ or₂;
-    have d₂ : 𝓢 ⊢ ∼φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := impTrans'' efq_imply_not₁ or₁;
-    exact or₃''' d₁ d₂ lem;
+    have d₁ : 𝓢 ⊢ φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := cTrans imply₁ or₂;
+    have d₂ : 𝓢 ⊢ ∼φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := cTrans efq_imply_not₁ or₁;
+    exact ofCOfCOfA d₁ d₂ lem;
 
 noncomputable instance : Entailment.LC 𝓢 where
 
 
 noncomputable instance : HasAxiomPeirce 𝓢 where
   peirce φ ψ := by
-    refine or₃''' imply₁ ?_ lem;
+    refine ofCOfCOfA imply₁ ?_ lem;
     apply deduct';
     apply deduct;
     refine (FiniteContext.byAxm (φ := (φ ➝ ψ) ➝ φ)) ⨀ ?_;

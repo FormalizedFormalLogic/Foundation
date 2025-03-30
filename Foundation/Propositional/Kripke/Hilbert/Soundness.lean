@@ -24,7 +24,7 @@ lemma soundness_of_validates_axiomInstances (hV : C.Validates H.axiomInstances) 
   | implyK => apply ValidOnFrame.imply₂;
   | andElimL => apply ValidOnFrame.andElim₁;
   | andElimR => apply ValidOnFrame.andElim₂;
-  | andIntro => apply ValidOnFrame.andInst₃;
+  | kIntro => apply ValidOnFrame.andInst₃;
   | orIntroL => apply ValidOnFrame.orInst₁;
   | orIntroR => apply ValidOnFrame.orInst₂;
   | orElim => apply ValidOnFrame.orElim;

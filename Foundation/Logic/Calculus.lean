@@ -191,7 +191,7 @@ instance [Cut F K] : Entailment.Classical 𝓚 where
       let d : 𝓚 ⟹ [φ ⋏ ∼ψ, ψ] := and (wk dp <| by simp) (close ψ)
       ofEq d (by simp)
     cut dpq dnq
-  neg_equiv φ := ofEq
+  negEquiv φ := ofEq
     (show 𝓚 ⊢ (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       and (or <| rotate₁ <| or <| close φ) (or <| and (close φ) verum'))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])

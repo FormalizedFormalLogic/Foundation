@@ -279,7 +279,7 @@ lemma intro_dia_semiequiv (h : ∀ y, x ≺ y → y ⊧ φ → y ⊧ ψ) : x ⊧
   simpa;
 
 
-lemma intro_neg_equiv (h : x ⊧ φ ↔ x ⊧ ψ) : x ⊧ ∼φ ↔ x ⊧ ∼ψ := by
+lemma intro_negEquiv (h : x ⊧ φ ↔ x ⊧ ψ) : x ⊧ ∼φ ↔ x ⊧ ∼ψ := by
   constructor;
   . apply intro_neg_semiequiv $ h.mpr;
   . apply intro_neg_semiequiv $ h.mp;
