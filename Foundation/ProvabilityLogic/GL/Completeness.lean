@@ -1,6 +1,92 @@
 import Foundation.ProvabilityLogic.Basic
 import Foundation.Modal.Kripke.Hilbert.GL.Tree
 import Foundation.Modal.Kripke.ExtendRoot
+import Foundation.Incompleteness.Arith.WitnessComparizon
+
+open Classical
+
+noncomputable section
+
+namespace LO.FirstOrder.Arith
+
+namespace SolovaySentence
+
+open LO.Arith
+
+section model
+
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+
+variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
+
+/-- Provability predicate for arithmetic stronger than $\mathbf{R_0}$. -/
+def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonₐ (⌜ℒₒᵣ⌝.neg φ) (⌜ℒₒᵣ⌝.neg ψ)
+
+lemma NegativeSuccessor.quote_iff_provabilityComparison {φ ψ : Sentence ℒₒᵣ} :
+    NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparisonₐ (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
+  simp [NegativeSuccessor, quote_sentence_eq_quote_emb (∼φ), quote_sentence_eq_quote_emb (∼ψ)]
+
+section
+
+def negativeSuccessorDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “φ ψ. ∃ nφ, ∃ nψ, !(ℒₒᵣ).lDef.negDef nφ φ ∧ !(ℒₒᵣ).lDef.negDef nψ ψ ∧ !T.provabilityComparisonₐDef nφ nψ” (by simp)
+
+lemma negativeSuccessor_defined : 𝚺₁-Relation (NegativeSuccessor T : V → V → Prop) via (negativeSuccessorDef T) := by
+  intro v
+  simp [negativeSuccessorDef, NegativeSuccessor, ((ℒₒᵣ).codeIn V).neg_defined.df.iff]
+
+@[simp] lemma eval_negativeSuccessorDef (v) :
+    Semiformula.Evalbm V v (negativeSuccessorDef T).val ↔ NegativeSuccessor T (v 0) (v 1) := (negativeSuccessor_defined T).df.iff v
+
+instance negativeSuccessor_definable : 𝚺₁-Relation (NegativeSuccessor T : V → V → Prop) := (negativeSuccessor_defined T).to_definable
+
+/-- instance for definability tactic-/
+instance negativeSuccessor_definable' : 𝚺-[0 + 1]-Relation (NegativeSuccessor T : V → V → Prop) := (negativeSuccessor_defined T).to_definable
+
+end
+
+end model
+
+open Modal ProvabilityLogic Kripke
+
+variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
+
+variable {M : Kripke.Model} {r : M.World} [M.IsFiniteTree r] [Fintype M.World]
+
+local notation "𝐖" => M.World
+
+abbrev WChain (i j : 𝐖) := {l : List 𝐖 // l.ChainI (· ≻ ·) i j}
+
+instance (i j : 𝐖) : Finite (WChain i j) :=
+  List.ChainI.finite_of_irreflexive_of_transitive
+    (by exact IsIrrefl.irrefl (r := (· ≺ ·)))
+    (by intro x y z hxy hyz
+        exact IsTrans.trans (r := (· ≺ ·)) z y x hyz hxy)
+    i j
+
+def twoPoint (i j : 𝐖) : Semisentence ℒₒᵣ (Fintype.card 𝐖) :=
+  ⩕ k ∈ { k : 𝐖 | i ≺ k }, (negativeSuccessorDef T)/[#(Fintype.equivFin 𝐖 j), #(Fintype.equivFin 𝐖 k)]
+
+def Φchain {i j : 𝐖} : WChain i j → Semisentence ℒₒᵣ (Fintype.card 𝐖)
+  |         ⟨[k], h⟩ => ⊤
+  | ⟨k :: l :: ε, h⟩ =>
+    have e : i = k := by rcases h; rfl
+    have : (l :: ε).ChainI (· ≻ ·) l j := by
+      rcases h
+      case cons m lt h =>
+        rcases h
+        case singleton => simp
+        case cons n ln h =>
+          exact h.cons ln
+    Φchain ⟨l :: ε, this⟩ ⋏ twoPoint T l k
+
+def Φ (i : 𝐖) : Semisentence ℒₒᵣ (Fintype.card 𝐖) :=
+  haveI := Fintype.ofFinite (WChain r i)
+  ⩖ ε : WChain r i, Φchain T ε
+
+end SolovaySentence
+
+end LO.FirstOrder.Arith
 
 namespace LO
 
@@ -48,7 +134,7 @@ variable {L} [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sente
 local notation "𝐖" => Frame.World <| Model.toFrame <| M₁.extendRoot r₁
 
 -- TODO: cleanup
-noncomputable instance : Fintype 𝐖 := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite
+noncomputable instance : Fintype 𝐖 := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree |>.toIsFinite.world_finite
 
 structure SolovaySentences where
   σ : (M₁.extendRoot r₁).World → Sentence L

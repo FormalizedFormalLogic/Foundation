@@ -65,11 +65,12 @@ lemma nodup (IR : Irreflexive R) (TR : Transitive R) {a b l} : ChainI R a b l �
       have notin :a ∉ l := not_mem_of_rel IR TR h Raa'
       simp_all
 
-noncomputable def fintypeOfIrreflexiveOfTransitive [Fintype α] (IR : Irreflexive R) (TR : Transitive R) (a b : α) :
-    Fintype {l : List α // l.ChainI R a b} := by
+lemma finite_of_irreflexive_of_transitive [Finite α] (IR : Irreflexive R) (TR : Transitive R) (a b : α) :
+    Finite {l : List α // l.ChainI R a b} := by
+  haveI : Fintype α := Fintype.ofFinite α
   let f : {l : List α // l.ChainI R a b} → {l : List α // l.Nodup} := fun l ↦ ⟨l, l.prop.nodup IR TR⟩
   have : Function.Injective f := by intro ⟨l₁, hl₁⟩ ⟨l₂, hl₂⟩; simp [f]
-  exact Fintype.ofInjective f this
+  exact Finite.of_injective f this
 
 end ChainI
 

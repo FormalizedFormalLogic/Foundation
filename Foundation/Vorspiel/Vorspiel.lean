@@ -608,7 +608,8 @@ lemma induction_with_singleton
     | nil => exact hsingle a;
     | cons b bs => exact hcons a (b :: bs) (by simp) ih;
 
-noncomputable instance Nodup.fintype [Fintype α] : Fintype {l : List α // l.Nodup} := by
+instance Nodup.finite [Finite α] : Finite {l : List α // l.Nodup} := by
+  haveI : Fintype α := Fintype.ofFinite α
   let N := Fintype.card α + 1
   have : Fintype ((i : Fin N) × Vector α i) := Sigma.instFintype
   let f : {l : List α // l.Nodup} → ((i : Fin N) × Vector α i) := fun l ↦
@@ -616,7 +617,7 @@ noncomputable instance Nodup.fintype [Fintype α] : Fintype {l : List α // l.No
   have : Function.Injective f := by
     intro ⟨l₁, hl₁⟩ ⟨l₂, hl₂⟩ H
     simpa [f] using congrArg (fun p ↦ p.2.val) H
-  exact Fintype.ofInjective f this
+  exact Finite.of_injective f this
 
 end List
 
