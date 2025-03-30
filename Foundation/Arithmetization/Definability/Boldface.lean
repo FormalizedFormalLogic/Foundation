@@ -349,9 +349,9 @@ lemma disj (Γ : List (ℌ.Semiformula V k)) {R : (φ : ℌ.Semiformula V k) →
 open Classical in
 lemma fconj {s : Finset ι} {R : ι → (Fin k → V) → Prop} {φ : ι → ℌ.Semiformula V k} (hR : ∀ i ∈ s, DefinedWithParam (R i) (φ i)) :
     DefinedWithParam (fun x ↦ ∀ i ∈ s, R i x) (⩕ i ∈ s, φ i) := by
-  suffices DefinedWithParam (fun x ↦ ∀ i ∈ s, R i x) (s.image φ).toList.conj by simpa [Finset.conj', Finset.conj]
-  have : DefinedWithParam (fun x ↦ ∀ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.image φ).toList.conj := by
-    simpa using conj (s.image φ).toList (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
+  suffices DefinedWithParam (fun x ↦ ∀ i ∈ s, R i x) (s.toList.map φ).conj by simpa [Finset.conj', Finset.conj]
+  have : DefinedWithParam (fun x ↦ ∀ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.toList.map φ).conj := by
+    simpa using conj (s.toList.map φ) (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
       suffices ∀ a ∈ s, DefinedWithParam (fun v => ∀ i ∈ s, φ a = φ i → R i v) (φ a) by simpa
       intro i hi
       exact (hR i hi).of_iff fun v ↦
@@ -362,9 +362,9 @@ lemma fconj {s : Finset ι} {R : ι → (Fin k → V) → Prop} {φ : ι → ℌ
 open Classical in
 lemma fdisj {s : Finset ι} {R : ι → (Fin k → V) → Prop} {φ : ι → ℌ.Semiformula V k} (hR : ∀ i ∈ s, DefinedWithParam (R i) (φ i)) :
     DefinedWithParam (fun x ↦ ∃ i ∈ s, R i x) (⩖ i ∈ s, φ i) := by
-  suffices DefinedWithParam (fun x ↦ ∃ i ∈ s, R i x) (s.image φ).toList.disj by simpa [Finset.disj', Finset.disj]
-  have : DefinedWithParam (fun x ↦ ∃ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.image φ).toList.disj := by
-    simpa using disj (s.image φ).toList (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
+  suffices DefinedWithParam (fun x ↦ ∃ i ∈ s, R i x) (s.toList.map φ).disj by simpa [Finset.disj', Finset.disj]
+  have : DefinedWithParam (fun x ↦ ∃ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.toList.map φ).disj := by
+    simpa using disj (s.toList.map φ) (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
       suffices ∀ a ∈ s, DefinedWithParam (fun v => ∀ i ∈ s, φ a = φ i → R i v) (φ a) by simpa
       intro i hi
       exact (hR i hi).of_iff fun v ↦
