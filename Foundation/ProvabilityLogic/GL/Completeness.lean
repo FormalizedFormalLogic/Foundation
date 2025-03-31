@@ -42,30 +42,30 @@ open Modal.Formula.Kripke
 
 variable {L} [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sentence L)]
          {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL]
-         (M₁ : Kripke.Model) (r₁ : M₁.World) [M₁.IsFiniteTree r₁]
          {A B : Modal.Formula _}
 
-local notation "𝐖" => Frame.World <| Model.toFrame <| M₁.extendRoot r₁
-
 -- TODO: cleanup
-noncomputable instance : Fintype 𝐖 := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree (r := r₁) |>.toIsFinite.world_finite
+noncomputable instance {F₁ : Kripke.Frame} {r₁ : F₁.World} [F₁.IsFiniteTree r₁] : Fintype (F₁.extendRoot r₁).World := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree |>.toIsFinite.world_finite
+noncomputable instance {M₁ : Kripke.Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁] : Fintype (M₁.extendRoot r₁).World := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree |>.toIsFinite.world_finite
 
-structure SolovaySentences where
-  σ : (M₁.extendRoot r₁).World → Sentence L
+structure SolovaySentences
+  (F₁ : Kripke.Frame) (r₁ : F₁.World) [F₁.IsFiniteTree r₁]
+  where
+  σ : (F₁.extendRoot r₁).World → Sentence L
   protected SC1 : ∀ i j, i ≠ j → T₀ ⊢!. σ i ➝ ∼σ j
   protected SC2 : ∀ i j, i ≺ j → T₀ ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
-  protected SC3 : ∀ i, Model.extendRoot.root ≺ i → T₀ ⊢!. σ i ➝ 𝔅 (⩖ j ∈ { j : 𝐖 | i ≺ j }, σ j)
+  protected SC3 : ∀ i, Frame.extendRoot.root ≺ i → T₀ ⊢!. σ i ➝ 𝔅 (⩖ j ∈ { j : (F₁.extendRoot r₁).World | i ≺ j }, σ j)
   protected SC4 : T ⊬. ∼(σ r₁)
 
-variable {𝔅 M₁ r₁}
+variable {𝔅}
 
 namespace SolovaySentences
 
-instance : CoeFun (SolovaySentences 𝔅 M₁ r₁) (λ _ => 𝐖 → Sentence L) := ⟨λ σ => σ.σ⟩
+instance {F₁ : Kripke.Frame} {r₁ : F₁.World} [F₁.IsFiniteTree r₁] : CoeFun (SolovaySentences 𝔅 F₁ r₁) (λ _ => (F₁.extendRoot r₁) → Sentence L) := ⟨λ σ => σ.σ⟩
 
-noncomputable def realization (σ : SolovaySentences 𝔅 M₁ r₁) : Realization L := λ a => ⩖ i ∈ { i : 𝐖 | i ⊧ (.atom a) }, σ i
+variable {M₁ : Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁] {σ : SolovaySentences 𝔅 M₁.toFrame r₁}
 
-variable {σ : SolovaySentences 𝔅 M₁ r₁}
+noncomputable def realization (σ : SolovaySentences 𝔅 M₁.toFrame r₁) : Realization L := λ a => ⩖ i ∈ { i : (M₁.extendRoot r₁).World | i ⊧ (.atom a) }, σ i
 
 theorem mainlemma {i : M₁.World} :
   (i ⊧ A → T₀ ⊢!. (σ i) ➝ (σ.realization.interpret 𝔅 A)) ∧
@@ -121,7 +121,7 @@ theorem arithmetical_completeness_GL : (∀ {f : Realization L}, T ⊢!. (f.inte
   intro hA;
   push_neg;
   obtain ⟨M₁, r₁, _, hA₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
-  let σ : SolovaySentences 𝔅 M₁ r₁ := by sorry; -- TODO: Sect 2.1
+  let σ : SolovaySentences 𝔅 M₁.toFrame r₁ := by sorry; -- TODO: Sect 2.1
   use σ.realization;
 
   have : T₀ ⊢!. σ r₁ ➝ σ.realization.interpret 𝔅 (∼A) := σ.mainlemma (A := ∼A) (i := r₁) |>.1 $ hA₁
