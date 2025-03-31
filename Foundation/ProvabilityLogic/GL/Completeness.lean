@@ -2,6 +2,8 @@ import Foundation.ProvabilityLogic.Basic
 import Foundation.Modal.Kripke.Hilbert.GL.Tree
 import Foundation.Modal.Kripke.ExtendRoot
 import Foundation.Incompleteness.Arith.WitnessComparizon
+import Foundation.Incompleteness.Arith.FixedPoint
+import Foundation.Incompleteness.Arith.ConsistencyPredicate
 
 open Classical
 
@@ -64,10 +66,10 @@ instance (i j : 𝐖) : Finite (WChain i j) :=
         exact IsTrans.trans (r := (· ≺ ·)) z y x hyz hxy)
     i j
 
-def twoPoint (i j : 𝐖) : Semisentence ℒₒᵣ (Fintype.card 𝐖) :=
-  ⩕ k ∈ { k : 𝐖 | i ≺ k }, (negativeSuccessorDef T)/[#(Fintype.equivFin 𝐖 j), #(Fintype.equivFin 𝐖 k)]
+def twoPointAux (t : 𝐖 → Semiterm ℒₒᵣ Empty N) (i j : 𝐖) : Semisentence ℒₒᵣ N :=
+  ⩕ k ∈ { k : 𝐖 | i ≺ k }, (negativeSuccessorDef T)/[t j, t k]
 
-def Φchain {i j : 𝐖} : WChain i j → Semisentence ℒₒᵣ (Fintype.card 𝐖)
+def θChainAux (t : 𝐖 → Semiterm ℒₒᵣ Empty N) {i j : 𝐖} : WChain i j → Semisentence ℒₒᵣ N
   |         ⟨[k], h⟩ => ⊤
   | ⟨k :: l :: ε, h⟩ =>
     have e : i = k := by rcases h; rfl
@@ -78,11 +80,56 @@ def Φchain {i j : 𝐖} : WChain i j → Semisentence ℒₒᵣ (Fintype.card �
         case singleton => simp
         case cons n ln h =>
           exact h.cons ln
-    Φchain ⟨l :: ε, this⟩ ⋏ twoPoint T l k
+    θChainAux t ⟨l :: ε, this⟩ ⋏ twoPointAux T t l k
 
-def Φ (i : 𝐖) : Semisentence ℒₒᵣ (Fintype.card 𝐖) :=
+def θAux (t : 𝐖 → Semiterm ℒₒᵣ Empty N) (i : 𝐖) : Semisentence ℒₒᵣ N :=
   haveI := Fintype.ofFinite (WChain r i)
-  ⩖ ε : WChain r i, Φchain T ε
+  ⩖ ε : WChain r i, θChainAux T t ε
+
+lemma rew_twoPointAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : 𝐖 → Semiterm ℒₒᵣ Empty N) :
+    Rew.substs w ▹ twoPointAux T t i j = twoPointAux T (fun i ↦ Rew.substs w (t i)) i j := by
+  simp [twoPointAux, Finset.hom_conj', Function.comp_def,
+    ←TransitiveRewriting.comp_app, Rew.substs_comp_substs]
+
+lemma rew_θChainAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : 𝐖 → Semiterm ℒₒᵣ Empty N) (ε : WChain i j) :
+    Rew.substs w ▹ θChainAux T t ε = θChainAux T (fun i ↦ Rew.substs w (t i)) ε := by
+  match ε with
+  |         ⟨[k], h⟩ => simp [θChainAux]
+  | ⟨k :: l :: ε, h⟩ =>
+    have : (l :: ε).ChainI (· ≻ ·) l j := by
+      rcases h
+      case cons m lt h =>
+        rcases h
+        case singleton => simp
+        case cons n ln h =>
+          exact h.cons ln
+    simp [θChainAux, rew_θChainAux w _ ⟨l :: ε, this⟩, rew_twoPointAux]
+
+lemma rew_θAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : 𝐖 → Semiterm ℒₒᵣ Empty N) (i : 𝐖) :
+    Rew.substs w ▹ θAux T t i = θAux T (fun i ↦ Rew.substs w (t i)) i := by
+  simp [Finset.hom_disj', θAux]
+  sorry
+
+def solovay (i : 𝐖) : Sentence ℒₒᵣ := multifixpoint
+  (fun j ↦
+    let jj := (Fintype.equivFin 𝐖).symm j
+    θAux T (fun i ↦ #(Fintype.equivFin 𝐖 i)) jj ⋏ ⩕ k ∈ { k : 𝐖 | jj ≺ k }, T.consistencyₐ/[#(Fintype.equivFin 𝐖 k)])
+  (Fintype.equivFin 𝐖 i)
+
+def θChain {i j : 𝐖} (ε : WChain i j) : Sentence ℒₒᵣ := θChainAux T (fun i ↦ ⌜solovay T i⌝) ε
+
+def θ (i : 𝐖) : Sentence ℒₒᵣ := θAux T (fun i ↦ ⌜solovay T i⌝) i
+
+lemma solovay_diag (i : 𝐖) :
+    𝐈𝚺₁ ⊢!. solovay T i ⭤ θ T i ⋏ ⩕ k ∈ { k : 𝐖 | i ≺ k }, T.consistencyₐ/[⌜solovay T k⌝] := by
+  have : 𝐈𝚺₁ ⊢!. solovay T i ⭤
+      (Rew.substs fun j ↦ ⌜solovay T ((Fintype.equivFin 𝐖).symm j)⌝) ▹
+        (θAux T (fun i ↦ #(Fintype.equivFin 𝐖 i)) i ⋏ ⩕ k ∈ { k : 𝐖 | i ≺ k }, T.consistencyₐ/[#(Fintype.equivFin 𝐖 k)]) := by
+    simpa [solovay] using multidiagonal (T := 𝐈𝚺₁) (i := Fintype.equivFin 𝐖 i)
+      (fun j ↦
+        let jj := (Fintype.equivFin 𝐖).symm j
+        θAux T (fun i ↦ #(Fintype.equivFin 𝐖 i)) jj ⋏ ⩕ k ∈ { k : 𝐖 | jj ≺ k }, T.consistencyₐ/[#(Fintype.equivFin 𝐖 k)])
+  simpa [θ, Finset.hom_conj', Function.comp_def, rew_θAux, ←TransitiveRewriting.comp_app, Rew.substs_comp_substs] using this
 
 end SolovaySentence
 
