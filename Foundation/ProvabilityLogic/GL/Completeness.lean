@@ -42,7 +42,6 @@ open Modal.Formula.Kripke
 
 variable {L} [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sentence L)]
          {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL]
-         -- (F₁ : Kripke.Frame) (r₁ : F₁.World) [F₁.IsFiniteTree r₁]
          {A B : Modal.Formula _}
 
 -- TODO: cleanup
