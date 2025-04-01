@@ -38,7 +38,7 @@ instance finite_complete : Complete (Hilbert.KTB) Kripke.FrameClass.finite_refl_
   intro F ⟨F_refl, F_symm⟩ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationModel M φ.subformulas;
-  apply filteration FM (finestFilterationModel.filterOf) (by aesop) |>.mpr;
+  apply filteration FM (finestFilterationModel.filterOf) (by subformula) |>.mpr;
   apply hp;
   refine ⟨?_, ?_, ?_⟩;
   . apply FilterEqvQuotient.finite; simp;
