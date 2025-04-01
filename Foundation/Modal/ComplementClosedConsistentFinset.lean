@@ -213,6 +213,7 @@ open Formula (atom)
 open FormulaFinset
 
 variable {Φ Ψ : FormulaFinset α}
+variable {ψ χ : Formula α}
 
 abbrev ComplementClosedConsistentFinset (𝓢 : S) (Ψ : FormulaFinset α) := { T : FormulaFinset α // (Consistent 𝓢 T) ∧ (T.ComplementaryClosed Ψ)}
 
@@ -254,7 +255,7 @@ lemma lindenbaum
 
 noncomputable instance [Entailment.Consistent 𝓢] : Inhabited (ComplementClosedConsistentFinset 𝓢 Ψ) := ⟨lindenbaum (Φ := ∅) (Ψ := Ψ) (by simp) (FormulaFinset.empty_conisistent) |>.choose⟩
 
-lemma membership_iff (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) := by
+lemma membership_iff (hq_sub : ψ ∈ Ψ := by subformula) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) := by
   constructor;
   . intro h; exact Context.by_axm! h;
   . intro hp;
@@ -267,13 +268,14 @@ lemma membership_iff (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) :=
     have := complement_derive_bot hp hnp;
     simpa;
 
-lemma mem_verum (h : ⊤ ∈ Ψ) : ⊤ ∈ X := by
+lemma mem_verum (h : ⊤ ∈ Ψ := by subformula) : ⊤ ∈ X := by
   apply membership_iff h |>.mpr;
   exact verum!;
 
 @[simp] lemma mem_falsum : ⊥ ∉ X := FormulaSet.not_mem_falsum_of_consistent X.consistent
 
-lemma iff_mem_compl (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (-ψ ∉ X) := by
+
+lemma iff_mem_compl (hq_sub : ψ ∈ Ψ := by subformula) : (ψ ∈ X) ↔ (-ψ ∉ X) := by
   constructor;
   . intro hq; replace hq := membership_iff hq_sub |>.mp hq;
     by_contra hnq;
@@ -302,7 +304,7 @@ lemma iff_mem_compl (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (-ψ ∉ X) := by
   . intro h; exact mem_of_not_mem_compl (by assumption) h;
 
 lemma iff_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ) (hsub_q : ψ ∈ Ψ)  (hsub_r : χ ∈ Ψ)
+  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by subformula) (hsub_q : ψ ∈ Ψ := by subformula)  (hsub_r : χ ∈ Ψ := by subformula)
   : ((ψ ➝ χ) ∈ X) ↔ (ψ ∈ X) → (-χ ∉ X) := by
   constructor;
   . intro hqr hq;
@@ -328,9 +330,9 @@ lemma iff_mem_imp
       exact imply₁'! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
 
 lemma iff_not_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ) (hsub_q : ψ ∈ Ψ)  (hsub_r : χ ∈ Ψ)
+  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by subformula) (hsub_q : ψ ∈ Ψ := by subformula)  (hsub_r : χ ∈ Ψ := by subformula)
   : ((ψ ➝ χ) ∉ X) ↔ (ψ ∈ X) ∧ (-χ ∈ X) := by
-  simpa using @iff_mem_imp α (𝓢 := 𝓢) _ _ _ Ψ X _ ψ χ hsub_qr hsub_q hsub_r |>.not;
+  simpa using iff_mem_imp (Ψ := Ψ) |>.not;
 
 instance : Finite (ComplementClosedConsistentFinset 𝓢 Ψ) := by
   let f : ComplementClosedConsistentFinset 𝓢 Ψ → (Finset.powerset (Ψ⁻)) := λ X => ⟨X, by simpa using X.closed.subset⟩

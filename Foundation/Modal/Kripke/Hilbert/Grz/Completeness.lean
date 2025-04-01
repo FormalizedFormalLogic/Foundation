@@ -179,8 +179,8 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>
-    have := subformulas.mem_imp q_sub |>.1; -- TODO: remove
-    have := subformulas.mem_imp q_sub |>.2; -- TODO: remove
+    have : ψ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.1;
+    have : χ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.2;
     constructor;
     . contrapose;
       intro h;
@@ -188,18 +188,18 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
       apply Satisfies.and_def.mpr;
       constructor;
       . apply ihq (by subformula) |>.mpr;
-        exact iff_not_mem_imp (by subformula) (by subformula) (by subformula) |>.mp h |>.1;
+        exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.1;
       . apply ihr (by subformula) |>.not.mpr;
         exact iff_mem_compl (by subformula) |>.not.mpr $ by
           push_neg;
-          exact iff_not_mem_imp (by subformula) (by subformula) (by subformula) |>.mp h |>.2;
+          exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.2;
     . contrapose;
       intro h;
       replace h := Satisfies.and_def.mp $ Satisfies.not_imp.mp h;
       obtain ⟨hq, hr⟩ := h;
       replace hq := ihq (by subformula) |>.mp hq;
       replace hr := ihr (by subformula) |>.not.mp hr;
-      apply iff_not_mem_imp (by subformula) (by subformula) (by subformula) |>.mpr;
+      apply iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mpr;
       constructor;
       . assumption;
       . simpa using iff_mem_compl (by subformula) |>.not.mp hr;
@@ -242,7 +242,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         use X;
         constructor;
         . exact IsRefl.refl X;
-        . exact ih (by aesop) |>.not.mpr w;
+        . exact ih (by subformula) |>.not.mpr w;
     . intro h Y RXY;
       apply ih (subformulas.mem_box q_sub) |>.mpr;
       have : ↑Y *⊢[𝓢]! □ψ ➝ ψ := Context.of! $ axiomT!;

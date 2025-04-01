@@ -130,28 +130,31 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>
+    have : ψ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.1;
+    have : χ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.2;
     constructor;
     . contrapose;
       intro h;
       apply Satisfies.imp_def.not.mpr;
       push_neg;
       constructor;
-      . apply ihq (subformulas.mem_imp q_sub |>.1) |>.mpr;
-        exact iff_not_mem_imp q_sub (subformulas.mem_imp q_sub |>.1) (subformulas.mem_imp q_sub |>.2) |>.mp h |>.1;
-      . apply ihr (subformulas.mem_imp q_sub |>.2) |>.not.mpr;
-        have := iff_not_mem_imp q_sub (subformulas.mem_imp q_sub |>.1) (subformulas.mem_imp q_sub |>.2) |>.mp h |>.2;
-        exact iff_mem_compl (subformulas.mem_imp q_sub |>.2) |>.not.mpr (by simpa using this);
+      . apply ihq (by subformula) |>.mpr;
+        exact iff_not_mem_imp q_sub |>.mp h |>.1;
+      . apply ihr (by subformula) |>.not.mpr;
+        have := iff_not_mem_imp q_sub |>.mp h |>.2;
+        exact iff_mem_compl (by subformula) |>.not.mpr (by simpa using this);
     . contrapose;
       intro h;
       replace h := Satisfies.imp_def.not.mp h; push_neg at h;
       obtain ⟨hq, hr⟩ := h;
-      replace hq : ψ ∈ X := ihq (subformulas.mem_imp q_sub |>.1) |>.mp hq;
-      replace hr : χ ∉ X := ihr (subformulas.mem_imp q_sub |>.2) |>.not.mp hr;
-      apply iff_not_mem_imp q_sub (subformulas.mem_imp q_sub |>.1) (subformulas.mem_imp q_sub |>.2) |>.mpr;
+      replace hq : ψ ∈ X := ihq (by subformula) |>.mp hq;
+      replace hr : χ ∉ X := ihr (by subformula) |>.not.mp hr;
+      apply iff_not_mem_imp q_sub |>.mpr;
       constructor;
       . assumption;
-      . simpa using iff_mem_compl (subformulas.mem_imp q_sub |>.2) |>.not.mp (by simpa using hr);
+      . simpa using iff_mem_compl (by subformula) |>.not.mp (by simpa using hr);
   | hbox ψ ih =>
+    have : ψ ∈ φ.subformulas := subformulas.mem_box q_sub;
     constructor;
     . contrapose;
       intro h;
@@ -165,13 +168,13 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
         . aesop;
         . aesop;
       . apply ih ?_ |>.not.mpr;
-        . apply iff_mem_compl (subformulas.mem_box q_sub) |>.not.mpr;
+        . apply iff_mem_compl (by subformula) |>.not.mpr;
           push_neg;
           apply hY₁.2;
           simp;
-        . exact subformulas.mem_box q_sub;
+        . subformula;
     . intro h Y RXY;
-      apply ih (subformulas.mem_box q_sub) |>.mpr;
+      apply ih (by subformula) |>.mpr;
       refine RXY.1 ψ ?_ h |>.1;
       assumption;
 
