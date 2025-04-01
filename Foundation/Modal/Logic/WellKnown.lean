@@ -167,7 +167,7 @@ lemma Triv.Kripke.eq_finite_equality_logic : Logic.Triv = Kripke.FrameClass.fini
 protected abbrev Ver : Logic := Hilbert.Ver.logic
 instance : (Logic.Ver).Normal := Hilbert.normal
 lemma Ver.eq_IsolatedFrameClass_Logic : Logic.Ver = Kripke.FrameClass.isolated.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
+lemma Ver.Kripke.eq_finite_isolated_logic : Logic.Ver = Kripke.FrameClass.finite_isolated.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev KTc : Logic := Hilbert.KTc.logic
 lemma KTc.eq_CoreflexiveKripkeFrameClass_Logic : Logic.KTc = Kripke.FrameClass.corefl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
