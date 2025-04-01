@@ -149,7 +149,9 @@ import Foundation.Incompleteness.Arith.Second
 import Foundation.Incompleteness.Arith.DC
 import Foundation.Incompleteness.DC.Basic
 
-import Foundation.Incompleteness.ProvabilityLogic.Basic
+-- Provability Logic
+import Foundation.ProvabilityLogic.Soundness
+import Foundation.ProvabilityLogic.GL.Completeness
 
 import Foundation.AutoProver.Classical
 

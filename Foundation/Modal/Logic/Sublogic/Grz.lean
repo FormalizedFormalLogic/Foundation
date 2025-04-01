@@ -43,12 +43,6 @@ lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
         . use 1;
           constructor <;> omega;
 
-theorem Grz_ssubset_Triv : Logic.Grz ⊂ Logic.Triv := by
-  convert Grz_ssubset_S5Grz;
-  exact S5Grz_eq_Triv.symm;
-instance : ProperSublogic Logic.Grz Logic.Triv := ⟨Grz_ssubset_Triv⟩
-
-
 instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -90,7 +84,17 @@ instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
 theorem S4Point2_ssubset_GrzPoint2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . sorry;
+  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_confluent_preorder ⊧ φ by
+      simpa [S4Point2.Kripke.eq_finite_confluent_preorder_Logic];
+    use Axioms.Grz (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      constructor;
+      . refine ⟨inferInstance, {refl := by simp, trans := by simp}, ⟨?_⟩⟩;
+        . rintro x y z ⟨Rxy, Ryz⟩; use 0;
+      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.S4Point2 Logic.GrzPoint2 := ⟨S4Point2_ssubset_GrzPoint2⟩
 
 
@@ -148,7 +152,45 @@ instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
 theorem S4Point3_ssubset_GrzPoint3 : Logic.S4Point3 ⊂ Logic.GrzPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . sorry;
+  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_connected_preorder ⊧ φ by
+      simpa [S4Point3.Kripke.eq_finite_connected_preorder_Logic];
+    use Axioms.Grz (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      constructor;
+      . refine ⟨inferInstance, {refl := by simp, trans := by simp}, ⟨by simp [Connected]⟩⟩;
+      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 instance : ProperSublogic Logic.S4Point3 Logic.GrzPoint3 := ⟨S4Point3_ssubset_GrzPoint3⟩
+
+
+theorem GrzPoint3_ssubset_Triv : Logic.GrzPoint3 ⊂ Logic.Triv := by
+  constructor;
+  . rw [GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic, Triv.Kripke.eq_finite_equality_logic];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨by tauto, inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.finite_connected_partial_order ⊧ φ by
+      simpa [GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic];
+    use Axioms.Tc (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨by tauto, {refl := ?_, trans := ?_, antisymm := ?_}, ⟨?_⟩⟩;
+        . tauto;
+        . omega;
+        . simp only [M]; omega;
+        . simp only [Connected, and_imp, M]; omega;
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ x ≠ 0 by
+          simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
+        use 1;
+        constructor;
+        . omega;
+        . trivial;
+instance : ProperSublogic Logic.GrzPoint3 Logic.Triv := ⟨GrzPoint3_ssubset_Triv⟩
 
 end LO.Modal.Logic

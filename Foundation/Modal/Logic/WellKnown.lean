@@ -122,12 +122,14 @@ lemma S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic : Logic.S4 = Kripke.FrameC
 protected abbrev S4Point2 : Logic := Hilbert.S4Point2.logic
 lemma S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic : Logic.S4Point2 = Kripke.FrameClass.confluent_preorder.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
+lemma S4Point2.Kripke.eq_finite_confluent_preorder_Logic : Logic.S4Point2 = Kripke.FrameClass.finite_confluent_preorder.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev S4Point3 : Logic := Hilbert.S4Point3.logic
 lemma S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic : Logic.S4Point3 = Kripke.FrameClass.connected_preorder.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
+lemma S4Point3.Kripke.eq_finite_connected_preorder_Logic : Logic.S4Point3 = Kripke.FrameClass.finite_connected_preorder.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev S5 : Logic := Hilbert.S5.logic
 lemma S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic : Logic.S5 = Kripke.FrameClass.refl_eucl.logic
@@ -165,7 +167,7 @@ lemma Triv.Kripke.eq_finite_equality_logic : Logic.Triv = Kripke.FrameClass.fini
 protected abbrev Ver : Logic := Hilbert.Ver.logic
 instance : (Logic.Ver).Normal := Hilbert.normal
 lemma Ver.eq_IsolatedFrameClass_Logic : Logic.Ver = Kripke.FrameClass.isolated.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
+lemma Ver.Kripke.eq_finite_isolated_logic : Logic.Ver = Kripke.FrameClass.finite_isolated.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev KTc : Logic := Hilbert.KTc.logic
 lemma KTc.eq_CoreflexiveKripkeFrameClass_Logic : Logic.KTc = Kripke.FrameClass.corefl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
