@@ -17,7 +17,7 @@ variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
 
 def _root_.LO.FirstOrder.Theory.Consistencyₐ (φ : V) : Prop := ¬T.Provableₐ (⌜ℒₒᵣ⌝.neg φ)
 
-lemma _root_.LO.FirstOrder.Theory.Consistencyₐ.quote {φ : Sentence ℒₒᵣ} :
+lemma _root_.LO.FirstOrder.Theory.Consistencyₐ.quote_iff {φ : Sentence ℒₒᵣ} :
     T.Consistencyₐ (⌜φ⌝ : V) ↔ ¬T.Provableₐ (⌜∼φ⌝ : V) := by
   simp [LO.FirstOrder.Theory.Consistencyₐ, quote_sentence_eq_quote_emb (∼φ)]
 

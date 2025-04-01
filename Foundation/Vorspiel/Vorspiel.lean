@@ -629,6 +629,40 @@ instance Nodup.finite [Finite α] : Finite {l : List α // l.Nodup} := by
     simpa [f] using congrArg (fun p ↦ p.2.val) H
   exact Finite.of_injective f this
 
+section suffix
+
+lemma suffix_of_cons_suffix {l₁ l₂ : List α} {a} : a :: l₁ <:+ l₂ → l₁ <:+ l₂ := by rintro ⟨l₂, rfl⟩; exact ⟨l₂ ++ [a], by simp⟩
+
+lemma suffix_cons_of {l₁ l₂ : List α} {a} : l₁ <:+ l₂ → l₁ <:+ a :: l₂ := fun h ↦ suffix_cons_iff.mpr <| Or.inr h
+
+lemma exists_of_not_suffix (l₁ l₂ : List α) : ¬l₁ <:+ l₂ → ∃ l a, a :: l <:+ l₁ ∧ l <:+ l₂ ∧ ¬a :: l <:+ l₂ :=
+  match l₁ with
+  |      [] => by simp
+  | a :: l₁ => by
+    intro h
+    by_cases h₁₂ : l₁ <:+ l₂
+    · exact ⟨l₁, a, by simp_all⟩
+    · rcases exists_of_not_suffix l₁ l₂ h₁₂ with ⟨l, b, hb, hll₂, nh⟩
+      exact ⟨l, b, suffix_cons_of hb, hll₂, nh⟩
+
+lemma IsSuffix.eq_or_cons_suffix : l₁ <:+ l₂ → l₁ = l₂ ∨ ∃ a, a :: l₁ <:+ l₂ := by
+  rintro ⟨l, rfl⟩
+  rcases eq_nil_or_concat' l with (rfl | ⟨l, a, rfl⟩)
+  · simp
+  · right; exact ⟨a, l, by simp⟩
+
+lemma suffix_trichotomy {l₁ l₂ : List α} (h₁₂ : ¬l₁ <:+ l₂) (h₂₁ : ¬l₂ <:+ l₁) : ∃ l a b, a ≠ b ∧ a :: l <:+ l₁ ∧ b :: l <:+ l₂ := by
+  rcases exists_of_not_suffix _ _ h₁₂ with ⟨l, a, ha, hkl, _⟩
+  have : ∃ b, b :: l <:+ l₂ := by
+    rcases hkl.eq_or_cons_suffix with (rfl | h)
+    · have : l <:+ l₁ := suffix_of_cons_suffix ha
+      contradiction
+    exact h
+  rcases this with ⟨b, hb⟩
+  exact ⟨l, a, b, by rintro rfl; contradiction, ha, hb⟩
+
+end suffix
+
 end List
 
 namespace List.Vector

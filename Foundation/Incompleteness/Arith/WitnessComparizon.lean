@@ -113,6 +113,8 @@ variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
 /-- Provability predicate for arithmetic stronger than $\mathbf{R_0}$. -/
 def _root_.LO.FirstOrder.Theory.ProvabilityComparisonₐ (φ ψ : V) : Prop := ((T + 𝐑₀').codeIn V).ProvabilityComparison φ ψ
 
+section
+
 def _root_.LO.FirstOrder.Theory.provabilityComparisonₐDef : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. !(T + 𝐑₀').tDef.provabilityComparisonDef φ ψ” (by simp)
 
@@ -126,6 +128,21 @@ instance provabilityComparisonₐ_definable : 𝚺₁-Relation (T.ProvabilityCom
 
 /-- instance for definability tactic-/
 instance provabilityComparisonₐ_definable' : 𝚺-[0 + 1]-Relation (T.ProvabilityComparisonₐ : V → V → Prop) := provabilityComparisonₐ_definable T
+
+end
+
+namespace ProvabilityComparisonₐ
+
+variable {T} {φ ψ : V}
+
+lemma refl_iff_provable : T.ProvabilityComparisonₐ φ φ ↔ T.Provableₐ φ := Language.Theory.ProvabilityComparison.refl_iff_provable
+
+lemma antisymm : T.ProvabilityComparisonₐ φ ψ → T.ProvabilityComparisonₐ ψ φ → φ = ψ := Language.Theory.ProvabilityComparison.antisymm
+
+lemma find_minimal_proof_fintype [Fintype ι] (φ : ι → V) (H : T.Provableₐ (φ i)) :
+    ∃ j, ∀ k, T.ProvabilityComparisonₐ (φ j) (φ k) := Language.Theory.ProvabilityComparison.find_minimal_proof_fintype _ H
+
+end ProvabilityComparisonₐ
 
 end ProvabilityComparisonOnArithmetic
 
