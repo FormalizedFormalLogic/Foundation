@@ -88,7 +88,7 @@ def θAux (t : 𝐖 → Semiterm ℒₒᵣ Empty N) (i : 𝐖) : Semisentence �
 
 lemma rew_twoPointAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : 𝐖 → Semiterm ℒₒᵣ Empty N) :
     Rew.substs w ▹ twoPointAux T t i j = twoPointAux T (fun i ↦ Rew.substs w (t i)) i j := by
-  simp [twoPointAux, Finset.hom_conj', Function.comp_def,
+  simp [twoPointAux, Finset.map_conj', Function.comp_def,
     ←TransitiveRewriting.comp_app, Rew.substs_comp_substs]
 
 lemma rew_θChainAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : 𝐖 → Semiterm ℒₒᵣ Empty N) (ε : WChain i j) :
@@ -107,7 +107,7 @@ lemma rew_θChainAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : 𝐖 → S
 
 lemma rew_θAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : 𝐖 → Semiterm ℒₒᵣ Empty N) (i : 𝐖) :
     Rew.substs w ▹ θAux T t i = θAux T (fun i ↦ Rew.substs w (t i)) i := by
-  simp [Finset.hom_disj', θAux]
+  simp [Finset.map_disj', θAux]
   sorry
 
 def solovay (i : 𝐖) : Sentence ℒₒᵣ := multifixpoint

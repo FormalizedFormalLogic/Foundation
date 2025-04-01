@@ -608,6 +608,16 @@ lemma induction_with_singleton
     | nil => exact hsingle a;
     | cons b bs => exact hcons a (b :: bs) (by simp) ih;
 
+@[elab_as_elim]
+def induction_with_singleton'
+  {motive : List α → Sort*}
+  (hnil : motive [])
+  (hsingle : ∀ a, motive [a])
+  (hcons : ∀ a b as, motive (b :: as) → motive (a :: b :: as)) : ∀ as, motive as
+  |           [] => hnil
+  |          [a] => hsingle a
+  | a :: b :: as => hcons a b as (induction_with_singleton' hnil hsingle hcons (b :: as))
+
 instance Nodup.finite [Finite α] : Finite {l : List α // l.Nodup} := by
   haveI : Fintype α := Fintype.ofFinite α
   let N := Fintype.card α + 1
