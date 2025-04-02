@@ -98,11 +98,11 @@ open ProvabilityPredicate
 
 variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] [L.DecidableEq]
          {T₀ T : FirstOrder.Theory L} [T₀ ⪯ T] [Diagonalization T₀]
-         {M} [Nonempty M] [Structure L M]
+         {M : Type*} [Nonempty M] [Structure L M]
          {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [𝔅.Justified M]
          {A : Formula ℕ}
 
-lemma arithmetical_soundness_S
+theorem arithmetical_soundness_S
   (hSound : ∀ {σ}, T ⊢!. σ → M ⊧ₘ₀ σ)  -- TODO: remove
   (h : A ∈ Logic.S) (f : Realization L) : M ⊧ₘ₀ (f.interpret 𝔅 A) := by
   induction h using Logic.S.rec' with
@@ -114,5 +114,24 @@ lemma arithmetical_soundness_S
   | mdp ihAB ihA =>
     simp only [Realization.interpret, models₀_imply_iff] at ihAB;
     apply ihAB ihA;
+
+
+section
+
+instance : 𝐏𝐀.Delta1Definable := by sorry
+
+instance : (𝐏𝐀.standardDP 𝐏𝐀).Justified ℕ := ⟨by sorry⟩
+
+lemma _root_.LO.Modal.Logic.iff_provable_GL_provable_box_S : A ∈ Logic.GL ↔ □A ∈ Logic.S := by
+  constructor;
+  . intro h;
+    apply Logic.sumQuasiNormal.mem₁;
+    apply nec! h;
+  . intro h;
+    apply arithmetical_completeness_GL (𝔅 := 𝐏𝐀.standardDP 𝐏𝐀);
+    intro f;
+    exact (𝐏𝐀.standardDP 𝐏𝐀).justified (M := ℕ) |>.mpr $ arithmetical_soundness_S (by sorry) h f;
+
+end
 
 end LO.ProvabilityLogic
