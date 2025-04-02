@@ -1,8 +1,6 @@
-import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Logic.Extension
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.Soundness
-import Foundation.Incompleteness.Arith.Second
 import Mathlib.Tactic.TFAE
 
 namespace LO
@@ -49,7 +47,18 @@ end Entailment
 
 namespace Modal
 
+
 section
+
+variable {M : Kripke.Model} {x : M.World} {φ ψ : Formula ℕ} {Γ : FormulaFinset ℕ}
+
+lemma Formula.Kripke.Satisfies.finset_conj_def : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
+  simp only [Semantics.realize_finset_conj, Satisfies.iff_models];
+
+end
+
+section
+
 
 open Logic
 
@@ -128,6 +137,14 @@ protected def Logic.S.rec'
     . rwa [←Logic.eq_S_S'] at hφψ;
     . rwa [←Logic.eq_S_S'] at hφ;
 
+
+lemma Logic.conj_iff {L : Modal.Logic} [L.QuasiNormal] {Γ : FormulaFinset ℕ} : Γ.conj ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
+  constructor;
+  . intro h φ hφ;
+    sorry;
+  . intro h;
+    sorry;
+
 end
 
 variable {α} [DecidableEq α]
@@ -189,7 +206,7 @@ section
 
 instance : 𝐏𝐀.Delta1Definable := by sorry
 
-instance  {T : FirstOrder.Theory ℒₒᵣ} [𝐏𝐀 ⪯ T] [T.Delta1Definable] : (𝐏𝐀.standardDP T).Justified ℕ := by sorry
+instance {T : FirstOrder.Theory ℒₒᵣ} [𝐏𝐀 ⪯ T] [T.Delta1Definable] : (𝐏𝐀.standardDP T).Justified ℕ := by sorry
 
 lemma _root_.LO.Modal.Logic.iff_provable_GL_provable_box_S : A ∈ Logic.GL ↔ □A ∈ Logic.S := by
   constructor;
@@ -211,13 +228,6 @@ open Modal
 open Modal.Kripke
 open Modal.Formula.Kripke
 
-lemma conj_iff {L : Modal.Logic} [L.QuasiNormal] {Γ : FormulaFinset ℕ} : Γ.conj ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
-  constructor;
-  . intro h φ hφ;
-    sorry;
-  . intro h;
-    sorry;
-
 variable {T : FirstOrder.Theory ℒₒᵣ} [𝐏𝐀 ⪯ T] [T.Delta1Definable]
 
 lemma GL_S_TFAE :
@@ -229,14 +239,14 @@ lemma GL_S_TFAE :
   tfae_have 1 → 2 := by
     intro h;
     apply Logic.S.mdp (GL_subset_S h) ?_;
-    apply conj_iff.mpr;
+    apply Logic.conj_iff.mpr;
     suffices ∀ B, □B ∈ A.subformulas → □B ➝ B ∈ Logic.S by simpa [Formula.rflSubformula];
     rintro B _;
     exact Logic.S.mem_axiomT;
   tfae_have 2 → 3 := by
     intro h f;
     apply arithmetical_soundness_S;
-    . sorry;
+    . sorry; -- soundness of 𝐏𝐀 (T), `T ⊢!. σ → ℕ ⊧ₘ₀ σ`
     . exact h;
   tfae_have 3 → 1 := by
     contrapose;
@@ -249,7 +259,8 @@ lemma GL_S_TFAE :
     replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
     push_neg at hA;
     obtain ⟨hA₁, hA₂⟩ := hA;
-    replace hA₂ : ¬Satisfies M₀ r₁ A := by sorry;
+    replace hA₁ : ∀ φ ∈ A.rflSubformula, Satisfies M₀ r₁ φ := Satisfies.finset_conj_def.mp $ Model.extendRoot.modal_equivalence_original_world.mp hA₁;
+    replace hA₂ : ¬Satisfies M₀ r₁ A := Model.extendRoot.modal_equivalence_original_world.not.mp hA₂;
     let σ : SolovaySentences 𝔅 M₁.toFrame r₁ := by sorry;
     use σ.realization;
 
@@ -298,7 +309,9 @@ lemma GL_S_TFAE :
           apply Entailment.WeakerThan.pbl (𝓢 := 𝐏𝐀.alt);
           have : 𝐏𝐀 ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret 𝔅 B := by
             apply fdisj_imply!;
-            have hrfl : Satisfies M₀ (Sum.inr r₁) (□B ➝ B) := by sorry;
+            have hrfl : Satisfies M₀ (Sum.inr r₁) (□B ➝ B) := by
+              apply hA₁;
+              simpa [Formula.rflSubformula];
             rintro (_ | i) _;
             . suffices 𝐏𝐀 ⊢!. σ r₀ ➝ σ.realization.interpret 𝔅 B by convert this;
               apply ihB (Formula.subformulas.mem_box B_sub) |>.1;
@@ -331,11 +344,11 @@ lemma GL_S_TFAE :
     exact this $ by sorry; -- by lemma 2.1.1(4)
   tfae_finish;
 
-theorem arithmetical_completeness_S : A ∈ Logic.S ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret (𝐏𝐀.standardDP T) A) := by
-  exact GL_S_TFAE.out 1 2;
+theorem arithmetical_completeness_S : A ∈ Logic.S ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret (𝐏𝐀.standardDP T) A) := GL_S_TFAE.out 1 2
+
+lemma _root_.LO.Modal.Logic.iff_provable_rfl_GL_provable_S : (A.rflSubformula.conj ➝ A) ∈ Logic.GL ↔ A ∈ Logic.S := GL_S_TFAE (T := 𝐏𝐀) |>.out 0 1
 
 end
-
 
 end ProvabilityLogic
 
