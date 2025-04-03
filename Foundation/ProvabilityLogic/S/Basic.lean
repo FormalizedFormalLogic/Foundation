@@ -184,19 +184,26 @@ open ProvabilityPredicate
 
 variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] [L.DecidableEq]
          {T₀ T : FirstOrder.Theory L} [T₀ ⪯ T] [Diagonalization T₀]
-         {M : Type*} [Nonempty M] [Structure L M]
+         {M : Type*} [Nonempty M] [Structure L M] [M ⊧ₘ* T]
          {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [𝔅.Justified M]
          {A B : Formula ℕ}
 
+-- TODO: rename and move
+omit
+  [Semiterm.Operator.GoedelNumber L (Sentence L)]
+  [L.DecidableEq]
+in
+lemma sound_models (h : T ⊢!. σ) : M ⊧ₘ₀ σ := consequence_iff.mp (sound! (T := T) h) M inferInstance
+
 theorem arithmetical_soundness_S
-  (hSound : ∀ {σ}, T ⊢!. σ → M ⊧ₘ₀ σ)  -- TODO: remove
   (h : A ∈ Logic.S) (f : Realization L) : M ⊧ₘ₀ (f.interpret 𝔅 A) := by
   induction h using Logic.S.rec' with
-  | mem_GL h => exact hSound $ arithmetical_soundness_GL h
+  | mem_GL h =>
+    exact sound_models $ arithmetical_soundness_GL h;
   | axiomT =>
     simp only [Realization.interpret, models₀_imply_iff];
     intro h;
-    exact hSound $ 𝔅.justified (M := M) |>.mpr h;
+    exact sound_models $ (𝔅.justified (M := M) |>.mpr h);
   | mdp ihAB ihA =>
     simp only [Realization.interpret, models₀_imply_iff] at ihAB;
     apply ihAB ihA;
@@ -206,7 +213,7 @@ section
 
 instance : 𝐏𝐀.Delta1Definable := by sorry
 
-instance {T : FirstOrder.Theory ℒₒᵣ} [𝐏𝐀 ⪯ T] [T.Delta1Definable] : (𝐏𝐀.standardDP T).Justified ℕ := by sorry
+instance {T : FirstOrder.Theory ℒₒᵣ} [𝐏𝐀 ⪯ T] [T.Delta1Definable] : (𝐏𝐀.standardDP T).Justified ℕ := ⟨by sorry⟩
 
 lemma _root_.LO.Modal.Logic.iff_provable_GL_provable_box_S : A ∈ Logic.GL ↔ □A ∈ Logic.S := by
   constructor;
@@ -216,7 +223,7 @@ lemma _root_.LO.Modal.Logic.iff_provable_GL_provable_box_S : A ∈ Logic.GL ↔ 
   . intro h;
     apply arithmetical_completeness_GL (𝔅 := 𝐏𝐀.standardDP 𝐏𝐀);
     intro f;
-    exact (𝐏𝐀.standardDP 𝐏𝐀).justified (M := ℕ) |>.mpr $ arithmetical_soundness_S (by sorry) h f;
+    exact (𝐏𝐀.standardDP 𝐏𝐀).justified (M := ℕ) |>.mpr $ arithmetical_soundness_S h f;
 
 end
 
@@ -244,8 +251,7 @@ lemma GL_S_TFAE :
   tfae_have 2 → 3 := by
     intro h f;
     apply arithmetical_soundness_S;
-    . sorry; -- soundness of T₀ (T), `T ⊢!. σ → ℕ ⊧ₘ₀ σ`
-    . exact h;
+    exact h;
   tfae_have 3 → 1 := by
     contrapose;
     push_neg;
@@ -335,8 +341,8 @@ lemma GL_S_TFAE :
           refine imp_trans''! ?_ this;
           apply σ.SC2;
           tauto;
-    have : T₀ ⊢!. σ.σ r₀ ➝ ∼σ.realization.interpret 𝔅 A := H A (by simp) |>.2 hA₂;
-    have : M ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret 𝔅 A := by sorry; -- by T₀ soundness
+    have : M ⊧ₘ* T₀ := models_of_subtheory (U := T₀) (T := T) (M := M) inferInstance;
+    have : M ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret 𝔅 A := sound_models $ H A (by simp) |>.2 hA₂;
     simp only [models₀_imply_iff, models₀_not_iff] at this;
     exact this $ by sorry; -- by lemma 2.1.1(4)
   tfae_finish;
