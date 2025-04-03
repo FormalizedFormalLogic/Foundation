@@ -186,7 +186,7 @@ variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] [L.DecidableEq]
          {T₀ T : FirstOrder.Theory L} [T₀ ⪯ T] [Diagonalization T₀]
          {M : Type*} [Nonempty M] [Structure L M]
          {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [𝔅.Justified M]
-         {A : Formula ℕ}
+         {A B : Formula ℕ}
 
 theorem arithmetical_soundness_S
   (hSound : ∀ {σ}, T ⊢!. σ → M ⊧ₘ₀ σ)  -- TODO: remove
@@ -228,13 +228,11 @@ open Modal
 open Modal.Kripke
 open Modal.Formula.Kripke
 
-variable {T : FirstOrder.Theory ℒₒᵣ} [𝐏𝐀 ⪯ T] [T.Delta1Definable]
-
 lemma GL_S_TFAE :
   [
     (A.rflSubformula.conj ➝ A) ∈ Logic.GL,
     A ∈ Logic.S,
-    ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret (𝐏𝐀.standardDP T) A)
+    ∀ f : Realization L, M ⊧ₘ₀ (f.interpret 𝔅 A)
   ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;
@@ -246,7 +244,7 @@ lemma GL_S_TFAE :
   tfae_have 2 → 3 := by
     intro h f;
     apply arithmetical_soundness_S;
-    . sorry; -- soundness of 𝐏𝐀 (T), `T ⊢!. σ → ℕ ⊧ₘ₀ σ`
+    . sorry; -- soundness of T₀ (T), `T ⊢!. σ → ℕ ⊧ₘ₀ σ`
     . exact h;
   tfae_have 3 → 1 := by
     contrapose;
@@ -255,7 +253,6 @@ lemma GL_S_TFAE :
     obtain ⟨M₁, r₁, _, hA⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
     let M₀ := Model.extendRoot M₁ r₁;
     let r₀ : M₀.World := Model.extendRoot.root;
-    let 𝔅 := (𝐏𝐀.standardDP T);
     replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
     push_neg at hA;
     obtain ⟨hA₁, hA₂⟩ := hA;
@@ -267,8 +264,8 @@ lemma GL_S_TFAE :
     let r₀ := Kripke.Model.extendRoot.root (M := M₁) (r := r₁);
     have H :
       ∀ B ∈ A.subformulas,
-      (Satisfies M₀ r₁ B → 𝐏𝐀 ⊢!. (σ r₀) ➝ (σ.realization.interpret 𝔅 B)) ∧
-      (¬Satisfies M₀ r₁ B → 𝐏𝐀 ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret 𝔅 B)) := by
+      (Satisfies M₀ r₁ B → T₀ ⊢!. (σ r₀) ➝ (σ.realization.interpret 𝔅 B)) ∧
+      (¬Satisfies M₀ r₁ B → T₀ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret 𝔅 B)) := by
       intro B B_sub;
       induction B using Formula.rec' with
       | hfalsum => simp [Satisfies, Realization.interpret];
@@ -306,14 +303,14 @@ lemma GL_S_TFAE :
         . intro h;
           apply imply₁'!;
           apply 𝔅.D1;
-          apply Entailment.WeakerThan.pbl (𝓢 := 𝐏𝐀.alt);
-          have : 𝐏𝐀 ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret 𝔅 B := by
+          apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
+          have : T₀ ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret 𝔅 B := by
             apply fdisj_imply!;
             have hrfl : Satisfies M₀ (Sum.inr r₁) (□B ➝ B) := by
               apply hA₁;
               simpa [Formula.rflSubformula];
             rintro (_ | i) _;
-            . suffices 𝐏𝐀 ⊢!. σ r₀ ➝ σ.realization.interpret 𝔅 B by convert this;
+            . suffices T₀ ⊢!. σ r₀ ➝ σ.realization.interpret 𝔅 B by convert this;
               apply ihB (Formula.subformulas.mem_box B_sub) |>.1;
               exact Satisfies.mdp hrfl h;
             . by_cases e : i = r₁;
@@ -326,27 +323,27 @@ lemma GL_S_TFAE :
                 suffices r₁ ≺ i by simpa [Frame.Rel', Model.extendRoot, Frame.extendRoot, M₀];
                 apply Frame.IsRooted.direct_rooted_of_trans;
                 assumption;
-          exact this ⨀ (by sorry); -- `𝐏𝐀 ⊢!. ⩖ j, σ j`
+          exact this ⨀ (by sorry); -- `T₀ ⊢!. ⩖ j, σ j`
         . intro h;
           have := Satisfies.box_def.not.mp h;
           push_neg at this;
           obtain ⟨(_ | i), Rij, hA⟩ := this;
           . simp only [Frame.Rel', Model.extendRoot, Frame.extendRoot, M₀] at Rij;
-          have : 𝐏𝐀 ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret 𝔅 B := σ.mainlemma (A := B) (i := i) |>.2
+          have : T₀ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret 𝔅 B := σ.mainlemma (A := B) (i := i) |>.2
             $ Model.extendRoot.modal_equivalence_original_world |>.not.mpr hA;
-          have : 𝐏𝐀 ⊢!. ∼𝔅 (∼σ.σ (Sum.inr i)) ➝ ∼𝔅 (σ.realization.interpret 𝔅 B) := contra₀'! $ 𝔅.prov_distribute_imply' $ contra₁'! $ this;
+          have : T₀ ⊢!. ∼𝔅 (∼σ.σ (Sum.inr i)) ➝ ∼𝔅 (σ.realization.interpret 𝔅 B) := contra₀'! $ 𝔅.prov_distribute_imply' $ contra₁'! $ this;
           refine imp_trans''! ?_ this;
           apply σ.SC2;
           tauto;
-    have : 𝐏𝐀 ⊢!. σ.σ r₀ ➝ ∼σ.realization.interpret 𝔅 A := H A (by simp) |>.2 hA₂;
-    have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret 𝔅 A := by sorry; -- by 𝐏𝐀 soundness
+    have : T₀ ⊢!. σ.σ r₀ ➝ ∼σ.realization.interpret 𝔅 A := H A (by simp) |>.2 hA₂;
+    have : M ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret 𝔅 A := by sorry; -- by T₀ soundness
     simp only [models₀_imply_iff, models₀_not_iff] at this;
     exact this $ by sorry; -- by lemma 2.1.1(4)
   tfae_finish;
 
-theorem arithmetical_completeness_S : A ∈ Logic.S ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret (𝐏𝐀.standardDP T) A) := GL_S_TFAE.out 1 2
+theorem arithmetical_completeness_S : A ∈ Logic.S ↔ ∀ f : Realization L, M ⊧ₘ₀ (f.interpret 𝔅 A) := GL_S_TFAE.out 1 2
 
-lemma _root_.LO.Modal.Logic.iff_provable_rfl_GL_provable_S : (A.rflSubformula.conj ➝ A) ∈ Logic.GL ↔ A ∈ Logic.S := GL_S_TFAE (T := 𝐏𝐀) |>.out 0 1
+lemma _root_.LO.Modal.Logic.iff_provable_rfl_GL_provable_S : (A.rflSubformula.conj ➝ A) ∈ Logic.GL ↔ A ∈ Logic.S := GL_S_TFAE (𝔅 := 𝐏𝐀.standardDP 𝐏𝐀) (M := ℕ) |>.out 0 1
 
 end
 
