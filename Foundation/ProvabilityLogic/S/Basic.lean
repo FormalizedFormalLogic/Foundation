@@ -138,12 +138,58 @@ protected def Logic.S.rec'
     . rwa [←Logic.eq_S_S'] at hφ;
 
 
-lemma Logic.conj_iff {L : Modal.Logic} [L.QuasiNormal] {Γ : FormulaFinset ℕ} : Γ.conj ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
+namespace Logic
+
+open Entailment
+
+variable {L : Modal.Logic} [L.QuasiNormal] {φ ψ : Formula ℕ}
+
+lemma p_q_Apq (hφ : φ ∈ L) (hψ : ψ ∈ L) : φ ⋏ ψ ∈ L := by
+  apply Logic.mdp (φ := ψ);
+  apply Logic.mdp (φ := φ) (ψ := ψ ➝ φ ⋏ ψ);
+  . apply Logic.of_mem_K;
+    exact and₃!;
+  . assumption;
+  . assumption;
+
+lemma conj_iffAux {Γ : List (Formula ℕ)} : Γ.conj ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
   constructor;
   . intro h φ hφ;
-    sorry;
+    refine Logic.mdp ?_ h;
+    apply Logic.of_mem_K;
+    apply implyLeft_conj_eq_conj!.mpr;
+    apply generalConj'! hφ;
   . intro h;
-    sorry;
+    induction Γ using List.induction_with_singleton with
+    | hnil =>
+      simp only [List.conj_nil, List.not_mem_nil, IsEmpty.forall_iff, implies_true, iff_true];
+      apply Logic.of_mem_K;
+      exact verum!;
+    | hsingle φ =>
+      apply p_q_Apq;
+      . tauto;
+      . apply Logic.of_mem_K;
+        exact verum!;
+    | @hcons φ Γ hΓ ih =>
+      apply p_q_Apq;
+      . apply h;
+        tauto;
+      . apply ih;
+        tauto;
+
+lemma conj_iff {Γ : FormulaFinset ℕ} : Γ.conj ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
+  have := Logic.conj_iffAux (L := L) (Γ := Γ.toList);
+  constructor;
+  . intro h φ hφ;
+    apply Logic.conj_iffAux (Γ := Γ.toList) |>.mp (by tauto);
+    simpa;
+  . intro h;
+    apply Logic.conj_iffAux (Γ := Γ.toList) |>.mpr;
+    intro φ hφ;
+    apply h;
+    simpa using hφ;
+
+end Logic
 
 end
 
