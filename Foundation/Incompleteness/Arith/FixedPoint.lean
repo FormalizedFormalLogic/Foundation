@@ -133,9 +133,27 @@ theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     have ht : ∀ i, substNumerals (t i) t = ⌜multifixpoint θ i⌝ := by
       intro i; simp [t, multifixpoint, substNumerals_app_quote_quote]
     calc
-      V ⊧/![] (multifixpoint θ i) ↔ V ⊧/t (multidiag (θ i))                 := by simp [t, multifixpoint]
+      V ⊧/![] (multifixpoint θ i) ↔ V ⊧/t (multidiag (θ i))              := by simp [t, multifixpoint]
       _                      ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
-      _                      ↔ V ⊧/(fun i ↦ ⌜multifixpoint θ i⌝) (θ i) := by simp [ht]
+      _                      ↔ V ⊧/(fun i ↦ ⌜multifixpoint θ i⌝) (θ i)   := by simp [ht]
+
+def exclusiveMultifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
+  multifixpoint (fun j ↦ (θ j).padding j) i
+
+@[simp] lemma exclusiveMultifixpoint_inj_iff (θ : Fin k → Semisentence ℒₒᵣ k) :
+    exclusiveMultifixpoint θ i = exclusiveMultifixpoint θ j ↔ i = j := by
+  constructor
+  · unfold exclusiveMultifixpoint multifixpoint
+    suffices ∀ ω : Rew ℒₒᵣ Empty k Empty 0, ω ▹ multidiag ((θ i).padding i) = ω ▹ multidiag ((θ j).padding j) → i = j by exact this _
+    intro
+    simp [multidiag, Fin.val_inj]
+  · rintro rfl; rfl
+
+theorem exclusiveMultidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
+    T ⊢!. exclusiveMultifixpoint θ i ⭤ (Rew.substs fun j ↦ ⌜exclusiveMultifixpoint θ j⌝) ▹ (θ i) := by
+  have : T ⊢!. exclusiveMultifixpoint θ i ⭤ ((Rew.substs fun j ↦ ⌜exclusiveMultifixpoint θ j⌝) ▹ θ i).padding ↑i := by
+    simpa using multidiagonal (T := T) (fun j ↦ (θ j).padding j) (i := i)
+  exact Entailment.iff_trans''! this (Entailment.padding_iff _ _)
 
 end Multidiagonalization
 

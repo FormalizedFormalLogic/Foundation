@@ -228,7 +228,7 @@ lemma rew_θAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : F → Semiterm 
     Rew.substs w ▹ θAux T t i = θAux T (fun i ↦ Rew.substs w (t i)) i := by
   simp [Finset.map_udisj, θAux, rew_θChainAux]
 
-def _root_.LO.FirstOrder.Arith.solovay (i : F) : Sentence ℒₒᵣ := multifixpoint
+def _root_.LO.FirstOrder.Arith.solovay (i : F) : Sentence ℒₒᵣ := exclusiveMultifixpoint
   (fun j ↦
     let jj := (Fintype.equivFin F).symm j
     θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistencyₐ/[#(Fintype.equivFin F k)])
@@ -245,11 +245,13 @@ lemma solovay_diag (i : F) :
   have : 𝐈𝚺₁ ⊢!. solovay T i ⭤
       (Rew.substs fun j ↦ ⌜solovay T ((Fintype.equivFin F).symm j)⌝) ▹
         (θAux T (fun i ↦ #(Fintype.equivFin F i)) i ⋏ ⩕ k ∈ { k : F | i ≺ k }, T.consistencyₐ/[#(Fintype.equivFin F k)]) := by
-    simpa [solovay] using multidiagonal (T := 𝐈𝚺₁) (i := Fintype.equivFin F i)
+    simpa [solovay] using exclusiveMultidiagonal (T := 𝐈𝚺₁) (i := Fintype.equivFin F i)
       (fun j ↦
         let jj := (Fintype.equivFin F).symm j
         θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistencyₐ/[#(Fintype.equivFin F k)])
   simpa [θ, Finset.map_conj', Function.comp_def, rew_θAux, ←TransitiveRewriting.comp_app, Rew.substs_comp_substs] using this
+
+@[simp] lemma solovay_exclusive {i j : F} : solovay T i = solovay T j ↔ i = j := by simp [solovay]
 
 end stx
 
@@ -411,7 +413,7 @@ private lemma Solovay.exclusive.comparable {i₁ i₂ : F} {ε₁ ε₂ : List F
     exact ProvabilityComparisonₐ.refl_iff_provable.mp (this j hij₁)
   contradiction
 
-lemma Solovay.exclusive {i₁ i₂ : F} (ne : i₁ ≠ i₂) : Solovay T V i₁ → ¬Solovay T V i₂ := by {
+lemma Solovay.exclusive {i₁ i₂ : F} (ne : i₁ ≠ i₂) : Solovay T V i₁ → ¬Solovay T V i₂ := by
   intro S₁ S₂
   rcases S₁ with ⟨⟨ε₁, cε₁, Θε₁⟩, Hi₁⟩
   rcases S₂ with ⟨⟨ε₂, cε₂, Θε₂⟩, Hi₂⟩
@@ -445,10 +447,8 @@ lemma Solovay.exclusive {i₁ i₂ : F} (ne : i₁ ≠ i₂) : Solovay T V i₁ 
     simpa [NegativeSuccessor.quote_iff_provabilityComparison] using
       ΘChain.doubleton_iff.mp C₂ j₁
         (cε₁.rel_of_infix _ _ <| List.infix_iff_prefix_suffix.mpr ⟨j₁ :: k :: ε, by simp, hj₁⟩)
-  have : solovay T j₁ = solovay T j₂ := by simpa using ProvabilityComparisonₐ.antisymm P₁ P₂
-  simp at this
-  sorry
- }
+  have : j₁ = j₂ := by simpa using ProvabilityComparisonₐ.antisymm P₁ P₂
+  contradiction
 
 end model
 
