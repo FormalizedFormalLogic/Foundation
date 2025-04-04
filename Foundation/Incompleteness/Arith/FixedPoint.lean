@@ -155,6 +155,16 @@ theorem exclusiveMultidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     simpa using multidiagonal (T := T) (fun j ↦ (θ j).padding j) (i := i)
   exact Entailment.iff_trans''! this (Entailment.padding_iff _ _)
 
+lemma multifixpoint_pi {θ : Fin k → Semisentence ℒₒᵣ k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :
+    Hierarchy 𝚷 (m + 1) (multifixpoint θ i) := by
+  simp [multifixpoint, multidiag, h]
+  intro _
+  apply Hierarchy.mono (s := 1) (by simp) (by simp)
+
+lemma exclusiveMultifixpoint_pi {θ : Fin k → Semisentence ℒₒᵣ k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :
+    Hierarchy 𝚷 (m + 1) (exclusiveMultifixpoint θ i) := by
+  apply multifixpoint_pi; simp [h]
+
 end Multidiagonalization
 
 end LO.FirstOrder.Arith
