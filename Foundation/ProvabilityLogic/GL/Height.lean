@@ -1,4 +1,5 @@
 import Foundation.ProvabilityLogic.S.Basic
+import Mathlib.Order.WellFoundedSet
 
 namespace LO
 
@@ -154,6 +155,95 @@ lemma Logic.iff_provable_GL_provable_GLBB : (□^[n]⊥ ➝ φ) ∈ Logic.GL ↔
     | boxbot => simp;
     | mdp ihφψ ihψ => exact ihφψ ⨀₁ ihψ;
 
+def Logic.GLₙ : ℕ → Logic
+  | 0     => Logic.GL
+  | n + 1 => Logic.GLBB ⟨(n + 1), by omega⟩
+
 end Modal
+
+
+namespace FirstOrder
+
+open DerivabilityCondition
+
+namespace Theory
+
+variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)]
+         {T₀ T U : FirstOrder.Theory L}
+         {𝔅 : ProvabilityPredicate T₀ T}
+
+def provabilityHeightSet (U : Theory L) (𝔅 : ProvabilityPredicate T₀ T) : Set ℕ+ := { n | U ⊢!. (𝔅^[n])/[⌜(⊥ : Sentence L)⌝] }
+
+lemma provabilityHeightSet.IsWF : (provabilityHeightSet U 𝔅).IsWF := by
+  apply Set.wellFoundedOn_iff.mpr;
+  sorry;
+
+open Classical in
+noncomputable def provabilityHeight (U : Theory L) (𝔅 : ProvabilityPredicate T₀ T) : ℕ :=
+  if hH : (provabilityHeightSet U 𝔅).Nonempty then Set.IsWF.min provabilityHeightSet.IsWF hH |>.1 else 0
+
+lemma provabilityHeight.iff_zero : (provabilityHeight U 𝔅) = 0 ↔ ¬(provabilityHeightSet U 𝔅).Nonempty := by
+  constructor;
+  . contrapose;
+    push_neg;
+    sorry;
+  . simp_all [provabilityHeight]
+
+lemma provabilityHeight.nobot_of_zero : (provabilityHeight U 𝔅) = 0 ↔ ∀ n, U ⊬. (𝔅^[n])/[⌜(⊥ : Sentence L)⌝] := by
+  simp_all [iff_zero, provabilityHeightSet, Set.Nonempty];
+
+end Theory
+
+end FirstOrder
+
+
+namespace ProvabilityLogic
+
+open Classical
+open Entailment Entailment.FiniteContext
+open FirstOrder FirstOrder.DerivabilityCondition
+open Modal
+open Modal.Kripke
+open Modal.Formula.Kripke
+
+variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)]
+         {T₀ T : FirstOrder.Theory L}
+         {𝔅 : ProvabilityPredicate T₀ T}
+
+protected lemma GL_classification_provabilityHeight.positive (n : ℕ+):
+  (Theory.provabilityHeight T 𝔅 = n) ↔ (∀ A, (∀ {f : Realization L}, T ⊢!. (f.interpret 𝔅 A)) ↔ A ∈ Logic.GLBB n) := by
+  constructor;
+  . intro h;
+    sorry;
+  . intro h;
+    sorry;
+
+protected lemma GL_classification_provabilityHeight.zero :
+  (Theory.provabilityHeight T 𝔅 = 0) ↔ (∀ A, (∀ {f : Realization L}, T ⊢!. (f.interpret 𝔅 A)) ↔ A ∈ Logic.GL) := by
+  constructor;
+  . intro h;
+    have := Theory.provabilityHeight.nobot_of_zero.mp h;
+    push_neg at this;
+    sorry;
+  . contrapose;
+    intro h;
+    replace h : 1 ≤ Theory.provabilityHeight T 𝔅 := Nat.one_le_iff_ne_zero.mpr h;
+    let n : ℕ+ := ⟨Theory.provabilityHeight T 𝔅, by omega⟩;
+    by_contra H₁;
+    have H₂ : (Theory.provabilityHeight T 𝔅 = Theory.provabilityHeight T 𝔅) ↔ (∀ A, (∀ {f : Realization L}, T ⊢!. (f.interpret 𝔅 A)) ↔ A ∈ Logic.GLBB n) :=
+      GL_classification_provabilityHeight.positive n;
+    simp only [true_iff] at H₂;
+    have : Logic.GL = Logic.GLBB n := by ext A; exact Iff.trans (H₁ A |>.symm) $ H₂ A;
+    have : Logic.GL ≠ Logic.GLBB n := Set.ssubset_iff_subset_ne.mp (Modal.Logic.GL_ssubset_GLBB (n := n)) |>.2;
+    contradiction;
+
+theorem GL_classification_provabilityHeight (n : ℕ):
+  (Theory.provabilityHeight T 𝔅 = n) ↔ (∀ A, (∀ {f : Realization L}, T ⊢!. (f.interpret 𝔅 A)) ↔ A ∈ Logic.GLₙ n) := by
+  match n with
+  | n + 1 => apply GL_classification_provabilityHeight.positive ⟨(n + 1), by omega⟩;
+  | 0 => apply GL_classification_provabilityHeight.zero;
+
+end ProvabilityLogic
+
 
 end LO
