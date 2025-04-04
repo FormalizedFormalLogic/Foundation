@@ -26,6 +26,10 @@ variable {F : Type*} [LogicalConnective F] [DecidableEq F]
 lemma not_imply_prem''! (hpq : 𝓢 ⊢! φ ➝ ψ) (hpnr : 𝓢 ⊢! φ ➝ ∼ξ) : 𝓢 ⊢! φ ➝ ∼(ψ ➝ ξ) :=
   deduct'! $ (contra₀'! $ not_or_of_imply!) ⨀ (demorgan₂'! $ and₃'! (dni'! $ of'! hpq ⨀ (by_axm!)) (of'! hpnr ⨀ (by_axm!)))
 
+def ofAOfN (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := or₃''' (contra₃' (dhyp d)) (impId _) b
+
+def of_a!_of_n! (b : 𝓢 ⊢! φ ⋎ ψ) (d : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! ψ := ⟨ofAOfN b.get d.get⟩
+
 end Entailment
 
 
@@ -428,8 +432,8 @@ lemma Solovay.exclusive {i₁ i₂ : F} (ne : i₁ ≠ i₂) : T.Solovay V i₁ 
   contradiction
 
 /-- Condition 2.-/
-lemma Solovay.consistent {i j : F} (hij : i ≺ j) : T.Solovay V i → T.Consistencyₐ (⌜T.solovay j⌝ : V) := fun h ↦
-  h.2 j hij
+lemma Solovay.consistent {i j : F} (hij : i ≺ j) : T.Solovay V i → ¬T.Provableₐ (⌜∼T.solovay j⌝ : V) := fun h ↦
+  (Theory.Consistencyₐ.quote_iff _).mp (h.2 j hij)
 
 lemma Solovay.refute (ne : r ≠ i) : T.Solovay V i → T.Provableₐ (⌜∼T.solovay i⌝ : V) := by
   intro h
@@ -466,6 +470,33 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
     · exact ⟨j, hij, hSj⟩
     · exact ⟨k, Trans.trans hij hjk, hSk⟩
 
+lemma Solovay.disjunction : ∃ i : F, T.Solovay V i := by
+  have : T.Solovay V r ∨ ∃ j, r ≺ j ∧ T.Solovay V j :=
+    Θ.disjunction (V := V) (T := T) r (by simp [Θ]; exact ⟨[r], by simp⟩)
+  rcases this with  (H | ⟨i, _, H⟩)
+  · exact ⟨r, H⟩
+  · exact ⟨i, H⟩
+
+lemma θ_disjunction (i : F) : 𝐈𝚺₁ ⊢!. θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
+  complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+    simpa [models_iff] using Θ.disjunction i
+
+/-- Condition 3.-/
+lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
+    T.Solovay V i → T.Provableₐ (⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ : V) := by
+  intro hS
+  have TP : T†V ⊢! ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := provableₐ_of_provable'₀ <| by
+    have : 𝐈𝚺₁ ⊢!. θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
+      complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+        simpa [models_iff] using Θ.disjunction i
+    exact Entailment.WeakerThan.pbl (𝓢 := 𝐈𝚺₁) (𝓣 := T) this
+  have Tθ : T†V ⊢! ⌜θ T i⌝ :=
+    sigma₁_complete_provable (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
+  have hP : T†V ⊢! ⌜T.solovay i⌝ ⋎ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := (by simpa using TP) ⨀ Tθ
+  have : T†V ⊢! ∼⌜T.solovay i⌝ := by simpa using provableₐ_iff.mp (Solovay.refute ne hS)
+  have : T†V ⊢! ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
+  exact provableₐ_iff.mpr this
+
 end model
 
 lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : T.Solovay ℕ r := by
@@ -496,9 +527,10 @@ lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : T.
   · have : ¬T.Solovay ℕ i := NS i (by rintro rfl; exact IsIrrefl.irrefl r hri)
     contradiction
 
+/-- Condition 4.-/
 lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] {i : F} (h : r ≺ i) : T ⊬. ∼T.solovay i := by
   haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝐈𝚺₁ ⪯ T))
-  have : T.Consistencyₐ ⌜T.solovay i⌝ := Solovay.consistent (V := ℕ) (T := T) h solovay_root_sound
+  have : ∼T.Provableₐ ⌜∼T.solovay i⌝ := Solovay.consistent (V := ℕ) (T := T) h solovay_root_sound
   simpa [Theory.Consistencyₐ.quote_iff, provableₐ_iff_provable₀, unprovable₀_iff] using this
 
 end SolovaySentence

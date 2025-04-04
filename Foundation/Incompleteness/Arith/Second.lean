@@ -45,9 +45,7 @@ theorem provableₐ_D2 {σ π} : T ⊢!. U.bewₐ (σ ➝ π) ➝ U.bewₐ σ �
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
-    simp [models_iff]
-    intro hσπ hσ
-    exact provableₐ_iff.mpr <| (by simpa using provableₐ_iff.mp hσπ) ⨀ provableₐ_iff.mp hσ
+    simpa [models_iff] using modus_ponens₀
 
 lemma provableₐ_sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     T ⊢!. σ ➝ U.bewₐ σ :=
