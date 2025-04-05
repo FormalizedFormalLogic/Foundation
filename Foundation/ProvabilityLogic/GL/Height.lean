@@ -182,15 +182,27 @@ open Classical in
 noncomputable def provabilityHeight (U : Theory L) (𝔅 : ProvabilityPredicate T₀ T) : ℕ :=
   if hH : (provabilityHeightSet U 𝔅).Nonempty then Set.IsWF.min provabilityHeightSet.IsWF hH |>.1 else 0
 
-lemma provabilityHeight.iff_zero : (provabilityHeight U 𝔅) = 0 ↔ ¬(provabilityHeightSet U 𝔅).Nonempty := by
+namespace provabilityHeight
+
+lemma iff_zero : (provabilityHeight U 𝔅) = 0 ↔ ¬(provabilityHeightSet U 𝔅).Nonempty := by
   constructor;
   . contrapose;
     push_neg;
-    sorry;
+    intro h;
+    simp only [provabilityHeight, h, reduceDIte];
+    apply Nat.one_le_iff_ne_zero.mp;
+    apply PNat.one_le;
   . simp_all [provabilityHeight]
 
-lemma provabilityHeight.nobot_of_zero : (provabilityHeight U 𝔅) = 0 ↔ ∀ n, U ⊬. (𝔅^[n])/[⌜(⊥ : Sentence L)⌝] := by
+lemma nobot_of_zero : (provabilityHeight U 𝔅) = 0 ↔ ∀ n, U ⊬. (𝔅^[n])/[⌜(⊥ : Sentence L)⌝] := by
   simp_all [iff_zero, provabilityHeightSet, Set.Nonempty];
+
+lemma nobot_lt {n : ℕ+} : (provabilityHeight U 𝔅) = n ↔ ∀ m < n, T ⊬. (𝔅^[m])/[⌜(⊥ : Sentence L)⌝] := by sorry;
+
+lemma provable_of {n : ℕ+} : (provabilityHeight U 𝔅) = n → U ⊢!. (𝔅^[n])/[⌜(⊥ : Sentence L)⌝] := by
+  sorry;
+
+end provabilityHeight
 
 end Theory
 
@@ -205,16 +217,92 @@ open FirstOrder FirstOrder.DerivabilityCondition
 open Modal
 open Modal.Kripke
 open Modal.Formula.Kripke
+open Classical
+
+
+section
 
 variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         {T₀ T : FirstOrder.Theory L}
-         {𝔅 : ProvabilityPredicate T₀ T}
+         {T₀ T : FirstOrder.Theory L}  {𝔅 : ProvabilityPredicate T₀ T}
+         {f : Realization L} {A B : Modal.Formula _}
 
-protected lemma GL_classification_provabilityHeight.positive (n : ℕ+):
+@[simp] lemma Realization.interpret_imp : (f.interpret 𝔅 (A ➝ B)) = (f.interpret 𝔅 A) ➝ (f.interpret 𝔅 B) := by simp [Realization.interpret];
+@[simp] lemma Realization.interpret_bot : (f.interpret 𝔅 ⊥) = ⊥ := by simp [interpret]
+@[simp] lemma Realization.interpret_box : (f.interpret 𝔅 (□A)) = 𝔅 (f.interpret 𝔅 A) := by simp [interpret];
+@[simp] lemma Realization.interpret_multibox {n : ℕ+} : (f.interpret 𝔅 (□^[n]A)) = (𝔅^[n])/[⌜(f.interpret 𝔅 A)⌝] := by
+  sorry
+
+end
+
+variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)]
+         {T₀ T : FirstOrder.Theory L} [Diagonalization T₀] [T₀ ⪯ T]
+         {M : Type*} [Nonempty M] [Structure L M] [M ⊧ₘ* T]
+         {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [𝔅.Justified M]
+
+
+protected lemma GL_classification_provabilityHeight.positive
+  {M : Type*} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.Justified M]
+  (n : ℕ+):
   (Theory.provabilityHeight T 𝔅 = n) ↔ (∀ A, (∀ {f : Realization L}, T ⊢!. (f.interpret 𝔅 A)) ↔ A ∈ Logic.GLBB n) := by
   constructor;
-  . intro h;
-    sorry;
+  . intro hHeight A;
+    constructor;
+    . contrapose;
+      push_neg;
+      intro hA;
+      replace hA := Logic.iff_provable_GL_provable_GLBB.not.mpr hA;
+      obtain ⟨M₁, r₁, _, hA⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
+      have : Fintype M₁.World := by sorry;
+      let M₀ := Model.extendRoot M₁ r₁;
+      let r₀ : M₀.World := Model.extendRoot.root;
+      replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
+      push_neg at hA;
+      obtain ⟨hA₁, hA₂⟩ := hA;
+      replace hA₁ : Satisfies M₀ (Sum.inr r₁) (□^[n]⊥) := Model.extendRoot.modal_equivalence_original_world.mp hA₁;
+      -- replace hA₂ : ¬Satisfies M₀ r₁ A := Model.extendRoot.modal_equivalence_original_world.not.mp hA₂;
+      let σ : SolovaySentences 𝔅 M₁.toFrame r₁ := by sorry;
+      use σ.realization;
+      have H₁ : T₀ ⊢!. ∼(𝔅^[n])/[⌜(⊥ : Sentence L)⌝] ➝ (σ r₀) := by
+        have : T₀ ⊢!. (⩖ i : M₁.World, σ i) ➝ (𝔅^[n])/[⌜(⊥ : Sentence L)⌝] := by
+          apply fdisj_imply!;
+          intro i _;
+          have := @Realization.interpret_multibox (𝔅 := 𝔅) (A := ⊥) (n := n) (f := σ.realization)
+          simp only [Realization.interpret_bot] at this;
+          rw [←this];
+          apply σ.mainlemma (i := i) (A := □^[↑n]⊥) |>.1;
+          sorry;
+        have : T₀ ⊢!. ∼(𝔅^[n])/[⌜⊥⌝] ➝ ∼⩖ i : M₁.World, σ i := contra₀'! this;
+        have : T₀ ⊢!. ∼(𝔅^[n])/[⌜⊥⌝] ➝ ⩕ i : M₁.World, ∼σ i := imp_trans''! this $ by sorry;
+        refine imp_trans''! this $ by
+          have : T₀ ⊢!. ⩖ j, σ j := by sorry;
+          sorry;
+      have H₂ : T₀ ⊢!. (σ r₀) ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) := by
+        exact imp_trans''! (σ.SC2 r₀ (Sum.inr r₁) (by sorry))
+          $ contra₀'!
+          $ 𝔅.prov_distribute_imply'
+          $ contra₁'!
+          $ σ.mainlemma (i := r₁) |>.2 hA₂;
+      have : M ⊧ₘ* T₀ := models_of_subtheory (U := T₀) (T := T) (M := M) inferInstance;
+      have : M ⊧ₘ₀ ∼(𝔅^[n])/[⌜(⊥ : Sentence L)⌝] ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) := sound_models $ imp_trans''! H₁ H₂;
+      replace : ¬M ⊧ₘ₀ (𝔅^[n])/[⌜(⊥ : Sentence L)⌝] → ¬M ⊧ₘ₀ 𝔅 (σ.realization.interpret 𝔅 A) := by simpa only [models₀_imply_iff, models₀_not_iff] using this;
+      have : ¬M ⊧ₘ₀ 𝔅 (σ.realization.interpret 𝔅 A) := this $ by
+        induction n with
+        | one => apply 𝔅.justified (M := M) |>.not.mp; sorry;
+        | succ n =>
+          simp only [ProvabilityPredicate.iterate_succ];
+          apply 𝔅.justified (M := M) |>.not.mp;
+          apply Theory.provabilityHeight.nobot_lt.mp hHeight;
+          apply PNat.lt_add_right;
+      exact 𝔅.justified (M := M) |>.not.mpr this;
+    . intro hA f;
+      induction hA with
+      | mem_GL hA => apply arithmetical_soundness_GL hA;
+      | boxbot =>
+        replace hHeight := Theory.provabilityHeight.provable_of hHeight;
+        sorry;
+      | mdp ihAB ihA =>
+        simp [Realization.interpret] at ihAB;
+        exact ihAB ⨀ ihA;
   . intro h;
     sorry;
 
