@@ -4,6 +4,7 @@ import Foundation.Modal.Kripke.ExtendRoot
 import Foundation.Incompleteness.Arith.WitnessComparizon
 import Foundation.Incompleteness.Arith.FixedPoint
 import Foundation.Incompleteness.Arith.ConsistencyPredicate
+import Foundation.ProvabilityLogic.Soundness
 
 open Classical
 
@@ -578,6 +579,6 @@ theorem arithmetical_completeness_GL :
   exact σ.SC4 _ (by rintro ⟨⟩) this;
 
 theorem arithmetical_completeness_GL_iff :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) A) ↔ A ∈ Logic.GL := ⟨arithmetical_completeness_GL, by sorry⟩
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) A) ↔ A ∈ Logic.GL := ⟨arithmetical_completeness_GL, arithmetical_soundness_GL⟩
 
 end LO.ProvabilityLogic
