@@ -44,39 +44,46 @@ end Modal.Kripke
 
 namespace ProvabilityLogic
 
-open Classical
 open Entailment Entailment.FiniteContext
 open FirstOrder FirstOrder.DerivabilityCondition
 open Modal
 open Modal.Kripke
 open Modal.Formula.Kripke
 
-variable {L} [DecidableEq (Sentence L)] [Semiterm.Operator.GoedelNumber L (Sentence L)]
+variable {L : Language} [L.DecidableEq] [Semiterm.Operator.GoedelNumber L (Sentence L)]
          {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL]
          {A B : Modal.Formula _}
 
--- TODO: cleanup
-noncomputable instance {F₁ : Kripke.Frame} {r₁ : F₁.World} [F₁.IsFiniteTree r₁] : Fintype (F₁.extendRoot r₁).World := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree |>.toIsFinite.world_finite
-noncomputable instance {M₁ : Kripke.Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁] : Fintype (M₁.extendRoot r₁).World := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree |>.toIsFinite.world_finite
-
 structure SolovaySentences
-  (F₁ : Kripke.Frame) (r₁ : F₁.World) [F₁.IsFiniteTree r₁]
+  (F : Kripke.Frame) (r : F) [F.IsFiniteTree r] [Fintype F]
   where
-  σ : (F₁.extendRoot r₁).World → Sentence L
+  σ : F → Sentence L
   protected SC1 : ∀ i j, i ≠ j → T₀ ⊢!. σ i ➝ ∼σ j
   protected SC2 : ∀ i j, i ≺ j → T₀ ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
-  protected SC3 : ∀ i, Frame.extendRoot.root ≺ i → T₀ ⊢!. σ i ➝ 𝔅 (⩖ j ∈ { j : (F₁.extendRoot r₁).World | i ≺ j }, σ j)
-  protected SC4 : T ⊬. ∼(σ r₁)
+  protected SC3 : ∀ i, r ≠ i → T₀ ⊢!. σ i ➝ 𝔅 (⩖ j ∈ { j : F | i ≺ j }, σ j)
+  protected SC4 : ∀ i, r ≠ i → T ⊬. ∼(σ i)
+
+-- TODO: cleanup
+--noncomputable instance {F₁ : Kripke.Frame} {r₁ : F₁.World} [F₁.IsFiniteTree r₁] : Fintype (F₁.extendRoot r₁).World := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree |>.toIsFinite.world_finite
+--noncomputable instance {M₁ : Kripke.Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁] : Fintype (M₁.extendRoot r₁).World := @Fintype.ofFinite _ $ Frame.extendRoot.instIsFiniteTree |>.toIsFinite.world_finite
+
 
 variable {𝔅}
 
 namespace SolovaySentences
 
-instance {F₁ : Kripke.Frame} {r₁ : F₁.World} [F₁.IsFiniteTree r₁] : CoeFun (SolovaySentences 𝔅 F₁ r₁) (λ _ => (F₁.extendRoot r₁) → Sentence L) := ⟨λ σ => σ.σ⟩
+instance {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F] : CoeFun (SolovaySentences 𝔅 F r) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
 
-variable {M₁ : Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁] {σ : SolovaySentences 𝔅 M₁.toFrame r₁}
+variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M.World] [Fintype M.World] {σ : SolovaySentences 𝔅 M.toFrame r}
 
-noncomputable def realization (σ : SolovaySentences 𝔅 M₁.toFrame r₁) : Realization L := λ a => ⩖ i ∈ { i : (M₁.extendRoot r₁).World | i ⊧ (.atom a) }, σ i
+noncomputable def realization (σ : SolovaySentences 𝔅 M.toFrame r) :
+    Realization L := λ a => ⩖ i ∈ { i : M.World | i ⊧ (.atom a) }, σ i
+
+variable {M₁ : Model} {r₁ : M₁.World} [M₁.IsFiniteTree r₁] [Fintype (M₁.extendRoot r₁).World]
+
+instance : (M₁.extendRoot r₁).IsFiniteTree Frame.extendRoot.root := Frame.extendRoot.instIsFiniteTree
+
+variable {σ : SolovaySentences 𝔅 (M₁.extendRoot r₁).toFrame Frame.extendRoot.root}
 
 theorem mainlemma {i : M₁.World} :
   (i ⊧ A → T₀ ⊢!. (σ i) ➝ (σ.realization.interpret 𝔅 A)) ∧
@@ -110,12 +117,12 @@ theorem mainlemma {i : M₁.World} :
     simp only [Realization.interpret];
     constructor;
     . intro h;
-      apply imp_trans''! $ σ.SC3 i $ Model.extendRoot.rooted_original;
+      apply imp_trans''! $ σ.SC3 i $ (by rintro ⟨⟩);
       apply 𝔅.prov_distribute_imply';
       apply fdisj_imply!;
       rintro j Rij;
       match j with
-      | Sum.inl j => simp [Frame.Rel', Frame.extendRoot] at Rij
+      | Sum.inl j => simp [Frame.Rel', Model.extendRoot, Frame.extendRoot] at Rij
       | Sum.inr j => exact ihA.1 $ h j $ by simpa using Rij;
     . intro h;
       have := Satisfies.box_def.not.mp h;
@@ -126,25 +133,6 @@ theorem mainlemma {i : M₁.World} :
       exact imp_trans''! (σ.SC2 i j Rij) this;
 
 end SolovaySentences
-
-theorem arithmetical_completeness_GL : (∀ {f : Realization L}, T ⊢!. (f.interpret 𝔅 A)) → A ∈ Logic.GL := by
-  contrapose;
-  intro hA;
-  push_neg;
-  obtain ⟨M₁, r₁, _, hA₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
-  let σ : SolovaySentences 𝔅 M₁.toFrame r₁ := by sorry; -- TODO: Sect 2.1
-  use σ.realization;
-
-  have : T₀ ⊢!. σ r₁ ➝ σ.realization.interpret 𝔅 (∼A) := σ.mainlemma (A := ∼A) (i := r₁) |>.1 $ hA₁
-  replace : T₀ ⊢!. σ.realization.interpret 𝔅 A ➝ ∼(σ r₁) := by
-    apply contra₁'!;
-    apply imp_trans''! this;
-    apply and₂'! neg_equiv!;
-  replace : T ⊢!. σ.realization.interpret 𝔅 A ➝ ∼(σ r₁) := WeakerThan.pbl this;
-
-  by_contra hC;
-  have : T ⊢!. ∼(σ r₁) := this ⨀ hC;
-  exact σ.SC4 this;
 
 end ProvabilityLogic
 
@@ -292,7 +280,7 @@ inductive ΘChain : List F → Prop where
 
 def Θ (i : F) : Prop := ∃ ε : List F, ε.ChainI (· ≻ ·) i r ∧ ΘChain T V ε
 
-abbrev _root_.LO.FirstOrder.Theory.Solovay (i : F) := Θ T V i ∧ ∀ j, i ≺ j → T.Consistencyₐ (⌜T.solovay j⌝ : V)
+def _root_.LO.FirstOrder.Theory.Solovay (i : F) := Θ T V i ∧ ∀ j, i ≺ j → T.Consistencyₐ (⌜T.solovay j⌝ : V)
 
 variable {T V}
 
@@ -453,7 +441,7 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
   · right
     have : ∃ j, i ≺ j ∧ ∀ k, i ≺ k → T.ProvabilityComparisonₐ (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
       have : ∃ j, i ≺ j ∧ T.Provableₐ (⌜∼T.solovay j⌝ : V) := by
-        simp [Theory.Consistencyₐ.quote_iff] at hS; exact hS hΘ
+        simp [Theory.Consistencyₐ.quote_iff, Theory.Solovay] at hS; exact hS hΘ
       rcases this with ⟨j', hij', hj'⟩
       have := ProvabilityComparisonₐ.find_minimal_proof_fintype (T := T) (ι := {j : F // i ≺ j}) (i := ⟨j', hij'⟩)
         (fun k ↦ ⌜∼T.solovay k.val⌝) (by simpa)
@@ -528,11 +516,68 @@ lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : T.
     contradiction
 
 /-- Condition 4.-/
-lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] {i : F} (h : r ≺ i) : T ⊬. ∼T.solovay i := by
+lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] {i : F} (h : r ≠ i) : T ⊬. ∼T.solovay i := by
   haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝐈𝚺₁ ⪯ T))
-  have : ∼T.Provableₐ ⌜∼T.solovay i⌝ := Solovay.consistent (V := ℕ) (T := T) h solovay_root_sound
+  have : ∼T.Provableₐ ⌜∼T.solovay i⌝ :=
+    Solovay.consistent (V := ℕ) (T := T) (Frame.IsRooted.direct_rooted_of_trans i (Ne.symm h)) solovay_root_sound
   simpa [Theory.Consistencyₐ.quote_iff, provableₐ_iff_provable₀, unprovable₀_iff] using this
+
+variable (F r)
+
+instance standard [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : SolovaySentences ((𝐈𝚺₁).standardDP T) F r where
+  σ := T.solovay
+  SC1 i j ne :=
+    have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+    complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+      simpa [models_iff] using Solovay.exclusive ne
+  SC2 i j h :=
+    have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+    complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+      simpa [models_iff, standardDP_def] using Solovay.consistent h
+  SC3 i h :=
+    have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+    complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+    simpa [models_iff, standardDP_def] using Solovay.box_disjunction h
+  SC4 i ne := solovay_unprovable ne
 
 end SolovaySentence
 
 end LO.FirstOrder.Arith
+
+namespace LO.ProvabilityLogic
+
+open Entailment Entailment.FiniteContext
+open FirstOrder FirstOrder.Arith FirstOrder.DerivabilityCondition
+open Modal
+open Modal.Kripke
+open Modal.Formula.Kripke
+
+variable {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)]
+
+variable {A B : Modal.Formula _}
+
+/-- Arithmetical completeness of GL-/
+theorem arithmetical_completeness_GL :
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) A) → A ∈ Logic.GL := by
+  contrapose;
+  intro hA;
+  push_neg;
+  obtain ⟨M₁, r₁, _, hA₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
+  have : Fintype (M₁.extendRoot r₁).World := Fintype.ofFinite _
+  let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₁.extendRoot r₁).toFrame Frame.extendRoot.root :=
+    SolovaySentence.standard (M₁.extendRoot r₁).toFrame Frame.extendRoot.root
+  use σ.realization;
+  have : 𝐈𝚺₁ ⊢!. σ r₁ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) (∼A) := σ.mainlemma (A := ∼A) (i := r₁) |>.1 $ hA₁
+  replace : 𝐈𝚺₁ ⊢!. σ.realization.interpret ((𝐈𝚺₁).standardDP T) A ➝ ∼(σ r₁) := by
+    apply contra₁'!;
+    apply imp_trans''! this;
+    apply and₂'! neg_equiv!;
+  replace : T ⊢!. σ.realization.interpret ((𝐈𝚺₁).standardDP T) A ➝ ∼(σ r₁) := WeakerThan.pbl this;
+  by_contra hC;
+  have : T ⊢!. ∼(σ r₁) := this ⨀ hC;
+  exact σ.SC4 _ (by rintro ⟨⟩) this;
+
+theorem arithmetical_completeness_GL_iff :
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) A) ↔ A ∈ Logic.GL := ⟨arithmetical_completeness_GL, by sorry⟩
+
+end LO.ProvabilityLogic
