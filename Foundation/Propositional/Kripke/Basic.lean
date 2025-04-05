@@ -250,7 +250,7 @@ instance : Semantics.Top (Frame) := ⟨λ _ => ValidOnFrame.top⟩
 
 protected lemma bot : ¬F ⊧ ⊥ := by
   simp [ValidOnFrame.models_iff, ValidOnFrame];
-  use ⟨(λ _ _ => True), by tauto⟩;
+  exact ⟨(λ _ _ => True), by tauto⟩;
 instance : Semantics.Bot (Frame) := ⟨λ _ => ValidOnFrame.bot⟩
 
 

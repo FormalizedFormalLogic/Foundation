@@ -152,7 +152,7 @@ lemma dne'! [ModusPonens 𝓢] [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! ∼∼φ) : �
   This is weaker asssumption than _"introducing `∼φ` as an abbreviation of `φ ➝ ⊥`" (`NegAbbrev`)_.
 -/
 class NegationEquiv (𝓢 : S) where
-  neg_equiv (φ) : 𝓢 ⊢ Axioms.NegEquiv φ
+  neg_equiv (φ : F) : 𝓢 ⊢ Axioms.NegEquiv φ
 
 def neg_equiv [NegationEquiv 𝓢] : 𝓢 ⊢ ∼φ ⭤ (φ ➝ ⊥) := NegationEquiv.neg_equiv _
 @[simp] lemma neg_equiv! [NegationEquiv 𝓢] : 𝓢 ⊢! ∼φ ⭤ (φ ➝ ⊥) := ⟨neg_equiv⟩
