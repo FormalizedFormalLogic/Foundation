@@ -152,36 +152,31 @@ lemma p_q_Apq (hφ : φ ∈ L) (hψ : ψ ∈ L) : φ ⋏ ψ ∈ L := by
   . assumption;
   . assumption;
 
-lemma conj_iffAux {Γ : List (Formula ℕ)} : Γ.conj ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
+lemma conj_iffAux {Γ : List (Formula ℕ)} : Γ.conj₂ ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
   constructor;
   . intro h φ hφ;
     refine Logic.mdp ?_ h;
     apply Logic.of_mem_K;
-    apply implyLeft_conj_eq_conj!.mpr;
-    apply generalConj'! hφ;
+    apply general_conj'! hφ;
   . intro h;
     induction Γ using List.induction_with_singleton with
     | hnil =>
-      simp only [List.conj_nil, List.not_mem_nil, IsEmpty.forall_iff, implies_true, iff_true];
+      simp only [List.conj₂_nil];
       apply Logic.of_mem_K;
       exact verum!;
     | hsingle φ =>
-      apply p_q_Apq;
-      . tauto;
-      . apply Logic.of_mem_K;
-        exact verum!;
+      apply h;
+      simp;
     | @hcons φ Γ hΓ ih =>
+      simp [List.conj₂_cons_nonempty hΓ];
       apply p_q_Apq;
-      . apply h;
-        tauto;
-      . apply ih;
-        tauto;
+      . apply h; tauto;
+      . apply ih; tauto;
 
 lemma conj_iff {Γ : FormulaFinset ℕ} : Γ.conj ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
-  have := Logic.conj_iffAux (L := L) (Γ := Γ.toList);
   constructor;
   . intro h φ hφ;
-    apply Logic.conj_iffAux (Γ := Γ.toList) |>.mp (by tauto);
+    apply Logic.conj_iffAux (Γ := Γ.toList) |>.mp $ h;
     simpa;
   . intro h;
     apply Logic.conj_iffAux (Γ := Γ.toList) |>.mpr;
@@ -229,27 +224,21 @@ open FirstOrder FirstOrder.DerivabilityCondition
 open ProvabilityPredicate
 
 variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] [L.DecidableEq]
-         {T₀ T : FirstOrder.Theory L} [T₀ ⪯ T] [Diagonalization T₀]
-         {M : Type*} [Nonempty M] [Structure L M] [M ⊧ₘ* T]
-         {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [𝔅.Justified M]
+         {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]
+         {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.Justified ℕ]
          {A B : Formula ℕ}
 
 -- TODO: rename and move
-omit
-  [Semiterm.Operator.GoedelNumber L (Sentence L)]
-  [L.DecidableEq]
-in
-lemma sound_models (h : T ⊢!. σ) : M ⊧ₘ₀ σ := consequence_iff.mp (sound! (T := T) h) M inferInstance
+lemma sound_models (h : T ⊢!. σ) : ℕ ⊧ₘ₀ σ := consequence_iff.mp (sound! (T := T) h) ℕ inferInstance
 
-theorem arithmetical_soundness_S
-  (h : A ∈ Logic.S) (f : Realization L) : M ⊧ₘ₀ (f.interpret 𝔅 A) := by
+theorem arithmetical_soundness_S (h : A ∈ Logic.S) (f : Realization ℒₒᵣ) : ℕ ⊧ₘ₀ (f.interpret 𝔅 A) := by
   induction h using Logic.S.rec' with
   | mem_GL h =>
     exact sound_models $ arithmetical_soundness_GL h;
   | axiomT =>
     simp only [Realization.interpret, models₀_imply_iff];
     intro h;
-    exact sound_models $ (𝔅.justified (M := M) |>.mpr h);
+    exact sound_models $ (𝔅.justified (M := ℕ) |>.mpr h);
   | mdp ihAB ihA =>
     simp only [Realization.interpret, models₀_imply_iff] at ihAB;
     apply ihAB ihA;
@@ -257,9 +246,11 @@ theorem arithmetical_soundness_S
 
 section
 
-instance : 𝐏𝐀.Delta1Definable := by sorry
+instance : 𝐈𝚺₁.Delta1Definable := by sorry
 
-instance {T : FirstOrder.Theory ℒₒᵣ} [𝐏𝐀 ⪯ T] [T.Delta1Definable] : (𝐏𝐀.standardDP T).Justified ℕ := ⟨by sorry⟩
+instance : Arith.SoundOn 𝐈𝚺₁ (Arith.Hierarchy 𝚷 2) := by sorry
+
+instance [𝐈𝚺₁ ⪯ T] [T.Delta1Definable] : ((𝐈𝚺₁).standardDP T).Justified ℕ := ⟨by sorry⟩
 
 lemma _root_.LO.Modal.Logic.iff_provable_GL_provable_box_S : A ∈ Logic.GL ↔ □A ∈ Logic.S := by
   constructor;
@@ -267,9 +258,9 @@ lemma _root_.LO.Modal.Logic.iff_provable_GL_provable_box_S : A ∈ Logic.GL ↔ 
     apply Logic.sumQuasiNormal.mem₁;
     apply nec! h;
   . intro h;
-    apply arithmetical_completeness_GL (𝔅 := 𝐏𝐀.standardDP 𝐏𝐀);
+    apply arithmetical_completeness_GL (T := 𝐈𝚺₁);
     intro f;
-    exact (𝐏𝐀.standardDP 𝐏𝐀).justified (M := ℕ) |>.mpr $ arithmetical_soundness_S h f;
+    exact ((𝐈𝚺₁).standardDP 𝐈𝚺₁).justified (M := ℕ) |>.mpr $ arithmetical_soundness_S h f;
 
 end
 
@@ -280,12 +271,16 @@ open Entailment FiniteContext
 open Modal
 open Modal.Kripke
 open Modal.Formula.Kripke
+open Arith
 
-lemma GL_S_TFAE :
+variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)]
+
+lemma GL_S_TFAE
+  :
   [
     (A.rflSubformula.conj ➝ A) ∈ Logic.GL,
     A ∈ Logic.S,
-    ∀ f : Realization L, M ⊧ₘ₀ (f.interpret 𝔅 A)
+    ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A)
   ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;
@@ -310,14 +305,16 @@ lemma GL_S_TFAE :
     obtain ⟨hA₁, hA₂⟩ := hA;
     replace hA₁ : ∀ φ ∈ A.rflSubformula, Satisfies M₀ r₁ φ := Satisfies.finset_conj_def.mp $ Model.extendRoot.modal_equivalence_original_world.mp hA₁;
     replace hA₂ : ¬Satisfies M₀ r₁ A := Model.extendRoot.modal_equivalence_original_world.not.mp hA₂;
-    let σ : SolovaySentences 𝔅 M₁.toFrame r₁ := by sorry;
+    have : Fintype (M₁.extendRoot r₁).World := Fintype.ofFinite _
+    let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) ((M₁.extendRoot r₁).toFrame) r₀ :=
+      SolovaySentence.standard (M₁.extendRoot r₁).toFrame Frame.extendRoot.root
     use σ.realization;
 
     let r₀ := Kripke.Model.extendRoot.root (M := M₁) (r := r₁);
     have H :
       ∀ B ∈ A.subformulas,
-      (Satisfies M₀ r₁ B → T₀ ⊢!. (σ r₀) ➝ (σ.realization.interpret 𝔅 B)) ∧
-      (¬Satisfies M₀ r₁ B → T₀ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret 𝔅 B)) := by
+      (Satisfies M₀ r₁ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) ∧
+      (¬Satisfies M₀ r₁ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) := by
       intro B B_sub;
       induction B using Formula.rec' with
       | hfalsum => simp [Satisfies, Realization.interpret];
@@ -354,48 +351,51 @@ lemma GL_S_TFAE :
         constructor;
         . intro h;
           apply imply₁'!;
-          apply 𝔅.D1;
-          apply Entailment.WeakerThan.pbl (𝓢 := T₀.alt);
-          have : T₀ ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret 𝔅 B := by
+          apply ((𝐈𝚺₁).standardDP T).D1;
+          apply Entailment.WeakerThan.pbl (𝓢 := 𝐈𝚺₁.alt);
+          have : 𝐈𝚺₁ ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B := by
             apply fdisj_imply!;
             have hrfl : Satisfies M₀ (Sum.inr r₁) (□B ➝ B) := by
               apply hA₁;
               simpa [Formula.rflSubformula];
             rintro (_ | i) _;
-            . suffices T₀ ⊢!. σ r₀ ➝ σ.realization.interpret 𝔅 B by convert this;
+            . suffices 𝐈𝚺₁ ⊢!. σ r₀ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B by convert this;
               apply ihB (Formula.subformulas.mem_box B_sub) |>.1;
               exact Satisfies.mdp hrfl h;
             . by_cases e : i = r₁;
               . rw [e];
-                apply σ.mainlemma (A := B) (i := r₁) |>.1;
+                apply σ.mainlemma (i := r₁) |>.1;
                 exact Model.extendRoot.modal_equivalence_original_world.mpr $ Satisfies.mdp hrfl h;
-              . apply σ.mainlemma (A := B) (i := i) |>.1;
+              . apply σ.mainlemma (i := i) |>.1;
                 apply Model.extendRoot.modal_equivalence_original_world.mpr;
                 apply h;
                 suffices r₁ ≺ i by simpa [Frame.Rel', Model.extendRoot, Frame.extendRoot, M₀];
                 apply Frame.IsRooted.direct_rooted_of_trans;
                 assumption;
-          exact this ⨀ (by sorry); -- `T₀ ⊢!. ⩖ j, σ j`
+          exact this ⨀ (by sorry); -- `𝐈𝚺₁ ⊢!. ⩖ j, σ j`
         . intro h;
           have := Satisfies.box_def.not.mp h;
           push_neg at this;
           obtain ⟨(_ | i), Rij, hA⟩ := this;
           . simp only [Frame.Rel', Model.extendRoot, Frame.extendRoot, M₀] at Rij;
-          have : T₀ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret 𝔅 B := σ.mainlemma (A := B) (i := i) |>.2
+          have : 𝐈𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) B := σ.mainlemma (A := B) (i := i) |>.2
             $ Model.extendRoot.modal_equivalence_original_world |>.not.mpr hA;
-          have : T₀ ⊢!. ∼𝔅 (∼σ.σ (Sum.inr i)) ➝ ∼𝔅 (σ.realization.interpret 𝔅 B) := contra₀'! $ 𝔅.prov_distribute_imply' $ contra₁'! $ this;
+          have : 𝐈𝚺₁ ⊢!. ∼((𝐈𝚺₁).standardDP T) (∼σ (Sum.inr i)) ➝ ∼((𝐈𝚺₁).standardDP T) (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B) :=
+            contra₀'!
+            $ ((𝐈𝚺₁).standardDP T).prov_distribute_imply'
+            $ contra₁'! $ this;
           refine imp_trans''! ?_ this;
           apply σ.SC2;
           tauto;
-    have : M ⊧ₘ* T₀ := models_of_subtheory (U := T₀) (T := T) (M := M) inferInstance;
-    have : M ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret 𝔅 A := sound_models $ H A (by simp) |>.2 hA₂;
+    have : ℕ ⊧ₘ* 𝐈𝚺₁ := models_of_subtheory (U := 𝐈𝚺₁) (T := T) (M := ℕ) inferInstance;
+    have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) A := sound_models $ H A (by simp) |>.2 hA₂;
     simp only [models₀_imply_iff, models₀_not_iff] at this;
     exact this $ by sorry; -- by lemma 2.1.1(4)
   tfae_finish;
 
-theorem arithmetical_completeness_S : A ∈ Logic.S ↔ ∀ f : Realization L, M ⊧ₘ₀ (f.interpret 𝔅 A) := GL_S_TFAE.out 1 2
+theorem arithmetical_completeness_S : A ∈ Logic.S ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A) := GL_S_TFAE.out 1 2
 
-lemma _root_.LO.Modal.Logic.iff_provable_rfl_GL_provable_S : (A.rflSubformula.conj ➝ A) ∈ Logic.GL ↔ A ∈ Logic.S := GL_S_TFAE (𝔅 := 𝐏𝐀.standardDP 𝐏𝐀) (M := ℕ) |>.out 0 1
+lemma _root_.LO.Modal.Logic.iff_provable_rfl_GL_provable_S : (A.rflSubformula.conj ➝ A) ∈ Logic.GL ↔ A ∈ Logic.S := GL_S_TFAE (T := 𝐈𝚺₁) |>.out 0 1
 
 end
 
