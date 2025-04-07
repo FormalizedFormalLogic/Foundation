@@ -5,12 +5,13 @@ import Foundation.Incompleteness.ToFoundation.Basic
 noncomputable section
 
 open Classical
-
 namespace LO.Arith
 
 open LO.FirstOrder LO.FirstOrder.Arith
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+
+section WitnessComparisons
 
 variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
 
@@ -103,10 +104,46 @@ lemma find_minimal_proof_fintype [Fintype ι] (φ : ι → V) (H : T.Provable (�
 
 end Language.Theory.ProvabilityComparison
 
+end WitnessComparisons
+
+section ProvabilityComparisonOnArithmetic
+
+variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
+
+/-- Provability predicate for arithmetic stronger than $\mathbf{R_0}$. -/
+def _root_.LO.FirstOrder.Theory.ProvabilityComparisonₐ (φ ψ : V) : Prop := ((T + 𝐑₀').codeIn V).ProvabilityComparison φ ψ
+
+section
+
+def _root_.LO.FirstOrder.Theory.provabilityComparisonₐDef : 𝚺₁.Semisentence 2 := .mkSigma
+  “φ ψ. !(T + 𝐑₀').tDef.provabilityComparisonDef φ ψ” (by simp)
+
+lemma provabilityComparisonₐ_defined : 𝚺₁-Relation (T.ProvabilityComparisonₐ : V → V → Prop) via T.provabilityComparisonₐDef := by
+  intro v; simp [FirstOrder.Theory.provabilityComparisonₐDef, FirstOrder.Theory.ProvabilityComparisonₐ, ((T + 𝐑₀').codeIn V).provabilityComparison_defined.df.iff]
+
+@[simp] lemma eval_provabilityComparisonₐ (v) :
+    Semiformula.Evalbm V v T.provabilityComparisonₐDef.val ↔ T.ProvabilityComparisonₐ (v 0) (v 1) := (provabilityComparisonₐ_defined T).df.iff v
+
+instance provabilityComparisonₐ_definable : 𝚺₁-Relation (T.ProvabilityComparisonₐ : V → V → Prop) := (provabilityComparisonₐ_defined T).to_definable
+
+/-- instance for definability tactic-/
+instance provabilityComparisonₐ_definable' : 𝚺-[0 + 1]-Relation (T.ProvabilityComparisonₐ : V → V → Prop) := provabilityComparisonₐ_definable T
+
+end
+
+namespace ProvabilityComparisonₐ
+
+variable {T} {φ ψ : V}
+
+lemma refl_iff_provable : T.ProvabilityComparisonₐ φ φ ↔ T.Provableₐ φ := Language.Theory.ProvabilityComparison.refl_iff_provable
+
+lemma antisymm : T.ProvabilityComparisonₐ φ ψ → T.ProvabilityComparisonₐ ψ φ → φ = ψ := Language.Theory.ProvabilityComparison.antisymm
+
+lemma find_minimal_proof_fintype [Fintype ι] (φ : ι → V) (H : T.Provableₐ (φ i)) :
+    ∃ j, ∀ k, T.ProvabilityComparisonₐ (φ j) (φ k) := Language.Theory.ProvabilityComparison.find_minimal_proof_fintype _ H
+
+end ProvabilityComparisonₐ
+
+end ProvabilityComparisonOnArithmetic
+
 end LO.Arith
-
-namespace LO.FirstOrder.Arith
-
-
-
-end LO.FirstOrder.Arith

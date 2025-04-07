@@ -39,7 +39,7 @@ instance finite_complete : Complete (Hilbert.KT4B) Kripke.FrameClass.finite_symm
   replace F_equiv := Set.mem_setOf_eq.mp F_equiv;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf) (by aesop) |>.mpr;
+  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
   apply hp;
   refine ⟨?_, ?_⟩;
   . apply FilterEqvQuotient.finite; simp;
