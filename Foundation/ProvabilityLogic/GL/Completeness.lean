@@ -11,7 +11,7 @@ open FiniteContext
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F]
          {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Classical 𝓢]
+         {𝓢 : S} [Entailment.Cl 𝓢]
          {φ ψ ξ : F}
          {Γ Δ : List F}
          {ι} [Fintype ι] {Φ : ι → F}

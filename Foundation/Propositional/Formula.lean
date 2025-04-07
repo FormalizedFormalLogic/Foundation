@@ -449,8 +449,7 @@ infixr:80 " ∘ " => Substitution.comp
 lemma Formula.subst_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
   induction φ using Formula.rec' <;> simp_all [Substitution.comp];
 
-
-def ZeroSubstitution (α) := {s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
+def ZeroSubstitution (α) := { s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
 
 lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
   induction φ using Formula.rec' <;> simp [Formula.letterless, *];
