@@ -11,7 +11,7 @@ open FiniteContext
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F]
          {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Classical 𝓢]
+         {𝓢 : S} [Entailment.Cl 𝓢]
          {φ ψ χ ξ : F}
 
 lemma IIIpIqbNIpNq : 𝓢 ⊢! ((φ ➝ ψ ➝ ⊥) ➝ ⊥) ➝ ∼(φ ➝ ∼ψ) := by

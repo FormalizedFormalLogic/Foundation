@@ -1,6 +1,6 @@
-import Foundation.Propositional.Classical.Basic
+import Foundation.Propositional.ClassicalSemantics.Basic
 import Foundation.Propositional.Tait.Calculus
-import Foundation.Propositional.Classical.Tait
+import Foundation.Propositional.ClassicalSemantics.Tait
 import Mathlib.Algebra.Order.BigOperators.Group.List
 
 namespace LO.Propositional
@@ -209,7 +209,7 @@ abbrev Sequent.IsOpen (Γ : Sequent α) : Prop := Γ.IsAtomic ∧ ¬Γ.IsClosed
 instance [DecidableEq α] : DecidablePred (Sequent.IsOpen (α := α)) := inferInstance
 
 lemma Sequent.IsOpen.not_tautology (h : Γ.IsOpen) : ¬Γ.IsTautology :=
-  Sequent.notTautology_iff.mpr ⟨⟨fun a ↦ .atom a ∉ Γ⟩, fun φ hφ ↦ by
+  Sequent.notTautology_iff.mpr ⟨fun a ↦ .atom a ∉ Γ, fun φ hφ ↦ by
     rcases show φ.IsAtomic from h.1 φ hφ
     case atom a =>
       simp [hφ]

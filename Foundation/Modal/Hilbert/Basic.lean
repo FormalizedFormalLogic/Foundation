@@ -46,7 +46,7 @@ instance : Entailment.Lukasiewicz H where
   imply₂ := imply₂
   elim_contra := ec
 
-instance : Entailment.Classical H where
+instance : Entailment.Cl H where
 
 instance : Entailment.HasDiaDuality H := inferInstance
 
