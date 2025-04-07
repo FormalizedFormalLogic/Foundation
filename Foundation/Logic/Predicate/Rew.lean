@@ -761,6 +761,16 @@ lemma smul_ext' {ω₁ ω₂ : Rew L ξ n₁ ζ n₂} (h : ω₁ = ω₂) {φ : 
 
 @[simp] lemma smul_bex (ω : Rew L ξ n₁ ζ n₂) (φ ψ : F (n₁ + 1)) : ω ▹ (∃[φ] ψ) = ∃[ω.q ▹ φ] (ω.q ▹ ψ) := by simp [bex]
 
+@[simp] lemma smul_univItr (ω : Rew L ξ n₁ ζ n₂) (φ : F (n₁ + k)) :
+    ω ▹ (∀^[k] φ) = ∀^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
+  induction k <;> simp [univItr_succ, *]
+  rfl
+
+@[simp] lemma smul_exItr (ω : Rew L ξ n₁ ζ n₂) (φ : F (n₁ + k)) :
+    ω ▹ (∃^[k] φ) = ∃^[k] (ω.qpow k ▹ φ : G (n₂ + k)) := by
+  induction k <;> simp [exItr_succ, *]
+  rfl
+
 abbrev substitute [Rewriting L ξ F ξ F] (φ : F n₁) (w : Fin n₁ → Semiterm L ξ n₂) : F n₂ := Rew.substs w ▹ φ
 
 infix:90 " ⇜ " => LO.FirstOrder.Rewriting.substitute

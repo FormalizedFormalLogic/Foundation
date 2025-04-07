@@ -658,8 +658,21 @@ lemma quote_sentence_def' (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).Formula) 
 @[simp] lemma quote_sentence_val (σ : Sentence L) : (⌜σ⌝ : (L.codeIn V).Formula).val = ⌜σ⌝ := by
   simp [quote_sentence_def', quote_eq_coe_encode]
 
+/-- TODO: refactor names-/
 @[simp] lemma codeIn''_imp (σ π : Sentence L) : (⌜σ ➝ π⌝ : (L.codeIn V).Formula) = ⌜σ⌝ ➝ ⌜π⌝ := by
   simp [quote_sentence_def']
+
+@[simp] lemma codeIn''_or (σ π : Sentence L) : (⌜σ ⋎ π⌝ : (L.codeIn V).Formula) = ⌜σ⌝ ⋎ ⌜π⌝ := by
+  simp [quote_sentence_def']
+
+@[simp] lemma codeIn''_neg (σ : Sentence L) : (⌜∼σ⌝ : (L.codeIn V).Formula) = ∼⌜σ⌝ := by
+  simp [quote_sentence_def']
+
+/- Lemmata for `simp`-/
+@[simp] lemma codeIn'_imp0 (φ ψ : SyntacticFormula L) : (⌜φ ➝ ψ⌝ : (L.codeIn V).Formula) = ⌜φ⌝ ➝ ⌜ψ⌝ := codeIn'_imp _ _ _
+@[simp] lemma codeIn'_or0 (φ ψ : SyntacticFormula L) : (⌜φ ⋎ ψ⌝ : (L.codeIn V).Formula) = ⌜φ⌝ ⋎ ⌜ψ⌝ := codeIn'_or _ _ _
+@[simp] lemma codeIn'_and0 (φ ψ : SyntacticFormula L) : (⌜φ ⋏ ψ⌝ : (L.codeIn V).Formula) = ⌜φ⌝ ⋏ ⌜ψ⌝ := codeIn'_and _ _ _
+@[simp] lemma codeIn'_neg0 (φ : SyntacticFormula L) : (⌜∼φ⌝ : (L.codeIn V).Formula) = ∼⌜φ⌝ := codeIn'_neg _ _
 
 end Semiformula
 

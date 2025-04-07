@@ -334,24 +334,26 @@ lemma all {P : (Fin (k + 1) → V) → Prop} {φ : 𝚷-[m + 1].Semiformula V (k
     (hp : DefinedWithParam P φ) :
     DefinedWithParam (fun v ↦ ∀ x, P (x :> v)) φ.all := by intro _; simp [hp.df.iff]
 
-lemma conj (Γ : List (ℌ.Semiformula V k)) {R : (φ : ℌ.Semiformula V k) → (Fin k → V) → Prop} (hR : ∀ φ ∈ Γ, DefinedWithParam (R φ) φ) :
-    DefinedWithParam (fun x ↦ ∀ φ ∈ Γ, R φ x) Γ.conj :=
+lemma conj₂ (Γ : List (ℌ.Semiformula V k)) {R : (φ : ℌ.Semiformula V k) → (Fin k → V) → Prop} (hR : ∀ φ ∈ Γ, DefinedWithParam (R φ) φ) :
+    DefinedWithParam (fun x ↦ ∀ φ ∈ Γ, R φ x) (⋀Γ) :=
   match Γ with
-  |     [] => by simp
-  | φ :: Γ => by simpa using (hR φ (by simp)).and (conj Γ (R := R) (fun ψ hψ ↦ hR ψ (by simp [hψ])))
+  |          [] => by simp
+  |         [φ] => by simpa using hR _ (by simp)
+  | φ :: ψ :: Γ => by simpa using (hR φ (by simp)).and (conj₂ (ψ :: Γ) (R := R) (fun ψ hψ ↦ hR ψ (by simp [hψ])))
 
-lemma disj (Γ : List (ℌ.Semiformula V k)) {R : (φ : ℌ.Semiformula V k) → (Fin k → V) → Prop} (hR : ∀ φ ∈ Γ, DefinedWithParam (R φ) φ) :
-    DefinedWithParam (fun x ↦ ∃ φ ∈ Γ, R φ x) Γ.disj :=
+lemma disj₂ (Γ : List (ℌ.Semiformula V k)) {R : (φ : ℌ.Semiformula V k) → (Fin k → V) → Prop} (hR : ∀ φ ∈ Γ, DefinedWithParam (R φ) φ) :
+    DefinedWithParam (fun x ↦ ∃ φ ∈ Γ, R φ x) (⋁Γ) :=
   match Γ with
-  |     [] => by simp
-  | φ :: Γ => by simpa using (hR φ (by simp)).or (disj Γ (R := R) (fun ψ hψ ↦ hR ψ (by simp [hψ])))
+  |          [] => by simp
+  |         [φ] => by simpa using hR _ (by simp)
+  | φ :: ψ :: Γ => by simpa using (hR φ (by simp)).or (disj₂ (ψ :: Γ) (R := R) (fun ψ hψ ↦ hR ψ (by simp [hψ])))
 
 open Classical in
 lemma fconj {s : Finset ι} {R : ι → (Fin k → V) → Prop} {φ : ι → ℌ.Semiformula V k} (hR : ∀ i ∈ s, DefinedWithParam (R i) (φ i)) :
     DefinedWithParam (fun x ↦ ∀ i ∈ s, R i x) (⩕ i ∈ s, φ i) := by
-  suffices DefinedWithParam (fun x ↦ ∀ i ∈ s, R i x) (s.image φ).toList.conj by simpa [Finset.conj', Finset.conj]
-  have : DefinedWithParam (fun x ↦ ∀ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.image φ).toList.conj := by
-    simpa using conj (s.image φ).toList (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
+  suffices DefinedWithParam (fun x ↦ ∀ i ∈ s, R i x) (s.toList.map φ).conj₂ by simpa [Finset.conj', Finset.conj]
+  have : DefinedWithParam (fun x ↦ ∀ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.toList.map φ).conj₂ := by
+    simpa using conj₂ (s.toList.map φ) (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
       suffices ∀ a ∈ s, DefinedWithParam (fun v => ∀ i ∈ s, φ a = φ i → R i v) (φ a) by simpa
       intro i hi
       exact (hR i hi).of_iff fun v ↦
@@ -362,9 +364,9 @@ lemma fconj {s : Finset ι} {R : ι → (Fin k → V) → Prop} {φ : ι → ℌ
 open Classical in
 lemma fdisj {s : Finset ι} {R : ι → (Fin k → V) → Prop} {φ : ι → ℌ.Semiformula V k} (hR : ∀ i ∈ s, DefinedWithParam (R i) (φ i)) :
     DefinedWithParam (fun x ↦ ∃ i ∈ s, R i x) (⩖ i ∈ s, φ i) := by
-  suffices DefinedWithParam (fun x ↦ ∃ i ∈ s, R i x) (s.image φ).toList.disj by simpa [Finset.disj', Finset.disj]
-  have : DefinedWithParam (fun x ↦ ∃ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.image φ).toList.disj := by
-    simpa using disj (s.image φ).toList (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
+  suffices DefinedWithParam (fun x ↦ ∃ i ∈ s, R i x) (s.toList.map φ).disj₂ by simpa [Finset.disj', Finset.disj]
+  have : DefinedWithParam (fun x ↦ ∃ i ∈ s, ∀ j ∈ s, φ i = φ j → R j x) (s.toList.map φ).disj₂ := by
+    simpa using disj₂ (s.toList.map φ) (R := fun ψ v ↦ ∀ i ∈ s, ψ = φ i → R i v) (by
       suffices ∀ a ∈ s, DefinedWithParam (fun v => ∀ i ∈ s, φ a = φ i → R i v) (φ a) by simpa
       intro i hi
       exact (hR i hi).of_iff fun v ↦
