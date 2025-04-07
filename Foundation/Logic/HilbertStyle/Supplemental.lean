@@ -569,22 +569,38 @@ omit [DecidableEq F] in @[simp] lemma conjIffConj! : 𝓢 ⊢! ⋀Γ ⭤ Γ.conj
 omit [DecidableEq F] in lemma implyLeft_conj_eq_conj! : 𝓢 ⊢! Γ.conj ➝ φ ↔ 𝓢 ⊢! ⋀Γ ➝ φ := replace_imply_left_by_iff'! $ iff_comm'! conjIffConj!
 
 
-lemma generalConj'! (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := replace_imply_left_by_iff'! conjIffConj! |>.mpr (general_conj! h)
-lemma generalConj'₂! (h : φ ∈ Γ) (d : 𝓢 ⊢! ⋀Γ) : 𝓢 ⊢! φ := (generalConj'! h) ⨀ d
+lemma general_conj'! (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := replace_imply_left_by_iff'! conjIffConj! |>.mpr (general_conj! h)
+lemma general_conj'₂! (h : φ ∈ Γ) (d : 𝓢 ⊢! ⋀Γ) : 𝓢 ⊢! φ := (general_conj'! h) ⨀ d
 
 section Conjunction
 
+/--! note: It may be easier to handle define `List.conj` based on `List.conj' (?)`  -/
+def implyListConj' (φ : F) (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ φ ➝ ψ i) : 𝓢 ⊢ φ ➝ l.conj' ψ :=
+  implyConj' φ (l.map ψ) fun χ h ↦
+    let ⟨i, hi, e⟩ := l.chooseX (fun i ↦ ψ i = χ) (by simpa using h)
+    Entailment.cast (by simp [e]) (b i hi)
+lemma imply_list_conj'! (φ : F) (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢! φ ➝ ψ i) : 𝓢 ⊢! φ ➝ l.conj' ψ :=
+  ⟨implyListConj' φ l ψ fun i hi ↦ (b i hi).get⟩
+
+def generalListConj'! {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢ l.conj' φ ➝ φ i := generalConj' (by simp; use i)
+lemma general_list_conj'! {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢! l.conj' φ ➝ φ i := ⟨generalListConj'! h φ⟩
+
 omit [DecidableEq F] in
 lemma imply_finset_conj! (φ : F) (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ s.conj :=
-  imply_conj! φ s.toList fun ψ hψ ↦ b ψ (by simpa using hψ)
+  imply_conj'! φ s.toList fun ψ hψ ↦ b ψ (by simpa using hψ)
 
-lemma general_finset_conj! {s : Finset F} (h : φ ∈ s) : 𝓢 ⊢! s.conj ➝ φ := general_conj! <| by simp [h]
+lemma general_finset_conj! {s : Finset F} (h : φ ∈ s) : 𝓢 ⊢! s.conj ➝ φ := general_conj'! <| by simp [h]
 
-omit [DecidableEq F] in
-lemma imply_finset_iConj! [Fintype ι] (φ : F) (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! φ ➝ ψ i) :
-    𝓢 ⊢! φ ➝ ⩕ i, ψ i := imply_finset_conj! φ _ (by simpa using b)
+lemma imply_fconj! (φ : F) (s : Finset ι) (ψ : ι → F) (b : ∀ i ∈ s, 𝓢 ⊢! φ ➝ ψ i) :
+    𝓢 ⊢! φ ➝ ⩕ i ∈ s, ψ i := imply_list_conj'! φ s.toList ψ (by simpa)
 
-lemma general_finset_iConj! [Fintype ι] (φ : ι → F) (i) : 𝓢 ⊢! (⩕ i, φ i) ➝ φ i := general_finset_conj! <| by simp
+lemma general_fconj! {s : Finset ι} (φ : ι → F) {i} (hi : i ∈ s) : 𝓢 ⊢! (⩕ i ∈ s, φ i) ➝ φ i :=
+  general_list_conj'! (by simpa) φ
+
+lemma imply_uconj! [Fintype ι] (φ : F) (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! φ ➝ ψ i) :
+    𝓢 ⊢! φ ➝ ⩕ i, ψ i := imply_fconj! φ Finset.univ ψ (by simpa using b)
+
+lemma general_uconj! [Fintype ι] (φ : ι → F) (i) : 𝓢 ⊢! (⩕ i, φ i) ➝ φ i := general_fconj! _ <| by simp
 
 omit [DecidableEq F] in
 lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! ⋀Γ) ↔ (∀ φ ∈ Γ, 𝓢 ⊢! φ) := by
@@ -604,8 +620,8 @@ lemma iff_provable_list_conj {Γ : List F} : (𝓢 ⊢! ⋀Γ) ↔ (∀ φ ∈ �
 lemma conjconj_subset! (h : ∀ φ, φ ∈ Γ → φ ∈ Δ) : 𝓢 ⊢! ⋀Δ ➝ ⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
-  | hsingle => simp_all; exact generalConj'! h;
-  | hcons φ Γ hne ih => simp_all; exact imply_right_and! (generalConj'! h.1) ih;
+  | hsingle => simp_all; exact general_conj'! h;
+  | hcons φ Γ hne ih => simp_all; exact imply_right_and! (general_conj'! h.1) ih;
 
 lemma conjconj_provable! (h : ∀ φ, φ ∈ Γ → Δ ⊢[𝓢]! φ) : 𝓢 ⊢! ⋀Δ ➝ ⋀Γ :=
   by induction Γ using List.induction_with_singleton with
@@ -699,26 +715,64 @@ def implyDisj (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ ➝ Γ.disj :=
     else
       have : φ ∈ Γ := by simpa [e] using h
       impTrans'' (implyDisj Γ this) or₂
-def imply_disj! (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! φ ➝ Γ.disj := ⟨implyDisj Γ h⟩
+lemma imply_disj! (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! φ ➝ Γ.disj := ⟨implyDisj Γ h⟩
 
 def disjImply [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ Γ.disj ➝ φ :=
   match Γ with
   |     [] => efq
   | ψ :: Γ => or₃'' (b ψ (by simp)) <| disjImply Γ fun ψ h ↦ b ψ (by simp [h])
-def disj_imply! [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! Γ.disj ➝ φ :=
+omit [DecidableEq F] in
+lemma disj_imply! [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! Γ.disj ➝ φ :=
   ⟨disjImply Γ fun ψ h ↦ (b ψ h).get⟩
 
-lemma imply_finset_disj (s : Finset F) (h : φ ∈ s) : 𝓢 ⊢! φ ➝ s.disj := imply_disj! _ (by simp [h])
+def implyDisj' (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ ➝ ⋁Γ :=
+  match Γ with
+  |     [] => by simp at h
+  |    [ψ] => cast (by simp_all) (impId φ)
+  | ψ :: χ :: Γ =>
+    if e : φ = ψ then cast (by simp [e]) (or₁ : 𝓢 ⊢ φ ➝ φ ⋎ ⋁(χ :: Γ))
+    else
+      have : φ ∈ χ :: Γ := by simpa [e] using h
+      impTrans'' (implyDisj' _ this) or₂
+def imply_disj'! (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! φ ➝ ⋁Γ := ⟨implyDisj' Γ h⟩
+
+def disj'Imply [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ ⋁Γ ➝ φ :=
+  match Γ with
+  |     [] => efq
+  |    [ψ] => b _ (by simp)
+  | ψ :: χ :: Γ => or₃'' (b ψ (by simp)) <| disj'Imply _ fun ψ h ↦ b ψ (by simp [h])
+omit [DecidableEq F] in
+lemma disj'_imply! [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! ⋁Γ ➝ φ :=
+  ⟨disj'Imply Γ fun ψ h ↦ (b ψ h).get⟩
+
+lemma imply_finset_disj (s : Finset F) (h : φ ∈ s) : 𝓢 ⊢! φ ➝ s.disj := imply_disj'! _ (by simp [h])
+
+/-- TODO: name refactor -/
+def implyListDisj' (φ : ι → F) (l : List ι) (h : i ∈ l) : 𝓢 ⊢ φ i ➝ l.disj' φ :=
+  implyDisj' (l.map φ) (by simp; exact ⟨i, h, rfl⟩)
+lemma imply_list_disj'! (φ : ι → F) (l : List ι) (h : i ∈ l) : 𝓢 ⊢! φ i ➝ l.disj' φ := ⟨implyListDisj' φ l h⟩
+
+def listDisj'Imply [HasAxiomEFQ 𝓢] (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ ψ i ➝ φ) : 𝓢 ⊢ l.disj' ψ ➝ φ :=
+  disj'Imply _ fun χ h ↦
+    let ⟨i, hi, e⟩ := l.chooseX (ψ · = χ) (by simpa using h)
+    Entailment.cast (by simp [e]) (b i hi)
+lemma list_disj'_imply! [HasAxiomEFQ 𝓢] (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! l.disj' ψ ➝ φ :=
+  ⟨listDisj'Imply l ψ fun i hi ↦ (b i hi).get⟩
 
 omit [DecidableEq F] in
 lemma finset_disj_imply! [HasAxiomEFQ 𝓢] (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! s.disj ➝ φ :=
-  disj_imply! _ fun ψ h ↦ b ψ (by simpa using h)
+  disj'_imply! _ fun ψ h ↦ b ψ (by simpa using h)
 
-lemma imply_iDisj [Fintype ι] (φ : ι → F) : 𝓢 ⊢! φ i ➝ ⩖ j, φ j := imply_finset_disj _ (by simp)
+lemma imply_fdisj (s : Finset ι) (φ : ι → F) {i} (hi : i ∈ s) : 𝓢 ⊢! φ i ➝ ⩖ j ∈ s, φ j :=
+  imply_list_disj'! _ _ (by simp [hi])
 
-omit [DecidableEq F] in
-lemma iDisj_imply! [HasAxiomEFQ 𝓢] [Fintype ι] (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! (⩖ i, ψ i) ➝ φ :=
-  finset_disj_imply! _ (by simpa)
+lemma fdisj_imply! [HasAxiomEFQ 𝓢] (s : Finset ι) (ψ : ι → F) (b : ∀ i ∈ s, 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! (⩖ i ∈ s, ψ i) ➝ φ :=
+  list_disj'_imply! _ _ (by simpa)
+
+lemma imply_udisj [Fintype ι] (φ : ι → F) : 𝓢 ⊢! φ i ➝ ⩖ j, φ j := imply_list_disj'! _ _ (by simp)
+
+lemma udisj_imply! [HasAxiomEFQ 𝓢] [Fintype ι] (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! (⩖ i, ψ i) ➝ φ :=
+  list_disj'_imply! _ _ (by simpa)
 
 omit [DecidableEq F] in
 lemma iff_concact_disj! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁(Γ ++ Δ) ⭤ ⋁Γ ⋎ ⋁Δ := by
@@ -815,6 +869,19 @@ lemma disj_allsame! [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢!
 lemma disj_allsame'! [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 ⊢! ⋁Γ) : 𝓢 ⊢! φ := (disj_allsame! hd) ⨀ h
 
 end disjunction
+
+section classical
+
+variable [Entailment.Classical 𝓢]
+
+lemma not_imply_prem''! (hpq : 𝓢 ⊢! φ ➝ ψ) (hpnr : 𝓢 ⊢! φ ➝ ∼ξ) : 𝓢 ⊢! φ ➝ ∼(ψ ➝ ξ) :=
+  deduct'! $ (contra₀'! $ not_or_of_imply!) ⨀ (demorgan₂'! $ and₃'! (dni'! $ of'! hpq ⨀ (by_axm!)) (of'! hpnr ⨀ (by_axm!)))
+
+def ofAOfN (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := or₃''' (contra₃' (dhyp d)) (impId _) b
+
+def of_a!_of_n! (b : 𝓢 ⊢! φ ⋎ ψ) (d : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! ψ := ⟨ofAOfN b.get d.get⟩
+
+end classical
 
 section consistency
 

@@ -147,15 +147,37 @@ instance [IsRefl α rel] [IsCoreflexive α rel] : IsEquality α rel := ⟨equali
 lemma refl_of_equality (h : Equality rel) : Reflexive rel := by
   intro x;
   exact h.mpr rfl;
-
 instance [IsEquality α rel] : IsRefl α rel := ⟨refl_of_equality IsEquality.equality⟩
 
+lemma trans_of_equality (h : Equality rel) : Transitive rel := by
+  rintro x y z Rxy Ryz;
+  replace Rxy := h.mp Rxy; subst Rxy;
+  replace Ryz := h.mp Ryz; subst Ryz;
+  apply refl_of_equality h;
+instance [IsEquality α rel] : IsTrans α rel := ⟨trans_of_equality IsEquality.equality⟩
+
+lemma antisymm_of_equality (h : Equality rel) : AntiSymmetric rel := by
+  rintro x y Rxy Ryz;
+  replace Rxy := h.mp Rxy; subst Rxy;
+  rfl;
+instance [IsEquality α rel] : IsAntisymm α rel := ⟨antisymm_of_equality IsEquality.equality⟩
+
+instance [IsEquality α rel] : IsPartialOrder α rel where
 
 lemma corefl_of_equality (h : Equality rel) : Coreflexive rel := by
   intro x y Rxy;
   apply h.mp Rxy;
 
 instance [IsEquality α rel] : IsCoreflexive α rel := ⟨corefl_of_equality IsEquality.equality⟩
+
+
+lemma connected_of_equality (h : Equality rel) : Connected rel := by
+  rintro x y z ⟨Rxy, Ryz⟩;
+  replace Rxy := h.mp Rxy; subst Rxy;
+  replace Ryz := h.mp Ryz; subst Ryz;
+  left;
+  apply refl_of_equality h;
+instance [IsEquality α rel] : IsConnected α rel := ⟨connected_of_equality IsEquality.equality⟩
 
 
 lemma irreflexive_of_assymetric (hAssym : Asymmetric rel) : Irreflexive rel := by
@@ -183,6 +205,26 @@ lemma coreflexive_of_isolated (h : Isolated rel) : Coreflexive rel := by
   exact h Rxy;
 instance [IsIsolated α rel] : IsCoreflexive α rel := ⟨coreflexive_of_isolated IsIsolated.isolated⟩
 
+lemma irrefl_of_isolated (h : Isolated rel) : Irreflexive rel := by
+  intro x Rxx;
+  exfalso;
+  exact h Rxx;
+instance [IsIsolated α rel] : IsIrrefl α rel := ⟨irrefl_of_isolated IsIsolated.isolated⟩
+
+lemma transitive_of_isolated (h : Isolated rel) : Transitive rel := by
+  rintro x y z Rxy;
+  exfalso;
+  exact h Rxy;
+instance [IsIsolated α rel] : IsTrans α rel := ⟨transitive_of_isolated IsIsolated.isolated⟩
+
+instance [IsIsolated α rel] : IsStrictOrder α rel where
+
+lemma weakConnected_of_isolated (h : Isolated rel) : WeakConnected rel := by
+  rintro x y z ⟨Rxy, Ryz, _⟩;
+  exfalso;
+  exact h Rxy;
+instance [IsIsolated α rel] : IsWeakConnected α rel := ⟨weakConnected_of_isolated IsIsolated.isolated⟩
+
 
 lemma refl_of_universal (h : Universal rel) : Reflexive rel := by intro x; exact @h x x;
 instance [IsUniversal α rel] : IsRefl α rel := ⟨refl_of_universal IsUniversal.universal⟩
@@ -195,6 +237,7 @@ instance [IsUniversal α rel] : IsPreorder α rel where
 
 lemma connected_of_universal (h : Universal rel) : Connected rel := by simp_all [Connected, Universal];
 instance [IsUniversal α rel] : IsConnected α rel := ⟨connected_of_universal IsUniversal.universal⟩
+
 
 
 lemma weakConfluent_of_confluent (hConfl : Confluent rel) : WeakConfluent rel := by
@@ -224,5 +267,12 @@ lemma confluent_of_refl_connected (hRefl : Reflexive rel) (hConfl : Connected re
 
 instance [IsRefl α rel] [IsConnected α rel] : IsConfluent α rel := ⟨confluent_of_refl_connected IsRefl.reflexive IsConnected.connected⟩
 
+
+instance weakConnected_of_euclidean (h : Euclidean rel) : WeakConnected rel := by
+  rintro x y z ⟨Rxy, Rxz, _⟩;
+  right;
+  exact h Rxy Rxz;
+
+instance [IsEuclidean α rel] : IsWeakConnected α rel := ⟨weakConnected_of_euclidean IsEuclidean.euclidean⟩
 
 end

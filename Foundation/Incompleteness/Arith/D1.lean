@@ -210,8 +210,18 @@ section
 
 variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
-theorem provableₐ_of_provable {σ} : T ⊢! σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦
+/-- Hilbert–Bernays provability condition D1 -/
+theorem provableₐ_of_provable {φ} : T ⊢! φ → T.Provableₐ (⌜φ⌝ : V) := fun h ↦
   Language.Theory.Derivable.of_ss Formalized.theory_subset_AddR₀ (provable_of_provable h)
+
+theorem provableₐ_of_provable₀ {σ} : T ⊢!. σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by
+  simpa using provableₐ_of_provable (T := T) (V := V) h
+
+theorem provableₐ_of_provable' {φ} : T ⊢! φ → T†V ⊢! ⌜φ⌝ := fun h ↦ by
+  simpa [provableₐ_iff'] using provableₐ_of_provable (V := V) h
+
+theorem provableₐ_of_provable'₀ {σ} : T ⊢!. σ → T†V ⊢! ⌜σ⌝ := fun h ↦ by
+  simpa [provableₐ_iff] using provableₐ_of_provable₀ (V := V) h
 
 end
 

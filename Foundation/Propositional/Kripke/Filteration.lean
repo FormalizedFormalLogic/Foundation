@@ -123,7 +123,7 @@ section
 variable {M : Model} {T : FormulaSet ℕ} [T.SubformulaClosed]
          (FM : Model) (filterOf : FilterOf FM M T)
 
-theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
+theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subformula) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
   induction φ using Formula.rec' generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;
@@ -132,35 +132,35 @@ theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T) : x ⊧ φ 
     constructor;
     . rintro ⟨hφ, hψ⟩;
       constructor;
-      . refine ihφ (FormulaSet.SubformulaClosed.mem_and₁ hs) |>.mp hφ;
-      . refine ihψ (FormulaSet.SubformulaClosed.mem_and₂ hs) |>.mp hψ;
+      . refine ihφ (by subformula) |>.mp hφ;
+      . refine ihψ (by subformula) |>.mp hψ;
     . rintro ⟨hφ, hψ⟩;
       constructor;
-      . refine ihφ (FormulaSet.SubformulaClosed.mem_and₁ hs) |>.mpr hφ;
-      . refine ihψ (FormulaSet.SubformulaClosed.mem_and₂ hs) |>.mpr hψ;
+      . refine ihφ (by subformula) |>.mpr hφ;
+      . refine ihψ (by subformula) |>.mpr hψ;
   | hor φ ψ ihφ ihψ =>
     constructor;
     . rintro (hφ | hψ);
-      . left; exact ihφ (FormulaSet.SubformulaClosed.mem_or₁ hs) |>.mp hφ;
-      . right; exact ihψ (FormulaSet.SubformulaClosed.mem_or₂ hs) |>.mp hψ;
+      . left; exact ihφ (by subformula) |>.mp hφ;
+      . right; exact ihψ (by subformula) |>.mp hψ;
     . rintro (hφ | hψ);
-      . left; exact ihφ (FormulaSet.SubformulaClosed.mem_or₁ hs) |>.mpr hφ;
-      . right; exact ihψ (FormulaSet.SubformulaClosed.mem_or₂ hs) |>.mpr hψ;
+      . left; exact ihφ (by subformula) |>.mpr hφ;
+      . right; exact ihψ (by subformula) |>.mpr hψ;
   | himp φ ψ ihφ ihψ =>
     constructor;
     . rintro hφψ Qy RQxQy hφ;
       obtain ⟨y, ey⟩ := Quotient.exists_rep (cast (filterOf.def_world) Qy);
-      apply (show Satisfies M y ψ → Satisfies FM Qy ψ by simpa [ey] using @ihψ y (FormulaSet.SubformulaClosed.mem_imp₂ hs) |>.mp)
+      apply (show Satisfies M y ψ → Satisfies FM Qy ψ by simpa [ey] using ihψ (x := y) (by subformula) |>.mp)
       have : ∀ φ ∈ T, Satisfies M x φ → Satisfies M y φ := by simpa [←ey] using filterOf.def_rel_back RQxQy;
       apply this (φ ➝ ψ) hs hφψ;
       . apply M.refl;
-      . apply ihφ (FormulaSet.SubformulaClosed.mem_imp₁ hs) |>.mpr;
+      . apply ihφ (by subformula) |>.mpr;
         convert hφ;
         simp_all;
     . rintro h y Rxy hφ;
-      apply ihψ (FormulaSet.SubformulaClosed.mem_imp₂ hs) |>.mpr;
+      apply ihψ (by subformula) |>.mpr;
       apply h (filterOf.def_rel_forth Rxy);
-      apply ihφ (FormulaSet.SubformulaClosed.mem_imp₁ hs) |>.mp hφ;
+      apply ihφ (by subformula) |>.mp hφ;
   | _ => trivial
 
 end

@@ -229,7 +229,7 @@ lemma substitution_boldfaceBoundedFunction {f : Fin k → (Fin l → V) → V}
   have : ℌ.Boldface fun v ↦ ∃ w ≤ (f · v), (∀ i, w i = f i v) ∧ P w := by
     apply bex_vec_le_boldfaceBoundedFunction hf
     apply and
-    · apply conj; intro i
+    · apply fintype_all; intro i
       simpa using retraction (.of_zero (hf i).2) (i.natAdd l :> Fin.castAdd k)
     · apply retraction hP
   apply of_iff this <| by
@@ -415,7 +415,7 @@ attribute [aesop 8 (rule_sets := [Definability]) safe]
 attribute [aesop 10 (rule_sets := [Definability]) safe]
   Boldface.not
   Boldface.imp
-  Boldface.iff
+  Boldface.biconditional
 
 attribute [aesop 11 (rule_sets := [Definability]) safe]
   Boldface.and

@@ -228,6 +228,9 @@ lemma pi_of_pi_all {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚷 s (∀' φ) 
 @[simp] lemma all_iff {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚷 (s + 1) (∀' φ) ↔ Hierarchy 𝚷 (s + 1) φ :=
   ⟨pi_of_pi_all, all⟩
 
+@[simp] lemma univItr_iff {φ : Semiformula L ξ (n + k)} : Hierarchy 𝚷 (s + 1) (∀^[k] φ) ↔ Hierarchy 𝚷 (s + 1) φ := by
+  induction k <;> simp [univItr_succ, *]
+
 lemma sigma_of_sigma_ex {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚺 s (∃' φ) → Hierarchy 𝚺 s φ := by
   generalize hr : ∃' φ = r
   generalize hb : (𝚺 : Polarity) = Γ
@@ -240,6 +243,9 @@ lemma sigma_of_sigma_ex {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚺 s (∃'
 
 @[simp] lemma sigma_iff {φ : Semiformula L ξ (n + 1)} : Hierarchy 𝚺 (s + 1) (∃' φ) ↔ Hierarchy 𝚺 (s + 1) φ :=
   ⟨sigma_of_sigma_ex, ex⟩
+
+@[simp] lemma exItr_iff {φ : Semiformula L ξ (n + k)} : Hierarchy 𝚺 (s + 1) (∃^[k] φ) ↔ Hierarchy 𝚺 (s + 1) φ := by
+  induction k <;> simp [exItr_succ, *]
 
 lemma rew (ω : Rew L ξ₁ n₁ ξ₂ n₂) {φ : Semiformula L ξ₁ n₁} : Hierarchy Γ s φ → Hierarchy Γ s (ω ▹ φ) := by
   intro h; induction h generalizing n₂ <;> try simp [*, Semiformula.rew_rel, Semiformula.rew_nrel]
@@ -349,6 +355,44 @@ lemma remove_exists {φ : Semiformula L ξ (n + 1)} : Hierarchy b s (∃' φ) �
   case ex => assumption
   case sigma h => exact h.accum _
   case dummy_pi h => exact h.accum _
+
+@[simp] lemma padding_iff {Γ s n} {φ : Semiformula L ξ n} :
+    Hierarchy Γ s (φ.padding k) ↔ Hierarchy Γ s φ := by
+  simp [Semiformula.padding]
+  intro h
+  induction k <;> simp [List.replicate_succ, *]
+
+@[simp] lemma list_conj₂_iff {Γ s n} {l : List (Semiformula L ξ n)} :
+    Hierarchy Γ s (⋀l) ↔ ∀ φ ∈ l, Hierarchy Γ s φ := by
+  match l with
+  |          [] => simp
+  |         [_] => simp
+  | ψ :: χ :: l => simp [list_conj₂_iff (l := χ :: l)]
+
+@[simp] lemma list_disj₂_iff {Γ s n} {l : List (Semiformula L ξ n)} :
+    Hierarchy Γ s (⋁l) ↔ ∀ φ ∈ l, Hierarchy Γ s φ := by
+  match l with
+  |          [] => simp
+  |         [_] => simp
+  | ψ :: χ :: l => simp [list_disj₂_iff (l := χ :: l)]
+
+@[simp] lemma list_conj'_iff {Γ s n} {l : List ι} {φ : ι → Semiformula L ξ n} :
+    Hierarchy Γ s (l.conj' φ) ↔ ∀ i ∈ l, Hierarchy Γ s (φ i) := by simp [List.conj']
+
+@[simp] lemma list_disj'_iff {Γ s n} {l : List ι} {φ : ι → Semiformula L ξ n} :
+    Hierarchy Γ s (l.disj' φ) ↔ ∀ i ∈ l, Hierarchy Γ s (φ i) := by simp [List.disj']
+
+@[simp] lemma finset_conj'_iff {Γ s n} {t : Finset ι} {φ : ι → Semiformula L ξ n} :
+    Hierarchy Γ s (t.conj' φ) ↔ ∀ i ∈ t, Hierarchy Γ s (φ i) := by simp [Finset.conj']
+
+@[simp] lemma finset_disj'_iff {Γ s n} {t : Finset ι} {φ : ι → Semiformula L ξ n} :
+    Hierarchy Γ s (t.disj' φ) ↔ ∀ i ∈ t, Hierarchy Γ s (φ i) := by simp [Finset.disj']
+
+@[simp] lemma finset_uconj_iff {Γ s n} [Fintype ι] {φ : ι → Semiformula L ξ n} :
+    Hierarchy Γ s (Finset.uconj φ) ↔ ∀ i, Hierarchy Γ s (φ i) := by simp [Finset.uconj]
+
+@[simp] lemma finset_udisj_iff {Γ s n} [Fintype ι] {φ : ι → Semiformula L ξ n} :
+    Hierarchy Γ s (Finset.udisj φ) ↔ ∀ i, Hierarchy Γ s (φ i) := by simp [Finset.udisj]
 
 end Hierarchy
 

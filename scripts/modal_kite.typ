@@ -22,7 +22,7 @@ Kite of Modal Logics
   raw(
     "
   digraph ModalLogicsKite {
-    rankdir = LR;
+    rankdir = BT;
 
     node [
       shape=none
@@ -40,6 +40,9 @@ Kite of Modal Logics
     {rank = same; \"LO.Modal.Logic.KD\"; \"LO.Modal.Logic.KB\"; \"LO.Modal.Logic.K4\"; \"LO.Modal.Logic.K5\";}
     {rank = same; \"LO.Modal.Logic.KT\"; \"LO.Modal.Logic.KDB\"; \"LO.Modal.Logic.KD4\"; \"LO.Modal.Logic.KD5\"; \"LO.Modal.Logic.K45\";}
     {rank = same; \"LO.Modal.Logic.KTB\"; \"LO.Modal.Logic.S4\"; \"LO.Modal.Logic.KD45\"; \"LO.Modal.Logic.KB4\";}
+    {rank = same; \"LO.Modal.Logic.K4Point2\"; \"LO.Modal.Logic.K4Point3\";}
+    {rank = same; \"LO.Modal.Logic.GL\"; \"LO.Modal.Logic.Grz\";}
+    {rank = same; \"LO.Modal.Logic.GLPoint3\"; \"LO.Modal.Logic.GrzPoint3\";}
   "
       + arrows.join("\n")
       + "}",

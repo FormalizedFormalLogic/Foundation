@@ -273,7 +273,7 @@ lemma collect_multibox_conj! : 𝓢 ⊢! ⋀□'^[n]Γ ➝ □^[n]⋀Γ := by
   | hsingle => simp;
   | hcons φ Γ h ih =>
     simp_all only [ne_eq, not_false_eq_true, List.conj₂_cons_nonempty];
-    refine imp_trans''! (imply_right_and! (generalConj'! ?_) (imp_trans''! ?_ ih)) collect_multibox_and!;
+    refine imp_trans''! (imply_right_and! (general_conj'! ?_) (imp_trans''! ?_ ih)) collect_multibox_and!;
     . simp;
     . simp [List.multibox, List.multibox_nonempty h];
 

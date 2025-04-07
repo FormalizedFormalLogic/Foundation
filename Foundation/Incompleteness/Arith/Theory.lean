@@ -655,17 +655,18 @@ instance Theory.addCobhamR0'Delta1Definable (T : Theory ℒₒᵣ) [d : T.Delta1
   d.add Theory.CobhamR0'Delta1Definable
 section
 
-variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
+abbrev _root_.LO.FirstOrder.Theory.AddR₀TTheory
+    (T : Theory ℒₒᵣ) [T.Delta1Definable] (V) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] : ⌜ℒₒᵣ⌝[V].TTheory := (T + 𝐑₀').tCodeIn V
 
-abbrev _root_.LO.FirstOrder.Theory.AddR₀TTheory : ⌜ℒₒᵣ⌝[V].TTheory := (T + 𝐑₀').tCodeIn V
+scoped [LO.Arith] infix:100 "†" => LO.FirstOrder.Theory.AddR₀TTheory
 
-variable {T}
+variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
-@[simp] lemma R₀'_subset_AddR₀ : ⌜𝐑₀'⌝[V] ⊆ T.AddR₀TTheory := Set.subset_union_right
+@[simp] lemma R₀'_subset_AddR₀ : ⌜𝐑₀'⌝[V] ⊆ T†V := Set.subset_union_right
 
-@[simp] lemma theory_subset_AddR₀ : T.tCodeIn V ⊆ T.AddR₀TTheory := FirstOrder.Theory.Delta1Definable.add_subset_left _ _
+@[simp] lemma theory_subset_AddR₀ : T.tCodeIn V ⊆ T†V := FirstOrder.Theory.Delta1Definable.add_subset_left _ _
 
-instance : R₀Theory (T.AddR₀TTheory (V := V)) where
+instance : R₀Theory (T†V) where
   refl := Language.Theory.TProof.ofSubset (by simp) Theory.CobhamR0'.eqRefl.proof
   replace := fun φ ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.CobhamR0'.replace.proof φ)
   add := fun n m ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.CobhamR0'.Ω₁.proof n m)
@@ -688,7 +689,11 @@ def _root_.LO.FirstOrder.Theory.Provableₐ (φ : V) : Prop := ((T + 𝐑₀').c
 
 variable {T}
 
-lemma provableₐ_iff {σ : Sentence ℒₒᵣ} : T.Provableₐ (⌜σ⌝ : V) ↔ (T + 𝐑₀').tCodeIn V ⊢! ⌜σ⌝ := by
+lemma provableₐ_iff {σ : Sentence ℒₒᵣ} : T.Provableₐ (⌜σ⌝ : V) ↔ T†V ⊢! ⌜σ⌝ := by
+  simp [Language.Theory.TProvable.iff_provable]; rfl
+
+/-- TODO: refactor name-/
+lemma provableₐ_iff' {φ : SyntacticFormula ℒₒᵣ} : T.Provableₐ (⌜φ⌝ : V) ↔ T†V ⊢! ⌜φ⌝ := by
   simp [Language.Theory.TProvable.iff_provable]; rfl
 
 section

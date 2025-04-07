@@ -430,6 +430,8 @@ lemma le_of_subset {a b : V} (h : a ⊆ b) : a ≤ b := by
 lemma mem_ext {a b : V} (h : ∀ i, i ∈ a ↔ i ∈ b) : a = b :=
   le_antisymm (le_of_subset fun i hi ↦ (h i).mp hi) (le_of_subset fun i hi ↦ (h i).mpr hi)
 
+lemma mem_ext_iff {a b : V} : a = b ↔ ∀ i, i ∈ a ↔ i ∈ b := ⟨by rintro rfl; simp, mem_ext⟩
+
 lemma pos_iff_nonempty {s : V} : 0 < s ↔ s ≠ ∅ := pos_iff_ne_zero
 
 lemma nonempty_of_pos {a : V} (h : 0 < a) : ∃ i, i ∈ a := by

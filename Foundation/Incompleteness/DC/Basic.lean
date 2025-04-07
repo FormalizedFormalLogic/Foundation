@@ -97,6 +97,8 @@ lemma D2' [𝔅.HBL2] [Entailment.ModusPonens T] : T₀ ⊢!. 𝔅 (σ ➝ τ) �
 
 lemma prov_distribute_imply [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) : T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := 𝔅.D2' $ 𝔅.D1 h
 
+lemma prov_distribute_imply' [T₀ ⪯ T] [𝔅.HBL2] (h : T₀ ⊢!. σ ➝ τ) : T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := prov_distribute_imply $ WeakerThan.pbl h
+
 lemma prov_distribute_iff [𝔅.HBL2] (h : T ⊢!. σ ⭤ τ) : T₀ ⊢!. (𝔅 σ) ⭤ (𝔅 τ) := by
   apply iff_intro!;
   . exact prov_distribute_imply $ and₁'! h;

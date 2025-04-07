@@ -41,6 +41,13 @@ open
   finestFilterationTransitiveClosureModel
   Relation
 
+instance finite_sound : Sound (Hilbert.S4Point2) Kripke.FrameClass.finite_confluent_preorder := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomFour_of_transitive;
+  . exact validate_AxiomPoint2_of_confluent;
+
 instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_confluent_preorder := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
@@ -50,7 +57,7 @@ instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
   let FRM := finestFilterationTransitiveClosureModel (M↾r) (φ.subformulas);
-  apply filteration FRM (finestFilterationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTrans)) (by aesop) |>.mpr;
+  apply filteration FRM (finestFilterationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTrans)) (by subformula) |>.mpr;
   apply hφ;
 
   refine ⟨?_, ?_, ?_⟩;

@@ -24,7 +24,8 @@ Main Result in this repository. More results and details are in [Book] and [Doc]
   - [Kripke completeness for well-known subsystems][modal:logic_kripke_completeness]
   - [_Modal Cube_][modal:cube], and [sublogic relations for other logics](modal:sublogic)
   - [Gödel-McKinsey-Tarski Theorem][modal:gmt_theorem] and [Modal Companions](modal:companion)
-  - [Provability Logic][provability_logic]
+- [Provability Logic][provability_logic]
+  - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
 
 [prop]: ./Foundation/Propositional
 [prop:classical_tait]: ./Foundation/Propositional/Tait/Calculus.lean
@@ -47,7 +48,8 @@ Main Result in this repository. More results and details are in [Book] and [Doc]
 [modal:sublogic]: ./Foundation/Modal/Logic/Sublogic
 [modal:gmt_theorem]: ./Foundation/Modal/ModalCompanion/Int.lean
 [modal:companion]: ./Foundation/Modal/ModalCompanion
-[provability_logic]: ./Foundation/Incompleteness/ProvabilityLogic
+[provability_logic]: ./Foundation/ProvabilityLogic
+[provability_logic:GL_arith_complete]: ./Foundation/ProvabilityLogic/GL/Completeness.lean
 
 ## Documents
 

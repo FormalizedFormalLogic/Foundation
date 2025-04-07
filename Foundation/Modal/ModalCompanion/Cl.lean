@@ -1,6 +1,7 @@
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.Logic.Sublogic.ModalCube
 import Foundation.Modal.Kripke.Hilbert.S5
+import Foundation.Modal.Boxdot.Ver_Triv
 
 
 namespace LO
@@ -160,5 +161,12 @@ instance modalCompanion_Cl_Triv : ModalCompanion Logic.Cl Logic.Triv := by
 
 end S5Grz
 
+
+section boxdot
+
+theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : φ ∈ Logic.Cl ↔ φᵍᵇ ∈ Logic.Ver := by
+  exact Iff.trans modalCompanion_Cl_Triv.companion Hilbert.iff_boxdotTranslated_Ver_Triv.symm
+
+end boxdot
 
 end LO.Modal

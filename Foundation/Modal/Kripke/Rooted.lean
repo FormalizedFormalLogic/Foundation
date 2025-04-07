@@ -10,7 +10,7 @@ open Relation
 class Frame.IsGenerated (F : Kripke.Frame) (R : Set F.World) (roots_nonempty : R.Nonempty := by tauto_set) where
   roots_generates : ∀ w ∉ R, ∃ r ∈ R, r ≺^+ w
 
-class Frame.IsRooted (F : Kripke.Frame) (r : F.World) where
+class Frame.IsRooted (F : Kripke.Frame) (r : outParam F.World) where
   root_generates : ∀ w ≠ r, r ≺^+ w
 
 namespace Frame.IsRooted

@@ -10,3 +10,4 @@ import Foundation.FirstOrder.Basic.Calculus2
 import Foundation.FirstOrder.Basic.Coding
 import Foundation.FirstOrder.Basic.Eq
 import Foundation.FirstOrder.Basic.Soundness
+import Foundation.FirstOrder.Basic.Padding
