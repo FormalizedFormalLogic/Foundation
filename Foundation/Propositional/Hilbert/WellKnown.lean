@@ -81,7 +81,7 @@ protected abbrev Cl : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.LEM (.atom
 instance : Hilbert.Cl.FiniteAxiomatizable where
 instance : Hilbert.Cl.HasEFQ where p := 0;
 instance : Hilbert.Cl.HasLEM where p := 0;
-instance : Entailment.Classical (Hilbert.Cl) where
+instance : Entailment.Cl (Hilbert.Cl) where
 
 lemma Int_weakerThan_Cl : (Hilbert.Int) ⪯ (Hilbert.Cl) := by
   apply weakerThan_of_subset_axioms;

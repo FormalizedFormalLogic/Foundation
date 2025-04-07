@@ -187,10 +187,10 @@ instance [DecidableEq F] : StrongCut (FiniteContext F 𝓢) (FiniteContext F �
 instance [HasAxiomEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomEFQ Γ := ⟨fun _ ↦ of efq⟩
 
 instance [HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := inferInstance
-instance [Entailment.Intuitionistic 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Intuitionistic Γ where
+instance [Entailment.Int 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Int Γ where
 
 instance [HasAxiomDNE 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomDNE Γ := ⟨fun φ ↦ of (HasAxiomDNE.dne φ)⟩
-instance [Entailment.Classical 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Classical Γ where
+instance [Entailment.Cl 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Cl Γ where
 
 end
 
@@ -350,9 +350,9 @@ instance [HasAxiomEFQ 𝓢] : DeductiveExplosion (FiniteContext F 𝓢) := infer
 
 end minimal
 
-instance [DecidableEq F] [Entailment.Intuitionistic 𝓢] (Γ : Context F 𝓢) : Entailment.Intuitionistic Γ where
+instance [DecidableEq F] [Entailment.Int 𝓢] (Γ : Context F 𝓢) : Entailment.Int Γ where
 
-instance [DecidableEq F] [Entailment.Classical 𝓢] (Γ : Context F 𝓢) : Entailment.Classical Γ where
+instance [DecidableEq F] [Entailment.Cl 𝓢] (Γ : Context F 𝓢) : Entailment.Cl Γ where
 
 end
 
