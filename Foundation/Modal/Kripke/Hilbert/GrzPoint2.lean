@@ -32,8 +32,24 @@ section
 
 namespace Kripke
 
+variable {F : Frame}
+
 def Frame.terminals (F : Frame) : Set F.World := { t | ∀ {y}, t ≺ y → y = t }
 def Frame.terminals_of (F : Frame) (x : F.World) : Set F.World := { t | x ≺^+ t ∧ ∀ {y}, t ≺ y → y = t }
+
+lemma not_exists_infinite_chain [h : F.IsFinite] : ¬(∀ x : F.World, ∃ y : F.World, x ≠ y ∧ x ≺ y) := by
+  by_contra hC;
+  obtain ⟨n, ⟨hn⟩⟩ := Finite.exists_equiv_fin (h := h.world_finite);
+  have : n > 0 := by
+    by_contra hn0;
+    replace hn0 : n = 0 := by simpa [gt_iff_lt, not_lt, nonpos_iff_eq_zero] using hn0;
+    subst hn0;
+    apply Fin.elim0 $ hn.toFun (F.world_nonempty.some);
+  let x := hn.invFun ⟨n - 1, by omega⟩;
+  obtain ⟨y, exy, Rxy⟩ := hC x;
+  let m := hn.toFun y;
+
+  sorry;
 
 end Kripke
 
@@ -212,14 +228,14 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
       | himp χ ξ ihχ ihξ =>
         constructor;
         . intro h hχ;
-          apply ihξ (Formula.subformulas.mem_imp₂ ψ_sub) |>.mp;
+          apply ihξ (Formula.subformulas.mem_imp ψ_sub |>.2) |>.mp;
           apply h;
-          apply ihχ (Formula.subformulas.mem_imp₁ ψ_sub) |>.mpr;
+          apply ihχ (Formula.subformulas.mem_imp ψ_sub |>.1) |>.mpr;
           assumption;
         . intro h hχ;
-          apply ihξ (Formula.subformulas.mem_imp₂ ψ_sub) |>.mpr;
+          apply ihξ (Formula.subformulas.mem_imp ψ_sub |>.2) |>.mpr;
           apply h;
-          apply ihχ (Formula.subformulas.mem_imp₁ ψ_sub) |>.mp;
+          apply ihχ (Formula.subformulas.mem_imp ψ_sub |>.1) |>.mp;
           assumption;
       | hbox ψ ihψ =>
         constructor;
@@ -246,7 +262,13 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
             simp [M', Frame.Rel'] at Ruv;
             exact ihψ x (Formula.subformulas.mem_box ψ_sub) |>.mp $ hψ _ Ruv;
           | Sum.inr x =>
-            obtain ⟨t, t_terminal, Rut⟩ : ∃ t ∈ RM.terminals, y ≺ t := by sorry
+            obtain ⟨t, t_terminal, Rut⟩ : ∃ t ∈ RM.terminals, y ≺ t := by
+              by_contra hC;
+              push_neg at hC;
+              apply Kripke.not_exists_infinite_chain (F := RM.toFrame);
+              intro t;
+              sorry
+
               /-
               by_contra hC;
               push_neg at hC;
@@ -271,8 +293,8 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
         . intro h v Ruv;
           exact ihψ v (Formula.subformulas.mem_box ψ_sub) |>.mpr $ @h (Sum.inl v) Ruv;
       | himp _ _ ihχ ihξ =>
-        have := ihχ y (Formula.subformulas.mem_imp₁ ψ_sub);
-        have := ihξ y (Formula.subformulas.mem_imp₂ ψ_sub);
+        have := ihχ y (Formula.subformulas.mem_imp ψ_sub |>.1);
+        have := ihξ y (Formula.subformulas.mem_imp ψ_sub |>.2);
         tauto;
       | _ => tauto;
     exact this r' φ (by simp) |>.not.mp hφ;
