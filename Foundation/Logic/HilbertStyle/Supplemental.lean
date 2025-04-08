@@ -870,6 +870,19 @@ lemma disj_allsame'! [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 
 
 end disjunction
 
+section classical
+
+variable [Entailment.Cl 𝓢]
+
+lemma not_imply_prem''! (hpq : 𝓢 ⊢! φ ➝ ψ) (hpnr : 𝓢 ⊢! φ ➝ ∼ξ) : 𝓢 ⊢! φ ➝ ∼(ψ ➝ ξ) :=
+  deduct'! $ (contra₀'! $ not_or_of_imply!) ⨀ (demorgan₂'! $ and₃'! (dni'! $ of'! hpq ⨀ (by_axm!)) (of'! hpnr ⨀ (by_axm!)))
+
+def ofAOfN (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := or₃''' (contra₃' (dhyp d)) (impId _) b
+
+def of_a!_of_n! (b : 𝓢 ⊢! φ ⋎ ψ) (d : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! ψ := ⟨ofAOfN b.get d.get⟩
+
+end classical
+
 section consistency
 
 variable [HasAxiomEFQ 𝓢]

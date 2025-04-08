@@ -103,6 +103,22 @@ def pMorphism : Model.PseudoEpimorphism M (M.extendRoot r) := PseudoEpimorphism.
 lemma modal_equivalence_original_world {x : M.World} : ModalEquivalent (M₁ := M) (M₂ := M.extendRoot r) x (Sum.inr x) := by
   apply Model.PseudoEpimorphism.modal_equivalence pMorphism;
 
+@[simp] lemma inr_forces_iff {i : M.World} :
+    @Semantics.Realize (Modal.Formula ℕ) (M.extendRoot r).World _ (Sum.inr i) φ ↔ i ⊧ φ := by
+  match φ with
+  | .atom a => rfl
+  |       ⊥ => simp
+  |   φ ➝ ψ =>
+    simp [inr_forces_iff (φ := φ), inr_forces_iff (φ := ψ)]
+  |      □φ =>
+    constructor
+    · intro h j hij
+      exact inr_forces_iff.mp (h (Sum.inr j) hij)
+    · intro h j hij
+      rcases j with (⟨⟨⟩⟩ | ⟨j⟩)
+      · rcases hij
+      · exact inr_forces_iff.mpr (h j hij)
+
 end Model.extendRoot
 
 

@@ -66,8 +66,9 @@ section
 
 open Entailment
 open Formula
+open Propositional
 
-variable {v : Propositional.Classical.Valuation ℕ}
+variable {v : ClassicalSemantics.Valuation ℕ}
 
 lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
   (v ⊧ (φᵀ.toPropFormula) → Hilbert.KD ⊢! φ) ∧
@@ -84,7 +85,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
       . exact efq_of_neg! $ ihφ (letterless.def_imp₁ hl) |>.2 hφ;
       . exact imply₁'! $ ihψ (letterless.def_imp₂ hl) |>.1 hψ;
     . intro h;
-      simp only [trivTranslate, toPropFormula, Semantics.Realize, Propositional.Formula.Classical.val] at h;
+      simp only [trivTranslate, toPropFormula, Semantics.Realize, Formula.ClassicalSemantics.val] at h;
       push_neg at h;
       rcases h with ⟨hφ, hψ⟩;
       replace hφ := ihφ (letterless.def_imp₁ hl) |>.1 hφ;
@@ -107,14 +108,14 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
 lemma provable_KD_of_classical_satisfiability (hl : φ.letterless) : (v ⊧ φᵀ.toPropFormula) → Hilbert.KD ⊢! φ :=
   KD_provability_of_classical_satisfiability hl |>.1
 
-lemma provable_KD_of_classical_tautology (hl : φ.letterless) (h : (Semantics.Valid (Propositional.Classical.Valuation ℕ) (φᵀ.toPropFormula)))
-  : Hilbert.KD ⊢! φ := provable_KD_of_classical_satisfiability hl (h ⟨(λ _ => True)⟩)
+lemma provable_KD_of_classical_tautology (hl : φ.letterless) (h : (Semantics.Valid (ClassicalSemantics.Valuation ℕ) (φᵀ.toPropFormula)))
+  : Hilbert.KD ⊢! φ := provable_KD_of_classical_satisfiability hl (h (λ _ => True))
 
 lemma provable_not_KD_of_classical_unsatisfiable (hl : φ.letterless) : (¬(v ⊧ φᵀ.toPropFormula)) → Hilbert.KD ⊢! ∼φ :=
   KD_provability_of_classical_satisfiability hl |>.2
 
 private lemma subset_Triv_of_KD_subset.lemma₁
-  {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _} {v : Propositional.Classical.Valuation α} :
+  {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _} {v : ClassicalSemantics.Valuation α} :
   v ⊧ (((φᵀ.toPropFormula)⟦s.1⟧)) ↔
   v ⊧ ((φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula)
   := by
@@ -137,8 +138,8 @@ private lemma subset_Triv_of_KD_subset.lemma₁
 
 lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _}
   :
-  Semantics.Valid (Propositional.Classical.Valuation α) (∼((φᵀ.toPropFormula)⟦s.1⟧)) ↔
-  Semantics.Valid (Propositional.Classical.Valuation α) ((∼φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula)
+  Semantics.Valid (ClassicalSemantics.Valuation α) (∼((φᵀ.toPropFormula)⟦s.1⟧)) ↔
+  Semantics.Valid (ClassicalSemantics.Valuation α) ((∼φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula)
   := by
   constructor;
   . intro h v hφ;
@@ -150,13 +151,13 @@ theorem subset_Triv_of_KD_subset (hS : Logic.KD ⊆ L) : L ⊆ Logic.Triv := by
   by_contra hC;
   obtain ⟨φ, hφ₁, hφ₂⟩ := Set.not_subset.mp hC;
   have := Hilbert.Triv.iff_provable_Cl.not.mp hφ₂;
-  have := (not_imp_not.mpr Propositional.Hilbert.Cl.Classical.completeness) this;
-  obtain ⟨s, h⟩ := Propositional.Classical.tautology_neg_zero_subst_instance_of_not_tautology this;
+  have := (not_imp_not.mpr Propositional.Hilbert.Cl.completeness) this;
+  obtain ⟨s, h⟩ := Propositional.ClassicalSemantics.tautology_neg_zero_subst_instance_of_not_tautology this;
   let ψ := φ⟦(s : Modal.ZeroSubstitution _).1⟧;
-  have : Semantics.Valid (Propositional.Classical.Valuation ℕ) (∼(ψᵀ.toPropFormula)) := subset_Triv_of_KD_subset.lemma₂.mp h;
+  have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (∼(ψᵀ.toPropFormula)) := subset_Triv_of_KD_subset.lemma₂.mp h;
   have : Hilbert.KD ⊢! ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.letterless_zeroSubst
     $ Semantics.Not.realize_not.mp
-    $ this ⟨(λ _ => True)⟩;
+    $ this (λ _ => True);
   have : ∼ψ ∈ L := hS this;
   have : ∼ψ ∉ L := Modal.Logic.not_neg_mem_of_mem $ Modal.Logic.subst hφ₁;
   contradiction
