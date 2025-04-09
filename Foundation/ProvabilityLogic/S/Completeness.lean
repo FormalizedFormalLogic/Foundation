@@ -13,7 +13,7 @@ open FiniteContext
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F]
          {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Classical 𝓢]
+         {𝓢 : S} [Entailment.Cl 𝓢]
          {φ ψ ξ : F}
 
 lemma ENIpqApNq! : 𝓢 ⊢! ∼(φ ➝ ψ) ⭤ (φ ⋏ ∼ψ) := by
@@ -275,6 +275,8 @@ open Arith
 
 variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)]
 
+instance instIsFiniteTree {F : Frame} (r : F) [F.IsFiniteTree r] : (F.extendRoot r).IsFiniteTree Frame.extendRoot.root where
+
 lemma GL_S_TFAE
   :
   [
@@ -303,18 +305,17 @@ lemma GL_S_TFAE
     replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
     push_neg at hA;
     obtain ⟨hA₁, hA₂⟩ := hA;
-    replace hA₁ : ∀ φ ∈ A.rflSubformula, Satisfies M₀ r₁ φ := Satisfies.finset_conj_def.mp $ Model.extendRoot.modal_equivalence_original_world.mp hA₁;
-    replace hA₂ : ¬Satisfies M₀ r₁ A := Model.extendRoot.modal_equivalence_original_world.not.mp hA₂;
+    replace hA₁ : ∀ φ ∈ A.rflSubformula, r₁ ⊧ φ := by simpa using Satisfies.finset_conj_def.mp (Model.extendRoot.modal_equivalence_original_world.mp hA₁)
+    replace hA₂ : ¬r₁ ⊧ A := by simpa using Model.extendRoot.modal_equivalence_original_world.not.mp hA₂;
+    have : (M₁.extendRoot r₁).IsFiniteTree r₀ := Frame.extendRoot.instIsFiniteTree
     have : Fintype (M₁.extendRoot r₁).World := Fintype.ofFinite _
     let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) ((M₁.extendRoot r₁).toFrame) r₀ :=
-      SolovaySentence.standard (M₁.extendRoot r₁).toFrame Frame.extendRoot.root
+      SolovaySentences.standard (M₁.extendRoot r₁).toFrame Frame.extendRoot.root
     use σ.realization;
-
-    let r₀ := Kripke.Model.extendRoot.root (M := M₁) (r := r₁);
     have H :
       ∀ B ∈ A.subformulas,
-      (Satisfies M₀ r₁ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) ∧
-      (¬Satisfies M₀ r₁ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) := by
+      (r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) ∧
+      (¬r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) := by
       intro B B_sub;
       induction B using Formula.rec' with
       | hfalsum => simp [Satisfies, Realization.interpret];
@@ -355,19 +356,22 @@ lemma GL_S_TFAE
           apply Entailment.WeakerThan.pbl (𝓢 := 𝐈𝚺₁.alt);
           have : 𝐈𝚺₁ ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B := by
             apply fdisj_imply!;
-            have hrfl : Satisfies M₀ (Sum.inr r₁) (□B ➝ B) := by
+            have hrfl : r₁ ⊧ □B ➝ B := by
               apply hA₁;
               simpa [Formula.rflSubformula];
             rintro (_ | i) _;
             . suffices 𝐈𝚺₁ ⊢!. σ r₀ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B by convert this;
               apply ihB (Formula.subformulas.mem_box B_sub) |>.1;
-              exact Satisfies.mdp hrfl h;
+              exact hrfl h;
             . by_cases e : i = r₁;
               . rw [e];
-                apply σ.mainlemma (i := r₁) |>.1;
-                exact Model.extendRoot.modal_equivalence_original_world.mpr $ Satisfies.mdp hrfl h;
-              . apply σ.mainlemma (i := i) |>.1;
+                apply σ.mainlemma (i := r₁) (by { trivial }) |>.1;
+                exact Model.extendRoot.modal_equivalence_original_world.mpr
+                  <| Model.extendRoot.inr_forces_iff.mpr <| Model.extendRoot.inr_forces_iff.mpr (hrfl h);
+              . apply σ.mainlemma (i := i) (by trivial) |>.1;
                 apply Model.extendRoot.modal_equivalence_original_world.mpr;
+                apply Model.extendRoot.inr_forces_iff.mpr
+                apply Model.extendRoot.inr_forces_iff.mpr
                 apply h;
                 suffices r₁ ≺ i by simpa [Frame.Rel', Model.extendRoot, Frame.extendRoot, M₀];
                 apply Frame.IsRooted.direct_rooted_of_trans;
@@ -376,10 +380,10 @@ lemma GL_S_TFAE
         . intro h;
           have := Satisfies.box_def.not.mp h;
           push_neg at this;
-          obtain ⟨(_ | i), Rij, hA⟩ := this;
-          . simp only [Frame.Rel', Model.extendRoot, Frame.extendRoot, M₀] at Rij;
-          have : 𝐈𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) B := σ.mainlemma (A := B) (i := i) |>.2
-            $ Model.extendRoot.modal_equivalence_original_world |>.not.mpr hA;
+          obtain ⟨i, Rij, hA⟩ := this;
+          have : 𝐈𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) B := σ.mainlemma (A := B) (i := i) (by trivial) |>.2
+            <| Model.extendRoot.modal_equivalence_original_world |>.not.mpr <| by
+              simpa [Model.extendRoot.inr_forces_iff (M := M₀), Model.extendRoot.inr_forces_iff (M := M₁)] using hA
           have : 𝐈𝚺₁ ⊢!. ∼((𝐈𝚺₁).standardDP T) (∼σ (Sum.inr i)) ➝ ∼((𝐈𝚺₁).standardDP T) (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B) :=
             contra₀'!
             $ ((𝐈𝚺₁).standardDP T).prov_distribute_imply'
