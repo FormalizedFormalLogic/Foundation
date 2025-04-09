@@ -1,9 +1,11 @@
-import Foundation.Propositional.Classical.Basic
+import Foundation.Propositional.ClassicalSemantics.Basic
 import Foundation.Propositional.NNFormula
 
 namespace LO.Propositional
 
 variable {α : Type*}
+
+open ClassicalSemantics (Valuation)
 
 
 namespace NNFormula
@@ -42,13 +44,13 @@ end val
 
 section semantics
 
-variable {v : Classical.Valuation α}
+variable {v : Valuation α}
 
-instance semantics : Semantics (NNFormula α) (Classical.Valuation α) := ⟨fun v ↦ NNFormula.val v⟩
+instance semantics : Semantics (NNFormula α) (Valuation α) := ⟨fun v ↦ NNFormula.val v⟩
 
-lemma models_iff_val {v : Classical.Valuation α} {f : NNFormula α} : v ⊧ f ↔ NNFormula.val v f := iff_of_eq rfl
+lemma models_iff_val {v : Valuation α} {f : NNFormula α} : v ⊧ f ↔ NNFormula.val v f := iff_of_eq rfl
 
-instance : Semantics.Tarski (Classical.Valuation α) where
+instance : Semantics.Tarski (Valuation α) where
   realize_top := by simp [models_iff_val]
   realize_bot := by simp [models_iff_val]
   realize_and := by simp [models_iff_val]

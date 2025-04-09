@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert.Maximal.Basic
-import Foundation.Propositional.Classical.Hilbert
+import Foundation.Propositional.ClassicalSemantics.Hilbert
 
 namespace LO.Modal
 
@@ -18,8 +18,8 @@ namespace Triv
 
 lemma unprovable_AxiomL : Hilbert.Triv ⊬ (Axioms.L (.atom a)) := by
   apply Hilbert.Triv.iff_provable_Cl.not.mpr;
-  apply Hilbert.Cl.Classical.not_provable_of_exists_valuation;
-  use ⟨(λ _ => False)⟩;
+  apply Hilbert.Cl.not_provable_of_exists_valuation;
+  use (λ _ => False);
   tauto;
 
 end Triv
@@ -29,8 +29,8 @@ namespace Ver
 
 lemma unprovable_AxiomP : (Hilbert.Ver) ⊬ Axioms.P := by
   apply Hilbert.Ver.iff_provable_Cl.not.mpr;
-  apply Hilbert.Cl.Classical.not_provable_of_exists_valuation;
-  use ⟨(λ _ => False)⟩;
+  apply Hilbert.Cl.not_provable_of_exists_valuation;
+  use (λ _ => False);
   tauto;
 
 end Ver
@@ -45,8 +45,8 @@ lemma provable_trivTranslated_Cl : (Hilbert.K4) ⊢! φ → (Hilbert.Cl) ⊢! φ
 
 lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
   apply not_imp_not.mpr provable_trivTranslated_Cl;
-  apply Hilbert.Cl.Classical.not_provable_of_exists_valuation;
-  use ⟨(λ _ => False)⟩;
+  apply Hilbert.Cl.not_provable_of_exists_valuation;
+  use (λ _ => False);
   tauto;
 
 end K4
@@ -67,8 +67,8 @@ lemma provable_verTranslated_Cl : (Hilbert.GL) ⊢! φ → (Hilbert.Cl) ⊢! φ�
 
 lemma unprovable_AxiomT : (Hilbert.GL) ⊬ Axioms.T (.atom a) := by
   apply not_imp_not.mpr provable_verTranslated_Cl;
-  apply Hilbert.Cl.Classical.not_provable_of_exists_valuation;
-  use ⟨(λ _ => False)⟩;
+  apply Hilbert.Cl.not_provable_of_exists_valuation;
+  use (λ _ => False);
   tauto;
 
 instance : Entailment.Consistent (Hilbert.GL) := by

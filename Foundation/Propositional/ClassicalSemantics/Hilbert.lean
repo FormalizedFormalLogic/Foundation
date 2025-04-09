@@ -1,40 +1,38 @@
 import Foundation.Propositional.Hilbert.WellKnown
-import Foundation.Propositional.Classical.Basic
+import Foundation.Propositional.ClassicalSemantics.Basic
 import Foundation.Propositional.ConsistentTableau
 
 namespace LO.Propositional
 
 open Semantics
+open ClassicalSemantics (Valuation)
+open Formula.ClassicalSemantics
 
-namespace Hilbert.Cl.Classical
+namespace Hilbert.Cl
 
-theorem soundness (h : Hilbert.Cl ⊢! φ) : Valid (Classical.Valuation ℕ) φ := by
+theorem soundness (h : Hilbert.Cl ⊢! φ) : Valid (Valuation ℕ) φ := by
   intro v;
   induction h using Hilbert.Deduction.rec! with
   | maxm h => rcases h with ⟨φ, (rfl | rfl), ⟨_, rfl⟩⟩ <;> { tauto; }
   | mdp ihφψ ihφ => exact ihφψ ihφ;
-  | andElimL =>
-    simp [Semantics.Realize, Formula.Classical.val]; tauto;
-  | andElimR =>
-    simp [Semantics.Realize, Formula.Classical.val];
-  | orElim =>
-    simp [Semantics.Realize, Formula.Classical.val]
-    tauto;
+  | andElimL => simp [Semantics.Realize, val]; tauto;
+  | andElimR => simp [Semantics.Realize, val];
+  | orElim => simp [Semantics.Realize, val]; tauto;
   | _ => tauto;
 
-lemma not_provable_of_exists_valuation : (∃ v : Classical.Valuation _, ¬(v ⊧ φ)) → ¬(Hilbert.Cl ⊢! φ) := by
+lemma not_provable_of_exists_valuation : (∃ v : Valuation _, ¬(v ⊧ φ)) → ¬(Hilbert.Cl ⊢! φ) := by
   contrapose;
   push_neg;
   exact soundness;
 
-section
+
+section Completeness
 
 open
   Entailment
   SaturatedConsistentTableau
 
-def canonicalVal (T : SaturatedConsistentTableau Hilbert.Cl) : Classical.Valuation ℕ where
-  val a := (.atom a) ∈ T.1.1
+def canonicalVal (T : SaturatedConsistentTableau Hilbert.Cl) : Valuation ℕ := λ a => (.atom a) ∈ T.1.1
 
 lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) ⊧ φ ↔ φ ∈ T.1.1 := by
   induction φ using Formula.rec' with
@@ -81,7 +79,7 @@ lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) 
       . left; apply ihφ.mpr hφ;
       . right; apply ihψ.mpr hψ;
 
-theorem completeness : (Valid (Classical.Valuation _) φ) → (Hilbert.Cl ⊢! φ) := by
+theorem completeness : (Valid (Valuation _) φ) → (Hilbert.Cl ⊢! φ) := by
   contrapose;
   intro h;
   obtain ⟨T, hT⟩ := lindenbaum (𝓢 := Hilbert.Cl) (t₀ := (∅, {φ})) $ by
@@ -98,13 +96,13 @@ theorem completeness : (Valid (Classical.Valuation _) φ) → (Hilbert.Cl ⊢! �
   apply hT.2;
   tauto;
 
-lemma exists_valuation_of_not_provable : ¬(Hilbert.Cl ⊢! φ) → ∃ v : Classical.Valuation _, ¬(v ⊧ φ) := by
+lemma exists_valuation_of_not_provable : ¬(Hilbert.Cl ⊢! φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
   contrapose;
   push_neg;
   exact completeness;
 
-end
+end Completeness
 
-end Hilbert.Cl.Classical
+end Hilbert.Cl
 
 end LO.Propositional

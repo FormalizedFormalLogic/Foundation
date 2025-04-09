@@ -1,4 +1,4 @@
-import Foundation.Propositional.Classical.NNFormula
+import Foundation.Propositional.ClassicalSemantics.NNFormula
 import Foundation.Propositional.Tait.Calculus
 
 namespace LO.Propositional
@@ -7,7 +7,7 @@ namespace LO.Propositional
 
 variable {α : Type*} {T : Theory α} {Γ : Sequent α}
 
-open Propositional.Classical
+open ClassicalSemantics (Valuation)
 namespace Derivation
 
 theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
@@ -45,7 +45,9 @@ end Derivation
 
 lemma soundness {T : Theory α} {φ} : T ⊢! φ → T ⊨[Valuation α] φ := by
   rintro ⟨b⟩ v hv; simpa using Derivation.sound b hv
-namespace Classical
+
+namespace ClassicalSemantics
+
 instance (T : Theory α) : Sound T (Semantics.models (Valuation α) T)  := ⟨soundness⟩
 
 section complete
@@ -149,7 +151,7 @@ lemma mem_maximalConsistentTheory_or {φ ψ} (h : φ ⋎ ψ ∈ maximalConsisten
   simp_all
 
 lemma maximalConsistentTheory_satisfiable :
-    Valuation.mk (NNFormula.atom · ∈ maximalConsistentTheory consisT) ⊧* maximalConsistentTheory consisT := ⟨by
+    (NNFormula.atom · ∈ maximalConsistentTheory consisT) ⊧* maximalConsistentTheory consisT := ⟨by
   intro φ hp
   induction φ using NNFormula.rec' <;> simp
   case hatom => simpa
@@ -167,7 +169,7 @@ lemma maximalConsistentTheory_satisfiable :
     · right; exact ihq hq⟩
 
 lemma satisfiable_of_consistent (consisT : Consistent T) : Semantics.Satisfiable (Valuation α) T :=
-  ⟨⟨(NNFormula.atom · ∈ maximalConsistentTheory consisT)⟩,
+  ⟨(NNFormula.atom · ∈ maximalConsistentTheory consisT),
     Semantics.RealizeSet.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
 
 theorem completeness! : T ⊨[Valuation α] φ → T ⊢! φ := by
@@ -195,17 +197,17 @@ instance (T : Theory α) : Complete T (Semantics.models (Valuation α) T)  where
 
 end complete
 
-end Classical
+end ClassicalSemantics
 
 theorem Derivation.complete : T ⊨[Valuation α] Γ.disj → T ⟹! Γ := fun h ↦
-  Tait.derivable_iff_provable_disj.mpr (completeness! h)
+  Tait.derivable_iff_provable_disj.mpr (ClassicalSemantics.completeness! h)
 
 theorem Derivation.complete_iff : T ⟹! Γ ↔ T ⊨[Valuation α] Γ.disj := ⟨sound!, complete⟩
 
-theorem Sequent.isTautology_iff : Γ.IsTautology ↔ ∀ v : Classical.Valuation α, ∃ φ ∈ Γ, v ⊧ φ := by
+theorem Sequent.isTautology_iff : Γ.IsTautology ↔ ∀ v : Valuation α, ∃ φ ∈ Γ, v ⊧ φ := by
   simp [Sequent.IsTautology, Derivation.complete_iff, Semantics.consequence_iff]
 
-theorem Sequent.notTautology_iff : ¬Γ.IsTautology ↔ ∃ v : Classical.Valuation α, ∀ φ ∈ Γ, ¬v ⊧ φ := by
+theorem Sequent.notTautology_iff : ¬Γ.IsTautology ↔ ∃ v : Valuation α, ∀ φ ∈ Γ, ¬v ⊧ φ := by
   simp [Sequent.isTautology_iff]
 
 end Propositional
