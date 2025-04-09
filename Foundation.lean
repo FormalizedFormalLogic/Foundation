@@ -153,6 +153,7 @@ import Foundation.Incompleteness.DC.Basic
 import Foundation.ProvabilityLogic.Soundness
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.Grz.Completeness
+import Foundation.ProvabilityLogic.S.Completeness
 
 import Foundation.AutoProver.Classical
 
