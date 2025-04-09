@@ -17,6 +17,26 @@ variable {F : Type*} [LogicalConnective F] [DecidableEq F]
 
 lemma IIIpIqbb_Apq (h : 𝓢 ⊢! ((φ ➝ (ψ ➝ ⊥)) ➝ ⊥)) : 𝓢 ⊢! (φ ⋏ ψ) := IIIpIqbbApq ⨀ h
 
+lemma IIIpbqOpq : 𝓢 ⊢! ((φ ➝ ⊥) ➝ ψ) ➝ (φ ⋎ ψ) := by
+  apply deduct'!;
+  apply or₃'''! or₁! ?_ lem!;
+  . apply deduct!;
+    apply or₂'!;
+    have H₁ : [∼φ, (φ ➝ ⊥) ➝ ψ] ⊢[𝓢]! φ ➝ ⊥ := neg_equiv'!.mp by_axm!;
+    have H₂ : [∼φ, (φ ➝ ⊥) ➝ ψ] ⊢[𝓢]! (φ ➝ ⊥) ➝ ψ := by_axm!;
+    exact H₂ ⨀ H₁;
+
+lemma IOpqIIpbq : 𝓢 ⊢! (φ ⋎ ψ) ➝ ((φ ➝ ⊥) ➝ ψ) := by
+  apply deduct'!;
+  apply deduct!;
+  have : [φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ ⋎ ψ := by_axm!;
+  apply or₃'''! ?_ imp_id! this;
+  . apply deduct!;
+    refine efq! ⨀ ?_;
+    have H₁ : [φ, φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ := by_axm!;
+    have H₂ : [φ, φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ ➝ ⊥ := by_axm!;
+    exact H₂ ⨀ H₁;
+
 end Entailment
 
 
@@ -111,15 +131,13 @@ variable [DecidableEq (Sentence L)]
 lemma iff_interpret_or_inside : T ⊢!. f.interpret 𝔅 (A ⋎ B) ⭤ (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
   simp [Realization.interpret];
   apply and₃'!;
-  . sorry;
-  . sorry;
+  . apply IIIpbqOpq;
+  . apply IOpqIIpbq;
 
 lemma iff_interpret_or : T ⊢!. f.interpret 𝔅 (A ⋎ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
   constructor;
-  . intro h;
-    sorry;
-  . intro h;
-    sorry;
+  . intro h; apply (and₁'! iff_interpret_or_inside) ⨀ h;
+  . intro h; apply (and₂'! iff_interpret_or_inside) ⨀ h;
 
 lemma iff_interpret_and : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
   constructor;
