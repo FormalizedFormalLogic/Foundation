@@ -1,44 +1,7 @@
-import Foundation.ProvabilityLogic.GL.Completeness
-import Foundation.ProvabilityLogic.Grz.Completeness
 import Foundation.Modal.Hilbert.GL.Independency
+import Foundation.ProvabilityLogic.GL.Completeness
 
 namespace LO
-
-
-namespace Entailment
-
-open Entailment
-open FiniteContext
-
-variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Classical 𝓢]
-         {φ ψ χ ξ : F}
-
-lemma IIIpIqbb_Apq (h : 𝓢 ⊢! ((φ ➝ (ψ ➝ ⊥)) ➝ ⊥)) : 𝓢 ⊢! (φ ⋏ ψ) := IIIpIqbbApq ⨀ h
-
-lemma IIIpbqOpq : 𝓢 ⊢! ((φ ➝ ⊥) ➝ ψ) ➝ (φ ⋎ ψ) := by
-  apply deduct'!;
-  apply or₃'''! or₁! ?_ lem!;
-  . apply deduct!;
-    apply or₂'!;
-    have H₁ : [∼φ, (φ ➝ ⊥) ➝ ψ] ⊢[𝓢]! φ ➝ ⊥ := neg_equiv'!.mp by_axm!;
-    have H₂ : [∼φ, (φ ➝ ⊥) ➝ ψ] ⊢[𝓢]! (φ ➝ ⊥) ➝ ψ := by_axm!;
-    exact H₂ ⨀ H₁;
-
-lemma IOpqIIpbq : 𝓢 ⊢! (φ ⋎ ψ) ➝ ((φ ➝ ⊥) ➝ ψ) := by
-  apply deduct'!;
-  apply deduct!;
-  have : [φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ ⋎ ψ := by_axm!;
-  apply or₃'''! ?_ imp_id! this;
-  . apply deduct!;
-    refine efq! ⨀ ?_;
-    have H₁ : [φ, φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ := by_axm!;
-    have H₂ : [φ, φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ ➝ ⊥ := by_axm!;
-    exact H₂ ⨀ H₁;
-
-end Entailment
-
 
 namespace FirstOrder.DerivabilityCondition
 
@@ -86,89 +49,27 @@ end FirstOrder.DerivabilityCondition
 
 namespace ProvabilityLogic
 
-namespace Realization
-
-open FirstOrder FirstOrder.DerivabilityCondition
-open Modal
-open Modal.Hilbert
-open FirstOrder
-open Entailment FiniteContext
-
-variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] -- [DecidableEq (Sentence L)]
-         {T₀ T : Theory L} -- [T₀ ⪯ T]
-         {𝔅 : ProvabilityPredicate T₀ T} {f : Realization L} {A B : Modal.Formula _}
-
-lemma letterless_interpret
-  {f₁ f₂ : Realization L} (A_letterless : A.letterless)
-  : (f₁.interpret 𝔅 A) = (f₂.interpret 𝔅 A) := by
-  induction A using Formula.rec' with
-  | hatom a => simp at A_letterless;
-  | hfalsum => simp_all [Realization.interpret];
-  | himp A B ihA ihB =>
-    replace ihA := ihA $ Modal.Formula.letterless.def_imp₁ A_letterless;
-    replace ihB := ihB $ Modal.Formula.letterless.def_imp₂ A_letterless;
-    simp_all [Realization.interpret];
-  | hbox A ihA =>
-    replace ihA := ihA $ Modal.Formula.letterless.def_box A_letterless;
-    simp_all [Realization.interpret];
-
-lemma iff_interpret_atom : T ⊢!. f.interpret 𝔅 (.atom a) ↔ T ⊢!. f a := by  simp [Realization.interpret];
-lemma iff_interpret_imp : T ⊢!. f.interpret 𝔅 (A ➝ B) ↔ T ⊢!. (f.interpret 𝔅 A) ➝ (f.interpret 𝔅 B) := by simp [Realization.interpret];
-lemma iff_interpret_bot : T ⊢!. f.interpret 𝔅 ⊥ ↔ T ⊢!. ⊥ := by simp [Realization.interpret];
-lemma iff_interpret_box : T ⊢!. f.interpret 𝔅 (□A) ↔ T ⊢!. 𝔅 (f.interpret 𝔅 A) := by simp [Realization.interpret];
-lemma iff_interpret_neg : T ⊢!. f.interpret 𝔅 (∼A) ↔ T ⊢!. ∼(f.interpret 𝔅 A) := by
-  dsimp [Realization.interpret];
-  apply neg_equiv'!.symm;
-
-lemma iff_interpret_neg_inside : T ⊢!. f.interpret 𝔅 (∼A) ⭤ ∼(f.interpret 𝔅 A) := by
-  dsimp [Realization.interpret];
-  apply and₃'!;
-  . apply and₂'! $ neg_equiv!
-  . apply and₁'! $ neg_equiv!
-
-variable [DecidableEq (Sentence L)]
-
-lemma iff_interpret_or_inside : T ⊢!. f.interpret 𝔅 (A ⋎ B) ⭤ (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
-  simp [Realization.interpret];
-  apply and₃'!;
-  . apply IIIpbqOpq;
-  . apply IOpqIIpbq;
-
-lemma iff_interpret_or : T ⊢!. f.interpret 𝔅 (A ⋎ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
-  constructor;
-  . intro h; apply (and₁'! iff_interpret_or_inside) ⨀ h;
-  . intro h; apply (and₂'! iff_interpret_or_inside) ⨀ h;
-
-lemma iff_interpret_and : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
-  constructor;
-  . intro h; apply IIIpIqbb_Apq h;
-  . intro h; apply Apq_IIpIqbb h;
-
-lemma iff_interpret_and_inside : T ⊢!. f.interpret 𝔅 (A ⋏ B) ⭤ (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
-  apply and₃'!;
-  . apply IIIpIqbbApq;
-  . apply ApqIIpIqbb;
-
-lemma iff_interpret_and' : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ∧ T ⊢!. (f.interpret 𝔅 B) := by
-  apply Iff.trans iff_interpret_and;
-  constructor;
-  . intro h;
-    constructor;
-    . apply and₁'! h;
-    . apply and₂'! h;
-  . rintro ⟨_, _⟩;
-    apply and₃'! <;> assumption;
-
-end Realization
-
-
-
 open FirstOrder FirstOrder.Arith FirstOrder.DerivabilityCondition
 open Entailment
 
 variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
          {f : Realization ℒₒᵣ}
          {A B : Modal.Formula _}
+
+
+section Corollary
+
+/-- Gödel's Second Incompleteness Theorem -/
+example [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : T ⊬. ((𝐈𝚺₁).standardDP T).con := by
+  have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ Modal.Hilbert.GL.unprovable_notbox (φ := ⊥);
+  push_neg at h;
+  obtain ⟨f, h⟩ := h;
+  exact Realization.iff_interpret_neg.not.mp h;
+
+end Corollary
+
+
+section Independency
 
 lemma iff_modalConsis_bewConsis_inside
   : T ⊢!. f.interpret (𝐈𝚺₁.standardDP T) (∼□⊥) ⭤ (𝐈𝚺₁.standardDP T).con := by
@@ -185,7 +86,6 @@ variable [𝐈𝚺₁ ⪯ T]
 lemma iff_modalIndep_bewIndep_inside :
   T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) (Modal.independency A) ⭤ ((𝐈𝚺₁).standardDP T).indep (f.interpret ((𝐈𝚺₁).standardDP T) A)
   := by
-  simp [Modal.independency, ProvabilityPredicate.indep];
   apply and₃'!;
   . refine imp_trans''! (and₁'! $ Realization.iff_interpret_and_inside) ?_;
     apply and_replace!;
@@ -235,7 +135,7 @@ lemma unprovable_independency_of_consistency :
       iff_modalConsis_bewConsis_inside;
     exact Iff.trans H₁ H₂ |>.not.mp this;
   have h := Modal.Hilbert.GL.unprovable_independency (φ := ∼□⊥);
-  replace h := arithmetical_completeness_GL_iff (T := T) |>.not.mpr h;
+  replace h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr h;
   push_neg at h;
   obtain ⟨f, h⟩ := h;
   congr;
@@ -261,7 +161,7 @@ lemma unrefutable_independency_of_consistency :
       . intro H; exact and₂'! H₂ ⨀ H;
     apply Iff.trans H₁ H₂ |>.not.mp this;
   have h := Modal.Hilbert.GL.unprovable_not_independency_of_consistency;
-  replace h := arithmetical_completeness_GL_iff (T := T) |>.not.mpr h;
+  replace h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr h;
   push_neg at h;
   obtain ⟨f, h⟩ := h;
   replace h := Realization.iff_interpret_neg.not.mp h;
@@ -273,10 +173,7 @@ theorem undecidable_independency_of_consistency :
   . exact unprovable_independency_of_consistency;
   . exact unrefutable_independency_of_consistency;
 
-example : T ⊬. ((𝐈𝚺₁).standardDP T).con := by
-  have h := arithmetical_completeness_GL_iff (T := T) |>.not.mpr $ Modal.Hilbert.GL.unprovable_notbox (φ := ⊥);
-  push_neg at h;
-  obtain ⟨f, h⟩ := h;
-  exact Realization.iff_interpret_neg.not.mp h;
+end Independency
+
 
 end LO.ProvabilityLogic
