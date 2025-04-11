@@ -399,7 +399,7 @@ lemma Language.Theory.Provable.complete₀ {σ : Sentence L} :
   ⟨by simpa [Language.Theory.TProvable.iff_provable] using Language.Theory.Provable.sound₀, tprovable_of_provable⟩
 
 @[simp] lemma provableₐ_iff_provable₀ {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐑₀ ⪯ T] {σ : Sentence ℒₒᵣ} :
-    T.Provableₐ (⌜σ⌝ : ℕ) ↔ T ⊢! ↑σ := by
+    T.Provableₐ (⌜σ⌝ : ℕ) ↔ T ⊢!. σ := by
   simpa [provableₐ_iff, Language.Theory.Provable.complete₀] using FirstOrder.Arith.add_cobhamR0'.symm
 
 end LO.Arith
