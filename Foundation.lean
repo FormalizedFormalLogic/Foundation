@@ -12,8 +12,8 @@ import Foundation.Logic.Entailment
 -- import Foundation.AutoProver.Prover
 
 -- Propositional
-import Foundation.Propositional.Classical.Tait
-import Foundation.Propositional.Classical.Hilbert
+import Foundation.Propositional.ClassicalSemantics.Tait
+import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Heyting.Semantics
 import Foundation.Propositional.Logic.Disjunctive
@@ -152,6 +152,7 @@ import Foundation.Incompleteness.DC.Basic
 -- Provability Logic
 import Foundation.ProvabilityLogic.Soundness
 import Foundation.ProvabilityLogic.GL.Completeness
+import Foundation.ProvabilityLogic.Grz.Completeness
 import Foundation.ProvabilityLogic.S.Completeness
 
 import Foundation.AutoProver.Classical

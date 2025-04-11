@@ -1,7 +1,7 @@
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Vorspiel.Collection
 import Foundation.Modal.LogicSymbol
-import Foundation.Propositional.Classical.ZeroSubst
+import Foundation.Propositional.ClassicalSemantics.ZeroSubst
 import Foundation.Subformula
 
 namespace LO.Modal
