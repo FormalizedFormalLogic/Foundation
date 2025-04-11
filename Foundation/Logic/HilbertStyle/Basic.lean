@@ -171,9 +171,9 @@ protected class Minimal (𝓢 : S) extends
               HasAxiomAndElim 𝓢, HasAxiomAndInst 𝓢,
               HasAxiomOrInst 𝓢, HasAxiomOrElim 𝓢
 
-protected class Intuitionistic (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomEFQ 𝓢
+protected class Int (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomEFQ 𝓢
 
-protected class Classical (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomDNE 𝓢
+protected class Cl (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomDNE 𝓢
 
 
 section
@@ -386,7 +386,7 @@ def Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T) (f : G →ˡ
   or₂ φ ψ := e _ (by simpa using or₂)
   or₃ φ ψ χ := e _ (by simpa using or₃)
 
-def Classical.ofEquiv (𝓢 : S) [Entailment.Classical 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢ f φ ≃ 𝓣 ⊢ φ) : Entailment.Classical 𝓣 where
+def Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢ f φ ≃ 𝓣 ⊢ φ) : Entailment.Cl 𝓣 where
   mdp {φ ψ dpq dp} := (e ψ) (
     let d : 𝓢 ⊢ f φ ➝ f ψ := by simpa using (e (φ ➝ ψ)).symm dpq
     d ⨀ ((e φ).symm dp))
