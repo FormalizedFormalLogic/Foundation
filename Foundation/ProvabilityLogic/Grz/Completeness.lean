@@ -3,64 +3,6 @@ import Foundation.Modal.Boxdot.GL_Grz
 
 namespace LO
 
-
-namespace Entailment
-
-open Entailment
-open FiniteContext
-
-variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Cl 𝓢]
-         {φ ψ χ ξ : F}
-
-lemma IIIpIqbNIpNq : 𝓢 ⊢! ((φ ➝ ψ ➝ ⊥) ➝ ⊥) ➝ ∼(φ ➝ ∼ψ) := by
-  apply imp_trans''! (and₂'! neg_equiv!) ?_;
-  apply contra₀'!;
-  apply dhyp_imp'!;
-  apply and₁'! neg_equiv!;
-
-lemma ONpNq_IpNq (h : 𝓢 ⊢! ∼φ ⋎ ∼ψ) : 𝓢 ⊢! φ ➝ ∼ψ := by
-  apply or₃'''! efq_imply_not₁! imply₁! h;
-
-@[simp]
-lemma IIIpIqbbApq : 𝓢 ⊢! ((φ ➝ (ψ ➝ ⊥)) ➝ ⊥) ➝ (φ ⋏ ψ) := by
-  apply imp_trans''! IIIpIqbNIpNq ?_;
-  apply contra₂'!
-  apply deduct'!;
-  have : [∼(φ ⋏ ψ)] ⊢[𝓢]! ∼φ ⋎ ∼ψ := demorgan₄'! $ by_axm!
-  exact or₃'''! efq_imply_not₁! imply₁! this;
-
-lemma Apq_IIpIqbb (b : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! (φ ➝ ψ ➝ ⊥) ➝ ⊥ := by
-  apply deduct'!;
-  have h₁ : [φ ➝ ψ ➝ ⊥] ⊢[𝓢]! φ := of'! $ and₁'! b;
-  have h₂ : [φ ➝ ψ ➝ ⊥] ⊢[𝓢]! ψ := of'! $ and₂'! b;
-  have H : [φ ➝ ψ ➝ ⊥] ⊢[𝓢]! φ ➝ ψ ➝ ⊥ := by_axm!;
-  exact (H ⨀ h₁) ⨀ h₂;
-
-@[simp]
-lemma ApqIIpIqbb : 𝓢 ⊢! (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by
-  apply deduct'!;
-  apply Apq_IIpIqbb;
-  apply by_axm!;
-  simp;
-
-lemma Epq_Ers_EEw (h₁ : 𝓢 ⊢! ψ ➝ φ) (h₂ : 𝓢 ⊢! χ ➝ ξ) : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ ξ) := by
-  replace h₁ : [ψ, φ ➝ χ] ⊢[𝓢]! ψ ➝ φ := of'! $ h₁;
-  replace h₂ : [ψ, φ ➝ χ] ⊢[𝓢]! χ ➝ ξ := of'! $ h₂;
-  have h₃ : [ψ, φ ➝ χ] ⊢[𝓢]! φ ➝ χ := by_axm!;
-  apply deduct'!;
-  apply deduct!;
-  exact h₂ ⨀ (h₃ ⨀ (h₁ ⨀ (by_axm!)))
-
-lemma Epq_Ers_EE (h₁ : 𝓢 ⊢! φ ⭤ ψ) (h₂ : 𝓢 ⊢! χ ⭤ ξ) : 𝓢 ⊢! (φ ➝ χ) ⭤ (ψ ➝ ξ) := by
-  apply and₃'!;
-  . apply Epq_Ers_EEw (and₂'! h₁) (and₁'! h₂);
-  . apply Epq_Ers_EEw (and₁'! h₁) (and₂'! h₂);
-
-end Entailment
-
-
 open FirstOrder FirstOrder.DerivabilityCondition
 open Modal
 open Modal.Hilbert
