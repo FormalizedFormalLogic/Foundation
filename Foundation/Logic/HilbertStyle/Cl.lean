@@ -101,4 +101,29 @@ lemma IOpqIIpbq : 𝓢 ⊢! (φ ⋎ ψ) ➝ ((φ ➝ ⊥) ➝ ψ) := by
     have H₂ : [φ, φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ ➝ ⊥ := by_axm!;
     exact H₂ ⨀ H₁;
 
+lemma ENIpqApNq! : 𝓢 ⊢! ∼(φ ➝ ψ) ⭤ (φ ⋏ ∼ψ) := by
+  apply and₃'!;
+  . apply deduct'!;
+    apply and₃'!;
+    . apply deductInv'!;
+      apply contra₂'!;
+      exact efq_imply_not₁!
+    . apply deductInv'!;
+      apply contra₂'!;
+      apply imp_swap'!;
+      apply deduct'!;
+      exact dne!;
+  . apply not_imply_prem''! and₁! and₂!;
+
+lemma NIpq_ApNq! : 𝓢 ⊢! ∼(φ ➝ ψ) ↔ 𝓢 ⊢! (φ ⋏ ∼ψ) := by
+  constructor;
+  . intro h; exact (and₁'! ENIpqApNq!) ⨀ h;
+  . intro h; exact (and₂'! ENIpqApNq!) ⨀ h;
+
+lemma p_Nq_NIpq! (hp : 𝓢 ⊢! φ) (hnq : 𝓢 ⊢! ∼ψ) : 𝓢 ⊢! ∼(φ ➝ ψ) := by
+  apply NIpq_ApNq!.mpr;
+  apply and₃'!;
+  . exact hp;
+  . exact hnq;
+
 end LO.Entailment

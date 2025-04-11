@@ -1,13 +1,15 @@
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.Modal.Boxdot.GL_Grz
 
-namespace LO.ProvabilityLogic
+namespace LO
 
 open FirstOrder FirstOrder.DerivabilityCondition
 open Modal
 open Modal.Hilbert
 open FirstOrder
 open Entailment FiniteContext
+
+namespace ProvabilityLogic
 
 variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] [DecidableEq (Sentence L)]
          {T₀ T : Theory L} [T₀ ⪯ T] {A : Modal.Formula ℕ}

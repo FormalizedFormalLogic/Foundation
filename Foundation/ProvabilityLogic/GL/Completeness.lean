@@ -415,16 +415,12 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
     · exact ⟨j, hij, hSj⟩
     · exact ⟨k, Trans.trans hij hjk, hSk⟩
 
-lemma Solovay.disjunction : ∃ i : F, T.Solovay V i := by
+lemma solovay_disjunction : ∃ i : F, T.Solovay V i := by
   have : T.Solovay V r ∨ ∃ j, r ≺ j ∧ T.Solovay V j :=
-    Θ.disjunction (V := V) (T := T) r (by simp [Θ]; exact ⟨[r], by simp⟩)
+    Θ.disjunction (V := V) (T := T) r ⟨[r], by simp⟩
   rcases this with  (H | ⟨i, _, H⟩)
   · exact ⟨r, H⟩
   · exact ⟨i, H⟩
-
-lemma θ_disjunction (i : F) : 𝐈𝚺₁ ⊢!. θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
-  complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff] using Θ.disjunction i
 
 /-- Condition 3.-/
 lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
@@ -432,7 +428,7 @@ lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
   intro hS
   have TP : T†V ⊢! ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := provableₐ_of_provable'₀ <| by
     have : 𝐈𝚺₁ ⊢!. θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
-      complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+      oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
         simpa [models_iff] using Θ.disjunction i
     exact Entailment.WeakerThan.pbl (𝓢 := 𝐈𝚺₁) (𝓣 := T) this
   have Tθ : T†V ⊢! ⌜θ T i⌝ :=
@@ -464,9 +460,9 @@ lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : T.
               (show Hierarchy 𝚺 1 (θ T i) by simp).mono (show 1 ≤ 2 by simp)]) this
       have : T.Solovay ℕ i ↔ ℕ ⊧/![] π := by
         simpa [models_iff] using consequence_iff.mp (sound! (T := 𝐈𝚺₁) sπ) ℕ inferInstance
-      simp [this]; assumption
+      simpa [this]
     contradiction
-  have : T.Solovay ℕ r ∨ ∃ j, r ≺ j ∧ T.Solovay ℕ j := Θ.disjunction (V := ℕ) (T := T) r (by simp [Θ]; exact ⟨[r], by simp⟩)
+  have : T.Solovay ℕ r ∨ ∃ j, r ≺ j ∧ T.Solovay ℕ j := Θ.disjunction (V := ℕ) (T := T) r ⟨[r], by simp⟩
   rcases this with (H | ⟨i, hri, Hi⟩)
   · assumption
   · have : ¬T.Solovay ℕ i := NS i (by rintro rfl; exact IsIrrefl.irrefl r hri)
@@ -479,23 +475,25 @@ lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] {i :
     Solovay.consistent (V := ℕ) (T := T) (Frame.IsRooted.direct_rooted_of_trans i (Ne.symm h)) solovay_root_sound
   simpa [Theory.Consistencyₐ.quote_iff, provableₐ_iff_provable₀, unprovable₀_iff] using this
 
-variable (F r)
+variable (T F r)
 
 instance standard [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : SolovaySentences ((𝐈𝚺₁).standardDP T) F r where
   σ := T.solovay
   SC1 i j ne :=
     have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-    complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+    oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using Solovay.exclusive ne
   SC2 i j h :=
     have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-    complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+    oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardDP_def] using Solovay.consistent h
   SC3 i h :=
     have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-    complete (T := 𝐈𝚺₁) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+    oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff, standardDP_def] using Solovay.box_disjunction h
   SC4 i ne := solovay_unprovable ne
+
+lemma standard_σ_def [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : (standard F r T).σ = T.solovay := rfl
 
 end SolovaySentences
 
@@ -520,7 +518,7 @@ theorem GL.arithmetical_completeness :
   have : (M₁.extendRoot r₁).IsFiniteTree Frame.extendRoot.root := Frame.extendRoot.instIsFiniteTree
   have : Fintype (M₁.extendRoot r₁).World := Fintype.ofFinite _
   let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₁.extendRoot r₁).toFrame Frame.extendRoot.root :=
-    SolovaySentences.standard (M₁.extendRoot r₁).toFrame Frame.extendRoot.root
+    SolovaySentences.standard (M₁.extendRoot r₁).toFrame Frame.extendRoot.root T
   use σ.realization;
   have : 𝐈𝚺₁ ⊢!. σ r₁ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) (∼A) :=
     σ.mainlemma (A := ∼A) (i := r₁) (by trivial) |>.1 $ (by simpa using hA₁)

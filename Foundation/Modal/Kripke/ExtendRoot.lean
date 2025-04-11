@@ -119,6 +119,9 @@ lemma modal_equivalence_original_world {x : M.World} : ModalEquivalent (M₁ := 
       · rcases hij
       · exact inr_forces_iff.mpr (h j hij)
 
+@[simp] lemma inr_satisfies_iff {i : M.World} :
+    Formula.Kripke.Satisfies (M.extendRoot r) (Sum.inr i) φ ↔ Formula.Kripke.Satisfies M i φ := inr_forces_iff
+
 end Model.extendRoot
 
 

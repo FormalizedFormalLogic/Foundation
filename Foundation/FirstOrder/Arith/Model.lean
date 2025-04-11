@@ -232,6 +232,12 @@ lemma oRing_consequence_of (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T] (φ : Syntact
   rcases standardModel_unique M s
   exact H M
 
+lemma oRing_provable_of (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+    T ⊢! φ := complete <| oRing_consequence_of _ _ H
+
+lemma oRing_provable₀_of (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T] (σ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ₀ σ) :
+    T ⊢!. σ := complete (T := T) <| oRing_consequence_of _ _ H
+
 lemma oRing_weakerThan_of (T S : Theory ℒₒᵣ) [𝐄𝐐 ⪯ S]
     (H : ∀ (M : Type*)
            [ORingStruc M]
