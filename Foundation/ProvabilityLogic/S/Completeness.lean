@@ -1,47 +1,8 @@
 import Foundation.Modal.Logic.Extension
 import Foundation.ProvabilityLogic.GL.Completeness
-import Foundation.ProvabilityLogic.Soundness
 import Mathlib.Tactic.TFAE
 
 namespace LO
-
-
-namespace Entailment
-
-open Entailment
-open FiniteContext
-
-variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Cl 𝓢]
-         {φ ψ ξ : F}
-
-lemma ENIpqApNq! : 𝓢 ⊢! ∼(φ ➝ ψ) ⭤ (φ ⋏ ∼ψ) := by
-  apply and₃'!;
-  . apply deduct'!;
-    apply and₃'!;
-    . apply deductInv'!;
-      apply contra₂'!;
-      exact efq_imply_not₁!
-    . apply deductInv'!;
-      apply contra₂'!;
-      apply imp_swap'!;
-      apply deduct'!;
-      exact dne!;
-  . apply not_imply_prem''! and₁! and₂!;
-
-lemma NIpq_ApNq! : 𝓢 ⊢! ∼(φ ➝ ψ) ↔ 𝓢 ⊢! (φ ⋏ ∼ψ) := by
-  constructor;
-  . intro h; exact (and₁'! ENIpqApNq!) ⨀ h;
-  . intro h; exact (and₂'! ENIpqApNq!) ⨀ h;
-
-lemma p_Nq_NIpq! (hp : 𝓢 ⊢! φ) (hnq : 𝓢 ⊢! ∼ψ) : 𝓢 ⊢! ∼(φ ➝ ψ) := by
-  apply NIpq_ApNq!.mpr;
-  apply and₃'!;
-  . exact hp;
-  . exact hnq;
-
-end Entailment
 
 namespace Modal
 
@@ -203,7 +164,7 @@ variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T�
 theorem arithmetical_soundness_S (h : A ∈ Logic.S) (f : Realization ℒₒᵣ) : ℕ ⊧ₘ₀ f.interpret 𝔅 A := by
   induction h using Logic.S.rec' with
   | mem_GL h =>
-    exact models_of_provable₀ inferInstance (arithmetical_soundness_GL (L := ℒₒᵣ) h);
+    exact models_of_provable₀ inferInstance (GL.arithmetical_soundness (L := ℒₒᵣ) h);
   | axiomT =>
     simp only [Realization.interpret, models₀_imply_iff];
     intro h;
@@ -226,7 +187,7 @@ lemma _root_.LO.Modal.Logic.iff_provable_GL_provable_box_S : A ∈ Logic.GL ↔ 
     apply Logic.sumQuasiNormal.mem₁;
     apply nec! h;
   . intro h;
-    apply arithmetical_completeness_GL (T := 𝐈𝚺₁);
+    apply GL.arithmetical_completeness (T := 𝐈𝚺₁);
     intro f;
     exact Iff.mp ((𝐈𝚺₁).standardDP 𝐈𝚺₁).sound (arithmetical_soundness_S h f)
 
@@ -366,7 +327,7 @@ lemma GL_S_TFAE :
       simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using SolovaySentences.solovay_root_sound
   tfae_finish;
 
-theorem arithmetical_completeness_S : A ∈ Logic.S ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A) := GL_S_TFAE.out 1 2
+theorem S.arithmetical_completeness_iff : A ∈ Logic.S ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A) := GL_S_TFAE.out 1 2
 
 lemma _root_.LO.Modal.Logic.iff_provable_rfl_GL_provable_S : (A.rflSubformula.conj ➝ A) ∈ Logic.GL ↔ A ∈ Logic.S := GL_S_TFAE (T := 𝐈𝚺₁) |>.out 0 1
 

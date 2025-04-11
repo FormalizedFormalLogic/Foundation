@@ -493,6 +493,8 @@ instance standard [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : SolovaySe
     simpa [models_iff, standardDP_def] using Solovay.box_disjunction h
   SC4 i ne := solovay_unprovable ne
 
+lemma standard_σ_def [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : (standard F r T).σ = T.solovay := rfl
+
 end SolovaySentences
 
 end LO.FirstOrder.Arith
@@ -516,7 +518,7 @@ theorem GL.arithmetical_completeness :
   have : (M₁.extendRoot r₁).IsFiniteTree Frame.extendRoot.root := Frame.extendRoot.instIsFiniteTree
   have : Fintype (M₁.extendRoot r₁).World := Fintype.ofFinite _
   let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₁.extendRoot r₁).toFrame Frame.extendRoot.root :=
-    SolovaySentences.standard (M₁.extendRoot r₁).toFrame Frame.extendRoot.root
+    SolovaySentences.standard (M₁.extendRoot r₁).toFrame Frame.extendRoot.root T
   use σ.realization;
   have : 𝐈𝚺₁ ⊢!. σ r₁ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) (∼A) :=
     σ.mainlemma (A := ∼A) (i := r₁) (by trivial) |>.1 $ (by simpa using hA₁)
