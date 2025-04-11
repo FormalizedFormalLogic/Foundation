@@ -106,6 +106,8 @@ lemma prov_distribute_imply [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) : T₀ ⊢!. (�
 
 lemma prov_distribute_imply' [T₀ ⪯ T] [𝔅.HBL2] (h : T₀ ⊢!. σ ➝ τ) : T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := prov_distribute_imply $ WeakerThan.pbl h
 
+lemma prov_distribute_imply'' [T₀ ⪯ T] [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) : T ⊢!. (𝔅 σ) ➝ (𝔅 τ) := WeakerThan.pbl $ prov_distribute_imply h
+
 lemma prov_distribute_iff [𝔅.HBL2] (h : T ⊢!. σ ⭤ τ) : T₀ ⊢!. (𝔅 σ) ⭤ (𝔅 τ) := by
   apply iff_intro!;
   . exact prov_distribute_imply $ and₁'! h;

@@ -150,10 +150,15 @@ import Foundation.Incompleteness.Arith.DC
 import Foundation.Incompleteness.DC.Basic
 
 -- Provability Logic
-import Foundation.ProvabilityLogic.Soundness
+import Foundation.ProvabilityLogic.N.Soundness
+
 import Foundation.ProvabilityLogic.GL.Completeness
+import Foundation.ProvabilityLogic.GL.Unprovability
+
 import Foundation.ProvabilityLogic.Grz.Completeness
+
 import Foundation.ProvabilityLogic.S.Completeness
+
 
 import Foundation.AutoProver.Classical
 
