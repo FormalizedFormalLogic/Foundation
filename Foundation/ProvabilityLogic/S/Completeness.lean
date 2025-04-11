@@ -43,10 +43,7 @@ lemma p_Nq_NIpq! (hp : 𝓢 ⊢! φ) (hnq : 𝓢 ⊢! ∼ψ) : 𝓢 ⊢! ∼(φ 
 
 end Entailment
 
-
-
 namespace Modal
-
 
 section
 
@@ -58,7 +55,6 @@ lemma Formula.Kripke.Satisfies.finset_conj_def : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ
 end
 
 section
-
 
 open Logic
 
@@ -193,30 +189,6 @@ noncomputable abbrev Formula.rflSubformula (φ : Formula α) : FormulaFinset α 
 
 end Modal
 
-
-
-namespace FirstOrder.DerivabilityCondition
-
-namespace ProvabilityPredicate
-
-variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] [L.DecidableEq]
-         {M : Type*} [Nonempty M] [Structure L M]
-         {T₀ T : FirstOrder.Theory L} [T₀ ⪯ T] [Diagonalization T₀]
-         {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL]
-
-class Sound (𝔅 : ProvabilityPredicate T₀ T) [Structure L ℕ] where
-  protected sound {σ : Sentence L} : ℕ ⊧ₘ₀ 𝔅 σ ↔ T ⊢!. σ
-
-protected alias sound := Sound.sound
-
-attribute [simp] sound
-
-end ProvabilityPredicate
-
-end FirstOrder.DerivabilityCondition
-
-
-
 namespace ProvabilityLogic
 
 open Entailment
@@ -224,32 +196,27 @@ open Modal
 open FirstOrder FirstOrder.DerivabilityCondition
 open ProvabilityPredicate
 
-variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] [L.DecidableEq]
-         {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]
-         {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.Sound]
+variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]
+         {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.Sound ℕ]
          {A B : Formula ℕ}
-
--- TODO: rename and move
-lemma sound_models (h : T ⊢!. σ) : ℕ ⊧ₘ₀ σ := consequence_iff.mp (sound! (T := T) h) ℕ inferInstance
 
 theorem arithmetical_soundness_S (h : A ∈ Logic.S) (f : Realization ℒₒᵣ) : ℕ ⊧ₘ₀ f.interpret 𝔅 A := by
   induction h using Logic.S.rec' with
   | mem_GL h =>
-    exact sound_models $ arithmetical_soundness_GL h;
+    exact models_of_provable₀ inferInstance (arithmetical_soundness_GL (L := ℒₒᵣ) h);
   | axiomT =>
     simp only [Realization.interpret, models₀_imply_iff];
     intro h;
-    exact sound_models (Iff.mp 𝔅.sound h)
+    exact models_of_provable₀ inferInstance (Iff.mp 𝔅.sound h)
   | mdp ihAB ihA =>
     simp only [Realization.interpret, models₀_imply_iff] at ihAB;
     apply ihAB ihA;
-
 
 section
 
 instance : 𝐈𝚺₁.Delta1Definable := by sorry
 
-instance [𝐈𝚺₁ ⪯ T] [T.Delta1Definable] : ((𝐈𝚺₁).standardDP T).Sound := ⟨fun {σ} ↦ by
+instance [𝐈𝚺₁ ⪯ T] [T.Delta1Definable] : ((𝐈𝚺₁).standardDP T).Sound ℕ := ⟨fun {σ} ↦ by
   have : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   simp [Arith.standardDP_def, models₀_iff]⟩
 
@@ -393,7 +360,7 @@ lemma GL_S_TFAE :
           apply σ.SC2;
           tauto;
     have : ℕ ⊧ₘ* 𝐈𝚺₁ := models_of_subtheory (U := 𝐈𝚺₁) (T := T) (M := ℕ) inferInstance;
-    have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) A := sound_models $ H A (by simp) |>.2 hA₂;
+    have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) A := models_of_provable₀ inferInstance $ H A (by simp) |>.2 hA₂;
     simp only [models₀_imply_iff, models₀_not_iff] at this;
     exact this <| by
       simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using SolovaySentences.solovay_root_sound

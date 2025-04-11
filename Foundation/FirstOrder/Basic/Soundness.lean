@@ -92,10 +92,10 @@ lemma unprovable_of_countermodel {M : Type*} [s : Structure L M] [Nonempty M] [h
   intro h
   exact c (h hM f)
 
-lemma models_of_provable (h : T ⊢! φ) (M : Type*) [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) :
+lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : T ⊢! φ) :
     M ⊧ₘ φ := consequence_iff.mp (sound! h) M inferInstance
 
-lemma models_of_provable₀ (h : T ⊢!. σ) {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) :
+lemma models_of_provable₀ {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : T ⊢!. σ) :
     M ⊧ₘ₀ σ := consequence_iff.mp (sound! (T := T) h) M inferInstance
 
 end sound
