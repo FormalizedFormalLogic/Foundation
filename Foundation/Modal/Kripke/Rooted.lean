@@ -140,6 +140,8 @@ instance instIsRooted : (F↾r).IsRooted pointGenerate.root where
 
 instance [Finite F] : Finite (F↾r) := inferInstance
 
+instance isFinite [finite : F.IsFinite] : (F↾r).IsFinite := inferInstance
+
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
 instance isRefl [IsRefl _ F] : IsRefl (F↾r).World (F↾r).Rel := ⟨by
@@ -166,6 +168,11 @@ instance isIrrefl [IsIrrefl _ F] : IsIrrefl _ (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ h;
   . exact IsIrrefl.irrefl _ $ by simpa using h;
   . exact IsIrrefl.irrefl _ $ by simpa using h;
+⟩
+
+instance isAsymm [assym : IsAsymm _ F] : IsAsymm (F↾r).World (F↾r).Rel := ⟨by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy <;>
+  { dsimp at Rxy; apply IsAsymm.asymm _ _ Rxy; }
 ⟩
 
 /-

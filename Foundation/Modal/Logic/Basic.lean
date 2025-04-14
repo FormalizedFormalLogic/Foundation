@@ -44,6 +44,8 @@ variable {L : Logic}
 
 section
 
+open Entailment
+
 variable [L.QuasiNormal]
 variable {φ ψ χ : Formula ℕ}
 
@@ -59,6 +61,47 @@ protected lemma efq (h : ⊥ ∈ L) : ∀ {φ}, φ ∈ L := by
   intro φ;
   have : ⊥ ➝ φ ∈ L := by apply QuasiNormal.subset_K; simp;
   exact Logic.mdp this h;
+
+lemma p_q_Apq (hφ : φ ∈ L) (hψ : ψ ∈ L) : φ ⋏ ψ ∈ L := by
+  apply Logic.mdp (φ := ψ);
+  apply Logic.mdp (φ := φ) (ψ := ψ ➝ φ ⋏ ψ);
+  . apply Logic.of_mem_K;
+    exact and₃!;
+  . assumption;
+  . assumption;
+
+lemma conj_iffAux {Γ : List (Formula ℕ)} : Γ.conj₂ ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
+  constructor;
+  . intro h φ hφ;
+    refine Logic.mdp ?_ h;
+    apply Logic.of_mem_K;
+    apply general_conj'! hφ;
+  . intro h;
+    induction Γ using List.induction_with_singleton with
+    | hnil =>
+      simp only [List.conj₂_nil];
+      apply Logic.of_mem_K;
+      exact verum!;
+    | hsingle φ =>
+      apply h;
+      simp;
+    | @hcons φ Γ hΓ ih =>
+      simp [List.conj₂_cons_nonempty hΓ];
+      apply p_q_Apq;
+      . apply h; tauto;
+      . apply ih; tauto;
+
+lemma conj_iff {Γ : FormulaFinset ℕ} : Γ.conj ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
+  constructor;
+  . intro h φ hφ;
+    apply Logic.conj_iffAux (Γ := Γ.toList) |>.mp $ h;
+    simpa;
+  . intro h;
+    apply Logic.conj_iffAux (Γ := Γ.toList) |>.mpr;
+    intro φ hφ;
+    apply h;
+    simpa using hφ;
+
 
 section
 
@@ -84,6 +127,7 @@ lemma not_mem_of_neg_mem : ∼φ ∈ L → φ ∉ L := by
   tauto;
 
 end
+
 
 end
 

@@ -237,6 +237,9 @@ example {Γ : List _} : (∀ φ ∈ Γ, x ⊧ □φ) → x ⊧ □⋀Γ := by
   intro φ hφ;
   exact h φ hφ y Rxy;
 
+lemma finset_conj_def {Γ : FormulaFinset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
+  simp only [Semantics.realize_finset_conj, Satisfies.iff_models];
+
 lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 
 lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;

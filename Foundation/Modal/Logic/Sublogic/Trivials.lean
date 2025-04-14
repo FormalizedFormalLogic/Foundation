@@ -26,4 +26,6 @@ instance : ProperSublogic Logic.Ver Logic.Univ := ⟨by
     exact Hilbert.Ver.Kripke.consistent.not_bot;
 ⟩
 
+instance {L : Logic} [L.Consistent] : ProperSublogic L Logic.Univ := ⟨by constructor <;> simp⟩
+
 end LO.Modal.Logic
