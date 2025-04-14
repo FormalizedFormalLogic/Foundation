@@ -5,7 +5,6 @@ import Foundation.Modal.Boxdot.GL_Grz
 
 lemma Nat.zero_lt_of_not_zero {n : ℕ} (hn : n ≠ 0) : 0 < n := by omega;
 
-
 namespace List
 
 variable {α} [DecidableEq α]
@@ -25,18 +24,40 @@ def range_lt_Chain : List.Chain (· < ·) 0 (List.range n) := by sorry;
 
 section
 
-variable {R} [DecidableEq α] [IsTrans α R] {l : List α} {i j : Fin l.length}
 
-lemma Chain'.connected_of_trans' (h : List.Chain' R l) (eij : i ≠ j) : R (l.get i) (l.get j) ∨ R (l.get j) (l.get i) := by
-  by_contra hC;
-  push_neg at hC;
-  obtain ⟨nRij, nRji⟩ := hC;
+namespace Chain'
+
+variable {R} [IsTrans α R] {l : List α}
+
+lemma lt_trans (h : List.Chain' R l) [IsTrans _ R] (hij : i < j) : R (l.get i) (l.get j) := by
   sorry;
 
-lemma Chain'.connected_of_trans (h : List.Chain' R l) (hx : x ∈ l) (hy : y ∈ l) (exy : x ≠ y) : R x y ∨ R y x := by
-  have : x = l.get (l.finIdxOf hx) := List.get_finIdxOf.symm
-  have : y = l.get (l.finIdxOf hy) := List.get_finIdxOf.symm
+lemma connected_of_trans' (h : List.Chain' R l) (eij : i ≠ j) : R (l.get i) (l.get j) ∨ R (l.get j) (l.get i) := by
+  rcases Nat.lt_trichotomy i j with (Rij | neij | Rji);
+  . left; exact lt_trans h $ by omega;
+  . omega;
+  . right; exact lt_trans h $ by omega;
+
+lemma connected_of_trans (h : List.Chain' R l) (hx : x ∈ l) (hy : y ∈ l) (exy : x ≠ y) : R x y ∨ R y x := by
+  have : x = l.get (l.finIdxOf hx) := List.get_finIdxOf.symm;
+  have : y = l.get (l.finIdxOf hy) := List.get_finIdxOf.symm;
   convert Chain'.connected_of_trans' (i := l.finIdxOf hx) (j :=l.finIdxOf hy) h $ List.neq_findIdxOf_of_neq exy;
+
+lemma noDup_of_irrefl_trans (h : List.Chain' R l) [IsIrrefl _ R] : l.Nodup := by
+  apply List.nodup_iff_getElem?_ne_getElem?.mpr;
+  intro i j hij hj;
+  let i' : Fin l.length := ⟨i, by omega⟩;
+  let j' : Fin l.length := ⟨j, by omega⟩;
+  by_contra hC;
+  replace hC : l.get i' = l.get j' := by simpa [
+    (show l[i]? = l.get i' by exact List.getElem?_eq_getElem (by omega)),
+    (show l[j]? = l.get j' by exact List.getElem?_eq_getElem (by omega))
+  ] using hC;
+  have := lt_trans h (i := i') (j := j') (by simpa);
+  rw [hC] at this;
+  exact IsIrrefl.irrefl _ this;
+
+end Chain'
 
 end
 
@@ -75,7 +96,7 @@ def Frame.extendRoot₂ (F : Kripke.Frame) (r : outParam F.World) [F.IsRooted r]
 
 namespace Frame.extendRoot₂
 
-variable {F : Frame} {r : F.World} [F.IsRooted r] {x y : F.World} {n : ℕ+}
+variable {F : Frame} {r : outParam F.World} [F.IsRooted r] {x y : F.World} {n : ℕ+}
 
 instance : Coe (F.World) ((F.extendRoot₂ r n).World) := ⟨Sum.inr⟩
 
@@ -222,11 +243,13 @@ end Model.extendRoot₂
 
 section
 
-variable {M : Kripke.Model} [IsTrans _ M.Rel] [IsIrrefl _ M.Rel]
+open Classical
+
+variable {M : Kripke.Model} [Finite M.World] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel]
+variable {A : Formula _}
 variable {l : List M.World} {n : ℕ+}
 
-open Classical in
-lemma axiomT_in_irrefl_trans_chain (l_chain : List.Chain' (· ≺ ·) l)
+lemma atmost_one_validates_axiomT_in_irrefl_trans_chain' (l_chain : List.Chain' (· ≺ ·) l)
   : (∀ x ∈ l, x ⊧ (□A ➝ A)) ∨ (∃! x ∈ l, ¬x ⊧ (□A ➝ A)) := by
   apply or_iff_not_imp_left.mpr;
   push_neg;
@@ -243,12 +266,98 @@ lemma axiomT_in_irrefl_trans_chain (l_chain : List.Chain' (· ≺ ·) l)
     . have : x ⊧ A := hy₁ x Ryx; contradiction;
     . have : y ⊧ A := hx₁ y Rxy; contradiction;
 
-lemma axiomT_set_in_irrefl_trans_chain
-  (l_length : l.length = n + 1)
+lemma atmost_one_validates_axiomT_in_irrefl_trans_chain
+  (l_chain : List.Chain' (· ≺ ·) l) :
+  haveI : Fintype M.World := Fintype.ofFinite _;
+  Finset.card { x | x ∈ l ∧ ¬x ⊧ (□A ➝ A) } ≤ 1 := by
+  apply Nat.le_one_iff_eq_zero_or_eq_one.mpr;
+  rcases atmost_one_validates_axiomT_in_irrefl_trans_chain' (M := M) (l := l) (l_chain := l_chain) (A := A) with h | h;
+  . left;
+    apply Finset.card_filter_eq_zero_iff.mpr;
+    simp_all;
+  . right;
+    apply Finset.card_eq_one.mpr;
+    apply Finset.singleton_iff_unique_mem _ |>.mpr;
+    simp_all;
+
+lemma _root_.Finset.ssubset_of_subset_lt_card {s t : Finset α}
+  (h_subset : s ⊆ t)
+  (h_card_le : s.card < t.card) : s ⊂ t := by
+  constructor;
+  . assumption;
+  . by_contra hC;
+    have : t = s := Finset.eq_iff_card_le_of_subset hC |>.mp (by omega);
+    subst this;
+    simp at h_card_le;
+
+lemma _root_.Finset.eq_card_of_eq {s t : Finset α} (h : s = t) : s.card = t.card := by tauto;
+
+lemma _root_.Finset.sum_le_card {n : ℕ} {s : Finset α} {f : α → ℕ} (hf : ∀ a ∈ s, f a ≤ n)
+  : (∑ a ∈ s, f a) ≤ s.card * n :=
+  calc
+    _ ≤ (∑ x ∈ s, n) := by apply Finset.sum_le_sum hf
+    _ = s.card * n   := by simp_all;
+
+lemma validates_axiomT_set_in_irrefl_trans_chain
+  (Γ : Finset (Modal.Formula ℕ))
+  (l_length : l.length = Γ.card + 1)
   (l_chain : List.Chain' (· ≺ ·) l)
-  (Γ : Finset (Modal.Formula ℕ)) (Γ_length : Γ.card = n)
-  : ∃ x ∈ l, x ⊧ (Γ.image (λ γ => □γ ➝ γ) |>.conj) := by
-  sorry;
+  : ∃ x ∈ l, x ⊧ (Γ.image (λ γ => □γ ➝ γ)).conj := by
+  haveI : Fintype M.World := Fintype.ofFinite _;
+  let t₁ : Finset M.World := { x | x ∈ l ∧ ∃ A ∈ Γ, ¬x ⊧ (□A ➝ A) };
+  let t₂ : Finset M.World := l.toFinset;
+  have h₁ : t₁.card ≤ Γ.card :=
+    calc
+      _ = (Finset.biUnion Γ (λ A => { x | x ∈ l ∧ ¬x ⊧ (□A ➝ A) })).card := by
+        apply Finset.eq_card_of_eq;
+        ext x;
+        constructor;
+        . intro hx;
+          obtain ⟨_, hx₁, ⟨A, hA₁, hA₂⟩⟩ := Finset.mem_filter.mp hx;
+          apply Finset.mem_biUnion.mpr;
+          use A;
+          constructor;
+          . assumption;
+          . apply Finset.mem_filter.mpr;
+            tauto;
+        . intro hx;
+          obtain ⟨A, _, hA⟩ := Finset.mem_biUnion.mp hx;
+          obtain ⟨_, _, _⟩ := Finset.mem_filter.mp hA;
+          apply Finset.mem_filter.mpr;
+          tauto;
+      _ ≤ ∑ a ∈ Γ, Finset.card { x | x ∈ l ∧ ¬x ⊧ □a ➝ a } := Finset.card_biUnion_le
+      _ ≤ Γ.card * 1 := by
+        apply Finset.sum_le_card;
+        intro A hA;
+        convert atmost_one_validates_axiomT_in_irrefl_trans_chain l_chain;
+      _ = Γ.card := by omega;
+  have h₂ : t₂.card = l.length :=
+    calc
+      _ = l.dedup.length := List.card_toFinset l
+      _ = l.length       := by
+        suffices l.dedup = l by rw [this];
+        apply List.dedup_eq_self.mpr;
+        apply List.Chain'.noDup_of_irrefl_trans l_chain;
+  have : t₁ ⊂ t₂ := Finset.ssubset_of_subset_lt_card (by
+    intro x hx;
+    replace hx := Finset.mem_filter.mp hx;
+    apply List.mem_toFinset.mpr;
+    tauto;
+  ) (by omega);
+  obtain ⟨x, hx₂, nhx₁⟩ := Finset.exists_of_ssubset this;
+  replace hx₂ := List.mem_toFinset.mp hx₂;
+  replace hx₁ := Finset.mem_filter.not.mp nhx₁;
+  push_neg at hx₁;
+  use x;
+  constructor;
+  . assumption;
+  . apply Formula.Kripke.Satisfies.finset_conj_def.mpr;
+    simp only [Finset.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
+    intro A hA;
+    apply hx₁;
+    . simp;
+    . assumption;
+    . assumption;
 
 end
 
@@ -256,23 +365,26 @@ namespace Model.extendRoot₂
 
 open Classical
 
-variable {M : Model} {r : M.World} [IsTrans _ M.Rel] [IsIrrefl _ M.Rel] [M.IsRooted r] {x y : M.World}
+variable {M : Model} {r : M.World} [M.IsFinite] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel] [M.IsRooted r] {x y : M.World}
 
 lemma inr_satisfies_axiomT_set
-  {Γ : Finset (Modal.Formula ℕ)} (Γ_nonempty : Γ.Nonempty) :
+  {Γ : Finset (Modal.Formula ℕ)} :
   letI n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
   ∃ i : Fin n, Formula.Kripke.Satisfies (M.extendRoot₂ r n) (.inl i) (Γ.image (λ γ => □γ ➝ γ) |>.conj)
   := by
   let n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
   let M' := M.extendRoot₂ r n;
-  obtain ⟨x, hx₁, hx₂⟩ := @axiomT_set_in_irrefl_trans_chain (M := M')
+  have : Finite M'.World := by
+    unfold M' Model.extendRoot₂ Frame.extendRoot₂;
+    infer_instance;
+  obtain ⟨x, hx₁, hx₂⟩ := @validates_axiomT_set_in_irrefl_trans_chain (M := M')
+    (by infer_instance)
     (by apply Frame.extendRoot₂.isTrans)
     (by apply Frame.extendRoot₂.isAsymm.isIrrefl)
-    (n := ⟨Γ.card, Nat.zero_lt_of_not_zero $ Finset.Nonempty.card_ne_zero Γ_nonempty⟩)
     (l := Frame.extendRoot₂.chain)
+    (Γ := Γ)
     (Frame.extendRoot₂.chain_length)
     (Frame.extendRoot₂.chain_Chain')
-    Γ (by tauto);
   simp only [List.pure_def, List.bind_eq_flatMap, List.mem_map, List.mem_flatMap, List.mem_range, List.mem_cons, List.not_mem_nil, or_false, M', n] at hx₁;
   obtain ⟨i, _, rfl⟩ := hx₁;
   use i;
@@ -402,18 +514,8 @@ lemma iff_boxdot_GL_S : Aᵇ ∈ Logic.GL ↔ Aᵇ ∈ Logic.S := by
     replace h := Modal.Logic.iff_provable_rfl_GL_provable_S.mpr h;
     replace h := Hilbert.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
     apply Hilbert.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mpr;
-    wlog S_nonempty : Aᵇ.rflSubformula.Nonempty;
-    . intro M r _;
-      apply h M r;
-      apply Satisfies.finset_conj_def.mpr;
-      tauto;
     intro M r _;
-    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot₂.inr_satisfies_axiomT_set (M := M) (Γ := Aᵇ.subformulas.prebox) $ by
-      obtain ⟨_, hB⟩ := S_nonempty;
-      simp only [Finset.mem_image, Finset.eq_prebox_premultibox_one, Finset.mem_preimage, Function.iterate_one] at hB;
-      obtain ⟨B, hB, rfl⟩ := hB;
-      use B;
-      simpa;
+    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot₂.inr_satisfies_axiomT_set (M := M) (Γ := Aᵇ.subformulas.prebox)
     let M₁ := M.extendRoot₂ r ⟨Aᵇ.subformulas.prebox.card + 1, by omega⟩;
     let i₁ : M₁.World := Sum.inl i;
     refine Model.extendRoot₂.inl_satisfies_boxdot_iff.mpr
