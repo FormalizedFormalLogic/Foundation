@@ -1,5 +1,6 @@
 import Foundation.Meta.Kite.Generator
 import Foundation.Modal.Logic.WellKnown
+-- import Foundation.Modal.Logic.S
 
 namespace LO.Meta.Kite.Modal
 
@@ -60,6 +61,7 @@ def kite : Kite Vertex EdgeType where
     ⟨q(Logic.KT)⟩,
     ⟨q(Logic.KTB)⟩,
     ⟨q(Logic.KTc)⟩,
+    -- ⟨q(Logic.S)⟩,
     ⟨q(Logic.S4)⟩,
     ⟨q(Logic.S4Point2)⟩,
     ⟨q(Logic.S4Point3)⟩,

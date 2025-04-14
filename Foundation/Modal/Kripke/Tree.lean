@@ -5,7 +5,7 @@ namespace LO.Modal
 
 namespace Kripke
 
-
+@[mk_iff]
 class Frame.IsTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsRooted r, IsAsymm _ F.Rel, IsTrans _ F.Rel where
 
 namespace Frame.IsTree
@@ -18,7 +18,7 @@ protected lemma rel_irreflexive {r} [F.IsTree r] : IsIrrefl _ F.Rel := inferInst
 
 end Frame.IsTree
 
-
+@[mk_iff]
 class Frame.IsFiniteTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsFinite, F.IsTree r where
 
 
