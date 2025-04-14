@@ -151,6 +151,14 @@ lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic
   . exact sound.sound;
   . exact complete.complete;
 
+instance Logic.consistent_of_consistent_hilbert {H : Hilbert ℕ} [Entailment.Consistent H] : Consistent (H.logic) := ⟨by
+  apply Set.eq_univ_iff_forall.not.mpr;
+  push_neg;
+  obtain ⟨φ, hφ⟩ : ∃ φ, H ⊬ φ := Entailment.Consistent.exists_unprovable inferInstance;
+  use φ;
+  simpa;
+⟩
+
 lemma Logic.K.eq_AllKripkeFrameClass_Logic : Logic.K = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 -- lemma Logic.K.eq_AllKripkeFiniteFrameClass_Logic : Logic.K = FrameClass.finite_all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic

@@ -158,7 +158,7 @@ import Foundation.ProvabilityLogic.GL.Unprovability
 import Foundation.ProvabilityLogic.Grz.Completeness
 
 import Foundation.ProvabilityLogic.S.Completeness
-
+import Foundation.ProvabilityLogic.S.Consistent
 
 import Foundation.AutoProver.Classical
 
