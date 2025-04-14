@@ -2,13 +2,17 @@ import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.S.Completeness
 import Foundation.Modal.Boxdot.GL_Grz
 
-
 lemma Nat.zero_lt_of_not_zero {n : ℕ} (hn : n ≠ 0) : 0 < n := by omega;
 
 namespace List
 
-variable {α} [DecidableEq α]
+variable {α}
 variable {l : List α} {x y : α}
+
+
+section
+
+variable [DecidableEq α]
 
 def finIdxOf (l : List α) (hx : x ∈ l) : Fin l.length := ⟨l.idxOf x, idxOf_lt_length hx⟩
 
@@ -19,29 +23,65 @@ lemma neq_findIdxOf_of_neq {hx : x ∈ l} {hy : y ∈ l} (exy : x ≠ y) : l.fin
   apply List.idxOf_inj hx hy |>.not.mpr;
   exact exy;
 
-@[simp]
-def range_lt_Chain : List.Chain (· < ·) 0 (List.range n) := by sorry;
+end
+
 
 section
+
+lemma range.le_chain'_succ : List.Chain' (· < ·) (List.range (n + 1)) := by
+  apply List.chain'_range_succ (· < ·) n |>.mpr;
+  omega;
+
+@[simp]
+lemma range.le_chain' : List.Chain' (· < ·) (List.range n) := by
+  match n with
+  | 0 => simp [List.range_zero]
+  | n + 1 => apply le_chain'_succ;
+
+lemma finRange.le_chain'_succ : List.Chain' (· < ·) (List.finRange (n + 1)) := by
+  rw [finRange_succ];
+  induction n with
+  | zero => simp [finRange]
+  | succ n ih =>
+    rw [List.finRange_succ, List.map]
+    apply List.chain'_append_cons_cons (α := Fin (n + 2)) (l₁ := []) |>.mpr;
+    refine ⟨?_, ?_, ?_⟩;
+    . tauto;
+    . tauto;
+    . have := @List.chain'_map_of_chain'
+        (α := Fin (n + 1)) (β := Fin (n + 2)) (R := (· < ·)) (S := (· < ·))
+        (f := Fin.succ)
+        (by simp)
+        (l := 0 :: (map Fin.succ (finRange n)))
+      apply this;
+      exact ih;
+
+@[simp]
+lemma finRange.le_chain' : List.Chain' (· < ·) (List.finRange n) := by
+  match n with
+  | 0 => simp [List.finRange_zero]
+  | n + 1 => apply finRange.le_chain'_succ;
+
+end
 
 
 namespace Chain'
 
-variable {R} [IsTrans α R] {l : List α}
+variable {R} [IsTrans α R] {l : List α} {i j : Fin l.length}
 
-lemma lt_trans (h : List.Chain' R l) [IsTrans _ R] (hij : i < j) : R (l.get i) (l.get j) := by
-  sorry;
+lemma of_lt (h : List.Chain' R l) (hij : i < j) : R (l.get i) (l.get j) :=
+  List.pairwise_iff_get.mp (List.chain'_iff_pairwise.mp h) _ _ hij
 
 lemma connected_of_trans' (h : List.Chain' R l) (eij : i ≠ j) : R (l.get i) (l.get j) ∨ R (l.get j) (l.get i) := by
-  rcases Nat.lt_trichotomy i j with (Rij | neij | Rji);
-  . left; exact lt_trans h $ by omega;
+  rcases Nat.lt_trichotomy i j with (_ | _ | _);
+  . left; exact of_lt h $ by omega;
   . omega;
-  . right; exact lt_trans h $ by omega;
+  . right; exact of_lt h $ by omega;
 
-lemma connected_of_trans (h : List.Chain' R l) (hx : x ∈ l) (hy : y ∈ l) (exy : x ≠ y) : R x y ∨ R y x := by
+lemma connected_of_trans [DecidableEq α] (h : List.Chain' R l) (hx : x ∈ l) (hy : y ∈ l) (exy : x ≠ y) : R x y ∨ R y x := by
   have : x = l.get (l.finIdxOf hx) := List.get_finIdxOf.symm;
   have : y = l.get (l.finIdxOf hy) := List.get_finIdxOf.symm;
-  convert Chain'.connected_of_trans' (i := l.finIdxOf hx) (j :=l.finIdxOf hy) h $ List.neq_findIdxOf_of_neq exy;
+  convert Chain'.connected_of_trans' (i := l.finIdxOf hx) (j := l.finIdxOf hy) h $ List.neq_findIdxOf_of_neq exy;
 
 lemma noDup_of_irrefl_trans (h : List.Chain' R l) [IsIrrefl _ R] : l.Nodup := by
   apply List.nodup_iff_getElem?_ne_getElem?.mpr;
@@ -53,13 +93,11 @@ lemma noDup_of_irrefl_trans (h : List.Chain' R l) [IsIrrefl _ R] : l.Nodup := by
     (show l[i]? = l.get i' by exact List.getElem?_eq_getElem (by omega)),
     (show l[j]? = l.get j' by exact List.getElem?_eq_getElem (by omega))
   ] using hC;
-  have := lt_trans h (i := i') (j := j') (by simpa);
+  have : R (l.get i') (l.get j') := of_lt h (by simpa);
   rw [hC] at this;
   exact IsIrrefl.irrefl _ this;
 
 end Chain'
-
-end
 
 end List
 
@@ -119,7 +157,7 @@ instance instIsRooted : (F.extendRoot₂ r n).IsRooted extendRoot₂.root where
       apply Relation.TransGen.single;
       tauto;
 
-protected abbrev chain : List (F.extendRoot₂ r n |>.World) := List.range n |>.map (Sum.inl ·)
+protected abbrev chain : List (F.extendRoot₂ r n |>.World) := List.finRange n |>.map (Sum.inl ·)
 
 @[simp]
 lemma chain_length : extendRoot₂.chain (F := F) (r := r) (n := n).length = n := by simp
@@ -128,7 +166,7 @@ lemma chain_length : extendRoot₂.chain (F := F) (r := r) (n := n).length = n :
 lemma chain_Chain' : List.Chain' (· ≺ ·) (extendRoot₂.chain (F := F) (r := r) (n := n)) := by
   apply List.chain'_map_of_chain' (R := λ a b => a < b);
   . tauto;
-  . sorry;
+  . simp;
 
 instance isAsymm [IsAsymm _ F.Rel] : IsAsymm _ (F.extendRoot₂ r n).Rel := ⟨by
   intro x y hxy;
