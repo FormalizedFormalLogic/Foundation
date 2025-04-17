@@ -1,6 +1,5 @@
 import Foundation.Modal.Logic.Extension
 import Foundation.Modal.Logic.S
-import Foundation.Modal.Kripke.ExtendRoot2
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.Modal.Boxdot.Basic
 import Mathlib.Tactic.TFAE
@@ -63,7 +62,7 @@ open Arith
 
 variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)]
 
-instance instIsFiniteTree {F : Frame} (r : F) [F.IsFiniteTree r] : (F.extendRoot r).IsFiniteTree Frame.extendRoot.root where
+@[simp] lemma r {n : Fin 1} : n.val = (0 : Fin 1) := by omega;
 
 lemma GL_S_TFAE :
   [
@@ -87,13 +86,16 @@ lemma GL_S_TFAE :
     push_neg;
     intro hA;
     obtain ⟨M₁, r₁, _, hA⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
-    let M₀ := Model.extendRoot M₁ r₁;
+    let M₀ := Model.extendRoot M₁ r₁ 1;
     let r₀ : M₀.World := Model.extendRoot.root;
     replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
     push_neg at hA;
     obtain ⟨hA₁, hA₂⟩ := hA;
-    replace hA₁ : ∀ φ ∈ A.rflSubformula, r₁ ⊧ φ := by simpa using Satisfies.finset_conj_def.mp (Model.extendRoot.modal_equivalence_original_world.mp hA₁)
-    replace hA₂ : ¬r₁ ⊧ A := by simpa using Model.extendRoot.modal_equivalence_original_world.not.mp hA₂;
+    replace hA₁ : ∀ φ ∈ A.rflSubformula, r₁ ⊧ φ := by
+      intro φ hφ;
+      apply Model.extendRoot.inr_satisfies_iff.mp
+        $ (Satisfies.finset_conj_def.mp
+        $ Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr hA₁) φ hφ;
     have : M₀.IsFiniteTree r₀ := Frame.extendRoot.instIsFiniteTree
     have : Fintype M₀.World := Fintype.ofFinite _
     let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₀.toFrame) r₀ :=
@@ -146,21 +148,18 @@ lemma GL_S_TFAE :
             have hrfl : r₁ ⊧ □B ➝ B := by
               apply hA₁;
               simpa [Formula.rflSubformula];
-            rintro (_ | i) _;
-            . suffices 𝐈𝚺₁ ⊢!. σ r₀ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B by convert this;
+            rintro (i | i) _;
+            . rw [(show (Sum.inl i) = r₀ by simp [r₀]; omega)]
+              suffices 𝐈𝚺₁ ⊢!. σ r₀ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B by convert this;
               apply ihB (Formula.subformulas.mem_box B_sub) |>.1;
               exact hrfl h;
             . by_cases e : i = r₁;
               . rw [e];
                 apply σ.mainlemma (i := r₁) (by trivial) |>.1;
-                exact Model.extendRoot.modal_equivalence_original_world.mpr
-                  <| Model.extendRoot.inr_forces_iff.mpr <| Model.extendRoot.inr_forces_iff.mpr (hrfl h);
+                exact Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr $ hrfl h;
               . apply σ.mainlemma (i := i) (by trivial) |>.1;
-                apply Model.extendRoot.modal_equivalence_original_world.mpr;
-                apply Model.extendRoot.inr_forces_iff.mpr
-                apply Model.extendRoot.inr_forces_iff.mpr
+                apply Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr;
                 apply h;
-                suffices r₁ ≺ i by simpa [Frame.Rel', Model.extendRoot, Frame.extendRoot, M₀];
                 apply Frame.IsRooted.direct_rooted_of_trans;
                 assumption
           have b : 𝐈𝚺₁ ⊢!. ⩖ j, σ j := oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
@@ -170,9 +169,9 @@ lemma GL_S_TFAE :
           have := Satisfies.box_def.not.mp h;
           push_neg at this;
           obtain ⟨i, Rij, hA⟩ := this;
-          have : 𝐈𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) B := σ.mainlemma (A := B) (i := i) (by trivial) |>.2
-            <| Model.extendRoot.modal_equivalence_original_world |>.not.mpr <| by
-              simpa [Model.extendRoot.inr_forces_iff (M := M₀), Model.extendRoot.inr_forces_iff (M := M₁)] using hA
+          have : 𝐈𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) B :=
+            σ.mainlemma (A := B) (i := i) (by trivial) |>.2
+            <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
           have : 𝐈𝚺₁ ⊢!. ∼((𝐈𝚺₁).standardDP T) (∼σ (Sum.inr i)) ➝ ∼((𝐈𝚺₁).standardDP T) (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B) :=
             contra₀'!
             $ ((𝐈𝚺₁).standardDP T).prov_distribute_imply'
@@ -211,20 +210,20 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Aᵇ ∈ Logic.GL ↔ Aᵇ ∈ 
     replace h := Hilbert.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
     apply Hilbert.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mpr;
     intro M r _;
-    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot₂.inr_satisfies_axiomT_set (M := M) (Γ := Aᵇ.subformulas.prebox)
-    let M₁ := M.extendRoot₂ r ⟨Aᵇ.subformulas.prebox.card + 1, by omega⟩;
+    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_axiomT_set (M := M) (Γ := Aᵇ.subformulas.prebox)
+    let M₁ := M.extendRoot r ⟨Aᵇ.subformulas.prebox.card + 1, by omega⟩;
     let i₁ : M₁.World := Sum.inl i;
-    refine Model.extendRoot₂.inl_satisfies_boxdot_iff.mpr
+    refine Model.extendRoot.inl_satisfies_boxdot_iff.mpr
       $ Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mp
       $ @h (M₁↾i₁) Model.pointGenerate.root ?_ ?_;
     . apply Frame.isFiniteTree_iff _ _ |>.mpr
       constructor;
-      . apply Frame.pointGenerate.isFinite (finite := Frame.extendRoot₂.isFinite)
+      . apply Frame.pointGenerate.isFinite (finite := Frame.extendRoot.isFinite)
       . apply Frame.isTree_iff _ _ |>.mpr;
         refine ⟨?_, ?_, ?_⟩;
         . apply Frame.pointGenerate.instIsRooted;
-        . apply Frame.pointGenerate.isAsymm (assym := Frame.extendRoot₂.isAsymm);
-        . apply Frame.pointGenerate.isTrans (trans := Frame.extendRoot₂.isTrans);
+        . apply Frame.pointGenerate.isAsymm (assym := Frame.extendRoot.isAsymm);
+        . apply Frame.pointGenerate.isTrans (trans := Frame.extendRoot.isTrans);
     . apply @Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mpr
       apply Satisfies.finset_conj_def.mpr;
       intro B hB;

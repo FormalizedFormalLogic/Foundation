@@ -1,6 +1,5 @@
 import Foundation.ProvabilityLogic.Basic
 import Foundation.Modal.Kripke.Hilbert.GL.Tree
-import Foundation.Modal.Kripke.ExtendRoot
 import Foundation.Incompleteness.Arith.WitnessComparizon
 import Foundation.Incompleteness.Arith.FixedPoint
 import Foundation.Incompleteness.Arith.ConsistencyPredicate
@@ -515,13 +514,13 @@ theorem GL.arithmetical_completeness :
   intro hA;
   push_neg;
   obtain ⟨M₁, r₁, _, hA₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
-  have : (M₁.extendRoot r₁).IsFiniteTree Frame.extendRoot.root := Frame.extendRoot.instIsFiniteTree
-  have : Fintype (M₁.extendRoot r₁).World := Fintype.ofFinite _
-  let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₁.extendRoot r₁).toFrame Frame.extendRoot.root :=
-    SolovaySentences.standard (M₁.extendRoot r₁).toFrame Frame.extendRoot.root T
+  have : (M₁.extendRoot r₁ 1).IsFiniteTree Frame.extendRoot.root := Frame.extendRoot.instIsFiniteTree
+  have : Fintype (M₁.extendRoot r₁ 1).World := Fintype.ofFinite _
+  let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root :=
+    SolovaySentences.standard (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root T
   use σ.realization;
   have : 𝐈𝚺₁ ⊢!. σ r₁ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) (∼A) :=
-    σ.mainlemma (A := ∼A) (i := r₁) (by trivial) |>.1 $ (by simpa using hA₁)
+    σ.mainlemma (A := ∼A) (i := r₁) (by trivial) |>.1 $ Model.extendRoot.inr_satisfies_iff |>.not.mpr hA₁;
   replace : 𝐈𝚺₁ ⊢!. σ.realization.interpret ((𝐈𝚺₁).standardDP T) A ➝ ∼(σ r₁) := by
     apply contra₁'!;
     apply imp_trans''! this;
