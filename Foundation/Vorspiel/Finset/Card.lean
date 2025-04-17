@@ -1,8 +1,5 @@
-import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Tree
-import Foundation.Vorspiel.List.Chain
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Mathlib.Data.Finite.Sum
+import Mathlib.Algebra.Order.Ring.Nat
 
 namespace Finset
 
