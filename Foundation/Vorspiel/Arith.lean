@@ -405,7 +405,7 @@ lemma rem (i j : Fin n) : Arith₁ (fun v => v.get i % v.get j) := by
           ←Nat.sub_add_comm (le_of_lt hm), Nat.add_sub_of_le (Nat.mod_le (v.get i) (v.get j)),
           Nat.sub_add_cancel (le_of_lt hmvi)]
       rw[←this]
-      exact Nat.dvd_sub (Nat.sub_le_sub_left (le_of_lt hm) _) A (@Nat.dvd_sub_mod (v.get j) (v.get i))
+      exact Nat.dvd_sub A (@Nat.dvd_sub_mod (v.get j) (v.get i))
     have hpos : 0 < v.get i % v.get j - m := Nat.lt_sub_of_add_lt (by simpa using hm)
     have : v.get i % v.get j - m < v.get j := by
       have : v.get i % v.get j < v.get j :=

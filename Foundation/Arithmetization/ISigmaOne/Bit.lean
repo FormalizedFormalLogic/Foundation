@@ -235,7 +235,7 @@ lemma insert_eq {i a : V} : insert i a = bitInsert i a := rfl
 lemma singleton_eq_insert (i : V) : ({i} : V) = insert i ∅ := by simp [singleton_def, insert, bitInsert, emptyset_def]
 
 instance : LawfulSingleton V V where
-  insert_emptyc_eq := fun x ↦ Eq.symm <| singleton_eq_insert x
+  insert_empty_eq := fun x ↦ Eq.symm <| singleton_eq_insert x
 
 @[simp] lemma mem_bitInsert_iff {i j a : V} :
     i ∈ insert j a ↔ i = j ∨ i ∈ a := by
@@ -285,7 +285,7 @@ end insert
 lemma one_eq_singleton : (1 : V) = {∅} := by simp [singleton_eq_insert, insert, bitInsert, emptyset_def]
 
 @[simp] lemma mem_singleton_iff {i j : V} :
-    i ∈ ({j} : V) ↔ i = j := by simp [singleton_eq_insert, -insert_emptyc_eq]
+    i ∈ ({j} : V) ↔ i = j := by simp [singleton_eq_insert, -insert_empty_eq]
 
 lemma bitRemove_lt_of_mem {i a : V} (h : i ∈ a) : bitRemove i a < a := by
   simp [h, bitRemove, tsub_lt_iff_left (exp_le_of_mem h)]

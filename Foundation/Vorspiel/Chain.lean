@@ -68,10 +68,13 @@ lemma cons_cons_iff :
   · rintro ⟨rfl, hR, hC⟩
     exact hC.cons hR
 
-lemma not_mem_of_rel (IR : Irreflexive R) (TR : Transitive R) {a b x l} : ChainI R a b l → R x a → x ∉ l := by
-  rintro (_ | _)
-  case singleton => simp; intro hR; rintro rfl; exact IR _ hR
-  case cons a' l Raa' h =>
+lemma not_mem_of_rel (IR : Irreflexive R) (TR : Transitive R) {a b x : α} {l : List α} : ChainI R a b l → R x a → x ∉ l := by
+  match l with
+  |      [] => simp
+  | a' :: l =>
+    rintro (_ | _)
+    case singleton => simp; intro hR; rintro rfl; exact IR _ hR
+    case cons a' Raa' h =>
     intro Rxa
     have : x ≠ a := by rintro rfl; exact IR _ Rxa
     have : x ∉ l :=
