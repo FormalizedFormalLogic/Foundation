@@ -104,7 +104,6 @@ protected def pMorphism (F : Frame) (r : F) : F.mkTreeUnravelling r →ₚ F whe
     . simp;
       convert @List.getLast_append_singleton (l := cx.1) (a := z) |>.symm;
   back {cx y} h := by
-    simp_all;
     use ⟨cx.1 ++ [y], ?_⟩;
     . constructor;
       . simp;
