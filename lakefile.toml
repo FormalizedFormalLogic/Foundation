@@ -4,7 +4,7 @@ defaultTargets = ["Foundation"]
 [leanOptions]
 pp.unicode.fun = true
 linter.flexible = true
-linter.refine = true
+# linter.refine = true
 linter.oldObtain = true
 linter.style.multiGoal = true
 
