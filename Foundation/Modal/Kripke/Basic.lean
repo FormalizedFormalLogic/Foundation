@@ -82,6 +82,7 @@ abbrev Valuation (F : Frame) := F.World → ℕ → Prop
 
 structure Model extends Frame where
   Val : Valuation toFrame
+instance : CoeSort Model Type := ⟨λ M => M.toFrame.World⟩
 instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
 
 end Kripke
