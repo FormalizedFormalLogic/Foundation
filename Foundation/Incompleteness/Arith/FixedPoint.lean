@@ -168,3 +168,5 @@ lemma exclusiveMultifixpoint_pi {θ : Fin k → Semisentence ℒₒᵣ k} (h : �
 end Multidiagonalization
 
 end LO.FirstOrder.Arith
+
+end
