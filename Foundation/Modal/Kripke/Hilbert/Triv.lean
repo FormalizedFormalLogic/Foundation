@@ -84,7 +84,7 @@ instance complete_finite_equality : Complete (Hilbert.Triv) Kripke.FrameClass.fi
         intro x Rrx;
         exact IsEquality.equality.mp $ Relation.TransGen.unwrap Rrx
       . simp [Function.RightInverse, Function.LeftInverse];
-    . exact finOneEquiv.symm;
+    . exact fiNOneEquiv.symm;
   . apply isEquality_iff _ _ |>.mpr;
     rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
     . simp [IsRefl.refl];

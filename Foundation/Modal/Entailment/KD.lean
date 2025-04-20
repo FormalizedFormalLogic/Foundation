@@ -10,9 +10,9 @@ variable {𝓢 : S} [Entailment.Modal.KD 𝓢]
 namespace KD
 
 protected def axiomP : 𝓢 ⊢ Axioms.P := by
-  have : 𝓢 ⊢ ∼∼□(∼⊥) := dni' $ nec nO;
-  have : 𝓢 ⊢ ∼◇⊥ := (contra₀' $ ofKLeft diaDuality) ⨀ this;
-  exact (contra₀' axiomD) ⨀ this;
+  have : 𝓢 ⊢ ∼∼□(∼⊥) := dni' $ nec NO;
+  have : 𝓢 ⊢ ∼◇⊥ := (contra $ K_left diaDuality) ⨀ this;
+  exact (contra axiomD) ⨀ this;
 instance : HasAxiomP 𝓢 := ⟨KD.axiomP⟩
 
 end KD

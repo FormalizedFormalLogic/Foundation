@@ -23,24 +23,24 @@ lemma Logic.Cl.smallestMC.mem_diabox_box : (◇□(.atom 0) ➝ □(.atom 0)) �
     . simp;
     . tauto;
   apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
-  apply c!_trans ?_ imply_of_not_or!;
-  apply c!_trans ?_ or_comm!;
-  apply or_replace!;
+  apply C!_trans ?_ CANC!;
+  apply C!_trans ?_ or_comm!;
+  apply CAA!_of_C!_of_C!;
   . simp;
-  . apply contra₁'!;
+  . apply contra_CN!;
     exact diaDuality_mp!;
 
 lemma Logic.Cl.smallestMC.mem_AxiomFive : (◇(.atom 0) ➝ □◇(.atom 0)) ∈ Logic.Cl.smallestMC := by
   have := Logic.sumNormal.subst (s := λ _ => ∼(.atom 0)) $ mem_diabox_box;
   apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
   simp;
-  apply c!_trans ?_ imply_of_not_or!;
-  apply c!_trans not_or_of_imply! ?_;
-  apply c!_trans ?_ or_comm!;
-  apply or_replace!;
-  . apply contra₂'!;
+  apply C!_trans ?_ CANC!;
+  apply C!_trans CCAN! ?_;
+  apply C!_trans ?_ or_comm!;
+  apply CAA!_of_C!_of_C!;
+  . apply contra_CN!';
     exact diaDuality_mp!;
-  . apply contra₁'!;
+  . apply contra_CN!;
     exact diaDuality_mp!;
 
 end Propositional

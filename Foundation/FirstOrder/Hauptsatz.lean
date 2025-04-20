@@ -142,9 +142,9 @@ def ofSubset {q p : ℙ} (h : q ⊇ p) : q ≼ p := ⟨.ofSubset <| List.map_sub
 
 def and {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ φ :: ψ :: p := ⟨.or .id⟩
 
-def andLeft {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ φ :: p := trans (and φ ψ) (ofSubset <| by simp)
+def K_left {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ φ :: p := trans (and φ ψ) (ofSubset <| by simp)
 
-def andRight {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ ψ :: p := trans (and φ ψ) (ofSubset <| by simp)
+def K_right {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ ψ :: p := trans (and φ ψ) (ofSubset <| by simp)
 
 def all {p : ℙ} (φ : SyntacticSemiformula L 1) (t) : (∀' φ) :: p ≼ φ/[t] :: p := ⟨.ex t (by simpa [← Semiformula.neg_eq] using .id)⟩
 
@@ -152,11 +152,11 @@ def minLeLeft (p q : ℙ) : p ⊓ q ≼ p := ofSubset (by simp [inf_def])
 
 def minLeRight (p q : ℙ) : p ⊓ q ≼ q := ofSubset (by simp [inf_def])
 
-def leMinOfle (srp : r ≼ p) (srq : r ≼ q) : r ≼ p ⊓ q := ⟨
+def leMiNOfle (srp : r ≼ p) (srq : r ≼ q) : r ≼ p ⊓ q := ⟨
   let d : ∼p ++ ∼q ⟶⁺ ∼r := .wk (srp.val.add srq.val) (by simp)
   neg_inf_p_eq _ _ ▸ d⟩
 
-def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMinOfle s (.refl q)
+def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMiNOfle s (.refl q)
 
 end StrongerThan
 
@@ -342,7 +342,7 @@ protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
   |     φ ⋏ ψ =>
     let ihφ : [φ] ⊩ φᴺ := Forces.refl φ
     let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
-    andEquiv.symm ⟨ihφ.monotone (.andLeft φ ψ), ihψ.monotone (.andRight φ ψ)⟩
+    andEquiv.symm ⟨ihφ.monotone (.K_left φ ψ), ihψ.monotone (.K_right φ ψ)⟩
   |     φ ⋎ ψ => refl.or (Forces.refl φ) (Forces.refl ψ)
   |      ∀' φ => allEquiv.symm fun t ↦
     let b : [φ/[t]] ⊩ φᴺ/[t] := by simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])

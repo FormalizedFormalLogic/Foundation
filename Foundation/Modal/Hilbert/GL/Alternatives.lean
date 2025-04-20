@@ -38,7 +38,7 @@ namespace K4Henkin
 variable [Entailment.Modal.K4Henkin 𝓢]
 
 instance : LoebRule 𝓢 where
-  loeb h := h ⨀ (henkin $ eIntro (axiomK' $ nec h) axiomFour);
+  loeb h := h ⨀ (henkin $ E_intro (axiomK' $ nec h) axiomFour);
 
 end K4Henkin
 
@@ -50,7 +50,7 @@ namespace K4H
 variable [Entailment.Modal.K4H 𝓢]
 
 instance : HenkinRule 𝓢 where
-  henkin h := (ofKLeft h) ⨀ (axiomH ⨀ nec h);
+  henkin h := (K_left h) ⨀ (axiomH ⨀ nec h);
 
 end K4H
 

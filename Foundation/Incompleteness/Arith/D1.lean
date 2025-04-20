@@ -98,7 +98,7 @@ def codeIn [L.DecidableEq] : {Γ : Finset (SyntacticFormula L)} → T ⊢₂ Γ 
   | _, closed Δ φ _ _                         => Arith.axL ⌜Δ⌝ ⌜φ⌝
   | _, root (Δ := Δ) φ _ _                    => Arith.root ⌜Δ⌝ ⌜φ⌝
   | _, verum (Δ := Δ) _                       => Arith.verumIntro ⌜Δ⌝
-  | _, and (Δ := Δ) _ (φ := φ) (ψ := ψ) bp bq => Arith.kIntro ⌜Δ⌝ ⌜φ⌝ ⌜ψ⌝ bp.codeIn bq.codeIn
+  | _, and (Δ := Δ) _ (φ := φ) (ψ := ψ) bp bq => Arith.K_intro ⌜Δ⌝ ⌜φ⌝ ⌜ψ⌝ bp.codeIn bq.codeIn
   | _, or (Δ := Δ) (φ := φ) (ψ := ψ) _ d      => Arith.orIntro ⌜Δ⌝ ⌜φ⌝ ⌜ψ⌝ d.codeIn
   | _, all (Δ := Δ) (φ := φ) _ d              => Arith.allIntro ⌜Δ⌝ ⌜φ⌝ d.codeIn
   | _, ex (Δ := Δ) (φ := φ) _ t d             => Arith.exIntro ⌜Δ⌝ ⌜φ⌝ ⌜t⌝ d.codeIn
@@ -155,7 +155,7 @@ lemma quote_image_shift [L.DecidableEq] (Γ : Finset (SyntacticFormula L)) : (L.
     exact Language.Theory.Derivation.verumIntro (by simp)
       (by simpa [quote_verum] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
   case and Δ φ ψ hpq dp dq ihp ihq =>
-    apply Language.Theory.Derivation.kIntro
+    apply Language.Theory.Derivation.K_intro
       (by simpa [quote_and] using (Sequent.mem_codeIn_iff (V := V)).mpr hpq)
       ⟨by simp [fstidx_quote], ihp⟩
       ⟨by simp [fstidx_quote], ihq⟩
@@ -187,7 +187,7 @@ lemma quote_image_shift [L.DecidableEq] (Γ : Finset (SyntacticFormula L)) : (L.
       ⟨by simp [fstidx_quote], ih⟩
       ⟨by simp [fstidx_quote], ihn⟩
 
-@[simp] lemma derivationOf_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (T.codeIn V).DerivationOf ⌜d⌝ ⌜Γ⌝ :=
+@[simp] lemma derivatioNOf_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (T.codeIn V).DerivatioNOf ⌜d⌝ ⌜Γ⌝ :=
   ⟨by simp, by simp⟩
 
 lemma derivable_of_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (T.codeIn V).Derivable ⌜Γ⌝ :=

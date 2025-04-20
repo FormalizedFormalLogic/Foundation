@@ -18,7 +18,7 @@ section S4Point3
 lemma Hilbert.S4Point3.goedelTranslated_axiomDummett : Hilbert.S4Point3 ⊢! □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
   apply axiomK'!;
   apply nec!;
-  apply imp_swap'!;
+  apply C!_swap;
   apply deduct'!;
   apply deduct!;
   have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3]! ψᵍ ➝ □ψᵍ := of'! $ Hilbert.goedelTranslated_axiomTc;
@@ -40,7 +40,7 @@ lemma mem_gAxiomPoint3_smallestMC_of_LC : □(□(.atom 0) ➝ (.atom 1)) ⋎ �
     use Axioms.Dummett (.atom 0) (.atom 1);
     simp [Axioms.Dummett, goedelTranslate];
   apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
-  apply or_replace!;
+  apply CAA!_of_C!_of_C!;
   repeat exact Hilbert.S4Point.lemma₁;
 
 lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
@@ -71,7 +71,7 @@ lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
         apply modalCompanion_Int_S4.companion.mp;
         simp;
       . suffices Hilbert.S4Point3 ⊢! □(s 0ᵍ ➝ s 1ᵍ) ⋎ □(s 1ᵍ ➝ s 0ᵍ) by simpa [goedelTranslate];
-        apply or_replace'! axiomPoint3!;
+        apply A!_replace axiomPoint3!;
         repeat exact Hilbert.S4Point3.goedelTranslated_axiomDummett;
 
 instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := by
@@ -80,7 +80,7 @@ instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := 
     (IC := Propositional.Kripke.FrameClass.connected)
     (MC := Modal.Kripke.FrameClass.connected_preorder)
     (by rw [Propositional.Logic.LC.Kripke.eq_connected])
-    (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic])
+    (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.eq_ReflexivE_transitiveConnectedKripkeFrameClass_Logic])
     (by rintro F hF; replace hF := Set.mem_setOf_eq.mp hF; apply Set.mem_setOf_eq.mpr; refine ⟨inferInstance, inferInstance⟩);
 
 end Logic
@@ -131,7 +131,7 @@ instance modalCompanion_LC_GrzPoint3 : ModalCompanion Logic.LC Logic.GrzPoint3 :
     (IC := Propositional.Kripke.FrameClass.finite_connected)
     (MC := FrameClass.finite_connected_partial_order)
     (by rw [Logic.LC.Kripke.eq_finite_connected])
-    (by rw [←Logic.GrzPoint3.is_largestMC_of_LC, Modal.Logic.GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic])
+    (by rw [←Logic.GrzPoint3.is_largestMC_of_LC, Modal.Logic.GrzPoint3.eq_ReflexivE_transitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic])
     (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, inferInstance, inferInstance⟩)
 
 end GrzPoint3

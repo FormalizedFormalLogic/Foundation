@@ -9,11 +9,11 @@ open Kripke
 
 theorem KTB_ssubset_S5 : Logic.KTB ⊂ Logic.S5 := by
   constructor;
-  . rw [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
+  . rw [KTB.eq_ReflexivE_symmetricKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.refl_symm ⊧ φ by simpa [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.refl_symm ⊧ φ by simpa [KTB.eq_ReflexivE_symmetricKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
@@ -55,11 +55,11 @@ instance : ProperSublogic Logic.KD45 Logic.S5 := ⟨KD45_ssubset_S5⟩
 
 theorem KB4_ssubset_S5 : Logic.KB4 ⊂ Logic.S5 := by
   constructor;
-  . rw [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
+  . rw [KB4.eq_ReflexivE_transitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.symm_trans ⊧ φ by simpa [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.symm_trans ⊧ φ by simpa [KB4.eq_ReflexivE_transitiveKripkeFrameClass_Logic];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -90,7 +90,7 @@ instance : ProperSublogic Logic.KT Logic.KTB := ⟨KT_ssubset_KTB⟩
 
 theorem KDB_ssubset_KTB : Logic.KDB ⊂ Logic.KTB := by
   constructor;
-  . rw [KDB.eq_SerialSymmetricKripkeFrameClass_Logic, KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
+  . rw [KDB.eq_SerialSymmetricKripkeFrameClass_Logic, KTB.eq_ReflexivE_symmetricKripkeFrameClass_Logic];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
@@ -226,7 +226,7 @@ instance : ProperSublogic Logic.K45 Logic.KD45 := ⟨K45_ssubset_KD45⟩
 
 theorem K45_ssubset_KB4 : Logic.K45 ⊂ Logic.KB4 := by
   constructor;
-  . rw [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic, KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . rw [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic, KB4.eq_ReflexivE_transitiveKripkeFrameClass_Logic];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
@@ -488,11 +488,11 @@ instance : ProperSublogic Logic.K Logic.KB := ⟨K_ssubset_KB⟩
 
 theorem S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
   constructor;
-  . rw [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
+  . rw [S4.eq_ReflexivE_transitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexivE_transitiveKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;

@@ -45,13 +45,13 @@ instance : ProperSublogic Logic.KTc Logic.Ver := ⟨by
 
 instance : ProperSublogic Logic.KB4 Logic.KTc := ⟨by
   constructor;
-  . rw [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, KTc.eq_CoreflexiveKripkeFrameClass_Logic];
+  . rw [KB4.eq_ReflexivE_transitiveKripkeFrameClass_Logic, KTc.eq_CoreflexiveKripkeFrameClass_Logic];
     rintro φ hφ F F_corefl;
     replace hF := Set.mem_setOf_eq.mp F_corefl;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.KTc ⊢! φ ∧ ¬Kripke.FrameClass.symm_trans ⊧ φ by
-      simpa [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+      simpa [KB4.eq_ReflexivE_transitiveKripkeFrameClass_Logic];
     use (Axioms.Tc (.atom 0));
     constructor;
     . exact axiomTc!;

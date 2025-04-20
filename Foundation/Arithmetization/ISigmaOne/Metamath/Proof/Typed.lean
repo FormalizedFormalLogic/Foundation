@@ -133,7 +133,7 @@ variable {L}
 
 structure Language.Theory.TDerivation (T : Language.TTheory L) (Γ : L.Sequent) where
   derivation : V
-  derivationOf : T.thy.DerivationOf derivation Γ.val
+  derivatioNOf : T.thy.DerivatioNOf derivation Γ.val
 
 scoped infix:45 " ⊢¹ " => Language.Theory.TDerivation
 
@@ -150,7 +150,7 @@ def Language.Theory.Derivable.toTDerivation (Γ : L.Sequent) (h : T.thy.Derivabl
   exact ⟨a, ha.1, d, hd⟩
 
 lemma Language.Theory.TDerivation.toDerivable {Γ : L.Sequent} (d : T ⊢¹ Γ) : T.thy.Derivable Γ.val :=
-  ⟨d.derivation, d.derivationOf⟩
+  ⟨d.derivation, d.derivatioNOf⟩
 
 lemma Language.Theory.TProvable.iff_provable {σ : L.Formula} :
     T ⊢! σ ↔ T.thy.Provable σ.val := by
@@ -209,7 +209,7 @@ def cut (d₁ : T ⊢¹ insert p Γ) (d₂ : T ⊢¹ insert (∼p) Γ) : T ⊢¹
 
 def ofSubset (h : T ⊆ U) (d : T ⊢¹ Γ) : U ⊢¹ Γ where
   derivation := d.derivation
-  derivationOf := ⟨d.derivationOf.1, d.derivationOf.2.of_ss h⟩
+  derivatioNOf := ⟨d.derivatioNOf.1, d.derivatioNOf.2.of_ss h⟩
 
 def cut' (d₁ : T ⊢¹ insert p Γ) (d₂ : T ⊢¹ insert (∼p) Δ) : T ⊢¹ Γ ∪ Δ :=
   cut (p := p) (d₁.wk (by intro x; simp; tauto)) (d₂.wk (by intro x; simp; tauto))

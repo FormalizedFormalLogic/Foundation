@@ -69,7 +69,7 @@ instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_connected := 
     simp;
   . apply isConnected_iff _ _ |>.mpr;
     rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
-    . simp only [exists_and_left, or_self];
+    . simp only [exists_K!_left, or_self];
       apply Relation.TransGen.single
       use ⟨z, by tauto⟩;
       constructor;

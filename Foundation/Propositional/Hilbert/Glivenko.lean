@@ -10,7 +10,7 @@ variable [DecidableEq α]
 
 theorem iff_provable_dn_efq_dne_provable : (Hilbert.Int) ⊢! ∼∼φ ↔ (Hilbert.Cl) ⊢! φ := by
   constructor;
-  . intro d; exact of_nn! $ Int_weakerThan_Cl.subset d;
+  . intro d; exact of_NN! $ Int_weakerThan_Cl.subset d;
   . intro d;
     induction d using Deduction.rec! with
     | maxm hp =>
@@ -18,11 +18,11 @@ theorem iff_provable_dn_efq_dne_provable : (Hilbert.Int) ⊢! ∼∼φ ↔ (Hilb
       . apply dni'!;
         exact efq!;
       . generalize (s 0) = ψ;
-        apply n!_iff_cO!.mpr;
+        apply N!_iff_CO!.mpr;
         apply FiniteContext.deduct'!;
-        have : [∼(ψ ⋎ (ψ ➝ ⊥))] ⊢[Hilbert.Int]! ∼ψ ⋏ ∼(ψ ➝ ⊥) := demorgan₃'! $ FiniteContext.id!;
-        exact (n!_iff_cO!.mp $ of_k_right this) ⨀ (n!_iff_cO!.mp $ of_k!_left this);
-    | mdp ihφψ ihφ => exact dn_distribute_imply'! ihφψ ⨀ ihφ;
+        have : [∼(ψ ⋎ (ψ ➝ ⊥))] ⊢[Hilbert.Int]! ∼ψ ⋏ ∼(ψ ➝ ⊥) := KNN!_of_NA! $ FiniteContext.id!;
+        exact (N!_iff_CO!.mp $ K!_right this) ⨀ (N!_iff_CO!.mp $ K!_left this);
+    | mdp ihφψ ihφ => exact CNNNN!_of_NNC! ihφψ ⨀ ihφ;
     | _ => apply dni'!; simp;
 
 alias glivenko := iff_provable_dn_efq_dne_provable

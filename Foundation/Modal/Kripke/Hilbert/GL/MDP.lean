@@ -126,15 +126,15 @@ lemma MDP_Aux (h : (□''X) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) : (□''X) 
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
   have : Hilbert.GL ⊢! ⋀□'Δ ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
-  have : Hilbert.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := c!_trans (by simp) this;
+  have : Hilbert.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
   have : (Hilbert.GL ⊢! ⊡c ➝ φ₁) ⋎ (Hilbert.GL ⊢! ⊡c ➝ φ₂) := by
     by_contra hC;
     have ⟨h₁, h₂⟩ : (Hilbert.GL ⊬ ⊡c ➝ φ₁) ∧ (Hilbert.GL ⊬ ⊡c ➝ φ₂) := not_or.mp hC;
 
-    obtain ⟨M₁, r₁, _, hM₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₁;
-    obtain ⟨M₂, r₂, _, hM₂⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₂;
+    obtain ⟨M₁, r₁, _, hM₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FinitE_transitiveTree.mp h₁;
+    obtain ⟨M₂, r₂, _, hM₂⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FinitE_transitiveTree.mp h₂;
 
     let M₀ := Kripke.mdpCounterexmpleModel M₁ M₂ r₁ r₂;
     let r₀ := Kripke.mdpCounterexmpleModel.root (M₁ := M₁) (M₂ := M₂) (r₁ := r₁) (r₂ := r₂)
@@ -169,7 +169,7 @@ lemma MDP_Aux (h : (□''X) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) : (□''X) 
       push_neg;
       exact ⟨hp₁, hp₂⟩;
     have : ¬(Satisfies M₀ r₀ (□c ➝ (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
-    have : Hilbert.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr $ by
+    have : Hilbert.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FinitE_transitiveTree.mpr $ by
       use M₀, r₀;
       constructor;
       . infer_instance;
@@ -179,7 +179,7 @@ lemma MDP_Aux (h : (□''X) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) : (□''X) 
   rcases this with (h | h) <;> {
     subst e;
     have := imply_box_box_of_imply_boxdot_plain! h;
-    have := c!_trans collect_box_conj! this;
+    have := C!_trans collect_box_conj! this;
     have := FiniteContext.provable_iff.mpr this;
     have := Context.provable_iff.mpr $ by use □'Δ;
     tauto;

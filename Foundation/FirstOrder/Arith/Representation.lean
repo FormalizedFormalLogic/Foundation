@@ -80,7 +80,7 @@ variable {α β γ : Type*} [Primcodable α] [Primcodable β] [Primcodable γ]
 lemma projection {f : α → β →. γ} (hf : Partrec₂ f) (unif : ∀ {a b₁ b₂ c₁ c₂}, c₁ ∈ f a b₁ → c₂ ∈ f a b₂ → c₁ = c₂) :
     ∃ g : α →. γ, Partrec g ∧ (∀ c a, c ∈ g a ↔ ∃ b, c ∈ f a b) := by
   have := Nat.Partrec.projection (Partrec.bind_decode₂_iff.mp hf)
-    (by intro m n₁ n₂ c₁ c₂; simp only [Part.mem_bind_iff, Part.mem_ofOption,
+    (by intro m n₁ n₂ c₁ c₂; simp only [Part.mem_bind_iff, Part.mem_of_Option,
           Option.mem_def, decode₂_eq_some, Part.mem_map_iff, Prod.exists, encode_prod_val,
           Nat.pair_eq_pair, forall_exists_index, and_imp]
         rintro a b₁ rfl rfl c₁ h₁ rfl a b₂ e rfl c₂ h₂ rfl
@@ -88,7 +88,7 @@ lemma projection {f : α → β →. γ} (hf : Partrec₂ f) (unif : ∀ {a b₁
         rw [unif h₁ h₂])
   rcases this with ⟨g, hg, H⟩
   let g' : α →. γ := fun a ↦ (g (encode a)).bind fun n ↦ decode (α := γ) n
-  refine ⟨g', ((nat_iff.2 hg).comp Computable.encode).bind (Computable.decode.ofOption.comp Computable.snd).to₂, ?_⟩
+  refine ⟨g', ((nat_iff.2 hg).comp Computable.encode).bind (Computable.decode.of_Option.comp Computable.snd).to₂, ?_⟩
   have H : ∀ {c a : ℕ}, c ∈ g a ↔ ∃ a' b, encode a' = a ∧ ∃ c' ∈ f a' b, encode c' = c := by
     simp [Encodable.decode₂_eq_some] at H
     intro c a; constructor

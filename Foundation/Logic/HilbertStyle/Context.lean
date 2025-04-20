@@ -85,8 +85,8 @@ variable {Γ Δ E : List F}
 variable [Entailment.Minimal 𝓢]
 
 instance [DecidableEq F] : Axiomatized (FiniteContext F 𝓢) where
-  prfAxm := fun hp ↦ cConj₂ hp
-  weakening := fun H b ↦ cTrans (cConj₂Conj₂ H) b
+  prfAxm := fun hp ↦ left_Conj₂_intro hp
+  weakening := fun H b ↦ C_trans (CConj₂Conj₂ H) b
 
 instance : Compact (FiniteContext F 𝓢) where
   φ := fun {Γ} _ _ ↦ Γ
@@ -106,7 +106,7 @@ def weakening [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢] φ → Δ ⊢[
 lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {φ} : Γ ⊢[𝓢]! φ → Δ ⊢[𝓢]! φ := fun h ↦
   (Axiomatized.le_of_subset (by simpa)).subset h
 
-def of {φ : F} (b : 𝓢 ⊢ φ) : Γ ⊢[𝓢] φ := cOfConseq (ψ := ⋀Γ) b
+def of {φ : F} (b : 𝓢 ⊢ φ) : Γ ⊢[𝓢] φ := C_of_conseq (ψ := ⋀Γ) b
 
 def emptyPrf {φ : F} : [] ⊢[𝓢] φ → 𝓢 ⊢ φ := fun b ↦ b ⨀ verum
 
@@ -151,14 +151,14 @@ instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Mini
 def mdp' [DecidableEq F] (bΓ : Γ ⊢[𝓢] φ ➝ ψ) (bΔ : Δ ⊢[𝓢] φ) : (Γ ++ Δ) ⊢[𝓢] ψ := wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
 def deduct {φ ψ : F} : {Γ : List F} → (φ :: Γ) ⊢[𝓢] ψ → Γ ⊢[𝓢] φ ➝ ψ
-  | .nil => fun b ↦ ofDef <| cOfConseq (toDef b)
-  | .cons _ _ => fun b ↦ ofDef <| cCOfCK (cTrans (cKK _ _) (toDef b))
+  | .nil => fun b ↦ ofDef <| C_of_conseq (toDef b)
+  | .cons _ _ => fun b ↦ ofDef <| CC_of_CK (C_trans (CKK _ _) (toDef b))
 
 lemma deduct! (h : (φ :: Γ) ⊢[𝓢]! ψ) :  Γ ⊢[𝓢]! φ ➝ ψ  := ⟨FiniteContext.deduct h.some⟩
 
 def deductInv {φ ψ : F} : {Γ : List F} → Γ ⊢[𝓢] φ ➝ ψ → (φ :: Γ) ⊢[𝓢] ψ
   | .nil => λ b => ofDef <| (toDef b) ⨀ verum
-  | .cons _ _ => λ b => ofDef <| (cTrans (cKK _ _) (cKOfCC (toDef b)))
+  | .cons _ _ => λ b => ofDef <| (C_trans (CKK _ _) (CK_of_CC (toDef b)))
 
 lemma deductInv! (h : Γ ⊢[𝓢]! φ ➝ ψ) : (φ :: Γ) ⊢[𝓢]! ψ := ⟨FiniteContext.deductInv h.some⟩
 
@@ -181,8 +181,8 @@ instance deduction : Deduction (FiniteContext F 𝓢) where
 
 instance [DecidableEq F] : StrongCut (FiniteContext F 𝓢) (FiniteContext F 𝓢) :=
   ⟨fun {Γ Δ _} bΓ bΔ ↦
-    have : Γ ⊢ Δ.conj := conj₂Intro _ (fun _ hp ↦ bΓ hp)
-    ofDef <| cTrans (toDef this) (toDef bΔ)⟩
+    have : Γ ⊢ Δ.conj := Conj₂_intro _ (fun _ hp ↦ bΓ hp)
+    ofDef <| C_trans (toDef this) (toDef bΔ)⟩
 
 instance [HasAxiomEFQ 𝓢] (Γ : FiniteContext F 𝓢) : HasAxiomEFQ Γ := ⟨fun _ ↦ of efq⟩
 

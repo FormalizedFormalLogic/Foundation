@@ -92,7 +92,7 @@ abbrev TransitiveFrameClass : FrameClass := { F | Transitive F.Rel }
 abbrev ReflexiveEuclideanFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Euclidean F.Rel }
 
 /-- FrameClass for `𝐊𝐓𝐁` -/
-abbrev ReflexiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Symmetric F }
+abbrev ReflexivE_symmetricFrameClass : FrameClass := { F | Reflexive F ∧ Symmetric F }
 
 /-- FrameClass for `𝐒𝟓` -/
 abbrev UniversalFrameClass : FrameClass := { F | Universal F }
@@ -101,18 +101,18 @@ abbrev UniversalFrameClass : FrameClass := { F | Universal F }
 abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
 
 /-- FrameClass for `𝐈𝐧𝐭` and `𝐒𝟒` -/
-abbrev ReflexiveTransitiveFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
-alias PreorderFrameClass := ReflexiveTransitiveFrameClass
+abbrev ReflexivE_transitiveFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
+alias PreorderFrameClass := ReflexivE_transitiveFrameClass
 
 /-- FrameClass for `𝐊𝐂` and `𝐒𝟒.𝟐` -/
-abbrev ReflexiveTransitiveConfluentFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Confluent F }
+abbrev ReflexivE_transitiveConfluentFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Confluent F }
 
 /-- FrameClass for `𝐋𝐂` and `𝐒𝟒.𝟑` -/
-abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
+abbrev ReflexivE_transitiveConnectedFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
 
 /-- FrameClass for `𝐂𝐥` and `𝐊𝐓𝟒𝐁` (`𝐒𝟓`) -/
-abbrev ReflexiveTransitiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
-alias EquivalenceFrameClass := ReflexiveTransitiveSymmetricFrameClass
+abbrev ReflexivE_transitivE_symmetricFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
+alias EquivalenceFrameClass := ReflexivE_transitivE_symmetricFrameClass
 
 /-- FrameClass for `𝐆𝐋` -/
 abbrev TransitiveConverseWellFoundedFrameClass : FrameClass := { F | Transitive F ∧ ConverseWellFounded F }
@@ -121,10 +121,10 @@ abbrev TransitiveConverseWellFoundedFrameClass : FrameClass := { F | Transitive 
 abbrev TransitiveIrreflexiveFrameClass : FrameClass := { F | Transitive F ∧ Irreflexive F }
 
 /-- FrameClass for `𝐆𝐫𝐳` -/
-abbrev ReflexiveTransitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ WeaklyConverseWellFounded F }
+abbrev ReflexivE_transitiveWeaklyConverseWellFoundedFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ WeaklyConverseWellFounded F }
 
 /-- FrameClass for `𝐆𝐫𝐳` (Finite version) -/
-abbrev ReflexiveTransitiveAntiSymmetricFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ AntiSymmetric F }
+abbrev ReflexivE_transitiveAntiSymmetricFrameClass : FrameClass := { F | Reflexive F.Rel ∧ Transitive F ∧ AntiSymmetric F }
 
 end
 

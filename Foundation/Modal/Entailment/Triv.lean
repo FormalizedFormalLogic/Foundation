@@ -13,9 +13,9 @@ namespace Triv
 protected def axiomGrz : 𝓢 ⊢ □(□(φ ➝ □φ) ➝ φ) ➝ φ := by
   have : 𝓢 ⊢ φ ➝ □φ := axiomTc;
   have d₁ := nec this;
-  have d₂ : 𝓢 ⊢ □(φ ➝ □φ) ➝ ((□(φ ➝ □φ)) ➝ φ) ➝ φ := p_pq_q;
+  have d₂ : 𝓢 ⊢ □(φ ➝ □φ) ➝ ((□(φ ➝ □φ)) ➝ φ) ➝ φ := CCC;
   have := d₂ ⨀ d₁;
-  exact cTrans axiomT this;
+  exact C_trans axiomT this;
 instance : HasAxiomGrz 𝓢 := ⟨fun _ ↦ Triv.axiomGrz⟩
 
 end Triv

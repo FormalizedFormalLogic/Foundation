@@ -451,13 +451,13 @@ variable {𝓢 : S}
 instance [Entailment.Minimal 𝓢] [ModalDeMorgan F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
   intro φ;
   simp only [Axioms.DiaDuality, ModalDeMorgan.box, DeMorgan.neg];
-  apply eId;
+  apply E_Id;
 ⟩
 
 instance [Entailment.Minimal 𝓢] [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
   intro φ;
   simp only [Axioms.DiaDuality, DiaAbbrev.dia_abbrev];
-  apply eId;
+  apply E_Id;
 ⟩
 
 instance [ModusPonens 𝓢] [HasAxiomT 𝓢] : Unnecessitation 𝓢 := ⟨by
@@ -553,7 +553,7 @@ instance [Disjunctive 𝓢] [Unnecessitation 𝓢] : ModalDisjunctive 𝓢 where
     . right; exact unnec! h;
 
 private lemma unnec_of_mdp_aux [ModalDisjunctive 𝓢] (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! φ := by
-    have : 𝓢 ⊢! □φ ⋎ □φ := a!_of_left h;
+    have : 𝓢 ⊢! □φ ⋎ □φ := A!_intro_left h;
     rcases modal_disjunctive this with (h | h) <;> tauto;
 
 noncomputable instance unnecessitation_of_modalDisjunctive [ModalDisjunctive 𝓢] : Unnecessitation 𝓢 where

@@ -22,7 +22,7 @@ lemma arithmetical_soundness_N (h : (Hilbert.N) ⊢! φ) : ∀ {f : Realization 
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | imply₁ => exact imply₁!;
   | imply₂ => exact imply₂!;
-  | ec => exact elimContra_neg!;
+  | ec => exact CCCOCOC!;
 
 
 lemma arithmetical_soundness_GL [Diagonalization T] [𝔅.HBL] (h : (Hilbert.GL) ⊢! φ) : ∀ {f : Realization L}, U ⊢!. (f.interpret 𝔅 φ) := by
@@ -36,7 +36,7 @@ lemma arithmetical_soundness_GL [Diagonalization T] [𝔅.HBL] (h : (Hilbert.GL)
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | imply₁ => exact imply₁!;
   | imply₂ => exact imply₂!;
-  | ec => exact elimContra_neg!;
+  | ec => exact CCCOCOC!;
 
 instance {T : Theory ℒₒᵣ} [𝐈𝚺₁ ⪯ T] [T.Delta1Definable] : ArithmeticalSound (Logic.GL) (T.standardDP T) := ⟨arithmetical_soundness_GL⟩
 

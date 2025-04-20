@@ -81,29 +81,29 @@ lemma truthlemma_lemma2
     simpa using hΓ₂ χ hr;
 
   by_contra hC;
-  have : Γ₁ ⊢[_]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ cK!_iff_cC!.mp hC;
-  have : Γ₁ ⊢[_]! (□ψ ⋏ -ψ) ➝ ⊥ := c!_trans (by
+  have : Γ₁ ⊢[_]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ CK!_iff_CC!.mp hC;
+  have : Γ₁ ⊢[_]! (□ψ ⋏ -ψ) ➝ ⊥ := C!_trans (by
     suffices Γ₁ ⊢[Hilbert.GL]! ⋀[□ψ, -ψ] ➝ ⋀Γ₂ by
       simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
-    apply conjconj_subset!;
+    apply CConj₂Conj₂!_of_subset;
     simpa using hΓ₂;
   ) this;
-  have : Γ₁ ⊢[_]! □ψ ➝ -ψ ➝ ⊥ := cK!_iff_cC!.mp this;
+  have : Γ₁ ⊢[_]! □ψ ➝ -ψ ➝ ⊥ := CK!_iff_CC!.mp this;
   have : Γ₁ ⊢[Hilbert.GL]! □ψ ➝ ψ := by
     rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
     . rw [hp] at this;
-      exact c!_trans this dne!;
+      exact C!_trans this dne!;
     . simpa only [complement] using this;
   have : (□'Γ₁) ⊢[_]! □(□ψ ➝ ψ) := contextual_nec! this;
   have : (□'Γ₁) ⊢[_]! □ψ := axiomL! ⨀ this;
   have : _ ⊢! ⋀□'Γ₁ ➝ □ψ := provable_iff.mp this;
-  have : _ ⊢! ⋀□'(X.1.prebox ∪ X.1.prebox.box |>.toList) ➝ □ψ := c!_trans (conjconj_subset! (by
+  have : _ ⊢! ⋀□'(X.1.prebox ∪ X.1.prebox.box |>.toList) ➝ □ψ := C!_trans (CConj₂Conj₂!_of_subset (by
     intro χ hχ;
     obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hχ;
     apply List.box_mem_of;
     simp_all;
   )) this;
-  have : _ ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := c!_trans (conjconj_provable! (by
+  have : _ ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := C!_trans (CConj₂Conj₂!_of_provable (by
     intro χ hχ;
     obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hχ;
     replace hξ : □ξ ∈ ↑X ∨ ∃ a, □a ∈ ↑X ∧ □a = ξ := by simpa using hξ;

@@ -9,7 +9,7 @@ open Kripke
 theorem S4_ssubset_Grz : Logic.S4 ⊂ Logic.Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexivE_transitiveKripkeFrameClass_Logic];
     use Axioms.Grz (.atom 0)
     constructor;
     . exact axiomGrz!;
@@ -23,7 +23,7 @@ instance : ProperSublogic Logic.S4 Logic.Grz := ⟨S4_ssubset_Grz⟩
 lemma Grz_ssubset_S5Grz : Logic.Grz ⊂ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by simpa [Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by simpa [Grz.eq_ReflexivE_transitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0)
     constructor;
     . exact axiomFive!;
@@ -53,7 +53,7 @@ instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by
-      simpa [Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
+      simpa [Grz.eq_ReflexivE_transitiveAntiSymmetricFiniteKripkeFrameClass_Logic];
     use Axioms.Point2 (.atom 0);
     constructor;
     . simp;
@@ -96,12 +96,12 @@ instance : ProperSublogic Logic.S4Point2 Logic.GrzPoint2 := ⟨S4Point2_ssubset_
 
 instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
   constructor;
-  . rw [GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic, GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic];
+  . rw [GrzPoint2.eq_ReflexivE_transitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic, GrzPoint3.eq_ReflexivE_transitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic];
     rintro φ hφ F ⟨_, _, _⟩;
     apply hφ;
     refine ⟨by tauto, inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_confluent_partial_order ⊧ φ by
-      simpa [GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic];
+      simpa [GrzPoint2.eq_ReflexivE_transitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic];
     use Axioms.Point3 (.atom 0) (.atom 1);
     constructor;
     . simp;

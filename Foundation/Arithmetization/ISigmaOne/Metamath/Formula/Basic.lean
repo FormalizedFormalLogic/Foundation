@@ -162,8 +162,8 @@ lemma nth_lt_qqRel_of_lt {i k r v : V} (hi : i < len v) : v.[i] < ^rel k r v :=
 lemma nth_lt_qqNRel_of_lt {i k r v : V} (hi : i < len v) : v.[i] < ^nrel k r v :=
   lt_trans (nth_lt_self hi) (v_lt_nrel _ _ _)
 
-@[simp] lemma lt_and_left (p q : V) : p < p ^⋏ q := le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
-@[simp] lemma lt_and_right (p q : V) : q < p ^⋏ q := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
+@[simp] lemma lt_K!_left (p q : V) : p < p ^⋏ q := le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
+@[simp] lemma lt_K!_right (p q : V) : q < p ^⋏ q := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
 
 @[simp] lemma lt_or_left (p q : V) : p < p ^⋎ q := le_iff_lt_succ.mp <| le_trans (le_pair_left _ _) <| le_pair_right _ _
 @[simp] lemma lt_or_right (p q : V) : q < p ^⋎ q := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _

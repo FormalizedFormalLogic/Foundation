@@ -19,12 +19,12 @@ lemma provable_boxdotTranslated_K4_of_provable_S4 : Hilbert.S4 ⊢! φ → Hilbe
 
 lemma provable_S4_iff_boxdotTranslated : Hilbert.S4 ⊢! φ ⭤ φᵇ := by
   induction φ using Formula.rec' with
-  | hbox φ ihp => exact e!_trans (box_iff! ihp) iff_box_boxdot!;
-  | himp φ ψ ihp ihq => exact imp_replace_iff! ihp ihq;
-  | _ => exact e!_id;
+  | hbox φ ihp => exact E!_trans (box_iff! ihp) iff_box_boxdot!;
+  | himp φ ψ ihp ihq => exact ECC!_of_E!_of_E! ihp ihq;
+  | _ => exact E!_id;
 
 lemma provable_S4_of_provable_boxdotTranslated_K4 (h : Hilbert.K4 ⊢! φᵇ) : Hilbert.S4 ⊢! φ := by
-  exact (of_k_right provable_S4_iff_boxdotTranslated) ⨀ ((weakerThan_iff.mp $ Hilbert.K4_weakerThan_S4) h)
+  exact (K!_right provable_S4_iff_boxdotTranslated) ⨀ ((weakerThan_iff.mp $ Hilbert.K4_weakerThan_S4) h)
 
 theorem iff_boxdotTranslatedK4_S4 : Hilbert.K4 ⊢! φᵇ ↔ Hilbert.S4 ⊢! φ:= ⟨
   provable_S4_of_provable_boxdotTranslated_K4,

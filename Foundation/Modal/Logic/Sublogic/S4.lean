@@ -9,7 +9,7 @@ open Kripke
 theorem S4_ssubset_S4Point2 : Logic.S4 ⊂ Logic.S4Point2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexivE_transitiveKripkeFrameClass_Logic];
     use Axioms.Point2 (.atom 0)
     constructor;
     . exact axiomPoint2!;
@@ -37,12 +37,12 @@ instance : ProperSublogic Logic.S4 Logic.S4Point2 := ⟨S4_ssubset_S4Point2⟩
 
 theorem S4Point2_ssubset_S4Point3 : Logic.S4Point2 ⊂ Logic.S4Point3 := by
   constructor;
-  . rw [S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic, S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+  . rw [S4Point2.eq_ReflexivE_transitiveConfluentKripkeFrameClass_Logic, S4Point3.eq_ReflexivE_transitiveConnectedKripkeFrameClass_Logic];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬FrameClass.confluent_preorder ⊧ φ by
-      simpa [S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
+      simpa [S4Point2.eq_ReflexivE_transitiveConfluentKripkeFrameClass_Logic];
     use Axioms.Point3 (.atom 0) (.atom 1);
     constructor;
     . exact axiomPoint3!;
@@ -82,13 +82,13 @@ lemma S4_ssubset_S4Point3 : Logic.S4 ⊂ Logic.S4Point3 := by
 
 theorem S4Point3_ssubset_S5 : Logic.S4Point3 ⊂ Logic.S5 := by
   constructor;
-  . rw [S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic, S5.eq_UniversalKripkeFrameClass_Logic];
+  . rw [S4Point3.eq_ReflexivE_transitiveConnectedKripkeFrameClass_Logic, S5.eq_UniversalKripkeFrameClass_Logic];
     rintro φ hφ F F_univ;
     replace F_univ := Set.mem_setOf_eq.mp F_univ
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.connected_preorder ⊧ φ by
-      simpa [S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+      simpa [S4Point3.eq_ReflexivE_transitiveConnectedKripkeFrameClass_Logic];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;

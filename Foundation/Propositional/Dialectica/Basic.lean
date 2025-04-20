@@ -61,10 +61,10 @@ lemma not_valid_iff_notValid {φ : Formula α} : (¬⊩ φ) ↔ (⊮ φ) := by
 
 @[simp] lemma interpret_atom {w c V} {a : α} : (⟦w | c⟧⊩[V] .atom a) ↔ V a := Eq.to_iff rfl
 
-@[simp] lemma interpret_and_left {φ ψ : Formula α} {V θ π} :
+@[simp] lemma interpret_K!_left {φ ψ : Formula α} {V θ π} :
     ⟦θ | .inl π⟧⊩[V] φ ⋏ ψ ↔ ⟦θ.1 | π⟧⊩[V] φ := Eq.to_iff rfl
 
-@[simp] lemma interpret_and_right {φ ψ : Formula α} {V θ π} :
+@[simp] lemma interpret_K!_right {φ ψ : Formula α} {V θ π} :
     ⟦θ | .inr π⟧⊩[V] φ ⋏ ψ ↔ ⟦θ.2 | π⟧⊩[V] ψ := Eq.to_iff rfl
 
 @[simp] lemma interpret_or_left {φ ψ : Formula α} {V θ π} :

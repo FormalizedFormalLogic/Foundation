@@ -31,7 +31,7 @@ instance : ProperSublogic Logic.K4 Logic.K4Point2 := ⟨by
 
 instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
   constructor;
-  . rw [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic, S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
+  . rw [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic, S4Point2.eq_ReflexivE_transitiveConfluentKripkeFrameClass_Logic];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
@@ -87,7 +87,7 @@ instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
 
 instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
   constructor;
-  . rw [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic, S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+  . rw [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic, S4Point3.eq_ReflexivE_transitiveConnectedKripkeFrameClass_Logic];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
