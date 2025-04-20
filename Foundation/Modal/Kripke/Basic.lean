@@ -28,6 +28,9 @@ variable {F : Frame} {x y : F.World}
 abbrev Rel' (x y : F.World) := F.Rel x y
 infix:45 " ≺ " => Frame.Rel'
 
+abbrev InvRel (x y : F.World) := F.Rel y x
+infix:45 " ≻ " => Frame.InvRel
+
 abbrev RelItr' (n : ℕ) := F.Rel.iterate n
 notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
 
@@ -79,6 +82,7 @@ abbrev Valuation (F : Frame) := F.World → ℕ → Prop
 
 structure Model extends Frame where
   Val : Valuation toFrame
+instance : CoeSort Model Type := ⟨λ M => M.toFrame.World⟩
 instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
 
 end Kripke
@@ -233,6 +237,9 @@ example {Γ : List _} : (∀ φ ∈ Γ, x ⊧ □φ) → x ⊧ □⋀Γ := by
   apply conj_def.mpr;
   intro φ hφ;
   exact h φ hφ y Rxy;
+
+lemma finset_conj_def {Γ : FormulaFinset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
+  simp only [Semantics.realize_finset_conj, Satisfies.iff_models];
 
 lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 

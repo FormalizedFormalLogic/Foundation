@@ -574,23 +574,23 @@ instance Language.Theory.derivation_definable : 𝚫₁-Predicate T.Derivation :
 
 instance Language.Theory.derivation_definable' : Γ-[m + 1]-Predicate T.Derivation := T.derivation_definable.of_deltaOne
 
-def _root_.LO.FirstOrder.Arith.LDef.TDef.derivatioNOfDef {pL : LDef} (pT : pL.TDef) : 𝚫₁.Semisentence 2 := .mkDelta
+def _root_.LO.FirstOrder.Arith.LDef.TDef.derivationOfDef {pL : LDef} (pT : pL.TDef) : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “d s. !fstIdxDef s d ∧ !pT.derivationDef.sigma d” (by simp))
   (.mkPi “d s. !fstIdxDef s d ∧ !pT.derivationDef.pi d” (by simp))
 
-lemma Language.Theory.derivatioNOf_defined : 𝚫₁-Relation T.DerivationOf via pT.derivatioNOfDef :=
-  ⟨by intro v; simp [LDef.TDef.derivatioNOfDef, HierarchySymbol.Semiformula.val_sigma, T.derivation_defined.proper.iff'],
-   by intro v; simp [LDef.TDef.derivatioNOfDef, HierarchySymbol.Semiformula.val_sigma, T.derivation_defined.df.iff, eq_comm (b := fstIdx (v 0))]; rfl⟩
+lemma Language.Theory.derivationOf_defined : 𝚫₁-Relation T.DerivationOf via pT.derivationOfDef :=
+  ⟨by intro v; simp [LDef.TDef.derivationOfDef, HierarchySymbol.Semiformula.val_sigma, T.derivation_defined.proper.iff'],
+   by intro v; simp [LDef.TDef.derivationOfDef, HierarchySymbol.Semiformula.val_sigma, T.derivation_defined.df.iff, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
-instance Language.Theory.derivatioNOf_definable : 𝚫₁-Relation T.DerivationOf := T.derivatioNOf_defined.to_definable
+instance Language.Theory.derivatioNOf_definable : 𝚫₁-Relation T.DerivationOf := T.derivationOf_defined.to_definable
 
 instance Language.Theory.derivatioNOf_definable' : Γ-[m + 1]-Relation T.DerivationOf := T.derivatioNOf_definable.of_deltaOne
 
 def _root_.LO.FirstOrder.Arith.LDef.TDef.derivableDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 1 := .mkSigma
-  “s. ∃ d, !pT.derivatioNOfDef.sigma d s” (by simp)
+  “s. ∃ d, !pT.derivationOfDef.sigma d s” (by simp)
 
 lemma Language.Theory.derivable_defined : 𝚺₁-Predicate T.Derivable via pT.derivableDef := by
-  intro v; simp [LDef.TDef.derivableDef, HierarchySymbol.Semiformula.val_sigma, (derivatioNOf_defined T).df.iff, Language.Theory.Derivable]
+  intro v; simp [LDef.TDef.derivableDef, HierarchySymbol.Semiformula.val_sigma, (derivationOf_defined T).df.iff, Language.Theory.Derivable]
 
 instance Language.Theory.derivable_definable : 𝚺₁-Predicate T.Derivable := (derivable_defined T).to_definable
 

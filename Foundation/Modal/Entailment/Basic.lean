@@ -472,7 +472,7 @@ namespace Modal
 
 variable (𝓢 : S)
 
-protected class K extends Entailment.Classical 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
+protected class K extends Entailment.Cl 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
 
 protected class KD extends Entailment.Modal.K 𝓢, HasAxiomD 𝓢
 

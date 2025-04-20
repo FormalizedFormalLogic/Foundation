@@ -158,7 +158,7 @@ section intuitionistic
 
 open LindenbaumAlgebra
 
-variable [Entailment.Intuitionistic 𝓢]
+variable [Entailment.Int 𝓢]
 
 instance LindenbaumAlgebra.heyting [DecidableEq F] : HeytingAlgebra (LindenbaumAlgebra 𝓢) where
   bot_le φ := by
@@ -176,7 +176,7 @@ section classical
 
 open LindenbaumAlgebra
 
-variable [Entailment.Classical 𝓢]
+variable [Entailment.Cl 𝓢]
 
 instance LindenbaumAlgebra.boolean [DecidableEq F] : BooleanAlgebra (LindenbaumAlgebra 𝓢) where
   inf_compl_le_bot φ := by

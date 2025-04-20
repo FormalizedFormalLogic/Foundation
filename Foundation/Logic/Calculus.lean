@@ -184,7 +184,7 @@ lemma inconsistent_of_provable_and_refutable {φ} (bp : 𝓚 ⊢! φ) (br : 𝓚
   inconsistent_iff_provable.mpr <| cut! bp br
 -/
 
-instance [Cut F K] : Entailment.Classical 𝓚 where
+instance [Cut F K] : Entailment.Cl 𝓚 where
   mdp {φ ψ dpq dp} :=
     let dpq : 𝓚 ⟹ [∼φ ⋎ ψ, ψ] := wk dpq (by simp [DeMorgan.imply])
     let dnq : 𝓚 ⟹ [∼(∼φ ⋎ ψ), ψ] :=

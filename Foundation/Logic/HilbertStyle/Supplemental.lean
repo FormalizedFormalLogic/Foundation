@@ -73,7 +73,7 @@ def right_A_intro_right (h : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ ψ ➝ (φ ⋎ χ) :
   exact of h;
 omit [DecidableEq F] in lemma right_A!_intro_right (h : 𝓢 ⊢! ψ ➝ χ) : 𝓢 ⊢! ψ ➝ (φ ⋎ χ) := ⟨right_A_intro_right h.some⟩
 
-
+omit [DecidableEq F] in
 def right_K_intro (hq : 𝓢 ⊢ φ ➝ ψ) (hr : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ φ ➝ ψ ⋏ χ := by
   apply deduct';
   replace hq : [] ⊢[𝓢] φ ➝ ψ := of hq;
@@ -294,24 +294,24 @@ def CCCNNNN : 𝓢 ⊢ (φ ➝ ψ) ➝ (∼∼φ ➝ ∼∼ψ) := deduct' $ CNNN
 @[simp] lemma CCCNNNN! : 𝓢 ⊢! (φ ➝ ψ) ➝ (∼∼φ ➝ ∼∼ψ) := ⟨CCCNNNN⟩
 
 
-def contra_CN (b : 𝓢 ⊢ φ ➝ ∼ψ) : 𝓢 ⊢ ψ ➝ ∼φ := C_trans dni (contra b)
-lemma contra_CN! (b : 𝓢 ⊢! φ ➝ ∼ψ) : 𝓢 ⊢! ψ ➝ ∼φ := ⟨contra_CN b.some⟩
+def CN_of_CN_right (b : 𝓢 ⊢ φ ➝ ∼ψ) : 𝓢 ⊢ ψ ➝ ∼φ := C_trans dni (contra b)
+lemma CN!_of_CN!_right (b : 𝓢 ⊢! φ ➝ ∼ψ) : 𝓢 ⊢! ψ ➝ ∼φ := ⟨CN_of_CN_right b.some⟩
 
-def CCNCN : 𝓢 ⊢ (φ ➝ ∼ψ) ➝ (ψ ➝ ∼φ) := deduct' $ contra_CN FiniteContext.id
+def CCNCN : 𝓢 ⊢ (φ ➝ ∼ψ) ➝ (ψ ➝ ∼φ) := deduct' $ CN_of_CN_right FiniteContext.id
 lemma CCNCN! : 𝓢 ⊢! (φ ➝ ∼ψ) ➝ (ψ ➝ ∼φ) := ⟨CCNCN⟩
 
 
-def contra_CN' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼φ ➝ ψ) : 𝓢 ⊢ ∼ψ ➝ φ := C_trans (contra b) dne
-lemma contra_CN!' [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼φ ➝ ψ) : 𝓢 ⊢! ∼ψ ➝ φ := ⟨contra_CN' b.some⟩
+def CN_of_CN_left [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼φ ➝ ψ) : 𝓢 ⊢ ∼ψ ➝ φ := C_trans (contra b) dne
+lemma CN!_of_CN!_left [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼φ ➝ ψ) : 𝓢 ⊢! ∼ψ ➝ φ := ⟨CN_of_CN_left b.some⟩
 
-def CCNCN' [HasAxiomDNE 𝓢] : 𝓢 ⊢ (∼φ ➝ ψ) ➝ (∼ψ ➝ φ) := deduct' $ contra_CN' FiniteContext.id
+def CCNCN' [HasAxiomDNE 𝓢] : 𝓢 ⊢ (∼φ ➝ ψ) ➝ (∼ψ ➝ φ) := deduct' $ CN_of_CN_left FiniteContext.id
 @[simp] lemma CCNCN'! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (∼φ ➝ ψ) ➝ (∼ψ ➝ φ) := ⟨CCNCN'⟩
 
 
-def contra_CNN [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼φ ➝ ∼ψ) : 𝓢 ⊢ ψ ➝ φ := C_trans dni (contra_CN' b)
-lemma contra_CNN! [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼φ ➝ ∼ψ) : 𝓢 ⊢! ψ ➝ φ := ⟨contra_CNN b.some⟩
+def C_of_CNN [HasAxiomDNE 𝓢] (b : 𝓢 ⊢ ∼φ ➝ ∼ψ) : 𝓢 ⊢ ψ ➝ φ := C_trans dni (CN_of_CN_left b)
+lemma C!_of_CNN! [HasAxiomDNE 𝓢] (b : 𝓢 ⊢! ∼φ ➝ ∼ψ) : 𝓢 ⊢! ψ ➝ φ := ⟨C_of_CNN b.some⟩
 
-def CCNNC [HasAxiomDNE 𝓢] : 𝓢 ⊢ (∼φ ➝ ∼ψ) ➝ (ψ ➝ φ) :=  deduct' $ contra_CNN FiniteContext.id
+def CCNNC [HasAxiomDNE 𝓢] : 𝓢 ⊢ (∼φ ➝ ∼ψ) ➝ (ψ ➝ φ) :=  deduct' $ C_of_CNN FiniteContext.id
 @[simp] lemma CCNNC! [HasAxiomDNE 𝓢] : 𝓢 ⊢! (∼φ ➝ ∼ψ) ➝ (ψ ➝ φ) := ⟨CCNNC⟩
 
 
@@ -321,8 +321,8 @@ lemma ENN!_of_E! (b : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ∼φ ⭤ ∼ψ := ⟨ENN
 
 def EN_of_EN_right [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ φ ⭤ ∼ψ) : 𝓢 ⊢ ∼φ ⭤ ψ := by
   apply E_intro;
-  . apply contra_CN' $  K_right h;
-  . apply contra_CN $  K_left h;
+  . apply CN_of_CN_left $  K_right h;
+  . apply CN_of_CN_right $  K_left h;
 lemma EN!_of_EN!_right [HasAxiomDNE 𝓢] (h : 𝓢 ⊢! φ ⭤ ∼ψ) : 𝓢 ⊢! ∼φ ⭤ ψ := ⟨EN_of_EN_right h.some⟩
 
 def EN_of_EN_left [HasAxiomDNE 𝓢] (h : 𝓢 ⊢ ∼φ ⭤ ψ) : 𝓢 ⊢ φ ⭤ ∼ψ := E_symm $ EN_of_EN_right $ E_symm h
@@ -466,7 +466,7 @@ lemma KNN!_of_NA! (b : 𝓢 ⊢! ∼(φ ⋎ ψ)) : 𝓢 ⊢! ∼φ ⋏ ∼ψ := 
 
 -- TODO: Actually this can be computable but it's too slow.
 noncomputable def CNKANN [HasAxiomDNE 𝓢] : 𝓢 ⊢ ∼(φ ⋏ ψ) ➝ (∼φ ⋎ ∼ψ) := by
-  apply contra_CN';
+  apply CN_of_CN_left;
   apply deduct';
   exact K_replace (KNN_of_NA $ FiniteContext.id) dne dne;
 @[simp] lemma CNKANN! [HasAxiomDNE 𝓢] : 𝓢 ⊢! ∼(φ ⋏ ψ) ➝ (∼φ ⋎ ∼ψ) := ⟨CNKANN⟩
@@ -535,14 +535,14 @@ noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomLEM 𝓢 where
 
 instance [HasAxiomDNE 𝓢] : HasAxiomEFQ 𝓢 where
   efq φ := by
-    apply contra_CNN;
+    apply C_of_CNN;
     exact C_trans (K_left negEquiv) $ C_trans (C_swap imply₁) (K_right negEquiv);
 
 instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
   elimContra φ ψ := by
     apply deduct';
     have : [∼ψ ➝ ∼φ] ⊢[𝓢] ∼ψ ➝ ∼φ := FiniteContext.byAxm;
-    exact contra_CNN this;
+    exact C_of_CNN this;
 
 end
 
@@ -563,17 +563,33 @@ omit [DecidableEq F] in lemma CConj!_iff_CConj₂ : 𝓢 ⊢! Γ.conj ➝ φ ↔
 
 section Conjunction
 
+/--! note: It may be easier to handle define `List.conj` based on `List.conj' (?)`  -/
+def right_Conj'_intro (φ : F) (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ φ ➝ ψ i) : 𝓢 ⊢ φ ➝ l.conj' ψ :=
+  right_Conj₂_intro φ (l.map ψ) fun χ h ↦
+    let ⟨i, hi, e⟩ := l.chooseX (fun i ↦ ψ i = χ) (by simpa using h)
+    Entailment.cast (by simp [e]) (b i hi)
+lemma right_Conj'!_intro (φ : F) (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢! φ ➝ ψ i) : 𝓢 ⊢! φ ➝ l.conj' ψ :=
+  ⟨right_Conj'_intro φ l ψ fun i hi ↦ (b i hi).get⟩
+
+def left_Conj'_intro {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢ l.conj' φ ➝ φ i := left_Conj₂_intro (by simp; use i)
+lemma left_Conj'!_intro {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢! l.conj' φ ➝ φ i := ⟨left_Conj'_intro h φ⟩
+
 omit [DecidableEq F] in
 lemma right_Fconj!_intro (φ : F) (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ s.conj :=
-  right_Conj_intro! φ s.toList fun ψ hψ ↦ b ψ (by simpa using hψ)
+  right_Conj₂!_intro φ s.toList fun ψ hψ ↦ b ψ (by simpa using hψ)
 
-lemma left_Fconj!_intro {s : Finset F} (h : φ ∈ s) : 𝓢 ⊢! s.conj ➝ φ := left_Conj!_intro <| by simp [h]
+lemma left_Fconj!_intro {s : Finset F} (h : φ ∈ s) : 𝓢 ⊢! s.conj ➝ φ := left_Conj₂!_intro <| by simp [h]
 
-omit [DecidableEq F] in
-lemma right_Iconj!_intro [Fintype ι] (φ : F) (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! φ ➝ ψ i) :
-    𝓢 ⊢! φ ➝ ⩕ i, ψ i := right_Fconj!_intro φ _ (by simpa using b)
+lemma right_Fconj'!_intro (φ : F) (s : Finset ι) (ψ : ι → F) (b : ∀ i ∈ s, 𝓢 ⊢! φ ➝ ψ i) :
+    𝓢 ⊢! φ ➝ ⩕ i ∈ s, ψ i := right_Conj'!_intro φ s.toList ψ (by simpa)
 
-lemma left_Iconj!_intro [Fintype ι] (φ : ι → F) (i) : 𝓢 ⊢! (⩕ i, φ i) ➝ φ i := left_Fconj!_intro <| by simp
+lemma left_Fconj'!_intro {s : Finset ι} (φ : ι → F) {i} (hi : i ∈ s) : 𝓢 ⊢! (⩕ i ∈ s, φ i) ➝ φ i :=
+  left_Conj'!_intro (by simpa) φ
+
+lemma right_Uconj!_intro [Fintype ι] (φ : F) (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! φ ➝ ψ i) :
+    𝓢 ⊢! φ ➝ ⩕ i, ψ i := right_Fconj'!_intro φ Finset.univ ψ (by simpa using b)
+
+lemma left_Uconj!_intro [Fintype ι] (φ : ι → F) (i) : 𝓢 ⊢! (⩕ i, φ i) ➝ φ i := left_Fconj'!_intro _ <| by simp
 
 omit [DecidableEq F] in
 lemma Conj₂!_iff_forall_provable {Γ : List F} : (𝓢 ⊢! ⋀Γ) ↔ (∀ φ ∈ Γ, 𝓢 ⊢! φ) := by
@@ -697,17 +713,53 @@ def left_Disj_intro [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ
 def left_Disj!_intro [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! Γ.disj ➝ φ :=
   ⟨left_Disj_intro Γ fun ψ h ↦ (b ψ h).get⟩
 
-lemma right_Fdisj!_intro (s : Finset F) (h : φ ∈ s) : 𝓢 ⊢! φ ➝ s.disj := right_Disj!_intro _ (by simp [h])
+def right_Disj₂_intro (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ ➝ ⋁Γ :=
+  match Γ with
+  |     [] => by simp at h
+  |    [ψ] => cast (by simp_all) (C_id φ)
+  | ψ :: χ :: Γ =>
+    if e : φ = ψ then cast (by simp [e]) (or₁ : 𝓢 ⊢ φ ➝ φ ⋎ ⋁(χ :: Γ))
+    else
+      have : φ ∈ χ :: Γ := by simpa [e] using h
+      C_trans (right_Disj₂_intro _ this) or₂
+def right_Disj₂!_intro (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! φ ➝ ⋁Γ := ⟨right_Disj₂_intro Γ h⟩
+
+def left_Disj₂_intro [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ ⋁Γ ➝ φ :=
+  match Γ with
+  |     [] => efq
+  |    [ψ] => b _ (by simp)
+  | ψ :: χ :: Γ => left_A_intro (b ψ (by simp)) <| left_Disj₂_intro _ fun ψ h ↦ b ψ (by simp [h])
+omit [DecidableEq F] in
+lemma left_Disj₂!_intro [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! ⋁Γ ➝ φ :=
+  ⟨left_Disj₂_intro Γ fun ψ h ↦ (b ψ h).get⟩
+
+def right_Disj'_intro (φ : ι → F) (l : List ι) (h : i ∈ l) : 𝓢 ⊢ φ i ➝ l.disj' φ :=
+  right_Disj₂_intro (l.map φ) (by simp; exact ⟨i, h, rfl⟩)
+lemma right_Disj'!_intro (φ : ι → F) (l : List ι) (h : i ∈ l) : 𝓢 ⊢! φ i ➝ l.disj' φ := ⟨right_Disj'_intro φ l h⟩
+
+def left_Disj'_intro [HasAxiomEFQ 𝓢] (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ ψ i ➝ φ) : 𝓢 ⊢ l.disj' ψ ➝ φ :=
+  left_Disj₂_intro _ fun χ h ↦
+    let ⟨i, hi, e⟩ := l.chooseX (ψ · = χ) (by simpa using h)
+    Entailment.cast (by simp [e]) (b i hi)
+lemma left_Disj'!_intro [HasAxiomEFQ 𝓢] (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! l.disj' ψ ➝ φ :=
+  ⟨left_Disj'_intro l ψ fun i hi ↦ (b i hi).get⟩
+
+lemma right_Fdisj!_intro (s : Finset F) (h : φ ∈ s) : 𝓢 ⊢! φ ➝ s.disj := right_Disj₂!_intro _ (by simp [h])
 
 omit [DecidableEq F] in
 lemma left_Fdisj!_intro [HasAxiomEFQ 𝓢] (s : Finset F) (b : (ψ : F) → ψ ∈ s → 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! s.disj ➝ φ :=
-  left_Disj!_intro _ fun ψ h ↦ b ψ (by simpa using h)
+  left_Disj₂!_intro _ fun ψ h ↦ b ψ (by simpa using h)
 
-lemma right_Idisj!_intro [Fintype ι] (φ : ι → F) : 𝓢 ⊢! φ i ➝ ⩖ j, φ j := right_Fdisj!_intro _ (by simp)
+lemma right_Fdisj'!_intro (s : Finset ι) (φ : ι → F) {i} (hi : i ∈ s) : 𝓢 ⊢! φ i ➝ ⩖ j ∈ s, φ j :=
+  right_Disj'!_intro _ _ (by simp [hi])
 
-omit [DecidableEq F] in
-lemma left_Idisj!_intro [HasAxiomEFQ 𝓢] [Fintype ι] (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! (⩖ i, ψ i) ➝ φ :=
-  left_Fdisj!_intro _ (by simpa)
+lemma right_Udisj!_intro [Fintype ι] (φ : ι → F) : 𝓢 ⊢! φ i ➝ ⩖ j, φ j := right_Fdisj'!_intro _ _ (by simp)
+
+lemma left_Fdisj'!_intro [HasAxiomEFQ 𝓢] (s : Finset ι) (ψ : ι → F) (b : ∀ i ∈ s, 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! (⩖ i ∈ s, ψ i) ➝ φ :=
+  left_Disj'!_intro _ _ (by simpa)
+
+lemma left_Udisj!_intro [HasAxiomEFQ 𝓢] [Fintype ι] (ψ : ι → F) (b : (i : ι) → 𝓢 ⊢! ψ i ➝ φ) : 𝓢 ⊢! (⩖ i, ψ i) ➝ φ :=
+  left_Fdisj'!_intro _ _ (by simpa)
 
 omit [DecidableEq F] in
 lemma EDisj₂AppendADisj₂Disj₂! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁(Γ ++ Δ) ⭤ ⋁Γ ⋎ ⋁Δ := by
@@ -804,6 +856,19 @@ lemma left_Disj₂!_intro' [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : �
 lemma of_Disj₂!_of_mem_eq [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 ⊢! ⋁Γ) : 𝓢 ⊢! φ := (left_Disj₂!_intro' hd) ⨀ h
 
 end disjunction
+
+section classical
+
+variable [Entailment.Cl 𝓢]
+
+lemma not_imply_prem''! (hpq : 𝓢 ⊢! φ ➝ ψ) (hpnr : 𝓢 ⊢! φ ➝ ∼ξ) : 𝓢 ⊢! φ ➝ ∼(ψ ➝ ξ) :=
+  deduct'! $ (contra! $ CCAN!) ⨀ (NA!_of_KNN! $ K!_intro (dni'! $ of'! hpq ⨀ (by_axm!)) (of'! hpnr ⨀ (by_axm!)))
+
+def ofAOfN (b : 𝓢 ⊢ φ ⋎ ψ) (d : 𝓢 ⊢ ∼φ) : 𝓢 ⊢ ψ := A_cases (C_of_CNN (dhyp d)) (C_id _) b
+
+def of_a!_of_n! (b : 𝓢 ⊢! φ ⋎ ψ) (d : 𝓢 ⊢! ∼φ) : 𝓢 ⊢! ψ := ⟨ofAOfN b.get d.get⟩
+
+end classical
 
 section consistency
 

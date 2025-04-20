@@ -80,11 +80,17 @@ variable {𝓜 : M}
 @[simp] lemma realize_list_conj {l : List F} :
     𝓜 ⊧ l.conj ↔ ∀ φ ∈ l, 𝓜 ⊧ φ := by induction l <;> simp [*]
 
+@[simp] lemma realize_list_conj₂ {l : List F} :
+    𝓜 ⊧ ⋀l ↔ ∀ φ ∈ l, 𝓜 ⊧ φ := by induction l using List.induction_with_singleton <;> simp [*]
+
 @[simp] lemma realize_finset_conj {s : Finset F} :
     𝓜 ⊧ s.conj ↔ ∀ φ ∈ s, 𝓜 ⊧ φ := by simp [Finset.conj]
 
 @[simp] lemma realize_list_disj {l : List F} :
     𝓜 ⊧ l.disj ↔ ∃ φ ∈ l, 𝓜 ⊧ φ := by induction l <;> simp [*]
+
+@[simp] lemma realize_list_disj₂ {l : List F} :
+    𝓜 ⊧ ⋁l ↔ ∃ φ ∈ l, 𝓜 ⊧ φ := by induction l using List.induction_with_singleton <;> simp [*]
 
 @[simp] lemma realize_finset_disj {s : Finset F} :
     𝓜 ⊧ s.disj ↔ ∃ φ ∈ s, 𝓜 ⊧ φ := by simp [Finset.disj]
@@ -123,7 +129,7 @@ lemma realizeSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃f⦄, f ∈
 
 lemma not_satisfiable_finset [LogicalConnective F] [Tarski M] [DecidableEq F] (t : Finset F) :
     ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (∼·)).disj := by
-  simp [Satisfiable, realizeSet_iff, Valid, Finset.map_disj]
+  simp [Satisfiable, realizeSet_iff, Valid]
 
 lemma satisfiableSet_iff_models_nonempty {T : Set F} :
     Satisfiable M T ↔ (models M T).Nonempty :=

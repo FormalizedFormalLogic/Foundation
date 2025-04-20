@@ -361,7 +361,7 @@ instance : Entailment.Minimal T where
       · exact TDerivation.em q
       · exact TDerivation.em r
 
-instance : Entailment.Classical T where
+instance : Entailment.Cl T where
   dne p := by
     simp [Axioms.DNE, Semiformula.imp_def]
     apply TDerivation.or

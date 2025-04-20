@@ -1,8 +1,12 @@
 name = "Foundation"
 defaultTargets = ["Foundation"]
 
-# [leanOptions]
-# linter.flexible = true
+[leanOptions]
+pp.unicode.fun = true
+linter.flexible = true
+linter.refine = true
+linter.oldObtain = true
+linter.style.multiGoal = true
 
 [[require]]
 name = "mathlib"

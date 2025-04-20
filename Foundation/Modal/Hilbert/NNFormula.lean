@@ -42,9 +42,9 @@ lemma iff_neg {φ : NNFormula _} : Hilbert.K ⊢! ∼(φ.toFormula) ⭤ (∼φ).
       apply contra!;
       apply axiomK'!;
       apply nec!;
-      apply contra_CN!';
+      apply CN!_of_CN!_left;
       exact K!_left ih;
-    . apply contra_CN!;
+    . apply CN!_of_CN!_right;
       apply C!_trans (K!_left $ box_duality!) ?_
       apply contra!;
       apply diaK'!;
@@ -54,9 +54,9 @@ lemma iff_neg {φ : NNFormula _} : Hilbert.K ⊢! ∼(φ.toFormula) ⭤ (∼φ).
     . apply C!_trans ?_ (K!_right $ box_duality!);
       apply contra!;
       apply diaK'!;
-      apply contra_CN!';
+      apply CN!_of_CN!_left;
       exact K!_left ih;
-    . apply contra_CN!
+    . apply CN!_of_CN!_right
       apply C!_trans (K!_left $ dia_duality!) ?_;
       apply contra!;
       apply axiomK'!;

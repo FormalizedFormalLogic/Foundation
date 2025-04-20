@@ -59,6 +59,7 @@ instance {F : Frame} : CoeFun (Valuation F) (λ _ => F.World → ℕ → Prop) :
 
 structure Model extends Frame where
   Val : Valuation toFrame
+instance : CoeSort (Model) (Type) := ⟨λ M => M.World⟩
 instance : CoeFun (Model) (λ M => M.World → ℕ → Prop) := ⟨fun m => m.Val⟩
 
 end Kripke

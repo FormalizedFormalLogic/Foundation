@@ -28,7 +28,7 @@ lemma iff_inconsistent_inconsistent {Φ : FormulaFinset α} : FormulaSet.Inconsi
 
 section
 
-variable [Entailment.Classical 𝓢]
+variable [Entailment.Cl 𝓢]
 
 @[simp]
 lemma empty_conisistent [Entailment.Consistent 𝓢] : FormulaFinset.Consistent 𝓢 ∅ := by
@@ -108,7 +108,7 @@ noncomputable def enum (𝓢 : S) (Φ : FormulaFinset α) : (List (Formula α)) 
   | ψ :: qs => next 𝓢 ψ (enum 𝓢 Φ qs)
 local notation:max t"[" l "]" => enum 𝓢 t l
 
-lemma next_consistent [Entailment.Classical 𝓢]
+lemma next_consistent [Entailment.Cl 𝓢]
   (Φ_consis : FormulaFinset.Consistent 𝓢 Φ) (φ : Formula α)
   : FormulaFinset.Consistent 𝓢 (next 𝓢 φ Φ) := by
   simp only [next];
@@ -123,7 +123,7 @@ lemma next_consistent [Entailment.Classical 𝓢]
     have : ↑Φ *⊢[𝓢]! ⊥ := neg_complement_derive_bot h₁ h₂;
     contradiction;
 
-lemma enum_consistent [Entailment.Classical 𝓢]
+lemma enum_consistent [Entailment.Cl 𝓢]
   (Φ_consis : Φ.Consistent 𝓢) {l : List (Formula α)} : FormulaFinset.Consistent 𝓢 (Φ[l]) := by
   induction l with
   | nil => exact Φ_consis;
@@ -175,7 +175,7 @@ end exists_consistent_complementary_closed
 
 open exists_consistent_complementary_closed in
 lemma exists_consistent_complementary_closed
-  [Entailment.Classical 𝓢]
+  [Entailment.Cl 𝓢]
   {S : FormulaFinset α}
   (h_sub : P ⊆ S⁻) (P_consis : FormulaFinset.Consistent 𝓢 P)
   : ∃ P', P ⊆ P' ∧ FormulaFinset.Consistent 𝓢 P' ∧ P'.ComplementaryClosed S := by
@@ -213,6 +213,7 @@ open Formula (atom)
 open FormulaFinset
 
 variable {Φ Ψ : FormulaFinset α}
+variable {ψ χ : Formula α}
 
 abbrev ComplementClosedConsistentFinset (𝓢 : S) (Ψ : FormulaFinset α) := { T : FormulaFinset α // (Consistent 𝓢 T) ∧ (T.ComplementaryClosed Ψ)}
 
@@ -243,7 +244,7 @@ lemma equality_def : X₁ = X₂ ↔ X₁.1 = X₂.1 := by
   . intro h; cases h; rfl;
   . intro h; cases X₁; cases X₂; simp_all;
 
-variable [Entailment.Classical 𝓢]
+variable [Entailment.Cl 𝓢]
 
 lemma lindenbaum
   {Φ Ψ : FormulaFinset α}
@@ -254,7 +255,7 @@ lemma lindenbaum
 
 noncomputable instance [Entailment.Consistent 𝓢] : Inhabited (ComplementClosedConsistentFinset 𝓢 Ψ) := ⟨lindenbaum (Φ := ∅) (Ψ := Ψ) (by simp) (FormulaFinset.empty_conisistent) |>.choose⟩
 
-lemma membership_iff (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) := by
+lemma membership_iff (hq_sub : ψ ∈ Ψ := by subformula) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) := by
   constructor;
   . intro h; exact Context.by_axm! h;
   . intro hp;
@@ -267,13 +268,14 @@ lemma membership_iff (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) :=
     have := complement_derive_bot hp hnp;
     simpa;
 
-lemma mem_verum (h : ⊤ ∈ Ψ) : ⊤ ∈ X := by
+lemma mem_verum (h : ⊤ ∈ Ψ := by subformula) : ⊤ ∈ X := by
   apply membership_iff h |>.mpr;
   exact verum!;
 
 @[simp] lemma mem_falsum : ⊥ ∉ X := FormulaSet.not_mem_falsum_of_consistent X.consistent
 
-lemma iff_mem_compl (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (-ψ ∉ X) := by
+
+lemma iff_mem_compl (hq_sub : ψ ∈ Ψ := by subformula) : (ψ ∈ X) ↔ (-ψ ∉ X) := by
   constructor;
   . intro hq; replace hq := membership_iff hq_sub |>.mp hq;
     by_contra hnq;
@@ -302,7 +304,7 @@ lemma iff_mem_compl (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (-ψ ∉ X) := by
   . intro h; exact mem_of_not_mem_compl (by assumption) h;
 
 lemma iff_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ) (hsub_q : ψ ∈ Ψ := by trivial)  (hsub_r : χ ∈ Ψ := by trivial)
+  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by subformula) (hsub_q : ψ ∈ Ψ := by subformula)  (hsub_r : χ ∈ Ψ := by subformula)
   : ((ψ ➝ χ) ∈ X) ↔ (ψ ∈ X) → (-χ ∉ X) := by
   constructor;
   . intro hqr hq;
@@ -328,9 +330,9 @@ lemma iff_mem_imp
       exact C!_of_conseq! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
 
 lemma iff_not_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ) (hsub_q : ψ ∈ Ψ := by trivial)  (hsub_r : χ ∈ Ψ := by trivial)
+  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by subformula) (hsub_q : ψ ∈ Ψ := by subformula)  (hsub_r : χ ∈ Ψ := by subformula)
   : ((ψ ➝ χ) ∉ X) ↔ (ψ ∈ X) ∧ (-χ ∈ X) := by
-  simpa using @iff_mem_imp α (𝓢 := 𝓢) _ _ _ Ψ X _ ψ χ hsub_qr hsub_q hsub_r |>.not;
+  simpa using iff_mem_imp (Ψ := Ψ) |>.not;
 
 instance : Finite (ComplementClosedConsistentFinset 𝓢 Ψ) := by
   let f : ComplementClosedConsistentFinset 𝓢 Ψ → (Finset.powerset (Ψ⁻)) := λ X => ⟨X, by simpa using X.closed.subset⟩

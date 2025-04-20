@@ -60,6 +60,13 @@ class FormalizedLoeb (𝔅 : ProvabilityPredicate T₀ T) where
 class Rosser (𝔅 : ProvabilityPredicate T₀ T) where
   protected Ro {σ : Sentence L} : T ⊢!. ∼σ → T₀ ⊢!. ∼(𝔅 σ)
 
+class Sound (𝔅 : ProvabilityPredicate T₀ T) (N : outParam Type*) [Nonempty N] [Structure L N] where
+  protected sound {σ : Sentence L} : N ⊧ₘ₀ 𝔅 σ ↔ T ⊢!. σ
+
+protected alias sound := Sound.sound
+
+attribute [simp] sound
+
 section
 
 open LO.Entailment
@@ -96,6 +103,10 @@ lemma D2' [𝔅.HBL2] [Entailment.ModusPonens T] : T₀ ⊢!. 𝔅 (σ ➝ τ) �
   exact 𝔅.D2 ⨀ h;
 
 lemma prov_distribute_imply [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) : T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := 𝔅.D2' $ 𝔅.D1 h
+
+lemma prov_distribute_imply' [T₀ ⪯ T] [𝔅.HBL2] (h : T₀ ⊢!. σ ➝ τ) : T₀ ⊢!. (𝔅 σ) ➝ (𝔅 τ) := prov_distribute_imply $ WeakerThan.pbl h
+
+lemma prov_distribute_imply'' [T₀ ⪯ T] [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) : T ⊢!. (𝔅 σ) ➝ (𝔅 τ) := WeakerThan.pbl $ prov_distribute_imply h
 
 lemma prov_distribute_iff [𝔅.HBL2] (h : T ⊢!. σ ⭤ τ) : T₀ ⊢!. (𝔅 σ) ⭤ (𝔅 τ) := by
   apply E!_intro;
@@ -143,7 +154,7 @@ variable [T₀ ⪯ T]
 
 private lemma goedel_specAux₁ : T ⊢!. γ ⭤ ∼𝔅 γ := WeakerThan.pbl (𝓢 := T₀.alt) goedel_spec
 
-private lemma goedel_specAux₂ [L.DecidableEq] : T ⊢!. ∼γ ➝ 𝔅 γ := contra_CN!' $ K!_right goedel_specAux₁
+private lemma goedel_specAux₂ [L.DecidableEq] : T ⊢!. ∼γ ➝ 𝔅 γ := CN!_of_CN!_left $ K!_right goedel_specAux₁
 
 end GoedelSentence
 
@@ -199,7 +210,7 @@ lemma formalized_consistent_of_existance_unprovable : T₀ ⊢!. ∼(𝔅 σ) �
 private lemma consistency_lemma_1 [T₀ ⪯ U] : (U ⊢!. 𝔅.con ➝ ∼(𝔅 σ)) ↔ (U ⊢!. (𝔅 σ) ➝ 𝔅 (∼σ)) := by
   constructor;
   . intro H;
-    exact contra_CNN! $ C!_trans (WeakerThan.pbl (𝓢 := T₀.alt) formalized_consistent_of_existance_unprovable) H;
+    exact C!_of_CNN! $ C!_trans (WeakerThan.pbl (𝓢 := T₀.alt) formalized_consistent_of_existance_unprovable) H;
   . intro H
     apply contra!
     have : T₀ ⊢!. (𝔅 σ) ⋏ 𝔅 (∼σ) ➝ 𝔅 ⊥ := C!_trans prov_collect_and $ prov_distribute_imply lac!;
@@ -223,7 +234,7 @@ variable [T₀ ⪯ T] [Diagonalization T₀]
 /-- Formalized First Incompleteness Theorem -/
 theorem formalized_unprovable_goedel : T ⊢!. 𝔅.con ➝ ∼𝔅 γ := by
   have h₁ : T₀ ⊢!. 𝔅 γ ➝ 𝔅 (𝔅 γ) := 𝔅.D3;
-  have h₂ : T ⊢!. 𝔅 γ ➝ ∼γ := WeakerThan.pbl $ contra_CN! $ K!_left goedel_spec;
+  have h₂ : T ⊢!. 𝔅 γ ➝ ∼γ := WeakerThan.pbl $ CN!_of_CN!_right $ K!_left goedel_spec;
   have h₃ : T₀ ⊢!. 𝔅 (𝔅 γ) ➝ 𝔅 (∼γ) := prov_distribute_imply h₂;
   exact WeakerThan.pbl $ contra! $ consistency_lemma_2 ⨀ (C!_trans h₁ h₃);
 
@@ -300,7 +311,7 @@ variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL] [𝔅.Go
 lemma formalized_unprovable_not_consistency
   : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
-  have : T ⊢!. ∼𝔅.con := Loeb.LT $ contra_CN! hC;
+  have : T ⊢!. ∼𝔅.con := Loeb.LT $ CN!_of_CN!_right hC;
   have : T ⊬. ∼𝔅.con := unrefutable_consistency;
   contradiction;
 

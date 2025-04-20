@@ -174,9 +174,9 @@ protected class Minimal (𝓢 : S) extends
               HasAxiomAndElim 𝓢, HasAxiomAndInst 𝓢,
               HasAxiomOrInst 𝓢, HasAxiomOrElim 𝓢
 
-protected class Intuitionistic (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomEFQ 𝓢
+protected class Int (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomEFQ 𝓢
 
-protected class Classical (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomDNE 𝓢
+protected class Cl (𝓢 : S) extends Entailment.Minimal 𝓢, HasAxiomDNE 𝓢
 
 
 section
@@ -327,7 +327,7 @@ def right_Conj_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢
   match Γ with
   |     [] => C_of_conseq verum
   | ψ :: Γ => CK_of_C_of_C (b ψ (by simp)) (right_Conj_intro φ Γ (fun ψ hq ↦ b ψ (by simp [hq])))
-def right_Conj_intro! (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ Γ.conj := ⟨right_Conj_intro φ Γ fun ψ h ↦ (b ψ h).get⟩
+def right_Conj!_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ Γ.conj := ⟨right_Conj_intro φ Γ fun ψ h ↦ (b ψ h).get⟩
 
 def CConjConj [DecidableEq F] (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := right_Conj_intro _ _ (fun _ hq ↦ left_Conj_intro (h hq))
 
@@ -382,7 +382,7 @@ def Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T) (f : G →ˡ
   or₂ φ ψ := e _ (by simpa using or₂)
   or₃ φ ψ χ := e _ (by simpa using or₃)
 
-def Classical.ofEquiv (𝓢 : S) [Entailment.Classical 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢ f φ ≃ 𝓣 ⊢ φ) : Entailment.Classical 𝓣 where
+def Cl.ofEquiv (𝓢 : S) [Entailment.Cl 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢ f φ ≃ 𝓣 ⊢ φ) : Entailment.Cl 𝓣 where
   mdp {φ ψ dpq dp} := (e ψ) (
     let d : 𝓢 ⊢ f φ ➝ f ψ := by simpa using (e (φ ➝ ψ)).symm dpq
     d ⨀ ((e φ).symm dp))

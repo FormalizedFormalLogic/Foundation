@@ -20,7 +20,7 @@ instance [DecidableEq α] [hEfq : H.HasEFQ] : Entailment.HasAxiomEFQ H where
     . exact hEfq.mem_efq;
     . use (λ b => if hEfq.p = b then φ else (.atom b));
       simp;
-instance [DecidableEq α] [H.HasEFQ] : Entailment.Intuitionistic H where
+instance [DecidableEq α] [H.HasEFQ] : Entailment.Int H where
 
 end
 

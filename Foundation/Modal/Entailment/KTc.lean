@@ -19,7 +19,7 @@ instance : HasAxiomFive 𝓢 := ⟨fun _ ↦ KTc.axiomFive⟩
 
 protected def axiomDiaT : 𝓢 ⊢ ◇φ ➝ φ := by
   apply C_trans (K_left diaDuality) ?_;
-  apply contra_CN';
+  apply CN_of_CN_left;
   exact axiomTc;
 instance : HasAxiomDiaT 𝓢 := ⟨fun _ ↦ KTc.axiomDiaT⟩
 
@@ -30,7 +30,7 @@ namespace KTc'
 
 variable [Entailment.Modal.KTc' 𝓢]
 
-protected def axiomTc : 𝓢 ⊢ φ ➝ □φ := C_trans (contra_CNN (C_trans (K_right diaDuality) diaT)) box_dne
+protected def axiomTc : 𝓢 ⊢ φ ➝ □φ := C_trans (C_of_CNN (C_trans (K_right diaDuality) diaT)) box_dne
 instance : HasAxiomTc 𝓢 := ⟨fun _ ↦ KTc'.axiomTc⟩
 
 end KTc'

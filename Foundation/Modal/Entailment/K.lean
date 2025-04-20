@@ -57,8 +57,8 @@ def multiDiaDuality : 𝓢 ⊢ ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := by
     apply ENN_of_E;
     apply boxIff';
     apply E_intro;
-    . exact contra_CN' $ K_right ih;
-    . exact contra_CN $ K_left ih;
+    . exact CN_of_CN_left $ K_right ih;
+    . exact CN_of_CN_right $ K_left ih;
 lemma multidia_duality! : 𝓢 ⊢! ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := ⟨multiDiaDuality⟩
 
 lemma multidia_duality'! : 𝓢 ⊢! ◇^[n]φ ↔ 𝓢 ⊢! ∼(□^[n](∼φ)) := by
@@ -358,7 +358,7 @@ lemma distribute_multidia_or! : 𝓢 ⊢! ◇^[n](φ ⋎ ψ) ➝ ◇^[n]φ ⋎ �
   | succ n ih =>
     suffices 𝓢 ⊢! ◇◇^[n](φ ⋎ ψ) ➝ ◇◇^[n]φ ⋎ ◇◇^[n]ψ by simpa [Dia.multidia_succ];
     apply C!_trans (K!_left dia_duality!);
-    apply contra_CN!';
+    apply CN!_of_CN!_left;
     apply C!_trans CNAKNN!;
     suffices 𝓢 ⊢! □(∼◇^[n]φ ⋏ ∼◇^[n]ψ) ➝ □(∼◇^[n](φ ⋎ ψ)) by
       apply C!_trans ?_ this;
@@ -400,7 +400,7 @@ lemma iff_top_right! (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ⊤ ⭤ φ := iff_symm'! $ i
 @[simp]
 lemma iff_not_bot_top! : 𝓢 ⊢! ∼⊤ ⭤ ⊥ := by
   apply E!_intro;
-  . apply contra_CN!';
+  . apply CN!_of_CN!_left;
     apply C!_of_conseq!;
     simp;
   . exact efq!;

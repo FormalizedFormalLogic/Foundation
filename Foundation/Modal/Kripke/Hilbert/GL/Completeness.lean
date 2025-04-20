@@ -54,19 +54,15 @@ lemma truthlemma_lemma1
   . apply Finset.mem_union.mpr;
     tauto;
   . have := X.closed.subset hp;
-    have := FormulaFinset.complementary_mem_box (by apply subformulas.mem_imp₁) this;
+    have := FormulaFinset.complementary_mem_box (by subformula) this;
     apply Finset.mem_union.mpr;
-    left;
-    exact subformulas.mem_box this;
+    subformula;
   . exact X.closed.subset hr;
   . apply Finset.mem_union.mpr;
     right;
     apply Finset.mem_image.mpr;
     use ψ;
-    constructor;
-    . exact subformulas.mem_box hq;
-    . tauto;
-
+    subformula;
 
 lemma truthlemma_lemma2
   {X : ComplementClosedConsistentFinset Hilbert.GL φ.subformulas}
@@ -127,34 +123,38 @@ lemma truthlemma_lemma2
   have : □ψ ∈ X := membership_iff hq₁ |>.mpr this;
   contradiction;
 
+-- TODO: `subformula` tactic cannot handle, I don't know why.
 lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformulas) :
   Satisfies (miniCanonicalModel φ) X ψ ↔ ψ ∈ X := by
   induction ψ using Formula.rec' generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>
+    have : ψ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.1;
+    have : χ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.2;
     constructor;
     . contrapose;
       intro h;
       apply Satisfies.imp_def.not.mpr;
       push_neg;
       constructor;
-      . apply ihq (subformulas.mem_imp₁ q_sub) |>.mpr;
-        exact iff_not_mem_imp q_sub (subformulas.mem_imp₁ q_sub) (subformulas.mem_imp₂ q_sub) |>.mp h |>.1;
-      . apply ihr (subformulas.mem_imp₂ q_sub) |>.not.mpr;
-        have := iff_not_mem_imp q_sub (subformulas.mem_imp₁ q_sub) (subformulas.mem_imp₂ q_sub) |>.mp h |>.2;
-        exact iff_mem_compl (subformulas.mem_imp₂ q_sub) |>.not.mpr (by simpa using this);
+      . apply ihq (by subformula) |>.mpr;
+        exact iff_not_mem_imp q_sub |>.mp h |>.1;
+      . apply ihr (by subformula) |>.not.mpr;
+        have := iff_not_mem_imp q_sub |>.mp h |>.2;
+        exact iff_mem_compl (by subformula) |>.not.mpr (by simpa using this);
     . contrapose;
       intro h;
       replace h := Satisfies.imp_def.not.mp h; push_neg at h;
       obtain ⟨hq, hr⟩ := h;
-      replace hq : ψ ∈ X := ihq (subformulas.mem_imp₁ q_sub) |>.mp hq;
-      replace hr : χ ∉ X := ihr (subformulas.mem_imp₂ q_sub) |>.not.mp hr;
-      apply iff_not_mem_imp q_sub (subformulas.mem_imp₁ q_sub) (subformulas.mem_imp₂ q_sub) |>.mpr;
+      replace hq : ψ ∈ X := ihq (by subformula) |>.mp hq;
+      replace hr : χ ∉ X := ihr (by subformula) |>.not.mp hr;
+      apply iff_not_mem_imp q_sub |>.mpr;
       constructor;
       . assumption;
-      . simpa using iff_mem_compl (subformulas.mem_imp₂ q_sub) |>.not.mp (by simpa using hr);
+      . simpa using iff_mem_compl (by subformula) |>.not.mp (by simpa using hr);
   | hbox ψ ih =>
+    have : ψ ∈ φ.subformulas := subformulas.mem_box q_sub;
     constructor;
     . contrapose;
       intro h;
@@ -168,13 +168,13 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
         . aesop;
         . aesop;
       . apply ih ?_ |>.not.mpr;
-        . apply iff_mem_compl (subformulas.mem_box q_sub) |>.not.mpr;
+        . apply iff_mem_compl (by subformula) |>.not.mpr;
           push_neg;
           apply hY₁.2;
           simp;
-        . exact subformulas.mem_box q_sub;
+        . subformula;
     . intro h Y RXY;
-      apply ih (subformulas.mem_box q_sub) |>.mpr;
+      apply ih (by subformula) |>.mpr;
       refine RXY.1 ψ ?_ h |>.1;
       assumption;
 
@@ -193,14 +193,14 @@ instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_trans_irr
         simp only [FormulaFinset.complementary, Finset.singleton_subset_iff, Finset.mem_union, Finset.mem_image];
         right;
         use φ;
-        constructor <;> simp;
+        subformula;
       )
       (FormulaFinset.unprovable_iff_singleton_compl_consistent.mpr h);
     use (miniCanonicalModel φ), X;
     constructor;
     . tauto;
-    . apply truthlemma (by simp) |>.not.mpr;
-      exact iff_mem_compl (by simp) |>.not.mpr $ by
+    . apply truthlemma (by subformula) |>.not.mpr;
+      exact iff_mem_compl (by subformula) |>.not.mpr $ by
         push_neg;
         apply hX₁;
         tauto;

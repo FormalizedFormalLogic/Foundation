@@ -1,5 +1,6 @@
 import Foundation.Meta.Kite.Generator
 import Foundation.Modal.Logic.WellKnown
+-- import Foundation.Modal.Logic.S
 
 namespace LO.Meta.Kite.Modal
 
@@ -38,7 +39,10 @@ def kite : Kite Vertex EdgeType where
   vertices := [
     ⟨q(Logic.Empty)⟩,
     ⟨q(Logic.GL)⟩,
+    ⟨q(Logic.GLPoint3)⟩,
     ⟨q(Logic.Grz)⟩,
+    ⟨q(Logic.GrzPoint2)⟩,
+    ⟨q(Logic.GrzPoint3)⟩,
     ⟨q(Logic.K)⟩,
     ⟨q(Logic.K4)⟩,
     ⟨q(Logic.K45)⟩,
@@ -57,6 +61,7 @@ def kite : Kite Vertex EdgeType where
     ⟨q(Logic.KT)⟩,
     ⟨q(Logic.KTB)⟩,
     ⟨q(Logic.KTc)⟩,
+    -- ⟨q(Logic.S)⟩,
     ⟨q(Logic.S4)⟩,
     ⟨q(Logic.S4Point2)⟩,
     ⟨q(Logic.S4Point3)⟩,

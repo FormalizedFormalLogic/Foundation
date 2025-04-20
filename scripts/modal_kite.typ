@@ -22,7 +22,7 @@ Kite of Modal Logics
   raw(
     "
   digraph ModalLogicsKite {
-    rankdir = LR;
+    rankdir = BT;
 
     node [
       shape=none
@@ -40,12 +40,17 @@ Kite of Modal Logics
     {rank = same; \"LO.Modal.Logic.KD\"; \"LO.Modal.Logic.KB\"; \"LO.Modal.Logic.K4\"; \"LO.Modal.Logic.K5\";}
     {rank = same; \"LO.Modal.Logic.KT\"; \"LO.Modal.Logic.KDB\"; \"LO.Modal.Logic.KD4\"; \"LO.Modal.Logic.KD5\"; \"LO.Modal.Logic.K45\";}
     {rank = same; \"LO.Modal.Logic.KTB\"; \"LO.Modal.Logic.S4\"; \"LO.Modal.Logic.KD45\"; \"LO.Modal.Logic.KB4\";}
+    {rank = same; \"LO.Modal.Logic.K4Point2\"; \"LO.Modal.Logic.K4Point3\";}
+    {rank = same; \"LO.Modal.Logic.GL\"; \"LO.Modal.Logic.Grz\";}
+    {rank = same; \"LO.Modal.Logic.GLPoint3\"; \"LO.Modal.Logic.GrzPoint3\";}
   "
       + arrows.join("\n")
       + "}",
   ),
   labels: (
     "LO.Modal.Logic.Dum": $Logic("Dum")$,
+    "LO.Modal.Logic.DumPoint2": $Logic("Dum.2")$,
+    "LO.Modal.Logic.DumPoint3": $Logic("Dum.3")$,
     "LO.Modal.Logic.Empty": $emptyset$,
     "LO.Modal.Logic.GL": $Logic("GL")$,
     "LO.Modal.Logic.GLPoint2": $Logic("GL.2")$,
@@ -57,12 +62,12 @@ Kite of Modal Logics
     "LO.Modal.Logic.K": $Logic("K")$,
     "LO.Modal.Logic.K4": $Logic("K4")$,
     "LO.Modal.Logic.K45": $Logic("K45")$,
+    "LO.Modal.Logic.K4M": $Logic("K4M")$,
     "LO.Modal.Logic.K4Point1": $Logic("K4.1")$,
     "LO.Modal.Logic.K4Point2": $Logic("K4.2")$,
     "LO.Modal.Logic.K4Point2Z": $Logic("K4.2Z")$,
     "LO.Modal.Logic.K4Point3": $Logic("K4.3")$,
     "LO.Modal.Logic.K4Point3Z": $Logic("K4.3Z")$,
-    "LO.Modal.Logic.K4M": $Logic("K4M")$,
     "LO.Modal.Logic.K4Z": $Logic("K4Z")$,
     "LO.Modal.Logic.K5": $Logic("K5")$,
     "LO.Modal.Logic.KB": $Logic("KB")$,
@@ -78,21 +83,20 @@ Kite of Modal Logics
     "LO.Modal.Logic.KT": $Logic("KT")$,
     "LO.Modal.Logic.KTB": $Logic("KTB")$,
     "LO.Modal.Logic.KTc": $Logic("KTc")$,
+    "LO.Modal.Logic.S": $Logic("S")$,
     "LO.Modal.Logic.S4": $Logic("S4")$,
+    "LO.Modal.Logic.S4M": $Logic("S4M")$,
     "LO.Modal.Logic.S4Point1": $Logic("S4.1")$,
     "LO.Modal.Logic.S4Point2": $Logic("S4.2")$,
+    "LO.Modal.Logic.S4Point2M": $Logic("S4.2M")$,
+    "LO.Modal.Logic.S4Point2Point4M": $Logic("S4.2.4M")$,
     "LO.Modal.Logic.S4Point3": $Logic("S4.3")$,
     "LO.Modal.Logic.S4Point4": $Logic("S4.4")$,
-    "LO.Modal.Logic.S4Point2Point4M": $Logic("S4.2.4M")$,
     "LO.Modal.Logic.S4Point9": $Logic("S4.4") + Axiom("M18")$,
-    "LO.Modal.Logic.S4M": $Logic("S4M")$,
     "LO.Modal.Logic.S5": $Logic("S5")$,
     "LO.Modal.Logic.Triv": $Logic("Triv")$,
     "LO.Modal.Logic.Univ": $bot$,
     "LO.Modal.Logic.Ver": $Logic("Ver")$,
-    "LO.Modal.Logic.S4Point2M": $Logic("S4.2M")$,
-    "LO.Modal.Logic.DumPoint2": $Logic("Dum.2")$,
-    "LO.Modal.Logic.DumPoint3": $Logic("Dum.3")$,
   ),
   width: 480pt,
 )

@@ -21,7 +21,7 @@ theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.letterless) : φ ∈ 
     have : ◇φᵍ ∈ Modal.Logic.Triv := Modal.Logic.S4_ssubset_Triv.1 this;
     have : φᵍ ∈ Modal.Logic.Triv := diaT'! this;
     have : Hilbert.Cl ⊢! φᵍᵀ.toPropFormula _ := Modal.Hilbert.Triv.iff_provable_Cl.mp this;
-    have : Semantics.Valid (Classical.Valuation ℕ) (φᵍᵀ.toPropFormula _) := Hilbert.Cl.Classical.soundness this;
+    have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (φᵍᵀ.toPropFormula _) := Hilbert.Cl.soundness this;
     have : φᵍ ∈ Modal.Logic.KD := Modal.Logic.provable_KD_of_classical_tautology (Formula.goedelTranslate.letterless hφ) this;
     have : φᵍ ∈ Modal.Logic.S4 := Modal.Logic.KD_ssubset_S4.1 this;
     exact Modal.modalCompanion_Int_S4.companion.mpr this;

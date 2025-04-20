@@ -1,6 +1,7 @@
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.Logic.Sublogic.ModalCube
 import Foundation.Modal.Kripke.Hilbert.S5
+import Foundation.Modal.Boxdot.Ver_Triv
 
 
 namespace LO
@@ -27,7 +28,7 @@ lemma Logic.Cl.smallestMC.mem_diabox_box : (◇□(.atom 0) ➝ □(.atom 0)) �
   apply C!_trans ?_ or_comm!;
   apply CAA!_of_C!_of_C!;
   . simp;
-  . apply contra_CN!;
+  . apply CN!_of_CN!_right;
     exact diaDuality_mp!;
 
 lemma Logic.Cl.smallestMC.mem_AxiomFive : (◇(.atom 0) ➝ □◇(.atom 0)) ∈ Logic.Cl.smallestMC := by
@@ -38,9 +39,9 @@ lemma Logic.Cl.smallestMC.mem_AxiomFive : (◇(.atom 0) ➝ □◇(.atom 0)) ∈
   apply C!_trans CCAN! ?_;
   apply C!_trans ?_ or_comm!;
   apply CAA!_of_C!_of_C!;
-  . apply contra_CN!';
+  . apply CN!_of_CN!_left;
     exact diaDuality_mp!;
-  . apply contra_CN!;
+  . apply CN!_of_CN!_right;
     exact diaDuality_mp!;
 
 end Propositional
@@ -160,5 +161,12 @@ instance modalCompanion_Cl_Triv : ModalCompanion Logic.Cl Logic.Triv := by
 
 end S5Grz
 
+
+section boxdot
+
+theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : φ ∈ Logic.Cl ↔ φᵍᵇ ∈ Logic.Ver := by
+  exact Iff.trans modalCompanion_Cl_Triv.companion Hilbert.iff_boxdotTranslated_Ver_Triv.symm
+
+end boxdot
 
 end LO.Modal

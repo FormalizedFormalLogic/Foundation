@@ -68,7 +68,7 @@ namespace Derivation
 
 variable {L : Language} [L.DecidableEq] {T : Theory L}
 
-open Rewriting Entailment Entailment.FiniteContext HilbertProofᵢ
+open Rewriting LO.Entailment Entailment.FiniteContext HilbertProofᵢ
 
 noncomputable
 def negDoubleNegation : (φ : SyntacticFormula L) → 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ
@@ -102,6 +102,8 @@ def negDoubleNegation : (φ : SyntacticFormula L) → 𝐌𝐢𝐧¹ ⊢ ∼φ�
     this
   termination_by φ => φ.complexity
 
+open Entailment
+
 noncomputable
 def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] ⊥
   | axL Γ r v            => nthAxm 1 ⨀ nthAxm 0
@@ -114,7 +116,7 @@ def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹
   | @or _ _ Γ φ ψ d      =>
     have : (∼Γ)ᴺ ⊢[𝐌𝐢𝐧¹] (∼ψ)ᴺ ➝ (∼φ)ᴺ ➝ ⊥ := deduct <| deduct  <| goedelGentzen d
     have : ((∼φ)ᴺ ⋏ (∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[𝐌𝐢𝐧¹] ⊥ :=
-      Entailment.FiniteContext.weakening (by simp) this ⨀ (K_right (nthAxm 0)) ⨀ (K_left (nthAxm 0))
+      Entailment.FiniteContext.weakening (by simp) this ⨀ (Entailment.K_right (nthAxm 0)) ⨀ (Entailment.K_left (nthAxm 0))
     this
   | @all _ _ Γ φ d       =>
     have eΓ : (∼Γ⁺)ᴺ = ((∼Γ)ᴺ)⁺ := by

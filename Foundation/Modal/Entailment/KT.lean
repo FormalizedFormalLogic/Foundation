@@ -30,7 +30,7 @@ namespace KT'
 
 variable [Entailment.Modal.KT' 𝓢]
 
-protected def axiomT : 𝓢 ⊢ □φ ➝ φ := C_trans box_dni (contra_CNN (C_trans diaTc diaDuality_mp))
+protected def axiomT : 𝓢 ⊢ □φ ➝ φ := C_trans box_dni (C_of_CNN (C_trans diaTc diaDuality_mp))
 
 instance : HasAxiomT 𝓢 := ⟨fun _ ↦ KT'.axiomT⟩
 instance : Entailment.Modal.KT 𝓢 where
