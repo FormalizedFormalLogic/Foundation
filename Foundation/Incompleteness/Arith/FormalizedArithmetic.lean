@@ -284,7 +284,7 @@ noncomputable def ballIntro (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
     have : T ⊢ φ.shift^/[(i : ⌜ℒₒᵣ⌝.Term).sing] := by
       simpa [Language.TSemifromula.shift_substs] using shift (bs i hi)
     exact of (replace T φ.shift ↑i &'0) ⨀ e ⨀ of this
-  exact A_replace this (K_right (nltNumeral T (&'0) n))
+  exact A_replace_left this (K_right (nltNumeral T (&'0) n))
 
 lemma ball_intro! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
     (bs : ∀ i < n, T ⊢! φ ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :

@@ -190,7 +190,7 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ =
         by_cases e : k₁ = k₂
         · rcases e with rfl
           exact match decEq r r₂ with
-          | isTrue h  => by simp [h]; exact Matrix.deCVec _ _ (fun i => decEq (v i) (v₂ i))
+          | isTrue h  => by simp [h]; exact Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
           | isFalse h => isFalse (by simp [h])
         · exact isFalse (by simp [e])
   | _, φ ⋏ ψ,    χ => by

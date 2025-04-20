@@ -187,7 +187,7 @@ lemma quote_image_shift [L.DecidableEq] (Γ : Finset (SyntacticFormula L)) : (L.
       ⟨by simp [fstidx_quote], ih⟩
       ⟨by simp [fstidx_quote], ihn⟩
 
-@[simp] lemma derivatioNOf_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (T.codeIn V).DerivatioNOf ⌜d⌝ ⌜Γ⌝ :=
+@[simp] lemma derivatioNOf_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (T.codeIn V).DerivationOf ⌜d⌝ ⌜Γ⌝ :=
   ⟨by simp, by simp⟩
 
 lemma derivable_of_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (T.codeIn V).Derivable ⌜Γ⌝ :=

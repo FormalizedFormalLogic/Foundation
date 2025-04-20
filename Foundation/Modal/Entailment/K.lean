@@ -209,7 +209,7 @@ lemma distribute_multibox_conj! : 𝓢 ⊢! □^[n]⋀Γ ➝ ⋀□'^[n]Γ := by
       rcases hψ with (rfl | hψ)
       . apply and₁!;
       . obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_multibox hψ;
-        exact left_K!_intro_right $ left_Conj₂_intro! hψ;
+        exact left_K!_intro_right $ left_Conj₂!_intro hψ;
 
 @[simp] lemma distribute_box_conj! : 𝓢 ⊢! □(⋀Γ) ➝ ⋀(□'Γ) := distribute_multibox_conj! (n := 1)
 
@@ -273,7 +273,7 @@ lemma collect_multibox_conj! : 𝓢 ⊢! ⋀□'^[n]Γ ➝ □^[n]⋀Γ := by
   | hsingle => simp;
   | hcons φ Γ h ih =>
     simp_all only [ne_eq, not_false_eq_true, List.conj₂_cons_nonempty];
-    refine C!_trans (right_K!_intro (left_Conj₂_intro! ?_) (C!_trans ?_ ih)) collect_multibox_and!;
+    refine C!_trans (right_K!_intro (left_Conj₂!_intro ?_) (C!_trans ?_ ih)) collect_multibox_and!;
     . simp;
     . simp [List.multibox, List.multibox_nonempty h];
 

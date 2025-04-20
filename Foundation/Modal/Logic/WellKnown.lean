@@ -70,7 +70,7 @@ lemma KB.eq_SymmetricKripkeFrameClass_Logic : Logic.KB = Kripke.FrameClass.symm.
 
 
 protected abbrev KB4 : Logic := Hilbert.KB4.logic
-lemma KB4.eq_ReflexivE_transitiveKripkeFrameClass_Logic : Logic.KB4 = Kripke.FrameClass.symm_trans.logic
+lemma KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic : Logic.KB4 = Kripke.FrameClass.symm_trans.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
@@ -110,22 +110,22 @@ lemma KT.eq_ReflexiveKripkeFrameClass_Logic : Logic.KT = Kripke.FrameClass.refl.
 
 
 protected abbrev KTB : Logic := Hilbert.KTB.logic
-lemma KTB.eq_ReflexivE_symmetricKripkeFrameClass_Logic : Logic.KTB = Kripke.FrameClass.refl_symm.logic
+lemma KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic : Logic.KTB = Kripke.FrameClass.refl_symm.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev S4 : Logic := Hilbert.S4.logic
-lemma S4.eq_ReflexivE_transitiveKripkeFrameClass_Logic : Logic.S4 = Kripke.FrameClass.preorder.logic
+lemma S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic : Logic.S4 = Kripke.FrameClass.preorder.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev S4Point2 : Logic := Hilbert.S4Point2.logic
-lemma S4Point2.eq_ReflexivE_transitiveConfluentKripkeFrameClass_Logic : Logic.S4Point2 = Kripke.FrameClass.confluent_preorder.logic
+lemma S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic : Logic.S4Point2 = Kripke.FrameClass.confluent_preorder.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
 protected abbrev S4Point3 : Logic := Hilbert.S4Point3.logic
-lemma S4Point3.eq_ReflexivE_transitiveConnectedKripkeFrameClass_Logic : Logic.S4Point3 = Kripke.FrameClass.connected_preorder.logic
+lemma S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic : Logic.S4Point3 = Kripke.FrameClass.connected_preorder.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 
@@ -147,15 +147,15 @@ lemma GLPoint3.Kripke.eq_finiteStrictLinearOrder_logic : Logic.GLPoint3 = Kripke
 protected abbrev KH : Logic := Hilbert.KH.logic
 
 protected abbrev Grz : Logic := Hilbert.Grz.logic
-lemma Grz.eq_ReflexivE_transitiveAntiSymmetricFiniteKripkeFrameClass_Logic : Logic.Grz = Kripke.FrameClass.finite_partial_order.logic
+lemma Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic : Logic.Grz = Kripke.FrameClass.finite_partial_order.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev GrzPoint2 : Logic := Hilbert.GrzPoint2.logic
-lemma GrzPoint2.eq_ReflexivE_transitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic : Logic.GrzPoint2 = Kripke.FrameClass.finite_confluent_partial_order.logic
+lemma GrzPoint2.eq_ReflexiveTransitiveAntiSymmetricConfluentFiniteKripkeFrameClass_Logic : Logic.GrzPoint2 = Kripke.FrameClass.finite_confluent_partial_order.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev GrzPoint3 : Logic := Hilbert.GrzPoint3.logic
-lemma GrzPoint3.eq_ReflexivE_transitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic : Logic.GrzPoint3 = Kripke.FrameClass.finite_connected_partial_order.logic
+lemma GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic : Logic.GrzPoint3 = Kripke.FrameClass.finite_connected_partial_order.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev Triv : Logic := Hilbert.Triv.logic

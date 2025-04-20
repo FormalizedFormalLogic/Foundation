@@ -133,7 +133,7 @@ variable {L}
 
 structure Language.Theory.TDerivation (T : Language.TTheory L) (Γ : L.Sequent) where
   derivation : V
-  derivatioNOf : T.thy.DerivatioNOf derivation Γ.val
+  derivatioNOf : T.thy.DerivationOf derivation Γ.val
 
 scoped infix:45 " ⊢¹ " => Language.Theory.TDerivation
 

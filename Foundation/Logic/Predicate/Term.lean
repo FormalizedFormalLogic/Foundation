@@ -67,7 +67,7 @@ def hasDecEq : (t u : Semiterm L ξ n) → Decidable (Eq t u)
       by_cases e : k₁ = k₂
       · rcases e with rfl
         exact match decEq r₁ r₂ with
-        | isTrue h => by simp[h]; exact Matrix.deCVec _ _ (fun i => hasDecEq (v₁ i) (v₂ i))
+        | isTrue h => by simp[h]; exact Matrix.decVec _ _ (fun i => hasDecEq (v₁ i) (v₂ i))
         | isFalse h => isFalse (by simp[h])
       · exact isFalse (by simp[e])
 

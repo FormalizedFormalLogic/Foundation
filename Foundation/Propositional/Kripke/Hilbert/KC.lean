@@ -69,7 +69,7 @@ instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_confluent := 
   . apply FilterEqvQuotient.finite; simp;
   . apply isConfluent_iff _ _ |>.mpr;
     rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
-    . simp only [exists_K!_left, and_self];
+    . simp only [exists_and_left, and_self];
       let Z : RM.World := ⟨z, by tauto⟩;
       use ⟦Z⟧;
       apply Relation.TransGen.single;

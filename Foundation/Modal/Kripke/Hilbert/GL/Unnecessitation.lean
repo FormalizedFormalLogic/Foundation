@@ -14,7 +14,7 @@ open Model in
 lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → Hilbert.GL ⊢! ⊡φ ➝ ψ := by
   contrapose;
   intro h;
-  have := Kripke.iff_unprovable_exists_unsatisfies_FinitE_transitiveTree.mp h;
+  have := Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h;
   obtain ⟨M, r, M_tree, hs⟩ := this;
 
   let M₀ := M.extendRoot r;
@@ -40,7 +40,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
       exact Frame.extendRoot.isTrans (r := r);
     . assumption;
 
-  apply Kripke.iff_unprovable_exists_unsatisfies_FinitE_transitiveTree.mpr;
+  apply Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr;
   use M₀, r₀;
   refine ⟨?_, ?_⟩;
   . exact Frame.extendRoot.instIsFiniteTree;

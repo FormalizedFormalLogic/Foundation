@@ -86,7 +86,7 @@ def negDoubleNegation : (φ : SyntacticFormula L) → 𝐌𝐢𝐧¹ ⊢ ∼φ�
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⭤ (∼φ)ᴺ := negDoubleNegation φ
     have ihψ : 𝐌𝐢𝐧¹ ⊢ ∼ψᴺ ⭤ (∼ψ)ᴺ := negDoubleNegation ψ
     have : 𝐌𝐢𝐧¹ ⊢ ∼φᴺ ⋏ ∼ψᴺ ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.EKK_of_E_of_E ihφ ihψ
-    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∼φᴺ ⋏ ∼ψᴺ) ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.E_trans (dNOfNegative (by simp)) this
+    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∼φᴺ ⋏ ∼ψᴺ) ⭤ (∼φ)ᴺ ⋏ (∼ψ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
   | ∀' φ      =>
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
@@ -98,7 +98,7 @@ def negDoubleNegation : (φ : SyntacticFormula L) → 𝐌𝐢𝐧¹ ⊢ ∼φ�
     have ihφ : 𝐌𝐢𝐧¹ ⊢ ∼(free φ)ᴺ ⭤ (∼(free φ))ᴺ := negDoubleNegation (free φ)
     have : 𝐌𝐢𝐧¹ ⊢ ∀' ∼φᴺ ⭤ ∀' (∼φ)ᴺ :=
       allIffAllOfIff <| Entailment.cast (by simp [Semiformula.rew_doubleNegation]) ihφ
-    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∀' ∼φᴺ) ⭤ ∀' (∼φ)ᴺ := Entailment.E_trans (dNOfNegative (by simp)) this
+    have : 𝐌𝐢𝐧¹ ⊢ ∼∼(∀' ∼φᴺ) ⭤ ∀' (∼φ)ᴺ := Entailment.E_trans (DN_of_isNegative (by simp)) this
     this
   termination_by φ => φ.complexity
 

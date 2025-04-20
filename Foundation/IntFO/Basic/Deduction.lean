@@ -175,7 +175,7 @@ def dneOfNegative [L.DecidableEq] : {φ : SyntacticFormulaᵢ L} → φ.IsNegati
 def ofDNOfNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} {Γ} (b : Γ ⊢[Λ] ∼∼φ) (h : φ.IsNegative) : Γ ⊢[Λ] φ :=
   Entailment.C_trans (toDef b) (dneOfNegative h)
 
-def dNOfNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ :=
+def DN_of_isNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ :=
   Entailment.K_intro (dneOfNegative h) Entailment.dni
 
 def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ⊥ ➝ φ
@@ -193,7 +193,7 @@ def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ �
   termination_by φ _ => φ.complexity
 
 def iffnegOfNegIff [L.DecidableEq] {φ ψ : SyntacticFormulaᵢ L} (h : φ.IsNegative) (b : Λ ⊢ ∼φ ⭤ ψ) : Λ ⊢ φ ⭤ ∼ψ :=
-  Entailment.E_trans (Entailment.E_symm <| dNOfNegative h) (Entailment.ENN_of_E b)
+  Entailment.E_trans (Entailment.E_symm <| DN_of_isNegative h) (Entailment.ENN_of_E b)
 
 def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢ φ → Λ ⊢ Rew.rewrite f ▹ φ
   | mdp b d        => rewrite f b ⨀ rewrite f d

@@ -152,11 +152,11 @@ def minLeLeft (p q : ℙ) : p ⊓ q ≼ p := ofSubset (by simp [inf_def])
 
 def minLeRight (p q : ℙ) : p ⊓ q ≼ q := ofSubset (by simp [inf_def])
 
-def leMiNOfle (srp : r ≼ p) (srq : r ≼ q) : r ≼ p ⊓ q := ⟨
+def leMinOfle (srp : r ≼ p) (srq : r ≼ q) : r ≼ p ⊓ q := ⟨
   let d : ∼p ++ ∼q ⟶⁺ ∼r := .wk (srp.val.add srq.val) (by simp)
   neg_inf_p_eq _ _ ▸ d⟩
 
-def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMiNOfle s (.refl q)
+def leMinRightOfLe (s : q ≼ p) : q ≼ p ⊓ q := leMinOfle s (.refl q)
 
 end StrongerThan
 

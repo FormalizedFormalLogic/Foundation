@@ -171,7 +171,7 @@ lemma provable_iff_inconsistent {φ} :
   constructor
   · intro h; exact cut! (of_axiom_subset (by simp) h) (root! <| by simp)
   · rintro ⟨b⟩
-    exact ⟨by simpa using Tait.Axiomatized.proof_OfContra b⟩
+    exact ⟨by simpa using Tait.Axiomatized.proofOfContra b⟩
 
 lemma refutable_iff_inconsistent {φ} :
     𝓚 ⊢! ∼φ ↔ Inconsistent (cons φ 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (φ := ∼φ)
@@ -257,7 +257,7 @@ def disjConsOfAppend {Γ Δ} (d : 𝓚 ⟹ Γ ++ Δ) : 𝓚 ⟹ Γ.disj :: Δ :=
     have : 𝓚 ⟹ Γ ++ φ :: Δ := wk d <| by simp
     wk (disjConsOfAppend this) (by simp)
 
-def proof_OfDerivation (d : 𝓚 ⟹ Γ) : 𝓚 ⊢ Γ.disj := disjConsOfAppend (Γ := Γ) (Δ := []) (ofEq d (by simp))
+def proofOfDerivation (d : 𝓚 ⟹ Γ) : 𝓚 ⊢ Γ.disj := disjConsOfAppend (Γ := Γ) (Δ := []) (ofEq d (by simp))
 
 def AppendOfDisjCons [Cut F K] {Γ Δ} (d : 𝓚 ⟹ Γ.disj :: Δ) : 𝓚 ⟹ Γ ++ Δ :=
   match Γ with
@@ -269,7 +269,7 @@ def AppendOfDisjCons [Cut F K] {Γ Δ} (d : 𝓚 ⟹ Γ.disj :: Δ) : 𝓚 ⟹ �
 def derivatioNOfProof [Cut F K] (d : 𝓚 ⊢ Γ.disj) : 𝓚 ⟹ Γ := ofEq (AppendOfDisjCons d) (by simp)
 
 lemma derivable_iff_provable_disj [Cut F K] : 𝓚 ⟹! Γ ↔ 𝓚 ⊢! Γ.disj :=
-  ⟨fun h ↦ ⟨proof_OfDerivation h.get⟩, fun h ↦ ⟨derivatioNOfProof h.get⟩⟩
+  ⟨fun h ↦ ⟨proofOfDerivation h.get⟩, fun h ↦ ⟨derivatioNOfProof h.get⟩⟩
 
 end Tait
 

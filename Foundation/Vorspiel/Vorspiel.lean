@@ -129,11 +129,11 @@ lemma vecCons_assoc (a b : α) (s : Fin n → α) :
     a :> (s <: b) = (a :> s) <: b := by
   funext x; cases' x using Fin.cases with x <;> simp; cases x using Fin.lastCases <;> simp [Fin.succ_castSucc]
 
-def deCVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
+def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
   | 0,     _, _, _ => by simpa [Matrix.empty_eq] using isTrue trivial
   | n + 1, v, w, d => by
       rw [eq_vecCons v, eq_vecCons w, vecCons_ext]
-      haveI : Decidable (v ∘ Fin.succ = w ∘ Fin.succ) := deCVec _ _ (by intros i; simpa using d _)
+      haveI : Decidable (v ∘ Fin.succ = w ∘ Fin.succ) := decVec _ _ (by intros i; simpa using d _)
       refine instDecidableAnd
 
 lemma comp_vecCons (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (a :> s) x) = f a :> f ∘ s :=
@@ -276,7 +276,7 @@ lemma eq_vecCons (s : (i : Fin (n + 1)) → α i) : s = s 0 ::> fun i => s i.suc
       · exact funext (fun i => by simpa using congrFun h i.succ),
    by intros h; simp [h]⟩
 
-def deCVec {n : ℕ} {α : Fin n → Type _}
+def decVec {n : ℕ} {α : Fin n → Type _}
   (v w : (i : Fin n) → α i) (h : ∀ i, Decidable (v i = w i)) : Decidable (v = w) := by
     induction' n with n ih
     · exact isTrue (by funext x; exact finZeroElim (α := fun x => v x = w x) x)
@@ -415,7 +415,7 @@ open Matrix
 variable {α : Type u} [s : Setoid α] {β : Sort v}
 
 @[elab_as_elim]
-lemma inductioNOnVec {φ : (Fin n → Quotient s) → Prop} (v : Fin n → Quotient s)
+lemma inductionOnVec {φ : (Fin n → Quotient s) → Prop} (v : Fin n → Quotient s)
   (h : ∀ v : Fin n → α, φ (fun i => Quotient.mk s (v i))) : φ v :=
   Quotient.induction_on_pi v h
 

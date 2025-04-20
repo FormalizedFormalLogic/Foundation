@@ -187,7 +187,7 @@ scoped instance : Inter V := ⟨inter⟩
 @[simp] lemma mem_inter_iff {a b c : V} : a ∈ b ∩ c ↔ a ∈ b ∧ a ∈ c := by
   simp [Inter.inter, inter, mem_sInter_iff_of_pos (s := {b, c}) (nonempty_iff.mpr ⟨b, by simp⟩)]
 
-lemma inter_comm (a b : V) : a ∩ b = b ∩ a := mem_ext (by simp [K!_symm])
+lemma inter_comm (a b : V) : a ∩ b = b ∩ a := mem_ext (by simp [and_comm])
 
 lemma inter_eq_self_of_subset {a b : V} (h : a ⊆ b) :
   a ∩ b = a := mem_ext (by simp; intro i hi; exact h hi)
@@ -506,7 +506,7 @@ lemma mem_restr_iff {x f s : V} : x ∈ f ↾ s ↔ x ∈ f ∧ π₁ x ∈ s :=
 lemma IsMapping.restr {m : V} (h : IsMapping m) (s : V) : IsMapping (m ↾ s) := h.of_subset (by simp)
 
 lemma domain_restr (f s : V) : domain (f ↾ s) = domain f ∩ s :=
-  mem_ext (by simp [mem_domain_iff, pair_mem_restr_iff, exists_K!_right, mem_inter_iff])
+  mem_ext (by simp [mem_domain_iff, pair_mem_restr_iff, exists_and_right, mem_inter_iff])
 
 lemma domain_restr_of_subset_domain {f s : V} (h : s ⊆ domain f) : domain (f ↾ s) = s := by
   simp [domain_restr, inter_comm, inter_eq_self_of_subset h]
