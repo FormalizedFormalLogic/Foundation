@@ -120,7 +120,7 @@ lemma GL_S_TFAE :
           push_neg at this;
           obtain ⟨hA, hB⟩ := this;
           apply deduct'!;
-          apply p_Nq_NIpq!;
+          apply NC!_of_N!_of_!;
           . exact deductInv'! $ ihB (Formula.subformulas.mem_imp B_sub |>.1) |>.1 hA;
           . exact deductInv'! $ ihC (Formula.subformulas.mem_imp B_sub |>.2) |>.2 hB;
       | hatom =>

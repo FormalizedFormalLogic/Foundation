@@ -41,14 +41,14 @@ lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢!. f.interp
   induction A using Formula.rec' with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | hfalsum => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
-  | himp A B ihA ihB => exact Epq_Ers_EIprIqs! ihA ihB;
+  | himp A B ihA ihB => exact ECC!_of_E!_of_E! ihA ihB;
   | hbox A ih =>
     apply K!_intro;
-    . apply C!_trans IIIpIqbbApq! ?_;
+    . apply C!_trans CCCCOOK! ?_;
       apply CKK!_of_C!_of_C!;
       . exact K!_left ih;
       . exact 𝔅.prov_distribute_imply'' $ K!_left ih;
-    . apply C!_trans ?_ ApqIIpIqbb!;
+    . apply C!_trans ?_ CKCCCOO!;
       apply CKK!_of_C!_of_C!;
       . exact K!_right ih;
       . exact 𝔅.prov_distribute_imply'' $ K!_right ih;

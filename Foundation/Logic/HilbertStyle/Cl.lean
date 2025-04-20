@@ -11,26 +11,26 @@ variable {F : Type*} [LogicalConnective F] [DecidableEq F]
          {φ ψ χ ξ : F}
 
 @[simp]
-lemma IIIpIqbNIpNq! : 𝓢 ⊢! ((φ ➝ ψ ➝ ⊥) ➝ ⊥) ➝ ∼(φ ➝ ∼ψ) := by
+lemma CCCCOONCN! : 𝓢 ⊢! ((φ ➝ ψ ➝ ⊥) ➝ ⊥) ➝ ∼(φ ➝ ∼ψ) := by
   apply C!_trans (K!_right neg_equiv!) ?_;
   apply contra!;
   apply CCC!_of_C!_right;
   apply K!_left neg_equiv!;
 
-lemma ONpNq_IpNq! (h : 𝓢 ⊢! ∼φ ⋎ ∼ψ) : 𝓢 ⊢! φ ➝ ∼ψ := by
+lemma CN!_of_AN! (h : 𝓢 ⊢! ∼φ ⋎ ∼ψ) : 𝓢 ⊢! φ ➝ ∼ψ := by
   apply A!_cases CNC! imply₁! h;
 
 @[simp]
-lemma IIIpIqbbApq! : 𝓢 ⊢! ((φ ➝ (ψ ➝ ⊥)) ➝ ⊥) ➝ (φ ⋏ ψ) := by
-  apply C!_trans IIIpIqbNIpNq! ?_;
+lemma CCCCOOK! : 𝓢 ⊢! ((φ ➝ (ψ ➝ ⊥)) ➝ ⊥) ➝ (φ ⋏ ψ) := by
+  apply C!_trans CCCCOONCN! ?_;
   apply CN!_of_CN!_left
   apply deduct'!;
   have : [∼(φ ⋏ ψ)] ⊢[𝓢]! ∼φ ⋎ ∼ψ := ANN!_of_NK! $ by_axm!
   exact A!_cases CNC! imply₁! this;
 
-lemma IIIpIqbb_Apq! (h : 𝓢 ⊢! ((φ ➝ (ψ ➝ ⊥)) ➝ ⊥)) : 𝓢 ⊢! (φ ⋏ ψ) := IIIpIqbbApq! ⨀ h
+lemma K!_of_CCCO! (h : 𝓢 ⊢! ((φ ➝ (ψ ➝ ⊥)) ➝ ⊥)) : 𝓢 ⊢! (φ ⋏ ψ) := CCCCOOK! ⨀ h
 
-lemma Apq_IIpIqbb! (b : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! (φ ➝ ψ ➝ ⊥) ➝ ⊥ := by
+lemma CCCOO!_of_K! (b : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! (φ ➝ ψ ➝ ⊥) ➝ ⊥ := by
   apply deduct'!;
   have h₁ : [φ ➝ ψ ➝ ⊥] ⊢[𝓢]! φ := of'! $ K!_left b;
   have h₂ : [φ ➝ ψ ➝ ⊥] ⊢[𝓢]! ψ := of'! $ K!_right b;
@@ -38,13 +38,13 @@ lemma Apq_IIpIqbb! (b : 𝓢 ⊢! φ ⋏ ψ) : 𝓢 ⊢! (φ ➝ ψ ➝ ⊥) ➝
   exact (H ⨀ h₁) ⨀ h₂;
 
 @[simp]
-lemma ApqIIpIqbb! : 𝓢 ⊢! (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by
+lemma CKCCCOO! : 𝓢 ⊢! (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by
   apply deduct'!;
-  apply Apq_IIpIqbb!;
+  apply CCCOO!_of_K!;
   apply by_axm!;
   simp;
 
-lemma Iqp_Irs_IIprIqs (h₁ : 𝓢 ⊢! ψ ➝ φ) (h₂ : 𝓢 ⊢! χ ➝ ξ) : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ ξ) := by
+lemma CCC!_of_C!_of_C! (h₁ : 𝓢 ⊢! ψ ➝ φ) (h₂ : 𝓢 ⊢! χ ➝ ξ) : 𝓢 ⊢! (φ ➝ χ) ➝ (ψ ➝ ξ) := by
   replace h₁ : [ψ, φ ➝ χ] ⊢[𝓢]! ψ ➝ φ := of'! $ h₁;
   replace h₂ : [ψ, φ ➝ χ] ⊢[𝓢]! χ ➝ ξ := of'! $ h₂;
   have h₃ : [ψ, φ ➝ χ] ⊢[𝓢]! φ ➝ χ := by_axm!;
@@ -52,13 +52,8 @@ lemma Iqp_Irs_IIprIqs (h₁ : 𝓢 ⊢! ψ ➝ φ) (h₂ : 𝓢 ⊢! χ ➝ ξ) 
   apply deduct!;
   exact h₂ ⨀ (h₃ ⨀ (h₁ ⨀ (by_axm!)))
 
-lemma Epq_Ers_EIprIqs! (h₁ : 𝓢 ⊢! φ ⭤ ψ) (h₂ : 𝓢 ⊢! χ ⭤ ξ) : 𝓢 ⊢! (φ ➝ χ) ⭤ (ψ ➝ ξ) := by
-  apply K!_intro;
-  . apply Iqp_Irs_IIprIqs (K!_right h₁) (K!_left h₂);
-  . apply Iqp_Irs_IIprIqs (K!_left h₁) (K!_right h₂);
-
 @[simp]
-lemma IIIpbqOpq! : 𝓢 ⊢! ((φ ➝ ⊥) ➝ ψ) ➝ (φ ⋎ ψ) := by
+lemma CCCOA! : 𝓢 ⊢! ((φ ➝ ⊥) ➝ ψ) ➝ (φ ⋎ ψ) := by
   apply deduct'!;
   apply A!_cases or₁! ?_ lem!;
   . apply deduct!;
@@ -68,7 +63,7 @@ lemma IIIpbqOpq! : 𝓢 ⊢! ((φ ➝ ⊥) ➝ ψ) ➝ (φ ⋎ ψ) := by
     exact H₂ ⨀ H₁;
 
 @[simp]
-lemma IOpqIIpbq! : 𝓢 ⊢! (φ ⋎ ψ) ➝ ((φ ➝ ⊥) ➝ ψ) := by
+lemma CACCO! : 𝓢 ⊢! (φ ⋎ ψ) ➝ ((φ ➝ ⊥) ➝ ψ) := by
   apply deduct'!;
   apply deduct!;
   have : [φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ ⋎ ψ := by_axm!;
@@ -79,29 +74,7 @@ lemma IOpqIIpbq! : 𝓢 ⊢! (φ ⋎ ψ) ➝ ((φ ➝ ⊥) ➝ ψ) := by
     have H₂ : [φ, φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ ➝ ⊥ := by_axm!;
     exact H₂ ⨀ H₁;
 
-@[simp]
-lemma IIIpbqOpq : 𝓢 ⊢! ((φ ➝ ⊥) ➝ ψ) ➝ (φ ⋎ ψ) := by
-  apply deduct'!;
-  apply A!_cases or₁! ?_ lem!;
-  . apply deduct!;
-    apply A!_intro_right;
-    have H₁ : [∼φ, (φ ➝ ⊥) ➝ ψ] ⊢[𝓢]! φ ➝ ⊥ := N!_iff_CO!.mp by_axm!;
-    have H₂ : [∼φ, (φ ➝ ⊥) ➝ ψ] ⊢[𝓢]! (φ ➝ ⊥) ➝ ψ := by_axm!;
-    exact H₂ ⨀ H₁;
-
-@[simp]
-lemma IOpqIIpbq : 𝓢 ⊢! (φ ⋎ ψ) ➝ ((φ ➝ ⊥) ➝ ψ) := by
-  apply deduct'!;
-  apply deduct!;
-  have : [φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ ⋎ ψ := by_axm!;
-  apply A!_cases ?_ C!_id this;
-  . apply deduct!;
-    refine efq! ⨀ ?_;
-    have H₁ : [φ, φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ := by_axm!;
-    have H₂ : [φ, φ ➝ ⊥, φ ⋎ ψ] ⊢[𝓢]! φ ➝ ⊥ := by_axm!;
-    exact H₂ ⨀ H₁;
-
-lemma ENIpqApNq! : 𝓢 ⊢! ∼(φ ➝ ψ) ⭤ (φ ⋏ ∼ψ) := by
+lemma ENCKN! : 𝓢 ⊢! ∼(φ ➝ ψ) ⭤ (φ ⋏ ∼ψ) := by
   apply K!_intro;
   . apply deduct'!;
     apply K!_intro;
@@ -115,13 +88,13 @@ lemma ENIpqApNq! : 𝓢 ⊢! ∼(φ ➝ ψ) ⭤ (φ ⋏ ∼ψ) := by
       exact dne!;
   . apply not_imply_prem''! and₁! and₂!;
 
-lemma NIpq_ApNq! : 𝓢 ⊢! ∼(φ ➝ ψ) ↔ 𝓢 ⊢! (φ ⋏ ∼ψ) := by
+lemma NC!_iff_KN! : 𝓢 ⊢! ∼(φ ➝ ψ) ↔ 𝓢 ⊢! (φ ⋏ ∼ψ) := by
   constructor;
-  . intro h; exact (K!_left ENIpqApNq!) ⨀ h;
-  . intro h; exact (K!_right ENIpqApNq!) ⨀ h;
+  . intro h; exact (K!_left ENCKN!) ⨀ h;
+  . intro h; exact (K!_right ENCKN!) ⨀ h;
 
-lemma p_Nq_NIpq! (hp : 𝓢 ⊢! φ) (hnq : 𝓢 ⊢! ∼ψ) : 𝓢 ⊢! ∼(φ ➝ ψ) := by
-  apply NIpq_ApNq!.mpr;
+lemma NC!_of_N!_of_! (hp : 𝓢 ⊢! φ) (hnq : 𝓢 ⊢! ∼ψ) : 𝓢 ⊢! ∼(φ ➝ ψ) := by
+  apply NC!_iff_KN!.mpr;
   apply K!_intro;
   . exact hp;
   . exact hnq;

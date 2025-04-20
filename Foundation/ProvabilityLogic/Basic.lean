@@ -50,8 +50,8 @@ variable [DecidableEq (Sentence L)]
 
 lemma iff_interpret_or_inside : T ⊢!. f.interpret 𝔅 (A ⋎ B) ⭤ (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
   apply K!_intro;
-  . apply IIIpbqOpq!;
-  . apply IOpqIIpbq!;
+  . apply CCCOA!;
+  . apply CACCO!;
 
 lemma iff_interpret_or : T ⊢!. f.interpret 𝔅 (A ⋎ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
   constructor;
@@ -60,13 +60,13 @@ lemma iff_interpret_or : T ⊢!. f.interpret 𝔅 (A ⋎ B) ↔ T ⊢!. (f.inter
 
 lemma iff_interpret_and : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
   constructor;
-  . intro h; apply IIIpIqbb_Apq! h;
-  . intro h; apply Apq_IIpIqbb! h;
+  . intro h; apply K!_of_CCCO! h;
+  . intro h; apply CCCOO!_of_K! h;
 
 lemma iff_interpret_and_inside : T ⊢!. f.interpret 𝔅 (A ⋏ B) ⭤ (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
   apply K!_intro;
-  . apply IIIpIqbbApq!;
-  . apply ApqIIpIqbb!;
+  . apply CCCCOOK!;
+  . apply CKCCCOO!;
 
 lemma iff_interpret_and' : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ∧ T ⊢!. (f.interpret 𝔅 B) := by
   apply Iff.trans iff_interpret_and;
