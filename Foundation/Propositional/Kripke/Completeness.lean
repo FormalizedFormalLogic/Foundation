@@ -66,12 +66,12 @@ private lemma truthlemma.himp
         have := by simpa using hΓ χ hr₁;
         simp_all;
       by_contra hC;
-      have : 𝓢 ⊢! ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := imp_trans''! (and_imply_iff_imply_imply'!.mp $ imply_left_remove_conj! hC) (by
+      have : 𝓢 ⊢! ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := C!_trans (CK!_iff_CC!.mp $ CKConj₂Remove!_of_CConj₂! hC) (by
         apply deduct'!;
         apply deduct!;
         have : [φ, φ ➝ ⋁Δ] ⊢[𝓢]! φ := by_axm!;
         have : [φ, φ ➝ ⋁Δ] ⊢[𝓢]! ⋁Δ := by_axm! ⨀ this;
-        exact disj_allsame'! (by simpa using hΔ) this;
+        exact of_Disj₂!_of_mem_eq (by simpa using hΔ) this;
       )
       have : 𝓢 ⊬ ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := by simpa using (t.consistent hΓ (show ∀ χ ∈ [φ ➝ ψ], χ ∈ t.1.2 by simp_all));
       contradiction;
@@ -93,7 +93,7 @@ private lemma truthlemma.himp
       (by simp_all)
       (show 𝓢 ⊢! ⋀[φ, φ ➝ ψ] ➝ ψ by
         simp;
-        apply and_imply_iff_imply_imply'!.mpr;
+        apply CK!_iff_CC!.mpr;
         apply deduct'!;
         apply deduct!;
         exact by_axm! ⨀ (by_axm! (φ := φ));
@@ -117,7 +117,7 @@ lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ �
       by_contra hC;
       replace hΓ : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr hΓ;
       subst hΓ;
-      have : 𝓢 ⊢! φ := disj_allsame'! hΔ (hC ⨀ verum!);
+      have : 𝓢 ⊢! φ := of_Disj₂!_of_mem_eq hΔ (hC ⨀ verum!);
       contradiction;
     obtain ⟨t', ht'⟩ := lindenbaum this;
     simp [ValidOnModel.iff_models, ValidOnModel]

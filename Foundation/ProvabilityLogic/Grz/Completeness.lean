@@ -41,22 +41,22 @@ lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢!. f.interp
   induction A using Formula.rec' with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | hfalsum => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
-  | himp A B ihA ihB => exact Epq_Ers_EIprIqs! ihA ihB;
+  | himp A B ihA ihB => exact ECC!_of_E!_of_E! ihA ihB;
   | hbox A ih =>
-    apply and₃'!;
-    . apply imp_trans''! IIIpIqbbApq! ?_;
-      apply and_replace!;
-      . exact and₁'! ih;
-      . exact 𝔅.prov_distribute_imply'' $ and₁'! ih;
-    . apply imp_trans''! ?_ ApqIIpIqbb!;
-      apply and_replace!;
-      . exact and₂'! ih;
-      . exact 𝔅.prov_distribute_imply'' $ and₂'! ih;
+    apply K!_intro;
+    . apply C!_trans CCCCOOK! ?_;
+      apply CKK!_of_C!_of_C!;
+      . exact K!_left ih;
+      . exact 𝔅.prov_distribute_imply'' $ K!_left ih;
+    . apply C!_trans ?_ CKCCCOO!;
+      apply CKK!_of_C!_of_C!;
+      . exact K!_right ih;
+      . exact 𝔅.prov_distribute_imply'' $ K!_right ih;
 
 lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ↔ T ⊢!. f.strongInterpret 𝔅 A := by
   constructor;
-  . intro h; exact (and₁'! iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
-  . intro h; exact (and₂'! iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
+  . intro h; exact (K!_left iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
+  . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
 
 lemma iff_models_interpret_boxdot_strongInterpret {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.Sound M] : M ⊧ₘ₀ f.interpret 𝔅 (Aᵇ) ↔ M ⊧ₘ₀ f.strongInterpret 𝔅 A := by
   induction A using Formula.rec' with

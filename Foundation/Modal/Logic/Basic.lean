@@ -75,7 +75,7 @@ lemma conj_iffAux {Γ : List (Formula ℕ)} : Γ.conj₂ ∈ L ↔ ∀ φ ∈ Γ
   . intro h φ hφ;
     refine Logic.mdp ?_ h;
     apply Logic.of_mem_K;
-    apply general_conj'! hφ;
+    apply left_Conj₂!_intro hφ;
   . intro h;
     induction Γ using List.induction_with_singleton with
     | hnil =>

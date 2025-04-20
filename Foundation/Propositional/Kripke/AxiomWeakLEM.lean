@@ -115,21 +115,21 @@ instance [Entailment.HasAxiomWeakLEM 𝓢] : IsConfluent _ (canonicalFrame 𝓢)
       have := by simpa using List.of_mem_filter hp;
       exact this.1;
     have : 𝓢 ⊬ ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ∼⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
-    have : 𝓢 ⊢! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := intro_bot_of_and!;
+    have : 𝓢 ⊢! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := CKNO!;
     contradiction;
 
-  have : 𝓢 ⊢! (⋀Θx ⋏ (⋀Θy ⋏ ⋀Θz)) ➝ ⊥ := imp_trans''! (by
+  have : 𝓢 ⊢! (⋀Θx ⋏ (⋀Θy ⋏ ⋀Θz)) ➝ ⊥ := C!_trans (by
     -- TODO: need more refactor
-    have d₁ : 𝓢 ⊢! ⋀Θx ⋏ ⋀(Θy ++ Θz) ➝ ⋀(Θx ++ (Θy ++ Θz)) := and₂'! $ iff_concat_conj!;
-    have d₂ : 𝓢 ⊢! ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θy ++ Θz) := and₂'! $ iff_concat_conj!;
-    have d₃ : 𝓢 ⊢! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θx ++ (Θy ++ Θz)) := imp_trans''! (by
+    have d₁ : 𝓢 ⊢! ⋀Θx ⋏ ⋀(Θy ++ Θz) ➝ ⋀(Θx ++ (Θy ++ Θz)) := K!_right $ EConj₂AppendKConj₂Conj₂!;
+    have d₂ : 𝓢 ⊢! ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θy ++ Θz) := K!_right $ EConj₂AppendKConj₂Conj₂!;
+    have d₃ : 𝓢 ⊢! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θx ++ (Θy ++ Θz)) := C!_trans (by
       apply deduct'!;
       have : [⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz] ⊢[𝓢]! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz := FiniteContext.by_axm!;
-      apply and₃'!;
-      . exact and₁'! this;
-      . exact (FiniteContext.of'! d₂) ⨀ (and₂'! this);
+      apply K!_intro;
+      . exact K!_left this;
+      . exact (FiniteContext.of'! d₂) ⨀ (K!_right this);
     ) d₁;
-    exact imp_trans''! d₃ $ conjconj_subset! $ by
+    exact C!_trans d₃ $ CConj₂Conj₂!_of_subset $ by
       intro φ hp; simp;
       apply or_iff_not_imp_left.mpr;
       intro nmem_Θx;
@@ -149,9 +149,9 @@ instance [Entailment.HasAxiomWeakLEM 𝓢] : IsConfluent _ (canonicalFrame 𝓢)
         . assumption;
         . exact hz₁ hz;
   ) h;
-  have : 𝓢 ⊢! ⋀Θx ➝ ⋀Θy ➝ ∼⋀Θz := and_imply_iff_imply_imply'!.mp $
-    (imp_trans''! (and_imply_iff_imply_imply'!.mp $ imp_trans''! (and₁'! and_assoc!) this) (and₂'! $ neg_equiv!));
-  have d : 𝓢 ⊢! ⋀Θx ➝ ∼∼⋀Θz ➝ ∼⋀Θy := imp_trans''! this contra₀!;
+  have : 𝓢 ⊢! ⋀Θx ➝ ⋀Θy ➝ ∼⋀Θz := CK!_iff_CC!.mp $
+    (C!_trans (CK!_iff_CC!.mp $ C!_trans (K!_left K!_assoc) this) (K!_right $ neg_equiv!));
+  have d : 𝓢 ⊢! ⋀Θx ➝ ∼∼⋀Θz ➝ ∼⋀Θy := C!_trans this CCCNN!;
 
   have mem_Θx_x : ⋀Θx ∈ x.1.1 := iff_mem₁_conj.mpr $ by
     intro φ hp;

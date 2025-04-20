@@ -18,7 +18,7 @@ lemma provable_boxdotTranslated_Ver_of_Triv : (Hilbert.Triv) ⊢! φ → (Hilber
   . exact boxdot_axiomK!;
   . simp only [BoxdotTranslation, axiomVer!, and₁!];
   . apply deduct'!;
-    apply and₃'! <;> simp;
+    apply K!_intro <;> simp;
 
 lemma provable_Triv_of_boxdotTranslated_Ver : (Hilbert.Ver) ⊢! φᵇ → (Hilbert.Triv) ⊢! φ := by
   contrapose;

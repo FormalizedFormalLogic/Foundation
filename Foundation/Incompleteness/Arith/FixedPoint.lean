@@ -153,7 +153,7 @@ theorem exclusiveMultidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢!. exclusiveMultifixpoint θ i ⭤ (Rew.substs fun j ↦ ⌜exclusiveMultifixpoint θ j⌝) ▹ (θ i) := by
   have : T ⊢!. exclusiveMultifixpoint θ i ⭤ ((Rew.substs fun j ↦ ⌜exclusiveMultifixpoint θ j⌝) ▹ θ i).padding ↑i := by
     simpa using multidiagonal (T := T) (fun j ↦ (θ j).padding j) (i := i)
-  exact Entailment.iff_trans''! this (Entailment.padding_iff _ _)
+  exact Entailment.E!_trans this (Entailment.padding_iff _ _)
 
 lemma multifixpoint_pi {θ : Fin k → Semisentence ℒₒᵣ k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :
     Hierarchy 𝚷 (m + 1) (multifixpoint θ i) := by

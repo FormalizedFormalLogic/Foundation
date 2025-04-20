@@ -113,24 +113,24 @@ lemma GL_S_TFAE :
         constructor;
         . intro h;
           rcases Satisfies.imp_def₂.mp h with (hA | hB);
-          . exact imp_trans''! (ihB (Formula.subformulas.mem_imp B_sub |>.1) |>.2 hA) efq_imply_not₁!;
-          . exact imp_trans''! (ihC (Formula.subformulas.mem_imp B_sub |>.2) |>.1 hB) imply₁!;
+          . exact C!_trans (ihB (Formula.subformulas.mem_imp B_sub |>.1) |>.2 hA) CNC!;
+          . exact C!_trans (ihC (Formula.subformulas.mem_imp B_sub |>.2) |>.1 hB) imply₁!;
         . intro h;
           have := Satisfies.imp_def.not.mp h;
           push_neg at this;
           obtain ⟨hA, hB⟩ := this;
           apply deduct'!;
-          apply p_Nq_NIpq!;
+          apply NC!_of_N!_of_!;
           . exact deductInv'! $ ihB (Formula.subformulas.mem_imp B_sub |>.1) |>.1 hA;
           . exact deductInv'! $ ihC (Formula.subformulas.mem_imp B_sub |>.2) |>.2 hB;
       | hatom =>
         constructor;
         . intro h;
-          apply imply_fdisj;
+          apply right_Fdisj'!_intro;
           simpa;
         . intro h;
-          apply contra₁'!;
-          apply fdisj_imply!;
+          apply CN!_of_CN!_right;
+          apply left_Fdisj'!_intro;
           intro i hi;
           apply σ.SC1;
           by_contra hC; subst hC;
@@ -140,11 +140,11 @@ lemma GL_S_TFAE :
         simp only [Realization.interpret];
         constructor;
         . intro h;
-          apply imply₁'!;
+          apply C!_of_conseq!;
           apply ((𝐈𝚺₁).standardDP T).D1;
           apply Entailment.WeakerThan.pbl (𝓢 := 𝐈𝚺₁.alt);
           have : 𝐈𝚺₁ ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B := by
-            apply fdisj_imply!;
+            apply left_Fdisj'!_intro;
             have hrfl : r₁ ⊧ □B ➝ B := by
               apply hA₁;
               simpa [Formula.rflSubformula];
@@ -175,8 +175,8 @@ lemma GL_S_TFAE :
           have : 𝐈𝚺₁ ⊢!. ∼((𝐈𝚺₁).standardDP T) (∼σ (Sum.inr i)) ➝ ∼((𝐈𝚺₁).standardDP T) (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B) :=
             contra₀'!
             $ ((𝐈𝚺₁).standardDP T).prov_distribute_imply'
-            $ contra₁'! $ this;
-          refine imp_trans''! ?_ this;
+            $ CN!_of_CN!_right $ this;
+          refine C!_trans ?_ this;
           apply σ.SC2;
           tauto;
     have : ℕ ⊧ₘ* 𝐈𝚺₁ := models_of_subtheory (U := 𝐈𝚺₁) (T := T) (M := ℕ) inferInstance;

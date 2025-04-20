@@ -44,7 +44,7 @@ instance : Entailment.Lukasiewicz H where
   mdp := mdp
   imply₁ := imply₁
   imply₂ := imply₂
-  elim_contra := ec
+  elimContra := ec
 
 instance : Entailment.Cl H where
 

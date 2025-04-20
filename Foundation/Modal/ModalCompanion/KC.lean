@@ -25,17 +25,17 @@ section S4Point2
 open Formula.Kripke in
 lemma Hilbert.S4Point2.goedelTranslated_axiomWLEM : Hilbert.S4Point2 ⊢! □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
   suffices Hilbert.S4Point2 ⊢! □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
-    apply or_replace'! this;
+    apply A!_replace this;
     . apply axiomK'!;
       apply nec!;
-      apply contra₀'!;
+      apply contra!;
       exact Hilbert.goedelTranslated_axiomTc;
     . apply axiomK'!;
       apply nec!;
-      apply contra₀'!;
+      apply contra!;
       apply axiomK'!;
       apply nec!;
-      apply contra₀'!;
+      apply contra!;
       exact axiomT!
   apply Hilbert.S4Point2.Kripke.complete.complete;
   rintro F ⟨_, _⟩ V x;

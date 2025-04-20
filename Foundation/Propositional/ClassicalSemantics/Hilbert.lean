@@ -87,7 +87,7 @@ theorem completeness : (Valid (Valuation _) φ) → (Hilbert.Cl ⊢! φ) := by
     by_contra hC;
     replace hΓ : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr hΓ;
     subst hΓ;
-    exact h $ disj_allsame'! hΔ (hC ⨀ verum!);
+    exact h $ of_Disj₂!_of_mem_eq hΔ (hC ⨀ verum!);
   unfold Semantics.Valid;
   push_neg;
   use (canonicalVal T);

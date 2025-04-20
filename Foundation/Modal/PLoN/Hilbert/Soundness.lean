@@ -27,7 +27,7 @@ lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy H.axiomInsta
   | nec ih => exact ValidOnFrame.nec ih;
   | imply₁ => exact ValidOnFrame.imply₁;
   | imply₂ => exact ValidOnFrame.imply₂;
-  | ec => exact ValidOnFrame.elim_contra;
+  | ec => exact ValidOnFrame.elimContra;
 
 instance [C.DefinedBy H.axiomInstances] : Sound H C := ⟨fun {_} => soundness_of_defined_by_AxiomInstances⟩
 

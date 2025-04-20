@@ -84,7 +84,7 @@ instance : Entailment.Minimal Λ where
   or₁ := or₁
   or₂ := or₂
   or₃ := or₃
-  neg_equiv _ := Entailment.iffId _
+  negEquiv _ := Entailment.E_Id _
 
 variable {Λ}
 
@@ -124,16 +124,16 @@ def implyAll {φ ψ} (b : Λ ⊢ shift φ ➝ free ψ) : Λ ⊢ φ ➝ ∀' ψ :
   have : Λ ⊢ ∀' (φ/[] ➝ ψ) := gen <| by simpa using b
   all₂ φ ψ ⨀ this
 
-def genOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ] free φ) : Γ ⊢[Λ] ∀' φ :=
+def geNOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ] free φ) : Γ ⊢[Λ] ∀' φ :=
   ofDef <| implyAll <| by simpa [shift_conj₂] using toDef b
 
 def specializeOverContext {Γ φ} (b : Γ ⊢[Λ] ∀' φ) (t) : Γ ⊢[Λ] φ/[t] :=
-  ofDef <| Entailment.impTrans'' (toDef b) (all₁ φ t)
+  ofDef <| Entailment.C_trans (toDef b) (all₁ φ t)
 
 def allImplyAllOfAllImply (φ ψ) : Λ ⊢ ∀' (φ ➝ ψ) ➝ ∀' φ ➝ ∀' ψ := by
   apply deduct'
   apply deduct
-  apply genOverFiniteContext
+  apply geNOverFiniteContext
   have b₁ : [∀' shift φ, ∀' (shift φ ➝ shift ψ)] ⊢[Λ] free φ ➝ free ψ :=
     Entailment.cast (by simp) (specializeOverContext (nthAxm 1) &0)
   have b₂ : [∀' shift φ, ∀' (shift φ ➝ shift ψ)] ⊢[Λ] free φ :=
@@ -141,22 +141,22 @@ def allImplyAllOfAllImply (φ ψ) : Λ ⊢ ∀' (φ ➝ ψ) ➝ ∀' φ ➝ ∀'
   have : [∀' φ, ∀' (φ ➝ ψ)]⁺ ⊢[Λ] free ψ := cast (by simp) (b₁ ⨀ b₂)
   exact this
 
-def allIffAllOfIff {φ ψ} (b : Λ ⊢ free φ ⭤ free ψ) : Λ ⊢ ∀' φ ⭤ ∀' ψ := Entailment.andIntro
-  (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (by simp) (Entailment.andLeft b)))
-  (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (by simp) (Entailment.andRight b)))
+def allIffAllOfIff {φ ψ} (b : Λ ⊢ free φ ⭤ free ψ) : Λ ⊢ ∀' φ ⭤ ∀' ψ := Entailment.K_intro
+  (allImplyAllOfAllImply φ ψ ⨀ gen (Entailment.cast (by simp) (Entailment.K_left b)))
+  (allImplyAllOfAllImply ψ φ ⨀ gen (Entailment.cast (by simp) (Entailment.K_right b)))
 
 set_option diagnostics true in
 set_option profiler true in
 def dneOfNegative [L.DecidableEq] : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ∼∼φ ➝ φ
-  | ⊥,     _ => Entailment.falsumDNE
+  | ⊥,     _ => Entailment.CNNOO
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢ ∼∼φ ➝ φ := dneOfNegative (by simp [by simpa using h])
     have ihψ : Λ ⊢ ∼∼ψ ➝ ψ := dneOfNegative (by simp [by simpa using h])
-    have : Λ ⊢ ∼φ ➝ ∼(φ ⋏ ψ) := Entailment.contra₀' Entailment.and₁
+    have : Λ ⊢ ∼φ ➝ ∼(φ ⋏ ψ) := Entailment.contra Entailment.and₁
     have dφ : [∼∼(φ ⋏ ψ)] ⊢[Λ] φ := of ihφ ⨀ (deduct <| byAxm₁ ⨀ (of this ⨀ byAxm₀))
-    have : Λ ⊢ ∼ψ ➝ ∼(φ ⋏ ψ) := Entailment.contra₀' Entailment.and₂
+    have : Λ ⊢ ∼ψ ➝ ∼(φ ⋏ ψ) := Entailment.contra Entailment.and₂
     have dψ : [∼∼(φ ⋏ ψ)] ⊢[Λ] ψ := of ihψ ⨀ (deduct <| byAxm₁ ⨀ (of this ⨀ byAxm₀))
-    deduct' (Entailment.andIntro dφ dψ)
+    deduct' (Entailment.K_intro dφ dψ)
   | φ ➝ ψ, h =>
     let ihψ : Λ ⊢ ∼∼ψ ➝ ψ := dneOfNegative (by simp [by simpa using h])
     have : [∼ψ, φ, ∼∼(φ ➝ ψ)] ⊢[Λ] ∼(φ ➝ ψ) := deduct <| byAxm₁ ⨀ (byAxm₀ ⨀ byAxm₂)
@@ -173,27 +173,27 @@ def dneOfNegative [L.DecidableEq] : {φ : SyntacticFormulaᵢ L} → φ.IsNegati
   termination_by φ _ => φ.complexity
 
 def ofDNOfNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} {Γ} (b : Γ ⊢[Λ] ∼∼φ) (h : φ.IsNegative) : Γ ⊢[Λ] φ :=
-  Entailment.impTrans'' (toDef b) (dneOfNegative h)
+  Entailment.C_trans (toDef b) (dneOfNegative h)
 
-def dnOfNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ :=
-  Entailment.andIntro (dneOfNegative h) Entailment.dni
+def DN_of_isNegative [L.DecidableEq] {φ : SyntacticFormulaᵢ L} (h : φ.IsNegative) : Λ ⊢ ∼∼φ ⭤ φ :=
+  Entailment.K_intro (dneOfNegative h) Entailment.dni
 
 def efqOfNegative : {φ : SyntacticFormulaᵢ L} → φ.IsNegative → Λ ⊢ ⊥ ➝ φ
-  | ⊥,     _ => Entailment.impId ⊥
+  | ⊥,     _ => Entailment.C_id ⊥
   | φ ⋏ ψ, h =>
     have ihφ : Λ ⊢ ⊥ ➝ φ := efqOfNegative (by simp [by simpa using h])
     have ihψ : Λ ⊢ ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
-    Entailment.implyAnd ihφ ihψ
+    Entailment.CK_of_C_of_C ihφ ihψ
   | φ ➝ ψ, h =>
     have ihψ : Λ ⊢ ⊥ ➝ ψ := efqOfNegative (by simp [by simpa using h])
-    Entailment.impTrans'' ihψ Entailment.imply₁
+    Entailment.C_trans ihψ Entailment.imply₁
   | ∀' φ,  h =>
     have ihφ : Λ ⊢ ⊥ ➝ free φ := efqOfNegative (by simp [by simpa using h])
     implyAll <| Entailment.cast (by simp) ihφ
   termination_by φ _ => φ.complexity
 
 def iffnegOfNegIff [L.DecidableEq] {φ ψ : SyntacticFormulaᵢ L} (h : φ.IsNegative) (b : Λ ⊢ ∼φ ⭤ ψ) : Λ ⊢ φ ⭤ ∼ψ :=
-  Entailment.iffTrans'' (Entailment.iffComm' <| dnOfNegative h) (Entailment.negReplaceIff' b)
+  Entailment.E_trans (Entailment.E_symm <| DN_of_isNegative h) (Entailment.ENN_of_E b)
 
 def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢ φ → Λ ⊢ Rew.rewrite f ▹ φ
   | mdp b d        => rewrite f b ⨀ rewrite f d

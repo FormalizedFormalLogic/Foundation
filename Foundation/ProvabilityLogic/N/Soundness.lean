@@ -21,6 +21,6 @@ lemma N.arithmetical_soundness (h : (Hilbert.N) ⊢! A) : ∀ {f : Realization L
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | imply₁ => exact imply₁!;
   | imply₂ => exact imply₂!;
-  | ec => exact elim_contra_neg!;
+  | ec => exact CCCOCOC!;
 
 end LO.ProvabilityLogic

@@ -20,7 +20,7 @@ variable {φ : Formula ℕ}
 
 lemma unprovable_notbox : Hilbert.GL ⊬ ∼□φ := by
   by_contra hC;
-  have : Hilbert.GL ⊢! ∼□φ ➝ ∼□⊥ := contra₀'! (imply_box_distribute'! efq!)
+  have : Hilbert.GL ⊢! ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
   have : Hilbert.GL ⊢! ∼□⊥ := this ⨀ hC;
   have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using provable_verTranslated_Cl this;
   have := Hilbert.Cl.soundness this (λ _ => False);
@@ -28,13 +28,13 @@ lemma unprovable_notbox : Hilbert.GL ⊬ ∼□φ := by
 
 lemma unprovable_independency : Hilbert.GL ⊬ independency φ := by
   by_contra hC;
-  exact unprovable_notbox $ and₁'! hC;
+  exact unprovable_notbox $ K!_left hC;
 
 lemma unprovable_not_independency_of_consistency : Hilbert.GL ⊬ ∼(independency (∼□⊥)) := by
   by_contra hC;
-  rcases modal_disjunctive (dne_or! $ demorgan₄'! hC) with (h | h);
+  rcases modal_disjunctive (A!_of_ANNNN! $ ANN!_of_NK! hC) with (h | h);
   . exact unprovable_notbox h;
-  . exact Consistent.not_bot (inferInstance) $ unnec! $ dne'! h
+  . exact Consistent.not_bot (inferInstance) $ unnec! $ of_NN! h
 
 theorem undecidable_independency_of_consistency : Undecidable Hilbert.GL (independency (∼□⊥)) := by
   constructor;
@@ -52,9 +52,9 @@ lemma unprovable_not_higherIndependency_of_consistency : Hilbert.GL ⊬ ∼(high
   by_contra hC;
   induction n with
   | zero =>
-    exact Consistent.not_bot (inferInstance) $ unnec! $ dne'! hC;
+    exact Consistent.not_bot (inferInstance) $ unnec! $ of_NN! hC;
   | succ n ih =>
-    rcases modal_disjunctive (dne_or! $ demorgan₄'! hC) with (h | h);
+    rcases modal_disjunctive (A!_of_ANNNN! $ ANN!_of_NK! hC) with (h | h);
     . exact unprovable_higherIndependency_of_consistency h;
     . exact ih h;
 

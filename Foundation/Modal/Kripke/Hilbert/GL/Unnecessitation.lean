@@ -48,7 +48,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
 
 theorem unnecessitation! : Hilbert.GL ⊢! □φ → Hilbert.GL ⊢! φ := by
   intro h;
-  have : Hilbert.GL ⊢! □⊤ ➝ □φ := imply₁'! (ψ := □⊤) h;
+  have : Hilbert.GL ⊢! □⊤ ➝ □φ := C!_of_conseq! (ψ := □⊤) h;
   have : Hilbert.GL ⊢! ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 

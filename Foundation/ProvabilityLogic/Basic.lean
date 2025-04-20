@@ -38,45 +38,45 @@ lemma iff_interpret_bot : T ⊢!. f.interpret 𝔅 ⊥ ↔ T ⊢!. ⊥ := by sim
 lemma iff_interpret_box : T ⊢!. f.interpret 𝔅 (□A) ↔ T ⊢!. 𝔅 (f.interpret 𝔅 A) := by simp [Realization.interpret];
 lemma iff_interpret_neg : T ⊢!. f.interpret 𝔅 (∼A) ↔ T ⊢!. ∼(f.interpret 𝔅 A) := by
   dsimp [Realization.interpret];
-  apply neg_equiv'!.symm;
+  apply N!_iff_CO!.symm;
 
 lemma iff_interpret_neg_inside : T ⊢!. f.interpret 𝔅 (∼A) ⭤ ∼(f.interpret 𝔅 A) := by
   dsimp [Realization.interpret];
-  apply and₃'!;
-  . apply and₂'! $ neg_equiv!
-  . apply and₁'! $ neg_equiv!
+  apply K!_intro;
+  . apply K!_right $ neg_equiv!
+  . apply K!_left $ neg_equiv!
 
 variable [DecidableEq (Sentence L)]
 
 lemma iff_interpret_or_inside : T ⊢!. f.interpret 𝔅 (A ⋎ B) ⭤ (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
-  apply and₃'!;
-  . apply IIIpbqOpq!;
-  . apply IOpqIIpbq!;
+  apply K!_intro;
+  . apply CCCOA!;
+  . apply CACCO!;
 
 lemma iff_interpret_or : T ⊢!. f.interpret 𝔅 (A ⋎ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
   constructor;
-  . intro h; apply (and₁'! iff_interpret_or_inside) ⨀ h;
-  . intro h; apply (and₂'! iff_interpret_or_inside) ⨀ h;
+  . intro h; apply (K!_left iff_interpret_or_inside) ⨀ h;
+  . intro h; apply (K!_right iff_interpret_or_inside) ⨀ h;
 
 lemma iff_interpret_and : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
   constructor;
-  . intro h; apply IIIpIqbb_Apq! h;
-  . intro h; apply Apq_IIpIqbb! h;
+  . intro h; apply K!_of_CCCO! h;
+  . intro h; apply CCCOO!_of_K! h;
 
 lemma iff_interpret_and_inside : T ⊢!. f.interpret 𝔅 (A ⋏ B) ⭤ (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
-  apply and₃'!;
-  . apply IIIpIqbbApq!;
-  . apply ApqIIpIqbb!;
+  apply K!_intro;
+  . apply CCCCOOK!;
+  . apply CKCCCOO!;
 
 lemma iff_interpret_and' : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ∧ T ⊢!. (f.interpret 𝔅 B) := by
   apply Iff.trans iff_interpret_and;
   constructor;
   . intro h;
     constructor;
-    . apply and₁'! h;
-    . apply and₂'! h;
+    . apply K!_left h;
+    . apply K!_right h;
   . rintro ⟨_, _⟩;
-    apply and₃'! <;> assumption;
+    apply K!_intro <;> assumption;
 
 end
 

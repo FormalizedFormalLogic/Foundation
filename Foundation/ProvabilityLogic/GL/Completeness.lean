@@ -50,11 +50,11 @@ theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : 
   | hatom a =>
     constructor;
     . intro h;
-      apply imply_fdisj;
+      apply right_Fdisj'!_intro;
       simpa using h;
     . intro h;
-      apply contra₁'!;
-      apply fdisj_imply!;
+      apply CN!_of_CN!_right;
+      apply left_Fdisj'!_intro;
       intro i hi;
       apply σ.SC1;
       by_contra hC; subst hC;
@@ -65,17 +65,17 @@ theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : 
     constructor;
     . intro h;
       rcases Satisfies.imp_def₂.mp h with (hA | hB);
-      . exact imp_trans''! ((ihA hri).2 hA) efq_imply_not₁!;
-      . exact imp_trans''! ((ihB hri).1 hB) imply₁!;
+      . exact C!_trans ((ihA hri).2 hA) CNC!;
+      . exact C!_trans ((ihB hri).1 hB) imply₁!;
     . intro hA hB;
       exact not_imply_prem''! ((ihA hri).1 hA) ((ihB hri).2 hB);
   | hbox A ihA =>
     simp only [Realization.interpret];
     constructor;
     . intro h;
-      apply imp_trans''! $ σ.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri);
+      apply C!_trans $ σ.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri);
       apply 𝔅.prov_distribute_imply';
-      apply fdisj_imply!;
+      apply left_Fdisj'!_intro;
       rintro j Rij;
       replace Rij : i ≺ j := by simpa using Rij
       exact (ihA (IsTrans.trans _ _ _ hri Rij)).1 (h j Rij)
@@ -83,10 +83,10 @@ theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : 
       have := Satisfies.box_def.not.mp h;
       push_neg at this;
       obtain ⟨j, Rij, hA⟩ := this;
-      have := contra₁'! $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
+      have := CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
       have : T₀ ⊢!. ∼𝔅 (∼σ.σ j) ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) :=
-        contra₀'! $ 𝔅.prov_distribute_imply' $ contra₁'! $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
-      exact imp_trans''! (σ.SC2 i j Rij) this;
+        contra₀'! $ 𝔅.prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
+      exact C!_trans (σ.SC2 i j Rij) this;
 
 end SolovaySentences
 
@@ -449,7 +449,7 @@ lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : T.
       have sπ : 𝐈𝚺₁ ⊢!. T.solovay i ⭤ π := solovay_diag T i
       have : T ⊢!. ∼π := by
         have : T ⊢!. T.solovay i ⭤ π := Entailment.WeakerThan.wk (inferInstanceAs (𝐈𝚺₁ ⪯ T)) sπ
-        exact Entailment.and_left! (Entailment.neg_replace_iff'! this) ⨀ Bi
+        exact Entailment.K!_left (Entailment.ENN!_of_E! this) ⨀ Bi
       have : ¬ℕ ⊧/![] π := by
         simpa [models_iff] using
           (inferInstanceAs (SoundOn T (Hierarchy 𝚷 2))).sound
@@ -522,9 +522,9 @@ theorem GL.arithmetical_completeness :
   have : 𝐈𝚺₁ ⊢!. σ r₁ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) (∼A) :=
     σ.mainlemma (A := ∼A) (i := r₁) (by trivial) |>.1 $ Model.extendRoot.inr_satisfies_iff |>.not.mpr hA₁;
   replace : 𝐈𝚺₁ ⊢!. σ.realization.interpret ((𝐈𝚺₁).standardDP T) A ➝ ∼(σ r₁) := by
-    apply contra₁'!;
-    apply imp_trans''! this;
-    apply and₂'! neg_equiv!;
+    apply CN!_of_CN!_right;
+    apply C!_trans this;
+    apply K!_right neg_equiv!;
   replace : T ⊢!. σ.realization.interpret ((𝐈𝚺₁).standardDP T) A ➝ ∼(σ r₁) := WeakerThan.pbl this;
   by_contra hC;
   have : T ⊢!. ∼(σ r₁) := this ⨀ hC;
