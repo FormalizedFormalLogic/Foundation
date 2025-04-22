@@ -39,18 +39,20 @@ instance [IsTrans _ F] : IsEquiv _ (clusterEquiv F) where
 
 end
 
-
-abbrev ClusterEqvSetoid (F : Frame) [IsTrans _ F] : Setoid (F.World) := ⟨clusterEquiv F, IsEquiv.equivalence⟩
-
-abbrev Cluster (F : Frame) [IsTrans _ F] := Quotient (ClusterEqvSetoid F)
+abbrev Cluster (F : Frame) [IsTrans _ F] := Quotient (⟨clusterEquiv F, IsEquiv.equivalence⟩)
 
 namespace Cluster
 
-variable {F : Frame} [IsTrans _ F] {x y : F.World} {C Cx Cy : Cluster F}
+variable {F : Frame} [IsTrans _ F] {x y : F.World} {C : Cluster F}
+
+instance [Finite F] : Finite (Cluster F) := Finite.of_surjective (λ x => ⟦x⟧) $ by
+  intro C;
+  obtain ⟨x, rfl⟩ := Quotient.exists_rep C;
+  use x;
 
 @[simp]
 lemma iff_eq_cluster : (⟦x⟧ : Cluster F) = ⟦y⟧ ↔ (x = y ∨ (x ≺ y ∧ y ≺ x)) := by
-  simp only [ClusterEqvSetoid, Quotient.eq, clusterEquiv];
+  simp only [Quotient.eq, clusterEquiv];
 
 @[simp]
 protected def rel : Rel (Cluster F) (Cluster F) := Quotient.lift₂ (λ x y => x ≺ y) $ by
@@ -76,8 +78,68 @@ protected def rel : Rel (Cluster F) (Cluster F) := Quotient.lift₂ (λ x y => x
         exact _root_.trans (_root_.trans Rx₁x₂ Rx₂y₂) Ry₂y₁;
 local infix:50 " ≼ " => Cluster.rel
 
+instance : IsTrans (Cluster F) (· ≼ ·) := ⟨by
+  rintro X Y Z RXY RYZ;
+  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+  obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
+  obtain ⟨z, rfl⟩ := Quotient.exists_rep Z;
+  simp only [Cluster.rel, Quotient.lift_mk] at RXY RYZ;
+  apply _root_.trans RXY RYZ;
+⟩
+
+instance : IsAntisymm (Cluster F) (· ≼ ·) := ⟨by
+  rintro X Y RXY RYX;
+  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+  obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
+  simp only [Cluster.rel, Quotient.lift_mk] at RXY RYX;
+  apply iff_eq_cluster.mpr;
+  right;
+  tauto;
+⟩
+
+instance [IsRefl _ F] : IsRefl (Cluster F) (· ≼ ·)  := ⟨by
+  rintro X;
+  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+  simp only [Cluster.rel, Quotient.lift_mk];
+  apply IsRefl.refl;
+⟩
+
+
 protected def strict_rel : Rel (Cluster F) (Cluster F) := λ X Y => X ≼ Y ∧ X ≠ Y
 local infix:50 " ≺ " => Cluster.strict_rel
+
+instance rel_trans : IsTrans (Cluster F) (· ≺ ·) := ⟨by
+  rintro X Y Z ⟨RXY, _⟩ ⟨RYZ, _⟩;
+  constructor;
+  . exact _root_.trans RXY RYZ;
+  . by_contra hC;
+    subst hC;
+    have : X = Y := antisymm RXY RYZ;
+    contradiction;
+⟩
+
+instance : IsIrrefl (Cluster F) (· ≺ ·) := ⟨by
+  rintro X;
+  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+  simp [Cluster.strict_rel, Quotient.lift_mk];
+⟩
+
+instance : IsAsymm (Cluster F) (· ≺ ·) := ⟨by
+  intro X Y ⟨RXY, _⟩;
+  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+  obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
+  simp_all [Cluster.strict_rel, Quotient.lift_mk, clusterEquiv];
+⟩
+
+instance [IsTrichotomous _ F] : IsTrichotomous (Cluster F) (· ≺ ·) := ⟨by
+  rintro X Y;
+  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+  obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
+  rcases (trichotomous (r := (· ≺ ·)) x y) with Rxy | rfl | Rxy <;> tauto;
+⟩
+
+instance : IsStrictOrder (Cluster F) (· ≺ ·) where
+instance [IsTrichotomous _ F] : IsStrictTotalOrder (Cluster F) (· ≺ ·) where
 
 protected abbrev mem : Cluster F → F.World → Prop := λ C x => C = ⟦x⟧
 instance : Membership (F.World) (Cluster F) := ⟨Cluster.mem⟩
@@ -85,7 +147,7 @@ instance : Membership (F.World) (Cluster F) := ⟨Cluster.mem⟩
 @[simp]
 lemma mem_iff : x ∈ C ↔ C = ⟦x⟧ := by
   obtain ⟨c, rfl⟩ := Quotient.exists_rep C;
-  simp only [ClusterEqvSetoid, Quotient.eq, clusterEquiv, Cluster.mem, Membership.mem];
+  simp only [Quotient.eq, clusterEquiv, Cluster.mem, Membership.mem];
 
 @[simp]
 lemma mem_iff₂ : x ∈ (⟦y⟧ : Cluster F) ↔ y = x ∨ y ≺ x ∧ x ≺ y := by
@@ -181,7 +243,7 @@ lemma either_simple_or_proper_of_non_degenerate (h : ¬C.degenerate) : C.simple 
       . tauto;
       . apply not_imp_comm.mp (ex y) ?_ |>.symm;
         push_neg;
-        dsimp [ClusterEqvSetoid, clusterEquiv];
+        dsimp [clusterEquiv];
         tauto;
 
 theorem degenerate_or_simple_or_proper : C.degenerate ∨ C.simple ∨ C.proper := by
@@ -195,64 +257,65 @@ end Cluster
 
 
 
-def Frame.skelton (F : Frame) [IsTrans _ F] : Kripke.Frame where
+def Frame.skeleton (F : Frame) [IsTrans _ F] : Kripke.Frame where
   World := Cluster F
   world_nonempty := ⟨⟦F.world_nonempty.some⟧⟩
-  Rel := Quotient.lift₂ (λ x y => x ≺ y) $ by
-    rintro x₁ y₁ x₂ y₂ (rfl | ⟨Rx₁x₂, Rx₂x₁⟩) (rfl | ⟨Ry₁y₂, Ry₂y₁⟩);
-    . rfl;
-    . apply eq_iff_iff.mpr;
-      constructor;
-      . intro Rx₁y₁;
-        exact IsTrans.transitive Rx₁y₁ Ry₁y₂;
-      . intro Rx₁y₂;
-        exact IsTrans.transitive Rx₁y₂ Ry₂y₁;
-    . apply eq_iff_iff.mpr;
-      constructor;
-      . intro Rx₁y₁;
-        exact IsTrans.transitive Rx₂x₁ Rx₁y₁;
-      . intro Rx₂y₁;
-        exact IsTrans.transitive Rx₁x₂ Rx₂y₁;
-    . apply eq_iff_iff.mpr;
-      constructor;
-      . intro Rx₁y₁;
-        exact IsTrans.transitive Rx₂x₁ $ IsTrans.transitive Rx₁y₁ Ry₁y₂;
-      . intro Rx₂y₂;
-        exact IsTrans.transitive (IsTrans.transitive Rx₁x₂ Rx₂y₂) Ry₂y₁;
+  Rel := Cluster.rel
+
 
 section
 
 variable {F : Frame} [IsTrans _ F]
 
-instance : IsTrans _ F.skelton := ⟨by
-  rintro X Y Z RXY RYZ;
-  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
-  obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
-  obtain ⟨z, rfl⟩ := Quotient.exists_rep Z;
-  simp only [Frame.skelton, Quotient.lift_mk] at RXY RYZ;
-  apply IsTrans.transitive RXY RYZ;
-⟩
+instance : IsTrans _ F.skeleton := by
+  dsimp only [Frame.skeleton];
+  infer_instance;
 
-instance : IsAntisymm _ F.skelton := ⟨by
-  rintro X Y RXY RYX;
-  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
-  obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
-  simp only [Frame.skelton, Quotient.lift_mk] at RXY RYX;
-  apply Quotient.eq.mpr;
-  right;
-  tauto;
-⟩
+instance : IsAntisymm _ F.skeleton :=  by
+  dsimp only [Frame.skeleton];
+  infer_instance;
 
-instance [IsRefl _ F] : IsRefl _ F.skelton := ⟨by
-  rintro X;
-  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
-  simp only [Frame.skelton, Quotient.lift_mk]
-  apply IsRefl.refl;
-⟩
+instance [IsRefl _ F] : IsRefl _ F.skeleton :=  by
+  dsimp only [Frame.skeleton];
+  infer_instance;
 
-instance [IsRefl _ F] : IsPartialOrder _ F.skelton where
+instance [IsRefl _ F] : IsPartialOrder _ F.skeleton where
+
+instance [Finite F] : Finite F.skeleton := by
+  dsimp only [Frame.skeleton];
+  infer_instance;
 
 end
+
+
+def Frame.strictSkelteon (F : Frame) [IsTrans _ F] : Kripke.Frame where
+  World := Cluster F
+  world_nonempty := ⟨⟦F.world_nonempty.some⟧⟩
+  Rel := Cluster.strict_rel
+
+namespace Frame.strictSkelteon
+
+variable {F : Frame} [IsTrans _ F]
+
+instance : IsTrans _ F.strictSkelteon := by
+  dsimp only [Frame.strictSkelteon];
+  infer_instance;
+
+instance : IsIrrefl _ F.strictSkelteon := by
+  dsimp only [Frame.strictSkelteon];
+  infer_instance;
+
+instance [IsTrichotomous _ F] : IsTrichotomous _ F.strictSkelteon := by
+  dsimp only [Frame.strictSkelteon];
+  infer_instance;
+
+instance [IsTrichotomous _ F] : IsStrictTotalOrder _ F.strictSkelteon where
+
+instance [Finite F] : Finite F.strictSkelteon := by
+  dsimp only [Frame.strictSkelteon];
+  infer_instance;
+
+end Frame.strictSkelteon
 
 end Kripke
 
