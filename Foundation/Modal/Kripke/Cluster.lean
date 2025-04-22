@@ -79,11 +79,29 @@ local infix:50 " ≼ " => Cluster.rel
 protected def strict_rel : Rel (Cluster F) (Cluster F) := λ X Y => X ≼ Y ∧ X ≠ Y
 local infix:50 " ≺ " => Cluster.strict_rel
 
-lemma refl_in_cluster_of_more_than_one (h : ∃ x y, x ≠ y ∧ C = ⟦x⟧ ∧ C = ⟦y⟧) : ∀ z, C = ⟦z⟧ → z ≺ z := by
+protected abbrev mem : Cluster F → F.World → Prop := λ C x => C = ⟦x⟧
+instance : Membership (F.World) (Cluster F) := ⟨Cluster.mem⟩
+
+@[simp]
+lemma mem_iff : x ∈ C ↔ C = ⟦x⟧ := by
+  obtain ⟨c, rfl⟩ := Quotient.exists_rep C;
+  simp only [ClusterEqvSetoid, Quotient.eq, clusterEquiv, Cluster.mem, Membership.mem];
+
+@[simp]
+lemma mem_iff₂ : x ∈ (⟦y⟧ : Cluster F) ↔ y = x ∨ y ≺ x ∧ x ≺ y := by
+  constructor;
+  . intro h;
+    replace h := mem_iff.mp h;
+    simpa using h;
+  . intro h;
+    apply mem_iff.mpr;
+    simpa using h;
+
+lemma refl_in_cluster_of_more_than_one (h : ∃ x y, x ≠ y ∧ x ∈ C ∧ y ∈ C) : ∀ z, z ∈ C → z ≺ z := by
   obtain ⟨c, rfl⟩ := Quotient.exists_rep C;
   obtain ⟨x, y, hxy, hx, hy⟩ := h;
   intro z hz;
-  simp only [ClusterEqvSetoid, Quotient.eq, clusterEquiv] at hx hy hz;
+  simp only [mem_iff₂] at hx hy hz;
   rcases hx with rfl | ⟨Rcx, Rxc⟩ <;>
   rcases hy with rfl | ⟨Rcy, Ryc⟩ <;>
   rcases hz with rfl | ⟨Rcz, Rzc⟩;
@@ -96,23 +114,23 @@ lemma refl_in_cluster_of_more_than_one (h : ∃ x y, x ≠ y ∧ C = ⟦x⟧ ∧
   . exact _root_.trans Rcy Ryc;
   . exact _root_.trans Rzc Rcz;
 
-lemma refl_rel_of_more_than_one (h : ∃ x y, x ≠ y ∧ C = ⟦x⟧ ∧ C = ⟦y⟧) : C ≼ C := by
+lemma refl_rel_of_more_than_one (h : ∃ x y, x ≠ y ∧ x ∈ C ∧ y ∈ C) : C ≼ C := by
   obtain ⟨c, rfl⟩ := Quotient.exists_rep C;
   apply refl_in_cluster_of_more_than_one h;
   tauto;
 
 def degenerate (C : Cluster F) := ¬C ≼ C
 
-lemma not_more_than_two_of_degenerate : C.degenerate → ¬∃ x y, x ≠ y ∧ C = ⟦x⟧ ∧ C = ⟦y⟧ := by
+lemma not_more_than_two_of_degenerate : C.degenerate → ¬∃ x y, x ≠ y ∧ x ∈ C ∧ y ∈ C := by
   apply not_imp_not.mpr $ refl_rel_of_more_than_one;
 
-lemma degenerate_iff_exists_unique_irrefl_point : C.degenerate ↔ (∃! x, C = ⟦x⟧ ∧ ¬x ≺ x) := by
+lemma degenerate_iff_exists_unique_irrefl_point : C.degenerate ↔ (∃! x, x ∈ C ∧ ¬x ≺ x) := by
   obtain ⟨c, rfl⟩ := Quotient.exists_rep C;
   constructor;
   . intro h;
     use c;
     constructor;
-    . tauto;
+    . simpa;
     . rintro x ⟨hx₁, hx₂⟩;
       by_contra nexc;
       have := not_more_than_two_of_degenerate h;
@@ -120,13 +138,12 @@ lemma degenerate_iff_exists_unique_irrefl_point : C.degenerate ↔ (∃! x, C = 
       replace this := this c x (by tauto) (by tauto);
       contradiction;
   . rintro ⟨x, ⟨hx₁, hx₂⟩, hx₃⟩;
-    simp only [ClusterEqvSetoid, Quotient.eq, clusterEquiv] at hx₁;
-    rcases hx₁ with rfl | ⟨Rxy, Ryx⟩;
+    rcases (mem_iff₂.mp hx₁) with rfl | ⟨Rxy, Ryx⟩;
     . apply hx₂;
     . exfalso;
       exact hx₂ $ _root_.trans Ryx Rxy;
 
-def simple (C : Cluster F) := ∃! x, C = ⟦x⟧ ∧ x ≺ x
+def simple (C : Cluster F) := ∃! x, x ∈ C ∧ x ≺ x
 
 lemma not_degenerate_of_simple (h : C.simple) : ¬C.degenerate := by
   apply degenerate_iff_exists_unique_irrefl_point.not.mpr;
@@ -140,7 +157,7 @@ lemma not_degenerate_of_simple (h : C.simple) : ¬C.degenerate := by
     contradiction;
   . exact hy₂ $ refl_in_cluster_of_more_than_one (by use x, y) y hy₁;
 
-def proper (C : Cluster F) := ∃ x y, x ≠ y ∧ C = ⟦x⟧ ∧ C = ⟦y⟧
+def proper (C : Cluster F) := ∃ x y, x ≠ y ∧ x ∈ C ∧ y ∈ C
 
 lemma not_degenerate_of_proper (h : C.proper) : ¬C.degenerate := by
   by_contra hC;
@@ -152,6 +169,7 @@ lemma either_simple_or_proper_of_non_degenerate (h : ¬C.degenerate) : C.simple 
   . right;
     obtain ⟨y, nexy, h⟩ := ex;
     use x, y;
+    tauto;
   . left;
     use x;
     constructor;
