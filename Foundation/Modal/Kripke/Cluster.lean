@@ -3,17 +3,6 @@ import Foundation.Modal.Kripke.Rooted
 import Mathlib.Data.Finite.Card
 
 
-namespace LO.Modal.Axioms
-
-variable {F : Type*} [BasicModalLogicalConnective F]
-variable (φ ψ χ : F)
-
-protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
-
-end LO.Modal.Axioms
-
-
-
 def IsEquiv.equivalence [IsEquiv α r] : Equivalence r where
   refl := IsRefl.refl
   symm {_ _} := by apply IsSymm.symm
