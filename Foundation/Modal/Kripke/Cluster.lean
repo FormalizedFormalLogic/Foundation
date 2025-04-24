@@ -1,4 +1,18 @@
 import Foundation.Modal.Kripke.Preservation
+import Foundation.Modal.Kripke.Rooted
+import Mathlib.Data.Finite.Card
+
+
+namespace LO.Modal.Axioms
+
+variable {F : Type*} [BasicModalLogicalConnective F]
+variable (φ ψ χ : F)
+
+protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
+
+end LO.Modal.Axioms
+
+
 
 def IsEquiv.equivalence [IsEquiv α r] : Equivalence r where
   refl := IsRefl.refl
@@ -54,8 +68,7 @@ instance [Finite F] : Finite (Cluster F) := Finite.of_surjective (λ x => ⟦x�
 lemma iff_eq_cluster : (⟦x⟧ : Cluster F) = ⟦y⟧ ↔ (x = y ∨ (x ≺ y ∧ y ≺ x)) := by
   simp only [Quotient.eq, clusterEquiv];
 
-@[simp]
-protected def rel : Rel (Cluster F) (Cluster F) := Quotient.lift₂ (λ x y => x ≺ y) $ by
+protected abbrev rel : Rel (Cluster F) (Cluster F) := Quotient.lift₂ (λ x y => x ≺ y) $ by
     rintro x₁ y₁ x₂ y₂ (rfl | ⟨Rx₁x₂, Rx₂x₁⟩) (rfl | ⟨Ry₁y₂, Ry₂y₁⟩);
     . rfl;
     . apply eq_iff_iff.mpr;
@@ -104,11 +117,18 @@ instance [IsRefl _ F] : IsRefl (Cluster F) (· ≼ ·)  := ⟨by
   apply IsRefl.refl;
 ⟩
 
+instance [IsTotal _ F] : IsTotal (Cluster F) (· ≼ ·) := ⟨by
+  rintro X Y;
+  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+  obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
+  rcases total_of (· ≺ ·) x y with Rxy | Rxy <;> tauto;
+⟩
 
-protected def strict_rel : Rel (Cluster F) (Cluster F) := λ X Y => X ≼ Y ∧ X ≠ Y
+
+protected abbrev strict_rel : Rel (Cluster F) (Cluster F) := λ X Y => X ≼ Y ∧ X ≠ Y
 local infix:50 " ≺ " => Cluster.strict_rel
 
-instance rel_trans : IsTrans (Cluster F) (· ≺ ·) := ⟨by
+instance : IsTrans (Cluster F) (· ≺ ·) := ⟨by
   rintro X Y Z ⟨RXY, _⟩ ⟨RYZ, _⟩;
   constructor;
   . exact _root_.trans RXY RYZ;
@@ -131,6 +151,8 @@ instance : IsAsymm (Cluster F) (· ≺ ·) := ⟨by
   simp_all [Cluster.strict_rel, Quotient.lift_mk, clusterEquiv];
 ⟩
 
+instance : IsStrictOrder (Cluster F) (· ≺ ·) where
+
 instance [IsTrichotomous _ F] : IsTrichotomous (Cluster F) (· ≺ ·) := ⟨by
   rintro X Y;
   obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
@@ -138,8 +160,8 @@ instance [IsTrichotomous _ F] : IsTrichotomous (Cluster F) (· ≺ ·) := ⟨by
   rcases (trichotomous (r := (· ≺ ·)) x y) with Rxy | rfl | Rxy <;> tauto;
 ⟩
 
-instance : IsStrictOrder (Cluster F) (· ≺ ·) where
 instance [IsTrichotomous _ F] : IsStrictTotalOrder (Cluster F) (· ≺ ·) where
+
 
 protected abbrev mem : Cluster F → F.World → Prop := λ C x => C = ⟦x⟧
 instance : Membership (F.World) (Cluster F) := ⟨Cluster.mem⟩
@@ -158,6 +180,20 @@ lemma mem_iff₂ : x ∈ (⟦y⟧ : Cluster F) ↔ y = x ∨ y ≺ x ∧ x ≺ y
   . intro h;
     apply mem_iff.mpr;
     simpa using h;
+
+lemma mem_same_cluster (hx : x ∈ C) (hy : y ∈ C): y = x ∨ (y ≺ x ∧ x ≺ y) := by
+  obtain ⟨c, rfl⟩ := Quotient.exists_rep C;
+  replace hx := mem_iff₂.mp hx;
+  replace hy := mem_iff₂.mp hy;
+  rcases hx with rfl | ⟨Rcx, Rxc⟩ <;>
+  rcases hy with rfl | ⟨Rcy, Ryc⟩;
+  . tauto;
+  . tauto;
+  . tauto;
+  . right;
+    constructor;
+    . exact _root_.trans Ryc Rcx;
+    . exact _root_.trans Rxc Rcy;
 
 lemma refl_in_cluster_of_more_than_one (h : ∃ x y, x ≠ y ∧ x ∈ C ∧ y ∈ C) : ∀ z, z ∈ C → z ≺ z := by
   obtain ⟨c, rfl⟩ := Quotient.exists_rep C;
@@ -219,11 +255,25 @@ lemma not_degenerate_of_simple (h : C.simple) : ¬C.degenerate := by
     contradiction;
   . exact hy₂ $ refl_in_cluster_of_more_than_one (by use x, y) y hy₁;
 
+lemma refl_in_simple (h : C.simple) (hx : x ∈ C) : x ≺ x := by
+  obtain ⟨y, ⟨hy, _⟩, _⟩ := h;
+  rcases mem_same_cluster hx hy with rfl | ⟨Rxy, Ryx⟩;
+  . assumption;
+  . exact _root_.trans Ryx Rxy;
+
 def proper (C : Cluster F) := ∃ x y, x ≠ y ∧ x ∈ C ∧ y ∈ C
 
 lemma not_degenerate_of_proper (h : C.proper) : ¬C.degenerate := by
   by_contra hC;
   exact not_more_than_two_of_degenerate hC h;
+
+lemma refl_in_proper (h : C.proper) (hx : x ∈ C) : x ≺ x := by
+  obtain ⟨y, z, hxy, hy, hz⟩ := h;
+  rcases mem_same_cluster hx hy with rfl | ⟨Rxy, Ryx⟩;
+  . rcases mem_same_cluster hy hz with rfl | ⟨Ryz, Rzy⟩;
+    . contradiction;
+    . exact _root_.trans Rzy Ryz;
+  . exact _root_.trans Ryx Rxy;
 
 lemma either_simple_or_proper_of_non_degenerate (h : ¬C.degenerate) : C.simple ∨ C.proper := by
   obtain ⟨x, rfl⟩ := Quotient.exists_rep C;
@@ -246,6 +296,11 @@ lemma either_simple_or_proper_of_non_degenerate (h : ¬C.degenerate) : C.simple 
         dsimp [clusterEquiv];
         tauto;
 
+lemma refl_of_mem_non_degenerate (h : ¬C.degenerate) (hx : x ∈ C) : x ≺ x := by
+  rcases (either_simple_or_proper_of_non_degenerate h) with h | h;
+  . apply refl_in_simple h hx;
+  . apply refl_in_proper h hx;
+
 theorem degenerate_or_simple_or_proper : C.degenerate ∨ C.simple ∨ C.proper := by
   by_cases h : C.degenerate;
   . left;
@@ -262,10 +317,13 @@ def Frame.skeleton (F : Frame) [IsTrans _ F] : Kripke.Frame where
   world_nonempty := ⟨⟦F.world_nonempty.some⟧⟩
   Rel := Cluster.rel
 
-
 section
 
 variable {F : Frame} [IsTrans _ F]
+
+instance [Finite F] : Finite F.skeleton := by
+  dsimp only [Frame.skeleton];
+  infer_instance;
 
 instance : IsTrans _ F.skeleton := by
   dsimp only [Frame.skeleton];
@@ -279,11 +337,13 @@ instance [IsRefl _ F] : IsRefl _ F.skeleton :=  by
   dsimp only [Frame.skeleton];
   infer_instance;
 
-instance [IsRefl _ F] : IsPartialOrder _ F.skeleton where
-
-instance [Finite F] : Finite F.skeleton := by
+instance [IsTotal _ F] : IsTotal _ F.skeleton := by
   dsimp only [Frame.skeleton];
   infer_instance;
+
+instance [IsRefl _ F] : IsPartialOrder _ F.skeleton where
+
+instance [IsTotal _ F] : IsLinearOrder _ F.skeleton where
 
 end
 
@@ -296,6 +356,10 @@ def Frame.strictSkelteon (F : Frame) [IsTrans _ F] : Kripke.Frame where
 namespace Frame.strictSkelteon
 
 variable {F : Frame} [IsTrans _ F]
+
+instance [Finite F] : Finite F.strictSkelteon := by
+  dsimp only [Frame.strictSkelteon];
+  infer_instance;
 
 instance : IsTrans _ F.strictSkelteon := by
   dsimp only [Frame.strictSkelteon];
@@ -310,10 +374,6 @@ instance [IsTrichotomous _ F] : IsTrichotomous _ F.strictSkelteon := by
   infer_instance;
 
 instance [IsTrichotomous _ F] : IsStrictTotalOrder _ F.strictSkelteon where
-
-instance [Finite F] : Finite F.strictSkelteon := by
-  dsimp only [Frame.strictSkelteon];
-  infer_instance;
 
 end Frame.strictSkelteon
 

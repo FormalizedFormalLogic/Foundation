@@ -69,6 +69,7 @@ import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.NNFormula
 import Foundation.Modal.Kripke.ComplexityLimited
 import Foundation.Modal.Kripke.Undefinability
+import Foundation.Modal.Kripke.AxiomZ
 
 import Foundation.Modal.PLoN.Hilbert.N
 
