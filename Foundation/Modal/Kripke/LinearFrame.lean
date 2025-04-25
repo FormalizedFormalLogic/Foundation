@@ -140,4 +140,89 @@ lemma NatLTFrame_validates_AxiomZ : NatLTFrame ⊧ (Axiom.Z (.atom 0)) := by
   . apply hz;
     assumption;
 
+open
+  Formula
+  Formula.Kripke
+in
+/-- Goldblatt, Exercise 8.9 -/
+lemma NatLEFrame_validates_AxiomDum : NatLEFrame ⊧ (Axiom.Dum (.atom 0)) := by
+  intro V x hx₁ hx₂;
+  obtain ⟨y, le_xy, hy⟩ := Satisfies.dia_def.mp hx₂;
+  rcases lt_or_eq_of_le le_xy with (le_xy | rfl);
+  . rcases or_not_of_imp (hx₁ x (by omega)) with _ | hx₃;
+    . assumption;
+    . by_contra hx;
+      obtain ⟨⟨u, u_ioc⟩, hu₁, hu⟩ := @WellFounded.has_min (α := Finset.Ioo x y) (· > ·)
+        (Finite.wellFounded_of_trans_of_irrefl _)
+        ({ u | ¬Satisfies ⟨NatLTFrame, V⟩ u (.atom 0) })
+        (by
+          replace hx₃ := Satisfies.box_def.not.mp hx₃;
+          push_neg at hx₃;
+          obtain ⟨u, lt_xu, hu⟩ := hx₃;
+          replace lt_xu : x < u := by
+            rcases (lt_or_eq_of_le lt_xu) with h | rfl;
+            . assumption;
+            . exfalso;
+              replace hu := Satisfies.imp_def₂.not.mp hu;
+              push_neg at hu;
+              exact hx $ hu.1;
+          replace hu := Satisfies.imp_def₂.not.mp hu;
+          push_neg at hu;
+          obtain ⟨hu₁, hu₂⟩ := hu;
+          replace hu₂ := Satisfies.box_def.not.mp hu₂;
+          push_neg at hu₂;
+          obtain ⟨v, lt_uv, hv⟩ := hu₂;
+          replace lt_uv : u < v := by
+            rcases (lt_or_eq_of_le lt_uv) with h | rfl;
+            . assumption;
+            . contradiction;;
+          refine ⟨⟨v, ?_⟩, ?_⟩;
+          . apply Finset.mem_Ioo.mpr;
+            constructor;
+            . exact lt_trans lt_xu lt_uv;
+            . by_contra hC;
+              replace le_yv := not_lt.mp hC;
+              apply hv;
+              apply hy;
+              exact le_yv;
+          . tauto;
+        )
+      have ⟨lt_xu, lt_uy⟩ := Finset.mem_Ioo.mp u_ioc;
+      have hu₂ := hx₁ u (le_of_lt lt_xu);
+      have := not_imp_not.mpr hu₂ hu₁;
+      replace this := Satisfies.box_def.not.mp this;
+      push_neg at this;
+      obtain ⟨v, lt_uv, hv⟩ := this;
+      replace lt_uv : u < v := by
+        rcases (lt_or_eq_of_le lt_uv) with h | rfl;
+        . assumption;
+        . exfalso;
+          replace hv := Satisfies.imp_def₂.not.mp hv;
+          push_neg at hv;
+          exact hu₁ hv.1;
+      replace hv := Satisfies.imp_def₂.not.mp hv;
+      push_neg at hv;
+      obtain ⟨hv₁, hv₂⟩ := hv;
+      replace hv₂ := Satisfies.box_def.not.mp hv₂;
+      push_neg at hv₂;
+      obtain ⟨w, lt_vw, hw⟩ := hv₂;
+      replace lt_vw : v < w := by
+        rcases (lt_or_eq_of_le lt_vw) with h | rfl;
+        . assumption;
+        . contradiction;
+      have : u < w := lt_trans lt_uv lt_vw;
+      have := hu ⟨w, ?_⟩ hw;
+      . contradiction;
+      . apply Finset.mem_Ioo.mpr;
+        constructor;
+        . exact lt_trans (lt_trans lt_xu lt_uv) lt_vw;
+        . by_contra hC;
+          apply hw;
+          apply hy;
+          exact not_lt.mp hC;
+  . apply hx₁ x (by tauto);
+    intro y lt_xy hy₂ z lt_yz;
+    apply hy;
+    omega;
+
 end LO.Modal.Kripke

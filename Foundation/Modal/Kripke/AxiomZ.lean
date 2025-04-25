@@ -7,6 +7,7 @@ variable {F : Type*} [BasicModalLogicalConnective F]
 variable (φ ψ χ : F)
 
 protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
+protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
 
 end LO.Modal.Axiom
 
