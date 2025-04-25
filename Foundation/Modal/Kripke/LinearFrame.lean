@@ -6,93 +6,93 @@ import Mathlib.Order.Interval.Finset.Nat
 
 namespace LO.Modal.Kripke
 
-abbrev NatLTFrame : Kripke.Frame where
+abbrev natLT : Kripke.Frame where
   World := ℕ
   Rel := (· < ·)
 
-namespace NatLTFrame
+namespace natLT
 
-instance : IsTrans _ NatLTFrame := by
-  dsimp only [NatLTFrame];
+instance : IsTrans _ natLT := by
+  dsimp only [natLT];
   infer_instance;
 
-abbrev min : NatLTFrame.World := 0
+abbrev min : natLT.World := 0
 
-instance : Frame.IsRooted NatLTFrame NatLTFrame.min where
+instance : Frame.IsRooted natLT natLT.min where
   root_generates := by
     intro x hx;
     apply Relation.TransGen.single;
-    simp_all [Frame.Rel', NatLTFrame, NatLTFrame.min];
+    simp_all [Frame.Rel', natLT, natLT.min];
     omega;
 
-end NatLTFrame
+end natLT
 
 
-abbrev NatLEFrame : Kripke.Frame where
+abbrev natLE : Kripke.Frame where
   World := ℕ
   Rel := (· ≤ ·)
 
-namespace NatLEFrame
+namespace natLE
 
-instance : IsTrans _ NatLEFrame := by
-  dsimp only [NatLEFrame];
+instance : IsTrans _ natLE := by
+  dsimp only [natLE];
   infer_instance;
 
-instance : IsRefl _ NatLEFrame := by
-  dsimp only [NatLEFrame];
+instance : IsRefl _ natLE := by
+  dsimp only [natLE];
   infer_instance;
 
-abbrev min : NatLEFrame.World := 0
+abbrev min : natLE.World := 0
 
-instance : Frame.IsRooted NatLEFrame NatLEFrame.min where
+instance : Frame.IsRooted natLE natLE.min where
   root_generates := by
     intro x _;
     apply Relation.TransGen.single;
-    simp_all [Frame.Rel', NatLEFrame, NatLEFrame.min];
+    simp_all [Frame.Rel', natLE, natLE.min];
 
-end NatLEFrame
+end natLE
 
 
-abbrev FinLTFrame (n : ℕ) [NeZero n] : Kripke.Frame where
+abbrev finLT (n : ℕ) [NeZero n] : Kripke.Frame where
   World := Fin n
   Rel := (· < ·)
 
-namespace FinLTFrame
+namespace finLT
 
 variable {n : ℕ} [NeZero n]
 
-instance : Finite (FinLTFrame n) := by
-  dsimp only [FinLTFrame];
+instance : Finite (finLT n) := by
+  dsimp only [finLT];
   infer_instance;
 
-end FinLTFrame
+end finLT
 
 
-abbrev FinLEFrame (n : ℕ) [NeZero n] : Kripke.Frame where
+abbrev finLE (n : ℕ) [NeZero n] : Kripke.Frame where
   World := Fin n
   Rel := (· ≤ ·)
 
-namespace FinLEFrame
+namespace finLE
 
 variable {n : ℕ} [NeZero n]
 
-instance : Finite (FinLTFrame n) := by
-  dsimp only [FinLTFrame];
+instance : Finite (finLT n) := by
+  dsimp only [finLT];
   infer_instance;
 
-instance : IsTrans _ (FinLEFrame n) := by
-  dsimp only [FinLEFrame];
+instance : IsTrans _ (finLE n) := by
+  dsimp only [finLE];
   infer_instance;
 
-instance : IsRefl _ (FinLEFrame n) := by
-  dsimp only [FinLEFrame];
+instance : IsRefl _ (finLE n) := by
+  dsimp only [finLE];
   infer_instance;
 
-instance : IsAntisymm _ (FinLEFrame n) := by
-  dsimp only [FinLEFrame];
+instance : IsAntisymm _ (finLE n) := by
+  dsimp only [finLE];
   infer_instance;
 
-end FinLEFrame
+end finLE
 
 
 open
@@ -100,7 +100,7 @@ open
   Formula.Kripke
 in
 /-- Goldblatt, Exercise 8.1 (1) -/
-lemma NatLTFrame_validates_AxiomZ : NatLTFrame ⊧ (Axiom.Z (.atom 0)) := by
+lemma natLT_validates_AxiomZ : natLT ⊧ (Axiom.Z (.atom 0)) := by
   intro V x hx₁ hx₂ y lt_xy;
   obtain ⟨z, lt_xz, hz⟩ := Satisfies.dia_def.mp hx₂;
   rcases lt_trichotomy y z with (lt_yz | rfl | lt_zy);
@@ -109,7 +109,7 @@ lemma NatLTFrame_validates_AxiomZ : NatLTFrame ⊧ (Axiom.Z (.atom 0)) := by
     . exfalso;
       obtain ⟨⟨u, u_ioc⟩, hu₁, hu⟩ := @WellFounded.has_min (α := Finset.Ioc y z) (· > ·)
         (Finite.wellFounded_of_trans_of_irrefl _)
-        ({ u | ¬Satisfies ⟨NatLTFrame, V⟩ u (.atom 0) })
+        ({ u | ¬Satisfies ⟨natLT, V⟩ u (.atom 0) })
         (by
           replace hy := Satisfies.box_def.not.mp hy;
           push_neg at hy;
@@ -145,7 +145,7 @@ open
   Formula.Kripke
 in
 /-- Goldblatt, Exercise 8.9 -/
-lemma NatLEFrame_validates_AxiomDum : NatLEFrame ⊧ (Axiom.Dum (.atom 0)) := by
+lemma natLE_validates_AxiomDum : natLE ⊧ (Axiom.Dum (.atom 0)) := by
   intro V x hx₁ hx₂;
   obtain ⟨y, le_xy, hy⟩ := Satisfies.dia_def.mp hx₂;
   rcases lt_or_eq_of_le le_xy with (le_xy | rfl);
@@ -154,7 +154,7 @@ lemma NatLEFrame_validates_AxiomDum : NatLEFrame ⊧ (Axiom.Dum (.atom 0)) := by
     . by_contra hx;
       obtain ⟨⟨u, u_ioc⟩, hu₁, hu⟩ := @WellFounded.has_min (α := Finset.Ioo x y) (· > ·)
         (Finite.wellFounded_of_trans_of_irrefl _)
-        ({ u | ¬Satisfies ⟨NatLTFrame, V⟩ u (.atom 0) })
+        ({ u | ¬Satisfies ⟨natLT, V⟩ u (.atom 0) })
         (by
           replace hx₃ := Satisfies.box_def.not.mp hx₃;
           push_neg at hx₃;
