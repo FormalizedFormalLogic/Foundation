@@ -34,6 +34,8 @@ def Isolated := ∀ ⦃x y⦄, ¬(x ≺ y)
 
 def Universal := ∀ ⦃x y⦄, x ≺ y
 
+def Trichotomous := ∀ ⦃x y⦄, x ≺ y ∨ x = y ∨ y ≺ x
+
 end
 
 
@@ -251,6 +253,17 @@ lemma weakConnected_of_connected (hConnected : Connected rel) : WeakConnected re
   rintro x y z ⟨Rxy, Rxz, _⟩;
   rcases hConnected ⟨Rxy, Rxz⟩ with (Ryz | Rzy) <;> simp_all;
 instance [IsConnected α rel] : IsWeakConnected α rel := ⟨weakConnected_of_connected IsConnected.connected⟩
+
+
+lemma connected_of_trichotomy
+  (hRefl : Reflexive rel)
+  (hTri : Trichotomous rel) : Connected rel := by
+  rintro x y z ⟨Rxy, Rxz⟩;
+  rcases @hTri y z with Rxy | rfl | Ryz;
+  . left; assumption;
+  . left; apply hRefl;
+  . right; assumption;
+instance [IsRefl α rel] [IsTrichotomous α rel] : IsConnected α rel := ⟨connected_of_trichotomy IsRefl.reflexive IsTrichotomous.trichotomous⟩
 
 
 lemma confluent_of_refl_connected (hRefl : Reflexive rel) (hConfl : Connected rel) : Confluent rel := by

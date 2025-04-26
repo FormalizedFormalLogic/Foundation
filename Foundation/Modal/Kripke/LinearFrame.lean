@@ -28,6 +28,20 @@ instance : IsTrans _ natLT := by
   dsimp only [natLT];
   infer_instance;
 
+instance : IsSerial _ natLT := ⟨by
+  intro x;
+  use x + 1;
+  omega;
+⟩
+
+instance : IsWeakConnected _ natLT := ⟨by
+  rintro x y z ⟨Rxy, Ryx, nyz⟩;
+  rcases lt_trichotomy y z with Rxy | rfl | rxy;
+  . left; assumption;
+  . contradiction;
+  . right; assumption;
+⟩
+
 abbrev min : natLT.World := 0
 
 instance : Frame.IsRooted natLT natLT.min where
@@ -153,10 +167,6 @@ lemma natLT_validates_AxiomZ : natLT ⊧ (Axiom.Z (.atom 0)) := by
   . apply hz;
     assumption;
 
-open
-  Formula
-  Formula.Kripke
-in
 /-- Goldblatt, Exercise 8.9 -/
 lemma natLE_validates_AxiomDum : natLE ⊧ (Axiom.Dum (.atom 0)) := by
   intro V x hx₁ hx₂;
