@@ -1,8 +1,20 @@
 import Foundation.Modal.Kripke.Preservation
 import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.AxiomZ
 import Mathlib.Order.Interval.Finset.Defs
 import Mathlib.Order.Interval.Finset.Nat
+
+
+namespace LO.Modal.Axiom
+
+variable {F : Type*} [BasicModalLogicalConnective F]
+variable (φ ψ χ : F)
+
+protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
+protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
+
+end LO.Modal.Axiom
+
+
 
 namespace LO.Modal.Kripke
 
@@ -95,10 +107,11 @@ instance : IsAntisymm _ (finLE n) := by
 end finLE
 
 
-open
-  Formula
-  Formula.Kripke
-in
+
+section
+
+open Formula Formula.Kripke
+
 /-- Goldblatt, Exercise 8.1 (1) -/
 lemma natLT_validates_AxiomZ : natLT ⊧ (Axiom.Z (.atom 0)) := by
   intro V x hx₁ hx₂ y lt_xy;
@@ -224,5 +237,7 @@ lemma natLE_validates_AxiomDum : natLE ⊧ (Axiom.Dum (.atom 0)) := by
     intro y lt_xy hy₂ z lt_yz;
     apply hy;
     omega;
+
+end
 
 end LO.Modal.Kripke

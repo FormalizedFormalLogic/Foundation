@@ -1,17 +1,6 @@
 import Foundation.Modal.Kripke.Cluster
 import Foundation.Modal.Kripke.Terminated
-
-namespace LO.Modal.Axiom
-
-variable {F : Type*} [BasicModalLogicalConnective F]
-variable (φ ψ χ : F)
-
-protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
-protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
-
-end LO.Modal.Axiom
-
-
+import Foundation.Modal.Kripke.LinearFrame
 
 namespace LO.Modal.Kripke
 
@@ -77,7 +66,7 @@ open
   Formula.Kripke
   Frame.IsBalloon
 in
-lemma validate_axiomZ_of_balloon
+lemma balooon_validates_axiomZ
   {F : Frame} [IsTrans _ F] {e : Cluster F} [F.IsBalloon e] : F ⊧ (Axiom.Z (.atom 0)) := by
   intro V x;
   suffices ¬(Satisfies _ x (□(□(.atom 0) ➝ (.atom 0)))) ∨ ¬(Satisfies _ x (◇□(.atom 0))) ∨ (Satisfies _ x (□(.atom 0))) by tauto;
