@@ -1,15 +1,40 @@
+import Foundation.Vorspiel.List.Chain
 import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.Hilbert.S4Point2
 import Mathlib.Data.Finite.Sum
-import Mathlib.Order.OrderIsoNat
 import Mathlib.Data.Set.Finite.Basic
+
+@[simp] lemma Nat.sub_one_lt' [NeZero n] : n - 1 < n := sub_one_lt $ NeZero.ne n
+
+namespace Fin
+
+variable {n : ℕ} [NeZero n] {i : Fin n}
+
+def last' : Fin n := ⟨n - 1, Nat.sub_one_lt'⟩
+
+@[simp]
+lemma lt_last' : i ≤ Fin.last' := by
+  apply Nat.le_sub_one_of_lt;
+  apply Fin.is_lt;
+
+end Fin
+
 
 namespace List
 
-variable {l : List α} {a : α} {R : α → α → Prop}
+variable {α} {l : List α} {a : α} {R : α → α → Prop}
 
-lemma mem_head?_eq_head : x ∈ l.head? → ∃ h, x = l.head h := by
-  sorry;
+lemma mem_head?_eq_head : a ∈ l.head? → ∃ h, a = l.head h := by
+  match l with
+  | [] => simp;
+  | y::ys =>
+    simp [head?_cons, head_cons];
+    tauto;
+
+lemma concat_head?_eq_head (lh : l ≠ []) : (l.concat a).head? = some (l.head lh) := by
+  match l with
+  | [] => contradiction;
+  | _::_ => simp;
 
 lemma chain'_concat :  List.Chain' R (l.concat a) ↔ List.Chain' R l ∧ ∀ x ∈ l.getLast?, R x a := by
   rw [List.concat_eq_append]
@@ -24,14 +49,58 @@ lemma chain'_concat :  List.Chain' R (l.concat a) ↔ List.Chain' R l ∧ ∀ x 
       have : R x a := h₂ x hx;
       simpa;
 
-lemma chain'_trans_head (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, R (l.head lh) x := by
-  sorry;
+section
 
-lemma chain'_trans_getLast (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, R x (l.getLast lh) := by
-  sorry;
+variable [DecidableEq α]
 
-lemma concat_head?_eq_head (lh : l ≠ []) : (l.concat y).head? = some (l.head lh) := by
-  sorry;
+lemma rel_head_of_chain'_trans [IsTrans _ R] (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.head lh → R (l.head lh) x := by
+  intro x hx₁ hx₂;
+  let i : Fin l.length := ⟨0, List.length_pos_of_ne_nil lh⟩;
+  let j : Fin l.length := List.finIdxOf _ hx₁;
+  convert List.Chain'.of_lt h (i := i) (j := j) ?_;
+  . apply List.head_eq_getElem_zero;
+  . apply List.get_finIdxOf.symm;
+  . apply lt_of_le_of_ne;
+    . apply Nat.zero_le;
+    . by_contra hC;
+      apply hx₂;
+      dsimp [i, j] at hC;
+      convert List.head_eq_getElem_zero lh |>.symm;
+      have := List.get_finIdxOf (hx := hx₁) |>.symm;
+      rwa [←hC] at this;
+
+lemma rel_head_of_chain'_preorder [IsPreorder _ R] (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, R (l.head lh) x := by
+  intro x hx;
+  by_cases e : x = l.head lh;
+  . subst e;
+    apply refl;
+  . apply rel_head_of_chain'_trans h lh <;> assumption;
+
+lemma rel_getLast_of_chain'_trans [IsTrans _ R] (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.getLast lh → R x (l.getLast lh) := by
+  intro x hx₁ hx₂;
+  have : NeZero l.length := ⟨List.length_eq_zero_iff.not.mpr lh⟩;
+  let i : Fin l.length := List.finIdxOf l hx₁;
+  let j : Fin l.length := Fin.last';
+  convert List.Chain'.of_lt h (i := i) (j := j) ?_;
+  . apply List.get_finIdxOf.symm;
+  . apply List.getLast_eq_getElem;
+  . apply lt_of_le_of_ne;
+    . exact Fin.lt_last';
+    . by_contra hC;
+      apply hx₂;
+      dsimp [i, j] at hC;
+      convert List.getLast_eq_getElem _ lh |>.symm;
+      have := List.get_finIdxOf (hx := hx₁) |>.symm;
+      rwa [hC] at this;
+
+lemma rel_getLast_of_chain'_preorder [IsPreorder _ R] (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, R x (l.getLast lh) := by
+  intro x hx;
+  by_cases e : x = l.getLast lh;
+  . subst e;
+    apply refl;
+  . apply rel_getLast_of_chain'_trans h lh <;> assumption;
+
+end
 
 end List
 
@@ -79,7 +148,8 @@ lemma Frame.exists_card [IsFinite F] : ∃ n : ℕ+, Nonempty (F.World ≃ Fin n
     subst hn0;
     apply Fin.elim0 $ hn.toFun (F.world_nonempty.some);
 
-private lemma Frame.exists_arbitary_length_chain_of_terminal_orphan {s} [IsRefl _ F] [IsAntisymm _ F] (h : ∀ t ∈ F.terminals, ¬s ≺ t) (n : ℕ+) :
+open Classical in
+private lemma Frame.exists_arbitary_length_chain_of_terminal_orphan {s} [IsPartialOrder _ F] (h : ∀ t ∈ F.terminals, ¬s ≺ t) (n : ℕ+) :
   ∃ l : List F.World, List.Chain' F.Rel l ∧ l.head? = s ∧ l.Nodup ∧ l.length = n := by
   induction n with
   | one => use [s]; aesop;
@@ -90,7 +160,7 @@ private lemma Frame.exists_arbitary_length_chain_of_terminal_orphan {s} [IsRefl 
     have : (l.getLast l_nonempty) ∉ F.terminals := by
       by_contra hC;
       apply h _ hC;
-      apply List.chain'_trans_head l₁;
+      apply List.rel_getLast_of_chain'_preorder l₁;
       simp;
     simp only [Frame.terminals, Set.mem_setOf_eq, not_forall, Classical.not_imp] at this;
     obtain ⟨y, hy₁, hy₂⟩ := this;
@@ -106,50 +176,19 @@ private lemma Frame.exists_arbitary_length_chain_of_terminal_orphan {s} [IsRefl 
     . apply List.concat_head?_eq_head;
     . apply List.Nodup.concat;
       . by_contra hC;
-        have := antisymm hy₁ (List.chain'_trans_getLast l₁ l_nonempty y hC);
+        have := antisymm hy₁ (List.rel_getLast_of_chain'_preorder l₁ l_nonempty y hC);
         simp_all;
       . tauto;
     . simp_all;
 
-private lemma Frame.exists_arbitary_length_chain_of_terminal_orphan₂ {s} [IsRefl _ F] [IsAntisymm _ F] (h : ∀ t ∈ F.terminals, ¬s ≺ t) (n : ℕ+) :
-  ∃ l : List F.World, List.Chain' F.Rel l ∧ l.head? = s ∧ l.Nodup ∧ l.length = n := by
-  induction n with
-  | one => use [s]; aesop;
-  | succ n ih =>
-    obtain ⟨l, l₁, l₂, l₄, l₃⟩ := ih;
-    obtain ⟨l_nonempty, rfl⟩ := List.mem_head?_eq_head l₂; clear l₂;
-    have : (l.getLast l_nonempty) ∉ F.terminals := by
-      by_contra hC;
-      apply h _ hC;
-      apply List.chain'_trans_head l₁;
-      simp;
-    simp only [Frame.terminals, Set.mem_setOf_eq, not_forall, Classical.not_imp] at this;
-    obtain ⟨y, hy₁, hy₂⟩ := this;
-    use (l.concat y);
-    refine ⟨?_, ?_, ?_, ?_⟩;
-    . apply List.chain'_concat.mpr;
-      constructor;
-      . assumption;
-      . intro z hz;
-        convert hy₁;
-        obtain ⟨_, rfl⟩ := List.mem_getLast?_eq_getLast hz;
-        tauto;
-    . apply List.concat_head?_eq_head;
-    . apply List.Nodup.concat;
-      . by_contra hC;
-        have := antisymm hy₁ (List.chain'_trans_getLast l₁ l_nonempty y hC);
-        simp_all;
-      . tauto;
-    . simp_all;
-
-private lemma Frame.no_terminal_orphan_of_finite [IsFinite F] [IsRefl _ F] [IsAntisymm _ F] : ¬∀ t ∈ F.terminals, ¬s ≺ t := by
+private lemma Frame.no_terminal_orphan_of_finite [IsFinite F] [IsPartialOrder _ F] : ¬∀ t ∈ F.terminals, ¬s ≺ t := by
   by_contra hC;
   obtain ⟨n, ⟨hn⟩⟩ := F.exists_card;
   obtain ⟨l, _, _, l₃, l₄⟩ := Frame.exists_arbitary_length_chain_of_terminal_orphan hC (n + 1);
   sorry
 
 /-- In finite frame, every point can reach some terminal. -/
-theorem Frame.exists_terminal [IsFinite F] [IsRefl _ F] [IsAntisymm _ F] : ∃ t ∈ F.terminals, s ≺ t := by
+theorem Frame.exists_terminal [IsFinite F] [IsPartialOrder _ F] : ∃ t ∈ F.terminals, s ≺ t := by
   have := F.no_terminal_orphan_of_finite (s := s)
   push_neg at this;
   tauto;
@@ -168,7 +207,8 @@ lemma box_at_terminal {x : F.World} (hx : x ∈ F.terminals) (h : Satisfies ⟨F
   exact h;
 
 lemma dia_at_terminal {x : F.World} (hx : x ∈ F.terminals) (h : ¬Satisfies ⟨F, V⟩ x φ) : ¬Satisfies ⟨F, V⟩ x (◇φ) := by
-  simp [Satisfies, Frame.terminals, not_exists, Set.mem_setOf_eq, Satisfies] at hx ⊢;
+  apply Satisfies.dia_def.not.mpr;
+  push_neg;
   intro y Rxy;
   have := hx Rxy;
   subst this;
@@ -240,6 +280,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
   replace hφ : Hilbert.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
   generalize eΓ : (φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList = Γ at hφ;
   obtain ⟨M, r, ⟨_, M_refl, M_trans, M_antisymm⟩, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (@Hilbert.Grz.Kripke.complete.complete _) hφ;
+  have : IsPartialOrder _ M.toFrame := IsPartialOrder.mk
 
   clear hφ;
 
@@ -250,8 +291,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
     by_cases e : r' = w;
     . subst e; apply Frame.pointGenerate.isRefl.refl;
     . exact Frame.IsRooted.root_generates w (by tauto) |>.unwrap (trans := Frame.pointGenerate.isTrans)
-  have : IsRefl _ RM.Rel := Frame.pointGenerate.isRefl;
-  have : IsAntisymm _ RM.Rel := Frame.pointGenerate.isAntisymm;
+  have : IsPartialOrder _ RM.Rel := Frame.pointGenerate.isPartialOrder;
 
   replace hΓφ : ¬(r' ⊧ ⋀Γ → r' ⊧ φ) := Satisfies.imp_def.not.mp $ Model.pointGenerate.modal_equivalent_at_root (r := r) |>.not.mpr hΓφ;
   push_neg at hΓφ;

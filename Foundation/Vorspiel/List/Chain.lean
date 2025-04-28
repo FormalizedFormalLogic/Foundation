@@ -101,5 +101,3 @@ lemma noDup_of_irrefl_trans (h : List.Chain' R l) [IsIrrefl _ R] : l.Nodup := by
 end Chain'
 
 end List
-
-#min_imports
