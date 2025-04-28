@@ -1,6 +1,6 @@
 import Mathlib.Data.List.Nodup
 import Mathlib.Data.List.Range
-
+import Foundation.Vorspiel.Fin.Supplemental
 
 lemma Nat.zero_lt_of_not_zero {n : ℕ} (hn : n ≠ 0) : 0 < n := by omega;
 
@@ -99,5 +99,90 @@ lemma noDup_of_irrefl_trans (h : List.Chain' R l) [IsIrrefl _ R] : l.Nodup := by
   exact IsIrrefl.irrefl _ this;
 
 end Chain'
+
+
+lemma mem_head?_eq_head : a ∈ l.head? → ∃ h, a = l.head h := by
+  match l with
+  | [] => simp;
+  | y::ys =>
+    simp [head?_cons, head_cons];
+    tauto;
+
+lemma concat_head?_eq_head (lh : l ≠ []) : (l.concat a).head? = some (l.head lh) := by
+  match l with
+  | [] => contradiction;
+  | _::_ => simp;
+
+lemma chain'_concat :  List.Chain' R (l.concat a) ↔ List.Chain' R l ∧ ∀ x ∈ l.getLast?, R x a := by
+  rw [List.concat_eq_append]
+  constructor;
+  . intro h;
+    simpa using List.chain'_append.mp h;
+  . rintro ⟨h₁, h₂⟩;
+    apply List.chain'_append.mpr;
+    refine ⟨h₁, ?_, ?_⟩;
+    . simp;
+    . intro x hx;
+      have : R x a := h₂ x hx;
+      simpa;
+
+
+section
+
+variable [DecidableEq α]
+
+lemma rel_head_of_chain'_trans [IsTrans _ R] (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.head lh → R (l.head lh) x := by
+  intro x hx₁ hx₂;
+  let i : Fin l.length := ⟨0, List.length_pos_of_ne_nil lh⟩;
+  let j : Fin l.length := List.finIdxOf _ hx₁;
+  convert List.Chain'.of_lt h (i := i) (j := j) ?_;
+  . apply List.head_eq_getElem_zero;
+  . apply List.get_finIdxOf.symm;
+  . apply lt_of_le_of_ne;
+    . apply Nat.zero_le;
+    . by_contra hC;
+      apply hx₂;
+      dsimp [i, j] at hC;
+      convert List.head_eq_getElem_zero lh |>.symm;
+      have := List.get_finIdxOf (hx := hx₁) |>.symm;
+      rwa [←hC] at this;
+
+lemma rel_head_of_chain'_preorder [IsPreorder _ R] (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, R (l.head lh) x := by
+  intro x hx;
+  by_cases e : x = l.head lh;
+  . subst e;
+    apply refl;
+  . apply rel_head_of_chain'_trans h lh <;> assumption;
+
+lemma rel_getLast_of_chain'_trans [IsTrans _ R] (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, x ≠ l.getLast lh → R x (l.getLast lh) := by
+  intro x hx₁ hx₂;
+  have : NeZero l.length := ⟨List.length_eq_zero_iff.not.mpr lh⟩;
+  let i : Fin l.length := List.finIdxOf l hx₁;
+  let j : Fin l.length := Fin.last';
+  convert List.Chain'.of_lt h (i := i) (j := j) ?_;
+  . apply List.get_finIdxOf.symm;
+  . apply List.getLast_eq_getElem;
+  . apply lt_of_le_of_ne;
+    . exact Fin.lt_last';
+    . by_contra hC;
+      apply hx₂;
+      dsimp [i, j] at hC;
+      convert List.getLast_eq_getElem _ lh |>.symm;
+      have := List.get_finIdxOf (hx := hx₁) |>.symm;
+      rwa [hC] at this;
+
+lemma rel_getLast_of_chain'_preorder [IsPreorder _ R] (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, R x (l.getLast lh) := by
+  intro x hx;
+  by_cases e : x = l.getLast lh;
+  . subst e;
+    apply refl;
+  . apply rel_getLast_of_chain'_trans h lh <;> assumption;
+
+end
+
+def embedding_of_exists_noDup {l : List α} (hl₁ : l.Nodup) (hl₂ : l.length = n) : Fin n ↪ α := by
+  refine ⟨λ ⟨i, hi⟩ => l.get ⟨i, by omega⟩, ?_⟩;
+  . rintro ⟨i, hi⟩ ⟨j, hj⟩ hij;
+    simpa using (List.nodup_iff_injective_get (l := l) |>.mp hl₁) hij;
 
 end List
