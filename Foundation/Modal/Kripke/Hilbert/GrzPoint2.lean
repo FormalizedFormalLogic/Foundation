@@ -3,10 +3,16 @@ import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.Hilbert.S4Point2
 import Mathlib.Data.Finite.Sum
 import Mathlib.Data.Set.Finite.Basic
+import Mathlib.Data.Fintype.Pigeonhole
 
 @[simp] lemma Nat.sub_one_lt' [NeZero n] : n - 1 < n := sub_one_lt $ NeZero.ne n
 
+
 namespace Fin
+
+lemma isEmpty_embedding_lt (hn : n > m) : IsEmpty (Fin n ↪ Fin m) := by
+  apply Function.Embedding.isEmpty_of_card_lt;
+  simpa;
 
 variable {n : ℕ} [NeZero n] {i : Fin n}
 
@@ -102,6 +108,11 @@ lemma rel_getLast_of_chain'_preorder [IsPreorder _ R] (h : List.Chain' R l) (lh 
 
 end
 
+def embedding_of_exists_noDup {l : List α} (hl₁ : l.Nodup) (hl₂ : l.length = n) : Fin n ↪ α := by
+  refine ⟨λ ⟨i, hi⟩ => l.get ⟨i, by omega⟩, ?_⟩;
+  . rintro ⟨i, hi⟩ ⟨j, hj⟩ hij;
+    simpa using (List.nodup_iff_injective_get (l := l) |>.mp hl₁) hij;
+
 end List
 
 
@@ -185,7 +196,8 @@ private lemma Frame.no_terminal_orphan_of_finite [IsFinite F] [IsPartialOrder _ 
   by_contra hC;
   obtain ⟨n, ⟨hn⟩⟩ := F.exists_card;
   obtain ⟨l, _, _, l₃, l₄⟩ := Frame.exists_arbitary_length_chain_of_terminal_orphan hC (n + 1);
-  sorry
+  apply Fin.isEmpty_embedding_lt (n := n + 1) (m := n) (by omega) |>.false;
+  exact (List.embedding_of_exists_noDup l₃ l₄).trans hn.toEmbedding;
 
 /-- In finite frame, every point can reach some terminal. -/
 theorem Frame.exists_terminal [IsFinite F] [IsPartialOrder _ F] : ∃ t ∈ F.terminals, s ≺ t := by
