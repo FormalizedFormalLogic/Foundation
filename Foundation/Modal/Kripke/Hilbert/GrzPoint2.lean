@@ -1,6 +1,40 @@
 import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.Hilbert.S4Point2
 import Mathlib.Data.Finite.Sum
+import Mathlib.Order.OrderIsoNat
+import Mathlib.Data.Set.Finite.Basic
+
+namespace List
+
+variable {l : List α} {a : α} {R : α → α → Prop}
+
+lemma mem_head?_eq_head : x ∈ l.head? → ∃ h, x = l.head h := by
+  sorry;
+
+lemma chain'_concat :  List.Chain' R (l.concat a) ↔ List.Chain' R l ∧ ∀ x ∈ l.getLast?, R x a := by
+  rw [List.concat_eq_append]
+  constructor;
+  . intro h;
+    simpa using List.chain'_append.mp h;
+  . rintro ⟨h₁, h₂⟩;
+    apply List.chain'_append.mpr;
+    refine ⟨h₁, ?_, ?_⟩;
+    . simp;
+    . intro x hx;
+      have : R x a := h₂ x hx;
+      simpa;
+
+lemma chain'_trans_head (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, R (l.head lh) x := by
+  sorry;
+
+lemma chain'_trans_getLast (h : List.Chain' R l) (lh : l ≠ []) : ∀ x ∈ l, R x (l.getLast lh) := by
+  sorry;
+
+lemma concat_head?_eq_head (lh : l ≠ []) : (l.concat y).head? = some (l.head lh) := by
+  sorry;
+
+end List
+
 
 namespace LO.Modal
 
@@ -37,21 +71,91 @@ variable {F : Frame}
 def Frame.terminals (F : Frame) : Set F.World := { t | ∀ {y}, t ≺ y → y = t }
 def Frame.terminals_of (F : Frame) (x : F.World) : Set F.World := { t | x ≺^+ t ∧ ∀ {y}, t ≺ y → y = t }
 
-lemma not_exists_infinite_chain [h : F.IsFinite] : ¬(∀ x : F.World, ∃ y : F.World, x ≠ y ∧ x ≺ y) := by
-  by_contra hC;
-  obtain ⟨n, ⟨hn⟩⟩ := Finite.exists_equiv_fin (h := h.world_finite);
-  have : n > 0 := by
-    by_contra hn0;
+lemma Frame.exists_card [IsFinite F] : ∃ n : ℕ+, Nonempty (F.World ≃ Fin n) := by
+  obtain ⟨n, ⟨hn⟩⟩ := Finite.exists_equiv_fin F.World;
+  refine ⟨⟨n, ?_⟩, ⟨hn⟩⟩
+  . by_contra hn0;
     replace hn0 : n = 0 := by simpa [gt_iff_lt, not_lt, nonpos_iff_eq_zero] using hn0;
     subst hn0;
     apply Fin.elim0 $ hn.toFun (F.world_nonempty.some);
-  let x := hn.invFun ⟨n - 1, by omega⟩;
-  obtain ⟨y, exy, Rxy⟩ := hC x;
-  let m := hn.toFun y;
 
-  sorry;
+private lemma Frame.exists_arbitary_length_chain_of_terminal_orphan {s} [IsRefl _ F] [IsAntisymm _ F] (h : ∀ t ∈ F.terminals, ¬s ≺ t) (n : ℕ+) :
+  ∃ l : List F.World, List.Chain' F.Rel l ∧ l.head? = s ∧ l.Nodup ∧ l.length = n := by
+  induction n with
+  | one => use [s]; aesop;
+  | succ n ih =>
+    obtain ⟨l, l₁, l₂, l₄, l₃⟩ := ih;
+    obtain ⟨l_nonempty, rfl⟩ := List.mem_head?_eq_head l₂;
+    clear l₂;
+    have : (l.getLast l_nonempty) ∉ F.terminals := by
+      by_contra hC;
+      apply h _ hC;
+      apply List.chain'_trans_head l₁;
+      simp;
+    simp only [Frame.terminals, Set.mem_setOf_eq, not_forall, Classical.not_imp] at this;
+    obtain ⟨y, hy₁, hy₂⟩ := this;
+    use (l.concat y);
+    refine ⟨?_, ?_, ?_, ?_⟩;
+    . apply List.chain'_concat.mpr;
+      constructor;
+      . assumption;
+      . intro z hz;
+        convert hy₁;
+        obtain ⟨_, rfl⟩ := List.mem_getLast?_eq_getLast hz;
+        tauto;
+    . apply List.concat_head?_eq_head;
+    . apply List.Nodup.concat;
+      . by_contra hC;
+        have := antisymm hy₁ (List.chain'_trans_getLast l₁ l_nonempty y hC);
+        simp_all;
+      . tauto;
+    . simp_all;
+
+private lemma Frame.exists_arbitary_length_chain_of_terminal_orphan₂ {s} [IsRefl _ F] [IsAntisymm _ F] (h : ∀ t ∈ F.terminals, ¬s ≺ t) (n : ℕ+) :
+  ∃ l : List F.World, List.Chain' F.Rel l ∧ l.head? = s ∧ l.Nodup ∧ l.length = n := by
+  induction n with
+  | one => use [s]; aesop;
+  | succ n ih =>
+    obtain ⟨l, l₁, l₂, l₄, l₃⟩ := ih;
+    obtain ⟨l_nonempty, rfl⟩ := List.mem_head?_eq_head l₂; clear l₂;
+    have : (l.getLast l_nonempty) ∉ F.terminals := by
+      by_contra hC;
+      apply h _ hC;
+      apply List.chain'_trans_head l₁;
+      simp;
+    simp only [Frame.terminals, Set.mem_setOf_eq, not_forall, Classical.not_imp] at this;
+    obtain ⟨y, hy₁, hy₂⟩ := this;
+    use (l.concat y);
+    refine ⟨?_, ?_, ?_, ?_⟩;
+    . apply List.chain'_concat.mpr;
+      constructor;
+      . assumption;
+      . intro z hz;
+        convert hy₁;
+        obtain ⟨_, rfl⟩ := List.mem_getLast?_eq_getLast hz;
+        tauto;
+    . apply List.concat_head?_eq_head;
+    . apply List.Nodup.concat;
+      . by_contra hC;
+        have := antisymm hy₁ (List.chain'_trans_getLast l₁ l_nonempty y hC);
+        simp_all;
+      . tauto;
+    . simp_all;
+
+private lemma Frame.no_terminal_orphan_of_finite [IsFinite F] [IsRefl _ F] [IsAntisymm _ F] : ¬∀ t ∈ F.terminals, ¬s ≺ t := by
+  by_contra hC;
+  obtain ⟨n, ⟨hn⟩⟩ := F.exists_card;
+  obtain ⟨l, _, _, l₃, l₄⟩ := Frame.exists_arbitary_length_chain_of_terminal_orphan hC (n + 1);
+  sorry
+
+/-- In finite frame, every point can reach some terminal. -/
+theorem Frame.exists_terminal [IsFinite F] [IsRefl _ F] [IsAntisymm _ F] : ∃ t ∈ F.terminals, s ≺ t := by
+  have := F.no_terminal_orphan_of_finite (s := s)
+  push_neg at this;
+  tauto;
 
 end Kripke
+
 
 namespace Formula.Kripke.Satisfies
 
@@ -63,7 +167,7 @@ lemma box_at_terminal {x : F.World} (hx : x ∈ F.terminals) (h : Satisfies ⟨F
   subst this;
   exact h;
 
-lemma dia_at_terminal {x : F.World} (hx : x ∈ F.terminals) (h :  ¬Satisfies ⟨F, V⟩ x φ) : ¬Satisfies ⟨F, V⟩ x (◇φ) := by
+lemma dia_at_terminal {x : F.World} (hx : x ∈ F.terminals) (h : ¬Satisfies ⟨F, V⟩ x φ) : ¬Satisfies ⟨F, V⟩ x (◇φ) := by
   simp [Satisfies, Frame.terminals, not_exists, Set.mem_setOf_eq, Satisfies] at hx ⊢;
   intro y Rxy;
   have := hx Rxy;
@@ -85,10 +189,10 @@ lemma Grz_weakerThan_GrzPoint2 : Hilbert.Grz ⪯ Hilbert.GrzPoint2 := weakerThan
 
 lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Hilbert.Grz]! φ) : Hilbert.GrzPoint2 ⊢! φ := by
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
-  simp at hΓ₁;
+  simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe] at hΓ₁;
   replace hΓ₂ := Grz_weakerThan_GrzPoint2.pbl $ FiniteContext.provable_iff.mp hΓ₂;
   exact hΓ₂ ⨀ by
-    apply conj_intro'!;
+    apply Conj₂!_intro;
     intro γ hγ;
     obtain ⟨a, ha, rfl⟩ := hΓ₁ _ hγ;
     exact axiomPoint2!;
@@ -146,6 +250,8 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
     by_cases e : r' = w;
     . subst e; apply Frame.pointGenerate.isRefl.refl;
     . exact Frame.IsRooted.root_generates w (by tauto) |>.unwrap (trans := Frame.pointGenerate.isTrans)
+  have : IsRefl _ RM.Rel := Frame.pointGenerate.isRefl;
+  have : IsAntisymm _ RM.Rel := Frame.pointGenerate.isAntisymm;
 
   replace hΓφ : ¬(r' ⊧ ⋀Γ → r' ⊧ φ) := Satisfies.imp_def.not.mp $ Model.pointGenerate.modal_equivalent_at_root (r := r) |>.not.mpr hΓφ;
   push_neg at hΓφ;
@@ -217,7 +323,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
       intro t t_terminal ψ ψ_sub;
       induction ψ using Formula.rec' with
       | hatom a =>
-        simp [Satisfies, M']
+        simp only [Satisfies.iff_models, Satisfies, RM, M']
         constructor;
         . intro ha t' t'_terminal;
           exact H₁ a (iff_mem_atoms_mem_subformula.mpr ψ_sub) t t_terminal t' t'_terminal ha;
@@ -259,34 +365,10 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
         . intro hψ v Ruv;
           match v with
           | Sum.inl x =>
-            simp [M', Frame.Rel'] at Ruv;
+            simp only [Frame.Rel', M', RM] at Ruv;
             exact ihψ x (Formula.subformulas.mem_box ψ_sub) |>.mp $ hψ _ Ruv;
           | Sum.inr x =>
-            obtain ⟨t, t_terminal, Rut⟩ : ∃ t ∈ RM.terminals, y ≺ t := by
-              by_contra hC;
-              push_neg at hC;
-              apply Kripke.not_exists_infinite_chain (F := RM.toFrame);
-              intro t;
-              sorry
-
-              /-
-              by_contra hC;
-              push_neg at hC;
-              simp [Frame.terminals] at hC;
-              by_cases y_terminal : y ∈ RM.terminals;
-              . exact hC y y_terminal $ Frame.pointGenerate.rel_refl M_refl y;
-              . simp [Frame.terminals] at y_terminal;
-                obtain ⟨z, Ryz, eyz⟩ := y_terminal;
-                by_cases z_terminal : z ∈ RM.terminals;
-                . exact hC z z_terminal Ryz;
-                . simp [Frame.terminals] at z_terminal;
-                  obtain ⟨w, Rzw, ewz⟩ := z_terminal;
-                  have ewy : w ≠ y := by
-                    by_contra ewy; subst ewy;
-                    have := Frame.pointGenerate.rel_antisymm M_antisymm Rzw Ryz;
-                    contradiction;
-                  -- by similar arguments, arbitary n-poinst in RM, but FM is finite. it contradicts.
-              -/
+            obtain ⟨t, t_terminal, Rut⟩ : ∃ t ∈ RM.terminals, y ≺ t := Frame.exists_terminal;
             apply H₂ t t_terminal ψ (Formula.subformulas.mem_box ψ_sub) |>.mp;
             apply hψ;
             exact Rut;
