@@ -43,6 +43,14 @@ variable [HasAxiomKrieselPutnam 𝓢]
 def krieselputnam : 𝓢 ⊢ (∼φ ➝ ψ ⋎ χ) ➝ (∼φ ➝ ψ) ⋎ (∼φ ➝ χ) := HasAxiomKrieselPutnam.krieselputnam φ ψ χ
 @[simp] lemma krieselputnam! : 𝓢 ⊢! (∼φ ➝ ψ ⋎ χ) ➝ (∼φ ➝ ψ) ⋎ (∼φ ➝ χ) := ⟨krieselputnam⟩
 
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomKrieselPutnam Γ := ⟨fun _ _ _ ↦ FiniteContext.of krieselputnam⟩
+instance (Γ : Context F 𝓢) : HasAxiomKrieselPutnam Γ := ⟨fun _ _ _ ↦ Context.of krieselputnam⟩
+
+def krieselputnam' (h : 𝓢 ⊢ (∼φ ➝ ψ ⋎ χ)) : 𝓢 ⊢ (∼φ ➝ ψ) ⋎ (∼φ ➝ χ) := krieselputnam ⨀ h
+lemma krieselputnam'! (h : 𝓢 ⊢! (∼φ ➝ ψ ⋎ χ)) : 𝓢 ⊢! (∼φ ➝ ψ) ⋎ (∼φ ➝ χ) := ⟨krieselputnam' h.some⟩
+
 end
 
 

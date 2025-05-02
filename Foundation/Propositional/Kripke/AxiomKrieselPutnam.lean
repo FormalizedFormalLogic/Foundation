@@ -90,8 +90,46 @@ namespace Canonical
 
 instance [Entailment.HasAxiomKrieselPutnam 𝓢] : SufficesKriselPutnamCondition _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
-  obtain ⟨u, hu₁, hu₂⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1 ∪ ({ φ | ∼φ ∈ (y.1.1 ∩ z.1.1)}.image (∼·)), y.1.2 ∪ z.1.2⟩) $ by
-    sorry;
+  let NΓyz := { φ | ∼φ ∈ (y.1.1 ∩ z.1.1)}.image (∼·);
+  obtain ⟨u, hu₁, hu₂⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1 ∪ NΓyz, y.1.2 ∪ z.1.2⟩) $ by
+    rintro Γ Δ hΓ hΔ;
+    by_contra hC;
+    replace hΓ : ∀ φ ∈ Γ, φ ∈ (Γ.filter (· ∈ x.1.1)) ∨ φ ∈ (Γ.filter (· ∈ NΓyz)) := by
+      simp only [List.mem_filter, decide_eq_true_eq];
+      intro φ hφ;
+      rcases hΓ φ hφ with (h | h) <;> tauto;
+    replace hΔ : ∀ φ ∈ Δ, φ ∈ (Δ.filter (· ∈ y.1.2)) ∨ φ ∈ (Δ.filter (· ∈ z.1.2)) := by
+      simp only [List.mem_filter, decide_eq_true_eq];
+      intro φ hφ;
+      rcases hΔ φ hφ with (h | h) <;> tauto;
+    generalize Γ.filter (· ∈ x.1.1) = Γx at hΓ;
+    generalize eΓyz : Γ.filter (· ∈ NΓyz) = Γyz at hΓ;
+    generalize eΔy : Δ.filter (· ∈ y.1.2) = Δy at hΔ;
+    generalize eΔz : Δ.filter (· ∈ z.1.2) = Δz at hΔ;
+    replace hC : 𝓢 ⊢! (⋀Γx ⋏ ∼⋀Γyz) ➝ ⋁Δy ⋎ ⋁Δz := by sorry;
+    generalize ⋀Γx = γx at hC;
+    generalize eγyz : ⋀Γyz = γyz at hC;
+    generalize eδy : ⋁Δy = δy at hC;
+    generalize eδz : ⋁Δz = δz at hC;
+    replace hC : 𝓢 ⊢! γx ➝ ∼γyz ➝ δy ⋎ δz := by sorry;
+
+    have : ∼γyz ∈ NΓyz := by
+      subst eγyz eΓyz;
+      simp only [Set.mem_inter_iff, Set.mem_image, Set.mem_setOf_eq, Formula.neg_inj, exists_eq_right, NΓyz];
+      constructor;
+      . sorry;
+      . sorry;
+    simp [NΓyz] at this;
+
+    have : δy ∈ y.1.2 := by subst eδy eΔy; apply iff_mem₂_disj.mpr; simp;
+    have : δz ∈ z.1.2 := by subst eδz eΔz; apply iff_mem₂_disj.mpr; simp;
+
+    have : [γx] ⊢[𝓢]! (∼γyz ➝ δy) ⋎ (∼γyz ➝ δz) := krieselputnam'! $ deductInv'! hC;
+    rcases iff_mem₁_or.mp $ iff_provable_include₁'.mp this x (by sorry) with (h | h);
+    . apply iff_not_mem₂_mem₁.mpr $ of_mem₁_imp' (Rxy h) $ (by tauto);
+      assumption;
+    . apply iff_not_mem₂_mem₁.mpr $ of_mem₁_imp' (Rxz h) $ (by tauto);
+      assumption;
   replace hu₂ := Set.union_subset_iff.mp hu₂;
   use u;
   refine ⟨?_, ?_, ?_, ?_⟩;
@@ -125,8 +163,7 @@ instance [Entailment.HasAxiomKrieselPutnam 𝓢] : SufficesKriselPutnamCondition
             apply Conj₂!_iff_forall_provable.mpr;
             intro φ hφ;
             rcases h₁ φ hφ with (h | h);
-            . apply Context.by_axm!;
-              tauto;
+            . sorry;
             . sorry;
         . intro φ hφ;
           simp only [List.toFinset_filter, decide_eq_true_eq, Finset.coe_filter, List.mem_toFinset, Set.mem_setOf_eq] at hφ;
@@ -134,6 +171,7 @@ instance [Entailment.HasAxiomKrieselPutnam 𝓢] : SufficesKriselPutnamCondition
     obtain ⟨γ₂, hγ₂₁, hγ₂₂⟩ : ∃ γ₂ ∈ v.1.1, ∼γ₂ ∈ z.1.1 := by sorry;
     simp only [Set.mem_inter_iff, Set.union_subset_iff, Set.image_subset_iff] at hu₁;
     have : ∼(γ₁ ⋏ γ₂) ∈ v.1.1 := Ruv $ hu₁.2 $ by
+      simp only [Set.mem_inter_iff, Set.mem_image, Set.mem_setOf_eq, Formula.neg_inj, exists_eq_right, NΓyz];
       constructor <;>
       . apply SaturatedConsistentTableau.mdp_mem₁_provable CANNNK!;
         apply SaturatedConsistentTableau.iff_mem₁_or.mpr;
