@@ -26,7 +26,24 @@ def canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
 
 namespace canonicalFrame
 
-variable [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
+variable {x y : canonicalFrame 𝓢}
+
+lemma rel₁ : x ≺ y ↔ x.1.1 ⊆ y.1.1 := by simp [Frame.Rel', canonicalFrame];
+
+lemma rel₂ : x ≺ y ↔ y.1.2 ⊆ x.1.2 := by
+  constructor;
+  . intro h φ;
+    contrapose;
+    intro hφ;
+    apply iff_not_mem₂_mem₁.mpr;
+    apply h;
+    exact iff_not_mem₂_mem₁.mp hφ;
+  . intro h φ;
+    contrapose;
+    intro hφ;
+    apply iff_not_mem₁_mem₂.mpr;
+    apply h;
+    exact iff_not_mem₁_mem₂.mp hφ;
 
 end canonicalFrame
 

@@ -10,6 +10,9 @@ def KrieselPutnamCondition :=
   (R x y ∧ R x z ∧ ¬R y z ∧ ¬R z y) →
   (∃ u, R x u ∧ R u y ∧ R u z ∧ (∀ v, R u v → ∃ w, R v w ∧ (R y w ∨ R z w)))
 
+class SufficesKriselPutnamCondition (α) (R : α → α → Prop) : Prop where
+  kpCondition : KrieselPutnamCondition R
+
 end
 
 
@@ -69,6 +72,80 @@ lemma validate_KrieselPutnam_of_KrieselPutnamCondition : KrieselPutnamCondition 
   . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼(.atom 0))) Rz₂w hz₂₁) $ Satisfies.formula_hereditary Rvw hv;
 
 end definability
+
+
+section canonicality
+
+variable {S} [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
+
+open Formula.Kripke
+open Entailment
+     Entailment.FiniteContext
+open canonicalModel
+open SaturatedConsistentTableau
+open Classical
+
+namespace Canonical
+
+instance [Entailment.HasAxiomKrieselPutnam 𝓢] : SufficesKriselPutnamCondition _ (canonicalFrame 𝓢).Rel := ⟨by
+  rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
+  obtain ⟨u, hu₁, hu₂⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1 ∪ ({ φ | ∼φ ∈ (y.1.1 ∩ z.1.1)}.image (∼·)), y.1.2 ∪ z.1.2⟩) $ by
+    sorry;
+  replace hu₂ := Set.union_subset_iff.mp hu₂;
+  use u;
+  refine ⟨?_, ?_, ?_, ?_⟩;
+  . exact Set.union_subset_iff.mp hu₁ |>.1;
+  . apply Kripke.canonicalFrame.rel₂.mpr; exact hu₂ |>.1;
+  . apply Kripke.canonicalFrame.rel₂.mpr; exact hu₂ |>.2;
+  . intro v Ruv;
+    by_contra hC;
+    push_neg at hC;
+    obtain ⟨γ₁, hγ₁₁, hγ₁₂⟩ : ∃ γ₁ ∈ v.1.1, ∼γ₁ ∈ y.1.1 := by
+      have : Tableau.Inconsistent 𝓢 ⟨y.1.1 ∪ v.1.1, ∅⟩ := by
+        by_contra hconsis;
+        obtain ⟨t, ht⟩ := lindenbaum hconsis;
+        apply hC t ?_ |>.1;
+        . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.1;
+        . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.2;
+      dsimp [Tableau.Inconsistent, Tableau.Consistent] at this;
+      push_neg at this;
+      obtain ⟨Γ, Δ, h₁, h₂, h₃⟩ := this;
+      use ⋀(Γ.filter (· ∈ v.1.1));
+      constructor;
+      . apply iff_mem₁_conj.mpr; simp;
+      . apply iff_provable_include₁ (T := {x ∈ Γ | x ∈ y.1.1}) |>.mp ?_ y ?_;
+        . have : Δ = [] := by sorry;
+          subst this;
+
+          simp at h₃;
+          replace h₃ := Context.of! (Γ := insert (⋀(Γ.filter (· ∈ v.1.1))) {x | x ∈ Γ ∧ x ∈ y.1.1}) h₃;
+          apply Context.deduct!;
+          exact h₃ ⨀ by
+            apply Conj₂!_iff_forall_provable.mpr;
+            intro φ hφ;
+            rcases h₁ φ hφ with (h | h);
+            . apply Context.by_axm!;
+              tauto;
+            . sorry;
+        . intro φ hφ;
+          simp only [List.toFinset_filter, decide_eq_true_eq, Finset.coe_filter, List.mem_toFinset, Set.mem_setOf_eq] at hφ;
+          exact hφ.2;
+    obtain ⟨γ₂, hγ₂₁, hγ₂₂⟩ : ∃ γ₂ ∈ v.1.1, ∼γ₂ ∈ z.1.1 := by sorry;
+    simp only [Set.mem_inter_iff, Set.union_subset_iff, Set.image_subset_iff] at hu₁;
+    have : ∼(γ₁ ⋏ γ₂) ∈ v.1.1 := Ruv $ hu₁.2 $ by
+      constructor <;>
+      . apply SaturatedConsistentTableau.mdp_mem₁_provable CANNNK!;
+        apply SaturatedConsistentTableau.iff_mem₁_or.mpr;
+        tauto;
+    apply SaturatedConsistentTableau.of_mem₁_neg' this;
+    apply SaturatedConsistentTableau.iff_mem₁_and.mpr;
+    tauto;
+⟩
+
+end Canonical
+
+end canonicality
 
 end Kripke
 
