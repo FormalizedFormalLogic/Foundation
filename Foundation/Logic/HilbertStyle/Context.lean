@@ -284,6 +284,8 @@ instance : Compact (Context F 𝓢) where
   φ_subset := by rintro ⟨Γ⟩ φ b; exact b.subset
   φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
+-- lemma provable_iff' [DecidableEq F] {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (↑Δ ⊆ Γ) ∧ Δ *⊢[𝓢]! φ
+
 def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢] ψ → Γ *⊢[𝓢] φ ➝ ψ
   | ⟨Δ, h, b⟩ =>
     have h : ∀ ψ ∈ Δ, ψ = φ ∨ ψ ∈ Γ := by simpa using h
@@ -298,29 +300,22 @@ def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢] 
       · contradiction
       · assumption,
       FiniteContext.deduct b' ⟩
-
 lemma deduct! [DecidableEq F] (h : (insert φ Γ) *⊢[𝓢]! ψ) : Γ *⊢[𝓢]! φ ➝ ψ := ⟨Context.deduct h.some⟩
 
 def deductInv {φ ψ : F} {Γ : Set F} : Γ *⊢[𝓢] φ ➝ ψ → (insert φ Γ) *⊢[𝓢] ψ
   | ⟨Δ, h, b⟩ => ⟨φ :: Δ, by simp; intro χ hr; exact Or.inr (h χ hr), FiniteContext.deductInv b⟩
-
 lemma deductInv! [DecidableEq F] (h : Γ *⊢[𝓢]! φ ➝ ψ) : (insert φ Γ) *⊢[𝓢]! ψ := ⟨Context.deductInv h.some⟩
 
 instance deduction [DecidableEq F] : Deduction (Context F 𝓢) where
   ofInsert := deduct
   inv := deductInv
 
+def weakening [DecidableEq F] (h : Γ ⊆ Δ) {φ : F} : Γ *⊢[𝓢] φ → Δ *⊢[𝓢] φ := Axiomatized.weakening (by simpa)
+lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {φ : F} : Γ *⊢[𝓢]! φ → Δ *⊢[𝓢]! φ := fun h ↦ (Axiomatized.le_of_subset (by simpa)).subset h
+
 def of {φ : F} (b : 𝓢 ⊢ φ) : Γ *⊢[𝓢] φ := ⟨[], by simp, FiniteContext.of b⟩
 
 lemma of! (b : 𝓢 ⊢! φ) : Γ *⊢[𝓢]! φ := ⟨Context.of b.some⟩
-
-def weakening [DecidableEq F] (h : Γ ⊆ Δ) {φ : F} : Γ *⊢[𝓢] φ → Δ *⊢[𝓢] φ := by
-  intro h;
-  have := @Axiomatized.le_of_subset (S := (Context F 𝓢)) _ _ _ _ Γ Δ (by simpa) |>.subset;
-  have := @this φ;
-  simp [theory] at this;
-
-  sorry;
 
 def mdp [DecidableEq F] {Γ : Set F} (bpq : Γ *⊢[𝓢] φ ➝ ψ) (bp : Γ *⊢[𝓢] φ) : Γ *⊢[𝓢] ψ :=
   ⟨ bpq.ctx ++ bp.ctx, by
