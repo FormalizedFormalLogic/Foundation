@@ -284,25 +284,7 @@ instance : Compact (Context F 𝓢) where
   φ_subset := by rintro ⟨Γ⟩ φ b; exact b.subset
   φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
-lemma provable_iff' [DecidableEq F] {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (↑Δ ⊆ Γ) ∧ Δ *⊢[𝓢]! φ := by
-  apply Iff.trans provable_iff;
-  constructor;
-  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
-    use Δ.toFinset;
-    constructor;
-    . intro ψ hψ;
-      apply hΔ₁;
-      simpa using hψ;
-    . sorry;
-  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
-    obtain ⟨Δ', hΔ'₁, hΔ'₂⟩ := Compact.finite_provable hΔ₂;
-    use Δ.toList;
-    constructor;
-    . intro ψ hψ;
-      apply hΔ₁;
-      simpa using hψ;
-    .
-      sorry;
+-- lemma provable_iff' [DecidableEq F] {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (↑Δ ⊆ Γ) ∧ Δ *⊢[𝓢]! φ
 
 def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢] ψ → Γ *⊢[𝓢] φ ➝ ψ
   | ⟨Δ, h, b⟩ =>

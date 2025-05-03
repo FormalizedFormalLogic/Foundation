@@ -1,27 +1,6 @@
 import Foundation.Propositional.Kripke.Basic
 import Foundation.Propositional.ConsistentTableau
 
-namespace Set
-
-variable {α : Type} {s t : Set α} {a : α}
-
-lemma iff_subset_insert_subset_diff : s ⊆ insert a t ↔ s \ {a} ⊆ t := by
-  constructor;
-  . intro ha b hb;
-    rcases ha hb.1 with (rfl | hb);
-    . simp at hb;
-    . assumption;
-  . intro ha b hb;
-    apply or_iff_not_imp_left.mpr
-    intro h;
-    apply ha;
-    constructor;
-    . assumption;
-    . simpa;
-
-end Set
-
-
 namespace LO.Propositional
 
 variable {S} [Entailment (Formula ℕ) S]
