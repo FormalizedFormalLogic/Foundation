@@ -54,50 +54,49 @@ private lemma truthlemma.himp
   : t ⊧ φ ➝ ψ ↔ φ ➝ ψ ∈ t.1.1 := by
   constructor;
   . contrapose;
-    simp_all [Satisfies];
     intro h;
     replace h := iff_not_mem₁_mem₂.mp h;
     obtain ⟨t', ⟨h, _⟩⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := (insert φ t.1.1, {ψ})) $ by
-      simp only [Tableau.Consistent];
       intro Γ Δ hΓ hΔ;
-      replace hΓ : ∀ χ, χ ∈ Γ.remove φ → χ ∈ t.1.1 := by
-        intro χ hr;
-        have ⟨hr₁, hr₂⟩ := List.mem_remove_iff.mp hr;
-        have := by simpa using hΓ χ hr₁;
-        simp_all;
       by_contra hC;
-      have : 𝓢 ⊢! ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := C!_trans (CK!_iff_CC!.mp $ CKConj₂Remove!_of_CConj₂! hC) (by
-        apply deduct'!;
-        apply deduct!;
-        have : [φ, φ ➝ ⋁Δ] ⊢[𝓢]! φ := by_axm!;
-        have : [φ, φ ➝ ⋁Δ] ⊢[𝓢]! ⋁Δ := by_axm! ⨀ this;
-        exact of_Disj₂!_of_mem_eq (by simpa using hΔ) this;
-      )
-      have : 𝓢 ⊬ ⋀(Γ.remove φ) ➝ (φ ➝ ψ) := by simpa using (t.consistent hΓ (show ∀ χ ∈ [φ ➝ ψ], χ ∈ t.1.2 by simp_all));
-      contradiction;
+      apply t.consistent (Γ := Γ.erase φ) (Δ := {φ ➝ ψ}) ?_ ?_;
+      . simp only [Finset.disj_singleton];
+        apply FConj_DT.mpr;
+        apply Context.deduct!
+        replace hC := Context.weakening! (Δ := insert φ Γ.toSet) (by simp) $ FConj_DT.mp hC;
+        rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
+        . simp only [Finset.coe_eq_empty] at hΔ;
+          subst hΔ;
+          simp only [Finset.disj_empty, Finset.coe_erase, Set.insert_diff_singleton] at hC ⊢;
+          exact of_O! hC;
+        . simp only [Finset.coe_eq_singleton] at hΔ;
+          subst hΔ;
+          simpa using hC;
+      . simpa using Set.iff_subset_insert_subset_diff.mp hΓ;
+      . simpa;
     have ⟨_, _⟩ := Set.insert_subset_iff.mp h;
+    apply Satisfies.imp_def.not.mpr;
+    push_neg;
     use t';
     constructor;
     . assumption;
     . constructor;
-      . assumption;
-      . apply iff_not_mem₁_mem₂.mpr;
+      . apply ihp.mpr;
+        assumption;
+      . apply ihq.not.mpr;
+        apply iff_not_mem₁_mem₂.mpr;
         simp_all only [Set.singleton_subset_iff];
-  . simp [Satisfies.imp_def];
-    intro h t' htt' hp;
+  . intro h t' htt' hp;
     replace hp := ihp.mp hp;
     have hpq := htt' h;
     apply ihq.mpr;
     apply iff_not_mem₂_mem₁.mp;
-    exact not_mem₂
-      (by simp_all)
-      (show 𝓢 ⊢! ⋀[φ, φ ➝ ψ] ➝ ψ by
-        simp;
-        apply CK!_iff_CC!.mpr;
-        apply deduct'!;
-        apply deduct!;
-        exact by_axm! ⨀ (by_axm! (φ := φ));
-      );
+    apply not_mem₂ (Γ := {φ, φ ➝ ψ});
+    . simp only [Finset.coe_insert, Finset.coe_singleton];
+      apply Set.doubleton_subset.mpr;
+      tauto;
+    . suffices 𝓢 ⊢! Finset.conj {φ, φ ➝ ψ} ➝ Finset.disj {ψ} by simpa;
+      apply CFConj_CDisj!_of_innerMDP (φ := φ) (ψ := ψ) <;> simp;
 
 lemma truthlemma : t ⊧ φ ↔ φ ∈ t.1.1 := by
   induction φ using Formula.rec' generalizing t with
@@ -115,12 +114,18 @@ lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ �
       simp only [Tableau.Consistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
-      replace hΓ : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr hΓ;
-      subst hΓ;
-      have : 𝓢 ⊢! φ := of_Disj₂!_of_mem_eq hΔ (hC ⨀ verum!);
-      contradiction;
+      apply h;
+      rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
+      . simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΓ hΔ;
+        subst hΓ hΔ;
+        simp only [Finset.conj_empty, Finset.disj_empty] at hC;
+        exact of_O! $ hC ⨀ verum!;
+      . simp only [Set.subset_empty_iff, Finset.coe_eq_empty, Finset.coe_eq_singleton] at hΓ hΔ;
+        subst hΓ hΔ;
+        simp only [Finset.conj_empty, Finset.disj_singleton] at hC;
+        exact hC ⨀ verum!;
     obtain ⟨t', ht'⟩ := lindenbaum this;
-    simp [ValidOnModel.iff_models, ValidOnModel]
+    simp only [ValidOnModel.iff_models, ValidOnModel, Satisfies.iff_models, not_forall]
     existsi t';
     apply truthlemma.not.mpr;
     apply iff_not_mem₁_mem₂.mpr;
