@@ -557,7 +557,7 @@ lemma iff_mem₂_or [DecidableEq α] : φ ⋎ ψ ∈ t.1.2 ↔ φ ∈ t.1.2 ∧ 
     . have := iff_not_mem₂_mem₁.mpr hφ; contradiction;
     . exact iff_not_mem₂_mem₁.mpr hψ;
 
-lemma iff_mem₂_disj {Γ : List (Formula α)} : ⋁Γ ∈ t.1.2 ↔ ∀ φ ∈ Γ, φ ∈ t.1.2 := by
+lemma iff_mem₂_disj [DecidableEq α] {Γ : List (Formula α)} : ⋁Γ ∈ t.1.2 ↔ ∀ φ ∈ Γ, φ ∈ t.1.2 := by
   induction Γ using List.induction_with_singleton with
   | hcons φ Γ Γ_nil ih =>
     simp only [(List.disj₂_cons_nonempty Γ_nil), List.mem_cons];
