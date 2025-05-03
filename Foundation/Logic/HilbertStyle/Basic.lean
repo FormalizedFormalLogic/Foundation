@@ -357,6 +357,7 @@ lemma right_Conj₂!_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ �
 
 def CConj₂Conj₂ [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ ⋀Γ ➝ ⋀Δ :=
   right_Conj₂_intro _ _ (fun _ hq ↦ left_Conj₂_intro (h hq))
+lemma CConj₂_Conj₂! [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢! ⋀Γ ➝ ⋀Δ := ⟨CConj₂Conj₂ h⟩
 
 end Conjunction
 
