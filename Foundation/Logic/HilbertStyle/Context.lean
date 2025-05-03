@@ -318,9 +318,11 @@ def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢] 
       · contradiction
       · assumption,
       FiniteContext.deduct b' ⟩
+lemma deduct! [DecidableEq F] (h : (insert φ Γ) *⊢[𝓢]! ψ) : Γ *⊢[𝓢]! φ ➝ ψ := ⟨Context.deduct h.some⟩
 
 def deductInv {φ ψ : F} {Γ : Set F} : Γ *⊢[𝓢] φ ➝ ψ → (insert φ Γ) *⊢[𝓢] ψ
   | ⟨Δ, h, b⟩ => ⟨φ :: Δ, by simp; intro χ hr; exact Or.inr (h χ hr), FiniteContext.deductInv b⟩
+lemma deductInv! [DecidableEq F] (h : Γ *⊢[𝓢]! φ ➝ ψ) : (insert φ Γ) *⊢[𝓢]! ψ := ⟨Context.deductInv h.some⟩
 
 instance deduction [DecidableEq F] : Deduction (Context F 𝓢) where
   ofInsert := deduct
