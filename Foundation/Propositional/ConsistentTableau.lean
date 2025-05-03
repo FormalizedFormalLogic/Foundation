@@ -420,17 +420,6 @@ lemma iff_provable_include₁ : T *⊢[𝓢]! φ ↔ ∀ t : SaturatedConsistent
     apply ht.2;
     simp;
 
-lemma iff_provable_include₁' : Γ ⊢[𝓢]! φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, (∀ φ ∈ Γ, φ ∈ t.1.1) → φ ∈ t.1.1 := by
-  constructor;
-  . intro h t ht;
-    apply iff_provable_include₁ (T := Γ.toFinset) |>.mp;
-    . sorry;
-    . intro φ hφ;
-      apply ht;
-      simpa using hφ;
-  . intro h;
-    sorry;
-
 lemma iff_provable_mem₁ : 𝓢 ⊢! φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, φ ∈ t.1.1 := by
   constructor;
   . intro h t;
