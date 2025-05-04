@@ -1,6 +1,105 @@
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Entailment.Cl
 
+namespace LO.Entailment
+
+variable {F : Type*} [LogicalConnective F]
+         {S : Type*} [Entailment F S]
+         {𝓢 : S} [Entailment.Minimal 𝓢]
+         {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
+         {Γ Δ : List F}
+
+@[simp]
+lemma CFdisjUnionAFdisj [DecidableEq F] [HasAxiomEFQ 𝓢] {Γ Δ : Finset F} : 𝓢 ⊢! (Γ ∪ Δ).disj ➝ Γ.disj ⋎ Δ.disj := by
+  apply left_Fdisj!_intro;
+  simp only [Finset.mem_union];
+  rintro ψ (hψ | hψ);
+  . apply C!_trans (ψ := Γ.disj) ?_ or₁!;
+    apply right_Fdisj!_intro;
+    assumption;
+  . apply C!_trans (ψ := Δ.disj) ?_ or₂!;
+    apply right_Fdisj!_intro;
+    assumption;
+
+lemma C!_replace (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! φ₁ ➝ φ₂ → 𝓢 ⊢! ψ₁ ➝ ψ₂ := λ h => C!_trans h₁ $ C!_trans h h₂
+
+/-- List version of `CNAKNN!` -/
+@[simp]
+lemma CNDisj₁Conj₂! [DecidableEq F] : 𝓢 ⊢! ∼⋁Γ ➝ ⋀(Γ.map (∼·)) := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ Γ hΓ ih =>
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    refine C!_trans CNAKNN! ?_;
+    apply CKK!_of_C!' ih;
+
+/--- Finset version of `CNAKNN!` -/
+@[simp]
+lemma CNFdisjFconj! [DecidableEq F] [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! ∼Γ.disj ➝ (Γ.image (∼·)).conj := by
+  apply C!_replace ?_ ?_ $ CNDisj₁Conj₂! (Γ := Γ.toList);
+  . apply contra!;
+    exact CFDisjDisj₂;
+  . apply CConj₂Conj₂!_of_provable;
+    intro φ hφ;
+    apply FiniteContext.by_axm!
+    simpa using hφ;
+
+@[simp] lemma CONV! : 𝓢 ⊢! ⊤ ➝ ∼⊥ := by
+  apply FiniteContext.deduct'!;
+  exact NO!;
+
+/--- Finset version of `CKNNNA!` -/
+@[simp]
+lemma CConj₂NNDisj₂! [DecidableEq F] : 𝓢 ⊢! ⋀Γ.map (∼·) ➝ ∼⋁Γ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ Γ hΓ ih =>
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    apply C!_trans ?_ CKNNNA!;
+    apply CKK!_of_C!' ih;
+
+/--- Finset version of `CKNNNA!` -/
+@[simp]
+lemma CFconjNNFconj! [DecidableEq F] [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! (Γ.image (∼·)).conj ➝ ∼Γ.disj := by
+  apply C!_replace ?_ ?_ $ CConj₂NNDisj₂! (Γ := Γ.toList);
+  . apply CConj₂Conj₂!_of_provable;
+    intro φ hφ;
+    apply FiniteContext.by_axm!
+    simpa using hφ;
+  . apply contra!;
+    simp;
+
+@[simp]
+lemma CNDisj₂NConj₂! [DecidableEq F] [HasAxiomDNE 𝓢] {Γ : List F} : 𝓢 ⊢! ∼⋁(Γ.map (∼·)) ➝ ⋀Γ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ Γ hΓ ih =>
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    suffices 𝓢 ⊢! ∼(∼φ ⋎ ∼∼⋁List.map (fun x ↦ ∼x) Γ) ➝ φ ⋏ ⋀Γ by
+      apply C!_trans ?_ this;
+      apply contra!;
+      apply CAA!_of_C!_right;
+      exact dne!;
+    apply C!_trans CNAKNN! ?_;
+    apply CKK!_of_C!_of_C!;
+    . exact dne!;
+    . exact C!_trans dne! ih;
+
+lemma CNFdisj₂NFconj₂! [DecidableEq F] [HasAxiomDNE 𝓢] {Γ : Finset F} : 𝓢 ⊢! ∼(Γ.image (∼·)).disj ➝ Γ.conj := by
+  apply C!_replace ?_ ?_ $ CNDisj₂NConj₂! (Γ := Γ.toList);
+  . apply contra!;
+    apply left_Disj₂!_intro;
+    intro ψ hψ;
+    apply right_Fdisj!_intro;
+    simpa using hψ;
+  . simp;
+
+end LO.Entailment
+
+
 section
 
 variable {α : Sort*} (R : α → α → Prop)
@@ -90,55 +189,90 @@ namespace Canonical
 
 instance [Entailment.HasAxiomKrieselPutnam 𝓢] : SufficesKriselPutnamCondition _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
-  let NΓyz := { φ | ∼φ ∈ (y.1.1 ∩ z.1.1)}.image (∼·);
-  obtain ⟨u, hu₁, hu₂⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1 ∪ NΓyz, y.1.2 ∪ z.1.2⟩) $ by
+  let ΓNyz := { φ | ∼φ ∈ (y.1.1 ∩ z.1.1)}.image (∼·);
+  obtain ⟨u, hu₁, hu₂⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1 ∪ ΓNyz, y.1.2 ∪ z.1.2⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra hC;
-    replace hΓ : ∀ φ ∈ Γ, φ ∈ (Γ.filter (· ∈ x.1.1)) ∨ φ ∈ (Γ.filter (· ∈ NΓyz)) := by
-      simp only [List.mem_filter, decide_eq_true_eq];
+    let Γx := { φ ∈ Γ | φ ∈ x.1.1};
+    let Γ₁ := { φ ∈ Γ | φ ∈ ΓNyz };
+    let Γ₂ := Γ₁.preimage (∼·) $ by simp [Set.InjOn];
+    let Δy := { φ ∈ Δ | φ ∈ y.1.2};
+    let Δz := { φ ∈ Δ | φ ∈ z.1.2};
+    replace hC : 𝓢 ⊢! (Γx ∪ Γ₁).conj ➝ (Δy ∪ Δz).disj := C!_replace ?_ ?_ hC;
+    . replace hC : 𝓢 ⊢! Γx.conj ⋏ Γ₁.conj ➝ Δy.disj ⋎ Δz.disj := C!_replace CKFconjFconjUnion! CFdisjUnionAFdisj hC;
+      generalize eδy : Δy.disj = δy at hC;
+      generalize eδz : Δz.disj = δz at hC;
+      replace hC : ↑Γx *⊢[𝓢]! ∼(Γ₂.disj) ➝ δy ⋎ δz := C!_trans ?_ $ FConj_DT.mp $ CK!_iff_CC!.mp hC;
+      . generalize eγ : Γ₂.disj = γ at hC;
+        replace hC : ↑Γx *⊢[𝓢]! (∼γ ➝ δy) ⋎ (∼γ ➝ δz) := krieselputnam'! hC;
+        replace hC : ∼γ ➝ δy ∈ x.1.1 ∨ ∼γ ➝ δz ∈ x.1.1 := iff_mem₁_or.mp $ iff_provable_include₁.mp hC x ?_;
+        . rcases hC with h | h;
+          . apply iff_not_mem₂_mem₁.mpr $ of_mem₁_imp' (Rxy h) ?_
+            . subst eδy;
+              apply iff_mem₂_fdisj.mpr;
+              intro φ hφ;
+              simp only [Finset.coe_filter, Set.mem_setOf_eq, Δy] at hφ;
+              exact hφ.2;
+            . subst eγ;
+              apply mdp_mem₁_provable (φ := Γ₁.conj) ?_ ?_;
+              . apply C!_trans ?_ CFconjNNFconj!;
+                apply CFConj_FConj!_of_subset;
+                intro φ;
+                simp only [Finset.mem_image, Finset.mem_preimage, Finset.mem_filter, forall_exists_index, and_imp, Γ₁, Γ₂];
+                rintro _ _ _ rfl;
+                tauto;
+              . apply iff_mem₁_fconj.mpr;
+                intro φ;
+                simp only [Set.mem_inter_iff, Set.mem_image, Set.mem_setOf_eq, Finset.coe_filter, and_imp, forall_exists_index, Γ₁, ΓNyz];
+                rintro _ _ _ _ rfl;
+                assumption;
+          . apply iff_not_mem₂_mem₁.mpr $ of_mem₁_imp' (Rxz h) ?_
+            . subst eδz;
+              apply iff_mem₂_fdisj.mpr;
+              intro φ hφ;
+              simp only [Finset.coe_filter, Set.mem_setOf_eq, Δz] at hφ;
+              exact hφ.2;
+            . subst eγ;
+              apply mdp_mem₁_provable (φ := Γ₁.conj) ?_ ?_;
+              . apply C!_trans ?_ CFconjNNFconj!;
+                apply CFConj_FConj!_of_subset;
+                intro φ;
+                simp only [Finset.mem_image, Finset.mem_preimage, Finset.mem_filter, forall_exists_index, and_imp, Γ₁, Γ₂];
+                rintro _ _ _ rfl;
+                tauto;
+              . apply iff_mem₁_fconj.mpr;
+                intro φ;
+                simp only [Set.mem_inter_iff, Set.mem_image, Set.mem_setOf_eq, Finset.coe_filter, and_imp, forall_exists_index, Γ₁, ΓNyz];
+                rintro _ _ _ _ rfl;
+                assumption;
+        . intro φ hφ;
+          simp only [Finset.coe_filter, Set.mem_setOf_eq, Γx, Δy, Δz] at hφ;
+          exact hφ.2;
+      . apply Context.of!;
+        apply right_Fconj!_intro;
+        simp only [Set.mem_inter_iff, Set.mem_image, Set.mem_setOf_eq, Finset.mem_filter, and_imp, forall_exists_index, Γ₁, Γ₂, ΓNyz];
+        rintro _ hψ ψ hψ₁ hψ₂ rfl;
+        apply C!_trans CNFdisjFconj!;
+        apply left_Fconj!_intro;
+        suffices ∼ψ ∈ Γ ∧ ∼ψ ∈ y.1.1 ∧ ∼ψ ∈ z.1.1 by simpa [Γ₁, Γ₂] using this;
+        tauto;
+    . apply CFConj_FConj!_of_subset;
       intro φ hφ;
-      rcases hΓ φ hφ with (h | h) <;> tauto;
-    replace hΔ : ∀ φ ∈ Δ, φ ∈ (Δ.filter (· ∈ y.1.2)) ∨ φ ∈ (Δ.filter (· ∈ z.1.2)) := by
-      simp only [List.mem_filter, decide_eq_true_eq];
+      simp only [Finset.mem_union, Finset.mem_filter, Γx, Γ₁];
+      rcases hΓ hφ with h | h <;> tauto;
+    . apply CFDisjFDisj_of_subset;
       intro φ hφ;
-      rcases hΔ φ hφ with (h | h) <;> tauto;
-    generalize Γ.filter (· ∈ x.1.1) = Γx at hΓ;
-    generalize eΓyz : Γ.filter (· ∈ NΓyz) = Γyz at hΓ;
-    generalize eΔy : Δ.filter (· ∈ y.1.2) = Δy at hΔ;
-    generalize eΔz : Δ.filter (· ∈ z.1.2) = Δz at hΔ;
-    replace hC : 𝓢 ⊢! (⋀Γx ⋏ ∼⋀Γyz) ➝ ⋁Δy ⋎ ⋁Δz := by sorry;
-    generalize ⋀Γx = γx at hC;
-    generalize eγyz : ⋀Γyz = γyz at hC;
-    generalize eδy : ⋁Δy = δy at hC;
-    generalize eδz : ⋁Δz = δz at hC;
-    replace hC : 𝓢 ⊢! γx ➝ ∼γyz ➝ δy ⋎ δz := by sorry;
-
-    have : ∼γyz ∈ NΓyz := by
-      subst eγyz eΓyz;
-      simp only [Set.mem_inter_iff, Set.mem_image, Set.mem_setOf_eq, Formula.neg_inj, exists_eq_right, NΓyz];
-      constructor;
-      . sorry;
-      . sorry;
-    simp [NΓyz] at this;
-
-    have : δy ∈ y.1.2 := by subst eδy eΔy; apply iff_mem₂_disj.mpr; simp;
-    have : δz ∈ z.1.2 := by subst eδz eΔz; apply iff_mem₂_disj.mpr; simp;
-
-    have : [γx] ⊢[𝓢]! (∼γyz ➝ δy) ⋎ (∼γyz ➝ δz) := krieselputnam'! $ deductInv'! hC;
-    rcases iff_mem₁_or.mp $ iff_provable_include₁'.mp this x (by sorry) with (h | h);
-    . apply iff_not_mem₂_mem₁.mpr $ of_mem₁_imp' (Rxy h) $ (by tauto);
-      assumption;
-    . apply iff_not_mem₂_mem₁.mpr $ of_mem₁_imp' (Rxz h) $ (by tauto);
-      assumption;
+      simp only [Finset.mem_union, Finset.mem_filter, Δy, Δz];
+      rcases hΔ hφ with h | h <;> tauto;
+  replace hu₁ := Set.union_subset_iff.mp hu₁;
   replace hu₂ := Set.union_subset_iff.mp hu₂;
   use u;
   refine ⟨?_, ?_, ?_, ?_⟩;
-  . exact Set.union_subset_iff.mp hu₁ |>.1;
+  . exact hu₁.1;
   . apply Kripke.canonicalFrame.rel₂.mpr; exact hu₂ |>.1;
   . apply Kripke.canonicalFrame.rel₂.mpr; exact hu₂ |>.2;
   . intro v Ruv;
-    by_contra hC;
-    push_neg at hC;
+    by_contra! hC;
     obtain ⟨γ₁, hγ₁₁, hγ₁₂⟩ : ∃ γ₁ ∈ v.1.1, ∼γ₁ ∈ y.1.1 := by
       have : Tableau.Inconsistent 𝓢 ⟨y.1.1 ∪ v.1.1, ∅⟩ := by
         by_contra hconsis;
@@ -148,36 +282,59 @@ instance [Entailment.HasAxiomKrieselPutnam 𝓢] : SufficesKriselPutnamCondition
         . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.2;
       dsimp [Tableau.Inconsistent, Tableau.Consistent] at this;
       push_neg at this;
-      obtain ⟨Γ, Δ, h₁, h₂, h₃⟩ := this;
-      use ⋀(Γ.filter (· ∈ v.1.1));
+      obtain ⟨Γ, Δ, hΓ, hΔ, hΓΔ⟩ := this;
+      simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
+      subst hΔ;
+      simp only [Finset.disj_empty, Decidable.not_not] at hΓΔ;
+      use ({ φ ∈ Γ | φ ∈ v.1.1}).conj;
       constructor;
-      . apply iff_mem₁_conj.mpr; simp;
-      . apply iff_provable_include₁ (T := {x ∈ Γ | x ∈ y.1.1}) |>.mp ?_ y ?_;
-        . have : Δ = [] := by sorry;
-          subst this;
-
-          simp at h₃;
-          replace h₃ := Context.of! (Γ := insert (⋀(Γ.filter (· ∈ v.1.1))) {x | x ∈ Γ ∧ x ∈ y.1.1}) h₃;
-          apply Context.deduct!;
-          exact h₃ ⨀ by
-            apply Conj₂!_iff_forall_provable.mpr;
-            intro φ hφ;
-            rcases h₁ φ hφ with (h | h);
-            . sorry;
-            . sorry;
-        . intro φ hφ;
-          simp only [List.toFinset_filter, decide_eq_true_eq, Finset.coe_filter, List.mem_toFinset, Set.mem_setOf_eq] at hφ;
-          exact hφ.2;
-    obtain ⟨γ₂, hγ₂₁, hγ₂₂⟩ : ∃ γ₂ ∈ v.1.1, ∼γ₂ ∈ z.1.1 := by sorry;
-    simp only [Set.mem_inter_iff, Set.union_subset_iff, Set.image_subset_iff] at hu₁;
+      . apply iff_mem₁_fconj.mpr;
+        intro;
+        simp;
+      . apply iff_provable_include₁_finset (Γ := {x ∈ Γ | x ∈ y.1.1}) |>.mp ?_ y ?_;
+        . apply N!_iff_CO!.mpr;
+          apply FConj_DT'.mpr;
+          apply Context.weakening! ?_ (FConj_DT.mp hΓΔ);
+          intro φ hφ;
+          simp only [Finset.coe_union, Finset.coe_filter, Set.mem_union, Set.mem_setOf_eq];
+          rcases hΓ hφ with _ | _ <;> tauto;
+        . intro;
+          simp;
+    obtain ⟨γ₂, hγ₂₁, hγ₂₂⟩ : ∃ γ₂ ∈ v.1.1, ∼γ₂ ∈ z.1.1 := by
+      have : Tableau.Inconsistent 𝓢 ⟨z.1.1 ∪ v.1.1, ∅⟩ := by
+        by_contra hconsis;
+        obtain ⟨t, ht⟩ := lindenbaum hconsis;
+        apply hC t ?_ |>.2;
+        . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.1;
+        . exact Set.union_subset_iff.mp (Tableau.subset_def.mp ht |>.1) |>.2;
+      dsimp [Tableau.Inconsistent, Tableau.Consistent] at this;
+      push_neg at this;
+      obtain ⟨Γ, Δ, hΓ, hΔ, hΓΔ⟩ := this;
+      simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΔ;
+      subst hΔ;
+      simp only [Finset.disj_empty, Decidable.not_not] at hΓΔ;
+      use ({ φ ∈ Γ | φ ∈ v.1.1}).conj;
+      constructor;
+      . apply iff_mem₁_fconj.mpr;
+        intro;
+        simp;
+      . apply iff_provable_include₁_finset (Γ := {x ∈ Γ | x ∈ z.1.1}) |>.mp ?_ z ?_;
+        . apply N!_iff_CO!.mpr;
+          apply FConj_DT'.mpr;
+          apply Context.weakening! ?_ (FConj_DT.mp hΓΔ);
+          intro φ hφ;
+          simp only [Finset.coe_union, Finset.coe_filter, Set.mem_union, Set.mem_setOf_eq];
+          rcases hΓ hφ with _ | _ <;> tauto;
+        . intro;
+          simp;
     have : ∼(γ₁ ⋏ γ₂) ∈ v.1.1 := Ruv $ hu₁.2 $ by
-      simp only [Set.mem_inter_iff, Set.mem_image, Set.mem_setOf_eq, Formula.neg_inj, exists_eq_right, NΓyz];
+      simp only [Set.mem_inter_iff, Set.mem_image, Set.mem_setOf_eq, Formula.neg_inj, exists_eq_right, ΓNyz];
       constructor <;>
-      . apply SaturatedConsistentTableau.mdp_mem₁_provable CANNNK!;
-        apply SaturatedConsistentTableau.iff_mem₁_or.mpr;
+      . apply mdp_mem₁_provable CANNNK!;
+        apply iff_mem₁_or.mpr;
         tauto;
-    apply SaturatedConsistentTableau.of_mem₁_neg' this;
-    apply SaturatedConsistentTableau.iff_mem₁_and.mpr;
+    apply of_mem₁_neg' this;
+    apply iff_mem₁_and.mpr;
     tauto;
 ⟩
 
