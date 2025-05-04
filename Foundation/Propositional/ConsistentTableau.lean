@@ -420,6 +420,8 @@ lemma iff_provable_include₁ : T *⊢[𝓢]! φ ↔ ∀ t : SaturatedConsistent
     apply ht.2;
     simp;
 
+lemma iff_provable_include₁_finset {Γ : Finset (Formula α)} : ↑Γ *⊢[𝓢]! φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, (↑Γ ⊆ t.1.1) → φ ∈ t.1.1 := iff_provable_include₁
+
 lemma iff_provable_mem₁ : 𝓢 ⊢! φ ↔ ∀ t : SaturatedConsistentTableau 𝓢, φ ∈ t.1.1 := by
   constructor;
   . intro h t;
@@ -443,6 +445,11 @@ lemma mdp_mem₁_provable (h : 𝓢 ⊢! φ ➝ ψ) (hp₁ : φ ∈ t.1.1) : ψ 
   apply by simpa using t.consistent (Γ := {φ}) (Δ := {ψ}) (by simpa) (by simpa);
   exact h;
 
+lemma mdp_mem₂_provable (h : 𝓢 ⊢! φ ➝ ψ) (hp₁ : ψ ∈ t.1.2) : φ ∈ t.1.2 := by
+  by_contra hq₂;
+  have := iff_not_mem₂_mem₁.mpr $ mdp_mem₁_provable h $ iff_not_mem₂_mem₁.mp hq₂;
+  contradiction;
+
 @[simp] lemma mem₁_verum : ⊤ ∈ t.1.1 := by
   apply iff_not_mem₂_mem₁.mp;
   by_contra hC;
@@ -454,6 +461,8 @@ lemma mdp_mem₁_provable (h : 𝓢 ⊢! φ ➝ ψ) (hp₁ : φ ∈ t.1.1) : ψ 
   have : 𝓢 ⊬ ⊥ ➝ ⊥ := by simpa using t.consistent (Γ := {⊥}) (Δ := ∅) (by simpa) (by simp);
   apply this;
   simp;
+
+@[simp] lemma mem₂_falsum : ⊥ ∈ t.1.2 := iff_not_mem₁_mem₂.mp not_mem₁_falsum
 
 lemma mem₁_of_provable : 𝓢 ⊢! φ → φ ∈ t.1.1 := by
   intro h;
@@ -544,12 +553,35 @@ lemma iff_mem₂_or [DecidableEq α] : φ ⋎ ψ ∈ t.1.2 ↔ φ ∈ t.1.2 ∧ 
     . have := iff_not_mem₂_mem₁.mpr hφ; contradiction;
     . exact iff_not_mem₂_mem₁.mpr hψ;
 
+lemma iff_mem₂_disj [DecidableEq α] {Γ : List (Formula α)} : ⋁Γ ∈ t.1.2 ↔ ∀ φ ∈ Γ, φ ∈ t.1.2 := by
+  induction Γ using List.induction_with_singleton with
+  | hcons φ Γ Γ_nil ih =>
+    simp only [(List.disj₂_cons_nonempty Γ_nil), List.mem_cons];
+    constructor;
+    . rintro h φ (rfl | hp);
+      . exact iff_mem₂_or.mp h |>.1;
+      . exact ih.mp (iff_mem₂_or.mp h |>.2) _ hp;
+    . intro h;
+      apply iff_mem₂_or.mpr;
+      simp_all;
+  | _ => simp;
+
+lemma iff_mem₂_fdisj [DecidableEq α] {Γ : Finset (Formula α)} : Γ.disj ∈ t.1.2 ↔ ↑Γ ⊆ t.1.2 := by
+  apply Iff.trans $ show Γ.disj ∈ t.1.2 ↔ ⋁Γ.toList ∈ t.1.2 by constructor <;> apply mdp_mem₂_provable $ by simp;
+  apply Iff.trans iff_mem₂_disj;
+  simp_all only [Finset.mem_toList];
+  rfl;
 
 lemma of_mem₁_imp [DecidableEq α] : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   intro h;
   by_contra hC;
   push_neg at hC;
   exact hC.2 $ mdp_mem₁ h $ iff_not_mem₂_mem₁.mp hC.1
+
+lemma of_mem₁_imp' [DecidableEq α] : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.1 → ψ ∈ t.1.1) := by
+  intro h h₁;
+  apply or_iff_not_imp_left.mp $ of_mem₁_imp h;
+  apply iff_not_mem₂_mem₁.mpr h₁;
 
 lemma of_mem₁_neg [DecidableEq α] (h : ∼φ ∈ t.1.1) : φ ∈ t.1.2 := by
   rcases of_mem₁_imp h with (hC | hC);
@@ -586,6 +618,7 @@ lemma iff_mem₁_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ �
     . exact iff_not_mem₂_mem₁.mpr hφ;
     . exact iff_not_mem₁_mem₂.mpr hψ;
 
+
 lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   constructor;
   . apply of_mem₂_imp;
@@ -595,7 +628,6 @@ lemma iff_mem₂_imp [DecidableEq α] [Encodable α] [Entailment.Cl 𝓢] : φ �
     rcases of_mem₁_imp $ iff_not_mem₂_mem₁.mp hφψ with (hφ | hψ);
     . have := iff_not_mem₁_mem₂.mpr hφ; contradiction;
     . exact iff_not_mem₂_mem₁.mpr hψ;
-
 
 lemma not_mem₁_neg_of_mem₁ [DecidableEq α] : φ ∈ t.1.1 → ∼φ ∉ t.1.1 := by
   intro hp;
