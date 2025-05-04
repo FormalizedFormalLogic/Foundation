@@ -15,6 +15,11 @@ open NegationEquiv
 open FiniteContext
 open List
 
+omit [DecidableEq F] in
+@[simp] lemma CONV! : 𝓢 ⊢! ⊤ ➝ ∼⊥ := by
+  apply FiniteContext.deduct'!;
+  exact NO!;
+
 def innerMDP : 𝓢 ⊢ φ ⋏ (φ ➝ ψ) ➝ ψ := by
   apply deduct';
   have hp  : [φ, φ ➝ ψ] ⊢[𝓢] φ := FiniteContext.byAxm;
@@ -1025,6 +1030,18 @@ lemma CinsertFDisjAFDisj! [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! (insert
   . apply CFDisjFDisj_of_subset;
     simp;
 
+@[simp]
+lemma CFdisjUnionAFdisj [HasAxiomEFQ 𝓢] {Γ Δ : Finset F} : 𝓢 ⊢! (Γ ∪ Δ).disj ➝ Γ.disj ⋎ Δ.disj := by
+  apply left_Fdisj!_intro;
+  simp only [Finset.mem_union];
+  rintro ψ (hψ | hψ);
+  . apply C!_trans (ψ := Γ.disj) ?_ or₁!;
+    apply right_Fdisj!_intro;
+    assumption;
+  . apply C!_trans (ψ := Δ.disj) ?_ or₂!;
+    apply right_Fdisj!_intro;
+    assumption;
+
 end disjunction
 
 
@@ -1082,6 +1099,81 @@ lemma iff_FiniteContext_Context {Γ : List F} : Γ ⊢[𝓢]! φ ↔ ↑Γ.toFin
     replace h := FConj_DT.mpr h;
     apply FiniteContext.provable_iff.mpr;
     exact C!_trans (by simp) h;
+
+end
+
+
+section
+
+/-- List version of `CNAKNN!` -/
+@[simp]
+lemma CNDisj₁Conj₂! : 𝓢 ⊢! ∼⋁Γ ➝ ⋀(Γ.map (∼·)) := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ Γ hΓ ih =>
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    refine C!_trans CNAKNN! ?_;
+    apply CKK!_of_C!' ih;
+
+/--- Finset version of `CNAKNN!` -/
+@[simp]
+lemma CNFdisjFconj! [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! ∼Γ.disj ➝ (Γ.image (∼·)).conj := by
+  apply C!_replace ?_ ?_ $ CNDisj₁Conj₂! (Γ := Γ.toList);
+  . apply contra!;
+    exact CFDisjDisj₂;
+  . apply CConj₂Conj₂!_of_provable;
+    intro φ hφ;
+    apply FiniteContext.by_axm!
+    simpa using hφ;
+
+/--- Finset version of `CKNNNA!` -/
+@[simp]
+lemma CConj₂NNDisj₂! : 𝓢 ⊢! ⋀Γ.map (∼·) ➝ ∼⋁Γ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ Γ hΓ ih =>
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    apply C!_trans ?_ CKNNNA!;
+    apply CKK!_of_C!' ih;
+
+/--- Finset version of `CKNNNA!` -/
+@[simp]
+lemma CFconjNNFconj! [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! (Γ.image (∼·)).conj ➝ ∼Γ.disj := by
+  apply C!_replace ?_ ?_ $ CConj₂NNDisj₂! (Γ := Γ.toList);
+  . apply CConj₂Conj₂!_of_provable;
+    intro φ hφ;
+    apply FiniteContext.by_axm!
+    simpa using hφ;
+  . apply contra!;
+    simp;
+
+@[simp]
+lemma CNDisj₂NConj₂! [HasAxiomDNE 𝓢] {Γ : List F} : 𝓢 ⊢! ∼⋁(Γ.map (∼·)) ➝ ⋀Γ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ Γ hΓ ih =>
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    suffices 𝓢 ⊢! ∼(∼φ ⋎ ∼∼⋁List.map (fun x ↦ ∼x) Γ) ➝ φ ⋏ ⋀Γ by
+      apply C!_trans ?_ this;
+      apply contra!;
+      apply CAA!_of_C!_right;
+      exact dne!;
+    apply C!_trans CNAKNN! ?_;
+    apply CKK!_of_C!_of_C!;
+    . exact dne!;
+    . exact C!_trans dne! ih;
+
+lemma CNFdisj₂NFconj₂! [HasAxiomDNE 𝓢] {Γ : Finset F} : 𝓢 ⊢! ∼(Γ.image (∼·)).disj ➝ Γ.conj := by
+  apply C!_replace ?_ ?_ $ CNDisj₂NConj₂! (Γ := Γ.toList);
+  . apply contra!;
+    apply left_Disj₂!_intro;
+    intro ψ hψ;
+    apply right_Fdisj!_intro;
+    simpa using hψ;
+  . simp;
 
 end
 

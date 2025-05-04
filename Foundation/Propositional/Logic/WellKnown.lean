@@ -3,6 +3,7 @@ import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.Hilbert.Cl
 import Foundation.Propositional.Kripke.Hilbert.KC
 import Foundation.Propositional.Kripke.Hilbert.LC
+import Foundation.Propositional.Kripke.Hilbert.KP
 
 namespace LO.Propositional
 
@@ -26,6 +27,11 @@ lemma Cl.Kripke.eq_euclidean : Logic.Cl = Kripke.FrameClass.euclidean.logic
 lemma Cl.Kripke.eq_finite_euclidean : Logic.Cl = Kripke.FrameClass.finite_euclidean.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 lemma Cl.Kripke.eq_finite_symmetric : Logic.Cl = Kripke.FrameClass.finite_symmetric.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+
+protected abbrev KP : Logic := Hilbert.KP.logic
+lemma KP.Kripke.eq_krieselputnam : Logic.KP = Kripke.FrameClass.krieselputnam.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 end Logic

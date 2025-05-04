@@ -1,104 +1,6 @@
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Entailment.Cl
 
-namespace LO.Entailment
-
-variable {F : Type*} [LogicalConnective F]
-         {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Minimal 𝓢]
-         {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
-         {Γ Δ : List F}
-
-@[simp]
-lemma CFdisjUnionAFdisj [DecidableEq F] [HasAxiomEFQ 𝓢] {Γ Δ : Finset F} : 𝓢 ⊢! (Γ ∪ Δ).disj ➝ Γ.disj ⋎ Δ.disj := by
-  apply left_Fdisj!_intro;
-  simp only [Finset.mem_union];
-  rintro ψ (hψ | hψ);
-  . apply C!_trans (ψ := Γ.disj) ?_ or₁!;
-    apply right_Fdisj!_intro;
-    assumption;
-  . apply C!_trans (ψ := Δ.disj) ?_ or₂!;
-    apply right_Fdisj!_intro;
-    assumption;
-
-lemma C!_replace (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! φ₁ ➝ φ₂ → 𝓢 ⊢! ψ₁ ➝ ψ₂ := λ h => C!_trans h₁ $ C!_trans h h₂
-
-/-- List version of `CNAKNN!` -/
-@[simp]
-lemma CNDisj₁Conj₂! [DecidableEq F] : 𝓢 ⊢! ∼⋁Γ ➝ ⋀(Γ.map (∼·)) := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle => simp;
-  | hcons φ Γ hΓ ih =>
-    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
-    refine C!_trans CNAKNN! ?_;
-    apply CKK!_of_C!' ih;
-
-/--- Finset version of `CNAKNN!` -/
-@[simp]
-lemma CNFdisjFconj! [DecidableEq F] [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! ∼Γ.disj ➝ (Γ.image (∼·)).conj := by
-  apply C!_replace ?_ ?_ $ CNDisj₁Conj₂! (Γ := Γ.toList);
-  . apply contra!;
-    exact CFDisjDisj₂;
-  . apply CConj₂Conj₂!_of_provable;
-    intro φ hφ;
-    apply FiniteContext.by_axm!
-    simpa using hφ;
-
-@[simp] lemma CONV! : 𝓢 ⊢! ⊤ ➝ ∼⊥ := by
-  apply FiniteContext.deduct'!;
-  exact NO!;
-
-/--- Finset version of `CKNNNA!` -/
-@[simp]
-lemma CConj₂NNDisj₂! [DecidableEq F] : 𝓢 ⊢! ⋀Γ.map (∼·) ➝ ∼⋁Γ := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle => simp;
-  | hcons φ Γ hΓ ih =>
-    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
-    apply C!_trans ?_ CKNNNA!;
-    apply CKK!_of_C!' ih;
-
-/--- Finset version of `CKNNNA!` -/
-@[simp]
-lemma CFconjNNFconj! [DecidableEq F] [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! (Γ.image (∼·)).conj ➝ ∼Γ.disj := by
-  apply C!_replace ?_ ?_ $ CConj₂NNDisj₂! (Γ := Γ.toList);
-  . apply CConj₂Conj₂!_of_provable;
-    intro φ hφ;
-    apply FiniteContext.by_axm!
-    simpa using hφ;
-  . apply contra!;
-    simp;
-
-@[simp]
-lemma CNDisj₂NConj₂! [DecidableEq F] [HasAxiomDNE 𝓢] {Γ : List F} : 𝓢 ⊢! ∼⋁(Γ.map (∼·)) ➝ ⋀Γ := by
-  induction Γ using List.induction_with_singleton with
-  | hnil => simp;
-  | hsingle => simp;
-  | hcons φ Γ hΓ ih =>
-    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
-    suffices 𝓢 ⊢! ∼(∼φ ⋎ ∼∼⋁List.map (fun x ↦ ∼x) Γ) ➝ φ ⋏ ⋀Γ by
-      apply C!_trans ?_ this;
-      apply contra!;
-      apply CAA!_of_C!_right;
-      exact dne!;
-    apply C!_trans CNAKNN! ?_;
-    apply CKK!_of_C!_of_C!;
-    . exact dne!;
-    . exact C!_trans dne! ih;
-
-lemma CNFdisj₂NFconj₂! [DecidableEq F] [HasAxiomDNE 𝓢] {Γ : Finset F} : 𝓢 ⊢! ∼(Γ.image (∼·)).disj ➝ Γ.conj := by
-  apply C!_replace ?_ ?_ $ CNDisj₂NConj₂! (Γ := Γ.toList);
-  . apply contra!;
-    apply left_Disj₂!_intro;
-    intro ψ hψ;
-    apply right_Fdisj!_intro;
-    simpa using hψ;
-  . simp;
-
-end LO.Entailment
-
 
 section
 
@@ -109,7 +11,7 @@ def KrieselPutnamCondition :=
   (R x y ∧ R x z ∧ ¬R y z ∧ ¬R z y) →
   (∃ u, R x u ∧ R u y ∧ R u z ∧ (∀ v, R u v → ∃ w, R v w ∧ (R y w ∨ R z w)))
 
-class SufficesKriselPutnamCondition (α) (R : α → α → Prop) : Prop where
+class SatisfiesKriselPutnamCondition (α) (R : α → α → Prop) : Prop where
   kpCondition : KrieselPutnamCondition R
 
 end
@@ -123,13 +25,16 @@ open Formula.Kripke
 namespace Kripke
 
 
+instance : SatisfiesKriselPutnamCondition _ whitepoint := ⟨by simp [KrieselPutnamCondition]⟩
+
+
 section definability
 
 variable {F : Kripke.Frame}
 
 open Formula (atom)
 
-lemma validate_KrieselPutnam_of_KrieselPutnamCondition : KrieselPutnamCondition F → F ⊧ (Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)) := by
+lemma validate_KrieselPutnam_of_KrieselPutnamCondition' : KrieselPutnamCondition F → F ⊧ (Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)) := by
   intro hKP V x y Rxy h₁;
   by_contra hC;
   replace hC := Satisfies.or_def.not.mp hC;
@@ -170,6 +75,10 @@ lemma validate_KrieselPutnam_of_KrieselPutnamCondition : KrieselPutnamCondition 
   . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼(.atom 0))) Rz₁w hz₁₁) $ Satisfies.formula_hereditary Rvw hv;
   . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼(.atom 0))) Rz₂w hz₂₁) $ Satisfies.formula_hereditary Rvw hv;
 
+lemma validate_KrieselPutnam_of_KrieselPutnamCondition [SatisfiesKriselPutnamCondition _ F] : F ⊧ (Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2))  := by
+  apply validate_KrieselPutnam_of_KrieselPutnamCondition';
+  exact SatisfiesKriselPutnamCondition.kpCondition;
+
 end definability
 
 
@@ -187,7 +96,7 @@ open Classical
 
 namespace Canonical
 
-instance [Entailment.HasAxiomKrieselPutnam 𝓢] : SufficesKriselPutnamCondition _ (canonicalFrame 𝓢).Rel := ⟨by
+instance [Entailment.HasAxiomKrieselPutnam 𝓢] : SatisfiesKriselPutnamCondition _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
   let ΓNyz := { φ | ∼φ ∈ (y.1.1 ∩ z.1.1)}.image (∼·);
   obtain ⟨u, hu₁, hu₂⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1 ∪ ΓNyz, y.1.2 ∪ z.1.2⟩) $ by
