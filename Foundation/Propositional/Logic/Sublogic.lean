@@ -99,4 +99,75 @@ theorem Int_ssubset_Cl : Logic.Int ⊂ Logic.Cl := by
     . exact KC_ssubset_LC;
   . exact LC_ssubset_Cl
 
+
+
+section BD
+
+theorem BD_subset_BD_succ : Logic.BD (n + 1) ⊂ Logic.BD n := by
+  constructor;
+  . apply (Hilbert.weakerThan_of_dominate_axiomInstances ?_) |>.subset;
+    simp;
+    rintro φ (⟨s, rfl⟩ | ⟨s, rfl⟩);
+    . simp;
+    . sorry;
+  . suffices ∃ φ, (Hilbert.BD n) ⊢! φ ∧ ¬(FrameClass.isDepthLt (n + 1)) ⊧ φ by
+      simp [Set.setOf_subset_setOf, BD.Kripke.eq_isDepthLt];
+      obtain ⟨φ, hφ₁, hφ₂⟩ := this;
+      use φ;
+      constructor;
+      . exact BD.Kripke.eq_isDepthLt.subset hφ₁;
+      . assumption;
+    use Axioms.BoundDepth n;
+    constructor;
+    . apply Hilbert.Deduction.maxm!;
+      simp only [Set.mem_setOf_eq, Set.mem_insert_iff, Set.mem_singleton_iff, exists_eq_or_imp, exists_eq_left];
+      right;
+      use Substitution.id;
+      simp;
+    . apply not_validOnFrameClass_of_exists_frame;
+      let F : Frame := {
+        World := Fin (n + 1),
+        Rel := λ x y => x ≤ y
+        rel_partial_order := {
+          refl := by omega;
+          trans := by omega;
+          antisymm := by omega;
+        }
+      }
+      use F;
+      constructor;
+      . simp [Frame.IsDepthLt];
+        intro l hl₁ hl₂;
+        sorry;
+      . apply not_imp_not.mpr $ Kripke.isDepthLt_of_validate_BoundDepth;
+        dsimp [Frame.IsDepthLt];
+        push_neg;
+        use List.finRange (n + 1);
+        refine ⟨⟨?_, ?_⟩, ?_⟩;
+        . simp [List.finRange];
+        . sorry;
+        . intro i j;
+          contrapose!;
+          sorry;
+
+lemma BD_subset_of_lt (hnm : n < m) : Logic.BD m ⊂ Logic.BD n  := by
+  sorry;
+
+lemma BD_injective (hnm : n ≠ m) : Logic.BD n ≠ Logic.BD m := by
+  rcases lt_trichotomy n m with h | rfl | h;
+  . apply BD_subset_of_lt h |>.ne.symm;
+  . contradiction;
+  . apply BD_subset_of_lt h |>.ne;
+
+/-- There are countable infinite superintuitionistic logics. -/
+instance : Infinite SuperintuitionisticLogic := Infinite.of_injective (λ n => ⟨Logic.BD n, inferInstance⟩) $ by
+  intro i j;
+  simp only [Subtype.mk.injEq];
+  contrapose!;
+  intro hij;
+  apply BD_injective;
+  exact hij;
+
+end BD
+
 end LO.Propositional.Logic

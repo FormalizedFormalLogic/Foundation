@@ -35,6 +35,8 @@ instance [Finite F.World] : F.IsFinite := ⟨⟩
 @[trans] lemma trans (F : Frame) {x y z : F.World} : x ≺ y → y ≺ z → x ≺ z := F.rel_partial_order.trans x y z
 lemma antisymm (F : Frame) {x y : F.World} : x ≺ y → y ≺ x → x = y := F.rel_partial_order.antisymm x y
 
+noncomputable abbrev default (F : Frame) : F.World := F.world_nonempty.some
+
 end Frame
 
 section

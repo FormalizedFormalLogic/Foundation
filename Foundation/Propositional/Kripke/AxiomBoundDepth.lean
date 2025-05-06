@@ -108,7 +108,63 @@ lemma validate_BoundDepth'_of_isDepthLt {n : ℕ} : F.IsDepthLt (n + 1) → F �
 lemma validate_BoundDepth_of_isDepthLt {n : ℕ+} : F.IsDepthLt n → F ⊧ Axioms.BoundDepth n := by
   simpa using validate_BoundDepth'_of_isDepthLt (n := n.natPred);
 
+lemma isDepthLt_of_validate_BoundDepth {n : ℕ+} : F ⊧ Axioms.BoundDepth n → F.IsDepthLt n := by sorry;
+
 end definability
+
+
+
+section canonical
+
+variable {S} [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
+
+open Formula.Kripke
+open Entailment
+     Entailment.FiniteContext
+open canonicalModel
+open SaturatedConsistentTableau
+open Classical
+
+namespace Canonical
+
+open Formula
+
+lemma isDepthLt' (h : 𝓢 ⊢! (Axioms.BoundDepth' n)) :
+  ∀ l : List (canonicalFrame 𝓢).World, l.length = n + 2 ∧ (l.head? = some (canonicalFrame 𝓢).default) ∧ l.Chain' (· ≺ ·) → ∃ i j : Fin l.length, i ≠ j ∧ l.get i = l.get j := by
+  rintro l ⟨hl₁, hl₂, hl₃⟩;
+  induction n with
+  | zero =>
+    simp at hl₁;
+    let i₀ : Fin l.length := ⟨0, by omega⟩;
+    let i₁ : Fin l.length := ⟨1, by omega⟩;
+    use i₀, i₁;
+    constructor;
+    . simp [i₀, i₁];
+    . generalize l.get i₀ = x₀;
+      generalize l.get i₁ = x₁;
+      sorry;
+      /-
+      have Rx₀₁ : x₀ ≺ x₁ := by
+        sorry;
+      by_contra hC;
+      have := (iff_valid_on_canonicalModel_deducible.mpr h) x₀;
+      simp [Axioms.BoundDepth', Axioms.BoundDepth] at this;
+      rcases this with (h | h);
+      . simp [Semantics.Realize, Satisfies, canonicalModel] at h;
+        simp [Semantics.Realize] at h;
+      . have := Satisfies.neg_def.mp h Rx₀₁
+
+        sorry;
+      -/
+  | succ n ih =>
+    sorry;
+
+end Canonical
+
+end canonical
+
+
 
 end Kripke
 
