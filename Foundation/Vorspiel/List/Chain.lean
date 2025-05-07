@@ -73,6 +73,11 @@ variable {R} [IsTrans α R] {l : List α} {i j : Fin l.length}
 lemma of_lt (h : List.Chain' R l) (hij : i < j) : R (l.get i) (l.get j) :=
   List.pairwise_iff_get.mp (List.chain'_iff_pairwise.mp h) _ _ hij
 
+lemma of_le [IsRefl α R] (h : List.Chain' R l) (hij : i ≤ j) : R (l.get i) (l.get j) := by
+  rcases (lt_or_eq_of_le hij) with hij | rfl;
+  . apply of_lt h hij;
+  . apply IsRefl.refl;
+
 lemma connected_of_trans' (h : List.Chain' R l) (eij : i ≠ j) : R (l.get i) (l.get j) ∨ R (l.get j) (l.get i) := by
   rcases Nat.lt_trichotomy i j with (_ | _ | _);
   . left; exact of_lt h $ by omega;

@@ -19,7 +19,9 @@ class IsSuperintuitionistic (L : Logic) where
   mdp_closed {φ ψ} : φ ➝ ψ ∈ L → φ ∈ L → ψ ∈ L
   subst_closed {φ} : φ ∈ L → ∀ s, φ⟦s⟧ ∈ L
 
-abbrev SuperintuitionisticLogic := { L : Logic // L.IsSuperintuitionistic }
+class Consistent (L : Logic) : Prop where
+  consis : L ≠ Set.univ
+attribute [simp] Consistent.consis
 
 end Logic
 
@@ -47,9 +49,16 @@ protected instance superintuitionistic [H.HasEFQ] : (H.logic).IsSuperintuitionis
 
 end Hilbert
 
+
 instance : (Logic.Int).IsSuperintuitionistic := Hilbert.superintuitionistic
 
-
+instance Logic.consistent_of_consistent_hilbert {H : Hilbert ℕ} [Entailment.Consistent H] : Consistent (H.logic) := ⟨by
+  apply Set.eq_univ_iff_forall.not.mpr;
+  push_neg;
+  obtain ⟨φ, hφ⟩ : ∃ φ, H ⊬ φ := Entailment.Consistent.exists_unprovable inferInstance;
+  use φ;
+  simpa;
+⟩
 
 section
 
@@ -68,6 +77,8 @@ lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic {H : Hilbert ℕ} {C : Frame
 lemma Logic.Int.Kripke.eq_all : Logic.Int = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 lemma Logic.Int.Kripke.eq_all_finite : Logic.Int = FrameClass.finite_all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+
 
 end
 

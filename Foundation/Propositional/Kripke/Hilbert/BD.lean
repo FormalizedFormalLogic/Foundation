@@ -30,8 +30,10 @@ instance consistent : Entailment.Consistent (Hilbert.BD n) := consistent_of_soun
   apply Set.mem_setOf_eq.mpr;
   simp only [Frame.IsDepthLt, whitepoint, ne_eq, List.get_eq_getElem, and_true, and_imp];
   intro l hl₁ hl₂;
+  apply List.nodup_iff_get_ne_get.not.mpr;
+  push_neg;
   use ⟨0, by omega⟩, ⟨n, by omega⟩;
-  simp only [Fin.mk.injEq];
+  simp only [ne_eq, Fin.mk.injEq, Fin.getElem_fin, and_true];
   apply PNat.ne_zero n |>.symm;
 
 instance canonical : Canonical (Hilbert.BD n) (FrameClass.isDepthLt n) := ⟨by
