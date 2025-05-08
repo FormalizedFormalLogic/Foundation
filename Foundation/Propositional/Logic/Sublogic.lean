@@ -1,15 +1,5 @@
 import Foundation.Propositional.Logic.WellKnown
 
-
-namespace List.finRange
-
-#check List.getElem_finRange
-
--- lemma finRange_get
-
-end List.finRange
-
-
 namespace LO.Propositional.Logic
 
 open Entailment

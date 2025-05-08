@@ -1,14 +1,5 @@
 import Foundation.Propositional.Logic.WellKnown
 
-
-namespace List
-
-lemma finfin {l : List (Fin n)} : l.length > n → ¬l.Nodup := by
-  sorry
-
-end List
-
-
 namespace LO.Propositional.Logic
 
 open Entailment
@@ -21,14 +12,18 @@ variable {n m : ℕ+}
 
 theorem subset_succ : Logic.BD (n + 1) ⊂ Logic.BD n := by
   constructor;
-  . apply (Hilbert.weakerThan_of_dominate_axiomInstances ?_) |>.subset;
-    simp;
-    rintro φ (⟨s, rfl⟩ | ⟨s, rfl⟩);
-    . simp;
-    . sorry;
+  . simp only [Kripke.eq_isDepthLt, Set.setOf_subset_setOf];
+    intro φ hφ F hF;
+    apply hφ;
+    simp only [Set.mem_setOf_eq, Frame.IsDepthLt, and_imp, PNat.add_coe, PNat.val_ofNat] at hF ⊢;
+    intro l hl₁ hl₂;
+    apply List.not_noDup_of_not_tail_noDup $ hF l.tail ?_ ?_;
+    . simpa;
+    . apply List.Chain'.tail hl₂;
   . suffices ∃ φ, (Hilbert.BD n) ⊢! φ ∧ ¬(FrameClass.isDepthLt (n + 1)) ⊧ φ by
-      simp [Set.setOf_subset_setOf, BD.Kripke.eq_isDepthLt];
       obtain ⟨φ, hφ₁, hφ₂⟩ := this;
+      simp only [Kripke.eq_isDepthLt, Set.setOf_subset_setOf];
+      push_neg;
       use φ;
       constructor;
       . exact BD.Kripke.eq_isDepthLt.subset hφ₁;
@@ -41,34 +36,17 @@ theorem subset_succ : Logic.BD (n + 1) ⊂ Logic.BD n := by
       use Substitution.id;
       simp;
     . apply not_validOnFrameClass_of_exists_frame;
-      let F : Frame := {
-        World := Fin (n + 1),
-        Rel := λ x y => x ≤ y
-        rel_partial_order := {
-          refl := by omega;
-          trans := by omega;
-          antisymm := by omega;
-        }
-      }
-      use F;
+      use ⟨Fin (n + 1), (· ≤ ·)⟩;
       constructor;
-      . simp [Frame.IsDepthLt];
-        intro l hl₁ hl₂;
-        sorry;
+      . simp only [Set.mem_setOf_eq, Frame.IsDepthLt, PNat.add_coe, PNat.val_ofNat, and_imp];
+        rintro l hl _;
+        apply List.not_nodup_of_lt_length;
+        omega;
       . apply not_imp_not.mpr $ Kripke.isDepthLt_of_validate_BoundDepth;
         dsimp [Frame.IsDepthLt];
         push_neg;
         use List.finRange (n + 1);
-        refine ⟨⟨?_, ?_⟩, ?_⟩;
-        . simp [List.finRange];
-        . sorry;
-        . sorry;
-          /-
-          intro i j;
-          contrapose!;
-          -- simp [List.get_finRange]
-          sorry;
-          -/
+        exact ⟨⟨List.length_finRange _, List.finRange.chain'_lt⟩, List.finRange.noDup⟩;
 
 lemma subset_add : Logic.BD (n + m) ⊂ Logic.BD n := by
   induction m with
@@ -94,8 +72,7 @@ instance : Infinite { L : Logic // L.IsSuperintuitionistic ∧ L.Consistent } :=
   intro i j;
   simp only [Subtype.mk.injEq];
   contrapose!;
-  intro hij;
-  exact BD.neq_of_neq hij;
+  apply BD.neq_of_neq;
 
 end BD
 
