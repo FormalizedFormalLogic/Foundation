@@ -143,7 +143,8 @@ lemma wowwow
 -/
 
 lemma isDepthLt_of_validate_BoundDepth'_aux {n : ℕ}
-  {l : List F.World} (hl₁ : l.length = n + 2) (hl₂ : l.Chain' (· ≺ ·)) :
+  {l : List F.World}
+  (hl₁ : l.length = n + 2) (hl₂ : l.Chain' (· ≺ ·)) :
   letI M : Model := ⟨F, (cascadeVal l (n + 1))⟩;
   letI x₀ : M.World := l.head (List.ne_nil_of_length_pos (by omega));
   Satisfies M x₀ (Axioms.BoundDepth' n) → ¬l.Nodup := by
@@ -183,16 +184,17 @@ lemma isDepthLt_of_validate_BoundDepth'_aux {n : ℕ}
           simp;
         . simpa [Semantics.Realize, Satisfies, hl₁, List.head_eq_getElem_zero] using h;
     . suffices ¬l.tail.Nodup by exact List.not_noDup_of_not_tail_noDup this;
-      sorry;
-      /-
-      apply ih (l := l.tail) (by simpa) (by apply List.Chain'.tail hl₂);
-      apply wowwow (by omega) hl₂;
-      refine h (w' := l.tail.head ?_) ?_ ?_;
-      . suffices l[0] ≺ l[1] by simpa [List.head_eq_getElem_zero];
-        apply List.Chain'.of_lt hl₂;
-        simp;
-      . simp [Satisfies, hl₁];
-      -/
+      apply ih (l := l.tail);
+      . exact List.Chain'.tail hl₂;
+      . have := h (w' := l.tail.head ?_) ?_ ?_;
+        . sorry;
+        . apply List.ne_nil_of_length_pos
+          simp [hl₁];
+        . suffices l[0] ≺ l[1] by simpa [List.head_eq_getElem_zero];
+          apply List.Chain'.of_lt hl₂;
+          simp;
+        . simp [Satisfies, hl₁]
+      . simpa;
 
 lemma isDepthLt_of_validate_BoundDepth' {n : ℕ} (h : F ⊧ Axioms.BoundDepth' n) : F.IsDepthLt (n + 1) := by
   rintro l ⟨l₁, l₂⟩;
@@ -234,8 +236,8 @@ lemma isDepthLt' (h : 𝓢 ⊢! (Axioms.BoundDepth' n)) :
     use i₀, i₁;
     constructor;
     . simp [i₀, i₁];
-    . generalize l.get i₀ = x₀;
-      generalize l.get i₁ = x₁;
+    . generalize ex₀ : l.get i₀ = x₀;
+      generalize ex₁ : l.get i₁ = x₁;
       sorry;
       /-
       have Rx₀₁ : x₀ ≺ x₁ := by
