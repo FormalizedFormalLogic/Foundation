@@ -459,25 +459,26 @@ example {_ : ψ ⋏ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subform
 example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
 -- example {_ : ψ ⋏ (ψ ⋎ □(□χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
 
-
-@[simp]
-lemma complexity_lower (h : ψ ∈ φ.subformulas) : ψ.complexity ≤ φ.complexity := by sorry
-  /-
+lemma complexity_lower (h : ψ ∈ φ.subformulas) : ψ.complexity ≤ φ.complexity := by
   induction φ using Formula.rec' with
-  | himp φ₁ φ₂ ihp₁ ihp₂ =>
-    simp_all [subformulas];
-    rcases h with _ | h₁ | h₂;
-    . subst_vars; simp [Formula.complexity];
-    . have := ihp₁ h₁; simp [Formula.complexity]; omega;
-    . have := ihp₂ h₂; simp [Formula.complexity]; omega;
-  | hbox φ ihp =>
-    simp_all [subformulas];
-    rcases h with _ | h₁;
-    . subst_vars; simp [Formula.complexity];
-    . have := ihp h₁; simp [Formula.complexity]; omega;
-  | hatom => simp_all [subformulas];
-  | hfalsum => simp_all [subformulas, Formula.complexity];
-  -/
+  | hfalsum => simp_all [subformulas, complexity];
+  | hatom => simp_all [subformulas, complexity];
+  | hbox φ ihφ =>
+    simp only [subformulas, Finset.mem_insert] at h;
+    rcases h with rfl | h;
+    . rfl;
+    . simp_all [complexity];
+      omega;
+  | himp φ₁ φ₂ ihφ₁ ihφ₂ =>
+    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with rfl | h | h;
+    . rfl;
+    . simp [complexity];
+      have := ihφ₁ h;
+      omega;
+    . simp [complexity];
+      have := ihφ₂ h;
+      omega;
 
 end Formula.subformulas
 
