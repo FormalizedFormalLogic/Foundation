@@ -714,6 +714,19 @@ lemma iff_mem₂_disj {Γ : List _} : ⋁Γ ∈ t.1.2 ↔ (∀ φ ∈ Γ, φ ∈
         tauto;
   | _ => simp;
 
+lemma iff_mem₂_fdisj {Γ : Finset _} : Γ.disj ∈ t.1.2 ↔ (↑Γ ⊆ t.1.2) := by
+  constructor;
+  . intro h φ hφ;
+    apply iff_mem₂_disj (Γ := Γ.toList) (t := t) |>.mp;
+    . apply mdp_mem₂_provable ?_ h; simp;
+    . simpa;
+  . intro h;
+    apply mdp_mem₂_provable ?_ $ iff_mem₂_disj (Γ := Γ.toList) (t := t) |>.mpr $ by
+      intro φ hφ;
+      apply h;
+      simp_all;
+    simp;
+
 omit [Encodable α] in
 private lemma of_mem₁_imp : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   intro h;

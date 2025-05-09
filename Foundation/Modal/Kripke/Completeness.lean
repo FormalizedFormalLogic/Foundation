@@ -18,7 +18,7 @@ section
 
 abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢] : Kripke.Frame where
   World := MaximalConsistentTableau 𝓢
-  Rel t₁ t₂ := □''⁻¹t₁.1.1 ⊆ t₂.1.1
+  Rel t₁ t₂ := t₁.1.1.prebox ⊆ t₂.1.1
 
 abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢] : Model where
   toFrame := canonicalFrame 𝓢
@@ -169,34 +169,32 @@ lemma def_multirel_multibox_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]
       . intro φ hφ; exact truthlemma₂.mpr $ h $ Satisfies.not_def.mpr $ truthlemma₂.mp hφ;
     | succ n ih =>
       intro h;
-      obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, □''^[n]{ φ | ¬y ⊧ φ }⟩) $ by
+      obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, Set.multibox n { φ | ¬y ⊧ φ }⟩) $ by
         intro Γ Δ hΓ hΔ;
-        by_contra hC;
-        have : 𝓢 ⊢! □⋀Γ ➝ □⋁Δ := imply_box_distribute'! hC;
-        have : □⋁Δ ∈ x.1.1 := mdp_mem₁_provable this $ by
+        by_contra! hC;
+        have : 𝓢 ⊢! □Γ.conj ➝ □Δ.disj := imply_box_distribute'! hC;
+        have : □Δ.disj ∈ x.1.1 := mdp_mem₁_provable this $ by
           apply truthlemma₁.mpr;
           intro y Rxy;
-          apply Satisfies.conj_def.mpr;
+          apply Satisfies.fconj_def.mpr;
           intro φ hφ;
-          exact hΓ φ hφ y Rxy;
-        have : x ⊧ □⋁Δ := truthlemma₁.mp this;
-        have : x ⊧ □^[(n + 1)](⋁□'⁻¹^[n]Δ) := by
-          suffices x ⊧ □□^[n]⋁□'⁻¹^[n]Δ by simpa;
+          apply hΓ hφ y Rxy;
+        have : x ⊧ □Δ.disj := truthlemma₁.mp this;
+        have : x ⊧ □^[(n + 1)](Δ.premultibox n |>.disj) := by
+          suffices x ⊧ □□^[n](Finset.premultibox n Δ).disj by simpa;
           intro y Rxy;
           apply multibox_def.mpr;
           intro z Ryz;
-          obtain ⟨ψ, hψ₁, hψ₂⟩ := disj_def.mp $ this y Rxy;
-          obtain ⟨ξ, _, rfl⟩ := by simpa using (hΔ ψ hψ₁);
-          apply disj_def.mpr;
+          obtain ⟨ψ, hψ₁, hψ₂⟩ := Satisfies.fdisj_def.mp $ this y Rxy;
+          obtain ⟨ξ, _, rfl⟩ := by simpa using hΔ hψ₁;
+          apply Satisfies.fdisj_def.mpr;
           use ξ;
           constructor;
           . simpa;
           . exact Satisfies.multibox_def.mp hψ₂ Ryz;
-        have : y ⊧ ⋁□'⁻¹^[n]Δ := h this;
-        obtain ⟨ψ, hψ₁, hψ₂⟩ := disj_def.mp this;
-        have : ¬y ⊧ ψ := by
-          have := hΔ _ (by simpa using hψ₁);
-          simpa using this;
+        have : y ⊧ (Δ.premultibox n |>.disj) := h this;
+        obtain ⟨ψ, hψ₁, hψ₂⟩ := fdisj_def.mp this;
+        have : ¬y ⊧ ψ := by simpa using @hΔ (□^[n]ψ) (by simpa using hψ₁);
         contradiction;
       use t;
       constructor;

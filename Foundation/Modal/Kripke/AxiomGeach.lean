@@ -2,6 +2,48 @@ import Foundation.Modal.Kripke.Completeness
 import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Modal.Geachean
 
+
+namespace Finset
+
+variable {n : ℕ} {F : Type*} [LO.Dia F] {s : Finset F} {φ : F}
+
+lemma mem_multidia_of_toList_multibox [DecidableEq F] (h : φ ∈ s.toList.multidia n) : φ ∈ (s.multidia n) := by
+  simp only [mem_image];
+  obtain ⟨φ, hφ, rfl⟩ := List.exists_multidia_of_mem_multidia h;
+  use φ;
+  constructor;
+  . simpa using hφ;
+  . tauto;
+
+end Finset
+
+namespace LO.Entailment
+
+variable {F : Type*} [BasicModalLogicalConnective F] [DecidableEq F]
+         {S : Type*} [Entailment F S]
+         {𝓢 : S} [Entailment.Modal.K 𝓢]
+         {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F} {n : ℕ}
+
+lemma CMultidiaMultidia_of_C (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ◇^[n]φ ➝ ◇^[n]ψ := by
+  induction n with
+  | zero => simpa;
+  | succ n ih =>
+    simp only [Dia.multidia_succ];
+    apply diaK'! ih;
+
+@[simp]
+lemma distribute_multidia_fdisj! {Γ : Finset F} : 𝓢 ⊢! ◇^[n]Γ.disj ➝ (Γ.multidia n).disj := by
+  refine C!_replace ?_ ?_ (distribute_multidia_disj! (n := n) (Γ := Γ.toList));
+  . apply CMultidiaMultidia_of_C;
+    simp;
+  . apply left_Disj₂!_intro
+    intro φ hφ;
+    apply right_Fdisj!_intro;
+    exact Finset.mem_multidia_of_toList_multibox hφ;
+
+end LO.Entailment
+
+
 namespace LO
 
 
@@ -198,24 +240,13 @@ namespace Canonical
 
 instance [Entailment.HasAxiomGeach g 𝓢] : IsGeachean g _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz⟩;
-  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹^[g.m]y.1.1, ◇''⁻¹^[g.n]z.1.2⟩) $ by
+  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.premultibox g.m, z.1.2.premultidia g.n⟩) $ by
     rintro Γ Δ hΓ hΔ;
-    by_contra hC;
-
-    replace hΓ : ∀ φ ∈ □'^[g.m]Γ, φ ∈ y.1.1 := by
-      intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := List.exists_multibox_of_mem_multibox hφ;
-      exact hΓ _ hψ;
-    have hγ : □^[g.m](⋀Γ) ∈ y.1.1 := mdp_mem₁_provable collect_multibox_conj! $ iff_mem₁_conj.mpr hΓ
-    generalize ⋀Γ = γ at hγ hC;
-
-    replace hΔ : ∀ φ ∈ ◇'^[g.n]Δ, φ ∈ z.1.2 := by
-      intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := List.exists_multidia_of_mem_multidia hφ;
-      exact hΔ _ hψ;
-    have hδ : ◇^[g.n](⋁Δ) ∈ z.1.2 := mdp_mem₂_provable distribute_multidia_disj! $ iff_mem₂_disj.mpr hΔ;
-    generalize ⋁Δ = δ at hδ hC;
-
+    by_contra! hC;
+    have hγ : □^[g.m](Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_multibox_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
+    have hδ : ◇^[g.n](Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_multidia_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
+    generalize Γ.conj = γ at hγ hC;
+    generalize Δ.disj = δ at hδ hC;
     have : 𝓢 ⊢! □^[g.m]γ ➝ □^[g.m]δ := imply_multibox_distribute'! hC;
     have : □^[g.m]δ ∈ y.1.1 := mdp_mem₁_provable this hγ;
     have : ◇^[g.i](□^[g.m]δ) ∈ x.1.1 := def_multirel_multidia_mem₁.mp Rxy this;
