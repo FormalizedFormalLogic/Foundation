@@ -84,7 +84,7 @@ end
 lemma letterless_interpret
   {f₁ f₂ : Realization L} (A_letterless : A.letterless)
   : (f₁.interpret 𝔅 A) = (f₂.interpret 𝔅 A) := by
-  induction A using Formula.rec' with
+  induction A with
   | hatom a => simp at A_letterless;
   | hfalsum => simp_all [Realization.interpret];
   | himp A B ihA ihB =>

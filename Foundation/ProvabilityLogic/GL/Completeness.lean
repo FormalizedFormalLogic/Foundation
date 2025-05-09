@@ -45,7 +45,7 @@ theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : 
   (i ⊧ A → T₀ ⊢!. σ i ➝ σ.realization.interpret 𝔅 A) ∧
   (¬i ⊧ A → T₀ ⊢!. σ i ➝ ∼σ.realization.interpret 𝔅 A)
   := by
-  induction A using Formula.rec' generalizing i with
+  induction A generalizing i with
   | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
   | hatom a =>
     constructor;

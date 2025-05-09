@@ -126,7 +126,7 @@ lemma truthlemma_lemma2
 -- TODO: `subformula` tactic cannot handle, I don't know why.
 lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformulas) :
   Satisfies (miniCanonicalModel φ) X ψ ↔ ψ ∈ X := by
-  induction ψ using Formula.rec' generalizing X with
+  induction ψ generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>

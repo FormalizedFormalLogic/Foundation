@@ -36,7 +36,7 @@ variable {φ ψ : Formula ℕ}
 variable {t : (canonicalModel 𝓢).World}
 
 lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧ φ) := by
-  induction φ using Formula.rec' generalizing t with
+  induction φ generalizing t with
   | hatom =>
     simp_all only [Semantics.Realize, Satisfies, implies_true, true_and];
     exact iff_not_mem₁_mem₂.symm;
