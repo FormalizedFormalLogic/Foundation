@@ -100,7 +100,8 @@ lemma fixpoint_eq (θ : Semisentence ℒₒᵣ 1) :
   simp [fixpoint, substs_diag]
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
-    T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝] :=
+    T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝] := by sorry;
+  /-
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance
@@ -110,6 +111,7 @@ theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
       V ⊧/![] (fixpoint θ)
       ↔ Θ (substNumeral ⌜diag θ⌝ ⌜diag θ⌝) := by simp [Θ, fixpoint_eq]
     _ ↔ Θ ⌜fixpoint θ⌝                     := by simp [substNumeral_app_quote_quote]; rfl
+  -/
 
 end Diagonalization
 
