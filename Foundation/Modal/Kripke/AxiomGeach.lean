@@ -41,6 +41,8 @@ lemma distribute_multidia_fdisj! {Γ : Finset F} : 𝓢 ⊢! ◇^[n]Γ.disj ➝ 
     apply right_Fdisj!_intro;
     exact Finset.mem_multidia_of_toList_multibox hφ;
 
+@[simp] lemma distribute_dia_fdisj! {Γ : Finset F} : 𝓢 ⊢! ◇Γ.disj ➝ (Γ.dia).disj := distribute_multidia_fdisj! (n := 1)
+
 end LO.Entailment
 
 

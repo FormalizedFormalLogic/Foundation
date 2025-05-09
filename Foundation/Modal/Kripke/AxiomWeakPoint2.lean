@@ -1,5 +1,6 @@
 import Foundation.Modal.Kripke.Completeness
 import Foundation.Vorspiel.Relation.Supplemental
+import Foundation.Modal.Kripke.AxiomGeach
 
 namespace LO.Modal
 
@@ -63,22 +64,13 @@ namespace Canonical
 
 instance [Entailment.HasAxiomWeakPoint2 𝓢] : IsWeakConfluent _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz, eyz⟩;
-  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹y.1.1, ◇''⁻¹z.1.2⟩) $ by
+  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.prebox, z.1.2.predia⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra hC;
-    replace hΓ : ∀ φ ∈ □'Γ, φ ∈ y.1.1 := by
-      intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := List.exists_multibox_of_mem_multibox hφ;
-      exact hΓ _ hψ;
-    have hγ : □(⋀Γ) ∈ y.1.1 := mdp_mem₁_provable collect_multibox_conj! $ iff_mem₁_conj.mpr hΓ;
-    generalize ⋀Γ = γ₁ at hγ hC;
-
-    replace hΔ : ∀ φ ∈ ◇'Δ, φ ∈ z.1.2 := by
-      intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := List.exists_multidia_of_mem_multidia hφ;
-      exact hΔ _ hψ;
-    have hδ : ◇(⋁Δ) ∈ z.1.2 := mdp_mem₂_provable distribute_dia_disj! $ iff_mem₂_disj.mpr hΔ;
-    generalize ⋁Δ = δ₁ at hδ hC;
+    have hγ : □(Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_box_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
+    have hδ : ◇(Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_dia_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
+    generalize Γ.conj = γ₁ at hγ hC;
+    generalize Δ.disj = δ₁ at hδ hC;
     obtain ⟨δ₂, hδ₂₁, hδ₂₂⟩ := exists₁₂_of_ne eyz;
 
     have : 𝓢 ⊢! □γ₁ ➝ □δ₁ := imply_box_distribute'! hC;

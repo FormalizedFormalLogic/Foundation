@@ -44,6 +44,8 @@ lemma collect_multibox_fconj! {Γ : Finset _} : 𝓢 ⊢! (Γ.multibox n).conj �
     apply multinec!;
     simp;
 
+@[simp] lemma collect_box_fconj! {Γ : Finset _} : 𝓢 ⊢! (Γ.box).conj ➝ □(Γ.conj) := collect_multibox_fconj! (n := 1)
+
 end LO.Entailment
 
 
