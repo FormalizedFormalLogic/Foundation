@@ -280,7 +280,7 @@ lemma validates_axiomT_set_in_irrefl_trans_chain
   use x;
   constructor;
   . assumption;
-  . apply Formula.Kripke.Satisfies.finset_conj_def.mpr;
+  . apply Formula.Kripke.Satisfies.fconj_def.mpr;
     simp only [Finset.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
     intro A hA;
     apply hx₁;

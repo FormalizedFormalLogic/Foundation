@@ -6,49 +6,6 @@ import Foundation.Vorspiel.List.Supplemental
 import Foundation.Vorspiel.Finset.Supplemental
 import Foundation.Vorspiel.Set.Supplemental
 
-
-namespace Finset
-
-variable {n : ℕ} {F : Type*} [LO.Box F] {s : Finset F} {φ : F}
-
-lemma mem_multibox_of_toList_multibox [DecidableEq F] (h : φ ∈ s.toList.multibox n) : φ ∈ (s.multibox n) := by
-  simp only [mem_image];
-  obtain ⟨φ, hφ, rfl⟩ := List.exists_multibox_of_mem_multibox h;
-  use φ;
-  constructor;
-  . simpa using hφ;
-  . tauto;
-
-end Finset
-
-
-namespace LO.Entailment
-
-variable {F : Type*} [BasicModalLogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Modal.K 𝓢]
-         {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F} {n : ℕ}
-
-lemma left_Fdisj!_intro' {Γ : Finset _} [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢! Γ.disj ➝ φ := by
-  apply C!_trans ?_ $ left_Disj₂!_intro' (Γ := Γ.toList) (by simpa);
-  simp;
-
-@[simp]
-lemma collect_multibox_fconj! {Γ : Finset _} : 𝓢 ⊢! (Γ.multibox n).conj ➝ □^[n](Γ.conj) := by
-  refine C!_replace ?_ ?_ (collect_multibox_conj! (n := n) (Γ := Γ.toList));
-  . apply right_Conj₂!_intro
-    intro φ hφ;
-    apply left_Fconj!_intro;
-    apply Finset.mem_multibox_of_toList_multibox hφ;
-  . apply multibox_axiomK'!
-    apply multinec!;
-    simp;
-
-@[simp] lemma collect_box_fconj! {Γ : Finset _} : 𝓢 ⊢! (Γ.box).conj ➝ □(Γ.conj) := collect_multibox_fconj! (n := 1)
-
-end LO.Entailment
-
-
 namespace LO.Modal
 
 open Entailment

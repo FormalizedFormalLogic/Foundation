@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.Completeness
 import Foundation.Vorspiel.Relation.Supplemental
-import Foundation.Modal.Kripke.AxiomGeach
 
 namespace LO.Modal
 

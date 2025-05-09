@@ -47,8 +47,8 @@ variable {φ ψ : Formula ℕ}
 abbrev miniCanonicalFrame (𝓢 : S) [Entailment.Modal.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Frame where
   World := ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)
   Rel X Y :=
-    (∀ ψ ∈ □''⁻¹(φ.subformulasGrz), □ψ ∈ X → □ψ ∈ Y) ∧
-    ((∀ ψ ∈ □''⁻¹(φ.subformulasGrz), □ψ ∈ Y → □ψ ∈ X) → X = Y)
+    (∀ ψ ∈ (φ.subformulasGrz).prebox, □ψ ∈ X → □ψ ∈ Y) ∧
+    ((∀ ψ ∈ (φ.subformulasGrz).prebox, □ψ ∈ Y → □ψ ∈ X) → X = Y)
 
 namespace miniCanonicalFrame
 
@@ -135,19 +135,19 @@ lemma truthlemma_lemma2
       . rw [hp] at this;
         exact C!_trans this dne!;
       . simpa only [complement] using this;
-    have : (□'Γ₁) ⊢[𝓢]! □(□(ψ ➝ □ψ) ➝ ψ) := contextual_nec! this;
-    have : (□'Γ₁) ⊢[𝓢]! ψ := axiomGrz! ⨀ this;
-    have : 𝓢 ⊢! ⋀□'□'Γ₁ ➝ □ψ := contextual_nec! this;
-    have : 𝓢 ⊢! □□⋀Γ₁ ➝ □ψ := C!_trans (C!_trans (distribute_multibox_conj! (n := 2)) $ CConj₂Conj₂!_of_subset (λ _ => iff_mem_multibox_add.mp)) this;
+    have : Γ₁.box ⊢[𝓢]! □(□(ψ ➝ □ψ) ➝ ψ) := contextual_nec! this;
+    have : Γ₁.box ⊢[𝓢]! ψ := axiomGrz! ⨀ this;
+    have : 𝓢 ⊢! ⋀Γ₁.box.box ➝ □ψ := contextual_nec! this;
+    have : 𝓢 ⊢! □□⋀Γ₁ ➝ □ψ := C!_trans (C!_trans (distribute_multibox_conj! (n := 2)) $ CConj₂Conj₂!_of_subset (λ _ => List.iff_mem_multibox_add.mp)) this;
     have : 𝓢 ⊢! □⋀Γ₁ ➝ □ψ := C!_trans axiomFour! this;
-    have : 𝓢 ⊢! ⋀□'Γ₁ ➝ □ψ := C!_trans collect_box_conj! this;
-    have : 𝓢 ⊢! ⋀□'(X.1.prebox.box |>.toList) ➝ □ψ := C!_trans (CConj₂Conj₂!_of_subset (by
+    have : 𝓢 ⊢! ⋀Γ₁.box ➝ □ψ := C!_trans collect_box_conj! this;
+    have : 𝓢 ⊢! ⋀(X.1.prebox.box |>.toList).box ➝ □ψ := C!_trans (CConj₂Conj₂!_of_subset (by
       intro ξ hξ;
       obtain ⟨χ, hχ, rfl⟩ := List.exists_box_of_mem_box hξ;
       apply List.box_mem_of;
       simpa using hΓ₁ χ hχ;
     )) this;
-    have : 𝓢 ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := C!_trans (CConj₂Conj₂!_of_provable (by
+    have : 𝓢 ⊢! ⋀(X.1.prebox.toList).box ➝ □ψ := C!_trans (CConj₂Conj₂!_of_provable (by
       intro ψ hψ;
       obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hψ;
       obtain ⟨χ, hχ, rfl⟩ := by simpa using hξ;
@@ -158,7 +158,7 @@ lemma truthlemma_lemma2
     )) this;
     have : X *⊢[𝓢]! □ψ := by
       apply Context.provable_iff.mpr;
-      use □'X.1.prebox.toList;
+      use X.1.prebox.toList.box;
       constructor;
       . intro ψ hψ;
         obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hψ;

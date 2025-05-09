@@ -2,50 +2,6 @@ import Foundation.Modal.Kripke.Completeness
 import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Modal.Geachean
 
-
-namespace Finset
-
-variable {n : ℕ} {F : Type*} [LO.Dia F] {s : Finset F} {φ : F}
-
-lemma mem_multidia_of_toList_multibox [DecidableEq F] (h : φ ∈ s.toList.multidia n) : φ ∈ (s.multidia n) := by
-  simp only [mem_image];
-  obtain ⟨φ, hφ, rfl⟩ := List.exists_multidia_of_mem_multidia h;
-  use φ;
-  constructor;
-  . simpa using hφ;
-  . tauto;
-
-end Finset
-
-namespace LO.Entailment
-
-variable {F : Type*} [BasicModalLogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Modal.K 𝓢]
-         {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F} {n : ℕ}
-
-lemma CMultidiaMultidia_of_C (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ◇^[n]φ ➝ ◇^[n]ψ := by
-  induction n with
-  | zero => simpa;
-  | succ n ih =>
-    simp only [Dia.multidia_succ];
-    apply diaK'! ih;
-
-@[simp]
-lemma distribute_multidia_fdisj! {Γ : Finset F} : 𝓢 ⊢! ◇^[n]Γ.disj ➝ (Γ.multidia n).disj := by
-  refine C!_replace ?_ ?_ (distribute_multidia_disj! (n := n) (Γ := Γ.toList));
-  . apply CMultidiaMultidia_of_C;
-    simp;
-  . apply left_Disj₂!_intro
-    intro φ hφ;
-    apply right_Fdisj!_intro;
-    exact Finset.mem_multidia_of_toList_multibox hφ;
-
-@[simp] lemma distribute_dia_fdisj! {Γ : Finset F} : 𝓢 ⊢! ◇Γ.disj ➝ (Γ.dia).disj := distribute_multidia_fdisj! (n := 1)
-
-end LO.Entailment
-
-
 namespace LO
 
 

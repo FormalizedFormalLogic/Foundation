@@ -1042,6 +1042,10 @@ lemma CFdisjUnionAFdisj [HasAxiomEFQ 𝓢] {Γ Δ : Finset F} : 𝓢 ⊢! (Γ �
     apply right_Fdisj!_intro;
     assumption;
 
+lemma left_Fdisj!_intro' {Γ : Finset _} [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢! Γ.disj ➝ φ := by
+  apply C!_trans ?_ $ left_Disj₂!_intro' (Γ := Γ.toList) (by simpa);
+  simp;
+
 end disjunction
 
 

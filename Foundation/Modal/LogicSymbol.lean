@@ -308,6 +308,13 @@ lemma iff_mem_multibox_add : φ ∈ (l.multibox m |>.multibox n) ↔ φ ∈ l.mu
 
 end List
 
+lemma Finset.mem_multibox_of_toList_multibox [DecidableEq F] {s : Finset F} (h : φ ∈ s.toList.multibox n) : φ ∈ (s.multibox n) := by
+  simp only [mem_image];
+  obtain ⟨φ, hφ, rfl⟩ := List.exists_multibox_of_mem_multibox h;
+  use φ;
+  constructor;
+  . simpa using hφ;
+  . tauto;
 
 namespace Finset
 
@@ -481,6 +488,14 @@ lemma iff_mem_multidia_add : φ ∈ (l.multidia m |>.multidia n) ↔ φ ∈ l.mu
         exact h;
 
 end List
+
+lemma Finset.mem_multidia_of_toList_multibox [DecidableEq F] {s : Finset F} (h : φ ∈ s.toList.multidia n) : φ ∈ (s.multidia n) := by
+  simp only [mem_image];
+  obtain ⟨φ, hφ, rfl⟩ := List.exists_multidia_of_mem_multidia h;
+  use φ;
+  constructor;
+  . simpa using hφ;
+  . tauto;
 
 end Dia
 

@@ -161,6 +161,15 @@ def diaK' (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ ◇φ ➝ ◇ψ := by
   assumption;
 lemma diaK'! (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ◇φ ➝ ◇ψ := ⟨diaK' h.some⟩
 
+lemma CMultidiaMultidia_of_C (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ◇^[n]φ ➝ ◇^[n]ψ := by
+  induction n with
+  | zero => simpa;
+  | succ n ih =>
+    simp only [Dia.multidia_succ];
+    apply diaK'! ih;
+
+
+
 def diaIff' (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ (◇φ ⭤ ◇ψ) := by
   apply E_trans diaDuality;
   apply K_symm;
@@ -351,6 +360,25 @@ lemma contextual_nec! (h : Γ ⊢[𝓢]! φ) : Γ.box ⊢[𝓢]! □φ :=
 end List
 
 
+section Finset
+
+variable {Γ : Finset F}
+
+@[simp]
+lemma collect_multibox_fconj! : 𝓢 ⊢! (Γ.multibox n).conj ➝ □^[n](Γ.conj) := by
+  refine C!_replace ?_ ?_ (collect_multibox_conj! (n := n) (Γ := Γ.toList));
+  . apply right_Conj₂!_intro
+    intro φ hφ;
+    apply left_Fconj!_intro;
+    apply Finset.mem_multibox_of_toList_multibox hφ;
+  . apply multibox_axiomK'!
+    apply multinec!;
+    simp;
+
+@[simp] lemma collect_box_fconj! : 𝓢 ⊢! (Γ.box).conj ➝ □(Γ.conj) := collect_multibox_fconj! (n := 1)
+
+end Finset
+
 
 def diaOrInst₁ : 𝓢 ⊢ ◇φ ➝ ◇(φ ⋎ ψ) := by
   apply C_trans (K_left diaDuality);
@@ -491,6 +519,24 @@ lemma distribute_dia_disj! : 𝓢 ⊢! ◇⋁Γ ➝ ⋁(Γ.dia) := by simpa usin
 
 end List
 
+
+section Finset
+
+variable {Γ : Finset F}
+
+@[simp]
+lemma distribute_multidia_fdisj! : 𝓢 ⊢! ◇^[n]Γ.disj ➝ (Γ.multidia n).disj := by
+  refine C!_replace ?_ ?_ (distribute_multidia_disj! (n := n) (Γ := Γ.toList));
+  . apply CMultidiaMultidia_of_C;
+    simp;
+  . apply left_Disj₂!_intro
+    intro φ hφ;
+    apply right_Fdisj!_intro;
+    exact Finset.mem_multidia_of_toList_multibox hφ;
+
+@[simp] lemma distribute_dia_fdisj! : 𝓢 ⊢! ◇Γ.disj ➝ (Γ.dia).disj := distribute_multidia_fdisj! (n := 1)
+
+end Finset
 
 
 
