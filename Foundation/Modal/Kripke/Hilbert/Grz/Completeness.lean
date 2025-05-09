@@ -138,18 +138,18 @@ lemma truthlemma_lemma2
     have : (□'Γ₁) ⊢[𝓢]! □(□(ψ ➝ □ψ) ➝ ψ) := contextual_nec! this;
     have : (□'Γ₁) ⊢[𝓢]! ψ := axiomGrz! ⨀ this;
     have : 𝓢 ⊢! ⋀□'□'Γ₁ ➝ □ψ := contextual_nec! this;
-    have : 𝓢 ⊢! □□⋀Γ₁ ➝ □ψ := C!_trans (C!_trans (distribute_multibox_conj! (n := 2)) $ CConj₂Conj₂!_of_subset (λ _ => List.mem_multibox_add.mp)) this;
+    have : 𝓢 ⊢! □□⋀Γ₁ ➝ □ψ := C!_trans (C!_trans (distribute_multibox_conj! (n := 2)) $ CConj₂Conj₂!_of_subset (λ _ => iff_mem_multibox_add.mp)) this;
     have : 𝓢 ⊢! □⋀Γ₁ ➝ □ψ := C!_trans axiomFour! this;
     have : 𝓢 ⊢! ⋀□'Γ₁ ➝ □ψ := C!_trans collect_box_conj! this;
     have : 𝓢 ⊢! ⋀□'(X.1.prebox.box |>.toList) ➝ □ψ := C!_trans (CConj₂Conj₂!_of_subset (by
       intro ξ hξ;
-      obtain ⟨χ, hχ, rfl⟩ := List.exists_of_box hξ;
+      obtain ⟨χ, hχ, rfl⟩ := List.exists_box_of_mem_box hξ;
       apply List.box_mem_of;
       simpa using hΓ₁ χ hχ;
     )) this;
     have : 𝓢 ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := C!_trans (CConj₂Conj₂!_of_provable (by
       intro ψ hψ;
-      obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
+      obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hψ;
       obtain ⟨χ, hχ, rfl⟩ := by simpa using hξ;
       apply axiomFour'!;
       apply FiniteContext.by_axm!;
@@ -161,7 +161,7 @@ lemma truthlemma_lemma2
       use □'X.1.prebox.toList;
       constructor;
       . intro ψ hψ;
-        obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
+        obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hψ;
         simp_all;
       . assumption;
     have : □ψ ∈ X := membership_iff (by subformula) |>.mpr this;

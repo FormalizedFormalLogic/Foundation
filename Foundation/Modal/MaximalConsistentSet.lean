@@ -496,7 +496,7 @@ lemma iff_mem_multibox : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet
         push_neg at this;
         have : 𝓢 ⊬ ⋀□'^[n]Γ ➝ □^[n]φ := FiniteContext.provable_iff.not.mp $ this (□'^[n]Γ) (by
           intro ψ hq;
-          obtain ⟨χ, hr₁, rfl⟩ := List.exists_of_multibox hq;
+          obtain ⟨χ, hr₁, rfl⟩ := List.exists_multibox_of_mem_multibox hq;
           simpa using hΓ₁ χ hr₁;
         );
         revert this;

@@ -68,14 +68,14 @@ instance [Entailment.HasAxiomWeakPoint2 𝓢] : IsWeakConfluent _ (canonicalFram
     by_contra hC;
     replace hΓ : ∀ φ ∈ □'Γ, φ ∈ y.1.1 := by
       intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := List.exists_of_multibox hφ;
+      obtain ⟨ψ, hψ, rfl⟩ := List.exists_multibox_of_mem_multibox hφ;
       exact hΓ _ hψ;
     have hγ : □(⋀Γ) ∈ y.1.1 := mdp_mem₁_provable collect_multibox_conj! $ iff_mem₁_conj.mpr hΓ;
     generalize ⋀Γ = γ₁ at hγ hC;
 
     replace hΔ : ∀ φ ∈ ◇'Δ, φ ∈ z.1.2 := by
       intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := List.exists_of_multidia hφ;
+      obtain ⟨ψ, hψ, rfl⟩ := List.exists_multidia_of_mem_multidia hφ;
       exact hΔ _ hψ;
     have hδ : ◇(⋁Δ) ∈ z.1.2 := mdp_mem₂_provable distribute_dia_disj! $ iff_mem₂_disj.mpr hΔ;
     generalize ⋁Δ = δ₁ at hδ hC;
