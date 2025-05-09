@@ -94,7 +94,7 @@ lemma GL_S_TFAE :
     replace hA₁ : ∀ φ ∈ A.rflSubformula, r₁ ⊧ φ := by
       intro φ hφ;
       apply Model.extendRoot.inr_satisfies_iff.mp
-        $ (Satisfies.finset_conj_def.mp
+        $ (Satisfies.fconj_def.mp
         $ Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr hA₁) φ hφ;
     have : M₀.IsFiniteTree r₀ := Frame.extendRoot.instIsFiniteTree
     have : Fintype M₀.World := Fintype.ofFinite _
@@ -225,9 +225,9 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Aᵇ ∈ Logic.GL ↔ Aᵇ ∈ 
         . apply Frame.pointGenerate.isAsymm (assym := Frame.extendRoot.isAsymm);
         . apply Frame.pointGenerate.isTrans (trans := Frame.extendRoot.isTrans);
     . apply @Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mpr
-      apply Satisfies.finset_conj_def.mpr;
+      apply Satisfies.fconj_def.mpr;
       intro B hB;
-      apply Satisfies.finset_conj_def.mp hi;
+      apply Satisfies.fconj_def.mp hi;
       simp only [Finset.mem_image, Finset.eq_prebox_premultibox_one, Finset.mem_preimage, Function.iterate_one] at hB ⊢;
       obtain ⟨C, hC, rfl⟩ := hB;
       use C;

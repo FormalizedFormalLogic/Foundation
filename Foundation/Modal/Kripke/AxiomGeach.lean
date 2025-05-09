@@ -198,24 +198,13 @@ namespace Canonical
 
 instance [Entailment.HasAxiomGeach g 𝓢] : IsGeachean g _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz⟩;
-  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨□''⁻¹^[g.m]y.1.1, ◇''⁻¹^[g.n]z.1.2⟩) $ by
+  have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.premultibox g.m, z.1.2.premultidia g.n⟩) $ by
     rintro Γ Δ hΓ hΔ;
-    by_contra hC;
-
-    replace hΓ : ∀ φ ∈ □'^[g.m]Γ, φ ∈ y.1.1 := by
-      intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := List.exists_of_multibox hφ;
-      exact hΓ _ hψ;
-    have hγ : □^[g.m](⋀Γ) ∈ y.1.1 := mdp_mem₁_provable collect_multibox_conj! $ iff_mem₁_conj.mpr hΓ
-    generalize ⋀Γ = γ at hγ hC;
-
-    replace hΔ : ∀ φ ∈ ◇'^[g.n]Δ, φ ∈ z.1.2 := by
-      intro φ hφ;
-      obtain ⟨ψ, hψ, rfl⟩ := List.exists_of_multidia hφ;
-      exact hΔ _ hψ;
-    have hδ : ◇^[g.n](⋁Δ) ∈ z.1.2 := mdp_mem₂_provable distribute_multidia_disj! $ iff_mem₂_disj.mpr hΔ;
-    generalize ⋁Δ = δ at hδ hC;
-
+    by_contra! hC;
+    have hγ : □^[g.m](Γ.conj) ∈ y.1.1 := y.mdp_mem₁_provable collect_multibox_fconj! $ iff_mem₁_fconj.mpr (by simpa using hΓ);
+    have hδ : ◇^[g.n](Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_multidia_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
+    generalize Γ.conj = γ at hγ hC;
+    generalize Δ.disj = δ at hδ hC;
     have : 𝓢 ⊢! □^[g.m]γ ➝ □^[g.m]δ := imply_multibox_distribute'! hC;
     have : □^[g.m]δ ∈ y.1.1 := mdp_mem₁_provable this hγ;
     have : ◇^[g.i](□^[g.m]δ) ∈ x.1.1 := def_multirel_multidia_mem₁.mp Rxy this;

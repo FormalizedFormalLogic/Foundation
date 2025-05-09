@@ -122,10 +122,10 @@ end mdpCounterexmpleModel
 end Kripke
 
 
-lemma MDP_Aux (h : (□''X) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) : (□''X) *⊢[Hilbert.GL]! □φ₁ ∨ (□''X) *⊢[Hilbert.GL]! □φ₂ := by
+lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) : (X.box) *⊢[Hilbert.GL]! □φ₁ ∨ (X.box) *⊢[Hilbert.GL]! □φ₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
-  have : Hilbert.GL ⊢! ⋀□'Δ ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
+  have : Hilbert.GL ⊢! ⋀Δ.box ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
   have : Hilbert.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
@@ -181,7 +181,7 @@ lemma MDP_Aux (h : (□''X) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) : (□''X) 
     have := imply_box_box_of_imply_boxdot_plain! h;
     have := C!_trans collect_box_conj! this;
     have := FiniteContext.provable_iff.mpr this;
-    have := Context.provable_iff.mpr $ by use □'Δ;
+    have := Context.provable_iff.mpr $ by use Δ.box;
     tauto;
   };
 
