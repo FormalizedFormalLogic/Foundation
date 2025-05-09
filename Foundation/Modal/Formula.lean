@@ -163,7 +163,7 @@ def cases' {C : Formula α → Sort w}
   | □φ      => hbox φ
   | φ ➝ ψ   => himp φ ψ
 
-@[elab_as_elim]
+@[induction_eliminator]
 def rec' {C : Formula α → Sort w}
   (hfalsum : C ⊥)
   (hatom   : ∀ a : α, C (atom a))
@@ -424,13 +424,13 @@ variable [DecidableEq α] {φ ψ χ : Formula α}
 
 @[subformula]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
-  induction φ using Formula.rec' with
+  induction φ with
   | himp => simp_all [subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [subformulas];
 
 @[subformula]
 protected lemma mem_box (h : □ψ ∈ φ.subformulas) : ψ ∈ φ.subformulas := by
-  induction φ using Formula.rec' <;> {
+  induction φ <;> {
     simp_all [subformulas];
     try rcases h with (hq | hr) <;> simp_all;
   };
@@ -462,7 +462,7 @@ example {_ : ψ ⋏ (ψ ⋎ □(□χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.s
 
 @[simp]
 lemma complexity_lower (h : ψ ∈ φ.subformulas) : ψ.complexity ≤ φ.complexity  := by
-  induction φ using Formula.rec' with
+  induction φ with
   | himp φ₁ φ₂ ihp₁ ihp₂ =>
     simp_all [subformulas];
     rcases h with _ | h₁ | h₂;
@@ -561,7 +561,7 @@ end Formula.subst
 abbrev Substitution.id {α} : Substitution α := λ a => .atom a
 
 @[simp]
-lemma Formula.subst.def_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ using Formula.rec' <;> simp_all;
+lemma Formula.subst.def_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ <;> simp_all;
 
 
 def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
@@ -569,7 +569,7 @@ infixr:80 " ∘ " => Substitution.comp
 
 @[simp]
 lemma Formula.subst.def_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
-  induction φ using Formula.rec' <;> simp_all [Substitution.comp];
+  induction φ <;> simp_all [Substitution.comp];
 
 
 class SubstitutionClosed (S : Set (Formula α)) where
@@ -579,7 +579,7 @@ class SubstitutionClosed (S : Set (Formula α)) where
 def ZeroSubstitution (α) := {s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
 
 lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
-  induction φ using Formula.rec' <;> simp [Formula.letterless, *];
+  induction φ <;> simp [Formula.letterless, *];
   case hatom => exact s.2;
 
 lemma Formula.toModalFormula.letterless {φ : Propositional.Formula α} (h : φ.letterless) : φ.toModalFormula.letterless := by

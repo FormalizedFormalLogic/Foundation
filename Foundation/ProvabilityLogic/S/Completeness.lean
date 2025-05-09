@@ -106,7 +106,7 @@ lemma GL_S_TFAE :
       (r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) ∧
       (¬r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) := by
       intro B B_sub;
-      induction B using Formula.rec' with
+      induction B with
       | hfalsum => simp [Satisfies, Realization.interpret];
       | himp B C ihB ihC =>
         dsimp [Realization.interpret];

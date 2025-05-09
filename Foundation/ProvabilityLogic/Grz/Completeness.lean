@@ -38,7 +38,7 @@ def strongInterpret (f : Realization L) (𝔅 : ProvabilityPredicate T₀ T) : F
   | □φ => (f.strongInterpret 𝔅 φ) ⋏ 𝔅 (f.strongInterpret 𝔅 φ)
 
 lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ⭤ f.strongInterpret 𝔅 A := by
-  induction A using Formula.rec' with
+  induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | hfalsum => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | himp A B ihA ihB => exact ECC!_of_E!_of_E! ihA ihB;
@@ -59,7 +59,7 @@ lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] : T ⊢!. f.interpret �
   . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
 
 lemma iff_models_interpret_boxdot_strongInterpret {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.Sound M] : M ⊧ₘ₀ f.interpret 𝔅 (Aᵇ) ↔ M ⊧ₘ₀ f.strongInterpret 𝔅 A := by
-  induction A using Formula.rec' with
+  induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | hfalsum => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | himp A B ihA ihB =>

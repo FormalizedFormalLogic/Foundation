@@ -36,13 +36,13 @@ instance : Semantics.Tarski (Valuation α) where
 
 lemma eq_fml_of_eq_atom {v u : Valuation α} (h : ∀ {a : α}, v a ↔ u a) : (∀ {φ : Formula α}, v ⊧ φ ↔ u ⊧ φ) := by
   intro φ;
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom => apply h;
   | _ => simp [*]
 
 lemma iff_subst_self (s) :
   ((λ a => val v ((.atom a)⟦s⟧)) : Valuation α) ⊧ φ ↔ v ⊧ (φ⟦s⟧) := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom a => simp [val, models_iff_val];
   | hfalsum => simp [val];
   | himp φ ψ ihφ ihψ =>

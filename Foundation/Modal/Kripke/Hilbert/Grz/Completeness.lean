@@ -175,7 +175,7 @@ lemma truthlemma_lemma3 : 𝓢 ⊢! (φ ⋏ □(φ ➝ □φ)) ➝ □φ := by
 
 lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.subformulas) :
   Satisfies (miniCanonicalModel 𝓢 φ) X ψ ↔ ψ ∈ X := by
-  induction ψ using Formula.rec' generalizing X with
+  induction ψ generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>

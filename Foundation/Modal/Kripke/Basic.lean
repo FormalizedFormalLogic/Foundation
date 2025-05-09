@@ -365,7 +365,7 @@ lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Satisfies
 lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
   letI U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | hatom a => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | hbox φ ih =>

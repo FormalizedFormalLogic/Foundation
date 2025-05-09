@@ -28,7 +28,7 @@ def atoms : Formula α → Finset α
   | φ ➝ ψ => φ.atoms ∪ ψ.atoms
 
 lemma iff_mem_atoms_mem_subformula : (a ∈ φ.atoms) ↔ (atom a ∈ φ.subformulas) := by
-  induction φ using Formula.rec' <;> simp_all [atoms, subformulas];
+  induction φ <;> simp_all [atoms, subformulas];
 
 end Formula
 
@@ -264,7 +264,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
       contradiction;
     have H₂ : ∀ t ∈ RM.terminals, ∀ ψ ∈ φ.subformulas, t ⊧ ψ ↔ (Satisfies M' (Sum.inr ()) ψ) := by
       intro t t_terminal ψ ψ_sub;
-      induction ψ using Formula.rec' with
+      induction ψ with
       | hatom a =>
         simp only [Satisfies.iff_models, Satisfies, RM, M']
         constructor;
@@ -302,7 +302,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
           tauto;
     have : ∀ y : RM.World, ∀ ψ ∈ φ.subformulas, y ⊧ ψ ↔ (Satisfies M' (Sum.inl y) ψ) := by
       intro y ψ ψ_sub;
-      induction ψ using Formula.rec' generalizing y with
+      induction ψ generalizing y with
       | hbox ψ ihψ =>
         constructor;
         . intro hψ v Ruv;

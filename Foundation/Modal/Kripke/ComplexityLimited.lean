@@ -24,7 +24,7 @@ lemma iff_satisfy_complexityLimitedModel_aux
   :
   haveI : x ∈ {y | ∃ n ≤ φ.complexity, r ≺^[n] y} := by obtain ⟨n, _, _⟩ := hx; use n; exact ⟨by omega, by assumption⟩;
   x ⊧ ψ ↔ Satisfies (complexityLimitedModel M r φ) ⟨x, this⟩ ψ := by
-  induction ψ using Formula.rec' generalizing x φ with
+  induction ψ generalizing x φ with
   | hbox ψ ihq =>
     obtain ⟨n, hn, hx⟩ := hx;
     simp [Formula.complexity] at hn;

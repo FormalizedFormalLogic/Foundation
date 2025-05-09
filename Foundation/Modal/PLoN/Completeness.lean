@@ -25,7 +25,7 @@ abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl �
 variable {φ : Formula ℕ}
 
 lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊧ φ ↔ (φ ∈ X) := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hfalsum =>
     simp only [Semantics.Realize, PLoN.Satisfies, false_iff];
     exact not_mem_falsum;

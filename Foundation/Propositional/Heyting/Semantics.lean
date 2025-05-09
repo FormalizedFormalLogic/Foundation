@@ -133,7 +133,7 @@ def lindenbaum : HeytingSemantics α where
 
 
 lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hand φ ψ ihp ihq => simp only [hVal_and, ihp, ihq]; rw [inf_def];
   | hor _ _ ihp ihq => simp only [hVal_or, ihp, ihq]; rw [sup_def];
   | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def];

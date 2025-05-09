@@ -43,7 +43,7 @@ infix:50 " ↭ " => ModalEquivalent
 
 lemma modal_equivalent_of_bisimilar (Bi : M₁ ⇄ M₂) (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
   intro φ;
-  induction φ using Formula.rec' generalizing x₁ x₂ with
+  induction φ generalizing x₁ x₂ with
   | hatom a => exact Bi.atomic bisx;
   | himp φ ψ ihp ihq =>
     constructor;

@@ -117,7 +117,7 @@ instance : Semantics.Or M.World where
 
 lemma formula_hereditary
   (hw : w ≺ w') : w ⊧ φ → w' ⊧ φ := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom => apply M.Val.hereditary hw;
   | himp =>
     intro hpq v hv;
@@ -138,7 +138,7 @@ lemma iff_subst_self {F : Frame} {V : Valuation F} {x : F.World} (s) :
     fun {_ _} Rwv {_} => formula_hereditary Rwv
   ⟩;
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | hatom a => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp φ ψ ihφ ihψ =>
