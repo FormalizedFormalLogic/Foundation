@@ -94,7 +94,7 @@ lemma GL_S_TFAE :
     replace hA₁ : ∀ φ ∈ A.rflSubformula, r₁ ⊧ φ := by
       intro φ hφ;
       apply Model.extendRoot.inr_satisfies_iff.mp
-        $ (Satisfies.finset_conj_def.mp
+        $ (Satisfies.fconj_def.mp
         $ Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr hA₁) φ hφ;
     have : M₀.IsFiniteTree r₀ := Frame.extendRoot.instIsFiniteTree
     have : Fintype M₀.World := Fintype.ofFinite _
