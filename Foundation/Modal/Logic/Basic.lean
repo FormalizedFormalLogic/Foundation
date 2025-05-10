@@ -64,10 +64,10 @@ protected lemma efq (h : ⊥ ∈ L) : ∀ {φ}, φ ∈ L := by
 
 lemma p_q_Apq (hφ : φ ∈ L) (hψ : ψ ∈ L) : φ ⋏ ψ ∈ L := by
   apply Logic.mdp (φ := ψ);
-  apply Logic.mdp (φ := φ) (ψ := ψ ➝ φ ⋏ ψ);
-  . apply Logic.of_mem_K;
-    exact and₃!;
-  . assumption;
+  . apply Logic.mdp (φ := φ) (ψ := ψ ➝ φ ⋏ ψ);
+    . apply Logic.of_mem_K;
+      exact and₃!;
+    . assumption;
   . assumption;
 
 lemma conj_iffAux {Γ : List (Formula ℕ)} : Γ.conj₂ ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
@@ -86,7 +86,7 @@ lemma conj_iffAux {Γ : List (Formula ℕ)} : Γ.conj₂ ∈ L ↔ ∀ φ ∈ Γ
       apply h;
       simp;
     | @hcons φ Γ hΓ ih =>
-      simp [List.conj₂_cons_nonempty hΓ];
+      simp only [List.conj₂_cons_nonempty hΓ];
       apply p_q_Apq;
       . apply h; tauto;
       . apply ih; tauto;

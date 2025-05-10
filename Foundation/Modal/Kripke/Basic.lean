@@ -207,7 +207,7 @@ lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
 lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by
   induction Γ using List.induction_with_singleton with
   | hcons φ Γ hΓ ih =>
-    suffices x ⊧ φ ∨ x ⊧ ⋁Γ ↔ x ⊧ φ ∨ ∃ a ∈ Γ, x ⊧ a by simpa [List.disj₂_cons_nonempty hΓ];
+    suffices x ⊧ φ ∨ x ⊧ ⋁Γ ↔ x ⊧ φ ∨ ∃ a ∈ Γ, x ⊧ a by simp [List.disj₂_cons_nonempty hΓ];
     constructor;
     . rintro (_ | h)
       . tauto;
@@ -220,7 +220,7 @@ lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by
 lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by
   induction Γ using List.induction_with_singleton with
   | hcons φ Γ hΓ ih =>
-    suffices (x ⊧ φ ∧ x ⊧ ⋀Γ) ↔ (x ⊧ φ ∧ ∀ φ ∈ Γ, x ⊧ φ) by simpa [List.conj₂_cons_nonempty hΓ];
+    suffices (x ⊧ φ ∧ x ⊧ ⋀Γ) ↔ (x ⊧ φ ∧ ∀ φ ∈ Γ, x ⊧ φ) by simp [List.conj₂_cons_nonempty hΓ];
     constructor;
     . intro ⟨_, hΓ⟩;
       constructor;

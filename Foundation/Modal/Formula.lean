@@ -184,8 +184,10 @@ variable [DecidableEq α]
 
 def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
   | ⊥, ψ => by
-    cases ψ using cases' <;>
-    { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
+    cases ψ using cases' <;> .
+      simp only [reduceCtorEq];
+      try { exact isFalse not_false };
+      try { exact isTrue trivial };
   | atom a, ψ => by
     cases ψ <;> try { simp; exact isFalse not_false }
     simp; exact decEq _ _;

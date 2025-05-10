@@ -206,7 +206,7 @@ def E_Id [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] 
 @[simp] def E!_id [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! φ ⭤ φ := ⟨E_Id φ⟩
 
 instance [NegAbbrev F] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
-  negEquiv := by intro φ; simp [Axioms.NegEquiv, NegAbbrev.neg]; apply E_Id;
+  negEquiv := by intro φ; simp only [Axioms.NegEquiv, NegAbbrev.neg]; apply E_Id;
 
 
 def NO [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ ∼⊥ := N_of_CO (C_id ⊥)
@@ -241,8 +241,8 @@ lemma C!_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢! 
 lemma C!_replace [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! φ₁ ➝ φ₂ → 𝓢 ⊢! ψ₁ ➝ ψ₂ := λ h => C!_trans h₁ $ C!_trans h h₂
 
 lemma unprovable_C!_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊬ φ ➝ χ → 𝓢 ⊬ ψ ➝ χ := by
-  contrapose; simp [neg_neg];
-  exact C!_trans hpq;
+  contrapose!;
+  simpa using C!_trans hpq;
 
 def E_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢ φ ⭤ ψ) (h₂ : 𝓢 ⊢ ψ ⭤ χ) : 𝓢 ⊢ φ ⭤ χ := by
   apply E_intro;
@@ -347,7 +347,7 @@ def Conj₂_intro (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢ φ) : �
   |          [] => verum
   |         [ψ] => by apply b; simp;
   | ψ :: χ :: Γ => by
-    simp;
+    simp only [ne_eq, reduceCtorEq, not_false_eq_true, List.conj₂_cons_nonempty];
     exact K_intro (b ψ (by simp)) (Conj₂_intro _ (by aesop))
 lemma Conj₂!_intro (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢! φ) : 𝓢 ⊢! ⋀Γ := ⟨Conj₂_intro Γ (λ φ hp => (b φ hp).some)⟩
 
@@ -356,7 +356,7 @@ def right_Conj₂_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → �
   |          [] => C_of_conseq verum
   |         [ψ] => by apply b; simp;
   | ψ :: χ :: Γ => by
-    simp;
+    simp only [ne_eq, reduceCtorEq, not_false_eq_true, List.conj₂_cons_nonempty];
     apply CK_of_C_of_C (b ψ (by simp)) (right_Conj₂_intro φ _ (fun ψ hq ↦ b ψ (by simp [hq])));
 lemma right_Conj₂!_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ ⋀Γ := ⟨right_Conj₂_intro φ Γ (λ ψ hq => (b ψ hq).some)⟩
 

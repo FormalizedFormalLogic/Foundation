@@ -39,7 +39,7 @@ variable {𝓢 : S} {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ s t : F}
 
 variable [Entailment.Lukasiewicz 𝓢]
 
-def verum : 𝓢 ⊢ ⊤ := by simp [LukasiewiczAbbrev.top]; exact C_id ⊥;
+def verum : 𝓢 ⊢ ⊤ := by simp only [LukasiewiczAbbrev.top, LukasiewiczAbbrev.neg]; exact C_id ⊥;
 instance : HasAxiomVerum 𝓢 := ⟨Lukasiewicz.verum⟩
 
 def dne : 𝓢 ⊢ ∼∼φ ➝ φ := by
@@ -76,7 +76,8 @@ def explodeHyp₂ (h₁ : 𝓢 ⊢ φ ➝ ψ ➝ χ) (h₂ : 𝓢 ⊢ φ ➝ ψ 
 
 def efq : 𝓢 ⊢ ⊥ ➝ φ := by
   have := explodeHyp (𝓢 := 𝓢) (φ := ⊥) (ψ := ⊤) (χ := φ);
-  exact this (by simp; exact imply₁) (by simp; exact imply₁);
+  simp only [LukasiewiczAbbrev.top, LukasiewiczAbbrev.neg] at this;
+  exact this imply₁ imply₁;
 instance : HasAxiomEFQ 𝓢 := ⟨λ φ => Lukasiewicz.efq (φ := φ)⟩
 
 def CCCCC (h : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ ψ ➝ φ ➝ χ := by
@@ -105,7 +106,7 @@ def C_trans₁ : 𝓢 ⊢ (φ ➝ ψ) ➝ (ψ ➝ χ) ➝ (φ ➝ χ) := CCCCC C
 def dhypBoth (h : 𝓢 ⊢ ψ ➝ χ) : 𝓢 ⊢ (φ ➝ ψ) ➝ (φ ➝ χ) := imply₂ ⨀ (C_of_conseq $ h)
 
 def explode₂₁ : 𝓢 ⊢ ∼φ ➝ φ ➝ ψ := by
-  simp;
+  simp only [LukasiewiczAbbrev.neg];
   exact dhypBoth efq;
 
 def explode₁₂ : 𝓢 ⊢ φ ➝ ∼φ ➝ ψ := CCCCC explode₂₁
@@ -156,7 +157,7 @@ def orInst₁ : 𝓢 ⊢ φ ➝ φ ⋎ ψ := by
   exact explode₁₂;
 
 def orInst₂ : 𝓢 ⊢ ψ ➝ φ ⋎ ψ := by
-  simp [LukasiewiczAbbrev.or];
+  simp only [LukasiewiczAbbrev.or, LukasiewiczAbbrev.neg];
   exact imply₁;
 
 instance : HasAxiomOrInst 𝓢 := ⟨λ φ ψ => Lukasiewicz.orInst₁ (φ := φ) (ψ := ψ), λ φ ψ => Lukasiewicz.orInst₂ (φ := φ) (ψ := ψ)⟩

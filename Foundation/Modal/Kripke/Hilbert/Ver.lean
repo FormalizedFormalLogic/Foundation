@@ -49,7 +49,7 @@ instance complete_finite_isolated : Complete (Hilbert.Ver) Kripke.FrameClass.fin
     constructor;
     trans Unit;
     . refine ⟨λ _ => (), λ _ => ⟨r, by tauto⟩, ?_, ?_⟩
-      . simp [Function.LeftInverse];
+      . simp only [Function.LeftInverse, Subtype.forall, Subtype.mk.injEq, forall_eq_or_imp, true_and];
         intro x Rrx;
         exfalso;
         induction Rrx with

@@ -17,13 +17,13 @@ lemma serial_def : Serial rel ↔ (Geachean ⟨0, 0, 1, 1⟩ rel) := by simp [Ge
 lemma reflexive_def : Reflexive rel ↔ (Geachean ⟨0, 0, 1, 0⟩ rel) := by simp [Geachean, Reflexive];
 
 lemma symmetric_def : Symmetric rel ↔ (Geachean ⟨0, 1, 0, 1⟩ rel) := by
-  simp [Geachean, Symmetric];
+  simp only [Symmetric, Geachean, Rel.iterate.iff_zero, Rel.iterate.iff_succ, exists_eq_right, exists_eq_left', and_imp];
   constructor;
   . rintro h x y z rfl Rxz; exact h Rxz;
   . intro h x y Rxy; exact h rfl Rxy;
 
 lemma transitive_def : Transitive rel ↔ (Geachean ⟨0, 2, 1, 0⟩ rel) := by
-  simp [Geachean, Transitive];
+  simp only [Transitive, Geachean, Rel.iterate.iff_zero, Rel.iterate.iff_succ, exists_eq_right, exists_eq_right', and_imp, forall_exists_index];
   constructor;
   . rintro h x y z rfl w Rxw Rwz; exact h Rxw Rwz;
   . intro h x y z Rxy Ryz; exact h rfl y Rxy Ryz
@@ -33,7 +33,7 @@ lemma euclidean_def : Euclidean rel ↔ (Geachean ⟨1, 1, 0, 1⟩ rel) := by si
 lemma confluent_def : Confluent rel ↔ (Geachean ⟨1, 1, 1, 1⟩ rel) := by simp [Geachean, Confluent];
 
 lemma coreflexive_def : Coreflexive rel ↔ (Geachean ⟨0, 1, 0, 0⟩ rel) := by
-  simp [Geachean, Coreflexive];
+  simp only [Coreflexive, Geachean, Rel.iterate.iff_zero, Rel.iterate.iff_succ, exists_eq_right, exists_eq_left', and_imp];
   constructor;
   . rintro h x y z rfl Rxz; have := h Rxz; tauto;
   . intro h x y Rxy; have := h rfl Rxy; tauto;
@@ -43,7 +43,7 @@ lemma functional_def : Functional rel ↔ (Geachean ⟨1, 1, 0, 0⟩ rel) := by
   constructor <;> tauto;
 
 lemma dense_def : Dense rel ↔ (Geachean ⟨0, 1, 2, 0⟩ rel) := by
-  simp [Geachean, Dense];
+  simp only [Dense, Geachean, Rel.iterate.iff_zero, Rel.iterate.iff_succ, exists_eq_right, exists_eq_right', and_imp];
   constructor;
   . rintro h x y z rfl Rxz; exact h Rxz;
   . intro h x y Rxy; exact h rfl Rxy;

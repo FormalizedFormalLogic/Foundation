@@ -29,14 +29,16 @@ lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (φᵇ)) ↔ (Satis
       apply ihq.mpr;
       exact h $ ihp.mp hp;
   | hbox φ ih =>
-    simp [Formula.BoxdotTranslation, Box.boxdot, Satisfies];
+    dsimp [Formula.BoxdotTranslation];
     constructor;
-    . rintro ⟨h₁, h₂⟩;
+    . intro h;
+      replace ⟨h₁, h₂⟩ := Satisfies.and_def.mp h;
       intro y Rxy;
       rcases (Relation.reflGen_iff _ _ _ |>.mp Rxy) with (rfl | Rxy);
       . apply ih.mp h₁;
       . exact ih.mp $ h₂ y Rxy;
     . rintro h;
+      apply Satisfies.and_def.mpr;
       constructor;
       . exact ih.mpr $ @h x ReflGen.refl;
       . intro y Rxy;

@@ -39,9 +39,9 @@ lemma Finite.exists_ne_map_eq_of_infinite_lt {α β} [LinearOrder α] [Infinite 
 
 
 lemma antisymm_of_weaklyConverseWellFounded : WeaklyConverseWellFounded rel → AntiSymmetric rel := by
-  contrapose;
-  simp [AntiSymmetric];
-  intro x y Rxy Ryz hxy;
+  dsimp [AntiSymmetric, WeaklyConverseWellFounded];
+  contrapose!;
+  rintro ⟨x, y, Rxy, Ryz, hxy⟩;
   apply ConverseWellFounded.iff_has_max.not.mpr;
   push_neg;
   use {x, y};
@@ -66,9 +66,8 @@ lemma weaklyConverseWellFounded_of_finite_trans_antisymm (hFin : Finite α) (R_t
     replace hWCWF := ConverseWellFounded.iff_has_max.not.mp hWCWF;
     push_neg at hWCWF;
     obtain ⟨f, hf⟩ := dependent_choice hWCWF; clear hWCWF;
-    simp [Relation.IrreflGen] at hf;
 
-    simp [AntiSymmetric];
+    simp only [AntiSymmetric, not_forall, Classical.not_imp];
     obtain ⟨i, j, hij, e⟩ := Finite.exists_ne_map_eq_of_infinite_lt f;
     use (f i), (f (i + 1));
     have ⟨hi₁, hi₂⟩ := hf i;
