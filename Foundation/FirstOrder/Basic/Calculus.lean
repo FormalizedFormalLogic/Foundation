@@ -1,3 +1,4 @@
+import Mathlib.Data.List.MinMax
 import Foundation.Logic.Calculus
 import Foundation.FirstOrder.Basic.Syntax.Rew
 

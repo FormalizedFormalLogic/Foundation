@@ -341,12 +341,3 @@ lemma bold_sigma_one_completeness' {n} {σ : Semisentence ℒₒᵣ n} (hσ : Hi
   simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (φ := σ) hσ (f := Empty.elim) (e := e) h
 
 end LO.Arith
-
-namespace List.Vector
-
-variable {α : Type*}
-
-@[simp] lemma nil_get (v : Vector α 0) : v.get = ![] := by
-  ext i; exact i.elim0
-
-end List.Vector

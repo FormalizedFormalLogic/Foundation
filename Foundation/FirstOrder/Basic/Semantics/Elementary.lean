@@ -1,4 +1,5 @@
 import Foundation.FirstOrder.Basic.Semantics.Semantics
+import Mathlib.Data.SetLike.Basic
 
 namespace LO
 

@@ -1,4 +1,5 @@
 import Foundation.Logic.LogicSymbol
+import Mathlib.Data.Finset.Preimage
 
 open Function
 

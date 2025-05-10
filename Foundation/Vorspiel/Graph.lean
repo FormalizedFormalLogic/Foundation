@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.Vorspiel.Vorspiel
+import Foundation.Vorspiel.Vorspiel
 
 namespace Function
 

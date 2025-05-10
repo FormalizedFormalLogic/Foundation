@@ -1,5 +1,6 @@
 import Foundation.Logic.Predicate.Term
 import Foundation.Logic.Predicate.Quantifier
+import Mathlib.Data.Finset.Max
 
 /-!
 # Formulas of first-order logic

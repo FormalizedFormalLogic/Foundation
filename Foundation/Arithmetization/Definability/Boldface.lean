@@ -1,5 +1,6 @@
 import Foundation.Arithmetization.Definability.Hierarchy
-import Foundation.Arithmetization.Vorspiel.Graph
+import Foundation.Vorspiel.Graph
+import Foundation.Vorspiel.Fin.Supplemental
 
 namespace LO.FirstOrder.Arith
 

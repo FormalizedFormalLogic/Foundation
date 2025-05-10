@@ -1,5 +1,11 @@
 import Foundation.Vorspiel.Vorspiel
 
+
+class Exp (α : Type*) where
+  exp : α → α
+export Exp (exp)
+
+
 namespace LO
 
 /-- Coding objects into syntactic objects (e.g. natural numbers, first-order terms) -/
