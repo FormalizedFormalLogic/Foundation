@@ -214,6 +214,20 @@ instance [hH : H.HasH] : Entailment.HasAxiomH H where
     . use (λ b => if hH.p = b then φ else (.atom b));
       simp;
 
+
+class HasZ (H : Hilbert α) where
+  p : α
+  mem_Z : Axioms.Z (.atom p) ∈ H.axioms := by tauto;
+
+instance [hZ : H.HasZ] : Entailment.HasAxiomZ H where
+  Z φ := by
+    apply maxm;
+    use Axioms.Z (.atom hZ.p);
+    constructor;
+    . exact hZ.mem_Z;
+    . use (λ b => if hZ.p = b then φ else (.atom b));
+      simp;
+
 end
 
 protected abbrev KT : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}⟩
@@ -407,6 +421,14 @@ instance : (Hilbert.KTc).HasK where p := 0; q := 1;
 instance : (Hilbert.KTc).HasTc where p := 0
 instance : Entailment.Modal.KTc (Hilbert.KTc) where
 
+
+protected abbrev KD4Point3Z : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Four (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1), Axioms.Z (.atom 0)}⟩
+instance : (Hilbert.KD4Point3Z).HasK where p := 0; q := 1;
+instance : (Hilbert.KD4Point3Z).HasD where p := 0
+instance : (Hilbert.KD4Point3Z).HasFour where p := 0
+instance : (Hilbert.KD4Point3Z).HasWeakPoint3 where p := 0; q := 1;
+instance : (Hilbert.KD4Point3Z).HasZ where p := 0
+instance : Entailment.Modal.KD4Point3Z (Hilbert.KD4Point3Z) where
 
 protected abbrev N : Hilbert ℕ := ⟨{}⟩
 

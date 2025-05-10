@@ -442,6 +442,26 @@ instance (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH�
 end
 
 
+
+class HasAxiomZ (𝓢 : S) where
+  Z (φ : F) : 𝓢 ⊢ Axioms.Z φ
+
+section
+
+variable [HasAxiomZ 𝓢]
+
+def axiomZ : 𝓢 ⊢ □(□φ ➝ φ) ➝ (◇□φ ➝ □φ) := HasAxiomZ.Z _
+@[simp] lemma axiomZ! : 𝓢 ⊢! □(□φ ➝ φ) ➝ (◇□φ ➝ □φ) := ⟨axiomZ⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomZ Γ := ⟨fun _ ↦ FiniteContext.of axiomZ⟩
+instance (Γ : Context F 𝓢) : HasAxiomZ Γ := ⟨fun _ ↦ Context.of axiomZ⟩
+
+end
+
+
+
 section
 
 variable [BasicModalLogicalConnective F] [DecidableEq F]
@@ -451,13 +471,13 @@ variable {𝓢 : S}
 instance [Entailment.Minimal 𝓢] [ModalDeMorgan F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
   intro φ;
   simp only [Axioms.DiaDuality, ModalDeMorgan.box, DeMorgan.neg];
-  apply iffId;
+  apply E_Id;
 ⟩
 
 instance [Entailment.Minimal 𝓢] [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
   intro φ;
   simp only [Axioms.DiaDuality, DiaAbbrev.dia_abbrev];
-  apply iffId;
+  apply E_Id;
 ⟩
 
 instance [ModusPonens 𝓢] [HasAxiomT 𝓢] : Unnecessitation 𝓢 := ⟨by
@@ -513,6 +533,7 @@ protected class Ver extends Entailment.Modal.K 𝓢, HasAxiomVer 𝓢
 protected class K4 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢
 protected class K4Point2 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint2 𝓢
 protected class K4Point3 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢
+protected class KD4Point3Z extends Entailment.Modal.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢, HasAxiomZ 𝓢
 
 protected class K5 extends Entailment.Modal.K 𝓢, HasAxiomFive 𝓢
 
@@ -553,7 +574,7 @@ instance [Disjunctive 𝓢] [Unnecessitation 𝓢] : ModalDisjunctive 𝓢 where
     . right; exact unnec! h;
 
 private lemma unnec_of_mdp_aux [ModalDisjunctive 𝓢] (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! φ := by
-    have : 𝓢 ⊢! □φ ⋎ □φ := or₁'! h;
+    have : 𝓢 ⊢! □φ ⋎ □φ := A!_intro_left h;
     rcases modal_disjunctive this with (h | h) <;> tauto;
 
 noncomputable instance unnecessitation_of_modalDisjunctive [ModalDisjunctive 𝓢] : Unnecessitation 𝓢 where

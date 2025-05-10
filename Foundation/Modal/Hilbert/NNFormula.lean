@@ -13,75 +13,75 @@ open
 
 lemma iff_neg {φ : NNFormula _} : Hilbert.K ⊢! ∼(φ.toFormula) ⭤ (∼φ).toFormula := by
   induction φ using NNFormula.rec' with
-  | hNatom a => apply and₃'! <;> simp;
+  | hNatom a => apply K!_intro <;> simp;
   | hAnd φ ψ ihφ ihψ =>
-    apply and₃'!;
+    apply K!_intro;
     . apply deduct'!;
-      apply or_replace'! $ demorgan₄'! $ show [∼(φ.toFormula ⋏ ψ.toFormula)] ⊢[Hilbert.K]! ∼(φ.toFormula ⋏ ψ.toFormula) by simp;
-      . apply of'! $ and₁'! ihφ;
-      . apply of'! $ and₁'! ihψ;
+      apply A!_replace $ ANN!_of_NK! $ show [∼(φ.toFormula ⋏ ψ.toFormula)] ⊢[Hilbert.K]! ∼(φ.toFormula ⋏ ψ.toFormula) by simp;
+      . apply of'! $ K!_left ihφ;
+      . apply of'! $ K!_left ihψ;
     . apply deduct'!;
-      apply demorgan₁'!;
-      apply or_replace'! $ show [(∼φ).toFormula ⋎ (∼ψ).toFormula] ⊢[Hilbert.K]! (∼φ).toFormula ⋎ (∼ψ).toFormula by simp;
-      . apply of'! $ and₂'! ihφ;
-      . apply of'! $ and₂'! ihψ;
+      apply NK!_of_ANN!;
+      apply A!_replace $ show [(∼φ).toFormula ⋎ (∼ψ).toFormula] ⊢[Hilbert.K]! (∼φ).toFormula ⋎ (∼ψ).toFormula by simp;
+      . apply of'! $ K!_right ihφ;
+      . apply of'! $ K!_right ihψ;
   | hOr φ ψ ihφ ihψ =>
-    apply and₃'!;
+    apply K!_intro;
     . apply deduct'!;
-      apply and_replace'! $ demorgan₃'! $ show [∼(φ.toFormula ⋎ ψ.toFormula)] ⊢[Hilbert.K]! (∼(φ.toFormula ⋎ ψ.toFormula)) by simp;
-      . apply of'! $ and₁'! ihφ;
-      . apply of'! $ and₁'! ihψ;
+      apply K!_replace $ KNN!_of_NA! $ show [∼(φ.toFormula ⋎ ψ.toFormula)] ⊢[Hilbert.K]! (∼(φ.toFormula ⋎ ψ.toFormula)) by simp;
+      . apply of'! $ K!_left ihφ;
+      . apply of'! $ K!_left ihψ;
     . apply deduct'!;
-      apply demorgan₂'!;
-      apply and_replace'! $ show [(∼φ).toFormula ⋏ (∼ψ).toFormula] ⊢[Hilbert.K]! (∼φ).toFormula ⋏ (∼ψ).toFormula by simp;
-      . apply of'! $ and₂'! ihφ;
-      . apply of'! $ and₂'! ihψ;
+      apply NA!_of_KNN!;
+      apply K!_replace $ show [(∼φ).toFormula ⋏ (∼ψ).toFormula] ⊢[Hilbert.K]! (∼φ).toFormula ⋏ (∼ψ).toFormula by simp;
+      . apply of'! $ K!_right ihφ;
+      . apply of'! $ K!_right ihψ;
   | hBox φ ih =>
-    apply and₃'!;
-    . apply imp_trans''! ?_ $ and₂'! $ dia_duality!;
-      apply contra₀'!;
+    apply K!_intro;
+    . apply C!_trans ?_ $ K!_right $ dia_duality!;
+      apply contra!;
       apply axiomK'!;
       apply nec!;
-      apply contra₂'!;
-      exact and₁'! ih;
-    . apply contra₁'!;
-      apply imp_trans''! (and₁'! $ box_duality!) ?_
-      apply contra₀'!;
+      apply CN!_of_CN!_left;
+      exact K!_left ih;
+    . apply CN!_of_CN!_right;
+      apply C!_trans (K!_left $ box_duality!) ?_
+      apply contra!;
       apply diaK'!;
-      exact and₂'! ih;
+      exact K!_right ih;
   | hDia φ ih =>
-    apply and₃'!;
-    . apply imp_trans''! ?_ (and₂'! $ box_duality!);
-      apply contra₀'!;
+    apply K!_intro;
+    . apply C!_trans ?_ (K!_right $ box_duality!);
+      apply contra!;
       apply diaK'!;
-      apply contra₂'!;
-      exact and₁'! ih;
-    . apply contra₁'!
-      apply imp_trans''! (and₁'! $ dia_duality!) ?_;
-      apply contra₀'!;
+      apply CN!_of_CN!_left;
+      exact K!_left ih;
+    . apply CN!_of_CN!_right
+      apply C!_trans (K!_left $ dia_duality!) ?_;
+      apply contra!;
       apply axiomK'!;
       apply nec!;
-      exact and₂'! ih;
+      exact K!_right ih;
   | _ => simp;
 
 lemma exists_iff {φ} : ∃ ψ : NNFormula _, Hilbert.K ⊢! φ ⭤ ψ.toFormula := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom a => use (.atom a); simp;
   | hfalsum => use ⊥; simp;
   | himp φ ψ ihφ ihψ =>
     obtain ⟨φ', hφ'⟩ := ihφ;
     obtain ⟨ψ', hψ'⟩ := ihψ;
     use φ' ➝ ψ';
-    apply and₃'!;
+    apply K!_intro;
     . apply deduct'!;
-      apply or_replace'! $ not_or_of_imply'! (show [φ ➝ ψ] ⊢[Hilbert.K]! φ ➝ ψ by simp;);
+      apply A!_replace $ AN!_of_C! (show [φ ➝ ψ] ⊢[Hilbert.K]! φ ➝ ψ by simp;);
       . apply of'!;
-        exact imp_trans''! (contra₀'! $ (and₂'! $ hφ')) $ and₁'! iff_neg
-      . exact of'! $ and₁'! hψ';
-    . apply or₃''!;
-      . apply imp_trans''! (imp_trans''! (and₂'! $ iff_neg) (contra₀'! $ and₁'! hφ'));
-        exact efq_imply_not₁!;
-      . exact imp_trans''! (and₂'! $ hψ') imply₁!;
+        exact C!_trans (contra! $ (K!_right $ hφ')) $ K!_left iff_neg
+      . exact of'! $ K!_left hψ';
+    . apply left_A!_intro;
+      . apply C!_trans (C!_trans (K!_right $ iff_neg) (contra! $ K!_left hφ'));
+        exact CNC!;
+      . exact C!_trans (K!_right $ hψ') imply₁!;
   | hbox φ ihφ =>
     obtain ⟨ψ, ih⟩ := ihφ;
     use □ψ;
@@ -90,7 +90,7 @@ lemma exists_iff {φ} : ∃ ψ : NNFormula _, Hilbert.K ⊢! φ ⭤ ψ.toFormula
 lemma exists_of_provable {φ} (h : Hilbert.K ⊢! φ) : ∃ ψ : NNFormula _, Hilbert.K ⊢! ψ.toFormula := by
   obtain ⟨ψ, h₂⟩ := exists_iff (φ := φ);
   use ψ;
-  exact and₁'! h₂ ⨀ h;
+  exact K!_left h₂ ⨀ h;
 
 /-
 lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
@@ -109,7 +109,7 @@ lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
     obtain ⟨Γ, hΓ⟩ := ihφ $ NNFormula.isModalCNFPart.of_degree_zero hφ;
     obtain ⟨Δ, hΔ⟩ := ihψ $ NNFormula.isModalCNFPart.of_degree_zero hψ;
     use Γ ++ Δ;
-    apply and₃'!;
+    apply K!_intro;
     . sorry;
     . sorry;
   | hOr φ ψ ihφ ihψ =>
@@ -118,18 +118,18 @@ lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
     obtain ⟨Δ, hΔ⟩ := ihψ hψ;
     use Γ ++ Δ;
     simp only [List.map_append, List.map_subtype];
-    apply and₃'!;
-    . apply or₃''!;
-      . apply imp_trans''! (and₁'! hΓ) ?_;
-        apply imp_trans''! ?_ (and₂'! iff_concact_disj!)
+    apply K!_intro;
+    . apply left_A!_intro;
+      . apply C!_trans (K!_left hΓ) ?_;
+        apply C!_trans ?_ (K!_right EDisj₂AppendADisj₂Disj₂!)
         simp;
-      . apply imp_trans''! (and₁'! hΔ) ?_;
-        apply imp_trans''! ?_ (and₂'! iff_concact_disj!)
+      . apply C!_trans (K!_left hΔ) ?_;
+        apply C!_trans ?_ (K!_right EDisj₂AppendADisj₂Disj₂!)
         simp;
-    . apply imp_trans''! (and₁'! iff_concact_disj!) ?_;
-      apply or_replace!;
-      . simpa using and₂'! hΓ;
-      . simpa using and₂'! hΔ;
+    . apply C!_trans (K!_left EDisj₂AppendADisj₂Disj₂!) ?_;
+      apply CAA!_of_C!_of_C!;
+      . simpa using K!_right hΓ;
+      . simpa using K!_right hΔ;
 
 lemma exists_CNFPart_list {φ : NNFormula _} (φ_CNFP : φ.isModalCNFPart)
   : ∃ Γ : List { φ : NNFormula ℕ // φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0 }, Hilbert.K ⊢! φ.toFormula ⭤ ⋁(Γ.map (·.1)) := by
@@ -200,13 +200,13 @@ theorem exists_CNF_DNF {φ : NNFormula _}
     . use (φ₁ ⋏ ψ₁);
       constructor;
       . tauto;
-      . apply and₃'!;
-        . apply and_replace!
-          . exact and₁'! hφ₁;
-          . exact and₁'! hψ₁;
-        . apply and_replace!;
-          . exact and₂'! hφ₁;
-          . exact and₂'! hψ₁;
+      . apply K!_intro;
+        . apply CKK!_of_C!_of_C!
+          . exact K!_left hφ₁;
+          . exact K!_left hψ₁;
+        . apply CKK!_of_C!_of_C!;
+          . exact K!_right hφ₁;
+          . exact K!_right hψ₁;
     . obtain ⟨Γ, hΓ⟩ := exists_CNF_list φ₁_CNF;
       obtain ⟨Δ, hΔ⟩ := exists_CNF_list ψ₁_CNF;
       sorry;
@@ -218,13 +218,13 @@ theorem exists_CNF_DNF {φ : NNFormula _}
     . use (φ₂ ⋎ ψ₂);
       constructor;
       . tauto;
-      . apply and₃'!;
-        . apply or_replace!
-          . exact and₁'! hφ₂;
-          . exact and₁'! hψ₂;
-        . apply or_replace!;
-          . exact and₂'! hφ₂;
-          . exact and₂'! hψ₂;
+      . apply K!_intro;
+        . apply CAA!_of_C!_of_C!
+          . exact K!_left hφ₂;
+          . exact K!_left hψ₂;
+        . apply CAA!_of_C!_of_C!;
+          . exact K!_right hφ₂;
+          . exact K!_right hψ₂;
 -/
 
 lemma exists_CNF (φ : NNFormula _)

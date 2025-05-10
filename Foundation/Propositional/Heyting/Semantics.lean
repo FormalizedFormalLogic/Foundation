@@ -114,7 +114,7 @@ lemma sound {φ : Formula α} (d : H ⊢! φ) : mod H ⊧ φ := by
   case implyK φ ψ χ => simp [himp_himp_inf_himp_inf_le]
   case andElimL => simp
   case andElimR => simp
-  case andIntro => simp
+  case K_intro => simp
   case orIntroL => simp
   case orIntroR => simp
   case orElim => simp [himp_inf_himp_inf_sup_le]
@@ -133,7 +133,7 @@ def lindenbaum : HeytingSemantics α where
 
 
 lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hand φ ψ ihp ihq => simp only [hVal_and, ihp, ihq]; rw [inf_def];
   | hor _ _ ihp ihq => simp only [hVal_or, ihp, ihq]; rw [sup_def];
   | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def];

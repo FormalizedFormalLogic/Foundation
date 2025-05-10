@@ -191,7 +191,7 @@ instance [Cut F K] : Entailment.Cl 𝓚 where
       let d : 𝓚 ⟹ [φ ⋏ ∼ψ, ψ] := and (wk dp <| by simp) (close ψ)
       ofEq d (by simp)
     cut dpq dnq
-  neg_equiv φ := ofEq
+  negEquiv φ := ofEq
     (show 𝓚 ⊢ (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       and (or <| rotate₁ <| or <| close φ) (or <| and (close φ) verum'))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
@@ -266,10 +266,10 @@ def AppendOfDisjCons [Cut F K] {Γ Δ} (d : 𝓚 ⟹ Γ.disj :: Δ) : 𝓚 ⟹ �
     have : 𝓚 ⟹ Γ.disj :: φ :: Δ := wk (orReversion d) (by simp)
     wk (AppendOfDisjCons this) (by simp)
 
-def derivationOfProof [Cut F K] (d : 𝓚 ⊢ Γ.disj) : 𝓚 ⟹ Γ := ofEq (AppendOfDisjCons d) (by simp)
+def derivatioNOfProof [Cut F K] (d : 𝓚 ⊢ Γ.disj) : 𝓚 ⟹ Γ := ofEq (AppendOfDisjCons d) (by simp)
 
 lemma derivable_iff_provable_disj [Cut F K] : 𝓚 ⟹! Γ ↔ 𝓚 ⊢! Γ.disj :=
-  ⟨fun h ↦ ⟨proofOfDerivation h.get⟩, fun h ↦ ⟨derivationOfProof h.get⟩⟩
+  ⟨fun h ↦ ⟨proofOfDerivation h.get⟩, fun h ↦ ⟨derivatioNOfProof h.get⟩⟩
 
 end Tait
 

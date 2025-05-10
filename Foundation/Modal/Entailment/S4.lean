@@ -9,15 +9,15 @@ variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailme
 variable {𝓢 : S} [Entailment.Modal.S4 𝓢]
 
 def iff_box_boxdot : 𝓢 ⊢ □φ ⭤ ⊡φ := by
-  apply iffIntro;
-  . exact implyRightAnd (axiomT) (impId _);
+  apply E_intro;
+  . exact right_K_intro (axiomT) (C_id _);
   . exact and₂;
 @[simp] lemma iff_box_boxdot! : 𝓢 ⊢! □φ ⭤ ⊡φ := ⟨iff_box_boxdot⟩
 
 def iff_dia_diadot : 𝓢 ⊢ ◇φ ⭤ ⟐φ := by
-  apply iffIntro;
+  apply E_intro;
   . exact or₂;
-  . exact or₃'' diaTc (impId _)
+  . exact left_A_intro diaTc (C_id _)
 @[simp] lemma iff_dia_diadot! : 𝓢 ⊢! ◇φ ⭤ ⟐φ := ⟨iff_dia_diadot⟩
 
 end LO.Entailment

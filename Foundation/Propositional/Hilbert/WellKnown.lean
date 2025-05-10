@@ -71,6 +71,29 @@ instance [DecidableEq α] [hDummett : H.HasDummett] : Entailment.HasAxiomDummett
       );
       simp [hDummett.ne_pq];
 
+class HasKrieselPutnam (H : Hilbert α) where
+  p : α
+  q : α
+  r : α
+  ne_pq : p ≠ q := by tauto;
+  ne_pr : p ≠ r := by tauto;
+  ne_qr : q ≠ r := by tauto;
+  mem_kp : Axioms.KrieselPutnam (.atom p) (.atom q) (.atom r) ∈ H.axioms := by tauto;
+
+instance [DecidableEq α] [hKrieselPutnam : H.HasKrieselPutnam] : Entailment.HasAxiomKrieselPutnam H where
+  krieselputnam φ ψ χ := by
+    apply maxm;
+    use Axioms.KrieselPutnam (.atom hKrieselPutnam.p) (.atom hKrieselPutnam.q) (.atom hKrieselPutnam.r);
+    constructor;
+    . exact hKrieselPutnam.mem_kp;
+    . use (λ b =>
+        if hKrieselPutnam.p = b then φ
+        else if hKrieselPutnam.q = b then ψ
+        else if hKrieselPutnam.r = b then χ
+        else (.atom b)
+      );
+      simp [hKrieselPutnam.ne_pq, hKrieselPutnam.ne_pr, hKrieselPutnam.ne_qr];
+
 end
 
 
@@ -100,6 +123,13 @@ instance : Hilbert.LC.FiniteAxiomatizable where
 instance : Hilbert.LC.HasEFQ where p := 0;
 instance : Hilbert.LC.HasDummett where p := 0; q := 1;
 instance : Entailment.LC (Hilbert.LC) where
+
+
+protected abbrev KP : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}⟩
+instance : Hilbert.KP.FiniteAxiomatizable where
+instance : Hilbert.KP.HasEFQ where p := 0;
+instance : Hilbert.KP.HasKrieselPutnam where p := 0; q := 1; r := 2;
+instance : Entailment.KP (Hilbert.KP) where
 
 end
 

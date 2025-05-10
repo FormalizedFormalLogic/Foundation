@@ -18,8 +18,8 @@ variable {φ ψ : Formula ℕ}
 abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.Frame where
   World := ComplementClosedConsistentFinset Hilbert.GL φ.subformulas
   Rel X Y :=
-    (∀ ψ ∈ □''⁻¹φ.subformulas, □ψ ∈ X → (ψ ∈ Y ∧ □ψ ∈ Y)) ∧
-    (∃ χ ∈ □''⁻¹φ.subformulas, □χ ∉ X ∧ □χ ∈ Y)
+    (∀ ψ ∈ φ.subformulas.prebox, □ψ ∈ X → (ψ ∈ Y ∧ □ψ ∈ Y)) ∧
+    (∃ χ ∈ φ.subformulas.prebox, □χ ∉ X ∧ □χ ∈ Y)
 
 namespace miniCanonicalFrame
 
@@ -77,31 +77,31 @@ lemma truthlemma_lemma2
     simpa using hΓ₂ χ hr;
 
   by_contra hC;
-  have : Γ₁ ⊢[_]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ and_imply_iff_imply_imply'!.mp hC;
-  have : Γ₁ ⊢[_]! (□ψ ⋏ -ψ) ➝ ⊥ := imp_trans''! (by
+  have : Γ₁ ⊢[_]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ CK!_iff_CC!.mp hC;
+  have : Γ₁ ⊢[_]! (□ψ ⋏ -ψ) ➝ ⊥ := C!_trans (by
     suffices Γ₁ ⊢[Hilbert.GL]! ⋀[□ψ, -ψ] ➝ ⋀Γ₂ by
       simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
-    apply conjconj_subset!;
+    apply CConj₂Conj₂!_of_subset;
     simpa using hΓ₂;
   ) this;
-  have : Γ₁ ⊢[_]! □ψ ➝ -ψ ➝ ⊥ := and_imply_iff_imply_imply'!.mp this;
+  have : Γ₁ ⊢[_]! □ψ ➝ -ψ ➝ ⊥ := CK!_iff_CC!.mp this;
   have : Γ₁ ⊢[Hilbert.GL]! □ψ ➝ ψ := by
     rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
     . rw [hp] at this;
-      exact imp_trans''! this dne!;
+      exact C!_trans this dne!;
     . simpa only [complement] using this;
-  have : (□'Γ₁) ⊢[_]! □(□ψ ➝ ψ) := contextual_nec! this;
-  have : (□'Γ₁) ⊢[_]! □ψ := axiomL! ⨀ this;
-  have : _ ⊢! ⋀□'Γ₁ ➝ □ψ := provable_iff.mp this;
-  have : _ ⊢! ⋀□'(X.1.prebox ∪ X.1.prebox.box |>.toList) ➝ □ψ := imp_trans''! (conjconj_subset! (by
+  have : (Γ₁.box) ⊢[_]! □(□ψ ➝ ψ) := contextual_nec! this;
+  have : (Γ₁.box) ⊢[_]! □ψ := axiomL! ⨀ this;
+  have : _ ⊢! ⋀Γ₁.box ➝ □ψ := provable_iff.mp this;
+  have : _ ⊢! ⋀(X.1.prebox ∪ X.1.prebox.box |>.toList).box ➝ □ψ := C!_trans (CConj₂Conj₂!_of_subset (by
     intro χ hχ;
-    obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hχ;
+    obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hχ;
     apply List.box_mem_of;
     simp_all;
   )) this;
-  have : _ ⊢! ⋀□'(X.1.prebox.toList) ➝ □ψ := imp_trans''! (conjconj_provable! (by
+  have : _ ⊢! ⋀(X.1.prebox.toList).box ➝ □ψ := C!_trans (CConj₂Conj₂!_of_provable (by
     intro χ hχ;
-    obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hχ;
+    obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hχ;
     replace hξ : □ξ ∈ ↑X ∨ ∃ a, □a ∈ ↑X ∧ □a = ξ := by simpa using hξ;
     rcases hξ with (hξ | ⟨ξ, hξ, rfl⟩);
     . apply FiniteContext.by_axm!;
@@ -114,10 +114,10 @@ lemma truthlemma_lemma2
   )) this;
   have : X *⊢[Hilbert.GL]! □ψ := by
     apply Context.provable_iff.mpr;
-    use □'X.1.prebox.toList;
+    use X.1.prebox.toList.box;
     constructor;
     . intro ψ hψ;
-      obtain ⟨ξ, hξ, rfl⟩ := List.exists_of_box hψ;
+      obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hψ;
       simp_all;
     . assumption;
   have : □ψ ∈ X := membership_iff hq₁ |>.mpr this;
@@ -126,7 +126,7 @@ lemma truthlemma_lemma2
 -- TODO: `subformula` tactic cannot handle, I don't know why.
 lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformulas) :
   Satisfies (miniCanonicalModel φ) X ψ ↔ ψ ∈ X := by
-  induction ψ using Formula.rec' generalizing X with
+  induction ψ generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>
@@ -176,7 +176,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
     . intro h Y RXY;
       apply ih (by subformula) |>.mpr;
       refine RXY.1 ψ ?_ h |>.1;
-      assumption;
+      simpa;
 
 instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_trans_irrefl := ⟨by
   intro φ;

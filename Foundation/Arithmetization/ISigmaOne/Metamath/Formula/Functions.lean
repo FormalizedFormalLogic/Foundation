@@ -214,9 +214,9 @@ section iff
   simp [Language.iff]
   intros; simp_all
 
-@[simp] lemma lt_iff_left (p q : V) : p < L.iff p q := lt_trans (lt_or_right _ _) (lt_and_right _ _)
+@[simp] lemma lt_iff_left (p q : V) : p < L.iff p q := lt_trans (lt_or_right _ _) (lt_K!_right _ _)
 
-@[simp] lemma lt_iff_right (p q : V) : q < L.iff p q := lt_trans (lt_or_right _ _) (lt_and_left _ _)
+@[simp] lemma lt_iff_right (p q : V) : q < L.iff p q := lt_trans (lt_or_right _ _) (lt_K!_left _ _)
 
 section
 

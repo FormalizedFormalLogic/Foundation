@@ -29,8 +29,8 @@ lemma validate_WeakPoint3_of_weakConnected [IsWeakConnected _ F] : F ⊧ (Axioms
     subst hC;
     contradiction;
   rcases IsWeakConnected.weak_connected ⟨Rxy, Rxz, nyz⟩ with (Ryz | Rzy);
-  . have := hz _ Ryz; contradiction;
-  . have := hy _ Rzy; contradiction;
+  . apply nhz0; exact hz _ Ryz;
+  . apply nhy1; exact hy _ Rzy;
 
 lemma weakConnected_of_validate_WeakPoint3 : F ⊧ (Axioms.WeakPoint3 (.atom 0) (.atom 1)) → WeakConnected F := by
   contrapose;
@@ -42,20 +42,8 @@ lemma weakConnected_of_validate_WeakPoint3 : F ⊧ (Axioms.WeakPoint3 (.atom 0) 
     ∃ w, x ≺ w ∧ (w = y ∨ y ≺ w) ∧ (∀ (v : F.World), w ≺ v → ¬v = y → y ≺ v) ∧ ¬w = z ∧ ¬z ≺ w ∧
     ∃ w, x ≺ w ∧ (w = z ∨ z ≺ w) ∧ (∀ (v : F.World), w ≺ v → ¬v = z → z ≺ v) ∧ ¬w = y ∧ ¬y ≺ w by
     simpa [Semantics.Realize, Satisfies];
-  refine ⟨
-    _,
-    Rxy,
-    by tauto,
-    by tauto,
-    by tauto,
-    nRzy,
-    _,
-    Rxz,
-    by tauto,
-    by tauto,
-    by tauto,
-    nRyz
-  ⟩;
+  refine ⟨y, Rxy, ?_, ?_, ?_, ?_, z, Rxz, ?_, ?_, ?_, ?_⟩;
+  all_goals tauto;
 
 end definability
 

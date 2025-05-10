@@ -43,7 +43,7 @@ infix:50 " ↭ " => ModalEquivalent
 
 lemma modal_equivalent_of_bisimilar (Bi : M₁ ⇄ M₂) (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
   intro φ;
-  induction φ using Formula.rec' generalizing x₁ x₂ with
+  induction φ generalizing x₁ x₂ with
   | hatom a => exact Bi.atomic bisx;
   | himp φ ψ ihp ihq =>
     constructor;
@@ -249,25 +249,26 @@ namespace Frame
 variable {F : Kripke.Frame} (x : F.World)
 
 def successors := { w | x ≺^* w }
-postfix:100 "↑*" => Frame.upward
+postfix:100 "↥*" => Frame.successors
 
 def immediate_successors := { w | x ≺ w }
-postfix:100 "↑¹" => Frame.immediate_successor
+postfix:100 "↥¹" => Frame.immediate_successors
 
 def proper_immediate_successors := { w | x ≠ w ∧ x ≺ w }
-postfix:100 "↑" => Frame.proper_immediate_successor
+postfix:100 "↥" => Frame.proper_immediate_successors
 
 
 def predeccsors := { w | w ≺^* x }
-postfix:100 "↓*" => Frame.downward
+postfix:100 "↧*" => Frame.predeccsors
 
 def immediate_predeccsors := { w | w ≺ x }
-postfix:100 "↓¹" => Frame.immediate_predeccsor
+postfix:100 "↧¹" => Frame.immediate_predeccsors
 
 def proper_immediate_predeccsors := { w | w ≠ x ∧ w ≺ x }
-postfix:100 "↓" => Frame.proper_immediate_predeccsors
+postfix:100 "↧" => Frame.proper_immediate_predeccsors
 
 end Frame
+
 
 -/
 

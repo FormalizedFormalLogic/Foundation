@@ -163,15 +163,15 @@ variable [Entailment.Modal.S4 MH]
 lemma goedelTranslated_axiomTc : MH ⊢! φᵍ ➝ □φᵍ := by
   induction φ using Propositional.Formula.rec' with
   | hfalsum => simp only [goedelTranslate, efq!];
-  | hand φ ψ ihp ihq => exact imp_trans''! (and_replace! ihp ihq) collect_box_and!
-  | hor φ ψ ihp ihq => exact imp_trans''! (or₃''! (imply_left_or'! ihp) (imply_right_or'! ihq)) collect_box_or!
+  | hand φ ψ ihp ihq => exact C!_trans (CKK!_of_C!_of_C! ihp ihq) collect_box_and!
+  | hor φ ψ ihp ihq => exact C!_trans (left_A!_intro (right_A!_intro_left ihp) (right_A!_intro_right ihq)) collect_box_or!
   | _ => simp only [goedelTranslate, axiomFour!];
 
 lemma goedelTranslated_implyS : MH ⊢! (φ ➝ ψ ➝ φ)ᵍ := by
-  exact nec! $ imp_trans''! goedelTranslated_axiomTc $ axiomK'! $ nec! $ imply₁!;
+  exact nec! $ C!_trans goedelTranslated_axiomTc $ axiomK'! $ nec! $ imply₁!;
 
 lemma goedelTranslated_implyK : MH ⊢! ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
-  apply nec! $ imp_trans''! (imp_trans''! (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! imply₂!) axiomK!;
+  apply nec! $ C!_trans (C!_trans (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! imply₂!) axiomK!;
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   apply deduct_iff.mpr;
@@ -181,10 +181,10 @@ lemma goedelTranslated_implyK : MH ⊢! ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ 
   exact axiomT'! this;
 
 lemma goedelTranslated_AndIntro : MH ⊢! (φ ➝ ψ ➝ φ ⋏ ψ)ᵍ := by
-  exact nec! $ imp_trans''! goedelTranslated_axiomTc $ axiomK'! $ nec! $ and₃!
+  exact nec! $ C!_trans goedelTranslated_axiomTc $ axiomK'! $ nec! $ and₃!
 
 lemma goedelTranslated_OrElim : MH ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)))ᵍ := by
-  exact nec! $ imp_trans''! axiomFour! $ axiomK'! $ nec! $ imp_trans''! (axiomK'! $ nec! $ or₃!) axiomK!;
+  exact nec! $ C!_trans axiomFour! $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! $ or₃!) axiomK!;
 
 lemma provable_goedelTranslated_of_provable
   (IH : Propositional.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [Entailment.Modal.S4 MH]
@@ -195,12 +195,12 @@ lemma provable_goedelTranslated_of_provable
   | maxm ih => apply hAx; assumption;
   | mdp ihpq ihp =>
     exact axiomT'! $ axiomK''! (ihpq) $ nec! $ ihp;
-  | verum => exact nec! imp_id!;
+  | verum => exact nec! C!_id;
   | andElimL => exact nec! and₁!;
   | andElimR => exact nec! and₂!;
   | orIntroL => exact nec! or₁!;
   | orIntroR => exact nec! or₂!;
-  | andIntro => exact goedelTranslated_AndIntro;
+  | K_intro => exact goedelTranslated_AndIntro;
   | orElim => exact goedelTranslated_OrElim;
   | implyS => exact goedelTranslated_implyS;
   | implyK => exact goedelTranslated_implyK;
@@ -210,7 +210,7 @@ end Modal.Hilbert
 /-
 lemma dp_of_mdp [ModalDisjunctive mH] [ModalCompanion iH mH] [Entailment.S4 mH] : iH ⊢! φ ⋎ ψ → iH ⊢! φ ∨ iH ⊢! ψ := by
     intro hpq;
-    have : mH ⊢! □φᵍ ⋎ □ψᵍ := or₃'''! (imply_left_or'! axiomTc_GTranslate!) (imply_right_or'! axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
+    have : mH ⊢! □φᵍ ⋎ □ψᵍ := of_C!_of_C!_of_A! (right_A!_intro_left axiomTc_GTranslate!) (right_A!_intro_right axiomTc_GTranslate!) (by simpa using ModalCompanion.companion.mp hpq);
     cases ModalDisjunctive.modal_disjunctive this with
     | inl h => left; exact ModalCompanion.companion.mpr h;
     | inr h => right; exact ModalCompanion.companion.mpr h;

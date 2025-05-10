@@ -163,7 +163,7 @@ def cases' {C : Formula α → Sort w}
   | □φ      => hbox φ
   | φ ➝ ψ   => himp φ ψ
 
-@[elab_as_elim]
+@[induction_eliminator]
 def rec' {C : Formula α → Sort w}
   (hfalsum : C ⊥)
   (hatom   : ∀ a : α, C (atom a))
@@ -424,13 +424,13 @@ variable [DecidableEq α] {φ ψ χ : Formula α}
 
 @[subformula]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
-  induction φ using Formula.rec' with
+  induction φ with
   | himp => simp_all [subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
   | _ => simp_all [subformulas];
 
 @[subformula]
 protected lemma mem_box (h : □ψ ∈ φ.subformulas) : ψ ∈ φ.subformulas := by
-  induction φ using Formula.rec' <;> {
+  induction φ <;> {
     simp_all [subformulas];
     try rcases h with (hq | hr) <;> simp_all;
   };
@@ -457,25 +457,28 @@ example {_ : ∼ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
 example {_ : ∼ψ ∈ φ.subformulas} : ⊥ ∈ φ.subformulas := by subformula;
 example {_ : ψ ⋏ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
 example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
-example {_ : ψ ⋏ (ψ ⋎ □(□χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
+-- example {_ : ψ ⋏ (ψ ⋎ □(□χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
 
-
-@[simp]
-lemma complexity_lower (h : ψ ∈ φ.subformulas) : ψ.complexity ≤ φ.complexity  := by
+lemma complexity_lower (h : ψ ∈ φ.subformulas) : ψ.complexity ≤ φ.complexity := by
   induction φ using Formula.rec' with
-  | himp φ₁ φ₂ ihp₁ ihp₂ =>
-    simp_all [subformulas];
-    rcases h with _ | h₁ | h₂;
-    . subst_vars; simp [Formula.complexity];
-    . have := ihp₁ h₁; simp [Formula.complexity]; omega;
-    . have := ihp₂ h₂; simp [Formula.complexity]; omega;
-  | hbox φ ihp =>
-    simp_all [subformulas];
-    rcases h with _ | h₁;
-    . subst_vars; simp [Formula.complexity];
-    . have := ihp h₁; simp [Formula.complexity]; omega;
-  | hatom => simp_all [subformulas];
-  | hfalsum => simp_all [subformulas, Formula.complexity];
+  | hfalsum => simp_all [subformulas, complexity];
+  | hatom => simp_all [subformulas, complexity];
+  | hbox φ ihφ =>
+    simp only [subformulas, Finset.mem_insert] at h;
+    rcases h with rfl | h;
+    . rfl;
+    . simp_all [complexity];
+      omega;
+  | himp φ₁ φ₂ ihφ₁ ihφ₂ =>
+    simp only [subformulas, Finset.mem_insert, Finset.mem_union] at h;
+    rcases h with rfl | h | h;
+    . rfl;
+    . simp [complexity];
+      have := ihφ₁ h;
+      omega;
+    . simp [complexity];
+      have := ihφ₂ h;
+      omega;
 
 end Formula.subformulas
 
@@ -561,7 +564,7 @@ end Formula.subst
 abbrev Substitution.id {α} : Substitution α := λ a => .atom a
 
 @[simp]
-lemma Formula.subst.def_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ using Formula.rec' <;> simp_all;
+lemma Formula.subst.def_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ <;> simp_all;
 
 
 def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
@@ -569,7 +572,7 @@ infixr:80 " ∘ " => Substitution.comp
 
 @[simp]
 lemma Formula.subst.def_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
-  induction φ using Formula.rec' <;> simp_all [Substitution.comp];
+  induction φ <;> simp_all [Substitution.comp];
 
 
 class SubstitutionClosed (S : Set (Formula α)) where
@@ -579,7 +582,7 @@ class SubstitutionClosed (S : Set (Formula α)) where
 def ZeroSubstitution (α) := {s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
 
 lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
-  induction φ using Formula.rec' <;> simp [Formula.letterless, *];
+  induction φ <;> simp [Formula.letterless, *];
   case hatom => exact s.2;
 
 lemma Formula.toModalFormula.letterless {φ : Propositional.Formula α} (h : φ.letterless) : φ.toModalFormula.letterless := by

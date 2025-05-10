@@ -79,4 +79,6 @@ protected abbrev L := □(□φ ➝ φ) ➝ □φ
 
 protected abbrev H := □(□φ ⭤ φ) ➝ □φ
 
+protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
+
 end LO.Axioms

@@ -14,11 +14,11 @@ namespace KT
 variable [Entailment.Modal.KT 𝓢]
 
 def axiomDiaTc : 𝓢 ⊢ φ ➝ ◇φ := by
-  apply impTrans'' ?_ (and₂' diaDuality);
-  exact impTrans'' dni $ contra₀' axiomT;
+  apply C_trans ?_ (K_right diaDuality);
+  exact C_trans dni $ contra axiomT;
 instance : HasAxiomDiaTc 𝓢 := ⟨fun _ ↦ KT.axiomDiaTc⟩
 
-protected def axiomP : 𝓢 ⊢ ∼□⊥ := neg_equiv'.mpr axiomT
+protected def axiomP : 𝓢 ⊢ ∼□⊥ := N_of_CO axiomT
 instance : HasAxiomP 𝓢 := ⟨KT.axiomP⟩
 instance : Entailment.Modal.KP 𝓢 where
 instance : Entailment.Modal.KD 𝓢 where
@@ -30,7 +30,7 @@ namespace KT'
 
 variable [Entailment.Modal.KT' 𝓢]
 
-protected def axiomT : 𝓢 ⊢ □φ ➝ φ := impTrans'' box_dni (contra₃' (impTrans'' diaTc diaDuality_mp))
+protected def axiomT : 𝓢 ⊢ □φ ➝ φ := C_trans box_dni (C_of_CNN (C_trans diaTc diaDuality_mp))
 
 instance : HasAxiomT 𝓢 := ⟨fun _ ↦ KT'.axiomT⟩
 instance : Entailment.Modal.KT 𝓢 where

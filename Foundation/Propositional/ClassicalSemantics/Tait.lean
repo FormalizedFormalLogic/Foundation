@@ -118,7 +118,7 @@ lemma maximalConsistentTheory_consistent' {φ} :
   intro h hn
   have : Inconsistent (maximalConsistentTheory consisT) :=
     Entailment.inconsistent_iff_provable_bot.mpr
-      (neg_mdp! (mem_maximalConsistentTheory_iff.mp hn) (mem_maximalConsistentTheory_iff.mp h))
+      (neg_mdp (mem_maximalConsistentTheory_iff.mp hn) (mem_maximalConsistentTheory_iff.mp h))
   have := this.not_con
   simp_all
 
@@ -127,7 +127,7 @@ lemma not_mem_maximalConsistentTheory_iff :
   by_cases hp : φ ∈ maximalConsistentTheory consisT <;> simp [hp]
   · intro bnp
     have : Inconsistent (maximalConsistentTheory consisT) :=
-      Entailment.inconsistent_of_provable (neg_mdp! bnp (mem_maximalConsistentTheory_iff.mp hp))
+      Entailment.inconsistent_of_provable (neg_mdp bnp (mem_maximalConsistentTheory_iff.mp hp))
     have := this.not_con
     simp_all
   · exact mem_maximalConsistentTheory_iff.mp
@@ -136,8 +136,8 @@ lemma not_mem_maximalConsistentTheory_iff :
 lemma mem_maximalConsistentTheory_and {φ ψ} (h : φ ⋏ ψ ∈ maximalConsistentTheory consisT) :
     φ ∈ maximalConsistentTheory consisT ∧ ψ ∈ maximalConsistentTheory consisT := by
   have : maximalConsistentTheory consisT ⊢! φ ⋏ ψ := mem_maximalConsistentTheory_iff.mp h
-  exact ⟨mem_maximalConsistentTheory_iff.mpr (and_left! this),
-         mem_maximalConsistentTheory_iff.mpr (and_right! this)⟩
+  exact ⟨mem_maximalConsistentTheory_iff.mpr (K!_left this),
+         mem_maximalConsistentTheory_iff.mpr (K!_right this)⟩
 
 lemma mem_maximalConsistentTheory_or {φ ψ} (h : φ ⋎ ψ ∈ maximalConsistentTheory consisT) :
     φ ∈ maximalConsistentTheory consisT ∨ ψ ∈ maximalConsistentTheory consisT := by
@@ -146,7 +146,7 @@ lemma mem_maximalConsistentTheory_or {φ ψ} (h : φ ⋎ ψ ∈ maximalConsisten
     simpa [not_or, not_mem_maximalConsistentTheory_iff] using A
   have : Inconsistent (maximalConsistentTheory consisT) :=
     Entailment.inconsistent_of_provable
-      (or₃'''! (neg_equiv'!.mp b.1) (neg_equiv'!.mp b.2) (mem_maximalConsistentTheory_iff.mp h))
+      (of_C!_of_C!_of_A! (N!_iff_CO!.mp b.1) (N!_iff_CO!.mp b.2) (mem_maximalConsistentTheory_iff.mp h))
   have := this.not_con
   simp_all
 

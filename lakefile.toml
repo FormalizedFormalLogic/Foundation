@@ -9,9 +9,14 @@ linter.oldObtain = true
 linter.style.multiGoal = true
 
 [[require]]
-name = "mathlib"
 scope = "leanprover-community"
-version = "git#master"
+name = "mathlib"
+rev = "v4.20.0-rc2"
+
+[[require]]
+scope = "leanprover"
+name = "doc-gen4"
+rev = "v4.20.0-rc2"
 
 [[lean_lib]]
 name = "Foundation"

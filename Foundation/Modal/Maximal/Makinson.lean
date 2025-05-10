@@ -49,7 +49,7 @@ lemma KD_subset_of_not_subset_Ver (hV : ¬L ⊆ Logic.Ver) : Logic.KD ⊆ L := b
     . obtain ⟨ψ, hψ₁, hψ₂⟩ := Set.not_subset_iff_exists_mem_not_mem.mp hV;
       obtain ⟨ξ, hξ⟩ := KD_subset_of_not_subset_Ver.lemma₁ hψ₁ hψ₂;
       apply Logic.mdp (φ := ◇ξ);
-      . exact Logic.subset_K $ contra₀'! $ axiomK'! $ nec! $ efq!;
+      . exact Logic.subset_K $ contra! $ axiomK'! $ nec! $ efq!;
       . exact hξ;
   | mdp hφψ hφ => exact Logic.mdp hφψ hφ;
   | nec hφ => exact Logic.nec hφ;
@@ -74,7 +74,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
   (v ⊧ (φᵀ.toPropFormula) → Hilbert.KD ⊢! φ) ∧
   (¬(v ⊧ (φᵀ.toPropFormula)) → Hilbert.KD ⊢! ∼φ)
   := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom => simp at hl;
   | hfalsum => simp [trivTranslate, toPropFormula];
   | himp φ ψ ihφ ihψ =>
@@ -82,8 +82,8 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
     . intro h;
       simp only [trivTranslate, toPropFormula] at h;
       rcases imp_iff_not_or.mp h with (hφ | hψ);
-      . exact efq_of_neg! $ ihφ (letterless.def_imp₁ hl) |>.2 hφ;
-      . exact imply₁'! $ ihψ (letterless.def_imp₂ hl) |>.1 hψ;
+      . exact C_of_N $ ihφ (letterless.def_imp₁ hl) |>.2 hφ;
+      . exact C!_of_conseq! $ ihψ (letterless.def_imp₂ hl) |>.1 hψ;
     . intro h;
       simp only [trivTranslate, toPropFormula, Semantics.Realize, Formula.ClassicalSemantics.val] at h;
       push_neg at h;
@@ -119,7 +119,7 @@ private lemma subset_Triv_of_KD_subset.lemma₁
   v ⊧ (((φᵀ.toPropFormula)⟦s.1⟧)) ↔
   v ⊧ ((φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula)
   := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom a =>
     suffices v ⊧ (s.1 a) ↔ v ⊧ (s.1 a).toModalFormulaᵀ.toPropFormula by
       simpa [trivTranslate, toPropFormula];

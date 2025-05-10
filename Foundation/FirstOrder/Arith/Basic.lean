@@ -187,6 +187,9 @@ class SoundOn {L : Language} [Structure L ℕ]
     (T : Theory L) (F : Sentence L → Prop) where
   sound : ∀ {σ}, F σ → T ⊢! ↑σ → ℕ ⊧ₘ₀ σ
 
+instance {L : Language} [Structure L ℕ] (T : Theory L) (F : Sentence L → Prop) [ℕ ⊧ₘ* T] : SoundOn T F :=
+  ⟨fun _ b ↦ consequence_iff.mp (sound! (T := T) b) ℕ inferInstance⟩
+
 section
 
 variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))

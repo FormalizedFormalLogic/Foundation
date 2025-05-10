@@ -19,7 +19,7 @@ lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F �
   refine ⟨inferInstance, inferInstance, inferInstance⟩;
 
 lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (φᵇ)) ↔ (Satisfies ⟨F^=, V⟩ x φ) := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | himp φ ψ ihp ihq =>
     constructor;
     . intro h hp;
@@ -50,7 +50,7 @@ lemma iff_frame_boxdot_reflexive_closure : (F ⊧ (φᵇ)) ↔ ((F^=) ⊧ φ) :=
   . intro h V x; apply iff_boxdot_reflexive_closure.mpr; exact h V x;
 
 lemma iff_reflexivize_irreflexivize [IsRefl _ F] {x : F.World} {V} : (Satisfies ⟨F, V⟩ x φ) ↔ (Satisfies ⟨F^≠^=, V⟩ x φ) := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | hatom φ => rfl;
   | hfalsum => rfl;
   | himp φ ψ ihp ihq =>

@@ -97,7 +97,7 @@ variable {M₁ : Kripke.Model} {M₂ : Kripke.Model}
 
 lemma satisfies_left_on_counterexampleDPModel :
   w ⊧ φ ↔ (Satisfies (counterexampleDPModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inl w) φ) := by
-  induction φ using Formula.rec' generalizing w with
+  induction φ generalizing w with
   | himp φ ψ ihp ihq =>
     constructor;
     . intro hpq X hWX hp;
@@ -114,7 +114,7 @@ lemma satisfies_left_on_counterexampleDPModel :
 
 lemma satisfies_right_on_counterexampleDPModel :
   w ⊧ φ ↔ (Satisfies (counterexampleDPModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inr w) φ) := by
-  induction φ using Formula.rec' generalizing w with
+  induction φ generalizing w with
   | himp φ ψ ihp ihq =>
     constructor;
     . intro h X hWX hp;

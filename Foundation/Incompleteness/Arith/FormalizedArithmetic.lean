@@ -245,11 +245,11 @@ def ltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t <' ↑n ⭤ (tSubstIt
   simpa [Language.SemitermVec.q_of_pos, Language.Semiformula.substs₁] using specialize this t
 
 noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t ≮' ↑n ⭤ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by
-  simpa using negReplaceIff' <| ltNumeral T t n
+  simpa using ENN_of_E <| ltNumeral T t n
 
 def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
   have : T ⊢ ↑n <' ↑m ⭤ _ := ltNumeral T n m
-  apply andRight this ⨀ ?_
+  apply K_right this ⨀ ?_
   apply disj (i := m - (n + 1)) _ (by simpa using sub_succ_lt_self h)
   simpa [nth_tSubstItr', h] using eqRefl T ↑n
 
@@ -257,8 +257,8 @@ lemma lt_complete! {n m : V} (h : n < m) : T ⊢! ↑n <' ↑m := ⟨ltComplete 
 
 noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := by
   have : T ⊢ ↑n ≮' ↑m ⭤ (tSubstItr (↑n : ⌜ℒₒᵣ⌝.Term).sing (#'1 ≠' #'0) m).conj := by
-    simpa using negReplaceIff' <| ltNumeral T n m
-  refine andRight this ⨀ ?_
+    simpa using ENN_of_E <| ltNumeral T n m
+  refine K_right this ⨀ ?_
   apply conj'
   intro i hi
   have hi : i < m := by simpa using hi
@@ -284,7 +284,7 @@ noncomputable def ballIntro (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
     have : T ⊢ φ.shift^/[(i : ⌜ℒₒᵣ⌝.Term).sing] := by
       simpa [Language.TSemifromula.shift_substs] using shift (bs i hi)
     exact of (replace T φ.shift ↑i &'0) ⨀ e ⨀ of this
-  exact orReplaceLeft' this (andRight (nltNumeral T (&'0) n))
+  exact A_replace_left this (K_right (nltNumeral T (&'0) n))
 
 lemma ball_intro! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
     (bs : ∀ i < n, T ⊢! φ ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
@@ -295,7 +295,7 @@ noncomputable def bexIntro (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V) {i
     T ⊢ φ.bex ↑n := by
   apply ex i
   suffices T ⊢ i <' n ⋏ φ^/[(i : ⌜ℒₒᵣ⌝.Term).sing] by simpa
-  exact Entailment.andIntro (ltComplete T hi) b
+  exact Entailment.K_intro (ltComplete T hi) b
 
 lemma bex_intro! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V) {i}
     (hi : i < n) (b : T ⊢! φ ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :

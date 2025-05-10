@@ -140,6 +140,8 @@ instance instIsRooted : (F↾r).IsRooted pointGenerate.root where
 
 instance [Finite F] : Finite (F↾r) := inferInstance
 
+instance isFinite [finite : F.IsFinite] : (F↾r).IsFinite := inferInstance
+
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
 instance isRefl [IsRefl _ F] : IsRefl (F↾r).World (F↾r).Rel := ⟨by
@@ -160,12 +162,25 @@ instance isTrans [trans : IsTrans _ F] : IsTrans (F↾r).World (F↾r).Rel := �
   . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
 ⟩
 
+lemma rel_antisymm (F_antisymm : AntiSymmetric F) : AntiSymmetric (F↾r).Rel := by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy hyx;
+  all_goals aesop;
+
+instance isAntisymm [IsAntisymm _ F] : IsAntisymm _ (F↾r).Rel := ⟨rel_antisymm IsAntisymm.antisymm⟩
+
 instance isPreorder [IsPreorder _ F] : IsPreorder _ (F↾r) where
+
+instance isPartialOrder [IsPartialOrder _ F] : IsPartialOrder _ (F↾r) where
 
 instance isIrrefl [IsIrrefl _ F] : IsIrrefl _ (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ h;
   . exact IsIrrefl.irrefl _ $ by simpa using h;
   . exact IsIrrefl.irrefl _ $ by simpa using h;
+⟩
+
+instance isAsymm [assym : IsAsymm _ F] : IsAsymm (F↾r).World (F↾r).Rel := ⟨by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy <;>
+  { dsimp at Rxy; apply IsAsymm.asymm _ _ Rxy; }
 ⟩
 
 /-
@@ -244,7 +259,15 @@ namespace Model.pointGenerate
 
 variable {M : Kripke.Model} {r : M.World}
 
+instance [M.IsFinite] : (M↾r).IsFinite := by
+  simp [Model.pointGenerate];
+  infer_instance;
+
 protected abbrev root : (M↾r).World := ⟨r, by tauto⟩
+
+instance : (M↾r).IsRooted pointGenerate.root := by
+  simp [Model.pointGenerate];
+  infer_instance;
 
 protected def pMorphism : (M↾r) →ₚ M := by
   apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism (F := M.toFrame) (r := r));

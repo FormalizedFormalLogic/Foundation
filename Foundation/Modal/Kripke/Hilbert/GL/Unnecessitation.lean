@@ -17,17 +17,17 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
   have := Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h;
   obtain ⟨M, r, M_tree, hs⟩ := this;
 
-  let M₀ := M.extendRoot r;
-  let r₀ : M₀.World := extendRoot.root (r := r);
+  let M₀ := M.extendRoot r 1;
+  let r₀ : M₀.World := extendRoot.root;
 
   have hs : Satisfies M r (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies, Semantics.Realize];
-  replace hs := @Model.extendRoot.modal_equivalence_original_world (M := M) (r := r) inferInstance r (⊡φ ⋏ ∼ψ) |>.mp hs;
+  replace hs := @Model.extendRoot.modal_equivalence_original_world (M := M) (r := r) (n := 1) inferInstance r (⊡φ ⋏ ∼ψ) |>.mp hs;
   have ⟨hs₁₂, hs₃⟩ := Satisfies.and_def.mp hs;
   have ⟨hs₁, hs₂⟩ := Satisfies.and_def.mp hs₁₂;
 
   have hbp : Satisfies M₀ r₀ (□φ) := by
     intro x hx;
-    rcases Frame.extendRoot.through_original_root (F := M.toFrame) (x := x) hx with (rfl | hr);
+    rcases Frame.extendRoot.not_root_of_from_root₁ (F := M.toFrame) (x := x) hx with (rfl | hr);
     . tauto;
     . apply hs₂; exact hr.unwrap;
   have hbq : ¬(Satisfies M₀ r₀ (□ψ)) := by
@@ -48,7 +48,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
 
 theorem unnecessitation! : Hilbert.GL ⊢! □φ → Hilbert.GL ⊢! φ := by
   intro h;
-  have : Hilbert.GL ⊢! □⊤ ➝ □φ := imply₁'! (ψ := □⊤) h;
+  have : Hilbert.GL ⊢! □⊤ ➝ □φ := C!_of_conseq! (ψ := □⊤) h;
   have : Hilbert.GL ⊢! ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 

@@ -69,6 +69,8 @@ import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.NNFormula
 import Foundation.Modal.Kripke.ComplexityLimited
 import Foundation.Modal.Kripke.Undefinability
+import Foundation.Modal.Kripke.Balloon
+import Foundation.Modal.Kripke.LinearFrame
 
 import Foundation.Modal.PLoN.Hilbert.N
 
@@ -156,6 +158,8 @@ import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.GL.Unprovability
 
 import Foundation.ProvabilityLogic.Grz.Completeness
+
+import Foundation.ProvabilityLogic.S.Completeness
 
 import Foundation.AutoProver.Classical
 

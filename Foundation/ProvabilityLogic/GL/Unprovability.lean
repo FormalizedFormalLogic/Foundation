@@ -18,29 +18,29 @@ def indep (𝔅 : ProvabilityPredicate T₀ T) (σ : Sentence L) : Sentence L :=
 
 lemma indep_distribute [𝔅.HBL2] (h : T ⊢!. σ ⭤ π) :
   T ⊢!. 𝔅.indep σ ➝ 𝔅.indep π := by
-  apply and_replace!;
-  . apply contra₀'!;
+  apply CKK!_of_C!_of_C!;
+  . apply contra!;
     apply WeakerThan.pbl (𝓢 := T₀.alt);
     apply 𝔅.prov_distribute_imply;
-    exact and₂'! h;
-  . apply contra₀'!;
+    exact K!_right h;
+  . apply contra!;
     apply WeakerThan.pbl (𝓢 := T₀.alt);
     apply 𝔅.prov_distribute_imply;
-    apply contra₀'!;
-    exact and₁'! h;
+    apply contra!;
+    exact K!_left h;
 
 lemma indep_iff_distribute_inside [𝔅.HBL2] (h : T ⊢!. σ ⭤ π) :
   T ⊢!. 𝔅.indep σ ⭤ 𝔅.indep π := by
-  apply and₃'!
+  apply K!_intro
   . exact indep_distribute $ h;
   . apply indep_distribute;
-    exact iff_comm'! h;
+    exact E!_symm h;
 
 lemma indep_iff_distribute [𝔅.HBL2] (h : T ⊢!. σ ⭤ π) :
   T ⊢!. 𝔅.indep σ ↔ T ⊢!. 𝔅.indep π := by
   constructor;
-  . intro H; exact and₁'! (indep_iff_distribute_inside h) ⨀ H;
-  . intro H; exact and₂'! (indep_iff_distribute_inside h) ⨀ H;
+  . intro H; exact K!_left (indep_iff_distribute_inside h) ⨀ H;
+  . intro H; exact K!_right (indep_iff_distribute_inside h) ⨀ H;
 
 end ProvabilityPredicate
 
@@ -73,12 +73,12 @@ section Independency
 
 lemma iff_modalConsis_bewConsis_inside
   : T ⊢!. f.interpret (𝐈𝚺₁.standardDP T) (∼□⊥) ⭤ (𝐈𝚺₁.standardDP T).con := by
-  apply and₃'!;
-  . refine imp_trans''! (and₁'! Realization.iff_interpret_neg_inside) ?_;
-    apply contra₀'!;
+  apply K!_intro;
+  . refine C!_trans (K!_left Realization.iff_interpret_neg_inside) ?_;
+    apply contra!;
     simp [Realization.interpret];
-  . refine imp_trans''! ?_ (and₂'! Realization.iff_interpret_neg_inside)
-    apply contra₀'!;
+  . refine C!_trans ?_ (K!_right Realization.iff_interpret_neg_inside)
+    apply contra!;
     simp [Realization.interpret];
 
 variable [𝐈𝚺₁ ⪯ T]
@@ -86,41 +86,41 @@ variable [𝐈𝚺₁ ⪯ T]
 lemma iff_modalIndep_bewIndep_inside :
   T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) (Modal.independency A) ⭤ ((𝐈𝚺₁).standardDP T).indep (f.interpret ((𝐈𝚺₁).standardDP T) A)
   := by
-  apply and₃'!;
-  . refine imp_trans''! (and₁'! $ Realization.iff_interpret_and_inside) ?_;
-    apply and_replace!;
-    . apply and₁'! Realization.iff_interpret_neg_inside;
-    . apply imp_trans''! (and₁'! $ Realization.iff_interpret_neg_inside (A := □(∼A))) ?_;
-      apply contra₀'!;
+  apply K!_intro;
+  . refine C!_trans (K!_left $ Realization.iff_interpret_and_inside) ?_;
+    apply CKK!_of_C!_of_C!;
+    . apply K!_left Realization.iff_interpret_neg_inside;
+    . apply C!_trans (K!_left $ Realization.iff_interpret_neg_inside (A := □(∼A))) ?_;
+      apply contra!;
       apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.alt);
       apply ((𝐈𝚺₁).standardDP T).prov_distribute_imply;
-      apply and₂'! $ Realization.iff_interpret_neg_inside;
-  . refine imp_trans''! ?_ (and₂'! $ Realization.iff_interpret_and_inside);
-    apply and_replace!;
-    . exact imp_trans''! (and₂'! $ Realization.iff_interpret_neg_inside (A := □A)) imp_id!;
-    . apply imp_trans''! ?_ (and₂'! $ Realization.iff_interpret_neg_inside (A := □(∼A)));
-      apply contra₀'!;
+      apply K!_right $ Realization.iff_interpret_neg_inside;
+  . refine C!_trans ?_ (K!_right $ Realization.iff_interpret_and_inside);
+    apply CKK!_of_C!_of_C!;
+    . exact C!_trans (K!_right $ Realization.iff_interpret_neg_inside (A := □A)) C!_id;
+    . apply C!_trans ?_ (K!_right $ Realization.iff_interpret_neg_inside (A := □(∼A)));
+      apply contra!;
       apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.alt);
       apply ((𝐈𝚺₁).standardDP T).prov_distribute_imply;
-      apply and₁'! $ Realization.iff_interpret_neg_inside;
+      apply K!_left $ Realization.iff_interpret_neg_inside;
 
 lemma iff_modalIndep_bewIndep :
   T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) (Modal.independency A) ↔ T ⊢!. ((𝐈𝚺₁).standardDP T).indep (f.interpret ((𝐈𝚺₁).standardDP T) A)
   := by
   constructor;
-  . intro h; exact (and₁'! iff_modalIndep_bewIndep_inside) ⨀ h;
-  . intro h; exact (and₂'! iff_modalIndep_bewIndep_inside) ⨀ h;
+  . intro h; exact (K!_left iff_modalIndep_bewIndep_inside) ⨀ h;
+  . intro h; exact (K!_right iff_modalIndep_bewIndep_inside) ⨀ h;
 
 lemma iff_not_modalIndep_not_bewIndep_inside :
   T ⊢!. ∼f.interpret ((𝐈𝚺₁).standardDP T) (Modal.independency A) ⭤ ∼((𝐈𝚺₁).standardDP T).indep (f.interpret ((𝐈𝚺₁).standardDP T) A)
-  := neg_replace_iff'! iff_modalIndep_bewIndep_inside
+  := ENN!_of_E! iff_modalIndep_bewIndep_inside
 
 lemma iff_not_modalIndep_not_bewIndep :
   T ⊢!. ∼f.interpret ((𝐈𝚺₁).standardDP T) (Modal.independency A) ↔ T ⊢!. ∼((𝐈𝚺₁).standardDP T).indep (f.interpret ((𝐈𝚺₁).standardDP T) A)
   := by
   constructor;
-  . intro h; exact (and₁'! iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
-  . intro h; exact (and₂'! iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
+  . intro h; exact (K!_left iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
+  . intro h; exact (K!_right iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
 
 variable [SoundOn T (Hierarchy 𝚷 2)]
 
@@ -148,7 +148,7 @@ lemma unrefutable_independency_of_consistency :
     have H₂ : T ⊢!.
       ∼(𝐈𝚺₁.standardDP T).indep (g.interpret (𝐈𝚺₁.standardDP T) (∼□⊥)) ⭤
       ∼(𝐈𝚺₁.standardDP T).indep (𝐈𝚺₁.standardDP T).con
-      := neg_replace_iff'! $ ((𝐈𝚺₁).standardDP T).indep_iff_distribute_inside (T := T)
+      := ENN!_of_E! $ ((𝐈𝚺₁).standardDP T).indep_iff_distribute_inside (T := T)
       (σ := g.interpret (𝐈𝚺₁.standardDP T) (∼□⊥))
       (π := (𝐈𝚺₁.standardDP T).con)
       iff_modalConsis_bewConsis_inside;
@@ -157,8 +157,8 @@ lemma unrefutable_independency_of_consistency :
       T ⊢!. ∼(𝐈𝚺₁.standardDP T).indep (𝐈𝚺₁.standardDP T).con
       := by
       constructor;
-      . intro H; exact and₁'! H₂ ⨀ H;
-      . intro H; exact and₂'! H₂ ⨀ H;
+      . intro H; exact K!_left H₂ ⨀ H;
+      . intro H; exact K!_right H₂ ⨀ H;
     apply Iff.trans H₁ H₂ |>.not.mp this;
   have h := Modal.Hilbert.GL.unprovable_not_independency_of_consistency;
   replace h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr h;
