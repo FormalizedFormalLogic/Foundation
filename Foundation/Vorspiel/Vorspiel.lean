@@ -1,20 +1,12 @@
-import Mathlib.Data.Vector.Basic
-import Mathlib.Data.Fin.Basic
+import Mathlib.Algebra.Order.Ring.Nat
 import Mathlib.Data.Fin.VecNotation
-import Mathlib.Data.Fintype.Basic
-import Mathlib.Data.Finset.Basic
-import Mathlib.Data.Finset.Preimage
-import Mathlib.Data.Finset.Sort
-import Mathlib.Order.Filter.Ultrafilter.Defs
-import Mathlib.Logic.Encodable.Basic
-import Mathlib.Computability.Primrec
-import Mathlib.Computability.Partrec
-import Mathlib.Data.Finset.Sort
-import Mathlib.Data.List.GetD
-import Mathlib.Data.Set.Finite.Range
-import Mathlib.Tactic.TautoSet
 import Mathlib.Data.Fintype.Sigma
 import Mathlib.Data.Fintype.Vector
+import Mathlib.Data.List.GetD
+import Mathlib.Data.Nat.Bits
+import Mathlib.Data.Nat.Pairing
+import Mathlib.Data.PFun
+import Mathlib.Logic.Encodable.Basic
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -336,48 +328,6 @@ lemma pair_le_pair_of_le {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ ≤ a₂) (hb : 
 
 end Nat
 
-namespace Fin
-
-lemma pos_of_coe_ne_zero {i : Fin (n + 1)} (h : (i : ℕ) ≠ 0) :
-    0 < i := Nat.pos_of_ne_zero h
-
-@[simp] lemma one_pos'' : (0 : Fin (n + 2)) < 1 := pos_of_coe_ne_zero (Nat.succ_ne_zero 0)
-
-@[simp] lemma two_pos : (0 : Fin (n + 3)) < 2 := pos_of_coe_ne_zero (Nat.succ_ne_zero 1)
-
-@[simp] lemma three_pos : (0 : Fin (n + 4)) < 3 := pos_of_coe_ne_zero (Nat.succ_ne_zero 2)
-
-@[simp] lemma four_pos : (0 : Fin (n + 5)) < 4 := pos_of_coe_ne_zero (Nat.succ_ne_zero 3)
-
-@[simp] lemma five_pos : (0 : Fin (n + 6)) < 5 := pos_of_coe_ne_zero (Nat.succ_ne_zero 4)
-
-end Fin
-
-namespace Fintype
-variable {ι : Type _} [Fintype ι]
-
-section
-
-variable {α : Type _} [SemilatticeSup α] [OrderBot α]
-
-def sup (f : ι → α) : α := (Finset.univ : Finset ι).sup f
-
-@[simp] lemma elem_le_sup (f : ι → α) (i : ι) : f i ≤ sup f := Finset.le_sup (by simp)
-
-lemma le_sup {a : α} {f : ι → α} (i : ι) (le : a ≤ f i) : a ≤ sup f := le_trans le (elem_le_sup _ _)
-
-@[simp] lemma sup_le_iff {f : ι → α} {a : α} :
-    sup f ≤ a ↔ (∀ i, f i ≤ a) := by simp [sup]
-
-@[simp] lemma finsup_eq_0_of_empty [IsEmpty ι] (f : ι → α) : sup f = ⊥ := by simp [sup]
-
-end
-
-def decideEqPi {β : ι → Type*} (a b : (i : ι) → β i) (_ : (i : ι) → Decidable (a i = b i)) : Decidable (a = b) :=
-  decidable_of_iff (∀ i, a i = b i) funext_iff.symm
-
-end Fintype
-
 namespace String
 
 def vecToStr : ∀ {n}, (Fin n → String) → String
@@ -665,71 +615,6 @@ end suffix
 
 end List
 
-namespace List.Vector
-
-variable {α : Type*}
-
-lemma get_mk_eq_get {n} (l : List α) (h : l.length = n) (i : Fin n) : List.Vector.get (⟨l, h⟩ : List.Vector α n) i = l.get (i.cast h.symm) := rfl
-
-lemma get_one {α : Type*} {n} (v : Vector α (n + 2)) : v.get 1 = v.tail.head := by
-  rw [←Vector.get_zero, Vector.get_tail_succ]; rfl
-
-lemma ofFn_vecCons (a : α) (v : Fin n → α) :
-    ofFn (a :> v) = a ::ᵥ ofFn v := by
-  ext i; cases i using Fin.cases <;> simp
-
-end List.Vector
-
-namespace Finset
-
-variable {α : Type u} {β : Type v} {γ : Type w}
-
-noncomputable def rangeOfFinite {ι : Sort v} [Finite ι] (f : ι → α) : Finset α :=
-  Set.Finite.toFinset (s := Set.range f) (Set.finite_range f)
-
-lemma mem_rangeOfFinite_iff  {ι : Sort v} [Finite ι] {f : ι → α} {a : α} :
-    a ∈ rangeOfFinite f ↔ ∃ i : ι, f i = a := by simp [rangeOfFinite]
-
-noncomputable def imageOfFinset [DecidableEq β] (s : Finset α) (f : (a : α) → a ∈ s → β) : Finset β :=
-  Finset.biUnion s (rangeOfFinite $ f ·)
-
-lemma mem_imageOfFinset_iff [DecidableEq β] {s : Finset α} {f : (a : α) → a ∈ s → β} {b : β} :
-    b ∈ imageOfFinset s f ↔ ∃ (a : α) (ha : a ∈ s), f a ha = b := by
-  simp [imageOfFinset, mem_rangeOfFinite_iff]
-
-@[simp] lemma mem_imageOfFinset  [DecidableEq β] {s : Finset α} (f : (a : α) → a ∈ s → β) (a : α) (ha : a ∈ s) :
-    f a ha ∈ imageOfFinset s f := by simpa [mem_imageOfFinset_iff] using ⟨a, ha, rfl⟩
-
-lemma erase_union [DecidableEq α] {a : α} {s t : Finset α} :
-  (s ∪ t).erase a = (s.erase a) ∪ (t.erase a) := by ext; simp [and_or_left]
-
-@[simp] lemma equiv_univ {α α'} [Fintype α] [Fintype α'] [DecidableEq α'] (e : α ≃ α') :
-    (Finset.univ : Finset α).image e = Finset.univ := by ext x; simp
-
-@[simp] lemma sup_univ_equiv {α α'} [DecidableEq α] [Fintype α] [Fintype α'] [SemilatticeSup β] [OrderBot β] (f : α → β) (e : α' ≃ α) :
-    Finset.sup Finset.univ (fun i => f (e i)) = Finset.sup Finset.univ f := by
-  simpa [Function.comp] using Eq.symm <| Finset.sup_image Finset.univ e f
-
-lemma sup_univ_cast {α : Type _} [SemilatticeSup α] [OrderBot α] {n} (f : Fin n → α) (n') {h : n' = n} :
-    Finset.sup Finset.univ (fun (i : Fin n') => f (i.cast h)) = Finset.sup Finset.univ f := by rcases h with rfl; simp
-
-end Finset
-
-namespace Denumerable
-
-lemma lt_of_mem_list : ∀ n i, i ∈ Denumerable.ofNat (List ℕ) n → i < n
-  |     0 => by simp
-  | n + 1 => by
-    have : n.unpair.2 < n + 1 := Nat.lt_succ_of_le (Nat.unpair_right_le n)
-    suffices (Nat.unpair n).1 < n + 1 ∧ ∀ a ∈ ofNat (List ℕ) (Nat.unpair n).2, a < n + 1 by simpa
-    constructor
-    · exact Nat.lt_succ_of_le (Nat.unpair_left_le n)
-    · intro i hi
-      have : i < n.unpair.2 := lt_of_mem_list n.unpair.2 i hi
-      exact lt_trans this (Nat.lt_succ_of_le $ Nat.unpair_right_le n)
-
-end Denumerable
-
 namespace Part
 
 @[simp] lemma mem_vector_mOfFn : ∀ {n : ℕ} {w : List.Vector α n} {v : Fin n →. α},
@@ -743,32 +628,3 @@ namespace Part
     · intro h; exact ⟨w.head, by simpa using h 0, w.tail, fun i => by simpa using h i.succ, by simp⟩
 
 end Part
-
-namespace Set
-
-variable {α : Type*}
-
-lemma subset_mem_chain_of_finite (c : Set (Set α)) (hc : Set.Nonempty c) (hchain : IsChain (· ⊆ ·) c)
-    {s} (hfin : Set.Finite s) : s ⊆ ⋃₀ c → ∃ t ∈ c, s ⊆ t :=
-  Set.Finite.induction_on s hfin
-    (by rcases hc with ⟨t, ht⟩; intro; exact ⟨t, ht, by simp⟩)
-    (by intro a s _ _ ih h
-        have : ∃ t ∈ c, s ⊆ t := ih (subset_trans (Set.subset_insert a s) h)
-        rcases this with ⟨t, htc, ht⟩
-        have : ∃ u ∈ c, a ∈ u := by
-          have : (∃ t ∈ c, a ∈ t) ∧ s ⊆ ⋃₀ c := by simpa [Set.insert_subset_iff] using h
-          exact this.1
-        rcases this with ⟨u, huc, hu⟩
-        have : ∃ z ∈ c, t ⊆ z ∧ u ⊆ z := IsChain.directedOn hchain t htc u huc
-        rcases this with ⟨z, hzc, htz, huz⟩
-        exact ⟨z, hzc, Set.insert_subset (huz hu) (Set.Subset.trans ht htz)⟩)
-
-end Set
-
-class Exp (α : Type*) where
-  exp : α → α
-export Exp (exp)
-
-/-- Class for `α` has at least `n` elements -/
-class Atleast (n : ℕ+) (α) where
-  mapping : ∃ f : Fin n → α, Function.HasLeftInverse f

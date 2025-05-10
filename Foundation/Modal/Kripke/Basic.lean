@@ -1,6 +1,7 @@
 import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
+import Mathlib.Tactic.TautoSet
 
 namespace LO.Modal
 

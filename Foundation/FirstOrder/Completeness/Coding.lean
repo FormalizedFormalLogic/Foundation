@@ -1,4 +1,6 @@
 import Foundation.FirstOrder.Basic
+import Mathlib.Logic.Encodable.Pi
+
 
 namespace LO
 

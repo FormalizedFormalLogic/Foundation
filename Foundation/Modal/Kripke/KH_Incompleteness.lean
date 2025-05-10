@@ -1,6 +1,7 @@
 import Foundation.Modal.Kripke.AxiomL
 import Foundation.Modal.Hilbert.WellKnown
 import Mathlib.Order.Interval.Finset.Nat
+import Mathlib.Data.Finset.Max
 
 namespace LO.Modal
 

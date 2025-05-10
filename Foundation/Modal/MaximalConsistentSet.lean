@@ -1,5 +1,8 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.K
+import Foundation.Vorspiel.Order.Zorn
+import Mathlib.Tactic.TautoSet
+import Mathlib.Order.Zorn
 
 namespace LO.Modal
 

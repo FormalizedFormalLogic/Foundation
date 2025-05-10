@@ -1,5 +1,6 @@
 import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Propositional.Hilbert.Basic
+import Mathlib.Tactic.TautoSet
 
 namespace LO.Propositional
 

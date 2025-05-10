@@ -1,5 +1,6 @@
 import Foundation.Propositional.ClassicalSemantics.NNFormula
 import Foundation.Propositional.Tait.Calculus
+import Foundation.Vorspiel.Order.Zorn
 
 namespace LO.Propositional
 

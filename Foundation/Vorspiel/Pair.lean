@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.Vorspiel.Vorspiel
+import Foundation.Vorspiel.Vorspiel
 
 class Pair (α : Type*) where
   pair : α → α → α

@@ -1,5 +1,5 @@
 import Foundation.Arithmetization.ISigmaOne.Bit
-import Foundation.Arithmetization.Vorspiel.ExistsUnique
+import Foundation.Vorspiel.ExistsUnique
 
 /-!
 

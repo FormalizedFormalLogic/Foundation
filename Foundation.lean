@@ -98,10 +98,6 @@ import Foundation.Modal.Logic.Sublogic.Trivials
 import Foundation.Modal.Maximal.Makinson
 
 -- Arithmetization
-import Foundation.Arithmetization.Vorspiel.Vorspiel
-import Foundation.Arithmetization.Vorspiel.Graph
-import Foundation.Arithmetization.Vorspiel.Lemmata
-
 import Foundation.Arithmetization.Definability.Init
 import Foundation.Arithmetization.Definability.Hierarchy
 import Foundation.Arithmetization.Definability.Boldface
