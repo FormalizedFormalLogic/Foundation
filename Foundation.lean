@@ -19,6 +19,7 @@ import Foundation.Propositional.Heyting.Semantics
 import Foundation.Propositional.Logic.Disjunctive
 import Foundation.Propositional.Logic.WellKnown
 import Foundation.Propositional.Logic.Sublogic
+import Foundation.Propositional.Logic.Sublogic.BD
 import Foundation.Propositional.Logic.Letterless_Int_Cl
 
 -- FirstOrder

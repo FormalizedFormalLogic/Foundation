@@ -1,6 +1,7 @@
 import Mathlib.Data.List.Nodup
 import Mathlib.Data.List.Range
 import Foundation.Vorspiel.Fin.Supplemental
+import Foundation.Vorspiel.List.Supplemental
 
 lemma Nat.zero_lt_of_not_zero {n : ℕ} (hn : n ≠ 0) : 0 < n := by omega;
 
@@ -39,29 +40,6 @@ lemma range.le_chain' : List.Chain' (· < ·) (List.range n) := by
   | 0 => simp [List.range_zero]
   | n + 1 => apply le_chain'_succ;
 
-lemma finRange.le_chain'_succ : List.Chain' (· < ·) (List.finRange (n + 1)) := by
-  rw [finRange_succ];
-  induction n with
-  | zero => simp [finRange]
-  | succ n ih =>
-    rw [List.finRange_succ, List.map]
-    apply List.chain'_append_cons_cons (α := Fin (n + 2)) (l₁ := []) |>.mpr;
-    refine ⟨?_, ?_, ?_⟩;
-    . tauto;
-    . tauto;
-    . have := @List.chain'_map_of_chain'
-        (α := Fin (n + 1)) (β := Fin (n + 2)) (R := (· < ·)) (S := (· < ·))
-        (f := Fin.succ)
-        (by simp)
-        (l := 0 :: (map Fin.succ (finRange n)))
-      apply this;
-      exact ih;
-
-@[simp]
-lemma finRange.le_chain' : List.Chain' (· < ·) (List.finRange n) := by
-  match n with
-  | 0 => simp [List.finRange_zero]
-  | n + 1 => apply finRange.le_chain'_succ;
 
 end
 
@@ -72,6 +50,11 @@ variable {R} [IsTrans α R] {l : List α} {i j : Fin l.length}
 
 lemma of_lt (h : List.Chain' R l) (hij : i < j) : R (l.get i) (l.get j) :=
   List.pairwise_iff_get.mp (List.chain'_iff_pairwise.mp h) _ _ hij
+
+lemma of_le [IsRefl α R] (h : List.Chain' R l) (hij : i ≤ j) : R (l.get i) (l.get j) := by
+  rcases (lt_or_eq_of_le hij) with hij | rfl;
+  . apply of_lt h hij;
+  . apply IsRefl.refl;
 
 lemma connected_of_trans' (h : List.Chain' R l) (eij : i ≠ j) : R (l.get i) (l.get j) ∨ R (l.get j) (l.get i) := by
   rcases Nat.lt_trichotomy i j with (_ | _ | _);
@@ -126,6 +109,23 @@ lemma chain'_concat :  List.Chain' R (l.concat a) ↔ List.Chain' R l ∧ ∀ x 
       have : R x a := h₂ x hx;
       simpa;
 
+lemma chain'_of_trans_of_lt {l : List α} {R} [IsTrans _ R] (h : ∀ i j : Fin l.length, i < j → R l[i] l[j]) : l.Chain' R := by
+  induction l with
+  | nil => simp;
+  | cons x xs ih =>
+    apply List.chain'_cons'.mpr;
+    constructor;
+    . intro y hy;
+      replace hy := List.mem_head?_eq_head hy;
+      obtain ⟨hxs, rfl⟩ := hy;
+      have := h ⟨0, by simp⟩ ⟨1, ?_⟩ ?_;
+      . simpa [←(List.head_eq_getElem_zero hxs)] using this;
+      . simp [length_cons, lt_add_iff_pos_left, List.ne_nil_iff_length_pos.mp hxs];
+      . apply Fin.mk_lt_mk.mpr;
+        omega;
+    . apply ih;
+      rintro ⟨i, hi⟩ ⟨j, hj⟩ hij;
+      simpa using h ⟨i + 1, by simpa⟩ ⟨j + 1, by simpa⟩ (by simpa);
 
 section
 
@@ -180,9 +180,41 @@ lemma rel_getLast_of_chain'_preorder [IsPreorder _ R] (h : List.Chain' R l) (lh 
 
 end
 
+
 def embedding_of_exists_noDup {l : List α} (hl₁ : l.Nodup) (hl₂ : l.length = n) : Fin n ↪ α := by
   refine ⟨λ ⟨i, hi⟩ => l.get ⟨i, by omega⟩, ?_⟩;
   . rintro ⟨i, hi⟩ ⟨j, hj⟩ hij;
     simpa using (List.nodup_iff_injective_get (l := l) |>.mp hl₁) hij;
+
+lemma not_nodup_of_lt_length {l : List (Fin n)} : l.length > n → ¬l.Nodup := by
+  contrapose!;
+  intro h;
+  apply Fin.le_of_nonempty_embedding;
+  exact ⟨List.embedding_of_exists_noDup h (n := l.length) (by simp)⟩;
+
+
+namespace finRange
+
+variable {n : ℕ}
+
+@[simp]
+lemma chain'_le : List.finRange n |>.Chain' (· < ·) := by
+  apply chain'_of_trans_of_lt;
+  intro i j hij;
+  simpa;
+
+@[simp]
+lemma chain'_lt : List.finRange n |>.Chain' (· ≤ ·) := by
+  apply chain'_of_trans_of_lt;
+  intro i j hij;
+  apply le_of_lt;
+  simpa;
+
+@[simp]
+lemma noDup : List.finRange n |>.Nodup := by
+  apply List.nodup_iff_get_ne_get.mpr;
+  simp;
+
+end finRange
 
 end List

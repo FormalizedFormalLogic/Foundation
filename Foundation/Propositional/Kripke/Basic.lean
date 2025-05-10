@@ -35,6 +35,8 @@ instance [Finite F.World] : F.IsFinite := ⟨⟩
 @[trans] lemma trans (F : Frame) {x y z : F.World} : x ≺ y → y ≺ z → x ≺ z := F.rel_partial_order.trans x y z
 lemma antisymm (F : Frame) {x y : F.World} : x ≺ y → y ≺ x → x = y := F.rel_partial_order.antisymm x y
 
+noncomputable abbrev default (F : Frame) : F.World := F.world_nonempty.some
+
 end Frame
 
 section
@@ -95,11 +97,19 @@ variable {M : Kripke.Model} {w w' : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 
 @[simp] lemma and_def  : w ⊧ φ ⋏ ψ ↔ w ⊧ φ ∧ w ⊧ ψ := by simp [Satisfies];
 
+lemma not_and_def : ¬w ⊧ φ ⋏ ψ ↔ ¬w ⊧ φ ∨ ¬w ⊧ ψ := Iff.trans (Iff.not and_def) (by tauto)
+
 @[simp] lemma or_def   : w ⊧ φ ⋎ ψ ↔ w ⊧ φ ∨ w ⊧ ψ := by simp [Satisfies];
 
-@[simp] lemma imp_def  : w ⊧ φ ➝ ψ ↔ ∀ {w' : M.World}, (w ≺ w') → (w' ⊧ φ → w' ⊧ ψ) := by simp [Satisfies, imp_iff_not_or];
+lemma not_or_def : ¬w ⊧ φ ⋎ ψ ↔ ¬w ⊧ φ ∧ ¬w ⊧ ψ := Iff.trans (Iff.not or_def) (by simp_all)
+
+@[simp] lemma imp_def  : w ⊧ φ ➝ ψ ↔ ∀ {w'}, (w ≺ w') → (w' ⊧ φ → w' ⊧ ψ) := by simp [Satisfies, imp_iff_not_or];
+
+lemma not_imp_def : ¬w ⊧ φ ➝ ψ ↔ ∃ w', (w ≺ w') ∧ (w' ⊧ φ) ∧ ¬(w' ⊧ ψ) := Iff.trans (Iff.not imp_def) (by simp_all)
 
 @[simp] lemma neg_def  : w ⊧ ∼φ ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ φ) := by simp [Satisfies];
+
+lemma not_neg_def : ¬w ⊧ ∼φ ↔ ∃ w', (w ≺ w') ∧ (w' ⊧ φ) := Iff.trans (Iff.not neg_def) (by simp_all)
 
 lemma not_of_neg : w ⊧ ∼φ → ¬w ⊧ φ := fun h hC ↦ h (refl w) hC
 
