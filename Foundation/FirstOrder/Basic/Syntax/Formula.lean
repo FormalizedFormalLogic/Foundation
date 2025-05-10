@@ -561,6 +561,74 @@ lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
     (Semiformula.lMap Φ φ).freeVariables = φ.freeVariables := by
   induction φ using Semiformula.rec' <;> try simp [lMap_rel, lMap_nrel, freeVariables_rel, freeVariables_nrel, *]
 
+inductive IsIsomorphic : {n m : ℕ} → Semiformula L ξ n → Semiformula L ζ m → Prop
+  | rel (r : L.Rel k) (v v') : IsIsomorphic (.rel r v) (.rel r v')
+  | nrel (r : L.Rel k) (v v') : IsIsomorphic (.nrel r v) (.nrel r v')
+  | verum : IsIsomorphic ⊤ ⊤
+  | falsum : IsIsomorphic ⊥ ⊥
+  | and : IsIsomorphic φ₁ ψ₁ → IsIsomorphic φ₂ ψ₂ → IsIsomorphic (φ₁ ⋏ φ₂) (ψ₁ ⋏ ψ₂)
+  | or : IsIsomorphic φ₁ ψ₁ → IsIsomorphic φ₂ ψ₂ → IsIsomorphic (φ₁ ⋎ φ₂) (ψ₁ ⋎ ψ₂)
+  | fal : IsIsomorphic φ ψ → IsIsomorphic (∀' φ) (∀' ψ)
+  | ex : IsIsomorphic φ ψ → IsIsomorphic (∃' φ) (∃' ψ)
+
+attribute [simp] IsIsomorphic.rel IsIsomorphic.nrel IsIsomorphic.verum IsIsomorphic.falsum
+
+namespace IsIsomorphic
+
+@[simp] lemma and_iff {φ₁ φ₂ : Semiformula L ξ n} {ψ₁ ψ₂ : Semiformula L ζ m} :
+    (φ₁ ⋏ φ₂).IsIsomorphic (ψ₁ ⋏ ψ₂) ↔ φ₁.IsIsomorphic ψ₁ ∧ φ₂.IsIsomorphic ψ₂ := by
+  constructor
+  · rintro ⟨⟩; simp_all
+  · rintro ⟨hφ, hψ⟩; exact .and hφ hψ
+
+@[simp] lemma or_iff {φ₁ φ₂ : Semiformula L ξ n} {ψ₁ ψ₂ : Semiformula L ζ m} :
+    (φ₁ ⋎ φ₂).IsIsomorphic (ψ₁ ⋎ ψ₂) ↔ φ₁.IsIsomorphic ψ₁ ∧ φ₂.IsIsomorphic ψ₂ := by
+  constructor
+  · rintro ⟨⟩; simp_all
+  · rintro ⟨hφ, hψ⟩; exact .or hφ hψ
+
+@[simp] lemma fal_iff {φ : Semiformula L ξ (n + 1)} {ψ : Semiformula L ζ (m + 1)} :
+    (∀' φ).IsIsomorphic (∀' ψ) ↔ φ.IsIsomorphic ψ := by
+  constructor
+  · rintro ⟨⟩; simp_all
+  · exact .fal
+
+@[simp] lemma ex_iff {φ : Semiformula L ξ (n + 1)} {ψ : Semiformula L ζ (m + 1)} :
+    (∃' φ).IsIsomorphic (∃' ψ) ↔ φ.IsIsomorphic ψ := by
+  constructor
+  · rintro ⟨⟩; simp_all
+  · exact .ex
+
+@[simp, refl] protected lemma refl (φ : Semiformula L ξ n) :
+    φ.IsIsomorphic φ := by induction φ using rec' <;> simp [*]
+
+@[symm] protected lemma symm {φ : Semiformula L ξ n} {ψ : Semiformula L ζ m} :
+    φ.IsIsomorphic ψ → ψ.IsIsomorphic φ := fun h ↦ by
+  induction h <;> simp [*]
+
+end IsIsomorphic
+
+inductive IsGeneralizedSubformula : {n m : ℕ} → Semiformula L ξ n → Semiformula L ζ m → Prop
+  | rel (r : L.Rel k) (v v') : IsGeneralizedSubformula (.rel r v) (.rel r v')
+  | nrel (r : L.Rel k) (v v') : IsGeneralizedSubformula (.nrel r v) (.nrel r v')
+  | verum : IsGeneralizedSubformula ⊤ ⊤
+  | falsum : IsGeneralizedSubformula ⊥ ⊥
+  | and : IsGeneralizedSubformula φ ψ₁ → IsGeneralizedSubformula φ (ψ₁ ⋏ ψ₂)
+  | and_left : IsGeneralizedSubformula φ ψ₁ → IsGeneralizedSubformula φ (ψ₁ ⋏ ψ₂)
+  | and_right : IsGeneralizedSubformula φ ψ₂ → IsGeneralizedSubformula φ (ψ₁ ⋏ ψ₂)
+  | or_left : IsGeneralizedSubformula φ ψ₁ → IsGeneralizedSubformula φ (ψ₁ ⋎ ψ₂)
+  | or_right : IsGeneralizedSubformula φ ψ₂ → IsGeneralizedSubformula φ (ψ₁ ⋎ ψ₂)
+  | fal : IsGeneralizedSubformula φ ψ → IsGeneralizedSubformula φ (∀' ψ)
+  | ex : IsGeneralizedSubformula φ ψ → IsGeneralizedSubformula φ (∃' ψ)
+
+infix:60 " ≤ᵍˢᵘᵇ " => IsGeneralizedSubformula
+
+namespace IsGeneralizedSubformula
+
+attribute [simp] IsGeneralizedSubformula.rel IsGeneralizedSubformula.nrel
+
+end IsGeneralizedSubformula
+
 end Semiformula
 
 abbrev Theory (L : Language) := Set (SyntacticFormula L)

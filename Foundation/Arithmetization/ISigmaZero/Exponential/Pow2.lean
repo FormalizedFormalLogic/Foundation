@@ -308,13 +308,12 @@ lemma mul_add_lt_of_mul_lt_of_pos {a b p q : V} (hp : Pow2 p) (hq : Pow2 q)
   rcases zero_le a with (rfl | pos)
   · simp [hbq]
   have : p ∣ q :=
-    dvd_of_le hp hq (le_of_lt $
-      lt_of_mul_lt_of_one_le_of_nonneg_left (by simpa [mul_comm a p] using h) (pos_iff_one_le.mp pos) (by simp))
+    dvd_of_le hp hq (le_of_lt <| lt_of_le_of_lt (le_mul_of_pos_left pos) h)
   rcases this with ⟨q, rfl⟩
   have : a < q := lt_of_mul_lt_mul_right (a := p) (by simpa [mul_comm] using h)
   calc
     a * p + b < (a + 1) * p := by simp [add_mul, hb]
-    _         ≤ p * q       := by simp [mul_comm p q]; exact mul_le_mul_right (lt_iff_succ_le.mp this)
+    _         ≤ p * q       := by simpa [mul_comm p q] using mul_le_mul_right (lt_iff_succ_le.mp this)
 
 end Pow2
 

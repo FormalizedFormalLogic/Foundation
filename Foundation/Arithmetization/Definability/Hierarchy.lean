@@ -1,5 +1,4 @@
 import Foundation.Arithmetization.Vorspiel.Lemmata
-import Foundation.FirstOrder.Arith.StrictHierarchy
 
 /-!
 

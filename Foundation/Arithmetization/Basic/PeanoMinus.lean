@@ -51,7 +51,7 @@ instance sub_definable (ℌ : HierarchySymbol) : ℌ.BoldfaceFunction₂ ((· - 
 instance sub_polybounded : Bounded₂ ((· - ·) : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
 
 @[simp] lemma sub_self (a : V) : a - a = 0 :=
-  add_right_eq_self.mp (sub_spec_of_ge (a := a) (b := a) (by rfl)).symm
+  add_eq_left.mp (sub_spec_of_ge (a := a) (b := a) (by rfl)).symm
 
 lemma sub_spec_of_le (h : a ≤ b) : a - b = 0 := by
   rcases lt_or_eq_of_le h with (lt | rfl) <;> simp [sub_spec_of_lt, *]
@@ -138,6 +138,9 @@ lemma sub_succ_add_succ {x y : V} (h : y < x) (z) : x - (y + 1) + (z + 1) = x - 
 lemma le_sub_one_of_lt {a b : V} (h : a < b) : a ≤ b - 1 := by
   have : 1 ≤ b := one_le_of_zero_lt _ (pos_of_gt h)
   simp [le_iff_lt_succ, sub_add_self_of_le this, h]
+
+instance : AddCancelCommMonoid V where
+ add_left_cancel x y z e := by simpa using congr_arg (· - x) e
 
 end sub
 

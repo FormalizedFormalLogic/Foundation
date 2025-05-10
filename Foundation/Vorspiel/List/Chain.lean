@@ -167,7 +167,7 @@ lemma rel_getLast_of_chain'_trans [IsTrans _ R] (h : List.Chain' R l) (lh : l �
     . by_contra hC;
       apply hx₂;
       dsimp [i, j] at hC;
-      convert List.getLast_eq_getElem _ lh |>.symm;
+      convert List.getLast_eq_getElem lh |>.symm;
       have := List.get_finIdxOf (hx := hx₁) |>.symm;
       rwa [hC] at this;
 

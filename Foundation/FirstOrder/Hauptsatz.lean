@@ -130,7 +130,7 @@ scoped instance : Min ℙ := ⟨fun p q ↦ p ++ q⟩
 
 lemma inf_def (p q : ℙ) : p ⊓ q = p ++ q := rfl
 
-@[simp] lemma neg_inf_p_eq (p q : ℙ) : ∼(p ⊓ q) = ∼p ⊓ ∼q := List.map_append _ _ _
+@[simp] lemma neg_inf_p_eq (p q : ℙ) : ∼(p ⊓ q) = ∼p ⊓ ∼q := List.map_append
 
 namespace StrongerThan
 
