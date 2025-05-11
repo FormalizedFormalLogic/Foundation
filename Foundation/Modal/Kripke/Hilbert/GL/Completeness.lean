@@ -2,6 +2,76 @@ import Foundation.Modal.Entailment.GL
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Hilbert.GL.Soundness
 
+namespace LO.Entailment
+
+
+section
+
+variable {F : Type*} [LogicalConnective F] [DecidableEq F]
+         {S : Type*} [Entailment F S]
+         {𝓢 : S} [Entailment.Minimal 𝓢]
+         {φ ψ ξ χ : F}
+
+open NegationEquiv
+open FiniteContext
+open List
+
+lemma iff_provable_context_provable_finiteContext_toList {Δ : Finset F} : ↑Δ *⊢[𝓢]! φ ↔ Δ.toList ⊢[𝓢]! φ := by
+  constructor;
+  . intro h;
+    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
+    apply weakening! ?_ hΓ₂;
+    intro ψ hψ;
+    simpa using hΓ₁ ψ hψ;
+  . intro h;
+    apply Context.provable_iff.mpr;
+    use Δ.toList;
+    constructor;
+    . simp;
+    . assumption;
+
+lemma CFconjFconj!_of_provable {Γ Δ : Finset _} (h : ∀ φ, φ ∈ Γ → Δ *⊢[𝓢]! φ) : 𝓢 ⊢! Δ.conj ➝ Γ.conj := by
+  have : 𝓢 ⊢! ⋀(Δ.toList) ➝ ⋀(Γ.toList) := CConj₂Conj₂!_of_provable $ by
+    intro φ hφ;
+    apply iff_provable_context_provable_finiteContext_toList.mp
+    apply h φ;
+    simpa using hφ;
+  refine C!_replace ?_ ?_ this;
+  . simp;
+  . simp;
+
+end
+
+
+section
+
+variable {F : Type*} [BasicModalLogicalConnective F] [DecidableEq F]
+         {S : Type*} [Entailment F S]
+         {𝓢 : S} [Entailment.Modal.K 𝓢]
+         {φ ψ ξ χ : F}
+
+open NegationEquiv
+open FiniteContext
+open List
+
+lemma Context.nec! {Γ : Set F} (h : Γ *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! □φ := by
+  apply Context.provable_iff.mpr;
+  obtain ⟨Δ, hΔ₁, hΔ₂⟩ := Context.provable_iff.mp h;
+  have : Δ.box ⊢[𝓢]! □φ := contextual_nec! hΔ₂;
+  use Δ.box;
+  constructor;
+  . intro ψ hψ;
+    obtain ⟨ψ, hψ, rfl⟩ := List.exists_box_of_mem_box hψ;
+    simp_all;
+  . assumption;
+
+end
+
+
+
+end LO.Entailment
+
+
 namespace LO.Modal
 
 open Kripke
@@ -66,62 +136,52 @@ lemma truthlemma_lemma1
 
 lemma truthlemma_lemma2
   {X : ComplementClosedConsistentFinset Hilbert.GL φ.subformulas}
-  (hq₁ : □ψ ∈ φ.subformulas)
-  (hq₂ : □ψ ∉ X)
+  (hψ₁ : □ψ ∈ φ.subformulas)
+  (hψ₂ : □ψ ∉ X)
   : FormulaFinset.Consistent Hilbert.GL ((X.1.prebox ∪ X.1.prebox.box) ∪ {□ψ, -ψ}) := by
   apply FormulaFinset.intro_union_consistent;
-  rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
-
-  replace hΓ₂ : ∀ χ ∈ Γ₂, χ = □ψ ∨ χ = -ψ := by
-    intro χ hr;
-    simpa using hΓ₂ χ hr;
-
+  rintro Γ₁ Γ₂ hΓ₁ hΓ₂;
   by_contra hC;
-  have : Γ₁ ⊢[_]! ⋀Γ₂ ➝ ⊥ := provable_iff.mpr $ CK!_iff_CC!.mp hC;
-  have : Γ₁ ⊢[_]! (□ψ ⋏ -ψ) ➝ ⊥ := C!_trans (by
-    suffices Γ₁ ⊢[Hilbert.GL]! ⋀[□ψ, -ψ] ➝ ⋀Γ₂ by
-      simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
-    apply CConj₂Conj₂!_of_subset;
-    simpa using hΓ₂;
-  ) this;
-  have : Γ₁ ⊢[_]! □ψ ➝ -ψ ➝ ⊥ := CK!_iff_CC!.mp this;
-  have : Γ₁ ⊢[Hilbert.GL]! □ψ ➝ ψ := by
-    rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
-    . rw [hp] at this;
-      exact C!_trans this dne!;
-    . simpa only [complement] using this;
-  have : (Γ₁.box) ⊢[_]! □(□ψ ➝ ψ) := contextual_nec! this;
-  have : (Γ₁.box) ⊢[_]! □ψ := axiomL! ⨀ this;
-  have : _ ⊢! ⋀Γ₁.box ➝ □ψ := provable_iff.mp this;
-  have : _ ⊢! ⋀(X.1.prebox ∪ X.1.prebox.box |>.toList).box ➝ □ψ := C!_trans (CConj₂Conj₂!_of_subset (by
-    intro χ hχ;
-    obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hχ;
-    apply List.box_mem_of;
-    simp_all;
-  )) this;
-  have : _ ⊢! ⋀(X.1.prebox.toList).box ➝ □ψ := C!_trans (CConj₂Conj₂!_of_provable (by
-    intro χ hχ;
-    obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hχ;
-    replace hξ : □ξ ∈ ↑X ∨ ∃ a, □a ∈ ↑X ∧ □a = ξ := by simpa using hξ;
-    rcases hξ with (hξ | ⟨ξ, hξ, rfl⟩);
-    . apply FiniteContext.by_axm!;
-      apply List.box_mem_of;
-      simpa;
-    . apply axiomFour'!;
-      apply FiniteContext.by_axm!;
-      apply List.box_mem_of;
-      simpa;
-  )) this;
-  have : X *⊢[Hilbert.GL]! □ψ := by
-    apply Context.provable_iff.mpr;
-    use X.1.prebox.toList.box;
-    constructor;
-    . intro ψ hψ;
-      obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hψ;
-      simp_all;
-    . assumption;
-  have : □ψ ∈ X := membership_iff hq₁ |>.mpr this;
-  contradiction;
+  apply hψ₂;
+  have := Context.deduct! $ Context.weakening! (Γ := Γ₁ ∪ Γ₂) (Δ := insert (-ψ) (insert (□ψ) Γ₁)) ?_ hC;
+  . replace : (insert (□ψ) Γ₁) *⊢[Hilbert.GL]! ψ := by
+      rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
+      . rw [hp] at this;
+        apply of_NN!;
+        apply N!_iff_CO!.mp this;
+      . simp only [complement] at this;
+        apply N!_iff_CO!.mpr this;
+    replace := Context.deduct! this;
+    replace : ↑Γ₁.box *⊢[Hilbert.GL]! □(□ψ ➝ ψ) := by simpa using Context.nec! this;
+    replace := axiomL! ⨀ this;
+    replace : (X.1.prebox.box ∪ X.1.prebox.multibox 2) *⊢[Hilbert.GL]! □ψ := Context.weakening! ?_ this;
+    . replace : X.1.prebox.box *⊢[Hilbert.GL]! (X.1.prebox.multibox 2).conj ➝ □ψ := FConj_DT'.mpr $ by simpa using this;
+      replace : X.1.prebox.box *⊢[Hilbert.GL]! (X.1.prebox.box).conj ➝ □ψ := C!_trans ?_ this;
+      . have := FConj_DT'.mp this;
+        have : X *⊢[Hilbert.GL]! □ψ := by
+          apply Context.provable_iff_finset.mpr;
+          use X.1.prebox.box;
+          constructor;
+          . simp;
+          . simpa using this;
+        exact membership_iff hψ₁ |>.mpr this;
+      . apply CFconjFconj!_of_provable;
+        intro ξ hξ;
+        obtain ⟨ξ, h, rfl⟩ := Finset.exists_multibox_of_mem_multibox hξ;
+        apply axiomFour'!;
+        apply Context.by_axm!
+        simpa using h;
+    . simp only [Finset.coe_image, Function.iterate_one, Finset.coe_preimage, Box.multibox_succ, Set.image_subset_iff, Set.preimage_union, Box.box_injective, Set.preimage_image_eq];
+      intro ξ hξ;
+      simpa using hΓ₁ hξ;
+  . intro ξ;
+    simp only [Set.mem_union, Finset.mem_coe, Set.mem_insert_iff];
+    rintro (hξ₁ | hξ₂);
+    . have := hΓ₁ hξ₁;
+      tauto;
+    . have := hΓ₂ hξ₂;
+      simp at this;
+      tauto;
 
 -- TODO: `subformula` tactic cannot handle, I don't know why.
 lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformulas) :
