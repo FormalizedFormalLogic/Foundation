@@ -144,26 +144,15 @@ lemma truthlemma_lemma2
   by_contra hC;
   apply hψ₂;
   have := Context.deduct! $ Context.weakening! (Γ := Γ₁ ∪ Γ₂) (Δ := insert (-ψ) (insert (□ψ) Γ₁)) ?_ hC;
-  . replace : (insert (□ψ) Γ₁) *⊢[Hilbert.GL]! ψ := by
-      rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
-      . rw [hp] at this;
-        apply of_NN!;
-        apply N!_iff_CO!.mp this;
-      . simp only [complement] at this;
-        apply N!_iff_CO!.mpr this;
+  . replace : (insert (□ψ) Γ₁) *⊢[Hilbert.GL]! ψ := of_imply_complement_bot this;
     replace := Context.deduct! this;
     replace : ↑Γ₁.box *⊢[Hilbert.GL]! □(□ψ ➝ ψ) := by simpa using Context.nec! this;
     replace := axiomL! ⨀ this;
     replace : (X.1.prebox.box ∪ X.1.prebox.multibox 2) *⊢[Hilbert.GL]! □ψ := Context.weakening! ?_ this;
     . replace : X.1.prebox.box *⊢[Hilbert.GL]! (X.1.prebox.multibox 2).conj ➝ □ψ := FConj_DT'.mpr $ by simpa using this;
       replace : X.1.prebox.box *⊢[Hilbert.GL]! (X.1.prebox.box).conj ➝ □ψ := C!_trans ?_ this;
-      . have := FConj_DT'.mp this;
-        have : X *⊢[Hilbert.GL]! □ψ := by
-          apply Context.provable_iff_finset.mpr;
-          use X.1.prebox.box;
-          constructor;
-          . simp;
-          . simpa using this;
+      . replace := FConj_DT'.mp this;
+        have : X *⊢[Hilbert.GL]! □ψ := Context.weakening! (by simp) this;
         exact membership_iff hψ₁ |>.mpr this;
       . apply CFconjFconj!_of_provable;
         intro ξ hξ;
