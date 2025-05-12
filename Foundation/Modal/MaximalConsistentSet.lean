@@ -2,49 +2,6 @@ import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.K
 import Foundation.Vorspiel.Set.Supplemental
 
-namespace LO.Entailment
-
-variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Minimal 𝓢]
-         {φ ψ ξ χ : F}
-
-open NegationEquiv
-open FiniteContext
-open List
-
-namespace Context
-
-variable {Γ : Set F}
-
-lemma provable_iff_finset {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (Δ.toSet ⊆ Γ) ∧ Δ *⊢[𝓢]! φ := by
-  apply Iff.trans provable_iff;
-  constructor;
-  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
-    use Δ.toFinset;
-    constructor;
-    . simpa;
-    . apply provable_iff.mpr
-      use Δ;
-      constructor <;> simp_all;
-  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
-    use Δ.toList;
-    constructor;
-    . simpa;
-    . apply FiniteContext.provable_iff.mpr;
-      refine C!_trans ?_ (FConj_DT.mpr hΔ₂);
-      simp;
-
-lemma bot_of_mem_neg (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ *⊢[𝓢]! ⊥ := by
-  replace h₁ :  Γ *⊢[𝓢]! φ := by_axm! h₁;
-  replace h₂ :  Γ *⊢[𝓢]! φ ➝ ⊥ := N!_iff_CO!.mp $ by_axm! h₂;
-  exact h₂ ⨀ h₁;
-
-end Context
-
-end LO.Entailment
-
-
 namespace LO.Modal
 
 open Entailment
