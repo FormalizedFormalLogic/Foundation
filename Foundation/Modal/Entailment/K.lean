@@ -594,6 +594,17 @@ lemma provable_iff_boxed : (X.box) *⊢[𝓢]! φ ↔ ∃ Δ : List F, (∀ ψ �
     apply Context.provable_iff.mpr;
     use Δ.box;
 
+lemma nec! {Γ : Set F} (h : Γ *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! □φ := by
+  apply Context.provable_iff.mpr;
+  obtain ⟨Δ, hΔ₁, hΔ₂⟩ := Context.provable_iff.mp h;
+  have : Δ.box ⊢[𝓢]! □φ := contextual_nec! hΔ₂;
+  use Δ.box;
+  constructor;
+  . intro ψ hψ;
+    obtain ⟨ψ, hψ, rfl⟩ := List.exists_box_of_mem_box hψ;
+    simp_all;
+  . assumption;
+
 end Context
 
 end LO.Entailment

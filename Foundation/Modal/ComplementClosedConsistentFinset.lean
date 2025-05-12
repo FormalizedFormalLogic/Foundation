@@ -32,31 +32,29 @@ variable [Entailment.Cl 𝓢]
 
 @[simp]
 lemma empty_conisistent [Entailment.Consistent 𝓢] : FormulaFinset.Consistent 𝓢 ∅ := by
-  convert FormulaSet.emptyset_consistent (α := α);
-  . simp;
-  . simpa;
-  . assumption;
+  apply iff_theory_consistent_formulae_consistent.mp;
+  simp only [Finset.coe_empty];
+  apply FormulaSet.emptyset_consistent;
 
 lemma provable_iff_insert_neg_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (∼φ) Φ) ↔ ↑Φ *⊢[𝓢]! φ := by
-  convert @FormulaSet.provable_iff_insert_neg_not_consistent α _ _ _ _ (𝓢 := 𝓢) (T := ↑Φ) (φ := φ);
-  simp;
+  apply Iff.trans iff_inconsistent_inconsistent.symm;
+  simpa using FormulaSet.provable_iff_insert_neg_not_consistent;
 
 lemma neg_provable_iff_insert_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (φ) Φ) ↔ ↑Φ *⊢[𝓢]! ∼φ := by
-  convert @FormulaSet.neg_provable_iff_insert_not_consistent α _ _ _ _ (𝓢 := 𝓢) (T := ↑Φ) (φ := φ);
-  simp;
+  apply Iff.trans iff_inconsistent_inconsistent.symm;
+  simpa using FormulaSet.neg_provable_iff_insert_not_consistent;
 
 lemma unprovable_iff_singleton_neg_consistent : FormulaFinset.Consistent 𝓢 ({∼φ}) ↔ 𝓢 ⊬ φ := by
-  convert @FormulaSet.unprovable_iff_singleton_neg_consistent α _ _ _ _ (𝓢 := 𝓢) (φ := φ);
-  simp;
+  apply Iff.trans iff_theory_consistent_formulae_consistent.symm;
+  simpa using FormulaSet.unprovable_iff_singleton_neg_consistent;
 
 lemma unprovable_iff_singleton_compl_consistent : FormulaFinset.Consistent 𝓢 ({-φ}) ↔ 𝓢 ⊬ φ := by
   rcases (Formula.complement.or φ) with (hp | ⟨ψ, rfl⟩);
   . rw [hp];
-    convert FormulaSet.unprovable_iff_singleton_neg_consistent (𝓢 := 𝓢) (φ := φ);
-    simp;
+    apply unprovable_iff_singleton_neg_consistent;
   . simp only [Formula.complement];
-    convert FormulaSet.unprovable_iff_singleton_consistent (𝓢 := 𝓢) (φ := ψ);
-    simp;
+    apply Iff.trans iff_theory_consistent_formulae_consistent.symm;
+    simpa using FormulaSet.unprovable_iff_singleton_consistent;
 
 lemma provable_iff_singleton_compl_inconsistent : (FormulaFinset.Inconsistent 𝓢 ({-φ})) ↔ 𝓢 ⊢! φ := by
   constructor;
@@ -69,12 +67,12 @@ lemma provable_iff_singleton_compl_inconsistent : (FormulaFinset.Inconsistent �
     push_neg;
     apply unprovable_iff_singleton_compl_consistent.mp;
 
-lemma intro_union_consistent
-  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ P₁) ∧ (∀ φ ∈ Γ₂, φ ∈ P₂) → 𝓢 ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥)
+lemma intro_union_consistent (h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁ ⊆ P₁) → (Γ₂ ⊆ P₂) → (Γ₁ ∪ Γ₂) *⊬[𝓢] ⊥)
   : FormulaFinset.Consistent 𝓢 (P₁ ∪ P₂) := by
-  rw [←iff_theory_consistent_formulae_consistent];
+  apply iff_theory_consistent_formulae_consistent.mp;
   simpa using FormulaSet.intro_union_consistent h;
 
+/-
 lemma intro_triunion_consistent
   (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ P₁) ∧ (∀ φ ∈ Γ₂, φ ∈ P₂) ∧ (∀ φ ∈ Γ₃, φ ∈ P₃) → 𝓢 ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
   : FormulaFinset.Consistent 𝓢 (P₁ ∪ P₂ ∪ P₃) := by
@@ -92,6 +90,7 @@ lemma intro_triunion_consistent
     . left; left; assumption;
     . left; right; assumption;
     . right; assumption;
+-/
 
 end
 
