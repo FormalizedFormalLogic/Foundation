@@ -12,12 +12,17 @@ def x : V := ⌜Arith.exponentialDef.val⌝
 
 def y : V := ⌜remDef.val⌝
 
-example : ![(x : V)] 0 = x := by simp -- no memory leaks.
+example : ![(x : V)] 0 = x := by
+  simp -- no memory leaks.
 
-example : ∀ x : V, ![x, x] 0 = x := by simp -- no memory leaks.
+example : ∀ x : V, ![x, x] 0 = x := by
+  simp -- no memory leaks.
 
 example : ![(x : V), x] 0 = x := by
-  -- simp only [Matrix.cons_val_zero] -- memory leaks!
+  rw [Matrix.cons_val_zero] -- no memory leaks.
+
+example : ![(x : V), x] 0 = x := by
+  -- simp or simp only [Matrix.cons_val_zero] -- memory leaks!
   sorry
 
 example : ![(y : V), y] 0 = y := by
