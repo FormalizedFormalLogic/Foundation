@@ -118,7 +118,7 @@ example : ![(⌜σ⌝ : V)] 0 = ⌜σ⌝ := by simp -- no memory leaks.
 example : ∀ x : V, ![x, x] 0 = x := by simp -- no memory leaks.
 
 example : ![(⌜σ⌝ : V), ⌜σ⌝] 0 = ⌜σ⌝ := by
-  -- simp -- memory leaks!
+  --simp only [Matrix.cons_val_zero]-- simp -- memory leaks!
   sorry
 
 example : ![(⌜σ'⌝ : V), ⌜σ'⌝] 0 = ⌜σ'⌝ := by
