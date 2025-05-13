@@ -1,10 +1,6 @@
 import Foundation.Incompleteness.Arith.D3
-import Foundation.Logic.HilbertStyle.Supplemental
-import Foundation.Incompleteness.ToFoundation.Basic
 
-noncomputable section
-
-open Classical
+#eval Lean.versionString -- "4.20.0-rc2"
 
 namespace LO.Arith
 
