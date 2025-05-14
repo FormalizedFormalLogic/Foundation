@@ -24,8 +24,7 @@ instance Kripke.complete_finite : Complete (Hilbert.K) (FrameClass.finite_all) :
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFilterationModel M ↑φ.subformulas;
-
-  apply filteration FM (coarsestFilterationModel.filterOf) (by subformula) |>.mpr;
+  apply filteration FM (coarsestFilterationModel.filterOf) (by simp) |>.mpr;
   apply hp;
   apply Frame.isFinite_iff _ |>.mpr
   apply FilterEqvQuotient.finite;
