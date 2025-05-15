@@ -1,6 +1,8 @@
 import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.NNFormula
 import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Maximal.Basic
+import Foundation.Propositional.ClassicalSemantics.Hilbert
 
 namespace LO.Modal
 

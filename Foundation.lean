@@ -59,7 +59,6 @@ import Foundation.IntFO.Translation
 import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Hilbert.GL.Alternatives
-import Foundation.Modal.Hilbert.GL.Independency
 
 import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
 import Foundation.Modal.Kripke.Hilbert.GL.MDP

@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.GL.Independency
+import Foundation.Modal.Logic.GL.Independency
 import Foundation.ProvabilityLogic.GL.Completeness
 
 namespace LO
