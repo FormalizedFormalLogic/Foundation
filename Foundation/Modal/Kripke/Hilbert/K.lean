@@ -1,7 +1,7 @@
 import Foundation.Modal.Hilbert.K
 import Foundation.Modal.Kripke.Hilbert.Soundness
 import Foundation.Modal.Kripke.Completeness
-import Foundation.Modal.Kripke.Filteration
+import Foundation.Modal.Kripke.Filtration
 
 namespace LO.Modal
 
@@ -23,8 +23,8 @@ instance Kripke.complete_finite : Complete (Hilbert.K) (FrameClass.finite_all) :
   apply Kripke.complete.complete;
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
-  let FM := coarsestFilterationModel M ↑φ.subformulas;
-  apply filteration FM (coarsestFilterationModel.filterOf) (by simp) |>.mpr;
+  let FM := coarsestFiltrationModel M ↑φ.subformulas;
+  apply filtration FM (coarsestFiltrationModel.filterOf) (by simp) |>.mpr;
   apply hp;
   apply Frame.isFinite_iff _ |>.mpr
   apply FilterEqvQuotient.finite;

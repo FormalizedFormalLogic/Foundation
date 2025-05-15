@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.Hilbert.KT
 import Foundation.Modal.Kripke.Hilbert.KB
-import Foundation.Modal.Kripke.Filteration
+import Foundation.Modal.Kripke.Filtration
 
 namespace LO.Modal
 
@@ -37,13 +37,13 @@ instance finite_complete : Complete (Hilbert.KTB) Kripke.FrameClass.finite_refl_
   apply Kripke.complete.complete;
   intro F ⟨F_refl, F_symm⟩ V x;
   let M : Kripke.Model := ⟨F, V⟩;
-  let FM := finestFilterationModel M φ.subformulas;
-  apply filteration FM (finestFilterationModel.filterOf) (by subformula) |>.mpr;
+  let FM := finestFiltrationModel M φ.subformulas;
+  apply filtration FM (finestFiltrationModel.filterOf) (by subformula) |>.mpr;
   apply hp;
   refine ⟨?_, ?_, ?_⟩;
   . apply FilterEqvQuotient.finite; simp;
-  . apply Kripke.finestFilterationModel.isRefl;
-  . apply Kripke.finestFilterationModel.isSymm;
+  . apply Kripke.finestFiltrationModel.isRefl;
+  . apply Kripke.finestFiltrationModel.isSymm;
 ⟩
 
 end Hilbert.KTB.Kripke

@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.Hilbert.S4
 import Foundation.Modal.Kripke.AxiomPoint3
-import Foundation.Modal.Kripke.Filteration
+import Foundation.Modal.Kripke.Filtration
 import Foundation.Modal.Kripke.Rooted
 
 namespace LO.Modal
@@ -55,7 +55,7 @@ instance complete : Complete (Hilbert.S4Point3) Kripke.FrameClass.connected_preo
 section FFP
 
 open
-  finestFilterationTransitiveClosureModel
+  finestFiltrationTransitiveClosureModel
   Relation
 
 instance finite_sound : Sound (Hilbert.S4Point3) Kripke.FrameClass.finite_connected_preorder := instSound_of_validates_axioms $ by
@@ -73,15 +73,15 @@ instance finite_complete : Complete (Hilbert.S4Point3) Kripke.FrameClass.finite_
   let RM := M↾r;
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
-  let FRM := finestFilterationTransitiveClosureModel RM (φ.subformulas);
-  apply filteration FRM (finestFilterationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTrans)) (by subformula) |>.mpr;
+  let FRM := finestFiltrationTransitiveClosureModel RM (φ.subformulas);
+  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTrans)) (by subformula) |>.mpr;
   apply hφ;
 
   refine ⟨?_, ?_, ?_⟩;
   . apply Frame.isFinite_iff _ |>.mpr
     apply FilterEqvQuotient.finite;
     simp;
-  . exact finestFilterationTransitiveClosureModel.isPreorder (preorder := Frame.pointGenerate.isPreorder);
+  . exact finestFiltrationTransitiveClosureModel.isPreorder (preorder := Frame.pointGenerate.isPreorder);
   . apply isConnected_iff _ _ |>.mpr;
     rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
     . simp only [or_self];

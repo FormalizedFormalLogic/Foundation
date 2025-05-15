@@ -88,7 +88,7 @@ attribute [simp] FilterOf.def_world
 
 section
 
-theorem filteration
+theorem filtration
   {M : Model} (FM : Kripke.Model)
   {T : outParam (FormulaSet ℕ)} [T.IsSubformulaClosed]
   (filterOf : FilterOf FM M T)
@@ -142,7 +142,7 @@ instance isSerial [filterOf : FilterOf FM M T] [IsSerial _ M.Rel] : IsSerial _ F
 end FilterOf
 
 
-abbrev standardFilterationValuation (X : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M x a) (by
+abbrev standardFiltrationValuation (X : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M x a) (by
   intro x y h;
   apply eq_iff_iff.mpr;
   constructor;
@@ -158,7 +158,7 @@ variable
 
 section Coarsest
 
-abbrev coarsestFilterationFrame (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Frame where
+abbrev coarsestFiltrationFrame (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel := Quotient.lift₂ (λ x y => ∀ φ, □φ ∈ T → (x ⊧ □φ → y ⊧ φ)) (by
     intro x₁ y₁ x₂ y₂ hx hy;
@@ -168,21 +168,21 @@ abbrev coarsestFilterationFrame (M : Model) (T : FormulaSet ℕ) [T.IsSubformula
     . intro h φ hp sp₁; exact hy φ (of_mem_box hp) |>.mpr $ h φ hp $ hx (□φ) hp |>.mp sp₁;
   )
 
-abbrev coarsestFilterationModel (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Model where
-  toFrame := coarsestFilterationFrame M T
-  Val := standardFilterationValuation M T
+abbrev coarsestFiltrationModel (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Model where
+  toFrame := coarsestFiltrationFrame M T
+  Val := standardFiltrationValuation M T
 
-namespace coarsestFilterationModel
+namespace coarsestFiltrationModel
 
-instance filterOf : FilterOf (coarsestFilterationModel M T) M T where
+instance filterOf : FilterOf (coarsestFiltrationModel M T) M T where
   def_rel_forth := by tauto
   def_rel_back := by tauto
   def_valuation := by tauto
 
-instance [IsRefl _ M.Rel] : IsRefl _ (coarsestFilterationModel M T).Rel := coarsestFilterationModel.filterOf.isRefl
-instance [IsSerial _ M.Rel] : IsSerial _ (coarsestFilterationModel M T).Rel := coarsestFilterationModel.filterOf.isSerial
+instance [IsRefl _ M.Rel] : IsRefl _ (coarsestFiltrationModel M T).Rel := coarsestFiltrationModel.filterOf.isRefl
+instance [IsSerial _ M.Rel] : IsSerial _ (coarsestFiltrationModel M T).Rel := coarsestFiltrationModel.filterOf.isSerial
 
-end coarsestFilterationModel
+end coarsestFiltrationModel
 
 end Coarsest
 
@@ -190,18 +190,18 @@ end Coarsest
 
 section Finest
 
-abbrev finestFilterationFrame (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Frame where
+abbrev finestFiltrationFrame (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel X Y := ∃ x y, X = ⟦x⟧ ∧ Y = ⟦y⟧ ∧ x ≺ y
 
-abbrev finestFilterationModel (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Model where
-  toFrame := finestFilterationFrame M T
-  Val := standardFilterationValuation M T
+abbrev finestFiltrationModel (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Model where
+  toFrame := finestFiltrationFrame M T
+  Val := standardFiltrationValuation M T
 
 
-namespace finestFilterationModel
+namespace finestFiltrationModel
 
-instance filterOf : FilterOf (finestFilterationModel M T) M T where
+instance filterOf : FilterOf (finestFiltrationModel M T) M T where
   def_rel_forth := by tauto;
   def_rel_back := by
     simp only [cast_eq];
@@ -210,30 +210,30 @@ instance filterOf : FilterOf (finestFilterationModel M T) M T where
     have : y' ⊧ φ := this _ Rx'y';
     exact FilterEqvQuotient.iff_of_eq hy (of_mem_box hφ) |>.mpr this;
 
-instance isRefl [IsRefl _ M.Rel] : IsRefl _ (finestFilterationFrame M T).Rel := finestFilterationModel.filterOf.isRefl
-instance isSerial [IsSerial _ M.Rel] : IsSerial _ (finestFilterationFrame M T).Rel := finestFilterationModel.filterOf.isSerial
+instance isRefl [IsRefl _ M.Rel] : IsRefl _ (finestFiltrationFrame M T).Rel := finestFiltrationModel.filterOf.isRefl
+instance isSerial [IsSerial _ M.Rel] : IsSerial _ (finestFiltrationFrame M T).Rel := finestFiltrationModel.filterOf.isSerial
 
-instance isSymm [IsSymm _ M.Rel] : IsSymm _ (finestFilterationModel M T).Rel := ⟨by
+instance isSymm [IsSymm _ M.Rel] : IsSymm _ (finestFiltrationModel M T).Rel := ⟨by
   rintro _ _ ⟨x, y, rfl, rfl, Rxy⟩;
   use y, x;
   refine ⟨by trivial, by trivial, IsSymm.symm _ _ Rxy⟩;
 ⟩
 
-end finestFilterationModel
+end finestFiltrationModel
 
 
-abbrev finestFilterationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Model where
-  toFrame := (finestFilterationFrame M T)^+
-  Val := standardFilterationValuation M T
+abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Model where
+  toFrame := (finestFiltrationFrame M T)^+
+  Val := standardFiltrationValuation M T
 
-namespace finestFilterationTransitiveClosureModel
+namespace finestFiltrationTransitiveClosureModel
 
 open Relation in
-instance filterOf [trans : IsTrans _ M.Rel] : FilterOf (finestFilterationTransitiveClosureModel M T) M T where
+instance filterOf [trans : IsTrans _ M.Rel] : FilterOf (finestFiltrationTransitiveClosureModel M T) M T where
   def_rel_forth := by
     intro x y hxy;
     apply Relation.TransGen.single;
-    dsimp [finestFilterationTransitiveClosureModel, finestFilterationFrame];
+    dsimp [finestFiltrationTransitiveClosureModel, finestFiltrationFrame];
     tauto;
   def_rel_back := by
     rintro x y RXY φ hφ hx;
@@ -256,21 +256,21 @@ instance filterOf [trans : IsTrans _ M.Rel] : FilterOf (finestFilterationTransit
       apply FilterEqvQuotient.iff_of_eq exw (by assumption) |>.mp hx;
       exact _root_.trans Rwv Rvz;
 
-instance : IsTrans _ (finestFilterationTransitiveClosureModel M T).Rel := by
-  dsimp [finestFilterationTransitiveClosureModel]
+instance : IsTrans _ (finestFiltrationTransitiveClosureModel M T).Rel := by
+  dsimp [finestFiltrationTransitiveClosureModel]
   infer_instance;
 
-instance [IsPreorder _ M.Rel] : IsRefl _ (finestFilterationTransitiveClosureModel M T).Rel := finestFilterationTransitiveClosureModel.filterOf.isRefl
+instance [IsPreorder _ M.Rel] : IsRefl _ (finestFiltrationTransitiveClosureModel M T).Rel := finestFiltrationTransitiveClosureModel.filterOf.isRefl
 
-instance isPreorder [preorder : IsPreorder _ M.Rel] : IsPreorder _ (finestFilterationTransitiveClosureModel M T).Rel where
+instance isPreorder [preorder : IsPreorder _ M.Rel] : IsPreorder _ (finestFiltrationTransitiveClosureModel M T).Rel where
 
-instance [IsSerial _ M.Rel] [IsTrans _ M.Rel] : IsSerial _ (finestFilterationTransitiveClosureModel M T).Rel := finestFilterationTransitiveClosureModel.filterOf.isSerial
+instance [IsSerial _ M.Rel] [IsTrans _ M.Rel] : IsSerial _ (finestFiltrationTransitiveClosureModel M T).Rel := finestFiltrationTransitiveClosureModel.filterOf.isSerial
 
-instance [IsSymm _ M.Rel] : IsSymm _ (finestFilterationTransitiveClosureModel M T).Rel := by apply Frame.mkTransClosure.isSymm
+instance [IsSymm _ M.Rel] : IsSymm _ (finestFiltrationTransitiveClosureModel M T).Rel := by apply Frame.mkTransClosure.isSymm
 
-instance isEquiv [IsEquiv _ M.Rel] : IsEquiv _ (finestFilterationTransitiveClosureModel M T).Rel where
+instance isEquiv [IsEquiv _ M.Rel] : IsEquiv _ (finestFiltrationTransitiveClosureModel M T).Rel where
 
-end finestFilterationTransitiveClosureModel
+end finestFiltrationTransitiveClosureModel
 
 end Finest
 

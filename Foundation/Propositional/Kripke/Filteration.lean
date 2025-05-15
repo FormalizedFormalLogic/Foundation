@@ -109,7 +109,7 @@ section
 variable {M : Model} {T : FormulaSet ℕ} [T.SubformulaClosed]
          (FM : Model) (filterOf : FilterOf FM M T)
 
-theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subformula) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
+theorem filtration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subformula) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
   induction φ generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;
@@ -152,7 +152,7 @@ theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subfor
 
 end
 
-abbrev standardFilterationValuation (X : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M.Val x a) (by
+abbrev standardFiltrationValuation (X : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M.Val x a) (by
   intro x y h;
   apply eq_iff_iff.mpr;
   constructor;
@@ -161,7 +161,7 @@ abbrev standardFilterationValuation (X : FilterEqvQuotient M T) (a : ℕ) := (ha
 ) X
 
 
-abbrev coarsestFilterationFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
+abbrev coarsestFiltrationFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel := Quotient.lift₂ (λ x y => ∀ φ ∈ T, (x ⊧ φ → y ⊧ φ)) (by
     intro x₁ y₁ x₂ y₂ hx hy;
@@ -202,10 +202,10 @@ abbrev coarsestFilterationFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaCl
         exact RYX φ hφ₁ hφ₂;
   }
 
-abbrev coarsestFilterationModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
-  toFrame := coarsestFilterationFrame M T
+abbrev coarsestFiltrationModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
+  toFrame := coarsestFiltrationFrame M T
   Val := ⟨
-    standardFilterationValuation M T,
+    standardFiltrationValuation M T,
     by
       intro X Y RXY a hX ha;
       obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
@@ -214,7 +214,7 @@ abbrev coarsestFilterationModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaCl
       tauto;
   ⟩
 
-instance coarsestFilterationModel.filterOf {M} {T : FormulaSet ℕ} [T.SubformulaClosed] : FilterOf (coarsestFilterationModel M T) M T where
+instance coarsestFiltrationModel.filterOf {M} {T : FormulaSet ℕ} [T.SubformulaClosed] : FilterOf (coarsestFiltrationModel M T) M T where
   def_valuation := by tauto
   def_rel_forth := by
     intro x y Rxy;
@@ -230,7 +230,7 @@ open Formula.Kripke.Satisfies (formula_hereditary)
 
 variable {M T} [T.SubformulaClosed]
 
-abbrev finestFilterationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
+abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel := TransGen (λ X Y => ∃ x y, X = ⟦x⟧ ∧ Y = ⟦y⟧ ∧ x ≺ y)
   rel_partial_order := {
@@ -284,10 +284,10 @@ abbrev finestFilterationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) 
           exact ih u RUY this;
   }
 
-abbrev finestFilterationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
-  toFrame := (finestFilterationTransitiveClosureFrame M T)
+abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
+  toFrame := (finestFiltrationTransitiveClosureFrame M T)
   Val := ⟨
-    standardFilterationValuation M T,
+    standardFiltrationValuation M T,
     by
       intro X Y RXY a hX ha;
       obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
@@ -310,7 +310,7 @@ abbrev finestFilterationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) 
   ⟩
 
 
-instance finestFilterationTransitiveClosureModel.filterOf : FilterOf (finestFilterationTransitiveClosureModel M T) M T where
+instance finestFiltrationTransitiveClosureModel.filterOf : FilterOf (finestFiltrationTransitiveClosureModel M T) M T where
   def_valuation := by tauto
   def_rel_forth := by
     intro x y Rxy;
