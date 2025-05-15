@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Hilbert.Geach
-import Foundation.Modal.Kripke.Filteration
+import Foundation.Modal.Kripke.Filtration
 
 namespace LO.Modal
 
@@ -36,20 +36,20 @@ instance canonical : Canonical (Hilbert.S4) Kripke.FrameClass.preorder := ⟨by
 
 instance complete : Complete (Hilbert.S4) Kripke.FrameClass.preorder := inferInstance
 
-open finestFilterationTransitiveClosureModel in
+open finestFiltrationTransitiveClosureModel in
 instance finiteComplete : Complete (Hilbert.S4) Kripke.FrameClass.finite_preorder := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   rintro F F_preorder V x;
   replace F_preorder := Set.mem_setOf_eq.mp F_preorder;
   let M : Kripke.Model := ⟨F, V⟩;
-  let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
+  let FM := finestFiltrationTransitiveClosureModel M φ.subformulas;
+  apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
   apply hp;
   refine ⟨?_, ?_⟩;
   . apply FilterEqvQuotient.finite;
     simp;
-  . exact finestFilterationTransitiveClosureModel.isPreorder;
+  . exact finestFiltrationTransitiveClosureModel.isPreorder;
 ⟩
 
 end Hilbert.S4.Kripke
