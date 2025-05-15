@@ -42,5 +42,4 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Aᵇ ∈ Logic.GL ↔ Aᵇ ∈ 
 
 end Modal.Logic
 
-
 end LO
