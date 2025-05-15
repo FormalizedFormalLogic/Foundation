@@ -1,4 +1,5 @@
 import Foundation.Modal.Logic.Sublogic.K4
+import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal.Logic
 

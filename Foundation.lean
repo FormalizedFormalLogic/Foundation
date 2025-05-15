@@ -94,6 +94,8 @@ import Foundation.Modal.Logic.Sublogic.S4
 import Foundation.Modal.Logic.Sublogic.S5Grz
 import Foundation.Modal.Logic.Sublogic.Trivials
 
+import Foundation.Modal.Logic.S.Consistent
+
 import Foundation.Modal.Maximal.Makinson
 
 -- Arithmetization

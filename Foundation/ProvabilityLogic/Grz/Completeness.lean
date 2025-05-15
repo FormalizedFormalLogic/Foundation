@@ -1,5 +1,5 @@
-import Foundation.ProvabilityLogic.S.Completeness
 import Foundation.Modal.Boxdot.GL_Grz
+import Foundation.Modal.Boxdot.GL_S
 
 namespace LO
 
