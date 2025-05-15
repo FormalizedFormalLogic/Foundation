@@ -127,7 +127,7 @@ section boxdot
   Chagrov & Zakharyaschev 1997, Theorem 3.89
 -/
 theorem embedding_Int_GL {φ : Propositional.Formula ℕ} : φ ∈ Logic.Int ↔ φᵍᵇ ∈ Logic.GL := by
-  exact Iff.trans modalCompanion_Int_Grz.companion Hilbert.iff_boxdotTranslatedGL_Grz.symm
+  exact Iff.trans modalCompanion_Int_Grz.companion Logic.iff_provable_boxdot_GL_provable_Grz.symm
 
 end boxdot
 
