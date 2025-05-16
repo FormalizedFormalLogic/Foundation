@@ -228,58 +228,6 @@ lemma intro_union_consistent(h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁.toS
     have : φ ∈ T₁ ∪ T₂ := hΔ hφ;
     simp_all [Δ₁, Δ₂];
 
-/-
-omit [DecidableEq α] in
-open Classical in
-lemma intro_union_consistent
-  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ T₁) ∧ (∀ φ ∈ Γ₂, φ ∈ T₂) → 𝓢 ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥)
-  : Consistent 𝓢 (T₁ ∪ T₂) := by
-  apply def_consistent.mpr;
-  intro Δ hΔ;
-  let Δ₁ := (Δ.filter (· ∈ T₁));
-  let Δ₂ := (Δ.filter (· ∈ T₂));
-  have : 𝓢 ⊬ ⋀Δ₁ ⋏ ⋀Δ₂ ➝ ⊥ := @h Δ₁ Δ₂ ⟨(by intro _ h; simpa using List.of_mem_filter h), (by intro _ h; simpa using List.of_mem_filter h)⟩;
-  exact unprovable_C!_trans (by
-    apply FiniteContext.deduct'!;
-    apply Conj₂!_iff_forall_provable.mpr;
-    intro ψ hq;
-    cases (hΔ ψ hq);
-    . exact Conj₂!_iff_forall_provable.mp (K!_left FiniteContext.id!) ψ $ List.mem_filter_of_mem hq (by simpa);
-    . exact Conj₂!_iff_forall_provable.mp (K!_right FiniteContext.id!) ψ $ List.mem_filter_of_mem hq (by simpa);
-  ) this;
-
-open Classical in
-lemma intro_triunion_consistent
-  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ T₁) ∧ (∀ φ ∈ Γ₂, φ ∈ T₂) ∧ (∀ φ ∈ Γ₃, φ ∈ T₃) → 𝓢 ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
-  : Consistent 𝓢 (T₁ ∪ T₂ ∪ T₃) := by
-  apply intro_union_consistent;
-  rintro Γ₁₂ Γ₃ ⟨h₁₂, h₃⟩;
-  simp at h₁₂;
-  let Γ₁ := (Γ₁₂.filter (· ∈ T₁));
-  let Γ₂ := (Γ₁₂.filter (· ∈ T₂));
-  apply unprovable_C!_trans (φ := ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃);
-  . exact C!_trans (K!_right $ K!_assoc) $ by
-      apply CKK!_of_C!;
-      apply CConj₂Append!_iff_CKConj₂Conj₂!.mp;
-      apply CConj₂Conj₂!_of_subset;
-      intro φ hp;
-      simp [Γ₁, Γ₂];
-      rcases h₁₂ φ hp with (h₁ | h₂);
-      . left; exact ⟨hp, h₁⟩;
-      . right; exact ⟨hp, h₂⟩;
-  . apply h;
-    refine ⟨?_, ?_, h₃⟩;
-    . intro φ hp;
-      rcases h₁₂ φ (List.mem_of_mem_filter hp) with (_ | _)
-      . assumption;
-      . simpa using List.of_mem_filter hp;
-    . intro φ hp;
-      rcases h₁₂ φ (List.mem_of_mem_filter hp) with (_ | _)
-      . have := List.of_mem_filter hp; simp at this;
-        simpa using List.of_mem_filter hp;
-      . assumption;
--/
-
 lemma exists_consistent_maximal_of_consistent (T_consis : Consistent 𝓢 T)
   : ∃ Z, Consistent 𝓢 Z ∧ T ⊆ Z ∧ ∀ U, U *⊬[𝓢] ⊥ → Z ⊆ U → U = Z := by
   obtain ⟨Z, h₁, ⟨h₂, h₃⟩⟩ := zorn_subset_nonempty { T : FormulaSet α | Consistent 𝓢 T} (by
