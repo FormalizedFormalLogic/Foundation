@@ -6,10 +6,10 @@ open Formula
 open Entailment
 open Kripke
 
-instance : ProperSublogic Logic.K4 Logic.K4Dot1 := ⟨by
+instance : ProperSublogic Logic.K4 Logic.K4Point1 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Dot1 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K4Point1 ⊢! φ ∧ ¬TransitiveFrameClass ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
     use (Axioms.M (.atom 0));
     constructor;
     . exact axiomM!;

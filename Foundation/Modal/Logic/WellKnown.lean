@@ -24,7 +24,7 @@ import Foundation.Modal.Kripke.Hilbert.S4Point3
 import Foundation.Modal.Kripke.Hilbert.GrzPoint2
 import Foundation.Modal.Kripke.Hilbert.GrzPoint3
 import Foundation.Modal.Kripke.Hilbert.GLPoint3
-import Foundation.Modal.Kripke.Hilbert.S4Dot1
+import Foundation.Modal.Kripke.Hilbert.S4Point1
 import Foundation.Modal.Kripke.Hilbert.S4Dot2
 import Foundation.Modal.Kripke.Hilbert.S4Dot3
 import Foundation.Modal.Kripke.Hilbert.S5
@@ -57,8 +57,8 @@ protected abbrev K4Point3 : Logic := Hilbert.K4Point3.logic
 lemma K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic : Logic.K4Point3 = Kripke.FrameClass.trans_weakConnected.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
-protected abbrev K4Dot1 : Logic := Hilbert.K4Dot1.logic
-lemma K4Dot1.eq_TransitiveMcKinseyanKripkeFrameClass_Logic : Logic.K4Dot1 = Kripke.TransitiveMcKinseyanFrameClass.logic
+protected abbrev K4Point1 : Logic := Hilbert.K4Point1.logic
+lemma K4Point1.eq_TransitiveMcKinseyanKripkeFrameClass_Logic : Logic.K4Point1 = Kripke.TransitiveMcKinseyanFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev K45 : Logic := Hilbert.K45.logic
@@ -125,8 +125,8 @@ protected abbrev S4 : Logic := Hilbert.S4.logic
 lemma S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic : Logic.S4 = Kripke.FrameClass.preorder.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
-protected abbrev S4Dot1 : Logic := Hilbert.S4Dot1.logic
-lemma S4Dot1.eq_ReflexiveTransitiveMcKinseyanKripkeFrameClass_Logic : Logic.S4Dot1 = Kripke.ReflexiveTransitiveMcKinseyanFrameClass.logic
+protected abbrev S4Point1 : Logic := Hilbert.S4Point1.logic
+lemma S4Point1.eq_ReflexiveTransitiveMcKinseyanKripkeFrameClass_Logic : Logic.S4Point1 = Kripke.ReflexiveTransitiveMcKinseyanFrameClass.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev S4Point2 : Logic := Hilbert.S4Point2.logic

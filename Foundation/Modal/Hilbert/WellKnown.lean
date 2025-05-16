@@ -434,18 +434,18 @@ instance : (Hilbert.KTc).HasK where p := 0; q := 1;
 instance : (Hilbert.KTc).HasTc where p := 0
 instance : Entailment.Modal.KTc (Hilbert.KTc) where
 
-protected abbrev K4Dot1 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
-instance : (Hilbert.K4Dot1).HasK where p := 0; q := 1;
-instance : (Hilbert.K4Dot1).HasFour where p := 0
-instance : (Hilbert.K4Dot1).HasM where p := 0
-instance : Entailment.K4Dot1 (Hilbert.K4Dot1) where
+protected abbrev K4Point1 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
+instance : (Hilbert.K4Point1).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Point1).HasFour where p := 0
+instance : (Hilbert.K4Point1).HasM where p := 0
+instance : Entailment.K4Point1 (Hilbert.K4Point1) where
 
-protected abbrev S4Dot1 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
-instance : (Hilbert.S4Dot1).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Dot1).HasT where p := 0
-instance : (Hilbert.S4Dot1).HasFour where p := 0
-instance : (Hilbert.S4Dot1).HasM where p := 0
-instance : Entailment.S4Dot1 (Hilbert.S4Dot1) where
+protected abbrev S4Point1 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
+instance : (Hilbert.S4Point1).HasK where p := 0; q := 1;
+instance : (Hilbert.S4Point1).HasT where p := 0
+instance : (Hilbert.S4Point1).HasFour where p := 0
+instance : (Hilbert.S4Point1).HasM where p := 0
+instance : Entailment.S4Point1 (Hilbert.S4Point1) where
 
 protected abbrev KD4Point3Z : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Four (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1), Axioms.Z (.atom 0)}⟩
 instance : (Hilbert.KD4Point3Z).HasK where p := 0; q := 1;
