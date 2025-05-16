@@ -118,8 +118,6 @@ lemma consistent_either (hCon : t.Consistent 𝓢) (φ : Formula α) : Tableau.C
   . simp only [Finset.coe_union, Set.union_subset_iff]; tauto;
   . simp only [Finset.coe_union, Set.union_subset_iff]; tauto;
 
-  -- have : 𝓢 ⊢! ⋀(Γ₁ ++ Γ₂) ➝ ⋁(Δ₁ ++ Δ₂) := C!_trans (K!_left EConj₂AppendKConj₂Conj₂!) $ C!_trans (cut! h₁ h₂) (K!_right EDisj₂AppendADisj₂Disj₂!);
-
 end Consistent
 
 end
@@ -489,31 +487,22 @@ lemma iff_mem₁_and [DecidableEq α] : φ ⋏ ψ ∈ t.1.1 ↔ φ ∈ t.1.1 ∧
       apply Set.doubleton_subset.mpr;
       tauto;
 
-lemma iff_mem₁_conj₂ [DecidableEq α] {Γ : List (Formula α)} : ⋀Γ ∈ t.1.1 ↔ ∀ φ ∈ Γ, φ ∈ t.1.1 := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ Γ_nil ih =>
-    simp only [(List.conj₂_cons_nonempty Γ_nil), List.mem_cons];
-    constructor;
-    . rintro h φ (rfl | hp);
-      . exact iff_mem₁_and.mp h |>.1;
-      . exact ih.mp (iff_mem₁_and.mp h |>.2) _ hp;
-    . intro h;
-      apply iff_mem₁_and.mpr;
-      simp_all;
-  | _ => simp;
+lemma iff_mem₁_conj₂ [DecidableEq α] {Γ : List (Formula α)} : Γ.conj ∈ t.1.1 ↔ ∀ φ ∈ Γ, φ ∈ t.1.1 := by
+  induction Γ <;> simp_all [iff_mem₁_and];
 
 lemma iff_mem₁_fconj [DecidableEq α] {Γ : Finset (Formula α)} : Γ.conj ∈ t.1.1 ↔ ↑Γ ⊆ t.1.1 := by
   constructor;
   . intro h φ hφ;
     apply iff_mem₁_conj₂ (Γ := Γ.toList) (t := t) |>.mp;
-    . apply mdp_mem₁_provable ?_ h; simp;
+    . apply mdp_mem₁_provable ?_ h;
+      sorry;
     . simpa;
   . intro h;
     apply mdp_mem₁_provable ?_ $ iff_mem₁_conj₂ (Γ := Γ.toList) (t := t) |>.mpr $ by
       intro φ hφ;
       apply h;
       simp_all;
-    simp;
+    sorry;
 
 private lemma of_mem₁_or [DecidableEq α] : φ ⋎ ψ ∈ t.1.1 → (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) := by
   intro h;
@@ -553,24 +542,18 @@ lemma iff_mem₂_or [DecidableEq α] : φ ⋎ ψ ∈ t.1.2 ↔ φ ∈ t.1.2 ∧ 
     . have := iff_not_mem₂_mem₁.mpr hφ; contradiction;
     . exact iff_not_mem₂_mem₁.mpr hψ;
 
-lemma iff_mem₂_disj [DecidableEq α] {Γ : List (Formula α)} : ⋁Γ ∈ t.1.2 ↔ ∀ φ ∈ Γ, φ ∈ t.1.2 := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ Γ_nil ih =>
-    simp only [(List.disj₂_cons_nonempty Γ_nil), List.mem_cons];
-    constructor;
-    . rintro h φ (rfl | hp);
-      . exact iff_mem₂_or.mp h |>.1;
-      . exact ih.mp (iff_mem₂_or.mp h |>.2) _ hp;
-    . intro h;
-      apply iff_mem₂_or.mpr;
-      simp_all;
-  | _ => simp;
+lemma iff_mem₂_disj [DecidableEq α] {Γ : List (Formula α)} : Γ.disj ∈ t.1.2 ↔ ∀ φ ∈ Γ, φ ∈ t.1.2 := by
+  induction Γ <;> simp_all [iff_mem₂_or];
 
 lemma iff_mem₂_fdisj [DecidableEq α] {Γ : Finset (Formula α)} : Γ.disj ∈ t.1.2 ↔ ↑Γ ⊆ t.1.2 := by
+
+  sorry;
+  /-
   apply Iff.trans $ show Γ.disj ∈ t.1.2 ↔ ⋁Γ.toList ∈ t.1.2 by constructor <;> apply mdp_mem₂_provable $ by simp;
   apply Iff.trans iff_mem₂_disj;
   simp_all only [Finset.mem_toList];
   rfl;
+  -/
 
 lemma of_mem₁_imp [DecidableEq α] : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   intro h;

@@ -529,67 +529,41 @@ lemma iff_mem₂_and : φ ⋏ ψ ∈ t.1.2 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.2) :
     rcases of_mem₁_and $ iff_not_mem₂_mem₁.mp hφψ with ⟨hφ, hψ⟩;
     constructor <;> { apply iff_not_mem₂_mem₁.mpr; assumption; };
 
-lemma iff_mem₁_conj₂ {Γ : List (Formula α)} : ⋀Γ ∈ t.1.1 ↔ ∀ φ ∈ Γ, φ ∈ t.1.1 := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ Γ_nil ih =>
-    simp only [(List.conj₂_cons_nonempty Γ_nil), List.mem_cons];
-    constructor;
-    . rintro h φ (rfl | hp);
-      . exact iff_mem₁_and.mp h |>.1;
-      . exact ih.mp (iff_mem₁_and.mp h |>.2) _ hp;
-    . intro h;
-      apply iff_mem₁_and.mpr;
-      simp_all;
-  | _ => simp;
+lemma iff_mem₁_conj {Γ : List (Formula α)} : Γ.conj ∈ t.1.1 ↔ ∀ φ ∈ Γ, φ ∈ t.1.1 := by induction Γ <;> simp_all [iff_mem₁_and]
 
 lemma iff_mem₁_fconj {Γ : Finset (Formula α)} : Γ.conj ∈ t.1.1 ↔ ↑Γ ⊆ t.1.1 := by
   constructor;
   . intro h φ hφ;
-    apply iff_mem₁_conj₂ (Γ := Γ.toList) (t := t) |>.mp;
-    . apply mdp_mem₁_provable ?_ h; simp;
+    apply iff_mem₁_conj (Γ := Γ.toList) (t := t) |>.mp;
+    . apply mdp_mem₁_provable ?_ h;
+      sorry;
     . simpa;
   . intro h;
-    apply mdp_mem₁_provable ?_ $ iff_mem₁_conj₂ (Γ := Γ.toList) (t := t) |>.mpr $ by
-      intro φ hφ;
+    apply mdp_mem₁_provable ?_ $ iff_mem₁_conj (Γ := Γ.toList) (t := t) |>.mpr ?_
+    . sorry;
+    . intro φ hφ;
       apply h;
       simp_all;
-    simp;
 
-lemma iff_mem₂_conj₂ {Γ : List _} : ⋀Γ ∈ t.1.2 ↔ (∃ φ ∈ Γ, φ ∈ t.1.2) := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ hΓ ih =>
-    rw [List.conj₂_cons_nonempty hΓ];
-    constructor;
-    . intro h;
-      rcases iff_mem₂_and.mp h with (hφ | hΓ);
-      . exact ⟨φ, by tauto, hφ⟩;
-      . obtain ⟨ψ, hψ₁, hψ₂⟩ := ih.mp hΓ;
-        exact ⟨ψ, by tauto, hψ₂⟩;
-    . rintro ⟨ψ, (hψ₁ | hψ₁), hψ₂⟩;
-      . apply iff_mem₂_and.mpr;
-        left;
-        assumption;
-      . apply iff_mem₂_and.mpr;
-        right;
-        apply ih.mpr;
-        exact ⟨ψ, by simpa, hψ₂⟩;
-  | _ => simp;
+lemma iff_mem₂_conj {Γ : List _} : Γ.conj ∈ t.1.2 ↔ (∃ φ ∈ Γ, φ ∈ t.1.2) := by induction Γ <;> simp_all [iff_mem₂_and]
 
 lemma iff_mem₂_fconj {Γ : Finset (Formula α)} : Γ.conj ∈ t.1.2 ↔ (∃ φ ∈ Γ, φ ∈ t.1.2)  := by
   constructor;
   . intro h;
-    obtain ⟨φ, hφ₁, hφ₂⟩ := iff_mem₂_conj₂ (Γ := Γ.toList) (t := t) |>.mp $ by
-      apply mdp_mem₂_provable (ψ := Γ.conj);
-      . simp;
-      . assumption;
-    use φ;
-    constructor;
-    . simpa using hφ₁;
-    . simpa;
+    obtain ⟨φ, hφ₁, hφ₂⟩ := iff_mem₂_conj (Γ := Γ.toList) (t := t) |>.mp $ by
+      apply mdp_mem₂_provable ?_ h;
+      sorry;
+    . use φ;
+      constructor;
+      . simpa using hφ₁;
+      . simpa;
   . rintro ⟨ψ, hψ₁, hψ₂⟩;
-    apply iff_mem₂_conj₂.mpr;
-    use ψ;
-    constructor <;> simpa;
+    apply mdp_mem₂_provable ?_ $ iff_mem₂_conj (Γ := Γ.toList) (t := t) |>.mpr ?_
+    . sorry;
+    . use ψ;
+      constructor;
+      . simpa using hψ₁;
+      . simpa;
 
 omit [Encodable α] in
 private lemma of_mem₁_or : φ ⋎ ψ ∈ t.1.1 → (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) := by
@@ -632,59 +606,23 @@ lemma iff_mem₂_or : φ ⋎ ψ ∈ t.1.2 ↔ (φ ∈ t.1.2 ∧ ψ ∈ t.1.2) :=
     . have := iff_not_mem₂_mem₁.mpr hφ; contradiction;
     . exact iff_not_mem₂_mem₁.mpr hψ;
 
-lemma iff_mem₁_disj  {Γ : List _} : ⋁Γ ∈ t.1.1 ↔ (∃ φ ∈ Γ, φ ∈ t.1.1) := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ hΓ ih =>
-    rw [List.disj₂_cons_nonempty hΓ];
-    constructor;
-    . intro h;
-      rcases iff_mem₁_or.mp h with (hφ | hΓ);
-      . exact ⟨φ, by tauto, hφ⟩;
-      . obtain ⟨ψ, hψ₁, hψ₂⟩ := ih.mp hΓ;
-        exact ⟨ψ, by tauto, hψ₂⟩;
-    . rintro ⟨ψ, (hψ₁ | hψ₁), hψ₂⟩;
-      . apply iff_mem₁_or.mpr;
-        left;
-        assumption;
-      . apply iff_mem₁_or.mpr;
-        right;
-        apply ih.mpr;
-        exact ⟨ψ, by simpa, hψ₂⟩;
-  | _ => simp;
+lemma iff_mem₁_disj  {Γ : List _} : Γ.disj ∈ t.1.1 ↔ (∃ φ ∈ Γ, φ ∈ t.1.1) := by induction Γ <;> simp_all [iff_mem₁_or];
 
-lemma iff_mem₂_disj {Γ : List _} : ⋁Γ ∈ t.1.2 ↔ (∀ φ ∈ Γ, φ ∈ t.1.2) := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ hΓ ih =>
-    rw [List.disj₂_cons_nonempty hΓ];
-    constructor;
-    . intro h;
-      rcases iff_mem₂_or.mp h with ⟨hφ, hΓ⟩;
-      rintro ψ (hψ | hΓ);
-      . assumption;
-      . apply ih.mp hΓ;
-        assumption;
-    . intro h;
-      apply iff_mem₂_or.mpr;
-      constructor;
-      . apply h; tauto;
-      . apply ih.mpr;
-        intro ψ hψ;
-        apply h;
-        tauto;
-  | _ => simp;
+lemma iff_mem₂_disj {Γ : List _} : Γ.disj ∈ t.1.2 ↔ (∀ φ ∈ Γ, φ ∈ t.1.2) := by induction Γ <;> simp_all [iff_mem₂_or];
 
 lemma iff_mem₂_fdisj {Γ : Finset _} : Γ.disj ∈ t.1.2 ↔ (↑Γ ⊆ t.1.2) := by
   constructor;
   . intro h φ hφ;
     apply iff_mem₂_disj (Γ := Γ.toList) (t := t) |>.mp;
-    . apply mdp_mem₂_provable ?_ h; simp;
+    . apply mdp_mem₂_provable ?_ h;
+      sorry;
     . simpa;
   . intro h;
     apply mdp_mem₂_provable ?_ $ iff_mem₂_disj (Γ := Γ.toList) (t := t) |>.mpr $ by
       intro φ hφ;
       apply h;
       simp_all;
-    simp;
+    sorry;
 
 omit [Encodable α] in
 private lemma of_mem₁_imp : φ ➝ ψ ∈ t.1.1 → (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
