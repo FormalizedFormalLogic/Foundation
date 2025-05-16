@@ -222,7 +222,7 @@ instance [Entailment.HasAxiomGeach g 𝓢] : IsGeachean g _ (canonicalFrame 𝓢
     exact hu.2 hφ;
 ⟩
 
-instance [Entailment.HasAxiomFour 𝓢] : IsTrans _ (canonicalFrame 𝓢).Rel := inferInstance
+instance isTrans [Entailment.HasAxiomFour 𝓢] : IsTrans _ (canonicalFrame 𝓢).Rel := inferInstance
 instance [Entailment.HasAxiomT 𝓢] : IsRefl _ (canonicalFrame 𝓢).Rel := inferInstance
 instance [Entailment.HasAxiomFive 𝓢] : IsEuclidean _ (canonicalFrame 𝓢).Rel := inferInstance
 instance [Entailment.HasAxiomD 𝓢] : IsSerial _ (canonicalFrame 𝓢).Rel := inferInstance

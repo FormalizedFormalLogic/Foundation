@@ -544,10 +544,13 @@ instance [Entailment.Modal.Triv 𝓢] : Entailment.Modal.KT 𝓢 where
 instance [Entailment.Modal.Triv 𝓢] : Entailment.Modal.KTc 𝓢 where
 
 protected class Ver extends Entailment.Modal.K 𝓢, HasAxiomVer 𝓢
+
+protected class KM extends Entailment.Modal.K 𝓢, HasAxiomM 𝓢
+
 protected class K4 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢
-protected class K4Point1 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomM 𝓢
-protected class K4Point2 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint2 𝓢
-protected class K4Point3 extends Entailment.Modal.K 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢
+protected class K4Point1 extends Entailment.Modal.K4 𝓢, HasAxiomM 𝓢
+protected class K4Point2 extends Entailment.Modal.K4 𝓢, HasAxiomWeakPoint2 𝓢
+protected class K4Point3 extends Entailment.Modal.K4 𝓢, HasAxiomWeakPoint3 𝓢
 protected class KD4Point3Z extends Entailment.Modal.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢, HasAxiomZ 𝓢
 
 protected class K5 extends Entailment.Modal.K 𝓢, HasAxiomFive 𝓢

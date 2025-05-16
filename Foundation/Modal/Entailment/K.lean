@@ -161,6 +161,8 @@ def diaK' (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ ◇φ ➝ ◇ψ := by
   assumption;
 lemma diaK'! (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ◇φ ➝ ◇ψ := ⟨diaK' h.some⟩
 
+lemma diaK''! (h₁ : 𝓢 ⊢! φ ➝ ψ) (h₂ : 𝓢 ⊢! ◇φ) : 𝓢 ⊢! ◇ψ := (diaK'! h₁) ⨀ h₂
+
 lemma CMultidiaMultidia_of_C (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ◇^[n]φ ➝ ◇^[n]ψ := by
   induction n with
   | zero => simpa;
@@ -220,6 +222,15 @@ def boxDuality_mpr : 𝓢 ⊢ ∼(◇(∼φ)) ➝ □φ := K_right boxDuality
 
 def boxDuality_mpr' (h : 𝓢 ⊢ ∼(◇(∼φ))) : 𝓢 ⊢ □φ := boxDuality_mpr ⨀ h
 lemma boxDuality_mpr'! (h : 𝓢 ⊢! ∼(◇(∼φ))) : 𝓢 ⊢! □φ := ⟨boxDuality_mpr' h.some⟩
+
+@[simp]
+lemma CNDiaBoxN! : 𝓢 ⊢! □(∼φ) ➝ ∼◇φ := by
+  apply C!_trans boxDuality_mp!;
+  apply contra!;
+  apply diaK'!;
+  simp;
+
+lemma NDia_of_BoxN! (h : 𝓢 ⊢! □(∼φ)) : 𝓢 ⊢! ∼◇φ := CNDiaBoxN! ⨀ h
 
 lemma multibox_duality'! : 𝓢 ⊢! □^[n]φ ↔ 𝓢 ⊢! ∼(◇^[n](∼φ)) := by
   constructor;
