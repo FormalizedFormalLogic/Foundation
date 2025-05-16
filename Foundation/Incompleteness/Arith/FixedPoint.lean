@@ -99,47 +99,16 @@ lemma fixpoint_eq (θ : Semisentence ℒₒᵣ 1) :
     fixpoint θ = (“∀ x, !ssnum x !!⌜diag θ⌝ !!⌜diag θ⌝ → !θ x” : Sentence ℒₒᵣ) := by
   simp [fixpoint, substs_diag]
 
-section
-
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
-
-open LO.Arith
-
-def σ : Sentence ℒₒᵣ := “!divDef 0 0 0 ∧ !remDef 0 0 0”
-
-def σ' : Sentence ℒₒᵣ := “!remDef 0 0 0”
-
-def σ'' : Sentence ℒₒᵣ := “!divDef 0 0 0”
-
-example : ![σ, σ] 0 = σ := by simp -- no memory leaks.
-
-example : ![(⌜σ⌝ : V)] 0 = ⌜σ⌝ := by simp -- no memory leaks.
-
-example : ∀ x : V, ![x, x] 0 = x := by simp -- no memory leaks.
-
-example : ![(⌜σ⌝ : V), ⌜σ⌝] 0 = ⌜σ⌝ := by
-  --simp only [Matrix.cons_val_zero]-- simp -- memory leaks!
-  sorry
-
-example : ![(⌜σ'⌝ : V), ⌜σ'⌝] 0 = ⌜σ'⌝ := by
-  -- simp -- no memory leaks, but takes time.
-  sorry
-
-example : ![(⌜σ''⌝ : V), ⌜σ''⌝] 0 = ⌜σ''⌝ := by simp -- no memory leaks.
-
-lemma val_fixpoint (θ : Semisentence ℒₒᵣ 1) :
+lemma val_fixpoint (θ : Semisentence ℒₒᵣ 1) {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] :
     V ⊧/![] (fixpoint θ) ↔ Semiformula.Evalbm V ![(substNumeral ⌜diag θ⌝ ⌜diag θ⌝ : V)] θ := by
-  have E1 : ∀ x y z : V, (![x, y, z] 1) = y := fun x y z ↦ by simp only [Matrix.cons_val_one, Matrix.cons_val_zero]
+  have E1 : ∀ x y z : V, (![x, y, z] 1) = y := fun x y z ↦ by simp
   have E2 : ∀ x y z : V, (![x, y, z] 2) = z := fun x y z ↦ by simp
   have e1 : ∀ x : V, (![x, ⌜diag θ⌝, ⌜diag θ⌝] 1) = ⌜diag θ⌝ := fun x ↦ E1 _ _ _
   have e2 : ∀ x : V, (![x, ⌜diag θ⌝, ⌜diag θ⌝] 2) = ⌜diag θ⌝ := fun x ↦ E2 _ _ _
   simp only [Nat.reduceAdd, Fin.isValue, fixpoint_eq, Nat.succ_eq_add_one, Fin.isValue, Semiformula.eval_all,
     LogicalConnective.HomClass.map_imply, Semiformula.eval_substs, Matrix.comp_vecCons',
     Semiterm.val_bvar, Matrix.cons_val_fin_one, val_quote, Matrix.constant_eq_singleton,
-    LogicalConnective.Prop.arrow_eq, eval_ssnum, Matrix.cons_val_zero]
-  simp only [e1, e2, forall_eq]
-
-end
+    LogicalConnective.Prop.arrow_eq, eval_ssnum, Matrix.cons_val_zero, e1, e2, forall_eq]
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝] :=
