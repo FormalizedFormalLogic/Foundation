@@ -148,6 +148,9 @@ lemma K!_assoc : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ ⭤ φ ⋏ (ψ ⋏ χ) := by
     . exact K!_intro hp hq;
     . exact hr;
 
+omit [DecidableEq F] in lemma K!_assoc_mp (h : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ) : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ) := C_of_E_mp! K!_assoc ⨀ h
+omit [DecidableEq F] in lemma K!_assoc_mpr (h : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ)) : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ := C_of_E_mpr! K!_assoc ⨀ h
+
 def K_replace_left (hc : 𝓢 ⊢ φ ⋏ ψ) (h : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ χ ⋏ ψ := K_intro (h ⨀ K_left hc) (K_right hc)
 omit [DecidableEq F] in lemma K!_replace_left (hc : 𝓢 ⊢! φ ⋏ ψ) (h : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! χ ⋏ ψ := ⟨K_replace_left hc.some h.some⟩
 

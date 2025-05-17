@@ -327,6 +327,7 @@ def Conj_intro (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢ φ) : 𝓢
   match Γ with
   |     [] => verum
   | ψ :: Γ => K_intro (b ψ (by simp)) (Conj_intro Γ (fun ψ hq ↦ b ψ (by simp [hq])))
+lemma Conj!_intro {Γ : List F} (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢! φ) : 𝓢 ⊢! Γ.conj := ⟨Conj_intro Γ λ φ hφ => (b φ hφ).some⟩
 
 def right_Conj_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ Γ.conj :=
   match Γ with

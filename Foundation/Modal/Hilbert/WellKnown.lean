@@ -294,6 +294,11 @@ instance : Entailment.Modal.K4Point1 (Hilbert.K4Point1) where
 
 instance K_weakerThan_K4Point1 : Hilbert.K ⪯ Hilbert.K4Point1 := weakerThan_of_dominate_axioms $ by simp;
 
+noncomputable instance {H : Hilbert _} [Hilbert.K4Point1 ⪯ H] : Entailment.Modal.K4Point1 H where
+  K _ _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
+  Four _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
+  M _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
+
 protected abbrev K4Point2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}⟩
 instance : (Hilbert.K4Point2).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Point2).HasFour where p := 0

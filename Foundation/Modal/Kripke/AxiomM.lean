@@ -1,4 +1,3 @@
-
 import Foundation.Modal.Kripke.Basic
 import Foundation.Modal.Kripke.Hilbert.Geach
 import Foundation.Modal.Entailment.K4
@@ -19,41 +18,11 @@ class SatisfiesMcKinseyCondition (α) (rel : α → α → Prop) : Prop where
 end
 
 
-namespace LO.Entailment
-
-variable {F : Type*} [LogicalConnective F]
-         {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Minimal 𝓢]
-         {φ ψ ξ : F}
-
-open Entailment
-
-lemma K!_assoc_mpr (h : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ) : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ) := C_of_E_mp! K!_assoc ⨀ h
-lemma K!_assoc_mp (h : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ)) : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ := C_of_E_mpr! K!_assoc ⨀ h
-
-lemma Conj!_intro {Γ : List F} (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢! φ) : 𝓢 ⊢! Γ.conj := ⟨Conj_intro Γ λ φ hφ => (b φ hφ).some⟩
-
-end LO.Entailment
-
-
 
 namespace LO.Modal
 
-
 @[simp]
 lemma eq_box_toSet_toSet_box {F : Type*} [Box F] [DecidableEq F] {s : Finset F} : s.toSet.box = s.box.toSet := by ext φ; simp;
-
-
-namespace Hilbert
-
-variable {H : Hilbert _}
-
-noncomputable instance [Hilbert.K4Point1 ⪯ H] : Entailment.Modal.K4Point1 H where
-  K _ _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
-  Four _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
-  M _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
-
-end Hilbert
 
 
 namespace Hilbert.K
@@ -277,26 +246,6 @@ lemma validate_M_of_mckinseyan_trans (hTrans : Transitive F) : F ⊧ (Axioms.M (
         . intro v hvw _;
           sorry;
 
-abbrev TransitiveMcKinseyConditionFrameClass : FrameClass := { F | Transitive F ∧ McKinseyCondition F }
-
-instance TransitiveMcKinseyConditionFrameClass.DefinedByFourAndM : TransitiveMcKinseyConditionFrameClass.DefinedBy {Axioms.Four (.atom 0), Axioms.M (.atom 0)} := ⟨by
-  simp only [Set.mem_setOf_eq, Set.mem_insert_iff, Set.mem_singleton_iff, ValidOnFrame.models_iff, forall_eq_or_imp, forall_eq];
-  intro F;
-  constructor;
-  . rintro ⟨hT, hM⟩;
-    refine ⟨?_, ?_⟩;
-    . exact iff_transitive_validate_AxiomFour.mp hT;
-    . exact mcKinseyan_of_validate_M_trans hM;
-  . rintro ⟨hFour, hM⟩;
-    have := iff_transitive_validate_AxiomFour.mpr hFour;
-    constructor;
-    . assumption;
-    . exact validate_M_of_mckinseyan_trans this hM;
-⟩
-
-instance : Kripke.TransitiveMcKinseyConditionFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
-  simp [Transitive, McKinseyCondition];
 -/
 
 instance : SatisfiesMcKinseyCondition _ whitepoint := ⟨by
