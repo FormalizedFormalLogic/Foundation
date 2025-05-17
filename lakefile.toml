@@ -11,12 +11,12 @@ linter.style.multiGoal = true
 [[require]]
 scope = "leanprover-community"
 name = "mathlib"
-rev = "v4.20.0-rc2"
+rev = "v4.20.0-rc5"
 
 [[require]]
 scope = "leanprover"
 name = "doc-gen4"
-rev = "v4.20.0-rc2"
+rev = "v4.20.0-rc5"
 
 [[lean_lib]]
 name = "Foundation"
