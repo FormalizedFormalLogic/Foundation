@@ -11,7 +11,7 @@ namespace Kripke
 open Formula (atom)
 open Formula.Kripke
 
-def filterEquiv (M : Kripke.Model) (T : FormulaSet ℕ) [T.SubformulaClosed] (x y : M.World) := ∀ φ, (_ : φ ∈ T := by trivial) → x ⊧ φ ↔ y ⊧ φ
+def filterEquiv (M : Kripke.Model) (T : FormulaSet ℕ) [T.SubformulaClosed] (x y : M.World) := ∀ φ, (_ : φ ∈ T := by subformula) → x ⊧ φ ↔ y ⊧ φ
 
 variable (M : Kripke.Model) (T : FormulaSet ℕ) [T.SubformulaClosed]
 
@@ -34,17 +34,17 @@ variable {M T} {x y : M.World}
 lemma finite (T_finite : T.Finite) : Finite (FilterEqvQuotient M T) := by
   have : Finite (𝒫 T) := Set.Finite.powerset T_finite
   let f : FilterEqvQuotient M T → 𝒫 T :=
-    λ (Qx : FilterEqvQuotient M T) => Quotient.lift (λ x => ⟨{ φ ∈ T | x ⊧ φ }, (by simp_all)⟩) (by
+    λ (X : FilterEqvQuotient M T) => Quotient.lift (λ x => ⟨{ φ ∈ T | x ⊧ φ }, (by simp_all)⟩) (by
       intro x y hxy;
       suffices {φ | φ ∈ T ∧ Satisfies M x φ} = {φ | φ ∈ T ∧ Satisfies M y φ} by simpa;
       apply Set.eq_of_subset_of_subset;
       . rintro φ ⟨hp, hx⟩; exact ⟨hp, (hxy φ hp).mp hx⟩;
       . rintro φ ⟨hp, hy⟩; exact ⟨hp, (hxy φ hp).mpr hy⟩;
-    ) Qx
+    ) X
   have hf : Function.Injective f := by
-    intro Qx Qy h;
-    obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
-    obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
+    intro X Y h;
+    obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+    obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
     simp [f] at h;
     apply Quotient.eq''.mpr;
     intro φ hp;
@@ -70,29 +70,15 @@ end FilterEqvQuotient
 class FilterOf (FM : Model) (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Prop where
   def_world : FM.World = FilterEqvQuotient M T := by rfl
   def_rel_forth : ∀ {x y : M.World}, x ≺ y → (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧)
-  def_rel_back : ∀ {Qx Qy : FM.World}, Qx ≺ Qy → Quotient.lift₂ (λ x y => ∀ φ ∈ T, (x ⊧ φ → y ⊧ φ)) (by
-    intro x₁ y₁ x₂ y₂ hx hy;
-    apply eq_iff_iff.mpr;
-    constructor;
-    . intro h φ hφ hφ_x₂;
-      apply hy φ |>.mp;
-      apply h;
-      . exact hφ
-      . apply hx φ |>.mpr hφ_x₂;
-    . intro h φ hφ hφ_y₁;
-      apply hy φ |>.mpr;
-      apply h;
-      . exact hφ
-      . apply hx φ |>.mp hφ_y₁;
-  ) (cast def_world Qx) (cast def_world Qy)
-  def_valuation Qx a : (ha : (atom a) ∈ T := by trivial) →
-    FM Qx a ↔ Quotient.lift (λ x => M x a) (by
+  def_rel_back : ∀ {x y : M.World}, (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧) → ∀ φ ∈ T, (x ⊧ φ → y ⊧ φ)
+  def_valuation X a : (ha : (atom a) ∈ T := by subformula) →
+    FM X a ↔ Quotient.lift (λ x => M x a) (by
       intro x y h;
       apply eq_iff_iff.mpr;
       constructor;
       . intro hx; exact h (.atom a) ha |>.mp hx;
       . intro hy; exact h (.atom a) ha |>.mpr hy;
-    ) (cast def_world Qx)
+    ) (cast def_world X)
 
 attribute [simp] FilterOf.def_world
 
@@ -102,13 +88,13 @@ section
 variable {M T}
 
 lemma reflexive_filterOf_of_reflexive (h_filter : FilterOf FM M T) (hRefl : Reflexive M.toFrame) : Reflexive FM.Rel := by
-  intro Qx;
-  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) Qx);
+  intro X;
+  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) X);
   convert h_filter.def_rel_forth $ hRefl x <;> simp_all;
 
 lemma serial_filterOf_of_serial (h_filter : FilterOf FM M T) (hSerial : Serial M.toFrame) : Serial FM.Rel := by
-  intro Qx;
-  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) Qx);
+  intro X;
+  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) X);
   obtain ⟨y, Rxy⟩ := hSerial x;
   use (cast (h_filter.def_world.symm) ⟦y⟧);
   convert h_filter.def_rel_forth $ Rxy;
@@ -123,7 +109,7 @@ section
 variable {M : Model} {T : FormulaSet ℕ} [T.SubformulaClosed]
          (FM : Model) (filterOf : FilterOf FM M T)
 
-theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subformula) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
+theorem filtration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subformula) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
   induction φ generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;
@@ -148,85 +134,87 @@ theorem filteration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subfor
       . right; exact ihψ (by subformula) |>.mpr hψ;
   | himp φ ψ ihφ ihψ =>
     constructor;
-    . rintro hφψ Qy RQxQy hφ;
-      obtain ⟨y, ey⟩ := Quotient.exists_rep (cast (filterOf.def_world) Qy);
-      apply (show Satisfies M y ψ → Satisfies FM Qy ψ by simpa [ey] using ihψ (x := y) (by subformula) |>.mp)
-      have : ∀ φ ∈ T, Satisfies M x φ → Satisfies M y φ := by simpa [←ey] using filterOf.def_rel_back RQxQy;
-      apply this (φ ➝ ψ) hs hφψ;
-      . apply M.refl;
+    . rintro hφψ Y RXY hφ;
+      obtain ⟨y, ey⟩ := Quotient.exists_rep (cast (filterOf.def_world) Y);
+      have : y ⊧ ψ → Y ⊧ ψ := by simpa [ey] using ihψ (x := y) |>.mp;
+      apply this;
+      apply filterOf.def_rel_back ?_ (φ := φ ➝ ψ) hs hφψ;
+      . apply _root_.refl;
       . apply ihφ (by subformula) |>.mpr;
-        convert hφ;
-        simp_all;
-    . rintro h y Rxy hφ;
+        simpa [ey] using hφ;
+      . simpa [ey] using RXY;
+    . rintro hφψ y Rxy hφ;
       apply ihψ (by subformula) |>.mpr;
-      apply h (filterOf.def_rel_forth Rxy);
-      apply ihφ (by subformula) |>.mp hφ;
-  | _ => trivial
+      apply hφψ;
+      . apply filterOf.def_rel_forth Rxy;
+      . apply ihφ (by subformula) |>.mp hφ;
+  | _ => tauto
 
 end
 
-abbrev standardFilterationValuation (Qx : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M.Val x a) (by
+abbrev standardFiltrationValuation (X : FilterEqvQuotient M T) (a : ℕ) := (ha : (atom a) ∈ T) → Quotient.lift (λ x => M.Val x a) (by
   intro x y h;
   apply eq_iff_iff.mpr;
   constructor;
   . intro hx; exact h (.atom a) ha |>.mp hx;
   . intro hy; exact h (.atom a) ha |>.mpr hy;
-) Qx
+) X
 
 
-abbrev coarsestFilterationFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
+abbrev coarsestFiltrationFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
-  Rel Qx Qy :=
-    Quotient.lift₂ (λ x y => ∀ φ ∈ T, (x ⊧ φ → y ⊧ φ)) (by
-      intro x₁ y₁ x₂ y₂ hx hy;
-      apply eq_iff_iff.mpr;
-      constructor;
-      . intro h φ hφ hφ_x₂;
-        apply hy φ |>.mp;
-        apply h;
-        . exact hφ
-        . apply hx φ |>.mpr hφ_x₂;
-      . intro h φ hφ hφ_y₁;
-        apply hy φ |>.mpr;
-        apply h;
-        . exact hφ
-        . apply hx φ |>.mp hφ_y₁;
-    ) Qx Qy
+  Rel := Quotient.lift₂ (λ x y => ∀ φ ∈ T, (x ⊧ φ → y ⊧ φ)) (by
+    intro x₁ y₁ x₂ y₂ hx hy;
+    apply eq_iff_iff.mpr;
+    constructor;
+    . intro h φ hφ hφ_x₂;
+      apply hy φ |>.mp;
+      apply h;
+      . exact hφ
+      . apply hx φ |>.mpr hφ_x₂;
+    . intro h φ hφ hφ_y₁;
+      apply hy φ |>.mpr;
+      apply h;
+      . exact hφ
+      . apply hx φ |>.mp hφ_y₁;
+  )
   rel_partial_order := {
     refl := by
-      intro Qx;
-      obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
+      rintro X;
+      obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
       simp;
     trans := by
-      intro Qx Qy Qz RQxQy RQyQz;
-      obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
-      obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
-      obtain ⟨z, rfl⟩ := Quotient.exists_rep Qz;
+      rintro X Y Z RXY RYZ;
+      obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+      obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
+      obtain ⟨z, rfl⟩ := Quotient.exists_rep Z;
       simp_all;
     antisymm := by
-      intro Qx Qy RQxQy RQyQx;
-      obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
-      obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
+      rintro X Y RXY RYX;
+      obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+      obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
       simp only [Quotient.eq];
       intro φ hφ₁;
       constructor;
-      . intro hφ₂; exact RQxQy φ hφ₁ hφ₂;
-      . intro hφ₂; exact RQyQx φ hφ₁ hφ₂;
+      . intro hφ₂;
+        exact RXY φ hφ₁ hφ₂;
+      . intro hφ₂;
+        exact RYX φ hφ₁ hφ₂;
   }
 
-abbrev coarsestFilterationModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
-  toFrame := coarsestFilterationFrame M T
+abbrev coarsestFiltrationModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
+  toFrame := coarsestFiltrationFrame M T
   Val := ⟨
-    standardFilterationValuation M T,
+    standardFiltrationValuation M T,
     by
-      intro Qx Qy RQxQy a hQx ha;
-      obtain ⟨x, rfl⟩ := Quotient.exists_rep Qx;
-      obtain ⟨y, rfl⟩ := Quotient.exists_rep Qy;
-      apply RQxQy (.atom a) ha;
+      intro X Y RXY a hX ha;
+      obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+      obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
+      apply RXY (.atom a) ha;
       tauto;
   ⟩
 
-instance coarsestFilterationModel.filterOf {M} {T : FormulaSet ℕ} [T.SubformulaClosed] : FilterOf (coarsestFilterationModel M T) M T where
+instance coarsestFiltrationModel.filterOf {M} {T : FormulaSet ℕ} [T.SubformulaClosed] : FilterOf (coarsestFiltrationModel M T) M T where
   def_valuation := by tauto
   def_rel_forth := by
     intro x y Rxy;
@@ -242,7 +230,7 @@ open Formula.Kripke.Satisfies (formula_hereditary)
 
 variable {M T} [T.SubformulaClosed]
 
-abbrev finestFilterationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
+abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel := TransGen (λ X Y => ∃ x y, X = ⟦x⟧ ∧ Y = ⟦y⟧ ∧ x ≺ y)
   rel_partial_order := {
@@ -296,25 +284,22 @@ abbrev finestFilterationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) 
           exact ih u RUY this;
   }
 
-abbrev finestFilterationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
-  toFrame := (finestFilterationTransitiveClosureFrame M T)
+abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed] : Kripke.Model where
+  toFrame := (finestFiltrationTransitiveClosureFrame M T)
   Val := ⟨
-    standardFilterationValuation M T,
+    standardFiltrationValuation M T,
     by
-      intro X Y RXY a hX;
+      intro X Y RXY a hX ha;
       obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
       obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
       obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp RXY;
       clear RXY;
       induction n using PNat.recOn generalizing x with
       | one =>
-        simp [FilterEqvSetoid, filterEquiv] at hn;
-        obtain ⟨u, Rxu, v, Ryv, Ruv⟩ := hn;
-        intro ha;
-        apply Ryv _ ha |>.mpr;
-        apply M.Val.hereditary Ruv;
-        apply Rxu _ ha |>.mp;
-        tauto;
+        obtain ⟨u, v, exu, eyv, Ruv⟩ : ∃ u v : M.World, (⟦x⟧ : FilterEqvQuotient M T) = ⟦u⟧ ∧ (⟦y⟧ : FilterEqvQuotient M T) = ⟦v⟧ ∧ u ≺ v := by simpa using hn;
+        have := FilterEqvQuotient.iff_of_eq (h := exu) (.atom a) ha |>.mp $ hX ha;
+        have := formula_hereditary Ruv this;
+        exact FilterEqvQuotient.iff_of_eq eyv (.atom a) ha |>.mpr this;
       | succ n ih =>
         obtain ⟨_, ⟨x', u', exx', rfl, Rx'u'⟩, RUY⟩ := hn;
         refine ih u' ?_ RUY;
@@ -324,7 +309,8 @@ abbrev finestFilterationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) 
         tauto;
   ⟩
 
-instance finestFilterationTransitiveClosureModel.filterOf : FilterOf (finestFilterationTransitiveClosureModel M T) M T where
+
+instance finestFiltrationTransitiveClosureModel.filterOf : FilterOf (finestFiltrationTransitiveClosureModel M T) M T where
   def_valuation := by tauto
   def_rel_forth := by
     intro x y Rxy;
@@ -332,21 +318,25 @@ instance finestFilterationTransitiveClosureModel.filterOf : FilterOf (finestFilt
     use x, y;
     tauto;
   def_rel_back := by
-    rintro X Y RXY;
+    rintro x y RXY;
     obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp RXY;
     clear RXY;
-    induction n using PNat.recOn generalizing X with
+    induction n using PNat.recOn generalizing x with
     | one =>
-      obtain ⟨U, ⟨x, y, rfl, rfl, Rxy⟩, rfl⟩ := hn;
+      obtain ⟨u, v, exu, eyv, Ruv⟩ : ∃ u v : M.World, (⟦x⟧ : FilterEqvQuotient M T) = ⟦u⟧ ∧ (⟦y⟧ : FilterEqvQuotient M T) = ⟦v⟧ ∧ u ≺ v := by simpa using hn;
       intro φ hφ hx;
-      exact formula_hereditary Rxy hx;
+      have : u ⊧ φ := FilterEqvQuotient.iff_of_eq exu _ hφ |>.mp hx;
+      have : v ⊧ φ := formula_hereditary Ruv this;
+      exact FilterEqvQuotient.iff_of_eq eyv _ hφ |>.mpr this;
     | succ n ih =>
-      obtain ⟨_, ⟨x, u, rfl, rfl, Rxu⟩, RUY⟩ := hn;
-      obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
+      obtain ⟨U, ⟨v, w, exv, euw, Rvw⟩, RUY⟩ := hn;
+      obtain ⟨u, rfl⟩ := Quotient.exists_rep U;
       intro φ hφ hx;
-      apply @ih ⟦u⟧ RUY;
-      . exact hφ;
-      . apply formula_hereditary Rxu hx;
+      refine @ih u ?_ φ hφ ?_;
+      . simpa using RUY;
+      . have : v ⊧ φ := FilterEqvQuotient.iff_of_eq exv _ hφ |>.mp hx;
+        have : w ⊧ φ := formula_hereditary Rvw this;
+        exact FilterEqvQuotient.iff_of_eq euw _ hφ |>.mpr this;
 
 end
 

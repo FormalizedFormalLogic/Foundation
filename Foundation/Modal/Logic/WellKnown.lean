@@ -1,4 +1,3 @@
-import Foundation.Modal.Hilbert.Maximal.Unprovability
 import Foundation.Modal.Kripke.Hilbert.GL.MDP
 import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.Hilbert.K4

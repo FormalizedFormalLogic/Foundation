@@ -392,7 +392,7 @@ add_subformula_rules safe 5 tactic [
   (by exact FormulaSet.SubformulaClosed.mem_imp₂ (by assumption)),
 ]
 
-instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
+instance [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
   simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;
 ⟩
 

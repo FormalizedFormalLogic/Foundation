@@ -1,5 +1,6 @@
 import Foundation.Modal.Kripke.Hilbert.Grz.Soundness
 import Foundation.Modal.Kripke.Hilbert.KT
+import Foundation.Modal.Entailment.K4
 import Foundation.Modal.ComplementClosedConsistentFinset
 
 namespace LO.Modal
@@ -113,59 +114,44 @@ lemma truthlemma_lemma1
 
 omit [Consistent 𝓢] in
 lemma truthlemma_lemma2
-  {X : ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)} (hq₁ : □ψ ∈ φ.subformulas) (hq₂ : □ψ ∉ X)
+  {X : ComplementClosedConsistentFinset 𝓢 (φ.subformulasGrz)}
+  (hψ₁ : □ψ ∈ φ.subformulas)
+  (hψ₂ : □ψ ∉ X)
   : FormulaFinset.Consistent 𝓢 ((X.1.prebox.box) ∪ {□(ψ ➝ □ψ), -ψ}) := by
     apply FormulaFinset.intro_union_consistent;
-    rintro Γ₁ Γ₂ ⟨hΓ₁, hΓ₂⟩;
-    replace hΓ₂ : ∀ χ ∈ Γ₂, χ = □(ψ ➝ □ψ) ∨ χ = -ψ := by
-      intro χ hr;
-      simpa using hΓ₂ χ hr;
-
-    by_contra hC;
-    have : Γ₁ ⊢[𝓢]! ⋀Γ₂ ➝ ⊥ := CK!_iff_CC!.mp hC;
-    have : Γ₁ ⊢[𝓢]! (□(ψ ➝ □ψ) ⋏ -ψ) ➝ ⊥ := C!_trans (by
-      suffices Γ₁ ⊢[𝓢]! ⋀[□(ψ ➝ □ψ), -ψ] ➝ ⋀Γ₂ by
-        simpa only [ne_eq, List.cons_ne_self, not_false_eq_true, List.conj₂_cons_nonempty, List.conj₂_singleton];
-      apply CConj₂Conj₂!_of_subset;
-      simpa using hΓ₂;
-    ) this;
-    have : Γ₁ ⊢[𝓢]! □(ψ ➝ □ψ) ➝ -ψ ➝ ⊥ := CK!_iff_CC!.mp this;
-    have : Γ₁ ⊢[𝓢]! □(ψ ➝ □ψ) ➝ ψ := by
-      rcases Formula.complement.or (φ := ψ) with (hp | ⟨ψ, rfl⟩);
-      . rw [hp] at this;
-        exact C!_trans this dne!;
-      . simpa only [complement] using this;
-    have : Γ₁.box ⊢[𝓢]! □(□(ψ ➝ □ψ) ➝ ψ) := contextual_nec! this;
-    have : Γ₁.box ⊢[𝓢]! ψ := axiomGrz! ⨀ this;
-    have : 𝓢 ⊢! ⋀Γ₁.box.box ➝ □ψ := contextual_nec! this;
-    have : 𝓢 ⊢! □□⋀Γ₁ ➝ □ψ := C!_trans (C!_trans (distribute_multibox_conj! (n := 2)) $ CConj₂Conj₂!_of_subset (λ _ => List.iff_mem_multibox_add.mp)) this;
-    have : 𝓢 ⊢! □⋀Γ₁ ➝ □ψ := C!_trans axiomFour! this;
-    have : 𝓢 ⊢! ⋀Γ₁.box ➝ □ψ := C!_trans collect_box_conj! this;
-    have : 𝓢 ⊢! ⋀(X.1.prebox.box |>.toList).box ➝ □ψ := C!_trans (CConj₂Conj₂!_of_subset (by
-      intro ξ hξ;
-      obtain ⟨χ, hχ, rfl⟩ := List.exists_box_of_mem_box hξ;
-      apply List.box_mem_of;
-      simpa using hΓ₁ χ hχ;
-    )) this;
-    have : 𝓢 ⊢! ⋀(X.1.prebox.toList).box ➝ □ψ := C!_trans (CConj₂Conj₂!_of_provable (by
-      intro ψ hψ;
-      obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hψ;
-      obtain ⟨χ, hχ, rfl⟩ := by simpa using hξ;
-      apply axiomFour'!;
-      apply FiniteContext.by_axm!;
-      apply List.box_mem_of;
-      simpa;
-    )) this;
-    have : X *⊢[𝓢]! □ψ := by
-      apply Context.provable_iff.mpr;
-      use X.1.prebox.toList.box;
-      constructor;
-      . intro ψ hψ;
-        obtain ⟨ξ, hξ, rfl⟩ := List.exists_box_of_mem_box hψ;
-        simp_all;
-      . assumption;
-    have : □ψ ∈ X := membership_iff (by subformula) |>.mpr this;
-    contradiction;
+    rintro Γ₁ Γ₂ hΓ₁ hΓ₂;
+    by_contra! hC;
+    apply hψ₂;
+    have := Context.weakening! (Γ := Γ₁ ∪ Γ₂) (Δ := insert (-ψ) (insert (□(ψ ➝ □ψ)) Γ₁)) ?_ hC;
+    . replace := Context.deduct! this;
+      replace := of_imply_complement_bot this;
+      replace := Context.deduct! this;
+      replace := Context.nec! this;
+      replace := axiomGrz! ⨀ this;
+      replace := Context.nec! this;
+      replace := Context.boxbox_in_context_to_box this;
+      replace : X.1.toSet.prebox.box.box *⊢[𝓢]! □ψ := Context.weakening! ?_ this;
+      . replace := Context.boxbox_in_context_to_box this;
+        replace : X *⊢[𝓢]! □ψ := Context.weakening! ?_ this;
+        . exact membership_iff (subformulasGrz.mem_of_mem_subformula hψ₁) |>.mpr this;
+        . intro ξ hξ;
+          simp at hξ;
+          obtain ⟨ξ, hξ, rfl⟩ := hξ;
+          tauto;
+      . intro ξ hξ;
+        simp at hξ;
+        obtain ⟨ξ, hξ, rfl⟩ := hξ;
+        have := hΓ₁ hξ;
+        simp at this ⊢;
+        obtain ⟨χ, hχ, rfl⟩ := this;
+        use χ;
+    . intro ξ;
+      simp only [Set.mem_union, Finset.mem_coe, Set.mem_insert_iff];
+      rintro (hξ₁ | hξ₂);
+      . have := hΓ₁ hξ₁; tauto;
+      . have := hΓ₂ hξ₂;
+        simp at this;
+        tauto;
 
 omit [Consistent 𝓢] in
 lemma truthlemma_lemma3 : 𝓢 ⊢! (φ ⋏ □(φ ➝ □φ)) ➝ □φ := by

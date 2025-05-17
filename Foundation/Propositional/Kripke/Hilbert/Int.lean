@@ -1,7 +1,7 @@
 import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Kripke.Hilbert.Soundness
-import Foundation.Propositional.Kripke.Filteration
+import Foundation.Propositional.Kripke.Filtration
 import Foundation.Logic.Disjunctive
 
 namespace LO.Propositional
@@ -33,9 +33,9 @@ instance complete_finite : Complete (Hilbert.Int) FrameClass.finite_all := ⟨by
   apply Kripke.complete.complete;
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
-  let FM := coarsestFilterationModel M ↑φ.subformulas;
+  let FM := coarsestFiltrationModel M ↑φ.subformulas;
 
-  apply filteration FM (coarsestFilterationModel.filterOf) (by simp) |>.mpr;
+  apply filtration FM (coarsestFiltrationModel.filterOf) (by simp) |>.mpr;
   apply hφ;
 
   apply Frame.isFinite_iff _ |>.mpr;

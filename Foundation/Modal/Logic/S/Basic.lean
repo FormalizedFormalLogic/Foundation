@@ -1,5 +1,7 @@
+
 import Foundation.Modal.Logic.Extension
-import Foundation.ProvabilityLogic.GL.Completeness
+import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal
 
@@ -23,7 +25,6 @@ lemma Logic.S.mem_axiomT : □φ ➝ φ ∈ Logic.S := by
   apply Logic.subst (φ := Axioms.T (.atom 0)) (s := λ _ => φ);
   apply Logic.sumQuasiNormal.mem₂;
   tauto;
-
 
 lemma Logic.GL_subset_S : Logic.GL ⊆ Logic.S := by
   intro φ hφ;

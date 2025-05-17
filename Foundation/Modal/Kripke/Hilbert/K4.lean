@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Hilbert.Geach
-import Foundation.Modal.Kripke.Filteration
+import Foundation.Modal.Kripke.Filtration
 
 namespace LO.Modal
 
@@ -33,15 +33,15 @@ instance canonical : Canonical (Hilbert.K4) Kripke.FrameClass.trans := ⟨by
 
 instance complete : Complete (Hilbert.K4) Kripke.FrameClass.trans := inferInstance
 
-open finestFilterationTransitiveClosureModel in
+open finestFiltrationTransitiveClosureModel in
 instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   intro F F_trans V x;
   replace F_trans := Set.mem_setOf_eq.mp F_trans;
   let M : Kripke.Model := ⟨F, V⟩;
-  let FM := finestFilterationTransitiveClosureModel M φ.subformulas;
-  apply filteration FM (finestFilterationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
+  let FM := finestFiltrationTransitiveClosureModel M φ.subformulas;
+  apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
   apply hp;
   refine ⟨?_, inferInstance⟩;
   . apply FilterEqvQuotient.finite;
