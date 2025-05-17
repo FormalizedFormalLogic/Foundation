@@ -4,30 +4,32 @@ import Foundation.Modal.Kripke.AxiomM
 namespace LO.Modal
 
 open Kripke
+open Hilbert.Kripke
 open Geachean
 
-instance : TransitiveMcKinseyanFrameClass.DefinedBy Hilbert.K4Point1.axioms :=
-  FrameClass.definedBy_with_axiomK $ TransitiveMcKinseyanFrameClass.DefinedByFourAndM
+abbrev Kripke.FrameClass.trans_mckinsey : FrameClass := { F | IsTrans _ F ∧ SatisfiesMcKinseyCondition _ F }
 
 namespace Hilbert.K4Point1
 
-instance Kripke.sound : Sound (Hilbert.K4Point1) (Kripke.TransitiveMcKinseyanFrameClass) := inferInstance
+instance Kripke.sound : Sound (Hilbert.K4Point1) (Kripke.FrameClass.trans_mckinsey) := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  . exact validate_AxiomFour_of_transitive;
+  . exact validate_axiomM_of_satisfiesMcKinseyCondition;
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.K4Point1) :=
-  Kripke.Hilbert.consistent_of_FrameClass Kripke.TransitiveMcKinseyanFrameClass
+instance Kripke.consistent : Entailment.Consistent (Hilbert.K4Point1) := consistent_of_sound_frameclass Kripke.FrameClass.trans_mckinsey $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  constructor <;> infer_instance;
 
-open
-  Kripke
-  MaximalConsistentSet
-in
-instance Kripke.canonical : Canonical (Hilbert.K4Point1) TransitiveMcKinseyanFrameClass := by
-  have hK4 := canonicalFrame.multigeachean_of_provable_geach (G := {⟨0, 2, 1, 0⟩}) (𝓢 := Hilbert.K4Point1) (by simp);
+instance Kripke.canonical : Canonical (Hilbert.K4Point1) Kripke.FrameClass.trans_mckinsey := ⟨by
+  apply Set.mem_setOf_eq.mpr;
   constructor;
-  refine ⟨?_, ?_⟩;
-  . simpa [transitive_def] using @hK4 (⟨0, 2, 1, 0⟩) $ by tauto;
-  . sorry;
+  . infer_instance;
+  . apply Canonical.satisfiesMcKinseyCondition;
+⟩
 
-instance Kripke.complete : Complete (Hilbert.K4Point1) TransitiveMcKinseyanFrameClass := inferInstance
+instance Kripke.complete : Complete (Hilbert.K4Point1) Kripke.FrameClass.trans_mckinsey := inferInstance
 
 end Hilbert.K4Point1
 

@@ -175,7 +175,7 @@ section definability
 
 variable {F : Kripke.Frame}
 
-private lemma not_mckinseyCondition_of_not_validate_axiomM' (h : ¬F ⊧ (Axioms.M (.atom 0))) :
+lemma not_mckinseyCondition'_of_not_validate_axiomM (h : ¬F ⊧ (Axioms.M (.atom 0))) :
   ∃ x : F.World, ∀ y, x ≺ y → (∃ z w, (y ≺ z ∧ y ≺ w ∧ z ≠ w))
   := by
     obtain ⟨V, x, hx⟩ := ValidOnFrame.exists_valuation_world_of_not h;
@@ -197,24 +197,10 @@ private lemma not_mckinseyCondition_of_not_validate_axiomM' (h : ¬F ⊧ (Axioms
       contradiction;
     use z, w;
 
-private lemma not_McKinseyCondition_of_notPseudoMcKinseyCondition
-  (hMc : ∃ x : F.World, ∀ y, x ≺ y → (∃ z w, (y ≺ z ∧ y ≺ w ∧ z ≠ w)))
-  : ¬McKinseyCondition F.Rel := by
-  unfold McKinseyCondition;
-  push_neg;
-  obtain ⟨x, h⟩ := hMc;
-  use x;
-  intro y Rxy;
-  obtain ⟨u, v, Ryu, Ryv, huv⟩ := h y Rxy;
-  by_cases hyu : y = u;
-  . subst hyu;
-    use v;
-  . use u;
-
 lemma not_mckinseyCondition_of_not_validate_axiomM (h : ¬F ⊧ (Axioms.M (.atom 0))) : ¬McKinseyCondition F.Rel := by
   unfold McKinseyCondition;
   push_neg;
-  obtain ⟨x, h⟩ := not_mckinseyCondition_of_not_validate_axiomM' h;
+  obtain ⟨x, h⟩ := not_mckinseyCondition'_of_not_validate_axiomM h;
   use x;
   intro y Rxy;
   obtain ⟨u, v, Ryu, Ryv, huv⟩ := h y Rxy;
@@ -223,9 +209,13 @@ lemma not_mckinseyCondition_of_not_validate_axiomM (h : ¬F ⊧ (Axioms.M (.atom
     use v;
   . use u;
 
-lemma mckinseyCondition_of_validate_axiomM : McKinseyCondition F → F ⊧ (Axioms.M (.atom 0)) := by
+lemma validate_axiomM_of_mckinseyCondition : McKinseyCondition F → F ⊧ (Axioms.M (.atom 0)) := by
   contrapose!;
   exact not_mckinseyCondition_of_not_validate_axiomM;
+
+lemma validate_axiomM_of_satisfiesMcKinseyCondition [SatisfiesMcKinseyCondition _ F] : F ⊧ (Axioms.M (.atom 0)) := by
+  apply validate_axiomM_of_mckinseyCondition;
+  exact SatisfiesMcKinseyCondition.mckCondition;
 
 /-
 lemma validate_M_of_mckinseyan_trans (hTrans : Transitive F) : F ⊧ (Axioms.M (.atom 0)) → McKinseyCondition F := by
@@ -308,6 +298,12 @@ instance : Kripke.TransitiveMcKinseyConditionFrameClass.IsNonempty := by
   use ⟨Unit, λ _ _ => True⟩;
   simp [Transitive, McKinseyCondition];
 -/
+
+instance : SatisfiesMcKinseyCondition _ whitepoint := ⟨by
+  intro x;
+  use x;
+  tauto;
+⟩
 
 end definability
 

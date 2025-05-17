@@ -1,33 +1,36 @@
-import Foundation.Modal.Kripke.Hilbert.KT
-import Foundation.Modal.Kripke.Hilbert.K4Point1
+import Foundation.Modal.Kripke.Hilbert.K4
+import Foundation.Modal.Kripke.AxiomM
 
 namespace LO.Modal
 
 open Kripke
+open Hilbert.Kripke
 open Geachean
 
-abbrev Kripke.ReflexiveTransitiveMcKinseyanFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ McKinseyan F }
-
-instance : ReflexiveTransitiveMcKinseyanFrameClass.DefinedBy Hilbert.S4Point1.axioms := by
-  rw [
-    (show ReflexiveTransitiveMcKinseyanFrameClass = TransitiveMcKinseyanFrameClass ∩ ReflexiveFrameClass by aesop),
-    (show Hilbert.S4Point1.axioms = Hilbert.K4Point1.axioms ∪ {Axioms.T (.atom 0)} by aesop)
-  ];
-  exact FrameClass.definedBy_inter Kripke.TransitiveMcKinseyanFrameClass (Hilbert.K4Point1.axioms) ReflexiveFrameClass {Axioms.T (.atom 0)};
-
-instance : Kripke.ReflexiveTransitiveMcKinseyanFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ => True⟩;
-  simp [Reflexive, Transitive, McKinseyan];
-
+abbrev Kripke.FrameClass.trans_mckinsey : FrameClass := { F | IsPreorder _ F ∧ SatisfiesMcKinseyCondition _ F }
 
 namespace Hilbert.S4Point1
 
-instance Kripke.sound : Sound (Hilbert.S4Point1) (Kripke.ReflexiveTransitiveMcKinseyanFrameClass) := inferInstance
+instance Kripke.sound : Sound (Hilbert.S4Point1) (Kripke.FrameClass.trans_mckinsey) := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomK;
+  rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomFour_of_transitive;
+  . exact validate_axiomM_of_satisfiesMcKinseyCondition;
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.S4Point1) :=
-  Kripke.Hilbert.consistent_of_FrameClass Kripke.ReflexiveTransitiveMcKinseyanFrameClass
+instance Kripke.consistent : Entailment.Consistent (Hilbert.S4Point1) := consistent_of_sound_frameclass Kripke.FrameClass.trans_mckinsey $ by
+  use whitepoint;
+  apply Set.mem_setOf_eq.mpr;
+  constructor <;> infer_instance;
 
-instance Kripke.complete : Complete (Hilbert.S4Point1) ReflexiveTransitiveMcKinseyanFrameClass := by sorry;
+instance Kripke.canonical : Canonical (Hilbert.S4Point1) Kripke.FrameClass.trans_mckinsey := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  constructor;
+  . infer_instance;
+  . apply Canonical.satisfiesMcKinseyCondition;
+⟩
+
+instance Kripke.complete : Complete (Hilbert.S4Point1) Kripke.FrameClass.trans_mckinsey := inferInstance
 
 end Hilbert.S4Point1
 
