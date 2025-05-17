@@ -90,7 +90,7 @@ scoped instance : LinearOrder M where
     rintro x y z (rfl | hx) (rfl | hy) <;> simp[*, le_def]
     · exact Or.inr (Arith.lt_trans _ _ _ hx hy)
   le_antisymm := by
-    rintro x y (rfl | hx) <;> simp
+    rintro x y (rfl | hx) <;> try simp
     rintro (rfl | hy) <;> try simp
     exact False.elim $ Arith.lt_irrefl _ (Arith.lt_trans _ _ _ hx hy)
   le_total := by
@@ -100,21 +100,18 @@ scoped instance : LinearOrder M where
     ⟨fun h => ⟨Or.inr h, by
       simp only [le_def]; rintro (rfl | h'); { exact lt_irrefl y h }; { exact lt_irrefl _ (Arith.lt_trans _ _ _ h h') }⟩,
      by simp[not_or, le_def]; rintro (rfl | h) <;> simp[*] ⟩
-  decidableLE := fun _ _ => Classical.dec _
+  toDecidableLE := fun _ _ => Classical.dec _
 
 protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa[mul_comm] using Arith.mul_zero x
 
-scoped instance : LinearOrderedCommSemiring M where
+scoped instance : CommSemiring M where
   left_distrib := distr
   right_distrib := fun x y z => by simp[mul_comm _ z]; exact distr z x y
   zero_mul := Arith.zero_mul
   mul_zero := Arith.mul_zero
-  mul_assoc := Arith.mul_assoc
-  mul_comm := mul_comm
-  one_mul   := fun x => Arith.mul_comm x 1 ▸ Arith.mul_one x
-  mul_one   := Arith.mul_one
+
+scoped instance : IsStrictOrderedRing M where
   add_le_add_left := by rintro x y (rfl | h) z <;> simp[add_comm z]; exact Or.inr (add_lt_add x y z h)
-  zero_le_one := Or.inr zero_lt_one
   le_of_add_le_add_left := by
     rintro x y z h
     have : y ≤ z ∨ z < y := le_or_lt y z
@@ -122,13 +119,12 @@ scoped instance : LinearOrderedCommSemiring M where
     · exact hyz
     · have : x + z < x + y := by simpa[add_comm] using add_lt_add z y x hyz
       exact False.elim ((lt_iff_not_ge _ _).mp this h)
+  zero_le_one := Or.inr zero_lt_one
   exists_pair_ne := ⟨0, 1, ne_of_lt zero_lt_one⟩
   mul_lt_mul_of_pos_left := by
-    rintro x y z h hz; simp[mul_zero]; { simpa[mul_comm z] using mul_lt_mul x y z h hz }
+    rintro x y z h hz; { simpa[mul_comm z] using mul_lt_mul x y z h hz }
   mul_lt_mul_of_pos_right := by
-    rintro x y z h hz; simp[mul_zero]; { simpa using mul_lt_mul x y z h hz }
-  le_total := le_total
-  decidableLE := fun _ _ => Classical.dec _
+    rintro x y z h hz; { simpa using mul_lt_mul x y z h hz }
 
 scoped instance : CanonicallyOrderedAdd M where
   exists_add_of_le := by
@@ -137,7 +133,7 @@ scoped instance : CanonicallyOrderedAdd M where
     · simpa[eq_comm] using add_eq_of_lt x y h
   le_self_add := by intro x y; simp
 
-scoped instance : OrderedAddCommMonoid M where
+scoped instance : IsOrderedAddMonoid M where
   add_le_add_left _ _ h z := (add_le_add_iff_left z).mpr h
 
 lemma numeral_eq_natCast : (n : ℕ) → (ORingStruc.numeral n : M) = n
