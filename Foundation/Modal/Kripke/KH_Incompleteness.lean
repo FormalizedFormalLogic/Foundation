@@ -200,7 +200,7 @@ lemma exists_min_flat (h₁ : ∃ n, n♭ ∉ ‖φ‖) :
     simp at this;
 
 lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom a => simp [truthset, Satisfies];
   | hfalsum => simp [truthset, Satisfies];
   | himp φ ψ ihφ ihψ =>

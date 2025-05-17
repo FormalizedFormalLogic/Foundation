@@ -65,7 +65,7 @@ variable {M : PLoN.Model} {x : M.World} {φ ψ : Formula ℕ}
 lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺[φ] y → y ⊧ φ := by simp [PLoN.Satisfies];
 
 protected lemma not_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | _ => simp_all [Satisfies];
 
 protected lemma imp_def : x ⊧ φ ➝ ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;

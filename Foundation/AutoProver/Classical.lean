@@ -63,7 +63,7 @@ def weight (Γ : Sequent α) : ℕ := (Γ.map NNFormula.weight).sum
   unfold weight; simp
 
 lemma weight_le_weight_of_mem {φ : NNFormula α} {Γ : Sequent α} (h : φ ∈ Γ) : φ.weight ≤ Γ.weight :=
-  List.le_sum_of_mem (List.mem_map_of_mem NNFormula.weight h)
+  List.le_sum_of_mem (List.mem_map_of_mem h)
 
 lemma weight_remove [DecidableEq α] (Γ : Sequent α) (φ) :
     weight (Γ.remove φ) = Γ.weight - Γ.count φ * φ.weight := by
@@ -74,7 +74,7 @@ lemma weight_remove [DecidableEq α] (Γ : Sequent α) (φ) :
     by_cases e : φ = ψ
     · rcases e
       simp [add_mul, ←add_assoc, add_comm φ.weight, ih]
-    · simp [e, Γ.remove_cons_of_ne (Ne.symm e), add_assoc, ih]
+    · simp [e, Γ.remove_cons_of_ne (Ne.symm e), add_assoc, ih, List.count_cons_of_ne (Ne.symm e)]
 
 lemma weight_remove_le_of_mem [DecidableEq α] {φ} {Γ : Sequent α} (h : φ ∈ Γ) :
     weight (Γ.remove φ) ≤ Γ.weight - φ.weight := calc

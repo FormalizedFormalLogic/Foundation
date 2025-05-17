@@ -17,7 +17,7 @@ def Formula.BoxdotTranslation : Formula α → Formula α
 postfix:90 "ᵇ" => Formula.BoxdotTranslation
 
 class BoxdotProperty (L₁ L₂ : Logic) where
-  bdp {φ} : φᵇ ∈ L₁ ↔ φ ∈ L₂
+  bdp {φ : _} : φᵇ ∈ L₁ ↔ φ ∈ L₂
 
 
 theorem Hilbert.boxdotTranslated_of_dominate {H₁ H₂ : Hilbert α} [Entailment.Modal.K H₂]

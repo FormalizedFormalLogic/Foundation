@@ -1,7 +1,7 @@
 import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.AxiomWeakLEM
 import Foundation.Propositional.Kripke.Hilbert.Soundness
-import Foundation.Propositional.Kripke.Filteration
+import Foundation.Propositional.Kripke.Filtration
 import Foundation.Propositional.Kripke.Rooted
 
 namespace LO.Propositional
@@ -48,7 +48,7 @@ instance complete : Complete Hilbert.KC FrameClass.confluent := inferInstance
 section FFP
 
 open
-  finestFilterationTransitiveClosureModel
+  finestFiltrationTransitiveClosureModel
   Relation
 
 instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_confluent := ⟨by
@@ -61,8 +61,8 @@ instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_confluent := 
 
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
-  let FRM := finestFilterationTransitiveClosureModel RM (φ.subformulas);
-  apply filteration FRM finestFilterationTransitiveClosureModel.filterOf (by simp) |>.mpr;
+  let FRM := finestFiltrationTransitiveClosureModel RM (φ.subformulas);
+  apply filtration FRM finestFiltrationTransitiveClosureModel.filterOf (by simp) |>.mpr;
   apply hφ;
 
   refine ⟨?_, ?_⟩;

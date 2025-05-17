@@ -80,34 +80,19 @@ jobs:
           cp ./import_graph.html ./pages/src/assets
 
       # Build kites
-      - name: Generate kites
-        run: |
-          lake exe generate_modal_kite
-      - name: Copy kites to pages
-        run: |
-          cp ./scripts/modal_kite.png ./pages/src/assets
+      # temporary kite generating suspended
+      # - name: Generate kites
+      #   run: |
+      #     lake exe generate_modal_kite
+      # - name: Copy kites to pages
+      #   run: |
+      #     cp ./scripts/modal_kite.png ./pages/src/assets
 
       # Build doc
-      - name: Restore docbuild cache
-        id: cache-docbuild-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: docbuild/.lake
-          key: docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}
-          restore-keys: |
-            docbuild-lake-${{ runner.os }}-${{ hashFiles('docbuild/lean-toolchain') }}-${{ hashFiles('docbuild/lake-manifest.json') }}
-      - name: Build docbuild
-        working-directory: docbuild
-        run: lake build --keep-toolchain Foundation:docs
-      - name: Save docbuild cache
-        id: cache-docbuild-save
-        uses: actions/cache/save@v4
-        with:
-          path: docbuild/.lake
-          key: ${{ steps.cache-docbuild-restore.outputs.cache-primary-key }}
-      - name: Copy docbuild to pages
-        working-directory: docbuild
-        run: cp -r .lake/build/doc ../pages/_output/doc
+      - name: Build docs
+        run: lake build Foundation:docs
+      - name: Copy docs to pages
+        run: cp -r .lake/build/doc ./pages/_output/doc
 
       # Save project cache
       - name: Save project cache

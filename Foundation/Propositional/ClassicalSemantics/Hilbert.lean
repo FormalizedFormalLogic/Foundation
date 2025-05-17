@@ -35,7 +35,7 @@ open
 def canonicalVal (T : SaturatedConsistentTableau Hilbert.Cl) : Valuation ℕ := λ a => (.atom a) ∈ T.1.1
 
 lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) ⊧ φ ↔ φ ∈ T.1.1 := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom => simp [canonicalVal];
   | hfalsum => simp [canonicalVal];
   | himp φ ψ ihφ ihψ =>

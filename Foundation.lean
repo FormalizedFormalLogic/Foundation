@@ -60,7 +60,6 @@ import Foundation.IntFO.Translation
 import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Hilbert.GL.Alternatives
-import Foundation.Modal.Hilbert.GL.Independency
 
 import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
 import Foundation.Modal.Kripke.Hilbert.GL.MDP
@@ -95,6 +94,8 @@ import Foundation.Modal.Logic.Sublogic.KTc
 import Foundation.Modal.Logic.Sublogic.S4
 import Foundation.Modal.Logic.Sublogic.S5Grz
 import Foundation.Modal.Logic.Sublogic.Trivials
+
+import Foundation.Modal.Logic.S.Consistent
 
 import Foundation.Modal.Maximal.Makinson
 

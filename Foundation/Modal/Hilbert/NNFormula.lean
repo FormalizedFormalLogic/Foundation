@@ -65,7 +65,7 @@ lemma iff_neg {φ : NNFormula _} : Hilbert.K ⊢! ∼(φ.toFormula) ⭤ (∼φ).
   | _ => simp;
 
 lemma exists_iff {φ} : ∃ ψ : NNFormula _, Hilbert.K ⊢! φ ⭤ ψ.toFormula := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom a => use (.atom a); simp;
   | hfalsum => use ⊥; simp;
   | himp φ ψ ihφ ihψ =>

@@ -232,14 +232,11 @@ lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by
       . apply ih.mpr hΓ;
   | _ => simp;
 
-example {Γ : List _} : (∀ φ ∈ Γ, x ⊧ □φ) → x ⊧ □⋀Γ := by
-  intro h y Rxy;
-  apply conj_def.mpr;
-  intro φ hφ;
-  exact h φ hφ y Rxy;
-
-lemma finset_conj_def {Γ : FormulaFinset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
+lemma fconj_def {Γ : Finset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
   simp only [Semantics.realize_finset_conj, Satisfies.iff_models];
+
+lemma fdisj_def {Γ : Finset _} : x ⊧ Γ.disj ↔ ∃ φ ∈ Γ, x ⊧ φ := by
+  simp only [Semantics.realize_finset_disj, Satisfies.iff_models];
 
 lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 
@@ -368,7 +365,7 @@ lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Satisfies
 lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
   letI U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | hatom a => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | hbox φ ih =>

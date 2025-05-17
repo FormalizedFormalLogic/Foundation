@@ -6,7 +6,7 @@ namespace LO.Propositional
 
 @[simp]
 def Formula.goedelTranslate.letterless {φ : Formula ℕ} (hφ : φ.letterless) : φᵍ.letterless := by
-  induction φ using Formula.rec' <;> simp_all [Formula.letterless, goedelTranslate, Modal.Formula.letterless]
+  induction φ <;> simp_all [Formula.letterless, goedelTranslate, Modal.Formula.letterless]
 
 
 namespace Logic

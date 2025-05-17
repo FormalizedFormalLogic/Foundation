@@ -16,7 +16,7 @@ namespace complement
 variable {φ ψ : Formula α}
 
 @[simp] lemma neg_def : -(∼φ) = φ := by
-  induction φ using Formula.rec' <;> simp_all [complement]
+  induction φ <;> simp_all [complement]
 
 @[simp] lemma bot_def : -(⊥ : Formula α) = ∼(⊥) := by simp only [complement, imp_inj, and_true]; rfl;
 
@@ -88,7 +88,7 @@ section
 
 variable {α : Type*}
 variable {S} [Entailment (Formula α) S]
-variable {𝓢 : S} [Entailment.ModusPonens 𝓢]
+variable {𝓢 : S} [Entailment.Cl 𝓢] {φ : Formula _}
 
 lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! φ) (hcp : 𝓢 ⊢! -φ) : 𝓢 ⊢! ⊥ := by
   induction φ using Formula.cases_neg with
@@ -117,6 +117,16 @@ lemma neg_complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! ∼φ) (hcp : �
   | hbox φ =>
     unfold Formula.complement at hcp;
     exact hcp ⨀ hp;
+
+open Entailment
+
+lemma of_imply_complement_bot [DecidableEq α] (h : 𝓢 ⊢! (-φ) ➝ ⊥) : 𝓢 ⊢! φ := by
+  rcases Formula.complement.or (φ := φ) with (hφ | ⟨ψ, rfl⟩);
+  . rw [hφ] at h;
+    apply of_NN!;
+    apply N!_iff_CO!.mp h;
+  . simp only [Formula.complement] at h;
+    apply N!_iff_CO!.mpr h;
 
 end
 

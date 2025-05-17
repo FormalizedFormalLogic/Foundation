@@ -336,6 +336,20 @@ lemma emptyPrf! {φ : F} : ∅ *⊢[𝓢]! φ → 𝓢 ⊢! φ := fun h ↦ ⟨e
 
 lemma provable_iff_provable {φ : F} : 𝓢 ⊢! φ ↔ ∅ *⊢[𝓢]! φ := ⟨of!, emptyPrf!⟩
 
+lemma iff_provable_context_provable_finiteContext_toList [DecidableEq F] {Δ : Finset F} : ↑Δ *⊢[𝓢]! φ ↔ Δ.toList ⊢[𝓢]! φ := by
+  constructor;
+  . intro h;
+    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
+    apply FiniteContext.weakening! ?_ hΓ₂;
+    intro ψ hψ;
+    simpa using hΓ₁ ψ hψ;
+  . intro h;
+    apply Context.provable_iff.mpr;
+    use Δ.toList;
+    constructor;
+    . simp;
+    . assumption;
+
 instance minimal [DecidableEq F] (Γ : Context F 𝓢) : Entailment.Minimal Γ where
   mdp := mdp
   verum := of verum

@@ -1,6 +1,7 @@
 import Foundation.Modal.Logic.Extension
-import Foundation.Modal.Logic.S
+import Foundation.Modal.Logic.S.Basic
 import Foundation.ProvabilityLogic.GL.Completeness
+import Foundation.ProvabilityLogic.S.Soundness
 import Foundation.Modal.Boxdot.Basic
 import Mathlib.Tactic.TFAE
 
@@ -20,40 +21,6 @@ variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T�
          {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.Sound ℕ]
          {A B : Formula ℕ}
 
-theorem arithmetical_soundness_S (h : A ∈ Logic.S) (f : Realization ℒₒᵣ) : ℕ ⊧ₘ₀ f.interpret 𝔅 A := by
-  induction h using Logic.S.rec' with
-  | mem_GL h =>
-    exact models_of_provable₀ inferInstance (GL.arithmetical_soundness (L := ℒₒᵣ) h);
-  | axiomT =>
-    simp only [Realization.interpret, models₀_imply_iff];
-    intro h;
-    exact models_of_provable₀ inferInstance (Iff.mp 𝔅.sound h)
-  | mdp ihAB ihA =>
-    simp only [Realization.interpret, models₀_imply_iff] at ihAB;
-    apply ihAB ihA;
-
-section
-
-instance : 𝐈𝚺₁.Delta1Definable := by sorry
-
-instance [𝐈𝚺₁ ⪯ T] [T.Delta1Definable] : ((𝐈𝚺₁).standardDP T).Sound ℕ := ⟨fun {σ} ↦ by
-  have : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  simp [Arith.standardDP_def, models₀_iff]⟩
-
-lemma _root_.LO.Modal.Logic.iff_provable_GL_provable_box_S : A ∈ Logic.GL ↔ □A ∈ Logic.S := by
-  constructor;
-  . intro h;
-    apply Logic.sumQuasiNormal.mem₁;
-    apply nec! h;
-  . intro h;
-    apply GL.arithmetical_completeness (T := 𝐈𝚺₁);
-    intro f;
-    exact Iff.mp ((𝐈𝚺₁).standardDP 𝐈𝚺₁).sound (arithmetical_soundness_S h f)
-
-end
-
-section
-
 open Entailment FiniteContext
 open Modal
 open Modal.Kripke
@@ -61,8 +28,6 @@ open Modal.Formula.Kripke
 open Arith
 
 variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)]
-
-@[simp] lemma r {n : Fin 1} : n.val = (0 : Fin 1) := by omega;
 
 lemma GL_S_TFAE :
   [
@@ -79,7 +44,7 @@ lemma GL_S_TFAE :
     exact Logic.S.mem_axiomT;
   tfae_have 2 → 3 := by
     intro h f;
-    apply arithmetical_soundness_S;
+    apply S.arithmetical_soundness;
     exact h;
   tfae_have 3 → 1 := by
     contrapose;
@@ -94,7 +59,7 @@ lemma GL_S_TFAE :
     replace hA₁ : ∀ φ ∈ A.rflSubformula, r₁ ⊧ φ := by
       intro φ hφ;
       apply Model.extendRoot.inr_satisfies_iff.mp
-        $ (Satisfies.finset_conj_def.mp
+        $ (Satisfies.fconj_def.mp
         $ Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr hA₁) φ hφ;
     have : M₀.IsFiniteTree r₀ := Frame.extendRoot.instIsFiniteTree
     have : Fintype M₀.World := Fintype.ofFinite _
@@ -106,7 +71,7 @@ lemma GL_S_TFAE :
       (r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) ∧
       (¬r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) := by
       intro B B_sub;
-      induction B using Formula.rec' with
+      induction B with
       | hfalsum => simp [Satisfies, Realization.interpret];
       | himp B C ihB ihC =>
         dsimp [Realization.interpret];
@@ -188,65 +153,6 @@ lemma GL_S_TFAE :
 
 theorem S.arithmetical_completeness_iff : A ∈ Logic.S ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A) := GL_S_TFAE.out 1 2
 
-end
-
 end ProvabilityLogic
-
-
-
-namespace Modal.Logic
-
-open Kripke Formula.Kripke
-
-variable {A : Formula _}
-
-lemma iff_provable_rflSubformula_GL_provable_S : (A.rflSubformula.conj ➝ A) ∈ Logic.GL ↔ A ∈ Logic.S := ProvabilityLogic.GL_S_TFAE (T := 𝐈𝚺₁) |>.out 0 1
-
-lemma iff_provable_boxdot_GL_provable_boxdot_S : Aᵇ ∈ Logic.GL ↔ Aᵇ ∈ Logic.S := by
-  constructor;
-  . apply Logic.GL_subset_S;
-  . intro h;
-    replace h := iff_provable_rflSubformula_GL_provable_S.mpr h;
-    replace h := Hilbert.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
-    apply Hilbert.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mpr;
-    intro M r _;
-    obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_axiomT_set (M := M) (Γ := Aᵇ.subformulas.prebox)
-    let M₁ := M.extendRoot r ⟨Aᵇ.subformulas.prebox.card + 1, by omega⟩;
-    let i₁ : M₁.World := Sum.inl i;
-    refine Model.extendRoot.inl_satisfies_boxdot_iff.mpr
-      $ Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mp
-      $ @h (M₁↾i₁) Model.pointGenerate.root ?_ ?_;
-    . apply Frame.isFiniteTree_iff _ _ |>.mpr
-      constructor;
-      . apply Frame.pointGenerate.isFinite (finite := Frame.extendRoot.isFinite)
-      . apply Frame.isTree_iff _ _ |>.mpr;
-        refine ⟨?_, ?_, ?_⟩;
-        . apply Frame.pointGenerate.instIsRooted;
-        . apply Frame.pointGenerate.isAsymm (assym := Frame.extendRoot.isAsymm);
-        . apply Frame.pointGenerate.isTrans (trans := Frame.extendRoot.isTrans);
-    . apply @Model.pointGenerate.modal_equivalent_at_root (r := i₁) |>.mpr
-      apply Satisfies.finset_conj_def.mpr;
-      intro B hB;
-      apply Satisfies.finset_conj_def.mp hi;
-      simp only [Finset.mem_image, Finset.eq_prebox_premultibox_one, Finset.mem_preimage, Function.iterate_one] at hB ⊢;
-      obtain ⟨C, hC, rfl⟩ := hB;
-      use C;
-
-theorem S.no_bot : ⊥ ∉ Logic.S := by
-  have hb : (⊥ : Formula ℕ) = ⊥ᵇ := by simp [Formula.BoxdotTranslation];
-  rw [hb];
-  apply iff_provable_boxdot_GL_provable_boxdot_S.not.mp;
-  rw [←hb];
-  apply Logic.no_bot;
-
-instance : Logic.S.Consistent := ⟨by
-  apply Set.eq_univ_iff_forall.not.mpr;
-  push_neg;
-  use ⊥;
-  exact Logic.S.no_bot;
-⟩
-
-end Modal.Logic
-
 
 end LO

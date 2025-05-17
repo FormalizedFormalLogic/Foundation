@@ -116,7 +116,7 @@ private lemma truthlemma.himp
       apply CFConj_CDisj!_of_innerMDP (φ := φ) (ψ := ψ) <;> simp;
 
 lemma truthlemma : t ⊧ φ ↔ φ ∈ t.1.1 := by
-  induction φ using Formula.rec' generalizing t with
+  induction φ generalizing t with
   | hatom => tauto;
   | hfalsum => simp only [Semantics.Bot.realize_bot, not_mem₁_falsum];
   | himp φ ψ ihp ihq => exact truthlemma.himp ihp ihq;

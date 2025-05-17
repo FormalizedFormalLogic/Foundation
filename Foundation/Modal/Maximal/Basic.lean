@@ -75,7 +75,7 @@ lemma provable_of_classical_provable {H : Modal.Hilbert ℕ} {φ : Propositional
 namespace Triv
 
 lemma iff_trivTranslated : (Hilbert.Triv) ⊢! φ ⭤ φᵀ := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hbox φ ih =>
     apply E!_intro;
     . exact C!_trans axiomT! (K!_left ih)
@@ -106,7 +106,7 @@ end Triv
 namespace Ver
 
 lemma iff_verTranslated : (Hilbert.Ver) ⊢! φ ⭤ φⱽ := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hbox =>
     apply E!_intro;
     . exact C!_of_conseq! verum!

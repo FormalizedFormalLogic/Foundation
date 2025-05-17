@@ -782,6 +782,16 @@ lemma FConj_DT' {Γ Δ : Finset F} : Γ *⊢[𝓢]! Δ.conj ➝ φ ↔ ↑(Γ �
   . intro h; exact FConj_DT.mp $ C!_trans CFconjUnionKFconj! $ CK!_iff_CC!.mpr $ FConj_DT.mpr h;
   . intro h; exact FConj_DT.mp $ CK!_iff_CC!.mp $ C!_trans CKFconjFconjUnion! $ FConj_DT.mpr h;
 
+lemma CFconjFconj!_of_provable {Γ Δ : Finset _} (h : ∀ φ, φ ∈ Γ → Δ *⊢[𝓢]! φ) : 𝓢 ⊢! Δ.conj ➝ Γ.conj := by
+  have : 𝓢 ⊢! ⋀(Δ.toList) ➝ ⋀(Γ.toList) := CConj₂Conj₂!_of_provable $ by
+    intro φ hφ;
+    apply Context.iff_provable_context_provable_finiteContext_toList.mp
+    apply h φ;
+    simpa using hφ;
+  refine C!_replace ?_ ?_ this;
+  . simp;
+  . simp;
+
 end Conjunction
 
 section disjunction
@@ -1042,6 +1052,10 @@ lemma CFdisjUnionAFdisj [HasAxiomEFQ 𝓢] {Γ Δ : Finset F} : 𝓢 ⊢! (Γ �
     apply right_Fdisj!_intro;
     assumption;
 
+lemma left_Fdisj!_intro' {Γ : Finset _} [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢! Γ.disj ➝ φ := by
+  apply C!_trans ?_ $ left_Disj₂!_intro' (Γ := Γ.toList) (by simpa);
+  simp;
+
 end disjunction
 
 
@@ -1176,6 +1190,34 @@ lemma CNFdisj₂NFconj₂! [HasAxiomDNE 𝓢] {Γ : Finset F} : 𝓢 ⊢! ∼(Γ
   . simp;
 
 end
+
+
+namespace Context
+
+lemma provable_iff_finset {Γ : Set F} {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (Δ.toSet ⊆ Γ) ∧ Δ *⊢[𝓢]! φ := by
+  apply Iff.trans Context.provable_iff;
+  constructor;
+  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
+    use Δ.toFinset;
+    constructor;
+    . simpa;
+    . apply provable_iff.mpr
+      use Δ;
+      constructor <;> simp_all;
+  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
+    use Δ.toList;
+    constructor;
+    . simpa;
+    . apply FiniteContext.provable_iff.mpr;
+      refine C!_trans ?_ (FConj_DT.mpr hΔ₂);
+      simp;
+
+lemma bot_of_mem_neg  {Γ : Set F}  (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ *⊢[𝓢]! ⊥ := by
+  replace h₁ : Γ *⊢[𝓢]! φ := by_axm! h₁;
+  replace h₂ : Γ *⊢[𝓢]! φ ➝ ⊥ := N!_iff_CO!.mp $ by_axm! h₂;
+  exact h₂ ⨀ h₁;
+
+end Context
 
 
 

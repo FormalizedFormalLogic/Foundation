@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.Maximal.Basic
+import Foundation.Modal.Maximal.Basic
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 
 namespace LO.Modal

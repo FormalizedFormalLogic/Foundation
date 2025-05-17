@@ -99,7 +99,7 @@ def cases' {C : Formula α → Sort w}
   | φ ⋏ ψ   => hand φ ψ
   | φ ⋎ ψ   => hor φ ψ
 
-@[elab_as_elim]
+@[induction_eliminator]
 def rec' {C : Formula α → Sort w}
   (hfalsum : C ⊥)
   (hatom   : ∀ a : α, C (atom a))
@@ -268,7 +268,7 @@ variable {φ ψ χ : Formula α}
 
 @[subformula]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
-  induction φ using Formula.rec' with
+  induction φ with
   | himp =>
     simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union];
     rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
@@ -278,7 +278,7 @@ protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subform
 
 @[subformula]
 protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
-  induction φ using Formula.rec' with
+  induction φ with
   | himp => simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union]; tauto;
   | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hand =>
@@ -288,7 +288,7 @@ protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subform
 
 @[subformula]
 protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
-  induction φ using Formula.rec' with
+  induction φ with
   | himp => simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union]; tauto;
   | hor =>
     simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
@@ -328,7 +328,7 @@ lemma mem_imp₁ (h : φ ➝ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed
 lemma mem_imp₂ (h : φ ➝ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
 
 instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : SubformulaClosed (φ.subformulas) := ⟨by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom => simp [Formula.subformulas];
   | hfalsum => simp [Formula.subformulas];
   | himp φ ψ ihφ ihψ =>
@@ -392,7 +392,7 @@ add_subformula_rules safe 5 tactic [
   (by exact FormulaSet.SubformulaClosed.mem_imp₂ (by assumption)),
 ]
 
-instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
+instance [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
   simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;
 ⟩
 
@@ -450,19 +450,19 @@ end subst
 end Formula
 
 @[simp]
-lemma Formula.subst_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ using Formula.rec' <;> simp_all;
+lemma Formula.subst_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ <;> simp_all;
 
 def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
 infixr:80 " ∘ " => Substitution.comp
 
 @[simp]
 lemma Formula.subst_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
-  induction φ using Formula.rec' <;> simp_all [Substitution.comp];
+  induction φ <;> simp_all [Substitution.comp];
 
 def ZeroSubstitution (α) := { s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
 
 lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
-  induction φ using Formula.rec' <;> simp [Formula.letterless, *];
+  induction φ <;> simp [Formula.letterless, *];
   case hatom => exact s.2;
 
 
