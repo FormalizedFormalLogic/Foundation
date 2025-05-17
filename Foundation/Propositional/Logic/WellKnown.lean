@@ -4,6 +4,7 @@ import Foundation.Propositional.Kripke.Hilbert.Cl
 import Foundation.Propositional.Kripke.Hilbert.KC
 import Foundation.Propositional.Kripke.Hilbert.LC
 import Foundation.Propositional.Kripke.Hilbert.KP
+import Foundation.Propositional.Kripke.Hilbert.BD
 
 namespace LO.Propositional
 
@@ -32,6 +33,11 @@ lemma Cl.Kripke.eq_finite_symmetric : Logic.Cl = Kripke.FrameClass.finite_symmet
 
 protected abbrev KP : Logic := Hilbert.KP.logic
 lemma KP.Kripke.eq_krieselputnam : Logic.KP = Kripke.FrameClass.krieselputnam.logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+
+protected abbrev BD (n : ℕ+) : Logic := (Hilbert.BD n).logic
+lemma BD.Kripke.eq_isDepthLt : (Logic.BD n) = (Kripke.FrameClass.isDepthLt n).logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 end Logic
