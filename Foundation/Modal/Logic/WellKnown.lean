@@ -24,9 +24,6 @@ import Foundation.Modal.Kripke.Hilbert.S4Point3
 import Foundation.Modal.Kripke.Hilbert.GrzPoint2
 import Foundation.Modal.Kripke.Hilbert.GrzPoint3
 import Foundation.Modal.Kripke.Hilbert.GLPoint3
-import Foundation.Modal.Kripke.Hilbert.S4Point1
-import Foundation.Modal.Kripke.Hilbert.S4Dot2
-import Foundation.Modal.Kripke.Hilbert.S4Dot3
 import Foundation.Modal.Kripke.Hilbert.S5
 import Foundation.Modal.Kripke.Hilbert.Triv
 import Foundation.Modal.Kripke.Hilbert.Ver
