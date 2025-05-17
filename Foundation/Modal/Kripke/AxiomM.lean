@@ -1,6 +1,7 @@
 
 import Foundation.Modal.Kripke.Basic
 import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Entailment.K4
 import Foundation.Modal.Kripke.Hilbert.K
 import Foundation.Modal.Kripke.Hilbert.K4
 import Foundation.Modal.Kripke.Completeness
@@ -18,8 +19,26 @@ class SatisfiesMcKinseyCondition (α) (rel : α → α → Prop) : Prop where
 end
 
 
+namespace LO.Entailment
+
+variable {F : Type*} [LogicalConnective F]
+         {S : Type*} [Entailment F S]
+         {𝓢 : S} [Entailment.Minimal 𝓢]
+         {φ ψ ξ : F}
+
+open Entailment
+
+lemma K!_assoc_mpr (h : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ) : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ) := C_of_E_mp! K!_assoc ⨀ h
+lemma K!_assoc_mp (h : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ)) : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ := C_of_E_mpr! K!_assoc ⨀ h
+
+lemma Conj!_intro {Γ : List F} (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢! φ) : 𝓢 ⊢! Γ.conj := ⟨Conj_intro Γ λ φ hφ => (b φ hφ).some⟩
+
+end LO.Entailment
+
+
 
 namespace LO.Modal
+
 
 @[simp]
 lemma eq_box_toSet_toSet_box {F : Type*} [Box F] [DecidableEq F] {s : Finset F} : s.toSet.box = s.box.toSet := by ext φ; simp;
@@ -41,6 +60,8 @@ namespace Hilbert.K
 
 open Entailment
 open Formula.Kripke
+
+variable {φ ψ : Formula _}
 
 lemma axiomM_DiaCDiaBox! : Hilbert.K ⊢! (□◇φ ➝ ◇□φ) ⭤ ◇(◇φ ➝ □φ) := by
   apply Kripke.complete.complete;
@@ -86,7 +107,18 @@ lemma CKDiaBoxDiaK! : Hilbert.K ⊢! (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := by
     . apply hx₂ _ Rxy;
 
 lemma CKBoxDiaDiaK! : Hilbert.K ⊢! (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := by
-  sorry;
+  apply Kripke.complete.complete;
+  intro F _ V x hx;
+  have ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
+  have ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp hx₂;
+  apply Satisfies.dia_def.mpr;
+  use y;
+  constructor;
+  . assumption;
+  . apply Satisfies.and_def.mpr;
+    constructor;
+    . apply hx₁ _ Rxy;
+    . assumption
 
 end Hilbert.K
 
@@ -102,52 +134,26 @@ lemma CKDiaBoxDiaK! : Hilbert.K4Point1 ⊢! (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ)
 lemma CKBoxDiaDiaK! : Hilbert.K4Point1 ⊢! (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := K_weakerThan_K4Point1.pbl Hilbert.K.CKBoxDiaDiaK!
 
 lemma DiaK!_of_CKBoxDia (h : Hilbert.K4Point1 ⊢! ◇φ ⋏ □ψ) : Hilbert.K4Point1 ⊢! ◇(φ ⋏ ψ) := CKDiaBoxDiaK! ⨀ h
+lemma DiaK!_of_CKDiaBox (h : Hilbert.K4Point1 ⊢! □φ ⋏ ◇ψ) : Hilbert.K4Point1 ⊢! ◇(φ ⋏ ψ) := CKBoxDiaDiaK! ⨀ h
 
 lemma DiaCDiaBox! : Hilbert.K4Point1 ⊢! ◇(◇φ ➝ □φ) :=
   (K_weakerThan_K4Point1.pbl $ C_of_E_mp! $ Hilbert.K.axiomM_DiaCDiaBox!) ⨀ (by simp)
 
 lemma DiaConjCDiabox {Γ : List _} (hΓ : Γ ≠ []) : Hilbert.K4Point1 ⊢! ◇(Γ.map (λ φ => ◇φ ➝ □φ)).conj := by
-  induction Γ using List.induction_with_singleton' with
+  induction Γ using List.induction_with_singleton with
   | hnil => tauto;
   | hsingle φ =>
-    sorry;
-  | hcons φ ψ Γ ih =>
-    simp;
-    have : Hilbert.K4Point1 ⊢! (List.map (fun φ ↦ ◇(◇φ ➝ □φ)) (φ :: ψ :: Γ)).conj := by
-      -- Conj_intro
-      sorry;
-    have : Hilbert.K4Point1 ⊢! (List.map (fun φ ↦ □◇(◇φ ➝ □φ)) (φ :: ψ :: Γ)).conj := by
-      -- Conj_intro
-      sorry;
-    simp at this;
-    have := K!_replace_left this axiomM!;
-    have := (C_of_E_mpr! K!_assoc) ⨀ this;
-    have := K!_replace_left this CKDiaBoxDiaK!;
-    have : Hilbert.K4Point1 ⊢! ◇◇((◇φ ➝ □φ) ⋏ (◇ψ ➝ □ψ)) ⋏ (List.map (fun φ ↦ □◇(◇φ ➝ □φ)) Γ).conj := by sorry;
-    have : Hilbert.K4Point1 ⊢! ◇((◇φ ➝ □φ) ⋏ (◇ψ ➝ □ψ)) ⋏ (List.map (fun φ ↦ □◇(◇φ ➝ □φ)) Γ).conj := K!_replace_left this $ by
-      sorry;
-    have : Hilbert.K4Point1 ⊢! ◇((◇φ ➝ □φ) ⋏ (◇ψ ➝ □ψ)) ⋏ □(List.map (fun φ ↦ ◇(◇φ ➝ □φ)) Γ).conj := K!_replace_right this $ by
-      sorry;
-    have := DiaK!_of_CKBoxDia this;
-    sorry;
-    -- have : Hilbert.K4Point1 ⊢! (◇(◇φ ➝ □φ) ⋏ ◇(◇ψ ➝ □ψ)) ⋏ (List.map (fun φ ↦ □◇(◇φ ➝ □φ)) Γ).conj := K!_replace_left this $ by simp;
-    -- have := (C_of_E_mp! K!_assoc) ⨀ this;
-
-    /-
-    replace ih := ih (by simp);
-    simp at ih;
-    replace ih := nec! $ ih (by simp);
-
-    have : Hilbert.K4Point1 ⊢! ◇(◇φ ➝ □φ) := DiaCDiaBox!;
-    have : Hilbert.K4Point1 ⊢! ◇□(◇φ ➝ □φ) := axiomM! ⨀ nec! this;
-
-    have : Hilbert.K4Point1 ⊢! ◇((◇φ ➝ □φ) ⋏ (◇ψ ➝ □ψ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := by
-      apply DiaK!_of_CKBoxDia;
+    apply diaK''! ?_ $ DiaCDiaBox! (φ := φ);
+    apply right_K!_intro <;> simp;
+  | hcons φ Γ _ ih =>
+    have : Hilbert.K4Point1 ⊢! ◇□(◇φ ➝ □φ) ⋏ □◇(List.map (fun φ ↦ (◇φ ➝ □φ)) Γ).conj := by
       apply K!_intro;
-      . sorry;
-      . sorry;
+      . exact axiomM! ⨀ (nec! DiaCDiaBox!);
+      . exact nec! $ ih $ by assumption;
+    have : Hilbert.K4Point1 ⊢! ◇(□(◇φ ➝ □φ) ⋏ ◇(List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := DiaK!_of_CKBoxDia this;
+    replace : Hilbert.K4Point1 ⊢! ◇◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaK''! CKBoxDiaDiaK! this;
+    replace : Hilbert.K4Point1 ⊢! ◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaFour'! this;
     exact this;
-    -/
 
 lemma DiaFconjCDiabox {Γ : Finset _} (hΓ : Γ ≠ ∅) : Hilbert.K4Point1 ⊢! ◇(Γ.image (λ φ => ◇φ ➝ □φ)).conj := by
   apply diaK''! ?_ (h₂ := DiaConjCDiabox (Γ := Γ.toList) ?_);
