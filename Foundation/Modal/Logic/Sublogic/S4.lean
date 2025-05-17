@@ -9,16 +9,19 @@ open Kripke
 instance : ProperSublogic Logic.S4 Logic.S4Point1 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point1 ⊢! φ ∧ ¬ReflexiveTransitiveFrameClass ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4Point1 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
     use (Axioms.M (.atom 0));
     constructor;
     . exact axiomM!;
-    . apply Formula.Kripke.ValidOnFrameClass.not_of_exists_model_world;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;
-      suffices ∃ x, x ≠ (0 : M.World) by simpa [M, Transitive, Reflexive, Semantics.Realize, Satisfies];
-      use 1;
-      trivial;
+      constructor;
+      . apply isPreorder_iff _ _ |>.mpr;
+        refine ⟨⟨?_⟩, ⟨?_⟩⟩ <;> simp [M];
+      . suffices ∃ x, x ≠ (0 : M.World) by simpa [M, Transitive, Reflexive, Semantics.Realize, Satisfies];
+        use 1;
+        trivial;
 ⟩
 
 theorem S4_ssubset_S4Point2 : Logic.S4 ⊂ Logic.S4Point2 := by

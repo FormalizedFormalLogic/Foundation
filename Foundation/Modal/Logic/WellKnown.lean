@@ -55,7 +55,7 @@ lemma K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic : Logic.K4Point3
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev K4Point1 : Logic := Hilbert.K4Point1.logic
-lemma K4Point1.eq_TransitiveMcKinseyanKripkeFrameClass_Logic : Logic.K4Point1 = Kripke.TransitiveMcKinseyanFrameClass.logic
+lemma K4Point1.Kripke.eq_trans_mckinsey_logic : Logic.K4Point1 = Kripke.FrameClass.trans_mckinsey.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev K45 : Logic := Hilbert.K45.logic
@@ -123,7 +123,7 @@ lemma S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic : Logic.S4 = Kripke.FrameC
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev S4Point1 : Logic := Hilbert.S4Point1.logic
-lemma S4Point1.eq_ReflexiveTransitiveMcKinseyanKripkeFrameClass_Logic : Logic.S4Point1 = Kripke.ReflexiveTransitiveMcKinseyanFrameClass.logic
+lemma S4Point1.Kripke.eq_preorder_mckinsey_logic : Logic.S4Point1 = Kripke.FrameClass.preorder_mckinsey.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev S4Point2 : Logic := Hilbert.S4Point2.logic
