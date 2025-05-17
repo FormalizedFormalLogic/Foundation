@@ -80,12 +80,13 @@ jobs:
           cp ./import_graph.html ./pages/src/assets
 
       # Build kites
-      - name: Generate kites
-        run: |
-          lake exe generate_modal_kite
-      - name: Copy kites to pages
-        run: |
-          cp ./scripts/modal_kite.png ./pages/src/assets
+      # temporary kite generating suspended
+      # - name: Generate kites
+      #   run: |
+      #     lake exe generate_modal_kite
+      # - name: Copy kites to pages
+      #   run: |
+      #     cp ./scripts/modal_kite.png ./pages/src/assets
 
       # Build doc
       - name: Build docs

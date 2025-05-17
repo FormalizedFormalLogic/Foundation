@@ -25,8 +25,8 @@ protected def Consistent (𝓢 : S) (t : Tableau α) := ∀ {Γ Δ : Finset (For
 protected abbrev Inconsistent (𝓢 : S) (t : Tableau α) := ¬t.Consistent 𝓢
 
 protected structure Saturated (t : Tableau α) : Prop where
-  imply₁ {φ ψ} : φ ➝ ψ ∈ t.1 → φ ∈ t.2 ∨ ψ ∈ t.1
-  imply₂ {φ ψ} : φ ➝ ψ ∈ t.2 → φ ∈ t.1 ∧ ψ ∈ t.2
+  imply₁ {φ ψ : Formula _} : φ ➝ ψ ∈ t.1 → φ ∈ t.2 ∨ ψ ∈ t.1
+  imply₂ {φ ψ : Formula _} : φ ➝ ψ ∈ t.2 → φ ∈ t.1 ∧ ψ ∈ t.2
 
 protected structure Disjoint (t : Tableau α) : Prop where
   union : Disjoint t.1 t.2
@@ -210,9 +210,9 @@ variable {t : Tableau α}
 
 variable (𝓢 : S)
 
-def lindenbaum_next (φ : Formula α) (t : Tableau α) : Tableau α := if Tableau.Consistent 𝓢 (insert φ t.1, t.2) then (insert φ t.1, t.2) else (t.1, insert φ t.2)
+noncomputable def lindenbaum_next (φ : Formula α) (t : Tableau α) : Tableau α := if Tableau.Consistent 𝓢 (insert φ t.1, t.2) then (insert φ t.1, t.2) else (t.1, insert φ t.2)
 
-def lindenbaum_indexed [Encodable α] (t : Tableau α) : ℕ → Tableau α
+noncomputable def lindenbaum_indexed [Encodable α] (t : Tableau α) : ℕ → Tableau α
   | 0 => t
   | i + 1 =>
     match (decode i) with
