@@ -718,6 +718,9 @@ lemma iff_mem₁_imp : φ ➝ ψ ∈ t.1.1 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) :
     . exact iff_not_mem₂_mem₁.mpr hφ;
     . exact iff_not_mem₁_mem₂.mpr hψ;
 
+lemma iff_mem₁_imp' : φ ➝ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 → ψ ∈ t.1.1) := by
+  simp [iff_mem₁_imp, or_iff_not_imp_left, iff_not_mem₂_mem₁];
+
 lemma iff_mem₂_imp : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   constructor;
   . apply of_mem₂_imp;

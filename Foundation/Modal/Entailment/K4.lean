@@ -7,6 +7,16 @@ open FiniteContext
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
 variable {𝓢 : S} [Entailment.Modal.K4 𝓢]
 
+@[simp]
+lemma diaFour! : 𝓢 ⊢! ◇◇φ ➝ ◇φ := by
+  apply C!_replace diaDuality_mp! diaDuality_mpr!;
+  apply contra!;
+  suffices 𝓢 ⊢! □□(∼φ) ➝ □(∼◇φ) by apply C!_trans axiomFour! this;
+  apply axiomK'!;
+  apply nec!;
+  simp;
+lemma diaFour'! (h : 𝓢 ⊢! ◇◇φ) : 𝓢 ⊢! ◇φ := diaFour! ⨀ h
+
 def imply_BoxBoxdot_Box: 𝓢 ⊢  □⊡φ ➝ □φ := by
   exact C_trans distribute_box_and and₁
 @[simp] lemma imply_boxboxdot_box : 𝓢 ⊢! □⊡φ ➝ □φ := ⟨imply_BoxBoxdot_Box⟩
