@@ -43,7 +43,7 @@ lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k 
 
 section
 
-def _root_.LO.FirstOrder.Arith.ssnum : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Arith.ssnum : 𝚺₁.Semisentence 3 := .mkSigma
   “y p x. ∃ n, !numeralDef n x ∧ !p⌜ℒₒᵣ⌝.substs₁Def y n p” (by simp)
 
 lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
@@ -99,19 +99,28 @@ lemma fixpoint_eq (θ : Semisentence ℒₒᵣ 1) :
     fixpoint θ = (“∀ x, !ssnum x !!⌜diag θ⌝ !!⌜diag θ⌝ → !θ x” : Sentence ℒₒᵣ) := by
   simp [fixpoint, substs_diag]
 
+lemma val_fixpoint (θ : Semisentence ℒₒᵣ 1) {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] :
+    V ⊧/![] (fixpoint θ) ↔ Semiformula.Evalbm V ![(substNumeral ⌜diag θ⌝ ⌜diag θ⌝ : V)] θ := by
+  have E1 : ∀ x y z : V, (![x, y, z] 1) = y := fun x y z ↦ by simp
+  have E2 : ∀ x y z : V, (![x, y, z] 2) = z := fun x y z ↦ by simp
+  have e1 : ∀ x : V, (![x, ⌜diag θ⌝, ⌜diag θ⌝] 1) = ⌜diag θ⌝ := fun x ↦ E1 _ _ _
+  have e2 : ∀ x : V, (![x, ⌜diag θ⌝, ⌜diag θ⌝] 2) = ⌜diag θ⌝ := fun x ↦ E2 _ _ _
+  simp only [Nat.reduceAdd, Fin.isValue, fixpoint_eq, Nat.succ_eq_add_one, Fin.isValue, Semiformula.eval_all,
+    LogicalConnective.HomClass.map_imply, Semiformula.eval_substs, Matrix.comp_vecCons',
+    Semiterm.val_bvar, Matrix.cons_val_fin_one, val_quote, Matrix.constant_eq_singleton,
+    LogicalConnective.Prop.arrow_eq, eval_ssnum, Matrix.cons_val_zero, e1, e2, forall_eq]
+
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
-    T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝] := by sorry;
-  /-
+    T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝] :=
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance
-    simp [models_iff]
     let Θ : V → Prop := fun x ↦ Semiformula.Evalbm V ![x] θ
+    suffices V ⊧/![] (fixpoint θ) ↔ Θ ⌜fixpoint θ⌝ by simpa [Θ, models_iff]
     calc
       V ⊧/![] (fixpoint θ)
-      ↔ Θ (substNumeral ⌜diag θ⌝ ⌜diag θ⌝) := by simp [Θ, fixpoint_eq]
+      ↔ Θ (substNumeral ⌜diag θ⌝ ⌜diag θ⌝) := val_fixpoint θ --simp [Θ, fixpoint_eq]
     _ ↔ Θ ⌜fixpoint θ⌝                     := by simp [substNumeral_app_quote_quote]; rfl
-  -/
 
 end Diagonalization
 
