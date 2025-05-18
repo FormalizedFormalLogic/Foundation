@@ -17,7 +17,7 @@ namespace LO.Axioms.Modal
 variable {F : Type*} [BasicModalLogicalConnective F]
 variable (φ ψ χ : F)
 
-protected abbrev Mk := □(□□φ ➝ □ψ) ➝ (□φ ➝ ψ)
+protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
 
 end LO.Axioms.Modal
 
@@ -34,8 +34,8 @@ section
 
 variable [Modal.HasAxiomMk 𝓢]
 
-def axiomMk : 𝓢 ⊢ □(□□φ ➝ □ψ) ➝ (□φ ➝ ψ) := Modal.HasAxiomMk.Mk _ _
-@[simp] lemma axiomMk! : 𝓢 ⊢! □(□□φ ➝ □ψ) ➝ (□φ ➝ ψ) := ⟨axiomMk⟩
+def axiomMk : 𝓢 ⊢ □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := Modal.HasAxiomMk.Mk _ _
+@[simp] lemma axiomMk! : 𝓢 ⊢! □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := ⟨axiomMk⟩
 
 variable [Entailment.Minimal 𝓢]
 
@@ -72,81 +72,26 @@ section definability
 variable {F : Kripke.Frame}
 
 lemma validate_axiomMk_of_makinsonCondition (h : MakinsonCondition F.Rel) : F ⊧ (Axioms.Modal.Mk (.atom 0) (.atom 1)) := by
-  intro V x h₁ h₂;
+  intro V x hx;
+  replace ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
   obtain ⟨y, Rxy, Ryx, hz⟩ := @h x;
-  apply @h₁ y ?_ ?_;
+  apply Satisfies.dia_def.mpr;
+  use y;
+  constructor;
   . assumption;
-  . assumption;
-  . intro z Rxz u Rzu;
-    apply h₂;
-    apply hz u;
-    use z;
-    tauto;
+  . apply Satisfies.and_def.mpr;
+    constructor;
+    . suffices Satisfies ⟨F, V⟩ y (□^[2](.atom 0)) by simpa using this;
+      apply Satisfies.multibox_def.mpr
+      intro z Ryz;
+      apply hx₁;
+      apply hz;
+      exact Ryz;
+    . apply Satisfies.dia_def.mpr;
+      use x;
 
 lemma validate_axiomM_of_satisfiesMakinsonCondition [SatisfiesMakinsonCondition _ F.Rel] : F ⊧ (Axioms.Modal.Mk (.atom 0) (.atom 1)) :=
   validate_axiomMk_of_makinsonCondition SatisfiesMakinsonCondition.mkCondition
-
-/-
-lemma validate_M_of_mckinseyan_trans (hTrans : Transitive F) : F ⊧ (Axioms.M (.atom 0)) → McKinseyCondition F := by
-  contrapose;
-  intro hMc;
-  unfold McKinseyCondition at hMc;
-  push_neg at hMc;
-  obtain ⟨x, h⟩ := hMc;
-  by_cases hDead : ∀ y, ¬x ≺ y;
-  . apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ _ _ => True), x;
-    suffices (∀ y, x ≺ y → ∃ x, y ≺ x) ∧ ∀ y, ¬x ≺ y by
-      simpa [Satisfies];
-    constructor;
-    . intro y Rxy;
-      have := hDead y Rxy;
-      contradiction;
-    . assumption;
-  . push_neg at hDead;
-    obtain ⟨y, Rxy⟩ := hDead;
-    apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ z _ =>
-      x ≺ z ∧ ∀ u, x ≺ u → ∃ v, (v ≠ z ∧ u ≺ z ∧ u ≺ v)
-    ), x;
-    apply Satisfies.imp_def₂.not.mpr;
-    push_neg;
-
-    constructor;
-    . apply Satisfies.box_def.mpr;
-      intro w Rxw;
-      apply Satisfies.dia_def.mpr;
-      obtain ⟨z, Rwz, hwz⟩ := h w Rxw;
-      use z;
-      constructor;
-      . assumption;
-      . simp [Semantics.Realize, Satisfies];
-        constructor;
-        . exact hTrans Rxw Rwz;
-        . intro u Rxu;
-          use w;
-          refine ⟨?_, ?_, ?_⟩;
-          . tauto;
-          . sorry
-          . sorry;
-    . apply Satisfies.dia_def.not.mpr
-      push_neg;
-      intro z Rxz;
-      apply Satisfies.box_def.not.mpr;
-      push_neg;
-      obtain ⟨w, Rzw, hzw⟩ := h z Rxz;
-      use w;
-      constructor;
-      . assumption;
-      . simp [Semantics.Realize, Satisfies];
-        intro Rxw;
-        use z;
-        constructor;
-        . assumption;
-        . intro v hvw _;
-          sorry;
-
--/
 
 instance : SatisfiesMakinsonCondition _ whitepoint := ⟨by
   intro x;
