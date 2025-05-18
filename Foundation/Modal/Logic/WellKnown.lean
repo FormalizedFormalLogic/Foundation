@@ -1,6 +1,7 @@
 import Foundation.Modal.Kripke.Hilbert.GL.MDP
 import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.Hilbert.K4
+import Foundation.Modal.Kripke.Hilbert.K4n
 import Foundation.Modal.Kripke.Hilbert.K45
 import Foundation.Modal.Kripke.Hilbert.K4Point1
 import Foundation.Modal.Kripke.Hilbert.K4Point2
@@ -44,6 +45,9 @@ protected abbrev K4 : Logic := Hilbert.K4.logic
 lemma K4.eq_TransitiveKripkeFrameClass_Logic : Logic.K4 = Kripke.FrameClass.trans.logic
   := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
+protected abbrev K4n (n : ℕ+) : Logic := Hilbert.K4n n |>.logic
+lemma K4n.Kripke.eq_weak_trans_logic (n : ℕ+) : Logic.K4n n = (Kripke.FrameClass.weak_trans n).logic
+  := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 protected abbrev K4Point2 : Logic := Hilbert.K4Point2.logic
 lemma K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic : Logic.K4Point2 = Kripke.FrameClass.trans_weakConfluent.logic
