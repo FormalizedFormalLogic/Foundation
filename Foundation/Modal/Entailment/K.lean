@@ -605,6 +605,24 @@ lemma provable_iff_boxed : (X.box) *⊢[𝓢]! φ ↔ ∃ Δ : List F, (∀ ψ �
     apply Context.provable_iff.mpr;
     use Δ.box;
 
+lemma provable_iff_boxed_finset : (X.box) *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (Δ.box.toSet ⊆ X.box) ∧ (Δ.box) *⊢[𝓢]! φ := by
+  apply Iff.trans provable_iff_boxed;
+  constructor;
+  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
+    use Δ.toFinset;
+    constructor;
+    . intro ψ hψ;
+      apply hΔ₁ ψ;
+      sorry;
+    . sorry;
+  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
+    use Δ.toList;
+    constructor;
+    . intro ψ hψ;
+      apply hΔ₁;
+      sorry;
+    . sorry;
+
 lemma nec! {Γ : Set F} (h : Γ *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! □φ := by
   apply Context.provable_iff.mpr;
   obtain ⟨Δ, hΔ₁, hΔ₂⟩ := Context.provable_iff.mp h;

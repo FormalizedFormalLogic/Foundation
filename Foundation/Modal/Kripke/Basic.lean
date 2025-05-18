@@ -204,39 +204,13 @@ lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
       . apply ih.mpr;
         use y;
 
-lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ hΓ ih =>
-    suffices x ⊧ φ ∨ x ⊧ ⋁Γ ↔ x ⊧ φ ∨ ∃ a ∈ Γ, x ⊧ a by simpa [List.disj₂_cons_nonempty hΓ];
-    constructor;
-    . rintro (_ | h)
-      . tauto;
-      . right; exact ih.mp h;
-    . rintro (_ | h);
-      . tauto;
-      . right; exact ih.mpr h;
-  | _ => simp;
+lemma disj_def {Γ : List _} : x ⊧ Γ.disj ↔ ∃ φ ∈ Γ, x ⊧ φ := by simp;
 
-lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ hΓ ih =>
-    suffices (x ⊧ φ ∧ x ⊧ ⋀Γ) ↔ (x ⊧ φ ∧ ∀ φ ∈ Γ, x ⊧ φ) by simpa [List.conj₂_cons_nonempty hΓ];
-    constructor;
-    . intro ⟨_, hΓ⟩;
-      constructor;
-      . assumption;
-      . exact ih.mp hΓ;
-    . intro ⟨_, hΓ⟩;
-      constructor;
-      . assumption;
-      . apply ih.mpr hΓ;
-  | _ => simp;
+lemma conj_def {Γ : List _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by simp;
 
-lemma fconj_def {Γ : Finset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
-  simp only [Semantics.realize_finset_conj, Satisfies.iff_models];
+lemma fconj_def {Γ : Finset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by simp;
 
-lemma fdisj_def {Γ : Finset _} : x ⊧ Γ.disj ↔ ∃ φ ∈ Γ, x ⊧ φ := by
-  simp only [Semantics.realize_finset_disj, Satisfies.iff_models];
+lemma fdisj_def {Γ : Finset _} : x ⊧ Γ.disj ↔ ∃ φ ∈ Γ, x ⊧ φ := by simp;
 
 lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 
