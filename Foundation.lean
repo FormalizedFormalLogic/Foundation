@@ -59,7 +59,6 @@ import Foundation.IntFO.Translation
 import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Hilbert.GL.Alternatives
-import Foundation.Modal.Hilbert.GL.Independency
 
 import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
 import Foundation.Modal.Kripke.Hilbert.GL.MDP
@@ -69,6 +68,8 @@ import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
 import Foundation.Modal.Kripke.NNFormula
 import Foundation.Modal.Kripke.ComplexityLimited
 import Foundation.Modal.Kripke.Undefinability
+import Foundation.Modal.Kripke.Balloon
+import Foundation.Modal.Kripke.LinearFrame
 
 import Foundation.Modal.PLoN.Hilbert.N
 
@@ -92,6 +93,8 @@ import Foundation.Modal.Logic.Sublogic.KTc
 import Foundation.Modal.Logic.Sublogic.S4
 import Foundation.Modal.Logic.Sublogic.S5Grz
 import Foundation.Modal.Logic.Sublogic.Trivials
+
+import Foundation.Modal.Logic.S.Consistent
 
 import Foundation.Modal.Maximal.Makinson
 

@@ -52,11 +52,11 @@ lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confl
   ⟩;
   replace h : F ⊧ (Axioms.WeakLEM (.atom 0)) := by simpa using h;
   have : ¬Satisfies ⟨F, V⟩ x (∼(.atom 0)) := by
-    simp [Satisfies];
+    suffices ∃ y, x ≺ y ∧ V y 0 by simpa [Satisfies];
     use y;
     constructor;
     . exact Rxy;
-    . apply F.refl;
+    . simp [V];
   have : Satisfies ⟨F, V⟩ x (∼∼(.atom 0)) := by
     apply or_iff_not_imp_left.mp $ Satisfies.or_def.mp $ @h V x;
     assumption;
@@ -89,84 +89,62 @@ instance [Entailment.HasAxiomWeakLEM 𝓢] : IsConfluent _ (canonicalFrame 𝓢)
 
   intro Γ Δ;
   intro hΓ hΔ h;
-  simp_all;
-  have := List.eq_nil_iff_forall_not_mem.mpr hΔ; subst this; simp at h; clear hΔ;
+  simp only [Set.subset_empty_iff, Finset.coe_eq_empty] at hΓ hΔ;
+  subst hΔ;
+  simp only [Finset.disj_empty] at h;
 
-  have hΓy : ¬(∀ w, w ∈ Γ → w ∈ y.1.1) := by
-    by_contra hC;
-    have := by simpa using y.consistent (Γ := Γ) (Δ := []) hC (by simp);
-    contradiction;
-  push_neg at hΓy;
+  let Θx := { φ ∈ Γ | (φ ∈ y.1.1 ∧ φ ∈ x.1.1) ∨ (φ ∈ z.1.1 ∧ φ ∈ x.1.1) }
+  let Θy := { φ ∈ Γ | φ ∈ y.1.1 ∧ φ ∉ x.1.1 }
+  let Θz := { φ ∈ Γ | φ ∈ z.1.1 ∧ φ ∉ x.1.1 }
 
-  have hΓz : ¬(∀ w, w ∈ Γ → w ∈ z.1.1) := by
-    by_contra hC;
-    have := by simpa using z.consistent (Γ := Γ) (Δ := []) hC (by simp);
-    contradiction;
-  push_neg at hΓz;
+  suffices ∼Θy.conj ∈ x.1.1 by
+    apply not_mem₁_neg_of_mem₁ (φ := Θy.conj) (t := y) $ iff_mem₁_fconj.mpr $ by
+      intro φ;
+      simp only [Finset.coe_filter, Set.mem_setOf_eq, Θy];
+      tauto;
+    exact Rxy this;
 
-  let Θy := Γ.filter (λ φ => φ ∈ y.1.1 ∧ φ ∉ x.1.1);
-  let Θz := Γ.filter (λ φ => φ ∈ z.1.1 ∧ φ ∉ x.1.1);
-  let Θx := Γ.filter (λ φ => (φ ∈ y.1.1 ∧ φ ∈ x.1.1) ∨ (φ ∈ z.1.1 ∧ φ ∈ x.1.1));
-
-  suffices ∼⋀Θy ∈ x.1.1 by
-    have : ∼⋀Θy ∈ y.1.1 := Rxy this;
-    have : ⋀Θy ∈ y.1.1 := iff_mem₁_conj.mpr $ by
-      intro φ hp;
-      have := by simpa using List.of_mem_filter hp;
-      exact this.1;
-    have : 𝓢 ⊬ ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := y.consistent (Γ := [⋀Θy, ∼⋀Θy]) (Δ := []) (by simp; constructor <;> assumption) (by simp);
-    have : 𝓢 ⊢! ⋀Θy ⋏ ∼⋀Θy ➝ ⊥ := CKNO!;
-    contradiction;
-
-  have : 𝓢 ⊢! (⋀Θx ⋏ (⋀Θy ⋏ ⋀Θz)) ➝ ⊥ := C!_trans (by
-    -- TODO: need more refactor
-    have d₁ : 𝓢 ⊢! ⋀Θx ⋏ ⋀(Θy ++ Θz) ➝ ⋀(Θx ++ (Θy ++ Θz)) := K!_right $ EConj₂AppendKConj₂Conj₂!;
-    have d₂ : 𝓢 ⊢! ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θy ++ Θz) := K!_right $ EConj₂AppendKConj₂Conj₂!;
-    have d₃ : 𝓢 ⊢! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz ➝ ⋀(Θx ++ (Θy ++ Θz)) := C!_trans (by
-      apply deduct'!;
-      have : [⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz] ⊢[𝓢]! ⋀Θx ⋏ ⋀Θy ⋏ ⋀Θz := FiniteContext.by_axm!;
-      apply K!_intro;
-      . exact K!_left this;
-      . exact (FiniteContext.of'! d₂) ⨀ (K!_right this);
-    ) d₁;
-    exact C!_trans d₃ $ CConj₂Conj₂!_of_subset $ by
-      intro φ hp; simp;
-      apply or_iff_not_imp_left.mpr;
-      intro nmem_Θx;
-      have := (not_imp_not.mpr $ List.mem_filter_of_mem hp) nmem_Θx; simp at this;
-      have ⟨hy₁, hz₁⟩ := this;
-      rcases hΓ _ hp with (hy | hz);
-      . left;
-        apply List.mem_filter_of_mem hp;
-        simp;
-        constructor;
-        . assumption;
-        . exact hy₁ hy;
-      . right;
-        apply List.mem_filter_of_mem hp;
-        simp;
-        constructor;
-        . assumption;
-        . exact hz₁ hz;
-  ) h;
-  have : 𝓢 ⊢! ⋀Θx ➝ ⋀Θy ➝ ∼⋀Θz := CK!_iff_CC!.mp $
+  have : 𝓢 ⊢! (Θx.conj ⋏ Θy.conj ⋏ Θz.conj) ➝ ⊥ := by
+    apply C!_trans ?_ h;
+    apply CK!_iff_CC!.mpr;
+    apply FConj_DT.mpr;
+    apply CK!_iff_CC!.mpr;
+    apply FConj_DT'.mpr;
+    apply FConj_DT'.mpr;
+    apply FConj_DT.mp;
+    apply CFConj_FConj!_of_subset;
+    intro φ hφ;
+    rcases hΓ hφ with h | h;
+    . suffices φ ∈ Θx ∪ Θy by
+        apply Finset.mem_union.mpr;
+        tauto;
+      simp [Θx, Θy, Θz];
+      tauto;
+    . suffices φ ∈ Θx ∪ Θz by
+        rw [(show Θx ∪ Θy ∪ Θz = Θx ∪ Θz ∪ Θy by rw [Finset.union_assoc, Finset.union_comm Θy, ←Finset.union_assoc])]
+        apply Finset.mem_union.mpr;
+        tauto;
+      simp [Θx, Θy, Θz];
+      tauto;
+  have : 𝓢 ⊢! Θx.conj ➝ Θy.conj ➝ ∼Θz.conj := CK!_iff_CC!.mp $
     (C!_trans (CK!_iff_CC!.mp $ C!_trans (K!_left K!_assoc) this) (K!_right $ neg_equiv!));
-  have d : 𝓢 ⊢! ⋀Θx ➝ ∼∼⋀Θz ➝ ∼⋀Θy := C!_trans this CCCNN!;
+  replace : [Θx.conj] ⊢[𝓢]! Θy.conj ➝ ∼Θz.conj := FiniteContext.deductInv'! this;
+  replace : [Θx.conj] ⊢[𝓢]! ∼∼Θz.conj ➝ ∼Θy.conj := contra! this;
 
-  have mem_Θx_x : ⋀Θx ∈ x.1.1 := iff_mem₁_conj.mpr $ by
-    intro φ hp;
-    have := by simpa using List.of_mem_filter hp;
-    rcases this with ⟨_, _⟩ | ⟨_, _⟩ <;> assumption;
-  have mem_Θz_z : ⋀Θz ∈ z.1.1 := iff_mem₁_conj.mpr $ by
-    intro φ hp;
-    have := by simpa using List.of_mem_filter hp;
-    exact this.1;
+  have mem_Θx_x : Θx.conj ∈ x.1.1 := iff_mem₁_fconj.mpr $ by
+    intro φ;
+    simp only [Finset.coe_filter, Set.mem_setOf_eq, Θx, Θy, Θz];
+    tauto;
+  have mem_Θz_z : Θz.conj ∈ z.1.1 := iff_mem₁_fconj.mpr $ by
+    intro φ;
+    simp only [Finset.coe_filter, Set.mem_setOf_eq, Θz, Θy, Θx];
+    tauto;
 
-  have nmem_nΘz_z : ∼⋀Θz ∉ z.1.1 := not_mem₁_neg_of_mem₁ mem_Θz_z;
-  have nmem_nΘz_x : ∼⋀Θz ∉ x.1.1 := Set.not_mem_subset Rxz nmem_nΘz_z;
-  have mem_nnΘz_x : ∼∼⋀Θz ∈ x.1.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nmem_nΘz_x;
+  have nmem_nΘz_z : ∼Θz.conj ∉ z.1.1 := not_mem₁_neg_of_mem₁ mem_Θz_z;
+  have nmem_nΘz_x : ∼Θz.conj ∉ x.1.1 := Set.not_mem_subset Rxz nmem_nΘz_z;
+  have mem_nnΘz_x : ∼∼Θz.conj ∈ x.1.1 := or_iff_not_imp_left.mp (iff_mem₁_or.mp $ mem₁_of_provable $ wlem!) nmem_nΘz_x;
 
-  exact mdp₁_mem mem_nnΘz_x $ mdp_mem₁_provable d mem_Θx_x;
+  exact mdp₁_mem mem_nnΘz_x $ mdp_mem₁_provable this mem_Θx_x;
 ⟩
 
 end Canonical

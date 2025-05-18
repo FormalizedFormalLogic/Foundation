@@ -1,5 +1,7 @@
 import Foundation.Logic.Entailment
 import Foundation.Logic.HilbertStyle.Context
+import Foundation.Vorspiel.List.Supplemental
+import Foundation.Vorspiel.Finset.Supplemental
 
 namespace LO.Entailment
 
@@ -12,6 +14,11 @@ variable {F : Type*} [LogicalConnective F] [DecidableEq F]
 open NegationEquiv
 open FiniteContext
 open List
+
+omit [DecidableEq F] in
+@[simp] lemma CONV! : 𝓢 ⊢! ⊤ ➝ ∼⊥ := by
+  apply FiniteContext.deduct'!;
+  exact NO!;
 
 def innerMDP : 𝓢 ⊢ φ ⋏ (φ ➝ ψ) ➝ ψ := by
   apply deduct';
@@ -140,6 +147,9 @@ lemma K!_assoc : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ ⭤ φ ⋏ (ψ ⋏ χ) := by
     apply K!_intro;
     . exact K!_intro hp hq;
     . exact hr;
+
+omit [DecidableEq F] in lemma K!_assoc_mp (h : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ) : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ) := C_of_E_mp! K!_assoc ⨀ h
+omit [DecidableEq F] in lemma K!_assoc_mpr (h : 𝓢 ⊢! φ ⋏ (ψ ⋏ χ)) : 𝓢 ⊢! (φ ⋏ ψ) ⋏ χ := C_of_E_mpr! K!_assoc ⨀ h
 
 def K_replace_left (hc : 𝓢 ⊢ φ ⋏ ψ) (h : 𝓢 ⊢ φ ➝ χ) : 𝓢 ⊢ χ ⋏ ψ := K_intro (h ⨀ K_left hc) (K_right hc)
 omit [DecidableEq F] in lemma K!_replace_left (hc : 𝓢 ⊢! φ ⋏ ψ) (h : 𝓢 ⊢! φ ➝ χ) : 𝓢 ⊢! χ ⋏ ψ := ⟨K_replace_left hc.some h.some⟩
@@ -692,6 +702,99 @@ lemma CConj₂Append!_iff_CKConj₂Conj₂! : 𝓢 ⊢! ⋀(Γ ++ Δ) ➝ φ ↔
   . intro h; exact C!_trans (K!_right EConj₂AppendKConj₂Conj₂!) h;
   . intro h; exact C!_trans (K!_left EConj₂AppendKConj₂Conj₂!) h;
 
+@[simp] lemma CFConjConj₂ {Γ : Finset F} : 𝓢 ⊢! ⋀Γ.toList ➝ Γ.conj := by
+  apply CConj₂Conj₂!_of_provable;
+  apply FiniteContext.by_axm!;
+
+@[simp] lemma CConj₂Conj_list {Γ : List F} : 𝓢 ⊢! ⋀Γ ➝ Γ.toFinset.conj := by
+  apply C!_trans ?_ CFConjConj₂;
+  apply CConj₂Conj₂!_of_subset;
+  simp;
+
+@[simp] lemma CConj₂FConj {Γ : Finset F} : 𝓢 ⊢! Γ.conj ➝ ⋀Γ.toList := by
+  apply right_Conj₂!_intro;
+  intro φ hφ;
+  apply left_Fconj!_intro;
+  simpa using hφ;
+
+@[simp] lemma CConj₂FConj_list {Γ : List F} : 𝓢 ⊢! Γ.toFinset.conj ➝ ⋀Γ := by
+  apply C!_trans $ CConj₂FConj;
+  apply CConj₂Conj₂!_of_subset;
+  simp;
+
+lemma FConj_DT {Γ : Finset F} : 𝓢 ⊢! Γ.conj ➝ φ ↔ Γ *⊢[𝓢]! φ := by
+  constructor;
+  . intro h;
+    apply Context.provable_iff.mpr;
+    use Γ.toList;
+    constructor;
+    . simp;
+    . apply FiniteContext.provable_iff.mpr;
+      exact C!_trans (by simp) h;
+  . intro h;
+    obtain ⟨Δ, hΔ₁, hΔ₂⟩ := Context.provable_iff.mp h;
+    replace hΔ₂ : 𝓢 ⊢! ⋀Γ.toList ➝ φ := C!_trans (CConj₂Conj₂!_of_subset (by simpa)) $ FiniteContext.provable_iff.mp hΔ₂
+    exact C!_trans (by simp) hΔ₂;
+
+omit [DecidableEq F] in
+lemma FConj!_iff_forall_provable {Γ : Finset F} : (𝓢 ⊢! Γ.conj) ↔ (∀ φ ∈ Γ, 𝓢 ⊢! φ) := by
+  apply Iff.trans Conj₂!_iff_forall_provable;
+  constructor <;> simp_all;
+
+omit [DecidableEq F] in
+lemma FConj_of_FConj!_of_subset [DecidableEq F] {Γ Δ : Finset F} (h : Δ ⊆ Γ) (hΓ : 𝓢 ⊢! Γ.conj) : 𝓢 ⊢! Δ.conj := by
+  rw [FConj!_iff_forall_provable] at hΓ ⊢;
+  intro φ hφ;
+  apply hΓ;
+  apply h hφ;
+
+omit [DecidableEq F] in
+lemma CFConj_FConj!_of_subset [DecidableEq F] {Γ Δ : Finset F} (h : Δ ⊆ Γ) : 𝓢 ⊢! Γ.conj ➝ Δ.conj := by
+  apply FConj_DT.mpr;
+  apply FConj_of_FConj!_of_subset h;
+  apply FConj_DT.mp;
+  simp;
+
+@[simp] lemma CFconjUnionKFconj! {Γ Δ : Finset F} : 𝓢 ⊢! (Γ ∪ Δ).conj ➝ Γ.conj ⋏ Δ.conj := by
+  apply FConj_DT.mpr;
+  apply K!_intro <;>
+  . apply FConj_DT.mp;
+    apply CFConj_FConj!_of_subset;
+    simp;
+
+@[simp] lemma CinsertFConjKFConj! {Γ : Finset F} : 𝓢 ⊢! (insert φ Γ).conj ➝ φ ⋏ Γ.conj := by
+  suffices 𝓢 ⊢! ({φ} ∪ Γ).conj ➝ (Finset.conj {φ}) ⋏ Γ.conj by simpa using this;
+  apply CFconjUnionKFconj!;
+
+@[simp] lemma CKFconjFconjUnion! {Γ Δ : Finset F} : 𝓢 ⊢! Γ.conj ⋏ Δ.conj ➝ (Γ ∪ Δ).conj := by
+  apply right_Fconj!_intro;
+  simp only [Finset.mem_union];
+  rintro φ (hφ | hφ);
+  . apply left_K!_intro_left
+    apply left_Fconj!_intro hφ;
+  . apply left_K!_intro_right;
+    apply left_Fconj!_intro hφ;
+
+@[simp]
+lemma CKFConjinsertFConj! {Γ : Finset F} : 𝓢 ⊢! φ ⋏ Γ.conj ➝ (insert φ Γ).conj := by
+  suffices 𝓢 ⊢! (Finset.conj {φ}) ⋏ Γ.conj ➝ ({φ} ∪ Γ).conj by simpa using this;
+  apply CKFconjFconjUnion!;
+
+lemma FConj_DT' {Γ Δ : Finset F} : Γ *⊢[𝓢]! Δ.conj ➝ φ ↔ ↑(Γ ∪ Δ) *⊢[𝓢]! φ := by
+  constructor;
+  . intro h; exact FConj_DT.mp $ C!_trans CFconjUnionKFconj! $ CK!_iff_CC!.mpr $ FConj_DT.mpr h;
+  . intro h; exact FConj_DT.mp $ CK!_iff_CC!.mp $ C!_trans CKFconjFconjUnion! $ FConj_DT.mpr h;
+
+lemma CFconjFconj!_of_provable {Γ Δ : Finset _} (h : ∀ φ, φ ∈ Γ → Δ *⊢[𝓢]! φ) : 𝓢 ⊢! Δ.conj ➝ Γ.conj := by
+  have : 𝓢 ⊢! ⋀(Δ.toList) ➝ ⋀(Γ.toList) := CConj₂Conj₂!_of_provable $ by
+    intro φ hφ;
+    apply Context.iff_provable_context_provable_finiteContext_toList.mp
+    apply h φ;
+    simpa using hφ;
+  refine C!_replace ?_ ?_ this;
+  . simp;
+  . simp;
+
 end Conjunction
 
 section disjunction
@@ -855,7 +958,271 @@ lemma left_Disj₂!_intro' [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : �
 
 lemma of_Disj₂!_of_mem_eq [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) (h : 𝓢 ⊢! ⋁Γ) : 𝓢 ⊢! φ := (left_Disj₂!_intro' hd) ⨀ h
 
+
+@[simp] lemma CFDisjDisj₂ [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! ⋁Γ.toList ➝ Γ.disj := by
+  apply left_Disj₂!_intro;
+  intro ψ hψ;
+  apply right_Fdisj!_intro;
+  simpa using hψ;
+
+@[simp] lemma CDisj₂Disj [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! Γ.disj ➝ ⋁Γ.toList := by
+  apply left_Fdisj!_intro;
+  intro ψ hψ;
+  apply right_Disj₂!_intro;
+  simpa;
+
+lemma CDisj₂Disj₂_of_subset [HasAxiomEFQ 𝓢] {Γ Δ : List F} (h : ∀ φ ∈ Γ, φ ∈ Δ) : 𝓢 ⊢! ⋁Γ ➝ ⋁Δ := by
+  match Δ with
+  | [] =>
+    have : Γ = [] := List.iff_nil_forall.mpr h;
+    subst this;
+    simp;
+  | [φ] =>
+    apply left_Disj₂!_intro;
+    intro ψ hψ;
+    have := h ψ hψ;
+    simp_all;
+  | φ :: Δ =>
+    apply left_Disj₂!_intro;
+    intro ψ hψ;
+    apply right_Disj₂!_intro;
+    apply h;
+    exact hψ;
+
+lemma CFDisjFDisj_of_subset [HasAxiomEFQ 𝓢] {Γ Δ : Finset F} (h : Γ ⊆ Δ) : 𝓢 ⊢! Γ.disj ➝ Δ.disj := by
+  refine C!_trans (C!_trans ?_ (CDisj₂Disj₂_of_subset (Γ := Γ.toList) (Δ := Δ.toList) (by simpa))) ?_ <;> simp;
+
+lemma EDisj₂FDisj {Γ : List F} [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁Γ ⭤ Γ.toFinset.disj := by
+  match Γ with
+  | [] => simp;
+  | φ :: Γ =>
+    apply E!_intro;
+    . apply left_Disj₂!_intro;
+      simp only [List.mem_cons, List.toFinset_cons, forall_eq_or_imp];
+      constructor;
+      . apply right_Fdisj!_intro;
+        simp_all;
+      . intro ψ hψ;
+        apply right_Fdisj!_intro;
+        simp_all;
+    . apply left_Fdisj!_intro;
+      simp only [List.toFinset_cons, Finset.mem_insert, List.mem_toFinset, forall_eq_or_imp];
+      constructor;
+      . apply right_Disj₂!_intro;
+        tauto;
+      . intro ψ hψ;
+        apply right_Disj₂!_intro;
+        tauto;
+
+lemma EDisj₂FDisj!_doubleton [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁[φ, ψ] ⭤ Finset.disj {φ, ψ} := by
+  convert EDisj₂FDisj (𝓢 := 𝓢) (Γ := [φ, ψ]);
+  simp;
+
+lemma EConj₂_FConj!_doubleton [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁[φ, ψ] ↔ 𝓢 ⊢! Finset.disj {φ, ψ} := by
+  constructor;
+  . intro h; exact (C_of_E_mp! $ EDisj₂FDisj!_doubleton) ⨀ h;
+  . intro h; exact (C_of_E_mpr! $ EDisj₂FDisj!_doubleton) ⨀ h;
+
+@[simp]
+lemma CAFDisjinsertFDisj! [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! φ ⋎ Γ.disj ➝ (insert φ Γ).disj := by
+  apply left_A!_intro;
+  . apply right_Fdisj!_intro; simp;
+  . apply CFDisjFDisj_of_subset; simp;
+
+@[simp]
+lemma CinsertFDisjAFDisj! [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! (insert φ Γ).disj ➝ φ ⋎ Γ.disj := by
+  apply left_Fdisj!_intro;
+  simp only [Finset.mem_insert, forall_eq_or_imp, or₁!, true_and];
+  intro ψ hψ;
+  apply right_A!_intro_right;
+  apply right_Fdisj!_intro;
+  assumption;
+
+@[simp] lemma CAFdisjFdisjUnion [HasAxiomEFQ 𝓢] {Γ Δ : Finset F} : 𝓢 ⊢! Γ.disj ⋎ Δ.disj ➝ (Γ ∪ Δ).disj := by
+  apply left_A!_intro <;>
+  . apply CFDisjFDisj_of_subset;
+    simp;
+
+@[simp]
+lemma CFdisjUnionAFdisj [HasAxiomEFQ 𝓢] {Γ Δ : Finset F} : 𝓢 ⊢! (Γ ∪ Δ).disj ➝ Γ.disj ⋎ Δ.disj := by
+  apply left_Fdisj!_intro;
+  simp only [Finset.mem_union];
+  rintro ψ (hψ | hψ);
+  . apply C!_trans (ψ := Γ.disj) ?_ or₁!;
+    apply right_Fdisj!_intro;
+    assumption;
+  . apply C!_trans (ψ := Δ.disj) ?_ or₂!;
+    apply right_Fdisj!_intro;
+    assumption;
+
+lemma left_Fdisj!_intro' {Γ : Finset _} [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢! Γ.disj ➝ φ := by
+  apply C!_trans ?_ $ left_Disj₂!_intro' (Γ := Γ.toList) (by simpa);
+  simp;
+
 end disjunction
+
+
+section
+
+variable {Γ Δ : Finset F}
+
+lemma CFConj_CDisj!_of_A [HasAxiomEFQ 𝓢] (hφψ : φ ⋎ ψ ∈ Γ) (hφ : φ ∈ Δ) (hψ : ψ ∈ Δ) : 𝓢 ⊢! Γ.conj ➝ Δ.disj := by
+  apply C!_trans (ψ := Finset.disj {φ, ψ});
+  . apply C!_trans (ψ := Finset.conj {φ ⋎ ψ}) ?_;
+    . apply FConj_DT.mpr;
+      suffices ↑{φ ⋎ ψ} *⊢[𝓢]! [φ, ψ].disj₂ by simpa using EConj₂_FConj!_doubleton.mp this;
+      apply Context.by_axm!;
+      simp;
+    . apply CFConj_FConj!_of_subset;
+      simpa;
+  . apply left_Fdisj!_intro;
+    simp only [Finset.mem_insert, Finset.mem_singleton, forall_eq_or_imp, forall_eq];
+    constructor <;>
+    . apply right_Fdisj!_intro;
+      assumption;
+
+lemma CFConj_CDisj!_of_K_intro (hp : φ ∈ Γ) (hpq : ψ ∈ Γ) (hψ : φ ⋏ ψ ∈ Δ) : 𝓢 ⊢! Γ.conj ➝ Δ.disj := by
+  apply C!_trans (ψ := Finset.disj {φ ⋏ ψ});
+  . apply C!_trans (ψ := Finset.conj {φ, ψ}) ?_;
+    . apply FConj_DT.mpr;
+      simp only [Finset.coe_insert, Finset.coe_singleton, Finset.disj_singleton];
+      apply K!_intro <;> exact Context.by_axm! $ by simp;
+    . apply CFConj_FConj!_of_subset;
+      apply Finset.doubleton_subset.mpr;
+      tauto;
+  . simp only [Finset.disj_singleton];
+    apply right_Fdisj!_intro _ hψ;
+
+lemma CFConj_CDisj!_of_innerMDP (hp : φ ∈ Γ) (hpq : φ ➝ ψ ∈ Γ) (hψ : ψ ∈ Δ) : 𝓢 ⊢! Γ.conj ➝ Δ.disj := by
+  apply C!_trans (ψ := Finset.disj {ψ});
+  . apply C!_trans (ψ := Finset.conj {φ, φ ➝ ψ}) ?_;
+    . apply FConj_DT.mpr;
+      have h₁ : ({φ, φ ➝ ψ}) *⊢[𝓢]! φ ➝ ψ := Context.by_axm! $ by simp;
+      have h₂ : ({φ, φ ➝ ψ}) *⊢[𝓢]! φ := Context.by_axm! $ by simp;
+      simpa using h₁ ⨀ h₂;
+    . apply CFConj_FConj!_of_subset;
+      apply Finset.doubleton_subset.mpr;
+      tauto;
+  . simp only [Finset.disj_singleton];
+    apply right_Fdisj!_intro _ hψ;
+
+lemma iff_FiniteContext_Context {Γ : List F} : Γ ⊢[𝓢]! φ ↔ ↑Γ.toFinset *⊢[𝓢]! φ := by
+  constructor;
+  . intro h;
+    replace h := FiniteContext.provable_iff.mp h;
+    apply FConj_DT.mp;
+    exact C!_trans (by simp) h;
+  . intro h;
+    replace h := FConj_DT.mpr h;
+    apply FiniteContext.provable_iff.mpr;
+    exact C!_trans (by simp) h;
+
+end
+
+
+section
+
+/-- List version of `CNAKNN!` -/
+@[simp]
+lemma CNDisj₁Conj₂! : 𝓢 ⊢! ∼⋁Γ ➝ ⋀(Γ.map (∼·)) := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ Γ hΓ ih =>
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    refine C!_trans CNAKNN! ?_;
+    apply CKK!_of_C!' ih;
+
+/--- Finset version of `CNAKNN!` -/
+@[simp]
+lemma CNFdisjFconj! [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! ∼Γ.disj ➝ (Γ.image (∼·)).conj := by
+  apply C!_replace ?_ ?_ $ CNDisj₁Conj₂! (Γ := Γ.toList);
+  . apply contra!;
+    exact CFDisjDisj₂;
+  . apply CConj₂Conj₂!_of_provable;
+    intro φ hφ;
+    apply FiniteContext.by_axm!
+    simpa using hφ;
+
+/--- Finset version of `CKNNNA!` -/
+@[simp]
+lemma CConj₂NNDisj₂! : 𝓢 ⊢! ⋀Γ.map (∼·) ➝ ∼⋁Γ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ Γ hΓ ih =>
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    apply C!_trans ?_ CKNNNA!;
+    apply CKK!_of_C!' ih;
+
+/--- Finset version of `CKNNNA!` -/
+@[simp]
+lemma CFconjNNFconj! [HasAxiomEFQ 𝓢] {Γ : Finset F} : 𝓢 ⊢! (Γ.image (∼·)).conj ➝ ∼Γ.disj := by
+  apply C!_replace ?_ ?_ $ CConj₂NNDisj₂! (Γ := Γ.toList);
+  . apply CConj₂Conj₂!_of_provable;
+    intro φ hφ;
+    apply FiniteContext.by_axm!
+    simpa using hφ;
+  . apply contra!;
+    simp;
+
+@[simp]
+lemma CNDisj₂NConj₂! [HasAxiomDNE 𝓢] {Γ : List F} : 𝓢 ⊢! ∼⋁(Γ.map (∼·)) ➝ ⋀Γ := by
+  induction Γ using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ Γ hΓ ih =>
+    simp_all only [ne_eq, not_false_eq_true, List.disj₂_cons_nonempty, List.map_cons, List.map_eq_nil_iff, List.conj₂_cons_nonempty];
+    suffices 𝓢 ⊢! ∼(∼φ ⋎ ∼∼⋁List.map (fun x ↦ ∼x) Γ) ➝ φ ⋏ ⋀Γ by
+      apply C!_trans ?_ this;
+      apply contra!;
+      apply CAA!_of_C!_right;
+      exact dne!;
+    apply C!_trans CNAKNN! ?_;
+    apply CKK!_of_C!_of_C!;
+    . exact dne!;
+    . exact C!_trans dne! ih;
+
+lemma CNFdisj₂NFconj₂! [HasAxiomDNE 𝓢] {Γ : Finset F} : 𝓢 ⊢! ∼(Γ.image (∼·)).disj ➝ Γ.conj := by
+  apply C!_replace ?_ ?_ $ CNDisj₂NConj₂! (Γ := Γ.toList);
+  . apply contra!;
+    apply left_Disj₂!_intro;
+    intro ψ hψ;
+    apply right_Fdisj!_intro;
+    simpa using hψ;
+  . simp;
+
+end
+
+
+namespace Context
+
+lemma provable_iff_finset {Γ : Set F} {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (Δ.toSet ⊆ Γ) ∧ Δ *⊢[𝓢]! φ := by
+  apply Iff.trans Context.provable_iff;
+  constructor;
+  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
+    use Δ.toFinset;
+    constructor;
+    . simpa;
+    . apply provable_iff.mpr
+      use Δ;
+      constructor <;> simp_all;
+  . rintro ⟨Δ, hΔ₁, hΔ₂⟩;
+    use Δ.toList;
+    constructor;
+    . simpa;
+    . apply FiniteContext.provable_iff.mpr;
+      refine C!_trans ?_ (FConj_DT.mpr hΔ₂);
+      simp;
+
+lemma bot_of_mem_neg  {Γ : Set F}  (h₁ : φ ∈ Γ) (h₂ : ∼φ ∈ Γ) : Γ *⊢[𝓢]! ⊥ := by
+  replace h₁ : Γ *⊢[𝓢]! φ := by_axm! h₁;
+  replace h₂ : Γ *⊢[𝓢]! φ ➝ ⊥ := N!_iff_CO!.mp $ by_axm! h₂;
+  exact h₂ ⨀ h₁;
+
+end Context
+
+
 
 section classical
 

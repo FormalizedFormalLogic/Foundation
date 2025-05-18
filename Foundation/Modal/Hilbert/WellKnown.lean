@@ -214,6 +214,33 @@ instance [hH : H.HasH] : Entailment.HasAxiomH H where
     . use (λ b => if hH.p = b then φ else (.atom b));
       simp;
 
+
+class HasZ (H : Hilbert α) where
+  p : α
+  mem_Z : Axioms.Z (.atom p) ∈ H.axioms := by tauto;
+
+instance [hZ : H.HasZ] : Entailment.HasAxiomZ H where
+  Z φ := by
+    apply maxm;
+    use Axioms.Z (.atom hZ.p);
+    constructor;
+    . exact hZ.mem_Z;
+    . use (λ b => if hZ.p = b then φ else (.atom b));
+      simp;
+
+class HasM (H : Hilbert α) where
+  p : α
+  mem_M : Axioms.M (.atom p) ∈ H.axioms := by tauto;
+
+instance [hM : H.HasM] : Entailment.HasAxiomM H where
+  M φ := by
+    apply maxm;
+    use Axioms.M (.atom hM.p);
+    constructor;
+    . exact hM.mem_M;
+    . use (λ b => if hM.p = b then φ else (.atom b));
+      simp;
+
 end
 
 protected abbrev KT : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}⟩
@@ -247,11 +274,30 @@ instance : (Hilbert.KTB).HasT where p := 0
 instance : (Hilbert.KTB).HasB where p := 0
 instance : Entailment.Modal.KTB (Hilbert.KTB) where
 
+protected abbrev KM : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.M (.atom 0)}⟩
+instance : (Hilbert.KM).HasK where p := 0; q := 1;
+instance : (Hilbert.KM).HasM where p := 0
+instance : Entailment.Modal.KM (Hilbert.KM) where
+
+instance K_weakerThan_KM : Hilbert.K ⪯ Hilbert.KM := weakerThan_of_dominate_axioms $ by simp;
 
 protected abbrev K4 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
 instance : (Hilbert.K4).HasK where p := 0; q := 1;
 instance : (Hilbert.K4).HasFour where p := 0
 instance : Entailment.Modal.K4 (Hilbert.K4) where
+
+protected abbrev K4Point1 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
+instance : (Hilbert.K4Point1).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Point1).HasFour where p := 0
+instance : (Hilbert.K4Point1).HasM where p := 0
+instance : Entailment.Modal.K4Point1 (Hilbert.K4Point1) where
+
+instance K_weakerThan_K4Point1 : Hilbert.K ⪯ Hilbert.K4Point1 := weakerThan_of_dominate_axioms $ by simp;
+
+noncomputable instance {H : Hilbert _} [Hilbert.K4Point1 ⪯ H] : Entailment.Modal.K4Point1 H where
+  K _ _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
+  Four _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
+  M _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
 
 protected abbrev K4Point2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}⟩
 instance : (Hilbert.K4Point2).HasK where p := 0; q := 1;
@@ -321,7 +367,16 @@ instance : (Hilbert.S4).HasT where p := 0
 instance : (Hilbert.S4).HasFour where p := 0
 instance : Entailment.Modal.S4 (Hilbert.S4) where
 
-lemma K4_weakerThan_S4 : Hilbert.K4 ⪯ Hilbert.S4 := weakerThan_of_dominate_axioms $ by simp;
+instance K4_weakerThan_S4 : Hilbert.K4 ⪯ Hilbert.S4 := weakerThan_of_dominate_axioms $ by simp;
+
+protected abbrev S4Point1 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
+instance : (Hilbert.S4Point1).HasK where p := 0; q := 1;
+instance : (Hilbert.S4Point1).HasT where p := 0
+instance : (Hilbert.S4Point1).HasFour where p := 0
+instance : (Hilbert.S4Point1).HasM where p := 0
+instance : Entailment.Modal.S4Point1 (Hilbert.S4Point1) where
+
+instance K4Point1_weakerThan_S4Point1 : Hilbert.K4Point1 ⪯ Hilbert.S4Point1 := weakerThan_of_dominate_axioms $ by simp;
 
 protected abbrev S4Point2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point2 (.atom 0)}⟩
 instance : (Hilbert.S4Point2).HasK where p := 0; q := 1;
@@ -407,6 +462,13 @@ instance : (Hilbert.KTc).HasK where p := 0; q := 1;
 instance : (Hilbert.KTc).HasTc where p := 0
 instance : Entailment.Modal.KTc (Hilbert.KTc) where
 
+protected abbrev KD4Point3Z : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Four (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1), Axioms.Z (.atom 0)}⟩
+instance : (Hilbert.KD4Point3Z).HasK where p := 0; q := 1;
+instance : (Hilbert.KD4Point3Z).HasD where p := 0
+instance : (Hilbert.KD4Point3Z).HasFour where p := 0
+instance : (Hilbert.KD4Point3Z).HasWeakPoint3 where p := 0; q := 1;
+instance : (Hilbert.KD4Point3Z).HasZ where p := 0
+instance : Entailment.Modal.KD4Point3Z (Hilbert.KD4Point3Z) where
 
 protected abbrev N : Hilbert ℕ := ⟨{}⟩
 

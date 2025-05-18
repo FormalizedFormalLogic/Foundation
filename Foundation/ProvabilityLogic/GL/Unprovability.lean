@@ -1,7 +1,9 @@
-import Foundation.Modal.Hilbert.GL.Independency
+import Foundation.Modal.Logic.GL.Independency
 import Foundation.ProvabilityLogic.GL.Completeness
 
 namespace LO
+
+open Modal.Logic
 
 namespace FirstOrder.DerivabilityCondition
 
@@ -61,7 +63,7 @@ section Corollary
 
 /-- Gödel's Second Incompleteness Theorem -/
 example [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : T ⊬. ((𝐈𝚺₁).standardDP T).con := by
-  have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ Modal.Hilbert.GL.unprovable_notbox (φ := ⊥);
+  have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
   exact Realization.iff_interpret_neg.not.mp h;
@@ -134,8 +136,7 @@ lemma unprovable_independency_of_consistency :
       (π := (𝐈𝚺₁.standardDP T).con)
       iff_modalConsis_bewConsis_inside;
     exact Iff.trans H₁ H₂ |>.not.mp this;
-  have h := Modal.Hilbert.GL.unprovable_independency (φ := ∼□⊥);
-  replace h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr h;
+  have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_independency (φ := ∼□⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
   congr;
@@ -160,8 +161,7 @@ lemma unrefutable_independency_of_consistency :
       . intro H; exact K!_left H₂ ⨀ H;
       . intro H; exact K!_right H₂ ⨀ H;
     apply Iff.trans H₁ H₂ |>.not.mp this;
-  have h := Modal.Hilbert.GL.unprovable_not_independency_of_consistency;
-  replace h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr h;
+  have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_not_independency_of_consistency;
   push_neg at h;
   obtain ⟨f, h⟩ := h;
   replace h := Realization.iff_interpret_neg.not.mp h;

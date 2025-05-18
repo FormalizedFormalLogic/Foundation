@@ -17,6 +17,8 @@ noncomputable instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ Grz.axiomFour⟩
 protected noncomputable def axiomT : 𝓢 ⊢ □φ ➝ φ := C_trans lemma_axiomFour_axiomT and₁
 noncomputable instance : HasAxiomT 𝓢 := ⟨fun _ ↦ Grz.axiomT⟩
 
+noncomputable instance : Modal.S4 𝓢 where
+
 end Grz
 
 end LO.Entailment

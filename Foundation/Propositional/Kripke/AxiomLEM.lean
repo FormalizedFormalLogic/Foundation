@@ -48,9 +48,7 @@ lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F :
   ⟩;
   suffices Satisfies ⟨F, V⟩ y (.atom 0) by simpa [Satisfies] using this;
   apply V.hereditary Rxy;
-  simp at h;
-  have := @h V x;
-  simp [Semantics.Realize, Satisfies, V, or_iff_not_imp_right] at this;
+  have : ∀ (x_1 : F.World), x ≺ x_1 → z ≺ x_1 → z ≺ x := by simpa  [Semantics.Realize, Satisfies, V, or_iff_not_imp_right] using h V x;
   apply this z;
   . exact Rxz;
   . apply F.refl;
@@ -74,7 +72,6 @@ namespace Canonical
 
 instance [Entailment.HasAxiomLEM 𝓢] : IsEuclidean _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z;
-  simp [canonicalFrame];
   intro Rxy;
   contrapose;
   intro nRzy;

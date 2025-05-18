@@ -35,7 +35,7 @@ open
 def canonicalVal (T : SaturatedConsistentTableau Hilbert.Cl) : Valuation ℕ := λ a => (.atom a) ∈ T.1.1
 
 lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) ⊧ φ ↔ φ ∈ T.1.1 := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom => simp [canonicalVal];
   | hfalsum => simp [canonicalVal];
   | himp φ ψ ihφ ihψ =>
@@ -85,9 +85,16 @@ theorem completeness : (Valid (Valuation _) φ) → (Hilbert.Cl ⊢! φ) := by
   obtain ⟨T, hT⟩ := lindenbaum (𝓢 := Hilbert.Cl) (t₀ := (∅, {φ})) $ by
     intro Γ Δ hΓ hΔ;
     by_contra hC;
-    replace hΓ : Γ = [] := List.eq_nil_iff_forall_not_mem.mpr hΓ;
+    apply h;
+    replace hΓ : Γ = ∅ := by simpa using hΓ;
     subst hΓ;
-    exact h $ of_Disj₂!_of_mem_eq hΔ (hC ⨀ verum!);
+    rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
+    . simp only [Finset.coe_eq_empty] at hΔ;
+      subst hΔ;
+      exact of_O! $ (by simpa using hC) ⨀ verum!;
+    . simp only [Finset.coe_eq_singleton] at hΔ;
+      subst hΔ;
+      exact (by simpa using hC) ⨀ verum!;
   unfold Semantics.Valid;
   push_neg;
   use (canonicalVal T);

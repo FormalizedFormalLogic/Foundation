@@ -151,7 +151,7 @@ lemma inr_satisfies_iff : Formula.Kripke.Satisfies (M.extendRoot r n) (Sum.inr x
 
 open Formula.Kripke in
 lemma inl_satisfies_boxdot_iff [IsTrans _ M.Rel] : r ⊧ (φᵇ) ↔ Satisfies (M.extendRoot r n) (Sum.inl i) (φᵇ) := by
-  induction φ using Formula.rec' generalizing i with
+  induction φ generalizing i with
   | hatom φ => rfl;
   | hfalsum => rfl;
   | himp φ ψ ihA ihB =>
@@ -280,7 +280,7 @@ lemma validates_axiomT_set_in_irrefl_trans_chain
   use x;
   constructor;
   . assumption;
-  . apply Formula.Kripke.Satisfies.finset_conj_def.mpr;
+  . apply Formula.Kripke.Satisfies.fconj_def.mpr;
     simp only [Finset.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
     intro A hA;
     apply hx₁;

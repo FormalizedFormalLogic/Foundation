@@ -284,6 +284,8 @@ instance : Compact (Context F 𝓢) where
   φ_subset := by rintro ⟨Γ⟩ φ b; exact b.subset
   φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
+-- lemma provable_iff' [DecidableEq F] {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (↑Δ ⊆ Γ) ∧ Δ *⊢[𝓢]! φ
+
 def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢] ψ → Γ *⊢[𝓢] φ ➝ ψ
   | ⟨Δ, h, b⟩ =>
     have h : ∀ ψ ∈ Δ, ψ = φ ∨ ψ ∈ Γ := by simpa using h
@@ -298,13 +300,18 @@ def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢] 
       · contradiction
       · assumption,
       FiniteContext.deduct b' ⟩
+lemma deduct! [DecidableEq F] (h : (insert φ Γ) *⊢[𝓢]! ψ) : Γ *⊢[𝓢]! φ ➝ ψ := ⟨Context.deduct h.some⟩
 
 def deductInv {φ ψ : F} {Γ : Set F} : Γ *⊢[𝓢] φ ➝ ψ → (insert φ Γ) *⊢[𝓢] ψ
   | ⟨Δ, h, b⟩ => ⟨φ :: Δ, by simp; intro χ hr; exact Or.inr (h χ hr), FiniteContext.deductInv b⟩
+lemma deductInv! [DecidableEq F] (h : Γ *⊢[𝓢]! φ ➝ ψ) : (insert φ Γ) *⊢[𝓢]! ψ := ⟨Context.deductInv h.some⟩
 
 instance deduction [DecidableEq F] : Deduction (Context F 𝓢) where
   ofInsert := deduct
   inv := deductInv
+
+def weakening [DecidableEq F] (h : Γ ⊆ Δ) {φ : F} : Γ *⊢[𝓢] φ → Δ *⊢[𝓢] φ := Axiomatized.weakening (by simpa)
+lemma weakening! [DecidableEq F] (h : Γ ⊆ Δ) {φ : F} : Γ *⊢[𝓢]! φ → Δ *⊢[𝓢]! φ := fun h ↦ (Axiomatized.le_of_subset (by simpa)).subset h
 
 def of {φ : F} (b : 𝓢 ⊢ φ) : Γ *⊢[𝓢] φ := ⟨[], by simp, FiniteContext.of b⟩
 
@@ -328,6 +335,20 @@ def emptyPrf {φ : F} : ∅ *⊢[𝓢] φ → 𝓢 ⊢ φ := by
 lemma emptyPrf! {φ : F} : ∅ *⊢[𝓢]! φ → 𝓢 ⊢! φ := fun h ↦ ⟨emptyPrf h.some⟩
 
 lemma provable_iff_provable {φ : F} : 𝓢 ⊢! φ ↔ ∅ *⊢[𝓢]! φ := ⟨of!, emptyPrf!⟩
+
+lemma iff_provable_context_provable_finiteContext_toList [DecidableEq F] {Δ : Finset F} : ↑Δ *⊢[𝓢]! φ ↔ Δ.toList ⊢[𝓢]! φ := by
+  constructor;
+  . intro h;
+    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
+    apply FiniteContext.weakening! ?_ hΓ₂;
+    intro ψ hψ;
+    simpa using hΓ₁ ψ hψ;
+  . intro h;
+    apply Context.provable_iff.mpr;
+    use Δ.toList;
+    constructor;
+    . simp;
+    . assumption;
 
 instance minimal [DecidableEq F] (Γ : Context F 𝓢) : Entailment.Minimal Γ where
   mdp := mdp

@@ -4,14 +4,19 @@ defaultTargets = ["Foundation"]
 [leanOptions]
 pp.unicode.fun = true
 linter.flexible = true
-linter.refine = true
+# linter.refine = true
 linter.oldObtain = true
 linter.style.multiGoal = true
 
 [[require]]
-name = "mathlib"
 scope = "leanprover-community"
-version = "git#master"
+name = "mathlib"
+rev = "v4.20.0-rc5"
+
+[[require]]
+scope = "leanprover"
+name = "doc-gen4"
+rev = "v4.20.0-rc5"
 
 [[lean_lib]]
 name = "Foundation"

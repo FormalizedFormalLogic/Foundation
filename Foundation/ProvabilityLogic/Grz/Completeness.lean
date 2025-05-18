@@ -1,5 +1,4 @@
-import Foundation.ProvabilityLogic.S.Completeness
-import Foundation.Modal.Boxdot.GL_Grz
+import Foundation.Modal.Boxdot.Grz_S
 
 namespace LO
 
@@ -38,7 +37,7 @@ def strongInterpret (f : Realization L) (𝔅 : ProvabilityPredicate T₀ T) : F
   | □φ => (f.strongInterpret 𝔅 φ) ⋏ 𝔅 (f.strongInterpret 𝔅 φ)
 
 lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ⭤ f.strongInterpret 𝔅 A := by
-  induction A using Formula.rec' with
+  induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | hfalsum => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | himp A B ihA ihB => exact ECC!_of_E!_of_E! ihA ihB;
@@ -59,7 +58,7 @@ lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] : T ⊢!. f.interpret �
   . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
 
 lemma iff_models_interpret_boxdot_strongInterpret {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.Sound M] : M ⊧ₘ₀ f.interpret 𝔅 (Aᵇ) ↔ M ⊧ₘ₀ f.strongInterpret 𝔅 A := by
-  induction A using Formula.rec' with
+  induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | hfalsum => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
   | himp A B ihA ihB =>
@@ -109,8 +108,7 @@ theorem Grz.arithmetical_completeness_iff {T : Theory ℒₒᵣ} [T.Delta1Defina
 theorem Grz.arithmetical_completeness_model_iff
   {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [Arith.SoundOn T (Arith.Hierarchy 𝚷 2)] [ℕ ⊧ₘ* T] :
   (∀ {f : Realization ℒₒᵣ}, ℕ ⊧ₘ₀ f.strongInterpret ((𝐈𝚺₁).standardDP T) A) ↔ A ∈ Logic.Grz := by
-  apply Iff.trans ?_ iff_boxdotTranslatedGL_Grz;
-  apply Iff.trans ?_ Modal.Logic.iff_provable_boxdot_GL_provable_boxdot_S.symm;
+  apply Iff.trans ?_ Logic.iff_provable_Grz_provable_boxdot_S.symm;
   apply Iff.trans ?_ (S.arithmetical_completeness_iff (T := T)).symm;
   constructor;
   . intro h f; exact Realization.iff_models_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mpr $ h;

@@ -1,6 +1,8 @@
 import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.NNFormula
 import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Maximal.Basic
+import Foundation.Propositional.ClassicalSemantics.Hilbert
 
 namespace LO.Modal
 
@@ -74,7 +76,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
   (v ⊧ (φᵀ.toPropFormula) → Hilbert.KD ⊢! φ) ∧
   (¬(v ⊧ (φᵀ.toPropFormula)) → Hilbert.KD ⊢! ∼φ)
   := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom => simp at hl;
   | hfalsum => simp [trivTranslate, toPropFormula];
   | himp φ ψ ihφ ihψ =>
@@ -119,7 +121,7 @@ private lemma subset_Triv_of_KD_subset.lemma₁
   v ⊧ (((φᵀ.toPropFormula)⟦s.1⟧)) ↔
   v ⊧ ((φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula)
   := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom a =>
     suffices v ⊧ (s.1 a) ↔ v ⊧ (s.1 a).toModalFormulaᵀ.toPropFormula by
       simpa [trivTranslate, toPropFormula];

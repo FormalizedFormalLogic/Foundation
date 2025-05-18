@@ -1,7 +1,7 @@
 import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Kripke.Hilbert.Soundness
-import Foundation.Propositional.Kripke.Filteration
+import Foundation.Propositional.Kripke.Filtration
 import Foundation.Logic.Disjunctive
 
 namespace LO.Propositional
@@ -33,9 +33,9 @@ instance complete_finite : Complete (Hilbert.Int) FrameClass.finite_all := ⟨by
   apply Kripke.complete.complete;
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
-  let FM := coarsestFilterationModel M ↑φ.subformulas;
+  let FM := coarsestFiltrationModel M ↑φ.subformulas;
 
-  apply filteration FM (coarsestFilterationModel.filterOf) (by simp) |>.mpr;
+  apply filtration FM (coarsestFiltrationModel.filterOf) (by simp) |>.mpr;
   apply hφ;
 
   apply Frame.isFinite_iff _ |>.mpr;
@@ -97,7 +97,7 @@ variable {M₁ : Kripke.Model} {M₂ : Kripke.Model}
 
 lemma satisfies_left_on_counterexampleDPModel :
   w ⊧ φ ↔ (Satisfies (counterexampleDPModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inl w) φ) := by
-  induction φ using Formula.rec' generalizing w with
+  induction φ generalizing w with
   | himp φ ψ ihp ihq =>
     constructor;
     . intro hpq X hWX hp;
@@ -114,7 +114,7 @@ lemma satisfies_left_on_counterexampleDPModel :
 
 lemma satisfies_right_on_counterexampleDPModel :
   w ⊧ φ ↔ (Satisfies (counterexampleDPModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inr w) φ) := by
-  induction φ using Formula.rec' generalizing w with
+  induction φ generalizing w with
   | himp φ ψ ihp ihq =>
     constructor;
     . intro h X hWX hp;

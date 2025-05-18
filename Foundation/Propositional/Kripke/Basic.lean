@@ -101,6 +101,8 @@ variable {M : Kripke.Model} {w w' : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 
 @[simp] lemma neg_def  : w ⊧ ∼φ ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ φ) := by simp [Satisfies];
 
+lemma not_of_neg : w ⊧ ∼φ → ¬w ⊧ φ := fun h hC ↦ h (refl w) hC
+
 instance : Semantics.Top M.World where
   realize_top := by simp [Satisfies];
 
@@ -115,13 +117,18 @@ instance : Semantics.Or M.World where
 
 lemma formula_hereditary
   (hw : w ≺ w') : w ⊧ φ → w' ⊧ φ := by
-  induction φ using Formula.rec' with
+  induction φ with
   | hatom => apply M.Val.hereditary hw;
   | himp =>
     intro hpq v hv;
     exact hpq $ M.trans hw hv;
   | hor => simp_all [Satisfies]; tauto;
   | _ => simp_all [Satisfies];
+
+lemma formula_hereditary_not (hw : w ≺ w') : ¬w' ⊧ φ → ¬w ⊧ φ := by
+  contrapose;
+  push_neg;
+  exact formula_hereditary hw;
 
 lemma negEquiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies];
 
@@ -131,7 +138,7 @@ lemma iff_subst_self {F : Frame} {V : Valuation F} {x : F.World} (s) :
     fun {_ _} Rwv {_} => formula_hereditary Rwv
   ⟩;
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | hatom a => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp φ ψ ihφ ihψ =>
@@ -251,7 +258,7 @@ instance : Semantics.Top (Frame) := ⟨λ _ => ValidOnFrame.top⟩
 
 protected lemma bot : ¬F ⊧ ⊥ := by
   simp [ValidOnFrame.models_iff, ValidOnFrame];
-  use ⟨(λ _ _ => True), by tauto⟩;
+  exact ⟨(λ _ _ => True), by tauto⟩;
 instance : Semantics.Bot (Frame) := ⟨λ _ => ValidOnFrame.bot⟩
 
 

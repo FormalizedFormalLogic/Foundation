@@ -161,7 +161,7 @@ lemma TransGen.exists_iterate : TransGen R x y ↔ ∃ n > 0, R.iterate n x y :=
 lemma TransGen.remove_iterate (hn : n > 0) (Rxy : Rel.iterate (TransGen R) n x y) : (TransGen R) x y := by
   apply unwrap_of_trans hn Rxy;
 
-lemma TransGen.unwrap [IsTrans _ R] (Rxy : (TransGen R) x y) : R x y := by
+lemma TransGen.unwrap [trans : IsTrans _ R] (Rxy : (TransGen R) x y) : R x y := by
   have ⟨n, hn, Rxy⟩ := TransGen.exists_iterate.mp Rxy;
   exact unwrap_of_trans hn Rxy;
 

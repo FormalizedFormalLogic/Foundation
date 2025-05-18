@@ -19,7 +19,7 @@ lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F �
   refine ⟨inferInstance, inferInstance, inferInstance⟩;
 
 lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (φᵇ)) ↔ (Satisfies ⟨F^=, V⟩ x φ) := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | himp φ ψ ihp ihq =>
     constructor;
     . intro h hp;
@@ -50,7 +50,7 @@ lemma iff_frame_boxdot_reflexive_closure : (F ⊧ (φᵇ)) ↔ ((F^=) ⊧ φ) :=
   . intro h V x; apply iff_boxdot_reflexive_closure.mpr; exact h V x;
 
 lemma iff_reflexivize_irreflexivize [IsRefl _ F] {x : F.World} {V} : (Satisfies ⟨F, V⟩ x φ) ↔ (Satisfies ⟨F^≠^=, V⟩ x φ) := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | hatom φ => rfl;
   | hfalsum => rfl;
   | himp φ ψ ihp ihq =>
@@ -86,7 +86,7 @@ lemma iff_reflexivize_irreflexivize' [IsRefl _ F] : (F ⊧ φ) ↔ ((F^≠^=) �
 end Kripke
 
 
-namespace Hilbert
+namespace Logic
 
 open Kripke
 open Formula.Kripke
@@ -95,13 +95,13 @@ open Modal.Kripke
 open Entailment
 
 
-lemma provable_boxdotTranslated_GL_of_Grz : (Hilbert.Grz) ⊢! φ → (Hilbert.GL) ⊢! φᵇ := boxdotTranslated_of_dominate $ by
+lemma provable_boxdot_GL_of_provable_Grz : φ ∈ Logic.Grz → φᵇ ∈ Logic.GL := Hilbert.boxdotTranslated_of_dominate $ by
   intro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
   . exact boxdot_Grz_of_L!
 
-lemma provable_Grz_of_boxdotTranslated_GL : (Hilbert.GL) ⊢! φᵇ → (Hilbert.Grz) ⊢! φ := by
+lemma provable_Grz_of_provable_boxdot_GL : φᵇ ∈ Logic.GL → φ ∈ Logic.Grz := by
   contrapose;
   intro h;
   obtain ⟨F, ⟨_, _, _⟩, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
@@ -114,13 +114,13 @@ lemma provable_Grz_of_boxdotTranslated_GL : (Hilbert.GL) ⊢! φᵇ → (Hilbert
     apply iff_reflexivize_irreflexivize'.not.mp;
     exact h;
 
-theorem iff_boxdotTranslatedGL_Grz : (Hilbert.GL) ⊢! φᵇ ↔ (Hilbert.Grz) ⊢! φ := ⟨
-  provable_Grz_of_boxdotTranslated_GL,
-  provable_boxdotTranslated_GL_of_Grz
+theorem iff_provable_boxdot_GL_provable_Grz : φᵇ ∈ Logic.GL ↔ φ ∈ Logic.Grz := ⟨
+  provable_Grz_of_provable_boxdot_GL,
+  provable_boxdot_GL_of_provable_Grz
 ⟩
 
-end Hilbert
+instance : BoxdotProperty (Logic.GL) (Logic.Grz) := ⟨Logic.iff_provable_boxdot_GL_provable_Grz⟩
 
-instance : BoxdotProperty (Logic.GL) (Logic.Grz) := ⟨Hilbert.iff_boxdotTranslatedGL_Grz⟩
+end Logic
 
 end LO.Modal

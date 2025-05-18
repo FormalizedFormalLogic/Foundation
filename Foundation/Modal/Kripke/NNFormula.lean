@@ -217,7 +217,7 @@ namespace Formula.Kripke
 variable {φ : Formula ℕ}
 
 lemma Satisfies.toNNFormula : Formula.Kripke.Satisfies M x φ ↔ NNFormula.Kripke.Satisfies M x φ.toNNFormula := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | hbox φ ihφ =>
     constructor;
     . intro h y Rxy;
