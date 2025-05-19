@@ -88,6 +88,7 @@ import Foundation.Modal.Logic.Sublogic.ModalCube
 import Foundation.Modal.Logic.Sublogic.GL
 import Foundation.Modal.Logic.Sublogic.Grz
 import Foundation.Modal.Logic.Sublogic.K4
+import Foundation.Modal.Logic.Sublogic.K4n
 import Foundation.Modal.Logic.Sublogic.KH
 import Foundation.Modal.Logic.Sublogic.KTc
 import Foundation.Modal.Logic.Sublogic.S4
