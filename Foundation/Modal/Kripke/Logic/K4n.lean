@@ -81,70 +81,11 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-namespace Hilbert
-
-variable {α} [DecidableEq α] {H : Hilbert α} {n : ℕ+}
-
-open Deduction
-
-/-
-class HasFourN (n : ℕ+) (H : Hilbert α) where
-  p : α
-  mem_FourN : Axioms.Modal.FourN n (.atom p) ∈ H.axioms := by tauto;
-
-open Classical in
-instance [hFourN : Hilbert.HasFourN n H] : Entailment.Modal.HasAxiomFourN n H where
-  FourN φ := by
-    apply maxm;
-    use Axioms.Modal.FourN n (.atom hFourN.p);
-    constructor;
-    . exact hFourN.mem_FourN;
-    . use (λ b => if hFourN.p = b then φ else (.atom b));
-      simp;
--/
-
-protected abbrev K4n (n : ℕ+) : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Modal.FourN n (.atom 0)}⟩
-instance : (Hilbert.K4n n).HasK where p := 0; q := 1;
-instance : Entailment.Modal.K (Hilbert.K4n n) where
-instance : Entailment.Modal.HasAxiomFourN n (Hilbert.K4n n) where
-  FourN φ := by
-    apply maxm;
-    use Axioms.Modal.FourN n (.atom 0);
-    constructor;
-    . simp;
-    . use (λ b => if b = 0 then φ else (.atom b));
-      simp;
-
-end Hilbert
-
-
-
 namespace Kripke
-
-variable {n : ℕ+}
 
 protected abbrev FrameClass.weak_trans (n : ℕ+) : FrameClass := { F | IsWeakTrans n _ F.Rel }
 
-lemma validate_AxiomFourN_of_weak_transitive {F : Kripke.Frame} [IsWeakTrans n _ F.Rel] : F ⊧ (Axioms.Modal.FourN n (.atom 0)) := validate_AxiomGeach_of_Geachean (g := ⟨0, n + 1, n, 0⟩)
-
-namespace Canonical
-
-variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢]
-
-open Formula.Kripke
-open Entailment
-open MaximalConsistentTableau
-open canonicalModel
-
-instance isWeakTrans [Entailment.Modal.HasAxiomFourN n 𝓢] : IsWeakTrans n _ (canonicalFrame 𝓢).Rel := by
-  have : IsGeachean ⟨0, n + 1, n, 0⟩ _ (canonicalFrame 𝓢).Rel := isGeachean (g := ⟨0, n + 1, n, 0⟩) (𝓢 := 𝓢);
-  infer_instance;
-
-end Canonical
-
 end Kripke
-
 
 namespace Hilbert.K4n.Kripke
 
@@ -153,7 +94,7 @@ variable {n : ℕ+}
 instance sound : Sound (Hilbert.K4n n) (Kripke.FrameClass.weak_trans n) := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_trans φ rfl;
-  apply @validate_AxiomFourN_of_weak_transitive n F F_trans;
+  apply @validate_axiomFourN_of_weak_transitive n F F_trans;
 
 instance consistent : Entailment.Consistent (Hilbert.K4n n) :=
   consistent_of_sound_frameclass (FrameClass.weak_trans n) $ by
