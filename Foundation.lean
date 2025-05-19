@@ -99,6 +99,17 @@ import Foundation.Modal.Boxdot.GL_Grz
 
 import Foundation.Modal.Logic.Extension
 
+import Foundation.Modal.Logic.Sublogic.ModalCube
+import Foundation.Modal.Logic.Sublogic.GL
+import Foundation.Modal.Logic.Sublogic.Grz
+import Foundation.Modal.Logic.Sublogic.K4
+import Foundation.Modal.Logic.Sublogic.K4n
+import Foundation.Modal.Logic.Sublogic.KH
+import Foundation.Modal.Logic.Sublogic.KTc
+import Foundation.Modal.Logic.Sublogic.S4
+import Foundation.Modal.Logic.Sublogic.S5Grz
+import Foundation.Modal.Logic.Sublogic.Trivials
+
 import Foundation.Modal.Logic.S.Consistent
 
 import Foundation.Modal.Logic.Dz.Basic
