@@ -239,6 +239,24 @@ def axiomFour'! (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! □□φ := ⟨axiomFour' h.so
 end
 
 
+class HasAxiomFourN (n) (𝓢 : S) where
+  FourN (φ : F) : 𝓢 ⊢ Axioms.FourN n φ
+
+section
+
+variable [HasAxiomFourN n 𝓢]
+
+def axiomFourN : 𝓢 ⊢ □^[n]φ ➝ □^[(n + 1)]φ := by apply HasAxiomFourN.FourN
+@[simp] lemma axiomFourN! : 𝓢 ⊢!  □^[n]φ ➝ □^[(n + 1)]φ := ⟨axiomFourN⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomFourN n Γ := ⟨fun _ ↦ FiniteContext.of axiomFourN⟩
+instance (Γ : Context F 𝓢) : HasAxiomFourN n Γ := ⟨fun _ ↦ Context.of axiomFourN⟩
+
+end
+
+
 class HasAxiomFive [Dia F] (𝓢 : S) where
   Five (φ : F) : 𝓢 ⊢ Axioms.Five φ
 

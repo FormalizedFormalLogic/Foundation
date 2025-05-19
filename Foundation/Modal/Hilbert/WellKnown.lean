@@ -286,6 +286,18 @@ instance : (Hilbert.K4).HasK where p := 0; q := 1;
 instance : (Hilbert.K4).HasFour where p := 0
 instance : Entailment.Modal.K4 (Hilbert.K4) where
 
+protected abbrev K4n (n : ℕ+) : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.FourN n (.atom 0)}⟩
+instance : (Hilbert.K4n n).HasK where p := 0; q := 1;
+instance : Entailment.Modal.K (Hilbert.K4n n) where
+instance : Entailment.HasAxiomFourN n (Hilbert.K4n n) where
+  FourN φ := by
+    apply Deduction.maxm;
+    use Axioms.FourN n (.atom 0);
+    constructor;
+    . simp;
+    . use (λ b => if b = 0 then φ else (.atom b));
+      simp;
+
 protected abbrev K4Point1 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
 instance : (Hilbert.K4Point1).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Point1).HasFour where p := 0
