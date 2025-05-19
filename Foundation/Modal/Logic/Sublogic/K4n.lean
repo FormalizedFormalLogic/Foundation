@@ -17,111 +17,58 @@ theorem subset_succ : Logic.K4n (n + 1) ⊂ Logic.K4n n := by
   constructor;
   . refine Hilbert.weakerThan_of_dominate_axioms ?_ |>.subset;
     suffices Hilbert.K4n n ⊢! □^[n](.atom 0) ➝ □^[(n + 1)](.atom 0) by
-      simp only [Axioms.Modal.FourN, PNat.add_coe, PNat.val_ofNat, Box.multibox_succ, Set.mem_insert_iff, Set.mem_singleton_iff, forall_eq_or_imp, axiomK!, forall_eq, true_and];
+      simp only [Axioms.FourN, PNat.add_coe, PNat.val_ofNat, Box.multibox_succ, Set.mem_insert_iff, Set.mem_singleton_iff, forall_eq_or_imp, axiomK!, forall_eq, true_and];
       apply imply_box_distribute'!;
       simpa using this;
     exact axiomFourN!;
   . suffices ∃ φ, Hilbert.K4n n ⊢! φ ∧ ¬Kripke.FrameClass.weak_trans (n + 1) ⊧ φ by
       nth_rewrite 2 [Kripke.eq_weak_trans_logic];
       simpa;
-    use (Axioms.Modal.FourN n (.atom 0));
+    use (Axioms.FourN n (.atom 0));
     constructor;
     . exact axiomFourN!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Kripke.Model := ⟨⟨ℕ, λ x y => x ≤ n + 1 ∧ y ≤ n + 1 → y = x + 1⟩, λ w _ => w ≠ n + 1⟩;
-      have hM : ∀ {x y : ℕ}, x ≤ n + 1 ∧ y ≤ n + 1 → ∀ {m : ℕ+}, Rel.iterate M.Rel m x y ↔ y = x + m := by
-        rintro x y ⟨hx, hy⟩ m;
-        induction m generalizing x y with
-        | one =>
+      let M : Kripke.Model := ⟨⟨Fin (n + 2), λ x y => y = x.castSucc⟩, λ w _ => w < Fin.last (n + 1)⟩;
+      have hM : ∀ {y m : M}, (0 : M) ≺^[m] y ↔ y = m := by
+        rintro y m;
+        induction m using Fin.induction generalizing y with
+        | zero =>
           simp [M];
           tauto;
         | succ m ih =>
           constructor;
           . intro h;
             sorry;
-          . rintro h;
-            apply Rel.iterate.forward.mpr;
-            sorry;
+          . sorry;
       use M, 0;
-      sorry;
-      /-
       constructor;
       . refine ⟨?_⟩;
         rintro x y Rxy;
-        have : y = x + ↑↑(n + 2) := @hM x y (n + 2) |>.mp $ by
-          obtain ⟨u, Rxu, Ruy⟩ := Rxy;
-          use u;
-          exact ⟨Rxu, Ruy⟩;
-        have : y.1 < n + 2 := y.2;
+        induction x using Fin.induction generalizing y with
+        | zero =>
+          apply hM (m := ⟨n + 1, by omega⟩) |>.mpr;
+          obtain ⟨u, Rxu, Ruy⟩ := Rel.iterate.forward.mp Rxy;
+          rw [Ruy]
+          simp only [Fin.coe_castSucc, Fin.cast_val_eq_self];
+          rw [hM (m := ⟨n + 1, by omega⟩) |>.mp Rxu];
+        | succ x ih =>
 
-        apply hM.mpr;
-        simp at this;
-        sorry;
+          sorry;
       . apply Satisfies.imp_def₂.not.mpr;
         push_neg;
         constructor;
         . apply Satisfies.multibox_def.mpr;
-          intro y R0y;
-          simp [Semantics.Realize, Satisfies, M];
-          replace R0y := hM.mp R0y;
-          subst R0y;
-          sorry;
-        . apply Satisfies.multibox_def.not.mpr;
-          push_neg;
-          use (n + 1);
-          constructor;
-          . apply @hM 0 (n + 1) (n + 1) |>.mpr;
-            sorry;
-          . simp [Semantics.Realize, Satisfies, M];
-      induction n with
-      | one =>
-        constructor;
-        . refine ⟨?_⟩;
-          intro x y z;
-          simp_all;
-          sorry;
-        . apply Satisfies.imp_def₂.not.mpr;
-          push_neg;
-          constructor;
-          . rintro y rfl;
-            simp [Satisfies, M];
-            trivial;
-          . apply Satisfies.box_def.not.mpr;
-            push_neg;
-            use 1;
-            constructor;
-            . tauto;
-            . apply Satisfies.box_def.not.mpr;
-              push_neg;
-              use 2;
-              constructor;
-              . tauto;
-              . tauto;
-      | succ n ih =>
-        sorry;
-      use M, 0;
-      constructor;
-      . refine ⟨?_⟩;
-
-        sorry;
-      . apply Satisfies.imp_def₂.not.mpr;
-        push_neg;
-        constructor;
-        . apply Satisfies.multibox_def.mpr
           intro x R0x;
-          simp [Semantics.Realize, Satisfies];
-          sorry;
-        . apply Satisfies.multibox_def.not.mpr;
+          rw [@hM (y := x) (m := ⟨n, by omega⟩) |>.mp ?_];
+          . apply Fin.lt_last;
+          . simpa using R0x;
+        . apply Satisfies.multibox_def.not.mpr
           push_neg;
-          use (n + 1);
+          use Fin.last (n + 1);
           constructor;
-          . induction n with
-            | one => simp; tauto;
-            | succ n ih =>
-              have := @Rel.iterate.comp (x := 0) (y := n) (R := M.Rel) (n := n) (m := 2) |>.mp;
-              sorry;
-          . simp [M, Semantics.Realize, Satisfies];
-      -/
+          . apply hM (y := Fin.last (n + 1)) (m := ⟨(n + 1), by omega⟩) |>.mpr;
+            tauto;
+          . simp [M, Satisfies, Semantics.Realize];
 
 lemma subset_add : Logic.K4n (n + m) ⊂ Logic.K4n n := by
   induction m with
@@ -142,7 +89,7 @@ lemma neq_of_neq (hnm : n ≠ m) : Logic.K4n n ≠ Logic.K4n m := by
   . contradiction;
   . apply subset_of_lt h |>.ne;
 
-/-- There are countable infinite normal logics. -/
+/-- There are countable infinite consistent normal logics in `NExt(K4)`. -/
 instance : Infinite { L : Logic // L.Normal ∧ L.Consistent } := Infinite.of_injective (β := ℕ+) (λ n => ⟨Logic.K4n n, ⟨inferInstance, inferInstance⟩⟩) $ by
   intro i j;
   simp only [Subtype.mk.injEq];
