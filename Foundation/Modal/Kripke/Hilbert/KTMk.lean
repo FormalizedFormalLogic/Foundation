@@ -119,8 +119,7 @@ section
 open Formula.Kripke
 open Entailment
 
-set_option pp.proofs true in
-lemma validate_axiomFour_of_finite_model {M : Kripke.Model} (hM : M ⊧* Hilbert.KTMk.logic)
+lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Hilbert.KTMk.logic)
   : Finite M → ∀ φ : Formula ℕ, M ⊧ Axioms.Four φ := by
   contrapose!;
   rintro ⟨φ, hφ⟩;
@@ -201,9 +200,60 @@ lemma validate_axiomFour_of_finite_model {M : Kripke.Model} (hM : M ⊧* Hilbert
   rw [H i |>.choose_spec.2.1, H j |>.choose_spec.2.1];
   simp;
 
+lemma model_infinitity_of_not_validate_axiomFour {M : Kripke.Model} (hM : M ⊧* Hilbert.KTMk.logic)
+  : (∃ φ : Formula ℕ, ¬M ⊧ Axioms.Four φ) → Infinite M := by
+  contrapose!;
+  intro h;
+  apply validate_axiomFour_of_model_finitely hM;
+  simpa using h;
+
+abbrev recessionFrame : Kripke.Frame where
+  World := ℕ
+  Rel i j := i ≤ j + 1
+
+
+namespace recessionFrame
+
+instance : IsRefl _ recessionFrame := ⟨by tauto⟩
+instance : SatisfiesMakinsonCondition _ recessionFrame := ⟨by
+  intro i;
+  use i + 1;
+  refine ⟨by omega, by omega, by simp_all; omega⟩;
+⟩
+
+lemma not_transitive : ¬Transitive recessionFrame := by
+  by_contra h_trans;
+  have := @h_trans 2 1 0;
+  simp [recessionFrame] at this;
+
+lemma exists_not_validate_axiomFour : ∃ φ : Formula ℕ, ¬recessionFrame ⊧ Axioms.Four φ := by
+  use (.atom 0);
+  exact not_imp_not.mpr transitive_of_validate_AxiomFour not_transitive;
+
+end recessionFrame
+
+lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Hilbert.KTMk ⊬ Axioms.Four φ := by
+  obtain ⟨φ, hφ⟩ := recessionFrame.exists_not_validate_axiomFour;
+  use! φ;
+  apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.refl_makinson);
+  apply iff_not_validOnFrameClass_exists_frame.mpr;
+  use recessionFrame;
+  constructor;
+  . constructor <;> infer_instance;
+  . assumption;
+
+lemma no_finite_model_property : ¬(∀ φ, Hilbert.KTMk ⊬ φ → ∃ M : Kripke.Model, Finite M ∧ M ⊧* Hilbert.KTMk.logic ∧ ¬M ⊧ φ)  := by
+  by_contra! hC;
+  obtain ⟨φ, hφ⟩ := exists_not_provable_axiomFour;
+  obtain ⟨M, hM₁, hM₂, hM₃⟩ := @hC (Axioms.Four φ) hφ;
+  apply not_finite_iff_infinite.mpr $ @model_infinitity_of_not_validate_axiomFour M ?_ ⟨φ, hM₃⟩;
+  . assumption;
+  . assumption;
+
+example : ∃ φ, Hilbert.KTMk ⊬ φ ∧ (∀ M : Kripke.Model, Finite M → M ⊧* Hilbert.KTMk.logic → M ⊧ φ) := by
+  simpa using no_finite_model_property;
+
 end
-
-
 
 end Hilbert.KTMk.Kripke
 
