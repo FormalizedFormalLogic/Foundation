@@ -90,7 +90,7 @@ lemma validate_axiomMk_of_makinsonCondition (h : MakinsonCondition F.Rel) : F �
     . apply Satisfies.dia_def.mpr;
       use x;
 
-lemma validate_axiomM_of_satisfiesMakinsonCondition [SatisfiesMakinsonCondition _ F.Rel] : F ⊧ (Axioms.Modal.Mk (.atom 0) (.atom 1)) :=
+lemma validate_axiomMk_of_satisfiesMakinsonCondition [SatisfiesMakinsonCondition _ F.Rel] : F ⊧ (Axioms.Modal.Mk (.atom 0) (.atom 1)) :=
   validate_axiomMk_of_makinsonCondition SatisfiesMakinsonCondition.mkCondition
 
 instance : SatisfiesMakinsonCondition _ whitepoint := ⟨by

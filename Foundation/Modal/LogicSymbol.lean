@@ -1,4 +1,5 @@
 import Foundation.Logic.LogicSymbol
+import Mathlib.Data.PNat.Basic
 
 open Function
 
@@ -53,6 +54,10 @@ lemma add : □^[n](□^[m]φ) = □^[(n + m)]φ := by
   induction n with
   | zero => simp;
   | succ n ih => rw [(show n + 1 + m = n + m + 1 by omega)]; simpa;
+
+@[simp]
+lemma eq_box_pred_multibox_multibox {n : ℕ+} : □□^[(n - 1)]φ = □^[n]φ := by
+  induction n <;> simp;
 
 end Box
 

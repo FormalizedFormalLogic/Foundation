@@ -126,6 +126,16 @@ lemma chain'_concat :  List.Chain' R (l.concat a) ↔ List.Chain' R l ∧ ∀ x 
       have : R x a := h₂ x hx;
       simpa;
 
+lemma chain'_concat_of_not_nil (hl : l ≠ []) : List.Chain' R (l.concat a) ↔ List.Chain' R l ∧ R (l.getLast hl) a := by
+  apply Iff.trans List.chain'_concat;
+  suffices (∀ x ∈ l.getLast?, R x a) ↔ R (l.getLast hl) a by tauto;
+  constructor;
+  . intro h;
+    apply h (l.getLast hl);
+    apply List.getLast_mem_getLast?;
+  . rintro h x hx;
+    convert h;
+    simp_all [Option.some.injEq, List.getLast?_eq_some_getLast hl];
 
 section
 

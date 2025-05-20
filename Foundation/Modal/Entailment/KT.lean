@@ -6,7 +6,7 @@ namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [DecidableEq F] [BasicModalLogicalConnective F] [Entailment F S]
 variable {𝓢 : S}
 
 namespace KT
@@ -38,5 +38,20 @@ instance : Entailment.Modal.KD 𝓢 where
 
 end KT'
 
+
+section
+
+variable [Entailment.Modal.KT 𝓢]
+
+omit [DecidableEq F] in
+@[simp] lemma reduce_box_in_CAnt! : 𝓢 ⊢! □^[(i + n)]φ ➝ □^[i]φ := by
+  induction n with
+  | zero => simp;
+  | succ n ih =>
+    simp only [show (i + (n + 1)) = (i + n) + 1 by omega, Box.multibox_succ];
+    apply C!_trans ?_ ih;
+    apply axiomT!;
+
+end
 
 end LO.Entailment
