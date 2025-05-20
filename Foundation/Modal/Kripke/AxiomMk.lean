@@ -1,50 +1,5 @@
-import Foundation.Modal.LogicSymbol
-import Foundation.Logic.Disjunctive
-import Foundation.Logic.HilbertStyle.Supplemental
-import Foundation.Propositional.Entailment.Cl
-import Foundation.Modal.Axioms
-import Foundation.Modal.Entailment.Basic
-import Foundation.Modal.Kripke.Basic
-import Foundation.Modal.Kripke.Hilbert.Geach
-import Foundation.Modal.Entailment.K4
-import Foundation.Modal.Kripke.Hilbert.K
-import Foundation.Modal.Kripke.Hilbert.K4
 import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.Relation.Iterate
 
-namespace LO.Axioms.Modal
-
-variable {F : Type*} [BasicModalLogicalConnective F]
-variable (φ ψ χ : F)
-
-protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
-
-end LO.Axioms.Modal
-
-
-namespace LO.Entailment.Modal
-
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
-variable {𝓢 : S} {φ ψ : F}
-
-protected class HasAxiomMk [LogicalConnective F] [Box F](𝓢 : S) where
-  Mk (φ ψ : F) : 𝓢 ⊢ Axioms.Modal.Mk φ ψ
-
-section
-
-variable [Modal.HasAxiomMk 𝓢]
-
-def axiomMk : 𝓢 ⊢ □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := Modal.HasAxiomMk.Mk _ _
-@[simp] lemma axiomMk! : 𝓢 ⊢! □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := ⟨axiomMk⟩
-
-variable [Entailment.Minimal 𝓢]
-
-instance (Γ : FiniteContext F 𝓢) : Modal.HasAxiomMk Γ := ⟨fun _ _ ↦ FiniteContext.of axiomMk⟩
-instance (Γ : Context F 𝓢) : Modal.HasAxiomMk Γ := ⟨fun _ _ ↦ Context.of axiomMk⟩
-
-end
-
-end LO.Entailment.Modal
 
 
 section

@@ -15,6 +15,7 @@ import Foundation.Modal.Kripke.Hilbert.KD45
 import Foundation.Modal.Kripke.Hilbert.KD5
 import Foundation.Modal.Kripke.Hilbert.KDB
 import Foundation.Modal.Kripke.Hilbert.KT
+import Foundation.Modal.Kripke.Hilbert.KTMk
 import Foundation.Modal.Kripke.Hilbert.KTB
 import Foundation.Modal.Kripke.Hilbert.KTc
 import Foundation.Modal.Kripke.Hilbert.S4
@@ -178,6 +179,9 @@ lemma Ver.Kripke.eq_finite_isolated_logic : Logic.Ver = Kripke.FrameClass.finite
 
 protected abbrev KTc : Logic := Hilbert.KTc.logic
 lemma KTc.eq_CoreflexiveKripkeFrameClass_Logic : Logic.KTc = Kripke.FrameClass.corefl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+protected abbrev KTMk : Logic := Hilbert.KTMk.logic
+lemma KTMk.Kripke.eq_refl_makinson_logic : Logic.KTMk = Kripke.FrameClass.refl_makinson.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 end Logic
 

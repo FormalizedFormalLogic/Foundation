@@ -1,5 +1,7 @@
 import Foundation.Modal.LogicSymbol
 
+-- TODO: move to `LO.Axioms.Modal`
+
 namespace LO.Axioms
 
 variable {F : Type*} [BasicModalLogicalConnective F]
@@ -82,3 +84,13 @@ protected abbrev H := □(□φ ⭤ φ) ➝ □φ
 protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
 
 end LO.Axioms
+
+
+namespace LO.Axioms.Modal
+
+variable {F : Type*} [BasicModalLogicalConnective F]
+variable (φ ψ χ : F)
+
+protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
+
+end LO.Axioms.Modal

@@ -1,84 +1,11 @@
-import Foundation.Modal.Kripke.AxiomMk
-import Foundation.Modal.Kripke.Hilbert.Geach
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Modal.Logic.Basic
 import Foundation.Modal.Entailment.KT
-import Foundation.Modal.Kripke.Hilbert.GrzPoint2
-
-namespace List
-
-variable {α} {l : List α}
-
-lemma nodup_iff_get_ne_get : l.Nodup ↔ ∀ i j : Fin l.length, i < j → l[i] ≠ l[j] := by
-  apply Iff.trans nodup_iff_getElem?_ne_getElem?;
-  constructor;
-  . rintro h ⟨i, _⟩ ⟨j, hj⟩ hij;
-    have := h i j (by omega) hj;
-    simp_all;
-  . rintro h i j hij hj;
-    rw [getElem?_eq_getElem, getElem?_eq_getElem];
-    simpa [Option.some.injEq] using h ⟨i, by omega⟩ ⟨j, by omega⟩ hij;
-
-end List
-
-
-lemma List.Nodup.infinite_of_infinite : Infinite {l : List α // l.Nodup} → Infinite α := by
-  contrapose!;
-  simp only [not_infinite_iff_finite];
-  intro _;
-  exact List.Nodup.finite;
-
-namespace LO.Entailment.Modal
-
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
-variable {𝓢 : S} {φ ψ : F}
-
-section
-
-protected class KTMk (𝓢 : S) extends Entailment.Modal.KT 𝓢, Entailment.Modal.HasAxiomMk 𝓢
-
-end
-
-end LO.Entailment.Modal
-
-
+import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.AxiomMk
+import Foundation.Modal.Logic.Basic
+import Foundation.Vorspiel.List.Chain
 
 namespace LO.Modal
-
-namespace Hilbert
-
-section
-
-open Deduction
-
-variable {α} [DecidableEq α] {H : Hilbert α}
-
-class HasMk (H : Hilbert α) where
-  p : α
-  q : α
-  ne_pq : p ≠ q := by trivial;
-  mem_Mk : Axioms.Modal.Mk (.atom p) (.atom q) ∈ H.axioms := by tauto;
-
-instance [H.HasMk] : Entailment.Modal.HasAxiomMk H where
-  Mk φ ψ := by
-    apply maxm;
-    use Axioms.Modal.Mk (.atom $ HasMk.p H) (.atom $ HasMk.q H);
-    constructor;
-    . exact HasMk.mem_Mk;
-    . use (λ b => if b = (HasMk.q H) then ψ else if b = (HasMk.p H) then φ else (.atom b));
-      simp [HasMk.ne_pq];
-
-end
-
-protected abbrev KTMk : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Modal.Mk (.atom 0) (.atom 1)}⟩
-instance : (Hilbert.KTMk).HasK where p := 0; q := 1;
-instance : (Hilbert.KTMk).HasT where p := 0
-instance : (Hilbert.KTMk).HasMk where p := 0; q := 1
-instance : Entailment.Modal.KTMk (Hilbert.KTMk) where
-
-end Hilbert
-
-
 
 namespace Kripke
 

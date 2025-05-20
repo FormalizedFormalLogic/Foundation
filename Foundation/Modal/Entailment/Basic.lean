@@ -505,6 +505,34 @@ end
 
 namespace Modal
 
+
+section HasAxiom
+
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
+variable {𝓢 : S} {φ ψ : F}
+
+protected class HasAxiomMk [LogicalConnective F] [Box F](𝓢 : S) where
+  Mk (φ ψ : F) : 𝓢 ⊢ Axioms.Modal.Mk φ ψ
+
+section
+
+variable [Modal.HasAxiomMk 𝓢]
+
+def axiomMk : 𝓢 ⊢ □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := Modal.HasAxiomMk.Mk _ _
+@[simp] lemma axiomMk! : 𝓢 ⊢! □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ) := ⟨axiomMk⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : Modal.HasAxiomMk Γ := ⟨fun _ _ ↦ FiniteContext.of axiomMk⟩
+instance (Γ : Context F 𝓢) : Modal.HasAxiomMk Γ := ⟨fun _ _ ↦ Context.of axiomMk⟩
+
+end
+
+end HasAxiom
+
+
+section
+
 variable (𝓢 : S)
 
 protected class K extends Entailment.Cl 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
@@ -574,6 +602,10 @@ protected class GLPoint2 extends Entailment.Modal.GL 𝓢, HasAxiomWeakPoint2 �
 protected class GLPoint3 extends Entailment.Modal.GL 𝓢, HasAxiomWeakPoint3 𝓢
 
 protected class Grz extends Entailment.Modal.K 𝓢, HasAxiomGrz 𝓢
+
+protected class KTMk (𝓢 : S) extends Entailment.Modal.KT 𝓢, Entailment.Modal.HasAxiomMk 𝓢
+
+end
 
 end Modal
 
