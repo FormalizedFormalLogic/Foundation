@@ -69,8 +69,11 @@ open canonicalModel
 open MaximalConsistentTableau
 
 namespace Canonical
+
 open Classical in
 instance [Entailment.HasAxiomT 𝓢] [Entailment.Modal.HasAxiomMk 𝓢] : SatisfiesMakinsonCondition _ (canonicalFrame 𝓢).Rel := ⟨by
+  sorry;
+  /-
   rintro x;
   obtain ⟨y, hy⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1.prebox, x.1.2.box ∪ x.1.2.dia⟩) $ by
     rintro Γ Δ hΓ hΔ;
@@ -105,45 +108,6 @@ instance [Entailment.HasAxiomT 𝓢] [Entailment.Modal.HasAxiomMk 𝓢] : Satisf
     intro φ hφ;
     apply def_multirel_multidia_mem₂.mp Ryz;
     exact @hy.2 (◇◇φ) (by simpa);
-
-  /-
-  by_contra! hC;
-
-  obtain ⟨z, ⟨u, Rxu, Ruz⟩, nRxz⟩ := hC x (_root_.refl x) (_root_.refl x);
-  replace Ruz : u ≺ z := by simpa using Ruz;
-
-  obtain ⟨φ, hφx, hφz⟩ := Set.not_subset.mp nRxz;
-  replace hφx : □φ ∈ x.1.1 := by simpa using hφx;
-
-  have : z ≠ u := by by_contra hC; subst hC; contradiction;
-  obtain ⟨ψ, hψz, hψu⟩ := exists₁₂_of_ne this;
-
-  apply x.neither (φ := Axioms.Modal.Mk φ (□ψ));
-  constructor;
-  . exact iff_provable_mem₁.mp axiomMk! x;
-  . apply iff_mem₂_imp.mpr;
-    constructor;
-    . apply iff_mem₁_box.mpr;
-      intro y hy;
-      sorry;
-    . apply iff_mem₂_imp.mpr;
-      constructor;
-      . assumption;
-      . apply iff_mem₂_box.mpr;
-        use u;
-  -/
-
-  /-
-  have ⟨y, hy⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1.prebox, x.1.2.predia⟩) $ by sorry;
-  use y;
-  refine ⟨?_, ?_, ?_⟩;
-  . exact hy.1;
-  . sorry;
-  . rintro z Ryz;
-    replace Ryz : ∀ {φ}, □^[2]φ ∈ y.1.1 → φ ∈ z.1.1 := def_multirel_multibox_mem₁ (n := 2) |>.mp Ryz;
-    intro ψ hψ;
-    have := hy.1 hψ;
-    sorry;
   -/
 ⟩
 

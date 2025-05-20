@@ -36,7 +36,12 @@ instance consistent : Entailment.Consistent (Hilbert.KTMk) := consistent_of_soun
     use x;
     tauto;
 
-instance canonical : Canonical (Hilbert.KTMk) Kripke.FrameClass.refl_makinson := sorry
+instance canonical : Canonical (Hilbert.KTMk) Kripke.FrameClass.refl_makinson := ⟨by
+  apply Set.mem_setOf_eq.mpr;
+  constructor;
+  . infer_instance;
+  . infer_instance;
+⟩
 
 instance complete : Complete (Hilbert.KTMk) Kripke.FrameClass.refl_makinson := inferInstance
 
