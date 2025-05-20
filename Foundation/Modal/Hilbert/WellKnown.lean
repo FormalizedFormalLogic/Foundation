@@ -241,6 +241,21 @@ instance [hM : H.HasM] : Entailment.HasAxiomM H where
     . use (λ b => if hM.p = b then φ else (.atom b));
       simp;
 
+class HasMk (H : Hilbert α) where
+  p : α
+  q : α
+  ne_pq : p ≠ q := by trivial;
+  mem_Mk : Axioms.Modal.Mk (.atom p) (.atom q) ∈ H.axioms := by tauto;
+
+instance [H.HasMk] : Entailment.Modal.HasAxiomMk H where
+  Mk φ ψ := by
+    apply maxm;
+    use Axioms.Modal.Mk (.atom $ HasMk.p H) (.atom $ HasMk.q H);
+    constructor;
+    . exact HasMk.mem_Mk;
+    . use (λ b => if b = (HasMk.q H) then ψ else if b = (HasMk.p H) then φ else (.atom b));
+      simp [HasMk.ne_pq];
+
 end
 
 protected abbrev KT : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}⟩
@@ -469,6 +484,12 @@ instance : (Hilbert.KD4Point3Z).HasFour where p := 0
 instance : (Hilbert.KD4Point3Z).HasWeakPoint3 where p := 0; q := 1;
 instance : (Hilbert.KD4Point3Z).HasZ where p := 0
 instance : Entailment.Modal.KD4Point3Z (Hilbert.KD4Point3Z) where
+
+protected abbrev KTMk : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Modal.Mk (.atom 0) (.atom 1)}⟩
+instance : (Hilbert.KTMk).HasK where p := 0; q := 1;
+instance : (Hilbert.KTMk).HasT where p := 0
+instance : (Hilbert.KTMk).HasMk where p := 0; q := 1
+instance : Entailment.Modal.KTMk (Hilbert.KTMk) where
 
 protected abbrev N : Hilbert ℕ := ⟨{}⟩
 
