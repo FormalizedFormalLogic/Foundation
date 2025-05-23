@@ -54,7 +54,7 @@ section Decidable
 
 variable [∀ k, DecidableEq (L.Func k)] [DecidableEq ξ]
 
-def hasDecEq : (t u : Semiterm L ξ n) → Decidable (Eq t u)
+def hasDecEq : (t u : Semiterm L ξ n) → Decidable (t = u)
   | #x,                   #y                   => by simp; exact decEq x y
   | #_,                   &_                   => isFalse Semiterm.noConfusion
   | #_,                   func _ _             => isFalse Semiterm.noConfusion
@@ -67,7 +67,7 @@ def hasDecEq : (t u : Semiterm L ξ n) → Decidable (Eq t u)
       by_cases e : k₁ = k₂
       · rcases e with rfl
         exact match decEq r₁ r₂ with
-        | isTrue h => by simp[h]; exact Matrix.decVec _ _ (fun i => hasDecEq (v₁ i) (v₂ i))
+        |  isTrue h => by simpa [h] using Matrix.decVec _ _ fun i ↦ hasDecEq (v₁ i) (v₂ i)
         | isFalse h => isFalse (by simp[h])
       · exact isFalse (by simp[e])
 
@@ -88,7 +88,7 @@ lemma complexity_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) : (func
 
 @[simp] lemma complexity_func_lt {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) (i) :
     (v i).complexity < (func f v).complexity := by
-  simp [complexity_func, Nat.lt_add_one_iff]; exact Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
+  simpa [complexity_func, Nat.lt_add_one_iff] using Finset.le_sup (f := fun i ↦ complexity (v i)) (by simp)
 
 abbrev func! (k) (f : L.Func k) (v : Fin k → Semiterm L ξ n) := func f v
 
@@ -120,6 +120,14 @@ end Positive
 
 lemma bv_eq_empty_of_positive {t : Semiterm L ξ 1} (ht : t.Positive) : t.bv = ∅ :=
   Finset.eq_empty_of_forall_not_mem <| by simp [Positive, Fin.eq_zero] at ht ⊢; assumption
+
+instance Positive.dec : (t : Semiterm L ξ (n + 1)) → Decidable t.Positive
+  |        #x => decidable_of_iff (0 < x) (by simp)
+  |        &x => .isTrue (by simp)
+  | .func f v =>
+    have : DecidablePred fun i ↦ (v i).Positive := fun i ↦ Positive.dec (v i)
+    have : Decidable (∀ i, (v i).Positive) := inferInstance
+    decidable_of_iff (∀ i, (v i).Positive) (by simp)
 
 section freeVariables
 
