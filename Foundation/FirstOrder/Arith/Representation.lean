@@ -341,8 +341,8 @@ private lemma models_codeAux {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc :
       have : ∃ w, (∀ i, List.Vector.get w i ∈ g i (List.Vector.ofFn v)) ∧ y ∈ f w := by
         simpa using Part.eq_some_iff.mp h
       rcases this with ⟨w, hw, hy⟩
-      exact ⟨w.get, (ihf y w.get).mpr (by simpa[Part.eq_some_iff] using hy),
-        fun i => (ihg i (w.get i) v).mpr (by simpa[Part.eq_some_iff] using hw i)⟩
+      exact ⟨w.get, (ihf y w.get).mpr (by simpa [Part.eq_some_iff] using hy),
+        fun i => (ihg i (w.get i) v).mpr (by simpa [Part.eq_some_iff] using hw i)⟩
   case rfind c f _ ihf =>
     simp [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons', ihf, List.Vector.ofFn_vecCons]
     constructor
@@ -352,7 +352,7 @@ private lemma models_codeAux {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc :
 
 lemma models_code {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc : c.eval f) (y : ℕ) (v : Fin k → ℕ) :
     Semiformula.Evalbm ℕ (y :> v) (code c) ↔ y ∈ f (List.Vector.ofFn v) := by
-  simpa[code, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp_def,
+  simpa [code, models_iff, Semiformula.eval_rew, Matrix.empty_eq, Function.comp_def,
     Matrix.comp_vecCons', ←Part.eq_some_iff] using models_codeAux hc y v
 
 noncomputable def codeOfPartrec' {k} (f : List.Vector ℕ k →. ℕ) : Semisentence ℒₒᵣ (k + 1) :=

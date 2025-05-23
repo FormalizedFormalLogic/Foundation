@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.Vorspiel.Vorspiel
+import Mathlib.Logic.Function.Defs
 
 namespace Function
 

@@ -22,7 +22,7 @@ lemma isInfiniteDescendingChain_of_non_acc (z : α) (hz : ¬Acc r z) :
   have : ∀ i, (i ≠ 0 → descendingChain r z i ≺ descendingChain r z i.pred) ∧ ¬Acc r (descendingChain r z i) := by
     intro i; induction' i with i ih
     · simpa using hz
-    · simp[descendingChain]
+    · simp [descendingChain]
       have : ∃ y, y ≺ (descendingChain r z i) ∧ ¬Acc r y := (not_acc_iff r).mp ih.2
       exact Classical.epsilon_spec this
   intro i; simpa using (this (i + 1)).1

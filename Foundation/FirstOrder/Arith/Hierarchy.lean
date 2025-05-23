@@ -52,13 +52,13 @@ namespace Hierarchy
 
 @[simp] lemma conj_iff {φ : Fin m → Semiformula L ξ n} :
     Hierarchy Γ s (Matrix.conj φ) ↔ ∀ i, Hierarchy Γ s (φ i) := by
-  induction m <;> simp[Matrix.conj, Matrix.vecTail, *]
-  · exact ⟨by rintro ⟨hz, hs⟩ i; cases i using Fin.cases <;> simp[*],
+  induction m <;> simp [Matrix.conj, Matrix.vecTail, *]
+  · exact ⟨by rintro ⟨hz, hs⟩ i; cases i using Fin.cases <;> simp [*],
            by intro h; exact ⟨h 0, fun _ => h _⟩⟩
 
 lemma zero_eq_alt {φ : Semiformula L ξ n} : Hierarchy Γ 0 φ → Hierarchy Γ.alt 0 φ := by
   generalize hz : 0 = z
-  rw[eq_comm] at hz
+  rw [eq_comm] at hz
   intro h
   induction h <;> try simp at hz ⊢
   case and _ _ ihp ihq =>
@@ -69,12 +69,12 @@ lemma zero_eq_alt {φ : Semiformula L ξ n} : Hierarchy Γ 0 φ → Hierarchy Γ
 
 lemma pi_zero_iff_sigma_zero {φ : Semiformula L ξ n} : Hierarchy 𝚷 0 φ ↔ Hierarchy 𝚺 0 φ := ⟨zero_eq_alt, zero_eq_alt⟩
 
-lemma zero_iff {Γ Γ'} {φ : Semiformula L ξ n} : Hierarchy Γ 0 φ ↔ Hierarchy Γ' 0 φ := by rcases Γ <;> rcases Γ' <;> simp[pi_zero_iff_sigma_zero]
+lemma zero_iff {Γ Γ'} {φ : Semiformula L ξ n} : Hierarchy Γ 0 φ ↔ Hierarchy Γ' 0 φ := by rcases Γ <;> rcases Γ' <;> simp [pi_zero_iff_sigma_zero]
 
 lemma zero_iff_delta_zero {Γ} {φ : Semiformula L ξ n} : Hierarchy Γ 0 φ ↔ DeltaZero φ := by
-  simp[DeltaZero, pi_zero_iff_sigma_zero]; apply zero_iff
+  simp [DeltaZero, pi_zero_iff_sigma_zero]; apply zero_iff
 
-@[simp] lemma alt_zero_iff_zero {φ : Semiformula L ξ n} : Hierarchy Γ.alt 0 φ ↔ Hierarchy Γ 0 φ := by rcases Γ <;> simp[pi_zero_iff_sigma_zero]
+@[simp] lemma alt_zero_iff_zero {φ : Semiformula L ξ n} : Hierarchy Γ.alt 0 φ ↔ Hierarchy Γ 0 φ := by rcases Γ <;> simp [pi_zero_iff_sigma_zero]
 
 lemma accum : ∀ {Γ} {s : ℕ} {φ : Semiformula L ξ n}, Hierarchy Γ s φ → ∀ Γ', Hierarchy Γ' (s + 1) φ
   | _, _, _, verum _ _ _,    _ => verum _ _ _
@@ -133,22 +133,22 @@ section
 variable {L : Language}
 
 @[simp] lemma equal [L.Eq] [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t = !!u” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
     Semiformula.Operator.Eq.sentence_eq]
 
 @[simp] lemma lt [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t < !!u” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
     Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
 
 @[simp] lemma le [L.Eq] [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t ≤ !!u” := by
-  simp[Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
     Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq,
     Semiformula.Operator.LE.sentence_eq]
 
 end
 
 lemma neg {φ : Semiformula L ξ n} : Hierarchy Γ s φ → Hierarchy Γ.alt s (∼φ) := by
-  intro h; induction h <;> try simp[*]
+  intro h; induction h <;> try simp [*]
   case bex pos _ ih => exact ball pos ih
   case ball pos _ ih => exact bex pos ih
   case ex ih => exact all ih
@@ -161,7 +161,7 @@ lemma neg {φ : Semiformula L ξ n} : Hierarchy Γ s φ → Hierarchy Γ.alt s (
 @[simp] lemma neg_iff {φ : Semiformula L ξ n} : Hierarchy Γ s (∼φ) ↔ Hierarchy Γ.alt s φ :=
   ⟨fun h => by simpa using neg h, fun h => by simpa using neg h⟩
 
-@[simp] lemma imp_iff {φ ψ : Semiformula L ξ n} : Hierarchy Γ s (φ ➝ ψ) ↔ (Hierarchy Γ.alt s φ ∧ Hierarchy Γ s ψ) := by simp[Semiformula.imp_eq]
+@[simp] lemma imp_iff {φ ψ : Semiformula L ξ n} : Hierarchy Γ s (φ ➝ ψ) ↔ (Hierarchy Γ.alt s φ ∧ Hierarchy Γ s ψ) := by simp [Semiformula.imp_eq]
 
 @[simp] lemma ball_iff {Γ s n} {φ : Semiformula L ξ (n + 1)} {t : Semiterm L ξ (n + 1)} (ht : t.Positive) :
     Hierarchy Γ s (∀[“x. x < !!t”] φ) ↔ Hierarchy Γ s φ :=
@@ -313,8 +313,8 @@ instance : LogicalConnective.AndOrClosed (Hierarchy Γ s : Semiformula L ξ k �
   or := or
 
 instance : LogicalConnective.Closed (Hierarchy Γ 0 : Semiformula L ξ k → Prop) where
-  not := by simp[neg_iff]
-  imply := by simp[Semiformula.imp_eq, neg_iff]; intro φ ψ hp hq; simp[*]
+  not := by simp [neg_iff]
+  imply := by simp [Semiformula.imp_eq, neg_iff]; intro φ ψ hp hq; simp [*]
 
 lemma of_open {φ : Semiformula L ξ n} : φ.Open → Hierarchy Γ s φ := by
   induction φ using Semiformula.rec' <;> simp
@@ -332,11 +332,11 @@ lemma oringEmb {φ : Semiformula ℒₒᵣ ξ n} : Hierarchy Γ s φ → Hierarc
 
 lemma iff_iff {φ ψ : Semiformula L ξ n} :
     Hierarchy b s (φ ⭤ ψ) ↔ (Hierarchy b s φ ∧ Hierarchy b.alt s φ ∧ Hierarchy b s ψ ∧ Hierarchy b.alt s ψ) := by
-  simp[Semiformula.iff_eq]; tauto
+  simp [Semiformula.iff_eq]; tauto
 
 @[simp] lemma iff_iff₀ {φ ψ : Semiformula L ξ n} :
     Hierarchy b 0 (φ ⭤ ψ) ↔ (Hierarchy b 0 φ ∧ Hierarchy b 0 ψ) := by
-  simp[Semiformula.iff_eq]; tauto
+  simp [Semiformula.iff_eq]; tauto
 
 @[simp] lemma matrix_conj_iff {b s n} {φ : Fin m → Semiformula L ξ n} :
     Hierarchy b s (Matrix.conj fun j ↦ φ j) ↔ ∀ j, Hierarchy b s (φ j) := by

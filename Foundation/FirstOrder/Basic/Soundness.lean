@@ -41,7 +41,7 @@ lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ
     · exact ⟨ψ, by simp [hq], hhq⟩
   | @ex _ _ Δ φ t d => by
     have : Evalm M ![t.valm M ![] ε] ε φ ∨ ∃ φ ∈ Δ, Evalfm M ε φ := by
-      simpa[eval_substs, Matrix.constant_eq_singleton] using sound M ε d
+      simpa [eval_substs, Matrix.constant_eq_singleton] using sound M ε d
     rcases this with (hp | ⟨ψ, hq, hhq⟩)
     · exact ⟨∃' φ, by simp, t.valm M ![] ε, hp⟩
     · exact ⟨ψ, by simp [hq], hhq⟩

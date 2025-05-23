@@ -205,7 +205,7 @@ section
 lemma seqCons_graph (t x s : V) :
     t = s ⁀' x ↔ ∃ l ≤ 2 * s, l = lh s ∧ ∃ p ≤ (2 * s + x + 1)^2, p = ⟪l, x⟫ ∧ t = insert p s :=
   ⟨by rintro rfl
-      exact ⟨lh s, by simp[lt_succ_iff_le], rfl, ⟪lh s, x⟫,
+      exact ⟨lh s, by simp [lt_succ_iff_le], rfl, ⟪lh s, x⟫,
         le_trans (pair_le_pair_left (by simp) x) (pair_polybound (2 * s) x), rfl, by rfl⟩,
    by rintro ⟨l, _, rfl, p, _, rfl, rfl⟩; rfl⟩
 

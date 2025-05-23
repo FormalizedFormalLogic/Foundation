@@ -18,7 +18,7 @@ variable {T : Theory L} [𝐄𝐐 ⪯ T]
 
 noncomputable def leIffEqOrLt : T ⊢! “∀ x y, x ≤ y ↔ x = y ∨ x < y” :=
   complete
-    (consequence_iff.mpr $ fun _ _ _ _ => by simp[models_def, Semiformula.Operator.LE.def_of_Eq_of_LT])
+    (consequence_iff.mpr $ fun _ _ _ _ => by simp [models_def, Semiformula.Operator.LE.def_of_Eq_of_LT])
 
 lemma provOf (φ : SyntacticFormula L)
   (H : ∀ (M : Type (max u w))

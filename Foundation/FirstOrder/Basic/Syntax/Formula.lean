@@ -53,7 +53,7 @@ def neg {n} : Semiformula L ξ n → Semiformula L ξ n
   | ex φ     => all (neg φ)
 
 lemma neg_neg (φ : Semiformula L ξ n) : neg (neg φ) = φ :=
-  by induction φ <;> simp[*, neg]
+  by induction φ <;> simp [*, neg]
 
 instance : LogicalConnective (Semiformula L ξ n) where
   tilde := neg
@@ -146,13 +146,13 @@ lemma bex_eq (φ ψ : Semiformula L ξ (n + 1)) : (∃[φ] ψ) = ∃' (φ ⋏ ψ
 by simp [Wedge.wedge]
 
 @[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Semiformula L ξ n) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
-by simp[Vee.vee]
+by simp [Vee.vee]
 
 @[simp] lemma all_inj (φ ψ : Semiformula L ξ (n + 1)) : ∀' φ = ∀' ψ ↔ φ = ψ :=
-  by simp[UnivQuantifier.univ]
+  by simp [UnivQuantifier.univ]
 
 @[simp] lemma ex_inj (φ ψ : Semiformula L ξ (n + 1)) : ∃' φ = ∃' ψ ↔ φ = ψ :=
-  by simp[ExQuantifier.ex]
+  by simp [ExQuantifier.ex]
 
 @[simp] lemma univClosure_inj (φ ψ : Semiformula L ξ n) : ∀* φ = ∀* ψ ↔ φ = ψ := by
   induction n <;> simp [*, univClosure_succ]
@@ -244,7 +244,7 @@ def rec' {C : ∀ n, Semiformula L ξ n → Sort w}
   | _, ex φ     => hex φ (rec' hverum hfalsum hrel hnrel hand hor hall hex φ)
 
 @[simp] lemma complexity_neg (φ : Semiformula L ξ n) : complexity (∼φ) = complexity φ :=
-  by induction φ using rec' <;> simp[*]
+  by induction φ using rec' <;> simp [*]
 
 section Decidable
 
@@ -261,18 +261,18 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformula L ξ n) → Decidable (φ = ψ
         by_cases e : k₁ = k₂
         · rcases e with rfl
           exact match decEq r r₂ with
-          | isTrue h  => by simp[h]; exact Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
-          | isFalse h => isFalse (by simp[h])
-        · exact isFalse (by simp[e])
+          | isTrue h  => by simp [h]; exact Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
+          | isFalse h => isFalse (by simp [h])
+        · exact isFalse (by simp [e])
   | _, nrel r v, ψ => by
       cases ψ using cases' <;> try { simp; exact isFalse not_false }
       case hnrel k₁ k₂ r₂ v₂ =>
         by_cases e : k₁ = k₂
         · rcases e with rfl
           exact match decEq r r₂ with
-          | isTrue h  => by simp[h]; exact Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
-          | isFalse h => isFalse (by simp[h])
-        · exact isFalse (by simp[e])
+          | isTrue h  => by simp [h]; exact Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
+          | isFalse h => isFalse (by simp [h])
+        · exact isFalse (by simp [e])
   | _, φ ⋏ ψ,    r => by
       cases r using cases' <;> try { simp; exact isFalse not_false }
       case hand φ' ψ' =>
@@ -280,8 +280,8 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformula L ξ n) → Decidable (φ = ψ
         | isTrue hp =>
           match hasDecEq ψ ψ' with
           | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-          | isFalse hq => isFalse (by simp[hp, hq])
-        | isFalse hp => isFalse (by simp[hp])
+          | isFalse hq => isFalse (by simp [hp, hq])
+        | isFalse hp => isFalse (by simp [hp])
   | _, φ ⋎ ψ,    r => by
       cases r using cases' <;> try { simp; exact isFalse not_false }
       case hor φ' ψ' =>
@@ -289,8 +289,8 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformula L ξ n) → Decidable (φ = ψ
         | isTrue hp =>
           match hasDecEq ψ ψ' with
           | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-          | isFalse hq => isFalse (by simp[hp, hq])
-        | isFalse hp => isFalse (by simp[hp])
+          | isFalse hq => isFalse (by simp [hp, hq])
+        | isFalse hp => isFalse (by simp [hp])
   | _, ∀' φ,     ψ => by
       cases ψ using cases' <;> try { simp; exact isFalse not_false }
       case hall φ' => simp; exact hasDecEq φ φ'
@@ -333,13 +333,13 @@ def qr : ∀ {n}, Semiformula L ξ n → ℕ
 @[simp] lemma qr_ex (φ : Semiformula L ξ (n + 1)) : (∃' φ).qr = φ.qr + 1 := rfl
 
 @[simp] lemma qr_neg (φ : Semiformula L ξ n) : (∼φ).qr = φ.qr := by
-  induction' φ using rec' <;> simp[*]
+  induction' φ using rec' <;> simp [*]
 
 @[simp] lemma qr_imply (φ ψ : Semiformula L ξ n) : (φ ➝ ψ).qr = max φ.qr ψ.qr :=
-  by simp[imp_eq]
+  by simp [imp_eq]
 
 @[simp] lemma qr_iff (φ ψ : Semiformula L ξ n) : (φ ⭤ ψ).qr = max φ.qr ψ.qr :=
-  by simp[iff_eq, total_of]
+  by simp [iff_eq, total_of]
 
 end qr
 
@@ -357,22 +357,22 @@ def Open (φ : Semiformula L ξ n) : Prop := φ.qr = 0
 
 @[simp] lemma open_nrel {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ n) : (nrel r v).Open := rfl
 
-@[simp] lemma open_and {φ ψ : Semiformula L ξ n} : (φ ⋏ ψ).Open ↔ φ.Open ∧ ψ.Open := by simp[Open]
+@[simp] lemma open_and {φ ψ : Semiformula L ξ n} : (φ ⋏ ψ).Open ↔ φ.Open ∧ ψ.Open := by simp [Open]
 
-@[simp] lemma open_or {φ ψ : Semiformula L ξ n} : (φ ⋎ ψ).Open ↔ φ.Open ∧ ψ.Open := by simp[Open]
+@[simp] lemma open_or {φ ψ : Semiformula L ξ n} : (φ ⋎ ψ).Open ↔ φ.Open ∧ ψ.Open := by simp [Open]
 
-@[simp] lemma not_open_all {φ : Semiformula L ξ (n + 1)} : ¬(∀' φ).Open := by simp[Open]
+@[simp] lemma not_open_all {φ : Semiformula L ξ (n + 1)} : ¬(∀' φ).Open := by simp [Open]
 
-@[simp] lemma not_open_ex {φ : Semiformula L ξ (n + 1)} : ¬(∃' φ).Open := by simp[Open]
+@[simp] lemma not_open_ex {φ : Semiformula L ξ (n + 1)} : ¬(∃' φ).Open := by simp [Open]
 
 @[simp] lemma open_neg {φ : Semiformula L ξ n} : (∼φ).Open ↔ φ.Open := by
-  simp[Open]
+  simp [Open]
 
 @[simp] lemma open_imply {φ ψ : Semiformula L ξ n} : (φ ➝ ψ).Open ↔ φ.Open ∧ ψ.Open :=
-  by simp[Open]
+  by simp [Open]
 
 @[simp] lemma open_iff {φ ψ : Semiformula L ξ n} : (φ ⭤ ψ).Open ↔ φ.Open ∧ ψ.Open :=
-  by simp[Open]
+  by simp [Open]
 
 end Open
 
@@ -496,42 +496,42 @@ def lMapAux (Φ : L₁ →ᵥ L₂) : ∀ {n}, Semiformula L₁ ξ n → Semifor
 
 lemma lMapAux_neg {n} (φ : Semiformula L₁ ξ n) :
     (∼φ).lMapAux Φ = ∼φ.lMapAux Φ :=
-  by induction φ using Semiformula.rec' <;> simp[*, lMapAux, ←Semiformula.neg_eq]
+  by induction φ using Semiformula.rec' <;> simp [*, lMapAux, ←Semiformula.neg_eq]
 
 def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformula L₂ ξ n where
   toTr := lMapAux Φ
-  map_top' := by simp[lMapAux]
-  map_bot' := by simp[lMapAux]
-  map_and' := by simp[lMapAux]
-  map_or'  := by simp[lMapAux]
-  map_neg' := by simp[lMapAux_neg]
-  map_imply' := by simp[Semiformula.imp_eq, lMapAux_neg, ←Semiformula.neg_eq, lMapAux]
+  map_top' := by simp [lMapAux]
+  map_bot' := by simp [lMapAux]
+  map_and' := by simp [lMapAux]
+  map_or'  := by simp [lMapAux]
+  map_neg' := by simp [lMapAux_neg]
+  map_imply' := by simp [Semiformula.imp_eq, lMapAux_neg, ←Semiformula.neg_eq, lMapAux]
 
 lemma lMap_rel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
     lMap Φ (rel r v) = rel (Φ.rel r) (fun i => (v i).lMap Φ) := rfl
 
 @[simp] lemma lMap_rel₀ (r : L₁.Rel 0) (v : Fin 0 → Semiterm L₁ ξ n) :
-    lMap Φ (rel r v) = rel (Φ.rel r) ![] := by simp[lMap_rel, Matrix.empty_eq]
+    lMap Φ (rel r v) = rel (Φ.rel r) ![] := by simp [lMap_rel, Matrix.empty_eq]
 
 @[simp] lemma lMap_rel₁ (r : L₁.Rel 1) (t : Semiterm L₁ ξ n) :
-    lMap Φ (rel r ![t]) = rel (Φ.rel r) ![t.lMap Φ] := by simp[lMap_rel, Matrix.constant_eq_singleton]
+    lMap Φ (rel r ![t]) = rel (Φ.rel r) ![t.lMap Φ] := by simp [lMap_rel, Matrix.constant_eq_singleton]
 
 @[simp] lemma lMap_rel₂ (r : L₁.Rel 2) (t₁ t₂ : Semiterm L₁ ξ n) :
     lMap Φ (rel r ![t₁, t₂]) = rel (Φ.rel r) ![t₁.lMap Φ, t₂.lMap Φ] := by
-  simp[lMap_rel]; funext i; induction i using Fin.induction <;> simp
+  simp [lMap_rel]; funext i; induction i using Fin.induction <;> simp
 
 lemma lMap_nrel {k} (r : L₁.Rel k) (v : Fin k → Semiterm L₁ ξ n) :
     lMap Φ (nrel r v) = nrel (Φ.rel r) (fun i => (v i).lMap Φ) := rfl
 
 @[simp] lemma lMap_nrel₀ (r : L₁.Rel 0) (v : Fin 0 → Semiterm L₁ ξ n) :
-    lMap Φ (nrel r v) = nrel (Φ.rel r) ![] := by simp[lMap_nrel, Matrix.empty_eq]
+    lMap Φ (nrel r v) = nrel (Φ.rel r) ![] := by simp [lMap_nrel, Matrix.empty_eq]
 
 @[simp] lemma lMap_nrel₁ (r : L₁.Rel 1) (t : Semiterm L₁ ξ n) :
-    lMap Φ (nrel r ![t]) = nrel (Φ.rel r) ![t.lMap Φ] := by simp[lMap_nrel, Matrix.constant_eq_singleton]
+    lMap Φ (nrel r ![t]) = nrel (Φ.rel r) ![t.lMap Φ] := by simp [lMap_nrel, Matrix.constant_eq_singleton]
 
 @[simp] lemma lMap_nrel₂ (r : L₁.Rel 2) (t₁ t₂ : Semiterm L₁ ξ n) :
     lMap Φ (nrel r ![t₁, t₂]) = nrel (Φ.rel r) ![t₁.lMap Φ, t₂.lMap Φ] := by
-  simp[lMap_nrel]; funext i; induction i using Fin.induction <;> simp
+  simp [lMap_nrel]; funext i; induction i using Fin.induction <;> simp
 
 @[simp] lemma lMap_all (φ : Semiformula L₁ ξ (n + 1)) :
     lMap Φ (∀' φ) = ∀' lMap Φ φ := rfl
