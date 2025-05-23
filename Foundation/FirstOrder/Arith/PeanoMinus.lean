@@ -21,55 +21,55 @@ lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 variable [M ⊧ₘ* 𝐏𝐀⁻]
 
 protected lemma add_zero (x : M) : x + 0 = x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.addZero (fun _ ↦ x)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.addZero (fun _ ↦ x)
 
 protected lemma add_assoc (x y z : M) : (x + y) + z = x + (y + z) := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.addAssoc (x :>ₙ y :>ₙ fun _ ↦ z)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.addAssoc (x :>ₙ y :>ₙ fun _ ↦ z)
 
 protected lemma add_comm (x y : M) : x + y = y + x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.addComm (x :>ₙ fun _ ↦ y)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.addComm (x :>ₙ fun _ ↦ y)
 
 lemma add_eq_of_lt (x y : M) : x < y → ∃ z, x + z = y := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.addEqOfLt (x :>ₙ fun _ ↦ y)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.addEqOfLt (x :>ₙ fun _ ↦ y)
 
 @[simp] lemma zero_le (x : M) : 0 ≤ x := by
-  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.PeanoMinus.zeroLe (fun _ ↦ x)
+  simpa [models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.PeanoMinus.zeroLe (fun _ ↦ x)
 
 lemma zero_lt_one : (0 : M) < 1 := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.zeroLtOne
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.zeroLtOne
 
 lemma one_le_of_zero_lt (x : M) : 0 < x → 1 ≤ x := by
-  simpa[models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.PeanoMinus.oneLeOfZeroLt (fun _ ↦ x)
+  simpa [models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M Theory.PeanoMinus.oneLeOfZeroLt (fun _ ↦ x)
 
 lemma add_lt_add (x y z : M) : x < y → x + z < y + z := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.addLtAdd (x :>ₙ y :>ₙ fun _ ↦ z)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.addLtAdd (x :>ₙ y :>ₙ fun _ ↦ z)
 
 protected lemma mul_zero (x : M) : x * 0 = 0 := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulZero (fun _ ↦ x)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulZero (fun _ ↦ x)
 
 protected lemma mul_one (x : M) : x * 1 = x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulOne (fun _ ↦ x)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulOne (fun _ ↦ x)
 
 protected lemma mul_assoc (x y z : M) : (x * y) * z = x * (y * z) := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulAssoc (x :>ₙ y :>ₙ fun _ ↦ z)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulAssoc (x :>ₙ y :>ₙ fun _ ↦ z)
 
 protected lemma mul_comm (x y : M) : x * y = y * x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulComm (x :>ₙ fun _ ↦ y)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulComm (x :>ₙ fun _ ↦ y)
 
 lemma mul_lt_mul (x y z : M) : x < y → 0 < z → x * z < y * z := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulLtMul (x :>ₙ y :>ₙ fun _ ↦ z)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.mulLtMul (x :>ₙ y :>ₙ fun _ ↦ z)
 
 lemma distr (x y z : M) : x * (y + z) = x * y + x * z := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.distr (x :>ₙ y :>ₙ fun _ ↦ z)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.distr (x :>ₙ y :>ₙ fun _ ↦ z)
 
 lemma lt_irrefl (x : M) : ¬x < x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.ltIrrefl (fun _ ↦ x)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.ltIrrefl (fun _ ↦ x)
 
 protected lemma lt_trans (x y z : M) : x < y → y < z → x < z := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.ltTrans (x :>ₙ y :>ₙ fun _ ↦ z)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.ltTrans (x :>ₙ y :>ₙ fun _ ↦ z)
 
 lemma lt_tri (x y : M) : x < y ∨ x = y ∨ y < x := by
-  simpa[models_iff] using ModelsTheory.models M Theory.PeanoMinus.ltTri (x :>ₙ fun _ ↦ y)
+  simpa [models_iff] using ModelsTheory.models M Theory.PeanoMinus.ltTri (x :>ₙ fun _ ↦ y)
 
 scoped instance : AddCommMonoid M where
   add_assoc := Arith.add_assoc
@@ -87,7 +87,7 @@ scoped instance : CommMonoid M where
 scoped instance : LinearOrder M where
   le_refl := fun x => Or.inl (by simp)
   le_trans := by
-    rintro x y z (rfl | hx) (rfl | hy) <;> simp[*, le_def]
+    rintro x y z (rfl | hx) (rfl | hy) <;> simp [*, le_def]
     · exact Or.inr (Arith.lt_trans _ _ _ hx hy)
   le_antisymm := by
     rintro x y (rfl | hx) <;> try simp
@@ -95,34 +95,34 @@ scoped instance : LinearOrder M where
     exact False.elim $ Arith.lt_irrefl _ (Arith.lt_trans _ _ _ hx hy)
   le_total := by
     intro x y
-    rcases Arith.lt_tri x y with (h | rfl | h) <;> simp[*, le_def]
+    rcases Arith.lt_tri x y with (h | rfl | h) <;> simp [*, le_def]
   lt_iff_le_not_le := fun x y =>
     ⟨fun h => ⟨Or.inr h, by
       simp only [le_def]; rintro (rfl | h'); { exact lt_irrefl y h }; { exact lt_irrefl _ (Arith.lt_trans _ _ _ h h') }⟩,
-     by simp[not_or, le_def]; rintro (rfl | h) <;> simp[*] ⟩
+     by simp [not_or, le_def]; rintro (rfl | h) <;> simp [*] ⟩
   toDecidableLE := fun _ _ => Classical.dec _
 
-protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa[mul_comm] using Arith.mul_zero x
+protected lemma zero_mul : ∀ x : M, 0 * x = 0 := fun x => by simpa [mul_comm] using Arith.mul_zero x
 
 scoped instance : CommSemiring M where
   left_distrib := distr
-  right_distrib := fun x y z => by simp[mul_comm _ z]; exact distr z x y
+  right_distrib := fun x y z => by simp [mul_comm _ z]; exact distr z x y
   zero_mul := Arith.zero_mul
   mul_zero := Arith.mul_zero
 
 scoped instance : IsStrictOrderedRing M where
-  add_le_add_left := by rintro x y (rfl | h) z <;> simp[add_comm z]; exact Or.inr (add_lt_add x y z h)
+  add_le_add_left := by rintro x y (rfl | h) z <;> simp [add_comm z]; exact Or.inr (add_lt_add x y z h)
   le_of_add_le_add_left := by
     rintro x y z h
     have : y ≤ z ∨ z < y := le_or_lt y z
     rcases this with (hyz | hyz)
     · exact hyz
-    · have : x + z < x + y := by simpa[add_comm] using add_lt_add z y x hyz
+    · have : x + z < x + y := by simpa [add_comm] using add_lt_add z y x hyz
       exact False.elim ((lt_iff_not_ge _ _).mp this h)
   zero_le_one := Or.inr zero_lt_one
   exists_pair_ne := ⟨0, 1, ne_of_lt zero_lt_one⟩
   mul_lt_mul_of_pos_left := by
-    rintro x y z h hz; { simpa[mul_comm z] using mul_lt_mul x y z h hz }
+    rintro x y z h hz; { simpa [mul_comm z] using mul_lt_mul x y z h hz }
   mul_lt_mul_of_pos_right := by
     rintro x y z h hz; { simpa using mul_lt_mul x y z h hz }
 
@@ -130,7 +130,7 @@ scoped instance : CanonicallyOrderedAdd M where
   exists_add_of_le := by
     rintro x y (rfl | h)
     · exact ⟨0, by simp⟩
-    · simpa[eq_comm] using add_eq_of_lt x y h
+    · simpa [eq_comm] using add_eq_of_lt x y h
   le_self_add := by intro x y; simp
 
 scoped instance : IsOrderedAddMonoid M where
@@ -139,7 +139,7 @@ scoped instance : IsOrderedAddMonoid M where
 lemma numeral_eq_natCast : (n : ℕ) → (ORingStruc.numeral n : M) = n
   | 0     => rfl
   | 1     => by simp
-  | n + 2 => by simp[ORingStruc.numeral, numeral_eq_natCast (n + 1), add_assoc, one_add_one_eq_two]
+  | n + 2 => by simp [ORingStruc.numeral, numeral_eq_natCast (n + 1), add_assoc, one_add_one_eq_two]
 
 lemma not_neg (x : M) : ¬x < 0 := by simp
 
@@ -152,13 +152,13 @@ lemma le_iff_lt_succ {x y : M} : x ≤ y ↔ x < y + 1 :=
    fun h => by
     rcases lt_iff_exists_add.mp h with ⟨z, hz, h⟩
     rcases eq_succ_of_pos hz with ⟨z', rfl⟩
-    have : y = x + z' := by simpa[←add_assoc] using h
-    simp[this]⟩
+    have : y = x + z' := by simpa [←add_assoc] using h
+    simp [this]⟩
 
 lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
-  | 0,     x, hx => by simp[not_neg] at hx
+  | 0,     x, hx => by simp [not_neg] at hx
   | n + 1, x, hx => by
-    have : x ≤ n := by simpa[le_iff_lt_succ] using hx
+    have : x ≤ n := by simpa [le_iff_lt_succ] using hx
     rcases this with (rfl | hx)
     · exact ⟨n, rfl⟩
     · exact eq_nat_of_lt_nat hx

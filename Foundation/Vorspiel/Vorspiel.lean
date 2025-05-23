@@ -82,6 +82,16 @@ def vecConsLast {n : ℕ} (t : Fin n → α) (h : α) : Fin n.succ → α :=
 
 @[simp] lemma cons_app_three {n : ℕ} (a : α) (s : Fin n.succ.succ.succ → α) : (a :> s) 3 = s 2 := rfl
 
+@[simp] lemma cons_app_four {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ → α) : (a :> s) 4 = s 3 := rfl
+
+@[simp] lemma cons_app_five {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ → α) : (a :> s) 5 = s 4 := rfl
+
+@[simp] lemma cons_app_six {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ → α) : (a :> s) 6 = s 5 := rfl
+
+@[simp] lemma cons_app_seven {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 7 = s 6 := rfl
+
+@[simp] lemma cons_app_eight {n : ℕ} (a : α) (s : Fin n.succ.succ.succ.succ.succ.succ.succ.succ → α) : (a :> s) 8 = s 7 := rfl
+
 section delab
 open Lean PrettyPrinter Delaborator SubExpr
 
@@ -94,8 +104,6 @@ def unexpandVecCons : Unexpander
   | `($(_) $a ![])      => `(![$a])
   | `($(_) $a ![$as,*]) => `(![$a, $as,*])
   | _                   => throw ()
-
-#check ![1, 2]
 
 end delab
 
@@ -116,7 +124,10 @@ infixl:70 " <: " => vecConsLast
 @[simp] lemma zero_cons_succ_eq_self (f : Fin (n + 1) → α) : (f 0 :> (f ·.succ) : Fin (n + 1) → α) = f := by
     funext x; cases x using Fin.cases <;> simp
 
-lemma eq_vecCons (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
+lemma eq_vecCons (s : Fin (n + 1) → C) : s 0 :> s ∘ Fin.succ = s :=
+   funext $ Fin.cases (by simp) (by simp)
+
+lemma eq_vecCons' (s : Fin (n + 1) → C) : s 0 :> (s ·.succ) = s :=
    funext $ Fin.cases (by simp) (by simp)
 
 @[simp] lemma vecCons_ext (a₁ a₂ : α) (s₁ s₂ : Fin n → α) :
@@ -134,18 +145,25 @@ lemma vecCons_assoc (a b : α) (s : Fin n → α) :
 def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
   | 0,     _, _, _ => by simpa [Matrix.empty_eq] using isTrue trivial
   | n + 1, v, w, d => by
-      rw [eq_vecCons v, eq_vecCons w, vecCons_ext]
+      rw [←eq_vecCons v, ←eq_vecCons w, vecCons_ext]
       haveI : Decidable (v ∘ Fin.succ = w ∘ Fin.succ) := decVec _ _ (by intros i; simpa using d _)
       refine instDecidableAnd
 
-lemma comp_vecCons (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (a :> s) x) = f a :> f ∘ s :=
-funext (fun i => cases (by simp) (by simp) i)
+lemma comp_vecCons (f : α → β) (a : α) (s : Fin n → α) :
+    (fun x ↦ f <| (a :> s) x) = f a :> f ∘ s :=
+  funext (fun i => cases (by simp) (by simp) i)
 
-lemma comp_vecCons' (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (a :> s) x) = f a :> fun i => f (s i) :=
+lemma comp_vecCons' (f : α → β) (a : α) (s : Fin n → α) :
+    (fun x ↦ f <| (a :> s) x) = f a :> fun i ↦ f (s i) :=
   comp_vecCons f a s
 
 lemma comp_vecCons'' (f : α → β) (a : α) (s : Fin n → α) : f ∘ (a :> s) = f a :> f ∘ s :=
   comp_vecCons f a s
+
+lemma comp_vecCons₂' (g : β → γ) (f : α → β) (a : α) (s : Fin n → α) :
+    (fun x ↦ g <| f <| (a :> s) x) = (g (f a) :> fun i ↦ g <| f <| s i) := by
+  funext x
+  cases x using Fin.cases <;> simp
 
 @[simp] lemma comp₀ : f ∘ (![] : Fin 0 → α) = ![] := by simp [Matrix.empty_eq]
 
@@ -180,6 +198,17 @@ lemma constant_eq_vec₂ {a : α} : (fun _ => a) = ![a, a] := by
 
 lemma fun_eq_vec₂ {v : Fin 2 → α} : v = ![v 0, v 1] := by
   funext x; cases x using Fin.cases <;> simp [Fin.eq_zero]
+
+lemma fun_eq_vec₃ {v : Fin 3 → α} : v = ![v 0, v 1, v 2] := by
+  funext x
+  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
+  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
+
+lemma fun_eq_vec₄ {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
+  funext x
+  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
+  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
+  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
 
 lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : ∀ i, a ≠ f i) : Function.Injective (a :> f) := by
   have : ∀ i, f i ≠ a := fun i => (ha i).symm
@@ -248,6 +277,15 @@ open Encodable
   simp [vecToNat, Function.comp_def]
 
 end vecToNat
+
+lemma forall_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
+    (∀ v, φ v) ↔ (∀ a, ∀ v, φ (a :> v)) :=
+  ⟨fun h a v ↦ h (a :> v), fun h v ↦ by simpa [eq_vecCons v] using h (v 0) (v ∘ Fin.succ)⟩
+
+lemma exists_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
+    (∃ v, φ v) ↔ (∃ a, ∃ v, φ (a :> v)) :=
+  ⟨by rintro ⟨v, hv⟩; exact ⟨v 0, v ∘ Fin.succ, by simpa [eq_vecCons] using hv⟩,
+   by rintro ⟨a, v, hv⟩; exact ⟨_, hv⟩⟩
 
 end Matrix
 
@@ -351,6 +389,56 @@ lemma pos_of_coe_ne_zero {i : Fin (n + 1)} (h : (i : ℕ) ≠ 0) :
 
 @[simp] lemma five_pos : (0 : Fin (n + 6)) < 5 := pos_of_coe_ne_zero (Nat.succ_ne_zero 4)
 
+lemma forall_fin_iff_zero_and_forall_succ {P : Fin (k + 1) → Prop} : (∀ i, P i) ↔ P 0 ∧ ∀ i : Fin k, P i.succ :=
+  ⟨fun h ↦ ⟨h 0, fun i ↦ h i.succ⟩, by
+    rintro ⟨hz, hs⟩ i
+    cases' i using Fin.cases with i
+    · exact hz
+    · exact hs i⟩
+
+lemma exists_fin_iff_zero_or_exists_succ {P : Fin (k + 1) → Prop} : (∃ i, P i) ↔ P 0 ∨ ∃ i : Fin k, P i.succ :=
+  ⟨by rintro ⟨i, hi⟩
+      cases i using Fin.cases
+      · left; exact hi
+      · right; exact ⟨_, hi⟩,
+   by rintro (hz | ⟨i, h⟩)
+      · exact ⟨0, hz⟩
+      · exact ⟨_, h⟩⟩
+
+lemma forall_vec_iff_forall_forall_vec {P : (Fin (k + 1) → α) → Prop} :
+    (∀ v : Fin (k + 1) → α, P v) ↔ ∀ x, ∀ v : Fin k → α, P (x :> v) := by
+  constructor
+  · intro h x v; exact h _
+  · intro h v; simpa using h (v 0) (v ·.succ)
+
+lemma exists_vec_iff_exists_exists_vec {P : (Fin (k + 1) → α) → Prop} :
+    (∃ v : Fin (k + 1) → α, P v) ↔ ∃ x, ∃ v : Fin k → α, P (x :> v) := by
+  constructor
+  · rintro ⟨v, h⟩; exact ⟨v 0, (v ·.succ), by simpa using h⟩
+  · rintro ⟨x, v, h⟩; exact ⟨_, h⟩
+
+lemma exists_le_vec_iff_exists_le_exists_vec [LE α] {P : (Fin (k + 1) → α) → Prop} {f : Fin (k + 1) → α} :
+    (∃ v ≤ f, P v) ↔ ∃ x ≤ f 0, ∃ v ≤ (f ·.succ), P (x :> v) := by
+  constructor
+  · rintro ⟨w, hw, h⟩
+    exact ⟨w 0, hw 0, (w ·.succ), fun i ↦ hw i.succ, by simpa using h⟩
+  · rintro ⟨x, hx, v, hv, h⟩
+    refine ⟨x :> v, ?_, h⟩
+    intro i; cases' i using Fin.cases with i
+    · exact hx
+    · exact hv i
+
+lemma forall_le_vec_iff_forall_le_forall_vec [LE α] {P : (Fin (k + 1) → α) → Prop} {f : Fin (k + 1) → α} :
+    (∀ v ≤ f, P v) ↔ ∀ x ≤ f 0, ∀ v ≤ (f ·.succ), P (x :> v) := by
+  constructor
+  · intro h x hx v hv
+    refine h (x :> v) ?_
+    intro i; cases' i using Fin.cases with i
+    · exact hx
+    · exact hv i
+  · intro h v hv
+    simpa using h (v 0) (hv 0) (v ·.succ) (hv ·.succ)
+
 end Fin
 
 namespace Fintype
@@ -384,8 +472,6 @@ def vecToStr : ∀ {n}, (Fin n → String) → String
   | 0,     _ => ""
   | n + 1, s => if n = 0 then s 0 else s 0 ++ ", " ++ @vecToStr n (fun i => s (Fin.succ i))
 
-#eval vecToStr !["a", "b", "c", "d"]
-
 end String
 
 namespace Empty
@@ -397,7 +483,9 @@ end Empty
 namespace IsEmpty
 variable {o : Sort u} (h : IsEmpty o)
 
-lemma eq_elim {α : Sort*} (f : o → α) : f = h.elim' := funext h.elim
+lemma eq_elim' {α : Sort*} (f : o → α) : f = h.elim' := funext h.elim
+
+lemma eq_elim {α : Sort*} (f : o → α) : f = h.elim := funext h.elim
 
 end IsEmpty
 
@@ -763,11 +851,25 @@ lemma subset_mem_chain_of_finite (c : Set (Set α)) (hc : Set.Nonempty c) (hchai
         rcases this with ⟨z, hzc, htz, huz⟩
         exact ⟨z, hzc, Set.insert_subset (huz hu) (Set.Subset.trans ht htz)⟩)
 
+@[simp] lemma subset_union_three₁ (s t u : Set α) : s ⊆ s ∪ t ∪ u := Set.subset_union_of_subset_left (by simp) _
+
+@[simp] lemma subset_union_three₂ (s t u : Set α) : t ⊆ s ∪ t ∪ u := Set.subset_union_of_subset_left (by simp) _
+
+@[simp] lemma subset_union_three₃ (s t u : Set α) : u ⊆ s ∪ t ∪ u := Set.subset_union_of_subset_right (by rfl) _
+
 end Set
 
-class Exp (α : Type*) where
-  exp : α → α
-export Exp (exp)
+namespace ToString
+
+instance : ToString Empty := ⟨Empty.elim⟩
+
+end ToString
+
+namespace Nonempty
+
+instance [Zero α] : Nonempty α := ⟨0⟩
+
+end Nonempty
 
 /-- Class for `α` has at least `n` elements -/
 class Atleast (n : ℕ+) (α) where

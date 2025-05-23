@@ -56,7 +56,7 @@ instance standardModel : Structure ℒₒᵣ M where
     | ORing.Rel.lt => fun v => v 0 < v 1
 
 instance : Structure.Eq ℒₒᵣ M :=
-  ⟨by intro a b; simp[standardModel, Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq, Semiformula.eval_rel]⟩
+  ⟨by intro a b; simp [standardModel, Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq, Semiformula.eval_rel]⟩
 
 instance : Structure.Zero ℒₒᵣ M := ⟨rfl⟩
 
@@ -77,8 +77,8 @@ lemma standardModel_unique' (s : Structure ℒₒᵣ M)
     (hEq : Structure.Eq ℒₒᵣ M) (hLT : Structure.LT ℒₒᵣ M) : s = standardModel M := Structure.ext
   (funext₃ fun k f _ =>
     match k, f with
-    | _, Language.Zero.zero => by simp[Matrix.empty_eq]
-    | _, Language.One.one   => by simp[Matrix.empty_eq]
+    | _, Language.Zero.zero => by simp [Matrix.empty_eq]
+    | _, Language.One.one   => by simp [Matrix.empty_eq]
     | _, Language.Add.add   => by simp
     | _, Language.Mul.mul   => by simp)
   (funext₃ fun k r _ =>

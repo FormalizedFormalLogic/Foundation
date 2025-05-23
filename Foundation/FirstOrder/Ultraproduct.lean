@@ -41,7 +41,7 @@ variable (e : Fin n → Uprod A 𝓤) (ε : μ → Uprod A 𝓤)
 
 lemma val_Uprod (t : Semiterm L μ n) :
     t.valm (Uprod A 𝓤) e ε = ⟨fun i ↦ t.val (s i) (fun x ↦ (e x).val i) (fun x ↦ (ε x).val i)⟩ :=
-  by induction t <;> simp[*, val_func]
+  by induction t <;> simp [*, val_func]
 
 end Semiterm
 
@@ -86,7 +86,7 @@ lemma eval_Uprod [(i : I) → Nonempty (A i)] {φ : Semiformula L μ n} :
   case hex φ _ =>
     constructor
     · rintro ⟨x, hx⟩
-      exact Filter.mem_of_superset hx (by intro i h; use x.val i; simpa[val_vecCons_val_eq] using h)
+      exact Filter.mem_of_superset hx (by intro i h; use x.val i; simpa [val_vecCons_val_eq] using h)
     · intro h
       let z : Uprod A 𝓤 := ⟨fun i =>
         Classical.epsilon (fun z => Eval (s i) (z :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ)⟩
@@ -95,7 +95,7 @@ lemma eval_Uprod [(i : I) → Nonempty (A i)] {φ : Semiformula L μ n} :
         intro i; rintro ⟨x, hx⟩
         have : Eval (s i) (z.val i :> fun x ↦ (e x).val i) (fun x ↦ (ε x).val i) φ :=
           Classical.epsilon_spec (p := fun z => Eval (s i) (z :> fun x ↦ (e x).val i) _ φ) ⟨x, hx⟩
-        rw[val_vecCons_val_eq] at this; exact this)
+        rw [val_vecCons_val_eq] at this; exact this)
 
 lemma val_Uprod [(i : I) → Nonempty (A i)] {φ : Formula L μ} :
     Evalfm (Uprod A 𝓤) ε φ ↔ {i | Evalf (s i) (fun x ↦ (ε x).val i) φ} ∈ 𝓤 := by
@@ -150,7 +150,7 @@ lemma compactness_aux :
 
 theorem compact :
     Satisfiable T ↔ ∀ u : Finset (SyntacticFormula L), ↑u ⊆ T → Satisfiable (u : Theory L) := by
-  rw[compactness_aux]; simp
+  rw [compactness_aux]; simp
 
 instance : Compact (SmallStruc L) := ⟨compact⟩
 

@@ -31,14 +31,14 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 @[simp] lemma sub_le_self (a b : V) : a - b ≤ a := by
   have : b ≤ a ∨ a < b := le_or_lt b a
-  rcases this with (hxy | hxy) <;> simp[hxy]
+  rcases this with (hxy | hxy) <;> simp [hxy]
   · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
-  · simp[sub_spec_of_lt hxy]
+  · simp [sub_spec_of_lt hxy]
 
 open FirstOrder.Arith.HierarchySymbol.Boldface
 
 def _root_.LO.FirstOrder.Arith.subDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef := by
   intro v; simp [FirstOrder.Arith.subDef, sub_eq_iff]
@@ -70,7 +70,7 @@ lemma add_tsub_self_of_le (h : b ≤ a) : b + (a - b) = a := by symm; exact sub_
 @[simp] lemma sub_zero (a : V) : a - 0 = a := by
   simpa using sub_add_self_of_le (show 0 ≤ a from zero_le a)
 
-lemma sub_remove_left (e : a = b + c) : a - c = b := by simp[e]
+lemma sub_remove_left (e : a = b + c) : a - c = b := by simp [e]
 
 lemma sub_sub : a - b - c = a - (b + c) := by
   by_cases ha : b + c ≤ a
@@ -81,7 +81,7 @@ lemma sub_sub : a - b - c = a - (b + c) := by
     · by_cases hb : b ≤ a
       · have : a < a := calc
           a < b + c       := not_le.mp ha
-          _ ≤ b + (a - b) := by simp[hc]
+          _ ≤ b + (a - b) := by simp [hc]
           _ = a           := add_tsub_self_of_le hb
         simp at this
       · simp [show a - b = 0 from sub_spec_of_lt (not_le.mp hb)]
@@ -155,7 +155,7 @@ lemma le_mul_self_of_pos_right (hy : 0 < b) : a ≤ a * b := by
 
 lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
   by_cases hx : a = 0
-  · simp[hx]; rintro rfl; exact ⟨0, by simp⟩
+  · simp [hx]; rintro rfl; exact ⟨0, by simp⟩
   · constructor
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c

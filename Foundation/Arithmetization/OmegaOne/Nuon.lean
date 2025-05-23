@@ -378,7 +378,7 @@ lemma SeriesSegment.succ (hU : (I # L)^2 ≤ U) (hIL : ‖‖I‖^2‖ ≤ ‖L�
     have : k / ‖I‖ < ‖I‖ := div_lt_of_lt_mul (by simpa [sq] using hk)
     calc
       ‖nₘ + ‖I‖‖ ≤ ‖‖I‖ * (k / ‖I‖ + 1)‖ := length_monotone <| by simp [mul_add, HT.le_add]
-      _        ≤ ‖‖I‖^2‖                 := length_monotone <| by simp[sq]; exact mul_le_mul_left (lt_iff_succ_le.mp this)
+      _        ≤ ‖‖I‖^2‖                 := length_monotone <| by simp [sq]; exact mul_le_mul_left (lt_iff_succ_le.mp this)
       _        ≤ ‖L‖                     := hIL
   rcases div_mod_succ k ‖I‖ with (⟨hdiv, hmodsucc, hmod⟩ | ⟨hdiv, hmod⟩)
   · have : Segment U L A (‖I‖ * (k / ‖I‖)) ‖I‖ nₘ (n + fbit A k) := by

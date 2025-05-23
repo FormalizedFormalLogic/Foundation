@@ -109,14 +109,14 @@ elab "equalTest" : term => do
 section List
 variable {α : Type u}
 
-lemma List.mem_of_eq {a b : α} {l} (h : a = b) : a ∈ b :: l := by simp[h]
+lemma List.mem_of_eq {a b : α} {l} (h : a = b) : a ∈ b :: l := by simp [h]
 
-lemma List.mem_of_mem {a b : α} {l : List α} (h : a ∈ l) : a ∈ b :: l := by simp[h]
+lemma List.mem_of_mem {a b : α} {l : List α} (h : a ∈ l) : a ∈ b :: l := by simp [h]
 
 lemma List.cases_of_mem_cons {φ : α → Prop} {a a' : α} {l : List α} (h : a' ∈ a :: l)
     (hl : ∀ a' ∈ l, φ a') (ha : φ a) : φ a' := by
   rcases List.mem_cons.mp h with (h | h)
-  · simpa[h]
+  · simpa [h]
   · exact hl _ h
 
 def memQList? {α : Q(Type u)} (a : Q($α)) : (l : List Q($α)) → MetaM $  Option Q($a ∈ $(toQList (u := u) l))
@@ -178,7 +178,7 @@ lemma compVecEmpty {α : Type u} {β : Type v} (f : α → β) : f ∘ ![] = ![]
 
 lemma compVecCons {α : Type u} {β : Type v} (f : α → β) {n}
   {a : α} {as : Fin n → α} {b : β} {bs : Fin n → β} (hb : f a = b) (hbs : f ∘ as = bs) :
-    f ∘ (a :> as) = b :> bs := by simp[Function.comp, Matrix.comp_vecCons, hb, ←hbs]
+    f ∘ (a :> as) = b :> bs := by simp [Function.comp, Matrix.comp_vecCons, hb, ←hbs]
 
 lemma vecConsExt {α : Type u} {n}
   {a : α} {as : Fin n → α} {b : α} {bs : Fin n → α} (hb : a = b) (hbs : as = bs) :
@@ -207,7 +207,7 @@ def vecUnfold (α : Q(Type u)) :
       return a :> ih
 
 lemma eq_cons_app_succ_of_eq {α : Type u} {a b : α} {as : Fin n → α} {i : Fin n}
-  (has : as i = b) : (a :> as) i.succ = b := by simp[has]
+  (has : as i = b) : (a :> as) i.succ = b := by simp [has]
 
 partial def vectorGet {α : Q(Type u)} :
     {n : ℕ} → (l : Q(Fin $n → $α)) → (i : Fin n) → MetaM ((a : Q($α)) × Q($l $i = $a))
@@ -361,7 +361,7 @@ elab "dbgvectorQNth" : term => do
 #eval dbgvectorQNth
 
 private lemma vecCons_assoc_eq {a b : α} {s : Fin n → α} (h : s <: b = t) :
-    (a :> s) <: b = a :> t := by simp[←h, Matrix.vecCons_assoc]
+    (a :> s) <: b = a :> t := by simp [←h, Matrix.vecCons_assoc]
 
 partial def vectorAppend {α : Q(Type u)}
     (n : Q(ℕ)) (v : Q(Fin $n → $α)) (a : Q($α)) : MetaM ((w : Q(Fin ($n + 1) → $α)) × Q($v <: $a = $w)) := do
