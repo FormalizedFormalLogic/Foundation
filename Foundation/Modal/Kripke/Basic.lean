@@ -416,7 +416,6 @@ instance : Semantics.Bot (Kripke.Model) where
 instance : Semantics.Top (Kripke.Model) where
   realize_top := λ _ => ValidOnModel.top_def;
 
-
 lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
   apply not_iff_not.mp;
   push_neg;
@@ -428,6 +427,10 @@ alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
 protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
   intro x;
   exact (Satisfies.imp_def.mp $ hpq x) (hp x);
+
+protected lemma not_of_neg : M ⊧ ∼φ → ¬M ⊧ φ := by
+  intro h₁ h₂;
+  simpa [show falsum = ⊥ by rfl] using ValidOnModel.mdp h₁ h₂;
 
 protected lemma nec (h : M ⊧ φ) : M ⊧ □φ := by
   intro x y _;
