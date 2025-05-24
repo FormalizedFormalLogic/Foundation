@@ -58,9 +58,7 @@ Main Result in this repository. More results and details are in [Book] and [Doc]
 
 ## Financial Supports
 
-Currently, this project is basically organizing and contributing by unpaid graduate students.
-Any financial supports would greatly helps us.
-If you considered, please contact us.
+Currently, this project is basically organizing and contributing by unpaid contributors, so any financial supports would greatly helps us. If you considered, please contact us.
 
 ## Previous Sponsors
 
