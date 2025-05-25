@@ -60,7 +60,7 @@ Main Result in this repository. More results and details are in [Book] and [Doc]
 
 Any financial supports would greatly helps us. If you considered, please contact us: [palalansouki@gmail.com](mailto:palalansouki@gmail.com)
 
-## Previous Sponsors
+### Previous Sponsors
 
 Companies and organizations that have supported us in the past.
 
