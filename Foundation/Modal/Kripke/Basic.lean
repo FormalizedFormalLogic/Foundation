@@ -1,6 +1,7 @@
 import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
+import Foundation.Modal.Logic.Basic
 
 namespace LO.Modal
 
@@ -525,6 +526,13 @@ end Formula.Kripke
 
 
 namespace Kripke
+
+section
+
+abbrev FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
+
+end
+
 
 section
 

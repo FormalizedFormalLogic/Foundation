@@ -1,6 +1,6 @@
 import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Boxdot.GL_Grz
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.Logic.Triv
+import Foundation.Modal.Kripke.Logic.Ver
 
 namespace LO.Modal
 

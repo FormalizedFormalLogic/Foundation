@@ -1,6 +1,4 @@
-
 import Foundation.Modal.Logic.Extension
-import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal
@@ -8,7 +6,7 @@ namespace LO.Modal
 open Logic
 
 protected abbrev Logic.S := addQuasiNormal Logic.GL (Axioms.T (.atom 0))
-instance : Logic.S.QuasiNormal where
+instance : Logic.S.IsQuasiNormal where
   subset_K := by
     intro φ hφ;
     apply Logic.sumQuasiNormal.mem₁;
@@ -38,7 +36,7 @@ lemma Logic.GL_ssubset_S : Logic.GL ⊂ Logic.S := by
     use (Axioms.T (.atom 0));
     constructor;
     . exact Logic.S.mem_axiomT;
-    . exact Hilbert.GL.unprovable_AxiomT;
+    . exact Logic.GL.unprovable_AxiomT;
 instance : ProperSublogic Logic.GL Logic.S := ⟨Logic.GL_ssubset_S⟩
 
 

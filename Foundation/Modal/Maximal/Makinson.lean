@@ -1,14 +1,15 @@
 import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.NNFormula
-import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Maximal.Basic
+import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Kripke.Logic.Ver
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 
 namespace LO.Modal
 
 namespace Logic
 
-variable {L : Logic} [L.Normal] [L.Consistent] {φ ψ : Formula ℕ}
+variable {L : Logic} [L.IsNormal] [L.Consistent] {φ ψ : Formula ℕ}
 
 class VerFamily (L : Logic) : Prop where
   subset_Ver : L ⊆ Logic.Ver
