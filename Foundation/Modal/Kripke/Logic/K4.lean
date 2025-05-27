@@ -2,6 +2,7 @@ import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Filtration
+import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
@@ -49,6 +50,38 @@ instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans 
 
 end Hilbert.K4.Kripke
 
-lemma Logic.K4.Kripke.trans : Logic.K4 = FrameClass.trans.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma K4.Kripke.trans : Logic.K4 = FrameClass.trans.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.K Logic.K4 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+      rw [K.Kripke.all];
+      tauto;
+    use (Axioms.Four (.atom 0));
+    constructor;
+    . exact axiomFour!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ w _ => w = 1⟩;
+      use M, 0;
+      constructor
+      . trivial;
+      . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 by
+          simpa [Semantics.Realize, Satisfies];
+        constructor;
+        . intro x;
+          match x with
+          | 0 => tauto;
+          | 1 => tauto;
+        . exact ⟨1, by omega, 0, by omega, by trivial⟩;
+⟩
+
+end Logic
 
 end LO.Modal

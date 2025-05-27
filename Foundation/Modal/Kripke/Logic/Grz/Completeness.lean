@@ -3,6 +3,7 @@ import Foundation.Modal.Kripke.Logic.KT
 import Foundation.Modal.Entailment.K4
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Hilbert
+import Foundation.Modal.Kripke.Logic.S4
 
 namespace LO.Modal
 
@@ -278,7 +279,30 @@ instance complete : Complete (Hilbert.Grz) FrameClass.finite_partial_order :=
 end Hilbert.Grz.Kripke
 
 
-lemma Logic.Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_partial_order.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
 
+open Formula
+open Entailment
+open Kripke
+
+lemma Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_partial_order.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.S4 Logic.Grz := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by
+      rw [S4.Kripke.preorder];
+      tauto;
+    use Axioms.Grz (.atom 0)
+    constructor;
+    . exact axiomGrz!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      constructor;
+      . refine {refl := by tauto, trans := by tauto};
+      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
+⟩
+
+end Logic
 
 end LO.Modal

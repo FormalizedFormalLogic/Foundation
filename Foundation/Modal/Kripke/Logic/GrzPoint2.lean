@@ -329,6 +329,72 @@ end
 
 end Hilbert.GrzPoint2.Kripke
 
-lemma Logic.GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_confluent_partial_order.logic := eq_hilbert_logic_frameClass_logic
+
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_confluent_partial_order.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by
+      rw [Grz.Kripke.finite_partial_order];
+      tauto;
+    use Axioms.Point2 (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 3, λ x y => x = 0 ∨ x = y⟩,
+        λ x a => x = 1
+      ⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨by tauto, {
+          refl := by omega
+          trans := by omega
+          antisymm := by simp [M]; omega;
+        }⟩;
+      . apply Satisfies.imp_def₂.not.mpr;
+        push_neg;
+        constructor;
+        . apply Satisfies.dia_def.mpr;
+          use 1;
+          constructor;
+          . omega;
+          . intro y Rxy; simp_all [M, Semantics.Realize, Satisfies, Frame.Rel'];
+        . apply Satisfies.box_def.not.mpr;
+          push_neg;
+          use 2;
+          constructor;
+          . omega;
+          . apply Satisfies.dia_def.not.mpr;
+            push_neg;
+            simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
+⟩
+
+instance : ProperSublogic Logic.S4Point2 Logic.GrzPoint2 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_confluent_preorder ⊧ φ by
+      rw [S4Point2.Kripke.finite_confluent_preorder];
+      tauto;
+    use Axioms.Grz (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      constructor;
+      . refine ⟨inferInstance, {refl := by simp, trans := by simp}, ⟨?_⟩⟩;
+        . rintro x y z ⟨Rxy, Ryz⟩; use 0;
+      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
+⟩
+
+
+end Logic
 
 end LO.Modal

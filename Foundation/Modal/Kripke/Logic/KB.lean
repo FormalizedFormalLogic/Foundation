@@ -1,6 +1,7 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
@@ -32,6 +33,33 @@ instance complete : Complete (Hilbert.KB) Kripke.FrameClass.symm := inferInstanc
 
 end Hilbert.KB.Kripke
 
-lemma Logic.KB.Kripke.symm : Logic.KB = FrameClass.symm.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma KB.Kripke.symm : Logic.KB = FrameClass.symm.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.K Logic.KB := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+      rw [K.Kripke.all];
+      tauto;
+    use (Axioms.B (.atom 0));
+    constructor;
+    . exact axiomB!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => x = 0 ∧ y = 1⟩, λ w _ => w = 0⟩;
+      use M, 0;
+      constructor;
+      . trivial;
+      . suffices ∃ (x : M.World), (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [Semantics.Realize, Satisfies, M];
+        use 1;
+        trivial;
+⟩
+
+end Logic
 
 end LO.Modal

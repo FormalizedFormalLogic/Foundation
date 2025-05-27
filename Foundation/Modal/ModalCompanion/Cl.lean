@@ -1,6 +1,5 @@
 import Foundation.Modal.ModalCompanion.Int
-import Foundation.Modal.Logic.Sublogic.ModalCube
-import Foundation.Modal.Kripke.Logic.S5
+import Foundation.Modal.Kripke.Logic.S5Grz
 import Foundation.Modal.Boxdot.Ver_Triv
 
 
@@ -77,12 +76,13 @@ lemma S5.is_smallestMC_of_Cl : Logic.S5 = Logic.Cl.smallestMC := by
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;
     | nec h ih => apply Modal.Logic.nec ih;
-    | mem₁ h => apply Logic.S4_ssubset_S5.1 h;
+    | mem₁ h => exact Logic.Sublogic.subset (L₁ := Logic.S4) h;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
       haveI : Hilbert.S4 ⊢! ◇φᵍ := iff_provable_Cl_provable_dia_gS4.mp hφ;
       haveI : Hilbert.S4 ⊢! ◇□φᵍ := (diaK'! $ Hilbert.goedelTranslated_axiomTc) ⨀ this;
-      exact rm_diabox'! $ Logic.S4_ssubset_S5.1 this;
+      apply rm_diabox'!;
+      exact Logic.Sublogic.subset (L₁ := Logic.S4) (L₂ := Logic.S5) this;
 
 instance modalCompanion_Cl_S5 : ModalCompanion Logic.Cl Logic.S5 := by
   rw [Logic.S5.is_smallestMC_of_Cl];
@@ -108,7 +108,7 @@ section S5Grz
 
 lemma Logic.gS5Grz_of_Cl : φ ∈ Logic.Cl → φᵍ ∈ Logic.S5Grz := by
   intro h;
-  exact S5_ssubset_S5Grz.1 $ modalCompanion_Cl_S5.companion.mp h;
+  exact Sublogic.subset $ modalCompanion_Cl_S5.companion.mp h;
 
 lemma Logic.S5Grz.is_largestMC_of_Cl : Logic.S5Grz = Logic.Cl.largestMC := by
   ext φ;
@@ -136,7 +136,7 @@ lemma Logic.S5Grz.is_largestMC_of_Cl : Logic.S5Grz = Logic.Cl.largestMC := by
   . intro hφ;
     induction hφ with
     | mem₁ h =>
-      apply S5_ssubset_S5Grz.1;
+      apply Sublogic.subset (L₁ := Logic.S5) (L₂ := Logic.S5Grz);
       rwa [S5.is_smallestMC_of_Cl];
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;
@@ -150,13 +150,13 @@ instance modalCompanion_Cl_S5Grz : ModalCompanion Logic.Cl Logic.S5Grz := by
     (IC := Propositional.Kripke.FrameClass.finite_symmetric)
     (MC := Modal.Kripke.FrameClass.finite_equality);
   . rw [Logic.Cl.Kripke.eq_finite_symmetric]
-  . rw [←Logic.S5Grz.is_largestMC_of_Cl, ←Logic.S5Grz.Kripke.eq_finite_equality_logic]
+  . rw [←Logic.S5Grz.is_largestMC_of_Cl, ←Logic.S5Grz.Kripke.finite_equality]
   . rintro F ⟨_, _⟩;
     refine ⟨inferInstance, inferInstance⟩;
 
 instance modalCompanion_Cl_Triv : ModalCompanion Logic.Cl Logic.Triv := by
-  convert modalCompanion_Cl_S5Grz;
-  exact Logic.S5Grz_eq_Triv.symm;
+  rw [←Logic.eq_S5Grz_Triv];
+  infer_instance
 
 end S5Grz
 

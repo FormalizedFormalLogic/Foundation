@@ -2,6 +2,7 @@ import Foundation.Modal.Kripke.AxiomWeakPoint2
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Kripke.Logic.K4
 
 namespace LO.Modal
 
@@ -36,6 +37,40 @@ instance complete : Complete (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConf
 
 end Hilbert.K4Point2.Kripke
 
-lemma Logic.K4Point2.Kripke.trans_weakConfluent : Logic.K4Point2 = FrameClass.trans_weakConfluent.logic := eq_hilbert_logic_frameClass_logic
+
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma K4Point2.Kripke.trans_weakConfluent : Logic.K4Point2 = FrameClass.trans_weakConfluent.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.K4 Logic.K4Point2 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.K4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
+      rw [K4.Kripke.trans];
+      tauto;
+    use (Axioms.WeakPoint2 (.atom 0) (.atom 1));
+    constructor;
+    . exact axiomWeakPoint2!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 2, λ x y => x = 0⟩,
+        λ w a => if a = 0 then True else w = 0
+      ⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨by tauto⟩;
+      . suffices ∃ (x : M.World), (∀ y, ¬x ≺ y) ∧ x ≠ 0 by
+          simpa [M, Semantics.Realize, Satisfies];
+        use 1;
+        constructor;
+        . omega;
+        . trivial;
+⟩
+
+end Logic
 
 end LO.Modal

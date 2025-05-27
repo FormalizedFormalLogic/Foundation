@@ -2,6 +2,8 @@ import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Filtration
+import Foundation.Modal.Kripke.Logic.S4
+import Foundation.Modal.Kripke.Logic.K4Point2
 import Foundation.Modal.Kripke.Rooted
 
 namespace LO.Modal
@@ -105,7 +107,75 @@ end FFP
 
 end Hilbert.S4Point2.Kripke
 
-lemma Logic.S4Point2.Kripke.confluent_preorder : Logic.S4Point2 = FrameClass.confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
-lemma Logic.S4Point2.Kripke.finite_confluent_preorder : Logic.S4Point2 = FrameClass.finite_confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma S4Point2.Kripke.confluent_preorder : Logic.S4Point2 = FrameClass.confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
+lemma S4Point2.Kripke.finite_confluent_preorder : Logic.S4Point2 = FrameClass.finite_confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.S4 Logic.S4Point2 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by
+      rw [S4.Kripke.preorder];
+      tauto;
+    use Axioms.Point2 (.atom 0)
+    constructor;
+    . exact axiomPoint2!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = y) ⟩, λ w _ => w = 1⟩;
+      use M, 0;
+      constructor;
+      . apply isPreorder_iff _ _ |>.mpr;
+        refine ⟨⟨?_⟩, ⟨?_⟩⟩ <;> omega;
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, x ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
+          simpa [M, Semantics.Realize, Satisfies];
+        use 1;
+        refine ⟨by omega, ?_, ?_⟩;
+        . intro y;
+          match y with
+          | 0 => omega;
+          | 1 => tauto;
+          | 2 => omega;
+        . use 2;
+          constructor;
+          . omega;
+          . omega;
+⟩
+
+instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
+  constructor;
+  . rw [K4Point2.Kripke.trans_weakConfluent, S4Point2.Kripke.confluent_preorder];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConfluent ⊧ φ by
+      rw [K4Point2.Kripke.trans_weakConfluent];
+      tauto;
+    use (Axioms.Point2 (.atom 0));
+    constructor;
+    . exact axiomPoint2!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 2, λ x y => x < y⟩,
+        λ w a => False
+      ⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨⟨by omega⟩, ⟨?_⟩⟩;
+        . simp [M, WeakConfluent]; omega;
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x by
+          simpa [M, Semantics.Realize, Satisfies];
+        use 1;
+        refine ⟨?_, ?_, ?_⟩;
+        . omega;
+        . omega;
+        . use 1; omega;
+⟩
+
+end Logic
 
 end LO.Modal

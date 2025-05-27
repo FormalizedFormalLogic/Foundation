@@ -1,6 +1,5 @@
 import Foundation.Modal.Boxdot.GL_Grz
 import Foundation.Modal.Logic.Extension
-import Foundation.Modal.Logic.Sublogic.Grz
 import Foundation.Modal.ModalCompanion.Basic
 import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Logic.WellKnown
@@ -60,7 +59,7 @@ section Grz
 
 lemma Logic.gGrz_of_Int : φ ∈ Logic.Int → φᵍ ∈ Logic.Grz := by
   intro h;
-  exact S4_ssubset_Grz.1 $ Logic.gS4_of_Int h;
+  apply Sublogic.subset $ Logic.gS4_of_Int h;
 
 lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
   ext φ;
@@ -81,7 +80,7 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
   . intro hφ;
     induction hφ with
     | mem₁ h =>
-      apply S4_ssubset_Grz.1;
+      apply Sublogic.subset (L₁ := Logic.S4) (L₂ := Logic.Grz);
       rwa [Logic.S4.is_smallestMC_of_Int]
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;

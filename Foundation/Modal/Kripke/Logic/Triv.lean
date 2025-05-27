@@ -1,6 +1,7 @@
 import Foundation.Modal.Kripke.Logic.KT
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Rooted
+import Foundation.Modal.Kripke.Logic.GrzPoint3
 
 namespace LO.Modal
 
@@ -97,8 +98,65 @@ end FFP
 end Hilbert.Triv.Kripke
 
 
-lemma Logic.Triv.Kripke.equality : Logic.Triv = FrameClass.equality.logic := eq_hilbert_logic_frameClass_logic
-lemma Logic.Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_equality.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+
+lemma Triv.Kripke.equality : Logic.Triv = FrameClass.equality.logic := eq_hilbert_logic_frameClass_logic
+lemma Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_equality.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.KTc Logic.Triv := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.corefl ⊧ φ by
+      rw [KTc.Kripke.corefl];
+      tauto;
+    use (Axioms.T (.atom 0));
+    constructor;
+    . exact axiomT!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => False⟩, λ w _ => False⟩, 0;
+      constructor;
+      . refine ⟨by tauto⟩;
+      . simp [Satisfies, Semantics.Realize];
+⟩
+
+instance : ProperSublogic Logic.GrzPoint3 Logic.Triv := ⟨by
+  constructor;
+  . rw [GrzPoint3.Kripke.finite_connected_partial_order, Triv.Kripke.finite_equality];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨by tauto, inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.finite_connected_partial_order ⊧ φ by
+      rw [GrzPoint3.Kripke.finite_connected_partial_order];
+      tauto;
+    use Axioms.Tc (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨by tauto, {refl := ?_, trans := ?_, antisymm := ?_}, ⟨?_⟩⟩;
+        . tauto;
+        . omega;
+        . simp only [M]; omega;
+        . simp only [Connected, and_imp, M]; omega;
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ x ≠ 0 by
+          simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
+        use 1;
+        constructor;
+        . omega;
+        . trivial;
+⟩
+
+instance : ProperSublogic Logic.Triv Logic.Univ := inferInstance
+
+end Logic
+
 
 
 end LO.Modal

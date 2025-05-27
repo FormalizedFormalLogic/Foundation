@@ -219,3 +219,5 @@ protected instance FrameClass.finite_strict_preorder.definability
 end Kripke
 
 end LO.Modal
+
+#min_imports

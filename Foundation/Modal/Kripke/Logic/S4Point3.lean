@@ -2,6 +2,8 @@ import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.AxiomPoint3
 import Foundation.Modal.Kripke.Filtration
 import Foundation.Modal.Kripke.Rooted
+import Foundation.Modal.Kripke.Logic.S4Point2
+import Foundation.Modal.Kripke.Logic.K4Point3
 
 namespace LO.Modal
 
@@ -111,7 +113,86 @@ end FFP
 
 end Hilbert.S4Point3.Kripke
 
-lemma Logic.S4Point3.Kripke.connected_preorder : Logic.S4Point3 = FrameClass.connected_preorder.logic := eq_hilbert_logic_frameClass_logic
-lemma Logic.S4Point3.Kripke.finite_connected_preorder : Logic.S4Point3 = FrameClass.finite_connected_preorder.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma S4Point3.Kripke.connected_preorder : Logic.S4Point3 = FrameClass.connected_preorder.logic := eq_hilbert_logic_frameClass_logic
+lemma S4Point3.Kripke.finite_connected_preorder : Logic.S4Point3 = FrameClass.finite_connected_preorder.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.S4Point2 Logic.S4Point3 := ⟨
+  by
+  constructor;
+  . rw [S4Point2.Kripke.confluent_preorder, S4Point3.Kripke.connected_preorder];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬FrameClass.confluent_preorder ⊧ φ by
+      rw [S4Point2.Kripke.confluent_preorder];
+      tauto;
+    use Axioms.Point3 (.atom 0) (.atom 1);
+    constructor;
+    . exact axiomPoint3!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 4, λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)⟩,
+        λ w a => (a = 0 ∧ (w = 1 ∨ w = 3)) ∨ (a = 1 ∧ (w = 2 ∨ w = 3))
+      ⟩;
+      use M, 0;
+      constructor;
+      . apply Set.mem_setOf_eq.mpr
+        refine ⟨?_, ⟨?_⟩⟩;
+        . apply isPreorder_iff _ _ |>.mpr;
+          refine ⟨⟨by omega⟩, ⟨by omega⟩⟩;
+        . rintro x y z ⟨Rxy, Ryz⟩;
+          use 3;
+          constructor <;> omega;
+      . apply Kripke.Satisfies.or_def.not.mpr;
+        push_neg;
+        constructor;
+        . apply Kripke.Satisfies.box_def.not.mpr;
+          push_neg;
+          use 1;
+          simp [Satisfies, Semantics.Realize, M];
+          constructor <;> omega;
+        . apply Kripke.Satisfies.box_def.not.mpr;
+          push_neg;
+          use 2;
+          simp [Satisfies, Semantics.Realize, M];
+          constructor <;> omega;
+⟩
+
+instance : ProperSublogic Logic.S4 Logic.S4Point3 := ProperSublogic.trans Logic.S4 Logic.S4Point2 Logic.S4Point3
+
+instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
+  constructor;
+  . rw [K4Point3.Kripke.trans_weakConnected, S4Point3.Kripke.connected_preorder];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by
+      rw [K4Point3.Kripke.trans_weakConnected];
+      tauto;
+    use (Axioms.Point3 (.atom 0) (.atom 1));
+    constructor;
+    . exact axiomPoint3!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨
+        ⟨Fin 2, λ x y => x < y⟩,
+        λ w a => False
+      ⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨⟨by omega⟩, ⟨by simp [M, WeakConnected]⟩⟩
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∀ y, ¬x ≺ y by
+          simpa [M, Semantics.Realize, Satisfies];
+        use 1;
+        refine ⟨?_, ?_, ⟨1, ?_, ?_⟩⟩;
+        repeat omega;
+⟩
+
+end Logic
 
 end LO.Modal

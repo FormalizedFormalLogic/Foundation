@@ -74,4 +74,8 @@ theorem Hilbert.iff_provable_S5Grz_provable_Triv : (Hilbert.S5Grz ⊢! φ) ↔ (
   . apply fun h ↦ (weakerThan_of_dominate_axioms @h).subset;
     rintro φ (⟨_, _, rfl⟩ | (⟨_, rfl⟩ | ⟨_, rfl⟩)) <;> simp;
 
+lemma Logic.eq_S5Grz_Triv : Logic.S5Grz = Logic.Triv := by
+  ext φ;
+  exact Hilbert.iff_provable_S5Grz_provable_Triv;
+
 end LO.Modal

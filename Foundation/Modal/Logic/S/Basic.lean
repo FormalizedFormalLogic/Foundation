@@ -1,5 +1,4 @@
 import Foundation.Modal.Logic.Extension
-
 import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal
@@ -37,7 +36,7 @@ lemma Logic.GL_ssubset_S : Logic.GL ⊂ Logic.S := by
     use (Axioms.T (.atom 0));
     constructor;
     . exact Logic.S.mem_axiomT;
-    . exact Hilbert.GL.unprovable_AxiomT;
+    . exact Logic.GL.unprovable_AxiomT;
 instance : ProperSublogic Logic.GL Logic.S := ⟨Logic.GL_ssubset_S⟩
 
 

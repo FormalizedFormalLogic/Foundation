@@ -2,6 +2,8 @@ import Foundation.Modal.Entailment.GL
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Logic.GL.Soundness
 import Foundation.Modal.Kripke.Hilbert
+import Foundation.Modal.Kripke.Logic.K4
+import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal
 
@@ -188,6 +190,15 @@ instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_trans_irr
 
 end Hilbert.GL.Kripke
 
-lemma Logic.GL.Kripke.finite_trans_irrefl : Logic.GL = FrameClass.finite_trans_irrefl.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma GL.Kripke.finite_trans_irrefl : Logic.GL = FrameClass.finite_trans_irrefl.logic := eq_hilbert_logic_frameClass_logic
+
+end Logic
+
 
 end LO.Modal

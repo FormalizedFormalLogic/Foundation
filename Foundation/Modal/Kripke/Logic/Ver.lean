@@ -2,6 +2,8 @@ import Foundation.Modal.Kripke.AxiomVer
 import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Rooted
 import Foundation.Modal.Kripke.Hilbert
+import Foundation.Modal.Kripke.Logic.KTc
+import Foundation.Modal.Kripke.Logic.GLPoint3
 
 namespace LO.Modal
 
@@ -63,7 +65,65 @@ instance complete_finite_isolated : Complete (Hilbert.Ver) Kripke.FrameClass.fin
 
 end Hilbert.Ver.Kripke
 
-lemma Logic.Ver.Kripke.isolated : Logic.Ver = FrameClass.isolated.logic := eq_hilbert_logic_frameClass_logic
-lemma Logic.Ver.Kripke.finite_isolated : Logic.Ver = FrameClass.finite_isolated.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma Ver.Kripke.isolated : Logic.Ver = FrameClass.isolated.logic := eq_hilbert_logic_frameClass_logic
+lemma Ver.Kripke.finite_isolated : Logic.Ver = FrameClass.finite_isolated.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.KTc Logic.Ver := ⟨by
+  constructor;
+  . rw [KTc.Kripke.corefl, Ver.Kripke.isolated];
+    rintro φ hφ F hF;
+    replace hF := Set.mem_setOf_eq.mp hF;
+    apply hφ;
+    apply Set.mem_setOf_eq.mpr;
+    infer_instance;
+  . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.corefl ⊧ φ by
+      rw [KTc.Kripke.corefl];
+      tauto;
+    use (Axioms.Ver ⊥);
+    constructor;
+    . exact axiomVer!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨by unfold Coreflexive; trivial⟩
+      . suffices ∃ x, (0 : M.World) ≺ x by simpa [Satisfies, Semantics.Realize];
+        use 0;
+⟩
+
+instance : ProperSublogic Logic.GLPoint3 Logic.Ver := ⟨by
+  constructor;
+  . rw [GLPoint3.Kripke.finite_strict_linear_order, Ver.Kripke.finite_isolated];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨by tauto, inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.finite_strict_linear_order ⊧ φ by
+      rw [GLPoint3.Kripke.finite_strict_linear_order];
+      tauto;
+    use (Axioms.Ver ⊥);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 2, λ x y => x < y⟩, (λ w a => False)⟩, 0;
+      constructor;
+      . refine ⟨inferInstance, {irrefl := ?_, trans := ?_}, ⟨?_⟩⟩;
+        . omega;
+        . omega;
+        . simp [WeakConnected];
+      . simp only [Semantics.Realize, Satisfies, imp_false, not_forall, not_not];
+        use 1;
+        tauto;
+⟩
+
+instance : ProperSublogic Logic.Ver Logic.Univ := inferInstance
+
+end Logic
+
 
 end LO.Modal

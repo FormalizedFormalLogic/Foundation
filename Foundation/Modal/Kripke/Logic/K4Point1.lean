@@ -33,6 +33,31 @@ instance Kripke.complete : Complete (Hilbert.K4Point1) Kripke.FrameClass.trans_m
 
 end Hilbert.K4Point1
 
-lemma Logic.K4Point1.Kripke.trans_mckinsey : Logic.K4Point1 = FrameClass.trans_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma K4Point1.Kripke.trans_mckinsey : Logic.K4Point1 = FrameClass.trans_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.K4 Logic.K4Point1 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.K4Point1 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
+      rw [K4.Kripke.trans];
+      tauto;
+    use (Axioms.M (.atom 0));
+    constructor;
+    . exact axiomM!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
+      constructor;
+      . refine ⟨by tauto⟩;
+      . simp [Semantics.Realize, Satisfies];
+⟩
+
+end Logic
+
 
 end LO.Modal

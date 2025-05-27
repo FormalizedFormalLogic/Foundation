@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Logic.KT
-import Foundation.Modal.Kripke.Logic.KB
+import Foundation.Modal.Kripke.Logic.KDB
 import Foundation.Modal.Kripke.Filtration
 
 namespace LO.Modal
@@ -48,6 +48,57 @@ instance finite_complete : Complete (Hilbert.KTB) Kripke.FrameClass.finite_refl_
 
 end Hilbert.KTB.Kripke
 
-lemma Logic.KTB.Kripke.refl_symm : Logic.KTB = FrameClass.refl_symm.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma KTB.Kripke.refl_symm : Logic.KTB = FrameClass.refl_symm.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.KT Logic.KTB := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by
+      rw [KT.Kripke.refl];
+      tauto;
+    use (Axioms.B (.atom 0));
+    constructor;
+    . exact axiomB!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
+      use M, 0;
+      constructor;
+      . tauto;
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
+          simpa [M, Semantics.Realize, Satisfies];
+        use 1;
+        omega;
+⟩
+
+instance : ProperSublogic Logic.KDB Logic.KTB := ⟨by
+  constructor;
+  . rw [KDB.Kripke.serial_symm, KTB.Kripke.refl_symm];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬FrameClass.serial_symm ⊧ φ by
+      rw [KDB.Kripke.serial_symm];
+      tauto;
+    use (Axioms.T (.atom 0));
+    constructor;
+    . exact axiomT!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Bool, λ x y => x ≠ y⟩, λ x _ => x = true⟩, false;
+      constructor;
+      . refine ⟨⟨?_⟩, ⟨by tauto⟩⟩;
+        . intro x;
+          use !x;
+          simp;
+      . simp [Semantics.Realize, Satisfies];
+        tauto;
+⟩
+
+end Logic
 
 end LO.Modal

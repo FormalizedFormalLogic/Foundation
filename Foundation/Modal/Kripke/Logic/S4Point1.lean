@@ -1,5 +1,6 @@
 import Foundation.Modal.Kripke.Logic.K4
 import Foundation.Modal.Kripke.AxiomM
+import Foundation.Modal.Kripke.Logic.S4
 
 namespace LO.Modal
 
@@ -34,6 +35,34 @@ instance Kripke.complete : Complete (Hilbert.S4Point1) Kripke.FrameClass.preorde
 
 end Hilbert.S4Point1
 
-lemma Logic.S4Point1.Kripke.preorder_mckinsey : Logic.S4Point1 = FrameClass.preorder_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+lemma S4Point1.Kripke.preorder_mckinsey : Logic.S4Point1 = FrameClass.preorder_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+
+instance : ProperSublogic Logic.S4 Logic.S4Point1 := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.S4Point1 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by
+      rw [S4.Kripke.preorder];
+      tauto;
+    use (Axioms.M (.atom 0));
+    constructor;
+    . exact axiomM!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
+      use M, 0;
+      constructor;
+      . apply isPreorder_iff _ _ |>.mpr;
+        refine ⟨⟨?_⟩, ⟨?_⟩⟩ <;> simp [M];
+      . suffices ∃ x, x ≠ (0 : M.World) by simpa [M, Transitive, Reflexive, Semantics.Realize, Satisfies];
+        use 1;
+        trivial;
+⟩
+
+end Logic
 
 end LO.Modal
