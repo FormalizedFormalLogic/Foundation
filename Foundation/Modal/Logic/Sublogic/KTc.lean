@@ -1,7 +1,7 @@
-import Foundation.Modal.Kripke.Hilbert.KTc
-import Foundation.Modal.Kripke.Hilbert.Triv
-import Foundation.Modal.Kripke.Hilbert.Ver
-import Foundation.Modal.Kripke.Hilbert.KB4
+import Foundation.Modal.Kripke.Logic.KTc
+import Foundation.Modal.Kripke.Logic.Triv
+import Foundation.Modal.Kripke.Logic.Ver
+import Foundation.Modal.Kripke.Logic.KB4
 
 namespace LO.Modal.Logic
 

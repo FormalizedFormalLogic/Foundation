@@ -1,6 +1,6 @@
 import Foundation.Modal.Logic.Sublogic.ModalCube
 import Foundation.Modal.Hilbert.S5Grz
-import Foundation.Modal.Kripke.Hilbert.Triv
+import Foundation.Modal.Kripke.Logic.Triv
 
 namespace LO.Modal.Logic
 

@@ -1,9 +1,9 @@
 import Foundation.Modal.Logic.Sublogic.K4
 import Foundation.Modal.Maximal.Unprovability
 import Foundation.Modal.Entailment.GL
-import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
-import Foundation.Modal.Kripke.Hilbert.GLPoint3
-import Foundation.Modal.Kripke.Hilbert.Ver
+import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
+import Foundation.Modal.Kripke.Logic.GLPoint3
+import Foundation.Modal.Kripke.Logic.Ver
 
 namespace LO.Modal.Logic
 

@@ -1,10 +1,10 @@
 import Foundation.Modal.Logic.Sublogic.S5Grz
-import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
-import Foundation.Modal.Kripke.Hilbert.GrzPoint2
-import Foundation.Modal.Kripke.Hilbert.GrzPoint3
-import Foundation.Modal.Kripke.Hilbert.S4Point1
-import Foundation.Modal.Kripke.Hilbert.S4Point2
-import Foundation.Modal.Kripke.Hilbert.S4Point3
+import Foundation.Modal.Kripke.Logic.Grz.Completeness
+import Foundation.Modal.Kripke.Logic.GrzPoint2
+import Foundation.Modal.Kripke.Logic.GrzPoint3
+import Foundation.Modal.Kripke.Logic.S4Point1
+import Foundation.Modal.Kripke.Logic.S4Point2
+import Foundation.Modal.Kripke.Logic.S4Point3
 
 namespace LO.Modal.Logic
 

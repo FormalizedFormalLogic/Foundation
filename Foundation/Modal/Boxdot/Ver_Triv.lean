@@ -1,6 +1,6 @@
 import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Hilbert.Triv
-import Foundation.Modal.Kripke.Hilbert.Ver
+import Foundation.Modal.Kripke.Logic.Triv
+import Foundation.Modal.Kripke.Logic.Ver
 
 namespace LO.Modal
 

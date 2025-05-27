@@ -1,6 +1,6 @@
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.Logic.Sublogic.ModalCube
-import Foundation.Modal.Kripke.Hilbert.S5
+import Foundation.Modal.Kripke.Logic.S5
 import Foundation.Modal.Boxdot.Ver_Triv
 
 

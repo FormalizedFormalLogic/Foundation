@@ -1,5 +1,5 @@
 import Foundation.Modal.Maximal.Unprovability
-import Foundation.Modal.Kripke.Hilbert.GL.MDP
+import Foundation.Modal.Kripke.Logic.GL.MDP
 
 
 namespace LO.Modal

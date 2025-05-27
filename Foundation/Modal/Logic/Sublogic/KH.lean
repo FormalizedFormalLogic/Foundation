@@ -1,5 +1,5 @@
-import Foundation.Modal.Kripke.Hilbert.K
-import Foundation.Modal.Kripke.Hilbert.GL.Completeness
+import Foundation.Modal.Kripke.Logic.K
+import Foundation.Modal.Kripke.Logic.GL.Completeness
 import Foundation.Modal.Kripke.KH_Incompleteness
 
 namespace LO.Modal.Logic

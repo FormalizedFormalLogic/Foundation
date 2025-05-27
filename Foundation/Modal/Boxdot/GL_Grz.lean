@@ -1,6 +1,6 @@
 import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Kripke.Hilbert.GL.Completeness
-import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
+import Foundation.Modal.Kripke.Logic.GL.Completeness
+import Foundation.Modal.Kripke.Logic.Grz.Completeness
 
 namespace LO.Modal
 

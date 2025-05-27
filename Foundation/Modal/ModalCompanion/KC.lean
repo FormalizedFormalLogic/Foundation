@@ -1,6 +1,6 @@
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.Logic.Sublogic.S4
-import Foundation.Modal.Kripke.Hilbert.S4Point2
+import Foundation.Modal.Kripke.Logic.S4Point2
 
 namespace LO.Propositional
 

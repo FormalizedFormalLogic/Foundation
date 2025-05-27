@@ -1,7 +1,7 @@
-import Foundation.Modal.Kripke.Hilbert.S4Point1
-import Foundation.Modal.Kripke.Hilbert.S4Point2
-import Foundation.Modal.Kripke.Hilbert.S4Point3
-import Foundation.Modal.Kripke.Hilbert.S5
+import Foundation.Modal.Kripke.Logic.S4Point1
+import Foundation.Modal.Kripke.Logic.S4Point2
+import Foundation.Modal.Kripke.Logic.S4Point3
+import Foundation.Modal.Kripke.Logic.S5
 
 namespace LO.Modal.Logic
 

@@ -60,10 +60,10 @@ import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Hilbert.GL.Alternatives
 
-import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
-import Foundation.Modal.Kripke.Hilbert.GL.MDP
+import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
+import Foundation.Modal.Kripke.Logic.GL.MDP
 
-import Foundation.Modal.Kripke.Hilbert.Grz.Completeness
+import Foundation.Modal.Kripke.Logic.Grz.Completeness
 
 import Foundation.Modal.Kripke.NNFormula
 import Foundation.Modal.Kripke.ComplexityLimited
