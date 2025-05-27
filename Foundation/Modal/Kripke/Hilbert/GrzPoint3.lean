@@ -72,4 +72,6 @@ instance finite_complete : Complete (Hilbert.GrzPoint3) (FrameClass.finite_conne
 
 end Hilbert.GrzPoint3.Kripke
 
+lemma Logic.GrzPoint3.Kripke.finite_connected_partial_order : Logic.GrzPoint3 = FrameClass.finite_connected_partial_order.logic := eq_hilbert_logic_frameClass_logic
+
 end LO.Modal

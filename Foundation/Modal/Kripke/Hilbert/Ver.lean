@@ -1,7 +1,7 @@
 import Foundation.Modal.Kripke.AxiomVer
-import Foundation.Modal.Kripke.Hilbert.Soundness
 import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Rooted
+import Foundation.Modal.Kripke.Hilbert.Basic
 
 namespace LO.Modal
 
@@ -62,5 +62,8 @@ instance complete_finite_isolated : Complete (Hilbert.Ver) Kripke.FrameClass.fin
 ⟩
 
 end Hilbert.Ver.Kripke
+
+lemma Logic.Ver.Kripke.isolated : Logic.Ver = FrameClass.isolated.logic := eq_hilbert_logic_frameClass_logic
+lemma Logic.Ver.Kripke.finite_isolated : Logic.Ver = FrameClass.finite_isolated.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

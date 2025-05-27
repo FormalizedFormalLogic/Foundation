@@ -34,7 +34,6 @@ lemma Logic.Cl.smallestMC.mem_diabox_box : (◇□(.atom 0) ➝ □(.atom 0)) �
 lemma Logic.Cl.smallestMC.mem_AxiomFive : (◇(.atom 0) ➝ □◇(.atom 0)) ∈ Logic.Cl.smallestMC := by
   have := Logic.sumNormal.subst (s := λ _ => ∼(.atom 0)) $ mem_diabox_box;
   apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
-  simp;
   apply C!_trans ?_ CANC!;
   apply C!_trans CCAN! ?_;
   apply C!_trans ?_ or_comm!;
@@ -91,7 +90,7 @@ instance modalCompanion_Cl_S5 : ModalCompanion Logic.Cl Logic.S5 := by
     (IC := Propositional.Kripke.FrameClass.euclidean)
     (MC := Modal.Kripke.FrameClass.refl_eucl)
     (by rw [Propositional.Logic.Cl.Kripke.eq_euclidean])
-    (by rw [←Logic.S5.is_smallestMC_of_Cl, ←Logic.S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic])
+    (by rw [←Logic.S5.is_smallestMC_of_Cl, ←Logic.S5.Kripke.refl_eucl])
     (by
       simp;
       intro F hF;

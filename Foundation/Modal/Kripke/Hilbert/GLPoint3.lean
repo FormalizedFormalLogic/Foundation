@@ -34,4 +34,6 @@ instance finite_complete : Complete (Hilbert.GLPoint3) (FrameClass.finite_strict
 
 end Hilbert.GLPoint3.Kripke
 
+lemma Logic.GLPoint3.Kripke.finite_strict_linear_order : Logic.GLPoint3 = FrameClass.finite_strict_linear_order.logic := eq_hilbert_logic_frameClass_logic
+
 end LO.Modal

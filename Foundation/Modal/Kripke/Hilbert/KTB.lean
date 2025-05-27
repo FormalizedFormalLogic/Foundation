@@ -48,4 +48,6 @@ instance finite_complete : Complete (Hilbert.KTB) Kripke.FrameClass.finite_refl_
 
 end Hilbert.KTB.Kripke
 
+lemma Logic.KTB.Kripke.refl_symm : Logic.KTB = FrameClass.refl_symm.logic := eq_hilbert_logic_frameClass_logic
+
 end LO.Modal

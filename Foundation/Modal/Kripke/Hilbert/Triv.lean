@@ -94,7 +94,11 @@ instance complete_finite_equality : Complete (Hilbert.Triv) Kripke.FrameClass.fi
 
 end FFP
 
-
 end Hilbert.Triv.Kripke
+
+
+lemma Logic.Triv.Kripke.equality : Logic.Triv = FrameClass.equality.logic := eq_hilbert_logic_frameClass_logic
+lemma Logic.Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_equality.logic := eq_hilbert_logic_frameClass_logic
+
 
 end LO.Modal

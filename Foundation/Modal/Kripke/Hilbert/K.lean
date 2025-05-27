@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert.K
-import Foundation.Modal.Kripke.Hilbert.Soundness
+import Foundation.Modal.Kripke.Hilbert.Basic
 import Foundation.Modal.Kripke.Completeness
 import Foundation.Modal.Kripke.Filtration
 
@@ -8,17 +8,19 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
-namespace Hilbert.K
+namespace Hilbert.K.Kripke
 
-instance Kripke.sound : Sound (Hilbert.K) FrameClass.all := instSound_of_validates_axioms FrameClass.all.validates_axiomK
+instance sound : Sound (Hilbert.K) FrameClass.all := instSound_of_validates_axioms FrameClass.all.validates_axiomK
+
+instance sound_finite : Sound (Hilbert.K) FrameClass.finite_all := instSound_of_validates_axioms FrameClass.finite_all.validates_axiomK
 
 instance : Entailment.Consistent (Hilbert.K) := consistent_of_sound_frameclass FrameClass.all (by simp)
 
 instance : Kripke.Canonical (Hilbert.K) FrameClass.all := ⟨by trivial⟩
 
-instance Kripke.complete : Complete (Hilbert.K) FrameClass.all := inferInstance
+instance complete : Complete (Hilbert.K) FrameClass.all := inferInstance
 
-instance Kripke.complete_finite : Complete (Hilbert.K) (FrameClass.finite_all) := ⟨by
+instance complete_finite : Complete (Hilbert.K) (FrameClass.finite_all) := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   intro F _ V x;
@@ -31,6 +33,9 @@ instance Kripke.complete_finite : Complete (Hilbert.K) (FrameClass.finite_all) :
   simp;
 ⟩
 
-end Hilbert.K
+end Hilbert.K.Kripke
+
+lemma Logic.K.Kripke.all : Logic.K = FrameClass.all.logic := eq_hilbert_logic_frameClass_logic
+lemma Logic.K.Kripke.finite_all : Logic.K = FrameClass.finite_all.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

@@ -1,4 +1,6 @@
 import Foundation.Modal.Boxdot.GL_Grz
+import Foundation.Modal.Kripke.Hilbert.GrzPoint3
+import Foundation.Modal.Kripke.Hilbert.GLPoint3
 
 namespace LO.Modal
 

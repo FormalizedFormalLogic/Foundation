@@ -33,4 +33,6 @@ instance Kripke.complete : Complete (Hilbert.K4Point1) Kripke.FrameClass.trans_m
 
 end Hilbert.K4Point1
 
+lemma Logic.K4Point1.Kripke.trans_mckinsey : Logic.K4Point1 = FrameClass.trans_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+
 end LO.Modal

@@ -1,4 +1,6 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.Hilbert.Basic
+import Foundation.Modal.Hilbert.WellKnown
 namespace LO.Modal
 
 open Kripke
@@ -27,5 +29,7 @@ instance canonical : Canonical (Hilbert.KD5) Kripke.FrameClass.serial_eucl := ‚ü
 instance complete : Complete (Hilbert.KD5) Kripke.FrameClass.serial_eucl := inferInstance
 
 end Hilbert.KD5.Kripke
+
+lemma Logic.KD5.Kripke.serial_eucl : Logic.KD5 = FrameClass.serial_eucl.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

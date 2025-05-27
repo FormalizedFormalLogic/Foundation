@@ -1,4 +1,7 @@
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.Hilbert.KTc
+import Foundation.Modal.Kripke.Hilbert.Triv
+import Foundation.Modal.Kripke.Hilbert.Ver
+import Foundation.Modal.Kripke.Hilbert.KB4
 
 namespace LO.Modal.Logic
 
@@ -10,7 +13,8 @@ instance : ProperSublogic Logic.KTc Logic.Triv := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.corefl ⊧ φ by
-      simpa [KTc.eq_CoreflexiveKripkeFrameClass_Logic];
+      rw [KTc.Kripke.corefl];
+      tauto;
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -23,14 +27,15 @@ instance : ProperSublogic Logic.KTc Logic.Triv := ⟨by
 
 instance : ProperSublogic Logic.KTc Logic.Ver := ⟨by
   constructor;
-  . rw [KTc.eq_CoreflexiveKripkeFrameClass_Logic, Ver.eq_IsolatedFrameClass_Logic];
+  . rw [KTc.Kripke.corefl, Ver.Kripke.isolated];
     rintro φ hφ F hF;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply hφ;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
   . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.corefl ⊧ φ by
-      simpa [KTc.eq_CoreflexiveKripkeFrameClass_Logic];
+      rw [KTc.Kripke.corefl];
+      tauto;
     use (Axioms.Ver ⊥);
     constructor;
     . exact axiomVer!;
@@ -45,13 +50,14 @@ instance : ProperSublogic Logic.KTc Logic.Ver := ⟨by
 
 instance : ProperSublogic Logic.KB4 Logic.KTc := ⟨by
   constructor;
-  . rw [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, KTc.eq_CoreflexiveKripkeFrameClass_Logic];
+  . rw [KB4.Kripke.refl_trans, KTc.Kripke.corefl];
     rintro φ hφ F F_corefl;
     replace hF := Set.mem_setOf_eq.mp F_corefl;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.KTc ⊢! φ ∧ ¬Kripke.FrameClass.symm_trans ⊧ φ by
-      simpa [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+      rw [KB4.Kripke.refl_trans];
+      tauto;
     use (Axioms.Tc (.atom 0));
     constructor;
     . exact axiomTc!;

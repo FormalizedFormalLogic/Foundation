@@ -1,7 +1,6 @@
 import Foundation.Modal.Boxdot.GL_Grz
 import Foundation.Modal.Logic.Extension
 import Foundation.Modal.Logic.Sublogic.Grz
-import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.ModalCompanion.Basic
 import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Logic.WellKnown
@@ -50,7 +49,7 @@ instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
     (IC := Propositional.Kripke.FrameClass.all)
     (MC := Modal.Kripke.FrameClass.preorder)
     (by rw [Logic.Int.Kripke.eq_all])
-    (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic])
+    (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.Kripke.preorder])
     (by simp; intro F; infer_instance;);
 
 end S4
@@ -96,7 +95,7 @@ instance modalCompanion_Int_Grz : ModalCompanion Logic.Int Logic.Grz := by
     (IC := Propositional.Kripke.FrameClass.finite_all)
     (MC := FrameClass.finite_partial_order)
     (by rw [Logic.Int.Kripke.eq_all_finite])
-    (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic])
+    (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.Kripke.finite_partial_order])
     (by rintro F ⟨⟩; refine ⟨by tauto, inferInstance⟩);
 
 end Grz
@@ -109,13 +108,13 @@ lemma Logic.iff_provable_Cl_provable_dia_gS4 : (φ ∈ Logic.Cl) ↔ (◇φᵍ �
   . intro h;
     suffices □◇φᵍ ∈ Logic.S4 by exact axiomT'! this;
     have := modalCompanion_Int_S4.companion.mp $ Hilbert.glivenko.mpr h;
-    rw [Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic] at this ⊢;
+    rw [Logic.S4.Kripke.preorder] at this ⊢;
     exact this;
   . intro h;
     apply Hilbert.glivenko.mp;
     apply modalCompanion_Int_S4.companion.mpr;
     have : □◇φᵍ ∈ Logic.S4 := nec! h;
-    rw [Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic] at this ⊢;
+    rw [Logic.S4.Kripke.preorder] at this ⊢;
     exact this;
 
 end glivenko

@@ -1,6 +1,7 @@
 import Foundation.Modal.Entailment.GL
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Hilbert.GL.Soundness
+import Foundation.Modal.Kripke.Hilbert.Basic
 
 namespace LO.Modal
 
@@ -185,4 +186,8 @@ instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_trans_irr
         tauto;
 ⟩
 
-end LO.Modal.Hilbert.GL.Kripke
+end Hilbert.GL.Kripke
+
+lemma Logic.GL.Kripke.finite_trans_irrefl : Logic.GL = FrameClass.finite_trans_irrefl.logic := eq_hilbert_logic_frameClass_logic
+
+end LO.Modal

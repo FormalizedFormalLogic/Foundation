@@ -111,5 +111,7 @@ end FFP
 
 end Hilbert.S4Point3.Kripke
 
+lemma Logic.S4Point3.Kripke.connected_preorder : Logic.S4Point3 = FrameClass.connected_preorder.logic := eq_hilbert_logic_frameClass_logic
+lemma Logic.S4Point3.Kripke.finite_connected_preorder : Logic.S4Point3 = FrameClass.finite_connected_preorder.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

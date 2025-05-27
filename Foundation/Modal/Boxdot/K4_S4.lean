@@ -1,6 +1,7 @@
 import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Entailment.S4
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.Hilbert.K4
+import Foundation.Modal.Kripke.Hilbert.S4
 
 namespace LO.Modal
 

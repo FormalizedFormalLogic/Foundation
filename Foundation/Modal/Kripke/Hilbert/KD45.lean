@@ -1,4 +1,6 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.Hilbert.Basic
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
@@ -29,5 +31,7 @@ instance canonical : Canonical (Hilbert.KD45) Kripke.FrameClass.serial_trans_euc
 instance complete : Complete (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := inferInstance
 
 end Hilbert.KD45.Kripke
+
+lemma Logic.KD45.Kripke.serial_trans_eucl : Logic.KD45 = FrameClass.serial_trans_eucl.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

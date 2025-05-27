@@ -1,4 +1,6 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.Hilbert.Basic
+import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Filtration
 import Foundation.Modal.Kripke.Rooted
 
@@ -102,5 +104,8 @@ instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_
 end FFP
 
 end Hilbert.S4Point2.Kripke
+
+lemma Logic.S4Point2.Kripke.confluent_preorder : Logic.S4Point2 = FrameClass.confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
+lemma Logic.S4Point2.Kripke.finite_confluent_preorder : Logic.S4Point2 = FrameClass.finite_confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

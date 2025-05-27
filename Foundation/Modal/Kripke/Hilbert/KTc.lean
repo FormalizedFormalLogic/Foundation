@@ -1,4 +1,6 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.Hilbert.Basic
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
@@ -28,5 +30,7 @@ instance canonical : Canonical (Hilbert.KTc) FrameClass.corefl := ⟨by
 instance complete : Complete (Hilbert.KTc) FrameClass.corefl := inferInstance
 
 end Hilbert.KTc.Kripke
+
+lemma Logic.KTc.Kripke.corefl : Logic.KTc = FrameClass.corefl.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

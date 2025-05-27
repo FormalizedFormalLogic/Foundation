@@ -1,4 +1,6 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.Hilbert.Basic
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
@@ -29,5 +31,7 @@ instance canonical : Canonical (Hilbert.KB) Kripke.FrameClass.symm := ⟨by
 instance complete : Complete (Hilbert.KB) Kripke.FrameClass.symm := inferInstance
 
 end Hilbert.KB.Kripke
+
+lemma Logic.KB.Kripke.symm : Logic.KB = FrameClass.symm.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

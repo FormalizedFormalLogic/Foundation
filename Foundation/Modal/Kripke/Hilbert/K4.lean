@@ -1,4 +1,6 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.Hilbert.Basic
 import Foundation.Modal.Kripke.Filtration
 
 namespace LO.Modal
@@ -7,10 +9,7 @@ open Kripke
 open Hilbert.Kripke
 open Geachean
 
-variable {F : Frame}
-
 protected abbrev Kripke.FrameClass.trans : FrameClass := { F | IsTrans _ F }
-
 protected abbrev Kripke.FrameClass.finite_trans : FrameClass := { F | Finite F ∧ IsTrans _ F }
 
 namespace Hilbert.K4.Kripke
@@ -49,5 +48,7 @@ instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans 
 ⟩
 
 end Hilbert.K4.Kripke
+
+lemma Logic.K4.Kripke.trans : Logic.K4 = FrameClass.trans.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

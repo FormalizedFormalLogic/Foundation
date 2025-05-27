@@ -1,5 +1,6 @@
-import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Logic.Sublogic.ModalCube
+import Foundation.Modal.Hilbert.S5Grz
+import Foundation.Modal.Kripke.Hilbert.Triv
 
 namespace LO.Modal.Logic
 
@@ -10,7 +11,9 @@ open Kripke
 lemma S5_ssubset_S5Grz : Logic.S5 ⊂ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.universal ⊧ φ by simpa [S5.eq_UniversalKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.universal ⊧ φ by
+      rw [S5.Kripke.universal];
+      tauto;
     use Axioms.Grz (.atom 0)
     constructor;
     . exact axiomGrz!;
@@ -26,8 +29,9 @@ lemma S5Grz_eq_Triv : Logic.S5Grz = Logic.Triv := by
   ext φ;
   exact Hilbert.iff_provable_S5Grz_provable_Triv;
 
+
 lemma S5Grz.Kripke.eq_finite_equality_logic : Logic.S5Grz = Kripke.FrameClass.finite_equality.logic := by
-  rw [S5Grz_eq_Triv, Triv.Kripke.eq_finite_equality_logic]
+  rw [S5Grz_eq_Triv, Triv.Kripke.finite_equality]
 
 
 theorem S5_ssubset_Triv : Logic.S5 ⊂ Logic.Triv := by

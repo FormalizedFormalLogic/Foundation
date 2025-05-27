@@ -1,6 +1,5 @@
-
 import Foundation.Modal.Logic.Extension
-import Foundation.Modal.Logic.WellKnown
+
 import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal
@@ -8,7 +7,7 @@ namespace LO.Modal
 open Logic
 
 protected abbrev Logic.S := addQuasiNormal Logic.GL (Axioms.T (.atom 0))
-instance : Logic.S.QuasiNormal where
+instance : Logic.S.IsQuasiNormal where
   subset_K := by
     intro φ hφ;
     apply Logic.sumQuasiNormal.mem₁;

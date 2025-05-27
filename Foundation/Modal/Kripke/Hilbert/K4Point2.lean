@@ -1,5 +1,7 @@
 import Foundation.Modal.Kripke.AxiomWeakPoint2
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.Hilbert.Basic
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
@@ -33,5 +35,7 @@ instance canonical : Canonical (Hilbert.K4Point2) Kripke.FrameClass.trans_weakCo
 instance complete : Complete (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent := inferInstance
 
 end Hilbert.K4Point2.Kripke
+
+lemma Logic.K4Point2.Kripke.trans_weakConfluent : Logic.K4Point2 = FrameClass.trans_weakConfluent.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

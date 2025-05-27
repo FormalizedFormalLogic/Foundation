@@ -1,4 +1,6 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.Hilbert.Basic
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
@@ -28,5 +30,7 @@ instance canonical : Canonical (Hilbert.KDB) Kripke.FrameClass.serial_symm := ‚ü
 instance complete : Complete (Hilbert.KDB) Kripke.FrameClass.serial_symm := inferInstance
 
 end Hilbert.KDB.Kripke
+
+lemma Logic.KDB.Kripke.serial_symm : Logic.KDB = FrameClass.serial_symm.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

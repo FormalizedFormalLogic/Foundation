@@ -1,5 +1,9 @@
 import Foundation.Modal.Logic.Sublogic.K4
 import Foundation.Modal.Maximal.Unprovability
+import Foundation.Modal.Entailment.GL
+import Foundation.Modal.Kripke.Hilbert.GL.Unnecessitation
+import Foundation.Modal.Kripke.Hilbert.GLPoint3
+import Foundation.Modal.Kripke.Hilbert.Ver
 
 namespace LO.Modal.Logic
 
@@ -10,7 +14,7 @@ open Kripke
 theorem K4_ssubset_GL : Logic.K4 ⊂ Logic.GL := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.K4 ⊢! φ by simpa;
+  . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.K4 ⊢! φ by tauto;
     use (Axioms.L (.atom 0));
     constructor;
     . exact axiomL!;
@@ -20,7 +24,7 @@ instance : ProperSublogic Logic.K4 Logic.GL := ⟨K4_ssubset_GL⟩
 theorem GL_ssubset_Ver : Logic.GL ⊂ Logic.Ver := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬Hilbert.GL ⊢! φ by simpa;
+  . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬Hilbert.GL ⊢! φ by tauto;
     use (Axioms.Ver ⊥);
     constructor;
     . exact axiomVer!;
@@ -34,7 +38,8 @@ theorem GL_ssubset_GLPoint3 : Logic.GL ⊂ Logic.GLPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.finite_trans_irrefl ⊧ φ by
-      simpa [GL.eq_TransitiveIrreflexiveFiniteKripkeFrameClass_Logic];
+      rw [GL.Kripke.finite_trans_irrefl];
+      tauto;
     use (Axioms.WeakPoint3 (.atom 0) (.atom 1));
     constructor;
     . simp;
@@ -53,7 +58,8 @@ theorem K4Point3_ssubset_GLPoint3 : Logic.K4Point3 ⊂ Logic.GLPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by
-      simpa [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
+      rw [K4Point3.Kripke.trans_weakConnected];
+      tauto;
     use (Axioms.L (.atom 0));
     constructor;
     . simp;
@@ -71,12 +77,13 @@ instance : ProperSublogic Logic.K4Point3 Logic.GLPoint3 := ⟨K4Point3_ssubset_G
 
 theorem GLPoint3_ssubset_Ver : Logic.GLPoint3 ⊂ Logic.Ver := by
   constructor;
-  . rw [GLPoint3.Kripke.eq_finiteStrictLinearOrder_logic, Ver.Kripke.eq_finite_isolated_logic];
+  . rw [GLPoint3.Kripke.finite_strict_linear_order, Ver.Kripke.finite_isolated];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨by tauto, inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.finite_strict_linear_order ⊧ φ by
-      simpa [GLPoint3.Kripke.eq_finiteStrictLinearOrder_logic];
+      rw [GLPoint3.Kripke.finite_strict_linear_order];
+      tauto;
     use (Axioms.Ver ⊥);
     constructor;
     . simp;

@@ -1,6 +1,7 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.K
 import Foundation.Logic.HilbertStyle.Lukasiewicz
+import Foundation.Modal.Logic.Basic
 
 namespace LO.Modal
 
@@ -95,9 +96,6 @@ def subst! {φ} (s) (h : H ⊢! φ) : H ⊢! φ⟦s⟧ := by
 
 end Deduction
 
-
-abbrev theorems (H : Hilbert α) := Entailment.theory H
-
 lemma of_subset (hs : H₁.axioms ⊆ H₂.axioms) : H₁ ⊢! φ → H₂ ⊢! φ := by
   intro h;
   induction h using Deduction.rec! with
@@ -126,6 +124,30 @@ lemma weakerThan_of_dominate_axioms (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.
   rintro φ ⟨ψ, hψ, ⟨s, rfl⟩⟩;
   apply subst!;
   apply hMaxm hψ;
+
+
+abbrev logic (H : Hilbert ℕ) : Logic := Entailment.theory H
+
+section
+
+variable {H : Hilbert ℕ}
+
+@[simp]
+lemma iff_mem_logic {φ : Formula ℕ} : φ ∈ H.logic ↔ H ⊢! φ := by simp [Entailment.theory];
+
+instance [Entailment.Consistent H] : H.logic.Consistent := ⟨by
+  apply Set.eq_univ_iff_forall.not.mpr;
+  push_neg;
+  obtain ⟨φ, hφ⟩ : ∃ φ, H ⊬ φ := Entailment.Consistent.exists_unprovable inferInstance;
+  use! φ;
+  simpa;
+⟩
+
+instance [Entailment.Unnecessitation H] : H.logic.Unnecessitation := ⟨fun {_} h => unnec! h⟩
+
+instance [Entailment.ModalDisjunctive H] : H.logic.ModalDisjunctive := ⟨fun {_ _} h => modal_disjunctive h⟩
+
+end
 
 end Hilbert
 

@@ -1,5 +1,22 @@
-import Foundation.Modal.Logic.WellKnown
-import Foundation.Modal.Kripke.KH_Incompleteness
+import Foundation.Modal.Kripke.Hilbert.K
+import Foundation.Modal.Kripke.Hilbert.K4
+import Foundation.Modal.Kripke.Hilbert.K45
+import Foundation.Modal.Kripke.Hilbert.K5
+import Foundation.Modal.Kripke.Hilbert.KB
+import Foundation.Modal.Kripke.Hilbert.KB4
+import Foundation.Modal.Kripke.Hilbert.KB4
+import Foundation.Modal.Kripke.Hilbert.KD
+import Foundation.Modal.Kripke.Hilbert.KD4
+import Foundation.Modal.Kripke.Hilbert.KD5
+import Foundation.Modal.Kripke.Hilbert.KD45
+import Foundation.Modal.Kripke.Hilbert.KDB
+import Foundation.Modal.Kripke.Hilbert.KT
+import Foundation.Modal.Kripke.Hilbert.KT4B
+import Foundation.Modal.Kripke.Hilbert.KTB
+import Foundation.Modal.Kripke.Hilbert.KTB
+import Foundation.Modal.Kripke.Hilbert.S4
+import Foundation.Modal.Kripke.Hilbert.S5
+import Foundation.Modal.Entailment.KT
 
 namespace LO.Modal.Logic
 
@@ -9,11 +26,13 @@ open Kripke
 
 theorem KTB_ssubset_S5 : Logic.KTB ⊂ Logic.S5 := by
   constructor;
-  . rw [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
+  . rw [KTB.Kripke.refl_symm, S5.Kripke.refl_eucl];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.refl_symm ⊧ φ by simpa [KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.refl_symm ⊧ φ by
+      rw [KTB.Kripke.refl_symm];
+      tauto;
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
@@ -32,11 +51,13 @@ instance : ProperSublogic Logic.KTB Logic.S5 := ⟨KTB_ssubset_S5⟩
 
 theorem KD45_ssubset_S5 : Logic.KD45 ⊂ Logic.S5 := by
   constructor;
-  . rw [KD45.eq_SerialTransitiveEuclideanKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
+  . rw [KD45.Kripke.serial_trans_eucl, S5.Kripke.refl_eucl];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.serial_trans_eucl ⊧ φ by simpa [KD45.eq_SerialTransitiveEuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.serial_trans_eucl ⊧ φ by
+      rw [KD45.Kripke.serial_trans_eucl];
+      tauto;
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -55,11 +76,13 @@ instance : ProperSublogic Logic.KD45 Logic.S5 := ⟨KD45_ssubset_S5⟩
 
 theorem KB4_ssubset_S5 : Logic.KB4 ⊂ Logic.S5 := by
   constructor;
-  . rw [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
+  . rw [KB4.Kripke.refl_trans, S5.Kripke.refl_eucl];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.symm_trans ⊧ φ by simpa [KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.symm_trans ⊧ φ by
+      rw [KB4.Kripke.refl_trans];
+      tauto;
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -73,7 +96,9 @@ instance : ProperSublogic Logic.KB4 Logic.S5 := ⟨KB4_ssubset_S5⟩
 theorem KT_ssubset_KTB : Logic.KT ⊂ Logic.KTB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by
+      rw [KT.Kripke.refl];
+      tauto;
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
@@ -90,11 +115,13 @@ instance : ProperSublogic Logic.KT Logic.KTB := ⟨KT_ssubset_KTB⟩
 
 theorem KDB_ssubset_KTB : Logic.KDB ⊂ Logic.KTB := by
   constructor;
-  . rw [KDB.eq_SerialSymmetricKripkeFrameClass_Logic, KTB.eq_ReflexiveSymmetricKripkeFrameClass_Logic];
+  . rw [KDB.Kripke.serial_symm, KTB.Kripke.refl_symm];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬FrameClass.serial_symm ⊧ φ by simpa [KDB.eq_SerialSymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬FrameClass.serial_symm ⊧ φ by
+      rw [KDB.Kripke.serial_symm];
+      tauto;
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -112,7 +139,9 @@ instance : ProperSublogic Logic.KDB Logic.KTB := ⟨KDB_ssubset_KTB⟩
 theorem KT_ssubset_S4 : Logic.KT ⊂ Logic.S4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomT!]) |>.subset;
-  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by simpa [KT.eq_ReflexiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by
+      rw [KT.Kripke.refl];
+      tauto;
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
@@ -142,7 +171,9 @@ instance : ProperSublogic Logic.KT Logic.S4 := ⟨KT_ssubset_S4⟩
 theorem KD4_ssubset_S4 : Logic.KD4 ⊂ Logic.S4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by simpa [KD4.eq_SerialTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by
+      rw [KD4.Kripke.serial_trans];
+      tauto;
     use Axioms.T (.atom 0);
     constructor;
     . exact axiomT!;
@@ -156,7 +187,9 @@ instance : ProperSublogic Logic.KD4 Logic.S4 := ⟨KD4_ssubset_S4⟩
 theorem KD4_ssubset_KD45 : Logic.KD4 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by simpa [KD4.eq_SerialTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by
+      rw [KD4.Kripke.serial_trans];
+      tauto;
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
@@ -179,7 +212,9 @@ instance : ProperSublogic Logic.KD4 Logic.KD45 := ⟨KD4_ssubset_KD45⟩
 theorem KD5_ssubset_KD45 : Logic.KD5 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_eucl ⊧ φ by simpa [KD5.eq_SerialEuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_eucl ⊧ φ by
+      rw [KD5.Kripke.serial_eucl];
+      tauto;
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
@@ -213,7 +248,9 @@ instance : ProperSublogic Logic.KD5 Logic.KD45 := ⟨KD5_ssubset_KD45⟩
 theorem K45_ssubset_KD45 : Logic.K45 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by simpa [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by
+      rw [K45.Kripke.trans_eucl];
+      tauto;
     use Axioms.D (.atom 0);
     constructor;
     . exact axiomD!;
@@ -226,11 +263,13 @@ instance : ProperSublogic Logic.K45 Logic.KD45 := ⟨K45_ssubset_KD45⟩
 
 theorem K45_ssubset_KB4 : Logic.K45 ⊂ Logic.KB4 := by
   constructor;
-  . rw [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic, KB4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . rw [K45.Kripke.trans_eucl, KB4.Kripke.refl_trans];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by simpa [K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by
+      rw [K45.Kripke.trans_eucl];
+      tauto;
     use Axioms.B (.atom 0);
     constructor;
     . exact axiomB!;
@@ -244,7 +283,9 @@ instance : ProperSublogic Logic.K45 Logic.KB4 := ⟨K45_ssubset_KB4⟩
 theorem KB_ssubset_KB4 : Logic.KB ⊂ Logic.KB4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by simpa [KB.eq_SymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by
+      rw [KB.Kripke.symm];
+      tauto;
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
@@ -259,7 +300,9 @@ instance : ProperSublogic Logic.KB Logic.KB4 := ⟨KB_ssubset_KB4⟩
 theorem KD_ssubset_KT : Logic.KD ⊂ Logic.KT := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomD!]) |>.subset;
-  . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
+      rw [KD.Kripke.serial];
+      tauto;
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -274,7 +317,9 @@ instance : ProperSublogic Logic.KD Logic.KT := ⟨KD_ssubset_KT⟩
 theorem KD_ssubset_KDB : Logic.KD ⊂ Logic.KDB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
+      rw [KD.Kripke.serial];
+      tauto;
     use Axioms.B (.atom 0);
     constructor;
     . exact axiomB!;
@@ -295,7 +340,9 @@ instance : ProperSublogic Logic.KD Logic.KDB := ⟨KD_ssubset_KDB⟩
 theorem KB_ssubset_KDB : Logic.KB ⊂ Logic.KDB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by simpa [KB.eq_SymmetricKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by
+      rw [KB.Kripke.symm];
+      tauto;
     use Axioms.D (.atom 0);
     constructor;
     . exact axiomD!;
@@ -309,7 +356,9 @@ instance : ProperSublogic Logic.KB Logic.KDB := ⟨KB_ssubset_KDB⟩
 theorem KD_ssubset_KD4 : Logic.KD ⊂ Logic.KD4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
+      rw [KD.Kripke.serial];
+      tauto
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
@@ -324,7 +373,9 @@ instance : ProperSublogic Logic.KD Logic.KD4 := ⟨KD_ssubset_KD4⟩
 theorem K4_ssubset_KD4 : Logic.K4 ⊂ Logic.KD4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.trans ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.trans ⊧ φ by
+      rw [K4.Kripke.trans];
+      tauto;
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
@@ -343,7 +394,9 @@ lemma K4_ssubset_S4 : Logic.K4 ⊂ Logic.S4 := by
 theorem KD_ssubset_KD5 : Logic.KD ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by simpa [KD.eq_SerialKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
+      rw [KD.Kripke.serial];
+      tauto;
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
@@ -363,7 +416,9 @@ instance : ProperSublogic Logic.KD Logic.KD5 := ⟨KD_ssubset_KD5⟩
 theorem K5_ssubset_KD5 : Logic.K5 ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by
+      rw [K5.Kripke.eucl];
+      tauto;
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
@@ -377,7 +432,9 @@ instance : ProperSublogic Logic.K5 Logic.KD5 := ⟨K5_ssubset_KD5⟩
 theorem K4_ssubset_K45 : Logic.K4 ⊂ Logic.K45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬FrameClass.trans ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬FrameClass.trans ⊧ φ by
+      rw [K4.Kripke.trans];
+      tauto;
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
@@ -400,7 +457,9 @@ instance : ProperSublogic Logic.K4 Logic.K45 := ⟨K4_ssubset_K45⟩
 theorem K5_ssubset_K45 : Logic.K5 ⊂ Logic.K45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by simpa [K5.eq_EuclideanKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by
+      rw [K5.Kripke.eucl];
+      tauto;
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
@@ -419,7 +478,9 @@ instance : ProperSublogic Logic.K5 Logic.K45 := ⟨K5_ssubset_K45⟩
 theorem K_ssubset_KD : Logic.K ⊂ Logic.KD := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+      rw [K.Kripke.all];
+      tauto;
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
@@ -433,7 +494,9 @@ instance : ProperSublogic Logic.K Logic.KD := ⟨K_ssubset_KD⟩
 theorem K_ssubset_K4 : Logic.K ⊂ Logic.K4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+      rw [K.Kripke.all];
+      tauto;
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
@@ -455,7 +518,9 @@ instance : ProperSublogic Logic.K Logic.K4 := ⟨K_ssubset_K4⟩
 theorem K_ssubset_K5 : Logic.K ⊂ Logic.K5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+      rw [K.Kripke.all];
+      tauto;
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
@@ -472,7 +537,9 @@ instance : ProperSublogic Logic.K Logic.K5 := ⟨K_ssubset_K5⟩
 theorem K_ssubset_KB : Logic.K ⊂ Logic.KB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.eq_AllKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+      rw [K.Kripke.all];
+      tauto;
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
@@ -488,11 +555,13 @@ instance : ProperSublogic Logic.K Logic.KB := ⟨K_ssubset_KB⟩
 
 theorem S4_ssubset_S5 : Logic.S4 ⊂ Logic.S5 := by
   constructor;
-  . rw [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic, S5.eq_ReflexiveEuclideanKripkeFrameClass_Logic];
+  . rw [S4.Kripke.preorder, S5.Kripke.refl_eucl];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by simpa [S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by
+      rw [S4.Kripke.preorder];
+      tauto;
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;

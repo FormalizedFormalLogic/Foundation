@@ -1,4 +1,11 @@
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.Hilbert.K4
+import Foundation.Modal.Kripke.Hilbert.K4Point1
+import Foundation.Modal.Kripke.Hilbert.K4Point2
+import Foundation.Modal.Kripke.Hilbert.K4Point3
+import Foundation.Modal.Kripke.Hilbert.S4Point1
+import Foundation.Modal.Kripke.Hilbert.S4Point2
+import Foundation.Modal.Kripke.Hilbert.S4Point3
+import Foundation.Modal.Kripke.Hilbert.K45
 
 namespace LO.Modal.Logic
 
@@ -9,7 +16,9 @@ open Kripke
 instance : ProperSublogic Logic.K4 Logic.K4Point1 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point1 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K4Point1 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
+      rw [K4.Kripke.trans];
+      tauto;
     use (Axioms.M (.atom 0));
     constructor;
     . exact axiomM!;
@@ -23,7 +32,9 @@ instance : ProperSublogic Logic.K4 Logic.K4Point1 := ⟨by
 instance : ProperSublogic Logic.K4 Logic.K4Point2 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
+      rw [K4.Kripke.trans];
+      tauto;
     use (Axioms.WeakPoint2 (.atom 0) (.atom 1));
     constructor;
     . exact axiomWeakPoint2!;
@@ -45,11 +56,13 @@ instance : ProperSublogic Logic.K4 Logic.K4Point2 := ⟨by
 
 instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
   constructor;
-  . rw [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic, S4Point2.eq_ReflexiveTransitiveConfluentKripkeFrameClass_Logic];
+  . rw [K4Point2.Kripke.trans_weakConfluent, S4Point2.Kripke.confluent_preorder];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConfluent ⊧ φ by simpa [K4Point2.eq_TransitiveWeakConfluentKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConfluent ⊧ φ by
+      rw [K4Point2.Kripke.trans_weakConfluent];
+      tauto;
     use (Axioms.Point2 (.atom 0));
     constructor;
     . exact axiomPoint2!;
@@ -75,7 +88,9 @@ instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
 instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by simpa [K4.eq_TransitiveKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
+      rw [K4.Kripke.trans];
+      tauto;
     use (Axioms.WeakPoint3 (.atom 0) (.atom 1));
     constructor;
     . exact axiomWeakPoint3!;
@@ -88,7 +103,8 @@ instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
       constructor;
       . refine ⟨by omega⟩
       . suffices
-          ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 1 ∧ (∀ y, x ≺ y → y = 1) ∧ ¬x = 2 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 2 ∧ (∀ z : M.World, x ≺ z → z = 2) ∧ x ≠ 1
+          ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 1 ∧ (∀ y, x ≺ y → y = 1) ∧ ¬x = 2 ∧
+          ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 2 ∧ (∀ z : M.World, x ≺ z → z = 2) ∧ x ≠ 1
           by simpa [M, Semantics.Realize, Satisfies];
         refine ⟨1, ?_, rfl, ?_, ?_, 2, ?_, rfl, ?_, ?_⟩;
         . trivial;
@@ -101,11 +117,13 @@ instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
 
 instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
   constructor;
-  . rw [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic, S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic];
+  . rw [K4Point3.Kripke.trans_weakConnected, S4Point3.Kripke.connected_preorder];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by simpa [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
+  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by
+      rw [K4Point3.Kripke.trans_weakConnected];
+      tauto;
     use (Axioms.Point3 (.atom 0) (.atom 1));
     constructor;
     . exact axiomPoint3!;
@@ -126,12 +144,13 @@ instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
 
 instance : ProperSublogic Logic.K4Point3 Logic.K45 := ⟨by
   constructor;
-  . rw [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic, K45.eq_TransitiveEuclideanKripkeFrameClass_Logic];
+  . rw [K4Point3.Kripke.trans_weakConnected, K45.Kripke.trans_eucl];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by
-      simpa [K4Point3.eq_TransitiveWeakConnectedKripkeFrameClass_Logic];
+      rw [K4Point3.Kripke.trans_weakConnected];
+      tauto;
     use (Axioms.Five (.atom 0));
     constructor;
     . simp;

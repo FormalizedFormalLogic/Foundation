@@ -1,4 +1,6 @@
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.Hilbert.K
+import Foundation.Modal.Kripke.Hilbert.Triv
+import Foundation.Modal.Kripke.Hilbert.Ver
 
 namespace LO.Modal.Logic
 

@@ -329,4 +329,6 @@ end
 
 end Hilbert.GrzPoint2.Kripke
 
+lemma Logic.GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_confluent_partial_order.logic := eq_hilbert_logic_frameClass_logic
+
 end LO.Modal

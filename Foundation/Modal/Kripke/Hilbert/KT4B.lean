@@ -1,4 +1,6 @@
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.Hilbert.Basic
+import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Filtration
 
 namespace LO.Modal
@@ -47,6 +49,8 @@ instance finite_complete : Complete (Hilbert.KT4B) Kripke.FrameClass.finite_symm
 ⟩
 
 end Hilbert.KT4B.Kripke
+
+lemma Logic.KT4B.Kripke.symm_preorder : Logic.KT4B = FrameClass.symm_preorder.logic := eq_hilbert_logic_frameClass_logic
 
 
 end LO.Modal

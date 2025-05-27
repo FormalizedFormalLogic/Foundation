@@ -2,6 +2,7 @@ import Foundation.Modal.Kripke.Hilbert.Grz.Soundness
 import Foundation.Modal.Kripke.Hilbert.KT
 import Foundation.Modal.Entailment.K4
 import Foundation.Modal.ComplementClosedConsistentFinset
+import Foundation.Modal.Kripke.Hilbert.Basic
 
 namespace LO.Modal
 
@@ -275,5 +276,9 @@ instance complete : Complete (Hilbert.Grz) FrameClass.finite_partial_order :=
     refine ⟨inferInstance, inferInstance⟩;
 
 end Hilbert.Grz.Kripke
+
+
+lemma Logic.Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_partial_order.logic := eq_hilbert_logic_frameClass_logic
+
 
 end LO.Modal

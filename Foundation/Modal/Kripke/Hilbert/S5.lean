@@ -53,15 +53,18 @@ instance canonical : Canonical (Hilbert.S5) Kripke.FrameClass.refl_eucl := ⟨by
   constructor <;> infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.S5) Kripke.FrameClass.refl_eucl := inferInstance
+instance complete_refl_eucl : Complete (Hilbert.S5) Kripke.FrameClass.refl_eucl := inferInstance
 
 instance complete_universal : Complete (Hilbert.S5) FrameClass.universal := ⟨by
   intro φ hF;
-  apply Kripke.complete.complete;
+  apply Kripke.complete_refl_eucl.complete;
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mp;
   exact hF;
 ⟩
 
 end Hilbert.S5.Kripke
+
+lemma Logic.S5.Kripke.refl_eucl : Logic.S5 = FrameClass.refl_eucl.logic := eq_hilbert_logic_frameClass_logic
+lemma Logic.S5.Kripke.universal : Logic.S5 = FrameClass.universal.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

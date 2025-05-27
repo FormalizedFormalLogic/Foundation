@@ -34,4 +34,6 @@ instance Kripke.complete : Complete (Hilbert.S4Point1) Kripke.FrameClass.preorde
 
 end Hilbert.S4Point1
 
+lemma Logic.S4Point1.Kripke.preorder_mckinsey : Logic.S4Point1 = FrameClass.preorder_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+
 end LO.Modal
