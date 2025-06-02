@@ -146,6 +146,9 @@ def multiDiaDuality : 𝓢 ⊢ ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := by
     . exact CN_of_CN_right $ K_left ih;
 lemma multidia_duality! : 𝓢 ⊢! ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := ⟨multiDiaDuality⟩
 
+@[simp] lemma multidia_duality!_mp : 𝓢 ⊢! ◇^[n]φ ➝ ∼(□^[n](∼φ)) := C_of_E_mp! multidia_duality!
+@[simp] lemma multidia_duality!_mpr : 𝓢 ⊢! ∼(□^[n](∼φ)) ➝ ◇^[n]φ := C_of_E_mpr! multidia_duality!
+
 lemma multidia_duality'! : 𝓢 ⊢! ◇^[n]φ ↔ 𝓢 ⊢! ∼(□^[n](∼φ)) := by
   constructor;
   . intro h; exact (K!_left multidia_duality!) ⨀ h;

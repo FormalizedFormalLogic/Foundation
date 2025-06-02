@@ -62,6 +62,7 @@ import Foundation.Modal.Hilbert.GL.Alternatives
 
 import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
 import Foundation.Modal.Kripke.Logic.GL.MDP
+import Foundation.Modal.Kripke.Logic.S4Point4
 
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
 
@@ -77,6 +78,7 @@ import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.KTMk
 import Foundation.Modal.Kripke.Logic.S4Point2Point1
 import Foundation.Modal.Kripke.Logic.S4Point3
+import Foundation.Modal.Kripke.Logic.S4Point4
 import Foundation.Modal.Kripke.Logic.S5
 import Foundation.Modal.Kripke.Logic.S5Grz
 
