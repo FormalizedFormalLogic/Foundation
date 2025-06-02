@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert.KP
-import Foundation.Modal.Hilbert.NNFormula
+import Foundation.Modal.Kripke.NNFormula
 import Foundation.Modal.Maximal.Basic
 import Foundation.Modal.Logic.Extension
 import Foundation.Modal.Kripke.Logic.Ver
@@ -22,8 +22,44 @@ section
 
 open Entailment
 
+open Classical in
 lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : φ ∈ L) (hV : φ ∉ Logic.Ver) : ∃ ψ, ◇ψ ∈ L := by
-  obtain ⟨ψ, ⟨Γ, rfl⟩, h⟩ := Hilbert.NNFormula.exists_CNF φ;
+  obtain ⟨Γs, _, hΓs⟩ := Hilbert.K.NNFormula.exists_CNF φ;
+  have : Hilbert.Ver ⊬ ↑Γs.toMCNF := by sorry;
+  obtain ⟨Γ, hΓ₁, hΓ₂⟩ : ∃ Γ ∈ Γs, Hilbert.Ver ⊬ ↑(⩖ φ ∈ Γ, φ.1) := by sorry;
+  let Γ' := insert (⟨⊥, by tauto⟩) Γ
+  let Γb := { γ ∈ Γ' | γ.1.isPrebox };
+  let Γd := { γ ∈ Γ' | γ.1.isPredia };
+  let Γp := { γ ∈ Γ' | γ.1.degree = 0 };
+  have : Γ' = Γb ∪ Γd ∪ Γp := by
+    ext ⟨ψ, hψ⟩;
+    simp only [Finset.union_assoc, Finset.mem_union, Finset.mem_filter, Γb, Γd, Γp];
+    constructor;
+    . intro; simp_all;
+    . tauto;
+  replace hΓ₂ : Hilbert.Ver ⊬ (⩖ φ ∈ Γ', ↑φ) := by
+    simp [Γ'];
+    sorry;
+  have : Hilbert.Ver ⊬ ↑(⩖ γ ∈ Γb, γ.1) ⋎ ↑(⩖ γ ∈ Γd, γ.1) ⋎ ↑(⩖ γ ∈ Γp, γ.1) := by
+    sorry;
+  generalize eγb : (⩖ γ ∈ Γb, γ.1).toFormula = γb at this;
+  generalize eγd : (⩖ γ ∈ Γd, γ.1).toFormula = γd at this;
+  generalize eγp : (⩖ γ ∈ Γp, γ.1).toFormula = γp at this;
+  have H₁ : Hilbert.Ver ⊬ γd ⋎ γp := by sorry;
+  obtain ⟨s, hs⟩ := Propositional.ClassicalSemantics.tautology_neg_zero_subst_instance_of_not_tautology (φ := γp.toPropFormula (by sorry)) $ by
+    by_contra hC;
+    have := Propositional.Hilbert.Cl.completeness hC;
+    have : Hilbert.Ver ⊢! γp := by sorry;
+    have : Hilbert.Ver ⊢! γd ⋎ γp := by sorry;
+    contradiction;
+  replace hs := Propositional.Hilbert.Cl.completeness hs;
+  have H₂ : γd ⋎ γp ∈ L := by sorry;
+  have := @Logic.subst (hφ := H₂) _ _ _ (λ a => s.1 a);
+  have : γd⟦fun a ↦ (s.1 a)⟧ ∈ L := by sorry;
+
+  sorry;
+  /-
+  obtain ⟨ψ, ⟨Γ, rfl⟩, h⟩ := Hilbert.K.NNFormula.exists_CNF φ;
   generalize eγ : (⋀Γ.unattach).toFormula = γ at h;
   have : φ.toNNFormula.toFormula ⭤ γ ∈ L := Logic.of_mem_K h;
 
@@ -41,6 +77,7 @@ lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : φ ∈ L) (hV : φ ∉ Logic.Ve
   have : ∃ Γ: List (Formula ℕ), φ ⭤ ⋀Γ ∈ L := by sorry;
   simp at hV;
   sorry;
+  -/
 
 lemma KD_subset_of_not_subset_Ver (hV : ¬L ⊆ Logic.Ver) : Logic.KD ⊆ L := by
   intro φ hφ;

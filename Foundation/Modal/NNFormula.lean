@@ -163,7 +163,7 @@ def cases'
   | □φ => hBox φ
   | ◇φ => hDia φ
 
-@[elab_as_elim]
+@[induction_eliminator]
 def rec'
   {C : NNFormula α → Sort v}
   (hAtom   : ∀ a, C (atom a))
@@ -247,9 +247,7 @@ def ofNat : Nat → Option (NNFormula α)
 instance : Encodable (NNFormula α) where
   encode := toNat
   decode := ofNat
-  encodek := by
-    intro φ;
-    induction φ using rec' <;> simp [toNat, ofNat, encodek, *]
+  encodek φ := by induction φ <;> simp [toNat, ofNat, encodek, *]
 
 end Encodable
 
@@ -293,30 +291,31 @@ lemma def_dia : isModalCNFPart (◇φ) := by use [⟨◇φ, by tauto⟩]; tauto;
 
 end isModalCNFPart
 
-
-def isModalCNF (φ : NNFormula α) := ∃ Γ : List { ψ // isModalCNFPart ψ }, φ = ⋀Γ.unattach
+/-
+def isModalCNF : NNFormula α → Prop
+  | φ ⋏ ψ => φ.isModalCNF ∧ ψ.isModalCNF
+  | φ => φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0
 
 namespace isModalCNF
 
-@[simp] lemma def_atom {a : α} : isModalCNF (.atom a) := by use [⟨(.atom a), isModalCNFPart.def_atom⟩]; simp;
-@[simp] lemma def_natom {a : α} : isModalCNF (.natom a) := by use [⟨(.natom a), isModalCNFPart.def_natom⟩]; simp;
-@[simp] lemma def_falsum : isModalCNF (⊥ : NNFormula α) := by use [⟨⊥, isModalCNFPart.def_falsum⟩]; simp;
-@[simp] lemma def_verum : isModalCNF (⊤ : NNFormula α) := by use [⟨⊤, isModalCNFPart.def_verum⟩]; simp;
-@[simp] lemma def_box {φ : NNFormula α} : isModalCNF (□φ) := by use [⟨□φ, isModalCNFPart.def_box⟩]; simp;
-@[simp] lemma def_dia {φ : NNFormula α} : isModalCNF (◇φ) := by use [⟨◇φ, isModalCNFPart.def_dia⟩]; simp;
+@[simp] lemma def_atom {a : α} : isModalCNF (.atom a) := by simp [isModalCNF, degree];
+@[simp] lemma def_natom {a : α} : isModalCNF (.natom a) := by simp [isModalCNF, degree];
+@[simp] lemma def_falsum : isModalCNF (⊥ : NNFormula α) := by simp [isModalCNF, degree];
+@[simp] lemma def_verum : isModalCNF (⊤ : NNFormula α) := by simp [isModalCNF, degree];
+@[simp] lemma def_box {φ : NNFormula α} : isModalCNF (□φ) := by simp [isModalCNF, isPrebox];
+@[simp] lemma def_dia {φ : NNFormula α} : isModalCNF (◇φ) := by simp [isModalCNF, isPredia];
 
 end isModalCNF
 
 
 def isModalDNFPart : NNFormula α → Prop
-  | φ ⋏ ψ  => (φ.isModalDNFPart) ∧ (ψ.isModalDNFPart)
-  | φ      => φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0
-
+  | φ ⋏ ψ => (φ.isModalDNFPart) ∧ (ψ.isModalDNFPart)
+  | φ     => φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0
 
 namespace isModalDNFPart
 
 lemma of_degree_zero {φ : NNFormula α} (h : φ.degree = 0) : isModalDNFPart φ := by
-  induction φ using rec' with
+  induction φ with
   | hAnd φ ψ ihφ ihψ =>
     constructor;
     . apply ihφ; simp_all [degree];
@@ -328,21 +327,26 @@ end isModalDNFPart
 
 def isModalDNF : NNFormula α → Prop
   | φ ⋎ ψ => φ.isModalDNF ∧ ψ.isModalDNF
-  | φ => φ.isModalDNFPart
+  | φ => φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0
 
 namespace isModalDNF
 
-@[simp] lemma def_atom {a : α} : isModalDNF (.atom a) := by simp[isModalDNF, isModalDNFPart, degree]
-@[simp] lemma def_natom {a : α} : isModalDNF (.natom a) := by simp[isModalDNF, isModalDNFPart, degree]
-@[simp] lemma def_falsum : isModalDNF (⊥ : NNFormula α) := by simp[isModalDNF, isModalDNFPart, degree]
-@[simp] lemma def_verum : isModalDNF (⊤ : NNFormula α) := by simp[isModalDNF, isModalDNFPart, degree]
-@[simp] lemma def_box {φ : NNFormula α} : isModalDNF (□φ) := by simp[isModalDNF, isPrebox, isModalDNFPart]
-@[simp] lemma def_dia {φ : NNFormula α} : isModalDNF (◇φ) := by simp[isModalDNF, isPredia, isModalDNFPart]
-
+@[simp] lemma def_atom {a : α} : isModalDNF (.atom a) := by simp [isModalDNF, degree]
+@[simp] lemma def_natom {a : α} : isModalDNF (.natom a) := by simp [isModalDNF, degree]
+@[simp] lemma def_falsum : isModalDNF (⊥ : NNFormula α) := by simp [isModalDNF, degree]
+@[simp] lemma def_verum : isModalDNF (⊤ : NNFormula α) := by simp [isModalDNF, degree]
+@[simp] lemma def_box {φ : NNFormula α} : isModalDNF (□φ) := by simp [isModalDNF, isPrebox]
+@[simp] lemma def_dia {φ : NNFormula α} : isModalDNF (◇φ) := by simp [isModalDNF, isPredia]
 
 end isModalDNF
+-/
 
 end NNFormula
+
+abbrev MNFSegments (α) := Finset $ Finset {φ : NNFormula α // φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0 }
+
+noncomputable def MNFSegments.toMCNF (Γ : MNFSegments α) := ⩕ γ ∈ Γ, ⩖ φ ∈ γ, φ.1
+noncomputable def MNFSegments.toMDNF (Γ : MNFSegments α) := ⩖ γ ∈ Γ, ⩕ φ ∈ γ, φ.1
 
 
 namespace Formula

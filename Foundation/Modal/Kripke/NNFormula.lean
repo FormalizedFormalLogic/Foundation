@@ -1,5 +1,6 @@
 import Foundation.Modal.NNFormula
 import Foundation.Modal.Kripke.Basic
+import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
@@ -46,7 +47,7 @@ protected lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺ y → y ⊧ φ := by simp
 protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Satisfies.iff_models, Satisfies];
 
 protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
-  induction φ using NNFormula.rec' generalizing x with
+  induction φ generalizing x with
   | hOr φ ψ ihφ ihψ =>
     simp only [DeMorgan.or, Satisfies.or_def, not_or];
     constructor;
@@ -94,6 +95,19 @@ protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
 protected lemma imp_def : x ⊧ φ ➝ ψ ↔ x ⊧ φ → x ⊧ ψ := by
   simp [←NNFormula.imp_eq, NNFormula.imp, Satisfies.or_def, Satisfies.neg_def];
   tauto;
+
+protected lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by
+  constructor;
+  . intro h;
+    have ⟨hφψ, hψφ⟩ := Satisfies.and_def.mp h;
+    constructor;
+    . exact Satisfies.imp_def.mp hφψ;
+    . exact Satisfies.imp_def.mp hψφ;
+  . rintro ⟨hφψ, hψφ⟩;
+    apply Satisfies.and_def.mpr;
+    constructor;
+    . apply Satisfies.imp_def.mpr; exact hφψ;
+    . apply Satisfies.imp_def.mpr; exact hψφ;
 
 protected instance : Semantics.Tarski (M.World) where
   realize_top := λ _ => Satisfies.top_def
@@ -253,6 +267,147 @@ lemma ValidOnFrame.toNNFormula : Formula.Kripke.ValidOnFrame F φ ↔ NNFormula.
 ⟩
 
 end Formula.Kripke
+
+
+namespace Hilbert.K.NNFormula
+
+open Formula.Kripke
+
+variable {φ ψ : NNFormula _}
+
+lemma iff_neg : Hilbert.K ⊢! ∼(φ.toFormula) ⭤ (∼φ).toFormula := by
+  apply Hilbert.K.Kripke.complete.complete;
+  intro F _ V x;
+  apply Satisfies.iff_def.mpr;
+  induction φ generalizing x with
+  | hOr φ ψ ihφ ihψ =>
+    constructor;
+    . intro h;
+      replace h := Satisfies.or_def.not.mp $ Satisfies.not_def.mp h;
+      push_neg at h;
+      apply Satisfies.and_def.mpr;
+      constructor;
+      . apply ihφ x |>.mp; exact h.1;
+      . apply ihψ x |>.mp; exact h.2;
+    . intro h;
+      replace h := Satisfies.and_def.mp h;
+      apply Satisfies.or_def.not.mpr;
+      push_neg;
+      constructor;
+      . apply ihφ x |>.mpr;
+        exact h.1;
+      . apply ihψ x |>.mpr;
+        exact h.2;
+  | hAnd φ ψ ihφ ihψ =>
+    constructor;
+    . intro h;
+      replace h := Satisfies.and_def.not.mp $ Satisfies.not_def.mp h;
+      set_option push_neg.use_distrib true in push_neg at h;
+      apply Satisfies.or_def.mpr;
+      rcases h with (hφ | hψ);
+      . left; apply ihφ x |>.mp; exact hφ;
+      . right; apply ihψ x |>.mp; exact hψ;
+    . intro h;
+      apply Satisfies.and_def.not.mpr;
+      set_option push_neg.use_distrib true in push_neg;
+      rcases Satisfies.or_def.mp h with (hφ | hψ);
+      . left; apply ihφ x |>.mpr; exact hφ;
+      . right; apply ihψ x |>.mpr; exact hψ;
+  | hBox φ ih =>
+    constructor;
+    . intro h;
+      replace h := Satisfies.box_def.not.mp $ Satisfies.not_def.mp h;
+      push_neg at h;
+      obtain ⟨y, Rxy, hy⟩ := h;
+      apply Satisfies.dia_def.mpr;
+      use y;
+      constructor;
+      . assumption;
+      . apply ih y |>.mp hy;
+    . intro h;
+      obtain ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp h;
+      apply Satisfies.box_def.not.mpr;
+      push_neg;
+      use y;
+      constructor;
+      . assumption;
+      . apply ih y |>.mpr hy;
+  | hDia φ ih =>
+    constructor;
+    . intro h;
+      replace h := Satisfies.dia_def.not.mp $ Satisfies.not_def.mp h;
+      push_neg at h;
+      intro y Rxy;
+      exact ih y |>.mp $ h _ Rxy;
+    . intro h;
+      apply Satisfies.dia_def.not.mpr;
+      push_neg;
+      intro y Rxy;
+      exact ih y |>.mpr $ h y Rxy;
+  | _ => simp [Satisfies, Semantics.Realize];
+
+lemma exists_CNF_DNF (φ : NNFormula _) :
+  (∃ Γ : MNFSegments ℕ, Γ.toMCNF.degree = φ.degree ∧ Hilbert.K ⊢! φ.toFormula ⭤ Γ.toMCNF) ∧
+  (∃ Δ : MNFSegments ℕ, Δ.toMDNF.degree = φ.degree ∧ Hilbert.K ⊢! φ.toFormula ⭤ Δ.toMDNF)
+  := by
+  sorry;
+
+lemma exists_CNF (φ : NNFormula _) : ∃ Γ : MNFSegments ℕ, Γ.toMCNF.degree = φ.degree ∧ Hilbert.K ⊢! φ.toFormula ⭤ Γ.toMCNF := exists_CNF_DNF φ |>.1
+lemma exists_DNF (φ : NNFormula _) : ∃ Δ : MNFSegments ℕ, Δ.toMDNF.degree = φ.degree ∧ Hilbert.K ⊢! φ.toFormula ⭤ Δ.toMDNF := exists_CNF_DNF φ |>.2
+
+/-
+lemma exists_CNF_DNF (φ : NNFormula _) :
+  (∃ γ : NNFormula _, γ.isModalCNF ∧ γ.degree = φ.degree ∧ Hilbert.K ⊢! φ.toFormula ⭤ γ.toFormula) ∧
+  (∃ δ : NNFormula _, δ.isModalDNF ∧ δ.degree = φ.degree ∧ Hilbert.K ⊢! φ.toFormula ⭤ δ.toFormula)
+  := by
+  induction φ with
+  | hAtom a   => constructor <;> . use (.atom a); simp;
+  | hNatom a  => constructor <;> . use (.natom a); simp;
+  | hVerum    => constructor <;> . use ⊤; simp;
+  | hFalsum   => constructor <;> . use ⊥; simp;
+  | hBox φ ih => constructor <;> . use (□φ); simp;
+  | hDia φ ih => constructor <;> . use (◇φ); simp;
+  | hAnd φ ψ ihφ ihψ =>
+    obtain ⟨⟨γφ, hγφ₁, hγφ₂, hγφ₃⟩, ⟨δφ, hδφ₁, hδφ₂, hδφ₃⟩⟩ := ihφ;
+    obtain ⟨⟨γψ, hγψ₁, hγψ₂, hγψ₃⟩, ⟨δψ, hδψ₁, hδψ₂, hδψ₃⟩⟩ := ihψ;
+    constructor;
+    . use (γφ ⋏ γψ);
+      refine ⟨?_, ?_, ?_⟩;
+      . tauto;
+      . sorry;
+      . apply EKK!_of_E!_of_E! <;> assumption;
+    . match δφ, δψ with
+      | δφ₁ ⋎ δφ₂, δψ₁ ⋎ δψ₂ =>
+        use (δφ₁ ⋏ δψ₁) ⋎ (δφ₂ ⋏ δψ₂);
+        constructor;
+        . simp [NNFormula.isModalDNF] at hδφ₁ hδψ₁;
+          constructor;
+          . sorry;
+          . sorry;
+        . simp [NNFormula.toFormula] at hδφ₂ hδψ₂ ⊢;
+          sorry;
+      | δφ₁ ⋎ δφ₂, δψ =>
+        sorry;
+      | δφ, δψ₁ ⋎ δψ₂ =>
+        sorry;
+      | δφ, δψ =>
+        sorry;
+  | hOr φ ψ ihφ ihψ =>
+    obtain ⟨⟨γφ, hγφ₁, hγφ₂, hγφ₃⟩, ⟨δφ, hδφ₁, hδφ₂, hδφ₃⟩⟩ := ihφ;
+    obtain ⟨⟨γψ, hγψ₁, hγψ₂, hγψ₃⟩, ⟨δψ, hδψ₁, hδψ₂, hδψ₃⟩⟩ := ihψ;
+    constructor;
+    . sorry;
+    . use (δφ ⋎ δψ);
+      refine ⟨?_, ?_, ?_⟩;
+      . tauto;
+      . sorry;
+      . apply EAA!_of_E!_of_E! <;> assumption;
+
+lemma exists_CNF (φ : NNFormula _) : ∃ γ : NNFormula _, γ.isModalCNF ∧ γ.degree = φ.degree ∧ Hilbert.K ⊢! φ.toFormula ⭤ γ.toFormula := exists_CNF_DNF φ |>.1
+lemma exists_DNF (φ : NNFormula _) : ∃ δ : NNFormula _, δ.isModalDNF ∧ δ.degree = φ.degree ∧ Hilbert.K ⊢! φ.toFormula ⭤ δ.toFormula := exists_CNF_DNF φ |>.2
+-/
+
+end Hilbert.K.NNFormula
 
 
 end LO.Modal
