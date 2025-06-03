@@ -38,8 +38,8 @@ def strongInterpret (f : Realization L) (𝔅 : ProvabilityPredicate T₀ T) : F
 
 lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ⭤ f.strongInterpret 𝔅 A := by
   induction A with
-  | hatom φ => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
-  | hfalsum => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
+  | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
+  | hfalsum => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | himp A B ihA ihB => exact ECC!_of_E!_of_E! ihA ihB;
   | hbox A ih =>
     apply K!_intro;
@@ -59,10 +59,10 @@ lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] : T ⊢!. f.interpret �
 
 lemma iff_models_interpret_boxdot_strongInterpret {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.Sound M] : M ⊧ₘ₀ f.interpret 𝔅 (Aᵇ) ↔ M ⊧ₘ₀ f.strongInterpret 𝔅 A := by
   induction A with
-  | hatom φ => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
-  | hfalsum => simp [Realization.interpret, strongInterpret, Formula.BoxdotTranslation];
+  | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
+  | hfalsum => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | himp A B ihA ihB =>
-    simp only [Formula.BoxdotTranslation, interpret, models₀_imply_iff, strongInterpret];
+    simp only [Formula.boxdotTranslate, interpret, models₀_imply_iff, strongInterpret];
     constructor;
     . intro hAB hA;
       apply ihB.mp;
@@ -76,7 +76,7 @@ lemma iff_models_interpret_boxdot_strongInterpret {M} [Nonempty M] [Structure L 
       exact hA;
   | hbox A ih =>
     suffices (M ⊧ₘ₀ f.interpret 𝔅 (Aᵇ)) ∧ (M ⊧ₘ₀ 𝔅 (f.interpret 𝔅 (Aᵇ))) ↔ M ⊧ₘ₀ f.strongInterpret 𝔅 A ∧ M ⊧ₘ₀ 𝔅 (f.strongInterpret 𝔅 A) by
-      simpa [Formula.BoxdotTranslation, interpret, strongInterpret] using this;
+      simpa [Formula.boxdotTranslate, interpret, strongInterpret] using this;
     constructor;
     . rintro ⟨h₁, h₂⟩;
       constructor;

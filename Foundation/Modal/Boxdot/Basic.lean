@@ -10,12 +10,12 @@ open Hilbert.Deduction
 variable [DecidableEq α]
 variable {φ : Formula α}
 
-def Formula.BoxdotTranslation : Formula α → Formula α
+def Formula.boxdotTranslate : Formula α → Formula α
   | atom a => .atom a
   | ⊥ => ⊥
-  | φ ➝ ψ => (BoxdotTranslation φ) ➝ (BoxdotTranslation ψ)
-  | □φ => ⊡(BoxdotTranslation φ)
-postfix:90 "ᵇ" => Formula.BoxdotTranslation
+  | φ ➝ ψ => (boxdotTranslate φ) ➝ (boxdotTranslate ψ)
+  | □φ => ⊡(boxdotTranslate φ)
+postfix:90 "ᵇ" => Formula.boxdotTranslate
 
 class BoxdotProperty (L₁ L₂ : Logic) where
   bdp {φ : _} : φᵇ ∈ L₁ ↔ φ ∈ L₂
@@ -51,7 +51,7 @@ lemma iff_boxdot_reflexive_closure : (Satisfies ⟨F, V⟩ x (φᵇ)) ↔ (Satis
       apply ihq.mpr;
       exact h $ ihp.mp hp;
   | hbox φ ih =>
-    simp [Formula.BoxdotTranslation, Box.boxdot, Satisfies];
+    simp [Formula.boxdotTranslate, Box.boxdot, Satisfies];
     constructor;
     . rintro ⟨h₁, h₂⟩;
       intro y Rxy;
