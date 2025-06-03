@@ -85,4 +85,17 @@ protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
 
 protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
 
+
+protected structure Geach.Taple where
+  i : ℕ
+  j : ℕ
+  m : ℕ
+  n : ℕ
+
+/--
+  Axiom for Geach confluency.
+-/
+protected abbrev Geach (g : Geach.Taple) (φ : F) := ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ)
+
+
 end LO.Modal.Axioms

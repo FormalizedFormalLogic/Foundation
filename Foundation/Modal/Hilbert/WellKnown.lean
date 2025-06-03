@@ -254,6 +254,19 @@ instance [H.HasMk] : Entailment.HasAxiomMk H where
     . use (λ b => if b = (HasMk.q H) then ψ else if b = (HasMk.p H) then φ else (.atom b));
       simp [HasMk.ne_pq];
 
+class HasGeach (g) (H : Hilbert α) where
+  p : α
+  mem_Geach : Axioms.Geach g (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasGeach g] : Entailment.HasAxiomGeach g H where
+  Geach φ := by
+    apply maxm;
+    use Axioms.Geach g (.atom (HasGeach.p g H));
+    constructor;
+    . exact HasGeach.mem_Geach;
+    . use (λ b => if HasGeach.p g H = b then φ else (.atom b));
+      simp;
+
 end Hilbert
 
 

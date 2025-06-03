@@ -8,7 +8,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open Geachean
+open GeachConfluent
 
 abbrev Kripke.FrameClass.symm_trans : FrameClass := { F | IsSymm _ F ∧ IsTrans _ F }
 

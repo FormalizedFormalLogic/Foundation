@@ -497,6 +497,36 @@ instance (Γ : Context F 𝓢) : HasAxiomMk Γ := ⟨fun _ _ ↦ Context.of axio
 end
 
 
+class HasAxiomGeach [LogicalConnective F] (g) (𝓢 : S) where
+  Geach (φ : F) : 𝓢 ⊢ Axioms.Geach g φ
+
+section
+
+instance [Entailment.HasAxiomT 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 0⟩ 𝓢 := ⟨fun _ => axiomT⟩
+instance [Entailment.HasAxiomB 𝓢]      : Entailment.HasAxiomGeach ⟨0, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomB⟩
+instance [Entailment.HasAxiomD 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 1⟩ 𝓢 := ⟨fun _ => axiomD⟩
+instance [Entailment.HasAxiomFour 𝓢]   : Entailment.HasAxiomGeach ⟨0, 2, 1, 0⟩ 𝓢 := ⟨fun _ => axiomFour⟩
+instance [Entailment.HasAxiomFive 𝓢]   : Entailment.HasAxiomGeach ⟨1, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomFive⟩
+instance [Entailment.HasAxiomTc 𝓢]     : Entailment.HasAxiomGeach ⟨0, 1, 0, 0⟩ 𝓢 := ⟨fun _ => axiomTc⟩
+instance [Entailment.HasAxiomPoint2 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 1, 1⟩ 𝓢 := ⟨fun _ => axiomPoint2⟩
+
+end
+
+section
+
+variable [HasAxiomGeach g 𝓢]
+
+def axiomGeach : 𝓢 ⊢ ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := HasAxiomGeach.Geach _
+@[simp] lemma axiomGeach! : 𝓢 ⊢! ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := ⟨axiomGeach⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomGeach g Γ := ⟨fun _ ↦ FiniteContext.of axiomGeach⟩
+instance (Γ : Context F 𝓢) : HasAxiomGeach g Γ := ⟨fun _ ↦ Context.of axiomGeach⟩
+
+end
+
+
 section
 
 variable [BasicModalLogicalConnective F] [DecidableEq F]
