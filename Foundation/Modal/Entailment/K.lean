@@ -1,11 +1,11 @@
 import Foundation.Modal.Entailment.Basic
 
-namespace LO.Entailment
+namespace LO.Modal.Entailment
 
-open FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
-variable {𝓢 : S} [Entailment.Modal.K 𝓢] {n : ℕ} {φ ψ ξ χ: F}
+variable {𝓢 : S} [Entailment.K 𝓢] {n : ℕ} {φ ψ ξ χ: F}
 
 -- TODO: move to supplemental
 section
@@ -618,4 +618,4 @@ lemma nec! {Γ : Set F} (h : Γ *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! □φ := by
 
 end Context
 
-end LO.Entailment
+end LO.Modal.Entailment

@@ -3,19 +3,6 @@ import Foundation.Modal.Kripke.Rooted
 import Mathlib.Order.Interval.Finset.Defs
 import Mathlib.Order.Interval.Finset.Nat
 
-
-namespace LO.Modal.Axiom
-
-variable {F : Type*} [BasicModalLogicalConnective F]
-variable (φ ψ χ : F)
-
-protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
-protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
-
-end LO.Modal.Axiom
-
-
-
 namespace LO.Modal.Kripke
 
 abbrev natLT : Kripke.Frame where
@@ -127,7 +114,7 @@ section
 open Formula Formula.Kripke
 
 /-- Goldblatt, Exercise 8.1 (1) -/
-lemma natLT_validates_AxiomZ : natLT ⊧ (Axiom.Z (.atom 0)) := by
+lemma natLT_validates_AxiomZ : natLT ⊧ (Axioms.Z (.atom 0)) := by
   intro V x hx₁ hx₂ y lt_xy;
   obtain ⟨z, lt_xz, hz⟩ := Satisfies.dia_def.mp hx₂;
   rcases lt_trichotomy y z with (lt_yz | rfl | lt_zy);
@@ -168,7 +155,7 @@ lemma natLT_validates_AxiomZ : natLT ⊧ (Axiom.Z (.atom 0)) := by
     assumption;
 
 /-- Goldblatt, Exercise 8.9 -/
-lemma natLE_validates_AxiomDum : natLE ⊧ (Axiom.Dum (.atom 0)) := by
+lemma natLE_validates_AxiomDum : natLE ⊧ (Axioms.Dum (.atom 0)) := by
   intro V x hx₁ hx₂;
   obtain ⟨y, le_xy, hy⟩ := Satisfies.dia_def.mp hx₂;
   rcases lt_or_eq_of_le le_xy with (le_xy | rfl);

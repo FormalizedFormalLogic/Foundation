@@ -12,7 +12,7 @@ def Formula.goedelTranslate.letterless {φ : Formula ℕ} (hφ : φ.letterless) 
 
 namespace Logic
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.letterless) : φ ∈ Logic.Int ↔ φ ∈ Logic.Cl := by
   constructor;

@@ -10,7 +10,7 @@ open Kripke
 open Formula.Kripke
 open Formula (BoxdotTranslation)
 open Modal.Kripke
-open Entailment Entailment.FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 lemma provable_boxdotTranslated_Ver_of_Triv : (Hilbert.Triv) ⊢! φ → (Hilbert.Ver) ⊢! φᵇ := boxdotTranslated_of_dominate $ by
   intro φ hp;

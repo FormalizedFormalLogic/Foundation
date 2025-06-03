@@ -4,11 +4,9 @@ import Foundation.Modal.Entailment.GL
 
 namespace LO.Modal
 
-open Entailment
-
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 open Formula
-open Entailment
 open Hilbert
 open Hilbert.Deduction
 open Formula

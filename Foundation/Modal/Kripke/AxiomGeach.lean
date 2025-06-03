@@ -2,10 +2,9 @@ import Foundation.Modal.Kripke.Completeness
 import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Modal.Geachean
 
-namespace LO
+namespace LO.Modal
 
-
-section
+open LO.Modal.Entailment
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
 variable {𝓢 : S}
@@ -34,10 +33,6 @@ instance [Entailment.HasAxiomPoint2 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 1,
 
 end Entailment
 
-end
-
-
-namespace Modal
 
 namespace Kripke
 
@@ -50,6 +45,7 @@ instance whitepoint.instIsGeachean (g) : IsGeachean g _ whitepoint.Rel := ⟨by
 ⟩
 
 open Formula.Kripke
+
 
 protected abbrev FrameClass.multiGeachean (G : Set Geachean.Taple) : FrameClass := { F | (MultiGeachean G) F.Rel }
 
@@ -186,8 +182,8 @@ end definability
 
 section canonicality
 
-variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢]
+variable [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
 open Entailment

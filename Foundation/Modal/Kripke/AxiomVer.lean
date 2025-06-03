@@ -24,7 +24,7 @@ section canonicality
 open Entailment
 
 variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
 open Entailment

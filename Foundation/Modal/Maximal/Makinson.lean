@@ -20,7 +20,7 @@ class TrivFamily (L : Logic) : Prop where
 
 section
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : φ ∈ L) (hV : φ ∉ Logic.Ver) : ∃ ψ, ◇ψ ∈ L := by
   obtain ⟨ψ, ⟨Γ, rfl⟩, h⟩ := Hilbert.NNFormula.exists_CNF φ;
@@ -67,7 +67,7 @@ end
 
 section
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Formula
 open Propositional
 

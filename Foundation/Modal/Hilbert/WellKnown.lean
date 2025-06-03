@@ -243,12 +243,12 @@ class HasMk (H : Hilbert α) where
   p : α
   q : α
   ne_pq : p ≠ q := by trivial;
-  mem_Mk : Axioms.Modal.Mk (.atom p) (.atom q) ∈ H.axioms := by tauto;
+  mem_Mk : Axioms.Mk (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [H.HasMk] : Entailment.Modal.HasAxiomMk H where
+instance [H.HasMk] : Entailment.HasAxiomMk H where
   Mk φ ψ := by
     apply maxm;
-    use Axioms.Modal.Mk (.atom $ HasMk.p H) (.atom $ HasMk.q H);
+    use Axioms.Mk (.atom $ HasMk.p H) (.atom $ HasMk.q H);
     constructor;
     . exact HasMk.mem_Mk;
     . use (λ b => if b = (HasMk.q H) then ψ else if b = (HasMk.p H) then φ else (.atom b));
@@ -264,7 +264,7 @@ namespace Hilbert.KT
 
 instance : (Hilbert.KT).HasK where p := 0; q := 1;
 instance : (Hilbert.KT).HasT where p := 0
-instance : Entailment.Modal.KT (Hilbert.KT) where
+instance : Entailment.KT (Hilbert.KT) where
 
 end Hilbert.KT
 
@@ -276,7 +276,7 @@ namespace Hilbert.KD
 
 instance : (Hilbert.KD).HasK where p := 0; q := 1;
 instance : (Hilbert.KD).HasD where p := 0
-instance : Entailment.Modal.KD (Hilbert.KD) where
+instance : Entailment.KD (Hilbert.KD) where
 
 end Hilbert.KD
 
@@ -288,7 +288,7 @@ namespace Hilbert.KB
 
 instance : (Hilbert.KB).HasK where p := 0; q := 1;
 instance : (Hilbert.KB).HasB where p := 0
-instance : Entailment.Modal.KB (Hilbert.KB) where
+instance : Entailment.KB (Hilbert.KB) where
 
 end Hilbert.KB
 
@@ -301,7 +301,7 @@ namespace Hilbert.KDB
 instance : (Hilbert.KDB).HasK where p := 0; q := 1;
 instance : (Hilbert.KDB).HasD where p := 0
 instance : (Hilbert.KDB).HasB where p := 0
-instance : Entailment.Modal.KDB (Hilbert.KDB) where
+instance : Entailment.KDB (Hilbert.KDB) where
 
 end Hilbert.KDB
 
@@ -314,7 +314,7 @@ namespace Hilbert.KTB
 instance : (Hilbert.KTB).HasK where p := 0; q := 1;
 instance : (Hilbert.KTB).HasT where p := 0
 instance : (Hilbert.KTB).HasB where p := 0
-instance : Entailment.Modal.KTB (Hilbert.KTB) where
+instance : Entailment.KTB (Hilbert.KTB) where
 
 end Hilbert.KTB
 
@@ -326,7 +326,7 @@ namespace Hilbert.KM
 
 instance : (Hilbert.KM).HasK where p := 0; q := 1;
 instance : (Hilbert.KM).HasM where p := 0
-instance : Entailment.Modal.KM (Hilbert.KM) where
+instance : Entailment.KM (Hilbert.KM) where
 
 end Hilbert.KM
 
@@ -340,7 +340,7 @@ namespace Hilbert.K4
 
 instance : (Hilbert.K4).HasK where p := 0; q := 1;
 instance : (Hilbert.K4).HasFour where p := 0
-instance : Entailment.Modal.K4 (Hilbert.K4) where
+instance : Entailment.K4 (Hilbert.K4) where
 
 end Hilbert.K4
 
@@ -354,9 +354,9 @@ namespace Hilbert.K4Point1
 instance : (Hilbert.K4Point1).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Point1).HasFour where p := 0
 instance : (Hilbert.K4Point1).HasM where p := 0
-instance : Entailment.Modal.K4Point1 (Hilbert.K4Point1) where
+instance : Entailment.K4Point1 (Hilbert.K4Point1) where
 
-noncomputable instance {H : Hilbert _} [Hilbert.K4Point1 ⪯ H] : Entailment.Modal.K4Point1 H where
+noncomputable instance {H : Hilbert _} [Hilbert.K4Point1 ⪯ H] : Entailment.K4Point1 H where
   K _ _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
   Four _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
   M _ := Entailment.WeakerThan.pbl (𝓢 := Hilbert.K4Point1) (by simp) |>.some
@@ -374,7 +374,7 @@ namespace Hilbert.K4Point2
 instance : (Hilbert.K4Point2).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Point2).HasFour where p := 0
 instance : (Hilbert.K4Point2).HasWeakPoint2 where p := 0; q := 1;
-instance : Entailment.Modal.K4Point2 (Hilbert.K4Point2) where
+instance : Entailment.K4Point2 (Hilbert.K4Point2) where
 
 end Hilbert.K4Point2
 
@@ -387,7 +387,7 @@ namespace Hilbert.K4Point3
 instance : (Hilbert.K4Point3).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Point3).HasFour where p := 0
 instance : (Hilbert.K4Point3).HasWeakPoint3 where p := 0; q := 1;
-instance : Entailment.Modal.K4Point3 (Hilbert.K4Point3) where
+instance : Entailment.K4Point3 (Hilbert.K4Point3) where
 
 end Hilbert.K4Point3
 
@@ -401,7 +401,7 @@ instance : (Hilbert.KT4B).HasK where p := 0; q := 1;
 instance : (Hilbert.KT4B).HasT where p := 0
 instance : (Hilbert.KT4B).HasFour where p := 0
 instance : (Hilbert.KT4B).HasB where p := 0
-instance : Entailment.Modal.KT4B (Hilbert.KT4B) where
+instance : Entailment.KT4B (Hilbert.KT4B) where
 
 end Hilbert.KT4B
 
@@ -414,7 +414,7 @@ namespace Hilbert.K45
 instance : (Hilbert.K45).HasK where p := 0; q := 1;
 instance : (Hilbert.K45).HasFour where p := 0
 instance : (Hilbert.K45).HasFive where p := 0
-instance : Entailment.Modal.K45 (Hilbert.K45) where
+instance : Entailment.K45 (Hilbert.K45) where
 
 end Hilbert.K45
 
@@ -427,7 +427,7 @@ namespace Hilbert.KD4
 instance : (Hilbert.KD4).HasK where p := 0; q := 1;
 instance : (Hilbert.KD4).HasD where p := 0
 instance : (Hilbert.KD4).HasFour where p := 0
-instance : Entailment.Modal.KD4 (Hilbert.KD4) where
+instance : Entailment.KD4 (Hilbert.KD4) where
 
 end Hilbert.KD4
 
@@ -440,7 +440,7 @@ namespace Hilbert.KD5
 instance : (Hilbert.KD5).HasK where p := 0; q := 1;
 instance : (Hilbert.KD5).HasD where p := 0
 instance : (Hilbert.KD5).HasFive where p := 0
-instance : Entailment.Modal.KD5 (Hilbert.KD5) where
+instance : Entailment.KD5 (Hilbert.KD5) where
 
 end Hilbert.KD5
 
@@ -454,7 +454,7 @@ instance : (Hilbert.KD45).HasK where p := 0; q := 1;
 instance : (Hilbert.KD45).HasD where p := 0
 instance : (Hilbert.KD45).HasFour where p := 0
 instance : (Hilbert.KD45).HasFive where p := 0
-instance : Entailment.Modal.KD45 (Hilbert.KD45) where
+instance : Entailment.KD45 (Hilbert.KD45) where
 
 end Hilbert.KD45
 
@@ -468,7 +468,7 @@ namespace Hilbert.KB4
 instance : (Hilbert.KB4).HasK where p := 0; q := 1;
 instance : (Hilbert.KB4).HasB where p := 0
 instance : (Hilbert.KB4).HasFour where p := 0
-instance : Entailment.Modal.KB4 (Hilbert.KB4) where
+instance : Entailment.KB4 (Hilbert.KB4) where
 
 end Hilbert.KB4
 
@@ -481,7 +481,7 @@ namespace Hilbert.KB5
 instance : (Hilbert.KB5).HasK where p := 0; q := 1;
 instance : (Hilbert.KB5).HasB where p := 0
 instance : (Hilbert.KB5).HasFive where p := 0
-instance : Entailment.Modal.KB5 (Hilbert.KB5) where
+instance : Entailment.KB5 (Hilbert.KB5) where
 
 end Hilbert.KB5
 
@@ -494,7 +494,7 @@ namespace Hilbert.S4
 instance : (Hilbert.S4).HasK where p := 0; q := 1;
 instance : (Hilbert.S4).HasT where p := 0
 instance : (Hilbert.S4).HasFour where p := 0
-instance : Entailment.Modal.S4 (Hilbert.S4) where
+instance : Entailment.S4 (Hilbert.S4) where
 
 end Hilbert.S4
 
@@ -511,7 +511,7 @@ instance : (Hilbert.S4Point1).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Point1).HasT where p := 0
 instance : (Hilbert.S4Point1).HasFour where p := 0
 instance : (Hilbert.S4Point1).HasM where p := 0
-instance : Entailment.Modal.S4Point1 (Hilbert.S4Point1) where
+instance : Entailment.S4Point1 (Hilbert.S4Point1) where
 
 end Hilbert.S4Point1
 
@@ -527,7 +527,7 @@ instance : (Hilbert.S4Point2).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Point2).HasT where p := 0
 instance : (Hilbert.S4Point2).HasFour where p := 0
 instance : (Hilbert.S4Point2).HasPoint2 where p := 0
-instance : Entailment.Modal.S4Point2 (Hilbert.S4Point2) where
+instance : Entailment.S4Point2 (Hilbert.S4Point2) where
 
 end Hilbert.S4Point2
 
@@ -541,7 +541,7 @@ instance : (Hilbert.S4Point3).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Point3).HasT where p := 0
 instance : (Hilbert.S4Point3).HasFour where p := 0
 instance : (Hilbert.S4Point3).HasPoint3 where p := 0; q := 1;
-instance : Entailment.Modal.S4Point3 (Hilbert.S4Point3) where
+instance : Entailment.S4Point3 (Hilbert.S4Point3) where
 
 end Hilbert.S4Point3
 
@@ -553,7 +553,7 @@ namespace Hilbert.K5
 
 instance : (Hilbert.K5).HasK where p := 0; q := 1;
 instance : (Hilbert.K5).HasFive where p := 0
-instance : Entailment.Modal.K5 (Hilbert.K5) where
+instance : Entailment.K5 (Hilbert.K5) where
 
 end Hilbert.K5
 
@@ -565,7 +565,7 @@ namespace Hilbert.S5
 instance : (Hilbert.S5).HasK where p := 0; q := 1;
 instance : (Hilbert.S5).HasT where p := 0
 instance : (Hilbert.S5).HasFive where p := 0
-instance : Entailment.Modal.S5 (Hilbert.S5) where
+instance : Entailment.S5 (Hilbert.S5) where
 
 end Hilbert.S5
 
@@ -577,7 +577,7 @@ namespace Hilbert.GL
 
 instance : (Hilbert.GL).HasK where p := 0; q := 1;
 instance : (Hilbert.GL).HasL where p := 0
-instance : Entailment.Modal.GL (Hilbert.GL) where
+instance : Entailment.GL (Hilbert.GL) where
 
 end Hilbert.GL
 
@@ -590,7 +590,7 @@ namespace Hilbert.GLPoint3
 instance : (Hilbert.GLPoint3).HasK where p := 0; q := 1;
 instance : (Hilbert.GLPoint3).HasL where p := 0
 instance : (Hilbert.GLPoint3).HasWeakPoint3 where p := 0; q := 1;
-instance : Entailment.Modal.GLPoint3 (Hilbert.GLPoint3) where
+instance : Entailment.GLPoint3 (Hilbert.GLPoint3) where
 
 end Hilbert.GLPoint3
 
@@ -613,7 +613,7 @@ namespace Hilbert.Grz
 
 instance : (Hilbert.Grz).HasK where p := 0; q := 1;
 instance : (Hilbert.Grz).HasGrz where p := 0
-instance : Entailment.Modal.Grz (Hilbert.Grz) where
+instance : Entailment.Grz (Hilbert.Grz) where
 
 end Hilbert.Grz
 
@@ -629,7 +629,7 @@ namespace Hilbert.GrzPoint2
 instance : (Hilbert.GrzPoint2).HasK where p := 0; q := 1;
 instance : (Hilbert.GrzPoint2).HasGrz where p := 0
 instance : (Hilbert.GrzPoint2).HasPoint2 where p := 0
-instance : Entailment.Modal.Grz (Hilbert.GrzPoint2) where
+instance : Entailment.Grz (Hilbert.GrzPoint2) where
 
 end Hilbert.GrzPoint2
 
@@ -642,7 +642,7 @@ namespace Hilbert.GrzPoint3
 instance : (Hilbert.GrzPoint3).HasK where p := 0; q := 1;
 instance : (Hilbert.GrzPoint3).HasGrz where p := 0
 instance : (Hilbert.GrzPoint3).HasPoint3 where p := 0; q := 1;
-instance : Entailment.Modal.Grz (Hilbert.GrzPoint3) where
+instance : Entailment.Grz (Hilbert.GrzPoint3) where
 
 end Hilbert.GrzPoint3
 
@@ -654,7 +654,7 @@ namespace Hilbert.Ver
 
 instance : (Hilbert.Ver).HasK where p := 0; q := 1;
 instance : (Hilbert.Ver).HasVer where p := 0
-instance : Entailment.Modal.Ver (Hilbert.Ver) where
+instance : Entailment.Ver (Hilbert.Ver) where
 
 end Hilbert.Ver
 
@@ -669,7 +669,7 @@ namespace Hilbert.Triv
 instance : (Hilbert.Triv).HasK where p := 0; q := 1;
 instance : (Hilbert.Triv).HasT where p := 0
 instance : (Hilbert.Triv).HasTc where p := 0
-instance : Entailment.Modal.Triv (Hilbert.Triv) where
+instance : Entailment.Triv (Hilbert.Triv) where
 
 end Hilbert.Triv
 
@@ -683,7 +683,7 @@ namespace Hilbert.KTc
 
 instance : (Hilbert.KTc).HasK where p := 0; q := 1;
 instance : (Hilbert.KTc).HasTc where p := 0
-instance : Entailment.Modal.KTc (Hilbert.KTc) where
+instance : Entailment.KTc (Hilbert.KTc) where
 
 end Hilbert.KTc
 
@@ -698,12 +698,12 @@ instance : (Hilbert.KD4Point3Z).HasD where p := 0
 instance : (Hilbert.KD4Point3Z).HasFour where p := 0
 instance : (Hilbert.KD4Point3Z).HasWeakPoint3 where p := 0; q := 1;
 instance : (Hilbert.KD4Point3Z).HasZ where p := 0
-instance : Entailment.Modal.KD4Point3Z (Hilbert.KD4Point3Z) where
+instance : Entailment.KD4Point3Z (Hilbert.KD4Point3Z) where
 
 end Hilbert.KD4Point3Z
 
 
-protected abbrev Hilbert.KTMk : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Modal.Mk (.atom 0) (.atom 1)}⟩
+protected abbrev Hilbert.KTMk : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Mk (.atom 0) (.atom 1)}⟩
 protected abbrev Logic.KTMk := Hilbert.KTMk.logic
 
 namespace Hilbert.KTMk
@@ -711,7 +711,7 @@ namespace Hilbert.KTMk
 instance : (Hilbert.KTMk).HasK where p := 0; q := 1;
 instance : (Hilbert.KTMk).HasT where p := 0
 instance : (Hilbert.KTMk).HasMk where p := 0; q := 1
-instance : Entailment.Modal.KTMk (Hilbert.KTMk) where
+instance : Entailment.KTMk (Hilbert.KTMk) where
 
 end Hilbert.KTMk
 

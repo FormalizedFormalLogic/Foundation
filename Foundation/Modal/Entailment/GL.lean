@@ -1,11 +1,11 @@
 import Foundation.Modal.Entailment.K4
 
-namespace LO.Entailment
+namespace LO.Modal.Entailment
 
-open FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.Modal.GL 𝓢]
+variable {𝓢 : S} [Entailment.GL 𝓢]
 
 def goedel2 : 𝓢 ⊢ (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := by
   apply ENN_of_E;
@@ -34,7 +34,7 @@ protected def axiomFour : 𝓢 ⊢ Axioms.Four φ := by
   have : 𝓢 ⊢ φ ➝ (□⊡φ ➝ ⊡φ) := C_trans this (CCC_of_C_left BoxBoxdot_BoxDotbox);
   exact C_trans (C_trans (implyBoxDistribute' this) axiomL) (implyBoxDistribute' $ and₂);
 instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ GL.axiomFour⟩
-instance : Entailment.Modal.K4 𝓢 where
+instance : Entailment.K4 𝓢 where
 
 protected def axiomH : 𝓢 ⊢ Axioms.H φ := C_trans (implyBoxDistribute' and₁) axiomL
 instance : HasAxiomH 𝓢 := ⟨fun _ ↦ GL.axiomH⟩
@@ -93,4 +93,4 @@ lemma imply_box_box_of_imply_boxdot_axiomT! (h : 𝓢 ⊢! ⊡φ ➝ (□ψ ➝ 
 lemma imply_box_box_of_imply_boxdot_plain! (h : 𝓢 ⊢! ⊡φ ➝ ψ) : 𝓢 ⊢! □φ ➝ □ψ := by
   exact imply_box_box_of_imply_boxdot_axiomT! $ imply_boxdot_axiomT_of_imply_boxdot_boxdot! $ imply_boxdot_boxdot_of_imply_boxdot_plain! h
 
-end LO.Entailment
+end LO.Modal.Entailment
