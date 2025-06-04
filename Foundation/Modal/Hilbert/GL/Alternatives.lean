@@ -3,18 +3,18 @@ import Foundation.Modal.Entailment.GL
 import Mathlib.Tactic.TFAE
 
 
-namespace LO.Entailment
+namespace LO.Modal.Entailment
 
-open FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
 variable {𝓢 : S}
 
-protected class Modal.K4Loeb (𝓢 : S) extends Entailment.Modal.K4 𝓢, LoebRule 𝓢
+protected class K4Loeb (𝓢 : S) extends Entailment.K4 𝓢, LoebRule 𝓢
 
 namespace K4Loeb
 
-variable [Entailment.Modal.K4Loeb 𝓢]
+variable [Entailment.K4Loeb 𝓢]
 
 protected def axiomL : 𝓢 ⊢ Axioms.L φ := by
   dsimp [Axioms.L];
@@ -31,11 +31,11 @@ instance : HasAxiomL 𝓢 := ⟨fun _ ↦ K4Loeb.axiomL⟩
 end K4Loeb
 
 
-protected class Modal.K4Henkin (𝓢 : S) extends Entailment.Modal.K4 𝓢, HenkinRule 𝓢
+protected class K4Henkin (𝓢 : S) extends Entailment.K4 𝓢, HenkinRule 𝓢
 
 namespace K4Henkin
 
-variable [Entailment.Modal.K4Henkin 𝓢]
+variable [Entailment.K4Henkin 𝓢]
 
 instance : LoebRule 𝓢 where
   loeb h := h ⨀ (henkin $ E_intro (axiomK' $ nec h) axiomFour);
@@ -43,18 +43,18 @@ instance : LoebRule 𝓢 where
 end K4Henkin
 
 
-protected class Modal.K4H (𝓢 : S) extends Entailment.Modal.K4 𝓢, HasAxiomH 𝓢
+protected class K4H (𝓢 : S) extends Entailment.K4 𝓢, HasAxiomH 𝓢
 
 namespace K4H
 
-variable [Entailment.Modal.K4H 𝓢]
+variable [Entailment.K4H 𝓢]
 
 instance : HenkinRule 𝓢 where
   henkin h := (K_left h) ⨀ (axiomH ⨀ nec h);
 
 end K4H
 
-end LO.Entailment
+end LO.Modal.Entailment
 
 
 
@@ -62,7 +62,7 @@ namespace LO.Modal
 
 namespace Hilbert
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {α : Type*}
 
@@ -299,17 +299,17 @@ protected abbrev K4H : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.F
 instance : (Hilbert.K4H).HasK where p := 0; q := 1;
 instance : (Hilbert.K4H).HasFour where p := 0
 instance : (Hilbert.K4H).HasH where p := 0
-instance : Entailment.Modal.K4H (Hilbert.K4H) where
+instance : Entailment.K4H (Hilbert.K4H) where
 
 protected abbrev K4Loeb : Hilbert.WithLoebRule ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
 instance : (Hilbert.K4Loeb).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Loeb).HasFour where p := 0
-instance : Entailment.Modal.K4Loeb (Hilbert.K4Loeb) where
+instance : Entailment.K4Loeb (Hilbert.K4Loeb) where
 
 protected abbrev K4Henkin : Hilbert.WithHenkinRule ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
 instance : (Hilbert.K4Henkin).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Henkin).HasFour where p := 0
-instance : Entailment.Modal.K4Henkin (Hilbert.K4Henkin) where
+instance : Entailment.K4Henkin (Hilbert.K4Henkin) where
 
 theorem provable_GL_TFAE : [
     Hilbert.GL ⊢! φ,

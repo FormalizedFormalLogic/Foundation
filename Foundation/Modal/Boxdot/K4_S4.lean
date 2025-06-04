@@ -5,7 +5,7 @@ import Foundation.Modal.Kripke.Logic.S4
 
 namespace LO.Modal
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Formula
 open Hilbert.Deduction
 

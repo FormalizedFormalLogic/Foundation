@@ -8,8 +8,9 @@ namespace NNFormula
 
 open
   NNFormula
-  Entailment
-  Entailment.FiniteContext
+  LO.Entailment
+  LO.Entailment.FiniteContext
+  LO.Modal.Entailment
 
 lemma iff_neg {φ : NNFormula _} : Hilbert.K ⊢! ∼(φ.toFormula) ⭤ (∼φ).toFormula := by
   induction φ using NNFormula.rec' with

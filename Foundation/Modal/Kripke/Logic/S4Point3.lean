@@ -9,7 +9,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open Geachean
+open GeachConfluent
 
 abbrev Kripke.FrameClass.connected_preorder : FrameClass := { F | IsPreorder _ F ∧ IsConnected _ F }
 abbrev Kripke.FrameClass.finite_connected_preorder : FrameClass := { F | F.IsFinite ∧ IsPreorder _ F ∧ IsConnected _ F }

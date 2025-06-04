@@ -5,7 +5,7 @@ import Foundation.Modal.Logic.Basic
 
 namespace LO.Modal
 
-open Entailment
+open LO.Entailment LO.Modal.Entailment
 
 variable {α : Type*}
 

@@ -8,7 +8,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open Geachean
+open GeachConfluent
 
 abbrev Kripke.FrameClass.trans_weakConnected : FrameClass := { F | IsTrans _ F ∧ IsWeakConnected _ F }
 

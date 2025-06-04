@@ -157,9 +157,9 @@ lemma inl_satisfies_boxdot_iff [IsTrans _ M.Rel] : r ⊧ (φᵇ) ↔ Satisfies (
   | himp φ ψ ihA ihB =>
     replace ihA := @ihA i;
     replace ihB := @ihB i;
-    simp_all [Satisfies, Formula.BoxdotTranslation];
+    simp_all [Satisfies, Formula.boxdotTranslate];
   | hbox φ ih =>
-    dsimp [Formula.BoxdotTranslation];
+    dsimp [Formula.boxdotTranslate];
     constructor;
     . intro h;
       obtain ⟨h₁, h₂⟩ := Satisfies.and_def.mp h;
