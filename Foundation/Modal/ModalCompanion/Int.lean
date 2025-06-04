@@ -6,7 +6,7 @@ import Foundation.Propositional.Logic.WellKnown
 
 namespace LO.Modal
 
-open Entailment FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 open Propositional.Formula (goedelTranslate)
 open Modal

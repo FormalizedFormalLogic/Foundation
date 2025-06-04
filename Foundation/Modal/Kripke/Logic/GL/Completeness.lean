@@ -3,12 +3,11 @@ import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Logic.GL.Soundness
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Logic.K4
-import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal
 
 open Kripke
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Formula
 open Entailment Entailment.FiniteContext
 open Formula.Kripke

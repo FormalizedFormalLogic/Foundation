@@ -3,6 +3,8 @@ import Foundation.Modal.Hilbert.K
 
 namespace LO.Modal
 
+open LO.Entailment LO.Modal.Entailment
+
 variable {L L₀ L₁ L₂ L₃ : Logic}
 
 namespace Logic

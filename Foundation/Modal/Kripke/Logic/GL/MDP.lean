@@ -2,8 +2,8 @@ import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
 
 namespace LO.Modal
 
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Kripke
-open Entailment
 open Formula.Kripke
 
 namespace Hilbert.GL

@@ -59,7 +59,7 @@ end definability
 section canonicality
 
 variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
 open Entailment
@@ -71,7 +71,7 @@ open MaximalConsistentTableau
 namespace Canonical
 
 open Classical in
-instance [Entailment.HasAxiomT 𝓢] [Entailment.Modal.HasAxiomMk 𝓢] : SatisfiesMakinsonCondition _ (canonicalFrame 𝓢).Rel := ⟨by
+instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : SatisfiesMakinsonCondition _ (canonicalFrame 𝓢).Rel := ⟨by
   sorry;
   /-
   rintro x;

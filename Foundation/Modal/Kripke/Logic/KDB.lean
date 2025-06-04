@@ -8,7 +8,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open Geachean
+open GeachConfluent
 
 abbrev Kripke.FrameClass.serial_symm : FrameClass := { F | IsSerial _ F ∧ IsSymm _ F }
 

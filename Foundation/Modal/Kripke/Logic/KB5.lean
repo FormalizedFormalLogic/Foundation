@@ -6,7 +6,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open Geachean
+open GeachConfluent
 
 abbrev Kripke.FrameClass.symm_eucl : FrameClass := { F | IsSymm _ F ∧ IsEuclidean _ F }
 
