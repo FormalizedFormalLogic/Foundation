@@ -37,7 +37,6 @@ lemma Logic.GL_ssubset_S : Logic.GL ⊂ Logic.S := by
     constructor;
     . exact Logic.S.mem_axiomT;
     . exact Logic.GL.unprovable_AxiomT;
-instance : ProperSublogic Logic.GL Logic.S := ⟨Logic.GL_ssubset_S⟩
 
 
 section

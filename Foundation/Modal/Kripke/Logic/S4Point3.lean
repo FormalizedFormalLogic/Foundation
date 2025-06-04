@@ -122,8 +122,8 @@ open Kripke
 lemma S4Point3.Kripke.connected_preorder : Logic.S4Point3 = FrameClass.connected_preorder.logic := eq_hilbert_logic_frameClass_logic
 lemma S4Point3.Kripke.finite_connected_preorder : Logic.S4Point3 = FrameClass.finite_connected_preorder.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.S4Point2 Logic.S4Point3 := ⟨
-  by
+@[simp]
+theorem S4Point3.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.S4Point3 := by
   constructor;
   . rw [S4Point2.Kripke.confluent_preorder, S4Point3.Kripke.connected_preorder];
     rintro φ hφ F ⟨_, _⟩;
@@ -162,11 +162,15 @@ instance : ProperSublogic Logic.S4Point2 Logic.S4Point3 := ⟨
           use 2;
           simp [Satisfies, Semantics.Realize, M];
           constructor <;> omega;
-⟩
 
-instance : ProperSublogic Logic.S4 Logic.S4Point3 := ProperSublogic.trans Logic.S4 Logic.S4Point2 Logic.S4Point3
+@[simp]
+lemma S4Point3.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4Point3 := by
+  trans Logic.S4Point2;
+  . simp;
+  . simp;
 
-instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
+@[simp]
+theorem S4Point3.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.S4Point3 := by
   constructor;
   . rw [K4Point3.Kripke.trans_weakConnected, S4Point3.Kripke.connected_preorder];
     rintro φ hφ F ⟨_, _⟩;
@@ -191,7 +195,6 @@ instance : ProperSublogic Logic.K4Point3 Logic.S4Point3 := ⟨by
         use 1;
         refine ⟨?_, ?_, ⟨1, ?_, ?_⟩⟩;
         repeat omega;
-⟩
 
 end Logic
 

@@ -41,7 +41,8 @@ open Kripke
 
 lemma KDB.Kripke.serial_symm : Logic.KDB = FrameClass.serial_symm.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KD Logic.KDB := ⟨by
+@[simp]
+theorem KDB.proper_extension_of_KD : Logic.KD ⊂ Logic.KDB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
@@ -62,9 +63,9 @@ instance : ProperSublogic Logic.KD Logic.KDB := ⟨by
       . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [M, Semantics.Realize, Satisfies];
         use 1;
         constructor <;> omega;
-⟩
 
-instance : ProperSublogic Logic.KB Logic.KDB := ⟨by
+@[simp]
+theorem KDB.proper_extension_of_KB : Logic.KB ⊂ Logic.KDB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by
@@ -78,7 +79,6 @@ instance : ProperSublogic Logic.KB Logic.KDB := ⟨by
       constructor;
       . refine ⟨by tauto⟩;
       . simp [Semantics.Realize, Satisfies];
-⟩
 
 end Logic
 
