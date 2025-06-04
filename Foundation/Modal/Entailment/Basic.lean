@@ -610,9 +610,8 @@ instance [Entailment.S4 𝓢] : Entailment.K4 𝓢 where
 instance [Entailment.S4 𝓢] : Entailment.KT 𝓢 where
 
 protected class S4Point1 extends Entailment.S4 𝓢, HasAxiomM 𝓢
-
 protected class S4Point2 extends Entailment.S4 𝓢, HasAxiomPoint2 𝓢
-
+protected class S4Point2Point1 extends Entailment.S4 𝓢, HasAxiomM 𝓢, HasAxiomPoint2 𝓢
 protected class S4Point3 extends Entailment.S4 𝓢, HasAxiomPoint3 𝓢
 
 protected class S5 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢

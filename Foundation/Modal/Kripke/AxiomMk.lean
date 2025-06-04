@@ -26,7 +26,7 @@ section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_axiomMk_of_makinsonCondition (h : MakinsonCondition F.Rel) : F ⊧ (Axioms.Modal.Mk (.atom 0) (.atom 1)) := by
+lemma validate_axiomMk_of_makinsonCondition (h : MakinsonCondition F.Rel) : F ⊧ (Axioms.Mk (.atom 0) (.atom 1)) := by
   intro V x hx;
   replace ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
   obtain ⟨y, Rxy, Ryx, hz⟩ := @h x;
@@ -45,7 +45,7 @@ lemma validate_axiomMk_of_makinsonCondition (h : MakinsonCondition F.Rel) : F �
     . apply Satisfies.dia_def.mpr;
       use x;
 
-lemma validate_axiomMk_of_satisfiesMakinsonCondition [SatisfiesMakinsonCondition _ F.Rel] : F ⊧ (Axioms.Modal.Mk (.atom 0) (.atom 1)) :=
+lemma validate_axiomMk_of_satisfiesMakinsonCondition [SatisfiesMakinsonCondition _ F.Rel] : F ⊧ (Axioms.Mk (.atom 0) (.atom 1)) :=
   validate_axiomMk_of_makinsonCondition SatisfiesMakinsonCondition.mkCondition
 
 instance : SatisfiesMakinsonCondition _ whitepoint := ⟨by
@@ -62,9 +62,7 @@ variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
-open Entailment
-     Entailment.FiniteContext
-open Entailment.Modal
+open LO.Entailment Entailment.FiniteContext LO.Modal.Entailment
 open canonicalModel
 open MaximalConsistentTableau
 

@@ -28,7 +28,7 @@ instance Kripke.canonical : Canonical (Hilbert.S4Point1) Kripke.FrameClass.preor
   apply Set.mem_setOf_eq.mpr;
   constructor;
   . infer_instance;
-  . apply Canonical.satisfiesMcKinseyCondition;
+  . infer_instance;
 ⟩
 
 instance Kripke.complete : Complete (Hilbert.S4Point1) Kripke.FrameClass.preorder_mckinsey := inferInstance
