@@ -1,14 +1,12 @@
 import Foundation.Modal.Logic.Extension
-import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Logic.GL.Independency
-import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal
 
 open Logic
 
 protected abbrev Logic.Dz := sumQuasiNormal Logic.GL {∼□⊥, □(□(.atom 0) ⋎ □(.atom 1)) ➝ □(.atom 0) ⋎ □(.atom 1)}
-instance : Logic.Dz.QuasiNormal where
+instance : Logic.Dz.IsQuasiNormal where
   subset_K := by
     intro φ hφ;
     apply Logic.sumQuasiNormal.mem₁;
