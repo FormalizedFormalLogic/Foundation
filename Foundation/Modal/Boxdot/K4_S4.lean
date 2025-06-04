@@ -1,10 +1,11 @@
 import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Entailment.S4
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.Logic.K4
+import Foundation.Modal.Kripke.Logic.S4
 
 namespace LO.Modal
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Formula
 open Hilbert.Deduction
 

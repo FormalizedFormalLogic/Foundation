@@ -1,8 +1,9 @@
 import Foundation.Modal.Kripke.Basic
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Entailment.K4
-import Foundation.Modal.Kripke.Hilbert.K
-import Foundation.Modal.Kripke.Hilbert.K4
+import Foundation.Modal.Kripke.Logic.K
+import Foundation.Modal.Kripke.Logic.K4
 import Foundation.Modal.Kripke.Completeness
 
 
@@ -259,7 +260,7 @@ end definability
 section canonicality
 
 variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
 open Entailment

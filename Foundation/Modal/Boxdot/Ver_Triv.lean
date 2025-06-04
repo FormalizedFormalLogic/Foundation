@@ -1,6 +1,6 @@
 import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Boxdot.GL_Grz
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.Logic.Triv
+import Foundation.Modal.Kripke.Logic.Ver
 
 namespace LO.Modal
 
@@ -8,15 +8,15 @@ namespace Hilbert
 
 open Kripke
 open Formula.Kripke
-open Formula (BoxdotTranslation)
+open Formula (boxdotTranslate)
 open Modal.Kripke
-open Entailment Entailment.FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 lemma provable_boxdotTranslated_Ver_of_Triv : (Hilbert.Triv) ⊢! φ → (Hilbert.Ver) ⊢! φᵇ := boxdotTranslated_of_dominate $ by
   intro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
-  . simp only [BoxdotTranslation, axiomVer!, and₁!];
+  . simp only [boxdotTranslate, axiomVer!, and₁!];
   . apply deduct'!;
     apply K!_intro <;> simp;
 

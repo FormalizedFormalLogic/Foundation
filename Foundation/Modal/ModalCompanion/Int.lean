@@ -1,14 +1,12 @@
 import Foundation.Modal.Boxdot.GL_Grz
 import Foundation.Modal.Logic.Extension
-import Foundation.Modal.Logic.Sublogic.Grz
-import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.ModalCompanion.Basic
 import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Logic.WellKnown
 
 namespace LO.Modal
 
-open Entailment FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 open Propositional.Formula (goedelTranslate)
 open Modal
@@ -50,7 +48,7 @@ instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
     (IC := Propositional.Kripke.FrameClass.all)
     (MC := Modal.Kripke.FrameClass.preorder)
     (by rw [Logic.Int.Kripke.eq_all])
-    (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic])
+    (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.Kripke.preorder])
     (by simp; intro F; infer_instance;);
 
 end S4
@@ -61,7 +59,7 @@ section Grz
 
 lemma Logic.gGrz_of_Int : φ ∈ Logic.Int → φᵍ ∈ Logic.Grz := by
   intro h;
-  exact S4_ssubset_Grz.1 $ Logic.gS4_of_Int h;
+  apply Sublogic.subset $ Logic.gS4_of_Int h;
 
 lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
   ext φ;
@@ -82,7 +80,7 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
   . intro hφ;
     induction hφ with
     | mem₁ h =>
-      apply S4_ssubset_Grz.1;
+      apply Sublogic.subset (L₁ := Logic.S4) (L₂ := Logic.Grz);
       rwa [Logic.S4.is_smallestMC_of_Int]
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;
@@ -96,7 +94,7 @@ instance modalCompanion_Int_Grz : ModalCompanion Logic.Int Logic.Grz := by
     (IC := Propositional.Kripke.FrameClass.finite_all)
     (MC := FrameClass.finite_partial_order)
     (by rw [Logic.Int.Kripke.eq_all_finite])
-    (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.eq_ReflexiveTransitiveAntiSymmetricFiniteKripkeFrameClass_Logic])
+    (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.Kripke.finite_partial_order])
     (by rintro F ⟨⟩; refine ⟨by tauto, inferInstance⟩);
 
 end Grz
@@ -109,13 +107,13 @@ lemma Logic.iff_provable_Cl_provable_dia_gS4 : (φ ∈ Logic.Cl) ↔ (◇φᵍ �
   . intro h;
     suffices □◇φᵍ ∈ Logic.S4 by exact axiomT'! this;
     have := modalCompanion_Int_S4.companion.mp $ Hilbert.glivenko.mpr h;
-    rw [Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic] at this ⊢;
+    rw [Logic.S4.Kripke.preorder] at this ⊢;
     exact this;
   . intro h;
     apply Hilbert.glivenko.mp;
     apply modalCompanion_Int_S4.companion.mpr;
     have : □◇φᵍ ∈ Logic.S4 := nec! h;
-    rw [Logic.S4.eq_ReflexiveTransitiveKripkeFrameClass_Logic] at this ⊢;
+    rw [Logic.S4.Kripke.preorder] at this ⊢;
     exact this;
 
 end glivenko

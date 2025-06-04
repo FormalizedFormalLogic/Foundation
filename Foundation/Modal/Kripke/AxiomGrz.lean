@@ -1,7 +1,8 @@
 import Foundation.Vorspiel.Relation.Supplemental
 import Foundation.Vorspiel.Relation.WCWF
-import Foundation.Modal.Kripke.Hilbert.K
-import Foundation.Modal.Kripke.Hilbert.Geach
+import Foundation.Modal.Kripke.Logic.K
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
@@ -218,3 +219,5 @@ protected instance FrameClass.finite_strict_preorder.definability
 end Kripke
 
 end LO.Modal
+
+#min_imports

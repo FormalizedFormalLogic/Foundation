@@ -1,6 +1,6 @@
 import Foundation.Modal.LogicSymbol
 
-namespace LO.Axioms
+namespace LO.Modal.Axioms
 
 variable {F : Type*} [BasicModalLogicalConnective F]
 variable (φ ψ χ : F)
@@ -81,4 +81,21 @@ protected abbrev H := □(□φ ⭤ φ) ➝ □φ
 
 protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
 
-end LO.Axioms
+protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
+
+protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
+
+
+protected structure Geach.Taple where
+  i : ℕ
+  j : ℕ
+  m : ℕ
+  n : ℕ
+
+/--
+  Axiom for Geach confluency.
+-/
+protected abbrev Geach (g : Geach.Taple) (φ : F) := ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ)
+
+
+end LO.Modal.Axioms

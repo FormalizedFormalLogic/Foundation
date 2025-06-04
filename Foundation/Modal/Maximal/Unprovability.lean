@@ -1,17 +1,17 @@
 import Foundation.Modal.Maximal.Basic
 import Foundation.Propositional.ClassicalSemantics.Hilbert
+import Foundation.Modal.Entailment.GL
 
 namespace LO.Modal
 
-open Entailment
-
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
-
+open Formula
 open Hilbert
 open Hilbert.Deduction
 open Formula
 
-namespace Hilbert
+namespace Logic
 
 
 namespace Triv
@@ -51,12 +51,23 @@ lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
 
 end K4
 
+instance : ProperSublogic Logic.K4 Logic.GL := ⟨by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.K4 ⊢! φ by tauto;
+    use (Axioms.L (.atom 0));
+    constructor;
+    . exact axiomL!;
+    . exact K4.unprovable_AxiomL;
+⟩
+
+
 
 namespace GL
 
 lemma provable_verTranslated_Cl : (Hilbert.GL) ⊢! φ → (Hilbert.Cl) ⊢! φⱽ.toPropFormula := by
   intro h;
-  induction h using Deduction.rec! with
+  induction h using Hilbert.Deduction.rec! with
     | maxm a =>
       rcases a with ⟨_, (⟨_, _, rfl⟩ | ⟨_, rfl⟩), ⟨_, rfl⟩⟩
       <;> simp [verTranslate, Formula.toPropFormula];
@@ -78,7 +89,6 @@ instance : Entailment.Consistent (Hilbert.GL) := by
 
 end GL
 
-
 theorem not_S4_weakerThan_GL : ¬(Hilbert.S4) ⪯ (Hilbert.GL) := by
   apply Entailment.not_weakerThan_iff.mpr;
   use (Axioms.T (atom 0));
@@ -86,7 +96,7 @@ theorem not_S4_weakerThan_GL : ¬(Hilbert.S4) ⪯ (Hilbert.GL) := by
   . exact axiomT!;
   . exact GL.unprovable_AxiomT;
 
-end Hilbert
+end Logic
 
 
 end LO.Modal

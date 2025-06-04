@@ -1,6 +1,7 @@
 import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
+import Foundation.Modal.Logic.Basic
 
 namespace LO.Modal
 
@@ -147,6 +148,8 @@ lemma multibox_dn : x ⊧ □^[n](∼∼φ) ↔ x ⊧ □^[n]φ := by
     . intro h y Rxy;
       exact ih.mpr $ (h y Rxy);
 
+lemma box_dn : x ⊧ □(∼∼φ) ↔ x ⊧ □φ := multibox_dn (n := 1)
+
 lemma multidia_dn : x ⊧ ◇^[n](∼∼φ) ↔ x ⊧ ◇^[n]φ := by
   induction n generalizing x with
   | zero => simp;
@@ -167,6 +170,8 @@ lemma multidia_dn : x ⊧ ◇^[n](∼∼φ) ↔ x ⊧ ◇^[n]φ := by
       constructor;
       . exact Rxy;
       . exact ih.mpr h;
+
+lemma dia_dn : x ⊧ ◇(∼∼φ) ↔ x ⊧ ◇φ := multidia_dn (n := 1)
 
 lemma multibox_def : x ⊧ □^[n]φ ↔ ∀ {y}, x ≺^[n] y → y ⊧ φ := by
   induction n generalizing x with
@@ -521,6 +526,13 @@ end Formula.Kripke
 
 
 namespace Kripke
+
+section
+
+abbrev FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
+
+end
+
 
 section
 

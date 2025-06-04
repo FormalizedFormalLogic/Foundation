@@ -2,3 +2,6 @@
 
 # VSCode
 .vscode/settings.json
+
+# import graph
+import_graph.pdf
