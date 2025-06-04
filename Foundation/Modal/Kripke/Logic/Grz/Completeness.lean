@@ -301,7 +301,6 @@ theorem Grz.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Grz := by
       . refine {refl := by tauto, trans := by tauto};
       . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 
-
 theorem Grz.proper_extension_of_S4Point1 : Logic.S4Point1 ⊂ Logic.Grz := by
   constructor;
   . rw [S4Point1.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
