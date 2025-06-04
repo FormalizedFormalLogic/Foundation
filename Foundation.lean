@@ -101,6 +101,8 @@ import Foundation.Modal.Logic.Extension
 
 import Foundation.Modal.Logic.S.Consistent
 
+import Foundation.Modal.Logic.Dz.Basic
+
 import Foundation.Modal.Maximal.Makinson
 
 -- Arithmetization
