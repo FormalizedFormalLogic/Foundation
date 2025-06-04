@@ -41,7 +41,7 @@ open Kripke
 
 lemma KB.Kripke.symm : Logic.KB = FrameClass.symm.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.K Logic.KB := ⟨by
+theorem KB.proper_extension_of_K : Logic.K ⊂ Logic.KB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
@@ -58,7 +58,6 @@ instance : ProperSublogic Logic.K Logic.KB := ⟨by
       . suffices ∃ (x : M.World), (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [Semantics.Realize, Satisfies, M];
         use 1;
         trivial;
-⟩
 
 end Logic
 

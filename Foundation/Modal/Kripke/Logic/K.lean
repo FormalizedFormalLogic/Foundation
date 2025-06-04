@@ -41,13 +41,12 @@ namespace Logic
 lemma K.Kripke.all : Logic.K = FrameClass.all.logic := eq_hilbert_logic_frameClass_logic
 lemma K.Kripke.finite_all : Logic.K = FrameClass.finite_all.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.Empty Logic.K := ⟨by
+theorem K.proper_extension_of_Empty : Logic.Empty ⊂ Logic.K := by
   constructor;
   . simp;
   . suffices ∃ φ, Hilbert.K ⊢! φ by tauto_set;
     use ⊤;
     simp;
-⟩
 
 end Logic
 

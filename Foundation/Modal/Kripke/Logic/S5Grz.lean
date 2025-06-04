@@ -12,7 +12,8 @@ open Kripke
 lemma S5Grz.Kripke.finite_equality : Logic.S5Grz = Kripke.FrameClass.finite_equality.logic := by
   rw [eq_S5Grz_Triv, Triv.Kripke.finite_equality]
 
-instance : ProperSublogic Logic.S5 Logic.S5Grz := ⟨by
+@[simp]
+theorem S5Grz.proper_extension_of_S5 : Logic.S5 ⊂ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.universal ⊧ φ by
@@ -26,9 +27,9 @@ instance : ProperSublogic Logic.S5 Logic.S5Grz := ⟨by
       constructor;
       . refine ⟨by simp [Universal]⟩;
       . simp [Semantics.Realize, Satisfies];
-⟩
 
-instance : ProperSublogic Logic.Grz Logic.S5Grz := ⟨by
+@[simp]
+theorem S5Grz.proper_extension_of_Grz : Logic.Grz ⊂ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by
@@ -52,12 +53,12 @@ instance : ProperSublogic Logic.Grz Logic.S5Grz := ⟨by
         . omega;
         . use 1;
           constructor <;> omega;
-⟩
 
-instance : ProperSublogic Logic.S5 Logic.Triv := by
-  rw [←eq_S5Grz_Triv];
-  infer_instance;
+@[simp]
+theorem Triv.proper_extension_of_S5 : Logic.S5 ⊂ Logic.Triv := by simp [←eq_S5Grz_Triv];
 
-instance : ProperSublogic Logic.S4 Logic.Triv := ProperSublogic.trans Logic.S4 Logic.S5 Logic.Triv
+@[simp]
+lemma Triv.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Triv := by
+  trans Logic.S5 <;> simp;
 
 end LO.Modal.Logic

@@ -285,7 +285,7 @@ open Kripke
 
 lemma Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_partial_order.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.S4 Logic.Grz := ⟨by
+theorem Grz.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by
@@ -299,7 +299,7 @@ instance : ProperSublogic Logic.S4 Logic.Grz := ⟨by
       constructor;
       . refine {refl := by tauto, trans := by tauto};
       . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
-⟩
+
 
 end Logic
 

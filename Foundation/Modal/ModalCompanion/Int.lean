@@ -59,7 +59,7 @@ section Grz
 
 lemma Logic.gGrz_of_Int : φ ∈ Logic.Int → φᵍ ∈ Logic.Grz := by
   intro h;
-  apply Sublogic.subset $ Logic.gS4_of_Int h;
+  apply Grz.proper_extension_of_S4.subset $ Logic.gS4_of_Int h;
 
 lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
   ext φ;
@@ -80,7 +80,7 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
   . intro hφ;
     induction hφ with
     | mem₁ h =>
-      apply Sublogic.subset (L₁ := Logic.S4) (L₂ := Logic.Grz);
+      apply Grz.proper_extension_of_S4.subset;
       rwa [Logic.S4.is_smallestMC_of_Int]
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;

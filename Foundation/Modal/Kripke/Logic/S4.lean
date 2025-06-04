@@ -64,7 +64,8 @@ open Kripke
 
 lemma S4.Kripke.preorder : Logic.S4 = FrameClass.preorder.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KT Logic.S4 := ⟨by
+@[simp]
+theorem S4.proper_extension_of_KT : Logic.KT ⊂ Logic.S4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomT!]) |>.subset;
   . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by
@@ -94,9 +95,9 @@ instance : ProperSublogic Logic.KT Logic.S4 := ⟨by
           . omega;
           . use 2;
             refine ⟨by omega;, by trivial, by trivial⟩;
-⟩
 
-instance : ProperSublogic Logic.KD4 Logic.S4 := ⟨by
+@[simp]
+theorem S4.proper_extension_of_KD4 : Logic.KD4 ⊂ Logic.S4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by
@@ -110,9 +111,9 @@ instance : ProperSublogic Logic.KD4 Logic.S4 := ⟨by
       constructor;
       . refine ⟨⟨by tauto⟩, ⟨by omega⟩⟩;
       . simp [Semantics.Realize, Satisfies];
-⟩
 
-instance : ProperSublogic Logic.KD Logic.S4 := ProperSublogic.trans Logic.KD Logic.KT Logic.S4
+@[simp]
+lemma S4.proper_extension_of_KD : Logic.KD ⊂ Logic.S4 := by trans Logic.KT <;> simp;
 
 end Logic
 

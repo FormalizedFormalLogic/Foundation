@@ -45,7 +45,7 @@ open Kripke
 
 lemma K4Point3.Kripke.trans_weakConnected : Logic.K4Point3 = FrameClass.trans_weakConnected.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
+theorem K4Point3.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
@@ -73,7 +73,6 @@ instance : ProperSublogic Logic.K4 Logic.K4Point3 := ⟨by
         . omega;
         . trivial;
         . trivial;
-⟩
 
 end Logic
 

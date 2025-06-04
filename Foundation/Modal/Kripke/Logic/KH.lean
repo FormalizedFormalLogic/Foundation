@@ -372,7 +372,8 @@ open Formula
 open Entailment
 open Kripke
 
-instance : ProperSublogic Logic.K Logic.KH := ⟨by
+@[simp]
+theorem KH.proper_extension_of_K : Logic.K ⊂ Logic.KH := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KH ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
@@ -385,9 +386,9 @@ instance : ProperSublogic Logic.K Logic.KH := ⟨by
       use ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩, 0;
       simp [Satisfies, Semantics.Realize];
       constructor <;> tauto;
-⟩
 
-instance : ProperSublogic Logic.KH Logic.GL := ⟨by
+@[simp]
+theorem GL.proper_extension_of_KH : Logic.KH ⊂ Logic.GL := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.KH ⊢! φ by tauto;
@@ -395,7 +396,6 @@ instance : ProperSublogic Logic.KH Logic.GL := ⟨by
     constructor;
     . exact axiomFour!;
     . exact KH_unprov_axiomFour;
-⟩
 
 end Logic
 

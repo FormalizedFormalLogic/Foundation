@@ -58,7 +58,7 @@ open Kripke
 
 lemma K4.Kripke.trans : Logic.K4 = FrameClass.trans.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.K Logic.K4 := ⟨by
+theorem K4.proper_extension_of_K : Logic.K ⊂ Logic.K4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
@@ -80,7 +80,6 @@ instance : ProperSublogic Logic.K Logic.K4 := ⟨by
           | 0 => tauto;
           | 1 => tauto;
         . exact ⟨1, by omega, 0, by omega, by trivial⟩;
-⟩
 
 end Logic
 

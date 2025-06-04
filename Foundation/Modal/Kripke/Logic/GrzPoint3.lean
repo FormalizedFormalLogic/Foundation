@@ -80,7 +80,7 @@ open Kripke
 
 lemma GrzPoint3.Kripke.finite_connected_partial_order : Logic.GrzPoint3 = FrameClass.finite_connected_partial_order.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
+theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⊂ Logic.GrzPoint3 := by
   constructor;
   . rw [GrzPoint2.Kripke.finite_confluent_partial_order, GrzPoint3.Kripke.finite_connected_partial_order];
     rintro φ hφ F ⟨_, _, _⟩;
@@ -130,9 +130,8 @@ instance : ProperSublogic Logic.GrzPoint2 Logic.GrzPoint3 := ⟨by
             constructor;
             . tauto;
             . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
-⟩
 
-instance : ProperSublogic Logic.S4Point3 Logic.GrzPoint3 := ⟨by
+theorem GrzPoint3.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.GrzPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_connected_preorder ⊧ φ by
@@ -146,7 +145,6 @@ instance : ProperSublogic Logic.S4Point3 Logic.GrzPoint3 := ⟨by
       constructor;
       . refine ⟨inferInstance, {refl := by simp, trans := by simp}, ⟨by simp [Connected]⟩⟩;
       . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
-⟩
 
 end Logic
 

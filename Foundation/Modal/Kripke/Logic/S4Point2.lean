@@ -116,7 +116,8 @@ open Kripke
 lemma S4Point2.Kripke.confluent_preorder : Logic.S4Point2 = FrameClass.confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
 lemma S4Point2.Kripke.finite_confluent_preorder : Logic.S4Point2 = FrameClass.finite_confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.S4 Logic.S4Point2 := ⟨by
+@[simp]
+theorem S4Point2.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4Point2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by
@@ -144,9 +145,9 @@ instance : ProperSublogic Logic.S4 Logic.S4Point2 := ⟨by
           constructor;
           . omega;
           . omega;
-⟩
 
-instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
+@[simp]
+theorem S4Point2.proper_extension_of_K4Point2 : Logic.K4Point2 ⊂ Logic.S4Point2 := by
   constructor;
   . rw [K4Point2.Kripke.trans_weakConfluent, S4Point2.Kripke.confluent_preorder];
     rintro φ hφ F ⟨_, _⟩;
@@ -174,7 +175,6 @@ instance : ProperSublogic Logic.K4Point2 Logic.S4Point2 := ⟨by
         . omega;
         . omega;
         . use 1; omega;
-⟩
 
 end Logic
 

@@ -78,7 +78,7 @@ open Kripke
 lemma S5.Kripke.refl_eucl : Logic.S5 = FrameClass.refl_eucl.logic := eq_hilbert_logic_frameClass_logic
 lemma S5.Kripke.universal : Logic.S5 = FrameClass.universal.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KTB Logic.S5 := ⟨by
+theorem S5.proper_extension_of_KTB : Logic.KTB ⊂ Logic.S5 := by
   constructor;
   . rw [KTB.Kripke.refl_symm, S5.Kripke.refl_eucl];
     rintro φ hφ F ⟨_, _⟩;
@@ -101,9 +101,8 @@ instance : ProperSublogic Logic.KTB Logic.S5 := ⟨by
         . omega;
         . use 2;
           constructor <;> omega;
-⟩
 
-instance : ProperSublogic Logic.KD45 Logic.S5 := ⟨by
+theorem S5.proper_extension_of_KD45 : Logic.KD45 ⊂ Logic.S5 := by
   constructor;
   . rw [KD45.Kripke.serial_trans_eucl, S5.Kripke.refl_eucl];
     rintro φ hφ F ⟨_, _⟩;
@@ -126,9 +125,8 @@ instance : ProperSublogic Logic.KD45 Logic.S5 := ⟨by
           | 1 => use 1; tauto;
       . simp [Semantics.Realize, Satisfies, M];
         tauto;
-⟩
 
-instance : ProperSublogic Logic.KB4 Logic.S5 := ⟨by
+theorem S5.proper_extension_of_KB4 : Logic.KB4 ⊂ Logic.S5 := by
   constructor;
   . rw [KB4.Kripke.refl_trans, S5.Kripke.refl_eucl];
     rintro φ hφ F ⟨_, _⟩;
@@ -145,9 +143,9 @@ instance : ProperSublogic Logic.KB4 Logic.S5 := ⟨by
       constructor;
       . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
       . simp [Semantics.Realize, Satisfies];
-⟩
 
-instance : ProperSublogic Logic.S4 Logic.S5 := ⟨by
+@[simp]
+theorem S5.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S5 := by
   constructor;
   . rw [S4.Kripke.preorder, S5.Kripke.refl_eucl];
     rintro φ hφ F ⟨_, _⟩;
@@ -172,9 +170,8 @@ instance : ProperSublogic Logic.S4 Logic.S5 := ⟨by
         . tauto;
         . use 1;
           omega;
-⟩
 
-instance : ProperSublogic Logic.S4Point3 Logic.S5 := ⟨by
+theorem S5.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.S5 := by
   constructor;
   . rw [S4Point3.Kripke.connected_preorder, S5.Kripke.universal];
     rintro φ hφ F F_univ;
@@ -202,7 +199,6 @@ instance : ProperSublogic Logic.S4Point3 Logic.S5 := ⟨by
         . omega;
         . use 1;
           constructor <;> omega;
-⟩
 
 end Logic
 

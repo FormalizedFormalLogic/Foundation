@@ -338,7 +338,7 @@ open Kripke
 
 lemma GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_confluent_partial_order.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
+theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by
@@ -375,9 +375,8 @@ instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
           . apply Satisfies.dia_def.not.mpr;
             push_neg;
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
-⟩
 
-instance : ProperSublogic Logic.S4Point2 Logic.GrzPoint2 := ⟨by
+theorem GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_confluent_preorder ⊧ φ by
@@ -392,7 +391,6 @@ instance : ProperSublogic Logic.S4Point2 Logic.GrzPoint2 := ⟨by
       . refine ⟨inferInstance, {refl := by simp, trans := by simp}, ⟨?_⟩⟩;
         . rintro x y z ⟨Rxy, Ryz⟩; use 0;
       . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
-⟩
 
 
 end Logic

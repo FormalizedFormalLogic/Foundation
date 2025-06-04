@@ -41,7 +41,8 @@ open Kripke
 
 lemma KT.Kripke.refl : Logic.KT = FrameClass.refl.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KD Logic.KT := ⟨by
+@[simp]
+theorem KT.proper_extension_of_KD : Logic.KD ⊂ Logic.KT := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomD!]) |>.subset;
   . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
@@ -55,7 +56,6 @@ instance : ProperSublogic Logic.KD Logic.KT := ⟨by
       constructor;
       . refine ⟨by tauto⟩;
       . simp [Semantics.Realize, Satisfies];
-⟩
 
 end Logic
 
