@@ -65,6 +65,21 @@ import Foundation.Modal.Kripke.Logic.GL.MDP
 
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
 
+import Foundation.Modal.Kripke.Logic.GLPoint3
+import Foundation.Modal.Kripke.Logic.GrzPoint2
+import Foundation.Modal.Kripke.Logic.GrzPoint3
+import Foundation.Modal.Kripke.Logic.K4Point1
+import Foundation.Modal.Kripke.Logic.K4Point2
+import Foundation.Modal.Kripke.Logic.K4Point3
+import Foundation.Modal.Kripke.Logic.KH
+import Foundation.Modal.Kripke.Logic.KT4B
+import Foundation.Modal.Kripke.Logic.KTc
+import Foundation.Modal.Kripke.Logic.KTMk
+import Foundation.Modal.Kripke.Logic.S4Point2Point1
+import Foundation.Modal.Kripke.Logic.S4Point3
+import Foundation.Modal.Kripke.Logic.S5
+import Foundation.Modal.Kripke.Logic.S5Grz
+
 import Foundation.Modal.Kripke.NNFormula
 import Foundation.Modal.Kripke.ComplexityLimited
 import Foundation.Modal.Kripke.Undefinability
@@ -85,6 +100,8 @@ import Foundation.Modal.Boxdot.GL_Grz
 import Foundation.Modal.Logic.Extension
 
 import Foundation.Modal.Logic.S.Consistent
+
+import Foundation.Modal.Logic.Dz.Basic
 
 import Foundation.Modal.Maximal.Makinson
 

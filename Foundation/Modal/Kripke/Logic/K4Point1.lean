@@ -5,7 +5,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open Geachean
+open GeachConfluent
 
 abbrev Kripke.FrameClass.trans_mckinsey : FrameClass := { F | IsTrans _ F ∧ SatisfiesMcKinseyCondition _ F }
 
@@ -26,7 +26,7 @@ instance Kripke.canonical : Canonical (Hilbert.K4Point1) Kripke.FrameClass.trans
   apply Set.mem_setOf_eq.mpr;
   constructor;
   . infer_instance;
-  . apply Canonical.satisfiesMcKinseyCondition;
+  . infer_instance;
 ⟩
 
 instance Kripke.complete : Complete (Hilbert.K4Point1) Kripke.FrameClass.trans_mckinsey := inferInstance

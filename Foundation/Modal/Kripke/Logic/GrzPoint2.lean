@@ -126,7 +126,7 @@ section
 
 namespace Hilbert
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 lemma Grz_weakerThan_GrzPoint2 : Hilbert.Grz ⪯ Hilbert.GrzPoint2 := weakerThan_of_dominate_axioms $ by simp;
 
@@ -141,7 +141,7 @@ lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).t
     exact axiomPoint2!;
 
 lemma not_Grz_of_not_GrzPoint2 (h : Hilbert.GrzPoint2 ⊬ φ) : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList ⊬[Hilbert.Grz] φ := by
-  have := provable_iff.not.mp $ not_imp_not.mpr GrzPoint2_of_Grz h;
+  have := Context.provable_iff.not.mp $ not_imp_not.mpr GrzPoint2_of_Grz h;
   push_neg at this;
   convert this ((φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList) $ by simp;
 

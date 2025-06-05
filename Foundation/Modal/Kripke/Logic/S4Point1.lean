@@ -1,12 +1,13 @@
 import Foundation.Modal.Kripke.Logic.K4
 import Foundation.Modal.Kripke.AxiomM
 import Foundation.Modal.Kripke.Logic.S4
+import Foundation.Modal.Kripke.Logic.K4Point1
 
 namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open Geachean
+open GeachConfluent
 
 abbrev Kripke.FrameClass.preorder_mckinsey : FrameClass := { F | IsPreorder _ F ∧ SatisfiesMcKinseyCondition _ F }
 
@@ -28,7 +29,7 @@ instance Kripke.canonical : Canonical (Hilbert.S4Point1) Kripke.FrameClass.preor
   apply Set.mem_setOf_eq.mpr;
   constructor;
   . infer_instance;
-  . apply Canonical.satisfiesMcKinseyCondition;
+  . infer_instance;
 ⟩
 
 instance Kripke.complete : Complete (Hilbert.S4Point1) Kripke.FrameClass.preorder_mckinsey := inferInstance
@@ -62,6 +63,25 @@ instance : ProperSublogic Logic.S4 Logic.S4Point1 := ⟨by
         use 1;
         trivial;
 ⟩
+
+@[simp]
+theorem S4Point1.proper_extension_of_K4Point1 : Logic.K4Point1 ⊂ Logic.S4Point1 := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.S4Point1 ⊢! φ ∧ ¬FrameClass.trans_mckinsey ⊧ φ by
+      rw [K4Point1.Kripke.trans_mckinsey];
+      tauto;
+    use (Axioms.T (.atom 0));
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨⟨?_⟩, ⟨?_⟩⟩;
+        . omega;
+        . simp [M, McKinseyCondition];
+      . simp [Semantics.Realize, Satisfies, M];
 
 end Logic
 

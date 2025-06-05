@@ -5,7 +5,7 @@ import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
 
 namespace LO.Modal
 
-open Entailment FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 open Propositional.Formula (goedelTranslate)
 open Propositional.Formula (atom)

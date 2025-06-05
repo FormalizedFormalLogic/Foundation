@@ -4,7 +4,7 @@ import Foundation.Modal.Kripke.Logic.GL.MDP
 
 namespace LO.Modal
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 
 variable [DecidableEq α]

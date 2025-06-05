@@ -17,7 +17,7 @@ namespace Hilbert
 
 open Kripke
 open Formula.Kripke
-open Formula (BoxdotTranslation)
+open Formula (boxdotTranslate)
 open Modal.Kripke
 open Entailment
 

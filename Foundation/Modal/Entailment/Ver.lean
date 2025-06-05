@@ -1,11 +1,11 @@
 import Foundation.Modal.Entailment.K
 
-namespace LO.Entailment
+namespace LO.Modal.Entailment
 
 open FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.Modal.Ver 𝓢]
+variable {𝓢 : S} [Entailment.Ver 𝓢]
 
 def bot_of_dia : 𝓢 ⊢ ◇φ ➝ ⊥ := by
   have : 𝓢 ⊢ ∼◇φ ➝ (◇φ ➝ ⊥) := K_left $ negEquiv (𝓢 := 𝓢) (φ := ◇φ);
@@ -29,4 +29,4 @@ instance : HasAxiomL 𝓢 := ⟨fun _ ↦ Ver.axiomL⟩
 end Ver
 
 
-end LO.Entailment
+end LO.Modal.Entailment
