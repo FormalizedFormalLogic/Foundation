@@ -129,7 +129,11 @@ lemma eq_vecCons (s : Fin (n + 1) → C) : s = s 0 :> s ∘ Fin.succ :=
 
 lemma vecCons_assoc (a b : α) (s : Fin n → α) :
     a :> (s <: b) = (a :> s) <: b := by
-  funext x; cases' x using Fin.cases with x <;> simp; cases x using Fin.lastCases <;> simp [Fin.succ_castSucc]
+  funext x; cases' x using Fin.cases with x <;> simp
+  cases x using Fin.lastCases
+  · simp [Fin.succ_castSucc]
+  case cast i =>
+    simp only [rightConcat_castSucc, Fin.succ_castSucc i, cons_val_succ]
 
 def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
   | 0,     _, _, _ => by simpa [Matrix.empty_eq] using isTrue trivial
