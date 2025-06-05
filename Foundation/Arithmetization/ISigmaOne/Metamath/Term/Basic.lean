@@ -387,13 +387,13 @@ def construction : Fixpoint.Construction V β.blueprint where
         Semiformula.eval_bexLT, eval_qqBvarDef, Matrix.cons_app_five, c.bvar_defined.iff,
         LogicalConnective.Prop.and_eq, eval_qqFvarDef, c.fvar_defined.iff, Matrix.cons_val_three,
         Semiformula.eval_ex, Matrix.cons_app_seven, Matrix.cons_app_six, eval_repeatVec,
-        eval_lenDef, Semiformula.eval_ballLT, eval_nthDef, Semiformula.eval_operator₃, cons_app_11,
+        eval_lenDef, Semiformula.eval_ballLT, eval_nthDef, Semiformula.eval_operator_three, cons_app_11,
         cons_app_10, cons_app_9, Matrix.cons_app_eight, eval_memRel, exists_eq_left, eval_qqFuncDef,
         Fin.succ_one_eq_two, c.func_defined.iff, LogicalConnective.Prop.or_eq,
         HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi, (isUTerm_defined L).proper.iff',
         c.bvar_defined.graph_delta.proper.iff', HierarchySymbol.Semiformula.graphDelta_val,
         c.fvar_defined.graph_delta.proper.iff', Semiformula.eval_all,
-        LogicalConnective.HomClass.map_imply, Semiformula.eval_operator₂, Structure.Eq.eq,
+        LogicalConnective.HomClass.map_imply, Semiformula.eval_operator_two, Structure.Eq.eq,
         LogicalConnective.Prop.arrow_eq, forall_eq, c.func_defined.graph_delta.proper.iff']
       ,
     by  intro v
@@ -414,7 +414,7 @@ def construction : Fixpoint.Construction V β.blueprint where
           c.bvar_defined.iff, LogicalConnective.Prop.and_eq, eval_qqFvarDef, c.fvar_defined.iff,
           Matrix.cons_val_three, Semiformula.eval_ex, Matrix.cons_app_seven, Matrix.cons_app_six,
           Matrix.cons_app_five, Matrix.cons_val_four, eval_repeatVec, eval_lenDef,
-          Semiformula.eval_ballLT, eval_nthDef, Semiformula.eval_operator₃, cons_app_11,
+          Semiformula.eval_ballLT, eval_nthDef, Semiformula.eval_operator_three, cons_app_11,
           cons_app_10, cons_app_9, Matrix.cons_app_eight, eval_memRel, exists_eq_left,
           eval_qqFuncDef, Fin.succ_one_eq_two, c.func_defined.iff,
           LogicalConnective.Prop.or_eq] using c.phi_iff _ _ _⟩

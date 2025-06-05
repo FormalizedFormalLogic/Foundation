@@ -47,9 +47,9 @@ instance standardModel : Structure ℒₒᵣ M where
   func := fun _ f =>
     match f with
     | ORing.Func.zero => fun _ => 0
-    | ORing.Func.one  => fun _ => 1
-    | ORing.Func.add  => fun v => v 0 + v 1
-    | ORing.Func.mul  => fun v => v 0 * v 1
+    |  ORing.Func.one => fun _ => 1
+    |  ORing.Func.add => fun v => v 0 + v 1
+    |  ORing.Func.mul => fun v => v 0 * v 1
   rel := fun _ r =>
     match r with
     | ORing.Rel.eq => fun v => v 0 = v 1
@@ -78,9 +78,9 @@ lemma standardModel_unique' (s : Structure ℒₒᵣ M)
   (funext₃ fun k f _ =>
     match k, f with
     | _, Language.Zero.zero => by simp [Matrix.empty_eq]
-    | _, Language.One.one   => by simp [Matrix.empty_eq]
-    | _, Language.Add.add   => by simp
-    | _, Language.Mul.mul   => by simp)
+    | _,   Language.One.one => by simp [Matrix.empty_eq]
+    | _,   Language.Add.add => by simp
+    | _,   Language.Mul.mul => by simp)
   (funext₃ fun k r _ =>
     match k, r with
     | _, Language.Eq.eq => by simp
@@ -119,17 +119,19 @@ end
 
 section
 
-variable {L : Language} [L.ORing]
-variable {M : Type*} [ORingStruc M] [s : Structure L M]
-  [Structure.Zero L M] [Structure.One L M] [Structure.Add L M] [Structure.Mul L M] [Structure.Eq L M] [Structure.LT L M]
+variable {M : Type*} [ORingStruc M]
 
-@[simp] lemma modelsTheory_lMap_oringEmb (T : Theory ℒₒᵣ) :
+@[simp] lemma modelsTheory_lMap_oringEmb
+    {L : Language} [L.ORing] [Structure L M]
+    [Structure.Zero L M] [Structure.One L M] [Structure.Add L M] [Structure.Mul L M]
+    [Structure.Eq L M] [Structure.LT L M]
+    (T : Theory ℒₒᵣ) :
     M ⊧ₘ* (T.lMap oringEmb : Theory L) ↔ M ⊧ₘ* T := by
-  simp [modelsTheory_iff]
+  simp only [modelsTheory_iff]
   constructor
   · intro H φ hp f
     exact eval_lMap_oringEmb.mp <| @H (Semiformula.lMap oringEmb φ) (Set.mem_image_of_mem _ hp) f
-  · simp [Theory.lMap]
+  · simp only [Theory.lMap, Set.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
     intro H φ hp f; exact eval_lMap_oringEmb.mpr (H hp f)
 
 instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
@@ -161,6 +163,7 @@ instance models_CobhamR0 : ℕ ⊧ₘ* 𝐑₀ := ⟨by
   case Ω₃ h =>
     simpa [models_def, ←le_iff_eq_or_lt] using h⟩
 
+set_option linter.flexible false in
 instance models_PeanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   intro σ h
   rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
@@ -178,6 +181,7 @@ instance models_PeanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
     have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
     exact modelsTheory_iff.mp this h⟩
 
+set_option linter.flexible false in
 lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ := by
   simp [Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
     Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
@@ -185,6 +189,7 @@ lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ 
   · exact hzero
   · exact hsucc x ih
 
+set_option linter.flexible false in
 instance models_iSigma (Γ k) : ℕ ⊧ₘ* 𝐈𝐍𝐃Γ k := by
   simp [Theory.indScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
 
@@ -192,6 +197,7 @@ instance models_iSigmaZero : ℕ ⊧ₘ* 𝐈𝚺₀ := inferInstance
 
 instance models_iSigmaOne : ℕ ⊧ₘ* 𝐈𝚺₁ := inferInstance
 
+set_option linter.flexible false in
 instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
   simp [Theory.peano, Theory.indScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
 

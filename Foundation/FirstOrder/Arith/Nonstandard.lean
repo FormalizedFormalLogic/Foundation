@@ -73,7 +73,7 @@ instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
     haveI : Structure.Mul ℒₒᵣ ℕ⋆ := ⟨fun _ _ => rfl⟩
     haveI : Structure.Eq ℒₒᵣ ℕ⋆ := ⟨fun _ _ => by
       simp [Semiformula.Operator.val, Semiformula.Operator.Eq.sentence_eq,
-        ←Semiformula.eval_lMap, Matrix.fun_eq_vec₂]⟩
+        ←Semiformula.eval_lMap, Matrix.fun_eq_vec_two]⟩
     haveI : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
     exact standardModel_unique _ _
   have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this.realize _ (Set.mem_image_of_mem _ hσ))

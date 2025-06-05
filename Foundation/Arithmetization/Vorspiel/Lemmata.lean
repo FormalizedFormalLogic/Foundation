@@ -41,9 +41,9 @@ def arithCases {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
   | func Language.One.one _   => by
       simpa [Matrix.empty_eq, Operator.const, Operator.operator, Operator.numeral, Operator.One.term_eq] using hone
   | func Language.Add.add v   => by
-    simpa [Operator.operator, Operator.Add.term_eq, Rew.func, ←Matrix.fun_eq_vec₂] using hadd (v 0) (v 1)
+    simpa [Operator.operator, Operator.Add.term_eq, Rew.func, ←Matrix.fun_eq_vec_two] using hadd (v 0) (v 1)
   | func Language.Mul.mul v   => by
-    simpa [Operator.operator, Operator.Mul.term_eq, Rew.func, ←Matrix.fun_eq_vec₂] using hmul (v 0) (v 1)
+    simpa [Operator.operator, Operator.Mul.term_eq, Rew.func, ←Matrix.fun_eq_vec_two] using hmul (v 0) (v 1)
 
 @[elab_as_elim]
 def arithRec {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
@@ -63,11 +63,11 @@ def arithRec {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
   | func Language.Add.add v   => by
     have ih0 := arithRec hbvar hfvar hzero hone hadd hmul (v 0)
     have ih1 := arithRec hbvar hfvar hzero hone hadd hmul (v 1)
-    simpa [Operator.operator, Operator.Add.term_eq, Rew.func, ←Matrix.fun_eq_vec₂] using hadd ih0 ih1
+    simpa [Operator.operator, Operator.Add.term_eq, Rew.func, ←Matrix.fun_eq_vec_two] using hadd ih0 ih1
   | func Language.Mul.mul v   => by
     have ih0 := arithRec hbvar hfvar hzero hone hadd hmul (v 0)
     have ih1 := arithRec hbvar hfvar hzero hone hadd hmul (v 1)
-    simpa [Operator.operator, Operator.Mul.term_eq, Rew.func, ←Matrix.fun_eq_vec₂] using hmul ih0 ih1
+    simpa [Operator.operator, Operator.Mul.term_eq, Rew.func, ←Matrix.fun_eq_vec_two] using hmul ih0 ih1
   termination_by t => t.complexity
 
 end Semiterm
@@ -233,7 +233,7 @@ open FirstOrder FirstOrder.Semiterm
     (Operator.npow ℒₒᵣ k).val ![a] = a ^ k := by
   induction k <;> simp [Operator.npow_zero, Operator.npow_succ, Operator.val_comp, Matrix.empty_eq, Matrix.comp_vecCons']
   case succ k IH =>
-    rw [Matrix.fun_eq_vec₂ (v := fun i => Operator.val ((Operator.npow ℒₒᵣ k :> ![Operator.bvar 0]) i) ![a]), pow_succ]
+    rw [Matrix.fun_eq_vec_two (v := fun i => Operator.val ((Operator.npow ℒₒᵣ k :> ![Operator.bvar 0]) i) ![a]), pow_succ]
     simp [npowRec, mul_comm a, IH]
 
 instance : Structure.Monotone ℒₒᵣ M := ⟨

@@ -133,15 +133,15 @@ section
 variable {L : Language}
 
 @[simp] lemma equal [L.Eq] [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t = !!u” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two,
     Semiformula.Operator.Eq.sentence_eq]
 
 @[simp] lemma lt [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t < !!u” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two,
     Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
 
 @[simp] lemma le [L.Eq] [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t ≤ !!u” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂,
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two,
     Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq,
     Semiformula.Operator.LE.sentence_eq]
 
@@ -394,6 +394,18 @@ lemma remove_exists {φ : Semiformula L ξ (n + 1)} : Hierarchy b s (∃' φ) �
 @[simp] lemma finset_udisj_iff {Γ s n} [Fintype ι] {φ : ι → Semiformula L ξ n} :
     Hierarchy Γ s (Finset.udisj φ) ↔ ∀ i, Hierarchy Γ s (φ i) := by simp [Finset.udisj]
 
+@[simp] lemma exItr {n k} {φ : Semiformula L ξ (n + k)} :
+    Hierarchy 𝚺 (s + 1) (∃^[k] φ) ↔ Hierarchy 𝚺 (s + 1) φ := by
+  match k with
+  |     0 => simp
+  | k + 1 => simp [LO.exItr_succ, exItr]
+
+@[simp] lemma univItr {n k} {φ : Semiformula L ξ (n + k)} :
+    Hierarchy 𝚷 (s + 1) (∀^[k] φ) ↔ Hierarchy 𝚷 (s + 1) φ := by
+  match k with
+  |     0 => simp
+  | k + 1 => simp [LO.univItr_succ, univItr]
+
 end Hierarchy
 
 section
@@ -422,10 +434,10 @@ lemma sigma₁_induction {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
     (hEx : ∀ n φ, Hierarchy 𝚺 1 φ → P (n + 1) φ → P n (∃' φ)) : ∀ n φ, Hierarchy 𝚺 1 φ → P n φ
   | _, _, Hierarchy.verum _ _ _               => hVerum _
   | _, _, Hierarchy.falsum _ _ _              => hFalsum _
-  | _, _, Hierarchy.rel _ _ Language.Eq.eq v  => by simpa [←Matrix.fun_eq_vec₂] using hEQ _ (v 0) (v 1)
-  | _, _, Hierarchy.nrel _ _ Language.Eq.eq v => by simpa [←Matrix.fun_eq_vec₂] using hNEQ _ (v 0) (v 1)
-  | _, _, Hierarchy.rel _ _ Language.LT.lt v  => by simpa [←Matrix.fun_eq_vec₂] using hLT _ (v 0) (v 1)
-  | _, _, Hierarchy.nrel _ _ Language.LT.lt v => by simpa [←Matrix.fun_eq_vec₂] using hNLT _ (v 0) (v 1)
+  | _, _, Hierarchy.rel _ _ Language.Eq.eq v  => by simpa [←Matrix.fun_eq_vec_two] using hEQ _ (v 0) (v 1)
+  | _, _, Hierarchy.nrel _ _ Language.Eq.eq v => by simpa [←Matrix.fun_eq_vec_two] using hNEQ _ (v 0) (v 1)
+  | _, _, Hierarchy.rel _ _ Language.LT.lt v  => by simpa [←Matrix.fun_eq_vec_two] using hLT _ (v 0) (v 1)
+  | _, _, Hierarchy.nrel _ _ Language.LT.lt v => by simpa [←Matrix.fun_eq_vec_two] using hNLT _ (v 0) (v 1)
   | _, _, Hierarchy.and hp hq                 =>
     hAnd _ _ _ hp hq
       (sigma₁_induction hVerum hFalsum hEQ hNEQ hLT hNLT hAnd hOr hBall hEx _ _ hp)

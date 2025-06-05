@@ -82,7 +82,7 @@ def ballIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) 
 def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∃ x < !!t, x ∈ !!(Rew.bShift t) ∧ !p x ⋯”
 
 @[simp] lemma Hierarchy.bit {t u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t ∈ !!u” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def]
 
 @[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
@@ -138,10 +138,10 @@ macro_rules
 end
 
 @[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRelOpr]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def, memRelOpr]
 
 @[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec₂, operator_mem_def, memRel₃Opr]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def, memRel₃Opr]
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 

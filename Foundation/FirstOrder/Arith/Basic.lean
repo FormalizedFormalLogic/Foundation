@@ -11,8 +11,8 @@ namespace ORingStruc
 variable {α : Type*} [ORingStruc α]
 
 def numeral : ℕ → α
-  | 0     => 0
-  | 1     => 1
+  |     0 => 0
+  |     1 => 1
   | n + 2 => numeral (n + 1) + 1
 
  @[simp] lemma zero_eq_zero : (numeral 0 : α) = 0 := rfl
@@ -22,8 +22,8 @@ def numeral : ℕ → α
 end ORingStruc
 
 @[simp] lemma Nat.numeral_eq : (n : ℕ) → ORingStruc.numeral n = n
-  | 0     => rfl
-  | 1     => rfl
+  |     0 => rfl
+  |     1 => rfl
   | n + 2 => by simp [ORingStruc.numeral, Nat.numeral_eq (n + 1)]
 
 namespace FirstOrder
@@ -36,9 +36,9 @@ def oringEmb : ℒₒᵣ →ᵥ L where
   func := fun {k} f ↦
     match k, f with
     | _, Zero.zero => Zero.zero
-    | _, One.one   => One.one
-    | _, Add.add   => Add.add
-    | _, Mul.mul   => Mul.mul
+    | _,   One.one => One.one
+    | _,   Add.add => Add.add
+    | _,   Mul.mul => Mul.mul
   rel := fun {k} r ↦
     match k, r with
     | _, Eq.eq => Eq.eq
@@ -76,24 +76,36 @@ instance : Coe (Semiterm ℒₒᵣ ξ n) (Semiterm L ξ n) := ⟨lMap Language.o
 
 @[simp] lemma oringEmb_add (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
     Semiterm.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (Operator.Add.add.operator v) = Operator.Add.add.operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
-  simp [lMap_func, Rew.func, Operator.operator, Operator.Add.term_eq, Matrix.empty_eq]
-  funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
+  simpa [lMap_func, Rew.func, Operator.operator, Operator.Add.term_eq, Matrix.empty_eq] using Matrix.fun_eq_vec_two
 
 @[simp] lemma oringEmb_mul (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
     Semiterm.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (Operator.Mul.mul.operator v) = Operator.Mul.mul.operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
-  simp [lMap_func, Rew.func, Operator.operator, Operator.Mul.term_eq, Matrix.empty_eq]
-  funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
+  simpa [lMap_func, Rew.func, Operator.operator, Operator.Mul.term_eq, Matrix.empty_eq] using Matrix.fun_eq_vec_two
 
 @[simp] lemma oringEmb_numeral (z : ℕ) :
-    Semiterm.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) ((Operator.numeral ℒₒᵣ z).const : Semiterm ℒₒᵣ ξ n) = (Operator.numeral L z).const := by
+    lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) ((Operator.numeral ℒₒᵣ z).const : Semiterm ℒₒᵣ ξ n) = (Operator.numeral L z).const :=
   match z with
-  | 0     => exact oringEmb_zero
-  | 1     => exact oringEmb_one
-  | z + 2 =>
-    simp [Operator.numeral_add_two]
-    congr; funext i; cases i using Fin.cases
-    · exact oringEmb_numeral (z + 1)
-    · simp
+  |     0 => oringEmb_zero
+  |     1 => oringEmb_one
+  | z + 2 => by simp [Operator.numeral_add_two, Matrix.fun_eq_vec_two, oringEmb_numeral (z + 1)]
+
+section ToString
+
+variable [ToString ξ]
+
+def toStringORing : Semiterm ℒₒᵣ ξ n → String
+  |                        #x => "x_{" ++ toString (n - 1 - (x : ℕ)) ++ "}"
+  |                        &x => "a_{" ++ toString x ++ "}"
+  | func Language.Zero.zero _ => "0"
+  |   func Language.One.one _ => "1"
+  |   func Language.Add.add v => "(" ++ toStringORing (v 0) ++ " + " ++ toStringORing (v 1) ++ ")"
+  |   func Language.Mul.mul v => "(" ++ toStringORing (v 0) ++ " \\cdot " ++ toStringORing (v 1) ++ ")"
+
+instance : Repr (Semiterm ℒₒᵣ ξ n) := ⟨fun t _ ↦ t.toStringORing⟩
+
+instance : ToString (Semiterm ℒₒᵣ ξ n) := ⟨toStringORing⟩
+
+end ToString
 
 end Semiterm
 
@@ -105,13 +117,35 @@ instance : Coe (Theory ℒₒᵣ) (Theory L) := ⟨(Semiformula.lMap Language.or
 
 @[simp] lemma oringEmb_eq (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
     Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (op(=).operator v) = op(=).operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
-  simp [lMap_rel, rew_rel, Operator.operator, Operator.Eq.sentence_eq]
-  funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
+  simpa [lMap_rel, rew_rel, Operator.operator, Operator.Eq.sentence_eq] using Matrix.fun_eq_vec_two
 
 @[simp] lemma oringEmb_lt (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
     Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (op(<).operator v) = op(<).operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
-  simp [lMap_rel, rew_rel, Operator.operator, Operator.LT.sentence_eq]
-  funext i; cases i using Fin.cases <;> simp [Fin.eq_zero]
+  simpa [lMap_rel, rew_rel, Operator.operator, Operator.LT.sentence_eq] using Matrix.fun_eq_vec_two
+
+section ToString
+
+variable [ToString ξ]
+
+def toStringORing : ∀ {n}, Semiformula ℒₒᵣ ξ n → String
+  | _,                             ⊤ => "\\top"
+  | _,                             ⊥ => "\\bot"
+  | _,          rel Language.Eq.eq v => (v 0).toStringORing ++ " = " ++ (v 1).toStringORing
+  | _,          rel Language.LT.lt v => (v 0).toStringORing ++ " < " ++ (v 1).toStringORing
+  | _,         nrel Language.Eq.eq v => (v 0).toStringORing ++ " \\not = " ++ (v 1).toStringORing
+  | _,         nrel Language.LT.lt v => (v 0).toStringORing ++ " \\not < " ++ (v 1).toStringORing
+  | _,                         φ ⋏ ψ => "[" ++ φ.toStringORing ++ "]" ++ " \\land " ++ "[" ++ ψ.toStringORing ++ "]"
+  | _,                         φ ⋎ ψ => "[" ++ φ.toStringORing ++ "]" ++ " \\lor "  ++ "[" ++ ψ.toStringORing ++ "]"
+  | n, ∀' (rel Language.LT.lt v ➝ φ) => "(\\forall x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
+  | n, ∃' (rel Language.LT.lt v ⋏ φ) => "(\\exists x_{" ++ toString n ++ "} < " ++ (v 1).toStringORing ++ ") " ++ "[" ++ φ.toStringORing ++ "]"
+  | n,                          ∀' φ => "(\\forall x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
+  | n,                          ∃' φ => "(\\exists x_{" ++ toString n ++ "}) " ++ "[" ++ φ.toStringORing ++ "]"
+
+instance : Repr (Semiformula ℒₒᵣ ξ n) := ⟨fun φ _ ↦ φ.toStringORing⟩
+
+instance : ToString (Semiformula ℒₒᵣ ξ n) := ⟨toStringORing⟩
+
+end ToString
 
 end Semiformula
 
@@ -135,7 +169,7 @@ variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [ORing
   | 0     => by simp [ORingStruc.numeral, Semiterm.Operator.numeral_zero]
   | 1     => by simp [ORingStruc.numeral, Semiterm.Operator.numeral_one]
   | z + 2 => by simp [ORingStruc.numeral, Semiterm.Operator.numeral_add_two,
-                  Semiterm.Operator.val_comp, Matrix.fun_eq_vec₂, numeral_eq_numeral (z + 1)]
+                  Semiterm.Operator.val_comp, Matrix.fun_eq_vec_two, numeral_eq_numeral (z + 1)]
 
 end Structure
 

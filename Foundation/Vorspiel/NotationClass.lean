@@ -4,8 +4,6 @@ class Exp (α : Type*) where
   exp : α → α
 export Exp (exp)
 
-notation "exp " x:90 => Exp.exp x
-
 class Hash (α : Type*) where
   hash : α → α → α
 

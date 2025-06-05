@@ -22,7 +22,7 @@ lemma re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
   constructor
   · intro h
     exact ⟨.mkSigma (codeOfREPred P) (by simp [codeOfREPred, codeOfPartrec']), by
-      intro v; symm; simp; simpa [←Matrix.constant_eq_singleton'] using codeOfREPred_spec h (x := v 0)⟩
+      intro v; symm; simp; simpa [←Matrix.fun_eq_vec_one] using codeOfREPred_spec h (x := v 0)⟩
   · rintro ⟨φ, hφ⟩
     have := (sigma1_re id (φ.sigma_prop)).comp
       (f := fun x : ℕ ↦ x ::ᵥ List.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))

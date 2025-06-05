@@ -129,7 +129,7 @@ lemma models_indScheme_alt : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarc
     simpa using
       neg_induction_h Γ m (P := λ x ↦ ¬Semiformula.Evalm V ![x] v φ)
         (.mkPolarity (∼(Rew.rewriteMap v ▹ φ)) (by simpa using hp)
-        (by intro x; simp [←Matrix.constant_eq_singleton', Semiformula.eval_rewriteMap]))
+        (by intro x; simp [←Matrix.fun_eq_vec_one, Semiformula.eval_rewriteMap]))
   exact this H0 Hsucc x
 
 instance : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ.alt m) := models_indScheme_alt Γ m

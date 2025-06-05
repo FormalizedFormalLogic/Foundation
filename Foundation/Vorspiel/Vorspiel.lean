@@ -191,20 +191,20 @@ lemma vecConsLast_vecEmpty {s : Fin 0 → α} (a : α) : s <: a = ![a] :=
 
 lemma constant_eq_singleton {a : α} : (fun _ => a) = ![a] := by funext x; simp
 
-lemma constant_eq_singleton' {v : Fin 1 → α} : v = ![v 0] := by funext x; simp [Fin.eq_zero]
+lemma fun_eq_vec_one {v : Fin 1 → α} : v = ![v 0] := by funext x; simp [Fin.eq_zero]
 
 lemma constant_eq_vec₂ {a : α} : (fun _ => a) = ![a, a] := by
   funext x; cases x using Fin.cases <;> simp [Fin.eq_zero]
 
-lemma fun_eq_vec₂ {v : Fin 2 → α} : v = ![v 0, v 1] := by
+lemma fun_eq_vec_two {v : Fin 2 → α} : v = ![v 0, v 1] := by
   funext x; cases x using Fin.cases <;> simp [Fin.eq_zero]
 
-lemma fun_eq_vec₃ {v : Fin 3 → α} : v = ![v 0, v 1, v 2] := by
+lemma fun_eq_vec_three {v : Fin 3 → α} : v = ![v 0, v 1, v 2] := by
   funext x
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
 
-lemma fun_eq_vec₄ {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
+lemma fun_eq_vec_four {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
   funext x
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
@@ -355,7 +355,7 @@ lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v
   · exact i.elim0
   · cases' e with e
     · simp [natToVec] at h
-    · simp only [natToVec, Option.map_eq_some'] at h
+    · simp only [natToVec, Option.map_eq_some_iff] at h
       rcases h with ⟨v, hnv, rfl⟩
       cases' i using Fin.cases with i
       · simp [lt_succ, unpair_left_le]
@@ -367,10 +367,10 @@ by induction n <;> simp [←Nat.add_one] at h ⊢
 
 lemma pair_le_pair_of_le {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ ≤ a₂) (hb : b₁ ≤ b₂) : a₁.pair b₁ ≤ a₂.pair b₂ := by
   rcases lt_or_eq_of_le ha with (ha | rfl) <;> rcases lt_or_eq_of_le hb with (hb | rfl)
-  { exact le_of_lt (lt_trans (Nat.pair_lt_pair_left b₁ ha) (Nat.pair_lt_pair_right a₂ hb)) }
-  { exact le_of_lt (Nat.pair_lt_pair_left b₁ ha) }
-  { exact le_of_lt (Nat.pair_lt_pair_right a₁ hb) }
-  { rfl }
+  · exact le_of_lt (lt_trans (Nat.pair_lt_pair_left b₁ ha) (Nat.pair_lt_pair_right a₂ hb))
+  · exact le_of_lt (Nat.pair_lt_pair_left b₁ ha)
+  · exact le_of_lt (Nat.pair_lt_pair_right a₁ hb)
+  · rfl
 
 end Nat
 
@@ -515,10 +515,10 @@ def liftVec : ∀ {n} (f : (Fin n → α) → β),
 | n + 1, f, h, v =>
   let ih : α → (Fin n → Quotient s) → β :=
     fun a v => liftVec (n := n) (fun v => f (a :> v))
-      (fun v₁ v₂ hv => h (a :> v₁) (a :> v₂) (Fin.cases (by simpa using refl a) hv)) v
+      (fun v₁ v₂ hv => h (a :> v₁) (a :> v₂) (Fin.cases (by simp) hv)) v
   Quot.liftOn (vecHead v) (ih · (vecTail v))
     (fun a b hab => by
-      have : ∀ v, f (a :> v) = f (b :> v) := fun v ↦ h _ _ (Fin.cases hab (by simpa using fun x ↦ refl _))
+      have : ∀ v, f (a :> v) = f (b :> v) := fun v ↦ h _ _ (Fin.cases hab (by simp))
       simp [this, ih])
 
 @[simp] lemma liftVec_zero (f : (Fin 0 → α) → β) (h) (v : Fin 0 → Quotient s) : liftVec f h v = f ![] := rfl

@@ -89,8 +89,8 @@ variable {L V}
 variable [V ⊧ₘ* 𝐏𝐀⁻]
 
 instance : (L.codeIn V).Defined L.lDef where
-  func := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec₂]
-  rel := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec₂]
+  func := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec_two]
+  rel := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec_two]
 
 instance : GoedelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
 

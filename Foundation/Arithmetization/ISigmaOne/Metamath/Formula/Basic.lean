@@ -281,7 +281,7 @@ def construction : Fixpoint.Construction V (blueprint pL) where
           Matrix.cons_val_fin_one, Matrix.constant_eq_singleton,
           Language.Defined.eval_rel_iff (L := L), L.isUTermVec_defined.df.iff,
           Matrix.cons_val_three, Fin.succ_one_eq_two, eval_qqRelDef, LogicalConnective.Prop.and_eq,
-          eval_qqNRelDef, eval_qqVerumDef, eval_qqFalsumDef, Semiformula.eval_operator₂,
+          eval_qqNRelDef, eval_qqVerumDef, eval_qqFalsumDef, Semiformula.eval_operator_two,
           Structure.Mem.mem, eval_qqAndDef, eval_qqOrDef, eval_qqAllDef, eval_qqExDef,
           LogicalConnective.Prop.or_eq] using phi_iff L _ _⟩
 
@@ -741,7 +741,7 @@ def construction : Fixpoint.Construction V (β.blueprint) where
         Matrix.cons_val_four, Matrix.cons_val_succ, eval_qqRelDef, Matrix.cons_app_five,
         c.rel_defined.iff, LogicalConnective.Prop.and_eq, eval_qqNRelDef, c.nrel_defined.iff,
         eval_qqVerumDef, c.verum_defined.iff, eval_qqFalsumDef, c.falsum_defined.iff,
-        Matrix.cons_app_six, Matrix.cons_app_seven, Semiformula.eval_operator₄,
+        Matrix.cons_app_six, Matrix.cons_app_seven, Semiformula.eval_operator_four,
         Matrix.cons_app_eight, eval_memRel₃, eval_qqAndDef, c.and_defined.iff, eval_qqOrDef,
         c.or_defined.iff, Semiformula.eval_ex, c.allChanges_defined.iff, exists_eq_left,
         eval_qqAllDef, c.all_defined.iff, c.exChanges_defined.iff, eval_qqExDef, c.ex_defined.iff,
@@ -780,7 +780,7 @@ def construction : Fixpoint.Construction V (β.blueprint) where
           Matrix.cons_app_five, c.rel_defined.iff, LogicalConnective.Prop.and_eq, eval_qqNRelDef,
           c.nrel_defined.iff, eval_qqVerumDef, c.verum_defined.iff, eval_qqFalsumDef,
           c.falsum_defined.iff, Matrix.cons_app_six, Matrix.cons_app_seven,
-          Semiformula.eval_operator₄, Matrix.cons_app_eight, eval_memRel₃, eval_qqAndDef,
+          Semiformula.eval_operator_four, Matrix.cons_app_eight, eval_memRel₃, eval_qqAndDef,
           c.and_defined.iff, eval_qqOrDef, c.or_defined.iff, Semiformula.eval_ex,
           c.allChanges_defined.iff, exists_eq_left, eval_qqAllDef, c.all_defined.iff,
           c.exChanges_defined.iff, eval_qqExDef, c.ex_defined.iff,

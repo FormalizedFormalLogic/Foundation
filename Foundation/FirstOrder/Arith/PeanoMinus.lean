@@ -196,6 +196,8 @@ instance : 𝐑₀ ⪱ 𝐏𝐀⁻ :=
     R₀_unprovable_add_zero
     (Entailment.by_axm _ Theory.PeanoMinus.addZero)
 
+instance (M : Type*) [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻] : M ⊧ₘ* 𝐑₀ := models_of_subtheory (T := 𝐏𝐀⁻) inferInstance
+
 end FirstOrder.Arith
 
 end LO

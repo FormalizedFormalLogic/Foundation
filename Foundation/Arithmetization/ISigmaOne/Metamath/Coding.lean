@@ -352,7 +352,7 @@ lemma quote_termShiftVec {k n} (v : Fin k → SyntacticSemiterm L n) :
         _ = ⌜(Operator.operator (Operator.numeral ℒₒᵣ (k + 1)) ![] : SyntacticSemiterm ℒₒᵣ n)⌝
           ^+ ⌜(Operator.operator op(1) ![] : SyntacticSemiterm ℒₒᵣ n)⌝ := by
           unfold Semiterm.numeral
-          simp [Operator.numeral_succ, Matrix.fun_eq_vec₂]
+          simp [Operator.numeral_succ, Matrix.fun_eq_vec_two]
         _ = numeral ((k + 1 : ℕ) : V) ^+ ↑𝟏 := by
           rw [←quote_one']
           congr
@@ -597,9 +597,9 @@ lemma codeIn'_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
 @[simp] lemma codeIn'_one (n : ℕ) :
     (⌜(func Language.One.one ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : (Language.codeIn ℒₒᵣ V).Semiterm n) = ↑(1 : V) := by ext; simp
 @[simp] lemma codeIn'_add (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
-    (⌜func Language.Add.add v⌝ : (Language.codeIn ℒₒᵣ V).Semiterm n) = ⌜v 0⌝ + ⌜v 1⌝ := by ext; rw [Matrix.fun_eq_vec₂ (v := v)]; simp [quote_add]
+    (⌜func Language.Add.add v⌝ : (Language.codeIn ℒₒᵣ V).Semiterm n) = ⌜v 0⌝ + ⌜v 1⌝ := by ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [quote_add]
 @[simp] lemma codeIn'_mul (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
-    (⌜func Language.Mul.mul v⌝ : (Language.codeIn ℒₒᵣ V).Semiterm n) = ⌜v 0⌝ * ⌜v 1⌝ := by ext; rw [Matrix.fun_eq_vec₂ (v := v)]; simp [quote_add]
+    (⌜func Language.Mul.mul v⌝ : (Language.codeIn ℒₒᵣ V).Semiterm n) = ⌜v 0⌝ * ⌜v 1⌝ := by ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [quote_add]
 
 end Semiterm
 
@@ -632,16 +632,16 @@ open LO.Arith Formalized
 
 @[simp] lemma codeIn'_eq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜rel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ =' ⌜v 1⌝) := by
-  ext; rw [Matrix.fun_eq_vec₂ (v := v)]; simp [Language.Semiterm.equals]
+  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Language.Semiterm.equals]
 @[simp] lemma codeIn'_neq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜nrel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ ≠' ⌜v 1⌝) := by
-  ext; rw [Matrix.fun_eq_vec₂ (v := v)]; simp [Language.Semiterm.notEquals]
+  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Language.Semiterm.notEquals]
 @[simp] lemma codeIn'_lt (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜rel Language.LT.lt v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ <' ⌜v 1⌝) := by
-  ext; rw [Matrix.fun_eq_vec₂ (v := v)]; simp [Language.Semiterm.lessThan]
+  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Language.Semiterm.lessThan]
 @[simp] lemma codeIn'_nlt (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜nrel Language.LT.lt v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ ≮' ⌜v 1⌝) := by
-  ext; rw [Matrix.fun_eq_vec₂ (v := v)]; simp [Language.Semiterm.notLessThan]
+  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Language.Semiterm.notLessThan]
 @[simp] lemma codeIn'_ball (t : SyntacticSemiterm ℒₒᵣ n) (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
     (⌜∀[“#0 < !!(Rew.bShift t)”] φ⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = Language.Semiformula.ball ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
   ext; simp [LO.ball, imp_eq, Language.Semiformula.cast,

@@ -56,7 +56,7 @@ abbrev add (x y : M) : M := s.func Language.Add.add ![x, y]
 abbrev mul (x y : M) : M := s.func Language.Mul.mul ![x, y]
 
 lemma operator_eq_eq (v : Fin 2 → M) : (Semiformula.Operator.Eq.eq (L := ℒₒᵣ)).val v = eql (v 0) (v 1) := by
-  rw [Matrix.fun_eq_vec₂ (v := v)]; simp; rfl
+  rw [Matrix.fun_eq_vec_two (v := v)]; simp; rfl
 
 lemma operator_lt_eq : (Semiformula.Operator.LT.lt (L := ℒₒᵣ)).val ![a, b] = s.rel Language.LT.lt ![a, b] := rfl
 
@@ -109,19 +109,19 @@ noncomputable instance : 𝐄𝐐 ⪯ 𝐑₀' := Entailment.WeakerThan.ofAxm! <
     | _, Language.Add.add =>
       apply complete (consequence_iff.mpr fun M _ _ s f ↦ ?_)
       simp [operator_eq_eq, Semiterm.val_func]
-      intro h; rw [Matrix.fun_eq_vec₂ (v := fun i : Fin 2 ↦ f i), Matrix.fun_eq_vec₂ (v := fun i : Fin 2 ↦ f (2 + i))]
+      intro h; rw [Matrix.fun_eq_vec_two (v := fun i : Fin 2 ↦ f i), Matrix.fun_eq_vec_two (v := fun i : Fin 2 ↦ f (2 + i))]
       apply add_ext (by simpa using h 0) (by simpa using h 1)
     | _, Language.Mul.mul =>
       apply complete (consequence_iff.mpr fun M _ _ s f ↦ ?_)
       simp [operator_eq_eq, Semiterm.val_func]
-      intro h; rw [Matrix.fun_eq_vec₂ (v := fun i : Fin 2 ↦ f i), Matrix.fun_eq_vec₂ (v := fun i : Fin 2 ↦ f (2 + i))]
+      intro h; rw [Matrix.fun_eq_vec_two (v := fun i : Fin 2 ↦ f i), Matrix.fun_eq_vec_two (v := fun i : Fin 2 ↦ f (2 + i))]
       apply mul_ext (by simpa using h 0) (by simpa using h 1)
   case relExt k R =>
     match k, R with
     | _, Language.Eq.eq =>
       apply complete (consequence_iff.mpr fun M _ _ s f ↦ ?_)
       simp [operator_eq_eq, Semiterm.val_func, Semiformula.eval_rel]
-      rw [Matrix.fun_eq_vec₂ (v := fun i : Fin 2 ↦ f i), Matrix.fun_eq_vec₂ (v := fun i : Fin 2 ↦ f (2 + i))]
+      rw [Matrix.fun_eq_vec_two (v := fun i : Fin 2 ↦ f i), Matrix.fun_eq_vec_two (v := fun i : Fin 2 ↦ f (2 + i))]
       intro hs h;
       have e20 : eql (f 2) (f 0) := by simpa using eq_symm (hs 0)
       have e01 : eql (f 0) (f 1) := by simpa using h
@@ -130,7 +130,7 @@ noncomputable instance : 𝐄𝐐 ⪯ 𝐑₀' := Entailment.WeakerThan.ofAxm! <
     | _, Language.LT.lt =>
       apply complete (consequence_iff.mpr fun M _ _ s f ↦ ?_)
       simp [operator_eq_eq, Semiterm.val_func, Semiformula.eval_rel]
-      rw [Matrix.fun_eq_vec₂ (v := fun i : Fin 2 ↦ f i), Matrix.fun_eq_vec₂ (v := fun i : Fin 2 ↦ f (2 + i))]
+      rw [Matrix.fun_eq_vec_two (v := fun i : Fin 2 ↦ f i), Matrix.fun_eq_vec_two (v := fun i : Fin 2 ↦ f (2 + i))]
       intro hs h;
 
 
@@ -350,7 +350,7 @@ def Ω₁ :
       Matrix.cons_val_four, Fin.succ_one_eq_two, Matrix.cons_val_succ, Structure.Add.add,
       Matrix.cons_app_six, eval_qqEQDef, LogicalConnective.Prop.and_eq, exists_eq_left,
       HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi,
-      Semiformula.eval_all, LogicalConnective.HomClass.map_imply, Semiformula.eval_operator₂,
+      Semiformula.eval_all, LogicalConnective.HomClass.map_imply, Semiformula.eval_operator_two,
       Matrix.cons_app_seven, Structure.Eq.eq, LogicalConnective.Prop.arrow_eq, forall_eq]
 
 def Ω₂ :
@@ -413,7 +413,7 @@ def Ω₂ :
       Matrix.cons_val_four, Fin.succ_one_eq_two, Matrix.cons_val_succ, Structure.Mul.mul,
       Matrix.cons_app_six, eval_qqEQDef, LogicalConnective.Prop.and_eq, exists_eq_left,
       HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi,
-      Semiformula.eval_all, LogicalConnective.HomClass.map_imply, Semiformula.eval_operator₂,
+      Semiformula.eval_all, LogicalConnective.HomClass.map_imply, Semiformula.eval_operator_two,
       Matrix.cons_app_seven, Structure.Eq.eq, LogicalConnective.Prop.arrow_eq, forall_eq]
 
 def Ω₃ :
@@ -435,7 +435,7 @@ def Ω₃ :
       HierarchySymbol.Semiformula.val_mkDelta, HierarchySymbol.Semiformula.val_mkSigma,
       Semiformula.eval_bexLT, Semiterm.val_bvar, Matrix.cons_val_fin_one, Matrix.cons_val_one,
       Matrix.vecHead, LogicalConnective.HomClass.map_and, LogicalConnective.HomClass.map_neg,
-      Semiformula.eval_operator₂, Matrix.cons_val_zero, Structure.Eq.eq,
+      Semiformula.eval_operator_two, Matrix.cons_val_zero, Structure.Eq.eq,
       LogicalConnective.Prop.neg_eq, Semiformula.eval_ex, Semiformula.eval_substs,
       Matrix.comp_vecCons', Matrix.cons_val_two, Matrix.vecTail, Function.comp_apply,
       Fin.succ_zero_eq_one, Matrix.constant_eq_singleton, eval_numeralDef, Matrix.cons_val_four,

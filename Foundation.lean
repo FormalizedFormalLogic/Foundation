@@ -99,6 +99,7 @@ import Foundation.Modal.Logic.S.Consistent
 import Foundation.Modal.Maximal.Makinson
 
 -- Arithmetization
+/-
 import Foundation.Arithmetization.Vorspiel.Vorspiel
 import Foundation.Arithmetization.Vorspiel.Graph
 import Foundation.Arithmetization.Vorspiel.Lemmata
@@ -163,7 +164,7 @@ import Foundation.ProvabilityLogic.Grz.Completeness
 import Foundation.ProvabilityLogic.S.Completeness
 
 import Foundation.AutoProver.Classical
-
+-/
 -- Meta
 import Foundation.Meta.Kite.Arith
 import Foundation.Meta.Kite.Modal

@@ -400,7 +400,7 @@ lemma eval_bShift' (φ : Semiformula L ξ n) :
     Eval s e ε (@Rew.toS L n ▹ φ) ↔ Eval s ![] e φ := by
   simp [Rew.toS, eval_rew, Function.comp_def, Matrix.empty_eq]
 
-lemma eval_embSubsts {ξ} {ε : ξ → M} {k} (w : Fin k → Semiterm L ξ n) (σ : Semisentence L k) :
+@[simp] lemma eval_embSubsts {ξ} {ε : ξ → M} {k} (w : Fin k → Semiterm L ξ n) (σ : Semisentence L k) :
     Eval s e ε ((@Rew.embSubsts L ξ n k w) ▹ σ) ↔ Evalb s (fun x ↦ (w x).val s e ε) σ := by
   simp [eval_rew, Function.comp_def, Empty.eq_elim]
 
@@ -587,6 +587,24 @@ lemma models_iff₀ {φ} : M ⊧ₘ φ ↔ Semiformula.Evalb s ![] ∀∀₀φ :
   simp [models_def, Semiformula.eval_close₀]
 
 lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ {φ}, φ ∈ T → M ⊧ₘ φ) := Semantics.realizeSet_iff
+
+section Models₀
+
+@[simp] lemma models₀_verum : M ⊧ₘ₀ (⊤ : Sentence L) := by simp [models₀_iff]
+
+@[simp] lemma not_models₀_falsum : ¬M ⊧ₘ₀ (⊥ : Sentence L) := by simp [models₀_iff]
+
+@[simp] lemma models₀_not_iff (σ : Sentence L) : M ⊧ₘ₀ (∼σ) ↔ ¬M ⊧ₘ₀ σ := by simp [models₀_iff]
+
+@[simp] lemma models₀_or_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⋎ π) ↔ M ⊧ₘ₀ σ ∨ M ⊧ₘ₀ π := by simp [models₀_iff]
+
+@[simp] lemma models₀_and_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⋏ π) ↔ M ⊧ₘ₀ σ ∧ M ⊧ₘ₀ π := by simp [models₀_iff]
+
+@[simp] lemma models₀_imply_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ➝ π) ↔ M ⊧ₘ₀ σ → M ⊧ₘ₀ π := by simp [models₀_iff]
+
+@[simp] lemma models₀_equiv_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⭤ π) ↔ (M ⊧ₘ₀ σ ↔ M ⊧ₘ₀ π) := by simp [models₀_iff]
+
+end Models₀
 
 variable (M T)
 

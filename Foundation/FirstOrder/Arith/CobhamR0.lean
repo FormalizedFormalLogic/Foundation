@@ -75,7 +75,7 @@ lemma bold_sigma_one_completeness {n} {φ : Semiformula ℒₒᵣ ξ n} (hp : Hi
     · left; exact ihp hp
     · right; exact ihq hq
   case hBall =>
-    simp only [Semiformula.eval_ball, Nat.succ_eq_add_one, Semiformula.eval_operator₂,
+    simp only [Semiformula.eval_ball, Nat.succ_eq_add_one, Semiformula.eval_operator_two,
       Semiterm.val_bvar, Matrix.cons_val_zero, Semiterm.val_bShift, Structure.LT.lt, val_numeral]
     intro n t φ _ ihp e hp x hx
     rcases lt_numeral_iff.mp hx with ⟨x, rfl⟩
@@ -90,6 +90,25 @@ lemma sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 �
   suffices Semiformula.Evalbm ℕ ![] σ → Semiformula.Evalbm M ![] σ by simpa [models₀_iff]
   intro h
   simpa [Matrix.empty_eq, Empty.eq_elim] using bold_sigma_one_completeness hσ h
+
+variable (M)
+
+lemma nat_extention_sigmaOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+    ℕ ⊧ₘ₀ σ → M ⊧ₘ₀ σ := fun h ↦ by
+  simpa [Matrix.empty_eq] using LO.Arith.sigma_one_completeness (M := M) hσ h
+
+lemma nat_extention_piOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚷 1 σ) :
+    M ⊧ₘ₀ σ → ℕ ⊧ₘ₀ σ := by
+  contrapose
+  simpa using nat_extention_sigmaOne M (σ := ∼σ) (by simpa using hσ)
+
+variable {M}
+
+lemma bold_sigma_one_completeness' {n} {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 1 σ) {e} :
+    Semiformula.Evalbm ℕ e σ → Semiformula.Evalbm M (fun x ↦ numeral (e x)) σ := fun h ↦ by
+  simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (φ := σ) hσ (f := Empty.elim) (e := e) h
+
+
 
 end Arith
 

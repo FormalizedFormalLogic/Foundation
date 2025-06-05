@@ -303,7 +303,7 @@ end model
 -/
 
 private lemma codeAux_sigma_one {k} (c : Nat.ArithPart₁.Code k) : Hierarchy 𝚺 1 (codeAux c) := by
-  induction c <;> simp [codeAux, Matrix.fun_eq_vec₂]
+  induction c <;> simp [codeAux, Matrix.fun_eq_vec_two]
   case comp c d ihc ihg =>
     exact Hierarchy.exClosure (by simp [ihc, ihg])
   case rfind k c ih => simp [ih]
