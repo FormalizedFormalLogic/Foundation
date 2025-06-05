@@ -4,6 +4,7 @@ import Foundation.Modal.Entailment.K4
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Logic.S4
+import Foundation.Modal.Kripke.Logic.S4Point1
 
 namespace LO.Modal
 
@@ -300,6 +301,38 @@ instance : ProperSublogic Logic.S4 Logic.Grz := ⟨by
       . refine {refl := by tauto, trans := by tauto};
       . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 ⟩
+
+theorem Grz.proper_extension_of_S4Point1 : Logic.S4Point1 ⊂ Logic.Grz := by
+  constructor;
+  . rw [S4Point1.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨inferInstance, ⟨?_⟩⟩;
+    . intro x;
+      -- TODO: use `Finite.exists_le_maximal`
+      sorry;
+  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬Kripke.FrameClass.preorder_mckinsey ⊧ φ by
+      rw [S4Point1.Kripke.preorder_mckinsey];
+      tauto;
+    use Axioms.Grz (.atom 0)
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
+      constructor;
+      . refine ⟨?_, ⟨?_⟩⟩
+        . apply isPreorder_iff _ _ |>.mpr;
+          refine ⟨⟨?_⟩, ⟨?_⟩⟩;
+          . omega;
+          . omega;
+        . simp [McKinseyCondition];
+      . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
+          simpa [Semantics.Realize, Satisfies];
+        intro x hx hxn1;
+        by_contra hxn2;
+        rcases @hx 1 (by omega) (by tauto) x (by omega);
+        . contradiction;
+        . contradiction;
 
 end Logic
 
