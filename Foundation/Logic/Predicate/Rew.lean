@@ -565,10 +565,10 @@ variable (ω : SyntacticRew L n₁ n₂)
 @[simp] lemma q_shift : (shift (L := L) (n := n)).q = shift := by ext x; { cases x using Fin.cases <;> simp }; { simp }
 
 @[simp] lemma q_free : (free (L := L) (n := n)).q = free := by
-  ext x; { cases' x using Fin.cases with x <;> simp; { cases x using Fin.lastCases <;> simp[Fin.succ_castSucc] } }; { simp }
+  ext x; { cases' x using Fin.cases with x <;> simp; { cases x using Fin.lastCases <;> simp[-Fin.castSucc_succ, Fin.succ_castSucc] } }; { simp }
 
 @[simp] lemma q_fix : (fix (L := L) (n := n)).q = fix := by
-  ext x; { cases x using Fin.cases <;> simp[Fin.succ_castSucc] }; { cases x <;> simp }
+  ext x; { cases x using Fin.cases <;> simp[-Fin.castSucc_succ, Fin.succ_castSucc] }; { cases x <;> simp }
 
 --@[simp] lemma qpow_fix (k : ℕ) : (fix (L := L) (n := n)).qpow k = fix := by
 
