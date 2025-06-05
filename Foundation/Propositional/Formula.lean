@@ -49,13 +49,13 @@ instance : ToString (Formula α) := ⟨toStr⟩
 
 end ToString
 
-@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Wedge.wedge]
+@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
 
-@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Vee.vee]
+@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
 
-@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Arrow.arrow]
+@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 
-@[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp[Tilde.tilde]
+@[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [Tilde.tilde]
 
 
 lemma neg_def (φ : Formula α) : ∼φ = φ ➝ ⊥ := rfl
@@ -131,8 +131,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp[hp, hq])
-      | isFalse hp => isFalse (by simp[hp])
+        | isFalse hq => isFalse (by simp [hp, hq])
+      | isFalse hp => isFalse (by simp [hp])
   | φ ⋏ ψ, χ => by
     cases χ using cases' <;> try { simp; exact isFalse not_false }
     case hand φ' ψ' =>
@@ -140,8 +140,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp[hp, hq])
-      | isFalse hp => isFalse (by simp[hp])
+        | isFalse hq => isFalse (by simp [hp, hq])
+      | isFalse hp => isFalse (by simp [hp])
   | φ ⋎ ψ, χ => by
     cases χ using cases' <;> try { simp; exact isFalse not_false }
     case hor φ' ψ' =>
@@ -149,8 +149,8 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp[hp, hq])
-      | isFalse hp => isFalse (by simp[hp])
+        | isFalse hq => isFalse (by simp [hp, hq])
+      | isFalse hp => isFalse (by simp [hp])
 
 instance : DecidableEq (Formula α) := hasDecEq
 

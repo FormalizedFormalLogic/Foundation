@@ -467,8 +467,8 @@ lemma retractiont (h : ℌ.Boldface P) (f : Fin k → Semiterm ℒₒᵣ V n) :
 
 @[simp] lemma const {P : Prop} : ℌ.Boldface (fun _ : Fin k → V ↦ P) := of_zero (by
   by_cases hP : P
-  · exact ⟨.mkSigma ⊤ (by simp), by intro; simp[hP]⟩
-  · exact ⟨.mkSigma ⊥ (by simp), by intro; simp[hP]⟩)
+  · exact ⟨.mkSigma ⊤ (by simp), by intro; simp [hP]⟩
+  · exact ⟨.mkSigma ⊥ (by simp), by intro; simp [hP]⟩)
 
 lemma and (h₁ : ℌ.Boldface P) (h₂ : ℌ.Boldface Q) :
     ℌ.Boldface (fun v ↦ P v ∧ Q v) := by

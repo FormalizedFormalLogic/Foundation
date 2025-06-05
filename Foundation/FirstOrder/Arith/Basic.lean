@@ -24,7 +24,7 @@ end ORingStruc
 @[simp] lemma Nat.numeral_eq : (n : ℕ) → ORingStruc.numeral n = n
   | 0     => rfl
   | 1     => rfl
-  | n + 2 => by simp[ORingStruc.numeral, Nat.numeral_eq (n + 1)]
+  | n + 2 => by simp [ORingStruc.numeral, Nat.numeral_eq (n + 1)]
 
 namespace FirstOrder
 
@@ -132,9 +132,9 @@ variable [Operator.Zero L] [Operator.One L] [Operator.Add L] {M : Type u} [ORing
   [Structure L M] [Structure.Zero L M] [Structure.One L M] [Structure.Add L M]
 
 @[simp] lemma numeral_eq_numeral : (z : ℕ) → (Semiterm.Operator.numeral L z).val ![] = (ORingStruc.numeral z : M)
-  | 0     => by simp[ORingStruc.numeral, Semiterm.Operator.numeral_zero]
-  | 1     => by simp[ORingStruc.numeral, Semiterm.Operator.numeral_one]
-  | z + 2 => by simp[ORingStruc.numeral, Semiterm.Operator.numeral_add_two,
+  | 0     => by simp [ORingStruc.numeral, Semiterm.Operator.numeral_zero]
+  | 1     => by simp [ORingStruc.numeral, Semiterm.Operator.numeral_one]
+  | z + 2 => by simp [ORingStruc.numeral, Semiterm.Operator.numeral_add_two,
                   Semiterm.Operator.val_comp, Matrix.fun_eq_vec₂, numeral_eq_numeral (z + 1)]
 
 end Structure

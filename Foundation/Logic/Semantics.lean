@@ -232,7 +232,7 @@ namespace Cumulative
 lemma subset_of_le {T : ℕ → Set F} (H : Cumulative T)
     {s₁ s₂ : ℕ} (h : s₁ ≤ s₂) : T s₁ ⊆ T s₂ := by
   suffices ∀ s d, T s ⊆ T (s + d) by
-    simpa[Nat.add_sub_of_le h] using this s₁ (s₂ - s₁)
+    simpa [Nat.add_sub_of_le h] using this s₁ (s₂ - s₁)
   intro s d
   induction' d with d ih
   · simp

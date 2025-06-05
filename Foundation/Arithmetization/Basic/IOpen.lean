@@ -20,7 +20,7 @@ lemma open_induction {P : V → Prop}
   induction (C := Semiformula.Open)
     (by rcases hP with ⟨p, hp, hhp⟩
         haveI : Inhabited V := Classical.inhabited_of_nonempty'
-        exact ⟨p.fvarEnumInv, Rew.rewriteMap p.fvarEnum ▹ p, by simp[hp],
+        exact ⟨p.fvarEnumInv, Rew.rewriteMap p.fvarEnum ▹ p, by simp [hp],
           by  intro x; simp [Semiformula.eval_rewriteMap, hhp]
               exact Semiformula.eval_iff_of_funEqOn p (by
                 intro z hz
@@ -93,10 +93,10 @@ lemma div_graph {a b c : V} : c = a / b ↔ ((0 < b → b * c ≤ a ∧ a < b * 
   Classical.choose!_eq_iff _
 
 def _root_.LO.FirstOrder.Arith.divDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “c a b. (0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “c a b. (0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma div_defined : 𝚺₀-Function₂ ((· / ·) : V → V → V) via divDef := by
-  intro v; simp[div_graph, divDef, Matrix.vecHead, Matrix.vecTail]
+  intro v; simp [div_graph, divDef, Matrix.vecHead, Matrix.vecTail]
 
 @[simp] lemma div_defined_iff (v) :
     Semiformula.Evalbm V v divDef.val ↔ v 0 = v 1 / v 2 := div_defined.df.iff v
@@ -140,7 +140,7 @@ lemma div_mul (a b c : V) : a / (b * c) = a / b / c := by
 @[simp] lemma div_le (a b : V) : a / b ≤ a := by
   have : 0 ≤ b := zero_le b
   rcases this with (rfl | pos) <;> simp [*]
-  have : 1 * (a / b) ≤ b * (a / b) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp[pos])) (by simp)
+  have : 1 * (a / b) ≤ b * (a / b) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp [pos])) (by simp)
   simpa using le_trans this (mul_div_le a b)
 
 instance div_polybounded : Bounded₂ ((· / ·) : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
@@ -197,7 +197,7 @@ lemma div_mul_add_self' (a c : V) {b} (pos : 0 < b) : (b * a + c) / b = a + c / 
 
 lemma mul_div_self_of_dvd {a b : V} : a * (b / a) = b ↔ a ∣ b := by
   rcases zero_le a with (rfl | pos)
-  · simp[eq_comm]
+  · simp [eq_comm]
   · constructor
     · intro e; rw [←e]; simp
     · rintro ⟨r, rfl⟩; simp [pos]
@@ -373,7 +373,7 @@ lemma two_dvd_mul {a b : V} : 2 ∣ a * b → 2 ∣ a ∨ 2 ∣ b := by
 lemma even_or_odd (a : V) : ∃ x, a = 2 * x ∨ a = 2 * x + 1 :=
   ⟨a / 2, by
     have : 2 * (a / 2) + (a % 2) = a := div_add_mod a 2
-    rcases mod_two a with (e | e) <;> { simp[e] at this; simp [this] }⟩
+    rcases mod_two a with (e | e) <;> { simp [e] at this; simp [this] }⟩
 
 lemma even_or_odd' (a : V) : a = 2 * (a / 2) ∨ a = 2 * (a / 2) + 1 := by
   have : 2 * (a / 2) + (a % 2) = a := div_add_mod a 2
@@ -415,10 +415,10 @@ prefix:75 "√" => sqrt
 lemma sqrt_graph {a b : V} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) := Classical.choose!_eq_iff _
 
 def _root_.LO.FirstOrder.Arith.sqrtDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “b a. b * b ≤ a ∧ a < (b + 1) * (b + 1)” (by simp[Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “b a. b * b ≤ a ∧ a < (b + 1) * (b + 1)” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma sqrt_defined : 𝚺₀-Function₁ (λ a : V ↦ √a) via sqrtDef := by
-  intro v; simp[sqrt_graph, sqrtDef, Matrix.vecHead, Matrix.vecTail]
+  intro v; simp [sqrt_graph, sqrtDef, Matrix.vecHead, Matrix.vecTail]
 
 @[simp] lemma sqrt_defined_iff (v) :
     Semiformula.Evalbm V v sqrtDef.val ↔ v 0 = √(v 1) := sqrt_defined.df.iff v
@@ -626,7 +626,7 @@ lemma pair_lt_pair_left {a₁ a₂ : V} (h : a₁ < a₂) (b) : ⟪a₁, b⟫ < 
       b * b + a₁ < b * b + b        := by simpa using h₁
       _          ≤ a₂ * a₂ + a₂     := add_le_add (mul_le_mul (by simpa using h₂) (by simpa using h₂) (by simp) (by simp)) (by simpa using h₂)
       _          ≤ a₂ * a₂ + a₂ + b := by simp
-  · simp[show ¬a₂ < b from by simp; exact le_trans (by simpa using h₁) (le_of_lt h)]
+  · simp [show ¬a₂ < b from by simp; exact le_trans (by simpa using h₁) (le_of_lt h)]
     apply _root_.add_lt_add (by simpa [←sq] using h) h
 
 lemma pair_le_pair_left {a₁ a₂ : V} (h : a₁ ≤ a₂) (b) : ⟪a₁, b⟫ ≤ ⟪a₂, b⟫ := by

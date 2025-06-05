@@ -105,7 +105,7 @@ lemma one_lt_iff_two_le : 1 < a ↔ 2 ≤ a := by simp [lt_iff_succ_le, one_add_
 lemma lt_two_iff_le_one : a < 2 ↔ a ≤ 1 := by
   simp [lt_iff_succ_le,
     show a + 1 ≤ 2 ↔ a ≤ 1 from by
-      rw[show (2 : M) = 1 + 1 from one_add_one_eq_two.symm]; exact add_le_add_iff_right 1]
+      rw [show (2 : M) = 1 + 1 from one_add_one_eq_two.symm]; exact add_le_add_iff_right 1]
 
 @[simp] lemma lt_one_iff_eq_zero : a < 1 ↔ a = 0 := ⟨by
   intro hx

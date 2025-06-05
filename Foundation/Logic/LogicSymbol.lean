@@ -95,14 +95,14 @@ instance PropLogicSymbols : LogicalConnective Prop where
 
 @[simp] lemma Prop.or_eq (φ ψ : Prop) : (φ ⋎ ψ) = (φ ∨ ψ) := rfl
 
-@[simp] lemma Prop.iff_eq (φ ψ : Prop) : (φ ⭤ ψ) = (φ ↔ ψ) := by simp[LogicalConnective.iff, iff_iff_implies_and_implies]
+@[simp] lemma Prop.iff_eq (φ ψ : Prop) : (φ ⭤ ψ) = (φ ↔ ψ) := by simp [LogicalConnective.iff, iff_iff_implies_and_implies]
 
 instance : DeMorgan Prop where
   verum := by simp
   falsum := by simp
-  imply := fun _ _ => by simp[imp_iff_not_or]
-  and := fun _ _ => by simp[-not_and, not_and_or]
-  or := fun _ _ => by simp[not_or]
+  imply := fun _ _ => by simp [imp_iff_not_or]
+  and := fun _ _ => by simp [-not_and, not_and_or]
+  or := fun _ _ => by simp [not_or]
   neg := fun _ => by simp
 
 class HomClass (F : Type*) (α β : outParam Type*) [LogicalConnective α] [LogicalConnective β] [FunLike F α β] where
@@ -123,7 +123,7 @@ variable (f : F) (a b : α)
 
 instance : CoeFun F (fun _ => α → β) := ⟨DFunLike.coe⟩
 
-@[simp] lemma map_iff : f (a ⭤ b) = f a ⭤ f b := by simp[LogicalConnective.iff]
+@[simp] lemma map_iff : f (a ⭤ b) = f a ⭤ f b := by simp [LogicalConnective.iff]
 
 end HomClass
 
@@ -316,26 +316,26 @@ variable [LogicalConnective α] [LogicalConnective β]
 
 @[simp] lemma conj_hom_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
   (f : F) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
-  induction' n with n ih <;> simp[conj]
-  · simp[ih]; constructor
+  induction' n with n ih <;> simp [conj]
+  · simp [ih]; constructor
     · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
     · intro h; exact ⟨h 0, fun i => h _⟩
 
 @[simp] lemma disj_hom_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
   (f : F) (v : Fin n → α) : f (disj v) = ∃ i, f (v i) := by
-  induction' n with n ih <;> simp[disj]
-  · simp[ih]; constructor
+  induction' n with n ih <;> simp [disj]
+  · simp [ih]; constructor
     · rintro (H | ⟨i, H⟩); { exact ⟨0, H⟩ }; { exact ⟨i.succ, H⟩ }
     · rintro ⟨i, h⟩
       cases i using Fin.cases; { left; exact h }; { right; exact ⟨_, h⟩ }
 
 lemma hom_conj [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj (f ∘ v) := by
-  induction' n with n ih <;> simp[*, conj]
+  induction' n with n ih <;> simp [*, conj]
 
 lemma hom_conj₂ [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (conj v) = conj fun i => f (v i) := hom_conj f v
 
 lemma hom_disj [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (disj v) = disj (f ∘ v) := by
-  induction' n with n ih <;> simp[*, disj]
+  induction' n with n ih <;> simp [*, disj]
 
 lemma hom_disj' [FunLike F α β] [LogicalConnective.HomClass F α β] (f : F) (v : Fin n → α) : f (disj v) = disj fun i => f (v i) := hom_disj f v
 
