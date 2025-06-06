@@ -1,7 +1,7 @@
 import Foundation.Vorspiel.List.Chain
 import Foundation.Vorspiel.Fin.Supplemental
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.S4Point2
+import Foundation.Modal.Kripke.Logic.S4Point2Point1
 import Mathlib.Data.Finite.Sum
 import Mathlib.Data.Set.Finite.Basic
 import Mathlib.Data.Fintype.Pigeonhole
@@ -39,8 +39,8 @@ namespace Kripke
 
 variable {F : Frame}
 
-def Frame.terminals (F : Frame) : Set F.World := { t | ∀ {y}, t ≺ y → y = t }
-def Frame.terminals_of (F : Frame) (x : F.World) : Set F.World := { t | x ≺^+ t ∧ ∀ {y}, t ≺ y → y = t }
+def Frame.terminals (F : Frame) : Set F.World := { t | ∀ {y}, t ≺ y → t = y }
+def Frame.terminals_of (F : Frame) (x : F.World) : Set F.World := { t | x ≺^+ t ∧ ∀ {y}, t ≺ y → t = y }
 
 lemma Frame.exists_card [IsFinite F] : ∃ n : ℕ+, Nonempty (F.World ≃ Fin n) := by
   obtain ⟨n, ⟨hn⟩⟩ := Finite.exists_equiv_fin F.World;
@@ -50,51 +50,12 @@ lemma Frame.exists_card [IsFinite F] : ∃ n : ℕ+, Nonempty (F.World ≃ Fin n
     subst hn0;
     apply Fin.elim0 $ hn.toFun (F.world_nonempty.some);
 
-open Classical in
-private lemma Frame.exists_arbitary_length_chain_of_terminal_orphan {s} [IsPartialOrder _ F] (h : ∀ t ∈ F.terminals, ¬s ≺ t) (n : ℕ+) :
-  ∃ l : List F.World, List.Chain' F.Rel l ∧ l.head? = s ∧ l.Nodup ∧ l.length = n := by
-  induction n with
-  | one => use [s]; aesop;
-  | succ n ih =>
-    obtain ⟨l, l₁, l₂, l₄, l₃⟩ := ih;
-    obtain ⟨l_nonempty, rfl⟩ := List.mem_head?_eq_head l₂;
-    clear l₂;
-    have : (l.getLast l_nonempty) ∉ F.terminals := by
-      by_contra hC;
-      apply h _ hC;
-      apply List.rel_getLast_of_chain'_preorder l₁;
-      simp;
-    simp only [Frame.terminals, Set.mem_setOf_eq, not_forall, Classical.not_imp] at this;
-    obtain ⟨y, hy₁, hy₂⟩ := this;
-    use (l.concat y);
-    refine ⟨?_, ?_, ?_, ?_⟩;
-    . apply List.chain'_concat.mpr;
-      constructor;
-      . assumption;
-      . intro z hz;
-        convert hy₁;
-        obtain ⟨_, rfl⟩ := List.mem_getLast?_eq_getLast hz;
-        tauto;
-    . apply List.concat_head?_eq_head;
-    . apply List.Nodup.concat;
-      . by_contra hC;
-        have := antisymm hy₁ (List.rel_getLast_of_chain'_preorder l₁ l_nonempty y hC);
-        simp_all;
-      . tauto;
-    . simp_all;
-
-private lemma Frame.no_terminal_orphan_of_finite [IsFinite F] [IsPartialOrder _ F] : ¬∀ t ∈ F.terminals, ¬s ≺ t := by
-  by_contra hC;
-  obtain ⟨n, ⟨hn⟩⟩ := F.exists_card;
-  obtain ⟨l, _, _, l₃, l₄⟩ := Frame.exists_arbitary_length_chain_of_terminal_orphan hC (n + 1);
-  apply Fin.isEmpty_embedding_lt (n := n + 1) (m := n) (by omega) |>.false;
-  exact (List.embedding_of_exists_noDup l₃ l₄).trans hn.toEmbedding;
-
-/-- In finite frame, every point can reach some terminal. -/
-theorem Frame.exists_terminal [IsFinite F] [IsPartialOrder _ F] : ∃ t ∈ F.terminals, s ≺ t := by
-  have := F.no_terminal_orphan_of_finite (s := s)
-  push_neg at this;
-  tauto;
+lemma Frame.exists_terminal [IsFinite F] [IsPartialOrder _ F] : ∃ t ∈ F.terminals, s ≺ t := by
+  obtain ⟨t, ht₁, ht₂⟩ := @SatisfiesMcKinseyCondition.mckCondition _ F.Rel _ s;
+  use t;
+  constructor;
+  . apply ht₂;
+  . assumption;
 
 end Kripke
 
@@ -338,6 +299,7 @@ open Kripke
 
 lemma GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_confluent_partial_order.logic := eq_hilbert_logic_frameClass_logic
 
+@[simp]
 theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -376,22 +338,40 @@ theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
             push_neg;
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
 
-theorem GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by
+@[simp]
+theorem GrzPoint2.proper_extension_of_S4Point2Point1 : Logic.S4Point2Point1 ⊂ Logic.GrzPoint2 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_confluent_preorder ⊧ φ by
-      rw [S4Point2.Kripke.finite_confluent_preorder];
+  . rw [S4Point2Point1.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
+    rintro φ hφ F ⟨_, _, _⟩;
+    apply hφ;
+    refine ⟨inferInstance, inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.preorder_confluent_mckinsey ⊧ φ by
+      rw [S4Point2Point1.Kripke.preorder_confluent_mckinsey];
       tauto;
     use Axioms.Grz (.atom 0);
     constructor;
     . simp;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
+      use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
       constructor;
-      . refine ⟨inferInstance, {refl := by simp, trans := by simp}, ⟨?_⟩⟩;
-        . rintro x y z ⟨Rxy, Ryz⟩; use 0;
-      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
+      . refine ⟨?_, ⟨?_⟩, ⟨?_⟩⟩;
+        . apply isPreorder_iff _ _ |>.mpr;
+          refine ⟨⟨?_⟩, ⟨?_⟩⟩;
+          . omega;
+          . omega;
+        . simp [Confluent];
+        . simp [McKinseyCondition];
+      . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
+          simpa [Semantics.Realize, Satisfies];
+        intro x hx hxn1;
+        by_contra hxn2;
+        rcases @hx 1 (by omega) (by tauto) x (by omega);
+        . contradiction;
+        . contradiction;
 
+@[simp]
+lemma GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by
+  trans Logic.S4Point2Point1 <;> simp;
 
 end Logic
 

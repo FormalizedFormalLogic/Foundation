@@ -11,6 +11,7 @@ section
 
 variable {α : Type u} (rel : α → α → Prop)
 
+/-- Every point can see terminal. -/
 def McKinseyCondition := ∀ x, ∃ y, rel x y ∧ (∀ z, rel y z → y = z)
 
 class SatisfiesMcKinseyCondition (α) (rel : α → α → Prop) : Prop where
