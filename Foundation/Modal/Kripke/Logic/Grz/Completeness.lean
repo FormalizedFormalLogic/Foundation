@@ -307,10 +307,7 @@ theorem Grz.proper_extension_of_S4Point1 : Logic.S4Point1 ⊂ Logic.Grz := by
   . rw [S4Point1.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
-    refine ⟨inferInstance, ⟨?_⟩⟩;
-    . intro x;
-      -- TODO: use `Finite.exists_le_maximal`
-      sorry;
+    refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬Kripke.FrameClass.preorder_mckinsey ⊧ φ by
       rw [S4Point1.Kripke.preorder_mckinsey];
       tauto;
