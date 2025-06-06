@@ -43,7 +43,7 @@ open Kripke
 
 lemma KD45.Kripke.serial_trans_eucl : Logic.KD45 = FrameClass.serial_trans_eucl.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KD4 Logic.KD45 := ⟨by
+theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by
@@ -66,9 +66,8 @@ instance : ProperSublogic Logic.KD4 Logic.KD45 := ⟨by
         . tauto;
         . use 1;
           constructor <;> omega;
-⟩
 
-instance : ProperSublogic Logic.KD5 Logic.KD45 := ⟨by
+theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_eucl ⊧ φ by
@@ -102,9 +101,8 @@ instance : ProperSublogic Logic.KD5 Logic.KD45 := ⟨by
             constructor;
             . omega;
             . trivial;
-⟩
 
-instance : ProperSublogic Logic.K45 Logic.KD45 := ⟨by
+theorem KD45.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by
@@ -118,7 +116,6 @@ instance : ProperSublogic Logic.K45 Logic.KD45 := ⟨by
       constructor;
       . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
       . simp [Semantics.Realize, Satisfies];
-⟩
 
 end Logic
 

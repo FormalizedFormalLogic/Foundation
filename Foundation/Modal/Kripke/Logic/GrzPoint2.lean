@@ -299,7 +299,8 @@ open Kripke
 
 lemma GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_confluent_partial_order.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
+@[simp]
+theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by
@@ -336,8 +337,8 @@ instance : ProperSublogic Logic.Grz Logic.GrzPoint2 := ⟨by
           . apply Satisfies.dia_def.not.mpr;
             push_neg;
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
-⟩
 
+@[simp]
 theorem GrzPoint2.proper_extension_of_S4Point2Point1 : Logic.S4Point2Point1 ⊂ Logic.GrzPoint2 := by
   constructor;
   . rw [S4Point2Point1.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
@@ -367,6 +368,8 @@ theorem GrzPoint2.proper_extension_of_S4Point2Point1 : Logic.S4Point2Point1 ⊂ 
         rcases @hx 1 (by omega) (by tauto) x (by omega);
         . contradiction;
         . contradiction;
+
+lemma GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by sorry
 
 end Logic
 

@@ -41,7 +41,7 @@ open Kripke
 
 lemma K4Point1.Kripke.trans_mckinsey : Logic.K4Point1 = FrameClass.trans_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.K4 Logic.K4Point1 := ⟨by
+theorem K4Point1.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point1 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K4Point1 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
@@ -55,7 +55,6 @@ instance : ProperSublogic Logic.K4 Logic.K4Point1 := ⟨by
       constructor;
       . refine ⟨by tauto⟩;
       . simp [Semantics.Realize, Satisfies];
-⟩
 
 end Logic
 

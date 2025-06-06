@@ -42,7 +42,7 @@ open Kripke
 
 lemma KD4.Kripke.serial_trans : Logic.KD4 = FrameClass.serial_trans.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KD Logic.KD4 := ⟨by
+theorem KD4.proper_extension_of_KD : Logic.KD ⊂ Logic.KD4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
@@ -57,9 +57,8 @@ instance : ProperSublogic Logic.KD Logic.KD4 := ⟨by
       . refine ⟨by simp [Serial]⟩;
       . simp [Semantics.Realize, Satisfies];
         tauto;
-⟩
 
-instance : ProperSublogic Logic.K4 Logic.KD4 := ⟨by
+theorem KD4.proper_extension_of_K4 : Logic.K4 ⊂ Logic.KD4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.trans ⊧ φ by
@@ -73,7 +72,6 @@ instance : ProperSublogic Logic.K4 Logic.KD4 := ⟨by
       constructor;
       . refine ⟨by tauto⟩;
       . simp [Semantics.Realize, Satisfies];
-⟩
 
 end Logic
 

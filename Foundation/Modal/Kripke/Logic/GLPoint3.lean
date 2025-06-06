@@ -42,7 +42,7 @@ open Kripke
 
 lemma GLPoint3.Kripke.finite_strict_linear_order : Logic.GLPoint3 = FrameClass.finite_strict_linear_order.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.GL Logic.GLPoint3 := ⟨by
+theorem GLPoint3.proper_extension_of_GL : Logic.GL ⊂ Logic.GLPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.finite_trans_irrefl ⊧ φ by
@@ -60,9 +60,8 @@ instance : ProperSublogic Logic.GL Logic.GLPoint3 := ⟨by
           simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
         refine ⟨?_, ?_, ?_, ?_⟩;
         all_goals omega;
-⟩
 
-instance : ProperSublogic Logic.K4Point3 Logic.GLPoint3 := ⟨by
+theorem GLPoint3.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.GLPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by
@@ -81,7 +80,6 @@ instance : ProperSublogic Logic.K4Point3 Logic.GLPoint3 := ⟨by
           use y;
         . use 1;
           omega;
-⟩
 
 end Logic
 
