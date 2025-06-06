@@ -369,7 +369,9 @@ theorem GrzPoint2.proper_extension_of_S4Point2Point1 : Logic.S4Point2Point1 ⊂ 
         . contradiction;
         . contradiction;
 
-lemma GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by sorry
+@[simp]
+lemma GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by
+  trans Logic.S4Point2Point1 <;> simp;
 
 end Logic
 
