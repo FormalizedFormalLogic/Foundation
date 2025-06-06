@@ -40,7 +40,7 @@ open Kripke
 
 lemma K5.Kripke.eucl : Logic.K5 = FrameClass.eucl.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.K Logic.K5 := ⟨by
+theorem K5.proper_extension_of_K : Logic.K ⊂ Logic.K5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
@@ -57,7 +57,6 @@ instance : ProperSublogic Logic.K Logic.K5 := ⟨by
       . suffices ∃ (x : M.World), ¬x = 0 by simpa [Semantics.Realize, Satisfies, M];
         use 1;
         trivial;
-⟩
 
 end Logic
 

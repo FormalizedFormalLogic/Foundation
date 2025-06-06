@@ -44,7 +44,8 @@ open Kripke
 
 lemma S4Point1.Kripke.preorder_mckinsey : Logic.S4Point1 = FrameClass.preorder_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.S4 Logic.S4Point1 := ⟨by
+@[simp]
+theorem S4Point1.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4Point1 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S4Point1 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by
@@ -62,7 +63,25 @@ instance : ProperSublogic Logic.S4 Logic.S4Point1 := ⟨by
       . suffices ∃ x, x ≠ (0 : M.World) by simpa [M, Transitive, Reflexive, Semantics.Realize, Satisfies];
         use 1;
         trivial;
-⟩
+
+@[simp]
+theorem S4Point1.proper_extension_of_K4Point1 : Logic.K4Point1 ⊂ Logic.S4Point1 := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.S4Point1 ⊢! φ ∧ ¬FrameClass.trans_mckinsey ⊧ φ by
+      rw [K4Point1.Kripke.trans_mckinsey];
+      tauto;
+    use (Axioms.T (.atom 0));
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨⟨?_⟩, ⟨?_⟩⟩;
+        . omega;
+        . simp [M, McKinseyCondition];
+      . simp [Semantics.Realize, Satisfies, M];
 
 @[simp]
 theorem S4Point1.proper_extension_of_K4Point1 : Logic.K4Point1 ⊂ Logic.S4Point1 := by

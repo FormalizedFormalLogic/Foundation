@@ -106,7 +106,7 @@ lemma S4Point2.is_smallestMC_of_KC : Logic.S4Point2 = Logic.KC.smallestMC := by
     | _ => apply Logic.sumNormal.mem₁; simp;
   . intro hφ;
     induction hφ with
-    | mem₁ h => apply Sublogic.subset h;
+    | mem₁ h => apply S4Point2.proper_extension_of_S4.subset h;
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;
     | nec h ih => apply Modal.Logic.nec ih;
@@ -114,7 +114,7 @@ lemma S4Point2.is_smallestMC_of_KC : Logic.S4Point2 = Logic.KC.smallestMC := by
       rcases h with ⟨φ, hφ, rfl⟩;
       apply Hilbert.provable_goedelTranslated_of_provable Hilbert.KC Hilbert.S4Point2 ?_ (by trivial);
       rintro _ ⟨_, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩;
-      . apply Sublogic.subset (L₁ := Logic.S4) (L₂ := Logic.S4Point2);
+      . apply S4Point2.proper_extension_of_S4.subset
         apply modalCompanion_Int_S4.companion.mp;
         simp;
       . suffices Hilbert.S4Point2 ⊢! □(∼(s 0)ᵍ) ⋎ □(∼□(∼(s 0)ᵍ)) by simpa;
@@ -138,7 +138,7 @@ section GrzPoint2
 
 lemma Logic.gGrzPoint2_of_KC : φ ∈ Logic.KC → φᵍ ∈ Logic.GrzPoint2 := by
   intro h;
-  exact Sublogic.subset $ modalCompanion_KC_S4Point2.companion.mp h;
+  exact GrzPoint2.proper_extension_of_S4Point2.subset $ modalCompanion_KC_S4Point2.companion.mp h;
 
 lemma Logic.GrzPoint2.is_largestMC_of_KC : Logic.GrzPoint2 = Logic.KC.largestMC := by
   ext φ;
@@ -163,7 +163,7 @@ lemma Logic.GrzPoint2.is_largestMC_of_KC : Logic.GrzPoint2 = Logic.KC.largestMC 
   . intro hφ;
     induction hφ with
     | mem₁ h =>
-      apply Sublogic.subset (L₁ := Logic.S4Point2) (L₂ := Logic.GrzPoint2);
+      apply GrzPoint2.proper_extension_of_S4Point2.subset;
       rwa [Logic.S4Point2.is_smallestMC_of_KC]
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;

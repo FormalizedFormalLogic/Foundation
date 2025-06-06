@@ -41,7 +41,6 @@ lemma Logic.GL_ssubset_Dz : Logic.GL ⊂ Logic.Dz := by
     constructor;
     . exact Logic.Dz.mem_axiomP
     . exact Logic.GL.unprovable_notbox;
-instance : ProperSublogic Logic.GL Logic.Dz := ⟨Logic.GL_ssubset_Dz⟩
 
 
 section

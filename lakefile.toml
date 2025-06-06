@@ -28,5 +28,5 @@ supportInterpreter = true
 
 [[lean_exe]]
 name = "generate_modal_kite"
-srcDir = "scripts"
+root = "Kite.Modal"
 supportInterpreter = true

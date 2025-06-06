@@ -74,7 +74,7 @@ open Kripke
 lemma Ver.Kripke.isolated : Logic.Ver = FrameClass.isolated.logic := eq_hilbert_logic_frameClass_logic
 lemma Ver.Kripke.finite_isolated : Logic.Ver = FrameClass.finite_isolated.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KTc Logic.Ver := ⟨by
+theorem Ver.proper_extension_of_Ktc : Logic.KTc ⊂ Logic.Ver := by
   constructor;
   . rw [KTc.Kripke.corefl, Ver.Kripke.isolated];
     rintro φ hφ F hF;
@@ -95,9 +95,8 @@ instance : ProperSublogic Logic.KTc Logic.Ver := ⟨by
       . refine ⟨by unfold Coreflexive; trivial⟩
       . suffices ∃ x, (0 : M.World) ≺ x by simpa [Satisfies, Semantics.Realize];
         use 0;
-⟩
 
-instance : ProperSublogic Logic.GLPoint3 Logic.Ver := ⟨by
+theorem Ver.proper_extension_of_GLPoint3 : Logic.GLPoint3 ⊂ Logic.Ver := by
   constructor;
   . rw [GLPoint3.Kripke.finite_strict_linear_order, Ver.Kripke.finite_isolated];
     rintro φ hφ F ⟨_, _⟩;
@@ -119,9 +118,9 @@ instance : ProperSublogic Logic.GLPoint3 Logic.Ver := ⟨by
       . simp only [Semantics.Realize, Satisfies, imp_false, not_forall, not_not];
         use 1;
         tauto;
-⟩
 
-instance : ProperSublogic Logic.Ver Logic.Univ := inferInstance
+@[simp]
+theorem Univ.proper_extension_of_Ver : Logic.Ver ⊂ Logic.Univ := by  constructor <;> simp;
 
 end Logic
 

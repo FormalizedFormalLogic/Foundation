@@ -41,7 +41,7 @@ open Kripke
 
 lemma KB4.Kripke.refl_trans : Logic.KB4 = FrameClass.symm_trans.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.K45 Logic.KB4 := ⟨by
+theorem KB4.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KB4 := by
   constructor;
   . rw [K45.Kripke.trans_eucl, KB4.Kripke.refl_trans];
     rintro φ hφ F ⟨_, _⟩;
@@ -58,9 +58,8 @@ instance : ProperSublogic Logic.K45 Logic.KB4 := ⟨by
       constructor;
       . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
       . simp [Semantics.Realize, Satisfies];
-⟩
 
-instance : ProperSublogic Logic.KB Logic.KB4 := ⟨by
+theorem KB4.proper_extension_of_KB : Logic.KB ⊂ Logic.KB4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by
@@ -75,7 +74,6 @@ instance : ProperSublogic Logic.KB Logic.KB4 := ⟨by
       . refine ⟨by simp⟩;
       . simp [Semantics.Realize, Satisfies];
         tauto;
-⟩
 
 end Logic
 

@@ -173,4 +173,3 @@ import Foundation.AutoProver.Classical
 
 -- Meta
 import Foundation.Meta.Kite.Arith
-import Foundation.Meta.Kite.Modal

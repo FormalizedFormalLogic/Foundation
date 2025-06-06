@@ -56,7 +56,8 @@ open Kripke
 
 lemma KTB.Kripke.refl_symm : Logic.KTB = FrameClass.refl_symm.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KT Logic.KTB := ⟨by
+@[simp]
+theorem KTB.proper_extension_of_KT : Logic.KT ⊂ Logic.KTB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬Kripke.FrameClass.refl ⊧ φ by
@@ -74,9 +75,9 @@ instance : ProperSublogic Logic.KT Logic.KTB := ⟨by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;
         omega;
-⟩
 
-instance : ProperSublogic Logic.KDB Logic.KTB := ⟨by
+@[simp]
+theorem KTB.proper_extension_of_KDB : Logic.KDB ⊂ Logic.KTB := by
   constructor;
   . rw [KDB.Kripke.serial_symm, KTB.Kripke.refl_symm];
     rintro φ hφ F ⟨_, _⟩;
@@ -97,7 +98,6 @@ instance : ProperSublogic Logic.KDB Logic.KTB := ⟨by
           simp;
       . simp [Semantics.Realize, Satisfies];
         tauto;
-⟩
 
 end Logic
 
