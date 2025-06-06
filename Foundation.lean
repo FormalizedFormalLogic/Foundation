@@ -71,6 +71,7 @@ import Foundation.Modal.Kripke.Logic.GrzPoint3
 import Foundation.Modal.Kripke.Logic.K4Point1
 import Foundation.Modal.Kripke.Logic.K4Point2
 import Foundation.Modal.Kripke.Logic.K4Point3
+import Foundation.Modal.Kripke.Logic.K4n
 import Foundation.Modal.Kripke.Logic.KH
 import Foundation.Modal.Kripke.Logic.KT4B
 import Foundation.Modal.Kripke.Logic.KTc
