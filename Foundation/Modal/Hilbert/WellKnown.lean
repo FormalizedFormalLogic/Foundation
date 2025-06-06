@@ -362,8 +362,11 @@ protected abbrev Logic.K4n (n : ℕ+) := Hilbert.K4n n |>.logic
 
 namespace Hilbert.K4n
 
+variable {n : ℕ+}
+
 instance : (Hilbert.K4n n).HasK where p := 0; q := 1;
-instance : Entailment.Modal.K (Hilbert.K4n n) where
+instance : Entailment.K (Hilbert.K4n n) where
+
 instance : Entailment.HasAxiomFourN n (Hilbert.K4n n) where
   FourN φ := by
     apply Deduction.maxm;

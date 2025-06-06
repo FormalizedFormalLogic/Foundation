@@ -524,6 +524,7 @@ instance [Entailment.HasAxiomT 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1,
 instance [Entailment.HasAxiomB 𝓢]      : Entailment.HasAxiomGeach ⟨0, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomB⟩
 instance [Entailment.HasAxiomD 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 1⟩ 𝓢 := ⟨fun _ => axiomD⟩
 instance [Entailment.HasAxiomFour 𝓢]   : Entailment.HasAxiomGeach ⟨0, 2, 1, 0⟩ 𝓢 := ⟨fun _ => axiomFour⟩
+instance [Entailment.HasAxiomFourN n 𝓢] : HasAxiomGeach ⟨0, n + 1, n, 0⟩ 𝓢 := ⟨fun _ ↦ axiomFourN⟩
 instance [Entailment.HasAxiomFive 𝓢]   : Entailment.HasAxiomGeach ⟨1, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomFive⟩
 instance [Entailment.HasAxiomTc 𝓢]     : Entailment.HasAxiomGeach ⟨0, 1, 0, 0⟩ 𝓢 := ⟨fun _ => axiomTc⟩
 instance [Entailment.HasAxiomPoint2 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 1, 1⟩ 𝓢 := ⟨fun _ => axiomPoint2⟩
