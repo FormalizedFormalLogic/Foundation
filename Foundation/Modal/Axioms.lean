@@ -61,7 +61,7 @@ protected abbrev WeakPoint3 := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ)
 /--
   - `R1`: Hudges & Cresswell
 -/
-protected abbrev Point4 := φ ➝ ◇□φ ➝ □φ
+protected abbrev Point4 := ◇□φ ➝ φ ➝ □φ
 
 /--
   Axiom for

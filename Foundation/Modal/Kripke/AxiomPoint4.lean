@@ -46,8 +46,8 @@ lemma validate_axiomPoint4_of_sobocinskiCondition : SobocinskiCondition F.Rel �
   replace h₂ := Satisfies.not_imp_def.mp h₂;
   replace ⟨h₂, h₃⟩ := h₂;
 
-  replace h₂ := Satisfies.dia_def.mp h₂;
-  obtain ⟨z, Rxz, hz⟩ := h₂;
+  replace h₁ := Satisfies.dia_def.mp h₁;
+  obtain ⟨z, Rxz, hz⟩ := h₁;
 
   replace h₃ := Satisfies.not_box_def.mp h₃;
   obtain ⟨y, Rxy, hy⟩ := h₃;
@@ -65,20 +65,15 @@ lemma sobocinskiCondition_of_validate_axiomPoint4 : F ⊧ (Axioms.Point4 (.atom 
   contrapose!;
   rintro ⟨x, y, z, nexy, Rxy, Rxz, Rzy⟩;
   apply ValidOnFrame.not_of_exists_valuation_world;
-  suffices ∃ V : Valuation F, ∃ x, V x 0 ∧ ∃ z, x ≺ z ∧ (∀ w, z ≺ w → V w 0) ∧ ∃ y, x ≺ y ∧ ¬V y 0 by
+  suffices ∃ V : Valuation F, ∃ x z, x ≺ z ∧ (∀ w, z ≺ w → V w 0) ∧ V x 0 ∧ ∃ y, x ≺ y ∧ ¬V y 0 by
     simpa [Axioms.Point4, Satisfies];
-  use (λ w _ => w = x ∨ z ≺ w), x;
-  constructor;
+  use (λ w _ => w = x ∨ z ≺ w), x, z;
+  refine ⟨?_, ?_, ?_, ?_⟩;
+  . assumption;
   . tauto;
-  . use z;
-    constructor;
-    . assumption
-    . constructor;
-      . tauto;
-      . use y;
-        constructor;
-        . assumption;
-        . tauto;
+  . tauto;
+  . use y;
+    tauto;
 
 instance : SatisfiesSobocinskiCondition _ whitepoint := ⟨by tauto⟩
 
@@ -99,19 +94,24 @@ open MaximalConsistentTableau
 
 namespace Canonical
 
-open Classical in
 instance [Entailment.K 𝓢] [Entailment.HasAxiomPoint4 𝓢] : SatisfiesSobocinskiCondition _ (canonicalFrame 𝓢).Rel := ⟨by
   intro x y z nexy Rxy Rxz;
-
-  replace Rxz := def_rel_dia_mem₁.mp Rxz;
-
+  obtain ⟨φ, hφ₁, hφ₂⟩ := exists₁₂_of_ne nexy;
   apply def_rel_box_mem₁.mpr;
-  intro φ hφ;
-  have : φ ➝ □φ ∈ x.1.1 := mdp_mem₁_provable (show 𝓢 ⊢! ◇□φ ➝ φ ➝ □φ by exact C!_swap $ axiomPoint4!) $ Rxz hφ;
-  rcases iff_mem₁_imp.mp this with (this | this);
-  . have := def_rel_box_mem₁.mp Rxy;
-    sorry;
-  . exact def_rel_box_mem₁.mp Rxy this;
+  intro ψ hψ;
+  have : (φ ⋎ ψ) ➝ □(φ ⋎ ψ) ∈ x.1.1 := mdp_mem₁_provable axiomPoint4! $ def_rel_dia_mem₁.mp Rxz $ mdp_mem₁_provable (by
+    apply imply_box_distribute'!;
+    simp;
+  ) hψ;
+  have : □(φ ⋎ ψ) ∈ x.1.1 := iff_mem₁_imp'.mp this $ by
+    apply iff_mem₁_or.mpr;
+    left;
+    tauto;
+  rcases iff_mem₁_or.mp $ (iff_mem₁_box.mp this) Rxy with (_ | _);
+  . exfalso;
+    apply y.neither (φ := φ);
+    constructor <;> assumption;
+  . assumption;
 ⟩
 
 end Canonical

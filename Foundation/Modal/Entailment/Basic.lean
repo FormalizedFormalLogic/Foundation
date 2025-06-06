@@ -504,8 +504,8 @@ section
 
 variable [HasAxiomPoint4 𝓢]
 
-def axiomPoint4 : 𝓢 ⊢ φ ➝ ◇□φ ➝ □φ := HasAxiomPoint4.Point4 _
-@[simp] lemma axiomPoint4! : 𝓢 ⊢! φ ➝ ◇□φ ➝ □φ := ⟨axiomPoint4⟩
+def axiomPoint4 : 𝓢 ⊢ ◇□φ ➝ φ ➝ □φ := HasAxiomPoint4.Point4 _
+@[simp] lemma axiomPoint4! : 𝓢 ⊢! ◇□φ ➝ φ ➝ □φ := ⟨axiomPoint4⟩
 
 variable [Entailment.Minimal 𝓢]
 
