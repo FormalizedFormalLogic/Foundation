@@ -44,7 +44,8 @@ open Kripke
 
 lemma S4Point2Point1.Kripke.preorder_confluent_mckinsey : Logic.S4Point2Point1 = FrameClass.preorder_confluent_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.S4Point1 Logic.S4Point2Point1 := ⟨by
+@[simp]
+theorem S4Point2Point1.proper_extension_of_S4Point1 : Logic.S4Point1 ⊂ Logic.S4Point2Point1 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S4Point2Point1 ⊢! φ ∧ ¬Kripke.FrameClass.preorder_mckinsey ⊧ φ by
@@ -74,9 +75,9 @@ instance : ProperSublogic Logic.S4Point1 Logic.S4Point2Point1 := ⟨by
           omega;
         . use 2;
           omega;
-⟩
 
-instance : ProperSublogic Logic.S4Point2 Logic.S4Point2Point1 := ⟨by
+@[simp]
+theorem S4Point2Point1.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.S4Point2Point1 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S4Point2Point1 ⊢! φ ∧ ¬FrameClass.confluent_preorder ⊧ φ by
@@ -96,7 +97,6 @@ instance : ProperSublogic Logic.S4Point2 Logic.S4Point2Point1 := ⟨by
       . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Realize, Satisfies];
         use 1;
         trivial;
-⟩
 
 end Logic
 

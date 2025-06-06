@@ -42,7 +42,7 @@ open Kripke
 
 lemma KD5.Kripke.serial_eucl : Logic.KD5 = FrameClass.serial_eucl.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KD Logic.KD5 := ⟨by
+theorem KD5.proper_extension_of_KD : Logic.KD ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
@@ -62,9 +62,8 @@ instance : ProperSublogic Logic.KD Logic.KD5 := ⟨by
         . tauto;
         . use 1;
           constructor <;> tauto;
-⟩
 
-instance : ProperSublogic Logic.K5 Logic.KD5 := ⟨by
+theorem KD5.proper_extension_of_K5 : Logic.K5 ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by
@@ -78,7 +77,6 @@ instance : ProperSublogic Logic.K5 Logic.KD5 := ⟨by
       constructor;
       . refine ⟨by tauto⟩
       . simp [Semantics.Realize, Satisfies];
-⟩
 
 
 end Logic

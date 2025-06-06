@@ -40,7 +40,8 @@ open Kripke
 
 lemma KTc.Kripke.corefl : Logic.KTc = FrameClass.corefl.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KB4 Logic.KTc := ⟨by
+@[simp]
+theorem KTc.proper_extension_of_KB4 : Logic.KB4 ⊂ Logic.KTc := by
   constructor;
   . rw [KB4.Kripke.refl_trans, KTc.Kripke.corefl];
     rintro φ hφ F F_corefl;
@@ -63,7 +64,7 @@ instance : ProperSublogic Logic.KB4 Logic.KTc := ⟨by
           tauto;
         use 1;
         aesop;
-⟩
+
 end Logic
 
 end LO.Modal

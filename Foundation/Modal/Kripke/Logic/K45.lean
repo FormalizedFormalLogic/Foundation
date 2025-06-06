@@ -43,7 +43,7 @@ open Kripke
 
 lemma K45.Kripke.trans_eucl : Logic.K45 = FrameClass.trans_eucl.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.K5 Logic.K45 := ⟨by
+theorem K45.proper_extension_of_K : Logic.K5 ⊂ Logic.K45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by
@@ -62,9 +62,8 @@ instance : ProperSublogic Logic.K5 Logic.K45 := ⟨by
         constructor;
         . intro y; tauto;
         . exact ⟨1, by omega, 2, by omega, by trivial⟩;
-⟩
 
-instance : ProperSublogic Logic.K4Point3 Logic.K45 := ⟨by
+theorem K5.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.K45 := by
   constructor;
   . rw [K4Point3.Kripke.trans_weakConnected, K45.Kripke.trans_eucl];
     rintro φ hφ F ⟨_, _⟩;
@@ -90,7 +89,6 @@ instance : ProperSublogic Logic.K4Point3 Logic.K45 := ⟨by
         . omega;
         . use 2;
           omega;
-⟩
 
 end Logic
 

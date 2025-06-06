@@ -108,7 +108,8 @@ open Kripke
 lemma Triv.Kripke.equality : Logic.Triv = FrameClass.equality.logic := eq_hilbert_logic_frameClass_logic
 lemma Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_equality.logic := eq_hilbert_logic_frameClass_logic
 
-instance : ProperSublogic Logic.KTc Logic.Triv := ⟨by
+@[simp]
+theorem Triv.proper_extension_of_KTc : Logic.KTc ⊂ Logic.Triv := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.corefl ⊧ φ by
@@ -122,9 +123,9 @@ instance : ProperSublogic Logic.KTc Logic.Triv := ⟨by
       constructor;
       . refine ⟨by tauto⟩;
       . simp [Satisfies, Semantics.Realize];
-⟩
 
-instance : ProperSublogic Logic.GrzPoint3 Logic.Triv := ⟨by
+@[simp]
+theorem Triv.proper_extension_of_GrzPoint3 : Logic.GrzPoint3 ⊂ Logic.Triv := by
   constructor;
   . rw [GrzPoint3.Kripke.finite_connected_partial_order, Triv.Kripke.finite_equality];
     rintro φ hφ F ⟨_, _⟩;
@@ -151,9 +152,9 @@ instance : ProperSublogic Logic.GrzPoint3 Logic.Triv := ⟨by
         constructor;
         . omega;
         . trivial;
-⟩
 
-instance : ProperSublogic Logic.Triv Logic.Univ := inferInstance
+@[simp]
+theorem Univ.proper_extension_of_Triv : Logic.Triv ⊂ Logic.Univ := by  constructor <;> simp;
 
 end Logic
 
