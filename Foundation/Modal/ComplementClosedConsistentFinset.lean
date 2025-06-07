@@ -4,7 +4,7 @@ import Foundation.Modal.Complement
 
 namespace LO.Modal
 
-open Entailment
+open LO.Entailment
 
 variable {α : Type*} [DecidableEq α]
 variable {S} [Entailment (Formula α) S]

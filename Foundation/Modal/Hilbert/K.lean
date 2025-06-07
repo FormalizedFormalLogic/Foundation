@@ -1,12 +1,12 @@
 import Foundation.Modal.Hilbert.Basic
 
-namespace LO.Modal.Hilbert
+namespace LO.Modal
+
+namespace Hilbert
 
 variable {H : Hilbert α}
 
 open Deduction
-
-section
 
 class HasK (H : Hilbert α) where
   p : α
@@ -23,16 +23,14 @@ instance [DecidableEq α] [hK : H.HasK] : Entailment.HasAxiomK H where
     . use (λ b => if hK.p = b then φ else if hK.q = b then ψ else (.atom b));
       simp [hK.ne_pq];
 
-end
-
-
-section
-
 protected abbrev K : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1)}⟩
 instance : Hilbert.K.FiniteAxiomatizable where
 instance : Hilbert.K.HasK where p := 0; q := 1
-instance : Entailment.Modal.K (Hilbert.K) where
+instance : Entailment.K (Hilbert.K) where
 
-end
+end Hilbert
 
-end LO.Modal.Hilbert
+
+protected abbrev Logic.K := Hilbert.K.logic
+
+end LO.Modal

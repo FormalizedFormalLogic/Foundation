@@ -1,5 +1,6 @@
 import Foundation.ProvabilityLogic.Basic
-import Foundation.Modal.Kripke.Hilbert.GL.Tree
+import Foundation.Modal.Kripke.Logic.GL.Tree
+import Foundation.Modal.Kripke.ExtendRoot
 import Foundation.Incompleteness.Arith.WitnessComparizon
 import Foundation.Incompleteness.Arith.FixedPoint
 import Foundation.Incompleteness.Arith.ConsistencyPredicate

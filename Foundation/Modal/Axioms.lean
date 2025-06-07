@@ -1,8 +1,6 @@
 import Foundation.Modal.LogicSymbol
 
--- TODO: move to `LO.Axioms.Modal`
-
-namespace LO.Axioms
+namespace LO.Modal.Axioms
 
 variable {F : Type*} [BasicModalLogicalConnective F]
 variable (φ ψ χ : F)
@@ -61,6 +59,11 @@ protected abbrev Point3 := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ)
 protected abbrev WeakPoint3 := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ)
 
 /--
+  - `R1`: Hudges & Cresswell
+-/
+protected abbrev Point4 := ◇□φ ➝ φ ➝ □φ
+
+/--
   Axiom for
   - weakly converse wellfounded partial order (for non-resritcted Kripke frame)
   - partial order (for finite Kripke frame)
@@ -83,14 +86,18 @@ protected abbrev H := □(□φ ⭤ φ) ➝ □φ
 
 protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
 
-end LO.Axioms
-
-
-namespace LO.Axioms.Modal
-
-variable {F : Type*} [BasicModalLogicalConnective F]
-variable (φ ψ χ : F)
+protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
 
 protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
 
-end LO.Axioms.Modal
+
+protected structure Geach.Taple where
+  i : ℕ
+  j : ℕ
+  m : ℕ
+  n : ℕ
+
+/--
+  Axiom for Geach confluency.
+-/
+protected abbrev Geach (g : Geach.Taple) (φ : F) := ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ)

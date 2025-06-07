@@ -9,18 +9,18 @@ open Kripke
 open MaximalConsistentTableau
 
 variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 namespace Kripke
 
 
 section
 
-abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢] : Kripke.Frame where
+abbrev canonicalFrame (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Kripke.Frame where
   World := MaximalConsistentTableau 𝓢
   Rel t₁ t₂ := t₁.1.1.prebox ⊆ t₂.1.1
 
-abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢] : Model where
+abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] : Model where
   toFrame := canonicalFrame 𝓢
   Val t a := (atom a) ∈ t.1.1
 
@@ -125,7 +125,7 @@ lemma iff_valid_on_canonicalModel_deducible : (canonicalModel 𝓢) ⊧ φ ↔ �
 end lemmata
 
 
-class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢] (C : FrameClass) : Prop where
+class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.K 𝓢] (C : FrameClass) : Prop where
   canonical : (Kripke.canonicalFrame 𝓢) ∈ C
 
 instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by

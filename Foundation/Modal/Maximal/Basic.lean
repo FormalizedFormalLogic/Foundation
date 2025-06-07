@@ -3,6 +3,8 @@ import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
+
 variable {α} [DecidableEq α]
 
 namespace Formula

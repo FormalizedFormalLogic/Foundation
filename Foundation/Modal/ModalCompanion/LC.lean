@@ -1,11 +1,11 @@
 import Foundation.Modal.ModalCompanion.Int
-import Foundation.Modal.Logic.Sublogic.S4
+import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Propositional.Kripke.Hilbert.LC
 import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
 
 namespace LO.Modal
 
-open Entailment FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 open Propositional.Formula (goedelTranslate)
 open Propositional.Formula (atom)
@@ -59,7 +59,7 @@ lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
     | _ => apply Logic.sumNormal.mem₁; simp;
   . intro hφ;
     induction hφ with
-    | mem₁ h => apply Logic.S4_ssubset_S4Point3.1 h;
+    | mem₁ h => apply Logic.S4Point3.proper_extension_of_S4.subset h;
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;
     | nec h ih => apply Modal.Logic.nec ih;
@@ -67,7 +67,7 @@ lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
       rcases h with ⟨φ, hφ, rfl⟩;
       apply Hilbert.provable_goedelTranslated_of_provable Hilbert.LC Hilbert.S4Point3 ?_ (by trivial);
       rintro _ ⟨_, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩;
-      . apply Logic.S4_ssubset_S4Point3.1;
+      . apply Logic.S4Point3.proper_extension_of_S4.subset;
         apply modalCompanion_Int_S4.companion.mp;
         simp;
       . suffices Hilbert.S4Point3 ⊢! □(s 0ᵍ ➝ s 1ᵍ) ⋎ □(s 1ᵍ ➝ s 0ᵍ) by simpa [goedelTranslate];
@@ -80,7 +80,7 @@ instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := 
     (IC := Propositional.Kripke.FrameClass.connected)
     (MC := Modal.Kripke.FrameClass.connected_preorder)
     (by rw [Propositional.Logic.LC.Kripke.eq_connected])
-    (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.eq_ReflexiveTransitiveConnectedKripkeFrameClass_Logic])
+    (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.Kripke.connected_preorder])
     (by rintro F hF; replace hF := Set.mem_setOf_eq.mp hF; apply Set.mem_setOf_eq.mpr; refine ⟨inferInstance, inferInstance⟩);
 
 end Logic
@@ -92,7 +92,8 @@ section GrzPoint3
 
 lemma Logic.gGrzPoint3_of_LC : φ ∈ Logic.LC → φᵍ ∈ Logic.GrzPoint3 := by
   intro h;
-  exact S4Point3_ssubset_GrzPoint3.1 $ modalCompanion_LC_S4Point3.companion.mp h;
+  apply GrzPoint3.proper_extension_of_S4Point3.subset;
+  exact modalCompanion_LC_S4Point3.companion.mp h;
 
 lemma Logic.GrzPoint3.is_largestMC_of_LC : Logic.GrzPoint3 = Logic.LC.largestMC := by
   ext φ;
@@ -117,7 +118,7 @@ lemma Logic.GrzPoint3.is_largestMC_of_LC : Logic.GrzPoint3 = Logic.LC.largestMC 
   . intro hφ;
     induction hφ with
     | mem₁ h =>
-      apply S4Point3_ssubset_GrzPoint3.1;
+      apply GrzPoint3.proper_extension_of_S4Point3.subset;
       rwa [Logic.S4Point3.is_smallestMC_of_LC]
     | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
     | subst h ih => apply Modal.Logic.subst ih;
@@ -131,7 +132,7 @@ instance modalCompanion_LC_GrzPoint3 : ModalCompanion Logic.LC Logic.GrzPoint3 :
     (IC := Propositional.Kripke.FrameClass.finite_connected)
     (MC := FrameClass.finite_connected_partial_order)
     (by rw [Logic.LC.Kripke.eq_finite_connected])
-    (by rw [←Logic.GrzPoint3.is_largestMC_of_LC, Modal.Logic.GrzPoint3.eq_ReflexiveTransitiveAntiSymmetricConnectedFiniteKripkeFrameClass_Logic])
+    (by rw [←Logic.GrzPoint3.is_largestMC_of_LC, Modal.Logic.GrzPoint3.Kripke.finite_connected_partial_order])
     (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, inferInstance, inferInstance⟩)
 
 end GrzPoint3

@@ -1,11 +1,11 @@
 import Foundation.Modal.Entailment.Basic
 
-namespace LO.Entailment
+namespace LO.Modal.Entailment
 
-open FiniteContext
+open LO.Entailment LO.Entailment.FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
-variable {𝓢 : S} [Entailment.Modal.K 𝓢] {n : ℕ} {φ ψ ξ χ: F}
+variable {𝓢 : S} [Entailment.K 𝓢] {n : ℕ} {φ ψ ξ χ: F}
 
 -- TODO: move to supplemental
 section
@@ -145,6 +145,9 @@ def multiDiaDuality : 𝓢 ⊢ ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := by
     . exact CN_of_CN_left $ K_right ih;
     . exact CN_of_CN_right $ K_left ih;
 lemma multidia_duality! : 𝓢 ⊢! ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := ⟨multiDiaDuality⟩
+
+@[simp] lemma multidia_duality!_mp : 𝓢 ⊢! ◇^[n]φ ➝ ∼(□^[n](∼φ)) := C_of_E_mp! multidia_duality!
+@[simp] lemma multidia_duality!_mpr : 𝓢 ⊢! ∼(□^[n](∼φ)) ➝ ◇^[n]φ := C_of_E_mpr! multidia_duality!
 
 lemma multidia_duality'! : 𝓢 ⊢! ◇^[n]φ ↔ 𝓢 ⊢! ∼(□^[n](∼φ)) := by
   constructor;
@@ -618,4 +621,4 @@ lemma nec! {Γ : Set F} (h : Γ *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! □φ := by
 
 end Context
 
-end LO.Entailment
+end LO.Modal.Entailment

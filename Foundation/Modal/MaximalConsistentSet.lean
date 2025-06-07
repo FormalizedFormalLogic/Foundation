@@ -4,7 +4,7 @@ import Foundation.Vorspiel.Set.Supplemental
 
 namespace LO.Modal
 
-open Entailment
+open LO.Entailment LO.Modal.Entailment
 
 variable {α : Type*}
 variable {S} [Entailment (Formula α) S]
@@ -496,7 +496,7 @@ lemma iff_mem_conj : (⋀Γ ∈ Ω) ↔ (∀ φ ∈ Γ, φ ∈ Ω) := by simp [m
 
 section
 
-variable [Entailment.Modal.K 𝓢]
+variable [Entailment.K 𝓢]
 
 lemma iff_mem_multibox : (□^[n]φ ∈ Ω) ↔ (∀ {Ω' : MaximalConsistentSet 𝓢}, (Ω.1.premultibox n ⊆ Ω'.1) → (φ ∈ Ω')) := by
   constructor;

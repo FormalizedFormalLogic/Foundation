@@ -1,6 +1,5 @@
 import Foundation.Meta.Kite.Generator
-import Foundation.Modal.Logic.WellKnown
--- import Foundation.Modal.Logic.S
+import Foundation.Modal.Logic.S.Basic
 
 namespace LO.Meta.Kite.Modal
 

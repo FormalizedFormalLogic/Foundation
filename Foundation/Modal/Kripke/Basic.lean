@@ -1,6 +1,7 @@
 import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
+import Foundation.Modal.Logic.Basic
 
 namespace LO.Modal
 
@@ -109,6 +110,7 @@ variable {M : Kripke.Model} {x : M.World} {φ ψ : Formula ℕ}
 protected lemma bot_def : ¬x ⊧ ⊥ := by simp [Satisfies];
 
 protected lemma imp_def : x ⊧ φ ➝ ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;
+protected lemma not_imp_def : ¬(x ⊧ φ ➝ ψ) ↔ (x ⊧ φ) ∧ ¬(x ⊧ ψ) := by constructor <;> . contrapose!; tauto;
 
 protected lemma imp_def₂ : x ⊧ φ ➝ ψ ↔ ¬x ⊧ φ ∨ x ⊧ ψ := by tauto;
 
@@ -120,9 +122,11 @@ protected lemma not_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by simp [Satisfies];
 
 protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
 
-@[simp] protected lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺ y → y ⊧ φ := by simp [Satisfies];
+protected lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺ y → y ⊧ φ := by simp [Satisfies];
+protected lemma not_box_def : ¬x ⊧ □φ ↔ (∃ y, x ≺ y ∧ ¬y ⊧ φ) := by simp [Satisfies];
 
-@[simp] protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Satisfies];
+protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp [Satisfies];
+protected lemma not_dia_def : ¬x ⊧ ◇φ ↔ ∀ y, x ≺ y → ¬(y ⊧ φ) := by simp [Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
   realize_top := λ _ => Satisfies.top_def;
@@ -525,6 +529,13 @@ end Formula.Kripke
 
 
 namespace Kripke
+
+section
+
+abbrev FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
+
+end
+
 
 section
 

@@ -1,11 +1,10 @@
 import Foundation.Propositional.Logic.Basic
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Logic.Extension
 
 namespace LO
 
-open Entailment FiniteContext
-open Necessitation
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 
 def Propositional.Formula.goedelTranslate : Propositional.Formula α → Modal.Formula α
@@ -31,7 +30,7 @@ def smallestMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.sumNormal
 lemma smallestMC.mdp_S4 (hφψ : Modal.Hilbert.S4 ⊢! φ ➝ ψ) (hφ : φ ∈ IL.smallestMC)
   : ψ ∈ IL.smallestMC := Modal.Logic.sumNormal.mdp (Modal.Logic.sumNormal.mem₁ hφψ) hφ
 
-def largestMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.smallestMC (Axioms.Grz (.atom 0))
+def largestMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.smallestMC (Modal.Axioms.Grz (.atom 0))
 
 end Propositional.Logic
 
@@ -158,7 +157,7 @@ variable {IL : Propositional.Logic} {ML : Modal.Logic}
 variable {IH : Propositional.Hilbert ℕ} {MH : Modal.Hilbert ℕ}
 variable {φ ψ χ : Propositional.Formula ℕ}
 
-variable [Entailment.Modal.S4 MH]
+variable [Entailment.S4 MH]
 
 lemma goedelTranslated_axiomTc : MH ⊢! φᵍ ➝ □φᵍ := by
   induction φ using Propositional.Formula.rec' with
@@ -187,7 +186,7 @@ lemma goedelTranslated_OrElim : MH ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ �
   exact nec! $ C!_trans axiomFour! $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! $ or₃!) axiomK!;
 
 lemma provable_goedelTranslated_of_provable
-  (IH : Propositional.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [Entailment.Modal.S4 MH]
+  (IH : Propositional.Hilbert ℕ) (MH : Modal.Hilbert ℕ) [Entailment.S4 MH]
   (hAx : ∀ φ ∈ IH.axiomInstances, MH ⊢! φᵍ)
   : IH ⊢! φ → MH ⊢! φᵍ := by
   intro h;

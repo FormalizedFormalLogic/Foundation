@@ -1,7 +1,7 @@
 import Foundation.Incompleteness.Arith.DC
 import Foundation.Incompleteness.DC.Basic
-import Foundation.Modal.Logic.WellKnown
 import Foundation.Logic.HilbertStyle.Cl
+import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO
 

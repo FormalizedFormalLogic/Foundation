@@ -67,7 +67,7 @@ open
   Frame.IsBalloon
 in
 lemma balooon_validates_axiomZ
-  {F : Frame} [IsTrans _ F] {e : Cluster F} [F.IsBalloon e] : F ⊧ (Axiom.Z (.atom 0)) := by
+  {F : Frame} [IsTrans _ F] {e : Cluster F} [F.IsBalloon e] : F ⊧ (Axioms.Z (.atom 0)) := by
   intro V x;
   suffices ¬(Satisfies _ x (□(□(.atom 0) ➝ (.atom 0)))) ∨ ¬(Satisfies _ x (◇□(.atom 0))) ∨ (Satisfies _ x (□(.atom 0))) by tauto;
   by_cases h : Satisfies _ x (□(.atom 0));

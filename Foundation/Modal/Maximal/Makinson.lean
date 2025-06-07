@@ -1,14 +1,15 @@
 import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.NNFormula
-import Foundation.Modal.Logic.WellKnown
 import Foundation.Modal.Maximal.Basic
+import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Kripke.Logic.Ver
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 
 namespace LO.Modal
 
 namespace Logic
 
-variable {L : Logic} [L.Normal] [L.Consistent] {φ ψ : Formula ℕ}
+variable {L : Logic} [L.IsNormal] [L.Consistent] {φ ψ : Formula ℕ}
 
 class VerFamily (L : Logic) : Prop where
   subset_Ver : L ⊆ Logic.Ver
@@ -19,7 +20,7 @@ class TrivFamily (L : Logic) : Prop where
 
 section
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : φ ∈ L) (hV : φ ∉ Logic.Ver) : ∃ ψ, ◇ψ ∈ L := by
   obtain ⟨ψ, ⟨Γ, rfl⟩, h⟩ := Hilbert.NNFormula.exists_CNF φ;
@@ -66,7 +67,7 @@ end
 
 section
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Formula
 open Propositional
 

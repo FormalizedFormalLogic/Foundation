@@ -1,10 +1,10 @@
 import Foundation.Modal.Maximal.Unprovability
-import Foundation.Modal.Kripke.Hilbert.GL.MDP
-import Foundation.Modal.Logic.WellKnown
+import Foundation.Modal.Kripke.Logic.GL.MDP
+
 
 namespace LO.Modal
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 
 variable [DecidableEq α]

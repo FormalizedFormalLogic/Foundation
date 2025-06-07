@@ -1,11 +1,11 @@
 import Foundation.Modal.Entailment.K
 
-namespace LO.Entailment
+namespace LO.Modal.Entailment
 
-open FiniteContext
+open LO.Entailment Entailment.FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.Modal.K4 𝓢]
+variable {𝓢 : S} [Entailment.K4 𝓢]
 
 @[simp]
 lemma diaFour! : 𝓢 ⊢! ◇◇φ ➝ ◇φ := by
@@ -81,4 +81,4 @@ lemma Context.boxbox_in_context_to_box {Γ : Set F} (h : Γ.box.box *⊢[𝓢]! 
   rw [(show Γ.box.box = Γ.multibox 2 by ext; simp)] at h;
   apply Context.multibox_2_in_context_to_box h;
 
-end LO.Entailment
+end LO.Modal.Entailment
