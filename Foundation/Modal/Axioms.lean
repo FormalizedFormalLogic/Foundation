@@ -59,6 +59,11 @@ protected abbrev Point3 := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ)
 protected abbrev WeakPoint3 := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ)
 
 /--
+  - `R1`: Hudges & Cresswell
+-/
+protected abbrev Point4 := ◇□φ ➝ φ ➝ □φ
+
+/--
   Axiom for
   - weakly converse wellfounded partial order (for non-resritcted Kripke frame)
   - partial order (for finite Kripke frame)
@@ -96,6 +101,3 @@ protected structure Geach.Taple where
   Axiom for Geach confluency.
 -/
 protected abbrev Geach (g : Geach.Taple) (φ : F) := ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ)
-
-
-end LO.Modal.Axioms
