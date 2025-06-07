@@ -40,7 +40,7 @@ open Kripke
 lemma S4Point4.Kripke.preorder_sobocinski : Logic.S4Point4 = FrameClass.preorder_sobocinski.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
-theorem S4Point4.proper_extension_of_S4Point4 : Logic.S4Point3 ⊂ Logic.S4Point4 := by
+theorem S4Point4.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.S4Point4 := by
   constructor;
   . rw [S4Point3.Kripke.connected_preorder, S4Point4.Kripke.preorder_sobocinski];
     rintro φ hφ F ⟨_, _⟩;
