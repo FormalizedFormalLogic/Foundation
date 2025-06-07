@@ -268,6 +268,19 @@ instance [H.HasMk] : Entailment.HasAxiomMk H where
     . use (λ b => if b = (HasMk.q H) then ψ else if b = (HasMk.p H) then φ else (.atom b));
       simp [HasMk.ne_pq];
 
+class HasH1 (H : Hilbert α) where
+  p : α
+  mem_H1 : Axioms.H1 (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasH1] : Entailment.HasAxiomH1 H where
+  H1 φ := by
+    apply maxm;
+    use Axioms.H1 (.atom $ HasH1.p H);
+    constructor;
+    . exact HasH1.mem_H1;
+    . use (λ b => if HasH1.p H = b then φ else (.atom b));
+      simp;
+
 class HasGeach (g) (H : Hilbert α) where
   p : α
   mem_Geach : Axioms.Geach g (.atom p) ∈ H.axioms := by tauto;
@@ -544,6 +557,19 @@ instance : Hilbert.K4Point1 ⪯ Hilbert.S4Point1 := weakerThan_of_dominate_axiom
 
 end Hilbert.S4Point1
 
+
+protected abbrev Hilbert.SobK1Point2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.H1 (.atom 0)}⟩
+protected abbrev Logic.SobK1Point2 := Hilbert.SobK1Point2.logic
+
+namespace Hilbert.SobK1Point2
+
+instance : (Hilbert.SobK1Point2).HasK where p := 0; q := 1;
+instance : (Hilbert.SobK1Point2).HasT where p := 0
+instance : (Hilbert.SobK1Point2).HasFour where p := 0
+instance : (Hilbert.SobK1Point2).HasH1 where p := 0
+instance : Entailment.SobK1Point2 (Hilbert.SobK1Point2) where
+
+end Hilbert.SobK1Point2
 
 
 protected abbrev Hilbert.S4Point2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point2 (.atom 0)}⟩

@@ -90,6 +90,10 @@ protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
 
 protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
 
+/--
+  For Sobocinski's `K1.2`.
+-/
+protected abbrev H1 := φ ➝ □(◇φ ➝ φ)
 
 protected structure Geach.Taple where
   i : ℕ
@@ -101,3 +105,5 @@ protected structure Geach.Taple where
   Axiom for Geach confluency.
 -/
 protected abbrev Geach (g : Geach.Taple) (φ : F) := ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ)
+
+end LO.Modal.Axioms
