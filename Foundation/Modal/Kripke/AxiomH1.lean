@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.Completeness
 import Foundation.Vorspiel.Relation.Supplemental
-
+import Foundation.Modal.Kripke.AxiomGrz
 
 section
 
@@ -86,24 +86,24 @@ open MaximalConsistentTableau
 
 namespace Canonical
 
-instance [Entailment.K 𝓢] [Entailment.HasAxiomPoint4 𝓢] : SatisfiesSobocinskiCondition _ (canonicalFrame 𝓢).Rel := ⟨by
-  intro x y z nexy Rxy Rxz;
-  obtain ⟨φ, hφ₁, hφ₂⟩ := exists₁₂_of_ne nexy;
-  apply def_rel_box_mem₁.mpr;
-  intro ψ hψ;
-  have : (φ ⋎ ψ) ➝ □(φ ⋎ ψ) ∈ x.1.1 := mdp_mem₁_provable axiomPoint4! $ def_rel_dia_mem₁.mp Rxz $ mdp_mem₁_provable (by
-    apply imply_box_distribute'!;
-    simp;
-  ) hψ;
-  have : □(φ ⋎ ψ) ∈ x.1.1 := iff_mem₁_imp'.mp this $ by
+instance [Entailment.K 𝓢] [Entailment.HasAxiomH1 𝓢] : IsDetourFree _ (canonicalFrame 𝓢).Rel := ⟨by
+  rintro x y z Rxy Ryz;
+  by_contra! hC;
+  obtain ⟨nexy, neyz⟩ := hC;
+
+  obtain ⟨φ, hφx, hφy⟩ := exists₁₂_of_ne nexy;
+  obtain ⟨ψ, hψy, hψz⟩ := exists₂₁_of_ne neyz;
+
+  suffices φ ⋎ ψ ∈ y.1.1 by apply neither ⟨this, iff_mem₂_or.mpr $ ?_⟩; tauto;
+
+  have : □(◇(φ ⋎ ψ) ➝ φ ⋎ ψ) ∈ x.1.1 := mdp_mem₁_provable axiomH1! $ by
     apply iff_mem₁_or.mpr;
-    left;
     tauto;
-  rcases iff_mem₁_or.mp $ (iff_mem₁_box.mp this) Rxy with (_ | _);
-  . exfalso;
-    apply y.neither (φ := φ);
-    constructor <;> assumption;
-  . assumption;
+  have : ◇(φ ⋎ ψ) ➝ φ ⋎ ψ ∈ y.1.1 := def_rel_box_mem₁.mp Rxy this;
+  exact iff_mem₁_imp'.mp this $ by
+    apply def_rel_dia_mem₁.mp Ryz;
+    apply iff_mem₁_or.mpr;
+    tauto;
 ⟩
 
 end Canonical
