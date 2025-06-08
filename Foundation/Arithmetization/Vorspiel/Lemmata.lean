@@ -1,78 +1,7 @@
 import Foundation.Arithmetization.Vorspiel.Vorspiel
 import Mathlib.Algebra.GCDMonoid.Basic
 
-namespace LO.FirstOrder
-
-namespace Structure
-
-class Monotone (L : Language) (M : Type*) [LE M] [Structure L M] where
-  monotone : ∀ {k} (f : L.Func k) (v₁ v₂ : Fin k → M), (∀ i, v₁ i ≤ v₂ i) → Structure.func f v₁ ≤ Structure.func f v₂
-
-namespace Monotone
-
-variable {L : Language} {M : Type*} [LE M] [Structure L M] [Monotone L M]
-
-lemma term_monotone (t : Semiterm L ξ n) {e₁ e₂ : Fin n → M} {ε₁ ε₂ : ξ → M}
-    (he : ∀ i, e₁ i ≤ e₂ i) (hε : ∀ i, ε₁ i ≤ ε₂ i) :
-    t.valm M e₁ ε₁ ≤ t.valm M e₂ ε₂ := by
-  induction t <;> simp [*, Semiterm.val_func]
-  case func k f v ih =>
-    exact Monotone.monotone f _ _ ih
-
-end Monotone
-
-end Structure
-
-namespace Semiterm
-
-@[elab_as_elim]
-def arithCases {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
-  (hbvar : ∀ x : Fin n, C #x)
-  (hfvar : ∀ x : ξ, C &x)
-  (hzero : C ‘0’)
-  (hone  : C ‘1’)
-  (hadd  : ∀ (t u : Semiterm ℒₒᵣ ξ n), C ‘!!t + !!u’)
-  (hmul  : ∀ (t u : Semiterm ℒₒᵣ ξ n), C ‘!!t * !!u’) :
-    ∀ (t : Semiterm ℒₒᵣ ξ n), C t
-  | #x                        => hbvar x
-  | &x                        => hfvar x
-  | func Language.Zero.zero _ => by
-      simpa [Matrix.empty_eq, Operator.const, Operator.operator, Operator.numeral, Operator.Zero.term_eq] using hzero
-  | func Language.One.one _   => by
-      simpa [Matrix.empty_eq, Operator.const, Operator.operator, Operator.numeral, Operator.One.term_eq] using hone
-  | func Language.Add.add v   => by
-    simpa [Operator.operator, Operator.Add.term_eq, Rew.func, ←Matrix.fun_eq_vec_two] using hadd (v 0) (v 1)
-  | func Language.Mul.mul v   => by
-    simpa [Operator.operator, Operator.Mul.term_eq, Rew.func, ←Matrix.fun_eq_vec_two] using hmul (v 0) (v 1)
-
-@[elab_as_elim]
-def arithRec {n} {C : Semiterm ℒₒᵣ ξ n → Sort w}
-  (hbvar : ∀ x : Fin n, C #x)
-  (hfvar : ∀ x : ξ, C &x)
-  (hzero : C ‘0’)
-  (hone  : C ‘1’)
-  (hadd  : ∀ {t u : Semiterm ℒₒᵣ ξ n}, C t → C u → C ‘!!t + !!u’)
-  (hmul  : ∀ {t u : Semiterm ℒₒᵣ ξ n}, C t → C u → C ‘!!t * !!u’) :
-    ∀ (t : Semiterm ℒₒᵣ ξ n), C t
-  | #x                        => hbvar x
-  | &x                        => hfvar x
-  | func Language.Zero.zero _ => by
-      simpa [Matrix.empty_eq, Operator.const, Operator.operator, Operator.numeral, Operator.Zero.term_eq] using hzero
-  | func Language.One.one _   => by
-      simpa [Matrix.empty_eq, Operator.const, Operator.operator, Operator.numeral, Operator.One.term_eq] using hone
-  | func Language.Add.add v   => by
-    have ih0 := arithRec hbvar hfvar hzero hone hadd hmul (v 0)
-    have ih1 := arithRec hbvar hfvar hzero hone hadd hmul (v 1)
-    simpa [Operator.operator, Operator.Add.term_eq, Rew.func, ←Matrix.fun_eq_vec_two] using hadd ih0 ih1
-  | func Language.Mul.mul v   => by
-    have ih0 := arithRec hbvar hfvar hzero hone hadd hmul (v 0)
-    have ih1 := arithRec hbvar hfvar hzero hone hadd hmul (v 1)
-    simpa [Operator.operator, Operator.Mul.term_eq, Rew.func, ←Matrix.fun_eq_vec_two] using hmul ih0 ih1
-  termination_by t => t.complexity
-
-end Semiterm
-
-end FirstOrder
+namespace LO
 
 namespace Arith
 
@@ -257,7 +186,7 @@ instance : Structure.Monotone ℒₒᵣ M := ⟨
   · cases m <;> simp
 
 /-- TODO: move-/
-lemma coe_succ (x : ℕ) : ((x + 1 : ℕ) : M) = (x : M) + 1 := by simp
+lemma coe_add_one (x : ℕ) : ((x + 1 : ℕ) : M) = (x : M) + 1 := by simp
 
 variable (M)
 
@@ -268,7 +197,7 @@ variable {M}
 @[simp] lemma natCast_nat (n : ℕ) : @Nat.cast ℕ (natCast ℕ) n = n := by
   induction n
   · rfl
-  · unfold natCast; rw [coe_succ]; simp [*]
+  · unfold natCast; rw [coe_add_one]; simp [*]
 
 end
 

@@ -27,17 +27,17 @@ end
 
 namespace Theory
 
-inductive CobhamR0' : Theory ℒₒᵣ
-  | eq_refl : CobhamR0' “∀ x, x = x”
-  | replace (φ : SyntacticSemiformula ℒₒᵣ 1) : CobhamR0' “∀ x y, x = y → !φ x → !φ y”
-  | Ω₁ (n m : ℕ)  : CobhamR0' “↑n + ↑m = ↑(n + m)”
-  | Ω₂ (n m : ℕ)  : CobhamR0' “↑n * ↑m = ↑(n * m)”
-  | Ω₃ (n m : ℕ)  : n ≠ m → CobhamR0' “↑n ≠ ↑m”
-  | Ω₄ (n : ℕ) : CobhamR0' “∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i”
+inductive R0' : Theory ℒₒᵣ
+  | eq_refl : R0' “∀ x, x = x”
+  | replace (φ : SyntacticSemiformula ℒₒᵣ 1) : R0' “∀ x y, x = y → !φ x → !φ y”
+  | Ω₁ (n m : ℕ)  : R0' “↑n + ↑m = ↑(n + m)”
+  | Ω₂ (n m : ℕ)  : R0' “↑n * ↑m = ↑(n * m)”
+  | Ω₃ (n m : ℕ)  : n ≠ m → R0' “↑n ≠ ↑m”
+  | Ω₄ (n : ℕ) : R0' “∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i”
 
-notation "𝐑₀'" => CobhamR0'
+notation "𝐑₀'" => R0'
 
-abbrev addCobhamR0' (T : Theory ℒₒᵣ) : Theory ℒₒᵣ := T + 𝐑₀'
+abbrev addR0' (T : Theory ℒₒᵣ) : Theory ℒₒᵣ := T + 𝐑₀'
 
 end Theory
 
@@ -45,7 +45,7 @@ namespace Arith
 /-
 
 
-namespace CobhamR0'
+namespace R0'
 
 variable {M : Type*} [Nonempty M] [s : Structure ℒₒᵣ M] [M ⊧ₘ* 𝐑₀'] {a b c : M}
 
@@ -61,32 +61,32 @@ lemma operator_eq_eq (v : Fin 2 → M) : (Semiformula.Operator.Eq.eq (L := ℒ�
 lemma operator_lt_eq : (Semiformula.Operator.LT.lt (L := ℒₒᵣ)).val ![a, b] = s.rel Language.LT.lt ![a, b] := rfl
 
 @[simp] lemma eq_refl (a : M) : eql a a := by
-  have := by simpa using ModelsTheory.models M Theory.CobhamR0'.eq_refl (fun _ ↦ a)
+  have := by simpa using ModelsTheory.models M Theory.R0'.eq_refl (fun _ ↦ a)
   exact this a
 
 lemma eq_symm {a b : M} : eql a b → eql b a := fun h ↦ by
   have : ∀ x y, eql x y → eql x a → eql y a := by
-    simpa [operator_eq_eq] using ModelsTheory.models M (Theory.CobhamR0'.replace “x. x = &0”) (fun _ ↦ a)
+    simpa [operator_eq_eq] using ModelsTheory.models M (Theory.R0'.replace “x. x = &0”) (fun _ ↦ a)
   exact this a b h (by simp)
 
 lemma eq_trans {a b c : M} : eql a b → eql b c → eql a c := fun hab hbc ↦ by
-  have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.CobhamR0'.replace “x. &0 = x”) (fun _ ↦ a)
+  have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.R0'.replace “x. &0 = x”) (fun _ ↦ a)
   exact this b c hbc hab
 
 lemma add_ext {a₁ a₂ b₁ b₂ : M} (ha : eql a₁ a₂) (hb : eql b₁ b₂) :
     eql (s.func Language.Add.add ![a₁, b₁]) (s.func Language.Add.add ![a₂, b₂]) := by
   have e : eql (s.func Language.Add.add ![a₁, b₁]) (s.func Language.Add.add ![a₂, b₁]) := by
-    have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.CobhamR0'.replace “x. &0 + &1 = x + &1”) (a₁ :>ₙ fun _ ↦ b₁)
+    have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.R0'.replace “x. &0 + &1 = x + &1”) (a₁ :>ₙ fun _ ↦ b₁)
     exact this a₁ a₂ ha (by simp)
-  have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.CobhamR0'.replace “x. &0 + &1 = &2 + x”) (a₁ :>ₙ b₁ :>ₙ fun _ ↦ a₂)
+  have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.R0'.replace “x. &0 + &1 = &2 + x”) (a₁ :>ₙ b₁ :>ₙ fun _ ↦ a₂)
   exact this b₁ b₂ hb e
 
 lemma mul_ext {a₁ a₂ b₁ b₂ : M} (ha : eql a₁ a₂) (hb : eql b₁ b₂) :
     eql (s.func Language.Mul.mul ![a₁, b₁]) (s.func Language.Mul.mul ![a₂, b₂]) := by
   have e : eql (s.func Language.Mul.mul ![a₁, b₁]) (s.func Language.Mul.mul ![a₂, b₁]) := by
-    have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.CobhamR0'.replace “x. &0 * &1 = x * &1”) (a₁ :>ₙ fun _ ↦ b₁)
+    have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.R0'.replace “x. &0 * &1 = x * &1”) (a₁ :>ₙ fun _ ↦ b₁)
     exact this a₁ a₂ ha (by simp)
-  have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.CobhamR0'.replace “x. &0 * &1 = &2 * x”) (a₁ :>ₙ b₁ :>ₙ fun _ ↦ a₂)
+  have := by simpa [operator_eq_eq] using ModelsTheory.models M (Theory.R0'.replace “x. &0 * &1 = &2 * x”) (a₁ :>ₙ b₁ :>ₙ fun _ ↦ a₂)
   exact this b₁ b₂ hb e
 
 noncomputable instance : 𝐄𝐐 ⪯ 𝐑₀' := Entailment.WeakerThan.ofAxm! <| by {
@@ -141,15 +141,15 @@ noncomputable instance : 𝐄𝐐 ⪯ 𝐑₀' := Entailment.WeakerThan.ofAxm! <
 
 open LO.Arith
 
-noncomputable instance CobhamR0'.subtheoryOfCobhamR0 : 𝐑₀' ⪯ 𝐑₀ := Entailment.WeakerThan.ofAxm! <| by
+noncomputable instance R0'.subtheoryOfR0 : 𝐑₀' ⪯ 𝐑₀ := Entailment.WeakerThan.ofAxm! <| by
   intro φ hp
   rcases hp
   · apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff]
   · apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff]
-  case Ω₁ n m => exact Entailment.by_axm _ (Theory.CobhamR0.Ω₁ n m)
-  case Ω₂ n m => exact Entailment.by_axm _ (Theory.CobhamR0.Ω₂ n m)
-  case Ω₃ n m h => exact Entailment.by_axm _ (Theory.CobhamR0.Ω₃ n m h)
-  case Ω₄ n => exact Entailment.by_axm _ (Theory.CobhamR0.Ω₄ n)
+  case Ω₁ n m => exact Entailment.by_axm _ (Theory.R0.Ω₁ n m)
+  case Ω₂ n m => exact Entailment.by_axm _ (Theory.R0.Ω₂ n m)
+  case Ω₃ n m h => exact Entailment.by_axm _ (Theory.R0.Ω₃ n m h)
+  case Ω₄ n => exact Entailment.by_axm _ (Theory.R0.Ω₄ n)
 
 variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T]
 
@@ -197,7 +197,7 @@ end
 
 namespace Formalized
 
-namespace Theory.CobhamR0'
+namespace Theory.R0'
 
 def eqRefl : FirstOrder.Theory.Delta1Definable {(“∀ x, x = x” : SyntacticFormula ℒₒᵣ)} := singleton _
 
@@ -545,19 +545,19 @@ def Ω₄ :
       HierarchySymbol.Semiformula.val_mkPi, Semiformula.eval_all,
       LogicalConnective.HomClass.map_imply, LogicalConnective.Prop.arrow_eq, forall_eq]
 
-end Theory.CobhamR0'
+end Theory.R0'
 
-open Theory.CobhamR0'
+open Theory.R0'
 
-instance Theory.CobhamR0'Delta1Definable : 𝐑₀'.Delta1Definable := (eqRefl.add <| replace.add <| Ω₁.add <| Ω₂.add <| Ω₃.add Ω₄).ofEq <| by
+instance Theory.R0'Delta1Definable : 𝐑₀'.Delta1Definable := (eqRefl.add <| replace.add <| Ω₁.add <| Ω₂.add <| Ω₃.add Ω₄).ofEq <| by
     ext φ; constructor
     · rintro (hφ | hφ | hφ | hφ | hφ | hφ) <;> simp at hφ
-      · rcases hφ; exact Theory.CobhamR0'.eq_refl
-      · rcases hφ with ⟨φ, rfl⟩; exact FirstOrder.Theory.CobhamR0'.replace φ
-      · rcases hφ with ⟨n, m, rfl⟩; exact FirstOrder.Theory.CobhamR0'.Ω₁ n m
-      · rcases hφ with ⟨n, m, rfl⟩; exact FirstOrder.Theory.CobhamR0'.Ω₂ n m
-      · rcases hφ with ⟨n, m, ne, rfl⟩; exact FirstOrder.Theory.CobhamR0'.Ω₃ n m ne
-      · rcases hφ with ⟨n, rfl⟩; exact FirstOrder.Theory.CobhamR0'.Ω₄ n
+      · rcases hφ; exact Theory.R0'.eq_refl
+      · rcases hφ with ⟨φ, rfl⟩; exact FirstOrder.Theory.R0'.replace φ
+      · rcases hφ with ⟨n, m, rfl⟩; exact FirstOrder.Theory.R0'.Ω₁ n m
+      · rcases hφ with ⟨n, m, rfl⟩; exact FirstOrder.Theory.R0'.Ω₂ n m
+      · rcases hφ with ⟨n, m, ne, rfl⟩; exact FirstOrder.Theory.R0'.Ω₃ n m ne
+      · rcases hφ with ⟨n, rfl⟩; exact FirstOrder.Theory.R0'.Ω₄ n
     · intro hφ; cases hφ
       case eq_refl => left; simp
       case replace φ => right; left; exact ⟨φ, by simp⟩
@@ -566,14 +566,14 @@ instance Theory.CobhamR0'Delta1Definable : 𝐑₀'.Delta1Definable := (eqRefl.a
       case Ω₃ n m ne => right; right; right; right; left; exact ⟨n, m, ne, by simp⟩
       case Ω₄ n => right; right; right; right; right; exact ⟨n, by simp⟩
 
-abbrev Theory.CobhamR0' : ⌜ℒₒᵣ⌝[V].Theory := 𝐑₀'.codeIn V
+abbrev Theory.R0' : ⌜ℒₒᵣ⌝[V].Theory := 𝐑₀'.codeIn V
 
-abbrev TTheory.CobhamR0' : ⌜ℒₒᵣ⌝[V].TTheory := 𝐑₀'.tCodeIn V
+abbrev TTheory.R0' : ⌜ℒₒᵣ⌝[V].TTheory := 𝐑₀'.tCodeIn V
 
-notation "⌜𝐑₀'⌝" => TTheory.CobhamR0'
-notation "⌜𝐑₀'⌝[" V "]" => TTheory.CobhamR0' (V := V)
+notation "⌜𝐑₀'⌝" => TTheory.R0'
+notation "⌜𝐑₀'⌝[" V "]" => TTheory.R0' (V := V)
 
-namespace Theory.CobhamR0'
+namespace Theory.R0'
 
 def eqRefl.proof : ⌜𝐑₀'⌝[V] ⊢ (#'0 =' #'0).all := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_left
@@ -649,10 +649,10 @@ def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0)
   apply lt_trans ?_ (lt_iff_left _ _)
   apply lt_of_le_of_lt (by simp) (lt_qqLT_right _ _)
 
-end Theory.CobhamR0'
+end Theory.R0'
 
-instance Theory.addCobhamR0'Delta1Definable (T : Theory ℒₒᵣ) [d : T.Delta1Definable] : (T + 𝐑₀').Delta1Definable :=
-  d.add Theory.CobhamR0'Delta1Definable
+instance Theory.addR0'Delta1Definable (T : Theory ℒₒᵣ) [d : T.Delta1Definable] : (T + 𝐑₀').Delta1Definable :=
+  d.add Theory.R0'Delta1Definable
 section
 
 abbrev _root_.LO.FirstOrder.Theory.AddR₀TTheory
@@ -667,12 +667,12 @@ variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 @[simp] lemma theory_subset_AddR₀ : T.tCodeIn V ⊆ T†V := FirstOrder.Theory.Delta1Definable.add_subset_left _ _
 
 instance : R₀Theory (T†V) where
-  refl := Language.Theory.TProof.ofSubset (by simp) Theory.CobhamR0'.eqRefl.proof
-  replace := fun φ ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.CobhamR0'.replace.proof φ)
-  add := fun n m ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.CobhamR0'.Ω₁.proof n m)
-  mul := fun n m ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.CobhamR0'.Ω₂.proof n m)
-  ne := fun h ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.CobhamR0'.Ω₃.proof h)
-  ltNumeral := fun n ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.CobhamR0'.Ω₄.proof n)
+  refl := Language.Theory.TProof.ofSubset (by simp) Theory.R0'.eqRefl.proof
+  replace := fun φ ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.R0'.replace.proof φ)
+  add := fun n m ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.R0'.Ω₁.proof n m)
+  mul := fun n m ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.R0'.Ω₂.proof n m)
+  ne := fun h ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.R0'.Ω₃.proof h)
+  ltNumeral := fun n ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.R0'.Ω₄.proof n)
 
 end
 

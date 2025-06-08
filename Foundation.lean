@@ -40,7 +40,7 @@ import Foundation.FirstOrder.Arith.Hierarchy
 import Foundation.FirstOrder.Arith.StrictHierarchy
 import Foundation.FirstOrder.Arith.Theory
 import Foundation.FirstOrder.Arith.Model
-import Foundation.FirstOrder.Arith.CobhamR0
+import Foundation.FirstOrder.Arith.R0
 import Foundation.FirstOrder.Arith.PeanoMinus
 import Foundation.FirstOrder.Arith.Representation
 import Foundation.FirstOrder.Arith.Nonstandard

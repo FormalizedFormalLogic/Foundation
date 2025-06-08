@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Theory
+import Foundation.FirstOrder.Arith.Basic.ORingStruc
 
 namespace LO
 
@@ -134,6 +134,7 @@ variable {M : Type*} [ORingStruc M]
   · simp only [Theory.lMap, Set.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
     intro H φ hp f; exact eval_lMap_oringEmb.mpr (H hp f)
 
+/-
 instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
 
 instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* Theory.indScheme ℒₒᵣ Semiformula.Open :=
@@ -146,40 +147,16 @@ def models_indScheme_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧
 
 instance models_PeanoMinus_of_models_peano [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
 
+-/
+
 end
 
 end model
 
+/-
 namespace Standard
 
 variable {ξ : Type v} (e : Fin n → ℕ) (ε : ξ → ℕ)
-
-instance models_CobhamR0 : ℕ ⊧ₘ* 𝐑₀ := ⟨by
-  intro σ h
-  rcases h <;> try { simp [models_def, ←le_iff_eq_or_lt]; done }
-  case equal h =>
-    have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
-    simpa [models_def] using modelsTheory_iff.mp this h
-  case Ω₃ h =>
-    simpa [models_def, ←le_iff_eq_or_lt] using h⟩
-
-set_option linter.flexible false in
-instance models_PeanoMinus : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
-  intro σ h
-  rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
-  case addAssoc => intro f; exact add_assoc _ _ _
-  case addComm  => intro f; exact add_comm _ _
-  case mulAssoc => intro f; exact mul_assoc _ _ _
-  case mulComm  => intro f; exact mul_comm _ _
-  case addEqOfLt => intro f h; exact ⟨f 1 - f 0, Nat.add_sub_of_le (le_of_lt h)⟩
-  case oneLeOfZeroLt => intro n hn; exact hn
-  case mulLtMul => rintro f h hl; exact (mul_lt_mul_right hl).mpr h
-  case distr => intro f; exact Nat.mul_add _ _ _
-  case ltTrans => intro f; exact Nat.lt_trans
-  case ltTri => intro f; exact Nat.lt_trichotomy _ _
-  case equal h =>
-    have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
-    exact modelsTheory_iff.mp this h⟩
 
 set_option linter.flexible false in
 lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ := by
@@ -203,6 +180,8 @@ instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
 
 end Standard
 
+-/
+
 section
 
 variable (L : Language.{u}) [ORing L]
@@ -216,22 +195,6 @@ structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSub
   closedLt : ∀ x y : M, Semiformula.Evalb s ![x, y] “x y. x < y” → y ∈ domain → x ∈ domain
 
 end
-
-abbrev Theory.TrueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
-
-notation "𝐓𝐀" => Theory.TrueArith
-
-instance Standard.models_trueArith : ℕ ⊧ₘ* 𝐓𝐀 :=
-  modelsTheory_iff.mpr fun {φ} ↦ by simp
-
-lemma trueArith_provable_iff {φ : SyntacticFormula ℒₒᵣ} :
-    𝐓𝐀 ⊢! φ ↔ ℕ ⊧ₘ φ :=
-  ⟨fun h ↦ consequence_iff'.mp (sound₀! h) ℕ, fun h ↦ Entailment.by_axm _ h⟩
-
-instance (T : Theory ℒₒᵣ) [ℕ ⊧ₘ* T] : T ⪯ 𝐓𝐀 := ⟨by
-  rintro φ h
-  have : ℕ ⊧ₘ φ := consequence_iff'.mp (sound₀! h) ℕ
-  exact trueArith_provable_iff.mpr this⟩
 
 lemma oRing_consequence_of (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊨ φ := consequence_of T φ fun M _ s _ _ ↦ by
@@ -257,14 +220,15 @@ namespace Theory
 
 open Arith
 
-instance CobhamR0.consistent : Entailment.Consistent 𝐑₀ :=
-  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐑₀)⟩
+/-
 
 instance Peano.consistent : Entailment.Consistent 𝐏𝐀 :=
   Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐏𝐀)⟩
 
 instance TrueArith.consistent : Entailment.Consistent 𝐓𝐀 :=
   Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐓𝐀)⟩
+
+-/
 
 end Theory
 

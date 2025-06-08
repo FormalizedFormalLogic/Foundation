@@ -1,10 +1,9 @@
-import Foundation.FirstOrder.Arith.PeanoMinus
+import Foundation.FirstOrder.TrueArithmetic.Basic
+import Foundation.FirstOrder.PeanoMinus.Basic
 
-namespace LO
+namespace LO.FirstOrderTrueArith
 
-namespace FirstOrder
-
-namespace Arith
+open FirstOrder Arith PeanoMinus
 
 abbrev withStar := Language.add ℒₒᵣ Language.unit
 
@@ -31,9 +30,10 @@ lemma satisfiable_trueArithWithStarUnbounded (c : ℕ) : Satisfiable (trueArithW
   haveI : Structure.Eq ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
   haveI : Structure.LT ℒₒᵣ⋆ ℕ := ⟨fun _ _ => iff_of_eq rfl⟩
   have : ℕ ⊧ₘ* starUnbounded c := by
-    simp [starUnbounded, models_iff]; exact Fin.prop
+    have : ∀ (i : Fin c), (↑i : ℕ) < Semiterm.Operator.val (L := ℒₒᵣ⋆) Semiterm.Operator.Star.star ![] := Fin.prop
+    simp [starUnbounded, models_iff, this]
   have : ℕ ⊧ₘ* trueArithWithStarUnbounded c := by
-    simp [trueArithWithStarUnbounded, models_iff]; exact this
+    simpa [trueArithWithStarUnbounded, models_iff] using this
   exact satisfiable_intro ℕ this
 
 lemma satisfiable_union_trueArithWithStarUnbounded :
@@ -59,7 +59,7 @@ local notation "⋆" => star
 
 lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧ₘ* ⋃ c, trueArithWithStarUnbounded c := ModelOfSatEq.models _
 
-instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
+instance : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
   have : ℕ⋆ ⊧ₘ* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
     Semantics.RealizeSet.of_subset models_union_trueArithWithStarUnbounded
       (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (by simp) _)
@@ -80,22 +80,14 @@ instance trueArith : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
   exact e ▸ this⟩
 
 instance : ℕ⋆ ⊧ₘ* 𝐏𝐀⁻ :=
-  ModelsTheory.of_ss (U := 𝐓𝐀) inferInstance (Structure.subset_of_models.mpr $ Arith.Standard.models_PeanoMinus)
-
-open LO.Arith
+  ModelsTheory.of_ss (U := 𝐓𝐀) inferInstance (Structure.subset_of_models.mpr inferInstance)
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆ ⊧ₘ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
     models_union_trueArithWithStarUnbounded.realize _
-      (Set.mem_iUnion_of_mem (n + 1) (Set.mem_union_right _ <| by simp; apply Set.mem_range_self (Fin.last n)))
-  simpa [models_iff, Arith.numeral_eq_natCast] using this
+      <| Set.mem_iUnion_of_mem (n + 1)
+      <| Set.mem_union_right _
+      <| by simp only [Rew.hom_finitary2, Rew.finitary0]; exact Set.mem_range_self (Fin.last n)
+  simpa [models_iff, numeral_eq_natCast] using this
 
 end Nonstandard
-
-end
-
-end Arith
-
-end FirstOrder
-
-end LO

@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Hierarchy
+import Foundation.FirstOrder.Arith.Basic
 
 namespace LO
 
@@ -18,14 +18,14 @@ namespace Theory
 
 variable (L)
 
-inductive CobhamR0 : Theory ℒₒᵣ
-  | equal : ∀ φ ∈ 𝐄𝐐, CobhamR0 φ
-  | Ω₁ (n m : ℕ)  : CobhamR0 “↑n + ↑m = ↑(n + m)”
-  | Ω₂ (n m : ℕ)  : CobhamR0 “↑n * ↑m = ↑(n * m)”
-  | Ω₃  (n m : ℕ)  : n ≠ m → CobhamR0 “↑n ≠ ↑m”
-  | Ω₄ (n : ℕ) : CobhamR0 “∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i”
+inductive R0 : Theory ℒₒᵣ
+  | equal : ∀ φ ∈ 𝐄𝐐, R0 φ
+  | Ω₁ (n m : ℕ)  : R0 “↑n + ↑m = ↑(n + m)”
+  | Ω₂ (n m : ℕ)  : R0 “↑n * ↑m = ↑(n * m)”
+  | Ω₃  (n m : ℕ)  : n ≠ m → R0 “↑n ≠ ↑m”
+  | Ω₄ (n : ℕ) : R0 “∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i”
 
-notation "𝐑₀" => CobhamR0
+notation "𝐑₀" => R0
 
 variable {L}
 
@@ -118,9 +118,7 @@ lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ �
 
 instance : 𝐏𝐀⁻ ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.ofSubset (by simp [indH, Theory.add_def])
 
-instance : 𝐄𝐐 ⪯ 𝐑₀ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ CobhamR0.equal φ hp
 
-instance : 𝐄𝐐 ⪯ 𝐏𝐀⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PeanoMinus.equal φ hp
 
 instance : 𝐄𝐐 ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
