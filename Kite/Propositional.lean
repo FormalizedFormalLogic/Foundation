@@ -1,26 +1,10 @@
 import Foundation.Propositional.Logic.Basic
+import Kite.Basic
 
 open Lean Meta Qq Elab Command
 open LO.Propositional
 
 namespace Kite
-
-inductive EdgeType
-| eq
-| ssub
-| sub
-
-instance : ToString EdgeType := ⟨λ t =>
-  match t with
-  | .eq => "eq"
-  | .ssub => "ssub"
-  | .sub => "sub"
-⟩
-
-structure Edge where
-  a: String
-  b: String
-  type: EdgeType
 
 def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   match ← inferTypeQ ci.type with
@@ -30,17 +14,17 @@ def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   | _ => return none
 
 def findMatches : MetaM Json := do
-  let mut edges : Array Edge := #[]
+  let mut edges : Edges := .emptyWithCapacity
   for (name, ci) in (← getEnv).constants do
     if ci.isUnsafe then continue
     if ←name.isBlackListed then continue
     try
       match ←isMatch ci with
-      | some i => edges := edges.push i
+      | some i => edges := edges.insert i
       | none => continue
     catch _ => continue
 
-  return Json.arr $ edges.map $ (λ ⟨a, b, t⟩ => Json.mkObj [
+  return Json.arr $ edges.reductTrans.map $ (λ ⟨a, b, t⟩ => Json.mkObj [
     ("from", s!"{a}"),
     ("to", s!"{b}"),
     ("type", s!"{t}")
