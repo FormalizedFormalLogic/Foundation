@@ -81,7 +81,7 @@ instance : 𝐄𝐐 ⪯ 𝐈𝐍𝐃 Γ n := Entailment.WeakerThan.trans (inferI
 
 instance : 𝐄𝐐 ⪯ 𝐈open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
-instance : 𝐈open ⪯ 𝐈𝚺i :=
+instance : 𝐈open ⪯ 𝐈𝐍𝐃 Γ n :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arith.Hierarchy.of_open
 
 instance : 𝐈𝚺₀ ⪯ 𝐈𝚺₁ :=
@@ -348,5 +348,35 @@ lemma ISigma0.least_number [V ⊧ₘ* 𝐈𝚺₀] {P : V → Prop} (hP : 𝚺�
     {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   InductionOnHierarchy.order_induction_sigma Γ 1 hP ind
+
+
+instance [V ⊧ₘ* 𝐈open] : V ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈open)
+
+instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈𝚺₀)
+
+instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ := inferInstance
+
+
+set_option linter.flexible false in
+lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ := by
+  simp [Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
+    Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
+  intro e hzero hsucc x; induction' x with x ih
+  · exact hzero
+  · exact hsucc x ih
+
+instance models_ISigma (Γ k) : ℕ ⊧ₘ* 𝐈𝐍𝐃 Γ k := by
+  simp only [ModelsTheory.add_iff, instModelsTheoryNat, InductionScheme,
+    Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp, true_and]
+  rintro _ φ _ rfl; simp [models_succInd]
+
+instance models_ISigmaZero : ℕ ⊧ₘ* 𝐈𝚺₀ := inferInstance
+
+instance models_ISigmaOne : ℕ ⊧ₘ* 𝐈𝚺₁ := inferInstance
+
+instance models_Peano : ℕ ⊧ₘ* 𝐏𝐀 := by
+  simp only [Peano, InductionScheme, ModelsTheory.add_iff, instModelsTheoryNat,
+    Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp, true_and]
+  rintro _ φ _ rfl; simp [models_succInd]
 
 end LO

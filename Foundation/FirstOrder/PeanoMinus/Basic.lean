@@ -140,7 +140,7 @@ open FirstOrder Arith Language
   apply Set.finite_singleton
 
 set_option linter.flexible false in
-instance : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
+@[simp] instance : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   intro σ h
   rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
   case addAssoc => intro f; exact add_assoc _ _ _
@@ -179,7 +179,7 @@ protected lemma add_comm (x y : M) : x + y = y + x := by
 lemma add_eq_of_lt (x y : M) : x < y → ∃ z, x + z = y := by
   simpa [models_iff] using ModelsTheory.models M PeanoMinus.addEqOfLt (x :>ₙ fun _ ↦ y)
 
-@[simp] lemma zero_le (x : M) : 0 ≤ x := by
+@[simp] protected lemma zero_le (x : M) : 0 ≤ x := by
   simpa [models_iff, Structure.le_iff_of_eq_of_lt] using ModelsTheory.models M PeanoMinus.zeroLe (fun _ ↦ x)
 
 lemma zero_lt_one : (0 : M) < 1 := by

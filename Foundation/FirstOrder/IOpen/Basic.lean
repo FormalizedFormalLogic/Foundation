@@ -1,11 +1,14 @@
-import Foundation.Arithmetization.Basic.Ind
+import Foundation.FirstOrder.Arith.Induction
 import Mathlib.Logic.Nonempty
 
-namespace LO.Arith
+/-!
+# Basic properties of theory $\mathsf{I_{open}}$
 
-open FirstOrder FirstOrder.Arith
+-/
 
-noncomputable section
+namespace LO.IOpen
+
+open FirstOrder Arith PeanoMinus
 
 variable {V : Type*} [ORingStruc V]
 
@@ -13,38 +16,47 @@ section IOpen
 
 variable [V ⊧ₘ* 𝐈open]
 
+instance : V ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈open)
+
+instance : V ⊧ₘ* InductionScheme ℒₒᵣ Semiformula.Open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈open)
+
 @[elab_as_elim]
-lemma open_induction {P : V → Prop}
+lemma succ_induction {P : V → Prop}
     (hP : ∃ p : Semiformula ℒₒᵣ V 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] id p)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  induction (C := Semiformula.Open)
-    (by rcases hP with ⟨p, hp, hhp⟩
-        haveI : Inhabited V := Classical.inhabited_of_nonempty'
-        exact ⟨p.enumarateFVar, Rew.rewriteMap p.idxOfFVar ▹ p, by simp [hp],
-          by  intro x; simp [Semiformula.eval_rewriteMap, hhp]
-              exact Semiformula.eval_iff_of_funEqOn p (by
-                intro z hz
-                simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hz)])⟩) zero succ
+  InductionScheme.succ_induction (C := Semiformula.Open) (by
+    rcases hP with ⟨p, hp, hhp⟩
+    haveI : Inhabited V := Classical.inhabited_of_nonempty'
+    refine ⟨p.enumarateFVar, Rew.rewriteMap p.idxOfFVar ▹ p, by simp [hp], ?_⟩
+    intro x
+    simp only [hhp, Nat.succ_eq_add_one, Nat.reduceAdd, Semiformula.eval_rewriteMap]
+    exact Semiformula.eval_iff_of_funEqOn p (by
+      intro z hz
+      simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hz)]))
+    zero succ
 
-lemma open_leastNumber {P : V → Prop}
+lemma least_number {P : V → Prop}
     (hP : ∃ p : Semiformula ℒₒᵣ V 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] id p)
     (zero : P 0) {a} (counterex : ¬P a) : ∃ x, P x ∧ ¬P (x + 1) := by
   by_contra A
   have : ∀ x, P x := by
-    intro x; induction x using open_induction
+    intro x; induction x using succ_induction
     · exact hP
     case zero => exact zero
     case succ n ih =>
-      simp at A
-      exact A n ih
+      have : ∀ (x : V), P x → P (x + 1) := by simpa using A
+      exact this n ih
   have : P a := this a
   contradiction
+
+/-! ### Division -/
+
+section div
 
 lemma div_exists_unique_pos (a : V) {b} (pos : 0 < b) : ∃! u, b * u ≤ a ∧ a < b * (u + 1) := by
   have : ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
     have : a < b * (a + 1) → ∃ u, b * u ≤ a ∧ a < b * (u + 1) := by
-      simpa using open_leastNumber (P := fun u ↦ b * u ≤ a) ⟨“x. &b * x ≤ &a”, by simp, by intro x; simp⟩
-    simp at this
+      simpa using least_number (P := fun u ↦ b * u ≤ a) ⟨“x. &b * x ≤ &a”, by simp, by intro x; simp⟩
     have hx : a < b * (a + 1) := by
       have : a + 0 < b * a + b :=
         add_lt_add_of_le_of_lt (le_mul_self_of_pos_left pos) pos
@@ -62,14 +74,12 @@ lemma div_exists_unique_pos (a : V) {b} (pos : 0 < b) : ∃! u, b * u ≤ a ∧ 
       _ ≤ a           := hu'.1
     exact LT.lt.false this)
 
-section div
-
 lemma div_exists_unique (a b : V) : ∃! u, (0 < b → b * u ≤ a ∧ a < b * (u + 1)) ∧ (b = 0 → u = 0) := by
-  have : 0 ≤ b := by exact zero_le b
+  have : 0 ≤ b := by exact PeanoMinus.zero_le b
   rcases this with (rfl | pos) <;> simp [*]
   · simpa [pos_iff_ne_zero.mp pos] using div_exists_unique_pos a pos
 
-scoped instance : Div V := ⟨fun a b ↦ Classical.choose! (div_exists_unique a b)⟩
+noncomputable scoped instance : Div V := ⟨fun a b ↦ Classical.choose! (div_exists_unique a b)⟩
 
 lemma mul_div_le_pos (a : V) (h : 0 < b) : b * (a / b) ≤ a := ((Classical.choose!_spec (div_exists_unique a b)).1 h).1
 
@@ -125,23 +135,25 @@ lemma div_mul (a b c : V) : a / (b * c) = a / b / c := by
   · simp
   exact div_eq_of
     (by calc
-          b * c * (a / b / c) ≤ b * (a / b) := by simp [mul_assoc]; exact mul_le_mul_left (mul_div_le_pos (a / b) hc)
+          b * c * (a / b / c) ≤ b * (a / b) := by simpa [mul_assoc] using mul_le_mul_left (mul_div_le_pos (a / b) hc)
           _                   ≤ a := mul_div_le_pos a hb)
     (by calc
           a < b * (a / b + 1)         := lt_mul_div_succ a hb
-          _ ≤ b * c * (a / b / c + 1) := by simp [mul_assoc]; exact mul_le_mul_left (lt_iff_succ_le.mp <| lt_mul_div_succ (a / b) hc))
+          _ ≤ b * c * (a / b / c + 1) := by simpa [mul_assoc] using mul_le_mul_left (lt_iff_succ_le.mp <| lt_mul_div_succ (a / b) hc))
 
 @[simp] lemma mul_div_le (a b : V) : b * (a / b) ≤ a := by
   have : 0 ≤ b := by exact zero_le b
-  rcases this with (rfl | pos) <;> simp [*]
-  rcases eq_mul_div_add_of_pos a pos with ⟨v, _, e⟩
-  simpa [← e] using show b * (a / b) ≤ b * (a / b) + v from le_self_add
+  rcases this with (rfl | pos)
+  · simp
+  · rcases eq_mul_div_add_of_pos a pos with ⟨v, _, e⟩
+    simpa [← e] using show b * (a / b) ≤ b * (a / b) + v from le_self_add
 
 @[simp] lemma div_le (a b : V) : a / b ≤ a := by
   have : 0 ≤ b := zero_le b
-  rcases this with (rfl | pos) <;> simp [*]
-  have : 1 * (a / b) ≤ b * (a / b) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp [pos])) (by simp)
-  simpa using le_trans this (mul_div_le a b)
+  rcases this with (rfl | pos)
+  · simp
+  · have : 1 * (a / b) ≤ b * (a / b) := mul_le_mul_of_nonneg_right (le_iff_lt_succ.mpr (by simp [pos])) (by simp)
+    simpa using le_trans this (mul_div_le a b)
 
 instance div_polybounded : Bounded₂ ((· / ·) : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -225,10 +237,9 @@ lemma div_monotone {a b : V} (h : a ≤ b) (c : V) : a / c ≤ b / c := by
 
 lemma div_lt_of_lt_mul {a b c : V} (h : a < b * c) : a / c < b := by
   by_contra hb
-  simp at hb
   have : a < a := calc
     a < b * c     := h
-    _ ≤ a / c * c := mul_le_mul_right hb
+    _ ≤ a / c * c := mul_le_mul_right (by simpa using hb)
     _ ≤ a         := by simp
   simp_all
 
@@ -240,11 +251,13 @@ lemma div_cancel_right {c} (pos : 0 < c) (a b : V) : (a * c) / (b * c) = a / b :
 
 end div
 
+/-! ### Remainder -/
+
 section mod
 
-def rem (a b : V) : V := a - b * (a / b)
+noncomputable def rem (a b : V) : V := a - b * (a / b)
 
-scoped instance : Mod V := ⟨rem⟩
+noncomputable scoped instance : Mod V := ⟨rem⟩
 
 lemma mod_def (a b : V) : a % b = a - b * (a / b) := rfl
 
@@ -278,7 +291,7 @@ lemma mod_mul_add_of_lt (a b : V) {r} (hr : r < b) : (a * b + r) % b = r := by
   simp [mod_def, div_mul_add a b hr, mul_comm]
 
 @[simp] lemma mod_mul_add (a c : V) (pos : 0 < b) : (a * b + c) % b = c % b := by
-  simp [mod_def, div_mul_add_self, pos, mul_add, ←sub_sub, show b * a = a * b from mul_comm _ _]
+  simp [mod_def, div_mul_add_self, pos, mul_add, ←PeanoMinus.sub_sub, show b * a = a * b from mul_comm _ _]
 
 @[simp] lemma mod_add_mul (a b : V) (pos : 0 < c) : (a + b * c) % c = a % c := by
   simp [add_comm a (b * c), pos]
@@ -312,7 +325,7 @@ lemma mod_mul_add_of_lt (a b : V) {r} (hr : r < b) : (a * b + r) % b = r := by
 instance mod_polybounded : Bounded₂ ((· % ·) : V → V → V) := ⟨#0, by intro v; simp⟩
 
 lemma mod_eq_zero_iff_dvd {a b : V} : b % a = 0 ↔ a ∣ b := by
-  simp [mod_def]
+  simp only [mod_def, sub_eq_zero_iff_le]
   constructor
   · intro H; exact mul_div_self_of_dvd.mp (le_antisymm (mul_div_le b a) H)
   · intro H; simp [mul_div_self_of_dvd.mpr H]
@@ -358,7 +371,7 @@ end mod
 
 lemma two_dvd_mul {a b : V} : 2 ∣ a * b → 2 ∣ a ∨ 2 ∣ b := by
   intro H; by_contra A
-  simp [not_or] at A
+  have A : ¬2 ∣ a ∧ ¬2 ∣ b := by simpa using A
   have ha : a % 2 = 1 := by
     have : a % 2 = 0 ∨ a % 2 = 1 := mod_two a
     simpa [show a % 2 ≠ 0 from by simpa [←mod_eq_zero_iff_dvd] using A.1] using this
@@ -381,12 +394,14 @@ lemma even_or_odd' (a : V) : a = 2 * (a / 2) ∨ a = 2 * (a / 2) + 1 := by
 
 lemma two_prime : Prime (2 : V) := ⟨by simp, by simp, by intro a b h; exact two_dvd_mul h⟩
 
+/-! ### Square root -/
+
 section sqrt
 
 lemma sqrt_exists_unique (a : V) : ∃! x, x * x ≤ a ∧ a < (x + 1) * (x + 1) := by
   have : ∃ x, x * x ≤ a ∧ a < (x + 1) * (x + 1) := by
     have : a < (a + 1) * (a + 1) → ∃ x, x * x ≤ a ∧ a < (x + 1) * (x + 1) := by
-      simpa using open_leastNumber (P := λ x ↦ x * x ≤ a) ⟨“x. x * x ≤ &a”, by simp, by simp⟩
+      simpa using least_number (P := λ x ↦ x * x ≤ a) ⟨“x. x * x ≤ &a”, by simp, by simp⟩
     have hn : a < (a + 1) * (a + 1) := calc
       a ≤ a * a             := le_mul_self a
       _ < a * a + 1         := lt_add_one (a * a)
@@ -404,7 +419,7 @@ lemma sqrt_exists_unique (a : V) : ∃! x, x * x ≤ a ∧ a < (x + 1) * (x + 1)
       _ ≤ a                 := hy.1
     simp at this)
 
-def sqrt (a : V) : V := Classical.choose! (sqrt_exists_unique a)
+noncomputable def sqrt (a : V) : V := Classical.choose! (sqrt_exists_unique a)
 
 prefix:75 "√" => sqrt
 
@@ -431,14 +446,14 @@ lemma sqrt_eq_of_le_of_lt {x a : V} (le : x * x ≤ a) (lt : a < (x + 1) * (x + 
   Eq.symm <| eq_sqrt x a ⟨le, lt⟩
 
 lemma sqrt_eq_of_le_of_le {x a : V} (le : x * x ≤ a) (h : a ≤ x * x + 2 * x) : √a = x :=
-  sqrt_eq_of_le_of_lt le (by simp [add_mul_self_eq]; exact le_iff_lt_succ.mp h)
+  sqrt_eq_of_le_of_lt le <| by simpa [add_mul_self_eq] using le_iff_lt_succ.mp h
 
 @[simp] lemma sq_sqrt_le (a : V) : (√a) ^ 2 ≤ a := by simp [sq]
 
 @[simp] lemma sqrt_lt_sq (a : V) : a < (√a + 1) ^ 2 := by simp [sq]
 
 @[simp] lemma sqrt_mul_self (a : V) : √(a * a) = a :=
-  Eq.symm <| eq_sqrt a (a * a) (by simp; exact mul_self_lt_mul_self (by simp) (by simp))
+  Eq.symm <| eq_sqrt a (a * a) <| by simpa using mul_self_lt_mul_self (by simp) (by simp)
 
 @[simp] lemma sqrt_sq (a : V) : √(a^2) = a := by simp [sq]
 
@@ -493,12 +508,14 @@ lemma sq_lt_of_lt_sqrt {a b : V} : a < √b → a^2 < b := by
 
 end sqrt
 
+/-! ### Pairing -/
+
 section pair
 
 open Classical
 
 -- https://github.com/leanprover-community/mathlib4/blob/b075cdd0e6ad8b5a3295e7484b2ae59e9b2ec2a7/Mathlib/Data/Nat/Pairing.lean#L37
-def pair (a b : V) : V := if a < b then b * b + a else a * a + a + b
+noncomputable def pair (a b : V) : V := if a < b then b * b + a else a * a + a + b
 
 --notation "⟪" a ", " b "⟫" => pair a b
 
@@ -535,32 +552,31 @@ instance pair_definable : 𝚺₀-Function₂ (pair : V → V → V) := pair_def
 instance : Bounded₂ (pair : V → V → V) :=
   ⟨‘x y. (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> try simp [pair, *]⟩
 
-def unpair (a : V) : V × V := if a - √a * √a < √a then (a - √a * √a, √a) else (√a, a - √a * √a - √a)
+noncomputable def unpair (a : V) : V × V := if a - √a * √a < √a then (a - √a * √a, √a) else (√a, a - √a * √a - √a)
 
-abbrev pi₁ (a : V) : V := (unpair a).1
+noncomputable abbrev pi₁ (a : V) : V := (unpair a).1
 
-abbrev pi₂ (a : V) : V := (unpair a).2
+noncomputable abbrev pi₂ (a : V) : V := (unpair a).2
 
 prefix: 80 "π₁" => pi₁
 
 prefix: 80 "π₂" => pi₂
 
 @[simp] lemma pair_unpair (a : V) : ⟪π₁ a, π₂ a⟫ = a := by
-  simp [pi₁, pi₂, unpair]
+  simp only [pi₁, unpair, pi₂]
   split_ifs with h
   · simp [pair, h]
-  · simp; simp [pair, h]
-    have : a - √a * √a - √a ≤ √a := by simp [add_comm (2 * √a), ←two_mul]
-    simp [not_lt.mpr this]
-    have :√a ≤ a - √a * √a := by simpa using h
+  · suffices √a * √a + √a + (a - √a * √a - √a) = a by
+      simpa [pair, not_lt.mpr (show a - √a * √a - √a ≤ √a by simp [add_comm (2 * √a), ←two_mul])]
+    have : √a ≤ a - √a * √a := by simpa using h
     calc
-      √a * √a + √a + (a - √a * √a - √a) = √a * √a + (a - √a * √a) := by simp [add_assoc]
-                                                                        rw [add_tsub_self_of_le, add_tsub_self_of_le] <;> simp [this]
-      _                                 = a                       := add_tsub_self_of_le (by simp)
+      √a * √a + √a + (a - √a * √a - √a) = √a * √a + (√a + (a - √a * √a - √a)) := by simp [add_assoc]
+      _                                 = √a * √a + (a - √a * √a)             := by simp [add_tsub_self_of_le this]
+      _                                 = a                                   := add_tsub_self_of_le (by simp)
 
 @[simp] lemma unpair_pair (a b : V) : unpair ⟪a, b⟫ = (a, b) := by
-  simp [pair]; split_ifs with h
-  · have : √(b * b + a) = b := sqrt_eq_of_le_of_le (by simp) (by simp; exact le_trans (le_of_lt h) (by simp))
+  simp only [pair]; split_ifs with h
+  · have : √(b * b + a) = b := sqrt_eq_of_le_of_le (by simp) (by simpa using le_trans (le_of_lt h) (by simp))
     simp [unpair, this, show ¬b ≤ a from by simpa using h]
   · have : √(a * a + (a + b)) = a :=
       sqrt_eq_of_le_of_le (by simp [add_assoc]) (by simp [add_assoc, two_mul, show b ≤ a from by simpa using h])
@@ -570,7 +586,7 @@ prefix: 80 "π₂" => pi₂
 
 @[simp] lemma pi₂_pair (a b : V) : π₂ ⟪a, b⟫ = b := by simp [pi₂]
 
-def pairEquiv : V × V ≃ V := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩ => unpair_pair a b, pair_unpair⟩
+noncomputable def pairEquiv : V × V ≃ V := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩ => unpair_pair a b, pair_unpair⟩
 
 @[simp] lemma pi₁_le_self (a : V) : π₁ a ≤ a := by simp [pi₁, unpair]; split_ifs <;> simp
 
@@ -581,8 +597,8 @@ def pairEquiv : V × V ≃ V := ⟨Function.uncurry pair, unpair, fun ⟨a, b⟩
 @[simp] lemma le_pair_right (a b : V) : b ≤ ⟪a, b⟫ := by simpa using pi₂_le_self ⟪a, b⟫
 
 @[simp] lemma lt_pair_left_of_pos {a} (pos : 0 < a) (b : V) : a < ⟪a, b⟫ := by
-  simp [pair]; split_ifs
-  · simp; exact pos_iff_ne_zero.mp <| pos_of_gt (by assumption)
+  simp only [pair]; split_ifs
+  · simpa using pos_iff_ne_zero.mp <| pos_of_gt (by assumption)
   · calc
       a < a * a + a     := lt_add_of_pos_left a (by simpa using (pos_iff_ne_zero.mp pos))
       _ ≤ a * a + a + b := by simp
@@ -597,6 +613,7 @@ def _root_.LO.FirstOrder.Arith.pi₁Def : 𝚺₀.Semisentence 2 :=
 def _root_.LO.FirstOrder.Arith.pi₂Def : 𝚺₀.Semisentence 2 :=
   .mkSigma “y p. ∃ x <⁺ p, !pairDef p x y” (by simp)
 
+set_option linter.flexible false in
 lemma pi₁_defined : 𝚺₀-Function₁ (pi₁ : V → V) via pi₁Def := by
   intro v; simp [pi₁Def]
   constructor
@@ -608,6 +625,7 @@ lemma pi₁_defined : 𝚺₀-Function₁ (pi₁ : V → V) via pi₁Def := by
 
 instance pi₁_definable : 𝚺₀-Function₁ (pi₁ : V → V) := pi₁_defined.to_definable₀
 
+set_option linter.flexible false in
 lemma pi₂_defined : 𝚺₀-Function₁ (pi₂ : V → V) via pi₂Def := by
   intro v; simp [pi₂Def]
   constructor
@@ -620,14 +638,18 @@ lemma pi₂_defined : 𝚺₀-Function₁ (pi₂ : V → V) via pi₂Def := by
 instance pi₂_definable : 𝚺₀-Function₁ (pi₂ : V → V) := pi₂_defined.to_definable₀
 
 lemma pair_lt_pair_left {a₁ a₂ : V} (h : a₁ < a₂) (b) : ⟪a₁, b⟫ < ⟪a₂, b⟫ := by
-  by_cases h₁ : a₁ < b <;> simp [pair, h₁]
-  · by_cases h₂ : a₂ < b <;> simp [pair, h₂, h]
-    calc
-      b * b + a₁ < b * b + b        := by simpa using h₁
-      _          ≤ a₂ * a₂ + a₂     := add_le_add (mul_le_mul (by simpa using h₂) (by simpa using h₂) (by simp) (by simp)) (by simpa using h₂)
-      _          ≤ a₂ * a₂ + a₂ + b := by simp
-  · simp [show ¬a₂ < b from by simp; exact le_trans (by simpa using h₁) (le_of_lt h)]
-    apply _root_.add_lt_add (by simpa [←sq] using h) h
+  by_cases h₁ : a₁ < b
+  · simp only [pair, h₁, ↓reduceIte]
+    by_cases h₂ : a₂ < b
+    · simp [pair, h₂, h]
+    · suffices b * b + a₁ < a₂ * a₂ + a₂ + b by simpa [pair, h₂, h]
+      calc
+        b * b + a₁ < b * b + b        := by simpa using h₁
+        _          ≤ a₂ * a₂ + a₂     := add_le_add (mul_le_mul (by simpa using h₂) (by simpa using h₂) (by simp) (by simp)) (by simpa using h₂)
+        _          ≤ a₂ * a₂ + a₂ + b := by simp
+  · simp [pair, h₁]
+    simpa [show ¬a₂ < b by simpa using le_trans (by simpa using h₁) (le_of_lt h)]
+    using _root_.add_lt_add (by simpa [←sq] using h) h
 
 lemma pair_le_pair_left {a₁ a₂ : V} (h : a₁ ≤ a₂) (b) : ⟪a₁, b⟫ ≤ ⟪a₂, b⟫ := by
   rcases h with (rfl | lt)
@@ -635,13 +657,15 @@ lemma pair_le_pair_left {a₁ a₂ : V} (h : a₁ ≤ a₂) (b) : ⟪a₁, b⟫ 
   · exact le_of_lt (pair_lt_pair_left lt b)
 
 lemma pair_lt_pair_right (a : V) {b₁ b₂} (h : b₁ < b₂) : ⟪a, b₁⟫ < ⟪a, b₂⟫ := by
-  by_cases h₁ : a < b₁ <;> simp [pair, h₁]
-  · simpa [lt_trans h₁ h, ←sq] using h
-  · by_cases h₂ : a < b₂ <;> simp [h₂, h]
-    calc
-      a * a + a + b₁ < (a + 1) * (a + 1) + b₁ := by simp [add_mul_self_eq]; apply lt_succ_iff_le.mpr; simp
-      _              ≤ b₂ * b₂ + b₁           := by simpa [←sq, succ_le_iff_lt] using h₂
-      _              ≤ b₂ * b₂ + a            := by simpa using h₁
+  by_cases h₁ : a < b₁
+  · simpa [pair, h₁, lt_trans h₁ h, ←sq] using h
+  · by_cases h₂ : a < b₂
+    · suffices a * a + a + b₁ < b₂ * b₂ + a by simpa [pair, h₁, h₂, h]
+      calc
+        a * a + a + b₁ < (a + 1) * (a + 1) + b₁ := by simpa [add_mul_self_eq] using lt_succ_iff_le.mpr (by simp)
+        _              ≤ b₂ * b₂ + b₁           := by simpa [←sq, succ_le_iff_lt] using h₂
+        _              ≤ b₂ * b₂ + a            := by simpa using h₁
+    · simp [pair, h₁, h₂, h]
 
 lemma pair_le_pair_right (a : V) {b₁ b₂} (h : b₁ ≤ b₂) : ⟪a, b₁⟫ ≤ ⟪a, b₂⟫ := by
   rcases h with (rfl | lt)
@@ -683,8 +707,6 @@ def _root_.LO.FirstOrder.Arith.pair₆Def : 𝚺₀.Semisentence 7 :=
 theorem fegergreg (v : Fin 4 → ℕ) : v (0 : Fin (Nat.succ 1)).succ.succ = v 2 := by { simp only [Nat.succ_eq_add_one,
   Nat.reduceAdd, Fin.isValue, Fin.succ_zero_eq_one, Fin.succ_one_eq_two] }
 
-axiom P : Fin 3 → Prop
-
 theorem fin4 {n} : (2 : Fin (n + 3)).succ = 3 := rfl
 
 @[simp] theorem Fin.succ_zero_eq_one'' {n} : (0 : Fin (n + 1)).succ = 1 := rfl
@@ -695,13 +717,15 @@ example (v : Fin 4 → ℕ) : v (2 : Fin 3).succ = v 3 := by { simp [fin4] }
 
 theorem ss (v : Fin 4 → ℕ) : v (Fin.succ (0 : Fin (Nat.succ 1))).succ = v 2 := by { simp [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Fin.succ_zero_eq_one, Fin.succ_one_eq_two] }
 
+set_option linter.flexible false in
 lemma pair₃_defined : 𝚺₀-Function₃ ((⟪·, ·, ·⟫) : V → V → V → V) via pair₃Def := by
   intro v; simp [pair₃Def]
-  rintro h; simp [h]
+  intro h; simp [h]
 
 @[simp] lemma eval_pair₃Def (v) :
     Semiformula.Evalbm V v pair₃Def.val ↔ v 0 = ⟪v 1, v 2, v 3⟫ := pair₃_defined.df.iff v
 
+set_option linter.flexible false in
 lemma pair₄_defined : 𝚺₀-Function₄ ((⟪·, ·, ·, ·⟫) : V → V → V → V → V) via pair₄Def := by
   intro v; simp [pair₄Def]
   intro e; simp [e]
@@ -709,6 +733,7 @@ lemma pair₄_defined : 𝚺₀-Function₄ ((⟪·, ·, ·, ·⟫) : V → V �
 @[simp] lemma eval_pair₄Def (v) :
     Semiformula.Evalbm V v pair₄Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4⟫ := pair₄_defined.df.iff v
 
+set_option linter.flexible false in
 lemma pair₅_defined : 𝚺₀.DefinedFunction (fun v : Fin 5 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4⟫)) pair₅Def := by
   intro v; simp [pair₅Def]
   intro e; simp [e]
@@ -716,6 +741,7 @@ lemma pair₅_defined : 𝚺₀.DefinedFunction (fun v : Fin 5 → V ↦ (⟪v 0
 @[simp] lemma eval_pair₅Def (v) :
     Semiformula.Evalbm V v pair₅Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4, v 5⟫ := pair₅_defined.df.iff v
 
+set_option linter.flexible false in
 lemma pair₆_defined : 𝚺₀.DefinedFunction (fun v : Fin 6 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4, v 5⟫)) pair₆Def := by
   intro v; simp [pair₆Def]
   intro e; simp [e]
@@ -725,22 +751,22 @@ lemma pair₆_defined : 𝚺₀.DefinedFunction (fun v : Fin 6 → V ↦ (⟪v 0
 
 end
 
-def npair : {n : ℕ} → (v : Fin n → V) → V
-  | 0,     _ => 0
+noncomputable def npair : {n : ℕ} → (v : Fin n → V) → V
+  |     0, _ => 0
   | _ + 1, v => ⟪v 0, npair (v ·.succ)⟫
 
 @[simp] lemma npair_zero (v : Fin 0 → V) : npair v = 0 := by simp [npair]
 
 lemma npair_succ (x) (v : Fin n → V) : npair (x :> v) = ⟪x, npair v⟫ := by simp [npair]
 
-def unNpair : {n : ℕ} → Fin n → V → V
-  | 0,     i, _ => i.elim0
+noncomputable def unNpair : {n : ℕ} → Fin n → V → V
+  |     0, i, _ => i.elim0
   | _ + 1, i, x => Fin.cases (π₁ x) (fun i ↦ unNpair i (π₂ x)) i
 
 @[simp] lemma unNpair_npair {n} (i : Fin n) (v : Fin n → V) : unNpair i (npair v) = v i := by
-  induction' n with n ih <;> simp [npair, unNpair, *]
-  · exact i.elim0
-  · cases i using Fin.cases <;> simp
+  induction' n with n ih
+  · simpa [npair, unNpair] using i.elim0
+  · cases i using Fin.cases <;> simp [npair, unNpair, *]
 
 section
 
@@ -769,15 +795,18 @@ end pair
 
 end IOpen
 
+/-! ### Polynomial induction -/
+
 section polynomial_induction
 
-variable [V ⊧ₘ* 𝐈open]
+variable [V ⊧ₘ* 𝐏𝐀⁻]
 
 @[elab_as_elim]
-lemma hierarchy_polynomial_induction (Γ m) [V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ m)]
+lemma hierarchy_polynomial_induction (Γ m) [V ⊧ₘ* 𝐈𝐍𝐃 Γ m]
     {P : V → Prop} (hP : Γ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
-  intro x; induction x using order_induction
+  haveI : V ⊧ₘ* 𝐈open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈𝐍𝐃 Γ m)
+  intro x; induction x using InductionOnHierarchy.order_induction
   · exact Γ
   · exact m
   · exact hP
@@ -791,6 +820,8 @@ lemma hierarchy_polynomial_induction (Γ m) [V ⊧ₘ* Theory.InductionScheme �
       · simpa [←hx] using odd (x / 2) (IH (x / 2) this)
 
 end polynomial_induction
+
+open PeanoMinus
 
 @[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₀ [V ⊧ₘ* 𝐈𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
@@ -808,10 +839,8 @@ variable [V ⊧ₘ* 𝐈open]
 
 lemma nat_cast_pair (n m : ℕ) : (⟪n, m⟫ : ℕ) = ⟪(↑n : V), (↑m : V)⟫ := by simp [pair]
 
-lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [Arith.pair, Nat.pair]
+lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [pair, Nat.pair]
 
 lemma pair_coe_eq_coe_pair (m n : ℕ) :  ⟪n, m⟫ = (Nat.pair n m : V) := by simp [nat_cast_pair, nat_pair_eq]
 
-end
-
-end LO.Arith
+end IOpen
