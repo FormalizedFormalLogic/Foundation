@@ -7,10 +7,19 @@ open Kripke
 open Formula
 open Formula.Kripke
 
+
+lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic {H : Hilbert ℕ} {C : FrameClass}
+  [sound : Sound H C] [complete : Complete H C]
+  : H.logic = C.logic := by
+  ext φ;
+  constructor;
+  . exact sound.sound;
+  . exact complete.complete;
+
+
 namespace Hilbert.Kripke
 
 variable {H : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
-
 
 section
 

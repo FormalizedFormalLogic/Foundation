@@ -396,6 +396,13 @@ end FrameClass
 
 end
 
+
+section
+
+abbrev FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
+
+end
+
 end Kripke
 
 end LO.Propositional

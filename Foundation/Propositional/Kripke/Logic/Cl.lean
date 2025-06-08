@@ -1,9 +1,6 @@
-import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.AxiomLEM
-import Foundation.Propositional.Kripke.AxiomWeakLEM
-import Foundation.Propositional.Kripke.Filtration
-import Foundation.Propositional.Kripke.Hilbert.Soundness
-import Foundation.Propositional.Kripke.Rooted
+import Foundation.Propositional.Kripke.AxiomDummett
+import Foundation.Propositional.Kripke.Logic.LC
 
 namespace LO.Propositional
 
@@ -115,6 +112,52 @@ instance complete_finite_euclidean : Complete (Hilbert.Cl) FrameClass.finite_euc
 end FFP
 
 end Hilbert.Cl.Kripke
+
+
+namespace Logic.Cl
+
+lemma Kripke.euclidean : Logic.Cl = Kripke.FrameClass.euclidean.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.finite_euclidean : Logic.Cl = Kripke.FrameClass.finite_euclidean.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.finite_symmetric : Logic.Cl = Kripke.FrameClass.finite_symmetric.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+@[simp]
+theorem proper_extension_of_LC : Logic.LC ⊂ Logic.Cl := by
+  constructor;
+  . apply (Hilbert.weakerThan_of_dominate_axiomInstances
+      (by rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp)).subset;
+  . suffices ∃ φ, Hilbert.Cl ⊢! φ ∧ ¬FrameClass.connected ⊧ φ by
+      rw [LC.Kripke.connected];
+      tauto;
+    use Axioms.LEM (.atom 0);
+    constructor;
+    . simp;
+    . apply not_validOnFrameClass_of_exists_frame;
+      use {
+        World := Fin 2,
+        Rel := λ x y => x ≤ y
+        rel_partial_order := {
+          refl := by omega;
+          trans := by omega;
+          antisymm := by omega;
+        }
+      };
+      constructor;
+      . apply isConnected_iff _ _ |>.mpr
+        simp [Connected];
+        omega;
+      . apply not_imp_not.mpr $ Kripke.euclidean_of_validate_LEM;
+        unfold Euclidean;
+        push_neg;
+        use 0, 0, 1;
+        simp;
+
+@[simp]
+lemma proper_extension_of_Int : Logic.Int ⊂ Logic.Cl := by
+  trans Logic.LC;
+  trans Logic.KC;
+  all_goals simp;
+
+end Logic.Cl
 
 
 end LO.Propositional

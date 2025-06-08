@@ -1,6 +1,5 @@
-import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.AxiomKrieselPutnam
-import Foundation.Propositional.Kripke.Hilbert.Soundness
+import Foundation.Propositional.Kripke.Logic.Int
 
 namespace LO.Propositional
 
@@ -36,5 +35,12 @@ instance canonical : Canonical Hilbert.KP FrameClass.krieselputnam := ⟨by
 instance complete : Complete Hilbert.KP FrameClass.krieselputnam := inferInstance
 
 end Hilbert.KP.Kripke
+
+
+namespace Logic.KP
+
+lemma Kripke.krieselputnam : Logic.KP = Kripke.FrameClass.krieselputnam.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+end Logic.KP
 
 end LO.Propositional

@@ -1,7 +1,7 @@
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.Kripke.Logic.S4Point3
-import Foundation.Propositional.Kripke.Hilbert.LC
 import Foundation.Modal.Boxdot.GLPoint3_GrzPoint3
+import Foundation.Propositional.Kripke.Logic.LC
 
 namespace LO.Modal
 
@@ -79,7 +79,7 @@ instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := 
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.connected)
     (MC := Modal.Kripke.FrameClass.connected_preorder)
-    (by rw [Propositional.Logic.LC.Kripke.eq_connected])
+    (by rw [Propositional.Logic.LC.Kripke.connected])
     (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.Kripke.connected_preorder])
     (by rintro F hF; replace hF := Set.mem_setOf_eq.mp hF; apply Set.mem_setOf_eq.mpr; refine ⟨inferInstance, inferInstance⟩);
 
@@ -131,7 +131,7 @@ instance modalCompanion_LC_GrzPoint3 : ModalCompanion Logic.LC Logic.GrzPoint3 :
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_connected)
     (MC := FrameClass.finite_connected_partial_order)
-    (by rw [Logic.LC.Kripke.eq_finite_connected])
+    (by rw [Logic.LC.Kripke.finite_connected])
     (by rw [←Logic.GrzPoint3.is_largestMC_of_LC, Modal.Logic.GrzPoint3.Kripke.finite_connected_partial_order])
     (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, inferInstance, inferInstance⟩)
 

@@ -16,9 +16,8 @@ import Foundation.Propositional.ClassicalSemantics.Tait
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Heyting.Semantics
-import Foundation.Propositional.Logic.Disjunctive
-import Foundation.Propositional.Logic.WellKnown
-import Foundation.Propositional.Logic.Sublogic
+import Foundation.Propositional.Kripke.Logic.KP
+import Foundation.Propositional.Kripke.Logic.Cl
 import Foundation.Propositional.Logic.Letterless_Int_Cl
 
 -- FirstOrder

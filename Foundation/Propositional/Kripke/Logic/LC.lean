@@ -1,8 +1,5 @@
-import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.AxiomDummett
-import Foundation.Propositional.Kripke.Hilbert.Soundness
-import Foundation.Propositional.Kripke.Filtration
-import Foundation.Propositional.Kripke.Rooted
+import Foundation.Propositional.Kripke.Logic.KC
 
 namespace LO.Propositional
 
@@ -101,7 +98,47 @@ instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_connected := 
 
 end FFP
 
-
 end Hilbert.LC.Kripke
+
+namespace Logic.LC
+
+
+lemma Kripke.connected : Logic.LC = Kripke.FrameClass.connected.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.finite_connected : Logic.LC = Kripke.FrameClass.finite_connected.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+@[simp]
+theorem proper_extension_of_KC : Logic.KC ⊂ Logic.LC := by
+  constructor;
+  . exact (Hilbert.weakerThan_of_dominate_axiomInstances
+      (by rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp)).subset
+  . suffices ∃ φ, Hilbert.LC ⊢! φ ∧ ¬FrameClass.confluent ⊧ φ by
+      rw [KC.Kripke.confluent];
+      tauto;
+    use Axioms.Dummett (.atom 0) (.atom 1);
+    constructor;
+    . simp;
+    . apply not_validOnFrameClass_of_exists_frame;
+      use {
+        World := Fin 4
+        Rel := λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)
+        rel_partial_order := {
+          refl := by omega;
+          trans := by omega;
+          antisymm := by omega;
+        }
+      };
+      constructor;
+      . apply isConfluent_iff _ _ |>.mpr
+        simp only [Confluent, Fin.isValue, not_and, and_imp];
+        intros;
+        use 3;
+        omega;
+      . apply not_imp_not.mpr $ Kripke.connected_of_validate_Dummett;
+        unfold Connected;
+        push_neg;
+        use 0, 1, 2;
+        simp;
+
+end Logic.LC
 
 end LO.Propositional

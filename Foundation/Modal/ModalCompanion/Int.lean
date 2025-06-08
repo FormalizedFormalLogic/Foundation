@@ -2,7 +2,7 @@ import Foundation.Modal.Boxdot.GL_Grz
 import Foundation.Modal.Logic.Extension
 import Foundation.Modal.ModalCompanion.Basic
 import Foundation.Propositional.Hilbert.Glivenko
-import Foundation.Propositional.Logic.WellKnown
+import Foundation.Propositional.Kripke.Logic.Int
 
 namespace LO.Modal
 
@@ -47,7 +47,7 @@ instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.all)
     (MC := Modal.Kripke.FrameClass.preorder)
-    (by rw [Logic.Int.Kripke.eq_all])
+    (by rw [Logic.Int.Kripke.all])
     (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.Kripke.preorder])
     (by simp; intro F; infer_instance;);
 
@@ -93,7 +93,7 @@ instance modalCompanion_Int_Grz : ModalCompanion Logic.Int Logic.Grz := by
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_all)
     (MC := FrameClass.finite_partial_order)
-    (by rw [Logic.Int.Kripke.eq_all_finite])
+    (by rw [Logic.Int.Kripke.all_finite])
     (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.Kripke.finite_partial_order])
     (by rintro F ⟨⟩; refine ⟨by tauto, inferInstance⟩);
 

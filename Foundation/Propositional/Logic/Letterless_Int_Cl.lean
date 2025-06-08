@@ -1,7 +1,7 @@
+import Foundation.Modal.Kripke.Logic.S5Grz
 import Foundation.Modal.Maximal.Makinson
 import Foundation.Modal.ModalCompanion.Int
-import Foundation.Modal.Kripke.Logic.S5Grz
-import Foundation.Propositional.Logic.Sublogic
+import Foundation.Propositional.Kripke.Logic.Cl
 
 namespace LO.Propositional
 
@@ -16,7 +16,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.letterless) : φ ∈ Logic.Int ↔ φ ∈ Logic.Cl := by
   constructor;
-  . apply Int_ssubset_Cl.1;
+  . apply Propositional.Logic.Cl.proper_extension_of_Int.1;
   . intro h;
     have : ◇φᵍ ∈ Modal.Logic.S4 := Modal.Logic.iff_provable_Cl_provable_dia_gS4.mp h;
     have : ◇φᵍ ∈ Modal.Logic.Triv := Modal.Logic.Triv.proper_extension_of_S4.subset this;
