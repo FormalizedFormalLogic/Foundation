@@ -1,14 +1,30 @@
-import Foundation.Propositional.Hilbert.Int
+import Foundation.Propositional.Hilbert.Basic
 import Foundation.Propositional.Entailment.Basic
 
+namespace LO.Propositional
 
-namespace LO.Propositional.Hilbert
+namespace Hilbert
 
 variable {H : Hilbert α}
 
 open Deduction
 
 section
+
+class HasEFQ (H : Hilbert α) where
+  p : α
+  mem_efq : (⊥ ➝ (.atom p)) ∈ H.axioms := by tauto;
+
+instance [DecidableEq α] [hEfq : H.HasEFQ] : Entailment.HasAxiomEFQ H where
+  efq φ := by
+    apply maxm;
+    use Axioms.EFQ (Formula.atom hEfq.p);
+    constructor;
+    . exact hEfq.mem_efq;
+    . use (λ b => if hEfq.p = b then φ else (.atom b));
+      simp;
+instance [DecidableEq α] [H.HasEFQ] : Entailment.Int H where
+
 
 class HasLEM (H : Hilbert α) where
   p : α
@@ -94,43 +110,77 @@ instance [DecidableEq α] [hKrieselPutnam : H.HasKrieselPutnam] : Entailment.Has
       );
       simp [hKrieselPutnam.ne_pq, hKrieselPutnam.ne_pr, hKrieselPutnam.ne_qr];
 
+
 end
 
+end Hilbert
 
-section
+
+protected abbrev Hilbert.Int : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0)}⟩
+protected abbrev Logic.Int : Logic := Hilbert.Int.logic
+
+namespace Hilbert.Int
+
+instance : Hilbert.Int.FiniteAxiomatizable where
+instance : Hilbert.Int.HasEFQ where p := 0;
+
+end Hilbert.Int
 
 
-protected abbrev Cl : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.LEM (.atom 0)}⟩
+protected abbrev Hilbert.Cl : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.LEM (.atom 0)}⟩
+protected abbrev Logic.Cl : Logic := Hilbert.Cl.logic
+
+namespace Hilbert
+
 instance : Hilbert.Cl.FiniteAxiomatizable where
 instance : Hilbert.Cl.HasEFQ where p := 0;
 instance : Hilbert.Cl.HasLEM where p := 0;
 instance : Entailment.Cl (Hilbert.Cl) where
 
-lemma Int_weakerThan_Cl : (Hilbert.Int) ⪯ (Hilbert.Cl) := by
+end Hilbert
+
+lemma Hilbert.Int_weakerThan_Cl : (Hilbert.Int) ⪯ (Hilbert.Cl) := by
   apply weakerThan_of_subset_axioms;
   tauto;
 
 
-protected abbrev KC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}⟩
+protected abbrev Hilbert.KC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}⟩
+protected abbrev Logic.KC : Logic := Hilbert.KC.logic
+
+namespace Hilbert.KC
+
 instance : Hilbert.KC.FiniteAxiomatizable where
 instance : Hilbert.KC.HasEFQ where p := 0;
 instance : Hilbert.KC.HasWeakLEM where p := 0;
 instance : Entailment.KC (Hilbert.KC) where
 
+end Hilbert.KC
 
-protected abbrev LC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.Dummett (.atom 0) (.atom 1)}⟩
+
+protected abbrev Hilbert.LC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.Dummett (.atom 0) (.atom 1)}⟩
+protected abbrev Logic.LC : Logic := Hilbert.LC.logic
+
+namespace Hilbert.LC
+
 instance : Hilbert.LC.FiniteAxiomatizable where
 instance : Hilbert.LC.HasEFQ where p := 0;
 instance : Hilbert.LC.HasDummett where p := 0; q := 1;
 instance : Entailment.LC (Hilbert.LC) where
 
+end Hilbert.LC
 
-protected abbrev KP : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}⟩
+
+protected abbrev Hilbert.KP : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}⟩
+protected abbrev Logic.KP : Logic := Hilbert.KP.logic
+
+namespace Hilbert.KP
+
 instance : Hilbert.KP.FiniteAxiomatizable where
 instance : Hilbert.KP.HasEFQ where p := 0;
 instance : Hilbert.KP.HasKrieselPutnam where p := 0; q := 1; r := 2;
 instance : Entailment.KP (Hilbert.KP) where
 
-end
+end Hilbert.KP
 
-end LO.Propositional.Hilbert
+
+end LO.Propositional

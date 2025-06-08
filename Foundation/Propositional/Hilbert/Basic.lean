@@ -1,5 +1,7 @@
 import Foundation.Logic.HilbertStyle.Supplemental
 import Foundation.Propositional.Formula
+import Foundation.Propositional.Logic.Basic
+import Foundation.Logic.Disjunctive
 
 namespace LO.Propositional
 
@@ -123,6 +125,29 @@ lemma weakerThan_of_subset_axioms (hSubset : H₁.axioms ⊆ H₂.axioms) : H₁
   constructor;
   . exact hSubset hs;
   . use s;
+
+end
+
+abbrev logic (H : Hilbert ℕ) : Logic := Entailment.theory H
+
+section
+
+variable {H : Hilbert ℕ}
+
+open Entailment
+
+@[simp]
+lemma iff_mem_logic {φ : Formula ℕ} : φ ∈ H.logic ↔ H ⊢! φ := by simp [Entailment.theory];
+
+instance [Entailment.Consistent H] : H.logic.Consistent := ⟨by
+  apply Set.eq_univ_iff_forall.not.mpr;
+  push_neg;
+  obtain ⟨φ, hφ⟩ : ∃ φ, H ⊬ φ := Entailment.Consistent.exists_unprovable inferInstance;
+  use! φ;
+  simpa;
+⟩
+
+instance [Entailment.Disjunctive H] : H.logic.Disjunctive := ⟨fun {_ _} h => Disjunctive.disjunctive h⟩
 
 end
 

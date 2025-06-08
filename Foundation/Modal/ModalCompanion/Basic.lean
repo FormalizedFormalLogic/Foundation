@@ -1,6 +1,6 @@
-import Foundation.Propositional.Logic.Basic
 import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Logic.Extension
+import Foundation.Propositional.Kripke.Basic
 
 namespace LO
 

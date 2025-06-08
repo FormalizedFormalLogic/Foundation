@@ -1,8 +1,7 @@
-import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.AxiomWeakLEM
-import Foundation.Propositional.Kripke.Hilbert.Soundness
-import Foundation.Propositional.Kripke.Filtration
 import Foundation.Propositional.Kripke.Rooted
+import Foundation.Propositional.Kripke.Logic.Int
+
 
 namespace LO.Propositional
 
@@ -113,7 +112,45 @@ instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_confluent := 
 
 end FFP
 
-
 end Hilbert.KC.Kripke
+
+namespace Logic.KC
+
+open Kripke
+open Entailment
+open Formula.Kripke
+
+lemma Kripke.confluent : Logic.KC = Kripke.FrameClass.confluent.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.finite_confluent : Logic.KC = Kripke.FrameClass.finite_confluent.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+@[simp]
+theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KC := by
+  constructor;
+  . exact (Hilbert.weakerThan_of_subset_axioms (by simp)).subset;
+  . suffices ∃ φ, Hilbert.KC ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+      rw [Logic.Int.Kripke.all];
+      tauto;
+    use Axioms.WeakLEM (.atom 0);
+    constructor;
+    . exact wlem!;
+    . apply not_validOnFrameClass_of_exists_frame;
+      use {
+        World := Fin 3
+        Rel := λ x y => x = 0 ∨ (x = y)
+        rel_partial_order := {
+          refl := by omega;
+          trans := by omega;
+          antisymm := by omega;
+        }
+      };
+      constructor;
+      . tauto;
+      . apply not_imp_not.mpr $ Kripke.confluent_of_validate_WeakLEM;
+        unfold Confluent;
+        push_neg;
+        use 0, 1, 2;
+        simp;
+
+end Logic.KC
 
 end LO.Propositional

@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Int
+import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Vorspiel.Order
 import Foundation.Logic.LindenbaumAlgebra
 
