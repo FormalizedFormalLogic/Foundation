@@ -1,4 +1,3 @@
-import Foundation.Init
 import Mathlib.Data.List.Defs
 
 open Lean Meta

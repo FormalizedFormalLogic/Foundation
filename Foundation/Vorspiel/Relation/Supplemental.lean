@@ -1,4 +1,3 @@
-import Foundation.Init
 import Mathlib.Logic.Relation
 
 section
