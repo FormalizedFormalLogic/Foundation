@@ -30,3 +30,8 @@ supportInterpreter = true
 name = "generate_modal_kite"
 srcDir = "scripts"
 supportInterpreter = true
+
+[[lean_exe]]
+name = "generate_propositional_kite"
+root = "Kite.Propositional"
+supportInterpreter = true
