@@ -3,10 +3,10 @@ defaultTargets = ["Foundation"]
 
 [leanOptions]
 pp.unicode.fun = true
-linter.flexible = true
-# linter.refine = true
-linter.oldObtain = true
-linter.style.multiGoal = true
+weak.linter.flexible = true
+weak.linter.refine = true
+weak.linter.oldObtain = true
+weak.linter.style.multiGoal = true
 
 [[require]]
 scope = "leanprover-community"
