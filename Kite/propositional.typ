@@ -7,7 +7,7 @@
 #let Logic(L) = $upright(bold(#L))$
 #let Axiom(A) = $upright(sans(#A))$
 
-#let arrows = json("./propositional_kite.json").map(((from, to, type)) => {
+#let arrows = json("./propositional.json").map(((from, to, type)) => {
   if type == "ssub" {
     return strfmt("\"{}\" -> \"{}\"", from, to)
   } else if type == "sub" {
@@ -17,7 +17,7 @@
   }
 })
 
-#figure(caption: [Kite of Propositional Logics])[
+#figure(caption: [Kite of Propositional Logics], numbering: none)[
   #raw-render(
     raw(
       "

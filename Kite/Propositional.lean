@@ -36,4 +36,4 @@ unsafe def main : IO Unit := do
   initSearchPath (← findSysroot)
   let env ← importModules (loadExts := true) #[`Foundation] {}
   let ⟨s, _, _⟩ ← Kite.findMatches.toIO { fileName := "<compiler>", fileMap := default } { env := env }
-  IO.FS.writeFile "Kite/propositional_kite.json" s.pretty
+  IO.FS.writeFile "Kite/propositional.json" s.pretty
