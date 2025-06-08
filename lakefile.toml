@@ -21,6 +21,9 @@ rev = "v4.21.0-rc1"
 [[lean_lib]]
 name = "Foundation"
 
+[[lean_lib]]
+name = "Kite"
+
 [[lean_exe]]
 name = "generate_arith_kite"
 srcDir = "scripts"
@@ -29,4 +32,9 @@ supportInterpreter = true
 [[lean_exe]]
 name = "generate_modal_kite"
 srcDir = "scripts"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "generate_propositional_kite"
+root = "Kite.Propositional"
 supportInterpreter = true
