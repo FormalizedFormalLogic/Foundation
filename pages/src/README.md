@@ -10,6 +10,10 @@ Visualization for sublogic/subtheory relations.
 
 ![Kite of Modal Logics](./assets/modal_kite.png)
 
+### Propositional Logics
+
+![Kite of Propositional Logics](./assets/propositional_kite.png)
+
 ### First-Order Arithmetics
 
 ![Kite of First-Order Arithmetics](./assets/arith_kite.png)
