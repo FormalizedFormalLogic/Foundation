@@ -28,7 +28,7 @@ lemma induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ :
   rcases this with ⟨q, _, hq⟩
   have : ∀ x ≤ a, x ∈ p ∨ x ∈ q := by
     intro x hx
-    induction x using induction_sigma1
+    induction x using ISigma1.sigma1_succ_induction
     · clear hp hq zero succ
       definability
     case zero => simpa [hp, hq] using zero
@@ -51,7 +51,7 @@ lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
   rcases this with ⟨q, _, hq⟩
   have : ∀ x ≤ a, x ∈ p ∨ x ∈ q := by
     intro x hx
-    induction x using order_induction_sigma1
+    induction x using ISigma1.sigma1_order_induction
     · clear hp hq ind
       apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]

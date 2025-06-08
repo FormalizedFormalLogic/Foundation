@@ -318,7 +318,7 @@ theorem seq_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
   (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (s ⁀' x)) :
     ∀ {s : V}, Seq s → P s := by
   intro s sseq
-  induction s using order_induction_h_sigma1
+  induction s using ISigma1.sigma1_order_induction
   · exact Γ
   · definability
   case ind s ih =>
@@ -423,7 +423,7 @@ end seqToVec
 
 open HierarchySymbol
 
-lemma order_ball_induction_sigma1 {f : V → V → V} (hf : 𝚺₁-Function₂ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+lemma order_ball_ISigma1.sigma1_succ_induction {f : V → V → V} (hf : 𝚺₁-Function₂ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f x y, P x' y') → P x y) : ∀ x y, P x y := by
   have maxf : ∀ x y, ∃ m, ∀ x' ≤ x, ∀ y' ≤ y, f x' y' ≤ m := by
     intro x y;
@@ -436,7 +436,7 @@ lemma order_ball_induction_sigma1 {f : V → V → V} (hf : 𝚺₁-Function₂ 
       ⟪0, y⟫ ∈ W ∧
       ∀ l < k, ∀ m < W, ∀ m' < W, ⟪l, m⟫ ∈ W → ⟪l + 1, m'⟫ ∈ W → ∀ x' ≤ x - l, ∀ y' ≤ m, f x' y' ≤ m' := by
     intro k hk
-    induction k using induction_sigma1
+    induction k using ISigma1.sigma1_succ_induction
     · apply Boldface.imp (Boldface.comp₂ (by definability) (by definability))
       apply Boldface.ex
       apply Boldface.and (Boldface.comp₁ (by definability))
@@ -479,7 +479,7 @@ lemma order_ball_induction_sigma1 {f : V → V → V} (hf : 𝚺₁-Function₂ 
   rcases this x (by rfl) with ⟨W, SW, hxW, hW₀, hWₛ⟩
   have : ∀ i ≤ x, ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := by
     intro i
-    induction i using induction_sigma1
+    induction i using ISigma1.sigma1_succ_induction
     · apply Boldface.imp
         (Boldface.comp₂ (.var _) (.const _))
       apply Boldface.ball_lt (.const _)
@@ -509,10 +509,10 @@ lemma order_ball_induction_sigma1 {f : V → V → V} (hf : 𝚺₁-Function₂ 
       exact ih m₁ (by simp [m₁]) (by simp [m₁]) x'' (lt_succ_iff_le.mp (lt_of_lt_of_le hx'' hx')) y'' (le_trans hy'' this)
   exact this x (by rfl) y (lt_of_mem_rng hW₀) (by simpa using hW₀) x (by rfl) y (by rfl)
 
-lemma order_ball_induction_sigma1' {f : V → V} (hf : 𝚺₁-Function₁ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+lemma order_ball_ISigma1.sigma1_succ_induction' {f : V → V} (hf : 𝚺₁-Function₁ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f y, P x' y') → P x y) : ∀ x y, P x y :=
   have : 𝚺₁-Function₂ (fun _ ↦ f) := BoldfaceFunction.comp₁ (by simp)
-  order_ball_induction_sigma1 this hP ind
+  order_ball_ISigma1.sigma1_succ_induction this hP ind
 
 lemma order_ball_induction₂_sigma1 {fy fz : V → V → V → V}
     (hfy : 𝚺₁-Function₃ fy) (hfz : 𝚺₁-Function₃ fz) {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
@@ -535,7 +535,7 @@ lemma order_ball_induction₂_sigma1 {fy fz : V → V → V → V}
       · apply BoldfaceFunction.comp₁ (.var _)
       · apply BoldfaceFunction.comp₁ (.var _)
   intro x y z
-  simpa [Q] using order_ball_induction_sigma1 hf hQ (fun x w ih ↦
+  simpa [Q] using order_ball_ISigma1.sigma1_succ_induction hf hQ (fun x w ih ↦
     ind x (π₁ w) (π₂ w) (fun x' hx' y' hy' z' hz' ↦ by simpa [Q] using ih x' hx' ⟪y', z'⟫ (pair_le_pair hy' hz')))
     x ⟪y, z⟫
 
@@ -573,7 +573,7 @@ lemma order_ball_induction₃_sigma1 {fy fz fw : V → V → V → V → V}
           (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
           (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
   intro x y z w
-  have := order_ball_induction_sigma1 hf hQ (fun x v ih ↦
+  have := order_ball_ISigma1.sigma1_succ_induction hf hQ (fun x v ih ↦
     ind x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)) (fun x' hx' y' hy' z' hz' w' hw' ↦ by
       simpa [Q] using ih x' hx' ⟪y', z', w'⟫ (pair_le_pair hy' <| pair_le_pair hz' hw')))
     x ⟪y, z, w⟫

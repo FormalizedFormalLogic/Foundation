@@ -496,7 +496,7 @@ private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ
     · simpa using HierarchySymbol.Boldface.bcomp₁ (by definability)
     · simpa using HierarchySymbol.Boldface.bcomp₂ (by definability) (by definability)
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : V) := by
-    simpa using least_number_h Γ.alt m this hs
+    simpa using least_number Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩
   have t_le_s : t ≤ s := not_lt.mp (by
     intro lt

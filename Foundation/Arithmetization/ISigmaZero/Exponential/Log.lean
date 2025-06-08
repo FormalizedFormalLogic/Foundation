@@ -282,7 +282,7 @@ lemma brange_exists_unique (a : V) : ∀ x < ‖a‖, ∃! y, Exponential x y :=
     intro x hx; rcases this x hx with ⟨_, _, H⟩
     exact ExistsUnique.intro _ H (fun y' H' ↦ H'.uniq H)
   intro x
-  induction x using induction_sigma0
+  induction x using ISigma0.succ_induction
   · definability
   case zero =>
     intro ha

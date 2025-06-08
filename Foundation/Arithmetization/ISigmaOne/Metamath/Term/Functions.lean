@@ -660,14 +660,14 @@ instance seqExp_definable : 𝚺-[0 + 1]-Function₁ (numeralAux : V → V) := n
 end
 
 @[simp] lemma lt_numeralAux_self (n : V) : n < numeralAux n := by
-    induction n using induction_sigma1
+    induction n using ISigma1.sigma1_succ_induction
     · definability
     case zero => simp [Formalized.one]
     case succ n ih =>
       refine lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
 
 @[simp] lemma numeralAux_semiterm (n x : V) : ⌜ℒₒᵣ⌝.IsSemiterm n (numeralAux x) := by
-  induction x using induction_sigma1
+  induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ x ih => simp [qqAdd, ih]
@@ -724,7 +724,7 @@ end
 
 @[simp] lemma numeral_substs {w : V} (hw : ⌜ℒₒᵣ⌝.IsSemitermVec n m w) (x : V) :
     ⌜ℒₒᵣ⌝.termSubst w (numeral x) = numeral x := by
-  induction x using induction_sigma1
+  induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp [hw, Formalized.zero, qqFunc_absolute]
   case succ x ih =>
@@ -736,7 +736,7 @@ end
 
 @[simp] lemma numeral_shift (x : V) :
     ⌜ℒₒᵣ⌝.termShift (numeral x) = numeral x := by
-  induction x using induction_sigma1
+  induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp [Formalized.zero, qqFunc_absolute]
   case succ x ih =>
@@ -748,7 +748,7 @@ end
 
 @[simp] lemma numeral_bShift (x : V) :
     ⌜ℒₒᵣ⌝.termBShift (numeral x) = numeral x := by
-  induction x using induction_sigma1
+  induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp [Formalized.zero, qqFunc_absolute]
   case succ x ih =>

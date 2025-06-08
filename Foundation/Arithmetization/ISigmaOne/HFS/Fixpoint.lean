@@ -133,7 +133,7 @@ lemma mem_limSeq_succ_iff {x s : V} :
     x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by simp [limSeq_succ, mem_succ_iff]
 
 lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
-  induction s' using induction_sigma1 generalizing s
+  induction s' using ISigma1.sigma1_succ_induction generalizing s
   · apply HierarchySymbol.Boldface.ball_le (by definability)
     apply HierarchySymbol.Boldface.comp₂
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
@@ -150,7 +150,7 @@ lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s'
 
 lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
     u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
-  induction u using order_induction_pi1 generalizing s
+  induction u using ISigma1.pi1_order_induction generalizing s
   · apply HierarchySymbol.Boldface.all
     apply HierarchySymbol.Boldface.imp
     · apply HierarchySymbol.Boldface.comp₂
@@ -251,7 +251,7 @@ end
 theorem induction [c.StrongFinite] {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
-  apply order_induction_hh (Γ := Γ) (m := 1) (P := fun x ↦ c.Fixpoint v x → P x)
+  apply order_induction_sigma (Γ := Γ) (m := 1) (P := fun x ↦ c.Fixpoint v x → P x)
   · apply HierarchySymbol.Boldface.imp
       (HierarchySymbol.BoldfacePred.comp
         (by

@@ -105,7 +105,7 @@ lemma neg_not_uformula {x} (h : ¬L.IsUFormula x) :
     L.neg x = 0 := (construction L).result_prop_not _ h
 
 lemma Language.IsUFormula.neg {p : V} : L.IsUFormula p → L.IsUFormula (L.neg p) := by
-  apply Language.IsUFormula.induction_sigma1
+  apply Language.IsUFormula.ISigma1.sigma1_succ_induction
   · definability
   · intro k r v hr hv; simp [hr, hv]
   · intro k r v hr hv; simp [hr, hv]
@@ -117,7 +117,7 @@ lemma Language.IsUFormula.neg {p : V} : L.IsUFormula p → L.IsUFormula (L.neg p
   · intro p hp ihp; simp [hp, ihp]
 
 @[simp] lemma Language.IsUFormula.bv_neg {p : V} : L.IsUFormula p → L.bv (L.neg p) = L.bv p := by
-  apply Language.IsUFormula.induction_sigma1
+  apply Language.IsUFormula.ISigma1.sigma1_succ_induction
   · definability
   · intro k R v hR hv; simp [*]
   · intro k R v hR hv; simp [*]
@@ -129,7 +129,7 @@ lemma Language.IsUFormula.neg {p : V} : L.IsUFormula p → L.IsUFormula (L.neg p
   · intro p hp ihp; simp [hp, hp.neg, ihp]
 
 @[simp] lemma Language.IsUFormula.neg_neg {p : V} : L.IsUFormula p → L.neg (L.neg p) = p := by
-  apply Language.IsUFormula.induction_sigma1
+  apply Language.IsUFormula.ISigma1.sigma1_succ_induction
   · definability
   · intro k r v hr hv; simp [hr, hv]
   · intro k r v hr hv; simp [hr, hv]
@@ -327,7 +327,7 @@ lemma shift_not_uformula {x} (h : ¬L.IsUFormula x) :
     L.shift x = 0 := (construction L).result_prop_not _ h
 
 lemma Language.IsUFormula.shift {p : V} : L.IsUFormula p → L.IsUFormula (L.shift p) := by
-  apply Language.IsUFormula.induction_sigma1
+  apply Language.IsUFormula.ISigma1.sigma1_succ_induction
   · definability
   · intro k r v hr hv; simp [hr, hv]
   · intro k r v hr hv; simp [hr, hv]
@@ -339,7 +339,7 @@ lemma Language.IsUFormula.shift {p : V} : L.IsUFormula p → L.IsUFormula (L.shi
   · intro p hp ihp; simp [hp, hp.neg, ihp]
 
 lemma Language.IsUFormula.bv_shift {p : V} : L.IsUFormula p → L.bv (L.shift p) = L.bv p := by
-  apply Language.IsUFormula.induction_sigma1
+  apply Language.IsUFormula.ISigma1.sigma1_succ_induction
   · definability
   · intro k r v hr hv; simp [hr, hv]
   · intro k r v hr hv; simp [hr, hv]
@@ -351,7 +351,7 @@ lemma Language.IsUFormula.bv_shift {p : V} : L.IsUFormula p → L.bv (L.shift p)
   · intro p hp ihp; simp [hp, hp.neg, ihp, hp.shift]
 
 lemma Language.IsSemiformula.shift {p : V} : L.IsSemiformula n p → L.IsSemiformula n (L.shift p) := by
-  apply Language.IsSemiformula.induction_sigma1
+  apply Language.IsSemiformula.ISigma1.sigma1_succ_induction
   · definability
   · intro n k r v hr hv; simp [hr, hv, hv.isUTerm]
   · intro n k r v hr hv; simp [hr, hv, hv.isUTerm]
@@ -370,7 +370,7 @@ lemma Language.IsSemiformula.shift {p : V} : L.IsSemiformula n p → L.IsSemifor
     Language.IsSemiformula.shift⟩
 
 lemma shift_neg {p : V} (hp : L.IsSemiformula n p) : L.shift (L.neg p) = L.neg (L.shift p) := by
-  apply Language.IsSemiformula.induction_sigma1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply Language.IsSemiformula.ISigma1.sigma1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro n k R v hR hv; simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
   · intro n k R v hR hv; simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
@@ -487,7 +487,7 @@ variable {m w : V}
 @[simp] lemma substs_ex {p} (hp : L.IsUFormula p) :
     L.substs w (^∃ p) = ^∃ (L.substs (L.qVec w) p) := by simp [Language.substs, hp, construction]
 
-lemma isUFormula_subst_induction_sigma1 {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
+lemma isUFormula_subst_ISigma1.sigma1_succ_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
     (hRel : ∀ w k R v, L.Rel k R → L.IsUTermVec k v → P w (^relk R v) (^rel k R (L.termSubstVec k w v)))
     (hNRel : ∀ w k R v, L.Rel k R → L.IsUTermVec k v → P w (^nrelk R v) (^nrel k R (L.termSubstVec k w v)))
     (hverum : ∀ w, P w ^⊤ ^⊤)
@@ -583,7 +583,7 @@ lemma substs_not_uformula {w x} (h : ¬L.IsUFormula x) :
 lemma substs_neg {p} (hp : L.IsSemiformula n p) :
     L.IsSemitermVec n m w → L.substs w (L.neg p) = L.neg (L.substs w p) := by
   revert m w
-  apply Language.IsSemiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply Language.IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intros n k R v hR hv m w hw
     rw [neg_rel hR hv.isUTerm, substs_nrel hR hv.isUTerm, substs_rel hR hv.isUTerm, neg_rel hR (hw.termSubstVec hv).isUTerm]
@@ -613,7 +613,7 @@ lemma substs_neg {p} (hp : L.IsSemiformula n p) :
 lemma shift_substs {p} (hp : L.IsSemiformula n p) :
     L.IsSemitermVec n m w → L.shift (L.substs w p) = L.substs (L.termShiftVec n w) (L.shift p) := by
   revert m w
-  apply Language.IsSemiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply Language.IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro n k R v hR hv m w hw
     rw [substs_rel hR hv.isUTerm,
@@ -677,7 +677,7 @@ lemma shift_substs {p} (hp : L.IsSemiformula n p) :
 lemma substs_substs {p} (hp : L.IsSemiformula l p) :
     L.IsSemitermVec n m w → L.IsSemitermVec l n v → L.substs w (L.substs v p) = L.substs (L.termSubstVec l w v) p := by
   revert m w n v
-  apply Language.IsSemiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply Language.IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro l k R ts hR hts m w n v _ hv
     rw [substs_rel hR hts.isUTerm,
@@ -729,7 +729,7 @@ lemma substs_substs {p} (hp : L.IsSemiformula l p) :
 lemma subst_eq_self {n w : V} (hp : L.IsSemiformula n p) (hw : L.IsSemitermVec n n w) (H : ∀ i < n, w.[i] = ^#i) :
     L.substs w p = p := by
   revert w
-  apply Language.IsSemiformula.induction_pi1 ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply Language.IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro n k R v hR hv w _ H
     simp only [substs_rel, qqRel_inj, true_and, hR, hv.isUTerm]

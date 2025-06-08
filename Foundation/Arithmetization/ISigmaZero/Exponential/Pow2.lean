@@ -201,7 +201,7 @@ lemma mul {a b : V} (ha : Pow2 a) (hb : Pow2 b) : Pow2 (a * b) := by
   suffices ∀ b : V, ∀ a ≤ b, Pow2 a → Pow2 b → Pow2 (a * b) by
     exact this b a hab ha hb
   intro b
-  induction b using order_induction_sigma0
+  induction b using ISigma0.order_induction
   · definability
   case ind IH a b IH =>
     intro a hab ha hb
@@ -231,7 +231,7 @@ lemma sq {a : V} : Pow2 a → Pow2 (a^2) := by
 lemma dvd_of_le {a b : V} (ha : Pow2 a) (hb : Pow2 b) : a ≤ b → a ∣ b := by
   suffices  ∀ b : V, ∀ a ≤ b, Pow2 a → Pow2 b → a ∣ b by
     intro hab; exact this b a hab ha hb
-  intro b; induction b using order_induction_sigma0
+  intro b; induction b using ISigma0.order_induction
   · definability
   case ind b IH =>
     intro a hab ha hb
@@ -279,7 +279,7 @@ lemma sq_or_dsq {a : V} (pa : Pow2 a) : ∃ b, a = b^2 ∨ a = 2 * b^2 := by
   suffices ∃ b ≤ a, a = b^2 ∨ a = 2 * b^2 by
     rcases this with ⟨b, _, h⟩
     exact ⟨b, h⟩
-  induction a using order_induction_sigma0
+  induction a using ISigma0.order_induction
   · definability
   case ind a IH =>
     rcases Pow2.elim'.mp pa with (rfl | ⟨ha, a, rfl, pa'⟩)

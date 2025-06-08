@@ -18,7 +18,7 @@ section neg
 
 variable (Γ : Polarity) (m : ℕ) [V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ m)]
 
-lemma induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
+lemma induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   induction (P := P) (C := Hierarchy Γ m) (by
     rcases hP with ⟨φ, hp⟩
@@ -32,11 +32,11 @@ lemma induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
           simp [this, hp.df.iff]⟩)
     zero succ
 
-lemma order_induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
+lemma order_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
   suffices ∀ x, ∀ y < x, P y by
     intro x; exact this (x + 1) x (by simp only [lt_add_iff_pos_right, lt_one_iff_eq_zero])
-  intro x; induction x using induction_h
+  intro x; induction x using induction
   · exact Γ
   · exact m
   · suffices Γ-[m].BoldfacePred fun x => ∀ y < x, P y by exact this
@@ -49,13 +49,13 @@ lemma order_induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     · exact ind y IH
   case inst => exact inferInstance
 
-private lemma neg_induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
+private lemma neg_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (nzero : ¬P 0) (nsucc : ∀ x, ¬P x → ¬P (x + 1)) : ∀ x, ¬P x := by
   by_contra A
   have : ∃ x, P x := by simpa using A
   rcases this with ⟨a, ha⟩
   have : ∀ x ≤ a, P (a - x) := by
-    intro x; induction x using induction_h
+    intro x; induction x using induction
     · exact Γ
     · exact m
     · suffices Γ-[m].BoldfacePred fun x => x ≤ a → P (a - x) by exact this
@@ -85,20 +85,20 @@ lemma models_InductionScheme_alt : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (A
     (∀ x, Semiformula.Evalm V ![x] v φ → Semiformula.Evalm V ![x + 1] v φ) →
       ∀ x, Semiformula.Evalm V ![x] v φ := by
     simpa using
-      neg_induction_h Γ m (P := λ x ↦ ¬Semiformula.Evalm V ![x] v φ)
+      neg_induction Γ m (P := λ x ↦ ¬Semiformula.Evalm V ![x] v φ)
         (.mkPolarity (∼(Rew.rewriteMap v ▹ φ)) (by simpa using hp)
         (by intro x; simp [←Matrix.fun_eq_vec_one, Semiformula.eval_rewriteMap]))
   exact this H0 Hsucc x
 
 instance : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ.alt m) := models_InductionScheme_alt Γ m
 
-lemma least_number_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
+lemma least_number {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
   by_contra A
   have A : ∀ z, P z → ∃ w < z, P w := by simpa using A
   have : ∀ z, ∀ w < z, ¬P w := by
     intro z
-    induction z using induction_h
+    induction z using induction
     · exact Γ.alt
     · exact m
     · suffices Γ.alt-[m].BoldfacePred fun z ↦ ∀ w < z, ¬P w by exact this
@@ -122,32 +122,32 @@ section
 
 variable (Γ : SigmaPiDelta) (m : ℕ) [V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚺 m)]
 
-lemma induction_hh {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
+lemma succ_induction_sigma {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   match Γ with
-  | 𝚺 => induction_h 𝚺 m hP zero succ
+  | 𝚺 => induction 𝚺 m hP zero succ
   | 𝚷 =>
     haveI : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚷 m) := models_InductionScheme_alt 𝚺 m
-    induction_h 𝚷 m hP zero succ
-  | 𝚫 => induction_h 𝚺 m hP.of_delta zero succ
+    induction 𝚷 m hP zero succ
+  | 𝚫 => induction 𝚺 m hP.of_delta zero succ
 
-lemma order_induction_hh {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
+lemma order_induction_sigma {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
   match Γ with
-  | 𝚺 => order_induction_h 𝚺 m hP ind
+  | 𝚺 => order_induction 𝚺 m hP ind
   | 𝚷 =>
     haveI : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚷 m) := models_InductionScheme_alt 𝚺 m
-    order_induction_h 𝚷 m hP ind
-  | 𝚫 => order_induction_h 𝚺 m hP.of_delta ind
+    order_induction 𝚷 m hP ind
+  | 𝚫 => order_induction 𝚺 m hP.of_delta ind
 
-lemma least_number_hh {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
+lemma least_number_sigma {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
   match Γ with
-  | 𝚺 => least_number_h 𝚺 m hP h
+  | 𝚺 => least_number 𝚺 m hP h
   | 𝚷 =>
     haveI : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚷 m) := models_InductionScheme_alt 𝚺 m
-    least_number_h 𝚷 m hP h
-  | 𝚫 => least_number_h 𝚺 m hP.of_delta h
+    least_number 𝚷 m hP h
+  | 𝚫 => least_number 𝚺 m hP.of_delta h
 
 end
 
@@ -188,44 +188,44 @@ instance [V ⊧ₘ* 𝐈𝚺 n] : V ⊧ₘ* 𝐈𝐍𝐃Γ n :=
   | 𝚺 => inferInstance
   | 𝚷 => inferInstance
 
-@[elab_as_elim] lemma induction_sigma0 [V ⊧ₘ* 𝐈𝚺₀]
+@[elab_as_elim] lemma ISigma0.succ_induction [V ⊧ₘ* 𝐈𝚺₀]
     {P : V → Prop} (hP : 𝚺₀.BoldfacePred P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h 𝚺 0 hP zero succ
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction 𝚺 0 hP zero succ
 
-@[elab_as_elim] lemma induction_sigma1 [V ⊧ₘ* 𝐈𝚺₁]
+@[elab_as_elim] lemma ISigma1.sigma1_succ_induction [V ⊧ₘ* 𝐈𝚺₁]
     {P : V → Prop} (hP : 𝚺₁-Predicate P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h 𝚺 1 hP zero succ
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction 𝚺 1 hP zero succ
 
-@[elab_as_elim] lemma induction_pi1 [V ⊧ₘ* 𝐈𝚺₁]
+@[elab_as_elim] lemma ISigma1.pi1_succ_induction [V ⊧ₘ* 𝐈𝚺₁]
     {P : V → Prop} (hP : 𝚷₁-Predicate P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_h 𝚷 1 hP zero succ
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction 𝚷 1 hP zero succ
 
-@[elab_as_elim] lemma order_induction_sigma0 [V ⊧ₘ* 𝐈𝚺₀]
+@[elab_as_elim] lemma ISigma0.order_induction [V ⊧ₘ* 𝐈𝚺₀]
     {P : V → Prop} (hP : 𝚺₀-Predicate P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  order_induction_h 𝚺 0 hP ind
+  order_induction 𝚺 0 hP ind
 
-@[elab_as_elim] lemma order_induction_sigma1 [V ⊧ₘ* 𝐈𝚺₁]
+@[elab_as_elim] lemma ISigma1.sigma1_order_induction [V ⊧ₘ* 𝐈𝚺₁]
     {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  order_induction_h 𝚺 1 hP ind
+  order_induction 𝚺 1 hP ind
 
-@[elab_as_elim] lemma order_induction_pi1 [V ⊧ₘ* 𝐈𝚺₁]
+@[elab_as_elim] lemma ISigma1.pi1_order_induction [V ⊧ₘ* 𝐈𝚺₁]
     {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x :=
-  order_induction_h 𝚷 1 hP ind
+  order_induction 𝚷 1 hP ind
 
-lemma least_number_sigma0 [V ⊧ₘ* 𝐈𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
+lemma ISigma0.least_number [V ⊧ₘ* 𝐈𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z :=
-  least_number_h 𝚺 0 hP h
+  least_number 𝚺 0 hP h
 
-@[elab_as_elim] lemma induction_h_sigma1 [V ⊧ₘ* 𝐈𝚺₁] (Γ)
+@[elab_as_elim] lemma ISigma1.sigma1_succ_induction [V ⊧ₘ* 𝐈𝚺₁] (Γ)
     {P : V → Prop} (hP : Γ-[1]-Predicate P)
-    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := induction_hh Γ 1 hP zero succ
+    (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x := succ_induction_sigma Γ 1 hP zero succ
 
-@[elab_as_elim] lemma order_induction_h_sigma1 [V ⊧ₘ* 𝐈𝚺₁] (Γ)
+@[elab_as_elim] lemma ISigma1.sigma1_order_induction [V ⊧ₘ* 𝐈𝚺₁] (Γ)
     {P : V → Prop} (hP : Γ-[1]-Predicate P)
-    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := order_induction_hh Γ 1 hP ind
+    (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := order_induction_sigma Γ 1 hP ind
 
 end LO.Arith
 

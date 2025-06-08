@@ -58,7 +58,7 @@ lemma refl_iff_derivable : T.DerivabilityComparison Γ Γ ↔ T.Derivable Γ := 
     exact ⟨d, dd⟩
   · rintro ⟨d, dd⟩
     have : ∃ b, T.DerivationOf b Γ ∧ ∀ z < b, ¬T.DerivationOf z Γ :=
-      least_number_hh 𝚺 1 (P := (T.DerivationOf · Γ)) (by definability) dd
+      least_number_sigma 𝚺 1 (P := (T.DerivationOf · Γ)) (by definability) dd
     rcases this with ⟨b, bd, h⟩
     exact ⟨b, bd, h⟩
 
@@ -82,7 +82,7 @@ lemma find_minimal_proof_fintype [Fintype ι] (Γ : ι → V) (H : T.Derivable (
   rcases show ∃ dᵢ, T.DerivationOf dᵢ (Γ i)from H with ⟨dᵢ, Hdᵢ⟩
   have : ∃ z, (∃ j, T.DerivationOf z (Γ j)) ∧ ∀ w < z, ∀ (x : ι), ¬T.DerivationOf w (Γ x) := by
     simpa using
-      least_number_hh 𝚺 1 (P := fun z ↦ ∃ j, T.DerivationOf z (Γ j))
+      least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, T.DerivationOf z (Γ j))
         (HierarchySymbol.Boldface.fintype_ex fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
   rcases this with ⟨z, ⟨j, hj⟩, H⟩
   exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩

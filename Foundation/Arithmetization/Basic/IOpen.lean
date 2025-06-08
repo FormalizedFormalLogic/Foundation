@@ -777,7 +777,7 @@ variable [V ⊧ₘ* 𝐈open]
 lemma hierarchy_polynomial_induction (Γ m) [V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ m)]
     {P : V → Prop} (hP : Γ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
-  intro x; induction x using order_induction_h
+  intro x; induction x using order_induction
   · exact Γ
   · exact m
   · exact hP

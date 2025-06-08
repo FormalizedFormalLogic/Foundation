@@ -199,7 +199,7 @@ lemma graph_succ {v i x : V} :
 lemma graph_exists (v i : V) : ∃ x, Graph ⟪v, i, x⟫ := by
   suffices ∀ i' ≤ i, ∀ v' ≤ v, ∃ x, Graph ⟪v', i', x⟫ from this i (by simp) v (by simp)
   intro i' hi'
-  induction i' using induction_sigma1
+  induction i' using ISigma1.sigma1_succ_induction
   · definability
   case zero =>
     intro v' _
@@ -210,7 +210,7 @@ lemma graph_exists (v i : V) : ∃ x, Graph ⟪v, i, x⟫ := by
     exact ⟨x, graph_case.mpr <| Or.inr ⟨v', i', x, rfl, hx⟩⟩
 
 lemma graph_unique {v i x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, i, x₂⟫ → x₁ = x₂ := by
-  induction i using induction_pi1 generalizing v x₁ x₂
+  induction i using ISigma1.pi1_succ_induction generalizing v x₁ x₂
   · definability
   case zero =>
     simp [graph_zero]
@@ -261,19 +261,19 @@ lemma cons_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
 
 lemma cons_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
-  order_induction_hh Γ 1 hP (by
+  order_induction_sigma Γ 1 hP (by
     intro v ih
     rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩)
     · exact nil
     · exact cons _ _ (ih v (by simp)))
 
 @[elab_as_elim]
-lemma cons_induction_sigma1 {P : V → Prop} (hP : 𝚺₁-Predicate P)
+lemma cons_ISigma1.sigma1_succ_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   cons_induction 𝚺 hP nil cons
 
 @[elab_as_elim]
-lemma cons_induction_pi1 {P : V → Prop} (hP : 𝚷₁-Predicate P)
+lemma cons_ISigma1.pi1_succ_induction {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   cons_induction 𝚷 hP nil cons
 
@@ -306,13 +306,13 @@ lemma pi₁_zero : π₁ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₁_le_self 0)
 lemma pi₂_zero : π₂ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₂_le_self 0)
 
 @[simp] lemma nth_zero_idx (i : V) : (0).[i] = 0 := by
-  induction i using induction_sigma1
+  induction i using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp [nth_zero, fstIdx, pi₁_zero]
   case succ i ih => simp [nth_succ, sndIdx, pi₂_zero, ih]
 
 lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : v.[i] < v := by
-  induction i using induction_pi1 generalizing v
+  induction i using ISigma1.pi1_succ_induction generalizing v
   · definability
   case zero =>
     rcases zero_or_succ v with (rfl | ⟨v, rfl⟩)
@@ -466,7 +466,7 @@ lemma graph_cons {x xs y : V} :
 variable (param)
 
 lemma graph_exists (xs : V) : ∃ y, c.Graph param ⟪xs, y⟫ := by
-  induction xs using cons_induction_sigma1
+  induction xs using cons_ISigma1.sigma1_succ_induction
   · definability
   case nil =>
     exact ⟨c.nil param, c.graph_nil.mpr rfl⟩
@@ -477,7 +477,7 @@ lemma graph_exists (xs : V) : ∃ y, c.Graph param ⟪xs, y⟫ := by
 variable {param}
 
 lemma graph_unique {xs y₁ y₂ : V} : c.Graph param ⟪xs, y₁⟫ → c.Graph param ⟪xs, y₂⟫ → y₁ = y₂ := by
-  induction xs using cons_induction_pi1 generalizing y₁ y₂
+  induction xs using cons_ISigma1.pi1_succ_induction generalizing y₁ y₂
   · definability
   case nil =>
     simp [graph_nil]; rintro rfl rfl; rfl
@@ -578,7 +578,7 @@ end
   rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩) <;> simp
 
 lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
-  induction v using cons_induction_pi1 generalizing i
+  induction v using cons_ISigma1.pi1_succ_induction generalizing i
   · definability
   case nil => simp
   case cons x v ih =>
@@ -587,7 +587,7 @@ lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
     simpa using ih (by simpa using hl)
 
 @[simp] lemma len_le (v : V) : len v ≤ v := by
-  induction v using cons_induction_pi1
+  induction v using cons_ISigma1.pi1_succ_induction
   · definability
   case nil => simp
   case cons x v ih =>
@@ -598,7 +598,7 @@ lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
 end len
 
 lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
-  induction v₁ using cons_induction_pi1 generalizing v₂
+  induction v₁ using cons_ISigma1.pi1_succ_induction generalizing v₂
   · definability
   case nil =>
     exact Eq.symm <| len_zero_iff_eq_nil.mp (by simp [←hl])
@@ -613,7 +613,7 @@ lemma nth_ext' (l : V) {v₁ v₂ : V} (hl₁ : len v₁ = l) (hl₂ : len v₂ 
   rcases hl₂; exact nth_ext hl₁ (by simpa [hl₁] using H)
 
 lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) : v₁ ≤ v₂ := by
-  induction v₁ using cons_induction_pi1 generalizing v₂
+  induction v₁ using cons_ISigma1.pi1_succ_induction generalizing v₂
   · definability
   case nil => simp
   case cons x₁ v₁ ih =>
@@ -624,7 +624,7 @@ lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < l
     exact cons_le_cons hx hv
 
 lemma nth_lt_self {v i : V} (hi : i < len v) : v.[i] < v := by
-  induction v using cons_induction_pi1 generalizing i
+  induction v using cons_ISigma1.pi1_succ_induction generalizing i
   · definability
   case nil => simp at hi
   case cons x v ih =>
@@ -636,7 +636,7 @@ theorem sigmaOne_skolem_vec {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l}
     (H : ∀ x < l, ∃ y, R x y) : ∃ v, len v = l ∧ ∀ i < l, R i v.[i] := by
   have : ∀ k ≤ l, ∃ v, len v = k ∧ ∀ i < k, R (l - k + i) v.[i] := by
     intro k hk
-    induction k using induction_sigma1
+    induction k using ISigma1.sigma1_succ_induction
     · definability
     case zero => exact ⟨0, by simp⟩
     case succ k ih =>
@@ -707,7 +707,7 @@ instance listMax_definable' (Γ m) : Γ-[m + 1]-Function₁ (listMax : V → V) 
 end
 
 lemma nth_le_listMax {i v : V} (h : i < len v) : v.[i] ≤ listMax v := by
-  induction v using cons_induction_pi1 generalizing i
+  induction v using cons_ISigma1.pi1_succ_induction generalizing i
   · definability
   case nil => simp
   case cons x v ih =>
@@ -716,7 +716,7 @@ lemma nth_le_listMax {i v : V} (h : i < len v) : v.[i] ≤ listMax v := by
     · simp [ih (by simpa using h)]
 
 lemma listMaxss_le {v z : V} (h : ∀ i < len v, v.[i] ≤ z) : listMax v ≤ z := by
-  induction v using cons_induction_pi1
+  induction v using cons_ISigma1.pi1_succ_induction
   · definability
   case nil => simp
   case cons x v ih =>
@@ -732,7 +732,7 @@ lemma listMaxss_le_iff {v z : V} : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ 
 
 /-
 lemma nth_le_listMaxs (v : V) (hv : v ≠ 0) : ∃ i < len v, v.[i] = listMax v := by
-  induction v using cons_induction_sigma1
+  induction v using cons_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp at hv
   case cons x v ih =>
@@ -797,7 +797,7 @@ instance takeLast_definable' (Γ m) : Γ-[m + 1]-Function₂ (takeLast : V → V
 end
 
 lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
-  induction v using cons_induction_sigma1
+  induction v using cons_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp_all
   case cons x v ih =>
@@ -817,13 +817,13 @@ lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
 @[simp] lemma add_sub_add (a b c : V) : (a + c) - (b + c) = a - b := add_tsub_add_eq_tsub_right a c b
 
 @[simp] lemma takeLast_zero (v : V) : takeLast v 0 = 0 := by
-  induction v using cons_induction_sigma1
+  induction v using cons_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
   case cons x v ih => simp [takeLast_cons, ih]
 
 lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[len v - (i + 1)] ∷ takeLast v i := by
-  induction v using cons_induction_sigma1 generalizing i
+  induction v using cons_ISigma1.sigma1_succ_induction generalizing i
   · definability
   case nil => simp at h
   case cons x v ih =>
@@ -884,13 +884,13 @@ instance concat_definable' (Γ m) : Γ-[m + 1]-Function₂ (concat : V → V →
 end
 
 @[simp] lemma len_concat (v z : V) : len (concat v z) = len v + 1 := by
-  induction v using cons_induction_sigma1
+  induction v using cons_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
   case cons x v ih => simp [ih]
 
 lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] := by
-  induction v using cons_induction_sigma1 generalizing i
+  induction v using cons_ISigma1.sigma1_succ_induction generalizing i
   · definability
   case nil => simp at hi
   case cons x v ih =>
@@ -899,7 +899,7 @@ lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] :=
     · simp [ih (by simpa using hi)]
 
 @[simp] lemma concat_nth_len (v z : V) : (concat v z).[len v] = z := by
-  induction v using cons_induction_sigma1
+  induction v using cons_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
   case cons x v ih => simp [ih]
@@ -1043,7 +1043,7 @@ instance repeatVec_definable' (Γ) : Γ-[m + 1]-Function₂ (repeatVec : V → V
 end
 
 @[simp] lemma len_repeatVec (x k : V) : len (repeatVec x k) = k := by
-  induction k using induction_sigma1
+  induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
   case succ k ih => simp [ih]
@@ -1052,7 +1052,7 @@ end
   simpa using len_le (repeatVec x k)
 
 lemma nth_repeatVec (x k : V) {i} (h : i < k) : (repeatVec x k).[i] = x := by
-  induction k using induction_sigma1 generalizing i
+  induction k using ISigma1.sigma1_succ_induction generalizing i
   · definability
   case zero => simp at h
   case succ k ih =>
@@ -1112,7 +1112,7 @@ instance vecToSet_definable' (Γ) : Γ-[m + 1]-Function₁ (vecToSet : V → V) 
 end
 
 lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i] := by
-  induction v using cons_induction_sigma1
+  induction v using cons_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
   case cons y v ih =>

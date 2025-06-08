@@ -515,7 +515,7 @@ end restriction
 
 theorem insert_induction {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (hempty : P ∅) (hinsert : ∀ a s, a ∉ s → P s → P (insert a s)) : ∀ s, P s :=
-  order_induction_hh Γ 1 hP <| by
+  order_induction_sigma Γ 1 hP <| by
     intro s IH
     rcases eq_empty_or_nonempty s with (rfl | ⟨x, hx⟩)
     · exact hempty

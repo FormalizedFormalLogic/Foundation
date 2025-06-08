@@ -832,7 +832,7 @@ lemma conj (ps : V) {s} (hs : L.IsFormulaSet s)
     (ds : ∀ i < len ps, T.Derivable (insert ps.[i] s)) : T.Derivable (insert (^⋀ ps) s) := by
   have : ∀ k ≤ len ps, T.Derivable (insert (^⋀ (takeLast ps k)) s) := by
     intro k hk
-    induction k using induction_sigma1
+    induction k using ISigma1.sigma1_succ_induction
     · definability
     case zero => simpa using verum (by simp [hs]) (by simp)
     case succ k ih =>
@@ -846,7 +846,7 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
   have : ∀ k ≤ len ps, ∀ s' ≤ vecToSet ps, s' ⊆ vecToSet ps →
       (∀ i < len ps - k, ps.[i] ∈ s') → T.Derivable (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
     intro k hk
-    induction k using induction_sigma1
+    induction k using ISigma1.sigma1_succ_induction
     · apply HierarchySymbol.Boldface.imp (by definability)
       apply HierarchySymbol.Boldface.ball_le (by definability)
       apply HierarchySymbol.Boldface.imp (by definability)
