@@ -1,5 +1,6 @@
-import Foundation.Arithmetization.Definability.Hierarchy
-import Foundation.Arithmetization.Vorspiel.Graph
+import Foundation.FirstOrder.Arith.Definability.Hierarchy
+import Foundation.FirstOrder.Arith.BoundedQuantifier
+import Foundation.Vorspiel.Graph
 
 namespace LO.FirstOrder.Arith
 
@@ -21,7 +22,7 @@ namespace Arith.HierarchySymbol
 
 variable (ξ : Type*) (n : ℕ)
 
-open LO.Arith
+open PeanoMinus
 
 variable {V : Type*} [ORingStruc V]
 
@@ -209,9 +210,13 @@ lemma of_eq {f g : (Fin k → V) → V} (h : ∀ x, f x = g x)
 
 lemma graph_delta {f : (Fin k → V) → V} {φ : 𝚺-[m].Semisentence (k + 1)}
     (h : DefinedFunction f φ) : DefinedFunction f φ.graphDelta :=
-  ⟨by cases' m with m <;> simp [HierarchySymbol.Semiformula.graphDelta]
-      intro e; simp [Empty.eq_elim, h.df.iff]
-      rw [eq_comm],
+  ⟨by
+      cases' m with m
+      case zero => simp [HierarchySymbol.Semiformula.graphDelta]
+      case succ =>
+        simp only [Semiformula.graphDelta]
+        intro e
+        simp [Empty.eq_elim, h.df.iff]; tauto,
    by intro v; simp [h.df.iff]⟩
 
 end DefinedFunction
@@ -564,13 +569,13 @@ lemma exVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
     apply ex; apply ih
     let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
     exact of_iff (retraction h g) (by
-      intro v; simp [g]
+      intro v; simp only [g]
       apply iff_of_eq; congr
       · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
       · ext i
         cases' i using Fin.cases with i
-        · simp; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-        · simp; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
+        · simp only [Matrix.cons_val_zero, g]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+        · simp only [Matrix.cons_val_succ, g]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
 
 lemma allVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
     (h : 𝚷-[m+1].Boldface fun w : Fin (k + l) → V ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :
@@ -586,13 +591,13 @@ lemma allVec {k l} {P : (Fin k → V) → (Fin l → V) → Prop}
     apply all; apply ih
     let g : Fin (k + (l + 1)) → Fin (k + 1 + l) := Matrix.vecAppend rfl (fun x ↦ x.succ.castAdd l) (Fin.castAdd l 0 :> fun j ↦ j.natAdd (k + 1))
     exact of_iff (retraction h g) (by
-      intro v; simp [g]
+      intro v; simp only [g]
       apply iff_of_eq; congr
       · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
       · ext i
         cases' i using Fin.cases with i
-        · simp; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-        · simp; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
+        · simp only [Matrix.cons_val_zero, g]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+        · simp only [Matrix.cons_val_succ, g]; congr 1; ext; simp [Matrix.vecAppend_eq_ite])
 
 private lemma substitution_sigma {f : Fin k → (Fin l → V) → V} (hP : 𝚺-[m+1].Boldface P) (hf : ∀ i, 𝚺-[m+1].BoldfaceFunction (f i)) :
     𝚺-[m+1].Boldface fun z ↦ P (fun i ↦ f i z) := by
@@ -644,21 +649,21 @@ lemma BoldfaceRel.comp {P : V → V → Prop} {k} {f g : (Fin k → V) → V}
     (hP : Γ-[m + 1].BoldfaceRel P)
     (hf : 𝚺-[m + 1].BoldfaceFunction f) (hg : 𝚺-[m + 1].BoldfaceFunction g) :
     Γ-[m + 1].Boldface fun v ↦ P (f v) (g v) :=
-  Boldface.substitution (f := ![f, g]) hP (by simp [forall_fin_iff_zero_and_forall_succ, hf, hg])
+  Boldface.substitution (f := ![f, g]) hP (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf, hg])
 
 lemma BoldfaceRel₃.comp {k} {P : V → V → V → Prop} {f₁ f₂ f₃ : (Fin k → V) → V}
     (hP : Γ-[m + 1].BoldfaceRel₃ P)
     (hf₁ : 𝚺-[m + 1].BoldfaceFunction f₁) (hf₂ : 𝚺-[m + 1].BoldfaceFunction f₂)
     (hf₃ : 𝚺-[m + 1].BoldfaceFunction f₃) :
     Γ-[m + 1].Boldface (fun v ↦ P (f₁ v) (f₂ v) (f₃ v)) :=
-  Boldface.substitution (f := ![f₁, f₂, f₃]) hP (by simp [forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃])
+  Boldface.substitution (f := ![f₁, f₂, f₃]) hP (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃])
 
 lemma BoldfaceRel₄.comp {k} {P : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ : (Fin k → V) → V}
     (hP : Γ-[m + 1].BoldfaceRel₄ P)
     (hf₁ : 𝚺-[m + 1].BoldfaceFunction f₁) (hf₂ : 𝚺-[m + 1].BoldfaceFunction f₂)
     (hf₃ : 𝚺-[m + 1].BoldfaceFunction f₃) (hf₄ : 𝚺-[m + 1].BoldfaceFunction f₄) :
     Γ-[m + 1].Boldface (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v)) :=
-  Boldface.substitution (f := ![f₁, f₂, f₃, f₄]) hP (by simp [forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄])
+  Boldface.substitution (f := ![f₁, f₂, f₃, f₄]) hP (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄])
 
 lemma BoldfaceRel₅.comp {k} {P : V → V → V → V → V → Prop} {f₁ f₂ f₃ f₄ f₅ : (Fin k → V) → V}
     (hP : Γ-[m + 1].BoldfaceRel₅ P)
@@ -666,7 +671,7 @@ lemma BoldfaceRel₅.comp {k} {P : V → V → V → V → V → Prop} {f₁ f�
     (hf₃ : 𝚺-[m + 1].BoldfaceFunction f₃) (hf₄ : 𝚺-[m + 1].BoldfaceFunction f₄)
     (hf₅ : 𝚺-[m + 1].BoldfaceFunction f₅) :
     Γ-[m + 1].Boldface (fun v ↦ P (f₁ v) (f₂ v) (f₃ v) (f₄ v) (f₅ v)) :=
-  Boldface.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hP (by simp [forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄, hf₅])
+  Boldface.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hP (by simp [Fin.forall_fin_iff_zero_and_forall_succ, hf₁, hf₂, hf₃, hf₄, hf₅])
 
 namespace Boldface
 
@@ -731,10 +736,12 @@ lemma graph_delta {k} {f : (Fin k → V) → V}
     (h : 𝚺-[m].BoldfaceFunction f) : 𝚫-[m].BoldfaceFunction f := by
   rcases h with ⟨φ, h⟩
   exact ⟨φ.graphDelta, by
-    cases' m with m <;> simp [HierarchySymbol.Semiformula.graphDelta]
-    intro e; simp [Empty.eq_elim, h.df.iff]
-    exact eq_comm, by
-    intro v; simp [h.df.iff]⟩
+    cases' m with m
+    case zero => simp [HierarchySymbol.Semiformula.graphDelta]
+    case succ =>
+      simp only [Semiformula.graphDelta]
+      intro e; simp [Empty.eq_elim, h.df.iff]; tauto,
+  by intro v; simp [h.df.iff]⟩
 
 instance {k} {f : (Fin k → V) → V} [h : 𝚺-[m].BoldfaceFunction f] : 𝚫-[m].BoldfaceFunction f :=
   BoldfaceFunction.graph_delta h
@@ -799,21 +806,21 @@ lemma BoldfaceFunction₂.comp {k} {F : V → V → V} {f₁ f₂ : (Fin k → V
     (hF : Γ-[m + 1].BoldfaceFunction₂ F)
     (hf₁ : 𝚺-[m + 1].BoldfaceFunction f₁) (hf₂ : 𝚺-[m + 1].BoldfaceFunction f₂) :
     Γ-[m + 1].BoldfaceFunction (fun v ↦ F (f₁ v) (f₂ v)) :=
-  BoldfaceFunction.substitution (f := ![f₁, f₂]) hF (by simp [forall_fin_iff_zero_and_forall_succ, *])
+  BoldfaceFunction.substitution (f := ![f₁, f₂]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma BoldfaceFunction₃.comp {k} {F : V → V → V → V} {f₁ f₂ f₃ : (Fin k → V) → V}
     (hF : Γ-[m + 1].BoldfaceFunction₃ F)
     (hf₁ : 𝚺-[m + 1].BoldfaceFunction f₁) (hf₂ : 𝚺-[m + 1].BoldfaceFunction f₂)
     (hf₃ : 𝚺-[m + 1].BoldfaceFunction f₃) :
     Γ-[m + 1].BoldfaceFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) :=
-  BoldfaceFunction.substitution (f := ![f₁, f₂, f₃]) hF (by simp [forall_fin_iff_zero_and_forall_succ, *])
+  BoldfaceFunction.substitution (f := ![f₁, f₂, f₃]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma BoldfaceFunction₄.comp {k} {F : V → V → V → V → V} {f₁ f₂ f₃ f₄ : (Fin k → V) → V}
     (hF : Γ-[m + 1].BoldfaceFunction₄ F)
     (hf₁ : 𝚺-[m + 1].BoldfaceFunction f₁) (hf₂ : 𝚺-[m + 1].BoldfaceFunction f₂)
     (hf₃ : 𝚺-[m + 1].BoldfaceFunction f₃) (hf₄ : 𝚺-[m + 1].BoldfaceFunction f₄) :
     Γ-[m + 1].BoldfaceFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v) (f₄ v)) :=
-  BoldfaceFunction.substitution (f := ![f₁, f₂, f₃, f₄]) hF (by simp [forall_fin_iff_zero_and_forall_succ, *])
+  BoldfaceFunction.substitution (f := ![f₁, f₂, f₃, f₄]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 lemma BoldfaceFunction₅.comp {k} {F : V → V → V → V → V → V} {f₁ f₂ f₃ f₄ f₅ : (Fin k → V) → V}
     (hF : Γ-[m + 1].BoldfaceFunction₅ F)
@@ -821,7 +828,7 @@ lemma BoldfaceFunction₅.comp {k} {F : V → V → V → V → V → V} {f₁ f
     (hf₃ : 𝚺-[m + 1].BoldfaceFunction f₃) (hf₄ : 𝚺-[m + 1].BoldfaceFunction f₄)
     (hf₅ : 𝚺-[m + 1].BoldfaceFunction f₅) :
     Γ-[m + 1].BoldfaceFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v) (f₄ v) (f₅ v)) :=
-  BoldfaceFunction.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hF (by simp [forall_fin_iff_zero_and_forall_succ, *])
+  BoldfaceFunction.substitution (f := ![f₁, f₂, f₃, f₄, f₅]) hF (by simp [Fin.forall_fin_iff_zero_and_forall_succ, *])
 
 namespace BoldfaceFunction
 

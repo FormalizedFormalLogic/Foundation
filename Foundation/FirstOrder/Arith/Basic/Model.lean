@@ -135,17 +135,17 @@ variable {M : Type*} [ORingStruc M]
     intro H φ hp f; exact eval_lMap_oringEmb.mpr (H hp f)
 
 /-
-instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
+instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
 
-instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* Theory.indScheme ℒₒᵣ Semiformula.Open :=
-  ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
+instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* Theory.InductionScheme ℒₒᵣ Semiformula.Open :=
+  ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
 
-def models_PeanoMinus_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
+def models_PeanoMinus_of_models_InductionOnHierarchy (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.InductionScheme _ (Arith.Hierarchy Γ n))
 
-def models_indScheme_of_models_indH (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ n) :=
-  ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.indScheme _ (Arith.Hierarchy Γ n))
+def models_InductionScheme_of_models_InductionOnHierarchy (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ n) :=
+  ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.InductionScheme _ (Arith.Hierarchy Γ n))
 
-instance models_PeanoMinus_of_models_peano [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.indScheme _ Set.univ)
+instance models_PeanoMinus_of_models_Peano [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.InductionScheme _ Set.univ)
 
 -/
 
@@ -167,16 +167,16 @@ lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ 
   · exact hsucc x ih
 
 set_option linter.flexible false in
-instance models_iSigma (Γ k) : ℕ ⊧ₘ* 𝐈𝐍𝐃Γ k := by
-  simp [Theory.indScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
+instance models_ISigma (Γ k) : ℕ ⊧ₘ* 𝐈𝐍𝐃Γ k := by
+  simp [Theory.InductionScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
 
-instance models_iSigmaZero : ℕ ⊧ₘ* 𝐈𝚺₀ := inferInstance
+instance models_ISigmaZero : ℕ ⊧ₘ* 𝐈𝚺₀ := inferInstance
 
-instance models_iSigmaOne : ℕ ⊧ₘ* 𝐈𝚺₁ := inferInstance
+instance models_ISigmaOne : ℕ ⊧ₘ* 𝐈𝚺₁ := inferInstance
 
 set_option linter.flexible false in
-instance models_peano : ℕ ⊧ₘ* 𝐏𝐀 := by
-  simp [Theory.peano, Theory.indScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
+instance models_Peano : ℕ ⊧ₘ* 𝐏𝐀 := by
+  simp [Theory.Peano, Theory.InductionScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
 
 end Standard
 

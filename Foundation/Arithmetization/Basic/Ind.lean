@@ -1,26 +1,5 @@
 import Foundation.Arithmetization.Basic.PeanoMinus
 
-namespace LO.FirstOrder.Arith
-
-open FirstOrder.Theory
-
-variable {C C' : Semiformula ℒₒᵣ ℕ 1 → Prop}
-
-lemma mem_indScheme_of_mem {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) :
-    succInd φ ∈ indScheme ℒₒᵣ C := by
-  simp [indScheme]; exact ⟨φ, hp, rfl⟩
-
-lemma mem_iOpen_of_qfree {φ : Semiformula ℒₒᵣ ℕ 1} (hp : φ.Open) :
-    succInd φ ∈ indScheme ℒₒᵣ Semiformula.Open := by
-  exact ⟨φ, hp, rfl⟩
-
-lemma indScheme_subset (h : ∀ {φ : Semiformula ℒₒᵣ ℕ 1},  C φ → C' φ) : indScheme ℒₒᵣ C ⊆ indScheme ℒₒᵣ C' := by
-  intro _; simp [indScheme]; rintro φ hp rfl; exact ⟨φ, h hp, rfl⟩
-
-lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ 𝐈𝚺 s₂ :=
-  Set.union_subset_union_right _ (indScheme_subset (fun H ↦ H.mono h))
-
-end LO.FirstOrder.Arith
 
 noncomputable section
 
@@ -32,33 +11,12 @@ variable {V : Type*} [ORingStruc V]
 
 section
 
-section IndScheme
-
-variable {C : Semiformula ℒₒᵣ ℕ 1 → Prop} [V ⊧ₘ* Theory.indScheme ℒₒᵣ C]
-
-private lemma induction_eval {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) (v) :
-    Semiformula.Evalm V ![0] v φ →
-    (∀ x, Semiformula.Evalm V ![x] v φ → Semiformula.Evalm V ![x + 1] v φ) →
-    ∀ x, Semiformula.Evalm V ![x] v φ := by
-  have : V ⊧ₘ succInd φ :=
-    ModelsTheory.models (T := Theory.indScheme _ C) V (by simpa using mem_indScheme_of_mem hp)
-  simp [models_iff, succInd, Semiformula.eval_substs,
-    Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] at this
-  exact this v
-
-@[elab_as_elim]
-lemma induction {P : V → Prop}
-    (hP : ∃ e : ℕ → V, ∃ φ : Semiformula ℒₒᵣ ℕ 1, C φ ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] e φ) :
-    P 0 → (∀ x, P x → P (x + 1)) → ∀ x, P x := by
-  rcases hP with ⟨e, φ, Cp, hp⟩; simpa [←hp] using induction_eval (V := V) Cp e
-
-end IndScheme
 
 variable [V ⊧ₘ* 𝐏𝐀⁻]
 
 section neg
 
-variable (Γ : Polarity) (m : ℕ) [V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ m)]
+variable (Γ : Polarity) (m : ℕ) [V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ m)]
 
 lemma induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
@@ -66,11 +24,11 @@ lemma induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     rcases hP with ⟨φ, hp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
 
-    exact ⟨φ.val.fvarEnumInv, (Rew.rewriteMap φ.val.fvarEnum) ▹ φ.val, by simp [hp],
+    exact ⟨φ.val.enumarateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val, by simp [hp],
       by  intro x; simp [Semiformula.eval_rewriteMap]
-          have : (Semiformula.Evalm V ![x] fun x ↦ φ.val.fvarEnumInv (φ.val.fvarEnum x)) φ.val ↔ (Semiformula.Evalm V ![x] id) φ.val :=
+          have : (Semiformula.Evalm V ![x] fun x ↦ φ.val.enumarateFVar (φ.val.idxOfFVar x)) φ.val ↔ (Semiformula.Evalm V ![x] id) φ.val :=
             Semiformula.eval_iff_of_funEqOn _ (by
-              intro x hx; simp [Semiformula.fvarEnumInv_fvarEnum (Semiformula.mem_fvarList_iff_fvar?.mpr hx)])
+              intro x hx; simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)])
           simp [this, hp.df.iff]⟩)
     zero succ
 
@@ -117,8 +75,8 @@ private lemma neg_induction_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
   have : P 0 := by simpa using this a (by rfl)
   contradiction
 
-lemma models_indScheme_alt : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ.alt m) := by
-  simp [Theory.indH, Theory.indScheme]
+lemma models_InductionScheme_alt : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ.alt m) := by
+  simp [Theory.InductionOnHierarchy, Theory.InductionScheme]
   rintro _ φ hp rfl
   simp [models_iff, succInd, Semiformula.eval_rew_q,
     Semiformula.eval_substs, Function.comp, Matrix.constant_eq_singleton]
@@ -132,7 +90,7 @@ lemma models_indScheme_alt : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarc
         (by intro x; simp [←Matrix.fun_eq_vec_one, Semiformula.eval_rewriteMap]))
   exact this H0 Hsucc x
 
-instance : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ.alt m) := models_indScheme_alt Γ m
+instance : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ.alt m) := models_InductionScheme_alt Γ m
 
 lemma least_number_h {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
@@ -162,14 +120,14 @@ end neg
 
 section
 
-variable (Γ : SigmaPiDelta) (m : ℕ) [V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy 𝚺 m)]
+variable (Γ : SigmaPiDelta) (m : ℕ) [V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚺 m)]
 
 lemma induction_hh {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   match Γ with
   | 𝚺 => induction_h 𝚺 m hP zero succ
   | 𝚷 =>
-    haveI : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy 𝚷 m) := models_indScheme_alt 𝚺 m
+    haveI : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚷 m) := models_InductionScheme_alt 𝚺 m
     induction_h 𝚷 m hP zero succ
   | 𝚫 => induction_h 𝚺 m hP.of_delta zero succ
 
@@ -178,7 +136,7 @@ lemma order_induction_hh {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
   match Γ with
   | 𝚺 => order_induction_h 𝚺 m hP ind
   | 𝚷 =>
-    haveI : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy 𝚷 m) := models_indScheme_alt 𝚺 m
+    haveI : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚷 m) := models_InductionScheme_alt 𝚺 m
     order_induction_h 𝚷 m hP ind
   | 𝚫 => order_induction_h 𝚺 m hP.of_delta ind
 
@@ -187,40 +145,40 @@ lemma least_number_hh {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
   match Γ with
   | 𝚺 => least_number_h 𝚺 m hP h
   | 𝚷 =>
-    haveI : V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy 𝚷 m) := models_indScheme_alt 𝚺 m
+    haveI : V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚷 m) := models_InductionScheme_alt 𝚺 m
     least_number_h 𝚷 m hP h
   | 𝚫 => least_number_h 𝚺 m hP.of_delta h
 
 end
 
-instance [V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy 𝚺 m)] :
-    V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ m) := by
+instance [V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚺 m)] :
+    V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ m) := by
   rcases Γ
   · exact inferInstance
-  · exact models_indScheme_alt 𝚺 m
+  · exact models_InductionScheme_alt 𝚺 m
 
 end
 
-def mod_IOpen_of_mod_indH (Γ n) [V ⊧ₘ* 𝐈𝐍𝐃Γ n] : V ⊧ₘ* 𝐈open :=
+def mod_IOpen_of_mod_InductionOnHierarchy (Γ n) [V ⊧ₘ* 𝐈𝐍𝐃Γ n] : V ⊧ₘ* 𝐈open :=
   ModelsTheory.of_ss (U := 𝐈𝐍𝐃Γ n) inferInstance
-    (Set.union_subset_union_right _ (indScheme_subset Hierarchy.of_open))
+    (Set.union_subset_union_right _ (InductionScheme_subset Hierarchy.of_open))
 
 def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝐈𝚺 n₂] : V ⊧ₘ* 𝐈𝚺 n₁ :=
-  ModelsTheory.of_ss inferInstance (iSigma_subset_mono h)
+  ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
 
-instance [V ⊧ₘ* 𝐈open] : V ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left V 𝐏𝐀⁻ (Theory.indScheme _ Semiformula.Open)
+instance [V ⊧ₘ* 𝐈open] : V ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left V 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
 
-instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈open := mod_IOpen_of_mod_indH 𝚺 0
+instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈open := mod_IOpen_of_mod_InductionOnHierarchy 𝚺 0
 
 instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
 instance [V ⊧ₘ* 𝐈𝚺 n] : V ⊧ₘ* 𝐈𝚷 n :=
-  haveI : V ⊧ₘ* 𝐏𝐀⁻ := models_PeanoMinus_of_models_indH 𝚺 n
+  haveI : V ⊧ₘ* 𝐏𝐀⁻ := models_PeanoMinus_of_models_InductionOnHierarchy 𝚺 n
   inferInstance
 
 instance [V ⊧ₘ* 𝐈𝚷 n] : V ⊧ₘ* 𝐈𝚺 n :=
-  haveI : V ⊧ₘ* 𝐏𝐀⁻ := Arith.models_PeanoMinus_of_models_indH 𝚷 n
-  by simp [*]; simpa [Theory.iPi] using models_indScheme_alt (V := V) 𝚷 n
+  haveI : V ⊧ₘ* 𝐏𝐀⁻ := Arith.models_PeanoMinus_of_models_InductionOnHierarchy 𝚷 n
+  by simp [*]; simpa [Theory.IPi] using models_InductionScheme_alt (V := V) 𝚷 n
 
 lemma models_ISigma_iff_models_IPi {n} : V ⊧ₘ* 𝐈𝚺 n ↔ V ⊧ₘ* 𝐈𝚷 n :=
   ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩

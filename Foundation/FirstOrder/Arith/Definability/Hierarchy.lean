@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.Vorspiel.Lemmata
+import Foundation.FirstOrder.PeanoMinus.Basic
 
 /-!
 
@@ -120,7 +120,7 @@ def mkPolarity (φ : Semiformula ℒₒᵣ ξ n) : (Γ : Polarity) → Hierarchy
   · exact Hierarchy.of_zero φ.sigma_prop
   · exact Hierarchy.of_zero φ.pi_prop
   · cases φ
-    simp; exact Hierarchy.of_zero (sigma_prop _)
+    simpa using Hierarchy.of_zero (sigma_prop _)
 
 variable {M : Type*} [ORingStruc M]
 
@@ -183,7 +183,7 @@ def rew (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → 
   rcases Γ with ⟨Γ, m⟩; rcases φ with (_ | _ | ⟨⟨p, _⟩, ⟨q, _⟩⟩) <;> simp [rew]
 
 @[simp] lemma ProperOn.rew {φ : 𝚫-[m].Semisentence n₁} (h : φ.ProperOn M) (ω : Rew ℒₒᵣ Empty n₁ Empty n₂) : (φ.rew ω).ProperOn M := by
-  rcases φ; simp [ProperOn, Semiformula.rew, Semiformula.eval_rew, Function.comp, h.iff, Empty.eq_elim]
+  rcases φ; simp only [ProperOn, Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, Empty.eq_elim, pi_mkDelta]
   intro e; exact h.iff _
 
 @[simp] lemma ProperOn.rew' {φ : 𝚫-[m].Semisentence n₁} (h : φ.ProperOn M) (ω : Rew ℒₒᵣ Empty n₁ M n₂) : (φ.rew ω).ProperWithParamOn M := by
@@ -193,7 +193,7 @@ def rew (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → 
 @[simp] lemma ProperWithParamOn.rew {φ : 𝚫-[m].Semiformula M n₁}
     (h : φ.ProperWithParamOn M) (f : Fin n₁ → Semiterm ℒₒᵣ M n₂) : (φ.rew (Rew.substs f)).ProperWithParamOn M := by
   rcases φ; intro e;
-  simp [ProperOn, Semiformula.rew, Semiformula.eval_rew, Function.comp, h.iff, Empty.eq_elim]
+  simp only [Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, pi_mkDelta]
   exact h.iff _
 
 def emb : {Γ : HierarchySymbol} → Γ.Semiformula ξ n → Γ.Semiformula ξ n

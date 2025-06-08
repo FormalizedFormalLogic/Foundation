@@ -71,52 +71,52 @@ notation "𝐏𝐀⁻" => PeanoMinus
 
 variable (L)
 
-def indScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
+def InductionScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
   { ψ | ∃ φ : Semiformula L ℕ 1, Γ φ ∧ ψ = succInd φ }
 
-abbrev iOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ Semiformula.Open
+abbrev IOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Semiformula.Open
 
-notation "𝐈open" => iOpen
+notation "𝐈open" => IOpen
 
-abbrev indH (Γ : Polarity) (k : ℕ) : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ (Arith.Hierarchy Γ k)
+abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ (Arith.Hierarchy Γ k)
 
-prefix:max "𝐈𝐍𝐃" => indH
+prefix:max "𝐈𝐍𝐃" => InductionOnHierarchy
 
-abbrev iSigma (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃𝚺 k
+abbrev ISigma (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃𝚺 k
 
-prefix:max "𝐈𝚺" => iSigma
+prefix:max "𝐈𝚺" => ISigma
 
-notation "𝐈𝚺₀" => iSigma 0
+notation "𝐈𝚺₀" => ISigma 0
 
-abbrev iPi (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃𝚷 k
+abbrev IPi (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃𝚷 k
 
-prefix:max "𝐈𝚷" => iPi
+prefix:max "𝐈𝚷" => IPi
 
-notation "𝐈𝚷₀" => iPi 0
+notation "𝐈𝚷₀" => IPi 0
 
-notation "𝐈𝚺₁" => iSigma 1
+notation "𝐈𝚺₁" => ISigma 1
 
-notation "𝐈𝚷₁" => iPi 1
+notation "𝐈𝚷₁" => IPi 1
 
-abbrev peano : Theory ℒₒᵣ := 𝐏𝐀⁻ + indScheme ℒₒᵣ Set.univ
+abbrev Peano : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Set.univ
 
-notation "𝐏𝐀" => peano
+notation "𝐏𝐀" => Peano
 
 variable {L}
 
-lemma coe_indH_subset_indH : (indScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theory L) ⊆ indScheme L (Arith.Hierarchy Γ ν) := by
-  simp only [indScheme, Set.image_subset_iff, Set.preimage_setOf_eq, Set.setOf_subset_setOf, forall_exists_index, and_imp]
+lemma coe_InductionOnHierarchy_subset_InductionOnHierarchy : (InductionScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theory L) ⊆ InductionScheme L (Arith.Hierarchy Γ ν) := by
+  simp only [InductionScheme, Set.image_subset_iff, Set.preimage_setOf_eq, Set.setOf_subset_setOf, forall_exists_index, and_imp]
   rintro _ φ Hp rfl
   exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) φ, Hierarchy.oringEmb Hp,
     by simp [succInd, Semiformula.lMap_substs]⟩
 
-lemma indScheme_subset (h : ∀ {φ : Semiformula ℒₒᵣ ℕ 1},  C φ → C' φ) : indScheme ℒₒᵣ C ⊆ indScheme ℒₒᵣ C' := by
-  intro _; simp [indScheme]; rintro φ hp rfl; exact ⟨φ, h hp, rfl⟩
+lemma InductionScheme_subset (h : ∀ {φ : Semiformula ℒₒᵣ ℕ 1},  C φ → C' φ) : InductionScheme ℒₒᵣ C ⊆ InductionScheme ℒₒᵣ C' := by
+  intro _; simp [InductionScheme]; rintro φ hp rfl; exact ⟨φ, h hp, rfl⟩
 
-lemma iSigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ 𝐈𝚺 s₂ :=
-  Set.union_subset_union_right _ (indScheme_subset (fun H ↦ H.mono h))
+lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⊆ 𝐈𝚺 s₂ :=
+  Set.union_subset_union_right _ (InductionScheme_subset (fun H ↦ H.mono h))
 
-instance : 𝐏𝐀⁻ ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.ofSubset (by simp [indH, Theory.add_def])
+instance : 𝐏𝐀⁻ ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.ofSubset (by simp [InductionOnHierarchy, Theory.add_def])
 
 
 
@@ -125,16 +125,16 @@ instance : 𝐄𝐐 ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.trans (inferIn
 instance : 𝐄𝐐 ⪯ 𝐈open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
 instance (i) : 𝐈open ⪯ 𝐈𝚺i :=
-  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| indScheme_subset Hierarchy.of_open
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Hierarchy.of_open
 
-lemma iSigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⪯ 𝐈𝚺 s₂ :=
-  Entailment.WeakerThan.ofSubset (iSigma_subset_mono h)
+lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⪯ 𝐈𝚺 s₂ :=
+  Entailment.WeakerThan.ofSubset (ISigma_subset_mono h)
 
 instance : 𝐈𝚺₀ ⪯ 𝐈𝚺₁ :=
-  iSigma_weakerThan_of_le (by decide)
+  ISigma_weakerThan_of_le (by decide)
 
 instance (i) : 𝐈𝚺i ⪯ 𝐏𝐀 :=
-  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| indScheme_subset (by intros; trivial)
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset (by intros; trivial)
 
 example (a b : ℕ) : Set.Finite {a, b} := by simp only [Set.finite_singleton, Set.Finite.insert]
 

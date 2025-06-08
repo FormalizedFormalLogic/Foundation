@@ -1,27 +1,38 @@
-import Foundation.Arithmetization.Definability.Absoluteness
+import Foundation.FirstOrder.PeanoMinus.Basic
+import Foundation.FirstOrder.Arith.Definability
+import Mathlib.Algebra.GroupWithZero.Divisibility
+import Mathlib.Algebra.Prime.Lemmas
 
-namespace LO.Arith
+/-!
+# Functions and relations defined in $\mathsf{PA^-}$
 
-open FirstOrder FirstOrder.Arith
+This file provides functions and relations defined in $\mathsf{PA^-}
 
-noncomputable section
+-/
+
+namespace LO.PeanoMinus
+
+open FirstOrder Arith
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
 
 variable {a b c : V}
 
+/-! ### (Modified) Subtraction -/
+
 section sub
 
 lemma sub_existsUnique (a b : V) : ∃! c, (a ≥ b → a = b + c) ∧ (a < b → c = 0) := by
   have : b ≤ a ∨ a < b := le_or_lt b a
-  rcases this with (hxy | hxy) <;> simp [hxy]
-  have : ∃ c, a = b + c := exists_add_of_le hxy
-  rcases this with ⟨c, rfl⟩
-  exact ExistsUnique.intro c rfl (fun a h => (add_left_cancel h).symm)
+  rcases this with (hxy | hxy)
+  · have : ∃ c, a = b + c := exists_add_of_le hxy
+    rcases this with ⟨c, rfl⟩
+    simp [hxy]
+  · simp [hxy]
 
-def sub (a b : V) : V := Classical.choose! (sub_existsUnique a b)
+noncomputable def sub (a b : V) : V := Classical.choose! (sub_existsUnique a b)
 
-instance : Sub V := ⟨sub⟩
+noncomputable scoped instance : Sub V := ⟨sub⟩
 
 lemma sub_spec_of_ge (h : a ≥ b) : a = b + (a - b) := (Classical.choose!_spec (sub_existsUnique a b)).1 h
 
@@ -76,7 +87,7 @@ lemma sub_sub : a - b - c = a - (b + c) := by
   by_cases ha : b + c ≤ a
   · exact sub_remove_left <| sub_remove_left <| by
       simp [add_assoc, show c + b = b + c from add_comm _ _, sub_add_self_of_le, ha]
-  · simp [sub_spec_of_lt (show a < b + c from not_le.mp ha)]
+  · suffices a - b - c = 0 by simpa [sub_spec_of_lt (show a < b + c from not_le.mp ha)]
     by_cases hc : c ≤ a - b
     · by_cases hb : b ≤ a
       · have : a < a := calc
@@ -88,10 +99,10 @@ lemma sub_sub : a - b - c = a - (b + c) := by
     · exact sub_spec_of_lt (not_le.mp hc)
 
 @[simp] lemma pos_sub_iff_lt : 0 < a - b ↔ b < a :=
-  ⟨by contrapose; simp; exact sub_spec_of_le,
+  ⟨by contrapose; simpa using sub_spec_of_le,
    by intro h; by_contra hs
-      simp at hs
-      have : a = b := by simpa [hs] using sub_spec_of_ge (show b ≤ a from LT.lt.le h)
+      have : a = b := by
+        simpa [show a - b = 0 by simpa using hs] using sub_spec_of_ge (show b ≤ a from LT.lt.le h)
       simp [this] at h⟩
 
 @[simp] lemma sub_eq_zero_iff_le : a - b = 0 ↔ a ≤ b :=
@@ -104,8 +115,8 @@ instance : OrderedSub V where
     · calc
         a - b ≤ c ↔ (a - b) + b ≤ c + b := by simp
         _         ↔ a ≤ c + b           := by rw [sub_add_self_of_le h]
-    · simp [sub_spec_of_lt (show a < b from by simpa using h)]
-      exact le_trans (le_of_lt $ show a < b from by simpa using h) (by simp)
+    · suffices a ≤ c + b by simpa [sub_spec_of_lt (show a < b from by simpa using h)]
+      exact le_trans (le_of_lt <| show a < b from by simpa using h) (by simp)
 
 lemma zero_or_succ (a : V) : a = 0 ∨ ∃ a', a = a' + 1 := by
   rcases zero_le a with (rfl | pos)
@@ -133,7 +144,8 @@ lemma add_sub_of_le (h : c ≤ b) (a : V) : a + b - c = a + (b - c) := add_tsub_
 lemma sub_succ_add_succ {x y : V} (h : y < x) (z) : x - (y + 1) + (z + 1) = x - y + z := calc
   x - (y + 1) + (z + 1) = x - (y + 1) + 1 + z := by simp [add_assoc, add_comm]
   _                     = x - y - 1 + 1 + z   := by simp [sub_sub]
-  _                     = x - y + z           := by simp; rw [sub_add_self_of_le (one_le_of_zero_lt _ (pos_sub_iff_lt.mpr h))]
+  _                     = x - y + z           := by
+    simp [show x - y - 1 + 1 = x - y from sub_add_self_of_le <| one_le_of_zero_lt _ <| pos_sub_iff_lt.mpr h]
 
 lemma le_sub_one_of_lt {a b : V} (h : a < b) : a ≤ b - 1 := by
   have : 1 ≤ b := one_le_of_zero_lt _ (pos_of_gt h)
@@ -144,6 +156,8 @@ instance : AddCancelCommMonoid V where
 
 end sub
 
+/-! ### Divisibility -/
+
 section Dvd
 
 lemma le_mul_self_of_pos_left (hy : 0 < b) : a ≤ b * a := by
@@ -153,9 +167,11 @@ lemma le_mul_self_of_pos_left (hy : 0 < b) : a ≤ b * a := by
 lemma le_mul_self_of_pos_right (hy : 0 < b) : a ≤ a * b := by
   simpa [mul_comm a b] using le_mul_self_of_pos_left hy
 
+open Classical
+
 lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
   by_cases hx : a = 0
-  · simp [hx]; rintro rfl; exact ⟨0, by simp⟩
+  · simp [hx, show ∃ x, x ≤ b from ⟨0, by simp⟩]
   · constructor
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
@@ -207,10 +223,15 @@ theorem units_eq_one (u : Vˣ) : u = 1 :=
 @[simp] lemma unit_iff_eq_one {a : V} : IsUnit a ↔ a = 1 :=
   ⟨by rintro ⟨u, rfl⟩; simp [units_eq_one u], by rintro rfl; simp⟩
 
+/-! ### Prime number -/
+
 section Prime
 
+instance : CancelCommMonoidWithZero V where
+
+open Classical in
 lemma eq_one_or_eq_of_dvd_of_prime {p a : V} (pp : Prime p) (hxp : a ∣ p) : a = 1 ∨ a = p := by
-  have : p ∣ a ∨ a ∣ 1 := pp.left_dvd_or_dvd_right_of_dvd_mul (show a ∣ p * 1 from by simpa using hxp)
+  have : p ∣ a ∨ a ∣ 1 := Prime.left_dvd_or_dvd_right_of_dvd_mul pp (show a ∣ p * 1 from by simpa using hxp)
   rcases this with (hx | hx)
   · right; exact dvd_antisymm hxp hx
   · left; exact dvd_one_iff.mp hx
@@ -228,11 +249,14 @@ lemma isPrime_defined : 𝚺₀-Predicate (λ a : V ↦ IsPrime a) via isPrime :
 
 end Prime
 
+/-! ### Minimum -/
+
 section min
 
 def _root_.LO.FirstOrder.Arith.min : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≤ y → z = x) ∧ (x ≥ y → z = y)” (by simp)
 
+set_option linter.flexible false in
 lemma min_defined : 𝚺₀-Function₂ (min : V → V → V) via min := by
   intro v; simp [FirstOrder.Arith.min]
   rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
@@ -250,11 +274,14 @@ instance min_polybounded : Bounded₂ (min : V → V → V) := ⟨#0, λ _ ↦ b
 
 end min
 
+/-! ### Maximum -/
+
 section max
 
 def _root_.LO.FirstOrder.Arith.max : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)” (by simp)
 
+set_option linter.flexible false in
 lemma max_defined : 𝚺₀-Function₂ (max : V → V → V) via max := by
   intro v; simp [Arith.max]
   rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
@@ -272,6 +299,4 @@ instance max_polybounded : Bounded₂ (max : V → V → V) := ⟨‘#0 + #1’,
 
 end max
 
-end
-
-end LO.Arith
+end LO.PeanoMinus

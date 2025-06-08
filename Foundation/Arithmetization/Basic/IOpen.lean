@@ -20,11 +20,11 @@ lemma open_induction {P : V → Prop}
   induction (C := Semiformula.Open)
     (by rcases hP with ⟨p, hp, hhp⟩
         haveI : Inhabited V := Classical.inhabited_of_nonempty'
-        exact ⟨p.fvarEnumInv, Rew.rewriteMap p.fvarEnum ▹ p, by simp [hp],
+        exact ⟨p.enumarateFVar, Rew.rewriteMap p.idxOfFVar ▹ p, by simp [hp],
           by  intro x; simp [Semiformula.eval_rewriteMap, hhp]
               exact Semiformula.eval_iff_of_funEqOn p (by
                 intro z hz
-                simp [Semiformula.fvarEnumInv_fvarEnum (Semiformula.mem_fvarList_iff_fvar?.mpr hz)])⟩) zero succ
+                simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hz)])⟩) zero succ
 
 lemma open_leastNumber {P : V → Prop}
     (hP : ∃ p : Semiformula ℒₒᵣ V 1, p.Open ∧ ∀ x, P x ↔ Semiformula.Evalm V ![x] id p)
@@ -774,7 +774,7 @@ section polynomial_induction
 variable [V ⊧ₘ* 𝐈open]
 
 @[elab_as_elim]
-lemma hierarchy_polynomial_induction (Γ m) [V ⊧ₘ* Theory.indScheme ℒₒᵣ (Arith.Hierarchy Γ m)]
+lemma hierarchy_polynomial_induction (Γ m) [V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ m)]
     {P : V → Prop} (hP : Γ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
   intro x; induction x using order_induction_h

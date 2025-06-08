@@ -1,8 +1,9 @@
-import Foundation.Arithmetization.Definability.BoundedBoldface
+import Foundation.FirstOrder.Arith.Definability.BoundedBoldface
+import Foundation.FirstOrder.R0.Basic
 
 namespace LO.FirstOrder.Arith
 
-open LO.Arith
+open PeanoMinus R0
 
 lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence ℒₒᵣ k} :
     ℕ ⊧/v φ ↔ ℕ ⊧ₘ₀ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
@@ -16,8 +17,8 @@ lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence �
 
 lemma shigmaZero_absolute {k} (φ : 𝚺₀.Semisentence k) (v : Fin k → ℕ) :
     ℕ ⊧/v φ.val ↔ V ⊧/(v ·) φ.val :=
-  ⟨by simp [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]; exact nat_extention_sigmaOne V (by simp),
-   by simp [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]; exact nat_extention_piOne V (by simp)⟩
+  ⟨by simpa [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs] using nat_extention_sigmaOne V (by simp),
+   by simpa [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs] using nat_extention_piOne V (by simp)⟩
 
 lemma Defined.shigmaZero_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop} {φ : 𝚺₀.Semisentence k}
     (hR : 𝚺₀.Defined R φ) (hR' : 𝚺₀.Defined R' φ) (v : Fin k → ℕ) :
@@ -31,13 +32,13 @@ lemma DefinedFunction.shigmaZero_absolute_func {k} {f : (Fin k → ℕ) → ℕ}
 
 lemma sigmaOne_upward_absolute {k} (φ : 𝚺₁.Semisentence k) (v : Fin k → ℕ) :
     ℕ ⊧/v φ.val → V ⊧/(v ·) φ.val := by
-  simp [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]
-  exact nat_extention_sigmaOne V (by simp)
+  simpa [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]
+  using nat_extention_sigmaOne V (by simp)
 
 lemma piOne_downward_absolute {k} (φ : 𝚷₁.Semisentence k) (v : Fin k → ℕ) :
     V ⊧/(v ·) φ.val → ℕ ⊧/v φ.val := by
-  simp [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]
-  exact nat_extention_piOne V (by simp)
+  simpa [nat_modelsWithParam_iff_models_substs, modelsWithParam_iff_models_substs]
+  using nat_extention_piOne V (by simp)
 
 lemma deltaOne_absolute {k} (φ : 𝚫₁.Semisentence k)
     (properNat : φ.ProperOn ℕ) (proper : φ.ProperOn V) (v : Fin k → ℕ) :
@@ -61,20 +62,20 @@ lemma models_iff_of_Sigma0 {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺
     V ⊧/(e ·) σ ↔ ℕ ⊧/e σ := by
   by_cases h : ℕ ⊧/e σ <;> simp [h]
   · have : V ⊧/(e ·) σ := by
-      simpa [numeral_eq_natCast] using LO.Arith.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) h
+      simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) h
     simpa [HierarchySymbol.Semiformula.val_sigma] using this
   · have : ℕ ⊧/e (∼σ) := by simpa using h
-    have : V ⊧/(e ·) (∼σ) := by simpa [numeral_eq_natCast] using LO.Arith.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) this
+    have : V ⊧/(e ·) (∼σ) := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp [Hierarchy.of_zero hσ]) this
     simpa using this
 
 lemma models_iff_of_Delta1 {σ : 𝚫₁.Semisentence n} (hσ : σ.ProperOn ℕ) (hσV : σ.ProperOn V) {e : Fin n → ℕ} :
     V ⊧/(e ·) σ.val ↔ ℕ ⊧/e σ.val := by
   by_cases h : ℕ ⊧/e σ.val <;> simp [h]
   · have : ℕ ⊧/e σ.sigma.val := by simpa [HierarchySymbol.Semiformula.val_sigma] using h
-    have : V ⊧/(e ·) σ.sigma.val := by simpa [numeral_eq_natCast] using LO.Arith.bold_sigma_one_completeness' (M := V) (by simp) this
+    have : V ⊧/(e ·) σ.sigma.val := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [HierarchySymbol.Semiformula.val_sigma] using this
   · have : ℕ ⊧/e (∼σ.pi.val) := by simpa [hσ.iff'] using h
-    have : V ⊧/(e ·) (∼σ.pi.val) := by simpa [numeral_eq_natCast] using LO.Arith.bold_sigma_one_completeness' (M := V) (by simp) this
+    have : V ⊧/(e ·) (∼σ.pi.val) := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [hσV.iff'] using this
 
 variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ⪯ T] [Sigma1Sound T]

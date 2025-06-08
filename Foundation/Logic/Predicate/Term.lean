@@ -120,7 +120,7 @@ namespace Positive
 end Positive
 
 lemma bv_eq_empty_of_positive {t : Semiterm L ξ 1} (ht : t.Positive) : t.bv = ∅ :=
-  Finset.eq_empty_of_forall_not_mem <| by simp_all [Positive, Fin.eq_zero]
+  Finset.eq_empty_of_forall_notMem <| by simp_all [Positive, Fin.eq_zero]
 
 section freeVariables
 
@@ -192,6 +192,28 @@ instance : Inhabited (Semiterm L ξ n) := ⟨func default ![]⟩
 lemma default_def : (default : Semiterm L ξ n) = func default ![] := rfl
 
 end
+
+section idxOfFVar
+
+def fvarList : Semiterm L ξ n → List ξ
+  |       #_ => []
+  |       &x => [x]
+  | func _ v => List.flatten <| Matrix.toList fun i ↦ fvarList (v i)
+
+def idxOfFVar [DecidableEq ξ] (t : Semiterm L ξ n) : ξ → ℕ := t.fvarList.idxOf
+
+def enumarateFVar [Inhabited ξ] (t : Semiterm L ξ n) : ℕ → ξ :=
+  fun i ↦ if hi : i < t.fvarList.length then t.fvarList.get ⟨i, hi⟩ else default
+
+lemma enumarateFVar_idxOfFVar [DecidableEq ξ] [Inhabited ξ] {t : Semiterm L ξ n} {x : ξ} (hx : x ∈ t.fvarList) :
+    enumarateFVar t (idxOfFVar t x) = x := by
+  simpa [enumarateFVar, idxOfFVar]
+  using fun h ↦ False.elim <| not_le.mpr (List.idxOf_lt_length_iff.mpr $ hx) h
+
+lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {t : Semiterm L ξ n} : x ∈ t.fvarList ↔ t.FVar? x:= by
+  induction t <;> { simp [fvarList, *]; try tauto }
+
+end idxOfFVar
 
 end Semiterm
 
