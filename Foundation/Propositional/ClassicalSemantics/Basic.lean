@@ -79,17 +79,53 @@ lemma iff_subst_self (s) :
 end Formula.ClassicalSemantics
 
 
-namespace ClassicalSemantics
 
-variable {v : Valuation α} {φ ψ : Formula α}
+section
 
 open Semantics (Valid)
+open Formula (atom)
+open Formula.ClassicalSemantics
+open ClassicalSemantics
 
-lemma tautology_subst_instance (h : Valid (Valuation _) φ) : ∀ s, Valid (Valuation _) (φ⟦s⟧) := by
+variable {v : ClassicalSemantics.Valuation α} {φ ψ : Formula α}
+
+abbrev Formula.isTautology (φ : Formula α) := Valid (ClassicalSemantics.Valuation α) φ
+
+lemma isTautology_subst_of_isTautology (h : φ.isTautology) : ∀ s, (φ⟦s⟧).isTautology := by
   intro s v;
   apply Formula.ClassicalSemantics.iff_subst_self s |>.mp;
   apply h;
 
-end ClassicalSemantics
+lemma iff_isTautology_and : (φ.isTautology) ∧ (ψ.isTautology) ↔ (φ ⋏ ψ).isTautology := by
+  constructor;
+  . rintro ⟨hφ, hψ⟩ v;
+    have := hφ v;
+    have := hψ v;
+    tauto;
+  . intro h;
+    constructor;
+    . intro v; exact h v |>.1;
+    . intro v; exact h v |>.2;
+
+lemma of_isTautology_or : φ.isTautology ∨ ψ.isTautology → (φ ⋎ ψ).isTautology := by
+  rintro (hφ | hψ) v;
+  . left; exact hφ v;
+  . right; exact hψ v;
+
+lemma of_isTautology_imp₂ : (ψ.isTautology) → (φ ➝ ψ).isTautology := by
+  intro hψ v h;
+  apply hψ;
+
+@[simp]
+lemma isTautology_bot : ¬((⊥ : Formula α).isTautology) := by
+  intro h;
+  have := @h (λ _ => True);
+  simp at this;
+
+@[simp]
+lemma isTautology_top : (⊤ : Formula α).isTautology := by intro v; simp;
+
+end
+
 
 end LO.Propositional

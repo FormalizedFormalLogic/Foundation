@@ -8,22 +8,28 @@ open Classical
 open Semantics (Valid)
 open Formula.ClassicalSemantics
 
-lemma tautology_neg_zero_subst_instance_of_not_tautology (h : ¬Valid (ClassicalSemantics.Valuation _) φ)
-  : ∃ s : ZeroSubstitution α, Valid (ClassicalSemantics.Valuation _) (∼(φ⟦s.1⟧)) := by
-  unfold Valid at h;
+open Classical in
+noncomputable abbrev vfSubst (v : Valuation α) : ZeroSubstitution α := ⟨
+    λ a => if v a then ⊤ else ⊥,
+    by intro a; simp [Formula.subst.subst_atom]; split <;> tauto;
+⟩
+
+theorem exists_neg_zeroSubst_of_not_isTautology (h : ¬φ.isTautology)
+  : ∃ s : ZeroSubstitution α, Formula.isTautology (∼(φ⟦s.1⟧)) := by
+  unfold Formula.isTautology Valid at h;
   push_neg at h;
   obtain ⟨v, hv⟩ := h;
-  let s : ZeroSubstitution α := ⟨
-    (λ a => if (v a) then ⊤ else ⊥),
-    by intro a; simp only [Formula.subst.subst_atom]; split <;> tauto;
-  ⟩;
-  use s;
+  use vfSubst v;
   intro u;
-  apply iff_subst_self s.1 |>.not.mp;
+  apply iff_subst_self _ |>.not.mp;
   apply eq_fml_of_eq_atom (v := v) ?_ |>.not.mp
   . exact hv;
   . intro a;
-    simp [s, val];
+    simp [val];
     split <;> tauto;
+
+lemma isTautology_of_forall_zeroSubst : (∀ s : ZeroSubstitution α, ¬(∼(φ⟦s.1⟧)).isTautology) → φ.isTautology := by
+  contrapose!;
+  apply exists_neg_zeroSubst_of_not_isTautology;
 
 end LO.Propositional.ClassicalSemantics

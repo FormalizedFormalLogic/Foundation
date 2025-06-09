@@ -39,4 +39,20 @@ end Hilbert
 
 instance : (Logic.Int).Superintuitionistic := Hilbert.superintuitionistic
 
+namespace Logic
+
+variable {L : Logic} [L.Superintuitionistic] [L.Consistent]
+
+lemma no_bot : ¬(⊥ ∈ L) := by
+  intro hbot;
+  suffices ∀ φ, φ ∈ L by
+    apply @Consistent.consis L _;
+    exact Set.eq_univ_iff_forall.mpr this;
+  intro φ;
+  apply @Superintuitionistic.mdp_closed L _ ⊥ φ ?_ hbot;
+  apply Superintuitionistic.subset_Int;
+  simp;
+
+end Logic
+
 end LO.Propositional
