@@ -3,7 +3,7 @@ import Foundation.Modal.Kripke.Logic.KTB
 import Foundation.Modal.Kripke.Logic.KD45
 import Foundation.Modal.Kripke.Logic.KB4
 import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.Logic.S4Point3
+import Foundation.Modal.Kripke.Logic.S4Point4
 
 namespace LO.Modal
 
@@ -171,34 +171,46 @@ theorem S5.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S5 := by
         . use 1;
           omega;
 
-theorem S5.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.S5 := by
+@[simp]
+theorem S5.proper_extension_of_S4Point4 : Logic.S4Point4 ⊂ Logic.S5 := by
   constructor;
-  . rw [S4Point3.Kripke.connected_preorder, S5.Kripke.universal];
+  . rw [S4Point4.Kripke.preorder_sobocinski, S5.Kripke.universal];
     rintro φ hφ F F_univ;
     apply hφ;
     replace F_univ := Set.mem_setOf_eq.mp F_univ
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.connected_preorder ⊧ φ by
-      rw [S4Point3.Kripke.connected_preorder];
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.preorder_sobocinski ⊧ φ by
+      rw [S4Point4.Kripke.preorder_sobocinski];
       tauto;
     use Axioms.Five (.atom 0);
     constructor;
-    . exact axiomFive!;
+    . simp;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w a => (w = 0)⟩;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w a => w = 0⟩;
       use M, 0;
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         refine ⟨?_, ⟨?_⟩⟩;
         . apply isPreorder_iff _ _ |>.mpr;
           refine ⟨⟨by omega⟩, ⟨by omega⟩⟩;
-        . rintro x y z ⟨Rxy, Ryz⟩; omega;
-      . suffices (0 : M.World) ≺ 0 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
+        . rintro x y z _;
+          match x, y, z with
+          | 0, 0, _ => contradiction;
+          | 1, 1, _ => contradiction;
+          | 0, 1, 0 => omega;
+          | 0, 1, 1 => omega;
+          | 1, 0, 0 => omega;
+          | 1, 0, 1 => omega;
+      . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M) ≺ x ∧ ¬x ≺ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
         . omega;
         . use 1;
           constructor <;> omega;
+
+@[simp]
+lemma S5.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.S5 := by
+  trans Logic.S4Point4 <;> simp;
 
 end Logic
 

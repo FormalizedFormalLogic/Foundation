@@ -21,6 +21,11 @@ instance [SatisfiesSobocinskiCondition _ rel] : IsConnected _ rel := ⟨by
     apply SatisfiesSobocinskiCondition.sobCondition x y z hxy Rxy Rxz;
 ⟩
 
+instance [IsEuclidean _ rel] : SatisfiesSobocinskiCondition _ rel := ⟨by
+  intro x y z _ Rxy Rxz;
+  apply IsEuclidean.euclidean Rxy Rxz;
+⟩
+
 end
 
 
