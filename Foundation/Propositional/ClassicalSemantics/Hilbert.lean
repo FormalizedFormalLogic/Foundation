@@ -5,12 +5,12 @@ import Foundation.Propositional.ConsistentTableau
 namespace LO.Propositional
 
 open Semantics
-open ClassicalSemantics (Valuation)
+open ClassicalSemantics
 open Formula.ClassicalSemantics
 
 namespace Hilbert.Cl
 
-theorem soundness (h : Hilbert.Cl ⊢! φ) : Valid (Valuation ℕ) φ := by
+theorem soundness (h : Hilbert.Cl ⊢! φ) : φ.isTautology := by
   intro v;
   induction h using Hilbert.Deduction.rec! with
   | maxm h => rcases h with ⟨φ, (rfl | rfl), ⟨_, rfl⟩⟩ <;> { tauto; }
@@ -79,7 +79,7 @@ lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) 
       . left; apply ihφ.mpr hφ;
       . right; apply ihψ.mpr hψ;
 
-theorem completeness : (Valid (Valuation _) φ) → (Hilbert.Cl ⊢! φ) := by
+theorem completeness : (φ.isTautology) → (Hilbert.Cl ⊢! φ) := by
   contrapose;
   intro h;
   obtain ⟨T, hT⟩ := lindenbaum (𝓢 := Hilbert.Cl) (t₀ := (∅, {φ})) $ by
@@ -95,13 +95,18 @@ theorem completeness : (Valid (Valuation _) φ) → (Hilbert.Cl ⊢! φ) := by
     . simp only [Finset.coe_eq_singleton] at hΔ;
       subst hΔ;
       exact (by simpa using hC) ⨀ verum!;
-  unfold Semantics.Valid;
+  unfold Formula.isTautology Semantics.Valid;
   push_neg;
   use (canonicalVal T);
   apply truthlemma.not.mpr;
   apply iff_not_mem₁_mem₂.mpr;
   apply hT.2;
   tauto;
+
+theorem iff_isTautology_provable : φ.isTautology ↔ Hilbert.Cl ⊢! φ := ⟨
+  completeness,
+  soundness,
+⟩
 
 lemma exists_valuation_of_not_provable : ¬(Hilbert.Cl ⊢! φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
   contrapose;
@@ -111,5 +116,16 @@ lemma exists_valuation_of_not_provable : ¬(Hilbert.Cl ⊢! φ) → ∃ v : Valu
 end Completeness
 
 end Hilbert.Cl
+
+
+namespace Logic.Cl
+
+variable {φ : Formula ℕ}
+
+theorem tautologies : Logic.Cl = { φ | φ.isTautology } := by
+  ext φ;
+  simp [Hilbert.Cl.iff_isTautology_provable];
+
+end Logic.Cl
 
 end LO.Propositional

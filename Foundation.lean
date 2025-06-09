@@ -19,6 +19,7 @@ import Foundation.Propositional.Heyting.Semantics
 import Foundation.Propositional.Kripke.Logic.KP
 import Foundation.Propositional.Kripke.Logic.Cl
 import Foundation.Propositional.Logic.Letterless_Int_Cl
+import Foundation.Propositional.Logic.PostComplete
 
 -- FirstOrder
 
