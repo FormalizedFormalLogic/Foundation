@@ -4,8 +4,6 @@ import Foundation.Propositional.Logic.Extension
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Propositional.ClassicalSemantics.ZeroSubst
 
--- #check Set.ssubset_of_subset
-
 lemma Set.ssubset_of_subset_ne {α : Type*} {s t : Set α} (h : s ⊆ t) (hne : s ≠ t) : s ⊂ t := by
   constructor;
   . assumption;
@@ -33,8 +31,11 @@ theorem Cl.post_complete : ∀ L : Ext (Logic.Cl), L.1.Consistent → L.1 = Logi
   replace ⟨hL, ⟨φ, hφ₁, hφ₂⟩⟩ := Set.ssubset_iff_exists.mp $ Set.ssubset_of_subset_ne L_subset (by tauto);
   have ⟨v, hv⟩ := exists_valuation_of_not_provable hφ₂;
   have h₁ : ∼(φ⟦(vfSubst v).1⟧) ∈ L := hL $ by
-    apply Hilbert.Cl.completeness;
-    sorry;
+    simp only [tautologies, Formula.subst.subst_atom, Set.mem_setOf_eq];
+    suffices ¬(φ⟦(vfSubst v).1⟧).isTautology by
+      apply neg_isTautology_of_not_isTautology_of_letterless ?_ this;
+      apply Formula.letterless_zeroSubst (s := vfSubst v);
+    apply isTautology_vfSubst.not.mp hv;
   have h₂ : φ⟦(vfSubst v).1⟧ ∈ L := subst_closed hφ₁ _;
   exact mdp_closed h₁ h₂;
 

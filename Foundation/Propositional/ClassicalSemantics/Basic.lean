@@ -76,6 +76,27 @@ lemma iff_subst_self (s) :
       . left; apply ihφ.mpr hφ;
       . right; apply ihψ.mpr hψ;
 
+lemma equiv_of_letterless (hl : φ.letterless) : ∀ v w : Valuation _, v ⊧ φ ↔ w ⊧ φ := by
+  intro v w;
+  induction φ with
+  | hatom a => simp at hl;
+  | hfalsum => simp;
+  | himp φ ψ ihφ ihψ =>
+    simp only [Formula.letterless] at hl;
+    replace ihφ := ihφ hl.1;
+    replace ihψ := ihψ hl.2;
+    simp_all;
+  | hand φ ψ ihφ ihψ =>
+    simp only [Formula.letterless] at hl;
+    replace ihφ := ihφ hl.1;
+    replace ihψ := ihψ hl.2;
+    simp_all;
+  | hor φ ψ ihφ ihψ =>
+    simp only [Formula.letterless] at hl;
+    replace ihφ := ihφ hl.1;
+    replace ihψ := ihψ hl.2;
+    simp_all;
+
 end Formula.ClassicalSemantics
 
 
@@ -124,6 +145,17 @@ lemma isTautology_bot : ¬((⊥ : Formula α).isTautology) := by
 
 @[simp]
 lemma isTautology_top : (⊤ : Formula α).isTautology := by intro v; simp;
+
+lemma isTautology_of_not_neg_isTautology_of_letterless (hl : φ.letterless) : ¬((∼φ).isTautology) → φ.isTautology := by
+  intro h v;
+  obtain ⟨w, hw⟩ : ∃ x : Valuation _, x ⊧ φ := by simpa [Formula.isTautology, Valid] using h;
+  have H := Formula.ClassicalSemantics.equiv_of_letterless hl;
+  apply H w v |>.mp;
+  assumption;
+
+lemma neg_isTautology_of_not_isTautology_of_letterless (hl : φ.letterless) : ¬φ.isTautology → (∼φ).isTautology := by
+  contrapose!;
+  apply isTautology_of_not_neg_isTautology_of_letterless hl;
 
 end
 
