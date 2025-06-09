@@ -29,7 +29,7 @@ def InductionScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
 
 abbrev IOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Semiformula.Open
 
-notation "𝐈open" => IOpen
+notation "𝐈Open" => IOpen
 
 abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ (Arith.Hierarchy Γ k)
 
@@ -79,9 +79,9 @@ instance : 𝐏𝐀⁻ ⪯ 𝐈𝐍𝐃 Γ n := Entailment.WeakerThan.ofSubset (
 
 instance : 𝐄𝐐 ⪯ 𝐈𝐍𝐃 Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
-instance : 𝐄𝐐 ⪯ 𝐈open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
+instance : 𝐄𝐐 ⪯ 𝐈Open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
-instance : 𝐈open ⪯ 𝐈𝐍𝐃 Γ n :=
+instance : 𝐈Open ⪯ 𝐈𝐍𝐃 Γ n :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arith.Hierarchy.of_open
 
 instance : 𝐈𝚺₀ ⪯ 𝐈𝚺₁ :=
@@ -350,9 +350,9 @@ lemma ISigma0.least_number [V ⊧ₘ* 𝐈𝚺₀] {P : V → Prop} (hP : 𝚺�
   InductionOnHierarchy.order_induction_sigma Γ 1 hP ind
 
 
-instance [V ⊧ₘ* 𝐈open] : V ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈open)
+instance [V ⊧ₘ* 𝐈Open] : V ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈Open)
 
-instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈𝚺₀)
+instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈Open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈𝚺₀)
 
 instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ := inferInstance
 

@@ -414,7 +414,7 @@ lemma zero_mem_iff {a : V} : 0 ∉ a ↔ 2 ∣ a := by simp [mem_iff_bit, Bit, L
   simp [mem_iff_bit, Bit, LenBit, exp_succ, div_mul]
 
 lemma le_of_subset {a b : V} (h : a ⊆ b) : a ≤ b := by
-  induction b using hierarchy_polynomial_induction_oRing_pi₁ generalizing a
+  induction b using ISigma1.pi1_polynomial_induction generalizing a
   · definability
   case zero =>
     simp [eq_zero_of_subset_zero h]

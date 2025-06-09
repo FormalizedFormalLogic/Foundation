@@ -76,7 +76,7 @@ def InductionScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
 
 abbrev IOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Semiformula.Open
 
-notation "𝐈open" => IOpen
+notation "𝐈Open" => IOpen
 
 abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ (Arith.Hierarchy Γ k)
 
@@ -122,9 +122,9 @@ instance : 𝐏𝐀⁻ ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.ofSubset (b
 
 instance : 𝐄𝐐 ⪯ 𝐈𝐍𝐃Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
-instance : 𝐄𝐐 ⪯ 𝐈open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
+instance : 𝐄𝐐 ⪯ 𝐈Open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
-instance (i) : 𝐈open ⪯ 𝐈𝚺i :=
+instance (i) : 𝐈Open ⪯ 𝐈𝚺i :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Hierarchy.of_open
 
 lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝐈𝚺 s₁ ⪯ 𝐈𝚺 s₂ :=

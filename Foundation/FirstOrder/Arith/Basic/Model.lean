@@ -135,9 +135,9 @@ variable {M : Type*} [ORingStruc M]
     intro H φ hp f; exact eval_lMap_oringEmb.mpr (H hp f)
 
 /-
-instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
+instance [M ⊧ₘ* 𝐈Open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
 
-instance [M ⊧ₘ* 𝐈open] : M ⊧ₘ* Theory.InductionScheme ℒₒᵣ Semiformula.Open :=
+instance [M ⊧ₘ* 𝐈Open] : M ⊧ₘ* Theory.InductionScheme ℒₒᵣ Semiformula.Open :=
   ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
 
 def models_PeanoMinus_of_models_InductionOnHierarchy (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.InductionScheme _ (Arith.Hierarchy Γ n))

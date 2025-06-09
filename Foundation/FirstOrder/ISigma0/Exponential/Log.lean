@@ -1,20 +1,23 @@
-import Foundation.Arithmetization.ISigmaZero.Exponential.Exp
+import Foundation.FirstOrder.ISigma0.Exponential.Exp
 
-noncomputable section
+/-!
+# Logarithmic function
 
-namespace LO.Arith
+-/
+
+namespace LO
+
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V]
 
-open FirstOrder FirstOrder.Arith
-
-section ISigma₀
+namespace ISigma0
 
 variable [V ⊧ₘ* 𝐈𝚺₀]
 
 lemma log_exists_unique_pos {y : V} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
   have : ∃ x < y, ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
-    induction y using hierarchy_polynomial_induction_oRing_sigma₀
+    induction y using ISigma0.sigma0_polynomial_induction
     · definability
     case zero => simp at hy
     case even y _ IH =>
@@ -25,7 +28,7 @@ lemma log_exists_unique_pos {y : V} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ 
       rcases (zero_le y : 0 ≤ y) with (rfl | pos)
       · simp
       · rcases (IH pos : ∃ x < y, ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') with ⟨x, hxy, y', gey, H, lty⟩
-        exact ⟨x + 1, by simp; exact lt_of_lt_of_le hxy (by simp),
+        exact ⟨x + 1, by simpa using lt_of_lt_of_le hxy (by simp),
           2 * y', le_trans (by simpa using gey) le_self_add, Exponential.exponential_succ_mul_two.mpr H, two_mul_add_one_lt_two_mul_of_lt lty⟩
   rcases this with ⟨x, hx⟩
   exact ExistsUnique.intro x hx (fun x' ↦ by
@@ -47,7 +50,7 @@ lemma log_exists_unique (y : V) : ∃! x, (y = 0 → x = 0) ∧ (0 < y → x < y
   · rcases hy; simp
   · simp [hy, pos_iff_ne_zero.mpr hy, log_exists_unique_pos]
 
-def log (a : V) : V := Classical.choose! (log_exists_unique a)
+noncomputable def log (a : V) : V := Classical.choose! (log_exists_unique a)
 
 @[simp] lemma log_zero : log (0 : V) = 0 :=
   (Classical.choose!_spec (log_exists_unique (0 : V))).1 rfl
@@ -116,7 +119,7 @@ lemma log_mul_pow2_add_of_lt {a p b : V} (pos : 0 < a) (pp : Pow2 p) (hb : b < p
       calc
         a * p + b < a * p + p    := by simp [hb]
         _         = (a + 1) * p  := by simp [add_mul]
-        _         ≤ 2 * (a' * p) := by simp [←mul_assoc]; exact mul_le_mul_right (lt_iff_succ_le.mp ha))
+        _         ≤ 2 * (a' * p) := by simpa [←mul_assoc] using mul_le_mul_right (lt_iff_succ_le.mp ha))
 
 lemma log_mul_pow2 {a p : V} (pos : 0 < a) (pp : Pow2 p) : log (a * p) = log a + log p := by
   simpa using log_mul_pow2_add_of_lt pos pp pp.pos
@@ -137,9 +140,9 @@ lemma log_monotone {a b : V} (h : a ≤ b) : log a ≤ log b := by
     _ ≤ b      := h
   simp_all
 
-def binaryLength (a : V) : V := if 0 < a then log a + 1 else 0
+noncomputable def binaryLength (a : V) : V := if 0 < a then log a + 1 else 0
 
-scoped instance : Length V := ⟨binaryLength⟩
+noncomputable scoped instance : Length V := ⟨binaryLength⟩
 
 lemma length_eq_binaryLength (a : V) : ‖a‖ = if 0 < a then log a + 1 else 0 := rfl
 
@@ -173,7 +176,7 @@ instance : Bounded₁ (‖·‖ : V → V) := ⟨#0, λ _ ↦ by simp⟩
 @[simp] lemma length_one : ‖(1 : V)‖ = 1 := by simp [length_eq_binaryLength]
 
 lemma Exponential.length_eq {x y : V} (H : Exponential x y) : ‖y‖ = x + 1 := by
-  simp [length_of_pos H.range_pos]; exact H.log_eq_of_exp
+  simpa [length_of_pos H.range_pos] using H.log_eq_of_exp
 
 lemma length_two_mul_of_pos {a : V} (pos : 0 < a) : ‖2 * a‖ = ‖a‖ + 1 := by
   simp [pos, length_of_pos, log_two_mul_of_pos]
@@ -192,8 +195,8 @@ lemma length_mul_pow2 {a p : V} (pos : 0 < a) (pp : Pow2 p) : ‖a * p‖ = ‖a
 lemma length_monotone {a b : V} (h : a ≤ b) : ‖a‖ ≤ ‖b‖ := by
   rcases zero_le a with (rfl | posa)
   · simp
-  · simp [length_of_pos posa, length_of_pos (lt_of_lt_of_le posa h)]
-    exact log_monotone h
+  · simpa [length_of_pos posa, length_of_pos (lt_of_lt_of_le posa h)]
+    using log_monotone h
 
 lemma pos_of_lt_length {a b : V} (h : a < ‖b‖) : 0 < b := by
   by_contra A; rcases (show b = 0 from by simpa using A); simp_all
@@ -221,8 +224,8 @@ lemma lt_exponential_log_self {a b : V} (h : Exponential (log a) b) : a < 2 * b 
 lemma lt_exp_len_self {a b : V} (h : Exponential ‖a‖ b) : a < b := by
   rcases zero_le a with (rfl | pos)
   · simp at h; simp [h]
-  simp [length_of_pos pos] at h
-  rcases Exponential.exponential_succ.mp h with ⟨b, rfl, H⟩
+  have : Exponential (log a + 1) b := by simpa [length_of_pos pos] using h
+  rcases Exponential.exponential_succ.mp this with ⟨b, rfl, H⟩
   exact lt_exponential_log_self H
 
 lemma le_iff_le_log_of_exp {x y a : V} (H : Exponential x y) (pos : 0 < a) : y ≤ a ↔ x ≤ log a :=
@@ -231,7 +234,7 @@ lemma le_iff_le_log_of_exp {x y a : V} (H : Exponential x y) (pos : 0 < a) : y �
 
 lemma le_iff_lt_length_of_exp {x y a : V} (H : Exponential x y) : y ≤ a ↔ x < ‖a‖ := by
   rcases zero_le a with (rfl | pos)
-  · simp; exact pos_iff_ne_zero.mp H.range_pos
+  · simpa using pos_iff_ne_zero.mp H.range_pos
   simp [le_iff_le_log_of_exp H pos, length_of_pos pos, ←le_iff_lt_succ]
 
 lemma Exponential.lt_iff_log_lt {x y a : V} (H : Exponential x y) (pos : 0 < a) : a < y ↔ log a < x :=
@@ -249,12 +252,12 @@ lemma Exponential.lt_length {x y : V} (H : Exponential x y) : x < ‖y‖ := (le
 lemma lt_exponential_length {a b : V} (h : Exponential ‖a‖ b) : a < b := by
   rcases zero_le a with (rfl | pos)
   · simp at h; simp [h]
-  simp [length_of_pos pos] at h
-  rcases Exponential.exponential_succ.mp h with ⟨b, rfl, H⟩
+  have : Exponential (log a + 1) b := by simpa [length_of_pos pos] using h
+  rcases Exponential.exponential_succ.mp this with ⟨b, rfl, H⟩
   exact lt_exponential_log_self H
 
 lemma sq_len_le_three_mul (a : V) : ‖a‖ ^ 2 ≤ 3 * a := by
-  induction a using hierarchy_polynomial_induction_oRing_sigma₀
+  induction a using ISigma0.sigma0_polynomial_induction
   · definability
   case zero => simp
   case even a pos IH =>
@@ -297,12 +300,12 @@ lemma brange_exists_unique (a : V) : ∀ x < ‖a‖, ∃! y, Exponential x y :=
 
 lemma bexp_exists_unique (a x : V) : ∃! y, (x < ‖a‖ → Exponential x y) ∧ (‖a‖ ≤ x → y = 0) := by
   by_cases hx : x < ‖a‖
-  · simp [hx, show ¬‖a‖ ≤ x from by simpa using hx, log_exists_unique_pos]
-    exact brange_exists_unique a x hx
+  · simpa [hx, show ¬‖a‖ ≤ x from by simpa using hx, log_exists_unique_pos]
+    using brange_exists_unique a x hx
   · simp [hx, show ‖a‖ ≤ x from by simpa using hx]
 
 /-- `bexp a x = exp x` if `x < ‖a‖`; `= 0` o.w.-/
-def bexp (a x : V) : V := Classical.choose! (bexp_exists_unique a x)
+noncomputable def bexp (a x : V) : V := Classical.choose! (bexp_exists_unique a x)
 
 lemma exp_bexp_of_lt {a x : V} (h : x < ‖a‖) : Exponential x (bexp a x) :=
   (Classical.choose!_spec (bexp_exists_unique a x)).1 h
@@ -400,7 +403,7 @@ lemma bexp_two_mul_add_one_succ {a i : V} : bexp (2 * a + 1) (i + 1) = 2 * bexp 
   · simp [bexp_eq_zero_of_le, h, show ‖2 * a + 1‖ ≤ i + 1 from by simp [length_two_mul_add_one, h]]
   · exact bexp_eq_of_exp (by simp [length_two_mul_add_one, h]) (exp_bexp_of_lt h).succ
 
-def fbit (a i : V) : V := (a / bexp a i) % 2
+noncomputable def fbit (a i : V) : V := (a / bexp a i) % 2
 
 @[simp] lemma fbit_lt_two (a i : V) : fbit a i < 2 := by simp [fbit]
 
@@ -431,7 +434,7 @@ instance : Bounded₂ (fbit : V → V → V) := ⟨‘1’, λ _ ↦ by simp⟩
   simp [fbit, bexp_two_mul_succ, div_cancel_left]
 
 @[simp] lemma fbit_mul_two_add_one_mul (a i : V) : fbit (2 * a + 1) (i + 1) = fbit a i := by
-  simp [fbit, bexp_two_mul_add_one_succ, div_cancel_left, div_mul]
+  simp [fbit, bexp_two_mul_add_one_succ, div_cancel_left, IOpen.div_mul]
 
 @[simp] lemma fbit_two_mul_zero_eq_zero (a : V) : fbit (2 * a) 0 = 0 := by
   rcases zero_le a with (rfl | pos)
@@ -441,47 +444,45 @@ instance : Bounded₂ (fbit : V → V → V) := ⟨‘1’, λ _ ↦ by simp⟩
 
 @[simp] lemma fbit_two_mul_add_one_zero_eq_one (a : V) : fbit (2 * a + 1) 0 = 1 := by simp [fbit, one_lt_two]
 
-end ISigma₀
+end ISigma0
 
-section ISigma₁
+namespace ISigma1
 
 variable [V ⊧ₘ* 𝐈𝚺₁]
 
-@[simp] lemma log_exponential (a : V) : log (exp a) = a := (exponential_exp a).log_eq_of_exp
+@[simp] lemma log_exponential (a : V) : log (Exp.exp a) = a := (exponential_exp a).log_eq_of_exp
 
-lemma exp_log_le_self {a : V} (pos : 0 < a) : exp (log a) ≤ a := by
+lemma exp_log_le_self {a : V} (pos : 0 < a) : Exp.exp (log a) ≤ a := by
   rcases log_pos pos with ⟨_, _, H, _⟩
   rcases H.uniq (exponential_exp (log a))
   assumption
 
-lemma lt_two_mul_exponential_log {a : V} (pos : 0 < a) : a < 2 * exp (log a) := by
+lemma lt_two_mul_exponential_log {a : V} (pos : 0 < a) : a < 2 * Exp.exp (log a) := by
   rcases log_pos pos with ⟨_, _, H, _⟩
   rcases H.uniq (exponential_exp (log a))
   assumption
 
-@[simp] lemma length_exponential (a : V) : ‖exp a‖ = a + 1 := by
+@[simp] lemma length_exponential (a : V) : ‖Exp.exp a‖ = a + 1 := by
   simp [length_of_pos (exp_pos a)]
 
-lemma exp_add (a b : V) : exp (a + b) = exp a * exp b :=
+lemma exp_add (a b : V) : Exp.exp (a + b) = Exp.exp a * Exp.exp b :=
   exp_of_exponential (Exponential.add_mul (exponential_exp a) (exponential_exp b))
 
-lemma log_mul_exp_add_of_lt {a b : V} (pos : 0 < a) (i : V) (hb : b < exp i) : log (a * exp i + b) = log a + i := by
+lemma log_mul_exp_add_of_lt {a b : V} (pos : 0 < a) (i : V) (hb : b < Exp.exp i) : log (a * Exp.exp i + b) = log a + i := by
   simp [log_mul_pow2_add_of_lt pos (exp_pow2 i) hb]
 
-lemma log_mul_exp {a : V} (pos : 0 < a) (i : V) : log (a * exp i) = log a + i := by
+lemma log_mul_exp {a : V} (pos : 0 < a) (i : V) : log (a * Exp.exp i) = log a + i := by
   simp [log_mul_pow2 pos (exp_pow2 i)]
 
-lemma length_mul_exp_add_of_lt {a b : V} (pos : 0 < a) (i : V) (hb : b < exp i) : ‖a * exp i + b‖ = ‖a‖ + i := by
+lemma length_mul_exp_add_of_lt {a b : V} (pos : 0 < a) (i : V) (hb : b < Exp.exp i) : ‖a * Exp.exp i + b‖ = ‖a‖ + i := by
   simp [length_mul_pow2_add_of_lt pos (exp_pow2 i) hb]
 
-lemma length_mul_exp {a : V} (pos : 0 < a) (i : V) : ‖a * exp i‖ = ‖a‖ + i := by
+lemma length_mul_exp {a : V} (pos : 0 < a) (i : V) : ‖a * Exp.exp i‖ = ‖a‖ + i := by
   simp [length_mul_pow2 pos (exp_pow2 i)]
 
-lemma exp_le_iff_le_log {i a : V} (pos : 0 < a) : exp i ≤ a ↔ i ≤ log a :=
+lemma exp_le_iff_le_log {i a : V} (pos : 0 < a) : Exp.exp i ≤ a ↔ i ≤ log a :=
   ⟨by intro h; simpa using log_monotone h, fun h ↦ le_trans (exp_monotone_le.mpr h) (exp_log_le_self pos)⟩
 
-end ISigma₁
+end ISigma1
 
-end LO.Arith
-
-end
+end LO

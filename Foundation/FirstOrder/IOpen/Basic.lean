@@ -6,19 +6,19 @@ import Mathlib.Logic.Nonempty
 
 -/
 
-namespace LO.IOpen
+namespace LO
 
 open FirstOrder Arith PeanoMinus
 
 variable {V : Type*} [ORingStruc V]
 
-section IOpen
+namespace IOpen
 
-variable [V ⊧ₘ* 𝐈open]
+variable [V ⊧ₘ* 𝐈Open]
 
-instance : V ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈open)
+instance : V ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈Open)
 
-instance : V ⊧ₘ* InductionScheme ℒₒᵣ Semiformula.Open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈open)
+instance : V ⊧ₘ* InductionScheme ℒₒᵣ Semiformula.Open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈Open)
 
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
@@ -791,21 +791,25 @@ lemma unNpair_defined {n} (i : Fin n) : 𝚺₀-Function₁ (unNpair i : V → V
 
 end
 
+lemma nat_cast_pair (n m : ℕ) : (⟪n, m⟫ : ℕ) = ⟪(↑n : V), (↑m : V)⟫ := by simp [pair]
+
+lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [pair, Nat.pair]
+
+lemma pair_coe_eq_coe_pair (m n : ℕ) :  ⟪n, m⟫ = (Nat.pair n m : V) := by simp [nat_cast_pair, nat_pair_eq]
+
 end pair
 
 end IOpen
 
 /-! ### Polynomial induction -/
 
-section polynomial_induction
-
-variable [V ⊧ₘ* 𝐏𝐀⁻]
+open PeanoMinus IOpen
 
 @[elab_as_elim]
-lemma hierarchy_polynomial_induction (Γ m) [V ⊧ₘ* 𝐈𝐍𝐃 Γ m]
+lemma InductionOnHierarchy.polynomial_induction [V ⊧ₘ* 𝐏𝐀⁻] (Γ m) [V ⊧ₘ* 𝐈𝐍𝐃 Γ m]
     {P : V → Prop} (hP : Γ-[m]-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x := by
-  haveI : V ⊧ₘ* 𝐈open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈𝐍𝐃 Γ m)
+  haveI : V ⊧ₘ* 𝐈Open := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝐈𝐍𝐃 Γ m)
   intro x; induction x using InductionOnHierarchy.order_induction
   · exact Γ
   · exact m
@@ -819,28 +823,16 @@ lemma hierarchy_polynomial_induction (Γ m) [V ⊧ₘ* 𝐈𝐍𝐃 Γ m]
       · simpa [←hx] using even (x / 2) (by by_contra A; simp at A; simp [show x = 0 from by simpa [A] using hx] at pos) (IH (x / 2) this)
       · simpa [←hx] using odd (x / 2) (IH (x / 2) this)
 
-end polynomial_induction
-
-open PeanoMinus
-
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₀ [V ⊧ₘ* 𝐈𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
+@[elab_as_elim] lemma ISigma0.sigma0_polynomial_induction [V ⊧ₘ* 𝐈𝚺₀] {P : V → Prop} (hP : 𝚺₀-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  hierarchy_polynomial_induction 𝚺 0 (P := P) hP zero even odd
+  InductionOnHierarchy.polynomial_induction 𝚺 0 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_sigma₁ [V ⊧ₘ* 𝐈𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
+@[elab_as_elim] lemma ISigma1.sigma1_polynomial_induction [V ⊧ₘ* 𝐈𝚺₁] {P : V → Prop} (hP : 𝚺₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  hierarchy_polynomial_induction 𝚺 1 (P := P) hP zero even odd
+  InductionOnHierarchy.polynomial_induction 𝚺 1 (P := P) hP zero even odd
 
-@[elab_as_elim] lemma hierarchy_polynomial_induction_oRing_pi₁ [V ⊧ₘ* 𝐈𝚷₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
+@[elab_as_elim] lemma ISigma1.pi1_polynomial_induction [V ⊧ₘ* 𝐈𝚺₁] {P : V → Prop} (hP : 𝚷₁-Predicate P)
     (zero : P 0) (even : ∀ x > 0, P x → P (2 * x)) (odd : ∀ x, P x → P (2 * x + 1)) : ∀ x, P x :=
-  hierarchy_polynomial_induction 𝚷 1 (P := P) hP zero even odd
+  InductionOnHierarchy.polynomial_induction 𝚷 1 (P := P) hP zero even odd
 
-variable [V ⊧ₘ* 𝐈open]
-
-lemma nat_cast_pair (n m : ℕ) : (⟪n, m⟫ : ℕ) = ⟪(↑n : V), (↑m : V)⟫ := by simp [pair]
-
-lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [pair, Nat.pair]
-
-lemma pair_coe_eq_coe_pair (m n : ℕ) :  ⟪n, m⟫ = (Nat.pair n m : V) := by simp [nat_cast_pair, nat_pair_eq]
-
-end IOpen
+end LO

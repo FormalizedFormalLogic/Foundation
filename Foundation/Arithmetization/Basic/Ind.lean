@@ -159,16 +159,16 @@ instance [V ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy 𝚺 m)] :
 
 end
 
-def mod_IOpen_of_mod_InductionOnHierarchy (Γ n) [V ⊧ₘ* 𝐈𝐍𝐃Γ n] : V ⊧ₘ* 𝐈open :=
+def mod_IOpen_of_mod_InductionOnHierarchy (Γ n) [V ⊧ₘ* 𝐈𝐍𝐃Γ n] : V ⊧ₘ* 𝐈Open :=
   ModelsTheory.of_ss (U := 𝐈𝐍𝐃Γ n) inferInstance
     (Set.union_subset_union_right _ (InductionScheme_subset Hierarchy.of_open))
 
 def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝐈𝚺 n₂] : V ⊧ₘ* 𝐈𝚺 n₁ :=
   ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
 
-instance [V ⊧ₘ* 𝐈open] : V ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left V 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
+instance [V ⊧ₘ* 𝐈Open] : V ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left V 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
 
-instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈open := mod_IOpen_of_mod_InductionOnHierarchy 𝚺 0
+instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈Open := mod_IOpen_of_mod_InductionOnHierarchy 𝚺 0
 
 instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ := mod_ISigma_of_le (show 0 ≤ 1 from by simp)
 
