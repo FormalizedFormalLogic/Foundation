@@ -76,7 +76,7 @@ import Foundation.Modal.Kripke.Logic.KH
 import Foundation.Modal.Kripke.Logic.KT4B
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.KTMk
-import Foundation.Modal.Kripke.Logic.SobK2
+import Foundation.Modal.Kripke.Logic.SobK4
 import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Kripke.Logic.S4Point4
 import Foundation.Modal.Kripke.Logic.S5
