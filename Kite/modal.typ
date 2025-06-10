@@ -95,6 +95,8 @@
       "LO.Modal.Logic.S5Grz": $Logic("S5Grz")$,
       "LO.Modal.Logic.SobK1": $Logic("SobK1")$,
       "LO.Modal.Logic.SobK2": $Logic("SobK2")$,
+      "LO.Modal.Logic.SobK3": $Logic("SobK3")$,
+      "LO.Modal.Logic.SobK4": $Logic("SobK4")$,
       "LO.Modal.Logic.Triv": $Logic("Triv")$,
       "LO.Modal.Logic.Univ": $bot$,
       "LO.Modal.Logic.Ver": $Logic("Ver")$,
