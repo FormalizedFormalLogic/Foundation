@@ -1,15 +1,12 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Basic
-import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Functions
-import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Typed
-
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Basic
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Functions
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Iteration
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Typed
-
-import Foundation.Arithmetization.ISigmaOne.Metamath.Proof.Thy
-import Foundation.Arithmetization.ISigmaOne.Metamath.Proof.Derivation
-import Foundation.Arithmetization.ISigmaOne.Metamath.Proof.Typed
-
-import Foundation.Arithmetization.ISigmaOne.Metamath.Coding
-import Foundation.Arithmetization.ISigmaOne.Metamath.CodedTheory
+import Foundation.FirstOrder.ISigma1.Metamath.Term.Basic
+import Foundation.FirstOrder.ISigma1.Metamath.Term.Functions
+import Foundation.FirstOrder.ISigma1.Metamath.Term.Typed
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Basic
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Functions
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Iteration
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Typed
+import Foundation.FirstOrder.ISigma1.Metamath.Proof.Theory
+import Foundation.FirstOrder.ISigma1.Metamath.Proof.Derivation
+import Foundation.FirstOrder.ISigma1.Metamath.Proof.Typed
+import Foundation.FirstOrder.ISigma1.Metamath.Coding
+import Foundation.FirstOrder.ISigma1.Metamath.CodedTheory

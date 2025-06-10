@@ -1,23 +1,21 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath.Language
-import Foundation.Arithmetization.ISigmaOne.HFS
+import Foundation.FirstOrder.ISigma1.Metamath.Language
+import Foundation.FirstOrder.ISigma1.HFS
 
-noncomputable section
+namespace LO.ISigma1.Metamath
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
 section term
 
-def qqBvar (z : V) : V := ⟪0, z⟫ + 1
+noncomputable def qqBvar (z : V) : V := ⟪0, z⟫ + 1
 
-def qqFvar (x : V) : V := ⟪1, x⟫ + 1
+noncomputable def qqFvar (x : V) : V := ⟪1, x⟫ + 1
 
-def qqFunc (k f v : V) : V := ⟪2, k, f, v⟫ + 1
+noncomputable def qqFunc (k f v : V) : V := ⟪2, k, f, v⟫ + 1
 
 scoped prefix:max "^#" => qqBvar
 
@@ -122,7 +120,7 @@ def blueprint (pL : LDef) : Fixpoint.Blueprint 0 where
 def construction : Fixpoint.Construction V (blueprint pL) where
   Φ := fun _ ↦ Phi L
   defined := ⟨by intro v; simp [blueprint], by
-    intro v; simp [blueprint, phi_iff, Language.Defined.eval_func (L := L)]⟩
+    intro v; simp [blueprint, phi_iff, Metamath.Language.Defined.eval_func (L := L)]⟩
   monotone := by
     rintro C C' hC _ x (h | h | ⟨k, f, v, hkf, hk, h, rfl⟩)
     · exact Or.inl h
@@ -306,7 +304,7 @@ end Blueprint
 
 variable (V)
 
-structure Construction (L : Arith.Language V) {k : ℕ} (φ : Blueprint pL k) where
+structure Construction (L : Metamath.Language V) {k : ℕ} (φ : Blueprint pL k) where
   bvar : (Fin k → V) → V → V
   fvar : (Fin k → V) → V → V
   func : (Fin k → V) → V → V → V → V → V
@@ -327,7 +325,7 @@ def Phi (param : Fin arity → V) (C : Set V) (pr : V) : Prop :=
     (∃ k f v w, (k = len w ∧ ∀ i < k, ⟪v.[i], w.[i]⟫ ∈ C) ∧ pr = ⟪^func k f v, c.func param k f v w⟫) )
 
 lemma seq_bound {k s m : V} (Ss : Seq s) (hk : k = lh s) (hs : ∀ i z, ⟪i, z⟫ ∈ s → z < m) :
-    s < exp ((k + m + 1)^2) := lt_exp_iff.mpr <| fun p hp ↦ by
+    s < Exp.exp ((k + m + 1)^2) := lt_exp_iff.mpr <| fun p hp ↦ by
   have : p < ⟪k, m⟫ := by
     simpa [hk] using
       pair_lt_pair (Ss.lt_lh_of_mem (show ⟪π₁ p, π₂ p⟫ ∈ s by simpa using hp)) (hs (π₁ p) (π₂ p) (by simpa using hp))
@@ -473,7 +471,7 @@ lemma graph_bvar_iff {z} :
   constructor
   · intro H
     rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, rfl⟩ | ⟨_, h, _⟩ | ⟨_, _, _, _, _, h, _⟩)⟩
-    · simp at h; rcases h; rfl
+    · rcases (by simpa using h); rfl
     · simp [qqBvar, qqFvar] at h
     · simp [qqBvar, qqFunc] at h
   · rintro rfl; exact Graph.case_iff.mpr ⟨by simp, Or.inl ⟨z, by simp⟩⟩
@@ -484,7 +482,7 @@ lemma graph_fvar_iff (x) :
   · intro H
     rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, _⟩ | ⟨_, h, rfl⟩ | ⟨_, _, _, _, _, h, _⟩)⟩
     · simp [qqFvar, qqBvar] at h
-    · simp [qqFvar, qqFvar] at h; rcases h; rfl
+    · rcases (by simpa using h); rfl
     · simp [qqFvar, qqFunc] at h
   · rintro rfl; exact Graph.case_iff.mpr ⟨by simp, Or.inr <| Or.inl ⟨x, by simp⟩⟩
 
@@ -498,10 +496,10 @@ lemma graph_func_inv {k f v y} :
       (k = len w ∧ ∀ i < k, c.Graph param v.[i] w.[i]) ∧
       y = c.func param k f v w := by
   intro H
-  rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, _⟩ | ⟨_, h, rfl⟩ | ⟨k, f, v, w, hw, h, rfl⟩)⟩
+  rcases Graph.case_iff.mp H with ⟨_, (⟨_, h, _⟩ | ⟨_, h, rfl⟩ | ⟨k', f', v', w, hw, h, rfl⟩)⟩
   · simp [qqFunc, qqBvar] at h
   · simp [qqFunc, qqFvar] at h
-  · simp [qqFunc, qqFunc] at h; rcases h with ⟨rfl, rfl, rfl⟩
+  · rcases show k = k' ∧ f = f' ∧ v = v' by simpa [qqFunc, qqFunc] using h with ⟨rfl, rfl, rfl⟩
     exact ⟨w, hw, by rfl⟩
 
 variable {c} (param n)
@@ -544,9 +542,9 @@ lemma graph_existsUnique {t : V} (ht : L.IsUTerm t) : ∃! y, c.Graph param t y 
 
 lemma graph_existsUnique_total (t : V) : ∃! y,
     (L.IsUTerm t → c.Graph param t y) ∧ (¬L.IsUTerm t → y = 0) := by
-  by_cases ht : L.IsUTerm t <;> simp [ht]; exact c.graph_existsUnique _ ht
+  by_cases ht : L.IsUTerm t <;> simp [ht, c.graph_existsUnique param]
 
-def result (t : V) : V := Classical.choose! (c.graph_existsUnique_total param t)
+noncomputable def result (t : V) : V := Classical.choose! (c.graph_existsUnique_total param t)
 
 def result_prop {t : V} (ht : L.IsUTerm t) : c.Graph param t (c.result param t) :=
   Classical.choose!_spec (c.graph_existsUnique_total param t) |>.1 ht
@@ -590,9 +588,9 @@ variable (c param)
 lemma graph_existsUnique_vec_total (k w : V) : ∃! w',
     (L.IsUTermVec k w → k = len w' ∧ ∀ i < k, c.Graph param w.[i] w'.[i]) ∧
     (¬L.IsUTermVec k w → w' = 0) := by
-  by_cases h : L.IsUTermVec k w <;> simp [h]; exact c.graph_existsUnique_vec h
+  by_cases h : L.IsUTermVec k w <;> simp [h, c.graph_existsUnique_vec]
 
-def resultVec (k w : V) : V := Classical.choose! (c.graph_existsUnique_vec_total param k w)
+noncomputable def resultVec (k w : V) : V := Classical.choose! (c.graph_existsUnique_vec_total param k w)
 
 @[simp] lemma resultVec_lh {k w : V} (hw : L.IsUTermVec k w) : len (c.resultVec param k w) = k :=
   Eq.symm <| Classical.choose!_spec (c.graph_existsUnique_vec_total param k w) |>.1 hw |>.1
@@ -669,7 +667,7 @@ def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
 
 variable (L)
 
-def construction : Language.TermRec.Construction V L (blueprint pL) where
+noncomputable def construction : Language.TermRec.Construction V L (blueprint pL) where
   bvar (_ z)        := z + 1
   fvar (_ _)        := 0
   func (_ _ _ _ v') := listMax v'
@@ -685,9 +683,9 @@ open IsUTerm.BV
 
 variable (L)
 
-def Language.termBV (t : V) : V := (construction L).result ![] t
+noncomputable def Language.termBV (t : V) : V := (construction L).result ![] t
 
-def Language.termBVVec (k v : V) : V := (construction L).resultVec ![] k v
+noncomputable def Language.termBVVec (k v : V) : V := (construction L).resultVec ![] k v
 
 variable {L}
 
@@ -916,6 +914,4 @@ lemma Language.IsSemiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate
 
 end isSemiterm
 
-end LO.Arith
-
-end
+end LO.ISigma1.Metamath

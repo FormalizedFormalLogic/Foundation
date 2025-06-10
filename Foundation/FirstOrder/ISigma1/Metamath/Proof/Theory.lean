@@ -1,15 +1,13 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Functions
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Iteration
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Functions
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Iteration
 
-noncomputable section
+namespace LO.ISigma1.Metamath
 
-namespace LO.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
-open FirstOrder FirstOrder.Arith
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {V : Type*} [ORingStruc V]
-
-variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
 section theory
 
@@ -18,13 +16,14 @@ variable (L)
 structure _root_.LO.FirstOrder.Arith.LDef.TDef (pL : LDef) where
   ch : 𝚫₁.Semisentence 1
 
-protected structure Language.Theory (L : Arith.Language V) {pL : LDef} [Arith.Language.Defined L pL] where
+protected structure Language.Theory (L : Metamath.Language V) {pL : LDef} [Metamath.Language.Defined L pL] where
   set : Set V
 
 instance : Membership V L.Theory := ⟨fun T x ↦ x ∈ T.set⟩
 
 instance : HasSubset L.Theory := ⟨fun T U ↦ T.set ⊆ U.set⟩
 
+omit [V ⊧ₘ* 𝐈𝚺₁] in
 lemma Language.Theory.mem_def {T : L.Theory} {p} : p ∈ T ↔ p ∈ T.set := by rfl
 
 variable {L}
@@ -43,3 +42,5 @@ instance mem_definable : 𝚫₁-Predicate (· ∈ T) := (mem_defined T).to_defi
 end Language.Theory
 
 end theory
+
+end LO.ISigma1.Metamath

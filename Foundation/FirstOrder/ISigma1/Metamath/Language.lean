@@ -1,12 +1,8 @@
-import Foundation.Arithmetization.ISigmaOne.HFS
+import Foundation.FirstOrder.ISigma1.HFS
 
-noncomputable section
+namespace LO.ISigma1.Metamath
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
-
-section
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V]
 
@@ -24,11 +20,11 @@ variable {V}
 
 namespace Language
 
-protected class Defined (L : Arith.Language V) (pL : outParam LDef) where
+protected class Defined (L : Metamath.Language V) (pL : outParam LDef) where
   func : 𝚺₀-Relation L.Func via pL.func
   rel : 𝚺₀-Relation L.Rel via pL.rel
 
-variable {L : Arith.Language V} {pL : LDef} [L.Defined pL]
+variable {L : Metamath.Language V} {pL : LDef} [L.Defined pL]
 
 @[simp] lemma Defined.eval_func (v) :
     Semiformula.Evalbm V v pL.func.val ↔ L.Func (v 0) (v 1) := Defined.func.df.iff v
@@ -47,8 +43,6 @@ instance Defined.rel_definable : 𝚺₀-Relation L.Rel := Defined.rel.to_defina
   HierarchySymbol.Boldface.of_zero Defined.rel_definable
 
 end Language
-
-end
 
 section
 
@@ -78,7 +72,7 @@ variable {V : Type*} [ORingStruc V]
 
 variable (L V)
 
-def _root_.LO.FirstOrder.Language.codeIn : Arith.Language V where
+def _root_.LO.FirstOrder.Language.codeIn : Metamath.Language V where
   Func := fun x y ↦ V ⊧/![x, y] L.lDef.func.val
   Rel := fun x y ↦ V ⊧/![x, y] L.lDef.rel.val
 
@@ -104,12 +98,14 @@ lemma quote_rel_def (R : L.Rel k) : (⌜R⌝ : V) = ↑(Encodable.encode R) := r
 
 lemma codeIn_func_quote_iff {k x : ℕ} : (L.codeIn V).Func k x ↔ ∃ f : L.Func k, Encodable.encode f = x :=
   have : V ⊧/![k, x] L.lDef.func.val ↔ ℕ ⊧/![k, x] L.lDef.func.val := by
-    simpa using models_iff_of_Sigma0 (V := V) (σ := L.lDef.func.val) (by simp) (e := ![k, x])
+    simpa [Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+      using models_iff_of_Sigma0 (V := V) (σ := L.lDef.func.val) (by simp) (e := ![k, x])
   Iff.trans this <| Iff.trans (DefinableLanguage.func_iff.symm) <| (by simp)
 
 lemma codeIn_rel_quote_iff {k x : ℕ} : (L.codeIn V).Rel k x ↔ ∃ R : L.Rel k, Encodable.encode R = x :=
   have : V ⊧/![k, x] L.lDef.rel.val ↔ ℕ ⊧/![k, x] L.lDef.rel.val := by
-    simpa using models_iff_of_Sigma0 (V := V) (σ := L.lDef.rel.val) (by simp) (e := ![k, x])
+    simpa [Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+      using models_iff_of_Sigma0 (V := V) (σ := L.lDef.rel.val) (by simp) (e := ![k, x])
   Iff.trans this <| Iff.trans (DefinableLanguage.rel_iff.symm) <| (by simp [quote_rel_def])
 
 @[simp] lemma codeIn_func_quote {k : ℕ} (f : L.Func k) : (L.codeIn V).Func k ⌜f⌝ :=
@@ -136,7 +132,7 @@ omit [(k : ℕ) → Encodable (L.Func k)] [DefinableLanguage L] in
 
 end
 
-/-- TODO: move to Basic/Syntax/Language.lean-/
+/-- TODO: move to Basic/Syntax/Metamath.Language.lean-/
 lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
     f ∈ Set.range (Encodable.encode : FirstOrder.Language.Func ℒₒᵣ k → ℕ) ↔
     (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1) := by
@@ -153,7 +149,7 @@ lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
     · exact ⟨Language.ORing.Func.add, rfl⟩
     · exact ⟨Language.ORing.Func.mul, rfl⟩
 
-/-- TODO: move to Basic/Syntax/Language.lean-/
+/-- TODO: move to Basic/Syntax/Metamath.Language.lean-/
 lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
     r ∈ Set.range (Encodable.encode : FirstOrder.Language.Rel ℒₒᵣ k → ℕ) ↔
     (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1) := by
@@ -174,11 +170,11 @@ instance : DefinableLanguage ℒₒᵣ where
   rel_iff {k c} := by
     simpa [models_iff] using Language.ORing.of_mem_range_encode_rel
 
-namespace Formalized
+namespace Arithmetization
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-abbrev LOR : Arith.Language V := Language.codeIn ℒₒᵣ V
+abbrev LOR : Metamath.Language V := Language.codeIn ℒₒᵣ V
 
 abbrev LOR.code : LDef := Language.lDef ℒₒᵣ
 
@@ -190,7 +186,7 @@ notation "p⌜ℒₒᵣ⌝" => LOR.code
 
 variable (V)
 
-instance LOR.defined : (⌜ℒₒᵣ⌝ : Arith.Language V).Defined (Language.lDef ℒₒᵣ) := inferInstance
+instance LOR.defined : (⌜ℒₒᵣ⌝ : Metamath.Language V).Defined (Language.lDef ℒₒᵣ) := inferInstance
 
 variable {V}
 
@@ -238,8 +234,6 @@ lemma func_iff {k f : V} : ⌜ℒₒᵣ⌝.Func k f ↔ (k = 0 ∧ f = zeroIndex
   simp [FirstOrder.Language.codeIn_func_def, lDef.func_def,
     coe_zeroIndex_eq, coe_oneIndex_eq, coe_addIndex_eq, coe_mulIndex_eq]
 
-end Formalized
+end Arithmetization
 
-end LO.Arith
-
-end
+end LO.ISigma1.Metamath

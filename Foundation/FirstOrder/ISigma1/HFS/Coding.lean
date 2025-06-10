@@ -1,15 +1,13 @@
-import Foundation.Arithmetization.ISigmaOne.HFS.Vec
+import Foundation.FirstOrder.ISigma1.HFS.Vec
 
-noncomputable section
+namespace LO.ISigma1
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-def finsetArithmetizeAux : List V → V
-  | []      => ∅
+noncomputable def finsetArithmetizeAux : List V → V
+  |      [] => ∅
   | x :: xs => insert x (finsetArithmetizeAux xs)
 
 @[simp] lemma finsetArithmetizeAux_nil : finsetArithmetizeAux ([] : List V) = ∅ := rfl
@@ -20,7 +18,7 @@ def finsetArithmetizeAux : List V → V
 @[simp] lemma mem_finsetArithmetizeAux_iff {x : V} {s : List V} :
     x ∈ finsetArithmetizeAux s ↔ x ∈ s := by induction s <;> simp [*]
 
-def _root_.Finset.arithmetize (s : Finset V) : V := finsetArithmetizeAux s.toList
+noncomputable def _root_.Finset.arithmetize (s : Finset V) : V := finsetArithmetizeAux s.toList
 
 @[simp] lemma mem_finsetArithmetize_iff {x : V} {s : Finset V} :
     x ∈ s.arithmetize ↔ x ∈ s := by
@@ -33,6 +31,4 @@ def _root_.Finset.arithmetize (s : Finset V) : V := finsetArithmetizeAux s.toLis
     (insert a s).arithmetize = insert a s.arithmetize := mem_ext <| by
   intro x; simp
 
-end LO.Arith
-
-end
+end LO.ISigma1

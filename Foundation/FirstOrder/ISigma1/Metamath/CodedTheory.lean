@@ -1,6 +1,5 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath.Coding
-import Foundation.Arithmetization.ISigmaOne.Metamath.Proof.Typed
-import Foundation.FirstOrder.Arith.PeanoMinus
+import Foundation.FirstOrder.ISigma1.Metamath.Coding
+import Foundation.FirstOrder.ISigma1.Metamath.Proof.Typed
 
 namespace LO.FirstOrder.Theory
 
@@ -18,15 +17,15 @@ def curve (σ : Semisentence L 1) : Set M := {x | M ⊧/![x] σ}
 
 variable {σ π : Semisentence L 1}
 
-lemma curve_mem_left {x : M} (hx : x ∈ σ.curve) : x ∈ (σ ⋎ π).curve := by simp [curve]; left; exact hx
+lemma curve_mem_left {x : M} (hx : x ∈ σ.curve) : x ∈ (σ ⋎ π).curve := by left; simpa [curve] using hx
 
-lemma curve_mem_right {x : M} (hx : x ∈ π.curve) : x ∈ (σ ⋎ π).curve := by simp [curve]; right; exact hx
+lemma curve_mem_right {x : M} (hx : x ∈ π.curve) : x ∈ (σ ⋎ π).curve := by right; simpa [curve] using hx
 
 end LO.FirstOrder.Semiformula
 
 namespace LO.FirstOrder.Theory
 
-open LO.Arith
+open LO.ISigma1.Metamath
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
@@ -54,7 +53,8 @@ variable {T V}
 
 @[simp] lemma mem_codeIn_iff {σ} : ⌜σ⌝ ∈ T.codeIn V ↔ σ ∈ T :=
   have : V ⊧/![⌜σ⌝] T.tDef.ch.val ↔ ℕ ⊧/![⌜σ⌝] T.tDef.ch.val := by
-    simpa [coe_quote] using FirstOrder.Arith.models_iff_of_Delta1 (V := V) (σ := T.tDef.ch) (by simp) (by simp) (e := ![⌜σ⌝])
+    simpa [coe_quote, Matrix.constant_eq_singleton]
+      using FirstOrder.Arith.models_iff_of_Delta1 (V := V) (σ := T.tDef.ch) (by simp) (by simp) (e := ![⌜σ⌝])
   Iff.trans this Theory.Delta1Definable.mem_iff
 
 instance tDef_defined : (T.codeIn V).Defined T.tDef where
@@ -63,7 +63,7 @@ instance tDef_defined : (T.codeIn V).Defined T.tDef where
     rw [show v = ![v 0] from Matrix.fun_eq_vec_one]
     have := (consequence_iff (T := 𝐈𝚺₁)).mp (sound! <| FirstOrder.Theory.Delta1Definable.isDelta1 (T := T)) V inferInstance
     simp [models_iff] at this ⊢
-    simp [Theory.tDef, this],
+    simp [Matrix.constant_eq_singleton, Theory.tDef, this],
   by intro v; simp [FirstOrder.Semiformula.curve, Theory.codeIn, ←Matrix.fun_eq_vec_one]⟩
 
 variable (T V)

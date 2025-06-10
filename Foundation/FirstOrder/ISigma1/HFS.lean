@@ -1,6 +1,6 @@
-import Foundation.Arithmetization.ISigmaOne.HFS.Basic
-import Foundation.Arithmetization.ISigmaOne.HFS.Seq
-import Foundation.Arithmetization.ISigmaOne.HFS.PRF
-import Foundation.Arithmetization.ISigmaOne.HFS.Fixpoint
-import Foundation.Arithmetization.ISigmaOne.HFS.Vec
-import Foundation.Arithmetization.ISigmaOne.HFS.Coding
+import Foundation.FirstOrder.ISigma1.HFS.Basic
+import Foundation.FirstOrder.ISigma1.HFS.Seq
+import Foundation.FirstOrder.ISigma1.HFS.PRF
+import Foundation.FirstOrder.ISigma1.HFS.Fixpoint
+import Foundation.FirstOrder.ISigma1.HFS.Vec
+import Foundation.FirstOrder.ISigma1.HFS.Coding

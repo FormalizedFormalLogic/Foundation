@@ -159,8 +159,7 @@ section
 
 def graphDef : 𝚺₁.Semisentence 1 := blueprint.fixpointDef
 
-lemma graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef :=
-  construction.fixpoint_defined
+lemma graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef := construction.fixpoint_defined
 
 instance graph_definable : 𝚺₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
 
@@ -180,8 +179,8 @@ lemma graph_zero {v x : V} :
     Graph ⟪v, 0, x⟫ ↔ x = fstIdx v := by
   constructor
   · intro h
-    rcases graph_case.mp h with (⟨v, h⟩ | ⟨v, i, x, h, _⟩)
-    · simp at h; rcases h with ⟨rfl, rfl, rfl⟩; rfl
+    rcases graph_case.mp h with (⟨w, h⟩ | ⟨w, i, x, h, _⟩)
+    · rcases show v = w ∧ x = fstIdx w by simpa using h with ⟨rfl, rfl, rfl⟩; rfl
     · simp at h
   · rintro rfl; exact graph_case.mpr <| Or.inl ⟨v, rfl⟩
 
@@ -189,9 +188,9 @@ lemma graph_succ {v i x : V} :
     Graph ⟪v, i + 1, x⟫ ↔ Graph ⟪sndIdx v, i, x⟫ := by
   constructor
   · intro h
-    rcases graph_case.mp h with (⟨v, h⟩ | ⟨v, i, x, h, hv⟩)
+    rcases graph_case.mp h with (⟨w, h⟩ | ⟨w, j, y, h, hw⟩)
     · simp at h
-    · simp at h; rcases h with ⟨rfl, rfl, rfl⟩; exact hv
+    · rcases show v = w ∧ i = j ∧ x = y by simpa using h with ⟨rfl, rfl, rfl⟩; exact hw
   · intro h; exact graph_case.mpr <| Or.inr ⟨v, i, x, rfl, h⟩
 
 lemma graph_exists (v i : V) : ∃ x, Graph ⟪v, i, x⟫ := by
@@ -211,10 +210,10 @@ lemma graph_unique {v i x₁ x₂ : V} : Graph ⟪v, i, x₁⟫ → Graph ⟪v, 
   induction i using ISigma1.pi1_succ_induction generalizing v x₁ x₂
   · definability
   case zero =>
-    simp [graph_zero]
+    simp only [graph_zero]
     rintro rfl rfl; rfl
   case succ i ih =>
-    simp [graph_succ]
+    simp only [graph_succ]
     exact ih
 
 lemma graph_existsUnique (v i : V) : ∃! x, Graph ⟪v, i, x⟫ := by
@@ -280,6 +279,7 @@ section
 def _root_.LO.FirstOrder.Arith.nthDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “y v i. ∃ pr, !pair₃Def pr v i y ∧ !graphDef pr” (by simp)
 
+set_option linter.flexible false in
 lemma nth_defined : 𝚺₁-Function₂ (nth : V → V → V) via nthDef := by
   intro v; simp [nthDef, graph_defined.df.iff]
   constructor
@@ -319,7 +319,7 @@ lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : v.[i] < v := by
   case succ i ih =>
     rcases zero_or_succ v with (rfl | ⟨v, rfl⟩)
     · simp at hv
-    · simp [succ_eq_cons v]
+    · simp only [succ_eq_cons v, nth_cons_succ]
       rcases eq_zero_or_pos (π₂ v) with (h | h)
       · simp [h]
       · exact lt_trans (ih h) (by simp)
@@ -447,7 +447,7 @@ lemma graph_nil {l : V} :
   constructor
   · intro h
     rcases c.graph_case.mp h with (h | ⟨x, xs, ih, h, _⟩)
-    · simp at h; rcases h with ⟨rfl, rfl⟩; rfl
+    · rcases show l = c.nil param by simpa using h with ⟨rfl, rfl⟩; rfl
     · simp at h
   · rintro rfl; exact c.graph_case.mpr <| Or.inl rfl
 
@@ -455,10 +455,10 @@ lemma graph_cons {x xs y : V} :
     c.Graph param ⟪x ∷ xs, y⟫ ↔ ∃ y', y = c.cons param x xs y' ∧ c.Graph param ⟪xs, y'⟫ := by
   constructor
   · intro h
-    rcases c.graph_case.mp h with (h | ⟨x, xs, y, h, hg⟩)
+    rcases c.graph_case.mp h with (h | ⟨z, zs, v, h, hg⟩)
     · simp at h
-    · simp at h; rcases h with ⟨⟨rfl, rfl⟩, rfl⟩
-      exact ⟨y, rfl, hg⟩
+    · rcases show (x = z ∧ xs = zs) ∧ y = c.cons param z zs v by simpa using h with ⟨⟨rfl, rfl⟩, rfl⟩
+      exact ⟨v, rfl, hg⟩
   · rintro ⟨y, rfl, h⟩; exact c.graph_case.mpr <| Or.inr ⟨x, xs, y, rfl, h⟩
 
 variable (param)
@@ -478,9 +478,9 @@ lemma graph_unique {xs y₁ y₂ : V} : c.Graph param ⟪xs, y₁⟫ → c.Graph
   induction xs using cons_ISigma1.pi1_succ_induction generalizing y₁ y₂
   · definability
   case nil =>
-    simp [graph_nil]; rintro rfl rfl; rfl
+    simp only [graph_nil]; rintro rfl rfl; rfl
   case cons x v ih =>
-    simp [graph_cons]
+    simp only [graph_cons, forall_exists_index, and_imp]
     rintro l₁ rfl h₁ l₂ rfl h₂
     rcases ih h₁ h₂; rfl
 
@@ -506,6 +506,7 @@ lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result p
 
 section
 
+set_option linter.flexible false in
 lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) β.resultDef := by
   intro v; simp [Blueprint.resultDef, c.graph_defined.df.iff]
   constructor
@@ -759,9 +760,10 @@ noncomputable def construction : VecRec.Construction V blueprint where
   nil_defined := by intro v; simp [blueprint]
   cons_defined := by
     intro v
-    simp [blueprint, Fin.isValue]
-    show (v 0 = if len (v 2) < v 4 then v 1 ∷ v 2 else v 3) ↔
-      (len (v 2) < v 4 → v 0 = v 1 ∷ v 2) ∧ (v 4 ≤ len (v 2) → v 0 = v 3)
+    suffices
+      (v 0 = if len (v 2) < v 4 then v 1 ∷ v 2 else v 3) ↔
+      (len (v 2) < v 4 → v 0 = v 1 ∷ v 2) ∧ (v 4 ≤ len (v 2) → v 0 = v 3) by
+      simpa [blueprint, Fin.isValue]
     rcases lt_or_ge (len (v 2)) (v 4) with (hv | hv)
     · simp [hv]
     · simp [hv, not_lt_of_le hv]
@@ -799,14 +801,13 @@ lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
   · definability
   case nil => simp_all
   case cons x v ih =>
-    simp [takeLast_cons]
     have : k = len v + 1 ∨ k ≤ len v := by
       rcases eq_or_lt_of_le h with (h | h)
       · left; simpa using h
       · right; simpa [lt_succ_iff_le] using h
     rcases this with (rfl | hkv)
-    · simp
-    · simp [not_lt_of_le hkv, ih hkv]
+    · simp [takeLast_cons]
+    · simp [takeLast_cons, not_lt_of_le hkv, ih hkv]
 
 @[simp] lemma takeLast_len_self (v : V) : takeLast v (len v) = v := by
   rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩) <;> simp [takeLast_cons]
@@ -825,15 +826,13 @@ lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[le
   · definability
   case nil => simp at h
   case cons x v ih =>
-    simp [takeLast_cons, lt_succ_iff_le]
     rcases show i = len v ∨ i < len v from eq_or_lt_of_le (by simpa [lt_succ_iff_le] using h) with (rfl | hi)
-    · simp
+    · simp [takeLast_cons, lt_succ_iff_le]
     · have : len v - i = len v - (i + 1) + 1 := by
         rw [←PeanoMinus.sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
-      simpa [not_le_of_lt hi, ↓reduceIte, this, nth_cons_succ, not_lt_of_gt hi] using ih hi
+      simpa [takeLast_cons, lt_succ_iff_le, not_le_of_lt hi, this, not_lt_of_gt hi] using ih hi
 
 end takeLast
-
 
 /-!
 
@@ -928,8 +927,9 @@ lemma nth_mem_memVec {i v : V} (h : i < len v) : v.[i] ∈ᵥ v := ⟨i, by simp
 @[simp] lemma memVec_cons_iff {x y v : V} : x ∈ᵥ y ∷ v ↔ x = y ∨ x ∈ᵥ v := by
   constructor
   · rintro ⟨i, h, rfl⟩
-    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩) <;> simp
-    right; exact nth_mem_memVec (by simpa using h)
+    rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
+    · simp
+    · right; simpa using nth_mem_memVec (by simpa using h)
   · rintro (rfl | hx)
     · simp
     · rcases hx with ⟨i, hi, rfl⟩
@@ -980,6 +980,7 @@ def _root_.LO.FirstOrder.Arith.subsetVecDef : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “v w. ∀ x <⁺ v, !memVecDef.pi x v → !memVecDef.sigma x w” (by simp))
   (.mkPi “v w. ∀ x <⁺ v, !memVecDef.sigma x v → !memVecDef.pi x w” (by simp))
 
+set_option linter.flexible false in
 lemma subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
   ⟨by intro v; simp [subsetVecDef, HierarchySymbol.Semiformula.val_sigma, memVec_defined.proper.iff'],
    by intro v

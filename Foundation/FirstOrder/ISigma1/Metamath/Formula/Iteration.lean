@@ -1,11 +1,11 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Functions
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Functions
 
 namespace LO.FirstOrder.Semiformula
 
 variable {L : Language} {ξ : Type*} {n : ℕ}
 
 def replicate (p : Semiformula L ξ n) : ℕ → Semiformula L ξ n
-  | 0     => p
+  |     0 => p
   | k + 1 => p ⋏ p.replicate k
 
 lemma replicate_zero (p : Semiformula L ξ n) : p.replicate 0 = p := by simp [replicate]
@@ -16,15 +16,14 @@ def weight (k : ℕ) : Semiformula L ξ n := (List.replicate k ⊤).conj
 
 end LO.FirstOrder.Semiformula
 
-noncomputable section
 
-namespace LO.Arith
+namespace LO.ISigma1.Metamath
 
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
 namespace QQConj
 
@@ -32,7 +31,7 @@ def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. !qqVerumDef y” (by simp)
   cons := .mkSigma “y p ps ih. !qqAndDef y p ih” (by simp)
 
-def construction : VecRec.Construction V blueprint where
+noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ^⊤
   cons _ p _ ih := p ^⋏ ih
   nil_defined := by intro v; simp [blueprint]
@@ -44,7 +43,7 @@ section qqConj
 
 open QQConj
 
-def qqConj (ps : V) : V := construction.result ![] ps
+noncomputable def qqConj (ps : V) : V := construction.result ![] ps
 
 scoped notation:65 "^⋀ " ps:66 => qqConj ps
 
@@ -74,7 +73,7 @@ lemma qqConj_semiformula {n ps : V} :
   · definability
   case nil => simp
   case cons p ps ih =>
-    simp [ih]
+    simp only [qqConj_cons, Language.IsSemiformula.and, ih, len_cons]
     constructor
     · rintro ⟨hp, hps⟩ i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -101,7 +100,7 @@ def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. !qqFalsumDef y” (by simp)
   cons := .mkSigma “y p ps ih. !qqOrDef y p ih” (by simp)
 
-def construction : VecRec.Construction V blueprint where
+noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ^⊥
   cons _ p _ ih := p ^⋎ ih
   nil_defined := by intro v; simp [blueprint]
@@ -113,7 +112,7 @@ section qqDisj
 
 open QQDisj
 
-def qqDisj (ps : V) : V := construction.result ![] ps
+noncomputable def qqDisj (ps : V) : V := construction.result ![] ps
 
 scoped notation:65 "^⋁ " ps:66 => qqDisj ps
 
@@ -143,7 +142,7 @@ lemma qqDisj_semiformula {ps : V} :
   · definability
   case nil => simp
   case cons p ps ih =>
-    simp [ih]
+    simp only [qqDisj_cons, Language.IsSemiformula.or, ih, len_cons]
     constructor
     · rintro ⟨hp, hps⟩ i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -156,18 +155,18 @@ lemma qqDisj_semiformula {ps : V} :
 
 end qqDisj
 
-namespace Formalized
+namespace Arithmetization
 
 section substItr
 
 namespace SubstItr
 
-def blueprint : PR.Blueprint 2 where
+noncomputable def blueprint : PR.Blueprint 2 where
   zero := .mkSigma “y w p. y = 0” (by simp)
   succ := .mkSigma “y ih k w p. ∃ numeral, !numeralDef numeral k ∧ ∃ v, !consDef v numeral w ∧
     ∃ sp, !(Language.lDef ℒₒᵣ).substsDef sp v p ∧ !consDef y sp ih” (by simp)
 
-def construction : PR.Construction V blueprint where
+noncomputable def construction : PR.Construction V blueprint where
   zero _ := 0
   succ param k ih := (⌜ℒₒᵣ⌝.substs (numeral k ∷ param 0) (param 1)) ∷ ih
   zero_defined := by intro v; simp [blueprint]
@@ -177,7 +176,7 @@ end SubstItr
 
 open SubstItr
 
-def substItr (w p k : V) : V := construction.result ![w, p] k
+noncomputable def substItr (w p k : V) : V := construction.result ![w, p] k
 
 @[simp] lemma substItr_zero (w p : V) : substItr w p 0 = 0 := by simp [substItr, construction]
 
@@ -185,10 +184,10 @@ def substItr (w p k : V) : V := construction.result ![w, p] k
 
 section
 
-def _root_.LO.FirstOrder.Arith.substItrDef : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.substs ![#0, #3, #1, #2])
+noncomputable def _root_.LO.FirstOrder.Arith.substItrDef : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.substs ![#0, #3, #1, #2])
 
 lemma substItr_defined : 𝚺₁-Function₃ (substItr : V → V → V → V) via substItrDef :=
-  fun v ↦ by simp [construction.result_defined_iff, substItrDef, substItr]
+  fun v ↦ by simp [construction.result_defined_iff, substItrDef, substItr, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
 @[simp] lemma substItr_defined_iff (v) :
     Semiformula.Evalbm V v substItrDef.val ↔ v 0 = substItr (v 1) (v 2) (v 3) := substItr_defined.df.iff v
@@ -222,15 +221,15 @@ lemma neg_conj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1
   · definability
   case zero => simp
   case succ k ih =>
-    simp [hw]
+    simp only [substItr_succ, qqConj_cons, qqDisj_cons]
     rw [neg_and, ←substs_neg hp (m := m), ih]
     · simp [hw]
     · exact Language.IsSemiformula.isUFormula <| hp.substs (by simpa [hw])
-    · apply Language.IsSemiformula.isUFormula
+    · apply Language.IsSemiformula.isUFormula (n := m)
       simp only [qqConj_semiformula, len_substItr]
       intro i hi
       simp only [gt_iff_lt, hi, substItr_nth]
-      apply hp.substs (by simpa [hw])
+      apply hp.substs (by simp [hw])
 
 lemma neg_disj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.IsSemitermVec n m w) :
     ⌜ℒₒᵣ⌝.neg (^⋁ (substItr w p k)) = ^⋀ (substItr w (⌜ℒₒᵣ⌝.neg p) k) := by
@@ -238,15 +237,15 @@ lemma neg_disj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1
   · definability
   case zero => simp
   case succ k ih =>
-    simp [hw]
+    simp only [substItr_succ, qqDisj_cons, qqConj_cons]
     rw [neg_or, ←substs_neg hp (m := m), ih]
     · simp [hw]
     · apply Language.IsSemiformula.isUFormula <| hp.substs (by simpa [hw])
-    · apply Language.IsSemiformula.isUFormula
+    · apply Language.IsSemiformula.isUFormula (n := m)
       simp only [qqDisj_semiformula, len_substItr]
       intro i hi
       simp only [gt_iff_lt, hi, substItr_nth]
-      apply hp.substs (by simpa [hw])
+      apply hp.substs (by simp [hw])
 
 lemma substs_conj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1) p) (hw : ⌜ℒₒᵣ⌝.IsSemitermVec n m w) (hv : ⌜ℒₒᵣ⌝.IsSemitermVec m l v) :
     ⌜ℒₒᵣ⌝.substs v (^⋀ (substItr w p k)) = ^⋀ (substItr (⌜ℒₒᵣ⌝.termSubstVec n v w) p k) := by
@@ -284,11 +283,11 @@ lemma substs_disj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula
 
 end substItr
 
-end Formalized
+end Arithmetization
 
 section verums
 
-def qqVerums (k : V) : V := ^⋀ repeatVec ^⊤ k
+noncomputable def qqVerums (k : V) : V := ^⋀ repeatVec ^⊤ k
 
 @[simp] lemma le_qqVerums (k : V) : k ≤ qqVerums k := by
   simpa [qqVerums] using len_le_conj (repeatVec ^⊤ k)
@@ -311,7 +310,7 @@ instance qqVerums_definable' : Γ-[m + 1]-Function₁ (qqVerums : V → V) := .o
 end
 
 @[simp] protected lemma Language.IsSemiformula.qqVerums (k : V) : L.IsSemiformula n (qqVerums k) := by
-  simp [qqVerums]
+  simp only [qqVerums, qqConj_semiformula, len_repeatVec]
   intro i hi; simp [nth_repeatVec _ _ hi]
 
 @[simp] lemma qqVerums_zero : qqVerums (0 : V) = ^⊤ := by simp [qqVerums]
@@ -320,6 +319,4 @@ end
 
 end verums
 
-end LO.Arith
-
-end
+end LO.ISigma1.Metamath

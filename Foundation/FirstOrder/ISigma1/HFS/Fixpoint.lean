@@ -263,6 +263,8 @@ theorem induction [c.StrongFinite] {P : V → Prop} (hP : Γ-[1]-Predicate P)
 
 end Construction
 
+attribute [irreducible] Blueprint.fixpointDef
+
 end Fixpoint
 
 end LO.ISigma1

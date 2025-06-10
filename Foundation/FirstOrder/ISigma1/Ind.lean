@@ -1,16 +1,13 @@
-import Foundation.Arithmetization.ISigmaOne.Bit
+import Foundation.FirstOrder.ISigma1.Bit
 
 /-!
-
 # $\Sigma_n \lor \Pi_n$-Induction
 
 -/
 
-noncomputable section
+namespace LO.Induction
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1
 
 variable {V : Type*} [ORingStruc V]
 
@@ -20,10 +17,10 @@ lemma induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ :
     (zero : P 0 ∨ Q 0) (succ : ∀ x, P x ∨ Q x → P (x + 1) ∨ Q (x + 1)) : ∀ x, P x ∨ Q x := by
   haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a
-  have : ∃ p < exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
+  have : ∃ p < Exp.exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
     simpa [lt_succ_iff_le] using finset_comprehension hP (a + 1)
   rcases this with ⟨p, _, hp⟩
-  have : ∃ q < exp (a + 1), ∀ x ≤ a, x ∈ q ↔ Q x := by
+  have : ∃ q < Exp.exp (a + 1), ∀ x ≤ a, x ∈ q ↔ Q x := by
     simpa [lt_succ_iff_le] using finset_comprehension hQ (a + 1)
   rcases this with ⟨q, _, hq⟩
   have : ∀ x ≤ a, x ∈ p ∨ x ∈ q := by
@@ -43,10 +40,10 @@ lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
     (ind : ∀ x, (∀ y < x, P y ∨ Q y) → P x ∨ Q x) : ∀ x, P x ∨ Q x := by
   haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   intro a
-  have : ∃ p < exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
+  have : ∃ p < Exp.exp (a + 1), ∀ x ≤ a, x ∈ p ↔ P x := by
     simpa [lt_succ_iff_le] using finset_comprehension hP (a + 1)
   rcases this with ⟨p, _, hp⟩
-  have : ∃ q < exp (a + 1), ∀ x ≤ a, x ∈ q ↔ Q x := by
+  have : ∃ q < Exp.exp (a + 1), ∀ x ≤ a, x ∈ q ↔ Q x := by
     simpa [lt_succ_iff_le] using finset_comprehension hQ (a + 1)
   rcases this with ⟨q, _, hq⟩
   have : ∀ x ≤ a, x ∈ p ∨ x ∈ q := by
@@ -74,6 +71,4 @@ lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
       simpa [hp, hq, hx] using this
   simpa [hp, hq] using this a (by rfl)
 
-end LO.Arith
-
-end
+end LO.Induction

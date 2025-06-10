@@ -1,16 +1,14 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Basic
+import Foundation.FirstOrder.ISigma1.Metamath.Term.Basic
 
-noncomputable section
+namespace LO.ISigma1.Metamath
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section
 
-variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
 namespace TermSubst
 
@@ -21,7 +19,7 @@ def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 1 where
 
 variable (L)
 
-def construction : Language.TermRec.Construction V L (blueprint pL) where
+noncomputable def construction : Language.TermRec.Construction V L (blueprint pL) where
   bvar (param z)        := (param 1).[z]
   fvar (_     x)        := ^&x
   func (_     k f _ v') := ^func k f v'
@@ -37,9 +35,9 @@ open TermSubst
 
 variable (L)
 
-def Language.termSubst (w t : V) : V := (construction L).result ![w] t
+noncomputable def Language.termSubst (w t : V) : V := (construction L).result ![w] t
 
-def Language.termSubstVec (k w v : V) : V := (construction L).resultVec ![w] k v
+noncomputable def Language.termSubstVec (k w v : V) : V := (construction L).resultVec ![w] k v
 
 variable {L}
 
@@ -64,14 +62,17 @@ def _root_.LO.FirstOrder.Arith.LDef.termSubstVecDef (pL : LDef) : 𝚺₁.Semise
 variable (L)
 
 lemma Language.termSubst_defined : 𝚺₁-Function₂ L.termSubst via pL.termSubstDef := by
-  intro v; simpa [LDef.termSubstDef, Language.termSubst] using (construction L).result_defined ![v 0, v 2, v 1]
+  intro v
+  simpa [LDef.termSubstDef, Language.termSubst, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    using (construction L).result_defined ![v 0, v 2, v 1]
 
 instance Language.termSubst_definable : 𝚺₁-Function₂ L.termSubst := (termSubst_defined L).to_definable
 
 instance Language.termSubst_definable' : Γ-[k + 1]-Function₂ L.termSubst := L.termSubst_definable.of_sigmaOne
 
 lemma Language.termSubstVec_defined : 𝚺₁-Function₃ L.termSubstVec via pL.termSubstVecDef := by
-  intro v; simpa [LDef.termSubstVecDef, Language.termSubstVec] using (construction L).resultVec_defined ![v 0, v 1, v 3, v 2]
+  intro v; simpa [LDef.termSubstVecDef, Language.termSubstVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    using (construction L).resultVec_defined ![v 0, v 1, v 3, v 2]
 
 instance Language.termSubstVec_definable : 𝚺₁-Function₃ L.termSubstVec := L.termSubstVec_defined.to_definable
 
@@ -170,7 +171,7 @@ def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
 
 variable (L)
 
-def construction : Language.TermRec.Construction V L (blueprint pL) where
+noncomputable def construction : Language.TermRec.Construction V L (blueprint pL) where
   bvar (_ z)        := ^#z
   fvar (_ x)        := ^&(x + 1)
   func (_ k f _ v') := ^func k f v'
@@ -186,9 +187,9 @@ open TermShift
 
 variable (L)
 
-def Language.termShift (t : V) : V := (construction L).result ![] t
+noncomputable def Language.termShift (t : V) : V := (construction L).result ![] t
 
-def Language.termShiftVec (k v : V) : V := (construction L).resultVec ![] k v
+noncomputable def Language.termShiftVec (k v : V) : V := (construction L).resultVec ![] k v
 
 variable {L}
 
@@ -309,7 +310,7 @@ def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
 
 variable (L)
 
-def construction : Language.TermRec.Construction V L (blueprint pL) where
+noncomputable def construction : Language.TermRec.Construction V L (blueprint pL) where
   bvar (_ z)        := ^#(z + 1)
   fvar (_ x)        := ^&x
   func (_ k f _ v') := ^func k f v'
@@ -325,9 +326,9 @@ open TermBShift
 
 variable (L)
 
-def Language.termBShift (t : V) : V := (construction L).result ![] t
+noncomputable def Language.termBShift (t : V) : V := (construction L).result ![] t
 
-def Language.termBShiftVec (k v : V) : V := (construction L).resultVec ![] k v
+noncomputable def Language.termBShiftVec (k v : V) : V := (construction L).resultVec ![] k v
 
 variable {L}
 
@@ -426,7 +427,7 @@ end termBShift
 
 variable (L)
 
-def Language.qVec (w : V) : V := ^#0 ∷ L.termBShiftVec (len w) w
+noncomputable def Language.qVec (w : V) : V := ^#0 ∷ L.termBShiftVec (len w) w
 
 variable {L}
 
@@ -453,7 +454,7 @@ lemma substs_cons_bShift {u t w} (ht : L.IsSemiterm n t) :
     rw [Language.termBShift_func hf hv.isUTerm,
       Language.termSubst_func hf hv.termBShiftVec.isUTerm,
       Language.termSubst_func hf hv.isUTerm]
-    simp [hf, hv.isUTerm]
+    simp only [qqFunc_inj, true_and]
     apply nth_ext' k
       (by rw [len_termSubstVec hv.termBShiftVec.isUTerm])
       (by rw [len_termSubstVec hv.isUTerm])
@@ -504,8 +505,7 @@ lemma bShift_substs {n m w t} (ht : L.IsSemiterm n t) (hw : L.IsSemitermVec n m 
 lemma substs_qVec_bShift {n t m w} (ht : L.IsSemiterm n t) (hw : L.IsSemitermVec n m w) :
     L.termSubst (L.qVec w) (L.termBShift t) = L.termBShift (L.termSubst w t) := by
   rcases hw.lh
-  simp [Language.qVec]
-  rw [substs_cons_bShift ht, bShift_substs ht hw]
+  simp [Language.qVec, substs_cons_bShift ht, bShift_substs ht hw]
 
 lemma termSubstVec_qVec_qVec {l n m : V} (hv : L.IsSemitermVec l n v) (hw : L.IsSemitermVec n m w) :
     L.termSubstVec (l + 1) (L.qVec w) (L.qVec v) = L.qVec (L.termSubstVec l w v) := by
@@ -519,9 +519,8 @@ lemma termSubstVec_qVec_qVec {l n m : V} (hv : L.IsSemitermVec l n v) (hw : L.Is
   rw [termSubstVec_cons (by simp) (by rcases hv.lh; exact hv.termBShiftVec.isUTerm)]
   rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
   · simp
-  · simp
-    have hi : i < len v := by simpa using hi
-    rw [nth_termSubstVec hv.termBShiftVec.isUTerm hi,
+  · have hi : i < len v := by simpa using hi
+    simp [nth_termSubstVec hv.termBShiftVec.isUTerm hi,
       nth_termBShiftVec hv.isUTerm hi,
       nth_termBShiftVec (hw.termSubstVec hv).isUTerm hi,
       nth_termSubstVec hv.isUTerm hi,
@@ -563,19 +562,19 @@ end fvfree
 
 end
 
-namespace Formalized
+namespace Arithmetization
 
-protected def zero : ℕ := ^func 0 zeroIndex 0
+protected noncomputable def zero : ℕ := ^func 0 zeroIndex 0
 
-protected def one : ℕ := ^func 0 oneIndex 0
+protected noncomputable def one : ℕ := ^func 0 oneIndex 0
 
-def qqAdd (x y : V) := ^func 2 (addIndex : V) ?[x, y]
+noncomputable def qqAdd (x y : V) := ^func 2 (addIndex : V) ?[x, y]
 
-def qqMul (x y : V) := ^func 2 (mulIndex : V) ?[x, y]
+noncomputable def qqMul (x y : V) := ^func 2 (mulIndex : V) ?[x, y]
 
-notation "𝟎" => Formalized.zero
+notation "𝟎" => Arithmetization.zero
 
-notation "𝟏" => Formalized.one
+notation "𝟏" => Arithmetization.one
 
 infixl:80 " ^+ " => qqAdd
 
@@ -622,24 +621,24 @@ end
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
 @[simp] lemma zero_semiterm : ⌜ℒₒᵣ⌝.IsSemiterm n (𝟎 : V) := by
-  simp [Formalized.zero, qqFunc_absolute]
+  simp [Arithmetization.zero, qqFunc_absolute]
 
 @[simp] lemma one_semiterm : ⌜ℒₒᵣ⌝.IsSemiterm n (𝟏 : V) := by
-  simp [Formalized.one, qqFunc_absolute]
+  simp [Arithmetization.one, qqFunc_absolute]
 
 namespace Numeral
 
-def blueprint : PR.Blueprint 0 where
-  zero := .mkSigma “y. y = ↑Formalized.one” (by simp)
-  succ := .mkSigma “y t n. !qqAddDef y t ↑Formalized.one” (by simp)
+noncomputable def blueprint : PR.Blueprint 0 where
+  zero := .mkSigma “y. y = ↑Arithmetization.one” (by simp)
+  succ := .mkSigma “y t n. !qqAddDef y t ↑Arithmetization.one” (by simp)
 
-def construction : PR.Construction V blueprint where
+noncomputable def construction : PR.Construction V blueprint where
   zero := fun _ ↦ 𝟏
   succ := fun _ _ t ↦ t ^+ 𝟏
   zero_defined := by intro v; simp [blueprint, numeral_eq_natCast]
   succ_defined := by intro v; simp [qqAdd, blueprint, numeral_eq_natCast]
 
-def numeralAux (x : V) : V := construction.result ![] x
+noncomputable def numeralAux (x : V) : V := construction.result ![] x
 
 @[simp] lemma numeralAux_zero : numeralAux (0 : V) = 𝟏 := by simp [numeralAux, construction]
 
@@ -647,7 +646,7 @@ def numeralAux (x : V) : V := construction.result ![] x
 
 section
 
-def numeralAuxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+noncomputable def numeralAuxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma numeralAux_defined : 𝚺₁-Function₁ (numeralAux : V → V) via numeralAuxDef :=
   fun v ↦ by simp [construction.result_defined_iff, numeralAuxDef]; rfl
@@ -662,7 +661,7 @@ end
 @[simp] lemma lt_numeralAux_self (n : V) : n < numeralAux n := by
     induction n using ISigma1.sigma1_succ_induction
     · definability
-    case zero => simp [Formalized.one]
+    case zero => simp [Arithmetization.one]
     case succ n ih =>
       refine lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
 
@@ -678,7 +677,7 @@ section numeral
 
 open Numeral
 
-def numeral (x : V) : V := if x = 0 then 𝟎 else numeralAux (x - 1)
+noncomputable def numeral (x : V) : V := if x = 0 then 𝟎 else numeralAux (x - 1)
 
 @[simp] lemma numeral_zero : numeral (0 : V) = 𝟎 := by simp [numeral]
 
@@ -703,9 +702,9 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
 
 section
 
-def _root_.LO.FirstOrder.Arith.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Arith.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
   “t x.
-    (x = 0 → t = ↑Formalized.zero) ∧
+    (x = 0 → t = ↑Arithmetization.zero) ∧
     (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxDef t x')”
   (by simp)
 
@@ -722,44 +721,42 @@ instance numeral_definable' : Γ-[m + 1]-Function₁ (numeral : V → V) := .of_
 
 end
 
-@[simp] lemma numeral_substs {w : V} (hw : ⌜ℒₒᵣ⌝.IsSemitermVec n m w) (x : V) :
+@[simp] lemma numeral_substs {w : V} (_ : ⌜ℒₒᵣ⌝.IsSemitermVec n m w) (x : V) :
     ⌜ℒₒᵣ⌝.termSubst w (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [hw, Formalized.zero, qqFunc_absolute]
+  case zero => simp [Arithmetization.zero, qqFunc_absolute]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [hw, Formalized.one, qqFunc_absolute]
+    · simp [Arithmetization.one, qqFunc_absolute]
     · simp only [numeral_add_two, qqAdd, LOR_func_addIndex]
-      rw [Language.termSubst_func (by simp) (by simp [Formalized.one, qqFunc_absolute])]
-      simp [ih, Formalized.one, qqFunc_absolute]
+      rw [Language.termSubst_func (by simp) (by simp [Arithmetization.one, qqFunc_absolute])]
+      simp [ih, Arithmetization.one, qqFunc_absolute]
 
 @[simp] lemma numeral_shift (x : V) :
     ⌜ℒₒᵣ⌝.termShift (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [Formalized.zero, qqFunc_absolute]
+  case zero => simp [Arithmetization.zero, qqFunc_absolute]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [Formalized.one, qqFunc_absolute]
+    · simp [Arithmetization.one, qqFunc_absolute]
     · simp only [numeral_add_two, qqAdd, LOR_func_addIndex]
-      rw [Language.termShift_func (by simp) (by simp [Formalized.one, qqFunc_absolute])]
-      simp [ih, Formalized.one, qqFunc_absolute]
+      rw [Language.termShift_func (by simp) (by simp [Arithmetization.one, qqFunc_absolute])]
+      simp [ih, Arithmetization.one, qqFunc_absolute]
 
 @[simp] lemma numeral_bShift (x : V) :
     ⌜ℒₒᵣ⌝.termBShift (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [Formalized.zero, qqFunc_absolute]
+  case zero => simp [Arithmetization.zero, qqFunc_absolute]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [Formalized.one, qqFunc_absolute]
-    · simp [qqAdd, ih, Formalized.one, qqFunc_absolute]
+    · simp [Arithmetization.one, qqFunc_absolute]
+    · simp [qqAdd, ih, Arithmetization.one, qqFunc_absolute]
 
 end numeral
 
-end Formalized
+end Arithmetization
 
-end LO.Arith
-
-end
+end LO.ISigma1.Metamath

@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Functions
+import Foundation.FirstOrder.ISigma1.Metamath.Term.Functions
 
 /-!
 
@@ -6,15 +6,13 @@ import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Functions
 
 -/
 
-noncomputable section
+namespace LO.ISigma1.Metamath
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
 /-
 section typed_fin
@@ -66,17 +64,17 @@ lemma Language.Semiterm.ext {t u : L.Semiterm n}
 lemma Language.SemitermVec.ext {v w : L.SemitermVec k n}
     (h : v.val = w.val) : v = w := by rcases v; rcases w; simpa using h
 
-def Language.bvar {n : V} (z : V) (hz : z < n := by simp) : L.Semiterm n := ⟨^#z, by simp [hz]⟩
+noncomputable def Language.bvar {n : V} (z : V) (hz : z < n := by simp) : L.Semiterm n := ⟨^#z, by simp [hz]⟩
 
-def Language.fvar {n : V} (x : V) : L.Semiterm n := ⟨^&x, by simp⟩
+noncomputable def Language.fvar {n : V} (x : V) : L.Semiterm n := ⟨^&x, by simp⟩
 
-def Language.func {n k f : V} (hf : L.Func k f) (v : L.SemitermVec k n) :
+noncomputable def Language.func {n k f : V} (hf : L.Func k f) (v : L.SemitermVec k n) :
     L.Semiterm n := ⟨^func k f v.val , by simp [hf]⟩
 
 variable {L}
 
-abbrev bv {n : V} (x : V) (h : x < n := by simp) : L.Semiterm n := L.bvar x h
-abbrev fv {n : V} (x : V) : L.Semiterm n := L.fvar x
+noncomputable abbrev bv {n : V} (x : V) (h : x < n := by simp) : L.Semiterm n := L.bvar x h
+noncomputable abbrev fv {n : V} (x : V) : L.Semiterm n := L.fvar x
 
 scoped prefix:max "#'" => bv
 scoped prefix:max "&'" => fv
@@ -84,7 +82,7 @@ scoped prefix:max "&'" => fv
 @[simp] lemma Language.val_bvar {n : V} (z : V) (hz : z < n) : (L.bvar z hz).val = ^#z := rfl
 @[simp] lemma Language.val_fvar {n : V} (x : V) : (L.fvar x : L.Semiterm n).val = ^&x := rfl
 
-def Language.Semiterm.cons {m n} (t : L.Semiterm n) (v : L.SemitermVec m n) :
+noncomputable def Language.Semiterm.cons {m n} (t : L.Semiterm n) (v : L.SemitermVec m n) :
     L.SemitermVec (m + 1) n := ⟨t.val ∷ v.val, by simp⟩
 
 scoped infixr:67 " ∷ᵗ " => Language.Semiterm.cons
@@ -101,17 +99,17 @@ variable {L}
 @[simp] lemma Language.Semitermvec.val_nil (n : V) :
     (Language.SemitermVec.nil L n).val = 0 := rfl
 
-abbrev Language.Semiterm.sing {n} (t : L.Semiterm n) : L.SemitermVec (0 + 1) n := t ∷ᵗ .nil L n
+noncomputable abbrev Language.Semiterm.sing {n} (t : L.Semiterm n) : L.SemitermVec (0 + 1) n := t ∷ᵗ .nil L n
 
 namespace Language.Semiterm
 
-def shift (t : L.Semiterm n) : L.Semiterm n :=
+noncomputable def shift (t : L.Semiterm n) : L.Semiterm n :=
   ⟨L.termShift t.val, Language.IsSemiterm.termShift t.prop⟩
 
-def bShift (t : L.Semiterm n) : L.Semiterm (n + 1) :=
+noncomputable def bShift (t : L.Semiterm n) : L.Semiterm (n + 1) :=
   ⟨L.termBShift t.val, Language.IsSemiterm.termBShift t.prop⟩
 
-def substs (t : L.Semiterm n) (w : L.SemitermVec n m) : L.Semiterm m :=
+noncomputable def substs (t : L.Semiterm n) (w : L.SemitermVec n m) : L.Semiterm m :=
   ⟨L.termSubst w.val t.val, w.prop.termSubst t.prop⟩
 
 @[simp] lemma val_shift (t : L.Semiterm n) : t.shift.val = L.termShift t.val := rfl
@@ -124,13 +122,13 @@ notation t:max "^ᵗ/[" w "]" => Language.Semiterm.substs t w
 
 namespace Language.SemitermVec
 
-def shift (v : L.SemitermVec k n) : L.SemitermVec k n :=
+noncomputable def shift (v : L.SemitermVec k n) : L.SemitermVec k n :=
   ⟨L.termShiftVec k v.val, Language.IsSemitermVec.termShiftVec v.prop⟩
 
-def bShift (v : L.SemitermVec k n) : L.SemitermVec k (n + 1) :=
+noncomputable def bShift (v : L.SemitermVec k n) : L.SemitermVec k (n + 1) :=
   ⟨L.termBShiftVec k v.val, Language.IsSemitermVec.termBShiftVec v.prop⟩
 
-def substs (v : L.SemitermVec k n) (w : L.SemitermVec n m) : L.SemitermVec k m :=
+noncomputable def substs (v : L.SemitermVec k n) (w : L.SemitermVec n m) : L.SemitermVec k m :=
   ⟨L.termSubstVec k w.val v.val, Language.IsSemitermVec.termSubstVec w.prop v.prop⟩
 
 @[simp] lemma val_shift (v : L.SemitermVec k n) : v.shift.val = L.termShiftVec k v.val := rfl
@@ -161,7 +159,7 @@ def substs (v : L.SemitermVec k n) (w : L.SemitermVec n m) : L.SemitermVec k m :
     (t ∷ᵗ v).substs w = t.substs w ∷ᵗ v.substs w := by
   ext; simp [substs, Language.Semiterm.substs, termSubstVec_cons t.prop.isUTerm v.prop.isUTerm]
 
-def nth (t : L.SemitermVec k n) (i : V) (hi : i < k := by simp) : L.Semiterm n :=
+noncomputable def nth (t : L.SemitermVec k n) (i : V) (hi : i < k := by simp) : L.Semiterm n :=
   ⟨t.val.[i], t.prop.nth hi⟩
 
 @[simp] lemma nth_val (v : L.SemitermVec k n) (i : V) (hi : i < k) : (v.nth i hi).val = v.val.[i] := by simp [nth]
@@ -175,13 +173,13 @@ def nth (t : L.SemitermVec k n) (i : V) (hi : i < k := by simp) : L.Semiterm n :
     (t ∷ᵗ v).nth 1 (by simp) = v.nth 0 (by simp) := by ext; simp [nth]
 
 lemma nth_of_pos (t : L.Semiterm n) (v : L.SemitermVec k n) (i : V) (ipos : 0 < i) (hi : i < k + 1) :
-    (t ∷ᵗ v).nth i (by simp [hi]) = v.nth (i - 1) (tsub_lt_iff_left (one_le_of_zero_lt i ipos) |>.mpr hi) := by
+    (t ∷ᵗ v).nth i (by simp [hi]) = v.nth (i - 1) (PeanoMinus.tsub_lt_iff_left (one_le_of_zero_lt i ipos) |>.mpr hi) := by
   ext; simp only [nth, Semitermvec.val_cons]
   rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
   · simp at ipos
   · simp
 
-def q (w : L.SemitermVec k n) : L.SemitermVec (k + 1) (n + 1) := L.bvar (0 : V) ∷ᵗ w.bShift
+noncomputable def q (w : L.SemitermVec k n) : L.SemitermVec (k + 1) (n + 1) := L.bvar (0 : V) ∷ᵗ w.bShift
 
 @[simp] lemma q_zero (w : L.SemitermVec k n) : w.q.nth 0 = L.bvar 0 := by simp [q]
 
@@ -194,7 +192,7 @@ def q (w : L.SemitermVec k n) : L.SemitermVec (k + 1) (n + 1) := L.bvar (0 : V) 
   simpa using q_succ w h
 
 lemma q_of_pos (w : L.SemitermVec k n) (i) (ipos : 0 < i) (hi : i < k + 1) :
-    w.q.nth i (by simp [hi]) = (w.nth (i - 1) (tsub_lt_iff_left (one_le_of_zero_lt i ipos) |>.mpr hi)).bShift := by
+    w.q.nth i (by simp [hi]) = (w.nth (i - 1) (PeanoMinus.tsub_lt_iff_left (one_le_of_zero_lt i ipos) |>.mpr hi)).bShift := by
   rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
   · simp at ipos
   · simp [q_succ w (by simpa using hi)]
@@ -239,8 +237,7 @@ namespace Language.Semiterm
 
 @[simp] lemma bShift_substs_sing (t u : L.Term) :
     t.bShift.substs u.sing = t := by
-  ext; simp [substs, bShift]
-  rw [substs_cons_bShift t.prop]; simp
+  ext; simp [substs, bShift, substs_cons_bShift t.prop]
 
 lemma bShift_shift_comm (t : L.Semiterm n) :
     t.shift.bShift = t.bShift.shift := by
@@ -268,19 +265,19 @@ end Language.Semiterm
 
 end typed_isfvfree
 
-namespace Formalized
+namespace Arithmetization
 
-def typedNumeral (n m : V) : ⌜ℒₒᵣ⌝.Semiterm n := ⟨numeral m, by simp⟩
+noncomputable def typedNumeral (n m : V) : ⌜ℒₒᵣ⌝.Semiterm n := ⟨numeral m, by simp⟩
 
-def add {n : V} (t u : ⌜ℒₒᵣ⌝.Semiterm n) : ⌜ℒₒᵣ⌝.Semiterm n := ⟨t.val ^+ u.val, by simp [qqAdd]⟩
+noncomputable def add {n : V} (t u : ⌜ℒₒᵣ⌝.Semiterm n) : ⌜ℒₒᵣ⌝.Semiterm n := ⟨t.val ^+ u.val, by simp [qqAdd]⟩
 
-def mul {n : V} (t u : ⌜ℒₒᵣ⌝.Semiterm n) : ⌜ℒₒᵣ⌝.Semiterm n := ⟨t.val ^* u.val, by simp [qqMul]⟩
+noncomputable def mul {n : V} (t u : ⌜ℒₒᵣ⌝.Semiterm n) : ⌜ℒₒᵣ⌝.Semiterm n := ⟨t.val ^* u.val, by simp [qqMul]⟩
 
-instance (n : V) : Add (⌜ℒₒᵣ⌝.Semiterm n) := ⟨add⟩
+noncomputable instance (n : V) : Add (⌜ℒₒᵣ⌝.Semiterm n) := ⟨add⟩
 
-instance (n : V) : Mul (⌜ℒₒᵣ⌝.Semiterm n) := ⟨mul⟩
+noncomputable instance (n : V) : Mul (⌜ℒₒᵣ⌝.Semiterm n) := ⟨mul⟩
 
-instance coeNumeral (n : V) : Coe V (⌜ℒₒᵣ⌝.Semiterm n) := ⟨typedNumeral n⟩
+noncomputable instance coeNumeral (n : V) : Coe V (⌜ℒₒᵣ⌝.Semiterm n) := ⟨typedNumeral n⟩
 
 variable {n : V}
 
@@ -370,6 +367,4 @@ lemma semiterm_induction (Γ) {n : V} {P : ⌜ℒₒᵣ⌝.Semiterm n → Prop}
         (by simpa using ih 1 (by simp) (by simp [ht₂]))
 -/
 
-end Formalized
-
-end LO.Arith
+end LO.ISigma1.Metamath.Arithmetization

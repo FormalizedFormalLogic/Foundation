@@ -1,15 +1,13 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Basic
-import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Functions
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Basic
+import Foundation.FirstOrder.ISigma1.Metamath.Term.Functions
 
-noncomputable section
+namespace LO.ISigma1.Metamath
 
-namespace LO.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
-open FirstOrder FirstOrder.Arith
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {V : Type*} [Zero V] [One V] [Add V] [Mul V] [LT V] [V ⊧ₘ* 𝐈𝚺₁]
-
-variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
 section negation
 
@@ -29,7 +27,7 @@ def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
 
 variable (L)
 
-def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
+noncomputable def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   rel {_} := fun k R v ↦ ^nrel k R v
   nrel {_} := fun k R v ↦ ^rel k R v
   verum {_} := ^⊥
@@ -57,7 +55,7 @@ open Negation
 
 variable (L)
 
-def Language.neg (p : V) : V := (construction L).result 0 p
+noncomputable def Language.neg (p : V) : V := (construction L).result 0 p
 
 variable {L}
 
@@ -68,7 +66,7 @@ def _root_.LO.FirstOrder.Arith.LDef.negDef (pL : LDef) : 𝚺₁.Semisentence 2 
 variable (L)
 
 lemma Language.neg_defined : 𝚺₁-Function₁ L.neg via pL.negDef := fun v ↦ by
-  simpa [LDef.negDef] using (construction L).result_defined ![v 0, 0, v 1]
+  simpa [LDef.negDef, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using (construction L).result_defined ![v 0, 0, v 1]
 
 instance Language.neg_definable : 𝚺₁-Function₁ L.neg := L.neg_defined.to_definable
 
@@ -166,11 +164,11 @@ end negation
 
 variable (L)
 
-def Language.imp (p q : V) : V := L.neg p ^⋎ q
+noncomputable def Language.imp (p q : V) : V := L.neg p ^⋎ q
 
 notation:60 p:61 " ^→[" L "] " q:60 => Language.imp L p q
 
-def Language.iff (p q : V) : V := (L.imp p q) ^⋏ (L.imp q p)
+noncomputable def Language.iff (p q : V) : V := (L.imp p q) ^⋏ (L.imp q p)
 
 variable {L}
 
@@ -206,12 +204,12 @@ section iff
 
 @[simp] lemma Language.IsUFormula.iff {p q : V} :
     L.IsUFormula (L.iff p q) ↔ L.IsUFormula p ∧ L.IsUFormula q := by
-  simp [Language.iff]
+  simp only [Language.iff, and, imp, and_iff_left_iff_imp, and_imp]
   intros; simp_all
 
 @[simp] lemma Language.IsSemiformula.iff {n p q : V} :
     L.IsSemiformula n (L.iff p q) ↔ L.IsSemiformula n p ∧ L.IsSemiformula n q := by
-  simp [Language.iff]
+  simp only [Language.iff, and, imp, and_iff_left_iff_imp, and_imp]
   intros; simp_all
 
 @[simp] lemma lt_iff_left (p q : V) : p < L.iff p q := lt_trans (lt_or_right _ _) (lt_K!_right _ _)
@@ -254,7 +252,7 @@ def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
 
 variable (L)
 
-def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
+noncomputable def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   rel {_} := fun k R v ↦ ^rel k R (L.termShiftVec k v)
   nrel {_} := fun k R v ↦ ^nrel k R (L.termShiftVec k v)
   verum {_} := ^⊤
@@ -282,7 +280,7 @@ open Shift
 
 variable (L)
 
-def Language.shift (p : V) : V := (construction L).result 0 p
+noncomputable def Language.shift (p : V) : V := (construction L).result 0 p
 
 variable {L}
 
@@ -293,7 +291,7 @@ def _root_.LO.FirstOrder.Arith.LDef.shiftDef (pL : LDef) : 𝚺₁.Semisentence 
 variable (L)
 
 lemma Language.shift_defined : 𝚺₁-Function₁ L.shift via pL.shiftDef := fun v ↦ by
-  simpa [LDef.shiftDef] using (construction L).result_defined ![v 0, 0, v 1]
+  simpa [LDef.shiftDef, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using (construction L).result_defined ![v 0, 0, v 1]
 
 instance Language.shift_definable : 𝚺₁-Function₁ L.shift := L.shift_defined.to_definable
 
@@ -417,7 +415,7 @@ def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
 
 variable (L)
 
-def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
+noncomputable def construction : Language.UformulaRec1.Construction V L (blueprint pL) where
   rel (param)  := fun k R v ↦ ^rel k R (L.termSubstVec k param v)
   nrel (param) := fun k R v ↦ ^nrel k R (L.termSubstVec k param v)
   verum _      := ^⊤
@@ -445,7 +443,7 @@ open Substs
 
 variable (L)
 
-def Language.substs (w p : V) : V := (construction L).result w p
+noncomputable def Language.substs (w p : V) : V := (construction L).result w p
 
 variable {L}
 
@@ -554,11 +552,11 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
 @[simp] lemma Language.IsSemiformula.substs {n p m w : V} :
     L.IsSemiformula n p → L.IsSemitermVec n m w → L.IsSemiformula m (L.substs w p) := by
   let fw : V → V → V → V → V := fun _ w _ _ ↦ Max.max w (L.qVec w)
-  have hfw : 𝚺₁-Function₄ fw := by simp [fw]; definability
+  have hfw : 𝚺₁-Function₄ fw := by definability
   let fn : V → V → V → V → V := fun _ _ n _ ↦ n + 1
-  have hfn : 𝚺₁-Function₄ fn := by simp [fn]; definability
+  have hfn : 𝚺₁-Function₄ fn := by definability
   let fm : V → V → V → V → V := fun _ _ _ m ↦ m + 1
-  have hfm : 𝚺₁-Function₄ fm := by simp [fm]; definability
+  have hfm : 𝚺₁-Function₄ fm := by definability
   apply order_ball_induction₃_sigma1 hfw hfn hfm ?_ ?_ p w n m
   · definability
   intro p w n m ih hp hw
@@ -775,7 +773,7 @@ end substs
 
 variable (L)
 
-def Language.substs₁ (t u : V) : V := L.substs ?[t] u
+noncomputable def Language.substs₁ (t u : V) : V := L.substs ?[t] u
 
 variable {L}
 
@@ -804,7 +802,7 @@ end substs₁
 
 variable (L)
 
-def Language.free (p : V) : V := L.substs₁ ^&0 (L.shift p)
+noncomputable def Language.free (p : V) : V := L.substs₁ ^&0 (L.shift p)
 
 variable {L}
 
@@ -879,15 +877,15 @@ lemma Language.IsFVFree.ex {n p : V} (hp : L.IsFVFree (n + 1) p) :
 end fvfree
 -/
 
-namespace Formalized
+namespace Arithmetization
 
-def qqEQ (x y : V) : V := ^rel 2 (eqIndex : V) ?[x, y]
+noncomputable def qqEQ (x y : V) : V := ^rel 2 (eqIndex : V) ?[x, y]
 
-def qqNEQ (x y : V) : V := ^nrel 2 (eqIndex : V) ?[x, y]
+noncomputable def qqNEQ (x y : V) : V := ^nrel 2 (eqIndex : V) ?[x, y]
 
-def qqLT (x y : V) : V := ^rel 2 (ltIndex : V) ?[x, y]
+noncomputable def qqLT (x y : V) : V := ^rel 2 (ltIndex : V) ?[x, y]
 
-def qqNLT (x y : V) : V := ^nrel 2 (ltIndex : V) ?[x, y]
+noncomputable def qqNLT (x y : V) : V := ^nrel 2 (ltIndex : V) ?[x, y]
 
 notation:75 x:75 " ^= " y:76 => qqEQ x y
 
@@ -962,29 +960,27 @@ instance (Γ m) : Γ-[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne
 @[simp] lemma eval_qqNLTDef (v) : Semiformula.Evalbm V v qqNLTDef.val ↔ v 0 = v 1 ^≮ v 2 := qqNLT_defined.df.iff v
 
 lemma neg_eq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^= u) = t ^≠ u := by
-  simp [qqEQ, qqNEQ]
+  simp only [qqEQ, LOR_rel_eqIndex, qqNEQ]
   rw [neg_rel (by simp) (by simp [ht, hu])]
 
 lemma neg_neq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^≠ u) = t ^= u := by
-  simp [qqEQ, qqNEQ]
+  simp only [qqNEQ, LOR_rel_eqIndex, qqEQ]
   rw [neg_nrel (by simp) (by simp [ht, hu])]
 
 lemma neg_lt {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^< u) = t ^≮ u := by
-  simp [qqLT, qqNLT]
+  simp only [qqLT, LOR_rel_ltIndex, qqNLT]
   rw [neg_rel (by simp) (by simp [ht, hu])]
 
 lemma neg_nlt {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^≮ u) = t ^< u := by
-  simp [qqLT, qqNLT]
+  simp only [qqNLT, LOR_rel_ltIndex, qqLT]
   rw [neg_nrel (by simp) (by simp [ht, hu])]
 
 lemma substs_eq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) :
     ⌜ℒₒᵣ⌝.substs w (t ^= u) = (⌜ℒₒᵣ⌝.termSubst w t) ^= (⌜ℒₒᵣ⌝.termSubst w u) := by
-  simp [qqEQ]; rw [substs_rel (by simp) (by simp [ht, hu])]
-  simp; rw [termSubstVec_cons₂ ht hu]
+  simp only [qqEQ, LOR_rel_eqIndex]
+  rw [substs_rel (by simp) (by simp [ht, hu])]
+  simp [termSubstVec_cons₂ ht hu]
 
+end Arithmetization
 
-end Formalized
-
-end LO.Arith
-
-end
+end LO.ISigma1.Metamath

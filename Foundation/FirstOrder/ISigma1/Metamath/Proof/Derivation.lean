@@ -1,14 +1,12 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath.Proof.Thy
+import Foundation.FirstOrder.ISigma1.Metamath.Proof.Theory
 
-noncomputable section
+namespace LO.ISigma1.Metamath
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
 variable {T : L.Theory} {pT : pL.TDef} [T.Defined pT]
 
@@ -47,7 +45,7 @@ end
 
 @[simp] lemma Language.IsFormulaSet.insert_iff {p s} : L.IsFormulaSet (insert p s) ↔ L.IsFormula p ∧ L.IsFormulaSet s :=
   ⟨fun h ↦ ⟨h p (by simp), fun q hq ↦ h q (by simp [hq])⟩,
-   by rintro ⟨hp, hs⟩ q; simp; rintro (rfl | hqs)
+   by rintro ⟨hp, hs⟩ q; simp only [mem_bitInsert_iff]; rintro (rfl | hqs)
       · exact hp
       · exact hs q hqs⟩
 
@@ -66,7 +64,7 @@ lemma setShift_existsUnique (s : V) :
     ∃! t : V, ∀ y, y ∈ t ↔ ∃ x ∈ s, y = L.shift x :=
   sigma₁_replacement (by definability) s
 
-def Language.setShift (s : V) : V := Classical.choose! (setShift_existsUnique L s)
+noncomputable def Language.setShift (s : V) : V := Classical.choose! (setShift_existsUnique L s)
 
 variable {L}
 
@@ -76,7 +74,7 @@ lemma mem_setShift_iff {s y : V} : y ∈ L.setShift s ↔ ∃ x ∈ s, y = L.shi
   Classical.choose!_spec (setShift_existsUnique L s) y
 
 lemma Language.IsFormulaSet.setShift {s : V} (h : L.IsFormulaSet s) : L.IsFormulaSet (L.setShift s) := by
-  simp [Language.IsFormulaSet, mem_setShift_iff]
+  simp only [IsFormulaSet, mem_setShift_iff, forall_exists_index, and_imp]
   rintro _ p hp rfl; exact (h p hp).shift
 
 lemma shift_mem_setShift {p s : V} (h : p ∈ s) : L.shift p ∈ L.setShift s :=
@@ -87,14 +85,14 @@ lemma shift_mem_setShift {p s : V} (h : p ∈ s) : L.shift p ∈ L.setShift s :=
   ⟨by intro h p hp; simpa using h (L.shift p) (shift_mem_setShift hp), Language.IsFormulaSet.setShift⟩
 
 @[simp] lemma mem_setShift_union {s t : V} : L.setShift (s ∪ t) = L.setShift s ∪ L.setShift t := mem_ext <| by
-  simp [mem_setShift_iff]; intro x
+  simp only [mem_setShift_iff, mem_cup_iff]; intro x
   constructor
   · rintro ⟨z, (hz | hz), rfl⟩
     · left; exact ⟨z, hz, rfl⟩
     · right; exact ⟨z, hz, rfl⟩
   · rintro (⟨z, hz, rfl⟩ | ⟨z, hz, rfl⟩)
-    exact ⟨z, Or.inl hz, rfl⟩
-    exact ⟨z, Or.inr hz, rfl⟩
+    · exact ⟨z, Or.inl hz, rfl⟩
+    · exact ⟨z, Or.inr hz, rfl⟩
 
 @[simp] lemma mem_setShift_insert {x s : V} : L.setShift (insert x s) = insert (L.shift x) (L.setShift s) := mem_ext <| by
   simp [mem_setShift_iff]
@@ -131,25 +129,25 @@ end
 
 end setShift
 
-def axL (s p : V) : V := ⟪s, 0, p⟫ + 1
+noncomputable def axL (s p : V) : V := ⟪s, 0, p⟫ + 1
 
-def verumIntro (s : V) : V := ⟪s, 1, 0⟫ + 1
+noncomputable def verumIntro (s : V) : V := ⟪s, 1, 0⟫ + 1
 
-def K_intro (s p q dp dq : V) : V := ⟪s, 2, p, q, dp, dq⟫ + 1
+noncomputable def K_intro (s p q dp dq : V) : V := ⟪s, 2, p, q, dp, dq⟫ + 1
 
-def orIntro (s p q d : V) : V := ⟪s, 3, p, q, d⟫ + 1
+noncomputable def orIntro (s p q d : V) : V := ⟪s, 3, p, q, d⟫ + 1
 
-def allIntro (s p d : V) : V := ⟪s, 4, p, d⟫ + 1
+noncomputable def allIntro (s p d : V) : V := ⟪s, 4, p, d⟫ + 1
 
-def exIntro (s p t d : V) : V := ⟪s, 5, p, t, d⟫ + 1
+noncomputable def exIntro (s p t d : V) : V := ⟪s, 5, p, t, d⟫ + 1
 
-def wkRule (s d : V) : V := ⟪s, 6, d⟫ + 1
+noncomputable def wkRule (s d : V) : V := ⟪s, 6, d⟫ + 1
 
-def shiftRule (s d : V) : V := ⟪s, 7, d⟫ + 1
+noncomputable def shiftRule (s d : V) : V := ⟪s, 7, d⟫ + 1
 
-def cutRule (s p d₁ d₂ : V) : V := ⟪s, 8, p, d₁, d₂⟫ + 1
+noncomputable def cutRule (s p d₁ d₂ : V) : V := ⟪s, 8, p, d₁, d₂⟫ + 1
 
-def root (s p : V) : V := ⟪s, 9, p⟫ + 1
+noncomputable def root (s p : V) : V := ⟪s, 9, p⟫ + 1
 
 section
 
@@ -313,7 +311,7 @@ end
 
 namespace Derivation
 
-abbrev conseq (x : V) : V := π₁ x
+noncomputable abbrev conseq (x : V) : V := π₁ x
 
 variable (T)
 
@@ -682,20 +680,20 @@ lemma Language.Theory.Derivation.verumIntro {s : V} (hs : L.IsFormulaSet s) (h :
 lemma Language.Theory.Derivation.K_intro {s p q dp dq : V} (h : p ^⋏ q ∈ s)
     (hdp : T.DerivationOf dp (insert p s)) (hdq : T.DerivationOf dq (insert q s)) :
     T.Derivation (K_intro s p q dp dq) :=
-  Language.Theory.Derivation.mk ⟨by simp; intro r hr; exact hdp.isFormulaSet r (by simp [hr]),
+  Language.Theory.Derivation.mk ⟨by simp only [fstIdx_K_intro]; intro r hr; exact hdp.isFormulaSet r (by simp [hr]),
     Or.inr <| Or.inr <| Or.inl ⟨s, p, q, dp, dq, rfl, h, hdp, hdq⟩⟩
 
 lemma Language.Theory.Derivation.orIntro {s p q dpq : V} (h : p ^⋎ q ∈ s)
     (hdpq : T.DerivationOf dpq (insert p (insert q s))) :
     T.Derivation (orIntro s p q dpq) :=
-  Language.Theory.Derivation.mk ⟨by simp; intro r hr; exact hdpq.isFormulaSet r (by simp [hr]),
+  Language.Theory.Derivation.mk ⟨by simp only [fstIdx_orIntro]; intro r hr; exact hdpq.isFormulaSet r (by simp [hr]),
     Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, q, dpq, rfl, h, hdpq⟩⟩
 
 lemma Language.Theory.Derivation.allIntro {s p dp : V} (h : ^∀ p ∈ s)
     (hdp : T.DerivationOf dp (insert (L.free p) (L.setShift s))) :
     T.Derivation (allIntro s p dp) :=
   Language.Theory.Derivation.mk
-    ⟨by simp; intro q hq; simpa using hdp.isFormulaSet (L.shift q) (by simp [shift_mem_setShift hq]),
+    ⟨by simp only [fstIdx_allIntro]; intro q hq; simpa using hdp.isFormulaSet (L.shift q) (by simp [shift_mem_setShift hq]),
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, dp, rfl, h, hdp⟩⟩
 
 lemma Language.Theory.Derivation.exIntro {s p t dp : V}
@@ -703,7 +701,7 @@ lemma Language.Theory.Derivation.exIntro {s p t dp : V}
     (hdp : T.DerivationOf dp (insert (L.substs₁ t p) s)) :
     T.Derivation (exIntro s p t dp) :=
   Language.Theory.Derivation.mk
-    ⟨by simp; intro q hq; exact hdp.isFormulaSet q (by simp [hq]),
+    ⟨by simp only [fstIdx_exIntro]; intro q hq; exact hdp.isFormulaSet q (by simp [hq]),
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, t, dp, rfl, h, ht, hdp⟩⟩
 
 lemma Language.Theory.Derivation.wkRule {s s' d : V} (hs : L.IsFormulaSet s)
@@ -723,7 +721,7 @@ lemma Language.Theory.Derivation.cutRule {s p d₁ d₂ : V}
     (hd₂ : T.DerivationOf d₂ (insert (L.neg p) s)) :
     T.Derivation (cutRule s p d₁ d₂) :=
   Language.Theory.Derivation.mk
-    ⟨by simp; intro q hq; exact hd₁.isFormulaSet q (by simp [hq]),
+    ⟨by simp only [fstIdx_cutRule]; intro q hq; exact hd₁.isFormulaSet q (by simp [hq]),
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, d₁, d₂, rfl, hd₁, hd₂⟩⟩
 
 lemma Language.Theory.Derivation.root {s p : V} (hs : L.IsFormulaSet s) (hp : p ∈ s) (hT : p ∈ T) :
@@ -810,7 +808,7 @@ lemma cut {s : V} (p) (hd₁ : T.Derivable (insert p s)) (hd₂ : T.Derivable (i
 
 lemma by_axm {s : V} (hs : L.IsFormulaSet s) (p) (hp : p ∈ s) (hT : p ∈ T) :
     T.Derivable s := by
-  exact ⟨Arith.root s p, by simp, Language.Theory.Derivation.root hs hp hT⟩
+  exact ⟨Metamath.root s p, by simp, Language.Theory.Derivation.root hs hp hT⟩
 
 lemma of_ss (h : T ⊆ U) {s : V} : T.Derivable s → U.Derivable s := by
   rintro ⟨d, hd⟩; exact ⟨d, hd.1, hd.2.of_ss h⟩
@@ -836,10 +834,9 @@ lemma conj (ps : V) {s} (hs : L.IsFormulaSet s)
     · definability
     case zero => simpa using verum (by simp [hs]) (by simp)
     case succ k ih =>
-      simp [takeLast_succ_of_lt (succ_le_iff_lt.mp hk)]
       have ih : T.Derivable (insert (^⋀ takeLast ps k) s) := ih (le_trans le_self_add hk)
       have : T.Derivable (insert ps.[len ps - (k + 1)] s) := ds (len ps - (k + 1)) ((tsub_lt_iff_left hk).mpr (by simp))
-      exact this.and ih
+      simpa [takeLast_succ_of_lt (succ_le_iff_lt.mp hk)] using this.and ih
   simpa using this (len ps) (by rfl)
 
 lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (insert (^⋁ ps) s) := by
@@ -855,7 +852,7 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
     case zero =>
       intro s' _ ss hs'
       refine wk ?_ ?_ d
-      · simp [by simpa using d.isFormulaSet]
+      · suffices L.IsFormulaSet s' by simpa [by simpa using d.isFormulaSet]
         intro x hx
         exact d.isFormulaSet x (by simp [ss hx])
       · intro x
@@ -865,11 +862,11 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
         · right; right; exact hx
     case succ k ih =>
       intro s' _ ss hs'
-      simp [takeLast_succ_of_lt (succ_le_iff_lt.mp hk)]
+      simp only [takeLast_succ_of_lt (succ_le_iff_lt.mp hk), qqDisj_cons]
       apply Derivable.or
       let s'' := insert ps.[len ps - (k + 1)] s'
       have hs'' : s'' ⊆ vecToSet ps := by
-        intro x; simp [s'']
+        intro x; simp only [mem_bitInsert_iff, s'']
         rintro (rfl | h)
         · exact mem_vecToSet_iff.mpr ⟨_, by simp [tsub_lt_iff_left hk], rfl⟩
         · exact ss h
@@ -877,7 +874,7 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
         refine ih (le_trans (by simp) hk) s'' (le_of_subset hs'') hs'' ?_
         intro i hi
         have : i ≤ len ps - (k + 1) := by
-          simpa [sub_sub] using le_sub_one_of_lt hi
+          simpa [PeanoMinus.sub_sub] using le_sub_one_of_lt hi
         rcases lt_or_eq_of_le this with (hi | rfl)
         · simp [s'', hs' i hi]
         · simp [s'']
@@ -887,7 +884,8 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
 lemma disj (ps s : V) {i} (hps : ∀ i < len ps, L.IsFormula ps.[i])
   (hi : i < len ps) (d : T.Derivable (insert ps.[i] s)) : T.Derivable (insert (^⋁ ps) s) :=
   disjDistr ps s <| wk
-    (by simp [by simpa using d.isFormulaSet]; intro x hx; rcases mem_vecToSet_iff.mp hx with ⟨i, hi, rfl⟩; exact hps i hi)
+    (by suffices L.IsFormulaSet (vecToSet ps) by simpa [by simpa using d.isFormulaSet]
+        intro x hx; rcases mem_vecToSet_iff.mp hx with ⟨i, hi, rfl⟩; exact hps i hi)
     (by
       intro x; simp only [mem_bitInsert_iff, mem_cup_iff]
       rintro (rfl | hx)
@@ -905,4 +903,4 @@ end Language.Theory.Derivable
 
 end derivation
 
-end LO.Arith
+end LO.ISigma1.Metamath
