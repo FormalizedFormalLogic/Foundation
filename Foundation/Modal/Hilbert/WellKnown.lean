@@ -545,25 +545,7 @@ instance : Hilbert.K4M ⪯ Hilbert.SobK1 := weakerThan_of_dominate_axioms $ by s
 end Hilbert.SobK1
 
 
-
-protected abbrev Hilbert.S4Point2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point2 (.atom 0)}⟩
-protected abbrev Logic.S4Point2 := Hilbert.S4Point2.logic
-
-namespace Hilbert.S4Point2
-
-instance : (Hilbert.S4Point2).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Point2).HasT where p := 0
-instance : (Hilbert.S4Point2).HasFour where p := 0
-instance : (Hilbert.S4Point2).HasPoint2 where p := 0
-instance : Entailment.S4Point2 (Hilbert.S4Point2) where
-
-end Hilbert.S4Point2
-
-
 protected abbrev Hilbert.SobK2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0), Axioms.Point2 (.atom 0)}⟩
-/--
-  - Sobociński's `K2` (Hudges & Cresswell 2007)
--/
 protected abbrev Logic.SobK2 := Hilbert.SobK2.logic
 
 namespace Hilbert.SobK2
@@ -578,6 +560,55 @@ instance : Entailment.SobK2 (Hilbert.SobK2) where
 instance : Hilbert.K4M ⪯ Hilbert.SobK2 := weakerThan_of_dominate_axioms $ by simp;
 
 end Hilbert.SobK2
+
+
+protected abbrev Hilbert.SobK3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
+protected abbrev Logic.SobK3 := Hilbert.SobK3.logic
+
+namespace Hilbert.SobK3
+
+instance : (Hilbert.SobK3).HasK where p := 0; q := 1;
+instance : (Hilbert.SobK3).HasT where p := 0
+instance : (Hilbert.SobK3).HasFour where p := 0
+instance : (Hilbert.SobK3).HasM where p := 0
+instance : (Hilbert.SobK3).HasPoint3 where p := 0; q := 1;
+instance : Entailment.SobK3 (Hilbert.SobK3) where
+
+instance : Hilbert.K4M ⪯ Hilbert.SobK3 := weakerThan_of_dominate_axioms $ by simp;
+
+end Hilbert.SobK3
+
+
+protected abbrev Hilbert.SobK4 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0), Axioms.Point4 (.atom 0)}⟩
+protected abbrev Logic.SobK4 := Hilbert.SobK4.logic
+
+namespace Hilbert.SobK4
+
+instance : (Hilbert.SobK4).HasK where p := 0; q := 1;
+instance : (Hilbert.SobK4).HasT where p := 0
+instance : (Hilbert.SobK4).HasFour where p := 0
+instance : (Hilbert.SobK4).HasM where p := 0
+instance : (Hilbert.SobK4).HasPoint4 where p := 0
+instance : Entailment.SobK4 (Hilbert.SobK4) where
+
+instance : Hilbert.K4M ⪯ Hilbert.SobK4 := weakerThan_of_dominate_axioms $ by simp;
+
+end Hilbert.SobK4
+
+
+protected abbrev Hilbert.S4Point2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point2 (.atom 0)}⟩
+protected abbrev Logic.S4Point2 := Hilbert.S4Point2.logic
+
+namespace Hilbert.S4Point2
+
+instance : (Hilbert.S4Point2).HasK where p := 0; q := 1;
+instance : (Hilbert.S4Point2).HasT where p := 0
+instance : (Hilbert.S4Point2).HasFour where p := 0
+instance : (Hilbert.S4Point2).HasPoint2 where p := 0
+instance : Entailment.S4Point2 (Hilbert.S4Point2) where
+
+end Hilbert.S4Point2
+
 
 
 protected abbrev Hilbert.S4Point3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
