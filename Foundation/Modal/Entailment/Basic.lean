@@ -616,7 +616,7 @@ protected class Ver extends Entailment.K 𝓢, HasAxiomVer 𝓢
 protected class KM extends Entailment.K 𝓢, HasAxiomM 𝓢
 
 protected class K4 extends Entailment.K 𝓢, HasAxiomFour 𝓢
-protected class K4Point1 extends Entailment.K4 𝓢, HasAxiomM 𝓢
+protected class K4M extends Entailment.K4 𝓢, HasAxiomM 𝓢
 protected class K4Point2 extends Entailment.K4 𝓢, HasAxiomWeakPoint2 𝓢
 protected class K4Point3 extends Entailment.K4 𝓢, HasAxiomWeakPoint3 𝓢
 protected class KD4Point3Z extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢, HasAxiomZ 𝓢
@@ -627,9 +627,9 @@ protected class S4 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFour 𝓢
 instance [Entailment.S4 𝓢] : Entailment.K4 𝓢 where
 instance [Entailment.S4 𝓢] : Entailment.KT 𝓢 where
 
-protected class S4Point1 extends Entailment.S4 𝓢, HasAxiomM 𝓢
+protected class SobK1 extends Entailment.S4 𝓢, HasAxiomM 𝓢
 protected class S4Point2 extends Entailment.S4 𝓢, HasAxiomPoint2 𝓢
-protected class S4Point2Point1 extends Entailment.S4 𝓢, HasAxiomM 𝓢, HasAxiomPoint2 𝓢
+protected class SobK2 extends Entailment.S4 𝓢, HasAxiomM 𝓢, HasAxiomPoint2 𝓢
 protected class S4Point3 extends Entailment.S4 𝓢, HasAxiomPoint3 𝓢
 protected class S4Point4 extends Entailment.S4 𝓢, HasAxiomPoint4 𝓢
 

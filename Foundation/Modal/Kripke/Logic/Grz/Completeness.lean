@@ -4,7 +4,7 @@ import Foundation.Modal.Entailment.K4
 import Foundation.Modal.ComplementClosedConsistentFinset
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.Logic.S4Point1
+import Foundation.Modal.Kripke.Logic.SobK1
 
 namespace LO.Modal
 
@@ -301,14 +301,14 @@ theorem Grz.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Grz := by
       . refine {refl := by tauto, trans := by tauto};
       . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 
-theorem Grz.proper_extension_of_S4Point1 : Logic.S4Point1 ⊂ Logic.Grz := by
+theorem Grz.proper_extension_of_SobK1 : Logic.SobK1 ⊂ Logic.Grz := by
   constructor;
-  . rw [S4Point1.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
+  . rw [SobK1.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬Kripke.FrameClass.preorder_mckinsey ⊧ φ by
-      rw [S4Point1.Kripke.preorder_mckinsey];
+      rw [SobK1.Kripke.preorder_mckinsey];
       tauto;
     use Axioms.Grz (.atom 0)
     constructor;
