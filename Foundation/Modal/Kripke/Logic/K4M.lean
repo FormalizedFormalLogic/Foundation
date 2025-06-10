@@ -9,29 +9,29 @@ open GeachConfluent
 
 abbrev Kripke.FrameClass.trans_mckinsey : FrameClass := { F | IsTrans _ F ∧ SatisfiesMcKinseyCondition _ F }
 
-namespace Hilbert.K4Point1
+namespace Hilbert.K4M
 
-instance Kripke.sound : Sound (Hilbert.K4Point1) (Kripke.FrameClass.trans_mckinsey) := instSound_of_validates_axioms $ by
+instance Kripke.sound : Sound (Hilbert.K4M) (Kripke.FrameClass.trans_mckinsey) := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomM_of_satisfiesMcKinseyCondition;
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.K4Point1) := consistent_of_sound_frameclass Kripke.FrameClass.trans_mckinsey $ by
+instance Kripke.consistent : Entailment.Consistent (Hilbert.K4M) := consistent_of_sound_frameclass Kripke.FrameClass.trans_mckinsey $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   constructor <;> infer_instance;
 
-instance Kripke.canonical : Canonical (Hilbert.K4Point1) Kripke.FrameClass.trans_mckinsey := ⟨by
+instance Kripke.canonical : Canonical (Hilbert.K4M) Kripke.FrameClass.trans_mckinsey := ⟨by
   apply Set.mem_setOf_eq.mpr;
   constructor;
   . infer_instance;
   . infer_instance;
 ⟩
 
-instance Kripke.complete : Complete (Hilbert.K4Point1) Kripke.FrameClass.trans_mckinsey := inferInstance
+instance Kripke.complete : Complete (Hilbert.K4M) Kripke.FrameClass.trans_mckinsey := inferInstance
 
-end Hilbert.K4Point1
+end Hilbert.K4M
 
 namespace Logic
 
@@ -39,12 +39,12 @@ open Formula
 open Entailment
 open Kripke
 
-lemma K4Point1.Kripke.trans_mckinsey : Logic.K4Point1 = FrameClass.trans_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+lemma K4M.Kripke.trans_mckinsey : Logic.K4M = FrameClass.trans_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 
-theorem K4Point1.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point1 := by
+theorem K4M.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point1 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
+  . suffices ∃ φ, Hilbert.K4M ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
       rw [K4.Kripke.trans];
       tauto;
     use (Axioms.M (.atom 0));
