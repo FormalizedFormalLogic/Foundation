@@ -295,7 +295,7 @@ open canonicalModel
 
 namespace Canonical
 
-instance [Entailment.HasAxiomGeach g 𝓢] : IsGeachConfluent g _ (canonicalFrame 𝓢).Rel := ⟨by
+instance isGeachConfluent [Entailment.HasAxiomGeach g 𝓢] : IsGeachConfluent g _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z ⟨Rxy, Rxz⟩;
   have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.premultibox g.m, z.1.2.premultidia g.n⟩) $ by
     rintro Γ Δ hΓ hΔ;
