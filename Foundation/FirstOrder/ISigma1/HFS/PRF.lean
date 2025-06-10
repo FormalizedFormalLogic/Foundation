@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.ISigmaOne.HFS.Seq
+import Foundation.FirstOrder.ISigma1.HFS.Seq
 
 /-!
 
@@ -6,11 +6,9 @@ import Foundation.Arithmetization.ISigmaOne.HFS.Seq
 
 -/
 
-noncomputable section
+namespace LO.ISigma1
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -62,7 +60,7 @@ private lemma cseq_iff (s : V) : c.CSeq v s ↔
    by rintro ⟨Hs, ⟨z, _, rfl, hz⟩, h⟩
       exact ⟨Hs, hz, fun i hi z hiz ↦ by
         rcases h i
-          (lt_of_lt_of_le hi (by simp; exact le_trans (lh_bound _) (by simp)))
+          (lt_of_lt_of_le hi (by simpa using le_trans (lh_bound _) (by simp)))
           ⟨lh s, by simp [lt_succ_iff_le], rfl, by simpa [lt_tsub_iff_right] using hi⟩ z (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
         exact h⟩⟩
 
@@ -105,7 +103,8 @@ lemma unique {s₁ s₂ : V} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁
         ih hi' z' (by simp [z']) (H₂.seq.nth (lt_of_lt_of_le hi' h₁₂)) (by simp [z']) (by simp [z']) (by simp)
       simp [this]
     have h₁' : ⟪i + 1, c.succ v i z'⟫ ∈ s₁ := H₁.succ i (by simp [lt_tsub_iff_right, hi]) z' ih₁
-    have h₂' : ⟪i + 1, c.succ v i z'⟫ ∈ s₂ := H₂.succ i (by simp [lt_tsub_iff_right]; exact lt_of_lt_of_le hi h₁₂) z' ih₂
+    have h₂' : ⟪i + 1, c.succ v i z'⟫ ∈ s₂ :=
+      H₂.succ i (by simpa [lt_tsub_iff_right] using lt_of_lt_of_le hi h₁₂) z' ih₂
     have e₁ : z₁ = c.succ v i z' := H₁.seq.isMapping.uniq h₁ h₁'
     have e₂ : z₂ = c.succ v i z' := H₂.seq.isMapping.uniq h₂ h₂'
     simp [e₁, e₂]
@@ -118,27 +117,29 @@ lemma CSeq.initial : c.CSeq v !⟦c.zero v⟧ :=
 lemma CSeq.successor {s l z : V} (Hs : c.CSeq v s) (hl : l + 1 = lh s) (hz : ⟪l, z⟫ ∈ s) :
     c.CSeq v (s ⁀' c.succ v l z) :=
   ⟨ Hs.seq.seqCons _, by simp [seqCons, Hs.zero], by
-    simp [Hs.seq.lh_seqCons]
+    simp only [Hs.seq.lh_seqCons, add_tsub_cancel_right]
     intro i hi w hiw
     have hiws : ⟪i, w⟫ ∈ s := by
-      simp [mem_seqCons_iff] at hiw; rcases hiw with (⟨rfl, rfl⟩ | h)
+      rcases show i = lh s ∧ w = c.succ v l z ∨ ⟪i, w⟫ ∈ s by
+        simpa [mem_seqCons_iff] using hiw with (⟨rfl, rfl⟩ | h)
       · simp at hi
       · assumption
     have : i ≤ l := by simpa [←hl, lt_succ_iff_le] using hi
     rcases this with (rfl | hil)
     · have : w = z := Hs.seq.isMapping.uniq hiws hz
       simp [this, hl]
-    · simp [mem_seqCons_iff]; right
+    · simp only [mem_seqCons_iff]; right
       exact Hs.succ i (by simp [←hl, hil]) w hiws ⟩
 
 variable (c v)
 
+open Classical in
 lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
   induction l using ISigma1.sigma1_succ_induction
   · apply HierarchySymbol.Boldface.ex
     apply HierarchySymbol.Boldface.and
     · exact ⟨p.cseqDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
-        intro w; simpa using c.cseq_defined_iff (w 0 :> v) |>.symm⟩
+        intro w; simpa [Matrix.comp_vecCons'] using c.cseq_defined_iff (w 0 :> v) |>.symm⟩
     · definability
   case zero =>
     exact ⟨!⟦c.zero v⟧, CSeq.initial, by simp⟩
@@ -157,7 +158,7 @@ lemma cSeq_result_existsUnique (l : V) : ∃! z, ∃ s, c.CSeq v s ∧ l + 1 = l
     rintro z' ⟨s', Hs', h', hz'⟩
     exact Eq.symm <| Hs.unique Hs' (by simp [←h, ←h']) (show l < lh s from by simp [←h]) hz hz')
 
-def result (u : V) : V := Classical.choose! (c.cSeq_result_existsUnique v u)
+noncomputable def result (u : V) : V := Classical.choose! (c.cSeq_result_existsUnique v u)
 
 lemma result_spec (u : V) : ∃ s, c.CSeq v s ∧ u + 1 = lh s ∧ ⟪u, c.result v u⟫ ∈ s :=
   Classical.choose!_spec (c.cSeq_result_existsUnique v u)
@@ -180,9 +181,10 @@ lemma result_graph (z u : V) : z = c.result v u ↔ ∃ s, c.CSeq v s ∧ ⟪u, 
    by rintro ⟨s, Hs, h⟩
       rcases c.result_spec v u with ⟨s', Hs', hu, h'⟩
       exact Eq.symm <| Hs'.unique Hs
-        (by simp [←hu, succ_le_iff_lt]; exact Hs.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
+        (by simpa [←hu, succ_le_iff_lt] using Hs.seq.lt_lh_iff.mpr (mem_domain_of_pair_mem h))
         (by simp [←hu]) h' h⟩
 
+set_option linter.flexible false in
 lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) p.resultDef := by
   intro v; simp [Blueprint.resultDef, result_graph]
   apply exists_congr; intro x
@@ -200,10 +202,10 @@ instance result_definable : 𝚺₁.BoldfaceFunction (fun v ↦ c.result (v ·.s
 instance result_definable_delta₁ : 𝚫₁.BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined_delta.to_definable
 
+attribute [irreducible] Blueprint.resultDef
+
 end Construction
 
 end PR
 
-end LO.Arith
-
-end
+end LO.ISigma1

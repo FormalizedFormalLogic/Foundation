@@ -1,23 +1,24 @@
-import Foundation.Arithmetization.ISigmaZero.Exponential.Exp
-import Foundation.Arithmetization.ISigmaZero.Exponential.Log
+import Foundation.FirstOrder.ISigma0.Exponential
 
-noncomputable section
+/-!
+# $\mathrm{Bit}$ predicate
 
-namespace LO.Arith
+-/
 
-open FirstOrder FirstOrder.Arith
+namespace LO.ISigma1
 
-variable {V : Type*} [ORingStruc V]
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
-variable [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-def Bit (i a : V) : Prop := LenBit (exp i) a
+def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
 
 instance : Membership V V := ⟨fun a i ↦ Bit i a⟩
 
 def _root_.LO.FirstOrder.Arith.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y” (by simp)
 
+set_option linter.flexible false in
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) via bitDef := by
   intro v; simp [bitDef, ←le_iff_lt_succ]
   constructor
@@ -39,11 +40,11 @@ lemma mem_absolute (i a : ℕ) : i ∈ a ↔ (i : V) ∈ (a : V) := by
 
 lemma mem_iff_bit {i a : V} : i ∈ a ↔ Bit i a := iff_of_eq rfl
 
-lemma exp_le_of_mem {i a : V} (h : i ∈ a) : exp i ≤ a := LenBit.le h
+lemma exp_le_of_mem {i a : V} (h : i ∈ a) : Exp.exp i ≤ a := LenBit.le h
 
 lemma lt_of_mem {i a : V} (h : i ∈ a) : i < a := lt_of_lt_of_le (lt_exp i) (exp_le_of_mem h)
 
-lemma not_mem_of_lt_exp {i a : V} (h : a < exp i) : i ∉ a := fun H ↦ by have := lt_of_le_of_lt (exp_le_of_mem H) h; simp at this
+lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by have := lt_of_le_of_lt (exp_le_of_mem H) h; simp at this
 
 section
 
@@ -64,9 +65,7 @@ section
 
 end
 
-end LO.Arith
-
-end
+end LO.ISigma1
 
 namespace LO.FirstOrder.Arith
 
@@ -143,22 +142,26 @@ end
 @[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def, memRel₃Opr]
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+open FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1
 
-open LO.Arith
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, bit_defined.df.iff]⟩
 
 @[simp] lemma eval_ballIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
     Semiformula.Evalm V e ε (ballIn t p) ↔ ∀ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p := by
-  simp [ballIn]
+  suffices
+    (∀ x < t.valm V e ε, x ∈ t.valm V e ε → Semiformula.Evalm V (x :> e) ε p) ↔
+    ∀ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p by simpa [ballIn]
   constructor
   · intro h x hx; exact h x (lt_of_mem hx) hx
   · intro h x _ hx; exact h x hx
 
 @[simp] lemma eval_bexIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
     Semiformula.Evalm V e ε (bexIn t p) ↔ ∃ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p := by
-  simp [bexIn]
+  suffices
+    (∃ x < t.valm V e ε, x ∈ t.valm V e ε ∧ Semiformula.Evalm V (x :> e) ε p) ↔
+    ∃ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p by simpa [bexIn]
   constructor
   · rintro ⟨x, _, hx, h⟩; exact ⟨x, hx, h⟩
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
@@ -181,23 +184,17 @@ lemma memRel₃_defined : 𝚺₀-Relation₄ (fun r x y z : V ↦ ⟪x, y, z⟫
 
 end LO.FirstOrder.Arith
 
-noncomputable section
+namespace LO.ISigma1
 
-namespace LO.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
-open FirstOrder FirstOrder.Arith
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {V : Type*} [ORingStruc V]
+lemma mem_iff_mul_exp_add_exp_add {i a : V} : i ∈ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + Exp.exp i + r := by
+  simpa [mem_iff_bit, exp_succ] using lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
-variable [V ⊧ₘ* 𝐈𝚺₁]
-
-lemma mem_iff_mul_exp_add_exp_add {i a : V} : i ∈ a ↔ ∃ k, ∃ r < exp i, a = k * exp (i + 1) + exp i + r := by
-  simp [mem_iff_bit, exp_succ]
-  exact lenbit_iff_add_mul (exp_pow2 i) (a := a)
-
-lemma not_mem_iff_mul_exp_add {i a : V} : i ∉ a ↔ ∃ k, ∃ r < exp i, a = k * exp (i + 1) + r := by
-  simp [mem_iff_bit, exp_succ]
-  exact not_lenbit_iff_add_mul (exp_pow2 i) (a := a)
+lemma not_mem_iff_mul_exp_add {i a : V} : i ∉ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + r := by
+  simpa [mem_iff_bit, exp_succ] using not_lenbit_iff_add_mul (exp_pow2 i) (a := a)
 
 section empty
 
@@ -214,21 +211,21 @@ end empty
 
 section singleton
 
-scoped instance : Singleton V V := ⟨fun a ↦ exp a⟩
+noncomputable scoped instance : Singleton V V := ⟨fun a ↦ Exp.exp a⟩
 
-lemma singleton_def (a : V) : {a} = exp a := rfl
+lemma singleton_def (a : V) : {a} = Exp.exp a := rfl
 
 end singleton
 
 section insert
 
 open Classical in
-noncomputable def bitInsert (i a : V) : V := if i ∈ a then a else a + exp i
+noncomputable def bitInsert (i a : V) : V := if i ∈ a then a else a + Exp.exp i
 
 open Classical in
-noncomputable def bitRemove (i a : V) : V := if i ∈ a then a - exp i else a
+noncomputable def bitRemove (i a : V) : V := if i ∈ a then a - Exp.exp i else a
 
-scoped instance : Insert V V := ⟨bitInsert⟩
+noncomputable scoped instance : Insert V V := ⟨bitInsert⟩
 
 lemma insert_eq {i a : V} : insert i a = bitInsert i a := rfl
 
@@ -246,15 +243,16 @@ instance : LawfulSingleton V V where
 
 @[simp] lemma mem_bitRemove_iff {i j a : V} :
     i ∈ bitRemove j a ↔ i ≠ j ∧ i ∈ a := by
-  by_cases h : j ∈ a <;> simp [h, bitRemove]
-  · simpa [exp_inj.eq_iff] using
+  by_cases h : j ∈ a
+  · simpa [h, bitRemove, exp_inj.eq_iff] using
       lenbit_sub_pow2_iff_of_lenbit (exp_pow2 i) (exp_pow2 j) h
-  · rintro _ rfl; contradiction
+  · simp only [bitRemove, h, ↓reduceIte, ne_eq, iff_and_self]
+    rintro _ rfl; contradiction
 
 @[simp] lemma not_mem_bitRemove_self (i a : V) : i ∉ bitRemove i a := by simp
 
 lemma insert_graph (b i a : V) :
-    b = insert i a ↔ (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e ≤ b, e = exp i ∧ b = a + e) :=
+    b = insert i a ↔ (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e ≤ b, e = Exp.exp i ∧ b = a + e) :=
   ⟨by rintro rfl; by_cases hi : i ∈ a <;> simp [hi, insert, bitInsert],
    by by_cases hi : i ∈ a <;> simp only [hi, true_and, not_true_eq_false, false_and,
         or_false, insert, bitInsert, ↓reduceIte, imp_self,
@@ -274,11 +272,12 @@ instance insert_definable : 𝚺₀-Function₂ (insert : V → V → V) := inse
 
 instance insert_definable' (Γ) : Γ-Function₂ (insert : V → V → V) := insert_definable.of_zero
 
-lemma insert_le_of_le_of_le {i j a b : V} (hij : i ≤ j) (hab : a ≤ b) : insert i a ≤ b + exp j := by
-  simp [insert, bitInsert]
-  by_cases hi : i ∈ a <;> simp [hi]
-  · exact le_trans hab (by simp)
-  · exact add_le_add hab (exp_monotone_le.mpr hij)
+open Classical in
+lemma insert_le_of_le_of_le {i j a b : V} (hij : i ≤ j) (hab : a ≤ b) : insert i a ≤ b + Exp.exp j := by
+  suffices (if i ∈ a then a else a + Exp.exp i) ≤ b + Exp.exp j by simpa [insert, bitInsert]
+  by_cases hi : i ∈ a
+  · simpa [hi] using le_trans hab (by simp)
+  · simpa [hi] using add_le_add hab (exp_monotone_le.mpr hij)
 
 end insert
 
@@ -291,7 +290,9 @@ lemma bitRemove_lt_of_mem {i a : V} (h : i ∈ a) : bitRemove i a < a := by
   simp [h, bitRemove, tsub_lt_iff_left (exp_le_of_mem h)]
 
 lemma pos_of_nonempty {i a : V} (h : i ∈ a) : 0 < a := by
-  by_contra A; simp at A; rcases A; simp_all
+  by_contra A
+  rcases show a = 0 by simpa using A
+  simp_all
 
 @[simp] lemma mem_insert (i a : V) : i ∈ insert i a := by simp
 
@@ -300,21 +301,22 @@ lemma insert_eq_self_of_mem {i a : V} (h : i ∈ a) : insert i a = a := by
 
 lemma log_mem_of_pos {a : V} (h : 0 < a) : log a ∈ a :=
   mem_iff_mul_exp_add_exp_add.mpr
-    ⟨0, a - exp log a,
+    ⟨0, a - Exp.exp (log a),
       (tsub_lt_iff_left (exp_log_le_self h)).mpr (by rw [←two_mul]; exact lt_two_mul_exponential_log h),
-      by simp; exact Eq.symm <| add_tsub_self_of_le (exp_log_le_self h)⟩
+      by simpa using Eq.symm <| add_tsub_self_of_le (exp_log_le_self h)⟩
 
 lemma le_log_of_mem {i a : V} (h : i ∈ a) : i ≤ log a := (exp_le_iff_le_log (pos_of_nonempty h)).mp (exp_le_of_mem h)
 
-lemma succ_mem_iff_mem_div_two {i a : V} : i + 1 ∈ a ↔ i ∈ a / 2 := by simp [mem_iff_bit, Bit, LenBit.iff_rem, exp_succ, div_mul]
+lemma succ_mem_iff_mem_div_two {i a : V} : i + 1 ∈ a ↔ i ∈ a / 2 := by
+  simp [mem_iff_bit, Bit, LenBit.iff_rem, exp_succ, IOpen.div_mul]
 
 lemma lt_length_of_mem {i a : V} (h : i ∈ a) : i < ‖a‖ := by
   simpa [length_of_pos (pos_of_nonempty h), ←le_iff_lt_succ] using le_log_of_mem h
 
-lemma lt_exp_iff {a i : V} : a < exp i ↔ ∀ j ∈ a, j < i :=
+lemma lt_exp_iff {a i : V} : a < Exp.exp i ↔ ∀ j ∈ a, j < i :=
   ⟨fun h j hj ↦ exp_monotone.mp <| lt_of_le_of_lt (exp_le_of_mem hj) h,
-   by contrapose; simp
-      intro (h : exp i ≤ a)
+   by suffices Exp.exp i ≤ a → ∃ x ∈ a, i ≤ x by contrapose; simpa
+      intro h
       have pos : 0 < a := lt_of_lt_of_le (by simp) h
       exact ⟨log a, log_mem_of_pos pos, (exp_le_iff_le_log pos).mp h⟩⟩
 
@@ -324,8 +326,9 @@ def _root_.LO.FirstOrder.Arith.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
   “a b. ∀ i < a, i ∈ a → i ∈ b” (by simp)
 
 lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : V → V → Prop) via bitSubsetDef := by
-  intro v; simp [bitSubsetDef]
-  exact ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
+  intro v
+  simpa [bitSubsetDef]
+    using ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
 
 @[simp] lemma bitSubset_defined_iff (v) :
     Semiformula.Evalbm V v bitSubsetDef.val ↔ v 0 ⊆ v 1 := bitSubset_defined.df.iff v
@@ -341,42 +344,46 @@ lemma subset_iff {a b : V} : a ⊆ b ↔ (∀ x ∈ a, x ∈ b) := by simp [HasS
 @[trans] lemma subset_trans {a b c : V} (hab : a ⊆ b) (hbc : b ⊆ c) : a ⊆ c := by
   intro x hx; exact hbc (hab hx)
 
-lemma mem_exp_add_succ_sub_one (i j : V) : i ∈ exp (i + j + 1) - 1 := by
-  have : exp (i + j + 1) - 1 = (exp j - 1) * exp (i + 1) + exp i + (exp i - 1) := calc
-    exp (i + j + 1) - 1 = exp j * exp (i + 1) - 1                             := by simp [exp_add, ←mul_assoc, mul_comm]
-    _                   = exp j * exp (i + 1) - exp (i + 1) + exp (i + 1) - 1 := by rw [sub_add_self_of_le]; exact le_mul_of_pos_left (exp_pos j)
-    _                   = (exp j - 1) * exp (i + 1) + exp (i + 1) - 1         := by simp [sub_mul]
-    _                   = (exp j - 1) * exp (i + 1) + (exp i + exp i) - 1     := by simp [←two_mul, ←exp_succ i]
-    _                   = (exp j - 1) * exp (i + 1) + (exp i + exp i - 1)     := by rw [add_tsub_assoc_of_le]; simp [←two_mul, ←pos_iff_one_le]
-    _                   = (exp j - 1) * exp (i + 1) + exp i + (exp i - 1)     := by simp [add_assoc, add_tsub_assoc_of_le]
-  exact mem_iff_mul_exp_add_exp_add.mpr ⟨exp j - 1, exp i - 1, (tsub_lt_iff_left (by simp)).mpr $ by simp, this⟩
+lemma mem_exp_add_succ_sub_one (i j : V) : i ∈ Exp.exp (i + j + 1) - 1 := by
+  have : Exp.exp (i + j + 1) - 1 = (Exp.exp j - 1) * Exp.exp (i + 1) + Exp.exp i + (Exp.exp i - 1) := calc
+    Exp.exp (i + j + 1) - 1 = Exp.exp j * Exp.exp (i + 1) - 1                             := by simp [exp_add, ←mul_assoc, mul_comm]
+    _                   = Exp.exp j * Exp.exp (i + 1) - Exp.exp (i + 1) + Exp.exp (i + 1) - 1 := by rw [sub_add_self_of_le]; exact le_mul_of_pos_left (exp_pos j)
+    _                   = (Exp.exp j - 1) * Exp.exp (i + 1) + Exp.exp (i + 1) - 1         := by simp [sub_mul]
+    _                   = (Exp.exp j - 1) * Exp.exp (i + 1) + (Exp.exp i + Exp.exp i) - 1     := by simp [←two_mul, ←exp_succ i]
+    _                   = (Exp.exp j - 1) * Exp.exp (i + 1) + (Exp.exp i + Exp.exp i - 1)     := by rw [add_tsub_assoc_of_le]; simp [←two_mul, ←pos_iff_one_le]
+    _                   = (Exp.exp j - 1) * Exp.exp (i + 1) + Exp.exp i + (Exp.exp i - 1)     := by simp [add_assoc, add_tsub_assoc_of_le]
+  exact mem_iff_mul_exp_add_exp_add.mpr ⟨Exp.exp j - 1, Exp.exp i - 1, (tsub_lt_iff_left (by simp)).mpr $ by simp, this⟩
 
 /-- under a = {0, 1, 2, ..., a - 1} -/
-def under (a : V) : V := exp a - 1
+noncomputable def under (a : V) : V := Exp.exp a - 1
 
 @[simp] lemma le_under (a : V) : a ≤ under a :=
-  le_iff_lt_succ.mpr (by simp [under, show exp a - 1 + 1 = exp a from sub_add_self_of_le (by simp)])
+  le_iff_lt_succ.mpr (by simp [under, show Exp.exp a - 1 + 1 = Exp.exp a from sub_add_self_of_le (by simp)])
 
 @[simp] lemma mem_under_iff {i j : V} : i ∈ under j ↔ i < j := by
   constructor
   · intro h
-    have : exp i < exp j := calc
-      exp i ≤ exp j - 1 := exp_le_of_mem h
-      _     < exp j     := pred_lt_self_of_pos (exp_pos j)
+    have : Exp.exp i < Exp.exp j := calc
+      Exp.exp i ≤ Exp.exp j - 1 := exp_le_of_mem h
+      _     < Exp.exp j     := pred_lt_self_of_pos (exp_pos j)
     exact exp_monotone.mp this
   · intro lt
     have := lt_iff_succ_le.mp lt
     let k := j - (i + 1)
-    have : j = i + k + 1 := by
-      simp [add_assoc, ←sub_sub, k]; rw [sub_add_self_of_le, add_tsub_self_of_le]
-      · exact le_of_lt lt
-      · exact le_tsub_of_add_le_left this
+    have : j = i + k + 1 := calc
+      j = i + (j - i)         := by rw [add_tsub_self_of_le (le_of_lt lt)]
+      _ = i + (j - i - 1 + 1) := by rw [sub_add_self_of_le <| le_tsub_of_add_le_left <| lt_iff_succ_le.mp lt]
+      _ = i + k + 1           := by simp [add_assoc, ←PeanoMinus.sub_sub, k]
     rw [this]; exact mem_exp_add_succ_sub_one i k
 
 @[simp] lemma not_mem_under_self (i : V) : i ∉ under i := by simp
 
-private lemma under_graph (x y : V) : y = under x ↔ y + 1 = exp x :=
-  ⟨by rintro rfl; simp [under, sub_add_self_of_le], by intro h; have := congr_arg (· - 1) h; simp [under] at this ⊢; exact this⟩
+private lemma under_graph (x y : V) : y = under x ↔ y + 1 = Exp.exp x := by
+  constructor
+  · rintro rfl; simp [under, sub_add_self_of_le]
+  · intro h
+    have := congr_arg (· - 1) h
+    simpa [under] using this
 
 def _root_.LO.FirstOrder.Arith.underDef : 𝚺₀.Semisentence 2 := .mkSigma
   “y x. !expDef.val (y + 1) x” (by simp)
@@ -411,7 +418,7 @@ lemma zero_mem_iff {a : V} : 0 ∉ a ↔ 2 ∣ a := by simp [mem_iff_bit, Bit, L
   simp [mem_iff_bit, Bit, LenBit, exp_succ, div_cancel_left]
 
 @[simp] lemma succ_mem_two_mul_succ_iff {i a : V} : i + 1 ∈ 2 * a + 1 ↔ i ∈ a := by
-  simp [mem_iff_bit, Bit, LenBit, exp_succ, div_mul]
+  simp [mem_iff_bit, Bit, LenBit, exp_succ, IOpen.div_mul]
 
 lemma le_of_subset {a b : V} (h : a ⊆ b) : a ≤ b := by
   induction b using ISigma1.pi1_polynomial_induction generalizing a
@@ -445,8 +452,9 @@ lemma eq_empty_or_nonempty (a : V) : a = ∅ ∨ ∃ i, i ∈ a := by
   · right; exact nonempty_of_pos pos
 
 lemma nonempty_iff {s : V} : s ≠ ∅ ↔ ∃ x, x ∈ s := by
-  rcases eq_empty_or_nonempty s with ⟨rfl, hy⟩ <;> simp
-  simp [show s ≠ ∅ from by rintro rfl; simp_all]; assumption
+  rcases eq_empty_or_nonempty s with ⟨rfl, hy⟩
+  · simp
+  · simpa [show s ≠ ∅ from by rintro rfl; simp_all]
 
 lemma isempty_iff {s : V} : s = ∅ ↔ ∀ x, x ∉ s := by
   simpa using not_iff_not.mpr (nonempty_iff (s := s))
@@ -473,22 +481,23 @@ lemma lt_of_lt_log {a b : V} (pos : 0 < b) (h : ∀ i ∈ a, i < log b) : a < b 
   mem_ext (by simp [mem_under_iff, lt_succ_iff_le, le_iff_eq_or_lt])
 
 lemma insert_remove {i a : V} (h : i ∈ a) : insert i (bitRemove i a) = a := mem_ext <| by
-  simp; intro j
+  suffices ∀ j, j = i ∨ j ≠ i ∧ j ∈ a ↔ j ∈ a by simpa
+  intro j
   constructor
   · rintro (rfl | ⟨_, hj⟩) <;> assumption
   · intro hj; simp [hj, eq_or_ne j i]
 
 section
 
-variable {m : ℕ} [Fact (1 ≤ m)] [V ⊧ₘ* 𝐈𝐍𝐃𝚺 m]
+variable {m : ℕ} [Fact (1 ≤ m)] [V ⊧ₘ* 𝐈𝐍𝐃 𝚺 m]
 
 omit [V ⊧ₘ* 𝐈𝚺₁]
 
 private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
     haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
-    ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i := by
+    ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
   haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
-  have : ∃ s < exp a, ∀ i < a, P i → i ∈ s :=
+  have : ∃ s < Exp.exp a, ∀ i < a, P i → i ∈ s :=
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
   have : Γ.alt-[m]-Predicate (fun s : V ↦ ∀ i < a, P i → i ∈ s) := by
@@ -496,7 +505,7 @@ private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ
     · simpa using HierarchySymbol.Boldface.bcomp₁ (by definability)
     · simpa using HierarchySymbol.Boldface.bcomp₂ (by definability) (by definability)
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : V) := by
-    simpa using least_number Γ.alt m this hs
+    simpa using InductionOnHierarchy.least_number Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩
   have t_le_s : t ≤ s := not_lt.mp (by
     intro lt
@@ -513,7 +522,7 @@ private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ
 
 theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
     haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
-    ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i :=
+    ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i :=
   match Γ with
   | 𝚺 => finset_comprehension_aux 𝚺 hP a
   | 𝚷 => finset_comprehension_aux 𝚷 hP a
@@ -521,7 +530,7 @@ theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γ-[m]-Predicate P) (a 
 
 theorem finset_comprehension_exists_unique {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
     haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
-    ∃! s, s < exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
+    ∃! s, s < Exp.exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
   haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   rcases finset_comprehension hP a with ⟨s, hs, Hs⟩
   exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
@@ -538,16 +547,14 @@ theorem finset_comprehension_exists_unique {P : V → Prop} (hP : Γ-[m]-Predica
 
 end
 
-section ISigma₁
-
 instance : Fact (1 ≤ 1) := ⟨by rfl⟩
 
 theorem finset_comprehension₁ {P : V → Prop} (hP : Γ-[1]-Predicate P) (a : V) :
-    ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i :=
+    ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i :=
   finset_comprehension hP a
 
 theorem finset_comprehension₁! {P : V → Prop} (hP : Γ-[1]-Predicate P) (a : V) :
-    ∃! s, s < exp a ∧ (∀ i < a, i ∈ s ↔ P i) := by
+    ∃! s, s < Exp.exp a ∧ (∀ i < a, i ∈ s ↔ P i) := by
   rcases finset_comprehension₁ hP a with ⟨s, hs, Ha⟩
   exact ExistsUnique.intro s ⟨hs, Ha⟩
     (by
@@ -572,19 +579,4 @@ theorem finite_comprehension₁! {P : V → Prop} (hP : Γ-[1]-Predicate P) (fin
       fun h ↦ (Hs i (mh i h)).mpr h⟩
   exact ExistsUnique.intro s H (fun s' H' ↦ mem_ext <| fun i ↦ by simp [H, H'])
 
-/-
-def setExt {Γ} (p : 𝚫₁.Semisentence (n + 1)) : Γ.Semisentence (n + 1) :=
-  match Γ with
-  | (𝚺, m) => .mkSigma “u | ∀ x < u, x ∈ u ↔ !p x ⋯” (by {  })
-
-lemma set_iff {n} {f : (Fin n → V) → V} {R : (Fin (n + 1) → V) → Prop}
-    (hf : ∀ v x, x ∈ f v ↔ R (x :> v)) {Γ} (p : (Γ, 1).Semisentence (n + 1)) : DefinedFunction ℒₒᵣ (Γ, 1) f p := by {
-
-     }
--/
-
-end ISigma₁
-
-end LO.Arith
-
-end
+end LO.ISigma1

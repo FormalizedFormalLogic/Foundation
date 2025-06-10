@@ -356,6 +356,8 @@ instance [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ* 𝐈Open := models_of_subtheory <| 
 
 instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ := inferInstance
 
+def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝐈𝚺 n₂] : V ⊧ₘ* 𝐈𝚺 n₁ :=
+  ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
 
 set_option linter.flexible false in
 lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ := by

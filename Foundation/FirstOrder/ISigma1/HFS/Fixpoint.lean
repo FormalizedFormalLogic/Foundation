@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.ISigmaOne.HFS.PRF
+import Foundation.FirstOrder.ISigma1.HFS.PRF
 
 /-!
 
@@ -6,11 +6,9 @@ import Foundation.Arithmetization.ISigmaOne.HFS.PRF
 
 -/
 
-noncomputable section
+namespace LO.ISigma1
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -77,7 +75,7 @@ lemma succ_existsUnique (s ih : V) :
   exact finite_comprehension₁! this
     ⟨s + 1, fun i ↦ by rintro ⟨hi, _⟩; exact lt_succ_iff_le.mpr hi⟩
 
-def succ (s ih : V) : V := Classical.choose! (c.succ_existsUnique v s ih)
+noncomputable def succ (s ih : V) : V := Classical.choose! (c.succ_existsUnique v s ih)
 
 variable {v}
 
@@ -102,7 +100,7 @@ lemma succ_defined : 𝚺₁.DefinedFunction (fun v : Fin (k + 2) → V ↦ c.su
 lemma eval_succDef (v) :
     Semiformula.Evalbm V v φ.succDef.val ↔ v 0 = c.succ (v ·.succ.succ.succ) (v 2) (v 1) := c.succ_defined.df.iff v
 
-def prConstruction : PR.Construction V φ.prBlueprint where
+noncomputable def prConstruction : PR.Construction V φ.prBlueprint where
   zero := fun _ ↦ ∅
   succ := c.succ
   zero_defined := by intro v; simp [Blueprint.prBlueprint, emptyset_def]
@@ -110,7 +108,7 @@ def prConstruction : PR.Construction V φ.prBlueprint where
 
 variable (v)
 
-def limSeq (s : V) : V := c.prConstruction.result v s
+noncomputable def limSeq (s : V) : V := c.prConstruction.result v s
 
 variable {v}
 
@@ -139,7 +137,7 @@ lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s'
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
   case zero =>
-    simp; rintro rfl; simp
+    simp only [nonpos_iff_eq_zero, limSeq_zero]; rintro rfl; simp
   case succ s' ih =>
     intro hs u hu
     rcases zero_or_succ s with (rfl | ⟨s, rfl⟩)
@@ -220,7 +218,6 @@ theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
       exact c.monotone (fun z hx ↦ by exact ⟨u, hx⟩) this,
    by intro hx
       rcases Finite.finite hx with ⟨m, hm⟩
-      simp at hm
       have : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v s := c.finite_upperbound m
       rcases this with ⟨s, hs⟩
       have : c.Φ v {z | z ∈ c.limSeq v s} x :=
@@ -251,7 +248,7 @@ end
 theorem induction [c.StrongFinite] {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
-  apply order_induction_sigma (Γ := Γ) (m := 1) (P := fun x ↦ c.Fixpoint v x → P x)
+  apply InductionOnHierarchy.order_induction_sigma (Γ := Γ) (m := 1) (P := fun x ↦ c.Fixpoint v x → P x)
   · apply HierarchySymbol.Boldface.imp
       (HierarchySymbol.BoldfacePred.comp
         (by
@@ -268,6 +265,4 @@ end Construction
 
 end Fixpoint
 
-end LO.Arith
-
-end
+end LO.ISigma1

@@ -128,7 +128,7 @@ lemma pred_lt_self_of_pos (h : 0 < a) : a - 1 < a := by
   · simp_all
   · simp
 
-lemma tsub_lt_iff_left (h : b ≤ a) : a - b < c ↔ a < c + b := AddLECancellable.tsub_lt_iff_right (add_le_cancel b) h
+protected lemma tsub_lt_iff_left (h : b ≤ a) : a - b < c ↔ a < c + b := AddLECancellable.tsub_lt_iff_right (add_le_cancel b) h
 
 lemma sub_mul (h : b ≤ a) : (a - b) * c = a * c - b * c := by
   have : a = (a - b) + b := (tsub_eq_iff_eq_add_of_le h).mp rfl

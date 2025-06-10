@@ -562,7 +562,7 @@ protected class Mul [Operator.Mul L] [Mul M] : Prop where
   mul : ∀ a b : M, (@Operator.Mul.mul L _).val ![a, b] = a * b
 
 protected class Exp [Operator.Exp L] [Exp M] : Prop where
-  exp : ∀ a : M, (@Operator.Exp.exp L _).val ![a] = exp a
+  exp : ∀ a : M, (@Operator.Exp.exp L _).val ![a] = Exp.exp a
 
 protected class Eq [Operator.Eq L] : Prop where
   eq : ∀ a b : M, (@Operator.Eq.eq L _).val ![a, b] ↔ a = b
@@ -604,7 +604,7 @@ variable {L}
     Structure.Mul.mul (L := L) (v 0) (v 1)
 
 @[simp] lemma exp_eq_of_lang [L.Exp] [Exp M] [Structure.Exp L M] {v : Fin 1 → M} :
-    Structure.func (L := L) Language.Exp.exp v = exp (v 0) := by
+    Structure.func (L := L) Language.Exp.exp v = _root_.Exp.exp (v 0) := by
   simpa [val_func, ←Matrix.fun_eq_vec_one] using
     Structure.Exp.exp (L := L) (v 0)
 

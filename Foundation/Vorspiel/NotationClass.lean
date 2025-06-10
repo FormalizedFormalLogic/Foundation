@@ -2,7 +2,6 @@ import Foundation.Vorspiel.Vorspiel
 
 class Exp (α : Type*) where
   exp : α → α
-export Exp (exp)
 
 class Hash (α : Type*) where
   hash : α → α → α

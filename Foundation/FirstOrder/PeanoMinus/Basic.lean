@@ -2,12 +2,12 @@ import Foundation.FirstOrder.Arith.Basic
 import Foundation.FirstOrder.R0.Basic
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Data.Nat.Cast.Order.Basic
+import Mathlib.Algebra.Order.Sub.Basic
 
 /-!
 # Theory $\mathsf{PA^-}$
 
 -/
-noncomputable section
 
 namespace LO
 
@@ -231,7 +231,7 @@ scoped instance : CommMonoid M where
   mul_one   := PeanoMinus.mul_one
   mul_comm  := PeanoMinus.mul_comm
 
-scoped instance : LinearOrder M where
+noncomputable scoped instance : LinearOrder M where
   le_refl := fun x ↦ Or.inl (by simp)
   le_trans := by
     rintro x y z (rfl | hx) (rfl | hy)
@@ -543,5 +543,3 @@ instance (M : Type*) [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻] : M ⊧ₘ* 𝐑₀ 
 end PeanoMinus
 
 end LO
-
-end

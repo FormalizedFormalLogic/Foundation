@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.ISigmaOne.HFS.Fixpoint
+import Foundation.FirstOrder.ISigma1.HFS.Fixpoint
 
 /-!
 
@@ -6,17 +6,15 @@ import Foundation.Arithmetization.ISigmaOne.HFS.Fixpoint
 
 -/
 
-noncomputable section
+namespace LO.ISigma1
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section cons
 
-instance : Cons V V := ⟨(⟪·, ·⟫ + 1)⟩
+noncomputable instance : Cons V V := ⟨(⟪·, ·⟫ + 1)⟩
 
 scoped infixr:67 " ∷ " => cons
 
@@ -229,7 +227,7 @@ section nth
 
 open Nth
 
-def nth (v i : V) : V := Classical.choose! (graph_existsUnique v i)
+noncomputable def nth (v i : V) : V := Classical.choose! (graph_existsUnique v i)
 
 scoped notation:max v:max ".[" i "]" => nth v i
 
@@ -261,7 +259,7 @@ lemma cons_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
 
 lemma cons_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
-  order_induction_sigma Γ 1 hP (by
+  ISigma1.order_induction Γ hP (by
     intro v ih
     rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩)
     · exact nil
@@ -492,7 +490,7 @@ lemma graph_existsUnique (xs : V) : ∃! y, c.Graph param ⟪xs, y⟫ := by
   rcases c.graph_exists param xs with ⟨y, hy⟩
   exact ExistsUnique.intro y hy (fun y' hy' ↦ c.graph_unique hy' hy)
 
-def result (xs : V) : V := Classical.choose! (c.graph_existsUnique param xs)
+noncomputable def result (xs : V) : V := Classical.choose! (c.graph_existsUnique param xs)
 
 lemma result_graph (xs : V) : c.Graph param ⟪xs, c.result param xs⟫ :=
   Classical.choose!_spec (c.graph_existsUnique param xs)
@@ -553,7 +551,7 @@ section len
 
 open Len
 
-def len (v : V) : V := construction.result ![] v
+noncomputable def len (v : V) : V := construction.result ![] v
 
 @[simp] lemma len_nil : len (0 : V) = 0 := by simp [len, construction]
 
@@ -673,7 +671,7 @@ def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. y = 0” (by simp)
   cons := .mkSigma “y x xs ih. !FirstOrder.Arith.max y x ih” (by simp)
 
-def construction : VecRec.Construction V blueprint where
+noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := 0
   cons _ x _ ih := max x ih
   nil_defined := by intro v; simp [blueprint]
@@ -685,7 +683,7 @@ section listMax
 
 open ListMax
 
-def listMax (v : V) : V := construction.result ![] v
+noncomputable def listMax (v : V) : V := construction.result ![] v
 
 @[simp] lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, construction]
 
@@ -755,7 +753,7 @@ def blueprint : VecRec.Blueprint 1 where
     ∃ l, !lenDef l xs ∧
     (l < k → !consDef y x xs) ∧ (k ≤ l → y = ih)” (by simp)
 
-def construction : VecRec.Construction V blueprint where
+noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := 0
   cons (param x xs ih) := if len xs < param 0 then x ∷ xs else ih
   nil_defined := by intro v; simp [blueprint]
@@ -774,7 +772,7 @@ section takeLast
 
 open TakeLast
 
-def takeLast (v k : V) : V := construction.result ![k] v
+noncomputable def takeLast (v k : V) : V := construction.result ![k] v
 
 @[simp] lemma takeLast_nil : takeLast (0 : V) k = 0 := by simp [takeLast, construction]
 
@@ -831,7 +829,7 @@ lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[le
     rcases show i = len v ∨ i < len v from eq_or_lt_of_le (by simpa [lt_succ_iff_le] using h) with (rfl | hi)
     · simp
     · have : len v - i = len v - (i + 1) + 1 := by
-        rw [←sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
+        rw [←PeanoMinus.sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
       simpa [not_le_of_lt hi, ↓reduceIte, this, nth_cons_succ, not_lt_of_gt hi] using ih hi
 
 end takeLast
@@ -849,7 +847,7 @@ def blueprint : VecRec.Blueprint 1 where
   nil := .mkSigma “y z. !consDef y z 0” (by simp)
   cons := .mkSigma “y x xs ih z. !consDef y x ih” (by simp)
 
-def construction : VecRec.Construction V blueprint where
+noncomputable def construction : VecRec.Construction V blueprint where
   nil param := ?[param 0]
   cons (_ x _ ih) := x ∷ ih
   nil_defined := by intro v; simp [blueprint]
@@ -862,7 +860,7 @@ section concat
 
 open Concat
 
-def concat (v z : V) : V := construction.result ![z] v
+noncomputable def concat (v z : V) : V := construction.result ![z] v
 
 @[simp] lemma concat_nil (z : V) : concat 0 z = ?[z] := by simp [concat, construction]
 
@@ -1013,14 +1011,14 @@ def repeatVec.blueprint : PR.Blueprint 1 where
   zero := .mkSigma “y x. y = 0” (by simp)
   succ := .mkSigma “y ih n x. !consDef y x ih” (by simp)
 
-def repeatVec.construction : PR.Construction V repeatVec.blueprint where
+noncomputable def repeatVec.construction : PR.Construction V repeatVec.blueprint where
   zero := fun _ ↦ 0
   succ := fun x _ ih ↦ x 0 ∷ ih
   zero_defined := by intro v; simp [blueprint]
   succ_defined := by intro v; simp [blueprint]
 
 /-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0`-/
-def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k
+noncomputable def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k
 
 @[simp] lemma repeatVec_zero (x : V) : repeatVec x 0 = 0 := by simp [repeatVec, repeatVec.construction]
 
@@ -1077,7 +1075,7 @@ def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. y = 0” (by simp)
   cons := .mkSigma “y x xs ih. !insertDef y x ih” (by simp)
 
-def construction : VecRec.Construction V blueprint where
+noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ∅
   cons (_ x _ ih) := insert x ih
   nil_defined := by intro v; simp [blueprint, emptyset_def]
@@ -1089,7 +1087,7 @@ section vecToSet
 
 open VecToSet
 
-def vecToSet (v : V) : V := construction.result ![] v
+noncomputable def vecToSet (v : V) : V := construction.result ![] v
 
 @[simp] lemma vecToSet_nil : vecToSet (0 : V) = ∅ := by simp [vecToSet, construction]
 
@@ -1131,4 +1129,4 @@ lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i]
 
 end vecToSet
 
-end LO.Arith
+end LO.ISigma1

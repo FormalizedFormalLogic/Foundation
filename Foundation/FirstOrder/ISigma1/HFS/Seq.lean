@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.ISigmaOne.HFS.Basic
+import Foundation.FirstOrder.ISigma1.HFS.Basic
 
 /-!
 
@@ -6,11 +6,9 @@ import Foundation.Arithmetization.ISigmaOne.HFS.Basic
 
 -/
 
-noncomputable section
+namespace LO.ISigma1
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -59,7 +57,7 @@ lemma lh_exists_uniq (s : V) : ∃! l, (Seq s → domain s = under l) ∧ (¬Seq
       (by simp [show Seq s from ⟨h, l, hl⟩, hl])
   · simp [h]
 
-def lh (s : V) : V := Classical.choose! (lh_exists_uniq s)
+noncomputable def lh (s : V) : V := Classical.choose! (lh_exists_uniq s)
 
 lemma lh_prop (s : V) : (Seq s → domain s = under (lh s)) ∧ (¬Seq s → lh s = 0) := Classical.choose!_spec (lh_exists_uniq s)
 
@@ -102,7 +100,7 @@ lemma Seq.exists {s : V} (h : Seq s) {x : V} (hx : x < lh s) : ∃ y, ⟪x, y⟫
 
 lemma Seq.nth_exists_uniq {s : V} (h : Seq s) {x : V} (hx : x < lh s) : ∃! y, ⟪x, y⟫ ∈ s := h.isMapping x (by simpa [h.domain_eq] using hx)
 
-def Seq.nth {s : V} (h : Seq s) {x : V} (hx : x < lh s) : V := Classical.choose! (h.nth_exists_uniq hx)
+noncomputable def Seq.nth {s : V} (h : Seq s) {x : V} (hx : x < lh s) : V := Classical.choose! (h.nth_exists_uniq hx)
 
 @[simp] lemma Seq.nth_mem {s : V} (h : Seq s) {x : V} (hx : x < lh s) :
     ⟪x, h.nth hx⟫ ∈ s := Classical.choose!_spec (h.nth_exists_uniq hx)
@@ -117,17 +115,19 @@ lemma Seq.lh_eq_of {s : V} (H : Seq s) {l} (h : domain s = under l) : lh s = l :
 
 lemma Seq.lt_lh_iff {s : V} (h : Seq s) {i} : i < lh s ↔ i ∈ domain s := by simp [h.domain_eq]
 
-lemma Seq.lt_lh_of_mem {s : V} (h : Seq s) {i x} (hix : ⟪i, x⟫ ∈ s) : i < lh s := by simp [h.lt_lh_iff, mem_domain_iff]; exact ⟨x, hix⟩
+lemma Seq.lt_lh_of_mem {s : V} (h : Seq s) {i x} (hix : ⟪i, x⟫ ∈ s) : i < lh s := by
+  simpa [h.lt_lh_iff, mem_domain_iff] using ⟨x, hix⟩
 
-def seqCons (s x : V) : V := insert ⟪lh s, x⟫ s
+noncomputable def seqCons (s x : V) : V := insert ⟪lh s, x⟫ s
 
 section znth
 
 def znth_existsUnique (s i : V) : ∃! x, (Seq s ∧ i < lh s → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < lh s) → x = 0) := by
-  by_cases h : Seq s ∧ i < lh s <;> simp [h]
-  exact h.1.nth_exists_uniq h.2
+  by_cases h : Seq s ∧ i < lh s
+  · simpa [h] using h.1.nth_exists_uniq h.2
+  · simp [h]
 
-def znth (s i : V) : V := Classical.choose! (znth_existsUnique s i)
+noncomputable def znth (s i : V) : V := Classical.choose! (znth_existsUnique s i)
 
 protected lemma Seq.znth {s i : V} (h : Seq s) (hi : i < lh s) : ⟪i, znth s i⟫ ∈ s := Classical.choose!_spec (znth_existsUnique s i) |>.1 ⟨h, hi⟩
 
@@ -172,7 +172,7 @@ lemma Seq.isempty_of_lh_eq_zero {s : V} (Hs : Seq s) (h : lh s = 0) : s = ∅ :=
 
 lemma Seq.lt_seqCons {s} (hs : Seq s) (x : V) : s < s ⁀' x :=
   lt_iff_le_and_ne.mpr <| ⟨le_of_subset <| by simp, by
-    simp [seqCons]; intro A
+    simp only [seqCons, ne_eq]; intro A
     have : ⟪lh s, x⟫ ∈ s := by simpa [←A] using mem_insert ⟪lh s, x⟫ s
     simpa using hs.lt_lh_of_mem this⟩
 
@@ -191,11 +191,11 @@ lemma mem_seqCons_iff {i x z s : V} : ⟪i, x⟫ ∈ s ⁀' z ↔ (i = lh s ∧ 
 @[simp] lemma lh_mem_seqCons (s z : V) : ⟪lh s, z⟫ ∈ s ⁀' z := by simp [seqCons]
 
 @[simp] lemma lh_mem_seqCons_iff {s x z : V} (H : Seq s) : ⟪lh s, x⟫ ∈ s ⁀' z ↔ x = z := by
-  simp [seqCons]
+  suffices ⟪lh s, x⟫ ∈ s → x = z by simpa [seqCons]
   intro h; have := H.lt_lh_of_mem h; simp at this
 
 lemma Seq.mem_seqCons_iff_of_lt {s x z : V} (hi : i < lh s) : ⟪i, x⟫ ∈ s ⁀' z ↔ ⟪i, x⟫ ∈ s := by
-  simp [seqCons, hi]
+  suffices i = lh s → x = z → ⟪i, x⟫ ∈ s by simpa [seqCons, hi]
   rintro rfl; simp at hi
 
 @[simp] lemma lh_not_mem {s} (Ss : Seq s) (x : V) : ⟪lh s, x⟫ ∉ s := fun h ↦ by have := Ss.lt_lh_of_mem h; simp at this
@@ -237,7 +237,9 @@ lemma Seq.restr_lh {s : V} (H : Seq s) {i : V} (hi : i ≤ lh s) : lh (s ↾ und
 
 lemma domain_bitRemove_of_isMapping_of_mem {x y s : V} (hs : IsMapping s) (hxy : ⟪x, y⟫ ∈ s) :
     domain (bitRemove ⟪x, y⟫ s) = bitRemove x (domain s) := by
-  apply mem_ext; simp [mem_domain_iff]; intro x₁
+  suffices ∀ x₁, (∃ y₁, (x₁ = x → y₁ ≠ y) ∧ ⟪x₁, y₁⟫ ∈ s) ↔ x₁ ≠ x ∧ ∃ y, ⟪x₁, y⟫ ∈ s by
+    apply mem_ext; simpa [mem_domain_iff]
+  intro x₁
   constructor
   · rintro ⟨y₁, hy₁, hx₁y₁⟩; exact ⟨by rintro rfl; exact hy₁ rfl (hs.uniq hx₁y₁ hxy), y₁, hx₁y₁⟩
   · intro ⟨hx, y₁, hx₁y₁⟩
@@ -249,7 +251,8 @@ lemma Seq.eq_of_eq_of_subset {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂)
   constructor
   · intro hu; exact h hu
   · intro hu
-    have : π₁ u < lh s₁ := by simpa [hl] using H₂.lt_lh_of_mem (show ⟪π₁ u, π₂ u⟫ ∈ s₂ from by simpa using hu)
+    have : π₁ u < lh s₁ := by
+      simpa [hl] using H₂.lt_lh_of_mem (show ⟪π₁ u, π₂ u⟫ ∈ s₂ from by simpa using hu)
     have : ∃ y, ⟪π₁ u, y⟫ ∈ s₁ := H₁.exists this
     rcases this with ⟨y, hy⟩
     have : y = π₂ u := H₂.isMapping.uniq (h hy) (show ⟪π₁ u, π₂ u⟫ ∈ s₂ from by simpa using hu)
@@ -276,7 +279,8 @@ lemma Seq.lh_ext {s₁ s₂ : V} (H₁ : Seq s₁) (H₂ : Seq s₂) (h : lh s�
       have ha₁a₂ : a₁ = a₂ := (H₂.seqCons a₂).isMapping.uniq hs₁ hs₂
       have : s₁ ⊆ s₂ := subset_pair <| by
         intro i x hix
-        have : i = lh s₂ ∧ x = a₂ ∨ ⟪i, x⟫ ∈ s₂ := by simpa [mem_seqCons_iff, h] using Seq.subset_seqCons s₁ a₁ hix
+        have : i = lh s₂ ∧ x = a₂ ∨ ⟪i, x⟫ ∈ s₂ := by
+          simpa [mem_seqCons_iff, h] using Seq.subset_seqCons s₁ a₁ hix
         rcases this with (⟨rfl, rfl⟩ | hix₂)
         · have := H₁.lt_lh_of_mem hix; simp [hs₁s₂] at this
         · assumption
@@ -299,8 +303,7 @@ lemma Seq.cases_iff {s : V} : Seq s ↔ s = ∅ ∨ ∃ x s', Seq s' ∧ s = s' 
     have hdoms' : domain s' = under i := by
       simp only [domain_bitRemove_of_isMapping_of_mem h.isMapping his, h.domain_eq, s']
       apply mem_ext
-      simp [lhs_eq, and_or_left]
-      intro j hj; exact ne_of_lt hj
+      simpa [lhs_eq, and_or_left] using fun j hj ↦ ne_of_lt hj
     have hs' : Seq s' := ⟨ h.isMapping.of_subset (by simp [s']), i, hdoms' ⟩
     have hs'i : lh s' = i := by simpa [hs'.domain_eq] using hdoms'
     exact ⟨h.nth hi, s', hs', mem_ext <| fun v ↦ by
@@ -318,7 +321,7 @@ theorem seq_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
   (hnil : P ∅) (hcons : ∀ s x, Seq s → P s → P (s ⁀' x)) :
     ∀ {s : V}, Seq s → P s := by
   intro s sseq
-  induction s using ISigma1.sigma1_order_induction
+  induction s using ISigma1.order_induction
   · exact Γ
   · definability
   case ind s ih =>
@@ -394,7 +397,7 @@ theorem sigmaOne_skolem_seq! {R : V → V → Prop} (hP : 𝚺₁-Relation R) {l
 
 section seqToVec
 
-def vecToSeq : {n : ℕ} → (Fin n → V) → V
+noncomputable def vecToSeq : {n : ℕ} → (Fin n → V) → V
   | 0,     _ => ∅
   | n + 1, v => vecToSeq (v ·.castSucc) ⁀' v (Fin.last n)
 
@@ -404,8 +407,9 @@ def vecToSeq : {n : ℕ} → (Fin n → V) → V
     vecToSeq (v <: a) = vecToSeq v ⁀' a := by simp [vecToSeq]
 
 @[simp] lemma vecToSeq_seq {n} (v : Fin n → V) : Seq (vecToSeq v) := by
-  induction' n with n ih <;> simp [vecToSeq]
-  exact (ih _).seqCons _
+  induction' n with n ih
+  · simp [vecToSeq]
+  · exact (ih _).seqCons _
 
 @[simp] lemma lh_vecToSeq {n} (v : Fin n → V) : lh (vecToSeq v) = n := by
   induction' n with n ih <;> simp [vecToSeq, *]
@@ -413,11 +417,9 @@ def vecToSeq : {n : ℕ} → (Fin n → V) → V
 lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟪(i : V), v i⟫ ∈ vecToSeq v := by
   induction' n with n ih
   · exact i.elim0
-  · simp [vecToSeq]
-    cases' i using Fin.lastCases with i
-    · simp [mem_seqCons_iff]
-    · simp [mem_seqCons_iff]
-      right; exact ih (v ·.castSucc) i
+  · cases' i using Fin.lastCases with i
+    · simp [vecToSeq, mem_seqCons_iff]
+    · simpa [vecToSeq, mem_seqCons_iff] using Or.inr <| ih (v ·.castSucc) i
 
 end seqToVec
 
@@ -470,8 +472,10 @@ lemma order_ball_ISigma1.sigma1_succ_induction {f : V → V → V} (hf : 𝚺₁
       exact ⟨W ⁀' m₁, SW.seqCons m₁, by simp [SW, hkW], Seq.subset_seqCons _ _ hW₀, by
         intro l hl m _ m' _ hm hm' x' hx' y' hy'
         rcases show l ≤ k from lt_succ_iff_le.mp hl with (rfl | hl)
-        · have hmm₀ : m = m₀ := by simp [mem_seqCons_iff, ←hkW] at hm; exact SW.isMapping.uniq hm (by simp [m₀])
-          have hm'm₁ : m' = m₁ := by simpa [SW, hkW, mem_seqCons_iff] using hm'
+        · have hmm₀ : m = m₀ :=
+            SW.isMapping.uniq (by simpa [mem_seqCons_iff, ←hkW] using hm) (by simp [m₀])
+          have hm'm₁ : m' = m₁ := by
+            simpa [SW, hkW, mem_seqCons_iff] using hm'
           simpa [hm'm₁] using hm₁ x' hx' y' (by simp [←hmm₀, hy'])
         · have Hm : ⟪l, m⟫ ∈ W := Seq.mem_seqCons_iff_of_lt (by simpa [←hkW]) |>.mp hm
           have Hm' : ⟪l + 1, m'⟫ ∈ W := Seq.mem_seqCons_iff_of_lt (by simpa [←hkW]) |>.mp hm'
@@ -504,7 +508,7 @@ lemma order_ball_ISigma1.sigma1_succ_induction {f : V → V → V} (hf : 𝚺₁
       let m₁ := SW.nth (show x - i < lh W by simp [←hxW, lt_succ_iff_le])
       have : f x' y' ≤ m₁ :=
         hWₛ (x - (i + 1)) (tsub_lt_iff_left hi |>.mpr (by simp)) m (lt_of_mem_rng hm) m₁ (by simp [m₁]) hm
-          (by rw [←sub_sub, sub_add_self_of_le (show 1 ≤ x - i from le_tsub_of_add_le_left hi)]; simp [m₁])
+          (by rw [←PeanoMinus.sub_sub, sub_add_self_of_le (show 1 ≤ x - i from le_tsub_of_add_le_left hi)]; simp [m₁])
           x' (by simp [tsub_tsub_cancel_of_le hi, hx']) y' hy'
       exact ih m₁ (by simp [m₁]) (by simp [m₁]) x'' (lt_succ_iff_le.mp (lt_of_lt_of_le hx'' hx')) y'' (le_trans hy'' this)
   exact this x (by rfl) y (lt_of_mem_rng hW₀) (by simpa using hW₀) x (by rfl) y (by rfl)
@@ -520,13 +524,12 @@ lemma order_ball_induction₂_sigma1 {fy fz : V → V → V → V}
     ∀ x y z, P x y z := by
   let Q : V → V → Prop := fun x w ↦ P x (π₁ w) (π₂ w)
   have hQ : 𝚺₁-Relation Q := by
-    simp [Q]
     apply Boldface.comp₃ (.var _)
       (BoldfaceFunction.comp₁ (.var _))
       (BoldfaceFunction.comp₁ (.var _))
   let f : V → V → V := fun x w ↦ ⟪fy x (π₁ w) (π₂ w), fz x (π₁ w) (π₂ w)⟫
   have hf : 𝚺₁-Function₂ f := by
-    simp [f]
+    simp only [f, Q]
     apply BoldfaceFunction.comp₂
     · apply BoldfaceFunction.comp₃ (.var _)
       · apply BoldfaceFunction.comp₁ (.var _)
@@ -545,7 +548,6 @@ lemma order_ball_induction₃_sigma1 {fy fz fw : V → V → V → V → V}
     ∀ x y z w, P x y z w := by
   let Q : V → V → Prop := fun x v ↦ P x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))
   have hQ : 𝚺₁-Relation Q := by
-    simp [Q]
     apply Boldface.comp₄
       (.var _)
       (BoldfaceFunction.comp₁ <| .var _)
@@ -554,7 +556,7 @@ lemma order_ball_induction₃_sigma1 {fy fz fw : V → V → V → V → V}
   let f : V → V → V := fun x v ↦
     ⟪fy x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fz x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fw x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))⟫
   have hf : 𝚺₁-Function₂ f := by
-    simp [f]
+    simp only [f]
     apply BoldfaceFunction.comp₂
     · apply BoldfaceFunction.comp₄
         (.var _)
@@ -579,6 +581,4 @@ lemma order_ball_induction₃_sigma1 {fy fz fw : V → V → V → V → V}
     x ⟪y, z, w⟫
   simpa [Q] using this
 
-end LO.Arith
-
-end
+end LO.ISigma1
