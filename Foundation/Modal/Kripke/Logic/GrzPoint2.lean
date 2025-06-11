@@ -1,7 +1,7 @@
 import Foundation.Vorspiel.List.Chain
 import Foundation.Vorspiel.Fin.Supplemental
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.SobK2
+import Foundation.Modal.Kripke.Logic.S4Point2M
 import Mathlib.Data.Finite.Sum
 import Mathlib.Data.Set.Finite.Basic
 import Mathlib.Data.Fintype.Pigeonhole
@@ -339,14 +339,14 @@ theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
 
 @[simp]
-theorem GrzPoint2.proper_extension_of_SobK2 : Logic.SobK2 ⊂ Logic.GrzPoint2 := by
+theorem GrzPoint2.proper_extension_of_S4Point2M : Logic.S4Point2M ⊂ Logic.GrzPoint2 := by
   constructor;
-  . rw [SobK2.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
+  . rw [S4Point2M.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
     rintro φ hφ F ⟨_, _, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.preorder_confluent_mckinsey ⊧ φ by
-      rw [SobK2.Kripke.preorder_confluent_mckinsey];
+      rw [S4Point2M.Kripke.preorder_confluent_mckinsey];
       tauto;
     use Axioms.Grz (.atom 0);
     constructor;
@@ -371,7 +371,7 @@ theorem GrzPoint2.proper_extension_of_SobK2 : Logic.SobK2 ⊂ Logic.GrzPoint2 :=
 
 @[simp]
 lemma GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by
-  trans Logic.SobK2 <;> simp;
+  trans Logic.S4Point2M <;> simp;
 
 end Logic
 

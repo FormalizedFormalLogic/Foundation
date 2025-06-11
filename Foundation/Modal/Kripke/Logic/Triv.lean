@@ -2,7 +2,7 @@ import Foundation.Modal.Kripke.Logic.KT
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Rooted
 import Foundation.Modal.Kripke.Logic.GrzPoint3
-import Foundation.Modal.Kripke.Logic.SobK4
+import Foundation.Modal.Kripke.Logic.S4Point4M
 
 namespace LO.Modal
 
@@ -155,14 +155,14 @@ theorem Triv.proper_extension_of_GrzPoint3 : Logic.GrzPoint3 ⊂ Logic.Triv := b
         . trivial;
 
 @[simp]
-theorem Triv.proper_extension_of_SobK4 : Logic.SobK4 ⊂ Logic.Triv := by
+theorem Triv.proper_extension_of_S4Point4M : Logic.S4Point4M ⊂ Logic.Triv := by
   constructor;
-  . rw [SobK4.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
+  . rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨by tauto, inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.preorder_sobocinski_mckinsey ⊧ φ by
-      rw [SobK4.Kripke.preorder_sobocinski_mckinsey];
+      rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey];
       tauto;
     use Axioms.Tc (.atom 0);
     constructor;

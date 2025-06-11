@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Logic.SobK2
+import Foundation.Modal.Kripke.Logic.S4Point2M
 import Foundation.Modal.Kripke.Logic.S4Point3
 
 namespace LO.Modal
@@ -9,9 +9,9 @@ open GeachConfluent
 
 abbrev Kripke.FrameClass.preorder_connected_mckinsey : FrameClass := { F | IsPreorder _ F ∧ IsConnected _ F ∧ SatisfiesMcKinseyCondition _ F }
 
-namespace Hilbert.SobK3.Kripke
+namespace Hilbert.S4Point3M.Kripke
 
-instance sound : Sound (Hilbert.SobK3) Kripke.FrameClass.preorder_connected_mckinsey := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.S4Point3M) Kripke.FrameClass.preorder_connected_mckinsey := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -19,12 +19,12 @@ instance sound : Sound (Hilbert.SobK3) Kripke.FrameClass.preorder_connected_mcki
   . exact validate_axiomM_of_satisfiesMcKinseyCondition;
   . exact validate_AxiomPoint3_of_connected;
 
-instance consistent : Entailment.Consistent (Hilbert.SobK3) :=
+instance consistent : Entailment.Consistent (Hilbert.S4Point3M) :=
   consistent_of_sound_frameclass FrameClass.preorder_connected_mckinsey $ by
     use whitepoint;
     refine ⟨inferInstance, inferInstance, inferInstance⟩;
 
-instance canonical : Canonical (Hilbert.SobK3) Kripke.FrameClass.preorder_connected_mckinsey := ⟨by
+instance canonical : Canonical (Hilbert.S4Point3M) Kripke.FrameClass.preorder_connected_mckinsey := ⟨by
   apply Set.mem_setOf_eq.mpr;
   refine ⟨?_, ?_, ?_⟩;
   . constructor;
@@ -32,9 +32,9 @@ instance canonical : Canonical (Hilbert.SobK3) Kripke.FrameClass.preorder_connec
   . infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.SobK3) Kripke.FrameClass.preorder_connected_mckinsey := inferInstance
+instance complete : Complete (Hilbert.S4Point3M) Kripke.FrameClass.preorder_connected_mckinsey := inferInstance
 
-end Hilbert.SobK3.Kripke
+end Hilbert.S4Point3M.Kripke
 
 namespace Logic
 
@@ -42,17 +42,17 @@ open Formula
 open Entailment
 open Kripke
 
-lemma SobK3.Kripke.preorder_connected_mckinsey : Logic.SobK3 = FrameClass.preorder_connected_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+lemma S4Point3M.Kripke.preorder_connected_mckinsey : Logic.S4Point3M = FrameClass.preorder_connected_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
-theorem SobK3.proper_extension_of_SobK2 : Logic.SobK2 ⊂ Logic.SobK3 := by
+theorem S4Point3M.proper_extension_of_S4Point2M : Logic.S4Point2M ⊂ Logic.S4Point3M := by
   constructor;
-  . rw [SobK2.Kripke.preorder_confluent_mckinsey, SobK3.Kripke.preorder_connected_mckinsey]
+  . rw [S4Point2M.Kripke.preorder_confluent_mckinsey, S4Point3M.Kripke.preorder_connected_mckinsey]
     rintro φ hφ F ⟨_, _, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.SobK3 ⊢! φ ∧ ¬Kripke.FrameClass.preorder_confluent_mckinsey ⊧ φ by
-      rw [SobK2.Kripke.preorder_confluent_mckinsey];
+  . suffices ∃ φ, Hilbert.S4Point3M ⊢! φ ∧ ¬Kripke.FrameClass.preorder_confluent_mckinsey ⊧ φ by
+      rw [S4Point2M.Kripke.preorder_confluent_mckinsey];
       tauto;
     use (Axioms.Point3 (.atom 0) (.atom 1));
     constructor;
@@ -79,10 +79,10 @@ theorem SobK3.proper_extension_of_SobK2 : Logic.SobK2 ⊂ Logic.SobK3 := by
         . use 2; simp only [M]; refine ⟨?_, ?_, ?_, ?_⟩ <;> omega;
 
 @[simp]
-theorem SobK3.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.SobK3 := by
+theorem S4Point3M.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.S4Point3M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.SobK3 ⊢! φ ∧ ¬FrameClass.connected_preorder ⊧ φ by
+  . suffices ∃ φ, Hilbert.S4Point3M ⊢! φ ∧ ¬FrameClass.connected_preorder ⊧ φ by
       rw [S4Point3.Kripke.connected_preorder];
       tauto;
     use (Axioms.M (.atom 0))
