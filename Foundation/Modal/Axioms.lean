@@ -70,10 +70,12 @@ protected abbrev Point4 := ◇□φ ➝ φ ➝ □φ
 -/
 protected abbrev Grz := □(□(φ ➝ □φ) ➝ φ) ➝ φ
 
+protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
+
 /--
   Axiom for McKinsey condition
 -/
-protected abbrev M := (□◇φ ➝ ◇□φ)
+protected abbrev M := □◇φ ➝ ◇□φ
 
 /--
   Axiom for
@@ -82,11 +84,9 @@ protected abbrev M := (□◇φ ➝ ◇□φ)
 -/
 protected abbrev L := □(□φ ➝ φ) ➝ □φ
 
-protected abbrev H := □(□φ ⭤ φ) ➝ □φ
-
 protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
 
-protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
+protected abbrev H := □(□φ ⭤ φ) ➝ □φ
 
 protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
 

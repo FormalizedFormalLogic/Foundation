@@ -1,4 +1,5 @@
 import Foundation.Modal.Hilbert.K
+import Foundation.Modal.Entailment.GL
 import Foundation.Modal.Entailment.Grz
 
 namespace LO.Modal
@@ -182,6 +183,20 @@ instance [hGrz : H.HasGrz] : Entailment.HasAxiomGrz H where
     constructor;
     . exact hGrz.mem_Grz;
     . use (λ b => if hGrz.p = b then φ else (.atom b));
+      simp;
+
+
+class HasDum (H : Hilbert α) where
+  p : α
+  mem_Dum : Axioms.Dum (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasDum] : Entailment.HasAxiomDum H where
+  Dum φ := by
+    apply maxm;
+    use Axioms.Dum (.atom $ HasDum.p H);
+    constructor;
+    . exact HasDum.mem_Dum;
+    . use (λ b => if b = (HasDum.p H) then φ else (.atom b));
       simp;
 
 
@@ -675,6 +690,22 @@ instance : Entailment.GL (Hilbert.GL) where
 end Hilbert.GL
 
 
+protected abbrev Hilbert.GLPoint2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}⟩
+protected abbrev Logic.GLPoint2 := Hilbert.GLPoint2.logic
+
+namespace Hilbert.GLPoint2
+
+instance : (Hilbert.GLPoint2).HasK where p := 0; q := 1;
+instance : (Hilbert.GLPoint2).HasL where p := 0
+instance : (Hilbert.GLPoint2).HasWeakPoint2 where p := 0; q := 1;
+instance : Entailment.GLPoint2 (Hilbert.GLPoint2) where
+
+end Hilbert.GLPoint2
+
+-- TODO: show it is proper
+lemma Logic.GLPoint2.is_extension_of_GL : Logic.GL ⊆ Logic.GLPoint2 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+
+
 protected abbrev Hilbert.GLPoint3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}⟩
 protected abbrev Logic.GLPoint3 := Hilbert.GLPoint3.logic
 
@@ -686,6 +717,61 @@ instance : (Hilbert.GLPoint3).HasWeakPoint3 where p := 0; q := 1;
 instance : Entailment.GLPoint3 (Hilbert.GLPoint3) where
 
 end Hilbert.GLPoint3
+
+
+protected abbrev Hilbert.K4Z : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Z (.atom 0)}⟩
+protected abbrev Logic.K4Z := Hilbert.K4Z.logic
+
+namespace Hilbert.K4Z
+
+instance : (Hilbert.K4Z).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Z).HasFour where p := 0
+instance : (Hilbert.K4Z).HasZ where p := 0
+instance : Entailment.K4Z (Hilbert.K4Z) where
+
+end Hilbert.K4Z
+
+-- TODO: show it is proper
+lemma Logic.K4Z.is_extension_of_K4 : Logic.K4 ⊆ Logic.K4Z := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.GL.is_extension_of_K4Z : Logic.K4Z ⊆ Logic.GL := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+
+
+protected abbrev Hilbert.K4Point2Z : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Z (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}⟩
+protected abbrev Logic.K4Point2Z := Hilbert.K4Point2Z.logic
+
+namespace Hilbert.K4Point2Z
+
+instance : (Hilbert.K4Point2Z).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Point2Z).HasFour where p := 0
+instance : (Hilbert.K4Point2Z).HasZ where p := 0
+instance : (Hilbert.K4Point2Z).HasWeakPoint2 where p := 0; q := 1;
+instance : Entailment.K4Point2Z (Hilbert.K4Point2Z) where
+
+end Hilbert.K4Point2Z
+
+-- TODO: show it is proper
+lemma Logic.K4Point2Z.is_extension_of_K4Point2 : Logic.K4Point2 ⊆ Logic.K4Point2Z := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.K4Point2Z.is_extension_of_K4Z : Logic.K4Z ⊆ Logic.K4Point2Z := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.GLPoint2.is_extension_of_K4Point2Z : Logic.K4Point2Z ⊆ Logic.GLPoint2 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+
+
+protected abbrev Hilbert.K4Point3Z : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Z (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}⟩
+protected abbrev Logic.K4Point3Z := Hilbert.K4Point3Z.logic
+
+namespace Hilbert.K4Point3Z
+
+instance : (Hilbert.K4Point3Z).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Point3Z).HasFour where p := 0
+instance : (Hilbert.K4Point3Z).HasZ where p := 0
+instance : (Hilbert.K4Point3Z).HasWeakPoint3 where p := 0; q := 1;
+instance : Entailment.K4Point3Z (Hilbert.K4Point3Z) where
+
+end Hilbert.K4Point3Z
+
+-- TODO: show it is proper
+lemma Logic.K4Point3Z.is_extension_of_K4Point3 : Logic.K4Point3 ⊆ Logic.K4Point3Z := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.K4Point3Z.is_extension_of_K4Z : Logic.K4Z ⊆ Logic.K4Point3Z := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.GLPoint3.is_extension_of_K4Point3Z : Logic.K4Point3Z ⊆ Logic.GLPoint3 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
 
 
 protected abbrev Hilbert.KH : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.H (.atom 0)}⟩
@@ -708,10 +794,9 @@ instance : (Hilbert.Grz).HasK where p := 0; q := 1;
 instance : (Hilbert.Grz).HasGrz where p := 0
 instance : Entailment.Grz (Hilbert.Grz) where
 
+instance : Hilbert.KT ⪯ Hilbert.Grz := weakerThan_of_dominate_axioms $ by simp;
+
 end Hilbert.Grz
-
-lemma Hilbert.KT_weakerThan_Grz : Hilbert.KT ⪯ Hilbert.Grz := weakerThan_of_dominate_axioms $ by simp;
-
 
 
 protected abbrev Hilbert.GrzPoint2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Point2 (.atom 0)}⟩
@@ -722,7 +807,7 @@ namespace Hilbert.GrzPoint2
 instance : (Hilbert.GrzPoint2).HasK where p := 0; q := 1;
 instance : (Hilbert.GrzPoint2).HasGrz where p := 0
 instance : (Hilbert.GrzPoint2).HasPoint2 where p := 0
-instance : Entailment.Grz (Hilbert.GrzPoint2) where
+instance : Entailment.GrzPoint2 (Hilbert.GrzPoint2) where
 
 end Hilbert.GrzPoint2
 
@@ -735,9 +820,68 @@ namespace Hilbert.GrzPoint3
 instance : (Hilbert.GrzPoint3).HasK where p := 0; q := 1;
 instance : (Hilbert.GrzPoint3).HasGrz where p := 0
 instance : (Hilbert.GrzPoint3).HasPoint3 where p := 0; q := 1;
-instance : Entailment.Grz (Hilbert.GrzPoint3) where
+instance : Entailment.GrzPoint3 (Hilbert.GrzPoint3) where
 
 end Hilbert.GrzPoint3
+
+
+protected abbrev Hilbert.Dum : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dum (.atom 0)}⟩
+protected abbrev Logic.Dum := Hilbert.Dum.logic
+
+namespace Hilbert.Dum
+
+instance : (Hilbert.Dum).HasK where p := 0; q := 1;
+instance : (Hilbert.Dum).HasT where p := 0
+instance : (Hilbert.Dum).HasFour where p := 0
+instance : (Hilbert.Dum).HasDum where p := 0
+instance : Entailment.Dum (Hilbert.Dum) where
+
+end Hilbert.Dum
+
+-- TODO: show it is proper
+lemma Logic.Dum.is_extension_of_S4 : Logic.S4 ⊆ Logic.Dum := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.Grz.is_extension_of_Dum : Logic.Dum ⊆ Logic.Grz := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+
+
+protected abbrev Hilbert.DumPoint2 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dum (.atom 0), Axioms.Point2 (.atom 0)}⟩
+protected abbrev Logic.DumPoint2 := Hilbert.DumPoint2.logic
+
+namespace Hilbert.DumPoint2
+
+instance : (Hilbert.DumPoint2).HasK where p := 0; q := 1;
+instance : (Hilbert.DumPoint2).HasT where p := 0
+instance : (Hilbert.DumPoint2).HasFour where p := 0
+instance : (Hilbert.DumPoint2).HasDum where p := 0
+instance : (Hilbert.DumPoint2).HasPoint2 where p := 0
+instance : Entailment.DumPoint2 (Hilbert.DumPoint2) where
+
+end Hilbert.DumPoint2
+
+-- TODO: show it is proper
+lemma Logic.DumPoint2.is_extension_of_Dum : Logic.Dum ⊆ Logic.DumPoint2 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.DumPoint2.is_extension_of_S4Point2 : Logic.S4Point2 ⊆ Logic.DumPoint2 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.GrzPoint2.is_extension_of_DumPoint2 : Logic.DumPoint2 ⊆ Logic.GrzPoint2 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+
+
+protected abbrev Hilbert.DumPoint3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dum (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
+protected abbrev Logic.DumPoint3 := Hilbert.DumPoint3.logic
+
+namespace Hilbert.DumPoint3
+
+instance : (Hilbert.DumPoint3).HasK where p := 0; q := 1;
+instance : (Hilbert.DumPoint3).HasT where p := 0
+instance : (Hilbert.DumPoint3).HasFour where p := 0
+instance : (Hilbert.DumPoint3).HasDum where p := 0
+instance : (Hilbert.DumPoint3).HasPoint3 where p := 0; q := 1;
+instance : Entailment.DumPoint3 (Hilbert.DumPoint3) where
+
+end Hilbert.DumPoint3
+
+-- TODO: show it is proper
+lemma Logic.DumPoint3.is_extension_of_Dum : Logic.Dum ⊆ Logic.DumPoint3 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.DumPoint3.is_extension_of_S4Point3 : Logic.S4Point3 ⊆ Logic.DumPoint3 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+lemma Logic.GrzPoint3.is_extension_of_DumPoint3 : Logic.DumPoint3 ⊆ Logic.GrzPoint3 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
+
 
 
 protected abbrev Hilbert.Ver : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Ver (.atom 0)}⟩
