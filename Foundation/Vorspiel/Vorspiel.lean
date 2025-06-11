@@ -141,11 +141,12 @@ lemma eq_vecCons' (s : Fin (n + 1) → C) : s 0 :> (s ·.succ) = s :=
 
 lemma vecCons_assoc (a b : α) (s : Fin n → α) :
     a :> (s <: b) = (a :> s) <: b := by
-  funext x; cases' x using Fin.cases with x <;> simp
-  cases x using Fin.lastCases
-  · simp [Fin.succ_castSucc]
-  case cast i =>
-    simp only [rightConcat_castSucc, Fin.succ_castSucc i, cons_val_succ]
+  funext x; cases' x using Fin.cases with x
+  · simp
+  · cases x using Fin.lastCases
+    · simp [Fin.succ_castSucc]
+    case cast i =>
+      simp; simp only [rightConcat_castSucc, Fin.succ_castSucc i, cons_val_succ]
 
 def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decidable (v i = w i)) → Decidable (v = w)
   | 0,     _, _, _ => by simpa [Matrix.empty_eq] using isTrue trivial
@@ -444,7 +445,24 @@ lemma forall_le_vec_iff_forall_le_forall_vec [LE α] {P : (Fin (k + 1) → α) �
   · intro h v hv
     simpa using h (v 0) (hv 0) (v ·.succ) (hv ·.succ)
 
+@[inline] def addCast (m) : Fin n → Fin (m + n) :=
+  castLE <| Nat.le_add_left n m
+
+@[simp] lemma addCast_val (i : Fin n) : (i.addCast m : ℕ) = i := rfl
+
 end Fin
+
+namespace Matrix
+
+variable {α : Type*}
+
+@[simp] lemma appeendr_addCast (u : Fin m → α) (v : Fin n → α) (i : Fin m) :
+    appendr u v (i.addCast n) = u i := by simp [appendr, vecAppend_eq_ite]
+
+@[simp] lemma appeendr_addNat (u : Fin m → α) (v : Fin n → α) (i : Fin n) :
+    appendr u v (i.addNat m) = v i := by simp [appendr, vecAppend_eq_ite]
+
+end Matrix
 
 namespace Fintype
 variable {ι : Type _} [Fintype ι]

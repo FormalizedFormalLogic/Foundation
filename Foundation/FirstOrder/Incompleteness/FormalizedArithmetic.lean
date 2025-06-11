@@ -1,4 +1,4 @@
-import Foundation.Arithmetization.ISigmaOne.Metamath
+import Foundation.FirstOrder.ISigma1.Metamath
 
 /-!
 
@@ -6,19 +6,16 @@ import Foundation.Arithmetization.ISigmaOne.Metamath
 
 -/
 
-noncomputable section
-
 open Classical
+namespace LO.ISigma1.Metamath
 
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
-namespace Formalized
+namespace Arithmetization
 
 variable (V)
 
@@ -41,7 +38,7 @@ class R₀Theory (T : LOR.TTheory (V := V)) where
   ne {n m : V} : n ≠ m → T ⊢ ↑n ≠' ↑m
   ltNumeral (n : V) : T ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all
 
-abbrev oneAbbrev {n} : ⌜ℒₒᵣ⌝[V].Semiterm n := (1 : V)
+noncomputable abbrev oneAbbrev {n} : ⌜ℒₒᵣ⌝[V].Semiterm n := (1 : V)
 
 scoped notation "^1" => oneAbbrev
 
@@ -64,7 +61,7 @@ section R₀Theory
 
 variable [R₀Theory T]
 
-def eqRefl (t : ⌜ℒₒᵣ⌝.Term) : T ⊢ t =' t := by
+noncomputable def eqRefl (t : ⌜ℒₒᵣ⌝.Term) : T ⊢ t =' t := by
   have : T ⊢ (#'0 =' #'0).all := R₀Theory.refl
   simpa [Language.Semiformula.substs₁] using specialize this t
 
@@ -79,7 +76,7 @@ noncomputable def replace (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜�
 
 lemma replace! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' u ➝ φ^/[t.sing] ➝ φ^/[u.sing] := ⟨replace T φ t u⟩
 
-def eqSymm (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ t₂ =' t₁ := by
+noncomputable def eqSymm (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ t₂ =' t₁ := by
   apply deduct'
   let Γ := [t₁ =' t₂]
   have e₁ : Γ ⊢[T] t₁ =' t₂ := FiniteContext.byAxm (by simp [Γ])
@@ -92,7 +89,7 @@ lemma eq_symm! (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ t₂
 
 lemma eq_symm'! {t₁ t₂ : ⌜ℒₒᵣ⌝.Term} (h : T ⊢! t₁ =' t₂) : T ⊢! t₂ =' t₁ := eq_symm! T t₁ t₂ ⨀ h
 
-def eqTrans (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ t₂ =' t₃ ➝ t₁ =' t₃ := by
+noncomputable def eqTrans (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ t₂ =' t₃ ➝ t₁ =' t₃ := by
   apply deduct'
   apply deduct
   let Γ := [t₂ =' t₃, t₁ =' t₂]
@@ -223,7 +220,7 @@ noncomputable def bexReplace (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : �
 lemma bex_replace! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) :
     T ⊢! t =' u ➝ φ.bex t ➝ φ.bex u := ⟨bexReplace T φ t u⟩
 
-def eqComplete {n m : V} (h : n = m) : T ⊢ ↑n =' ↑m := by
+noncomputable def eqComplete {n m : V} (h : n = m) : T ⊢ ↑n =' ↑m := by
   rcases h; exact eqRefl T _
 
 lemma eq_complete! {n m : V} (h : n = m) : T ⊢! ↑n =' ↑m := ⟨eqComplete T h⟩
@@ -240,14 +237,14 @@ def neComplete {n m : V} (h : n ≠ m) : T ⊢ ↑n ≠' ↑m := R₀Theory.ne h
 
 lemma ne_complete! {n m : V} (h : n ≠ m) : T ⊢! ↑n ≠' ↑m := ⟨neComplete T h⟩
 
-def ltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t <' ↑n ⭤ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
+noncomputable def ltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t <' ↑n ⭤ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
   have : T ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := R₀Theory.ltNumeral n
   simpa [Language.SemitermVec.q_of_pos, Language.Semiformula.substs₁] using specialize this t
 
 noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t ≮' ↑n ⭤ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by
   simpa using ENN_of_E <| ltNumeral T t n
 
-def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
+noncomputable def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
   have : T ⊢ ↑n <' ↑m ⭤ _ := ltNumeral T n m
   apply K_right this ⨀ ?_
   apply disj (i := m - (n + 1)) _ (by simpa using sub_succ_lt_self h)
@@ -305,8 +302,6 @@ end R₀Theory
 
 end TProof
 
-end Formalized
+end Arithmetization
 
-end LO.Arith
-
-end
+end LO.ISigma1.Metamath

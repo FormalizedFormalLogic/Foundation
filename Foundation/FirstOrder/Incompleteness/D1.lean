@@ -1,10 +1,16 @@
-import Foundation.Incompleteness.Arith.Theory
+import Foundation.FirstOrder.Incompleteness.Theory
+import Foundation.FirstOrder.ISigma1.Metamath.CodedTheory
 
-noncomputable section
+/-!
+# Derivability condition D1
+
+-/
+
+open Encodable LO FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 namespace LO.FirstOrder
 
-open LO.Arith FirstOrder.Arith
+open Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -16,12 +22,12 @@ namespace Derivation2
 
 def cast [L.DecidableEq] {T : Theory L} (d : T ⊢₂ Γ) (h : Γ = Δ) : T ⊢₂ Δ := h ▸ d
 
-noncomputable def Sequent.codeIn (Γ : Finset (SyntacticFormula L)) : V := ∑ φ ∈ Γ, exp (⌜φ⌝ : V)
+noncomputable def Sequent.codeIn (Γ : Finset (SyntacticFormula L)) : V := ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V)
 
 noncomputable instance : GoedelQuote (Finset (SyntacticFormula L)) V := ⟨Sequent.codeIn V⟩
 
 omit [L.DecidableEq] in
-lemma Sequent.codeIn_def (Γ : Finset (SyntacticFormula L)) : ⌜Γ⌝ = ∑ φ ∈ Γ, exp (⌜φ⌝ : V) := rfl
+lemma Sequent.codeIn_def (Γ : Finset (SyntacticFormula L)) : ⌜Γ⌝ = ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V) := rfl
 
 variable {V}
 
@@ -35,10 +41,11 @@ lemma Sequent.mem_codeIn_iff {Γ : Finset (SyntacticFormula L)} {φ} : ⌜φ⌝ 
   induction Γ using Finset.induction generalizing φ
   case empty => simp [Sequent.codeIn_def]
   case insert a Γ ha ih =>
-    have : exp ⌜a⌝ + ∑ φ ∈ Γ, exp (⌜φ⌝ : V) = insert (⌜a⌝ : V) (⌜Γ⌝ : V) := by
-      simp [insert, bitInsert, (not_iff_not.mpr ih.symm).mp ha, add_comm]
+    have : Exp.exp ⌜a⌝ + ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V) = insert (⌜a⌝ : V) (⌜Γ⌝ : V) := by
+      suffices ∑ φ ∈ Γ, Exp.exp ⌜φ⌝ = ⌜Γ⌝ by
+        simpa [insert, bitInsert, (not_iff_not.mpr ih.symm).mp ha, add_comm]
       rw [Sequent.codeIn_def]
-    simp [ha, Sequent.codeIn_def]
+    simp only [codeIn_def, ha, not_false_eq_true, Finset.sum_insert, Finset.mem_insert]
     rw [this]
     simp [←ih]
 
@@ -57,7 +64,7 @@ omit [L.DecidableEq] in
 @[simp] lemma Sequent.codeIn_insert [L.DecidableEq] (Γ : Finset (SyntacticFormula L)) (φ) : (⌜(insert φ Γ)⌝ : V) = insert ⌜φ⌝ ⌜Γ⌝ := by
   by_cases hp : φ ∈ Γ
   · simp [Sequent.mem_codeIn_iff, hp, insert_eq_self_of_mem]
-  · have : (⌜insert φ Γ⌝ : V) = exp ⌜φ⌝ + ⌜Γ⌝ := by simp [Sequent.codeIn_def, hp]
+  · have : (⌜insert φ Γ⌝ : V) = Exp.exp ⌜φ⌝ + ⌜Γ⌝ := by simp [Sequent.codeIn_def, hp]
     simp [Sequent.mem_codeIn_iff, this, insert_eq, bitInsert, hp, add_comm]
 
 omit [L.DecidableEq] in
@@ -78,13 +85,12 @@ lemma Sequent.mem_codeIn_iff' {Γ : Finset (SyntacticFormula L)} : x ∈ (⌜Γ�
 
 lemma setShift_quote [DefinableLanguage L] (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift ⌜Γ⌝ = ⌜Finset.image Rewriting.shift Γ⌝ := by
   apply mem_ext
-  intro x; simp [mem_setShift_iff]
+  intro x; simp only [mem_setShift_iff]
   constructor
   · rintro ⟨x, hx, rfl⟩
     rcases Sequent.mem_codeIn hx with ⟨p, _, rfl⟩
     rw [←quote_shift, Sequent.mem_codeIn_iff]
-    simp
-    exact ⟨p, by simpa [Sequent.mem_codeIn_iff] using hx, rfl⟩
+    simpa using ⟨p, by simpa [Sequent.mem_codeIn_iff] using hx, rfl⟩
   · intro hx
     rcases Sequent.mem_codeIn hx with ⟨p', hp', rfl⟩
     rcases by simpa using hp' with ⟨p, hp, rfl⟩
@@ -94,19 +100,19 @@ variable (V)
 
 variable {T : Theory L}
 
-def codeIn [L.DecidableEq] : {Γ : Finset (SyntacticFormula L)} → T ⊢₂ Γ → V
-  | _, closed Δ φ _ _                         => Arith.axL ⌜Δ⌝ ⌜φ⌝
-  | _, root (Δ := Δ) φ _ _                    => Arith.root ⌜Δ⌝ ⌜φ⌝
-  | _, verum (Δ := Δ) _                       => Arith.verumIntro ⌜Δ⌝
-  | _, and (Δ := Δ) _ (φ := φ) (ψ := ψ) bp bq => Arith.K_intro ⌜Δ⌝ ⌜φ⌝ ⌜ψ⌝ bp.codeIn bq.codeIn
-  | _, or (Δ := Δ) (φ := φ) (ψ := ψ) _ d      => Arith.orIntro ⌜Δ⌝ ⌜φ⌝ ⌜ψ⌝ d.codeIn
-  | _, all (Δ := Δ) (φ := φ) _ d              => Arith.allIntro ⌜Δ⌝ ⌜φ⌝ d.codeIn
-  | _, ex (Δ := Δ) (φ := φ) _ t d             => Arith.exIntro ⌜Δ⌝ ⌜φ⌝ ⌜t⌝ d.codeIn
-  | _, wk (Γ := Γ) d _                        => Arith.wkRule ⌜Γ⌝ d.codeIn
-  | _, shift (Δ := Δ) d                       => Arith.shiftRule ⌜Δ.image Rewriting.shift⌝ d.codeIn
-  | _, cut (Δ := Δ) (φ := φ) d dn             => Arith.cutRule ⌜Δ⌝ ⌜φ⌝ d.codeIn dn.codeIn
+noncomputable def codeIn [L.DecidableEq] {Γ : Finset (SyntacticFormula L)} : T ⊢₂ Γ → V
+  | closed Δ φ _ _                         => Metamath.axL ⌜Δ⌝ ⌜φ⌝
+  | root (Δ := Δ) φ _ _                    => Metamath.root ⌜Δ⌝ ⌜φ⌝
+  | verum (Δ := Δ) _                       => Metamath.verumIntro ⌜Δ⌝
+  | and (Δ := Δ) _ (φ := φ) (ψ := ψ) bp bq => Metamath.K_intro ⌜Δ⌝ ⌜φ⌝ ⌜ψ⌝ bp.codeIn bq.codeIn
+  | or (Δ := Δ) (φ := φ) (ψ := ψ) _ d      => Metamath.orIntro ⌜Δ⌝ ⌜φ⌝ ⌜ψ⌝ d.codeIn
+  | all (Δ := Δ) (φ := φ) _ d              => Metamath.allIntro ⌜Δ⌝ ⌜φ⌝ d.codeIn
+  | ex (Δ := Δ) (φ := φ) _ t d             => Metamath.exIntro ⌜Δ⌝ ⌜φ⌝ ⌜t⌝ d.codeIn
+  | wk (Γ := Γ) d _                        => Metamath.wkRule ⌜Γ⌝ d.codeIn
+  | shift (Δ := Δ) d                       => Metamath.shiftRule ⌜Δ.image Rewriting.shift⌝ d.codeIn
+  | cut (Δ := Δ) (φ := φ) d dn             => Metamath.cutRule ⌜Δ⌝ ⌜φ⌝ d.codeIn dn.codeIn
 
-instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⊢₂ Γ) V := ⟨codeIn V⟩
+noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⊢₂ Γ) V := ⟨codeIn V⟩
 
 lemma quote_derivation_def {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : (⌜d⌝ : V) = d.codeIn V := rfl
 
@@ -117,9 +123,9 @@ end Derivation2
 
 end LO.FirstOrder
 
-namespace LO.Arith
+namespace LO.ISigma1.Metamath
 
-open FirstOrder FirstOrder.Arith FirstOrder.Semiformula
+open FirstOrder Semiformula Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -171,7 +177,7 @@ lemma quote_image_shift [L.DecidableEq] (Γ : Finset (SyntacticFormula L)) : (L.
     apply Language.Theory.Derivation.exIntro
       (by simpa [quote_ex] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
       (semiterm_codeIn t)
-      ⟨by simp [fstidx_quote, Language.substs₁], ih⟩
+      ⟨by simp [fstidx_quote, Language.substs₁, Matrix.constant_eq_singleton], ih⟩
   case wk Δ Γ d h ih =>
     apply Language.Theory.Derivation.wkRule (s' := ⌜Δ⌝)
       (by simp)
@@ -179,9 +185,8 @@ lemma quote_image_shift [L.DecidableEq] (Γ : Finset (SyntacticFormula L)) : (L.
           simp [Sequent.mem_codeIn_iff, h hp])
       ⟨by simp [fstidx_quote], ih⟩
   case shift Δ d ih =>
-    simp [quote_derivation_def, Derivation2.codeIn, ←quote_image_shift]
-    apply Language.Theory.Derivation.shiftRule
-      ⟨by simp [fstidx_quote], ih⟩
+    simpa [quote_derivation_def, Derivation2.codeIn, ←quote_image_shift]
+    using Language.Theory.Derivation.shiftRule ⟨by simp [fstidx_quote], ih⟩
   case cut Δ φ d dn ih ihn =>
     apply Language.Theory.Derivation.cutRule
       ⟨by simp [fstidx_quote], ih⟩
@@ -212,7 +217,7 @@ variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
 /-- Hilbert–Bernays provability condition D1 -/
 theorem provableₐ_of_provable {φ} : T ⊢! φ → T.Provableₐ (⌜φ⌝ : V) := fun h ↦
-  Language.Theory.Derivable.of_ss Formalized.theory_subset_AddR₀ (provable_of_provable h)
+  Language.Theory.Derivable.of_ss Arithmetization.theory_subset_AddR₀ (provable_of_provable h)
 
 theorem provableₐ_of_provable₀ {σ} : T ⊢!. σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by
   simpa using provableₐ_of_provable (T := T) (V := V) h
@@ -225,7 +230,7 @@ theorem provableₐ_of_provable'₀ {σ} : T ⊢!. σ → T†V ⊢! ⌜σ⌝ :=
 
 end
 
-end LO.Arith
+end LO.ISigma1.Metamath
 
 namespace Nat
 
@@ -240,8 +245,9 @@ lemma mem_bitIndices_iff {x s : ℕ} : x ∈ s.bitIndices ↔ Odd (s / 2 ^ x) :=
   induction s using Nat.binaryRec generalizing x
   case z => simp [Nat.dvd_zero]
   case f b s ih =>
-    cases b <;> simp [ih]
-    · constructor
+    cases b
+    · suffices (∃ a, Odd (s / 2 ^ a) ∧ a + 1 = x) ↔ Odd (2 * s / 2 ^ x) by simpa [ih]
+      constructor
       · rintro ⟨x, hx, rfl⟩
         rw [show 2 ^ (x + 1) = 2 * 2 ^ x by simp [Nat.pow_add_one, mul_comm], Nat.mul_div_mul_left _ _ (by simp)]
         exact hx
@@ -250,7 +256,8 @@ lemma mem_bitIndices_iff {x s : ℕ} : x ∈ s.bitIndices ↔ Odd (s / 2 ^ x) :=
         · simp [not_odd_iff_even.mpr (even_two_mul s)] at h
         · refine ⟨x, ?_, rfl⟩
           rwa [show 2 ^ (x + 1) = 2 * 2 ^ x by simp [Nat.pow_add_one, mul_comm], Nat.mul_div_mul_left _ _ (by simp)] at h
-    · constructor
+    · suffices (x = 0 ∨ ∃ a, Odd (s / 2 ^ a) ∧ a + 1 = x) ↔ Odd ((2 * s + 1) / 2 ^ x) by simpa [ih]
+      constructor
       · rintro (rfl | ⟨x, hx, rfl⟩)
         · simp
         · rw [show 2 ^ (x + 1) = 2 * 2 ^ x by simp [Nat.pow_add_one, mul_comm], double_add_one_div_of_double]
@@ -269,9 +276,7 @@ variable {L : Language} {T : Theory L}
 
 end LO.FirstOrder
 
-namespace LO.Arith
-
-open FirstOrder Encodable
+namespace LO.ISigma1.Metamath
 
 variable {L : Language} [L.DecidableEq] [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
@@ -279,8 +284,9 @@ lemma isFormulaSet_sound {s : ℕ} : (L.codeIn ℕ).IsFormulaSet s → ∃ S : F
   intro h
   have : ∀ x, ∃ φ : SyntacticFormula L, x ∈ s → ⌜φ⌝ = x := by
     intro x;
-    by_cases hx : x ∈ s <;> simp [hx]
-    exact (h x hx).sound
+    by_cases hx : x ∈ s
+    · simpa [hx] using (h x hx).sound
+    · simp [hx]
   choose ps hps using this
   exact ⟨(s.bitIndices.map ps).toFinset, by
     apply mem_ext
@@ -292,8 +298,7 @@ lemma isFormulaSet_sound {s : ℕ} : (L.codeIn ℕ).IsFormulaSet s → ∃ S : F
       simpa [hps x (mem_iff_mem_bitIndices.mpr hx)] using mem_iff_mem_bitIndices.mpr hx
     · intro h
       rw [←hps x h]
-      simp [Derivation2.Sequent.mem_codeIn_iff, ←mem_iff_mem_bitIndices]
-      exact ⟨x, h, rfl⟩⟩
+      simpa [Derivation2.Sequent.mem_codeIn_iff, ←mem_iff_mem_bitIndices] using ⟨x, h, rfl⟩⟩
 
 section
 
@@ -349,7 +354,7 @@ lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation 
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
     refine ⟨Derivation2.ex (φ := φ)
       (by simp [←Sequent.mem_codeIn_iff (V := ℕ), Semiformula.quote_ex, hps]) t
-      (b.cast <| Sequent.quote_inj (V := ℕ) <| by simp [hΔ, hd, Language.substs₁])⟩
+      (b.cast <| Sequent.quote_inj (V := ℕ) <| by simp [hΔ, hd, Language.substs₁, Matrix.constant_eq_singleton])⟩
   · rcases by simpa using hΓ
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
     refine ⟨Derivation2.wk (Δ := Δ) b
@@ -402,4 +407,4 @@ lemma Language.Theory.Provable.complete₀ {σ : Sentence L} :
     T.Provableₐ (⌜σ⌝ : ℕ) ↔ T ⊢!. σ := by
   simpa [provableₐ_iff, Language.Theory.Provable.complete₀] using FirstOrder.Arith.add_cobhamR0'.symm
 
-end LO.Arith
+end LO.ISigma1.Metamath

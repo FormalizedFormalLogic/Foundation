@@ -1,4 +1,4 @@
-import Foundation.Incompleteness.Arith.D1
+import Foundation.FirstOrder.Incompleteness.D1
 
 /-!
 
@@ -6,21 +6,17 @@ import Foundation.Incompleteness.Arith.D1
 
 -/
 
-noncomputable section
+namespace LO.ISigma1.Metamath
 
-open Classical
-
-namespace LO.Arith
-
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-namespace Formalized
+namespace Arithmetization
 
 variable {T : LOR.TTheory (V := V)} [R₀Theory T]
 
-def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).SemitermVec n 0 :=
+noncomputable def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).SemitermVec n 0 :=
   ⟨⌜fun i ↦ numeral (e i)⌝,
    Language.IsSemitermVec.iff.mpr <| ⟨by simp, by
     intro i hi
@@ -38,13 +34,15 @@ def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).SemitermVec n
   calc (i : V) < (i : V) + (n - i : V) := by simp
   _  = (n : V) := by simp
 
-@[simp] lemma len_semitermvec {L : Arith.Language V} {pL} [L.Defined pL] (v : L.SemitermVec k n) : len v.val = k := v.prop.lh
+@[simp] lemma len_semitermvec {L : Metamath.Language V} {pL} [L.Defined pL] (v : L.SemitermVec k n) : len v.val = k := v.prop.lh
 
 @[simp] lemma cast_substs_numVec (φ : Semisentence ℒₒᵣ (n + 1)) :
     ((.cast (V := V) (n := ↑(n + 1)) (n' := ↑n + 1) ⌜Rew.embs ▹ φ⌝ (by simp)) ^/[(toNumVec e).q.substs (typedNumeral 0 x).sing]) =
     ⌜Rew.embs ▹ φ⌝ ^/[toNumVec (x :> e)] := by
   have : (toNumVec e).q.substs (typedNumeral 0 x).sing = x ∷ᵗ toNumVec e := by
-    ext; simp
+    suffices
+      (⌜ℒₒᵣ⌝[V]).termSubstVec (n + 1) (numeral x ∷ 0) ((⌜ℒₒᵣ⌝[V]).qVec (toNumVec e).val)
+      = numeral x ∷ (toNumVec e).val by ext; simpa
     apply nth_ext' ((↑n : V) + 1)
       (by rw [len_termSubstVec]; simpa using (toNumVec e).prop.qVec.isUTerm)
       (by simp [(toNumVec e).prop.lh])
@@ -59,7 +57,7 @@ def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).SemitermVec n
         numeral_substs (n := 1) (m := 0) (by simp)]
       simp
   rw [this]
-  ext; simp [toNumVec]
+  ext; simp [toNumVec, Matrix.comp_vecCons']
 
 namespace TProof
 
@@ -81,11 +79,10 @@ noncomputable def termEqComplete {n : ℕ} (e : Fin n → V) :
       have : T ⊢ ((v 0).valbm V e + (v 1).valbm V e : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑((v 0).valbm V e + (v 1).valbm V e) := addComplete T _ _
       exact eqTrans T _ _ _ ⨀ ih ⨀ this
   | Semiterm.func Language.Mul.mul v   => by
-      simp [Rew.func, Semiterm.val_func]
       have ih : T ⊢ (⌜Rew.embs (v 0)⌝^ᵗ/[toNumVec e] * ⌜Rew.embs (v 1)⌝^ᵗ/[toNumVec e]) =' (↑((v 0).valbm V e) * ↑((v 1).valbm V e)) :=
         mulExt T _ _ _ _ ⨀ termEqComplete e (v 0) ⨀ termEqComplete e (v 1)
       have : T ⊢ ((v 0).valbm V e * (v 1).valbm V e : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑((v 0).valbm V e * (v 1).valbm V e) := mulComplete T _ _
-      exact eqTrans T _ _ _ ⨀ ih ⨀ this
+      simpa [Rew.func, Semiterm.val_func] using eqTrans T _ _ _ ⨀ ih ⨀ this
 
 lemma termEq_complete! {n : ℕ} (e : Fin n → V) (t : Semiterm ℒₒᵣ Empty n) :
     T ⊢! ⌜Rew.embs t⌝^ᵗ/[toNumVec e] =' ↑(t.valbm V e) := ⟨termEqComplete T e t⟩
@@ -160,7 +157,8 @@ theorem bold_sigma₁_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierarc
     intro x hx
     suffices T ⊢! ⌜Rew.embs ▹ φ⌝^/[toNumVec (x :> e)] by simpa [Language.TSemifromula.substs_substs]
     have : Semiformula.Evalbm V (x :> e) φ := by
-      simp at h; exact h x hx
+      have : ∀ x < t.valbm V e, Semiformula.Evalbm V (x :> e) φ := by simpa using h
+      exact this x hx
     exact ihp this
   case hEx =>
     intro n φ _ ihp e h
@@ -176,7 +174,7 @@ theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) 
 
 end TProof
 
-end Formalized
+end Arithmetization
 
 section
 
@@ -184,11 +182,11 @@ variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
 theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by
-  simpa [provableₐ_iff] using Formalized.TProof.sigma₁_complete _ hσ h
+  simpa [provableₐ_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
 
 theorem sigma₁_complete_provable {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T†V ⊢! ⌜σ⌝ := fun h ↦ by
-  simpa [provableₐ_iff] using Formalized.TProof.sigma₁_complete _ hσ h
+  simpa [provableₐ_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
 
 end
 
@@ -205,4 +203,4 @@ theorem modus_ponens₀ {σ τ : Sentence ℒₒᵣ} (hστ : T.Provableₐ (⌜
 
 end D2
 
-end LO.Arith
+end LO.ISigma1.Metamath

@@ -1,4 +1,4 @@
-import Foundation.Incompleteness.Arith.FormalizedArithmetic
+import Foundation.FirstOrder.Incompleteness.FormalizedArithmetic
 
 /-!
 
@@ -139,17 +139,17 @@ noncomputable instance : 𝐄𝐐 ⪯ 𝐑₀' := Entailment.WeakerThan.ofAxm! <
 
 -/
 
-open LO.Arith
+open LO.ISigma1.Metamath
 
 noncomputable instance R0'.subtheoryOfR0 : 𝐑₀' ⪯ 𝐑₀ := Entailment.WeakerThan.ofAxm! <| by
   intro φ hp
   rcases hp
   · apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff]
   · apply complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ => by simp [models_iff]
-  case Ω₁ n m => exact Entailment.by_axm _ (Theory.R0.Ω₁ n m)
-  case Ω₂ n m => exact Entailment.by_axm _ (Theory.R0.Ω₂ n m)
-  case Ω₃ n m h => exact Entailment.by_axm _ (Theory.R0.Ω₃ n m h)
-  case Ω₄ n => exact Entailment.by_axm _ (Theory.R0.Ω₄ n)
+  case Ω₁ n m => exact Entailment.by_axm _ (R0.Ω₁ n m)
+  case Ω₂ n m => exact Entailment.by_axm _ (R0.Ω₂ n m)
+  case Ω₃ n m h => exact Entailment.by_axm _ (R0.Ω₃ n m h)
+  case Ω₄ n => exact Entailment.by_axm _ (R0.Ω₄ n)
 
 variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T]
 
@@ -173,9 +173,9 @@ noncomputable section
 
 open Classical
 
-namespace LO.Arith
+namespace LO.ISigma1.Metamath
 
-open FirstOrder FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -195,7 +195,7 @@ def singleton (φ : SyntacticFormula L) :
 
 end
 
-namespace Formalized
+namespace Arithmetization
 
 namespace Theory.R0'
 
@@ -259,11 +259,12 @@ def replace :
       exact ⟨q, by symm; apply (quote_inj_iff (V := ℕ)).mp; simpa using h⟩
     · rintro ⟨q, rfl⟩
       exact ⟨⌜q⌝, by
-        simp [subst_eq_self₁]
+        suffices ⌜q⌝ < ^∀ ^∀ (^#1 ^= ^#0 ^→[(ℒₒᵣ).codeIn ℕ] ((ℒₒᵣ).codeIn ℕ).substs (^#1 ∷ 0) ⌜q⌝ ^→[(ℒₒᵣ).codeIn ℕ] ⌜q⌝) by
+          simpa [subst_eq_self₁, Matrix.constant_eq_singleton]
         refine lt_trans ?_ (lt_forall _)
         refine lt_trans ?_ (lt_forall _)
         refine lt_trans ?_ (lt_or_right _ _)
-        exact lt_or_right _ _, by simp⟩
+        exact lt_or_right _ _, by simp [Matrix.constant_eq_singleton]⟩
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
@@ -327,13 +328,14 @@ def Ω₁ :
       exact (quote_inj_iff (V := ℕ)).mp (by simpa using h)
     · rintro ⟨n, m, rfl⟩
       refine ⟨n, by
-          simp
-          apply lt_trans ?_ (lt_qqEQ_left _ _)
-          apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqAdd_left _ _),
+          simpa using lt_trans
+            (lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←PeanoMinus.le_def]) (lt_qqAdd_left _ _))
+            (lt_qqEQ_left _ _),
         m, by
-          simp
-          apply lt_trans ?_ (lt_qqEQ_left _ _)
-          apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqAdd_right _ _), by simp⟩
+          simpa using lt_trans
+            (lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←PeanoMinus.le_def]) (lt_qqAdd_right _ _))
+            (lt_qqEQ_left _ _),
+        by simp⟩
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
@@ -390,13 +392,14 @@ def Ω₂ :
       exact (quote_inj_iff (V := ℕ)).mp (by simpa using h)
     · rintro ⟨n, m, rfl⟩
       refine ⟨n, by
-          simp
-          apply lt_trans ?_ (lt_qqEQ_left _ _)
-          apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqMul_left _ _),
+          simpa using lt_trans
+            (lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←PeanoMinus.le_def]) (lt_qqMul_left _ _))
+            (lt_qqEQ_left _ _),
         m, by
-          simp
-          apply lt_trans ?_ (lt_qqEQ_left _ _)
-          apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqMul_right _ _), by simp⟩
+          simpa using lt_trans
+            (lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←PeanoMinus.le_def]) (lt_qqMul_right _ _))
+            (lt_qqEQ_left _ _),
+        by simp⟩
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma,
@@ -444,17 +447,21 @@ def Ω₃ :
     constructor
     · rintro ⟨n, _, m, _, ne, h⟩
       refine ⟨n, m, ne, ?_⟩
-      exact (quote_inj_iff (V := ℕ)).mp (by simp; rw [neg_eq (by simp) (by simp)]; simpa using h)
+      exact (quote_inj_iff (V := ℕ)).mp
+        (by simp only [quote_neg, Semiformula.quote_eq',
+              quote_numeral_eq_numeral, natCast_nat]
+            rw [neg_eq (by simp) (by simp)]; simpa using h)
     · rintro ⟨n, m, ne, rfl⟩
       refine ⟨n, by
-          simp
+          simp only [quote_neg, Semiformula.quote_eq', quote_numeral_eq_numeral, natCast_nat]
           rw [neg_eq (by simp) (by simp)]
-          exact lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqNEQ_left _ _),
+          exact lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←PeanoMinus.le_def]) (lt_qqNEQ_left _ _),
         m, by
-          simp
+          simp only [quote_neg, Semiformula.quote_eq', quote_numeral_eq_numeral, natCast_nat]
           rw [neg_eq (by simp) (by simp)]
-          exact lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqNEQ_right _ _), ne, ?_⟩
-      simp; rw [neg_eq (by simp) (by simp)]
+          exact lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←PeanoMinus.le_def]) (lt_qqNEQ_right _ _), ne, ?_⟩
+      simp only [quote_neg, Semiformula.quote_eq', quote_numeral_eq_numeral, natCast_nat]
+      rw [neg_eq (by simp) (by simp)]
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by simp
 
 private lemma quote_disjLt_eq (n : ℕ) :
@@ -463,7 +470,8 @@ private lemma quote_disjLt_eq (n : ℕ) :
   induction n
   case zero => simp
   case succ n ih =>
-    simp [ih]; rw [substs_eq (by simp) (by simp)]; simp
+    suffices ^#0 ^= numeral n = ⌜ℒₒᵣ⌝.substs (numeral n ∷ ^#0 ∷ 0) (^#1 ^= ^#0) by simpa [ih]
+    rw [substs_eq (by simp) (by simp)]; simp
 
 def Ω₄ :
     FirstOrder.Theory.Delta1Definable {(“∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i” : SyntacticFormula ℒₒᵣ) | n} where
@@ -516,10 +524,12 @@ def Ω₄ :
       exact (quote_inj_iff (V := ℕ)).mp (by simpa [quote_disjLt_eq] using h)
     · rintro ⟨n, rfl⟩
       refine ⟨n, by
-        simp
+        simp only [Fin.isValue, Semiformula.quote_all, Nat.reduceAdd, quote_iff,
+          Semiformula.quote_lt', Semiterm.quote_bvar, Fin.val_eq_zero, natCast_nat,
+          quote_numeral_eq_numeral]
         apply lt_trans ?_ (lt_forall _)
         apply lt_trans ?_ (lt_iff_left _ _)
-        apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←LO.Arith.le_def]) (lt_qqLT_right _ _), ?_⟩
+        apply lt_of_le_of_lt (by simp [le_iff_eq_or_lt, ←PeanoMinus.le_def]) (lt_qqLT_right _ _), ?_⟩
       simp [quote_disjLt_eq]
   isDelta1 := Arith.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ v ↦ by
     /-
@@ -551,7 +561,7 @@ open Theory.R0'
 
 instance Theory.R0'Delta1Definable : 𝐑₀'.Delta1Definable := (eqRefl.add <| replace.add <| Ω₁.add <| Ω₂.add <| Ω₃.add Ω₄).ofEq <| by
     ext φ; constructor
-    · rintro (hφ | hφ | hφ | hφ | hφ | hφ) <;> simp at hφ
+    · rintro (hφ | hφ | hφ | hφ | hφ | hφ)
       · rcases hφ; exact Theory.R0'.eq_refl
       · rcases hφ with ⟨φ, rfl⟩; exact FirstOrder.Theory.R0'.replace φ
       · rcases hφ with ⟨n, m, rfl⟩; exact FirstOrder.Theory.R0'.Ω₁ n m
@@ -586,9 +596,14 @@ def replace.proof (φ : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1)) :
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_left
   unfold replace
-  simp [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve,
-    (Language.isSemiformula_defined (LOR (V := V))).df.iff,
-    (Language.substs_defined (LOR (V := V))).df.iff, (Language.imp_defined (LOR (V := V))).df.iff]
+  suffices
+    ∃ x < ^∀ ^∀ (^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#1 ∷ 0) φ.val ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#0 ∷ 0) φ.val),
+      ⌜ℒₒᵣ⌝.IsSemiformula 1 x ∧
+        ^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#1 ∷ 0) φ.val ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#0 ∷ 0) φ.val =
+          ^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#1 ∷ 0) x ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#0 ∷ 0) x by
+    simpa [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve,
+      (Language.isSemiformula_defined (LOR (V := V))).df.iff,
+      (Language.substs_defined (LOR (V := V))).df.iff, (Language.imp_defined (LOR (V := V))).df.iff]
   refine ⟨φ.val, ?_, by simpa using φ.prop, rfl⟩
   · rw [subst_eq_self₁ (by simpa using φ.prop)]
     refine lt_trans ?_ (lt_forall _)
@@ -602,7 +617,11 @@ def Ω₁.proof (n m : V) :
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_left
   unfold Ω₁
-  simp [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve]
+  suffices
+    ∃ x < numeral n ^+ numeral m ^= numeral (n + m),
+      ∃ y < numeral n ^+ numeral m ^= numeral (n + m),
+        numeral n ^+ numeral m ^= numeral (n + m) = numeral x ^+ numeral y ^= numeral (x + y) by
+    simpa [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve]
   refine ⟨n, ?_, m, ?_, rfl⟩
   · apply lt_trans ?_ (lt_qqEQ_left _ _)
     apply lt_of_le_of_lt (by simp) (lt_qqAdd_left _ _)
@@ -616,7 +635,11 @@ def Ω₂.proof (n m : V) :
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_left
   unfold Ω₂
-  simp [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve]
+  suffices
+    ∃ x < numeral n ^* numeral m ^= numeral (n * m),
+      ∃ y < numeral n ^* numeral m ^= numeral (n * m),
+        numeral n ^* numeral m ^= numeral (n * m) = numeral x ^* numeral y ^= numeral (x * y) by
+    simpa [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve]
   refine ⟨n, ?_, m, ?_, rfl⟩
   · apply lt_trans ?_ (lt_qqEQ_left _ _)
     apply lt_of_le_of_lt (by simp) (lt_qqMul_left _ _)
@@ -630,7 +653,10 @@ def Ω₃.proof {n m : V} (ne : n ≠ m) : ⌜𝐑₀'⌝[V] ⊢ ↑n ≠' ↑m 
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_left
   unfold Ω₃
-  simp [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve]
+  suffices
+    ∃ x < numeral n ^≠ numeral m,
+      ∃ y < numeral n ^≠ numeral m, ¬x = y ∧ numeral n ^≠ numeral m = numeral x ^≠ numeral y by
+    simpa [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve]
   refine ⟨n, ?_, m, ?_, ne, rfl⟩
   · exact lt_of_le_of_lt (by simp) (lt_qqNEQ_left _ _)
   · exact lt_of_le_of_lt (by simp) (lt_qqNEQ_right _ _)
@@ -642,7 +668,11 @@ def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0)
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
   unfold Ω₄
-  simp [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve,
+  suffices
+    ∃ x < ^∀ ⌜ℒₒᵣ⌝.iff (^#0 ^< numeral n) (^⋁ substItr (^#0 ∷ 0) (^#1 ^= ^#0) n),
+      ⌜ℒₒᵣ⌝.iff (^#0 ^< numeral n) (^⋁ substItr (^#0 ∷ 0) (^#1 ^= ^#0) n) =
+        ⌜ℒₒᵣ⌝.iff (^#0 ^< numeral x) (^⋁ substItr (^#0 ∷ 0) (^#1 ^= ^#0) x) by
+    simpa [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve,
       (Language.iff_defined (LOR (V := V))).df.iff]
   refine ⟨n, ?_, rfl⟩
   apply lt_trans ?_ (lt_forall _)
@@ -658,7 +688,7 @@ section
 abbrev _root_.LO.FirstOrder.Theory.AddR₀TTheory
     (T : Theory ℒₒᵣ) [T.Delta1Definable] (V) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] : ⌜ℒₒᵣ⌝[V].TTheory := (T + 𝐑₀').tCodeIn V
 
-scoped [LO.Arith] infix:100 "†" => LO.FirstOrder.Theory.AddR₀TTheory
+scoped [LO.ISigma1.Metamath] infix:100 "†" => LO.FirstOrder.Theory.AddR₀TTheory
 
 variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
@@ -676,9 +706,9 @@ instance : R₀Theory (T†V) where
 
 end
 
-end Formalized
+end Arithmetization
 
-open Formalized
+open Arithmetization
 
 section
 
@@ -718,4 +748,4 @@ end
 
 end
 
-end LO.Arith
+end LO.ISigma1.Metamath
