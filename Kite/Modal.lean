@@ -1,17 +1,16 @@
 import Kite.Basic
-import Foundation.Modal.Logic.Basic
+import Foundation.Modal.Hilbert.WellKnown
 -- import Foundation.Modal.Kripke.Logic.S5
 
 open Lean Meta Qq Elab Command
 open LO.Modal
-
 
 namespace Kite
 
 def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   match ← inferTypeQ ci.type with
   | ⟨1, ~q(Prop), ~q(@HasSSubset.SSubset Logic _ $a $b)⟩ => return some ⟨a.constName.toString, b.constName.toString, .ssub⟩
-  -- | ⟨1, ~q(Prop), ~q(@HasSubset.Subset Logic _ $a $b)⟩ => return some (.ext, a, b)
+  | ⟨1, ~q(Prop), ~q(@HasSubset.Subset Logic _ $a $b)⟩ => return some ⟨a.constName.toString, b.constName.toString, .sub⟩
   -- | ⟨1, ~q(Prop), ~q(($a : Logic) = $b)⟩ => return some (.ext, a, b)
   | _ => return none
 
@@ -26,11 +25,7 @@ def findMatches : MetaM Json := do
       | none => continue
     catch _ => continue
 
-  return Json.arr $ edges.reductTrans.map $ (λ ⟨a, b, t⟩ => Json.mkObj [
-    ("from", s!"{a}"),
-    ("to", s!"{b}"),
-    ("type", s!"{t}")
-  ])
+  return edges.toOutput
 
 end Kite
 

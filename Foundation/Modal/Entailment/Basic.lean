@@ -367,6 +367,24 @@ instance (Γ : Context F 𝓢) : HasAxiomGrz Γ := ⟨fun _ ↦ Context.of axiom
 end
 
 
+class HasAxiomDum (𝓢 : S) where
+  Dum (φ : F) : 𝓢 ⊢ Axioms.Dum φ
+
+section
+
+variable [HasAxiomDum 𝓢]
+
+def axiomDum : 𝓢 ⊢ □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ) := HasAxiomDum.Dum _
+@[simp] lemma axiomDum! : 𝓢 ⊢! □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ) := ⟨axiomDum⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomDum Γ := ⟨fun _ ↦ FiniteContext.of axiomDum⟩
+instance (Γ : Context F 𝓢) : HasAxiomDum Γ := ⟨fun _ ↦ Context.of axiomDum⟩
+
+end
+
+
 class HasAxiomTc (𝓢 : S) where
   Tc (φ : F) : 𝓢 ⊢ Axioms.Tc φ
 
@@ -643,7 +661,17 @@ protected class GL extends Entailment.K 𝓢, HasAxiomL 𝓢
 protected class GLPoint2 extends Entailment.GL 𝓢, HasAxiomWeakPoint2 𝓢
 protected class GLPoint3 extends Entailment.GL 𝓢, HasAxiomWeakPoint3 𝓢
 
+protected class K4Z extends Entailment.K 𝓢, HasAxiomFour 𝓢, HasAxiomZ 𝓢
+protected class K4Point2Z extends Entailment.K4Z 𝓢, HasAxiomWeakPoint2 𝓢
+protected class K4Point3Z extends Entailment.K4Z 𝓢, HasAxiomWeakPoint3 𝓢
+
 protected class Grz extends Entailment.K 𝓢, HasAxiomGrz 𝓢
+protected class GrzPoint2 extends Entailment.Grz 𝓢, HasAxiomPoint2 𝓢
+protected class GrzPoint3 extends Entailment.Grz 𝓢, HasAxiomPoint3 𝓢
+
+protected class Dum extends Entailment.S4 𝓢, HasAxiomDum 𝓢
+protected class DumPoint2 extends Entailment.Dum 𝓢, HasAxiomPoint2 𝓢
+protected class DumPoint3 extends Entailment.Dum 𝓢, HasAxiomPoint3 𝓢
 
 protected class KTMk (𝓢 : S) extends Entailment.KT 𝓢, Entailment.HasAxiomMk 𝓢
 
