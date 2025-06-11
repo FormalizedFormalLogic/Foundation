@@ -3,10 +3,10 @@ import Foundation.Vorspiel.Vorspiel
 class Exp (α : Type*) where
   exp : α → α
 
-class Hash (α : Type*) where
-  hash : α → α → α
+class Smash (α : Type*) where
+  smash : α → α → α
 
-infix:80 " # " => Hash.hash
+infix:80 " ⨳ " => Smash.smash
 
 class Length (α : Type*) where
   length : α → α
