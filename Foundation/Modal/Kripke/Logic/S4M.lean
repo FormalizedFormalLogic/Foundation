@@ -11,30 +11,30 @@ open GeachConfluent
 
 abbrev Kripke.FrameClass.preorder_mckinsey : FrameClass := { F | IsPreorder _ F ∧ SatisfiesMcKinseyCondition _ F }
 
-namespace Hilbert.SobK1
+namespace Hilbert.S4M
 
-instance Kripke.sound : Sound (Hilbert.SobK1) (Kripke.FrameClass.preorder_mckinsey) := instSound_of_validates_axioms $ by
+instance Kripke.sound : Sound (Hilbert.S4M) (Kripke.FrameClass.preorder_mckinsey) := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomM_of_satisfiesMcKinseyCondition;
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.SobK1) := consistent_of_sound_frameclass Kripke.FrameClass.preorder_mckinsey $ by
+instance Kripke.consistent : Entailment.Consistent (Hilbert.S4M) := consistent_of_sound_frameclass Kripke.FrameClass.preorder_mckinsey $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   constructor <;> infer_instance;
 
-instance Kripke.canonical : Canonical (Hilbert.SobK1) Kripke.FrameClass.preorder_mckinsey := ⟨by
+instance Kripke.canonical : Canonical (Hilbert.S4M) Kripke.FrameClass.preorder_mckinsey := ⟨by
   apply Set.mem_setOf_eq.mpr;
   constructor;
   . infer_instance;
   . infer_instance;
 ⟩
 
-instance Kripke.complete : Complete (Hilbert.SobK1) Kripke.FrameClass.preorder_mckinsey := inferInstance
+instance Kripke.complete : Complete (Hilbert.S4M) Kripke.FrameClass.preorder_mckinsey := inferInstance
 
-end Hilbert.SobK1
+end Hilbert.S4M
 
 namespace Logic
 
@@ -42,13 +42,13 @@ open Formula
 open Entailment
 open Kripke
 
-lemma SobK1.Kripke.preorder_mckinsey : Logic.SobK1 = FrameClass.preorder_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+lemma S4M.Kripke.preorder_mckinsey : Logic.S4M = FrameClass.preorder_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
-theorem SobK1.proper_extension_of_S4 : Logic.S4 ⊂ Logic.SobK1 := by
+theorem S4M.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.SobK1 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by
+  . suffices ∃ φ, Hilbert.S4M ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by
       rw [S4.Kripke.preorder];
       tauto;
     use (Axioms.M (.atom 0));
@@ -65,10 +65,10 @@ theorem SobK1.proper_extension_of_S4 : Logic.S4 ⊂ Logic.SobK1 := by
         trivial;
 
 @[simp]
-theorem SobK1.proper_extension_of_K4M : Logic.K4M ⊂ Logic.SobK1 := by
+theorem S4M.proper_extension_of_K4M : Logic.K4M ⊂ Logic.S4M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.SobK1 ⊢! φ ∧ ¬FrameClass.trans_mckinsey ⊧ φ by
+  . suffices ∃ φ, Hilbert.S4M ⊢! φ ∧ ¬FrameClass.trans_mckinsey ⊧ φ by
       rw [K4M.Kripke.trans_mckinsey];
       tauto;
     use (Axioms.T (.atom 0));
