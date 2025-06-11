@@ -24,11 +24,7 @@ def findMatches : MetaM Json := do
       | none => continue
     catch _ => continue
 
-  return Json.arr $ edges.reductTrans.map $ (λ ⟨a, b, t⟩ => Json.mkObj [
-    ("from", s!"{a}"),
-    ("to", s!"{b}"),
-    ("type", s!"{t}")
-  ])
+  return edges.toOutput
 
 end Kite
 
