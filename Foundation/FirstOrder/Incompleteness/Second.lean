@@ -1,12 +1,15 @@
-import Foundation.Incompleteness.Arith.FixedPoint
+import Foundation.FirstOrder.Incompleteness.FixedPoint
 
-noncomputable section
+/-!
+# Gödel's second incompleteness theorem over $\mathsf{I}\Sigma_1$
+
+-/
 
 open Classical
 
-namespace LO.FirstOrder.Arith
+namespace LO.ISigma1
 
-open LO.Arith LO.Arith.Formalized
+open FirstOrder Arith PeanoMinus IOpen ISigma0 Metamath Arithmetization
 
 variable {T : Theory ℒₒᵣ} [𝐈𝚺₁ ⪯ T]
 
@@ -14,9 +17,9 @@ section
 
 variable (U : Theory ℒₒᵣ) [U.Delta1Definable]
 
-abbrev _root_.LO.FirstOrder.Theory.bewₐ (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := U.provableₐ/[⌜σ⌝]
+noncomputable abbrev _root_.LO.FirstOrder.Theory.bewₐ (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := U.provableₐ/[⌜σ⌝]
 
-abbrev _root_.LO.FirstOrder.Theory.consistentₐ : Sentence ℒₒᵣ := ∼U.bewₐ ⊥
+noncomputable abbrev _root_.LO.FirstOrder.Theory.consistentₐ : Sentence ℒₒᵣ := ∼U.bewₐ ⊥
 
 abbrev _root_.LO.FirstOrder.Theory.Consistentₐ : Theory ℒₒᵣ := {↑U.consistentₐ}
 
@@ -26,7 +29,7 @@ abbrev _root_.LO.FirstOrder.Theory.Inconsistentₐ : Theory ℒₒᵣ := {∼↑
 
 notation "¬𝐂𝐨𝐧[" U "]" => LO.FirstOrder.Theory.Inconsistentₐ U
 
-def _root_.LO.FirstOrder.Theory.goedelₐ : Sentence ℒₒᵣ := fixpoint (∼U.provableₐ)
+noncomputable def _root_.LO.FirstOrder.Theory.goedelₐ : Sentence ℒₒᵣ := fixpoint (∼U.provableₐ)
 
 end
 
@@ -145,7 +148,7 @@ instance [Entailment.Consistent T] : ℕ ⊧ₘ* 𝐂𝐨𝐧[T] := by
   suffices ¬T.Provableₐ ⌜⊥⌝ by simpa [models₀_iff] using  this
   intro H
   haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  have : T ⊢! ⊥ := Arith.provableₐ_iff_provable₀.mp H
+  have : T ⊢! ⊥ := provableₐ_iff_provable₀.mp H
   have : Entailment.Inconsistent T := inconsistent_iff_provable_bot.mpr this
   exact Consistent.not_inconsistent this
 
@@ -159,6 +162,4 @@ instance [ℕ ⊧ₘ* T] : T ⪱ T + ¬𝐂𝐨𝐧[T] :=
 
 end
 
-end LO.FirstOrder.Arith
-
-end
+end LO.ISigma1

@@ -1,31 +1,29 @@
-import Foundation.Incompleteness.Arith.D3
+import Foundation.FirstOrder.Incompleteness.D3
 import Foundation.Logic.HilbertStyle.Supplemental
-import Foundation.Incompleteness.ToFoundation.Basic
-
-noncomputable section
 
 open Classical
 
-namespace LO.Arith.Formalized
+namespace LO.ISigma1.Metamath.Arithmetization
 
-open LO.FirstOrder LO.FirstOrder.Arith
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-def substNumeral (φ x : V) : V := ⌜ℒₒᵣ⌝.substs₁ (numeral x) φ
+noncomputable def substNumeral (φ x : V) : V := ⌜ℒₒᵣ⌝.substs₁ (numeral x) φ
 
 lemma substNumeral_app_quote (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
     substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[‘↑n’] : Sentence ℒₒᵣ)⌝ := by
   dsimp [substNumeral]
   let w : Fin 1 → Semiterm ℒₒᵣ Empty 0 := ![‘↑n’]
-  have : ?[numeral (n : V)] = (⌜fun i : Fin 1 ↦ ⌜w i⌝⌝ : V) := nth_ext' 1 (by simp) (by simp) (by simp [w])
+  have : ?[numeral (n : V)] = (⌜fun i : Fin 1 ↦ ⌜w i⌝⌝ : V) :=
+    nth_ext' 1 (by simp) (by simp) (by simp [w, Matrix.constant_eq_singleton])
   rw [Language.substs₁, this, quote_substs' (L := ℒₒᵣ)]
 
 lemma substNumeral_app_quote_quote (σ π : Semisentence ℒₒᵣ 1) :
     substNumeral (⌜σ⌝ : V) ⌜π⌝ = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
   simpa [coe_quote, quote_eq_encode] using substNumeral_app_quote σ ⌜π⌝
 
-def substNumerals (φ : V) (v : Fin k → V) : V := ⌜ℒₒᵣ⌝.substs ⌜fun i ↦ numeral (v i)⌝ φ
+noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := ⌜ℒₒᵣ⌝.substs ⌜fun i ↦ numeral (v i)⌝ φ
 
 lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ) :
     (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.substs (fun i ↦ ‘↑(v i)’)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
@@ -52,7 +50,7 @@ lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) 
 @[simp] lemma eval_ssnum (v) :
     Semiformula.Evalbm V v ssnum.val ↔ v 0 = substNumeral (v 1) (v 2) := substNumeral_defined.df.iff v
 
-def _root_.LO.FirstOrder.Arith.ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Arith.ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “y p. ∃ n, !lenDef ↑k n ∧
     (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k) ∧ !numeralDef z #i.succ.succ.succ.succ) ∧
     !p⌜ℒₒᵣ⌝.substsDef y n p” (by simp)
@@ -77,19 +75,19 @@ lemma substNumerals_defined :
 
 end
 
-end LO.Arith.Formalized
+end LO.ISigma1.Metamath.Arithmetization
 
-namespace LO.FirstOrder.Arith
+namespace LO.ISigma1
 
-open LO.Arith LO.Arith.Formalized
+open FirstOrder Arith PeanoMinus IOpen ISigma0 Metamath Arithmetization
 
 variable {T : Theory ℒₒᵣ} [𝐈𝚺₁ ⪯ T]
 
 section Diagonalization
 
-def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 := “x. ∀ y, !ssnum y x x → !θ y”
+noncomputable def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 := “x. ∀ y, !ssnum y x x → !θ y”
 
-def fixpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
+noncomputable def fixpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
 
 lemma substs_diag (θ σ : Semisentence ℒₒᵣ 1) :
     “!(diag θ) !!(⌜σ⌝ : Semiterm ℒₒᵣ Empty 0)” = (“∀ x, !ssnum x !!⌜σ⌝ !!⌜σ⌝ → !θ x” : Sentence ℒₒᵣ) := by
@@ -116,7 +114,8 @@ theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
   complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance
     let Θ : V → Prop := fun x ↦ Semiformula.Evalbm V ![x] θ
-    suffices V ⊧/![] (fixpoint θ) ↔ Θ ⌜fixpoint θ⌝ by simpa [Θ, models_iff]
+    suffices V ⊧/![] (fixpoint θ) ↔ Θ ⌜fixpoint θ⌝ by
+      simpa [Θ, models_iff, Matrix.constant_eq_singleton]
     calc
       V ⊧/![] (fixpoint θ)
       ↔ Θ (substNumeral ⌜diag θ⌝ ⌜diag θ⌝) := val_fixpoint θ --simp [Θ, fixpoint_eq]
@@ -127,12 +126,12 @@ end Diagonalization
 section Multidiagonalization
 
 /-- $\mathrm{diag}_i(\vec{x}) := (\forall \vec{y})\left[ \left(\bigwedge_j \mathrm{ssnums}(y_j, x_j, \vec{x})\right) \to \theta_i(\vec{y}) \right]$ -/
-def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒₒᵣ k :=
+noncomputable def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒₒᵣ k :=
   ∀^[k] (
     (Matrix.conj fun j : Fin k ↦ (Rew.substs <| #(j.addCast k) :> #(j.addNat k) :> fun l ↦ #(l.addNat k)) ▹ ssnums.val) ➝
     (Rew.substs fun j ↦ #(j.addCast k)) ▹ θ)
 
-def multifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.substs fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
+noncomputable def multifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.substs fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
 
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢!. multifixpoint θ i ⭤ (Rew.substs fun j ↦ ⌜multifixpoint θ j⌝) ▹ (θ i) :=
@@ -148,7 +147,7 @@ theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
       _                      ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
       _                      ↔ V ⊧/(fun i ↦ ⌜multifixpoint θ i⌝) (θ i)   := by simp [ht]
 
-def exclusiveMultifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
+noncomputable def exclusiveMultifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
   multifixpoint (fun j ↦ (θ j).padding j) i
 
 @[simp] lemma exclusiveMultifixpoint_inj_iff (θ : Fin k → Semisentence ℒₒᵣ k) :
@@ -168,9 +167,7 @@ theorem exclusiveMultidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
 
 lemma multifixpoint_pi {θ : Fin k → Semisentence ℒₒᵣ k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :
     Hierarchy 𝚷 (m + 1) (multifixpoint θ i) := by
-  simp [multifixpoint, multidiag, h]
-  intro _
-  apply Hierarchy.mono (s := 1) (by simp) (by simp)
+  simpa [multifixpoint, multidiag, h] using fun _ ↦ Hierarchy.mono (s := 1) (by simp) (by simp)
 
 lemma exclusiveMultifixpoint_pi {θ : Fin k → Semisentence ℒₒᵣ k} (h : ∀ i, Hierarchy 𝚷 (m + 1) (θ i)) :
     Hierarchy 𝚷 (m + 1) (exclusiveMultifixpoint θ i) := by
@@ -178,6 +175,4 @@ lemma exclusiveMultifixpoint_pi {θ : Fin k → Semisentence ℒₒᵣ k} (h : �
 
 end Multidiagonalization
 
-end LO.FirstOrder.Arith
-
-end
+end LO.ISigma1
