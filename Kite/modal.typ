@@ -25,7 +25,7 @@
 
     node [
       shape=none
-      margin=0.1
+      margin=0.05
       width=0
       height=0
     ]
@@ -33,14 +33,16 @@
     edge [
       style = solid
       arrowhead = vee
+      arrowsize = 0.5
     ];
 
     {rank = same; \"LO.Modal.Logic.Triv\"; \"LO.Modal.Logic.Ver\";}
     {rank = same; \"LO.Modal.Logic.KD\"; \"LO.Modal.Logic.KB\"; \"LO.Modal.Logic.K4\"; \"LO.Modal.Logic.K5\";}
     {rank = same; \"LO.Modal.Logic.KT\"; \"LO.Modal.Logic.KDB\"; \"LO.Modal.Logic.KD4\"; \"LO.Modal.Logic.KD5\"; \"LO.Modal.Logic.K45\";}
     {rank = same; \"LO.Modal.Logic.KTB\"; \"LO.Modal.Logic.S4\"; \"LO.Modal.Logic.KD45\"; \"LO.Modal.Logic.KB4\";}
-    {rank = same; \"LO.Modal.Logic.K4Point2\"; \"LO.Modal.Logic.K4Point3\";}
     {rank = same; \"LO.Modal.Logic.GL\"; \"LO.Modal.Logic.Grz\";}
+    {rank = same; \"LO.Modal.Logic.GLPoint2\"; \"LO.Modal.Logic.GrzPoint2\";}
+    {rank = same; \"LO.Modal.Logic.GLPoint3\"; \"LO.Modal.Logic.GrzPoint3\";}
     {rank = same; \"LO.Modal.Logic.GLPoint3\"; \"LO.Modal.Logic.GrzPoint3\";}
     {rank = same; \"LO.Modal.Logic.S5Grz\"; \"LO.Modal.Logic.Triv\";}
   "
