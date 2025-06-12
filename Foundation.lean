@@ -65,6 +65,7 @@ import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
 import Foundation.FirstOrder.Incompleteness.WitnessComparison
+import Foundation.FirstOrder.Incompleteness.Delta1
 
 
 import Foundation.FirstOrder.Hauptsatz
