@@ -112,7 +112,7 @@ theorem Construction.case :
     c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x
 ```
 
-- [Blueprint](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Blueprint), [Construction](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction), [Construction.Finite](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction.Finite), [Construction.Fixpoint](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction.Fixpoint), [Construction.case](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction.case)
+- [Blueprint](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Blueprint), [Construction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction), [Construction.Finite](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.Finite), [Construction.Fixpoint](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.Fixpoint), [Construction.case](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.case)
 
 $\mathsf{Fix}_\Phi(\vec v, x)$ is $\Delta_1$ if $\Phi$ satisfies strong finiteness:
 
@@ -121,7 +121,7 @@ class Construction.StrongFinite (c : Construction M φ) where
   strong_finite {C : Set M} {v x} : c.Φ v C x → c.Φ v {y ∈ C | y < x} x
 ```
 
-- [StrongFinite](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction.StrongFinite)
+- [StrongFinite](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.StrongFinite)
 
 Also structural induction holds.
 
@@ -132,4 +132,4 @@ theorem Construction.induction [c.StrongFinite]
     ∀ x, c.Fixpoint v x → P x
 ```
 
-- [LO.Arith.Fixpoint.Construction.induction](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Fixpoint.html#LO.Arith.Fixpoint.Construction.induction)
+- [LO.Arith.Fixpoint.Construction.induction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.induction)

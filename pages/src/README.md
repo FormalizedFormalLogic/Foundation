@@ -2,6 +2,9 @@
 
 [Formalized Formal Logic](https://github.com/FormalizedFormalLogic/Foundation) is aim to formalize some various results of mathematical logic in [Lean Theorem Prover](https://lean-lang.org).
 
+## Document
+- [Doc](https://FormalizedFormalLogic.github.io/Foundation/doc)
+
 ## Kites
 
 Visualization for sublogic/subtheory relations.
