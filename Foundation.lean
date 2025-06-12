@@ -65,6 +65,7 @@ import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
 import Foundation.FirstOrder.Incompleteness.WitnessComparison
+import Foundation.FirstOrder.Incompleteness.Delta1
 
 
 import Foundation.FirstOrder.Hauptsatz
@@ -140,6 +141,3 @@ import Foundation.ProvabilityLogic.Grz.Completeness
 import Foundation.ProvabilityLogic.S.Completeness
 
 import Foundation.AutoProver.Classical
-
--- Meta
-import Foundation.Meta.Kite.Arith

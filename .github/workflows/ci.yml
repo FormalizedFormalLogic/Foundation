@@ -88,6 +88,10 @@ jobs:
         run: |
           lake exe generate_modal_kite
           typst compile ./Kite/modal.typ ./pages/src/assets/modal_kite.png
+      - name: Generate Arith Kite
+        run: |
+          lake exe generate_arith_kite
+          typst compile ./Kite/arith.typ ./pages/src/assets/arith_kite.png
 
       # Build doc
       - name: Build docs
