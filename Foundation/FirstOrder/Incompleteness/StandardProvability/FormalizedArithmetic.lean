@@ -7,6 +7,7 @@ import Foundation.FirstOrder.ISigma1.Metamath
 -/
 
 open Classical
+
 namespace LO.ISigma1.Metamath
 
 open FirstOrder Arith PeanoMinus IOpen ISigma0

@@ -1,13 +1,16 @@
-import Foundation.Incompleteness.Arith.D3
+import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.Logic.HilbertStyle.Supplemental
-import Foundation.Incompleteness.ToFoundation.Basic
 
-noncomputable section
+/-!
+# Consistency predicate
+
+-/
 
 open Classical
-namespace LO.Arith
 
-open LO.FirstOrder LO.FirstOrder.Arith
+namespace LO.ISigma1.Metamath
+
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -23,7 +26,7 @@ lemma _root_.LO.FirstOrder.Theory.Consistencyₐ.quote_iff {φ : Sentence ℒₒ
 
 section
 
-def _root_.LO.FirstOrder.Theory.consistencyₐ : 𝚷₁.Semisentence 1 := .mkPi
+noncomputable def _root_.LO.FirstOrder.Theory.consistencyₐ : 𝚷₁.Semisentence 1 := .mkPi
   “φ. ∀ nφ, !(ℒₒᵣ).lDef.negDef nφ φ → ¬!T.provableₐ nφ” (by simp)
 
 lemma consistencyₐ_defined : 𝚷₁-Predicate (T.Consistencyₐ : V → Prop) via T.consistencyₐ := by
@@ -37,4 +40,6 @@ instance consistencyₐ_definable : 𝚷₁-Predicate (T.Consistencyₐ : V → 
 
 end
 
-variable {T}
+end WitnessComparisons
+
+end LO.ISigma1.Metamath

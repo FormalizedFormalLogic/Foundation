@@ -1,8 +1,8 @@
-import Foundation.FirstOrder.Incompleteness.FormalizedArithmetic
+import Foundation.FirstOrder.Incompleteness.StandardProvability.FormalizedArithmetic
 
 /-!
 
-# Formalized $\Sigma_1$-Completeness
+# Formalized theory $\mathsf{R_0}$
 
 -/
 

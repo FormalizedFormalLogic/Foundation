@@ -1,5 +1,5 @@
-import Foundation.Incompleteness.Arith.DC
-import Foundation.Incompleteness.DC.Basic
+import Foundation.FirstOrder.Incompleteness.DerivabilityCondition.Basic
+import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.Logic.HilbertStyle.Cl
 import Foundation.Modal.Hilbert.WellKnown
 

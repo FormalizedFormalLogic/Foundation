@@ -128,7 +128,7 @@ lemma GL_S_TFAE :
                 apply Frame.IsRooted.direct_rooted_of_trans;
                 assumption
           have b : 𝐈𝚺₁ ⊢!. ⩖ j, σ j := oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
-            simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using SolovaySentences.solovay_disjunction
+            simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_disjunction
           exact this ⨀ b
         . intro h;
           have := Satisfies.box_def.not.mp h;
@@ -138,7 +138,7 @@ lemma GL_S_TFAE :
             σ.mainlemma (A := B) (i := i) (by trivial) |>.2
             <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
           have : 𝐈𝚺₁ ⊢!. ∼((𝐈𝚺₁).standardDP T) (∼σ (Sum.inr i)) ➝ ∼((𝐈𝚺₁).standardDP T) (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B) :=
-            contra₀'!
+            contra!
             $ ((𝐈𝚺₁).standardDP T).prov_distribute_imply'
             $ CN!_of_CN!_right $ this;
           refine C!_trans ?_ this;
@@ -148,7 +148,7 @@ lemma GL_S_TFAE :
     have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) A := models_of_provable₀ inferInstance $ H A (by simp) |>.2 hA₂;
     simp only [models₀_imply_iff, models₀_not_iff] at this;
     exact this <| by
-      simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using SolovaySentences.solovay_root_sound
+      simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;
 
 theorem S.arithmetical_completeness_iff : A ∈ Logic.S ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A) := GL_S_TFAE.out 1 2

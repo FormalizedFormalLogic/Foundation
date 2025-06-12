@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Incompleteness.D3
+import Foundation.FirstOrder.ISigma1.Metamath
 import Foundation.Logic.HilbertStyle.Supplemental
 
 open Classical

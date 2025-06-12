@@ -1,7 +1,6 @@
-import Foundation.FirstOrder.Incompleteness.D1
+import Foundation.FirstOrder.Incompleteness.StandardProvability.D1
 
 /-!
-
 # Formalized $\Sigma_1$-Completeness
 
 -/

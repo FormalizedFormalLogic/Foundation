@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Incompleteness.Theory
+import Foundation.FirstOrder.Incompleteness.StandardProvability.FormalizedR0
 import Foundation.FirstOrder.ISigma1.Metamath.CodedTheory
 
 /-!

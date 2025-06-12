@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Incompleteness.D1
+import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.FirstOrder.R0.Representation
 
 /-!

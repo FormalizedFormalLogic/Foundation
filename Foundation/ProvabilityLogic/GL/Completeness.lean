@@ -1,10 +1,15 @@
 import Foundation.ProvabilityLogic.Basic
 import Foundation.Modal.Kripke.Logic.GL.Tree
 import Foundation.Modal.Kripke.ExtendRoot
-import Foundation.Incompleteness.Arith.WitnessComparizon
-import Foundation.Incompleteness.Arith.FixedPoint
-import Foundation.Incompleteness.Arith.ConsistencyPredicate
+import Foundation.FirstOrder.Incompleteness.WitnessComparizon
+import Foundation.FirstOrder.Incompleteness.FixedPoint
+import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
 import Foundation.ProvabilityLogic.GL.Soundness
+
+/-!
+# Solovay's arithmetical completeness of $\mathsf{GL}$
+
+-/
 
 open Classical
 
@@ -86,7 +91,7 @@ theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : 
       obtain ⟨j, Rij, hA⟩ := this;
       have := CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
       have : T₀ ⊢!. ∼𝔅 (∼σ.σ j) ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) :=
-        contra₀'! $ 𝔅.prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
+        contra! $ 𝔅.prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
       exact C!_trans (σ.SC2 i j Rij) this;
 
 end SolovaySentences
@@ -95,15 +100,15 @@ end ProvabilityLogic
 
 end LO
 
-namespace LO.FirstOrder.Arith
+namespace LO.ISigma1.Metamath
+
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 namespace SolovaySentences
 
 open Modal ProvabilityLogic Kripke
 
 variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
-
-open LO.Arith
 
 variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
@@ -165,8 +170,8 @@ def θAux (t : F → Semiterm ℒₒᵣ Empty N) (i : F) : Semisentence ℒₒ�
 
 lemma rew_twoPointAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : F → Semiterm ℒₒᵣ Empty N) :
     Rew.substs w ▹ twoPointAux T t i j = twoPointAux T (fun i ↦ Rew.substs w (t i)) i j := by
-  simp [twoPointAux, Finset.map_conj', Function.comp_def,
-    ←TransitiveRewriting.comp_app, Rew.substs_comp_substs]
+  simp [twoPointAux, Finset.map_conj', Function.comp_def, ←TransitiveRewriting.comp_app,
+    Rew.substs_comp_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
 lemma rew_θChainAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : F → Semiterm ℒₒᵣ Empty N) (ε : List F) :
     Rew.substs w ▹ θChainAux T t ε = θChainAux T (fun i ↦ Rew.substs w (t i)) ε := by
@@ -196,11 +201,13 @@ lemma solovay_diag (i : F) :
   have : 𝐈𝚺₁ ⊢!. T.solovay i ⭤
       (Rew.substs fun j ↦ ⌜T.solovay ((Fintype.equivFin F).symm j)⌝) ▹
         (θAux T (fun i ↦ #(Fintype.equivFin F i)) i ⋏ ⩕ k ∈ { k : F | i ≺ k }, T.consistencyₐ/[#(Fintype.equivFin F k)]) := by
-    simpa [Theory.solovay] using exclusiveMultidiagonal (T := 𝐈𝚺₁) (i := Fintype.equivFin F i)
-      (fun j ↦
-        let jj := (Fintype.equivFin F).symm j
-        θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistencyₐ/[#(Fintype.equivFin F k)])
-  simpa [θ, Finset.map_conj', Function.comp_def, rew_θAux, ←TransitiveRewriting.comp_app, Rew.substs_comp_substs] using this
+    simpa [Theory.solovay, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
+      exclusiveMultidiagonal (T := 𝐈𝚺₁) (i := Fintype.equivFin F i)
+        (fun j ↦
+          let jj := (Fintype.equivFin F).symm j
+          θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistencyₐ/[#(Fintype.equivFin F k)])
+  simpa [θ, Finset.map_conj', Function.comp_def, rew_θAux, ←TransitiveRewriting.comp_app,
+    Rew.substs_comp_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using this
 
 @[simp] lemma solovay_exclusive {i j : F} : T.solovay i = T.solovay j ↔ i = j := by simp [Theory.solovay]
 
@@ -398,7 +405,9 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
   · right
     have : ∃ j, i ≺ j ∧ ∀ k, i ≺ k → T.ProvabilityComparisonₐ (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
       have : ∃ j, i ≺ j ∧ T.Provableₐ (⌜∼T.solovay j⌝ : V) := by
-        simp [Theory.Consistencyₐ.quote_iff, Theory.Solovay] at hS; exact hS hΘ
+        have : Θ T V i → ∃ x, i ≺ x ∧ T.Provableₐ (⌜∼T.solovay x⌝ : V) := by
+          simpa [Theory.Consistencyₐ.quote_iff, Theory.Solovay] using hS
+        exact this hΘ
       rcases this with ⟨j', hij', hj'⟩
       have := ProvabilityComparisonₐ.find_minimal_proof_fintype (T := T) (ι := {j : F // i ≺ j}) (i := ⟨j', hij'⟩)
         (fun k ↦ ⌜∼T.solovay k.val⌝) (by simpa)
@@ -477,7 +486,8 @@ lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] {i :
 
 variable (T F r)
 
-instance standard [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : SolovaySentences ((𝐈𝚺₁).standardDP T) F r where
+instance _root_.LO.ProvabilityLogic.SolovaySentences.standard
+    [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : SolovaySentences ((𝐈𝚺₁).standardDP T) F r where
   σ := T.solovay
   SC1 i j ne :=
     have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
@@ -493,16 +503,17 @@ instance standard [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : SolovaySe
     simpa [models_iff, standardDP_def] using Solovay.box_disjunction h
   SC4 i ne := solovay_unprovable ne
 
-lemma standard_σ_def [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : (standard F r T).σ = T.solovay := rfl
+lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] :
+    (SolovaySentences.standard F r T).σ = T.solovay := rfl
 
 end SolovaySentences
 
-end LO.FirstOrder.Arith
+end LO.ISigma1.Metamath
 
 namespace LO.ProvabilityLogic
 
 open Entailment Entailment.FiniteContext
-open FirstOrder FirstOrder.Arith FirstOrder.DerivabilityCondition
+open FirstOrder Arith FirstOrder.DerivabilityCondition
 open Modal
 open Modal.Kripke
 

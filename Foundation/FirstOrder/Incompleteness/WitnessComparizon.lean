@@ -1,19 +1,20 @@
-import Foundation.Incompleteness.Arith.D3
+import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.Logic.HilbertStyle.Supplemental
-import Foundation.Incompleteness.ToFoundation.Basic
 
-noncomputable section
+/-!
+# Witness comparisons of provability
 
-open Classical
-namespace LO.Arith
+-/
 
-open LO.FirstOrder LO.FirstOrder.Arith
+namespace LO.ISigma1.Metamath
+
+open FirstOrder Arith PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section WitnessComparisons
 
-variable {L : Arith.Language V} {pL : LDef} [Arith.Language.Defined L pL]
+variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
 variable (T : L.Theory) {pT : pL.TDef} [T.Defined pT]
 
@@ -58,7 +59,7 @@ lemma refl_iff_derivable : T.DerivabilityComparison Γ Γ ↔ T.Derivable Γ := 
     exact ⟨d, dd⟩
   · rintro ⟨d, dd⟩
     have : ∃ b, T.DerivationOf b Γ ∧ ∀ z < b, ¬T.DerivationOf z Γ :=
-      least_number_sigma 𝚺 1 (P := (T.DerivationOf · Γ)) (by definability) dd
+      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := (T.DerivationOf · Γ)) (by definability) dd
     rcases this with ⟨b, bd, h⟩
     exact ⟨b, bd, h⟩
 
@@ -82,7 +83,7 @@ lemma find_minimal_proof_fintype [Fintype ι] (Γ : ι → V) (H : T.Derivable (
   rcases show ∃ dᵢ, T.DerivationOf dᵢ (Γ i)from H with ⟨dᵢ, Hdᵢ⟩
   have : ∃ z, (∃ j, T.DerivationOf z (Γ j)) ∧ ∀ w < z, ∀ (x : ι), ¬T.DerivationOf w (Γ x) := by
     simpa using
-      least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, T.DerivationOf z (Γ j))
+      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, T.DerivationOf z (Γ j))
         (HierarchySymbol.Boldface.fintype_ex fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
   rcases this with ⟨z, ⟨j, hj⟩, H⟩
   exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩
@@ -115,7 +116,7 @@ def _root_.LO.FirstOrder.Theory.ProvabilityComparisonₐ (φ ψ : V) : Prop := (
 
 section
 
-def _root_.LO.FirstOrder.Theory.provabilityComparisonₐDef : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Theory.provabilityComparisonₐDef : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. !(T + 𝐑₀').tDef.provabilityComparisonDef φ ψ” (by simp)
 
 lemma provabilityComparisonₐ_defined : 𝚺₁-Relation (T.ProvabilityComparisonₐ : V → V → Prop) via T.provabilityComparisonₐDef := by
@@ -146,4 +147,4 @@ end ProvabilityComparisonₐ
 
 end ProvabilityComparisonOnArithmetic
 
-end LO.Arith
+end LO.ISigma1.Metamath

@@ -1,6 +1,5 @@
-import Foundation.FirstOrder.Arith.Theory
+import Foundation.FirstOrder.Arith.Basic
 import Foundation.Logic.HilbertStyle.Supplemental
-import Foundation.Incompleteness.ToFoundation.Basic
 
 namespace LO.FirstOrder
 
