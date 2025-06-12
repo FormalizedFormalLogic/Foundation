@@ -26,7 +26,7 @@ name = "Kite"
 
 [[lean_exe]]
 name = "generate_arith_kite"
-srcDir = "scripts"
+root = "Kite.Arith"
 supportInterpreter = true
 
 [[lean_exe]]

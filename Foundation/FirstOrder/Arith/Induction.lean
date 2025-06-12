@@ -1,5 +1,6 @@
 import Foundation.FirstOrder.Arith.Definability
 import Foundation.FirstOrder.PeanoMinus.Functions
+import Foundation.FirstOrder.TrueArithmetic.Basic
 
 /-!
 # Induction schemata of Arithmetic
@@ -97,6 +98,12 @@ lemma mem_InductionScheme_of_mem {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) 
 lemma mem_IOpen_of_qfree {φ : Semiformula ℒₒᵣ ℕ 1} (hp : φ.Open) :
     succInd φ ∈ InductionScheme ℒₒᵣ Semiformula.Open := by
   exact ⟨φ, hp, rfl⟩
+
+instance : 𝐏𝐀⁻ ⪯ 𝐈Open := inferInstance
+
+instance : 𝐈Open ⪯ 𝐈𝚺₀ := inferInstance
+
+instance : 𝐈𝚺₁ ⪯ 𝐏𝐀 := inferInstance
 
 end LO
 
@@ -380,5 +387,11 @@ instance models_Peano : ℕ ⊧ₘ* 𝐏𝐀 := by
   simp only [Peano, InductionScheme, ModelsTheory.add_iff, instModelsTheoryNat,
     Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp, true_and]
   rintro _ φ _ rfl; simp [models_succInd]
+
+instance : Entailment.Consistent (𝐈𝐍𝐃 Γ k) := consistent_of_sound (𝐈𝐍𝐃 Γ k) (Eq ⊥) rfl
+
+instance : Entailment.Consistent 𝐏𝐀 := consistent_of_sound 𝐏𝐀 (Eq ⊥) rfl
+
+instance : 𝐏𝐀 ⪯ 𝐓𝐀 := inferInstance
 
 end LO
