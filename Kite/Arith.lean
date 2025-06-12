@@ -1,13 +1,10 @@
 import Kite.Basic
 import Foundation.FirstOrder.Arith.Basic
-import Foundation.FirstOrder.Omega1.Basic
 
 open Lean Meta Qq Elab Command
 open LO.FirstOrder
 
 namespace Kite
-
-#print LO.PeanoMinus.instWeakerThanSyntacticFormulaORingTheoryR0
 
 def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   match ← inferTypeQ ci.type with
