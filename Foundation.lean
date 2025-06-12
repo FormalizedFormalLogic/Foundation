@@ -140,6 +140,3 @@ import Foundation.ProvabilityLogic.Grz.Completeness
 import Foundation.ProvabilityLogic.S.Completeness
 
 import Foundation.AutoProver.Classical
-
--- Meta
-import Foundation.Meta.Kite.Arith
