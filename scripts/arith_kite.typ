@@ -39,7 +39,7 @@ Kite of First-Order Arithmetics
       + "}",
   ),
   labels: (
-    "CobhamR0": $Theory(R_0)$,
+    "R0": $Theory(R_0)$,
     "ISigma0": $Theory(I Sigma_0)$,
     "ISigma1": $Theory(I Sigma_1)$,
     "PAMinus": $Theory("PA"^-)$,

@@ -20,8 +20,8 @@ theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
   case and Γ φ ψ _ _ ihp ihq =>
     by_cases hv : v ⊧ Γ.disj
     · simp [hv]
-    · have : v ⊧ φ := by simpa[hv] using ihp
-      have : v ⊧ ψ := by simpa[hv] using ihq
+    · have : v ⊧ φ := by simpa [hv] using ihp
+      have : v ⊧ ψ := by simpa [hv] using ihq
       simp [*]
   case or Γ φ ψ d ih =>
     simpa [or_assoc] using ih
@@ -32,8 +32,8 @@ theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
   case cut Γ φ _ _ ihp ihn =>
     by_cases hv : v ⊧ Γ.disj
     · simp [hv]
-    · have : v ⊧ φ := by simpa[hv] using ihp
-      have : ¬v ⊧ φ := by simpa[hv] using ihn
+    · have : v ⊧ φ := by simpa [hv] using ihp
+      have : ¬v ⊧ φ := by simpa [hv] using ihn
       contradiction
   case root φ h =>
     have : v ⊧* T := by simpa [Semantics.models] using hv

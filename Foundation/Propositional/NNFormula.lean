@@ -24,7 +24,7 @@ def neg : NNFormula α → NNFormula α
   | or φ ψ  => and (neg φ) (neg ψ)
 
 lemma neg_neg (φ : NNFormula α) : neg (neg φ) = φ :=
-  by induction φ <;> simp[*, neg]
+  by induction φ <;> simp [*, neg]
 
 instance : LogicalConnective (NNFormula α) where
   tilde := neg
@@ -78,17 +78,17 @@ lemma imp_eq (φ ψ : NNFormula α) : φ ➝ ψ = ∼φ ⋎ ψ := rfl
 lemma iff_eq (φ ψ : NNFormula α) : φ ⭤ ψ = (∼φ ⋎ ψ) ⋏ (∼ψ ⋎ φ) := rfl
 
 @[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : NNFormula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
-by simp[Wedge.wedge]
+by simp [Wedge.wedge]
 
 @[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : NNFormula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ :=
-by simp[Vee.vee]
+by simp [Vee.vee]
 
 instance : DeMorgan (NNFormula α) where
   verum := rfl
   falsum := rfl
   and := by simp
   or := by simp
-  imply := by simp[imp_eq]
+  imply := by simp [imp_eq]
   neg := by simp
 
 def complexity : NNFormula α → ℕ
@@ -144,7 +144,7 @@ def rec' {C : NNFormula α → Sort w}
   | φ ⋎ ψ   => hor φ ψ (rec' hverum hfalsum hatom hnatom hand hor φ) (rec' hverum hfalsum hatom hnatom hand hor ψ)
 
 @[simp] lemma complexity_neg (φ : NNFormula α) : complexity (∼φ) = complexity φ :=
-  by induction φ using rec' <;> simp[*]
+  by induction φ using rec' <;> simp [*]
 
 section Decidable
 
@@ -168,8 +168,8 @@ def hasDecEq : (φ ψ : NNFormula α) → Decidable (φ = ψ)
         | isTrue hp =>
           match hasDecEq ψ ψ' with
           | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-          | isFalse hq => isFalse (by simp[hp, hq])
-        | isFalse hp => isFalse (by simp[hp])
+          | isFalse hq => isFalse (by simp [hp, hq])
+        | isFalse hp => isFalse (by simp [hp])
   | φ ⋎ ψ,   χ => by
       cases χ using cases' <;> try { simp; exact isFalse not_false }
       case hor φ' ψ' =>
@@ -177,8 +177,8 @@ def hasDecEq : (φ ψ : NNFormula α) → Decidable (φ = ψ)
         | isTrue hp =>
           match hasDecEq ψ ψ' with
           | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-          | isFalse hq => isFalse (by simp[hp, hq])
-        | isFalse hp => isFalse (by simp[hp])
+          | isFalse hq => isFalse (by simp [hp, hq])
+        | isFalse hp => isFalse (by simp [hp])
 
 instance : DecidableEq (NNFormula α) := hasDecEq
 

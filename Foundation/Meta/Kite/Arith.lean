@@ -1,6 +1,6 @@
 import Foundation.Meta.Kite.Generator
-import Foundation.FirstOrder.Arith.Theory
-import Foundation.FirstOrder.Arith.Model
+import Foundation.FirstOrder.TrueArithmetic.Basic
+import Foundation.FirstOrder.Incompleteness.Second
 
 namespace LO.Meta.Kite.Arith
 
@@ -45,7 +45,7 @@ def EdgeType.search {F : Q(Type)} (s t : Vertex F) : MetaM (Option EdgeType) := 
 
 def kite : Kite (Vertex q(SyntacticFormula ℒₒᵣ)) EdgeType where
   vertices := [
-    ⟨"CobhamR0", q(Theory ℒₒᵣ), q(𝐑₀)⟩,
+    ⟨"R0", q(Theory ℒₒᵣ), q(𝐑₀)⟩,
     ⟨"PAMinus", q(Theory ℒₒᵣ), q(𝐏𝐀⁻)⟩,
     ⟨"ISigma0", q(Theory ℒₒᵣ), q(𝐈𝚺₀)⟩,
     ⟨"ISigma1", q(Theory ℒₒᵣ), q(𝐈𝚺₁)⟩,

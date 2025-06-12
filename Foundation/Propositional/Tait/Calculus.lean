@@ -31,15 +31,15 @@ def length : {Δ : Sequent α} → T ⟹ Δ → ℕ
   | _, cut dp dn   => (max (length dp) (length dn)).succ
   | _, root _      => 0
 
-protected def cast (d : T ⟹ Δ) (e : Δ = Γ) : T ⟹ Γ := cast (by simp[e]) d
+protected def cast (d : T ⟹ Δ) (e : Δ = Γ) : T ⟹ Γ := cast (by simp [e]) d
 
 @[simp] lemma length_cast (d : T ⟹ Δ) (e : Δ = Γ) : length (Derivation.cast d e) = length d := by
-  rcases e with rfl; simp[Derivation.cast]
+  rcases e with rfl; simp [Derivation.cast]
 
-def verum' (h : ⊤ ∈ Δ) : T ⟹ Δ := (verum Δ).wk (by simp[h])
+def verum' (h : ⊤ ∈ Δ) : T ⟹ Δ := (verum Δ).wk (by simp [h])
 
 def axL' (a : α)
-    (h : NNFormula.atom a ∈ Δ) (hn : NNFormula.natom a ∈ Δ) : T ⟹ Δ := (axL Δ a).wk (by simp[h, hn])
+    (h : NNFormula.atom a ∈ Δ) (hn : NNFormula.natom a ∈ Δ) : T ⟹ Δ := (axL Δ a).wk (by simp [h, hn])
 
 def em {φ : NNFormula α} {Δ : Sequent α} (hpos : φ ∈ Δ) (hneg : ∼φ ∈ Δ) : T ⟹ Δ := by
   induction φ using NNFormula.rec' generalizing Δ <;> simp at hneg
@@ -50,13 +50,13 @@ def em {φ : NNFormula α} {Δ : Sequent α} (hpos : φ ∈ Δ) (hneg : ∼φ �
   case hand φ ψ ihp ihq =>
     have ihp : T ⟹ φ :: ∼φ :: ∼ψ :: Δ := ihp (by simp) (by simp)
     have ihq : T ⟹ ψ :: ∼φ :: ∼ψ :: Δ := ihq (by simp) (by simp)
-    have : T ⟹ ∼φ :: ∼ψ :: Δ := (ihp.and ihq).wk (by simp[hpos])
-    exact this.or.wk (by simp[hneg])
+    have : T ⟹ ∼φ :: ∼ψ :: Δ := (ihp.and ihq).wk (by simp [hpos])
+    exact this.or.wk (by simp [hneg])
   case hor φ ψ ihp ihq  =>
     have ihp : T ⟹ ∼φ :: φ :: ψ :: Δ := ihp (by simp) (by simp)
     have ihq : T ⟹ ∼ψ :: φ :: ψ :: Δ := ihq (by simp) (by simp)
-    have : T ⟹ φ :: ψ :: Δ := (ihp.and ihq).wk (by simp[hneg])
-    exact this.or.wk (by simp[hpos])
+    have : T ⟹ φ :: ψ :: Δ := (ihp.and ihq).wk (by simp [hneg])
+    exact this.or.wk (by simp [hpos])
 
 instance : Tait (NNFormula α) (Theory α) where
   verum := fun _ Δ => Derivation.verum Δ

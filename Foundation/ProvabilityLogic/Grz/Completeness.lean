@@ -8,19 +8,6 @@ open Modal.Hilbert
 open FirstOrder
 open Entailment FiniteContext
 
-namespace FirstOrder
-
-variable {L} {M : Type*} [Nonempty M] [Structure L M]
-
-@[simp] lemma models₀_and_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⋏ π) ↔ M ⊧ₘ₀ σ ∧ M ⊧ₘ₀ π := by simp [models₀_iff]
-
-@[simp] lemma models₀_bot_iff : ¬(M ⊧ₘ₀ (⊥ : Sentence L)) := by simp [models₀_iff]
-
-@[simp] lemma models₀_top_iff : M ⊧ₘ₀ (⊤ : Sentence L) := by simp [models₀_iff];
-
-end FirstOrder
-
-
 namespace ProvabilityLogic
 
 variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] [DecidableEq (Sentence L)]
