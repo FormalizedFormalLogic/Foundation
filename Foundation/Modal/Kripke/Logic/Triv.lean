@@ -2,6 +2,7 @@ import Foundation.Modal.Kripke.Logic.KT
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Rooted
 import Foundation.Modal.Kripke.Logic.GrzPoint3
+import Foundation.Modal.Kripke.Logic.S4Point4M
 
 namespace LO.Modal
 
@@ -146,6 +147,42 @@ theorem Triv.proper_extension_of_GrzPoint3 : Logic.GrzPoint3 ⊂ Logic.Triv := b
         . omega;
         . simp only [M]; omega;
         . simp only [Connected, and_imp, M]; omega;
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ x ≠ 0 by
+          simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
+        use 1;
+        constructor;
+        . omega;
+        . trivial;
+
+@[simp]
+theorem Triv.proper_extension_of_S4Point4M : Logic.S4Point4M ⊂ Logic.Triv := by
+  constructor;
+  . rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
+    rintro φ hφ F ⟨_, _⟩;
+    apply hφ;
+    refine ⟨by tauto, inferInstance, inferInstance⟩;
+  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.preorder_sobocinski_mckinsey ⊧ φ by
+      rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey];
+      tauto;
+    use Axioms.Tc (.atom 0);
+    constructor;
+    . simp;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
+      use M, 0;
+      constructor;
+      . refine ⟨?_, ⟨?_⟩, ⟨?_⟩⟩;
+        . tauto;
+        . intro x y z _ Rxy Ryz;
+          match x, y, z with
+          | 0, 0, _ => contradiction;
+          | 1, 1, _ => contradiction;
+          | 0, 1, _ => omega
+          | 1, 0, _ => omega;
+        . intro x;
+          use 1;
+          simp [M];
+          constructor <;> omega;
       . suffices ∃ x, (0 : M.World) ≺ x ∧ x ≠ 0 by
           simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
         use 1;

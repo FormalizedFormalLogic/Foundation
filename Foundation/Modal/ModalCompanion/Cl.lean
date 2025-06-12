@@ -1,7 +1,7 @@
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.Kripke.Logic.S5Grz
 import Foundation.Modal.Boxdot.Ver_Triv
-
+import Foundation.Propositional.Kripke.Logic.Cl
 
 namespace LO
 
@@ -89,7 +89,7 @@ instance modalCompanion_Cl_S5 : ModalCompanion Logic.Cl Logic.S5 := by
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.euclidean)
     (MC := Modal.Kripke.FrameClass.refl_eucl)
-    (by rw [Propositional.Logic.Cl.Kripke.eq_euclidean])
+    (by rw [Propositional.Logic.Cl.Kripke.euclidean])
     (by rw [←Logic.S5.is_smallestMC_of_Cl, ←Logic.S5.Kripke.refl_eucl])
     (by
       simp;
@@ -150,7 +150,7 @@ instance modalCompanion_Cl_S5Grz : ModalCompanion Logic.Cl Logic.S5Grz := by
   apply Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_symmetric)
     (MC := Modal.Kripke.FrameClass.finite_equality);
-  . rw [Logic.Cl.Kripke.eq_finite_symmetric]
+  . rw [Logic.Cl.Kripke.finite_symmetric]
   . rw [←Logic.S5Grz.is_largestMC_of_Cl, ←Logic.S5Grz.Kripke.finite_equality]
   . rintro F ⟨_, _⟩;
     refine ⟨inferInstance, inferInstance⟩;

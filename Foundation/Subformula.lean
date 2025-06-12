@@ -1,5 +1,4 @@
 import Aesop
-import Foundation.Init
 
 declare_aesop_rule_sets [Subformula]
 

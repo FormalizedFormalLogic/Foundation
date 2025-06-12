@@ -1,5 +1,6 @@
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.Kripke.Logic.GrzPoint2
+import Foundation.Propositional.Kripke.Logic.KC
 
 namespace LO.Propositional
 
@@ -125,7 +126,7 @@ instance modalCompanion_KC_S4Point2 : ModalCompanion Logic.KC Logic.S4Point2 := 
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.confluent)
     (MC := FrameClass.confluent_preorder)
-    (by rw [Propositional.Logic.KC.Kripke.eq_confluent])
+    (by rw [Propositional.Logic.KC.Kripke.confluent])
     (by rw [←Modal.Logic.S4Point2.is_smallestMC_of_KC, ←Modal.Logic.S4Point2.Kripke.confluent_preorder])
     (by rintro F hF; replace hF := Set.mem_setOf_eq.mp hF; apply Set.mem_setOf_eq.mpr; refine ⟨inferInstance, inferInstance⟩);
 
@@ -176,7 +177,7 @@ instance modalCompanion_KC_GrzPoint2 : ModalCompanion Logic.KC Logic.GrzPoint2 :
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_confluent)
     (MC := FrameClass.finite_confluent_partial_order)
-    (by rw [Logic.KC.Kripke.eq_finite_confluent])
+    (by rw [Logic.KC.Kripke.finite_confluent])
     (by rw [←Logic.GrzPoint2.is_largestMC_of_KC, Modal.Logic.GrzPoint2.Kripke.finite_confluent_partial_order])
     (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, inferInstance, inferInstance⟩)
 

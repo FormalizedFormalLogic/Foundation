@@ -1,15 +1,14 @@
 import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.Kripke.Completeness
-import Foundation.Propositional.Kripke.Hilbert.Soundness
+import Foundation.Propositional.Kripke.Hilbert
 import Foundation.Propositional.Kripke.Filtration
 import Foundation.Logic.Disjunctive
 
 namespace LO.Propositional
 
+open Kripke
 open Formula.Kripke
 open Hilbert.Kripke
-
-open Kripke
 
 namespace Hilbert.Int.Kripke
 
@@ -165,6 +164,15 @@ instance : Entailment.Disjunctive (Hilbert.Int) := ⟨disjunctive⟩
 end DP
 
 end Hilbert.Int.Kripke
+
+namespace Logic.Int
+
+lemma Kripke.all : Logic.Int = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.all_finite : Logic.Int = FrameClass.finite_all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+instance : (Logic.Int).Disjunctive := inferInstance
+
+end Logic.Int
 
 
 end LO.Propositional

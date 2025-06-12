@@ -19,6 +19,8 @@ noncomputable instance : HasAxiomT 𝓢 := ⟨fun _ ↦ Grz.axiomT⟩
 
 noncomputable instance : Entailment.S4 𝓢 where
 
+instance : HasAxiomDum 𝓢 := ⟨fun _ ↦ C_trans axiomGrz imply₁⟩
+
 end Grz
 
 end LO.Modal.Entailment

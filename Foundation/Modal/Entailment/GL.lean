@@ -25,6 +25,10 @@ lemma goedel2'! : 𝓢 ⊢! (∼(□⊥) : F) ↔ 𝓢 ⊢! ∼(□(∼(□⊥))
 
 namespace GL
 
+variable {φ ψ : F}
+
+instance : HasAxiomZ 𝓢 := ⟨fun _ ↦ C_trans axiomL imply₁⟩
+
 protected def axiomFour : 𝓢 ⊢ Axioms.Four φ := by
   dsimp [Axioms.Four];
   have : 𝓢 ⊢ φ ➝ (⊡□φ ➝ ⊡φ) := by

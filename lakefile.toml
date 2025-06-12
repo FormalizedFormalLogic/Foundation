@@ -3,10 +3,10 @@ defaultTargets = ["Foundation"]
 
 [leanOptions]
 pp.unicode.fun = true
-linter.flexible = true
-# linter.refine = true
-linter.oldObtain = true
-linter.style.multiGoal = true
+weak.linter.flexible = true
+weak.linter.refine = true
+weak.linter.oldObtain = true
+weak.linter.style.multiGoal = true
 
 [[require]]
 scope = "leanprover-community"
@@ -21,6 +21,9 @@ rev = "v4.21.0-rc1"
 [[lean_lib]]
 name = "Foundation"
 
+[[lean_lib]]
+name = "Kite"
+
 [[lean_exe]]
 name = "generate_arith_kite"
 srcDir = "scripts"
@@ -28,5 +31,10 @@ supportInterpreter = true
 
 [[lean_exe]]
 name = "generate_modal_kite"
-srcDir = "scripts"
+root = "Kite.Modal"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "generate_propositional_kite"
+root = "Kite.Propositional"
 supportInterpreter = true
