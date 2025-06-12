@@ -11,34 +11,34 @@ In $\mathsf{I}\Sigma_1$, we can further prove their entireness.
 Weak theory of sets in $V_\omega$ (Hereditary Finite Sets) can be developed inside $\mathsf{I}\Sigma_1$ using Ackermann coding and bit predicate. Hereafter, we will use the notation $i \in a$ in the sense of bit predicate:
 
 ```lean
-lemma mem_iff_bit [M ⊧ₘ* 𝐈𝚺₁] {i a : M} : i ∈ a ↔ Bit i a
+lemma LO.Arith.mem_iff_bit [M ⊧ₘ* 𝐈𝚺₁] {i a : M} : i ∈ a ↔ Bit i a
 ```
 
-- [LO.Arith.mem_iff_bit](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/Bit.html#LO.Arith.mem_iff_bit)
+- [LO.Arith.mem_iff_bit](https://formalizedformallogic.github.io/Foundation/doc/Foundation/Arithmetization/ISigmaOne/Bit.html#LO.Arith.mem_iff_bit)
 
 The following comprehension holds.
 
 ```lean
-theorem finset_comprehension₁ [M ⊧ₘ* 𝐈𝚺₁]
+theorem LO.ISigma1.finset_comprehension₁ [M ⊧ₘ* 𝐈𝚺₁]
     {P : M → Prop} (hP : (Γ, 1)-Predicate P) (a : M) :
     ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i
 ```
 
-- [LO.Arith.finset_comprehension₁](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/Bit.html#LO.Arith.finset_comprehension%E2%82%81)
+- [LO.ISigma1.finset_comprehension₁](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Bit.html#LO.ISigma1.finset_comprehension%E2%82%81)
 
-The basic concepts of set theory, such as [union](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Basic.html#LO.Arith.union), [inter](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Basic.html#LO.Arith.inter),
-[cartesian product](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Basic.html#LO.Arith.product),
-and [mapping](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Basic.html#LO.Arith.IsMapping), etc. are defined.
+The basic concepts of set theory, such as [union](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.union), [inter](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.inter),
+[cartesian product](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.product),
+and [mapping](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Basic.html#LO.ISigma1.IsMapping), etc. are defined.
 
 ### Seq
 
 $\mathrm{Seq}(s)$ iff $s$ is a mapping and its domain is $[0, l)$ for some $l$.
 
 ```lean
-def Seq [M ⊧ₘ* 𝐈𝚺₁] (s : M) : Prop := IsMapping s ∧ ∃ l, domain s = under l
+def LO.ISigma1.Seq [M ⊧ₘ* 𝐈𝚺₁] (s : M) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 ```
 
-- [LO.Arith.Seq](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/Seq.html#LO.Arith.Seq)
+- [LO.ISigma1.Seq](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.Seq)
 
 ### Primitive Recursion
 
@@ -53,17 +53,17 @@ $$
 $$
 
 ```lean
-structure Formulae (k : ℕ) where
+structure Blueprint (k : ℕ) where
   zero : 𝚺₁-Semisentence (k + 1)
   succ : 𝚺₁-Semisentence (k + 3)
 
-structure Construction {k : ℕ} (p : Formulae k) where
+structure Construction {k : ℕ} (p : Blueprint k) where
   zero : (Fin k → M) → M
   succ : (Fin k → M) → M → M → M
   zero_defined : DefinedFunction zero p.zero
   succ_defined : DefinedFunction (fun v ↦ succ (v ·.succ.succ) (v 1) (v 0)) p.succ
 
-variable {k : ℕ} {p : Formulae k} (c : Construction M p) (v : Fin k → M)
+variable {k : ℕ} {p : Blueprint k} (c : Construction M p) (v : Fin k → M)
 
 def Construction.result (u : M) : M
 
@@ -74,7 +74,7 @@ theorem Construction.result_succ (u : M) :
     c.result v (u + 1) = c.succ v u (c.result v u)
 ```
 
-- [Formulae](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/PRF.html#LO.Arith.PR.Formulae), [Construction](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/PRF.html#LO.Arith.PR.Construction), [Construction.result](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/PRF.html#LO.Arith.PR.Construction.result), [Construction.result_zero](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/PRF.html#LO.Arith.PR.Construction.result_zero), [Construction.result_succ](https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/ISigmaOne/HFS/PRF.html#LO.Arith.PR.Construction.result_succ)
+- [Blueprint](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Blueprint), [Construction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Construction), [Construction.result](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Construction.result), [Construction.result_zero](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Construction.result_zero), [Construction.result_succ](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/PRF.html#LO.ISigma1.PR.Construction.result_succ)
 
 ### Fixpoint
 

@@ -1,7 +1,7 @@
 import Foundation.IntFO.Translation
 
 /-!
-#Algebraic Proofs of Cut Elimination
+# Algebraic proofs of cut elimination
 
 Main reference: Jeremy Avigad, Algebraic proofs of cut elimination, The Journal of Logic and Algebraic Programming, Volume 49, Issues 1–2, 2001, Pages 15-30
  -/
