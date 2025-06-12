@@ -1,7 +1,7 @@
 import Foundation.ProvabilityLogic.Basic
 import Foundation.Modal.Kripke.Logic.GL.Tree
 import Foundation.Modal.Kripke.ExtendRoot
-import Foundation.FirstOrder.Incompleteness.WitnessComparizon
+import Foundation.FirstOrder.Incompleteness.WitnessComparison
 import Foundation.FirstOrder.Incompleteness.FixedPoint
 import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
 import Foundation.ProvabilityLogic.GL.Soundness

@@ -36,14 +36,36 @@ import Foundation.FirstOrder.Order.Le
 import Foundation.FirstOrder.Interpretation
 
 import Foundation.FirstOrder.Arith.Basic
-import Foundation.FirstOrder.Arith.Hierarchy
-import Foundation.FirstOrder.Arith.StrictHierarchy
-import Foundation.FirstOrder.Arith.Theory
-import Foundation.FirstOrder.Arith.Model
-import Foundation.FirstOrder.Arith.R0
-import Foundation.FirstOrder.Arith.PeanoMinus
-import Foundation.FirstOrder.Arith.Representation
-import Foundation.FirstOrder.Arith.Nonstandard
+import Foundation.FirstOrder.Arith.BoundedQuantifier
+import Foundation.FirstOrder.Arith.Definability
+import Foundation.FirstOrder.Arith.Induction
+
+import Foundation.FirstOrder.R0.Basic
+import Foundation.FirstOrder.R0.Representation
+
+import Foundation.FirstOrder.PeanoMinus.Basic
+import Foundation.FirstOrder.PeanoMinus.Functions
+
+import Foundation.FirstOrder.IOpen.Basic
+
+import Foundation.FirstOrder.ISigma0.Exponential
+
+import Foundation.FirstOrder.ISigma1.Bit
+import Foundation.FirstOrder.ISigma1.HFS
+import Foundation.FirstOrder.ISigma1.Ind
+import Foundation.FirstOrder.ISigma1.Metamath
+
+import Foundation.FirstOrder.Omega1.Basic
+import Foundation.FirstOrder.Omega1.Nuon
+
+import Foundation.FirstOrder.Incompleteness.FixedPoint
+import Foundation.FirstOrder.Incompleteness.StandardProvability
+import Foundation.FirstOrder.Incompleteness.DerivabilityCondition.Basic
+import Foundation.FirstOrder.Incompleteness.First
+import Foundation.FirstOrder.Incompleteness.Second
+import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
+import Foundation.FirstOrder.Incompleteness.WitnessComparison
+
 
 import Foundation.FirstOrder.Hauptsatz
 
@@ -107,61 +129,6 @@ import Foundation.Modal.Logic.Dz.Basic
 
 import Foundation.Modal.Maximal.Makinson
 
--- Arithmetization
-/-
-import Foundation.Arithmetization.Vorspiel.Vorspiel
-import Foundation.Arithmetization.Vorspiel.Graph
-import Foundation.Arithmetization.Vorspiel.Lemmata
-
-import Foundation.Arithmetization.Definability.Init
-import Foundation.Arithmetization.Definability.Hierarchy
-import Foundation.Arithmetization.Definability.Boldface
-import Foundation.Arithmetization.Definability.BoundedBoldface
-import Foundation.Arithmetization.Definability.Absoluteness
-
-import Foundation.Arithmetization.Basic.PeanoMinus
-import Foundation.Arithmetization.Basic.Ind
-import Foundation.Arithmetization.Basic.IOpen
-
-import Foundation.Arithmetization.ISigmaZero.Exponential.Pow2
-import Foundation.Arithmetization.ISigmaZero.Exponential.PPow2
-import Foundation.Arithmetization.ISigmaZero.Exponential.Exp
-import Foundation.Arithmetization.ISigmaZero.Exponential.Log
-
-import Foundation.Arithmetization.OmegaOne.Basic
-import Foundation.Arithmetization.OmegaOne.Nuon
-
-import Foundation.Arithmetization.ISigmaOne.Bit
-import Foundation.Arithmetization.ISigmaOne.HFS.Basic
-import Foundation.Arithmetization.ISigmaOne.HFS.Seq
-import Foundation.Arithmetization.ISigmaOne.HFS.PRF
-import Foundation.Arithmetization.ISigmaOne.HFS.Fixpoint
-
-import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Basic
-import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Functions
-import Foundation.Arithmetization.ISigmaOne.Metamath.Term.Typed
-
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Basic
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Functions
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Iteration
-import Foundation.Arithmetization.ISigmaOne.Metamath.Formula.Typed
-
-import Foundation.Arithmetization.ISigmaOne.Metamath.Proof.Thy
-import Foundation.Arithmetization.ISigmaOne.Metamath.Proof.Derivation
-import Foundation.Arithmetization.ISigmaOne.Metamath.Proof.Typed
-
-import Foundation.Arithmetization.ISigmaOne.Metamath.Coding
-import Foundation.Arithmetization.ISigmaOne.Metamath.CodedTheory
-
-import Foundation.Incompleteness.Arith.FormalizedArithmetic
-import Foundation.Incompleteness.Arith.Theory
-import Foundation.Incompleteness.Arith.D1
-import Foundation.Incompleteness.Arith.D3
-import Foundation.Incompleteness.Arith.First
-import Foundation.Incompleteness.Arith.Second
-import Foundation.Incompleteness.Arith.DC
-import Foundation.Incompleteness.DC.Basic
-
 -- Provability Logic
 import Foundation.ProvabilityLogic.N.Soundness
 
@@ -173,6 +140,6 @@ import Foundation.ProvabilityLogic.Grz.Completeness
 import Foundation.ProvabilityLogic.S.Completeness
 
 import Foundation.AutoProver.Classical
--/
+
 -- Meta
 import Foundation.Meta.Kite.Arith

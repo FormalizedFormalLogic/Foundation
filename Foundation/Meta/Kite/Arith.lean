@@ -1,6 +1,6 @@
 import Foundation.Meta.Kite.Generator
-import Foundation.FirstOrder.Arith.Theory
-import Foundation.FirstOrder.Arith.Model
+import Foundation.FirstOrder.TrueArithmetic.Basic
+import Foundation.FirstOrder.Incompleteness.Second
 
 namespace LO.Meta.Kite.Arith
 
