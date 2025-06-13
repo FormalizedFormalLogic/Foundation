@@ -46,6 +46,9 @@ import Foundation.FirstOrder.R0.Representation
 import Foundation.FirstOrder.PeanoMinus.Basic
 import Foundation.FirstOrder.PeanoMinus.Functions
 
+import Foundation.FirstOrder.TrueArithmetic.Basic
+import Foundation.FirstOrder.TrueArithmetic.Nonstandard
+
 import Foundation.FirstOrder.IOpen.Basic
 
 import Foundation.FirstOrder.ISigma0.Exponential
