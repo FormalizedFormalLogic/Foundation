@@ -18,6 +18,11 @@ scope = "leanprover"
 name = "doc-gen4"
 rev = "v4.21.0-rc3"
 
+[[require]]
+scope = "leanprover"
+name = "verso"
+rev = "v4.21.0-rc3"
+
 [[lean_lib]]
 name = "Foundation"
 
@@ -35,6 +40,9 @@ supportInterpreter = true
 name = "generate_propositional_kite"
 root = "Kite.Propositional"
 supportInterpreter = true
+
+[[lean_lib]]
+name = "Kite"
 
 [[lean_lib]]
 name = "Book"
