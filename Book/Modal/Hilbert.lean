@@ -3,7 +3,7 @@ import VersoManual
 
 import Foundation.Modal.Kripke.Logic.K
 
-import Book.References
+import Book.Bibliography
 
 open LO.Modal
 
