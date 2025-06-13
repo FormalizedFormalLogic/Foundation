@@ -11,18 +11,15 @@ weak.linter.style.multiGoal = true
 [[require]]
 scope = "leanprover-community"
 name = "mathlib"
-rev = "v4.21.0-rc1"
+rev = "v4.21.0-rc3"
 
 [[require]]
 scope = "leanprover"
 name = "doc-gen4"
-rev = "v4.21.0-rc1"
+rev = "v4.21.0-rc3"
 
 [[lean_lib]]
 name = "Foundation"
-
-[[lean_lib]]
-name = "Kite"
 
 [[lean_exe]]
 name = "generate_arith_kite"
@@ -38,3 +35,6 @@ supportInterpreter = true
 name = "generate_propositional_kite"
 root = "Kite.Propositional"
 supportInterpreter = true
+
+[[lean_lib]]
+name = "Kite"
