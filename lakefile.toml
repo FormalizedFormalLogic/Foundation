@@ -18,11 +18,6 @@ scope = "leanprover"
 name = "doc-gen4"
 rev = "v4.21.0-rc3"
 
-[[require]]
-scope = "leanprover"
-name = "verso"
-rev = "v4.21.0-rc3"
-
 [[lean_lib]]
 name = "Foundation"
 
