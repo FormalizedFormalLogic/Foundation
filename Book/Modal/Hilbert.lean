@@ -1,7 +1,9 @@
-import Foundation.Modal.Kripke.Logic.K
-
 import VersoBlog
 import VersoManual
+
+import Foundation.Modal.Kripke.Logic.K
+
+import Book.References
 
 open LO.Modal
 
@@ -23,6 +25,5 @@ tag := "modal-logic-hilbert-systems"
 # For {lean}`Logic.K`
 
 Recall {lean}`Logic.K` is defined by Hilbert system {lean}`Hilbert.K`.
-
 
 {docstring Hilbert.K.Kripke.complete}
