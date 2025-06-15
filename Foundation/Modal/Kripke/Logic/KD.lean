@@ -7,11 +7,10 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
 namespace Kripke.FrameClass
 
-protected abbrev serial : FrameClass := { F | IsSerial _ F.Rel }
+protected abbrev serial : FrameClass := { F | F.IsSerial }
 
 end Kripke.FrameClass
 

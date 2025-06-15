@@ -8,9 +8,8 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.serial_trans : FrameClass := { F | IsSerial _ F ∧ IsTrans _ F }
+abbrev Kripke.FrameClass.serial_trans : FrameClass := { F | F.IsSerial ∧ F.IsTransitive }
 
 namespace Hilbert.KD4.Kripke
 
@@ -54,7 +53,7 @@ theorem KD4.proper_extension_of_KD : Logic.KD ⊂ Logic.KD4 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
       constructor;
-      . refine ⟨by simp [Serial]⟩;
+      . exact { serial := by simp [Serial]; };
       . simp [Semantics.Realize, Satisfies];
         tauto;
 
@@ -70,7 +69,7 @@ theorem KD4.proper_extension_of_K4 : Logic.K4 ⊂ Logic.KD4 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . refine ⟨by tauto⟩;
+      . exact { trans := by simp; }
       . simp [Semantics.Realize, Satisfies];
 
 end Logic

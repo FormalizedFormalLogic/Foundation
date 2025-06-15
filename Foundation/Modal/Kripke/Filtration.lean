@@ -11,8 +11,6 @@ open FormulaSet.IsSubformulaClosed
 open Formula (atom)
 open Formula.Kripke
 
-section
-
 def filterEquiv (M : Kripke.Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] (x y : M.World) := ∀ φ, (_ : φ ∈ T := by subformula) → x ⊧ φ ↔ y ⊧ φ
 
 variable (M : Kripke.Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed]
@@ -86,7 +84,6 @@ class FilterOf (FM : Model) (M : outParam Kripke.Model) (T : outParam (FormulaSe
 attribute [simp] FilterOf.def_world
 
 
-section
 
 theorem filtration
   {M : Model} (FM : Kripke.Model)
@@ -118,26 +115,26 @@ theorem filtration
       exact ihq (of_mem_imp₂ hs) |>.mpr $ hxy (ihp (of_mem_imp₁ hs) |>.mp hp);
   | _ => trivial
 
-end
 
 
 namespace FilterOf
 
 variable {FM : Model} {M : outParam _} {T : outParam (FormulaSet ℕ)} [T.IsSubformulaClosed]
 
-instance isRefl [filterOf : FilterOf FM M T] [IsRefl _ M.Rel] : IsRefl _ FM.Rel := ⟨by
-  intro X;
-  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (filterOf.def_world) X);
-  convert filterOf.def_rel_forth $ IsRefl.refl x <;> simp_all;
-⟩
+lemma isReflexive (filterOf : FilterOf FM M T) [M.IsReflexive] : FM.IsReflexive where
+  refl := by
+    intro X;
+    obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (filterOf.def_world) X);
+    convert filterOf.def_rel_forth $ IsRefl.refl x <;> simp_all;
 
-instance isSerial [filterOf : FilterOf FM M T] [IsSerial _ M.Rel] : IsSerial _ FM.Rel := ⟨by
-  intro X;
-  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (filterOf.def_world) X);
-  obtain ⟨y, Rxy⟩ : ∃ y, x ≺ y := IsSerial.serial x;
-  use (cast (filterOf.def_world.symm) ⟦y⟧);
-  simpa [hx] using filterOf.def_rel_forth Rxy;
-⟩
+lemma isSerial (filterOf : FilterOf FM M T) [M.IsSerial] : FM.IsSerial where
+  serial := by
+    intro X;
+    obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (filterOf.def_world) X);
+    obtain ⟨y, Rxy⟩ : ∃ y, x ≺ y := IsSerial.serial x;
+    use (cast (filterOf.def_world.symm) ⟦y⟧);
+    simpa [hx] using filterOf.def_rel_forth Rxy;
+
 
 end FilterOf
 
@@ -155,8 +152,6 @@ variable
   {M FM : Model}
   {T : FormulaSet ℕ} [T.IsSubformulaClosed]
 
-
-section Coarsest
 
 abbrev coarsestFiltrationFrame (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
@@ -179,16 +174,13 @@ instance filterOf : FilterOf (coarsestFiltrationModel M T) M T where
   def_rel_back := by tauto
   def_valuation := by tauto
 
-instance [IsRefl _ M.Rel] : IsRefl _ (coarsestFiltrationModel M T).Rel := coarsestFiltrationModel.filterOf.isRefl
-instance [IsSerial _ M.Rel] : IsSerial _ (coarsestFiltrationModel M T).Rel := coarsestFiltrationModel.filterOf.isSerial
+lemma isFinite (T_finite : T.Finite) : (coarsestFiltrationModel M T).IsFinite where world_finite := FilterEqvQuotient.finite T_finite
+instance [M.IsReflexive] : (coarsestFiltrationModel M T).IsReflexive := coarsestFiltrationModel.filterOf.isReflexive
+instance [M.IsSerial] : (coarsestFiltrationModel M T).IsSerial := coarsestFiltrationModel.filterOf.isSerial
 
 end coarsestFiltrationModel
 
-end Coarsest
 
-
-
-section Finest
 
 abbrev finestFiltrationFrame (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
@@ -210,14 +202,16 @@ instance filterOf : FilterOf (finestFiltrationModel M T) M T where
     have : y' ⊧ φ := this _ Rx'y';
     exact FilterEqvQuotient.iff_of_eq hy (of_mem_box hφ) |>.mpr this;
 
-instance isRefl [IsRefl _ M.Rel] : IsRefl _ (finestFiltrationFrame M T).Rel := finestFiltrationModel.filterOf.isRefl
-instance isSerial [IsSerial _ M.Rel] : IsSerial _ (finestFiltrationFrame M T).Rel := finestFiltrationModel.filterOf.isSerial
+lemma isFinite (T_finite : T.Finite) : (finestFiltrationModel M T).IsFinite where
+  world_finite := FilterEqvQuotient.finite T_finite
+instance [M.IsReflexive] : (finestFiltrationFrame M T).IsReflexive := finestFiltrationModel.filterOf.isReflexive
+instance [M.IsSerial] : (finestFiltrationFrame M T).IsSerial := finestFiltrationModel.filterOf.isSerial
+instance [M.IsSymmetric] : (finestFiltrationModel M T).IsSymmetric where
+  symm := by
+    rintro _ _ ⟨x, y, rfl, rfl, Rxy⟩;
+    use y, x;
+    refine ⟨by trivial, by trivial, IsSymm.symm _ _ Rxy⟩;
 
-instance isSymm [IsSymm _ M.Rel] : IsSymm _ (finestFiltrationModel M T).Rel := ⟨by
-  rintro _ _ ⟨x, y, rfl, rfl, Rxy⟩;
-  use y, x;
-  refine ⟨by trivial, by trivial, IsSymm.symm _ _ Rxy⟩;
-⟩
 
 end finestFiltrationModel
 
@@ -238,10 +232,10 @@ instance filterOf [trans : IsTrans _ M.Rel] : FilterOf (finestFiltrationTransiti
   def_rel_back := by
     rintro x y RXY φ hφ hx;
     simp only [cast_eq] at RXY;
-    replace ⟨n, RXY⟩ := TransGen.exists_iterate'.mp RXY;
+    replace ⟨n, RXY⟩ := HRel.TransGen.exists_iterate.mp RXY;
     induction n using PNat.recOn generalizing x with
     | one =>
-      simp only [PNat.val_ofNat, Rel.iterate.iff_succ, Rel.iterate.iff_zero, exists_eq_right] at RXY;
+      simp only [PNat.val_ofNat, HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right] at RXY;
       obtain ⟨u, v, exu, eyv, Ruv⟩ := RXY;
       have : u ⊧ □φ := FilterEqvQuotient.iff_of_eq exu hφ |>.mp hx;
       have : v ⊧ φ := this _ Ruv;
@@ -256,8 +250,12 @@ instance filterOf [trans : IsTrans _ M.Rel] : FilterOf (finestFiltrationTransiti
       apply FilterEqvQuotient.iff_of_eq exw (by assumption) |>.mp hx;
       exact _root_.trans Rwv Rvz;
 
-instance : IsTrans _ (finestFiltrationTransitiveClosureModel M T).Rel := by
-  dsimp [finestFiltrationTransitiveClosureModel]
+lemma isFinite (T_finite : T.Finite) : (finestFiltrationTransitiveClosureModel M T).IsFinite where
+  world_finite := FilterEqvQuotient.finite T_finite
+
+/-
+instance : (finestFiltrationTransitiveClosureModel M T).IsTransitive := by
+  dsimp [finestFiltrationTransitiveClosureModel];
   infer_instance;
 
 instance [IsPreorder _ M.Rel] : IsRefl _ (finestFiltrationTransitiveClosureModel M T).Rel := finestFiltrationTransitiveClosureModel.filterOf.isRefl
@@ -269,12 +267,9 @@ instance [IsSerial _ M.Rel] [IsTrans _ M.Rel] : IsSerial _ (finestFiltrationTran
 instance [IsSymm _ M.Rel] : IsSymm _ (finestFiltrationTransitiveClosureModel M T).Rel := by apply Frame.mkTransClosure.isSymm
 
 instance isEquiv [IsEquiv _ M.Rel] : IsEquiv _ (finestFiltrationTransitiveClosureModel M T).Rel where
+-/
 
 end finestFiltrationTransitiveClosureModel
-
-end Finest
-
-end
 
 
 end Kripke

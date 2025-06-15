@@ -30,7 +30,7 @@ instance finite_sound : Sound (Hilbert.GrzPoint3) FrameClass.finite_connected_pa
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl);
   . exact validate_AxiomGrz_of_finite_strict_preorder;
-  . exact validate_AxiomPoint3_of_connected;
+  . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
 instance consistent : Entailment.Consistent (Hilbert.GrzPoint3) :=
   consistent_of_sound_frameclass FrameClass.finite_connected_partial_order $ by

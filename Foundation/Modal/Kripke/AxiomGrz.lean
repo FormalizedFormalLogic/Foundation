@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.Relation.Supplemental
+
 import Foundation.Vorspiel.Relation.WCWF
 import Foundation.Modal.Kripke.Logic.K
 import Foundation.Modal.Kripke.AxiomGeach

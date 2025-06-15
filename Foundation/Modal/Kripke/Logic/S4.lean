@@ -7,14 +7,13 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
 
 namespace Kripke
 
-protected abbrev FrameClass.preorder : FrameClass := { F | IsPreorder _ F }
+protected abbrev FrameClass.preorder : FrameClass := { F | F.IsPreorder }
 
-protected abbrev FrameClass.finite_preorder: FrameClass := { F | Finite F.World ∧ IsPreorder _ F.Rel }
+protected abbrev FrameClass.finite_preorder: FrameClass := { F | F.IsFinite ∧ F.IsPreorder }
 
 end Kripke
 
@@ -49,9 +48,8 @@ instance finiteComplete : Complete (Hilbert.S4) Kripke.FrameClass.finite_preorde
   apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
   apply hp;
   refine ⟨?_, ?_⟩;
-  . apply FilterEqvQuotient.finite;
-    simp;
-  . exact finestFiltrationTransitiveClosureModel.isPreorder;
+  . apply finestFiltrationTransitiveClosureModel.isFinite $ by simp;
+  . sorry;
 ⟩
 
 end Hilbert.S4.Kripke
@@ -81,7 +79,7 @@ theorem S4.proper_extension_of_KT : Logic.KT ⊂ Logic.S4 := by
         ⟩;
       use M, 0;
       constructor;
-      . refine ⟨by omega⟩;
+      . exact { refl := by omega };
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 0 ∨ y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 0 ∧ y ≠ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -109,7 +107,7 @@ theorem S4.proper_extension_of_KD4 : Logic.KD4 ⊂ Logic.S4 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ _ y => y = 1⟩, (λ w _ => w = 1)⟩, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by omega⟩⟩;
+      . refine ⟨{serial := by simp [Serial]}, {trans := by simp}⟩;
       . simp [Semantics.Realize, Satisfies];
 
 @[simp]
