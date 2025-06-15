@@ -39,7 +39,7 @@ instance sound : Sound (Hilbert.S4Point3) Kripke.FrameClass.connected_preorder :
   rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
-  . exact validate_AxiomPoint3_of_connected;
+  . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
 instance consistent : Entailment.Consistent (Hilbert.S4Point3) :=
   consistent_of_sound_frameclass FrameClass.connected_preorder $ by
@@ -65,7 +65,7 @@ instance finite_sound : Sound (Hilbert.S4Point3) Kripke.FrameClass.finite_connec
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
-  . exact validate_AxiomPoint3_of_connected;
+  . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
 instance finite_complete : Complete (Hilbert.S4Point3) Kripke.FrameClass.finite_connected_preorder := ⟨by
   intro φ hφ;

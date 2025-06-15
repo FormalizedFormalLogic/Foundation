@@ -17,7 +17,7 @@ instance sound : Sound (Hilbert.S4Point3M) Kripke.FrameClass.preorder_connected_
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomM_of_satisfiesMcKinseyCondition;
-  . exact validate_AxiomPoint3_of_connected;
+  . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
 instance consistent : Entailment.Consistent (Hilbert.S4Point3M) :=
   consistent_of_sound_frameclass FrameClass.preorder_connected_mckinsey $ by

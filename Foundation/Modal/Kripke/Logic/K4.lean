@@ -8,10 +8,9 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-protected abbrev Kripke.FrameClass.trans : FrameClass := { F | IsTrans _ F }
-protected abbrev Kripke.FrameClass.finite_trans : FrameClass := { F | Finite F ∧ IsTrans _ F }
+protected abbrev Kripke.FrameClass.trans : FrameClass := { F | F.IsTransitive }
+protected abbrev Kripke.FrameClass.finite_trans : FrameClass := { F | F.IsFinite ∧ F.IsTransitive }
 
 namespace Hilbert.K4.Kripke
 
@@ -43,9 +42,9 @@ instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans 
   let FM := finestFiltrationTransitiveClosureModel M φ.subformulas;
   apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
   apply hp;
-  refine ⟨?_, inferInstance⟩;
-  . apply FilterEqvQuotient.finite;
-    simp;
+  refine ⟨?_, ?_⟩;
+  . apply finestFiltrationTransitiveClosureModel.isFinite $ by simp;
+  . sorry;
 ⟩
 
 end Hilbert.K4.Kripke

@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.Relation.Iterate
+import Foundation.Vorspiel.HRel.Basic
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
 import Foundation.Modal.Logic.Basic
@@ -12,12 +12,12 @@ namespace Kripke
 
 structure Frame where
   World : Type
-  Rel : Rel World World
+  Rel : HRel World
   [world_nonempty : Nonempty World]
 attribute [simp] Frame.world_nonempty
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
-instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
+instance : CoeFun Frame (λ F => HRel F.World) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
 namespace Frame
@@ -52,16 +52,6 @@ def whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
 instance : Finite whitepoint.World := by
   dsimp [whitepoint];
   infer_instance
-instance : IsRefl _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsTrans _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsEuclidean _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsSymm _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsSerial _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsAntisymm _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsPreorder _ whitepoint.Rel where
-instance : IsEquiv _ whitepoint.Rel where
-instance : IsPartialOrder _ whitepoint.Rel where
-instance : IsEquality _ whitepoint.Rel := ⟨by tauto⟩
 
 def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
 
@@ -71,7 +61,7 @@ instance : Finite blackpoint.World := by
 instance : IsIrrefl _ blackpoint.Rel := by tauto
 instance : IsTrans _ blackpoint.Rel := ⟨by tauto⟩
 instance : IsStrictOrder _ blackpoint.Rel where
-instance : IsConnected _ blackpoint.Rel := ⟨by tauto⟩
+-- instance : IsConnected _ blackpoint.Rel := ⟨by tauto⟩
 
 end
 

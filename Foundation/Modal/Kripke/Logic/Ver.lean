@@ -19,13 +19,13 @@ instance sound : Sound (Hilbert.Ver) FrameClass.isolated := instSound_of_validat
   apply FrameClass.Validates.withAxiomK;
   rintro F hF _ (rfl | rfl);
   have := Set.mem_setOf_eq.mp hF;
-  exact Kripke.validate_AxiomVer_of_isolated (F := F);
+  exact validate_AxiomVer_of_isIsolated (F := F);
 
 instance sound_finite_isolated : Sound (Hilbert.Ver) Kripke.FrameClass.finite_isolated :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F ⟨_, _⟩ _ (rfl | rfl);
-    exact validate_AxiomVer_of_isolated (F := F);
+    exact validate_AxiomVer_of_isIsolated (F := F);
 
 instance consistent : Entailment.Consistent (Hilbert.Ver) := consistent_of_sound_frameclass FrameClass.isolated $ by
   use blackpoint;

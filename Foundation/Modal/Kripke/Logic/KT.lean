@@ -8,9 +8,8 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-protected abbrev Kripke.FrameClass.refl : FrameClass := { F | IsRefl _ F }
+protected abbrev Kripke.FrameClass.refl : FrameClass := { F | F.IsReflexive }
 
 namespace Hilbert.KT
 
@@ -54,7 +53,7 @@ theorem KT.proper_extension_of_KD : Logic.KD ⊂ Logic.KT := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩, 0;
       constructor;
-      . refine ⟨by tauto⟩;
+      . exact { serial := by tauto };
       . simp [Semantics.Realize, Satisfies];
 
 end Logic
