@@ -11,9 +11,9 @@ open Entailment.Context
 open Kripke
 open Hilbert.Kripke
 
-abbrev Kripke.FrameClass.trans_cwf : FrameClass := { F | IsTrans _ F.Rel ∧ IsConverseWellFounded _ F.Rel }
+abbrev Kripke.FrameClass.trans_cwf : FrameClass := { F | F.IsTransitive.Rel ∧ IsConverseWellFounded _ F.Rel }
 
-abbrev Kripke.FrameClass.finite_trans_irrefl: FrameClass := { F | Finite F.World ∧ IsTrans _ F.Rel ∧ IsIrrefl _ F.Rel }
+abbrev Kripke.FrameClass.finite_trans_irrefl: FrameClass := { F | Finite F.World ∧ F.IsTransitive.Rel ∧ IsIrrefl _ F.Rel }
 
 
 namespace Hilbert.GL.Kripke

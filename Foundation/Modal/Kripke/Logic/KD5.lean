@@ -8,9 +8,9 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.serial_eucl : FrameClass := { F | IsSerial _ F ∧ IsEuclidean _ F }
+
+abbrev Kripke.FrameClass.serial_eucl : FrameClass := { F | F.IsSerial ∧ F.IsEuclidean }
 
 namespace Hilbert.KD5.Kripke
 
@@ -75,7 +75,7 @@ theorem KD5.proper_extension_of_K5 : Logic.K5 ⊂ Logic.KD5 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . refine ⟨by tauto⟩
+      . refine { reucl := by simp [RightEuclidean]; };
       . simp [Semantics.Realize, Satisfies];
 
 

@@ -9,9 +9,9 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.serial_trans_eucl : FrameClass := { F | IsSerial _ F ∧ IsTrans _ F ∧ IsEuclidean _ F }
+
+abbrev Kripke.FrameClass.serial_trans_eucl : FrameClass := { F | IsSerial _ F ∧ F.IsTransitive ∧ F.IsEuclidean }
 
 namespace Hilbert.KD45.Kripke
 

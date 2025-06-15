@@ -104,7 +104,7 @@ instance [F.IsDense] : F.IsGeachConvergent ⟨0, 1, 2, 0⟩ where
 
 
 class IsPreorder (F : Frame) extends F.IsReflexive, F.IsTransitive
-class IsEquiv (F : Frame) extends F.IsPreorder, F.IsSymmetric
+class IsEquivalence (F : Frame) extends F.IsPreorder, F.IsSymmetric
 
 end Frame
 
@@ -237,7 +237,7 @@ instance [Entailment.HasAxiomFive 𝓢] :(canonicalFrame 𝓢).IsEuclidean := in
 instance [Entailment.HasAxiomTc 𝓢] : (canonicalFrame 𝓢).IsCoreflexive := inferInstance
 instance [Entailment.HasAxiomPoint2 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStronglyConvergent := inferInstance
 instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] : (canonicalFrame 𝓢).IsPreorder where
-instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] [Entailment.HasAxiomB 𝓢] : (canonicalFrame 𝓢).IsEquiv where
+instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] [Entailment.HasAxiomB 𝓢] : (canonicalFrame 𝓢).IsEquivalence where
 
 end canonicality
 

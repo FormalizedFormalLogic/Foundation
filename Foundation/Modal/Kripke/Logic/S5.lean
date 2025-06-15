@@ -9,15 +9,15 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
+
 
 namespace Kripke
 
-protected abbrev FrameClass.refl_eucl : FrameClass := { F | IsRefl _ F ∧ IsEuclidean _ F }
+protected abbrev FrameClass.refl_eucl : FrameClass := { F | IsRefl _ F ∧ F.IsEuclidean }
 
 protected abbrev FrameClass.universal : FrameClass := { F | IsUniversal _ F }
 
-protected abbrev FrameClass.finite_refl_eucl: FrameClass := { F | F.IsFinite ∧ IsRefl _ F ∧ IsEuclidean _ F }
+protected abbrev FrameClass.finite_refl_eucl: FrameClass := { F | F.IsFinite ∧ IsRefl _ F ∧ F.IsEuclidean }
 
 lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
   constructor;

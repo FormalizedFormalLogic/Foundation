@@ -18,7 +18,7 @@ end Kripke
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
+
 
 namespace Hilbert.KTMk.Kripke
 

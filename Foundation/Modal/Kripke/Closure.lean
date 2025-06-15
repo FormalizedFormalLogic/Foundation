@@ -16,11 +16,12 @@ postfix:95 "^=" => ReflGen
 
 namespace ReflGen
 
+instance : Coe (F.World) (F^=.World) := ⟨id⟩
+
 instance [Finite F] : Finite (F^=) := inferInstance
 instance [F.IsFinite] : (F^=).IsFinite := inferInstance
 
 instance : (F^=).IsReflexive where
-  refl := by sorry
 
 end ReflGen
 
@@ -30,20 +31,21 @@ postfix:95 "^+" => TransGen
 
 namespace TransGen
 
-instance [Finite F] : Finite (F^+) := inferInstance
+instance : Coe (F.World) (F^+.World) := ⟨id⟩
+
 instance [F.IsFinite] : (F^+).IsFinite := inferInstance
 
-instance : (F^+).IsTransitive := by sorry
+instance : (F^+).IsTransitive where
 
-instance [IsRefl _ F.Rel] : IsRefl _ (F^+).Rel := ⟨fun a => TransGen.single (IsRefl.refl a)⟩
-instance [IsRefl _ F.Rel] : (F^+).IsPreorder where
+instance [F.IsReflexive] : F^+.IsReflexive where
+  refl := by simp only; apply IsRefl.refl;
 
-protected instance isSymm [IsSymm _ F.Rel] : IsSymm _ (F^+).Rel := ⟨by
-  intro x y rxy;
-  induction rxy with
-  | single h => exact TransGen.single $ (IsSymm.symm _ _) h;
-  | tail _ hyz ih => exact TransGen.trans (TransGen.single $ (IsSymm.symm _ _) hyz) ih
-⟩
+instance [F.IsReflexive] : F^+.IsPreorder where
+
+instance isSymmetric [F.IsSymmetric] : F^+.IsSymmetric where
+  symm := by simp only; apply IsSymm.symm;
+
+instance [F.IsReflexive] [F.IsSymmetric] : F^+.IsEquivalence where
 
 end TransGen
 
@@ -53,25 +55,34 @@ postfix:95 "^*" => ReflTransGen
 
 namespace ReflTransGen
 
+instance : Coe (F.World) (F^*.World) := ⟨id⟩
+
 instance [Finite F.World] : Finite (F^*).World := inferInstance
 
 instance : (F^*).IsPreorder where
 
-instance [F.IsSymmetric] : (F^*).IsSymmetric := by sorry
-instance [F.IsSymmetric] : (F^*).IsEquiv where
+instance [F.IsSymmetric] : F^*.IsSymmetric where symm := by simp only; apply IsSymm.symm;
+
+instance [F.IsSymmetric] : F^*.IsEquivalence where
 
 end ReflTransGen
 
+
+class IsIrreflexive (F : Frame) extends IsIrrefl _ F
+
+lemma irrefl [F.IsIrreflexive] (x : F) : ¬x ≺ x := by apply IsIrrefl.irrefl;
 
 abbrev IrreflGen (F : Frame) : Frame := ⟨F.World, F.Rel.IrreflGen⟩
 postfix:95 "^≠" => IrreflGen
 
 namespace IrreflGen
 
+instance : Coe (F.World) (F^≠.World) := ⟨id⟩
+
 instance [Finite F] : Finite (F^≠) := inferInstance
 instance [F.IsFinite] : (F^≠).IsFinite := inferInstance
 
-instance : IsIrrefl _ (F^≠.Rel) := sorry
+instance : F^≠.IsIrreflexive where irrefl := by apply IsIrrefl.irrefl;
 
 end IrreflGen
 

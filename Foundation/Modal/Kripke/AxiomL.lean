@@ -9,7 +9,7 @@ namespace Kripke
 
 variable {F : Frame}
 
-lemma validate_AxiomL_of_trans_cwf [IsTrans _ F.Rel] [cwf : IsConverseWellFounded _ F.Rel] : F ⊧ (Axioms.L (.atom 0)) := by
+lemma validate_AxiomL_of_trans_cwf [F.IsTransitive.Rel] [cwf : IsConverseWellFounded _ F.Rel] : F ⊧ (Axioms.L (.atom 0)) := by
   rintro V w;
   apply Satisfies.imp_def.mpr;
   contrapose;
@@ -32,7 +32,7 @@ lemma validate_AxiomL_of_trans_cwf [IsTrans _ F.Rel] [cwf : IsConverseWellFounde
       exact rmn;
     . assumption;
 
-lemma validate_AxiomL_of_finite_trans_irrefl [Finite F.World] [IsTrans _ F.Rel] [IsIrrefl _ F.Rel] : F ⊧ (Axioms.L (.atom 0)) :=
+lemma validate_AxiomL_of_finite_trans_irrefl [Finite F.World] [F.IsTransitive.Rel] [IsIrrefl _ F.Rel] : F ⊧ (Axioms.L (.atom 0)) :=
   validate_AxiomL_of_trans_cwf
 
 lemma trans_of_validate_AxiomL : F ⊧ (Axioms.L (.atom 0)) → Transitive F.Rel := by

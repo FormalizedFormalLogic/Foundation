@@ -7,9 +7,8 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-protected abbrev Kripke.FrameClass.eucl : FrameClass := { F | IsEuclidean _ F }
+protected abbrev Kripke.FrameClass.eucl : FrameClass := { F | F.IsEuclidean }
 
 namespace Hilbert.K5.Kripke
 

@@ -204,14 +204,13 @@ instance filterOf : FilterOf (finestFiltrationModel M T) M T where
 
 lemma isFinite (T_finite : T.Finite) : (finestFiltrationModel M T).IsFinite where
   world_finite := FilterEqvQuotient.finite T_finite
-instance [M.IsReflexive] : (finestFiltrationFrame M T).IsReflexive := finestFiltrationModel.filterOf.isReflexive
-instance [M.IsSerial] : (finestFiltrationFrame M T).IsSerial := finestFiltrationModel.filterOf.isSerial
-instance [M.IsSymmetric] : (finestFiltrationModel M T).IsSymmetric where
+instance isReflexive [M.IsReflexive] : (finestFiltrationFrame M T).IsReflexive := finestFiltrationModel.filterOf.isReflexive
+instance isSerial [M.IsSerial] : (finestFiltrationFrame M T).IsSerial := finestFiltrationModel.filterOf.isSerial
+instance isSymmetric [M.IsSymmetric] : (finestFiltrationModel M T).IsSymmetric where
   symm := by
     rintro _ _ ⟨x, y, rfl, rfl, Rxy⟩;
     use y, x;
     refine ⟨by trivial, by trivial, IsSymm.symm _ _ Rxy⟩;
-
 
 end finestFiltrationModel
 
@@ -253,21 +252,11 @@ instance filterOf [trans : IsTrans _ M.Rel] : FilterOf (finestFiltrationTransiti
 lemma isFinite (T_finite : T.Finite) : (finestFiltrationTransitiveClosureModel M T).IsFinite where
   world_finite := FilterEqvQuotient.finite T_finite
 
-/-
-instance : (finestFiltrationTransitiveClosureModel M T).IsTransitive := by
-  dsimp [finestFiltrationTransitiveClosureModel];
-  infer_instance;
-
-instance [IsPreorder _ M.Rel] : IsRefl _ (finestFiltrationTransitiveClosureModel M T).Rel := finestFiltrationTransitiveClosureModel.filterOf.isRefl
-
-instance isPreorder [preorder : IsPreorder _ M.Rel] : IsPreorder _ (finestFiltrationTransitiveClosureModel M T).Rel where
-
-instance [IsSerial _ M.Rel] [IsTrans _ M.Rel] : IsSerial _ (finestFiltrationTransitiveClosureModel M T).Rel := finestFiltrationTransitiveClosureModel.filterOf.isSerial
-
-instance [IsSymm _ M.Rel] : IsSymm _ (finestFiltrationTransitiveClosureModel M T).Rel := by apply Frame.mkTransClosure.isSymm
-
-instance isEquiv [IsEquiv _ M.Rel] : IsEquiv _ (finestFiltrationTransitiveClosureModel M T).Rel where
--/
+instance isRefl [M.IsPreorder] : (finestFiltrationTransitiveClosureModel M T).IsReflexive := finestFiltrationTransitiveClosureModel.filterOf.isReflexive
+instance isSerial [M.IsTransitive] [M.IsSerial] : (finestFiltrationTransitiveClosureModel M T).IsSerial := finestFiltrationTransitiveClosureModel.filterOf.isSerial
+instance isSymmetric [M.IsSymmetric] : (finestFiltrationTransitiveClosureModel M T).IsSymmetric := Frame.TransGen.isSymmetric
+instance isPreorder [M.IsPreorder] : (finestFiltrationTransitiveClosureModel M T).IsPreorder where
+instance isEquiv [M.IsEquivalence] : (finestFiltrationTransitiveClosureModel M T).IsEquivalence where
 
 end finestFiltrationTransitiveClosureModel
 

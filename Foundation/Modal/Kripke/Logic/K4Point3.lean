@@ -8,9 +8,9 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.trans_weakConnected : FrameClass := { F | IsTrans _ F ∧ IsWeakConnected _ F }
+
+abbrev Kripke.FrameClass.trans_weakConnected : FrameClass := { F | F.IsTransitive ∧ IsWeakConnected _ F }
 
 namespace Hilbert.K4Point3.Kripke
 

@@ -45,11 +45,11 @@ instance finiteComplete : Complete (Hilbert.S4) Kripke.FrameClass.finite_preorde
   replace F_preorder := Set.mem_setOf_eq.mp F_preorder;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFiltrationTransitiveClosureModel M φ.subformulas;
-  apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
+  apply filtration FM filterOf (by simp) |>.mpr;
   apply hp;
   refine ⟨?_, ?_⟩;
-  . apply finestFiltrationTransitiveClosureModel.isFinite $ by simp;
-  . sorry;
+  . apply isFinite $ by simp;
+  . apply isPreorder;
 ⟩
 
 end Hilbert.S4.Kripke

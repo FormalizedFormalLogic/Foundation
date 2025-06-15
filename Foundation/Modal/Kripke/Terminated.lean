@@ -9,7 +9,7 @@ namespace Frame.IsTerminated
 
 variable {F : Frame} {t : F.World} [F.IsTerminated t]
 
-lemma direct_terminated_of_trans [IsTrans _ F.Rel] : ∀ x ≠ t, x ≺ t := by
+lemma direct_terminated_of_trans [F.IsTransitive.Rel] : ∀ x ≠ t, x ≺ t := by
   intro x hx;
   exact Relation.TransGen.unwrap $ IsTerminated.terminal_terminated x hx;
 

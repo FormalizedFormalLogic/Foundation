@@ -8,7 +8,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
+
 
 namespace Kripke
 

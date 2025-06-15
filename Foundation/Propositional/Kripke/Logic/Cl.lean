@@ -10,9 +10,9 @@ open Formula.Kripke
 
 namespace Kripke.FrameClass
 
-protected abbrev euclidean : FrameClass := { F | IsEuclidean _ F }
+protected abbrev euclidean : FrameClass := { F | F.IsEuclidean }
 protected abbrev finite_symmetric : FrameClass := { F | Finite F ∧ IsSymm _ F }
-protected abbrev finite_euclidean : FrameClass := { F | Finite F ∧ IsEuclidean _ F }
+protected abbrev finite_euclidean : FrameClass := { F | Finite F ∧ F.IsEuclidean }
 
 lemma eq_finite_euclidean_finite_symmetric : FrameClass.finite_euclidean = FrameClass.finite_symmetric := by
   ext F;

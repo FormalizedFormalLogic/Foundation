@@ -7,10 +7,10 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
 
-protected abbrev Kripke.FrameClass.symm : FrameClass := { F | IsSymm _ F }
+
+protected abbrev Kripke.FrameClass.symm : FrameClass := { F | F.IsSymmetric }
 
 namespace Hilbert.KB.Kripke
 

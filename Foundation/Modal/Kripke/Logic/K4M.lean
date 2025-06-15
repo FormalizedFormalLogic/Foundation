@@ -5,9 +5,9 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.trans_mckinsey : FrameClass := { F | IsTrans _ F ∧ SatisfiesMcKinseyCondition _ F }
+
+abbrev Kripke.FrameClass.trans_mckinsey : FrameClass := { F | F.IsTransitive ∧ SatisfiesMcKinseyCondition _ F }
 
 namespace Hilbert.K4M
 

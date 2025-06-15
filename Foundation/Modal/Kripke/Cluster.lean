@@ -27,7 +27,7 @@ instance : IsSymm _ (clusterEquiv F) := ⟨by
   . right; exact ⟨Ryx, Rxy⟩;
 ⟩
 
-instance [IsTrans _ F] : IsTrans _ (clusterEquiv F) := ⟨by
+instance [F.IsTransitive] : IsTrans _ (clusterEquiv F) := ⟨by
   rintro x y z (rfl | ⟨Rxy, Ryx⟩) (rfl | ⟨Ryz, Rzy⟩);
   . apply refl;
   . right; exact ⟨Ryz, Rzy⟩;
@@ -38,15 +38,15 @@ instance [IsTrans _ F] : IsTrans _ (clusterEquiv F) := ⟨by
     . exact _root_.trans Rzy Ryx;
 ⟩
 
-instance [IsTrans _ F] : IsEquiv _ (clusterEquiv F) where
+instance [F.IsTransitive] : IsEquiv _ (clusterEquiv F) where
 
 end
 
-abbrev Cluster (F : Frame) [IsTrans _ F] := Quotient (⟨clusterEquiv F, IsEquiv.equivalence⟩)
+abbrev Cluster (F : Frame) [F.IsTransitive] := Quotient (⟨clusterEquiv F, IsEquiv.equivalence⟩)
 
 namespace Cluster
 
-variable {F : Frame} [IsTrans _ F] {x y : F.World} {C : Cluster F}
+variable {F : Frame} [F.IsTransitive] {x y : F.World} {C : Cluster F}
 
 instance [Finite F] : Finite (Cluster F) := Finite.of_surjective (λ x => ⟦x⟧) $ by
   intro C;
@@ -301,20 +301,20 @@ end Cluster
 
 
 
-def Frame.skeleton (F : Frame) [IsTrans _ F] : Kripke.Frame where
+def Frame.skeleton (F : Frame) [F.IsTransitive] : Kripke.Frame where
   World := Cluster F
   world_nonempty := ⟨⟦F.world_nonempty.some⟧⟩
   Rel := Cluster.rel
 
 section
 
-variable {F : Frame} [IsTrans _ F]
+variable {F : Frame} [F.IsTransitive]
 
 instance [Finite F] : Finite F.skeleton := by
   dsimp only [Frame.skeleton];
   infer_instance;
 
-instance : IsTrans _ F.skeleton := by
+instance : F.IsTransitive.skeleton := by
   dsimp only [Frame.skeleton];
   infer_instance;
 
@@ -337,20 +337,20 @@ instance [IsTotal _ F] : IsLinearOrder _ F.skeleton where
 end
 
 
-def Frame.strictSkelteon (F : Frame) [IsTrans _ F] : Kripke.Frame where
+def Frame.strictSkelteon (F : Frame) [F.IsTransitive] : Kripke.Frame where
   World := Cluster F
   world_nonempty := ⟨⟦F.world_nonempty.some⟧⟩
   Rel := Cluster.strict_rel
 
 namespace Frame.strictSkelteon
 
-variable {F : Frame} [IsTrans _ F]
+variable {F : Frame} [F.IsTransitive]
 
 instance [Finite F] : Finite F.strictSkelteon := by
   dsimp only [Frame.strictSkelteon];
   infer_instance;
 
-instance : IsTrans _ F.strictSkelteon := by
+instance : F.IsTransitive.strictSkelteon := by
   dsimp only [Frame.strictSkelteon];
   infer_instance;
 

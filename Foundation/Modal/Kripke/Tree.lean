@@ -6,7 +6,7 @@ namespace LO.Modal
 namespace Kripke
 
 @[mk_iff]
-class Frame.IsTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsRooted r, IsAsymm _ F.Rel, IsTrans _ F.Rel where
+class Frame.IsTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsRooted r, IsAsymm _ F.Rel, F.IsTransitive.Rel where
 
 namespace Frame.IsTree
 
@@ -165,13 +165,13 @@ instance : IsAsymm _ (F.mkTransTreeUnravelling r) := ⟨by
 
 lemma rel_def : X ≺ Y ↔ (∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.Chain' F.Rel (X.1 ++ l))) := treeUnravelling.transrel_def
 
-abbrev pMorphism (F : Frame) [IsTrans _ F.Rel] (r : F) : (F.mkTransTreeUnravelling r) →ₚ F := (treeUnravelling.pMorphism F r).TransitiveClosure
+abbrev pMorphism (F : Frame) [F.IsTransitive.Rel] (r : F) : (F.mkTransTreeUnravelling r) →ₚ F := (treeUnravelling.pMorphism F r).TransitiveClosure
 
 protected abbrev root : (F.mkTransTreeUnravelling r).World := treeUnravelling.root
 
 instance instIsRooted : (F.mkTransTreeUnravelling r).IsRooted (mkTransTreeUnravelling.root) := inferInstance
 
-instance instFinite [DecidableEq F.World] [Finite F] [IsTrans _ F] [IsIrrefl _ F] : Finite (F.mkTransTreeUnravelling r).World := by
+instance instFinite [DecidableEq F.World] [Finite F] [F.IsTransitive] [IsIrrefl _ F] : Finite (F.mkTransTreeUnravelling r).World := by
   suffices h : Finite { x // List.Chain' F.Rel x } by
     exact
      Finite.of_injective
@@ -186,7 +186,7 @@ instance instIsTree {F : Frame} {r : F.World}
     intro w;
     exact Frame.mkTransTreeUnravelling.instIsRooted.root_generates w;
 
-instance instIsFiniteTree [DecidableEq F.World] [Finite F] [IsTrans _ F.Rel] [IsIrrefl _ F.Rel]
+instance instIsFiniteTree [DecidableEq F.World] [Finite F] [F.IsTransitive.Rel] [IsIrrefl _ F.Rel]
   : (F.mkTransTreeUnravelling r).IsFiniteTree (mkTransTreeUnravelling.root) where
 
 end Frame.mkTransTreeUnravelling

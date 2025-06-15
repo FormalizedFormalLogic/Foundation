@@ -8,9 +8,9 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.serial_symm : FrameClass := { F | IsSerial _ F ∧ IsSymm _ F }
+
+abbrev Kripke.FrameClass.serial_symm : FrameClass := { F | F.IsSerial ∧ F.IsSymmetric }
 
 namespace Hilbert.KDB.Kripke
 
@@ -55,11 +55,7 @@ theorem KDB.proper_extension_of_KD : Logic.KD ⊂ Logic.KDB := by
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
-      . refine ⟨?_⟩;
-        intro x;
-        match x with
-        | 0 => use 1; tauto;
-        | 1 => use 1;
+      . refine { serial := by intro x; use 1; omega;}
       . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [M, Semantics.Realize, Satisfies];
         use 1;
         constructor <;> omega;
@@ -77,7 +73,7 @@ theorem KDB.proper_extension_of_KB : Logic.KB ⊂ Logic.KDB := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . refine ⟨by tauto⟩;
+      . refine { symm := by simp; };
       . simp [Semantics.Realize, Satisfies];
 
 end Logic

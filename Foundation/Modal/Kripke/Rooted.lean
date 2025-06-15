@@ -25,7 +25,7 @@ instance [rooted : F.IsRooted r] : F.IsGenerated {r} where
     . tauto;
     . exact rooted.root_generates x hx;
 
-lemma direct_rooted_of_trans [IsTrans _ F.Rel] : ∀ x ≠ r, r ≺ x := by
+lemma direct_rooted_of_trans [F.IsTransitive.Rel] : ∀ x ≠ r, r ≺ x := by
   intro x hx;
   obtain ⟨n, hn, Rrx⟩ := Relation.TransGen.exists_iterate.mp $ rooted.root_generates x hx;
   exact Rel.iterate.unwrap_of_trans hn Rrx;
@@ -150,7 +150,7 @@ instance isRefl [IsRefl _ F] : IsRefl (F↾r).World (F↾r).Rel := ⟨by
     exact this;
 ⟩
 
-instance isTrans [trans : IsTrans _ F] : IsTrans (F↾r).World (F↾r).Rel := ⟨by
+instance isTrans [trans : F.IsTransitive] : IsTrans (F↾r).World (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ hxy hyz;
   . assumption;
   . assumption;
@@ -216,7 +216,7 @@ instance isConnected (F_connected : Connected F) : Connected (F↾r).Rel := by
   . have := @F_connected x y z (by tauto); tauto;
 -/
 
-instance isUniversal [refl : IsRefl _ F] [eucl : IsEuclidean _ F] : IsUniversal _ (F↾r).Rel := ⟨by
+instance isUniversal [refl : IsRefl _ F] [eucl : F.IsEuclidean] : IsUniversal _ (F↾r).Rel := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
   . apply IsRefl.refl;
   . exact hy.unwrap;

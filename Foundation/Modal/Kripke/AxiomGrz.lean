@@ -18,7 +18,7 @@ variable {F : Kripke.Frame}
 
 lemma validate_AxiomGrz_of_refl_trans_wcwf
   [IsRefl _ F.Rel]
-  [IsTrans _ F.Rel]
+  [F.IsTransitive.Rel]
   [IsWeaklyConverseWellFounded _ F.Rel]
   : F ⊧ (Axioms.Grz (.atom 0)) := by
   intro V;

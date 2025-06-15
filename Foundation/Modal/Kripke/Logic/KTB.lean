@@ -6,7 +6,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
+
 
 abbrev Kripke.FrameClass.refl_symm : FrameClass := { F | IsRefl _ F ∧ IsSymm _ F }
 

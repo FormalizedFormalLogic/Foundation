@@ -7,7 +7,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
+
 
 abbrev Kripke.FrameClass.symm_preorder : FrameClass := { F | IsEquiv _ F.Rel }
 abbrev Kripke.FrameClass.finite_symm_preorder: FrameClass := { F | Finite F.World ∧ IsEquiv _ F.Rel }

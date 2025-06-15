@@ -7,7 +7,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
+
 
 protected abbrev Kripke.FrameClass.corefl : FrameClass := { F | IsCoreflexive _ F.Rel }
 

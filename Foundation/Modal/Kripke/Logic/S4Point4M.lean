@@ -5,7 +5,7 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
+
 
 abbrev Kripke.FrameClass.preorder_sobocinski_mckinsey : FrameClass := { F | IsPreorder _ F ∧ SatisfiesSobocinskiCondition _ F ∧ SatisfiesMcKinseyCondition _ F }
 
