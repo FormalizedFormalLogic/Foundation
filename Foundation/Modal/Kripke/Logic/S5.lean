@@ -76,10 +76,7 @@ instance consistent : Entailment.Consistent (Hilbert.S5) := consistent_of_sound_
   use whitepoint;
   constructor;
 
-instance canonical : Canonical (Hilbert.S5) FrameClass.S5 := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor;
-⟩
+instance canonical : Canonical (Hilbert.S5) FrameClass.S5 := ⟨by constructor⟩
 
 instance complete_refl_eucl : Complete (Hilbert.S5) FrameClass.S5 := inferInstance
 

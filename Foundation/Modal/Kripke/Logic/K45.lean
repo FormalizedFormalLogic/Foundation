@@ -28,12 +28,10 @@ instance sound : Sound (Hilbert.K45) FrameClass.IsK45 := instSound_of_validates_
 
 instance consistent : Entailment.Consistent (Hilbert.K45) := consistent_of_sound_frameclass FrameClass.IsK45 $ by
   use whitepoint;
-  constructor <;> infer_instance;
+  constructor;
 
-instance canonical : Canonical (Hilbert.K45) FrameClass.IsK45 := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
-⟩
+
+instance canonical : Canonical (Hilbert.K45) FrameClass.IsK45 := ⟨by constructor⟩
 
 instance complete : Complete (Hilbert.K45) FrameClass.IsK45 := inferInstance
 

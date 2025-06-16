@@ -38,8 +38,7 @@ instance consistent : Entailment.Consistent (Hilbert.KTMk) := consistent_of_soun
     tauto;
 
 instance canonical : Canonical (Hilbert.KTMk) Kripke.FrameClass.refl_makinson := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor;
+  constructor
   . infer_instance;
   . infer_instance;
 ⟩
@@ -172,7 +171,7 @@ lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Hilbert.KTMk ⊬ Axi
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use recessionFrame;
   constructor;
-  . constructor <;> infer_instance;
+  .
   . assumption;
 
 lemma no_finite_model_property : ¬(∀ φ, Hilbert.KTMk ⊬ φ → ∃ M : Kripke.Model, Finite M ∧ M ⊧* Hilbert.KTMk.logic ∧ ¬M ⊧ φ)  := by

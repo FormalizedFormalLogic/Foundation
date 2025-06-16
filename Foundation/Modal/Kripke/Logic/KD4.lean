@@ -28,11 +28,11 @@ instance sound : Sound (Hilbert.KD4) FrameClass.KD4 := instSound_of_validates_ax
 instance consistent : Entailment.Consistent (Hilbert.KD4) := consistent_of_sound_frameclass
   FrameClass.KD4 $ by
     use whitepoint;
-    constructor <;> infer_instance;
+    constructor
 
 instance canonical : Canonical (Hilbert.KD4) FrameClass.KD4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
+  constructor
 ⟩
 
 instance complete : Complete (Hilbert.KD4) FrameClass.KD4 := inferInstance
@@ -66,7 +66,7 @@ theorem KD4.proper_extension_of_KD : Logic.KD ⊂ Logic.KD4 := by
 theorem KD4.proper_extension_of_K4 : Logic.K4 ⊂ Logic.KD4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.trans ⊧ φ by
+  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by
       rw [K4.Kripke.trans];
       tauto;
     use (Axioms.D (.atom 0));

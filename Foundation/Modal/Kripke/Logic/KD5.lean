@@ -10,26 +10,30 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.serial_eucl : FrameClass := { F | F.IsSerial ∧ F.IsEuclidean }
+namespace Kripke
+
+protected class Frame.IsKD5 (F : Kripke.Frame) extends F.IsSerial, F.IsEuclidean
+protected abbrev FrameClass.KD5 : FrameClass := { F | F.IsKD5 }
+
+end Kripke
+
 
 namespace Hilbert.KD5.Kripke
 
-instance sound : Sound (Hilbert.KD5) Kripke.FrameClass.serial_eucl := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KD5) Kripke.FrameClass.KD5 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent (Hilbert.KD5) := consistent_of_sound_frameclass Kripke.FrameClass.serial_eucl $ by
+instance consistent : Entailment.Consistent (Hilbert.KD5) := consistent_of_sound_frameclass Kripke.FrameClass.KD5 $ by
   use whitepoint;
-  constructor <;> infer_instance;
+  constructor;
 
-instance canonical : Canonical (Hilbert.KD5) Kripke.FrameClass.serial_eucl := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
-⟩
 
-instance complete : Complete (Hilbert.KD5) Kripke.FrameClass.serial_eucl := inferInstance
+instance canonical : Canonical (Hilbert.KD5) Kripke.FrameClass.KD5 := ⟨by constructor⟩
+
+instance complete : Complete (Hilbert.KD5) Kripke.FrameClass.KD5 := inferInstance
 
 end Hilbert.KD5.Kripke
 
@@ -40,7 +44,7 @@ open Formula
 open Entailment
 open Kripke
 
-lemma KD5.Kripke.serial_eucl : Logic.KD5 = FrameClass.serial_eucl.logic := eq_hilbert_logic_frameClass_logic
+lemma KD5.Kripke.serial_eucl : Logic.KD5 = Kripke.FrameClass.KD5.logic := eq_hilbert_logic_frameClass_logic
 
 theorem KD5.proper_extension_of_KD : Logic.KD ⊂ Logic.KD5 := by
   constructor;

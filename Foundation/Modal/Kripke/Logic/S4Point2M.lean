@@ -33,10 +33,7 @@ instance consistent : Entailment.Consistent (Hilbert.S4Point2M) :=
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Hilbert.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor;
-⟩
+instance canonical : Canonical (Hilbert.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := ⟨by constructor⟩
 
 instance complete : Complete (Hilbert.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := inferInstance
 

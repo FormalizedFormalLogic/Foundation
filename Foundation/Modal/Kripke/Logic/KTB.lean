@@ -9,8 +9,12 @@ open Hilbert.Kripke
 
 namespace Kripke
 
+variable {F : Kripke.Frame}
+
 protected class Frame.IsKTB (F : Kripke.Frame) extends F.IsReflexive, F.IsSymmetric
 protected class Frame.IsFiniteKTB (F : Kripke.Frame) extends F.IsFinite, F.IsKTB
+
+instance [F.IsKTB] : F.IsKDB where
 
 protected abbrev FrameClass.KTB : FrameClass := { F | F.IsKTB }
 protected abbrev FrameClass.finite_KTB: FrameClass := { F | F.IsFiniteKTB }
@@ -26,15 +30,12 @@ instance sound : Sound (Hilbert.KTB) FrameClass.KTB := instSound_of_validates_ax
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomB_of_symmetric;
 
-instance consistent : Entailment.Consistent (Hilbert.KTB) := consistent_of_sound_frameclass
-  FrameClass.KTB $ by
-    use whitepoint;
-    constructor <;> infer_instance;
+instance consistent : Entailment.Consistent (Hilbert.KTB) := consistent_of_sound_frameclass FrameClass.KTB $ by
+  use whitepoint;
+  constructor;
 
-instance canonical : Canonical (Hilbert.KTB) FrameClass.KTB :=  ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
-⟩
+
+instance canonical : Canonical (Hilbert.KTB) FrameClass.KTB := ⟨by constructor⟩
 
 instance complete : Complete (Hilbert.KTB) FrameClass.KTB := inferInstance
 
@@ -97,10 +98,11 @@ theorem KTB.proper_extension_of_KT : Logic.KT ⊂ Logic.KTB := by
 theorem KTB.proper_extension_of_KDB : Logic.KDB ⊂ Logic.KTB := by
   constructor;
   . rw [KDB.Kripke.serial_symm, KTB.Kripke.refl_symm];
-    rintro φ hφ F ⟨_, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬FrameClass.serial_symm ⊧ φ by
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬Kripke.FrameClass.KDB ⊧ φ by
       rw [KDB.Kripke.serial_symm];
       tauto;
     use (Axioms.T (.atom 0));
@@ -109,15 +111,14 @@ theorem KTB.proper_extension_of_KDB : Logic.KDB ⊂ Logic.KTB := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ x _ => x = 1⟩, 0;
       constructor;
-      . refine ⟨
-          { serial := by
-              intro x;
-              match x with
-              | 0 => use 1; omega;
-              | 1 => use 0; omega;
-          },
-          { symm := by simp; omega }
-        ⟩;
+      . refine {
+          serial := by
+            intro x;
+            match x with
+            | 0 => use 1; omega;
+            | 1 => use 0; omega;
+          symm := by simp; omega
+        };
       . simp [Semantics.Realize, Satisfies];
         omega;
 

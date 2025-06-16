@@ -34,10 +34,7 @@ instance consistent : Entailment.Consistent (Hilbert.S4Point3M) :=
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Hilbert.S4Point3M) Kripke.FrameClass.S4Point3M := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor;
-⟩
+instance canonical : Canonical (Hilbert.S4Point3M) Kripke.FrameClass.S4Point3M := ⟨by constructor⟩
 
 instance complete : Complete (Hilbert.S4Point3M) Kripke.FrameClass.S4Point3M := inferInstance
 

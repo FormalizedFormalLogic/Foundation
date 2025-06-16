@@ -33,10 +33,7 @@ instance consistent : Entailment.Consistent (Hilbert.KD45) := consistent_of_soun
   use whitepoint;
   constructor;
 
-instance canonical : Canonical (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor;
-⟩
+instance canonical : Canonical (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := ⟨by constructor⟩
 
 instance complete : Complete (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := inferInstance
 
@@ -78,7 +75,7 @@ theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
 theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_eucl ⊧ φ by
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬Kripke.FrameClass.KD5 ⊧ φ by
       rw [KD5.Kripke.serial_eucl];
       tauto;
     use (Axioms.Four (.atom 0));
@@ -88,18 +85,15 @@ theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
-      . simp only [Set.mem_setOf_eq];
-        refine ⟨
-          {
-            serial := by
-              intro x;
-              match x with
-              | 0 => use 1; tauto;
-              | 1 => use 1; omega;
-              | 2 => use 2; omega;
-          },
-          { reucl := by simp [RightEuclidean]; omega; }
-        ⟩;
+      . refine {
+          serial := by
+            intro x;
+            match x with
+            | 0 => use 1; tauto;
+            | 1 => use 1; omega;
+            | 2 => use 2; omega;
+          reucl := by simp [RightEuclidean]; omega;
+        };
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;

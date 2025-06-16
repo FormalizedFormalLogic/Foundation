@@ -21,7 +21,7 @@ lemma FrameClass.eq_equality_refl_corefl : Kripke.FrameClass.equality = Kripke.F
   constructor;
   . intro F_eq;
     replace F_eq := Set.mem_setOf_eq.mp F_eq;
-    constructor <;> infer_instance;
+
   . rintro ⟨hRefl, hCorefl⟩;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
@@ -51,12 +51,12 @@ instance sound_finite_equality : Sound (Hilbert.Triv) Kripke.FrameClass.finite_e
 
 instance consistent : Entailment.Consistent (Hilbert.Triv) := consistent_of_sound_frameclass Kripke.FrameClass.refl_corefl $ by
   use whitepoint;
-  constructor <;> infer_instance;
+
 
 
 instance cannonical_refl_corefl : Canonical (Hilbert.Triv) Kripke.FrameClass.refl_corefl := ⟨by
   apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
+
 ⟩
 
 instance complete_refl_corefl : Complete (Hilbert.Triv) Kripke.FrameClass.refl_corefl := inferInstance

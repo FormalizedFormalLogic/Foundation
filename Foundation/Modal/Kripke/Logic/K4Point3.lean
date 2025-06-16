@@ -29,13 +29,9 @@ instance sound : Sound (Hilbert.K4Point3) FrameClass.IsK4Point3 := instSound_of_
 instance consistent : Entailment.Consistent (Hilbert.K4Point3) :=
   consistent_of_sound_frameclass FrameClass.IsK4Point3 $ by
     use whitepoint;
-    apply Set.mem_setOf_eq.mpr;
     constructor;
 
-instance canonical : Canonical (Hilbert.K4Point3) FrameClass.IsK4Point3 :=  ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
-⟩
+instance canonical : Canonical (Hilbert.K4Point3) FrameClass.IsK4Point3 :=  ⟨by constructor⟩
 
 instance complete : Complete (Hilbert.K4Point3) FrameClass.IsK4Point3 := inferInstance
 
@@ -52,7 +48,7 @@ lemma K4Point3.Kripke.trans_weakConnected : Logic.K4Point3 = FrameClass.IsK4Poin
 theorem K4Point3.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
+  . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by
       rw [K4.Kripke.trans];
       tauto;
     use (Axioms.WeakPoint3 (.atom 0) (.atom 1));

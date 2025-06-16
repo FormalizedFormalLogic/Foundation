@@ -9,27 +9,31 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
+namespace Kripke
 
-abbrev Kripke.FrameClass.serial_symm : FrameClass := { F | F.IsSerial ∧ F.IsSymmetric }
+protected class Frame.IsKDB (F : Kripke.Frame) extends F.IsSerial, F.IsSymmetric
+
+abbrev FrameClass.KDB : FrameClass := { F | F.IsKDB }
+
+end Kripke
+
 
 namespace Hilbert.KDB.Kripke
 
-instance sound : Sound (Hilbert.KDB) Kripke.FrameClass.serial_symm := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KDB) Kripke.FrameClass.KDB := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomB_of_symmetric;
 
-instance consistent : Entailment.Consistent (Hilbert.KDB) := consistent_of_sound_frameclass Kripke.FrameClass.serial_symm $ by
+instance consistent : Entailment.Consistent (Hilbert.KDB) := consistent_of_sound_frameclass Kripke.FrameClass.KDB $ by
   use whitepoint;
-  constructor <;> infer_instance;
+  constructor;
 
-instance canonical : Canonical (Hilbert.KDB) Kripke.FrameClass.serial_symm := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
-⟩
 
-instance complete : Complete (Hilbert.KDB) Kripke.FrameClass.serial_symm := inferInstance
+instance canonical : Canonical (Hilbert.KDB) Kripke.FrameClass.KDB := ⟨by constructor⟩
+
+instance complete : Complete (Hilbert.KDB) Kripke.FrameClass.KDB := inferInstance
 
 end Hilbert.KDB.Kripke
 
@@ -39,7 +43,7 @@ open Formula
 open Entailment
 open Kripke
 
-lemma KDB.Kripke.serial_symm : Logic.KDB = FrameClass.serial_symm.logic := eq_hilbert_logic_frameClass_logic
+lemma KDB.Kripke.serial_symm : Logic.KDB = Kripke.FrameClass.KDB.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
 theorem KDB.proper_extension_of_KD : Logic.KD ⊂ Logic.KDB := by

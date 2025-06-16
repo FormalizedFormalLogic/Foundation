@@ -34,10 +34,7 @@ instance Kripke.consistent : Entailment.Consistent (Hilbert.S4M) := consistent_o
   apply Set.mem_setOf_eq.mpr;
   constructor
 
-instance Kripke.canonical : Canonical (Hilbert.S4M) FrameClass.S4M := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor;
-⟩
+instance Kripke.canonical : Canonical (Hilbert.S4M) FrameClass.S4M := ⟨by constructor⟩
 
 instance Kripke.complete : Complete (Hilbert.S4M) FrameClass.S4M := inferInstance
 
