@@ -45,7 +45,7 @@ lemma KDB.Kripke.serial_symm : Logic.KDB = FrameClass.serial_symm.logic := eq_hi
 theorem KDB.proper_extension_of_KD : Logic.KD ⊂ Logic.KDB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
+  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
       rw [KD.Kripke.serial];
       tauto;
     use Axioms.B (.atom 0);
@@ -64,7 +64,7 @@ theorem KDB.proper_extension_of_KD : Logic.KD ⊂ Logic.KDB := by
 theorem KDB.proper_extension_of_KB : Logic.KB ⊂ Logic.KDB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by
+  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.KB ⊧ φ by
       rw [KB.Kripke.symm];
       tauto;
     use Axioms.D (.atom 0);

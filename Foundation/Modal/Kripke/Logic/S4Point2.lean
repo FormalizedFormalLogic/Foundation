@@ -12,15 +12,26 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.confluent_preorder : FrameClass := { F | F.IsPreorder ∧ F.IsPiecewiseStronglyConvergent  }
-abbrev Kripke.FrameClass.finite_confluent_preorder : FrameClass := { F | F.IsFinite ∧ F.IsPreorder ∧ F.IsPiecewiseStronglyConvergent }
+namespace Kripke
 
-instance {F : Kripke.Frame} [F.IsPiecewiseStronglyConvergent] : F.IsPiecewiseConvergent where
+variable {F : Kripke.Frame}
+
+class Frame.IsS4Point2 (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.IsPiecewiseStronglyConvergent where
+class Frame.IsFiniteS4Point2 (F : Frame) extends F.IsFinite, F.IsReflexive, F.IsTransitive, F.IsPiecewiseStronglyConvergent
+
+instance [F.IsS4Point2] : F.IsS4 where
+instance [F.IsS4Point2] : F.IsK4Point2 where
+
+abbrev FrameClass.S4Point2 : FrameClass := { F | F.IsS4Point2  }
+abbrev FrameClass.finite_S4Point2 : FrameClass := { F | F.IsFiniteS4Point2 }
+
+end Kripke
+
 
 
 namespace Hilbert.S4Point2.Kripke
 
-instance sound : Sound (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.S4Point2) FrameClass.S4Point2 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -28,18 +39,16 @@ instance sound : Sound (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder :
   . exact validate_AxiomPoint2_of_confluent;
 
 instance consistent : Entailment.Consistent (Hilbert.S4Point2) :=
-  consistent_of_sound_frameclass FrameClass.confluent_preorder $ by
+  consistent_of_sound_frameclass FrameClass.S4Point2 $ by
     use whitepoint;
-    refine ⟨inferInstance, inferInstance⟩;
+    constructor;
 
-instance canonical : Canonical (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder := ⟨by
+instance canonical : Canonical (Hilbert.S4Point2) FrameClass.S4Point2 := ⟨by
   apply Set.mem_setOf_eq.mpr;
-  refine ⟨?_, ?_⟩;
-  . constructor;
-  . infer_instance;
+  constructor;
 ⟩
 
-instance complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.confluent_preorder := inferInstance
+instance complete : Complete (Hilbert.S4Point2) FrameClass.S4Point2 := inferInstance
 
 
 section FFP
@@ -48,14 +57,14 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance finite_sound : Sound (Hilbert.S4Point2) Kripke.FrameClass.finite_confluent_preorder := instSound_of_validates_axioms $ by
+instance finite_sound : Sound (Hilbert.S4Point2) FrameClass.finite_S4Point2 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_confluent_preorder := ⟨by
+instance finite_complete : Complete (Hilbert.S4Point2) FrameClass.finite_S4Point2 := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   rintro F ⟨_, _⟩ V r;
@@ -67,11 +76,15 @@ instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_
   let FRM := finestFiltrationTransitiveClosureModel (M↾r) (φ.subformulas);
   apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTransitive)) (by subformula) |>.mpr;
   apply hφ;
+  apply Set.mem_setOf_eq.mpr;
+  sorry;
+  /-
 
   refine ⟨?_, ?_, ?_⟩;
   . apply isFinite $ by simp;
   . exact finestFiltrationTransitiveClosureModel.isPreorder (preorder := Frame.pointGenerate.isPreorder);
   . exact finestFiltrationTransitiveClosureModel.rooted_isPiecewiseStronglyConvergent;
+  -/
 ⟩
 
 end FFP
@@ -84,14 +97,14 @@ open Formula
 open Entailment
 open Kripke
 
-lemma S4Point2.Kripke.confluent_preorder : Logic.S4Point2 = FrameClass.confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
-lemma S4Point2.Kripke.finite_confluent_preorder : Logic.S4Point2 = FrameClass.finite_confluent_preorder.logic := eq_hilbert_logic_frameClass_logic
+lemma S4Point2.Kripke.confluent_preorder : Logic.S4Point2 = FrameClass.S4Point2.logic := eq_hilbert_logic_frameClass_logic
+lemma S4Point2.Kripke.finite_confluent_preorder : Logic.S4Point2 = FrameClass.finite_S4Point2.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
 theorem S4Point2.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4Point2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬FrameClass.preorder ⊧ φ by
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by
       rw [S4.Kripke.preorder];
       tauto;
     use Axioms.Point2 (.atom 0)
@@ -120,10 +133,11 @@ theorem S4Point2.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4Point2 := by
 theorem S4Point2.proper_extension_of_K4Point2 : Logic.K4Point2 ⊂ Logic.S4Point2 := by
   constructor;
   . rw [K4Point2.Kripke.trans_weakConfluent, S4Point2.Kripke.confluent_preorder];
-    rintro φ hφ F ⟨_, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConfluent ⊧ φ by
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.K4Point2 ⊧ φ by
       rw [K4Point2.Kripke.trans_weakConfluent];
       tauto;
     use (Axioms.Point2 (.atom 0));
@@ -137,7 +151,7 @@ theorem S4Point2.proper_extension_of_K4Point2 : Logic.K4Point2 ⊂ Logic.S4Point
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];
-        refine ⟨{}, { p_convergent := by simp [M, PiecewiseConvergent ]; omega; }⟩;
+        refine { p_convergent := by simp [M, PiecewiseConvergent ]; omega; };
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;

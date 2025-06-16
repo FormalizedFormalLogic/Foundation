@@ -9,27 +9,33 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
-abbrev Kripke.FrameClass.serial_trans : FrameClass := { F | F.IsSerial ∧ F.IsTransitive }
+namespace Kripke
+
+protected class Frame.IsKD4 (F : Kripke.Frame) extends F.IsSerial, F.IsTransitive
+
+protected abbrev FrameClass.KD4 : FrameClass := { F | F.IsKD4 }
+
+end Kripke
 
 namespace Hilbert.KD4.Kripke
 
-instance sound : Sound (Hilbert.KD4) Kripke.FrameClass.serial_trans := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KD4) FrameClass.KD4 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFour_of_transitive;
 
 instance consistent : Entailment.Consistent (Hilbert.KD4) := consistent_of_sound_frameclass
-  Kripke.FrameClass.serial_trans $ by
+  FrameClass.KD4 $ by
     use whitepoint;
     constructor <;> infer_instance;
 
-instance canonical : Canonical (Hilbert.KD4) Kripke.FrameClass.serial_trans := ⟨by
+instance canonical : Canonical (Hilbert.KD4) FrameClass.KD4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   constructor <;> infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KD4) Kripke.FrameClass.serial_trans := inferInstance
+instance complete : Complete (Hilbert.KD4) FrameClass.KD4 := inferInstance
 
 end Hilbert.KD4.Kripke
 
@@ -39,12 +45,12 @@ open Formula
 open Entailment
 open Kripke
 
-lemma KD4.Kripke.serial_trans : Logic.KD4 = FrameClass.serial_trans.logic := eq_hilbert_logic_frameClass_logic
+lemma KD4.Kripke.serial_trans : Logic.KD4 = FrameClass.KD4.logic := eq_hilbert_logic_frameClass_logic
 
 theorem KD4.proper_extension_of_KD : Logic.KD ⊂ Logic.KD4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
+  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
       rw [KD.Kripke.serial];
       tauto
     use Axioms.Four (.atom 0);

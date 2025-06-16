@@ -8,28 +8,33 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
+namespace Kripke
+
+protected abbrev Frame.IsKB := Frame.IsSymmetric
+protected abbrev FrameClass.KB : FrameClass := { F | F.IsKB }
+
+end Kripke
 
 
-protected abbrev Kripke.FrameClass.symm : FrameClass := { F | F.IsSymmetric }
 
 namespace Hilbert.KB.Kripke
 
-instance sound : Sound (Hilbert.KB) Kripke.FrameClass.symm := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KB) FrameClass.KB := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_symm _ rfl;
   exact validate_AxiomB_of_symmetric (sym := F_symm);
 
-instance consistent : Entailment.Consistent (Hilbert.KB) := consistent_of_sound_frameclass FrameClass.symm $ by
+instance consistent : Entailment.Consistent (Hilbert.KB) := consistent_of_sound_frameclass FrameClass.KB $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance canonical : Canonical (Hilbert.KB) Kripke.FrameClass.symm := ⟨by
+instance canonical : Canonical (Hilbert.KB) FrameClass.KB := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KB) Kripke.FrameClass.symm := inferInstance
+instance complete : Complete (Hilbert.KB) FrameClass.KB := inferInstance
 
 end Hilbert.KB.Kripke
 
@@ -39,7 +44,7 @@ open Formula
 open Entailment
 open Kripke
 
-lemma KB.Kripke.symm : Logic.KB = FrameClass.symm.logic := eq_hilbert_logic_frameClass_logic
+lemma KB.Kripke.symm : Logic.KB = FrameClass.KB.logic := eq_hilbert_logic_frameClass_logic
 
 theorem KB.proper_extension_of_K : Logic.K ⊂ Logic.KB := by
   constructor;

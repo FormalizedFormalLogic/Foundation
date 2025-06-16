@@ -289,7 +289,7 @@ lemma Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_partial_or
 theorem Grz.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by
+  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by
       rw [S4.Kripke.preorder];
       tauto;
     use Axioms.Grz (.atom 0)
@@ -307,7 +307,7 @@ theorem Grz.proper_extension_of_S4M : Logic.S4M ⊂ Logic.Grz := by
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬Kripke.FrameClass.preorder_mckinsey ⊧ φ by
+  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬FrameClass.S4M ⊧ φ by
       rw [S4M.Kripke.preorder_mckinsey];
       tauto;
     use Axioms.Grz (.atom 0)

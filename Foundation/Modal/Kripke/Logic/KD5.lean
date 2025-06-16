@@ -45,7 +45,7 @@ lemma KD5.Kripke.serial_eucl : Logic.KD5 = FrameClass.serial_eucl.logic := eq_hi
 theorem KD5.proper_extension_of_KD : Logic.KD ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
+  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
       rw [KD.Kripke.serial];
       tauto;
     use (Axioms.Five (.atom 0));
@@ -66,7 +66,7 @@ theorem KD5.proper_extension_of_KD : Logic.KD ⊂ Logic.KD5 := by
 theorem KD5.proper_extension_of_K5 : Logic.K5 ⊂ Logic.KD5 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by
+  . suffices ∃ φ, Hilbert.KD5 ⊢! φ ∧ ¬Kripke.FrameClass.K5 ⊧ φ by
       rw [K5.Kripke.eucl];
       tauto;
     use (Axioms.D (.atom 0));

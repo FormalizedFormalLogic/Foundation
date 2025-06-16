@@ -9,7 +9,7 @@ variable {F : Kripke.Frame}
 
 namespace Frame
 
-class IsPiecewiseStronglyConnected (F : Frame) extends _root_.IsPiecewiseStronglyConnected F.Rel
+abbrev IsPiecewiseStronglyConnected (F : Frame) := _root_.IsPiecewiseStronglyConnected F.Rel
 
 lemma ps_connected [F.IsPiecewiseStronglyConnected] : ∀ {x y z : F.World}, x ≺ y → x ≺ z →  y ≺ z ∨ z ≺ y := by
   apply IsPiecewiseStronglyConnected.ps_connected

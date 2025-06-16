@@ -12,31 +12,34 @@ open Hilbert.Kripke
 
 namespace Kripke
 
-protected abbrev FrameClass.refl : FrameClass := { F | F.IsReflexive }
+protected abbrev Frame.IsKT := Frame.IsReflexive
 
-instance {F : Kripke.Frame} [F.IsReflexive] : F.IsSerial where
+protected abbrev FrameClass.KT : FrameClass := { F | F.IsKT }
+
+instance {F : Kripke.Frame} [F.IsKT] : F.IsKD := by simp
 
 end Kripke
 
 
 namespace Hilbert.KT
 
-instance Kripke.sound : Sound (Hilbert.KT) Kripke.FrameClass.refl := instSound_of_validates_axioms $ by
+instance Kripke.sound : Sound (Hilbert.KT) FrameClass.KT := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_refl _ rfl;
   exact Kripke.validate_AxiomT_of_reflexive (refl := F_refl);
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.KT) := consistent_of_sound_frameclass Kripke.FrameClass.refl $ by
+instance Kripke.consistent : Entailment.Consistent (Hilbert.KT) := consistent_of_sound_frameclass FrameClass.KT $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
-  infer_instance;
+  simp;
 
-instance Kripke.canonical : Canonical (Hilbert.KT) Kripke.FrameClass.refl := ⟨by
+instance Kripke.canonical : Canonical (Hilbert.KT) FrameClass.KT := ⟨by
   apply Set.mem_setOf_eq.mpr;
+  dsimp [Frame.IsKT];
   infer_instance;
 ⟩
 
-instance Kripke.complete : Complete (Hilbert.KT) Kripke.FrameClass.refl := inferInstance
+instance Kripke.complete : Complete (Hilbert.KT) FrameClass.KT := inferInstance
 
 end Hilbert.KT
 
@@ -46,13 +49,13 @@ open Formula
 open Entailment
 open Kripke
 
-lemma KT.Kripke.refl : Logic.KT = FrameClass.refl.logic := eq_hilbert_logic_frameClass_logic
+lemma KT.Kripke.refl : Logic.KT = FrameClass.KT.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
 theorem KT.proper_extension_of_KD : Logic.KD ⊂ Logic.KT := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
+  . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
       rw [KD.Kripke.serial];
       tauto;
     use (Axioms.T (.atom 0));

@@ -11,7 +11,7 @@ variable {F : Kripke.Frame}
 
 namespace Frame
 
-class IsPiecewiseConvergent (F : Frame) extends _root_.IsPiecewiseConvergent F.Rel
+abbrev IsPiecewiseConvergent (F : Frame) := _root_.IsPiecewiseConvergent F.Rel
 
 end Frame
 

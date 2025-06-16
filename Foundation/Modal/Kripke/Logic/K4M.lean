@@ -6,30 +6,33 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
+namespace Kripke
 
-abbrev Kripke.FrameClass.trans_mckinsey : FrameClass := { F | F.IsTransitive ∧ SatisfiesMcKinseyCondition _ F }
+class Frame.IsK4M (F : Kripke.Frame) extends F.IsTransitive, F.SatisfiesMcKinseyCondition where
+
+abbrev FrameClass.K4M : FrameClass := { F | F.IsK4M }
+
+end Kripke
 
 namespace Hilbert.K4M
 
-instance Kripke.sound : Sound (Hilbert.K4M) (Kripke.FrameClass.trans_mckinsey) := instSound_of_validates_axioms $ by
+instance Kripke.sound : Sound (Hilbert.K4M) FrameClass.K4M := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomM_of_satisfiesMcKinseyCondition;
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.K4M) := consistent_of_sound_frameclass Kripke.FrameClass.trans_mckinsey $ by
+instance Kripke.consistent : Entailment.Consistent (Hilbert.K4M) := consistent_of_sound_frameclass FrameClass.K4M $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
+  constructor;
 
-instance Kripke.canonical : Canonical (Hilbert.K4M) Kripke.FrameClass.trans_mckinsey := ⟨by
+instance Kripke.canonical : Canonical (Hilbert.K4M) FrameClass.K4M := ⟨by
   apply Set.mem_setOf_eq.mpr;
   constructor;
-  . infer_instance;
-  . infer_instance;
 ⟩
 
-instance Kripke.complete : Complete (Hilbert.K4M) Kripke.FrameClass.trans_mckinsey := inferInstance
+instance Kripke.complete : Complete (Hilbert.K4M) FrameClass.K4M := inferInstance
 
 end Hilbert.K4M
 
@@ -39,7 +42,7 @@ open Formula
 open Entailment
 open Kripke
 
-lemma K4M.Kripke.trans_mckinsey : Logic.K4M = FrameClass.trans_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+lemma K4M.Kripke.trans_mckinsey : Logic.K4M = FrameClass.K4M.logic := eq_hilbert_logic_frameClass_logic
 
 theorem K4M.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4M := by
   constructor;
@@ -53,7 +56,7 @@ theorem K4M.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4M := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
       constructor;
-      . refine ⟨by tauto⟩;
+      . simp only [Set.mem_setOf_eq]; refine { trans := by simp; }
       . simp [Semantics.Realize, Satisfies];
 
 end Logic

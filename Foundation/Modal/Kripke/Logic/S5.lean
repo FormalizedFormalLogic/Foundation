@@ -14,23 +14,27 @@ open Hilbert.Kripke
 
 namespace Kripke
 
-
-protected abbrev FrameClass.refl_eucl : FrameClass := { F | F.IsReflexive ∧ F.IsEuclidean }
-
-instance {F : Frame} [F.IsReflexive] [F.IsEuclidean] : F.IsSymmetric where
-instance {F : Frame} [F.IsReflexive] [F.IsEuclidean] : F.IsTransitive where
-
-protected abbrev FrameClass.finite_refl_eucl: FrameClass := { F | F.IsFinite ∧ F.IsReflexive ∧ F.IsEuclidean }
+variable {F : Frame}
 
 class Frame.IsUniversal (F : Frame) extends _root_.IsUniversal F.Rel
-@[simp] lemma universal {F : Frame} [F.IsUniversal] : ∀ {x y : F.World}, x ≺ y := by apply IsUniversal.universal;
+@[simp] lemma universal [F.IsUniversal] : ∀ {x y : F.World}, x ≺ y := by apply IsUniversal.universal;
 
+instance [F.IsUniversal] : F.IsEuclidean := by simp
+instance [F.IsUniversal] : F.IsPreorder where
+
+protected class Frame.IsS5 (F : Frame) extends F.IsReflexive, F.IsEuclidean
+protected class Frame.IsFiniteS5 (F : Frame) extends F.IsFinite, F.IsS5
+
+instance [F.IsS5] : F.IsKD45 where
+instance [F.IsS5] : F.IsKB4 where
+instance [F.IsS5] : F.IsKTB where
+instance [F.IsS5] : F.IsS4Point4 where
+
+protected abbrev FrameClass.S5 : FrameClass := { F | F.IsS5 }
+protected abbrev FrameClass.finiteS5: FrameClass := { F | F.IsFiniteS5 }
 protected abbrev FrameClass.universal : FrameClass := { F | F.IsUniversal }
 
-instance {F : Frame} [F.IsUniversal] : F.IsPreorder where
-instance {F : Frame} [F.IsUniversal] : F.IsEuclidean where
-
-instance Frame.pointGenerate.isUniversal {F : Frame} [F.IsReflexive] [F.IsEuclidean] (r : F.World) : (F↾r).IsUniversal where
+instance Frame.pointGenerate.isUniversal (F : Frame) (r : F.World) (_ : F.IsS5) : (F↾r).IsUniversal where
   universal := by
     rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
     . simp;
@@ -40,24 +44,23 @@ instance Frame.pointGenerate.isUniversal {F : Frame} [F.IsReflexive] [F.IsEuclid
     . suffices x ≺ y by simpa;
       apply F.eucl hx.unwrap hy.unwrap ;
 
-lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
+lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ FrameClass.S5 ⊧ φ := by
   constructor;
-  . rintro h F ⟨F_refl, F_eucl⟩ V r;
+  . rintro h F hF V r;
     apply @Model.pointGenerate.modal_equivalent_at_root _ _ |>.mp;
     apply h;
-    apply Set.mem_setOf_eq.mpr;
-    infer_instance;
+    apply Frame.pointGenerate.isUniversal F r hF;
   . rintro h F F_univ;
-    replace F_univ := Set.mem_setOf_eq.mp F_univ
     apply h;
-    constructor <;> infer_instance;
+    simp_all;
+    constructor;
 
 end Kripke
 
 
 namespace Hilbert.S5.Kripke
 
-instance sound_refl_eucl : Sound (Hilbert.S5) Kripke.FrameClass.refl_eucl := instSound_of_validates_axioms $ by
+instance sound_refl_eucl : Sound (Hilbert.S5) FrameClass.S5 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -69,16 +72,16 @@ instance sound_universal : Sound (Hilbert.S5) FrameClass.universal := ⟨by
   exact sound_refl_eucl.sound hF;
 ⟩
 
-instance consistent : Entailment.Consistent (Hilbert.S5) := consistent_of_sound_frameclass Kripke.FrameClass.refl_eucl $ by
+instance consistent : Entailment.Consistent (Hilbert.S5) := consistent_of_sound_frameclass FrameClass.S5 $ by
   use whitepoint;
-  refine ⟨inferInstance, inferInstance⟩;
+  constructor;
 
-instance canonical : Canonical (Hilbert.S5) Kripke.FrameClass.refl_eucl := ⟨by
+instance canonical : Canonical (Hilbert.S5) FrameClass.S5 := ⟨by
   apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
+  constructor;
 ⟩
 
-instance complete_refl_eucl : Complete (Hilbert.S5) Kripke.FrameClass.refl_eucl := inferInstance
+instance complete_refl_eucl : Complete (Hilbert.S5) FrameClass.S5 := inferInstance
 
 instance complete_universal : Complete (Hilbert.S5) FrameClass.universal := ⟨by
   intro φ hF;
@@ -96,16 +99,17 @@ open Formula
 open Entailment
 open Kripke
 
-lemma S5.Kripke.refl_eucl : Logic.S5 = FrameClass.refl_eucl.logic := eq_hilbert_logic_frameClass_logic
+lemma S5.Kripke.refl_eucl : Logic.S5 = FrameClass.S5.logic := eq_hilbert_logic_frameClass_logic
 lemma S5.Kripke.universal : Logic.S5 = FrameClass.universal.logic := eq_hilbert_logic_frameClass_logic
 
 theorem S5.proper_extension_of_KTB : Logic.KTB ⊂ Logic.S5 := by
   constructor;
   . rw [KTB.Kripke.refl_symm, S5.Kripke.refl_eucl];
-    rintro φ hφ F ⟨_, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.refl_symm ⊧ φ by
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.KTB ⊧ φ by
       rw [KTB.Kripke.refl_symm];
       tauto;
     use Axioms.Five (.atom 0);
@@ -115,7 +119,7 @@ theorem S5.proper_extension_of_KTB : Logic.KTB ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = 1 ∧ y ≠ 2) ∨ (x = 2 ∧ y ≠ 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨{ refl := by omega }, { symm := by omega }⟩;
+      . refine { refl := by omega, symm := by omega };
       . suffices (0 : M.World) ≺ 1 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -126,9 +130,10 @@ theorem S5.proper_extension_of_KTB : Logic.KTB ⊂ Logic.S5 := by
 theorem S5.proper_extension_of_KD45 : Logic.KD45 ⊂ Logic.S5 := by
   constructor;
   . rw [KD45.Kripke.serial_trans_eucl, S5.Kripke.refl_eucl];
-    rintro φ hφ F ⟨_, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance, inferInstance⟩;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
   . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.serial_trans_eucl ⊧ φ by
       rw [KD45.Kripke.serial_trans_eucl];
       tauto;
@@ -139,18 +144,22 @@ theorem S5.proper_extension_of_KD45 : Logic.KD45 ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 2, λ x y => (x = 0 ∧ y = 1) ∨ (x = 1 ∧ y = 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
-      . simp only [Fin.isValue, Set.mem_setOf_eq, M];
-        refine ⟨{ serial := by intro x; use 1; omega; }, { trans := by omega }, { reucl := by simp [RightEuclidean]; omega }⟩
+      . refine {
+          serial := by intro x; use 1; omega;,
+          trans := by omega,
+          reucl := by simp [RightEuclidean]; omega
+        }
       . simp [Semantics.Realize, Satisfies, M];
         tauto;
 
 theorem S5.proper_extension_of_KB4 : Logic.KB4 ⊂ Logic.S5 := by
   constructor;
   . rw [KB4.Kripke.refl_trans, S5.Kripke.refl_eucl];
-    rintro φ hφ F ⟨_, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.symm_trans ⊧ φ by
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.IsKB4 ⊧ φ by
       rw [KB4.Kripke.refl_trans];
       tauto;
     use (Axioms.T (.atom 0));
@@ -159,18 +168,18 @@ theorem S5.proper_extension_of_KB4 : Logic.KB4 ⊂ Logic.S5 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ x _ => False⟩, 0;
       constructor;
-      . simp only [Set.mem_setOf_eq];
-        refine ⟨{ symm := by tauto }, { trans := by tauto }⟩;
+      . refine { symm := by tauto, trans := by tauto };
       . simp [Semantics.Realize, Satisfies];
 
 @[simp]
 theorem S5.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S5 := by
   constructor;
   . rw [S4.Kripke.preorder, S5.Kripke.refl_eucl];
-    rintro φ hφ F ⟨_, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.preorder ⊧ φ by
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by
       rw [S4.Kripke.preorder];
       tauto;
     use Axioms.Five (.atom 0);
@@ -180,8 +189,7 @@ theorem S5.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ w _ => w = 2)⟩;
       use M, 0;
       constructor;
-      . simp only [Fin.isValue, Set.mem_setOf_eq, M];
-        refine { refl := by omega, trans := by omega };
+      . refine { refl := by omega, trans := by omega };
       . suffices (0 : M.World) ≺ 2 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -192,12 +200,12 @@ theorem S5.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S5 := by
 @[simp]
 theorem S5.proper_extension_of_S4Point4 : Logic.S4Point4 ⊂ Logic.S5 := by
   constructor;
-  . rw [S4Point4.Kripke.preorder_sobocinski, S5.Kripke.universal];
-    rintro φ hφ F F_univ;
+  . rw [S4Point4.Kripke.preorder_sobocinski, S5.Kripke.refl_eucl];
+    rintro φ hφ F hF;
     apply hφ;
-    replace F_univ := Set.mem_setOf_eq.mp F_univ;
-    refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.preorder_sobocinski ⊧ φ by
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬Kripke.FrameClass.S4Point4 ⊧ φ by
       rw [S4Point4.Kripke.preorder_sobocinski];
       tauto;
     use Axioms.Five (.atom 0);
@@ -207,8 +215,7 @@ theorem S5.proper_extension_of_S4Point4 : Logic.S4Point4 ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w a => w = 0⟩;
       use M, 0;
       constructor;
-      . simp only [Set.mem_setOf_eq, M];
-        refine ⟨{}, {
+      . refine {
           sobocinski := by
             intro x y z _ _;
             match x, y with
@@ -216,7 +223,7 @@ theorem S5.proper_extension_of_S4Point4 : Logic.S4Point4 ⊂ Logic.S5 := by
             | 0, 1 => omega;
             | 1, 0 => contradiction;
             | 1, 1 => contradiction;
-        }⟩;
+        };
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M) ≺ x ∧ ¬x ≺ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;

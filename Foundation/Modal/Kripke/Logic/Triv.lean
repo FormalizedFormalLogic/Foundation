@@ -161,7 +161,7 @@ theorem Triv.proper_extension_of_S4Point4M : Logic.S4Point4M ⊂ Logic.Triv := b
     rintro φ hφ F ⟨_, _⟩;
     apply hφ;
     refine ⟨by tauto, inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.preorder_sobocinski_mckinsey ⊧ φ by
+  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.S4Point4M ⊧ φ by
       rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey];
       tauto;
     use Axioms.Tc (.atom 0);

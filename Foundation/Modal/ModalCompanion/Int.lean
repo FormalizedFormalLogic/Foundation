@@ -46,7 +46,7 @@ instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
   rw [Logic.S4.is_smallestMC_of_Int];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.all)
-    (MC := Modal.Kripke.FrameClass.preorder)
+    (MC := FrameClass.S4)
     (by rw [Logic.Int.Kripke.all])
     (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.Kripke.preorder])
     (by simp; intro F; infer_instance;);

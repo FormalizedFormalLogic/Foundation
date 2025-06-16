@@ -21,7 +21,7 @@ instance : Coe (F.World) (F^=.World) := ⟨id⟩
 instance [Finite F] : Finite (F^=) := inferInstance
 instance [F.IsFinite] : (F^=).IsFinite := inferInstance
 
-instance : (F^=).IsReflexive where
+instance : (F^=).IsReflexive := by simp
 
 end ReflGen
 
@@ -35,15 +35,13 @@ instance : Coe (F.World) (F^+.World) := ⟨id⟩
 
 instance [F.IsFinite] : (F^+).IsFinite := inferInstance
 
-instance : (F^+).IsTransitive where
+instance : (F^+).IsTransitive := by simp
 
-instance [F.IsReflexive] : F^+.IsReflexive where
-  refl := by simp only; apply IsRefl.refl;
+instance [F.IsReflexive] : F^+.IsReflexive := by simp
 
 instance [F.IsReflexive] : F^+.IsPreorder where
 
-instance isSymmetric [F.IsSymmetric] : F^+.IsSymmetric where
-  symm := by simp only; apply IsSymm.symm;
+instance isSymmetric [F.IsSymmetric] : F^+.IsSymmetric := by simp
 
 instance [F.IsReflexive] [F.IsSymmetric] : F^+.IsEquivalence where
 

@@ -15,30 +15,32 @@ class IsGeachConvergent (F : Frame) (g : Axioms.Geach.Taple) where
   gconv : ∀ ⦃x y z : F⦄, x ≺^[g.i] y → x ≺^[g.j] z → ∃ u, y ≺^[g.m] u ∧ z ≺^[g.n] u
 
 
-class IsReflexive (F : Frame) extends _root_.IsRefl _ F.Rel
+abbrev IsReflexive (F : Frame) := _root_.IsRefl _ F
 
 @[simp] lemma refl [F.IsReflexive] : ∀ {x : F.World}, x ≺ x := by apply IsRefl.refl
 
+@[simp]
 instance [F.IsGeachConvergent ⟨0, 0, 1, 0⟩] : F.IsReflexive where
   refl := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 0⟩);
 instance [F.IsReflexive] : F.IsGeachConvergent ⟨0, 0, 1, 0⟩ where
   gconv x y z Rxy Rxz := by simp_all;
 
-
-class IsSerial (F : Frame) extends _root_.IsSerial F.Rel
+abbrev IsSerial (F : Frame) := _root_.IsSerial F.Rel
 
 lemma serial [F.IsSerial] : ∀ x : F, ∃ y, x ≺ y := IsSerial.serial
 
+@[simp]
 instance [F.IsGeachConvergent ⟨0, 0, 1, 1⟩] : F.IsSerial where
   serial := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 1⟩);
 instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ where
   gconv x y z Rxy Rxz := by simp_all; subst Rxz; apply _root_.IsSerial.serial
 
 
-class IsTransitive (F : Frame) extends _root_.IsTrans _ F.Rel'
+abbrev IsTransitive (F : Frame) := _root_.IsTrans _ F.Rel'
 
 lemma trans [F.IsTransitive] : ∀ {x y z : F.World}, x ≺ y → y ≺ z → x ≺ z := by apply IsTrans.trans
 
+@[simp]
 instance [F.IsGeachConvergent ⟨0, 2, 1, 0⟩] : F.IsTransitive where
   trans := by
     rintro x y z;
@@ -52,10 +54,11 @@ instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
     exact IsTrans.trans _ _ _ Rxy Ryz
 
 
-class IsSymmetric (F : Frame) extends _root_.IsSymm _ F.Rel'
+abbrev IsSymmetric (F : Frame) := _root_.IsSymm _ F.Rel'
 
 lemma symm [F.IsSymmetric] : ∀ {x y : F.World}, x ≺ y → y ≺ x := by apply IsSymm.symm
 
+@[simp]
 instance [F.IsGeachConvergent ⟨0, 1, 0, 1⟩] : F.IsSymmetric where
   symm x y := by
     have : ∀ x y z : F, x = y → x ≺ z → z ≺ y := by
@@ -65,10 +68,11 @@ instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by simp_all; subst Rxy; exact _root_.IsSymm.symm _ _ Rxz;
 
 
-class IsEuclidean (F : Frame) extends _root_.IsRightEuclidean F.Rel'
+abbrev IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel'
 
 lemma eucl [F.IsEuclidean] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y ≺ z := by apply IsRightEuclidean.reucl
 
+@[simp]
 instance [F.IsGeachConvergent ⟨1, 1, 0, 1⟩] : F.IsEuclidean where
   reucl x y z Rxy Rxz := by
     have : ∀ x y z : F, x ≺ y → x ≺ z → z ≺ y := by
@@ -78,11 +82,12 @@ instance [F.IsEuclidean] : F.IsGeachConvergent ⟨1, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by simp_all; exact IsRightEuclidean.reucl Rxz Rxy
 
 
-class IsPiecewiseStronglyConvergent (F : Frame) extends _root_.IsPiecewiseStronglyConvergent F.Rel'
+abbrev IsPiecewiseStronglyConvergent (F : Frame) := _root_.IsPiecewiseStronglyConvergent F.Rel'
 
 lemma ps_convergent [F.IsPiecewiseStronglyConvergent] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → ∃ u, y ≺ u ∧ z ≺ u := by
   apply IsPiecewiseStronglyConvergent.ps_convergent
 
+@[simp]
 instance [F.IsGeachConvergent ⟨1, 1, 1, 1⟩] : F.IsPiecewiseStronglyConvergent where
   ps_convergent := by simpa using IsGeachConvergent.gconv (g := ⟨1, 1, 1, 1⟩) (F := F);
 instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1⟩ where
@@ -92,10 +97,11 @@ instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1�
     use u;
 
 
-class IsCoreflexive (F : Frame) extends _root_.IsCoreflexive F.Rel'
+abbrev IsCoreflexive (F : Frame) := _root_.IsCoreflexive F.Rel'
 
 lemma corefl [F.IsCoreflexive] : ∀ {x y : F.World}, x ≺ y → x = y := by apply IsCoreflexive.corefl
 
+@[simp]
 instance [F.IsGeachConvergent ⟨0, 1, 0, 0⟩] : F.IsCoreflexive where
   corefl x y Rxy := by
     have : ∀ x y z : F, x = y → x ≺ z → z = y := by
@@ -263,15 +269,13 @@ instance [Entailment.HasAxiomGeach g 𝓢] : (canonicalFrame 𝓢).IsGeachConver
   . apply def_multirel_multidia_mem₂.mpr; apply hu.2;
 ⟩
 
-instance [Entailment.HasAxiomT 𝓢] : (canonicalFrame 𝓢).IsReflexive := inferInstance
-instance [Entailment.HasAxiomD 𝓢] : (canonicalFrame 𝓢).IsSerial := inferInstance
-instance [Entailment.HasAxiomB 𝓢] : (canonicalFrame 𝓢).IsSymmetric := inferInstance
-instance isTrans [Entailment.HasAxiomFour 𝓢] : (canonicalFrame 𝓢).IsTransitive := inferInstance
-instance [Entailment.HasAxiomFive 𝓢] :(canonicalFrame 𝓢).IsEuclidean := inferInstance
-instance [Entailment.HasAxiomTc 𝓢] : (canonicalFrame 𝓢).IsCoreflexive := inferInstance
-instance [Entailment.HasAxiomPoint2 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStronglyConvergent := inferInstance
-instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] : (canonicalFrame 𝓢).IsPreorder where
-instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] [Entailment.HasAxiomB 𝓢] : (canonicalFrame 𝓢).IsEquivalence where
+instance [Entailment.HasAxiomT 𝓢] : (canonicalFrame 𝓢).IsReflexive := by simp
+instance [Entailment.HasAxiomD 𝓢] : (canonicalFrame 𝓢).IsSerial := by simp
+instance [Entailment.HasAxiomB 𝓢] : (canonicalFrame 𝓢).IsSymmetric := by simp
+instance [Entailment.HasAxiomFour 𝓢] : (canonicalFrame 𝓢).IsTransitive := by simp
+instance [Entailment.HasAxiomFive 𝓢] :(canonicalFrame 𝓢).IsEuclidean := by simp
+instance [Entailment.HasAxiomTc 𝓢] : (canonicalFrame 𝓢).IsCoreflexive := by simp
+instance [Entailment.HasAxiomPoint2 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStronglyConvergent := by simp
 
 end canonicality
 

@@ -6,12 +6,22 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
+namespace Kripke
 
-abbrev Kripke.FrameClass.preorder_connected_mckinsey : FrameClass := { F | F.IsPreorder ∧ IsConnected _ F ∧ SatisfiesMcKinseyCondition _ F }
+variable {F : Kripke.Frame}
+
+protected class Frame.IsS4Point3M (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.IsPiecewiseConnected, F.SatisfiesMcKinseyCondition where
+
+instance [F.IsS4Point3M] : F.IsS4Point2M where
+
+protected abbrev FrameClass.S4Point3M : FrameClass := { F | F.IsS4Point3M }
+
+end Kripke
+
 
 namespace Hilbert.S4Point3M.Kripke
 
-instance sound : Sound (Hilbert.S4Point3M) Kripke.FrameClass.preorder_connected_mckinsey := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.S4Point3M) Kripke.FrameClass.S4Point3M := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -20,19 +30,16 @@ instance sound : Sound (Hilbert.S4Point3M) Kripke.FrameClass.preorder_connected_
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
 instance consistent : Entailment.Consistent (Hilbert.S4Point3M) :=
-  consistent_of_sound_frameclass FrameClass.preorder_connected_mckinsey $ by
+  consistent_of_sound_frameclass Kripke.FrameClass.S4Point3M $ by
     use whitepoint;
-    refine ⟨inferInstance, inferInstance, inferInstance⟩;
+    constructor;
 
-instance canonical : Canonical (Hilbert.S4Point3M) Kripke.FrameClass.preorder_connected_mckinsey := ⟨by
+instance canonical : Canonical (Hilbert.S4Point3M) Kripke.FrameClass.S4Point3M := ⟨by
   apply Set.mem_setOf_eq.mpr;
-  refine ⟨?_, ?_, ?_⟩;
-  . constructor;
-  . infer_instance;
-  . infer_instance;
+  constructor;
 ⟩
 
-instance complete : Complete (Hilbert.S4Point3M) Kripke.FrameClass.preorder_connected_mckinsey := inferInstance
+instance complete : Complete (Hilbert.S4Point3M) Kripke.FrameClass.S4Point3M := inferInstance
 
 end Hilbert.S4Point3M.Kripke
 
@@ -42,15 +49,16 @@ open Formula
 open Entailment
 open Kripke
 
-lemma S4Point3M.Kripke.preorder_connected_mckinsey : Logic.S4Point3M = FrameClass.preorder_connected_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+lemma S4Point3M.Kripke.preorder_connected_mckinsey : Logic.S4Point3M = Kripke.FrameClass.S4Point3M.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
 theorem S4Point3M.proper_extension_of_S4Point2M : Logic.S4Point2M ⊂ Logic.S4Point3M := by
   constructor;
   . rw [S4Point2M.Kripke.preorder_confluent_mckinsey, S4Point3M.Kripke.preorder_connected_mckinsey]
-    rintro φ hφ F ⟨_, _, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance, inferInstance⟩;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
   . suffices ∃ φ, Hilbert.S4Point3M ⊢! φ ∧ ¬Kripke.FrameClass.preorder_confluent_mckinsey ⊧ φ by
       rw [S4Point2M.Kripke.preorder_confluent_mckinsey];
       tauto;
@@ -64,11 +72,18 @@ theorem S4Point3M.proper_extension_of_S4Point2M : Logic.S4Point2M ⊂ Logic.S4Po
       ⟩;
       use M, 0;
       constructor
-      . refine ⟨?_, ⟨?_⟩, ⟨?_⟩⟩;
-        . apply isPreorder_iff _ _ |>.mpr;
-          refine ⟨⟨?_⟩, ⟨?_⟩⟩ <;> omega;
-        . intro x y z ⟨Rxy, Ryz⟩; use 3; simp [M];
-        . intro x; use 3; simp [M];
+      . refine {
+          refl := by omega,
+          trans := by omega,
+          mckinsey := by
+            intro x;
+            use 3;
+            simp [Frame.Rel', M];
+          ps_convergent := by
+            intro x y z Rxy Ryz;
+            use 3;
+            tauto;
+        }
       . suffices
           (∃ x, (0 : M) ≺ x ∧ (∀ (w : M), x ≺ w → w = 1 ∨ w = 3) ∧ x ≠ 2 ∧ x ≠ 3) ∧
           (∃ x, (0 : M) ≺ x ∧ (∀ (w : M), x ≺ w → w = 2 ∨ w = 3) ∧ x ≠ 1 ∧ x ≠ 3) by
@@ -82,7 +97,7 @@ theorem S4Point3M.proper_extension_of_S4Point2M : Logic.S4Point2M ⊂ Logic.S4Po
 theorem S4Point3M.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.S4Point3M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point3M ⊢! φ ∧ ¬FrameClass.connected_preorder ⊧ φ by
+  . suffices ∃ φ, Hilbert.S4Point3M ⊢! φ ∧ ¬FrameClass.S4Point3 ⊧ φ by
       rw [S4Point3.Kripke.connected_preorder];
       tauto;
     use (Axioms.M (.atom 0))
@@ -92,10 +107,11 @@ theorem S4Point3M.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.S4Poin
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
-      . refine ⟨?_, ⟨?_⟩⟩;
-        . apply isPreorder_iff _ _ |>.mpr;
-          refine ⟨⟨?_⟩, ⟨?_⟩⟩ <;> tauto;
-        . tauto;
+      . exact {
+          refl := by tauto,
+          trans := by tauto,
+          ps_connected := by tauto;
+        }
       . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Realize, Satisfies];
         use 1;
         trivial;

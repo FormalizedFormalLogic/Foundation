@@ -6,28 +6,36 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
-protected abbrev Kripke.FrameClass.trans_eucl : FrameClass := { F | F.IsTransitive ∧ F.IsEuclidean }
 
-instance {F : Kripke.Frame} [F.IsEuclidean] : F.IsPiecewiseConnected where
+namespace Kripke
+
+protected class Frame.IsK45 (F : Kripke.Frame) extends F.IsTransitive, F.IsEuclidean
+
+protected abbrev FrameClass.IsK45 : FrameClass := { F | F.IsK45 }
+
+instance {F : Kripke.Frame} [F.IsK45] : F.IsK4Point3 where
+
+end Kripke
+
 
 namespace Hilbert.K45.Kripke
 
-instance sound : Sound (Hilbert.K45) FrameClass.trans_eucl := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.K45) FrameClass.IsK45 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent (Hilbert.K45) := consistent_of_sound_frameclass Kripke.FrameClass.trans_eucl $ by
+instance consistent : Entailment.Consistent (Hilbert.K45) := consistent_of_sound_frameclass FrameClass.IsK45 $ by
   use whitepoint;
   constructor <;> infer_instance;
 
-instance canonical : Canonical (Hilbert.K45) FrameClass.trans_eucl := ⟨by
+instance canonical : Canonical (Hilbert.K45) FrameClass.IsK45 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   constructor <;> infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.K45) FrameClass.trans_eucl := inferInstance
+instance complete : Complete (Hilbert.K45) FrameClass.IsK45 := inferInstance
 
 end Hilbert.K45.Kripke
 
@@ -38,12 +46,12 @@ open Formula
 open Entailment
 open Kripke
 
-lemma K45.Kripke.trans_eucl : Logic.K45 = FrameClass.trans_eucl.logic := eq_hilbert_logic_frameClass_logic
+lemma K45.Kripke.trans_eucl : Logic.K45 = FrameClass.IsK45.logic := eq_hilbert_logic_frameClass_logic
 
 theorem K45.proper_extension_of_K : Logic.K5 ⊂ Logic.K45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.eucl ⊧ φ by
+  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.K5 ⊧ φ by
       rw [K5.Kripke.eucl];
       tauto;
     use (Axioms.Four (.atom 0));
@@ -64,10 +72,11 @@ theorem K45.proper_extension_of_K : Logic.K5 ⊂ Logic.K45 := by
 theorem K5.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.K45 := by
   constructor;
   . rw [K4Point3.Kripke.trans_weakConnected, K45.Kripke.trans_eucl];
-    rintro φ hφ F ⟨_, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by
       rw [K4Point3.Kripke.trans_weakConnected];
       tauto;
     use (Axioms.Five (.atom 0));
@@ -81,7 +90,10 @@ theorem K5.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.K45 := by
       use M, 0;
       constructor;
       . simp only [Set.mem_setOf_eq];
-        refine ⟨{ trans := by omega }, { p_connected := by simp [PiecewiseConnected, M]; omega}⟩;
+        refine {
+          trans := by omega,
+          p_connected := by simp [PiecewiseConnected, M]; omega;
+        };
       . suffices (0 : M.World) ≺ 2 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;

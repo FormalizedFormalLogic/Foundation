@@ -88,7 +88,7 @@ instance modalCompanion_Cl_S5 : ModalCompanion Logic.Cl Logic.S5 := by
   rw [Logic.S5.is_smallestMC_of_Cl];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.euclidean)
-    (MC := Modal.Kripke.FrameClass.refl_eucl)
+    (MC := FrameClass.S5)
     (by rw [Propositional.Logic.Cl.Kripke.euclidean])
     (by rw [←Logic.S5.is_smallestMC_of_Cl, ←Logic.S5.Kripke.refl_eucl])
     (by

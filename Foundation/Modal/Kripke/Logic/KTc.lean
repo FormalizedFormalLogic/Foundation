@@ -48,7 +48,7 @@ theorem KTc.proper_extension_of_KB4 : Logic.KB4 ⊂ Logic.KTc := by
     replace hF := Set.mem_setOf_eq.mp F_corefl;
     apply hφ;
     refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.KTc ⊢! φ ∧ ¬Kripke.FrameClass.symm_trans ⊧ φ by
+  . suffices ∃ φ, Hilbert.KTc ⊢! φ ∧ ¬FrameClass.IsKB4 ⊧ φ by
       rw [KB4.Kripke.refl_trans];
       tauto;
     use (Axioms.Tc (.atom 0));

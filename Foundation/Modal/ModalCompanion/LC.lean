@@ -78,7 +78,7 @@ instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := 
   rw [Logic.S4Point3.is_smallestMC_of_LC];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.connected)
-    (MC := Modal.Kripke.FrameClass.connected_preorder)
+    (MC := FrameClass.S4Point3)
     (by rw [Propositional.Logic.LC.Kripke.connected])
     (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.Kripke.connected_preorder])
     (by rintro F hF; replace hF := Set.mem_setOf_eq.mp hF; apply Set.mem_setOf_eq.mpr; refine ⟨inferInstance, inferInstance⟩);

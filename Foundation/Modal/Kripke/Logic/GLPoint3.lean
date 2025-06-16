@@ -64,7 +64,7 @@ theorem GLPoint3.proper_extension_of_GL : Logic.GL ⊂ Logic.GLPoint3 := by
 theorem GLPoint3.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.GLPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.trans_weakConnected ⊧ φ by
+  . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by
       rw [K4Point3.Kripke.trans_weakConnected];
       tauto;
     use (Axioms.L (.atom 0));

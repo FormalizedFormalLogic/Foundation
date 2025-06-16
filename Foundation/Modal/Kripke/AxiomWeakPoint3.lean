@@ -10,7 +10,7 @@ variable {F : Kripke.Frame}
 
 namespace Frame
 
-class IsPiecewiseConnected (F : Frame) extends _root_.IsPiecewiseConnected F.Rel
+abbrev IsPiecewiseConnected (F : Frame) := _root_.IsPiecewiseConnected F.Rel
 
 end Frame
 

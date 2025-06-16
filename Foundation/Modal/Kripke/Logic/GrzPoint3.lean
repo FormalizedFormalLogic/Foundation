@@ -134,7 +134,7 @@ theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⊂ Logic.GrzPo
 theorem GrzPoint3.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.GrzPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_connected_preorder ⊧ φ by
+  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_S4Point3 ⊧ φ by
       rw [S4Point3.Kripke.finite_connected_preorder];
       tauto;
     use Axioms.Grz (.atom 0);
