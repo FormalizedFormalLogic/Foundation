@@ -170,11 +170,7 @@ instance isPreorder [F.IsPreorder] : (F↾r).IsPreorder where
 
 -- instance isPartialOrder [IsPartialOrder _ F] : IsPartialOrder _ (F↾r) where
 
-instance isIrrefl [F.IsIrreflexive] : (F↾r).IsIrreflexive where
-  irrefl := by
-    rintro ⟨x, (rfl | hx)⟩ h;
-    . exact IsIrrefl.irrefl _ $ by simpa using h;
-    . exact IsIrrefl.irrefl _ $ by simpa using h;
+instance isIrreflexive [F.IsIrreflexive] : (F↾r).IsIrreflexive := ⟨by rintro ⟨x, (rfl | hx)⟩ h <;> simp at h⟩
 
 /-
 instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric where

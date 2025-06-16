@@ -1,10 +1,5 @@
-import Foundation.Modal.Kripke.Logic.Grz.Soundness
-import Foundation.Modal.Kripke.Logic.KT
-import Foundation.Modal.Entailment.K4
 import Foundation.Modal.ComplementClosedConsistentFinset
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.Logic.S4M
+import Foundation.Modal.Kripke.Logic.Grz.Soundness
 
 namespace LO.Modal
 
@@ -52,37 +47,31 @@ abbrev miniCanonicalFrame (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consisten
     (∀ ψ ∈ (φ.subformulasGrz).prebox, □ψ ∈ X → □ψ ∈ Y) ∧
     ((∀ ψ ∈ (φ.subformulasGrz).prebox, □ψ ∈ Y → □ψ ∈ X) → X = Y)
 
-namespace miniCanonicalFrame
+instance : (miniCanonicalFrame 𝓢 φ).IsReflexive where
+  refl := by tauto_set;
 
-instance : (miniCanonicalFrame 𝓢 φ).IsFinite := inferInstance
+instance : (miniCanonicalFrame 𝓢 φ).IsAntisymmetric where
+  antisymm := by
+    rintro X Y ⟨_, h₁⟩ ⟨h₂, _⟩;
+    exact h₁ h₂;
 
-instance : IsRefl _ (miniCanonicalFrame 𝓢 φ).Rel := ⟨by tauto_set⟩
+instance : (miniCanonicalFrame 𝓢 φ).IsTransitive where
+  trans := by
+    rintro X Y Z ⟨RXY₁, RXY₂⟩ ⟨RYZ₁, RYZ₂⟩;
+    constructor;
+    . rintro ψ hq₁ hq₂;
+      exact RYZ₁ ψ hq₁ $ RXY₁ ψ hq₁ hq₂;
+    . intro h;
+      have eXY : X = Y := RXY₂ $ by
+        intro ψ hs hq;
+        exact h ψ hs $ RYZ₁ ψ hs hq;
+      have eYZ : Y = Z := RYZ₂ $ by
+        intro ψ hs hq;
+        exact RXY₁ ψ hs $ h ψ hs hq;
+      subst_vars;
+      tauto;
 
-instance : IsTrans _ (miniCanonicalFrame 𝓢 φ).Rel := ⟨by
-  simp only [Transitive];
-  rintro X Y Z ⟨RXY₁, RXY₂⟩ ⟨RYZ₁, RYZ₂⟩;
-  constructor;
-  . rintro ψ hq₁ hq₂;
-    exact RYZ₁ ψ hq₁ $ RXY₁ ψ hq₁ hq₂;
-  . intro h;
-    have eXY : X = Y := RXY₂ $ by
-      intro ψ hs hq;
-      exact h ψ hs $ RYZ₁ ψ hs hq;
-    have eYZ : Y = Z := RYZ₂ $ by
-      intro ψ hs hq;
-      exact RXY₁ ψ hs $ h ψ hs hq;
-    subst_vars;
-    tauto;
-⟩
-
-instance : IsAntisymm _ (miniCanonicalFrame 𝓢 φ).Rel := ⟨by
-  rintro X Y ⟨_, h₁⟩ ⟨h₂, _⟩;
-  exact h₁ h₂;
-⟩
-
-instance : IsPartialOrder _ (miniCanonicalFrame 𝓢 φ).Rel where
-
-end miniCanonicalFrame
+instance : (miniCanonicalFrame 𝓢 φ).IsFiniteGrz where
 
 
 abbrev miniCanonicalModel (𝓢 : S) [Entailment.Grz 𝓢] [Entailment.Consistent 𝓢] (φ : Formula ℕ) : Kripke.Model where
@@ -228,7 +217,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         simp only [Satisfies]; push_neg;
         use X;
         constructor;
-        . exact IsRefl.refl X;
+        . apply Frame.refl;
         . exact ih (by subformula) |>.not.mpr w;
     . intro h Y RXY;
       apply ih (subformulas.mem_box q_sub) |>.mpr;
@@ -271,9 +260,10 @@ namespace Hilbert.Grz.Kripke
 
 open Kripke.Grz
 
-instance complete : Complete (Hilbert.Grz) FrameClass.finite_partial_order :=
-  complete_of_mem_miniCanonicalFrame FrameClass.finite_partial_order $ by
-    refine ⟨inferInstance, inferInstance⟩;
+instance complete : Complete (Hilbert.Grz) FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
+  simp only [Set.mem_setOf_eq];
+  intro φ;
+  infer_instance;
 
 end Hilbert.Grz.Kripke
 
@@ -284,29 +274,16 @@ open Formula
 open Entailment
 open Kripke
 
-lemma Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_partial_order.logic := eq_hilbert_logic_frameClass_logic
+lemma Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
 
-theorem Grz.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Grz := by
-  constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by
-      rw [S4.Kripke.preorder];
-      tauto;
-    use Axioms.Grz (.atom 0)
-    constructor;
-    . exact axiomGrz!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
-      constructor;
-      . refine {refl := by tauto, trans := by tauto};
-      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
-
+@[simp]
 theorem Grz.proper_extension_of_S4M : Logic.S4M ⊂ Logic.Grz := by
   constructor;
   . rw [S4M.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
-    rintro φ hφ F ⟨_, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance⟩;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
   . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬FrameClass.S4M ⊧ φ by
       rw [S4M.Kripke.preorder_mckinsey];
       tauto;
@@ -316,12 +293,11 @@ theorem Grz.proper_extension_of_S4M : Logic.S4M ⊂ Logic.Grz := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
       constructor;
-      . refine ⟨?_, ⟨?_⟩⟩
-        . apply isPreorder_iff _ _ |>.mpr;
-          refine ⟨⟨?_⟩, ⟨?_⟩⟩;
-          . omega;
-          . omega;
-        . simp [McKinseyCondition];
+      . exact {
+          refl := by omega,
+          trans := by omega,
+          mckinsey := by simp;
+        }
       . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
           simpa [Semantics.Realize, Satisfies];
         intro x hx hxn1;
@@ -329,6 +305,10 @@ theorem Grz.proper_extension_of_S4M : Logic.S4M ⊂ Logic.Grz := by
         rcases @hx 1 (by omega) (by tauto) x (by omega);
         . contradiction;
         . contradiction;
+
+@[simp]
+theorem Grz.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Grz := by
+  trans Logic.S4M <;> simp;
 
 end Logic
 

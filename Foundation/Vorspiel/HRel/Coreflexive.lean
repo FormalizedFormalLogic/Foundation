@@ -13,3 +13,13 @@ instance [IsSymm _ R] [IsAntisymm _ R] : IsCoreflexive R := ⟨by
   . assumption;
   . exact IsSymm.symm _ _ Rxy;
 ⟩
+
+instance [IsCoreflexive R] : IsTrans _ R := ⟨by
+  rintro x y z Rxy Ryz;
+  rwa [IsCoreflexive.corefl Rxy, IsCoreflexive.corefl Ryz] at *;
+⟩
+
+instance [IsCoreflexive R] : IsSymm _ R := ⟨by
+  intro x y Rxy;
+  rwa [IsCoreflexive.corefl Rxy] at *;
+⟩

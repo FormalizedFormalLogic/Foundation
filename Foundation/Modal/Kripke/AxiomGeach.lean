@@ -33,7 +33,10 @@ lemma serial [F.IsSerial] : ∀ x : F, ∃ y, x ≺ y := IsSerial.serial
 instance [F.IsGeachConvergent ⟨0, 0, 1, 1⟩] : F.IsSerial where
   serial := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 1⟩);
 instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ where
-  gconv x y z Rxy Rxz := by simp_all; subst Rxz; apply _root_.IsSerial.serial
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, and_self];
+    subst Rxz;
+    apply _root_.IsSerial.serial
 
 
 abbrev IsTransitive (F : Frame) := _root_.IsTrans _ F.Rel'
@@ -49,7 +52,8 @@ instance [F.IsGeachConvergent ⟨0, 2, 1, 0⟩] : F.IsTransitive where
     apply this x x z rfl y;
 instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all; subst Rxy;
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_right'];
+    subst Rxy;
     obtain ⟨y, Rxy, Ryz⟩ := Rxz;
     exact IsTrans.trans _ _ _ Rxy Ryz
 
@@ -65,7 +69,10 @@ instance [F.IsGeachConvergent ⟨0, 1, 0, 1⟩] : F.IsSymmetric where
       simpa using IsGeachConvergent.gconv (g := ⟨0, 1, 0, 1⟩) (F := F);
     apply @this x x y rfl;
 instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
-  gconv x y z Rxy Rxz := by simp_all; subst Rxy; exact _root_.IsSymm.symm _ _ Rxz;
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_left'];
+    subst Rxy;
+    exact _root_.IsSymm.symm _ _ Rxz;
 
 
 abbrev IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel'
@@ -79,7 +86,9 @@ instance [F.IsGeachConvergent ⟨1, 1, 0, 1⟩] : F.IsEuclidean where
       simpa using IsGeachConvergent.gconv (F := F) (g := ⟨1, 1, 0, 1⟩);
     apply this x z y Rxz Rxy;
 instance [F.IsEuclidean] : F.IsGeachConvergent ⟨1, 1, 0, 1⟩ where
-  gconv x y z Rxy Rxz := by simp_all; exact IsRightEuclidean.reucl Rxz Rxy
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right, exists_eq_left'];
+    exact IsRightEuclidean.reucl Rxz Rxy
 
 
 abbrev IsPiecewiseStronglyConvergent (F : Frame) := _root_.IsPiecewiseStronglyConvergent F.Rel'
@@ -92,7 +101,7 @@ instance [F.IsGeachConvergent ⟨1, 1, 1, 1⟩] : F.IsPiecewiseStronglyConvergen
   ps_convergent := by simpa using IsGeachConvergent.gconv (g := ⟨1, 1, 1, 1⟩) (F := F);
 instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all;
+    simp_all only [HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right];
     obtain ⟨u, Ryu, Rzu⟩ := IsPiecewiseStronglyConvergent.ps_convergent Rxy Rxz;
     use u;
 
@@ -109,7 +118,8 @@ instance [F.IsGeachConvergent ⟨0, 1, 0, 0⟩] : F.IsCoreflexive where
     apply this x x y rfl Rxy |>.symm;
 instance [F.IsCoreflexive] : F.IsGeachConvergent ⟨0, 1, 0, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all; subst Rxy;
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_left'];
+    subst Rxy;
     exact F.corefl Rxz |>.symm;
 
 
@@ -124,7 +134,9 @@ instance [F.IsGeachConvergent ⟨1, 1, 0, 0⟩] : F.IsFunctional where
       simpa using IsGeachConvergent.gconv (F := F) (g := ⟨1, 1, 0, 0⟩);
     exact this x y z Rxy Rxz |>.symm;
 instance [F.IsFunctional] : F.IsGeachConvergent ⟨1, 1, 0, 0⟩ where
-  gconv x y z Rxy Rxz := by simp_all; apply IsFunctional.functional Rxy Rxz |>.symm;
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right, exists_eq_left'];
+    apply IsFunctional.functional Rxy Rxz |>.symm;
 
 
 class IsDense (F : Frame) where
@@ -139,7 +151,8 @@ instance [F.IsGeachConvergent ⟨0, 1, 2, 0⟩] : F.IsDense where
     apply this x x y rfl Rxy;
 instance [F.IsDense] : F.IsGeachConvergent ⟨0, 1, 2, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all; subst Rxy;
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_right'];
+    subst Rxy;
     obtain ⟨u, Ryu, Rzu⟩ := IsDense.dense Rxz;
     use u;
 

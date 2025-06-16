@@ -1,13 +1,12 @@
-import Foundation.Vorspiel.Relation.CWF
-import Foundation.Vorspiel.Relation.Closure
+import Foundation.Vorspiel.HRel.CWF
 import Mathlib.Data.Fintype.Pigeonhole
 
 section
 
-abbrev WeaklyConverseWellFounded {α : Sort*} (rel : α → α → Prop) := ConverseWellFounded (Relation.IrreflGen rel)
+abbrev WeaklyConverseWellFounded {α} (rel : HRel α) := ConverseWellFounded (rel.IrreflGen)
 
 @[mk_iff]
-class IsWeaklyConverseWellFounded (α : Sort*) (rel : α → α → Prop) : Prop where wcwf : WeaklyConverseWellFounded rel
+class IsWeaklyConverseWellFounded (α) (rel : HRel α) where wcwf : WeaklyConverseWellFounded rel
 
 end
 
@@ -39,9 +38,9 @@ lemma Finite.exists_ne_map_eq_of_infinite_lt {α β} [LinearOrder α] [Infinite 
 
 
 lemma antisymm_of_weaklyConverseWellFounded : WeaklyConverseWellFounded rel → AntiSymmetric rel := by
-  contrapose;
-  simp [AntiSymmetric];
-  intro x y Rxy Ryz hxy;
+  dsimp [AntiSymmetric];
+  contrapose!;
+  rintro ⟨x, y, Rxy, Ryz, hxy⟩;
   apply ConverseWellFounded.iff_has_max.not.mpr;
   push_neg;
   use {x, y};
@@ -49,8 +48,8 @@ lemma antisymm_of_weaklyConverseWellFounded : WeaklyConverseWellFounded rel → 
   . simp;
   . intro z hz;
     by_cases z = x;
-    . use y; simp_all [Relation.IrreflGen];
-    . use x; simp_all [Relation.IrreflGen];
+    . use y; simp_all [HRel.IrreflGen];
+    . use x; simp_all [HRel.IrreflGen];
 
 instance [IsWeaklyConverseWellFounded _ rel] : IsAntisymm _ rel := ⟨by
   apply antisymm_of_weaklyConverseWellFounded;
@@ -61,14 +60,14 @@ instance [IsWeaklyConverseWellFounded _ rel] : IsAntisymm _ rel := ⟨by
 
 lemma weaklyConverseWellFounded_of_finite_trans_antisymm (hFin : Finite α) (R_trans : Transitive rel)
   : AntiSymmetric rel → WeaklyConverseWellFounded rel := by
-    contrapose;
+    dsimp [AntiSymmetric]
+    contrapose!;
     intro hWCWF;
     replace hWCWF := ConverseWellFounded.iff_has_max.not.mp hWCWF;
     push_neg at hWCWF;
     obtain ⟨f, hf⟩ := dependent_choice hWCWF; clear hWCWF;
-    simp [Relation.IrreflGen] at hf;
+    dsimp [HRel.IrreflGen] at hf;
 
-    simp [AntiSymmetric];
     obtain ⟨i, j, hij, e⟩ := Finite.exists_ne_map_eq_of_infinite_lt f;
     use (f i), (f (i + 1));
     have ⟨hi₁, hi₂⟩ := hf i;

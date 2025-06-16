@@ -69,7 +69,7 @@ instance isAsymm [IsAsymm _ F.Rel] : IsAsymm _ (F.extendRoot r n).Rel := ⟨by
   | .inr _, .inl _ => simp_all [Frame.Rel', Frame.extendRoot];
 ⟩
 
-instance isTrans [F.IsTransitive.Rel] : IsTrans _ (F.extendRoot r n).Rel := ⟨by
+instance isTrans [F.IsTransitive] : IsTrans _ (F.extendRoot r n).Rel := ⟨by
   intro x y z hxy hyz;
   match x, y, z with
   | .inr x, .inr y, .inr z =>
@@ -81,7 +81,7 @@ instance isTrans [F.IsTransitive.Rel] : IsTrans _ (F.extendRoot r n).Rel := ⟨b
   | .inl _, .inl _, .inl _ => simp_all [Frame.extendRoot]; omega;
 ⟩
 
-lemma rooted_original [F.IsTransitive.Rel] {x : F.World} : (extendRoot.root (F := F) (r := r) (n := n)) ≺ x := by
+lemma rooted_original [F.IsTransitive] {x : F.World} : (extendRoot.root (F := F) (r := r) (n := n)) ≺ x := by
   apply extendRoot.instIsRooted (F := F) (r := r) |>.direct_rooted_of_trans x;
   tauto;
 

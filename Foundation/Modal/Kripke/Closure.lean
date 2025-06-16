@@ -10,8 +10,10 @@ open Relation
 
 variable {F : Frame} {x y z : F.World}
 
+abbrev ReflRel := F.Rel.ReflGen
+infix:50 " ≺^= " => ReflRel
 
-abbrev ReflGen (F : Frame) : Frame := ⟨F.World, F.Rel.ReflGen⟩
+abbrev ReflGen (F : Frame) : Frame := ⟨F.World, (· ≺^= ·)⟩
 postfix:95 "^=" => ReflGen
 
 namespace ReflGen
@@ -26,7 +28,10 @@ instance : (F^=).IsReflexive := by simp
 end ReflGen
 
 
-abbrev TransGen (F : Frame) : Frame := ⟨F.World, F.Rel.TransGen⟩
+abbrev TransRel := F.Rel.TransGen
+infix:50 " ≺^+ " => TransRel
+
+abbrev TransGen (F : Frame) : Frame := ⟨F.World, (· ≺^+ ·)⟩
 postfix:95 "^+" => TransGen
 
 namespace TransGen
@@ -47,8 +52,10 @@ instance [F.IsReflexive] [F.IsSymmetric] : F^+.IsEquivalence where
 
 end TransGen
 
+abbrev ReflTransRel := F.Rel.ReflTransGen
+infix:50 " ≺^* " => ReflTransRel
 
-abbrev ReflTransGen (F : Frame) : Frame := ⟨F.World, F.Rel.ReflTransGen⟩
+abbrev ReflTransGen (F : Frame) : Frame := ⟨F.World, (· ≺^* ·)⟩
 postfix:95 "^*" => ReflTransGen
 
 namespace ReflTransGen
@@ -66,9 +73,9 @@ instance [F.IsSymmetric] : F^*.IsEquivalence where
 end ReflTransGen
 
 
-class IsIrreflexive (F : Frame) extends IsIrrefl _ F
+protected abbrev IsIrreflexive (F : Frame) := IsIrrefl _ F
 
-lemma irrefl [F.IsIrreflexive] (x : F) : ¬x ≺ x := by apply IsIrrefl.irrefl;
+@[simp] lemma irrefl [F.IsIrreflexive] (x : F) : ¬x ≺ x := by apply IsIrrefl.irrefl;
 
 abbrev IrreflGen (F : Frame) : Frame := ⟨F.World, F.Rel.IrreflGen⟩
 postfix:95 "^≠" => IrreflGen

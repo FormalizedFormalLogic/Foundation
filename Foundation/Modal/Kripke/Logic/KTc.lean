@@ -1,34 +1,44 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Logic.KB4
+
 
 namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
 
+namespace Kripke
 
-protected abbrev Kripke.FrameClass.corefl : FrameClass := { F | IsCoreflexive _ F.Rel }
+variable {F : Kripke.Frame}
+
+protected abbrev Frame.IsKTc := Frame.IsCoreflexive
+
+protected abbrev FrameClass.KTc : FrameClass := { F | F.IsKTc }
+
+instance [F.IsKTc] : F.IsKB4 where
+
+end Kripke
+
+
+
 
 namespace Hilbert.KTc.Kripke
 
-instance sound : Sound (Hilbert.KTc) Kripke.FrameClass.corefl := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KTc) Kripke.FrameClass.KTc := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_corefl _ rfl;
   exact Kripke.validate_AxiomTc_of_coreflexive (corefl := F_corefl);
 
-instance consistent : Entailment.Consistent (Hilbert.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.corefl $ by
+instance consistent : Entailment.Consistent (Hilbert.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.KTc $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance canonical : Canonical (Hilbert.KTc) FrameClass.corefl := ⟨by
+instance canonical : Canonical (Hilbert.KTc) Kripke.FrameClass.KTc := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KTc) FrameClass.corefl := inferInstance
+instance complete : Complete (Hilbert.KTc) Kripke.FrameClass.KTc := inferInstance
 
 end Hilbert.KTc.Kripke
 
@@ -38,16 +48,16 @@ open Formula
 open Entailment
 open Kripke
 
-lemma KTc.Kripke.corefl : Logic.KTc = FrameClass.corefl.logic := eq_hilbert_logic_frameClass_logic
+lemma KTc.Kripke.corefl : Logic.KTc = Kripke.FrameClass.KTc.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
 theorem KTc.proper_extension_of_KB4 : Logic.KB4 ⊂ Logic.KTc := by
   constructor;
   . rw [KB4.Kripke.refl_trans, KTc.Kripke.corefl];
-    rintro φ hφ F F_corefl;
-    replace hF := Set.mem_setOf_eq.mp F_corefl;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance⟩;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
   . suffices ∃ φ, Hilbert.KTc ⊢! φ ∧ ¬FrameClass.IsKB4 ⊧ φ by
       rw [KB4.Kripke.refl_trans];
       tauto;
@@ -58,7 +68,10 @@ theorem KTc.proper_extension_of_KB4 : Logic.KB4 ⊂ Logic.KTc := by
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨by simp [M]⟩, ⟨by simp [M]⟩⟩
+      . exact {
+          symm := by simp [M],
+          trans := by simp [M],
+        }
       . suffices ∃ x, (x : M.World) ≠ 0 by
           simp [M, Semantics.Realize, Satisfies];
           tauto;

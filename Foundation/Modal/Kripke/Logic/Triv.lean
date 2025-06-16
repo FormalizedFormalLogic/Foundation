@@ -113,7 +113,7 @@ lemma Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_equality.logi
 theorem Triv.proper_extension_of_KTc : Logic.KTc ⊂ Logic.Triv := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.corefl ⊧ φ by
+  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬Kripke.FrameClass.KTc ⊧ φ by
       rw [KTc.Kripke.corefl];
       tauto;
     use (Axioms.T (.atom 0));
