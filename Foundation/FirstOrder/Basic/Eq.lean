@@ -133,7 +133,7 @@ lemma eqv_relExt_aux {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v 
 
 lemma eqv_relExt {k} (r : L.Rel k) {v w : Fin k → M} (h : ∀ i, eqv L (v i) (w i)) :
     rel r v = rel r w := by
-  simp; constructor
+  simp only [eq_iff_iff]; constructor
   · exact eqv_relExt_aux r h
   · exact eqv_relExt_aux r (fun i => eqv_symm (h i))
 
@@ -172,11 +172,12 @@ lemma funk_mk {k} (f : L.Func k) (v : Fin k → M) : Structure.func (M := QuotEq
 lemma rel_mk {k} (r : L.Rel k) (v : Fin k → M) : Structure.rel (M := QuotEq L M) r (fun i => ⟦v i⟧) ↔ Structure.rel r v :=
   of_eq <| Quotient.liftVec_mk (s := eqvSetoid L M) _ _ _
 
-lemma val_mk {e} {ε} (t : Semiterm L μ n) : Semiterm.valm (QuotEq L M) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) t = ⟦Semiterm.valm M e ε t⟧ :=
+lemma val_mk {e} {ε} (t : Semiterm L μ n) :
+    Semiterm.valm (QuotEq L M) (fun i ↦ ⟦e i⟧) (fun i ↦ ⟦ε i⟧) t = ⟦Semiterm.valm M e ε t⟧ :=
   by induction t <;> simp [*, funk_mk, Semiterm.val_func]
 
 lemma eval_mk {e} {ε} {φ : Semiformula L μ n} :
-    Semiformula.Evalm (QuotEq L M) (fun i => ⟦e i⟧) (fun i => ⟦ε i⟧) φ ↔ Semiformula.Evalm M e ε φ := by
+    Semiformula.Evalm (QuotEq L M) (fun i ↦ ⟦e i⟧) (fun i ↦ ⟦ε i⟧) φ ↔ Semiformula.Evalm M e ε φ := by
   induction φ using Semiformula.rec' <;> simp [*, Semiformula.eval_rel, Semiformula.eval_nrel, val_mk, rel_mk]
   case hall n φ ih =>
     constructor
