@@ -10,7 +10,7 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.trans_weakConfluent : FrameClass := { F | F.IsTransitive ∧ IsWeakConfluent _ F }
+abbrev Kripke.FrameClass.trans_weakConfluent : FrameClass := { F | F.IsTransitive ∧ F.IsPiecewiseConvergent }
 
 namespace Hilbert.K4Point2.Kripke
 
@@ -62,7 +62,8 @@ theorem K4Point2.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point2 := by
       ⟩;
       use M, 0;
       constructor;
-      . refine ⟨by tauto⟩;
+      . simp only [Set.mem_setOf_eq];
+        exact { trans := by omega };
       . suffices ∃ (x : M.World), (∀ y, ¬x ≺ y) ∧ x ≠ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;

@@ -8,7 +8,7 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.symm_eucl : FrameClass := { F | IsSymm _ F ∧ F.IsEuclidean }
+abbrev Kripke.FrameClass.symm_eucl : FrameClass := { F | F.IsSymmetric ∧ F.IsEuclidean }
 
 namespace Hilbert.KB5.Kripke
 

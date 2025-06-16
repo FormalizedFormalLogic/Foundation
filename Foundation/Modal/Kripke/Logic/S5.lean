@@ -13,11 +13,11 @@ open Hilbert.Kripke
 
 namespace Kripke
 
-protected abbrev FrameClass.refl_eucl : FrameClass := { F | IsRefl _ F ∧ F.IsEuclidean }
+protected abbrev FrameClass.refl_eucl : FrameClass := { F | F.IsReflexive ∧ F.IsEuclidean }
 
 protected abbrev FrameClass.universal : FrameClass := { F | IsUniversal _ F }
 
-protected abbrev FrameClass.finite_refl_eucl: FrameClass := { F | F.IsFinite ∧ IsRefl _ F ∧ F.IsEuclidean }
+protected abbrev FrameClass.finite_refl_eucl: FrameClass := { F | F.IsFinite ∧ F.IsReflexive ∧ F.IsEuclidean }
 
 lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
   constructor;

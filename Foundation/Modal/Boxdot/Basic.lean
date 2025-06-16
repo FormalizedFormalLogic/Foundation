@@ -71,7 +71,7 @@ lemma iff_frame_boxdot_reflexive_closure : (F ⊧ (φᵇ)) ↔ ((F^=) ⊧ φ) :=
   . intro h V x; apply iff_boxdot_reflexive_closure.mp; exact h V x;
   . intro h V x; apply iff_boxdot_reflexive_closure.mpr; exact h V x;
 
-lemma iff_reflexivize_irreflexivize [IsRefl _ F] {x : F.World} {V} : (Satisfies ⟨F, V⟩ x φ) ↔ (Satisfies ⟨F^≠^=, V⟩ x φ) := by
+lemma iff_reflexivize_irreflexivize [F.IsReflexive] {x : F.World} {V} : (Satisfies ⟨F, V⟩ x φ) ↔ (Satisfies ⟨F^≠^=, V⟩ x φ) := by
   induction φ generalizing x with
   | hatom φ => rfl;
   | hfalsum => rfl;
@@ -100,7 +100,7 @@ lemma iff_reflexivize_irreflexivize [IsRefl _ F] {x : F.World} {V} : (Satisfies 
         exact h y $ by
           exact ReflGen.single ⟨(by simpa), Rxy⟩;
 
-lemma iff_reflexivize_irreflexivize' [IsRefl _ F] : (F ⊧ φ) ↔ ((F^≠^=) ⊧ φ) := by
+lemma iff_reflexivize_irreflexivize' [F.IsReflexive] : (F ⊧ φ) ↔ ((F^≠^=) ⊧ φ) := by
   constructor;
   . intro h V x; apply iff_reflexivize_irreflexivize.mp; exact h V x;
   . intro h V x; apply iff_reflexivize_irreflexivize.mpr; exact h V x;

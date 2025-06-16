@@ -15,7 +15,7 @@ end Frame
 
 
 instance : whitepoint.IsPiecewiseStronglyConnected where
-  psconnected := by tauto;
+  ps_connected := by tauto;
 
 
 section definability
@@ -33,22 +33,21 @@ lemma validate_axiomPoint3_of_isPiecewiseStronglyConnected [F.IsPiecewiseStrongl
   by_contra hC;
   push_neg at hC;
   obtain ⟨⟨y, Rxy, hp, hnq⟩, ⟨z, Rxz, hq, hnp⟩⟩ := hC;
-  rcases IsPiecewiseStronglyConnected.psconnected Rxy Rxz with (Ryz | Rzy);
+  rcases IsPiecewiseStronglyConnected.ps_connected Rxy Rxz with (Ryz | Rzy);
   . have := hp z Ryz; contradiction;
   . have := hq y Rzy; contradiction;
 
-private lemma connected_of_validate_Point3 : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1)) → PiecewiseStronglyConnected F.Rel := by
-  dsimp [PiecewiseStronglyConnected];
-  contrapose!;
-  rintro ⟨x, y, z, Rxy, Rxz, nRyz, nRzy⟩;
-  apply ValidOnFrame.not_of_exists_valuation_world;
-  use (λ w a => match a with | 0 => y ≺ w | 1 => z ≺ w | _ => False), x;
-  suffices ∃ y', x ≺ y' ∧ (∀ z', y' ≺ z' → y ≺ z') ∧ ¬z ≺ y' ∧ (∃ z', x ≺ z' ∧ (∀ y, z' ≺ y → z ≺ y) ∧ ¬y ≺ z') by
-    simpa [Semantics.Realize, Satisfies];
-  refine ⟨y, Rxy, by tauto, nRzy, z, Rxz, by tauto, nRyz⟩;
-
-instance isPiecewiseStronglyConnected_of_validate_axiomPoint3 (h : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1))) : F.IsPiecewiseStronglyConnected where
-  psconnected := connected_of_validate_Point3 h;
+lemma isPiecewiseStronglyConnected_of_validate_axiomPoint3 (h : F ⊧ (Axioms.Point3 (.atom 0) (.atom 1))) : F.IsPiecewiseStronglyConnected where
+  ps_connected := by
+    dsimp [PiecewiseStronglyConnected];
+    revert h;
+    contrapose!;
+    rintro ⟨x, y, z, Rxy, Rxz, nRyz, nRzy⟩;
+    apply ValidOnFrame.not_of_exists_valuation_world;
+    use (λ w a => match a with | 0 => y ≺ w | 1 => z ≺ w | _ => False), x;
+    suffices ∃ y', x ≺ y' ∧ (∀ z', y' ≺ z' → y ≺ z') ∧ ¬z ≺ y' ∧ (∃ z', x ≺ z' ∧ (∀ y, z' ≺ y → z ≺ y) ∧ ¬y ≺ z') by
+      simpa [Semantics.Realize, Satisfies];
+    refine ⟨y, Rxy, by tauto, nRzy, z, Rxz, by tauto, nRyz⟩;
 
 end definability
 
@@ -64,7 +63,7 @@ open MaximalConsistentTableau
 open canonicalModel
 
 instance [Entailment.HasAxiomPoint3 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStronglyConnected where
-  psconnected := by
+  ps_connected := by
     rintro x y z Rxy Rxz;
     by_contra hC;
     push_neg at hC;

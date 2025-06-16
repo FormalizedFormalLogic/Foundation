@@ -1,47 +1,46 @@
 import Foundation.Modal.Kripke.Completeness
-
-
-
-section
-
-variable {α : Type u} (rel : α → α → Prop)
-
-def SobocinskiCondition := ∀ x y z, x ≠ y → rel x y → rel x z → rel z y
-
-class SatisfiesSobocinskiCondition (α) (rel : α → α → Prop) : Prop where
-  sobCondition : SobocinskiCondition rel
-
-instance [SatisfiesSobocinskiCondition _ rel] : IsConnected _ rel := ⟨by
-  rintro x y z ⟨Rxy, Rxz⟩;
-  by_cases hxy : x = y;
-  . subst hxy;
-    left;
-    assumption;
-  . right;
-    apply SatisfiesSobocinskiCondition.sobCondition x y z hxy Rxy Rxz;
-⟩
-
-instance [IsEuclidean _ rel] : SatisfiesSobocinskiCondition _ rel := ⟨by
-  intro x y z _ Rxy Rxz;
-  apply IsEuclidean.euclidean Rxy Rxz;
-⟩
-
-end
-
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Modal.Kripke.AxiomPoint3
 
 namespace LO.Modal
+
+namespace Kripke
+
+variable {F : Kripke.Frame}
+
+namespace Frame
+
+class SatisfiesSobocinskiCondition (F : Kripke.Frame) where
+  sobocinski : ∀ ⦃x y z : F⦄, x ≠ y → x ≺ y → x ≺ z → z ≺ y
+
+instance [F.SatisfiesSobocinskiCondition] : F.IsPiecewiseStronglyConnected where
+  ps_connected := by
+    intro x y z Rxy Rxz;
+    by_cases exy : x = y;
+    . subst exy;
+      tauto;
+    . right;
+      exact SatisfiesSobocinskiCondition.sobocinski (by simpa) Rxy Rxz;
+
+instance [F.IsEuclidean] : F.SatisfiesSobocinskiCondition where
+  sobocinski := by
+    intro x y z _ Rxy Rxz;
+    exact IsRightEuclidean.reucl Rxz Rxy;
+
+end Frame
+
+
+instance : whitepoint.SatisfiesSobocinskiCondition := ⟨by tauto⟩
+
+
+section definability
 
 open Formula (atom)
 open Formula.Kripke
 
-namespace Kripke
-
-section definability
-
 variable {F : Kripke.Frame}
 
-lemma validate_axiomPoint4_of_sobocinskiCondition : SobocinskiCondition F.Rel → F ⊧ (Axioms.Point4 (.atom 0)) := by
-  dsimp [SobocinskiCondition];
+private lemma validate_axiomPoint4_of_sobocinskiCondition : (∀ ⦃x y z : F⦄, x ≠ y → x ≺ y → x ≺ z → z ≺ y) → F ⊧ (Axioms.Point4 (.atom 0)) := by
   contrapose!;
   intro h;
   obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
@@ -62,25 +61,24 @@ lemma validate_axiomPoint4_of_sobocinskiCondition : SobocinskiCondition F.Rel �
   . by_contra hC; subst hC; contradiction;
   . by_contra hC; apply hy; apply hz; assumption;
 
-lemma validate_axiomPoint4_of_satisfiesSobocinskiCondition [SatisfiesSobocinskiCondition _ F.Rel] : F ⊧ (Axioms.Point4 (.atom 0)) :=
-  validate_axiomPoint4_of_sobocinskiCondition SatisfiesSobocinskiCondition.sobCondition
+lemma validate_axiomPoint4_of_satisfiesSobocinskiCondition [F.SatisfiesSobocinskiCondition] : F ⊧ (Axioms.Point4 (.atom 0)) :=
+  validate_axiomPoint4_of_sobocinskiCondition Frame.SatisfiesSobocinskiCondition.sobocinski
 
-lemma sobocinskiCondition_of_validate_axiomPoint4 : F ⊧ (Axioms.Point4 (.atom 0)) → SobocinskiCondition F.Rel := by
-  dsimp [SobocinskiCondition];
-  contrapose!;
-  rintro ⟨x, y, z, nexy, Rxy, Rxz, Rzy⟩;
-  apply ValidOnFrame.not_of_exists_valuation_world;
-  suffices ∃ V : Valuation F, ∃ x z, x ≺ z ∧ (∀ w, z ≺ w → V w 0) ∧ V x 0 ∧ ∃ y, x ≺ y ∧ ¬V y 0 by
-    simpa [Axioms.Point4, Satisfies];
-  use (λ w _ => w = x ∨ z ≺ w), x, z;
-  refine ⟨?_, ?_, ?_, ?_⟩;
-  . assumption;
-  . tauto;
-  . tauto;
-  . use y;
-    tauto;
-
-instance : SatisfiesSobocinskiCondition _ whitepoint := ⟨by tauto⟩
+lemma sobocinskiCondition_of_validate_axiomPoint4 (h : F ⊧ (Axioms.Point4 (.atom 0))) : F.SatisfiesSobocinskiCondition where
+  sobocinski := by
+    revert h;
+    contrapose!;
+    rintro ⟨x, y, z, nexy, Rxy, Rxz, Rzy⟩;
+    apply ValidOnFrame.not_of_exists_valuation_world;
+    suffices ∃ V : Valuation F, ∃ x z, x ≺ z ∧ (∀ w, z ≺ w → V w 0) ∧ V x 0 ∧ ∃ y, x ≺ y ∧ ¬V y 0 by
+      simpa [Axioms.Point4, Satisfies];
+    use (λ w _ => w = x ∨ z ≺ w), x, z;
+    refine ⟨?_, ?_, ?_, ?_⟩;
+    . assumption;
+    . tauto;
+    . tauto;
+    . use y;
+      tauto;
 
 end definability
 
@@ -97,9 +95,7 @@ open LO.Entailment
 open canonicalModel
 open MaximalConsistentTableau
 
-namespace Canonical
-
-instance [Entailment.K 𝓢] [Entailment.HasAxiomPoint4 𝓢] : SatisfiesSobocinskiCondition _ (canonicalFrame 𝓢).Rel := ⟨by
+instance [Entailment.K 𝓢] [Entailment.HasAxiomPoint4 𝓢] : (canonicalFrame 𝓢).SatisfiesSobocinskiCondition := ⟨by
   intro x y z nexy Rxy Rxz;
   obtain ⟨φ, hφ₁, hφ₂⟩ := exists₁₂_of_ne nexy;
   apply def_rel_box_mem₁.mpr;
@@ -118,8 +114,6 @@ instance [Entailment.K 𝓢] [Entailment.HasAxiomPoint4 𝓢] : SatisfiesSobocin
     constructor <;> assumption;
   . assumption;
 ⟩
-
-end Canonical
 
 end canonicality
 

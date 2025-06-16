@@ -252,7 +252,8 @@ instance filterOf [trans : IsTrans _ M.Rel] : FilterOf (finestFiltrationTransiti
 lemma isFinite (T_finite : T.Finite) : (finestFiltrationTransitiveClosureModel M T).IsFinite where
   world_finite := FilterEqvQuotient.finite T_finite
 
-instance isRefl [M.IsPreorder] : (finestFiltrationTransitiveClosureModel M T).IsReflexive := finestFiltrationTransitiveClosureModel.filterOf.isReflexive
+instance isReflexive [M.IsPreorder] : (finestFiltrationTransitiveClosureModel M T).IsReflexive := finestFiltrationTransitiveClosureModel.filterOf.isReflexive
+instance isTransitive : (finestFiltrationTransitiveClosureModel M T).IsTransitive where
 instance isSerial [M.IsTransitive] [M.IsSerial] : (finestFiltrationTransitiveClosureModel M T).IsSerial := finestFiltrationTransitiveClosureModel.filterOf.isSerial
 instance isSymmetric [M.IsSymmetric] : (finestFiltrationTransitiveClosureModel M T).IsSymmetric := Frame.TransGen.isSymmetric
 instance isPreorder [M.IsPreorder] : (finestFiltrationTransitiveClosureModel M T).IsPreorder where

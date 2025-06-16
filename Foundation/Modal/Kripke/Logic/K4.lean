@@ -44,7 +44,7 @@ instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans 
   apply hp;
   refine ⟨?_, ?_⟩;
   . apply finestFiltrationTransitiveClosureModel.isFinite $ by simp;
-  . sorry;
+  . apply isTransitive;
 ⟩
 
 end Hilbert.K4.Kripke

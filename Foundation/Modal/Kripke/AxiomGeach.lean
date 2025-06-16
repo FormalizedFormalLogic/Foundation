@@ -1,7 +1,7 @@
 import Foundation.Modal.Kripke.Completeness
 import Foundation.Vorspiel.HRel.Euclidean
 import Foundation.Vorspiel.HRel.Coreflexive
-import Foundation.Vorspiel.HRel.Directed
+import Foundation.Vorspiel.HRel.Convergent
 
 namespace LO.Modal
 
@@ -14,17 +14,20 @@ namespace Frame
 class IsGeachConvergent (F : Frame) (g : Axioms.Geach.Taple) where
   gconv : ∀ ⦃x y z : F⦄, x ≺^[g.i] y → x ≺^[g.j] z → ∃ u, y ≺^[g.m] u ∧ z ≺^[g.n] u
 
+
 class IsReflexive (F : Frame) extends _root_.IsRefl _ F
 instance [F.IsGeachConvergent ⟨0, 0, 1, 0⟩] : F.IsReflexive where
   refl := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 0⟩);
 instance [F.IsReflexive] : F.IsGeachConvergent ⟨0, 0, 1, 0⟩ where
   gconv x y z Rxy Rxz := by simp_all; subst Rxz; apply _root_.IsRefl.refl;
 
+
 class IsSerial (F : Frame) extends _root_.IsSerial F.Rel
 instance [F.IsGeachConvergent ⟨0, 0, 1, 1⟩] : F.IsSerial where
   serial := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 1⟩);
 instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ where
   gconv x y z Rxy Rxz := by simp_all; subst Rxz; apply _root_.IsSerial.serial
+
 
 class IsTransitive (F : Frame) extends _root_.IsTrans _ F
 instance [F.IsGeachConvergent ⟨0, 2, 1, 0⟩] : F.IsTransitive where
@@ -39,6 +42,7 @@ instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
     obtain ⟨y, Rxy, Ryz⟩ := Rxz;
     exact IsTrans.trans _ _ _ Rxy Ryz
 
+
 class IsSymmetric (F : Frame) extends _root_.IsSymm _ F.Rel
 instance [F.IsGeachConvergent ⟨0, 1, 0, 1⟩] : F.IsSymmetric where
   symm x y := by
@@ -47,6 +51,7 @@ instance [F.IsGeachConvergent ⟨0, 1, 0, 1⟩] : F.IsSymmetric where
     apply @this x x y rfl;
 instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by simp_all; subst Rxy; exact _root_.IsSymm.symm _ _ Rxz;
+
 
 class IsEuclidean (F : Frame) extends _root_.IsRightEuclidean F.Rel
 instance [F.IsGeachConvergent ⟨1, 1, 0, 1⟩] : F.IsEuclidean where
@@ -79,6 +84,7 @@ instance [F.IsCoreflexive] : F.IsGeachConvergent ⟨0, 1, 0, 0⟩ where
     simp_all; subst Rxy;
     exact _root_.IsCoreflexive.corefl Rxz |>.symm;
 
+
 class IsFunctional (F : Frame) where
   functional : ∀ ⦃x y z : F.World⦄, x ≺ y → x ≺ z → y = z
 instance [F.IsGeachConvergent ⟨1, 1, 0, 0⟩] : F.IsFunctional where
@@ -88,6 +94,7 @@ instance [F.IsGeachConvergent ⟨1, 1, 0, 0⟩] : F.IsFunctional where
     exact this x y z Rxy Rxz |>.symm;
 instance [F.IsFunctional] : F.IsGeachConvergent ⟨1, 1, 0, 0⟩ where
   gconv x y z Rxy Rxz := by simp_all; apply IsFunctional.functional Rxy Rxz |>.symm;
+
 
 class IsDense (F : Frame) where
   dense : ∀ ⦃x y : F.World⦄, x ≺ y → ∃ u, x ≺ u ∧ u ≺ y

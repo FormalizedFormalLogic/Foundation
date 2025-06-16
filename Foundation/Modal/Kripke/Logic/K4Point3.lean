@@ -10,7 +10,7 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.trans_weakConnected : FrameClass := { F | F.IsTransitive ∧ IsWeakConnected _ F }
+abbrev Kripke.FrameClass.trans_weakConnected : FrameClass := { F | F.IsTransitive ∧ F.IsPiecewiseConnected }
 
 namespace Hilbert.K4Point3.Kripke
 
@@ -61,7 +61,8 @@ theorem K4Point3.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point3 := by
       ⟩;
       use M, 0;
       constructor;
-      . refine ⟨by omega⟩
+      . simp only [Set.mem_setOf_eq];
+        exact { trans := by omega }
       . suffices
           ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 1 ∧ (∀ y, x ≺ y → y = 1) ∧ ¬x = 2 ∧
           ∃ x : M.World, (0 : M.World) ≺ x ∧ x = 2 ∧ (∀ z : M.World, x ≺ z → z = 2) ∧ x ≠ 1

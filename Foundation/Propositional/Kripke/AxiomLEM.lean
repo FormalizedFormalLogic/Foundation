@@ -34,7 +34,7 @@ lemma validate_LEM_of_symmetric' : Symmetric F → F ⊧ (Axioms.LEM (.atom 0)) 
   . by_contra Ryx;
     exact h₁ $ Satisfies.formula_hereditary Ryx hy;
 
-lemma validate_LEM_of_symmetric [IsSymm _ F] : F ⊧ (Axioms.LEM (.atom 0)) := by
+lemma validate_LEM_of_symmetric [F.IsSymmetric] : F ⊧ (Axioms.LEM (.atom 0)) := by
   apply validate_LEM_of_symmetric';
   exact IsSymm.symm;
 

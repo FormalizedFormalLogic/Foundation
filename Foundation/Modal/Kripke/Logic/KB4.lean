@@ -10,7 +10,7 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.symm_trans : FrameClass := { F | IsSymm _ F ∧ F.IsTransitive }
+abbrev Kripke.FrameClass.symm_trans : FrameClass := { F | F.IsSymmetric ∧ F.IsTransitive }
 
 namespace Hilbert.KB4.Kripke
 

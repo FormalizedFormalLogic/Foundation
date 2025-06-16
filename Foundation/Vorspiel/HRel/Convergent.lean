@@ -11,7 +11,7 @@ class IsConvergent (R : HRel α) where
 
 def StronglyConvergent (R : HRel α) := ∀ ⦃x y⦄, ∃ u, R x u ∧ R y u
 
-/-- It is equivalent to `IsDirected` -/
+/-- NOTE: It is equivalent to `IsDirected` -/
 class IsStronglyConvergent (R : HRel α) where
   s_convergent : StronglyConvergent R
 

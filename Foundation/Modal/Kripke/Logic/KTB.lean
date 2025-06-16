@@ -8,9 +8,9 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.refl_symm : FrameClass := { F | IsRefl _ F ∧ IsSymm _ F }
+abbrev Kripke.FrameClass.refl_symm : FrameClass := { F | F.IsReflexive ∧ F.IsSymmetric }
 
-abbrev Kripke.FrameClass.finite_refl_symm: FrameClass := { F | Finite F.World ∧ IsRefl _ F ∧ IsSymm _ F }
+abbrev Kripke.FrameClass.finite_refl_symm: FrameClass := { F | Finite F.World ∧ F.IsReflexive ∧ F.IsSymmetric }
 
 namespace Hilbert.KTB.Kripke
 
@@ -42,8 +42,8 @@ instance finite_complete : Complete (Hilbert.KTB) Kripke.FrameClass.finite_refl_
   apply hp;
   refine ⟨?_, ?_, ?_⟩;
   . apply FilterEqvQuotient.finite; simp;
-  . apply Kripke.finestFiltrationModel.isRefl;
-  . apply Kripke.finestFiltrationModel.isSymm;
+  . apply Kripke.finestFiltrationModel.isReflexive;
+  . apply Kripke.finestFiltrationModel.isSymmetric;
 ⟩
 
 end Hilbert.KTB.Kripke
@@ -92,10 +92,7 @@ theorem KTB.proper_extension_of_KDB : Logic.KDB ⊂ Logic.KTB := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Bool, λ x y => x ≠ y⟩, λ x _ => x = true⟩, false;
       constructor;
-      . refine ⟨⟨?_⟩, ⟨by tauto⟩⟩;
-        . intro x;
-          use !x;
-          simp;
+      . refine ⟨{ serial := by simp [Serial] }, { symm := by simp }⟩;
       . simp [Semantics.Realize, Satisfies];
         tauto;
 

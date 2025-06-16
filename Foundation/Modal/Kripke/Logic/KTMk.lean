@@ -10,7 +10,7 @@ namespace LO.Modal
 
 namespace Kripke
 
-protected abbrev FrameClass.refl_makinson : FrameClass := { F | IsRefl _ F ∧ SatisfiesMakinsonCondition _ F.Rel }
+protected abbrev FrameClass.refl_makinson : FrameClass := { F | F.IsReflexive ∧ SatisfiesMakinsonCondition _ F.Rel }
 
 end Kripke
 

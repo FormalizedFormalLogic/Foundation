@@ -9,7 +9,15 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
-protected abbrev Kripke.FrameClass.refl : FrameClass := { F | F.IsReflexive }
+
+namespace Kripke
+
+protected abbrev FrameClass.refl : FrameClass := { F | F.IsReflexive }
+
+instance {F : Kripke.Frame} [F.IsReflexive] : F.IsSerial where
+
+end Kripke
+
 
 namespace Hilbert.KT
 
@@ -43,7 +51,7 @@ lemma KT.Kripke.refl : Logic.KT = FrameClass.refl.logic := eq_hilbert_logic_fram
 @[simp]
 theorem KT.proper_extension_of_KD : Logic.KD ⊂ Logic.KT := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomD!]) |>.subset;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
       rw [KD.Kripke.serial];
       tauto;

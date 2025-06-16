@@ -12,7 +12,7 @@ open Hilbert.Kripke
 
 namespace Kripke
 
-protected abbrev FrameClass.refl_corefl : FrameClass := { F | IsRefl _ F ∧ IsCoreflexive _ F }
+protected abbrev FrameClass.refl_corefl : FrameClass := { F | F.IsReflexive ∧ IsCoreflexive _ F }
 protected abbrev FrameClass.equality : FrameClass := { F | IsEquality _ F }
 protected abbrev FrameClass.finite_equality : FrameClass := { F | Finite F.World ∧ IsEquality _ F }
 

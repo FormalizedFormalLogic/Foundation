@@ -1,7 +1,3 @@
-import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
-import Foundation.Modal.Kripke.Logic.K4
 import Foundation.Modal.Kripke.Logic.K4Point3
 import Foundation.Modal.Kripke.Logic.K5
 
@@ -55,7 +51,8 @@ theorem K45.proper_extension_of_K : Logic.K5 ⊂ Logic.K45 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨by unfold Euclidean; omega⟩;
+      . simp only [Set.mem_setOf_eq];
+        exact { reucl := by simp [RightEuclidean]; omega }
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ z, x ≺ z ∧ ¬z = 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -81,7 +78,8 @@ theorem K5.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.K45 := by
       ⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨by omega⟩, ⟨by simp [M, WeakConnected]⟩⟩
+      . simp;
+        refine ⟨{ trans := by omega }, { p_connected := by simp [PiecewiseConnected, M]; omega}⟩;
       . suffices (0 : M.World) ≺ 2 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;

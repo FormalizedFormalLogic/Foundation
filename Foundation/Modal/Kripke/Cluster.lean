@@ -99,7 +99,7 @@ instance : IsAntisymm (Cluster F) (· ≼ ·) := ⟨by
   tauto;
 ⟩
 
-instance [IsRefl _ F] : IsRefl (Cluster F) (· ≼ ·)  := ⟨by
+instance [F.IsReflexive] : IsRefl (Cluster F) (· ≼ ·)  := ⟨by
   rintro X;
   obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
   simp only [Cluster.rel, Quotient.lift_mk];
@@ -322,7 +322,7 @@ instance : IsAntisymm _ F.skeleton :=  by
   dsimp only [Frame.skeleton];
   infer_instance;
 
-instance [IsRefl _ F] : IsRefl _ F.skeleton :=  by
+instance [F.IsReflexive] : F.IsReflexive.skeleton :=  by
   dsimp only [Frame.skeleton];
   infer_instance;
 
@@ -330,7 +330,7 @@ instance [IsTotal _ F] : IsTotal _ F.skeleton := by
   dsimp only [Frame.skeleton];
   infer_instance;
 
-instance [IsRefl _ F] : IsPartialOrder _ F.skeleton where
+instance [F.IsReflexive] : IsPartialOrder _ F.skeleton where
 
 instance [IsTotal _ F] : IsLinearOrder _ F.skeleton where
 
