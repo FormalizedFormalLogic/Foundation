@@ -11,7 +11,7 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.serial_trans_eucl : FrameClass := { F | IsSerial _ F ∧ F.IsTransitive ∧ F.IsEuclidean }
+abbrev Kripke.FrameClass.serial_trans_eucl : FrameClass := { F | F.IsSerial ∧ F.IsTransitive ∧ F.IsEuclidean }
 
 namespace Hilbert.KD45.Kripke
 
@@ -59,7 +59,8 @@ theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
         ⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by omega⟩⟩;
+      . simp only [Set.mem_setOf_eq];
+        refine ⟨{ serial := by tauto }, { trans := by omega }⟩;
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -80,12 +81,18 @@ theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨?_⟩, ⟨by unfold Euclidean; omega⟩⟩;
-        . intro x;
-          match x with
-          | 0 => use 1; tauto;
-          | 1 => use 1; omega;
-          | 2 => use 2; omega;
+      . simp only [Set.mem_setOf_eq];
+        refine ⟨
+          {
+            serial := by
+              intro x;
+              match x with
+              | 0 => use 1; tauto;
+              | 1 => use 1; omega;
+              | 2 => use 2; omega;
+          },
+          { reucl := by simp [RightEuclidean]; omega; }
+        ⟩;
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -114,7 +121,8 @@ theorem KD45.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KD45 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => True⟩, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
+      . simp only [Set.mem_setOf_eq];
+        refine ⟨{ trans := by simp }, { reucl := by simp [RightEuclidean] }⟩
       . simp [Semantics.Realize, Satisfies];
 
 end Logic

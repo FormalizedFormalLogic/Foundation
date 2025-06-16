@@ -9,7 +9,6 @@ open Hilbert.Kripke
 
 
 abbrev Kripke.FrameClass.refl_symm : FrameClass := { F | F.IsReflexive ∧ F.IsSymmetric }
-
 abbrev Kripke.FrameClass.finite_refl_symm: FrameClass := { F | Finite F.World ∧ F.IsReflexive ∧ F.IsSymmetric }
 
 namespace Hilbert.KTB.Kripke
@@ -90,11 +89,19 @@ theorem KTB.proper_extension_of_KDB : Logic.KDB ⊂ Logic.KTB := by
     constructor;
     . exact axiomT!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Bool, λ x y => x ≠ y⟩, λ x _ => x = true⟩, false;
+      use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ x _ => x = 1⟩, 0;
       constructor;
-      . refine ⟨{ serial := by simp [Serial] }, { symm := by simp }⟩;
+      . refine ⟨
+          { serial := by
+              intro x;
+              match x with
+              | 0 => use 1; omega;
+              | 1 => use 0; omega;
+          },
+          { symm := by simp; omega }
+        ⟩;
       . simp [Semantics.Realize, Satisfies];
-        tauto;
+        omega;
 
 end Logic
 

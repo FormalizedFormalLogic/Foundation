@@ -7,7 +7,7 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.preorder_connected_mckinsey : FrameClass := { F | IsPreorder _ F ∧ IsConnected _ F ∧ SatisfiesMcKinseyCondition _ F }
+abbrev Kripke.FrameClass.preorder_connected_mckinsey : FrameClass := { F | F.IsPreorder ∧ IsConnected _ F ∧ SatisfiesMcKinseyCondition _ F }
 
 namespace Hilbert.S4Point3M.Kripke
 

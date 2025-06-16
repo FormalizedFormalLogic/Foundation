@@ -6,7 +6,7 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
-abbrev Kripke.FrameClass.preorder_sobocinski : FrameClass := { F | IsPreorder _ F ∧ SatisfiesSobocinskiCondition _ F }
+abbrev Kripke.FrameClass.preorder_sobocinski : FrameClass := { F | F.IsPreorder ∧ F.SatisfiesSobocinskiCondition }
 
 namespace Hilbert.S4Point4.Kripke
 
@@ -59,9 +59,8 @@ theorem S4Point4.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.S4Point
       ⟩;
       use M, 0;
       constructor;
-      . refine ⟨?_, ⟨?_⟩⟩;
-        . tauto;
-        . intro x y z; omega;
+      . simp only [Set.mem_setOf_eq, M];
+        refine ⟨{}, {}⟩;
       . suffices ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 1 ∧ (0 : M.World) ≺ 1 by
           simpa [Semantics.Realize, Satisfies, M];
         use 2;

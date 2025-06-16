@@ -12,8 +12,11 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.confluent_preorder : FrameClass := { F | IsPreorder _ F ∧ IsConfluent _ F  }
-abbrev Kripke.FrameClass.finite_confluent_preorder : FrameClass := { F | Finite F.World ∧ IsPreorder _ F ∧ IsConfluent _ F }
+abbrev Kripke.FrameClass.confluent_preorder : FrameClass := { F | F.IsPreorder ∧ F.IsPiecewiseStronglyConvergent  }
+abbrev Kripke.FrameClass.finite_confluent_preorder : FrameClass := { F | F.IsFinite ∧ F.IsPreorder ∧ F.IsPiecewiseStronglyConvergent }
+
+instance {F : Kripke.Frame} [F.IsPiecewiseStronglyConvergent] : F.IsPiecewiseConvergent where
+
 
 namespace Hilbert.S4Point2.Kripke
 
@@ -58,49 +61,17 @@ instance finite_complete : Complete (Hilbert.S4Point2) Kripke.FrameClass.finite_
   rintro F ⟨_, _⟩ V r;
   let M : Kripke.Model := ⟨F, V⟩;
   let RM := M↾r;
+
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
   let FRM := finestFiltrationTransitiveClosureModel (M↾r) (φ.subformulas);
-  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTrans)) (by subformula) |>.mpr;
+  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTransitive)) (by subformula) |>.mpr;
   apply hφ;
 
   refine ⟨?_, ?_, ?_⟩;
-  . apply FilterEqvQuotient.finite; simp;
+  . apply isFinite $ by simp;
   . exact finestFiltrationTransitiveClosureModel.isPreorder (preorder := Frame.pointGenerate.isPreorder);
-  . apply isConfluent_iff _ _ |>.mpr;
-    rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
-    . simp only [and_self];
-      use ⟦⟨z, by tauto⟩⟧;
-      apply Relation.TransGen.single;
-      suffices z ≺ z by tauto;
-      apply IsRefl.refl;
-    . use ⟦⟨z, by tauto⟩⟧;
-      constructor;
-      . apply Relation.TransGen.single;
-        suffices y ≺ z by tauto;
-        exact TransGen.unwrap Rrz;
-      . apply Relation.TransGen.single;
-        suffices z ≺ z by tauto;
-        apply IsRefl.refl ;
-    . use ⟦⟨y, by tauto⟩⟧;
-      constructor;
-      . apply Relation.TransGen.single;
-        suffices y ≺ y by tauto;
-        apply IsRefl.refl;
-      . apply Relation.TransGen.single;
-        suffices z ≺ y by tauto;
-        exact TransGen.unwrap Rry;
-    . replace Rry := TransGen.unwrap Rry;
-      replace Rrz := TransGen.unwrap Rrz;
-      obtain ⟨u, Ruy, Ruz⟩ := IsConfluent.confluent ⟨Rry, Rrz⟩;
-      use ⟦⟨u, by
-        right;
-        apply Relation.TransGen.single;
-        exact IsTrans.trans _ _ _ Rry Ruy;
-      ⟩⟧;
-      constructor;
-      . exact Relation.TransGen.single $ by tauto;
-      . exact Relation.TransGen.single $ by tauto;
+  . exact finestFiltrationTransitiveClosureModel.rooted_isPiecewiseStronglyConvergent;
 ⟩
 
 end FFP
@@ -130,8 +101,7 @@ theorem S4Point2.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4Point2 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = y) ⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
-      . apply isPreorder_iff _ _ |>.mpr;
-        refine ⟨⟨?_⟩, ⟨?_⟩⟩ <;> omega;
+      . simp only [Set.mem_setOf_eq]; refine { refl := by omega, trans := by omega; };
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, x ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;
@@ -166,8 +136,8 @@ theorem S4Point2.proper_extension_of_K4Point2 : Logic.K4Point2 ⊂ Logic.S4Point
       ⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨by omega⟩, ⟨?_⟩⟩;
-        . simp [M, WeakConfluent]; omega;
+      . simp only [Set.mem_setOf_eq];
+        refine ⟨{}, { p_convergent := by simp [M, PiecewiseConvergent ]; omega; }⟩;
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;

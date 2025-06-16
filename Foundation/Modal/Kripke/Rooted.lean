@@ -104,7 +104,7 @@ infix:80 "↾" => Frame.pointGenerate
 
 namespace pointGenerate
 
-variable {F : Frame} {r : F.World}
+variable {F : Frame} {r : outParam (F.World)}
 
 lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.TransGen x y)
   : ((F↾r)^+.Rel ⟨x, hx⟩ ⟨y, hy⟩) := by
@@ -143,7 +143,7 @@ instance isFinite [finite : F.IsFinite] : (F↾r).IsFinite := inferInstance
 
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
-instance isRefl [F.IsReflexive] : (F↾r).IsReflexive where
+instance isReflexive [F.IsReflexive] : (F↾r).IsReflexive where
   refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact IsRefl.refl x;
 
 instance isTransitive [F.IsTransitive] : (F↾r).IsTransitive where
@@ -222,18 +222,6 @@ instance isConnected (F_connected : Connected F) : Connected (F↾r).Rel := by
   . have := @F_connected x z y (by tauto); tauto;
   . have := @F_connected x y z (by tauto); tauto;
   . have := @F_connected x y z (by tauto); tauto;
--/
-
-/-
-instance isUniversal [refl : F.IsReflexive] [eucl : F.IsEuclidean] : IsUniversal _ (F↾r).Rel := ⟨by
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
-  . apply IsRefl.refl;
-  . exact hy.unwrap;
-  . suffices x ≺ y by simpa;
-    exact IsSymm.symm _ _ hx.unwrap;
-  . suffices x ≺ y by simpa;
-    exact IsEuclidean.euclidean hy.unwrap hx.unwrap;
-⟩
 -/
 
 def pMorphism (F : Kripke.Frame) (r : F) : (F↾r) →ₚ F where

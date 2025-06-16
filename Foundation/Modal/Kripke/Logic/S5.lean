@@ -4,6 +4,7 @@ import Foundation.Modal.Kripke.Logic.KD45
 import Foundation.Modal.Kripke.Logic.KB4
 import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.Logic.S4Point4
+import Foundation.Vorspiel.HRel.Universal
 
 namespace LO.Modal
 
@@ -13,11 +14,31 @@ open Hilbert.Kripke
 
 namespace Kripke
 
+
 protected abbrev FrameClass.refl_eucl : FrameClass := { F | F.IsReflexive ∧ F.IsEuclidean }
 
-protected abbrev FrameClass.universal : FrameClass := { F | IsUniversal _ F }
+instance {F : Frame} [F.IsReflexive] [F.IsEuclidean] : F.IsSymmetric where
+instance {F : Frame} [F.IsReflexive] [F.IsEuclidean] : F.IsTransitive where
 
 protected abbrev FrameClass.finite_refl_eucl: FrameClass := { F | F.IsFinite ∧ F.IsReflexive ∧ F.IsEuclidean }
+
+class Frame.IsUniversal (F : Frame) extends _root_.IsUniversal F.Rel
+@[simp] lemma universal {F : Frame} [F.IsUniversal] : ∀ {x y : F.World}, x ≺ y := by apply IsUniversal.universal;
+
+protected abbrev FrameClass.universal : FrameClass := { F | F.IsUniversal }
+
+instance {F : Frame} [F.IsUniversal] : F.IsPreorder where
+instance {F : Frame} [F.IsUniversal] : F.IsEuclidean where
+
+instance Frame.pointGenerate.isUniversal {F : Frame} [F.IsReflexive] [F.IsEuclidean] (r : F.World) : (F↾r).IsUniversal where
+  universal := by
+    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
+    . simp;
+    . exact hy.unwrap;
+    . suffices x ≺ y by simpa;
+      exact IsSymm.symm _ _ hx.unwrap;
+    . suffices x ≺ y by simpa;
+      apply F.eucl hx.unwrap hy.unwrap ;
 
 lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : FrameClass.universal ⊧ φ ↔ Kripke.FrameClass.refl_eucl ⊧ φ := by
   constructor;
@@ -25,7 +46,7 @@ lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : Frame
     apply @Model.pointGenerate.modal_equivalent_at_root _ _ |>.mp;
     apply h;
     apply Set.mem_setOf_eq.mpr;
-    exact Frame.pointGenerate.isUniversal (r := r) (refl := F_refl) (eucl := F_eucl);
+    infer_instance;
   . rintro h F F_univ;
     replace F_univ := Set.mem_setOf_eq.mp F_univ
     apply h;
@@ -94,7 +115,7 @@ theorem S5.proper_extension_of_KTB : Logic.KTB ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = 1 ∧ y ≠ 2) ∨ (x = 2 ∧ y ≠ 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨by omega⟩, ⟨by omega⟩⟩;
+      . refine ⟨{ refl := by omega }, { symm := by omega }⟩;
       . suffices (0 : M.World) ≺ 1 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -118,11 +139,8 @@ theorem S5.proper_extension_of_KD45 : Logic.KD45 ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 2, λ x y => (x = 0 ∧ y = 1) ∨ (x = 1 ∧ y = 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨?_⟩, ⟨by omega⟩, ⟨by unfold Euclidean; omega⟩⟩;
-        . intro x;
-          match x with
-          | 0 => use 1; tauto;
-          | 1 => use 1; tauto;
+      . simp only [Fin.isValue, Set.mem_setOf_eq, M];
+        refine ⟨{ serial := by intro x; use 1; omega; }, { trans := by omega }, { reucl := by simp [RightEuclidean]; omega }⟩
       . simp [Semantics.Realize, Satisfies, M];
         tauto;
 
@@ -141,7 +159,8 @@ theorem S5.proper_extension_of_KB4 : Logic.KB4 ⊂ Logic.S5 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ x _ => False⟩, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
+      . simp only [Set.mem_setOf_eq];
+        refine ⟨{ symm := by tauto }, { trans := by tauto }⟩;
       . simp [Semantics.Realize, Satisfies];
 
 @[simp]
@@ -161,9 +180,8 @@ theorem S5.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = y) ∨ (x = 0 ∧ y = 1) ∨ (x = 0 ∧ y = 2)⟩, (λ w _ => w = 2)⟩;
       use M, 0;
       constructor;
-      . apply Set.mem_setOf_eq.mpr;
-        apply isPreorder_iff _ _ |>.mpr;
-        refine ⟨⟨by tauto⟩, ⟨by omega⟩⟩
+      . simp only [Fin.isValue, Set.mem_setOf_eq, M];
+        refine { refl := by omega, trans := by omega };
       . suffices (0 : M.World) ≺ 2 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -177,7 +195,7 @@ theorem S5.proper_extension_of_S4Point4 : Logic.S4Point4 ⊂ Logic.S5 := by
   . rw [S4Point4.Kripke.preorder_sobocinski, S5.Kripke.universal];
     rintro φ hφ F F_univ;
     apply hφ;
-    replace F_univ := Set.mem_setOf_eq.mp F_univ
+    replace F_univ := Set.mem_setOf_eq.mp F_univ;
     refine ⟨inferInstance, inferInstance⟩;
   . suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.preorder_sobocinski ⊧ φ by
       rw [S4Point4.Kripke.preorder_sobocinski];
@@ -189,18 +207,16 @@ theorem S5.proper_extension_of_S4Point4 : Logic.S4Point4 ⊂ Logic.S5 := by
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w a => w = 0⟩;
       use M, 0;
       constructor;
-      . apply Set.mem_setOf_eq.mpr;
-        refine ⟨?_, ⟨?_⟩⟩;
-        . apply isPreorder_iff _ _ |>.mpr;
-          refine ⟨⟨by omega⟩, ⟨by omega⟩⟩;
-        . rintro x y z _;
-          match x, y, z with
-          | 0, 0, _ => contradiction;
-          | 1, 1, _ => contradiction;
-          | 0, 1, 0 => omega;
-          | 0, 1, 1 => omega;
-          | 1, 0, 0 => omega;
-          | 1, 0, 1 => omega;
+      . simp only [Set.mem_setOf_eq, M];
+        refine ⟨{}, {
+          sobocinski := by
+            intro x y z _ _;
+            match x, y with
+            | 0, 0 => contradiction;
+            | 0, 1 => omega;
+            | 1, 0 => contradiction;
+            | 1, 1 => contradiction;
+        }⟩;
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M) ≺ x ∧ ¬x ≺ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;

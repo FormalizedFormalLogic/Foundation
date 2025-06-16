@@ -153,7 +153,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
   have RM_rooted : ∀ (w : RM.World), r' ≺ w := by
     intro w;
     by_cases e : r' = w;
-    . subst e; apply Frame.pointGenerate.isRefl.refl;
+    . subst e; apply isReflexive.refl;
     . exact Frame.IsRooted.root_generates w (by tauto) |>.unwrap (trans := Frame.pointGenerate.isTrans)
   have : IsPartialOrder _ RM.Rel := Frame.pointGenerate.isPartialOrder;
 
@@ -182,7 +182,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
       refl := by
         intro x;
         match x with
-        | Sum.inl x => apply (Frame.pointGenerate.isRefl).refl;
+        | Sum.inl x => apply (isReflexive).refl;
         | Sum.inr x => simp_all [M'];
       trans := by
         intro x y z Rxy Ryz;
@@ -255,7 +255,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
           | Sum.inr _ =>
             apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mp;
             apply ht;
-            apply Frame.pointGenerate.isRefl.refl;
+            apply isReflexive.refl;
         . intro ht u Rtu;
           have := t_terminal Rtu; subst this;
           apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mpr;

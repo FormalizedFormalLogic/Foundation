@@ -11,7 +11,7 @@ open Hilbert.Kripke
 
 namespace Kripke
 
-protected abbrev FrameClass.trans_wcwf : FrameClass := { F | IsPreorder _ F.Rel ∧ IsWeaklyConverseWellFounded _ F.Rel }
+protected abbrev FrameClass.trans_wcwf : FrameClass := { F | F.IsPreorder.Rel ∧ IsWeaklyConverseWellFounded _ F.Rel }
 protected abbrev FrameClass.finite_partial_order: FrameClass := { F | F.IsFinite ∧ IsPartialOrder _ F.Rel }
 
 end Kripke

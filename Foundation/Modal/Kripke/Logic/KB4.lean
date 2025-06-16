@@ -12,6 +12,9 @@ open Hilbert.Kripke
 
 abbrev Kripke.FrameClass.symm_trans : FrameClass := { F | F.IsSymmetric ∧ F.IsTransitive }
 
+instance {F : Kripke.Frame} [F.IsSymmetric] [F.IsTransitive] : F.IsEuclidean where
+
+
 namespace Hilbert.KB4.Kripke
 
 instance sound : Sound (Hilbert.KB4) Kripke.FrameClass.symm_trans := instSound_of_validates_axioms $ by
@@ -56,7 +59,8 @@ theorem KB4.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KB4 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
+      . simp only [Fin.isValue, Set.mem_setOf_eq];
+        refine ⟨{ trans := by omega }, { reucl := by tauto }⟩;
       . simp [Semantics.Realize, Satisfies];
 
 theorem KB4.proper_extension_of_KB : Logic.KB ⊂ Logic.KB4 := by
@@ -71,7 +75,8 @@ theorem KB4.proper_extension_of_KB : Logic.KB ⊂ Logic.KB4 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
       constructor;
-      . refine ⟨by simp⟩;
+      . simp only [bne_iff_ne, ne_eq, Set.mem_setOf_eq];
+        refine { symm := by tauto };
       . simp [Semantics.Realize, Satisfies];
         tauto;
 

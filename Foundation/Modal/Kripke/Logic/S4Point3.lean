@@ -11,26 +11,12 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.connected_preorder : FrameClass := { F | IsPreorder _ F ∧ IsConnected _ F }
-abbrev Kripke.FrameClass.finite_connected_preorder : FrameClass := { F | F.IsFinite ∧ IsPreorder _ F ∧ IsConnected _ F }
+abbrev Kripke.FrameClass.connected_preorder : FrameClass := { F | F.IsPreorder ∧ F.IsPiecewiseStronglyConnected }
+abbrev Kripke.FrameClass.finite_connected_preorder : FrameClass := { F | F.IsFinite ∧ F.IsPreorder ∧ F.IsPiecewiseStronglyConnected }
 
-/-
-namespace Kripke.FrameClass.connected_preorder
+instance {F : Frame} [F.IsPiecewiseStronglyConnected] : F.IsPiecewiseConnected where
+instance {F : Frame} [F.IsReflexive] [F.IsPiecewiseStronglyConnected] : F.IsPiecewiseStronglyConvergent where
 
-@[simp]
-protected lemma nonempty : Kripke.FrameClass.connected_preorder.Nonempty := by
-  use whitepoint;
-  simp [Reflexive, Transitive, Connected];
-
-lemma validates_HilbertS4Point3 : Kripke.FrameClass.connected_preorder.Validates Hilbert.S4Point3.axioms := by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
-  . exact validate_AxiomT_of_reflexive $ by assumption
-  . exact validate_AxiomFour_of_transitive $ by assumption;
-  . exact validate_AxiomPoint3_of_connected $ by assumption;
-
-end Kripke.FrameClass.connected_preorder
--/
 
 namespace Hilbert.S4Point3.Kripke
 
@@ -76,37 +62,13 @@ instance finite_complete : Complete (Hilbert.S4Point3) Kripke.FrameClass.finite_
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
   let FRM := finestFiltrationTransitiveClosureModel RM (φ.subformulas);
-  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTrans)) (by subformula) |>.mpr;
+  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTransitive)) (by simp) |>.mpr;
   apply hφ;
 
   refine ⟨?_, ?_, ?_⟩;
-  . apply Frame.isFinite_iff _ |>.mpr
-    apply FilterEqvQuotient.finite;
-    simp;
-  . exact finestFiltrationTransitiveClosureModel.isPreorder (preorder := Frame.pointGenerate.isPreorder);
-  . apply isConnected_iff _ _ |>.mpr;
-    rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
-    . simp only [or_self];
-      apply Relation.TransGen.single;
-      suffices z ≺ z by tauto;
-      apply IsRefl.refl;
-    . left;
-      apply Relation.TransGen.single;
-      suffices y ≺ z by tauto;
-      exact Rrz.unwrap;
-    . right;
-      apply Relation.TransGen.single;
-      suffices z ≺ y by tauto;
-      exact Rry.unwrap;
-    . replace Rry := Rry.unwrap;
-      replace Rrz := Rrz.unwrap;
-      rcases IsConnected.connected ⟨Rry, Rrz⟩ with (Ryz | Rrw);
-      . left;
-        apply Relation.TransGen.single;
-        tauto;
-      . right;
-        apply Relation.TransGen.single;
-        tauto;
+  . apply isFinite $ by simp;
+  . exact isPreorder (preorder := Frame.pointGenerate.isPreorder);
+  . exact rooted_isPiecewiseStronglyConnected;
 ⟩
 
 end FFP
@@ -142,13 +104,8 @@ theorem S4Point3.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.S4Point
       ⟩;
       use M, 0;
       constructor;
-      . apply Set.mem_setOf_eq.mpr
-        refine ⟨?_, ⟨?_⟩⟩;
-        . apply isPreorder_iff _ _ |>.mpr;
-          refine ⟨⟨by omega⟩, ⟨by omega⟩⟩;
-        . rintro x y z ⟨Rxy, Ryz⟩;
-          use 3;
-          constructor <;> omega;
+      . simp only [Set.mem_setOf_eq, M];
+        refine ⟨{refl := by omega, trans := by omega;}, {ps_convergent := by intro x y z Rxy Rxz; use 3; omega}⟩;
       . apply Kripke.Satisfies.or_def.not.mpr;
         push_neg;
         constructor;
@@ -189,7 +146,8 @@ theorem S4Point3.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.S4Point
       ⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨by omega⟩, ⟨by simp [M, WeakConnected]⟩⟩
+      . simp only [Set.mem_setOf_eq, M];
+        refine ⟨{trans := by omega;}, {p_connected := by simp [M, PiecewiseConnected]; omega }⟩;
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∀ y, ¬x ≺ y by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;

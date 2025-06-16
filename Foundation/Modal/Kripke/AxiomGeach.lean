@@ -15,21 +15,30 @@ class IsGeachConvergent (F : Frame) (g : Axioms.Geach.Taple) where
   gconv : ∀ ⦃x y z : F⦄, x ≺^[g.i] y → x ≺^[g.j] z → ∃ u, y ≺^[g.m] u ∧ z ≺^[g.n] u
 
 
-class IsReflexive (F : Frame) extends _root_.IsRefl _ F
+class IsReflexive (F : Frame) extends _root_.IsRefl _ F.Rel
+
+@[simp] lemma refl [F.IsReflexive] : ∀ {x : F.World}, x ≺ x := by apply IsRefl.refl
+
 instance [F.IsGeachConvergent ⟨0, 0, 1, 0⟩] : F.IsReflexive where
   refl := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 0⟩);
 instance [F.IsReflexive] : F.IsGeachConvergent ⟨0, 0, 1, 0⟩ where
-  gconv x y z Rxy Rxz := by simp_all; subst Rxz; apply _root_.IsRefl.refl;
+  gconv x y z Rxy Rxz := by simp_all;
 
 
 class IsSerial (F : Frame) extends _root_.IsSerial F.Rel
+
+lemma serial [F.IsSerial] : ∀ x : F, ∃ y, x ≺ y := IsSerial.serial
+
 instance [F.IsGeachConvergent ⟨0, 0, 1, 1⟩] : F.IsSerial where
   serial := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 1⟩);
 instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ where
   gconv x y z Rxy Rxz := by simp_all; subst Rxz; apply _root_.IsSerial.serial
 
 
-class IsTransitive (F : Frame) extends _root_.IsTrans _ F
+class IsTransitive (F : Frame) extends _root_.IsTrans _ F.Rel'
+
+lemma trans [F.IsTransitive] : ∀ {x y z : F.World}, x ≺ y → y ≺ z → x ≺ z := by apply IsTrans.trans
+
 instance [F.IsGeachConvergent ⟨0, 2, 1, 0⟩] : F.IsTransitive where
   trans := by
     rintro x y z;
@@ -43,7 +52,10 @@ instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
     exact IsTrans.trans _ _ _ Rxy Ryz
 
 
-class IsSymmetric (F : Frame) extends _root_.IsSymm _ F.Rel
+class IsSymmetric (F : Frame) extends _root_.IsSymm _ F.Rel'
+
+lemma symm [F.IsSymmetric] : ∀ {x y : F.World}, x ≺ y → y ≺ x := by apply IsSymm.symm
+
 instance [F.IsGeachConvergent ⟨0, 1, 0, 1⟩] : F.IsSymmetric where
   symm x y := by
     have : ∀ x y z : F, x = y → x ≺ z → z ≺ y := by
@@ -53,7 +65,10 @@ instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by simp_all; subst Rxy; exact _root_.IsSymm.symm _ _ Rxz;
 
 
-class IsEuclidean (F : Frame) extends _root_.IsRightEuclidean F.Rel
+class IsEuclidean (F : Frame) extends _root_.IsRightEuclidean F.Rel'
+
+lemma eucl [F.IsEuclidean] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y ≺ z := by apply IsRightEuclidean.reucl
+
 instance [F.IsGeachConvergent ⟨1, 1, 0, 1⟩] : F.IsEuclidean where
   reucl x y z Rxy Rxz := by
     have : ∀ x y z : F, x ≺ y → x ≺ z → z ≺ y := by
@@ -63,7 +78,11 @@ instance [F.IsEuclidean] : F.IsGeachConvergent ⟨1, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by simp_all; exact IsRightEuclidean.reucl Rxz Rxy
 
 
-class IsPiecewiseStronglyConvergent (F : Frame) extends _root_.IsPiecewiseStronglyConvergent F.Rel
+class IsPiecewiseStronglyConvergent (F : Frame) extends _root_.IsPiecewiseStronglyConvergent F.Rel'
+
+lemma ps_convergent [F.IsPiecewiseStronglyConvergent] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → ∃ u, y ≺ u ∧ z ≺ u := by
+  apply IsPiecewiseStronglyConvergent.ps_convergent
+
 instance [F.IsGeachConvergent ⟨1, 1, 1, 1⟩] : F.IsPiecewiseStronglyConvergent where
   ps_convergent := by simpa using IsGeachConvergent.gconv (g := ⟨1, 1, 1, 1⟩) (F := F);
 instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1⟩ where
@@ -73,7 +92,10 @@ instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1�
     use u;
 
 
-class IsCoreflexive (F : Frame) extends _root_.IsCoreflexive F.Rel
+class IsCoreflexive (F : Frame) extends _root_.IsCoreflexive F.Rel'
+
+lemma corefl [F.IsCoreflexive] : ∀ {x y : F.World}, x ≺ y → x = y := by apply IsCoreflexive.corefl
+
 instance [F.IsGeachConvergent ⟨0, 1, 0, 0⟩] : F.IsCoreflexive where
   corefl x y Rxy := by
     have : ∀ x y z : F, x = y → x ≺ z → z = y := by
@@ -82,11 +104,14 @@ instance [F.IsGeachConvergent ⟨0, 1, 0, 0⟩] : F.IsCoreflexive where
 instance [F.IsCoreflexive] : F.IsGeachConvergent ⟨0, 1, 0, 0⟩ where
   gconv x y z Rxy Rxz := by
     simp_all; subst Rxy;
-    exact _root_.IsCoreflexive.corefl Rxz |>.symm;
+    exact F.corefl Rxz |>.symm;
 
 
 class IsFunctional (F : Frame) where
   functional : ∀ ⦃x y z : F.World⦄, x ≺ y → x ≺ z → y = z
+
+lemma functional [F.IsFunctional] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y = z := by apply IsFunctional.functional
+
 instance [F.IsGeachConvergent ⟨1, 1, 0, 0⟩] : F.IsFunctional where
   functional x y z Rxy Rxz := by
     have : ∀ x y z : F, x ≺ y → x ≺ z → z = y := by
@@ -98,6 +123,9 @@ instance [F.IsFunctional] : F.IsGeachConvergent ⟨1, 1, 0, 0⟩ where
 
 class IsDense (F : Frame) where
   dense : ∀ ⦃x y : F.World⦄, x ≺ y → ∃ u, x ≺ u ∧ u ≺ y
+
+lemma dense [F.IsDense] : ∀ {x y : F.World}, x ≺ y → ∃ u, x ≺ u ∧ u ≺ y := by apply IsDense.dense
+
 instance [F.IsGeachConvergent ⟨0, 1, 2, 0⟩] : F.IsDense where
   dense x y Rxy := by
     have : ∀ x y z : F, x = y → x ≺ z → ∃ u, y ≺ u ∧ u ≺ z := by
@@ -119,10 +147,9 @@ end Frame
 instance : whitepoint.IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
   use ();
-  constructor;
-  . apply HRel.iterate.true_any; tauto;
-  . apply HRel.iterate.true_any; tauto;
+  constructor <;> . apply HRel.iterate.true_any; tauto;
 ⟩
+instance : whitepoint.IsPreorder where
 
 
 section definability

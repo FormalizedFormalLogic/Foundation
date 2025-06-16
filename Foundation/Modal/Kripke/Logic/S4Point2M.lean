@@ -7,7 +7,7 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.preorder_confluent_mckinsey : FrameClass := { F | IsPreorder _ F ∧ IsConfluent _ F ∧ SatisfiesMcKinseyCondition _ F }
+abbrev Kripke.FrameClass.preorder_confluent_mckinsey : FrameClass := { F | F.IsPreorder ∧ IsConfluent _ F ∧ SatisfiesMcKinseyCondition _ F }
 
 namespace Hilbert.S4Point2M.Kripke
 

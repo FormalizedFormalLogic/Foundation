@@ -9,7 +9,7 @@ open Kripke
 open Hilbert.Kripke
 
 
-abbrev Kripke.FrameClass.preorder_mckinsey : FrameClass := { F | IsPreorder _ F ∧ SatisfiesMcKinseyCondition _ F }
+abbrev Kripke.FrameClass.preorder_mckinsey : FrameClass := { F | F.IsPreorder ∧ SatisfiesMcKinseyCondition _ F }
 
 namespace Hilbert.S4M
 

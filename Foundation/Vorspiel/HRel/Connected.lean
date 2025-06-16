@@ -1,4 +1,5 @@
-import Foundation.Vorspiel.HRel.Basic
+import Foundation.Vorspiel.HRel.Euclidean
+import Foundation.Vorspiel.HRel.Convergent
 
 variable {α} {R : HRel α}
 
@@ -13,6 +14,11 @@ lemma IsPiecewiseConnected.p_connected' {R : HRel α} [IsPiecewiseConnected R] {
 instance [IsTrichotomous _ R] : IsPiecewiseConnected R :=
   ⟨fun ⦃_ y z⦄ _ _ ↦ IsTrichotomous.trichotomous y z⟩
 
+instance [IsRightEuclidean R] : IsPiecewiseConnected R := ⟨by
+  intro x y z Rxy Rxz;
+  have : R y z := IsRightEuclidean.reucl Rxy Rxz;
+  tauto;
+⟩
 
 def PiecewiseStronglyConnected (R : HRel α) := ∀ ⦃x y z⦄, R x y → R x z → (R y z ∨ R z y)
 
@@ -32,4 +38,17 @@ instance [IsPiecewiseConnected R] [IsRefl _ R] : IsPiecewiseStronglyConnected R 
 instance [IsPiecewiseStronglyConnected R] : IsPiecewiseConnected R := ⟨by
   intro x y z Rxy Rxz;
   rcases IsPiecewiseStronglyConnected.ps_connected Rxy Rxz <;> tauto;
+⟩
+
+instance [IsRefl _ R] [IsPiecewiseStronglyConnected R] : IsPiecewiseStronglyConvergent R := ⟨by
+  intro x y z Rxy Rxz;
+  rcases IsPiecewiseStronglyConnected.ps_connected Rxy Rxz with (Ryz | Rzy);
+  . use z;
+    constructor;
+    . assumption;
+    . apply IsRefl.refl;
+  . use y;
+    constructor;
+    . apply IsRefl.refl;
+    . assumption;
 ⟩

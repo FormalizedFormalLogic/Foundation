@@ -8,6 +8,8 @@ open Hilbert.Kripke
 
 protected abbrev Kripke.FrameClass.trans_eucl : FrameClass := { F | F.IsTransitive ∧ F.IsEuclidean }
 
+instance {F : Kripke.Frame} [F.IsEuclidean] : F.IsPiecewiseConnected where
+
 namespace Hilbert.K45.Kripke
 
 instance sound : Sound (Hilbert.K45) FrameClass.trans_eucl := instSound_of_validates_axioms $ by
@@ -78,7 +80,7 @@ theorem K5.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.K45 := by
       ⟩;
       use M, 0;
       constructor;
-      . simp;
+      . simp only [Set.mem_setOf_eq];
         refine ⟨{ trans := by omega }, { p_connected := by simp [PiecewiseConnected, M]; omega}⟩;
       . suffices (0 : M.World) ≺ 2 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
           simpa [M, Semantics.Realize, Satisfies];
