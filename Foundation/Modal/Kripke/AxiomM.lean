@@ -164,6 +164,8 @@ variable {F : Kripke.Frame}
 class Frame.SatisfiesMcKinseyCondition (F : Frame) where
   mckinsey : ∀ x : F, ∃ y, x ≺ y ∧ ∀ z, y ≺ z → y = z
 
+lemma Frame.mckinsey [F.SatisfiesMcKinseyCondition] : ∀ x : F, ∃ y, x ≺ y ∧ ∀ z, y ≺ z → y = z := SatisfiesMcKinseyCondition.mckinsey
+
 instance : whitepoint.SatisfiesMcKinseyCondition := ⟨by
   intro x;
   use x;

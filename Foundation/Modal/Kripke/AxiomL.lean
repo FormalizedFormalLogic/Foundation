@@ -1,6 +1,6 @@
 import Foundation.Vorspiel.HRel.CWF
 import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Kripke.Closure
+import Foundation.Modal.Kripke.Irreflexive
 
 namespace LO.Modal
 

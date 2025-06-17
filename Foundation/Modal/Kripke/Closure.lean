@@ -1,6 +1,7 @@
 import Foundation.Modal.Kripke.Basic
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Vorspiel.HRel.Basic
+import Foundation.Modal.Kripke.Irreflexive
 
 namespace LO.Modal.Kripke
 
@@ -24,6 +25,10 @@ instance [Finite F] : Finite (F^=) := inferInstance
 instance [F.IsFinite] : (F^=).IsFinite := inferInstance
 
 instance : (F^=).IsReflexive := by simp
+instance [F.IsSymmetric] : F^=.IsSymmetric := by simp
+instance [F.IsTransitive] : F^=.IsTransitive := by simp
+instance [F.IsTransitive] [F.IsIrreflexive] : F^=.IsAntisymmetric := ⟨by apply Frame.antisymm⟩
+instance [F.IsTransitive] [F.IsIrreflexive] : F^=.IsPartialOrder where
 
 end ReflGen
 
@@ -71,25 +76,6 @@ instance [F.IsSymmetric] : F^*.IsSymmetric where symm := by simp only; apply IsS
 instance [F.IsSymmetric] : F^*.IsEquivalence where
 
 end ReflTransGen
-
-
-protected abbrev IsIrreflexive (F : Frame) := IsIrrefl _ F
-
-@[simp] lemma irrefl [F.IsIrreflexive] (x : F) : ¬x ≺ x := by apply IsIrrefl.irrefl;
-
-abbrev IrreflGen (F : Frame) : Frame := ⟨F.World, F.Rel.IrreflGen⟩
-postfix:95 "^≠" => IrreflGen
-
-namespace IrreflGen
-
-instance : Coe (F.World) (F^≠.World) := ⟨id⟩
-
-instance [Finite F] : Finite (F^≠) := inferInstance
-instance [F.IsFinite] : (F^≠).IsFinite := inferInstance
-
-instance : F^≠.IsIrreflexive where irrefl := by apply IsIrrefl.irrefl;
-
-end IrreflGen
 
 end Frame
 

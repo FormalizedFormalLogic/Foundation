@@ -176,7 +176,7 @@ instance modalCompanion_KC_GrzPoint2 : ModalCompanion Logic.KC Logic.GrzPoint2 :
   rw [Logic.GrzPoint2.is_largestMC_of_KC];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_confluent)
-    (MC := FrameClass.finite_confluent_partial_order)
+    (MC := FrameClass.finite_GrzPoint2)
     (by rw [Logic.KC.Kripke.finite_confluent])
     (by rw [←Logic.GrzPoint2.is_largestMC_of_KC, Modal.Logic.GrzPoint2.Kripke.finite_confluent_partial_order])
     (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, inferInstance, inferInstance⟩)

@@ -1,4 +1,5 @@
 import Foundation.Modal.Kripke.Preservation
+import Foundation.Modal.Kripke.Irreflexive
 
 namespace LO.Modal
 
@@ -158,19 +159,16 @@ instance isTransitive [F.IsTransitive] : (F↾r).IsTransitive where
     . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
     . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
 
-/-
-lemma rel_antisymm (F_antisymm : AntiSymmetric F) : AntiSymmetric (F↾r).Rel := by
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy hyx;
-  all_goals aesop;
-
-instance isAntisymm [IsAntisymm _ F] : IsAntisymm _ (F↾r).Rel := ⟨rel_antisymm IsAntisymm.antisymm⟩
--/
-
-instance isPreorder [F.IsPreorder] : (F↾r).IsPreorder where
-
--- instance isPartialOrder [IsPartialOrder _ F] : IsPartialOrder _ (F↾r) where
+instance isAntisymmetric [F.IsAntisymmetric] : (F↾r).IsAntisymmetric := ⟨by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy Ryx;
+  . tauto;
+  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx;
+  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx;
+  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx;
+⟩
 
 instance isIrreflexive [F.IsIrreflexive] : (F↾r).IsIrreflexive := ⟨by rintro ⟨x, (rfl | hx)⟩ h <;> simp at h⟩
+
 
 /-
 instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric where
@@ -253,7 +251,7 @@ infix:100 "↾" => Model.pointGenerate
 
 namespace Model.pointGenerate
 
-variable {M : Kripke.Model} {r : M.World}
+variable {M : Kripke.Model} {r : outParam M.World}
 
 instance [M.IsFinite] : (M↾r).IsFinite := by dsimp [Model.pointGenerate]; infer_instance;
 
@@ -265,6 +263,12 @@ protected def pMorphism : (M↾r) →ₚ M := by
   apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism M.toFrame r);
   simp only [pointGenerate, Frame.pointGenerate, Subtype.forall];
   rintro p x (rfl | Rrx) <;> tauto;
+
+instance isReflexive [M.IsReflexive] : (M↾r).IsReflexive := Frame.pointGenerate.isReflexive
+instance isTransitive [M.IsTransitive] : (M↾r).IsTransitive := Frame.pointGenerate.isTransitive
+instance isAntisymmetric [M.IsAntisymmetric] : (M↾r).IsAntisymmetric := Frame.pointGenerate.isAntisymmetric
+instance isPreorder [M.IsPreorder] : (M↾r).IsPreorder where
+instance isPartialOrder [M.IsPartialOrder] : (M↾r).IsPartialOrder where
 
 /-
 instance : (M↾r) ⥹ M := by

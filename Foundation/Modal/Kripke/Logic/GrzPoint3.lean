@@ -19,7 +19,13 @@ open Kripke
 
 namespace Kripke
 
-abbrev FrameClass.finite_connected_partial_order : FrameClass := { F | F.IsFinite ∧ IsPartialOrder _ F.Rel ∧ IsConnected _ F.Rel  }
+variable {F : Frame}
+
+protected class Frame.IsFiniteGrzPoint3 (F : Frame) extends F.IsFinite, F.IsPartialOrder, F.IsPiecewiseStronglyConnected where
+
+abbrev FrameClass.finite_connected_partial_order : FrameClass := { F | F.IsFiniteGrzPoint3  }
+
+instance [F.IsFiniteGrzPoint3] : F.IsFiniteGrzPoint2 where
 
 end Kripke
 
@@ -35,7 +41,7 @@ instance finite_sound : Sound (Hilbert.GrzPoint3) FrameClass.finite_connected_pa
 instance consistent : Entailment.Consistent (Hilbert.GrzPoint3) :=
   consistent_of_sound_frameclass FrameClass.finite_connected_partial_order $ by
     use whitepoint;
-    refine ⟨inferInstance, inferInstance, inferInstance⟩;
+    constructor;
 
 instance finite_complete : Complete (Hilbert.GrzPoint3) (FrameClass.finite_connected_partial_order) :=
   Kripke.Grz.complete_of_mem_miniCanonicalFrame FrameClass.finite_connected_partial_order $ by
@@ -83,10 +89,11 @@ lemma GrzPoint3.Kripke.finite_connected_partial_order : Logic.GrzPoint3 = FrameC
 theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⊂ Logic.GrzPoint3 := by
   constructor;
   . rw [GrzPoint2.Kripke.finite_confluent_partial_order, GrzPoint3.Kripke.finite_connected_partial_order];
-    rintro φ hφ F ⟨_, _, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨by tauto, inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_confluent_partial_order ⊧ φ by
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_GrzPoint2 ⊧ φ by
       rw [GrzPoint2.Kripke.finite_confluent_partial_order];
       tauto;
     use Axioms.Point3 (.atom 0) (.atom 1);
@@ -100,13 +107,15 @@ theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⊂ Logic.GrzPo
       ⟩;
       use M, 0;
       constructor;
-      . refine ⟨by tauto, {
+      . exact {
           refl := by omega,
           trans := by omega,
           antisymm := by simp [M, F]; omega,
-        }, ⟨?_⟩⟩;
-        . rintro x y z ⟨(_ | _ | Rxy), (_ | _ | Rxy)⟩;
-          repeat { use 3; tauto; }
+          ps_convergent := by
+            rintro x y z Rxy Rxz;
+            use 3;
+            tauto;
+        }
       . apply Satisfies.or_def.not.mpr
         push_neg;
         constructor;
@@ -143,7 +152,13 @@ theorem GrzPoint3.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.GrzPoi
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
       constructor;
-      . refine ⟨inferInstance, {refl := by simp, trans := by simp}, ⟨by simp [Connected]⟩⟩;
+      . exact {
+          refl := by simp,
+          trans := by simp,
+          ps_connected := by
+            rintro x y z Rxy Rxz;
+            simp;
+        };
       . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
 
 end Logic

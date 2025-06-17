@@ -1,5 +1,6 @@
 import Foundation.Modal.Hilbert.Basic
 import Foundation.Modal.Kripke.Closure
+import Foundation.Modal.Kripke.Irreflexivize
 
 namespace LO.Modal
 

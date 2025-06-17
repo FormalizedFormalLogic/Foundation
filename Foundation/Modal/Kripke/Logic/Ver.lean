@@ -5,10 +5,26 @@ import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.GLPoint3
 
+
 namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
+
+
+namespace Kripke
+
+variable {F : Kripke.Frame}
+
+protected abbrev Frame.IsIsolated := Frame.Is
+
+protected abbrev FrameClass.KTc : FrameClass := { F | F.IsKTc }
+
+instance [F.IsKTc] : F.IsKB4 where
+
+end Kripke
+
+
 
 protected abbrev Kripke.FrameClass.isolated : FrameClass := { F | IsIsolated _ F }
 protected abbrev Kripke.FrameClass.finite_isolated : FrameClass := { F | Finite F.World ∧ IsIsolated _ F }

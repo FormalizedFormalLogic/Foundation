@@ -7,13 +7,10 @@ namespace LO.Modal
 
 namespace Kripke
 
-lemma mem_reflClosure_GrzFiniteFrameClass_of_mem_GLFiniteFrameClass (hF : F ∈ FrameClass.finite_trans_irrefl) : F^= ∈ FrameClass.finite_partial_order := by
-  obtain ⟨_, _, _⟩ := hF;
-  refine ⟨inferInstance, inferInstance⟩;
+variable {F : Frame}
 
-lemma mem_irreflClosure_GLFiniteFrameClass_of_mem_GrzFiniteFrameClass (hF : F ∈ FrameClass.finite_partial_order) : F^≠ ∈ FrameClass.finite_trans_irrefl := by
-  obtain ⟨_, _, F_trans, F_antisymm⟩ := hF;
-  refine ⟨inferInstance, inferInstance, inferInstance⟩;
+instance [F.IsFiniteGL] : F^=.IsFiniteGrz where
+instance [F.IsFiniteGrz] : (F^≠).IsFiniteGL := by sorry
 
 end Kripke
 
@@ -36,15 +33,16 @@ lemma provable_boxdot_GL_of_provable_Grz : φ ∈ Logic.Grz → φᵇ ∈ Logic.
 lemma provable_Grz_of_provable_boxdot_GL : φᵇ ∈ Logic.GL → φ ∈ Logic.Grz := by
   contrapose;
   intro h;
-  obtain ⟨F, ⟨_, _, _⟩, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
+  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
+  replace hF := Set.mem_setOf_eq.mp hF;
   apply not_imp_not.mpr $ Hilbert.GL.Kripke.finite_sound.sound;
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use F^≠;
   constructor;
-  . refine ⟨inferInstance, inferInstance, inferInstance⟩;
+  . apply Set.mem_setOf_eq.mpr; infer_instance;
   . apply Kripke.iff_frame_boxdot_reflexive_closure.not.mpr;
     apply iff_reflexivize_irreflexivize'.not.mp;
-    exact h;
+    assumption;
 
 theorem iff_provable_boxdot_GL_provable_Grz : φᵇ ∈ Logic.GL ↔ φ ∈ Logic.Grz := ⟨
   provable_Grz_of_provable_boxdot_GL,

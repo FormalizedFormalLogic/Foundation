@@ -15,7 +15,7 @@ namespace Kripke
 
 variable {F : Frame}
 
-protected class Frame.IsFiniteGL (F : Frame) extends F.IsFinite, F.IsTransitive, F.IsIrreflexive
+protected class Frame.IsFiniteGL (F : Frame) extends F.IsFinite, F.IsStrictPreorder
 
 protected abbrev FrameClass.finite_GL: FrameClass := { F | F.IsFiniteGL }
 

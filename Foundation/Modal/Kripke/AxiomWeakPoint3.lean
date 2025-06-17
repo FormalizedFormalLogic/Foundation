@@ -10,7 +10,12 @@ variable {F : Kripke.Frame}
 
 namespace Frame
 
+variable {F : Frame}
+
 abbrev IsPiecewiseConnected (F : Frame) := _root_.IsPiecewiseConnected F.Rel
+
+lemma p_connected [F.IsPiecewiseConnected] {x y z : F.World} : x ≺ y → x ≺ z → y ≺ z ∨ y = z ∨ z ≺ y := by apply IsPiecewiseConnected.p_connected
+lemma p_connected' [F.IsPiecewiseConnected] {x y z : F.World} : x ≺ y → x ≺ z → y ≠ z → y ≺ z ∨ z ≺ y := IsPiecewiseConnected.p_connected'
 
 end Frame
 

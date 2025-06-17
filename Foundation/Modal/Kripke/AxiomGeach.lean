@@ -15,7 +15,7 @@ class IsGeachConvergent (F : Frame) (g : Axioms.Geach.Taple) where
   gconv : ∀ ⦃x y z : F⦄, x ≺^[g.i] y → x ≺^[g.j] z → ∃ u, y ≺^[g.m] u ∧ z ≺^[g.n] u
 
 
-abbrev IsReflexive (F : Frame) := _root_.IsRefl _ F
+protected abbrev IsReflexive (F : Frame) := _root_.IsRefl _ F
 
 @[simp] lemma refl [F.IsReflexive] : ∀ {x : F.World}, x ≺ x := by apply IsRefl.refl
 
@@ -25,7 +25,7 @@ instance [F.IsGeachConvergent ⟨0, 0, 1, 0⟩] : F.IsReflexive where
 instance [F.IsReflexive] : F.IsGeachConvergent ⟨0, 0, 1, 0⟩ where
   gconv x y z Rxy Rxz := by simp_all;
 
-abbrev IsSerial (F : Frame) := _root_.IsSerial F.Rel
+protected abbrev IsSerial (F : Frame) := _root_.IsSerial F.Rel
 
 lemma serial [F.IsSerial] : ∀ x : F, ∃ y, x ≺ y := IsSerial.serial
 
@@ -39,7 +39,7 @@ instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ where
     apply _root_.IsSerial.serial
 
 
-abbrev IsTransitive (F : Frame) := _root_.IsTrans _ F.Rel'
+protected abbrev IsTransitive (F : Frame) := _root_.IsTrans _ F.Rel
 
 lemma trans [F.IsTransitive] : ∀ {x y z : F.World}, x ≺ y → y ≺ z → x ≺ z := by apply IsTrans.trans
 
@@ -58,7 +58,7 @@ instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
     exact IsTrans.trans _ _ _ Rxy Ryz
 
 
-abbrev IsSymmetric (F : Frame) := _root_.IsSymm _ F.Rel'
+protected abbrev IsSymmetric (F : Frame) := _root_.IsSymm _ F.Rel
 
 lemma symm [F.IsSymmetric] : ∀ {x y : F.World}, x ≺ y → y ≺ x := by apply IsSymm.symm
 
@@ -75,7 +75,7 @@ instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
     exact _root_.IsSymm.symm _ _ Rxz;
 
 
-abbrev IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel'
+protected abbrev IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel
 
 lemma eucl [F.IsEuclidean] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y ≺ z := by apply IsRightEuclidean.reucl
 
@@ -91,7 +91,7 @@ instance [F.IsEuclidean] : F.IsGeachConvergent ⟨1, 1, 0, 1⟩ where
     exact IsRightEuclidean.reucl Rxz Rxy
 
 
-abbrev IsPiecewiseStronglyConvergent (F : Frame) := _root_.IsPiecewiseStronglyConvergent F.Rel'
+protected abbrev IsPiecewiseStronglyConvergent (F : Frame) := _root_.IsPiecewiseStronglyConvergent F.Rel
 
 lemma ps_convergent [F.IsPiecewiseStronglyConvergent] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → ∃ u, y ≺ u ∧ z ≺ u := by
   apply IsPiecewiseStronglyConvergent.ps_convergent
@@ -106,7 +106,7 @@ instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1�
     use u;
 
 
-abbrev IsCoreflexive (F : Frame) := _root_.IsCoreflexive F.Rel'
+protected abbrev IsCoreflexive (F : Frame) := _root_.IsCoreflexive F.Rel
 
 lemma corefl [F.IsCoreflexive] : ∀ {x y : F.World}, x ≺ y → x = y := by apply IsCoreflexive.corefl
 
@@ -123,7 +123,7 @@ instance [F.IsCoreflexive] : F.IsGeachConvergent ⟨0, 1, 0, 0⟩ where
     exact F.corefl Rxz |>.symm;
 
 
-class IsFunctional (F : Frame) where
+protected class IsFunctional (F : Frame) where
   functional : ∀ ⦃x y z : F.World⦄, x ≺ y → x ≺ z → y = z
 
 lemma functional [F.IsFunctional] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y = z := by apply IsFunctional.functional
@@ -139,7 +139,7 @@ instance [F.IsFunctional] : F.IsGeachConvergent ⟨1, 1, 0, 0⟩ where
     apply IsFunctional.functional Rxy Rxz |>.symm;
 
 
-class IsDense (F : Frame) where
+protected class IsDense (F : Frame) where
   dense : ∀ ⦃x y : F.World⦄, x ≺ y → ∃ u, x ≺ u ∧ u ≺ y
 
 lemma dense [F.IsDense] : ∀ {x y : F.World}, x ≺ y → ∃ u, x ≺ u ∧ u ≺ y := by apply IsDense.dense
@@ -157,8 +157,8 @@ instance [F.IsDense] : F.IsGeachConvergent ⟨0, 1, 2, 0⟩ where
     use u;
 
 
-class IsPreorder (F : Frame) extends F.IsReflexive, F.IsTransitive
-class IsEquivalence (F : Frame) extends F.IsPreorder, F.IsSymmetric
+protected class IsPreorder (F : Frame) extends F.IsReflexive, F.IsTransitive
+protected class IsEquivalence (F : Frame) extends F.IsPreorder, F.IsSymmetric
 
 end Frame
 

@@ -23,7 +23,7 @@ protected abbrev FrameClass.finite_Grz: FrameClass := { F | F.IsFiniteGrz }
 instance : whitepoint.IsAntisymmetric := ⟨by tauto⟩
 instance : whitepoint.IsFiniteGrz where
 
-instance [F.IsFiniteGrz] : F.SatisfiesMcKinseyCondition where
+instance [F.IsFinite] [F.IsPartialOrder] : F.SatisfiesMcKinseyCondition where
   mckinsey := by
     intro x;
     obtain ⟨y, _, Rxy, hy₃⟩ :=  @Finite.exists_le_maximal _ {
