@@ -3,7 +3,7 @@ import Foundation.FirstOrder.Completeness.Corollaries
 import Foundation.Vorspiel.ExistsUnique
 
 /-!
-# Translation and interpretation
+# Translation and interpretation, bi-interpretation
 
 -/
 
@@ -576,5 +576,17 @@ protected def comp (τ : T₂ ⊳ T₃) (π : T₁ ⊳ T₂) : T₁ ⊳ T₃ whe
 end composition
 
 end Interpretation
+
+namespace Biinterpretation
+
+variable {L₁ L₂ L₃ : Language} [L₁.Eq] [L₂.Eq] [L₃.Eq] {T₁ : Theory L₁} {T₂ : Theory L₂} {T₃ : Theory L₃} [𝐄𝐐 ⪯ T₁] [𝐄𝐐 ⪯ T₂] [𝐄𝐐 ⪯ T₃]
+
+protected instance refl (T : Theory L₁) [𝐄𝐐 ⪯ T] : T ⋈ T := ⟨Interpretation.refl T, Interpretation.refl T⟩
+
+protected def symm (π : T₁ ⋈ T₂) : T₂ ⋈ T₁ := ⟨π.l, π.r⟩
+
+protected def trans (π : T₁ ⋈ T₂) (τ : T₂ ⋈ T₃) : T₁ ⋈ T₃ := ⟨τ.r.comp π.r, π.l.comp τ.l⟩
+
+end Biinterpretation
 
 end LO.FirstOrder
