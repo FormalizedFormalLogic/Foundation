@@ -3,6 +3,7 @@ import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Rooted
 import Foundation.Modal.Kripke.Logic.GrzPoint3
 import Foundation.Modal.Kripke.Logic.S4Point4M
+import Foundation.Vorspiel.HRel.Equality
 
 namespace LO.Modal
 

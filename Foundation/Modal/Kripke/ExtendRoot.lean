@@ -58,7 +58,7 @@ lemma chain_Chain' : List.Chain' (· ≺ ·) (extendRoot.chain (F := F) (r := r)
   . simp;
 
 
-instance isAsymm [IsAsymm _ F.Rel] : IsAsymm _ (F.extendRoot r n).Rel := ⟨by
+instance isAsymmetric [F.IsAsymmetric] : (F.extendRoot r n).IsAsymmetric := ⟨by
   intro x y hxy;
   match x, y with
   | .inr x, .inr y =>
@@ -69,7 +69,7 @@ instance isAsymm [IsAsymm _ F.Rel] : IsAsymm _ (F.extendRoot r n).Rel := ⟨by
   | .inr _, .inl _ => simp_all [Frame.Rel', Frame.extendRoot];
 ⟩
 
-instance isTrans [F.IsTransitive] : IsTrans _ (F.extendRoot r n).Rel := ⟨by
+instance isTransitive [F.IsTransitive] : (F.extendRoot r n).IsTransitive := ⟨by
   intro x y z hxy hyz;
   match x, y, z with
   | .inr x, .inr y, .inr z =>
@@ -85,9 +85,9 @@ lemma rooted_original [F.IsTransitive] {x : F.World} : (extendRoot.root (F := F)
   apply extendRoot.instIsRooted (F := F) (r := r) |>.direct_rooted_of_trans x;
   tauto;
 
-instance [F.IsTree r] : (F.extendRoot r n).IsTree extendRoot.root where
+instance isTree [F.IsTree r] : (F.extendRoot r n).IsTree extendRoot.root where
 
-instance instIsFiniteTree [F.IsFiniteTree r] : (F.extendRoot r n).IsFiniteTree extendRoot.root where
+instance isFiniteTree [F.IsFiniteTree r] : (F.extendRoot r n).IsFiniteTree extendRoot.root where
 
 def pMorphism : F →ₚ (F.extendRoot r n) where
   toFun := Sum.inr
@@ -137,7 +137,17 @@ instance : Coe (M.World) ((M.extendRoot r n).World) := ⟨Sum.inr⟩
 
 protected abbrev root := Frame.extendRoot.root (F := M.toFrame) (r := r) (n := n)
 
-lemma rooted_original [IsTrans _ M.Rel] : (extendRoot.root (M := M) (r := r) (n := n)) ≺ (Sum.inr x) := Frame.extendRoot.rooted_original
+lemma rooted_original [M.IsTransitive] : (extendRoot.root (M := M) (r := r) (n := n)) ≺ (Sum.inr x) := Frame.extendRoot.rooted_original
+
+instance isFinite [M.IsFinite] : (M.extendRoot r n).IsFinite := Frame.extendRoot.isFinite
+
+instance isTransitive [M.IsTransitive] : (M.extendRoot r n).IsTransitive := Frame.extendRoot.isTransitive
+
+instance isAsymmetric [M.IsAsymmetric] : (M.extendRoot r n).IsAsymmetric := Frame.extendRoot.isAsymmetric
+
+instance isTree [M.IsTree r] : (M.extendRoot r n).IsTree extendRoot.root := Frame.extendRoot.isTree
+
+instance isFiniteTree [M.IsFiniteTree r] : (M.extendRoot r n).IsFiniteTree extendRoot.root := Frame.extendRoot.isFiniteTree
 
 def pMorphism : Model.PseudoEpimorphism M (M.extendRoot r n) := PseudoEpimorphism.ofAtomic (Frame.extendRoot.pMorphism) $ by
   intros;
@@ -309,8 +319,8 @@ lemma inr_satisfies_axiomT_set
     infer_instance;
   obtain ⟨x, hx₁, hx₂⟩ := @validates_axiomT_set_in_irrefl_trans_chain (M := M')
     (by infer_instance)
-    (by apply Frame.extendRoot.isTrans)
-    (by apply Frame.extendRoot.isAsymm.isIrrefl)
+    (by apply isTransitive)
+    (by apply isAsymmetric.isIrrefl)
     (l := Frame.extendRoot.chain)
     (Γ := Γ)
     (Frame.extendRoot.chain_length)

@@ -158,7 +158,7 @@ instance [F.IsDense] : F.IsGeachConvergent ⟨0, 1, 2, 0⟩ where
 
 
 protected class IsPreorder (F : Frame) extends F.IsReflexive, F.IsTransitive
-protected class IsEquivalence (F : Frame) extends F.IsPreorder, F.IsSymmetric
+protected class IsEquivalence (F : Frame) extends F.IsReflexive, F.IsTransitive, F.IsSymmetric
 
 end Frame
 

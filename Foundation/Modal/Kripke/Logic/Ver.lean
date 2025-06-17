@@ -16,12 +16,6 @@ namespace Kripke
 
 variable {F : Kripke.Frame}
 
-protected abbrev Frame.IsIsolated := Frame.Is
-
-protected abbrev FrameClass.KTc : FrameClass := { F | F.IsKTc }
-
-instance [F.IsKTc] : F.IsKB4 where
-
 end Kripke
 
 

@@ -1,5 +1,6 @@
 import Foundation.Modal.Kripke.Preservation
 import Foundation.Modal.Kripke.Irreflexive
+import Foundation.Modal.Kripke.Asymmetric
 
 namespace LO.Modal
 
@@ -169,15 +170,7 @@ instance isAntisymmetric [F.IsAntisymmetric] : (F↾r).IsAntisymmetric := ⟨by
 
 instance isIrreflexive [F.IsIrreflexive] : (F↾r).IsIrreflexive := ⟨by rintro ⟨x, (rfl | hx)⟩ h <;> simp at h⟩
 
-
-/-
-instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric where
-  asymm := by
-    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy;
-    all_goals aesop;
--/
-
-instance isAsymm [assym : IsAsymm _ F] : IsAsymm (F↾r).World (F↾r).Rel := ⟨by
+instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy <;>
   { dsimp at Rxy; apply IsAsymm.asymm _ _ Rxy; }
 ⟩
@@ -266,6 +259,7 @@ protected def pMorphism : (M↾r) →ₚ M := by
 
 instance isReflexive [M.IsReflexive] : (M↾r).IsReflexive := Frame.pointGenerate.isReflexive
 instance isTransitive [M.IsTransitive] : (M↾r).IsTransitive := Frame.pointGenerate.isTransitive
+instance isAsymmetric [M.IsAsymmetric] : (M↾r).IsAsymmetric := Frame.pointGenerate.isAsymmetric
 instance isAntisymmetric [M.IsAntisymmetric] : (M↾r).IsAntisymmetric := Frame.pointGenerate.isAntisymmetric
 instance isPreorder [M.IsPreorder] : (M↾r).IsPreorder where
 instance isPartialOrder [M.IsPartialOrder] : (M↾r).IsPartialOrder where
