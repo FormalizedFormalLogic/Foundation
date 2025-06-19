@@ -39,10 +39,11 @@
     ),
     labels: (
       "LO.Propositional.Logic.Cl": $Logic("Cl")$,
-      "LO.Propositional.Logic.LC": $Logic("LC")$,
-      "LO.Propositional.Logic.KC": $Logic("KC")$,
       "LO.Propositional.Logic.Int": $Logic("Int")$,
+      "LO.Propositional.Logic.KC": $Logic("KC")$,
+      "LO.Propositional.Logic.KP": $Logic("KP")$,
+      "LO.Propositional.Logic.LC": $Logic("LC")$,
     ),
-    width: 80pt,
+    width: 90pt,
   )
 ]
