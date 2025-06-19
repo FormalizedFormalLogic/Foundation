@@ -72,26 +72,6 @@ lemma intro_union_consistent (h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁ �
   apply iff_theory_consistent_formulae_consistent.mp;
   simpa using FormulaSet.intro_union_consistent h;
 
-/-
-lemma intro_triunion_consistent
-  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ P₁) ∧ (∀ φ ∈ Γ₂, φ ∈ P₂) ∧ (∀ φ ∈ Γ₃, φ ∈ P₃) → 𝓢 ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
-  : FormulaFinset.Consistent 𝓢 (P₁ ∪ P₂ ∪ P₃) := by
-  rw [←iff_theory_consistent_formulae_consistent];
-  convert FormulaSet.intro_triunion_consistent h;
-  ext;
-  constructor;
-  . simp only [Finset.coe_union, Set.mem_union, Finset.mem_coe];
-    rintro ((hp₁ | hp₂) | hp₃);
-    . left; left; assumption;
-    . left; right; assumption;
-    . right; assumption;
-  . simp only [Set.mem_union, Finset.coe_union, Finset.mem_coe];
-    rintro ((hp₁ | hp₂) | hp₃);
-    . left; left; assumption;
-    . left; right; assumption;
-    . right; assumption;
--/
-
 end
 
 
