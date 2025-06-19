@@ -40,8 +40,8 @@ protected def axiomFour : 𝓢 ⊢ Axioms.Four φ := by
 instance : HasAxiomFour 𝓢 := ⟨fun _ ↦ GL.axiomFour⟩
 instance : Entailment.K4 𝓢 where
 
-protected def axiomH : 𝓢 ⊢ Axioms.H φ := C_trans (implyBoxDistribute' and₁) axiomL
-instance : HasAxiomH 𝓢 := ⟨fun _ ↦ GL.axiomH⟩
+protected def axiomHen : 𝓢 ⊢ Axioms.Hen φ := C_trans (implyBoxDistribute' and₁) axiomL
+instance : HasAxiomHen 𝓢 := ⟨fun _ ↦ GL.axiomHen⟩
 
 end GL
 

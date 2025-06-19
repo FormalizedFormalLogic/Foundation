@@ -43,16 +43,16 @@ instance : LoebRule 𝓢 where
 end K4Henkin
 
 
-protected class K4H (𝓢 : S) extends Entailment.K4 𝓢, HasAxiomH 𝓢
+protected class K4Hen (𝓢 : S) extends Entailment.K4 𝓢, HasAxiomHen 𝓢
 
-namespace K4H
+namespace K4Hen
 
-variable [Entailment.K4H 𝓢]
+variable [Entailment.K4Hen 𝓢]
 
 instance : HenkinRule 𝓢 where
-  henkin h := (K_left h) ⨀ (axiomH ⨀ nec h);
+  henkin h := (K_left h) ⨀ (axiomHen ⨀ nec h);
 
-end K4H
+end K4Hen
 
 end LO.Modal.Entailment
 
@@ -295,11 +295,11 @@ end
 end WithHenkinRule
 
 
-protected abbrev K4H : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.H (.atom 0)}⟩
-instance : (Hilbert.K4H).HasK where p := 0; q := 1;
-instance : (Hilbert.K4H).HasFour where p := 0
-instance : (Hilbert.K4H).HasH where p := 0
-instance : Entailment.K4H (Hilbert.K4H) where
+protected abbrev K4Hen : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Hen (.atom 0)}⟩
+instance : (Hilbert.K4Hen).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Hen).HasFour where p := 0
+instance : (Hilbert.K4Hen).HasHen where p := 0
+instance : Entailment.K4Hen (Hilbert.K4Hen) where
 
 protected abbrev K4Loeb : Hilbert.WithLoebRule ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
 instance : (Hilbert.K4Loeb).HasK where p := 0; q := 1;
@@ -315,7 +315,7 @@ theorem provable_GL_TFAE : [
     Hilbert.GL ⊢! φ,
     Hilbert.K4Loeb ⊢! φ,
     Hilbert.K4Henkin ⊢! φ,
-    Hilbert.K4H ⊢! φ
+    Hilbert.K4Hen ⊢! φ
   ].TFAE := by
   tfae_have 1 → 2 := by
     clear * -;
@@ -347,7 +347,7 @@ theorem provable_GL_TFAE : [
     clear * -;
     intro h;
     induction h using Hilbert.Deduction.rec! with
-    | maxm h => rcases (by simpa using h) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp only [axiomK!, axiomFour!, axiomH!];
+    | maxm h => rcases (by simpa using h) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp only [axiomK!, axiomFour!, axiomHen!];
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
     | nec ihφ => exact nec! ihφ;
     | _ => simp;

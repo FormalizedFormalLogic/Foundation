@@ -228,14 +228,14 @@ instance [DecidableEq α] [hVer : H.HasVer] : Entailment.HasAxiomVer H where
       simp;
 
 
-class HasH (H : Hilbert α) where
+class HasHen (H : Hilbert α) where
   p : α
-  mem_H : Axioms.H (.atom p) ∈ H.axioms := by tauto;
+  mem_H : Axioms.Hen (.atom p) ∈ H.axioms := by tauto;
 
-instance [hH : H.HasH] : Entailment.HasAxiomH H where
-  H φ := by
+instance [hH : H.HasHen] : Entailment.HasAxiomHen H where
+  Hen φ := by
     apply maxm;
-    use Axioms.H (.atom hH.p);
+    use Axioms.Hen (.atom hH.p);
     constructor;
     . exact hH.mem_H;
     . use (λ b => if hH.p = b then φ else (.atom b));
@@ -774,15 +774,15 @@ lemma Logic.K4Point3Z.is_extension_of_K4Z : Logic.K4Z ⊆ Logic.K4Point3Z := Hil
 lemma Logic.GLPoint3.is_extension_of_K4Point3Z : Logic.K4Point3Z ⊆ Logic.GLPoint3 := Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset
 
 
-protected abbrev Hilbert.KH : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.H (.atom 0)}⟩
-protected abbrev Logic.KH := Hilbert.KH.logic
+protected abbrev Hilbert.KHen : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Hen (.atom 0)}⟩
+protected abbrev Logic.KHen := Hilbert.KHen.logic
 
-namespace Hilbert.KH
+namespace Hilbert.KHen
 
-instance : (Hilbert.KH).HasK where p := 0; q := 1;
-instance : (Hilbert.KH).HasH where p := 0
+instance : (Hilbert.KHen).HasK where p := 0; q := 1;
+instance : (Hilbert.KHen).HasHen where p := 0
 
-end Hilbert.KH
+end Hilbert.KHen
 
 
 protected abbrev Hilbert.Grz : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0)}⟩

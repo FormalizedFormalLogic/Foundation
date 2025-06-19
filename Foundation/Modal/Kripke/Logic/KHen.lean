@@ -15,14 +15,14 @@ namespace Kripke
 
 variable {F : Kripke.Frame} {a : ℕ} {φ : Formula ℕ}
 
-lemma valid_atomic_H_of_valid_atomic_L : F ⊧ (Axioms.L (atom a)) → F ⊧ (Axioms.H (atom a)) := by
+lemma valid_atomic_axiomHen_of_valid_atomic_axiomL : F ⊧ (Axioms.L (atom a)) → F ⊧ (Axioms.Hen (atom a)) := by
   intro h V x hx;
   have : Satisfies ⟨F, V⟩ x (□(□a ➝ a)) := by
     intro y Rxy;
     exact (Satisfies.and_def.mp $ @hx y Rxy) |>.1;
   exact @h V x this;
 
-lemma valid_atomic_L_of_valid_atomic_H : F ⊧ Axioms.H (atom a) → F ⊧ Axioms.L (atom a) := by
+lemma valid_atomic_axiomL_of_valid_atomic_axiomHen : F ⊧ Axioms.Hen (atom a) → F ⊧ Axioms.L (atom a) := by
   intro hH V x hx;
 
   let V' : Valuation F := λ w a => ∀ n : ℕ, Satisfies ⟨F, V⟩ w (□^[n] a);
@@ -53,21 +53,22 @@ lemma valid_atomic_L_of_valid_atomic_H : F ⊧ Axioms.H (atom a) → F ⊧ Axiom
   intro w Rxw;
   exact @h₂ w Rxw 0;
 
-lemma valid_atomic_L_iff_valid_atomic_H : F ⊧ Axioms.L (atom 0) ↔ F ⊧ Axioms.H (atom 0) := by
+lemma valid_atomic_axiomL_iff_valid_atomic_axiomH : F ⊧ Axioms.L (atom 0) ↔ F ⊧ Axioms.Hen (atom 0) := by
   constructor;
-  . exact valid_atomic_H_of_valid_atomic_L;
-  . exact valid_atomic_L_of_valid_atomic_H;
+  . exact valid_atomic_axiomHen_of_valid_atomic_axiomL;
+  . exact valid_atomic_axiomL_of_valid_atomic_axiomHen;
 
-lemma valid_atomic_4_of_valid_atomic_L (h : F ⊧ Axioms.L (atom 0)) : F ⊧ Axioms.Four (atom 0) := by
+lemma valid_atomic_axiomFour_of_valid_atomic_axiomL (h : F ⊧ Axioms.L (atom 0)) : F ⊧ Axioms.Four (atom 0) := by
   intro V x h₂ y Rxy z Ryz;
   refine h₂ z ?_;
   have := isTransitive_of_validate_axiomL h;
   apply F.trans Rxy Ryz;
 
-lemma valid_atomic_Four_of_valid_atomic_H : F ⊧ Axioms.H (atom 0) → F ⊧ Axioms.Four (atom 0) := by
+lemma valid_atomic_axiomFour_of_valid_atomic_axiomH : F ⊧ Axioms.Hen (atom 0) → F ⊧ Axioms.Four (atom 0) := by
   trans;
-  . exact valid_atomic_L_iff_valid_atomic_H.mpr;
-  . exact valid_atomic_4_of_valid_atomic_L;
+  . exact valid_atomic_axiomL_iff_valid_atomic_axiomH.mpr;
+  . exact valid_atomic_axiomFour_of_valid_atomic_axiomL;
+
 
 abbrev cresswellFrame : Kripke.Frame where
   World := ℕ × Fin 2
@@ -82,7 +83,6 @@ namespace cresswellFrame
 
 @[match_pattern] abbrev sharp (n : ℕ) : cresswellFrame.World := (n, 0)
 postfix:max "♯" => sharp
-
 
 @[match_pattern] abbrev flat (n : ℕ) : cresswellFrame.World := (n, 1)
 postfix:max "♭" => flat
@@ -122,7 +122,7 @@ end cresswellModel
 
 open cresswellFrame cresswellModel
 
-lemma not_valid_axiomFour_in_cresswellModel : ¬(Satisfies cresswellModel 2♯ (Axioms.Four (atom 0))) := by
+lemma cresswellModel.not_valid_axiomFour : ¬(Satisfies cresswellModel 2♯ (Axioms.Four (atom 0))) := by
   apply Satisfies.imp_def.not.mpr;
   push_neg;
   constructor;
@@ -144,6 +144,7 @@ lemma not_valid_axiomFour_in_cresswellModel : ¬(Satisfies cresswellModel 2♯ (
       constructor;
       . omega;
       . tauto;
+
 
 abbrev cresswellModel.truthset (φ : Formula _) := { x : cresswellModel.World | Satisfies cresswellModel x φ }
 local notation "‖" φ "‖" => cresswellModel.truthset φ
@@ -266,7 +267,7 @@ lemma either_finite_cofinite : (‖φ‖.Finite) ∨ (‖φ‖ᶜ.Finite) := by
 end cresswellModel.truthset
 
 open Classical in
-lemma valid_axiomH_in_cresswellModel : cresswellModel ⊧ □(□φ ⭤ φ) ➝ □φ := by
+lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ ⭤ φ) ➝ □φ := by
   rintro x;
   by_cases h : ∀ n, n♭ ∈ ‖φ‖;
   . have tsφc_fin : ‖φ‖ᶜ.Finite := or_iff_not_imp_left.mp truthset.either_finite_cofinite $ truthset.infinite_of_all_flat h;
@@ -341,30 +342,36 @@ lemma valid_axiomH_in_cresswellModel : cresswellModel ⊧ □(□φ ⭤ φ) ➝ 
         apply hn_max;
         omega;
 
-lemma provable_KH_of_valid_cresswellModel : Hilbert.KH ⊢! φ → cresswellModel ⊧ φ := by
+end Kripke
+
+
+namespace Hilbert.KHen
+
+lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢! φ → cresswellModel ⊧ φ := by
   intro h;
   induction h using Hilbert.Deduction.rec! with
   | maxm h =>
     rcases (by simpa using h) with (⟨_, rfl⟩ | ⟨_, rfl⟩);
     . exact Kripke.ValidOnModel.axiomK;
-    . exact valid_axiomH_in_cresswellModel;
+    . exact cresswellModel.valid_axiomHen;
   | mdp ihφψ ihφ => exact Kripke.ValidOnModel.mdp ihφψ ihφ;
   | nec ihφ => exact Kripke.ValidOnModel.nec ihφ;
   | imply₁ => exact Kripke.ValidOnModel.imply₁;
   | imply₂ => exact Kripke.ValidOnModel.imply₂;
   | ec => exact Kripke.ValidOnModel.elimContra;
 
-lemma KH_unprov_axiomFour : Hilbert.KH ⊬ Axioms.Four (atom 0) := fun hC =>
-  not_valid_axiomFour_in_cresswellModel (provable_KH_of_valid_cresswellModel hC 2♯)
+lemma unprovable_atomic_axiomFour : Hilbert.KHen ⊬ Axioms.Four (atom a) := by
+  by_contra hC;
+  exact cresswellModel.not_valid_axiomFour $ Kripke.valid_cresswellModel_of_provable hC 2♯;
 
-theorem KH_KripkeIncomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, (Hilbert.KH ⊢! φ ↔ C ⊧ φ) := by
+theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, (Hilbert.KHen ⊢! φ ↔ C ⊧ φ) := by
   rintro ⟨C, h⟩;
-  have : C ⊧ Axioms.H (atom 0) := @h (Axioms.H (atom 0)) |>.mp $ by simp;
-  have : C ⊧ Axioms.Four (atom 0) := fun {F} hF => valid_atomic_Four_of_valid_atomic_H (this hF);
-  have : Hilbert.KH ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
-  exact @KH_unprov_axiomFour this;
+  have : C ⊧ Axioms.Hen (atom 0) := @h (Axioms.Hen (atom 0)) |>.mp $ by simp;
+  have : C ⊧ Axioms.Four (atom 0) := fun {F} hF => valid_atomic_axiomFour_of_valid_atomic_axiomH (this hF);
+  have : Hilbert.KHen ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
+  exact @unprovable_atomic_axiomFour _ this;
 
-end Kripke
+end Hilbert.KHen
 
 
 namespace Logic
@@ -374,29 +381,29 @@ open Entailment
 open Kripke
 
 @[simp]
-theorem KH.proper_extension_of_K : Logic.K ⊂ Logic.KH := by
+theorem KHen.proper_extension_of_K : Logic.K ⊂ Logic.KHen := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KH ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+  . suffices ∃ φ, Hilbert.KHen ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
       rw [K.Kripke.all];
       tauto;
-    use (Axioms.H (.atom 0));
+    use (Axioms.Hen (.atom 0));
     constructor;
-    . exact axiomH!;
+    . exact axiomHen!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩, 0;
       simp [Satisfies, Semantics.Realize];
       constructor <;> tauto;
 
 @[simp]
-theorem GL.proper_extension_of_KH : Logic.KH ⊂ Logic.GL := by
+theorem GL.proper_extension_of_KHen : Logic.KHen ⊂ Logic.GL := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.KH ⊢! φ by tauto;
+  . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.KHen ⊢! φ by tauto;
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
-    . exact KH_unprov_axiomFour;
+    . apply Hilbert.KHen.unprovable_atomic_axiomFour;
 
 end Logic
 
