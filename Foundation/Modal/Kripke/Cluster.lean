@@ -314,23 +314,24 @@ instance [Finite F] : Finite F.skeleton := by
   dsimp only [Frame.skeleton];
   infer_instance;
 
-instance : F.IsTransitive.skeleton := by
+instance : F.skeleton.IsTransitive := by
   dsimp only [Frame.skeleton];
   infer_instance;
 
-instance : IsAntisymm _ F.skeleton :=  by
+instance : F.skeleton.IsAntisymmetric :=  by
   dsimp only [Frame.skeleton];
   infer_instance;
 
-instance [F.IsReflexive] : F.IsReflexive.skeleton :=  by
+instance [F.IsReflexive] : F.skeleton.IsReflexive :=  by
   dsimp only [Frame.skeleton];
   infer_instance;
+
+instance [F.IsReflexive] : F.skeleton.IsPartialOrder where
+
 
 instance [IsTotal _ F] : IsTotal _ F.skeleton := by
   dsimp only [Frame.skeleton];
   infer_instance;
-
-instance [F.IsReflexive] : IsPartialOrder _ F.skeleton where
 
 instance [IsTotal _ F] : IsLinearOrder _ F.skeleton where
 
@@ -350,11 +351,11 @@ instance [Finite F] : Finite F.strictSkelteon := by
   dsimp only [Frame.strictSkelteon];
   infer_instance;
 
-instance : F.IsTransitive.strictSkelteon := by
+instance : F.strictSkelteon.IsTransitive := by
   dsimp only [Frame.strictSkelteon];
   infer_instance;
 
-instance : IsIrrefl _ F.strictSkelteon := by
+instance : F.strictSkelteon.IsIrreflexive := by
   dsimp only [Frame.strictSkelteon];
   infer_instance;
 

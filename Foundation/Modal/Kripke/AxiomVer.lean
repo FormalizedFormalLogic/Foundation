@@ -9,7 +9,7 @@ open Formula.Kripke
 
 variable {F : Frame}
 
-class Frame.IsIsolated (F : Frame) extends _root_.IsIsolated F.Rel
+protected abbrev Frame.IsIsolated (F : Frame) := _root_.IsIsolated F.Rel
 
 instance : blackpoint.IsIsolated where
   isolated := by tauto;

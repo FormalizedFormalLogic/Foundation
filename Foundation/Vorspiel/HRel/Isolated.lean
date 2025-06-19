@@ -8,19 +8,10 @@ def Isolated (R : HRel α) := ∀ ⦃x y⦄, ¬R x y
 class IsIsolated (R : HRel α) where
   isolated : Isolated R
 
-instance [IsIsolated R] : IsCoreflexive R := ⟨by
-  intro x y Rxy;
-  exfalso;
-  apply IsIsolated.isolated Rxy;
-⟩
+@[simp] lemma isolated [IsIsolated R] {x y : α} : ¬R x y := by apply IsIsolated.isolated
 
-instance [IsIsolated R] : IsIrrefl α R := ⟨by
-  intro x Rxx;
-  apply IsIsolated.isolated Rxx;
-⟩
+instance [IsIsolated R] : IsCoreflexive R := ⟨by simp_all [Coreflexive]⟩
 
-instance [IsIsolated R] : IsTrans α R := ⟨by
-  intro x y z Rxy;
-  exfalso;
-  apply IsIsolated.isolated Rxy;
-⟩
+instance [IsIsolated R] : IsIrrefl α R := ⟨by simp_all⟩
+
+instance [IsIsolated R] : IsTrans α R := ⟨by simp_all⟩
