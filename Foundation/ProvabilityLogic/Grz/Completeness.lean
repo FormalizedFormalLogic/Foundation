@@ -95,7 +95,7 @@ theorem Grz.arithmetical_completeness_iff {T : Theory ℒₒᵣ} [T.Delta1Defina
 theorem Grz.arithmetical_completeness_model_iff
   {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [Arith.SoundOn T (Arith.Hierarchy 𝚷 2)] [ℕ ⊧ₘ* T] :
   (∀ {f : Realization ℒₒᵣ}, ℕ ⊧ₘ₀ f.strongInterpret ((𝐈𝚺₁).standardDP T) A) ↔ A ∈ Logic.Grz := by
-  apply Iff.trans ?_ Logic.iff_provable_Grz_provable_boxdot_S.symm;
+  apply Iff.trans ?_ Logic.iff_provable_Grz_provable_boxdot_S;
   apply Iff.trans ?_ (S.arithmetical_completeness_iff (T := T)).symm;
   constructor;
   . intro h f; exact Realization.iff_models_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mpr $ h;

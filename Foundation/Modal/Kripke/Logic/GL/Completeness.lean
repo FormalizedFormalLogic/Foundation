@@ -25,11 +25,11 @@ abbrev miniCanonicalFrame (φ : Formula ℕ) : Kripke.Frame where
 
 namespace miniCanonicalFrame
 
-instance : Finite (miniCanonicalFrame φ).World := inferInstance
+instance : (miniCanonicalFrame φ).IsFinite := inferInstance
 
-instance : IsIrrefl _ (miniCanonicalFrame φ).Rel := ⟨by simp [Irreflexive]⟩
+instance : (miniCanonicalFrame φ).IsIrreflexive := ⟨by simp [Irreflexive]⟩
 
-instance : IsTrans _ (miniCanonicalFrame φ).Rel := ⟨by
+instance : (miniCanonicalFrame φ).IsTransitive := ⟨by
   rintro X Y Z ⟨RXY, ⟨χ, _, _, _⟩⟩ ⟨RYZ, _⟩;
   constructor;
   . rintro ψ hq₁ hq₂;
@@ -38,6 +38,8 @@ instance : IsTrans _ (miniCanonicalFrame φ).Rel := ⟨by
     refine ⟨by assumption, by assumption, ?_⟩;
     exact RYZ χ (by assumption) (by assumption) |>.2;
 ⟩
+
+instance : (miniCanonicalFrame φ).IsFiniteGL where
 
 end miniCanonicalFrame
 
@@ -159,7 +161,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       refine RXY.1 ψ ?_ h |>.1;
       simpa;
 
-instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_trans_irrefl := ⟨by
+instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_GL := ⟨by
   intro φ;
   contrapose;
   intro h;
@@ -167,7 +169,8 @@ instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_trans_irr
   push_neg;
   use (miniCanonicalFrame φ);
   constructor;
-  . exact ⟨inferInstance, inferInstance, inferInstance⟩;
+  . simp;
+    infer_instance;
   . apply ValidOnFrame.not_of_exists_model_world;
     obtain ⟨X, hX₁⟩ := lindenbaum (Φ := {-φ}) (Ψ := φ.subformulas)
       (by
@@ -195,7 +198,7 @@ open Formula
 open Entailment
 open Kripke
 
-lemma GL.Kripke.finite_trans_irrefl : Logic.GL = FrameClass.finite_trans_irrefl.logic := eq_hilbert_logic_frameClass_logic
+lemma GL.Kripke.finite_trans_irrefl : Logic.GL = FrameClass.finite_GL.logic := eq_hilbert_logic_frameClass_logic
 
 end Logic
 

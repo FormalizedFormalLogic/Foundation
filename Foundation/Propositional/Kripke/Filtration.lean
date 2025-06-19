@@ -1,5 +1,4 @@
 import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Propositional.Kripke.Preservation
 
 universe u v
@@ -87,11 +86,7 @@ section
 
 variable {M T}
 
-lemma reflexive_filterOf_of_reflexive (h_filter : FilterOf FM M T) (hRefl : Reflexive M.toFrame) : Reflexive FM.Rel := by
-  intro X;
-  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) X);
-  convert h_filter.def_rel_forth $ hRefl x <;> simp_all;
-
+/-
 lemma serial_filterOf_of_serial (h_filter : FilterOf FM M T) (hSerial : Serial M.toFrame) : Serial FM.Rel := by
   intro X;
   obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) X);
@@ -99,6 +94,7 @@ lemma serial_filterOf_of_serial (h_filter : FilterOf FM M T) (hSerial : Serial M
   use (cast (h_filter.def_world.symm) ⟦y⟧);
   convert h_filter.def_rel_forth $ Rxy;
   simp_all;
+-/
 
 end
 
@@ -248,7 +244,7 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
       simp only [Quotient.eq, FilterEqvSetoid, filterEquiv];
       intro φ hφ;
       constructor;
-      . obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp Rxy;
+      . obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp Rxy;
         clear Rxy Ryx;
         induction n using PNat.recOn generalizing x with
         | one =>
@@ -265,7 +261,7 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
           have : u' ⊧ φ := formula_hereditary Rx'u' this;
           have : u ⊧ φ := FilterEqvQuotient.iff_of_eq euu' φ hφ |>.mpr this;
           exact ih u RUY this;
-      . obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp Ryx;
+      . obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp Ryx;
         clear Rxy Ryx;
         induction n using PNat.recOn generalizing y with
         | one =>
@@ -292,7 +288,7 @@ abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [
       intro X Y RXY a hX ha;
       obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
       obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
-      obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp RXY;
+      obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp RXY;
       clear RXY;
       induction n using PNat.recOn generalizing x with
       | one =>
@@ -319,7 +315,7 @@ instance finestFiltrationTransitiveClosureModel.filterOf : FilterOf (finestFiltr
     tauto;
   def_rel_back := by
     rintro x y RXY;
-    obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp RXY;
+    obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp RXY;
     clear RXY;
     induction n using PNat.recOn generalizing x with
     | one =>

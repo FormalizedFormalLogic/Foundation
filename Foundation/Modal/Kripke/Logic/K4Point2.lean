@@ -8,32 +8,33 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.trans_weakConfluent : FrameClass := { F | IsTrans _ F ∧ IsWeakConfluent _ F }
+
+namespace Kripke
+
+class Frame.IsK4Point2 (F : Kripke.Frame) extends F.IsTransitive, F.IsPiecewiseConvergent where
+
+abbrev FrameClass.K4Point2 : FrameClass := { F | F.IsK4Point2 }
+
+end Kripke
+
 
 namespace Hilbert.K4Point2.Kripke
 
-instance sound : Sound (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_WeakPoint2_of_weakConfluent;
 
 instance consistent : Entailment.Consistent (Hilbert.K4Point2) :=
-  consistent_of_sound_frameclass FrameClass.trans_weakConfluent $ by
+  consistent_of_sound_frameclass Kripke.FrameClass.K4Point2 $ by
     use whitepoint;
-    apply Set.mem_setOf_eq.mpr;
     constructor;
-    . infer_instance;
-    . infer_instance;
 
-instance canonical : Canonical (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent :=  ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
-⟩
+instance canonical : Canonical (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 :=  ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.K4Point2) Kripke.FrameClass.trans_weakConfluent := inferInstance
+instance complete : Complete (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 := inferInstance
 
 end Hilbert.K4Point2.Kripke
 
@@ -44,12 +45,12 @@ open Formula
 open Entailment
 open Kripke
 
-lemma K4Point2.Kripke.trans_weakConfluent : Logic.K4Point2 = FrameClass.trans_weakConfluent.logic := eq_hilbert_logic_frameClass_logic
+lemma K4Point2.Kripke.trans_weakConfluent : Logic.K4Point2 = Kripke.FrameClass.K4Point2.logic := eq_hilbert_logic_frameClass_logic
 
 theorem K4Point2.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.trans ⊧ φ by
+  . suffices ∃ φ, Hilbert.K4Point2 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by
       rw [K4.Kripke.trans];
       tauto;
     use (Axioms.WeakPoint2 (.atom 0) (.atom 1));
@@ -62,7 +63,8 @@ theorem K4Point2.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point2 := by
       ⟩;
       use M, 0;
       constructor;
-      . refine ⟨by tauto⟩;
+      . simp only [Set.mem_setOf_eq];
+        exact { trans := by omega };
       . suffices ∃ (x : M.World), (∀ y, ¬x ≺ y) ∧ x ≠ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         use 1;

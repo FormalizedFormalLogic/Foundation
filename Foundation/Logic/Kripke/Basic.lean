@@ -1,7 +1,5 @@
 import Foundation.Logic.Semantics
 import Foundation.Logic.Entailment
-import Foundation.Vorspiel.Relation.Supplemantal
-import Foundation.Vorspiel.Relation.Iterate
 
 /-
   DEPRECATED!!

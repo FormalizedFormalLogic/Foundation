@@ -50,8 +50,8 @@ lemma Frame.exists_card [IsFinite F] : ∃ n : ℕ+, Nonempty (F.World ≃ Fin n
     subst hn0;
     apply Fin.elim0 $ hn.toFun (F.world_nonempty.some);
 
-lemma Frame.exists_terminal [IsFinite F] [IsPartialOrder _ F] : ∃ t ∈ F.terminals, s ≺ t := by
-  obtain ⟨t, ht₁, ht₂⟩ := @SatisfiesMcKinseyCondition.mckCondition _ F.Rel _ s;
+lemma Frame.exists_terminal [F.SatisfiesMcKinseyCondition] : ∃ t ∈ F.terminals, s ≺ t := by
+  obtain ⟨t, ht₁, ht₂⟩ := F.mckinsey s;
   use t;
   constructor;
   . apply ht₂;
@@ -113,49 +113,53 @@ end
 
 namespace Kripke
 
-abbrev FrameClass.finite_confluent_partial_order : FrameClass := { F | F.IsFinite ∧ IsPartialOrder _ F.Rel ∧ IsConfluent _ F.Rel }
+variable {F : Frame}
+
+protected class Frame.IsFiniteGrzPoint2 (F : Frame) extends F.IsFinite, F.IsPartialOrder, F.IsPiecewiseStronglyConvergent where
+
+protected abbrev FrameClass.finite_GrzPoint2 : FrameClass := { F | F.IsFiniteGrzPoint2 }
+
+instance [F.IsFiniteGrzPoint2] : F.IsS4Point2M where
 
 end Kripke
 
 
 namespace Hilbert.GrzPoint2.Kripke
 
-instance finite_sound : Sound (Hilbert.GrzPoint2) FrameClass.finite_confluent_partial_order := instSound_of_validates_axioms $ by
+instance finite_sound : Sound (Hilbert.GrzPoint2) FrameClass.finite_GrzPoint2 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl);
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_AxiomPoint2_of_confluent;
 
 instance consistent : Entailment.Consistent (Hilbert.GrzPoint2) :=
-  consistent_of_sound_frameclass FrameClass.finite_confluent_partial_order $ by
+  consistent_of_sound_frameclass FrameClass.finite_GrzPoint2 $ by
     use whitepoint;
-    refine ⟨inferInstance, inferInstance, inferInstance⟩;
+    constructor;
 
 
 section
 
 open Relation
 
-instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_confluent_partial_order := ⟨by
+instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_GrzPoint2 := ⟨by
   intro φ;
   contrapose;
   intro hφ;
 
   replace hφ : Hilbert.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
   generalize eΓ : (φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList = Γ at hφ;
-  obtain ⟨M, r, ⟨_, M_refl, M_trans, M_antisymm⟩, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (@Hilbert.Grz.Kripke.complete.complete _) hφ;
-  have : IsPartialOrder _ M.toFrame := IsPartialOrder.mk
-
-  clear hφ;
+  obtain ⟨M, r, hM, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (@Hilbert.Grz.Kripke.complete.complete _) hφ;
+  replace hM := Set.mem_setOf_eq.mp hM;
+  -- have : IsPartialOrder _ M.toFrame := IsPartialOrder.mk
 
   let RM := M↾r;
   let r' : RM.World := ⟨r, by tauto⟩;
   have RM_rooted : ∀ (w : RM.World), r' ≺ w := by
     intro w;
     by_cases e : r' = w;
-    . subst e; apply Frame.pointGenerate.isRefl.refl;
-    . exact Frame.IsRooted.root_generates w (by tauto) |>.unwrap (trans := Frame.pointGenerate.isTrans)
-  have : IsPartialOrder _ RM.Rel := Frame.pointGenerate.isPartialOrder;
+    . subst e; apply RM.refl;
+    . exact Frame.IsRooted.root_generates w (by tauto) |>.unwrap;
 
   replace hΓφ : ¬(r' ⊧ ⋀Γ → r' ⊧ φ) := Satisfies.imp_def.not.mp $ Model.pointGenerate.modal_equivalent_at_root (r := r) |>.not.mpr hΓφ;
   push_neg at hΓφ;
@@ -175,19 +179,18 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
   };
   apply not_validOnFrameClass_of_exists_model_world;
   use M', (Sum.inl r');
-  refine ⟨⟨?_, ?_, ⟨?_⟩⟩, ?_⟩;
-  . apply Frame.isFinite_iff _ |>.mpr;
-    infer_instance;
-  . exact {
+  constructor;
+  . apply Set.mem_setOf_eq.mpr;
+    exact {
       refl := by
         intro x;
         match x with
-        | Sum.inl x => apply (Frame.pointGenerate.isRefl).refl;
-        | Sum.inr x => simp_all [M'];
+        | Sum.inl x => simp [M'];
+        | Sum.inr x => simp_all [M'];,
       trans := by
         intro x y z Rxy Ryz;
         match x, y, z with
-        | Sum.inl x, Sum.inl y, Sum.inl z => exact Frame.pointGenerate.isTrans.transitive Rxy Ryz;
+        | Sum.inl x, Sum.inl y, Sum.inl z => exact Frame.pointGenerate.isTransitive.trans _ _ _ Rxy Ryz;
         | _, _, Sum.inr z => simp_all [M'];
         | _, Sum.inr y, Sum.inl z => simp_all [M'];
       antisymm := by
@@ -195,14 +198,15 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
         match x, y with
         | Sum.inl x, Sum.inl y =>
           simp only [Sum.inl.injEq, M'];
-          exact Frame.pointGenerate.isAntisymm.antisymm _ _ Rxy Ryz;
+          exact Frame.pointGenerate.isAntisymmetric.antisymm _ _ Rxy Ryz;
         | Sum.inl x, Sum.inr y => simp_all [M'];
         | Sum.inr x, Sum.inr y => simp_all [M'];
         | Sum.inr x, Sum.inl y => simp_all [M'];
-    };
-  . rintro x y z ⟨Rxy, Ryz⟩;
-    use (Sum.inr ());
-    simp [M'];
+      ps_convergent := by
+        rintro x y z Rxy Ryz;
+        use (Sum.inr ());
+        simp [M'];
+    }
   . have H₁ : ∀ a ∈ φ.atoms, ∀ t ∈ RM.toFrame.terminals, ∀ t' ∈ RM.toFrame.terminals, RM t a → RM t' a := by
       intro a ha t t_terminal t' t'_terminal hy;
       by_contra hy';
@@ -255,7 +259,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_conflu
           | Sum.inr _ =>
             apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mp;
             apply ht;
-            apply Frame.pointGenerate.isRefl.refl;
+            apply Frame.refl;
         . intro ht u Rtu;
           have := t_terminal Rtu; subst this;
           apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mpr;
@@ -297,13 +301,13 @@ open Formula
 open Entailment
 open Kripke
 
-lemma GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_confluent_partial_order.logic := eq_hilbert_logic_frameClass_logic
+lemma GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_GrzPoint2.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
 theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by
+  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_Grz ⊧ φ by
       rw [Grz.Kripke.finite_partial_order];
       tauto;
     use Axioms.Point2 (.atom 0);
@@ -316,11 +320,11 @@ theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
       ⟩;
       use M, 0;
       constructor;
-      . refine ⟨by tauto, {
+      . refine {
           refl := by omega
           trans := by omega
           antisymm := by simp [M]; omega;
-        }⟩;
+        };
       . apply Satisfies.imp_def₂.not.mpr;
         push_neg;
         constructor;
@@ -342,9 +346,10 @@ theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
 theorem GrzPoint2.proper_extension_of_S4Point2M : Logic.S4Point2M ⊂ Logic.GrzPoint2 := by
   constructor;
   . rw [S4Point2M.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
-    rintro φ hφ F ⟨_, _, _⟩;
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance, inferInstance⟩;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
   . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.preorder_confluent_mckinsey ⊧ φ by
       rw [S4Point2M.Kripke.preorder_confluent_mckinsey];
       tauto;
@@ -354,13 +359,16 @@ theorem GrzPoint2.proper_extension_of_S4Point2M : Logic.S4Point2M ⊂ Logic.GrzP
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
       constructor;
-      . refine ⟨?_, ⟨?_⟩, ⟨?_⟩⟩;
-        . apply isPreorder_iff _ _ |>.mpr;
-          refine ⟨⟨?_⟩, ⟨?_⟩⟩;
-          . omega;
-          . omega;
-        . simp [Confluent];
-        . simp [McKinseyCondition];
+      . apply Set.mem_setOf_eq.mpr;
+        exact {
+          trans := by omega,
+          refl := by omega,
+          mckinsey := by simp;
+          ps_convergent := by
+            intro x y z Rxy Rxz;
+            use 2;
+            omega;
+        };
       . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
           simpa [Semantics.Realize, Satisfies];
         intro x hx hxn1;

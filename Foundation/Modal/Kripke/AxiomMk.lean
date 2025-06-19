@@ -1,35 +1,30 @@
 import Foundation.Modal.Kripke.Completeness
 
-
-
-section
-
-variable {α : Type u} (rel : α → α → Prop)
-
-def MakinsonCondition := ∀ x, ∃ y, rel x y ∧ rel y x ∧ (∀ z, Rel.iterate rel 2 y z → rel x z)
-
-class SatisfiesMakinsonCondition (α) (rel : α → α → Prop) : Prop where
-  mkCondition : MakinsonCondition rel
-
-end
-
-
-
-
 namespace LO.Modal
 
 open Formula.Kripke
 
 namespace Kripke
 
-section definability
-
 variable {F : Kripke.Frame}
 
-lemma validate_axiomMk_of_makinsonCondition (h : MakinsonCondition F.Rel) : F ⊧ (Axioms.Mk (.atom 0) (.atom 1)) := by
+class Frame.SatisfiesMakinsonCondition (F : Frame) where
+  makinson : ∀ x : F, ∃ y, x ≺ y ∧ y ≺ x ∧ (∀ z, y ≺^[2] z → x ≺ z)
+
+lemma Frame.makinson [F.SatisfiesMakinsonCondition] : ∀ x : F, ∃ y, x ≺ y ∧ y ≺ x ∧ (∀ z, y ≺^[2] z → x ≺ z) := SatisfiesMakinsonCondition.makinson
+
+instance : whitepoint.SatisfiesMakinsonCondition := ⟨by
+  intro x;
+  use x;
+  tauto;
+⟩
+
+section definability
+
+lemma validate_axiomMk_of_satisfiesMakinsonCondition [F.SatisfiesMakinsonCondition] : F ⊧ (Axioms.Mk (.atom 0) (.atom 1)) := by
   intro V x hx;
   replace ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
-  obtain ⟨y, Rxy, Ryx, hz⟩ := @h x;
+  obtain ⟨y, Rxy, Ryx, hz⟩ := Frame.makinson x;
   apply Satisfies.dia_def.mpr;
   use y;
   constructor;
@@ -44,15 +39,6 @@ lemma validate_axiomMk_of_makinsonCondition (h : MakinsonCondition F.Rel) : F �
       exact Ryz;
     . apply Satisfies.dia_def.mpr;
       use x;
-
-lemma validate_axiomMk_of_satisfiesMakinsonCondition [SatisfiesMakinsonCondition _ F.Rel] : F ⊧ (Axioms.Mk (.atom 0) (.atom 1)) :=
-  validate_axiomMk_of_makinsonCondition SatisfiesMakinsonCondition.mkCondition
-
-instance : SatisfiesMakinsonCondition _ whitepoint := ⟨by
-  intro x;
-  use x;
-  tauto;
-⟩
 
 end definability
 
@@ -69,7 +55,7 @@ open MaximalConsistentTableau
 namespace Canonical
 
 open Classical in
-instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : SatisfiesMakinsonCondition _ (canonicalFrame 𝓢).Rel := ⟨by
+instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomMk 𝓢] : (canonicalFrame 𝓢).SatisfiesMakinsonCondition := ⟨by
   sorry;
   /-
   rintro x;

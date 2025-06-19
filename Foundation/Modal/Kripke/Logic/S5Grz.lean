@@ -9,8 +9,8 @@ open Formula
 open Entailment
 open Kripke
 
-lemma S5Grz.Kripke.finite_equality : Logic.S5Grz = Kripke.FrameClass.finite_equality.logic := by
-  rw [eq_S5Grz_Triv, Triv.Kripke.finite_equality]
+lemma S5Grz.Kripke.finite_equality : Logic.S5Grz = Kripke.FrameClass.finite_Triv.logic := by
+  rw [eq_S5Grz_Triv, Triv.Kripke.finite_equality];
 
 @[simp]
 theorem S5Grz.proper_extension_of_S5 : Logic.S5 ⊂ Logic.S5Grz := by
@@ -25,14 +25,17 @@ theorem S5Grz.proper_extension_of_S5 : Logic.S5 ⊂ Logic.S5Grz := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
       constructor;
-      . refine ⟨by simp [Universal]⟩;
+      . exact {
+          universal := by tauto;
+        };
       . simp [Semantics.Realize, Satisfies];
+        tauto;
 
 @[simp]
 theorem S5Grz.proper_extension_of_Grz : Logic.Grz ⊂ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.finite_partial_order ⊧ φ by
+  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.finite_Grz ⊧ φ by
       rw [Grz.Kripke.finite_partial_order];
       tauto;
     use Axioms.Five (.atom 0)
@@ -42,11 +45,11 @@ theorem S5Grz.proper_extension_of_Grz : Logic.Grz ⊂ Logic.S5Grz := by
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
       use M, 0;
       constructor;
-      . refine ⟨by tauto, {
+      . refine {
           refl := by omega,
           trans := by omega;
           antisymm := by simp [M]; omega;
-        }⟩;
+        };
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
           simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
         constructor;

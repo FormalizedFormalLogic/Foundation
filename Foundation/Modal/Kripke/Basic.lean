@@ -1,4 +1,4 @@
-import Foundation.Vorspiel.Relation.Iterate
+import Foundation.Vorspiel.HRel.Basic
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
 import Foundation.Modal.Logic.Basic
@@ -12,12 +12,12 @@ namespace Kripke
 
 structure Frame where
   World : Type
-  Rel : Rel World World
+  Rel : HRel World
   [world_nonempty : Nonempty World]
 attribute [simp] Frame.world_nonempty
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
-instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
+instance : CoeFun Frame (λ F => HRel F.World) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
 namespace Frame
@@ -52,16 +52,6 @@ def whitepoint : Frame := ⟨Unit, λ _ _ => True⟩
 instance : Finite whitepoint.World := by
   dsimp [whitepoint];
   infer_instance
-instance : IsRefl _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsTrans _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsEuclidean _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsSymm _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsSerial _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsAntisymm _ whitepoint.Rel := ⟨by tauto⟩
-instance : IsPreorder _ whitepoint.Rel where
-instance : IsEquiv _ whitepoint.Rel where
-instance : IsPartialOrder _ whitepoint.Rel where
-instance : IsEquality _ whitepoint.Rel := ⟨by tauto⟩
 
 def blackpoint : Frame := ⟨Unit, λ _ _ => False⟩
 
@@ -71,7 +61,7 @@ instance : Finite blackpoint.World := by
 instance : IsIrrefl _ blackpoint.Rel := by tauto
 instance : IsTrans _ blackpoint.Rel := ⟨by tauto⟩
 instance : IsStrictOrder _ blackpoint.Rel where
-instance : IsConnected _ blackpoint.Rel := ⟨by tauto⟩
+-- instance : IsConnected _ blackpoint.Rel := ⟨by tauto⟩
 
 end
 
@@ -215,7 +205,7 @@ lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
 lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by
   induction Γ using List.induction_with_singleton with
   | hcons φ Γ hΓ ih =>
-    suffices x ⊧ φ ∨ x ⊧ ⋁Γ ↔ x ⊧ φ ∨ ∃ a ∈ Γ, x ⊧ a by simpa [List.disj₂_cons_nonempty hΓ];
+    suffices x ⊧ φ ∨ x ⊧ ⋁Γ ↔ x ⊧ φ ∨ ∃ a ∈ Γ, x ⊧ a by simp [List.disj₂_cons_nonempty hΓ];
     constructor;
     . rintro (_ | h)
       . tauto;
@@ -228,7 +218,7 @@ lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by
 lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by
   induction Γ using List.induction_with_singleton with
   | hcons φ Γ hΓ ih =>
-    suffices (x ⊧ φ ∧ x ⊧ ⋀Γ) ↔ (x ⊧ φ ∧ ∀ φ ∈ Γ, x ⊧ φ) by simpa [List.conj₂_cons_nonempty hΓ];
+    suffices (x ⊧ φ ∧ x ⊧ ⋀Γ) ↔ (x ⊧ φ ∧ ∀ φ ∈ Γ, x ⊧ φ) by simp [List.conj₂_cons_nonempty hΓ];
     constructor;
     . intro ⟨_, hΓ⟩;
       constructor;
@@ -594,17 +584,6 @@ lemma Validates.inter_of (h₁ : C₁.Validates Γ₁) (h₂ : C₂.Validates Γ
   rintro ⟨hF₁, hF₂⟩ φ (hφ₁ | hφ₂);
   . exact h₁ F hF₁ _ hφ₁;
   . exact h₂ F hF₂ _ hφ₂;
-
-/-
-lemma Validates.sInter_of
-  (Ps : Set (FrameClass × FormulaSet ℕ))
-  (hPs : ∀ P ∈ Ps, Validates P.1 P.2)
-  : Validates (⋂₀ (Ps.image (·.1))) (⋃₀ (Ps.image (·.2))) := by
-  rintro F hF φ hφ;
-  simp only [Set.sInter_image, Set.mem_iInter, Prod.forall] at hF hφ;
-  simp at hPs;
-  sorry;
--/
 
 lemma ValidatesFormula.inter_of (h₁ : C₁.ValidatesFormula φ₁) (h₂ : C₂.ValidatesFormula φ₂) : (C₁ ∩ C₂).Validates {φ₁, φ₂}
   := Validates.inter_of h₁ h₂

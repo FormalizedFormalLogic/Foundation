@@ -1,23 +1,27 @@
 import Foundation.Modal.Kripke.Preservation
+import Foundation.Modal.Kripke.Irreflexive
+import Foundation.Modal.Kripke.Asymmetric
 
 namespace LO.Modal
 
 namespace Kripke
 
+variable {F : Kripke.Frame}
+
 open Formula.Kripke
 open Relation
 
-class Frame.IsGenerated (F : Kripke.Frame) (R : Set F.World) (roots_nonempty : R.Nonempty := by tauto_set) where
-  roots_generates : ∀ w ∉ R, ∃ r ∈ R, r ≺^+ w
+class Frame.IsGenerated (F : Kripke.Frame) (R : { s : Set F.World // s.Nonempty }) where
+  roots_generates : ∀ w ∉ R.1, ∃ r ∈ R.1, F.Rel.TransGen r w
 
 class Frame.IsRooted (F : Kripke.Frame) (r : outParam F.World) where
-  root_generates : ∀ w ≠ r, r ≺^+ w
+  root_generates : ∀ w ≠ r, F.Rel.TransGen r w
 
 namespace Frame.IsRooted
 
 variable {F : Frame} {r : F.World} [rooted : F.IsRooted r]
 
-instance [rooted : F.IsRooted r] : F.IsGenerated {r} where
+instance [rooted : F.IsRooted r] : F.IsGenerated (⟨{r}, by tauto⟩) where
   roots_generates := by
     rintro x hx;
     use r;
@@ -25,10 +29,10 @@ instance [rooted : F.IsRooted r] : F.IsGenerated {r} where
     . tauto;
     . exact rooted.root_generates x hx;
 
-lemma direct_rooted_of_trans [IsTrans _ F.Rel] : ∀ x ≠ r, r ≺ x := by
+lemma direct_rooted_of_trans [F.IsTransitive] : ∀ x ≠ r, r ≺ x := by
   intro x hx;
-  obtain ⟨n, hn, Rrx⟩ := Relation.TransGen.exists_iterate.mp $ rooted.root_generates x hx;
-  exact Rel.iterate.unwrap_of_trans hn Rrx;
+  obtain ⟨n, Rrx⟩ := HRel.TransGen.exists_iterate.mp $ rooted.root_generates x hx;
+  exact HRel.iterate.unwrap_of_trans Rrx;
 
 end Frame.IsRooted
 
@@ -40,31 +44,28 @@ instance Frame.mkTransClosure.IsRooted {F : Frame} {r : F.World} [rooted : F.IsR
 namespace Frame
 
 
-def setGenerate (F : Kripke.Frame) (R : Set F.World) (R_nonempty : R.Nonempty := by tauto_set) : Kripke.Frame where
-  World := { w // w ∈ R ∨ ∃ r ∈ R, r ≺^+ w }
+def setGenerate (F : Kripke.Frame) (R : { s : Set F.World // s.Nonempty }) : Kripke.Frame where
+  World := { w // w ∈ R.1 ∨ ∃ r ∈ R.1, F.Rel.TransGen r w }
   Rel x y := x.1 ≺ y.1
-  world_nonempty := by
-    let ⟨r, hr⟩ := R_nonempty;
-    exact ⟨r, Or.inl hr⟩
+  world_nonempty := by let ⟨r, hr⟩ := R.2; exact ⟨r, Or.inl hr⟩
+infix:80 "↾" => Frame.setGenerate
 
 namespace setGenerate
 
-variable {F : Frame} {R : Set F.World} {R_nonempty : R.Nonempty}
+variable {F : Frame} {R}
 
-protected abbrev roots : Set (F.setGenerate R R_nonempty) := { r | r.1 ∈ R }
-
-@[simp]
-lemma roots_nonempty : (setGenerate.roots (F := F) (R := R) (R_nonempty := R_nonempty)).Nonempty := by
-  obtain ⟨r, hr⟩ := R_nonempty;
+protected abbrev roots : { s : Set (F↾R) // s.Nonempty } := ⟨{ r | r.1 ∈ R.1 }, by
+  obtain ⟨r, hr⟩ := R.2;
   use ⟨r, by tauto⟩;
   tauto;
+⟩
 
-lemma trans_rel_of_origin_trans_rel {hx : x ∈ R ∨ ∃ r ∈ R, r ≺^+ x} {hy : y ∈ R ∨ ∃ r ∈ R, r ≺^+ y} (Rxy : x ≺^+ y)
-  : (RelTrans (F := F.setGenerate R R_nonempty) ⟨x, hx⟩ ⟨y, hy⟩) := by
+lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.Rel.TransGen x y)
+  : ((F↾R)^+.Rel ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
-  | base h => exact Relation.TransGen.single h;
+  | base h => exact _root_.Relation.TransGen.single h;
   | @ih a c ha hb hc =>
-    let b : (F.setGenerate R R_nonempty).World := ⟨c, by
+    let b : (F.setGenerate R).World := ⟨c, by
       rcases hx with hx | ⟨r₁, hR₁, Rr₁a⟩ <;>
       rcases hy with hy | ⟨r₂, hR₂, Rr₂b⟩;
       . right; use a; constructor; assumption; exact TransGen.single ha;
@@ -84,7 +85,7 @@ lemma trans_rel_of_origin_trans_rel {hx : x ∈ R ∨ ∃ r ∈ R, r ≺^+ x} {h
     . exact ha;
     . apply hc;
 
-instance instGenerated : (F.setGenerate R R_nonempty).IsGenerated (setGenerate.roots) (by simp) where
+instance instGenerated : (F↾R).IsGenerated (setGenerate.roots) where
   roots_generates := by
     rintro ⟨r, (hr | ⟨t, ht, Rtx⟩)⟩ _;
     . simp_all;
@@ -98,17 +99,17 @@ end setGenerate
 
 
 abbrev pointGenerate (F : Kripke.Frame) (r : F.World) : Kripke.Frame where
-  World := { w // w = r ∨ r ≺^+ w }
+  World := { w // w = r ∨ F.TransGen r w }
   Rel x y := x.1 ≺ y.1
   world_nonempty := ⟨r, by tauto⟩
-infix:100 "↾" => Frame.pointGenerate
+infix:80 "↾" => Frame.pointGenerate
 
 namespace pointGenerate
 
-variable {F : Frame} {r : F.World}
+variable {F : Frame} {r : outParam (F.World)}
 
-lemma trans_rel_of_origin_trans_rel {hx : x = r ∨ r ≺^+ x} {hy : y = r ∨ r ≺^+ y} (Rxy : x ≺^+ y)
-  : (RelTrans (F := F↾r) ⟨x, hx⟩ ⟨y, hy⟩) := by
+lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.TransGen x y)
+  : ((F↾r)^+.Rel ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
   | base h => exact Relation.TransGen.single h;
   | @ih a c ha hb hc =>
@@ -124,7 +125,7 @@ lemma trans_rel_of_origin_trans_rel {hx : x = r ∨ r ≺^+ x} {hy : y = r ∨ r
     . exact ha;
     . apply hc;
 
-lemma origin_trans_rel_of_trans_rel {u v : (F↾r).World} (Ruv : u ≺^+ v) : u.1 ≺^+ v.1 := by
+lemma origin_trans_rel_of_trans_rel {u v : (F↾r).World} (Ruv : (F↾r).TransGen u v) : F.TransGen u.1 v.1 := by
   induction Ruv using TransGen.head_induction_on with
   | base h => exact Relation.TransGen.single h;
   | ih a b c => exact TransGen.head a c;
@@ -144,44 +145,38 @@ instance isFinite [finite : F.IsFinite] : (F↾r).IsFinite := inferInstance
 
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
-instance isRefl [IsRefl _ F] : IsRefl (F↾r).World (F↾r).Rel := ⟨by
-  rintro ⟨x, (rfl | hx)⟩ <;>
-  . have : x ≺ x := IsRefl.refl x;
-    exact this;
+instance isReflexive [F.IsReflexive] : (F↾r).IsReflexive where
+  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact IsRefl.refl x;
+
+instance isTransitive [F.IsTransitive] : (F↾r).IsTransitive where
+  trans := by
+    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ hxy hyz;
+    . assumption;
+    . assumption;
+    . have : z ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+    . assumption;
+    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+
+instance isAntisymmetric [F.IsAntisymmetric] : (F↾r).IsAntisymmetric := ⟨by
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy Ryx;
+  . tauto;
+  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx;
+  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx;
+  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx;
 ⟩
 
-instance isTrans [trans : IsTrans _ F] : IsTrans (F↾r).World (F↾r).Rel := ⟨by
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ hxy hyz;
-  . assumption;
-  . assumption;
-  . have : z ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
-  . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
-  . assumption;
-  . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
-  . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
-  . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
-⟩
+instance isIrreflexive [F.IsIrreflexive] : (F↾r).IsIrreflexive := ⟨by rintro ⟨x, (rfl | hx)⟩ h <;> simp at h⟩
 
-lemma rel_antisymm (F_antisymm : AntiSymmetric F) : AntiSymmetric (F↾r).Rel := by
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy hyx;
-  all_goals aesop;
-
-instance isAntisymm [IsAntisymm _ F] : IsAntisymm _ (F↾r).Rel := ⟨rel_antisymm IsAntisymm.antisymm⟩
-
-instance isPreorder [IsPreorder _ F] : IsPreorder _ (F↾r) where
-
-instance isPartialOrder [IsPartialOrder _ F] : IsPartialOrder _ (F↾r) where
-
-instance isIrrefl [IsIrrefl _ F] : IsIrrefl _ (F↾r).Rel := ⟨by
-  rintro ⟨x, (rfl | hx)⟩ h;
-  . exact IsIrrefl.irrefl _ $ by simpa using h;
-  . exact IsIrrefl.irrefl _ $ by simpa using h;
-⟩
-
-instance isAsymm [assym : IsAsymm _ F] : IsAsymm (F↾r).World (F↾r).Rel := ⟨by
+instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric := ⟨by
   rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy <;>
   { dsimp at Rxy; apply IsAsymm.asymm _ _ Rxy; }
 ⟩
+
+
+
 
 /-
 instance isConfluent [IsConfluent _ F] : IsConfluent _ (F↾r).Rel := ⟨by
@@ -216,17 +211,7 @@ instance isConnected (F_connected : Connected F) : Connected (F↾r).Rel := by
   . have := @F_connected x y z (by tauto); tauto;
 -/
 
-instance isUniversal [refl : IsRefl _ F] [eucl : IsEuclidean _ F] : IsUniversal _ (F↾r).Rel := ⟨by
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩;
-  . apply IsRefl.refl;
-  . exact hy.unwrap;
-  . suffices x ≺ y by simpa;
-    exact IsSymm.symm _ _ hx.unwrap;
-  . suffices x ≺ y by simpa;
-    exact IsEuclidean.euclidean hy.unwrap hx.unwrap;
-⟩
-
-def pMorphism : (F↾r) →ₚ F where
+def pMorphism (F : Kripke.Frame) (r : F) : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x
   forth := by
     rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy;
@@ -236,6 +221,7 @@ def pMorphism : (F↾r) →ₚ F where
     . simp at Rwv; use ⟨y, by tauto⟩
     . use ⟨y, by right; exact Relation.TransGen.tail hx Rwv⟩;
 
+/-
 def generatedSub : F↾r ⥹ F where
   toFun := λ ⟨x, _⟩ => x
   forth := by
@@ -246,6 +232,7 @@ def generatedSub : F↾r ⥹ F where
     . simp at Rwv; use ⟨y, by tauto⟩
     . use ⟨y, by right; exact Relation.TransGen.tail hx Rwv⟩;
   monic := by simp;
+-/
 
 end pointGenerate
 
@@ -257,23 +244,27 @@ infix:100 "↾" => Model.pointGenerate
 
 namespace Model.pointGenerate
 
-variable {M : Kripke.Model} {r : M.World}
+variable {M : Kripke.Model} {r : outParam M.World}
 
-instance [M.IsFinite] : (M↾r).IsFinite := by
-  simp [Model.pointGenerate];
-  infer_instance;
+instance [M.IsFinite] : (M↾r).IsFinite := by dsimp [Model.pointGenerate]; infer_instance;
 
 protected abbrev root : (M↾r).World := ⟨r, by tauto⟩
 
-instance : (M↾r).IsRooted pointGenerate.root := by
-  simp [Model.pointGenerate];
-  infer_instance;
+instance : (M↾r).IsRooted pointGenerate.root := by dsimp [Model.pointGenerate]; infer_instance;
 
 protected def pMorphism : (M↾r) →ₚ M := by
-  apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism (F := M.toFrame) (r := r));
+  apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism M.toFrame r);
   simp only [pointGenerate, Frame.pointGenerate, Subtype.forall];
   rintro p x (rfl | Rrx) <;> tauto;
 
+instance isReflexive [M.IsReflexive] : (M↾r).IsReflexive := Frame.pointGenerate.isReflexive
+instance isTransitive [M.IsTransitive] : (M↾r).IsTransitive := Frame.pointGenerate.isTransitive
+instance isAsymmetric [M.IsAsymmetric] : (M↾r).IsAsymmetric := Frame.pointGenerate.isAsymmetric
+instance isAntisymmetric [M.IsAntisymmetric] : (M↾r).IsAntisymmetric := Frame.pointGenerate.isAntisymmetric
+instance isPreorder [M.IsPreorder] : (M↾r).IsPreorder where
+instance isPartialOrder [M.IsPartialOrder] : (M↾r).IsPartialOrder where
+
+/-
 instance : (M↾r) ⥹ M := by
   letI g := Frame.pointGenerate.generatedSub (F := M.toFrame) (r := r);
   exact {
@@ -285,6 +276,7 @@ instance : (M↾r) ⥹ M := by
       simp [Model.pointGenerate, Frame.pointGenerate, g];
       rintro p x (rfl | Rrx) <;> tauto;
   }
+-/
 
 protected def bisimulation (r : M.World) : (M↾r) ⇄ M := Model.pointGenerate.pMorphism.bisimulation
 

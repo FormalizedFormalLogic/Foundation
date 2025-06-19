@@ -9,40 +9,44 @@ open Kripke
 open Hilbert.Kripke
 open Formula.Kripke
 
-namespace Kripke.FrameClass
+namespace Kripke
 
-protected abbrev confluent : FrameClass := { F | IsConfluent _ F }
-protected abbrev finite_confluent : FrameClass := { F | Finite F ∧ IsConfluent _ F }
+protected abbrev Frame.IsKC := Frame.IsPiecewiseStronglyConvergent
+protected class Frame.IsFiniteKC (F : Frame) extends F.IsFinite, F.IsKC
 
-end Kripke.FrameClass
+protected abbrev FrameClass.KC : FrameClass := { F | F.IsKC }
+protected abbrev FrameClass.finite_KC : FrameClass := { F | F.IsFiniteKC }
+
+end Kripke
 
 
 namespace Hilbert.KC.Kripke
 
-instance sound : Sound Hilbert.KC FrameClass.confluent :=
+instance sound : Sound Hilbert.KC FrameClass.KC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_WeakLEM_of_confluent
+    apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
 
-instance sound_finite : Sound Hilbert.KC FrameClass.finite_confluent :=
+instance sound_finite : Sound Hilbert.KC FrameClass.finite_KC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
-    rintro F ⟨_, hF⟩ _ rfl;
-    apply validate_WeakLEM_of_confluent
+    rintro F hF _ rfl;
+    replace hF := Set.mem_setOf_eq.mp hF;
+    apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
 
-instance consistent : Entailment.Consistent Hilbert.KC := consistent_of_sound_frameclass FrameClass.confluent $ by
+instance consistent : Entailment.Consistent Hilbert.KC := consistent_of_sound_frameclass FrameClass.KC $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
-  infer_instance
+  infer_instance;
 
-instance canonical : Canonical Hilbert.KC FrameClass.confluent := ⟨by
+instance canonical : Canonical Hilbert.KC FrameClass.KC := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Hilbert.KC FrameClass.confluent := inferInstance
+instance complete : Complete Hilbert.KC FrameClass.KC := inferInstance
 
 section FFP
 
@@ -50,7 +54,7 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_confluent := ⟨by
+instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_KC := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   rintro F F_con V r;
@@ -63,51 +67,51 @@ instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_confluent := 
   let FRM := finestFiltrationTransitiveClosureModel RM (φ.subformulas);
   apply filtration FRM finestFiltrationTransitiveClosureModel.filterOf (by simp) |>.mpr;
   apply hφ;
-
-  refine ⟨?_, ?_⟩;
-  . apply FilterEqvQuotient.finite; simp;
-  . apply isConfluent_iff _ _ |>.mpr;
-    rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ ⟨RXY, RXZ⟩;
-    . simp only [exists_and_left, and_self];
-      let Z : RM.World := ⟨z, by tauto⟩;
-      use ⟦Z⟧;
-      apply Relation.TransGen.single;
-      use Z;
-      constructor;
-      . tauto;
-      . use Z;
+  exact {
+    world_finite := by apply FilterEqvQuotient.finite; simp;
+    ps_convergent := by
+      rintro X ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ RXY RXZ;
+      . simp only [exists_and_left, and_self];
+        let Z : RM.World := ⟨z, by tauto⟩;
+        use ⟦Z⟧;
+        apply Relation.TransGen.single;
+        use Z;
         constructor;
         . tauto;
-        . apply F.refl;
-    . let Y : RM.World := ⟨y, by tauto⟩;
-      let Z : RM.World := ⟨z, by tauto⟩;
-      use ⟦Z⟧;
-      constructor;
-      . apply TransGen.single;
-        use Y, Z;
-        tauto;
-      . apply Frame.refl;
-    . let Y : RM.World := ⟨y, by tauto⟩;
-      let Z : RM.World := ⟨z, by tauto⟩;
-      use ⟦Y⟧;
-      constructor;
-      . apply Frame.refl;
-      . apply TransGen.single;
-        use Z, Y;
-        tauto;
-    . obtain ⟨u, Ryu, Rzu⟩ := IsConfluent.confluent ⟨Rry, Rrz⟩;
-      have : r ≺ u := F.trans Rry Ryu;
-      let Y : RM.World := ⟨y, by tauto⟩;
-      let Z : RM.World := ⟨z, by tauto⟩;
-      let U : RM.World := ⟨u, by tauto⟩;
-      use ⟦U⟧;
-      constructor;
-      . apply TransGen.single;
-        use Y, U;
-        tauto;
-      . apply TransGen.single;
-        use Z, U;
-        tauto;
+        . use Z;
+          constructor;
+          . tauto;
+          . apply F.refl;
+      . let Y : RM.World := ⟨y, by tauto⟩;
+        let Z : RM.World := ⟨z, by tauto⟩;
+        use ⟦Z⟧;
+        constructor;
+        . apply TransGen.single;
+          use Y, Z;
+          tauto;
+        . apply Frame.refl;
+      . let Y : RM.World := ⟨y, by tauto⟩;
+        let Z : RM.World := ⟨z, by tauto⟩;
+        use ⟦Y⟧;
+        constructor;
+        . apply Frame.refl;
+        . apply TransGen.single;
+          use Z, Y;
+          tauto;
+      . obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rry Rrz;
+        have : r ≺ u := F.trans Rry Ryu;
+        let Y : RM.World := ⟨y, by tauto⟩;
+        let Z : RM.World := ⟨z, by tauto⟩;
+        let U : RM.World := ⟨u, by tauto⟩;
+        use ⟦U⟧;
+        constructor;
+        . apply TransGen.single;
+          use Y, U;
+          tauto;
+        . apply TransGen.single;
+          use Z, U;
+          tauto;
+  }
 ⟩
 
 end FFP
@@ -120,21 +124,19 @@ open Kripke
 open Entailment
 open Formula.Kripke
 
-lemma Kripke.confluent : Logic.KC = Kripke.FrameClass.confluent.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma Kripke.finite_confluent : Logic.KC = Kripke.FrameClass.finite_confluent.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.KC : Logic.KC = FrameClass.KC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.finite_KC : Logic.KC = FrameClass.finite_KC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 @[simp]
 theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KC := by
   constructor;
   . exact (Hilbert.weakerThan_of_subset_axioms (by simp)).subset;
-  . suffices ∃ φ, Hilbert.KC ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
-      rw [Logic.Int.Kripke.all];
-      tauto;
+  . suffices ∃ φ, Hilbert.KC ⊢! φ ∧ ¬FrameClass.all ⊧ φ by rw [Int.Kripke.Int]; tauto;
     use Axioms.WeakLEM (.atom 0);
     constructor;
     . exact wlem!;
     . apply not_validOnFrameClass_of_exists_frame;
-      use {
+      let F : Frame := {
         World := Fin 3
         Rel := λ x y => x = 0 ∨ (x = y)
         rel_partial_order := {
@@ -143,13 +145,13 @@ theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KC := by
           antisymm := by omega;
         }
       };
+      use F;
       constructor;
       . tauto;
-      . apply not_imp_not.mpr $ Kripke.confluent_of_validate_WeakLEM;
-        unfold Confluent;
-        push_neg;
-        use 0, 1, 2;
-        simp;
+      . apply not_imp_not.mpr $ isPiecewiseStronglyConvergent_of_validate_axiomWeakLEM;
+        by_contra hC;
+        have := @F.ps_convergent _ 0 1 2;
+        omega;
 
 end Logic.KC
 

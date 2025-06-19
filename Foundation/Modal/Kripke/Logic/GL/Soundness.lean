@@ -11,23 +11,30 @@ open Entailment.Context
 open Kripke
 open Hilbert.Kripke
 
-abbrev Kripke.FrameClass.trans_cwf : FrameClass := { F | IsTrans _ F.Rel ∧ IsConverseWellFounded _ F.Rel }
+namespace Kripke
 
-abbrev Kripke.FrameClass.finite_trans_irrefl: FrameClass := { F | Finite F.World ∧ IsTrans _ F.Rel ∧ IsIrrefl _ F.Rel }
+variable {F : Frame}
+
+protected class Frame.IsFiniteGL (F : Frame) extends F.IsFinite, F.IsStrictPreorder
+
+protected abbrev FrameClass.finite_GL: FrameClass := { F | F.IsFiniteGL }
+
+instance : blackpoint.IsFiniteGL where
+
+end Kripke
 
 
 namespace Hilbert.GL.Kripke
 
-instance finite_sound : Sound (Hilbert.GL) FrameClass.finite_trans_irrefl := instSound_of_validates_axioms $ by
+instance finite_sound : Sound (Hilbert.GL) FrameClass.finite_GL := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ rfl;
   exact validate_AxiomL_of_trans_cwf;
 
 instance consistent : Entailment.Consistent (Hilbert.GL) :=
-  consistent_of_sound_frameclass FrameClass.finite_trans_irrefl $ by
+  consistent_of_sound_frameclass FrameClass.finite_GL $ by
     use blackpoint;
-    apply Set.mem_setOf_eq.mpr;
-    exact ⟨inferInstance, inferInstance, inferInstance⟩
+    constructor;
 
 end Hilbert.GL.Kripke
 
