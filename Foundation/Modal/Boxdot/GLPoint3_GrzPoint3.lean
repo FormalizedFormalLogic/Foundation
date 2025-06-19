@@ -10,10 +10,11 @@ open Relation (ReflGen)
 open Formula.Kripke
 
 variable {F : Frame} {φ : Formula _}
+instance [F.IsFiniteGrzPoint3] : (F^≠).IsFiniteGLPoint3 where
 
 end Kripke
 
-namespace Hilbert
+namespace Logic
 
 open Kripke
 open Formula.Kripke
@@ -21,13 +22,14 @@ open Formula (boxdotTranslate)
 open Modal.Kripke
 open Entailment
 
-lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : (Hilbert.GrzPoint3) ⊢! φ → (Hilbert.GLPoint3) ⊢! φᵇ := boxdotTranslated_of_dominate $ by
+lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : (Hilbert.GrzPoint3) ⊢! φ → (Hilbert.GLPoint3) ⊢! φᵇ := Hilbert.boxdotTranslated_of_dominate $ by
   intro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨s, _, rfl⟩);
   . exact boxdot_axiomK!;
   . exact boxdot_Grz_of_L!
   . apply Hilbert.GLPoint3.Kripke.finite_complete.complete;
-    rintro F ⟨_, _, _⟩ V x;
+    rintro F hF V x;
+    replace hF := Set.mem_setOf_eq.mp hF;
     apply Satisfies.or_def.mpr;
     by_contra hC;
     push_neg at hC;
@@ -70,19 +72,20 @@ lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : (Hilbert.GrzPoint3) ⊢!
       obtain ⟨hC₁₁₁, hC₁₁₂⟩ := Satisfies.and_def.mp hC₁₁
       obtain ⟨hC₂₁, hC₂₂⟩ := hC₂;
       obtain ⟨hC₂₁₁, hC₂₁₂⟩ := Satisfies.and_def.mp hC₂₁
-      rcases IsWeakConnected.weak_connected ⟨Rxy, Rxz, by by_contra eyz; subst eyz; tauto⟩ with (Ryz | Rzy);
+      rcases F.p_connected' Rxy Rxz (by by_contra eyz; subst eyz; tauto) with (Ryz | Rzy);
       . exact hC₂₂ $ hC₁₁₂ z Ryz;
       . exact hC₁₂ $ hC₂₁₂ y Rzy;
 
 lemma provable_GrzPoint3_of_boxdotTranslated_GLPoint3 : (Hilbert.GLPoint3) ⊢! φᵇ → (Hilbert.GrzPoint3) ⊢! φ := by
   contrapose;
   intro h;
-  obtain ⟨F, ⟨_, _, _⟩, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Hilbert.GrzPoint3.Kripke.finite_complete |>.complete) h;
+  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Hilbert.GrzPoint3.Kripke.finite_complete |>.complete) h;
+  replace hF := Set.mem_setOf_eq.mp hF;
   apply not_imp_not.mpr $ Hilbert.GLPoint3.Kripke.finite_sound.sound;
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use F^≠;
   constructor;
-  . refine ⟨inferInstance, inferInstance, inferInstance⟩;
+  . apply Set.mem_setOf_eq.mpr; infer_instance;
   . apply Kripke.iff_frame_boxdot_reflexive_closure.not.mpr;
     apply iff_reflexivize_irreflexivize'.not.mp;
     exact h;
@@ -92,8 +95,8 @@ theorem iff_boxdotTranslatedGLPoint3_GrzPoint3 : (Hilbert.GLPoint3) ⊢! φᵇ �
   provable_boxdotTranslated_GLPoint3_of_GrzPoint3
 ⟩
 
-end Hilbert
+instance : BoxdotProperty (Logic.GLPoint3) (Logic.GrzPoint3) := ⟨iff_boxdotTranslatedGLPoint3_GrzPoint3⟩
 
-instance : BoxdotProperty (Logic.GLPoint3) (Logic.GrzPoint3) := ⟨Hilbert.iff_boxdotTranslatedGLPoint3_GrzPoint3⟩
+end Logic
 
 end LO.Modal

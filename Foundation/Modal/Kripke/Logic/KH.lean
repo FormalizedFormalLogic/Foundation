@@ -13,7 +13,7 @@ open Formula.Kripke
 
 namespace Kripke
 
-variable {F : Kripke.Frame} {a : ℕ}
+variable {F : Kripke.Frame} {a : ℕ} {φ : Formula ℕ}
 
 lemma valid_atomic_H_of_valid_atomic_L : F ⊧ (Axioms.L (atom a)) → F ⊧ (Axioms.H (atom a)) := by
   intro h V x hx;
@@ -58,10 +58,11 @@ lemma valid_atomic_L_iff_valid_atomic_H : F ⊧ Axioms.L (atom 0) ↔ F ⊧ Axio
   . exact valid_atomic_H_of_valid_atomic_L;
   . exact valid_atomic_L_of_valid_atomic_H;
 
-lemma valid_atomic_4_of_valid_atomic_L : F ⊧ Axioms.L (atom 0) → F ⊧ Axioms.Four (atom 0) := by
-  intro h V x h₂ y Rxy z Ryz;
+lemma valid_atomic_4_of_valid_atomic_L (h : F ⊧ Axioms.L (atom 0)) : F ⊧ Axioms.Four (atom 0) := by
+  intro V x h₂ y Rxy z Ryz;
   refine h₂ z ?_;
-  apply @trans_of_validate_AxiomL F h x y z Rxy Ryz;
+  have := isTransitive_of_validate_axiomL h;
+  apply F.trans Rxy Ryz;
 
 lemma valid_atomic_Four_of_valid_atomic_H : F ⊧ Axioms.H (atom 0) → F ⊧ Axioms.Four (atom 0) := by
   trans;

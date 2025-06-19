@@ -1,5 +1,6 @@
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Entailment.Cl
+import Foundation.Vorspiel.HRel.Euclidean
 
 namespace LO.Propositional
 
@@ -8,15 +9,21 @@ open Formula.Kripke
 
 namespace Kripke
 
+protected abbrev Frame.IsSymmetric (F : Frame) := _root_.IsSymm _ F.Rel
+lemma Frame.symm {F : Frame} [F.IsSymmetric] : ∀ ⦃x y : F⦄, x ≺ y → y ≺ x := by apply IsSymm.symm
+
+protected abbrev Frame.IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel
+lemma Frame.eucl {F : Frame} [F.IsEuclidean] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → y ≺ z := by apply IsRightEuclidean.reucl
+lemma Frame.eucl' {F : Frame} [F.IsEuclidean] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → z ≺ y := by apply IsRightEuclidean.reucl'
 
 section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_LEM_of_symmetric' : Symmetric F → F ⊧ (Axioms.LEM (.atom 0)) := by
-  unfold Symmetric Axioms.LEM;
-  contrapose;
-  push_neg;
+lemma validate_axiomLEM_of_isSymmetric [F.IsSymmetric] : F ⊧ (Axioms.LEM (.atom 0)) := by
+  have := F.symm;
+  revert this;
+  contrapose!;
   intro h;
 
   obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
@@ -34,24 +41,21 @@ lemma validate_LEM_of_symmetric' : Symmetric F → F ⊧ (Axioms.LEM (.atom 0)) 
   . by_contra Ryx;
     exact h₁ $ Satisfies.formula_hereditary Ryx hy;
 
-lemma validate_LEM_of_symmetric [IsSymm _ F] : F ⊧ (Axioms.LEM (.atom 0)) := by
-  apply validate_LEM_of_symmetric';
-  exact IsSymm.symm;
+lemma validate_axiomLEM_of_isEuclidean [F.IsEuclidean] : F ⊧ (Axioms.LEM (.atom 0)) := validate_axiomLEM_of_isSymmetric
 
-lemma validate_LEM_of_euclidean [IsEuclidean _ F] : F ⊧ (Axioms.LEM (.atom 0)) := validate_LEM_of_symmetric
-
-lemma euclidean_of_validate_LEM : F ⊧ (Axioms.LEM (.atom 0)) → Euclidean F := by
-  rintro h x y z Rxy Rxz;
-  let V : Kripke.Valuation F := ⟨λ {v a} => z ≺ v, by
+lemma isEuclidean_of_validate_axiomLEM (h : F ⊧ (Axioms.LEM (.atom 0))) : F.IsEuclidean := ⟨by
+  rintro x y z Rxy Rxz;
+  let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
     intro w v Rwv a Rzw;
     exact F.trans Rzw Rwv;
   ⟩;
-  suffices Satisfies ⟨F, V⟩ y (.atom 0) by simpa [Satisfies] using this;
-  apply V.hereditary Rxy;
-  have : ∀ (x_1 : F.World), x ≺ x_1 → z ≺ x_1 → z ≺ x := by simpa  [Semantics.Realize, Satisfies, V, or_iff_not_imp_right] using h V x;
-  apply this z;
-  . exact Rxz;
+  suffices Satisfies ⟨F, V⟩ z (.atom 0) by simpa [Satisfies] using this;
+  apply V.hereditary Rxz;
+  have : ∀ (w : F.World), x ≺ w → y ≺ w → y ≺ x := by simpa [Semantics.Realize, Satisfies, V, or_iff_not_imp_right] using h V x;
+  apply this y;
+  . exact Rxy;
   . apply F.refl;
+⟩
 
 end definability
 
@@ -68,24 +72,24 @@ open canonicalModel
 open SaturatedConsistentTableau
 open Classical
 
-namespace Canonical
+instance [Entailment.HasAxiomLEM 𝓢] : (canonicalFrame 𝓢).IsEuclidean := ⟨by
+  suffices ∀ x y z : (canonicalFrame 𝓢), x ≺ y → x ≺ z → z ≺ y by
+    intro x y z Rxy Rxz;
+    exact this x z y Rxz Rxy;
 
-instance [Entailment.HasAxiomLEM 𝓢] : IsEuclidean _ (canonicalFrame 𝓢).Rel := ⟨by
   rintro x y z;
   intro Rxy;
-  contrapose;
+  contrapose!;
   intro nRzy;
   obtain ⟨φ, hzφ, nhyφ⟩ := Set.not_subset.mp nRzy;
   apply Set.not_subset.mpr;
   use ∼φ;
   constructor;
   . by_contra hnφ;
-    have : φ ∈ y.1.1:= Rxy $ (or_iff_not_imp_right.mp $ iff_mem₁_or.mp $ mem₁_of_provable (by simp)) hnφ;
+    have : φ ∈ y.1.1 := Rxy $ (or_iff_not_imp_right.mp $ iff_mem₁_or.mp $ mem₁_of_provable (by simp)) hnφ;
     contradiction;
   . exact not_mem₁_neg_of_mem₁ hzφ;
 ⟩
-
-end Canonical
 
 end canonicality
 

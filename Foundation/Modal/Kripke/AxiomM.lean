@@ -7,35 +7,6 @@ import Foundation.Modal.Kripke.Logic.K4
 import Foundation.Modal.Kripke.Completeness
 import Mathlib.Order.Preorder.Finite
 
-section
-
-variable {α : Type u} (rel : α → α → Prop)
-
-/-- Every point can see terminal. -/
-def McKinseyCondition := ∀ x, ∃ y, rel x y ∧ (∀ z, rel y z → y = z)
-
-class SatisfiesMcKinseyCondition (α) (rel : α → α → Prop) : Prop where
-  mckCondition : McKinseyCondition rel
-
-instance [Finite α] [IsPartialOrder α rel] : SatisfiesMcKinseyCondition _ rel := ⟨by
-  intro x;
-  obtain ⟨y, _, Rxy, hy₃⟩ := @Finite.exists_le_maximal α {
-    le := rel,
-    le_refl := by apply _root_.refl,
-    le_trans := by intro x y z; apply _root_.trans,
-  } _ (λ y => rel x y) x (by apply _root_.refl);
-  use y;
-  constructor;
-  . tauto;
-  . intro z Ryz;
-    apply IsAntisymm.antisymm (r := rel) y z;
-    . assumption;
-    . exact @hy₃ z (_root_.trans Rxy Ryz) Ryz;
-⟩
-
-end
-
-
 
 namespace LO.Modal
 
@@ -158,119 +129,43 @@ open Formula.Kripke
 
 namespace Kripke
 
-section definability
-
 variable {F : Kripke.Frame}
 
-lemma not_mckinseyCondition'_of_not_validate_axiomM (h : ¬F ⊧ (Axioms.M (.atom 0))) :
-  ∃ x : F.World, ∀ y, x ≺ y → (∃ z w, (y ≺ z ∧ y ≺ w ∧ z ≠ w))
-  := by
-    obtain ⟨V, x, hx⟩ := ValidOnFrame.exists_valuation_world_of_not h;
-    have := Satisfies.imp_def₂.not.mp hx;
-    push_neg at this;
-    obtain ⟨h₁, h₂⟩ := this;
-    use x;
-    intro y Rxy;
-    obtain ⟨z, Ryz, hz⟩ := Satisfies.dia_def.mp $ h₁ _ Rxy;
-    obtain ⟨w, Ryw, hw⟩ := by
-      have := Satisfies.dia_def.not.mp h₂;
-      push_neg at this;
-      have := Satisfies.box_def.not.mp $ this y Rxy;
-      push_neg at this;
-      exact this;
-    have : z ≠ w := by
-      intro h;
-      subst h;
-      contradiction;
-    use z, w;
+class Frame.SatisfiesMcKinseyCondition (F : Frame) where
+  mckinsey : ∀ x : F, ∃ y, x ≺ y ∧ ∀ z, y ≺ z → y = z
 
-lemma not_mckinseyCondition_of_not_validate_axiomM (h : ¬F ⊧ (Axioms.M (.atom 0))) : ¬McKinseyCondition F.Rel := by
-  unfold McKinseyCondition;
-  push_neg;
-  obtain ⟨x, h⟩ := not_mckinseyCondition'_of_not_validate_axiomM h;
-  use x;
-  intro y Rxy;
-  obtain ⟨u, v, Ryu, Ryv, huv⟩ := h y Rxy;
-  by_cases hyu : y = u;
-  . subst hyu;
-    use v;
-  . use u;
+lemma Frame.mckinsey [F.SatisfiesMcKinseyCondition] : ∀ x : F, ∃ y, x ≺ y ∧ ∀ z, y ≺ z → y = z := SatisfiesMcKinseyCondition.mckinsey
 
-lemma validate_axiomM_of_mckinseyCondition : McKinseyCondition F → F ⊧ (Axioms.M (.atom 0)) := by
-  contrapose!;
-  exact not_mckinseyCondition_of_not_validate_axiomM;
-
-lemma validate_axiomM_of_satisfiesMcKinseyCondition [SatisfiesMcKinseyCondition _ F] : F ⊧ (Axioms.M (.atom 0)) := by
-  apply validate_axiomM_of_mckinseyCondition;
-  exact SatisfiesMcKinseyCondition.mckCondition;
-
-/-
-lemma validate_M_of_mckinseyan_trans (hTrans : Transitive F) : F ⊧ (Axioms.M (.atom 0)) → McKinseyCondition F := by
-  contrapose;
-  intro hMc;
-  unfold McKinseyCondition at hMc;
-  push_neg at hMc;
-  obtain ⟨x, h⟩ := hMc;
-  by_cases hDead : ∀ y, ¬x ≺ y;
-  . apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ _ _ => True), x;
-    suffices (∀ y, x ≺ y → ∃ x, y ≺ x) ∧ ∀ y, ¬x ≺ y by
-      simpa [Satisfies];
-    constructor;
-    . intro y Rxy;
-      have := hDead y Rxy;
-      contradiction;
-    . assumption;
-  . push_neg at hDead;
-    obtain ⟨y, Rxy⟩ := hDead;
-    apply ValidOnFrame.not_of_exists_valuation_world;
-    use (λ z _ =>
-      x ≺ z ∧ ∀ u, x ≺ u → ∃ v, (v ≠ z ∧ u ≺ z ∧ u ≺ v)
-    ), x;
-    apply Satisfies.imp_def₂.not.mpr;
-    push_neg;
-
-    constructor;
-    . apply Satisfies.box_def.mpr;
-      intro w Rxw;
-      apply Satisfies.dia_def.mpr;
-      obtain ⟨z, Rwz, hwz⟩ := h w Rxw;
-      use z;
-      constructor;
-      . assumption;
-      . simp [Semantics.Realize, Satisfies];
-        constructor;
-        . exact hTrans Rxw Rwz;
-        . intro u Rxu;
-          use w;
-          refine ⟨?_, ?_, ?_⟩;
-          . tauto;
-          . sorry
-          . sorry;
-    . apply Satisfies.dia_def.not.mpr
-      push_neg;
-      intro z Rxz;
-      apply Satisfies.box_def.not.mpr;
-      push_neg;
-      obtain ⟨w, Rzw, hzw⟩ := h z Rxz;
-      use w;
-      constructor;
-      . assumption;
-      . simp [Semantics.Realize, Satisfies];
-        intro Rxw;
-        use z;
-        constructor;
-        . assumption;
-        . intro v hvw _;
-          sorry;
-
--/
-
-instance : SatisfiesMcKinseyCondition _ whitepoint := ⟨by
+instance : whitepoint.SatisfiesMcKinseyCondition := ⟨by
   intro x;
   use x;
   tauto;
 ⟩
+
+section definability
+
+open Formula (atom)
+open Formula.Kripke
+
+lemma validate_axiomM_of_satisfiesMcKinseyCondition [F.SatisfiesMcKinseyCondition] : F ⊧ (Axioms.M (.atom 0)) := by
+  have := Frame.SatisfiesMcKinseyCondition.mckinsey (F := F);
+  revert this;
+  contrapose!;
+  intro h;
+  obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
+  have ⟨h₁, h₂⟩ := Satisfies.not_imp_def.mp h;
+  use x;
+  intro y Rxy;
+  obtain ⟨z, Ryz, hz⟩ := Satisfies.dia_def.mp $ h₁ _ Rxy;
+  obtain ⟨w, Ryw, h₂⟩ := Satisfies.not_box_def.mp $ (Satisfies.not_dia_def.mp h₂) y Rxy;
+  by_cases eyz : y = z;
+  . subst eyz;
+    use w;
+    constructor;
+    . assumption;
+    . by_contra hC; subst hC;
+      contradiction;
+  . tauto;
 
 end definability
 
@@ -287,7 +182,7 @@ open MaximalConsistentTableau
 namespace Canonical
 
 open Classical in
-instance {H : Hilbert ℕ} [Consistent H] [Hilbert.K4M ⪯ H] : SatisfiesMcKinseyCondition _ (canonicalFrame H).Rel := ⟨by
+instance {H : Hilbert ℕ} [Consistent H] [Hilbert.K4M ⪯ H] : (canonicalFrame H).SatisfiesMcKinseyCondition := ⟨by
   rintro x;
   have ⟨y, hy⟩ := lindenbaum (𝓢 := H) (t₀ := ⟨x.1.1.prebox ∪ Set.univ.image (λ φ => ◇φ ➝ □φ), ∅⟩) $ by
     intro Γ Δ hΓ hΔ;
@@ -347,12 +242,12 @@ instance {H : Hilbert ℕ} [Consistent H] [Hilbert.K4M ⪯ H] : SatisfiesMcKinse
   . obtain ⟨z, Ryz⟩ := hy;
     use z;
     constructor;
-    . exact _root_.trans Rxy Ryz;
+    . exact (canonicalFrame H).trans Rxy Ryz;
     . intro u Rzu;
       by_contra! ezu;
       obtain ⟨ξ, hξ₁, hξ₂⟩ := exists₁₂_of_ne ezu;
       have : □ξ ∈ y.1.1 := iff_mem₁_imp'.mp (by apply hy.1; simp) $ def_rel_dia_mem₁.mp Ryz hξ₁;
-      have : ξ ∈ u.1.1 := def_rel_box_mem₁.mp (_root_.trans Ryz Rzu) this;
+      have : ξ ∈ u.1.1 := def_rel_box_mem₁.mp ((canonicalFrame H).trans Ryz Rzu) this;
       exact iff_not_mem₂_mem₁.mpr this hξ₂;
   . use y;
     constructor;

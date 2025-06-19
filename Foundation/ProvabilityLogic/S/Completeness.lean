@@ -61,7 +61,6 @@ lemma GL_S_TFAE :
       apply Model.extendRoot.inr_satisfies_iff.mp
         $ (Satisfies.fconj_def.mp
         $ Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr hA₁) φ hφ;
-    have : M₀.IsFiniteTree r₀ := Frame.extendRoot.instIsFiniteTree
     have : Fintype M₀.World := Fintype.ofFinite _
     let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₀.toFrame) r₀ :=
       SolovaySentences.standard M₀.toFrame Frame.extendRoot.root T

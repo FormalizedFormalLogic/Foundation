@@ -526,7 +526,6 @@ theorem GL.arithmetical_completeness :
   intro hA;
   push_neg;
   obtain ⟨M₁, r₁, _, hA₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
-  have : (M₁.extendRoot r₁ 1).IsFiniteTree Frame.extendRoot.root := Frame.extendRoot.instIsFiniteTree
   have : Fintype (M₁.extendRoot r₁ 1).World := Fintype.ofFinite _
   let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root :=
     SolovaySentences.standard (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root T

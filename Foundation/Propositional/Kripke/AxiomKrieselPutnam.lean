@@ -2,20 +2,6 @@ import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Entailment.Cl
 
 
-section
-
-variable {α : Sort*} (R : α → α → Prop)
-
-def KrieselPutnamCondition :=
-  ∀ x y z,
-  (R x y ∧ R x z ∧ ¬R y z ∧ ¬R z y) →
-  (∃ u, R x u ∧ R u y ∧ R u z ∧ (∀ v, R u v → ∃ w, R v w ∧ (R y w ∨ R z w)))
-
-class SatisfiesKriselPutnamCondition (α) (R : α → α → Prop) : Prop where
-  kpCondition : KrieselPutnamCondition R
-
-end
-
 
 namespace LO.Propositional
 
@@ -24,8 +10,19 @@ open Formula.Kripke
 
 namespace Kripke
 
+protected class Frame.SatisfiesKriselPutnamCondition (F : Frame) where
+  kriesel_putnam :
+    ∀ x y z : F,
+    (x ≺ y ∧ x ≺ z ∧ ¬y ≺ z ∧ ¬z ≺ y) →
+    (∃ u, x ≺ u ∧ u ≺ y ∧ u ≺ z ∧ (∀ v, u ≺ v → ∃ w, v ≺ w ∧ (y ≺ w ∨ z ≺ w)))
 
-instance : SatisfiesKriselPutnamCondition _ whitepoint := ⟨by simp [KrieselPutnamCondition]⟩
+lemma Frame.kriesel_putnam {F : Frame} [F.SatisfiesKriselPutnamCondition] :
+  ∀ x y z : F,
+  (x ≺ y ∧ x ≺ z ∧ ¬y ≺ z ∧ ¬z ≺ y) →
+  (∃ u, x ≺ u ∧ u ≺ y ∧ u ≺ z ∧ (∀ v, u ≺ v → ∃ w, v ≺ w ∧ (y ≺ w ∨ z ≺ w))) :=
+  SatisfiesKriselPutnamCondition.kriesel_putnam
+
+instance : whitepoint.SatisfiesKriselPutnamCondition := ⟨by simp⟩
 
 
 section definability
@@ -34,8 +31,8 @@ variable {F : Kripke.Frame}
 
 open Formula (atom)
 
-lemma validate_KrieselPutnam_of_KrieselPutnamCondition' : KrieselPutnamCondition F → F ⊧ (Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)) := by
-  intro hKP V x y Rxy h₁;
+lemma validate_axiomKrieselPutnam_of_satisfiesKrieselPutnamCondition [F.SatisfiesKriselPutnamCondition ] : F ⊧ (Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)) := by
+  intro V x y Rxy h₁;
   by_contra hC;
   replace hC := Satisfies.or_def.not.mp hC;
   push_neg at hC;
@@ -49,7 +46,7 @@ lemma validate_KrieselPutnam_of_KrieselPutnamCondition' : KrieselPutnamCondition
   push_neg at h₃;
   obtain ⟨z₂, Ryz₂, ⟨hz₂₁, hz₂₂⟩⟩ := h₃;
 
-  obtain ⟨u, Ryu, ⟨Ruz₁, Ruz₂, h⟩⟩ := hKP y z₁ z₂ ⟨
+  obtain ⟨u, Ryu, ⟨Ruz₁, Ruz₂, h⟩⟩ := F.kriesel_putnam y z₁ z₂ ⟨
     Ryz₁, Ryz₂,
     by
       rcases Satisfies.or_def.mp $ h₁ Ryz₁ hz₁₁ with (h | h);
@@ -75,10 +72,6 @@ lemma validate_KrieselPutnam_of_KrieselPutnamCondition' : KrieselPutnamCondition
   . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼(.atom 0))) Rz₁w hz₁₁) $ Satisfies.formula_hereditary Rvw hv;
   . exact Satisfies.not_of_neg (Satisfies.formula_hereditary (φ := (∼(.atom 0))) Rz₂w hz₂₁) $ Satisfies.formula_hereditary Rvw hv;
 
-lemma validate_KrieselPutnam_of_KrieselPutnamCondition [SatisfiesKriselPutnamCondition _ F] : F ⊧ (Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2))  := by
-  apply validate_KrieselPutnam_of_KrieselPutnamCondition';
-  exact SatisfiesKriselPutnamCondition.kpCondition;
-
 end definability
 
 
@@ -96,7 +89,7 @@ open Classical
 
 namespace Canonical
 
-instance [Entailment.HasAxiomKrieselPutnam 𝓢] : SatisfiesKriselPutnamCondition _ (canonicalFrame 𝓢).Rel := ⟨by
+instance [Entailment.HasAxiomKrieselPutnam 𝓢] : (canonicalFrame 𝓢).SatisfiesKriselPutnamCondition := ⟨by
   rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
   let ΓNyz := { φ | ∼φ ∈ (y.1.1 ∩ z.1.1)}.image (∼·);
   obtain ⟨u, hu₁, hu₂⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨x.1.1 ∪ ΓNyz, y.1.2 ∪ z.1.2⟩) $ by

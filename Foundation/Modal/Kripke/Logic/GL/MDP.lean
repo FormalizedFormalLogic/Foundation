@@ -14,10 +14,10 @@ abbrev mdpCounterexmpleFrame (F₁ F₂ : Frame) (r₁ r₂) [F₁.IsFiniteTree 
   World := Unit ⊕ F₁.World ⊕ F₂.World
   Rel := λ x y =>
     match x, y with
-    | .inr (.inl x), .inr (.inl y) => x ≺ y -- M₁
-    | .inr (.inr x), .inr (.inr y) => x ≺ y -- M₂
+    | .inr (.inl x), .inr (.inl y) => x ≺ y -- F₁
+    | .inr (.inr x), .inr (.inr y) => x ≺ y -- F₂
     | .inl _, .inl _ => False -- r ⊀ r
-    | .inl _, _ => True -- r ≺ w₁ and r ≺ w₂ : w₁ ∈ M₁, w₂ ∈ M₂
+    | .inl _, _ => True -- r ≺ w₁ and r ≺ w₂ : w₁ ∈ F₁, w₂ ∈ F₂
     | _, _ => False
 
 namespace mdpCounterexmpleFrame
@@ -27,8 +27,8 @@ variable {F₁ F₂ : Frame} {r₁ : F₁.World} {r₂ : F₂.World} [F₁.IsFin
 instance : Coe (F₁.World) (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).World := ⟨Sum.inr ∘ Sum.inl⟩
 instance : Coe (F₂.World) (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).World := ⟨Sum.inr ∘ Sum.inr⟩
 
-instance
-  {F₁ F₂ : Frame} {r₁ : F₁.World} {r₂ : F₂.World} [tree₁ : F₁.IsFiniteTree r₁] [tree₂ : F₂.IsFiniteTree r₂]
+instance {F₁ F₂ : Frame} {r₁ : outParam F₁.World} {r₂ : outParam F₂.World}
+  [tree₁ : F₁.IsFiniteTree r₁] [tree₂ : F₂.IsFiniteTree r₂]
   : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).IsFiniteTree (.inl ()) where
   root_generates := by
     intro x hx;
@@ -49,8 +49,12 @@ instance
     match x, y, z with
     | .inr (.inl x), .inr (.inl y), .inr (.inl z) => apply tree₁.trans _ _ _ hxy hyz;
     | .inr (.inr x), .inr (.inr y), .inr (.inr z) => apply tree₂.trans _ _ _ hxy hyz;
-    | .inl _, .inr (.inr _), .inr (.inr _) => simp;
-    | .inl _, .inr (.inl _), .inr (.inl _) => simp;
+    | .inl _, .inr (.inr _), .inr (.inr _) => simp [Frame.Rel'];
+    | .inl _, .inr (.inl _), .inr (.inl _) => simp [Frame.Rel'];
+
+-- TODO: remove?
+instance : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).IsIrreflexive := ⟨by simp⟩
+
 
 protected abbrev root : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).World := .inl ()
 
@@ -68,9 +72,8 @@ lemma through_original_root {x : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).Wor
   : (x = r₁ ∨ (Sum.inr (Sum.inl r₁) ≺ x)) ∨ (x = r₂ ∨ (Sum.inr (Sum.inr r₂) ≺ x)) := by
   match x with
   | .inl x =>
-    have := (@Frame.IsTree.rel_irreflexive (mdpCounterexmpleFrame F₁ F₂ r₁ r₂) mdpCounterexmpleFrame.root _);
-    simp;
-    simp at this;
+    simp only [Function.comp_apply, reduceCtorEq, or_self];
+    apply (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).irrefl mdpCounterexmpleFrame.root;
     contradiction;
   | .inr (.inl x) =>
     by_cases e : x = r₁;

@@ -46,10 +46,10 @@ instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
   rw [Logic.S4.is_smallestMC_of_Int];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.all)
-    (MC := Modal.Kripke.FrameClass.preorder)
-    (by rw [Logic.Int.Kripke.all])
+    (MC := FrameClass.S4)
+    (by rw [Logic.Int.Kripke.Int])
     (by rw [←Logic.S4.is_smallestMC_of_Int, ←Modal.Logic.S4.Kripke.preorder])
-    (by simp; intro F; infer_instance;);
+    $ by intro F _; constructor;
 
 end S4
 
@@ -92,10 +92,10 @@ instance modalCompanion_Int_Grz : ModalCompanion Logic.Int Logic.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_all)
-    (MC := FrameClass.finite_partial_order)
-    (by rw [Logic.Int.Kripke.all_finite])
+    (MC := FrameClass.finite_Grz)
+    (by rw [Logic.Int.Kripke.finite_Int])
     (by rw [←Logic.Grz.is_largestMC_of_Int, Modal.Logic.Grz.Kripke.finite_partial_order])
-    (by rintro F ⟨⟩; refine ⟨by tauto, inferInstance⟩);
+    $ by rintro F hF; simp_all only [Set.mem_setOf_eq]; exact {}
 
 end Grz
 

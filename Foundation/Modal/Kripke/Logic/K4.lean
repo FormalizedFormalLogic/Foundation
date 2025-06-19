@@ -8,33 +8,40 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-protected abbrev Kripke.FrameClass.trans : FrameClass := { F | IsTrans _ F }
-protected abbrev Kripke.FrameClass.finite_trans : FrameClass := { F | Finite F ∧ IsTrans _ F }
+namespace Kripke
+
+abbrev Frame.IsK4 (F : Frame) := F.IsTransitive
+class Frame.IsFiniteK4 (F : Frame) extends Frame.IsK4 F, Frame.IsFinite F
+
+protected abbrev FrameClass.K4 : FrameClass := { F | F.IsK4 }
+protected abbrev FrameClass.finite_K4 : FrameClass := { F | F.IsFiniteK4 }
+
+end Kripke
+
 
 namespace Hilbert.K4.Kripke
 
-instance sound : Sound (Hilbert.K4) Kripke.FrameClass.trans := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.K4) FrameClass.K4 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_trans φ rfl;
   apply validate_AxiomFour_of_transitive (trans := F_trans);
 
 instance consistent : Entailment.Consistent (Hilbert.K4) :=
-  consistent_of_sound_frameclass FrameClass.trans $ by
+  consistent_of_sound_frameclass FrameClass.K4 $ by
     use whitepoint;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
 
-instance canonical : Canonical (Hilbert.K4) Kripke.FrameClass.trans := ⟨by
+instance canonical : Canonical (Hilbert.K4) FrameClass.K4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.K4) Kripke.FrameClass.trans := inferInstance
+instance complete : Complete (Hilbert.K4) FrameClass.K4 := inferInstance
 
 open finestFiltrationTransitiveClosureModel in
-instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans := ⟨by
+instance finite_complete : Complete (Hilbert.K4) FrameClass.finite_K4 := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   intro F F_trans V x;
@@ -43,9 +50,8 @@ instance finite_complete : Complete (Hilbert.K4) Kripke.FrameClass.finite_trans 
   let FM := finestFiltrationTransitiveClosureModel M φ.subformulas;
   apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
   apply hp;
-  refine ⟨?_, inferInstance⟩;
-  . apply FilterEqvQuotient.finite;
-    simp;
+  apply Set.mem_setOf_eq.mpr;
+  exact { world_finite := by apply FilterEqvQuotient.finite $ by simp }
 ⟩
 
 end Hilbert.K4.Kripke
@@ -56,7 +62,7 @@ open Formula
 open Entailment
 open Kripke
 
-lemma K4.Kripke.trans : Logic.K4 = FrameClass.trans.logic := eq_hilbert_logic_frameClass_logic
+lemma K4.Kripke.trans : Logic.K4 = FrameClass.K4.logic := eq_hilbert_logic_frameClass_logic
 
 theorem K4.proper_extension_of_K : Logic.K ⊂ Logic.K4 := by
   constructor;

@@ -7,35 +7,36 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-namespace Kripke.FrameClass
+namespace Kripke
 
-protected abbrev serial : FrameClass := { F | IsSerial _ F.Rel }
+protected abbrev Frame.IsKD := Frame.IsSerial
 
-end Kripke.FrameClass
+protected abbrev FrameClass.IsKD : FrameClass := { F | F.IsKD }
+
+end Kripke
 
 
 namespace Hilbert.KD.Kripke
 
-instance sound : Sound (Hilbert.KD) Kripke.FrameClass.serial :=
+instance sound : Sound (Hilbert.KD) FrameClass.IsKD :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F F_serial φ rfl;
     apply validate_AxiomD_of_serial (ser := F_serial);
 
 instance consistent : Entailment.Consistent (Hilbert.KD) :=
-  consistent_of_sound_frameclass FrameClass.serial $ by
+  consistent_of_sound_frameclass FrameClass.IsKD $ by
     use whitepoint;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
 
-instance canonical : Canonical (Hilbert.KD) Kripke.FrameClass.serial := ⟨by
+instance canonical : Canonical (Hilbert.KD) FrameClass.IsKD := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KD) Kripke.FrameClass.serial := inferInstance
+instance complete : Complete (Hilbert.KD) FrameClass.IsKD := inferInstance
 
 end Hilbert.KD.Kripke
 
@@ -45,7 +46,7 @@ open Formula
 open Entailment
 open Kripke
 
-lemma KD.Kripke.serial : Logic.KD = FrameClass.serial.logic := eq_hilbert_logic_frameClass_logic
+lemma KD.Kripke.serial : Logic.KD = FrameClass.IsKD.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
 theorem KD.proper_extension_of_K : Logic.K ⊂ Logic.KD := by

@@ -9,9 +9,16 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.serial_trans_eucl : FrameClass := { F | IsSerial _ F ∧ IsTrans _ F ∧ IsEuclidean _ F }
+namespace Kripke
+
+class Frame.IsKD45 (F : Kripke.Frame) extends F.IsSerial, F.IsTransitive, F.IsEuclidean
+
+abbrev FrameClass.serial_trans_eucl : FrameClass := { F | F.IsKD45 }
+
+end Kripke
+
+
 
 namespace Hilbert.KD45.Kripke
 
@@ -24,12 +31,9 @@ instance sound : Sound (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := ins
 
 instance consistent : Entailment.Consistent (Hilbert.KD45) := consistent_of_sound_frameclass Kripke.FrameClass.serial_trans_eucl $ by
   use whitepoint;
-  refine ⟨inferInstance, inferInstance, inferInstance⟩;
+  constructor;
 
-instance canonical : Canonical (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  refine ⟨inferInstance, inferInstance, inferInstance⟩;
-⟩
+instance canonical : Canonical (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := ⟨by constructor⟩
 
 instance complete : Complete (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := inferInstance
 
@@ -46,7 +50,7 @@ lemma KD45.Kripke.serial_trans_eucl : Logic.KD45 = FrameClass.serial_trans_eucl.
 theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.KD4 ⊧ φ by
       rw [KD4.Kripke.serial_trans];
       tauto;
     use Axioms.Five (.atom 0);
@@ -59,7 +63,8 @@ theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
         ⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by omega⟩⟩;
+      . simp only [Set.mem_setOf_eq];
+        refine { serial := by tauto, trans := by omega };
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -70,7 +75,7 @@ theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
 theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_eucl ⊧ φ by
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬Kripke.FrameClass.KD5 ⊧ φ by
       rw [KD5.Kripke.serial_eucl];
       tauto;
     use (Axioms.Four (.atom 0));
@@ -80,12 +85,15 @@ theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨?_⟩, ⟨by unfold Euclidean; omega⟩⟩;
-        . intro x;
-          match x with
-          | 0 => use 1; tauto;
-          | 1 => use 1; omega;
-          | 2 => use 2; omega;
+      . refine {
+          serial := by
+            intro x;
+            match x with
+            | 0 => use 1; tauto;
+            | 1 => use 1; omega;
+            | 2 => use 2; omega;
+          reucl := by simp [RightEuclidean]; omega;
+        };
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -105,7 +113,7 @@ theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
 theorem KD45.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by
+  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.IsK45 ⊧ φ by
       rw [K45.Kripke.trans_eucl];
       tauto;
     use Axioms.D (.atom 0);
@@ -114,7 +122,8 @@ theorem KD45.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KD45 := by
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => True⟩, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
+      . simp only [Set.mem_setOf_eq];
+        refine { trans := by simp, reucl := by simp [RightEuclidean] }
       . simp [Semantics.Realize, Satisfies];
 
 end Logic

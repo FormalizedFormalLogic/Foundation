@@ -7,28 +7,35 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-protected abbrev Kripke.FrameClass.eucl : FrameClass := { F | IsEuclidean _ F }
+
+namespace Kripke
+
+abbrev Frame.IsK5 (F : Frame) := F.IsEuclidean
+
+abbrev FrameClass.K5 : FrameClass := { F | F.IsK5 }
+
+end Kripke
+
 
 namespace Hilbert.K5.Kripke
 
-instance sound : Sound (Hilbert.K5) Kripke.FrameClass.eucl := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.K5) Kripke.FrameClass.K5 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_eucl _ rfl;
   exact validate_AxiomFive_of_euclidean (eucl := F_eucl);
 
-instance consistent : Entailment.Consistent (Hilbert.K5) := consistent_of_sound_frameclass FrameClass.eucl $ by
+instance consistent : Entailment.Consistent (Hilbert.K5) := consistent_of_sound_frameclass Kripke.FrameClass.K5 $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance canonical : Canonical (Hilbert.K5) Kripke.FrameClass.eucl := ⟨by
+instance canonical : Canonical (Hilbert.K5) Kripke.FrameClass.K5 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.K5) Kripke.FrameClass.eucl := inferInstance
+instance complete : Complete (Hilbert.K5) Kripke.FrameClass.K5 := inferInstance
 
 end Hilbert.K5.Kripke
 
@@ -38,7 +45,7 @@ open Formula
 open Entailment
 open Kripke
 
-lemma K5.Kripke.eucl : Logic.K5 = FrameClass.eucl.logic := eq_hilbert_logic_frameClass_logic
+lemma K5.Kripke.eucl : Logic.K5 = Kripke.FrameClass.K5.logic := eq_hilbert_logic_frameClass_logic
 
 theorem K5.proper_extension_of_K : Logic.K ⊂ Logic.K5 := by
   constructor;

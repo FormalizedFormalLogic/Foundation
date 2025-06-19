@@ -10,7 +10,11 @@ namespace LO.Modal
 
 namespace Kripke
 
-protected abbrev FrameClass.refl_makinson : FrameClass := { F | IsRefl _ F ∧ SatisfiesMakinsonCondition _ F.Rel }
+variable {F : Kripke.Frame}
+
+protected class Frame.IsKTMk (F : Frame) extends F.IsReflexive, F.SatisfiesMakinsonCondition
+
+protected abbrev FrameClass.KTMk : FrameClass := { F | F.IsKTMk }
 
 end Kripke
 
@@ -18,33 +22,23 @@ end Kripke
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
+
 
 namespace Hilbert.KTMk.Kripke
 
-instance sound : Sound (Hilbert.KTMk) Kripke.FrameClass.refl_makinson := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KTMk) Kripke.FrameClass.KTMk := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_axiomMk_of_satisfiesMakinsonCondition;
 
-instance consistent : Entailment.Consistent (Hilbert.KTMk) := consistent_of_sound_frameclass Kripke.FrameClass.refl_makinson $ by
+instance consistent : Entailment.Consistent (Hilbert.KTMk) := consistent_of_sound_frameclass Kripke.FrameClass.KTMk $ by
   use whitepoint;
   constructor;
-  . infer_instance;
-  . constructor;
-    intro x;
-    use x;
-    tauto;
 
-instance canonical : Canonical (Hilbert.KTMk) Kripke.FrameClass.refl_makinson := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor;
-  . infer_instance;
-  . infer_instance;
-⟩
+instance canonical : Canonical (Hilbert.KTMk) Kripke.FrameClass.KTMk := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.KTMk) Kripke.FrameClass.refl_makinson := inferInstance
+instance complete : Complete (Hilbert.KTMk) Kripke.FrameClass.KTMk := inferInstance
 
 
 section
@@ -147,17 +141,17 @@ abbrev recessionFrame : Kripke.Frame where
 
 namespace recessionFrame
 
-instance : IsRefl _ recessionFrame := ⟨by tauto⟩
-instance : SatisfiesMakinsonCondition _ recessionFrame := ⟨by
-  intro i;
-  use i + 1;
-  refine ⟨by omega, by omega, by simp_all; omega⟩;
-⟩
+instance : recessionFrame.IsKTMk where
+  refl := by tauto;
+  makinson := by
+    intro i;
+    use i + 1;
+    refine ⟨by omega, by omega, by simp_all; omega⟩;
 
-lemma not_transitive : ¬Transitive recessionFrame := by
+lemma not_transitive : ¬recessionFrame.IsTransitive := by
   by_contra h_trans;
-  have := @h_trans 2 1 0;
-  simp [recessionFrame] at this;
+  have := @Frame.trans recessionFrame _ 2 1 0;
+  omega;
 
 lemma exists_not_validate_axiomFour : ∃ φ : Formula ℕ, ¬recessionFrame ⊧ Axioms.Four φ := by
   use (.atom 0);
@@ -168,11 +162,12 @@ end recessionFrame
 lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Hilbert.KTMk ⊬ Axioms.Four φ := by
   obtain ⟨φ, hφ⟩ := recessionFrame.exists_not_validate_axiomFour;
   use! φ;
-  apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.refl_makinson);
+  apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.KTMk);
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use recessionFrame;
   constructor;
-  . constructor <;> infer_instance;
+  . apply Set.mem_setOf_eq.mpr;
+    infer_instance;
   . assumption;
 
 lemma no_finite_model_property : ¬(∀ φ, Hilbert.KTMk ⊬ φ → ∃ M : Kripke.Model, Finite M ∧ M ⊧* Hilbert.KTMk.logic ∧ ¬M ⊧ φ)  := by

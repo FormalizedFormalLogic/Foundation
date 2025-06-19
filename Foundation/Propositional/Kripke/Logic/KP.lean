@@ -7,39 +7,114 @@ open Kripke
 open Hilbert.Kripke
 open Formula.Kripke
 
-namespace Kripke.FrameClass
+namespace Kripke
 
-protected abbrev krieselputnam : FrameClass := { F | SatisfiesKriselPutnamCondition _ F }
+protected abbrev Frame.IsKP := Frame.SatisfiesKriselPutnamCondition
 
-end Kripke.FrameClass
+protected abbrev FrameClass.KP : FrameClass := { F | F.SatisfiesKriselPutnamCondition }
+
+end Kripke
 
 
 namespace Hilbert.KP.Kripke
 
-instance sound : Sound Hilbert.KP FrameClass.krieselputnam := instSound_of_validates_axioms $ by
+instance sound : Sound Hilbert.KP FrameClass.KP := instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_KrieselPutnam_of_KrieselPutnamCondition
+    apply validate_axiomKrieselPutnam_of_satisfiesKrieselPutnamCondition
 
-instance consistent : Entailment.Consistent Hilbert.KP := consistent_of_sound_frameclass FrameClass.krieselputnam $ by
+instance consistent : Entailment.Consistent Hilbert.KP := consistent_of_sound_frameclass FrameClass.KP $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance canonical : Canonical Hilbert.KP FrameClass.krieselputnam := ⟨by
+instance canonical : Canonical Hilbert.KP FrameClass.KP := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Hilbert.KP FrameClass.krieselputnam := inferInstance
+instance complete : Complete Hilbert.KP FrameClass.KP := inferInstance
 
 end Hilbert.KP.Kripke
 
 
 namespace Logic.KP
 
-lemma Kripke.krieselputnam : Logic.KP = Kripke.FrameClass.krieselputnam.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+open Formula
+
+lemma Kripke.KP : Logic.KP = FrameClass.KP.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+@[simp]
+theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KP := by
+  constructor;
+  . exact (Hilbert.weakerThan_of_subset_axioms (by simp)).subset;
+  . suffices ∃ φ, Hilbert.KP ⊢! φ ∧ ¬FrameClass.all ⊧ φ by rw [Int.Kripke.Int]; tauto;
+    use Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2);
+    constructor;
+    . simp;
+    . apply not_validOnFrameClass_of_exists_model_world;
+      let M : Kripke.Model := {
+        World := Fin 5
+        Rel x y := x = y ∨ x = 0 ∨ (x ≤ 1 ∧ y = 2) ∨ (x ≤ 1 ∧ y = 3) ∨ (x ≤ 1 ∧ y = 4)
+        rel_partial_order := {
+          refl := by tauto;
+          trans := by omega;
+          antisymm := by omega;
+        }
+        Val := ⟨λ w a =>
+          match a with
+          | 0 => w = 2
+          | 1 => w = 3
+          | 2 => w = 4
+          | _ => False,
+          by
+            intro x y Rxy a ha;
+            split at ha;
+            . subst ha; simp [Frame.Rel'] at Rxy; tauto;
+            . subst ha; simp [Frame.Rel'] at Rxy; tauto;
+            . subst ha; simp [Frame.Rel'] at Rxy; tauto;
+            . tauto;
+        ⟩
+      }
+      use M, 0;
+      constructor;
+      . tauto;
+      . apply Satisfies.imp_def.not.mpr;
+        push_neg;
+        use 1;
+        constructor;
+        . tauto;
+        . constructor;
+          . intro x R1x;
+            match x with
+            | 0 => omega;
+            | 1 =>
+              suffices ¬Satisfies M 1 (∼atom 0) by tauto
+              apply Satisfies.neg_def.not.mpr;
+              push_neg;
+              use 2;
+              constructor;
+              . tauto;
+              . simp [Semantics.Realize, Satisfies, M];
+            | 2 => tauto;
+            | 3 => tauto;
+            | 4 => tauto;
+          . apply Satisfies.or_def.not.mpr;
+            push_neg;
+            constructor;
+            . apply Satisfies.imp_def.not.mpr;
+              push_neg;
+              use 4;
+              constructor;
+              . tauto;
+              . simp [Semantics.Realize, Satisfies, M, Frame.Rel'];
+            . apply Satisfies.imp_def.not.mpr;
+              push_neg;
+              use 3;
+              constructor;
+              . tauto;
+              . simp [Semantics.Realize, Satisfies, M, Frame.Rel'];
 
 end Logic.KP
 

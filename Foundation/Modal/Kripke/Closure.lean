@@ -1,6 +1,7 @@
 import Foundation.Modal.Kripke.Basic
-import Foundation.Vorspiel.Relation.Supplemental
-import Foundation.Vorspiel.Relation.WCWF
+import Foundation.Modal.Kripke.AxiomGeach
+import Foundation.Vorspiel.HRel.Basic
+import Foundation.Modal.Kripke.Irreflexive
 
 namespace LO.Modal.Kripke
 
@@ -10,103 +11,72 @@ open Relation
 
 variable {F : Frame} {x y z : F.World}
 
+abbrev ReflRel := F.Rel.ReflGen
+infix:50 " ≺^= " => ReflRel
 
-section trans_refl
+abbrev ReflGen (F : Frame) : Frame := ⟨F.World, (· ≺^= ·)⟩
+postfix:95 "^=" => ReflGen
 
-abbrev RelReflTrans : _root_.Rel F.World F.World := ReflTransGen (· ≺ ·)
-infix:50 " ≺^* " => RelReflTrans
+namespace ReflGen
 
-abbrev mkTransReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^* ·)⟩
-postfix:95 "^*" => mkTransReflClosure
-
-namespace mkTransReflClosure
-
-instance [Finite F.World] : Finite (F^*).World := inferInstance
-
-instance : IsPreorder _ (F^*).Rel where
-
-instance [IsSymm _ F.Rel] : IsSymm _ (F^*).Rel := ⟨by
-  apply ReflTransGen.symmetric;
-  exact IsSymm.symm
-⟩
-instance [IsSymm _ F.Rel] : IsEquiv _ (F^*).Rel where
-
-end mkTransReflClosure
-
-end trans_refl
-
-
-section trans
-
-abbrev RelTrans : _root_.Rel F.World F.World := TransGen (· ≺ ·)
-infix:50 " ≺^+ " => RelTrans
-
-abbrev mkTransClosure (F : Frame) : Frame := ⟨F.World, (· ≺^+ ·)⟩
-postfix:95 "^+" => mkTransClosure
-
-namespace mkTransClosure
-
-instance [Finite F] : Finite (F^+) := inferInstance
-instance [F.IsFinite] : (F^+).IsFinite := inferInstance
-
-instance : IsTrans _ (F^+).Rel := inferInstance
-
-instance [IsRefl _ F.Rel] : IsRefl _ (F^+).Rel := ⟨fun a => TransGen.single (IsRefl.refl a)⟩
-
-instance [IsRefl _ F.Rel] : IsPreorder _ (F^+).Rel where
-
-protected instance isSymm [IsSymm _ F.Rel] : IsSymm _ (F^+).Rel := ⟨by
-  intro x y rxy;
-  induction rxy with
-  | single h => exact TransGen.single $ (IsSymm.symm _ _) h;
-  | tail _ hyz ih => exact TransGen.trans (TransGen.single $ (IsSymm.symm _ _) hyz) ih
-⟩
-
-end mkTransClosure
-
-end trans
-
-
-section refl
-
-abbrev RelRefl : _root_.Rel F.World F.World := ReflGen (· ≺ ·)
-infix:50 " ≺^= " => RelRefl
-
-abbrev mkReflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^= ·)⟩
-postfix:95 "^=" => mkReflClosure
-
-namespace mkReflClosure
+instance : Coe (F.World) (F^=.World) := ⟨id⟩
 
 instance [Finite F] : Finite (F^=) := inferInstance
 instance [F.IsFinite] : (F^=).IsFinite := inferInstance
 
-instance : IsRefl _ (F^=.Rel) := inferInstance
+instance : (F^=).IsReflexive := by simp
+instance [F.IsSymmetric] : F^=.IsSymmetric := by simp
+instance [F.IsTransitive] : F^=.IsTransitive := by simp
+instance [F.IsTransitive] [F.IsIrreflexive] : F^=.IsAntisymmetric := ⟨by apply Frame.antisymm⟩
+instance [F.IsTransitive] [F.IsIrreflexive] : F^=.IsPartialOrder where
 
-end mkReflClosure
-
-end refl
+end ReflGen
 
 
-section irrefl
+abbrev TransRel := F.Rel.TransGen
+infix:50 " ≺^+ " => TransRel
 
-abbrev RelIrrefl : _root_.Rel F.World F.World := IrreflGen (· ≺ ·)
-infix:50 " ≺^≠ " => RelIrrefl
+abbrev TransGen (F : Frame) : Frame := ⟨F.World, (· ≺^+ ·)⟩
+postfix:95 "^+" => TransGen
 
-abbrev mkIrreflClosure (F : Frame) : Frame := ⟨F.World, (· ≺^≠ ·)⟩
-postfix:95 "^≠" => mkIrreflClosure
+namespace TransGen
 
-namespace mkIrreflClosure
+instance : Coe (F.World) (F^+.World) := ⟨id⟩
 
-instance [Finite F] : Finite (F^≠) := inferInstance
-instance [F.IsFinite] : (F^≠).IsFinite := inferInstance
+instance [F.IsFinite] : (F^+).IsFinite := inferInstance
 
-instance : IsIrrefl _ (F^≠.Rel) := ⟨by simp [IrreflGen]⟩
+instance : (F^+).IsTransitive := by simp
 
-end mkIrreflClosure
+instance [F.IsReflexive] : F^+.IsReflexive := by simp
 
-end irrefl
+instance [F.IsReflexive] : F^+.IsPreorder where
+
+instance isSymmetric [F.IsSymmetric] : F^+.IsSymmetric := by simp
+
+instance [F.IsReflexive] [F.IsSymmetric] : F^+.IsEquivalence where
+
+end TransGen
+
+abbrev ReflTransRel := F.Rel.ReflTransGen
+infix:50 " ≺^* " => ReflTransRel
+
+abbrev ReflTransGen (F : Frame) : Frame := ⟨F.World, (· ≺^* ·)⟩
+postfix:95 "^*" => ReflTransGen
+
+namespace ReflTransGen
+
+instance : Coe (F.World) (F^*.World) := ⟨id⟩
+
+instance [Finite F.World] : Finite (F^*).World := inferInstance
+
+instance : (F^*).IsPreorder where
+
+instance [F.IsSymmetric] : F^*.IsSymmetric where symm := by simp only; apply IsSymm.symm;
+
+instance [F.IsSymmetric] : F^*.IsEquivalence where
+
+end ReflTransGen
 
 end Frame
-
 
 end LO.Modal.Kripke
