@@ -167,8 +167,8 @@ end Hilbert.Int.Kripke
 
 namespace Logic.Int
 
-lemma Kripke.all : Logic.Int = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma Kripke.all_finite : Logic.Int = FrameClass.finite_all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.Int : Logic.Int = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.finite_Int : Logic.Int = FrameClass.finite_all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 instance : (Logic.Int).Disjunctive := inferInstance
 

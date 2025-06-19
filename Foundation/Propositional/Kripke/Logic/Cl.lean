@@ -8,60 +8,49 @@ open Kripke
 open Hilbert.Kripke
 open Formula.Kripke
 
-namespace Kripke.FrameClass
 
-protected abbrev euclidean : FrameClass := { F | F.IsEuclidean }
-protected abbrev finite_symmetric : FrameClass := { F | Finite F ∧ F.IsSymmetric }
-protected abbrev finite_euclidean : FrameClass := { F | Finite F ∧ F.IsEuclidean }
+namespace Kripke
 
-lemma eq_finite_euclidean_finite_symmetric : FrameClass.finite_euclidean = FrameClass.finite_symmetric := by
-  ext F;
-  constructor;
-  . rintro ⟨_, hF⟩; exact ⟨by tauto, inferInstance⟩;
-  . rintro ⟨_, hF⟩; exact ⟨by tauto, inferInstance⟩;
+variable {F : Frame}
 
-end Kripke.FrameClass
+protected abbrev Frame.IsCl := Frame.IsEuclidean
+protected class Frame.IsFiniteCl (F : Frame) extends F.IsFinite, F.IsCl
+
+instance : whitepoint.IsEuclidean := ⟨by tauto⟩
+
+protected abbrev FrameClass.Cl : FrameClass := { F | F.IsCl }
+protected abbrev FrameClass.finite_Cl : FrameClass := { F | F.IsFiniteCl }
+
+end Kripke
+
 
 
 namespace Hilbert.Cl.Kripke
 
-instance sound_finite : Sound Hilbert.Cl FrameClass.finite_symmetric :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomEFQ;
-    rintro F ⟨_, hF⟩ _ rfl;
-    apply validate_LEM_of_symmetric;
-
-instance sound_finite_symmetric : Sound Hilbert.Cl FrameClass.finite_symmetric :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomEFQ;
-    rintro F ⟨_, hF⟩ _ rfl;
-    apply validate_LEM_of_symmetric;
-
-instance sound_euclidean : Sound Hilbert.Cl FrameClass.euclidean :=
+instance sound : Sound Hilbert.Cl FrameClass.Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_LEM_of_euclidean;
+    apply validate_axiomLEM_of_isEuclidean;
 
-instance sound_finite_euclidean : Sound Hilbert.Cl FrameClass.finite_euclidean :=
+instance sound_finite : Sound Hilbert.Cl FrameClass.finite_Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F ⟨_, hF⟩ _ rfl;
-    apply validate_LEM_of_euclidean;
+    apply validate_axiomLEM_of_isEuclidean;
 
-
-instance consistent : Entailment.Consistent Hilbert.Cl := consistent_of_sound_frameclass FrameClass.euclidean $ by
+instance consistent : Entailment.Consistent Hilbert.Cl := consistent_of_sound_frameclass FrameClass.Cl $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance canonical : Canonical Hilbert.Cl FrameClass.euclidean :=  ⟨by
+instance canonical : Canonical Hilbert.Cl FrameClass.Cl :=  ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Hilbert.Cl FrameClass.euclidean := inferInstance
+instance complete : Complete Hilbert.Cl FrameClass.Cl := inferInstance
 
 section FFP
 
@@ -69,7 +58,14 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance complete_finite_symmetric : Complete (Hilbert.Cl) FrameClass.finite_symmetric := ⟨by
+instance complete_finite_symmetric : Complete (Hilbert.Cl) FrameClass.finite_Cl := by
+  suffices Complete (Hilbert.Cl) { F : Frame | F.IsFinite ∧ F.IsSymmetric } by
+    convert this;
+    constructor;
+    . rintro ⟨_, hF⟩; exact ⟨by tauto, inferInstance⟩;
+    . rintro ⟨_, hF⟩; exact {}
+
+  constructor;
   intro φ hφ;
   apply Kripke.complete.complete;
   rintro F F_con V r;
@@ -84,8 +80,12 @@ instance complete_finite_symmetric : Complete (Hilbert.Cl) FrameClass.finite_sym
   apply hφ;
 
   refine ⟨?_, ?_⟩;
-  . apply FilterEqvQuotient.finite; simp;
-  . apply isSymm_iff _ _ |>.mpr;
+  . exact {
+      world_finite := by
+        apply FilterEqvQuotient.finite;
+        simp;
+    };
+  . constructor;
     rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ RXY;
     . simp_all;
     . apply TransGen.single;
@@ -101,13 +101,7 @@ instance complete_finite_symmetric : Complete (Hilbert.Cl) FrameClass.finite_sym
     . apply Relation.TransGen.single;
       use ⟨y, by tauto⟩, ⟨x, by tauto⟩;
       refine ⟨by tauto, by tauto, ?_⟩;
-      . have : y ≺ x := IsEuclidean.euclidean Rrx Rry;
-        tauto;
-⟩
-
-instance complete_finite_euclidean : Complete (Hilbert.Cl) FrameClass.finite_euclidean := by
-  convert complete_finite_symmetric;
-  exact FrameClass.eq_finite_euclidean_finite_symmetric;
+      . simpa using F.eucl' Rrx Rry;
 
 end FFP
 
@@ -116,23 +110,20 @@ end Hilbert.Cl.Kripke
 
 namespace Logic.Cl
 
-lemma Kripke.euclidean : Logic.Cl = Kripke.FrameClass.euclidean.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma Kripke.finite_euclidean : Logic.Cl = Kripke.FrameClass.finite_euclidean.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma Kripke.finite_symmetric : Logic.Cl = Kripke.FrameClass.finite_symmetric.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.Cl : Logic.Cl = FrameClass.Cl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma Kripke.finite_Cl : Logic.Cl = FrameClass.finite_Cl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
 @[simp]
 theorem proper_extension_of_LC : Logic.LC ⊂ Logic.Cl := by
   constructor;
   . apply (Hilbert.weakerThan_of_dominate_axiomInstances
       (by rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp)).subset;
-  . suffices ∃ φ, Hilbert.Cl ⊢! φ ∧ ¬FrameClass.connected ⊧ φ by
-      rw [LC.Kripke.connected];
-      tauto;
+  . suffices ∃ φ, Hilbert.Cl ⊢! φ ∧ ¬FrameClass.LC ⊧ φ by rw [LC.Kripke.LC]; tauto;
     use Axioms.LEM (.atom 0);
     constructor;
     . simp;
     . apply not_validOnFrameClass_of_exists_frame;
-      use {
+      let F : Frame := {
         World := Fin 2,
         Rel := λ x y => x ≤ y
         rel_partial_order := {
@@ -141,15 +132,13 @@ theorem proper_extension_of_LC : Logic.LC ⊂ Logic.Cl := by
           antisymm := by omega;
         }
       };
+      use F;
       constructor;
-      . apply isConnected_iff _ _ |>.mpr
-        simp [Connected];
+      . refine { ps_connected := by intro x y z; omega; }
+      . apply not_imp_not.mpr $ Kripke.isEuclidean_of_validate_axiomLEM;
+        by_contra hC;
+        have := @F.eucl _ 0 1 0;
         omega;
-      . apply not_imp_not.mpr $ Kripke.euclidean_of_validate_LEM;
-        unfold Euclidean;
-        push_neg;
-        use 0, 0, 1;
-        simp;
 
 @[simp]
 lemma proper_extension_of_Int : Logic.Int ⊂ Logic.Cl := by

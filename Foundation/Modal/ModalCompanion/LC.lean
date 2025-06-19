@@ -77,11 +77,11 @@ lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
 instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := by
   rw [Logic.S4Point3.is_smallestMC_of_LC];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.FrameClass.connected)
-    (MC := FrameClass.S4Point3)
-    (by rw [Propositional.Logic.LC.Kripke.connected])
+    (IC := Propositional.Kripke.FrameClass.LC)
+    (MC := Modal.Kripke.FrameClass.S4Point3)
+    (by rw [Logic.LC.Kripke.LC])
     (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.Kripke.connected_preorder])
-    (by rintro F hF; replace hF := Set.mem_setOf_eq.mp hF; apply Set.mem_setOf_eq.mpr; refine ⟨inferInstance, inferInstance⟩);
+    (by intro F hF; simp_all only [Set.mem_setOf_eq]; exact {})
 
 end Logic
 
@@ -129,11 +129,11 @@ lemma Logic.GrzPoint3.is_largestMC_of_LC : Logic.GrzPoint3 = Logic.LC.largestMC 
 instance modalCompanion_LC_GrzPoint3 : ModalCompanion Logic.LC Logic.GrzPoint3 := by
   rw [Logic.GrzPoint3.is_largestMC_of_LC];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.FrameClass.finite_connected)
-    (MC := FrameClass.finite_connected_partial_order)
-    (by rw [Logic.LC.Kripke.finite_connected])
+    (IC := Propositional.Kripke.FrameClass.finite_LC)
+    (MC := Modal.Kripke.FrameClass.finite_connected_partial_order)
+    (by rw [Logic.LC.Kripke.finite_LC])
     (by rw [←Logic.GrzPoint3.is_largestMC_of_LC, Modal.Logic.GrzPoint3.Kripke.finite_connected_partial_order])
-    (by rintro F ⟨_, F_confl⟩; refine ⟨by tauto, inferInstance, inferInstance⟩)
+    (by intro F hF; simp_all only [Set.mem_setOf_eq]; exact {})
 
 end GrzPoint3
 
@@ -141,7 +141,7 @@ end GrzPoint3
 section boxdot
 
 theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : φ ∈ Logic.LC ↔ φᵍᵇ ∈ Logic.GLPoint3 := by
-  exact Iff.trans modalCompanion_LC_GrzPoint3.companion Hilbert.iff_boxdotTranslatedGLPoint3_GrzPoint3.symm
+  exact Iff.trans modalCompanion_LC_GrzPoint3.companion Logic.iff_boxdotTranslatedGLPoint3_GrzPoint3.symm
 
 end boxdot
 

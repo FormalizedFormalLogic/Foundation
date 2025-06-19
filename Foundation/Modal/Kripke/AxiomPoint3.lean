@@ -15,7 +15,7 @@ abbrev IsPiecewiseStronglyConnected (F : Frame) := _root_.IsPiecewiseStronglyCon
 
 instance [F.IsPiecewiseStronglyConnected] : F.IsPiecewiseConnected := inferInstance
 
-lemma ps_connected [F.IsPiecewiseStronglyConnected] : ∀ {x y z : F.World}, x ≺ y → x ≺ z →  y ≺ z ∨ z ≺ y := by
+lemma ps_connected [F.IsPiecewiseStronglyConnected] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y ≺ z ∨ z ≺ y := by
   apply IsPiecewiseStronglyConnected.ps_connected
 
 end Frame

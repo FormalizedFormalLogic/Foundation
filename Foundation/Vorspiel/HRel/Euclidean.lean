@@ -7,6 +7,7 @@ def RightEuclidean (R : HRel α) := ∀ ⦃x y z⦄, R x y → R x z → R y z
 class IsRightEuclidean (R : HRel α) where
   reucl : RightEuclidean R
 
+lemma IsRightEuclidean.reucl' [IsRightEuclidean R] {x y z : α} (Rxy : R x y) (Rxz : R x z) : R z y := reucl Rxz Rxy
 
 instance [IsSymm _ R] [IsTrans _ R] : IsRightEuclidean R := ⟨by
   intro x y z Rxy Rxz;

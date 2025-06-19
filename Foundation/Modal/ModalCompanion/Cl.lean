@@ -87,17 +87,11 @@ lemma S5.is_smallestMC_of_Cl : Logic.S5 = Logic.Cl.smallestMC := by
 instance modalCompanion_Cl_S5 : ModalCompanion Logic.Cl Logic.S5 := by
   rw [Logic.S5.is_smallestMC_of_Cl];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.FrameClass.euclidean)
-    (MC := FrameClass.S5)
-    (by rw [Propositional.Logic.Cl.Kripke.euclidean])
+    (IC := Propositional.Kripke.FrameClass.Cl)
+    (MC := Modal.Kripke.FrameClass.S5)
+    (by rw [Logic.Cl.Kripke.Cl])
     (by rw [←Logic.S5.is_smallestMC_of_Cl, ←Logic.S5.Kripke.refl_eucl])
-    (by
-      simp;
-      intro F hF;
-      constructor;
-      . infer_instance;
-      . infer_instance;
-    );
+    (by intro F hF; simp_all only [Set.mem_setOf_eq]; constructor);
 
 end Logic
 
@@ -148,12 +142,11 @@ lemma Logic.S5Grz.is_largestMC_of_Cl : Logic.S5Grz = Logic.Cl.largestMC := by
 instance modalCompanion_Cl_S5Grz : ModalCompanion Logic.Cl Logic.S5Grz := by
   rw [Logic.S5Grz.is_largestMC_of_Cl];
   apply Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.FrameClass.finite_symmetric)
-    (MC := Modal.Kripke.FrameClass.finite_equality);
-  . rw [Logic.Cl.Kripke.finite_symmetric]
+    (IC := Propositional.Kripke.FrameClass.finite_Cl)
+    (MC := Modal.Kripke.FrameClass.finite_Triv);
+  . rw [Logic.Cl.Kripke.finite_Cl]
   . rw [←Logic.S5Grz.is_largestMC_of_Cl, ←Logic.S5Grz.Kripke.finite_equality]
-  . rintro F ⟨_, _⟩;
-    refine ⟨inferInstance, inferInstance⟩;
+  . intro F hF; simp_all only [Set.mem_setOf_eq]; exact {};
 
 instance modalCompanion_Cl_Triv : ModalCompanion Logic.Cl Logic.Triv := by
   rw [←Logic.eq_S5Grz_Triv];
@@ -165,7 +158,7 @@ end S5Grz
 section boxdot
 
 theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : φ ∈ Logic.Cl ↔ φᵍᵇ ∈ Logic.Ver := by
-  exact Iff.trans modalCompanion_Cl_Triv.companion Hilbert.iff_boxdotTranslated_Ver_Triv.symm
+  exact Iff.trans modalCompanion_Cl_Triv.companion Logic.iff_boxdotTranslated_Ver_Triv.symm
 
 end boxdot
 
