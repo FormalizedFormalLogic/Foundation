@@ -7,36 +7,6 @@ import Foundation.Modal.Kripke.Logic.K4
 import Foundation.Modal.Kripke.Completeness
 import Mathlib.Order.Preorder.Finite
 
-/-
-section
-
-variable {α : Type u} (rel : α → α → Prop)
-
-/-- Every point can see terminal. -/
-def McKinseyCondition := ∀ x, ∃ y, rel x y ∧ (∀ z, rel y z → y = z)
-
-class SatisfiesMcKinseyCondition (α) (rel : α → α → Prop) : Prop where
-  mckCondition : McKinseyCondition rel
-
-instance [Finite α] [IsPartialOrder α rel] : SatisfiesMcKinseyCondition _ rel := ⟨by
-  intro x;
-  obtain ⟨y, _, Rxy, hy₃⟩ := @Finite.exists_le_maximal α {
-    le := rel,
-    le_refl := by apply _root_.refl,
-    le_trans := by intro x y z; apply _root_.trans,
-  } _ (λ y => rel x y) x (by apply _root_.refl);
-  use y;
-  constructor;
-  . tauto;
-  . intro z Ryz;
-    apply IsAntisymm.antisymm (r := rel) y z;
-    . assumption;
-    . exact @hy₃ z (_root_.trans Rxy Ryz) Ryz;
-⟩
-
-end
--/
-
 
 namespace LO.Modal
 
