@@ -10,7 +10,7 @@ namespace Kripke
 variable {F : Frame}
 
 instance [F.IsFiniteGL] : F^=.IsFiniteGrz where
-instance [F.IsFiniteGrz] : (F^≠).IsFiniteGL := by sorry
+instance [F.IsFiniteGrz] : (F^≠).IsFiniteGL where
 
 end Kripke
 

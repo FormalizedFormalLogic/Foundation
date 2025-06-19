@@ -51,12 +51,7 @@ instance finite_complete : Complete (Hilbert.K4) FrameClass.finite_K4 := ⟨by
   apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
   apply hp;
   apply Set.mem_setOf_eq.mpr;
-  sorry;
-  /-
-  refine ⟨?_, ?_⟩;
-  . apply finestFiltrationTransitiveClosureModel.isFinite $ by simp;
-  . apply isTransitive;
-  -/
+  exact { world_finite := by apply FilterEqvQuotient.finite $ by simp }
 ⟩
 
 end Hilbert.K4.Kripke

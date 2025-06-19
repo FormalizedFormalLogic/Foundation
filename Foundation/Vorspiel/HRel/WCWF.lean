@@ -77,8 +77,8 @@ lemma weaklyConverseWellFounded_of_finite_trans_antisymm (hFin : Finite α) (R_t
     have H : ∀ i j, i < j → rel (f i) (f j) := by
       intro i j hij
       induction hij with
-      | refl => exact hf i |>.2;
-      | step _ ih => exact R_trans ih $ hf _ |>.2;
+      | refl => exact hf i |>.1;
+      | step _ ih => exact R_trans ih $ hf _ |>.1;
     have := H (i + 1) j this;
     simpa [e];
 

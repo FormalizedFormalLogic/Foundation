@@ -585,17 +585,6 @@ lemma Validates.inter_of (h₁ : C₁.Validates Γ₁) (h₂ : C₂.Validates Γ
   . exact h₁ F hF₁ _ hφ₁;
   . exact h₂ F hF₂ _ hφ₂;
 
-/-
-lemma Validates.sInter_of
-  (Ps : Set (FrameClass × FormulaSet ℕ))
-  (hPs : ∀ P ∈ Ps, Validates P.1 P.2)
-  : Validates (⋂₀ (Ps.image (·.1))) (⋃₀ (Ps.image (·.2))) := by
-  rintro F hF φ hφ;
-  simp only [Set.sInter_image, Set.mem_iInter, Prod.forall] at hF hφ;
-  simp at hPs;
-  sorry;
--/
-
 lemma ValidatesFormula.inter_of (h₁ : C₁.ValidatesFormula φ₁) (h₂ : C₂.ValidatesFormula φ₂) : (C₁ ∩ C₂).Validates {φ₁, φ₂}
   := Validates.inter_of h₁ h₂
 

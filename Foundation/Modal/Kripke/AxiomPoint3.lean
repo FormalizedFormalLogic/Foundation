@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.HRel.Connected
+import Foundation.Modal.Kripke.AxiomWeakPoint3
 
 namespace LO.Modal
 
@@ -9,7 +9,11 @@ variable {F : Kripke.Frame}
 
 namespace Frame
 
+variable {F : Frame}
+
 abbrev IsPiecewiseStronglyConnected (F : Frame) := _root_.IsPiecewiseStronglyConnected F.Rel
+
+instance [F.IsPiecewiseStronglyConnected] : F.IsPiecewiseConnected := inferInstance
 
 lemma ps_connected [F.IsPiecewiseStronglyConnected] : ∀ {x y z : F.World}, x ≺ y → x ≺ z →  y ≺ z ∨ z ≺ y := by
   apply IsPiecewiseStronglyConnected.ps_connected

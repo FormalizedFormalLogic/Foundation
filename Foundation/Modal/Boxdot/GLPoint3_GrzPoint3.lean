@@ -10,11 +10,11 @@ open Relation (ReflGen)
 open Formula.Kripke
 
 variable {F : Frame} {φ : Formula _}
-instance [F.IsFiniteGrzPoint3] : (F^≠).IsFiniteGLPoint3 := by sorry
+instance [F.IsFiniteGrzPoint3] : (F^≠).IsFiniteGLPoint3 where
 
 end Kripke
 
-namespace Hilbert
+namespace Logic
 
 open Kripke
 open Formula.Kripke
@@ -22,7 +22,7 @@ open Formula (boxdotTranslate)
 open Modal.Kripke
 open Entailment
 
-lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : (Hilbert.GrzPoint3) ⊢! φ → (Hilbert.GLPoint3) ⊢! φᵇ := boxdotTranslated_of_dominate $ by
+lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : (Hilbert.GrzPoint3) ⊢! φ → (Hilbert.GLPoint3) ⊢! φᵇ := Hilbert.boxdotTranslated_of_dominate $ by
   intro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨s, _, rfl⟩);
   . exact boxdot_axiomK!;
@@ -95,8 +95,8 @@ theorem iff_boxdotTranslatedGLPoint3_GrzPoint3 : (Hilbert.GLPoint3) ⊢! φᵇ �
   provable_boxdotTranslated_GLPoint3_of_GrzPoint3
 ⟩
 
-end Hilbert
+instance : BoxdotProperty (Logic.GLPoint3) (Logic.GrzPoint3) := ⟨iff_boxdotTranslatedGLPoint3_GrzPoint3⟩
 
-instance : BoxdotProperty (Logic.GLPoint3) (Logic.GrzPoint3) := ⟨Hilbert.iff_boxdotTranslatedGLPoint3_GrzPoint3⟩
+end Logic
 
 end LO.Modal

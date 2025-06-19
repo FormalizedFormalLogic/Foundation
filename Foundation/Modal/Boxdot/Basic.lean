@@ -91,7 +91,7 @@ lemma iff_reflexivize_irreflexivize [F.IsReflexive] {x : F.World} {V} : (Satisfi
       exact h y $ by
         induction Rxy with
         | refl => apply IsRefl.refl;
-        | single h => exact h.2;
+        | single h => exact h.1;
     . intro h y Rxy;
       by_cases e : x = y;
       . subst e;
@@ -99,7 +99,7 @@ lemma iff_reflexivize_irreflexivize [F.IsReflexive] {x : F.World} {V} : (Satisfi
         exact h x ReflGen.refl;
       . apply ihp (x := y) |>.mpr;
         exact h y $ by
-          exact ReflGen.single ⟨(by simpa), Rxy⟩;
+          exact ReflGen.single ⟨Rxy, (by simpa)⟩;
 
 lemma iff_reflexivize_irreflexivize' [F.IsReflexive] : (F ⊧ φ) ↔ ((F^≠^=) ⊧ φ) := by
   constructor;

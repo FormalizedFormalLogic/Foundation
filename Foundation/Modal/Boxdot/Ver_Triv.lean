@@ -34,8 +34,8 @@ lemma provable_Triv_of_boxdotTranslated_Ver : φᵇ ∈ Logic.Ver → φ ∈ Log
   . exact {
       isolated := by
         intro x y;
-        by_contra hC;
-        obtain ⟨nxy, Rxy⟩ := hC;
+        by_contra! hC;
+        obtain ⟨Rxy, nxy⟩ := hC;
         apply nxy;
         simpa using Rxy;
     }
@@ -48,8 +48,9 @@ theorem iff_boxdotTranslated_Ver_Triv : (Hilbert.Ver) ⊢! φᵇ ↔ (Hilbert.Tr
   provable_boxdotTranslated_Ver_of_Triv
 ⟩
 
+instance : BoxdotProperty (Logic.Ver) (Logic.Triv) := ⟨iff_boxdotTranslated_Ver_Triv⟩
+
 end Logic
 
--- instance : BoxdotProperty (Logic.Ver) (Logic.Triv) := ⟨Hilbert.iff_boxdotTranslated_Ver_Triv⟩
 
 end LO.Modal

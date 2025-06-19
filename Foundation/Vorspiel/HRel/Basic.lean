@@ -231,19 +231,19 @@ instance [IsSymm _ R] : IsSymm _ (R.ReflTransGen) := ⟨by
 end ReflTransGen
 
 
-def IrreflGen (r : HRel α) : HRel α := λ x y => x ≠ y ∧ r x y
+def IrreflGen (r : HRel α) : HRel α := λ x y => r x y ∧ x ≠ y
 
 namespace IrreflGen
 
 instance : IsIrrefl α (R.IrreflGen) := ⟨by simp [IrreflGen]⟩
 
 instance [IsTrans _ R] [IsAntisymm _ R] : IsTrans _ (R.IrreflGen) := ⟨by
-  rintro a b c ⟨hne, Rab⟩ ⟨_, Rbc⟩;
+  rintro a b c ⟨Rab, hne⟩ ⟨Rbc, _⟩;
   constructor;
+  . exact IsTrans.trans a b c Rab Rbc;
   . by_contra hC;
     subst hC;
     exact hne $ IsAntisymm.antisymm a b Rab Rbc;
-  . exact IsTrans.trans a b c Rab Rbc;
 ⟩
 
 instance [IsPartialOrder _ R] : IsStrictOrder _ (R.IrreflGen) where

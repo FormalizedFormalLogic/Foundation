@@ -185,11 +185,11 @@ end coarsestFiltrationModel
 
 
 
-abbrev finestFiltrationFrame (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Frame where
+abbrev finestFiltrationFrame (M : Model) (T : outParam (FormulaSet ℕ)) [T.IsSubformulaClosed] : Kripke.Frame where
   World := FilterEqvQuotient M T
   Rel X Y := ∃ x y, X = ⟦x⟧ ∧ Y = ⟦y⟧ ∧ x ≺ y
 
-abbrev finestFiltrationModel (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Model where
+abbrev finestFiltrationModel (M : Model) (T : outParam (FormulaSet ℕ)) [T.IsSubformulaClosed] : Kripke.Model where
   toFrame := finestFiltrationFrame M T
   Val := standardFiltrationValuation M T
 
@@ -218,7 +218,7 @@ instance isSymmetric [M.IsSymmetric] : (finestFiltrationModel M T).IsSymmetric w
 end finestFiltrationModel
 
 
-abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Kripke.Model where
+abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : outParam (FormulaSet ℕ)) [T.IsSubformulaClosed] : Kripke.Model where
   toFrame := (finestFiltrationFrame M T)^+
   Val := standardFiltrationValuation M T
 

@@ -43,25 +43,17 @@ instance finite_complete : Complete (Hilbert.KTB) FrameClass.finite_KTB := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   intro F hF V x;
+  replace hF := Set.mem_setOf_eq.mp hF;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFiltrationModel M φ.subformulas;
   apply filtration FM (finestFiltrationModel.filterOf) (by subformula) |>.mpr;
   apply hp;
   apply Set.mem_setOf_eq.mpr;
-  sorry;
-  /-
-  apply Frame.isFiniteKTB_iff _ |>.mpr;
-  constructor;
-  . apply finestFiltrationModel.isFinite $ by simp;
-  . constructor;
-    . apply finestFiltrationModel.isReflexive; simp;
-    . sorry;
-  -/
-
-  -- have : FM.IsFinite := finestFiltrationModel.isFinite $ by simp;
-  -- have : FM.IsReflexive := by sorry; -- apply finestFiltrationModel.isReflexive; simp;
-  -- have : FM.IsSymmetric := by sorry; -- apply finestFiltrationModel.isSymmetric; simp;
-  -- infer_instance
+  refine {
+    world_finite := by apply FilterEqvQuotient.finite $ by simp;
+    refl := finestFiltrationModel.isReflexive.refl
+    symm := finestFiltrationModel.isSymmetric.symm
+  }
 ⟩
 
 end Hilbert.KTB.Kripke

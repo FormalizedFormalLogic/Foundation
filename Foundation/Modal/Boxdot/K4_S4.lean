@@ -9,9 +9,9 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Formula
 open Hilbert.Deduction
 
-namespace Hilbert
+namespace Logic
 
-lemma provable_boxdotTranslated_K4_of_provable_S4 : Hilbert.S4 ⊢! φ → Hilbert.K4 ⊢! φᵇ := boxdotTranslated_of_dominate $ by
+lemma provable_boxdotTranslated_K4_of_provable_S4 : φ ∈ Logic.S4 → φᵇ ∈ Logic.K4 := Hilbert.boxdotTranslated_of_dominate $ by
   intro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
@@ -24,18 +24,19 @@ lemma provable_S4_iff_boxdotTranslated : Hilbert.S4 ⊢! φ ⭤ φᵇ := by
   | himp φ ψ ihp ihq => exact ECC!_of_E!_of_E! ihp ihq;
   | _ => exact E!_id;
 
-lemma provable_S4_of_provable_boxdotTranslated_K4 (h : Hilbert.K4 ⊢! φᵇ) : Hilbert.S4 ⊢! φ := by
+lemma provable_S4_of_provable_boxdotTranslated_K4 (h : φᵇ ∈ Logic.K4) : φ ∈ Logic.S4 := by
   exact (K!_right provable_S4_iff_boxdotTranslated) ⨀ ((weakerThan_iff.mp $ Hilbert.K4_weakerThan_S4) h)
 
-theorem iff_boxdotTranslatedK4_S4 : Hilbert.K4 ⊢! φᵇ ↔ Hilbert.S4 ⊢! φ:= ⟨
+theorem iff_boxdotTranslatedK4_S4 : φᵇ ∈ Logic.K4 ↔ φ ∈ Logic.S4 := ⟨
   provable_S4_of_provable_boxdotTranslated_K4,
   provable_boxdotTranslated_K4_of_provable_S4
 ⟩
 
-end Hilbert
+instance : BoxdotProperty Logic.K4 Logic.S4 := ⟨iff_boxdotTranslatedK4_S4⟩
+
+end Logic
 
 
-instance : BoxdotProperty Logic.K4 Logic.S4 := ⟨Hilbert.iff_boxdotTranslatedK4_S4⟩
 
 
 end LO.Modal

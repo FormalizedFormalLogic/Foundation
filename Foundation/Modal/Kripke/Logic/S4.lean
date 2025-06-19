@@ -40,18 +40,16 @@ open finestFiltrationTransitiveClosureModel in
 instance finiteComplete : Complete (Hilbert.S4) FrameClass.finite_S4 := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
-  rintro F F_preorder V x;
-  replace F_preorder := Set.mem_setOf_eq.mp F_preorder;
+  rintro F hF V x;
+  replace hF := Set.mem_setOf_eq.mp hF;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFiltrationTransitiveClosureModel M φ.subformulas;
   apply filtration FM filterOf (by simp) |>.mpr;
   apply hp;
-  apply Set.mem_setOf_eq.mpr;
-  sorry;
-  -- simp;
-  -- refine ⟨?_, ?_⟩;
-  -- . apply isFinite $ by simp;
-  -- . apply isPreorder;
+  refine {
+    world_finite := by apply FilterEqvQuotient.finite $ by simp;
+    refl := finestFiltrationTransitiveClosureModel.isReflexive.refl
+  }
 ⟩
 
 end Hilbert.S4.Kripke

@@ -8,6 +8,8 @@ open Hilbert.Kripke
 
 namespace Kripke
 
+variable {F : Frame}
+
 protected abbrev Frame.IsKT4B := Frame.IsEquivalence
 protected class Frame.IsFiniteKT4B (F : Frame) extends Frame.IsKT4B F, Frame.IsFinite F
 
@@ -42,15 +44,14 @@ instance finite_complete : Complete (Hilbert.KT4B) FrameClass.finite_KT4B := ⟨
   replace F_equiv := Set.mem_setOf_eq.mp F_equiv;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFiltrationTransitiveClosureModel M φ.subformulas;
-  apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by subformula) |>.mpr;
+  apply filtration FM (finestFiltrationTransitiveClosureModel.filterOf) (by simp) |>.mpr;
   apply hp;
   apply Set.mem_setOf_eq.mpr;
-  sorry;
-  /-
-  refine ⟨?_, ?_⟩;
-  . apply FilterEqvQuotient.finite; simp;
-  . exact finestFiltrationTransitiveClosureModel.isEquiv;
-  -/
+  exact {
+    world_finite := by apply FilterEqvQuotient.finite $ by simp;
+    symm := finestFiltrationTransitiveClosureModel.isSymmetric.symm
+    refl := finestFiltrationTransitiveClosureModel.isReflexive.refl
+  }
 ⟩
 
 end Hilbert.KT4B.Kripke

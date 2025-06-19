@@ -58,11 +58,11 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
       . simp [Satisfies];
         use y;
     . constructor;
+      . assumption;
       . by_contra hC;
         subst hC;
         simp [Satisfies] at hw₂;
         contradiction;
-      . assumption;
   . obtain ⟨x, Rwx, hx⟩ := by simpa [Satisfies] using hw₂;
     use x;
     constructor;
@@ -71,11 +71,11 @@ lemma validate_AxiomGrz_of_refl_trans_wcwf [F.IsReflexive] [F.IsTransitive] [F.I
       . intro y Rxy hy;
         exact hw₁ _ (IsTrans.trans _ _ _ Rwx Rxy) hy;
     . constructor;
+      . assumption;
       . by_contra hC;
         subst hC;
         simp [Satisfies] at hw₃
         contradiction;
-      . assumption;
 
 lemma validate_AxiomGrz_of_finite_strict_preorder [F.IsFinite] [F.IsPartialOrder] : F ⊧ (Axioms.Grz (.atom 0)) := validate_AxiomGrz_of_refl_trans_wcwf
 
@@ -138,7 +138,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
         rintro v h0v j rfl;
         use f (2 * j + 1);
         refine ⟨?_, ?_, f ((2 * j) + 2), ?_, ?_⟩;
-        . apply hf _ |>.2;
+        . apply hf _ |>.1;
         . intro i;
           rcases (lt_trichotomy i j) with (hij | rfl | hij);
           . apply H;
@@ -147,7 +147,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
             omega;
           . apply @H _ _ ?_ |>.symm;
             omega;
-        . apply hf _ |>.2;
+        . apply hf _ |>.1;
         . use (j + 1);
           rfl;
       . suffices ∃ x, f 0 = f (2 * x) by simpa [Satisfies];
@@ -161,13 +161,13 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
       . have : Satisfies ⟨F, V⟩ (f (j + 1)) (∼((.atom 0) ➝ □(.atom 0))) := by
           suffices f (j + 1) ≠ f j ∧ f (j + 1) ≺ f j by simp_all [Satisfies, V];
           constructor;
-          . exact Ne.symm $ (hf j).1;
+          . exact Ne.symm $ (hf j).2;
           . rw [←ejk];
             have H : ∀ {x y : ℕ}, x < y → F.Rel (f x) (f y) := by
               intro x y hxy;
               induction hxy with
-              | refl => exact (hf x).2;
-              | step _ ih => exact F.trans ih (hf _).2;
+              | refl => exact (hf x).1;
+              | step _ ih => exact F.trans ih (hf _).1;
             by_cases h : j + 1 = k;
             . subst_vars; simp;
             . have : j + 1 < k := by omega;
@@ -178,7 +178,7 @@ lemma WCWF_of_validate_AxiomGrz (h : F ⊧ Axioms.Grz (.atom 0)) : F.IsWeaklyCon
           simp_all [Satisfies, V];
           rintro x hx rfl;
           use f (j + 1);
-          refine ⟨(hf j).2, Ne.symm $ (hf j).1, this.2⟩;
+          refine ⟨(hf j).1, Ne.symm $ (hf j).2, this.2⟩;
         exact this _ hx;
       . simp [Satisfies, V];
 

@@ -1,4 +1,6 @@
 import Foundation.Modal.Kripke.Irreflexive
+import Foundation.Modal.Kripke.AxiomWeakPoint2
+import Foundation.Modal.Kripke.AxiomPoint3
 
 namespace LO.Modal.Kripke
 
@@ -21,11 +23,18 @@ instance [F.IsFinite] : (F^≠).IsFinite := inferInstance
 
 instance : (F^≠).IsIrreflexive := ⟨IsIrrefl.irrefl⟩
 
-instance [F.IsIrreflexive] [F.IsTransitive] : (F^≠).IsTransitive := by simp
+instance [F.IsAntisymmetric] [F.IsTransitive] : (F^≠).IsTransitive := inferInstance
 
 instance [F.IsAntisymmetric] : F^≠.IsAntisymmetric := ⟨by
-  rintro x y ⟨_, Rxy⟩ ⟨_, Ryx⟩;
+  rintro x y ⟨Rxy, _⟩ ⟨Ryx, _⟩;
   exact F.antisymm Rxy Ryx;
+⟩
+
+instance [F.IsPiecewiseStronglyConnected] : (F^≠).IsPiecewiseConnected := ⟨by
+  rintro x y z ⟨Rxy, _⟩ ⟨Ryz, _⟩;
+  suffices y ≠ z → F^≠.Rel y z ∨ F^≠.Rel z y by tauto;
+  intro nyz;
+  rcases F.ps_connected Rxy Ryz with (Ryz | Rzy) <;> tauto;
 ⟩
 
 end IrreflGen

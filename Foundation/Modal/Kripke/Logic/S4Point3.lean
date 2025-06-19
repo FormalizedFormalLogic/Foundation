@@ -61,7 +61,8 @@ instance finite_sound : Sound (Hilbert.S4Point3) FrameClass.finite_S4Point3 := i
 instance finite_complete : Complete (Hilbert.S4Point3) FrameClass.finite_S4Point3 := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
-  rintro F ⟨_, _⟩ V r;
+  rintro F hF V r;
+  replace hF := Set.mem_setOf_eq.mp hF;
   let M : Kripke.Model := ⟨F, V⟩;
   let RM := M↾r;
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
@@ -70,13 +71,7 @@ instance finite_complete : Complete (Hilbert.S4Point3) FrameClass.finite_S4Point
   apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTransitive)) (by simp) |>.mpr;
   apply hφ;
   apply Set.mem_setOf_eq.mpr;
-  sorry;
-  /-
-  refine ⟨?_, ?_, ?_⟩;
-  . apply isFinite $ by simp;
-  . exact isPreorder (preorder := Frame.pointGenerate.isPreorder);
-  . exact rooted_isPiecewiseStronglyConnected;
-  -/
+  refine { world_finite := FilterEqvQuotient.finite $ by simp; }
 ⟩
 
 end FFP
