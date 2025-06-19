@@ -386,6 +386,26 @@ instance : Entailment.K4 (Hilbert.K4) where
 
 end Hilbert.K4
 
+protected abbrev Hilbert.K4n (n : ℕ+) : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.FourN n (.atom 0)}⟩
+protected abbrev Logic.K4n (n : ℕ+) := Hilbert.K4n n |>.logic
+
+namespace Hilbert.K4n
+
+variable {n : ℕ+}
+
+instance : (Hilbert.K4n n).HasK where p := 0; q := 1;
+instance : Entailment.K (Hilbert.K4n n) where
+
+instance : Entailment.HasAxiomFourN n (Hilbert.K4n n) where
+  FourN φ := by
+    apply Deduction.maxm;
+    use Axioms.FourN n (.atom 0);
+    constructor;
+    . simp;
+    . use (λ b => if b = 0 then φ else (.atom b));
+      simp;
+
+end Hilbert.K4n
 
 
 protected abbrev Hilbert.K4M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
