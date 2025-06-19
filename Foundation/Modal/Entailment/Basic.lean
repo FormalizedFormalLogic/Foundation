@@ -443,20 +443,20 @@ end
 
 
 
-class HasAxiomH (𝓢 : S) where
-  H (φ : F) : 𝓢 ⊢ Axioms.H φ
+class HasAxiomHen (𝓢 : S) where
+  Hen (φ : F) : 𝓢 ⊢ Axioms.Hen φ
 
 section
 
-variable [HasAxiomH 𝓢]
+variable [HasAxiomHen 𝓢]
 
-def axiomH : 𝓢 ⊢ □(□φ ⭤ φ) ➝ □φ := HasAxiomH.H _
-@[simp] lemma axiomH! : 𝓢 ⊢! □(□φ ⭤ φ) ➝ □φ := ⟨axiomH⟩
+def axiomHen : 𝓢 ⊢ □(□φ ⭤ φ) ➝ □φ := HasAxiomHen.Hen _
+@[simp] lemma axiomHen! : 𝓢 ⊢! □(□φ ⭤ φ) ➝ □φ := ⟨axiomHen⟩
 
 variable [Entailment.Minimal 𝓢]
 
-instance (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ FiniteContext.of axiomH⟩
-instance (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomHen Γ := ⟨fun _ ↦ FiniteContext.of axiomHen⟩
+instance (Γ : Context F 𝓢) : HasAxiomHen Γ := ⟨fun _ ↦ Context.of axiomHen⟩
 
 end
 
