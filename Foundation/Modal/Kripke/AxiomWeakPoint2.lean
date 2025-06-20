@@ -13,6 +13,9 @@ namespace Frame
 
 abbrev IsPiecewiseConvergent (F : Frame) := _root_.IsPiecewiseConvergent F.Rel
 
+lemma p_convergent [F.IsPiecewiseConvergent] {x y z : F.World} : x ≺ y → x ≺ z → y ≠ z → ∃ u, y ≺ u ∧ z ≺ u := by
+  apply IsPiecewiseConvergent.p_convergent
+
 end Frame
 
 

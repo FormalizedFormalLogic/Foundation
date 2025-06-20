@@ -481,7 +481,7 @@ lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : T.
 lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] {i : F} (h : r ≠ i) : T ⊬. ∼T.solovay i := by
   haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝐈𝚺₁ ⪯ T))
   have : ∼T.Provableₐ ⌜∼T.solovay i⌝ :=
-    Solovay.consistent (V := ℕ) (T := T) (Frame.IsRooted.direct_rooted_of_trans i (Ne.symm h)) solovay_root_sound
+    Solovay.consistent (V := ℕ) (T := T) (Frame.root_genaretes'! i (Ne.symm h)) solovay_root_sound
   simpa [Theory.Consistencyₐ.quote_iff, provableₐ_iff_provable₀, unprovable₀_iff] using this
 
 variable (T F r)
