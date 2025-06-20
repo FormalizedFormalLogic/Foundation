@@ -169,10 +169,6 @@ end Arith
 
 end LO.FirstOrder
 
-noncomputable section
-
-open Classical
-
 namespace LO.ISigma1.Metamath
 
 open FirstOrder Arith PeanoMinus IOpen ISigma0
@@ -199,9 +195,9 @@ namespace Arithmetization
 
 namespace Theory.R0'
 
-def eqRefl : FirstOrder.Theory.Delta1Definable {(“∀ x, x = x” : SyntacticFormula ℒₒᵣ)} := singleton _
+noncomputable def eqRefl : FirstOrder.Theory.Delta1Definable {(“∀ x, x = x” : SyntacticFormula ℒₒᵣ)} := singleton _
 
-def replace :
+noncomputable def replace :
     FirstOrder.Theory.Delta1Definable {“∀ x y, x = y → !φ x → !φ y” | φ : SyntacticSemiformula ℒₒᵣ 1} where
   ch := .mkDelta
     (.mkSigma
@@ -291,7 +287,7 @@ def replace :
       (Language.isSemiformula_defined (LOR (V := V))).proper.iff', Semiformula.eval_all,
       LogicalConnective.HomClass.map_imply, LogicalConnective.Prop.arrow_eq, forall_eq]
 
-def Ω₁ :
+noncomputable def Ω₁ :
     FirstOrder.Theory.Delta1Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, φ = “↑n + ↑m = ↑(n + m)”} where
   ch := .mkDelta
     (.mkSigma “p.
@@ -355,7 +351,7 @@ def Ω₁ :
       Semiformula.eval_all, LogicalConnective.HomClass.map_imply, Semiformula.eval_operator_two,
       Matrix.cons_app_seven, Structure.Eq.eq, LogicalConnective.Prop.arrow_eq, forall_eq]
 
-def Ω₂ :
+noncomputable def Ω₂ :
     FirstOrder.Theory.Delta1Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, φ = “↑n * ↑m = ↑(n * m)”} where
   ch := .mkDelta
     (.mkSigma “p.
@@ -419,7 +415,7 @@ def Ω₂ :
       Semiformula.eval_all, LogicalConnective.HomClass.map_imply, Semiformula.eval_operator_two,
       Matrix.cons_app_seven, Structure.Eq.eq, LogicalConnective.Prop.arrow_eq, forall_eq]
 
-def Ω₃ :
+noncomputable def Ω₃ :
     FirstOrder.Theory.Delta1Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, n ≠ m ∧ φ = “↑n ≠ ↑m”} where
   ch := .mkDelta
     (.mkSigma “p. ∃ n < p, ∃ m < p, n ≠ m ∧
@@ -473,7 +469,7 @@ private lemma quote_disjLt_eq (n : ℕ) :
     suffices ^#0 ^= numeral n = ⌜ℒₒᵣ⌝.substs (numeral n ∷ ^#0 ∷ 0) (^#1 ^= ^#0) by simpa [ih]
     rw [substs_eq (by simp) (by simp)]; simp
 
-def Ω₄ :
+noncomputable def Ω₄ :
     FirstOrder.Theory.Delta1Definable {(“∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i” : SyntacticFormula ℒₒᵣ) | n} where
   ch := .mkDelta
     (.mkSigma “p. ∃ n < p,
@@ -559,7 +555,7 @@ end Theory.R0'
 
 open Theory.R0'
 
-instance Theory.R0'Delta1Definable : 𝐑₀'.Delta1Definable := (eqRefl.add <| replace.add <| Ω₁.add <| Ω₂.add <| Ω₃.add Ω₄).ofEq <| by
+noncomputable instance Theory.R0'Delta1Definable : 𝐑₀'.Delta1Definable := (eqRefl.add <| replace.add <| Ω₁.add <| Ω₂.add <| Ω₃.add Ω₄).ofEq <| by
     ext φ; constructor
     · rintro (hφ | hφ | hφ | hφ | hφ | hφ)
       · rcases hφ; exact Theory.R0'.eq_refl
@@ -578,20 +574,20 @@ instance Theory.R0'Delta1Definable : 𝐑₀'.Delta1Definable := (eqRefl.add <| 
 
 abbrev Theory.R0' : ⌜ℒₒᵣ⌝[V].Theory := 𝐑₀'.codeIn V
 
-abbrev TTheory.R0' : ⌜ℒₒᵣ⌝[V].TTheory := 𝐑₀'.tCodeIn V
+noncomputable abbrev TTheory.R0' : ⌜ℒₒᵣ⌝[V].TTheory := 𝐑₀'.tCodeIn V
 
 notation "⌜𝐑₀'⌝" => TTheory.R0'
 notation "⌜𝐑₀'⌝[" V "]" => TTheory.R0' (V := V)
 
 namespace Theory.R0'
 
-def eqRefl.proof : ⌜𝐑₀'⌝[V] ⊢ (#'0 =' #'0).all := Language.Theory.TProof.byAxm <| by
+noncomputable def eqRefl.proof : ⌜𝐑₀'⌝[V] ⊢ (#'0 =' #'0).all := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_left
   unfold eqRefl
   simp [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve, numeral_eq_natCast]
   simp [qqAll, nat_cast_pair, qqEQ, qqRel, cons_absolute, qqBvar]
 
-def replace.proof (φ : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1)) :
+noncomputable def replace.proof (φ : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1)) :
     ⌜𝐑₀'⌝[V] ⊢ (#'1 =' #'0 ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_left
@@ -611,7 +607,7 @@ def replace.proof (φ : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1)) :
     refine lt_trans ?_ (lt_or_right _ _)
     exact lt_or_right _ _
 
-def Ω₁.proof (n m : V) :
+noncomputable def Ω₁.proof (n m : V) :
     ⌜𝐑₀'⌝[V] ⊢ (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n + m) := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
@@ -628,7 +624,7 @@ def Ω₁.proof (n m : V) :
   · apply lt_trans ?_ (lt_qqEQ_left _ _)
     apply lt_of_le_of_lt (by simp) (lt_qqAdd_right _ _)
 
-def Ω₂.proof (n m : V) :
+noncomputable def Ω₂.proof (n m : V) :
     ⌜𝐑₀'⌝[V] ⊢ (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n * m) := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
@@ -646,7 +642,7 @@ def Ω₂.proof (n m : V) :
   · apply lt_trans ?_ (lt_qqEQ_left _ _)
     apply lt_of_le_of_lt (by simp) (lt_qqMul_right _ _)
 
-def Ω₃.proof {n m : V} (ne : n ≠ m) : ⌜𝐑₀'⌝[V] ⊢ ↑n ≠' ↑m := Language.Theory.TProof.byAxm <| by
+noncomputable def Ω₃.proof {n m : V} (ne : n ≠ m) : ⌜𝐑₀'⌝[V] ⊢ ↑n ≠' ↑m := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
@@ -661,7 +657,7 @@ def Ω₃.proof {n m : V} (ne : n ≠ m) : ⌜𝐑₀'⌝[V] ⊢ ↑n ≠' ↑m 
   · exact lt_of_le_of_lt (by simp) (lt_qqNEQ_left _ _)
   · exact lt_of_le_of_lt (by simp) (lt_qqNEQ_right _ _)
 
-def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := Language.Theory.TProof.byAxm <| by
+noncomputable def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
@@ -681,11 +677,11 @@ def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0)
 
 end Theory.R0'
 
-instance Theory.addR0'Delta1Definable (T : Theory ℒₒᵣ) [d : T.Delta1Definable] : (T + 𝐑₀').Delta1Definable :=
+noncomputable instance Theory.addR0'Delta1Definable (T : Theory ℒₒᵣ) [d : T.Delta1Definable] : (T + 𝐑₀').Delta1Definable :=
   d.add Theory.R0'Delta1Definable
 section
 
-abbrev _root_.LO.FirstOrder.Theory.AddR₀TTheory
+noncomputable abbrev _root_.LO.FirstOrder.Theory.AddR₀TTheory
     (T : Theory ℒₒᵣ) [T.Delta1Definable] (V) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] : ⌜ℒₒᵣ⌝[V].TTheory := (T + 𝐑₀').tCodeIn V
 
 scoped [LO.ISigma1.Metamath] infix:100 "†" => LO.FirstOrder.Theory.AddR₀TTheory
@@ -696,7 +692,7 @@ variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 
 @[simp] lemma theory_subset_AddR₀ : T.tCodeIn V ⊆ T†V := FirstOrder.Theory.Delta1Definable.add_subset_left _ _
 
-instance : R₀Theory (T†V) where
+noncomputable instance : R₀Theory (T†V) where
   refl := Language.Theory.TProof.ofSubset (by simp) Theory.R0'.eqRefl.proof
   replace := fun φ ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.R0'.replace.proof φ)
   add := fun n m ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.R0'.Ω₁.proof n m)
@@ -730,7 +726,7 @@ section
 
 variable (T)
 
-def _root_.LO.FirstOrder.Theory.provableₐ : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Theory.provableₐ : 𝚺₁.Semisentence 1 := .mkSigma
   “p. !(T + 𝐑₀').tDef.prv p” (by simp)
 
 lemma provableₐ_defined : 𝚺₁-Predicate (T.Provableₐ : V → Prop) via T.provableₐ := by

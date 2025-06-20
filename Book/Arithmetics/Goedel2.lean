@@ -9,6 +9,9 @@ open Verso.Genre.Manual
 set_option verso.docstring.allowMissing true
 
 #doc (Manual) "Gödel's Second Incompleteness Theorem" =>
+%%%
+tag := "goedel-2"
+%%%
 
 Recall that inside $``\mathsf{I}\Sigma_1`` we can do basic set theory and primitive recursion.
 Many inductive notions and functions on them are defined in $``\Delta_1`` or $``\Sigma_1`` using

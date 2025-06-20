@@ -1,7 +1,7 @@
 import Book.Arithmetics.ISigma0
 import Book.Arithmetics.ISigma1
--- import Book.Arithmetics.Goedel1
--- import Book.Arithmetics.Goedel2
+import Book.Arithmetics.Goedel1
+import Book.Arithmetics.Goedel2
 
 open Verso.Genre
 open Verso.Genre.Manual
@@ -50,3 +50,7 @@ This was the result we wanted to achieve.
 {include 0 Book.Arithmetics.ISigma0}
 
 {include 0 Book.Arithmetics.ISigma1}
+
+{include 0 Book.Arithmetics.Goedel1}
+
+{include 0 Book.Arithmetics.Goedel2}
