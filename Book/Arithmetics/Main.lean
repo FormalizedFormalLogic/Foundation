@@ -1,7 +1,7 @@
 import Book.Arithmetics.ISigma0
 import Book.Arithmetics.ISigma1
--- import Book.Arithmetics.Goedel1
--- import Book.Arithmetics.Goedel2
+import Book.Arithmetics.Goedel1
+import Book.Arithmetics.Goedel2
 
 open Verso.Genre
 open Verso.Genre.Manual

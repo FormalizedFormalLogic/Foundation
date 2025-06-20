@@ -6,8 +6,6 @@ import Foundation.FirstOrder.ISigma1.Metamath
 
 -/
 
-open Classical
-
 namespace LO.ISigma1.Metamath
 
 open FirstOrder Arith PeanoMinus IOpen ISigma0
@@ -77,6 +75,7 @@ noncomputable def replace (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜�
 
 lemma replace! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' u ➝ φ^/[t.sing] ➝ φ^/[u.sing] := ⟨replace T φ t u⟩
 
+open Classical in
 noncomputable def eqSymm (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ t₂ =' t₁ := by
   apply deduct'
   let Γ := [t₁ =' t₂]
@@ -90,6 +89,7 @@ lemma eq_symm! (t₁ t₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ t₂
 
 lemma eq_symm'! {t₁ t₂ : ⌜ℒₒᵣ⌝.Term} (h : T ⊢! t₁ =' t₂) : T ⊢! t₂ =' t₁ := eq_symm! T t₁ t₂ ⨀ h
 
+open Classical in
 noncomputable def eqTrans (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ t₂ =' t₃ ➝ t₁ =' t₃ := by
   apply deduct'
   apply deduct
@@ -102,6 +102,7 @@ noncomputable def eqTrans (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =
 
 lemma eq_trans! (t₁ t₂ t₃ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ t₂ =' t₃ ➝ t₁ =' t₃ := ⟨eqTrans T t₁ t₂ t₃⟩
 
+open Classical in
 noncomputable def addExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ (t₁ + u₁) =' (t₂ + u₂) := by
   apply deduct'
   apply deduct
@@ -119,6 +120,7 @@ noncomputable def addExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
 
 lemma add_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ (t₁ + u₁) =' (t₂ + u₂) := ⟨addExt T t₁ t₂ u₁ u₂⟩
 
+open Classical in
 noncomputable def mulExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ (t₁ * u₁) =' (t₂ * u₂) := by
   apply deduct'
   apply deduct
@@ -136,6 +138,7 @@ noncomputable def mulExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
 
 lemma mul_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ (t₁ * u₁) =' (t₂ * u₂) := ⟨mulExt T t₁ t₂ u₁ u₂⟩
 
+open Classical in
 noncomputable def eqExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ =' u₁ ➝ t₂ =' u₂ := by
   apply deduct'
   apply deduct
@@ -150,6 +153,7 @@ noncomputable def eqExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
 lemma eq_ext (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ =' u₁ ➝ t₂ =' u₂ :=
   ⟨eqExt T t₁ t₂ u₁ u₂⟩
 
+open Classical in
 noncomputable def neExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ ≠' u₁ ➝ t₂ ≠' u₂ := by
   apply deduct'
   apply deduct
@@ -169,6 +173,7 @@ noncomputable def neExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
 lemma ne_ext (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ ≠' u₁ ➝ t₂ ≠' u₂ :=
   ⟨neExt T t₁ t₂ u₁ u₂⟩
 
+open Classical in
 noncomputable def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ <' u₁ ➝ t₂ <' u₂ := by
   apply deduct'
   apply deduct
@@ -188,6 +193,7 @@ noncomputable def ltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t�
 
 lemma lt_ext! (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢! t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ <' u₁ ➝ t₂ <' u₂ := ⟨ltExt T t₁ t₂ u₁ u₂⟩
 
+open Classical in
 noncomputable def nltExt (t₁ t₂ u₁ u₂ : ⌜ℒₒᵣ⌝.Term) : T ⊢ t₁ =' t₂ ➝ u₁ =' u₂ ➝ t₁ ≮' u₁ ➝ t₂ ≮' u₂ := by
   apply deduct'
   apply deduct
@@ -242,6 +248,7 @@ noncomputable def ltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t <' ↑n
   have : T ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := R₀Theory.ltNumeral n
   simpa [Language.SemitermVec.q_of_pos, Language.Semiformula.substs₁] using specialize this t
 
+open Classical in
 noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t ≮' ↑n ⭤ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by
   simpa using ENN_of_E <| ltNumeral T t n
 
@@ -253,6 +260,7 @@ noncomputable def ltComplete {n m : V} (h : n < m) : T ⊢ ↑n <' ↑m := by
 
 lemma lt_complete! {n m : V} (h : n < m) : T ⊢! ↑n <' ↑m := ⟨ltComplete T h⟩
 
+open Classical in
 noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := by
   have : T ⊢ ↑n ≮' ↑m ⭤ (tSubstItr (↑n : ⌜ℒₒᵣ⌝.Term).sing (#'1 ≠' #'0) m).conj := by
     simpa using ENN_of_E <| ltNumeral T n m
@@ -265,6 +273,7 @@ noncomputable def nltComplete {n m : V} (h : m ≤ n) : T ⊢ ↑n ≮' ↑m := 
 
 lemma nlt_complete {n m : V} (h : m ≤ n) : T ⊢! ↑n ≮' ↑m := ⟨nltComplete T h⟩
 
+open Classical in
 noncomputable def ballIntro (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
     (bs : ∀ i < n, T ⊢ φ ^/[(i : ⌜ℒₒᵣ⌝.Term).sing]) :
     T ⊢ φ.ball ↑n := by
