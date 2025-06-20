@@ -1,6 +1,8 @@
 import Foundation.Modal.Kripke.Preservation
 import Foundation.Modal.Kripke.Irreflexive
 import Foundation.Modal.Kripke.Asymmetric
+import Foundation.Modal.Kripke.AxiomWeakPoint2
+import Foundation.Modal.Kripke.AxiomPoint3
 
 namespace LO.Modal
 
@@ -11,11 +13,33 @@ variable {F : Kripke.Frame}
 open Formula.Kripke
 open Relation
 
+
 class Frame.IsGenerated (F : Kripke.Frame) (R : { s : Set F.World // s.Nonempty }) where
   roots_generates : ∀ w ∉ R.1, ∃ r ∈ R.1, F.Rel.TransGen r w
 
 class Frame.IsRooted (F : Kripke.Frame) (r : outParam F.World) where
   root_generates : ∀ w ≠ r, F.Rel.TransGen r w
+
+
+protected abbrev Frame.IsConvergent (F : Frame) := _root_.IsConvergent F.Rel
+lemma Frame.convergent [F.IsConvergent] : ∀ {x y : F.World}, x ≠ y → ∃ u, x ≺ u ∧ y ≺ u := by apply IsConvergent.convergent
+
+protected abbrev Frame.IsStronglyConvergent (F : Frame) := _root_.IsStronglyConvergent F.Rel
+lemma Frame.strongly_convergent [F.IsStronglyConvergent] : ∀ x y : F.World, ∃ u, x ≺ u ∧ y ≺ u := by apply IsStronglyConvergent.s_convergent
+
+
+
+protected abbrev Frame.IsStronglyConnected (F : Frame) := _root_.IsTotal _ F.Rel
+lemma Frame.s_connected [F.IsStronglyConnected] : ∀ {x y : F.World}, x ≺ y ∨ y ≺ x := by apply IsTotal.total
+
+protected abbrev Frame.IsConnected (F : Frame) := _root_.IsTrichotomous _ F.Rel
+lemma Frame.connected [F.IsConnected] : ∀ x y : F.World, x ≺ y ∨ x = y ∨ y ≺ x := by apply IsTrichotomous.trichotomous
+lemma Frame.connected' [F.IsConnected] : ∀ x y : F.World, x ≠ y → x ≺ y ∨ y ≺ x := by
+  rintro x y nexy;
+  rcases F.connected x y with (Rxy | rfl | Ryx);
+  . tauto;
+  . contradiction;
+  . tauto;
 
 namespace Frame.IsRooted
 
@@ -175,41 +199,70 @@ instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric := ⟨by
   { dsimp at Rxy; apply IsAsymm.asymm _ _ Rxy; }
 ⟩
 
-
-
-
-/-
-instance isConfluent [IsConfluent _ F] : IsConfluent _ (F↾r).Rel := ⟨by
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ ⟨Rxy, Rxz⟩;
-  . obtain ⟨w, _, _⟩ := IsConfluent.confl (x := z) (y := z) (z := z) (by tauto);
-    use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
-  . obtain ⟨w, _, _⟩ := @IsConfluent.confl y y z (by tauto);
-    use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
-  . obtain ⟨w, _, _⟩ := @IsConfluent.confl z y z (by tauto);
-    use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
-  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x y z (by tauto);
-    use ⟨w, by right; apply Relation.TransGen.tail hy $ by assumption⟩;
-  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x z z (by tauto);
-    use ⟨w, by right; apply Relation.TransGen.single; tauto⟩;
-  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x z y (by tauto);
-    use ⟨w, by right; apply Relation.TransGen.single $ by assumption⟩;
-  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x y z (by tauto);
-    use ⟨w, by right; apply Relation.TransGen.single $ by assumption⟩;
-  . obtain ⟨w, _, _⟩ := @IsConfluent.confl x y z (by tauto);
-    use ⟨w, by right; apply Relation.TransGen.tail hy $ by assumption⟩;
+instance isConvergent [F.IsPiecewiseConvergent] [F.IsTransitive] [F.IsReflexive] : (F↾r).IsConvergent := ⟨by
+  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ nexy;
+  . tauto;
+  . obtain ⟨u, ⟨Rxu, Ryu⟩⟩ := F.p_convergent (y := x)
+      (by apply F.refl)
+      (by apply HRel.TransGen.unwrap Rry)
+      (by simpa using nexy);
+    use ⟨u, by right; exact HRel.TransGen.single Rxu⟩;
+  . obtain ⟨u, ⟨Ryu, Rux⟩⟩ := F.p_convergent (y := y)
+      (by apply F.refl)
+      (by apply HRel.TransGen.unwrap Rrx)
+      (by simpa using nexy.symm);
+    use ⟨u, by right; exact HRel.TransGen.single Ryu⟩;
+  . obtain ⟨u, ⟨Rux, Ryu⟩⟩ := F.p_convergent (x := r) (y := x) (z := y)
+      (by apply HRel.TransGen.unwrap Rrx)
+      (by apply HRel.TransGen.unwrap Rry)
+      (by simpa using nexy);
+    use ⟨u, by right; exact HRel.TransGen.tail Rrx Rux⟩;
 ⟩
 
-instance isConnected (F_connected : Connected F) : Connected (F↾r).Rel := by
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ ⟨Rxy, Rxz⟩;
+instance isStronglyConvergent [F.IsPiecewiseStronglyConvergent] [F.IsReflexive] [F.IsTransitive] : (F↾r).IsStronglyConvergent := ⟨by
+  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩;
+  . use ⟨y, by tauto⟩;
+    constructor <;> apply Frame.refl;
+  . obtain ⟨u, Ryu, Rxu⟩ := F.ps_convergent
+      (by apply HRel.TransGen.unwrap Rry)
+      (by apply F.refl);
+    use ⟨u, by right; exact HRel.TransGen.single Rxu⟩;
+  . obtain ⟨u, Rxu, Ryu⟩ := F.ps_convergent
+      (by apply HRel.TransGen.unwrap Rrx)
+      (by apply F.refl);
+    use ⟨u, by right; exact HRel.TransGen.single Ryu⟩;
+  . obtain ⟨u, Rxu, Ryu⟩ := F.ps_convergent
+      (by apply HRel.TransGen.unwrap Rrx)
+      (by apply HRel.TransGen.unwrap Rry);
+    use ⟨u, by right; exact HRel.TransGen.tail Rrx Rxu⟩
+⟩
+
+instance isConnected [F.IsPiecewiseConnected] [F.IsTransitive] : (F↾r).IsConnected := ⟨by
+  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩;
   . tauto;
-  . tauto;
-  . tauto;
-  . have := @F_connected x y z (by tauto); tauto;
-  . have := @F_connected x z z (by tauto); tauto;
-  . have := @F_connected x z y (by tauto); tauto;
-  . have := @F_connected x y z (by tauto); tauto;
-  . have := @F_connected x y z (by tauto); tauto;
--/
+  . left;
+    simpa using HRel.TransGen.unwrap Rry;
+  . right; right;
+    simpa using HRel.TransGen.unwrap Rrx;
+  . suffices x ≠ y → x ≺ y ∨ y ≺ x by simp; tauto;
+    intro nexy;
+    refine F.p_connected' (x := r) ?_ ?_ nexy;
+    . simpa using HRel.TransGen.unwrap Rrx;
+    . simpa using HRel.TransGen.unwrap Rry;
+⟩
+
+instance isStronglyConnected [F.IsPiecewiseStronglyConnected] [F.IsReflexive] [F.IsTransitive] : (F↾r).IsStronglyConnected := ⟨by
+  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩;
+  . left; apply F.refl;
+  . left;
+    simpa using HRel.TransGen.unwrap Rry;
+  . right;
+    simpa using HRel.TransGen.unwrap Rrx;
+  . suffices x ≺ y ∨ y ≺ x by simp; tauto;
+    apply F.ps_connected (x := r);
+    . simpa using HRel.TransGen.unwrap Rrx;
+    . simpa using HRel.TransGen.unwrap Rry;
+⟩
 
 def pMorphism (F : Kripke.Frame) (r : F) : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x
@@ -263,6 +316,10 @@ instance isAsymmetric [M.IsAsymmetric] : (M↾r).IsAsymmetric := Frame.pointGene
 instance isAntisymmetric [M.IsAntisymmetric] : (M↾r).IsAntisymmetric := Frame.pointGenerate.isAntisymmetric
 instance isPreorder [M.IsPreorder] : (M↾r).IsPreorder where
 instance isPartialOrder [M.IsPartialOrder] : (M↾r).IsPartialOrder where
+instance isConvergent [M.IsPiecewiseConvergent] [M.IsTransitive] [M.IsReflexive] : (M↾r).IsConvergent := Frame.pointGenerate.isConvergent
+instance isStronglyConvergent [M.IsPiecewiseStronglyConvergent] [M.IsTransitive] [M.IsReflexive] : (M↾r).IsStronglyConvergent := Frame.pointGenerate.isStronglyConvergent
+instance isConnected [M.IsPiecewiseConnected] [M.IsTransitive] : (M↾r).IsConnected := Frame.pointGenerate.isConnected
+instance isStronglyConnected [M.IsPiecewiseStronglyConnected] [M.IsTransitive] [M.IsReflexive] : (M↾r).IsStronglyConnected := Frame.pointGenerate.isStronglyConnected
 
 /-
 instance : (M↾r) ⥹ M := by
