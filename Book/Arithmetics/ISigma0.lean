@@ -11,14 +11,14 @@ open Verso.Genre.Manual.InlineLean
 
 set_option verso.docstring.allowMissing true
 
-#doc (Manual) "𝐈𝚺₀" =>
+#doc (Manual) "ISigma0" =>
 %%%
 tag := "first-order-isigma0"
 %%%
 
-# Exponential2
+# Exponential
 
-The graph of exponential $``\mathrm{Exp}(x, y)`` is definable by $``\Sigma_0$-fomrula,
+The graph of exponential $``\mathrm{Exp}(x, y)`` is definable by $``\Sigma_0``-fomrula,
 and its inductive properties are proved in $``\mathsf{I}\Sigma_0``.
 
 {docstring LO.ISigma0.exponential_definable}
