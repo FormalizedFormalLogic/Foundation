@@ -50,3 +50,7 @@ This was the result we wanted to achieve.
 {include 0 Book.Arithmetics.ISigma0}
 
 {include 0 Book.Arithmetics.ISigma1}
+
+{include 0 Book.Arithmetics.Goedel1}
+
+{include 0 Book.Arithmetics.Goedel2}
