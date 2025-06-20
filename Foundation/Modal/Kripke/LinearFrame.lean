@@ -29,7 +29,7 @@ instance : natLT.IsPiecewiseConnected := ⟨by
 
 abbrev min : natLT.World := 0
 
-instance : Frame.IsRooted natLT natLT.min where
+instance : Frame.IsRootedBy natLT natLT.min where
   root_generates := by
     intro x hx;
     apply Relation.TransGen.single;
@@ -55,7 +55,7 @@ instance : IsRefl _ natLE := by
 
 abbrev min : natLE.World := 0
 
-instance : Frame.IsRooted natLE natLE.min where
+instance : Frame.IsRootedBy natLE natLE.min where
   root_generates := by
     intro x _;
     apply Relation.TransGen.single;

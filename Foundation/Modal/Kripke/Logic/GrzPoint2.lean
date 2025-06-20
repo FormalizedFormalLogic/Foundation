@@ -159,7 +159,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_GrzPoi
     intro w;
     by_cases e : r' = w;
     . subst e; apply RM.refl;
-    . exact Frame.IsRooted.root_generates w (by tauto) |>.unwrap;
+    . exact Frame.IsRootedBy.root_generates w (by tauto) |>.unwrap;
 
   replace hΓφ : ¬(r' ⊧ ⋀Γ → r' ⊧ φ) := Satisfies.imp_def.not.mp $ Model.pointGenerate.modal_equivalent_at_root (r := r) |>.not.mpr hΓφ;
   push_neg at hΓφ;

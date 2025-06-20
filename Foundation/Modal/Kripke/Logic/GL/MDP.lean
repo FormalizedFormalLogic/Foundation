@@ -79,12 +79,12 @@ lemma through_original_root {x : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).Wor
     by_cases e : x = r₁;
     . subst e; left; tauto;
     . left; right;
-      exact pMorphism₁.forth $ Frame.IsRooted.direct_rooted_of_trans x e
+      exact pMorphism₁.forth $ Frame.root_genaretes'! x e
   | .inr (.inr x) =>
     by_cases h : x = r₂;
     . subst h; right; tauto;
     . right; right;
-      exact pMorphism₂.forth $ Frame.IsRooted.direct_rooted_of_trans x h
+      exact pMorphism₂.forth $ Frame.root_genaretes'! x h
 
 end mdpCounterexmpleFrame
 
