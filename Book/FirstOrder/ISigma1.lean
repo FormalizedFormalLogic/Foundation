@@ -13,9 +13,9 @@ open Verso.Genre.Manual.InlineLean
 
 set_option verso.docstring.allowMissing true
 
-#doc (Manual) "ISigma1" =>
+#doc (Manual) "𝐈𝚺₁" =>
 %%%
-tag := "first-order-ISigma1"
+tag := "first-order-isigma1"
 %%%
 
 # Exponential
