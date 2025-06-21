@@ -1,6 +1,7 @@
 import Foundation.Propositional.Kripke.AxiomWeakLEM
 import Foundation.Propositional.Kripke.Rooted
 import Foundation.Propositional.Kripke.Logic.Int
+import Foundation.Propositional.Kripke.Logic.KP
 
 
 namespace LO.Propositional
@@ -11,11 +12,23 @@ open Formula.Kripke
 
 namespace Kripke
 
+variable {F : Frame}
+
 protected abbrev Frame.IsKC := Frame.IsPiecewiseStronglyConvergent
 protected class Frame.IsFiniteKC (F : Frame) extends F.IsFinite, F.IsKC
 
 protected abbrev FrameClass.KC : FrameClass := { F | F.IsKC }
 protected abbrev FrameClass.finite_KC : FrameClass := { F | F.IsFiniteKC }
+
+instance [F.IsKC] : F.IsKP := ⟨by
+  rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
+  use x;
+  refine ⟨F.refl, Rxy, Rxz, ?_⟩;
+  intro v Rxv;
+  obtain ⟨u, Ryu, Rvu⟩ := F.ps_convergent Rxy Rxv;
+  use u;
+  tauto;
+⟩
 
 end Kripke
 
@@ -152,6 +165,65 @@ theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KC := by
         by_contra hC;
         have := @F.ps_convergent _ 0 1 2;
         omega;
+
+@[simp]
+theorem proper_extension_of_KP : Logic.KP ⊂ Logic.KC := by
+  constructor;
+  . rw [KC.Kripke.KC, KP.Kripke.KP];
+    rintro φ hφ F hF;
+    apply hφ;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . suffices ∃ φ, Hilbert.KC ⊢! φ ∧ ¬FrameClass.KP ⊧ φ by rw [KP.Kripke.KP]; tauto;
+    use Axioms.WeakLEM (.atom 0);
+    constructor;
+    . simp;
+    . apply not_validOnFrameClass_of_exists_frame;
+      let F : Frame := {
+        World := Fin 3,
+        Rel := λ x y => x = 0 ∨ x = y
+        rel_partial_order := {
+          refl := by omega;
+          trans := by omega;
+          antisymm := by omega;
+        }
+      };
+      use F;
+      constructor;
+      . refine {
+          kriesel_putnam := by
+            rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
+            match x, y, z with
+            | _, 0, 0 => simp_all;
+            | _, 1, 1 => simp_all;
+            | _, 2, 2 => simp_all;
+            | 1, _, 2 => omega;
+            | 2, _, 1 => omega;
+            | 0, 0, _ => omega;
+            | 0, 1, 0 => omega;
+            | 0, 1, 2 =>
+              use 0;
+              refine ⟨by tauto, by tauto, by tauto, ?_⟩;
+              intro u hu;
+              match u with
+              | 0 => use 1; tauto;
+              | 1 => use 1; tauto;
+              | 2 => use 2; tauto;
+            | 0, 2, 0 => omega;
+            | 0, 2, 1 =>
+              use 0;
+              refine ⟨by tauto, by tauto, by tauto, ?_⟩;
+              intro u hu;
+              match u with
+              | 0 => use 1; tauto;
+              | 1 => use 1; tauto;
+              | 2 => use 2; tauto;
+        }
+      . apply not_imp_not.mpr $ Kripke.isPiecewiseStronglyConvergent_of_validate_axiomWeakLEM;
+        by_contra hC;
+        have := @F.ps_convergent _ 0 1 2;
+        omega;
+
 
 end Logic.KC
 

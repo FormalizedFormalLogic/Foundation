@@ -9,6 +9,7 @@ open Formula.Kripke
 
 namespace Kripke
 
+variable {F : Frame}
 protected abbrev Frame.IsLC := Frame.IsPiecewiseStronglyConnected
 protected class Frame.IsFiniteLC (F : Frame) extends F.IsFinite, F.IsLC
 
@@ -141,6 +142,7 @@ theorem proper_extension_of_KC : Logic.KC ⊂ Logic.LC := by
       . apply not_imp_not.mpr $ isPiecewiseStronglyConnected_of_validate_axiomDummett;
         by_contra hC;
         simpa using @hC.ps_connected 0 1 2;
+
 
 end Logic.LC
 
