@@ -21,13 +21,14 @@ protected class IsNormal (L : Logic) extends L.IsQuasiNormal where
 section
 
 open Entailment
+open Entailment.FiniteContext
 
 variable [L.IsQuasiNormal]
 variable {φ ψ χ : Formula ℕ}
 
 protected lemma subset_K : Logic.K ⊆ L := IsQuasiNormal.subset_K
 
-protected lemma of_mem_K : φ ∈ Logic.K → φ ∈ L := fun h => Logic.subset_K h
+lemma of_mem_K : φ ∈ Logic.K → φ ∈ L := fun h => Logic.subset_K h
 
 protected lemma mdp (hφψ : φ ➝ ψ ∈ L) (hφ : φ ∈ L) : ψ ∈ L := IsQuasiNormal.mdp_closed hφψ hφ
 
@@ -36,26 +37,71 @@ protected lemma subst (hφ : φ ∈ L) : φ⟦s⟧ ∈ L := IsQuasiNormal.subst_
 protected lemma efq (h : ⊥ ∈ L) : ∀ {φ}, φ ∈ L := by
   intro φ;
   apply Logic.mdp ?_ h;
-  apply Logic.of_mem_K;
+  apply L.of_mem_K;
   simp;
 
 lemma p_q_Apq (hφ : φ ∈ L) (hψ : ψ ∈ L) : φ ⋏ ψ ∈ L := by
   apply Logic.mdp ?_ hψ;
   apply Logic.mdp ?_ hφ;
-  apply Logic.of_mem_K;
+  apply L.of_mem_K;
   simp;
+
+@[simp]
+lemma C_id : φ ➝ φ ∈ L := by
+  apply L.of_mem_K;
+  simp;
+
+@[simp]
+lemma E_id : φ ⭤ φ ∈ L := by
+  apply L.of_mem_K;
+  simp;
+
+lemma E_symm (h : φ ⭤ ψ ∈ L) : ψ ⭤ φ ∈ L := by
+  apply Logic.mdp ?_ h;
+  apply L.of_mem_K;
+  -- TODO: extract this as `inside_E!_symm`
+  apply deduct'!;
+  apply E!_symm;
+  simp;
+
+lemma C_of_E_mp (h : φ ⭤ ψ ∈ L) : φ ➝ ψ ∈ L := by
+  apply Logic.mdp ?_ h;
+  apply L.of_mem_K;
+  -- TODO: extract this as `CEC!`
+  apply deduct'!;
+  apply C_of_E_mp!;
+  simp;
+
+lemma C_of_E_mpr (h : φ ⭤ ψ ∈ L) : ψ ➝ φ ∈ L := C_of_E_mp $ L.E_symm h
+
+lemma E_of_C_of_C (h : φ ➝ ψ ∈ L) (h : ψ ➝ φ ∈ L) : φ ⭤ ψ ∈ L := by
+  apply p_q_Apq <;> tauto;
+
+lemma C_trans (h₁ : φ ➝ ψ ∈ L) (h₂ : ψ ➝ χ ∈ L) : φ ➝ χ ∈ L := by
+  apply Logic.mdp ?_ h₂;
+  apply Logic.mdp ?_ h₁;
+  apply L.of_mem_K;
+  -- TODO: extract this as `inside_C!_trans`
+  apply deduct'!;
+  apply deduct!;
+  have H₁ : [ψ ➝ χ, φ ➝ ψ] ⊢[Hilbert.K]! φ ➝ ψ := by_axm!;
+  have H₂ : [ψ ➝ χ, φ ➝ ψ] ⊢[Hilbert.K]! ψ ➝ χ := by_axm!;
+  exact C!_trans H₁ H₂;
+
+lemma C_replace (h : φ ➝ ψ ∈ L) (hφ : φ' ➝ φ ∈ L) (hψ : ψ ➝ ψ' ∈ L) : φ' ➝ ψ' ∈ L :=
+  C_trans hφ $ C_trans h hψ
 
 lemma conj_iffAux {Γ : List (Formula ℕ)} : Γ.conj₂ ∈ L ↔ ∀ φ ∈ Γ, φ ∈ L := by
   constructor;
   . intro h φ hφ;
     refine Logic.mdp ?_ h;
-    apply Logic.of_mem_K;
+    apply L.of_mem_K;
     apply left_Conj₂!_intro hφ;
   . intro h;
     induction Γ using List.induction_with_singleton with
     | hnil =>
       simp only [List.conj₂_nil];
-      apply Logic.of_mem_K;
+      apply L.of_mem_K;
       exact verum!;
     | hsingle φ =>
       apply h;
@@ -109,7 +155,36 @@ section
 
 variable [L.IsNormal]
 
+variable {φ ψ : Formula ℕ}
+
 protected lemma nec (hφ : φ ∈ L) : □φ ∈ L := IsNormal.nec_closed hφ
+
+lemma neg_congruence (h : φ ⭤ ψ ∈ L) : ∼φ ⭤ ∼ψ ∈ L := by
+  apply E_of_C_of_C;
+  . apply Logic.mdp ?_ (C_of_E_mpr h);
+    apply L.of_mem_K;
+    simp;
+  . apply Logic.mdp ?_ (C_of_E_mp h);
+    apply L.of_mem_K;
+    simp;
+
+lemma box_regularity (h : φ ➝ ψ ∈ L) : □φ ➝ □ψ ∈ L := by
+  apply Logic.mdp ?_ $ Logic.nec h;
+  apply L.of_mem_K;
+  simp;
+
+lemma box_congruence (h : φ ⭤ ψ ∈ L) : □φ ⭤ □ψ ∈ L := by
+  apply E_of_C_of_C;
+  . apply box_regularity;
+    apply C_of_E_mp h;
+  . apply box_regularity;
+    apply C_of_E_mpr h;
+
+lemma dia_regularity (h : φ ⭤ ψ ∈ L) : ◇φ ⭤ ◇ψ ∈ L := by
+  apply neg_congruence;
+  apply box_congruence;
+  apply neg_congruence;
+  exact h;
 
 end
 
