@@ -18,6 +18,7 @@ instance : Entailment.Consistent (Hilbert.K) := consistent_of_sound_frameclass F
 
 instance : Kripke.Canonical (Hilbert.K) FrameClass.all := ⟨by trivial⟩
 
+/-- Hilbert system for `K` is complete for class of all Kripke frame -/
 instance complete : Complete (Hilbert.K) FrameClass.all := inferInstance
 
 instance complete_finite : Complete (Hilbert.K) (FrameClass.finite_all) := ⟨by
