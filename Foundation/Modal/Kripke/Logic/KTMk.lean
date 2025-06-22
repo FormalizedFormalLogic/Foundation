@@ -1,4 +1,4 @@
-import Foundation.Modal.Entailment.KT
+import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.AxiomMk
@@ -184,5 +184,71 @@ example : ∃ φ, Hilbert.KTMk ⊬ φ ∧ (∀ M : Kripke.Model, Finite M → M 
 end
 
 end Hilbert.KTMk.Kripke
+
+
+
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+@[simp]
+theorem KTMk.proper_extension_of_KT : Logic.KT ⊂ Logic.KTMk := by
+  constructor;
+  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . suffices ∃ φ, Hilbert.KTMk ⊢! φ ∧ ¬FrameClass.KT ⊧ φ by
+      rw [KT.Kripke.refl];
+      tauto;
+    use (Axioms.Mk (.atom 0) (.atom 1));
+    constructor;
+    . exact axiomMk!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 3, λ x y => x = y ∨ x + 1 = y⟩, λ w a => match a with | 0 => w ≠ 2 | 1 => w = 0 | _ => True⟩, 0;
+      constructor;
+      . exact { refl := by omega; }
+      . suffices ∀ (x : Fin 3), 0 = x ∨ 1 = x → (∀ y, x = y ∨ x + 1 = y → ∀ z, y = z ∨ y + 1 = z → z ≠ 2) → x ≠ 0 ∧ x + 1 ≠ 0 by
+          simpa [Frame.Rel', Satisfies, Semantics.Realize];
+        rintro x (rfl | rfl);
+        . intro h;
+          exfalso;
+          have : (1 : Fin 3) ≠ 2 := h 0 (by omega) 1 (by omega);
+          tauto;
+        . omega;
+
+@[simp]
+theorem S4.proper_extension_of_KTMk : Logic.KTMk ⊂ Logic.S4 := by
+  constructor;
+  . apply Hilbert.weakerThan_of_dominate_axioms ?_ |>.subset;
+    intro φ hφ;
+    rcases (by simpa using hφ) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, _, rfl⟩);
+    . simp;
+    . simp;
+    . apply LO.Modal.Hilbert.S4.Kripke.complete.complete;
+      intro F hF V x hx;
+      replace hF := Set.mem_setOf_eq.mp hF;
+      replace ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
+      apply Satisfies.dia_def.mpr;
+      use x;
+      constructor;
+      . apply F.refl;
+      . apply Satisfies.and_def.mpr;
+        constructor;
+        . intro y Rxy z Ryz;
+          apply hx₁;
+          exact F.trans Rxy Ryz;
+        . apply Satisfies.dia_def.mpr;
+          use x;
+          constructor;
+          . apply F.refl;
+          . assumption;
+  . suffices ∃ φ, φ ∈ Logic.S4 ∧ φ ∉ Logic.KTMk by tauto;
+    obtain ⟨φ, hφ⟩ := Hilbert.KTMk.Kripke.exists_not_provable_axiomFour;
+    use Axioms.Four φ;
+    constructor;
+    . simp;
+    . assumption;
+
+end Logic
 
 end LO.Modal
