@@ -83,6 +83,7 @@
       "LO.Modal.Logic.KHen": $Logic("KHen")$,
       "LO.Modal.Logic.KM": $Logic("KM")$,
       "LO.Modal.Logic.KT": $Logic("KT")$,
+      "LO.Modal.Logic.KTMk": $Logic("KTMk")$,
       "LO.Modal.Logic.KTB": $Logic("KTB")$,
       "LO.Modal.Logic.KTc": $Logic("KTc")$,
       "LO.Modal.Logic.S": $Logic("S")$,
