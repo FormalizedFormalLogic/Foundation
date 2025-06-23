@@ -1,8 +1,9 @@
+import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Logic.Extension
-import Foundation.Modal.Kripke.Logic.S4
 
 namespace LO.Modal
 
+@[match_pattern]
 inductive Modality : Type
   | empty : Modality
   | box : Modality → Modality
@@ -12,26 +13,43 @@ inductive Modality : Type
 
 namespace Modality
 
+notation:max "-" => Modality.empty
+prefix:80 "□" => Modality.box
+prefix:80 "◇" => Modality.dia
+prefix:80 "∼" => Modality.neg
+
 def toString : Modality → String
-  | empty => "·"
-  | box m => s!"□{m.toString}"
-  | dia m => s!"◇{m.toString}"
-  | neg m => s!"∼{m.toString}"
+  | - => "-"
+  | □m => s!"□{m.toString}"
+  | ◇m => s!"◇{m.toString}"
+  | ∼m => s!"∼{m.toString}"
 
 instance : Repr Modality := ⟨λ t _ => toString t⟩
 
 instance : ToString Modality := ⟨Modality.toString⟩
 
+/-- pure box -/
+abbrev pbox : Modality := □-
+notation:max "□" => pbox
 
-#eval Modality.box $ .dia $ .neg $ .empty
+/-- pure diamond -/
+abbrev pdia : Modality := ◇-
+notation:max "◇" => pdia
+
+/-- pure negation -/
+abbrev pneg : Modality := ∼-
+notation:max "∼" => pneg
+
+#eval □◇◇
+
 
 def op : Modality → (Modality → Modality)
-  | empty => id
-  | box m => λ n => m.op $ box n
-  | dia m => λ n => m.op $ dia n
-  | neg m => λ n => m.op $ neg n
+  | -  => id
+  | □m => λ n => m.op $ □n
+  | ◇m => λ n => m.op $ ◇n
+  | ∼m => λ n => m.op $ ∼n
 
-#eval (box $ box $ dia $ empty).op (neg $ dia $ box $ empty)
+#eval (□◇□).op (∼□◇)
 
 
 inductive Polarity
@@ -43,17 +61,17 @@ def Polarity.inv : Polarity → Polarity
   | neg => pos
 
 def polarity : Modality → Polarity
-  | empty => .pos
-  | box _ => .pos
-  | dia _ => .neg
-  | neg m => m.polarity.inv
+  | -  => .pos
+  | □_ => .pos
+  | ◇_ => .neg
+  | ∼m => m.polarity.inv
 
 
 def size : Modality → Nat
-  | empty => 0
-  | box m => 1 + m.size
-  | dia m => 1 + m.size
-  | neg m => 1 + m.size
+  | -  => 0
+  | □m => 1 + m.size
+  | ◇m => 1 + m.size
+  | ∼m => 1 + m.size
 
 
 end Modality
@@ -64,14 +82,14 @@ namespace Formula
 @[simp]
 def attachModality (m : Modality) (φ : Formula ℕ) : Formula ℕ :=
   match m with
-  | .empty  => φ
-  | .box m' => □ (φ.attachModality m')
-  | .dia m' => ◇ (φ.attachModality m')
-  | .neg m' => ∼ (φ.attachModality m')
+  | -   => φ
+  | □m' => □ (φ.attachModality m')
+  | ◇m' => ◇ (φ.attachModality m')
+  | ∼m' => ∼ (φ.attachModality m')
 
 instance : CoeFun (Modality) (λ _ => Formula ℕ → Formula ℕ) := ⟨Formula.attachModality⟩
 
-#eval (Modality.box $ .empty) (.atom 1)
+#eval (□-) (.atom 1)
 
 end Formula
 
@@ -120,7 +138,7 @@ class Translation (L : Logic) (M₁ M₂ : Modality) where
 
 notation M₁ " ⇝[" L "] " M₂ => Translation L M₁ M₂
 
-instance : IsRefl _ (Translation L) := ⟨by
+instance : IsRefl _ (· ⇝[L] ·) := ⟨by
   intro M;
   constructor;
   intro a;
@@ -128,7 +146,7 @@ instance : IsRefl _ (Translation L) := ⟨by
   simp;
 ⟩
 
-instance : IsTrans _ (Translation L) where
+instance : IsTrans _ (· ⇝[L] ·) where
   trans M₁ M₂ M₃ := by
     intro T₁₂ T₂₃;
     constructor;
@@ -158,19 +176,19 @@ instance [M₁ ⇝[L] M₂] [M₂ ⇝[L] M₁] : M₁ ↭[L] M₂ := by
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> infer_instance;
 
-instance : IsSymm _ (Equivalence L) := ⟨by
+instance : IsSymm _ (· ↭[L] ·) := ⟨by
   intro _ _ eq;
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> infer_instance;
 ⟩
 
-instance : IsRefl _ (Equivalence L) := ⟨by
+instance : IsRefl _ (· ↭[L] ·) := ⟨by
   intro _;
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> apply _root_.refl;
 ⟩
 
-instance : IsTrans _ (Equivalence L) := ⟨by
+instance : IsTrans _ (· ↭[L] ·) := ⟨by
   intro a b c;
   intro E₁₂ E₂₃;
   have ⟨T₁₂, T₂₁⟩ := iff_equivalence_bi_translate.mp E₁₂;
@@ -181,10 +199,10 @@ instance : IsTrans _ (Equivalence L) := ⟨by
   . exact _root_.trans T₃₂ T₂₁;
 ⟩
 
-instance : IsEquiv _ (Equivalence L) where
+instance : IsEquiv _ (· ↭[L] ·) where
 
 
-lemma translate_fml [M₁ ⇝[L] M₂] (φ : Formula _) : M₁ φ ➝ M₂ φ ∈ L := by
+lemma Translation.translate_fml [M₁ ⇝[L] M₂] (φ : Formula _) : M₁ φ ➝ M₂ φ ∈ L := by
   let s : Substitution ℕ := λ a => if a = 0 then φ else (.atom a);
   apply L.C_replace $ L.subst (Translation.translate (L := L) (M₁ := M₁) (M₂ := M₂) 0) (s := s);
   . simpa [s] using L.C_subst_attachModality_mpr (s := s) (φ := (.atom 0));
@@ -199,8 +217,8 @@ def translation_of_axiomInstance {a : ℕ} (h : (M₁ a) ➝ (M₂ a) ∈ L) : M
 ⟩
 
 
-lemma equivalent_fml [M₁ ↭[L] M₂] (φ : Formula _) : M₁ φ ⭤ M₂ φ ∈ L := by
-  apply L.E_of_C_of_C <;> apply translate_fml;
+lemma Equivalence.equivalent_fml [M₁ ↭[L] M₂] (φ : Formula _) : M₁ φ ⭤ M₂ φ ∈ L := by
+  apply L.E_of_C_of_C <;> apply Translation.translate_fml;
 
 def equivalence_of_axiomInstance {a : ℕ} (h : (M₁ a) ⭤ (M₂ a) ∈ L) : M₁ ↭[L] M₂ := by
   apply iff_equivalence_bi_translate.mpr;
@@ -220,27 +238,27 @@ open Formula
 
 variable {H : Hilbert ℕ} [H.HasK]
 
-instance [H.HasT] : (box $ empty) ⇝[H.logic] (empty) :=
+instance [H.HasT] : (□-) ⇝[H.logic] (-) :=
   translation_of_axiomInstance (a := Hilbert.HasT.p H) $ by simp;
 
-instance [H.HasTc] : (empty) ⇝[H.logic] (box $ empty) :=
+instance [H.HasTc] : (-) ⇝[H.logic] (□-) :=
   translation_of_axiomInstance (a := Hilbert.HasTc.p H) $ by simp;
 
-instance [H.HasFour] : (box $ empty) ⇝[H.logic] (box $ box $ empty) :=
+instance [H.HasFour] : (□-) ⇝[H.logic] (□□-) :=
   translation_of_axiomInstance (a := Hilbert.HasFour.p (H := H)) $ by simp
 
-instance [H.HasB] : (empty) ⇝[H.logic] (box $ dia $ empty) :=
+instance [H.HasB] : (-) ⇝[H.logic] (□◇-) :=
   translation_of_axiomInstance (a := Hilbert.HasB.p (H := H)) $ by simp;
 
-instance [H.HasD] : (box $ empty) ⇝[H.logic] (dia $ empty) :=
+instance [H.HasD] : (□-) ⇝[H.logic] (◇-) :=
   translation_of_axiomInstance (a := Hilbert.HasD.p (H := H)) $ by simp;
 
-instance [H.HasFive] : (dia $ empty) ⇝[H.logic] (box $ dia $ empty) :=
+instance [H.HasFive] : (◇-) ⇝[H.logic] (□◇-) :=
   translation_of_axiomInstance (a := Hilbert.HasFive.p (H := H)) $ by simp;
 
-instance : (box $ empty) ⇝[Logic.S4] (empty) := inferInstance
+instance : (□-) ⇝[Logic.S4] (-) := inferInstance
 
-instance : (box $ empty) ↭[Logic.Triv] (empty) := inferInstance
+instance : (□-) ↭[Logic.Triv] (-) := inferInstance
 
 end Logic
 
