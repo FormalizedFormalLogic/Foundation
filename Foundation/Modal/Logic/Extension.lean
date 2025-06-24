@@ -180,7 +180,7 @@ lemma box_congruence (h : φ ⭤ ψ ∈ L) : □φ ⭤ □ψ ∈ L := by
   . apply box_regularity;
     apply C_of_E_mpr h;
 
-lemma dia_regularity (h : φ ⭤ ψ ∈ L) : ◇φ ⭤ ◇ψ ∈ L := by
+lemma dia_congruence (h : φ ⭤ ψ ∈ L) : ◇φ ⭤ ◇ψ ∈ L := by
   apply neg_congruence;
   apply box_congruence;
   apply neg_congruence;
