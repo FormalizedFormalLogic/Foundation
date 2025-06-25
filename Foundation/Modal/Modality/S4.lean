@@ -8,11 +8,21 @@ section
 
 open Modality Modalities
 
-variable {M : Modalities} {n : ℕ} {L : Logic} {n : ℕ}
+variable {L : Logic} {M : Modalities} {n : ℕ} {n : ℕ}
 
 structure ModalityReducing (L : Logic) (n : ℕ) (M : Modalities) where
   M_size : ∀ m ∈ M, m.size ≤ n
   M_mem  : ∀ m ∈ Modalities.allOfSize n, ∃ m' ∈ M, m ⤳[L] m'
+
+abbrev ModalReducible (L : Logic) (n : ℕ) (M : Modalities) := ∀ m ∈ Modalities.allOfSize n, ∃ m' ∈ M, m ⤳[L] m'
+
+lemma ModalReducible.size_max {M_ne} : ModalReducible L (M.max_size M_ne) M → ModalReducible L (M.max_size M_ne + 1) M := by
+  generalize hn : M.max_size _ = n;
+  intro hM m hm;
+  obtain ⟨m', hm', (rfl | rfl | rfl)⟩ := allOfSize.eq_succ hm;
+  . sorry;
+  . sorry;
+  . sorry;
 
 end
 
@@ -119,135 +129,179 @@ macro "reduce_to " t:term : tactic => `(tactic| focus
   . infer_instance;
 )
 
-abbrev modalities : Modalities := {-, ∼, □, ◇, ∼□, ∼◇, □◇, ◇□, □◇□, ◇□◇, ∼□◇□, ∼◇□◇}
 
 
+abbrev modalities : Modalities := {-, ∼, □, ◇, ∼□, ∼◇, □◇, ◇□, ∼◇□, ◇□◇, ∼□◇}
 
 section
 
 set_option linter.style.multiGoal false
 
-instance : (□□) ≅[Logic.S4] (□)  := inferInstance
-instance : (□◇) ≅[Logic.S4] (□◇) := inferInstance
-instance : (□∼) ≅[Logic.S4] (∼◇) := inferInstance
-instance : (◇□) ≅[Logic.S4] (◇□) := inferInstance
-instance : (◇◇) ≅[Logic.S4] (◇)  := inferInstance
-instance : (◇∼) ≅[Logic.S4] (∼□) := inferInstance
+lemma modal_reducible_0 : ModalReducible Logic.S4 0 Logic.S4.modalities := by
+  simp [ModalReducible];
+  tauto;
+
+lemma modal_reducible_1 : ModalReducible Logic.S4 1 Logic.S4.modalities := by
+  intro m hm;
+  simp only [Modalities.allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union, Finset.mem_singleton] at hm;
+  rcases hm with rfl | rfl | rfl;
+  . reduce_to (∼);
+  . reduce_to (□);
+  . reduce_to (◇);
+
+instance : (∼∼) ≅[Logic.S4] (-)  := inferInstance
 instance : (∼□) ≅[Logic.S4] (∼□) := inferInstance
 instance : (∼◇) ≅[Logic.S4] (∼◇) := inferInstance
-instance : (∼∼) ≅[Logic.S4] (-)  := inferInstance
+instance : (□∼) ≅[Logic.S4] (∼◇) := inferInstance
+instance : (□□) ≅[Logic.S4] (□)  := inferInstance
+instance : (□◇) ≅[Logic.S4] (□◇) := inferInstance
+instance : (◇∼) ≅[Logic.S4] (∼□) := inferInstance
+instance : (◇□) ≅[Logic.S4] (◇□) := inferInstance
+instance : (◇◇) ≅[Logic.S4] (◇)  := inferInstance
 
-instance : (∼□□) ≅[Logic.S4] (∼□)  := equivalence_expand_left (□□) (□) (∼)
-instance : (∼□◇) ≅[Logic.S4] (∼□◇) := inferInstance
-instance : (∼□∼) ≅[Logic.S4] (◇)   := by trans (∼∼◇); exact equivalence_expand_left (□∼) (∼◇) (∼); exact equivalence_expand_right (∼∼) (-) (◇)
-instance : (∼◇□) ≅[Logic.S4] (∼◇□) := inferInstance
-instance : (∼◇◇) ≅[Logic.S4] (∼◇)  := equivalence_expand_left (◇◇) (◇) (∼)
-instance : (∼◇∼) ≅[Logic.S4] (□)   := by trans (∼∼□); exact equivalence_expand_left (◇∼) (∼□) (∼); exact equivalence_expand_right (∼∼) (-) (□)
+instance : (◇◇m) ≅[Logic.S4] (◇m)  := equivalence_expand_right (◇◇) (◇) m
+instance : (∼∼m) ≅[Logic.S4] (m)   := equivalence_expand_right (∼∼) (-) m
+
+
+lemma modal_reducible_2 : ∀ m ∈ Modalities.allOfSize 2, ∃ m' ∈ Logic.S4.modalities, m ⤳[Logic.S4] m' := by
+  intro m hm;
+  simp only [
+    Modalities.allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union,
+    Finset.mem_image, Finset.mem_singleton, exists_eq_or_imp, exists_eq_left
+  ] at hm;
+  rcases hm with (rfl | rfl | rfl) | (rfl | rfl | rfl) | (rfl | rfl | rfl);
+  . reduce_to (-);
+  . reduce_to (∼□);
+  . reduce_to (∼◇);
+  . reduce_to (∼◇);
+  . reduce_to (□);
+  . reduce_to (□◇);
+  . reduce_to (∼□);
+  . reduce_to (◇□);
+  . reduce_to (◇);
+
+instance : (∼∼∼) ≅[Logic.S4] (∼)   := equivalence_expand_right (∼∼) (-) (∼)
 instance : (∼∼□) ≅[Logic.S4] (□)   := equivalence_expand_right (∼∼) (-) (□)
 instance : (∼∼◇) ≅[Logic.S4] (◇)   := equivalence_expand_right (∼∼) (-) (◇)
-instance : (∼∼∼) ≅[Logic.S4] (∼)   := equivalence_expand_right (∼∼) (-) (∼)
+instance : (∼□∼) ≅[Logic.S4] (◇)   := by trans (∼∼◇); exact equivalence_expand_left (□∼) (∼◇) (∼); exact equivalence_expand_right (∼∼) (-) (◇)
+instance : (∼□□) ≅[Logic.S4] (∼□)  := equivalence_expand_left (□□) (□) (∼)
+instance : (∼□◇) ≅[Logic.S4] (∼□◇) := inferInstance
+instance : (∼◇∼) ≅[Logic.S4] (□)   := by trans (∼∼□); exact equivalence_expand_left (◇∼) (∼□) (∼); exact equivalence_expand_right (∼∼) (-) (□)
+instance : (∼◇□) ≅[Logic.S4] (∼◇□) := inferInstance
+instance : (∼◇◇) ≅[Logic.S4] (∼◇)  := equivalence_expand_left (◇◇) (◇) (∼)
+/-
+instance : (□∼∼) ⤳[Logic.S4] (-)   := translation_expand_left (∼∼) (-) (□)
 instance : (□∼□) ⤳[Logic.S4] (∼□)  := inferInstance
 instance : (□∼◇) ⤳[Logic.S4] (∼◇)  := inferInstance
-instance : (□∼∼) ⤳[Logic.S4] (-)   := translation_expand_left (∼∼) (-) (□)
+instance : (□□∼) ≅[Logic.S4] (∼◇)  := by trans (□∼) <;> infer_instance
 instance : (□□□) ≅[Logic.S4] (□)   := by trans (□□); exact equivalence_expand_right (□□) (□) (□); infer_instance;
 instance : (□□◇) ≅[Logic.S4] (□◇)  := equivalence_expand_right (□□) (□) (◇)
-instance : (□□∼) ≅[Logic.S4] (∼◇)  := by trans (□∼) <;> infer_instance
+instance : (□◇∼) ⤳[Logic.S4] (∼□)  := by trans (◇∼) <;> infer_instance
 instance : (□◇□) ⤳[Logic.S4] (◇□)  := by trans (◇□) <;> infer_instance
 instance : (□◇◇) ⤳[Logic.S4] (◇)   := by trans (◇◇) <;> infer_instance
-instance : (□◇∼) ⤳[Logic.S4] (∼□)  := by trans (◇∼) <;> infer_instance
+-/
+instance : (◇∼∼) ≅[Logic.S4] (◇)   := by trans (∼□∼); exact equivalence_expand_right (◇∼) (∼□) (∼); infer_instance;
 instance : (◇∼□) ≅[Logic.S4] (∼□)  := by trans (∼□□); exact equivalence_expand_right (◇∼) (∼□) (□); exact equivalence_expand_left (□□) (□) (∼)
 instance : (◇∼◇) ≅[Logic.S4] (∼□◇) := equivalence_expand_right (◇∼) (∼□) (◇)
-instance : (◇∼∼) ≅[Logic.S4] (◇)   := by trans (∼□∼); exact equivalence_expand_right (◇∼) (∼□) (∼); infer_instance;
+instance : (◇□∼) ≅[Logic.S4] (∼□◇) := by trans (◇∼◇); exact equivalence_expand_left (□∼) (∼◇) (◇); infer_instance;
 instance : (◇□□) ≅[Logic.S4] (◇□)  := equivalence_expand_left (□□) (□) (◇)
 instance : (◇□◇) ≅[Logic.S4] (◇□◇) := inferInstance
-instance : (◇□∼) ≅[Logic.S4] (∼□◇) := by trans (◇∼◇); exact equivalence_expand_left (□∼) (∼◇) (◇); infer_instance;
+instance : (◇◇∼) ≅[Logic.S4] (∼□)  := by trans (◇∼); exact equivalence_expand_right (◇◇) (◇) (∼); infer_instance;
 instance : (◇◇□) ≅[Logic.S4] (◇□)  := equivalence_expand_right (◇◇) (◇) (□)
 instance : (◇◇◇) ≅[Logic.S4] (◇)   := by trans (◇◇); exact equivalence_expand_left (◇◇) (◇) (◇); infer_instance;
-instance : (◇◇∼) ≅[Logic.S4] (∼□)  := by trans (◇∼); exact equivalence_expand_right (◇◇) (◇) (∼); infer_instance;
+
+lemma modal_reducible_3 : ∀ m ∈ Modalities.allOfSize 3, ∃ m' ∈ Logic.S4.modalities, m ⤳[Logic.S4] m' := by
+  intro m hm₃;
+  obtain ⟨m, hm₂, (rfl | rfl | rfl)⟩ := Modalities.allOfSize.eq_succ hm₃;
+  . replace hm₂ : (∼∼ = m ∨ ∼□ = m ∨ ∼◇ = m) ∨ (□∼ = m ∨ □□ = m ∨ □◇ = m) ∨ (◇∼ = m ∨ ◇□ = m ∨ ◇◇ = m) := by
+      simpa [Modalities.allOfSize] using hm₂;
+    rcases hm₂ with (rfl | rfl | rfl) | (rfl | rfl | rfl) | (rfl | rfl | rfl);
+    . reduce_to (∼);
+    . reduce_to (□);
+    . reduce_to (◇);
+    . reduce_to (◇);
+    . reduce_to (∼□);
+    . reduce_to (∼□◇);
+    . reduce_to (□);
+    . reduce_to (∼◇□);
+    . reduce_to (∼◇);
+  . obtain ⟨m', hm', hm'_reduce⟩ := modal_reducible_2 _ hm₂;
+    use m';
+    constructor;
+    . assumption;
+    . trans m;
+      . infer_instance;
+      . assumption;
+  . replace hm₂ : (∼∼ = m ∨ ∼□ = m ∨ ∼◇ = m) ∨ (□∼ = m ∨ □□ = m ∨ □◇ = m) ∨ (◇∼ = m ∨ ◇□ = m ∨ ◇◇ = m) := by
+      simpa [Modalities.allOfSize] using hm₂;
+    rcases hm₂ with (rfl | rfl | rfl) | (rfl | rfl | rfl) | (rfl | rfl | rfl);
+    . reduce_to (◇);
+    . reduce_to (∼□);
+    . reduce_to (∼□◇);
+    . reduce_to (∼□◇);
+    . reduce_to (◇□);
+    . reduce_to (◇□◇);
+    . reduce_to (∼□);
+    . reduce_to (◇□);
+    . reduce_to (◇);
+
+lemma modal_reducible_4 : ∀ m ∈ Modalities.allOfSize 4, ∃ m' ∈ Logic.S4.modalities, m ⤳[Logic.S4] m' := by
+  intro m hm₄;
+  obtain ⟨m, hm₃, (rfl | rfl | rfl)⟩ := Modalities.allOfSize.eq_succ hm₄;
+  . obtain ⟨m, hm₂, (rfl | rfl | rfl)⟩ := Modalities.allOfSize.eq_succ hm₃;
+    . obtain ⟨m', hm', hm'_reduce⟩ := modal_reducible_2 _ hm₂;
+      use m';
+      constructor;
+      . assumption;
+      . trans m;
+        . sorry;
+        . assumption;
+    . sorry;
+    . sorry;
+  . obtain ⟨m', hm', hm'_reduce⟩ := modal_reducible_3 _ hm₃;
+    use m';
+    constructor;
+    . assumption;
+    . trans m;
+      . infer_instance;
+      . assumption;
+  . obtain ⟨m', hm', hm'_reduce⟩ := modal_reducible_3 _ hm₃;
+    use m';
+    constructor;
+    . assumption;
+    . match m with
+      | -  => sorry;
+      | ∼m =>
+        sorry;
+      | □m =>
+        sorry;
+      | ◇m =>
+        trans (◇m);
+        . infer_instance;
+        . infer_instance;
+
+lemma modal_reducible_lt_5 : ∀ μ ∈ Modalities.allOfSize (n + 4), ∃ μ' ∈ modalities, μ ⤳[Logic.S4] μ' := by
+  induction n with
+  | zero => sorry;
+  | succ n ih =>
+    intro μ hμ₁;
+    obtain ⟨μ, hμ₂, (rfl | rfl | rfl)⟩ := Modalities.allOfSize.eq_succ hμ₁;
+    . sorry;
+    . sorry;
+    . sorry;
+
+lemma modal_reducible : ∀ n, ∀ μ ∈ Modalities.allOfSize n, ∃ μ' ∈ Logic.S4.modalities, μ ⤳[Logic.S4] μ' := by
+  intro n;
+  match n with
+  | 0 => exact modal_reducible_0;
+  | 1 => exact modal_reducible_1;
+  | 2 => exact modal_reducible_2;
+  | 3 => exact modal_reducible_3;
+  | 4 => exact modal_reducible_4;
+  | n + 4 =>
+    sorry;
 
 end
-
-
-#eval Modalities.more { m ∈ modalities | m.size = 2 }
-
-lemma reducing_modalities_degree_0 : ModalityReducing Logic.S4 0 (modalities.filter (·.size ≤ 0)) where
-  M_size := by decide
-  M_mem m hm := by
-    simp only [Modalities.allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union, Finset.mem_singleton] at hm;
-    subst hm;
-    reduce_to -;
-
-lemma reducing_modalities_degree_1 : ModalityReducing Logic.S4 1 (modalities.filter (·.size ≤ 1)) where
-  M_size := by decide
-  M_mem m hm := by
-    simp only [
-      Modalities.allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union, Finset.mem_singleton
-    ] at hm;
-    rcases hm with rfl | rfl | rfl;
-    . reduce_to □;
-    . reduce_to ◇;
-    . reduce_to ∼;
-
-/-
-lemma reducing_modalities_degree_2 : ModalityReducing Logic.S4 2 (modalities.filter (·.size ≤ 2)) where
-  M_size := by decide
-  M_mem m hm := by
-    simp only [
-      Modalities.allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union,
-      Finset.mem_image, Finset.mem_singleton, exists_eq_or_imp, exists_eq_left
-    ] at hm;
-    rcases hm with (rfl | rfl | rfl) | (rfl | rfl | rfl) | (rfl | rfl | rfl);
-    . reduce_to □;
-    . reduce_to □◇;
-    . reduce_to ∼◇;
-    . reduce_to ◇□;
-    . reduce_to ◇;
-    . reduce_to ∼□;
-    . reduce_to ∼□;
-    . reduce_to ∼◇;
-    . reduce_to -;
--/
-
-/-
-lemma reducing_modalities_degree_3 : ModalityReducing Logic.S4 3 (modalities.filter (·.size ≤ 3)) where
-  M_size := by decide
-  M_mem m hm := by
-    simp only [
-      Modalities.allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union,
-      Finset.mem_image, Finset.mem_singleton, exists_eq_or_imp, exists_eq_left
-    ] at hm;
-    rcases hm with
-      ⟨m, (rfl | rfl | rfl) | (rfl | rfl | rfl) | (rfl | rfl | rfl), rfl⟩ |
-      ⟨m, (rfl | rfl | rfl) | (rfl | rfl | rfl) | (rfl | rfl | rfl), rfl⟩ |
-      ⟨m, (rfl | rfl | rfl) | (rfl | rfl | rfl) | (rfl | rfl | rfl), rfl⟩;
-    . reduce_to □;
-    . reduce_to □◇;
-    . reduce_to ∼;
-    . reduce_to ◇□;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . reduce_to ◇□◇;
-    . sorry;
-    . reduce_to ◇□;
-    . reduce_to ◇;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . sorry;
-    . reduce_to □;
-    . reduce_to ◇;
-    . reduce_to ∼;
--/
 
 end Logic.S4
 

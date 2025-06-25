@@ -363,24 +363,14 @@ section
 
 variable {H : Hilbert ℕ} [H.HasK] {m : outParam (Modality)}
 
-instance [H.HasT] : (□m) ⤳[H.logic] (m) :=
+instance [H.HasT] : (□) ⤳[H.logic] (-) :=
   translation_of_axiomInstance (a := Hilbert.HasT.p H) $ by simp;
 
-instance [H.HasT] : (□□m) ⤳[H.logic] (m) := by
-  trans □m;
-  . infer_instance;
-  . infer_instance;
-
-instance [H.HasT] : (□□□m) ⤳[H.logic] (m) := by
-  trans □m;
-  . infer_instance;
-  . infer_instance;
+instance [H.HasFour] : (□) ⤳[H.logic] (□□) :=
+  translation_of_axiomInstance (a := Hilbert.HasFour.p (H := H)) $ by simp
 
 instance [H.HasTc] : (m) ⤳[H.logic] (□m) :=
   translation_of_axiomInstance (a := Hilbert.HasTc.p H) $ by simp;
-
-instance [H.HasFour] : (□m) ⤳[H.logic] (□□m) :=
-  translation_of_axiomInstance (a := Hilbert.HasFour.p (H := H)) $ by simp
 
 instance [H.HasB] : (m) ⤳[H.logic] (□◇m) :=
   translation_of_axiomInstance (a := Hilbert.HasB.p (H := H)) $ by simp;
@@ -416,12 +406,16 @@ def more (M : Modalities) : Modalities :=
 
 #eval more ({-, ∼, □, ◇})
 
+def max_size (M : Modalities) (hM : M.Nonempty := by decide) := M.image (λ m => m.size) |>.max' $ Finset.image_nonempty.mpr hM
+
+#eval max_size ({-, ∼, □, □, □, □□□□□□□, □, ◇})
+
 def allOfSize : ℕ → Modalities
   | 0 => {-}
   | n + 1 =>
+    (allOfSize n).image (λ m => ∼m) ∪
     (allOfSize n).image (λ m => □m) ∪
-    (allOfSize n).image (λ m => ◇m) ∪
-    (allOfSize n).image (λ m => ∼m)
+    (allOfSize n).image (λ m => ◇m)
 
 @[simp] lemma allOfSize.eq_zero : allOfSize 0 = {-} := rfl
 
@@ -435,9 +429,9 @@ lemma allOfSize.iff_mem_eq_size : m ∈ allOfSize n ↔ m.size = n := by
     . intro;
       match m with
       | -  => contradiction;
+      | ∼m => simp_all [allOfSize];
       | □m => simp_all [allOfSize];
       | ◇m => simp_all [allOfSize];
-      | ∼m => simp_all [allOfSize];
 
 instance : DecidablePred (· ∈ allOfSize n) := by
   simp only [allOfSize.iff_mem_eq_size];
@@ -446,8 +440,43 @@ instance : DecidablePred (· ∈ allOfSize n) := by
 #eval allOfSize 2
 #eval □ ∈ allOfSize 1
 
+lemma allOfSize.eq_succ_left (h : m ∈ allOfSize (n + 1)) : ∃ m' ∈ allOfSize n, m = ∼m' ∨ m = □m' ∨ m = ◇m' := by
+  simp only [allOfSize, Finset.union_assoc, Finset.mem_union, Finset.mem_image] at h;
+  rcases h with (⟨m, ⟨hm', rfl⟩⟩ | ⟨m, ⟨hm, rfl⟩⟩ | ⟨m, ⟨hm, rfl⟩⟩) <;>
+  . use m;
+    tauto;
 
-
+lemma allOfSize.eq_succ_right (h : m ∈ allOfSize (n + 1)) : ∃ m' ∈ allOfSize n, m = (m' + ∼) ∨ m = (m' + □) ∨ m = (m' + ◇) := by
+  induction n generalizing m with
+  | zero =>
+    use (-);
+    simp only [
+      allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union,
+      Finset.mem_singleton
+    ] at h;
+    constructor;
+    . tauto;
+    . rcases h with (rfl | rfl | rfl) <;> tauto;
+  | succ n ih =>
+    obtain ⟨m, hm, (rfl | rfl | rfl)⟩ := allOfSize.eq_succ_left h;
+    . rcases @ih _ hm with ⟨m', hm', (rfl | rfl | rfl)⟩ <;>
+      . use (∼m');
+        constructor;
+        . apply allOfSize.iff_mem_eq_size.mpr
+          simpa using allOfSize.iff_mem_eq_size.mp hm';
+        . tauto;
+    . rcases @ih _ hm with ⟨m', hm', (rfl | rfl | rfl)⟩ <;>
+      . use (□m');
+        constructor;
+        . apply allOfSize.iff_mem_eq_size.mpr
+          simpa using allOfSize.iff_mem_eq_size.mp hm';
+        . tauto;
+    . rcases @ih _ hm with ⟨m', hm', (rfl | rfl | rfl)⟩ <;>
+      . use (◇m');
+        constructor;
+        . apply allOfSize.iff_mem_eq_size.mpr
+          simpa using allOfSize.iff_mem_eq_size.mp hm';
+        . tauto;
 
 def allOfSizeLt : Nat → Modalities
   | 0 => allOfSize 0
