@@ -13,7 +13,7 @@ deriving DecidableEq, BEq
 
 namespace Modality
 
-variable {m m₁ m₂ : Modality}
+variable {m m₁ m₂ m₃ : Modality} {n n₁ n₂ : ℕ}
 
 notation:max "-" => Modality.empty
 prefix:80 "□" => Modality.box
@@ -52,9 +52,24 @@ def add : Modality → Modality → Modality
   | ∼m₁, m₂ => ∼(m₁.add m₂)
 instance : Add Modality := ⟨Modality.add⟩
 
-@[simp] lemma add_box : □m₁ + m₂ = □(m₁ + m₂) := rfl
-@[simp] lemma add_dia : ◇m₁ + m₂ = ◇(m₁ + m₂) := rfl
-@[simp] lemma add_neg : ∼m₁ + m₂ = ∼(m₁ + m₂) := rfl
+@[simp] lemma add_empty_left : - + m = m := by rfl
+@[simp] lemma add_box_left : □m₁ + m₂ = □(m₁ + m₂) := rfl
+@[simp] lemma add_dia_left : ◇m₁ + m₂ = ◇(m₁ + m₂) := rfl
+@[simp] lemma add_neg_left : ∼m₁ + m₂ = ∼(m₁ + m₂) := rfl
+
+@[simp]
+lemma add_empty_right : m + - = m := by
+  induction m with
+  | empty => rfl
+  | box m ih | dia m ih | neg m ih => simp [ih]
+
+@[simp]
+lemma add_assoc : (m₁ + m₂) + m₃ = m₁ + (m₂ + m₃) := by
+  induction m₁ with
+  | empty => rfl
+  | box m₁ ih | dia m₁ ih | neg m₁ ih => simp [ih]
+
+instance : Std.Associative (α := Modality) (· + ·) := ⟨@add_assoc⟩
 
 inductive Polarity
 | pos
@@ -100,16 +115,88 @@ def size : Modality → Nat
 @[simp] lemma dia_size_succ   : (◇m).size = m.size + 1 := rfl
 @[simp] lemma neg_size_succ   : (∼m).size = m.size + 1 := rfl
 
-instance : DecidablePred (Modality.size · = n) := inferInstance
-
 @[simp] lemma iff_empty_size_zero : m.size = 0 ↔ m = - := by
   constructor;
   . match m with
     | -  => tauto;
-    | □_
-    | ◇_
-    | ∼_ => simp;
+    | □_ | ◇_ | ∼_ => simp;
   . rintro rfl; simp;
+
+@[simp]
+lemma add_size : (m₁ + m₂).size = m₁.size + m₂.size := by
+  induction m₁ with
+  | empty => simp [add];
+  | box m₁ ih | dia m₁ ih | neg m₁ ih => simp [add, ih]; omega;
+
+lemma split_left₁ (hm : m.size = n₂ + 1) : ∃ m₁ m₂, m₁.size = 1 ∧ m₂.size = n₂ ∧ m = m₁ + m₂ := by
+  match m with
+  | -  => tauto;
+  | □m =>
+    use □, m;
+    refine ⟨by tauto, ?_, ?_⟩;
+    . simpa using hm;
+    . rfl;
+  | ◇m =>
+    use ◇, m;
+    refine ⟨by tauto, ?_, ?_⟩;
+    . simpa using hm;
+    . rfl;
+  | ∼m =>
+    use ∼, m;
+    refine ⟨by tauto, ?_, ?_⟩;
+    . simpa using hm;
+    . rfl;
+
+lemma split (hm : m.size = n₁ + n₂) : ∃ m₁ m₂, m₁.size = n₁ ∧ m₂.size = n₂ ∧ m = m₁ + m₂ := by
+  sorry;
+
+lemma split_left_le₁ (hm : m.size ≤ n₂ + 1) : ∃ m₁ m₂, m₁.size ≤ 1 ∧ m₂.size ≤ n₂ ∧ m = m₁ + m₂ := by
+  induction n₂ generalizing m with
+  | zero => simp_all;
+  | succ n ih =>
+    rcases Nat.le_or_eq_of_le_succ hm with (h | hm);
+    . obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := @ih m h;
+      use m₁, m₂;
+      refine ⟨by omega, by omega, rfl⟩;
+    . obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := split_left₁ hm;
+      use m₁, m₂;
+      refine ⟨by omega, by omega, rfl⟩;
+
+lemma split_le (hm : m.size ≤ n₁ + n₂) : ∃ m₁ m₂, m₁.size ≤ n₁ ∧ m₂.size ≤ n₂ ∧ m = m₁ + m₂ := by
+  sorry;
+
+lemma split_right₁ (hm : m.size = n + 1) : ∃ m₁ m₂, m₁.size = n ∧ m₂.size = 1 ∧ m = m₁ + m₂ := by
+  induction n generalizing m with
+  | zero => use (-), m; tauto;
+  | succ n ih =>
+    match m with
+    | -  => tauto;
+    | □m =>
+      obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := @ih m $ by simpa using hm;
+      use (□m₁), m₂;
+      simp_all;
+    | ◇m =>
+      obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := @ih m $ by simpa using hm;
+      use (◇m₁), m₂;
+      simp_all;
+    | ∼m =>
+      obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := @ih m $ by simpa using hm;
+      use (∼m₁), m₂;
+      simp_all;
+
+lemma split_right_le₁ (hm : m.size ≤ n + 1) : ∃ m₁ m₂, m₁.size ≤ n ∧ m₂.size ≤ 1 ∧ m = m₁ + m₂ := by
+  induction n generalizing m with
+  | zero => use (-), m; tauto;
+  | succ n ih =>
+    rcases Nat.le_or_eq_of_le_succ hm with (h | hm);
+    . obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := @ih m h;
+      use m₁, m₂;
+      refine ⟨by omega, by omega, rfl⟩;
+    . obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := split_right₁ hm;
+      use m₁, m₂;
+      refine ⟨by omega, by omega, rfl⟩;
+
+instance : DecidablePred (Modality.size · = n) := inferInstance
 
 end Modality
 
@@ -397,7 +484,7 @@ namespace Modalities
 
 open Modality
 
-variable {n : ℕ} {m : Modality}
+variable {n : ℕ} {m : Modality} {M : Modalities}
 
 def more (M : Modalities) : Modalities :=
   M.image (λ m => □m) ∪
@@ -406,9 +493,14 @@ def more (M : Modalities) : Modalities :=
 
 #eval more ({-, ∼, □, ◇})
 
-def max_size (M : Modalities) (hM : M.Nonempty := by decide) := M.image (λ m => m.size) |>.max' $ Finset.image_nonempty.mpr hM
+def max_size (M : Modalities) (M_nonempty : M.Nonempty := by decide) := M.image (λ m => m.size) |>.max' $ Finset.image_nonempty.mpr M_nonempty
 
 #eval max_size ({-, ∼, □, □, □, □□□□□□□, □, ◇})
+
+lemma lt_max_size_of_mem {M_nonempty : M.Nonempty} (hM : m ∈ M) : m.size ≤ (M.max_size M_nonempty) := by
+  apply Finset.le_max';
+  simp only [Finset.mem_image];
+  use m;
 
 def allOfSize : ℕ → Modalities
   | 0 => {-}
@@ -433,6 +525,13 @@ lemma allOfSize.iff_mem_eq_size : m ∈ allOfSize n ↔ m.size = n := by
       | □m => simp_all [allOfSize];
       | ◇m => simp_all [allOfSize];
 
+@[simp]
+lemma allOfSize.mem_of_size : m ∈ allOfSize m.size := by simp only [allOfSize.iff_mem_eq_size];
+
+@[simp]
+lemma allOfSize.iff_mem_zero : m ∈ allOfSize 0 ↔ m = - := by
+  simp [allOfSize.iff_mem_eq_size]
+
 instance : DecidablePred (· ∈ allOfSize n) := by
   simp only [allOfSize.iff_mem_eq_size];
   infer_instance;
@@ -440,55 +539,26 @@ instance : DecidablePred (· ∈ allOfSize n) := by
 #eval allOfSize 2
 #eval □ ∈ allOfSize 1
 
-lemma allOfSize.eq_succ_left (h : m ∈ allOfSize (n + 1)) : ∃ m' ∈ allOfSize n, m = ∼m' ∨ m = □m' ∨ m = ◇m' := by
-  simp only [allOfSize, Finset.union_assoc, Finset.mem_union, Finset.mem_image] at h;
-  rcases h with (⟨m, ⟨hm', rfl⟩⟩ | ⟨m, ⟨hm, rfl⟩⟩ | ⟨m, ⟨hm, rfl⟩⟩) <;>
-  . use m;
-    tauto;
+lemma allOfSize.eq_succ_left₁ : m ∈ allOfSize (n + 1) → ∃ m₁ m₂, m₁ ∈ allOfSize 1 ∧ m₂ ∈ allOfSize n ∧ m = m₁ + m₂ := by
+  simp only [allOfSize.iff_mem_eq_size];
+  apply split_left₁;
 
-lemma allOfSize.eq_succ_right (h : m ∈ allOfSize (n + 1)) : ∃ m' ∈ allOfSize n, m = (m' + ∼) ∨ m = (m' + □) ∨ m = (m' + ◇) := by
-  induction n generalizing m with
-  | zero =>
-    use (-);
-    simp only [
-      allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union,
-      Finset.mem_singleton
-    ] at h;
-    constructor;
-    . tauto;
-    . rcases h with (rfl | rfl | rfl) <;> tauto;
-  | succ n ih =>
-    obtain ⟨m, hm, (rfl | rfl | rfl)⟩ := allOfSize.eq_succ_left h;
-    . rcases @ih _ hm with ⟨m', hm', (rfl | rfl | rfl)⟩ <;>
-      . use (∼m');
-        constructor;
-        . apply allOfSize.iff_mem_eq_size.mpr
-          simpa using allOfSize.iff_mem_eq_size.mp hm';
-        . tauto;
-    . rcases @ih _ hm with ⟨m', hm', (rfl | rfl | rfl)⟩ <;>
-      . use (□m');
-        constructor;
-        . apply allOfSize.iff_mem_eq_size.mpr
-          simpa using allOfSize.iff_mem_eq_size.mp hm';
-        . tauto;
-    . rcases @ih _ hm with ⟨m', hm', (rfl | rfl | rfl)⟩ <;>
-      . use (◇m');
-        constructor;
-        . apply allOfSize.iff_mem_eq_size.mpr
-          simpa using allOfSize.iff_mem_eq_size.mp hm';
-        . tauto;
+lemma allOfSize.eq_succ_right₁ : m ∈ allOfSize (n + 1) → ∃ m₁ m₂, m₁ ∈ allOfSize n ∧ m₂ ∈ allOfSize 1 ∧ m = m₁ + m₂ := by
+  simp only [allOfSize.iff_mem_eq_size];
+  apply split_right₁;
 
-def allOfSizeLt : Nat → Modalities
+
+def allOfSizeLe : Nat → Modalities
   | 0 => allOfSize 0
-  | n + 1 => allOfSizeLt n ∪ allOfSize (n + 1)
+  | n + 1 => allOfSizeLe n ∪ allOfSize (n + 1)
 
-#eval allOfSizeLt 3
+#eval allOfSizeLe 3
 
-lemma allOfSizeLt.iff_mem_le_size : m ∈ allOfSizeLt n ↔ m.size ≤ n := by
+lemma allOfSizeLe.iff_mem_le_size : m ∈ allOfSizeLe n ↔ m.size ≤ n := by
   induction n with
-  | zero => simp [allOfSizeLt];
+  | zero => simp [allOfSizeLe];
   | succ n ih =>
-    simp only [allOfSizeLt, Finset.mem_union];
+    simp only [allOfSizeLe, Finset.mem_union];
     constructor;
     . rintro (h | h);
       . have := ih.mp h; omega;
@@ -502,60 +572,39 @@ lemma allOfSizeLt.iff_mem_le_size : m ∈ allOfSizeLt n ↔ m.size ≤ n := by
       . right;
         exact allOfSize.iff_mem_eq_size.mpr h;
 
-instance : DecidablePred (· ∈ allOfSizeLt n) := by
-  simp only [allOfSizeLt.iff_mem_le_size];
+instance : DecidablePred (· ∈ allOfSizeLe n) := by
+  simp only [allOfSizeLe.iff_mem_le_size];
   infer_instance;
 
-#eval □◇ ∈ allOfSizeLt 2
+#eval □◇ ∈ allOfSizeLe 2
+
+@[simp]
+lemma allOfSizeLe.iff_mem_zero : m ∈ allOfSizeLe 0 ↔ m = - := by
+  simp [allOfSizeLe.iff_mem_le_size, allOfSize.iff_mem_eq_size]
+
+@[simp]
+lemma allOfSizeLe.mem_empty : - ∈ allOfSizeLe n := by induction n <;> simp_all [allOfSizeLe];
+
+lemma allOfSizeLe.subset_of_le (h : n₁ ≤ n₂) : allOfSizeLe n₁ ⊆ allOfSizeLe n₂ := by
+  intro m;
+  simp_all [allOfSizeLe.iff_mem_le_size]
+  omega;
+
+lemma allOfSizeLe.eq_succ_left₁ : m ∈ allOfSizeLe (n₂ + 1) → ∃ m₁ m₂, m₁ ∈ allOfSizeLe 1 ∧ m₂ ∈ allOfSizeLe n₂ ∧ m = (m₁ + m₂) := by
+  simp only [allOfSizeLe.iff_mem_le_size];
+  apply split_left_le₁;
+
+lemma allOfSizeLe.eq_succ_right₁ : m ∈ allOfSizeLe (n₁ + 1) → ∃ m₁ m₂, m₁ ∈ allOfSizeLe n₁ ∧ m₂ ∈ allOfSizeLe 1 ∧ m = (m₁ + m₂) := by
+  simp only [allOfSizeLe.iff_mem_le_size];
+  apply split_right_le₁;
 
 
-/-
-def posOfSize : ℕ → List Modality
-  | 0 => [-]
-  | n + 1 =>
-    (posOfSize n).map (λ m => □m) ++
-    (posOfSize n).map (λ m => ◇m)
+def posOfSize : ℕ → Modalities
+  | 0 => {-}
+  | n + 1 => (posOfSize n).image (λ m => □m) ∪ (posOfSize n).image (λ m => ◇m)
 
 #eval posOfSize 3
 
-lemma posOfSize.eq_size_of_mem : ∀ M ∈ posOfSize n, M.size = n := by
-  induction n with
-  | zero => simp [posOfSize];
-  | succ n ih =>
-    simp only [posOfSize, List.append_assoc, List.mem_append, List.mem_map];
-    rintro m (⟨m, ⟨hm, rfl⟩⟩ | ⟨m, ⟨hm, rfl⟩⟩) <;> simp [ih m hm];
-
-lemma posOfSize.pos_of_mem : ∀ M ∈ posOfSize n, M.polarity = .pos := by
-  induction n with
-  | zero => simp [posOfSize];
-  | succ n ih =>
-    simp only [posOfSize, List.append_assoc, List.mem_append, List.mem_map];
-    rintro m (⟨m, ⟨hm, rfl⟩⟩ | ⟨M, ⟨hm, rfl⟩⟩) <;> simp [ih _ hm];
--/
-
-/-
-lemma posOfSize.iff_mem_eq_size : M ∈ posOfSize n ↔ M.size = n ∧ M.polarity = .pos := by
-  constructor;
-  . intro h;
-    constructor;
-    . exact posOfSize.eq_size_of_mem M h;
-    . exact posOfSize.pos_of_mem M h;
-  . induction n generalizing M with
-    | zero => simp [posOfSize]; tauto;
-    | succ n ih =>
-      simp only [posOfSize, List.append_assoc, List.mem_append, List.mem_map];
-      rintro ⟨hm₁, hm₂⟩;
-      match M with
-      | -  => contradiction;
-      | □M => simp_all [posOfSize];
-      | ◇M => simp_all [posOfSize];
-      | ∼M =>
-        sorry;
--/
-
 end Modalities
-
-
-
 
 end LO.Modal
