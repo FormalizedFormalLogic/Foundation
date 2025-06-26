@@ -32,15 +32,15 @@ instance : ToString Modality := ⟨Modality.toString⟩
 
 /-- pure box -/
 abbrev pbox : Modality := □-
-notation:max "□" => pbox
+notation:80 "□" => pbox
 
 /-- pure diamond -/
 abbrev pdia : Modality := ◇-
-notation:max "◇" => pdia
+notation:80 "◇" => pdia
 
 /-- pure negation -/
 abbrev pneg : Modality := ∼-
-notation:max "∼" => pneg
+notation:80 "∼" => pneg
 
 #eval □◇◇
 
@@ -115,12 +115,22 @@ def size : Modality → Nat
 @[simp] lemma dia_size_succ   : (◇m).size = m.size + 1 := rfl
 @[simp] lemma neg_size_succ   : (∼m).size = m.size + 1 := rfl
 
-@[simp] lemma iff_empty_size_zero : m.size = 0 ↔ m = - := by
+@[simp]
+lemma iff_size_0 : m.size = 0 ↔ m = - := by
   constructor;
   . match m with
     | -  => tauto;
     | □_ | ◇_ | ∼_ => simp;
   . rintro rfl; simp;
+
+lemma iff_size_1 : m.size = 1 ↔ m = □ ∨ m = ◇ ∨ m = ∼ := by
+  constructor;
+  . match m with
+    | -  => simp;
+    | □_ => simp;
+    | ◇_ => simp;
+    | ∼_ => simp;
+  . rintro (rfl | rfl | rfl) <;> simp;
 
 @[simp]
 lemma add_size : (m₁ + m₂).size = m₁.size + m₂.size := by
@@ -147,23 +157,12 @@ lemma split_left₁ (hm : m.size = n₂ + 1) : ∃ m₁ m₂, m₁.size = 1 ∧ 
     . simpa using hm;
     . rfl;
 
-lemma split (hm : m.size = n₁ + n₂) : ∃ m₁ m₂, m₁.size = n₁ ∧ m₂.size = n₂ ∧ m = m₁ + m₂ := by
-  sorry;
-
-lemma split_left_le₁ (hm : m.size ≤ n₂ + 1) : ∃ m₁ m₂, m₁.size ≤ 1 ∧ m₂.size ≤ n₂ ∧ m = m₁ + m₂ := by
-  induction n₂ generalizing m with
-  | zero => simp_all;
-  | succ n ih =>
-    rcases Nat.le_or_eq_of_le_succ hm with (h | hm);
-    . obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := @ih m h;
-      use m₁, m₂;
-      refine ⟨by omega, by omega, rfl⟩;
-    . obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := split_left₁ hm;
-      use m₁, m₂;
-      refine ⟨by omega, by omega, rfl⟩;
-
-lemma split_le (hm : m.size ≤ n₁ + n₂) : ∃ m₁ m₂, m₁.size ≤ n₁ ∧ m₂.size ≤ n₂ ∧ m = m₁ + m₂ := by
-  sorry;
+lemma split_left₁' (hm : m.size = n + 1) : ∃ m', m'.size = n ∧ (m = □m' ∨ m = ◇m' ∨ m = ∼m') := by
+  obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := split_left₁ hm;
+  use m₂;
+  constructor;
+  . assumption;
+  . rcases iff_size_1.mp hm₁ with (rfl | rfl | rfl) <;> tauto;
 
 lemma split_right₁ (hm : m.size = n + 1) : ∃ m₁ m₂, m₁.size = n ∧ m₂.size = 1 ∧ m = m₁ + m₂ := by
   induction n generalizing m with
@@ -184,6 +183,33 @@ lemma split_right₁ (hm : m.size = n + 1) : ∃ m₁ m₂, m₁.size = n ∧ m�
       use (∼m₁), m₂;
       simp_all;
 
+lemma split (hm : m.size = n₁ + n₂) : ∃ m₁ m₂, m₁.size = n₁ ∧ m₂.size = n₂ ∧ m = m₁ + m₂ := by
+  induction n₂ generalizing m with
+  | zero =>
+    subst hm;
+    use m, -;
+    refine ⟨?_, ?_, ?_⟩ <;> simp;
+  | succ n₂ ih =>
+    replace hm : m.size = (n₁ + n₂) + 1 := hm;
+    obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩  := split_right₁ hm;
+    obtain ⟨m₃, m₄, hm₃, hm₄, rfl⟩ := @ih m₁ hm₁;
+    use m₃, (m₄ + m₂);
+    refine ⟨by omega, ?_, ?_⟩;
+    . simp_all;
+    . simp [add_assoc]
+
+lemma split_left_le₁ (hm : m.size ≤ n₂ + 1) : ∃ m₁ m₂, m₁.size ≤ 1 ∧ m₂.size ≤ n₂ ∧ m = m₁ + m₂ := by
+  induction n₂ generalizing m with
+  | zero => simp_all;
+  | succ n ih =>
+    rcases Nat.le_or_eq_of_le_succ hm with (h | hm);
+    . obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := @ih m h;
+      use m₁, m₂;
+      refine ⟨by omega, by omega, rfl⟩;
+    . obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := split_left₁ hm;
+      use m₁, m₂;
+      refine ⟨by omega, by omega, rfl⟩;
+
 lemma split_right_le₁ (hm : m.size ≤ n + 1) : ∃ m₁ m₂, m₁.size ≤ n ∧ m₂.size ≤ 1 ∧ m = m₁ + m₂ := by
   induction n generalizing m with
   | zero => use (-), m; tauto;
@@ -195,6 +221,24 @@ lemma split_right_le₁ (hm : m.size ≤ n + 1) : ∃ m₁ m₂, m₁.size ≤ n
     . obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := split_right₁ hm;
       use m₁, m₂;
       refine ⟨by omega, by omega, rfl⟩;
+
+lemma split_le (hm : m.size ≤ n₁ + n₂) : ∃ m₁ m₂, m₁.size ≤ n₁ ∧ m₂.size ≤ n₂ ∧ m = m₁ + m₂ := by
+  induction n₂ generalizing m with
+  | zero =>
+    simp at hm;
+    use m, -;
+    refine ⟨?_, ?_, ?_⟩;
+    . assumption;
+    . simp;
+    . simp;
+  | succ n₂ ih =>
+    replace hm : m.size ≤ (n₁ + n₂) + 1 := hm;
+    obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩  := split_right_le₁ hm;
+    obtain ⟨m₃, m₄, hm₃, hm₄, rfl⟩ := @ih m₁ hm₁;
+    use m₃, (m₄ + m₂);
+    refine ⟨by omega, ?_, ?_⟩;
+    . simp; omega;
+    . simp [add_assoc]
 
 instance : DecidablePred (Modality.size · = n) := inferInstance
 

@@ -42,6 +42,7 @@ lemma ModalReducible.of_le (h : ModalReducibleLe L n M) : ModalReducible L n M :
 
 
 macro "reduce_to " t:term : tactic => `(tactic| focus
+  try simp only [add_empty_left, add_box_left, add_dia_left, add_neg_left];
   existsi $t;
   constructor;
   . set_option linter.unnecessarySimpa false in
@@ -141,9 +142,63 @@ lemma modal_reducible_2 : ModalReducible Logic.S5 2 S5.modalities := by
   . reduce_to (□);
   . reduce_to (◇);
 
+instance : (∼□∼) ≅[Logic.S5] (◇)  := by trans (∼∼◇); exact equivalence_expand_left (□∼) (∼◇) (∼); exact equivalence_expand_right (∼∼) (-) (◇)
+instance : (∼□□) ≅[Logic.S5] (∼□) := equivalence_expand_left (□□) (□) (∼)
+instance : (∼◇◇) ≅[Logic.S5] (∼◇) := equivalence_expand_left (◇◇) (◇) (∼)
+instance : (∼□◇) ≅[Logic.S5] (∼◇) := equivalence_expand_left (□◇) (◇) (∼)
+instance : (∼◇□) ≅[Logic.S5] (∼□) := equivalence_expand_left (◇□) (□) (∼)
+instance : (◇∼∼) ≅[Logic.S5] (◇)  := by trans (∼□∼); exact equivalence_expand_right (◇∼) (∼□) (∼); infer_instance;
+instance : (◇∼□) ≅[Logic.S5] (∼□) := by trans (∼□□); exact equivalence_expand_right (◇∼) (∼□) (□); exact equivalence_expand_left (□□) (□) (∼)
+instance : (◇∼◇) ≅[Logic.S5] (∼◇) := by trans (∼□◇); exact equivalence_expand_right (◇∼) (∼□) (◇); infer_instance;
+instance : (◇□□) ≅[Logic.S5] (□)  := by trans (◇□); exact equivalence_expand_left (□□) (□) (◇); infer_instance;
+instance : (◇□◇) ≅[Logic.S5] (◇)  := by trans (◇◇); exact equivalence_expand_left (□◇) (◇) (◇);  infer_instance;
+instance : (◇□∼) ≅[Logic.S5] (∼◇) := by trans (□∼); exact equivalence_expand_right (◇□) (□) (∼); infer_instance;
+instance : (◇◇∼) ≅[Logic.S5] (∼□) := by trans (◇∼); exact equivalence_expand_right (◇◇) (◇) (∼); infer_instance;
+instance : (◇◇□) ≅[Logic.S5] (◇□) := by trans (◇□); exact equivalence_expand_right (◇◇) (◇) (□); infer_instance;
+instance : (◇◇◇) ≅[Logic.S5] (◇)  := by trans (◇◇); exact equivalence_expand_left (◇◇) (◇) (◇); infer_instance;
+
 lemma modal_reducible_3 : ModalReducible Logic.S5 3 S5.modalities := by
   intro m hm;
-  sorry;
+  obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ := split_left₁ hm;
+  rcases iff_size_1.mp hm₁ with (rfl | rfl | rfl);
+  . obtain ⟨m', _, _⟩ := modal_reducible_2 m₂ hm₂;
+    use m';
+    constructor;
+    . assumption;
+    . trans m₂;
+      . apply translation_expand_right (□) (-);
+      . assumption;
+  . obtain ⟨m₁, m₂, hm₁, hm₂', rfl⟩ := split_left₁ hm₂;
+    rcases iff_size_1.mp hm₁ with (rfl | rfl | rfl);
+    . rcases iff_size_1.mp hm₂' with (rfl | rfl | rfl);
+      . reduce_to (□);
+      . reduce_to (◇);
+      . reduce_to (∼◇);
+    . obtain ⟨m', _, _⟩ := modal_reducible_2 (◇m₂) (by simpa);
+      use m';
+      constructor;
+      . assumption;
+      . trans (◇m₂)
+        . apply translation_expand_right (◇◇) (◇);
+        . assumption;
+    . rcases iff_size_1.mp hm₂' with (rfl | rfl | rfl);
+      . reduce_to (∼□);
+      . reduce_to (∼◇);
+      . reduce_to (◇);
+  . obtain ⟨m₁, m₂, hm₁, hm₂', rfl⟩ := split_left₁ hm₂;
+    rcases iff_size_1.mp hm₁ with (rfl | rfl | rfl);
+    . rcases iff_size_1.mp hm₂' with (rfl | rfl | rfl);
+      . reduce_to (∼□);
+      . reduce_to (∼◇);
+      . reduce_to (◇);
+    . rcases iff_size_1.mp hm₂' with (rfl | rfl | rfl);
+      . reduce_to (∼□);
+      . reduce_to (∼◇);
+      . reduce_to (□);
+    . use m₂;
+      constructor;
+      . rcases iff_size_1.mp hm₂' with (rfl | rfl | rfl) <;> tauto;
+      . apply translation_expand_right (∼∼) (-);
 
 lemma modal_reducible_le_3 : ModalReducibleLe Logic.S5 3 S5.modalities := by
   apply ModalReducibleLe.of_cumulative;
@@ -156,8 +211,7 @@ lemma modal_reducible_le_3 : ModalReducibleLe Logic.S5 3 S5.modalities := by
 
 lemma modal_reducible_le_succ_4 (n) : ModalReducibleLe Logic.S5 (n + 4) S5.modalities := by
   intro m hm;
-  obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ : ∃ m₁ m₂, m₁.size ≤ 3 ∧ m₂.size ≤ n + 1 ∧ m = m₁ + m₂ := by
-    exact split_le (n₁ := 3) (n₂ := n + 1) $ by omega;
+  obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ : ∃ m₁ m₂, m₁.size ≤ 3 ∧ m₂.size ≤ n + 1 ∧ m = m₁ + m₂ := split_le $ by omega;
   induction n generalizing m₂ with
   | zero =>
     obtain ⟨m₃, hm₃, _⟩ := modal_reducible_le_3 m₁ hm₁;
@@ -191,7 +245,7 @@ lemma modal_reducible_le (n : ℕ) : ModalReducibleLe Logic.S5 n S5.modalities :
   | 0 | 1 | 2 | 3 => apply ModalReducibleLe.gt modal_reducible_le_3 (by omega);
   | n + 4 => apply modal_reducible_le_succ_4;
 
-lemma modal_reducible (n : ℕ) : ModalReducible Logic.S5 n S5.modalities := by
+theorem modal_reducible (n : ℕ) : ModalReducible Logic.S5 n S5.modalities := by
   apply ModalReducible.of_le;
   exact modal_reducible_le n;
 
