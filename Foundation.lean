@@ -20,6 +20,7 @@ import Foundation.Propositional.Kripke.Logic.KP
 import Foundation.Propositional.Kripke.Logic.Cl
 import Foundation.Propositional.Logic.Letterless_Int_Cl
 import Foundation.Propositional.Logic.PostComplete
+import Foundation.Propositional.Decidable
 
 -- FirstOrder
 
@@ -143,4 +144,6 @@ import Foundation.ProvabilityLogic.Grz.Completeness
 
 import Foundation.ProvabilityLogic.S.Completeness
 
-import Foundation.AutoProver.Classical
+import Foundation.Meta.Qq
+import Foundation.Meta.Lit
+import Foundation.Meta.ClProver
