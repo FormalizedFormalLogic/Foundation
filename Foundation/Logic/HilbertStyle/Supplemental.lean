@@ -811,6 +811,10 @@ def right_Disj_intro (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢ φ ➝ Γ.disj :=
       C_trans (right_Disj_intro Γ this) or₂
 def right_Disj!_intro (Γ : List F) (h : φ ∈ Γ) : 𝓢 ⊢! φ ➝ Γ.disj := ⟨right_Disj_intro Γ h⟩
 
+def right_Disj_intro' (Γ : List F) (h : φ ∈ Γ) (hψ : 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ ψ ➝ Γ.disj :=
+  C_trans hψ (right_Disj_intro Γ h)
+def right_Disj!_intro' (Γ : List F) (h : φ ∈ Γ) (hψ : 𝓢 ⊢! ψ ➝ φ) : 𝓢 ⊢! ψ ➝ Γ.disj := ⟨right_Disj_intro' Γ h hψ.get⟩
+
 def left_Disj_intro [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ ψ ➝ φ) : 𝓢 ⊢ Γ.disj ➝ φ :=
   match Γ with
   |     [] => efq

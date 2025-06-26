@@ -336,7 +336,7 @@ lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp �
 
 lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro f ⟨b⟩; exact ⟨weakening h b⟩⟩
 
-lemma weakening! (h : 𝓢 ⊆ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := by rintro ⟨b⟩; exact ⟨weakening h b⟩
+lemma weakening! (h : 𝓢 ⊆ 𝓣 := by simp) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := by rintro ⟨b⟩; exact ⟨weakening h b⟩
 
 def weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening! h⟩
 
