@@ -543,11 +543,13 @@ section
 noncomputable instance [HasAxiomDNE 𝓢] : HasAxiomLEM 𝓢 where
   lem _ := A_of_ANNNN $ AN_of_C dni
 
+omit [DecidableEq F] in
 instance [HasAxiomDNE 𝓢] : HasAxiomEFQ 𝓢 where
   efq φ := by
     apply C_of_CNN;
     exact C_trans (K_left negEquiv) $ C_trans (C_swap imply₁) (K_right negEquiv);
 
+omit [DecidableEq F] in
 instance [HasAxiomDNE 𝓢] : HasAxiomElimContra 𝓢 where
   elimContra φ ψ := by
     apply deduct';
