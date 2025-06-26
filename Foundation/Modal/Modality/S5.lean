@@ -19,9 +19,9 @@ open Modalities
 
 protected abbrev modalities : Modalities := {-, ∼, □, ◇, ∼□, ∼◇}
 
-lemma modal_reducible_0 : ModalReducible Logic.S5 0 Logic.S5.modalities := ModalReducible.reducible_0_of_mem $ by simp;
+lemma modal_reduction_0 : ModalReduction Logic.S5 0 Logic.S5.modalities := ModalReduction.reducible_0_of_mem $ by simp;
 
-lemma modal_reducible_1 : ModalReducible Logic.S5 1 Logic.S5.modalities := ModalReducible.reducible_1_of_mem (by simp) (by simp) (by simp)
+lemma modal_reduction_1 : ModalReduction Logic.S5 1 Logic.S5.modalities := ModalReduction.reducible_1_of_mem (by simp) (by simp) (by simp)
 
 instance : (□□) ≅[Logic.S5] (□) := by
   apply iff_equivalence_bi_translate.mpr;
@@ -51,8 +51,8 @@ instance : (◇□) ≅[Logic.S5] (□) := by
   . apply translation_of_axiomInstance (a := 0); simp;
   . apply translation_of_axiomInstance (a := 0); simp;
 
-lemma modal_reducible_2 : ModalReducible Logic.S5 2 S5.modalities := by
-  apply ModalReducible.of_allOfSize;
+lemma modal_reduction_2 : ModalReduction Logic.S5 2 S5.modalities := by
+  apply ModalReduction.of_allOfSize;
   intro m hm;
   simp only [
     allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union,
@@ -84,10 +84,10 @@ instance : (◇◇∼) ≅[Logic.S5] (∼□) := by trans (◇∼); exact equiva
 instance : (◇◇□) ≅[Logic.S5] (◇□) := by trans (◇□); exact equivalence_expand_right (◇◇) (◇) (□); infer_instance;
 instance : (◇◇◇) ≅[Logic.S5] (◇)  := by trans (◇◇); exact equivalence_expand_left (◇◇) (◇) (◇); infer_instance;
 
-lemma modal_reducible_3 : ModalReducible Logic.S5 3 S5.modalities := by
+lemma modal_reduction_3 : ModalReduction Logic.S5 3 S5.modalities := by
   intro m hm;
   rcases split_left₁' hm with ⟨m₂, hm₂, (rfl | rfl | rfl)⟩;
-  . obtain ⟨m', _, _⟩ := modal_reducible_2 m₂ hm₂;
+  . obtain ⟨m', _, _⟩ := modal_reduction_2 m₂ hm₂;
     use m';
     constructor;
     . assumption;
@@ -99,7 +99,7 @@ lemma modal_reducible_3 : ModalReducible Logic.S5 3 S5.modalities := by
       . reduce_to (□);
       . reduce_to (◇);
       . reduce_to (∼◇);
-    . obtain ⟨m', _, _⟩ := modal_reducible_2 (◇m₂) (by simpa);
+    . obtain ⟨m', _, _⟩ := modal_reduction_2 (◇m₂) (by simpa);
       use m';
       constructor;
       . assumption;
@@ -125,13 +125,13 @@ lemma modal_reducible_3 : ModalReducible Logic.S5 3 S5.modalities := by
       . rcases iff_size_1.mp hm₂' with (rfl | rfl | rfl) <;> tauto;
       . apply translation_expand_right (∼∼) (-);
 
-theorem modal_reducible : ∀ n, ModalReducible Logic.S5 n S5.modalities := ModalReducible.forall_of_reducible_to_max (by simp) $ by
+theorem modal_reduction : ∀ n, ModalReduction Logic.S5 n S5.modalities := ModalReduction.forall_of_reducible_to_max (by simp) $ by
   intro n hn;
   match n with
-  | 0 => exact modal_reducible_0;
-  | 1 => exact modal_reducible_1;
-  | 2 => exact modal_reducible_2;
-  | 3 => exact modal_reducible_3;
+  | 0 => exact modal_reduction_0;
+  | 1 => exact modal_reduction_1;
+  | 2 => exact modal_reduction_2;
+  | 3 => exact modal_reduction_3;
 
 end Logic.S5
 
