@@ -530,13 +530,6 @@ open Modality
 
 variable {n : ℕ} {m : Modality} {M : Modalities}
 
-def more (M : Modalities) : Modalities :=
-  M.image (λ m => □m) ∪
-  M.image (λ m => ◇m) ∪
-  M.image (λ m => ∼m)
-
-#eval more ({-, ∼, □, ◇})
-
 def max_size (M : Modalities) (M_nonempty : M.Nonempty := by decide) := M.image (λ m => m.size) |>.max' $ Finset.image_nonempty.mpr M_nonempty
 
 #eval max_size ({-, ∼, □, □, □, □□□□□□□, □, ◇})
@@ -650,5 +643,137 @@ def posOfSize : ℕ → Modalities
 #eval posOfSize 3
 
 end Modalities
+
+
+
+section
+
+open Modality Modalities
+
+variable {L : Logic} {M : Modalities} {n : ℕ} {n : ℕ}
+
+/-- In `L`, every `n`-size modality is reduced to some modality in `M` -/
+abbrev ModalReducible (L : Logic) (n : ℕ) (M : Modalities) := ∀ m, m.size = n → ∃ m' ∈ M, m ⤳[L] m'
+
+lemma ModalReducible.of_allOfSize (h : ∀ m, m ∈ allOfSize n → ∃ m' ∈ M, m ⤳[L] m') : ModalReducible L n M := by
+  intro m hm;
+  apply h;
+  exact allOfSize.iff_mem_eq_size.mpr hm;
+
+
+/-- In `L`, every modality of size less than `n` is reduced to some modality in `M` -/
+abbrev ModalReducibleLe (L : Logic) (n : ℕ) (M : Modalities) := ∀ m, m.size ≤ n → ∃ m' ∈ M, m ⤳[L] m'
+
+lemma ModalReducibleLe.of_allOfSizeLe (h : ∀ m, m ∈ allOfSizeLe n → ∃ m' ∈ M, m ⤳[L] m') : ModalReducibleLe L n M := by
+  intro m hm;
+  apply h;
+  exact allOfSizeLe.iff_mem_le_size.mpr hm;
+
+lemma ModalReducibleLe.of_cumulative (h : ∀ n' ≤ n, ModalReducible L n' M) : ModalReducibleLe L n M := by
+  intro m hm;
+  apply h m.size ?_ m ?_ <;> tauto;
+
+lemma ModalReducibleLe.gt (h : ModalReducibleLe L n M) (hn : n ≥ n'): ModalReducibleLe L n' M := by
+  intro m hm;
+  apply h m (by omega);
+
+lemma ModalReducible.of_le (h : ModalReducibleLe L n M) : ModalReducible L n M := by
+  intro m hm;
+  apply h m (by omega);
+
+
+macro "reduce_to " t:term : tactic => `(tactic| focus
+  try simp only [add_empty_left, add_box_left, add_dia_left, add_neg_left];
+  existsi $t;
+  constructor;
+  . set_option linter.unnecessarySimpa false in
+    simpa;
+  . infer_instance;
+)
+
+section
+
+variable [L.IsNormal]
+
+lemma ModalReducible.reducible_0_of_mem (hM : (-) ∈ M) : ModalReducible L 0 M := by
+  apply of_allOfSize;
+  intro m hm;
+  simp only [allOfSize.eq_zero, Finset.mem_singleton] at hm;
+  subst hm;
+  reduce_to (-);
+
+lemma ModalReducible.reducible_1_of_mem (hNeg : (∼) ∈ M) (hBox : (□) ∈ M) (hDia : (◇) ∈ M) : ModalReducible L 1 M := by
+  apply of_allOfSize;
+  intro m hm;
+  simp only [
+    allOfSize, Finset.image_singleton, Finset.union_assoc, Finset.mem_union,
+    Finset.mem_singleton
+  ] at hm;
+  rcases hm with (rfl | rfl | rfl);
+  . reduce_to (∼);
+  . reduce_to (□);
+  . reduce_to (◇);
+
+lemma ModalReducible.succ_max_of {M : Modalities} (M_ne : M.Nonempty)
+  (hMR: ModalReducibleLe L ((M.max_size M_ne) + 1) M)
+  : ∀ n, ModalReducibleLe L (n + (M.max_size M_ne) + 2) M := by
+  generalize hk : (M.max_size M_ne) = k at hMR ⊢;
+  intro n m hm;
+  obtain ⟨m₁, m₂, hm₁, hm₂, rfl⟩ : ∃ m₁ m₂, m₁.size ≤ k + 1 ∧ m₂.size ≤ n + 1 ∧ m = m₁ + m₂ := split_le $ by omega;
+  induction n generalizing m₂ with
+  | zero =>
+    obtain ⟨m₃, hm₃, _⟩ := hMR m₁ hm₁;
+    obtain ⟨m₄, hm₄, _⟩ := hMR (m₃ + m₂) $ by
+      have : m₃.size ≤ k := by simpa [hk] using @Modalities.lt_max_size_of_mem _ M M_ne hm₃;
+      simp only [add_size];
+      omega;
+    use m₄;
+    constructor;
+    . assumption;
+    . trans (m₃ + m₂);
+      . apply translation_expand_right;
+      . assumption;
+  | succ n ih =>
+    obtain ⟨m₃, m₄, hm₃, hm₄, rfl⟩ := split_right_le₁ hm₂;
+    obtain ⟨m₅, hm₅, _⟩ := @ih m₃ hm₃ (by simp; omega);
+    obtain ⟨m₆, hm₆, _⟩ := hMR (m₅ + m₄) $ by
+      have : m₅.size ≤ k := by simpa [hk] using @Modalities.lt_max_size_of_mem _ M M_ne hm₅;
+      simp only [add_size];
+      omega;
+    use m₆;
+    constructor;
+    . assumption;
+    . trans (m₅ + m₄);
+      . rw [show (m₁ + (m₃ + m₄)) = ((m₁ + m₃) + m₄) by simp];
+        apply translation_expand_right;
+      . assumption;
+
+lemma ModalReducibleLe.forall_of_reducibleLe_to_max (M_ne : M.Nonempty) (hMR: ModalReducibleLe L ((M.max_size M_ne) + 1) M)
+  : ∀ n, ModalReducibleLe L n M := by
+  intro n;
+  by_cases hn : n ≤ (M.max_size M_ne) + 1;
+  . apply ModalReducibleLe.gt hMR;
+    omega;
+  . have : M.max_size M_ne + 2 ≤ n := by omega;
+    apply ModalReducibleLe.gt (n := n + M.max_size M_ne + 2) $ ModalReducible.succ_max_of M_ne hMR n;
+    omega;
+
+lemma ModalReducible.forall_of_reducibleLe_to_max (M_ne : M.Nonempty) (hMR: ModalReducibleLe L ((M.max_size M_ne) + 1) M)
+  : ∀ n, ModalReducible L n M := by
+  intro n;
+  apply ModalReducible.of_le;
+  apply ModalReducibleLe.forall_of_reducibleLe_to_max _ hMR;
+
+theorem ModalReducible.forall_of_reducible_to_max (M_ne : M.Nonempty) (hMR: ∀ n' ≤ ((M.max_size M_ne) + 1), ModalReducible L n' M)
+  : ∀ n, ModalReducible L n M := by
+  intro n;
+  apply forall_of_reducibleLe_to_max M_ne;
+  apply ModalReducibleLe.of_cumulative;
+  exact hMR;
+
+end
+
+
+end
 
 end LO.Modal
