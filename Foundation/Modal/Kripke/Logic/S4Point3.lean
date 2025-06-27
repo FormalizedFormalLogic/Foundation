@@ -124,6 +124,7 @@ instance : Logic.S4 ⪱ Logic.S4Point3 := by
   apply Entailment.strictlyWeakerThan.trans (𝓣 := Logic.S4Point2);
   . infer_instance;
   . infer_instance;
+@[deprecated] instance : Logic.S4 ⪯ Logic.S4Point3 := Entailment.StrictlyWeakerThan.weakerThan
 
 instance : Logic.K4Point3 ⪱ Logic.S4Point3 := by
   constructor;

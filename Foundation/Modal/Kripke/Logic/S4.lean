@@ -103,6 +103,10 @@ instance : Logic.KD4 ⪱ Logic.S4 := by
         };
       . simp [Semantics.Realize, Satisfies];
 
+instance : Logic.KD ⪱ Logic.S4 := by
+  apply Entailment.strictlyWeakerThan.trans (𝓣 := Logic.KD4) <;> infer_instance
+@[deprecated] instance : Logic.KD ⪯ Logic.S4 := Entailment.StrictlyWeakerThan.weakerThan
+
 end Logic.S4.Kripke
 
 end LO.Modal

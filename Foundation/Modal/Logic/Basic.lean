@@ -49,6 +49,13 @@ lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by
   apply not_congr;
   simp [iff_provable];
 
+lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
+  constructor;
+  . tauto;
+  . rintro h;
+    ext φ;
+    simpa using Equiv.iff.mp h φ;
+
 lemma subst! [L.Substitution] (s : Substitution _) (hφ : L ⊢! φ) : L ⊢! φ⟦s⟧ := ⟨Substitution.subst s hφ.some⟩
 
 

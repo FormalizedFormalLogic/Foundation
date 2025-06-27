@@ -63,7 +63,9 @@ instance : (Hilbert.S5Grz).HasGrz where p := 0
 instance : Entailment.S5Grz (Logic.S5Grz) where
 instance : Entailment.KTc' (Logic.S5Grz) where
 
-instance : (Logic.S5Grz) ≊ (Logic.Triv) := by
+@[simp]
+instance : Logic.S5Grz = Logic.Triv := by
+  apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply Hilbert.weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl | rfl) <;> simp;

@@ -52,8 +52,7 @@ lemma KD.Kripke.serial : Logic.KD = FrameClass.IsKD.logic := eq_hilbert_logic_fr
 
 instance : Logic.K ⪱ Logic.KD := by
   constructor;
-  . sorry;
-    -- exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.Kripke.all];
     use (Axioms.D (.atom 0));

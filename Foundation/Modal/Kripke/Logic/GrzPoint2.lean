@@ -366,6 +366,12 @@ instance : Logic.S4Point2M ⪱ Logic.GrzPoint2 := by
         . contradiction;
         . contradiction;
 
+instance : Logic.S4Point2 ⪱ Logic.GrzPoint2 := by
+  apply Entailment.strictlyWeakerThan.trans (𝓣 := Logic.S4Point2M);
+  . infer_instance;
+  . infer_instance;
+@[deprecated] instance : Logic.S4Point2 ⪯ Logic.GrzPoint2 := Entailment.StrictlyWeakerThan.weakerThan
+
 end Logic.GrzPoint2.Kripke
 
 end LO.Modal
