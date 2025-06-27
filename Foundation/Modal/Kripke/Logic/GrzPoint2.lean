@@ -124,15 +124,15 @@ instance [F.IsFiniteGrzPoint2] : F.IsS4Point2M where
 end Kripke
 
 
-namespace Hilbert.GrzPoint2.Kripke
+namespace Logic.GrzPoint2.Kripke
 
-instance finite_sound : Sound (Hilbert.GrzPoint2) FrameClass.finite_GrzPoint2 := instSound_of_validates_axioms $ by
+instance finite_sound : Sound Logic.GrzPoint2 FrameClass.finite_GrzPoint2 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl);
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance consistent : Entailment.Consistent (Hilbert.GrzPoint2) :=
+instance consistent : Entailment.Consistent Logic.GrzPoint2 :=
   consistent_of_sound_frameclass FrameClass.finite_GrzPoint2 $ by
     use whitepoint;
     constructor;
@@ -142,14 +142,14 @@ section
 
 open Relation
 
-instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_GrzPoint2 := ⟨by
+instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
   intro φ;
   contrapose;
   intro hφ;
 
   replace hφ : Hilbert.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
   generalize eΓ : (φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList = Γ at hφ;
-  obtain ⟨M, r, hM, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (@Hilbert.Grz.Kripke.complete.complete _) hφ;
+  obtain ⟨M, r, hM, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (@Logic.Grz.Kripke.complete.complete _) hφ;
   replace hM := Set.mem_setOf_eq.mp hM;
   -- have : IsPartialOrder _ M.toFrame := IsPartialOrder.mk
 
@@ -292,7 +292,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint2) FrameClass.finite_GrzPoi
 
 end
 
-end Hilbert.GrzPoint2.Kripke
+end Logic.GrzPoint2.Kripke
 
 
 namespace Logic
@@ -304,7 +304,7 @@ open Kripke
 lemma GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_GrzPoint2.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
-theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
+instance : Logic.Grz ⪱ Logic.GrzPoint2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_Grz ⊧ φ by
@@ -343,7 +343,7 @@ theorem GrzPoint2.proper_extension_of_Grz : Logic.Grz ⊂ Logic.GrzPoint2 := by
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
 
 @[simp]
-theorem GrzPoint2.proper_extension_of_S4Point2M : Logic.S4Point2M ⊂ Logic.GrzPoint2 := by
+instance : Logic.S4Point2M ⪱ Logic.GrzPoint2 := by
   constructor;
   . rw [S4Point2M.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
     rintro φ hφ F hF;
@@ -378,7 +378,7 @@ theorem GrzPoint2.proper_extension_of_S4Point2M : Logic.S4Point2M ⊂ Logic.GrzP
         . contradiction;
 
 @[simp]
-lemma GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.GrzPoint2 := by
+lemma GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⪱ Logic.GrzPoint2 := by
   trans Logic.S4Point2M <;> simp;
 
 end Logic

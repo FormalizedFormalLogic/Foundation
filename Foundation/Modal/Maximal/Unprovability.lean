@@ -51,7 +51,7 @@ lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
 
 end K4
 
-theorem GL.proper_extension_of_K4 : Logic.K4 ⊂ Logic.GL := by
+instance : Logic.K4 ⪱ Logic.GL := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.K4 ⊢! φ by tauto;

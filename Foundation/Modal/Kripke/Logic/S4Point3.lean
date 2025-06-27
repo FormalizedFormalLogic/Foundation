@@ -26,23 +26,23 @@ instance [F.IsS4Point3] : F.IsK4Point3 where
 end Kripke
 
 
-namespace Hilbert.S4Point3.Kripke
+namespace Logic.S4Point3.Kripke
 
-instance sound : Sound (Hilbert.S4Point3) FrameClass.S4Point3 := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.S4Point3 FrameClass.S4Point3 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance consistent : Entailment.Consistent (Hilbert.S4Point3) :=
+instance consistent : Entailment.Consistent Logic.S4Point3 :=
   consistent_of_sound_frameclass FrameClass.S4Point3 $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Hilbert.S4Point3) FrameClass.S4Point3 := ⟨by constructor⟩
+instance canonical : Canonical Logic.S4Point3 FrameClass.S4Point3 := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.S4Point3) FrameClass.S4Point3 := inferInstance
+instance complete : Complete Logic.S4Point3 FrameClass.S4Point3 := inferInstance
 
 
 section FFP
@@ -51,14 +51,14 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance finite_sound : Sound (Hilbert.S4Point3) FrameClass.finite_S4Point3 := instSound_of_validates_axioms $ by
+instance finite_sound : Sound Logic.S4Point3 FrameClass.finite_S4Point3 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance finite_complete : Complete (Hilbert.S4Point3) FrameClass.finite_S4Point3 := ⟨by
+instance finite_complete : Complete Logic.S4Point3 FrameClass.finite_S4Point3 := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   rintro F hF V r;
@@ -76,7 +76,7 @@ instance finite_complete : Complete (Hilbert.S4Point3) FrameClass.finite_S4Point
 
 end FFP
 
-end Hilbert.S4Point3.Kripke
+end Logic.S4Point3.Kripke
 
 namespace Logic
 
@@ -88,7 +88,7 @@ lemma S4Point3.Kripke.connected_preorder : Logic.S4Point3 = FrameClass.S4Point3.
 lemma S4Point3.Kripke.finite_connected_preorder : Logic.S4Point3 = FrameClass.finite_S4Point3.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
-theorem S4Point3.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.S4Point3 := by
+instance : Logic.S4Point2 ⪱ Logic.S4Point3 := by
   constructor;
   . rw [S4Point2.Kripke.confluent_preorder, S4Point3.Kripke.connected_preorder];
     rintro φ hφ F hF;
@@ -128,13 +128,13 @@ theorem S4Point3.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.S4Point
           constructor <;> omega;
 
 @[simp]
-lemma S4Point3.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4Point3 := by
+lemma S4Point3.proper_extension_of_S4 : Logic.S4 ⪱ Logic.S4Point3 := by
   trans Logic.S4Point2;
   . simp;
   . simp;
 
 @[simp]
-theorem S4Point3.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.S4Point3 := by
+instance : Logic.K4Point3 ⪱ Logic.S4Point3 := by
   constructor;
   . rw [K4Point3.Kripke.trans_weakConnected, S4Point3.Kripke.connected_preorder];
     rintro φ hφ F hF;

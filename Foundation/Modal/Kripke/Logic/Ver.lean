@@ -25,7 +25,7 @@ protected abbrev FrameClass.finite_Ver : FrameClass := { F | F.IsFiniteVer }
 end Kripke
 
 
-namespace Hilbert.Ver.Kripke
+namespace Logic.Ver.Kripke
 
 instance : Sound Hilbert.Ver FrameClass.Ver := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
@@ -33,26 +33,26 @@ instance : Sound Hilbert.Ver FrameClass.Ver := instSound_of_validates_axioms $ b
   simp_all only [Set.mem_setOf_eq];
   exact validate_AxiomVer_of_isIsolated;
 
-instance : Sound (Hilbert.Ver) Kripke.FrameClass.finite_Ver :=
+instance : Sound (Logic.Ver) Kripke.FrameClass.finite_Ver :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F hF _ (rfl | rfl);
     simp_all only [Set.mem_setOf_eq];
     exact validate_AxiomVer_of_isIsolated;
 
-instance : Entailment.Consistent (Hilbert.Ver) := consistent_of_sound_frameclass FrameClass.Ver $ by
+instance : Entailment.Consistent Logic.Ver := consistent_of_sound_frameclass FrameClass.Ver $ by
   use blackpoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Kripke.Canonical (Hilbert.Ver) FrameClass.Ver := ⟨by
+instance : Kripke.Canonical Logic.Ver FrameClass.Ver := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete (Hilbert.Ver) FrameClass.Ver := inferInstance
+instance : Complete Logic.Ver FrameClass.Ver := inferInstance
 
-instance : Complete (Hilbert.Ver) Kripke.FrameClass.finite_Ver := ⟨by
+instance : Complete (Logic.Ver) Kripke.FrameClass.finite_Ver := ⟨by
   intro φ hφ;
   apply LO.Complete.complete (𝓢 := Hilbert.Ver) (𝓜 := FrameClass.Ver);
   intro F hF V r;
@@ -74,7 +74,7 @@ instance : Complete (Hilbert.Ver) Kripke.FrameClass.finite_Ver := ⟨by
   }
 ⟩
 
-end Hilbert.Ver.Kripke
+end Logic.Ver.Kripke
 
 
 namespace Logic
@@ -86,7 +86,7 @@ open Kripke
 lemma Ver.Kripke.isolated : Logic.Ver = FrameClass.Ver.logic := eq_hilbert_logic_frameClass_logic
 lemma Ver.Kripke.finite_Ver : Logic.Ver = FrameClass.finite_Ver.logic := eq_hilbert_logic_frameClass_logic
 
-theorem Ver.proper_extension_of_Ktc : Logic.KTc ⊂ Logic.Ver := by
+instance : Logic.KTc ⪱ Logic.Ver := by
   constructor;
   . rw [KTc.Kripke.corefl, Ver.Kripke.isolated];
     rintro φ hφ F hF;
@@ -108,7 +108,7 @@ theorem Ver.proper_extension_of_Ktc : Logic.KTc ⊂ Logic.Ver := by
       . suffices ∃ x, (0 : M.World) ≺ x by simpa [Satisfies, Semantics.Realize];
         use 0;
 
-theorem Ver.proper_extension_of_GLPoint3 : Logic.GLPoint3 ⊂ Logic.Ver := by
+instance : Logic.GLPoint3 ⪱ Logic.Ver := by
   constructor;
   . rw [GLPoint3.Kripke.finite_strict_linear_order, Ver.Kripke.finite_Ver];
     rintro φ hφ F hF;
@@ -130,7 +130,7 @@ theorem Ver.proper_extension_of_GLPoint3 : Logic.GLPoint3 ⊂ Logic.Ver := by
         tauto;
 
 @[simp]
-theorem Univ.proper_extension_of_Ver : Logic.Ver ⊂ Logic.Univ := by  constructor <;> simp;
+instance : Logic.Ver ⪱ Logic.Univ := by  constructor <;> simp;
 
 end Logic
 

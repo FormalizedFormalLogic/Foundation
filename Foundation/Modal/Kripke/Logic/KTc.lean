@@ -21,26 +21,26 @@ end Kripke
 
 
 
-namespace Hilbert.KTc.Kripke
+namespace Logic.KTc.Kripke
 
-instance sound : Sound (Hilbert.KTc) Kripke.FrameClass.KTc := instSound_of_validates_axioms $ by
+instance sound : Sound (Logic.KTc) Kripke.FrameClass.KTc := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_corefl _ rfl;
   exact Kripke.validate_AxiomTc_of_coreflexive (corefl := F_corefl);
 
-instance consistent : Entailment.Consistent (Hilbert.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.KTc $ by
+instance consistent : Entailment.Consistent (Logic.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.KTc $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance canonical : Canonical (Hilbert.KTc) Kripke.FrameClass.KTc := ⟨by
+instance canonical : Canonical (Logic.KTc) Kripke.FrameClass.KTc := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KTc) Kripke.FrameClass.KTc := inferInstance
+instance complete : Complete (Logic.KTc) Kripke.FrameClass.KTc := inferInstance
 
-end Hilbert.KTc.Kripke
+end Logic.KTc.Kripke
 
 namespace Logic
 
@@ -51,7 +51,7 @@ open Kripke
 lemma KTc.Kripke.corefl : Logic.KTc = Kripke.FrameClass.KTc.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
-theorem KTc.proper_extension_of_KB4 : Logic.KB4 ⊂ Logic.KTc := by
+instance : Logic.KB4 ⪱ Logic.KTc := by
   constructor;
   . rw [KB4.Kripke.refl_trans, KTc.Kripke.corefl];
     rintro φ hφ F hF;

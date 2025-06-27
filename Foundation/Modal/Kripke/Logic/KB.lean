@@ -17,26 +17,26 @@ end Kripke
 
 
 
-namespace Hilbert.KB.Kripke
+namespace Logic.KB.Kripke
 
-instance sound : Sound (Hilbert.KB) FrameClass.KB := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.KB FrameClass.KB := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_symm _ rfl;
   exact validate_AxiomB_of_symmetric (sym := F_symm);
 
-instance consistent : Entailment.Consistent (Hilbert.KB) := consistent_of_sound_frameclass FrameClass.KB $ by
+instance consistent : Entailment.Consistent Logic.KB := consistent_of_sound_frameclass FrameClass.KB $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance canonical : Canonical (Hilbert.KB) FrameClass.KB := ⟨by
+instance canonical : Canonical Logic.KB FrameClass.KB := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KB) FrameClass.KB := inferInstance
+instance complete : Complete Logic.KB FrameClass.KB := inferInstance
 
-end Hilbert.KB.Kripke
+end Logic.KB.Kripke
 
 namespace Logic
 
@@ -46,7 +46,7 @@ open Kripke
 
 lemma KB.Kripke.symm : Logic.KB = FrameClass.KB.logic := eq_hilbert_logic_frameClass_logic
 
-theorem KB.proper_extension_of_K : Logic.K ⊂ Logic.KB := by
+instance : Logic.K ⪱ Logic.KB := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by

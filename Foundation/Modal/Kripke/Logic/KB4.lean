@@ -23,26 +23,26 @@ instance [F.IsKB4] : F.IsK45 where
 end Kripke
 
 
-namespace Hilbert.KB4.Kripke
+namespace Logic.KB4.Kripke
 
-instance sound : Sound (Hilbert.KB4) FrameClass.IsKB4 := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.KB4 FrameClass.IsKB4 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomB_of_symmetric;
   . exact validate_AxiomFour_of_transitive;
 
-instance consistent : Entailment.Consistent (Hilbert.KB4) := consistent_of_sound_frameclass FrameClass.IsKB4 $ by
+instance consistent : Entailment.Consistent Logic.KB4 := consistent_of_sound_frameclass FrameClass.IsKB4 $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical (Hilbert.KB4) FrameClass.IsKB4 := ⟨by
+instance canonical : Canonical Logic.KB4 FrameClass.IsKB4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   constructor
 ⟩
 
-instance complete : Complete (Hilbert.KB4) FrameClass.IsKB4 := inferInstance
+instance complete : Complete Logic.KB4 FrameClass.IsKB4 := inferInstance
 
-end Hilbert.KB4.Kripke
+end Logic.KB4.Kripke
 
 namespace Logic
 
@@ -52,7 +52,7 @@ open Kripke
 
 lemma KB4.Kripke.refl_trans : Logic.KB4 = FrameClass.IsKB4.logic := eq_hilbert_logic_frameClass_logic
 
-theorem KB4.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KB4 := by
+instance : Logic.K45 ⪱ Logic.KB4 := by
   constructor;
   . rw [K45.Kripke.trans_eucl, KB4.Kripke.refl_trans];
     rintro φ hφ F hF;
@@ -72,7 +72,7 @@ theorem KB4.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KB4 := by
         refine { trans := by omega, reucl := by tauto };
       . simp [Semantics.Realize, Satisfies];
 
-theorem KB4.proper_extension_of_KB : Logic.KB ⊂ Logic.KB4 := by
+instance : Logic.KB ⪱ Logic.KB4 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.KB ⊧ φ by

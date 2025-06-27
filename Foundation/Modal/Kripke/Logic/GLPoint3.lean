@@ -22,22 +22,22 @@ instance : blackpoint.IsFiniteGLPoint3 where
 end Kripke
 
 
-namespace Hilbert.GLPoint3.Kripke
+namespace Logic.GLPoint3.Kripke
 
-instance finite_sound : Sound (Hilbert.GLPoint3) FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
+instance finite_sound : Sound Logic.GLPoint3 FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl);
   . exact validate_AxiomL_of_finite_trans_irrefl;
   . exact validate_WeakPoint3_of_weakConnected;
 
-instance consistent : Entailment.Consistent (Hilbert.GLPoint3) :=
+instance consistent : Entailment.Consistent Logic.GLPoint3 :=
   consistent_of_sound_frameclass FrameClass.finite_GLPoint3 $ by
     use blackpoint;
     constructor;
 
-instance finite_complete : Complete (Hilbert.GLPoint3) FrameClass.finite_GLPoint3 := by sorry;
+instance finite_complete : Complete Logic.GLPoint3 FrameClass.finite_GLPoint3 := by sorry;
 
-end Hilbert.GLPoint3.Kripke
+end Logic.GLPoint3.Kripke
 
 namespace Logic
 
@@ -47,10 +47,10 @@ open Kripke
 
 lemma GLPoint3.Kripke.finite_strict_linear_order : Logic.GLPoint3 = FrameClass.finite_GLPoint3.logic := eq_hilbert_logic_frameClass_logic
 
-theorem GLPoint3.proper_extension_of_GL : Logic.GL ⊂ Logic.GLPoint3 := by
+instance : Logic.GL ⪱ Logic.GLPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.finite_GL ⊧ φ by
+  . suffices ∃ φ, Logic.GLPoint3 ⊢! φ ∧ .Kripke.FrameClass.finite_GL ⊧ φ by
       rw [GL.Kripke.finite_trans_irrefl];
       tauto;
     use (Axioms.WeakPoint3 (.atom 0) (.atom 1));
@@ -70,7 +70,7 @@ theorem GLPoint3.proper_extension_of_GL : Logic.GL ⊂ Logic.GLPoint3 := by
         refine ⟨?_, ?_, ?_, ?_⟩;
         all_goals omega;
 
-theorem GLPoint3.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.GLPoint3 := by
+instance : Logic.K4Point3 ⪱ Logic.GLPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by

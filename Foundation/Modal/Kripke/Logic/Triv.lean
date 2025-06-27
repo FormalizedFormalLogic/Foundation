@@ -29,34 +29,34 @@ protected abbrev FrameClass.finite_Triv : FrameClass := { F | F.IsFiniteTriv }
 end Kripke
 
 
-namespace Hilbert.Triv.Kripke
+namespace Logic.Triv.Kripke
 
-instance sound_Triv : Sound (Hilbert.Triv) Kripke.FrameClass.Triv :=
+instance sound_Triv : Sound (Logic.Triv) Kripke.FrameClass.Triv :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F ⟨_⟩ _ (rfl | rfl);
     . exact validate_AxiomT_of_reflexive;
     . exact validate_AxiomTc_of_coreflexive;
 
-instance sound_finite_Triv : Sound (Hilbert.Triv) Kripke.FrameClass.finite_Triv :=
+instance sound_finite_Triv : Sound (Logic.Triv) Kripke.FrameClass.finite_Triv :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F ⟨_, _⟩ _ (rfl | rfl);
     . exact validate_AxiomT_of_reflexive;
     . exact validate_AxiomTc_of_coreflexive;
 
-instance consistent : Entailment.Consistent (Hilbert.Triv) := consistent_of_sound_frameclass Kripke.FrameClass.Triv $ by
+instance consistent : Entailment.Consistent (Logic.Triv) := consistent_of_sound_frameclass Kripke.FrameClass.Triv $ by
   use whitepoint;
   constructor;
 
-instance cannonical_Triv : Canonical (Hilbert.Triv) Kripke.FrameClass.Triv := ⟨by constructor⟩
+instance cannonical_Triv : Canonical (Logic.Triv) Kripke.FrameClass.Triv := ⟨by constructor⟩
 
-instance complete_Triv : Complete (Hilbert.Triv) Kripke.FrameClass.Triv := inferInstance
+instance complete_Triv : Complete (Logic.Triv) Kripke.FrameClass.Triv := inferInstance
 
 section FFP
 
 open Relation in
-instance complete_finite_Triv : Complete (Hilbert.Triv) Kripke.FrameClass.finite_Triv := ⟨by
+instance complete_finite_Triv : Complete (Logic.Triv) Kripke.FrameClass.finite_Triv := ⟨by
   intro φ hφ;
   apply Kripke.complete_Triv.complete;
   intro F F_eq V r;
@@ -82,7 +82,7 @@ instance complete_finite_Triv : Complete (Hilbert.Triv) Kripke.FrameClass.finite
 
 end FFP
 
-end Hilbert.Triv.Kripke
+end Logic.Triv.Kripke
 
 
 namespace Logic
@@ -96,10 +96,10 @@ lemma Triv.Kripke.equality : Logic.Triv = FrameClass.Triv.logic := eq_hilbert_lo
 lemma Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_Triv.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
-theorem Triv.proper_extension_of_KTc : Logic.KTc ⊂ Logic.Triv := by
+instance : Logic.KTc ⪱ Logic.Triv := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬Kripke.FrameClass.KTc ⊧ φ by
+  . suffices ∃ φ, Logic.Triv ⊢! φ ∧ .Kripke.FrameClass.KTc ⊧ φ by
       rw [KTc.Kripke.corefl];
       tauto;
     use (Axioms.T (.atom 0));
@@ -112,7 +112,7 @@ theorem Triv.proper_extension_of_KTc : Logic.KTc ⊂ Logic.Triv := by
       . simp [Satisfies, Semantics.Realize];
 
 @[simp]
-theorem Triv.proper_extension_of_GrzPoint3 : Logic.GrzPoint3 ⊂ Logic.Triv := by
+instance : Logic.GrzPoint3 ⪱ Logic.Triv := by
   constructor;
   . rw [GrzPoint3.Kripke.finite_connected_partial_order, Triv.Kripke.finite_equality];
     rintro φ hφ F hF;
@@ -140,7 +140,7 @@ theorem Triv.proper_extension_of_GrzPoint3 : Logic.GrzPoint3 ⊂ Logic.Triv := b
           . trivial;
 
 @[simp]
-theorem Triv.proper_extension_of_S4Point4M : Logic.S4Point4M ⊂ Logic.Triv := by
+instance : Logic.S4Point4M ⪱ Logic.Triv := by
   constructor;
   . rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
     rintro φ hφ F hF;
@@ -182,7 +182,7 @@ theorem Triv.proper_extension_of_S4Point4M : Logic.S4Point4M ⊂ Logic.Triv := b
           . trivial;
 
 @[simp]
-theorem Univ.proper_extension_of_Triv : Logic.Triv ⊂ Logic.Univ := by constructor <;> simp;
+instance : Logic.Triv ⪱ Logic.Univ := by constructor <;> simp;
 
 end Logic
 

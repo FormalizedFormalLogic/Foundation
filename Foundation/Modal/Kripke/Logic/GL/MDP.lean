@@ -132,12 +132,12 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) 
   have : Hilbert.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
-  have : (Hilbert.GL ⊢! ⊡c ➝ φ₁) ⋎ (Hilbert.GL ⊢! ⊡c ➝ φ₂) := by
+  have : Logic.GL ⊢! ⊡c ➝ φ₁) ⋎ (Hilbert.GL ⊢! ⊡c ➝ φ₂ := by
     by_contra hC;
-    have ⟨h₁, h₂⟩ : (Hilbert.GL ⊬ ⊡c ➝ φ₁) ∧ (Hilbert.GL ⊬ ⊡c ➝ φ₂) := not_or.mp hC;
+    have ⟨h₁, h₂⟩ : Logic.GL ⊬ ⊡c ➝ φ₁) ∧ (Hilbert.GL ⊬ ⊡c ➝ φ₂ := not_or.mp hC;
 
-    obtain ⟨M₁, r₁, _, hM₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₁;
-    obtain ⟨M₂, r₂, _, hM₂⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₂;
+    obtain ⟨M₁, r₁, _, hM₁⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₁;
+    obtain ⟨M₂, r₂, _, hM₂⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₂;
 
     let M₀ := Kripke.mdpCounterexmpleModel M₁ M₂ r₁ r₂;
     let r₀ := Kripke.mdpCounterexmpleModel.root (M₁ := M₁) (M₂ := M₂) (r₁ := r₁) (r₂ := r₂)
@@ -172,7 +172,7 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) 
       push_neg;
       exact ⟨hp₁, hp₂⟩;
     have : ¬(Satisfies M₀ r₀ (□c ➝ (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
-    have : Hilbert.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr $ by
+    have : Logic.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr $ by
       use M₀, r₀;
       constructor;
       . infer_instance;

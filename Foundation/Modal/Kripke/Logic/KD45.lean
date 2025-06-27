@@ -20,24 +20,24 @@ end Kripke
 
 
 
-namespace Hilbert.KD45.Kripke
+namespace Logic.KD45.Kripke
 
-instance sound : Sound (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := instSound_of_validates_axioms $ by
+instance sound : Sound (Logic.KD45) Kripke.FrameClass.serial_trans_eucl := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent (Hilbert.KD45) := consistent_of_sound_frameclass Kripke.FrameClass.serial_trans_eucl $ by
+instance consistent : Entailment.Consistent (Logic.KD45) := consistent_of_sound_frameclass Kripke.FrameClass.serial_trans_eucl $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := ⟨by constructor⟩
+instance canonical : Canonical (Logic.KD45) Kripke.FrameClass.serial_trans_eucl := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := inferInstance
+instance complete : Complete (Logic.KD45) Kripke.FrameClass.serial_trans_eucl := inferInstance
 
-end Hilbert.KD45.Kripke
+end Logic.KD45.Kripke
 
 namespace Logic
 
@@ -47,7 +47,7 @@ open Kripke
 
 lemma KD45.Kripke.serial_trans_eucl : Logic.KD45 = FrameClass.serial_trans_eucl.logic := eq_hilbert_logic_frameClass_logic
 
-theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
+instance : Logic.KD4 ⪱ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.KD4 ⊧ φ by
@@ -72,10 +72,10 @@ theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
         . use 1;
           constructor <;> omega;
 
-theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
+instance : Logic.KD5 ⪱ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬Kripke.FrameClass.KD5 ⊧ φ by
+  . suffices ∃ φ, Logic.KD45 ⊢! φ ∧ .Kripke.FrameClass.KD5 ⊧ φ by
       rw [KD5.Kripke.serial_eucl];
       tauto;
     use (Axioms.Four (.atom 0));
@@ -110,7 +110,7 @@ theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
             . omega;
             . trivial;
 
-theorem KD45.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KD45 := by
+instance : Logic.K45 ⪱ Logic.KD45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.IsK45 ⊧ φ by

@@ -18,24 +18,24 @@ instance {F : Kripke.Frame} [F.IsK45] : F.IsK4Point3 where
 end Kripke
 
 
-namespace Hilbert.K45.Kripke
+namespace Logic.K45.Kripke
 
-instance sound : Sound (Hilbert.K45) FrameClass.IsK45 := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.K45 FrameClass.IsK45 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent (Hilbert.K45) := consistent_of_sound_frameclass FrameClass.IsK45 $ by
+instance consistent : Entailment.Consistent Logic.K45 := consistent_of_sound_frameclass FrameClass.IsK45 $ by
   use whitepoint;
   constructor;
 
 
-instance canonical : Canonical (Hilbert.K45) FrameClass.IsK45 := ⟨by constructor⟩
+instance canonical : Canonical Logic.K45 FrameClass.IsK45 := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.K45) FrameClass.IsK45 := inferInstance
+instance complete : Complete Logic.K45 FrameClass.IsK45 := inferInstance
 
-end Hilbert.K45.Kripke
+end Logic.K45.Kripke
 
 
 namespace Logic
@@ -46,10 +46,10 @@ open Kripke
 
 lemma K45.Kripke.trans_eucl : Logic.K45 = FrameClass.IsK45.logic := eq_hilbert_logic_frameClass_logic
 
-theorem K45.proper_extension_of_K : Logic.K5 ⊂ Logic.K45 := by
+instance : Logic.K5 ⪱ Logic.K45 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬Kripke.FrameClass.K5 ⊧ φ by
+  . suffices ∃ φ, Logic.K45 ⊢! φ ∧ .Kripke.FrameClass.K5 ⊧ φ by
       rw [K5.Kripke.eucl];
       tauto;
     use (Axioms.Four (.atom 0));
@@ -67,7 +67,7 @@ theorem K45.proper_extension_of_K : Logic.K5 ⊂ Logic.K45 := by
         . intro y; tauto;
         . exact ⟨1, by omega, 2, by omega, by trivial⟩;
 
-theorem K5.proper_extension_of_K4Point3 : Logic.K4Point3 ⊂ Logic.K45 := by
+instance : Logic.K4Point3 ⪱ Logic.K45 := by
   constructor;
   . rw [K4Point3.Kripke.trans_weakConnected, K45.Kripke.trans_eucl];
     rintro φ hφ F hF;

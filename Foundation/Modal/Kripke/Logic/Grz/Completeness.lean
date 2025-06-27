@@ -256,16 +256,16 @@ lemma complete_of_mem_miniCanonicalFrame
 end Kripke.Grz
 
 
-namespace Hilbert.Grz.Kripke
+namespace Logic.Grz.Kripke
 
 open Kripke.Grz
 
-instance complete : Complete (Hilbert.Grz) FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
+instance complete : Complete Logic.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
   simp only [Set.mem_setOf_eq];
   intro φ;
   infer_instance;
 
-end Hilbert.Grz.Kripke
+end Logic.Grz.Kripke
 
 
 namespace Logic
@@ -277,7 +277,7 @@ open Kripke
 lemma Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
-theorem Grz.proper_extension_of_S4M : Logic.S4M ⊂ Logic.Grz := by
+instance : Logic.S4M ⪱ Logic.Grz := by
   constructor;
   . rw [S4M.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
     rintro φ hφ F hF;
@@ -307,7 +307,7 @@ theorem Grz.proper_extension_of_S4M : Logic.S4M ⊂ Logic.Grz := by
         . contradiction;
 
 @[simp]
-theorem Grz.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Grz := by
+instance : Logic.S4 ⪱ Logic.Grz := by
   trans Logic.S4M <;> simp;
 
 end Logic

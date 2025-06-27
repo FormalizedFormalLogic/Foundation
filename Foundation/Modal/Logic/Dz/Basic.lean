@@ -33,7 +33,7 @@ lemma Logic.GL_subset_Dz : Logic.GL ⊆ Logic.Dz := by
   apply Logic.sumQuasiNormal.mem₁;
   assumption;
 
-lemma Logic.GL_ssubset_Dz : Logic.GL ⊂ Logic.Dz := by
+lemma Logic.GL_ssubset_Dz : Logic.GL ⪱ Logic.Dz := by
   constructor;
   . exact Logic.GL_subset_Dz;
   . suffices ∃ φ, φ ∈ Logic.Dz ∧ φ ∉ Logic.GL by exact Set.not_subset.mpr this;

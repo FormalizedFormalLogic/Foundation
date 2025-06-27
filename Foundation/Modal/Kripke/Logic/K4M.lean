@@ -16,19 +16,19 @@ end Kripke
 
 namespace Hilbert.K4M
 
-instance Kripke.sound : Sound (Hilbert.K4M) FrameClass.K4M := instSound_of_validates_axioms $ by
+instance Kripke.sound : Sound Logic.K4M FrameClass.K4M := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomM_of_satisfiesMcKinseyCondition;
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.K4M) := consistent_of_sound_frameclass FrameClass.K4M $ by
+instance Kripke.consistent : Entailment.Consistent Logic.K4M := consistent_of_sound_frameclass FrameClass.K4M $ by
   use whitepoint;
   constructor;
 
-instance Kripke.canonical : Canonical (Hilbert.K4M) FrameClass.K4M := ⟨by constructor⟩
+instance Kripke.canonical : Canonical Logic.K4M FrameClass.K4M := ⟨by constructor⟩
 
-instance Kripke.complete : Complete (Hilbert.K4M) FrameClass.K4M := inferInstance
+instance Kripke.complete : Complete Logic.K4M FrameClass.K4M := inferInstance
 
 end Hilbert.K4M
 
@@ -40,7 +40,7 @@ open Kripke
 
 lemma K4M.Kripke.trans_mckinsey : Logic.K4M = FrameClass.K4M.logic := eq_hilbert_logic_frameClass_logic
 
-theorem K4M.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4M := by
+instance : Logic.K4 ⪱ Logic.K4M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.K4M ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by

@@ -13,7 +13,7 @@ open Entailment Entailment.FiniteContext
 open Formula.Kripke
 open ComplementClosedConsistentFinset
 
-namespace Hilbert.GL.Kripke
+namespace Logic.GL.Kripke
 
 variable {φ ψ : Formula ℕ}
 
@@ -161,7 +161,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       refine RXY.1 ψ ?_ h |>.1;
       simpa;
 
-instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_GL := ⟨by
+instance finiteComplete : Complete Logic.GL.Kripke.FrameClass.finite_GL := ⟨by
   intro φ;
   contrapose;
   intro h;
@@ -190,7 +190,7 @@ instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_GL := ⟨
         tauto;
 ⟩
 
-end Hilbert.GL.Kripke
+end Logic.GL.Kripke
 
 namespace Logic
 

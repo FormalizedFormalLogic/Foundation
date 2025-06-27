@@ -520,7 +520,7 @@ instance : (Hilbert.S4Point2).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Point2).HasT where p := 0
 instance : (Hilbert.S4Point2).HasFour where p := 0
 instance : (Hilbert.S4Point2).HasPoint2 where p := 0
-
+instance : Entailment.S4Point2 (Logic.S4Point2) where
 
 
 protected abbrev Hilbert.S4Point3 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
@@ -529,6 +529,7 @@ instance : (Hilbert.S4Point3).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Point3).HasT where p := 0
 instance : (Hilbert.S4Point3).HasFour where p := 0
 instance : (Hilbert.S4Point3).HasPoint3 where p := 0; q := 1;
+instance : Entailment.S4Point3 (Logic.S4Point3) where
 
 
 protected abbrev Hilbert.S4Point4 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point4 (.atom 0)}⟩
@@ -537,12 +538,14 @@ instance : (Hilbert.S4Point4).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Point4).HasT where p := 0
 instance : (Hilbert.S4Point4).HasFour where p := 0
 instance : (Hilbert.S4Point4).HasPoint4 where p := 0
+instance : Entailment.S4Point4 (Logic.S4Point4) where
 
 
 protected abbrev Hilbert.K5 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Five (.atom 0)}⟩
 protected abbrev Logic.K5 := Hilbert.K5.logic
 instance : (Hilbert.K5).HasK where p := 0; q := 1;
 instance : (Hilbert.K5).HasFive where p := 0
+instance : Entailment.K5 (Logic.K5) where
 
 
 protected abbrev Hilbert.S5 : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0)}⟩
@@ -550,6 +553,7 @@ protected abbrev Logic.S5 := Hilbert.S5.logic
 instance : (Hilbert.S5).HasK where p := 0; q := 1;
 instance : (Hilbert.S5).HasT where p := 0
 instance : (Hilbert.S5).HasFive where p := 0
+instance : Entailment.S5 (Logic.S5) where
 
 
 protected abbrev Hilbert.GL : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0)}⟩

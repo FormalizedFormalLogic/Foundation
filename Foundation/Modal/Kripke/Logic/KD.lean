@@ -17,28 +17,28 @@ protected abbrev FrameClass.IsKD : FrameClass := { F | F.IsKD }
 end Kripke
 
 
-namespace Hilbert.KD.Kripke
+namespace Logic.KD.Kripke
 
-instance sound : Sound (Hilbert.KD) FrameClass.IsKD :=
+instance sound : Sound Logic.KD FrameClass.IsKD :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F F_serial φ rfl;
     apply validate_AxiomD_of_serial (ser := F_serial);
 
-instance consistent : Entailment.Consistent (Hilbert.KD) :=
+instance consistent : Entailment.Consistent Logic.KD :=
   consistent_of_sound_frameclass FrameClass.IsKD $ by
     use whitepoint;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
 
-instance canonical : Canonical (Hilbert.KD) FrameClass.IsKD := ⟨by
+instance canonical : Canonical Logic.KD FrameClass.IsKD := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KD) FrameClass.IsKD := inferInstance
+instance complete : Complete Logic.KD FrameClass.IsKD := inferInstance
 
-end Hilbert.KD.Kripke
+end Logic.KD.Kripke
 
 namespace Logic
 

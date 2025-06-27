@@ -29,7 +29,7 @@ lemma Logic.GL_subset_S : Logic.GL ⊆ Logic.S := by
   apply Logic.sumQuasiNormal.mem₁;
   assumption;
 
-lemma Logic.GL_ssubset_S : Logic.GL ⊂ Logic.S := by
+lemma Logic.GL_ssubset_S : Logic.GL ⪱ Logic.S := by
   constructor;
   . exact Logic.GL_subset_S;
   . suffices ∃ φ, φ ∈ Logic.S ∧ φ ∉ Logic.GL by exact Set.not_subset.mpr this;

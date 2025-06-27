@@ -30,20 +30,20 @@ instance [F.IsFiniteGrzPoint3] : F.IsFiniteGrzPoint2 where
 end Kripke
 
 
-namespace Hilbert.GrzPoint3.Kripke
+namespace Logic.GrzPoint3.Kripke
 
-instance finite_sound : Sound (Hilbert.GrzPoint3) FrameClass.finite_connected_partial_order := instSound_of_validates_axioms $ by
+instance finite_sound : Sound Logic.GrzPoint3 FrameClass.finite_connected_partial_order := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl);
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance consistent : Entailment.Consistent (Hilbert.GrzPoint3) :=
+instance consistent : Entailment.Consistent Logic.GrzPoint3 :=
   consistent_of_sound_frameclass FrameClass.finite_connected_partial_order $ by
     use whitepoint;
     constructor;
 
-instance finite_complete : Complete (Hilbert.GrzPoint3) (FrameClass.finite_connected_partial_order) :=
+instance finite_complete : Complete Logic.GrzPoint3) (FrameClass.finite_connected_partial_order :=
   Kripke.Grz.complete_of_mem_miniCanonicalFrame FrameClass.finite_connected_partial_order $ by
     sorry;
     /-
@@ -76,7 +76,7 @@ instance finite_complete : Complete (Hilbert.GrzPoint3) (FrameClass.finite_conne
       . sorry;
     -/
 
-end Hilbert.GrzPoint3.Kripke
+end Logic.GrzPoint3.Kripke
 
 namespace Logic
 
@@ -86,7 +86,7 @@ open Kripke
 
 lemma GrzPoint3.Kripke.finite_connected_partial_order : Logic.GrzPoint3 = FrameClass.finite_connected_partial_order.logic := eq_hilbert_logic_frameClass_logic
 
-theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⊂ Logic.GrzPoint3 := by
+theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⪱ Logic.GrzPoint3 := by
   constructor;
   . rw [GrzPoint2.Kripke.finite_confluent_partial_order, GrzPoint3.Kripke.finite_connected_partial_order];
     rintro φ hφ F hF;
@@ -140,7 +140,7 @@ theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⊂ Logic.GrzPo
             . tauto;
             . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
 
-theorem GrzPoint3.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.GrzPoint3 := by
+instance : Logic.S4Point3 ⪱ Logic.GrzPoint3 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_S4Point3 ⊧ φ by

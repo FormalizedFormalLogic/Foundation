@@ -18,9 +18,9 @@ abbrev FrameClass.preorder_confluent_mckinsey : FrameClass := { F | F.IsS4Point2
 end Kripke
 
 
-namespace Hilbert.S4Point2M.Kripke
+namespace Logic.S4Point2M.Kripke
 
-instance sound : Sound (Hilbert.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := instSound_of_validates_axioms $ by
+instance sound : Sound (Logic.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -28,16 +28,16 @@ instance sound : Sound (Hilbert.S4Point2M) Kripke.FrameClass.preorder_confluent_
   . exact validate_axiomM_of_satisfiesMcKinseyCondition;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance consistent : Entailment.Consistent (Hilbert.S4Point2M) :=
+instance consistent : Entailment.Consistent Logic.S4Point2M :=
   consistent_of_sound_frameclass FrameClass.preorder_confluent_mckinsey $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Hilbert.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := ⟨by constructor⟩
+instance canonical : Canonical (Logic.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := inferInstance
+instance complete : Complete (Logic.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := inferInstance
 
-end Hilbert.S4Point2M.Kripke
+end Logic.S4Point2M.Kripke
 
 namespace Logic
 
@@ -48,10 +48,10 @@ open Kripke
 lemma S4Point2M.Kripke.preorder_confluent_mckinsey : Logic.S4Point2M = FrameClass.preorder_confluent_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 
 @[simp]
-theorem S4Point2M.proper_extension_of_S4M : Logic.S4M ⊂ Logic.S4Point2M := by
+instance : Logic.S4M ⪱ Logic.S4Point2M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point2M ⊢! φ ∧ ¬Kripke.FrameClass.S4M ⊧ φ by
+  . suffices ∃ φ, Logic.S4Point2M ⊢! φ ∧ .Kripke.FrameClass.S4M ⊧ φ by
       rw [S4M.Kripke.preorder_mckinsey];
       tauto;
     use (Axioms.Point2 (.atom 0));
@@ -83,7 +83,7 @@ theorem S4Point2M.proper_extension_of_S4M : Logic.S4M ⊂ Logic.S4Point2M := by
           omega;
 
 @[simp]
-theorem S4Point2M.proper_extension_of_S4Point2 : Logic.S4Point2 ⊂ Logic.S4Point2M := by
+instance : Logic.S4Point2 ⪱ Logic.S4Point2M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
   . suffices ∃ φ, Hilbert.S4Point2M ⊢! φ ∧ ¬FrameClass.S4Point2 ⊧ φ by
