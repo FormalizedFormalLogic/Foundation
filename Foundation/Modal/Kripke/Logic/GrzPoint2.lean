@@ -85,28 +85,28 @@ end
 
 section
 
-namespace Hilbert
+namespace Logic
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-lemma Grz_weakerThan_GrzPoint2 : Hilbert.Grz ⪯ Hilbert.GrzPoint2 := weakerThan_of_dominate_axioms $ by simp;
+instance : Logic.Grz ⪯ Logic.GrzPoint2 := Hilbert.weakerThan_of_subset_axioms $ by simp;
 
-lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Hilbert.Grz]! φ) : Hilbert.GrzPoint2 ⊢! φ := by
+lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Logic.Grz]! φ) : Logic.GrzPoint2 ⊢! φ := by
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
   simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe] at hΓ₁;
-  replace hΓ₂ := Grz_weakerThan_GrzPoint2.pbl $ FiniteContext.provable_iff.mp hΓ₂;
+  replace hΓ₂ : Logic.GrzPoint2 ⊢! ⋀Γ ➝ φ := WeakerThan.pbl $ FiniteContext.provable_iff.mp hΓ₂;
   exact hΓ₂ ⨀ by
     apply Conj₂!_intro;
     intro γ hγ;
     obtain ⟨a, ha, rfl⟩ := hΓ₁ _ hγ;
     exact axiomPoint2!;
 
-lemma not_Grz_of_not_GrzPoint2 (h : Hilbert.GrzPoint2 ⊬ φ) : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList ⊬[Hilbert.Grz] φ := by
+lemma not_Grz_of_not_GrzPoint2 (h : Logic.GrzPoint2 ⊬ φ) : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList ⊬[Logic.Grz] φ := by
   have := Context.provable_iff.not.mp $ not_imp_not.mpr GrzPoint2_of_Grz h;
   push_neg at this;
   convert this ((φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList) $ by simp;
 
-end Hilbert
+end Logic
 
 end
 
@@ -147,7 +147,7 @@ instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 
   contrapose;
   intro hφ;
 
-  replace hφ : Hilbert.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
+  replace hφ : Logic.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
   generalize eΓ : (φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList = Γ at hφ;
   obtain ⟨M, r, hM, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (@Logic.Grz.Kripke.complete.complete _) hφ;
   replace hM := Set.mem_setOf_eq.mp hM;
@@ -292,23 +292,13 @@ instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 
 
 end
 
-end Logic.GrzPoint2.Kripke
-
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_GrzPoint2.logic := eq_hilbert_logic_frameClass_logic
+lemma finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_GrzPoint2.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.Grz ⪱ Logic.GrzPoint2 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_Grz ⊧ φ by
-      rw [Grz.Kripke.finite_partial_order];
-      tauto;
+  . infer_instance;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_Grz ⊧ φ by simpa [Grz.Kripke.finite_partial_order];
     use Axioms.Point2 (.atom 0);
     constructor;
     . simp;
@@ -343,14 +333,15 @@ instance : Logic.Grz ⪱ Logic.GrzPoint2 := by
 
 instance : Logic.S4Point2M ⪱ Logic.GrzPoint2 := by
   constructor;
-  . rw [S4Point2M.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.preorder_confluent_mckinsey ⊧ φ → FrameClass.finite_GrzPoint2 ⊧ φ by
+      simpa [S4Point2M.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.GrzPoint2 ⊢! φ ∧ ¬FrameClass.preorder_confluent_mckinsey ⊧ φ by
-      rw [S4Point2M.Kripke.preorder_confluent_mckinsey];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.GrzPoint2 ⊢! φ ∧ ¬FrameClass.preorder_confluent_mckinsey ⊧ φ by simpa [S4Point2M.Kripke.preorder_confluent_mckinsey];
     use Axioms.Grz (.atom 0);
     constructor;
     . simp;
@@ -375,10 +366,6 @@ instance : Logic.S4Point2M ⪱ Logic.GrzPoint2 := by
         . contradiction;
         . contradiction;
 
-@[simp]
-lemma GrzPoint2.proper_extension_of_S4Point2 : Logic.S4Point2 ⪱ Logic.GrzPoint2 := by
-  trans Logic.S4Point2M <;> simp;
-
-end Logic
+end Logic.GrzPoint2.Kripke
 
 end LO.Modal

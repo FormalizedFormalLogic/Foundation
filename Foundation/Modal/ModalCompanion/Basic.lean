@@ -15,7 +15,7 @@ def Propositional.Formula.goedelTranslate : Propositional.Formula α → Modal.F
   | φ ➝ ψ => □((goedelTranslate φ) ➝ (goedelTranslate ψ))
 postfix:90 "ᵍ" => Propositional.Formula.goedelTranslate
 
-class Modal.ModalCompanion (IL : Propositional.Logic) (ML : Modal.Logic) where
+class Modal.ModalCompanion (IL : Propositional.Logic) (ML : Modal.Logic _) where
   companion : ∀ {φ}, φ ∈ IL ↔ φᵍ ∈ ML
 
 lemma Modal.instModalCompanion (h₁ : ∀ {φ}, φ ∈ IL → φᵍ ∈ ML) (h₂ : ∀ {φ}, φᵍ ∈ ML → φ ∈ IL) : Modal.ModalCompanion IL ML := ⟨λ {_} => ⟨h₁, h₂⟩⟩
@@ -25,9 +25,9 @@ namespace Propositional.Logic
 
 variable {IL : Propositional.Logic}
 
-def smallestMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ IL }
+def smallestMC (IL : Propositional.Logic) : Modal.Logic ℕ := Modal.Logic.sumNormal Modal.Logic.S4 { φᵍ | φ ∈ IL }
 
-lemma smallestMC.mdp_S4 (hφψ : Modal.Hilbert.S4 ⊢! φ ➝ ψ) (hφ : φ ∈ IL.smallestMC)
+lemma smallestMC.mdp_S4 (hφψ : Modal.Logic.S4 ⊢! φ ➝ ψ) (hφ : φ ∈ IL.smallestMC)
   : ψ ∈ IL.smallestMC := Modal.Logic.sumNormal.mdp (Modal.Logic.sumNormal.mem₁ hφψ) hφ
 
 def largestMC (IL : Propositional.Logic) : Modal.Logic := Modal.Logic.addNormal IL.smallestMC (Modal.Axioms.Grz (.atom 0))
@@ -153,7 +153,7 @@ namespace Modal.Hilbert
 
 open Propositional.Formula (goedelTranslate)
 
-variable {IL : Propositional.Logic} {ML : Modal.Logic}
+variable {IL : Propositional.Logic} {ML : Modal.Logic ℕ}
 variable {IH : Propositional.Hilbert ℕ} {MH : Modal.Hilbert ℕ}
 variable {φ ψ χ : Propositional.Formula ℕ}
 

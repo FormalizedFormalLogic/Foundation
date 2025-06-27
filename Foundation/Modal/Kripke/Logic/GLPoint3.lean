@@ -37,22 +37,14 @@ instance consistent : Entailment.Consistent Logic.GLPoint3 :=
 
 instance finite_complete : Complete Logic.GLPoint3 FrameClass.finite_GLPoint3 := by sorry;
 
-end Logic.GLPoint3.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma GLPoint3.Kripke.finite_strict_linear_order : Logic.GLPoint3 = FrameClass.finite_GLPoint3.logic := eq_hilbert_logic_frameClass_logic
+lemma finite_strict_linear_order : Logic.GLPoint3 = FrameClass.finite_GLPoint3.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.GL ⪱ Logic.GLPoint3 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Logic.GLPoint3 ⊢! φ ∧ .Kripke.FrameClass.finite_GL ⊧ φ by
-      rw [GL.Kripke.finite_trans_irrefl];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.GLPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.finite_GL ⊧ φ by simpa [GL.Kripke.finite_trans_irrefl];
     use (Axioms.WeakPoint3 (.atom 0) (.atom 1));
     constructor;
     . simp;
@@ -72,10 +64,10 @@ instance : Logic.GL ⪱ Logic.GLPoint3 := by
 
 instance : Logic.K4Point3 ⪱ Logic.GLPoint3 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GLPoint3 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by
-      rw [K4Point3.Kripke.trans_weakConnected];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.GLPoint3 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by simpa [K4Point3.Kripke.trans_weakConnected];
     use (Axioms.L (.atom 0));
     constructor;
     . simp;
@@ -91,6 +83,6 @@ instance : Logic.K4Point3 ⪱ Logic.GLPoint3 := by
         . use 1;
           omega;
 
-end Logic
+end Logic.GLPoint3.Kripke
 
 end LO.Modal

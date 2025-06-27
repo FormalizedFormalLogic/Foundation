@@ -85,9 +85,9 @@ instance : Entailment.Necessitation H.logic where
     exact PLift.down hφ
 
 instance : H.logic.Substitution where
-  subst hφ s := by
+  subst s hφ := by
     constructor;
-    apply Deduction.subst s;
+    apply Deduction.subst;
     exact PLift.down hφ
 
 lemma maxm! (h : φ ∈ H.axiomInstances) : H.logic ⊢! φ := by
@@ -98,12 +98,8 @@ lemma maxm'! (h : φ ∈ H.axioms) : H.logic ⊢! φ := by
   apply iff_mem_logic.mpr;
   exact Deduction.maxm' h;
 
-lemma subst! (s : Substitution α) (hφ : H.logic ⊢! φ) : H.logic ⊢! φ⟦s⟧ := by
-  apply iff_mem_logic.mpr;
-  exact Deduction.subst s $ iff_mem_logic.mp hφ;
-
 @[induction_eliminator]
-lemma rec!
+protected lemma rec!
   {motive     : (φ : Formula α) → (H.logic ⊢! φ) → Sort}
   (maxm       : ∀ {φ : Formula α}, (h : φ ∈ H.axiomInstances) → motive φ (maxm! h))
   (mdp        : ∀ {φ ψ : Formula α}, {hpq : H.logic ⊢! φ ➝ ψ} → {hp : H.logic ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (mdp! hpq hp))
@@ -133,7 +129,7 @@ lemma weakerThan_of_subset_axioms (hs : H₁.axioms ⊆ H₂.axioms) : H₁.logi
   induction h with
   | maxm h =>
     obtain ⟨ψ, h, ⟨s, rfl⟩⟩ := h;
-    apply subst! s;
+    apply H₂.logic.subst! s;
     exact maxm'! $ hs h;
   | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂
   | nec ih => exact nec! ih;
@@ -151,7 +147,7 @@ lemma weakerThan_of_provable_axiomInstances (hs : H₂.logic ⊢!* H₁.axiomIns
 lemma weakerThan_of_provable_axioms (hs : H₂.logic ⊢!* H₁.axioms) : H₁.logic ⪯ H₂.logic := by
   apply weakerThan_of_provable_axiomInstances;
   rintro φ ⟨ψ, h, ⟨s, rfl⟩⟩;
-  exact H₂.logic.subst! (hs h) s;
+  exact H₂.logic.subst! s (hs h);
 
 end
 

@@ -92,7 +92,7 @@ lemma validate_AxiomT_AxiomFour_of_validate_Grz (h : F ⊧ Axioms.Grz (.atom 0))
     . exact h₂.1;
     . exact h₂.2 h₁;
   intro h₁;
-  have h₂ : Satisfies ⟨F, V⟩ x (□(.atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := @Hilbert.K.Kripke.sound.sound (□(.atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) lemma_Grz₁! F (by trivial) V x;
+  have h₂ : Satisfies ⟨F, V⟩ x (□(.atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) := @Logic.K.Kripke.sound.sound (□(.atom 0) ➝ □(□(ψ ➝ □ψ) ➝ ψ)) lemma_Grz₁! F (by trivial) V x;
   have h₃ : Satisfies ⟨F, V⟩ x (□(□(ψ ➝ □ψ) ➝ ψ) ➝ ψ) := Satisfies.iff_subst_self (s := λ a => if a = 0 then ψ else a) |>.mp $ h _ _;
   exact h₃ $ h₂ $ h₁;
 

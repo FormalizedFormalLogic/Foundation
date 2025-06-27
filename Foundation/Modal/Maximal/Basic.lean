@@ -60,9 +60,7 @@ end Formula
 open Entailment
 open Formula (trivTranslate verTranslate)
 
-namespace Hilbert
-
-lemma provable_of_classical_provable {H : Modal.Hilbert ℕ} {φ : Propositional.Formula ℕ} : ((Propositional.Hilbert.Cl) ⊢! φ) → (H.logic ⊢! φ.toModalFormula) := by
+lemma Hilbert.provable_of_classical_provable {H : Modal.Hilbert ℕ} {φ : Propositional.Formula ℕ} : ((Propositional.Hilbert.Cl) ⊢! φ) → (H.logic ⊢! φ.toModalFormula) := by
   intro h;
   induction h using Propositional.Hilbert.Deduction.rec! with
   | maxm ih =>
@@ -74,7 +72,7 @@ lemma provable_of_classical_provable {H : Modal.Hilbert ℕ} {φ : Propositional
     dsimp [Propositional.Formula.toModalFormula];
     simp;
 
-namespace Triv
+namespace Logic.Triv
 
 lemma iff_trivTranslated : (Logic.Triv) ⊢! φ ⭤ φᵀ := by
   induction φ with
@@ -99,13 +97,13 @@ protected theorem iff_provable_Cl : Logic.Triv ⊢! φ ↔ (Propositional.Hilber
     | _ => simp [trivTranslate, Formula.toPropFormula];
   . intro h;
     have d₁ : Logic.Triv ⊢! φᵀ ➝ φ := K!_right iff_trivTranslated;
-    have d₂ : Logic.Triv ⊢! φᵀ := by simpa only [trivTranslate.toIP] using provable_of_classical_provable h;
+    have d₂ : Logic.Triv ⊢! φᵀ := by simpa only [trivTranslate.toIP] using Hilbert.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
-end Triv
+end Logic.Triv
 
 
-namespace Ver
+namespace Logic.Ver
 
 lemma iff_verTranslated : (Logic.Ver) ⊢! φ ⭤ φⱽ := by
   induction φ with
@@ -129,12 +127,10 @@ protected lemma iff_provable_Cl : (Logic.Ver) ⊢! φ ↔ (Propositional.Hilbert
     | _ => simp [verTranslate, Formula.toPropFormula];
   . intro h;
     have d₁ : Logic.Ver ⊢! φⱽ ➝ φ := K!_right iff_verTranslated;
-    have d₂ : Logic.Ver ⊢! φⱽ := by simpa using provable_of_classical_provable h;
+    have d₂ : Logic.Ver ⊢! φⱽ := by simpa using Hilbert.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
-end Ver
+end Logic.Ver
 
-
-end Hilbert
 
 end LO.Modal

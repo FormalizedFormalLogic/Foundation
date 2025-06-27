@@ -43,8 +43,8 @@ instance consistent : Entailment.Consistent Logic.GrzPoint3 :=
     use whitepoint;
     constructor;
 
-instance finite_complete : Complete Logic.GrzPoint3) (FrameClass.finite_connected_partial_order :=
-  Kripke.Grz.complete_of_mem_miniCanonicalFrame FrameClass.finite_connected_partial_order $ by
+instance finite_complete : Complete Logic.GrzPoint3 FrameClass.finite_connected_partial_order :=
+  Grz.Kripke.complete_of_mem_miniCanonicalFrame FrameClass.finite_connected_partial_order $ by
     sorry;
     /-
     intro φ;
@@ -88,14 +88,15 @@ lemma GrzPoint3.Kripke.finite_connected_partial_order : Logic.GrzPoint3 = FrameC
 
 theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⪱ Logic.GrzPoint3 := by
   constructor;
-  . rw [GrzPoint2.Kripke.finite_confluent_partial_order, GrzPoint3.Kripke.finite_connected_partial_order];
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.finite_GrzPoint2 ⊧ φ → FrameClass.finite_connected_partial_order ⊧ φ by
+      simpa [GrzPoint2.Kripke.finite_confluent_partial_order, GrzPoint3.Kripke.finite_connected_partial_order];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_GrzPoint2 ⊧ φ by
-      rw [GrzPoint2.Kripke.finite_confluent_partial_order];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_GrzPoint2 ⊧ φ by simpa [GrzPoint2.Kripke.finite_confluent_partial_order];
     use Axioms.Point3 (.atom 0) (.atom 1);
     constructor;
     . simp;
@@ -142,10 +143,10 @@ theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⪱ Logic.GrzPo
 
 instance : Logic.S4Point3 ⪱ Logic.GrzPoint3 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_S4Point3 ⊧ φ by
-      rw [S4Point3.Kripke.finite_connected_preorder];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_S4Point3 ⊧ φ by simpa [S4Point3.Kripke.finite_connected_preorder];
     use Axioms.Grz (.atom 0);
     constructor;
     . simp;

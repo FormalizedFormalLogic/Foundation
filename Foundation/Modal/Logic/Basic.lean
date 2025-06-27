@@ -1,36 +1,31 @@
 import Foundation.Modal.Formula
+import Foundation.Modal.Entailment.Basic
 
 namespace LO.Modal
 
-abbrev Logic (α) := Set (Modal.Formula α)
+open LO.Entailment
+open Entailment
 
+variable {α : Type*}
+
+abbrev Logic (α) := Set (Modal.Formula α)
 
 instance : Entailment (Formula α) (Logic α) := ⟨fun L φ ↦ PLift (φ ∈ L)⟩
 
 
 namespace Logic
 
+variable {L L₀ L₁ L₂ L₃ : Logic α}
+
 section
 
-/-
-protected class ModusPonens (L : Logic) where
-  mdp_closed {φ ψ} : L ⊢! φ ➝ ψ → L ⊢! φ → L ⊢! ψ
--/
-
 protected class Substitution (L : Logic α) where
-  subst {φ} : L ⊢ φ → ∀ s, L ⊢ φ⟦s⟧
+  subst {φ} (s) : L ⊢ φ → L ⊢ φ⟦s⟧
 
+protected class IsQuasiNormal (L : Logic α) extends Entailment.Cl L, Entailment.HasAxiomK L, Entailment.HasDiaDuality L, L.Substitution where
 
-/-
-protected class Necessitation (L : Logic) where
-  nec_closed {φ} : φ ∈ L → □φ ∈ L
-
-protected class Unnecessitation (L : Logic) where
-  unnec_closed {φ} : □φ ∈ L → φ ∈ L
-
-protected class ModalDisjunctive (L : Logic) where
-  modal_disjunctive_closed {φ ψ} : □φ ⋎ □ψ ∈ L → φ ∈ L ∨ ψ ∈ L
--/
+protected class IsNormal (L : Logic α) extends L.IsQuasiNormal, Entailment.Necessitation L where
+instance [L.IsNormal] : Entailment.K L where
 
 end
 
@@ -54,7 +49,15 @@ lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by
   apply not_congr;
   simp [iff_provable];
 
-lemma subst! [L.Substitution] (hφ : L ⊢! φ) (s : Substitution _) : L ⊢! φ⟦s⟧ := ⟨Substitution.subst hφ.some s⟩
+lemma subst! [L.Substitution] (s : Substitution _) (hφ : L ⊢! φ) : L ⊢! φ⟦s⟧ := ⟨Substitution.subst s hφ.some⟩
+
+@[simp]
+lemma no_bot [DecidableEq α] [L.IsQuasiNormal] [Consistent L] : L ⊬ ⊥ := by
+  obtain ⟨φ, hφ⟩ := Consistent.exists_unprovable (𝓢 := L) inferInstance;
+  by_contra! hC;
+  apply hφ;
+  apply of_O!;
+  exact hC;
 
 end
 
@@ -63,9 +66,7 @@ end Logic
 
 section
 
-variable {α} {L : Logic α}
-
-open Entailment
+variable {L : Logic α}
 
 instance : (∅ : Logic α) ⪯ L := ⟨by simp [Entailment.theory]⟩
 

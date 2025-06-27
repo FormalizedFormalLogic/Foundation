@@ -59,7 +59,7 @@ theorem iff_provable_satisfies_FiniteTransitiveTree : Logic.GL ⊢! φ ↔ (∀ 
     apply valid_on_TransitiveIrreflexiveFrameClass_of_satisfies_at_root_on_FiniteTransitiveTree h hF;
 
 lemma iff_unprovable_exists_unsatisfies_FiniteTransitiveTree
-  : Hilbert.GL ⊬ φ ↔ ∃ M : Model, ∃ r, M.IsFiniteTree r ∧ ¬Satisfies M r φ := by
+  : Logic.GL ⊬ φ ↔ ∃ M : Model, ∃ r, M.IsFiniteTree r ∧ ¬Satisfies M r φ := by
   apply Iff.not_left;
   push_neg;
   exact iff_provable_satisfies_FiniteTransitiveTree;

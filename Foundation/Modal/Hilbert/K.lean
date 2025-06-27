@@ -23,13 +23,14 @@ instance [H.HasK] : Entailment.HasAxiomK H.logic where
     . exact HasK.mem_K;
     . use (λ b => if (HasK.p H) = b then φ else if (HasK.q H) = b then ψ else (.atom b));
       simp [HasK.ne_pq];
-
-protected abbrev K : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1)}⟩
-instance : Hilbert.K.HasK where p := 0; q := 1
+instance [H.HasK] : H.logic.IsNormal where
 
 end Hilbert
 
+
+protected abbrev Hilbert.K : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1)}⟩
 protected abbrev Logic.K := Hilbert.K.logic
+instance : Hilbert.K.HasK where p := 0; q := 1
 instance : Entailment.K (Logic.K) where
 
 end LO.Modal

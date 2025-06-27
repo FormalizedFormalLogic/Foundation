@@ -114,7 +114,7 @@ import Foundation.Modal.Kripke.Undefinability
 import Foundation.Modal.Kripke.Balloon
 import Foundation.Modal.Kripke.LinearFrame
 
-import Foundation.Modal.PLoN.Hilbert.N
+import Foundation.Modal.PLoN.Logic.N
 
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.ModalCompanion.KC

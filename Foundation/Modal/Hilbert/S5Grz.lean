@@ -55,28 +55,18 @@ namespace LO.Modal
 open Entailment
 
 protected abbrev Hilbert.S5Grz : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0), Axioms.Grz (.atom 0)}⟩
-
-namespace Hilbert.S5Grz
+protected abbrev Logic.S5Grz : Logic ℕ := Hilbert.S5Grz.logic
 instance : (Hilbert.S5Grz).HasK where p := 0; q := 1;
 instance : (Hilbert.S5Grz).HasT where p := 0
 instance : (Hilbert.S5Grz).HasFive where p := 0
 instance : (Hilbert.S5Grz).HasGrz where p := 0
-instance : Entailment.S5Grz (Hilbert.S5Grz) where
-instance : Entailment.KTc' (Hilbert.S5Grz) where
+instance : Entailment.S5Grz (Logic.S5Grz) where
+instance : Entailment.KTc' (Logic.S5Grz) where
 
-end Hilbert.S5Grz
-
-protected abbrev Logic.S5Grz := Hilbert.S5Grz.logic
-
-theorem Hilbert.iff_provable_S5Grz_provable_Triv : (Hilbert.S5Grz ⊢! φ) ↔ (Hilbert.Triv ⊢! φ) := by
+instance : (Logic.S5Grz) ≊ (Logic.Triv) := by
+  apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
-  . apply fun h ↦ (weakerThan_of_dominate_axioms @h).subset;
-    simp;
-  . apply fun h ↦ (weakerThan_of_dominate_axioms @h).subset;
-    rintro φ (⟨_, _, rfl⟩ | (⟨_, rfl⟩ | ⟨_, rfl⟩)) <;> simp;
-
-lemma Logic.eq_S5Grz_Triv : Logic.S5Grz = Logic.Triv := by
-  ext φ;
-  exact Hilbert.iff_provable_S5Grz_provable_Triv;
+  . apply Hilbert.weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl | rfl) <;> simp;
+  . apply Hilbert.weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl) <;> simp;
 
 end LO.Modal

@@ -97,10 +97,9 @@ lemma Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_Triv.logic :=
 
 instance : Logic.KTc ⪱ Logic.Triv := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Logic.Triv ⊢! φ ∧ .Kripke.FrameClass.KTc ⊧ φ by
-      rw [KTc.Kripke.corefl];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.Triv ⊢! φ ∧ ¬Kripke.FrameClass.KTc ⊧ φ by simpa [KTc.Kripke.corefl];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -112,14 +111,16 @@ instance : Logic.KTc ⪱ Logic.Triv := by
 
 instance : Logic.GrzPoint3 ⪱ Logic.Triv := by
   constructor;
-  . rw [GrzPoint3.Kripke.finite_connected_partial_order, Triv.Kripke.finite_equality];
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.finite_connected_partial_order ⊧ φ → FrameClass.finite_Triv ⊧ φ by
+      simpa [GrzPoint3.Kripke.finite_connected_partial_order, Triv.Kripke.finite_equality];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.finite_connected_partial_order ⊧ φ by
-      rw [GrzPoint3.Kripke.finite_connected_partial_order];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.Triv ⊢! φ ∧ ¬FrameClass.finite_connected_partial_order ⊧ φ by
+      simpa [GrzPoint3.Kripke.finite_connected_partial_order];
     use Axioms.Tc (.atom 0);
     constructor;
     . simp;
@@ -139,14 +140,15 @@ instance : Logic.GrzPoint3 ⪱ Logic.Triv := by
 
 instance : Logic.S4Point4M ⪱ Logic.Triv := by
   constructor;
-  . rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.S4Point4M ⊧ φ → FrameClass.finite_Triv ⊧ φ by
+      simpa [S4Point4M.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.S4Point4M ⊧ φ by
-      rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.Triv ⊢! φ ∧ ¬FrameClass.S4Point4M ⊧ φ by simpa [S4Point4M.Kripke.preorder_sobocinski_mckinsey];
     use Axioms.Tc (.atom 0);
     constructor;
     . simp;
@@ -177,8 +179,6 @@ instance : Logic.S4Point4M ⪱ Logic.Triv := by
           constructor;
           . omega;
           . trivial;
-
-instance : Logic.Triv ⪱ Logic.Univ := by constructor <;> simp;
 
 end Logic
 
