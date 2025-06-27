@@ -32,18 +32,27 @@ instance : ToString Modality := ⟨Modality.toString⟩
 
 /-- pure box -/
 abbrev pbox : Modality := □-
-notation:80 "□" => pbox
+notation:81 "□" => pbox
 
 /-- pure diamond -/
 abbrev pdia : Modality := ◇-
-notation:80 "◇" => pdia
+notation:81 "◇" => pdia
 
 /-- pure negation -/
 abbrev pneg : Modality := ∼-
-notation:80 "∼" => pneg
+notation:81 "∼" => pneg
 
 #eval □◇◇
 
+def sneg : Modality → Modality
+  | -  => ∼-
+  | □m => ∼□m
+  | ◇m => ∼◇m
+  | ∼m => m
+prefix:80 "⩪" => Modality.sneg
+
+abbrev psneg : Modality := ⩪-
+notation:81 "⩪" => psneg
 
 def add : Modality → Modality → Modality
   | - ,  m₂ => m₂
@@ -114,6 +123,21 @@ def size : Modality → Nat
 @[simp] lemma box_size_succ   : (□m).size = m.size + 1 := rfl
 @[simp] lemma dia_size_succ   : (◇m).size = m.size + 1 := rfl
 @[simp] lemma neg_size_succ   : (∼m).size = m.size + 1 := rfl
+
+@[simp]
+lemma sneg_size_le_succ : (⩪m).size ≤ (m.size + 1) := by
+  match m with
+  | - | □m | ◇m => simp [sneg];
+  | ∼m => simp [sneg]; omega;
+
+@[simp]
+lemma sneg_size_le_neg_size : (⩪m).size ≤ (∼m).size := by trans (m.size + 1) <;> simp [sneg_size_le_succ];
+
+@[simp]
+lemma sneg_sneg_size_le_succ : (⩪⩪m).size ≤ m.size + 1 := by
+  match m with
+  | - | □m | ◇m | ∼- | ∼□m | ∼◇m => simp [sneg];
+  | ∼∼m => simp [sneg]; omega;
 
 @[simp]
 lemma iff_size_0 : m.size = 0 ↔ m = - := by
