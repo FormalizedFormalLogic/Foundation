@@ -1,0 +1,40 @@
+import Foundation.Modal.Entailment.Basic
+import Foundation.Meta.ClProver
+
+namespace LO
+
+section
+
+variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [Entailment F S]
+
+variable {𝓢 𝓣 : S} [Entailment.Cl 𝓢] {φ ψ χ ξ : F}
+
+example : Entailment.TwoSided 𝓢 [φ, ψ] [χ ⋏ ξ, χ, ψ] := by cl_prover_2s
+
+example : Entailment.TwoSided 𝓢 [φ ⭤ ψ] [φ ➝ (χ ⋎ ψ)] := by cl_prover_2s
+
+example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, χ ⭤ ξ] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s 32
+
+example (h1 : 𝓢 ⊢! φ ⭤ ψ) (h2 : 𝓢 ⊢! χ ⭤ ξ) : Entailment.TwoSided 𝓢 [] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s [h1, h2]
+
+example : 𝓢 ⊢! (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by cl_prover
+
+example(h1 : 𝓢 ⊢! φ ⭤ ψ) (h2 : 𝓢 ⊢! χ ⭤ ξ) : 𝓢 ⊢! (ψ ➝ ∼ξ) ⭤ (φ ➝ ∼χ) := by cl_prover [h1, h2]
+
+end
+
+section
+
+open LO.Modal.Entailment
+
+variable {S F : Type*} [DecidableEq F] [BasicModalLogicalConnective F] [Entailment F S]
+
+variable {𝓢 : S} [Modal.Entailment.K 𝓢] {φ ψ ξ χ : F}
+
+example : 𝓢 ⊢! ((□φ ➝ □□φ) ➝ □φ) ➝ □φ := by cl_prover 6
+
+example (h : 𝓢 ⊢! □φ ⭤ φ) : 𝓢 ⊢! φ ⭤ □φ ⋏ φ := by cl_prover [h]
+
+end
+
+end LO

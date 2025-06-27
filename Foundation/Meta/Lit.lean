@@ -85,7 +85,15 @@ partial def denote : Q($F) → MetaM Lit
   |     ~q(∼$φ) => return ∼(←denote φ)
   |      ~q($e) => return atom e
 
-variable (F)
+def complexity : Litform α → ℕ
+  |  atom _ => 0
+  |       ⊤ => 0
+  |       ⊥ => 0
+  |   φ ⋏ ψ => max φ.complexity ψ.complexity + 1
+  |   φ ⋎ ψ => max φ.complexity ψ.complexity + 1
+  |      ∼φ => φ.complexity + 1
+  |   φ ➝ ψ => max φ.complexity ψ.complexity + 1
+  | iff φ ψ => max φ.complexity ψ.complexity + 1
 
 end Litform
 

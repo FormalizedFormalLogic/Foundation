@@ -1,6 +1,5 @@
 import Foundation.Logic.Calculus
 import Foundation.Logic.HilbertStyle.Supplemental
-import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit
 
@@ -20,9 +19,6 @@ variable {𝓢} [Entailment.Cl 𝓢]
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
-lemma provable_of (h : [] ⟹ [φ]) : 𝓢 ⊢! φ :=
-  FiniteContext.provable_iff_provable.mpr <| left_Disj!_intro [φ] (by simp) ⨀! h
-
 lemma weakening (h : Γ₁ ⟹ Δ₁) (HΓ : Γ₁ ⊆ Γ₂ := by simp) (HΔ : Δ₁ ⊆ Δ₂ := by simp) : Γ₂ ⟹ Δ₂ :=
   FiniteContext.weakening! HΓ <| left_Disj!_intro Δ₁ (fun _ hψ ↦ right_Disj!_intro _ (HΔ hψ)) ⨀! h
 
@@ -35,6 +31,12 @@ lemma rotate_right_inv (Γ Δ φ) (hφ : Γ ⟹ φ :: Δ) : Γ ⟹ Δ ++ [φ] :=
 lemma rotate_left_inv (Γ Δ φ) (hφ : (φ :: Γ) ⟹ Δ) : (Γ ++ [φ]) ⟹ Δ := weakening hφ
 
 variable (𝓢)
+
+lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢! φ :=
+  FiniteContext.provable_iff_provable.mpr <| left_Disj!_intro [φ] (by simp) ⨀! h
+
+lemma add_hyp (Γ Δ φ) (hφ : 𝓢 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ :=
+  deduct! h ⨀! of'! hφ
 
 lemma right_closed (Γ Δ φ) (h : φ ∈ Γ) : Γ ⟹ φ :: Δ := right_Disj!_intro _ (φ := φ) (by simp) ⨀! (by_axm! h)
 
@@ -208,48 +210,71 @@ def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List
   let Δ ← Qq.ofQList q
   return ⟨⟨_, _, _, F, LC, DC, S, E, 𝓢, CL⟩, Γ, Δ⟩
 
+def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
+  let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  let .some DC ← trySynthInstanceQ q(DecidableEq $F)
+    | throwError m! "error: failed to find instance DecidableEq {F}"
+  let .some LC ← trySynthInstanceQ q(LogicalConnective $F)
+    | throwError m! "error: failed to find instance DecidableEq {F}"
+  let .some CL ← trySynthInstanceQ q(Entailment.Cl $𝓢)
+    | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
+  return ⟨⟨_, _, _, F, LC, DC, S, E, 𝓢, CL⟩, p⟩
+
+def synthProvable (e : Expr) : MetaM (Expr × Expr × Expr) := do
+  let (ty : Q(Prop)) ← inferType e
+  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  return (𝓢, φ, e)
+
 abbrev Sequent := List Lit
 
-def Lit.toExpr (φ : Lit) : M Expr := do
+def litToExpr (φ : Lit) : M Expr := do
   let c ← read
   return Litform.toExpr c.LC φ
+
+def exprToLit (e : Expr) : M Lit := do
+  let c ← read
+  Litform.denote c.LC e
 
 def Sequent.toExprList (Γ : Sequent) : M (List Expr) := do
   let c ← read
   return Γ.map (Litform.toExpr c.LC)
+
+def exprListToLitList (l : List Expr) : M (List Lit) := do
+  let c ← read
+  l.mapM (m := MetaM) (Litform.denote c.LC)
 
 def Sequent.toExpr (Γ : Sequent) : M Expr := do
   let c ← read
   return toQList <| Γ.map (Litform.toExpr c.LC)
 
 def tryRightClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
-  match ← memQList?' (← Lit.toExpr φ) (← Γ.toExprList) with
+  match ← memQList?' (← litToExpr φ) (← Γ.toExprList) with
   |   .none => return none
   | .some e => do
     let eΓ ← Sequent.toExpr Γ
     let eΔ ← Sequent.toExpr Δ
-    let eφ ← Lit.toExpr φ
+    let eφ ← litToExpr φ
     return some <| ← iapp ``LO.Entailment.TwoSided.right_closed #[eΓ, eΔ, eφ, e]
 
 def tryLeftClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
-  match ← memQList?' (← Lit.toExpr φ) (← Δ.toExprList) with
+  match ← memQList?' (← litToExpr φ) (← Δ.toExprList) with
   |   .none => return none
   | .some e => do
     let eΓ ← Sequent.toExpr Γ
     let eΔ ← Sequent.toExpr Δ
-    let eφ ← Lit.toExpr φ
+    let eφ ← litToExpr φ
     return some <| ← iapp ``LO.Entailment.TwoSided.left_closed #[eΓ, eΔ, eφ, e]
 
 def rotateRight (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
+  let eφ ← litToExpr φ
   iapp ``LO.Entailment.TwoSided.rotate_right #[eΓ, eΔ, eφ, e]
 
 def rotateLeft (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
+  let eφ ← litToExpr φ
   iapp ``LO.Entailment.TwoSided.rotate_left #[eΓ, eΔ, eφ, e]
 
 def verumRight (Γ Δ : Sequent) : M Expr := do
@@ -265,35 +290,35 @@ def falsumRight (Γ Δ : Sequent) (e : Expr) : M Expr := do
 def andRight (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
-  let eψ ← Lit.toExpr ψ
+  let eφ ← litToExpr φ
+  let eψ ← litToExpr ψ
   iapp ``LO.Entailment.TwoSided.and_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def orRight (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
-  let eψ ← Lit.toExpr ψ
+  let eφ ← litToExpr φ
+  let eψ ← litToExpr ψ
   iapp ``LO.Entailment.TwoSided.or_right #[eΓ, eΔ, eφ, eψ, e]
 
 def negRight (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
+  let eφ ← litToExpr φ
   iapp ``LO.Entailment.TwoSided.neg_right #[eΓ, eΔ, eφ, e]
 
 def implyRight (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
-  let eψ ← Lit.toExpr ψ
+  let eφ ← litToExpr φ
+  let eψ ← litToExpr ψ
   iapp ``LO.Entailment.TwoSided.imply_right #[eΓ, eΔ, eφ, eψ, e]
 
 def iffRight (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
-  let eψ ← Lit.toExpr ψ
+  let eφ ← litToExpr φ
+  let eψ ← litToExpr ψ
   iapp ``LO.Entailment.TwoSided.iff_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 
@@ -310,167 +335,178 @@ def falsumLeft (Γ Δ : Sequent) : M Expr := do
 def andLeft (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
-  let eψ ← Lit.toExpr ψ
+  let eφ ← litToExpr φ
+  let eψ ← litToExpr ψ
   iapp ``LO.Entailment.TwoSided.and_left #[eΓ, eΔ, eφ, eψ, e]
 
 def orLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
-  let eψ ← Lit.toExpr ψ
+  let eφ ← litToExpr φ
+  let eψ ← litToExpr ψ
   iapp ``LO.Entailment.TwoSided.or_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def negLeft (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
+  let eφ ← litToExpr φ
   iapp ``LO.Entailment.TwoSided.neg_left #[eΓ, eΔ, eφ, e]
 
 def implyLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
-  let eψ ← Lit.toExpr ψ
+  let eφ ← litToExpr φ
+  let eψ ← litToExpr ψ
   iapp ``LO.Entailment.TwoSided.imply_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def iffLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  let eφ ← Lit.toExpr φ
-  let eψ ← Lit.toExpr ψ
+  let eφ ← litToExpr φ
+  let eψ ← litToExpr ψ
   iapp ``LO.Entailment.TwoSided.iff_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
-def search (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
-  logInfo m!"step: {k}, case: {b}, {Γ} ⟹ {Δ}"
+def addHyp (Γ Δ : Sequent) (φ : Lit) (E e : Expr) : M Expr := do
+  let eΓ ← Sequent.toExpr Γ
+  let eΔ ← Sequent.toExpr Δ
+  let eφ ← litToExpr φ
+  iapp ``LO.Entailment.TwoSided.add_hyp #[eΓ, eΔ, eφ, E, e]
+
+def toProvable (φ : Expr) (e : Expr) : M Expr := do
+  iapp ``LO.Entailment.TwoSided.to_provable #[φ, e]
+
+def prover (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
+  --logInfo m!"step: {k}, case: {b}, {← Sequent.toExpr Γ} ⟹ {← Sequent.toExpr Δ}"
   match k, b with
-  |     0,      _ => throwError m!"auto prove failed: {Γ} ⟹ {Δ}"
+  |     0,      _ => throwError m!"Proof search failed: {← Sequent.toExpr Γ} ⟹ {← Sequent.toExpr Δ}"
   | k + 1,  false =>
     match Δ with
     |    .atom a :: Δ => do
       let e ← tryRightClose (.atom a) Γ Δ
       match e with
       | some h =>
-        logInfo m!"case: GOAL CLOSED R: {a}"
         return h
       |   none => do
-        let e ← search k true Γ (Δ ++ [.atom a])
+        let e ← prover k true Γ (Δ ++ [.atom a])
         rotateRight Γ Δ (.atom a) e
     |          ⊤ :: Δ => verumRight Γ Δ
     |          ⊥ :: Δ => do
-      logInfo m!"case: ⊥_R"
-      let e ← search k true Γ Δ
+      let e ← prover k true Γ Δ
       falsumRight Γ Δ e
     |      φ ⋏ ψ :: Δ => do
-      let e₁ ← search k true Γ (Δ ++ [φ])
-      let e₂ ← search k true Γ (Δ ++ [ψ])
+      let e₁ ← prover k true Γ (Δ ++ [φ])
+      let e₂ ← prover k true Γ (Δ ++ [ψ])
       andRight Γ Δ φ ψ e₁ e₂
     |      φ ⋎ ψ :: Δ => do
-      let e ← search k true Γ (Δ ++ [φ, ψ])
+      let e ← prover k true Γ (Δ ++ [φ, ψ])
       orRight Γ Δ φ ψ e
     |         ∼φ :: Δ => do
-      let e ← search k true (Γ ++ [φ]) Δ
+      let e ← prover k true (Γ ++ [φ]) Δ
       negRight Γ Δ φ e
     |    (φ ➝ ψ) :: Δ => do
-      logInfo m!"case: imply_R"
-      let e ← search k true (Γ ++ [φ]) (Δ ++ [ψ])
+      let e ← prover k true (Γ ++ [φ]) (Δ ++ [ψ])
       implyRight Γ Δ φ ψ e
     | (.iff φ ψ) :: Δ => do
-      logInfo m!"case: iff_R"
-      let e₁ ← search k true (Γ ++ [φ]) (Δ ++ [ψ])
-      let e₂ ← search k true (Γ ++ [ψ]) (Δ ++ [φ])
+      let e₁ ← prover k true (Γ ++ [φ]) (Δ ++ [ψ])
+      let e₂ ← prover k true (Γ ++ [ψ]) (Δ ++ [φ])
       iffRight Γ Δ φ ψ e₁ e₂
     |              [] =>
-      search k true Γ []
+      prover k true Γ []
   | k + 1, true =>
     match Γ with
     |    .atom a :: Γ => do
       let e ← tryLeftClose (.atom a) Γ Δ
       match e with
       | some h =>
-        logInfo m!"case: GOAL CLOSED L: {a}"
         return h
       |   none => do
-        let e ← search k false (Γ ++ [.atom a]) Δ
+        let e ← prover k false (Γ ++ [.atom a]) Δ
         rotateLeft Γ Δ (.atom a) e
     |          ⊤ :: Γ => do
-      let e ← search k false Γ Δ
+      let e ← prover k false Γ Δ
       verumLeft Γ Δ e
     |          ⊥ :: Γ => do
       falsumLeft Γ Δ
     |      φ ⋏ ψ :: Γ => do
-      let e ← search k false (Γ ++ [φ, ψ]) Δ
+      let e ← prover k false (Γ ++ [φ, ψ]) Δ
       andLeft Γ Δ φ ψ e
     |      φ ⋎ ψ :: Γ => do
-      let e₁ ← search k false (Γ ++ [φ]) Δ
-      let e₂ ← search k false (Γ ++ [ψ]) Δ
+      let e₁ ← prover k false (Γ ++ [φ]) Δ
+      let e₂ ← prover k false (Γ ++ [ψ]) Δ
       orLeft Γ Δ φ ψ e₁ e₂
     |         ∼φ :: Γ => do
-      let e ← search k false Γ (Δ ++ [φ])
+      let e ← prover k false Γ (Δ ++ [φ])
       negLeft Γ Δ φ e
     |    (φ ➝ ψ) :: Γ => do
-      logInfo m!"case: imply_L"
-      let e₁ ← search k false Γ (Δ ++ [φ])
-      let e₂ ← search k false (Γ ++ [ψ]) Δ
+      let e₁ ← prover k false Γ (Δ ++ [φ])
+      let e₂ ← prover k false (Γ ++ [ψ]) Δ
       implyLeft Γ Δ φ ψ e₁ e₂
     | (.iff φ ψ) :: Γ => do
-      logInfo m!"case: iff_L"
-      let e₁ ← search k false Γ (Δ ++ [φ, ψ])
-      let e₂ ← search k false (Γ ++ [φ, ψ]) Δ
+      let e₁ ← prover k false Γ (Δ ++ [φ, ψ])
+      let e₂ ← prover k false (Γ ++ [φ, ψ]) Δ
       iffLeft Γ Δ φ ψ e₁ e₂
     |              [] =>
-      search k false [] Δ
+      prover k false [] Δ
 
-elab "cl_prover_2s" n:(num)? : tactic => withMainContext do
+def addHyps (prover : (Γ Δ : Sequent) → M Expr) (Γ Δ : Sequent) : List (Lit × Expr) → M Expr
+  |             [] => prover Γ Δ
+  | (φ, E) :: hyps => do
+    let e ← addHyps prover (φ :: Γ) Δ hyps
+    addHyp Γ Δ φ E e
+
+def main (n : ℕ) (seq : Array (Expr × Expr)) (L R : List Expr) : M Expr := do
+  let Γ ← exprListToLitList L
+  let Δ ← exprListToLitList R
+  let hyps ← seq.mapM fun (φ, e) ↦ return (← exprToLit φ, e)
+  addHyps (prover n false) Γ Δ hyps.toList
+
+syntax termSeq := "[" (term,*) "]"
+
+elab "cl_prover_2s" n:(num)? seq:(termSeq)? : tactic => withMainContext do
+  let ⟨c, L, R⟩ ← getGoalTwoSided <| ← whnfR <| ← getMainTarget
   let n : ℕ :=
     match n with
     | some n => n.getNat
-    | none   => 32
-  let ⟨c, L, R⟩ ← getGoalTwoSided <| ← whnfR <| ← getMainTarget
-  let Γ ← L.mapM (m := MetaM) (Litform.denote c.LC)
-  let Δ ← R.mapM (m := MetaM) (Litform.denote c.LC)
-  --logInfo m!"{Γ} ⟹ {Δ}"
-  closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (search n false Γ Δ) c
+    |   none => 32
+  let seq ← (match seq with
+    | some seq =>
+      match seq with
+      | `(termSeq| [ $ss,* ] ) => do
+        ss.getElems.mapM (fun s => do
+          --logInfo m! "(proverL₀) s : {s}, elaberm: {← Term.elabTerm s none}"
+          let ⟨𝓣, φ, h⟩ ← synthProvable (← Term.elabTerm s none true)
+          if (← isDefEq (← whnf 𝓣) (← whnf c.𝓢)) then
+            return (φ, h)
+          else throwError m!"hyp is not correct: {h}")
+      | _                      =>
+        return #[]
+    | _        =>
+      return #[])
+  closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (main n seq L R) c
 
-macro "cl_prover" n:(num)? : tactic => do
-  match n with
-  | some n => `(tactic| apply LO.Entailment.TwoSided.provable_of <;> cl_prover_2s $n)
-  | none   => `(tactic| apply LO.Entailment.TwoSided.provable_of <;> cl_prover_2s)
-
-section
-
-section
-
-variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [Entailment F S]
-
-variable {𝓢 : S} [Entailment.Cl 𝓢] {φ ψ : F}
-
-example : Entailment.TwoSided 𝓢 [φ, ψ] [χ ⋏ ξ, χ, ψ] := by cl_prover_2s
-
-example : Entailment.TwoSided 𝓢 [φ ⭤ ψ] [φ ➝ (χ ⋎ ψ)] := by cl_prover_2s
-
-example : Entailment.TwoSided 𝓢 [⊥] [⊥] := by cl_prover_2s
-
-example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, χ ⭤ ξ] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s 32
-
-example : 𝓢 ⊢! (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by
-  cl_prover
-
-example : 𝓢 ⊢! ((φ ⭤ ψ) ⋏ (χ ⭤ ξ)) ➝ ((ψ ➝ ξ) ⭤ (φ ➝ χ)) := by
-  cl_prover
-
-end
-section
-
-open LO.Propositional
-
-variable {φ ψ χ : Formula ℕ}
-
-example : Entailment.TwoSided Hilbert.Cl [φ ⋏ ⊤, ψ] [ψ, φ, .atom 9] := by { cl_prover_2s }
-
-end
-
-end
+elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
+  let ⟨c, φ⟩ ← getGoalProvable <| ← whnfR <| ← getMainTarget
+  let n : ℕ :=
+    match n with
+    | some n => n.getNat
+    |   none => 32
+  let seq ← (match seq with
+    | some seq =>
+      match seq with
+      | `(termSeq| [ $ss,* ] ) => do
+        ss.getElems.mapM (fun s => do
+          --logInfo m! "(proverL₀) s : {s}, elaberm: {← Term.elabTerm s none}"
+          let ⟨𝓣, φ, h⟩ ← synthProvable (← Term.elabTerm s none true)
+          if (← isDefEq (← whnf 𝓣) (← whnf c.𝓢)) then
+            return (φ, h)
+          else throwError m!"hyp is not correct: {h}")
+      | _                      =>
+        return #[]
+    | _        =>
+      return #[])
+  closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (r := c) do
+    let e ← main n seq [] [φ]
+    toProvable φ e
 
 end ClProver
 
