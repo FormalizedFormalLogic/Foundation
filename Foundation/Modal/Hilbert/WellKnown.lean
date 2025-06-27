@@ -18,39 +18,39 @@ class HasT (H : Hilbert α) where
   p : α
   mem_T : Axioms.T (.atom p) ∈ H.axioms := by tauto;
 
-instance [hT : H.HasT] : Entailment.HasAxiomT H where
+instance [H.HasT] : Entailment.HasAxiomT H where
   T φ := by
     apply maxm;
-    use Axioms.T (.atom hT.p);
+    use Axioms.T (.atom (HasT.p H));
     constructor;
-    . exact hT.mem_T;
-    . use (λ b => if hT.p = b then φ else (.atom b));
+    . exact HasT.mem_T;
+    . use (λ b => if (HasT.p H) = b then φ else (.atom b));
       simp;
 
 class HasB (H : Hilbert α) where
   p : α
   mem_B : Axioms.B (.atom p) ∈ H.axioms := by tauto;
 
-instance [hB : H.HasB] : Entailment.HasAxiomB H where
+instance [H.HasB] : Entailment.HasAxiomB H where
   B φ := by
     apply maxm;
-    use Axioms.B (.atom hB.p);
+    use Axioms.B (.atom (HasB.p H));
     constructor;
-    . exact hB.mem_B;
-    . use (λ b => if hB.p = b then φ else (.atom b));
+    . exact HasB.mem_B;
+    . use (λ b => if (HasB.p H) = b then φ else (.atom b));
       simp;
 
 class HasD (H : Hilbert α) where
   p : α
   mem_D : Axioms.D (.atom p) ∈ H.axioms := by tauto;
 
-instance [hD : H.HasD] : Entailment.HasAxiomD H where
+instance [H.HasD] : Entailment.HasAxiomD H where
   D φ := by
     apply maxm;
-    use Axioms.D (.atom hD.p);
+    use Axioms.D (.atom (HasD.p H));
     constructor;
-    . exact hD.mem_D;
-    . use (λ b => if hD.p = b then φ else (.atom b));
+    . exact HasD.mem_D;
+    . use (λ b => if (HasD.p H) = b then φ else (.atom b));
       simp;
 
 
@@ -58,13 +58,13 @@ class HasFour (H : Hilbert α) where
   p : α
   mem_Four : Axioms.Four (.atom p) ∈ H.axioms := by tauto;
 
-instance [hFour : H.HasFour] : Entailment.HasAxiomFour H where
+instance [H.HasFour] : Entailment.HasAxiomFour H where
   Four φ := by
     apply maxm;
-    use Axioms.Four (.atom hFour.p);
+    use Axioms.Four (.atom (HasFour.p H));
     constructor;
-    . exact hFour.mem_Four;
-    . use (λ b => if hFour.p = b then φ else (.atom b));
+    . exact HasFour.mem_Four;
+    . use (λ b => if (HasFour.p H) = b then φ else (.atom b));
       simp;
 
 
@@ -72,13 +72,13 @@ class HasFive (H : Hilbert α) where
   p : α
   mem_Five : Axioms.Five (.atom p) ∈ H.axioms := by tauto;
 
-instance [hFive : H.HasFive] : Entailment.HasAxiomFive H where
+instance [H.HasFive] : Entailment.HasAxiomFive H where
   Five φ := by
     apply maxm;
-    use Axioms.Five (.atom hFive.p);
+    use Axioms.Five (.atom (HasFive.p H));
     constructor;
-    . exact hFive.mem_Five;
-    . use (λ b => if hFive.p = b then φ else (.atom b));
+    . exact HasFive.mem_Five;
+    . use (λ b => if (HasFive.p H) = b then φ else (.atom b));
       simp;
 
 
@@ -86,13 +86,13 @@ class HasPoint2 (H : Hilbert α) where
   p : α
   mem_Point2 : Axioms.Point2 (.atom p) ∈ H.axioms := by tauto;
 
-instance [hPoint2 : H.HasPoint2] : Entailment.HasAxiomPoint2 H where
+instance [H.HasPoint2] : Entailment.HasAxiomPoint2 H where
   Point2 φ := by
     apply maxm;
-    use Axioms.Point2 (.atom hPoint2.p);
+    use Axioms.Point2 (.atom (HasPoint2.p H));
     constructor;
-    . exact hPoint2.mem_Point2;
-    . use (λ b => if hPoint2.p = b then φ else (.atom b));
+    . exact HasPoint2.mem_Point2;
+    . use (λ b => if (HasPoint2.p H) = b then φ else (.atom b));
       simp;
 
 
@@ -102,14 +102,14 @@ class HasWeakPoint2 (H : Hilbert α) where
   ne_pq : p ≠ q := by trivial;
   mem_WeakPoint2 : Axioms.WeakPoint2 (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [hDotWeak2 : H.HasWeakPoint2] : Entailment.HasAxiomWeakPoint2 H where
+instance [H.HasWeakPoint2] : Entailment.HasAxiomWeakPoint2 H where
   WeakPoint2 φ ψ := by
     apply maxm;
-    use Axioms.WeakPoint2 (.atom hDotWeak2.p) (.atom hDotWeak2.q);
+    use Axioms.WeakPoint2 (.atom (HasWeakPoint2.p H)) (.atom (HasWeakPoint2.q H));
     constructor;
-    . exact hDotWeak2.mem_WeakPoint2;
-    . use (λ b => if hDotWeak2.p = b then φ else if hDotWeak2.q = b then ψ else (.atom b));
-      simp [hDotWeak2.ne_pq];
+    . exact HasWeakPoint2.mem_WeakPoint2;
+    . use (λ b => if (HasWeakPoint2.p H) = b then φ else if (HasWeakPoint2.q H) = b then ψ else (.atom b));
+      simp [HasWeakPoint2.ne_pq];
 
 
 class HasPoint3 (H : Hilbert α) where
@@ -118,14 +118,14 @@ class HasPoint3 (H : Hilbert α) where
   ne_pq : p ≠ q := by trivial;
   mem_Point3 : Axioms.Point3 (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [hPoint3 : H.HasPoint3] : Entailment.HasAxiomPoint3 H where
+instance [H.HasPoint3] : Entailment.HasAxiomPoint3 H where
   Point3 φ ψ := by
     apply maxm;
-    use Axioms.Point3 (.atom hPoint3.p) (.atom hPoint3.q);
+    use Axioms.Point3 (.atom (HasPoint3.p H)) (.atom (HasPoint3.q H));
     constructor;
-    . exact hPoint3.mem_Point3;
-    . use (λ b => if hPoint3.p = b then φ else if hPoint3.q = b then ψ else (.atom b));
-      simp [hPoint3.ne_pq];
+    . exact HasPoint3.mem_Point3;
+    . use (λ b => if (HasPoint3.p H) = b then φ else if (HasPoint3.q H) = b then ψ else (.atom b));
+      simp [HasPoint3.ne_pq];
 
 
 class HasWeakPoint3 (H : Hilbert α) where
@@ -134,14 +134,14 @@ class HasWeakPoint3 (H : Hilbert α) where
   ne_pq : p ≠ q := by trivial;
   mem_WeakPoint3 : Axioms.WeakPoint3 (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [hDotWeak3 : H.HasWeakPoint3] : Entailment.HasAxiomWeakPoint3 H where
+instance [H.HasWeakPoint3] : Entailment.HasAxiomWeakPoint3 H where
   WeakPoint3 φ ψ := by
     apply maxm;
-    use Axioms.WeakPoint3 (.atom hDotWeak3.p) (.atom hDotWeak3.q);
+    use Axioms.WeakPoint3 (.atom (HasWeakPoint3.p H)) (.atom (HasWeakPoint3.q H));
     constructor;
-    . exact hDotWeak3.mem_WeakPoint3;
-    . use (λ b => if hDotWeak3.p = b then φ else if hDotWeak3.q = b then ψ else (.atom b));
-      simp [hDotWeak3.ne_pq];
+    . exact HasWeakPoint3.mem_WeakPoint3;
+    . use (λ b => if (HasWeakPoint3.p H) = b then φ else if (HasWeakPoint3.q H) = b then ψ else (.atom b));
+      simp [HasWeakPoint3.ne_pq];
 
 
 class HasPoint4 (H : Hilbert α) where
@@ -162,13 +162,13 @@ class HasL (H : Hilbert α) where
   p : α
   mem_L : Axioms.L (.atom p) ∈ H.axioms := by tauto;
 
-instance [hL : H.HasL] : Entailment.HasAxiomL H where
+instance [H.HasL] : Entailment.HasAxiomL H where
   L φ := by
     apply maxm;
-    use Axioms.L (.atom hL.p);
+    use Axioms.L (.atom (HasL.p H));
     constructor;
-    . exact hL.mem_L;
-    . use (λ b => if hL.p = b then φ else (.atom b));
+    . exact HasL.mem_L;
+    . use (λ b => if (HasL.p H) = b then φ else (.atom b));
       simp;
 
 
@@ -176,13 +176,13 @@ class HasGrz (H : Hilbert α) where
   p : α
   mem_Grz : Axioms.Grz (.atom p) ∈ H.axioms := by tauto;
 
-instance [hGrz : H.HasGrz] : Entailment.HasAxiomGrz H where
+instance [H.HasGrz] : Entailment.HasAxiomGrz H where
   Grz φ := by
     apply maxm;
-    use Axioms.Grz (.atom hGrz.p);
+    use Axioms.Grz (.atom (HasGrz.p H));
     constructor;
-    . exact hGrz.mem_Grz;
-    . use (λ b => if hGrz.p = b then φ else (.atom b));
+    . exact HasGrz.mem_Grz;
+    . use (λ b => if (HasGrz.p H) = b then φ else (.atom b));
       simp;
 
 
@@ -204,13 +204,13 @@ class HasTc (H : Hilbert α) where
   p : α
   mem_Tc : Axioms.Tc (.atom p) ∈ H.axioms := by tauto;
 
-instance [hTc : H.HasTc] : Entailment.HasAxiomTc H where
+instance [H.HasTc] : Entailment.HasAxiomTc H where
   Tc φ := by
     apply maxm;
-    use Axioms.Tc (.atom hTc.p);
+    use Axioms.Tc (.atom (HasTc.p H));
     constructor;
-    . exact hTc.mem_Tc;
-    . use (λ b => if hTc.p = b then φ else (.atom b));
+    . exact HasTc.mem_Tc;
+    . use (λ b => if (HasTc.p H) = b then φ else (.atom b));
       simp;
 
 
@@ -218,27 +218,27 @@ class HasVer (H : Hilbert α) where
   p : α
   mem_Ver : Axioms.Ver (.atom p) ∈ H.axioms := by tauto;
 
-instance [DecidableEq α] [hVer : H.HasVer] : Entailment.HasAxiomVer H where
+instance [H.HasVer] : Entailment.HasAxiomVer H where
   Ver φ := by
     apply maxm;
-    use Axioms.Ver (.atom hVer.p);
+    use Axioms.Ver (.atom (HasVer.p H));
     constructor;
-    . exact hVer.mem_Ver;
-    . use (λ b => if hVer.p = b then φ else (.atom b));
+    . exact HasVer.mem_Ver;
+    . use (λ b => if (HasVer.p H) = b then φ else (.atom b));
       simp;
 
 
 class HasHen (H : Hilbert α) where
   p : α
-  mem_H : Axioms.Hen (.atom p) ∈ H.axioms := by tauto;
+  mem_Hen : Axioms.Hen (.atom p) ∈ H.axioms := by tauto;
 
-instance [hH : H.HasHen] : Entailment.HasAxiomHen H where
+instance [H.HasHen] : Entailment.HasAxiomHen H where
   Hen φ := by
     apply maxm;
-    use Axioms.Hen (.atom hH.p);
+    use Axioms.Hen (.atom (HasHen.p H));
     constructor;
-    . exact hH.mem_H;
-    . use (λ b => if hH.p = b then φ else (.atom b));
+    . exact HasHen.mem_Hen;
+    . use (λ b => if (HasHen.p H) = b then φ else (.atom b));
       simp;
 
 
@@ -246,26 +246,26 @@ class HasZ (H : Hilbert α) where
   p : α
   mem_Z : Axioms.Z (.atom p) ∈ H.axioms := by tauto;
 
-instance [hZ : H.HasZ] : Entailment.HasAxiomZ H where
+instance [H.HasZ] : Entailment.HasAxiomZ H where
   Z φ := by
     apply maxm;
-    use Axioms.Z (.atom hZ.p);
+    use Axioms.Z (.atom (HasZ.p H));
     constructor;
-    . exact hZ.mem_Z;
-    . use (λ b => if hZ.p = b then φ else (.atom b));
+    . exact HasZ.mem_Z;
+    . use (λ b => if (HasZ.p H) = b then φ else (.atom b));
       simp;
 
 class HasM (H : Hilbert α) where
   p : α
   mem_M : Axioms.M (.atom p) ∈ H.axioms := by tauto;
 
-instance [hM : H.HasM] : Entailment.HasAxiomM H where
+instance [H.HasM] : Entailment.HasAxiomM H where
   M φ := by
     apply maxm;
-    use Axioms.M (.atom hM.p);
+    use Axioms.M (.atom (HasM.p H));
     constructor;
-    . exact hM.mem_M;
-    . use (λ b => if hM.p = b then φ else (.atom b));
+    . exact HasM.mem_M;
+    . use (λ b => if (HasM.p H) = b then φ else (.atom b));
       simp;
 
 class HasMk (H : Hilbert α) where
