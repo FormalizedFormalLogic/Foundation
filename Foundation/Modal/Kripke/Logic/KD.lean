@@ -48,13 +48,12 @@ open Kripke
 
 lemma KD.Kripke.serial : Logic.KD = FrameClass.IsKD.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
-theorem KD.proper_extension_of_K : Logic.K ⊂ Logic.KD := by
+instance : Logic.K ⪱ Logic.KD := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
-      rw [K.Kripke.all];
-      tauto;
+  . sorry;
+    -- exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.Kripke.all];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;

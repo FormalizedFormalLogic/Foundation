@@ -9,10 +9,9 @@ variable {L L₀ L₁ L₂ L₃ : Logic}
 
 namespace Logic
 
-protected class IsQuasiNormal (L : Logic) where
-  subset_K : Logic.K ⊆ L
-  mdp_closed {φ ψ} : φ ➝ ψ ∈ L → φ ∈ L → ψ ∈ L
-  subst_closed {φ} : φ ∈ L → ∀ s, φ⟦s⟧ ∈ L
+protected class IsQuasiNormal (L : Logic) extends Entailment.K L where
+  mdp_closed {φ ψ} : L ⊢! φ ➝ ψ → L ⊢! φ → L ⊢! ψ
+  subst_closed {φ} : L ⊢! φ → ∀ s, L ⊢! φ⟦s⟧
 
 protected class IsNormal (L : Logic) extends L.IsQuasiNormal where
   nec_closed {φ} : φ ∈ L → □φ ∈ L
@@ -140,6 +139,7 @@ namespace Hilbert
 open Entailment
 
 instance {H : Hilbert ℕ} [H.HasK] : (H.logic).IsNormal where
+  /-
   subset_K := by
     intro φ hφ;
     induction hφ using Hilbert.Deduction.rec! with
@@ -148,6 +148,7 @@ instance {H : Hilbert ℕ} [H.HasK] : (H.logic).IsNormal where
     | mdp ihφψ ihφ => exact mdp! ihφψ ihφ;
     | nec ih => exact nec! ih;
     | _ => simp;
+  -/
   mdp_closed := by
     intro φ ψ hφψ hφ;
     exact hφψ ⨀ hφ;
