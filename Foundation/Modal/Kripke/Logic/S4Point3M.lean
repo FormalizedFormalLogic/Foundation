@@ -3,6 +3,8 @@ import Foundation.Modal.Kripke.Logic.S4Point3
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -48,7 +50,6 @@ open Kripke
 
 lemma S4Point3M.Kripke.preorder_connected_mckinsey : Logic.S4Point3M = Kripke.FrameClass.S4Point3M.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
 instance : Logic.S4Point2M ⪱ Logic.S4Point3M := by
   constructor;
   . rw [S4Point2M.Kripke.preorder_confluent_mckinsey, S4Point3M.Kripke.preorder_connected_mckinsey]
@@ -90,7 +91,6 @@ instance : Logic.S4Point2M ⪱ Logic.S4Point3M := by
         . use 1; simp only [M]; refine ⟨?_, ?_, ?_, ?_⟩ <;> omega;
         . use 2; simp only [M]; refine ⟨?_, ?_, ?_, ?_⟩ <;> omega;
 
-@[simp]
 instance : Logic.S4Point3 ⪱ Logic.S4Point3M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;

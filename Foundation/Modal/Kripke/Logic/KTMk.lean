@@ -193,7 +193,6 @@ open Formula
 open Entailment
 open Kripke
 
-@[simp]
 instance : Logic.KT ⪱ Logic.KTMk := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -216,7 +215,6 @@ instance : Logic.KT ⪱ Logic.KTMk := by
           tauto;
         . omega;
 
-@[simp]
 instance : Logic.KTMk ⪱ Logic.S4 := by
   constructor;
   . apply Hilbert.weakerThan_of_dominate_axioms ?_ |>.subset;

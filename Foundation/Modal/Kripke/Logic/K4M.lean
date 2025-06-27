@@ -3,6 +3,8 @@ import Foundation.Modal.Kripke.AxiomM
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 

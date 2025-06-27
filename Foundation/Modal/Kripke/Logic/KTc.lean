@@ -3,6 +3,8 @@ import Foundation.Modal.Kripke.Logic.KB4
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -50,7 +52,6 @@ open Kripke
 
 lemma KTc.Kripke.corefl : Logic.KTc = Kripke.FrameClass.KTc.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
 instance : Logic.KB4 ⪱ Logic.KTc := by
   constructor;
   . rw [KB4.Kripke.refl_trans, KTc.Kripke.corefl];

@@ -7,6 +7,8 @@ import Foundation.Modal.Kripke.Logic.K4Point3
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -76,28 +78,19 @@ instance finite_complete : Complete Logic.S4Point3 FrameClass.finite_S4Point3 :=
 
 end FFP
 
-end Logic.S4Point3.Kripke
+lemma connected_preorder : Logic.S4Point3 = FrameClass.S4Point3.logic := eq_hilbert_logic_frameClass_logic
+lemma finite_connected_preorder : Logic.S4Point3 = FrameClass.finite_S4Point3.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma S4Point3.Kripke.connected_preorder : Logic.S4Point3 = FrameClass.S4Point3.logic := eq_hilbert_logic_frameClass_logic
-lemma S4Point3.Kripke.finite_connected_preorder : Logic.S4Point3 = FrameClass.finite_S4Point3.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
 instance : Logic.S4Point2 ⪱ Logic.S4Point3 := by
   constructor;
-  . rw [S4Point2.Kripke.confluent_preorder, S4Point3.Kripke.connected_preorder];
+  . apply Entailment.weakerThan_iff.mpr;
+    simp only [iff_provable, Set.mem_setOf_eq, S4Point2.Kripke.confluent_preorder, S4Point3.Kripke.connected_preorder];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬FrameClass.S4Point2 ⊧ φ by
-      rw [S4Point2.Kripke.confluent_preorder];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4Point3 ⊢! φ ∧ ¬FrameClass.S4Point2 ⊧ φ by simpa [S4Point2.Kripke.confluent_preorder];
     use Axioms.Point3 (.atom 0) (.atom 1);
     constructor;
     . exact axiomPoint3!;
@@ -127,23 +120,21 @@ instance : Logic.S4Point2 ⪱ Logic.S4Point3 := by
           simp [Satisfies, Semantics.Realize, M];
           constructor <;> omega;
 
-@[simp]
-lemma S4Point3.proper_extension_of_S4 : Logic.S4 ⪱ Logic.S4Point3 := by
-  trans Logic.S4Point2;
-  . simp;
-  . simp;
+instance : Logic.S4 ⪱ Logic.S4Point3 := by
+  apply Entailment.strictlyWeakerThan.trans (𝓣 := Logic.S4Point2);
+  . infer_instance;
+  . infer_instance;
 
-@[simp]
 instance : Logic.K4Point3 ⪱ Logic.S4Point3 := by
   constructor;
-  . rw [K4Point3.Kripke.trans_weakConnected, S4Point3.Kripke.connected_preorder];
+  . apply Entailment.weakerThan_iff.mpr;
+    simp only [iff_provable, Set.mem_setOf_eq, K4Point3.Kripke.trans_weakConnected, S4Point3.Kripke.connected_preorder];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.S4Point3 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by
-      rw [K4Point3.Kripke.trans_weakConnected];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4Point3 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by simpa [K4Point3.Kripke.trans_weakConnected];
     use (Axioms.Point3 (.atom 0) (.atom 1));
     constructor;
     . exact axiomPoint3!;
@@ -164,6 +155,6 @@ instance : Logic.K4Point3 ⪱ Logic.S4Point3 := by
         refine ⟨?_, ?_, ⟨1, ?_, ?_⟩⟩;
         repeat omega;
 
-end Logic
+end Logic.S4Point3.Kripke
 
 end LO.Modal

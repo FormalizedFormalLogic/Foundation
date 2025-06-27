@@ -4,6 +4,8 @@ import Foundation.Modal.Kripke.Filtration
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -56,23 +58,13 @@ instance finite_complete : Complete Logic.KTB FrameClass.finite_KTB := ⟨by
   }
 ⟩
 
-end Logic.KTB.Kripke
+lemma refl_symm : Logic.KTB = FrameClass.KTB.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KTB.Kripke.refl_symm : Logic.KTB = FrameClass.KTB.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
 instance : Logic.KT ⪱ Logic.KTB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Logic.KTB ⊢! φ ∧ .Kripke.FrameClass.KT ⊧ φ by
-      rw [KT.Kripke.refl];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KTB ⊢! φ ∧ ¬Kripke.FrameClass.KT ⊧ φ by simpa [KT.Kripke.refl];
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
@@ -86,17 +78,16 @@ instance : Logic.KT ⪱ Logic.KTB := by
         use 1;
         omega;
 
-@[simp]
 instance : Logic.KDB ⪱ Logic.KTB := by
   constructor;
-  . rw [KDB.Kripke.serial_symm, KTB.Kripke.refl_symm];
+  . apply Entailment.weakerThan_iff.mpr;
+    simp only [iff_provable, Set.mem_setOf_eq, KDB.Kripke.serial_symm, KTB.Kripke.refl_symm];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Logic.KTB ⊢! φ ∧ .Kripke.FrameClass.KDB ⊧ φ by
-      rw [KDB.Kripke.serial_symm];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KTB ⊢! φ ∧ ¬Kripke.FrameClass.KDB ⊧ φ by simpa [KDB.Kripke.serial_symm];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -114,6 +105,6 @@ instance : Logic.KDB ⪱ Logic.KTB := by
       . simp [Semantics.Realize, Satisfies];
         omega;
 
-end Logic
+end Logic.KTB.Kripke
 
 end LO.Modal

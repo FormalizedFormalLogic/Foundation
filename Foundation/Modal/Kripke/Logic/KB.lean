@@ -5,6 +5,8 @@ import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -36,25 +38,18 @@ instance canonical : Canonical Logic.KB FrameClass.KB := ⟨by
 
 instance complete : Complete Logic.KB FrameClass.KB := inferInstance
 
-end Logic.KB.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KB.Kripke.symm : Logic.KB = FrameClass.KB.logic := eq_hilbert_logic_frameClass_logic
+lemma symm : Logic.KB = FrameClass.KB.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.K ⪱ Logic.KB := by
+
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
-      rw [K.Kripke.all];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+      simpa [K.Kripke.all];
     use (Axioms.B (.atom 0));
     constructor;
-    . exact axiomB!;
+    . simp;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x = 0 ∧ y = 1⟩, λ w _ => w = 0⟩;
       use M, 0;
@@ -64,6 +59,6 @@ instance : Logic.K ⪱ Logic.KB := by
         use 1;
         trivial;
 
-end Logic
+end Logic.KB.Kripke
 
 end LO.Modal

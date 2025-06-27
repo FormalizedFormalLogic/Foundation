@@ -276,7 +276,6 @@ open Kripke
 
 lemma Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
 instance : Logic.S4M ⪱ Logic.Grz := by
   constructor;
   . rw [S4M.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
@@ -306,7 +305,6 @@ instance : Logic.S4M ⪱ Logic.Grz := by
         . contradiction;
         . contradiction;
 
-@[simp]
 instance : Logic.S4 ⪱ Logic.Grz := by
   trans Logic.S4M <;> simp;
 

@@ -5,6 +5,8 @@ import Foundation.Modal.Kripke.Logic.K4M
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -48,7 +50,6 @@ open Kripke
 
 lemma S4M.Kripke.preorder_mckinsey : Logic.S4M = FrameClass.S4M.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
 instance : Logic.S4 ⪱ Logic.S4M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -70,7 +71,6 @@ instance : Logic.S4 ⪱ Logic.S4M := by
         use 1;
         trivial;
 
-@[simp]
 instance : Logic.K4M ⪱ Logic.S4M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;

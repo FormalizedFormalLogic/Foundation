@@ -3,9 +3,10 @@ import Foundation.Modal.Kripke.AxiomPoint4
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-
 
 namespace Kripke
 
@@ -38,27 +39,18 @@ instance canonical : Canonical (Logic.S4Point4) Kripke.FrameClass.S4Point4 := �
 
 instance complete : Complete (Logic.S4Point4) Kripke.FrameClass.S4Point4 := inferInstance
 
-end Logic.S4Point4.Kripke
+lemma preorder_sobocinski : Logic.S4Point4 = Kripke.FrameClass.S4Point4.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma S4Point4.Kripke.preorder_sobocinski : Logic.S4Point4 = Kripke.FrameClass.S4Point4.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
 instance : Logic.S4Point3 ⪱ Logic.S4Point4 := by
   constructor;
-  . rw [S4Point3.Kripke.connected_preorder, S4Point4.Kripke.preorder_sobocinski];
+  . apply Entailment.weakerThan_iff.mpr;
+    simp only [iff_provable, Set.mem_setOf_eq, S4Point3.Kripke.connected_preorder, S4Point4.Kripke.preorder_sobocinski];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.S4Point4 ⊢! φ ∧ ¬FrameClass.S4Point3 ⊧ φ by
-      rw [S4Point3.Kripke.connected_preorder];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4Point4 ⊢! φ ∧ ¬FrameClass.S4Point3 ⊧ φ by simpa [S4Point3.Kripke.connected_preorder];
     use Axioms.Point4 (.atom 0);
     constructor;
     . simp;
@@ -75,6 +67,6 @@ instance : Logic.S4Point3 ⪱ Logic.S4Point4 := by
         use 2;
         omega;
 
-end Logic
+end Logic.S4Point4.Kripke
 
 end LO.Modal

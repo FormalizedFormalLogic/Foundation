@@ -9,6 +9,8 @@ open Formula
 open Formula.Kripke
 open Entailment
 open Entailment.Context
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 

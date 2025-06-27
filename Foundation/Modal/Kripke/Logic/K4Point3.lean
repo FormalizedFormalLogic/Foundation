@@ -6,6 +6,8 @@ import Foundation.Modal.Kripke.Logic.K4
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -35,22 +37,13 @@ instance canonical : Canonical Logic.K4Point3 FrameClass.IsK4Point3 :=  ⟨by co
 
 instance complete : Complete Logic.K4Point3 FrameClass.IsK4Point3 := inferInstance
 
-end Logic.K4Point3.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma K4Point3.Kripke.trans_weakConnected : Logic.K4Point3 = FrameClass.IsK4Point3.logic := eq_hilbert_logic_frameClass_logic
+lemma trans_weakConnected : Logic.K4Point3 = FrameClass.IsK4Point3.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.K4 ⪱ Logic.K4Point3 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by
-      rw [K4.Kripke.trans];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.K4Point3 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by simpa [K4.Kripke.trans];
     use (Axioms.WeakPoint3 (.atom 0) (.atom 1));
     constructor;
     . exact axiomWeakPoint3!;
@@ -75,6 +68,6 @@ instance : Logic.K4 ⪱ Logic.K4Point3 := by
         . trivial;
         . trivial;
 
-end Logic
+end Logic.K4Point3.Kripke
 
 end LO.Modal

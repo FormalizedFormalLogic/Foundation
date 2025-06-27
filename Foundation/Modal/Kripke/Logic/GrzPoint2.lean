@@ -303,7 +303,6 @@ open Kripke
 
 lemma GrzPoint2.Kripke.finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_GrzPoint2.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
 instance : Logic.Grz ⪱ Logic.GrzPoint2 := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -342,7 +341,6 @@ instance : Logic.Grz ⪱ Logic.GrzPoint2 := by
             push_neg;
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
 
-@[simp]
 instance : Logic.S4Point2M ⪱ Logic.GrzPoint2 := by
   constructor;
   . rw [S4Point2M.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];

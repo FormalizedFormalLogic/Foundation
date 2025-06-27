@@ -8,9 +8,10 @@ import Foundation.Modal.Kripke.Rooted
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-
 
 namespace Kripke
 
@@ -89,24 +90,14 @@ instance finite_complete : Complete Logic.S4Point2 FrameClass.finite_S4Point2 :=
 
 end FFP
 
-end Logic.S4Point2.Kripke
+protected lemma confluent_preorder : Logic.S4Point2 = FrameClass.S4Point2.logic := eq_hilbert_logic_frameClass_logic
+protected lemma finite_confluent_preorder : Logic.S4Point2 = FrameClass.finite_S4Point2.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma S4Point2.Kripke.confluent_preorder : Logic.S4Point2 = FrameClass.S4Point2.logic := eq_hilbert_logic_frameClass_logic
-lemma S4Point2.Kripke.finite_confluent_preorder : Logic.S4Point2 = FrameClass.finite_S4Point2.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
 instance : Logic.S4 ⪱ Logic.S4Point2 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by
-      rw [S4.Kripke.preorder];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4Point2 ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by simpa [S4.Kripke.preorder];
     use Axioms.Point2 (.atom 0)
     constructor;
     . exact axiomPoint2!;
@@ -129,17 +120,16 @@ instance : Logic.S4 ⪱ Logic.S4Point2 := by
           . omega;
           . omega;
 
-@[simp]
 instance : Logic.K4Point2 ⪱ Logic.S4Point2 := by
   constructor;
-  . rw [K4Point2.Kripke.trans_weakConfluent, S4Point2.Kripke.confluent_preorder];
+  . apply Entailment.weakerThan_iff.mpr;
+    simp only [iff_provable, Set.mem_setOf_eq, K4Point2.Kripke.K4Point2, S4Point2.Kripke.confluent_preorder];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Logic.S4Point2 ⊢! φ ∧ .Kripke.FrameClass.K4Point2 ⊧ φ by
-      rw [K4Point2.Kripke.trans_weakConfluent];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.K4Point2 ⊧ φ by simpa [K4Point2.Kripke.K4Point2];
     use (Axioms.Point2 (.atom 0));
     constructor;
     . exact axiomPoint2!;
@@ -160,6 +150,6 @@ instance : Logic.K4Point2 ⪱ Logic.S4Point2 := by
         . omega;
         . use 1; omega;
 
-end Logic
+end Logic.S4Point2.Kripke
 
 end LO.Modal

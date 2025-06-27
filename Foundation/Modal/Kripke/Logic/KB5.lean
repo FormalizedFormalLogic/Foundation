@@ -4,6 +4,8 @@ import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 

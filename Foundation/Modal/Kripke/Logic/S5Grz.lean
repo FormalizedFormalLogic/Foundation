@@ -12,7 +12,6 @@ open Kripke
 lemma S5Grz.Kripke.finite_equality : Logic.S5Grz = Kripke.FrameClass.finite_Triv.logic := by
   rw [eq_S5Grz_Triv, Triv.Kripke.finite_equality];
 
-@[simp]
 instance : Logic.S5 ⪱ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -31,7 +30,6 @@ instance : Logic.S5 ⪱ Logic.S5Grz := by
       . simp [Semantics.Realize, Satisfies];
         tauto;
 
-@[simp]
 instance : Logic.Grz ⪱ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -57,7 +55,6 @@ instance : Logic.Grz ⪱ Logic.S5Grz := by
         . use 1;
           constructor <;> omega;
 
-@[simp]
 instance : Logic.S5 ⪱ Logic.Triv := by simp [←eq_S5Grz_Triv];
 
 @[simp]

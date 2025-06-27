@@ -5,9 +5,10 @@ import Foundation.Modal.Kripke.Logic.KT
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-
 
 namespace Kripke
 
@@ -52,23 +53,13 @@ instance finiteComplete : Complete Logic.S4 FrameClass.finite_S4 := ⟨by
   }
 ⟩
 
-end Logic.S4.Kripke
+lemma preorder : Logic.S4 = FrameClass.S4.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma S4.Kripke.preorder : Logic.S4 = FrameClass.S4.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
 instance : Logic.KT ⪱ Logic.S4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomT!]) |>.subset;
-  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬FrameClass.KT ⊧ φ by
-      rw [KT.Kripke.refl];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4 ⊢! φ ∧ ¬FrameClass.KT ⊧ φ by simpa [KT.Kripke.refl];
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
@@ -94,13 +85,12 @@ instance : Logic.KT ⪱ Logic.S4 := by
           . use 2;
             refine ⟨by omega;, by trivial, by trivial⟩;
 
-@[simp]
 instance : Logic.KD4 ⪱ Logic.S4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬FrameClass.KD4 ⊧ φ by
-      rw [KD4.Kripke.serial_trans];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4 ⊢! φ ∧ ¬FrameClass.KD4 ⊧ φ by simpa [KD4.Kripke.serial_trans];
     use Axioms.T (.atom 0);
     constructor;
     . exact axiomT!;
@@ -113,9 +103,6 @@ instance : Logic.KD4 ⪱ Logic.S4 := by
         };
       . simp [Semantics.Realize, Satisfies];
 
-@[simp]
-lemma S4.proper_extension_of_KD : Logic.KD ⪱ Logic.S4 := by trans Logic.KT <;> simp;
-
-end Logic
+end Logic.S4.Kripke
 
 end LO.Modal

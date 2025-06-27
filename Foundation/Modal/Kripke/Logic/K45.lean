@@ -3,9 +3,10 @@ import Foundation.Modal.Kripke.Logic.K5
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-
 
 namespace Kripke
 
@@ -35,26 +36,16 @@ instance canonical : Canonical Logic.K45 FrameClass.IsK45 := ⟨by constructor�
 
 instance complete : Complete Logic.K45 FrameClass.IsK45 := inferInstance
 
-end Logic.K45.Kripke
-
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma K45.Kripke.trans_eucl : Logic.K45 = FrameClass.IsK45.logic := eq_hilbert_logic_frameClass_logic
+lemma trans_eucl : Logic.K45 = FrameClass.IsK45.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.K5 ⪱ Logic.K45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Logic.K45 ⊢! φ ∧ .Kripke.FrameClass.K5 ⊧ φ by
-      rw [K5.Kripke.eucl];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.K45 ⊢! φ ∧ ¬Kripke.FrameClass.K5 ⊧ φ by simpa [K5.Kripke.eucl];
     use (Axioms.Four (.atom 0));
     constructor;
-    . exact axiomFour!;
+    . simp;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
@@ -69,14 +60,14 @@ instance : Logic.K5 ⪱ Logic.K45 := by
 
 instance : Logic.K4Point3 ⪱ Logic.K45 := by
   constructor;
-  . rw [K4Point3.Kripke.trans_weakConnected, K45.Kripke.trans_eucl];
+  . apply Entailment.weakerThan_iff.mpr;
+    simp only [iff_provable, Set.mem_setOf_eq, K4Point3.Kripke.trans_weakConnected, K45.Kripke.trans_eucl];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.K45 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by
-      rw [K4Point3.Kripke.trans_weakConnected];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.K45 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by simpa [K4Point3.Kripke.trans_weakConnected];
     use (Axioms.Five (.atom 0));
     constructor;
     . simp;
@@ -99,6 +90,6 @@ instance : Logic.K4Point3 ⪱ Logic.K45 := by
         . use 2;
           omega;
 
-end Logic
+end Logic.K45.Kripke
 
 end LO.Modal

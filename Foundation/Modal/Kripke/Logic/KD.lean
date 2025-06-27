@@ -5,6 +5,8 @@ import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 

@@ -47,7 +47,6 @@ open Kripke
 
 lemma S4Point2M.Kripke.preorder_confluent_mckinsey : Logic.S4Point2M = FrameClass.preorder_confluent_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
 instance : Logic.S4M ⪱ Logic.S4Point2M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -82,7 +81,6 @@ instance : Logic.S4M ⪱ Logic.S4Point2M := by
         . use 2;
           omega;
 
-@[simp]
 instance : Logic.S4Point2 ⪱ Logic.S4Point2M := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;

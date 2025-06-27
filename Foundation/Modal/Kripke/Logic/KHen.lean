@@ -380,7 +380,6 @@ open Formula
 open Entailment
 open Kripke
 
-@[simp]
 instance : Logic.K ⪱ Logic.KHen := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -395,7 +394,6 @@ instance : Logic.K ⪱ Logic.KHen := by
       simp [Satisfies, Semantics.Realize];
       constructor <;> tauto;
 
-@[simp]
 instance : Logic.KHen ⪱ Logic.GL := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;

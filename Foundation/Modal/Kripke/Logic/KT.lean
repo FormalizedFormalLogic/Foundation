@@ -44,7 +44,6 @@ instance complete : Complete Logic.KT FrameClass.KT := inferInstance
 
 lemma refl : Logic.KT = FrameClass.KT.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
 instance : Logic.KD ⪱ Logic.KT := by
   constructor;
   . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;

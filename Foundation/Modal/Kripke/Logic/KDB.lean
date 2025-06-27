@@ -6,6 +6,8 @@ import Foundation.Modal.Kripke.Logic.KD
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -35,23 +37,13 @@ instance canonical : Canonical (Logic.KDB) Kripke.FrameClass.KDB := ⟨by constr
 
 instance complete : Complete (Logic.KDB) Kripke.FrameClass.KDB := inferInstance
 
-end Logic.KDB.Kripke
+lemma serial_symm : Logic.KDB = Kripke.FrameClass.KDB.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KDB.Kripke.serial_symm : Logic.KDB = Kripke.FrameClass.KDB.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
 instance : Logic.KD ⪱ Logic.KDB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
-      rw [KD.Kripke.serial];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KDB ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by simpa [KD.Kripke.serial];
     use Axioms.B (.atom 0);
     constructor;
     . exact axiomB!;
@@ -64,13 +56,11 @@ instance : Logic.KD ⪱ Logic.KDB := by
         use 1;
         constructor <;> omega;
 
-@[simp]
 instance : Logic.KB ⪱ Logic.KDB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.KB ⊧ φ by
-      rw [KB.Kripke.symm];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KDB ⊢! φ ∧ ¬FrameClass.KB ⊧ φ by simpa [KB.Kripke.symm];
     use Axioms.D (.atom 0);
     constructor;
     . exact axiomD!;
@@ -80,6 +70,6 @@ instance : Logic.KB ⪱ Logic.KDB := by
       . refine { symm := by simp; };
       . simp [Semantics.Realize, Satisfies];
 
-end Logic
+end Logic.KDB.Kripke
 
 end LO.Modal

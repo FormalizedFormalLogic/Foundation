@@ -7,6 +7,8 @@ import Foundation.Modal.Kripke.Logic.K45
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -37,22 +39,13 @@ instance canonical : Canonical (Logic.KD45) Kripke.FrameClass.serial_trans_eucl 
 
 instance complete : Complete (Logic.KD45) Kripke.FrameClass.serial_trans_eucl := inferInstance
 
-end Logic.KD45.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KD45.Kripke.serial_trans_eucl : Logic.KD45 = FrameClass.serial_trans_eucl.logic := eq_hilbert_logic_frameClass_logic
+lemma serial_trans_eucl : Logic.KD45 = FrameClass.serial_trans_eucl.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.KD4 ⪱ Logic.KD45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.KD4 ⊧ φ by
-      rw [KD4.Kripke.serial_trans];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KD45 ⊢! φ ∧ ¬FrameClass.KD4 ⊧ φ by simpa [KD4.Kripke.serial_trans];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
@@ -74,10 +67,9 @@ instance : Logic.KD4 ⪱ Logic.KD45 := by
 
 instance : Logic.KD5 ⪱ Logic.KD45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Logic.KD45 ⊢! φ ∧ .Kripke.FrameClass.KD5 ⊧ φ by
-      rw [KD5.Kripke.serial_eucl];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KD45 ⊢! φ ∧ ¬Kripke.FrameClass.KD5 ⊧ φ by simpa [KD5.Kripke.serial_eucl];
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
@@ -112,10 +104,9 @@ instance : Logic.KD5 ⪱ Logic.KD45 := by
 
 instance : Logic.K45 ⪱ Logic.KD45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.IsK45 ⊧ φ by
-      rw [K45.Kripke.trans_eucl];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KD45 ⊢! φ ∧ ¬FrameClass.IsK45 ⊧ φ by simpa [K45.Kripke.trans_eucl];
     use Axioms.D (.atom 0);
     constructor;
     . exact axiomD!;
@@ -126,7 +117,7 @@ instance : Logic.K45 ⪱ Logic.KD45 := by
         refine { trans := by simp, reucl := by simp [RightEuclidean] }
       . simp [Semantics.Realize, Satisfies];
 
-end Logic
+end Logic.KD45.Kripke
 
 
 end LO.Modal

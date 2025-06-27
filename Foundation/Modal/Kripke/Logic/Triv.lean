@@ -95,7 +95,6 @@ open Kripke
 lemma Triv.Kripke.equality : Logic.Triv = FrameClass.Triv.logic := eq_hilbert_logic_frameClass_logic
 lemma Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_Triv.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
 instance : Logic.KTc ⪱ Logic.Triv := by
   constructor;
   . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
@@ -111,7 +110,6 @@ instance : Logic.KTc ⪱ Logic.Triv := by
       . refine ⟨by tauto⟩;
       . simp [Satisfies, Semantics.Realize];
 
-@[simp]
 instance : Logic.GrzPoint3 ⪱ Logic.Triv := by
   constructor;
   . rw [GrzPoint3.Kripke.finite_connected_partial_order, Triv.Kripke.finite_equality];
@@ -139,7 +137,6 @@ instance : Logic.GrzPoint3 ⪱ Logic.Triv := by
           . omega;
           . trivial;
 
-@[simp]
 instance : Logic.S4Point4M ⪱ Logic.Triv := by
   constructor;
   . rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
@@ -181,7 +178,6 @@ instance : Logic.S4Point4M ⪱ Logic.Triv := by
           . omega;
           . trivial;
 
-@[simp]
 instance : Logic.Triv ⪱ Logic.Univ := by constructor <;> simp;
 
 end Logic

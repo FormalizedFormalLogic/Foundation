@@ -129,7 +129,6 @@ instance : Logic.GLPoint3 ⪱ Logic.Ver := by
         use 1;
         tauto;
 
-@[simp]
 instance : Logic.Ver ⪱ Logic.Univ := by  constructor <;> simp;
 
 end Logic

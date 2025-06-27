@@ -54,14 +54,15 @@ lemma KB4.Kripke.refl_trans : Logic.KB4 = FrameClass.IsKB4.logic := eq_hilbert_l
 
 instance : Logic.K45 ⪱ Logic.KB4 := by
   constructor;
-  . rw [K45.Kripke.trans_eucl, KB4.Kripke.refl_trans];
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.IsK45 ⊧ φ → FrameClass.IsKB4 ⊧ φ by
+      simpa [K45.Kripke.trans_eucl, KB4.Kripke.refl_trans];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.IsK45 ⊧ φ by
-      rw [K45.Kripke.trans_eucl];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KB4 ⊢! φ ∧ ¬FrameClass.IsK45 ⊧ φ by simpa [K45.Kripke.trans_eucl];
     use Axioms.B (.atom 0);
     constructor;
     . exact axiomB!;
@@ -74,10 +75,9 @@ instance : Logic.K45 ⪱ Logic.KB4 := by
 
 instance : Logic.KB ⪱ Logic.KB4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.KB ⊧ φ by
-      rw [KB.Kripke.symm];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KB4 ⊢! φ ∧ ¬FrameClass.KB ⊧ φ by simpa [KB.Kripke.symm];
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
