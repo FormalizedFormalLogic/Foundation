@@ -205,16 +205,11 @@ instance : Logic.S4Point4 ⪱ Logic.S5 := by
         . use 1;
           constructor <;> omega;
 
--- TODO: need golf
-instance : Logic.S4 ⪱ Logic.S5 := by
-  apply Entailment.strictlyWeakerThan.trans (𝓣 := Logic.S4Point2);
-  . infer_instance;
-  . apply Entailment.strictlyWeakerThan.trans (𝓣 := Logic.S4Point3);
-    . infer_instance;
-    . apply Entailment.strictlyWeakerThan.trans (𝓣 := Logic.S4Point4);
-      . infer_instance;
-      . infer_instance;
-@[deprecated] instance : Logic.S4 ⪯ Logic.S5 := Entailment.StrictlyWeakerThan.weakerThan
+instance : Logic.S4 ⪱ Logic.S5 := calc
+  Logic.S4 ⪱ Logic.S4Point2 := by infer_instance
+  _        ⪱ Logic.S4Point3 := by infer_instance
+  _        ⪱ Logic.S4Point4 := by infer_instance
+  _        ⪱ Logic.S5       := by infer_instance
 
 end Logic
 

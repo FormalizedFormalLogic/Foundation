@@ -290,8 +290,9 @@ instance : Logic.S4M ⪱ Logic.Grz := by
         . contradiction;
         . contradiction;
 
-instance : Logic.S4 ⪱ Logic.Grz := by apply strictlyWeakerThan.trans (𝓣 := Logic.S4M) <;> infer_instance;
-@[deprecated] instance : Logic.S4 ⪯ Logic.Grz := StrictlyWeakerThan.weakerThan
+instance : Logic.S4 ⪱ Logic.Grz := calc
+  Logic.S4 ⪱ Logic.S4M := by infer_instance
+  _        ⪱ Logic.Grz := by infer_instance
 
 end Logic.Grz.Kripke
 

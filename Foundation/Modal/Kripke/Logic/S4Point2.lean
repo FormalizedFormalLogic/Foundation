@@ -119,7 +119,6 @@ instance : Logic.S4 ⪱ Logic.S4Point2 := by
           constructor;
           . omega;
           . omega;
-@[deprecated] instance : Logic.S4 ⪯ Logic.S4Point2 := Entailment.StrictlyWeakerThan.weakerThan
 
 instance : Logic.K4Point2 ⪱ Logic.S4Point2 := by
   constructor;

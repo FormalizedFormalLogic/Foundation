@@ -161,7 +161,6 @@ instance : Logic.S4Point3 ⪱ Logic.GrzPoint3 := by
             simp;
         };
       . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
-@[deprecated] instance : Logic.S4Point3 ⪯ Logic.GrzPoint3 := Entailment.StrictlyWeakerThan.weakerThan
 
 end Logic
 

@@ -26,7 +26,6 @@ instance : Logic.S5 ⪱ Logic.S5Grz := by
       . exact { universal := by tauto; };
       . simp [Semantics.Realize, Satisfies];
         tauto;
-@[deprecated] instance : Logic.S5 ⪯ Logic.S5Grz := Entailment.StrictlyWeakerThan.weakerThan
 
 instance : Logic.S5 ⪱ Logic.Triv := by
   suffices Logic.S5 ⪱ Logic.S5Grz by simpa;
@@ -57,8 +56,8 @@ instance : Logic.Grz ⪱ Logic.S5Grz := by
         . use 1;
           constructor <;> omega;
 
-instance : Logic.S4 ⪱ Logic.Triv := by
-  apply Entailment.strictlyWeakerThan.trans (𝓣 := Logic.S5) <;> infer_instance
-@[deprecated] instance : Logic.S4 ⪯ Logic.Triv := Entailment.StrictlyWeakerThan.weakerThan
+instance : Logic.S4 ⪱ Logic.Triv := calc
+  Logic.S4 ⪱ Logic.S5   := by infer_instance
+  _        ⪱ Logic.Triv := by infer_instance
 
 end LO.Modal.Logic

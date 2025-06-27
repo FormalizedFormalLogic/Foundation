@@ -497,6 +497,39 @@ lemma not_dia_bot : 𝓢 ⊢! ∼◇^[n]⊥ := by
 -- def distributeDiaAnd' (h : 𝓢 ⊢ ◇(φ ⋏ ψ)) : 𝓢 ⊢ ◇φ ⋏ ◇ψ := distributeDiaAnd ⨀ h
 lemma distribute_dia_and'! (h : 𝓢 ⊢! ◇(φ ⋏ ψ)) : 𝓢 ⊢! ◇φ ⋏ ◇ψ := distribute_dia_and! ⨀ h
 
+-- TODO: move
+lemma neg_congruence! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ∼φ ⭤ ∼ψ := by
+  apply E!_intro;
+  . apply contra! $ C_of_E_mpr! h;
+  . apply contra! $ C_of_E_mp! h;
+
+
+omit [DecidableEq F] in
+lemma box_regularity! (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! □φ ➝ □ψ := by
+  apply ?_ ⨀ nec! h;
+  simp;
+
+
+-- TODO: move
+omit [DecidableEq F] in
+lemma box_congruence! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □φ ⭤ □ψ := by
+  apply E!_intro
+  . apply box_regularity!; exact C_of_E_mp! h;
+  . apply box_regularity!; exact C_of_E_mpr! h;
+
+-- TODO: move
+omit [DecidableEq F] in
+lemma E!_replace (h₁ : 𝓢 ⊢! φ₁ ⭤ ψ₁) (h₂ : 𝓢 ⊢! φ₂ ⭤ ψ₂) (h₃ : 𝓢 ⊢! φ₁ ⭤ φ₂) : 𝓢 ⊢! ψ₁ ⭤ ψ₂ := by
+  apply E!_intro;
+  . apply C!_replace (C_of_E_mpr! h₁) (C_of_E_mp! h₂) (C_of_E_mp! h₃);
+  . apply C!_replace (C_of_E_mpr! h₂) (C_of_E_mp! h₁) (C_of_E_mpr! h₃);
+
+lemma dia_congruence! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ◇φ ⭤ ◇ψ := by
+  apply E!_replace (E!_symm $ dia_duality!) (E!_symm $ dia_duality!);
+  apply neg_congruence!;
+  apply box_congruence!;
+  apply neg_congruence!;
+  exact h;
 
 section List
 
