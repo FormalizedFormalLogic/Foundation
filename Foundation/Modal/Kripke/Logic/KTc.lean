@@ -42,26 +42,19 @@ instance canonical : Canonical (Logic.KTc) Kripke.FrameClass.KTc := ⟨by
 
 instance complete : Complete (Logic.KTc) Kripke.FrameClass.KTc := inferInstance
 
-end Logic.KTc.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KTc.Kripke.corefl : Logic.KTc = Kripke.FrameClass.KTc.logic := eq_hilbert_logic_frameClass_logic
+lemma corefl : Logic.KTc = Kripke.FrameClass.KTc.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.KB4 ⪱ Logic.KTc := by
   constructor;
-  . rw [KB4.Kripke.refl_trans, KTc.Kripke.corefl];
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.IsKB4 ⊧ φ → FrameClass.KTc ⊧ φ by
+      simpa [KB4.Kripke.refl_trans, KTc.Kripke.corefl];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.KTc ⊢! φ ∧ ¬FrameClass.IsKB4 ⊧ φ by
-      rw [KB4.Kripke.refl_trans];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KTc ⊢! φ ∧ ¬FrameClass.IsKB4 ⊧ φ by simpa [KB4.Kripke.refl_trans];
     use (Axioms.Tc (.atom 0));
     constructor;
     . exact axiomTc!;
@@ -79,6 +72,6 @@ instance : Logic.KB4 ⪱ Logic.KTc := by
         use 1;
         aesop;
 
-end Logic
+end Logic.KTc.Kripke
 
 end LO.Modal

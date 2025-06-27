@@ -40,26 +40,20 @@ instance canonical : Canonical (Logic.S4Point3M) Kripke.FrameClass.S4Point3M := 
 
 instance complete : Complete (Logic.S4Point3M) Kripke.FrameClass.S4Point3M := inferInstance
 
-end Logic.S4Point3M.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma S4Point3M.Kripke.preorder_connected_mckinsey : Logic.S4Point3M = Kripke.FrameClass.S4Point3M.logic := eq_hilbert_logic_frameClass_logic
+lemma preorder_connected_mckinsey : Logic.S4Point3M = Kripke.FrameClass.S4Point3M.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.S4Point2M ⪱ Logic.S4Point3M := by
   constructor;
-  . rw [S4Point2M.Kripke.preorder_confluent_mckinsey, S4Point3M.Kripke.preorder_connected_mckinsey]
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.preorder_confluent_mckinsey ⊧ φ → FrameClass.S4Point3M ⊧ φ by
+      simpa [S4Point2M.Kripke.preorder_confluent_mckinsey, S4Point3M.Kripke.preorder_connected_mckinsey];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Logic.S4Point3M ⊢! φ ∧ .Kripke.FrameClass.preorder_confluent_mckinsey ⊧ φ by
-      rw [S4Point2M.Kripke.preorder_confluent_mckinsey];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4Point3M ⊢! φ ∧ ¬Kripke.FrameClass.preorder_confluent_mckinsey ⊧ φ by
+      simpa [S4Point2M.Kripke.preorder_confluent_mckinsey];
     use (Axioms.Point3 (.atom 0) (.atom 1));
     constructor;
     . simp;
@@ -93,10 +87,9 @@ instance : Logic.S4Point2M ⪱ Logic.S4Point3M := by
 
 instance : Logic.S4Point3 ⪱ Logic.S4Point3M := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point3M ⊢! φ ∧ ¬FrameClass.S4Point3 ⊧ φ by
-      rw [S4Point3.Kripke.connected_preorder];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4Point3M ⊢! φ ∧ ¬FrameClass.S4Point3 ⊧ φ by simpa [S4Point3.Kripke.connected_preorder];
     use (Axioms.M (.atom 0))
     constructor;
     . simp;
@@ -113,6 +106,6 @@ instance : Logic.S4Point3 ⪱ Logic.S4Point3M := by
         use 1;
         trivial;
 
-end Logic
+end Logic.S4Point3M.Kripke
 
 end LO.Modal

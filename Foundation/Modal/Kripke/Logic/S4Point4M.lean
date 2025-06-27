@@ -41,26 +41,19 @@ instance canonical : Canonical Logic.S4Point4M FrameClass.S4Point4M := ⟨by con
 
 instance complete : Complete Logic.S4Point4M FrameClass.S4Point4M := inferInstance
 
-end Logic.S4Point4M.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma S4Point4M.Kripke.preorder_sobocinski_mckinsey : Logic.S4Point4M = FrameClass.S4Point4M.logic := eq_hilbert_logic_frameClass_logic
+lemma preorder_sobocinski_mckinsey : Logic.S4Point4M = FrameClass.S4Point4M.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.S4Point3M ⪱ Logic.S4Point4M := by
   constructor;
-  . rw [S4Point3M.Kripke.preorder_connected_mckinsey, S4Point4M.Kripke.preorder_sobocinski_mckinsey]
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.S4Point3M ⊧ φ → FrameClass.S4Point4M ⊧ φ by
+      simpa [S4Point3M.Kripke.preorder_connected_mckinsey, S4Point4M.Kripke.preorder_sobocinski_mckinsey];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Logic.S4Point4M ⊢! φ ∧ .Kripke.FrameClass.S4Point3M ⊧ φ by
-      rw [S4Point3M.Kripke.preorder_connected_mckinsey];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.S4Point4M ⊢! φ ∧ ¬Kripke.FrameClass.S4Point3M ⊧ φ by simpa [S4Point3M.Kripke.preorder_connected_mckinsey];
     use (Axioms.Point4 (.atom 0));
     constructor;
     . simp;
@@ -84,14 +77,13 @@ instance : Logic.S4Point3M ⪱ Logic.S4Point4M := by
 
 instance : Logic.S4Point4 ⪱ Logic.S4Point4M := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Logic.S4Point4M ⊢! φ ∧ .Kripke.FrameClass.S4Point4 ⊧ φ by
-      rw [S4Point4.Kripke.preorder_sobocinski];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.M (.atom 0))
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . suffices ¬FrameClass.S4Point4 ⊧ Axioms.M (atom 0) by simpa [S4Point4.Kripke.preorder_sobocinski];
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -104,6 +96,6 @@ instance : Logic.S4Point4 ⪱ Logic.S4Point4M := by
         use 1;
         trivial;
 
-end Logic
+end Logic.S4Point4M.Kripke
 
 end LO.Modal

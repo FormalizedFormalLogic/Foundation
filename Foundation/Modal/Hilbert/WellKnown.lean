@@ -501,6 +501,7 @@ instance : (Hilbert.S4Point3M).HasT where p := 0
 instance : (Hilbert.S4Point3M).HasFour where p := 0
 instance : (Hilbert.S4Point3M).HasM where p := 0
 instance : (Hilbert.S4Point3M).HasPoint3 where p := 0; q := 1;
+instance : Entailment.S4Point3M (Logic.S4Point3M) where
 instance : Logic.K4M ⪯ Logic.S4Point3M := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
@@ -511,6 +512,7 @@ instance : (Hilbert.S4Point4M).HasT where p := 0
 instance : (Hilbert.S4Point4M).HasFour where p := 0
 instance : (Hilbert.S4Point4M).HasM where p := 0
 instance : (Hilbert.S4Point4M).HasPoint4 where p := 0
+instance : Entailment.S4Point4M (Logic.S4Point4M) where
 instance : Logic.K4M ⪯ Logic.S4Point4M := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 

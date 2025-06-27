@@ -46,7 +46,7 @@ section
 open Formula.Kripke
 open Entailment
 
-lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Hilbert.KTMk.logic)
+lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Logic.KTMk)
   : Finite M → ∀ φ : Formula ℕ, M ⊧ Axioms.Four φ := by
   contrapose!;
   rintro ⟨φ, hφ⟩;
@@ -91,7 +91,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Hilbe
         match c with
         | 0 => contradiction;
         | n + 1 =>
-          suffices Hilbert.KTMk ⊢! □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
+          suffices Logic.KTMk ⊢! □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
             simp_all [
               show (i + (n + 1)) = (i + n) + 1 by omega,
               show (i + 2) + n = (i + n) + 2 by omega
@@ -107,6 +107,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Hilbe
       . intro h;
         have : l[m] ⊧ □^[(m + 1)]φ ⋏ ∼□^[(m + 2)]φ ➝ ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := by
           apply hM.realize;
+          apply iff_provable.mp;
           simp;
         replace : l[m] ⊧ ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := this h;
         obtain ⟨y, hy₁, hy₂⟩ := Satisfies.dia_def.mp this;
@@ -159,7 +160,7 @@ lemma exists_not_validate_axiomFour : ∃ φ : Formula ℕ, ¬recessionFrame ⊧
 
 end recessionFrame
 
-lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Hilbert.KTMk ⊬ Axioms.Four φ := by
+lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Logic.KTMk ⊬ Axioms.Four φ := by
   obtain ⟨φ, hφ⟩ := recessionFrame.exists_not_validate_axiomFour;
   use! φ;
   apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.KTMk);
@@ -170,7 +171,7 @@ lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Hilbert.KTMk ⊬ Axi
     infer_instance;
   . assumption;
 
-lemma no_finite_model_property : ¬(∀ φ, Logic.KTMk ⊬ φ → ∃ M :.Kripke.Model, Finite M ∧ M ⊧* Hilbert.KTMk.logic ∧ ¬M ⊧ φ)  := by
+lemma no_finite_model_property : ¬(∀ φ, Logic.KTMk ⊬ φ → ∃ M : Kripke.Model, Finite M ∧ M ⊧* Hilbert.KTMk.logic ∧ ¬M ⊧ φ)  := by
   by_contra! hC;
   obtain ⟨φ, hφ⟩ := exists_not_provable_axiomFour;
   obtain ⟨M, hM₁, hM₂, hM₃⟩ := @hC (Axioms.Four φ) hφ;
@@ -178,7 +179,7 @@ lemma no_finite_model_property : ¬(∀ φ, Logic.KTMk ⊬ φ → ∃ M :.Kripke
   . assumption;
   . assumption;
 
-example : ∃ φ, Logic.KTMk ⊬ φ ∧ (∀ M :.Kripke.Model, Finite M → M ⊧* Hilbert.KTMk.logic → M ⊧ φ) := by
+example : ∃ φ, Logic.KTMk ⊬ φ ∧ (∀ M : Kripke.Model, Finite M → M ⊧* Hilbert.KTMk.logic → M ⊧ φ) := by
   simpa using no_finite_model_property;
 
 end
@@ -195,10 +196,9 @@ open Kripke
 
 instance : Logic.KT ⪱ Logic.KTMk := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KTMk ⊢! φ ∧ ¬FrameClass.KT ⊧ φ by
-      rw [KT.Kripke.refl];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KTMk ⊢! φ ∧ ¬FrameClass.KT ⊧ φ by simpa [KT.Kripke.refl];
     use (Axioms.Mk (.atom 0) (.atom 1));
     constructor;
     . exact axiomMk!;
@@ -217,7 +217,7 @@ instance : Logic.KT ⪱ Logic.KTMk := by
 
 instance : Logic.KTMk ⪱ Logic.S4 := by
   constructor;
-  . apply Hilbert.weakerThan_of_dominate_axioms ?_ |>.subset;
+  . apply Hilbert.weakerThan_of_provable_axioms;
     intro φ hφ;
     rcases (by simpa using hφ) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, _, rfl⟩);
     . simp;
@@ -240,7 +240,7 @@ instance : Logic.KTMk ⪱ Logic.S4 := by
           constructor;
           . apply F.refl;
           . assumption;
-  . suffices ∃ φ, φ ∈ Logic.S4 ∧ φ ∉ Logic.KTMk by tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
     obtain ⟨φ, hφ⟩ := Logic.KTMk.Kripke.exists_not_provable_axiomFour;
     use Axioms.Four φ;
     constructor;

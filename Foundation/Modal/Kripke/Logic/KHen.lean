@@ -345,11 +345,11 @@ lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ ⭤ φ) ➝ �
 end Kripke
 
 
-namespace Hilbert.KHen
+namespace Logic.KHen
 
-lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢! φ → cresswellModel ⊧ φ := by
+lemma Kripke.valid_cresswellModel_of_provable : Logic.KHen ⊢! φ → cresswellModel ⊧ φ := by
   intro h;
-  induction h using Hilbert.Deduction.rec! with
+  induction h with
   | maxm h =>
     rcases (by simpa using h) with (⟨_, rfl⟩ | ⟨_, rfl⟩);
     . exact Kripke.ValidOnModel.axiomK;
@@ -360,7 +360,7 @@ lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢! φ → cresswe
   | imply₂ => exact Kripke.ValidOnModel.imply₂;
   | ec => exact Kripke.ValidOnModel.elimContra;
 
-lemma unprovable_atomic_axiomFour : Hilbert.KHen ⊬ Axioms.Four (atom a) := by
+lemma unprovable_atomic_axiomFour : Logic.KHen ⊬ Axioms.Four (atom a) := by
   by_contra hC;
   exact cresswellModel.not_valid_axiomFour $ Kripke.valid_cresswellModel_of_provable hC 2♯;
 
@@ -368,10 +368,10 @@ theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Logic.KHen ⊢!
   rintro ⟨C, h⟩;
   have : C ⊧ Axioms.Hen (atom 0) := @h (Axioms.Hen (atom 0)) |>.mp $ by simp;
   have : C ⊧ Axioms.Four (atom 0) := fun {F} hF => valid_atomic_axiomFour_of_valid_atomic_axiomH (this hF);
-  have : Hilbert.KHen ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
+  have : Logic.KHen ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
   exact @unprovable_atomic_axiomFour _ this;
 
-end Hilbert.KHen
+end Logic.KHen
 
 
 namespace Logic
@@ -382,10 +382,9 @@ open Kripke
 
 instance : Logic.K ⪱ Logic.KHen := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KHen ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
-      rw [K.Kripke.all];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KHen ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.Kripke.all];
     use (Axioms.Hen (.atom 0));
     constructor;
     . exact axiomHen!;
@@ -396,12 +395,13 @@ instance : Logic.K ⪱ Logic.KHen := by
 
 instance : Logic.KHen ⪱ Logic.GL := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GL ⊢! φ ∧ ¬Hilbert.KHen ⊢! φ by tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
-    . apply Hilbert.KHen.unprovable_atomic_axiomFour;
+    . apply Logic.KHen.unprovable_atomic_axiomFour;
 
 end Logic
 

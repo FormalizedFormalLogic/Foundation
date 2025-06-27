@@ -16,38 +16,30 @@ abbrev FrameClass.K4M : FrameClass := { F | F.IsK4M }
 
 end Kripke
 
-namespace Hilbert.K4M
 
-instance Kripke.sound : Sound Logic.K4M FrameClass.K4M := instSound_of_validates_axioms $ by
+namespace Logic.K4M.Kripke
+
+instance sound : Sound Logic.K4M FrameClass.K4M := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomM_of_satisfiesMcKinseyCondition;
 
-instance Kripke.consistent : Entailment.Consistent Logic.K4M := consistent_of_sound_frameclass FrameClass.K4M $ by
+instance consistent : Entailment.Consistent Logic.K4M := consistent_of_sound_frameclass FrameClass.K4M $ by
   use whitepoint;
   constructor;
 
-instance Kripke.canonical : Canonical Logic.K4M FrameClass.K4M := ⟨by constructor⟩
+instance canonical : Canonical Logic.K4M FrameClass.K4M := ⟨by constructor⟩
 
-instance Kripke.complete : Complete Logic.K4M FrameClass.K4M := inferInstance
+instance complete : Complete Logic.K4M FrameClass.K4M := inferInstance
 
-end Hilbert.K4M
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma K4M.Kripke.trans_mckinsey : Logic.K4M = FrameClass.K4M.logic := eq_hilbert_logic_frameClass_logic
+lemma trans_mckinsey : Logic.K4M = FrameClass.K4M.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.K4 ⪱ Logic.K4M := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4M ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by
-      rw [K4.Kripke.trans];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.K4M ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by simpa [K4.Kripke.trans];
     use (Axioms.M (.atom 0));
     constructor;
     . exact axiomM!;
@@ -57,7 +49,6 @@ instance : Logic.K4 ⪱ Logic.K4M := by
       . simp only [Set.mem_setOf_eq]; refine { trans := by simp; }
       . simp [Semantics.Realize, Satisfies];
 
-end Logic
-
+end Logic.K4M.Kripke
 
 end LO.Modal

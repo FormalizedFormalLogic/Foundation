@@ -74,17 +74,8 @@ instance : Complete (Logic.Ver) Kripke.FrameClass.finite_Ver := ⟨by
   }
 ⟩
 
-end Logic.Ver.Kripke
-
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma Ver.Kripke.isolated : Logic.Ver = FrameClass.Ver.logic := eq_hilbert_logic_frameClass_logic
-lemma Ver.Kripke.finite_Ver : Logic.Ver = FrameClass.finite_Ver.logic := eq_hilbert_logic_frameClass_logic
+lemma isolated : Logic.Ver = FrameClass.Ver.logic := eq_hilbert_logic_frameClass_logic
+lemma finite_Ver : Logic.Ver = FrameClass.finite_Ver.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.KTc ⪱ Logic.Ver := by
   constructor;
