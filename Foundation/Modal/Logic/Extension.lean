@@ -16,8 +16,6 @@ inductive sumQuasiNormal (L₁ L₂ : Logic α) : Logic α
   | mdp  {φ ψ}  : sumQuasiNormal L₁ L₂ (φ ➝ ψ) → sumQuasiNormal L₁ L₂ φ → sumQuasiNormal L₁ L₂ ψ
   | subst {φ s} : sumQuasiNormal L₁ L₂ φ → sumQuasiNormal L₁ L₂ (φ⟦s⟧)
 
-abbrev addQuasiNormal (L : Logic α) (φ : Formula α) : Logic α := sumQuasiNormal L {φ}
-
 namespace sumQuasiNormal
 
 variable {φ ψ : Formula α}
@@ -29,13 +27,6 @@ lemma mem₁! (hφ : L₁ ⊢! φ) : sumQuasiNormal L₁ L₂ ⊢! φ := by
 lemma mem₂! (hφ : L₂ ⊢! φ) : sumQuasiNormal L₁ L₂ ⊢! φ := by
   apply iff_provable.mpr;
   apply sumQuasiNormal.mem₂ hφ;
-
-lemma mdp! (hφψ : (sumQuasiNormal L₁ L₂) ⊢! φ ➝ ψ) (hφ : (sumQuasiNormal L₁ L₂) ⊢! φ) : sumQuasiNormal L₁ L₂ ⊢! ψ := by
-  apply iff_provable.mpr;
-  apply sumQuasiNormal.mdp;
-  . apply iff_provable.mp; exact hφψ;
-  . apply iff_provable.mp; exact hφ;
-
 
 lemma symm : sumQuasiNormal L₁ L₂ = sumQuasiNormal L₂ L₁ := by
   ext φ;

@@ -31,17 +31,16 @@ variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)]
 
 lemma GL_S_TFAE :
   [
-    (A.rflSubformula.conj ➝ A) ∈ Logic.GL,
-    A ∈ Logic.S,
+    Logic.GL ⊢! (A.rflSubformula.conj ➝ A),
+    Logic.S ⊢! A,
     ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A)
   ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;
-    apply Logic.S.mdp (Logic.GL_subset_S h) ?_;
-    apply Logic.conj_iff.mpr;
-    suffices ∀ B, □B ∈ A.subformulas → □B ➝ B ∈ Logic.S by simpa [Formula.rflSubformula];
-    rintro B _;
-    exact Logic.S.mem_axiomT;
+    have h : Logic.S ⊢! Finset.conj A.rflSubformula ➝ A := WeakerThan.pbl h;
+    apply h ⨀ ?_;
+    apply FConj!_iff_forall_provable.mpr;
+    simp [-Logic.iff_provable];
   tfae_have 2 → 3 := by
     intro h f;
     apply S.arithmetical_soundness;
@@ -50,7 +49,7 @@ lemma GL_S_TFAE :
     contrapose;
     push_neg;
     intro hA;
-    obtain ⟨M₁, r₁, _, hA⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
+    obtain ⟨M₁, r₁, _, hA⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
     let M₀ := Model.extendRoot M₁ r₁ 1;
     let r₀ : M₀.World := Model.extendRoot.root;
     replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
@@ -150,7 +149,7 @@ lemma GL_S_TFAE :
       simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;
 
-theorem S.arithmetical_completeness_iff : A ∈ Logic.S ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A) := GL_S_TFAE.out 1 2
+theorem S.arithmetical_completeness_iff : Logic.S ⊢! A ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A) := GL_S_TFAE.out 1 2
 
 end ProvabilityLogic
 
