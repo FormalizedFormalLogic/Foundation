@@ -43,6 +43,9 @@ instance : Entailment.K4 𝓢 where
 protected def axiomHen : 𝓢 ⊢ Axioms.Hen φ := C_trans (implyBoxDistribute' and₁) axiomL
 instance : HasAxiomHen 𝓢 := ⟨fun _ ↦ GL.axiomHen⟩
 
+protected def axiomZ : 𝓢 ⊢ Axioms.Z φ := C_trans axiomL imply₁
+instance : HasAxiomZ 𝓢 := ⟨fun _ ↦ GL.axiomZ⟩
+
 end GL
 
 private noncomputable def lem_boxdot_Grz_of_L : 𝓢 ⊢ (⊡(⊡(φ ➝ ⊡φ) ➝ φ)) ➝ (□(φ ➝ ⊡φ) ➝ φ) := by

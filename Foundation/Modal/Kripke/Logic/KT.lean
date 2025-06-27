@@ -6,9 +6,10 @@ import Foundation.Modal.Entailment.KT
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-
 
 namespace Kripke
 
@@ -21,43 +22,34 @@ instance {F : Kripke.Frame} [F.IsKT] : F.IsKD := by simp
 end Kripke
 
 
-namespace Hilbert.KT
+namespace Logic.KT.Kripke
 
-instance Kripke.sound : Sound (Hilbert.KT) FrameClass.KT := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.KT FrameClass.KT := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_refl _ rfl;
   exact Kripke.validate_AxiomT_of_reflexive (refl := F_refl);
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.KT) := consistent_of_sound_frameclass FrameClass.KT $ by
+instance consistent : Entailment.Consistent Logic.KT := consistent_of_sound_frameclass FrameClass.KT $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   simp;
 
-instance Kripke.canonical : Canonical (Hilbert.KT) FrameClass.KT := ⟨by
+instance canonical : Canonical Logic.KT FrameClass.KT := ⟨by
   apply Set.mem_setOf_eq.mpr;
   dsimp [Frame.IsKT];
   infer_instance;
 ⟩
 
-instance Kripke.complete : Complete (Hilbert.KT) FrameClass.KT := inferInstance
+instance complete : Complete Logic.KT FrameClass.KT := inferInstance
 
-end Hilbert.KT
+lemma refl : Logic.KT = FrameClass.KT.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KT.Kripke.refl : Logic.KT = FrameClass.KT.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
-theorem KT.proper_extension_of_KD : Logic.KD ⊂ Logic.KT := by
+instance : Logic.KD ⪱ Logic.KT := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
-      rw [KD.Kripke.serial];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KT ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
+      simpa [KD.Kripke.serial];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -67,6 +59,6 @@ theorem KT.proper_extension_of_KD : Logic.KD ⊂ Logic.KT := by
       . exact { serial := by tauto };
       . simp [Semantics.Realize, Satisfies];
 
-end Logic
+end Logic.KT.Kripke
 
 end LO.Modal

@@ -19,27 +19,26 @@ abbrev higherIndependency (φ : Formula α) : ℕ → Formula α
 
 namespace Logic.GL
 
-open Hilbert.GL
-
 variable {n : ℕ} {φ : Formula ℕ}
 
-lemma unprovable_notbox : ∼□φ ∉ Logic.GL := by
+lemma unprovable_notbox : Logic.GL ⊬ ∼□φ := by
   by_contra hC;
-  have : Hilbert.GL ⊢! ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
-  have : Hilbert.GL ⊢! ∼□⊥ := this ⨀ hC;
+  have : Logic.GL ⊢! ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
+  have : Logic.GL ⊢! ∼□⊥ := this ⨀ hC;
   have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using provable_verTranslated_Cl this;
   have := Hilbert.Cl.soundness this (λ _ => False);
   tauto;
 
-lemma unprovable_independency : independency φ ∉ Logic.GL := by
+lemma unprovable_independency : Logic.GL ⊬ independency φ := by
   by_contra hC;
   exact unprovable_notbox $ K!_left hC;
 
-lemma unprovable_not_independency_of_consistency : ∼(independency (∼□⊥)) ∉ Logic.GL := by
+lemma unprovable_not_independency_of_consistency : Logic.GL ⊬ ∼(independency (∼□⊥)) := by
   by_contra hC;
   rcases modal_disjunctive (A!_of_ANNNN! $ ANN!_of_NK! hC) with (h | h);
   . exact unprovable_notbox h;
-  . exact Consistent.not_bot (inferInstance) $ unnec! $ of_NN! h
+  . have : Logic.GL ⊢! ⊥ := unnec! $ of_NN! h;
+    simpa;
 
 /-
 theorem undecidable_independency_of_consistency : Undecidable Hilbert.GL (independency (∼□⊥)) := by
@@ -49,16 +48,17 @@ theorem undecidable_independency_of_consistency : Undecidable Hilbert.GL (indepe
 -/
 
 
-lemma unprovable_higherIndependency_of_consistency : higherIndependency (∼□⊥) n ∉ Logic.GL := by
+lemma unprovable_higherIndependency_of_consistency : Logic.GL ⊬ higherIndependency (∼□⊥) n := by
   induction n with
   | zero => exact unprovable_notbox;
   | succ n ih => exact unprovable_independency;
 
-lemma unprovable_not_higherIndependency_of_consistency : ∼(higherIndependency (∼□⊥) n) ∉ Logic.GL := by
+lemma unprovable_not_higherIndependency_of_consistency : Logic.GL ⊬ ∼(higherIndependency (∼□⊥) n) := by
   by_contra hC;
   induction n with
   | zero =>
-    exact Consistent.not_bot (inferInstance) $ unnec! $ of_NN! hC;
+    have : Logic.GL ⊢! ⊥ := unnec! $ of_NN! hC;
+    simpa;
   | succ n ih =>
     rcases modal_disjunctive (A!_of_ANNNN! $ ANN!_of_NK! hC) with (h | h);
     . exact unprovable_higherIndependency_of_consistency h;

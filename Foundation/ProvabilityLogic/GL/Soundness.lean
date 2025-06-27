@@ -13,9 +13,9 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          {T U : FirstOrder.Theory L} [Diagonalization T]  [T ⪯ U]
          {𝔅 : ProvabilityPredicate T U} [𝔅.HBL]
 
-lemma GL.arithmetical_soundness (h : A ∈ Logic.GL) : ∀ {f : Realization L}, U ⊢!. (f.interpret 𝔅 A) := by
+lemma GL.arithmetical_soundness (h : Logic.GL ⊢! A) : ∀ {f : Realization L}, U ⊢!. (f.interpret 𝔅 A) := by
   intro f;
-  induction h using Hilbert.Deduction.rec! with
+  induction h with
   | maxm hp =>
     rcases (by simpa using hp) with (⟨_, rfl⟩ | ⟨_, rfl⟩)
     . exact D2_shift;

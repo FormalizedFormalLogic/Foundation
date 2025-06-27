@@ -5,6 +5,8 @@ import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -17,28 +19,28 @@ protected abbrev FrameClass.IsKD : FrameClass := { F | F.IsKD }
 end Kripke
 
 
-namespace Hilbert.KD.Kripke
+namespace Logic.KD.Kripke
 
-instance sound : Sound (Hilbert.KD) FrameClass.IsKD :=
+instance sound : Sound Logic.KD FrameClass.IsKD :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F F_serial φ rfl;
     apply validate_AxiomD_of_serial (ser := F_serial);
 
-instance consistent : Entailment.Consistent (Hilbert.KD) :=
+instance consistent : Entailment.Consistent Logic.KD :=
   consistent_of_sound_frameclass FrameClass.IsKD $ by
     use whitepoint;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
 
-instance canonical : Canonical (Hilbert.KD) FrameClass.IsKD := ⟨by
+instance canonical : Canonical Logic.KD FrameClass.IsKD := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KD) FrameClass.IsKD := inferInstance
+instance complete : Complete Logic.KD FrameClass.IsKD := inferInstance
 
-end Hilbert.KD.Kripke
+end Logic.KD.Kripke
 
 namespace Logic
 
@@ -48,13 +50,11 @@ open Kripke
 
 lemma KD.Kripke.serial : Logic.KD = FrameClass.IsKD.logic := eq_hilbert_logic_frameClass_logic
 
-@[simp]
-theorem KD.proper_extension_of_K : Logic.K ⊂ Logic.KD := by
+instance : Logic.K ⪱ Logic.KD := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
-      rw [K.Kripke.all];
-      tauto;
+  . infer_instance;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.Kripke.all];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;

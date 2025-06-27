@@ -6,6 +6,8 @@ import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -20,28 +22,28 @@ protected abbrev FrameClass.finite_K4 : FrameClass := { F | F.IsFiniteK4 }
 end Kripke
 
 
-namespace Hilbert.K4.Kripke
+namespace Logic.K4.Kripke
 
-instance sound : Sound (Hilbert.K4) FrameClass.K4 := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.K4 FrameClass.K4 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_trans φ rfl;
   apply validate_AxiomFour_of_transitive (trans := F_trans);
 
-instance consistent : Entailment.Consistent (Hilbert.K4) :=
+instance consistent : Entailment.Consistent Logic.K4 :=
   consistent_of_sound_frameclass FrameClass.K4 $ by
     use whitepoint;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
 
-instance canonical : Canonical (Hilbert.K4) FrameClass.K4 := ⟨by
+instance canonical : Canonical Logic.K4 FrameClass.K4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.K4) FrameClass.K4 := inferInstance
+instance complete : Complete Logic.K4 FrameClass.K4 := inferInstance
 
 open finestFiltrationTransitiveClosureModel in
-instance finite_complete : Complete (Hilbert.K4) FrameClass.finite_K4 := ⟨by
+instance finite_complete : Complete Logic.K4 FrameClass.finite_K4 := ⟨by
   intro φ hp;
   apply Kripke.complete.complete;
   intro F F_trans V x;
@@ -54,25 +56,16 @@ instance finite_complete : Complete (Hilbert.K4) FrameClass.finite_K4 := ⟨by
   exact { world_finite := by apply FilterEqvQuotient.finite $ by simp }
 ⟩
 
-end Hilbert.K4.Kripke
+lemma trans : Logic.K4 = FrameClass.K4.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma K4.Kripke.trans : Logic.K4 = FrameClass.K4.logic := eq_hilbert_logic_frameClass_logic
-
-theorem K4.proper_extension_of_K : Logic.K ⊂ Logic.K4 := by
+instance : Logic.K ⪱ Logic.K4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
-      rw [K.Kripke.all];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.K4 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.Kripke.all];
     use (Axioms.Four (.atom 0));
     constructor;
-    . exact axiomFour!;
+    . simp;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ w _ => w = 1⟩;
       use M, 0;
@@ -87,6 +80,6 @@ theorem K4.proper_extension_of_K : Logic.K ⊂ Logic.K4 := by
           | 1 => tauto;
         . exact ⟨1, by omega, 0, by omega, by trivial⟩;
 
-end Logic
+end Logic.K4.Kripke
 
 end LO.Modal

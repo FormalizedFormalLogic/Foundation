@@ -29,7 +29,7 @@ instance : (□□) ≅[Logic.S5] (□) := by
   . apply translation_of_axiomInstance (a := 0);
     simp;
   . apply translation_of_axiomInstance (a := 0);
-    apply S5.proper_extension_of_S4.subset;
+    apply Entailment.WeakerThan.pbl (𝓢 := Logic.S4);
     simp;
 instance : (□◇) ≅[Logic.S5] (◇) := by
   apply iff_equivalence_bi_translate.mpr;
@@ -40,10 +40,10 @@ instance : (◇◇) ≅[Logic.S5] (◇) := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
   . apply translation_of_axiomInstance (a := 0);
-    apply S5.proper_extension_of_S4.subset;
+    apply Entailment.WeakerThan.pbl (𝓢 := Logic.S4);
     simp;
   . apply translation_of_axiomInstance (a := 0);
-    apply S5.proper_extension_of_S4.subset;
+    apply Entailment.WeakerThan.pbl (𝓢 := Logic.S4);
     simp;
 instance : (◇□) ≅[Logic.S5] (□) := by
   apply iff_equivalence_bi_translate.mpr;
