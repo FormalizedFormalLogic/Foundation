@@ -33,4 +33,13 @@ protected abbrev Logic.K := Hilbert.K.logic
 instance : Hilbert.K.HasK where p := 0; q := 1
 instance : Entailment.K (Logic.K) where
 
+instance {L : Logic _} [L.IsNormal] : Logic.K ⪯ L := by
+  apply Entailment.weakerThan_iff.mpr;
+  intro φ hφ;
+  induction hφ with
+  | maxm h => rcases (by simpa using h) with ⟨_, rfl⟩; simp;
+  | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+  | nec ihφ => exact Entailment.nec! ihφ;
+  | imply₁ | imply₂ | ec => simp;
+
 end LO.Modal

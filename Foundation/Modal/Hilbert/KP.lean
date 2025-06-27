@@ -31,10 +31,13 @@ instance : Hilbert.KP.HasK where p := 0; q := 1
 instance : Hilbert.KP.HasP where
 instance : Entailment.KP (Logic.KP) where
 
-instance : (Logic.KP) ≊ (Logic.KD) := by
+instance : Logic.KP ≊ Logic.KD := by
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply Hilbert.weakerThan_of_provable_axioms; rintro φ (rfl | rfl) <;> simp;
   . apply Hilbert.weakerThan_of_provable_axioms; rintro φ (rfl | rfl) <;> simp;
+
+@[deprecated "Auto instance"] instance : Logic.KP ⪯ Logic.KD := by apply Entailment.Equiv.le inferInstance
+@[deprecated "Auto instance"] instance : Logic.KD ⪯ Logic.KP := by apply Entailment.Equiv.le $ Entailment.Equiv.symm inferInstance
 
 end LO.Modal

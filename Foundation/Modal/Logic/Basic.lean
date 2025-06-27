@@ -51,13 +51,26 @@ lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by
 
 lemma subst! [L.Substitution] (s : Substitution _) (hφ : L ⊢! φ) : L ⊢! φ⟦s⟧ := ⟨Substitution.subst s hφ.some⟩
 
+
+section
+
+variable [DecidableEq α] [L.IsQuasiNormal] [Consistent L]
+
 @[simp]
-lemma no_bot [DecidableEq α] [L.IsQuasiNormal] [Consistent L] : L ⊬ ⊥ := by
+lemma no_bot : L ⊬ ⊥ := by
   obtain ⟨φ, hφ⟩ := Consistent.exists_unprovable (𝓢 := L) inferInstance;
   by_contra! hC;
   apply hφ;
   apply of_O!;
   exact hC;
+
+-- TODO: more general place
+lemma not_neg_of! (hφ : L ⊢! φ) : L ⊬ ∼φ := by
+  by_contra! hC;
+  apply L.no_bot;
+  exact hC ⨀ hφ;
+
+end
 
 end
 
