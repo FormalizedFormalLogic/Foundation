@@ -19,32 +19,32 @@ protected abbrev FrameClass.finite_LC : FrameClass := { F | F.IsFiniteLC }
 end Kripke
 
 
-namespace Hilbert.LC.Kripke
+namespace Logic.LC.Kripke
 
-instance sound : Sound Hilbert.LC FrameClass.LC := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.LC FrameClass.LC := instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomDummett_of_isPiecewiseStronglyConnected;
 
-instance sound_finite : Sound Hilbert.LC FrameClass.finite_LC :=
+instance sound_finite : Sound Logic.LC FrameClass.finite_LC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomDummett_of_isPiecewiseStronglyConnected;
 
-instance consistent : Entailment.Consistent Hilbert.LC := consistent_of_sound_frameclass FrameClass.LC $ by
+instance consistent : Entailment.Consistent Logic.LC := consistent_of_sound_frameclass FrameClass.LC $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance canonical : Canonical Hilbert.LC FrameClass.LC := ⟨by
+instance canonical : Canonical Logic.LC FrameClass.LC := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Hilbert.LC FrameClass.LC := inferInstance
+instance complete : Complete Logic.LC FrameClass.LC := inferInstance
 
 section FFP
 
@@ -52,7 +52,7 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_LC := ⟨by
+instance finite_complete : Complete (Logic.LC) FrameClass.finite_LC := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   rintro F F_conn V r;
@@ -105,20 +105,15 @@ instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_LC := ⟨by
 
 end FFP
 
-end Hilbert.LC.Kripke
+lemma LC : Logic.LC = Kripke.FrameClass.LC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma finite_LC : Logic.LC = Kripke.FrameClass.finite_LC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
-namespace Logic.LC
-
-
-lemma Kripke.LC : Logic.LC = Kripke.FrameClass.LC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma Kripke.finite_LC : Logic.LC = Kripke.FrameClass.finite_LC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
-@[simp]
-theorem proper_extension_of_KC : Logic.KC ⊂ Logic.LC := by
+instance : Logic.KC ⪱ Logic.LC := by
   constructor;
-  . exact (Hilbert.weakerThan_of_dominate_axiomInstances
-      (by rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp)).subset
-  . suffices ∃ φ, Hilbert.LC ⊢! φ ∧ ¬FrameClass.KC ⊧ φ by rw [KC.Kripke.KC]; tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    rintro φ (rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.LC ⊢! φ ∧ ¬FrameClass.KC ⊧ φ by simpa [KC.Kripke.KC];
     use Axioms.Dummett (.atom 0) (.atom 1);
     constructor;
     . simp;
@@ -143,7 +138,6 @@ theorem proper_extension_of_KC : Logic.KC ⊂ Logic.LC := by
         by_contra hC;
         simpa using @hC.ps_connected 0 1 2;
 
-
-end Logic.LC
+end Logic.LC.Kripke
 
 end LO.Propositional
