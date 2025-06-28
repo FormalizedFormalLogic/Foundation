@@ -7,6 +7,7 @@ namespace LO
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 
+@[match_pattern]
 def Propositional.Formula.goedelTranslate : Propositional.Formula α → Modal.Formula α
   | .atom a  => □(.atom a)
   | ⊥ => ⊥
@@ -24,6 +25,8 @@ lemma Modal.instModalCompanion (h₁ : ∀ {φ}, IL ⊢! φ → ML ⊢! φᵍ) (
 namespace Propositional.Logic
 
 variable {IL : Propositional.Logic ℕ}
+
+variable (IL : Propositional.Logic ℕ)
 
 abbrev smallestMC (IL : Propositional.Logic ℕ) : Modal.Logic ℕ := Modal.Logic.sumNormal Modal.Logic.S4 ((Entailment.theory IL).image (·ᵍ))
 
@@ -64,7 +67,7 @@ section
 open Propositional.Formula (goedelTranslate)
 
 lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-  (IL : Propositional.Logic ℕ) (IC : Propositional.Kripke.FrameClass) (MC : Modal.Kripke.FrameClass)
+  {IL : Propositional.Logic ℕ} (IC : Propositional.Kripke.FrameClass) (MC : Modal.Kripke.FrameClass)
   (hIC_MC : ∀ F ∈ IC, ⟨F.World, F.Rel⟩ ∈ MC)
   [Complete IL IC] [Sound IL.smallestMC MC]
   : ModalCompanion IL (IL.smallestMC) := Modal.instModalCompanion
@@ -116,7 +119,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
   )
 
 lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-  (IL : Propositional.Logic ℕ) (IC : Propositional.Kripke.FrameClass) (MC : Modal.Kripke.FrameClass)
+  {IL : Propositional.Logic ℕ} (IC : Propositional.Kripke.FrameClass) (MC : Modal.Kripke.FrameClass)
   (hIC_MC : ∀ F ∈ IC, ⟨F.World, F.Rel⟩ ∈ MC)
   [Complete IL IC] [Sound IL.largestMC MC]
   : ModalCompanion IL (IL.largestMC) := Modal.instModalCompanion

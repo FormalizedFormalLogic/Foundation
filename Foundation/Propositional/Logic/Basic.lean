@@ -15,11 +15,13 @@ namespace Logic
 variable {L L₀ L₁ L₂ L₃ : Logic α} {φ ψ : Formula α}
 
 protected class Substitution (L : Logic α) where
-  subst {φ : Formula _} (s) : L ⊢ φ → L ⊢ φ⟦s⟧
+  subst! {φ : Formula _} (s) : L ⊢! φ → L ⊢! φ⟦s⟧
 
-protected class Superintuitionistic (L : Logic α) extends Entailment.Int L, L.Substitution where
+protected class IsSuperintuitionistic (L : Logic α) extends Entailment.Int L, L.Substitution where
 
 section
+
+export Substitution (subst!)
 
 @[simp low]
 lemma iff_provable : L ⊢! φ ↔ φ ∈ L := by
@@ -43,12 +45,9 @@ lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
     ext φ;
     simpa using Equiv.iff.mp h φ;
 
-lemma subst! [L.Substitution] (s : Substitution _) (hφ : L ⊢! φ) : L ⊢! φ⟦s⟧ := ⟨Substitution.subst s hφ.some⟩
-
-
 section
 
-variable [L.Superintuitionistic] [Consistent L]
+variable [L.IsSuperintuitionistic] [Consistent L]
 
 @[simp]
 lemma no_bot : L ⊬ ⊥ := by

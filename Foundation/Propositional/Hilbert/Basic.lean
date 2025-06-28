@@ -96,10 +96,11 @@ instance : Entailment.Minimal (H.logic) where
   or₃ _ _ _ := by constructor; apply Deduction.orElim;
 
 instance : H.logic.Substitution where
-  subst s hφ := by
+  subst! s hφ := by
+    constructor;
     constructor;
     apply Deduction.subst;
-    exact PLift.down hφ
+    exact PLift.down hφ.some
 
 lemma maxm! (h : φ ∈ H.axiomInstances) : H.logic ⊢! φ := by
   apply iff_mem_logic.mpr;

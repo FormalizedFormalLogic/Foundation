@@ -48,9 +48,8 @@ instance : Sound Logic.Int.smallestMC FrameClass.S4 := by
 instance modalCompanion_Int_S4 : ModalCompanion Logic.Int Logic.S4 := by
   rw [Logic.S4.is_smallestMC_of_Int];
   apply Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-    (IL := Logic.Int)
-    (IC := Propositional.Kripke.FrameClass.all)
-    (MC := FrameClass.S4)
+    Propositional.Kripke.FrameClass.all
+    FrameClass.S4
     (by intro F _; constructor);
 
 end S4
@@ -88,9 +87,8 @@ instance : Sound Logic.Int.largestMC FrameClass.finite_Grz := by
 instance modalCompanion_Int_Grz : ModalCompanion Logic.Int Logic.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   apply Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IL := Logic.Int)
-    (IC := Propositional.Kripke.FrameClass.finite_all)
-    (MC := FrameClass.finite_Grz)
+    Propositional.Kripke.FrameClass.finite_all
+    FrameClass.finite_Grz
     $ by rintro F hF; simp_all only [Set.mem_setOf_eq]; exact {}
 
 end Grz
@@ -118,7 +116,7 @@ section boxdot
 /--
   Chagrov & Zakharyaschev 1997, Theorem 3.89
 -/
-theorem embedding_Int_GL {φ : Propositional.Formula ℕ} : φ ∈ Logic.Int ↔ Logic.GL ⊢! φᵍᵇ:= by
+theorem embedding_Int_GL {φ : Propositional.Formula ℕ} : Logic.Int ⊢! φ ↔ Logic.GL ⊢! φᵍᵇ:= by
   exact Iff.trans modalCompanion_Int_Grz.companion Logic.iff_provable_boxdot_GL_provable_Grz.symm
 
 end boxdot

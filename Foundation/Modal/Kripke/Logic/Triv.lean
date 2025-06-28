@@ -5,9 +5,10 @@ import Foundation.Vorspiel.HRel.Equality
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-
 
 namespace Kripke
 
@@ -31,32 +32,32 @@ end Kripke
 
 namespace Logic.Triv.Kripke
 
-instance sound_Triv : Sound (Logic.Triv) Kripke.FrameClass.Triv :=
+instance sound_Triv : Sound Logic.Triv Kripke.FrameClass.Triv :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F ⟨_⟩ _ (rfl | rfl);
     . exact validate_AxiomT_of_reflexive;
     . exact validate_AxiomTc_of_coreflexive;
 
-instance sound_finite_Triv : Sound (Logic.Triv) Kripke.FrameClass.finite_Triv :=
+instance sound_finite_Triv : Sound Logic.Triv Kripke.FrameClass.finite_Triv :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F ⟨_, _⟩ _ (rfl | rfl);
     . exact validate_AxiomT_of_reflexive;
     . exact validate_AxiomTc_of_coreflexive;
 
-instance consistent : Entailment.Consistent (Logic.Triv) := consistent_of_sound_frameclass Kripke.FrameClass.Triv $ by
+instance consistent : Entailment.Consistent Logic.Triv := consistent_of_sound_frameclass Kripke.FrameClass.Triv $ by
   use whitepoint;
   constructor;
 
-instance cannonical_Triv : Canonical (Logic.Triv) Kripke.FrameClass.Triv := ⟨by constructor⟩
+instance cannonical_Triv : Canonical Logic.Triv Kripke.FrameClass.Triv := ⟨by constructor⟩
 
-instance complete_Triv : Complete (Logic.Triv) Kripke.FrameClass.Triv := inferInstance
+instance complete_Triv : Complete Logic.Triv Kripke.FrameClass.Triv := inferInstance
 
 section FFP
 
 open Relation in
-instance complete_finite_Triv : Complete (Logic.Triv) Kripke.FrameClass.finite_Triv := ⟨by
+instance complete_finite_Triv : Complete Logic.Triv Kripke.FrameClass.finite_Triv := ⟨by
   intro φ hφ;
   apply Kripke.complete_Triv.complete;
   intro F F_eq V r;
@@ -82,18 +83,8 @@ instance complete_finite_Triv : Complete (Logic.Triv) Kripke.FrameClass.finite_T
 
 end FFP
 
-end Logic.Triv.Kripke
-
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-
-lemma Triv.Kripke.equality : Logic.Triv = FrameClass.Triv.logic := eq_hilbert_logic_frameClass_logic
-lemma Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_Triv.logic := eq_hilbert_logic_frameClass_logic
+lemma equality : Logic.Triv = FrameClass.Triv.logic := eq_hilbert_logic_frameClass_logic
+lemma finite_equality : Logic.Triv = FrameClass.finite_Triv.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Logic.KTc ⪱ Logic.Triv := by
   constructor;
@@ -180,6 +171,6 @@ instance : Logic.S4Point4M ⪱ Logic.Triv := by
           . omega;
           . trivial;
 
-end Logic
+end Logic.Triv.Kripke
 
 end LO.Modal
