@@ -16,37 +16,37 @@ protected abbrev FrameClass.KP : FrameClass := { F | F.SatisfiesKriselPutnamCond
 end Kripke
 
 
-namespace Logic.KP.Kripke
+namespace Hilbert.KP.Kripke
 
-instance sound : Sound Logic.KP FrameClass.KP := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.KP FrameClass.KP := instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomKrieselPutnam_of_satisfiesKrieselPutnamCondition
 
-instance consistent : Entailment.Consistent Logic.KP := consistent_of_sound_frameclass FrameClass.KP $ by
+instance : Entailment.Consistent Hilbert.KP := consistent_of_sound_frameclass FrameClass.KP $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance canonical : Canonical Logic.KP FrameClass.KP := ⟨by
+instance : Canonical Hilbert.KP FrameClass.KP := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Logic.KP FrameClass.KP := inferInstance
+instance : Complete Hilbert.KP FrameClass.KP := inferInstance
 
-lemma KP : Logic.KP = FrameClass.KP.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+end KP.Kripke
 
-instance : Logic.Int ⪱ Logic.KP := by
+instance : Hilbert.Int ⪱ Hilbert.KP := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.KP ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [Int.Kripke.Int];
     use Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2);
     constructor;
     . simp;
-    . apply not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.all)
+      apply not_validOnFrameClass_of_exists_model_world;
       let M : Kripke.Model := {
         World := Fin 5
         Rel x y := x = y ∨ x = 0 ∨ (x ≤ 1 ∧ y = 2) ∨ (x ≤ 1 ∧ y = 3) ∨ (x ≤ 1 ∧ y = 4)
@@ -109,6 +109,16 @@ instance : Logic.Int ⪱ Logic.KP := by
               . tauto;
               . simp [Semantics.Realize, Satisfies, M, Frame.Rel'];
 
-end Logic.KP.Kripke
+end Hilbert
+
+
+namespace Logic
+
+lemma KP.Kripke.KP : Logic.KP = FrameClass.KP.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+
+instance : Logic.Int ⪱ Logic.KP := inferInstance
+
+end Logic
+
 
 end LO.Propositional
