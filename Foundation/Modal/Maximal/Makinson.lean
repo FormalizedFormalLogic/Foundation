@@ -45,7 +45,7 @@ lemma KD_subset_of_not_subset_Ver (hV : ¬L ⪯ Logic.Ver) : Logic.KD ⪯ L := b
   apply weakerThan_iff.mpr;
   intro φ hφ;
   replace hφ : Logic.KP ⊢! φ := WeakerThan.pbl hφ;
-  induction hφ with
+  induction hφ using Hilbert.rec! with
   | maxm h =>
     rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩);
     . simp;

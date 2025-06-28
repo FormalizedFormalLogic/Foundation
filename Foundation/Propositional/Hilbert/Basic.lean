@@ -5,6 +5,8 @@ import Foundation.Logic.Disjunctive
 
 namespace LO.Propositional
 
+open LO.Entailment LO.Modal.Entailment
+
 variable {α : Type u}
 
 structure Hilbert (α) where
@@ -12,14 +14,20 @@ structure Hilbert (α) where
 
 namespace Hilbert
 
+variable {H H₁ H₂ : Hilbert α}
+
 abbrev axiomInstances (H : Hilbert α) : Set (Formula α) := { φ⟦s⟧ | (φ ∈ H.axioms) (s : Substitution α) }
 
-class FiniteAxiomatizable (H : Hilbert α) where
-  axioms_fin : Set.Finite H.axioms := by simp
+lemma mem_axiomInstances_of_mem_axioms {φ} (h : φ ∈ H.axioms) : φ ∈ H.axiomInstances := by
+  use φ;
+  constructor;
+  . assumption;
+  . use Substitution.id;
+    simp;
 
 variable {H : Hilbert α}
 
-inductive Deduction (H : Hilbert α) : Formula α → Type _
+inductive Deduction (H : Hilbert α) : Formula α → Prop
   | maxm {φ}      : φ ∈ H.axiomInstances → Deduction H φ
   | mdp {φ ψ}     : Deduction H (φ ➝ ψ) → Deduction H φ → Deduction H ψ
   | verum         : Deduction H $ ⊤
@@ -27,127 +35,137 @@ inductive Deduction (H : Hilbert α) : Formula α → Type _
   | implyK φ ψ χ  : Deduction H $ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ
   | andElimL φ ψ  : Deduction H $ φ ⋏ ψ ➝ φ
   | andElimR φ ψ  : Deduction H $ φ ⋏ ψ ➝ ψ
-  | K_intro φ ψ  : Deduction H $ φ ➝ ψ ➝ φ ⋏ ψ
+  | K_intro φ ψ   : Deduction H $ φ ➝ ψ ➝ φ ⋏ ψ
   | orIntroL φ ψ  : Deduction H $ φ ➝ φ ⋎ ψ
   | orIntroR φ ψ  : Deduction H $ ψ ➝ φ ⋎ ψ
   | orElim φ ψ χ  : Deduction H $ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)
 
-instance : Entailment (Formula α) (Hilbert α) := ⟨Deduction⟩
+def Deduction.maxm' {H : Hilbert α} {φ} (h : φ ∈ H.axioms) : Deduction H φ := by
+  apply Deduction.maxm;
+  exact mem_axiomInstances_of_mem_axioms h;
 
-open Deduction
-open Hilbert
-
-section
-
-instance : Entailment.ModusPonens H := ⟨mdp⟩
-
-instance : Entailment.HasAxiomImply₁ H := ⟨implyS⟩
-
-instance : Entailment.HasAxiomImply₂ H := ⟨implyK⟩
-
-instance : Entailment.HasAxiomAndInst H := ⟨K_intro⟩
-
-instance : Entailment.Minimal H where
-  mdp := mdp
-  verum := verum
-  and₁ := andElimL
-  and₂ := andElimR
-  and₃ := K_intro
-  or₁ := orIntroL
-  or₂ := orIntroR
-  or₃ := orElim
-
-namespace Deduction
-
-lemma maxm! {φ} (h : φ ∈ H.axiomInstances) : H ⊢! φ := ⟨maxm h⟩
-
-open Entailment
-
-noncomputable def rec!
-  {motive      : (φ : Formula α) → H ⊢! φ → Sort*}
-  (maxm       : ∀ {φ}, (h : φ ∈ H.axiomInstances) → motive φ (maxm! h))
-  (mdp        : ∀ {φ ψ}, {hpq : H ⊢! φ ➝ ψ} → {hp : H ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (mdp! hpq hp))
-  (verum      : motive ⊤ verum!)
-  (implyS     : ∀ {φ ψ},   motive (Axioms.Imply₁ φ ψ) $ ⟨implyS φ ψ⟩)
-  (implyK     : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ ⟨implyK φ ψ χ⟩)
-  (andElimL   : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ φ) $ ⟨andElimL φ ψ⟩)
-  (andElimR   : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ ψ) $ ⟨andElimR φ ψ⟩)
-  (K_intro   : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) $ ⟨K_intro φ ψ⟩)
-  (orIntroL   : ∀ {φ ψ},   motive (φ ➝ φ ⋎ ψ) $ ⟨orIntroL φ ψ⟩)
-  (orIntroR   : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) $ ⟨orIntroR φ ψ⟩)
-  (orElim     : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) $ ⟨orElim φ ψ χ⟩)
-  : ∀ {φ}, (d : H ⊢! φ) → motive φ d := by
-  intro φ d;
-  induction d.some with
-  | maxm h => exact maxm h
-  | mdp hpq hp ihpq ihp => exact mdp (ihpq ⟨hpq⟩) (ihp ⟨hp⟩)
-  | _ => aesop
-
-def subst! {φ} (s) (h : H ⊢! φ) : H ⊢! φ⟦s⟧ := by
-  induction h using Deduction.rec! with
-  | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+def Deduction.subst {φ} (s) (h : Deduction H φ) : Deduction H (φ⟦s⟧) := by
+  induction h with
+  | implyK => apply Deduction.implyK;
+  | implyS => apply Deduction.implyS;
+  | andElimL => apply Deduction.andElimL;
+  | andElimR => apply Deduction.andElimR;
+  | orIntroL => apply Deduction.orIntroL;
+  | orIntroR => apply Deduction.orIntroR;
+  | orElim => apply Deduction.orElim;
+  | verum => apply Deduction.verum;
+  | K_intro => apply Deduction.K_intro;
+  | mdp _ _ ihφψ ihφ => apply Deduction.mdp ihφψ ihφ;
   | maxm h =>
-    obtain ⟨ψ, h, ⟨s', rfl⟩⟩ := h;
-    apply maxm!;
+    apply Deduction.maxm;
+    obtain ⟨ψ, h, s', rfl⟩ := h;
     use ψ;
     constructor;
     . assumption;
     . use s' ∘ s;
-      exact Formula.subst_comp;
-  | _ => simp;
-
-end Deduction
-
-end
+      simp;
 
 
+abbrev logic (H : Hilbert α) : Logic α := H.Deduction
 
 section
 
-open Entailment
+variable {H H₁ H₂ : Hilbert α} {φ ψ : Formula α}
 
-variable {H₁ H₂ : Hilbert α}
+lemma iff_mem_logic : H.logic ⊢! φ ↔ Deduction H φ := by simp [logic]; rfl;
 
-lemma weakerThan_of_dominate_axiomInstances (hMaxm : ∀ {φ : Formula α}, φ ∈ H₁.axiomInstances → H₂ ⊢! φ)
-  : H₁ ⪯ H₂ := by
-  apply Entailment.weakerThan_iff.mpr;
-  intro φ h;
-  induction h using Deduction.rec! with
-  | maxm hp => apply hMaxm hp;
-  | mdp ihpq ihp => exact ihpq ⨀ ihp;
+instance : Entailment.ModusPonens H.logic where
+  mdp hφψ hφ := by
+    constructor;
+    apply Deduction.mdp;
+    . exact PLift.down hφψ;
+    . exact PLift.down hφ;
+instance : Entailment.HasAxiomImply₁ H.logic where
+  imply₁ _ _ := by constructor; apply Deduction.implyS;
+instance : Entailment.HasAxiomImply₂ H.logic where
+  imply₂ _ _ _ := by constructor; apply Deduction.implyK;
+instance : Entailment.HasAxiomAndInst H.logic where
+  and₃ _ _ := by constructor; apply Deduction.K_intro;
+
+instance : Entailment.Minimal (H.logic) where
+  verum := by constructor; apply Deduction.verum;
+  and₁ _ _ := by constructor; apply Deduction.andElimL;
+  and₂ _ _ := by constructor; apply Deduction.andElimR;
+  or₁ _ _ := by constructor; apply Deduction.orIntroL;
+  or₂ _ _ := by constructor; apply Deduction.orIntroR;
+  or₃ _ _ _ := by constructor; apply Deduction.orElim;
+
+instance : H.logic.Substitution where
+  subst! s hφ := by
+    constructor;
+    constructor;
+    apply Deduction.subst;
+    exact PLift.down hφ.some
+
+lemma maxm! (h : φ ∈ H.axiomInstances) : H.logic ⊢! φ := by
+  apply iff_mem_logic.mpr;
+  exact Deduction.maxm h;
+
+lemma maxm'! (h : φ ∈ H.axioms) : H.logic ⊢! φ := by
+  apply iff_mem_logic.mpr;
+  exact Deduction.maxm' h;
+
+@[induction_eliminator]
+protected lemma rec!
+  {motive   : (φ : Formula α) → (H.logic ⊢! φ) → Sort}
+  (maxm     : ∀ {φ : Formula α}, (h : φ ∈ H.axiomInstances) → motive φ (maxm! h))
+  (mdp      : ∀ {φ ψ : Formula α}, {hpq : H.logic ⊢! φ ➝ ψ} → {hp : H.logic ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (mdp! hpq hp))
+  (verum    : motive ⊤ verum!)
+  (implyS   : ∀ {φ ψ},   motive (Axioms.Imply₁ φ ψ) $ by simp)
+  (implyK   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
+  (andElimL : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ φ) $ by simp)
+  (andElimR : ∀ {φ ψ},   motive (φ ⋏ ψ ➝ ψ) $ by simp)
+  (K_intro  : ∀ {φ ψ},   motive (φ ➝ ψ ➝ φ ⋏ ψ) $ by simp)
+  (orIntroL : ∀ {φ ψ},   motive (φ ➝ φ ⋎ ψ) $ by simp)
+  (orIntroR : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) $ by simp)
+  (orElim   : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) $ by simp)
+  : ∀ {φ}, (d : H.logic ⊢! φ) → motive φ d := by
+  rintro φ d;
+  induction iff_mem_logic.mp d with
+  | maxm h =>
+    apply maxm h;
+  | mdp hφψ hφ ihφψ ihφ =>
+    apply mdp;
+    . exact ihφψ $ iff_mem_logic.mpr hφψ;
+    . exact ihφ $ iff_mem_logic.mpr hφ;
+  | verum => simpa;
+  | implyS => apply implyS;
+  | implyK => apply implyK;
+  | andElimL => apply andElimL;
+  | andElimR => apply andElimR;
+  | K_intro => apply K_intro;
+  | orIntroL => apply orIntroL;
+  | orIntroR => apply orIntroR;
+  | orElim => apply orElim;
+
+lemma weakerThan_of_subset_axioms (hs : H₁.axioms ⊆ H₂.axioms) : H₁.logic ⪯ H₂.logic := by
+  apply weakerThan_iff.mpr;
+  intro _ h;
+  induction h with
+  | maxm h =>
+    obtain ⟨ψ, h, ⟨s, rfl⟩⟩ := h;
+    apply H₂.logic.subst! s;
+    exact maxm'! $ hs h;
+  | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂
   | _ => simp;
 
-lemma weakerThan_of_subset_axioms (hSubset : H₁.axioms ⊆ H₂.axioms) : H₁ ⪯ H₂ := by
-  apply weakerThan_of_dominate_axiomInstances;
-  rintro φ ⟨ψ, hs, ⟨s, rfl⟩⟩;
-  apply maxm!;
-  use ψ;
-  constructor;
-  . exact hSubset hs;
-  . use s;
+lemma weakerThan_of_provable_axiomInstances (hs : H₂.logic ⊢!* H₁.axiomInstances) : H₁.logic ⪯ H₂.logic := by
+  apply weakerThan_iff.mpr;
+  intro _ h;
+  induction h with
+  | maxm h => exact hs h;
+  | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂
+  | _ => simp;
 
-end
-
-abbrev logic (H : Hilbert ℕ) : Logic := Entailment.theory H
-
-section
-
-variable {H : Hilbert ℕ}
-
-open Entailment
-
-@[simp]
-lemma iff_mem_logic {φ : Formula ℕ} : φ ∈ H.logic ↔ H ⊢! φ := by simp [Entailment.theory];
-
-instance [Entailment.Consistent H] : H.logic.Consistent := ⟨by
-  apply Set.eq_univ_iff_forall.not.mpr;
-  push_neg;
-  obtain ⟨φ, hφ⟩ : ∃ φ, H ⊬ φ := Entailment.Consistent.exists_unprovable inferInstance;
-  use! φ;
-  simpa;
-⟩
-
-instance [Entailment.Disjunctive H] : H.logic.Disjunctive := ⟨fun {_ _} h => Disjunctive.disjunctive h⟩
+lemma weakerThan_of_provable_axioms (hs : H₂.logic ⊢!* H₁.axioms) : H₁.logic ⪯ H₂.logic := by
+  apply weakerThan_of_provable_axiomInstances;
+  rintro φ ⟨ψ, h, ⟨s, rfl⟩⟩;
+  exact H₂.logic.subst! s (hs h);
 
 end
 

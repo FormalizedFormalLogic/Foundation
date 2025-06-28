@@ -60,9 +60,9 @@ end Formula
 open Entailment
 open Formula (trivTranslate verTranslate)
 
-lemma Hilbert.provable_of_classical_provable {H : Modal.Hilbert ℕ} {φ : Propositional.Formula ℕ} : ((Propositional.Hilbert.Cl) ⊢! φ) → (H.logic ⊢! φ.toModalFormula) := by
+lemma Hilbert.provable_of_classical_provable {H : Modal.Hilbert ℕ} {φ : Propositional.Formula ℕ} : (Propositional.Logic.Cl ⊢! φ) → (H.logic ⊢! φ.toModalFormula) := by
   intro h;
-  induction h using Propositional.Hilbert.Deduction.rec! with
+  induction h using Propositional.Hilbert.rec! with
   | maxm ih =>
     rcases (by simpa using ih) with (⟨_, rfl⟩ | ⟨_, rfl⟩);
     . exact efq!;
@@ -83,7 +83,7 @@ lemma iff_trivTranslated : (Logic.Triv) ⊢! φ ⭤ φᵀ := by
   | himp _ _ ih₁ ih₂ => exact ECC!_of_E!_of_E! ih₁ ih₂;
   | _ => apply E!_id
 
-protected theorem iff_provable_Cl : Logic.Triv ⊢! φ ↔ (Propositional.Hilbert.Cl) ⊢! φᵀ.toPropFormula := by
+protected theorem iff_provable_Cl : Logic.Triv ⊢! φ ↔ Propositional.Logic.Cl ⊢! φᵀ.toPropFormula := by
   constructor;
   . intro h;
     induction h with
@@ -114,7 +114,7 @@ lemma iff_verTranslated : (Logic.Ver) ⊢! φ ⭤ φⱽ := by
   | himp _ _ ih₁ ih₂ => exact ECC!_of_E!_of_E! ih₁ ih₂;
   | _ => apply E!_id
 
-protected lemma iff_provable_Cl : (Logic.Ver) ⊢! φ ↔ (Propositional.Hilbert.Cl) ⊢! φⱽ.toPropFormula := by
+protected lemma iff_provable_Cl : (Logic.Ver) ⊢! φ ↔ Propositional.Logic.Cl ⊢! φⱽ.toPropFormula := by
   constructor;
   . intro h;
     induction h with

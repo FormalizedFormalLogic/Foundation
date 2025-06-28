@@ -399,7 +399,7 @@ end
 
 section
 
-abbrev FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
+abbrev FrameClass.logic (C : FrameClass) : Logic ℕ := { φ | C ⊧ φ }
 
 end
 
