@@ -5,43 +5,42 @@ import Foundation.Modal.Kripke.Logic.S5
 
 namespace LO.Modal.Logic
 
-open Formula
 open Entailment
+open Formula
 open Kripke
+open Hilbert.Kripke
 
-lemma S5Grz.Kripke.finite_equality : Logic.S5Grz = Kripke.FrameClass.finite_Triv.logic := by
-  rw [eq_S5Grz_Triv, Triv.Kripke.finite_equality];
+lemma S5Grz.Kripke.finite_equality : Logic.S5Grz = Kripke.FrameClass.finite_Triv.logic := by simp [Triv.Kripke.finite_equality]
 
-@[simp]
-theorem S5Grz.proper_extension_of_S5 : Logic.S5 ⊂ Logic.S5Grz := by
+instance : Logic.S5 ⪱ Logic.S5Grz := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.universal ⊧ φ by
-      rw [S5.Kripke.universal];
-      tauto;
+  . exact Hilbert.weakerThan_of_subset_axioms (by simp)
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0);
     constructor;
-    . exact axiomGrz!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . simp;
+    . suffices ¬FrameClass.universal ⊧ (Axioms.Grz (.atom 0)) by simpa [S5.Kripke.universal];
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
       constructor;
-      . exact {
-          universal := by tauto;
-        };
+      . exact { universal := by tauto; };
       . simp [Semantics.Realize, Satisfies];
         tauto;
 
-@[simp]
-theorem S5Grz.proper_extension_of_Grz : Logic.Grz ⊂ Logic.S5Grz := by
+instance : Logic.S5 ⪱ Logic.Triv := by
+  suffices Logic.S5 ⪱ Logic.S5Grz by simpa;
+  infer_instance
+
+instance : Logic.Grz ⪱ Logic.S5Grz := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.finite_Grz ⊧ φ by
-      rw [Grz.Kripke.finite_partial_order];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Five (.atom 0)
     constructor;
-    . exact axiomFive!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . simp;
+    . suffices ¬FrameClass.finite_Grz ⊧ Axioms.Five (.atom 0) by simpa [Grz.Kripke.finite_partial_order];
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
       use M, 0;
       constructor;
@@ -57,11 +56,8 @@ theorem S5Grz.proper_extension_of_Grz : Logic.Grz ⊂ Logic.S5Grz := by
         . use 1;
           constructor <;> omega;
 
-@[simp]
-theorem Triv.proper_extension_of_S5 : Logic.S5 ⊂ Logic.Triv := by simp [←eq_S5Grz_Triv];
-
-@[simp]
-lemma Triv.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Triv := by
-  trans Logic.S5 <;> simp;
+instance : Logic.S4 ⪱ Logic.Triv := calc
+  Logic.S4 ⪱ Logic.S5   := by infer_instance
+  _        ⪱ Logic.Triv := by infer_instance
 
 end LO.Modal.Logic

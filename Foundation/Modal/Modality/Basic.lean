@@ -1,7 +1,12 @@
 import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Logic.Extension
+import Foundation.Meta.ClProver
+
 
 namespace LO.Modal
+
+open Formula
+open LO.Entailment LO.Modal.Entailment
 
 @[match_pattern]
 inductive Modality : Type
@@ -316,33 +321,31 @@ end Formula
 
 namespace Logic
 
-open Formula
+variable {m : Modality} {L : Logic _} [L.IsNormal] {φ ψ : Formula ℕ} {s : Substitution ℕ}
 
-variable {m : Modality} {L : Logic} [L.IsNormal] {φ ψ : Formula ℕ} {s : Substitution ℕ}
-
-lemma modality_congruence (h : φ ⭤ ψ ∈ L) : (m φ) ⭤ (m ψ) ∈ L := by
+lemma modality_congruence (h : L ⊢! φ ⭤ ψ) : L ⊢! (m φ) ⭤ (m ψ) := by
   induction m with
-  | empty => simpa;
-  | box m' ih => apply L.box_congruence ih;
-  | dia m' ih => apply L.dia_congruence ih;
-  | neg m' ih => apply L.neg_congruence ih;
+  | empty => simpa [-iff_provable];
+  | box m' ih => apply box_congruence! ih;
+  | dia m' ih => apply dia_congruence! ih;
+  | neg m' ih => apply neg_congruence! ih;
 
-lemma E_subst_attachmodality : ((m φ)⟦s⟧) ⭤ (m (φ⟦s⟧)) ∈ L := by
+lemma E_subst_attachmodality : L ⊢! ((m φ)⟦s⟧) ⭤ (m (φ⟦s⟧)) := by
   induction m with
   | empty => simp;
-  | box m' ih => apply L.box_congruence ih;
-  | dia m' ih => apply L.dia_congruence ih;
-  | neg m' ih => apply L.neg_congruence ih;
+  | box m' ih => apply box_congruence! ih;
+  | dia m' ih => apply dia_congruence! ih;
+  | neg m' ih => apply neg_congruence! ih;
 
-lemma C_subst_attachmodality_mp : ((m φ)⟦s⟧) ➝ (m (φ⟦s⟧)) ∈ L := by
-  apply L.C_of_E_mp E_subst_attachmodality;
+lemma C_subst_attachmodality_mp : L ⊢! ((m φ)⟦s⟧) ➝ (m (φ⟦s⟧)) := by
+  apply C_of_E_mp! E_subst_attachmodality;
 
-lemma C_subst_attachmodality_mpr : (m (φ⟦s⟧)) ➝ ((m φ)⟦s⟧) ∈ L := by
-  apply L.C_of_E_mpr E_subst_attachmodality;
+lemma C_subst_attachmodality_mpr : L ⊢! (m (φ⟦s⟧)) ➝ ((m φ)⟦s⟧) := by
+  apply C_of_E_mpr! E_subst_attachmodality;
 
-lemma attachmodality_subst_of_subst_attachmodality : (m φ)⟦s⟧ ∈ L → m (φ⟦s⟧) ∈ L := L.mdp C_subst_attachmodality_mp
+lemma attachmodality_subst_of_subst_attachmodality : L ⊢! (m φ)⟦s⟧ → L ⊢! m (φ⟦s⟧) := mdp! $ C_subst_attachmodality_mp
 
-lemma subst_attachmodality_of_attachmodality_subst : m (φ⟦s⟧) ∈ L → (m φ)⟦s⟧ ∈ L := L.mdp C_subst_attachmodality_mpr
+lemma subst_attachmodality_of_attachmodality_subst : L ⊢! m (φ⟦s⟧) → L ⊢! (m φ)⟦s⟧ := mdp! $ C_subst_attachmodality_mpr
 
 end Logic
 
@@ -351,18 +354,16 @@ namespace Modality
 
 open Formula
 
-variable {L : Logic} [L.IsNormal] {m₁ m₂ : Modality}
+variable {L : Logic ℕ} [L.IsNormal] {m₁ m₂ : Modality}
 
-class Translation (L : Logic) (m₁ m₂ : Modality) where
-  translate : ∀ a, (m₁ (.atom a)) ➝ (m₂ (.atom a)) ∈ L
+class Translation (L : Logic _) (m₁ m₂ : Modality) where
+  translate : ∀ a,  L ⊢! (m₁ (.atom a)) ➝ (m₂ (.atom a))
 
 notation:90 M₁ " ⤳[" L "] " M₂ => Translation L M₁ M₂
 
 instance : IsRefl _ (· ⤳[L] ·) := ⟨by
   intro M;
   constructor;
-  intro a;
-  apply L.of_mem_K;
   simp;
 ⟩
 
@@ -371,15 +372,15 @@ instance : IsTrans _ (· ⤳[L] ·) where
     intro T₁₂ T₂₃;
     constructor;
     intro a;
-    exact L.C_trans (T₁₂.translate a) (T₂₃.translate a);
+    exact C!_trans (T₁₂.translate a) (T₂₃.translate a);
 
-class Equivalence (L : Logic) (M₁ M₂ : Modality) where
-  equivalent : ∀ a, (M₁ (.atom a)) ⭤ (M₂ (.atom a)) ∈ L
+class Equivalence (L : Logic ℕ) (M₁ M₂ : Modality) where
+  equivalent : ∀ a, L ⊢! (M₁ (.atom a)) ⭤ (M₂ (.atom a))
 
 notation M₁ " ≅[" L "] " M₂ => Equivalence L M₁ M₂
 
-instance [m₁ ≅[L] m₂] : m₁ ⤳[L] m₂ := ⟨fun a ↦ L.C_of_E_mp $ Equivalence.equivalent a⟩
-instance [m₁ ≅[L] m₂] : m₂ ⤳[L] m₁ := ⟨fun a ↦ L.C_of_E_mpr $ Equivalence.equivalent a⟩
+instance [m₁ ≅[L] m₂] : m₁ ⤳[L] m₂ := ⟨fun a ↦ C_of_E_mp! $ Equivalence.equivalent a⟩
+instance [m₁ ≅[L] m₂] : m₂ ⤳[L] m₁ := ⟨fun a ↦ C_of_E_mpr! $ Equivalence.equivalent a⟩
 
 lemma iff_equivalence_bi_translate : (m₁ ≅[L] m₂) ↔ (m₁ ⤳[L] m₂) ∧ (m₂ ⤳[L] m₁) := by
   constructor;
@@ -388,7 +389,7 @@ lemma iff_equivalence_bi_translate : (m₁ ≅[L] m₂) ↔ (m₁ ⤳[L] m₂) �
   . intro ⟨T₁₂, T₂₁⟩;
     constructor;
     intro a;
-    apply L.E_of_C_of_C;
+    apply E!_intro;
     . exact T₁₂.translate a;
     . exact T₂₁.translate a;
 
@@ -422,55 +423,55 @@ instance : IsTrans _ (· ≅[L] ·) := ⟨by
 instance : IsEquiv _ (· ≅[L] ·) where
 
 
-lemma Translation.translate_fml [m₁ ⤳[L] m₂] (φ : Formula _) : m₁ φ ➝ m₂ φ ∈ L := by
+lemma Translation.translate_fml [m₁ ⤳[L] m₂] (φ : Formula _) : L ⊢! m₁ φ ➝ m₂ φ := by
   let s : Substitution ℕ := λ a => if a = 0 then φ else (.atom a);
-  apply L.C_replace $ L.subst (Translation.translate (L := L) (m₁ := m₁) (m₂ := m₂) 0) (s := s);
+  apply C!_replace ?_ ?_ $ L.subst! (Translation.translate (L := L) (m₁ := m₁) (m₂ := m₂) 0) (s := s);
   . simpa [s] using L.C_subst_attachmodality_mpr (s := s) (φ := (.atom 0));
   . simpa [s] using L.C_subst_attachmodality_mp (s := s) (φ := (.atom 0));
 
-def translation_of_axiomInstance {a : ℕ} (h : (m₁ a) ➝ (m₂ a) ∈ L) : m₁ ⤳[L] m₂ := ⟨by
+def translation_of_axiomInstance {a : ℕ} (h : L ⊢! (m₁ a) ➝ (m₂ a)) : m₁ ⤳[L] m₂ := ⟨by
   intro b;
   let s : Substitution ℕ := λ c => if c = a then b else c;
-  apply L.C_replace $ L.subst h (s := s);
+  apply C!_replace ?_ ?_ $ L.subst! (s := s) h;
   . simpa [s] using L.C_subst_attachmodality_mpr (s := s) (φ := (.atom a));
   . simpa [s] using L.C_subst_attachmodality_mp (s := s) (φ := (.atom a));
 ⟩
 
-lemma translation_expand_right {L : Logic} [L.IsNormal] (m₁ m₂ m) [m₁ ⤳[L] m₂] : (m₁ + m) ⤳[L] (m₂ + m) := by
+lemma translation_expand_right {L : Logic _} [L.IsNormal] (m₁ m₂ m) [m₁ ⤳[L] m₂] : (m₁ + m) ⤳[L] (m₂ + m) := by
   constructor;
   intro a;
   simpa using Translation.translate_fml (L := L) (m₁ := m₁) (m₂ := m₂) $ m (.atom a);
 
-lemma translation_expand_left {L : Logic} [L.IsNormal] (m₁ m₂ m) [m₁ ⤳[L] m₂] [m ⤳[L] (-)] : (m + m₁) ⤳[L] (m₂) := by
+lemma translation_expand_left {L : Logic _} [L.IsNormal] (m₁ m₂ m) [m₁ ⤳[L] m₂] [m ⤳[L] (-)] : (m + m₁) ⤳[L] (m₂) := by
   constructor;
   intro a;
-  have H₁ : (m + m₁) (atom a) ➝ m₁ (atom a) ∈ L := by simpa using Translation.translate_fml (m₁ := m) (m₂ := (-)) (m₁ (.atom a));
-  have H₂ : m₁ (atom a) ➝ m₂ (atom a) ∈ L := Translation.translate_fml (.atom a);
-  exact L.C_trans H₁ H₂;
+  have H₁ : L ⊢! (m + m₁) (atom a) ➝ m₁ (atom a) := by simpa using Translation.translate_fml (m₁ := m) (m₂ := (-)) (m₁ (.atom a));
+  have H₂ : L ⊢! m₁ (atom a) ➝ m₂ (atom a) := Translation.translate_fml (.atom a);
+  exact C!_trans H₁ H₂;
 
-lemma Equivalence.equivalent_fml [m₁ ≅[L] m₂] (φ : Formula _) : m₁ φ ⭤ m₂ φ ∈ L := by
-  apply L.E_of_C_of_C <;> apply Translation.translate_fml;
+lemma Equivalence.equivalent_fml [m₁ ≅[L] m₂] (φ : Formula _) : L ⊢! m₁ φ ⭤ m₂ φ := by
+  apply E!_intro <;> apply Translation.translate_fml;
 
-def equivalence_of_axiomInstance {a : ℕ} (h : (m₁ a) ⭤ (m₂ a) ∈ L) : m₁ ≅[L] m₂ := by
+def equivalence_of_axiomInstance {a : ℕ} (h : L ⊢! (m₁ a) ⭤ (m₂ a)) : m₁ ≅[L] m₂ := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
   . apply translation_of_axiomInstance (a := a);
-    apply L.C_of_E_mp h;
+    apply C_of_E_mp! h;
   . apply translation_of_axiomInstance (a := a);
-    apply L.C_of_E_mpr h;
+    apply C_of_E_mpr! h;
 
-lemma equivalence_expand_right {L : Logic} [L.IsNormal] (m₁ m₂ m) [m₁ ≅[L] m₂] : (m₁ + m) ≅[L] (m₂ + m) := by
+lemma equivalence_expand_right {L : Logic _} [L.IsNormal] (m₁ m₂ m) [m₁ ≅[L] m₂] : (m₁ + m) ≅[L] (m₂ + m) := by
   apply iff_equivalence_bi_translate.mpr;
   constructor <;> apply translation_expand_right;
 
-lemma equivalence_expand_left {L : Logic} [L.IsNormal] (m₁ m₂ m) [m₁ ≅[L] m₂] : (m + m₁) ≅[L] (m + m₂) := by
+lemma equivalence_expand_left {L : Logic _} [L.IsNormal] (m₁ m₂ m) [m₁ ≅[L] m₂] : (m + m₁) ≅[L] (m + m₂) := by
   constructor;
   intro a;
   induction m with
   | empty    => apply Equivalence.equivalent_fml (m₁ := m₁) (m₂ := m₂);
-  | box m ih => apply L.box_congruence ih;
-  | dia m ih => apply L.dia_congruence ih;
-  | neg m ih => apply L.neg_congruence ih;
+  | box m ih => apply box_congruence! ih;
+  | dia m ih => apply dia_congruence! ih;
+  | neg m ih => apply neg_congruence! ih;
 
 end Modality
 
@@ -485,31 +486,22 @@ section
 
 open LO.Entailment
 
-variable {L : Logic} [L.IsNormal] {m : Modality}
+variable {L : Logic _} [L.IsNormal] {m : Modality}
 
 instance : m ⤳[L] m := refl m
 
-instance : (□) ≅[L] (∼◇∼) := by
-  constructor;
-  intro a;
-  apply L.of_mem_K;
-  simp;
+instance : (□) ≅[L] (∼◇∼) := by constructor; simp;
 
-instance : (◇) ≅[L] (∼□∼) := by
-  constructor;
-  intro a;
-  apply L.of_mem_K;
-  simp;
+instance : (◇) ≅[L] (∼□∼) := by constructor; simp;
 
 instance : (∼∼) ≅[L] (-) := by
   apply equivalence_of_axiomInstance (a := 0);
-  apply L.of_mem_K;
-  apply E!_symm;
-  simp;
+  simp only [attachmodality];
+  cl_prover;
 
 instance : (□∼) ≅[L] (∼◇) := by
   apply equivalence_of_axiomInstance (a := 0);
-  apply L.of_mem_K;
+  simp only [attachmodality];
   -- TODO: extract ` □∼p ⭤ ∼◇p`
   apply E!_intro;
   . simp;
@@ -519,7 +511,7 @@ instance : (□∼) ≅[L] (∼◇) := by
 
 instance : (◇∼) ≅[L] (∼□) := by
   apply equivalence_of_axiomInstance (a := 0);
-  apply L.of_mem_K;
+  simp only [attachmodality];
   -- TODO: extract `◇∼p ⭤ ∼□p`
   apply E!_intro;
   . apply C!_trans (ψ := ∼□(∼∼(.atom 0)));
@@ -692,10 +684,10 @@ section
 
 open Modality Modalities
 
-variable {L : Logic} {M : Modalities} {n : ℕ} {n : ℕ}
+variable {L : Logic _} {M : Modalities} {n : ℕ} {n : ℕ}
 
 /-- In `L`, every `n`-size modality is reduced to some modality in `M` -/
-abbrev ModalReduction (L : Logic) (n : ℕ) (M : Modalities) := ∀ m, m.size = n → ∃ m' ∈ M, m ⤳[L] m'
+abbrev ModalReduction (L : Logic _) (n : ℕ) (M : Modalities) := ∀ m, m.size = n → ∃ m' ∈ M, m ⤳[L] m'
 
 lemma ModalReduction.of_allOfSize (h : ∀ m, m ∈ allOfSize n → ∃ m' ∈ M, m ⤳[L] m') : ModalReduction L n M := by
   intro m hm;
@@ -704,7 +696,7 @@ lemma ModalReduction.of_allOfSize (h : ∀ m, m ∈ allOfSize n → ∃ m' ∈ M
 
 
 /-- In `L`, every modality of size less than `n` is reduced to some modality in `M` -/
-abbrev ModalReductionLe (L : Logic) (n : ℕ) (M : Modalities) := ∀ m, m.size ≤ n → ∃ m' ∈ M, m ⤳[L] m'
+abbrev ModalReductionLe (L : Logic _) (n : ℕ) (M : Modalities) := ∀ m, m.size ≤ n → ∃ m' ∈ M, m ⤳[L] m'
 
 lemma ModalReductionLe.of_allOfSizeLe (h : ∀ m, m ∈ allOfSizeLe n → ∃ m' ∈ M, m ⤳[L] m') : ModalReductionLe L n M := by
   intro m hm;

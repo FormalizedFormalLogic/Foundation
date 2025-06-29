@@ -12,19 +12,17 @@ namespace Hilbert.Cl
 
 theorem soundness (h : Hilbert.Cl ⊢! φ) : φ.isTautology := by
   intro v;
-  induction h using Hilbert.Deduction.rec! with
-  | maxm h => rcases h with ⟨φ, (rfl | rfl), ⟨_, rfl⟩⟩ <;> { tauto; }
+  induction h with
+  | axm _ h => rcases h with (rfl | rfl) <;> tauto;
   | mdp ihφψ ihφ => exact ihφψ ihφ;
   | andElimL => simp [Semantics.Realize, val]; tauto;
   | andElimR => simp [Semantics.Realize, val];
   | orElim => simp [Semantics.Realize, val]; tauto;
   | _ => tauto;
 
-lemma not_provable_of_exists_valuation : (∃ v : Valuation _, ¬(v ⊧ φ)) → ¬(Hilbert.Cl ⊢! φ) := by
-  contrapose;
-  push_neg;
-  exact soundness;
-
+lemma not_provable_of_exists_valuation : (∃ v : Valuation _, ¬(v ⊧ φ)) → Hilbert.Cl ⊬ φ := by
+  contrapose!;
+  simpa using soundness;
 
 section Completeness
 
@@ -109,9 +107,8 @@ theorem iff_isTautology_provable : φ.isTautology ↔ Hilbert.Cl ⊢! φ := ⟨
 ⟩
 
 lemma exists_valuation_of_not_provable : ¬(Hilbert.Cl ⊢! φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
-  contrapose;
-  push_neg;
-  exact completeness;
+  contrapose!;
+  simpa using completeness;
 
 end Completeness
 
@@ -124,7 +121,13 @@ variable {φ : Formula ℕ}
 
 theorem tautologies : Logic.Cl = { φ | φ.isTautology } := by
   ext φ;
-  simp [Hilbert.Cl.iff_isTautology_provable];
+  simp [Hilbert.Cl.iff_isTautology_provable, Entailment.theory];
+
+lemma exists_valuation_of_not (h : Logic.Cl ⊬ φ) : ∃ v : Valuation _, ¬(v ⊧ φ) := by
+  apply Hilbert.Cl.exists_valuation_of_not_provable;
+  tauto;
+
+lemma iff_isTautology : Logic.Cl ⊢! φ ↔ φ.isTautology := by simp [tautologies];
 
 end Logic.Cl
 

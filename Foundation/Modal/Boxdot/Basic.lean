@@ -18,14 +18,11 @@ def Formula.boxdotTranslate : Formula α → Formula α
   | □φ => ⊡(boxdotTranslate φ)
 postfix:90 "ᵇ" => Formula.boxdotTranslate
 
-class BoxdotProperty (L₁ L₂ : Logic) where
-  bdp {φ : _} : φᵇ ∈ L₁ ↔ φ ∈ L₂
 
-
-theorem Hilbert.boxdotTranslated_of_dominate {H₁ H₂ : Hilbert α} [Entailment.K H₂]
-  (h : ∀ φ ∈ H₁.axiomInstances, H₂ ⊢! φᵇ) : H₁ ⊢! φ → H₂ ⊢! φᵇ := by
+theorem Hilbert.of_provable_boxdotTranslated_axiomInstances {H₁ H₂ : Hilbert α} [Entailment.K H₂.logic]
+  (h : ∀ φ ∈ H₁.axiomInstances, H₂.logic ⊢! φᵇ) : H₁.logic ⊢! φ → H₂.logic ⊢! φᵇ := by
   intro d;
-  induction d using Hilbert.Deduction.rec! with
+  induction d with
   | maxm hs => exact h _ hs;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | nec ihp => exact boxdot_nec! $ ihp;

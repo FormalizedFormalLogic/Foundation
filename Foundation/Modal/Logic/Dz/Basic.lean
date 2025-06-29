@@ -3,89 +3,79 @@ import Foundation.Modal.Logic.GL.Independency
 
 namespace LO.Modal
 
+open Formula (atom)
 open Logic
 
 protected abbrev Logic.Dz := sumQuasiNormal Logic.GL {∼□⊥, □(□(.atom 0) ⋎ □(.atom 1)) ➝ □(.atom 0) ⋎ □(.atom 1)}
-instance : Logic.Dz.IsQuasiNormal where
-  subset_K := by
-    intro φ hφ;
-    apply Logic.sumQuasiNormal.mem₁;
-    exact Logic.of_mem_K hφ;
-  mdp_closed := by
-    intro φ ψ hφψ hφ;
-    apply Logic.sumQuasiNormal.mdp hφψ hφ;
-  subst_closed := by
-    intro φ hφ s;
-    apply Logic.sumQuasiNormal.subst;
-    exact hφ;
+instance : Logic.Dz.IsQuasiNormal := inferInstance
 
-lemma Logic.Dz.mem_axiomP : ∼□⊥ ∈ Logic.Dz := by
-  apply Logic.sumQuasiNormal.mem₂;
-  tauto;
+instance : Entailment.HasAxiomP Logic.Dz where
+  P := by
+    constructor;
+    apply Logic.sumQuasiNormal.mem₂;
+    simp;
 
-lemma Logic.Dz.mem_axiomDz : □(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ ∈ Logic.Dz := by
-  apply Logic.subst (φ := □(□(.atom 0) ⋎ □(.atom 1)) ➝ □(.atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
-  apply Logic.sumQuasiNormal.mem₂;
-  tauto;
+lemma Logic.Dz.mem_axiomDz : Logic.Dz ⊢! □(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ := by
+  apply Logic.subst! (φ := □(□(.atom 0) ⋎ □(.atom 1)) ➝ □(.atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
+  apply Logic.sumQuasiNormal.mem₂!;
+  simp;
 
-lemma Logic.GL_subset_Dz : Logic.GL ⊆ Logic.Dz := by
-  intro φ hφ;
-  apply Logic.sumQuasiNormal.mem₁;
-  assumption;
-
-lemma Logic.GL_ssubset_Dz : Logic.GL ⊂ Logic.Dz := by
+instance : Logic.GL ⪱ Logic.Dz := by
   constructor;
-  . exact Logic.GL_subset_Dz;
-  . suffices ∃ φ, φ ∈ Logic.Dz ∧ φ ∉ Logic.GL by exact Set.not_subset.mpr this;
+  . infer_instance;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use ∼□⊥;
     constructor;
-    . exact Logic.Dz.mem_axiomP
+    . simp;
     . exact Logic.GL.unprovable_notbox;
-
 
 section
 
-private inductive Logic.Dz' : Logic
-  | mem_GL {φ} : φ ∈ Logic.GL → Logic.Dz' φ
-  | axiomP : Logic.Dz' (∼□⊥)
-  | axiomDz (φ ψ) : Logic.Dz' (□(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ)
-  | mdp  {φ ψ} : Logic.Dz' (φ ➝ ψ) → Logic.Dz' φ → Logic.Dz' ψ
+private inductive Logic.Dz.aux : Logic ℕ
+  | mem_GL {φ} : Logic.GL ⊢! φ → Logic.Dz.aux φ
+  | axiomP : Logic.Dz.aux (∼□⊥)
+  | axiomDz (φ ψ) : Logic.Dz.aux (□(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ)
+  | mdp  {φ ψ} : Logic.Dz.aux (φ ➝ ψ) → Logic.Dz.aux φ → Logic.Dz.aux ψ
 
-private lemma Logic.eq_Dz_Dz' : Logic.Dz = Logic.Dz' := by
+private lemma Logic.Dz.eq_aux : Logic.Dz = Logic.Dz.aux := by
   ext φ;
   constructor;
   . intro h;
     induction h with
-    | mem₁ h => exact Logic.Dz'.mem_GL h;
+    | mem₁ h => exact Logic.Dz.aux.mem_GL h;
     | mem₂ h =>
       rcases h with (rfl | rfl);
-      . apply Logic.Dz'.axiomP;
-      . apply Logic.Dz'.axiomDz;
-    | mdp _ _ ihφψ ihφ => exact Logic.Dz'.mdp ihφψ ihφ;
+      . apply Logic.Dz.aux.axiomP;
+      . apply Logic.Dz.aux.axiomDz;
+    | mdp _ _ ihφψ ihφ => exact Logic.Dz.aux.mdp ihφψ ihφ;
     | subst hφ ihφ =>
       clear hφ;
       induction ihφ with
-      | mem_GL h => apply Logic.Dz'.mem_GL; exact Logic.subst h;
-      | axiomP => apply Logic.Dz'.axiomP;
-      | axiomDz _ _ => apply Logic.Dz'.axiomDz;
-      | mdp _ _ ihφψ ihφ => apply Logic.Dz'.mdp ihφψ ihφ;
+      | mem_GL h =>
+        apply Logic.Dz.aux.mem_GL;
+        apply subst!;
+        exact h;
+      | axiomP => apply Logic.Dz.aux.axiomP;
+      | axiomDz _ _ => apply Logic.Dz.aux.axiomDz;
+      | mdp _ _ ihφψ ihφ => apply Logic.Dz.aux.mdp ihφψ ihφ;
   . intro h;
+    apply iff_provable.mp;
     induction h with
-    | mem_GL h => exact sumQuasiNormal.mem₁ h;
-    | mdp _ _ ihφψ ihφ => exact sumQuasiNormal.mdp ihφψ ihφ;
+    | mem_GL h => exact sumQuasiNormal.mem₁! h;
+    | mdp _ _ ihφψ ihφ => exact ihφψ ⨀ ihφ;
     | axiomDz φ => apply Logic.Dz.mem_axiomDz;
-    | axiomP => apply Logic.Dz.mem_axiomP;
+    | axiomP => simp;
 
--- TODO: Remove `eq_S_Dz'`?
+-- TODO: Remove `eq_Dz_Dz'`?
 protected def Logic.Dz.rec'
-  {motive : (φ : Formula ℕ) → φ ∈ Logic.Dz → Prop}
-  (mem_GL : ∀ {φ}, (h : φ ∈ Logic.GL) → motive φ (sumQuasiNormal.mem₁ h))
-  (axiomP : motive (∼□⊥) Logic.Dz.mem_axiomP)
+  {motive : (φ : Formula ℕ) → (Logic.Dz ⊢! φ) → Prop}
+  (mem_GL : ∀ {φ}, (h : Logic.GL ⊢! φ) → motive φ (sumQuasiNormal.mem₁! h))
+  (axiomP : motive (∼□⊥) (by simp))
   (axiomDz : ∀ {φ ψ}, motive (□(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ) (Logic.Dz.mem_axiomDz))
-  (mdp : ∀ {φ ψ}, {hφψ : φ ➝ ψ ∈ Logic.Dz} → {hφ : φ ∈ Logic.Dz} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (sumQuasiNormal.mdp hφψ hφ))
-  : ∀ {φ}, (h : φ ∈ Logic.Dz) → motive φ h := by
+  (mdp : ∀ {φ ψ}, {hφψ : Logic.Dz ⊢! φ ➝ ψ} → {hφ : Logic.Dz ⊢! φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (hφψ ⨀ hφ))
+  : ∀ {φ}, (h : Logic.Dz ⊢! φ) → motive φ h := by
   intro φ h;
-  rw [Logic.eq_Dz_Dz'] at h;
+  replace h := iff_provable.mp $ Logic.Dz.eq_aux.symm ▸ h;
   induction h with
   | mem_GL h => apply mem_GL; assumption;
   | axiomP => apply axiomP;
@@ -94,8 +84,10 @@ protected def Logic.Dz.rec'
     apply mdp;
     . apply ihφψ;
     . apply ihφ;
-    . rwa [←Logic.eq_Dz_Dz'] at hφψ;
-    . rwa [←Logic.eq_Dz_Dz'] at hφ;
+    . replace hφψ := iff_provable.mpr hφψ;
+      rwa [←Logic.Dz.eq_aux] at hφψ;
+    . replace hφ := iff_provable.mpr hφ;
+      rwa [←Logic.Dz.eq_aux] at hφ;
 
 end
 

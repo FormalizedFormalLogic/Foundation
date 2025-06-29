@@ -79,23 +79,23 @@ lemma iff_models_interpret_boxdot_strongInterpret {M} [Nonempty M] [Structure L 
 end Realization
 
 theorem Grz.arithmetical_completeness_iff {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [Arith.SoundOn T (Arith.Hierarchy 𝚷 2)] :
-  (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.strongInterpret ((𝐈𝚺₁).standardDP T) A) ↔ A ∈ Logic.Grz := by
+  (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.strongInterpret ((𝐈𝚺₁).standardDP T) A) ↔ Logic.Grz ⊢! A := by
   constructor;
   . intro h;
-    suffices Aᵇ ∈ Logic.GL by exact BoxdotProperty.bdp.mp this;
+    suffices Logic.GL ⊢! Aᵇ by apply Modal.Logic.iff_provable_boxdot_GL_provable_Grz.mp this;
     apply GL.arithmetical_completeness_iff (T := T).mp;
     intro f;
     apply Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ).mpr;
     apply h;
   . intro h f;
-    replace h : Aᵇ ∈ Logic.GL := BoxdotProperty.bdp.mpr h;
+    replace h := Modal.Logic.iff_provable_boxdot_GL_provable_Grz.mpr h;
     have : (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) (Aᵇ)) := GL.arithmetical_completeness_iff.mpr h;
     exact Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ this;
 
 theorem Grz.arithmetical_completeness_model_iff
   {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [Arith.SoundOn T (Arith.Hierarchy 𝚷 2)] [ℕ ⊧ₘ* T] :
-  (∀ {f : Realization ℒₒᵣ}, ℕ ⊧ₘ₀ f.strongInterpret ((𝐈𝚺₁).standardDP T) A) ↔ A ∈ Logic.Grz := by
-  apply Iff.trans ?_ Logic.iff_provable_Grz_provable_boxdot_S;
+  (∀ {f : Realization ℒₒᵣ}, ℕ ⊧ₘ₀ f.strongInterpret ((𝐈𝚺₁).standardDP T) A) ↔ Logic.Grz ⊢! A := by
+  apply Iff.trans ?_ Modal.Logic.iff_provable_Grz_provable_boxdot_S;
   apply Iff.trans ?_ (S.arithmetical_completeness_iff (T := T)).symm;
   constructor;
   . intro h f; exact Realization.iff_models_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mpr $ h;

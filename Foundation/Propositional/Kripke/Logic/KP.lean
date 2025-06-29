@@ -7,53 +7,41 @@ open Kripke
 open Hilbert.Kripke
 open Formula.Kripke
 
-namespace Kripke
-
-protected abbrev Frame.IsKP := Frame.SatisfiesKriselPutnamCondition
-
-protected abbrev FrameClass.KP : FrameClass := { F | F.SatisfiesKriselPutnamCondition }
-
-end Kripke
+@[reducible] protected alias Kripke.Frame.IsKP := Frame.SatisfiesKriselPutnamCondition
+protected abbrev Kripke.FrameClass.KP : FrameClass := { F | F.SatisfiesKriselPutnamCondition }
 
 
 namespace Hilbert.KP.Kripke
 
-instance sound : Sound Hilbert.KP FrameClass.KP := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.KP FrameClass.KP := instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomKrieselPutnam_of_satisfiesKrieselPutnamCondition
 
-instance consistent : Entailment.Consistent Hilbert.KP := consistent_of_sound_frameclass FrameClass.KP $ by
+instance : Entailment.Consistent Hilbert.KP := consistent_of_sound_frameclass FrameClass.KP $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance canonical : Canonical Hilbert.KP FrameClass.KP := ⟨by
+instance : Canonical Hilbert.KP FrameClass.KP := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Hilbert.KP FrameClass.KP := inferInstance
+instance : Complete Hilbert.KP FrameClass.KP := inferInstance
 
-end Hilbert.KP.Kripke
+end KP.Kripke
 
-
-namespace Logic.KP
-
-open Formula
-
-lemma Kripke.KP : Logic.KP = FrameClass.KP.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
-@[simp]
-theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KP := by
+instance : Hilbert.Int ⪱ Hilbert.KP := by
   constructor;
-  . exact (Hilbert.weakerThan_of_subset_axioms (by simp)).subset;
-  . suffices ∃ φ, Hilbert.KP ⊢! φ ∧ ¬FrameClass.all ⊧ φ by rw [Int.Kripke.Int]; tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2);
     constructor;
     . simp;
-    . apply not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.all)
+      apply not_validOnFrameClass_of_exists_model_world;
       let M : Kripke.Model := {
         World := Fin 5
         Rel x y := x = y ∨ x = 0 ∨ (x ≤ 1 ∧ y = 2) ∨ (x ≤ 1 ∧ y = 3) ∨ (x ≤ 1 ∧ y = 4)
@@ -90,7 +78,7 @@ theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KP := by
             match x with
             | 0 => omega;
             | 1 =>
-              suffices ¬Satisfies M 1 (∼atom 0) by tauto
+              suffices ¬Satisfies M 1 (∼.atom 0) by tauto
               apply Satisfies.neg_def.not.mpr;
               push_neg;
               use 2;
@@ -116,6 +104,12 @@ theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KP := by
               . tauto;
               . simp [Semantics.Realize, Satisfies, M, Frame.Rel'];
 
-end Logic.KP
+end Hilbert
+
+
+propositional_kripke Logic.KP FrameClass.KP
+
+instance : Logic.Int ⪱ Logic.KP := inferInstance
+
 
 end LO.Propositional

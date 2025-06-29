@@ -20,6 +20,7 @@ import Foundation.Propositional.Kripke.Logic.KP
 import Foundation.Propositional.Kripke.Logic.Cl
 import Foundation.Propositional.Logic.Letterless_Int_Cl
 import Foundation.Propositional.Logic.PostComplete
+import Foundation.Propositional.Decidable
 
 -- FirstOrder
 
@@ -114,7 +115,7 @@ import Foundation.Modal.Kripke.Undefinability
 import Foundation.Modal.Kripke.Balloon
 import Foundation.Modal.Kripke.LinearFrame
 
-import Foundation.Modal.PLoN.Hilbert.N
+import Foundation.Modal.PLoN.Logic.N
 
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.ModalCompanion.KC
@@ -144,4 +145,6 @@ import Foundation.ProvabilityLogic.Grz.Completeness
 
 import Foundation.ProvabilityLogic.S.Completeness
 
-import Foundation.AutoProver.Classical
+import Foundation.Meta.Qq
+import Foundation.Meta.Lit
+import Foundation.Meta.ClProver

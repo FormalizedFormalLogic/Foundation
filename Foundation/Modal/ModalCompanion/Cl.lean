@@ -15,14 +15,14 @@ open Propositional
 open Propositional.Formula (atom)
 open Propositional.Formula (goedelTranslate)
 
-lemma Logic.Cl.smallestMC.mem_diabox_box : (◇□(.atom 0) ➝ □(.atom 0)) ∈ Logic.Cl.smallestMC := by
-  have : □(.atom 0) ⋎ □(∼□(.atom 0)) ∈ Logic.Cl.smallestMC := by
-    apply Logic.sumNormal.mem₂;
+lemma Logic.Cl.smallestMC.mem_diabox_box : Logic.Cl.smallestMC ⊢! (◇□(.atom 0) ➝ □(.atom 0)) := by
+  have : Logic.Cl.smallestMC ⊢! □(.atom 0) ⋎ □(∼□(.atom 0)) := by
+    apply Logic.sumNormal.mem₂!;
     use Axioms.LEM (.atom 0);
     constructor;
-    . simp;
+    . simp [theory];
     . tauto;
-  apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
+  apply _ ⨀ this;
   apply C!_trans ?_ CANC!;
   apply C!_trans ?_ or_comm!;
   apply CAA!_of_C!_of_C!;
@@ -30,17 +30,21 @@ lemma Logic.Cl.smallestMC.mem_diabox_box : (◇□(.atom 0) ➝ □(.atom 0)) �
   . apply CN!_of_CN!_right;
     exact diaDuality_mp!;
 
-lemma Logic.Cl.smallestMC.mem_AxiomFive : (◇(.atom 0) ➝ □◇(.atom 0)) ∈ Logic.Cl.smallestMC := by
-  have := Logic.sumNormal.subst (s := λ _ => ∼(.atom 0)) $ mem_diabox_box;
-  apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
-  apply C!_trans ?_ CANC!;
-  apply C!_trans CCAN! ?_;
-  apply C!_trans ?_ or_comm!;
-  apply CAA!_of_C!_of_C!;
-  . apply CN!_of_CN!_left;
-    exact diaDuality_mp!;
-  . apply CN!_of_CN!_right;
-    exact diaDuality_mp!;
+instance : Entailment.HasAxiomFive Logic.Cl.smallestMC where
+  Five φ := by
+    constructor;
+    apply Modal.Logic.iff_provable.mp;
+    apply Modal.Logic.subst! (L := Logic.Cl.smallestMC) (φ := Modal.Axioms.Five (.atom 0)) (s := λ a => φ);
+    have := Modal.Logic.subst! (s := λ _ => ∼(.atom 0)) $ Logic.Cl.smallestMC.mem_diabox_box;
+    apply _ ⨀ this;
+    apply C!_trans ?_ CANC!;
+    apply C!_trans CCAN! ?_;
+    apply C!_trans ?_ or_comm!;
+    apply CAA!_of_C!_of_C!;
+    . apply CN!_of_CN!_left;
+      exact diaDuality_mp!;
+    . apply CN!_of_CN!_right;
+      exact diaDuality_mp!;
 
 end Propositional
 
@@ -59,38 +63,39 @@ section S5
 namespace Logic
 
 lemma S5.is_smallestMC_of_Cl : Logic.S5 = Logic.Cl.smallestMC := by
-  ext φ;
+  apply Logic.iff_equal_provable_equiv.mpr;
+  apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
-  . intro hφ;
-    induction hφ using Hilbert.Deduction.rec! with
-    | maxm h =>
-      rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
-      . apply Logic.sumNormal.mem₁; simp;
-      . apply Logic.sumNormal.mem₁; simp;
-      . exact Logic.sumNormal.subst (s := λ _ => s 0) $ Logic.Cl.smallestMC.mem_AxiomFive;
-    | mdp => apply Logic.sumNormal.mdp <;> assumption;
-    | nec => apply Logic.sumNormal.nec; assumption;
-    | _ => apply Logic.sumNormal.mem₁; simp;
-  . intro hφ;
-    induction hφ with
-    | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
-    | subst h ih => apply Modal.Logic.subst ih;
-    | nec h ih => apply Modal.Logic.nec ih;
-    | mem₁ h => apply Logic.S5.proper_extension_of_S4.subset h;
+  . apply Entailment.weakerThan_iff.mpr;
+    intro φ hφ;
+    induction hφ using Modal.Hilbert.rec! with
+    | maxm h => rcases (by simpa using h) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
+    | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+    | nec ihφ => exact nec! ihφ;
+    | _ => simp;
+  . apply Entailment.weakerThan_iff.mpr;
+    intro _ hφ;
+    induction hφ using Logic.sumNormal.rec! with
+    | mem₁ h => apply WeakerThan.pbl h;
+    | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
+    | nec ihφ => exact nec! ihφ;
+    | subst ihφ => apply subst! _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      haveI : Hilbert.S4 ⊢! ◇φᵍ := iff_provable_Cl_provable_dia_gS4.mp hφ;
-      haveI : Hilbert.S4 ⊢! ◇□φᵍ := (diaK'! $ Hilbert.goedelTranslated_axiomTc) ⨀ this;
+      haveI : Logic.S4 ⊢! ◇φᵍ := iff_provable_Cl_provable_dia_gS4.mp hφ;
+      haveI : Logic.S4 ⊢! ◇□φᵍ := (diaK'! $ goedelTranslated_axiomTc) ⨀ this;
       apply rm_diabox'!;
-      apply S5.proper_extension_of_S4.subset this;
+      apply WeakerThan.pbl this;
+
+instance : Sound Logic.Cl.smallestMC FrameClass.S5 := by
+  rw [←Logic.S5.is_smallestMC_of_Cl];
+  infer_instance;
 
 instance modalCompanion_Cl_S5 : ModalCompanion Logic.Cl Logic.S5 := by
   rw [Logic.S5.is_smallestMC_of_Cl];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.Cl)
     (MC := Modal.Kripke.FrameClass.S5)
-    (by rw [Logic.Cl.Kripke.Cl])
-    (by rw [←Logic.S5.is_smallestMC_of_Cl, ←Logic.S5.Kripke.refl_eucl])
     (by intro F hF; simp_all only [Set.mem_setOf_eq]; constructor);
 
 end Logic
@@ -100,64 +105,58 @@ end S5
 
 section S5Grz
 
-lemma Logic.gS5Grz_of_Cl : φ ∈ Logic.Cl → φᵍ ∈ Logic.S5Grz := by
+lemma Logic.gS5Grz_of_Cl : Logic.Cl ⊢! φ → Logic.S5Grz ⊢! φᵍ := by
   intro h;
-  apply S5Grz.proper_extension_of_S5.subset;
-  exact modalCompanion_Cl_S5.companion.mp h;
+  apply WeakerThan.pbl $ modalCompanion_Cl_S5.companion.mp h;
 
 lemma Logic.S5Grz.is_largestMC_of_Cl : Logic.S5Grz = Logic.Cl.largestMC := by
-  ext φ;
+  apply Logic.iff_equal_provable_equiv.mpr;
+  apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
-  . intro hφ;
-    induction hφ using Hilbert.Deduction.rec! with
+  . apply Entailment.weakerThan_iff.mpr;
+    intro _ hφ;
+    induction hφ using Modal.Hilbert.rec! with
     | maxm h =>
-      simp at h;
-      rcases h with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
-      . apply Logic.sumNormal.mem₁;
-        apply Logic.sumNormal.mem₁;
+      rcases (by simpa using h) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
+      . simp;
+      . simp;
+      . apply WeakerThan.pbl (𝓢 := Logic.Cl.smallestMC);
         simp;
-      . apply Logic.sumNormal.mem₁;
-        apply Logic.sumNormal.mem₁;
-        simp;
-      . apply Logic.sumNormal.subst (φ := ◇(.atom 0) ➝ □◇(.atom 0)) (s := s);
-        apply Logic.sumNormal.mem₁;
-        exact Logic.Cl.smallestMC.mem_AxiomFive;
-      . apply Logic.sumNormal.subst (φ := □(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) ➝ (.atom 0)) (s := s);
-        apply Logic.sumNormal.mem₂;
-        simp;
-    | mdp => apply Logic.sumNormal.mdp <;> assumption;
-    | nec => apply Logic.sumNormal.nec; assumption;
-    | _ => apply Logic.sumNormal.mem₁; apply Logic.sumNormal.mem₁; simp;
-  . intro hφ;
-    induction hφ with
-    | mem₁ h =>
-      apply S5Grz.proper_extension_of_S5.subset;
-      rwa [S5.is_smallestMC_of_Cl];
-    | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
-    | subst h ih => apply Modal.Logic.subst ih;
-    | nec h ih => apply Modal.Logic.nec ih;
-    | mem₂ h =>
-      rcases h with ⟨φ, hφ, rfl⟩; simp;
+      . simp;
+    | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+    | nec ihφ => exact nec! ihφ;
+    | _ => simp;
+  . apply Entailment.weakerThan_iff.mpr;
+    intro φ hφ;
+    induction hφ using Logic.sumNormal.rec! with
+    | mem₁ h => apply WeakerThan.pbl $ Logic.S5.is_smallestMC_of_Cl ▸ h;
+    | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
+    | subst ih => apply subst! _ ih;
+    | nec ih => apply nec! ih;
+    | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
+
+instance : Sound Logic.Cl.largestMC FrameClass.finite_Triv := by
+  suffices Sound Logic.Triv FrameClass.finite_Triv by
+    simpa [←Logic.S5Grz.is_largestMC_of_Cl];
+  infer_instance;
 
 instance modalCompanion_Cl_S5Grz : ModalCompanion Logic.Cl Logic.S5Grz := by
   rw [Logic.S5Grz.is_largestMC_of_Cl];
   apply Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_Cl)
     (MC := Modal.Kripke.FrameClass.finite_Triv);
-  . rw [Logic.Cl.Kripke.finite_Cl]
-  . rw [←Logic.S5Grz.is_largestMC_of_Cl, ←Logic.S5Grz.Kripke.finite_equality]
   . intro F hF; simp_all only [Set.mem_setOf_eq]; exact {};
 
 instance modalCompanion_Cl_Triv : ModalCompanion Logic.Cl Logic.Triv := by
-  rw [←Logic.eq_S5Grz_Triv];
-  infer_instance
+  convert modalCompanion_Cl_S5Grz;
+  simp;
 
 end S5Grz
 
 
 section boxdot
 
-theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : φ ∈ Logic.Cl ↔ φᵍᵇ ∈ Logic.Ver := by
+theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : Logic.Cl ⊢! φ ↔ Logic.Ver ⊢! φᵍᵇ := by
   exact Iff.trans modalCompanion_Cl_Triv.companion Logic.iff_boxdotTranslated_Ver_Triv.symm
 
 end boxdot
