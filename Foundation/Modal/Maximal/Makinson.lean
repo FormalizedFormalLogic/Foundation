@@ -9,23 +9,23 @@ namespace LO.Modal
 
 namespace Logic
 
-variable {L : Logic} [L.IsNormal] [L.Consistent] {φ ψ : Formula ℕ}
+variable {L : Logic ℕ} [L.IsNormal] [Entailment.Consistent L] {φ ψ : Formula ℕ}
 
-class VerFamily (L : Logic) : Prop where
-  subset_Ver : L ⊆ Logic.Ver
+class VerFamily (L : Logic ℕ) : Prop where
+  subset_Ver : L ⪯ Logic.Ver
 
-class TrivFamily (L : Logic) : Prop where
-  KD_subset : Logic.KD ⊆ L
-  subset_Triv : L ⊆ Logic.Triv
+class TrivFamily (L : Logic ℕ) : Prop where
+  KD_subset   : Logic.KD ⪯ L
+  subset_Triv : L ⪯ Logic.Triv
 
 section
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : φ ∈ L) (hV : φ ∉ Logic.Ver) : ∃ ψ, ◇ψ ∈ L := by
+lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : L ⊢! φ) (hV : Logic.Ver ⊬ φ) : ∃ ψ, L ⊢! ◇ψ := by
   obtain ⟨ψ, ⟨Γ, rfl⟩, h⟩ := Hilbert.NNFormula.exists_CNF φ;
   generalize eγ : (⋀Γ.unattach).toFormula = γ at h;
-  have : φ.toNNFormula.toFormula ⭤ γ ∈ L := Logic.of_mem_K h;
+  have : L ⊢! φ.toNNFormula.toFormula ⭤ γ := WeakerThan.pbl h;
 
   have hγL : γ ∈ L := by sorry;
   have hγV : γ ∉ Logic.Ver := by sorry;
@@ -35,30 +35,30 @@ lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : φ ∈ L) (hV : φ ∉ Logic.Ve
   have hΔ₁ : ∀ ψ ∈ Δ, ¬ψ.1.isPrebox := by
     rintro ⟨ψ, _⟩ hψ₁ hψ₂;
     obtain ⟨ξ, rfl⟩ := NNFormula.exists_isPrebox hψ₂;
-    have : □ξ.toFormula ∈ Logic.Ver := by simp;
+    have : Logic.Ver ⊢! □ξ.toFormula := by simp;
     sorry;
 
-  have : ∃ Γ: List (Formula ℕ), φ ⭤ ⋀Γ ∈ L := by sorry;
-  simp at hV;
+  have : ∃ Γ: List (Formula ℕ), L ⊢! φ ⭤ ⋀Γ := by sorry;
   sorry;
 
-lemma KD_subset_of_not_subset_Ver (hV : ¬L ⊆ Logic.Ver) : Logic.KD ⊆ L := by
+lemma KD_subset_of_not_subset_Ver (hV : ¬L ⪯ Logic.Ver) : Logic.KD ⪯ L := by
+  apply weakerThan_iff.mpr;
   intro φ hφ;
-  replace hφ := Hilbert.iff_provable_KP_provable_KD.mpr hφ;
-  induction hφ using Hilbert.Deduction.rec! with
+  replace hφ : Logic.KP ⊢! φ := WeakerThan.pbl hφ;
+  induction hφ using Hilbert.rec! with
   | maxm h =>
     rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩);
-    . apply Logic.subset_K; simp;
-    . obtain ⟨ψ, hψ₁, hψ₂⟩ := Set.not_subset_iff_exists_mem_not_mem.mp hV;
+    . simp;
+    . obtain ⟨ψ, hψ₁, hψ₂⟩ := not_weakerThan_iff.mp hV;
       obtain ⟨ξ, hξ⟩ := KD_subset_of_not_subset_Ver.lemma₁ hψ₁ hψ₂;
-      apply Logic.mdp (φ := ◇ξ);
-      . exact Logic.subset_K $ contra! $ axiomK'! $ nec! $ efq!;
+      apply Entailment.mdp! (φ := ◇ξ);
+      . exact contra! $ axiomK'! $ nec! $ efq!;
       . exact hξ;
-  | mdp hφψ hφ => exact Logic.mdp hφψ hφ;
-  | nec hφ => exact Logic.nec hφ;
-  | _ => apply Logic.subset_K; simp;
+  | mdp hφψ hφ => exact hφψ ⨀ hφ;
+  | nec hφ => exact Entailment.nec! hφ;
+  | _ => simp;
 
-lemma KD_subset_of_not_VerFamily (h : ¬L.VerFamily) : Logic.KD ⊆ L := by
+lemma KD_subset_of_not_VerFamily (h : ¬L.VerFamily) : Logic.KD ⪯ L := by
   apply KD_subset_of_not_subset_Ver;
   tauto;
 
@@ -74,8 +74,8 @@ open Propositional
 variable {v : ClassicalSemantics.Valuation ℕ}
 
 lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
-  (v ⊧ (φᵀ.toPropFormula) → Hilbert.KD ⊢! φ) ∧
-  (¬(v ⊧ (φᵀ.toPropFormula)) → Hilbert.KD ⊢! ∼φ)
+  (v ⊧ (φᵀ.toPropFormula) → Logic.KD ⊢! φ) ∧
+  (¬(v ⊧ (φᵀ.toPropFormula)) → Logic.KD ⊢! ∼φ)
   := by
   induction φ with
   | hatom => simp at hl;
@@ -95,8 +95,8 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
       replace hψ := ihψ (letterless.def_imp₂ hl) |>.2 hψ;
       -- TODO: need golf
       apply FiniteContext.deduct'!;
-      replace hφ : [φ ➝ ψ] ⊢[Hilbert.KD]! φ := FiniteContext.of'! hφ;
-      replace hψ : [φ ➝ ψ] ⊢[Hilbert.KD]! ∼ψ := FiniteContext.of'! hψ;
+      replace hφ : [φ ➝ ψ] ⊢[Logic.KD]! φ := FiniteContext.of'! hφ;
+      replace hψ : [φ ➝ ψ] ⊢[Logic.KD]! ∼ψ := FiniteContext.of'! hψ;
       exact hψ ⨀ (FiniteContext.by_axm! ⨀ hφ);
   | hbox φ ihφ =>
     constructor;
@@ -105,16 +105,16 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.letterless) :
       apply ihφ (letterless.def_box hl) |>.1;
       tauto;
     . intro h;
-      have : Hilbert.KD ⊢! □(∼φ) := nec! $ ihφ (letterless.def_box hl) |>.2 $ by tauto;
+      have : Logic.KD ⊢! □(∼φ) := nec! $ ihφ (letterless.def_box hl) |>.2 $ by tauto;
       exact negbox_dne'! $ dia_duality'!.mp $ axiomD'! this;
 
-lemma provable_KD_of_classical_satisfiability (hl : φ.letterless) : (v ⊧ φᵀ.toPropFormula) → Hilbert.KD ⊢! φ :=
+lemma provable_KD_of_classical_satisfiability (hl : φ.letterless) : (v ⊧ φᵀ.toPropFormula) → Logic.KD ⊢! φ :=
   KD_provability_of_classical_satisfiability hl |>.1
 
 lemma provable_KD_of_classical_tautology (hl : φ.letterless) (h : (Semantics.Valid (ClassicalSemantics.Valuation ℕ) (φᵀ.toPropFormula)))
-  : Hilbert.KD ⊢! φ := provable_KD_of_classical_satisfiability hl (h (λ _ => True))
+  : Logic.KD ⊢! φ := provable_KD_of_classical_satisfiability hl (h (λ _ => True))
 
-lemma provable_not_KD_of_classical_unsatisfiable (hl : φ.letterless) : (¬(v ⊧ φᵀ.toPropFormula)) → Hilbert.KD ⊢! ∼φ :=
+lemma provable_not_KD_of_classical_unsatisfiable (hl : φ.letterless) : (¬(v ⊧ φᵀ.toPropFormula)) → Logic.KD ⊢! ∼φ :=
   KD_provability_of_classical_satisfiability hl |>.2
 
 private lemma subset_Triv_of_KD_subset.lemma₁
@@ -139,10 +139,9 @@ private lemma subset_Triv_of_KD_subset.lemma₁
     | hor => unfold Propositional.Formula.letterless at hψ; simp_all [trivTranslate, toPropFormula]; tauto;
   | _ => simp_all [trivTranslate, toPropFormula];
 
-lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _}
-  :
-  Semantics.Valid (ClassicalSemantics.Valuation α) (∼((φᵀ.toPropFormula)⟦s.1⟧)) ↔
-  Semantics.Valid (ClassicalSemantics.Valuation α) ((∼φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula)
+lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Propositional.ZeroSubstitution _} :
+  (∼((φᵀ.toPropFormula)⟦s.1⟧)).isTautology ↔
+  ((∼φ⟦(s : Modal.ZeroSubstitution _).1⟧)ᵀ.toPropFormula).isTautology
   := by
   constructor;
   . intro h v hφ;
@@ -150,20 +149,20 @@ lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Proposition
     exact lemma₁.mpr hφ;
   . intro h v; exact lemma₁ (φ := ∼φ).mpr $ h v;
 
-theorem subset_Triv_of_KD_subset (hS : Logic.KD ⊆ L) : L ⊆ Logic.Triv := by
-  by_contra hC;
-  obtain ⟨φ, hφ₁, hφ₂⟩ := Set.not_subset.mp hC;
-  have := Hilbert.Triv.iff_provable_Cl.not.mp hφ₂;
-  have := (not_imp_not.mpr Propositional.Hilbert.Cl.completeness) this;
-  obtain ⟨s, h⟩ := ClassicalSemantics.exists_neg_zeroSubst_of_not_isTautology this;
+@[instance]
+theorem subset_Triv_of_KD_subset [Logic.KD ⪯ L] : L ⪯ Logic.Triv := by
+  by_contra! hC;
+  obtain ⟨φ, hφ₁, hφ₂⟩ := not_weakerThan_iff.mp hC;
+  replace hφ₂ := (not_imp_not.mpr Propositional.Hilbert.Cl.completeness) $ Logic.Triv.iff_provable_Cl.not.mp hφ₂;
+  obtain ⟨s, h⟩ := ClassicalSemantics.exists_neg_zeroSubst_of_not_isTautology hφ₂;
   let ψ := φ⟦(s : Modal.ZeroSubstitution _).1⟧;
   have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (∼(ψᵀ.toPropFormula)) := subset_Triv_of_KD_subset.lemma₂.mp h;
-  have : Hilbert.KD ⊢! ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.letterless_zeroSubst
+  have : Logic.KD ⊢! ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.letterless_zeroSubst
     $ Semantics.Not.realize_not.mp
     $ this (λ _ => True);
-  have : ∼ψ ∈ L := hS this;
-  have : ∼ψ ∉ L := Modal.Logic.not_neg_mem_of_mem $ Modal.Logic.subst hφ₁;
-  contradiction
+  have : L ⊢! ∼ψ := WeakerThan.pbl this;
+  have : L ⊬ ∼ψ := L.not_neg_of! $ Logic.subst! _ hφ₁;
+  contradiction;
 
 end
 
@@ -174,14 +173,15 @@ theorem makinson : (L.VerFamily ∨ L.TrivFamily) ∧ ¬(L.VerFamily ∧ L.TrivF
     rintro h;
     constructor;
     . exact KD_subset_of_not_VerFamily h;
-    . exact subset_Triv_of_KD_subset $ KD_subset_of_not_VerFamily h;
+    . have := KD_subset_of_not_VerFamily h;
+      exact subset_Triv_of_KD_subset (L := L);
   . by_contra hC;
     have ⟨⟨hVer⟩, ⟨hKD, hTriv⟩⟩ := hC;
-    have h₁ : ∼□⊥ ∈ Logic.Ver := by apply hVer; apply hKD; simp;
-    have h₂ : □⊥ ∈ Logic.Ver := by simp;
-    have : Hilbert.Ver ⊢! ⊥ := h₁ ⨀ h₂;
-    have : Hilbert.Ver ⊬ ⊥ := Entailment.Consistent.not_bot inferInstance;
-    contradiction;
+    have : Logic.KD ⪯ Logic.Ver := by apply Entailment.WeakerThan.trans (𝓣 := L) <;> infer_instance;
+    have h₁ : Logic.Ver ⊢! ∼□⊥ := by apply Entailment.WeakerThan.pbl (show Logic.KD ⊢! ∼□⊥ by simp);
+    have h₂ : Logic.Ver ⊢! □⊥ := by simp;
+    have : Logic.Ver ⊢! ⊥ := h₁ ⨀ h₂;
+    simpa;
 
 lemma VerFamily.notTrivFamily [L.VerFamily] : ¬L.TrivFamily := by
   apply not_and.mp $ makinson (L := L) |>.2;

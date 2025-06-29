@@ -12,7 +12,7 @@ variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T�
          {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.Sound ℕ]
          {A B : Formula ℕ}
 
-theorem S.arithmetical_soundness (h : A ∈ Logic.S) (f : Realization ℒₒᵣ) : ℕ ⊧ₘ₀ f.interpret 𝔅 A := by
+theorem S.arithmetical_soundness (h : Logic.S ⊢! A) (f : Realization ℒₒᵣ) : ℕ ⊧ₘ₀ f.interpret 𝔅 A := by
   induction h using Logic.S.rec' with
   | mem_GL h =>
     exact models_of_provable₀ inferInstance (GL.arithmetical_soundness (L := ℒₒᵣ) h);

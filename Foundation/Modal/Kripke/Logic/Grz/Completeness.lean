@@ -34,7 +34,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open ComplementClosedConsistentFinset
 open Kripke
 
-namespace Kripke.Grz
+namespace Logic.Grz.Kripke
 
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Grz 𝓢]
@@ -253,44 +253,28 @@ lemma complete_of_mem_miniCanonicalFrame
       tauto;
 ⟩
 
-end Kripke.Grz
-
-
-namespace Hilbert.Grz.Kripke
-
-open Kripke.Grz
-
-instance complete : Complete (Hilbert.Grz) FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
+instance complete : Complete Logic.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
   simp only [Set.mem_setOf_eq];
   intro φ;
   infer_instance;
 
-end Hilbert.Grz.Kripke
+lemma finite_partial_order : Logic.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
 
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma Grz.Kripke.finite_partial_order : Logic.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
-theorem Grz.proper_extension_of_S4M : Logic.S4M ⊂ Logic.Grz := by
+instance : Logic.S4M ⪱ Logic.Grz := by
   constructor;
-  . rw [S4M.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.S4M ⊧ φ → FrameClass.finite_Grz ⊧ φ by
+      simpa [S4M.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.Grz ⊢! φ ∧ ¬FrameClass.S4M ⊧ φ by
-      rw [S4M.Kripke.preorder_mckinsey];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0)
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . suffices ¬FrameClass.S4M ⊧ (Axioms.Grz (.atom 0)) by simpa [S4M.Kripke.preorder_mckinsey];
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
       constructor;
       . exact {
@@ -306,10 +290,10 @@ theorem Grz.proper_extension_of_S4M : Logic.S4M ⊂ Logic.Grz := by
         . contradiction;
         . contradiction;
 
-@[simp]
-theorem Grz.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Grz := by
-  trans Logic.S4M <;> simp;
+instance : Logic.S4 ⪱ Logic.Grz := calc
+  Logic.S4 ⪱ Logic.S4M := by infer_instance
+  _        ⪱ Logic.Grz := by infer_instance
 
-end Logic
+end Logic.Grz.Kripke
 
 end LO.Modal

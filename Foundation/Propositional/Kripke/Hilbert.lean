@@ -9,12 +9,15 @@ open Formula.Kripke
 
 
 lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic {H : Hilbert ℕ} {C : FrameClass}
-  [sound : Sound H C] [complete : Complete H C]
+  [sound : Sound H.logic C] [complete : Complete H.logic C]
   : H.logic = C.logic := by
   ext φ;
   constructor;
-  . exact sound.sound;
-  . exact complete.complete;
+  . intro h;
+    apply sound.sound;
+    simpa;
+  . intro h;
+    simpa using complete.complete h;
 
 
 namespace Hilbert.Kripke
@@ -25,9 +28,9 @@ section
 
 variable {C : Kripke.FrameClass}
 
-lemma soundness_of_validates_axiomInstances (hV : C.Validates H.axiomInstances) : H ⊢! φ → C ⊧ φ := by
+lemma soundness_of_validates_axiomInstances (hV : C.Validates H.axiomInstances) : H.logic ⊢! φ → C ⊧ φ := by
   intro hφ F hF;
-  induction hφ using Hilbert.Deduction.rec! with
+  induction hφ with
   | verum => apply ValidOnFrame.top;
   | implyS => apply ValidOnFrame.imply₁;
   | implyK => apply ValidOnFrame.imply₂;
@@ -50,11 +53,11 @@ lemma validates_axioms_of_validates_axiomInstances (hV : C.Validates H.axioms) :
   rintro F hF _ ⟨φ, hφ, ⟨s, rfl⟩⟩;
   exact ValidOnFrame.subst $ hV F hF φ hφ;
 
-instance instSound_of_validates_axioms (hV : C.Validates H.axioms) : Sound H C := ⟨fun {_} =>
+instance instSound_of_validates_axioms (hV : C.Validates H.axioms) : Sound H.logic C := ⟨fun {_} =>
   soundness_of_validates_axiomInstances (validates_axioms_of_validates_axiomInstances hV)
 ⟩
 
-lemma consistent_of_sound_frameclass (C : FrameClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
+lemma consistent_of_sound_frameclass (C : FrameClass) (hC : Set.Nonempty C) [sound : Sound H.logic C] : Entailment.Consistent H.logic := by
   apply Entailment.Consistent.of_unprovable (f := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
@@ -65,7 +68,7 @@ lemma consistent_of_sound_frameclass (C : FrameClass) (hC : Set.Nonempty C) [sou
   . assumption;
   . simp;
 
-lemma finite_sound_of_sound (sound : Sound H C) : Sound H ({ F | F ∈ C ∧ Finite F }) := ⟨by
+lemma finite_sound_of_sound (sound : Sound H.logic C) : Sound H.logic ({ F | F ∈ C ∧ Finite F }) := ⟨by
   rintro φ hφ F ⟨hF₁, _⟩;
   exact sound.sound hφ hF₁;
 ⟩

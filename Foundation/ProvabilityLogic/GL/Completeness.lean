@@ -517,15 +517,15 @@ open FirstOrder Arith FirstOrder.DerivabilityCondition
 open Modal
 open Modal.Kripke
 
-variable {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)]
+variable {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] {A : Modal.Formula _}
 
 /-- Arithmetical completeness of GL-/
 theorem GL.arithmetical_completeness :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) A) → A ∈ Logic.GL := by
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) A) → Logic.GL ⊢! A := by
   contrapose;
   intro hA;
   push_neg;
-  obtain ⟨M₁, r₁, _, hA₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
+  obtain ⟨M₁, r₁, _, hA₁⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
   have : Fintype (M₁.extendRoot r₁ 1).World := Fintype.ofFinite _
   let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root :=
     SolovaySentences.standard (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root T
@@ -542,7 +542,7 @@ theorem GL.arithmetical_completeness :
   exact σ.SC4 _ (by rintro ⟨⟩) this;
 
 theorem GL.arithmetical_completeness_iff :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) A) ↔ A ∈ Logic.GL :=
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret ((𝐈𝚺₁).standardDP T) A) ↔ Logic.GL ⊢! A :=
   ⟨GL.arithmetical_completeness, GL.arithmetical_soundness⟩
 
 end LO.ProvabilityLogic

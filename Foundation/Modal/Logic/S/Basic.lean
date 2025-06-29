@@ -5,82 +5,71 @@ namespace LO.Modal
 
 open Logic
 
-protected abbrev Logic.S := addQuasiNormal Logic.GL (Axioms.T (.atom 0))
-instance : Logic.S.IsQuasiNormal where
-  subset_K := by
-    intro φ hφ;
-    apply Logic.sumQuasiNormal.mem₁;
-    exact Logic.of_mem_K hφ;
-  mdp_closed := by
-    intro φ ψ hφψ hφ;
-    apply Logic.sumQuasiNormal.mdp hφψ hφ;
-  subst_closed := by
-    intro φ hφ s;
-    apply Logic.sumQuasiNormal.subst;
-    exact hφ;
+protected abbrev Logic.S := sumQuasiNormal Logic.GL {Axioms.T (.atom 0)}
+instance : Logic.S.IsQuasiNormal := inferInstance
+instance : Entailment.HasAxiomT Logic.S where
+  T φ := by
+    constructor;
+    apply Logic.sumQuasiNormal.subst (φ := Axioms.T (.atom 0)) (s := λ _ => φ);
+    apply Logic.sumQuasiNormal.mem₂;
+    simp;
 
-lemma Logic.S.mem_axiomT : □φ ➝ φ ∈ Logic.S := by
-  apply Logic.subst (φ := Axioms.T (.atom 0)) (s := λ _ => φ);
-  apply Logic.sumQuasiNormal.mem₂;
-  tauto;
-
-lemma Logic.GL_subset_S : Logic.GL ⊆ Logic.S := by
-  intro φ hφ;
-  apply Logic.sumQuasiNormal.mem₁;
-  assumption;
-
-lemma Logic.GL_ssubset_S : Logic.GL ⊂ Logic.S := by
+instance : Logic.GL ⪱ Logic.S := by
   constructor;
-  . exact Logic.GL_subset_S;
-  . suffices ∃ φ, φ ∈ Logic.S ∧ φ ∉ Logic.GL by exact Set.not_subset.mpr this;
+  . infer_instance;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.T (.atom 0));
     constructor;
-    . exact Logic.S.mem_axiomT;
+    . simp;
     . exact Logic.GL.unprovable_AxiomT;
-
 
 section
 
-private inductive Logic.S' : Logic
-  | mem_GL {φ} : φ ∈ Logic.GL → Logic.S' φ
-  | axiomT (φ) : Logic.S' (Axioms.T φ)
-  | mdp  {φ ψ} : Logic.S' (φ ➝ ψ) → Logic.S' φ → Logic.S' ψ
+private inductive Logic.S.aux : Logic ℕ
+  | mem_GL {φ} : Logic.GL ⊢! φ → Logic.S.aux φ
+  | axiomT (φ) : Logic.S.aux (Axioms.T φ)
+  | mdp  {φ ψ} : Logic.S.aux (φ ➝ ψ) → Logic.S.aux φ → Logic.S.aux ψ
 
-private lemma Logic.eq_S_S' : Logic.S = Logic.S' := by
+private lemma Logic.S.eq_aux : Logic.S = Logic.S.aux := by
   ext φ;
   constructor;
   . intro h;
     induction h with
-    | mem₁ h => exact Logic.S'.mem_GL h;
-    | mem₂ h => subst h; exact Logic.S'.axiomT (.atom 0);
-    | mdp _ _ ihφψ ihφ => exact Logic.S'.mdp ihφψ ihφ;
+    | mem₁ h =>
+      apply Logic.S.aux.mem_GL h;
+    | mem₂ h =>
+      simp only [iff_provable, Set.mem_singleton_iff] at h;
+      subst h;
+      exact Logic.S.aux.axiomT (.atom 0);
+    | mdp _ _ ihφψ ihφ =>
+      exact Logic.S.aux.mdp ihφψ ihφ;
     | subst hφ ihφ =>
       clear hφ;
       induction ihφ with
       | mem_GL h =>
-        apply Logic.S'.mem_GL;
-        exact Logic.subst h;
-      | axiomT _ => apply Logic.S'.axiomT;
-      | mdp _ _ ihφψ ihφ =>
-        apply Logic.S'.mdp ihφψ ihφ;
+        apply Logic.S.aux.mem_GL;
+        apply subst!;
+        exact h;
+      | axiomT _ => apply Logic.S.aux.axiomT;
+      | mdp _ _ ihφψ ihφ => apply Logic.S.aux.mdp ihφψ ihφ;
   . intro h;
     induction h with
-    | mem_GL h => exact sumQuasiNormal.mem₁ h;
-    | mdp _ _ ihφψ ihφ => exact sumQuasiNormal.mdp ihφψ ihφ;
-    | axiomT φ =>
-      exact sumQuasiNormal.subst (φ := Axioms.T (.atom 0)) (s := λ _ => φ) $ by
-        apply Logic.sumQuasiNormal.mem₂;
-        simp;
+    | mem_GL h => apply Logic.sumQuasiNormal.mem₁; exact h;
+    | axiomT φ => apply iff_provable.mp; simp;
+    | mdp hφψ hφ ihφψ ihφ =>
+      apply Logic.sumQuasiNormal.mdp;
+      . assumption;
+      . assumption;
 
 -- TODO: Remove `eq_S_S'`?
 protected def Logic.S.rec'
-  {motive : (φ : Formula ℕ) → φ ∈ Logic.S → Prop}
-  (mem_GL : ∀ {φ}, (h : φ ∈ Logic.GL) → motive φ (sumQuasiNormal.mem₁ h))
-  (axiomT : ∀ {φ}, motive (Axioms.T φ) (sumQuasiNormal.subst (φ := Axioms.T (.atom 0)) (s := λ _ => φ) (sumQuasiNormal.mem₂ (by tauto))))
-  (mdp : ∀ {φ ψ}, {hφψ : φ ➝ ψ ∈ Logic.S} → {hφ : φ ∈ Logic.S} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (sumQuasiNormal.mdp hφψ hφ))
-  : ∀ {φ}, (h : φ ∈ Logic.S) → motive φ h := by
+  {motive : (φ : Formula ℕ) → (Logic.S ⊢! φ) → Prop}
+  (mem_GL : ∀ {φ}, (h : Logic.GL ⊢! φ) → motive φ (sumQuasiNormal.mem₁! h))
+  (axiomT : ∀ {φ}, motive (Axioms.T φ) (by simp))
+  (mdp : ∀ {φ ψ}, {hφψ : Logic.S ⊢! φ ➝ ψ} → {hφ : Logic.S ⊢! φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (hφψ ⨀ hφ))
+  : ∀ {φ}, (h : Logic.S ⊢! φ) → motive φ h := by
   intro φ h;
-  rw [Logic.eq_S_S'] at h;
+  replace h := iff_provable.mp $ Logic.S.eq_aux.symm ▸ h;
   induction h with
   | mem_GL h => apply mem_GL; assumption;
   | axiomT h => exact axiomT;
@@ -88,8 +77,10 @@ protected def Logic.S.rec'
     apply mdp;
     . apply ihφψ;
     . apply ihφ;
-    . rwa [←Logic.eq_S_S'] at hφψ;
-    . rwa [←Logic.eq_S_S'] at hφ;
+    . replace hφψ := iff_provable.mpr hφψ;
+      rwa [←Logic.S.eq_aux] at hφψ;
+    . replace hφ := iff_provable.mpr hφ;
+      rwa [←Logic.S.eq_aux] at hφ;
 
 end
 

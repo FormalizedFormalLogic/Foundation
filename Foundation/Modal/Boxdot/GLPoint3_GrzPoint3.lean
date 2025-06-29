@@ -22,12 +22,12 @@ open Formula (boxdotTranslate)
 open Modal.Kripke
 open Entailment
 
-lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : (Hilbert.GrzPoint3) ⊢! φ → (Hilbert.GLPoint3) ⊢! φᵇ := Hilbert.boxdotTranslated_of_dominate $ by
+lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : Logic.GrzPoint3 ⊢! φ → Logic.GLPoint3 ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
   intro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨s, _, rfl⟩);
   . exact boxdot_axiomK!;
   . exact boxdot_Grz_of_L!
-  . apply Hilbert.GLPoint3.Kripke.finite_complete.complete;
+  . apply Logic.GLPoint3.Kripke.finite_complete.complete;
     rintro F hF V x;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply Satisfies.or_def.mpr;
@@ -76,12 +76,12 @@ lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : (Hilbert.GrzPoint3) ⊢!
       . exact hC₂₂ $ hC₁₁₂ z Ryz;
       . exact hC₁₂ $ hC₂₁₂ y Rzy;
 
-lemma provable_GrzPoint3_of_boxdotTranslated_GLPoint3 : (Hilbert.GLPoint3) ⊢! φᵇ → (Hilbert.GrzPoint3) ⊢! φ := by
+lemma provable_GrzPoint3_of_boxdotTranslated_GLPoint3 : Logic.GLPoint3 ⊢! φᵇ → Logic.GrzPoint3 ⊢! φ := by
   contrapose;
   intro h;
-  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Hilbert.GrzPoint3.Kripke.finite_complete |>.complete) h;
+  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Logic.GrzPoint3.Kripke.finite_complete |>.complete) h;
   replace hF := Set.mem_setOf_eq.mp hF;
-  apply not_imp_not.mpr $ Hilbert.GLPoint3.Kripke.finite_sound.sound;
+  apply not_imp_not.mpr $ Logic.GLPoint3.Kripke.finite_sound.sound;
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use F^≠;
   constructor;
@@ -90,12 +90,10 @@ lemma provable_GrzPoint3_of_boxdotTranslated_GLPoint3 : (Hilbert.GLPoint3) ⊢! 
     apply iff_reflexivize_irreflexivize'.not.mp;
     exact h;
 
-theorem iff_boxdotTranslatedGLPoint3_GrzPoint3 : (Hilbert.GLPoint3) ⊢! φᵇ ↔ (Hilbert.GrzPoint3) ⊢! φ := ⟨
+theorem iff_boxdotTranslatedGLPoint3_GrzPoint3 : Logic.GLPoint3 ⊢! φᵇ ↔ Logic.GrzPoint3 ⊢! φ := ⟨
   provable_GrzPoint3_of_boxdotTranslated_GLPoint3,
   provable_boxdotTranslated_GLPoint3_of_GrzPoint3
 ⟩
-
-instance : BoxdotProperty (Logic.GLPoint3) (Logic.GrzPoint3) := ⟨iff_boxdotTranslatedGLPoint3_GrzPoint3⟩
 
 end Logic
 

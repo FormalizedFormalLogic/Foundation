@@ -10,24 +10,24 @@ open Kripke
 open Formula.Kripke
 open Hilbert.Kripke
 
-namespace Hilbert.Int.Kripke
+namespace Logic.Int.Kripke
 
-protected instance sound : Sound Hilbert.Int FrameClass.all :=
+protected instance sound : Sound Logic.Int FrameClass.all :=
   instSound_of_validates_axioms FrameClass.all.validates_AxiomEFQ
 
-protected instance consistent : Entailment.Consistent Hilbert.Int := consistent_of_sound_frameclass FrameClass.all (by simp)
+protected instance consistent : Entailment.Consistent Logic.Int := consistent_of_sound_frameclass FrameClass.all (by simp)
 
-instance sound_finite : Sound Hilbert.Int FrameClass.finite_all :=
+instance sound_finite : Sound Logic.Int FrameClass.finite_all :=
   instSound_of_validates_axioms FrameClass.finite_all.validates_AxiomEFQ
 
-instance canonical : Canonical Hilbert.Int FrameClass.all := by tauto;
+instance canonical : Canonical Logic.Int FrameClass.all := by tauto;
 
-instance complete: Complete Hilbert.Int FrameClass.all := inferInstance
+instance complete: Complete Logic.Int FrameClass.all := inferInstance
 
 
 section FFP
 
-instance complete_finite : Complete (Hilbert.Int) FrameClass.finite_all := ⟨by
+instance complete_finite : Complete (Logic.Int) FrameClass.finite_all := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   intro F _ V x;
@@ -128,7 +128,7 @@ lemma satisfies_right_on_counterexampleDPModel :
       exact ihq.mpr $ h (by simpa) $ ihp.mp hp;
   | _ => simp_all [counterexampleDPModel, Satisfies.iff_models, Satisfies];
 
-theorem disjunctive : (Hilbert.Int) ⊢! φ ⋎ ψ → (Hilbert.Int) ⊢! φ ∨ (Hilbert.Int) ⊢! ψ := by
+theorem disjunctive : Logic.Int ⊢! φ ⋎ ψ → Logic.Int ⊢! φ ∨ Logic.Int ⊢! ψ := by
   contrapose;
   intro hC; push_neg at hC;
   have ⟨hnφ, hnψ⟩ := hC;
@@ -159,20 +159,14 @@ theorem disjunctive : (Hilbert.Int) ⊢! φ ⋎ ψ → (Hilbert.Int) ⊢! φ ∨
       . exact satisfies_right_on_counterexampleDPModel.not.mp hψ;
       . apply F₂.refl;
 
-instance : Entailment.Disjunctive (Hilbert.Int) := ⟨disjunctive⟩
+instance : Entailment.Disjunctive Logic.Int := ⟨disjunctive⟩
 
 end DP
 
-end Hilbert.Int.Kripke
+lemma Int : Logic.Int = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma finite_Int : Logic.Int = FrameClass.finite_all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
-namespace Logic.Int
-
-lemma Kripke.Int : Logic.Int = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma Kripke.finite_Int : Logic.Int = FrameClass.finite_all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
-instance : (Logic.Int).Disjunctive := inferInstance
-
-end Logic.Int
+end Logic.Int.Kripke
 
 
 end LO.Propositional

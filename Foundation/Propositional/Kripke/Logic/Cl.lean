@@ -1,7 +1,6 @@
 import Foundation.Propositional.Kripke.AxiomLEM
 import Foundation.Propositional.Kripke.AxiomDummett
 import Foundation.Propositional.Kripke.Logic.LC
-import Foundation.Propositional.Kripke.Logic.KP
 
 namespace LO.Propositional
 
@@ -33,32 +32,32 @@ end Kripke
 
 
 
-namespace Hilbert.Cl.Kripke
+namespace Logic.Cl.Kripke
 
-instance sound : Sound Hilbert.Cl FrameClass.Cl :=
+instance sound : Sound Logic.Cl FrameClass.Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomLEM_of_isEuclidean;
 
-instance sound_finite : Sound Hilbert.Cl FrameClass.finite_Cl :=
+instance sound_finite : Sound Logic.Cl FrameClass.finite_Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F ⟨_, hF⟩ _ rfl;
     apply validate_axiomLEM_of_isEuclidean;
 
-instance consistent : Entailment.Consistent Hilbert.Cl := consistent_of_sound_frameclass FrameClass.Cl $ by
+instance consistent : Entailment.Consistent Logic.Cl := consistent_of_sound_frameclass FrameClass.Cl $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance canonical : Canonical Hilbert.Cl FrameClass.Cl :=  ⟨by
+instance canonical : Canonical Logic.Cl FrameClass.Cl :=  ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Hilbert.Cl FrameClass.Cl := inferInstance
+instance complete : Complete Logic.Cl FrameClass.Cl := inferInstance
 
 section FFP
 
@@ -66,8 +65,8 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance complete_finite_symmetric : Complete (Hilbert.Cl) FrameClass.finite_Cl := by
-  suffices Complete (Hilbert.Cl) { F : Frame | F.IsFinite ∧ F.IsSymmetric } by
+instance complete_finite_symmetric : Complete (Logic.Cl) FrameClass.finite_Cl := by
+  suffices Complete (Logic.Cl) { F : Frame | F.IsFinite ∧ F.IsSymmetric } by
     convert this;
     constructor;
     . rintro ⟨_, hF⟩; exact ⟨by tauto, inferInstance⟩;
@@ -113,20 +112,15 @@ instance complete_finite_symmetric : Complete (Hilbert.Cl) FrameClass.finite_Cl 
 
 end FFP
 
-end Hilbert.Cl.Kripke
+lemma Cl : Logic.Cl = FrameClass.Cl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma finite_Cl : Logic.Cl = FrameClass.finite_Cl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
-
-namespace Logic.Cl
-
-lemma Kripke.Cl : Logic.Cl = FrameClass.Cl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma Kripke.finite_Cl : Logic.Cl = FrameClass.finite_Cl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
-@[simp]
-theorem proper_extension_of_LC : Logic.LC ⊂ Logic.Cl := by
+instance : Logic.LC ⪱ Logic.Cl := by
   constructor;
-  . apply (Hilbert.weakerThan_of_dominate_axiomInstances
-      (by rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp)).subset;
-  . suffices ∃ φ, Hilbert.Cl ⊢! φ ∧ ¬FrameClass.LC ⊧ φ by rw [LC.Kripke.LC]; tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    rintro φ (rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.Cl ⊢! φ ∧ ¬FrameClass.LC ⊧ φ by simpa [LC.Kripke.LC];
     use Axioms.LEM (.atom 0);
     constructor;
     . simp;
@@ -148,71 +142,12 @@ theorem proper_extension_of_LC : Logic.LC ⊂ Logic.Cl := by
         have := @F.eucl _ 0 1 0;
         omega;
 
-@[simp]
-lemma proper_extension_of_Int : Logic.Int ⊂ Logic.Cl := by
-  trans Logic.LC;
-  trans Logic.KC;
-  all_goals simp;
+instance : Logic.Int ⪱ Logic.Cl := calc
+  Logic.Int ⪱ Logic.KC := by infer_instance
+  _         ⪱ Logic.LC := by infer_instance
+  _         ⪱ Logic.Cl := by infer_instance
 
-@[simp]
-theorem proper_extension_of_KP : Logic.KP ⊂ Logic.Cl := by
-  constructor;
-  . rw [KP.Kripke.KP, Cl.Kripke.Cl];
-    rintro φ hφ F hF;
-    apply hφ;
-    simp_all only [Set.mem_setOf_eq];
-    infer_instance;
-  . suffices ∃ φ, Hilbert.Cl ⊢! φ ∧ ¬FrameClass.KP ⊧ φ by rw [KP.Kripke.KP]; tauto;
-    use Axioms.LEM (.atom 0);
-    constructor;
-    . simp;
-    . apply not_validOnFrameClass_of_exists_frame;
-      let F : Frame := {
-        World := Fin 3,
-        Rel := λ x y => x = 0 ∨ x = y
-        rel_partial_order := {
-          refl := by omega;
-          trans := by omega;
-          antisymm := by omega;
-        }
-      };
-      use F;
-      constructor;
-      . refine {
-          kriesel_putnam := by
-            rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
-            match x, y, z with
-            | _, 0, 0 => simp_all;
-            | _, 1, 1 => simp_all;
-            | _, 2, 2 => simp_all;
-            | 1, _, 2 => omega;
-            | 2, _, 1 => omega;
-            | 0, 0, _ => omega;
-            | 0, 1, 0 => omega;
-            | 0, 1, 2 =>
-              use 0;
-              refine ⟨by tauto, by tauto, by tauto, ?_⟩;
-              intro u hu;
-              match u with
-              | 0 => use 1; tauto;
-              | 1 => use 1; tauto;
-              | 2 => use 2; tauto;
-            | 0, 2, 0 => omega;
-            | 0, 2, 1 =>
-              use 0;
-              refine ⟨by tauto, by tauto, by tauto, ?_⟩;
-              intro u hu;
-              match u with
-              | 0 => use 1; tauto;
-              | 1 => use 1; tauto;
-              | 2 => use 2; tauto;
-        }
-      . apply not_imp_not.mpr $ Kripke.isEuclidean_of_validate_axiomLEM;
-        by_contra hC;
-        have := @F.eucl _ 0 1 0;
-        omega;
-
-end Logic.Cl
+end Logic.Cl.Kripke
 
 
 end LO.Propositional

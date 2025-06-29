@@ -9,8 +9,10 @@ namespace Kite
 
 def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   match ← inferTypeQ ci.type with
-  | ⟨1, ~q(Prop), ~q(@HasSSubset.SSubset Logic _ $a $b)⟩ => return some ⟨a.constName.toString, b.constName.toString, .ssub⟩
-  | ⟨1, ~q(Prop), ~q(@HasSubset.Subset Logic _ $a $b)⟩ => return some ⟨a.constName.toString, b.constName.toString, .sub⟩
+  | ⟨1, ~q(Prop), ~q(LO.Entailment.StrictlyWeakerThan (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
+    return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .ssub⟩
+  | ⟨1, ~q(Prop), ~q(LO.Entailment.WeakerThan (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
+    return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .sub⟩
   -- | ⟨1, ~q(Prop), ~q(($a : Logic) = $b)⟩ => return some (.ext, a, b)
   | _ => return none
 

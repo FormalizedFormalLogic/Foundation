@@ -16,40 +16,33 @@ protected abbrev FrameClass.KP : FrameClass := { F | F.SatisfiesKriselPutnamCond
 end Kripke
 
 
-namespace Hilbert.KP.Kripke
+namespace Logic.KP.Kripke
 
-instance sound : Sound Hilbert.KP FrameClass.KP := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.KP FrameClass.KP := instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomKrieselPutnam_of_satisfiesKrieselPutnamCondition
 
-instance consistent : Entailment.Consistent Hilbert.KP := consistent_of_sound_frameclass FrameClass.KP $ by
+instance consistent : Entailment.Consistent Logic.KP := consistent_of_sound_frameclass FrameClass.KP $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance canonical : Canonical Hilbert.KP FrameClass.KP := ⟨by
+instance canonical : Canonical Logic.KP FrameClass.KP := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Hilbert.KP FrameClass.KP := inferInstance
+instance complete : Complete Logic.KP FrameClass.KP := inferInstance
 
-end Hilbert.KP.Kripke
+lemma KP : Logic.KP = FrameClass.KP.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
-
-namespace Logic.KP
-
-open Formula
-
-lemma Kripke.KP : Logic.KP = FrameClass.KP.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
-@[simp]
-theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KP := by
+instance : Logic.Int ⪱ Logic.KP := by
   constructor;
-  . exact (Hilbert.weakerThan_of_subset_axioms (by simp)).subset;
-  . suffices ∃ φ, Hilbert.KP ⊢! φ ∧ ¬FrameClass.all ⊧ φ by rw [Int.Kripke.Int]; tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KP ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [Int.Kripke.Int];
     use Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2);
     constructor;
     . simp;
@@ -90,7 +83,7 @@ theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KP := by
             match x with
             | 0 => omega;
             | 1 =>
-              suffices ¬Satisfies M 1 (∼atom 0) by tauto
+              suffices ¬Satisfies M 1 (∼.atom 0) by tauto
               apply Satisfies.neg_def.not.mpr;
               push_neg;
               use 2;
@@ -116,6 +109,6 @@ theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KP := by
               . tauto;
               . simp [Semantics.Realize, Satisfies, M, Frame.Rel'];
 
-end Logic.KP
+end Logic.KP.Kripke
 
 end LO.Propositional

@@ -6,6 +6,8 @@ import Foundation.Modal.Kripke.Logic.KD
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -18,40 +20,30 @@ abbrev FrameClass.KDB : FrameClass := { F | F.IsKDB }
 end Kripke
 
 
-namespace Hilbert.KDB.Kripke
+namespace Logic.KDB.Kripke
 
-instance sound : Sound (Hilbert.KDB) Kripke.FrameClass.KDB := instSound_of_validates_axioms $ by
+instance sound : Sound (Logic.KDB) Kripke.FrameClass.KDB := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomB_of_symmetric;
 
-instance consistent : Entailment.Consistent (Hilbert.KDB) := consistent_of_sound_frameclass Kripke.FrameClass.KDB $ by
+instance consistent : Entailment.Consistent (Logic.KDB) := consistent_of_sound_frameclass Kripke.FrameClass.KDB $ by
   use whitepoint;
   constructor;
 
 
-instance canonical : Canonical (Hilbert.KDB) Kripke.FrameClass.KDB := ⟨by constructor⟩
+instance canonical : Canonical (Logic.KDB) Kripke.FrameClass.KDB := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.KDB) Kripke.FrameClass.KDB := inferInstance
+instance complete : Complete (Logic.KDB) Kripke.FrameClass.KDB := inferInstance
 
-end Hilbert.KDB.Kripke
+lemma serial_symm : Logic.KDB = Kripke.FrameClass.KDB.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KDB.Kripke.serial_symm : Logic.KDB = Kripke.FrameClass.KDB.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
-theorem KDB.proper_extension_of_KD : Logic.KD ⊂ Logic.KDB := by
+instance : Logic.KD ⪱ Logic.KDB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
-      rw [KD.Kripke.serial];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KDB ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by simpa [KD.Kripke.serial];
     use Axioms.B (.atom 0);
     constructor;
     . exact axiomB!;
@@ -64,13 +56,11 @@ theorem KDB.proper_extension_of_KD : Logic.KD ⊂ Logic.KDB := by
         use 1;
         constructor <;> omega;
 
-@[simp]
-theorem KDB.proper_extension_of_KB : Logic.KB ⊂ Logic.KDB := by
+instance : Logic.KB ⪱ Logic.KDB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KDB ⊢! φ ∧ ¬FrameClass.KB ⊧ φ by
-      rw [KB.Kripke.symm];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KDB ⊢! φ ∧ ¬FrameClass.KB ⊧ φ by simpa [KB.Kripke.symm];
     use Axioms.D (.atom 0);
     constructor;
     . exact axiomD!;
@@ -80,6 +70,6 @@ theorem KDB.proper_extension_of_KB : Logic.KB ⊂ Logic.KDB := by
       . refine { symm := by simp; };
       . simp [Semantics.Realize, Satisfies];
 
-end Logic
+end Logic.KDB.Kripke
 
 end LO.Modal

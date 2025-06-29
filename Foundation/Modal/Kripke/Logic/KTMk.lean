@@ -1,4 +1,4 @@
-import Foundation.Modal.Entailment.KT
+import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.AxiomMk
@@ -24,21 +24,21 @@ open Kripke
 open Hilbert.Kripke
 
 
-namespace Hilbert.KTMk.Kripke
+namespace Logic.KTMk.Kripke
 
-instance sound : Sound (Hilbert.KTMk) Kripke.FrameClass.KTMk := instSound_of_validates_axioms $ by
+instance sound : Sound (Logic.KTMk) Kripke.FrameClass.KTMk := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_axiomMk_of_satisfiesMakinsonCondition;
 
-instance consistent : Entailment.Consistent (Hilbert.KTMk) := consistent_of_sound_frameclass Kripke.FrameClass.KTMk $ by
+instance consistent : Entailment.Consistent (Logic.KTMk) := consistent_of_sound_frameclass Kripke.FrameClass.KTMk $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical (Hilbert.KTMk) Kripke.FrameClass.KTMk := ⟨by constructor⟩
+instance canonical : Canonical (Logic.KTMk) Kripke.FrameClass.KTMk := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.KTMk) Kripke.FrameClass.KTMk := inferInstance
+instance complete : Complete (Logic.KTMk) Kripke.FrameClass.KTMk := inferInstance
 
 
 section
@@ -46,7 +46,7 @@ section
 open Formula.Kripke
 open Entailment
 
-lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Hilbert.KTMk.logic)
+lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Logic.KTMk)
   : Finite M → ∀ φ : Formula ℕ, M ⊧ Axioms.Four φ := by
   contrapose!;
   rintro ⟨φ, hφ⟩;
@@ -91,7 +91,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Hilbe
         match c with
         | 0 => contradiction;
         | n + 1 =>
-          suffices Hilbert.KTMk ⊢! □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
+          suffices Logic.KTMk ⊢! □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
             simp_all [
               show (i + (n + 1)) = (i + n) + 1 by omega,
               show (i + 2) + n = (i + n) + 2 by omega
@@ -107,6 +107,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Hilbe
       . intro h;
         have : l[m] ⊧ □^[(m + 1)]φ ⋏ ∼□^[(m + 2)]φ ➝ ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := by
           apply hM.realize;
+          apply iff_provable.mp;
           simp;
         replace : l[m] ⊧ ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := this h;
         obtain ⟨y, hy₁, hy₂⟩ := Satisfies.dia_def.mp this;
@@ -159,7 +160,7 @@ lemma exists_not_validate_axiomFour : ∃ φ : Formula ℕ, ¬recessionFrame ⊧
 
 end recessionFrame
 
-lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Hilbert.KTMk ⊬ Axioms.Four φ := by
+lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Logic.KTMk ⊬ Axioms.Four φ := by
   obtain ⟨φ, hφ⟩ := recessionFrame.exists_not_validate_axiomFour;
   use! φ;
   apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.KTMk);
@@ -170,7 +171,7 @@ lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Hilbert.KTMk ⊬ Axi
     infer_instance;
   . assumption;
 
-lemma no_finite_model_property : ¬(∀ φ, Hilbert.KTMk ⊬ φ → ∃ M : Kripke.Model, Finite M ∧ M ⊧* Hilbert.KTMk.logic ∧ ¬M ⊧ φ)  := by
+lemma no_finite_model_property : ¬(∀ φ, Logic.KTMk ⊬ φ → ∃ M : Kripke.Model, Finite M ∧ M ⊧* Hilbert.KTMk.logic ∧ ¬M ⊧ φ)  := by
   by_contra! hC;
   obtain ⟨φ, hφ⟩ := exists_not_provable_axiomFour;
   obtain ⟨M, hM₁, hM₂, hM₃⟩ := @hC (Axioms.Four φ) hφ;
@@ -178,11 +179,74 @@ lemma no_finite_model_property : ¬(∀ φ, Hilbert.KTMk ⊬ φ → ∃ M : Krip
   . assumption;
   . assumption;
 
-example : ∃ φ, Hilbert.KTMk ⊬ φ ∧ (∀ M : Kripke.Model, Finite M → M ⊧* Hilbert.KTMk.logic → M ⊧ φ) := by
+example : ∃ φ, Logic.KTMk ⊬ φ ∧ (∀ M : Kripke.Model, Finite M → M ⊧* Hilbert.KTMk.logic → M ⊧ φ) := by
   simpa using no_finite_model_property;
 
 end
 
-end Hilbert.KTMk.Kripke
+end Logic.KTMk.Kripke
+
+
+
+namespace Logic
+
+open Formula
+open Entailment
+open Kripke
+
+instance : Logic.KT ⪱ Logic.KTMk := by
+  constructor;
+  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KTMk ⊢! φ ∧ ¬FrameClass.KT ⊧ φ by simpa [KT.Kripke.refl];
+    use (Axioms.Mk (.atom 0) (.atom 1));
+    constructor;
+    . exact axiomMk!;
+    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      use ⟨⟨Fin 3, λ x y => x = y ∨ x + 1 = y⟩, λ w a => match a with | 0 => w ≠ 2 | 1 => w = 0 | _ => True⟩, 0;
+      constructor;
+      . exact { refl := by omega; }
+      . suffices ∀ (x : Fin 3), 0 = x ∨ 1 = x → (∀ y, x = y ∨ x + 1 = y → ∀ z, y = z ∨ y + 1 = z → z ≠ 2) → x ≠ 0 ∧ x + 1 ≠ 0 by
+          simpa [Frame.Rel', Satisfies, Semantics.Realize];
+        rintro x (rfl | rfl);
+        . intro h;
+          exfalso;
+          have : (1 : Fin 3) ≠ 2 := h 0 (by omega) 1 (by omega);
+          tauto;
+        . omega;
+
+instance : Logic.KTMk ⪱ Logic.S4 := by
+  constructor;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    intro φ hφ;
+    rcases (by simpa using hφ) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, _, rfl⟩);
+    . simp;
+    . simp;
+    . apply LO.Modal.Logic.S4.Kripke.complete.complete;
+      intro F hF V x hx;
+      replace hF := Set.mem_setOf_eq.mp hF;
+      replace ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
+      apply Satisfies.dia_def.mpr;
+      use x;
+      constructor;
+      . apply F.refl;
+      . apply Satisfies.and_def.mpr;
+        constructor;
+        . intro y Rxy z Ryz;
+          apply hx₁;
+          exact F.trans Rxy Ryz;
+        . apply Satisfies.dia_def.mpr;
+          use x;
+          constructor;
+          . apply F.refl;
+          . assumption;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    obtain ⟨φ, hφ⟩ := Logic.KTMk.Kripke.exists_not_provable_axiomFour;
+    use Axioms.Four φ;
+    constructor;
+    . simp;
+    . assumption;
+
+end Logic
 
 end LO.Modal

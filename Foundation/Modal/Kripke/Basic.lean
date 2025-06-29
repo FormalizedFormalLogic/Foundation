@@ -522,9 +522,9 @@ namespace Kripke
 
 section
 
-abbrev Frame.logic (F : Frame) : Logic := { φ | F ⊧ φ }
+abbrev Frame.logic (F : Frame) : Logic ℕ := { φ | F ⊧ φ }
 
-abbrev FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
+abbrev FrameClass.logic (C : FrameClass) : Logic ℕ := { φ | C ⊧ φ }
 
 end
 

@@ -6,6 +6,8 @@ import Foundation.Modal.Kripke.Logic.K4
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
 
@@ -18,39 +20,30 @@ abbrev FrameClass.IsK4Point3 : FrameClass := { F | F.IsK4Point3 }
 end Kripke
 
 
-namespace Hilbert.K4Point3.Kripke
+namespace Logic.K4Point3.Kripke
 
-instance sound : Sound (Hilbert.K4Point3) FrameClass.IsK4Point3 := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.K4Point3 FrameClass.IsK4Point3 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_WeakPoint3_of_weakConnected;
 
-instance consistent : Entailment.Consistent (Hilbert.K4Point3) :=
+instance consistent : Entailment.Consistent Logic.K4Point3 :=
   consistent_of_sound_frameclass FrameClass.IsK4Point3 $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Hilbert.K4Point3) FrameClass.IsK4Point3 :=  ⟨by constructor⟩
+instance canonical : Canonical Logic.K4Point3 FrameClass.IsK4Point3 :=  ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.K4Point3) FrameClass.IsK4Point3 := inferInstance
+instance complete : Complete Logic.K4Point3 FrameClass.IsK4Point3 := inferInstance
 
-end Hilbert.K4Point3.Kripke
+lemma trans_weakConnected : Logic.K4Point3 = FrameClass.IsK4Point3.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma K4Point3.Kripke.trans_weakConnected : Logic.K4Point3 = FrameClass.IsK4Point3.logic := eq_hilbert_logic_frameClass_logic
-
-theorem K4Point3.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point3 := by
+instance : Logic.K4 ⪱ Logic.K4Point3 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K4Point3 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by
-      rw [K4.Kripke.trans];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.K4Point3 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by simpa [K4.Kripke.trans];
     use (Axioms.WeakPoint3 (.atom 0) (.atom 1));
     constructor;
     . exact axiomWeakPoint3!;
@@ -75,6 +68,6 @@ theorem K4Point3.proper_extension_of_K4 : Logic.K4 ⊂ Logic.K4Point3 := by
         . trivial;
         . trivial;
 
-end Logic
+end Logic.K4Point3.Kripke
 
 end LO.Modal

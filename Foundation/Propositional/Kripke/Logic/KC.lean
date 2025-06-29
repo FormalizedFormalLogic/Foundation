@@ -1,6 +1,7 @@
 import Foundation.Propositional.Kripke.AxiomWeakLEM
 import Foundation.Propositional.Kripke.Rooted
 import Foundation.Propositional.Kripke.Logic.Int
+import Foundation.Propositional.Kripke.Logic.KP
 
 
 namespace LO.Propositional
@@ -11,42 +12,54 @@ open Formula.Kripke
 
 namespace Kripke
 
+variable {F : Frame}
+
 protected abbrev Frame.IsKC := Frame.IsPiecewiseStronglyConvergent
 protected class Frame.IsFiniteKC (F : Frame) extends F.IsFinite, F.IsKC
 
 protected abbrev FrameClass.KC : FrameClass := { F | F.IsKC }
 protected abbrev FrameClass.finite_KC : FrameClass := { F | F.IsFiniteKC }
 
+instance [F.IsKC] : F.IsKP := ⟨by
+  rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
+  use x;
+  refine ⟨F.refl, Rxy, Rxz, ?_⟩;
+  intro v Rxv;
+  obtain ⟨u, Ryu, Rvu⟩ := F.ps_convergent Rxy Rxv;
+  use u;
+  tauto;
+⟩
+
 end Kripke
 
 
-namespace Hilbert.KC.Kripke
+namespace Logic.KC.Kripke
 
-instance sound : Sound Hilbert.KC FrameClass.KC :=
+instance sound : Sound Logic.KC FrameClass.KC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
 
-instance sound_finite : Sound Hilbert.KC FrameClass.finite_KC :=
+instance sound_finite : Sound Logic.KC FrameClass.finite_KC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
 
-instance consistent : Entailment.Consistent Hilbert.KC := consistent_of_sound_frameclass FrameClass.KC $ by
+instance consistent : Entailment.Consistent Logic.KC := consistent_of_sound_frameclass FrameClass.KC $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance canonical : Canonical Hilbert.KC FrameClass.KC := ⟨by
+instance canonical : Canonical Logic.KC FrameClass.KC := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Hilbert.KC FrameClass.KC := inferInstance
+instance complete : Complete Logic.KC FrameClass.KC := inferInstance
 
 section FFP
 
@@ -54,7 +67,7 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_KC := ⟨by
+instance finite_complete : Complete (Logic.KC) FrameClass.finite_KC := ⟨by
   intro φ hφ;
   apply Kripke.complete.complete;
   rintro F F_con V r;
@@ -116,22 +129,18 @@ instance finite_complete : Complete (Hilbert.KC) FrameClass.finite_KC := ⟨by
 
 end FFP
 
-end Hilbert.KC.Kripke
-
-namespace Logic.KC
-
 open Kripke
 open Entailment
 open Formula.Kripke
 
-lemma Kripke.KC : Logic.KC = FrameClass.KC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma Kripke.finite_KC : Logic.KC = FrameClass.finite_KC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma KC : Logic.KC = FrameClass.KC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+lemma finite_KC : Logic.KC = FrameClass.finite_KC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
 
-@[simp]
-theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KC := by
+instance : Logic.Int ⪱ Logic.KC := by
   constructor;
-  . exact (Hilbert.weakerThan_of_subset_axioms (by simp)).subset;
-  . suffices ∃ φ, Hilbert.KC ⊢! φ ∧ ¬FrameClass.all ⊧ φ by rw [Int.Kripke.Int]; tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KC ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [Int.Kripke.Int];
     use Axioms.WeakLEM (.atom 0);
     constructor;
     . exact wlem!;
@@ -153,6 +162,66 @@ theorem proper_extension_of_Int : Logic.Int ⊂ Logic.KC := by
         have := @F.ps_convergent _ 0 1 2;
         omega;
 
-end Logic.KC
+@[simp]
+theorem proper_extension_of_KP : Logic.KP ⪱ Logic.KC := by
+  constructor;
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.KP ⊧ φ → FrameClass.KC ⊧ φ by simpa [KC.Kripke.KC, KP.Kripke.KP];
+    rintro φ hφ F hF;
+    apply hφ;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KC ⊢! φ ∧ ¬FrameClass.KP ⊧ φ by simpa [KP.Kripke.KP];
+    use Axioms.WeakLEM (.atom 0);
+    constructor;
+    . simp;
+    . apply not_validOnFrameClass_of_exists_frame;
+      let F : Frame := {
+        World := Fin 3,
+        Rel := λ x y => x = 0 ∨ x = y
+        rel_partial_order := {
+          refl := by omega;
+          trans := by omega;
+          antisymm := by omega;
+        }
+      };
+      use F;
+      constructor;
+      . refine {
+          kriesel_putnam := by
+            rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
+            match x, y, z with
+            | _, 0, 0 => simp_all;
+            | _, 1, 1 => simp_all;
+            | _, 2, 2 => simp_all;
+            | 1, _, 2 => omega;
+            | 2, _, 1 => omega;
+            | 0, 0, _ => omega;
+            | 0, 1, 0 => omega;
+            | 0, 1, 2 =>
+              use 0;
+              refine ⟨by tauto, by tauto, by tauto, ?_⟩;
+              intro u hu;
+              match u with
+              | 0 => use 1; tauto;
+              | 1 => use 1; tauto;
+              | 2 => use 2; tauto;
+            | 0, 2, 0 => omega;
+            | 0, 2, 1 =>
+              use 0;
+              refine ⟨by tauto, by tauto, by tauto, ?_⟩;
+              intro u hu;
+              match u with
+              | 0 => use 1; tauto;
+              | 1 => use 1; tauto;
+              | 2 => use 2; tauto;
+        }
+      . apply not_imp_not.mpr $ Kripke.isPiecewiseStronglyConvergent_of_validate_axiomWeakLEM;
+        by_contra hC;
+        have := @F.ps_convergent _ 0 1 2;
+        omega;
+
+end Logic.KC.Kripke
 
 end LO.Propositional

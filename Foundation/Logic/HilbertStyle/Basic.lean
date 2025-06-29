@@ -33,6 +33,7 @@ lemma mdp! [ModusPonens 𝓢] : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! φ → 𝓢 �
   rintro ⟨hpq⟩ ⟨hp⟩;
   exact ⟨hpq ⨀ hp⟩
 infixl:90 "⨀" => mdp!
+infixl:90 "⨀!" => mdp!
 
 class HasAxiomVerum (𝓢 : S) where
   verum : 𝓢 ⊢ Axioms.Verum
