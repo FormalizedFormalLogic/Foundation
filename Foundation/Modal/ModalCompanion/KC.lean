@@ -71,7 +71,7 @@ instance : Entailment.HasAxiomPoint2 Logic.KC.smallestMC where
       apply Logic.sumNormal.mem₂!;
       use Axioms.WeakLEM (.atom 0);
       constructor;
-      . simp [-Propositional.Logic.iff_provable, theory];
+      . simp [theory];
       . tauto;
     apply ?_ ⨀ this;
     apply Entailment.WeakerThan.pbl (𝓢 := Logic.S4);
@@ -115,11 +115,12 @@ lemma S4Point2.is_smallestMC_of_KC : Logic.S4Point2 = Logic.KC.smallestMC := by
     | subst ihφ => apply subst! _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable Hilbert.KC Logic.S4Point2 ?_ (by trivial);
-      rintro _ ⟨_, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩;
-      . exact WeakerThan.pbl $ modalCompanion_Int_S4.companion.mp (by simp);
-      . suffices Logic.S4Point2 ⊢! □(∼(s 0)ᵍ) ⋎ □(∼□(∼(s 0)ᵍ)) by simpa;
-        exact Logic.S4Point2.goedelTranslated_axiomWLEM;
+      apply provable_goedelTranslated_of_provable Hilbert.KC Logic.S4Point2;
+      . rintro _ ⟨_, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩;
+        . exact WeakerThan.pbl $ modalCompanion_Int_S4.companion.mp (by simp [theory]);
+        . suffices Logic.S4Point2 ⊢! □(∼(s 0)ᵍ) ⋎ □(∼□(∼(s 0)ᵍ)) by simpa;
+          exact Logic.S4Point2.goedelTranslated_axiomWLEM;
+      . simpa [theory] using hφ;
 
 instance : Sound Logic.KC.smallestMC FrameClass.S4Point2 := by
   rw [←Logic.S4Point2.is_smallestMC_of_KC];

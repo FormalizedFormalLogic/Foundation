@@ -212,12 +212,15 @@ lemma goedelTranslated_OrElim : ML ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ �
 lemma provable_goedelTranslated_of_provable
   (IH : Propositional.Hilbert ℕ) (ML : Modal.Logic ℕ) [Entailment.S4 ML]
   (hAx : ∀ φ ∈ IH.axiomInstances, ML ⊢! φᵍ)
-  : IH.logic ⊢! φ → ML ⊢! φᵍ := by
+  : IH ⊢! φ → ML ⊢! φᵍ := by
   intro h;
   induction h using Propositional.Hilbert.rec! with
-  | maxm ih => apply hAx; assumption;
+  | @axm φ _ ih =>
+    apply hAx;
+    use φ;
+    tauto;
   | mdp ihpq ihp =>
-    exact axiomT'! $ axiomK''! (ihpq) $ nec! $ ihp;
+    exact axiomT'! $ axiomK''! ihpq $ nec! $ ihp;
   | verum => exact nec! C!_id;
   | andElimL => exact nec! and₁!;
   | andElimR => exact nec! and₂!;

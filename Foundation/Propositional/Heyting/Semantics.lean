@@ -101,33 +101,29 @@ lemma mod_models_iff {φ : Formula α} :
     mod.{_,w} H ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* H.axiomInstances → ℍ ⊧ φ := by
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
-lemma sound {φ : Formula α} (d : H.logic ⊢! φ) : mod H ⊧ φ := by
-  apply mod_models_iff.mpr fun ℍ hℍ ↦ ?_
-  induction d using Hilbert.rec!;
-  case maxm φ hφ => exact hℍ.RealizeSet hφ;
-  case mdp φ ψ _ _ ihpq ihp =>
+lemma sound {φ : Formula α} (d : H ⊢! φ) : mod H ⊧ φ := by
+  apply mod_models_iff.mpr;
+  intro ℍ hℍ;
+  induction d with
+  | @axm φ s hφ =>
+    apply hℍ.RealizeSet;
+    use φ;
+    simpa;
+  | @mdp φ ψ _ _ ihpq ihp =>
     have : (ℍ ⊧ₕ φ) ≤ (ℍ ⊧ₕ ψ) := by simpa using ihpq
     simpa [val_def'.mp ihp] using this
-  case verum => simp
-  case implyS => simp
-  case implyK φ ψ χ => simp [himp_himp_inf_himp_inf_le]
-  case andElimL => simp
-  case andElimR => simp
-  case K_intro => simp
-  case orIntroL => simp
-  case orIntroR => simp
-  case orElim => simp [himp_inf_himp_inf_sup_le]
+  | _ => simp [himp_himp_inf_himp_inf_le, himp_inf_himp_inf_sup_le]
 
-instance : Sound H.logic (mod H) := ⟨sound⟩
+instance : Sound H (mod H) := ⟨sound⟩
 
 section
 
 open Entailment.LindenbaumAlgebra
 
-variable [DecidableEq α] (H : Hilbert α) [H.HasEFQ] [Entailment.Consistent H.logic]
+variable [DecidableEq α] (H : Hilbert α) [H.HasEFQ] [Entailment.Consistent H]
 
 def lindenbaum : HeytingSemantics α where
-  Algebra := Entailment.LindenbaumAlgebra H.logic
+  Algebra := Entailment.LindenbaumAlgebra H
   valAtom a := ⟦.atom a⟧
 
 
@@ -140,25 +136,25 @@ lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
 
 variable {H}
 
-omit [Entailment.Consistent H.logic] in
-lemma lindenbaum_complete_iff [Entailment.Consistent H.logic] {φ : Formula α} : lindenbaum H ⊧ φ ↔ H.logic ⊢! φ := by
+omit [Entailment.Consistent H] in
+lemma lindenbaum_complete_iff [Entailment.Consistent H] {φ : Formula α} : lindenbaum H ⊧ φ ↔ H ⊢! φ := by
   simp [val_def', lindenbaum_val_eq, provable_iff_eq_top]
 
-instance : Sound H.logic (lindenbaum H) := ⟨lindenbaum_complete_iff.mpr⟩
+instance : Sound H (lindenbaum H) := ⟨lindenbaum_complete_iff.mpr⟩
 
-instance : Complete H.logic (lindenbaum H) := ⟨lindenbaum_complete_iff.mp⟩
+instance : Complete H (lindenbaum H) := ⟨lindenbaum_complete_iff.mp⟩
 
 end
 
 open Hilbert.Deduction
 
-lemma complete [DecidableEq α] {φ : Formula α} [H.HasEFQ] (h : mod.{_,u} H ⊧ φ) : H.logic ⊢! φ := by
-  wlog Con : Entailment.Consistent H.logic
-  · exact Entailment.not_consistent_iff_inconsistent.mp Con φ
+lemma complete [DecidableEq α] {φ : Formula α} [H.HasEFQ] (h : mod.{_,u} H ⊧ φ) : H ⊢! φ := by
+  wlog Con : Entailment.Consistent H
+  . exact Entailment.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <|
-    mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hq ↦ lindenbaum_complete_iff.mpr <| Hilbert.maxm! hq⟩
+    mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hψ ↦ lindenbaum_complete_iff.mpr <| Hilbert.axm_instances! hψ⟩
 
-instance [DecidableEq α] [H.HasEFQ] : Complete H.logic (mod.{_,u} H) := ⟨complete⟩
+instance [DecidableEq α] [H.HasEFQ] : Complete H (mod.{_,u} H) := ⟨complete⟩
 
 end HeytingSemantics
 

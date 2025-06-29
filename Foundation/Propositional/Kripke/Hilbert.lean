@@ -7,28 +7,15 @@ open Kripke
 open Formula
 open Formula.Kripke
 
-
-lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic {H : Hilbert ℕ} {C : FrameClass}
-  [sound : Sound H.logic C] [complete : Complete H.logic C]
-  : H.logic = C.logic := by
-  ext φ;
-  constructor;
-  . intro h;
-    apply sound.sound;
-    simpa;
-  . intro h;
-    simpa using complete.complete h;
-
-
 namespace Hilbert.Kripke
 
-variable {H : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
+variable {H H₁ H₂ : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 
-section
+section FrameClass
 
-variable {C : Kripke.FrameClass}
+variable {C C₁ C₂ : Kripke.FrameClass}
 
-lemma soundness_of_validates_axiomInstances (hV : C.Validates H.axiomInstances) : H.logic ⊢! φ → C ⊧ φ := by
+lemma soundness_of_validates_axioms (hV : C.Validates H.axioms) : H ⊢! φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ with
   | verum => apply ValidOnFrame.top;
@@ -41,23 +28,13 @@ lemma soundness_of_validates_axiomInstances (hV : C.Validates H.axiomInstances) 
   | orIntroR => apply ValidOnFrame.orInst₂;
   | orElim => apply ValidOnFrame.orElim;
   | mdp => exact ValidOnFrame.mdp (by assumption) (by assumption);
-  | maxm hi =>
-    obtain ⟨ψ, h, ⟨s, rfl⟩⟩ := hi;
-    apply hV F hF (ψ⟦s⟧);
-    use ψ;
-    constructor
-    . assumption;
-    . use s;
+  | axm s hi =>
+    apply ValidOnFrame.subst;
+    apply hV F hF _ hi;
 
-lemma validates_axioms_of_validates_axiomInstances (hV : C.Validates H.axioms) : C.Validates H.axiomInstances := by
-  rintro F hF _ ⟨φ, hφ, ⟨s, rfl⟩⟩;
-  exact ValidOnFrame.subst $ hV F hF φ hφ;
+lemma instSound_of_validates_axioms (hV : C.Validates H.axioms) : Sound H C := ⟨fun {_} => soundness_of_validates_axioms hV⟩
 
-instance instSound_of_validates_axioms (hV : C.Validates H.axioms) : Sound H.logic C := ⟨fun {_} =>
-  soundness_of_validates_axiomInstances (validates_axioms_of_validates_axiomInstances hV)
-⟩
-
-lemma consistent_of_sound_frameclass (C : FrameClass) (hC : Set.Nonempty C) [sound : Sound H.logic C] : Entailment.Consistent H.logic := by
+lemma consistent_of_sound_frameclass (C : FrameClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
   apply Entailment.Consistent.of_unprovable (f := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
@@ -73,7 +50,54 @@ lemma finite_sound_of_sound (sound : Sound H.logic C) : Sound H.logic ({ F | F �
   exact sound.sound hφ hF₁;
 ⟩
 
+lemma weakerThan_of_subset_frameClass (C₁ C₂ : FrameClass) (hC : C₂ ⊆ C₁) [Sound H₁ C₁] [Complete H₂ C₂] : H₁ ⪯ H₂ := by
+  apply Entailment.weakerThan_iff.mpr;
+  intro φ hφ;
+  apply Complete.complete (𝓜 := C₂);
+  intro F hF;
+  apply Sound.sound (𝓢 := H₁) (𝓜 := C₁) hφ;
+  apply hC hF;
+
+lemma eq_Hilbert_Logic_KripkeFrameClass_Logic [sound : Sound H C] [complete : Complete H C] : H.logic = C.logic := by
+  ext φ;
+  constructor;
+  . intro h;
+    apply sound.sound;
+    simpa;
+  . intro h;
+    simpa using complete.complete h;
+
+instance [Sound H C] : Sound H.logic C := by
+  constructor;
+  intro φ hφ;
+  apply Sound.sound $ by simpa using hφ;
+
+instance [Complete H C] : Complete H.logic C := by
+  constructor;
+  intro φ hφ;
+  simpa using Complete.complete hφ;
+
+
+section
+
+open Lean Meta Elab Command
+
+syntax (name := generatePropositionalKripke) "propositional_kripke " term : command
+
+/-- WOW -/
+@[command_elab generatePropositionalKripke]
+def elabGenerateFinNatCoe : CommandElab
+| `(propositional_kripke $H:term $C:term) => do
+  let instSound ← `(instance : Sound $H $C := inferInstance)
+  let instComplete ← `(instance : Complete $H $C := inferInstance)
+
+  elabCommand instSound
+  elabCommand instComplete
+| _ => throwUnsupportedSyntax
+
 end
+
+end FrameClass
 
 end Hilbert.Kripke
 

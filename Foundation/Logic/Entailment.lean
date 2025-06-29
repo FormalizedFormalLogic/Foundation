@@ -563,6 +563,10 @@ section
 
 variable {𝓢 : S} {𝓜 : M} [Complete 𝓢 𝓜]
 
+lemma exists_countermodel_of_not_provable {f : F} (h : 𝓢 ⊬ f) : ¬𝓜 ⊧ f := by
+  contrapose! h;
+  simpa using Complete.complete (𝓢 := 𝓢) h;
+
 lemma meaningful_of_consistent : Entailment.Consistent 𝓢 → Semantics.Meaningful 𝓜 := by
   contrapose
   suffices (∀ (f : F), 𝓜 ⊧ f) → Entailment.Inconsistent 𝓢 by
