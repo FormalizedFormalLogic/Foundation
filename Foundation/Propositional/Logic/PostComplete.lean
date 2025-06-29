@@ -27,14 +27,12 @@ theorem Cl.post_complete : ¬∃ L : Logic _, Entailment.Consistent L ∧ Nonemp
   obtain ⟨L, L_consis, ⟨L_ne⟩, L_Cl⟩ := hC;
   apply Logic.no_bot (L := L);
   obtain ⟨hL, φ, hφ₁, hφ₂⟩ := Entailment.strictlyWeakerThan_iff.mp L_Cl;
-  have ⟨v, hv⟩ := exists_valuation_of_not_provable hφ₁;
+  have ⟨v, hv⟩ := exists_valuation_of_not hφ₁;
   have h₁ : L ⊢! ∼(φ⟦(vfSubst v).1⟧) := hL $ by
-    simp only [tautologies, Formula.subst.subst_atom, Set.mem_setOf_eq];
-    suffices ¬(φ⟦(vfSubst v).1⟧).isTautology by
-      simp only [iff_provable, Set.mem_setOf_eq];
-      apply neg_isTautology_of_not_isTautology_of_letterless ?_ this;
-      apply Formula.letterless_zeroSubst (s := vfSubst v);
-    apply isTautology_vfSubst.not.mp hv;
+    apply iff_isTautology.mpr;
+    apply neg_isTautology_of_not_isTautology_of_letterless;
+    . apply Formula.letterless_zeroSubst;
+    . apply isTautology_vfSubst.not.mp hv;
   have h₂ : L ⊢! φ⟦(vfSubst v).1⟧ := L.subst! _ hφ₂;
   exact h₁ ⨀ h₂;
 

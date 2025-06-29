@@ -13,7 +13,7 @@ namespace Kripke
 
 variable {F : Frame}
 
-protected abbrev Frame.IsCl := Frame.IsEuclidean
+@[reducible] protected alias Frame.IsCl := Frame.IsEuclidean
 protected class Frame.IsFiniteCl (F : Frame) extends F.IsFinite, F.IsCl
 
 instance : whitepoint.IsEuclidean := ⟨by tauto⟩
@@ -32,32 +32,34 @@ end Kripke
 
 
 
-namespace Logic.Cl.Kripke
+namespace Hilbert
 
-instance sound : Sound Logic.Cl FrameClass.Cl :=
+namespace Cl.Kripke
+
+instance : Sound Hilbert.Cl FrameClass.Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomLEM_of_isEuclidean;
 
-instance sound_finite : Sound Logic.Cl FrameClass.finite_Cl :=
+instance : Sound Hilbert.Cl FrameClass.finite_Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F ⟨_, hF⟩ _ rfl;
     apply validate_axiomLEM_of_isEuclidean;
 
-instance consistent : Entailment.Consistent Logic.Cl := consistent_of_sound_frameclass FrameClass.Cl $ by
+instance : Entailment.Consistent Hilbert.Cl := consistent_of_sound_frameclass FrameClass.Cl $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance canonical : Canonical Logic.Cl FrameClass.Cl :=  ⟨by
+instance : Canonical Hilbert.Cl FrameClass.Cl :=  ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Logic.Cl FrameClass.Cl := inferInstance
+instance : Complete Hilbert.Cl FrameClass.Cl := inferInstance
 
 section FFP
 
@@ -65,8 +67,8 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance complete_finite_symmetric : Complete (Logic.Cl) FrameClass.finite_Cl := by
-  suffices Complete (Logic.Cl) { F : Frame | F.IsFinite ∧ F.IsSymmetric } by
+instance : Complete Hilbert.Cl FrameClass.finite_Cl := by
+  suffices Complete Hilbert.Cl { F : Frame | F.IsFinite ∧ F.IsSymmetric } by
     convert this;
     constructor;
     . rintro ⟨_, hF⟩; exact ⟨by tauto, inferInstance⟩;
@@ -74,7 +76,7 @@ instance complete_finite_symmetric : Complete (Logic.Cl) FrameClass.finite_Cl :=
 
   constructor;
   intro φ hφ;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.Cl);
   rintro F F_con V r;
   replace F_con := Set.mem_setOf_eq.mp F_con;
   let M : Kripke.Model := ⟨F, V⟩;
@@ -112,19 +114,18 @@ instance complete_finite_symmetric : Complete (Logic.Cl) FrameClass.finite_Cl :=
 
 end FFP
 
-lemma Cl : Logic.Cl = FrameClass.Cl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma finite_Cl : Logic.Cl = FrameClass.finite_Cl.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+end Cl.Kripke
 
-instance : Logic.LC ⪱ Logic.Cl := by
+instance : Hilbert.LC ⪱ Hilbert.Cl := by
   constructor;
   . apply Hilbert.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.Cl ⊢! φ ∧ ¬FrameClass.LC ⊧ φ by simpa [LC.Kripke.LC];
     use Axioms.LEM (.atom 0);
     constructor;
     . simp;
-    . apply not_validOnFrameClass_of_exists_frame;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.LC)
+      apply not_validOnFrameClass_of_exists_frame;
       let F : Frame := {
         World := Fin 2,
         Rel := λ x y => x ≤ y
@@ -142,12 +143,17 @@ instance : Logic.LC ⪱ Logic.Cl := by
         have := @F.eucl _ 0 1 0;
         omega;
 
-instance : Logic.Int ⪱ Logic.Cl := calc
-  Logic.Int ⪱ Logic.KC := by infer_instance
-  _         ⪱ Logic.LC := by infer_instance
-  _         ⪱ Logic.Cl := by infer_instance
+instance : Hilbert.Int ⪱ Hilbert.Cl := calc
+  Hilbert.Int ⪱ Hilbert.KC := inferInstance
+  _           ⪱ Hilbert.LC := inferInstance
+  _           ⪱ Hilbert.Cl := inferInstance
 
-end Logic.Cl.Kripke
+end Hilbert
 
+propositional_kripke Logic.Cl FrameClass.Cl
+propositional_kripke Logic.Cl FrameClass.finite_Cl
+
+instance : Logic.LC ⪱ Logic.Cl := inferInstance
+instance : Logic.Int ⪱ Logic.Cl := inferInstance
 
 end LO.Propositional
