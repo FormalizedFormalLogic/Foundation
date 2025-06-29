@@ -1,4 +1,5 @@
 import Foundation.Propositional.Hilbert.WellKnown
+import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
@@ -71,6 +72,8 @@ lemma Hilbert.provable_of_classical_provable {H : Modal.Hilbert ℕ} {φ : Propo
 
 namespace Logic.Triv
 
+variable {φ : Modal.Formula ℕ}
+
 lemma iff_trivTranslated : Logic.Triv ⊢! φ ⭤ φᵀ := by
   induction φ with
   | hbox φ ih =>
@@ -80,7 +83,7 @@ lemma iff_trivTranslated : Logic.Triv ⊢! φ ⭤ φᵀ := by
   | himp _ _ ih₁ ih₂ => exact ECC!_of_E!_of_E! ih₁ ih₂;
   | _ => apply E!_id
 
-protected theorem iff_provable_Cl : Logic.Triv ⊢! φ ↔ Propositional.Hilbert.Cl ⊢! φᵀ.toPropFormula := by
+lemma iff_provable_Cl : Logic.Triv ⊢! φ ↔ Propositional.Hilbert.Cl ⊢! φᵀ.toPropFormula := by
   constructor;
   . intro h;
     induction h with
@@ -97,10 +100,16 @@ protected theorem iff_provable_Cl : Logic.Triv ⊢! φ ↔ Propositional.Hilbert
     have d₂ : Logic.Triv ⊢! φᵀ := by simpa only [trivTranslate.toIP] using Hilbert.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
 
+lemma iff_isTautology : Logic.Triv ⊢! φ ↔ φᵀ.toPropFormula.isTautology := by
+  apply Iff.trans Triv.iff_provable_Cl;
+  apply Propositional.Hilbert.Cl.iff_isTautology_provable.symm;
+
 end Logic.Triv
 
 
 namespace Logic.Ver
+
+variable {φ : Modal.Formula ℕ}
 
 lemma iff_verTranslated : Logic.Ver ⊢! φ ⭤ φⱽ := by
   induction φ with
@@ -126,6 +135,10 @@ protected lemma iff_provable_Cl : Logic.Ver ⊢! φ ↔ Propositional.Hilbert.Cl
     have d₁ : Logic.Ver ⊢! φⱽ ➝ φ := K!_right iff_verTranslated;
     have d₂ : Logic.Ver ⊢! φⱽ := by simpa using Hilbert.provable_of_classical_provable h;
     exact d₁ ⨀ d₂;
+
+lemma iff_isTautology : Logic.Ver ⊢! φ ↔ φⱽ.toPropFormula.isTautology := by
+  apply Iff.trans Ver.iff_provable_Cl;
+  apply Propositional.Hilbert.Cl.iff_isTautology_provable.symm;
 
 end Logic.Ver
 

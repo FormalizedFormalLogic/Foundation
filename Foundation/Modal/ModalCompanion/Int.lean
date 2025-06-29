@@ -14,7 +14,7 @@ open Modal.Kripke
 
 section S4
 
-lemma Logic.gS4_of_Int : Logic.Int ⊢! φ → Logic.S4 ⊢! φᵍ := by
+lemma Logic.gS4_of_Int : Hilbert.Int ⊢! φ → Logic.S4 ⊢! φᵍ := by
   apply provable_goedelTranslated_of_provable Hilbert.Int Logic.S4;
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
@@ -39,7 +39,10 @@ lemma Logic.S4.is_smallestMC_of_Int : Logic.S4 = Logic.Int.smallestMC := by
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
     | subst ih => apply Modal.Logic.subst! _ ih;
     | nec ih => apply Entailment.nec! ih;
-    | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; apply Logic.gS4_of_Int hφ;
+    | mem₂ h =>
+      rcases h with ⟨φ, hφ, rfl⟩;
+      simp only [theory, Propositional.Logic.iff_provable, Set.mem_setOf_eq] at hφ;
+      apply Logic.gS4_of_Int hφ;
 
 instance : Sound Logic.Int.smallestMC FrameClass.S4 := by
   rw [←Logic.S4.is_smallestMC_of_Int];
@@ -58,7 +61,7 @@ end S4
 
 section Grz
 
-lemma Logic.gGrz_of_Int : Logic.Int ⊢! φ → Logic.Grz ⊢! φᵍ := λ h ↦ WeakerThan.pbl $ gS4_of_Int h
+lemma Logic.gGrz_of_Int : Hilbert.Int ⊢! φ → Logic.Grz ⊢! φᵍ := λ h ↦ WeakerThan.pbl $ gS4_of_Int h
 
 lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = Logic.Int.largestMC := by
   apply Logic.iff_equal_provable_equiv.mpr;
@@ -100,10 +103,10 @@ lemma Logic.iff_provable_Cl_provable_dia_gS4 : Logic.Cl ⊢! φ ↔ Logic.S4 ⊢
   constructor;
   . intro h;
     suffices Logic.S4 ⊢! □◇φᵍ by exact axiomT'! this;
-    have := modalCompanion_Int_S4.companion.mp $ Hilbert.glivenko.mpr h;
+    have := modalCompanion_Int_S4.companion.mp $ iff_negneg_Int_Cl.mpr h;
     rwa [Logic.S4.Kripke.preorder] at this ⊢;
   . intro h;
-    apply Hilbert.glivenko.mp;
+    apply iff_negneg_Int_Cl.mp;
     apply modalCompanion_Int_S4.companion.mpr;
     have : Logic.S4 ⊢! □◇φᵍ := nec! h;
     rwa [Logic.S4.Kripke.preorder] at this ⊢;

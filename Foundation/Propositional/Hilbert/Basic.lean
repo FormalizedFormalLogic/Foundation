@@ -61,7 +61,7 @@ instance : Entailment.Minimal H where
 @[induction_eliminator]
 protected lemma rec!
   {motive   : (φ : Formula α) → (H ⊢! φ) → Sort}
-  (axm     : ∀ {φ : Formula α} (s), (h : φ ∈ H.axioms) → motive (φ⟦s⟧) ⟨.axm s h⟩)
+  (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ H.axioms) → motive (φ⟦s⟧) ⟨.axm s h⟩)
   (mdp      : ∀ {φ ψ : Formula α}, {hpq : H ⊢! φ ➝ ψ} → {hp : H ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (mdp! hpq hp))
   (verum    : motive ⊤ verum!)
   (implyS   : ∀ {φ ψ},   motive (Axioms.Imply₁ φ ψ) $ by simp)
@@ -138,6 +138,9 @@ instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := by
   simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];
   apply Equiv.iff.mp;
   infer_instance;
+
+lemma iff_provable : H ⊢! φ ↔ H.logic ⊢! φ := by simp [theory];
+lemma iff_not_provable : H ⊬ φ ↔ H.logic ⊬ φ := by simp [theory];
 
 instance : Entailment.Minimal H.logic where
   and₁ _ _     := by constructor; simp [theory];

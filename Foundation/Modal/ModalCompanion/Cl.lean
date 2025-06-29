@@ -20,7 +20,7 @@ lemma Logic.Cl.smallestMC.mem_diabox_box : Logic.Cl.smallestMC ⊢! (◇□(.ato
     apply Logic.sumNormal.mem₂!;
     use Axioms.LEM (.atom 0);
     constructor;
-    . simp [-Propositional.Logic.iff_provable, theory];
+    . simp [theory];
     . tauto;
   apply _ ⨀ this;
   apply C!_trans ?_ CANC!;

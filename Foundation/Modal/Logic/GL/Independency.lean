@@ -25,7 +25,7 @@ lemma unprovable_notbox : Logic.GL ⊬ ∼□φ := by
   by_contra hC;
   have : Logic.GL ⊢! ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
   have : Logic.GL ⊢! ∼□⊥ := this ⨀ hC;
-  have : Logic.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using provable_verTranslated_Cl this;
+  have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using provable_verTranslated_Cl this;
   have := Hilbert.Cl.soundness this (λ _ => False);
   tauto;
 

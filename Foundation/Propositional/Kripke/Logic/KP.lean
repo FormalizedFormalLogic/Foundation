@@ -7,13 +7,8 @@ open Kripke
 open Hilbert.Kripke
 open Formula.Kripke
 
-namespace Kripke
-
-protected abbrev Frame.IsKP := Frame.SatisfiesKriselPutnamCondition
-
-protected abbrev FrameClass.KP : FrameClass := { F | F.SatisfiesKriselPutnamCondition }
-
-end Kripke
+@[reducible] protected alias Kripke.Frame.IsKP := Frame.SatisfiesKriselPutnamCondition
+protected abbrev Kripke.FrameClass.KP : FrameClass := { F | F.SatisfiesKriselPutnamCondition }
 
 
 namespace Hilbert.KP.Kripke
@@ -112,13 +107,9 @@ instance : Hilbert.Int ⪱ Hilbert.KP := by
 end Hilbert
 
 
-namespace Logic
-
-lemma KP.Kripke.KP : Logic.KP = FrameClass.KP.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+propositional_kripke Logic.KP FrameClass.KP
 
 instance : Logic.Int ⪱ Logic.KP := inferInstance
-
-end Logic
 
 
 end LO.Propositional

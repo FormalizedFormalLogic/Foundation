@@ -7,24 +7,11 @@ open Kripke
 open Formula
 open Formula.Kripke
 
-lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic
-  {H : Hilbert ℕ} {C : FrameClass}
-  [sound : Sound H C] [complete : Complete H C]
-  : H.logic = C.logic := by
-  ext φ;
-  constructor;
-  . intro h;
-    apply sound.sound;
-    simpa;
-  . intro h;
-    simpa using complete.complete h;
-
-
 namespace Hilbert.Kripke
 
 variable {H H₁ H₂ : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 
-section
+section FrameClass
 
 variable {C C₁ C₂ : Kripke.FrameClass}
 
@@ -45,7 +32,7 @@ lemma soundness_of_validates_axioms (hV : C.Validates H.axioms) : H ⊢! φ → 
     apply ValidOnFrame.subst;
     apply hV F hF _ hi;
 
-instance instSound_of_validates_axioms (hV : C.Validates H.axioms) : Sound H C := ⟨fun {_} => soundness_of_validates_axioms hV⟩
+lemma instSound_of_validates_axioms (hV : C.Validates H.axioms) : Sound H C := ⟨fun {_} => soundness_of_validates_axioms hV⟩
 
 lemma consistent_of_sound_frameclass (C : FrameClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
   apply Entailment.Consistent.of_unprovable (f := ⊥);
@@ -71,7 +58,46 @@ lemma weakerThan_of_subset_frameClass (C₁ C₂ : FrameClass) (hC : C₂ ⊆ C�
   apply Sound.sound (𝓢 := H₁) (𝓜 := C₁) hφ;
   apply hC hF;
 
+lemma eq_Hilbert_Logic_KripkeFrameClass_Logic [sound : Sound H C] [complete : Complete H C] : H.logic = C.logic := by
+  ext φ;
+  constructor;
+  . intro h;
+    apply sound.sound;
+    simpa;
+  . intro h;
+    simpa using complete.complete h;
+
+instance [Sound H C] : Sound H.logic C := by
+  constructor;
+  intro φ hφ;
+  apply Sound.sound $ by simpa using hφ;
+
+instance [Complete H C] : Complete H.logic C := by
+  constructor;
+  intro φ hφ;
+  simpa using Complete.complete hφ;
+
+
+section
+
+open Lean Meta Elab Command
+
+syntax (name := generatePropositionalKripke) "propositional_kripke " term : command
+
+/-- WOW -/
+@[command_elab generatePropositionalKripke]
+def elabGenerateFinNatCoe : CommandElab
+| `(propositional_kripke $H:term $C:term) => do
+  let instSound ← `(instance : Sound $H $C := inferInstance)
+  let instComplete ← `(instance : Complete $H $C := inferInstance)
+
+  elabCommand instSound
+  elabCommand instComplete
+| _ => throwUnsupportedSyntax
+
 end
+
+end FrameClass
 
 end Hilbert.Kripke
 

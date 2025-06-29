@@ -10,26 +10,27 @@ open Kripke
 open Formula.Kripke
 open Hilbert.Kripke
 
+@[reducible] protected alias Kripke.FrameClass.Int := FrameClass.all
+@[reducible] protected alias Kripke.FrameClass.finite_Int := FrameClass.finite_all
+
+
 namespace Hilbert.Int.Kripke
 
-protected instance sound : Sound Hilbert.Int FrameClass.all :=
-  instSound_of_validates_axioms FrameClass.all.validates_AxiomEFQ
+instance : Sound Hilbert.Int FrameClass.Int := instSound_of_validates_axioms FrameClass.all.validates_AxiomEFQ
 
-protected instance consistent : Entailment.Consistent Hilbert.Int := consistent_of_sound_frameclass FrameClass.all (by simp)
+instance : Entailment.Consistent Hilbert.Int := consistent_of_sound_frameclass FrameClass.Int $ by simp
 
-instance sound_finite : Sound Hilbert.Int FrameClass.finite_all :=
-  instSound_of_validates_axioms FrameClass.finite_all.validates_AxiomEFQ
+instance : Sound Hilbert.Int FrameClass.finite_Int := instSound_of_validates_axioms FrameClass.finite_all.validates_AxiomEFQ
 
-instance canonical : Canonical Hilbert.Int FrameClass.all := by tauto;
+instance : Canonical Hilbert.Int FrameClass.Int := by tauto;
 
-instance complete: Complete Hilbert.Int FrameClass.all := inferInstance
-
+instance : Complete Hilbert.Int FrameClass.Int := inferInstance
 
 section FFP
 
-instance complete_finite : Complete (Hilbert.Int) FrameClass.finite_all := ⟨by
+instance : Complete Hilbert.Int FrameClass.finite_Int := ⟨by
   intro φ hφ;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.Int);
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFiltrationModel M ↑φ.subformulas;
@@ -44,8 +45,9 @@ instance complete_finite : Complete (Hilbert.Int) FrameClass.finite_all := ⟨by
 
 end FFP
 
-
 section DP
+
+variable {M₁ : Kripke.Model} {M₂ : Kripke.Model}
 
 abbrev counterexampleDPFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ : F₁.World) (w₂ : F₂.World) : Kripke.Frame where
   World := Unit ⊕ F₁.World ⊕ F₂.World;
@@ -92,8 +94,6 @@ abbrev counterexampleDPModel (M₁ : Kripke.Model) (M₂ : Kripke.Model) (w₁ :
         apply M₂.Val.hereditary;
   ⟩
 
-variable {M₁ : Kripke.Model} {M₂ : Kripke.Model}
-
 lemma satisfies_left_on_counterexampleDPModel :
   w ⊧ φ ↔ (Satisfies (counterexampleDPModel M₁ M₂ w₁ w₂) (Sum.inr $ Sum.inl w) φ) := by
   induction φ generalizing w with
@@ -129,23 +129,15 @@ lemma satisfies_right_on_counterexampleDPModel :
   | _ => simp_all [counterexampleDPModel, Satisfies.iff_models, Satisfies];
 
 theorem disjunctive : Hilbert.Int ⊢! φ ⋎ ψ → Hilbert.Int ⊢! φ ∨ Hilbert.Int ⊢! ψ := by
-  contrapose;
-  intro hC; push_neg at hC;
-  have ⟨hnφ, hnψ⟩ := hC;
+  contrapose!;
+  rintro ⟨hnφ, hnψ⟩;
 
-  replace hnφ := Semantics.set_models_iff.not.mp $ (not_imp_not.mpr Int.Kripke.complete.complete) hnφ;
-  push_neg at hnφ;
-  obtain ⟨F₁, _, hF₁⟩ := hnφ;
-  obtain ⟨V₁, w₁, hφ⟩ := Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₁;
+  obtain ⟨M₁, w₁, hM₁, hφ⟩ := iff_not_validOnFrameClass_exists_model_world.mp $ Complete.exists_countermodel_of_not_provable (𝓜 := FrameClass.Int) hnφ;
+  obtain ⟨M₂, w₂, hM₂, hψ⟩ := iff_not_validOnFrameClass_exists_model_world.mp $ Complete.exists_countermodel_of_not_provable (𝓜 := FrameClass.Int) hnψ;
 
-  replace hnψ := Semantics.set_models_iff.not.mp $ (not_imp_not.mpr Int.Kripke.complete.complete) hnψ;
-  push_neg at hnψ;
-  obtain ⟨F₂, _, hF₂⟩ := hnψ;
-  obtain ⟨V₂, w₂, hψ⟩ := Formula.Kripke.ValidOnFrame.exists_valuation_world_of_not hF₂;
-
-  apply (not_imp_not.mpr Int.Kripke.sound.sound);
+  apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.Int);
   apply not_validOnFrameClass_of_exists_model_world;
-  let M := counterexampleDPModel ⟨F₁, V₁⟩ ⟨F₂, V₂⟩ w₁ w₂;
+  let M := counterexampleDPModel M₁ M₂ w₁ w₂;
   use M, (Sum.inl ());
   constructor;
   . tauto;
@@ -154,10 +146,10 @@ theorem disjunctive : Hilbert.Int ⊢! φ ⋎ ψ → Hilbert.Int ⊢! φ ∨ Hil
     constructor;
     . apply not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inl w₁) φ ?_;
       . exact satisfies_left_on_counterexampleDPModel.not.mp hφ;
-      . apply F₁.refl;
+      . apply M₁.refl;
     . apply not_imp_not.mpr $ @Satisfies.formula_hereditary (M := M) (w := Sum.inl ()) (w' := Sum.inr $ Sum.inr w₂) ψ ?_;
       . exact satisfies_right_on_counterexampleDPModel.not.mp hψ;
-      . apply F₂.refl;
+      . apply M₂.refl;
 
 instance : Entailment.Disjunctive Hilbert.Int := ⟨disjunctive⟩
 
@@ -166,12 +158,8 @@ end DP
 end Hilbert.Int.Kripke
 
 
-namespace Logic.Int.Kripke
-
-lemma Int : Logic.Int = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma finite_Int : Logic.Int = FrameClass.finite_all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
-end Logic.Int.Kripke
+propositional_kripke Logic.Int FrameClass.Int
+propositional_kripke Logic.Int FrameClass.finite_Int
 
 
 end LO.Propositional

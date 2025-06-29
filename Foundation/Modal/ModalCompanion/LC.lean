@@ -45,7 +45,7 @@ instance : Entailment.HasAxiomPoint3 Logic.LC.smallestMC where
       apply Logic.sumNormal.mem₂!;
       use Axioms.Dummett (.atom 0) (.atom 1);
       constructor;
-      . simp [-Propositional.Logic.iff_provable, theory];
+      . simp [theory];
       . tauto;
     apply ?_ ⨀ this;
     apply CAA!_of_C!_of_C! <;>
@@ -72,12 +72,13 @@ lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
     | subst ihφ => apply subst! _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable Hilbert.LC Logic.S4Point3 ?_ (by trivial);
-      rintro _ ⟨_, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩;
-      . exact WeakerThan.pbl $ modalCompanion_Int_S4.companion.mp (by simp);
-      . suffices Logic.S4Point3 ⊢! □(s 0ᵍ ➝ s 1ᵍ) ⋎ □(s 1ᵍ ➝ s 0ᵍ) by simpa [goedelTranslate];
-        apply A!_replace axiomPoint3!;
-        repeat exact Logic.S4Point3.goedelTranslated_axiomDummett;
+      apply provable_goedelTranslated_of_provable Hilbert.LC Logic.S4Point3;
+      . rintro _ ⟨_, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩;
+        . exact WeakerThan.pbl $ modalCompanion_Int_S4.companion.mp $ by simp [theory];
+        . suffices Logic.S4Point3 ⊢! □(s 0ᵍ ➝ s 1ᵍ) ⋎ □(s 1ᵍ ➝ s 0ᵍ) by simpa [goedelTranslate];
+          apply A!_replace axiomPoint3!;
+          repeat exact Logic.S4Point3.goedelTranslated_axiomDummett;
+      . simpa [theory] using hφ;
 
 instance : Sound Logic.LC.smallestMC FrameClass.S4Point3 := by
   rw [←Logic.S4Point3.is_smallestMC_of_LC];
