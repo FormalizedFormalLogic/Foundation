@@ -14,6 +14,12 @@ variable {F : Frame}
 
 abbrev IsPiecewiseConnected (F : Frame) := _root_.IsPiecewiseConnected F.Rel
 
+lemma IsPiecewiseConnected.mk' (p_connected' : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y ≠ z → y ≺ z ∨ z ≺ y) : F.IsPiecewiseConnected where
+  p_connected := by
+    intro x y z Rxy Rxz;
+    suffices y ≠ z → y ≺ z ∨ z ≺ y by tauto;
+    apply p_connected' <;> tauto;
+
 lemma p_connected [F.IsPiecewiseConnected] {x y z : F.World} : x ≺ y → x ≺ z → y ≺ z ∨ y = z ∨ z ≺ y := by apply IsPiecewiseConnected.p_connected
 lemma p_connected' [F.IsPiecewiseConnected] {x y z : F.World} : x ≺ y → x ≺ z → y ≠ z → y ≺ z ∨ z ≺ y := IsPiecewiseConnected.p_connected'
 

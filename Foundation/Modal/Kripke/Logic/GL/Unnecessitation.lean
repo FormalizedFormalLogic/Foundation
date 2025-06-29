@@ -35,7 +35,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Logic.GL ⊢! □φ ➝ □ψ → Lo
     push_neg;
     use (Sum.inr r);
     constructor;
-    . exact @Frame.IsRooted.root_generates (F := M₀.toFrame) (r := r₀) (Frame.extendRoot.instIsRooted) (Sum.inr r) (by tauto) |>.unwrap;
+    . exact @Frame.IsRootedBy.root_generates (F := M₀.toFrame) (r := r₀) (Frame.extendRoot.instIsRooted) (Sum.inr r) (by tauto) |>.unwrap;
     . assumption;
 
   apply Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr;

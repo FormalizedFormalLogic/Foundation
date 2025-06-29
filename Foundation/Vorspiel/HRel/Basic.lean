@@ -8,6 +8,8 @@ namespace HRel
 
 variable {α} {R : HRel α} {x y z : α}
 
+local infix:50 " ≺ " => R
+
 def iterate (R : HRel α) : ℕ → HRel α
   | 0 => (· = ·)
   | n + 1 => fun x y ↦ ∃ z, R x z ∧ R.iterate n z y
@@ -133,9 +135,17 @@ end ReflGen
 
 def TransGen (R : HRel α) : HRel α := Relation.TransGen R
 
+local infix:50 " ≺^+ " => TransGen R
+
 namespace TransGen
 
 instance : IsTrans α (R.TransGen) := ⟨by apply Relation.TransGen.trans⟩
+
+lemma trans {x y z : α} (Rxy : x ≺^+ y) (Ryz : y ≺^+ z) : x ≺^+ z := Relation.TransGen.trans Rxy Ryz
+
+lemma single (Rxy : x ≺ y) : x ≺^+ y := Relation.TransGen.single Rxy
+
+lemma tail (Rxy : x ≺^+ y) (Ryz : y ≺ z) : x ≺^+ z := Relation.TransGen.tail Rxy Ryz
 
 lemma exists_iterate : TransGen R x y ↔ ∃ n : ℕ+, R.iterate n x y := by
   constructor;
