@@ -52,9 +52,9 @@ instance canonical : Canonical Logic.S4Point3 FrameClass.S4Point3 := ⟨by const
 
 instance complete : Complete Logic.S4Point3 FrameClass.S4Point3 := inferInstance
 
-instance : Complete (Hilbert.S4Point3) { F : Frame | F.IsLinearPreorder } := ⟨by
+instance : Complete Logic.S4Point3 { F : Frame | F.IsLinearPreorder } := ⟨by
   intro φ hφ;
-  apply complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.S4Point3);
   intro F hF V r;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply Model.pointGenerate.modal_equivalent_at_root (M := ⟨F, V⟩) (r := r) |>.mp;
