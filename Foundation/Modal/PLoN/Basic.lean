@@ -189,6 +189,7 @@ lemma iff_not_exists_model : (¬C ⊧ φ) ↔ (∃ M : PLoN.Model, M.toFrame ∈
 
 alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
 
+
 end ValidOnFrameClass
 
 end Formula.PLoN
