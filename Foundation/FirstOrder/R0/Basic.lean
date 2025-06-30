@@ -66,7 +66,7 @@ lemma lt_numeral_iff {x : M} {n : ℕ} : x < numeral n ↔ ∃ i : Fin n, x = nu
       intro h H
       rcases lt_numeral_iff.mp H with ⟨i, hi⟩
       rcases numeral_inj_iff.mp hi
-      exact (lt_self_iff_false m).mp (lt_of_le_of_lt (Nat.le_of_not_lt h) i.prop),
+      exact (lt_self_iff_false m).mp (lt_of_le_of_lt (Nat.le_of_not_gt h) i.prop),
    fun h ↦ lt_numeral_iff.mpr ⟨⟨n, h⟩, by simp⟩⟩
 
 open Hierarchy

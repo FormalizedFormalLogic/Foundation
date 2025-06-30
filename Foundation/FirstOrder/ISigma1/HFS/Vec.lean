@@ -766,7 +766,7 @@ noncomputable def construction : VecRec.Construction V blueprint where
       simpa [blueprint, Fin.isValue]
     rcases lt_or_ge (len (v 2)) (v 4) with (hv | hv)
     · simp [hv]
-    · simp [hv, not_lt_of_le hv]
+    · simp [hv, not_lt_of_ge hv]
 
 end TakeLast
 
@@ -807,7 +807,7 @@ lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
       · right; simpa [lt_succ_iff_le] using h
     rcases this with (rfl | hkv)
     · simp [takeLast_cons]
-    · simp [takeLast_cons, not_lt_of_le hkv, ih hkv]
+    · simp [takeLast_cons, not_lt_of_ge hkv, ih hkv]
 
 @[simp] lemma takeLast_len_self (v : V) : takeLast v (len v) = v := by
   rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩) <;> simp [takeLast_cons]
@@ -830,7 +830,7 @@ lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[le
     · simp [takeLast_cons, lt_succ_iff_le]
     · have : len v - i = len v - (i + 1) + 1 := by
         rw [←PeanoMinus.sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
-      simpa [takeLast_cons, lt_succ_iff_le, not_le_of_lt hi, this, not_lt_of_gt hi] using ih hi
+      simpa [takeLast_cons, lt_succ_iff_le, not_le_of_gt hi, this, not_lt_of_gt hi] using ih hi
 
 end takeLast
 

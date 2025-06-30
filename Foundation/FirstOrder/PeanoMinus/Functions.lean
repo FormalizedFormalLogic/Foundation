@@ -23,7 +23,7 @@ variable {a b c : V}
 section sub
 
 lemma sub_existsUnique (a b : V) : ∃! c, (a ≥ b → a = b + c) ∧ (a < b → c = 0) := by
-  have : b ≤ a ∨ a < b := le_or_lt b a
+  have : b ≤ a ∨ a < b := le_or_gt b a
   rcases this with (hxy | hxy)
   · have : ∃ c, a = b + c := exists_add_of_le hxy
     rcases this with ⟨c, rfl⟩
@@ -41,7 +41,7 @@ lemma sub_spec_of_lt (h : a < b) : a - b = 0 := (Classical.choose!_spec (sub_exi
 lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0)) := Classical.choose!_eq_iff (sub_existsUnique a b)
 
 @[simp] lemma sub_le_self (a b : V) : a - b ≤ a := by
-  have : b ≤ a ∨ a < b := le_or_lt b a
+  have : b ≤ a ∨ a < b := le_or_gt b a
   rcases this with (hxy | hxy) <;> simp [hxy]
   · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
   · simp [sub_spec_of_lt hxy]

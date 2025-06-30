@@ -30,7 +30,7 @@ lemma ext_eq_zero_of_lt {L S i : V} (h : ‖S‖ ≤ i * ‖L‖) : S{L}[i] = 0 
 @[simp] lemma ext_le_self (L S i : V) : S{L}[i] ≤ S := le_trans (mod_le _ _) (by simp [ext])
 
 lemma ext_graph_aux (z S L i : V) : z = S{L}[i] ↔ (‖S‖ ≤ i * ‖L‖ → z = 0) ∧ (i * ‖L‖ < ‖S‖ → ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % (L ⨳ 1)) := by
-  rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_lt _ _ with (le | lt)
+  rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_gt _ _ with (le | lt)
   · simp [ext_eq_zero_of_lt le, le, not_lt.mpr le]
   · suffices z = S / bexp S (i * ‖L‖) % L ⨳ 1 ↔ ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % L ⨳ 1 by
       simpa [lt, not_le.mpr lt, ext]
@@ -46,7 +46,7 @@ lemma ext_graph (z S L i : V) : z = S{L}[i] ↔
       (i * lL < lS →
         ∃ b ≤ S, Exponential (i * lL) b ∧ ∃ hL ≤ 2 * L + 1, Exponential lL hL ∧ ∃ divS ≤ S, divS = S / b ∧ z = divS % hL) := by
   rw [ext_graph_aux]
-  rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_lt _ _ with (le | lt)
+  rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_gt _ _ with (le | lt)
   · simp [ext_eq_zero_of_lt le, le, not_lt.mpr le]
   · suffices (∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % L ⨳ 1)
       ↔ ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ ∃ hL ≤ 2 * L + 1, Exponential ‖L‖ hL ∧ z = S / b % hL
