@@ -66,7 +66,7 @@ import Foundation.FirstOrder.Incompleteness.FixedPoint
 import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.FirstOrder.Incompleteness.DerivabilityCondition.Basic
 import Foundation.FirstOrder.Incompleteness.First
-import Foundation.FirstOrder.Incompleteness.Interpolant
+import Foundation.FirstOrder.Incompleteness.Dense
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
 import Foundation.FirstOrder.Incompleteness.WitnessComparison
