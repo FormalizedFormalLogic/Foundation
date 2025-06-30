@@ -1,6 +1,7 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.K
 import Foundation.Vorspiel.Set.Supplemental
+import Foundation.Meta.ClProver
 
 namespace LO.Modal
 
@@ -185,21 +186,22 @@ lemma not_mem_falsum_of_consistent (T_consis : Consistent 𝓢 T) : ⊥ ∉ T :=
 lemma not_singleton_consistent [Entailment.Necessitation 𝓢] (T_consis : Consistent 𝓢 T) (h : ∼□φ ∈ T) : Consistent 𝓢 {∼φ} := by
   apply def_consistent.mpr;
   intro Γ hΓ;
-  rcases Set.subset_singleton_iff_eq.mp hΓ with h | h;
-  . simp at h;
-    subst h;
-    sorry;
-  . simp at h;
-    subst h;
-    sorry;
-  /-
-  intro Γ hΓ;
-  simp only [Set.mem_singleton_iff] at hΓ;
-  by_contra hC;
-  have : 𝓢 ⊢! ∼(□φ) ➝ ⊥ := N!_iff_CO!.mp $ dni'! $ nec! $ of_NN! $ N!_iff_CO!.mpr $ C!_of_CConj₂!_of_unique hΓ hC;
-  have : 𝓢 ⊬ ∼(□φ) ➝ ⊥ := def_consistent.mp T_consis (Γ := [∼(□φ)]) (by aesop)
-  contradiction;
-  -/
+  rcases (Set.subset_singleton_iff_eq.mp hΓ) with hΓ | hΓ;
+  . by_contra! hC;
+    apply T_consis;
+    apply Context.weakening! _ hC;
+    simp [hΓ];
+  . by_contra! hC;
+    apply def_consistent.mp T_consis (Γ := {∼(□φ)}) $ by simpa;
+    have : 𝓢 ⊢! ∼φ ➝ ⊥ := by
+      apply Context.provable_iff_provable.mpr;
+      apply Context.deduct!;
+      simpa [hΓ] using hC;
+    have : 𝓢 ⊢! φ := by cl_prover [this];
+    have : 𝓢 ⊢! □φ := nec! this;
+    have : 𝓢 ⊢! ∼□φ ➝ ⊥ := by cl_prover [this];
+    simpa using Context.deductInv! $ Context.provable_iff_provable.mp this;
+
 
 lemma either_consistent (T_consis : Consistent 𝓢 T) (φ) : Consistent 𝓢 (insert φ T) ∨ Consistent 𝓢 (insert (∼φ) T) := by
   by_contra! hC;
@@ -227,58 +229,6 @@ lemma intro_union_consistent(h : ∀ {Γ₁ Γ₂ : FormulaFinset _}, (Γ₁.toS
   . intro φ hφ;
     have : φ ∈ T₁ ∪ T₂ := hΔ hφ;
     simp_all [Δ₁, Δ₂];
-
-/-
-omit [DecidableEq α] in
-open Classical in
-lemma intro_union_consistent
-  (h : ∀ {Γ₁ Γ₂ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ T₁) ∧ (∀ φ ∈ Γ₂, φ ∈ T₂) → 𝓢 ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ➝ ⊥)
-  : Consistent 𝓢 (T₁ ∪ T₂) := by
-  apply def_consistent.mpr;
-  intro Δ hΔ;
-  let Δ₁ := (Δ.filter (· ∈ T₁));
-  let Δ₂ := (Δ.filter (· ∈ T₂));
-  have : 𝓢 ⊬ ⋀Δ₁ ⋏ ⋀Δ₂ ➝ ⊥ := @h Δ₁ Δ₂ ⟨(by intro _ h; simpa using List.of_mem_filter h), (by intro _ h; simpa using List.of_mem_filter h)⟩;
-  exact unprovable_C!_trans (by
-    apply FiniteContext.deduct'!;
-    apply Conj₂!_iff_forall_provable.mpr;
-    intro ψ hq;
-    cases (hΔ ψ hq);
-    . exact Conj₂!_iff_forall_provable.mp (K!_left FiniteContext.id!) ψ $ List.mem_filter_of_mem hq (by simpa);
-    . exact Conj₂!_iff_forall_provable.mp (K!_right FiniteContext.id!) ψ $ List.mem_filter_of_mem hq (by simpa);
-  ) this;
-
-open Classical in
-lemma intro_triunion_consistent
-  (h : ∀ {Γ₁ Γ₂ Γ₃ : List (Formula α)}, (∀ φ ∈ Γ₁, φ ∈ T₁) ∧ (∀ φ ∈ Γ₂, φ ∈ T₂) ∧ (∀ φ ∈ Γ₃, φ ∈ T₃) → 𝓢 ⊬ ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃ ➝ ⊥)
-  : Consistent 𝓢 (T₁ ∪ T₂ ∪ T₃) := by
-  apply intro_union_consistent;
-  rintro Γ₁₂ Γ₃ ⟨h₁₂, h₃⟩;
-  simp at h₁₂;
-  let Γ₁ := (Γ₁₂.filter (· ∈ T₁));
-  let Γ₂ := (Γ₁₂.filter (· ∈ T₂));
-  apply unprovable_C!_trans (φ := ⋀Γ₁ ⋏ ⋀Γ₂ ⋏ ⋀Γ₃);
-  . exact C!_trans (K!_right $ K!_assoc) $ by
-      apply CKK!_of_C!;
-      apply CConj₂Append!_iff_CKConj₂Conj₂!.mp;
-      apply CConj₂Conj₂!_of_subset;
-      intro φ hp;
-      simp [Γ₁, Γ₂];
-      rcases h₁₂ φ hp with (h₁ | h₂);
-      . left; exact ⟨hp, h₁⟩;
-      . right; exact ⟨hp, h₂⟩;
-  . apply h;
-    refine ⟨?_, ?_, h₃⟩;
-    . intro φ hp;
-      rcases h₁₂ φ (List.mem_of_mem_filter hp) with (_ | _)
-      . assumption;
-      . simpa using List.of_mem_filter hp;
-    . intro φ hp;
-      rcases h₁₂ φ (List.mem_of_mem_filter hp) with (_ | _)
-      . have := List.of_mem_filter hp; simp at this;
-        simpa using List.of_mem_filter hp;
-      . assumption;
--/
 
 lemma exists_consistent_maximal_of_consistent (T_consis : Consistent 𝓢 T)
   : ∃ Z, Consistent 𝓢 Z ∧ T ⊆ Z ∧ ∀ U, U *⊬[𝓢] ⊥ → Z ⊆ U → U = Z := by
