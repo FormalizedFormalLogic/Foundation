@@ -246,7 +246,7 @@ noncomputable scoped instance : LinearOrder M where
   le_total := by
     intro x y
     rcases PeanoMinus.lt_tri x y with (h | rfl | h) <;> simp [*, le_def]
-  lt_iff_le_not_le := fun x y ↦
+  lt_iff_le_not_ge := fun x y ↦
     ⟨ fun h => ⟨Or.inr h, by
       simp only [le_def]; rintro (rfl | h');
       · exact lt_irrefl y h
@@ -270,11 +270,11 @@ scoped instance : IsStrictOrderedRing M where
     · simp only [add_comm z]; exact Or.inr (add_lt_add x y z h)
   le_of_add_le_add_left := by
     rintro x y z h
-    have : y ≤ z ∨ z < y := le_or_lt y z
+    have : y ≤ z ∨ z < y := le_or_gt y z
     rcases this with (hyz | hyz)
     · exact hyz
     · have : x + z < x + y := by simpa [add_comm] using add_lt_add z y x hyz
-      exact False.elim ((lt_iff_not_ge _ _).mp this h)
+      exact False.elim (lt_iff_not_ge.mp this h)
   zero_le_one := Or.inr zero_lt_one
   exists_pair_ne := ⟨0, 1, ne_of_lt zero_lt_one⟩
   mul_lt_mul_of_pos_left := by
