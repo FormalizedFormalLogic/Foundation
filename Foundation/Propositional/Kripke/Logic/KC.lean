@@ -190,9 +190,9 @@ instance : Hilbert.Int ⪱ Hilbert.KC := calc
 
 end Hilbert
 
-propositional_kripke Logic.KC FrameClass.KC
-propositional_kripke Logic.KC FrameClass.finite_KC
+propositional_kripke 𝐊𝐂 FrameClass.KC
+propositional_kripke 𝐊𝐂 FrameClass.finite_KC
 
-instance : Logic.KP ⪱ Logic.KC := inferInstance
+instance : 𝐊𝐏 ⪱ 𝐊𝐂 := inferInstance
 
 end LO.Propositional

@@ -22,7 +22,7 @@ open Formula.ClassicalSemantics
 open Propositional.Hilbert.Cl
 open ClassicalSemantics
 
-theorem Cl.post_complete : ¬∃ L : Logic _, Entailment.Consistent L ∧ Nonempty (L.IsSuperintuitionistic) ∧ Logic.Cl ⪱ L := by
+theorem Cl.post_complete : ¬∃ L : Logic _, Entailment.Consistent L ∧ Nonempty (L.IsSuperintuitionistic) ∧ 𝐂𝐥 ⪱ L := by
   by_contra! hC;
   obtain ⟨L, L_consis, ⟨L_ne⟩, L_Cl⟩ := hC;
   apply Logic.no_bot (L := L);

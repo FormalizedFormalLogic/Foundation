@@ -107,9 +107,9 @@ instance : Hilbert.Int ⪱ Hilbert.KP := by
 end Hilbert
 
 
-propositional_kripke Logic.KP FrameClass.KP
+propositional_kripke 𝐊𝐏 FrameClass.KP
 
-instance : Logic.Int ⪱ Logic.KP := inferInstance
+instance : 𝐈𝐧𝐭 ⪱ 𝐊𝐏 := inferInstance
 
 
 end LO.Propositional
