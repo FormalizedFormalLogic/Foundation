@@ -639,7 +639,7 @@ lemma ofFn_get_eq_map_cast {n} (g : α → β) (as : List α) {h} :
   ext i b; simp
   by_cases hi : i < n
   · simp [hi, List.ofFnNthVal, List.getElem?_eq_getElem (h ▸ hi)]
-  · simp [hi, List.ofFnNthVal, List.getElem?_eq_none (le_of_not_lt $ h ▸ hi)]
+  · simp [hi, List.ofFnNthVal, List.getElem?_eq_none (le_of_not_gt $ h ▸ hi)]
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 

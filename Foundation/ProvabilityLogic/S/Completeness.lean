@@ -123,7 +123,7 @@ lemma GL_S_TFAE :
               . apply σ.mainlemma (i := i) (by trivial) |>.1;
                 apply Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr;
                 apply h;
-                apply Frame.IsRooted.direct_rooted_of_trans;
+                apply Frame.root_genaretes'!;
                 assumption
           have b : 𝐈𝚺₁ ⊢!. ⩖ j, σ j := oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
             simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_disjunction

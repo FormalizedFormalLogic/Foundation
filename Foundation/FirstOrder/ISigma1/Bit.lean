@@ -465,7 +465,7 @@ lemma lt_of_lt_log {a b : V} (pos : 0 < b) (h : ∀ i ∈ a, i < log b) : a < b 
   rcases zero_le a with (rfl | apos)
   · exact pos
   by_contra A
-  exact not_lt_of_le (log_monotone <| show b ≤ a by simpa using A) (h (log a) (log_mem_of_pos apos))
+  exact not_lt_of_ge (log_monotone <| show b ≤ a by simpa using A) (h (log a) (log_mem_of_pos apos))
 
 @[simp] lemma under_inj {i j : V} : under i = under j ↔ i = j := ⟨fun h ↦ by
   by_contra ne

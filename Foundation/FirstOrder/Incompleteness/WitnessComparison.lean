@@ -68,8 +68,8 @@ lemma antisymm : T.DerivabilityComparison Γ Δ → T.DerivabilityComparison Δ 
   have : dΓ = dΔ := by
     by_contra ne
     wlog lt : dΓ < dΔ
-    · have : dΓ ≤ dΔ := le_of_not_lt <| this dΔ dΔd HΔ dΓ dΓd HΓ (Ne.symm ne)
-      have : dΔ ≤ dΓ := le_of_not_lt lt
+    · have : dΓ ≤ dΔ := le_of_not_gt <| this dΔ dΔd HΔ dΓ dΓd HΓ (Ne.symm ne)
+      have : dΔ ≤ dΓ := le_of_not_gt lt
       have : dΓ = dΔ := le_antisymm (by assumption) (by assumption)
       contradiction
     have : ¬T.DerivationOf dΓ Γ := HΔ dΓ lt

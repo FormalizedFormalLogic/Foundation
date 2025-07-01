@@ -25,6 +25,12 @@ protected abbrev FrameClass.finite_S4Point3 : FrameClass := { F | F.IsFiniteS4Po
 instance [F.IsS4Point3] : F.IsS4Point2 where
 instance [F.IsS4Point3] : F.IsK4Point3 where
 
+protected class Frame.IsLinearPreorder (F : Frame) extends F.IsReflexive, F.IsTransitive, F.IsStronglyConnected
+protected class Frame.IsFiniteLinearPreorder (F : Frame) extends F.IsFinite, F.IsLinearPreorder
+
+protected abbrev FrameClass.linearPreorder : FrameClass := { F | F.IsLinearPreorder }
+protected abbrev FrameClass.finite_linearPreorder : FrameClass := { F | F.IsFiniteLinearPreorder }
+
 end Kripke
 
 
@@ -46,6 +52,15 @@ instance canonical : Canonical Logic.S4Point3 FrameClass.S4Point3 := ⟨by const
 
 instance complete : Complete Logic.S4Point3 FrameClass.S4Point3 := inferInstance
 
+instance : Complete Logic.S4Point3 { F : Frame | F.IsLinearPreorder } := ⟨by
+  intro φ hφ;
+  apply Complete.complete (𝓜 := FrameClass.S4Point3);
+  intro F hF V r;
+  replace hF := Set.mem_setOf_eq.mp hF;
+  apply Model.pointGenerate.modal_equivalent_at_root (M := ⟨F, V⟩) (r := r) |>.mp;
+  apply hφ;
+  exact {}
+⟩
 
 section FFP
 
