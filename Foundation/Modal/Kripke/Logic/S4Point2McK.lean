@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Logic.S4M
+import Foundation.Modal.Kripke.Logic.S4McK
 import Foundation.Modal.Kripke.Logic.S4Point2
 
 namespace LO.Modal
@@ -12,16 +12,16 @@ namespace Kripke
 
 variable {F : Kripke.Frame}
 
-class Frame.IsS4Point2M (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.SatisfiesMcKinseyCondition, F.IsPiecewiseStronglyConvergent where
+class Frame.IsS4Point2McK (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.SatisfiesMcKinseyCondition, F.IsPiecewiseStronglyConvergent where
 
-abbrev FrameClass.preorder_confluent_mckinsey : FrameClass := { F | F.IsS4Point2M }
+abbrev FrameClass.preorder_confluent_mckinsey : FrameClass := { F | F.IsS4Point2McK }
 
 end Kripke
 
 
-namespace Logic.S4Point2M.Kripke
+namespace Logic.S4Point2McK.Kripke
 
-instance sound : Sound (Logic.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := instSound_of_validates_axioms $ by
+instance sound : Sound (Logic.S4Point2McK) Kripke.FrameClass.preorder_confluent_mckinsey := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -29,22 +29,22 @@ instance sound : Sound (Logic.S4Point2M) Kripke.FrameClass.preorder_confluent_mc
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance consistent : Entailment.Consistent Logic.S4Point2M :=
+instance consistent : Entailment.Consistent Logic.S4Point2McK :=
   consistent_of_sound_frameclass FrameClass.preorder_confluent_mckinsey $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Logic.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := ⟨by constructor⟩
+instance canonical : Canonical (Logic.S4Point2McK) Kripke.FrameClass.preorder_confluent_mckinsey := ⟨by constructor⟩
 
-instance complete : Complete (Logic.S4Point2M) Kripke.FrameClass.preorder_confluent_mckinsey := inferInstance
+instance complete : Complete (Logic.S4Point2McK) Kripke.FrameClass.preorder_confluent_mckinsey := inferInstance
 
-lemma preorder_confluent_mckinsey : Logic.S4Point2M = FrameClass.preorder_confluent_mckinsey.logic := eq_hilbert_logic_frameClass_logic
+lemma preorder_confluent_mckinsey : Logic.S4Point2McK = FrameClass.preorder_confluent_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.S4M ⪱ Logic.S4Point2M := by
+instance : Logic.S4McK ⪱ Logic.S4Point2McK := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S4Point2M ⊢! φ ∧ ¬Kripke.FrameClass.S4M ⊧ φ by simpa [S4M.Kripke.preorder_mckinsey];
+    suffices ∃ φ, Logic.S4Point2McK ⊢! φ ∧ ¬Kripke.FrameClass.S4McK ⊧ φ by simpa [S4McK.Kripke.preorder_mckinsey];
     use (Axioms.Point2 (.atom 0));
     constructor;
     . simp;
@@ -73,11 +73,11 @@ instance : Logic.S4M ⪱ Logic.S4Point2M := by
         . use 2;
           omega;
 
-instance : Logic.S4Point2 ⪱ Logic.S4Point2M := by
+instance : Logic.S4Point2 ⪱ Logic.S4Point2McK := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S4Point2M ⊢! φ ∧ ¬FrameClass.S4Point2 ⊧ φ by simpa [S4Point2.Kripke.confluent_preorder];
+    suffices ∃ φ, Logic.S4Point2McK ⊢! φ ∧ ¬FrameClass.S4Point2 ⊧ φ by simpa [S4Point2.Kripke.confluent_preorder];
     use (Axioms.McK (.atom 0))
     constructor;
     . simp;
@@ -94,6 +94,6 @@ instance : Logic.S4Point2 ⪱ Logic.S4Point2M := by
         use 1;
         trivial;
 
-end Logic.S4Point2M.Kripke
+end Logic.S4Point2McK.Kripke
 
 end LO.Modal

@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.AxiomGrz
 import Foundation.Modal.Hilbert.WellKnown
-import Foundation.Modal.Kripke.Logic.S4M
+import Foundation.Modal.Kripke.Logic.S4McK
 import Mathlib.Order.Preorder.Finite
 
 namespace LO.Modal
@@ -40,7 +40,7 @@ instance [F.IsFinite] [F.IsPartialOrder] : F.SatisfiesMcKinseyCondition where
       apply F.antisymm;
       . assumption;
       . exact @hy₃ z (F.trans Rxy Ryz) Ryz;
-instance [F.IsFiniteGrz] : F.IsS4M where
+instance [F.IsFiniteGrz] : F.IsS4McK where
 
 end Kripke
 

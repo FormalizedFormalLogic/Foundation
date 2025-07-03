@@ -260,11 +260,11 @@ instance complete : Complete Logic.Grz FrameClass.finite_Grz := complete_of_mem_
 
 lemma finite_partial_order : Logic.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.S4M ⪱ Logic.Grz := by
+instance : Logic.S4McK ⪱ Logic.Grz := by
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.S4M ⊧ φ → FrameClass.finite_Grz ⊧ φ by
-      simpa [S4M.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
+    suffices ∀ φ, FrameClass.S4McK ⊧ φ → FrameClass.finite_Grz ⊧ φ by
+      simpa [S4McK.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
@@ -273,7 +273,7 @@ instance : Logic.S4M ⪱ Logic.Grz := by
     use Axioms.Grz (.atom 0)
     constructor;
     . simp;
-    . suffices ¬FrameClass.S4M ⊧ (Axioms.Grz (.atom 0)) by simpa [S4M.Kripke.preorder_mckinsey];
+    . suffices ¬FrameClass.S4McK ⊧ (Axioms.Grz (.atom 0)) by simpa [S4McK.Kripke.preorder_mckinsey];
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
       constructor;
@@ -291,7 +291,7 @@ instance : Logic.S4M ⪱ Logic.Grz := by
         . contradiction;
 
 instance : Logic.S4 ⪱ Logic.Grz := calc
-  Logic.S4 ⪱ Logic.S4M := by infer_instance
+  Logic.S4 ⪱ Logic.S4McK := by infer_instance
   _        ⪱ Logic.Grz := by infer_instance
 
 end Logic.Grz.Kripke

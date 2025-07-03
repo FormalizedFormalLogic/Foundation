@@ -1,7 +1,7 @@
 import Foundation.Vorspiel.List.Chain
 import Foundation.Vorspiel.Fin.Supplemental
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.S4Point2M
+import Foundation.Modal.Kripke.Logic.S4Point2McK
 import Mathlib.Data.Finite.Sum
 import Mathlib.Data.Set.Finite.Basic
 import Mathlib.Data.Fintype.Pigeonhole
@@ -119,7 +119,7 @@ protected class Frame.IsFiniteGrzPoint2 (F : Frame) extends F.IsFinite, F.IsPart
 
 protected abbrev FrameClass.finite_GrzPoint2 : FrameClass := { F | F.IsFiniteGrzPoint2 }
 
-instance [F.IsFiniteGrzPoint2] : F.IsS4Point2M where
+instance [F.IsFiniteGrzPoint2] : F.IsS4Point2McK where
 
 end Kripke
 
@@ -331,17 +331,17 @@ instance : Logic.Grz ⪱ Logic.GrzPoint2 := by
             push_neg;
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
 
-instance : Logic.S4Point2M ⪱ Logic.GrzPoint2 := by
+instance : Logic.S4Point2McK ⪱ Logic.GrzPoint2 := by
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
     suffices ∀ φ, FrameClass.preorder_confluent_mckinsey ⊧ φ → FrameClass.finite_GrzPoint2 ⊧ φ by
-      simpa [S4Point2M.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
+      simpa [S4Point2McK.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.GrzPoint2 ⊢! φ ∧ ¬FrameClass.preorder_confluent_mckinsey ⊧ φ by simpa [S4Point2M.Kripke.preorder_confluent_mckinsey];
+    suffices ∃ φ, Logic.GrzPoint2 ⊢! φ ∧ ¬FrameClass.preorder_confluent_mckinsey ⊧ φ by simpa [S4Point2McK.Kripke.preorder_confluent_mckinsey];
     use Axioms.Grz (.atom 0);
     constructor;
     . simp;
@@ -367,7 +367,7 @@ instance : Logic.S4Point2M ⪱ Logic.GrzPoint2 := by
         . contradiction;
 
 instance : Logic.S4Point2 ⪱ Logic.GrzPoint2 := calc
-  Logic.S4Point2 ⪱ Logic.S4Point2M := by infer_instance
+  Logic.S4Point2 ⪱ Logic.S4Point2McK := by infer_instance
   _              ⪱ Logic.GrzPoint2 := by infer_instance
 
 end Logic.GrzPoint2.Kripke

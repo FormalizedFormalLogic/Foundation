@@ -81,39 +81,39 @@ lemma CKBoxDiaDiaK! : Logic.K ⊢! (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := by
 end Logic.K
 
 
-namespace Logic.K4M
+namespace Logic.K4McK
 
 open LO.Entailment Entailment.FiniteContext LO.Modal.Entailment
 
 variable {φ ψ : Formula _}
 
-lemma CKDiaBoxDiaK! : Logic.K4M ⊢! (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := WeakerThan.pbl Logic.K.CKDiaBoxDiaK!
+lemma CKDiaBoxDiaK! : Logic.K4McK ⊢! (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := WeakerThan.pbl Logic.K.CKDiaBoxDiaK!
 
-lemma CKBoxDiaDiaK! : Logic.K4M ⊢! (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := WeakerThan.pbl Logic.K.CKBoxDiaDiaK!
+lemma CKBoxDiaDiaK! : Logic.K4McK ⊢! (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := WeakerThan.pbl Logic.K.CKBoxDiaDiaK!
 
-lemma DiaK!_of_CKBoxDia (h : Logic.K4M ⊢! ◇φ ⋏ □ψ) : Logic.K4M ⊢! ◇(φ ⋏ ψ) := CKDiaBoxDiaK! ⨀ h
-lemma DiaK!_of_CKDiaBox (h : Logic.K4M ⊢! □φ ⋏ ◇ψ) : Logic.K4M ⊢! ◇(φ ⋏ ψ) := CKBoxDiaDiaK! ⨀ h
+lemma DiaK!_of_CKBoxDia (h : Logic.K4McK ⊢! ◇φ ⋏ □ψ) : Logic.K4McK ⊢! ◇(φ ⋏ ψ) := CKDiaBoxDiaK! ⨀ h
+lemma DiaK!_of_CKDiaBox (h : Logic.K4McK ⊢! □φ ⋏ ◇ψ) : Logic.K4McK ⊢! ◇(φ ⋏ ψ) := CKBoxDiaDiaK! ⨀ h
 
-lemma DiaCDiaBox! : Logic.K4M ⊢! ◇(◇φ ➝ □φ) :=
+lemma DiaCDiaBox! : Logic.K4McK ⊢! ◇(◇φ ➝ □φ) :=
   (WeakerThan.pbl $ C_of_E_mp! $ Logic.K.axiomMcK_DiaCDiaBox!) ⨀ (by simp)
 
-lemma DiaConjCDiabox {Γ : List _} (hΓ : Γ ≠ []) : Logic.K4M ⊢! ◇(Γ.map (λ φ => ◇φ ➝ □φ)).conj := by
+lemma DiaConjCDiabox {Γ : List _} (hΓ : Γ ≠ []) : Logic.K4McK ⊢! ◇(Γ.map (λ φ => ◇φ ➝ □φ)).conj := by
   induction Γ using List.induction_with_singleton with
   | hnil => tauto;
   | hsingle φ =>
     apply diaK''! ?_ $ DiaCDiaBox! (φ := φ);
     apply right_K!_intro <;> simp;
   | hcons φ Γ _ ih =>
-    have : Logic.K4M ⊢! ◇□(◇φ ➝ □φ) ⋏ □◇(List.map (fun φ ↦ (◇φ ➝ □φ)) Γ).conj := by
+    have : Logic.K4McK ⊢! ◇□(◇φ ➝ □φ) ⋏ □◇(List.map (fun φ ↦ (◇φ ➝ □φ)) Γ).conj := by
       apply K!_intro;
       . exact axiomMcK! ⨀ (nec! DiaCDiaBox!);
       . exact nec! $ ih $ by assumption;
-    have : Logic.K4M ⊢! ◇(□(◇φ ➝ □φ) ⋏ ◇(List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := DiaK!_of_CKBoxDia this;
-    replace : Logic.K4M ⊢! ◇◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaK''! CKBoxDiaDiaK! this;
-    replace : Logic.K4M ⊢! ◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaFour'! this;
+    have : Logic.K4McK ⊢! ◇(□(◇φ ➝ □φ) ⋏ ◇(List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := DiaK!_of_CKBoxDia this;
+    replace : Logic.K4McK ⊢! ◇◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaK''! CKBoxDiaDiaK! this;
+    replace : Logic.K4McK ⊢! ◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaFour'! this;
     exact this;
 
-lemma DiaFconjCDiabox {Γ : Finset _} (hΓ : Γ ≠ ∅) : Logic.K4M ⊢! ◇(Γ.image (λ φ => ◇φ ➝ □φ)).conj := by
+lemma DiaFconjCDiabox {Γ : Finset _} (hΓ : Γ ≠ ∅) : Logic.K4McK ⊢! ◇(Γ.image (λ φ => ◇φ ➝ □φ)).conj := by
   apply diaK''! ?_ (h₂ := DiaConjCDiabox (Γ := Γ.toList) ?_);
   . apply right_Fconj!_intro;
     intro ψ hψ;
@@ -121,7 +121,7 @@ lemma DiaFconjCDiabox {Γ : Finset _} (hΓ : Γ ≠ ∅) : Logic.K4M ⊢! ◇(Γ
     simpa using hψ;
   . simpa;
 
-end Logic.K4M
+end Logic.K4McK
 
 
 
@@ -181,7 +181,7 @@ open MaximalConsistentTableau
 namespace Canonical
 
 open Classical in
-instance [Logic.K4M ⪯ L] : (canonicalFrame L).SatisfiesMcKinseyCondition := ⟨by
+instance [Logic.K4McK ⪯ L] : (canonicalFrame L).SatisfiesMcKinseyCondition := ⟨by
   rintro x;
   have ⟨y, hy⟩ := lindenbaum (𝓢 := L) (t₀ := ⟨x.1.1.prebox ∪ Set.univ.image (λ φ => ◇φ ➝ □φ), ∅⟩) $ by
     intro Γ Δ hΓ hΔ;
@@ -200,8 +200,8 @@ instance [Logic.K4M ⪯ L] : (canonicalFrame L).SatisfiesMcKinseyCondition := �
     apply MaximalConsistentTableau.neither (t := x) (φ := ◇Γ'₂.conj);
     constructor;
     . apply iff_provable_mem₁.mp;
-      apply WeakerThan.pbl (𝓢 := Logic.K4M);
-      convert Logic.K4M.DiaFconjCDiabox (Γ := Γ'.preimage (λ φ => ◇φ ➝ □φ) (by simp [Set.InjOn])) ?_
+      apply WeakerThan.pbl (𝓢 := Logic.K4McK);
+      convert Logic.K4McK.DiaFconjCDiabox (Γ := Γ'.preimage (λ φ => ◇φ ➝ □φ) (by simp [Set.InjOn])) ?_
       . simp [Γ'₂, Finset.image_preimage];
       . simp [
           Γ',

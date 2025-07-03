@@ -10,36 +10,36 @@ open Hilbert.Kripke
 
 namespace Kripke
 
-class Frame.IsK4M (F : Kripke.Frame) extends F.IsTransitive, F.SatisfiesMcKinseyCondition where
+class Frame.IsK4McK (F : Kripke.Frame) extends F.IsTransitive, F.SatisfiesMcKinseyCondition where
 
-abbrev FrameClass.K4M : FrameClass := { F | F.IsK4M }
+abbrev FrameClass.K4McK : FrameClass := { F | F.IsK4McK }
 
 end Kripke
 
 
-namespace Logic.K4M.Kripke
+namespace Logic.K4McK.Kripke
 
-instance sound : Sound Logic.K4M FrameClass.K4M := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.K4McK FrameClass.K4McK := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
 
-instance consistent : Entailment.Consistent Logic.K4M := consistent_of_sound_frameclass FrameClass.K4M $ by
+instance consistent : Entailment.Consistent Logic.K4McK := consistent_of_sound_frameclass FrameClass.K4McK $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical Logic.K4M FrameClass.K4M := ⟨by constructor⟩
+instance canonical : Canonical Logic.K4McK FrameClass.K4McK := ⟨by constructor⟩
 
-instance complete : Complete Logic.K4M FrameClass.K4M := inferInstance
+instance complete : Complete Logic.K4McK FrameClass.K4McK := inferInstance
 
-lemma trans_mckinsey : Logic.K4M = FrameClass.K4M.logic := eq_hilbert_logic_frameClass_logic
+lemma trans_mckinsey : Logic.K4McK = FrameClass.K4McK.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.K4 ⪱ Logic.K4M := by
+instance : Logic.K4 ⪱ Logic.K4McK := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.K4M ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by simpa [K4.Kripke.trans];
+    suffices ∃ φ, Logic.K4McK ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by simpa [K4.Kripke.trans];
     use (Axioms.McK (.atom 0));
     constructor;
     . exact axiomMcK!;
@@ -49,6 +49,6 @@ instance : Logic.K4 ⪱ Logic.K4M := by
       . simp only [Set.mem_setOf_eq]; refine { trans := by simp; }
       . simp [Semantics.Realize, Satisfies];
 
-end Logic.K4M.Kripke
+end Logic.K4McK.Kripke
 
 end LO.Modal

@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.GrzPoint3
-import Foundation.Modal.Kripke.Logic.S4Point4M
+import Foundation.Modal.Kripke.Logic.S4Point4McK
 import Foundation.Vorspiel.HRel.Equality
 
 namespace LO.Modal
@@ -15,7 +15,7 @@ namespace Kripke
 variable {F : Frame}
 
 protected abbrev Frame.IsTriv (F : Frame) := _root_.IsEquality F.Rel
-instance [F.IsTriv] : F.IsS4Point4M where
+instance [F.IsTriv] : F.IsS4Point4McK where
   mckinsey := by simp
 
 protected class Frame.IsFiniteTriv (F : Frame) extends F.IsFinite, F.IsTriv
@@ -129,17 +129,17 @@ instance : Logic.GrzPoint3 ⪱ Logic.Triv := by
           . omega;
           . trivial;
 
-instance : Logic.S4Point4M ⪱ Logic.Triv := by
+instance : Logic.S4Point4McK ⪱ Logic.Triv := by
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.S4Point4M ⊧ φ → FrameClass.finite_Triv ⊧ φ by
-      simpa [S4Point4M.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
+    suffices ∀ φ, FrameClass.S4Point4McK ⊧ φ → FrameClass.finite_Triv ⊧ φ by
+      simpa [S4Point4McK.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.Triv ⊢! φ ∧ ¬FrameClass.S4Point4M ⊧ φ by simpa [S4Point4M.Kripke.preorder_sobocinski_mckinsey];
+    suffices ∃ φ, Logic.Triv ⊢! φ ∧ ¬FrameClass.S4Point4McK ⊧ φ by simpa [S4Point4McK.Kripke.preorder_sobocinski_mckinsey];
     use Axioms.Tc (.atom 0);
     constructor;
     . simp;
