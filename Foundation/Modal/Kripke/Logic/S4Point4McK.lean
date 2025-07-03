@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Logic.S4Point3M
+import Foundation.Modal.Kripke.Logic.S4Point3McK
 import Foundation.Modal.Kripke.Logic.S4Point4
 
 namespace LO.Modal
@@ -12,48 +12,48 @@ namespace Kripke
 
 variable {F : Kripke.Frame}
 
-protected class Frame.IsS4Point4M (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.SatisfiesSobocinskiCondition, F.SatisfiesMcKinseyCondition where
+protected class Frame.IsS4Point4McK (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.SatisfiesSobocinskiCondition, F.SatisfiesMcKinseyCondition where
 
-instance [F.IsS4Point4M] : F.IsS4Point3M where
+instance [F.IsS4Point4McK] : F.IsS4Point3McK where
 
-protected abbrev FrameClass.S4Point4M : FrameClass := { F | F.IsS4Point4M }
+protected abbrev FrameClass.S4Point4McK : FrameClass := { F | F.IsS4Point4McK }
 
 
 end Kripke
 
 
-namespace Logic.S4Point4M.Kripke
+namespace Logic.S4Point4McK.Kripke
 
-instance sound : Sound Logic.S4Point4M FrameClass.S4Point4M := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.S4Point4McK FrameClass.S4Point4McK := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
-  . exact validate_axiomM_of_satisfiesMcKinseyCondition;
+  . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_axiomPoint4_of_satisfiesSobocinskiCondition;
 
-instance consistent : Entailment.Consistent Logic.S4Point4M :=
-  consistent_of_sound_frameclass FrameClass.S4Point4M $ by
+instance consistent : Entailment.Consistent Logic.S4Point4McK :=
+  consistent_of_sound_frameclass FrameClass.S4Point4McK $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical Logic.S4Point4M FrameClass.S4Point4M := ⟨by constructor⟩
+instance canonical : Canonical Logic.S4Point4McK FrameClass.S4Point4McK := ⟨by constructor⟩
 
-instance complete : Complete Logic.S4Point4M FrameClass.S4Point4M := inferInstance
+instance complete : Complete Logic.S4Point4McK FrameClass.S4Point4McK := inferInstance
 
-lemma preorder_sobocinski_mckinsey : Logic.S4Point4M = FrameClass.S4Point4M.logic := eq_hilbert_logic_frameClass_logic
+lemma preorder_sobocinski_mckinsey : Logic.S4Point4McK = FrameClass.S4Point4McK.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.S4Point3M ⪱ Logic.S4Point4M := by
+instance : Logic.S4Point3McK ⪱ Logic.S4Point4McK := by
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.S4Point3M ⊧ φ → FrameClass.S4Point4M ⊧ φ by
-      simpa [S4Point3M.Kripke.preorder_connected_mckinsey, S4Point4M.Kripke.preorder_sobocinski_mckinsey];
+    suffices ∀ φ, FrameClass.S4Point3McK ⊧ φ → FrameClass.S4Point4McK ⊧ φ by
+      simpa [S4Point3McK.Kripke.preorder_connected_mckinsey, S4Point4McK.Kripke.preorder_sobocinski_mckinsey];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S4Point4M ⊢! φ ∧ ¬Kripke.FrameClass.S4Point3M ⊧ φ by simpa [S4Point3M.Kripke.preorder_connected_mckinsey];
+    suffices ∃ φ, Logic.S4Point4McK ⊢! φ ∧ ¬Kripke.FrameClass.S4Point3McK ⊧ φ by simpa [S4Point3McK.Kripke.preorder_connected_mckinsey];
     use (Axioms.Point4 (.atom 0));
     constructor;
     . simp;
@@ -75,14 +75,14 @@ instance : Logic.S4Point3M ⪱ Logic.S4Point4M := by
         use 2;
         omega;
 
-instance : Logic.S4Point4 ⪱ Logic.S4Point4M := by
+instance : Logic.S4Point4 ⪱ Logic.S4Point4McK := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.M (.atom 0))
+    use (Axioms.McK (.atom 0))
     constructor;
     . simp;
-    . suffices ¬FrameClass.S4Point4 ⊧ Axioms.M (atom 0) by simpa [S4Point4.Kripke.preorder_sobocinski];
+    . suffices ¬FrameClass.S4Point4 ⊧ Axioms.McK (atom 0) by simpa [S4Point4.Kripke.preorder_sobocinski];
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;
@@ -96,6 +96,6 @@ instance : Logic.S4Point4 ⪱ Logic.S4Point4M := by
         use 1;
         trivial;
 
-end Logic.S4Point4M.Kripke
+end Logic.S4Point4McK.Kripke
 
 end LO.Modal
