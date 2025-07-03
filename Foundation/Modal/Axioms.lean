@@ -75,7 +75,7 @@ protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
 /--
   Axiom for McKinsey condition
 -/
-protected abbrev M := □◇φ ➝ ◇□φ
+protected abbrev McK := □◇φ ➝ ◇□φ
 
 /--
   Axiom for

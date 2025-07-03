@@ -21,7 +21,7 @@ open Formula.Kripke
 
 variable {φ ψ : Formula _}
 
-lemma axiomM_DiaCDiaBox! : Logic.K ⊢! (□◇φ ➝ ◇□φ) ⭤ ◇(◇φ ➝ □φ) := by
+lemma axiomMcK_DiaCDiaBox! : Logic.K ⊢! (□◇φ ➝ ◇□φ) ⭤ ◇(◇φ ➝ □φ) := by
   apply Kripke.complete.complete;
   intro F _ V x;
   apply Satisfies.iff_def.mpr;
@@ -95,7 +95,7 @@ lemma DiaK!_of_CKBoxDia (h : Logic.K4M ⊢! ◇φ ⋏ □ψ) : Logic.K4M ⊢! �
 lemma DiaK!_of_CKDiaBox (h : Logic.K4M ⊢! □φ ⋏ ◇ψ) : Logic.K4M ⊢! ◇(φ ⋏ ψ) := CKBoxDiaDiaK! ⨀ h
 
 lemma DiaCDiaBox! : Logic.K4M ⊢! ◇(◇φ ➝ □φ) :=
-  (WeakerThan.pbl $ C_of_E_mp! $ Logic.K.axiomM_DiaCDiaBox!) ⨀ (by simp)
+  (WeakerThan.pbl $ C_of_E_mp! $ Logic.K.axiomMcK_DiaCDiaBox!) ⨀ (by simp)
 
 lemma DiaConjCDiabox {Γ : List _} (hΓ : Γ ≠ []) : Logic.K4M ⊢! ◇(Γ.map (λ φ => ◇φ ➝ □φ)).conj := by
   induction Γ using List.induction_with_singleton with
@@ -106,7 +106,7 @@ lemma DiaConjCDiabox {Γ : List _} (hΓ : Γ ≠ []) : Logic.K4M ⊢! ◇(Γ.map
   | hcons φ Γ _ ih =>
     have : Logic.K4M ⊢! ◇□(◇φ ➝ □φ) ⋏ □◇(List.map (fun φ ↦ (◇φ ➝ □φ)) Γ).conj := by
       apply K!_intro;
-      . exact axiomM! ⨀ (nec! DiaCDiaBox!);
+      . exact axiomMcK! ⨀ (nec! DiaCDiaBox!);
       . exact nec! $ ih $ by assumption;
     have : Logic.K4M ⊢! ◇(□(◇φ ➝ □φ) ⋏ ◇(List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := DiaK!_of_CKBoxDia this;
     replace : Logic.K4M ⊢! ◇◇((◇φ ➝ □φ) ⋏ (List.map (fun φ ↦ ◇φ ➝ □φ) Γ).conj) := diaK''! CKBoxDiaDiaK! this;
@@ -147,7 +147,7 @@ section definability
 open Formula (atom)
 open Formula.Kripke
 
-lemma validate_axiomM_of_satisfiesMcKinseyCondition [F.SatisfiesMcKinseyCondition] : F ⊧ (Axioms.M (.atom 0)) := by
+lemma validate_axiomMcK_of_satisfiesMcKinseyCondition [F.SatisfiesMcKinseyCondition] : F ⊧ (Axioms.McK (.atom 0)) := by
   have := Frame.SatisfiesMcKinseyCondition.mckinsey (F := F);
   revert this;
   contrapose!;

@@ -29,7 +29,7 @@ instance sound : Sound Logic.S4Point4M FrameClass.S4Point4M := instSound_of_vali
   rintro F ⟨_⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
-  . exact validate_axiomM_of_satisfiesMcKinseyCondition;
+  . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_axiomPoint4_of_satisfiesSobocinskiCondition;
 
 instance consistent : Entailment.Consistent Logic.S4Point4M :=
@@ -79,10 +79,10 @@ instance : Logic.S4Point4 ⪱ Logic.S4Point4M := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.M (.atom 0))
+    use (Axioms.McK (.atom 0))
     constructor;
     . simp;
-    . suffices ¬FrameClass.S4Point4 ⊧ Axioms.M (atom 0) by simpa [S4Point4.Kripke.preorder_sobocinski];
+    . suffices ¬FrameClass.S4Point4 ⊧ Axioms.McK (atom 0) by simpa [S4Point4.Kripke.preorder_sobocinski];
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;

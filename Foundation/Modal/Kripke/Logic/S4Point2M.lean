@@ -26,7 +26,7 @@ instance sound : Sound (Logic.S4Point2M) Kripke.FrameClass.preorder_confluent_mc
   rintro F ⟨_⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
-  . exact validate_axiomM_of_satisfiesMcKinseyCondition;
+  . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_AxiomPoint2_of_confluent;
 
 instance consistent : Entailment.Consistent Logic.S4Point2M :=
@@ -78,7 +78,7 @@ instance : Logic.S4Point2 ⪱ Logic.S4Point2M := by
   . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.S4Point2M ⊢! φ ∧ ¬FrameClass.S4Point2 ⊧ φ by simpa [S4Point2.Kripke.confluent_preorder];
-    use (Axioms.M (.atom 0))
+    use (Axioms.McK (.atom 0))
     constructor;
     . simp;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;

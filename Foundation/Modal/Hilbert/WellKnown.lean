@@ -267,18 +267,18 @@ instance [H.HasZ] : Entailment.HasAxiomZ H.logic where
     . use (λ b => if (HasZ.p H) = b then φ else (.atom b));
       simp;
 
-class HasM (H : Hilbert α) where
+class HasMcK (H : Hilbert α) where
   p : α
-  mem_M : Axioms.M (.atom p) ∈ H.axioms := by tauto;
+  mem_M : Axioms.McK (.atom p) ∈ H.axioms := by tauto;
 
-instance [H.HasM] : Entailment.HasAxiomM H.logic where
-  M φ := by
+instance [H.HasMcK] : Entailment.HasAxiomMcK H.logic where
+  McK φ := by
     constructor;
     apply maxm;
-    use Axioms.M (.atom (HasM.p H));
+    use Axioms.McK (.atom (HasMcK.p H));
     constructor;
-    . exact HasM.mem_M;
-    . use (λ b => if (HasM.p H) = b then φ else (.atom b));
+    . exact HasMcK.mem_M;
+    . use (λ b => if (HasMcK.p H) = b then φ else (.atom b));
       simp;
 
 
@@ -361,10 +361,10 @@ instance : (Hilbert.KTB).HasB where p := 0
 instance : Entailment.KTB (Logic.KTB) where
 
 
-protected abbrev Hilbert.KM : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.M (.atom 0)}⟩
+protected abbrev Hilbert.KM : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.McK (.atom 0)}⟩
 protected abbrev Logic.KM := Hilbert.KM.logic
 instance : (Hilbert.KM).HasK where p := 0; q := 1;
-instance : (Hilbert.KM).HasM where p := 0
+instance : (Hilbert.KM).HasMcK where p := 0
 instance : Entailment.KM (Logic.KM) where
 instance : Logic.K ⪯ Logic.KM := weakerThan_of_subset_axioms $ by simp;
 
@@ -376,18 +376,18 @@ instance : (Hilbert.K4).HasFour where p := 0
 instance : Entailment.K4 (Logic.K4) where
 
 
-protected abbrev Hilbert.K4M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
+protected abbrev Hilbert.K4M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.McK (.atom 0)}⟩
 protected abbrev Logic.K4M := Hilbert.K4M.logic
 instance : (Hilbert.K4M).HasK where p := 0; q := 1;
 instance : (Hilbert.K4M).HasFour where p := 0
-instance : (Hilbert.K4M).HasM where p := 0
+instance : (Hilbert.K4M).HasMcK where p := 0
 instance : Entailment.K4M (Logic.K4M) where
 
 instance : Logic.K ⪯ Logic.K4M := weakerThan_of_subset_axioms $ by simp;
 
 noncomputable instance [Entailment.K L] [Logic.K4M ⪯ L] : Entailment.K4M L where
   Four _ := Entailment.WeakerThan.pbl (𝓢 := Logic.K4M) (by simp) |>.some
-  M _ := Entailment.WeakerThan.pbl (𝓢 := Logic.K4M) (by simp) |>.some
+  McK _ := Entailment.WeakerThan.pbl (𝓢 := Logic.K4M) (by simp) |>.some
 
 
 
@@ -473,44 +473,44 @@ instance : Entailment.S4 (Logic.S4) where
 instance : Logic.K4 ⪯ Logic.S4 := weakerThan_of_subset_axioms $ by simp;
 
 
-protected abbrev Hilbert.S4M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
+protected abbrev Hilbert.S4M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0)}⟩
 protected abbrev Logic.S4M := Hilbert.S4M.logic
 instance : (Hilbert.S4M).HasK where p := 0; q := 1;
 instance : (Hilbert.S4M).HasT where p := 0
 instance : (Hilbert.S4M).HasFour where p := 0
-instance : (Hilbert.S4M).HasM where p := 0
+instance : (Hilbert.S4M).HasMcK where p := 0
 instance : Entailment.S4M (Logic.S4M) where
 instance : Logic.K4M ⪯ Logic.S4M := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
-protected abbrev Hilbert.S4Point2M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0), Axioms.Point2 (.atom 0)}⟩
+protected abbrev Hilbert.S4Point2M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point2 (.atom 0)}⟩
 protected abbrev Logic.S4Point2M := Hilbert.S4Point2M.logic
 instance : (Hilbert.S4Point2M).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Point2M).HasT where p := 0
 instance : (Hilbert.S4Point2M).HasFour where p := 0
-instance : (Hilbert.S4Point2M).HasM where p := 0
+instance : (Hilbert.S4Point2M).HasMcK where p := 0
 instance : (Hilbert.S4Point2M).HasPoint2 where p := 0
 instance : Entailment.S4Point2M (Logic.S4Point2M) where
 instance : Logic.K4M ⪯ Logic.S4Point2M := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
-protected abbrev Hilbert.S4Point3M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
+protected abbrev Hilbert.S4Point3M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
 protected abbrev Logic.S4Point3M := Hilbert.S4Point3M.logic
 instance : (Hilbert.S4Point3M).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Point3M).HasT where p := 0
 instance : (Hilbert.S4Point3M).HasFour where p := 0
-instance : (Hilbert.S4Point3M).HasM where p := 0
+instance : (Hilbert.S4Point3M).HasMcK where p := 0
 instance : (Hilbert.S4Point3M).HasPoint3 where p := 0; q := 1;
 instance : Entailment.S4Point3M (Logic.S4Point3M) where
 instance : Logic.K4M ⪯ Logic.S4Point3M := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
-protected abbrev Hilbert.S4Point4M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.M (.atom 0), Axioms.Point4 (.atom 0)}⟩
+protected abbrev Hilbert.S4Point4M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point4 (.atom 0)}⟩
 protected abbrev Logic.S4Point4M := Hilbert.S4Point4M.logic
 instance : (Hilbert.S4Point4M).HasK where p := 0; q := 1;
 instance : (Hilbert.S4Point4M).HasT where p := 0
 instance : (Hilbert.S4Point4M).HasFour where p := 0
-instance : (Hilbert.S4Point4M).HasM where p := 0
+instance : (Hilbert.S4Point4M).HasMcK where p := 0
 instance : (Hilbert.S4Point4M).HasPoint4 where p := 0
 instance : Entailment.S4Point4M (Logic.S4Point4M) where
 instance : Logic.K4M ⪯ Logic.S4Point4M := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
