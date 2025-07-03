@@ -9,6 +9,7 @@ namespace LO.Modal
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 open Propositional.Formula (goedelTranslate)
+open Propositional.Logic (smallestMC largestMC)
 open Modal
 open Modal.Kripke
 
@@ -19,7 +20,7 @@ lemma Logic.gS4_of_Int : Hilbert.Int ⊢! φ → Logic.S4 ⊢! φᵍ := by
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
 
-lemma Logic.S4.is_smallestMC_of_Int : Logic.S4 = 𝐈𝐧𝐭.smallestMC := by
+lemma Logic.S4.is_smallestMC_of_Int : Logic.S4 = (smallestMC 𝐈𝐧𝐭) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
@@ -44,7 +45,7 @@ lemma Logic.S4.is_smallestMC_of_Int : Logic.S4 = 𝐈𝐧𝐭.smallestMC := by
       simp only [theory, Propositional.Logic.iff_provable, Set.mem_setOf_eq] at hφ;
       apply Logic.gS4_of_Int hφ;
 
-instance : Sound 𝐈𝐧𝐭.smallestMC FrameClass.S4 := by
+instance : Sound (smallestMC 𝐈𝐧𝐭) FrameClass.S4 := by
   rw [←Logic.S4.is_smallestMC_of_Int];
   infer_instance;
 
@@ -63,7 +64,7 @@ section Grz
 
 lemma Logic.gGrz_of_Int : Hilbert.Int ⊢! φ → Logic.Grz ⊢! φᵍ := λ h ↦ WeakerThan.pbl $ gS4_of_Int h
 
-lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = 𝐈𝐧𝐭.largestMC := by
+lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = (Logic.largestMC 𝐈𝐧𝐭) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
@@ -83,7 +84,7 @@ lemma Logic.Grz.is_largestMC_of_Int : Logic.Grz = 𝐈𝐧𝐭.largestMC := by
     | nec ih => apply nec! ih;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-instance : Sound 𝐈𝐧𝐭.largestMC FrameClass.finite_Grz := by
+instance : Sound (Logic.largestMC 𝐈𝐧𝐭) FrameClass.finite_Grz := by
   rw [←Logic.Grz.is_largestMC_of_Int];
   infer_instance;
 
