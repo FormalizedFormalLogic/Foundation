@@ -135,11 +135,11 @@ instance : Hilbert.LC.HasDummett where p := 0; q := 1;
 instance : Entailment.LC (Hilbert.LC) where
 
 
-protected abbrev Hilbert.KP : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}⟩
-protected abbrev KP := Hilbert.KP.logic
-notation "𝐊𝐏" => Propositional.KP
-instance : Hilbert.KP.HasEFQ where p := 0;
-instance : Hilbert.KP.HasKrieselPutnam where p := 0; q := 1; r := 2;
-instance : Entailment.KP (Hilbert.KP) where
+protected abbrev Hilbert.KrieselPutnam : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}⟩
+protected abbrev KrieselPutnam := Hilbert.KrieselPutnam.logic
+notation "𝐊𝐏" => Propositional.KrieselPutnam
+instance : Hilbert.KrieselPutnam.HasEFQ where p := 0;
+instance : Hilbert.KrieselPutnam.HasKrieselPutnam where p := 0; q := 1; r := 2;
+instance : Entailment.KrieselPutnam (Hilbert.KrieselPutnam) where
 
 end LO.Propositional
