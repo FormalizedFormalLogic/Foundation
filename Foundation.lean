@@ -95,14 +95,14 @@ import Foundation.Modal.Kripke.Logic.Grz.Completeness
 import Foundation.Modal.Kripke.Logic.GLPoint3
 import Foundation.Modal.Kripke.Logic.GrzPoint2
 import Foundation.Modal.Kripke.Logic.GrzPoint3
-import Foundation.Modal.Kripke.Logic.K4M
+import Foundation.Modal.Kripke.Logic.K4McK
 import Foundation.Modal.Kripke.Logic.K4Point2
 import Foundation.Modal.Kripke.Logic.K4Point3
 import Foundation.Modal.Kripke.Logic.KHen
 import Foundation.Modal.Kripke.Logic.KT4B
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.KTMk
-import Foundation.Modal.Kripke.Logic.S4Point4M
+import Foundation.Modal.Kripke.Logic.S4Point4McK
 import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Kripke.Logic.S4Point4
 import Foundation.Modal.Kripke.Logic.S5

@@ -1,4 +1,4 @@
-import Foundation.Modal.Kripke.Logic.S4Point2M
+import Foundation.Modal.Kripke.Logic.S4Point2McK
 import Foundation.Modal.Kripke.Logic.S4Point3
 
 namespace LO.Modal
@@ -12,48 +12,48 @@ namespace Kripke
 
 variable {F : Kripke.Frame}
 
-protected class Frame.IsS4Point3M (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.IsPiecewiseConnected, F.SatisfiesMcKinseyCondition where
+protected class Frame.IsS4Point3McK (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.IsPiecewiseConnected, F.SatisfiesMcKinseyCondition where
 
-instance [F.IsS4Point3M] : F.IsS4Point2M where
+instance [F.IsS4Point3McK] : F.IsS4Point2McK where
 
-protected abbrev FrameClass.S4Point3M : FrameClass := { F | F.IsS4Point3M }
+protected abbrev FrameClass.S4Point3McK : FrameClass := { F | F.IsS4Point3McK }
 
 end Kripke
 
 
-namespace Logic.S4Point3M.Kripke
+namespace Logic.S4Point3McK.Kripke
 
-instance sound : Sound (Logic.S4Point3M) Kripke.FrameClass.S4Point3M := instSound_of_validates_axioms $ by
+instance sound : Sound (Logic.S4Point3McK) Kripke.FrameClass.S4Point3McK := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
-  . exact validate_axiomM_of_satisfiesMcKinseyCondition;
+  . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance consistent : Entailment.Consistent Logic.S4Point3M :=
-  consistent_of_sound_frameclass Kripke.FrameClass.S4Point3M $ by
+instance consistent : Entailment.Consistent Logic.S4Point3McK :=
+  consistent_of_sound_frameclass Kripke.FrameClass.S4Point3McK $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Logic.S4Point3M) Kripke.FrameClass.S4Point3M := ⟨by constructor⟩
+instance canonical : Canonical (Logic.S4Point3McK) Kripke.FrameClass.S4Point3McK := ⟨by constructor⟩
 
-instance complete : Complete (Logic.S4Point3M) Kripke.FrameClass.S4Point3M := inferInstance
+instance complete : Complete (Logic.S4Point3McK) Kripke.FrameClass.S4Point3McK := inferInstance
 
-lemma preorder_connected_mckinsey : Logic.S4Point3M = Kripke.FrameClass.S4Point3M.logic := eq_hilbert_logic_frameClass_logic
+lemma preorder_connected_mckinsey : Logic.S4Point3McK = Kripke.FrameClass.S4Point3McK.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.S4Point2M ⪱ Logic.S4Point3M := by
+instance : Logic.S4Point2McK ⪱ Logic.S4Point3McK := by
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.preorder_confluent_mckinsey ⊧ φ → FrameClass.S4Point3M ⊧ φ by
-      simpa [S4Point2M.Kripke.preorder_confluent_mckinsey, S4Point3M.Kripke.preorder_connected_mckinsey];
+    suffices ∀ φ, FrameClass.preorder_confluent_mckinsey ⊧ φ → FrameClass.S4Point3McK ⊧ φ by
+      simpa [S4Point2McK.Kripke.preorder_confluent_mckinsey, S4Point3McK.Kripke.preorder_connected_mckinsey];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S4Point3M ⊢! φ ∧ ¬Kripke.FrameClass.preorder_confluent_mckinsey ⊧ φ by
-      simpa [S4Point2M.Kripke.preorder_confluent_mckinsey];
+    suffices ∃ φ, Logic.S4Point3McK ⊢! φ ∧ ¬Kripke.FrameClass.preorder_confluent_mckinsey ⊧ φ by
+      simpa [S4Point2McK.Kripke.preorder_confluent_mckinsey];
     use (Axioms.Point3 (.atom 0) (.atom 1));
     constructor;
     . simp;
@@ -85,12 +85,12 @@ instance : Logic.S4Point2M ⪱ Logic.S4Point3M := by
         . use 1; simp only [M]; refine ⟨?_, ?_, ?_, ?_⟩ <;> omega;
         . use 2; simp only [M]; refine ⟨?_, ?_, ?_, ?_⟩ <;> omega;
 
-instance : Logic.S4Point3 ⪱ Logic.S4Point3M := by
+instance : Logic.S4Point3 ⪱ Logic.S4Point3McK := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S4Point3M ⊢! φ ∧ ¬FrameClass.S4Point3 ⊧ φ by simpa [S4Point3.Kripke.connected_preorder];
-    use (Axioms.M (.atom 0))
+    suffices ∃ φ, Logic.S4Point3McK ⊢! φ ∧ ¬FrameClass.S4Point3 ⊧ φ by simpa [S4Point3.Kripke.connected_preorder];
+    use (Axioms.McK (.atom 0))
     constructor;
     . simp;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
@@ -106,6 +106,6 @@ instance : Logic.S4Point3 ⪱ Logic.S4Point3M := by
         use 1;
         trivial;
 
-end Logic.S4Point3M.Kripke
+end Logic.S4Point3McK.Kripke
 
 end LO.Modal

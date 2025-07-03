@@ -1,7 +1,7 @@
 import Foundation.Modal.Kripke.Logic.K4
-import Foundation.Modal.Kripke.AxiomM
+import Foundation.Modal.Kripke.AxiomMcK
 import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Kripke.Logic.K4M
+import Foundation.Modal.Kripke.Logic.K4McK
 
 namespace LO.Modal
 
@@ -14,42 +14,42 @@ namespace Kripke
 
 variable {F : Kripke.Frame}
 
-class Frame.IsS4M (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.SatisfiesMcKinseyCondition where
+class Frame.IsS4McK (F : Kripke.Frame) extends F.IsReflexive, F.IsTransitive, F.SatisfiesMcKinseyCondition where
 
-abbrev FrameClass.S4M : FrameClass := { F | F.IsS4M }
+abbrev FrameClass.S4McK : FrameClass := { F | F.IsS4McK }
 
 end Kripke
 
 
 
-namespace Logic.S4M.Kripke
+namespace Logic.S4McK.Kripke
 
-instance sound : Sound Logic.S4M FrameClass.S4M := instSound_of_validates_axioms $ by
+instance sound : Sound Logic.S4McK FrameClass.S4McK := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
-  . exact validate_axiomM_of_satisfiesMcKinseyCondition;
+  . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
 
-instance consistent : Entailment.Consistent Logic.S4M := consistent_of_sound_frameclass FrameClass.S4M $ by
+instance consistent : Entailment.Consistent Logic.S4McK := consistent_of_sound_frameclass FrameClass.S4McK $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   constructor
 
-instance canonical : Canonical Logic.S4M FrameClass.S4M := ⟨by constructor⟩
+instance canonical : Canonical Logic.S4McK FrameClass.S4McK := ⟨by constructor⟩
 
-instance complete : Complete Logic.S4M FrameClass.S4M := inferInstance
+instance complete : Complete Logic.S4McK FrameClass.S4McK := inferInstance
 
-lemma preorder_mckinsey : Logic.S4M = FrameClass.S4M.logic := eq_hilbert_logic_frameClass_logic
+lemma preorder_mckinsey : Logic.S4McK = FrameClass.S4McK.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.S4 ⪱ Logic.S4M := by
+instance : Logic.S4 ⪱ Logic.S4McK := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S4M ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by simpa [S4.Kripke.preorder];
-    use (Axioms.M (.atom 0));
+    suffices ∃ φ, Logic.S4McK ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by simpa [S4.Kripke.preorder];
+    use (Axioms.McK (.atom 0));
     constructor;
-    . exact axiomM!;
+    . exact axiomMcK!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;
@@ -62,11 +62,11 @@ instance : Logic.S4 ⪱ Logic.S4M := by
         use 1;
         trivial;
 
-instance : Logic.K4M ⪱ Logic.S4M := by
+instance : Logic.K4McK ⪱ Logic.S4McK := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S4M ⊢! φ ∧ ¬FrameClass.K4M ⊧ φ by simpa [K4M.Kripke.trans_mckinsey];
+    suffices ∃ φ, Logic.S4McK ⊢! φ ∧ ¬FrameClass.K4McK ⊧ φ by simpa [K4McK.Kripke.trans_mckinsey];
     use (Axioms.T (.atom 0));
     constructor;
     . simp;
@@ -83,6 +83,6 @@ instance : Logic.K4M ⪱ Logic.S4M := by
         }
       . simp [Semantics.Realize, Satisfies, M];
 
-end Logic.S4M.Kripke
+end Logic.S4McK.Kripke
 
 end LO.Modal

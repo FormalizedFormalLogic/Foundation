@@ -480,19 +480,19 @@ instance (Γ : Context F 𝓢) : HasAxiomZ Γ := ⟨fun _ ↦ Context.of axiomZ�
 end
 
 
-class HasAxiomM (𝓢 : S) where
-  M (φ : F) : 𝓢 ⊢ Axioms.M φ
+class HasAxiomMcK (𝓢 : S) where
+  McK (φ : F) : 𝓢 ⊢ Axioms.McK φ
 
 section
 
-variable [HasAxiomM 𝓢]
+variable [HasAxiomMcK 𝓢]
 
-def axiomM : 𝓢 ⊢ □◇φ ➝ ◇□φ := HasAxiomM.M _
-@[simp] lemma axiomM! : 𝓢 ⊢! □◇φ ➝ ◇□φ := ⟨axiomM⟩
+def axiomMcK : 𝓢 ⊢ □◇φ ➝ ◇□φ := HasAxiomMcK.McK _
+@[simp] lemma axiomMcK! : 𝓢 ⊢! □◇φ ➝ ◇□φ := ⟨axiomMcK⟩
 
 variable [Entailment.Minimal 𝓢]
-instance (Γ : FiniteContext F 𝓢) : HasAxiomM Γ := ⟨fun _ ↦ FiniteContext.of axiomM⟩
-instance (Γ : Context F 𝓢) : HasAxiomM Γ := ⟨fun _ ↦ Context.of axiomM⟩
+instance (Γ : FiniteContext F 𝓢) : HasAxiomMcK Γ := ⟨fun _ ↦ FiniteContext.of axiomMcK⟩
+instance (Γ : Context F 𝓢) : HasAxiomMcK Γ := ⟨fun _ ↦ Context.of axiomMcK⟩
 
 end
 
@@ -631,10 +631,10 @@ instance [Entailment.Triv 𝓢] : Entailment.KTc 𝓢 where
 
 protected class Ver extends Entailment.K 𝓢, HasAxiomVer 𝓢
 
-protected class KM extends Entailment.K 𝓢, HasAxiomM 𝓢
+protected class KMcK extends Entailment.K 𝓢, HasAxiomMcK 𝓢
 
 protected class K4 extends Entailment.K 𝓢, HasAxiomFour 𝓢
-protected class K4M extends Entailment.K4 𝓢, HasAxiomM 𝓢
+protected class K4McK extends Entailment.K4 𝓢, HasAxiomMcK 𝓢
 protected class K4Point2 extends Entailment.K4 𝓢, HasAxiomWeakPoint2 𝓢
 protected class K4Point3 extends Entailment.K4 𝓢, HasAxiomWeakPoint3 𝓢
 protected class KD4Point3Z extends Entailment.K 𝓢, HasAxiomD 𝓢, HasAxiomFour 𝓢, HasAxiomWeakPoint3 𝓢, HasAxiomZ 𝓢
@@ -648,10 +648,10 @@ instance [Entailment.S4 𝓢] : Entailment.KT 𝓢 where
 protected class S4Point2 extends Entailment.S4 𝓢, HasAxiomPoint2 𝓢
 protected class S4Point3 extends Entailment.S4 𝓢, HasAxiomPoint3 𝓢
 protected class S4Point4 extends Entailment.S4 𝓢, HasAxiomPoint4 𝓢
-protected class S4M extends Entailment.S4 𝓢, HasAxiomM 𝓢
-protected class S4Point2M extends Entailment.S4M 𝓢, HasAxiomPoint2 𝓢
-protected class S4Point3M extends Entailment.S4M 𝓢, HasAxiomPoint3 𝓢
-protected class S4Point4M extends Entailment.S4M 𝓢, HasAxiomPoint4 𝓢
+protected class S4McK extends Entailment.S4 𝓢, HasAxiomMcK 𝓢
+protected class S4Point2McK extends Entailment.S4McK 𝓢, HasAxiomPoint2 𝓢
+protected class S4Point3McK extends Entailment.S4McK 𝓢, HasAxiomPoint3 𝓢
+protected class S4Point4McK extends Entailment.S4McK 𝓢, HasAxiomPoint4 𝓢
 
 protected class S5 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢
 instance [Entailment.S5 𝓢] : Entailment.KT 𝓢 where
