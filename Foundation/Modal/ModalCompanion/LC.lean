@@ -7,11 +7,11 @@ namespace LO.Modal
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
-open Propositional.Formula (goedelTranslate)
-open Propositional.Formula (atom)
+open Propositional.Formula (atom goedelTranslate)
+open Propositional.Logic (smallestMC largestMC)
 open Modal
-open Modal.Formula (atom)
 open Modal.Kripke
+open Modal.Formula.Kripke
 
 section S4Point3
 
@@ -36,12 +36,12 @@ private lemma Logic.S4Point.lemma₁ : Logic.S4 ⊢! □(□φ ➝ □ψ) ➝ �
 namespace Logic
 
 
-instance : Entailment.HasAxiomPoint3 Logic.LC.smallestMC where
+instance : Entailment.HasAxiomPoint3 (smallestMC 𝐋𝐂) where
   Point3 φ ψ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (L := Logic.LC.smallestMC) (φ := Modal.Axioms.Point3 (.atom 0) (.atom 1)) (s := λ a => match a with | 0 => φ | 1 => ψ | _ => .atom a);
-    have : Logic.LC.smallestMC ⊢! □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) := by
+    apply Modal.Logic.subst! (L := (smallestMC 𝐋𝐂)) (φ := Modal.Axioms.Point3 (.atom 0) (.atom 1)) (s := λ a => match a with | 0 => φ | 1 => ψ | _ => .atom a);
+    have : (smallestMC 𝐋𝐂) ⊢! □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) := by
       apply Logic.sumNormal.mem₂!;
       use Axioms.Dummett (.atom 0) (.atom 1);
       constructor;
@@ -52,7 +52,7 @@ instance : Entailment.HasAxiomPoint3 Logic.LC.smallestMC where
     . apply Entailment.WeakerThan.pbl (𝓢 := Logic.S4)
       simp;
 
-lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
+lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = (smallestMC 𝐋𝐂) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
@@ -80,11 +80,11 @@ lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
           repeat exact Logic.S4Point3.goedelTranslated_axiomDummett;
       . simpa [theory] using hφ;
 
-instance : Sound Logic.LC.smallestMC FrameClass.S4Point3 := by
+instance : Sound (smallestMC 𝐋𝐂) FrameClass.S4Point3 := by
   rw [←Logic.S4Point3.is_smallestMC_of_LC];
   infer_instance;
 
-instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := by
+instance modalCompanion_LC_S4Point3 : ModalCompanion 𝐋𝐂 Logic.S4Point3 := by
   rw [Logic.S4Point3.is_smallestMC_of_LC];
   exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.LC)
@@ -98,11 +98,11 @@ end S4Point3
 
 section GrzPoint3
 
-lemma Logic.gGrzPoint3_of_LC : Logic.LC ⊢! φ → Logic.GrzPoint3 ⊢! φᵍ := by
+lemma Logic.gGrzPoint3_of_LC : 𝐋𝐂 ⊢! φ → Logic.GrzPoint3 ⊢! φᵍ := by
   intro h;
   apply WeakerThan.pbl $ modalCompanion_LC_S4Point3.companion.mp h;
 
-lemma Logic.GrzPoint3.is_largestMC_of_LC : Logic.GrzPoint3 = Logic.LC.largestMC := by
+lemma Logic.GrzPoint3.is_largestMC_of_LC : Logic.GrzPoint3 = (Logic.largestMC 𝐋𝐂) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
@@ -113,7 +113,7 @@ lemma Logic.GrzPoint3.is_largestMC_of_LC : Logic.GrzPoint3 = Logic.LC.largestMC 
       rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
       . simp;
       . simp;
-      . apply WeakerThan.pbl (𝓢 := Logic.LC.smallestMC);
+      . apply WeakerThan.pbl (𝓢 := (smallestMC 𝐋𝐂));
         simp;
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
     | nec ihφ => exact nec! ihφ;
@@ -127,11 +127,11 @@ lemma Logic.GrzPoint3.is_largestMC_of_LC : Logic.GrzPoint3 = Logic.LC.largestMC 
     | nec ih => apply nec! ih;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-instance : Sound Logic.LC.largestMC FrameClass.finite_connected_partial_order := by
+instance : Sound (Logic.largestMC 𝐋𝐂) FrameClass.finite_connected_partial_order := by
   rw [←Logic.GrzPoint3.is_largestMC_of_LC];
   infer_instance;
 
-instance modalCompanion_LC_GrzPoint3 : ModalCompanion Logic.LC Logic.GrzPoint3 := by
+instance modalCompanion_LC_GrzPoint3 : ModalCompanion 𝐋𝐂 Logic.GrzPoint3 := by
   rw [Logic.GrzPoint3.is_largestMC_of_LC];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_LC)
@@ -143,7 +143,7 @@ end GrzPoint3
 
 section boxdot
 
-theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : Logic.LC ⊢! φ ↔ Logic.GLPoint3 ⊢! φᵍᵇ := by
+theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : 𝐋𝐂 ⊢! φ ↔ Logic.GLPoint3 ⊢! φᵍᵇ := by
   exact Iff.trans modalCompanion_LC_GrzPoint3.companion Logic.iff_boxdotTranslatedGLPoint3_GrzPoint3.symm
 
 end boxdot

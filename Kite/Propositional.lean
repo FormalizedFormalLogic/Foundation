@@ -1,7 +1,7 @@
 import Foundation.Propositional.Logic.Basic
 import Kite.Basic
 
-open Lean Meta Qq Elab Command
+open Lean Meta Qq Elab Command PrettyPrinter
 open LO.Propositional
 
 namespace Kite
@@ -9,11 +9,9 @@ namespace Kite
 def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   match ← inferTypeQ ci.type with
   | ⟨1, ~q(Prop), ~q(LO.Entailment.StrictlyWeakerThan (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
-    return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .ssub⟩
+    return some ⟨s!"{←PrettyPrinter.ppExpr a}", s!"{←PrettyPrinter.ppExpr b}", .ssub⟩
   | ⟨1, ~q(Prop), ~q(LO.Entailment.WeakerThan (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
-    return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .sub⟩
-  -- | ⟨1, ~q(Prop), ~q(@HasSubset.Subset Logic _ $a $b)⟩ => return some (.ext, a, b)
-  -- | ⟨1, ~q(Prop), ~q(($a : Logic) = $b)⟩ => return some (.ext, a, b)
+    return some ⟨s!"{←PrettyPrinter.ppExpr a}", s!"{←PrettyPrinter.ppExpr b}", .sub⟩
   | _ => return none
 
 def findMatches : MetaM Json := do
