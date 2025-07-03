@@ -136,10 +136,10 @@ instance : Hilbert.KC ⪱ Hilbert.LC := by
 end Hilbert
 
 
-propositional_kripke Logic.LC FrameClass.LC
-propositional_kripke Logic.LC FrameClass.finite_LC
+propositional_kripke 𝐋𝐂 FrameClass.LC
+propositional_kripke 𝐋𝐂 FrameClass.finite_LC
 
-instance : Logic.KC ⪱ Logic.LC := inferInstance
+instance : 𝐊𝐂 ⪱ 𝐋𝐂 := inferInstance
 
 
 end LO.Propositional

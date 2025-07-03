@@ -119,15 +119,15 @@ namespace Logic.Cl
 
 variable {φ : Formula ℕ}
 
-theorem tautologies : Logic.Cl = { φ | φ.isTautology } := by
+theorem tautologies : 𝐂𝐥 = { φ | φ.isTautology } := by
   ext φ;
   simp [Hilbert.Cl.iff_isTautology_provable, Entailment.theory];
 
-lemma exists_valuation_of_not (h : Logic.Cl ⊬ φ) : ∃ v : Valuation _, ¬(v ⊧ φ) := by
+lemma exists_valuation_of_not (h : 𝐂𝐥 ⊬ φ) : ∃ v : Valuation _, ¬(v ⊧ φ) := by
   apply Hilbert.Cl.exists_valuation_of_not_provable;
   tauto;
 
-lemma iff_isTautology : Logic.Cl ⊢! φ ↔ φ.isTautology := by simp [tautologies];
+lemma iff_isTautology : 𝐂𝐥 ⊢! φ ↔ φ.isTautology := by simp [tautologies];
 
 end Logic.Cl
 
