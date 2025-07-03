@@ -100,7 +100,7 @@ def comp (f : F₁ →ₚ F₂) (g : F₂ →ₚ F₃) : F₁ →ₚ F₃ where
     . simp_all;
     . assumption;
 
-def TransitiveClosure (f : F₁ →ₚ F₂) [IsTrans _ F₂] : F₁^+ →ₚ F₂ where
+def TransitiveClosure (f : F₁ →ₚ F₂) [F₂.IsTransitive] : F₁^+ →ₚ F₂ where
   toFun := f.toFun
   forth := by
     intro x y hxy;

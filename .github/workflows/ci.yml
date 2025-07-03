@@ -80,13 +80,18 @@ jobs:
           cp ./import_graph.html ./pages/src/assets
 
       # Build kites
-      # temporary kite generating suspended
-      # - name: Generate kites
-      #   run: |
-      #     lake exe generate_modal_kite
-      # - name: Copy kites to pages
-      #   run: |
-      #     cp ./scripts/modal_kite.png ./pages/src/assets
+      - name: Generate Propositional Kite
+        run: |
+          lake exe generate_propositional_kite
+          typst compile ./Kite/propositional.typ ./pages/src/assets/propositional_kite.png
+      - name: Generate Modal Kite
+        run: |
+          lake exe generate_modal_kite
+          typst compile ./Kite/modal.typ ./pages/src/assets/modal_kite.png
+      - name: Generate Arith Kite
+        run: |
+          lake exe generate_arith_kite
+          typst compile ./Kite/arith.typ ./pages/src/assets/arith_kite.png
 
       # Build doc
       - name: Build docs

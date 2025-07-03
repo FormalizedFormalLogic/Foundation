@@ -4,33 +4,38 @@ import Foundation.Modal.Hilbert.WellKnown
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.symm_eucl : FrameClass := { F | IsSymm _ F ∧ IsEuclidean _ F }
+namespace Kripke
 
-namespace Hilbert.KB5.Kripke
+protected class Frame.IsKB5 (F : Kripke.Frame) extends F.IsSymmetric, F.IsEuclidean
+protected abbrev FrameClass.KB5 : FrameClass := { F | F.IsKB5 }
 
-instance sound : Sound (Hilbert.KB5) Kripke.FrameClass.symm_eucl := instSound_of_validates_axioms $ by
+end Kripke
+
+
+namespace Logic.KB5.Kripke
+
+instance sound : Sound (Logic.KB5) Kripke.FrameClass.KB5 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomB_of_symmetric;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent (Hilbert.KB5) := consistent_of_sound_frameclass Kripke.FrameClass.symm_eucl $ by
+instance consistent : Entailment.Consistent (Logic.KB5) := consistent_of_sound_frameclass Kripke.FrameClass.KB5 $ by
   use whitepoint;
-  constructor <;> infer_instance;
+  constructor;
 
-instance canonical : Canonical (Hilbert.KB5) Kripke.FrameClass.symm_eucl := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
-⟩
 
-instance complete : Complete (Hilbert.KB5) Kripke.FrameClass.symm_eucl := inferInstance
+instance canonical : Canonical (Logic.KB5) Kripke.FrameClass.KB5 := ⟨by constructor⟩
 
-end Hilbert.KB5.Kripke
+instance complete : Complete (Logic.KB5) Kripke.FrameClass.KB5 := inferInstance
 
-lemma Logic.KB5.Kripke.symm : Logic.KB5 = FrameClass.symm_eucl.logic := eq_hilbert_logic_frameClass_logic
+end Logic.KB5.Kripke
+
+lemma Logic.KB5.Kripke.symm : Logic.KB5 = Kripke.FrameClass.KB5.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

@@ -1,4 +1,4 @@
-# References and
+# References
 
 ## References
 
@@ -18,3 +18,5 @@
 - A. Chagrov, M. Zakharyaschev, _"Modal Logic"_
 - G. E. Hughes, M. J. Cresswell, _"A New Introduction to Modal Logic"_
 - K. Segerberg, _"An Essay in Classical Modal Logic"_
+- S. Cook, P. Nguyen, _"Logical Foundations of Proof Complexity"_
+- J. Avigad, _"Algebraic proofs of cut elimination"_

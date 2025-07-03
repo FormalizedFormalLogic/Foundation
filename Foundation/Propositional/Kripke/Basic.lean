@@ -1,5 +1,6 @@
-import Foundation.Vorspiel.Relation.Supplemental
+
 import Foundation.Propositional.Hilbert.Basic
+import Foundation.Vorspiel.HRel.Basic
 
 namespace LO.Propositional
 
@@ -9,12 +10,12 @@ namespace Kripke
 
 structure Frame where
   World : Type
-  Rel : Rel World World
+  Rel : HRel World
   [world_nonempty : Nonempty World]
   [rel_partial_order : IsPartialOrder _ Rel]
 
 instance : CoeSort Frame (Type) := ⟨Frame.World⟩
-instance : CoeFun Frame (λ F => F.World → F.World → Prop) := ⟨Frame.Rel⟩
+instance : CoeFun Frame (λ F => HRel F.World) := ⟨Frame.Rel⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 instance {F : Frame} : IsPartialOrder F.World F.Rel := F.rel_partial_order
 
@@ -31,9 +32,9 @@ attribute [instance] Frame.IsFinite.world_finite
 
 instance [Finite F.World] : F.IsFinite := ⟨⟩
 
-@[simp, refl] lemma refl (F : Frame) {x : F.World} : x ≺ x := F.rel_partial_order.refl x
-@[trans] lemma trans (F : Frame) {x y z : F.World} : x ≺ y → y ≺ z → x ≺ z := F.rel_partial_order.trans x y z
-lemma antisymm (F : Frame) {x y : F.World} : x ≺ y → y ≺ x → x = y := F.rel_partial_order.antisymm x y
+@[simp, refl] lemma refl {x : F.World} : x ≺ x := F.rel_partial_order.refl x
+@[trans] lemma trans {x y z : F.World} : x ≺ y → y ≺ z → x ≺ z := F.rel_partial_order.trans x y z
+lemma antisymm {x y : F.World} : x ≺ y → y ≺ x → x = y := F.rel_partial_order.antisymm x y
 
 end Frame
 
@@ -43,8 +44,7 @@ abbrev whitepoint : Frame where
   World := Unit
   Rel := fun _ _ => True
   rel_partial_order := ⟨⟩
-instance : Frame.IsFinite whitepoint := inferInstance
-instance : IsUniversal _ whitepoint := ⟨by tauto⟩
+instance : whitepoint.IsFinite := inferInstance
 
 end
 
@@ -393,6 +393,13 @@ lemma finite_all.validates_AxiomEFQ : FrameClass.finite_all.ValidatesFormula (Ax
   exact Formula.Kripke.ValidOnFrame.efq;
 
 end FrameClass
+
+end
+
+
+section
+
+abbrev FrameClass.logic (C : FrameClass) : Logic ℕ := { φ | C ⊧ φ }
 
 end
 

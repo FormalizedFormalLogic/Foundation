@@ -88,7 +88,7 @@ protected class KC extends Entailment.Int 𝓢, HasAxiomWeakLEM 𝓢
 
 protected class LC extends Entailment.Int 𝓢, HasAxiomDummett 𝓢
 
-protected class KP extends Entailment.Int 𝓢, HasAxiomKrieselPutnam 𝓢
+protected class KrieselPutnam extends Entailment.Int 𝓢, HasAxiomKrieselPutnam 𝓢
 
 protected class Sc extends Entailment.Int 𝓢, HasAxiomScott 𝓢
 

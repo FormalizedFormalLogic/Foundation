@@ -100,6 +100,9 @@ lemma WeakerThan.pbl [h : 𝓢 ⪯ 𝓣] {φ} : 𝓢 ⊢! φ → 𝓣 ⊢! φ :=
 
 @[trans] lemma WeakerThan.trans : 𝓢 ⪯ 𝓣 → 𝓣 ⪯ 𝓤 → 𝓢 ⪯ 𝓤 := fun w₁ w₂ ↦ ⟨Set.Subset.trans w₁.subset w₂.subset⟩
 
+instance : Trans (α := S) (β := T) (γ := U) (· ⪯ ·) (· ⪯ ·) (· ⪯ ·) where
+  trans := WeakerThan.trans
+
 lemma weakerThan_iff : 𝓢 ⪯ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) :=
   ⟨fun h _ hf ↦ h.subset hf, fun h ↦ ⟨fun _ hf ↦ h hf⟩⟩
 
@@ -112,18 +115,32 @@ lemma strictlyWeakerThan_iff : 𝓢 ⪱ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 
   · rintro ⟨h, φ, hs, ht⟩
     exact ⟨weakerThan_iff.mpr h, not_weakerThan_iff.mpr ⟨φ, ht, hs⟩⟩
 
-@[trans]
-lemma strictlyWeakerThan.trans : 𝓢 ⪱ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := by
-  rintro ⟨h₁, nh₁⟩ ⟨h₂, _⟩;
-  constructor;
-  . exact WeakerThan.trans h₁ h₂;
-  . apply not_weakerThan_iff.mpr;
-    obtain ⟨f, hf₁, hf₂⟩ := not_weakerThan_iff.mp nh₁;
-    use f;
-    constructor;
-    . apply weakerThan_iff.mp h₂;
-      assumption;
-    . assumption;
+lemma swk_of_swk_of_wk : 𝓢 ⪱ 𝓣 → 𝓣 ⪯ 𝓤 → 𝓢 ⪱ 𝓤 := by
+  rintro ⟨h₁, nh₁⟩ h₂
+  constructor
+  . exact WeakerThan.trans h₁ h₂
+  · intro h
+    exact nh₁ (WeakerThan.trans h₂ h)
+
+lemma swk_of_wk_of_swk : 𝓢 ⪯ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := by
+  rintro h₁ ⟨h₂, nh₂⟩
+  constructor
+  . exact WeakerThan.trans h₁ h₂
+  · intro h
+    exact nh₂ (WeakerThan.trans h h₁)
+
+instance [𝓢 ⪱ 𝓣] : 𝓢 ⪯ 𝓣 := StrictlyWeakerThan.weakerThan
+
+lemma StrictlyWeakerThan.trans : 𝓢 ⪱ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := fun h₁ h₂ ↦ swk_of_swk_of_wk h₁ h₂.weakerThan
+
+instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ⪯ ·) (· ⪱ ·) where
+  trans := swk_of_swk_of_wk
+
+instance : Trans (α := S) (β := T) (γ := U) (· ⪯ ·) (· ⪱ ·) (· ⪱ ·) where
+  trans := swk_of_wk_of_swk
+
+instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ⪱ ·) (· ⪱ ·) where
+  trans := StrictlyWeakerThan.trans
 
 lemma weakening (h : 𝓢 ⪯ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := weakerThan_iff.mp h
 
@@ -149,6 +166,24 @@ lemma Equiv.antisymm_iff : 𝓢 ≊ 𝓣 ↔ 𝓢 ⪯ 𝓣 ∧ 𝓣 ⪯ 𝓢 := 
 alias ⟨_, Equiv.antisymm⟩ := Equiv.antisymm_iff
 
 lemma Equiv.le : 𝓢 ≊ 𝓣 → 𝓢 ⪯ 𝓣 := fun e ↦ ⟨by rw [e.eq]⟩
+
+instance : Trans (α := S) (β := T) (γ := U) (· ≊ ·) (· ≊ ·) (· ≊ ·) where
+  trans := Equiv.trans
+
+instance : Trans (α := S) (β := T) (γ := U) (· ≊ ·) (· ⪯ ·) (· ⪯ ·) where
+  trans h₁ h₂ := WeakerThan.trans h₁.le h₂
+
+instance : Trans (α := S) (β := T) (γ := U) (· ≊ ·) (· ≊ ·) (· ⪯ ·) where
+  trans h₁ h₂ := WeakerThan.trans h₁.le h₂.le
+
+instance : Trans (α := S) (β := T) (γ := U) (· ⪯ ·) (· ≊ ·) (· ⪯ ·) where
+  trans h₁ h₂ := WeakerThan.trans h₁ h₂.le
+
+instance : Trans (α := S) (β := T) (γ := U) (· ≊ ·) (· ⪱ ·) (· ⪱ ·) where
+  trans h₁ h₂ := swk_of_wk_of_swk h₁.le h₂
+
+instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ≊ ·) (· ⪱ ·) where
+  trans h₁ h₂ := swk_of_swk_of_wk h₁ h₂.le
 
 end WeakerThan
 
@@ -336,7 +371,7 @@ lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp �
 
 lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro f ⟨b⟩; exact ⟨weakening h b⟩⟩
 
-lemma weakening! (h : 𝓢 ⊆ 𝓣) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := by rintro ⟨b⟩; exact ⟨weakening h b⟩
+lemma weakening! (h : 𝓢 ⊆ 𝓣 := by simp) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := by rintro ⟨b⟩; exact ⟨weakening h b⟩
 
 def weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening! h⟩
 
@@ -527,6 +562,10 @@ namespace Complete
 section
 
 variable {𝓢 : S} {𝓜 : M} [Complete 𝓢 𝓜]
+
+lemma exists_countermodel_of_not_provable {f : F} (h : 𝓢 ⊬ f) : ¬𝓜 ⊧ f := by
+  contrapose! h;
+  simpa using Complete.complete (𝓢 := 𝓢) h;
 
 lemma meaningful_of_consistent : Entailment.Consistent 𝓢 → Semantics.Meaningful 𝓜 := by
   contrapose

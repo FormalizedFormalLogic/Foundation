@@ -6,73 +6,73 @@ import Foundation.Modal.Kripke.Logic.KD
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.serial_trans : FrameClass := { F | IsSerial _ F ∧ IsTrans _ F }
+namespace Kripke
 
-namespace Hilbert.KD4.Kripke
+protected class Frame.IsKD4 (F : Kripke.Frame) extends F.IsSerial, F.IsTransitive
 
-instance sound : Sound (Hilbert.KD4) Kripke.FrameClass.serial_trans := instSound_of_validates_axioms $ by
+protected abbrev FrameClass.KD4 : FrameClass := { F | F.IsKD4 }
+
+end Kripke
+
+
+namespace Logic.KD4.Kripke
+
+instance sound : Sound Logic.KD4 FrameClass.KD4 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFour_of_transitive;
 
-instance consistent : Entailment.Consistent (Hilbert.KD4) := consistent_of_sound_frameclass
-  Kripke.FrameClass.serial_trans $ by
+instance consistent : Entailment.Consistent Logic.KD4 := consistent_of_sound_frameclass
+  FrameClass.KD4 $ by
     use whitepoint;
-    constructor <;> infer_instance;
+    constructor
 
-instance canonical : Canonical (Hilbert.KD4) Kripke.FrameClass.serial_trans := ⟨by
+instance canonical : Canonical Logic.KD4 FrameClass.KD4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
+  constructor
 ⟩
 
-instance complete : Complete (Hilbert.KD4) Kripke.FrameClass.serial_trans := inferInstance
+instance complete : Complete Logic.KD4 FrameClass.KD4 := inferInstance
 
-end Hilbert.KD4.Kripke
+lemma serial_trans : Logic.KD4 = FrameClass.KD4.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KD4.Kripke.serial_trans : Logic.KD4 = FrameClass.serial_trans.logic := eq_hilbert_logic_frameClass_logic
-
-theorem KD4.proper_extension_of_KD : Logic.KD ⊂ Logic.KD4 := by
+instance : Logic.KD ⪱ Logic.KD4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.serial ⊧ φ by
-      rw [KD.Kripke.serial];
-      tauto
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KD4 ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
+      simpa [KD.Kripke.serial];
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
       constructor;
-      . refine ⟨by simp [Serial]⟩;
+      . exact { serial := by simp [Serial]; };
       . simp [Semantics.Realize, Satisfies];
         tauto;
 
-theorem KD4.proper_extension_of_K4 : Logic.K4 ⊂ Logic.KD4 := by
+instance : Logic.K4 ⪱ Logic.KD4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD4 ⊢! φ ∧ ¬FrameClass.trans ⊧ φ by
-      rw [K4.Kripke.trans];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KD4 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by
+      simpa [K4.Kripke.trans];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . refine ⟨by tauto⟩;
+      . exact { trans := by simp; }
       . simp [Semantics.Realize, Satisfies];
 
-end Logic
+end Logic.KD4.Kripke
 
 end LO.Modal

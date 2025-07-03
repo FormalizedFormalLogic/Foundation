@@ -8,30 +8,41 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.symm_trans : FrameClass := { F | IsSymm _ F ∧ IsTrans _ F }
 
-namespace Hilbert.KB4.Kripke
+namespace Kripke
 
-instance sound : Sound (Hilbert.KB4) Kripke.FrameClass.symm_trans := instSound_of_validates_axioms $ by
+variable {F : Kripke.Frame}
+
+protected class Frame.IsKB4 (F : Kripke.Frame) extends F.IsSymmetric, F.IsTransitive
+
+protected abbrev FrameClass.IsKB4 : FrameClass := { F | F.IsKB4 }
+
+instance [F.IsKB4] : F.IsK45 where
+
+end Kripke
+
+
+namespace Logic.KB4.Kripke
+
+instance sound : Sound Logic.KB4 FrameClass.IsKB4 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomB_of_symmetric;
   . exact validate_AxiomFour_of_transitive;
 
-instance consistent : Entailment.Consistent (Hilbert.KB4) := consistent_of_sound_frameclass Kripke.FrameClass.symm_trans $ by
+instance consistent : Entailment.Consistent Logic.KB4 := consistent_of_sound_frameclass FrameClass.IsKB4 $ by
   use whitepoint;
-  constructor <;> infer_instance;
+  constructor;
 
-instance canonical : Canonical (Hilbert.KB4) Kripke.FrameClass.symm_trans := ⟨by
+instance canonical : Canonical Logic.KB4 FrameClass.IsKB4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
-  constructor <;> infer_instance;
+  constructor
 ⟩
 
-instance complete : Complete (Hilbert.KB4) Kripke.FrameClass.symm_trans := inferInstance
+instance complete : Complete Logic.KB4 FrameClass.IsKB4 := inferInstance
 
-end Hilbert.KB4.Kripke
+end Logic.KB4.Kripke
 
 namespace Logic
 
@@ -39,39 +50,42 @@ open Formula
 open Entailment
 open Kripke
 
-lemma KB4.Kripke.refl_trans : Logic.KB4 = FrameClass.symm_trans.logic := eq_hilbert_logic_frameClass_logic
+lemma KB4.Kripke.refl_trans : Logic.KB4 = FrameClass.IsKB4.logic := eq_hilbert_logic_frameClass_logic
 
-theorem KB4.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KB4 := by
+instance : Logic.K45 ⪱ Logic.KB4 := by
   constructor;
-  . rw [K45.Kripke.trans_eucl, KB4.Kripke.refl_trans];
-    rintro φ hφ F ⟨_, _⟩;
+  . apply Entailment.weakerThan_iff.mpr;
+    suffices ∀ φ, FrameClass.IsK45 ⊧ φ → FrameClass.IsKB4 ⊧ φ by
+      simpa [K45.Kripke.trans_eucl, KB4.Kripke.refl_trans];
+    rintro φ hφ F hF;
     apply hφ;
-    refine ⟨inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by
-      rw [K45.Kripke.trans_eucl];
-      tauto;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KB4 ⊢! φ ∧ ¬FrameClass.IsK45 ⊧ φ by simpa [K45.Kripke.trans_eucl];
     use Axioms.B (.atom 0);
     constructor;
     . exact axiomB!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 0⟩, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
+      . simp only [Fin.isValue, Set.mem_setOf_eq];
+        refine { trans := by omega, reucl := by tauto };
       . simp [Semantics.Realize, Satisfies];
 
-theorem KB4.proper_extension_of_KB : Logic.KB ⊂ Logic.KB4 := by
+instance : Logic.KB ⪱ Logic.KB4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KB4 ⊢! φ ∧ ¬FrameClass.symm ⊧ φ by
-      rw [KB.Kripke.symm];
-      tauto;
+  . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.KB4 ⊢! φ ∧ ¬FrameClass.KB ⊧ φ by simpa [KB.Kripke.symm];
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
     . apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
       constructor;
-      . refine ⟨by simp⟩;
+      . simp only [bne_iff_ne, ne_eq, Set.mem_setOf_eq];
+        refine { symm := by tauto };
       . simp [Semantics.Realize, Satisfies];
         tauto;
 

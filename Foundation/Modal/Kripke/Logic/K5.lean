@@ -5,47 +5,48 @@ import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-protected abbrev Kripke.FrameClass.eucl : FrameClass := { F | IsEuclidean _ F }
+namespace Kripke
 
-namespace Hilbert.K5.Kripke
+abbrev Frame.IsK5 (F : Frame) := F.IsEuclidean
 
-instance sound : Sound (Hilbert.K5) Kripke.FrameClass.eucl := instSound_of_validates_axioms $ by
+abbrev FrameClass.K5 : FrameClass := { F | F.IsK5 }
+
+end Kripke
+
+
+namespace Logic.K5.Kripke
+
+instance sound : Sound (Logic.K5) Kripke.FrameClass.K5 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_eucl _ rfl;
   exact validate_AxiomFive_of_euclidean (eucl := F_eucl);
 
-instance consistent : Entailment.Consistent (Hilbert.K5) := consistent_of_sound_frameclass FrameClass.eucl $ by
-  use whitepoint;
-  apply Set.mem_setOf_eq.mpr;
-  infer_instance;
+instance consistent : Entailment.Consistent (Logic.K5) :=
+  consistent_of_sound_frameclass Kripke.FrameClass.K5 $ by
+    use whitepoint;
+    apply Set.mem_setOf_eq.mpr;
+    infer_instance;
 
-instance canonical : Canonical (Hilbert.K5) Kripke.FrameClass.eucl := ⟨by
+instance canonical : Canonical (Logic.K5) Kripke.FrameClass.K5 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.K5) Kripke.FrameClass.eucl := inferInstance
+instance complete : Complete (Logic.K5) Kripke.FrameClass.K5 := inferInstance
 
-end Hilbert.K5.Kripke
+lemma eucl : Logic.K5 = Kripke.FrameClass.K5.logic := eq_hilbert_logic_frameClass_logic
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma K5.Kripke.eucl : Logic.K5 = FrameClass.eucl.logic := eq_hilbert_logic_frameClass_logic
-
-theorem K5.proper_extension_of_K : Logic.K ⊂ Logic.K5 := by
+instance : Logic.K ⪱ Logic.K5 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.K5 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
-      rw [K.Kripke.all];
-      tauto;
+  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    suffices ∃ φ, Logic.K5 ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
+      simpa [K.Kripke.all];
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
@@ -58,6 +59,6 @@ theorem K5.proper_extension_of_K : Logic.K ⊂ Logic.K5 := by
         use 1;
         trivial;
 
-end Logic
+end Logic.K5.Kripke
 
 end LO.Modal

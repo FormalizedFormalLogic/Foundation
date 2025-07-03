@@ -1,5 +1,6 @@
-import Foundation.Incompleteness.Arith.DC
-import Foundation.Incompleteness.DC.Basic
+import Foundation.FirstOrder.Incompleteness.DerivabilityCondition.Basic
+import Foundation.FirstOrder.Incompleteness.StandardProvability
+import Foundation.FirstOrder.Incompleteness.Delta1
 import Foundation.Logic.HilbertStyle.Cl
 import Foundation.Modal.Hilbert.WellKnown
 
@@ -10,12 +11,9 @@ open FirstOrder LO.FirstOrder.DerivabilityCondition
 open Modal Modal.Hilbert
 
 
--- TODO: move and prove
 namespace FirstOrder
 
-variable {T : FirstOrder.Theory ℒₒᵣ}
-
-instance : 𝐈𝚺₁.Delta1Definable := by sorry
+variable {T : Theory ℒₒᵣ}
 
 instance [𝐈𝚺₁ ⪯ T] [T.Delta1Definable] : ((𝐈𝚺₁).standardDP T).Sound ℕ := ⟨fun {σ} ↦ by
   have : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance

@@ -8,10 +8,10 @@ open Kripke
 open Formula.Kripke
 open Relation
 
-namespace Hilbert.GL
+namespace Logic.GL
 
 open Model in
-lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → Hilbert.GL ⊢! ⊡φ ➝ ψ := by
+lemma imply_boxdot_plain_of_imply_box_box : Logic.GL ⊢! □φ ➝ □ψ → Logic.GL ⊢! ⊡φ ➝ ψ := by
   contrapose;
   intro h;
   have := Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h;
@@ -35,25 +35,23 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
     push_neg;
     use (Sum.inr r);
     constructor;
-    . haveI : r₀ ≺^+ Sum.inr r := @Frame.IsRooted.root_generates (F := M₀.toFrame) (r := r₀) (Frame.extendRoot.instIsRooted) (Sum.inr r) (by tauto);
-      apply @this.unwrap;
-      exact Frame.extendRoot.isTrans (r := r);
+    . exact @Frame.IsRootedBy.root_generates (F := M₀.toFrame) (r := r₀) (Frame.extendRoot.instIsRooted) (Sum.inr r) (by tauto) |>.unwrap;
     . assumption;
 
   apply Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr;
   use M₀, r₀;
   refine ⟨?_, ?_⟩;
-  . exact Frame.extendRoot.instIsFiniteTree;
+  . exact {};
   . tauto;
 
-theorem unnecessitation! : Hilbert.GL ⊢! □φ → Hilbert.GL ⊢! φ := by
+theorem unnecessitation! : Logic.GL ⊢! □φ → Logic.GL ⊢! φ := by
   intro h;
-  have : Hilbert.GL ⊢! □⊤ ➝ □φ := C!_of_conseq! (ψ := □⊤) h;
-  have : Hilbert.GL ⊢! ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
+  have : Logic.GL ⊢! □⊤ ➝ □φ := C!_of_conseq! (ψ := □⊤) h;
+  have : Logic.GL ⊢! ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 
-noncomputable instance : Entailment.Unnecessitation Hilbert.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩
+noncomputable instance : Entailment.Unnecessitation Logic.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩
 
-end Hilbert.GL
+end Logic.GL
 
 end LO.Modal

@@ -18,7 +18,7 @@ Main Result in this repository. More results and details are in [Book] and [Doc]
   - [Completeness Theorem][first_order:completeness]
   - [Gödel-Gentzen Translation][first_order:goedel_translation]
   - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
-  - [Arithmetic][arith] and [Arithmetization](arithmetization)
+  - [Arithmetic][arith]
   - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
 - [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
   - [Kripke completeness for well-known subsystems][modal:logic_kripke_completeness]

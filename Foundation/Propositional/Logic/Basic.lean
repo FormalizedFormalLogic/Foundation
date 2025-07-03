@@ -1,73 +1,98 @@
-import Foundation.Propositional.Hilbert.Int
-import Foundation.Propositional.Kripke.Hilbert.Int
+import Foundation.Propositional.Formula
+import Foundation.Modal.Entailment.Basic
 
 namespace LO.Propositional
 
-abbrev Logic := Set (Formula ℕ)
+open LO.Entailment
+open Entailment
 
+abbrev Logic (α) := Set (Propositional.Formula α)
 
-abbrev Hilbert.logic (H : Hilbert ℕ) : Logic := { φ | H ⊢! φ }
-
-
-protected abbrev Logic.Int : Logic := Hilbert.Int.logic
-
+instance : Entailment (Formula α) (Logic α) := ⟨fun L φ ↦ PLift (φ ∈ L)⟩
 
 namespace Logic
 
-class Superintuitionistic (L : Logic) where
-  subset_Int : Logic.Int ⊆ L
-  mdp_closed {φ ψ} : φ ➝ ψ ∈ L → φ ∈ L → ψ ∈ L
-  subst_closed {φ} : φ ∈ L → ∀ s, φ⟦s⟧ ∈ L
+variable {L L₀ L₁ L₂ L₃ : Logic α} {φ ψ : Formula α}
 
+protected class Substitution (L : Logic α) where
+  subst! {φ : Formula _} (s) : L ⊢! φ → L ⊢! φ⟦s⟧
+
+protected class IsSuperintuitionistic (L : Logic α) extends Entailment.Int L, L.Substitution where
+
+section
+
+export Substitution (subst!)
+
+@[simp low]
+lemma iff_provable : L ⊢! φ ↔ φ ∈ L := by
+  constructor;
+  . intro h;
+    exact PLift.down h.some;
+  . intro h;
+    constructor;
+    constructor;
+    exact h;
+
+@[simp low]
+lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by
+  apply not_congr;
+  simp [iff_provable];
+
+lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
+  constructor;
+  . tauto;
+  . rintro h;
+    ext φ;
+    simpa using Equiv.iff.mp h φ;
+
+section
+
+variable [L.IsSuperintuitionistic] [Consistent L]
+
+@[simp]
+lemma no_bot : L ⊬ ⊥ := by
+  obtain ⟨φ, hφ⟩ := Consistent.exists_unprovable (𝓢 := L) inferInstance;
+  by_contra! hC;
+  apply hφ;
+  apply of_O!;
+  exact hC;
+
+-- TODO: more general place
+lemma not_neg_of! (hφ : L ⊢! φ) : L ⊬ ∼φ := by
+  by_contra! hC;
+  apply L.no_bot;
+  exact hC ⨀ hφ;
+
+end
+
+end
 end Logic
-
-
-namespace Hilbert
-
-open Entailment
-
-variable {H : Hilbert ℕ}
-
-protected instance superintuitionistic [H.HasEFQ] : (H.logic).Superintuitionistic where
-  subset_Int := by
-    intro φ hφ;
-    induction hφ using Hilbert.Deduction.rec! with
-    | maxm h =>
-      rcases (by simpa using h) with ⟨s, rfl⟩; simp;
-    | mdp ihφψ ihφ => exact mdp! ihφψ ihφ;
-    | _ => simp;
-  mdp_closed := by
-    intro φ ψ hφψ hφ;
-    exact hφψ ⨀ hφ;
-  subst_closed := by
-    intro φ hφ s;
-    exact Hilbert.Deduction.subst! s hφ;
-
-end Hilbert
-
-instance : (Logic.Int).Superintuitionistic := Hilbert.superintuitionistic
-
 
 
 section
 
-open Kripke
+variable {L : Logic α}
 
-abbrev Kripke.FrameClass.logic (C : FrameClass) : Logic := { φ | C ⊧ φ }
+instance : (∅ : Logic α) ⪯ L := ⟨by simp [Entailment.theory]⟩
 
-lemma Logic.eq_Hilbert_Logic_KripkeFrameClass_Logic {H : Hilbert ℕ} {C : FrameClass}
-  [sound : Sound H C] [complete : Complete H C]
-  : H.logic = C.logic := by
-  ext φ;
+instance [HasAxiomVerum L] : (∅ : Logic α) ⪱ L := by
+  apply strictlyWeakerThan_iff.mpr;
   constructor;
-  . exact sound.sound;
-  . exact complete.complete;
+  . simp;
+  . use ⊤; constructor <;> simp;
 
-lemma Logic.Int.Kripke.eq_all : Logic.Int = FrameClass.all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+instance : L ⪯ (Set.univ : Logic α) := ⟨by simp [Entailment.theory]⟩
 
-lemma Logic.Int.Kripke.eq_all_finite : Logic.Int = FrameClass.finite_all.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
+instance [Consistent L] : L ⪱ (Set.univ : Logic α) := by
+  apply strictlyWeakerThan_iff.mpr;
+  constructor;
+  . simp;
+  . obtain ⟨φ, hφ⟩ := consistent_iff_exists_unprovable (𝓢 := L) |>.mp (by assumption);
+    use φ;
+    constructor;
+    . assumption;
+    . simp [Entailment.theory]
 
 end
-
 
 end LO.Propositional
