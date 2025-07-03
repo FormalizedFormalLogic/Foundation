@@ -4,15 +4,38 @@ import Foundation.Logic.LindenbaumAlgebra
 
 namespace LO
 
+
+namespace Entailment
+
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [Collection F S] [Deduction S]
+         {𝓢 : S} [Entailment.Cl 𝓢]
+
+lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (cons φ 𝓢) := by
+  apply consistent_iff_exists_unprovable.mpr;
+  use ⊥;
+  apply deduction_iff.not.mpr;
+  contrapose! h;
+  simp only [not_not];
+  cl_prover [h];
+
+lemma consistent_cons_of_unprovable (h : 𝓢 ⊬ φ) : Consistent (cons (∼φ) 𝓢) := by
+  apply consistent_cons_of_unprovable_neg;
+  contrapose! h;
+  simp_all only [not_not];
+  cl_prover [h];
+
+end Entailment
+
+
 namespace Entailment.LindenbaumAlgebra
 
 open Entailment LindenbaumAlgebra
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [Collection F S] [Axiomatized S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [Collection F S] [Deduction S]
          (𝓢 : S) [Entailment.Cl 𝓢]
 
-lemma density_of_essentially_incomplete
-  (hE : ∀ 𝓣 : S, 𝓢 ⪯ 𝓣 → ¬Entailment.Complete 𝓣)
+lemma dense_of_finite_extend_incomplete
+  (hE : ∀ φ : F, Entailment.Consistent (cons φ 𝓢) → ¬Entailment.Complete (cons φ 𝓢))
   (h : φ < ψ) : ∃ ξ : LindenbaumAlgebra 𝓢, φ < ξ ∧ ξ < ψ := by
   obtain ⟨φ, rfl⟩ := Quotient.exists_rep φ;
   obtain ⟨ψ, rfl⟩ := Quotient.exists_rep ψ;
@@ -20,11 +43,13 @@ lemma density_of_essentially_incomplete
   have h₁ : 𝓢 ⊢! φ ➝ ψ := le_def _ |>.mp $ le_of_lt h;
   have h₂ : 𝓢 ⊬  ψ ➝ φ := le_def _ |>.not.mp $ not_le_of_gt h;
 
-  obtain ⟨ρ, hρ⟩ := Entailment.incomplete_iff_exists_undecidable.mp $ @hE (cons (∼φ) $ cons ψ 𝓢) $ by
-    apply Axiomatized.weakerThanOfSubset;
-    apply Collection.subset_iff_set_subset_set.mpr;
-    intro;
-    simp_all;
+  obtain ⟨ρ, hρ⟩ := Entailment.incomplete_iff_exists_undecidable.mp $ @hE (∼φ ⋏ ψ) $ by
+    apply consistent_iff_exists_unprovable.mpr;
+    use ⊥;
+    apply deduction_iff.not.mpr;
+    contrapose! h₂;
+    simp only [not_not];
+    cl_prover [h₂];
   use ⟦φ ⋎ (ψ ⋏ ∼ρ)⟧;
   refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩⟩;
   . apply le_def _ |>.mpr;
@@ -33,14 +58,12 @@ lemma density_of_essentially_incomplete
     by_contra! hC;
     apply hρ.1;
     apply deduction_iff.mpr;
-    apply deduction_iff.mpr;
     cl_prover [h₁, hC];
   . apply le_def _ |>.mpr;
     cl_prover [h₁];
   . apply le_def _ |>.not.mpr;
     by_contra hC;
     apply hρ.2;
-    apply deduction_iff.mpr;
     apply deduction_iff.mpr;
     cl_prover [h₁, hC];
 
