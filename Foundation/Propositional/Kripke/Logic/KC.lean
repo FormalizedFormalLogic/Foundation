@@ -1,7 +1,7 @@
 import Foundation.Propositional.Kripke.AxiomWeakLEM
 import Foundation.Propositional.Kripke.Rooted
 import Foundation.Propositional.Kripke.Logic.Int
-import Foundation.Propositional.Kripke.Logic.KP
+import Foundation.Propositional.Kripke.Logic.KrieselPutnam
 
 
 namespace LO.Propositional
@@ -21,7 +21,7 @@ protected class Frame.IsFiniteKC (F : Frame) extends F.IsFinite, F.IsKC
 protected abbrev FrameClass.KC : FrameClass := { F | F.IsPiecewiseStronglyConvergent }
 protected abbrev FrameClass.finite_KC : FrameClass := { F | F.IsFiniteKC }
 
-instance [F.IsKC] : F.IsKP := ⟨by
+instance [F.IsKC] : F.IsKrieselPutnam := ⟨by
   rintro x y z ⟨Rxy, Rxz, nRyz, nRzy⟩;
   use x;
   refine ⟨F.refl, Rxy, Rxz, ?_⟩;
@@ -134,9 +134,9 @@ end FFP
 
 end KC.Kripke
 
-instance : Hilbert.KP ⪱ Hilbert.KC := by
+instance : Hilbert.KrieselPutnam ⪱ Hilbert.KC := by
   constructor;
-  . apply weakerThan_of_subset_frameClass FrameClass.KP FrameClass.KC;
+  . apply weakerThan_of_subset_frameClass FrameClass.KrieselPutnam FrameClass.KC;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance
@@ -144,7 +144,7 @@ instance : Hilbert.KP ⪱ Hilbert.KC := by
     use Axioms.WeakLEM (.atom 0);
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KP)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KrieselPutnam)
       apply not_validOnFrameClass_of_exists_frame;
       let F : Frame := {
         World := Fin 3,
@@ -185,7 +185,7 @@ instance : Hilbert.KP ⪱ Hilbert.KC := by
         omega;
 
 instance : Hilbert.Int ⪱ Hilbert.KC := calc
-  Hilbert.Int ⪱ Hilbert.KP := inferInstance
+  Hilbert.Int ⪱ Hilbert.KrieselPutnam := inferInstance
   _           ⪱ Hilbert.KC := inferInstance
 
 end Hilbert
