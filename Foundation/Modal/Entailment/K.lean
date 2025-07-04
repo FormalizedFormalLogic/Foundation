@@ -90,6 +90,7 @@ def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
 
 def boxverum : 𝓢 ⊢ (□⊤ : F) := multiboxverum (n := 1)
 @[simp] lemma boxverum! : 𝓢 ⊢! (□⊤ : F) := ⟨boxverum⟩
+instance : Entailment.HasAxiomN 𝓢 := ⟨boxverum⟩
 
 def boxdotverum : 𝓢 ⊢ (⊡⊤ : F) := K_intro verum boxverum
 @[simp] lemma boxdotverum! : 𝓢 ⊢! (⊡⊤ : F) := ⟨boxdotverum⟩
@@ -108,6 +109,8 @@ def collect_multibox_and : 𝓢 ⊢ □^[n]φ ⋏ □^[n]ψ ➝ □^[n](φ ⋏ �
 
 def collect_box_and : 𝓢 ⊢ □φ ⋏ □ψ ➝ □(φ ⋏ ψ) := collect_multibox_and (n := 1)
 @[simp] lemma collect_box_and! : 𝓢 ⊢! □φ ⋏ □ψ ➝ □(φ ⋏ ψ) := ⟨collect_box_and⟩
+
+instance : Entailment.HasAxiomC 𝓢 := ⟨λ _ _ => collect_box_and⟩
 
 def collect_multibox_and' (h : 𝓢 ⊢ □^[n]φ ⋏ □^[n]ψ) : 𝓢 ⊢ □^[n](φ ⋏ ψ) := collect_multibox_and ⨀ h
 lemma collect_multibox_and'! (h : 𝓢 ⊢! □^[n]φ ⋏ □^[n]ψ) : 𝓢 ⊢! □^[n](φ ⋏ ψ) := ⟨collect_multibox_and' h.some⟩
@@ -271,6 +274,8 @@ lemma distribute_multibox_and'! (d : 𝓢 ⊢! □^[n](φ ⋏ ψ)) : 𝓢 ⊢! �
 
 def distribute_box_and' (h : 𝓢 ⊢ □(φ ⋏ ψ)) : 𝓢 ⊢ □φ ⋏ □ψ := distribute_multibox_and' (n := 1) h
 lemma distribute_box_and'! (d : 𝓢 ⊢! □(φ ⋏ ψ)) : 𝓢 ⊢! □φ ⋏ □ψ := ⟨distribute_box_and' d.some⟩
+
+instance : Entailment.HasAxiomM 𝓢 := ⟨λ _ _ => distribute_box_and⟩
 
 
 def boxdotAxiomK : 𝓢 ⊢ ⊡(φ ➝ ψ) ➝ (⊡φ ➝ ⊡ψ) := by
@@ -516,6 +521,10 @@ lemma box_congruence! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □φ ⭤ □ψ := b
   apply E!_intro
   . apply box_regularity!; exact C_of_E_mp! h;
   . apply box_regularity!; exact C_of_E_mpr! h;
+
+-- TODO
+noncomputable instance : Entailment.RE 𝓢 where
+  re a := box_congruence! ⟨a⟩ |>.some
 
 -- TODO: move
 omit [DecidableEq F] in
