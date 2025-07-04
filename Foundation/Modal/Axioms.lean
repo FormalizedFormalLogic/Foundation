@@ -10,6 +10,12 @@ protected abbrev DiaDuality := ◇φ ⭤ ∼(□(∼φ))
 
 protected abbrev K := □(φ ➝ ψ) ➝ □φ ➝ □ψ
 
+protected abbrev M := □(φ ⋏ ψ) ➝ (□φ ⋏ □ψ)
+
+protected abbrev C := (□φ ⋏ □ψ) ➝ □(φ ⋏ ψ)
+
+protected abbrev N := □(⊤ : F)
+
 /-- Axiom for reflexive -/
 protected abbrev T := □φ ➝ φ
 
