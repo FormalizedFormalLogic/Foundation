@@ -1,7 +1,6 @@
 import Foundation.Modal.Kripke.Logic.K4
 import Foundation.Modal.Kripke.AxiomFourN
 import Foundation.Modal.Kripke.Filtration
-import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Vorspiel.Fin.Supplemental
 import Foundation.Modal.Logic.Extension
 
@@ -9,38 +8,44 @@ namespace LO.Modal
 
 open Kripke
 open Hilbert.Kripke
-open IsGeachConfluent
 
 namespace Kripke
 
-protected abbrev FrameClass.weak_trans (n : ℕ+) : FrameClass := { F | IsWeakTrans n _ F.Rel }
+protected abbrev FrameClass.K4n (n : ℕ+) : FrameClass := { F | F.IsWeakTransitive n }
 
 end Kripke
 
-namespace Hilbert.K4n.Kripke
+namespace Hilbert
 
 variable {n : ℕ+}
 
-instance sound : Sound (Hilbert.K4n n) (Kripke.FrameClass.weak_trans n) := instSound_of_validates_axioms $ by
+namespace K4n.Kripke
+
+instance : Sound (Logic.K4n n) (FrameClass.K4n n) := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_trans φ rfl;
-  apply @validate_axiomFourN_of_weak_transitive n F F_trans;
+  replace F_trans := Set.mem_setOf_eq.mp F_trans;
+  apply validate_AxiomFourN_of_weakTransitive;
 
-instance consistent : Entailment.Consistent (Hilbert.K4n n) :=
-  consistent_of_sound_frameclass (FrameClass.weak_trans n) $ by
+instance : Entailment.Consistent (Logic.K4n n) :=
+  consistent_of_sound_frameclass (FrameClass.K4n n) $ by
     use whitepoint;
     apply Set.mem_setOf_eq.mpr;
     constructor;
-    induction n <;> { simp [WeakTransitive]; tauto; }
+    induction n <;>
+    . simp [whitepoint];
 
-instance canonical : Canonical (Hilbert.K4n n) (FrameClass.weak_trans n) := ⟨by
+instance : Canonical (Logic.K4n n) (FrameClass.K4n n) := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.K4n n) (FrameClass.weak_trans n) := inferInstance
+instance : Complete (Logic.K4n n) (FrameClass.K4n n) := inferInstance
 
-end Hilbert.K4n.Kripke
+end K4n.Kripke
+
+
+end Hilbert
 
 
 namespace Logic
@@ -51,92 +56,121 @@ open Kripke
 
 namespace K4n
 
-lemma Kripke.eq_weak_trans_logic (n : ℕ+) : Logic.K4n n = (Kripke.FrameClass.weak_trans n).logic := eq_hilbert_logic_frameClass_logic
+lemma Kripke.eq_K4n_logic (n : ℕ+) : Logic.K4n n = (Kripke.FrameClass.K4n n).logic := eq_hilbert_logic_frameClass_logic
 
 lemma eq_K4_K4n_one : Logic.K4n 1 = Logic.K4 := rfl
 
-abbrev counterexampleModel (n : ℕ+) : Kripke.Model := ⟨⟨Fin (n + 2), λ x y => y = x + 1⟩, λ w _ => w = n⟩
 
-lemma NModel.iff_rel_zero {n : ℕ+} {m : Fin (n + 2)} {y : (counterexampleModel n).World} : (0 : counterexampleModel n) ≺^[m] y ↔ y = m := by
-  induction m using Fin.induction generalizing y with
-  | zero => simp; tauto;
+variable {n m : ℕ+}
+
+abbrev counterframe (n : ℕ+) : Kripke.Frame := ⟨Fin (n + 2), λ ⟨x, _⟩ ⟨y, _⟩ => y = min (x + 1) (n + 1)⟩
+
+abbrev counterframe.last : counterframe n |>.World := ⟨n + 1, by omega⟩
+
+lemma counterframe.iff_rel_from_zero {m : ℕ} {x : counterframe n} : (0 : counterframe n) ≺^[m] x ↔ x.1 = min m (n + 1) := by
+  induction m generalizing x with
+  | zero =>
+    simp;
+    tauto;
   | succ m ih =>
     constructor;
-    . intro h;
-      obtain ⟨u, h, rfl⟩ := Rel.iterate.forward.mp h;
-      convert @ih (u + 1) |>.mp ?_;
-      . sorry;
-      . sorry;
-    . sorry;
+    . intro R0x;
+      obtain ⟨u, R0u, Rux⟩ := HRel.iterate.forward.mp R0x;
+      have := ih.mp R0u;
+      simp_all;
+    . rintro h;
+      apply HRel.iterate.forward.mpr;
+      by_cases hm : m ≤ n + 1;
+      . use ⟨m, by omega⟩;
+        constructor;
+        . apply ih.mpr;
+          simpa;
+        . simp_all;
+      . use x;
+        constructor;
+        . apply ih.mpr;
+          omega;
+        . omega;
 
-instance : IsWeakTrans (n + 1) _ (counterexampleModel n).Rel := ⟨by
-  rintro x y ⟨u, Rxy, Ruy⟩;
-  sorry;
-⟩
+@[simp]
+lemma counterframe.refl_last : (last : counterframe n) ≺ last := by simp [Frame.Rel'];
 
-theorem subset_succ : Logic.K4n (n + 1) ⊂ Logic.K4n n := by
+instance : Frame.IsWeakTransitive (counterframe n) (n + 1) := by
   constructor;
-  . refine Hilbert.weakerThan_of_dominate_axioms ?_ |>.subset;
-    suffices Hilbert.K4n n ⊢! □^[n](.atom 0) ➝ □^[(n + 1)](.atom 0) by
-      simp only [Axioms.FourN, PNat.add_coe, PNat.val_ofNat, Box.multibox_succ, Set.mem_insert_iff, Set.mem_singleton_iff, forall_eq_or_imp, axiomK!, forall_eq, true_and];
+  intro x y Rxy;
+  by_cases ey : y = counterframe.last;
+  . subst ey;
+    sorry;
+  . sorry;
+
+instance succ_strictlyWeakerThan : Logic.K4n (n + 1) ⪱ Logic.K4n n := by
+  constructor;
+  . apply Hilbert.weakerThan_of_provable_axioms;
+    rintro φ (rfl | rfl);
+    . simp;
+    . suffices (Hilbert.K4n n).logic ⊢! □□^[n](.atom 0) ➝ □□^[(n + 1)](.atom 0) by
+        simpa [Axioms.FourN, PNat.add_coe, PNat.val_ofNat, Box.multibox_succ];
       apply imply_box_distribute'!;
-      simpa using this;
-    exact axiomFourN!;
-  . suffices ∃ φ, Hilbert.K4n n ⊢! φ ∧ ¬Kripke.FrameClass.weak_trans (n + 1) ⊧ φ by
-      nth_rewrite 2 [Kripke.eq_weak_trans_logic];
-      tauto;
-    use (Axioms.FourN n (.atom 0));
+      exact axiomFourN!;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use Axioms.FourN n (.atom 0);
     constructor;
-    . exact axiomFourN!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use (counterexampleModel n), 0;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4n (n + 1))
+      apply not_validOnFrameClass_of_exists_frame;
+      use (counterframe n);
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         infer_instance;
-      . apply Satisfies.imp_def₂.not.mpr;
-        push_neg;
+      . apply ValidOnFrame.not_of_exists_valuation_world;
+        use (λ w a => w ≠ counterframe.last), 0;
+        apply Satisfies.not_imp_def.mpr;
         constructor;
         . apply Satisfies.multibox_def.mpr;
           intro y R0y;
-          apply @NModel.iff_rel_zero n n y |>.mp;
-          convert R0y;
-          sorry;
+          replace R0y := counterframe.iff_rel_from_zero.mp R0y;
+          simp only [Semantics.Realize, Satisfies, counterframe.last, ne_eq];
+          aesop;
         . apply Satisfies.multibox_def.not.mpr;
           push_neg;
-          use (n + 1);
+          use counterframe.last;
           constructor;
-          . have := @NModel.iff_rel_zero n (n + 1) (n + 1) |>.mpr (by trivial);
-            sorry;
-          . simp [counterexampleModel, Semantics.Realize, Satisfies];
-            sorry;
+          . apply counterframe.iff_rel_from_zero.mpr;
+            simp;
+          . simp [Semantics.Realize, Satisfies];
 
-lemma subset_add : Logic.K4n (n + m) ⊂ Logic.K4n n := by
+instance add_strictlyWeakerThan : Logic.K4n (n + m) ⪱ Logic.K4n n := by
   induction m with
-  | one => exact subset_succ;
+  | one => infer_instance;
   | succ m ih =>
     trans Logic.K4n (n + m);
     . rw [(show n + (m + 1) = n + m + 1 by rfl)];
-      apply subset_succ;
+      infer_instance;
     . apply ih;
 
-lemma subset_of_lt (hnm : n < m) : Logic.K4n m ⊂ Logic.K4n n := by
-  convert subset_add (n := n) (m := m - n);
+instance strictlyWeakerThan_of_lt (hnm : n < m) : Logic.K4n m ⪱ Logic.K4n n := by
+  convert add_strictlyWeakerThan (n := n) (m := m - n);
   exact PNat.add_sub_of_lt hnm |>.symm;
 
-lemma neq_of_neq (hnm : n ≠ m) : Logic.K4n n ≠ Logic.K4n m := by
+instance not_equiv_of_ne (hnm : n ≠ m) : ¬(Logic.K4n n ≊ Logic.K4n m) := by
   rcases lt_trichotomy n m with h | rfl | h;
-  . apply subset_of_lt h |>.ne.symm;
+  . by_contra!;
+    apply strictlyWeakerThan_of_lt h |>.notWT;
+    exact this.le;
   . contradiction;
-  . apply subset_of_lt h |>.ne;
+  . by_contra!;
+    apply strictlyWeakerThan_of_lt h |>.notWT;
+    exact this.symm.le;
 
 end K4n
 
-/-- There are countable infinite consistent normal logics in `NExt(K4)`. -/
-instance : Infinite { L : Logic // L.IsNormal ∧ L.Consistent } := Infinite.of_injective (β := ℕ+) (λ n => ⟨Logic.K4n n, ⟨inferInstance, inferInstance⟩⟩) $ by
+instance : Infinite { L : Logic ℕ // Entailment.Consistent L } := Infinite.of_injective (β := ℕ+) (λ n => ⟨Logic.K4n n, inferInstance⟩) $ by
   intro i j;
   simp only [Subtype.mk.injEq];
   contrapose!;
-  apply K4n.neq_of_neq;
+  intro h;
+  apply Logic.iff_equal_provable_equiv.not.mpr;
+  apply K4n.not_equiv_of_ne h;
 
 end Logic
 

@@ -70,6 +70,21 @@ instance [H.HasFour] : Entailment.HasAxiomFour H.logic where
     . use (λ b => if (HasFour.p H) = b then φ else (.atom b));
       simp;
 
+class HasFourN (H : Hilbert α) (n : ℕ+) where
+  p : α
+  mem_FourN : Axioms.FourN n (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasFourN n] : Entailment.HasAxiomFourN n H.logic where
+  FourN φ := by
+    constructor;
+    apply maxm;
+    use Axioms.FourN n (.atom (HasFourN.p H n));
+    constructor;
+    . exact HasFourN.mem_FourN;
+    . use (λ b => if (HasFourN.p H n) = b then φ else (.atom b));
+      simp;
+
+
 class HasFive (H : Hilbert α) where
   p : α
   mem_Five : Axioms.Five (.atom p) ∈ H.axioms := by tauto;
@@ -377,24 +392,9 @@ instance : Entailment.K4 (Logic.K4) where
 
 protected abbrev Hilbert.K4n (n : ℕ+) : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.FourN n (.atom 0)}⟩
 protected abbrev Logic.K4n (n : ℕ+) := Hilbert.K4n n |>.logic
-
-namespace Hilbert.K4n
-
-variable {n : ℕ+}
-
 instance : (Hilbert.K4n n).HasK where p := 0; q := 1;
-instance : Entailment.K (Hilbert.K4n n) where
+instance : (Hilbert.K4n n).HasFourN n where p := 0;
 
-instance : Entailment.HasAxiomFourN n (Hilbert.K4n n) where
-  FourN φ := by
-    apply Deduction.maxm;
-    use Axioms.FourN n (.atom 0);
-    constructor;
-    . simp;
-    . use (λ b => if b = 0 then φ else (.atom b));
-      simp;
-
-end Hilbert.K4n
 
 protected abbrev Hilbert.K4M : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.M (.atom 0)}⟩
 protected abbrev Logic.K4M := Hilbert.K4M.logic
