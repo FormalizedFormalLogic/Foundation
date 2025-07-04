@@ -35,8 +35,8 @@ variable (𝓢)
 lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢! φ :=
   FiniteContext.provable_iff_provable.mpr <| left_Disj!_intro [φ] (by simp) ⨀! h
 
-lemma add_hyp (Γ Δ φ) (hφ : 𝓢 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ :=
-  deduct! h ⨀! of'! hφ
+lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ :=
+  deduct! h ⨀! of'! (WeakerThan.pbl hφ)
 
 lemma right_closed (Γ Δ φ) (h : φ ∈ Γ) : Γ ⟹ φ :: Δ := right_Disj!_intro _ (φ := φ) (by simp) ⨀! (by_axm! h)
 
@@ -220,11 +220,6 @@ def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
     | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
   return ⟨⟨_, _, _, F, LC, DC, S, E, 𝓢, CL⟩, p⟩
 
-def synthProvable (e : Expr) : MetaM (Expr × Expr × Expr) := do
-  let (ty : Q(Prop)) ← inferType e
-  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
-  return (𝓢, φ, e)
-
 abbrev Sequent := List Lit
 
 def litToExpr (φ : Lit) : M Expr := do
@@ -366,12 +361,6 @@ def iffLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eψ ← litToExpr ψ
   iapp ``LO.Entailment.TwoSided.iff_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
-def addHyp (Γ Δ : Sequent) (φ : Lit) (E e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.add_hyp #[eΓ, eΔ, eφ, E, e]
-
 def toProvable (φ : Expr) (e : Expr) : M Expr := do
   iapp ``LO.Entailment.TwoSided.to_provable #[φ, e]
 
@@ -448,16 +437,53 @@ def prover (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
     |              [] =>
       prover k false [] Δ
 
-def addHyps (prover : (Γ Δ : Sequent) → M Expr) (Γ Δ : Sequent) : List (Lit × Expr) → M Expr
-  |             [] => prover Γ Δ
-  | (φ, E) :: hyps => do
-    let e ← addHyps prover (φ :: Γ) Δ hyps
-    addHyp Γ Δ φ E e
+structure HypInfo where
+  levelF : Level
+  levelS : Level
+  levelE : Level
+  F : Q(Type levelF)
+  S : Q(Type levelS)
+  E : Q(Entailment.{_, _, levelE} $F $S)
+  𝓢 : Q($S)
+  φ : Q($F)
+  proof : Q($𝓢 ⊢! $φ)
 
-def main (n : ℕ) (seq : Array (Expr × Expr)) (L R : List Expr) : M Expr := do
+def synthProvable (e : Expr) : MetaM HypInfo := do
+  let (ty : Q(Prop)) ← inferType e
+  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  return ⟨_, _, _, F, S, E, 𝓢, φ, e⟩
+
+structure CompatibleHypInfo where
+  𝓢 : Expr
+  WT : Expr
+  φ : Lit
+  proof : Expr
+
+def HypInfo.toCompatible (h : HypInfo) : M CompatibleHypInfo := do
+  let c ← read
+  if (← isDefEq (← whnf h.F) (← whnf c.F)) && (← isDefEq (← whnf h.S) (← whnf c.S)) && (← isDefEq (← whnf h.E) (← whnf c.E)) then
+    let e := @Expr.const ``LO.Entailment.WeakerThan [c.levelF, c.levelS, c.levelS, c.levelE, c.levelE]
+      |>.app c.F |>.app c.S |>.app c.S |>.app c.E |>.app c.E |>.app h.𝓢 |>.app c.𝓢
+    let .some wt ← trySynthInstance e
+      | throwError m! "error: failed to find instance {e}"
+    return ⟨h.𝓢, wt, ← exprToLit h.φ, h.proof⟩
+  else throwError m! "error: proof not compatible: {h.proof}"
+
+def addHyp (𝓣 wt : Expr) (Γ Δ : Sequent) (φ : Lit) (E e : Expr) : M Expr := do
+  let eΓ ← Sequent.toExpr Γ
+  let eΔ ← Sequent.toExpr Δ
+  let eφ ← litToExpr φ
+  iapp ``LO.Entailment.TwoSided.add_hyp #[𝓣, wt, eΓ, eΔ, eφ, E, e]
+
+def addHyps (prover : (Γ Δ : Sequent) → M Expr) (Γ Δ : Sequent) : List HypInfo → M Expr
+  |        [] => prover Γ Δ
+  | h :: hyps => do
+    let H ← h.toCompatible
+    addHyp H.𝓢 H.WT Γ Δ H.φ H.proof <| ← addHyps prover (H.φ :: Γ) Δ hyps
+
+def main (n : ℕ) (hyps : Array HypInfo) (L R : List Expr) : M Expr := do
   let Γ ← exprListToLitList L
   let Δ ← exprListToLitList R
-  let hyps ← seq.mapM fun (φ, e) ↦ return (← exprToLit φ, e)
   addHyps (prover n false) Γ Δ hyps.toList
 
 syntax termSeq := "[" (term,*) "]"
@@ -468,21 +494,16 @@ elab "cl_prover_2s" n:(num)? seq:(termSeq)? : tactic => withMainContext do
     match n with
     | some n => n.getNat
     |   none => 32
-  let seq ← (match seq with
+  let hyps ← (match seq with
     | some seq =>
       match seq with
       | `(termSeq| [ $ss,* ] ) => do
-        ss.getElems.mapM (fun s => do
-          --logInfo m! "(proverL₀) s : {s}, elaberm: {← Term.elabTerm s none}"
-          let ⟨𝓣, φ, h⟩ ← synthProvable (← Term.elabTerm s none true)
-          if (← isDefEq (← whnf 𝓣) (← whnf c.𝓢)) then
-            return (φ, h)
-          else throwError m!"hyp is not correct: {h}")
+        ss.getElems.mapM fun s ↦ do synthProvable (← Term.elabTerm s none true)
       | _                      =>
         return #[]
     | _        =>
       return #[])
-  closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (main n seq L R) c
+  closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (main n hyps L R) c
 
 elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
   let ⟨c, φ⟩ ← getGoalProvable <| ← whnfR <| ← getMainTarget
@@ -490,22 +511,17 @@ elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
     match n with
     | some n => n.getNat
     |   none => 32
-  let seq ← (match seq with
+  let hyps ← (match seq with
     | some seq =>
       match seq with
       | `(termSeq| [ $ss,* ] ) => do
-        ss.getElems.mapM (fun s => do
-          --logInfo m! "(proverL₀) s : {s}, elaberm: {← Term.elabTerm s none}"
-          let ⟨𝓣, φ, h⟩ ← synthProvable (← Term.elabTerm s none true)
-          if (← isDefEq (← whnf 𝓣) (← whnf c.𝓢)) then
-            return (φ, h)
-          else throwError m!"hyp is not correct: {h}")
+        ss.getElems.mapM fun s ↦ do synthProvable (← Term.elabTerm s none true)
       | _                      =>
         return #[]
     | _        =>
       return #[])
   closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (r := c) do
-    let e ← main n seq [] [φ]
+    let e ← main n hyps [] [φ]
     toProvable φ e
 
 end ClProver
