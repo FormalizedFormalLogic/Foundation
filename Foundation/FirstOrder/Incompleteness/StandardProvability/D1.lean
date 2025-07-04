@@ -220,7 +220,7 @@ theorem provableₐ_of_provable {φ} : T ⊢! φ → T.Provableₐ (⌜φ⌝ : V
   Language.Theory.Derivable.of_ss Arithmetization.theory_subset_AddR₀ (provable_of_provable h)
 
 theorem provableₐ_of_provable₀ {σ} : T ⊢!. σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by
-  simpa using provableₐ_of_provable (T := T) (V := V) h
+  simpa using provableₐ_of_provable (T := T) (V := V) <| Axiom.provable_iff.mp h
 
 theorem provableₐ_of_provable' {φ} : T ⊢! φ → T†V ⊢! ⌜φ⌝ := fun h ↦ by
   simpa [provableₐ_iff'] using provableₐ_of_provable (V := V) h
@@ -392,7 +392,7 @@ variable {T : Theory L} [T.Delta1Definable]
 lemma Language.Theory.Provable.sound {φ : SyntacticFormula L} (h : (T.codeIn ℕ).Provable ⌜φ⌝) : T ⊢! φ :=
   provable_iff_derivable2.mpr <| Language.Theory.Provable.sound2 (by simpa using h)
 
-lemma Language.Theory.Provable.sound₀ {σ : Sentence L} (h : (T.codeIn ℕ).Provable ⌜σ⌝) : T ⊢! ↑σ :=
+lemma Language.Theory.Provable.smallSound {σ : Sentence L} (h : (T.codeIn ℕ).Provable ⌜σ⌝) : T ⊢! ↑σ :=
   provable_iff_derivable2.mpr <| Language.Theory.Provable.sound2 (by simpa using h)
 
 lemma Language.Theory.Provable.complete {φ : SyntacticFormula L} :
@@ -401,10 +401,11 @@ lemma Language.Theory.Provable.complete {φ : SyntacticFormula L} :
 
 lemma Language.Theory.Provable.complete₀ {σ : Sentence L} :
     T.tCodeIn ℕ ⊢! ⌜σ⌝ ↔ T ⊢! ↑σ :=
-  ⟨by simpa [Language.Theory.TProvable.iff_provable] using Language.Theory.Provable.sound₀, tprovable_of_provable⟩
+  ⟨by simpa [Language.Theory.TProvable.iff_provable] using Language.Theory.Provable.smallSound, tprovable_of_provable⟩
 
 @[simp] lemma provableₐ_iff_provable₀ {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐑₀ ⪯ T] {σ : Sentence ℒₒᵣ} :
     T.Provableₐ (⌜σ⌝ : ℕ) ↔ T ⊢!. σ := by
-  simpa [provableₐ_iff, Language.Theory.Provable.complete₀] using FirstOrder.Arith.add_cobhamR0'.symm
+  simpa [provableₐ_iff, Language.Theory.Provable.complete₀, Axiom.provable_iff] using
+    FirstOrder.Arith.add_cobhamR0'.symm
 
 end LO.ISigma1.Metamath

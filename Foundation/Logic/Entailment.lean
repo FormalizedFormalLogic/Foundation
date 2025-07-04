@@ -369,6 +369,10 @@ variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 
 lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
+protected def cons (φ : F) (𝓢 : S) : cons φ 𝓢 ⊢ φ := prfAxm (by simp)
+
+@[simp] def cons! (φ : F) (𝓢 : S) : cons φ 𝓢 ⊢! φ := provable_axm _ (by simp)
+
 lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro f ⟨b⟩; exact ⟨weakening h b⟩⟩
 
 lemma weakening! (h : 𝓢 ⊆ 𝓣 := by simp) {f} : 𝓢 ⊢! f → 𝓣 ⊢! f := by rintro ⟨b⟩; exact ⟨weakening h b⟩

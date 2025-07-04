@@ -239,14 +239,14 @@ lemma codeOfPartrec'_spec {k} {f : List.Vector ℕ k →. ℕ} (hf : Nat.Partrec
 
 open Classical
 
-noncomputable def codeOfREPred (p : ℕ → Prop) : Semisentence ℒₒᵣ 1 :=
-  let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
+noncomputable def codeOfREPred (A : ℕ → Prop) : Semisentence ℒₒᵣ 1 :=
+  let f : ℕ →. Unit := fun a ↦ Part.assert (A a) fun _ ↦ Part.some ()
   (codeOfPartrec' (fun v ↦ (f (v.get 0)).map fun _ ↦ 0))/[‘0’, #0]
 
-lemma codeOfREPred_spec {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
-    ℕ ⊧/![x] (codeOfREPred p) ↔ p x := by
-  let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
-  suffices ℕ ⊧/![x] ((codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0]) ↔ p x from this
+lemma codeOfREPred_spec {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
+    ℕ ⊧/![x] (codeOfREPred A) ↔ A x := by
+  let f : ℕ →. Unit := fun a ↦ Part.assert (A a) fun _ ↦ Part.some ()
+  suffices ℕ ⊧/![x] ((codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0]) ↔ A x from this
   have : Partrec fun v : List.Vector ℕ 1 ↦ (f (v.get 0)).map fun _ ↦ 0 := by
     refine Partrec.map (Partrec.comp hp (Primrec.to_comp <| Primrec.vector_get.comp .id (.const 0))) (Computable.const 0).to₂
   simpa [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
@@ -254,10 +254,10 @@ lemma codeOfREPred_spec {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
 
 variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T] [Sigma1Sound T]
 
-lemma re_complete {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
-    p x ↔ T ⊢! ↑((codeOfREPred p)/[‘↑x’] : Sentence ℒₒᵣ) := Iff.trans
+lemma re_complete {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
+    A x ↔ T ⊢!. (codeOfREPred A)/[‘↑x’] := Iff.trans
   (by simpa [models₀_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
-  (sigma_one_completeness_iff (by simp [codeOfREPred, codeOfPartrec']))
+  (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
 
 end Arith
 

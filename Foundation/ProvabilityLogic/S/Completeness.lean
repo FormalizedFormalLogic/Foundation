@@ -105,7 +105,7 @@ lemma GL_S_TFAE :
         . intro h;
           apply C!_of_conseq!;
           apply ((𝐈𝚺₁).standardDP T).D1;
-          apply Entailment.WeakerThan.pbl (𝓢 := 𝐈𝚺₁.alt);
+          apply Entailment.WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
           have : 𝐈𝚺₁ ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B := by
             apply left_Fdisj'!_intro;
             have hrfl : r₁ ⊧ □B ➝ B := by

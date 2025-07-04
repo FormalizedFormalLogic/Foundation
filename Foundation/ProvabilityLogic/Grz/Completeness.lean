@@ -23,7 +23,7 @@ def strongInterpret (f : Realization L) (𝔅 : ProvabilityPredicate T₀ T) : F
   | φ ➝ ψ => (f.strongInterpret 𝔅 φ) ➝ (f.strongInterpret 𝔅 ψ)
   | □φ => (f.strongInterpret 𝔅 φ) ⋏ 𝔅 (f.strongInterpret 𝔅 φ)
 
-lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ⭤ f.strongInterpret 𝔅 A := by
+lemma iff_interpret_boxdot_strongInterpret_inside [L.DecidableEq] [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ⭤ f.strongInterpret 𝔅 A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | hfalsum => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
@@ -39,12 +39,14 @@ lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] : T ⊢!. f.interp
       . exact K!_right ih;
       . exact 𝔅.prov_distribute_imply'' $ K!_right ih;
 
-lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ↔ T ⊢!. f.strongInterpret 𝔅 A := by
+lemma iff_interpret_boxdot_strongInterpret [L.DecidableEq] [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ↔ T ⊢!. f.strongInterpret 𝔅 A := by
   constructor;
   . intro h; exact (K!_left iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
   . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
 
-lemma iff_models_interpret_boxdot_strongInterpret {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.Sound M] : M ⊧ₘ₀ f.interpret 𝔅 (Aᵇ) ↔ M ⊧ₘ₀ f.strongInterpret 𝔅 A := by
+lemma iff_models_interpret_boxdot_strongInterpret
+    [L.DecidableEq] {M} [Nonempty M] [Structure L M] [M ⊧ₘ* T] [𝔅.HBL2] [𝔅.Sound M] :
+    M ⊧ₘ₀ f.interpret 𝔅 (Aᵇ) ↔ M ⊧ₘ₀ f.strongInterpret 𝔅 A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | hfalsum => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];

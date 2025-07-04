@@ -111,7 +111,7 @@ lemma val_fixpoint (θ : Semisentence ℒₒᵣ 1) {V : Type*} [ORingStruc V] [V
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝] :=
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance
     let Θ : V → Prop := fun x ↦ Semiformula.Evalbm V ![x] θ
     suffices V ⊧/![] (fixpoint θ) ↔ Θ ⌜fixpoint θ⌝ by
@@ -136,7 +136,7 @@ noncomputable def multifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : F
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢!. multifixpoint θ i ⭤ (Rew.substs fun j ↦ ⌜multifixpoint θ j⌝) ▹ (θ i) :=
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance
     suffices V ⊧/![] (multifixpoint θ i) ↔ V ⊧/(fun i ↦ ⌜multifixpoint θ i⌝) (θ i) by simpa [models_iff]
     let t : Fin k → V := fun i ↦ ⌜multidiag (θ i)⌝

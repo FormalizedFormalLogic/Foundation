@@ -44,7 +44,8 @@ theorem complete {φ : SyntacticFormula L} :
   haveI : ∀ k, Encodable ((languageFinset u).Rel k) := fun _ ↦ Fintype.toEncodable _
   let u' : Finset (SyntacticFormula (languageFinset u)) := Finset.imageOfFinset u (fun _ hp ↦ toSubLanguageFinsetSelf hp)
   have image_u' : u'.image (Semiformula.lMap L.ofSubLanguage) = u := by
-    ext τ; simp [u', Finset.mem_imageOfFinset_iff]
+    ext τ
+    simp only [Finset.mem_image, Finset.mem_imageOfFinset_iff, u']
     exact ⟨by rintro ⟨a, ⟨τ, hτ, rfl⟩, rfl⟩; simp [hτ],
       by intro hτ; exact ⟨toSubLanguageFinsetSelf hτ, ⟨τ, hτ, rfl⟩, Semiformula.lMap_toSubLanguageFinsetSelf hτ⟩⟩
   have : ¬Satisfiable (u' : Theory (languageFinset u)) := by
@@ -60,6 +61,9 @@ theorem complete {φ : SyntacticFormula L} :
 
 theorem complete_iff : T ⊨ φ ↔ T ⊢! φ :=
   ⟨fun h ↦ complete h, sound!⟩
+
+theorem complete₀ {σ : Sentence L} :
+    T ⊨ σ → (T : Axiom L) ⊢! σ := fun h ↦ Axiom.provable_iff.mpr (complete h)
 
 instance (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨complete⟩
 
