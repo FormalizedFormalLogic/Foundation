@@ -41,20 +41,20 @@ variable {U : Theory ℒₒᵣ} [U.Delta1Definable]
 theorem provableₐ_D1 {σ} : U ⊢!. σ → T ⊢!. U.bewₐ σ := by
   intro h
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  apply complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  apply complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
-    simpa [models_iff] using provableₐ_of_provable (T := U) (V := V) h
+    simpa [models_iff] using provableₐ_of_provable₀ (T := U) (V := V) h
 
 theorem provableₐ_D2 {σ π} : T ⊢!. U.bewₐ (σ ➝ π) ➝ U.bewₐ σ ➝ U.bewₐ π :=
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
     simpa [models_iff] using modus_ponens₀
 
 lemma provableₐ_sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     T ⊢!. σ ➝ U.bewₐ σ :=
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  complete (T := T) <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
     simpa [models_iff] using sigma₁_complete (T := U) (V := V) hσ
 
@@ -66,20 +66,20 @@ lemma goedel_iff_unprovable_goedel : T ⊢!. U.goedelₐ ⭤ ∼U.bewₐ U.goede
 
 open LO.Entailment LO.Entailment.FiniteContext
 
-lemma provableₐ_D2_context {Γ σ π} (hσπ : Γ ⊢[T.alt]! (U.bewₐ (σ ➝ π))) (hσ : Γ ⊢[T.alt]! U.bewₐ σ) :
-    Γ ⊢[T.alt]! U.bewₐ π := of'! provableₐ_D2 ⨀ hσπ ⨀ hσ
+lemma provableₐ_D2_context {Γ σ π} (hσπ : Γ ⊢[T.toAxiom]! (U.bewₐ (σ ➝ π))) (hσ : Γ ⊢[T.toAxiom]! U.bewₐ σ) :
+    Γ ⊢[T.toAxiom]! U.bewₐ π := of'! provableₐ_D2 ⨀ hσπ ⨀ hσ
 
-lemma provableₐ_D3_context {Γ σ} (hσπ : Γ ⊢[T.alt]! U.bewₐ σ) : Γ ⊢[T.alt]! U.bewₐ (U.bewₐ σ) := of'! provableₐ_D3 ⨀ hσπ
+lemma provableₐ_D3_context {Γ σ} (hσπ : Γ ⊢[T.toAxiom]! U.bewₐ σ) : Γ ⊢[T.toAxiom]! U.bewₐ (U.bewₐ σ) := of'! provableₐ_D3 ⨀ hσπ
 
 variable [ℕ ⊧ₘ* T] [𝐑₀ ⪯ U]
 
 omit [𝐈𝚺₁ ⪯ T] in
-lemma provableₐ_sound {σ} : T ⊢!. U.bewₐ σ → U ⊢! ↑σ := by
+lemma provableₐ_sound {σ} : T ⊢!. U.bewₐ σ → U ⊢!. σ := by
   intro h
-  have : U.Provableₐ (⌜σ⌝ : ℕ) := by simpa [models₀_iff] using consequence_iff.mp (sound! (T := T) h) ℕ inferInstance
+  have : U.Provableₐ (⌜σ⌝ : ℕ) := by simpa [models₀_iff] using consequence_iff.mp (sound!₀ h) ℕ inferInstance
   simpa using this
 
-lemma provableₐ_complete {σ} : U ⊢! ↑σ ↔ T ⊢!. U.bewₐ σ := ⟨provableₐ_D1, provableₐ_sound⟩
+lemma provableₐ_complete {σ} : U ⊢!. σ ↔ T ⊢!. U.bewₐ σ := ⟨provableₐ_D1, provableₐ_sound⟩
 
 end
 

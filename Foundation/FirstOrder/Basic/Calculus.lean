@@ -435,6 +435,13 @@ def Theory.deduction [L.DecidableEq] {T : Theory L} {φ ψ} (b : insert φ T ⊢
 theorem Theory.deduction! [L.DecidableEq] {T : Theory L} {φ ψ} (b : insert φ T ⊢! ψ) : T ⊢! ∀∀φ ➝ ψ :=
   ⟨Theory.deduction b.get⟩
 
+lemma Theory.close!_iff [L.DecidableEq] {T : Theory L} {φ} : T ⊢! ∀∀φ ↔ T ⊢! φ := by
+  constructor
+  · intro h
+    apply Theory.deduction! (Entailment.Axiomatized.cons! _ _) ⨀ h
+  · intro h
+    exact Derivation.toClose! h
+
 /-!
   ### Axiom (A set of sentences)
 -/
@@ -502,7 +509,7 @@ instance [L.DecidableEq] : Entailment.Deduction (Axiom L) where
     have : cons σ A ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
     this ⨀ (Axiomatized.cons _ _)
 
-def provable_iff [L.DecidableEq] {T : Theory L} {σ} :
+def provable_iff [L.DecidableEq] {T : Theory L} {σ : Sentence L} :
     (T : Axiom L) ⊢! σ ↔ T ⊢! ↑σ := by
   constructor
   · intro b
@@ -516,12 +523,15 @@ def provable_iff [L.DecidableEq] {T : Theory L} {σ} :
     apply toAxiomProof!
     apply Entailment.StrongCut.cut! ?_ b
     intro φ hφ
-    have : T.toAxiom.toTheory ⊢! ∀∀φ ➝ φ := Theory.deduction! (Axiomatized.cons! _ _)
-    exact this ⨀ (by_axm _ <| by
-      simpa [Theory.toAxiom, Axiom.toTheory] using ⟨φ, by simpa, rfl⟩)
+    have : T.toAxiom.toTheory ⊢! ∀∀φ :=
+      by_axm _ <| by simpa [Theory.toAxiom, Axiom.toTheory] using ⟨φ, by simpa, rfl⟩
+    exact Theory.close!_iff.mp this
 
 def unprovable_iff [L.DecidableEq] {T : Theory L} {σ} :
     (T : Axiom L) ⊬ σ ↔ T ⊬ ↑σ := provable_iff.not
+
+def provable_close₀_iff [L.DecidableEq] {T : Theory L} {φ : SyntacticFormula L} :
+    (T : Axiom L) ⊢! ∀∀₀ φ ↔ T ⊢! φ := Iff.trans provable_iff (by simp [Theory.close!_iff])
 
 end Axiom
 

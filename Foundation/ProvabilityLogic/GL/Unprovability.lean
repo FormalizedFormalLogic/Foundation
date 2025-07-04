@@ -11,7 +11,7 @@ namespace ProvabilityPredicate
 
 open LO.Entailment
 
-variable {L} [Semiterm.Operator.GoedelNumber L (Sentence L)] [DecidableEq (Sentence L)]
+variable {L : Language} [L.DecidableEq] [Semiterm.Operator.GoedelNumber L (Sentence L)] [DecidableEq (Sentence L)]
          {T₀ T : Theory L} [T₀ ⪯ T]
          {𝔅 : ProvabilityPredicate T₀ T}
          {σ π : Sentence L}
@@ -22,11 +22,11 @@ lemma indep_distribute [𝔅.HBL2] (h : T ⊢!. σ ⭤ π) :
   T ⊢!. 𝔅.indep σ ➝ 𝔅.indep π := by
   apply CKK!_of_C!_of_C!;
   . apply contra!;
-    apply WeakerThan.pbl (𝓢 := T₀.alt);
+    apply WeakerThan.pbl (𝓢 := T₀.toAxiom);
     apply 𝔅.prov_distribute_imply;
     exact K!_right h;
   . apply contra!;
-    apply WeakerThan.pbl (𝓢 := T₀.alt);
+    apply WeakerThan.pbl (𝓢 := T₀.toAxiom);
     apply 𝔅.prov_distribute_imply;
     apply contra!;
     exact K!_left h;
@@ -94,7 +94,7 @@ lemma iff_modalIndep_bewIndep_inside :
     . apply K!_left Realization.iff_interpret_neg_inside;
     . apply C!_trans (K!_left $ Realization.iff_interpret_neg_inside (A := □(∼A))) ?_;
       apply contra!;
-      apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.alt);
+      apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
       apply ((𝐈𝚺₁).standardDP T).prov_distribute_imply;
       apply K!_right $ Realization.iff_interpret_neg_inside;
   . refine C!_trans ?_ (K!_right $ Realization.iff_interpret_and_inside);
@@ -102,7 +102,7 @@ lemma iff_modalIndep_bewIndep_inside :
     . exact C!_trans (K!_right $ Realization.iff_interpret_neg_inside (A := □A)) C!_id;
     . apply C!_trans ?_ (K!_right $ Realization.iff_interpret_neg_inside (A := □(∼A)));
       apply contra!;
-      apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.alt);
+      apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
       apply ((𝐈𝚺₁).standardDP T).prov_distribute_imply;
       apply K!_left $ Realization.iff_interpret_neg_inside;
 
@@ -168,7 +168,7 @@ lemma unrefutable_independency_of_consistency :
   congr;
 
 theorem undecidable_independency_of_consistency :
-  Undecidable T.alt (((𝐈𝚺₁).standardDP T).indep (((𝐈𝚺₁).standardDP T).con)) := by
+  Undecidable T.toAxiom (((𝐈𝚺₁).standardDP T).indep (((𝐈𝚺₁).standardDP T).con)) := by
   constructor;
   . exact unprovable_independency_of_consistency;
   . exact unrefutable_independency_of_consistency;

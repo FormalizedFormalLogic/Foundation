@@ -39,17 +39,17 @@ theorem R0.goedel_first_incompleteness
   let σ : SyntacticSemiformula ℒₒᵣ 1 := codeOfREPred (D)
   let ρ : SyntacticFormula ℒₒᵣ := σ/[⌜σ⌝]
   have : ∀ n : ℕ, D n ↔ T ⊢! σ/[‘↑n’] := fun n ↦ by
-    simpa [Semiformula.coe_substs_eq_substs_coe₁] using re_complete (T := T) (D_re) (x := n)
+    simpa [Semiformula.coe_substs_eq_substs_coe₁, Axiom.provable_iff] using re_complete (T := T) (D_re) (x := n)
   have : T ⊢! ∼ρ ↔ T ⊢! ρ := by
     simpa [D, goedelNumber'_def, quote_eq_encode] using this ⌜σ⌝
   have con : Entailment.Consistent T := consistent_of_sigma1Sound T
   refine LO.Entailment.incomplete_iff_exists_undecidable.mpr ⟨↑ρ, ?_, ?_⟩
   · intro h
-    have : T ⊢! ∼↑ρ := by simpa [provable₀_iff] using this.mpr h
+    have : T ⊢! ∼↑ρ := by simpa [Axiom.provable_iff] using this.mpr h
     exact LO.Entailment.not_consistent_iff_inconsistent.mpr
       (Entailment.inconsistent_of_provable_of_unprovable h this) inferInstance
   · intro h
-    have : T ⊢! ↑ρ := this.mp (by simpa [provable₀_iff] using h)
+    have : T ⊢! ↑ρ := this.mp (by simpa [Axiom.provable_iff] using h)
     exact LO.Entailment.not_consistent_iff_inconsistent.mpr
       (Entailment.inconsistent_of_provable_of_unprovable this h) inferInstance
 

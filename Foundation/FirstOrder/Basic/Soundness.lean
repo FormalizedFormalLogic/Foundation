@@ -72,9 +72,16 @@ theorem sound : T ⊢ φ → T ⊨[Struc.{v, u} L] φ := fun b s hT f ↦ by
 
 theorem sound! : T ⊢! φ → T ⊨[Struc.{v, u} L] φ := fun ⟨b⟩ ↦ sound b
 
-theorem sound₀ : T ⊢ φ → T ⊨ φ := sound
+theorem sound!₀ [L.DecidableEq] {σ : Sentence L} :
+    (T : Axiom L) ⊢! σ → T ⊨[Struc.{v, u} L] σ :=
+  fun b ↦ sound! <| Axiom.provable_iff.mp b
 
-theorem sound₀! : T ⊢! φ → T ⊨ φ := sound!
+theorem smallSound : T ⊢ φ → T ⊨ φ := sound
+
+theorem smallSound! : T ⊢! φ → T ⊨ φ := sound!
+
+theorem smallSound!₀ [L.DecidableEq] {σ : Sentence L} :
+    (T : Axiom L) ⊢! σ → T ⊨ σ := sound!₀
 
 instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨sound!⟩
 
@@ -95,8 +102,11 @@ lemma unprovable_of_countermodel {M : Type*} [s : Structure L M] [Nonempty M] [h
 lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : T ⊢! φ) :
     M ⊧ₘ φ := consequence_iff.mp (sound! h) M inferInstance
 
-lemma models_of_provable₀ {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : T ⊢!. σ) :
-    M ⊧ₘ₀ σ := consequence_iff.mp (sound! (T := T) h) M inferInstance
+open Classical in
+lemma models_of_provable₀ {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : (T : Axiom L) ⊢! σ) :
+    M ⊧ₘ₀ σ :=
+  haveI : L.DecidableEq := inferInstance
+  consequence_iff.mp (sound! (T := T) <| Axiom.provable_iff.mp h) M inferInstance
 
 end sound
 
