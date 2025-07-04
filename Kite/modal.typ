@@ -45,11 +45,22 @@
     {rank = same; \"LO.Modal.Logic.GLPoint3\"; \"LO.Modal.Logic.GrzPoint3\";}
     {rank = same; \"LO.Modal.Logic.GLPoint3\"; \"LO.Modal.Logic.GrzPoint3\";}
     {rank = same; \"LO.Modal.Logic.S5Grz\"; \"LO.Modal.Logic.Triv\";}
+    {rank = same; \"LO.Modal.Logic.KP\"; \"LO.Modal.Logic.KD\";}
+    {rank = same; \"𝐄𝐌𝐂𝐍\"; \"LO.Modal.Logic.K\";}
   "
         + arrows.join("\n")
         + "}",
     ),
     labels: (
+      "𝐄": $Logic("E")$,
+      "𝐄𝐂": $Logic("EC")$,
+      "𝐄𝐂𝐍": $Logic("ECN")$,
+      "𝐄𝐊": $Logic("EK")$,
+      "𝐄𝐌": $Logic("EM")$,
+      "𝐄𝐌𝐂": $Logic("EMC")$,
+      "𝐄𝐌𝐂𝐍": $Logic("EMCN")$,
+      "𝐄𝐌𝐍": $Logic("EMN")$,
+      "𝐄𝐍": $Logic("EN")$,
       "LO.Modal.Logic.Dum": $Logic("Dum")$,
       "LO.Modal.Logic.DumPoint2": $Logic("Dum.2")$,
       "LO.Modal.Logic.DumPoint3": $Logic("Dum.3")$,

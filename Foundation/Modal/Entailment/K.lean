@@ -90,6 +90,7 @@ def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
 
 def boxverum : 𝓢 ⊢ (□⊤ : F) := multiboxverum (n := 1)
 @[simp] lemma boxverum! : 𝓢 ⊢! (□⊤ : F) := ⟨boxverum⟩
+instance : Entailment.HasAxiomN 𝓢 := ⟨boxverum⟩
 
 def boxdotverum : 𝓢 ⊢ (⊡⊤ : F) := K_intro verum boxverum
 @[simp] lemma boxdotverum! : 𝓢 ⊢! (⊡⊤ : F) := ⟨boxdotverum⟩
@@ -520,6 +521,10 @@ lemma box_congruence! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □φ ⭤ □ψ := b
   apply E!_intro
   . apply box_regularity!; exact C_of_E_mp! h;
   . apply box_regularity!; exact C_of_E_mpr! h;
+
+-- TODO
+noncomputable instance : Entailment.RE 𝓢 where
+  re a := box_congruence! ⟨a⟩ |>.some
 
 -- TODO: move
 omit [DecidableEq F] in
