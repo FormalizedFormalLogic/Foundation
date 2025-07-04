@@ -533,6 +533,9 @@ def unprovable_iff [L.DecidableEq] {T : Theory L} {σ} :
 def provable_close₀_iff [L.DecidableEq] {T : Theory L} {φ : SyntacticFormula L} :
     (T : Axiom L) ⊢! ∀∀₀ φ ↔ T ⊢! φ := Iff.trans provable_iff (by simp [Theory.close!_iff])
 
+instance [L.DecidableEq] (T U : Theory L) [T ⪯ U] : T.toAxiom ⪯ U.toAxiom :=
+  ⟨fun _ b ↦ Axiom.provable_iff.mpr <| (inferInstanceAs (T ⪯ U)).pbl (Axiom.provable_iff.mp b)⟩
+
 end Axiom
 
 end FirstOrder
