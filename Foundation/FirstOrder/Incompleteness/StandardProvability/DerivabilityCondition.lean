@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.Incompleteness.StandardProvability.D1
 import Foundation.FirstOrder.Incompleteness.StandardProvability.D3
-import Foundation.FirstOrder.Incompleteness.DerivabilityCondition.Basic
+import Foundation.ProvabilityLogic.Conditions
 import Foundation.FirstOrder.Incompleteness.FixedPoint
 
 /-!
@@ -87,28 +87,28 @@ end LO.ISigma1
 
 namespace LO.FirstOrder.Arith
 
-open DerivabilityCondition
+open ProvabilityLogic
 
 open PeanoMinus IOpen ISigma0 ISigma1 Metamath Arithmetization
 
-variable (T : Theory ℒₒᵣ) [𝐈𝚺₁ ⪯ T]
+variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
 
-variable (U : Theory ℒₒᵣ) [U.Delta1Definable]
-
-noncomputable instance : Diagonalization T where
+noncomputable instance : Diagonalization 𝐈𝚺₁ where
   fixpoint := fixpoint
   diag θ := diagonal θ
 
 /-- TODO: rename to `standardPP`-/
-noncomputable abbrev _root_.LO.FirstOrder.Theory.standardDP : ProvabilityPredicate T U where
-  prov := U.provableₐ
+noncomputable abbrev _root_.LO.FirstOrder.Theory.standardPr : ProvabilityPredicate 𝐈𝚺₁ T where
+  prov := T.provableₐ
   D1 := provableₐ_D1
 
-instance : (Theory.standardDP T U).HBL2 := ⟨provableₐ_D2⟩
-instance : (Theory.standardDP T U).HBL3 := ⟨provableₐ_D3⟩
-instance : (Theory.standardDP T U).HBL := ⟨⟩
-instance [ℕ ⊧ₘ* U] [𝐑₀ ⪯ U] : (Theory.standardDP T U).GoedelSound := ⟨fun h ↦ by simpa using provableₐ_sound h⟩
+instance : T.standardPr.HBL2 := ⟨fun _ _ ↦ provableₐ_D2⟩
+instance : T.standardPr.HBL3 := ⟨fun _ ↦ provableₐ_D3⟩
+instance : T.standardPr.HBL := ⟨⟩
+instance [ℕ ⊧ₘ* T] [𝐑₀ ⪯ T] : T.standardPr.GoedelSound := ⟨fun h ↦ by simpa using provableₐ_sound h⟩
 
-lemma standardDP_def (σ : Sentence ℒₒᵣ) : (T.standardDP U) σ = U.provableₐ.val/[⌜σ⌝] := rfl
+lemma standardPr_def (σ : Sentence ℒₒᵣ) : (T.standardPr) σ = T.provableₐ.val/[⌜σ⌝] := rfl
+
+instance [𝐑₀ ⪯ T] [T.Delta1Definable] : T.standardPr.Sound ℕ := ⟨fun {σ} ↦ by simp [Arith.standardPr_def, models₀_iff]⟩
 
 end LO.FirstOrder.Arith
