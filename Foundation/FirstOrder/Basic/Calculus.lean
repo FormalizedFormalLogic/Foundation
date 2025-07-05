@@ -509,7 +509,9 @@ instance [L.DecidableEq] : Entailment.Deduction (Axiom L) where
     have : cons σ A ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
     this ⨀ (Axiomatized.cons _ _)
 
-def provable_iff [L.DecidableEq] {T : Theory L} {σ : Sentence L} :
+variable [L.DecidableEq] {T : Theory L}
+
+def provable_iff {σ : Sentence L} :
     (T : Axiom L) ⊢! σ ↔ T ⊢! ↑σ := by
   constructor
   · intro b
@@ -527,14 +529,23 @@ def provable_iff [L.DecidableEq] {T : Theory L} {σ : Sentence L} :
       by_axm _ <| by simpa [Theory.toAxiom, Axiom.toTheory] using ⟨φ, by simpa, rfl⟩
     exact Theory.close!_iff.mp this
 
-def unprovable_iff [L.DecidableEq] {T : Theory L} {σ} :
+def unprovable_iff {σ} :
     (T : Axiom L) ⊬ σ ↔ T ⊬ ↑σ := provable_iff.not
 
-def provable_close₀_iff [L.DecidableEq] {T : Theory L} {φ : SyntacticFormula L} :
+def provable_close₀_iff {φ : SyntacticFormula L} :
     (T : Axiom L) ⊢! ∀∀₀ φ ↔ T ⊢! φ := Iff.trans provable_iff (by simp [Theory.close!_iff])
 
-instance [L.DecidableEq] (T U : Theory L) [T ⪯ U] : T.toAxiom ⪯ U.toAxiom :=
+def unprovable_close₀_iff {φ : SyntacticFormula L} :
+    (T : Axiom L) ⊬ ∀∀₀ φ ↔ T ⊬ φ := provable_close₀_iff.not
+
+instance (T U : Theory L) [T ⪯ U] : T.toAxiom ⪯ U.toAxiom :=
   ⟨fun _ b ↦ Axiom.provable_iff.mpr <| (inferInstanceAs (T ⪯ U)).pbl (Axiom.provable_iff.mp b)⟩
+
+@[simp] lemma consistent_iff {T : Theory L} :
+    Consistent (T : Axiom L) ↔ Consistent T := calc
+  Consistent (T : Axiom L) ↔ (T : Axiom L) ⊬ ⊥ := consistent_iff_unprovable_bot
+  _                        ↔ T ⊬ ⊥             := by simp [unprovable_iff]
+  _                        ↔ Consistent T      := consistent_iff_unprovable_bot.symm
 
 end Axiom
 

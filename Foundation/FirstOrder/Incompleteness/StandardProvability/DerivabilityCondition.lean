@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.Incompleteness.StandardProvability.D1
 import Foundation.FirstOrder.Incompleteness.StandardProvability.D3
-import Foundation.ProvabilityLogic.Conditions
+import Foundation.ProvabilityLogic.Incompleteness
 import Foundation.FirstOrder.Incompleteness.FixedPoint
 
 /-!

@@ -255,17 +255,26 @@ section
 
 open Encodable Semiterm.Operator.GoedelNumber
 
-instance {α} [Encodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
+variable {α} [Encodable α]
+
+instance : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
   Semiterm.Operator.GoedelNumber.ofEncodable
 
-lemma goedelNumber_def {α} [Encodable α] (a : α) :
+lemma goedelNumber_def (a : α) :
   goedelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
-lemma goedelNumber'_def {α} [Encodable α] (a : α) :
+lemma goedelNumber'_def (a : α) :
   (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
-@[simp] lemma encode_encode_eq {α} [Encodable α] (a : α) :
+lemma goedelNumber'_eq_coe_encode (a : α) :
+  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = ↑(Encodable.encode a) := rfl
+
+@[simp] lemma encode_encode_eq (a : α) :
     (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
+
+@[simp] lemma rew_goedelNumber' (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) (a : α) :
+    ω ⌜a⌝ = ⌜a⌝ := by
+  simp [goedelNumber'_def]
 
 end
 
