@@ -5,7 +5,7 @@ namespace LO.ProvabilityLogic
 
 open Entailment
 open Modal
-open FirstOrder FirstOrder.DerivabilityCondition
+open FirstOrder
 open ProvabilityPredicate
 
 variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]

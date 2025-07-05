@@ -14,7 +14,7 @@ namespace LO.ProvabilityLogic
 
 open Entailment
 open Modal
-open FirstOrder FirstOrder.DerivabilityCondition
+open FirstOrder
 open ProvabilityPredicate
 
 variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]
@@ -30,11 +30,11 @@ open Arith
 variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)]
 
 lemma GL_S_TFAE :
-  [
-    Logic.GL ⊢! (A.rflSubformula.conj ➝ A),
-    Logic.S ⊢! A,
-    ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A)
-  ].TFAE := by
+    [
+      Logic.GL ⊢! (A.rflSubformula.conj ➝ A),
+      Logic.S ⊢! A,
+      ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret T.standardPr A)
+    ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;
     have h : Logic.S ⊢! Finset.conj A.rflSubformula ➝ A := WeakerThan.pbl h;
@@ -43,6 +43,7 @@ lemma GL_S_TFAE :
     simp [-Logic.iff_provable];
   tfae_have 2 → 3 := by
     intro h f;
+    have : 𝐑₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
     apply S.arithmetical_soundness;
     exact h;
   tfae_have 3 → 1 := by
@@ -61,13 +62,13 @@ lemma GL_S_TFAE :
         $ (Satisfies.fconj_def.mp
         $ Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr hA₁) φ hφ;
     have : Fintype M₀.World := Fintype.ofFinite _
-    let σ : SolovaySentences ((𝐈𝚺₁).standardDP T) (M₀.toFrame) r₀ :=
+    let σ : SolovaySentences T.standardPr (M₀.toFrame) r₀ :=
       SolovaySentences.standard M₀.toFrame Frame.extendRoot.root T
     use σ.realization;
     have H :
       ∀ B ∈ A.subformulas,
-      (r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) ∧
-      (¬r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret ((𝐈𝚺₁).standardDP T) B)) := by
+      (r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization.interpret T.standardPr B)) ∧
+      (¬r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret T.standardPr B)) := by
       intro B B_sub;
       induction B with
       | hfalsum => simp [Satisfies, Realization.interpret];
@@ -104,16 +105,16 @@ lemma GL_S_TFAE :
         constructor;
         . intro h;
           apply C!_of_conseq!;
-          apply ((𝐈𝚺₁).standardDP T).D1;
+          apply T.standardPr.D1;
           apply Entailment.WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
-          have : 𝐈𝚺₁ ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B := by
+          have : 𝐈𝚺₁ ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret T.standardPr B := by
             apply left_Fdisj'!_intro;
             have hrfl : r₁ ⊧ □B ➝ B := by
               apply hA₁;
               simpa [Formula.rflSubformula];
             rintro (i | i) _;
             . rw [(show (Sum.inl i) = r₀ by simp [r₀]; omega)]
-              suffices 𝐈𝚺₁ ⊢!. σ r₀ ➝ σ.realization.interpret ((𝐈𝚺₁).standardDP T) B by convert this;
+              suffices 𝐈𝚺₁ ⊢!. σ r₀ ➝ σ.realization.interpret T.standardPr B by convert this;
               apply ihB (Formula.subformulas.mem_box B_sub) |>.1;
               exact hrfl h;
             . by_cases e : i = r₁;
@@ -132,24 +133,24 @@ lemma GL_S_TFAE :
           have := Satisfies.box_def.not.mp h;
           push_neg at this;
           obtain ⟨i, Rij, hA⟩ := this;
-          have : 𝐈𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) B :=
+          have : 𝐈𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret T.standardPr B :=
             σ.mainlemma (A := B) (i := i) (by trivial) |>.2
             <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
-          have : 𝐈𝚺₁ ⊢!. ∼((𝐈𝚺₁).standardDP T) (∼σ (Sum.inr i)) ➝ ∼((𝐈𝚺₁).standardDP T) (σ.realization.interpret ((𝐈𝚺₁).standardDP T) B) :=
+          have : 𝐈𝚺₁ ⊢!. ∼T.standardPr (∼σ (Sum.inr i)) ➝ ∼T.standardPr (σ.realization.interpret T.standardPr B) :=
             contra!
-            $ ((𝐈𝚺₁).standardDP T).prov_distribute_imply'
+            $ T.standardPr.prov_distribute_imply'
             $ CN!_of_CN!_right $ this;
           refine C!_trans ?_ this;
           apply σ.SC2;
           tauto;
     have : ℕ ⊧ₘ* 𝐈𝚺₁ := models_of_subtheory (U := 𝐈𝚺₁) (T := T) (M := ℕ) inferInstance;
-    have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret ((𝐈𝚺₁).standardDP T) A := models_of_provable₀ inferInstance $ H A (by simp) |>.2 hA₂;
+    have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret T.standardPr A := models_of_provable₀ inferInstance $ H A (by simp) |>.2 hA₂;
     simp only [models₀_imply_iff, models₀_not_iff] at this;
     exact this <| by
       simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;
 
-theorem S.arithmetical_completeness_iff : Logic.S ⊢! A ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret ((𝐈𝚺₁).standardDP T) A) := GL_S_TFAE.out 1 2
+theorem S.arithmetical_completeness_iff : Logic.S ⊢! A ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret T.standardPr A) := GL_S_TFAE.out 1 2
 
 end ProvabilityLogic
 

@@ -5,7 +5,7 @@ namespace LO.ProvabilityLogic
 open Entailment
 open Modal
 open Modal.Hilbert
-open FirstOrder FirstOrder.DerivabilityCondition
+open FirstOrder
 open ProvabilityPredicate
 
 variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
@@ -13,8 +13,7 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          {T U : FirstOrder.Theory L} [Diagonalization T]  [T ⪯ U]
          {𝔅 : ProvabilityPredicate T U} [𝔅.HBL]
 
-lemma GL.arithmetical_soundness (h : Logic.GL ⊢! A) : ∀ {f : Realization L}, U ⊢!. (f.interpret 𝔅 A) := by
-  intro f;
+lemma GL.arithmetical_soundness (h : Logic.GL ⊢! A) {f : Realization L} : U ⊢!. f.interpret 𝔅 A := by
   induction h with
   | maxm hp =>
     rcases (by simpa using hp) with (⟨_, rfl⟩ | ⟨_, rfl⟩)

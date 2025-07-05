@@ -50,7 +50,7 @@ class Rosser (𝔅 : ProvabilityPredicate T₀ T) where
   protected Ro {σ : Sentence L} : T ⊢!. ∼σ → T₀ ⊢!. ∼𝔅 σ
 
 class Sound (𝔅 : ProvabilityPredicate T₀ T) (N : outParam Type*) [Nonempty N] [Structure L N] where
-  protected sound (σ : Sentence L) : N ⊧ₘ₀ 𝔅 σ ↔ T ⊢!. σ
+  protected sound {σ : Sentence L} : N ⊧ₘ₀ 𝔅 σ ↔ T ⊢!. σ
 
 protected alias sound := Sound.sound
 
