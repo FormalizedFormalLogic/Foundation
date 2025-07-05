@@ -1,4 +1,4 @@
-import Foundation.ProvabilityLogic.Conditions
+import Foundation.ProvabilityLogic.Incompleteness
 import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.FirstOrder.Incompleteness.Delta1
 import Foundation.Logic.HilbertStyle.Cl

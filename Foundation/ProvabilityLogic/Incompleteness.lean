@@ -2,6 +2,10 @@ import Foundation.FirstOrder.Arith.Basic
 import Foundation.Logic.HilbertStyle.Supplemental
 import Foundation.Meta.ClProver
 
+/-!
+# Abstract incompleteness theorems and related results
+-/
+
 namespace LO.ProvabilityLogic
 
 open FirstOrder
@@ -141,58 +145,43 @@ lemma ProvabilityPredicate.goedel_spec : T₀ ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := by
   simp [goedel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
   rfl;
 
-lemma ProvabilityPredicate.goedel_spec_self [L.DecidableEq] [T₀ ⪯ T] :
-    T ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := WeakerThan.pbl 𝔅.goedel_spec
-
 variable {𝔅}
-
-variable [T₀ ⪯ T]
-
-private lemma goedel_specAux₁ [L.DecidableEq] : T ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := WeakerThan.pbl (𝓢 := T₀.toAxiom) 𝔅.goedel_spec
-
-private lemma goedel_specAux₂ [L.DecidableEq] : T ⊢!. ∼𝗚 ➝ 𝔅 𝗚 := CN!_of_CN!_left $ K!_right goedel_specAux₁
 
 end GoedelSentence
 
 class ProvabilityPredicate.GoedelSound (𝔅 : ProvabilityPredicate T₀ T) [Diagonalization T₀] where
-  γ_sound : T ⊢!. 𝔅 𝔅.goedel → T ⊢!. 𝔅.goedel
-
-open GoedelSound
+  goedel_sound : T ⊢!. 𝔅 𝔅.goedel → T ⊢!. 𝔅.goedel
 
 section First
 
-variable [T₀ ⪯ T] [Diagonalization T₀]
+variable [T₀ ⪯ T] [Diagonalization T₀] [L.DecidableEq] [Entailment.Consistent T]
 
 local notation "𝗚" => 𝔅.goedel
-
-variable [L.DecidableEq] [Entailment.Consistent T]
 
 theorem unprovable_goedel : T ⊬. 𝗚 := by
   intro h;
   have h₁ : T ⊢!. 𝔅 𝗚 := D1_shift h
-  have h₂ : T ⊢!. ∼𝔅 𝗚 := K!_left goedel_specAux₁ ⨀ h
-  have : T ⊢!. ⊥ := by cl_prover [h₁, h₂]
+  have : T ⊢!. ⊥ := by cl_prover [h₁, 𝔅.goedel_spec, h]
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <|
     inconsistent_iff_provable_bot.mpr (by simpa [Axiom.provable_iff] using this)
   contradiction
 
 theorem unrefutable_goedel [𝔅.GoedelSound] : T ⊬. ∼𝗚 := by
   intro h₂;
-  have h₁ : T ⊢!. 𝗚 := γ_sound $ goedel_specAux₂ ⨀ h₂;
+  have h₁ : T ⊢!. 𝗚 := GoedelSound.goedel_sound <| by cl_prover [𝔅.goedel_spec, h₂]
   have : T ⊢!. ⊥ := (N!_iff_CO!.mp h₂) ⨀ h₁;
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr <|
     inconsistent_iff_provable_bot.mpr (by simpa [Axiom.provable_iff] using this);
   contradiction;
 
-theorem goedel_independent [𝔅.GoedelSound] : Entailment.Undecidable T ↑𝗚 := by
-  suffices T ⊬. 𝗚 ∧ T ⊬. ∼𝗚 by simpa [Entailment.Undecidable, not_or, Axiom.unprovable_iff] using this
+theorem goedel_independent [𝔅.GoedelSound] : Entailment.Undecidable (T : Axiom L) 𝗚 := by
   constructor
   . apply unprovable_goedel
   . apply unrefutable_goedel
 
 theorem first_incompleteness [𝔅.GoedelSound] :
-    ¬Entailment.Complete T :=
-  Entailment.incomplete_iff_exists_undecidable.mpr ⟨𝗚, goedel_independent⟩
+    ¬Entailment.Complete (T : Axiom L) :=
+  incomplete_iff_exists_undecidable.mpr ⟨𝗚, goedel_independent⟩
 
 end First
 
@@ -200,17 +189,17 @@ section Second
 
 variable [L.DecidableEq] [𝔅.HBL]
 
-local notation "𝗚" => 𝔅.goedel
-
 lemma formalized_consistent_of_existance_unprovable (σ) : T₀ ⊢!. ∼𝔅 σ ➝ 𝔅.con := contra! $ 𝔅.D2 _ _ ⨀ (𝔅.D1 efq!)
 
 variable [T₀ ⪯ T] [Diagonalization T₀]
+
+local notation "𝗚" => 𝔅.goedel
 
 /-- Formalized First Incompleteness Theorem -/
 theorem formalized_unprovable_goedel : T₀ ⊢!. 𝔅.con ➝ ∼𝔅 𝗚 := by
   suffices T₀ ⊢!. ∼𝔅 ⊥ ➝ ∼𝔅 𝗚 from this
   have h₁ : T₀ ⊢!. 𝔅 𝗚 ➝ 𝔅 (𝔅 𝗚) := 𝔅.D3 𝗚
-  have h₂ : T₀ ⊢!. 𝔅 𝗚 ➝ 𝔅 (𝔅 𝗚 ➝ ⊥) := prov_distribute_imply <| by cl_prover [𝔅.goedel_spec_self]
+  have h₂ : T₀ ⊢!. 𝔅 𝗚 ➝ 𝔅 (𝔅 𝗚 ➝ ⊥) := prov_distribute_imply <| by cl_prover [𝔅.goedel_spec]
   have h₃ : T₀ ⊢!. 𝔅 (𝔅 𝗚 ➝ ⊥) ➝ 𝔅 (𝔅 𝗚) ➝ 𝔅 ⊥ := 𝔅.D2 (𝔅 𝗚) ⊥
   cl_prover [h₁, h₂, h₃]
 
@@ -231,6 +220,11 @@ theorem unrefutable_consistency [Consistent T] [𝔅.GoedelSound] : T ⊬. ∼�
   have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := goedel_iff_consistency
   have : T ⊢!. ∼𝗚 := by cl_prover [h, this]
   exact unrefutable_goedel this
+
+theorem consistency_independent [Consistent T] [𝔅.GoedelSound] : Undecidable (T : Axiom L) 𝔅.con := by
+  constructor
+  . apply unprovable_consistency
+  . apply unrefutable_consistency
 
 end Second
 
@@ -287,7 +281,6 @@ instance [L.DecidableEq] : 𝔅.FormalizedLoeb := ⟨formalized_loeb_theorem (T 
 
 end LoebTheorem
 
-
 variable [Entailment.Consistent T]
 
 lemma unprovable_consistency_via_loeb [L.DecidableEq] [𝔅.Loeb] : T ⊬. 𝔅.con := by
@@ -299,8 +292,8 @@ lemma unprovable_consistency_via_loeb [L.DecidableEq] [𝔅.Loeb] : T ⊬. 𝔅.
 
 variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL] [𝔅.GoedelSound]
 
-lemma formalized_unprovable_not_consistency
-  : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
+lemma formalized_unprovable_not_consistency :
+    T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
   have : T ⊢!. ∼𝔅.con := Loeb.LT $ CN!_of_CN!_right hC;
   have : T ⊬. ∼𝔅.con := unrefutable_consistency;
@@ -316,34 +309,19 @@ lemma formalized_unrefutable_goedel : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.goede
 
 end Loeb
 
-abbrev ProvabilityPredicate.rosser
-    [Diagonalization T₀]
-    (𝔅 : ProvabilityPredicate T₀ T) [𝔅.Rosser] : Sentence L :=
-  fixpoint T₀ “x. ¬!𝔅.prov x”
+section Rosser
 
-section RosserSentence
+variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] [Entailment.Consistent T]
 
-local notation "𝗥" => 𝔅.rosser
-
-variable [Diagonalization T₀] [𝔅.Rosser] (𝔅)
-
-lemma ProvabilityPredicate.rosser_spec : T₀ ⊢!. 𝗥 ⭤ ∼(𝔅 𝗥) := 𝔅.goedel_spec
-
-variable {𝔅}
-
-end RosserSentence
-
-section
-
-variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] [Entailment.Consistent T] [𝔅.Rosser]
-
-local notation "𝗥" => 𝔅.rosser
+local notation "𝗥" => 𝔅.goedel
 
 lemma unprovable_rosser : T ⊬. 𝗥 := unprovable_goedel
 
+variable [𝔅.Rosser]
+
 theorem unrefutable_rosser : T ⊬. ∼𝗥 := by
   intro hnρ;
-  have hρ : T ⊢!. 𝗥 := WeakerThan.pbl $ (K!_right 𝔅.rosser_spec) ⨀ (𝔅.Ro hnρ);
+  have hρ : T ⊢!. 𝗥 := WeakerThan.pbl $ (K!_right 𝔅.goedel_spec) ⨀ (𝔅.Ro hnρ);
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr $ inconsistent_iff_provable_bot.mpr <|
     by simpa [Axiom.provable_iff] using (N!_iff_CO!.mp hnρ) ⨀ hρ;
   contradiction
@@ -355,14 +333,14 @@ theorem rosser_independent : Entailment.Undecidable T ↑𝗥 := by
   . apply unrefutable_rosser
 
 theorem rosser_first_incompleteness (𝔅 : ProvabilityPredicate T₀ T) [𝔅.Rosser] : ¬Entailment.Complete T :=
-  Entailment.incomplete_iff_exists_undecidable.mpr ⟨𝔅.rosser, rosser_independent  ⟩
+  Entailment.incomplete_iff_exists_undecidable.mpr ⟨𝔅.goedel, rosser_independent⟩
 
 omit [Diagonalization T₀] [Consistent T] in
-/-- If `𝔅` satisfies Rosser provability condition, then `𝔅.con` is provable in `T`. -/
+/-- If `𝔅` satisfies Rosser provability condition, then `𝔅.con` is provable from `T`. -/
 theorem kriesel_remark : T ⊢!. 𝔅.con := by
   have : T₀ ⊢!. ∼𝔅 ⊥ := 𝔅.Ro (N!_iff_CO!.mpr (by simp));
   exact WeakerThan.pbl $ this;
 
-end
+end Rosser
 
 end LO.ProvabilityLogic

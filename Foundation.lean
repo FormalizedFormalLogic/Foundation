@@ -136,7 +136,7 @@ import Foundation.Modal.Logic.Dz.Basic
 import Foundation.Modal.Maximal.Makinson
 
 -- Provability Logic
-import Foundation.ProvabilityLogic.Conditions
+import Foundation.ProvabilityLogic.Incompleteness
 
 import Foundation.ProvabilityLogic.N.Soundness
 

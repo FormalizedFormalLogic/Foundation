@@ -1,4 +1,4 @@
-import Foundation.ProvabilityLogic.Basic
+import Foundation.ProvabilityLogic.Interpretation
 import Foundation.Modal.Kripke.Logic.GL.Tree
 import Foundation.Modal.Kripke.ExtendRoot
 import Foundation.FirstOrder.Incompleteness.WitnessComparison
