@@ -175,71 +175,6 @@ protected lemma re (hφ : M ⊧ φ ⭤ ψ) : M ⊧ □φ ⭤ □ψ := by
   ext x;
   simp [Satisfies, hφ];
 
-example : ¬(∀ M : Model, M ⊧ (Axioms.K (.atom 0) (.atom 1))) := by
-  push_neg;
-  let M : Model := {
-    World := Fin 3,
-    ν := λ w =>
-      match w with
-      | 0 => {{0}, {0, 1, 2}}
-      | 1 => {}
-      | 2 => {},
-    Val := λ w =>
-      match w with
-      | 0 => {0}
-      | 1 => {0, 1}
-      | _ => Set.univ
-  };
-  use M;
-  by_contra hC;
-  rcases (by simpa! [Satisfies, M] using hC 0) with (⟨_, h₂⟩ | h | h);
-  . apply h₂;
-    ext x;
-    simp;
-    omega;
-  . tauto_set;
-  . tauto_set;
-
-example : ¬(∀ M : Model, M ⊧ (Axioms.C (.atom 0) (.atom 1))) := by
-  push_neg;
-  let M : Model := {
-    World := Fin 2,
-    ν := λ w =>
-      match w with
-      | 0 => {{0}, {1}}
-      | 1 => {∅},
-    Val := λ w =>
-      match w with
-      | 0 => {0}
-      | 1 => {1}
-      | _ => Set.univ
-  };
-  use M;
-  by_contra hC;
-  have := hC 0;
-  simp [M, Satisfies] at this;
-
-example : ¬(∀ M : Model, M ⊧ (Axioms.M (.atom 0) (.atom 1))) := by
-  push_neg;
-  let M : Model := {
-    World := Fin 3,
-    ν := λ w =>
-      match w with
-      | 0 => {{1}, {2}, {0, 2}}
-      | 1 => {{0, 1}, {0, 2}, {0}}
-      | 2 => {{0}, {1, 2}, ∅},
-    Val := λ w =>
-      match w with
-      | 0 => {0, 1}
-      | 1 => {1, 2}
-      | _ => Set.univ
-  };
-  use M;
-  by_contra hC;
-  have := hC 0;
-  simp! [M, Satisfies] at this;
-  tauto_set;
-
 end ValidOnModel
 
 
@@ -290,6 +225,18 @@ protected lemma subst (s) (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
   exact h (λ a => Model.truthset ⟨F, V⟩ (atom a⟦s⟧)) x;
 
 end ValidOnFrame
+
+section
+
+variable {C : FrameClass} {φ ψ χ : Formula ℕ}
+
+lemma iff_not_validOnFrameClass_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Model, ∃ x : M.World, M.toFrame ∈ C ∧ ¬(x ⊧ φ)) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
+
+end
 
 end Formula.Neighborhood
 
