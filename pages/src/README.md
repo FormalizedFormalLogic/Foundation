@@ -6,7 +6,7 @@
 
 - [Doc](https://formalizedformallogic.github.io/Foundation/doc/Foundation.html)
 
-## Zoos
+## Zoo
 
 Visualization for sublogic/subtheory relations.
 
