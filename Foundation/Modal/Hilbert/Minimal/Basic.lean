@@ -202,18 +202,12 @@ notation "𝐄𝐌" => Modal.EM
 instance : Hilbert.EM.HasM where p := 0; q := 1
 instance : Entailment.EM Hilbert.EM where
 
-instance : Hilbert.E ⪯ Hilbert.EM := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : 𝐄 ⪯ 𝐄𝐌 := inferInstance
-
 
 protected abbrev Hilbert.EC : Hilbert.WithRE ℕ := ⟨{Axioms.C (.atom 0) (.atom 1)}⟩
 protected abbrev EC : Logic ℕ := Entailment.theory Hilbert.EC
 notation "𝐄𝐂" => Modal.EC
 instance : Hilbert.EC.HasC where p := 0; q := 1
 instance : Entailment.EC Hilbert.EC where
-
-instance : Hilbert.E ⪯ Hilbert.EC := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : 𝐄 ⪯ 𝐄𝐂 := inferInstance
 
 
 protected abbrev Hilbert.EN : Hilbert.WithRE ℕ := ⟨{Axioms.N}⟩
@@ -222,18 +216,12 @@ notation "𝐄𝐍" => Modal.EN
 instance : Hilbert.EN.HasN where
 instance : Entailment.EN Hilbert.EN where
 
-instance : Hilbert.E ⪯ Hilbert.EN := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : 𝐄 ⪯ 𝐄𝐍 := inferInstance
-
 
 protected abbrev Hilbert.EK : Hilbert.WithRE ℕ := ⟨{Axioms.K (.atom 0) (.atom 1)}⟩
 protected abbrev EK : Logic ℕ := Entailment.theory Hilbert.EK
 notation "𝐄𝐊" => Modal.EK
 instance : Hilbert.EK.HasK where p := 0; q := 1
 instance : Entailment.EK Hilbert.EK where
-
-instance : Hilbert.E ⪯ Hilbert.EK := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : 𝐄 ⪯ 𝐄𝐊 := inferInstance
 
 
 protected abbrev Hilbert.EMC : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1)}⟩
@@ -243,14 +231,6 @@ instance : Hilbert.EMC.HasM where p := 0; q := 1
 instance : Hilbert.EMC.HasC where p := 0; q := 1
 instance : Entailment.EMC Hilbert.EMC where
 
-instance : Hilbert.EM ⪯ Hilbert.EMC := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : Hilbert.EC ⪯ Hilbert.EMC := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : Hilbert.EK ⪯ Hilbert.EMC := Hilbert.WithRE.weakerThan_of_provable_axioms $ by
-  rintro φ (rfl | rfl); simp;
-instance : 𝐄𝐌 ⪯ 𝐄𝐌𝐂 := inferInstance
-instance : 𝐄𝐂 ⪯ 𝐄𝐌𝐂 := inferInstance
-instance : 𝐄𝐊 ⪯ 𝐄𝐌𝐂 := inferInstance
-
 
 protected abbrev Hilbert.EMN : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.N}⟩
 protected abbrev EMN : Logic ℕ := Entailment.theory Hilbert.EMN
@@ -259,10 +239,6 @@ instance : Hilbert.EMN.HasM where p := 0; q := 1
 instance : Hilbert.EMN.HasN where
 instance : Entailment.EMN Hilbert.EMN where
 
-instance : Hilbert.EM ⪯ Hilbert.EMN := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : Hilbert.EN ⪯ Hilbert.EMN := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : 𝐄𝐍 ⪯ 𝐄𝐌𝐍 := inferInstance
-instance : 𝐄𝐌 ⪯ 𝐄𝐌𝐍 := inferInstance
 
 protected abbrev Hilbert.ECN : Hilbert.WithRE ℕ := ⟨{Axioms.C (.atom 0) (.atom 1), Axioms.N}⟩
 protected abbrev ECN : Logic ℕ := Entailment.theory Hilbert.ECN
@@ -270,10 +246,6 @@ notation "𝐄𝐂𝐍" => Modal.ECN
 instance : Hilbert.ECN.HasC where p := 0; q := 1
 instance : Hilbert.ECN.HasN where
 instance : Entailment.ECN Hilbert.ECN where
-instance : Hilbert.EC ⪯ Hilbert.ECN := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : Hilbert.EN ⪯ Hilbert.ECN := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : 𝐄𝐂 ⪯ 𝐄𝐂𝐍 := inferInstance
-instance : 𝐄𝐍 ⪯ 𝐄𝐂𝐍 := inferInstance
 
 
 protected abbrev Hilbert.EMCN : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1), Axioms.N}⟩
@@ -283,11 +255,5 @@ instance : Hilbert.EMCN.HasM where p := 0; q := 1
 instance : Hilbert.EMCN.HasC where p := 0; q := 1
 instance : Hilbert.EMCN.HasN where
 instance : Entailment.EMCN Hilbert.EMCN where
-instance : Hilbert.EMC ⪯ Hilbert.EMCN := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : Hilbert.ECN ⪯ Hilbert.EMCN := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : Hilbert.EMN ⪯ Hilbert.EMCN := Hilbert.WithRE.weakerThan_of_subset_axioms (by simp)
-instance : 𝐄𝐌𝐂 ⪯ 𝐄𝐌𝐂𝐍 := inferInstance
-instance : 𝐄𝐂𝐍 ⪯ 𝐄𝐌𝐂𝐍 := inferInstance
-instance : 𝐄𝐌𝐍 ⪯ 𝐄𝐌𝐂𝐍 := inferInstance
 
 end LO.Modal
