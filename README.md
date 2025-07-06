@@ -14,17 +14,17 @@ Main Result in this repository. More results and details are in [Book] and [Doc]
   - [Completeness for Kripke semantics][prop:kripke]
   - [Disjunctive Property of intuitionistic logic][prop:int_disjunctive]
   - Rejection Law of Excluded Middle in intuitionistic logic and [sublogic relations][prop:sublogics]
-  - [Zoo of Propositional Logics](#zoo-of-propositional-logics)
+  - [Propositional Logic Zoo](#propositional-logic-zoo)
 - [First-Order Logic][first_order] and [Arithmetics][arith]
   - [Completeness Theorem][first_order:completeness]
   - [Gödel-Gentzen Translation][first_order:goedel_translation]
   - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
   - [Arithmetic][arith]
   - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
-  - [Zoo of Arithmetic Theories](#zoo-of-arithmetic-theories)
+  - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
 - [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
   - [Kripke completeness for well-known subsystems][modal:logic_kripke_completeness]
-  - [Zoo of Modal Logics](#zoo-of-modal-logics)
+  - [Modal Logic Zoo](#modal-logic-zoo)
   - [Gödel-McKinsey-Tarski Theorem][modal:gmt_theorem] and [Modal Companions](modal:companion)
 - [Provability Logic][provability_logic]
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
@@ -58,17 +58,20 @@ Main Result in this repository. More results and details are in [Book] and [Doc]
 
 ## Zoo
 
-### Zoo of Arithmetic Theories
+Lines represent subset relations  of theories/logics. Solid lines are represent *proper* subset.
 
-![Zoo of Arithmetic Theories](https://formalizedformallogic.github.io/Foundation/book/assets/arith_zoo.png)
+### Arithmetic Theory Zoo
 
-### Zoo of Modal Logics
+![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/arith_zoo.png)
 
-![Zoo of Modal Logics](https://formalizedformallogic.github.io/Foundation/book/assets/modal_zoo.png)
+### Modal Logic Zoo
 
-### Zoo of Propositional Logics
+![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/modal_zoo.png)
 
-![Zoo of Propositional Logics](https://formalizedformallogic.github.io/Foundation/book/assets/propositional_zoo.png)
+### Propositional Logic Zoo
+
+![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/propositional_zoo.png)
+
 ## Financial Supports
 
 Any financial supports would greatly helps us. If you considered, please contact us: [palalansouki@gmail.com](mailto:palalansouki@gmail.com)

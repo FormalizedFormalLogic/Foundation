@@ -8,19 +8,19 @@
 
 ## Zoo
 
-Visualization for sublogic/subtheory relations.
+Lines represent subset relations  of theories/logics. Solid lines are represent *proper* subset.
 
-### Modal Logics
+### Arithmetic Theory Zoo
 
-![Zoo of Modal Logics](./assets/modal_zoo.png)
+![Arithmetic Theory Zoo](./assets/arith_zoo.png)
 
-### Propositional Logics
+### Modal Logic Zoo
 
-![Zoo of Propositional Logics](./assets/propositional_zoo.png)
+![Modal Logic Zoo](./assets/modal_zoo.png)
 
-### First-Order Arithmetics
+### Propositional Logic Zoo
 
-![Zoo of First-Order Arithmetics](./assets/arith_zoo.png)
+![Propositional Logic Zoo](./assets/propositional_zoo.png)
 
 ## Import Graph
 

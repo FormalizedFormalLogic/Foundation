@@ -19,7 +19,7 @@
   }
 })
 
-#figure(caption: [Zoo of Modal Logics], numbering: none)[
+#figure(caption: [Modal Logic Zoo], numbering: none)[
   #raw-render(
     raw(
       "

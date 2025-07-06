@@ -20,7 +20,7 @@
   }
 })
 
-#figure(caption: [Zoo of Arithmetic Theories], numbering: none)[
+#figure(caption: [Arithmetic Theory Zoo], numbering: none)[
   #raw-render(
     raw(
       "
