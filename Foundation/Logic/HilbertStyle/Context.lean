@@ -291,10 +291,11 @@ def deduct [DecidableEq F] {φ ψ : F} {Γ : Set F} : (insert φ Γ) *⊢[𝓢] 
     have h : ∀ ψ ∈ Δ, ψ = φ ∨ ψ ∈ Γ := by simpa using h
     let b' : (φ :: Δ.filter (· ≠ φ)) ⊢[𝓢] ψ :=
       FiniteContext.weakening
-        (by simp [List.subset_def, List.mem_filter]; rintro χ hr; simp [hr]; tauto)
+        (by rintro χ hr; simp [hr]; tauto)
         b
     ⟨ Δ.filter (· ≠ φ), by
-      intro ψ; simp [List.mem_filter]
+      intro ψ;
+      simp [List.mem_filter]
       intro hq ne
       rcases h ψ hq
       · contradiction

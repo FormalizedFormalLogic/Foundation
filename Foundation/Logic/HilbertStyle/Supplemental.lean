@@ -583,7 +583,7 @@ def right_Conj'_intro (φ : F) (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, �
 lemma right_Conj'!_intro (φ : F) (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢! φ ➝ ψ i) : 𝓢 ⊢! φ ➝ l.conj' ψ :=
   ⟨right_Conj'_intro φ l ψ fun i hi ↦ (b i hi).get⟩
 
-def left_Conj'_intro {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢ l.conj' φ ➝ φ i := left_Conj₂_intro (by simp; use i)
+def left_Conj'_intro {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢ l.conj' φ ➝ φ i := left_Conj₂_intro (by apply mem_map.mpr; use i)
 lemma left_Conj'!_intro {l : List ι} (h : i ∈ l) (φ : ι → F) : 𝓢 ⊢! l.conj' φ ➝ φ i := ⟨left_Conj'_intro h φ⟩
 
 omit [DecidableEq F] in
@@ -609,7 +609,7 @@ lemma Conj₂!_iff_forall_provable {Γ : List F} : (𝓢 ⊢! ⋀Γ) ↔ (∀ φ
   | hnil => simp;
   | hsingle => simp;
   | hcons φ Γ hΓ ih =>
-    simp_all;
+    simp_all only [ne_eq, not_false_eq_true, conj₂_cons_nonempty, mem_cons, forall_eq_or_imp];
     constructor;
     . intro h;
       constructor;
@@ -621,22 +621,26 @@ lemma Conj₂!_iff_forall_provable {Γ : List F} : (𝓢 ⊢! ⋀Γ) ↔ (∀ φ
 lemma CConj₂Conj₂!_of_subset (h : ∀ φ, φ ∈ Γ → φ ∈ Δ) : 𝓢 ⊢! ⋀Δ ➝ ⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
-  | hsingle => simp_all; exact left_Conj₂!_intro h;
-  | hcons φ Γ hne ih => simp_all; exact right_K!_intro (left_Conj₂!_intro h.1) ih;
+  | hsingle => apply left_Conj₂!_intro; simpa using h;
+  | hcons φ Γ hne ih =>
+    simp_all only [ne_eq, mem_cons, or_true, implies_true, forall_const, forall_eq_or_imp, not_false_eq_true, conj₂_cons_nonempty];
+    exact right_K!_intro (left_Conj₂!_intro h.1) ih;
 
 lemma CConj₂Conj₂!_of_provable (h : ∀ φ, φ ∈ Γ → Δ ⊢[𝓢]! φ) : 𝓢 ⊢! ⋀Δ ➝ ⋀Γ :=
   by induction Γ using List.induction_with_singleton with
   | hnil => exact C!_of_conseq! verum!;
-  | hsingle => simp_all; exact provable_iff.mp h;
-  | hcons φ Γ hne ih => simp_all; exact right_K!_intro (provable_iff.mp h.1) ih;
+  | hsingle => apply provable_iff.mp; simpa using h;
+  | hcons φ Γ hne ih =>
+    simp_all only [ne_eq, mem_cons, or_true, implies_true, forall_const, forall_eq_or_imp, not_false_eq_true, conj₂_cons_nonempty];
+    exact right_K!_intro (provable_iff.mp h.1) ih;
 
 lemma CConj₂!_of_forall_provable (h : ∀ φ, φ ∈ Γ → Δ ⊢[𝓢]! φ) : Δ ⊢[𝓢]! ⋀Γ := provable_iff.mpr $ CConj₂Conj₂!_of_provable h
 
 lemma CConj₂!_of_unique (he : ∀ g ∈ Γ, g = φ) : 𝓢 ⊢! φ ➝ ⋀Γ := by
   induction Γ using List.induction_with_singleton with
   | hcons χ Γ h ih =>
-    simp_all;
-    have ⟨he₁, he₂⟩ := he; subst he₁;
+    simp_all only [ne_eq, mem_cons, true_or, or_true, implies_true, forall_const, forall_eq_or_imp, not_false_eq_true, conj₂_cons_nonempty];
+    have ⟨rfl, he₂⟩ := he;
     exact right_K!_intro C!_id ih;
   | _ => simp_all;
 
@@ -645,7 +649,7 @@ lemma C!_of_CConj₂!_of_unique (he : ∀ g ∈ Γ, g = φ) (hd : 𝓢 ⊢! ⋀�
 lemma CConj₂!_iff_CKConj₂! : 𝓢 ⊢! ⋀(φ :: Γ) ➝ ψ ↔ 𝓢 ⊢! φ ⋏ ⋀Γ ➝ ψ := by
   induction Γ with
   | nil =>
-    simp [CK!_iff_CC!];
+    simp only [conj₂_singleton, conj₂_nil, CK!_iff_CC!];
     constructor;
     . intro h; apply C!_swap; exact C!_of_conseq! h;
     . intro h; exact C!_swap h ⨀ verum!;
@@ -656,13 +660,11 @@ omit [DecidableEq F] in
   apply FiniteContext.deduct'!;
   have : [⋀(Γ ++ Δ)] ⊢[𝓢]! ⋀(Γ ++ Δ) := id!;
   have d := Conj₂!_iff_forall_provable.mp this;
-  apply K!_intro;
+  apply K!_intro <;>
   . apply Conj₂!_iff_forall_provable.mpr;
     intro φ hp;
-    exact d φ (by simp; left; exact hp);
-  . apply Conj₂!_iff_forall_provable.mpr;
-    intro φ hp;
-    exact d φ (by simp; right; exact hp);
+    apply d φ;
+    simp_all;
 
 @[simp]
 lemma CKConj₂RemoveConj₂! : 𝓢 ⊢! ⋀(Γ.remove φ) ⋏ φ ➝ ⋀Γ := by
@@ -843,7 +845,7 @@ lemma left_Disj₂!_intro [HasAxiomEFQ 𝓢] (Γ : List F) (b : (ψ : F) → ψ 
   ⟨left_Disj₂_intro Γ fun ψ h ↦ (b ψ h).get⟩
 
 def right_Disj'_intro (φ : ι → F) (l : List ι) (h : i ∈ l) : 𝓢 ⊢ φ i ➝ l.disj' φ :=
-  right_Disj₂_intro (l.map φ) (by simp; exact ⟨i, h, rfl⟩)
+  right_Disj₂_intro (l.map φ) (mem_map.mpr ⟨i, h, rfl⟩)
 lemma right_Disj'!_intro (φ : ι → F) (l : List ι) (h : i ∈ l) : 𝓢 ⊢! φ i ➝ l.disj' φ := ⟨right_Disj'_intro φ l h⟩
 
 def left_Disj'_intro [HasAxiomEFQ 𝓢] (l : List ι) (ψ : ι → F) (b : ∀ i ∈ l, 𝓢 ⊢ ψ i ➝ φ) : 𝓢 ⊢ l.disj' ψ ➝ φ :=
@@ -874,47 +876,45 @@ omit [DecidableEq F] in
 lemma EDisj₂AppendADisj₂Disj₂! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁(Γ ++ Δ) ⭤ ⋁Γ ⋎ ⋁Δ := by
   induction Γ using List.induction_with_singleton generalizing Δ <;> induction Δ using List.induction_with_singleton;
   case hnil.hnil =>
-    simp_all;
     apply E!_intro;
     . simp;
     . exact left_A!_intro efq! efq!;
   case hnil.hsingle =>
-    simp_all;
     apply E!_intro;
     . simp;
     . exact left_A!_intro efq! C!_id;
   case hsingle.hnil =>
-    simp_all;
     apply E!_intro;
     . simp;
     . exact left_A!_intro C!_id efq!;
   case hcons.hnil =>
-    simp_all;
     apply E!_intro;
     . simp;
-    . exact left_A!_intro C!_id efq!;
+    . simpa using left_A!_intro C!_id efq!;
   case hnil.hcons =>
-    simp_all;
     apply E!_intro;
     . simp;
     . exact left_A!_intro efq! C!_id;
   case hsingle.hsingle => simp_all;
   case hsingle.hcons => simp_all;
   case hcons.hsingle φ ps hps ihp ψ =>
-    simp_all;
-    apply E!_trans (by
-      apply EAA!_of_E!_right;
+    simp_all only [
+      ne_eq, cons_append, append_eq_nil_iff, cons_ne_self, and_self, not_false_eq_true,
+      disj₂_cons_nonempty, disj₂_singleton
+    ];
+    apply E!_trans ?_ EAAAA!;
+    . apply EAA!_of_E!_right;
       simpa using @ihp [ψ];
-    ) EAAAA!;
   case hcons.hcons φ ps hps ihp ψ qs hqs ihq =>
-    simp_all;
-    exact E!_trans (by
+    simp_all only [
+      ne_eq, cons_append, append_eq_nil_iff, and_self, not_false_eq_true,
+      disj₂_cons_nonempty, reduceCtorEq
+    ];
+    apply E!_trans ?_ EAAAA!;
+    . apply EAA!_of_E!_right;
+      apply E!_trans (@ihp (ψ :: qs));
       apply EAA!_of_E!_right;
-      exact E!_trans (@ihp (ψ :: qs)) (by
-        apply EAA!_of_E!_right;
-        simp_all;
-      )
-    ) EAAAA!;
+      simp_all;
 
 omit [DecidableEq F] in
 lemma Disj₂Append!_iff_ADisj₂Disj₂! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁(Γ ++ Δ) ↔ 𝓢 ⊢! ⋁Γ ⋎ ⋁Δ := by
@@ -926,7 +926,6 @@ omit [DecidableEq F] in
 lemma CDisj₂!_iff_CADisj₂! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! φ ➝ ⋁(ψ :: Γ) ↔ 𝓢 ⊢! φ ➝ ψ ⋎ ⋁Γ := by
   induction Γ with
   | nil =>
-    simp;
     constructor;
     . intro h; exact C!_trans h or₁!;
     . intro h; exact C!_trans h $ left_A!_intro C!_id efq!;
@@ -937,26 +936,28 @@ lemma CDisj₂ADisj₂Remove! [HasAxiomEFQ 𝓢] : 𝓢 ⊢! ⋁Γ ➝ φ ⋎ �
   induction Γ using List.induction_with_singleton with
   | hnil => simp;
   | hsingle ψ =>
-    simp;
     by_cases h: ψ = φ;
     . subst_vars; simp;
     . simp [(List.remove_singleton_of_ne h)];
   | hcons ψ Γ h ih =>
-    simp_all;
     by_cases hpq : ψ = φ;
-    . simp_all only [ne_eq, List.remove_cons_self]; exact left_A!_intro or₁! ih;
-    . simp_all [(List.remove_cons_of_ne Γ hpq)];
+    . simp_all only [ne_eq, not_false_eq_true, disj₂_cons_nonempty, eq_remove_cons];
+      exact left_A!_intro or₁! ih;
+    . simp_all only [ne_eq, not_false_eq_true, disj₂_cons_nonempty, (List.remove_cons_of_ne Γ hpq)];
       by_cases hqΓ : Γ.remove φ = [];
-      . simp_all;
+      . simp_all only [disj₂_nil, disj₂_singleton];
         exact left_A!_intro or₂! (C!_trans ih $ CAA!_of_C!_right efq!);
-      . simp_all;
+      . simp_all only [ne_eq, not_false_eq_true, disj₂_cons_nonempty];
         exact left_A!_intro (C!_trans or₁! or₂!) (C!_trans ih (CAA!_of_C!_right or₂!));
 
 lemma left_Disj₂!_intro' [HasAxiomEFQ 𝓢] (hd : ∀ ψ ∈ Γ, ψ = φ) : 𝓢 ⊢! ⋁Γ ➝ φ := by
   induction Γ using List.induction_with_singleton with
   | hcons ψ Δ hΔ ih =>
-    simp_all;
-    have ⟨hd₁, hd₂⟩ := hd; subst hd₁;
+    simp_all only [
+      ne_eq, mem_cons, true_or, or_true, implies_true, forall_const, forall_eq_or_imp,
+      not_false_eq_true, disj₂_cons_nonempty
+    ];
+    have ⟨rfl, hd₂⟩ := hd;
     apply provable_iff_provable.mpr;
     apply deduct_iff.mpr;
     exact of_C!_of_C!_of_A! (by simp) (weakening! (by simp) $ provable_iff_provable.mp $ ih) id!

@@ -119,13 +119,15 @@ variable [DecidableEq α]
 
 def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
   | ⊥, ψ => by
-    cases ψ using cases' <;>
-    { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
+    cases ψ using cases'
+    case hfalsum => simpa using isTrue trivial
+    all_goals simpa using isFalse not_false;
   | atom a, ψ => by
-    cases ψ using cases' <;> try { simp; exact isFalse not_false }
-    simp; exact decEq _ _
+    cases ψ using cases'
+    case hatom => exact decEq _ _
+    all_goals simpa using isFalse not_false;
   | φ ➝ ψ, χ => by
-    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    cases χ using cases'
     case himp φ' ψ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp =>
@@ -133,8 +135,9 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
         | isFalse hq => isFalse (by simp [hp, hq])
       | isFalse hp => isFalse (by simp [hp])
+    all_goals simpa using isFalse not_false;
   | φ ⋏ ψ, χ => by
-    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    cases χ using cases' <;> try { simpa using isFalse not_false }
     case hand φ' ψ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp =>
@@ -143,7 +146,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
         | isFalse hq => isFalse (by simp [hp, hq])
       | isFalse hp => isFalse (by simp [hp])
   | φ ⋎ ψ, χ => by
-    cases χ using cases' <;> try { simp; exact isFalse not_false }
+    cases χ using cases'
     case hor φ' ψ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp =>
@@ -151,6 +154,7 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
         | isFalse hq => isFalse (by simp [hp, hq])
       | isFalse hp => isFalse (by simp [hp])
+    all_goals simpa using isFalse not_false;
 
 instance : DecidableEq (Formula α) := hasDecEq
 
@@ -200,7 +204,7 @@ def ofNat : ℕ → Option (Formula α)
     | _ => none
 
 lemma ofNat_toNat : ∀ (φ : Formula α), ofNat (toNat φ) = some φ
-  | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek, Option.map_some'];
+  | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek, Option.map_some];
   | ⊥       => by simp [toNat, ofNat]
   | φ ➝ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
   | φ ⋏ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
@@ -264,7 +268,7 @@ namespace Formula.subformulas
 
 variable {φ ψ χ : Formula α}
 
-@[simp] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> { simp [subformulas]; try tauto; }
+@[simp] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas];
 
 @[subformula]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
@@ -462,8 +466,9 @@ lemma Formula.subst_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦
 def ZeroSubstitution (α) := { s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
 
 lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
-  induction φ <;> simp [Formula.letterless, *];
-  case hatom => exact s.2;
+  induction φ
+  case hatom => simpa using s.2;
+  all_goals simp_all [Formula.letterless];
 
 
 class SubstitutionClosed (S : Set (Formula α)) where
