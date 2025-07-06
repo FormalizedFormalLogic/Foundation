@@ -9,7 +9,7 @@
 #let omitLabels = ("𝐄𝐐", "𝐑₀'")
 
 #let arrows = json("./arith.json").map(((from, to, type)) => {
-  if omitLabels.contains(from) == false and omitLabels.contains(from) == false { 
+  if omitLabels.contains(from) == false and omitLabels.contains(from) == false {
     if type == "ssub" {
       return strfmt("\"{}\" -> \"{}\"", from, to)
     } else if type == "sub" {
@@ -55,10 +55,10 @@
       "𝐑₀": $Logic(R_0)$,
       "𝐓𝐀": $Logic("TA")$,
       "𝐄𝐐": $Logic("EQ")$,
-      "𝐈𝚺₁ + 𝐂𝐨𝐧[𝐈𝚺₁]": $Logic(I Sigma_1 + "Con"(I Sigma_1))$,
-      "𝐈𝚺₁ + ¬𝐂𝐨𝐧[𝐈𝚺₁]": $Logic(I Sigma_1 + not"Con"(I Sigma_1))$,
-      "𝐏𝐀 + 𝐂𝐨𝐧[𝐏𝐀]": $Logic("PA" + "Con"("PA"))$,
-      "𝐏𝐀 + ¬𝐂𝐨𝐧[𝐏𝐀]": $Logic("PA" + not"Con"("PA"))$,
+      "𝐈𝚺₁.AddSelfConsistency": $Logic(I Sigma_1 + "Con"(I Sigma_1))$,
+      "𝐈𝚺₁.AddSelfInconsistency": $Logic(I Sigma_1 + not"Con"(I Sigma_1))$,
+      "𝐏𝐀.AddSelfConsistency": $Logic("PA" + "Con"("PA"))$,
+      "𝐏𝐀.AddSelfInconsistency": $Logic("PA" + not"Con"("PA"))$,
     ),
     width: 240pt,
   )
