@@ -53,7 +53,7 @@ open FirstOrder FirstOrder.Arith
 open Modal Logic
 open Entailment
 
-variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Delta1Definable]
          {f : Realization ℒₒᵣ}
          {A B : Modal.Formula _}
 
@@ -61,7 +61,7 @@ variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
 section Corollary
 
 /-- Gödel's Second Incompleteness Theorem -/
-example [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)] : T ⊬. T.standardPr.con := by
+example [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T ⊬. T.standardPr.con := by
   have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
@@ -119,7 +119,7 @@ lemma iff_not_modalIndep_not_bewIndep :
   . intro h; exact (K!_left iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
   . intro h; exact (K!_right iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
 
-variable [SoundOn T (Hierarchy 𝚷 2)]
+variable [T.SoundOn (Hierarchy 𝚷 2)]
 
 lemma unprovable_independency_of_consistency :
     T ⊬. T.standardPr.indep (T.standardPr.con) := by

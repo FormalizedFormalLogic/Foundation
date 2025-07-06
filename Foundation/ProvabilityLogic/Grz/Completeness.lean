@@ -23,7 +23,8 @@ def strongInterpret (f : Realization L) (𝔅 : ProvabilityPredicate T₀ T) : F
   | φ ➝ ψ => (f.strongInterpret 𝔅 φ) ➝ (f.strongInterpret 𝔅 ψ)
   | □φ => (f.strongInterpret 𝔅 φ) ⋏ 𝔅 (f.strongInterpret 𝔅 φ)
 
-lemma iff_interpret_boxdot_strongInterpret_inside [L.DecidableEq] [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ⭤ f.strongInterpret 𝔅 A := by
+lemma iff_interpret_boxdot_strongInterpret_inside [L.DecidableEq] [𝔅.HBL2] :
+    T ⊢!. f.interpret 𝔅 (Aᵇ) ⭤ f.strongInterpret 𝔅 A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | hfalsum => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
@@ -39,7 +40,8 @@ lemma iff_interpret_boxdot_strongInterpret_inside [L.DecidableEq] [𝔅.HBL2] : 
       . exact K!_right ih;
       . exact 𝔅.prov_distribute_imply'' $ K!_right ih;
 
-lemma iff_interpret_boxdot_strongInterpret [L.DecidableEq] [𝔅.HBL2] : T ⊢!. f.interpret 𝔅 (Aᵇ) ↔ T ⊢!. f.strongInterpret 𝔅 A := by
+lemma iff_interpret_boxdot_strongInterpret [L.DecidableEq] [𝔅.HBL2] :
+    T ⊢!. f.interpret 𝔅 (Aᵇ) ↔ T ⊢!. f.strongInterpret 𝔅 A := by
   constructor;
   . intro h; exact (K!_left iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
   . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
@@ -80,8 +82,8 @@ lemma iff_models_interpret_boxdot_strongInterpret
 
 end Realization
 
-theorem Grz.arithmetical_completeness_iff {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [Arith.SoundOn T (Arith.Hierarchy 𝚷 2)] :
-  (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.strongInterpret T.standardPr A) ↔ Logic.Grz ⊢! A := by
+theorem Grz.arithmetical_completeness_iff {T : ArithmeticTheory} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Arith.Hierarchy 𝚷 2)] :
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.strongInterpret T.standardPr A) ↔ Logic.Grz ⊢! A := by
   constructor;
   . intro h;
     suffices Logic.GL ⊢! Aᵇ by apply Modal.Logic.iff_provable_boxdot_GL_provable_Grz.mp this;
@@ -95,8 +97,8 @@ theorem Grz.arithmetical_completeness_iff {T : Theory ℒₒᵣ} [T.Delta1Defina
     exact Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ this;
 
 theorem Grz.arithmetical_completeness_model_iff
-  {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [Arith.SoundOn T (Arith.Hierarchy 𝚷 2)] [ℕ ⊧ₘ* T] :
-  (∀ {f : Realization ℒₒᵣ}, ℕ ⊧ₘ₀ f.strongInterpret T.standardPr A) ↔ Logic.Grz ⊢! A := by
+    {T : ArithmeticTheory} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [ℕ ⊧ₘ* T] :
+    (∀ {f : Realization ℒₒᵣ}, ℕ ⊧ₘ₀ f.strongInterpret T.standardPr A) ↔ Logic.Grz ⊢! A := by
   apply Iff.trans ?_ Modal.Logic.iff_provable_Grz_provable_boxdot_S;
   apply Iff.trans ?_ (S.arithmetical_completeness_iff (T := T)).symm;
   have : 𝐑₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance

@@ -17,7 +17,7 @@ open Modal
 open FirstOrder
 open ProvabilityPredicate
 
-variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]
+variable {T₀ T : ArithmeticTheory} [T₀ ⪯ T] [Diagonalization T₀]
          {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.Sound ℕ]
          {A B : Formula ℕ}
 
@@ -27,7 +27,7 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 open Arith
 
-variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [SoundOn T (Hierarchy 𝚷 2)]
+variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)]
 
 lemma GL_S_TFAE :
     [

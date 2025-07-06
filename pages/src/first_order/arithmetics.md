@@ -80,7 +80,7 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 |                  $t [\vec{w}]$                  | [`L.termSubst w t`]     |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
 |           $\mathrm{Semiformula}_x(y)$           | [`L.Semiformula x y`]   |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
 |                  $φ [\vec{w}]$                  | [`L.substs w φ`]        |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
-|            $\mathrm{Pr}_T(\varphi)$             | [`T.Provableₐ φ`]       |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Sigma_1$ |        -         |
+|            $\mathrm{Pr}_T(\varphi)$             | [`T.Provable φ`]       |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Sigma_1$ |        -         |
  
 [`x ≤ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/PeanoMinus/Basic.html#LO.PeanoMinus.instLE
 [`x - y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/PeanoMinus/Functions.html#LO.PeanoMinus.sub
@@ -113,5 +113,5 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 [`L.termSubst w t`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Functions.html#LO.ISigma1.Metamath.Language.termSubst
 [`L.Semiformula x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Basic.html#LO.ISigma1.Metamath.Language.IsSemiformula
 [`L.substs w φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Functions.html#LO.ISigma1.Metamath.Language.substs
-[`T.Provableₐ φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/FormalizedR0.html#LO.FirstOrder.Theory.Provable%E2%82%90
+[`T.Provable φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/FormalizedR0.html#LO.FirstOrder.Theory.Provable%E2%82%90
 

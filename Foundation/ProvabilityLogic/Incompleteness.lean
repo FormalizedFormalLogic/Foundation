@@ -121,15 +121,13 @@ def prov_collect_and [𝔅.HBL2] [DecidableEq (Sentence L)] : T₀ ⊢!. 𝔅 σ
 
 end
 
-end ProvabilityPredicate
-
 variable {T₀ T : Theory L} {𝔅 : ProvabilityPredicate T₀ T}
 
 open LO.Entailment
 open Diagonalization
 open ProvabilityPredicate
 
-def ProvabilityPredicate.goedel [Diagonalization T₀] (𝔅 : ProvabilityPredicate T₀ T) : Sentence L :=
+def goedel [Diagonalization T₀] (𝔅 : ProvabilityPredicate T₀ T) : Sentence L :=
   fixpoint T₀ “x. ¬!𝔅.prov x”
 
 section GoedelSentence
@@ -140,7 +138,7 @@ local notation "𝗚" => 𝔅.goedel
 
 variable (𝔅)
 
-lemma ProvabilityPredicate.goedel_spec : T₀ ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := by
+lemma goedel_spec : T₀ ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := by
   convert (diag (T := T₀) “x. ¬!𝔅.prov x”);
   simp [goedel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
   rfl;
@@ -149,7 +147,7 @@ variable {𝔅}
 
 end GoedelSentence
 
-class ProvabilityPredicate.GoedelSound (𝔅 : ProvabilityPredicate T₀ T) [Diagonalization T₀] where
+class GoedelSound (𝔅 : ProvabilityPredicate T₀ T) [Diagonalization T₀] where
   goedel_sound : T ⊢!. 𝔅 𝔅.goedel → T ⊢!. 𝔅.goedel
 
 section First
@@ -191,7 +189,7 @@ variable [L.DecidableEq] [𝔅.HBL]
 
 lemma formalized_consistent_of_existance_unprovable (σ) : T₀ ⊢!. ∼𝔅 σ ➝ 𝔅.con := contra! $ 𝔅.D2 _ _ ⨀ (𝔅.D1 efq!)
 
-variable [T₀ ⪯ T] [Diagonalization T₀]
+variable [T₀ ⪯ T] [Diagonalization T₀] (𝔅)
 
 local notation "𝗚" => 𝔅.goedel
 
@@ -205,19 +203,19 @@ theorem formalized_unprovable_goedel : T₀ ⊢!. 𝔅.con ➝ ∼𝔅 𝗚 := b
 
 theorem goedel_iff_consistency : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := by
   have h₁ : T₀ ⊢!. ∼𝔅 𝗚 ➝ 𝔅.con := formalized_consistent_of_existance_unprovable 𝗚
-  have h₂ : T₀ ⊢!. 𝔅.con ➝ ∼𝔅 𝗚 := formalized_unprovable_goedel
+  have h₂ : T₀ ⊢!. 𝔅.con ➝ ∼𝔅 𝗚 := 𝔅.formalized_unprovable_goedel
   have h₃ : T₀ ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := 𝔅.goedel_spec
   cl_prover [h₁, h₂, h₃]
 
 theorem unprovable_consistency [Consistent T] : T ⊬. 𝔅.con := by
   intro h
-  have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := goedel_iff_consistency
+  have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_consistency
   have : T ⊢!. 𝗚 := by cl_prover [h, this]
   exact unprovable_goedel this
 
 theorem unrefutable_consistency [Consistent T] [𝔅.GoedelSound] : T ⊬. ∼𝔅.con := by
   intro h
-  have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := goedel_iff_consistency
+  have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_consistency
   have : T ⊢!. ∼𝗚 := by cl_prover [h, this]
   exact unrefutable_goedel this
 
@@ -230,7 +228,7 @@ end Second
 
 section Loeb
 
-def ProvabilityPredicate.kreisel [Diagonalization T₀]
+def kreisel [Diagonalization T₀]
     (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL]
     (σ : Sentence L) : Sentence L := fixpoint T₀ “x. !𝔅.prov x → !σ”
 
@@ -242,7 +240,7 @@ local prefix:80 "𝗞" => 𝔅.kreisel
 
 variable (𝔅)
 
-lemma ProvabilityPredicate.kreisel_spec (σ : Sentence L) : T₀ ⊢!. 𝗞 σ ⭤ (𝔅 (𝗞 σ) ➝ σ) := by
+lemma kreisel_spec (σ : Sentence L) : T₀ ⊢!. 𝗞 σ ⭤ (𝔅 (𝗞 σ) ➝ σ) := by
   convert (diag (T := T₀) “x. !𝔅.prov x → !σ”);
   simp [kreisel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
   rfl;
@@ -256,7 +254,6 @@ private lemma kreisel_specAux₁ [L.DecidableEq] [T₀ ⪯ T] (σ : Sentence L) 
 private lemma kreisel_specAux₂ (σ : Sentence L) : T₀ ⊢!. (𝔅 (𝗞 σ) ➝ σ) ➝ 𝗞 σ := K!_right (𝔅.kreisel_spec σ)
 
 end KrieselSentence
-
 
 section LoebTheorem
 
@@ -296,7 +293,7 @@ lemma formalized_unprovable_not_consistency :
     T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
   have : T ⊢!. ∼𝔅.con := Loeb.LT $ CN!_of_CN!_right hC;
-  have : T ⊬. ∼𝔅.con := unrefutable_consistency;
+  have : T ⊬. ∼𝔅.con := unrefutable_consistency 𝔅;
   contradiction;
 
 lemma formalized_unrefutable_goedel : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.goedel) := by
@@ -304,7 +301,7 @@ lemma formalized_unrefutable_goedel : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.goede
   have : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con)  := formalized_unprovable_not_consistency;
   have : T ⊢!. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) :=
     C!_trans hC $ WeakerThan.pbl <| K!_left <| ENN!_of_E!
-      <| prov_distribute_iff <| ENN!_of_E! <| WeakerThan.pbl goedel_iff_consistency;
+      <| prov_distribute_iff <| ENN!_of_E! <| WeakerThan.pbl (𝔅.goedel_iff_consistency);
   contradiction;
 
 end Loeb
@@ -343,4 +340,4 @@ theorem kriesel_remark : T ⊢!. 𝔅.con := by
 
 end Rosser
 
-end LO.ProvabilityLogic
+end LO.ProvabilityLogic.ProvabilityPredicate

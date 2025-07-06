@@ -111,10 +111,6 @@ end Semiterm
 
 namespace Semiformula
 
-instance : Coe (Semiformula ℒₒᵣ ξ n) (Semiformula L ξ n) := ⟨Semiformula.lMap Language.oringEmb⟩
-
-instance : Coe (Theory ℒₒᵣ) (Theory L) := ⟨(Semiformula.lMap Language.oringEmb '' ·)⟩
-
 @[simp] lemma oringEmb_eq (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
     Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (op(=).operator v) = op(=).operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
   simpa [lMap_rel, rew_rel, Operator.operator, Operator.Eq.sentence_eq] using Matrix.fun_eq_vec_two
@@ -216,22 +212,6 @@ macro_rules
 end BinderNotation
 
 namespace Arith
-
-class SoundOn {L : Language} [Structure L ℕ]
-    (T : Theory L) (F : Sentence L → Prop) where
-  sound : ∀ {σ}, F σ → T ⊢! ↑σ → ℕ ⊧ₘ₀ σ
-
-instance {L : Language} [Structure L ℕ] (T : Theory L) (F : Sentence L → Prop) [ℕ ⊧ₘ* T] : SoundOn T F :=
-  ⟨fun _ b ↦ consequence_iff.mp (sound! (T := T) b) ℕ inferInstance⟩
-
-section
-
-variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
-
-lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : Entailment.Consistent T :=
-  Entailment.consistent_iff_unprovable_bot.mpr fun b ↦ by simpa [Models₀] using SoundOn.sound (F := F) hF b
-
-end
 
 section
 

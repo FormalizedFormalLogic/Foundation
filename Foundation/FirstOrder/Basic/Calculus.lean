@@ -451,6 +451,8 @@ abbrev Axiom := Set (Sentence L)
 
 variable {L}
 
+abbrev ArithmeticAxiom := Axiom ℒₒᵣ
+
 @[coe] def Theory.toAxiom (T : Theory L) : Axiom L := Semiformula.close₀ '' T
 
 @[coe] def Axiom.toTheory (A : Axiom L) : Theory L := Rewriting.embedding '' A

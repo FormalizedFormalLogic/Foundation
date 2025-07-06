@@ -162,7 +162,7 @@ Following holds for all formula (not coded one) $\varphi$ and finite set $\Gamma
     V \models \mathrm{Provable}_{T + \mathsf{R_0}} (\ulcorner \sigma \urcorner)$
   ```lean
   theorem LO.ISigma1.Metamath.sigma1_complete (hσ : Hierarchy 𝚺 1 σ) :
-      V ⊧ₘ₀ σ → T.Provableₐ ⌜σ⌝
+      V ⊧ₘ₀ σ → T.Provable ⌜σ⌝
   ```
   - [LO.ISigma1.Metamath.sigma1_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D3.html#LO.ISigma1.Metamath.sigma1_complete)
 
@@ -170,11 +170,11 @@ Now assume that $U$ is a theory of arithmetic stronger than $\mathsf{R_0}$ and
 $T$ be a theory  of arithmetic stronger than $\mathsf{I}\Sigma_1$.
 The following holds, thanks to the completeness theorem.
 - $U \vdash \sigma \iff T \vdash \mathrm{Provable}_U(\ulcorner \sigma \urcorner)$
-  - [LO.ISigma1.provableₐ_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_complete)
+  - [LO.ISigma1.provable_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_complete)
 - $T \vdash \mathrm{Provable}_U(\ulcorner \sigma \to \pi \urcorner) \to \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \to \mathrm{Provable}_U(\ulcorner \pi \urcorner)$
-  - [LO.ISigma1.provableₐ_D2](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D2)
+  - [LO.ISigma1.provable_D2](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D2)
 - $T \vdash \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \to \mathrm{Provable}_U(\ulcorner \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \urcorner)$
-  - [LO.ISigma1.provableₐ_D3](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D3)
+  - [LO.ISigma1.provable_D3](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D3)
 
 ## Second Incompleteness Theorem
 
