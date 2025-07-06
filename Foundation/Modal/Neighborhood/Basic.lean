@@ -32,7 +32,7 @@ lemma Frame.eq_η_ν {F : Frame} {X Y : Set F.World} : (F.η X) = Y ↔ (∀ x, 
 
 section
 
-abbrev Frame.trivial : Frame := ⟨Unit, λ _ => ∅⟩
+abbrev Frame.simple_blackhole : Frame := ⟨Unit, λ _ => { Set.univ }⟩
 
 end
 

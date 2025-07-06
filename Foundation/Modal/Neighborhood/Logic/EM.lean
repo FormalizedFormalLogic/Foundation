@@ -1,6 +1,7 @@
 import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.AxiomM
 import Foundation.Modal.Neighborhood.Logic.E
+import Foundation.Vorspiel.Set.Fin
 
 namespace LO.Modal
 
@@ -27,7 +28,7 @@ instance : Sound Hilbert.EM FrameClass.EM := instSound_of_validates_axioms $ by
   apply valid_axiomM_of_isMonotonic;
 
 instance : Entailment.Consistent Hilbert.EM := consistent_of_sound_frameclass FrameClass.EM $ by
-  use Frame.trivial;
+  use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 

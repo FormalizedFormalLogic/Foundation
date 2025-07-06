@@ -12,7 +12,10 @@ class Frame.IsRegular (F : Frame) : Prop where
 
 lemma Frame.regular [Frame.IsRegular F] {X Y : Set F} : (F.η X) ∩ (F.η Y) ⊆ F.η (X ∩ Y) := by apply IsRegular.regular
 
-instance : Frame.trivial.IsRegular := ⟨by tauto_set⟩
+instance : Frame.simple_blackhole.IsRegular := ⟨by
+  intro X Y e;
+  simp_all;
+⟩
 
 lemma valid_axiomC_of_isRegular [F.IsRegular] : F ⊧ Axioms.C (.atom 0) (.atom 1) := by
   intro V x;

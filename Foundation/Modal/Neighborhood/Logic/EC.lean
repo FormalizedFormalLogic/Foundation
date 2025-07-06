@@ -27,7 +27,7 @@ instance : Sound Hilbert.EC FrameClass.EC := instSound_of_validates_axioms $ by
   apply valid_axiomC_of_isRegular;
 
 instance : Entailment.Consistent Hilbert.EC := consistent_of_sound_frameclass FrameClass.EC $ by
-  use Frame.trivial;
+  use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 

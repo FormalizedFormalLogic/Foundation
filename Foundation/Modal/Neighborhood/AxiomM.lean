@@ -8,11 +8,16 @@ open Formula.Neighborhood
 variable {F : Frame}
 
 class Frame.IsMonotonic (F : Frame) : Prop where
-  mono : ∀ X Y : Set F, X ⊆ Y → F.η X ⊆ F.η Y
+  mono : ∀ X Y : Set F, F.η (X ∩ Y) ⊆ F.η X ∩ F.η Y
 
-lemma Frame.mono [Frame.IsMonotonic F] {X Y : Set F} : X ⊆ Y → F.η X ⊆ F.η Y := by apply IsMonotonic.mono
+lemma Frame.mono [Frame.IsMonotonic F] {X Y : Set F} : F.η (X ∩ Y) ⊆ F.η X ∩ F.η Y := by apply IsMonotonic.mono
 
-instance : Frame.trivial.IsMonotonic := ⟨by simp⟩
+instance : Frame.simple_blackhole.IsMonotonic := ⟨by
+  intro X Y e he;
+  constructor <;>
+  . simp_all only [Set.mem_setOf_eq, Set.mem_singleton_iff];
+    tauto_set;
+⟩
 
 lemma valid_axiomM_of_isMonotonic [F.IsMonotonic] : F ⊧ Axioms.M (.atom 0) (.atom 1) := by
   intro V x;
@@ -21,8 +26,6 @@ lemma valid_axiomM_of_isMonotonic [F.IsMonotonic] : F ⊧ Axioms.M (.atom 0) (.a
     Model.truthset.eq_atom, Set.mem_union, Set.mem_compl_iff, Set.mem_setOf_eq, Set.mem_inter_iff
   ]
   apply not_or_of_imp;
-  intro h;
-  constructor <;>
-  . apply F.mono (by simp) h;
+  apply Frame.mono;
 
 end LO.Modal.Neighborhood

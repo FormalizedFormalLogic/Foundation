@@ -1,7 +1,10 @@
 import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.Logic.EM
+import Foundation.Modal.Neighborhood.Logic.EN
 import Foundation.Modal.Neighborhood.Logic.EC
 
+
+@[simp] lemma Set.Fin2.eq_univ : Set.univ (α := Fin 2) = {0, 1} := by ext x; match x with | 0 | 1 => simp
+@[simp] lemma Set.Fin3.eq_univ : Set.univ (α := Fin 3) = {0, 1, 2} := by ext x; match x with | 0 | 1 | 2 => simp
 
 namespace LO.Modal
 
@@ -11,39 +14,39 @@ open Formula.Neighborhood
 
 namespace Neighborhood
 
-protected class Frame.IsEMC (F) extends Frame.IsMonotonic F, Frame.IsRegular F where
-protected abbrev FrameClass.EMC : FrameClass := { F | F.IsEMC }
+protected class Frame.IsECN (F : Frame) extends F.IsRegular, F.ContainsUnit where
+protected abbrev FrameClass.ECN : FrameClass := { F | F.IsECN }
 
 end Neighborhood
 
 
 namespace Hilbert
 
-namespace EMC.Neighborhood
+namespace ECN.Neighborhood
 
-instance : Sound Hilbert.EMC FrameClass.EMC := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.ECN FrameClass.ECN := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.insert_iff, Semantics.RealizeSet.singleton_iff];
   refine ⟨?_, ?_⟩;
   . intro F hF;
     replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomM_of_isMonotonic;
+    apply valid_axiomC_of_isRegular;
   . intro F hF;
     replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomC_of_isRegular;
+    apply valid_axiomN_of_ContainsUnit;
 
-instance : Entailment.Consistent Hilbert.EMC := consistent_of_sound_frameclass FrameClass.EMC $ by
+instance : Entailment.Consistent Hilbert.ECN := consistent_of_sound_frameclass FrameClass.ECN $ by
   use Frame.simple_blackhole;
-  simp;
+  simp only [Set.mem_setOf_eq];
   constructor;
 
-end EMC.Neighborhood
+end ECN.Neighborhood
 
-instance : Hilbert.EC ⪱ Hilbert.EMC := by
+instance : Hilbert.EC ⪱ Hilbert.ECN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.M (.atom 0) (.atom 1));
+    use Axioms.N;
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EC);
@@ -78,11 +81,9 @@ instance : Hilbert.EC ⪱ Hilbert.EMC := by
               simp [M]
         }
       . simp! [M, Semantics.Realize, Satisfies];
-        ext x;
-        simp!;
-        omega;
+        tauto_set;
 
-instance : Hilbert.EM ⪱ Hilbert.EMC := by
+instance : Hilbert.EN ⪱ Hilbert.ECN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -90,14 +91,14 @@ instance : Hilbert.EM ⪱ Hilbert.EMC := by
     use (Axioms.C (.atom 0) (.atom 1));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EM);
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EN);
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 2,
         ν := λ w =>
           match w with
-          | 0 => {{0}, {1}, {0, 1}}
-          | 1 => {{1}, {0, 1}},
+          | 0 => {{0}, {1}, {0, 1}, Set.univ}
+          | 1 => {{1}, {0, 1}, Set.univ},
         Val := λ w =>
           match w with
           | 0 => {0}
@@ -107,30 +108,16 @@ instance : Hilbert.EM ⪱ Hilbert.EMC := by
       use M, 0;
       constructor;
       . exact {
-          mono := by
-            rintro X Y w hw;
-            constructor;
-            . match w with
-              | 0 | 1 =>
-                rcases Set.Fin2.all_cases X with rfl | rfl | rfl | rfl;
-                case inr.inl =>
-                  rcases Set.Fin2.all_cases Y with rfl | rfl | rfl | rfl <;>
-                  . simp [M] at hw; tauto_set;
-                all_goals simp_all [M];
-            . match w with
-              | 0 | 1 =>
-                rcases Set.Fin2.all_cases Y with rfl | rfl | rfl | rfl;
-                case inr.inl =>
-                  rcases Set.Fin2.all_cases X with rfl | rfl | rfl | rfl <;>
-                  . simp [M] at hw; tauto_set;
-                all_goals simp_all [M];
+          contains_unit := by
+            intro x;
+            match x with | 0 | 1 => simp_all [M]
         }
       . simp! [M, Semantics.Realize, Satisfies];
         tauto_set;
 
 end Hilbert
 
-instance : 𝐄𝐂 ⪱ 𝐄𝐌𝐂 := inferInstance
-instance : 𝐄𝐌 ⪱ 𝐄𝐌𝐂 := inferInstance
+instance : 𝐄𝐂 ⪱ 𝐄𝐂𝐍 := inferInstance
+instance : 𝐄𝐍 ⪱ 𝐄𝐂𝐍 := inferInstance
 
 end LO.Modal
