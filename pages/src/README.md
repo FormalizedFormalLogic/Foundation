@@ -3,23 +3,24 @@
 [Formalized Formal Logic](https://github.com/FormalizedFormalLogic/Foundation) is aim to formalize some various results of mathematical logic in [Lean Theorem Prover](https://lean-lang.org).
 
 ## Document
+
 - [Doc](https://formalizedformallogic.github.io/Foundation/doc/Foundation.html)
 
-## Kites
+## Zoos
 
 Visualization for sublogic/subtheory relations.
 
 ### Modal Logics
 
-![Kite of Modal Logics](./assets/modal_kite.png)
+![Zoo of Modal Logics](./assets/modal_zoo.png)
 
 ### Propositional Logics
 
-![Kite of Propositional Logics](./assets/propositional_kite.png)
+![Zoo of Propositional Logics](./assets/propositional_zoo.png)
 
 ### First-Order Arithmetics
 
-![Kite of First-Order Arithmetics](./assets/arith_kite.png)
+![Zoo of First-Order Arithmetics](./assets/arith_zoo.png)
 
 ## Import Graph
 

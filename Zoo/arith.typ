@@ -20,11 +20,11 @@
   }
 })
 
-#figure(caption: [Kite of Arithmetic Theories], numbering: none)[
+#figure(caption: [Zoo of Arithmetic Theories], numbering: none)[
   #raw-render(
     raw(
       "
-  digraph ModalLogicsKite {
+  digraph ModalLogicsZoo {
     rankdir = BT;
 
     node [

@@ -17,11 +17,11 @@
   }
 })
 
-#figure(caption: [Kite of Propositional Logics], numbering: none)[
+#figure(caption: [Zoo of Propositional Logics], numbering: none)[
   #raw-render(
     raw(
       "
-  digraph ModalLogicsKite {
+  digraph ModalLogicsZoo {
     rankdir = BT;
     node [
       shape=none

@@ -19,11 +19,11 @@
   }
 })
 
-#figure(caption: [Kite of Modal Logics], numbering: none)[
+#figure(caption: [Zoo of Modal Logics], numbering: none)[
   #raw-render(
     raw(
       "
-  digraph ModalLogicsKite {
+  digraph ModalLogicsZoo {
     rankdir = BT;
 
     node [

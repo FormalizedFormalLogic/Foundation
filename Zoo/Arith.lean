@@ -1,11 +1,11 @@
-import Kite.Basic
+import Zoo.Basic
 import Foundation.FirstOrder.Arith.Basic
 -- import Foundation.FirstOrder.Incompleteness.StandardProvability.FormalizedArithmetic
 
 open Lean Meta Qq Elab Command
 open LO.FirstOrder
 
-namespace Kite
+namespace Zoo
 
 def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   match ← inferTypeQ ci.type with
@@ -28,11 +28,11 @@ def findMatches : MetaM Json := do
 
   return edges.toOutput
 
-end Kite
+end Zoo
 
 
 unsafe def main : IO Unit := do
   initSearchPath (← findSysroot)
   let env ← importModules (loadExts := true) #[`Foundation] {}
-  let ⟨s, _, _⟩ ← Kite.findMatches.toIO { fileName := "<compiler>", fileMap := default } { env := env }
-  IO.FS.writeFile "Kite/arith.json" s.pretty
+  let ⟨s, _, _⟩ ← Zoo.findMatches.toIO { fileName := "<compiler>", fileMap := default } { env := env }
+  IO.FS.writeFile "Zoo/arith.json" s.pretty
