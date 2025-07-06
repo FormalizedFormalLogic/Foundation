@@ -44,7 +44,7 @@ namespace verTranslate
 @[simp]
 lemma degree_zero : φⱽ.degree = 0 := by
   induction φ using rec' with
-  | himp => simp [verTranslate, degree, *];
+  | himp => simp [verTranslate, *];
   | _ => rfl;
 
 @[simp]

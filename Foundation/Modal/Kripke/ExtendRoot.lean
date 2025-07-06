@@ -40,7 +40,7 @@ instance instIsRooted : (F.extendRoot r n).IsRootedBy extendRoot.root where
       obtain ⟨j, hj⟩ := j;
       apply Relation.TransGen.single;
       apply Nat.zero_lt_of_not_zero;
-      simp_all [Frame.Rel', Frame.extendRoot, extendRoot.root]
+      simp_all [Frame.Rel', Frame.extendRoot]
     | .inr x =>
       apply Relation.TransGen.single;
       tauto;
@@ -64,9 +64,9 @@ instance isAsymmetric [F.IsAsymmetric] : (F.extendRoot r n).IsAsymmetric := ⟨b
   | .inr x, .inr y =>
     suffices ¬y ≺ x by tauto;
     exact IsAsymm.asymm _ _ hxy;
-  | .inl i, .inl j => simp_all [Frame.Rel', Frame.extendRoot]; omega;
-  | .inl _, .inr _ => simp_all [Frame.Rel', Frame.extendRoot];
-  | .inr _, .inl _ => simp_all [Frame.Rel', Frame.extendRoot];
+  | .inl i, .inl j => simp_all [Frame.extendRoot]; omega;
+  | .inl _, .inr _ => simp_all [Frame.extendRoot];
+  | .inr _, .inl _ => simp_all [Frame.extendRoot];
 ⟩
 
 instance isTransitive [F.IsTransitive] : (F.extendRoot r n).IsTransitive := ⟨by

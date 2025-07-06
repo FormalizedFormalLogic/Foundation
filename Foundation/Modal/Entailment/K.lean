@@ -309,7 +309,7 @@ lemma distribute_multibox_conj! : 𝓢 ⊢! □^[n]⋀Γ ➝ ⋀(Γ.multibox n) 
   | hnil => simp;
   | hsingle => simp;
   | hcons φ Γ h ih =>
-    simp only [ne_eq, not_false_eq_true, List.conj₂_cons_nonempty h];
+    simp only [List.conj₂_cons_nonempty h];
     have h₁ : 𝓢 ⊢! □^[n](φ ⋏ ⋀Γ) ➝ □^[n]φ := imply_multibox_distribute'! $ and₁!;
     have h₂ : 𝓢 ⊢! □^[n](φ ⋏ ⋀Γ) ➝ ⋀(Γ.multibox n) := C!_trans (imply_multibox_distribute'! $ and₂!) ih;
     have := right_K!_intro h₁ h₂;

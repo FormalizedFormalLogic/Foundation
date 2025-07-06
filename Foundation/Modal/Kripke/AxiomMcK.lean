@@ -211,7 +211,7 @@ instance [Logic.K4McK ⪯ L] : (canonicalFrame L).SatisfiesMcKinseyCondition := 
     . replace hC : (Γ'₁ ∪ Γ'₂).toSet *⊢[L]! ⊥ := by
         convert hC;
         ext φ;
-        simp only [Set.mem_preimage, Function.iterate_one, Finset.mem_union, Finset.mem_filter, Finset.mem_insert, Γ'₁, Γ', Γ'₂, hΓ];
+        simp only [Set.mem_preimage, Function.iterate_one, Finset.mem_union, Finset.mem_filter, Finset.mem_insert, Γ'₁, Γ', Γ'₂];
         constructor;
         . tauto;
         . rintro (rfl | h);

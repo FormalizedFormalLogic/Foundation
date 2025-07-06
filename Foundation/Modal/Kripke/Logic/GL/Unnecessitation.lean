@@ -20,7 +20,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Logic.GL ⊢! □φ ➝ □ψ → Lo
   let M₀ := M.extendRoot r 1;
   let r₀ : M₀.World := extendRoot.root;
 
-  have hs : Satisfies M r (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies, Semantics.Realize];
+  have hs : Satisfies M r (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies];
   replace hs := @Model.extendRoot.modal_equivalence_original_world (M := M) (r := r) (n := 1) inferInstance r (⊡φ ⋏ ∼ψ) |>.mp hs;
   have ⟨hs₁₂, hs₃⟩ := Satisfies.and_def.mp hs;
   have ⟨hs₁, hs₂⟩ := Satisfies.and_def.mp hs₁₂;

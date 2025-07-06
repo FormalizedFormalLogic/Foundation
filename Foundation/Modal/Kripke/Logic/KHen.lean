@@ -96,13 +96,13 @@ lemma trichonomy : x ≺ y ∨ x = y ∨ y ≺ x := by
   | x♯, y♭ => simp [cresswellFrame, Frame.Rel'];
   | x♭, y♭ => simp [cresswellFrame, Frame.Rel']; omega;
 
-@[simp] lemma sharp_to_flat : n♯ ≺ m♭ := by simp [cresswellFrame, Frame.Rel']
+@[simp] lemma sharp_to_flat : n♯ ≺ m♭ := by simp [Frame.Rel']
 
-@[simp] lemma not_flat_to_sharp : ¬(n♭ ≺ m♯):= by simp [cresswellFrame, Frame.Rel'];
+@[simp] lemma not_flat_to_sharp : ¬(n♭ ≺ m♯):= by simp [Frame.Rel'];
 
-lemma sharp_to_sharp : n♯ ≺ m♯ ↔ n ≤ m + 1 := by simp [cresswellFrame, Frame.Rel']
+lemma sharp_to_sharp : n♯ ≺ m♯ ↔ n ≤ m + 1 := by simp [Frame.Rel']
 
-lemma flat_to_flat : n♭ ≺ m♭ ↔ n > m := by simp [cresswellFrame, Frame.Rel'];
+lemma flat_to_flat : n♭ ≺ m♭ ↔ n > m := by simp [Frame.Rel'];
 
 lemma exists_flat_of_from_flat (h : n♭ ≺ x) : ∃ m, x = ⟨m, 1⟩ ∧ n > m := by
   match x with

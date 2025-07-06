@@ -160,7 +160,7 @@ instance : Logic.S4Point3 ⪱ Logic.GrzPoint3 := by
             rintro x y z Rxy Rxz;
             simp;
         };
-      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
+      . simp [Semantics.Realize, Satisfies];
 
 end Logic
 

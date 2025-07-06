@@ -106,7 +106,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
           rcases Modal.Formula.Kripke.Satisfies.or_def.mp h with (hp | hq)
           . left; exact ihp x |>.mpr hp;
           . right; exact ihq x |>.mpr hq;
-      | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
+      | _ => simp_all [Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
     apply Sound.not_provable_of_countermodel (𝓜 := MC);
     apply Modal.Kripke.not_validOnFrameClass_of_exists_frame;
     use { World := F.World, Rel := F.Rel };
@@ -159,7 +159,7 @@ lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
           rcases Modal.Formula.Kripke.Satisfies.or_def.mp h with (hp | hq)
           . left; exact ihp x |>.mpr hp;
           . right; exact ihq x |>.mpr hq;
-      | _ => simp_all [goedelTranslate, Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
+      | _ => simp_all [Propositional.Formula.Kripke.Satisfies, Modal.Formula.Kripke.Satisfies];
     apply Sound.not_provable_of_countermodel (𝓜 := MC);
     apply Modal.Kripke.not_validOnFrameClass_of_exists_frame;
     use { World := F.World, Rel := F.Rel };
