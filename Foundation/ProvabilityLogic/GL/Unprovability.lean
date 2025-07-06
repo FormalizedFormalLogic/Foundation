@@ -163,7 +163,7 @@ lemma unrefutable_independency_of_consistency :
   congr;
 
 theorem undecidable_independency_of_consistency :
-    Undecidable T.toAxiom (T.standardPr.indep (T.standardPr.con)) := by
+    Independent T.toAxiom (T.standardPr.indep (T.standardPr.con)) := by
   constructor;
   . exact unprovable_independency_of_consistency;
   . exact unrefutable_independency_of_consistency;

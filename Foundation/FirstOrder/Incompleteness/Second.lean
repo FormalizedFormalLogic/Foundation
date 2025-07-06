@@ -22,7 +22,7 @@ theorem inconsistent_unprovable [T.Sigma1Sound] :
   T.standardPr.unrefutable_consistency
 
 theorem inconsistent_independent [T.Sigma1Sound] :
-    Entailment.Undecidable (T : Axiom ℒₒᵣ) (T.isConsistent : Sentence ℒₒᵣ) :=
+    Entailment.Independent (T : Axiom ℒₒᵣ) (T.isConsistent : Sentence ℒₒᵣ) :=
   have : 𝐑₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
   T.standardPr.consistency_independent
 

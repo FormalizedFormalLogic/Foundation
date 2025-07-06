@@ -41,7 +41,7 @@ lemma unprovable_not_independency_of_consistency : Logic.GL ⊬ ∼(independency
     simpa;
 
 /-
-theorem undecidable_independency_of_consistency : Undecidable Hilbert.GL (independency (∼□⊥)) := by
+theorem undecidable_independency_of_consistency : Independent Hilbert.GL (independency (∼□⊥)) := by
   constructor;
   . exact unprovable_independency;
   . exact unprovable_not_independency_of_consistency;
@@ -65,7 +65,7 @@ lemma unprovable_not_higherIndependency_of_consistency : Logic.GL ⊬ ∼(higher
     . exact ih h;
 
 /-
-theorem undecidable_higherIndependency_of_consistency : Undecidable Hilbert.GL (higherIndependency (∼□⊥) n) := by
+theorem undecidable_higherIndependency_of_consistency : Independent Hilbert.GL (higherIndependency (∼□⊥) n) := by
   constructor;
   . exact unprovable_higherIndependency_of_consistency;
   . exact unprovable_not_higherIndependency_of_consistency;

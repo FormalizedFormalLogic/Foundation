@@ -274,7 +274,7 @@ theorem LO.ISigma1.goedel_second_incompleteness
 
 theorem LO.ISigma1.inconsistent_undecidable
     (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [ℕ ⊧ₘ* T] :
-    System.Undecidable T ↑𝗖𝗼𝗻
+    System.Independent T ↑𝗖𝗼𝗻
 ```
 - [LO.ISigma1.goedel_second_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.goedel_second_incompleteness)
 - [LO.ISigma1.inconsistent_undecidable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.inconsistent_undecidable)

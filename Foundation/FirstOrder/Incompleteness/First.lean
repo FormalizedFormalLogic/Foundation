@@ -14,17 +14,18 @@ lemma FirstOrder.Arith.re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-P
     exact ⟨.mkSigma (codeOfREPred P) (by simp [codeOfREPred, codeOfPartrec']), by
       intro v; symm; simp; simpa [←Matrix.fun_eq_vec_one] using codeOfREPred_spec h (x := v 0)⟩
   · rintro ⟨φ, hφ⟩
-    have := (sigma1_re id (φ.sigma_prop)).comp
-      (f := fun x : ℕ ↦ x ::ᵥ List.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
+    have : REPred fun x ↦ (Semiformula.Evalm ℕ (x ::ᵥ List.Vector.nil).get id) _ :=
+      (sigma1_re id (φ.sigma_prop)).comp
+        (f := fun x : ℕ ↦ x ::ᵥ List.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
     exact this.of_eq <| by intro x; symm; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
 
 open Entailment FirstOrder Arith R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 /-- Gödel's first incompleteness theorem-/
 theorem R0.goedel_first_incompleteness
-    (T : Theory ℒₒᵣ) [𝐑₀ ⪯ T] [Sigma1Sound T] [T.Delta1Definable] :
+    (T : ArithmeticTheory) [𝐑₀ ⪯ T] [T.Sigma1Sound] [T.Delta1Definable] :
     ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
-  have con : Consistent (T : Axiom ℒₒᵣ) := by simpa using consistent_of_sigma1Sound T
+  have con : Consistent (T : Axiom ℒₒᵣ) := inferInstance
   let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : SyntacticSemiformula ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦

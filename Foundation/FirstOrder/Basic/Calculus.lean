@@ -543,11 +543,13 @@ def unprovable_close₀_iff {φ : SyntacticFormula L} :
 instance (T U : Theory L) [T ⪯ U] : T.toAxiom ⪯ U.toAxiom :=
   ⟨fun _ b ↦ Axiom.provable_iff.mpr <| (inferInstanceAs (T ⪯ U)).pbl (Axiom.provable_iff.mp b)⟩
 
-@[simp] lemma consistent_iff {T : Theory L} :
+@[simp] lemma consistent_iff :
     Consistent (T : Axiom L) ↔ Consistent T := calc
   Consistent (T : Axiom L) ↔ (T : Axiom L) ⊬ ⊥ := consistent_iff_unprovable_bot
   _                        ↔ T ⊬ ⊥             := by simp [unprovable_iff]
   _                        ↔ Consistent T      := consistent_iff_unprovable_bot.symm
+
+instance [Consistent T] : Consistent (T : Axiom L) := by simp_all
 
 end Axiom
 

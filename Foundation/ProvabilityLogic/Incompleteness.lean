@@ -172,7 +172,7 @@ theorem unrefutable_goedel [𝔅.GoedelSound] : T ⊬. ∼𝗚 := by
     inconsistent_iff_provable_bot.mpr (by simpa [Axiom.provable_iff] using this);
   contradiction;
 
-theorem goedel_independent [𝔅.GoedelSound] : Entailment.Undecidable (T : Axiom L) 𝗚 := by
+theorem goedel_independent [𝔅.GoedelSound] : Entailment.Independent (T : Axiom L) 𝗚 := by
   constructor
   . apply unprovable_goedel
   . apply unrefutable_goedel
@@ -219,7 +219,7 @@ theorem unrefutable_consistency [Consistent T] [𝔅.GoedelSound] : T ⊬. ∼�
   have : T ⊢!. ∼𝗚 := by cl_prover [h, this]
   exact unrefutable_goedel this
 
-theorem consistency_independent [Consistent T] [𝔅.GoedelSound] : Undecidable (T : Axiom L) 𝔅.con := by
+theorem consistency_independent [Consistent T] [𝔅.GoedelSound] : Independent (T : Axiom L) 𝔅.con := by
   constructor
   . apply unprovable_consistency
   . apply unrefutable_consistency
@@ -323,8 +323,8 @@ theorem unrefutable_rosser : T ⊬. ∼𝗥 := by
     by simpa [Axiom.provable_iff] using (N!_iff_CO!.mp hnρ) ⨀ hρ;
   contradiction
 
-theorem rosser_independent : Entailment.Undecidable T ↑𝗥 := by
-  suffices T ⊬. 𝗥 ∧ T ⊬. ∼𝗥 by simpa [Entailment.Undecidable, not_or, Axiom.unprovable_iff] using this;
+theorem rosser_independent : Entailment.Independent T ↑𝗥 := by
+  suffices T ⊬. 𝗥 ∧ T ⊬. ∼𝗥 by simpa [Entailment.Independent, not_or, Axiom.unprovable_iff] using this;
   constructor
   . apply unprovable_rosser
   . apply unrefutable_rosser
