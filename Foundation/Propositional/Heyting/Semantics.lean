@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Int
+import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Vorspiel.Order
 import Foundation.Logic.LindenbaumAlgebra
 
@@ -102,22 +102,17 @@ lemma mod_models_iff {φ : Formula α} :
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
 lemma sound {φ : Formula α} (d : H ⊢! φ) : mod H ⊧ φ := by
-  rcases d with ⟨d⟩
-  apply mod_models_iff.mpr fun ℍ hℍ ↦ ?_
-  induction d
-  case maxm φ hφ => exact hℍ.RealizeSet hφ;
-  case mdp φ ψ _ _ ihpq ihp =>
+  apply mod_models_iff.mpr;
+  intro ℍ hℍ;
+  induction d with
+  | @axm φ s hφ =>
+    apply hℍ.RealizeSet;
+    use φ;
+    simpa;
+  | @mdp φ ψ _ _ ihpq ihp =>
     have : (ℍ ⊧ₕ φ) ≤ (ℍ ⊧ₕ ψ) := by simpa using ihpq
     simpa [val_def'.mp ihp] using this
-  case verum => simp
-  case implyS => simp
-  case implyK φ ψ χ => simp [himp_himp_inf_himp_inf_le]
-  case andElimL => simp
-  case andElimR => simp
-  case K_intro => simp
-  case orIntroL => simp
-  case orIntroR => simp
-  case orElim => simp [himp_inf_himp_inf_sup_le]
+  | _ => simp [himp_himp_inf_himp_inf_le, himp_inf_himp_inf_sup_le]
 
 instance : Sound H (mod H) := ⟨sound⟩
 
@@ -155,9 +150,9 @@ open Hilbert.Deduction
 
 lemma complete [DecidableEq α] {φ : Formula α} [H.HasEFQ] (h : mod.{_,u} H ⊧ φ) : H ⊢! φ := by
   wlog Con : Entailment.Consistent H
-  · exact Entailment.not_consistent_iff_inconsistent.mp Con φ
+  . exact Entailment.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <|
-    mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hq ↦ lindenbaum_complete_iff.mpr <| maxm! hq⟩
+    mod_models_iff.mp h (lindenbaum H) ⟨fun ψ hψ ↦ lindenbaum_complete_iff.mpr <| Hilbert.axm_instances! hψ⟩
 
 instance [DecidableEq α] [H.HasEFQ] : Complete H (mod.{_,u} H) := ⟨complete⟩
 

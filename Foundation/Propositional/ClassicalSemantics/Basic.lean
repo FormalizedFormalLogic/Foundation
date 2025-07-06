@@ -76,20 +76,88 @@ lemma iff_subst_self (s) :
       . left; apply ihφ.mpr hφ;
       . right; apply ihψ.mpr hψ;
 
+lemma equiv_of_letterless (hl : φ.letterless) : ∀ v w : Valuation _, v ⊧ φ ↔ w ⊧ φ := by
+  intro v w;
+  induction φ with
+  | hatom a => simp at hl;
+  | hfalsum => simp;
+  | himp φ ψ ihφ ihψ =>
+    simp only [Formula.letterless] at hl;
+    replace ihφ := ihφ hl.1;
+    replace ihψ := ihψ hl.2;
+    simp_all;
+  | hand φ ψ ihφ ihψ =>
+    simp only [Formula.letterless] at hl;
+    replace ihφ := ihφ hl.1;
+    replace ihψ := ihψ hl.2;
+    simp_all;
+  | hor φ ψ ihφ ihψ =>
+    simp only [Formula.letterless] at hl;
+    replace ihφ := ihφ hl.1;
+    replace ihψ := ihψ hl.2;
+    simp_all;
+
 end Formula.ClassicalSemantics
 
 
-namespace ClassicalSemantics
 
-variable {v : Valuation α} {φ ψ : Formula α}
+section
 
 open Semantics (Valid)
+open Formula (atom)
+open Formula.ClassicalSemantics
+open ClassicalSemantics
 
-lemma tautology_subst_instance (h : Valid (Valuation _) φ) : ∀ s, Valid (Valuation _) (φ⟦s⟧) := by
+variable {v : ClassicalSemantics.Valuation α} {φ ψ : Formula α}
+
+abbrev Formula.isTautology (φ : Formula α) := Valid (ClassicalSemantics.Valuation α) φ
+
+lemma isTautology_subst_of_isTautology (h : φ.isTautology) : ∀ s, (φ⟦s⟧).isTautology := by
   intro s v;
   apply Formula.ClassicalSemantics.iff_subst_self s |>.mp;
   apply h;
 
-end ClassicalSemantics
+lemma iff_isTautology_and : (φ.isTautology) ∧ (ψ.isTautology) ↔ (φ ⋏ ψ).isTautology := by
+  constructor;
+  . rintro ⟨hφ, hψ⟩ v;
+    have := hφ v;
+    have := hψ v;
+    tauto;
+  . intro h;
+    constructor;
+    . intro v; exact h v |>.1;
+    . intro v; exact h v |>.2;
+
+lemma of_isTautology_or : φ.isTautology ∨ ψ.isTautology → (φ ⋎ ψ).isTautology := by
+  rintro (hφ | hψ) v;
+  . left; exact hφ v;
+  . right; exact hψ v;
+
+lemma of_isTautology_imp₂ : (ψ.isTautology) → (φ ➝ ψ).isTautology := by
+  intro hψ v h;
+  apply hψ;
+
+@[simp]
+lemma isTautology_bot : ¬((⊥ : Formula α).isTautology) := by
+  intro h;
+  have := @h (λ _ => True);
+  simp at this;
+
+@[simp]
+lemma isTautology_top : (⊤ : Formula α).isTautology := by intro v; simp;
+
+lemma isTautology_of_not_neg_isTautology_of_letterless (hl : φ.letterless) : ¬((∼φ).isTautology) → φ.isTautology := by
+  intro h v;
+  obtain ⟨w, hw⟩ : ∃ x : Valuation _, x ⊧ φ := by simpa [Formula.isTautology, Valid] using h;
+  have H := Formula.ClassicalSemantics.equiv_of_letterless hl;
+  apply H w v |>.mp;
+  assumption;
+
+lemma neg_isTautology_of_not_isTautology_of_letterless (hl : φ.letterless) : ¬φ.isTautology → (∼φ).isTautology := by
+  contrapose!;
+  apply isTautology_of_not_neg_isTautology_of_letterless hl;
+
+end
+
 
 end LO.Propositional

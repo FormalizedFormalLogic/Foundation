@@ -1,6 +1,7 @@
+import Foundation.Modal.Kripke.Logic.S5Grz
 import Foundation.Modal.Maximal.Makinson
 import Foundation.Modal.ModalCompanion.Int
-import Foundation.Propositional.Logic.Sublogic
+import Foundation.Propositional.Kripke.Logic.Cl
 
 namespace LO.Propositional
 
@@ -11,19 +12,19 @@ def Formula.goedelTranslate.letterless {φ : Formula ℕ} (hφ : φ.letterless) 
 
 namespace Logic
 
-open Entailment
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.letterless) : φ ∈ Logic.Int ↔ φ ∈ Logic.Cl := by
+theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.letterless) : 𝐈𝐧𝐭 ⊢! φ ↔ 𝐂𝐥 ⊢! φ := by
   constructor;
-  . apply Int_ssubset_Cl.1;
+  . apply WeakerThan.wk;
+    infer_instance;
   . intro h;
-    have : ◇φᵍ ∈ Modal.Logic.S4 := Modal.Logic.iff_provable_Cl_provable_dia_gS4.mp h;
-    have : ◇φᵍ ∈ Modal.Logic.Triv := Modal.Logic.S4_ssubset_Triv.1 this;
-    have : φᵍ ∈ Modal.Logic.Triv := diaT'! this;
-    have : Hilbert.Cl ⊢! φᵍᵀ.toPropFormula _ := Modal.Hilbert.Triv.iff_provable_Cl.mp this;
-    have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (φᵍᵀ.toPropFormula _) := Hilbert.Cl.soundness this;
-    have : φᵍ ∈ Modal.Logic.KD := Modal.Logic.provable_KD_of_classical_tautology (Formula.goedelTranslate.letterless hφ) this;
-    have : φᵍ ∈ Modal.Logic.S4 := Modal.Logic.KD_ssubset_S4.1 this;
+    have : Modal.Logic.S4 ⊢! ◇φᵍ := Modal.Logic.iff_provable_Cl_provable_dia_gS4.mp h;
+    have : Modal.Logic.Triv ⊢! ◇φᵍ := WeakerThan.pbl this;
+    have : Modal.Logic.Triv ⊢! φᵍ := diaT'! this;
+    have : (φᵍᵀ.toPropFormula _).isTautology := Modal.Logic.Triv.iff_isTautology.mp this;
+    have : Modal.Logic.KD ⊢! φᵍ := Modal.Logic.provable_KD_of_classical_tautology (Formula.goedelTranslate.letterless hφ) this;
+    have : Modal.Logic.S4 ⊢! φᵍ := WeakerThan.pbl this;
     exact Modal.modalCompanion_Int_S4.companion.mpr this;
 
 end Logic

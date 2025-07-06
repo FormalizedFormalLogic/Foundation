@@ -123,17 +123,17 @@ protected abbrev cast (d : T ⟹ Δ) (e : Δ = Γ) : T ⟹ Γ := e ▸ d
 @[simp] lemma cast_eq (d : T ⟹ Δ) (e : Δ = Δ) : Derivation.cast d e = d := rfl
 
 @[simp] lemma length_cast (d : T ⟹ Δ) (e : Δ = Γ) :
-    length (Derivation.cast d e) = length d := by rcases e with rfl; simp[Derivation.cast]
+    length (Derivation.cast d e) = length d := by rcases e with rfl; simp [Derivation.cast]
 
 @[simp] lemma length_cast' (d : T ⟹ Δ) (e : Δ = Γ) :
-    length (e ▸ d) = length d := by rcases e with rfl; simp[Derivation.cast]
+    length (e ▸ d) = length d := by rcases e with rfl; simp [Derivation.cast]
 
 alias weakening := wk
 
-def verum' (h : ⊤ ∈ Δ) : T ⟹ Δ := (verum Δ).wk (by simp[h])
+def verum' (h : ⊤ ∈ Δ) : T ⟹ Δ := (verum Δ).wk (by simp [h])
 
 def axL' {k} (r : L.Rel k) (v)
-    (h : Semiformula.rel r v ∈ Δ) (hn : Semiformula.nrel r v ∈ Δ) : T ⟹ Δ := (axL Δ r v).wk (by simp[h, hn])
+    (h : Semiformula.rel r v ∈ Δ) (hn : Semiformula.nrel r v ∈ Δ) : T ⟹ Δ := (axL Δ r v).wk (by simp [h, hn])
 
 def all' {φ} (h : ∀' φ ∈ Δ) (d : T ⟹ Rewriting.free φ :: Δ⁺) : T ⟹ Δ := d.all.wk (by simp [h])
 
@@ -156,25 +156,25 @@ def em {Δ : Sequent L} : {φ : SyntacticFormula L} → (hpos : φ ∈ Δ) → (
   | φ ⋏ ψ,     hpos, hneg =>
     have ihp : T ⟹ φ :: ∼φ :: ∼ψ :: Δ := em (φ := φ) (by simp) (by simp)
     have ihq : T ⟹ ψ :: ∼φ :: ∼ψ :: Δ := em (φ := ψ) (by simp) (by simp)
-    have : T ⟹ ∼φ :: ∼ψ :: Δ := (ihp.and ihq).wk (by simp[hpos])
+    have : T ⟹ ∼φ :: ∼ψ :: Δ := (ihp.and ihq).wk (by simp [hpos])
     this.or.wk (by simpa using hneg)
   | φ ⋎ ψ,     hpos, hneg =>
     have ihp : T ⟹ ∼φ :: φ :: ψ :: Δ := em (φ := φ) (by simp) (by simp)
     have ihq : T ⟹ ∼ψ :: φ :: ψ :: Δ := em (φ := ψ) (by simp) (by simp)
     have : T ⟹ φ :: ψ :: Δ := (ihp.and ihq).wk (by simp [by simpa using hneg])
-    this.or.wk (by simp[hpos])
+    this.or.wk (by simp [hpos])
   | ∀' φ,      hpos, hneg =>
     have : T ⟹ ∼Rewriting.free φ :: Rewriting.free φ :: Δ⁺ := em (φ := Rewriting.free φ) (by simp) (by simp)
     have : T ⟹ (∼Rewriting.shift φ)/[&0] :: Rewriting.free φ :: Δ⁺ :=
-      Derivation.cast this (by simp[←TransitiveRewriting.comp_app])
+      Derivation.cast this (by simp [←TransitiveRewriting.comp_app])
     have : T ⟹ Rewriting.free φ :: Δ⁺ := (ex &0 this).wk
       (List.cons_subset_of_subset_of_mem
         (List.mem_cons_of_mem (free φ) <| by simpa using mem_shifts_iff.mpr hneg) (by rfl))
-    this.all.wk (by simp[hpos])
+    this.all.wk (by simp [hpos])
   | ∃' φ,      hpos, hneg =>
     have : T ⟹ Rewriting.free φ :: ∼Rewriting.free φ :: Δ⁺ := em (φ := Rewriting.free φ) (by simp) (by simp)
     have : T ⟹ (Rewriting.shift φ)/[&0] :: ∼Rewriting.free φ :: Δ⁺ :=
-      Derivation.cast this (by simp[←TransitiveRewriting.comp_app])
+      Derivation.cast this (by simp [←TransitiveRewriting.comp_app])
     have : T ⟹ Rewriting.free (∼φ) :: Δ⁺ := (ex &0 this).wk
       (List.cons_subset_of_subset_of_mem
         (List.mem_cons_of_mem (free (∼φ)) <| by simpa using mem_shifts_iff.mpr hpos) (by simp))
@@ -239,7 +239,7 @@ def rewrite₁ (b : T ⊢ φ) (f : ℕ → SyntacticTerm L) : T ⊢ (Rew.rewrite
 
 def rewrite {Δ} : T ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), T ⟹ Δ.map fun φ ↦ Rew.rewrite f ▹ φ
   | axL Δ r v,            f =>
-    Derivation.cast (axL (Δ.map fun φ ↦ Rew.rewrite f ▹ φ) r (fun i ↦ Rew.rewrite f (v i))) (by simp[rew_rel, rew_nrel])
+    Derivation.cast (axL (Δ.map fun φ ↦ Rew.rewrite f ▹ φ) r (fun i ↦ Rew.rewrite f (v i))) (by simp [rew_rel, rew_nrel])
   | verum Δ,              f => Derivation.cast (verum (Δ.map fun φ ↦ Rew.rewrite f ▹ φ)) (by simp)
   | @or _ _ Δ φ ψ d,      f =>
     have : T ⟹ Rew.rewrite f ▹ φ ⋎ Rew.rewrite f ▹ ψ :: Δ.map fun φ ↦ Rew.rewrite f ▹ φ :=
@@ -254,12 +254,12 @@ def rewrite {Δ} : T ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), T ⟹ Δ.map 
       rewrite d (&0 :>ₙ fun x => Rew.shift (f x))
     have : T ⟹ (∀' Rew.rewrite (Rew.bShift ∘ f) ▹ φ) :: Δ.map fun φ ↦ Rew.rewrite f ▹ φ :=
       all (Derivation.cast this (by simp [free_rewrite_eq, Rewriting.shifts, shift_rewrite_eq, Finset.image_image, Function.comp_def]))
-    Derivation.cast this (by simp[Rew.q_rewrite])
+    Derivation.cast this (by simp [Rew.q_rewrite])
   | @ex _ _ Δ φ t d,      f =>
     have : T ⟹ (φ/[t] :: Δ).map fun φ ↦ Rew.rewrite f ▹ φ := rewrite d f
     have : T ⟹ (∃' Rew.rewrite (Rew.bShift ∘ f) ▹ φ) :: Δ.map fun φ ↦ Rew.rewrite f ▹ φ :=
-      ex (Rew.rewrite f t) (Derivation.cast this (by simp[rewrite_subst_eq]))
-    Derivation.cast this (by simp[Rew.q_rewrite])
+      ex (Rew.rewrite f t) (Derivation.cast this (by simp [rewrite_subst_eq]))
+    Derivation.cast this (by simp [Rew.q_rewrite])
   | @wk _ _ Δ Γ d ss,     f => (rewrite d f).wk (List.map_subset _ ss)
   | @cut _ _ Δ φ d dn,    f =>
     have dΔ : T ⟹ (Rew.rewrite f ▹ φ) :: Δ.map fun φ ↦ Rew.rewrite f ▹ φ := Derivation.cast (rewrite d f) (by simp)
@@ -349,18 +349,18 @@ def lMap (Φ : L₁ →ᵥ L₂) {Δ} : T₁ ⟹ Δ → T₁.lMap Φ ⟹ Δ.map 
     Derivation.cast this (by simp)
   | @all _ _ Δ φ d       =>
     have : T₁.lMap Φ ⟹ ((∀' .lMap Φ φ) :: (Δ.map (.lMap Φ)) : Sequent L₂) :=
-      all (Derivation.cast (lMap Φ d) (by simp[←Semiformula.lMap_free, shifts_image]))
+      all (Derivation.cast (lMap Φ d) (by simp [←Semiformula.lMap_free, shifts_image]))
     Derivation.cast this (by simp)
   | @ex _ _ Δ φ t d      =>
     have : T₁.lMap Φ ⟹ ((∃' .lMap Φ φ) :: (Δ.map (.lMap Φ)) : Sequent L₂) :=
       ex (Semiterm.lMap Φ t)
-        (Derivation.cast (lMap Φ d) (by simp[Semiformula.lMap_substs, Matrix.constant_eq_singleton]))
+        (Derivation.cast (lMap Φ d) (by simp [Semiformula.lMap_substs, Matrix.constant_eq_singleton]))
     Derivation.cast this (by simp)
   | @wk _ _ Δ Γ d ss     => (lMap Φ d).wk (List.map_subset _ ss)
   | @cut _ _ Δ φ d dn    =>
     have : T₁.lMap Φ ⟹ (Δ.map (.lMap Φ) : Sequent L₂) :=
       cut (φ := .lMap Φ φ) (Derivation.cast (lMap Φ d) (by simp)) (Derivation.cast (lMap Φ dn) (by simp))
-    Derivation.cast this (by simp[Finset.image_union])
+    Derivation.cast this (by simp [Finset.image_union])
   | root h               => root (Set.mem_image_of_mem _ h)
 
 lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : Entailment.Inconsistent T₁ → Entailment.Inconsistent (T₁.lMap Φ) := by
@@ -373,7 +373,7 @@ omit [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)
 private lemma map_subst_eq_free (φ : SyntacticSemiformula L 1) (h : ¬φ.FVar? m) :
     (@Rew.rewriteMap L ℕ ℕ 0 (fun x ↦ if x = m then 0 else x + 1)) ▹ (φ/[&m] : SyntacticFormula L) = Rewriting.free φ := by
   simp only [← TransitiveRewriting.comp_app]
-  exact Semiformula.rew_eq_of_funEqOn (by simp[Rew.comp_app, Fin.eq_zero])
+  exact Semiformula.rew_eq_of_funEqOn (by simp [Rew.comp_app, Fin.eq_zero])
     (fun x hx => by simp [Rew.comp_app, ne_of_mem_of_not_mem hx h])
 
 private lemma map_rewriteMap_eq_shifts (Δ : Sequent L) (h : ∀ φ ∈ Δ, ¬φ.FVar? m) :
@@ -386,7 +386,7 @@ def genelalizeByNewver {φ : SyntacticSemiformula L 1} (hp : ¬φ.FVar? m) (hΔ 
     (d : T ⟹ φ/[&m] :: Δ) : T ⟹ (∀' φ) :: Δ := by
   have : T ⟹ (Rewriting.free φ) :: Δ⁺ :=
     Derivation.cast (Derivation.map d (fun x => if x = m then 0 else x + 1))
-    (by simp[map_subst_eq_free φ hp, map_rewriteMap_eq_shifts Δ hΔ])
+    (by simp [map_subst_eq_free φ hp, map_rewriteMap_eq_shifts Δ hΔ])
   exact all this
 
 def exOfInstances (v : List (SyntacticTerm L)) (φ : SyntacticSemiformula L 1)
@@ -404,7 +404,7 @@ end Derivation
 def newVar (Γ : Sequent L) : ℕ := (Γ.map Semiformula.fvSup).foldr max 0
 
 lemma not_fvar?_newVar {φ : SyntacticFormula L} {Γ : Sequent L} (h : φ ∈ Γ) : ¬FVar? φ (newVar Γ) :=
-  not_fvar?_of_lt_fvSup φ (by simpa[newVar] using List.le_max_of_le (List.mem_map_of_mem h) (by simp))
+  not_fvar?_of_lt_fvSup φ (by simpa [newVar] using List.le_max_of_le (List.mem_map_of_mem h) (by simp))
 
 namespace Derivation
 
@@ -413,8 +413,8 @@ variable {P : SyntacticFormula L → Prop} {T : Theory L} {Δ : Sequent L}
 
 def allNvar {φ} (h : ∀' φ ∈ Δ) : T ⟹ φ/[&(newVar Δ)] :: Δ → T ⟹ Δ := fun b ↦
   let b : T ⟹ (∀' φ) :: Δ :=
-    genelalizeByNewver (by simpa[FVar?] using not_fvar?_newVar h) (fun _ ↦ not_fvar?_newVar) b
-  Tait.wk b (by simp[h])
+    genelalizeByNewver (by simpa [FVar?] using not_fvar?_newVar h) (fun _ ↦ not_fvar?_newVar) b
+  Tait.wk b (by simp [h])
 
 protected def id {φ} (hp : φ ∈ T) : T ⟹ ∼∀∀ φ :: Δ → T ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (toClose (root hp)) (by simp)) b
 
@@ -428,41 +428,130 @@ instance {T U : Theory L} : U ⪯ T + U := Entailment.Axiomatized.weakerThanOfSu
 
 end Theory
 
+def Theory.deduction [L.DecidableEq] {T : Theory L} {φ ψ} (b : insert φ T ⊢ ψ) : T ⊢ ∀∀φ ➝ ψ :=
+  have : T ⟹ [∼∀∀φ, ψ] := Derivation.deduction b
+  (Tait.or this).cast (by simp; rfl)
+
+theorem Theory.deduction! [L.DecidableEq] {T : Theory L} {φ ψ} (b : insert φ T ⊢! ψ) : T ⊢! ∀∀φ ➝ ψ :=
+  ⟨Theory.deduction b.get⟩
+
+lemma Theory.close!_iff [L.DecidableEq] {T : Theory L} {φ} : T ⊢! ∀∀φ ↔ T ⊢! φ := by
+  constructor
+  · intro h
+    apply Theory.deduction! (Entailment.Axiomatized.cons! _ _) ⨀ h
+  · intro h
+    exact Derivation.toClose! h
+
+/-!
+  ### Axiom (A set of sentences)
+-/
 variable (L)
 
-/--
-  An auxiliary structure to provide systems of provability of sentence.
--/
-structure Theory.Alt where
-  thy : Theory L
+abbrev Axiom := Set (Sentence L)
 
 variable {L}
 
-alias Theory.alt := Theory.Alt.mk
+abbrev ArithmeticAxiom := Axiom ℒₒᵣ
 
-instance : Entailment (Sentence L) (Theory.Alt L) := ⟨fun T σ ↦ T.thy ⊢ ↑σ⟩
+@[coe] def Theory.toAxiom (T : Theory L) : Axiom L := Semiformula.close₀ '' T
 
-@[simp] lemma Theory.alt_thy (T : Theory L) : T.alt.thy = T := rfl
+@[coe] def Axiom.toTheory (A : Axiom L) : Theory L := Rewriting.embedding '' A
 
-section
+instance : CoeOut (Theory L) (Axiom L) := ⟨Theory.toAxiom⟩
 
-abbrev Provable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊢! σ
+instance : Coe (Axiom L) (Theory L) := ⟨Axiom.toTheory⟩
+
+instance : Entailment (Sentence L) (Axiom L) := ⟨fun A σ ↦ (A : Theory L) ⊢ ↑σ⟩
+
+abbrev Provable₀ (T : Theory L) (σ : Sentence L) : Prop := (T : Axiom L) ⊢! σ
+
+abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := (T : Axiom L) ⊬ σ
 
 infix:45 " ⊢!. " => Provable₀
 
-abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬ σ
-
 infix:45 " ⊬. " => Unprovable₀
 
-instance (T : Theory.Alt L) : Entailment.Cl T := Entailment.Cl.ofEquiv T.thy T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
+instance (A : Axiom L) : Entailment.Cl A := Entailment.Cl.ofEquiv (A : Theory L) A (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
 
-variable {T : Theory L} {σ : Sentence L}
+def ofAxiomProof {A : Axiom L} {σ} : A ⊢ σ → (A : Theory L) ⊢ ↑σ := fun b ↦ b
 
-lemma provable₀_iff : T ⊢!. σ ↔ T ⊢! ↑σ := iff_of_eq rfl
+def toAxiomProof {A : Axiom L} {σ} : (A : Theory L) ⊢ ↑σ → A ⊢ σ := fun b ↦ b
 
-lemma unprovable₀_iff : T ⊬. σ ↔ T ⊬ ↑σ := iff_of_eq rfl
+def toAxiomProof! {A : Axiom L} {σ} : (A : Theory L) ⊢! ↑σ → A ⊢! σ := fun b ↦ b
 
-end
+namespace Axiom
+
+@[simp] lemma coe_mem_coe {σ : Sentence L} {A : Axiom L} : (σ : SyntacticFormula L) ∈ (A : Theory L) ↔ σ ∈ A := by
+  simp [Axiom.toTheory]
+
+@[simp] lemma coe_subset_coe {A B : Axiom L} : (A : Theory L) ⊆ (B : Theory L) ↔ A ⊆ B := by
+  constructor
+  · intro h σ hσ
+    simpa using h (Axiom.coe_mem_coe.mpr hσ)
+  · simp only [toTheory, Set.image_subset_iff]
+    intro h σ hσ
+    refine Set.mem_preimage.mpr (Axiom.coe_mem_coe.mpr (h hσ))
+
+@[simp] lemma coe_insert (σ : Sentence L) (A : Axiom L) : (insert σ A).toTheory = insert ↑σ ↑A := by
+  ext; simp [Axiom.toTheory]; tauto
+
+open Entailment
+
+instance : Axiomatized (Axiom L) where
+  prfAxm {A} σ h := toAxiomProof <| Axiomatized.prfAxm (by simpa using h)
+  weakening {σ A B} h b := toAxiomProof <| Axiomatized.weakening (by simpa using h) b
+
+def deduction [L.DecidableEq] {A : Axiom L} {σ τ} (b : insert σ A ⊢ τ) : A ⊢ σ ➝ τ :=
+  have : insert ↑σ A.toTheory ⊢ ↑τ := by simpa using ofAxiomProof b
+  (Theory.deduction this).cast (by simp)
+
+instance [L.DecidableEq] : Entailment.Deduction (Axiom L) where
+  ofInsert := Axiom.deduction
+  inv {σ τ A} b :=
+    have : cons σ A ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
+    this ⨀ (Axiomatized.cons _ _)
+
+variable [L.DecidableEq] {T : Theory L}
+
+def provable_iff {σ : Sentence L} :
+    (T : Axiom L) ⊢! σ ↔ T ⊢! ↑σ := by
+  constructor
+  · intro b
+    have : T.toAxiom.toTheory ⊢! ↑σ := b
+    apply Entailment.StrongCut.cut! ?_ this
+    intro τ hτ
+    have : ∃ τ' ∈ T, ∀∀ τ' = τ := by simpa [Theory.toAxiom, Axiom.toTheory] using hτ
+    rcases this with ⟨τ, h, rfl⟩
+    exact Derivation.toClose! <| by_axm _ <| by simpa
+  · intro b
+    apply toAxiomProof!
+    apply Entailment.StrongCut.cut! ?_ b
+    intro φ hφ
+    have : T.toAxiom.toTheory ⊢! ∀∀φ :=
+      by_axm _ <| by simpa [Theory.toAxiom, Axiom.toTheory] using ⟨φ, by simpa, rfl⟩
+    exact Theory.close!_iff.mp this
+
+def unprovable_iff {σ} :
+    (T : Axiom L) ⊬ σ ↔ T ⊬ ↑σ := provable_iff.not
+
+def provable_close₀_iff {φ : SyntacticFormula L} :
+    (T : Axiom L) ⊢! ∀∀₀ φ ↔ T ⊢! φ := Iff.trans provable_iff (by simp [Theory.close!_iff])
+
+def unprovable_close₀_iff {φ : SyntacticFormula L} :
+    (T : Axiom L) ⊬ ∀∀₀ φ ↔ T ⊬ φ := provable_close₀_iff.not
+
+instance (T U : Theory L) [T ⪯ U] : T.toAxiom ⪯ U.toAxiom :=
+  ⟨fun _ b ↦ Axiom.provable_iff.mpr <| (inferInstanceAs (T ⪯ U)).pbl (Axiom.provable_iff.mp b)⟩
+
+@[simp] lemma consistent_iff :
+    Consistent (T : Axiom L) ↔ Consistent T := calc
+  Consistent (T : Axiom L) ↔ (T : Axiom L) ⊬ ⊥ := consistent_iff_unprovable_bot
+  _                        ↔ T ⊬ ⊥             := by simp [unprovable_iff]
+  _                        ↔ Consistent T      := consistent_iff_unprovable_bot.symm
+
+instance [Consistent T] : Consistent (T : Axiom L) := by simp_all
+
+end Axiom
 
 end FirstOrder
 

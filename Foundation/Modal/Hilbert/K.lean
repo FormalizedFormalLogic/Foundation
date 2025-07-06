@@ -1,12 +1,12 @@
 import Foundation.Modal.Hilbert.Basic
 
-namespace LO.Modal.Hilbert
+namespace LO.Modal
 
-variable {H : Hilbert α}
+namespace Hilbert
+
+variable {α} [DecidableEq α] {H : Hilbert α}
 
 open Deduction
-
-section
 
 class HasK (H : Hilbert α) where
   p : α
@@ -14,25 +14,32 @@ class HasK (H : Hilbert α) where
   ne_pq : p ≠ q := by trivial;
   mem_K : Axioms.K (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [DecidableEq α] [hK : H.HasK] : Entailment.HasAxiomK H where
+instance [H.HasK] : Entailment.HasAxiomK H.logic where
   K φ ψ := by
-    apply maxm;
-    use Axioms.K (.atom hK.p) (.atom hK.q);
     constructor;
-    . exact hK.mem_K;
-    . use (λ b => if hK.p = b then φ else if hK.q = b then ψ else (.atom b));
-      simp [hK.ne_pq];
+    apply maxm;
+    use Axioms.K (.atom (HasK.p H)) (.atom (HasK.q H));
+    constructor;
+    . exact HasK.mem_K;
+    . use (λ b => if (HasK.p H) = b then φ else if (HasK.q H) = b then ψ else (.atom b));
+      simp [HasK.ne_pq];
+instance [H.HasK] : H.logic.IsNormal where
 
-end
+end Hilbert
 
 
-section
-
-protected abbrev K : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1)}⟩
-instance : Hilbert.K.FiniteAxiomatizable where
+protected abbrev Hilbert.K : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1)}⟩
+protected abbrev Logic.K := Hilbert.K.logic
 instance : Hilbert.K.HasK where p := 0; q := 1
-instance : Entailment.Modal.K (Hilbert.K) where
+instance : Entailment.K (Logic.K) where
 
-end
+instance {L : Logic _} [L.IsNormal] : Logic.K ⪯ L := by
+  apply Entailment.weakerThan_iff.mpr;
+  intro φ hφ;
+  induction hφ with
+  | maxm h => rcases (by simpa using h) with ⟨_, rfl⟩; simp;
+  | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+  | nec ihφ => exact Entailment.nec! ihφ;
+  | imply₁ | imply₂ | ec => simp;
 
-end LO.Modal.Hilbert
+end LO.Modal

@@ -1,203 +1,269 @@
 import Foundation.Modal.Kripke.Completeness
-import Foundation.Vorspiel.Relation.Supplemental
-import Foundation.Modal.Geachean
+import Foundation.Vorspiel.HRel.Euclidean
+import Foundation.Vorspiel.HRel.Coreflexive
+import Foundation.Vorspiel.HRel.Convergent
 
-namespace LO
-
-
-section
-
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
-variable {𝓢 : S}
-
-/--
-  Axiom for Geach confluency.
--/
-protected abbrev Axioms.Geach (g : Geachean.Taple) (φ : F) := ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ)
-
-namespace Entailment
-
-class HasAxiomGeach (g) (𝓢 : S) where Geach (φ : F) : 𝓢 ⊢ Axioms.Geach g φ
-
-variable {g} [HasAxiomGeach g 𝓢]
-
-def axiomGeach : 𝓢 ⊢ ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := HasAxiomGeach.Geach _
-@[simp] lemma axiomGeach! : 𝓢 ⊢! ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ) := ⟨axiomGeach⟩
-
-instance [Entailment.HasAxiomT 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 0⟩ 𝓢 := ⟨fun _ => axiomT⟩
-instance [Entailment.HasAxiomB 𝓢]      : Entailment.HasAxiomGeach ⟨0, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomB⟩
-instance [Entailment.HasAxiomD 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 1⟩ 𝓢 := ⟨fun _ => axiomD⟩
-instance [Entailment.HasAxiomFour 𝓢]   : Entailment.HasAxiomGeach ⟨0, 2, 1, 0⟩ 𝓢 := ⟨fun _ => axiomFour⟩
-instance [Entailment.HasAxiomFive 𝓢]   : Entailment.HasAxiomGeach ⟨1, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomFive⟩
-instance [Entailment.HasAxiomTc 𝓢]     : Entailment.HasAxiomGeach ⟨0, 1, 0, 0⟩ 𝓢 := ⟨fun _ => axiomTc⟩
-instance [Entailment.HasAxiomPoint2 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 1, 1⟩ 𝓢 := ⟨fun _ => axiomPoint2⟩
-
-end Entailment
-
-end
-
-
-namespace Modal
+namespace LO.Modal
 
 namespace Kripke
 
-instance whitepoint.instIsGeachean (g) : IsGeachean g _ whitepoint.Rel := ⟨by
-  rintro x y z ⟨Rxy, Rxz⟩;
+variable {F : Frame}
+
+namespace Frame
+
+class IsGeachConvergent (F : Frame) (g : Axioms.Geach.Taple) where
+  gconv : ∀ ⦃x y z : F⦄, x ≺^[g.i] y → x ≺^[g.j] z → ∃ u, y ≺^[g.m] u ∧ z ≺^[g.n] u
+
+
+protected abbrev IsReflexive (F : Frame) := _root_.IsRefl _ F
+
+@[simp] lemma refl [F.IsReflexive] : ∀ {x : F.World}, x ≺ x := by apply IsRefl.refl
+
+@[simp]
+instance [F.IsGeachConvergent ⟨0, 0, 1, 0⟩] : F.IsReflexive where
+  refl := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 0⟩);
+instance [F.IsReflexive] : F.IsGeachConvergent ⟨0, 0, 1, 0⟩ where
+  gconv x y z Rxy Rxz := by simp_all;
+
+protected abbrev IsSerial (F : Frame) := _root_.IsSerial F.Rel
+
+lemma serial [F.IsSerial] : ∀ x : F, ∃ y, x ≺ y := IsSerial.serial
+
+@[simp]
+instance [F.IsGeachConvergent ⟨0, 0, 1, 1⟩] : F.IsSerial where
+  serial := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 1⟩);
+instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ where
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, and_self];
+    subst Rxz;
+    apply _root_.IsSerial.serial
+
+
+protected abbrev IsTransitive (F : Frame) := _root_.IsTrans _ F.Rel
+
+lemma trans [F.IsTransitive] : ∀ {x y z : F.World}, x ≺ y → y ≺ z → x ≺ z := by apply IsTrans.trans
+
+@[simp]
+instance [F.IsGeachConvergent ⟨0, 2, 1, 0⟩] : F.IsTransitive where
+  trans := by
+    rintro x y z;
+    have : ∀ x y z : F, x = y → ∀ (u : F.World), x ≺ u → u ≺ z → y ≺ z := by
+      simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 2, 1, 0⟩);
+    apply this x x z rfl y;
+instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_right'];
+    subst Rxy;
+    obtain ⟨y, Rxy, Ryz⟩ := Rxz;
+    exact IsTrans.trans _ _ _ Rxy Ryz
+
+
+protected abbrev IsSymmetric (F : Frame) := _root_.IsSymm _ F.Rel
+
+lemma symm [F.IsSymmetric] : ∀ {x y : F.World}, x ≺ y → y ≺ x := by apply IsSymm.symm
+
+@[simp]
+instance [F.IsGeachConvergent ⟨0, 1, 0, 1⟩] : F.IsSymmetric where
+  symm x y := by
+    have : ∀ x y z : F, x = y → x ≺ z → z ≺ y := by
+      simpa using IsGeachConvergent.gconv (g := ⟨0, 1, 0, 1⟩) (F := F);
+    apply @this x x y rfl;
+instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_left'];
+    subst Rxy;
+    exact _root_.IsSymm.symm _ _ Rxz;
+
+
+protected abbrev IsEuclidean (F : Frame) := _root_.IsRightEuclidean F.Rel
+
+lemma eucl [F.IsEuclidean] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y ≺ z := by apply IsRightEuclidean.reucl
+
+@[simp]
+instance [F.IsGeachConvergent ⟨1, 1, 0, 1⟩] : F.IsEuclidean where
+  reucl x y z Rxy Rxz := by
+    have : ∀ x y z : F, x ≺ y → x ≺ z → z ≺ y := by
+      simpa using IsGeachConvergent.gconv (F := F) (g := ⟨1, 1, 0, 1⟩);
+    apply this x z y Rxz Rxy;
+instance [F.IsEuclidean] : F.IsGeachConvergent ⟨1, 1, 0, 1⟩ where
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right, exists_eq_left'];
+    exact IsRightEuclidean.reucl Rxz Rxy
+
+
+protected abbrev IsPiecewiseStronglyConvergent (F : Frame) := _root_.IsPiecewiseStronglyConvergent F.Rel
+
+lemma ps_convergent [F.IsPiecewiseStronglyConvergent] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → ∃ u, y ≺ u ∧ z ≺ u := by
+  apply IsPiecewiseStronglyConvergent.ps_convergent
+
+@[simp]
+instance [F.IsGeachConvergent ⟨1, 1, 1, 1⟩] : F.IsPiecewiseStronglyConvergent where
+  ps_convergent := by simpa using IsGeachConvergent.gconv (g := ⟨1, 1, 1, 1⟩) (F := F);
+instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1⟩ where
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right];
+    obtain ⟨u, Ryu, Rzu⟩ := IsPiecewiseStronglyConvergent.ps_convergent Rxy Rxz;
+    use u;
+
+
+protected abbrev IsCoreflexive (F : Frame) := _root_.IsCoreflexive F.Rel
+
+lemma corefl [F.IsCoreflexive] : ∀ {x y : F.World}, x ≺ y → x = y := by apply IsCoreflexive.corefl
+
+@[simp]
+instance [F.IsGeachConvergent ⟨0, 1, 0, 0⟩] : F.IsCoreflexive where
+  corefl x y Rxy := by
+    have : ∀ x y z : F, x = y → x ≺ z → z = y := by
+      simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 1, 0, 0⟩);
+    apply this x x y rfl Rxy |>.symm;
+instance [F.IsCoreflexive] : F.IsGeachConvergent ⟨0, 1, 0, 0⟩ where
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_left'];
+    subst Rxy;
+    exact F.corefl Rxz |>.symm;
+
+
+protected class IsFunctional (F : Frame) where
+  functional : ∀ ⦃x y z : F.World⦄, x ≺ y → x ≺ z → y = z
+
+lemma functional [F.IsFunctional] : ∀ {x y z : F.World}, x ≺ y → x ≺ z → y = z := by apply IsFunctional.functional
+
+instance [F.IsGeachConvergent ⟨1, 1, 0, 0⟩] : F.IsFunctional where
+  functional x y z Rxy Rxz := by
+    have : ∀ x y z : F, x ≺ y → x ≺ z → z = y := by
+      simpa using IsGeachConvergent.gconv (F := F) (g := ⟨1, 1, 0, 0⟩);
+    exact this x y z Rxy Rxz |>.symm;
+instance [F.IsFunctional] : F.IsGeachConvergent ⟨1, 1, 0, 0⟩ where
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right, exists_eq_left'];
+    apply IsFunctional.functional Rxy Rxz |>.symm;
+
+
+protected class IsDense (F : Frame) where
+  dense : ∀ ⦃x y : F.World⦄, x ≺ y → ∃ u, x ≺ u ∧ u ≺ y
+
+lemma dense [F.IsDense] : ∀ {x y : F.World}, x ≺ y → ∃ u, x ≺ u ∧ u ≺ y := by apply IsDense.dense
+
+instance [F.IsGeachConvergent ⟨0, 1, 2, 0⟩] : F.IsDense where
+  dense x y Rxy := by
+    have : ∀ x y z : F, x = y → x ≺ z → ∃ u, y ≺ u ∧ u ≺ z := by
+      simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 1, 2, 0⟩);
+    apply this x x y rfl Rxy;
+instance [F.IsDense] : F.IsGeachConvergent ⟨0, 1, 2, 0⟩ where
+  gconv x y z Rxy Rxz := by
+    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_right'];
+    subst Rxy;
+    obtain ⟨u, Ryu, Rzu⟩ := IsDense.dense Rxz;
+    use u;
+
+
+protected class IsPreorder (F : Frame) extends F.IsReflexive, F.IsTransitive
+
+protected class IsEquivalence (F : Frame) extends F.IsReflexive, F.IsTransitive, F.IsSymmetric
+instance [F.IsEquivalence] : F.IsPreorder where
+
+end Frame
+
+
+instance : whitepoint.IsGeachConvergent g := ⟨by
+  rintro x y z Rxy Rxz;
   use ();
-  constructor;
-  . apply Rel.iterate.true_any; tauto;
-  . apply Rel.iterate.true_any; tauto;
+  constructor <;> . apply HRel.iterate.true_any; tauto;
 ⟩
-
-open Formula.Kripke
-
-protected abbrev FrameClass.multiGeachean (G : Set Geachean.Taple) : FrameClass := { F | (MultiGeachean G) F.Rel }
+instance : whitepoint.IsPreorder where
 
 
 section definability
 
-variable {F : Kripke.Frame} (g : Geachean.Taple)
+open Formula (atom)
+open Formula.Kripke
 
-lemma validate_AxiomGeach_of_Geachean [IsGeachean g _ F.Rel] : F ⊧ (Axioms.Geach g (.atom 0)) := by
+lemma validate_axiomGeach_of_isGeachConvergent (g) [F.IsGeachConvergent g] : F ⊧ (Axioms.Geach g (.atom 0)) := by
   rintro V x h;
   apply Satisfies.multibox_def.mpr;
   obtain ⟨y, Rxy, hbp⟩ := Satisfies.multidia_def.mp h;
   intro z Rxz;
   apply Satisfies.multidia_def.mpr;
-  obtain ⟨u, Ryu, Rzu⟩ := IsGeachean.geachean ⟨Rxy, Rxz⟩;
+  obtain ⟨u, Ryu, Rzu⟩ := Frame.IsGeachConvergent.gconv Rxy Rxz;
   use u;
   constructor;
   . assumption;
   . exact (Satisfies.multibox_def.mp hbp) Ryu;
 
-section
-
-lemma validate_AxiomT_of_reflexive [refl : IsRefl _ F] : F ⊧ (Axioms.T (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 0, 1, 0⟩
-lemma validate_AxiomD_of_serial [ser : IsSerial _ F.Rel] : F ⊧ (Axioms.D (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 0, 1, 1⟩
-lemma validate_AxiomB_of_symmetric [sym : IsSymm _ F.Rel] : F ⊧ (Axioms.B (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 1, 0, 1⟩
-lemma validate_AxiomFour_of_transitive [trans : IsTrans _ F] : F ⊧ (Axioms.Four (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 2, 1, 0⟩
-lemma validate_AxiomFive_of_euclidean [eucl : IsEuclidean _ F.Rel] : F ⊧ (Axioms.Five (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨1, 1, 0, 1⟩
-lemma validate_AxiomPoint2_of_confluent [conf : IsConfluent _ F.Rel] : F ⊧ (Axioms.Point2 (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨1, 1, 1, 1⟩
-lemma validate_AxiomTc_of_coreflexive [corefl : IsCoreflexive _ F.Rel] : F ⊧ (Axioms.Tc (.atom 0)) := validate_AxiomGeach_of_Geachean ⟨0, 1, 0, 0⟩
-
-end
+lemma validate_AxiomT_of_reflexive [refl : F.IsReflexive] : F ⊧ (Axioms.T (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 0⟩
+lemma validate_AxiomD_of_serial [ser : F.IsSerial] : F ⊧ (Axioms.D (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 1⟩
+lemma validate_AxiomB_of_symmetric [sym : F.IsSymmetric] : F ⊧ (Axioms.B (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 1, 0, 1⟩
+lemma validate_AxiomFour_of_transitive [trans : F.IsTransitive] : F ⊧ (Axioms.Four (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 2, 1, 0⟩
+lemma validate_AxiomFive_of_euclidean [eucl : F.IsEuclidean] : F ⊧ (Axioms.Five (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨1, 1, 0, 1⟩
+lemma validate_AxiomPoint2_of_confluent [conf : F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.Point2 (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨1, 1, 1, 1⟩
+lemma validate_AxiomTc_of_coreflexive [corefl : F.IsCoreflexive] : F ⊧ (Axioms.Tc (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 1, 0, 0⟩
 
 
-lemma geachean_of_validate_AxiomGeach : F ⊧ (Axioms.Geach g (.atom 0)) → (Geachean g) F.Rel := by
-  rintro h x y z ⟨Rxy, Rxz⟩;
+lemma isGeachConvergent_of_validate_axiomGeach {g} (h : F ⊧ (Axioms.Geach g (.atom 0))) : F.IsGeachConvergent g := ⟨by
+  rintro x y z Rxy Rxz;
   let V : Kripke.Valuation F := λ v _ => y ≺^[g.m] v;
-  have : Satisfies ⟨F, V⟩ x (◇^[g.i](□^[g.m](.atom 0))) := by
+  have : Satisfies ⟨F, V⟩ x (□^[g.j](◇^[g.n](.atom 0)))  := h V x $ by
     apply Satisfies.multidia_def.mpr;
     use y;
     constructor;
     . assumption;
     . apply Satisfies.multibox_def.mpr;
       aesop;
-  have : Satisfies ⟨F, V⟩ x (□^[g.j](◇^[g.n]Formula.atom 0)) := h V x this;
-  have : Satisfies ⟨F, V⟩ z (◇^[g.n]Formula.atom 0) := Satisfies.multibox_def.mp this Rxz;
+  replace : Satisfies ⟨F, V⟩ z (◇^[g.n]Formula.atom 0) := Satisfies.multibox_def.mp this Rxz;
   obtain ⟨u, Rzu, Ryu⟩ := Satisfies.multidia_def.mp this;
   exact ⟨u, Ryu, Rzu⟩;
+⟩
 
-namespace FrameClass.multiGeachean
+lemma reflexive_of_validate_AxiomT (h : F ⊧ (Axioms.T (.atom 0))) : F.IsReflexive := by
+  suffices F.IsGeachConvergent ⟨0, 0, 1, 0⟩ by infer_instance;
+  apply isGeachConvergent_of_validate_axiomGeach;
+  simpa;
 
-@[simp]
-lemma nonempty : (FrameClass.multiGeachean G).Nonempty := by
-  use whitepoint;
-  intros t ht x y z h;
-  use x;
-  constructor <;> { apply Rel.iterate.true_any; tauto; }
+lemma transitive_of_validate_AxiomFour (h : F ⊧ (Axioms.Four (.atom 0))) : F.IsTransitive := by
+  suffices F.IsGeachConvergent ⟨0, 2, 1, 0⟩ by infer_instance;
+  apply isGeachConvergent_of_validate_axiomGeach;
+  simpa;
 
-end FrameClass.multiGeachean
+lemma euclidean_of_validate_AxiomFive (h : F ⊧ (Axioms.Five (.atom 0))) : F.IsEuclidean := by
+  suffices F.IsGeachConvergent ⟨1, 1, 0, 1⟩ by infer_instance;
+  apply isGeachConvergent_of_validate_axiomGeach;
+  simpa;
 
-/-
-instance FrameClass.multiGeachean.definability (G) : (FrameClass.multiGeachean G).DefinedBy (G.image (λ t => Axioms.Geach t (.atom 0))) := by
-  unfold FrameClass.multiGeachean MultiGeachean Axioms.Geach;
-  constructor;
-  intro F;
-  constructor;
-  . rintro hF φ ⟨g, ⟨hg, rfl⟩⟩ V x h;
-    obtain ⟨y, Rxy, hbp⟩ := Satisfies.multidia_def.mp h;
-    apply Satisfies.multibox_def.mpr;
-    intro z Rxz;
-    apply Satisfies.multidia_def.mpr;
-    obtain ⟨u, Ryu, Rzu⟩ := hF g hg ⟨Rxy, Rxz⟩;
-    use u;
-    constructor;
-    . assumption;
-    . exact (Satisfies.multibox_def.mp hbp) Ryu;
-  . rintro h g hg x y z ⟨Rxy, Rxz⟩;
-    let V : Kripke.Valuation F := λ v _ => y ≺^[g.m] v;
-    have : Satisfies ⟨F, V⟩ x (◇^[g.i](□^[g.m](.atom 0))) := by
-      apply Satisfies.multidia_def.mpr;
-      use y;
-      constructor;
-      . assumption;
-      . apply Satisfies.multibox_def.mpr;
-        aesop;
-    have : Satisfies ⟨F, V⟩ x (□^[g.j](◇^[g.n]Formula.atom 0)) := h (Axioms.Geach g (.atom 0)) (by tauto) V x this;
-    have : Satisfies ⟨F, V⟩ z (◇^[g.n]Formula.atom 0) := Satisfies.multibox_def.mp this Rxz;
-    obtain ⟨u, Rzu, Ryu⟩ := Satisfies.multidia_def.mp this;
-    exact ⟨u, Ryu, Rzu⟩;
--/
+lemma symmetric_of_validate_AxiomB (h : F ⊧ (Axioms.B (.atom 0))) : F.IsSymmetric := by
+  suffices F.IsGeachConvergent ⟨0, 1, 0, 1⟩ by infer_instance;
+  apply isGeachConvergent_of_validate_axiomGeach;
+  simpa;
 
-section
+lemma serial_of_validate_AxiomD (h : F ⊧ (Axioms.D (.atom 0))) : F.IsSerial := by
+  suffices F.IsGeachConvergent ⟨0, 0, 1, 1⟩ by infer_instance;
+  apply isGeachConvergent_of_validate_axiomGeach;
+  simpa;
 
-variable {F : Frame}
+lemma coreflexive_of_validate_AxiomTc (h : F ⊧ (Axioms.Tc (.atom 0))) : F.IsCoreflexive := by
+  suffices F.IsGeachConvergent ⟨0, 1, 0, 0⟩ by infer_instance;
+  apply isGeachConvergent_of_validate_axiomGeach;
+  simpa;
 
-lemma reflexive_of_validate_AxiomT (h : F ⊧ (Axioms.T (.atom 0))) : Reflexive F.Rel := by
-  rw [Geachean.reflexive_def];
-  apply geachean_of_validate_AxiomGeach;
-  exact h;
-
-lemma transitive_of_validate_AxiomFour (h : F ⊧ (Axioms.Four (.atom 0))) : Transitive F.Rel := by
-  rw [Geachean.transitive_def];
-  apply geachean_of_validate_AxiomGeach;
-  exact h;
-
-lemma euclidean_of_validate_AxiomFive (h : F ⊧ (Axioms.Five (.atom 0))) : Euclidean F.Rel := by
-  rw [Geachean.euclidean_def];
-  apply geachean_of_validate_AxiomGeach;
-  exact h;
-
-lemma symmetric_of_validate_AxiomB (h : F ⊧ (Axioms.B (.atom 0))) : Symmetric F.Rel := by
-  rw [Geachean.symmetric_def];
-  apply geachean_of_validate_AxiomGeach;
-  exact h;
-
-lemma serial_of_validate_AxiomD (h : F ⊧ (Axioms.D (.atom 0))) : Serial F.Rel := by
-  rw [Geachean.serial_def];
-  apply geachean_of_validate_AxiomGeach;
-  exact h;
-
-lemma coreflexive_of_validate_AxiomTc (h : F ⊧ (Axioms.Tc (.atom 0))) : Coreflexive F.Rel := by
-  rw [Geachean.coreflexive_def];
-  apply geachean_of_validate_AxiomGeach;
-  exact h;
-
-lemma confluent_of_validate_AxiomPoint2 (h : F ⊧ (Axioms.Point2 (.atom 0))) : Confluent F.Rel := by
-  rw [Geachean.confluent_def];
-  apply geachean_of_validate_AxiomGeach;
-  exact h;
-
-end
+lemma confluent_of_validate_AxiomPoint2 (h : F ⊧ (Axioms.Point2 (.atom 0))) : F.IsPiecewiseStronglyConvergent := by
+  suffices F.IsGeachConvergent ⟨1, 1, 1, 1⟩ by infer_instance;
+  apply isGeachConvergent_of_validate_axiomGeach;
+  simpa;
 
 end definability
 
 
 section canonicality
 
-variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Modal.K 𝓢]
+variable [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
 open Entailment
 open MaximalConsistentTableau
 open canonicalModel
 
-namespace Canonical
-
-instance [Entailment.HasAxiomGeach g 𝓢] : IsGeachean g _ (canonicalFrame 𝓢).Rel := ⟨by
-  rintro x y z ⟨Rxy, Rxz⟩;
+instance [Entailment.HasAxiomGeach g 𝓢] : (canonicalFrame 𝓢).IsGeachConvergent g := ⟨by
+  rintro x y z Rxy Rxz;
   have ⟨u, hu⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨y.1.1.premultibox g.m, z.1.2.premultidia g.n⟩) $ by
     rintro Γ Δ hΓ hΔ;
     by_contra! hC;
@@ -214,28 +280,19 @@ instance [Entailment.HasAxiomGeach g 𝓢] : IsGeachean g _ (canonicalFrame 𝓢
     contradiction;
   use u;
   constructor;
-  . apply def_multirel_multibox_mem₁.mpr;
-    intro φ hφ;
-    exact hu.1 hφ;
-  . apply def_multirel_multidia_mem₂.mpr;
-    intro φ hφ;
-    exact hu.2 hφ;
+  . apply def_multirel_multibox_mem₁.mpr; apply hu.1;
+  . apply def_multirel_multidia_mem₂.mpr; apply hu.2;
 ⟩
 
-instance isTrans [Entailment.HasAxiomFour 𝓢] : IsTrans _ (canonicalFrame 𝓢).Rel := inferInstance
-instance [Entailment.HasAxiomT 𝓢] : IsRefl _ (canonicalFrame 𝓢).Rel := inferInstance
-instance [Entailment.HasAxiomFive 𝓢] : IsEuclidean _ (canonicalFrame 𝓢).Rel := inferInstance
-instance [Entailment.HasAxiomD 𝓢] : IsSerial _ (canonicalFrame 𝓢).Rel := inferInstance
-instance [Entailment.HasAxiomB 𝓢] : IsSymm _ (canonicalFrame 𝓢).Rel := inferInstance
-instance [Entailment.HasAxiomTc 𝓢] : IsCoreflexive _ (canonicalFrame 𝓢).Rel := inferInstance
-instance [Entailment.HasAxiomPoint2 𝓢] : IsConfluent _ (canonicalFrame 𝓢).Rel := inferInstance
-instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] : IsPreorder _ (canonicalFrame 𝓢).Rel where
-instance [Entailment.HasAxiomT 𝓢] [Entailment.HasAxiomFour 𝓢] [Entailment.HasAxiomB 𝓢] : IsEquiv _ (canonicalFrame 𝓢).Rel where
-
-end Canonical
+instance [Entailment.HasAxiomT 𝓢] : (canonicalFrame 𝓢).IsReflexive := by simp
+instance [Entailment.HasAxiomD 𝓢] : (canonicalFrame 𝓢).IsSerial := by simp
+instance [Entailment.HasAxiomB 𝓢] : (canonicalFrame 𝓢).IsSymmetric := by simp
+instance [Entailment.HasAxiomFour 𝓢] : (canonicalFrame 𝓢).IsTransitive := by simp
+instance [Entailment.HasAxiomFive 𝓢] :(canonicalFrame 𝓢).IsEuclidean := by simp
+instance [Entailment.HasAxiomTc 𝓢] : (canonicalFrame 𝓢).IsCoreflexive := by simp
+instance [Entailment.HasAxiomPoint2 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStronglyConvergent := by simp
 
 end canonicality
-
 
 end Kripke
 

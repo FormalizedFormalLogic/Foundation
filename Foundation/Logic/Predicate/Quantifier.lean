@@ -42,6 +42,22 @@ def alt : Polarity → Polarity
 
 @[simp] lemma alt_alt (Γ : Polarity) : Γ.alt.alt = Γ := by rcases Γ <;> simp
 
+section symbol
+
+variable {α : Type*} [SigmaSymbol α] [PiSymbol α]
+
+protected def coe : Polarity → α
+ | 𝚺 => 𝚺
+ | 𝚷 => 𝚷
+
+instance : Coe Polarity α := ⟨Polarity.coe⟩
+
+@[simp] lemma coe_sigma : ((𝚺 : Polarity) : α) = 𝚺 := rfl
+
+@[simp] lemma coe_pi : ((𝚷 : Polarity) : α) = 𝚷 := rfl
+
+end symbol
+
 end Polarity
 
 inductive SigmaPiDelta where | sigma | pi | delta
@@ -72,6 +88,8 @@ def alt : SigmaPiDelta → SigmaPiDelta
 @[simp] lemma alt_delta : alt 𝚫 = 𝚫 := rfl
 
 @[simp] lemma alt_alt (Γ : SigmaPiDelta) : Γ.alt.alt = Γ := by rcases Γ <;> simp
+
+@[simp] lemma alt_coe (Γ : Polarity) : SigmaPiDelta.alt Γ = (Γ.alt : SigmaPiDelta) := by cases Γ <;> simp
 
 end SigmaPiDelta
 

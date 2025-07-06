@@ -24,7 +24,7 @@ def valAux : NNFormula α → F
 
 lemma valAux_neg (φ : NNFormula α) :
     valAux v (∼φ) = ∼(valAux v φ) :=
-  by induction φ using rec' <;> simp[*, valAux, ←neg_eq, or_iff_not_imp_left]
+  by induction φ using rec' <;> simp [*, valAux, ←neg_eq, or_iff_not_imp_left]
 
 def val : NNFormula α →ˡᶜ F where
   toTr := valAux v
@@ -32,8 +32,8 @@ def val : NNFormula α →ˡᶜ F where
   map_bot' := rfl
   map_and' := fun _ _ => rfl
   map_or' := fun _ _ => rfl
-  map_imply' := fun _ _ => by simp[DeMorgan.imply, valAux, ←neg_eq, valAux_neg]
-  map_neg' := fun _ => by simp[valAux, ←neg_eq, valAux_neg]
+  map_imply' := fun _ _ => by simp [DeMorgan.imply, valAux, ←neg_eq, valAux_neg]
+  map_neg' := fun _ => by simp [valAux, ←neg_eq, valAux_neg]
 
 @[simp] lemma val_atom : val v (atom a) = v a := rfl
 
