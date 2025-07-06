@@ -30,6 +30,13 @@ lemma Frame.eq_η_ν {F : Frame} {X Y : Set F.World} : (F.η X) = Y ↔ (∀ x, 
     apply h;
 
 
+section
+
+abbrev Frame.trivial : Frame := ⟨Unit, λ _ => ∅⟩
+
+end
+
+
 abbrev FrameClass := Set Frame
 
 
