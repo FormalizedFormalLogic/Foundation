@@ -37,7 +37,4 @@ instance : Logic.KP ≊ Logic.KD := by
   . apply Hilbert.weakerThan_of_provable_axioms; rintro φ (rfl | rfl) <;> simp;
   . apply Hilbert.weakerThan_of_provable_axioms; rintro φ (rfl | rfl) <;> simp;
 
-@[deprecated "Auto instance"] instance : Logic.KP ⪯ Logic.KD := by apply Entailment.Equiv.le inferInstance
-@[deprecated "Auto instance"] instance : Logic.KD ⪯ Logic.KP := by apply Entailment.Equiv.le $ Entailment.Equiv.symm inferInstance
-
 end LO.Modal

@@ -136,8 +136,7 @@ lemma Logic.S5Grz.is_largestMC_of_Cl : Logic.S5Grz = (Logic.largestMC 𝐂𝐥) 
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
 instance : Sound (Logic.largestMC 𝐂𝐥) FrameClass.finite_Triv := by
-  suffices Sound Logic.Triv FrameClass.finite_Triv by
-    simpa [←Logic.S5Grz.is_largestMC_of_Cl];
+  rw [←Logic.S5Grz.is_largestMC_of_Cl];
   infer_instance;
 
 instance modalCompanion_Cl_S5Grz : ModalCompanion 𝐂𝐥 Logic.S5Grz := by
@@ -149,7 +148,9 @@ instance modalCompanion_Cl_S5Grz : ModalCompanion 𝐂𝐥 Logic.S5Grz := by
 
 instance modalCompanion_Cl_Triv : ModalCompanion 𝐂𝐥 Logic.Triv := by
   convert modalCompanion_Cl_S5Grz;
-  simp;
+  apply Logic.iff_equal_provable_equiv.mpr;
+  apply Entailment.Equiv.symm
+  infer_instance;
 
 end S5Grz
 
