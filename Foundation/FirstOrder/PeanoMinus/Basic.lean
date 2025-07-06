@@ -35,7 +35,7 @@ abbrev         ltTri : SyntacticFormula ℒₒᵣ := “x y | x < y ∨ x = y �
 
 end PeanoMinus.Axiom
 
-inductive PeanoMinus : Theory ℒₒᵣ
+inductive PeanoMinus : ArithmeticTheory
   | equal         : ∀ φ ∈ 𝐄𝐐, PeanoMinus φ
   | addZero       : PeanoMinus PeanoMinus.Axiom.addZero
   | addAssoc      : PeanoMinus PeanoMinus.Axiom.addAssoc
@@ -154,7 +154,7 @@ set_option linter.flexible false in
   case ltTrans => intro f; exact Nat.lt_trans
   case ltTri => intro f; exact Nat.lt_trichotomy _ _
   case equal h =>
-    have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    have : ℕ ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h⟩
 
 instance : 𝐄𝐐 ⪯ 𝐏𝐀⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PeanoMinus.equal φ hp
@@ -323,7 +323,7 @@ instance qq : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
   intro φ h
   rcases h
   case equal h =>
-    have : M ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    have : M ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case Ω₁ n m =>
     simp [models_iff, numeral_eq_natCast]
@@ -530,7 +530,7 @@ variable {M}
   · rfl
   · unfold natCast; rw [coe_add_one]; simp [*]
 
-variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ⪯ T]
+variable {T : ArithmeticTheory} [𝐏𝐀⁻ ⪯ T]
 
 instance : 𝐑₀ ⪯ 𝐏𝐀⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
 

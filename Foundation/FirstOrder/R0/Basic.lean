@@ -14,7 +14,7 @@ namespace LO
 
 open FirstOrder FirstOrder.Arith
 
-inductive R0 : Theory ℒₒᵣ
+inductive R0 : ArithmeticTheory
   | equal : ∀ φ ∈ 𝐄𝐐, R0 φ
   | Ω₁ (n m : ℕ) : R0 “↑n + ↑m = ↑(n + m)”
   | Ω₂ (n m : ℕ) : R0 “↑n * ↑m = ↑(n * m)”
@@ -31,7 +31,7 @@ instance : ℕ ⊧ₘ* 𝐑₀ := ⟨by
   intro σ h
   rcases h <;> try { simp [models_def, ←le_iff_eq_or_lt]; done }
   case equal h =>
-    have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    have : ℕ ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
     simpa [models_def] using modelsTheory_iff.mp this h
   case Ω₃ h =>
     simpa [models_def, ←le_iff_eq_or_lt] using h⟩
@@ -140,7 +140,7 @@ end R0
 
 namespace FirstOrder.Arith
 
-variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T]
+variable {T : ArithmeticTheory} [𝐑₀ ⪯ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ₀ σ → T ⊢!. σ := fun H =>
@@ -150,10 +150,10 @@ theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1
     exact R0.sigma_one_completeness hσ H
 
 open Classical in
-theorem sigma_one_completeness_iff [ss : Sigma1Sound T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_completeness_iff [ss : T.Sigma1Sound] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ₀ σ ↔ T ⊢!. σ :=
   haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := T) inferInstance inferInstance
-  ⟨fun h ↦ sigma_one_completeness (T := T) hσ h, fun h ↦ ss.sound (by simp [hσ]) <| Axiom.provable_iff.mp h⟩
+  ⟨fun h ↦ sigma_one_completeness hσ h, fun h ↦ ss.sound h (by simp [hσ])⟩
 
 end FirstOrder.Arith
 
@@ -228,7 +228,7 @@ instance : OmegaAddOne ⊧ₘ* 𝐑₀ := ⟨by
   intro σ h
   rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
   case equal h =>
-    have : OmegaAddOne ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    have : OmegaAddOne ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case Ω₃ h => exact h
   case Ω₄ n =>

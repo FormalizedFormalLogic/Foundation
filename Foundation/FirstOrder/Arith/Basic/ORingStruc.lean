@@ -111,10 +111,6 @@ end Semiterm
 
 namespace Semiformula
 
-instance : Coe (Semiformula ℒₒᵣ ξ n) (Semiformula L ξ n) := ⟨Semiformula.lMap Language.oringEmb⟩
-
-instance : Coe (Theory ℒₒᵣ) (Theory L) := ⟨(Semiformula.lMap Language.oringEmb '' ·)⟩
-
 @[simp] lemma oringEmb_eq (v : Fin 2 → Semiterm ℒₒᵣ ξ n) :
     Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) (op(=).operator v) = op(=).operator ![(v 0 : Semiterm L ξ n), (v 1 : Semiterm L ξ n)] := by
   simpa [lMap_rel, rew_rel, Operator.operator, Operator.Eq.sentence_eq] using Matrix.fun_eq_vec_two
@@ -217,22 +213,6 @@ end BinderNotation
 
 namespace Arith
 
-class SoundOn {L : Language} [Structure L ℕ]
-    (T : Theory L) (F : Sentence L → Prop) where
-  sound : ∀ {σ}, F σ → T ⊢! ↑σ → ℕ ⊧ₘ₀ σ
-
-instance {L : Language} [Structure L ℕ] (T : Theory L) (F : Sentence L → Prop) [ℕ ⊧ₘ* T] : SoundOn T F :=
-  ⟨fun _ b ↦ consequence_iff.mp (sound! (T := T) b) ℕ inferInstance⟩
-
-section
-
-variable {L : Language} [Structure L ℕ] (T : Theory L) (F : Set (Sentence L))
-
-lemma consistent_of_sound [SoundOn T F] (hF : ⊥ ∈ F) : Entailment.Consistent T :=
-  Entailment.consistent_iff_unprovable_bot.mpr fun b ↦ by simpa [Models₀] using SoundOn.sound (F := F) hF b
-
-end
-
 section
 
 variable {L : Language.{u}} [L.ORing] (T : Theory L)
@@ -255,17 +235,26 @@ section
 
 open Encodable Semiterm.Operator.GoedelNumber
 
-instance {α} [Encodable α] : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
+variable {α} [Encodable α]
+
+instance : Semiterm.Operator.GoedelNumber ℒₒᵣ α :=
   Semiterm.Operator.GoedelNumber.ofEncodable
 
-lemma goedelNumber_def {α} [Encodable α] (a : α) :
+lemma goedelNumber_def (a : α) :
   goedelNumber a = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
-lemma goedelNumber'_def {α} [Encodable α] (a : α) :
+lemma goedelNumber'_def (a : α) :
   (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.encode ℒₒᵣ a := rfl
 
-@[simp] lemma encode_encode_eq {α} [Encodable α] (a : α) :
+lemma goedelNumber'_eq_coe_encode (a : α) :
+  (⌜a⌝ : Semiterm ℒₒᵣ ξ n) = ↑(Encodable.encode a) := rfl
+
+@[simp] lemma encode_encode_eq (a : α) :
     (goedelNumber (encode a) : Semiterm.Const ℒₒᵣ) = goedelNumber a := by simp [Semiterm.Operator.encode, goedelNumber_def]
+
+@[simp] lemma rew_goedelNumber' (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) (a : α) :
+    ω ⌜a⌝ = ⌜a⌝ := by
+  simp [goedelNumber'_def]
 
 end
 

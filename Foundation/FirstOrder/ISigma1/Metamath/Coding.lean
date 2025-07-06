@@ -1,83 +1,7 @@
 import Foundation.FirstOrder.ISigma1.Metamath.Formula.Typed
 import Mathlib.Combinatorics.Colex
 
-
 open Encodable LO FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
-
-namespace LO.FirstOrder
-
-variable {L : Language} {ξ : Type*}
-
-
-namespace Semiterm
-
-variable [Encodable ξ] [(k : ℕ) → Encodable (L.Func k)]
-
-lemma encode_eq_toNat (t : Semiterm L ξ n) : Encodable.encode t = toNat t := rfl
-
-lemma toNat_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
-    toNat (func f v) = (Nat.pair 2 <| Nat.pair k <| Nat.pair (encode f) <| Matrix.vecToNat fun i ↦ toNat (v i)) + 1 := rfl
-
-@[simp] lemma encode_emb (t : Semiterm L Empty n) : Encodable.encode (Rew.emb t : Semiterm L ξ n) = Encodable.encode t := by
-  simp only [encode_eq_toNat]
-  induction t
-  · simp [toNat]
-  · contradiction
-  · simp [Rew.func, toNat_func, *]
-
-end Semiterm
-
-namespace  Semiformula
-
-/-! TODO: move to Foundation-/
-lemma embedding_rel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
-    (Rewriting.embedding (rel R v) : Semiformula L ξ n) = (rel R fun i ↦ Rew.emb (v i)) := by rfl
-
-lemma embedding_nrel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
-    (Rewriting.embedding (nrel R v) : Semiformula L ξ n) = (nrel R fun i ↦ Rew.emb (v i)) := by rfl
-
-open Encodable
-
-variable [Encodable ξ] [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
-
-lemma encode_eq_toNat
-    (φ : Semiformula L ξ n) : Encodable.encode φ = toNat φ := rfl
-
-lemma encode_rel {arity : ℕ} (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) :
-    encode (Semiformula.rel R v) = (Nat.pair 0 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1 := rfl
-
-lemma encode_nrel {arity : ℕ} (R : L.Rel arity) (v : Fin arity → Semiterm L ξ n) :
-    encode (Semiformula.nrel R v) = (Nat.pair 1 <| arity.pair <| (encode R).pair <| Matrix.vecToNat fun i ↦ encode (v i)) + 1 := rfl
-
-lemma encode_verum : encode (⊤ : Semiformula L ξ n) = (Nat.pair 2 0) + 1 := rfl
-
-lemma encode_falsum : encode (⊥ : Semiformula L ξ n) = (Nat.pair 3 0) + 1 := rfl
-
-lemma encode_and (φ ψ : Semiformula L ξ n) : encode (φ ⋏ ψ) = (Nat.pair 4 <| φ.toNat.pair ψ.toNat) + 1 := rfl
-
-lemma encode_or (φ ψ : Semiformula L ξ n) : encode (φ ⋎ ψ) = (Nat.pair 5 <| φ.toNat.pair ψ.toNat) + 1 := rfl
-
-lemma encode_all (φ : Semiformula L ξ (n + 1)) : encode (∀' φ) = (Nat.pair 6 <| φ.toNat) + 1 := rfl
-
-lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃' φ) = (Nat.pair 7 <| φ.toNat) + 1 := rfl
-
-@[simp] lemma encode_emb
-    (φ : Semisentence L n) : Encodable.encode (Rewriting.embedding φ : Semiformula L ξ n) = Encodable.encode φ := by
-  induction φ using rec' <;>
-    simp [embedding_rel, embedding_nrel,
-      encode_rel, encode_nrel, encode_verum, encode_falsum, encode_and, encode_or, encode_all, encode_ex,
-      ← encode_eq_toNat, *]
-
-end Semiformula
-
-namespace Semiformula.Operator
-
-lemma lt_eq [L.LT] (t u : Semiterm L ξ n) :
-    LT.lt.operator ![t, u] = Semiformula.rel Language.LT.lt ![t, u] := by simp [operator, LT.sentence_eq, rew_rel]
-
-end Semiformula.Operator
-
-end LO.FirstOrder
 
 namespace LO.ISigma1.Metamath
 
@@ -649,11 +573,11 @@ open FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
 @[simp] lemma codeIn'_ball (t : SyntacticSemiterm ℒₒᵣ n) (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
     (⌜∀[“#0 < !!(Rew.bShift t)”] φ⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = Language.Semiformula.ball ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
   ext; simp [LO.ball, imp_eq, Language.Semiformula.cast,
-    Language.Semiformula.ball, Semiformula.Operator.lt_eq]
+    Language.Semiformula.ball, Semiformula.Operator.lt_def]
 @[simp] lemma codeIn'_bex (t : SyntacticSemiterm ℒₒᵣ n) (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
     (⌜∃[“#0 < !!(Rew.bShift t)”] φ⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = Language.Semiformula.bex ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
   ext; simp [LO.bex, imp_eq, Language.Semiformula.cast,
-    Language.Semiformula.ball, Semiformula.Operator.lt_eq]
+    Language.Semiformula.ball, Semiformula.Operator.lt_def]
 
 instance : GoedelQuote (Sentence L) ((L.codeIn V).Formula) := ⟨fun σ ↦ (⌜Rew.embs ▹ σ⌝ : (Language.codeIn L V).Semiformula (0 : ℕ))⟩
 
