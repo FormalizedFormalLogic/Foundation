@@ -31,15 +31,4 @@ instance : Logic.K ≊ 𝐄𝐌𝐂𝐍 := by
       . exact boxverum!;
     | _ => simp;
 
--- TODO: remove
-
-instance : Logic.K ⪯ 𝐄𝐌𝐂𝐍 := by
-  apply Entailment.Equiv.le;
-  infer_instance;
-
-instance : 𝐄𝐌𝐂𝐍 ⪯ Logic.K := by
-  apply Entailment.Equiv.le;
-  apply Entailment.Equiv.symm;
-  infer_instance;
-
 end LO.Modal
