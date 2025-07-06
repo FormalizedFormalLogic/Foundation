@@ -22,19 +22,19 @@ rev = "v4.22.0-rc3"
 name = "Foundation"
 
 [[lean_exe]]
-name = "generate_arith_kite"
-root = "Kite.Arith"
+name = "generate_arith_zoo"
+root = "Zoo.Arith"
 supportInterpreter = true
 
 [[lean_exe]]
-name = "generate_modal_kite"
-root = "Kite.Modal"
+name = "generate_modal_zoo"
+root = "Zoo.Modal"
 supportInterpreter = true
 
 [[lean_exe]]
-name = "generate_propositional_kite"
-root = "Kite.Propositional"
+name = "generate_propositional_zoo"
+root = "Zoo.Propositional"
 supportInterpreter = true
 
 [[lean_lib]]
-name = "Kite"
+name = "Zoo"

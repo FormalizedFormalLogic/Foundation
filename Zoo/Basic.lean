@@ -3,7 +3,7 @@ import Lean.Data.Json
 
 open Lean
 
-namespace Kite
+namespace Zoo
 
 inductive EdgeType
 | ssub
@@ -75,4 +75,4 @@ def Edges.toOutput (es : Edges) := es.cleanDup.reductTrans
     ])
   |> Json.arr
 
-end Kite
+end Zoo
