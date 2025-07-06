@@ -152,7 +152,7 @@ class GoedelSound (𝔅 : ProvabilityPredicate T₀ T) [Diagonalization T₀] wh
 
 section First
 
-variable [T₀ ⪯ T] [Diagonalization T₀] [L.DecidableEq] [Consistent T]
+variable (𝔅) [T₀ ⪯ T] [Diagonalization T₀] [L.DecidableEq] [Consistent T]
 
 local notation "𝗚" => 𝔅.goedel
 
@@ -172,8 +172,6 @@ theorem unrefutable_goedel [𝔅.GoedelSound] : T ⊬. ∼𝗚 := by
     inconsistent_iff_provable_bot.mpr (by simpa [Axiom.provable_iff] using this);
   contradiction;
 
-#check unrefutable_goedel
-
 theorem goedel_independent [𝔅.GoedelSound] : Independent (T : Axiom L) 𝗚 := by
   constructor
   . apply unprovable_goedel
@@ -181,7 +179,7 @@ theorem goedel_independent [𝔅.GoedelSound] : Independent (T : Axiom L) 𝗚 :
 
 theorem first_incompleteness [𝔅.GoedelSound] :
     ¬Entailment.Complete (T : Axiom L) :=
-  incomplete_iff_exists_undecidable.mpr ⟨𝗚, goedel_independent⟩
+  incomplete_iff_exists_undecidable.mpr ⟨𝗚, 𝔅.goedel_independent⟩
 
 end First
 
@@ -213,13 +211,13 @@ theorem unprovable_consistency [Consistent T] : T ⊬. 𝔅.con := by
   intro h
   have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_consistency
   have : T ⊢!. 𝗚 := by cl_prover [h, this]
-  exact unprovable_goedel this
+  exact 𝔅.unprovable_goedel this
 
 theorem unrefutable_consistency [Consistent T] [𝔅.GoedelSound] : T ⊬. ∼𝔅.con := by
   intro h
   have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_consistency
   have : T ⊢!. ∼𝗚 := by cl_prover [h, this]
-  exact unrefutable_goedel this
+  exact 𝔅.unrefutable_goedel this
 
 theorem consistency_independent [Consistent T] [𝔅.GoedelSound] : Independent (T : Axiom L) 𝔅.con := by
   constructor
@@ -280,7 +278,7 @@ instance [L.DecidableEq] : 𝔅.FormalizedLoeb := ⟨formalized_loeb_theorem (T 
 
 end LoebTheorem
 
-variable [Entailment.Consistent T]
+variable [Consistent T]
 
 lemma unprovable_consistency_via_loeb [L.DecidableEq] [𝔅.Loeb] : T ⊬. 𝔅.con := by
   by_contra hC;
@@ -310,11 +308,9 @@ end Loeb
 
 section Rosser
 
-variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] [Entailment.Consistent T]
+variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] [Consistent T]
 
 local notation "𝗥" => 𝔅.goedel
-
-lemma unprovable_rosser : T ⊬. 𝗥 := unprovable_goedel
 
 variable [𝔅.Rosser]
 
@@ -325,13 +321,12 @@ theorem unrefutable_rosser : T ⊬. ∼𝗥 := by
     by simpa [Axiom.provable_iff] using (N!_iff_CO!.mp hnρ) ⨀ hρ;
   contradiction
 
-theorem rosser_independent : Entailment.Independent T ↑𝗥 := by
-  suffices T ⊬. 𝗥 ∧ T ⊬. ∼𝗥 by simpa [Entailment.Independent, not_or, Axiom.unprovable_iff] using this;
+theorem rosser_independent : Independent (T : Axiom L) 𝗥 := by
   constructor
-  . apply unprovable_rosser
+  . apply unprovable_goedel
   . apply unrefutable_rosser
 
-theorem rosser_first_incompleteness (𝔅 : ProvabilityPredicate T₀ T) [𝔅.Rosser] : ¬Entailment.Complete T :=
+theorem rosser_first_incompleteness (𝔅 : ProvabilityPredicate T₀ T) [𝔅.Rosser] : ¬Entailment.Complete (T : Axiom L) :=
   Entailment.incomplete_iff_exists_undecidable.mpr ⟨𝔅.goedel, rosser_independent⟩
 
 omit [Diagonalization T₀] [Consistent T] in
