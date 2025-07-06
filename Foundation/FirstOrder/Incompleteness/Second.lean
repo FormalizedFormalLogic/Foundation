@@ -11,8 +11,8 @@ open FirstOrder Entailment ProvabilityLogic
 
 variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Delta1Definable]
 
-/-- Gödel's Second Incompleteness Theorem-/
-theorem goedel_second_incompleteness [Entailment.Consistent T] :
+/-- Gödel's second incompleteness theorem-/
+theorem goedel_second_incompleteness [Consistent T] :
     T ⊬. T.isConsistent :=
   T.standardPr.unprovable_consistency
 
@@ -22,7 +22,7 @@ theorem inconsistent_unprovable [T.Sigma1Sound] :
   T.standardPr.unrefutable_consistency
 
 theorem inconsistent_independent [T.Sigma1Sound] :
-    Entailment.Independent (T : Axiom ℒₒᵣ) (T.isConsistent : Sentence ℒₒᵣ) :=
+    Independent (T : Axiom ℒₒᵣ) (T.isConsistent : Sentence ℒₒᵣ) :=
   have : 𝐑₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
   T.standardPr.consistency_independent
 
@@ -31,7 +31,7 @@ abbrev _root_.LO.FirstOrder.ArithmeticTheory.AddSelfConsistency : ArithmeticTheo
 abbrev _root_.LO.FirstOrder.ArithmeticTheory.AddSelfInconsistency : ArithmeticTheory := T + {∼↑T.isConsistent}
 
 instance [Consistent T] : T ⪱ T.AddSelfConsistency :=
-  Entailment.StrictlyWeakerThan.of_unprovable_provable (φ := ↑T.isConsistent)
+  StrictlyWeakerThan.of_unprovable_provable (φ := ↑T.isConsistent)
     ((Axiom.unprovable_iff (T := T)).mp (goedel_second_incompleteness T))
     (Entailment.by_axm _ (by simp))
 
@@ -41,7 +41,7 @@ instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T.AddSelfConsistency := by
   simp [models_iff, *]
 
 instance [T.Sigma1Sound] : T ⪱ T.AddSelfInconsistency :=
-  Entailment.StrictlyWeakerThan.of_unprovable_provable (φ := ∼↑T.isConsistent)
+  StrictlyWeakerThan.of_unprovable_provable (φ := ∼↑T.isConsistent)
     (by simpa using (Axiom.unprovable_iff (T := T)).mp (inconsistent_unprovable T))
     (Entailment.by_axm _ (by simp))
 

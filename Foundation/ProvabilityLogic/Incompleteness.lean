@@ -152,7 +152,7 @@ class GoedelSound (𝔅 : ProvabilityPredicate T₀ T) [Diagonalization T₀] wh
 
 section First
 
-variable [T₀ ⪯ T] [Diagonalization T₀] [L.DecidableEq] [Entailment.Consistent T]
+variable [T₀ ⪯ T] [Diagonalization T₀] [L.DecidableEq] [Consistent T]
 
 local notation "𝗚" => 𝔅.goedel
 
@@ -172,7 +172,9 @@ theorem unrefutable_goedel [𝔅.GoedelSound] : T ⊬. ∼𝗚 := by
     inconsistent_iff_provable_bot.mpr (by simpa [Axiom.provable_iff] using this);
   contradiction;
 
-theorem goedel_independent [𝔅.GoedelSound] : Entailment.Independent (T : Axiom L) 𝗚 := by
+#check unrefutable_goedel
+
+theorem goedel_independent [𝔅.GoedelSound] : Independent (T : Axiom L) 𝗚 := by
   constructor
   . apply unprovable_goedel
   . apply unrefutable_goedel

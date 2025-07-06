@@ -241,16 +241,16 @@ $$
 #### Lemma: Gödel sentence is undecidable, i.e., $T \nvdash \mathrm{G}$ if $T$ is consistent, and $T \nvdash \lnot\mathrm{G}$ if $\mathbb{N} \models T$.
 
 ```lean
-lemma LO.ISigma1.goedel_unprovable
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [System.Consistent T] :
-    T ⊬ ↑𝗚
+theorem unprovable_goedel
+    (𝔅 : ProvabilityPredicate T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] :
+    T ⊬. 𝔅.goedel
 
-lemma LO.ISigma1.not_goedel_unprovable
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [ℕ ⊧ₘ* T] :
-    T ⊬ ∼↑𝗚
+theorem unrefutable_goedel
+    (𝔅 : ProvabilityPredicate T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] [𝔅.GoedelSound] :
+    T ⊬. ∼𝔅.goedel
 ```
-- [LO.ISigma1.goedel_unprovable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.goedel_unprovable)
-- [LO.ISigma1.not_goedel_unprovable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.not_goedel_unprovable)
+- [LO.ProvabilityLogic.ProvabilityPredicate.unprovable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.ProvabilityPredicate.unprovable_goedel)
+- [LO.ProvabilityLogic.ProvabilityPredicate.unrefutable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.ProvabilityPredicate.unrefutable_goedel)
 
 Define formalized incompleteness sentence $\mathrm{Con}_T$:
 $$
@@ -259,22 +259,22 @@ $$
 
 #### Lemma: $T \vdash \mathrm{Con}_T \leftrightarrow G_T$
 ```lean
-lemma LO.ISigma1.consistent_iff_goedel
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] :
-    T ⊢! ↑𝗖𝗼𝗻 ⭤ ↑𝗚
+theorem goedel_iff_consistency
+    (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL] [T₀ ⪯ T] [Diagonalization T₀] :
+    T₀ ⊢!. 𝔅.goedel ⭤ 𝔅.con
 ```
-- [LO.ISigma1.consistent_iff_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.consistent_iff_goedel)
+- [LO.ProvabilityLogic.ProvabilityPredicate.goedel_iff_consistency](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.ProvabilityPredicate.goedel_iff_consistency)
 
 #### Theorem: $T$ cannot prove its own consistency, i.e., $T \nvdash \mathrm{Con}_T$ if $T$ is consistent. Moreover, $\mathrm{Con}_T$ is undecidable from $T$ if $\mathbb{N} \models T$.
 
 ```lean
 theorem LO.ISigma1.goedel_second_incompleteness
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [System.Consistent T] :
-    T ⊬ ↑𝗖𝗼𝗻 
+    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [System.Consistent T] :
+    T ⊬. T.isConsistent 
 
 theorem LO.ISigma1.inconsistent_undecidable
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [ℕ ⊧ₘ* T] :
-    System.Independent T ↑𝗖𝗼𝗻
+    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [T.Sigma1Sound] :
+    Independent (T : Axiom ℒₒᵣ) (T.isConsistent : Sentence ℒₒᵣ)
 ```
 - [LO.ISigma1.goedel_second_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.goedel_second_incompleteness)
 - [LO.ISigma1.inconsistent_undecidable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.inconsistent_undecidable)

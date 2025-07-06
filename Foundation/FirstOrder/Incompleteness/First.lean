@@ -2,8 +2,7 @@ import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.FirstOrder.R0.Representation
 
 /-!
-# Gödel's first incompleteness theorem over $\mathsf{R_0}$
-
+# Gödel's first incompleteness theorem for arithmetic theories stronger than $\mathsf{R_0}$
 -/
 
 namespace LO
