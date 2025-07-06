@@ -44,6 +44,7 @@ lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : L ⊢! φ) (hV : Logic.Ver ⊬ 
 lemma KD_subset_of_not_subset_Ver (hV : ¬L ⪯ Logic.Ver) : Logic.KD ⪯ L := by
   apply weakerThan_iff.mpr;
   intro φ hφ;
+  have : Logic.KD ⪯ Logic.KP := by apply Entailment.Equiv.le $ Entailment.Equiv.symm inferInstance -- TODO: remove!
   replace hφ : Logic.KP ⊢! φ := WeakerThan.pbl hφ;
   induction hφ using Hilbert.rec! with
   | maxm h =>
