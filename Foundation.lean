@@ -63,7 +63,6 @@ import Foundation.FirstOrder.Omega1.Nuon
 
 import Foundation.FirstOrder.Incompleteness.FixedPoint
 import Foundation.FirstOrder.Incompleteness.StandardProvability
-import Foundation.FirstOrder.Incompleteness.DerivabilityCondition.Basic
 import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
@@ -139,6 +138,8 @@ import Foundation.Modal.Logic.Dz.Basic
 import Foundation.Modal.Maximal.Makinson
 
 -- Provability Logic
+import Foundation.ProvabilityLogic.Incompleteness
+
 import Foundation.ProvabilityLogic.N.Soundness
 
 import Foundation.ProvabilityLogic.GL.Completeness

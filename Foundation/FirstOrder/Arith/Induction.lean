@@ -28,21 +28,21 @@ variable (L)
 def InductionScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
   { ψ | ∃ φ : Semiformula L ℕ 1, Γ φ ∧ ψ = succInd φ }
 
-abbrev IOpen : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Semiformula.Open
+abbrev IOpen : ArithmeticTheory := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Semiformula.Open
 
 notation "𝐈Open" => IOpen
 
-abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ (Arith.Hierarchy Γ k)
+abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : ArithmeticTheory := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ (Arith.Hierarchy Γ k)
 
 prefix:max "𝐈𝐍𝐃 " => InductionOnHierarchy
 
-abbrev ISigma (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃 𝚺 k
+abbrev ISigma (k : ℕ) : ArithmeticTheory := 𝐈𝐍𝐃 𝚺 k
 
 prefix:max "𝐈𝚺" => ISigma
 
 notation "𝐈𝚺₀" => ISigma 0
 
-abbrev IPi (k : ℕ) : Theory ℒₒᵣ := 𝐈𝐍𝐃 𝚷 k
+abbrev IPi (k : ℕ) : ArithmeticTheory := 𝐈𝐍𝐃 𝚷 k
 
 prefix:max "𝐈𝚷" => IPi
 
@@ -52,20 +52,13 @@ notation "𝐈𝚺₁" => ISigma 1
 
 notation "𝐈𝚷₁" => IPi 1
 
-abbrev Peano : Theory ℒₒᵣ := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Set.univ
+abbrev Peano : ArithmeticTheory := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Set.univ
 
 notation "𝐏𝐀" => Peano
 
 variable {L}
 
 variable {C C' : Semiformula ℒₒᵣ ℕ 1 → Prop}
-
-lemma coe_InductionOnHierarchy_subset_InductionOnHierarchy :
-    (InductionScheme ℒₒᵣ (Arith.Hierarchy Γ ν) : Theory L) ⊆ InductionScheme L (Arith.Hierarchy Γ ν) := by
-  simp only [InductionScheme, Set.image_subset_iff, Set.preimage_setOf_eq, Set.setOf_subset_setOf, forall_exists_index, and_imp]
-  rintro _ φ Hp rfl
-  exact ⟨Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) φ, Arith.Hierarchy.oringEmb Hp,
-    by simp [succInd, Semiformula.lMap_substs]⟩
 
 lemma InductionScheme_subset (h : ∀ {φ : Semiformula ℒₒᵣ ℕ 1},  C φ → C' φ) : InductionScheme ℒₒᵣ C ⊆ InductionScheme ℒₒᵣ C' := by
   intro _; simp only [InductionScheme, Set.mem_setOf_eq, forall_exists_index, and_imp]; rintro φ hp rfl; exact ⟨φ, h hp, rfl⟩
@@ -388,9 +381,9 @@ instance models_Peano : ℕ ⊧ₘ* 𝐏𝐀 := by
     Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp, true_and]
   rintro _ φ _ rfl; simp [models_succInd]
 
-instance : Entailment.Consistent (𝐈𝐍𝐃 Γ k) := consistent_of_sound (𝐈𝐍𝐃 Γ k) (Eq ⊥) rfl
+instance : Entailment.Consistent (𝐈𝐍𝐃 Γ k) := (𝐈𝐍𝐃 Γ k).consistent_of_sound (Eq ⊥) rfl
 
-instance : Entailment.Consistent 𝐏𝐀 := consistent_of_sound 𝐏𝐀 (Eq ⊥) rfl
+instance : Entailment.Consistent 𝐏𝐀 := 𝐏𝐀.consistent_of_sound (Eq ⊥) rfl
 
 instance : 𝐏𝐀 ⪯ 𝐓𝐀 := inferInstance
 

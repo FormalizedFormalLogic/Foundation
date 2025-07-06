@@ -177,28 +177,28 @@ end Arithmetization
 
 section
 
-variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Delta1Definable]
 
 theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    V ⊧ₘ₀ σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by
-  simpa [provableₐ_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
+    V ⊧ₘ₀ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
+  simpa [provable_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
 
 theorem sigma₁_complete_provable {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T†V ⊢! ⌜σ⌝ := fun h ↦ by
-  simpa [provableₐ_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
+  simpa [provable_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
 
 end
 
 section D2
 
-variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Delta1Definable]
 
 /-- Hilbert–Bernays provability condition D2 -/
-theorem modus_ponens {φ ψ : SyntacticFormula ℒₒᵣ} (hφψ : T.Provableₐ (⌜φ ➝ ψ⌝ : V)) (hφ : T.Provableₐ (⌜φ⌝ : V)) :
-    T.Provableₐ (⌜ψ⌝ : V) := provableₐ_iff'.mpr <| (by simpa using provableₐ_iff'.mp hφψ) ⨀ provableₐ_iff'.mp hφ
+theorem modus_ponens {φ ψ : SyntacticFormula ℒₒᵣ} (hφψ : T.Provable (⌜φ ➝ ψ⌝ : V)) (hφ : T.Provable (⌜φ⌝ : V)) :
+    T.Provable (⌜ψ⌝ : V) := provable_iff'.mpr <| (by simpa using provable_iff'.mp hφψ) ⨀ provable_iff'.mp hφ
 
-theorem modus_ponens₀ {σ τ : Sentence ℒₒᵣ} (hστ : T.Provableₐ (⌜σ ➝ τ⌝ : V)) (hσ : T.Provableₐ (⌜σ⌝ : V)) :
-    T.Provableₐ (⌜τ⌝ : V) := provableₐ_iff.mpr <| (by simpa using provableₐ_iff.mp hστ) ⨀ provableₐ_iff.mp hσ
+theorem modus_ponens₀ {σ τ : Sentence ℒₒᵣ} (hστ : T.Provable (⌜σ ➝ τ⌝ : V)) (hσ : T.Provable (⌜σ⌝ : V)) :
+    T.Provable (⌜τ⌝ : V) := provable_iff.mpr <| (by simpa using provable_iff.mp hστ) ⨀ provable_iff.mp hσ
 
 end D2
 

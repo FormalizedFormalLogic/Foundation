@@ -338,12 +338,12 @@ variable (𝓢 : S)
 
 def Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ∼f
 
-def Undecidable (f : F) : Prop := 𝓢 ⊬ f ∧ 𝓢 ⊬ ∼f
+def Independent (f : F) : Prop := 𝓢 ⊬ f ∧ 𝓢 ⊬ ∼f
 
 end
 
 lemma incomplete_iff_exists_undecidable [LogicalConnective F] {𝓢 : S} :
-    ¬Entailment.Complete 𝓢 ↔ ∃ f, Undecidable 𝓢 f := by simp [Complete, Undecidable, not_or]
+    ¬Entailment.Complete 𝓢 ↔ ∃ f, Independent 𝓢 f := by simp [Complete, Independent, not_or]
 
 variable (S T)
 

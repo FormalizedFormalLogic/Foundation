@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Basic.ORingStruc
+import Foundation.FirstOrder.Arith.Basic.Model
 
 namespace LO
 
@@ -421,17 +421,6 @@ lemma remove_exists {φ : Semiformula L ξ (n + 1)} : Hierarchy b s (∃' φ) �
 
 end Hierarchy
 
-section
-
-variable {L : Language} [L.LT] [Structure L ℕ]
-
-abbrev Sigma1Sound (T : Theory L) := SoundOn T (Hierarchy 𝚺 1)
-
-lemma consistent_of_sigma1Sound (T : Theory L) [Sigma1Sound T] :
-    Entailment.Consistent T := consistent_of_sound T (Hierarchy 𝚺 1) (by simp [Set.mem_def])
-
-end
-
 section LOR
 
 lemma sigma₁_induction {P : (n : ℕ) → Semiformula ℒₒᵣ ξ n → Prop}
@@ -491,6 +480,11 @@ lemma sigma₁_induction' {n φ} (hp : Hierarchy 𝚺 1 φ)
 end LOR
 
 end Arith
+
+abbrev ArithmeticTheory.Sigma1Sound (T : ArithmeticTheory) := T.SoundOn (Arith.Hierarchy 𝚺 1)
+
+instance (T : ArithmeticTheory) [T.Sigma1Sound] : Entailment.Consistent T :=
+  T.consistent_of_sound (Arith.Hierarchy 𝚺 1) (by simp)
 
 end FirstOrder
 

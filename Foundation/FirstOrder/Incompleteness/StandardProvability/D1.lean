@@ -213,20 +213,20 @@ end
 
 section
 
-variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Delta1Definable]
 
 /-- Hilbert–Bernays provability condition D1 -/
-theorem provableₐ_of_provable {φ} : T ⊢! φ → T.Provableₐ (⌜φ⌝ : V) := fun h ↦
+theorem provable_of_provable_arith {φ} : T ⊢! φ → T.Provable (⌜φ⌝ : V) := fun h ↦
   Language.Theory.Derivable.of_ss Arithmetization.theory_subset_AddR₀ (provable_of_provable h)
 
-theorem provableₐ_of_provable₀ {σ} : T ⊢!. σ → T.Provableₐ (⌜σ⌝ : V) := fun h ↦ by
-  simpa using provableₐ_of_provable (T := T) (V := V) <| Axiom.provable_iff.mp h
+theorem provable_of_provable_arith₀ {σ} : T ⊢!. σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
+  simpa using provable_of_provable_arith (T := T) (V := V) <| Axiom.provable_iff.mp h
 
-theorem provableₐ_of_provable' {φ} : T ⊢! φ → T†V ⊢! ⌜φ⌝ := fun h ↦ by
-  simpa [provableₐ_iff'] using provableₐ_of_provable (V := V) h
+theorem provable_of_provable_arith' {φ} : T ⊢! φ → T†V ⊢! ⌜φ⌝ := fun h ↦ by
+  simpa [provable_iff'] using provable_of_provable_arith (V := V) h
 
-theorem provableₐ_of_provable'₀ {σ} : T ⊢!. σ → T†V ⊢! ⌜σ⌝ := fun h ↦ by
-  simpa [provableₐ_iff] using provableₐ_of_provable₀ (V := V) h
+theorem provable_of_provable_arith'₀ {σ} : T ⊢!. σ → T†V ⊢! ⌜σ⌝ := fun h ↦ by
+  simpa [provable_iff] using provable_of_provable_arith₀ (V := V) h
 
 end
 
@@ -403,9 +403,9 @@ lemma Language.Theory.Provable.complete₀ {σ : Sentence L} :
     T.tCodeIn ℕ ⊢! ⌜σ⌝ ↔ T ⊢! ↑σ :=
   ⟨by simpa [Language.Theory.TProvable.iff_provable] using Language.Theory.Provable.smallSound, tprovable_of_provable⟩
 
-@[simp] lemma provableₐ_iff_provable₀ {T : Theory ℒₒᵣ} [T.Delta1Definable] [𝐑₀ ⪯ T] {σ : Sentence ℒₒᵣ} :
-    T.Provableₐ (⌜σ⌝ : ℕ) ↔ T ⊢!. σ := by
-  simpa [provableₐ_iff, Language.Theory.Provable.complete₀, Axiom.provable_iff] using
+@[simp] lemma provable_iff_provable₀ {T : ArithmeticTheory} [T.Delta1Definable] [𝐑₀ ⪯ T] {σ : Sentence ℒₒᵣ} :
+    T.Provable (⌜σ⌝ : ℕ) ↔ T ⊢!. σ := by
+  simpa [provable_iff, Language.Theory.Provable.complete₀, Axiom.provable_iff] using
     FirstOrder.Arith.add_cobhamR0'.symm
 
 end LO.ISigma1.Metamath

@@ -78,7 +78,7 @@ lemma models_iff_of_Delta1 {σ : 𝚫₁.Semisentence n} (hσ : σ.ProperOn ℕ)
     have : V ⊧/(e ·) (∼σ.pi.val) := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [hσV.iff'] using this
 
-variable {T : Theory ℒₒᵣ} [𝐏𝐀⁻ ⪯ T] [Sigma1Sound T]
+variable {T : ArithmeticTheory} [𝐏𝐀⁻ ⪯ T] [T.Sigma1Sound]
 
 noncomputable instance : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐏𝐀⁻) inferInstance inferInstance
 

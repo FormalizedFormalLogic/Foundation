@@ -134,53 +134,9 @@ variable {M : Type*} [ORingStruc M]
   · simp only [Theory.lMap, Set.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
     intro H φ hp f; exact eval_lMap_oringEmb.mpr (H hp f)
 
-/-
-instance [M ⊧ₘ* 𝐈Open] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
-
-instance [M ⊧ₘ* 𝐈Open] : M ⊧ₘ* Theory.InductionScheme ℒₒᵣ Semiformula.Open :=
-  ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.InductionScheme _ Semiformula.Open)
-
-def models_PeanoMinus_of_models_InductionOnHierarchy (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.InductionScheme _ (Arith.Hierarchy Γ n))
-
-def models_InductionScheme_of_models_InductionOnHierarchy (Γ n) [M ⊧ₘ* 𝐈𝐍𝐃 Γ n] : M ⊧ₘ* Theory.InductionScheme ℒₒᵣ (Arith.Hierarchy Γ n) :=
-  ModelsTheory.of_add_right M 𝐏𝐀⁻ (Theory.InductionScheme _ (Arith.Hierarchy Γ n))
-
-instance models_PeanoMinus_of_models_Peano [M ⊧ₘ* 𝐏𝐀] : M ⊧ₘ* 𝐏𝐀⁻ := ModelsTheory.of_add_left M 𝐏𝐀⁻ (Theory.InductionScheme _ Set.univ)
-
--/
-
 end
 
 end model
-
-/-
-namespace Standard
-
-variable {ξ : Type v} (e : Fin n → ℕ) (ε : ξ → ℕ)
-
-set_option linter.flexible false in
-lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ := by
-  simp [Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
-    Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
-  intro e hzero hsucc x; induction' x with x ih
-  · exact hzero
-  · exact hsucc x ih
-
-set_option linter.flexible false in
-instance models_ISigma (Γ k) : ℕ ⊧ₘ* 𝐈𝐍𝐃Γ k := by
-  simp [Theory.InductionScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
-
-instance models_ISigmaZero : ℕ ⊧ₘ* 𝐈𝚺₀ := inferInstance
-
-instance models_ISigmaOne : ℕ ⊧ₘ* 𝐈𝚺₁ := inferInstance
-
-set_option linter.flexible false in
-instance models_Peano : ℕ ⊧ₘ* 𝐏𝐀 := by
-  simp [Theory.Peano, Theory.InductionScheme, models_PeanoMinus]; rintro _ φ _ rfl; simp [models_succInd]
-
-end Standard
-
--/
 
 section
 
@@ -216,21 +172,20 @@ lemma oRing_weakerThan_of (T S : Theory ℒₒᵣ) [𝐄𝐐 ⪯ S]
 
 end Arith
 
-namespace Theory
+class ArithmeticTheory.SoundOn (T : ArithmeticTheory) (F : Sentence ℒₒᵣ → Prop) where
+  sound : ∀ {σ}, T ⊢!. σ → F σ → ℕ ⊧ₘ₀ σ
 
-open Arith
+namespace ArithmeticTheory
 
-/-
+variable (T : ArithmeticTheory) (F : Sentence ℒₒᵣ → Prop)
 
-instance Peano.consistent : Entailment.Consistent 𝐏𝐀 :=
-  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐏𝐀)⟩
+instance [ℕ ⊧ₘ* T] : T.SoundOn F := ⟨fun b _ ↦ consequence_iff.mp (sound!₀ b) ℕ inferInstance⟩
 
-instance TrueArith.consistent : Entailment.Consistent 𝐓𝐀 :=
-  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐓𝐀)⟩
+lemma consistent_of_sound [SoundOn T F] (hF : F ⊥) : Entailment.Consistent T :=
+  Entailment.consistent_iff_unprovable_bot.mpr fun b ↦ by
+    simpa [Models₀] using SoundOn.sound (T := T) (F := F) (by simpa [Axiom.provable_iff]) hF
 
--/
-
-end Theory
+end ArithmeticTheory
 
 end FirstOrder
 
