@@ -118,7 +118,7 @@ import Foundation.Modal.Kripke.LinearFrame
 
 import Foundation.Modal.PLoN.Logic.N
 
-import Foundation.Modal.Neighborhood.Logic.E
+import Foundation.Modal.Neighborhood.Logic.EMCN
 
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.ModalCompanion.KC
