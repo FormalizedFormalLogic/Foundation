@@ -2,10 +2,6 @@ import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.Logic.EN
 import Foundation.Modal.Neighborhood.Logic.EC
 
-
-@[simp] lemma Set.Fin2.eq_univ : Set.univ (α := Fin 2) = {0, 1} := by ext x; match x with | 0 | 1 => simp
-@[simp] lemma Set.Fin3.eq_univ : Set.univ (α := Fin 3) = {0, 1, 2} := by ext x; match x with | 0 | 1 | 2 => simp
-
 namespace LO.Modal
 
 open Neighborhood
