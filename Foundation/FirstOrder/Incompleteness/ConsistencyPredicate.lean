@@ -31,13 +31,13 @@ lemma _root_.LO.FirstOrder.Theory.Consistency.quote_iff {φ : Sentence ℒₒᵣ
 section
 
 def _root_.LO.FirstOrder.ArithmeticTheory.isConsistent : 𝚷₁.Sentence :=
-  .mkPi (∼T.provabilityPred ⊥) (by simp)
+  .mkPi (∼T.provabilityPred ⊥)
 
 @[simp] lemma isConsistent_defined : Semiformula.Evalbm V ![] (T.isConsistent : Sentence ℒₒᵣ) ↔ T.IsConsistent V := by
   simp [ArithmeticTheory.isConsistent, ArithmeticTheory.IsConsistent]
 
 def _root_.LO.FirstOrder.ArithmeticTheory.consistency : 𝚷₁.Semisentence 1 := .mkPi
-  “φ. ∀ nφ, !(ℒₒᵣ).lDef.negDef nφ φ → ¬!T.provable nφ” (by simp)
+  “φ. ∀ nφ, !(ℒₒᵣ).lDef.negDef nφ φ → ¬!T.provable nφ”
 
 lemma consistency_defined : 𝚷₁-Predicate (T.Consistency : V → Prop) via T.consistency := by
   intro v

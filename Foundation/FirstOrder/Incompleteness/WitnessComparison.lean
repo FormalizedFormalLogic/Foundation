@@ -25,7 +25,7 @@ def Language.Theory.ProvabilityComparison (φ ψ : V) : Prop := T.DerivabilityCo
 section
 
 def _root_.LO.FirstOrder.Arithmetic.LDef.TDef.derivabilityComparisonDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 2 := .mkSigma
-  “s₁ s₂. ∃ d₁, !pT.derivationOfDef.sigma d₁ s₁ ∧ ∀ d₂ < d₁, ¬!pT.derivationOfDef.pi d₂ s₂” (by simp)
+  “s₁ s₂. ∃ d₁, !pT.derivationOfDef.sigma d₁ s₁ ∧ ∀ d₂ < d₁, ¬!pT.derivationOfDef.pi d₂ s₂”
 
 lemma Language.Theory.derivabilityComparison_defined : 𝚺₁-Relation T.DerivabilityComparison via pT.derivabilityComparisonDef := by
   intro v
@@ -35,7 +35,7 @@ lemma Language.Theory.derivabilityComparison_defined : 𝚺₁-Relation T.Deriva
 instance Language.Theory.derivabilityComparison_definable : 𝚺₁-Relation T.DerivabilityComparison := T.derivabilityComparison_defined.to_definable
 
 def _root_.LO.FirstOrder.Arithmetic.LDef.TDef.provabilityComparisonDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 2 := .mkSigma
-  “φ ψ. ∃ sφ sψ, !insertDef sφ φ 0 ∧ !insertDef sψ ψ 0 ∧ !pT.derivabilityComparisonDef sφ sψ” (by simp)
+  “φ ψ. ∃ sφ sψ, !insertDef sφ φ 0 ∧ !insertDef sψ ψ 0 ∧ !pT.derivabilityComparisonDef sφ sψ”
 
 lemma Language.Theory.provabilityComparison_defined : 𝚺₁-Relation T.ProvabilityComparison via pT.provabilityComparisonDef := by
   intro v; simp [LDef.TDef.provabilityComparisonDef, T.derivabilityComparison_defined.df.iff, Language.Theory.ProvabilityComparison, singleton_eq_insert, emptyset_def]
@@ -117,7 +117,7 @@ def _root_.LO.FirstOrder.Theory.ProvabilityComparisonₐ (φ ψ : V) : Prop := (
 section
 
 def _root_.LO.FirstOrder.Theory.provabilityComparisonₐDef : 𝚺₁.Semisentence 2 := .mkSigma
-  “φ ψ. !(T + 𝐑₀').tDef.provabilityComparisonDef φ ψ” (by simp)
+  “φ ψ. !(T + 𝐑₀').tDef.provabilityComparisonDef φ ψ”
 
 lemma provabilityComparisonₐ_defined : 𝚺₁-Relation (T.ProvabilityComparisonₐ : V → V → Prop) via T.provabilityComparisonₐDef := by
   intro v; simp [FirstOrder.Theory.provabilityComparisonₐDef, FirstOrder.Theory.ProvabilityComparisonₐ, ((T + 𝐑₀').codeIn V).provabilityComparison_defined.df.iff]

@@ -27,4 +27,8 @@ instance : 𝐏𝐀 + 𝐏𝐀.Con ⪯ 𝐓𝐀 := inferInstance
 
 instance : 𝐏𝐀 ⪱ 𝐏𝐀 + 𝐏𝐀.Incon := inferInstance
 
+instance : 𝐏𝐀 + 𝐏𝐀.Con ⪱ 𝐏𝐀 + 𝐏𝐀.Con + (𝐏𝐀 + 𝐏𝐀.Con).Incon :=
+  have : 𝐈𝚺₁ ⪯ 𝐏𝐀 + 𝐏𝐀.Con := Entailment.WeakerThan.trans (inferInstanceAs (𝐈𝚺₁ ⪯ 𝐏𝐀)) inferInstance
+  inferInstance
+
 end LO.FirstOrder

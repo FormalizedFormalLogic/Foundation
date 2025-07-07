@@ -50,8 +50,8 @@ namespace HierarchySymbol
 variable (ξ : Type*) (n : ℕ)
 
 protected inductive Semiformula : HierarchySymbol → Type _ where
-  | mkSigma {m} : (φ : Semiformula ℒₒᵣ ξ n) → Hierarchy 𝚺 m φ → 𝚺-[m].Semiformula
-  | mkPi {m}    : (φ : Semiformula ℒₒᵣ ξ n) → Hierarchy 𝚷 m φ → 𝚷-[m].Semiformula
+  | mkSigma {m} (φ : Semiformula ℒₒᵣ ξ n) (hφ : Hierarchy 𝚺 m φ := by simp) : 𝚺-[m].Semiformula
+  | mkPi {m} (φ : Semiformula ℒₒᵣ ξ n) (hφ : Hierarchy 𝚷 m φ := by simp) : 𝚷-[m].Semiformula
   | mkDelta {m} : 𝚺-[m].Semiformula → 𝚷-[m].Semiformula → 𝚫-[m].Semiformula
 
 protected abbrev Semisentence (Γ : HierarchySymbol) (n : ℕ) := Γ.Semiformula Empty n
