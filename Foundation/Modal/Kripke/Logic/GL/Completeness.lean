@@ -140,7 +140,6 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
           grind;
       all_goals grind;
   | hbox ψ ih =>
-    have : ψ ∈ φ.subformulas := subformulas.mem_box q_sub;
     constructor;
     . contrapose;
       intro h;

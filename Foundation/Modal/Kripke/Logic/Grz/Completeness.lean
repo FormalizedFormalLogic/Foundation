@@ -103,10 +103,7 @@ lemma truthlemma_lemma1
   . right;
     simp only [Finset.mem_image, Finset.mem_union, Finset.mem_preimage, Function.iterate_one];
     use ψ;
-    constructor;
-    . left;
-      exact subformulas.mem_box hq;
-    . rfl;
+    grind;
 
 omit [Consistent 𝓢] in
 lemma truthlemma_lemma2
@@ -159,8 +156,6 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>
-    have : ψ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.1;
-    have : χ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.2;
     constructor;
     . contrapose;
       intro h;
@@ -184,7 +179,6 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
       . assumption;
       . simpa using iff_not_mem_compl (by grind) |>.not.mp hr;
   | hbox ψ ih =>
-    have := subformulas.mem_box q_sub;
     constructor;
     . contrapose;
       by_cases w : ψ ∈ X;
@@ -224,7 +218,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         . apply Frame.refl;
         . exact ih (by grind) |>.not.mpr w;
     . intro h Y RXY;
-      apply ih (subformulas.mem_box q_sub) |>.mpr;
+      apply ih (by grind) |>.mpr;
       have : ↑Y *⊢[𝓢]! □ψ ➝ ψ := Context.of! $ axiomT!;
       have : ↑Y *⊢[𝓢]! ψ := this ⨀ (membership_iff (by grind) |>.mp (RXY.1 ψ (by simp; grind) h));
       exact membership_iff (by grind) |>.mpr this;

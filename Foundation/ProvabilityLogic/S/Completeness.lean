@@ -77,16 +77,16 @@ lemma GL_S_TFAE :
         constructor;
         . intro h;
           rcases Satisfies.imp_def₂.mp h with (hA | hB);
-          . exact C!_trans (ihB (Formula.subformulas.mem_imp B_sub |>.1) |>.2 hA) CNC!;
-          . exact C!_trans (ihC (Formula.subformulas.mem_imp B_sub |>.2) |>.1 hB) imply₁!;
+          . exact C!_trans (ihB (by grind) |>.2 hA) CNC!;
+          . exact C!_trans (ihC (by grind) |>.1 hB) imply₁!;
         . intro h;
           have := Satisfies.imp_def.not.mp h;
           push_neg at this;
           obtain ⟨hA, hB⟩ := this;
           apply deduct'!;
           apply NC!_of_N!_of_!;
-          . exact deductInv'! $ ihB (Formula.subformulas.mem_imp B_sub |>.1) |>.1 hA;
-          . exact deductInv'! $ ihC (Formula.subformulas.mem_imp B_sub |>.2) |>.2 hB;
+          . exact deductInv'! $ ihB (by grind) |>.1 hA;
+          . exact deductInv'! $ ihC (by grind) |>.2 hB;
       | hatom =>
         constructor;
         . intro h;
@@ -115,7 +115,7 @@ lemma GL_S_TFAE :
             rintro (i | i) _;
             . rw [(show (Sum.inl i) = r₀ by simp [r₀]; omega)]
               suffices 𝐈𝚺₁ ⊢!. σ r₀ ➝ σ.realization.interpret T.standardPr B by convert this;
-              apply ihB (Formula.subformulas.mem_box B_sub) |>.1;
+              apply ihB (by grind) |>.1;
               exact hrfl h;
             . by_cases e : i = r₁;
               . rw [e];
