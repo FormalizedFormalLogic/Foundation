@@ -21,23 +21,23 @@ end Kripke
 
 namespace Logic.K5.Kripke
 
-instance sound : Sound (Logic.K5) Kripke.FrameClass.K5 := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.K5) Kripke.FrameClass.K5 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F F_eucl _ rfl;
   exact validate_AxiomFive_of_euclidean (eucl := F_eucl);
 
-instance consistent : Entailment.Consistent (Logic.K5) :=
+instance consistent : Entailment.Consistent (Hilbert.K5) :=
   consistent_of_sound_frameclass Kripke.FrameClass.K5 $ by
     use whitepoint;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
 
-instance canonical : Canonical (Logic.K5) Kripke.FrameClass.K5 := ⟨by
+instance canonical : Canonical (Hilbert.K5) Kripke.FrameClass.K5 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Logic.K5) Kripke.FrameClass.K5 := inferInstance
+instance complete : Complete (Hilbert.K5) Kripke.FrameClass.K5 := inferInstance
 
 lemma eucl : Logic.K5 = Kripke.FrameClass.K5.logic := eq_hilbert_logic_frameClass_logic
 

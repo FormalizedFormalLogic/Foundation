@@ -19,20 +19,20 @@ end Kripke
 
 namespace Logic.KB5.Kripke
 
-instance sound : Sound (Logic.KB5) Kripke.FrameClass.KB5 := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KB5) Kripke.FrameClass.KB5 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomB_of_symmetric;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent (Logic.KB5) := consistent_of_sound_frameclass Kripke.FrameClass.KB5 $ by
+instance consistent : Entailment.Consistent (Hilbert.KB5) := consistent_of_sound_frameclass Kripke.FrameClass.KB5 $ by
   use whitepoint;
   constructor;
 
 
-instance canonical : Canonical (Logic.KB5) Kripke.FrameClass.KB5 := ⟨by constructor⟩
+instance canonical : Canonical (Hilbert.KB5) Kripke.FrameClass.KB5 := ⟨by constructor⟩
 
-instance complete : Complete (Logic.KB5) Kripke.FrameClass.KB5 := inferInstance
+instance complete : Complete (Hilbert.KB5) Kripke.FrameClass.KB5 := inferInstance
 
 end Logic.KB5.Kripke
 

@@ -7,21 +7,22 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
-namespace Logic.K.Kripke
 
-instance sound : Sound (Logic.K) FrameClass.all := instSound_of_validates_axioms FrameClass.all.validates_axiomK
+namespace Hilbert.K.Kripke
 
-instance sound_finite : Sound (Logic.K) FrameClass.finite_all := instSound_of_validates_axioms FrameClass.finite_all.validates_axiomK
+instance : Sound (Hilbert.K) FrameClass.all := instSound_of_validates_axioms FrameClass.all.validates_axiomK
 
-instance : Entailment.Consistent (Logic.K) := consistent_of_sound_frameclass FrameClass.all (by simp)
+instance : Sound (Hilbert.K) FrameClass.finite_all := instSound_of_validates_axioms FrameClass.finite_all.validates_axiomK
 
-instance : Kripke.Canonical (Logic.K) FrameClass.all := ⟨by trivial⟩
+instance : Entailment.Consistent (Hilbert.K) := consistent_of_sound_frameclass FrameClass.all (by simp)
 
-instance complete : Complete (Logic.K) FrameClass.all := inferInstance
+instance : Kripke.Canonical (Hilbert.K) FrameClass.all := ⟨by trivial⟩
 
-instance complete_finite : Complete (Logic.K) (FrameClass.finite_all) := ⟨by
+instance : Complete (Hilbert.K) FrameClass.all := inferInstance
+
+instance : Complete (Hilbert.K) (FrameClass.finite_all) := ⟨by
   intro φ hp;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.all);
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFiltrationModel M ↑φ.subformulas;
@@ -32,10 +33,10 @@ instance complete_finite : Complete (Logic.K) (FrameClass.finite_all) := ⟨by
   simp;
 ⟩
 
-lemma all : Logic.K = FrameClass.all.logic := eq_hilbert_logic_frameClass_logic
-lemma finite_all : Logic.K = FrameClass.finite_all.logic := eq_hilbert_logic_frameClass_logic
+end Hilbert.K.Kripke
 
-end Logic.K.Kripke
 
+lemma K.Kripke.eq_all : Modal.K = FrameClass.all.logic := eq_hilbert_logic_frameClass_logic
+lemma K.Kripke.eq_finite_all : Modal.K = FrameClass.finite_all.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

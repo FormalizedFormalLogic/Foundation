@@ -22,7 +22,7 @@ end Kripke
 
 namespace Logic.K4Point2.Kripke
 
-instance sound : Sound (Logic.K4Point2) Kripke.FrameClass.K4Point2 := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
@@ -33,9 +33,9 @@ instance consistent : Entailment.Consistent Logic.K4Point2 :=
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Logic.K4Point2) Kripke.FrameClass.K4Point2 :=  ⟨by constructor⟩
+instance canonical : Canonical (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 :=  ⟨by constructor⟩
 
-instance complete : Complete (Logic.K4Point2) Kripke.FrameClass.K4Point2 := inferInstance
+instance complete : Complete (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 := inferInstance
 
 lemma K4Point2 : Logic.K4Point2 = FrameClass.K4Point2.logic := eq_hilbert_logic_frameClass_logic
 

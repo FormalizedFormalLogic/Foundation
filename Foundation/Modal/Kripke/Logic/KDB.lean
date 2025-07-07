@@ -22,20 +22,20 @@ end Kripke
 
 namespace Logic.KDB.Kripke
 
-instance sound : Sound (Logic.KDB) Kripke.FrameClass.KDB := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KDB) Kripke.FrameClass.KDB := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomB_of_symmetric;
 
-instance consistent : Entailment.Consistent (Logic.KDB) := consistent_of_sound_frameclass Kripke.FrameClass.KDB $ by
+instance consistent : Entailment.Consistent (Hilbert.KDB) := consistent_of_sound_frameclass Kripke.FrameClass.KDB $ by
   use whitepoint;
   constructor;
 
 
-instance canonical : Canonical (Logic.KDB) Kripke.FrameClass.KDB := ⟨by constructor⟩
+instance canonical : Canonical (Hilbert.KDB) Kripke.FrameClass.KDB := ⟨by constructor⟩
 
-instance complete : Complete (Logic.KDB) Kripke.FrameClass.KDB := inferInstance
+instance complete : Complete (Hilbert.KDB) Kripke.FrameClass.KDB := inferInstance
 
 lemma serial_symm : Logic.KDB = Kripke.FrameClass.KDB.logic := eq_hilbert_logic_frameClass_logic
 

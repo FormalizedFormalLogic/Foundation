@@ -26,19 +26,19 @@ open Hilbert.Kripke
 
 namespace Logic.KTMk.Kripke
 
-instance sound : Sound (Logic.KTMk) Kripke.FrameClass.KTMk := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KTMk) Kripke.FrameClass.KTMk := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_axiomMk_of_satisfiesMakinsonCondition;
 
-instance consistent : Entailment.Consistent (Logic.KTMk) := consistent_of_sound_frameclass Kripke.FrameClass.KTMk $ by
+instance consistent : Entailment.Consistent (Hilbert.KTMk) := consistent_of_sound_frameclass Kripke.FrameClass.KTMk $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical (Logic.KTMk) Kripke.FrameClass.KTMk := ⟨by constructor⟩
+instance canonical : Canonical (Hilbert.KTMk) Kripke.FrameClass.KTMk := ⟨by constructor⟩
 
-instance complete : Complete (Logic.KTMk) Kripke.FrameClass.KTMk := inferInstance
+instance complete : Complete (Hilbert.KTMk) Kripke.FrameClass.KTMk := inferInstance
 
 
 section

@@ -24,20 +24,20 @@ end Kripke
 
 namespace Logic.KD45.Kripke
 
-instance sound : Sound (Logic.KD45) Kripke.FrameClass.serial_trans_eucl := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent (Logic.KD45) := consistent_of_sound_frameclass Kripke.FrameClass.serial_trans_eucl $ by
+instance consistent : Entailment.Consistent (Hilbert.KD45) := consistent_of_sound_frameclass Kripke.FrameClass.serial_trans_eucl $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical (Logic.KD45) Kripke.FrameClass.serial_trans_eucl := ⟨by constructor⟩
+instance canonical : Canonical (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := ⟨by constructor⟩
 
-instance complete : Complete (Logic.KD45) Kripke.FrameClass.serial_trans_eucl := inferInstance
+instance complete : Complete (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := inferInstance
 
 lemma serial_trans_eucl : Logic.KD45 = FrameClass.serial_trans_eucl.logic := eq_hilbert_logic_frameClass_logic
 

@@ -21,7 +21,7 @@ end Kripke
 
 namespace Logic.S4Point2McK.Kripke
 
-instance sound : Sound (Logic.S4Point2McK) Kripke.FrameClass.preorder_confluent_mckinsey := instSound_of_validates_axioms $ by
+instance sound : Sound (Hilbert.S4Point2McK) Kripke.FrameClass.preorder_confluent_mckinsey := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -34,9 +34,9 @@ instance consistent : Entailment.Consistent Logic.S4Point2McK :=
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Logic.S4Point2McK) Kripke.FrameClass.preorder_confluent_mckinsey := ⟨by constructor⟩
+instance canonical : Canonical (Hilbert.S4Point2McK) Kripke.FrameClass.preorder_confluent_mckinsey := ⟨by constructor⟩
 
-instance complete : Complete (Logic.S4Point2McK) Kripke.FrameClass.preorder_confluent_mckinsey := inferInstance
+instance complete : Complete (Hilbert.S4Point2McK) Kripke.FrameClass.preorder_confluent_mckinsey := inferInstance
 
 lemma preorder_confluent_mckinsey : Logic.S4Point2McK = FrameClass.preorder_confluent_mckinsey.logic := eq_hilbert_logic_frameClass_logic
 

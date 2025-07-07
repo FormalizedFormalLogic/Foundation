@@ -11,7 +11,7 @@ variable {H : Hilbert.Normal ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 variable {F : Kripke.Frame} {C : Kripke.FrameClass}
 
 
-lemma Logic.eq_hilbert_logic_frameClass_logic {H : Hilbert.Normal ℕ} {C : FrameClass} [sound : Sound H.logic C] [complete : Complete H.logic C] : H.logic = C.logic := by
+lemma eq_hilbert_logic_frameClass_logic {H : Hilbert.Normal ℕ} {C : FrameClass} [sound : Sound H C] [complete : Complete H C] : H.logic = C.logic := by
   ext φ;
   constructor;
   . intro h;
