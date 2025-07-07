@@ -64,7 +64,7 @@ variable {ξ n}
 
 namespace Semiformula
 
-def val {Γ : HierarchySymbol} : Γ.Semiformula ξ n → Semiformula ℒₒᵣ ξ n
+@[coe] def val {Γ : HierarchySymbol} : Γ.Semiformula ξ n → Semiformula ℒₒᵣ ξ n
   | mkSigma φ _ => φ
   | mkPi    φ _ => φ
   | mkDelta φ _ => φ.val

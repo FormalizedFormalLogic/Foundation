@@ -10,8 +10,6 @@ open Formula
 open Kripke
 open Hilbert.Kripke
 
-lemma S5Grz.Kripke.finite_equality : Logic.S5Grz = Kripke.FrameClass.finite_Triv.logic := by simp [Triv.Kripke.finite_equality]
-
 instance : Logic.S5 ⪱ Logic.S5Grz := by
   constructor;
   . exact Hilbert.weakerThan_of_subset_axioms (by simp)
@@ -26,10 +24,6 @@ instance : Logic.S5 ⪱ Logic.S5Grz := by
       . exact { universal := by tauto; };
       . simp [Semantics.Realize, Satisfies];
         tauto;
-
-instance : Logic.S5 ⪱ Logic.Triv := by
-  suffices Logic.S5 ⪱ Logic.S5Grz by simpa;
-  infer_instance
 
 instance : Logic.Grz ⪱ Logic.S5Grz := by
   constructor;
@@ -57,7 +51,15 @@ instance : Logic.Grz ⪱ Logic.S5Grz := by
           constructor <;> omega;
 
 instance : Logic.S4 ⪱ Logic.Triv := calc
-  Logic.S4 ⪱ Logic.S5   := by infer_instance
-  _        ⪱ Logic.Triv := by infer_instance
+  Logic.S4 ⪱ Logic.S5    := by infer_instance
+  _        ⪱ Logic.S5Grz := by infer_instance
+  _        ≊ Logic.Triv  := by infer_instance
+
+instance : Sound Logic.S5Grz FrameClass.finite_Triv := by
+  suffices Sound Logic.Triv FrameClass.finite_Triv by
+    convert this;
+    apply Logic.iff_equal_provable_equiv.mpr;
+    infer_instance;
+  infer_instance;
 
 end LO.Modal.Logic

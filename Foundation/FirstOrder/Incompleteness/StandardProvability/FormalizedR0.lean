@@ -27,7 +27,7 @@ end
 
 namespace Theory
 
-inductive R0' : Theory ℒₒᵣ
+inductive R0' : ArithmeticTheory
   | eq_refl : R0' “∀ x, x = x”
   | replace (φ : SyntacticSemiformula ℒₒᵣ 1) : R0' “∀ x y, x = y → !φ x → !φ y”
   | Ω₁ (n m : ℕ)  : R0' “↑n + ↑m = ↑(n + m)”
@@ -37,7 +37,7 @@ inductive R0' : Theory ℒₒᵣ
 
 notation "𝐑₀'" => R0'
 
-abbrev addR0' (T : Theory ℒₒᵣ) : Theory ℒₒᵣ := T + 𝐑₀'
+abbrev addR0' (T : ArithmeticTheory) : ArithmeticTheory := T + 𝐑₀'
 
 end Theory
 
@@ -151,7 +151,7 @@ noncomputable instance R0'.subtheoryOfR0 : 𝐑₀' ⪯ 𝐑₀ := Entailment.We
   case Ω₃ n m h => exact Entailment.by_axm _ (R0.Ω₃ n m h)
   case Ω₄ n => exact Entailment.by_axm _ (R0.Ω₄ n)
 
-variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T]
+variable {T : ArithmeticTheory} [𝐑₀ ⪯ T]
 
 lemma add_cobhamR0' {φ} : T ⊢! φ ↔ T + 𝐑₀' ⊢! φ := by
   constructor
@@ -681,16 +681,16 @@ def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0)
 
 end Theory.R0'
 
-instance Theory.addR0'Delta1Definable (T : Theory ℒₒᵣ) [d : T.Delta1Definable] : (T + 𝐑₀').Delta1Definable :=
+instance Theory.addR0'Delta1Definable (T : ArithmeticTheory) [d : T.Delta1Definable] : (T + 𝐑₀').Delta1Definable :=
   d.add Theory.R0'Delta1Definable
 section
 
-abbrev _root_.LO.FirstOrder.Theory.AddR₀TTheory
-    (T : Theory ℒₒᵣ) [T.Delta1Definable] (V) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] : ⌜ℒₒᵣ⌝[V].TTheory := (T + 𝐑₀').tCodeIn V
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.AddR₀TTheory
+    (T : ArithmeticTheory) [T.Delta1Definable] (V) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] : ⌜ℒₒᵣ⌝[V].TTheory := (T + 𝐑₀').tCodeIn V
 
-scoped [LO.ISigma1.Metamath] infix:100 "†" => LO.FirstOrder.Theory.AddR₀TTheory
+scoped [LO.ISigma1.Metamath] infix:100 "†" => LO.FirstOrder.ArithmeticTheory.AddR₀TTheory
 
-variable {T : Theory ℒₒᵣ} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Delta1Definable]
 
 @[simp] lemma R₀'_subset_AddR₀ : ⌜𝐑₀'⌝[V] ⊆ T†V := Set.subset_union_right
 
@@ -712,37 +712,37 @@ open Arithmetization
 
 section
 
-variable (T : Theory ℒₒᵣ) [T.Delta1Definable]
+variable (T : ArithmeticTheory) [T.Delta1Definable]
 
 /-- Provability predicate for arithmetic stronger than $\mathbf{R_0}$. -/
-def _root_.LO.FirstOrder.Theory.Provableₐ (φ : V) : Prop := ((T + 𝐑₀').codeIn V).Provable φ
+def _root_.LO.FirstOrder.ArithmeticTheory.Provable (φ : V) : Prop := ((T + 𝐑₀').codeIn V).Provable φ
 
 variable {T}
 
-lemma provableₐ_iff {σ : Sentence ℒₒᵣ} : T.Provableₐ (⌜σ⌝ : V) ↔ T†V ⊢! ⌜σ⌝ := by
+lemma provable_iff {σ : Sentence ℒₒᵣ} : T.Provable (⌜σ⌝ : V) ↔ T†V ⊢! ⌜σ⌝ := by
   simp [Language.Theory.TProvable.iff_provable]; rfl
 
 /-- TODO: refactor name-/
-lemma provableₐ_iff' {φ : SyntacticFormula ℒₒᵣ} : T.Provableₐ (⌜φ⌝ : V) ↔ T†V ⊢! ⌜φ⌝ := by
+lemma provable_iff' {φ : SyntacticFormula ℒₒᵣ} : T.Provable (⌜φ⌝ : V) ↔ T†V ⊢! ⌜φ⌝ := by
   simp [Language.Theory.TProvable.iff_provable]; rfl
 
 section
 
 variable (T)
 
-def _root_.LO.FirstOrder.Theory.provableₐ : 𝚺₁.Semisentence 1 := .mkSigma
+def _root_.LO.FirstOrder.ArithmeticTheory.provable : 𝚺₁.Semisentence 1 := .mkSigma
   “p. !(T + 𝐑₀').tDef.prv p” (by simp)
 
-lemma provableₐ_defined : 𝚺₁-Predicate (T.Provableₐ : V → Prop) via T.provableₐ := by
-  intro v; simp [FirstOrder.Theory.provableₐ, FirstOrder.Theory.Provableₐ, ((T + 𝐑₀').codeIn V).provable_defined.df.iff]
+lemma provable_defined : 𝚺₁-Predicate (T.Provable : V → Prop) via T.provable := by
+  intro v; simp [ArithmeticTheory.provable, ArithmeticTheory.Provable, ((T + 𝐑₀').codeIn V).provable_defined.df.iff]
 
-@[simp] lemma eval_provableₐ (v) :
-    Semiformula.Evalbm V v T.provableₐ.val ↔ T.Provableₐ (v 0) := (provableₐ_defined T).df.iff v
+@[simp] lemma eval_provable (v) :
+    Semiformula.Evalbm V v T.provable.val ↔ T.Provable (v 0) := (provable_defined T).df.iff v
 
-instance provableₐ_definable : 𝚺₁-Predicate (T.Provableₐ : V → Prop) := (provableₐ_defined T).to_definable
+instance provable_definable : 𝚺₁-Predicate (T.Provable : V → Prop) := (provable_defined T).to_definable
 
 /-- instance for definability tactic-/
-instance provableₐ_definable' : 𝚺-[0 + 1]-Predicate (T.Provableₐ : V → Prop) := provableₐ_definable T
+instance provable_definable' : 𝚺-[0 + 1]-Predicate (T.Provable : V → Prop) := provable_definable T
 
 end
 

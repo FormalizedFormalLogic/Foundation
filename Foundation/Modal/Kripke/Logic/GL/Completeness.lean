@@ -27,7 +27,7 @@ namespace miniCanonicalFrame
 
 instance : (miniCanonicalFrame φ).IsFinite := inferInstance
 
-instance : (miniCanonicalFrame φ).IsIrreflexive := ⟨by simp [Irreflexive]⟩
+instance : (miniCanonicalFrame φ).IsIrreflexive := ⟨by simp⟩
 
 instance : (miniCanonicalFrame φ).IsTransitive := ⟨by
   rintro X Y Z ⟨RXY, ⟨χ, _, _, _⟩⟩ ⟨RYZ, _⟩;
@@ -58,15 +58,15 @@ lemma truthlemma_lemma1
   . apply Finset.mem_union.mpr;
     tauto;
   . have := X.closed.subset hp;
-    have := FormulaFinset.complementary_mem_box (by subformula) this;
+    have := FormulaFinset.complementary_mem_box (by grind) this;
     apply Finset.mem_union.mpr;
-    subformula;
+    grind;
   . exact X.closed.subset hr;
   . apply Finset.mem_union.mpr;
     right;
     apply Finset.mem_image.mpr;
     use ψ;
-    subformula;
+    grind;
 
 lemma truthlemma_lemma2
   {X : ComplementClosedConsistentFinset Logic.GL φ.subformulas}
@@ -94,7 +94,7 @@ lemma truthlemma_lemma2
         apply axiomFour'!;
         apply Context.by_axm!
         simpa using h;
-    . simp only [Finset.coe_image, Function.iterate_one, Finset.coe_preimage, Box.multibox_succ, Set.image_subset_iff, Set.preimage_union, Box.box_injective, Set.preimage_image_eq];
+    . simp only [Finset.coe_image, Function.iterate_one, Finset.coe_preimage, Box.multibox_succ, Set.image_subset_iff, Set.preimage_union];
       intro ξ hξ;
       simpa using hΓ₁ hξ;
   . intro ξ;
@@ -106,58 +106,69 @@ lemma truthlemma_lemma2
       simp at this;
       tauto;
 
--- TODO: `subformula` tactic cannot handle, I don't know why.
+set_option linter.style.multiGoal false in
 lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformulas) :
   Satisfies (miniCanonicalModel φ) X ψ ↔ ψ ∈ X := by
   induction ψ generalizing X with
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>
-    have : ψ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.1;
-    have : χ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.2;
     constructor;
     . contrapose;
       intro h;
       apply Satisfies.imp_def.not.mpr;
       push_neg;
       constructor;
-      . apply ihq (by subformula) |>.mpr;
-        exact iff_not_mem_imp q_sub |>.mp h |>.1;
-      . apply ihr (by subformula) |>.not.mpr;
-        have := iff_not_mem_imp q_sub |>.mp h |>.2;
-        exact iff_mem_compl (by subformula) |>.not.mpr (by simpa using this);
-    . contrapose;
+      . apply ihq ?_ |>.mpr;
+        apply iff_not_mem_imp ?_ ?_ ?_ |>.mp h |>.1;
+        all_goals grind;
+      . apply ihr ?_ |>.not.mpr;
+        apply iff_not_mem_compl ?_ |>.not.mpr;
+        push_neg;
+        apply iff_not_mem_imp ?_ ?_ ?_ |>.mp h |>.2;
+        all_goals grind;
+    . contrapose!;
       intro h;
       replace h := Satisfies.imp_def.not.mp h; push_neg at h;
       obtain ⟨hq, hr⟩ := h;
-      replace hq : ψ ∈ X := ihq (by subformula) |>.mp hq;
-      replace hr : χ ∉ X := ihr (by subformula) |>.not.mp hr;
-      apply iff_not_mem_imp q_sub |>.mpr;
-      constructor;
-      . assumption;
-      . simpa using iff_mem_compl (by subformula) |>.not.mp (by simpa using hr);
+      replace hq : ψ ∈ X := ihq ?_ |>.mp hq;
+      replace hr : χ ∉ X := ihr ?_ |>.not.mp hr;
+      apply iff_not_mem_imp ?_ ?_ ?_ |>.mpr;
+      . constructor;
+        . assumption;
+        . apply iff_mem_compl ?_ |>.mp hr;
+          grind;
+      all_goals grind;
   | hbox ψ ih =>
-    have : ψ ∈ φ.subformulas := subformulas.mem_box q_sub;
     constructor;
     . contrapose;
       intro h;
       obtain ⟨Y, hY₁⟩ := lindenbaum (Ψ := φ.subformulas) (truthlemma_lemma1 q_sub) (truthlemma_lemma2 q_sub h);
       simp only [Finset.union_subset_iff] at hY₁;
-      apply Satisfies.box_def.not.mpr;
-      push_neg;
+      apply Satisfies.not_box_def.mpr;
       use Y;
       constructor;
       . constructor;
-        . aesop;
-        . aesop;
+        . intros;
+          constructor;
+          . apply hY₁.1.1;
+            simpa;
+          · apply hY₁.1.2;
+            simpa;
+        . use ψ;
+          refine ⟨?_, ?_, ?_⟩;
+          . simpa;
+          . simpa;
+          . apply hY₁.2;
+            simp;
       . apply ih ?_ |>.not.mpr;
-        . apply iff_mem_compl (by subformula) |>.not.mpr;
+        . apply iff_not_mem_compl (by grind) |>.not.mpr;
           push_neg;
           apply hY₁.2;
           simp;
-        . subformula;
+        . grind;
     . intro h Y RXY;
-      apply ih (by subformula) |>.mpr;
+      apply ih (by grind) |>.mpr;
       refine RXY.1 ψ ?_ h |>.1;
       simpa;
 
@@ -169,7 +180,7 @@ instance finiteComplete : Complete Logic.GL Kripke.FrameClass.finite_GL := ⟨by
   push_neg;
   use (miniCanonicalFrame φ);
   constructor;
-  . simp;
+  . apply Set.mem_setOf_eq.mpr;
     infer_instance;
   . apply ValidOnFrame.not_of_exists_model_world;
     obtain ⟨X, hX₁⟩ := lindenbaum (Φ := {-φ}) (Ψ := φ.subformulas)
@@ -177,17 +188,18 @@ instance finiteComplete : Complete Logic.GL Kripke.FrameClass.finite_GL := ⟨by
         simp only [FormulaFinset.complementary, Finset.singleton_subset_iff, Finset.mem_union, Finset.mem_image];
         right;
         use φ;
-        subformula;
+        grind;
       )
       (FormulaFinset.unprovable_iff_singleton_compl_consistent.mpr h);
     use (miniCanonicalModel φ), X;
     constructor;
     . tauto;
-    . apply truthlemma (by subformula) |>.not.mpr;
-      exact iff_mem_compl (by subformula) |>.not.mpr $ by
-        push_neg;
+    . apply truthlemma ?_ |>.not.mpr;
+      apply iff_not_mem_compl ?_ |>.not.mpr
+      . push_neg;
         apply hX₁;
         tauto;
+      all_goals grind;
 ⟩
 
 end Logic.GL.Kripke

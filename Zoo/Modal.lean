@@ -1,17 +1,20 @@
-import Foundation.Propositional.Logic.Basic
-import Kite.Basic
+import Zoo.Basic
+import Foundation.Modal.Hilbert.WellKnown
+-- import Foundation.Modal.Kripke.Logic.S5
 
-open Lean Meta Qq Elab Command PrettyPrinter
-open LO.Propositional
+open Lean Meta Qq Elab Command
+open LO.Modal
 
-namespace Kite
+namespace Zoo
 
 def isMatch (ci : ConstantInfo) : MetaM (Option Edge) := withNewMCtxDepth do
   match ← inferTypeQ ci.type with
   | ⟨1, ~q(Prop), ~q(LO.Entailment.StrictlyWeakerThan (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
-    return some ⟨s!"{←PrettyPrinter.ppExpr a}", s!"{←PrettyPrinter.ppExpr b}", .ssub⟩
+    return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .ssub⟩
   | ⟨1, ~q(Prop), ~q(LO.Entailment.WeakerThan (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
-    return some ⟨s!"{←PrettyPrinter.ppExpr a}", s!"{←PrettyPrinter.ppExpr b}", .sub⟩
+    return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .sub⟩
+  | ⟨1, ~q(Prop), ~q(LO.Entailment.Equiv (S := Logic ℕ) (T := Logic ℕ) $a $b)⟩ =>
+    return some ⟨toString (←Lean.PrettyPrinter.ppExpr a), toString (←Lean.PrettyPrinter.ppExpr b), .eq⟩
   | _ => return none
 
 def findMatches : MetaM Json := do
@@ -27,10 +30,11 @@ def findMatches : MetaM Json := do
 
   return edges.toOutput
 
-end Kite
+end Zoo
+
 
 unsafe def main : IO Unit := do
   initSearchPath (← findSysroot)
   let env ← importModules (loadExts := true) #[`Foundation] {}
-  let ⟨s, _, _⟩ ← Kite.findMatches.toIO { fileName := "<compiler>", fileMap := default } { env := env }
-  IO.FS.writeFile "Kite/propositional.json" s.pretty
+  let ⟨s, _, _⟩ ← Zoo.findMatches.toIO { fileName := "<compiler>", fileMap := default } { env := env }
+  IO.FS.writeFile "Zoo/modal.json" s.pretty

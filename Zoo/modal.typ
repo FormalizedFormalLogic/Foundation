@@ -5,27 +5,29 @@
 
 #let Logic(L) = $upright(bold(#L))$
 #let Axiom(A) = $upright(sans(#A))$
+#let Rule(A) = $(upright(#A))$
 
 #let arrows = json("./modal.json").map(((from, to, type)) => {
   if type == "ssub" {
     return strfmt("\"{}\" -> \"{}\"", from, to)
   } else if type == "sub" {
     return strfmt("\"{}\" -> \"{}\" [style=dashed] ", from, to)
+  } else if type == "eq" {
+    return strfmt("\"{}\" -> \"{}\" [color=\"black:white:black\" arrowhead=\"none\"] ", from, to)
   } else if type == "sorry" {
     return strfmt("\"{}\" -> \"{}\" [color=red; style=dashed] ", from, to)
   }
 })
 
-#figure(caption: [Kite of Modal Logics], numbering: none)[
+#figure(caption: [Modal Logic Zoo], numbering: none)[
   #raw-render(
     raw(
       "
-  digraph ModalLogicsKite {
+  digraph ModalLogicsZoo {
     rankdir = BT;
 
     node [
-      shape=none
-      margin=0.05
+      margin=0.1
       width=0
       height=0
     ]
@@ -33,7 +35,7 @@
     edge [
       style = solid
       arrowhead = vee
-      arrowsize = 0.5
+      arrowsize = 0.75
     ];
 
     {rank = same; \"LO.Modal.Logic.Triv\"; \"LO.Modal.Logic.Ver\";}
@@ -41,6 +43,7 @@
     {rank = same; \"LO.Modal.Logic.KT\"; \"LO.Modal.Logic.KDB\"; \"LO.Modal.Logic.KD4\"; \"LO.Modal.Logic.KD5\"; \"LO.Modal.Logic.K45\";}
     {rank = same; \"LO.Modal.Logic.KTB\"; \"LO.Modal.Logic.S4\"; \"LO.Modal.Logic.KD45\"; \"LO.Modal.Logic.KB4\";}
     {rank = same; \"LO.Modal.Logic.GL\"; \"LO.Modal.Logic.Grz\";}
+    {rank = same; \"LO.Modal.Logic.GL\"; \"LO.Modal.Logic.K4Henkin\"; \"LO.Modal.Logic.K4Loeb\"; \"LO.Modal.Logic.K4Hen\";}
     {rank = same; \"LO.Modal.Logic.GLPoint2\"; \"LO.Modal.Logic.GrzPoint2\";}
     {rank = same; \"LO.Modal.Logic.GLPoint3\"; \"LO.Modal.Logic.GrzPoint3\";}
     {rank = same; \"LO.Modal.Logic.GLPoint3\"; \"LO.Modal.Logic.GrzPoint3\";}
@@ -76,6 +79,9 @@
       "LO.Modal.Logic.K": $Logic("K")$,
       "LO.Modal.Logic.K4": $Logic("K4")$,
       "LO.Modal.Logic.K45": $Logic("K45")$,
+      "LO.Modal.Logic.K4Hen": $Logic("K4Hen")$,
+      "LO.Modal.Logic.K4Henkin": $Logic("K4") + Rule("Henkin")$,
+      "LO.Modal.Logic.K4Loeb": $Logic("K4") + Rule("Löb")$,
       "LO.Modal.Logic.K4McK": $Logic("K4McK")$,
       "LO.Modal.Logic.K4Point2": $Logic("K4.2")$,
       "LO.Modal.Logic.K4Point2Z": $Logic("K4.2Z")$,
@@ -116,6 +122,6 @@
       "LO.Modal.Logic.Univ": $bot$,
       "LO.Modal.Logic.Ver": $Logic("Ver")$,
     ),
-    width: 480pt,
+    width: 640pt,
   )
 ]

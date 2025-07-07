@@ -230,6 +230,12 @@ instance : Coe (Semisentence L n) (SyntacticSemiformula L n) := ⟨Rewriting.emb
 
 @[simp] lemma coe_inj (σ π : Semisentence L n) : (σ : SyntacticSemiformula L n) = π ↔ σ = π := Rewriting.embedding_injective.eq_iff
 
+lemma coe_rel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
+    (Rewriting.embedding (rel R v) : Semiformula L ξ n) = (rel R fun i ↦ Rew.emb (v i)) := by rfl
+
+lemma coe_nrel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
+    (Rewriting.embedding (nrel R v) : Semiformula L ξ n) = (nrel R fun i ↦ Rew.emb (v i)) := by rfl
+
 lemma coe_substitute_eq_substitute_coe (φ : Semisentence L k) (v : Fin k → Semiterm L Empty n) :
     (↑(φ ⇜ v) : SyntacticSemiformula L n) = (↑φ : SyntacticSemiformula L k)⇜(fun i ↦ (↑(v i) : Semiterm L ℕ n)) :=
   Rewriting.embedding_substitute_eq_substitute_embedding φ v

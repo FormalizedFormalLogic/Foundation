@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Incompleteness.DerivabilityCondition.Basic
+import Foundation.ProvabilityLogic.Incompleteness
 import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.FirstOrder.Incompleteness.Delta1
 import Foundation.Logic.HilbertStyle.Cl
@@ -7,24 +7,10 @@ import Foundation.Modal.Hilbert.WellKnown
 namespace LO
 
 open Entailment FiniteContext
-open FirstOrder LO.FirstOrder.DerivabilityCondition
+open FirstOrder ProvabilityLogic
 open Modal Modal.Hilbert
 
-
-namespace FirstOrder
-
-variable {T : Theory ℒₒᵣ}
-
-instance [𝐈𝚺₁ ⪯ T] [T.Delta1Definable] : ((𝐈𝚺₁).standardDP T).Sound ℕ := ⟨fun {σ} ↦ by
-  have : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  simp [Arith.standardDP_def, models₀_iff]⟩
-
-end FirstOrder
-
-
-
-variable {L : Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         {T₀ T : Theory L}
+variable {L : Language} [Semiterm.Operator.GoedelNumber L (Sentence L)] {T₀ T : Theory L}
 
 namespace ProvabilityLogic
 
@@ -93,7 +79,6 @@ lemma iff_interpret_and' : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.int
     apply K!_intro <;> assumption;
 
 end
-
 
 lemma letterless_interpret
   {f₁ f₂ : Realization L} (A_letterless : A.letterless)
