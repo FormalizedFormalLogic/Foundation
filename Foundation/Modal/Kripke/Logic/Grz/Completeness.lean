@@ -22,7 +22,7 @@ add_subformula_rules safe 10 tactic [
 ]
 
 @[subformula]
-protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by subformula;
+protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz;
 
 end subformulasGrz
 
@@ -166,7 +166,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
       . apply ihq (by subformula) |>.mpr;
         exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.1;
       . apply ihr (by subformula) |>.not.mpr;
-        exact iff_mem_compl (by subformula) |>.not.mpr $ by
+        exact iff_not_mem_compl (by subformula) |>.not.mpr $ by
           push_neg;
           exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.2;
     . contrapose;
@@ -178,7 +178,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
       apply iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mpr;
       constructor;
       . assumption;
-      . simpa using iff_mem_compl (by subformula) |>.not.mp hr;
+      . simpa using iff_not_mem_compl (by subformula) |>.not.mp hr;
   | hbox ψ ih =>
     have := subformulas.mem_box q_sub;
     constructor;
@@ -209,7 +209,7 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
               have : □ψ ∈ X := membership_iff (by subformula) |>.mpr this;
               contradiction;
         . apply ih (by subformula) |>.not.mpr;
-          apply iff_mem_compl (by subformula) |>.not.mpr;
+          apply iff_not_mem_compl (by subformula) |>.not.mpr;
           push_neg;
           apply hY.2;
           simp;
@@ -247,7 +247,7 @@ lemma complete_of_mem_miniCanonicalFrame
       (FormulaFinset.unprovable_iff_singleton_compl_consistent.mpr h);
     use (miniCanonicalModel _ φ).Val, X;
     apply truthlemma (by subformula) |>.not.mpr;
-    exact iff_mem_compl (by subformula) |>.not.mpr $ by
+    exact iff_not_mem_compl (by subformula) |>.not.mpr $ by
       push_neg;
       apply hX₁;
       tauto;
