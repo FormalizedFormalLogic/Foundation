@@ -152,3 +152,4 @@ import Foundation.ProvabilityLogic.S.Completeness
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit
 import Foundation.Meta.ClProver
+import Foundation.Meta.IntProver

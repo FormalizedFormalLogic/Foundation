@@ -1,167 +1,10 @@
-import Foundation.Logic.Calculus
-import Foundation.Logic.HilbertStyle.Supplemental
+import Foundation.Meta.TwoSided
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit
 
-namespace LO.Entailment
-
-variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment F S]
-
-variable (𝓢 : S)
-
-abbrev TwoSided (Γ Δ : List F) : Prop := Γ ⊢[𝓢]! Δ.disj
-
-namespace TwoSided
-
-open FiniteContext
-
-variable {𝓢} [Entailment.Cl 𝓢]
-
-local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
-
-lemma weakening (h : Γ₁ ⟹ Δ₁) (HΓ : Γ₁ ⊆ Γ₂ := by simp) (HΔ : Δ₁ ⊆ Δ₂ := by simp) : Γ₂ ⟹ Δ₂ :=
-  FiniteContext.weakening! HΓ <| left_Disj!_intro Δ₁ (fun _ hψ ↦ right_Disj!_intro _ (HΔ hψ)) ⨀! h
-
-lemma rotate_right (Γ Δ φ) (hφ : Γ ⟹ Δ ++ [φ]) : Γ ⟹ φ :: Δ := weakening hφ
-
-lemma rotate_left (Γ Δ φ) (hφ : (Γ ++ [φ]) ⟹ Δ) : (φ :: Γ) ⟹ Δ := weakening hφ
-
-lemma rotate_right_inv (Γ Δ φ) (hφ : Γ ⟹ φ :: Δ) : Γ ⟹ Δ ++ [φ] := weakening hφ
-
-lemma rotate_left_inv (Γ Δ φ) (hφ : (φ :: Γ) ⟹ Δ) : (Γ ++ [φ]) ⟹ Δ := weakening hφ
-
-variable (𝓢)
-
-lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢! φ :=
-  FiniteContext.provable_iff_provable.mpr <| left_Disj!_intro [φ] (by simp) ⨀! h
-
-lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ :=
-  deduct! h ⨀! of'! (WeakerThan.pbl hφ)
-
-lemma right_closed (Γ Δ φ) (h : φ ∈ Γ) : Γ ⟹ φ :: Δ := right_Disj!_intro _ (φ := φ) (by simp) ⨀! (by_axm! h)
-
-lemma left_closed (Γ Δ φ) (h : φ ∈ Δ) : (φ :: Γ) ⟹ Δ := right_Disj!_intro _ (φ := φ) h ⨀! by_axm!
-
-lemma verum_right (Γ Δ) : Γ ⟹ ⊤ :: Δ := right_Disj!_intro _ (φ := ⊤) (by simp) ⨀! (by simp)
-
-lemma falsum_left (Γ Δ) : (⊥ :: Γ) ⟹ Δ := efq! ⨀! by_axm₀!
-
-lemma falsum_right (Γ Δ) (h : Γ ⟹ Δ) : Γ ⟹ ⊥ :: Δ := weakening h
-
-lemma verum_left (Γ Δ) (h : Γ ⟹ Δ) : (⊤ :: Γ) ⟹ Δ := weakening h
-
-lemma and_right (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ⟹ Δ ++ [ψ]) : Γ ⟹ φ ⋏ ψ :: Δ := by
-  have : Γ ⊢[𝓢]! (φ :: Δ).disj ➝ (ψ :: Δ).disj ➝ (φ ⋏ ψ :: Δ).disj := by
-    apply left_Disj!_intro
-    rintro χ hχ
-    rcases show χ = φ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
-    · apply deduct!
-      apply left_Disj!_intro
-      intro ξ hξ
-      rcases show ξ = ψ ∨ ξ ∈ Δ by simpa using hξ with (rfl | hξ)
-      · apply deduct!
-        apply right_Disj!_intro (χ ⋏ ξ :: Δ) (φ := χ ⋏ ξ) List.mem_cons_self ⨀! (K!_intro by_axm₁! by_axm₀!)
-      · apply right_Disj!_intro _ (by simp [hξ])
-    · apply deduct!
-      apply dhyp!
-      apply right_Disj!_intro _ (φ := χ) (by simp [hχ]) ⨀! by_axm₀!
-  exact this ⨀! rotate_right _ _ _ hφ ⨀! rotate_right _ _ _ hψ
-
-lemma or_left (Γ Δ φ ψ) (hφ : (Γ ++ [φ]) ⟹ Δ) (hψ : (Γ ++ [ψ]) ⟹ Δ) : (φ ⋎ ψ :: Γ) ⟹ Δ := by
-  apply deductInv!
-  apply left_A!_intro
-  · apply deduct! (rotate_left _ _ _ hφ)
-  · apply deduct! (rotate_left _ _ _ hψ)
-
-lemma or_right (Γ Δ φ ψ) (h : Γ ⟹ Δ ++ [φ, ψ]) : Γ ⟹ φ ⋎ ψ :: Δ := by
-  have : Γ ⊢[𝓢]! (φ :: ψ :: Δ).disj ➝ (φ ⋎ ψ :: Δ).disj := by
-    apply left_Disj!_intro
-    intro χ hχ
-    rcases show χ = φ ∨ χ = ψ ∨ χ ∈ Δ by simpa using hχ with (rfl | rfl | hχ)
-    · apply right_Disj!_intro' (χ ⋎ ψ :: Δ) (φ := χ ⋎ ψ) (by simp) or₁!
-    · apply right_Disj!_intro' (φ ⋎ χ :: Δ) (φ := φ ⋎ χ) (by simp) or₂!
-    · apply right_Disj!_intro _ (by simp [hχ])
-  exact this ⨀! (weakening h)
-
-lemma and_left (Γ Δ φ ψ) (h : (Γ ++ [φ, ψ]) ⟹ Δ) : (φ ⋏ ψ :: Γ) ⟹ Δ := by
-  have h : (φ :: ψ :: Γ) ⟹ Δ := weakening h
-  have : (φ ⋏ ψ :: Γ) ⊢[𝓢]! ψ ➝ φ ➝ Δ.disj := wk! (by simp) (deduct! <| deduct! h)
-  exact this ⨀! (deductInv! and₂!) ⨀! (deductInv! and₁!)
-
-lemma neg_right (Γ Δ φ) (h : (Γ ++ [φ]) ⟹ Δ) : Γ ⟹ ∼φ :: Δ := by
-  have hφ : Γ ⊢[𝓢]! φ ➝ (∼φ :: Δ).disj := by
-    apply deduct!
-    suffices (φ :: Γ) ⊢[𝓢]! Δ.disj ➝ (∼φ :: Δ).disj from this ⨀ rotate_left Γ Δ φ h
-    apply left_Disj!_intro
-    intro ψ hψ
-    apply right_Disj!_intro _ (by simp [hψ])
-  have hnφ : Γ ⊢[𝓢]! ∼φ ➝ (∼φ :: Δ).disj := right_Disj!_intro _ (by simp)
-  exact left_A!_intro hφ hnφ ⨀ lem!
-
-lemma neg_left (Γ Δ φ) (h : Γ ⟹ Δ ++ [φ]) : (∼φ :: Γ) ⟹ Δ := by
-  suffices (∼φ :: Γ) ⊢[𝓢]! (φ :: Δ).disj ➝ Δ.disj from this ⨀ (wk! (by simp) (rotate_right _ _ _ h))
-  apply left_Disj!_intro
-  intro ψ hψ
-  rcases show ψ = φ ∨ ψ ∈ Δ by simpa using hψ with (rfl | hψ)
-  · apply deductInv!
-    exact CNC!
-  · apply right_Disj!_intro _ (by simp [hψ])
-
-lemma imply_right (Γ Δ φ ψ) (h : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) : Γ ⟹ (φ ➝ ψ) :: Δ := by
-  have h : (φ :: Γ) ⟹ ψ :: Δ := weakening h
-  have hnφ : Γ ⊢[𝓢]! ∼φ ➝ ((φ ➝ ψ) :: Δ).disj := by
-    apply right_Disj!_intro' ((φ ➝ ψ) :: Δ) (φ := φ ➝ ψ) (by simp)
-    exact CNC!
-  have hφ : Γ ⊢[𝓢]! φ ➝ ((φ ➝ ψ) :: Δ).disj := by
-    apply deduct!
-    suffices (φ :: Γ) ⊢[𝓢]! (ψ :: Δ).disj ➝ ((φ ➝ ψ) :: Δ).disj from this ⨀ h
-    apply left_Disj!_intro
-    intro χ hχ
-    rcases show χ = ψ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
-    · apply right_Disj!_intro' _ (φ := φ ➝ χ) (by simp)
-      exact imply₁!
-    · apply right_Disj!_intro
-      simp [hχ]
-  exact left_A!_intro hφ hnφ ⨀ lem!
-
-lemma imply_left (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : (Γ ++ [ψ]) ⟹ Δ) : ((φ ➝ ψ) :: Γ) ⟹ Δ := by
-  --apply deductInv!
-  suffices ((φ ➝ ψ) :: Γ) ⊢[𝓢]! (φ :: Δ).disj ➝ Δ.disj from this ⨀! wk! (by simp) (rotate_right Γ Δ φ hφ)
-  apply left_Disj!_intro
-  intro χ hχ
-  rcases show χ = φ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
-  · apply deduct!
-    have : Γ ⊢[𝓢]! ψ ➝ Δ.disj := deduct! (rotate_left Γ Δ ψ hψ)
-    apply (wk! (by simp) this) ⨀! (by_axm₁! ⨀! by_axm₀!)
-  · apply right_Disj!_intro _ (by simp [hχ])
-
-lemma iff_right (Γ Δ φ ψ) (hr : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) (hl : (Γ ++ [ψ]) ⟹ Δ ++ [φ]) : Γ ⟹ (φ ⭤ ψ) :: Δ := by
-  apply and_right
-  · apply rotate_right_inv
-    apply imply_right
-    assumption
-  · apply rotate_right_inv
-    apply imply_right
-    assumption
-
-lemma iff_left (Γ Δ φ ψ) (hr : Γ ⟹ Δ ++ [φ, ψ]) (hl : (Γ ++ [φ, ψ]) ⟹ Δ) : ((φ ⭤ ψ) :: Γ) ⟹ Δ := by
-  apply and_left
-  suffices ((φ ➝ ψ) :: (ψ ➝ φ) :: Γ) ⟹ Δ from weakening this
-  apply imply_left
-  · apply imply_left
-    · simpa using hr
-    · suffices (φ :: Γ) ⟹ φ :: Δ from weakening this
-      apply deductInv!
-      apply right_Disj!_intro _ (by simp)
-  · apply imply_left
-    · suffices (ψ :: Γ) ⟹ ψ :: Δ from weakening this
-      apply deductInv!
-      apply right_Disj!_intro _ (by simp)
-    · exact weakening hl
-
-end TwoSided
-
-end LO.Entailment
+/-!
+# Proof automation based on the proof search on $\mathbf{LK}$
+-/
 
 namespace LO.Meta
 
@@ -169,8 +12,67 @@ open Mathlib Qq Lean Elab Meta Tactic
 
 namespace ClProver
 
+namespace Theorems
+
+open Entailment TwoSided FiniteContext
+
+variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment F S] (𝓢 : S) [Entailment.Cl 𝓢]
+
+local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
+
+lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢! φ := TwoSided.to_provable h
+
+lemma rotate_right (Γ Δ φ) (hφ : Γ ⟹ Δ ++ [φ]) : Γ ⟹ φ :: Δ := TwoSided.rotate_right hφ
+
+lemma rotate_left (Γ Δ φ) (hφ : (Γ ++ [φ]) ⟹ Δ) : (φ :: Γ) ⟹ Δ := TwoSided.rotate_left hφ
+
+lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ := TwoSided.add_hyp hφ h
+
+lemma right_closed (Γ Δ φ) (h : φ ∈ Γ) : Γ ⟹ φ :: Δ := TwoSided.right_closed h
+
+lemma left_closed (Γ Δ φ) (h : φ ∈ Δ) : (φ :: Γ) ⟹ Δ := TwoSided.left_closed h
+
+lemma verum_right (Γ Δ) : Γ ⟹ ⊤ :: Δ := TwoSided.verum_right
+
+lemma falsum_left (Γ Δ) : (⊥ :: Γ) ⟹ Δ := TwoSided.falsum_left
+
+lemma falsum_right (Γ Δ) (h : Γ ⟹ Δ) : Γ ⟹ ⊥ :: Δ := TwoSided.falsum_right h
+
+lemma verum_left (Γ Δ) (h : Γ ⟹ Δ) : (⊤ :: Γ) ⟹ Δ := TwoSided.verum_left h
+
+lemma and_right (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ⟹ Δ ++ [ψ]) : Γ ⟹ φ ⋏ ψ :: Δ :=
+  TwoSided.and_right (weakening hφ) (weakening hψ)
+
+lemma or_left (Γ Δ φ ψ) (hφ : (Γ ++ [φ]) ⟹ Δ) (hψ : (Γ ++ [ψ]) ⟹ Δ) : (φ ⋎ ψ :: Γ) ⟹ Δ :=
+  TwoSided.or_left (weakening hφ) (weakening hψ)
+
+lemma or_right (Γ Δ φ ψ) (h : Γ ⟹ Δ ++ [φ, ψ]) : Γ ⟹ φ ⋎ ψ :: Δ :=
+  TwoSided.or_right (weakening h)
+
+lemma and_left (Γ Δ φ ψ) (h : (Γ ++ [φ, ψ]) ⟹ Δ) : (φ ⋏ ψ :: Γ) ⟹ Δ :=
+  TwoSided.and_left (weakening h)
+
+lemma neg_right (Γ Δ φ) (h : (Γ ++ [φ]) ⟹ Δ) : Γ ⟹ ∼φ :: Δ :=
+  TwoSided.neg_right_cl (weakening h)
+
+lemma neg_left (Γ Δ φ) (h : Γ ⟹ Δ ++ [φ]) : (∼φ :: Γ) ⟹ Δ :=
+  TwoSided.neg_left (weakening h)
+
+lemma imply_right (Γ Δ φ ψ) (h : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) : Γ ⟹ (φ ➝ ψ) :: Δ :=
+  TwoSided.imply_right_cl (weakening h)
+
+lemma imply_left (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : (Γ ++ [ψ]) ⟹ Δ) : ((φ ➝ ψ) :: Γ) ⟹ Δ :=
+  TwoSided.imply_left (weakening hφ) (weakening hψ)
+
+lemma iff_right (Γ Δ φ ψ) (hr : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) (hl : (Γ ++ [ψ]) ⟹ Δ ++ [φ]) : Γ ⟹ (φ ⭤ ψ) :: Δ :=
+  TwoSided.iff_right_cl (weakening hr) (weakening hl)
+
+lemma iff_left (Γ Δ φ ψ) (hr : Γ ⟹ Δ ++ [φ, ψ]) (hl : (Γ ++ [φ, ψ]) ⟹ Δ) : ((φ ⭤ ψ) :: Γ) ⟹ Δ :=
+  TwoSided.iff_left (weakening hr) (weakening hl)
+
+end Theorems
+
 initialize registerTraceClass `cl_prover
-initialize registerTraceClass `cl_prover.detail
 
 syntax (name := cl_prover) "cl_prover" : tactic
 
@@ -188,6 +90,8 @@ structure Context where
 
 /-- The monad for `cl_prover` contains. -/
 abbrev M := ReaderT Context AtomM
+
+#check Mathlib.Tactic.AtomM
 
 /-- Apply the function
   `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment F S] {𝓢} [Entailment.Cl 𝓢], _` to the
@@ -249,7 +153,7 @@ def tryRightClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
     let eΓ ← Sequent.toExpr Γ
     let eΔ ← Sequent.toExpr Δ
     let eφ ← litToExpr φ
-    return some <| ← iapp ``LO.Entailment.TwoSided.right_closed #[eΓ, eΔ, eφ, e]
+    return some <| ← iapp ``LO.Meta.ClProver.Theorems.right_closed #[eΓ, eΔ, eφ, e]
 
 def tryLeftClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
   match ← memQList?' (← litToExpr φ) (← Δ.toExprList) with
@@ -258,111 +162,111 @@ def tryLeftClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
     let eΓ ← Sequent.toExpr Γ
     let eΔ ← Sequent.toExpr Δ
     let eφ ← litToExpr φ
-    return some <| ← iapp ``LO.Entailment.TwoSided.left_closed #[eΓ, eΔ, eφ, e]
+    return some <| ← iapp ``LO.Meta.ClProver.Theorems.left_closed #[eΓ, eΔ, eφ, e]
 
 def rotateRight (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.rotate_right #[eΓ, eΔ, eφ, e]
+  iapp ``LO.Meta.ClProver.Theorems.rotate_right #[eΓ, eΔ, eφ, e]
 
 def rotateLeft (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.rotate_left #[eΓ, eΔ, eφ, e]
+  iapp ``LO.Meta.ClProver.Theorems.rotate_left #[eΓ, eΔ, eφ, e]
 
 def verumRight (Γ Δ : Sequent) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Entailment.TwoSided.verum_right #[eΓ, eΔ]
+  iapp ``LO.Meta.ClProver.Theorems.verum_right #[eΓ, eΔ]
 
 def falsumRight (Γ Δ : Sequent) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Entailment.TwoSided.falsum_right #[eΓ, eΔ, e]
+  iapp ``LO.Meta.ClProver.Theorems.falsum_right #[eΓ, eΔ, e]
 
 def andRight (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.and_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``LO.Meta.ClProver.Theorems.and_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def orRight (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.or_right #[eΓ, eΔ, eφ, eψ, e]
+  iapp ``LO.Meta.ClProver.Theorems.or_right #[eΓ, eΔ, eφ, eψ, e]
 
 def negRight (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.neg_right #[eΓ, eΔ, eφ, e]
+  iapp ``LO.Meta.ClProver.Theorems.neg_right #[eΓ, eΔ, eφ, e]
 
 def implyRight (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.imply_right #[eΓ, eΔ, eφ, eψ, e]
+  iapp ``LO.Meta.ClProver.Theorems.imply_right #[eΓ, eΔ, eφ, eψ, e]
 
 def iffRight (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.iff_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``LO.Meta.ClProver.Theorems.iff_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 
 def verumLeft (Γ Δ : Sequent) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Entailment.TwoSided.verum_left #[eΓ, eΔ, e]
+  iapp ``LO.Meta.ClProver.Theorems.verum_left #[eΓ, eΔ, e]
 
 def falsumLeft (Γ Δ : Sequent) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Entailment.TwoSided.falsum_left #[eΓ, eΔ]
+  iapp ``LO.Meta.ClProver.Theorems.falsum_left #[eΓ, eΔ]
 
 def andLeft (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.and_left #[eΓ, eΔ, eφ, eψ, e]
+  iapp ``LO.Meta.ClProver.Theorems.and_left #[eΓ, eΔ, eφ, eψ, e]
 
 def orLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.or_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``LO.Meta.ClProver.Theorems.or_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def negLeft (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.neg_left #[eΓ, eΔ, eφ, e]
+  iapp ``LO.Meta.ClProver.Theorems.neg_left #[eΓ, eΔ, eφ, e]
 
 def implyLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.imply_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``LO.Meta.ClProver.Theorems.imply_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def iffLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
   let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.iff_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+  iapp ``LO.Meta.ClProver.Theorems.iff_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
 
 def toProvable (φ : Expr) (e : Expr) : M Expr := do
-  iapp ``LO.Entailment.TwoSided.to_provable #[φ, e]
+  iapp ``LO.Meta.ClProver.Theorems.to_provable #[φ, e]
 
 def prover (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
   --logInfo m!"step: {k}, case: {b}, {← Sequent.toExpr Γ} ⟹ {← Sequent.toExpr Δ}"
@@ -473,7 +377,7 @@ def addHyp (𝓣 wt : Expr) (Γ Δ : Sequent) (φ : Lit) (E e : Expr) : M Expr :
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.add_hyp #[𝓣, wt, eΓ, eΔ, eφ, E, e]
+  iapp ``LO.Meta.ClProver.Theorems.add_hyp #[𝓣, wt, eΓ, eΔ, eφ, E, e]
 
 def addHyps (prover : (Γ Δ : Sequent) → M Expr) (Γ Δ : Sequent) : List HypInfo → M Expr
   |        [] => prover Γ Δ
