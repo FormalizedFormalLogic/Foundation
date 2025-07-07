@@ -80,18 +80,19 @@ jobs:
           cp ./import_graph.html ./pages/src/assets
 
       # Build zoos
-      - name: Generate Propositional Zoo
-        run: |
-          lake exe generate_propositional_zoo
-          typst compile ./Zoo/propositional.typ ./pages/src/assets/propositional_zoo.png
-      - name: Generate Modal Zoo
-        run: |
-          lake exe generate_modal_zoo
-          typst compile ./Zoo/modal.typ ./pages/src/assets/modal_zoo.png
-      - name: Generate Arith Zoo
-        run: |
-          lake exe generate_arith_zoo
-          typst compile ./Zoo/arith.typ ./pages/src/assets/arith_zoo.png
+      # 2025/07/07: Generating zoo is temporarily disabled for updating `v4.22.0-rc3`
+      # - name: Generate Propositional Zoo
+      #   run: |
+      #     lake exe generate_propositional_zoo
+      #     typst compile ./Zoo/propositional.typ ./pages/src/assets/propositional_zoo.png
+      # - name: Generate Modal Zoo
+      #   run: |
+      #     lake exe generate_modal_zoo
+      #     typst compile ./Zoo/modal.typ ./pages/src/assets/modal_zoo.png
+      # - name: Generate Arith Zoo
+      #   run: |
+      #     lake exe generate_arith_zoo
+      #     typst compile ./Zoo/arith.typ ./pages/src/assets/arith_zoo.png
 
       # Build doc
       - name: Build docs
