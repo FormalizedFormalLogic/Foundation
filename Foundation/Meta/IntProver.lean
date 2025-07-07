@@ -382,7 +382,7 @@ def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
     |           [] => throwError m!"Proof search failed: empty tableaux reached."
     | (Γ ⟶ Δ) :: T =>
       if ←isWeakerSequent Γ Δ T then
-        let e ← prover k true T
+        let e ← prover k false T
         remove T Γ Δ e
       else
       match Γ with
