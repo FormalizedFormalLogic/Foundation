@@ -10,7 +10,7 @@ import Foundation.FirstOrder.Incompleteness.FixedPoint
 
 namespace LO.ISigma1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0 Metamath Arithmetization
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath Arithmetization
 
 variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] (U : ArithmeticTheory) [U.Delta1Definable]
 
@@ -55,14 +55,14 @@ variable [T.SoundOnHierarchy 𝚺 1] [𝐑₀ ⪯ U]
 omit [𝐈𝚺₁ ⪯ T] in
 lemma provable_sound {σ} : T ⊢!. □σ → U ⊢!. σ := by
   intro h
-  have : ℕ ⊧ₘ₀ U.provabilityPred σ := ArithmeticTheory.SoundOn.sound (F := Arith.Hierarchy 𝚺 1) h (by simp)
+  have : ℕ ⊧ₘ₀ U.provabilityPred σ := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h (by simp)
   simpa [models₀_iff] using this
 
 lemma provable_complete {σ} : U ⊢!. σ ↔ T ⊢!. □σ := ⟨provable_D1, provable_sound⟩
 
 end LO.ISigma1
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Arithmetic
 
 open ProvabilityLogic
 
@@ -88,6 +88,6 @@ instance [T.SoundOnHierarchy 𝚺 1] [𝐑₀ ⪯ T] : T.standardPr.GoedelSound 
 
 lemma standardPr_def (σ : Sentence ℒₒᵣ) : T.standardPr σ = T.provabilityPred σ := rfl
 
-instance [𝐑₀ ⪯ T] [T.Delta1Definable] : T.standardPr.Sound ℕ := ⟨fun {σ} ↦ by simp [Arith.standardPr_def, models₀_iff]⟩
+instance [𝐑₀ ⪯ T] [T.Delta1Definable] : T.standardPr.Sound ℕ := ⟨fun {σ} ↦ by simp [Arithmetic.standardPr_def, models₀_iff]⟩
 
-end LO.FirstOrder.Arith
+end LO.FirstOrder.Arithmetic

@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Basic.Model
+import Foundation.FirstOrder.Arithmetic.Basic.Model
 
 namespace LO
 
@@ -6,7 +6,7 @@ namespace FirstOrder
 
 variable {L : Language} [L.LT]
 
-namespace Arith
+namespace Arithmetic
 
 inductive Hierarchy : Polarity → ℕ → {n : ℕ} → Semiformula L ξ n → Prop
   | verum (Γ s n)                                    : Hierarchy Γ s (⊤ : Semiformula L ξ n)
@@ -478,18 +478,18 @@ lemma sigma₁_induction' {n φ} (hp : Hierarchy 𝚺 1 φ)
 
 end LOR
 
-end Arith
+end Arithmetic
 
-abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) := T.SoundOn (Arith.Hierarchy Γ k)
+abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) := T.SoundOn (Arithmetic.Hierarchy Γ k)
 
 lemma ArithmeticTheory.soundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) [T.SoundOnHierarchy Γ k] :
-    T ⊢!. σ → Arith.Hierarchy Γ k σ → ℕ ⊧ₘ₀ σ := SoundOn.sound
+    T ⊢!. σ → Arithmetic.Hierarchy Γ k σ → ℕ ⊧ₘ₀ σ := SoundOn.sound
 
 instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚺 1] : Entailment.Consistent T :=
-  T.consistent_of_sound (Arith.Hierarchy 𝚺 1) (by simp)
+  T.consistent_of_sound (Arithmetic.Hierarchy 𝚺 1) (by simp)
 
 instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚷 2] : Entailment.Consistent T :=
-  T.consistent_of_sound (Arith.Hierarchy 𝚷 2) (by simp)
+  T.consistent_of_sound (Arithmetic.Hierarchy 𝚷 2) (by simp)
 
 end FirstOrder
 

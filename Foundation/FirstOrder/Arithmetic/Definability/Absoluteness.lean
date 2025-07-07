@@ -1,7 +1,7 @@
-import Foundation.FirstOrder.Arith.Definability.BoundedBoldface
+import Foundation.FirstOrder.Arithmetic.Definability.BoundedBoldface
 import Foundation.FirstOrder.R0.Basic
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Arithmetic
 
 open PeanoMinus R0
 
@@ -23,7 +23,7 @@ lemma shigmaZero_absolute {k} (φ : 𝚺₀.Semisentence k) (v : Fin k → ℕ) 
 lemma Defined.shigmaZero_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop} {φ : 𝚺₀.Semisentence k}
     (hR : 𝚺₀.Defined R φ) (hR' : 𝚺₀.Defined R' φ) (v : Fin k → ℕ) :
     R v ↔ R' (fun i ↦ (v i : V)) := by
-  simpa [hR.iff, hR'.iff] using Arith.shigmaZero_absolute V φ v
+  simpa [hR.iff, hR'.iff] using Arithmetic.shigmaZero_absolute V φ v
 
 lemma DefinedFunction.shigmaZero_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V} {φ : 𝚺₀.Semisentence (k + 1)}
     (hf : 𝚺₀.DefinedFunction f φ) (hf' : 𝚺₀.DefinedFunction f' φ) (v : Fin k → ℕ) :
@@ -107,6 +107,6 @@ lemma models_iff_provable_of_Delta1_param [V ⊧ₘ* T] {σ : 𝚫₁.Semisenten
   _                 ↔ T ⊢!. (σ.val ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x))       := by
       simp [HierarchySymbol.Semiformula.val_sigma]
 
-end Arith
+end Arithmetic
 
 end LO.FirstOrder

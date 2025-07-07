@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Basic
+import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.Logic.HilbertStyle.Supplemental
 import Foundation.Meta.ClProver
 
@@ -140,7 +140,7 @@ variable (𝔅)
 
 lemma goedel_spec : T₀ ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := by
   convert (diag (T := T₀) “x. ¬!𝔅.prov x”);
-  simp [goedel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
+  simp [goedel];
   rfl;
 
 variable {𝔅}
@@ -207,13 +207,13 @@ theorem goedel_iff_consistency : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := by
   have h₃ : T₀ ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := 𝔅.goedel_spec
   cl_prover [h₁, h₂, h₃]
 
-theorem unprovable_consistency [Consistent T] : T ⊬. 𝔅.con := by
+theorem con_unprovable [Consistent T] : T ⊬. 𝔅.con := by
   intro h
   have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_consistency
   have : T ⊢!. 𝗚 := by cl_prover [h, this]
   exact 𝔅.unprovable_goedel this
 
-theorem unrefutable_consistency [Consistent T] [𝔅.GoedelSound] : T ⊬. ∼𝔅.con := by
+theorem con_unrefutable [Consistent T] [𝔅.GoedelSound] : T ⊬. ∼𝔅.con := by
   intro h
   have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_consistency
   have : T ⊢!. ∼𝗚 := by cl_prover [h, this]
@@ -221,8 +221,8 @@ theorem unrefutable_consistency [Consistent T] [𝔅.GoedelSound] : T ⊬. ∼�
 
 theorem consistency_independent [Consistent T] [𝔅.GoedelSound] : Independent (T : Axiom L) 𝔅.con := by
   constructor
-  . apply unprovable_consistency
-  . apply unrefutable_consistency
+  . apply con_unprovable
+  . apply con_unrefutable
 
 end Second
 
@@ -293,7 +293,7 @@ lemma formalized_unprovable_not_consistency :
     T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
   have : T ⊢!. ∼𝔅.con := Loeb.LT $ CN!_of_CN!_right hC;
-  have : T ⊬. ∼𝔅.con := unrefutable_consistency 𝔅;
+  have : T ⊬. ∼𝔅.con := con_unrefutable 𝔅;
   contradiction;
 
 lemma formalized_unrefutable_goedel : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.goedel) := by

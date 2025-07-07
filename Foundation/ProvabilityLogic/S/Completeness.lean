@@ -25,7 +25,7 @@ open Entailment FiniteContext
 open Modal
 open Modal.Kripke
 open Modal.Formula.Kripke
-open Arith
+open Arithmetic
 
 variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)]
 

@@ -13,7 +13,7 @@ This file defines the $\Sigma_n / \Pi_n / \Delta_n$ formulas of arithmetic of fi
 
 -/
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Arithmetic
 
 structure HierarchySymbol where
   Γ : SigmaPiDelta
@@ -159,7 +159,7 @@ variable (T : Theory ℒₒᵣ)
 
 lemma ProvablyProperOn.ofProperOn [𝐄𝐐 ⪯ T] {φ : 𝚫-[m].Semisentence n}
     (h : ∀ (M : Type w) [ORingStruc M] [M ⊧ₘ* T], φ.ProperOn M) : φ.ProvablyProperOn T := by
-  apply complete₀ <| FirstOrder.Arith.oRing_consequence_of.{w} T _ ?_
+  apply complete₀ <| FirstOrder.Arithmetic.oRing_consequence_of.{w} T _ ?_
   intro M _ _
   simpa [models_iff] using (h M).iff
 
@@ -439,4 +439,4 @@ end Semiformula
 
 end HierarchySymbol
 
-end LO.FirstOrder.Arith
+end LO.FirstOrder.Arithmetic

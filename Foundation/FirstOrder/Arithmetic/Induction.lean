@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Definability
+import Foundation.FirstOrder.Arithmetic.Definability
 import Foundation.FirstOrder.PeanoMinus.Functions
 import Foundation.FirstOrder.TrueArithmetic.Basic
 
@@ -32,7 +32,7 @@ abbrev IOpen : ArithmeticTheory := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Semif
 
 notation "𝐈Open" => IOpen
 
-abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : ArithmeticTheory := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ (Arith.Hierarchy Γ k)
+abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : ArithmeticTheory := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ k)
 
 prefix:max "𝐈𝐍𝐃 " => InductionOnHierarchy
 
@@ -76,7 +76,7 @@ instance : 𝐄𝐐 ⪯ 𝐈𝐍𝐃 Γ n := Entailment.WeakerThan.trans (inferI
 instance : 𝐄𝐐 ⪯ 𝐈Open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
 instance : 𝐈Open ⪯ 𝐈𝐍𝐃 Γ n :=
-  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arith.Hierarchy.of_open
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arithmetic.Hierarchy.of_open
 
 instance : 𝐈𝚺₀ ⪯ 𝐈𝚺₁ :=
   ISigma_weakerThan_of_le (by decide)
@@ -102,7 +102,7 @@ end LO
 
 namespace LO
 
-open FirstOrder Arith PeanoMinus
+open FirstOrder Arithmetic PeanoMinus
 
 variable {V : Type*} [ORingStruc V]
 
@@ -194,7 +194,7 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
   have : P 0 := by simpa using this a (by rfl)
   contradiction
 
-instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arith.Hierarchy Γ.alt m) := by
+instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ.alt m) := by
   suffices
       ∀ (φ : Semiformula ℒₒᵣ ℕ 1), Hierarchy Γ.alt m φ →
       ∀ (f : ℕ → V),

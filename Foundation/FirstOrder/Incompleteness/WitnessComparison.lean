@@ -8,7 +8,7 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -24,7 +24,7 @@ def Language.Theory.ProvabilityComparison (φ ψ : V) : Prop := T.DerivabilityCo
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.TDef.derivabilityComparisonDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.LDef.TDef.derivabilityComparisonDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 2 := .mkSigma
   “s₁ s₂. ∃ d₁, !pT.derivationOfDef.sigma d₁ s₁ ∧ ∀ d₂ < d₁, ¬!pT.derivationOfDef.pi d₂ s₂” (by simp)
 
 lemma Language.Theory.derivabilityComparison_defined : 𝚺₁-Relation T.DerivabilityComparison via pT.derivabilityComparisonDef := by
@@ -34,7 +34,7 @@ lemma Language.Theory.derivabilityComparison_defined : 𝚺₁-Relation T.Deriva
 
 instance Language.Theory.derivabilityComparison_definable : 𝚺₁-Relation T.DerivabilityComparison := T.derivabilityComparison_defined.to_definable
 
-def _root_.LO.FirstOrder.Arith.LDef.TDef.provabilityComparisonDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.LDef.TDef.provabilityComparisonDef {pL : LDef} (pT : pL.TDef) : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ sφ sψ, !insertDef sφ φ 0 ∧ !insertDef sψ ψ 0 ∧ !pT.derivabilityComparisonDef sφ sψ” (by simp)
 
 lemma Language.Theory.provabilityComparison_defined : 𝚺₁-Relation T.ProvabilityComparison via pT.provabilityComparisonDef := by

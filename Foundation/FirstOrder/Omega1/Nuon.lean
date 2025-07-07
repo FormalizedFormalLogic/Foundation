@@ -3,7 +3,7 @@ import Foundation.FirstOrder.Omega1.Basic
 
 namespace LO.Omega1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁]
 
@@ -668,7 +668,7 @@ lemma nuon_bit1 (a : V) : nuon (2 * a + 1) = nuon a + 1 := by
 
 @[simp] lemma nuon_zero : nuon (0 : V) = 0 := Nuon.nuon_eq (by simp [Nuon])
 
-def _root_.LO.FirstOrder.Arith.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
   “n A. ∃ l <⁺ A, !lengthDef l A ∧ !Nuon.nuonAuxDef A l n” (by simp)
 
 lemma nuon_defined : 𝚺₀-Function₁ (nuon : V → V) via nuonDef := by

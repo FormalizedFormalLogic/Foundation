@@ -8,7 +8,7 @@ import Foundation.FirstOrder.ISigma1.Metamath.Formula.Iteration
 -/
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 

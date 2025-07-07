@@ -19,7 +19,7 @@ end LO.FirstOrder.Semiformula
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -53,7 +53,7 @@ scoped notation:65 "^⋀ " ps:66 => qqConj ps
 
 section
 
-def _root_.LO.FirstOrder.Arith.qqConjDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arithmetic.qqConjDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma qqConj_defined : 𝚺₁-Function₁ (qqConj : V → V) via qqConjDef := construction.result_defined
 
@@ -122,7 +122,7 @@ scoped notation:65 "^⋁ " ps:66 => qqDisj ps
 
 section
 
-def _root_.LO.FirstOrder.Arith.qqDisjDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arithmetic.qqDisjDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma qqDisj_defined : 𝚺₁-Function₁ (qqDisj : V → V) via qqDisjDef := construction.result_defined
 
@@ -184,7 +184,7 @@ noncomputable def substItr (w p k : V) : V := construction.result ![w, p] k
 
 section
 
-noncomputable def _root_.LO.FirstOrder.Arith.substItrDef : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.substs ![#0, #3, #1, #2])
+noncomputable def _root_.LO.FirstOrder.Arithmetic.substItrDef : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.substs ![#0, #3, #1, #2])
 
 lemma substItr_defined : 𝚺₁-Function₃ (substItr : V → V → V → V) via substItrDef :=
   fun v ↦ by simp [construction.result_defined_iff, substItrDef, substItr, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
@@ -294,7 +294,7 @@ noncomputable def qqVerums (k : V) : V := ^⋀ repeatVec ^⊤ k
 
 section
 
-def _root_.LO.FirstOrder.Arith.qqVerumsDef : 𝚺₁.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.qqVerumsDef : 𝚺₁.Semisentence 2 := .mkSigma
   “y k. ∃ verum, !qqVerumDef verum ∧ ∃ vs, !repeatVecDef vs verum k ∧ !qqConjDef y vs” (by simp)
 
 lemma qqVerums_defined : 𝚺₁-Function₁ (qqVerums : V → V) via qqVerumsDef :=

@@ -6,11 +6,11 @@ import Foundation.FirstOrder.ISigma1.Metamath.CodedTheory
 
 -/
 
-open Encodable LO FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open Encodable LO FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 namespace LO.FirstOrder
 
-open Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -125,7 +125,7 @@ end LO.FirstOrder
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Semiformula Arith PeanoMinus IOpen ISigma0
+open FirstOrder Semiformula Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -406,6 +406,6 @@ lemma Language.Theory.Provable.complete₀ {σ : Sentence L} :
 @[simp] lemma provable_iff_provable₀ {T : ArithmeticTheory} [T.Delta1Definable] [𝐑₀ ⪯ T] {σ : Sentence ℒₒᵣ} :
     T.Provable (⌜σ⌝ : ℕ) ↔ T ⊢!. σ := by
   simpa [provable_iff, Language.Theory.Provable.complete₀, Axiom.provable_iff] using
-    FirstOrder.Arith.add_cobhamR0'.symm
+    FirstOrder.Arithmetic.add_cobhamR0'.symm
 
 end LO.ISigma1.Metamath

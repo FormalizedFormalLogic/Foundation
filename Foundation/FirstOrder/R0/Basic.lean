@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Basic
+import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Data.Nat.Cast.Order.Basic
@@ -12,7 +12,7 @@ noncomputable section
 
 namespace LO
 
-open FirstOrder FirstOrder.Arith
+open FirstOrder FirstOrder.Arithmetic
 
 inductive R0 : ArithmeticTheory
   | equal : ∀ φ ∈ 𝐄𝐐, R0 φ
@@ -138,7 +138,7 @@ instance consistent : Entailment.Consistent 𝐑₀ :=
 
 end R0
 
-namespace FirstOrder.Arith
+namespace FirstOrder.Arithmetic
 
 variable {T : ArithmeticTheory} [𝐑₀ ⪯ T]
 
@@ -155,7 +155,7 @@ theorem sigma_one_completeness_iff [T.SoundOnHierarchy 𝚺 1] {σ : Sentence �
   haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   ⟨fun h ↦ sigma_one_completeness hσ h, fun h ↦ T.soundOnHierarchy 𝚺 1 h (by simp [hσ])⟩
 
-end FirstOrder.Arith
+end FirstOrder.Arithmetic
 
 /-!
 ## Unprovable theorems of $\mathsf{R}_0$

@@ -10,7 +10,7 @@ open Classical
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -46,7 +46,7 @@ scoped notation "^1" => oneAbbrev
 /-
 section
 
-def _root_.LO.FirstOrder.Arith.eqTheory : 𝚺₁.Semisentence 0 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.eqTheory : 𝚺₁.Semisentence 0 := .mkSigma
   “(∃ b0, !qqBvarDef b0 0 ∧ !qqAllDef )” (by simp)
 
 end

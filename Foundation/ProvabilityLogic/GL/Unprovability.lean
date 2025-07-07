@@ -49,7 +49,7 @@ end ProvabilityLogic
 
 namespace ProvabilityLogic
 
-open FirstOrder FirstOrder.Arith
+open FirstOrder FirstOrder.Arithmetic
 open Modal Logic
 open Entailment
 

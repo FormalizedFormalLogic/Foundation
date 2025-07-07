@@ -10,7 +10,7 @@ open Classical
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -65,7 +65,7 @@ abbrev _root_.LO.FirstOrder.ArithmeticTheory.Incon (T : ArithmeticTheory) [T.Del
 
 end LO.ISigma1.Metamath
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Arithmetic
 
 open Entailment ProvabilityLogic
 
@@ -76,4 +76,4 @@ instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T + T.Con := by
   have : Entailment.Consistent T := ArithmeticTheory.consistent_of_sound T (Eq ⊥) rfl
   simp [models_iff, *]
 
-end LO.FirstOrder.Arith
+end LO.FirstOrder.Arithmetic

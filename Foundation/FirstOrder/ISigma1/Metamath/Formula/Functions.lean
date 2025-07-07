@@ -3,7 +3,7 @@ import Foundation.FirstOrder.ISigma1.Metamath.Term.Functions
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -61,7 +61,7 @@ variable {L}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.negDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
+def _root_.LO.FirstOrder.Arithmetic.LDef.negDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
 
 variable (L)
 
@@ -184,7 +184,7 @@ section imp
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.impDef (pL : LDef) : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.LDef.impDef (pL : LDef) : 𝚺₁.Semisentence 3 := .mkSigma
   “r p q. ∃ np, !pL.negDef np p ∧ !qqOrDef r np q” (by simp)
 
 variable (L)
@@ -218,7 +218,7 @@ section iff
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.qqIffDef (pL : LDef) : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.LDef.qqIffDef (pL : LDef) : 𝚺₁.Semisentence 3 := .mkSigma
   “r p q. ∃ pq, !pL.impDef pq p q ∧ ∃ qp, !pL.impDef qp q p ∧ !qqAndDef r pq qp” (by simp)
 
 variable (L)
@@ -286,7 +286,7 @@ variable {L}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.shiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
+def _root_.LO.FirstOrder.Arithmetic.LDef.shiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
 
 variable (L)
 
@@ -387,7 +387,7 @@ section
 
 variable (L)
 
-def _root_.LO.FirstOrder.Arith.LDef.qVecDef (pL : LDef) : 𝚺₁.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.LDef.qVecDef (pL : LDef) : 𝚺₁.Semisentence 2 := .mkSigma
   “w' w. ∃ k, !lenDef k w ∧ ∃ sw, !pL.termBShiftVecDef sw k w ∧ ∃ t, !qqBvarDef t 0 ∧ !consDef w' t sw” (by simp)
 
 lemma Language.qVec_defined : 𝚺₁-Function₁ L.qVec via pL.qVecDef := by
@@ -449,7 +449,7 @@ variable {L}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.substsDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).result
+def _root_.LO.FirstOrder.Arithmetic.LDef.substsDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).result
 
 variable (L)
 
@@ -781,7 +781,7 @@ section substs₁
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.substs₁Def (pL : LDef) : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.LDef.substs₁Def (pL : LDef) : 𝚺₁.Semisentence 3 := .mkSigma
   “ z t p. ∃ v, !consDef v t 0 ∧ !pL.substsDef z v p” (by simp)
 
 variable (L)
@@ -810,7 +810,7 @@ section free
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.freeDef (pL : LDef) : 𝚺₁.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.LDef.freeDef (pL : LDef) : 𝚺₁.Semisentence 2 := .mkSigma
   “q p. ∃ fz, !qqFvarDef fz 0 ∧ ∃ sp, !pL.shiftDef sp p ∧ !pL.substs₁Def q fz sp” (by simp)
 
 variable (L)
@@ -838,7 +838,7 @@ def Language.IsFVFree (n p : V) : Prop := L.IsSemiformula n p ∧ L.shift p = p
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semisentence 2 :=
+def _root_.LO.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semisentence 2 :=
   .mkSigma “n p | !pL.isSemiformulaDef.sigma n p ∧ !pL.shiftDef p p” (by simp)
 
 lemma isFVFree_defined : 𝚺₁-Relation L.IsFVFree via pL.isFVFreeDef := by
@@ -919,16 +919,16 @@ notation:78 x:78 " ^≮ " y:79 => qqNLT x y
 @[simp] lemma lt_qqNLT_right (x y : V) : y < x ^≮ y := by
   simpa using nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqEQDef : 𝚺₁.Semisentence 3 :=
+def _root_.LO.FirstOrder.Arithmetic.qqEQDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑eqIndex v” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqNEQDef : 𝚺₁.Semisentence 3 :=
+def _root_.LO.FirstOrder.Arithmetic.qqNEQDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑eqIndex v” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqLTDef : 𝚺₁.Semisentence 3 :=
+def _root_.LO.FirstOrder.Arithmetic.qqLTDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑ltIndex v” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqNLTDef : 𝚺₁.Semisentence 3 :=
+def _root_.LO.FirstOrder.Arithmetic.qqNLTDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑ltIndex v” (by simp)
 
 lemma qqEQ_defined : 𝚺₁-Function₂ (qqEQ : V → V → V) via qqEQDef := by

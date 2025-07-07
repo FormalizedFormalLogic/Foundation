@@ -5,7 +5,7 @@ open Classical
 
 namespace LO.ISigma1.Metamath.Arithmetization
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -41,7 +41,7 @@ lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k 
 
 section
 
-noncomputable def _root_.LO.FirstOrder.Arith.ssnum : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Arithmetic.ssnum : 𝚺₁.Semisentence 3 := .mkSigma
   “y p x. ∃ n, !numeralDef n x ∧ !p⌜ℒₒᵣ⌝.substs₁Def y n p” (by simp)
 
 lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
@@ -50,13 +50,13 @@ lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) 
 @[simp] lemma eval_ssnum (v) :
     Semiformula.Evalbm V v ssnum.val ↔ v 0 = substNumeral (v 1) (v 2) := substNumeral_defined.df.iff v
 
-noncomputable def _root_.LO.FirstOrder.Arith.ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Arithmetic.ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “y p. ∃ n, !lenDef ↑k n ∧
     (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k) ∧ !numeralDef z #i.succ.succ.succ.succ) ∧
     !p⌜ℒₒᵣ⌝.substsDef y n p” (by simp)
 
 lemma substNumerals_defined :
-    Arith.HierarchySymbol.DefinedFunction (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := by
+    Arithmetic.HierarchySymbol.DefinedFunction (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := by
   intro v
   suffices
     (v 0 = ⌜ℒₒᵣ⌝.substs ⌜fun (i : Fin k) ↦ numeral (v i.succ.succ)⌝ (v 1)) ↔
@@ -79,7 +79,7 @@ end LO.ISigma1.Metamath.Arithmetization
 
 namespace LO.ISigma1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0 Metamath Arithmetization
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath Arithmetization
 
 variable {T : Theory ℒₒᵣ} [𝐈𝚺₁ ⪯ T]
 

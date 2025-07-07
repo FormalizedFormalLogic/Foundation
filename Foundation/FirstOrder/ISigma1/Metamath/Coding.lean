@@ -1,7 +1,7 @@
 import Foundation.FirstOrder.ISigma1.Metamath.Formula.Typed
 import Mathlib.Combinatorics.Colex
 
-open Encodable LO FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open Encodable LO FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 namespace LO.ISigma1.Metamath
 
@@ -350,10 +350,10 @@ lemma quote_nrel {k} (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) : (⌜n
   simp [quote_eq_coe_encode]
 
 lemma sentence_goedelNumber_def (σ : Sentence L) :
-  (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜σ⌝ := by simp [Arith.goedelNumber'_def, quote_eq_encode]
+  (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜σ⌝ := by simp [Arithmetic.goedelNumber'_def, quote_eq_encode]
 
 lemma syntacticformula_goedelNumber_def (φ : SyntacticFormula L) :
-  (⌜φ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜φ⌝ := by simp [Arith.goedelNumber'_def, quote_eq_encode]
+  (⌜φ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜φ⌝ := by simp [Arithmetic.goedelNumber'_def, quote_eq_encode]
 
 @[simp] lemma quote_weight (n : ℕ) : ⌜(weight k : SyntacticSemiformula L n)⌝ = (qqVerums k : V) := by
   unfold weight
@@ -556,7 +556,7 @@ instance goedelQuoteSyntacticFormulaToCodedFormula : GoedelQuote (SyntacticFormu
     (⌜(weight k : SyntacticSemiformula L n)⌝ : (L.codeIn V).Semiformula n) = (verums (L := L.codeIn V) k) := by
   ext; simp
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 @[simp] lemma codeIn'_eq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜rel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ =' ⌜v 1⌝) := by

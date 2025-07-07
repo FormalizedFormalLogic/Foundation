@@ -2,7 +2,7 @@ import Foundation.FirstOrder.ISigma1.Metamath.Term.Basic
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -55,9 +55,9 @@ variable {n m w : V}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.termSubstDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).result.rew <| Rew.substs ![#0, #2, #1]
+def _root_.LO.FirstOrder.Arithmetic.LDef.termSubstDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).result.rew <| Rew.substs ![#0, #2, #1]
 
-def _root_.LO.FirstOrder.Arith.LDef.termSubstVecDef (pL : LDef) : 𝚺₁.Semisentence 4 := (blueprint pL).resultVec.rew <| Rew.substs ![#0, #1, #3, #2]
+def _root_.LO.FirstOrder.Arithmetic.LDef.termSubstVecDef (pL : LDef) : 𝚺₁.Semisentence 4 := (blueprint pL).resultVec.rew <| Rew.substs ![#0, #1, #3, #2]
 
 variable (L)
 
@@ -207,9 +207,9 @@ variable {n : V}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.termShiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result
+def _root_.LO.FirstOrder.Arithmetic.LDef.termShiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result
 
-def _root_.LO.FirstOrder.Arith.LDef.termShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).resultVec
+def _root_.LO.FirstOrder.Arithmetic.LDef.termShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).resultVec
 
 variable (L)
 
@@ -344,9 +344,9 @@ variable {L}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.termBShiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result
+def _root_.LO.FirstOrder.Arithmetic.LDef.termBShiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result
 
-def _root_.LO.FirstOrder.Arith.LDef.termBShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).resultVec
+def _root_.LO.FirstOrder.Arithmetic.LDef.termBShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).resultVec
 
 variable (L)
 
@@ -582,10 +582,10 @@ infixl:82 " ^* " => qqMul
 
 section
 
-def _root_.LO.FirstOrder.Arith.qqAddDef : 𝚺₁.Semisentence 3 :=
+def _root_.LO.FirstOrder.Arithmetic.qqAddDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑addIndex v” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqMulDef : 𝚺₁.Semisentence 3 :=
+def _root_.LO.FirstOrder.Arithmetic.qqMulDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑mulIndex v” (by simp)
 
 lemma qqAdd_defined : 𝚺₁-Function₂ (qqAdd : V → V → V) via qqAddDef := by
@@ -702,7 +702,7 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
 
 section
 
-noncomputable def _root_.LO.FirstOrder.Arith.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Arithmetic.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
   “t x.
     (x = 0 → t = ↑Arithmetization.zero) ∧
     (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxDef t x')”

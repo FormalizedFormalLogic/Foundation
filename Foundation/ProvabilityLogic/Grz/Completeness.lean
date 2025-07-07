@@ -82,7 +82,7 @@ lemma iff_models_interpret_boxdot_strongInterpret
 
 end Realization
 
-theorem Grz.arithmetical_completeness_iff {T : ArithmeticTheory} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Arith.Hierarchy 𝚷 2)] :
+theorem Grz.arithmetical_completeness_iff {T : ArithmeticTheory} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Arithmetic.Hierarchy 𝚷 2)] :
     (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.strongInterpret T.standardPr A) ↔ Logic.Grz ⊢! A := by
   constructor;
   . intro h;
