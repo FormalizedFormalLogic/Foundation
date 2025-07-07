@@ -132,7 +132,7 @@ instance finite_sound : Sound Logic.GrzPoint2 FrameClass.finite_GrzPoint2 := ins
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance consistent : Entailment.Consistent Logic.GrzPoint2 :=
+instance : Entailment.Consistent Logic.GrzPoint2 :=
   consistent_of_sound_frameclass FrameClass.finite_GrzPoint2 $ by
     use whitepoint;
     constructor;

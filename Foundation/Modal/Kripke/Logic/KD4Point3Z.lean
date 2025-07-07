@@ -25,7 +25,7 @@ instance sound_natLT : Sound Hilbert.KD4Point3Z natLT := instSound_of_frame_vali
   . apply validate_WeakPoint3_of_weakConnected;
   . apply Kripke.natLT_validates_AxiomZ;
 
-instance consistent : Entailment.Consistent Logic.KD4Point3Z := consistent_of_sound_frames natLT
+instance : Entailment.Consistent Logic.KD4Point3Z := consistent_of_sound_frames natLT
 
 end Logic.KD4Point3Z.Kripke
 

@@ -28,36 +28,36 @@ protected abbrev FrameClass.finite_Ver : FrameClass := { F | F.IsFiniteVer }
 end Kripke
 
 
-namespace Logic.Ver.Kripke
+namespace Hilbert.Ver.Kripke
 
-instance : Sound Logic.Ver FrameClass.Ver := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.Ver FrameClass.Ver := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F hF _ (rfl | rfl);
   simp_all only [Set.mem_setOf_eq];
   exact validate_AxiomVer_of_isIsolated;
 
-instance : Sound (Logic.Ver) Kripke.FrameClass.finite_Ver :=
+instance : Sound (Hilbert.Ver) Kripke.FrameClass.finite_Ver :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F hF _ (rfl | rfl);
     simp_all only [Set.mem_setOf_eq];
     exact validate_AxiomVer_of_isIsolated;
 
-instance : Entailment.Consistent Logic.Ver := consistent_of_sound_frameclass FrameClass.Ver $ by
+instance : Entailment.Consistent Hilbert.Ver := consistent_of_sound_frameclass FrameClass.Ver $ by
   use blackpoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Kripke.Canonical Logic.Ver FrameClass.Ver := ⟨by
+instance : Kripke.Canonical Hilbert.Ver FrameClass.Ver := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete Logic.Ver FrameClass.Ver := inferInstance
+instance : Complete Hilbert.Ver FrameClass.Ver := inferInstance
 
-instance complete : Complete (Logic.Ver) Kripke.FrameClass.finite_Ver := ⟨by
+instance : Complete (Hilbert.Ver) Kripke.FrameClass.finite_Ver := ⟨by
   intro φ hφ;
-  apply LO.Complete.complete (𝓢 := Logic.Ver) (𝓜 := FrameClass.Ver);
+  apply LO.Complete.complete (𝓢 := Hilbert.Ver) (𝓜 := FrameClass.Ver);
   intro F hF V r;
   apply Model.pointGenerate.modal_equivalent_at_root (r := r) |>.mp;
   apply hφ;
@@ -77,10 +77,10 @@ instance complete : Complete (Logic.Ver) Kripke.FrameClass.finite_Ver := ⟨by
   }
 ⟩
 
-lemma isolated : Logic.Ver = FrameClass.Ver.logic := eq_hilbert_logic_frameClass_logic
-lemma finite_Ver : Logic.Ver = FrameClass.finite_Ver.logic := eq_hilbert_logic_frameClass_logic
+lemma isolated : Modal.Ver = FrameClass.Ver.logic := eq_hilbert_logic_frameClass_logic
+lemma finite_Ver : Modal.Ver = FrameClass.finite_Ver.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.KTc ⪱ Logic.Ver := by
+instance : Hilbert.KTc ⪱ Hilbert.Ver := by
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
     suffices ∀ φ, FrameClass.KTc ⊧ φ → FrameClass.Ver ⊧ φ by
@@ -104,7 +104,7 @@ instance : Logic.KTc ⪱ Logic.Ver := by
           simpa [Satisfies, Semantics.Realize];
         use 0;
 
-instance : Logic.GLPoint3 ⪱ Logic.Ver := by
+instance : Hilbert.GLPoint3 ⪱ Hilbert.Ver := by
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
     suffices ∀ φ, FrameClass.finite_GLPoint3 ⊧ φ → FrameClass.finite_Ver ⊧ φ by
@@ -127,6 +127,10 @@ instance : Logic.GLPoint3 ⪱ Logic.Ver := by
         use 1;
         tauto;
 
-end Logic.Ver.Kripke
+end Hilbert.Ver.Kripke
+
+instance : Modal.KTc ⪱ Modal.Ver := inferInstance
+
+instance : Modal.GLPoint3 ⪱ Modal.Ver := inferInstance
 
 end LO.Modal

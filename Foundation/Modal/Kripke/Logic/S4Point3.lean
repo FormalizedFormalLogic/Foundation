@@ -36,21 +36,21 @@ end Kripke
 
 namespace Logic.S4Point3.Kripke
 
-instance sound : Sound Logic.S4Point3 FrameClass.S4Point3 := instSound_of_validates_axioms $ by
+instance : Sound Logic.S4Point3 FrameClass.S4Point3 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance consistent : Entailment.Consistent Logic.S4Point3 :=
+instance : Entailment.Consistent Logic.S4Point3 :=
   consistent_of_sound_frameclass FrameClass.S4Point3 $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical Logic.S4Point3 FrameClass.S4Point3 := ⟨by constructor⟩
+instance : Canonical Logic.S4Point3 FrameClass.S4Point3 := ⟨by constructor⟩
 
-instance complete : Complete Logic.S4Point3 FrameClass.S4Point3 := inferInstance
+instance : Complete Logic.S4Point3 FrameClass.S4Point3 := inferInstance
 
 instance : Complete Logic.S4Point3 { F : Frame | F.IsLinearPreorder } := ⟨by
   intro φ hφ;

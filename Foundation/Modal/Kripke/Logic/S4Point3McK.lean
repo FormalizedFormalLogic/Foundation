@@ -23,7 +23,7 @@ end Kripke
 
 namespace Logic.S4Point3McK.Kripke
 
-instance sound : Sound (Hilbert.S4Point3McK) Kripke.FrameClass.S4Point3McK := instSound_of_validates_axioms $ by
+instance : Sound (Hilbert.S4Point3McK) Kripke.FrameClass.S4Point3McK := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -31,14 +31,14 @@ instance sound : Sound (Hilbert.S4Point3McK) Kripke.FrameClass.S4Point3McK := in
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance consistent : Entailment.Consistent Logic.S4Point3McK :=
+instance : Entailment.Consistent Logic.S4Point3McK :=
   consistent_of_sound_frameclass Kripke.FrameClass.S4Point3McK $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Hilbert.S4Point3McK) Kripke.FrameClass.S4Point3McK := ⟨by constructor⟩
+instance : Canonical (Hilbert.S4Point3McK) Kripke.FrameClass.S4Point3McK := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.S4Point3McK) Kripke.FrameClass.S4Point3McK := inferInstance
+instance : Complete (Hilbert.S4Point3McK) Kripke.FrameClass.S4Point3McK := inferInstance
 
 lemma preorder_connected_mckinsey : Logic.S4Point3McK = Kripke.FrameClass.S4Point3McK.logic := eq_hilbert_logic_frameClass_logic
 

@@ -20,59 +20,61 @@ protected abbrev FrameClass.KD4 : FrameClass := { F | F.IsKD4 }
 end Kripke
 
 
-namespace Logic.KD4.Kripke
+namespace Hilbert.KD4.Kripke
 
-instance sound : Sound Logic.KD4 FrameClass.KD4 := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.KD4 FrameClass.KD4 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFour_of_transitive;
 
-instance consistent : Entailment.Consistent Logic.KD4 := consistent_of_sound_frameclass
+instance : Entailment.Consistent Hilbert.KD4 := consistent_of_sound_frameclass
   FrameClass.KD4 $ by
     use whitepoint;
     constructor
 
-instance canonical : Canonical Logic.KD4 FrameClass.KD4 := ⟨by
+instance : Canonical Hilbert.KD4 FrameClass.KD4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   constructor
 ⟩
 
-instance complete : Complete Logic.KD4 FrameClass.KD4 := inferInstance
+instance : Complete Hilbert.KD4 FrameClass.KD4 := inferInstance
 
-lemma serial_trans : Logic.KD4 = FrameClass.KD4.logic := eq_hilbert_logic_frameClass_logic
+lemma serial_trans : Modal.KD4 = FrameClass.KD4.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.KD ⪱ Logic.KD4 := by
+instance : Hilbert.KD ⪱ Hilbert.KD4 := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.KD4 ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
-      simpa [KD.Kripke.serial];
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.IsKD)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
       constructor;
       . exact { serial := by simp [Serial]; };
       . simp [Semantics.Realize, Satisfies];
         tauto;
 
-instance : Logic.K4 ⪱ Logic.KD4 := by
+instance : Hilbert.K4 ⪱ Hilbert.KD4 := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.KD4 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by
-      simpa [K4.Kripke.trans];
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
       . exact { trans := by simp; }
       . simp [Semantics.Realize, Satisfies];
 
-end Logic.KD4.Kripke
+end Hilbert.KD4.Kripke
+
+instance : Modal.KD ⪱ Modal.KD4 := inferInstance
+
+instance : Modal.K4 ⪱ Modal.KD4 := inferInstance
 
 end LO.Modal

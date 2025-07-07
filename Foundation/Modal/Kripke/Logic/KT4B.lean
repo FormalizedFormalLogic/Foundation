@@ -19,27 +19,27 @@ abbrev FrameClass.finite_KT4B: FrameClass := { F | F.IsFiniteKT4B }
 end Kripke
 
 
-namespace Logic.KT4B.Kripke
+namespace Hilbert.KT4B.Kripke
 
-instance sound : Sound Logic.KT4B FrameClass.KT4B := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.KT4B FrameClass.KT4B := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomB_of_symmetric;
 
-instance consistent : Entailment.Consistent Logic.KT4B := consistent_of_sound_frameclass FrameClass.KT4B $ by
+instance : Entailment.Consistent Hilbert.KT4B := consistent_of_sound_frameclass FrameClass.KT4B $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical Logic.KT4B FrameClass.KT4B := ⟨by constructor⟩
+instance : Canonical Hilbert.KT4B FrameClass.KT4B := ⟨by constructor⟩
 
-instance complete : Complete Logic.KT4B FrameClass.KT4B := inferInstance
+instance : Complete Hilbert.KT4B FrameClass.KT4B := inferInstance
 
 open finestFiltrationTransitiveClosureModel in
-instance finite_complete : Complete Logic.KT4B FrameClass.finite_KT4B := ⟨by
+instance finite_complete : Complete Hilbert.KT4B FrameClass.finite_KT4B := ⟨by
   intro φ hp;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.KT4B);
   intro F F_equiv V x;
   replace F_equiv := Set.mem_setOf_eq.mp F_equiv;
   let M : Kripke.Model := ⟨F, V⟩;
@@ -54,9 +54,9 @@ instance finite_complete : Complete Logic.KT4B FrameClass.finite_KT4B := ⟨by
   }
 ⟩
 
-end Logic.KT4B.Kripke
+end Hilbert.KT4B.Kripke
 
-lemma Logic.KT4B.Kripke.symm_preorder : Logic.KT4B = FrameClass.KT4B.logic := eq_hilbert_logic_frameClass_logic
+lemma KT4B.Kripke.symm_preorder : Modal.KT4B = FrameClass.KT4B.logic := eq_hilbert_logic_frameClass_logic
 
 
 end LO.Modal

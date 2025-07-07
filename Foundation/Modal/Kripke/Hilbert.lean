@@ -7,7 +7,7 @@ open Formula
 open Kripke
 open Formula.Kripke
 
-variable {H : Hilbert.Normal ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
+variable {H H₁ H₂ : Hilbert.Normal ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 variable {F : Kripke.Frame} {C : Kripke.FrameClass}
 
 
@@ -72,6 +72,14 @@ lemma consistent_of_sound_frames (F : Kripke.Frame) [sound : Sound H F] : Entail
   apply Entailment.Consistent.of_unprovable (f := ⊥);
   apply not_imp_not.mpr sound.sound;
   exact Kripke.ValidOnFrame.bot_def;
+
+lemma weakerThan_of_subset_frameClass (C₁ C₂ : FrameClass) (hC : C₂ ⊆ C₁) [Sound H₁ C₁] [Complete H₂ C₂] : H₁ ⪯ H₂ := by
+  apply Entailment.weakerThan_iff.mpr;
+  intro φ hφ;
+  apply Complete.complete (𝓜 := C₂);
+  intro F hF;
+  apply Sound.sound (𝓢 := H₁) (𝓜 := C₁) hφ;
+  apply hC hF;
 
 end Hilbert.Kripke
 

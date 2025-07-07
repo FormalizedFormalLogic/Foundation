@@ -25,22 +25,22 @@ end Kripke
 
 namespace Logic.KB4.Kripke
 
-instance sound : Sound Logic.KB4 FrameClass.IsKB4 := instSound_of_validates_axioms $ by
+instance : Sound Logic.KB4 FrameClass.IsKB4 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomB_of_symmetric;
   . exact validate_AxiomFour_of_transitive;
 
-instance consistent : Entailment.Consistent Logic.KB4 := consistent_of_sound_frameclass FrameClass.IsKB4 $ by
+instance : Entailment.Consistent Logic.KB4 := consistent_of_sound_frameclass FrameClass.IsKB4 $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical Logic.KB4 FrameClass.IsKB4 := ⟨by
+instance : Canonical Logic.KB4 FrameClass.IsKB4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   constructor
 ⟩
 
-instance complete : Complete Logic.KB4 FrameClass.IsKB4 := inferInstance
+instance : Complete Logic.KB4 FrameClass.IsKB4 := inferInstance
 
 end Logic.KB4.Kripke
 

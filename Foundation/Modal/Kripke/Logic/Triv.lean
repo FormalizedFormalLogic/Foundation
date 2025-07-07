@@ -50,7 +50,7 @@ instance consistent : Entailment.Consistent Logic.Triv := consistent_of_sound_fr
   use whitepoint;
   constructor;
 
-instance cannonical_Triv : Canonical Logic.Triv Kripke.FrameClass.Triv := ⟨by constructor⟩
+instance : Canonical Logic.Triv Kripke.FrameClass.Triv := ⟨by constructor⟩
 
 instance complete_Triv : Complete Logic.Triv Kripke.FrameClass.Triv := inferInstance
 

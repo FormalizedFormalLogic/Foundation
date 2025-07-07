@@ -38,7 +38,7 @@ instance finite_sound : Sound Logic.GrzPoint3 FrameClass.finite_connected_partia
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance consistent : Entailment.Consistent Logic.GrzPoint3 :=
+instance : Entailment.Consistent Logic.GrzPoint3 :=
   consistent_of_sound_frameclass FrameClass.finite_connected_partial_order $ by
     use whitepoint;
     constructor;

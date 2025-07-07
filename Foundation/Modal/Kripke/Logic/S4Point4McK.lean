@@ -24,7 +24,7 @@ end Kripke
 
 namespace Logic.S4Point4McK.Kripke
 
-instance sound : Sound Logic.S4Point4McK FrameClass.S4Point4McK := instSound_of_validates_axioms $ by
+instance : Sound Logic.S4Point4McK FrameClass.S4Point4McK := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -32,14 +32,14 @@ instance sound : Sound Logic.S4Point4McK FrameClass.S4Point4McK := instSound_of_
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_axiomPoint4_of_satisfiesSobocinskiCondition;
 
-instance consistent : Entailment.Consistent Logic.S4Point4McK :=
+instance : Entailment.Consistent Logic.S4Point4McK :=
   consistent_of_sound_frameclass FrameClass.S4Point4McK $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical Logic.S4Point4McK FrameClass.S4Point4McK := ⟨by constructor⟩
+instance : Canonical Logic.S4Point4McK FrameClass.S4Point4McK := ⟨by constructor⟩
 
-instance complete : Complete Logic.S4Point4McK FrameClass.S4Point4McK := inferInstance
+instance : Complete Logic.S4Point4McK FrameClass.S4Point4McK := inferInstance
 
 lemma preorder_sobocinski_mckinsey : Logic.S4Point4McK = FrameClass.S4Point4McK.logic := eq_hilbert_logic_frameClass_logic
 

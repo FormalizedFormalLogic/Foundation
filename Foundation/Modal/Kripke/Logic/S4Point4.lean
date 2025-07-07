@@ -23,21 +23,21 @@ end Kripke
 
 namespace Logic.S4Point4.Kripke
 
-instance sound : Sound (Hilbert.S4Point4) Kripke.FrameClass.S4Point4 := instSound_of_validates_axioms $ by
+instance : Sound (Hilbert.S4Point4) Kripke.FrameClass.S4Point4 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomPoint4_of_satisfiesSobocinskiCondition;
 
-instance consistent : Entailment.Consistent Logic.S4Point4 :=
+instance : Entailment.Consistent Logic.S4Point4 :=
   consistent_of_sound_frameclass Kripke.FrameClass.S4Point4 $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Hilbert.S4Point4) Kripke.FrameClass.S4Point4 := ⟨by constructor⟩
+instance : Canonical (Hilbert.S4Point4) Kripke.FrameClass.S4Point4 := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.S4Point4) Kripke.FrameClass.S4Point4 := inferInstance
+instance : Complete (Hilbert.S4Point4) Kripke.FrameClass.S4Point4 := inferInstance
 
 lemma preorder_sobocinski : Logic.S4Point4 = Kripke.FrameClass.S4Point4.logic := eq_hilbert_logic_frameClass_logic
 

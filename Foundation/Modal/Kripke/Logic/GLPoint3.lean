@@ -30,7 +30,7 @@ instance finite_sound : Sound Logic.GLPoint3 FrameClass.finite_GLPoint3 := instS
   . exact validate_AxiomL_of_finite_trans_irrefl;
   . exact validate_WeakPoint3_of_weakConnected;
 
-instance consistent : Entailment.Consistent Logic.GLPoint3 :=
+instance : Entailment.Consistent Logic.GLPoint3 :=
   consistent_of_sound_frameclass FrameClass.finite_GLPoint3 $ by
     use blackpoint;
     constructor;
