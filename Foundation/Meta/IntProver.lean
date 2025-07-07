@@ -1,4 +1,6 @@
-import Foundation.Meta.ClProver
+import Foundation.Meta.TwoSided
+import Foundation.Meta.Qq
+import Foundation.Meta.Lit
 
 /-!
 # Proof automation based on the proof search on $\mathbf{LJpm}^*$
@@ -6,441 +8,410 @@ import Foundation.Meta.ClProver
 main reference: Grigori Mints, A Short Introduction to Intuitionistic Logic
 -/
 
-namespace LO.Entailment
-
-variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment F S]
-
-variable (F)
-
-structure Tabreau.Sequent where
-  antecedent : List F
-  succedent : List F
-
-abbrev Tabreau := List (Tabreau.Sequent F)
-
-variable {F} (𝓢 : S)
-
-def Tabreau.Valid (τ : Tabreau F) : Prop := ∃ S ∈ τ, TwoSided 𝓢 S.antecedent S.succedent
-
-variable {𝓢}
-
-namespace Tabreau
-
-
-
-end Tabreau
-
-
-/--/
-namespace OneSided
-
-set_option linter.unusedSectionVars false
-
-open FiniteContext
-
-variable {𝓢} [Entailment.Int 𝓢]
-
-local notation:40 Γ:47 " ⟹ " φ:46 => Γ ⊢[𝓢]! φ
-
-lemma weakening (h : Γ₁ ⟹ φ) (HΓ : Γ₁ ⊆ Γ₂ := by simp) : Γ₂ ⟹ φ :=
-  FiniteContext.weakening! HΓ h
-
-lemma rotate (Γ ξ φ) (hφ : (Γ ++ [φ]) ⟹ ξ) : (φ :: Γ) ⟹ ξ := weakening hφ
-
-lemma rotate_inv (Γ ξ φ) (hφ : (φ :: Γ) ⟹ ξ) : (Γ ++ [φ]) ⟹ ξ := weakening hφ
-
-variable (𝓢)
-
-lemma to_provable (φ) (h : [] ⟹ φ) : 𝓢 ⊢! φ :=
-  FiniteContext.provable_iff_provable.mpr h
-
-lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ :=
-  deduct! h ⨀! of'! (WeakerThan.pbl hφ)
-
-lemma right_closed (Γ ξ) (h : ξ ∈ Γ) : Γ ⟹ ξ := by_axm! h
-
-lemma verum_right (Γ) : Γ ⟹ ⊤ := by simp
-
-lemma falsum_left (Γ ξ) : (⊥ :: Γ) ⟹ ξ := efq! ⨀! by_axm₀!
-
-lemma verum_left (Γ ξ) (h : Γ ⟹ ξ) : (⊤ :: Γ) ⟹ ξ := weakening h
-
-lemma and_right (Γ φ ψ) (hφ : Γ ⟹ φ) (hψ : Γ ⟹ ψ) : Γ ⟹ φ ⋏ ψ := K!_intro hφ hψ
-
-lemma or_right₁ (Γ φ ψ) (h : Γ ⟹ φ) : Γ ⟹ φ ⋎ ψ := A!_intro_left h
-
-lemma or_right₂ (Γ φ ψ) (h : Γ ⟹ ψ) : Γ ⟹ φ ⋎ ψ := A!_intro_right h
-
-lemma imply_right (Γ φ ψ) (h : Γ ++ [φ] ⟹ ψ) : Γ ⟹ φ ➝ ψ := deduct_iff.mpr <| rotate _ _ _ h
-
-lemma or_left (Γ Δ φ ψ) (hφ : (Γ ++ [φ]) ⟹ Δ) (hψ : (Γ ++ [ψ]) ⟹ Δ) : (φ ⋎ ψ :: Γ) ⟹ Δ := by
-  apply deductInv!
-  apply left_A!_intro
-  · apply deduct! (rotate_left _ _ _ hφ)
-  · apply deduct! (rotate_left _ _ _ hψ)
-
-  have : Γ ⊢[𝓢]! (φ :: ψ :: Δ).disj ➝ (φ ⋎ ψ :: Δ).disj := by
-    apply left_Disj!_intro
-    intro χ hχ
-    rcases show χ = φ ∨ χ = ψ ∨ χ ∈ Δ by simpa using hχ with (rfl | rfl | hχ)
-    · apply right_Disj!_intro' (χ ⋎ ψ :: Δ) (φ := χ ⋎ ψ) (by simp) or₁!
-    · apply right_Disj!_intro' (φ ⋎ χ :: Δ) (φ := φ ⋎ χ) (by simp) or₂!
-    · apply right_Disj!_intro _ (by simp [hχ])
-  exact this ⨀! (weakening h)
-
-lemma and_left (Γ Δ φ ψ) (h : (Γ ++ [φ, ψ]) ⟹ Δ) : (φ ⋏ ψ :: Γ) ⟹ Δ := by
-  have h : (φ :: ψ :: Γ) ⟹ Δ := weakening h
-  have : (φ ⋏ ψ :: Γ) ⊢[𝓢]! ψ ➝ φ ➝ Δ.disj := wk! (by simp) (deduct! <| deduct! h)
-  exact this ⨀! (deductInv! and₂!) ⨀! (deductInv! and₁!)
-
-lemma neg_right (Γ Δ φ) (h : (Γ ++ [φ]) ⟹ Δ) : Γ ⟹ ∼φ :: Δ := by
-  have hφ : Γ ⊢[𝓢]! φ ➝ (∼φ :: Δ).disj := by
-    apply deduct!
-    suffices (φ :: Γ) ⊢[𝓢]! Δ.disj ➝ (∼φ :: Δ).disj from this ⨀ rotate_left Γ Δ φ h
-    apply left_Disj!_intro
-    intro ψ hψ
-    apply right_Disj!_intro _ (by simp [hψ])
-  have hnφ : Γ ⊢[𝓢]! ∼φ ➝ (∼φ :: Δ).disj := right_Disj!_intro _ (by simp)
-  exact left_A!_intro hφ hnφ ⨀ lem!
-
-lemma neg_left (Γ Δ φ) (h : Γ ⟹ Δ ++ [φ]) : (∼φ :: Γ) ⟹ Δ := by
-  suffices (∼φ :: Γ) ⊢[𝓢]! (φ :: Δ).disj ➝ Δ.disj from this ⨀ (wk! (by simp) (rotate_right _ _ _ h))
-  apply left_Disj!_intro
-  intro ψ hψ
-  rcases show ψ = φ ∨ ψ ∈ Δ by simpa using hψ with (rfl | hψ)
-  · apply deductInv!
-    exact CNC!
-  · apply right_Disj!_intro _ (by simp [hψ])
-
-lemma imply_right (Γ Δ φ ψ) (h : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) : Γ ⟹ (φ ➝ ψ) :: Δ := by
-  have h : (φ :: Γ) ⟹ ψ :: Δ := weakening h
-  have hnφ : Γ ⊢[𝓢]! ∼φ ➝ ((φ ➝ ψ) :: Δ).disj := by
-    apply right_Disj!_intro' ((φ ➝ ψ) :: Δ) (φ := φ ➝ ψ) (by simp)
-    exact CNC!
-  have hφ : Γ ⊢[𝓢]! φ ➝ ((φ ➝ ψ) :: Δ).disj := by
-    apply deduct!
-    suffices (φ :: Γ) ⊢[𝓢]! (ψ :: Δ).disj ➝ ((φ ➝ ψ) :: Δ).disj from this ⨀ h
-    apply left_Disj!_intro
-    intro χ hχ
-    rcases show χ = ψ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
-    · apply right_Disj!_intro' _ (φ := φ ➝ χ) (by simp)
-      exact imply₁!
-    · apply right_Disj!_intro
-      simp [hχ]
-  exact left_A!_intro hφ hnφ ⨀ lem!
-
-lemma imply_left (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : (Γ ++ [ψ]) ⟹ Δ) : ((φ ➝ ψ) :: Γ) ⟹ Δ := by
-  --apply deductInv!
-  suffices ((φ ➝ ψ) :: Γ) ⊢[𝓢]! (φ :: Δ).disj ➝ Δ.disj from this ⨀! wk! (by simp) (rotate_right Γ Δ φ hφ)
-  apply left_Disj!_intro
-  intro χ hχ
-  rcases show χ = φ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
-  · apply deduct!
-    have : Γ ⊢[𝓢]! ψ ➝ Δ.disj := deduct! (rotate_left Γ Δ ψ hψ)
-    apply (wk! (by simp) this) ⨀! (by_axm₁! ⨀! by_axm₀!)
-  · apply right_Disj!_intro _ (by simp [hχ])
-
-lemma iff_right (Γ Δ φ ψ) (hr : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) (hl : (Γ ++ [ψ]) ⟹ Δ ++ [φ]) : Γ ⟹ (φ ⭤ ψ) :: Δ := by
-  apply and_right
-  · apply rotate_right_inv
-    apply imply_right
-    assumption
-  · apply rotate_right_inv
-    apply imply_right
-    assumption
-
-lemma iff_left (Γ Δ φ ψ) (hr : Γ ⟹ Δ ++ [φ, ψ]) (hl : (Γ ++ [φ, ψ]) ⟹ Δ) : ((φ ⭤ ψ) :: Γ) ⟹ Δ := by
-  apply and_left
-  suffices ((φ ➝ ψ) :: (ψ ➝ φ) :: Γ) ⟹ Δ from weakening this
-  apply imply_left
-  · apply imply_left
-    · simpa using hr
-    · suffices (φ :: Γ) ⟹ φ :: Δ from weakening this
-      apply deductInv!
-      apply right_Disj!_intro _ (by simp)
-  · apply imply_left
-    · suffices (ψ :: Γ) ⟹ ψ :: Δ from weakening this
-      apply deductInv!
-      apply right_Disj!_intro _ (by simp)
-    · exact weakening hl
-
-end TwoSided
-
-end LO.Entailment
 
 namespace LO.Meta
 
 open Mathlib Qq Lean Elab Meta Tactic
 
-namespace ClProver
+namespace IntProver
 
-initialize registerTraceClass `cl_prover
-initialize registerTraceClass `cl_prover.detail
+namespace Theorems
 
-syntax (name := cl_prover) "cl_prover" : tactic
+open Entailment TwoSided Tableaux FiniteContext
+
+variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment F S] {𝓢 : S} [Entailment.Int 𝓢]
+
+local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
+
+scoped notation:0 Γ:45 " ⟶ " Δ:46 => Tableaux.Sequent.mk Γ Δ
+
+set_option linter.unusedSectionVars false in
+lemma to_twoSided (h : Valid 𝓢 [Γ ⟶ Δ]) : Γ ⟹ Δ := by
+  rcases h
+  · assumption
+  · simp_all
+
+lemma to_provable {φ} (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢! φ := by
+  rcases h
+  · exact TwoSided.to_provable <| by assumption
+  · simp_all
+
+lemma add_hyp {𝒯 : S} (s : 𝒯 ⪯ 𝓢) {Γ Δ φ} (hφ : 𝒯 ⊢! φ)  : Valid 𝓢 [φ :: Γ ⟶ Δ] → Valid 𝓢 [Γ ⟶ Δ] :=
+  Valid.of_single_uppercedent <| TwoSided.add_hyp hφ
+
+lemma right_closed {T Γ Δ φ} (h : φ ∈ Γ) : Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := Valid.right_closed h
+
+lemma left_closed {T Γ Δ φ} (h : φ ∈ Δ) : Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) := Valid.left_closed h
+
+
+
+set_option linter.unusedSectionVars false in
+lemma rotate {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ Δ) :: T) := Valid.of_subset
+
+lemma rotate_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
+  Valid.rotate_right (rotate h)
+
+lemma verum_right {T Γ Δ} : Valid 𝓢 ((Γ ⟶ ⊤ :: Δ) :: T) := Valid.verum_right
+
+lemma falsum_right {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ ⊥ :: Δ) :: T) := fun h ↦
+  Valid.falsum_right (rotate h)
+
+lemma and_right {T Γ Δ φ ψ} :
+    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ]]) → Valid 𝓢 ((Γ ⟶ φ ⋏ ψ :: Δ) :: T) := fun h₁ h₂ ↦
+  Valid.and_right (rotate h₁) (rotate h₂)
+
+lemma or_right {T Γ Δ φ ψ} :
+    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ, ψ]]) → Valid 𝓢 ((Γ ⟶ φ ⋎ ψ :: Δ) :: T) := fun h ↦
+  Valid.or_right (rotate h)
+
+lemma neg_right {T Γ Δ φ} :
+    Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ []] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ ∼φ :: Δ) :: T) := fun h ↦
+  Valid.neg_right' <| rotate <| rotate h
+
+lemma imply_right {T Γ Δ φ ψ} :
+    Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ (φ ➝ ψ) :: Δ) :: T) := fun h ↦
+  Valid.imply_right' <| rotate <| rotate h
+
+lemma iff_right {T Γ Δ φ ψ} :
+    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ ➝ ψ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ ➝ φ]]) → Valid 𝓢 ((Γ ⟶ (φ ⭤ ψ) :: Δ) :: T) := fun h₁ h₂ ↦
+  Valid.and_right (rotate h₁) (rotate h₂)
+
+
+
+lemma rotate_left {T Γ Δ φ} : Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
+  Valid.rotate_left
+
+lemma verum_left {T Γ Δ} : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((⊤ :: Γ ⟶ Δ) :: T) := Valid.verum_left
+
+set_option linter.unusedSectionVars false in
+lemma falsum_left {T Γ Δ} : Valid 𝓢 ((⊥ :: Γ ⟶ Δ) :: T) := Valid.falsum_left
+
+lemma or_left {T Γ Δ φ ψ} :
+    Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋎ ψ :: Γ ⟶ Δ) :: T) :=
+  Valid.or_left
+
+lemma and_left {T Γ Δ φ ψ} :
+    Valid 𝓢 ((Γ ++ [φ, ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋏ ψ :: Γ ⟶ Δ) :: T) :=
+  Valid.and_left
+
+lemma neg_left {T Γ Δ φ} :
+    Valid 𝓢 ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((∼φ :: Γ ⟶ Δ) :: T) :=
+  Valid.neg_left
+
+lemma imply_left {T Γ Δ φ ψ} :
+    Valid 𝓢 ((Γ ++ [φ ➝ ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 (((φ ➝ ψ) :: Γ ⟶ Δ) :: T) :=
+  Valid.imply_left
+
+lemma iff_left {T Γ Δ φ ψ} :
+    Valid 𝓢 ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⟶ Δ) :: T) → Valid 𝓢 (((φ ⭤ ψ) :: Γ ⟶ Δ) :: T) :=
+  Valid.and_left
+
+end Theorems
+
+initialize registerTraceClass `int_prover
+initialize registerTraceClass `int_prover.detail
 
 structure Context where
   levelF : Level
   levelS : Level
   levelE : Level
   F : Q(Type levelF)
-  LC : Q(LogicalConnective $F)
-  DC : Q(DecidableEq $F)
+  instLC : Q(LogicalConnective $F)
+  instDE : Q(DecidableEq $F)
   S : Q(Type levelS)
   E : Q(Entailment.{_, _, levelE} $F $S)
   𝓢 : Q($S)
-  CL : Q(Entailment.Cl $𝓢)
+  instInt : Q(Entailment.Int $𝓢)
 
-/-- The monad for `cl_prover` contains. -/
+open Mathlib Qq Lean Elab Meta Tactic
+
+/-- The monad for `int_prover` contains. -/
 abbrev M := ReaderT Context AtomM
 
 /-- Apply the function
-  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment F S] {𝓢} [Entailment.Cl 𝓢], _` to the
+  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment F S] {𝓢} [Entailment.Int 𝓢], _` to the
 implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
   mkAppN <| @Expr.const n [c.levelF, c.levelS, c.levelE]
-    |>.app c.F |>.app c.LC |>.app c.DC |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.CL
+    |>.app c.F |>.app c.instLC |>.app c.instDE |>.app c.S |>.app c.E |>.app c.𝓢 |>.app c.instInt
 
 def iapp (n : Name) (xs : Array Expr) : M Expr := do
   let c ← read
   return c.app n xs
 
 def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List Q($c.F)) := do
-  let ~q(@Entailment.TwoSided $F $LC $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
-  let .some DC ← trySynthInstanceQ q(DecidableEq $F)
+  let ~q(@Entailment.TwoSided $F $instLC $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  let .some instDE ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
-  let .some CL ← trySynthInstanceQ q(Entailment.Cl $𝓢)
+  let .some instInt ← trySynthInstanceQ q(Entailment.Int $𝓢)
     | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
   let Γ ← Qq.ofQList p
   let Δ ← Qq.ofQList q
-  return ⟨⟨_, _, _, F, LC, DC, S, E, 𝓢, CL⟩, Γ, Δ⟩
+  return ⟨⟨_, _, _, F, instLC, instDE, S, E, 𝓢, instInt⟩, Γ, Δ⟩
 
 def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
   let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
-  let .some DC ← trySynthInstanceQ q(DecidableEq $F)
+  let .some instDE ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
-  let .some LC ← trySynthInstanceQ q(LogicalConnective $F)
+  let .some instLC ← trySynthInstanceQ q(LogicalConnective $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
-  let .some CL ← trySynthInstanceQ q(Entailment.Cl $𝓢)
+  let .some instInt ← trySynthInstanceQ q(Entailment.Int $𝓢)
     | throwError m! "error: failed to find instance Entailment.Cl {𝓢}"
-  return ⟨⟨_, _, _, F, LC, DC, S, E, 𝓢, CL⟩, p⟩
+  return ⟨⟨_, _, _, F, instLC, instDE, S, E, 𝓢, instInt⟩, p⟩
 
 abbrev Sequent := List Lit
 
+abbrev Tableaux := Entailment.Tableaux Lit
+
+scoped notation:0 Γ:45 " ⟶ " Δ:46 => Entailment.Tableaux.Sequent.mk Γ Δ
+
 def litToExpr (φ : Lit) : M Expr := do
   let c ← read
-  return Litform.toExpr c.LC φ
+  return Litform.toExpr c.instLC φ
 
 def exprToLit (e : Expr) : M Lit := do
   let c ← read
-  Litform.denote c.LC e
+  Litform.denote c.instLC e
 
 def Sequent.toExprList (Γ : Sequent) : M (List Expr) := do
   let c ← read
-  return Γ.map (Litform.toExpr c.LC)
+  return Γ.map (Litform.toExpr c.instLC)
 
 def exprListToLitList (l : List Expr) : M (List Lit) := do
   let c ← read
-  l.mapM (m := MetaM) (Litform.denote c.LC)
+  l.mapM (m := MetaM) (Litform.denote c.instLC)
 
 def Sequent.toExpr (Γ : Sequent) : M Expr := do
   let c ← read
-  return toQList <| Γ.map (Litform.toExpr c.LC)
+  return toQList <| Γ.map (Litform.toExpr c.instLC)
 
-def tryRightClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
+def mkTableauSequentQ (F : Q(Type*)) (Γ Δ : Q(List $F)) : Q(Entailment.Tableaux.Sequent $F) :=
+  q($Γ ⟶ $Δ)
+
+def Tableaux.toExpr (T : Tableaux) : M Expr := do
+  let c ← read
+  let m ← T.mapM fun ⟨Γ, Δ⟩ ↦ do
+    let Γ ← Sequent.toExpr Γ
+    let Δ ← Sequent.toExpr Δ
+    let e := mkTableauSequentQ c.F Γ Δ
+    return e
+  return toQList (u := c.levelF) m
+
+def tryRightClose (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) : M (Option Expr) := do
   match ← memQList?' (← litToExpr φ) (← Γ.toExprList) with
   |   .none => return none
   | .some e => do
-    let eΓ ← Sequent.toExpr Γ
-    let eΔ ← Sequent.toExpr Δ
-    let eφ ← litToExpr φ
-    return some <| ← iapp ``LO.Entailment.TwoSided.right_closed #[eΓ, eΔ, eφ, e]
+    let T ← T.toExpr
+    let Γ ← Sequent.toExpr Γ
+    let Δ ← Sequent.toExpr Δ
+    let φ ← litToExpr φ
+    return some <| ← iapp ``LO.Meta.IntProver.Theorems.right_closed #[T, Γ, Δ, φ, e]
 
-def tryLeftClose (φ : Lit) (Γ Δ : Sequent) : M (Option Expr) := do
+def tryLeftClose (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) : M (Option Expr) := do
   match ← memQList?' (← litToExpr φ) (← Δ.toExprList) with
   |   .none => return none
   | .some e => do
-    let eΓ ← Sequent.toExpr Γ
-    let eΔ ← Sequent.toExpr Δ
-    let eφ ← litToExpr φ
-    return some <| ← iapp ``LO.Entailment.TwoSided.left_closed #[eΓ, eΔ, eφ, e]
+    let T ← T.toExpr
+    let Γ ← Sequent.toExpr Γ
+    let Δ ← Sequent.toExpr Δ
+    let φ ← litToExpr φ
+    return some <| ← iapp ``LO.Meta.IntProver.Theorems.left_closed #[T, Γ, Δ, φ, e]
 
-def rotateRight (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.rotate_right #[eΓ, eΔ, eφ, e]
+def rotateRight (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  iapp ``LO.Meta.IntProver.Theorems.rotate_right #[T, Γ, Δ, φ, e]
 
-def rotateLeft (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.rotate_left #[eΓ, eΔ, eφ, e]
+def rotateLeft (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  iapp ``LO.Meta.IntProver.Theorems.rotate_left #[T, Γ, Δ, φ, e]
 
-def verumRight (Γ Δ : Sequent) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Entailment.TwoSided.verum_right #[eΓ, eΔ]
+def verumRight (T : Tableaux) (Γ Δ : Sequent) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  iapp ``LO.Meta.IntProver.Theorems.verum_right #[T, Γ, Δ]
 
-def falsumRight (Γ Δ : Sequent) (e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Entailment.TwoSided.falsum_right #[eΓ, eΔ, e]
+def falsumRight (T : Tableaux) (Γ Δ : Sequent) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  iapp ``LO.Meta.IntProver.Theorems.falsum_right #[T, Γ, Δ, e]
 
-def andRight (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.and_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+def andRight (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  let ψ ← litToExpr ψ
+  iapp ``LO.Meta.IntProver.Theorems.and_right #[T, Γ, Δ, φ, ψ, e₁, e₂]
 
-def orRight (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.or_right #[eΓ, eΔ, eφ, eψ, e]
+def orRight (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  let ψ ← litToExpr ψ
+  iapp ``LO.Meta.IntProver.Theorems.or_right #[T, Γ, Δ, φ, ψ, e]
 
-def negRight (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.neg_right #[eΓ, eΔ, eφ, e]
+def negRight (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  iapp ``LO.Meta.IntProver.Theorems.neg_right #[T, Γ, Δ, φ, e]
 
-def implyRight (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.imply_right #[eΓ, eΔ, eφ, eψ, e]
+def implyRight (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  let ψ ← litToExpr ψ
+  iapp ``LO.Meta.IntProver.Theorems.imply_right #[T, Γ, Δ, φ, ψ, e]
 
-def iffRight (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.iff_right #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+def iffRight (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  let ψ ← litToExpr ψ
+  iapp ``LO.Meta.IntProver.Theorems.iff_right #[T, Γ, Δ, φ, ψ, e₁, e₂]
 
+def rotate (T : Tableaux) (Γ Δ : Sequent) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  iapp ``LO.Meta.IntProver.Theorems.rotate #[T, Γ, Δ, e]
 
-def verumLeft (Γ Δ : Sequent) (e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Entailment.TwoSided.verum_left #[eΓ, eΔ, e]
+def verumLeft (T : Tableaux) (Γ Δ : Sequent) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  iapp ``LO.Meta.IntProver.Theorems.verum_left #[T, Γ, Δ, e]
 
-def falsumLeft (Γ Δ : Sequent) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  iapp ``LO.Entailment.TwoSided.falsum_left #[eΓ, eΔ]
+def falsumLeft (T : Tableaux) (Γ Δ : Sequent) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  iapp ``LO.Meta.IntProver.Theorems.falsum_left #[T, Γ, Δ]
 
-def andLeft (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.and_left #[eΓ, eΔ, eφ, eψ, e]
+def andLeft (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  let ψ ← litToExpr ψ
+  iapp ``LO.Meta.IntProver.Theorems.and_left #[T, Γ, Δ, φ, ψ, e]
 
-def orLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.or_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+def orLeft (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  let ψ ← litToExpr ψ
+  iapp ``LO.Meta.IntProver.Theorems.or_left #[T, Γ, Δ, φ, ψ, e₁, e₂]
 
-def negLeft (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.neg_left #[eΓ, eΔ, eφ, e]
+def negLeft (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  iapp ``LO.Meta.IntProver.Theorems.neg_left #[T, Γ, Δ, φ, e]
 
-def implyLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.imply_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+def implyLeft (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  let ψ ← litToExpr ψ
+  iapp ``LO.Meta.IntProver.Theorems.imply_left #[T, Γ, Δ, φ, ψ, e₁, e₂]
 
-def iffLeft (Γ Δ : Sequent) (φ ψ : Lit) (e₁ e₂ : Expr) : M Expr := do
-  let eΓ ← Sequent.toExpr Γ
-  let eΔ ← Sequent.toExpr Δ
-  let eφ ← litToExpr φ
-  let eψ ← litToExpr ψ
-  iapp ``LO.Entailment.TwoSided.iff_left #[eΓ, eΔ, eφ, eψ, e₁, e₂]
+def iffLeft (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  let ψ ← litToExpr ψ
+  iapp ``LO.Meta.IntProver.Theorems.iff_left #[T, Γ, Δ, φ, ψ, e]
 
-def toProvable (φ : Expr) (e : Expr) : M Expr := do
-  iapp ``LO.Entailment.TwoSided.to_provable #[φ, e]
-
-def prover (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
-  --logInfo m!"step: {k}, case: {b}, {← Sequent.toExpr Γ} ⟹ {← Sequent.toExpr Δ}"
+def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
+  trace[int_prover.detail] m!"step: {k}, case: {b}, {← T.toExpr}"
+  logInfo m!"step: {k}, case: {b}, {← T.toExpr}"
   match k, b with
-  |     0,      _ => throwError m!"Proof search failed: {← Sequent.toExpr Γ} ⟹ {← Sequent.toExpr Δ}"
-  | k + 1,  false =>
-    match Δ with
-    |    .atom a :: Δ => do
-      let e ← tryRightClose (.atom a) Γ Δ
+  |     0,      _ => throwError m!"Proof search failed: {← T.toExpr}"
+  | k + 1, false =>
+    match T with
+    |                      [] => throwError m!"Proof search failed: empty tableaux reached."
+    |           ([] ⟶ Δ) :: T => prover k true (([] ⟶ Δ) :: T)
+    | (.atom a :: Γ ⟶ Δ) :: T => do
+      let e ← tryLeftClose T Γ Δ (.atom a)
       match e with
       | some h =>
         return h
       |   none => do
-        let e ← prover k true Γ (Δ ++ [.atom a])
-        rotateRight Γ Δ (.atom a) e
-    |          ⊤ :: Δ => verumRight Γ Δ
-    |          ⊥ :: Δ => do
-      let e ← prover k true Γ Δ
-      falsumRight Γ Δ e
-    |      φ ⋏ ψ :: Δ => do
-      let e₁ ← prover k true Γ (Δ ++ [φ])
-      let e₂ ← prover k true Γ (Δ ++ [ψ])
-      andRight Γ Δ φ ψ e₁ e₂
-    |      φ ⋎ ψ :: Δ => do
-      let e ← prover k true Γ (Δ ++ [φ, ψ])
-      orRight Γ Δ φ ψ e
-    |         ∼φ :: Δ => do
-      let e ← prover k true (Γ ++ [φ]) Δ
-      negRight Γ Δ φ e
-    |    (φ ➝ ψ) :: Δ => do
-      let e ← prover k true (Γ ++ [φ]) (Δ ++ [ψ])
-      implyRight Γ Δ φ ψ e
-    | (.iff φ ψ) :: Δ => do
-      let e₁ ← prover k true (Γ ++ [φ]) (Δ ++ [ψ])
-      let e₂ ← prover k true (Γ ++ [ψ]) (Δ ++ [φ])
-      iffRight Γ Δ φ ψ e₁ e₂
-    |              [] =>
-      prover k true Γ []
-  | k + 1, true =>
-    match Γ with
-    |    .atom a :: Γ => do
-      let e ← tryLeftClose (.atom a) Γ Δ
+        let e ← prover k true ((Γ ++ [.atom a] ⟶ Δ) :: T)
+        rotateLeft T Γ Δ (.atom a) e
+    | (⊤ :: Γ ⟶ Δ) :: T => do
+      let e ← prover k true ((Γ ⟶ Δ) :: T)
+      verumLeft T Γ Δ e
+    | (⊥ :: Γ ⟶ Δ) :: T => do
+      falsumLeft T Γ Δ
+    | (φ ⋏ ψ :: Γ ⟶ Δ) :: T => do
+      let e ← prover k true ((Γ ++ [φ, ψ] ⟶ Δ) :: T)
+      andLeft T Γ Δ φ ψ e
+    | (φ ⋎ ψ :: Γ ⟶ Δ) :: T => do
+      let e₁ ← prover k true ((Γ ++ [φ] ⟶ Δ) :: T)
+      let e₂ ← prover k true ((Γ ++ [ψ] ⟶ Δ) :: T)
+      orLeft T Γ Δ φ ψ e₁ e₂
+    | (∼φ :: Γ ⟶ Δ) :: T => do
+      let e ← prover k true ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T)
+      negLeft T Γ Δ φ e
+    | ((φ ➝ ψ) :: Γ ⟶ Δ) :: T => do
+      let e₁ ← prover k true ((Γ ++ [φ ➝ ψ] ⟶ Δ ++ [φ]) :: T)
+      let e₂ ← prover k true ((Γ ++ [ψ] ⟶ Δ) :: T)
+      implyLeft T Γ Δ φ ψ e₁ e₂
+    | ((.iff φ ψ) :: Γ ⟶ Δ) :: T => do
+      let e ← prover k true ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⟶ Δ) :: T)
+      iffLeft T Γ Δ φ ψ e
+  | k + 1,  true =>
+    match T with
+    |                      [] => throwError m!"Proof search failed: empty tableaux reached."
+    |           (Γ ⟶ []) :: T => do
+      let e ← prover k false (T ++ [Γ ⟶ []])
+      rotate T Γ [] e
+    | (Γ ⟶ .atom a :: Δ) :: T => do
+      let e ← tryRightClose T Γ Δ (.atom a)
       match e with
-      | some h =>
-        return h
+      | some h => return h
       |   none => do
-        let e ← prover k false (Γ ++ [.atom a]) Δ
-        rotateLeft Γ Δ (.atom a) e
-    |          ⊤ :: Γ => do
-      let e ← prover k false Γ Δ
-      verumLeft Γ Δ e
-    |          ⊥ :: Γ => do
-      falsumLeft Γ Δ
-    |      φ ⋏ ψ :: Γ => do
-      let e ← prover k false (Γ ++ [φ, ψ]) Δ
-      andLeft Γ Δ φ ψ e
-    |      φ ⋎ ψ :: Γ => do
-      let e₁ ← prover k false (Γ ++ [φ]) Δ
-      let e₂ ← prover k false (Γ ++ [ψ]) Δ
-      orLeft Γ Δ φ ψ e₁ e₂
-    |         ∼φ :: Γ => do
-      let e ← prover k false Γ (Δ ++ [φ])
-      negLeft Γ Δ φ e
-    |    (φ ➝ ψ) :: Γ => do
-      let e₁ ← prover k false Γ (Δ ++ [φ])
-      let e₂ ← prover k false (Γ ++ [ψ]) Δ
-      implyLeft Γ Δ φ ψ e₁ e₂
-    | (.iff φ ψ) :: Γ => do
-      let e₁ ← prover k false Γ (Δ ++ [φ, ψ])
-      let e₂ ← prover k false (Γ ++ [φ, ψ]) Δ
-      iffLeft Γ Δ φ ψ e₁ e₂
-    |              [] =>
-      prover k false [] Δ
+        let e ← prover k false (T ++ [Γ ⟶ Δ ++ [.atom a]])
+        rotateRight T Γ Δ (.atom a) e
+    | (Γ ⟶ ⊤ :: Δ) :: T => verumRight T Γ Δ
+    | (Γ ⟶ ⊥ :: Δ) :: T => do
+      let e ← prover k false (T ++ [Γ ⟶ Δ])
+      falsumRight T Γ Δ e
+    | (Γ ⟶ φ ⋏ ψ :: Δ) :: T => do
+      let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ]])
+      let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ]])
+      andRight T Γ Δ φ ψ e₁ e₂
+    | (Γ ⟶ φ ⋎ ψ :: Δ) :: T => do
+      let e ← prover k false (T ++ [Γ ⟶ Δ ++ [φ, ψ]])
+      orRight T Γ Δ φ ψ e
+    | (Γ ⟶ ∼φ :: Δ) :: T => do
+      let e ← prover k false (T ++ [Γ ++ [φ] ⟶ []] ++ [Γ ⟶ Δ])
+      negRight T Γ Δ φ e
+    | (Γ ⟶ (φ ➝ ψ) :: Δ) :: T => do
+      let e ← prover k false (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ])
+      implyRight T Γ Δ φ ψ e
+    | (Γ ⟶ (.iff φ ψ) :: Δ) :: T => do
+      let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ ➝ ψ]])
+      let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ ➝ φ]])
+      iffRight T Γ Δ φ ψ e₁ e₂
 
 structure HypInfo where
   levelF : Level
@@ -478,7 +449,7 @@ def addHyp (𝓣 wt : Expr) (Γ Δ : Sequent) (φ : Lit) (E e : Expr) : M Expr :
   let eΓ ← Sequent.toExpr Γ
   let eΔ ← Sequent.toExpr Δ
   let eφ ← litToExpr φ
-  iapp ``LO.Entailment.TwoSided.add_hyp #[𝓣, wt, eΓ, eΔ, eφ, E, e]
+  iapp ``LO.Meta.IntProver.Theorems.add_hyp #[𝓣, wt, eΓ, eΔ, eφ, E, e]
 
 def addHyps (prover : (Γ Δ : Sequent) → M Expr) (Γ Δ : Sequent) : List HypInfo → M Expr
   |        [] => prover Γ Δ
@@ -489,11 +460,19 @@ def addHyps (prover : (Γ Δ : Sequent) → M Expr) (Γ Δ : Sequent) : List Hyp
 def main (n : ℕ) (hyps : Array HypInfo) (L R : List Expr) : M Expr := do
   let Γ ← exprListToLitList L
   let Δ ← exprListToLitList R
-  addHyps (prover n false) Γ Δ hyps.toList
+  addHyps (fun Γ Δ ↦ prover n false [Γ ⟶ Δ]) Γ Δ hyps.toList
+
+def toTwoSided (L R : List Expr) (e : Expr) : M Expr := do
+  let Γ ← Sequent.toExpr <| ← exprListToLitList L
+  let Δ ← Sequent.toExpr <| ← exprListToLitList R
+  iapp ``LO.Meta.IntProver.Theorems.to_twoSided #[Γ, Δ, e]
+
+def toProvable (φ : Expr) (e : Expr) : M Expr :=
+  iapp ``LO.Meta.IntProver.Theorems.to_provable #[φ, e]
 
 syntax termSeq := "[" (term,*) "]"
 
-elab "cl_prover_2s" n:(num)? seq:(termSeq)? : tactic => withMainContext do
+elab "int_prover_2s" n:(num)? seq:(termSeq)? : tactic => withMainContext do
   let ⟨c, L, R⟩ ← getGoalTwoSided <| ← whnfR <| ← getMainTarget
   let n : ℕ :=
     match n with
@@ -508,14 +487,16 @@ elab "cl_prover_2s" n:(num)? seq:(termSeq)? : tactic => withMainContext do
         return #[]
     | _        =>
       return #[])
-  closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (main n hyps L R) c
+  closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (r := c) do
+    let e ← main n hyps L R
+    toTwoSided L R e
 
 elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
   let ⟨c, φ⟩ ← getGoalProvable <| ← whnfR <| ← getMainTarget
   let n : ℕ :=
     match n with
     | some n => n.getNat
-    |   none => 32
+    |   none => 64
   let hyps ← (match seq with
     | some seq =>
       match seq with
@@ -529,6 +510,55 @@ elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
     let e ← main n hyps [] [φ]
     toProvable φ e
 
-end ClProver
+section
+
+variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [Entailment F S]
+
+variable {𝓢 𝓣 : S} [Entailment.Int 𝓢] [𝓣 ⪯ 𝓢] {φ ψ χ ξ : F}
+
+example : Entailment.TwoSided 𝓢 [φ ➝ ψ, φ] [ψ] := by { int_prover_2s }
+
+example : Entailment.TwoSided 𝓢 [φ ➝ ∼χ, ∼χ ➝ φ] [φ ➝ ∼χ] := by { int_prover_2s  }
+
+example : Entailment.TwoSided 𝓢 [φ ➝ χ] [φ ➝ χ] := by { int_prover_2s 26 }
+
+example : Entailment.TwoSided 𝓢 [φ ➝ ψ, ψ ➝ χ, χ ➝ ξ] [φ ➝ χ] := by { int_prover_2s 26 }
+
+example : Entailment.TwoSided 𝓢 [φ ⭤ ψ] [ψ ⭤ φ] := by { int_prover_2s }
+
+example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, ∼ψ ⋏ χ] [∼φ ⋏ χ] := by { int_prover_2s }
+
+example : Entailment.TwoSided 𝓢 [∼φ ⭤ ψ] [ψ ⭤ ∼φ] := by { int_prover_2s 4 }
+
+example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, χ ➝ ψ] [(φ ⋎ χ) ➝ ψ] := by int_prover_2s
+
+example : Entailment.TwoSided 𝓢 [φ ⭤ ψ] [φ ➝ (χ ⋎ ψ)] := by int_prover_2s
+
+/--/
+example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, χ ⭤ ξ] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s 32
+
+example (h1 : 𝓢 ⊢! φ ⭤ ψ) (h2 : 𝓢 ⊢! χ ⭤ ξ) : Entailment.TwoSided 𝓢 [] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s [h1, h2]
+
+example : 𝓢 ⊢! (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by cl_prover
+
+example(h1 : 𝓢 ⊢! φ ⭤ ψ) (h2 : 𝓢 ⊢! χ ⭤ ξ) : 𝓢 ⊢! (ψ ➝ ∼ξ) ⭤ (φ ➝ ∼χ) := by cl_prover [h1, h2]
+
+end
+
+section
+
+open LO.Modal.Entailment
+
+variable {S F : Type*} [DecidableEq F] [BasicModalLogicalConnective F] [Entailment F S]
+
+variable {𝓢 𝓣 𝓤 : S} [𝓣 ⪯ 𝓢] [𝓤 ⪯ 𝓢] [Modal.Entailment.K 𝓢] {φ ψ ξ χ : F}
+
+example : 𝓢 ⊢! ((□φ ➝ □□φ) ➝ □φ) ➝ □φ := by cl_prover 6
+
+example (h₁ : 𝓣 ⊢! □φ ⭤ φ) (h₂ : 𝓤 ⊢! □ψ ⭤ ψ) : 𝓢 ⊢! φ ⋎ □ψ ⭤ □φ ⋏ φ ⋎ ψ := by cl_prover [h₁, h₂]
+
+end
+
+end IntProver
 
 end LO.Meta

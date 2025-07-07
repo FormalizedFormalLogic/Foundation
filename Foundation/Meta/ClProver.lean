@@ -1,6 +1,6 @@
+import Foundation.Meta.TwoSided
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit
-import Foundation.Meta.TwoSided
 
 /-!
 # Proof automation based on the proof search on $\mathbf{LK}$
@@ -90,6 +90,8 @@ structure Context where
 
 /-- The monad for `cl_prover` contains. -/
 abbrev M := ReaderT Context AtomM
+
+#check Mathlib.Tactic.AtomM
 
 /-- Apply the function
   `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment F S] {𝓢} [Entailment.Cl 𝓢], _` to the

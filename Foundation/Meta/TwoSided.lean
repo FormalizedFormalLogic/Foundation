@@ -103,8 +103,8 @@ lemma neg_right_cl [Entailment.Cl 𝓢] (h : Γ ++ [φ] ⟹ Δ) : Γ ⟹ ∼φ :
   have hnφ : Γ ⊢[𝓢]! ∼φ ➝ (∼φ :: Δ).disj := right_Disj!_intro _ (by simp)
   exact left_A!_intro hφ hnφ ⨀ lem!
 
-lemma neg_left (h : Γ ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ := by
-  have h : Γ ⟹ φ :: Δ := weakening h
+lemma neg_left_int (h : Γ ++ [∼φ] ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ := by
+  have h : ∼φ :: Γ ⟹ φ :: Δ := weakening h
   suffices (∼φ :: Γ) ⊢[𝓢]! (φ :: Δ).disj ➝ Δ.disj from this ⨀ (wk! (by simp) h)
   apply left_Disj!_intro
   intro ψ hψ
@@ -113,8 +113,11 @@ lemma neg_left (h : Γ ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ := by
     exact CNC!
   · apply right_Disj!_intro _ (by simp [hψ])
 
-lemma imply_left (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ ➝ ψ) :: Γ ⟹ Δ := by
-  have hφ : Γ ⟹ φ :: Δ := weakening hφ
+lemma neg_left (h : Γ ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ :=
+  neg_left_int (weakening h)
+
+lemma imply_left_int (hφ : Γ ++ [φ ➝ ψ] ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ ➝ ψ) :: Γ ⟹ Δ := by
+  have hφ : (φ ➝ ψ) :: Γ ⟹ φ :: Δ := weakening hφ
   have hψ : ψ :: Γ ⟹ Δ := weakening hψ
   suffices ((φ ➝ ψ) :: Γ) ⊢[𝓢]! (φ :: Δ).disj ➝ Δ.disj from this ⨀! wk! (by simp) hφ
   apply left_Disj!_intro
@@ -124,6 +127,9 @@ lemma imply_left (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ ➝ �
     have : Γ ⊢[𝓢]! ψ ➝ Δ.disj := deduct! hψ
     apply (wk! (by simp) this) ⨀! (by_axm₁! ⨀! by_axm₀!)
   · apply right_Disj!_intro _ (by simp [hχ])
+
+lemma imply_left (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ ➝ ψ) :: Γ ⟹ Δ :=
+  imply_left_int (weakening hφ) (weakening hψ)
 
 lemma imply_right_int (h : Γ ++ [φ] ⟹ [ψ]) : Γ ⟹ (φ ➝ ψ) :: Δ := by
   have h : φ :: Γ ⟹ [ψ] := weakening h
@@ -196,7 +202,7 @@ namespace Tableaux.Valid
 
 variable {T U V : Tableaux F} {Γ Γ₁ Γ₂ Δ Δ₁ Δ₂ Ξ Ξ₁ Ξ₂ Λ Λ₁ Λ₂ : List F} {φ ψ χ : F}
 
-scoped notation:0 Γ:45 " ⟶ " Δ:46 => Tableaux.Sequent.mk Γ Δ
+local notation:0 Γ:45 " ⟶ " Δ:46 => Tableaux.Sequent.mk Γ Δ
 
 omit [DecidableEq F] [Entailment.Int 𝓢]
 
@@ -219,7 +225,7 @@ lemma of_subset (h : Valid 𝓢 σ) (ss : σ ⊆ τ := by simp) : Valid 𝓢 τ 
     · exact Valid.of_mem h ss.1
     · exact h.of_subset ss.2
 
-lemma of_single_uppercedent (H : (Γ ⟹ Δ) → (Ξ ⟹ Λ)) (h : Valid 𝓢 (T ++ [Γ ⟶ Δ])) :
+lemma of_single_uppercedent (H : (Γ ⟹ Δ) → (Ξ ⟹ Λ)) (h : Valid 𝓢 ((Γ ⟶ Δ) :: T)) :
     Valid 𝓢 ((Ξ ⟶ Λ) :: T) := by
   have h : Valid 𝓢 ((Γ ⟶ Δ) :: T) := h.of_subset
   rcases h with (h | h)
@@ -227,7 +233,7 @@ lemma of_single_uppercedent (H : (Γ ⟹ Δ) → (Ξ ⟹ Λ)) (h : Valid 𝓢 (T
   · exact h.tail
 
 lemma of_double_uppercedent (H : (Γ₁ ⟹ Δ₁) → (Γ₂ ⟹ Δ₂) → (Ξ ⟹ Λ))
-    (h₁ : Valid 𝓢 (T ++ [Γ₁ ⟶ Δ₁])) (h₂ : Valid 𝓢 (T ++ [Γ₂ ⟶ Δ₂])) :
+    (h₁ : Valid 𝓢 ((Γ₁ ⟶ Δ₁) :: T)) (h₂ : Valid 𝓢 ((Γ₂ ⟶ Δ₂) :: T)) :
     Valid 𝓢 ((Ξ ⟶ Λ) :: T) := by
   have h₁ : Valid 𝓢 ((Γ₁ ⟶ Δ₁) :: T) := h₁.of_subset
   have h₂ : Valid 𝓢 ((Γ₂ ⟶ Δ₂) :: T) := h₂.of_subset
@@ -244,6 +250,16 @@ lemma to_provable (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢! φ := by
   · exact TwoSided.to_provable <| by assumption
   · simp_all
 
+lemma right_closed (h : φ ∈ Γ) : Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := head <| TwoSided.right_closed h
+
+lemma left_closed (h : φ ∈ Δ) : Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) := head <| TwoSided.left_closed h
+
+lemma rotate_right : Valid 𝓢 ((Γ ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) :=
+  of_single_uppercedent TwoSided.rotate_right
+
+lemma rotate_left : Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
+  of_single_uppercedent TwoSided.rotate_left
+
 lemma verum_right : Valid 𝓢 ((Γ ⟶ ⊤ :: Δ) :: T) :=
   Valid.head TwoSided.verum_right
 
@@ -251,23 +267,39 @@ omit [DecidableEq F] in
 lemma falsum_left : Valid 𝓢 ((⊥ :: Γ ⟶ Δ) :: T) :=
   Valid.head TwoSided.falsum_left
 
-lemma falsum_right : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ ⊥ :: Δ) :: T) :=
+lemma falsum_right : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((Γ ⟶ ⊥ :: Δ) :: T) :=
   of_single_uppercedent TwoSided.falsum_right
 
-lemma verum_left : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((⊤ :: Γ ⟶ Δ) :: T) :=
+lemma verum_left : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((⊤ :: Γ ⟶ Δ) :: T) :=
   of_single_uppercedent TwoSided.verum_left
 
 lemma and_right :
-    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ]]) → Valid 𝓢 ((Γ ⟶ φ ⋏ ψ :: Δ) :: T) :=
+    Valid 𝓢 ((Γ ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ⟶ Δ ++ [ψ]) :: T) → Valid 𝓢 ((Γ ⟶ φ ⋏ ψ :: Δ) :: T) :=
   of_double_uppercedent TwoSided.and_right
 
 lemma or_left :
-    Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ Δ]) → Valid 𝓢 (T ++ [Γ ++ [ψ] ⟶ Δ]) → Valid 𝓢 ((φ ⋎ ψ :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋎ ψ :: Γ ⟶ Δ) :: T) :=
   of_double_uppercedent TwoSided.or_left
 
+lemma or_right :
+    Valid 𝓢 ((Γ ⟶ Δ ++ [φ, ψ]) :: T) → Valid 𝓢 ((Γ ⟶ φ ⋎ ψ :: Δ) :: T) :=
+  of_single_uppercedent TwoSided.or_right
+
+lemma and_left :
+    Valid 𝓢 ((Γ ++ [φ, ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋏ ψ :: Γ ⟶ Δ) :: T) :=
+  of_single_uppercedent TwoSided.and_left
+
 lemma neg_right :
-    Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ [], Γ ⟶ Δ ++ [∼φ]]) → Valid 𝓢 ((Γ ⟶ ∼φ :: Δ) :: T) := fun h ↦ by
-  have h : Valid 𝓢 ((Γ ++ [φ] ⟶ []) :: (Γ ⟶ Δ ++ [∼φ]) :: T) := h.of_subset
+    Valid 𝓢 ((Γ ++ [φ] ⟶ []) :: (Γ ⟶ Δ ++ [∼φ]) :: T) → Valid 𝓢 ((Γ ⟶ ∼φ :: Δ) :: T) := fun h ↦ by
+  rcases h with (h | h)
+  · exact Valid.head <| TwoSided.neg_right_int h
+  · rcases h with (h | h)
+    · apply head
+      exact TwoSided.weakening h
+    · exact h.tail
+
+lemma neg_right' :
+    Valid 𝓢 ((Γ ++ [φ] ⟶ []) :: (Γ ⟶ Δ) :: T) → Valid 𝓢 ((Γ ⟶ ∼φ :: Δ) :: T) := fun h ↦ by
   rcases h with (h | h)
   · exact Valid.head <| TwoSided.neg_right_int h
   · rcases h with (h | h)
@@ -276,11 +308,11 @@ lemma neg_right :
     · exact h.tail
 
 lemma neg_left :
-    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 ((∼φ :: Γ ⟶ Δ) :: T) :=
-  of_single_uppercedent TwoSided.neg_left
+    Valid 𝓢 ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((∼φ :: Γ ⟶ Δ) :: T) :=
+  of_single_uppercedent TwoSided.neg_left_int
 
 lemma imply_right :
-    Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ [ψ], Γ ⟶ Δ ++ [φ ➝ ψ]]) → Valid 𝓢 ((Γ ⟶ (φ ➝ ψ) :: Δ) :: T) := fun h ↦ by
+    Valid 𝓢 ((Γ ++ [φ] ⟶ [ψ]) :: (Γ ⟶ Δ ++ [φ ➝ ψ]) :: T) → Valid 𝓢 ((Γ ⟶ (φ ➝ ψ) :: Δ) :: T) := fun h ↦ by
   have h : Valid 𝓢 ((Γ ++ [φ] ⟶ [ψ]) :: (Γ ⟶ Δ ++ [φ ➝ ψ]) :: T) := h.of_subset
   rcases h with (h | h)
   · exact Valid.head <| TwoSided.imply_right_int h
@@ -289,9 +321,19 @@ lemma imply_right :
       exact TwoSided.weakening h
     · exact h.tail
 
+lemma imply_right' :
+    Valid 𝓢 ((Γ ++ [φ] ⟶ [ψ]) :: (Γ ⟶ Δ) :: T) → Valid 𝓢 ((Γ ⟶ (φ ➝ ψ) :: Δ) :: T) := fun h ↦ by
+  have h : Valid 𝓢 ((Γ ++ [φ] ⟶ [ψ]) :: (Γ ⟶ Δ) :: T) := h.of_subset
+  rcases h with (h | h)
+  · exact Valid.head <| TwoSided.imply_right_int h
+  · rcases h with (h | h)
+    · apply head
+      exact TwoSided.weakening h
+    · exact h.tail
+
 lemma imply_left :
-    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 (T ++ [Γ ++ [ψ] ⟶ Δ]) → Valid 𝓢 (((φ ➝ ψ) :: Γ ⟶ Δ) :: T) :=
-  of_double_uppercedent TwoSided.imply_left
+    Valid 𝓢 ((Γ ++ [φ ➝ ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 (((φ ➝ ψ) :: Γ ⟶ Δ) :: T) :=
+  of_double_uppercedent TwoSided.imply_left_int
 
 end Tableaux.Valid
 
