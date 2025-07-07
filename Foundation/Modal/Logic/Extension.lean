@@ -1,6 +1,5 @@
 import Foundation.Logic.HilbertStyle.Supplemental
 import Foundation.Modal.Logic.Basic
-import Foundation.Modal.Hilbert.K
 
 namespace LO.Modal
 

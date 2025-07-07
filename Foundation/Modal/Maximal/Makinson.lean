@@ -1,4 +1,3 @@
-import Foundation.Modal.Hilbert.KP
 import Foundation.Modal.Hilbert.NNFormula
 import Foundation.Modal.Maximal.Basic
 import Foundation.Modal.Logic.Extension

@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.AxiomMk
 import Foundation.Modal.Logic.Basic

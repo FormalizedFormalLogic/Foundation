@@ -1,7 +1,7 @@
 import Foundation.Modal.Kripke.AxiomWeakPoint3
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.K4
 
 namespace LO.Modal

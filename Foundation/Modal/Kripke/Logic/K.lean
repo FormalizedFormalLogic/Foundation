@@ -1,4 +1,3 @@
-import Foundation.Modal.Hilbert.K
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Completeness
 import Foundation.Modal.Kripke.Filtration

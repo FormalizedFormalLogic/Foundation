@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.Basic
 import Foundation.Modal.Kripke.AxiomGeach
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Entailment.K4
 import Foundation.Modal.Kripke.Logic.K
 import Foundation.Modal.Kripke.Logic.K4

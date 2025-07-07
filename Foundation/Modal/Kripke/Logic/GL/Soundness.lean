@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.AxiomL
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 
 namespace LO.Modal
 

@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert.Minimal.Basic
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 
 
 namespace LO.Modal

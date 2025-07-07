@@ -1,5 +1,4 @@
 import Foundation.Modal.NNFormula
-import Foundation.Modal.Hilbert.K
 import Foundation.Modal.Entailment.K
 
 namespace LO.Modal.Hilbert

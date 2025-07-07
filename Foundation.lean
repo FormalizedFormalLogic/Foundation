@@ -81,8 +81,6 @@ import Foundation.IntFO.Translation
 -- import Foundation.Propositional.Dialectica.Basic
 
 -- Modal
-import Foundation.Modal.Hilbert.KP
-import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Hilbert.GL.Alternatives
 import Foundation.Modal.Hilbert.Minimal.Basic
 import Foundation.Modal.Hilbert.K_EMCN

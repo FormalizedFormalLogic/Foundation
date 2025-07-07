@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.AxiomGrz
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.S4McK
 import Mathlib.Order.Preorder.Finite
 

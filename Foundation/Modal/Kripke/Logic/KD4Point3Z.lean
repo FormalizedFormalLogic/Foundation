@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.AxiomL
 import Foundation.Modal.Kripke.Logic.Soundness
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.LinearFrame
 import Foundation.Modal.Kripke.AxiomWeakPoint3
 import Foundation.Modal.Kripke.AxiomGeach

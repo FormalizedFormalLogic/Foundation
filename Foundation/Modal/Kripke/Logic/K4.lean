@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Filtration

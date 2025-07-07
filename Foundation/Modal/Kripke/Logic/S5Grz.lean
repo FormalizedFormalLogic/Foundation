@@ -1,4 +1,3 @@
-import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
 import Foundation.Modal.Kripke.Logic.Triv
 import Foundation.Modal.Kripke.Logic.S5

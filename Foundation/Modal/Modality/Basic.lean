@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Logic.Extension
 import Foundation.Meta.ClProver
 
