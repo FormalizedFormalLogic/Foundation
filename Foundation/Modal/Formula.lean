@@ -2,7 +2,6 @@ import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Vorspiel.Collection
 import Foundation.Modal.LogicSymbol
 import Foundation.Propositional.ClassicalSemantics.ZeroSubst
-import Foundation.Subformula
 import Mathlib.Data.Set.Finite.Lattice
 
 namespace LO.Modal
