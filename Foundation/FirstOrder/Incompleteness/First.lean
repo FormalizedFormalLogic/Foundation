@@ -5,9 +5,9 @@ import Foundation.FirstOrder.R0.Representation
 # Gödel's first incompleteness theorem for arithmetic theories stronger than $\mathsf{R_0}$
 -/
 
-namespace LO
+namespace LO.FirstOrder.Arith
 
-lemma FirstOrder.Arith.re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
+lemma re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
   constructor
   · intro h
     exact ⟨.mkSigma (codeOfREPred P) (by simp [codeOfREPred, codeOfPartrec']), by
@@ -18,10 +18,10 @@ lemma FirstOrder.Arith.re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-P
         (f := fun x : ℕ ↦ x ::ᵥ List.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
     exact this.of_eq <| by intro x; symm; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
 
-open Entailment FirstOrder Arith R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open LO.Entailment FirstOrder Arith R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 /-- Gödel's first incompleteness theorem-/
-theorem R0.goedel_first_incompleteness
+theorem goedel_first_incompleteness
     (T : ArithmeticTheory) [𝐑₀ ⪯ T] [T.Sigma1Sound] [T.Delta1Definable] :
     ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
   have con : Consistent (T : Axiom ℒₒᵣ) := inferInstance
@@ -54,4 +54,4 @@ theorem R0.goedel_first_incompleteness
     , fun h ↦ not_consistent_iff_inconsistent.mpr
       (inconsistent_of_provable_of_unprovable (this.mp h) h) inferInstance ⟩
 
-end LO
+end LO.FirstOrder.Arith

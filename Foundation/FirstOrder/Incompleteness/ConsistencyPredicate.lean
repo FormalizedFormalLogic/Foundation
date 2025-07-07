@@ -34,7 +34,7 @@ noncomputable def _root_.LO.FirstOrder.ArithmeticTheory.isConsistent : 𝚷₁.S
   .mkPi (∼T.provabilityPred ⊥) (by simp)
 
 @[simp] lemma isConsistent_defined : Semiformula.Evalbm V ![] (T.isConsistent : Sentence ℒₒᵣ) ↔ T.IsConsistent V := by
-  simp [models₀_iff, ArithmeticTheory.isConsistent, ArithmeticTheory.IsConsistent]
+  simp [ArithmeticTheory.isConsistent, ArithmeticTheory.IsConsistent]
 
 noncomputable def _root_.LO.FirstOrder.ArithmeticTheory.consistency : 𝚷₁.Semisentence 1 := .mkPi
   “φ. ∀ nφ, !(ℒₒᵣ).lDef.negDef nφ φ → ¬!T.provable nφ” (by simp)
@@ -57,4 +57,23 @@ def isConsistent_eq : T.isConsistent = T.standardPr.con := rfl
 
 end WitnessComparisons
 
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.Con (T : ArithmeticTheory) [T.Delta1Definable] :
+  ArithmeticTheory := {↑T.isConsistent}
+
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.Incon (T : ArithmeticTheory) [T.Delta1Definable] :
+  ArithmeticTheory := {∼↑T.isConsistent}
+
 end LO.ISigma1.Metamath
+
+namespace LO.FirstOrder.Arith
+
+open Entailment ProvabilityLogic
+
+variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Delta1Definable]
+
+instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T + T.Con := by
+  have : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
+  have : Entailment.Consistent T := ArithmeticTheory.consistent_of_sound T (Eq ⊥) rfl
+  simp [models_iff, *]
+
+end LO.FirstOrder.Arith

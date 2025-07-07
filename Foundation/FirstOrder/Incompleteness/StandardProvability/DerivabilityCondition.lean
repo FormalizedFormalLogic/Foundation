@@ -92,7 +92,7 @@ noncomputable instance : Diagonalization 𝐈𝚺₁ where
   fixpoint := fixpoint
   diag θ := diagonal θ
 
-noncomputable abbrev _root_.LO.FirstOrder.Theory.standardPr : ProvabilityPredicate 𝐈𝚺₁ T where
+noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.standardPr : ProvabilityPredicate 𝐈𝚺₁ T where
   prov := T.provable
   D1 := provable_D1
 

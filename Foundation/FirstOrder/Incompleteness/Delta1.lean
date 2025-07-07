@@ -15,16 +15,16 @@ axiom PA_delta1Definable : 𝐏𝐀.Delta1Definable
 
 attribute [instance] ISigma1_delta1Definable PA_delta1Definable
 
-instance : 𝐈𝚺₁ ⪱ 𝐈𝚺₁.AddSelfConsistency := inferInstance
+instance : 𝐈𝚺₁ ⪱ 𝐈𝚺₁ + 𝐈𝚺₁.Con := inferInstance
 
-instance : 𝐈𝚺₁.AddSelfConsistency ⪯ 𝐓𝐀 := inferInstance
+instance : 𝐈𝚺₁ + 𝐈𝚺₁.Con ⪯ 𝐓𝐀 := inferInstance
 
-instance : 𝐈𝚺₁ ⪱ 𝐈𝚺₁.AddSelfInconsistency := inferInstance
+instance : 𝐈𝚺₁ ⪱ 𝐈𝚺₁ + 𝐈𝚺₁.Incon := inferInstance
 
-instance : 𝐏𝐀 ⪱ 𝐏𝐀.AddSelfConsistency := inferInstance
+instance : 𝐏𝐀 ⪱ 𝐏𝐀 + 𝐏𝐀.Con := inferInstance
 
-instance : 𝐏𝐀.AddSelfConsistency ⪯ 𝐓𝐀 := inferInstance
+instance : 𝐏𝐀 + 𝐏𝐀.Con ⪯ 𝐓𝐀 := inferInstance
 
-instance : 𝐏𝐀 ⪱ 𝐏𝐀.AddSelfInconsistency := inferInstance
+instance : 𝐏𝐀 ⪱ 𝐏𝐀 + 𝐏𝐀.Incon := inferInstance
 
 end LO.FirstOrder
