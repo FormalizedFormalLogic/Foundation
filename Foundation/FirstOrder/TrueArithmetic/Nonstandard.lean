@@ -3,7 +3,7 @@ import Foundation.FirstOrder.PeanoMinus.Basic
 
 namespace LO.FirstOrderTrueArith
 
-open FirstOrder Arith PeanoMinus
+open FirstOrder Arithmetic PeanoMinus
 
 abbrev withStar := Language.add ℒₒᵣ Language.unit
 

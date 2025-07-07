@@ -7,7 +7,7 @@ import Foundation.FirstOrder.ISigma0.Exponential.Exp
 
 namespace LO
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V]
 
@@ -68,7 +68,7 @@ lemma log_lt_self_of_pos {y : V} (pos : 0 < y) : log y < y :=
 
 lemma log_graph {x y : V} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') := Classical.choose!_eq_iff _
 
-def _root_.LO.FirstOrder.Arith.logDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.logDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' <⁺ y, !exponentialDef x y' ∧ y < 2 * y')” (by simp)
 
 lemma log_defined : 𝚺₀-Function₁ (log : V → V) via logDef := by
@@ -160,7 +160,7 @@ lemma length_graph {i a : V} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a
   · simp
   · simp [length_of_pos, pos, pos_iff_ne_zero.mp pos]
 
-def _root_.LO.FirstOrder.Arith.lengthDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.lengthDef : 𝚺₀.Semisentence 2 := .mkSigma
   “i a. (0 < a → ∃ k <⁺ a, !logDef k a ∧ i = k + 1) ∧ (a = 0 → i = 0)” (by simp)
 
 lemma length_defined : 𝚺₀-Function₁ (‖·‖ : V → V) via lengthDef := by
@@ -335,7 +335,7 @@ lemma bexp_graph {y a x : V} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x 
     · exact (hlt lt).uniq (exp_bexp_of_lt lt)
     · rcases hle le; simp [bexp_eq_zero_of_le le]⟩
 
-def _root_.LO.FirstOrder.Arith.bexpDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.bexpDef : 𝚺₀.Semisentence 3 := .mkSigma
   “y a x. ∃ l <⁺ a, !lengthDef l a ∧ (x < l → !exponentialDef x y) ∧ (l ≤ x → y = 0)” (by simp)
 
 lemma bexp_defined : 𝚺₀-Function₂ (bexp : V → V → V) via bexpDef := by
@@ -415,7 +415,7 @@ lemma fbit_eq_zero_iff {a i : V} : fbit a i = 0 ↔ ¬LenBit (bexp a i) a := by 
 
 lemma fbit_eq_zero_of_le {a i : V} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by simp [fbit, bexp_eq_zero_of_le hi]
 
-def _root_.LO.FirstOrder.Arith.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b a i. ∃ x <⁺ a, !bexpDef x a i ∧ ∃ y <⁺ a, !divDef y a x ∧ !remDef b y 2” (by simp)
 
 lemma fbit_defined : 𝚺₀-Function₂ (fbit : V → V → V) via fbitDef := by

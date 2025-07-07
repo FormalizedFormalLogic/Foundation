@@ -1,10 +1,10 @@
 import Foundation.FirstOrder.R0.Basic
-import Foundation.Vorspiel.Arith
+import Foundation.Vorspiel.Arithmetic
 import Mathlib.Computability.Primrec
 
 open Encodable Denumerable
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Arithmetic
 
 open Mathlib Encodable Semiterm.Operator.GoedelNumber
 
@@ -112,7 +112,7 @@ def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind (L := ℒₒ
 /-
 section model
 
-open LO.Arith
+open LO.Arithmetic
 
 variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐑₀]
 
@@ -252,14 +252,14 @@ lemma codeOfREPred_spec {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
   simpa [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
     using (codeOfPartrec'_spec (Nat.Partrec'.of_part this) (v := ![x]) (y := 0)).trans (by simp [f])
 
-variable {T : ArithmeticTheory} [𝐑₀ ⪯ T] [T.Sigma1Sound]
+variable {T : ArithmeticTheory} [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 lemma re_complete {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
     A x ↔ T ⊢!. (codeOfREPred A)/[‘↑x’] := Iff.trans
   (by simpa [models₀_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
   (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
 
-end Arith
+end Arithmetic
 
 end FirstOrder
 

@@ -5,44 +5,33 @@ import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
 # Gödel's second incompleteness theorem for arithmetic theories stronger than $\mathsf{I}\Sigma_1$
 -/
 
-namespace LO.ISigma1
+namespace LO.FirstOrder.Arithmetic
 
-open FirstOrder Entailment ProvabilityLogic
+open LO.Entailment ProvabilityLogic
 
 variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Delta1Definable]
 
 /-- Gödel's second incompleteness theorem-/
-theorem goedel_second_incompleteness [Consistent T] :
+theorem consistent_unprovable [Consistent T] :
     T ⊬. T.isConsistent :=
-  T.standardPr.unprovable_consistency
+  T.standardPr.con_unprovable
 
-theorem inconsistent_unprovable [T.Sigma1Sound] :
+theorem inconsistent_unprovable [T.SoundOnHierarchy 𝚺 1] :
     T ⊬. ∼T.isConsistent :=
-  have : 𝐑₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
-  T.standardPr.unrefutable_consistency
+  T.standardPr.con_unrefutable
 
-theorem inconsistent_independent [T.Sigma1Sound] :
+theorem inconsistent_independent [T.SoundOnHierarchy 𝚺 1] :
     Independent (T : Axiom ℒₒᵣ) (T.isConsistent : Sentence ℒₒᵣ) :=
-  have : 𝐑₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
-  T.standardPr.consistency_independent
+  T.standardPr.con_independent
 
-abbrev _root_.LO.FirstOrder.ArithmeticTheory.AddSelfConsistency : ArithmeticTheory := T + {↑T.isConsistent}
-
-abbrev _root_.LO.FirstOrder.ArithmeticTheory.AddSelfInconsistency : ArithmeticTheory := T + {∼↑T.isConsistent}
-
-instance [Consistent T] : T ⪱ T.AddSelfConsistency :=
+instance [Consistent T] : T ⪱ T + T.Con :=
   StrictlyWeakerThan.of_unprovable_provable (φ := ↑T.isConsistent)
-    ((Axiom.unprovable_iff (T := T)).mp (goedel_second_incompleteness T))
+    ((Axiom.unprovable_iff (T := T)).mp (consistent_unprovable T))
     (Entailment.by_axm _ (by simp))
 
-instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T.AddSelfConsistency := by
-  have : 𝐑₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
-  have : Consistent T := ArithmeticTheory.consistent_of_sound T (Eq ⊥) rfl
-  simp [models_iff, *]
-
-instance [T.Sigma1Sound] : T ⪱ T.AddSelfInconsistency :=
+instance [T.SoundOnHierarchy 𝚺 1] : T ⪱ T + T.Incon :=
   StrictlyWeakerThan.of_unprovable_provable (φ := ∼↑T.isConsistent)
     (by simpa using (Axiom.unprovable_iff (T := T)).mp (inconsistent_unprovable T))
     (Entailment.by_axm _ (by simp))
 
-end LO.ISigma1
+end LO.FirstOrder.Arithmetic

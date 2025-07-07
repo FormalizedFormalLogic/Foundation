@@ -2,13 +2,13 @@ import Foundation.FirstOrder.ISigma1.HFS
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V]
 
 variable (V)
 
-structure _root_.LO.FirstOrder.Arith.LDef where
+structure _root_.LO.FirstOrder.Arithmetic.LDef where
   func : 𝚺₀.Semisentence 2
   rel : 𝚺₀.Semisentence 2
 
@@ -56,7 +56,7 @@ instance (k) : Semiterm.Operator.GoedelNumber L₀ (L.Rel k) := ⟨fun r ↦ Sem
 
 variable (L)
 
-class DefinableLanguage extends Arith.LDef where
+class DefinableLanguage extends Arithmetic.LDef where
   func_iff {k c : ℕ} :
     c ∈ Set.range (Encodable.encode : L.Func k → ℕ) ↔ ℕ ⊧/![k, c] func.val
   rel_iff {k c : ℕ} :
@@ -170,7 +170,7 @@ instance : DefinableLanguage ℒₒᵣ where
   rel_iff {k c} := by
     simpa [models_iff] using Language.ORing.of_mem_range_encode_rel
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -234,6 +234,6 @@ lemma func_iff {k f : V} : ⌜ℒₒᵣ⌝.Func k f ↔ (k = 0 ∧ f = zeroIndex
   simp [FirstOrder.Language.codeIn_func_def, lDef.func_def,
     coe_zeroIndex_eq, coe_oneIndex_eq, coe_addIndex_eq, coe_mulIndex_eq]
 
-end Arithmetization
+end InternalArithmetic
 
 end LO.ISigma1.Metamath

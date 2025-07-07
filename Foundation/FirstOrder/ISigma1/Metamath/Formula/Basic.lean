@@ -2,7 +2,7 @@ import Foundation.FirstOrder.ISigma1.Metamath.Term.Basic
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -42,28 +42,28 @@ scoped notation "^∃ " p:64 => qqEx p
 
 section
 
-def _root_.LO.FirstOrder.Arith.qqRelDef : 𝚺₀.Semisentence 4 :=
+def _root_.LO.FirstOrder.Arithmetic.qqRelDef : 𝚺₀.Semisentence 4 :=
   .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 0 k r v ∧ p = p' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqNRelDef : 𝚺₀.Semisentence 4 :=
+def _root_.LO.FirstOrder.Arithmetic.qqNRelDef : 𝚺₀.Semisentence 4 :=
   .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 1 k r v ∧ p = p' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqVerumDef : 𝚺₀.Semisentence 1 :=
+def _root_.LO.FirstOrder.Arithmetic.qqVerumDef : 𝚺₀.Semisentence 1 :=
   .mkSigma “p. ∃ p' < p, !pairDef p' 2 0 ∧ p = p' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqFalsumDef : 𝚺₀.Semisentence 1 :=
+def _root_.LO.FirstOrder.Arithmetic.qqFalsumDef : 𝚺₀.Semisentence 1 :=
   .mkSigma “p. ∃ p' < p, !pairDef p' 3 0 ∧ p = p' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqAndDef : 𝚺₀.Semisentence 3 :=
+def _root_.LO.FirstOrder.Arithmetic.qqAndDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 4 p q ∧ r = r' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqOrDef : 𝚺₀.Semisentence 3 :=
+def _root_.LO.FirstOrder.Arithmetic.qqOrDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 5 p q ∧ r = r' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqAllDef : 𝚺₀.Semisentence 2 :=
+def _root_.LO.FirstOrder.Arithmetic.qqAllDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “r p. ∃ r' < r, !pairDef r' 6 p ∧ r = r' + 1” (by simp)
 
-def _root_.LO.FirstOrder.Arith.qqExDef : 𝚺₀.Semisentence 2 :=
+def _root_.LO.FirstOrder.Arithmetic.qqExDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “r p. ∃ r' < r, !pairDef r' 7 p ∧ r = r' + 1” (by simp)
 
 lemma qqRel_defined : 𝚺₀-Function₃ (qqRel : V → V → V → V) via qqRelDef := by
@@ -328,7 +328,7 @@ def Language.IsUFormula : V → Prop := (construction L).Fixpoint ![]
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.isUFormulaDef (pL : LDef) : 𝚫₁.Semisentence 1 :=
+def _root_.LO.FirstOrder.Arithmetic.LDef.isUFormulaDef (pL : LDef) : 𝚫₁.Semisentence 1 :=
   (blueprint pL).fixpointDefΔ₁
 
 lemma Language.isUFormula_defined : 𝚫₁-Predicate L.IsUFormula via pL.isUFormulaDef := (construction L).fixpoint_definedΔ₁
@@ -1219,17 +1219,17 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
   · apply HierarchySymbol.Boldface.ball_le (HierarchySymbol.BoldfaceFunction.var _)
     simp_all only [zero_add, Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Fin.succ_one_eq_two,
       Fin.succ_zero_eq_one]
-    apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.imp
+    apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.imp
     · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-      apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
+      apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₂
       · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
       · simp_all only [zero_add, Fin.isValue]
-        apply LO.FirstOrder.Arith.HierarchySymbol.BoldfaceFunction.comp₁
+        apply LO.FirstOrder.Arithmetic.HierarchySymbol.BoldfaceFunction.comp₁
         simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
-    · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₄
+    · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₄
       · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
       · simp_all only [zero_add, Fin.isValue]
-        apply LO.FirstOrder.Arith.HierarchySymbol.BoldfaceFunction.comp₁
+        apply LO.FirstOrder.Arithmetic.HierarchySymbol.BoldfaceFunction.comp₁
         simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
       · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
       · simp_all only [zero_add, Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
@@ -1266,8 +1266,8 @@ def blueprint (pL : LDef) : Language.UformulaRec1.Blueprint pL where
   nrel := .mkSigma “y param k R v. ∃ M, !pL.termBVVecDef M k v ∧ !listMaxDef y M” (by simp)
   verum := .mkSigma “y param. y = 0” (by simp)
   falsum := .mkSigma “y param. y = 0” (by simp)
-  and := .mkSigma “y param p₁ p₂ y₁ y₂. !Arith.max y y₁ y₂” (by simp)
-  or := .mkSigma “y param p₁ p₂ y₁ y₂. !Arith.max y y₁ y₂” (by simp)
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y y₁ y₂” (by simp)
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y y₁ y₂” (by simp)
   all := .mkSigma “y param p₁ y₁. !subDef y y₁ 1” (by simp)
   ex := .mkSigma “y param p₁ y₁. !subDef y y₁ 1” (by simp)
   allChanges := .mkSigma “param' param. param' = 0” (by simp)
@@ -1309,7 +1309,7 @@ variable {L}
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.bvDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
+def _root_.LO.FirstOrder.Arithmetic.LDef.bvDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result.rew (Rew.substs ![#0, ‘0’, #1])
 
 variable (L)
 
@@ -1366,15 +1366,15 @@ section
 
 variable (L)
 
-def _root_.LO.FirstOrder.Arith.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
+def _root_.LO.FirstOrder.Arithmetic.LDef.isSemiformulaDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p. !pL.isUFormulaDef.sigma p ∧ ∃ b, !pL.bvDef b p ∧ b ≤ n” (by simp))
   (.mkPi “n p. !pL.isUFormulaDef.pi p ∧ ∀ b, !pL.bvDef b p → b ≤ n” (by simp))
 
 lemma Language.isSemiformula_defined : 𝚫₁-Relation L.IsSemiformula via pL.isSemiformulaDef := by
   constructor
-  · intro v; simp [FirstOrder.Arith.LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma,
+  · intro v; simp [FirstOrder.Arithmetic.LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma,
       L.bv_defined.df.iff, L.isUFormula_defined.proper.iff']
-  · intro v; simp [FirstOrder.Arith.LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma,
+  · intro v; simp [FirstOrder.Arithmetic.LDef.isSemiformulaDef, HierarchySymbol.Semiformula.val_sigma,
       L.bv_defined.df.iff, L.isUFormula_defined.df.iff, Language.isSemiformula_iff]
 
 instance Language.isSemiformula_definable : 𝚫₁-Relation L.IsSemiformula := L.isSemiformula_defined.to_definable

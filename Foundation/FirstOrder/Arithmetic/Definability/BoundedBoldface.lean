@@ -1,7 +1,7 @@
-import Foundation.FirstOrder.Arith.Definability.Boldface
-import Foundation.FirstOrder.Arith.Definability.Init
+import Foundation.FirstOrder.Arithmetic.Definability.Boldface
+import Foundation.FirstOrder.Arithmetic.Definability.Init
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Arithmetic
 
 open PeanoMinus
 
@@ -450,4 +450,4 @@ example {ex : V → V} [h : 𝚺₁.BoldfaceFunction₁ ex] :
 
 end
 
-end LO.FirstOrder.Arith
+end LO.FirstOrder.Arithmetic

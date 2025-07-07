@@ -35,10 +35,10 @@ import Foundation.FirstOrder.Completeness.Completeness
 import Foundation.FirstOrder.Order.Le
 import Foundation.FirstOrder.Interpretation
 
-import Foundation.FirstOrder.Arith.Basic
-import Foundation.FirstOrder.Arith.BoundedQuantifier
-import Foundation.FirstOrder.Arith.Definability
-import Foundation.FirstOrder.Arith.Induction
+import Foundation.FirstOrder.Arithmetic.Basic
+import Foundation.FirstOrder.Arithmetic.BoundedQuantifier
+import Foundation.FirstOrder.Arithmetic.Definability
+import Foundation.FirstOrder.Arithmetic.Induction
 
 import Foundation.FirstOrder.R0.Basic
 import Foundation.FirstOrder.R0.Representation

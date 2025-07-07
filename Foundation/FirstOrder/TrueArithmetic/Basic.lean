@@ -1,8 +1,8 @@
-import Foundation.FirstOrder.Arith.Basic
+import Foundation.FirstOrder.Arithmetic.Basic
 
 namespace LO
 
-open FirstOrder Arith
+open FirstOrder Arithmetic
 
 abbrev FirstOrderTrueArith : Theory ℒₒᵣ := Structure.theory ℒₒᵣ ℕ
 

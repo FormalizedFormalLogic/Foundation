@@ -8,7 +8,7 @@ $\mathrm{Pow2}(n)$ is a property that holds iff $n = 2^i$ for some $i$.
 
 namespace LO.ISigma0
 
-open FirstOrder Arith PeanoMinus IOpen
+open FirstOrder Arithmetic PeanoMinus IOpen
 
 variable {V : Type*} [ORingStruc V]
 
@@ -18,7 +18,7 @@ variable [V ⊧ₘ* 𝐈Open]
 
 def Pow2 (a : V) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
-def _root_.LO.FirstOrder.Arith.pow2Def : 𝚺₀.Semisentence 1 :=
+def _root_.LO.FirstOrder.Arithmetic.pow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “a. 0 < a ∧ ∀ r <⁺ a, 1 < r → r ∣ a → 2 ∣ r” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
 
 lemma pow2_defined : 𝚺₀-Predicate (Pow2 : V → Prop) via pow2Def := by
@@ -112,7 +112,7 @@ section LenBit
 /-- $\mathrm{LenBit} (2^i, a) \iff \text{$i$th-bit of $a$ is $1$}$. -/
 def LenBit (i a : V) : Prop := ¬2 ∣ (a / i)
 
-def _root_.LO.FirstOrder.Arith.lenbitDef : 𝚺₀.Semisentence 2 :=
+def _root_.LO.FirstOrder.Arithmetic.lenbitDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “i a. ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z” (by simp)
 
 lemma lenbit_defined : 𝚺₀-Relation (LenBit : V → V → Prop) via lenbitDef := by
