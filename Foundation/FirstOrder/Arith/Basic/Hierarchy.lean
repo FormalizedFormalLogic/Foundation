@@ -141,8 +141,7 @@ variable {L : Language}
     Semiformula.Operator.Eq.sentence_eq]
 
 @[simp] lemma lt [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t < !!u” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two,
-    Semiformula.Operator.Eq.sentence_eq, Semiformula.Operator.LT.sentence_eq]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, Semiformula.Operator.LT.sentence_eq]
 
 @[simp] lemma le [L.Eq] [L.LT] {t u : Semiterm L ξ n} : Hierarchy Γ s “!!t ≤ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two,
@@ -481,10 +480,16 @@ end LOR
 
 end Arith
 
-abbrev ArithmeticTheory.Sigma1Sound (T : ArithmeticTheory) := T.SoundOn (Arith.Hierarchy 𝚺 1)
+abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) := T.SoundOn (Arith.Hierarchy Γ k)
 
-instance (T : ArithmeticTheory) [T.Sigma1Sound] : Entailment.Consistent T :=
+lemma ArithmeticTheory.soundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) [T.SoundOnHierarchy Γ k] :
+    T ⊢!. σ → Arith.Hierarchy Γ k σ → ℕ ⊧ₘ₀ σ := SoundOn.sound
+
+instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚺 1] : Entailment.Consistent T :=
   T.consistent_of_sound (Arith.Hierarchy 𝚺 1) (by simp)
+
+instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚷 2] : Entailment.Consistent T :=
+  T.consistent_of_sound (Arith.Hierarchy 𝚷 2) (by simp)
 
 end FirstOrder
 

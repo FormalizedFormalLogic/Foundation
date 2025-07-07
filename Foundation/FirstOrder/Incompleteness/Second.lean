@@ -16,11 +16,11 @@ theorem goedel_second_incompleteness [Consistent T] :
     T ⊬. T.isConsistent :=
   T.standardPr.unprovable_consistency
 
-theorem inconsistent_unprovable [T.Sigma1Sound] :
+theorem inconsistent_unprovable [T.SoundOnHierarchy 𝚺 1] :
     T ⊬. ∼T.isConsistent :=
   T.standardPr.unrefutable_consistency
 
-theorem inconsistent_independent [T.Sigma1Sound] :
+theorem inconsistent_independent [T.SoundOnHierarchy 𝚺 1] :
     Independent (T : Axiom ℒₒᵣ) (T.isConsistent : Sentence ℒₒᵣ) :=
   T.standardPr.consistency_independent
 
@@ -29,7 +29,7 @@ instance [Consistent T] : T ⪱ T + T.Con :=
     ((Axiom.unprovable_iff (T := T)).mp (goedel_second_incompleteness T))
     (Entailment.by_axm _ (by simp))
 
-instance [T.Sigma1Sound] : T ⪱ T + T.Incon :=
+instance [T.SoundOnHierarchy 𝚺 1] : T ⪱ T + T.Incon :=
   StrictlyWeakerThan.of_unprovable_provable (φ := ∼↑T.isConsistent)
     (by simpa using (Axiom.unprovable_iff (T := T)).mp (inconsistent_unprovable T))
     (Entailment.by_axm _ (by simp))

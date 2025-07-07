@@ -12,27 +12,11 @@ namespace LO.ISigma1
 
 open FirstOrder Arith PeanoMinus IOpen ISigma0 Metamath Arithmetization
 
-variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T]
-
-section
-
-variable (U : ArithmeticTheory) [U.Delta1Definable]
+variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] (U : ArithmeticTheory) [U.Delta1Definable]
 
 noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.provabilityPred (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := U.provable/[⌜σ⌝]
 
-/-
-noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.consistent : Sentence ℒₒᵣ := ∼U.provabilityPred ⊥
-
-abbrev _root_.LO.FirstOrder.ArithmeticTheory.Consistent : ArithmeticTheory := {↑U.consistent}
-
-abbrev _root_.LO.FirstOrder.ArithmeticTheory.Inconsistent : ArithmeticTheory := {∼↑U.consistent}
--/
-
-end
-
-section
-
-variable {U : ArithmeticTheory} [U.Delta1Definable]
+variable {U}
 
 local prefix:90 "□" => U.provabilityPred
 
@@ -66,7 +50,7 @@ lemma provable_D2_context {Γ σ π} (hσπ : Γ ⊢[T.toAxiom]! (□(σ ➝ π)
 
 lemma provable_D3_context {Γ σ} (hσπ : Γ ⊢[T.toAxiom]! □σ) : Γ ⊢[T.toAxiom]! □(□σ) := of'! provable_D3 ⨀ hσπ
 
-variable [T.Sigma1Sound] [𝐑₀ ⪯ U]
+variable [T.SoundOnHierarchy 𝚺 1] [𝐑₀ ⪯ U]
 
 omit [𝐈𝚺₁ ⪯ T] in
 lemma provable_sound {σ} : T ⊢!. □σ → U ⊢!. σ := by
@@ -75,8 +59,6 @@ lemma provable_sound {σ} : T ⊢!. □σ → U ⊢!. σ := by
   simpa [models₀_iff] using this
 
 lemma provable_complete {σ} : U ⊢!. σ ↔ T ⊢!. □σ := ⟨provable_D1, provable_sound⟩
-
-end
 
 end LO.ISigma1
 
@@ -102,7 +84,7 @@ instance : T.standardPr.HBL3 := ⟨fun _ ↦ provable_D3⟩
 
 instance : T.standardPr.HBL where
 
-instance [T.Sigma1Sound] [𝐑₀ ⪯ T] : T.standardPr.GoedelSound := ⟨fun h ↦ by simpa using provable_sound h⟩
+instance [T.SoundOnHierarchy 𝚺 1] [𝐑₀ ⪯ T] : T.standardPr.GoedelSound := ⟨fun h ↦ by simpa using provable_sound h⟩
 
 lemma standardPr_def (σ : Sentence ℒₒᵣ) : T.standardPr σ = T.provabilityPred σ := rfl
 

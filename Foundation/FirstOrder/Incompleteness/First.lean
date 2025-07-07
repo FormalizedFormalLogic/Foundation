@@ -22,7 +22,7 @@ open LO.Entailment FirstOrder Arith R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 /-- Gödel's first incompleteness theorem-/
 theorem goedel_first_incompleteness
-    (T : ArithmeticTheory) [𝐑₀ ⪯ T] [T.Sigma1Sound] [T.Delta1Definable] :
+    (T : ArithmeticTheory) [T.Delta1Definable] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]  :
     ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
   have con : Consistent (T : Axiom ℒₒᵣ) := inferInstance
   let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : SyntacticSemiformula ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
@@ -41,7 +41,7 @@ theorem goedel_first_incompleteness
   let σ : Semisentence ℒₒᵣ 1 := codeOfREPred D
   let ρ : Sentence ℒₒᵣ := σ/[⌜σ⌝]
   have : ∀ n : ℕ, D n ↔ T ⊢!. σ/[↑n] := fun n ↦ by
-    simpa [Semiformula.coe_substs_eq_substs_coe₁, Axiom.provable_iff] using re_complete (T := T) D_re (x := n)
+    simpa [Semiformula.coe_substs_eq_substs_coe₁, Axiom.provable_iff] using re_complete D_re
   have : T ⊢!. ∼ρ ↔ T ⊢!. ρ := by
     have : T ⊢! ∼↑σ/[↑(Encodable.encode σ)] ↔ T ⊢! ↑σ/[↑(Encodable.encode σ)] := by
       simpa [Axiom.provable_iff, quote_eq_encode,
