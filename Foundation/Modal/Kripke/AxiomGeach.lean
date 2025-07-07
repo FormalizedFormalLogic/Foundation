@@ -178,7 +178,9 @@ section definability
 open Formula (atom)
 open Formula.Kripke
 
-lemma validate_axiomGeach_of_isGeachConvergent (g) [F.IsGeachConvergent g] : F ⊧ (Axioms.Geach g (.atom 0)) := by
+variable {φ : Formula _}
+
+lemma validate_axiomGeach_of_isGeachConvergent (g) [F.IsGeachConvergent g] : F ⊧ (Axioms.Geach g φ) := by
   rintro V x h;
   apply Satisfies.multibox_def.mpr;
   obtain ⟨y, Rxy, hbp⟩ := Satisfies.multidia_def.mp h;
@@ -190,13 +192,13 @@ lemma validate_axiomGeach_of_isGeachConvergent (g) [F.IsGeachConvergent g] : F �
   . assumption;
   . exact (Satisfies.multibox_def.mp hbp) Ryu;
 
-lemma validate_AxiomT_of_reflexive [refl : F.IsReflexive] : F ⊧ (Axioms.T (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 0⟩
-lemma validate_AxiomD_of_serial [ser : F.IsSerial] : F ⊧ (Axioms.D (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 1⟩
-lemma validate_AxiomB_of_symmetric [sym : F.IsSymmetric] : F ⊧ (Axioms.B (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 1, 0, 1⟩
-lemma validate_AxiomFour_of_transitive [trans : F.IsTransitive] : F ⊧ (Axioms.Four (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 2, 1, 0⟩
-lemma validate_AxiomFive_of_euclidean [eucl : F.IsEuclidean] : F ⊧ (Axioms.Five (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨1, 1, 0, 1⟩
-lemma validate_AxiomPoint2_of_confluent [conf : F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.Point2 (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨1, 1, 1, 1⟩
-lemma validate_AxiomTc_of_coreflexive [corefl : F.IsCoreflexive] : F ⊧ (Axioms.Tc (.atom 0)) := validate_axiomGeach_of_isGeachConvergent ⟨0, 1, 0, 0⟩
+lemma validate_AxiomT_of_reflexive [refl : F.IsReflexive] : F ⊧ (Axioms.T φ) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 0⟩
+lemma validate_AxiomD_of_serial [ser : F.IsSerial] : F ⊧ (Axioms.D φ) := validate_axiomGeach_of_isGeachConvergent ⟨0, 0, 1, 1⟩
+lemma validate_AxiomB_of_symmetric [sym : F.IsSymmetric] : F ⊧ (Axioms.B φ) := validate_axiomGeach_of_isGeachConvergent ⟨0, 1, 0, 1⟩
+lemma validate_AxiomFour_of_transitive [trans : F.IsTransitive] : F ⊧ (Axioms.Four φ) := validate_axiomGeach_of_isGeachConvergent ⟨0, 2, 1, 0⟩
+lemma validate_AxiomFive_of_euclidean [eucl : F.IsEuclidean] : F ⊧ (Axioms.Five φ) := validate_axiomGeach_of_isGeachConvergent ⟨1, 1, 0, 1⟩
+lemma validate_AxiomPoint2_of_confluent [conf : F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.Point2 φ) := validate_axiomGeach_of_isGeachConvergent ⟨1, 1, 1, 1⟩
+lemma validate_AxiomTc_of_coreflexive [corefl : F.IsCoreflexive] : F ⊧ (Axioms.Tc φ) := validate_axiomGeach_of_isGeachConvergent ⟨0, 1, 0, 0⟩
 
 
 lemma isGeachConvergent_of_validate_axiomGeach {g} (h : F ⊧ (Axioms.Geach g (.atom 0))) : F.IsGeachConvergent g := ⟨by

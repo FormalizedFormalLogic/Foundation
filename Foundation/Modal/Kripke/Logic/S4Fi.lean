@@ -53,6 +53,23 @@ def S4Fi.unprovable_AxiomFi_ant.countermodel : Kripke.Model where
     | Sum.inr (0, 2), 2 => True
     | _, _ => False
 
+instance : S4Fi.unprovable_AxiomFi_ant.countermodel.IsReflexive := ⟨by
+  intro x;
+  match x with
+  | Sum.inl _ => simp [S4Fi.unprovable_AxiomFi_ant.countermodel];
+  | Sum.inr _ => simp [S4Fi.unprovable_AxiomFi_ant.countermodel];
+⟩
+
+instance : S4Fi.unprovable_AxiomFi_ant.countermodel.IsTransitive := ⟨by
+  intro x y z;
+  match x, y, z with
+  | Sum.inl _, _, _ | Sum.inr _, Sum.inl _, _ | Sum.inr _, Sum.inr _, Sum.inl _ =>
+    simp [S4Fi.unprovable_AxiomFi_ant.countermodel];
+  | Sum.inr (n, i), Sum.inr (m, j), Sum.inr (k, l) =>
+    dsimp [S4Fi.unprovable_AxiomFi_ant.countermodel];
+    grind;
+⟩
+
 /-- if `i ≤ 2`, `x ⊧ i` iff `x = (0, i)` -/
 lemma S4Fi.unprovable_AxiomFi_ant.countermodel.iff_at_level0_satisfies {x : countermodel} {i : Fin 3} : x ⊧ (atom i.1) ↔ x = Sum.inr (0, i) := by
   constructor
@@ -67,7 +84,60 @@ lemma S4Fi.unprovable_AxiomFi_ant.countermodel.only_self_at_level0 {y : counterm
   | Sum.inl _ => simp [Frame.Rel', countermodel];
   | Sum.inr (m, j) => simp [Frame.Rel', countermodel]; tauto;
 
-lemma S4Fi.unprovable_AxiomFi_ant.countermodel.countermodel_S4Fi : unprovable_AxiomFi_ant.countermodel ⊧* 𝐒𝟒𝐅𝐢 := by sorry;
+
+
+lemma S4Fi.unprovable_AxiomFi_ant.countermodel.countermodel_S4Fi : unprovable_AxiomFi_ant.countermodel ⊧* 𝐒𝟒𝐅𝐢 := by
+  constructor;
+  intro φ hφ;
+  replace hφ := Logic.iff_provable.mpr hφ;
+  induction hφ with
+  | mdp ihφψ ihφ => apply ValidOnModel.mdp ihφψ ihφ;
+  | nec ihφ => apply ValidOnModel.nec ihφ;
+  | imply₁ => apply ValidOnModel.imply₁;
+  | imply₂ => apply ValidOnModel.imply₂;
+  | ec => apply ValidOnModel.elimContra;
+  | maxm ih =>
+    rcases (by simpa using ih) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
+    . apply ValidOnModel.axiomK;
+    . apply @validate_AxiomT_of_reflexive countermodel.toFrame (s 0);
+    . apply @validate_AxiomFour_of_transitive countermodel.toFrame (s 0);
+    . intro x h;
+      apply Satisfies.dia_def.mpr;
+      use Sum.inr (1, 2);
+      constructor;
+      . match x with
+        | Sum.inl _
+        | Sum.inr (2, 0)
+        | Sum.inr (2, 1)
+        | Sum.inr (1, 2)
+        | Sum.inr (n + 3, i) =>
+          simp [Frame.Rel', countermodel];
+        | Sum.inr (0, i)
+        | Sum.inr (1, 0)
+        | Sum.inr (1, 1)
+        | Sum.inr (2, 2) =>
+          have := Satisfies.and_def.mp h |>.1;
+          sorry;
+      . simp only [Semantics.And.realize_and];
+        refine ⟨?_, ?_, ?_⟩;
+        . apply Satisfies.dia_def.mpr;
+          use Sum.inr (0, 0);
+          constructor;
+          . simp [Frame.Rel', countermodel];
+          . sorry;
+        . apply Satisfies.dia_def.mpr;
+          use Sum.inr (0, 1);
+          constructor;
+          . simp [Frame.Rel', countermodel];
+          . sorry;
+        . apply Satisfies.not_def.mpr;
+          apply Satisfies.not_dia_def.mpr;
+          intro y R12y;
+          have : y = Sum.inr (0, 0) ∨ y = Sum.inr (0, 1) ∨ y = Sum.inr (1, 2) := by sorry;
+          rcases this with (rfl | rfl | rfl);
+          . sorry;
+          . sorry;
+          . sorry;
 
 lemma S4Fi.unprovable_AxiomFi_ant : 𝐒𝟒𝐅𝐢 ⊬ ∼Axioms.Fi.ant (.atom 0) (.atom 1) (.atom 2) (.atom 3) := by
   suffices ∃ M : Model, M ⊧* 𝐒𝟒𝐅𝐢 ∧ ∃ x : M, x ⊧ (Axioms.Fi.ant (.atom 0) (.atom 1) (.atom 2) (.atom 3)) by
