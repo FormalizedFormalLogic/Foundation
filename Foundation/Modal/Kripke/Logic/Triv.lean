@@ -90,7 +90,7 @@ instance : Logic.KTc ⪱ Logic.Triv := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.Triv ⊢! φ ∧ ¬Kripke.FrameClass.KTc ⊧ φ by simpa [KTc.Kripke.corefl];
+    suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬Kripke.FrameClass.KTc ⊧ φ by simpa [KTc.Kripke.corefl];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
@@ -110,7 +110,7 @@ instance : Logic.GrzPoint3 ⪱ Logic.Triv := by
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.Triv ⊢! φ ∧ ¬FrameClass.finite_connected_partial_order ⊧ φ by
+    suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.finite_connected_partial_order ⊧ φ by
       simpa [GrzPoint3.Kripke.finite_connected_partial_order];
     use Axioms.Tc (.atom 0);
     constructor;
@@ -139,7 +139,7 @@ instance : Logic.S4Point4McK ⪱ Logic.Triv := by
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.Triv ⊢! φ ∧ ¬FrameClass.S4Point4McK ⊧ φ by simpa [S4Point4McK.Kripke.preorder_sobocinski_mckinsey];
+    suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.S4Point4McK ⊧ φ by simpa [S4Point4McK.Kripke.preorder_sobocinski_mckinsey];
     use Axioms.Tc (.atom 0);
     constructor;
     . simp;

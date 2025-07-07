@@ -22,19 +22,19 @@ namespace Hilbert
 
 namespace N
 
-instance : AllFrameClass.DefinedBy Hilbert.N.axiomInstances := ⟨by simp_all [Hilbert.axiomInstances]⟩
+instance : AllFrameClass.DefinedBy Hilbert.N.axiomInstances := ⟨by simp_all⟩
 
-instance : Entailment.Consistent Logic.N := PLoN.Hilbert.consistent_of_FrameClass PLoN.AllFrameClass
+instance : Entailment.Consistent Hilbert.N := PLoN.Hilbert.consistent_of_FrameClass PLoN.AllFrameClass
 
-instance : Canonical Logic.N PLoN.AllFrameClass := ⟨by tauto⟩
+instance : Canonical Hilbert.N PLoN.AllFrameClass := ⟨by tauto⟩
 
-instance : Complete Logic.N PLoN.AllFrameClass := inferInstance
+instance : Complete Hilbert.N PLoN.AllFrameClass := inferInstance
 
 end N
 
-instance : Logic.N ⪱ Logic.K := by
+instance : Hilbert.N ⪱ Hilbert.K := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.K (.atom 0) (.atom 1);
     constructor;
@@ -76,5 +76,7 @@ instance : Logic.N ⪱ Logic.K := by
             . simp [Semantics.Realize, Satisfies];
 
 end Hilbert
+
+instance : Modal.N ⪯ Modal.K := inferInstance
 
 end LO.Modal

@@ -6,7 +6,6 @@ namespace LO.Modal
 
 open LO.Entailment LO.Modal.Entailment
 open Formula
-open Hilbert.Deduction
 
 variable [DecidableEq α]
 variable {φ : Formula α}
@@ -19,7 +18,7 @@ def Formula.boxdotTranslate : Formula α → Formula α
 postfix:90 "ᵇ" => Formula.boxdotTranslate
 
 
-theorem Hilbert.of_provable_boxdotTranslated_axiomInstances {H₁ H₂ : Hilbert α} [Entailment.K H₂.logic]
+theorem Hilbert.of_provable_boxdotTranslated_axiomInstances {H₁ H₂ : Hilbert.Normal α} [Entailment.K H₂.logic]
   (h : ∀ φ ∈ H₁.axiomInstances, H₂.logic ⊢! φᵇ) : H₁.logic ⊢! φ → H₂.logic ⊢! φᵇ := by
   intro d;
   induction d with

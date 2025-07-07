@@ -157,7 +157,7 @@ end S5Grz
 
 section boxdot
 
-theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ ↔ Logic.Ver ⊢! φᵍᵇ := by
+theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ ↔ Hilbert.Ver ⊢! φᵍᵇ := by
   exact Iff.trans modalCompanion_Cl_Triv.companion Logic.iff_boxdotTranslated_Ver_Triv.symm
 
 end boxdot

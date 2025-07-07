@@ -210,7 +210,7 @@ lemma goedelTranslated_OrElim : ML ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ �
   exact nec! $ C!_trans axiomFour! $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! $ or₃!) axiomK!;
 
 lemma provable_goedelTranslated_of_provable
-  (IH : Propositional.Hilbert ℕ) (ML : Modal.Logic ℕ) [Entailment.S4 ML]
+  (IH : Propositional.Hilbert.Normal ℕ) (ML : Modal.Logic ℕ) [Entailment.S4 ML]
   (hAx : ∀ φ ∈ IH.axiomInstances, ML ⊢! φᵍ)
   : IH ⊢! φ → ML ⊢! φᵍ := by
   intro h;

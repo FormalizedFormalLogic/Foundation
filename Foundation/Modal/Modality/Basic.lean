@@ -526,10 +526,12 @@ end
 
 section
 
-variable {H : Hilbert ℕ} [H.HasK] {m : outParam (Modality)}
+open Hilbert.Normal
+
+variable {H : Hilbert.Normal ℕ} [H.HasK] {m : outParam (Modality)}
 
 instance [H.HasT] : (□) ⤳[H.logic] (-) :=
-  translation_of_axiomInstance (a := Hilbert.HasT.p H) $ by simp;
+  translation_of_axiomInstance (a := HasT.p H) $ by simp;
 
 instance [H.HasFour] : (□) ⤳[H.logic] (□□) :=
   translation_of_axiomInstance (a := Hilbert.HasFour.p (H := H)) $ by simp

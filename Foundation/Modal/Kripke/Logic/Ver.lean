@@ -91,7 +91,7 @@ instance : Logic.KTc ⪱ Logic.Ver := by
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.Ver ⊢! φ ∧ ¬FrameClass.KTc ⊧ φ by simpa [KTc.Kripke.corefl];
+    suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.KTc ⊧ φ by simpa [KTc.Kripke.corefl];
     use (Axioms.Ver ⊥);
     constructor;
     . simp;
@@ -115,7 +115,7 @@ instance : Logic.GLPoint3 ⪱ Logic.Ver := by
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.Ver ⊢! φ ∧ ¬FrameClass.finite_GLPoint3 ⊧ φ by simpa [GLPoint3.Kripke.finite_strict_linear_order];
+    suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.finite_GLPoint3 ⊧ φ by simpa [GLPoint3.Kripke.finite_strict_linear_order];
     use (Axioms.Ver ⊥);
     constructor;
     . simp;

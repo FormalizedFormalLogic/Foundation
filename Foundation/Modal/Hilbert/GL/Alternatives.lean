@@ -409,7 +409,7 @@ end WithHenkinRule
 end Hilbert
 
 
-protected abbrev Hilbert.K4Hen : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Hen (.atom 0)}⟩
+protected abbrev Hilbert.K4Hen : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Hen (.atom 0)}⟩
 protected abbrev Logic.K4Hen := Hilbert.K4Hen.logic
 instance : (Hilbert.K4Hen).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Hen).HasFour where p := 0

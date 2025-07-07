@@ -14,7 +14,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {φ : Formula ℕ}
 
-lemma provable_boxdotTranslated_Ver_of_Triv : Logic.Triv ⊢! φ → Logic.Ver ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
+lemma provable_boxdotTranslated_Ver_of_Triv : Hilbert.Triv ⊢! φ → Hilbert.Ver ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
   rintro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
@@ -22,7 +22,7 @@ lemma provable_boxdotTranslated_Ver_of_Triv : Logic.Triv ⊢! φ → Logic.Ver �
   . apply deduct'!;
     apply K!_intro <;> simp;
 
-lemma provable_Triv_of_boxdotTranslated_Ver : Logic.Ver ⊢! φᵇ → Logic.Triv ⊢! φ := by
+lemma provable_Triv_of_boxdotTranslated_Ver : Hilbert.Ver ⊢! φᵇ → Hilbert.Triv ⊢! φ := by
   suffices FrameClass.Ver ⊧ φᵇ → FrameClass.finite_Triv ⊧ φ by
     simpa [iff_provable, Set.mem_setOf_eq, Triv.Kripke.finite_equality, Logic.Ver.Kripke.isolated];
   contrapose;
@@ -44,7 +44,7 @@ lemma provable_Triv_of_boxdotTranslated_Ver : Logic.Ver ⊢! φᵇ → Logic.Tri
     apply iff_reflexivize_irreflexivize'.not.mp;
     exact h;
 
-theorem iff_boxdotTranslated_Ver_Triv : Logic.Ver ⊢! φᵇ ↔ Logic.Triv ⊢! φ := ⟨
+theorem iff_boxdotTranslated_Ver_Triv : Hilbert.Ver ⊢! φᵇ ↔ Hilbert.Triv ⊢! φ := ⟨
   provable_Triv_of_boxdotTranslated_Ver,
   provable_boxdotTranslated_Ver_of_Triv
 ⟩

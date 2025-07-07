@@ -34,7 +34,7 @@ lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : L ⊢! φ) (hV : Logic.Ver ⊬ 
   have hΔ₁ : ∀ ψ ∈ Δ, ¬ψ.1.isPrebox := by
     rintro ⟨ψ, _⟩ hψ₁ hψ₂;
     obtain ⟨ξ, rfl⟩ := NNFormula.exists_isPrebox hψ₂;
-    have : Logic.Ver ⊢! □ξ.toFormula := by simp;
+    have : Hilbert.Ver ⊢! □ξ.toFormula := by simp;
     sorry;
 
   have : ∃ Γ: List (Formula ℕ), L ⊢! φ ⭤ ⋀Γ := by sorry;
@@ -178,9 +178,9 @@ theorem makinson : (L.VerFamily ∨ L.TrivFamily) ∧ ¬(L.VerFamily ∧ L.TrivF
   . by_contra hC;
     have ⟨⟨hVer⟩, ⟨hKD, hTriv⟩⟩ := hC;
     have : Logic.KD ⪯ Logic.Ver := by apply Entailment.WeakerThan.trans (𝓣 := L) <;> infer_instance;
-    have h₁ : Logic.Ver ⊢! ∼□⊥ := by apply Entailment.WeakerThan.pbl (show Logic.KD ⊢! ∼□⊥ by simp);
-    have h₂ : Logic.Ver ⊢! □⊥ := by simp;
-    have : Logic.Ver ⊢! ⊥ := h₁ ⨀ h₂;
+    have h₁ : Hilbert.Ver ⊢! ∼□⊥ := by apply Entailment.WeakerThan.pbl (show Logic.KD ⊢! ∼□⊥ by simp);
+    have h₂ : Hilbert.Ver ⊢! □⊥ := by simp;
+    have : Hilbert.Ver ⊢! ⊥ := h₁ ⨀ h₂;
     simpa;
 
 lemma VerFamily.notTrivFamily [L.VerFamily] : ¬L.TrivFamily := by
