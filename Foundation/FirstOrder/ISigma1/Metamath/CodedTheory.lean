@@ -80,7 +80,7 @@ namespace Delta1Definable
 
 open Arithmetic.HierarchySymbol.Semiformula LO.FirstOrder.Theory
 
-def add (dT : T.Delta1Definable) (dU : U.Delta1Definable) : (T + U).Delta1Definable where
+instance add (dT : T.Delta1Definable) (dU : U.Delta1Definable) : (T + U).Delta1Definable where
   ch := T.tDef.ch ⋎ U.tDef.ch
   mem_iff {φ} := by simp
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
@@ -109,8 +109,6 @@ instance empty : Theory.Delta1Definable (∅ : Theory L) where
   mem_iff {ψ} := by simp
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
-/-! memo: This noncomputable is *not* essetial. -/
-noncomputable
 def singleton (φ : SyntacticFormula L) : Theory.Delta1Definable {φ} where
   ch := .ofZero (.mkSigma “x. x = ↑⌜φ⌝” (by simp)) _
   mem_iff {ψ} := by simp
@@ -128,6 +126,10 @@ def ofList (l : List (SyntacticFormula L)) : Delta1Definable {φ | φ ∈ l} :=
 
 noncomputable
 def ofFinite (T : Theory L) (h : Set.Finite T) : T.Delta1Definable := (ofList h.toFinset.toList).ofEq (by ext; simp)
+
+instance [T.Delta1Definable] [U.Delta1Definable] : (T + U).Delta1Definable := add inferInstance inferInstance
+
+instance (φ : SyntacticFormula L) : Theory.Delta1Definable {φ} := singleton φ
 
 end Delta1Definable
 

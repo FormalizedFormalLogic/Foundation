@@ -14,7 +14,7 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath Arithmetization
 
 variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] (U : ArithmeticTheory) [U.Delta1Definable]
 
-noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.provabilityPred (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := U.provable/[⌜σ⌝]
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.provabilityPred (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := U.provable/[⌜σ⌝]
 
 variable {U}
 
@@ -70,11 +70,11 @@ open PeanoMinus IOpen ISigma0 ISigma1 Metamath Arithmetization
 
 variable (T : ArithmeticTheory) [T.Delta1Definable]
 
-noncomputable instance : Diagonalization 𝐈𝚺₁ where
+instance : Diagonalization 𝐈𝚺₁ where
   fixpoint := fixpoint
   diag θ := diagonal θ
 
-noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.standardPr : ProvabilityPredicate 𝐈𝚺₁ T where
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.standardPr : ProvabilityPredicate 𝐈𝚺₁ T where
   prov := T.provable
   D1 := provable_D1
 

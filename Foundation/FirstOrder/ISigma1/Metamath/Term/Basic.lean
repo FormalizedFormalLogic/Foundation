@@ -17,11 +17,15 @@ noncomputable def qqFvar (x : V) : V := ⟪1, x⟫ + 1
 
 noncomputable def qqFunc (k f v : V) : V := ⟪2, k, f, v⟫ + 1
 
+def qqFuncN (k f v : ℕ) : ℕ := (Nat.pair 2 <| Nat.pair k <| Nat.pair f v) + 1
+
 scoped prefix:max "^#" => qqBvar
 
 scoped prefix:max "^&" => qqFvar
 
 scoped prefix:max "^func " => qqFunc
+
+lemma qqFuncN_eq_qqFunc (k f v : ℕ) : qqFuncN k f v = qqFunc k f v := by simp [qqFunc, qqFuncN, nat_pair_eq]
 
 @[simp] lemma var_lt_qqBvar (z : V) : z < ^#z := lt_succ_iff_le.mpr <| le_pair_right 0 z
 

@@ -136,7 +136,7 @@ lemma termSubst_termSubst {l n w v t : V} (hv : L.IsSemitermVec l n v) (ht : L.I
   · definability
   · intro z hz
     rw [Language.termSubst_bvar z, Language.termSubst_bvar z, nth_termSubstVec hv.isUTerm hz]
-  · intro x; simp [hv]
+  · intro x; simp
   · intro k f ts hf hts ih
     rw [Language.termSubst_func hf hts.isUTerm,
       Language.termSubst_func hf (hv.termSubstVec hts).isUTerm,
@@ -272,11 +272,11 @@ lemma termShiftVec_cons {k t ts : V} (ht : L.IsUTerm t) (hts : L.IsUTermVec k ts
       exact ih i hi
 
 @[simp] lemma Language.IsUTermVec.termShiftVec {k v} (hv : L.IsUTermVec k v) : L.IsUTermVec k (L.termShiftVec k v) :=
-    ⟨by simp [termShiftVec, hv], fun i hi ↦ by rw [nth_termShiftVec hv hi]; exact (hv.nth hi).termShift⟩
+    ⟨by simp [hv], fun i hi ↦ by rw [nth_termShiftVec hv hi]; exact (hv.nth hi).termShift⟩
 
 @[simp] lemma Language.IsSemitermVec.termShiftVec {k n v} (hv : L.IsSemitermVec k n v) : L.IsSemitermVec k n (L.termShiftVec k v) :=
   Language.IsSemitermVec.iff.mpr
-    ⟨by simp [termShiftVec, hv.isUTerm], fun i hi ↦ by
+    ⟨by simp [hv.isUTerm], fun i hi ↦ by
       rw [nth_termShiftVec hv.isUTerm hi]; exact (hv.nth hi).termShift⟩
 
 @[simp] lemma Language.IsUTerm.termBVtermShift {t} (ht : L.IsUTerm t) : L.termBV (L.termShift t) = L.termBV t := by
@@ -409,7 +409,7 @@ lemma termBShiftVec_cons {k t ts : V} (ht : L.IsUTerm t) (hts : L.IsUTermVec k t
 lemma termBShift_termShift {t} (ht : L.IsSemiterm n t) : L.termBShift (L.termShift t) = L.termShift (L.termBShift t) := by
   apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
-  · intro z hz; simp [hz]
+  · intro z hz; simp
   · intro x; simp
   · intro k f v hkf hv ih
     rw [L.termShift_func hkf hv.isUTerm,
@@ -432,7 +432,7 @@ noncomputable def Language.qVec (w : V) : V := ^#0 ∷ L.termBShiftVec (len w) w
 variable {L}
 
 @[simp] lemma len_qVec {k w : V} (h : L.IsUTermVec k w) : len (L.qVec w) = k + 1 := by
-  rcases h.lh; simp [Language.qVec, h, h]
+  rcases h.lh; simp [Language.qVec, h]
 
 lemma Language.IsSemitermVec.qVec {k n w : V} (h : L.IsSemitermVec k n w) : L.IsSemitermVec (k + 1) (n + 1) (L.qVec w) := by
   rcases h.lh
@@ -448,7 +448,7 @@ lemma substs_cons_bShift {u t w} (ht : L.IsSemiterm n t) :
     L.termSubst (u ∷ w) (L.termBShift t) = L.termSubst w t := by
   apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
-  · intro z hz; simp [hz]
+  · intro z hz; simp
   · intro x; simp
   · intro k f v hf hv ih
     rw [Language.termBShift_func hf hv.isUTerm,
@@ -489,7 +489,7 @@ lemma bShift_substs {n m w t} (ht : L.IsSemiterm n t) (hw : L.IsSemitermVec n m 
     L.termBShift (L.termSubst w t) = L.termSubst (L.termBShiftVec n w) t := by
   apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
-  · intro z hz; simp [hz, nth_termBShiftVec hw.isUTerm hz]
+  · intro z hz; simp [nth_termBShiftVec hw.isUTerm hz]
   · intro x; simp
   · intro k f v hf hv ih
     rw [L.termSubst_func hf hv.isUTerm,
@@ -564,13 +564,13 @@ end
 
 namespace Arithmetization
 
-protected noncomputable def zero : ℕ := ^func 0 zeroIndex 0
+protected def zero : ℕ := qqFuncN 0 zeroIndex 0
 
-protected noncomputable def one : ℕ := ^func 0 oneIndex 0
+protected def one : ℕ := qqFuncN 0 oneIndex 0
 
-noncomputable def qqAdd (x y : V) := ^func 2 (addIndex : V) ?[x, y]
+noncomputable def qqAdd (x y : V) : V := ^func 2 (addIndex : V) ?[x, y]
 
-noncomputable def qqMul (x y : V) := ^func 2 (mulIndex : V) ?[x, y]
+noncomputable def qqMul (x y : V) : V := ^func 2 (mulIndex : V) ?[x, y]
 
 notation "𝟎" => Arithmetization.zero
 
@@ -621,14 +621,14 @@ end
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
 @[simp] lemma zero_semiterm : ⌜ℒₒᵣ⌝.IsSemiterm n (𝟎 : V) := by
-  simp [Arithmetization.zero, qqFunc_absolute]
+  simp [Arithmetization.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma one_semiterm : ⌜ℒₒᵣ⌝.IsSemiterm n (𝟏 : V) := by
-  simp [Arithmetization.one, qqFunc_absolute]
+  simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 namespace Numeral
 
-noncomputable def blueprint : PR.Blueprint 0 where
+def blueprint : PR.Blueprint 0 where
   zero := .mkSigma “y. y = ↑Arithmetization.one” (by simp)
   succ := .mkSigma “y t n. !qqAddDef y t ↑Arithmetization.one” (by simp)
 
@@ -646,7 +646,7 @@ noncomputable def numeralAux (x : V) : V := construction.result ![] x
 
 section
 
-noncomputable def numeralAuxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def numeralAuxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma numeralAux_defined : 𝚺₁-Function₁ (numeralAux : V → V) via numeralAuxDef :=
   fun v ↦ by simp [construction.result_defined_iff, numeralAuxDef]; rfl
@@ -661,7 +661,7 @@ end
 @[simp] lemma lt_numeralAux_self (n : V) : n < numeralAux n := by
     induction n using ISigma1.sigma1_succ_induction
     · definability
-    case zero => simp [Arithmetization.one]
+    case zero => simp [Arithmetization.one, qqFuncN_eq_qqFunc]
     case succ n ih =>
       refine lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
 
@@ -683,12 +683,12 @@ noncomputable def numeral (x : V) : V := if x = 0 then 𝟎 else numeralAux (x -
 
 @[simp] lemma numeral_one : numeral (1 : V) = 𝟏 := by simp [numeral]
 
-@[simp] lemma numeral_add_two : numeral (n + 1 + 1 : V) = numeral (n + 1) ^+ 𝟏 := by simp [numeral, ←add_assoc]
+@[simp] lemma numeral_add_two : numeral (n + 1 + 1 : V) = numeral (n + 1) ^+ 𝟏 := by simp [numeral]
 
 lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 := by
   rcases zero_or_succ n with (rfl | ⟨n, rfl⟩)
   · simp at pos
-  simp [numeral, ←one_add_one_eq_two, ←add_assoc]
+  simp [numeral]
 
 @[simp] lemma numeral_semiterm (n x : V) : ⌜ℒₒᵣ⌝.IsSemiterm n (numeral x) := by
   by_cases hx : x = 0 <;> simp [hx, numeral]
@@ -702,7 +702,7 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
 
 section
 
-noncomputable def _root_.LO.FirstOrder.Arithmetic.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
   “t x.
     (x = 0 → t = ↑Arithmetization.zero) ∧
     (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxDef t x')”
@@ -725,35 +725,35 @@ end
     ⌜ℒₒᵣ⌝.termSubst w (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [Arithmetization.zero, qqFunc_absolute]
+  case zero => simp [Arithmetization.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [Arithmetization.one, qqFunc_absolute]
-    · simp only [numeral_add_two, qqAdd, LOR_func_addIndex]
-      rw [Language.termSubst_func (by simp) (by simp [Arithmetization.one, qqFunc_absolute])]
-      simp [ih, Arithmetization.one, qqFunc_absolute]
+    · simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp only [numeral_add_two, qqAdd]
+      rw [Language.termSubst_func (by simp) (by simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      simp [ih, Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_shift (x : V) :
     ⌜ℒₒᵣ⌝.termShift (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [Arithmetization.zero, qqFunc_absolute]
+  case zero => simp [Arithmetization.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [Arithmetization.one, qqFunc_absolute]
-    · simp only [numeral_add_two, qqAdd, LOR_func_addIndex]
-      rw [Language.termShift_func (by simp) (by simp [Arithmetization.one, qqFunc_absolute])]
-      simp [ih, Arithmetization.one, qqFunc_absolute]
+    · simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp only [numeral_add_two, qqAdd]
+      rw [Language.termShift_func (by simp) (by simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      simp [ih, Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_bShift (x : V) :
     ⌜ℒₒᵣ⌝.termBShift (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [Arithmetization.zero, qqFunc_absolute]
+  case zero => simp [Arithmetization.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [Arithmetization.one, qqFunc_absolute]
-    · simp [qqAdd, ih, Arithmetization.one, qqFunc_absolute]
+    · simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [qqAdd, ih, Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 end numeral
 

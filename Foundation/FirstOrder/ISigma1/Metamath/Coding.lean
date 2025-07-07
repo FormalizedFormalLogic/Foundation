@@ -130,13 +130,13 @@ lemma quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
 
 @[simp] lemma quote_zero (n) :
     (⌜(Semiterm.func Language.Zero.zero ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 := by
-  simp [FirstOrder.Semiterm.quote_func, Arithmetization.zero, Arithmetization.qqFunc_absolute]; rfl
+  simp [FirstOrder.Semiterm.quote_func, Arithmetization.zero, Arithmetization.qqFunc_absolute, qqFuncN_eq_qqFunc]; rfl
 
 @[simp] lemma quote_zero' (n) : (⌜(‘0’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 := quote_zero V n
 
 @[simp] lemma quote_one (n) :
     (⌜(Semiterm.func Language.One.one ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 := by
-  simp [FirstOrder.Semiterm.quote_func, Arithmetization.one, Arithmetization.qqFunc_absolute]; rfl
+  simp [FirstOrder.Semiterm.quote_func, Arithmetization.one, Arithmetization.qqFunc_absolute, qqFuncN_eq_qqFunc]; rfl
 
 @[simp] lemma quote_one' (n) : (⌜(‘1’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 := quote_one V n
 

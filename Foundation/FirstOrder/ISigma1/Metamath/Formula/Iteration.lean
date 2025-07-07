@@ -161,7 +161,7 @@ section substItr
 
 namespace SubstItr
 
-noncomputable def blueprint : PR.Blueprint 2 where
+def blueprint : PR.Blueprint 2 where
   zero := .mkSigma “y w p. y = 0” (by simp)
   succ := .mkSigma “y ih k w p. ∃ numeral, !numeralDef numeral k ∧ ∃ v, !consDef v numeral w ∧
     ∃ sp, !(Language.lDef ℒₒᵣ).substsDef sp v p ∧ !consDef y sp ih” (by simp)
@@ -184,7 +184,7 @@ noncomputable def substItr (w p k : V) : V := construction.result ![w, p] k
 
 section
 
-noncomputable def _root_.LO.FirstOrder.Arithmetic.substItrDef : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.substs ![#0, #3, #1, #2])
+def _root_.LO.FirstOrder.Arithmetic.substItrDef : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.substs ![#0, #3, #1, #2])
 
 lemma substItr_defined : 𝚺₁-Function₃ (substItr : V → V → V → V) via substItrDef :=
   fun v ↦ by simp [construction.result_defined_iff, substItrDef, substItr, Matrix.comp_vecCons', Matrix.constant_eq_singleton]

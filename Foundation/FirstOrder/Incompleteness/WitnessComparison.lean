@@ -116,7 +116,7 @@ def _root_.LO.FirstOrder.Theory.ProvabilityComparisonₐ (φ ψ : V) : Prop := (
 
 section
 
-noncomputable def _root_.LO.FirstOrder.Theory.provabilityComparisonₐDef : 𝚺₁.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Theory.provabilityComparisonₐDef : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. !(T + 𝐑₀').tDef.provabilityComparisonDef φ ψ” (by simp)
 
 lemma provabilityComparisonₐ_defined : 𝚺₁-Relation (T.ProvabilityComparisonₐ : V → V → Prop) via T.provabilityComparisonₐDef := by
