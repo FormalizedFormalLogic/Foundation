@@ -21,6 +21,10 @@ variable {Γ Γ₁ Γ₂ Δ Δ₁ Δ₂ : List F} {φ ψ χ : F}
 lemma weakening (h : Γ₁ ⟹ Δ₁) (HΓ : Γ₁ ⊆ Γ₂ := by simp) (HΔ : Δ₁ ⊆ Δ₂ := by simp) : Γ₂ ⟹ Δ₂ :=
   FiniteContext.weakening! HΓ <| left_Disj!_intro Δ₁ (fun _ hψ ↦ right_Disj!_intro _ (HΔ hψ)) ⨀! h
 
+lemma remove_left (hφ : Γ ⟹ Δ) : φ :: Γ ⟹ Δ := weakening hφ
+
+lemma remove_right (hφ : Γ ⟹ Δ) : Γ ⟹ φ :: Δ := weakening hφ
+
 lemma rotate_right (hφ : Γ ⟹ Δ ++ [φ]) : Γ ⟹ φ :: Δ := weakening hφ
 
 lemma rotate_left (hφ : (Γ ++ [φ]) ⟹ Δ) : (φ :: Γ) ⟹ Δ := weakening hφ
@@ -243,6 +247,9 @@ lemma of_double_uppercedent (H : (Γ₁ ⟹ Δ₁) → (Γ₂ ⟹ Δ₂) → (Ξ
     · exact h₂.tail
   · exact h₁.tail
 
+lemma remove : Valid 𝓢 T → Valid 𝓢 ((Γ ⟶ Δ) :: T) :=
+  of_subset
+
 variable [DecidableEq F] [Entailment.Int 𝓢]
 
 lemma to_provable (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢! φ := by
@@ -253,6 +260,12 @@ lemma to_provable (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢! φ := by
 lemma right_closed (h : φ ∈ Γ) : Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := head <| TwoSided.right_closed h
 
 lemma left_closed (h : φ ∈ Δ) : Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) := head <| TwoSided.left_closed h
+
+lemma remove_right : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) :=
+  of_single_uppercedent TwoSided.remove_right
+
+lemma remove_left : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
+  of_single_uppercedent TwoSided.remove_left
 
 lemma rotate_right : Valid 𝓢 ((Γ ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) :=
   of_single_uppercedent TwoSided.rotate_right

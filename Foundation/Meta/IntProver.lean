@@ -3,7 +3,7 @@ import Foundation.Meta.Qq
 import Foundation.Meta.Lit
 
 /-!
-# Proof automation based on the proof search on $\mathbf{LJpm}^*$
+# Proof automation based on the proof search on (modified) $\mathbf{LJpm}^*$
 
 main reference: Grigori Mints, A Short Introduction to Intuitionistic Logic
 -/
@@ -26,7 +26,7 @@ local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 scoped notation:0 Γ:45 " ⟶ " Δ:46 => Tableaux.Sequent.mk Γ Δ
 
 set_option linter.unusedSectionVars false in
-lemma to_twoSided (h : Valid 𝓢 [Γ ⟶ Δ]) : Γ ⟹ Δ := by
+lemma to_twoSided {Γ Δ} (h : Valid 𝓢 [Γ ⟶ Δ]) : Γ ⟹ Δ := by
   rcases h
   · assumption
   · simp_all
@@ -43,10 +43,15 @@ lemma right_closed {T Γ Δ φ} (h : φ ∈ Γ) : Valid 𝓢 ((Γ ⟶ φ :: Δ) 
 
 lemma left_closed {T Γ Δ φ} (h : φ ∈ Δ) : Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) := Valid.left_closed h
 
-
+set_option linter.unusedSectionVars false in
+lemma remove {T Γ Δ} : Valid 𝓢 T → Valid 𝓢 ((Γ ⟶ Δ) :: T) := Valid.of_subset
 
 set_option linter.unusedSectionVars false in
 lemma rotate {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ Δ) :: T) := Valid.of_subset
+
+
+lemma remove_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
+  Valid.remove_right (rotate h)
 
 lemma rotate_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
   Valid.rotate_right (rotate h)
@@ -77,6 +82,8 @@ lemma iff_right {T Γ Δ φ ψ} :
   Valid.and_right (rotate h₁) (rotate h₂)
 
 
+lemma remove_left {T Γ Δ φ} : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
+  Valid.remove_left
 
 lemma rotate_left {T Γ Δ φ} : Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
   Valid.rotate_left
@@ -197,6 +204,12 @@ def Tableaux.toExpr (T : Tableaux) : M Expr := do
     return e
   return toQList (u := c.levelF) m
 
+def remove (T : Tableaux) (Γ Δ : Sequent) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  iapp ``LO.Meta.IntProver.Theorems.remove #[T, Γ, Δ, e]
+
 def tryRightClose (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) : M (Option Expr) := do
   match ← memQList?' (← litToExpr φ) (← Γ.toExprList) with
   |   .none => return none
@@ -216,6 +229,20 @@ def tryLeftClose (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) : M (Option Expr) :
     let Δ ← Sequent.toExpr Δ
     let φ ← litToExpr φ
     return some <| ← iapp ``LO.Meta.IntProver.Theorems.left_closed #[T, Γ, Δ, φ, e]
+
+def removeRight (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  iapp ``LO.Meta.IntProver.Theorems.remove_right #[T, Γ, Δ, φ, e]
+
+def removeLeft (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
+  let T ← T.toExpr
+  let Γ ← Sequent.toExpr Γ
+  let Δ ← Sequent.toExpr Δ
+  let φ ← litToExpr φ
+  iapp ``LO.Meta.IntProver.Theorems.remove_left #[T, Γ, Δ, φ, e]
 
 def rotateRight (T : Tableaux) (Γ Δ : Sequent) (φ : Lit) (e : Expr) : M Expr := do
   let T ← T.toExpr
@@ -339,79 +366,110 @@ def iffLeft (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr :
   let ψ ← litToExpr ψ
   iapp ``LO.Meta.IntProver.Theorems.iff_left #[T, Γ, Δ, φ, ψ, e]
 
+def isWeakerSequent (Γ Δ : Sequent) (T : Tableaux) : M Bool := do
+  match T with
+  |           [] => return false
+  | (Ξ ⟶ Λ) :: T =>
+    return ((←Lit.dSubsetList Γ Ξ) && (←Lit.dSubsetList Δ Λ)) || (←isWeakerSequent Γ Δ T)
+
 def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
   trace[int_prover.detail] m!"step: {k}, case: {b}, {← T.toExpr}"
-  logInfo m!"step: {k}, case: {b}, {← T.toExpr}"
+  -- logInfo m!"step: {k}, case: {b}, {← T.toExpr}"
   match k, b with
   |     0,      _ => throwError m!"Proof search failed: {← T.toExpr}"
   | k + 1, false =>
     match T with
-    |                      [] => throwError m!"Proof search failed: empty tableaux reached."
-    |           ([] ⟶ Δ) :: T => prover k true (([] ⟶ Δ) :: T)
-    | (.atom a :: Γ ⟶ Δ) :: T => do
-      let e ← tryLeftClose T Γ Δ (.atom a)
-      match e with
-      | some h =>
-        return h
-      |   none => do
-        let e ← prover k true ((Γ ++ [.atom a] ⟶ Δ) :: T)
-        rotateLeft T Γ Δ (.atom a) e
-    | (⊤ :: Γ ⟶ Δ) :: T => do
-      let e ← prover k true ((Γ ⟶ Δ) :: T)
-      verumLeft T Γ Δ e
-    | (⊥ :: Γ ⟶ Δ) :: T => do
-      falsumLeft T Γ Δ
-    | (φ ⋏ ψ :: Γ ⟶ Δ) :: T => do
-      let e ← prover k true ((Γ ++ [φ, ψ] ⟶ Δ) :: T)
-      andLeft T Γ Δ φ ψ e
-    | (φ ⋎ ψ :: Γ ⟶ Δ) :: T => do
-      let e₁ ← prover k true ((Γ ++ [φ] ⟶ Δ) :: T)
-      let e₂ ← prover k true ((Γ ++ [ψ] ⟶ Δ) :: T)
-      orLeft T Γ Δ φ ψ e₁ e₂
-    | (∼φ :: Γ ⟶ Δ) :: T => do
-      let e ← prover k true ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T)
-      negLeft T Γ Δ φ e
-    | ((φ ➝ ψ) :: Γ ⟶ Δ) :: T => do
-      let e₁ ← prover k true ((Γ ++ [φ ➝ ψ] ⟶ Δ ++ [φ]) :: T)
-      let e₂ ← prover k true ((Γ ++ [ψ] ⟶ Δ) :: T)
-      implyLeft T Γ Δ φ ψ e₁ e₂
-    | ((.iff φ ψ) :: Γ ⟶ Δ) :: T => do
-      let e ← prover k true ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⟶ Δ) :: T)
-      iffLeft T Γ Δ φ ψ e
+    |           [] => throwError m!"Proof search failed: empty tableaux reached."
+    | (Γ ⟶ Δ) :: T =>
+      if ←isWeakerSequent Γ Δ T then
+        let e ← prover k true T
+        remove T Γ Δ e
+      else
+      match Γ with
+      |     [] => prover k true (([] ⟶ Δ) :: T)
+      | φ :: Γ => do
+        match ← tryLeftClose T Γ Δ φ with
+        | some h => return h
+        |   none => do
+          if ← φ.dMem Γ then
+            let e ← prover k true ((Γ ⟶ Δ) :: T)
+            removeLeft T Γ Δ φ e
+          else
+          match φ with
+          | .atom a => do
+            let e ← prover k true ((Γ ++ [.atom a] ⟶ Δ) :: T)
+            rotateLeft T Γ Δ (.atom a) e
+          | ⊤ => do
+            let e ← prover k true ((Γ ⟶ Δ) :: T)
+            verumLeft T Γ Δ e
+          | ⊥ => do
+            falsumLeft T Γ Δ
+          | φ ⋏ ψ => do
+            let e ← prover k true ((Γ ++ [φ, ψ] ⟶ Δ) :: T)
+            andLeft T Γ Δ φ ψ e
+          | φ ⋎ ψ => do
+            let e₁ ← prover k true ((Γ ++ [φ] ⟶ Δ) :: T)
+            let e₂ ← prover k true ((Γ ++ [ψ] ⟶ Δ) :: T)
+            orLeft T Γ Δ φ ψ e₁ e₂
+          | ∼φ => do
+            let e ← prover k true ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T)
+            negLeft T Γ Δ φ e
+          | φ ➝ ψ => do
+            let e₁ ← prover k true ((Γ ++ [φ ➝ ψ] ⟶ Δ ++ [φ]) :: T)
+            let e₂ ← prover k true ((Γ ++ [ψ] ⟶ Δ) :: T)
+            implyLeft T Γ Δ φ ψ e₁ e₂
+          | .iff φ ψ => do
+            let e ← prover k true ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⟶ Δ) :: T)
+            iffLeft T Γ Δ φ ψ e
   | k + 1,  true =>
     match T with
-    |                      [] => throwError m!"Proof search failed: empty tableaux reached."
-    |           (Γ ⟶ []) :: T => do
-      let e ← prover k false (T ++ [Γ ⟶ []])
-      rotate T Γ [] e
-    | (Γ ⟶ .atom a :: Δ) :: T => do
-      let e ← tryRightClose T Γ Δ (.atom a)
-      match e with
-      | some h => return h
-      |   none => do
-        let e ← prover k false (T ++ [Γ ⟶ Δ ++ [.atom a]])
-        rotateRight T Γ Δ (.atom a) e
-    | (Γ ⟶ ⊤ :: Δ) :: T => verumRight T Γ Δ
-    | (Γ ⟶ ⊥ :: Δ) :: T => do
-      let e ← prover k false (T ++ [Γ ⟶ Δ])
-      falsumRight T Γ Δ e
-    | (Γ ⟶ φ ⋏ ψ :: Δ) :: T => do
-      let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ]])
-      let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ]])
-      andRight T Γ Δ φ ψ e₁ e₂
-    | (Γ ⟶ φ ⋎ ψ :: Δ) :: T => do
-      let e ← prover k false (T ++ [Γ ⟶ Δ ++ [φ, ψ]])
-      orRight T Γ Δ φ ψ e
-    | (Γ ⟶ ∼φ :: Δ) :: T => do
-      let e ← prover k false (T ++ [Γ ++ [φ] ⟶ []] ++ [Γ ⟶ Δ])
-      negRight T Γ Δ φ e
-    | (Γ ⟶ (φ ➝ ψ) :: Δ) :: T => do
-      let e ← prover k false (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ])
-      implyRight T Γ Δ φ ψ e
-    | (Γ ⟶ (.iff φ ψ) :: Δ) :: T => do
-      let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ ➝ ψ]])
-      let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ ➝ φ]])
-      iffRight T Γ Δ φ ψ e₁ e₂
+    |                [] => throwError m!"Proof search failed: empty tableaux reached."
+    |     (Γ ⟶ Δ) :: T => do
+      if ←isWeakerSequent Γ Δ T then
+        let e ← prover k false T
+        remove T Γ Δ e
+      else
+      match Δ with
+      | [] =>
+        let e ← prover k false (T ++ [Γ ⟶ []])
+        rotate T Γ [] e
+      | φ :: Δ => do
+        match ← tryRightClose T Γ Δ φ with
+        | some h => return h
+        |   none => do
+          if ← φ.dMem Δ then
+            let e ← prover k false (T ++ [Γ ⟶ Δ])
+            removeRight T Γ Δ φ e
+          else
+          match φ with
+          | .atom a => do
+            let e ← tryRightClose T Γ Δ (.atom a)
+            match e with
+            | some h => return h
+            |   none => do
+              let e ← prover k false (T ++ [Γ ⟶ Δ ++ [.atom a]])
+              rotateRight T Γ Δ (.atom a) e
+          | ⊤ => verumRight T Γ Δ
+          | ⊥ => do
+            let e ← prover k false (T ++ [Γ ⟶ Δ])
+            falsumRight T Γ Δ e
+          | φ ⋏ ψ => do
+            let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ]])
+            let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ]])
+            andRight T Γ Δ φ ψ e₁ e₂
+          | φ ⋎ ψ => do
+            let e ← prover k false (T ++ [Γ ⟶ Δ ++ [φ, ψ]])
+            orRight T Γ Δ φ ψ e
+          | ∼φ => do
+            let e ← prover k false (T ++ [Γ ++ [φ] ⟶ []] ++ [Γ ⟶ Δ])
+            negRight T Γ Δ φ e
+          | φ ➝ ψ => do
+            let e ← prover k false (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ])
+            implyRight T Γ Δ φ ψ e
+          | .iff φ ψ => do
+            let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ ➝ ψ]])
+            let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ ➝ φ]])
+            iffRight T Γ Δ φ ψ e₁ e₂
 
 structure HypInfo where
   levelF : Level
@@ -477,7 +535,7 @@ elab "int_prover_2s" n:(num)? seq:(termSeq)? : tactic => withMainContext do
   let n : ℕ :=
     match n with
     | some n => n.getNat
-    |   none => 32
+    |   none => 64
   let hyps ← (match seq with
     | some seq =>
       match seq with
@@ -491,7 +549,7 @@ elab "int_prover_2s" n:(num)? seq:(termSeq)? : tactic => withMainContext do
     let e ← main n hyps L R
     toTwoSided L R e
 
-elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
+elab "int_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
   let ⟨c, φ⟩ ← getGoalProvable <| ← whnfR <| ← getMainTarget
   let n : ℕ :=
     match n with
@@ -509,55 +567,6 @@ elab "cl_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
   closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (r := c) do
     let e ← main n hyps [] [φ]
     toProvable φ e
-
-section
-
-variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [Entailment F S]
-
-variable {𝓢 𝓣 : S} [Entailment.Int 𝓢] [𝓣 ⪯ 𝓢] {φ ψ χ ξ : F}
-
-example : Entailment.TwoSided 𝓢 [φ ➝ ψ, φ] [ψ] := by { int_prover_2s }
-
-example : Entailment.TwoSided 𝓢 [φ ➝ ∼χ, ∼χ ➝ φ] [φ ➝ ∼χ] := by { int_prover_2s  }
-
-example : Entailment.TwoSided 𝓢 [φ ➝ χ] [φ ➝ χ] := by { int_prover_2s 26 }
-
-example : Entailment.TwoSided 𝓢 [φ ➝ ψ, ψ ➝ χ, χ ➝ ξ] [φ ➝ χ] := by { int_prover_2s 26 }
-
-example : Entailment.TwoSided 𝓢 [φ ⭤ ψ] [ψ ⭤ φ] := by { int_prover_2s }
-
-example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, ∼ψ ⋏ χ] [∼φ ⋏ χ] := by { int_prover_2s }
-
-example : Entailment.TwoSided 𝓢 [∼φ ⭤ ψ] [ψ ⭤ ∼φ] := by { int_prover_2s 4 }
-
-example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, χ ➝ ψ] [(φ ⋎ χ) ➝ ψ] := by int_prover_2s
-
-example : Entailment.TwoSided 𝓢 [φ ⭤ ψ] [φ ➝ (χ ⋎ ψ)] := by int_prover_2s
-
-/--/
-example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, χ ⭤ ξ] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s 32
-
-example (h1 : 𝓢 ⊢! φ ⭤ ψ) (h2 : 𝓢 ⊢! χ ⭤ ξ) : Entailment.TwoSided 𝓢 [] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s [h1, h2]
-
-example : 𝓢 ⊢! (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by cl_prover
-
-example(h1 : 𝓢 ⊢! φ ⭤ ψ) (h2 : 𝓢 ⊢! χ ⭤ ξ) : 𝓢 ⊢! (ψ ➝ ∼ξ) ⭤ (φ ➝ ∼χ) := by cl_prover [h1, h2]
-
-end
-
-section
-
-open LO.Modal.Entailment
-
-variable {S F : Type*} [DecidableEq F] [BasicModalLogicalConnective F] [Entailment F S]
-
-variable {𝓢 𝓣 𝓤 : S} [𝓣 ⪯ 𝓢] [𝓤 ⪯ 𝓢] [Modal.Entailment.K 𝓢] {φ ψ ξ χ : F}
-
-example : 𝓢 ⊢! ((□φ ➝ □□φ) ➝ □φ) ➝ □φ := by cl_prover 6
-
-example (h₁ : 𝓣 ⊢! □φ ⭤ φ) (h₂ : 𝓤 ⊢! □ψ ⭤ ψ) : 𝓢 ⊢! φ ⋎ □ψ ⭤ □φ ⋏ φ ⋎ ψ := by cl_prover [h₁, h₂]
-
-end
 
 end IntProver
 
