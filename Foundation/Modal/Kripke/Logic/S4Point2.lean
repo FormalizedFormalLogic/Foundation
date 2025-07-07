@@ -73,7 +73,7 @@ instance finite_complete : Complete Logic.S4Point2 FrameClass.finite_S4Point2 :=
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
   let FRM := finestFiltrationTransitiveClosureModel (M↾r) (φ.subformulas);
-  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTransitive)) (by subformula) |>.mpr;
+  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTransitive)) (by simp) |>.mpr;
   apply hφ;
   apply Set.mem_setOf_eq.mpr;
   exact {

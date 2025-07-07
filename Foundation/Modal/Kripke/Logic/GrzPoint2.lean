@@ -242,14 +242,14 @@ instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 
       | himp χ ξ ihχ ihξ =>
         constructor;
         . intro h hχ;
-          apply ihξ (Formula.subformulas.mem_imp ψ_sub |>.2) |>.mp;
+          apply ihξ (by grind) |>.mp;
           apply h;
-          apply ihχ (Formula.subformulas.mem_imp ψ_sub |>.1) |>.mpr;
+          apply ihχ (by grind) |>.mpr;
           assumption;
         . intro h hχ;
-          apply ihξ (Formula.subformulas.mem_imp ψ_sub |>.2) |>.mpr;
+          apply ihξ (by grind) |>.mpr;
           apply h;
-          apply ihχ (Formula.subformulas.mem_imp ψ_sub |>.1) |>.mp;
+          apply ihχ (by grind) |>.mp;
           assumption;
       | hbox ψ ihψ =>
         constructor;
@@ -257,12 +257,12 @@ instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 
           match u with
           | Sum.inl x => simp [M', Frame.Rel'] at Ru;
           | Sum.inr _ =>
-            apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mp;
+            apply ihψ (by grind) |>.mp;
             apply ht;
             apply Frame.refl;
         . intro ht u Rtu;
           have := t_terminal Rtu; subst this;
-          apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mpr;
+          apply ihψ (by grind) |>.mpr;
           apply ht;
           tauto;
     have : ∀ y : RM.World, ∀ ψ ∈ φ.subformulas, y ⊧ ψ ↔ (Satisfies M' (Sum.inl y) ψ) := by
@@ -274,17 +274,17 @@ instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 
           match v with
           | Sum.inl x =>
             simp only [Frame.Rel', M', RM] at Ruv;
-            exact ihψ x (Formula.subformulas.mem_box ψ_sub) |>.mp $ hψ _ Ruv;
+            exact ihψ x (by grind) |>.mp $ hψ _ Ruv;
           | Sum.inr x =>
             obtain ⟨t, t_terminal, Rut⟩ : ∃ t ∈ RM.terminals, y ≺ t := Frame.exists_terminal;
-            apply H₂ t t_terminal ψ (Formula.subformulas.mem_box ψ_sub) |>.mp;
+            apply H₂ t t_terminal ψ (by grind) |>.mp;
             apply hψ;
             exact Rut;
         . intro h v Ruv;
-          exact ihψ v (Formula.subformulas.mem_box ψ_sub) |>.mpr $ @h (Sum.inl v) Ruv;
+          exact ihψ v (by grind) |>.mpr $ @h (Sum.inl v) Ruv;
       | himp _ _ ihχ ihξ =>
-        have := ihχ y (Formula.subformulas.mem_imp ψ_sub |>.1);
-        have := ihξ y (Formula.subformulas.mem_imp ψ_sub |>.2);
+        have := ihχ y (by grind);
+        have := ihξ y (by grind);
         tauto;
       | _ => tauto;
     exact this r' φ (by simp) |>.not.mp hφ;
