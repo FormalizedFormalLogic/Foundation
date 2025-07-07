@@ -22,7 +22,7 @@ theorem inconsistent_unprovable [T.SoundOnHierarchy 𝚺 1] :
 
 theorem inconsistent_independent [T.SoundOnHierarchy 𝚺 1] :
     Independent (T : Axiom ℒₒᵣ) (T.isConsistent : Sentence ℒₒᵣ) :=
-  T.standardPr.consistency_independent
+  T.standardPr.con_independent
 
 instance [Consistent T] : T ⪱ T + T.Con :=
   StrictlyWeakerThan.of_unprovable_provable (φ := ↑T.isConsistent)
