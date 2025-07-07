@@ -16,7 +16,7 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 variable (V)
 
@@ -303,6 +303,6 @@ end R₀Theory
 
 end TProof
 
-end Arithmetization
+end InternalArithmetic
 
 end LO.ISigma1.Metamath

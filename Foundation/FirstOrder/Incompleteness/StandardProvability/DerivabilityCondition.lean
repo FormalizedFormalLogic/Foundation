@@ -10,7 +10,7 @@ import Foundation.FirstOrder.Incompleteness.FixedPoint
 
 namespace LO.ISigma1
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath Arithmetization
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath InternalArithmetic
 
 variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] (U : ArithmeticTheory) [U.Delta1Definable]
 
@@ -66,7 +66,7 @@ namespace LO.FirstOrder.Arithmetic
 
 open ProvabilityLogic
 
-open PeanoMinus IOpen ISigma0 ISigma1 Metamath Arithmetization
+open PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
 
 variable (T : ArithmeticTheory) [T.Delta1Definable]
 

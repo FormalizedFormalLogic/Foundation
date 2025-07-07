@@ -562,7 +562,7 @@ end fvfree
 
 end
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 protected def zero : ℕ := qqFuncN 0 zeroIndex 0
 
@@ -572,9 +572,9 @@ noncomputable def qqAdd (x y : V) : V := ^func 2 (addIndex : V) ?[x, y]
 
 noncomputable def qqMul (x y : V) : V := ^func 2 (mulIndex : V) ?[x, y]
 
-notation "𝟎" => Arithmetization.zero
+notation "𝟎" => InternalArithmetic.zero
 
-notation "𝟏" => Arithmetization.one
+notation "𝟏" => InternalArithmetic.one
 
 infixl:80 " ^+ " => qqAdd
 
@@ -621,16 +621,16 @@ end
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
 @[simp] lemma zero_semiterm : ⌜ℒₒᵣ⌝.IsSemiterm n (𝟎 : V) := by
-  simp [Arithmetization.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma one_semiterm : ⌜ℒₒᵣ⌝.IsSemiterm n (𝟏 : V) := by
-  simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 namespace Numeral
 
 def blueprint : PR.Blueprint 0 where
-  zero := .mkSigma “y. y = ↑Arithmetization.one” (by simp)
-  succ := .mkSigma “y t n. !qqAddDef y t ↑Arithmetization.one” (by simp)
+  zero := .mkSigma “y. y = ↑InternalArithmetic.one” (by simp)
+  succ := .mkSigma “y t n. !qqAddDef y t ↑InternalArithmetic.one” (by simp)
 
 noncomputable def construction : PR.Construction V blueprint where
   zero := fun _ ↦ 𝟏
@@ -661,7 +661,7 @@ end
 @[simp] lemma lt_numeralAux_self (n : V) : n < numeralAux n := by
     induction n using ISigma1.sigma1_succ_induction
     · definability
-    case zero => simp [Arithmetization.one, qqFuncN_eq_qqFunc]
+    case zero => simp [InternalArithmetic.one, qqFuncN_eq_qqFunc]
     case succ n ih =>
       refine lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
 
@@ -704,7 +704,7 @@ section
 
 def _root_.LO.FirstOrder.Arithmetic.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
   “t x.
-    (x = 0 → t = ↑Arithmetization.zero) ∧
+    (x = 0 → t = ↑InternalArithmetic.zero) ∧
     (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxDef t x')”
   (by simp)
 
@@ -725,38 +725,38 @@ end
     ⌜ℒₒᵣ⌝.termSubst w (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [Arithmetization.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
     · simp only [numeral_add_two, qqAdd]
-      rw [Language.termSubst_func (by simp) (by simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
-      simp [ih, Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+      rw [Language.termSubst_func (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      simp [ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_shift (x : V) :
     ⌜ℒₒᵣ⌝.termShift (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [Arithmetization.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
     · simp only [numeral_add_two, qqAdd]
-      rw [Language.termShift_func (by simp) (by simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
-      simp [ih, Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+      rw [Language.termShift_func (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      simp [ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_bShift (x : V) :
     ⌜ℒₒᵣ⌝.termBShift (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [Arithmetization.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
-    · simp [Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
-    · simp [qqAdd, ih, Arithmetization.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [qqAdd, ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 end numeral
 
-end Arithmetization
+end InternalArithmetic
 
 end LO.ISigma1.Metamath

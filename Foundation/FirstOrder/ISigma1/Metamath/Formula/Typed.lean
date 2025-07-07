@@ -262,7 +262,7 @@ end Language.Semiformula
 end typed_isfvfree
 -/
 
-open Arithmetization
+open InternalArithmetic
 
 noncomputable def Language.Semiterm.equals {n : V} (t u : ⌜ℒₒᵣ⌝.Semiterm n) : ⌜ℒₒᵣ⌝.Semiformula n := ⟨t.val ^= u.val, by simp [qqEQ]⟩
 
@@ -286,7 +286,7 @@ noncomputable def Language.Semiformula.ball {n : V} (t : ⌜ℒₒᵣ⌝.Semiter
 noncomputable def Language.Semiformula.bex {n : V} (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) : ⌜ℒₒᵣ⌝.Semiformula n :=
   (⌜ℒₒᵣ⌝.bvar 0 <' t.bShift ⋏ p).ex
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 variable {n m : V}
 
@@ -427,7 +427,7 @@ lemma nth_tSubstItr' {n m : V} (w : ⌜ℒₒᵣ⌝.SemitermVec n m) (p : ⌜ℒ
     (tSubstItr w p k).disj.substs v = (tSubstItr (w.substs v) p k).disj := by
   ext; simp [Language.Semiformula.substs, Language.SemitermVec.substs, substs_disj_substItr p.prop w.prop v.prop]
 
-end Arithmetization
+end InternalArithmetic
 
 lemma Language.Semiformula.ball_eq_imp {n : V} (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) :
     p.ball t = (⌜ℒₒᵣ⌝.bvar 0 <' t.bShift ➝ p).all := by simp [Language.Semiformula.ball, imp_def]

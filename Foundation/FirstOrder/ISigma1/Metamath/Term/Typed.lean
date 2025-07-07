@@ -265,7 +265,7 @@ end Language.Semiterm
 
 end typed_isfvfree
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 noncomputable def typedNumeral (n m : V) : ⌜ℒₒᵣ⌝.Semiterm n := ⟨numeral m, by simp⟩
 
@@ -367,4 +367,4 @@ lemma semiterm_induction (Γ) {n : V} {P : ⌜ℒₒᵣ⌝.Semiterm n → Prop}
         (by simpa using ih 1 (by simp) (by simp [ht₂]))
 -/
 
-end LO.ISigma1.Metamath.Arithmetization
+end LO.ISigma1.Metamath.InternalArithmetic

@@ -217,7 +217,7 @@ variable {T : ArithmeticTheory} [T.Delta1Definable]
 
 /-- Hilbert–Bernays provability condition D1 -/
 theorem provable_of_provable_arith {φ} : T ⊢! φ → T.Provable (⌜φ⌝ : V) := fun h ↦
-  Language.Theory.Derivable.of_ss Arithmetization.theory_subset_AddR₀ (provable_of_provable h)
+  Language.Theory.Derivable.of_ss InternalArithmetic.theory_subset_AddR₀ (provable_of_provable h)
 
 theorem provable_of_provable_arith₀ {σ} : T ⊢!. σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
   simpa using provable_of_provable_arith (T := T) (V := V) <| Axiom.provable_iff.mp h

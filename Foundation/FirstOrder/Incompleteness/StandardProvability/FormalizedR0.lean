@@ -195,7 +195,7 @@ def singleton (φ : SyntacticFormula L) :
 
 end
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 namespace Theory.R0'
 
@@ -706,9 +706,9 @@ noncomputable instance : R₀Theory (T†V) where
 
 end
 
-end Arithmetization
+end InternalArithmetic
 
-open Arithmetization
+open InternalArithmetic
 
 section
 

@@ -877,7 +877,7 @@ lemma Language.IsFVFree.ex {n p : V} (hp : L.IsFVFree (n + 1) p) :
 end fvfree
 -/
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 noncomputable def qqEQ (x y : V) : V := ^rel 2 (eqIndex : V) ?[x, y]
 
@@ -981,6 +981,6 @@ lemma substs_eq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝
   rw [substs_rel (by simp) (by simp [ht, hu])]
   simp [termSubstVec_cons₂ ht hu]
 
-end Arithmetization
+end InternalArithmetic
 
 end LO.ISigma1.Metamath

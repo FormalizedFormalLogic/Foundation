@@ -11,7 +11,7 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 variable {T : LOR.TTheory (V := V)} [R₀Theory T]
 
@@ -173,7 +173,7 @@ theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) 
 
 end TProof
 
-end Arithmetization
+end InternalArithmetic
 
 section
 
@@ -181,11 +181,11 @@ variable {T : ArithmeticTheory} [T.Delta1Definable]
 
 theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
-  simpa [provable_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
+  simpa [provable_iff] using InternalArithmetic.TProof.sigma₁_complete _ hσ h
 
 theorem sigma₁_complete_provable {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T†V ⊢! ⌜σ⌝ := fun h ↦ by
-  simpa [provable_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
+  simpa [provable_iff] using InternalArithmetic.TProof.sigma₁_complete _ hσ h
 
 end
 

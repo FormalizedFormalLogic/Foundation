@@ -155,7 +155,7 @@ lemma qqDisj_semiformula {ps : V} :
 
 end qqDisj
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 section substItr
 
@@ -283,7 +283,7 @@ lemma substs_disj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula
 
 end substItr
 
-end Arithmetization
+end InternalArithmetic
 
 section verums
 

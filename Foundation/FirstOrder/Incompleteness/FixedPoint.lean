@@ -3,7 +3,7 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 open Classical
 
-namespace LO.ISigma1.Metamath.Arithmetization
+namespace LO.ISigma1.Metamath.InternalArithmetic
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
@@ -75,11 +75,11 @@ lemma substNumerals_defined :
 
 end
 
-end LO.ISigma1.Metamath.Arithmetization
+end LO.ISigma1.Metamath.InternalArithmetic
 
 namespace LO.ISigma1
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath Arithmetization
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath InternalArithmetic
 
 variable {T : Theory ℒₒᵣ} [𝐈𝚺₁ ⪯ T]
 

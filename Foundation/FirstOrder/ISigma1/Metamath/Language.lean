@@ -170,7 +170,7 @@ instance : DefinableLanguage ℒₒᵣ where
   rel_iff {k c} := by
     simpa [models_iff] using Language.ORing.of_mem_range_encode_rel
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -234,6 +234,6 @@ lemma func_iff {k f : V} : ⌜ℒₒᵣ⌝.Func k f ↔ (k = 0 ∧ f = zeroIndex
   simp [FirstOrder.Language.codeIn_func_def, lDef.func_def,
     coe_zeroIndex_eq, coe_oneIndex_eq, coe_addIndex_eq, coe_mulIndex_eq]
 
-end Arithmetization
+end InternalArithmetic
 
 end LO.ISigma1.Metamath

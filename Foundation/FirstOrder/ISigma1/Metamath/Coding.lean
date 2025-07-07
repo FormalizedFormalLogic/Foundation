@@ -130,13 +130,13 @@ lemma quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
 
 @[simp] lemma quote_zero (n) :
     (⌜(Semiterm.func Language.Zero.zero ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 := by
-  simp [FirstOrder.Semiterm.quote_func, Arithmetization.zero, Arithmetization.qqFunc_absolute, qqFuncN_eq_qqFunc]; rfl
+  simp [FirstOrder.Semiterm.quote_func, InternalArithmetic.zero, InternalArithmetic.qqFunc_absolute, qqFuncN_eq_qqFunc]; rfl
 
 @[simp] lemma quote_zero' (n) : (⌜(‘0’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 := quote_zero V n
 
 @[simp] lemma quote_one (n) :
     (⌜(Semiterm.func Language.One.one ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 := by
-  simp [FirstOrder.Semiterm.quote_func, Arithmetization.one, Arithmetization.qqFunc_absolute, qqFuncN_eq_qqFunc]; rfl
+  simp [FirstOrder.Semiterm.quote_func, InternalArithmetic.one, InternalArithmetic.qqFunc_absolute, qqFuncN_eq_qqFunc]; rfl
 
 @[simp] lemma quote_one' (n) : (⌜(‘1’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 := quote_one V n
 
@@ -264,8 +264,8 @@ lemma quote_termShiftVec {k n} (v : Fin k → SyntacticSemiterm L n) :
     rw [nth_termBShiftVec Hv.isUTerm hi]
     simpa using ih i
 
-@[simp] lemma Arithmetization.quote_numeral_eq_numeral (k : ℕ) :
-    (⌜(‘↑k’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = Arithmetization.numeral (k : V) := by
+@[simp] lemma InternalArithmetic.quote_numeral_eq_numeral (k : ℕ) :
+    (⌜(‘↑k’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = InternalArithmetic.numeral (k : V) := by
   induction k
   case zero => simp
   case succ k ih =>
@@ -289,11 +289,11 @@ omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
 lemma quote_eterm_eq_quote_emb (t : Semiterm L Empty n) : (⌜t⌝ : V) = (⌜Rew.embs t⌝ : V) := by
   simp [quote_eq_coe_encode]
 
-@[simp] lemma Arithmetization.quote_numeral_eq_numeral' (k : ℕ) :
-    (⌜(‘↑k’ : Semiterm ℒₒᵣ Empty n)⌝ : V) = Arithmetization.numeral (k : V) := by
+@[simp] lemma InternalArithmetic.quote_numeral_eq_numeral' (k : ℕ) :
+    (⌜(‘↑k’ : Semiterm ℒₒᵣ Empty n)⌝ : V) = InternalArithmetic.numeral (k : V) := by
   simp [quote_eterm_eq_quote_emb]
 
-@[simp] lemma quote_quote_eq_numeral {α : Type*} [Encodable α] {x : α} : (⌜(⌜x⌝ : Semiterm ℒₒᵣ ℕ n)⌝ : V) = Arithmetization.numeral ⌜x⌝ := by
+@[simp] lemma quote_quote_eq_numeral {α : Type*} [Encodable α] {x : α} : (⌜(⌜x⌝ : Semiterm ℒₒᵣ ℕ n)⌝ : V) = InternalArithmetic.numeral ⌜x⌝ := by
   simp [goedelNumber'_def]; simp [quote_eq_coe_encode]
 
 end LO.ISigma1.Metamath

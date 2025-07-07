@@ -29,7 +29,7 @@ theorem incomplete
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦
         ⌜ℒₒᵣ⌝.IsSemiformula 1 φ ∧
-          (T.codeIn ℕ).Provable (⌜ℒₒᵣ⌝.neg <| ⌜ℒₒᵣ⌝.substs ?[Arithmetization.numeral φ] φ) := by
+          (T.codeIn ℕ).Provable (⌜ℒₒᵣ⌝.neg <| ⌜ℒₒᵣ⌝.substs ?[InternalArithmetic.numeral φ] φ) := by
       definability
     exact REPred.of_eq (re_iff_sigma1.mpr this) <| by
       intro φ; constructor
