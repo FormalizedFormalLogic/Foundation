@@ -13,6 +13,7 @@ open Formula
 open Kripke
 open Hilbert.Kripke
 
+
 namespace Kripke
 
 variable {F : Frame}
@@ -39,5 +40,8 @@ instance consistent : Entailment.Consistent Hilbert.GL :=
     constructor;
 
 end Logic.GL.Kripke
+
+
+instance : Entailment.Consistent Modal.GL := inferInstance
 
 end LO.Modal

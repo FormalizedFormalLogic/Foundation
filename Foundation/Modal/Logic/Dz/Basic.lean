@@ -27,7 +27,7 @@ instance : Modal.GL ⪱ Modal.Dz := by
     use ∼□⊥;
     constructor;
     . simp;
-    . simpa using Logic.GL.unprovable_notbox;
+    . simpa using GL.unprovable_notbox;
 
 section
 

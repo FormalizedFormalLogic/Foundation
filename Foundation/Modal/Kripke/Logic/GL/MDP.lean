@@ -194,7 +194,11 @@ theorem modal_disjunctive (h : Hilbert.GL ⊢! □φ₁ ⋎ □φ₂) : Hilbert.
     have := unnec! $ Context.emptyPrf! h;
     tauto;
   }
-instance : ModalDisjunctive (Hilbert.GL) := ⟨modal_disjunctive⟩
+instance : ModalDisjunctive Hilbert.GL := ⟨modal_disjunctive⟩
+instance : ModalDisjunctive Modal.GL where
+  modal_disjunctive := by
+    simp only [Normal.iff_logic_provable_provable];
+    apply modal_disjunctive;
 
 end Hilbert.GL
 

@@ -107,6 +107,9 @@ section
 
 abbrev logic (H : Hilbert.Normal α) : Logic α := Entailment.theory H
 
+@[simp high]
+lemma iff_logic_provable_provable : H.logic ⊢! φ ↔ H ⊢! φ := by simp [Entailment.theory, Logic.iff_provable];
+
 instance : Entailment.Lukasiewicz H.logic where
   mdp hφψ hφ := by
     replace hφψ := hφψ.1;
@@ -117,6 +120,7 @@ instance : Entailment.Lukasiewicz H.logic where
   imply₁ _ _ := by constructor; simp [Entailment.theory];
   imply₂ _ _ _ := by constructor; simp [Entailment.theory];
   elimContra _ _ := by constructor; simp [Entailment.theory];
+
 instance : Entailment.Necessitation H.logic where
   nec hφ := by
     replace hφ := hφ.1;
@@ -142,8 +146,12 @@ instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := by
   apply Equiv.iff.mp;
   infer_instance;
 
-@[simp high]
-lemma iff_logic_provable_provable : H.logic ⊢! φ ↔ H ⊢! φ := by simp [Entailment.theory, Logic.iff_provable];
+instance [Entailment.Consistent H] : Entailment.Consistent H.logic where
+  not_inconsistent := by
+    simp only [Inconsistent, iff_logic_provable_provable, not_forall]
+    use ⊥;
+    apply Entailment.Consistent.not_bot;
+    infer_instance;
 
 end
 
@@ -456,7 +464,7 @@ end Hilbert
 
 section
 
-variable {H : Hilbert.Normal ℕ}
+variable {H : Hilbert.Normal ℕ} {L : Logic ℕ}
 
 open Formula (atom)
 open Hilbert.Normal (weakerThan_of_subset_axioms weakerThan_of_provable_axioms)
@@ -465,6 +473,17 @@ protected abbrev Hilbert.K : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom
 protected abbrev K := Hilbert.K.logic
 instance : Hilbert.K.HasK where p := 0; q := 1
 instance : Entailment.K (Hilbert.K) where
+
+instance [L.IsNormal] : Modal.K ⪯ L := by
+  constructor;
+  intro φ;
+  suffices Hilbert.K ⊢! φ → L ⊢! φ by simpa [theory, Set.mem_setOf_eq, Set.setOf_mem_eq];
+  intro hφ;
+  induction hφ using Hilbert.Normal.rec! with
+  | axm s h => rcases h with rfl; simp;
+  | nec hφ => apply nec! hφ;
+  | mdp hφψ hφ => exact mdp! hφψ hφ
+  | imply₁ | imply₂ | ec => simp;
 
 
 protected abbrev Hilbert.KT : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}⟩
@@ -488,12 +507,13 @@ instance : Hilbert.KP.HasP where
 instance : Entailment.KP (Hilbert.KP) where
 
 
-instance : Modal.KP ≊ Modal.KD := by
-  suffices Hilbert.KP ≊ Hilbert.KD by infer_instance;
+instance : Hilbert.KP ≊ Hilbert.KD := by
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl) <;> simp;
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl) <;> simp;
+
+instance : Modal.KP ≊ Modal.KD := inferInstance
 
 
 protected abbrev Hilbert.KB : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.B (.atom 0)}⟩
