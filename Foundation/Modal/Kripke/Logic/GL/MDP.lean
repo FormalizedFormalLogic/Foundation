@@ -194,6 +194,7 @@ theorem modal_disjunctive (h : Hilbert.GL ⊢! □φ₁ ⋎ □φ₂) : Hilbert.
     have := unnec! $ Context.emptyPrf! h;
     tauto;
   }
+instance : ModalDisjunctive (Hilbert.GL) := ⟨modal_disjunctive⟩
 
 end Hilbert.GL
 

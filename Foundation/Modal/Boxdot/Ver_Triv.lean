@@ -23,12 +23,12 @@ lemma provable_boxdotTranslated_Ver_of_Triv : Hilbert.Triv ⊢! φ → Hilbert.V
     apply K!_intro <;> simp;
 
 lemma provable_Triv_of_boxdotTranslated_Ver : Hilbert.Ver ⊢! φᵇ → Hilbert.Triv ⊢! φ := by
-  suffices FrameClass.Ver ⊧ φᵇ → FrameClass.finite_Triv ⊧ φ by
-    simpa [iff_provable, Set.mem_setOf_eq, Triv.Kripke.finite_equality, Logic.Ver.Kripke.isolated];
-  contrapose;
   intro h;
-  obtain ⟨F, F_eq, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ h;
-  replace F_eq := Set.mem_setOf_eq.mp F_eq;
+  replace h := Sound.sound (𝓢 := Hilbert.Ver) (𝓜 := FrameClass.Ver) h;
+  apply Complete.complete (𝓢 := Hilbert.Triv) (𝓜 := FrameClass.Triv);
+  contrapose! h;
+  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ h;
+  replace hF := Set.mem_setOf_eq.mp hF;
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use F^≠;
   constructor;

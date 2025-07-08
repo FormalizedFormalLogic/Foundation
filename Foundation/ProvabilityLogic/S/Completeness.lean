@@ -31,13 +31,13 @@ variable [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)]
 
 lemma GL_S_TFAE :
     [
-      Logic.GL ⊢! (A.rflSubformula.conj ➝ A),
-      Logic.S ⊢! A,
+      Modal.GL ⊢! (A.rflSubformula.conj ➝ A),
+      Modal.S ⊢! A,
       ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret T.standardPr A)
     ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;
-    have h : Logic.S ⊢! Finset.conj A.rflSubformula ➝ A := WeakerThan.pbl h;
+    have h : Modal.S ⊢! Finset.conj A.rflSubformula ➝ A := WeakerThan.pbl h;
     apply h ⨀ ?_;
     apply FConj!_iff_forall_provable.mpr;
     simp [-Logic.iff_provable];
@@ -50,6 +50,7 @@ lemma GL_S_TFAE :
     contrapose;
     push_neg;
     intro hA;
+    replace hA := Hilbert.Normal.iff_logic_provable_provable.not.mp hA;
     obtain ⟨M₁, r₁, _, hA⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
     let M₀ := Model.extendRoot M₁ r₁ 1;
     let r₀ : M₀.World := Model.extendRoot.root;
@@ -150,7 +151,7 @@ lemma GL_S_TFAE :
       simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;
 
-theorem S.arithmetical_completeness_iff : Logic.S ⊢! A ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret T.standardPr A) := GL_S_TFAE.out 1 2
+theorem S.arithmetical_completeness_iff : Modal.S ⊢! A ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret T.standardPr A) := GL_S_TFAE.out 1 2
 
 end ProvabilityLogic
 

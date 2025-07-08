@@ -61,7 +61,7 @@ end Formula
 open Entailment
 open Formula (trivTranslate verTranslate)
 
-lemma Hilbert.provable_of_classical_provable {H : Modal.Hilbert.Normal ℕ} {φ : Propositional.Formula ℕ} : Propositional.Hilbert.Cl ⊢! φ → (H.logic ⊢! φ.toModalFormula) := by
+lemma Hilbert.provable_of_classical_provable {H : Modal.Hilbert.Normal ℕ} {φ : Propositional.Formula ℕ} : Propositional.Hilbert.Cl ⊢! φ → (H ⊢! φ.toModalFormula) := by
   intro h;
   induction h using Propositional.Hilbert.rec! with
   | axm _ h => rcases h with (rfl | rfl) <;> simp;
@@ -86,10 +86,9 @@ lemma iff_trivTranslated : Hilbert.Triv ⊢! φ ⭤ φᵀ := by
 lemma iff_provable_Cl : Hilbert.Triv ⊢! φ ↔ Propositional.Hilbert.Cl ⊢! φᵀ.toPropFormula := by
   constructor;
   . intro h;
-    induction h with
-    | maxm a =>
-      rcases a with ⟨_, (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩), ⟨_, rfl⟩⟩
-      <;> simp [trivTranslate, Formula.toPropFormula];
+    induction h using Hilbert.Normal.rec! with
+    | axm s a =>
+      rcases a with (rfl | rfl | rfl) <;> simp [trivTranslate, Formula.toPropFormula];
     | mdp ih₁ ih₂ =>
       dsimp [trivTranslate] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;
@@ -123,10 +122,9 @@ lemma iff_verTranslated : Hilbert.Ver ⊢! φ ⭤ φⱽ := by
 protected lemma iff_provable_Cl : Hilbert.Ver ⊢! φ ↔ Propositional.Hilbert.Cl ⊢! φⱽ.toPropFormula := by
   constructor;
   . intro h;
-    induction h with
-    | maxm a =>
-      rcases a with ⟨_, (⟨_, _, rfl⟩ | ⟨_, rfl⟩), ⟨_, rfl⟩⟩
-      <;> simp [verTranslate, Formula.toPropFormula];
+    induction h using Hilbert.Normal.rec! with
+    | axm s a =>
+      rcases a with (rfl | rfl | rfl) <;> simp [verTranslate, Formula.toPropFormula];
     | mdp ih₁ ih₂ =>
       dsimp [verTranslate] at ih₁ ih₂;
       exact ih₁ ⨀ ih₂;

@@ -13,7 +13,8 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          {T U : FirstOrder.Theory L} [Diagonalization T]  [T ⪯ U]
          {𝔅 : ProvabilityPredicate T U} [𝔅.HBL]
 
-lemma GL.arithmetical_soundness (h : Hilbert.GL ⊢! A) {f : Realization L} : U ⊢!. f.interpret 𝔅 A := by
+lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization L} : U ⊢!. f.interpret 𝔅 A := by
+  replace h := Normal.iff_logic_provable_provable.mp h;
   induction h using Hilbert.Normal.rec! with
   | axm _ hp =>
     rcases hp with (⟨_, rfl⟩ | ⟨_, rfl⟩)

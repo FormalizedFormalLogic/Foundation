@@ -53,6 +53,9 @@ instance : Entailment.Lukasiewicz H where
 instance : Entailment.Necessitation H where
   nec := .nec
 
+instance : Entailment.DeductiveExplosion (Hilbert.Normal α) where
+  dexp := fun h _ ↦ of_O h
+
 protected lemma rec!
   {motive   : (φ : Formula α) → (H ⊢! φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ H.axioms) → motive (φ⟦s⟧) ⟨.axm s h⟩)
@@ -104,6 +107,23 @@ section
 
 abbrev logic (H : Hilbert.Normal α) : Logic α := Entailment.theory H
 
+instance : Entailment.Lukasiewicz H.logic where
+  mdp hφψ hφ := by
+    replace hφψ := hφψ.1;
+    replace hφ := hφ.1;
+    simp_all only [theory, Set.mem_setOf_eq];
+    constructor;
+    exact hφψ ⨀ hφ;
+  imply₁ _ _ := by constructor; simp [Entailment.theory];
+  imply₂ _ _ _ := by constructor; simp [Entailment.theory];
+  elimContra _ _ := by constructor; simp [Entailment.theory];
+instance : Entailment.Necessitation H.logic where
+  nec hφ := by
+    replace hφ := hφ.1;
+    simp only [theory, Set.mem_setOf_eq];
+    constructor;
+    exact nec! hφ;
+
 instance [H₁ ⪯ H₂] : H₁.logic ⪯ H₂.logic := by
   apply weakerThan_iff.mpr;
   simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];
@@ -121,6 +141,9 @@ instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := by
   simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];
   apply Equiv.iff.mp;
   infer_instance;
+
+@[simp high]
+lemma iff_logic_provable_provable : H.logic ⊢! φ ↔ H ⊢! φ := by simp [Entailment.theory, Logic.iff_provable];
 
 end
 
@@ -144,6 +167,14 @@ instance [H.HasK] : Entailment.HasAxiomK H where
         else if (HasK.q H) = b then ψ
         else (.atom b))
       HasK.mem_K;
+
+instance [H.HasK] : H.logic.IsNormal where
+  K φ ψ := by constructor; simp [Entailment.theory];
+  subst s hφ := by
+    replace hφ := hφ.1;
+    constructor;
+    simp_all only [theory, Set.mem_setOf_eq];
+    apply subst! s hφ;
 
 
 class HasT (H : Hilbert.Normal α) where

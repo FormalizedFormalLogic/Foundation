@@ -531,28 +531,28 @@ open Hilbert.Normal
 variable {H : Hilbert.Normal ℕ} [H.HasK] {m : outParam (Modality)}
 
 instance [H.HasT] : (□) ⤳[H.logic] (-) :=
-  translation_of_axiomInstance (a := HasT.p H) $ by simp;
+  translation_of_axiomInstance (a := HasT.p H) $ by simp [Entailment.theory];
 
 instance [H.HasFour] : (□) ⤳[H.logic] (□□) :=
-  translation_of_axiomInstance (a := Hilbert.HasFour.p (H := H)) $ by simp
+  translation_of_axiomInstance (a := HasFour.p (H := H)) $ by simp [Entailment.theory];
 
 instance [H.HasTc] : (m) ⤳[H.logic] (□m) :=
-  translation_of_axiomInstance (a := Hilbert.HasTc.p H) $ by simp;
+  translation_of_axiomInstance (a := HasTc.p H) $ by simp [Entailment.theory];
 
 instance [H.HasB] : (m) ⤳[H.logic] (□◇m) :=
-  translation_of_axiomInstance (a := Hilbert.HasB.p (H := H)) $ by simp;
+  translation_of_axiomInstance (a := HasB.p (H := H)) $ by simp [Entailment.theory];
 
 instance [H.HasD] : (□m) ⤳[H.logic] (◇m) :=
-  translation_of_axiomInstance (a := Hilbert.HasD.p (H := H)) $ by simp;
+  translation_of_axiomInstance (a := HasD.p (H := H)) $ by simp [Entailment.theory];
 
 instance [H.HasFive] : (◇m) ⤳[H.logic] (□◇m) :=
-  translation_of_axiomInstance (a := Hilbert.HasFive.p (H := H)) $ by simp;
+  translation_of_axiomInstance (a := HasFive.p (H := H)) $ by simp [Entailment.theory];
 
 end
 
-instance : (□-) ⤳[Logic.S4] (-) := inferInstance
+instance : (□-) ⤳[Modal.S4] (-) := inferInstance
 
-instance : (□-) ≅[Logic.Triv] (-) := inferInstance
+instance : (□-) ≅[Modal.Triv] (-) := inferInstance
 
 
 end Logic
