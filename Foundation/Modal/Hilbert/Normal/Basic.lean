@@ -1,6 +1,7 @@
 import Foundation.Modal.Entailment.GL
 import Foundation.Modal.Entailment.Grz
 import Foundation.Modal.Entailment.S5Grz
+import Foundation.Modal.Entailment.K4Hen
 import Foundation.Modal.Logic.Basic
 
 
@@ -746,6 +747,14 @@ protected abbrev Hilbert.KHen : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.a
 protected abbrev KHen := Hilbert.KHen.logic
 instance : (Hilbert.KHen).HasK where p := 0; q := 1;
 instance : (Hilbert.KHen).HasHen where p := 0;
+
+
+protected abbrev Hilbert.K4Hen : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Hen (.atom 0)}⟩
+protected abbrev Logic.K4Hen := Hilbert.K4Hen.logic
+instance : (Hilbert.K4Hen).HasK where p := 0; q := 1;
+instance : (Hilbert.K4Hen).HasFour where p := 0
+instance : (Hilbert.K4Hen).HasHen where p := 0
+instance : Entailment.K4Hen (Hilbert.K4Hen) where
 
 
 protected abbrev Hilbert.Grz : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0)}⟩
