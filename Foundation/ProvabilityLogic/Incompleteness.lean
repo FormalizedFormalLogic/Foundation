@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Basic
+import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.Logic.HilbertStyle.Supplemental
 import Foundation.Meta.ClProver
 
@@ -140,7 +140,7 @@ variable (𝔅)
 
 lemma goedel_spec : T₀ ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := by
   convert (diag (T := T₀) “x. ¬!𝔅.prov x”);
-  simp [goedel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
+  simp [goedel];
   rfl;
 
 variable {𝔅}
@@ -201,28 +201,28 @@ theorem formalized_unprovable_goedel : T₀ ⊢!. 𝔅.con ➝ ∼𝔅 𝗚 := b
   have h₃ : T₀ ⊢!. 𝔅 (𝔅 𝗚 ➝ ⊥) ➝ 𝔅 (𝔅 𝗚) ➝ 𝔅 ⊥ := 𝔅.D2 (𝔅 𝗚) ⊥
   cl_prover [h₁, h₂, h₃]
 
-theorem goedel_iff_consistency : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := by
+theorem goedel_iff_con : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := by
   have h₁ : T₀ ⊢!. ∼𝔅 𝗚 ➝ 𝔅.con := formalized_consistent_of_existance_unprovable 𝗚
   have h₂ : T₀ ⊢!. 𝔅.con ➝ ∼𝔅 𝗚 := 𝔅.formalized_unprovable_goedel
   have h₃ : T₀ ⊢!. 𝗚 ⭤ ∼𝔅 𝗚 := 𝔅.goedel_spec
   cl_prover [h₁, h₂, h₃]
 
-theorem unprovable_consistency [Consistent T] : T ⊬. 𝔅.con := by
+theorem con_unprovable [Consistent T] : T ⊬. 𝔅.con := by
   intro h
-  have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_consistency
+  have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_con
   have : T ⊢!. 𝗚 := by cl_prover [h, this]
   exact 𝔅.unprovable_goedel this
 
-theorem unrefutable_consistency [Consistent T] [𝔅.GoedelSound] : T ⊬. ∼𝔅.con := by
+theorem con_unrefutable [Consistent T] [𝔅.GoedelSound] : T ⊬. ∼𝔅.con := by
   intro h
-  have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_consistency
+  have : T₀ ⊢!. 𝗚 ⭤ 𝔅.con := 𝔅.goedel_iff_con
   have : T ⊢!. ∼𝗚 := by cl_prover [h, this]
   exact 𝔅.unrefutable_goedel this
 
-theorem consistency_independent [Consistent T] [𝔅.GoedelSound] : Independent (T : Axiom L) 𝔅.con := by
+theorem con_independent [Consistent T] [𝔅.GoedelSound] : Independent (T : Axiom L) 𝔅.con := by
   constructor
-  . apply unprovable_consistency
-  . apply unrefutable_consistency
+  . apply con_unprovable
+  . apply con_unrefutable
 
 end Second
 
@@ -280,7 +280,7 @@ end LoebTheorem
 
 variable [Consistent T]
 
-lemma unprovable_consistency_via_loeb [L.DecidableEq] [𝔅.Loeb] : T ⊬. 𝔅.con := by
+lemma unprovable_con_via_loeb [L.DecidableEq] [𝔅.Loeb] : T ⊬. 𝔅.con := by
   by_contra hC;
   have : T ⊢!. ⊥ := Loeb.LT $ N!_iff_CO!.mp hC;
   have : ¬Consistent T := not_consistent_iff_inconsistent.mpr
@@ -289,19 +289,19 @@ lemma unprovable_consistency_via_loeb [L.DecidableEq] [𝔅.Loeb] : T ⊬. 𝔅.
 
 variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] [𝔅.HBL] [𝔅.GoedelSound]
 
-lemma formalized_unprovable_not_consistency :
+lemma formalized_unprovable_not_con :
     T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) := by
   by_contra hC;
   have : T ⊢!. ∼𝔅.con := Loeb.LT $ CN!_of_CN!_right hC;
-  have : T ⊬. ∼𝔅.con := unrefutable_consistency 𝔅;
+  have : T ⊬. ∼𝔅.con := con_unrefutable 𝔅;
   contradiction;
 
 lemma formalized_unrefutable_goedel : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.goedel) := by
   by_contra hC;
-  have : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con)  := formalized_unprovable_not_consistency;
+  have : T ⊬. 𝔅.con ➝ ∼𝔅 (∼𝔅.con)  := formalized_unprovable_not_con;
   have : T ⊢!. 𝔅.con ➝ ∼𝔅 (∼𝔅.con) :=
     C!_trans hC $ WeakerThan.pbl <| K!_left <| ENN!_of_E!
-      <| prov_distribute_iff <| ENN!_of_E! <| WeakerThan.pbl (𝔅.goedel_iff_consistency);
+      <| prov_distribute_iff <| ENN!_of_E! <| WeakerThan.pbl (𝔅.goedel_iff_con);
   contradiction;
 
 end Loeb

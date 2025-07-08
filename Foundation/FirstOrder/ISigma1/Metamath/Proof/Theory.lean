@@ -3,7 +3,7 @@ import Foundation.FirstOrder.ISigma1.Metamath.Formula.Iteration
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -13,7 +13,7 @@ section theory
 
 variable (L)
 
-structure _root_.LO.FirstOrder.Arith.LDef.TDef (pL : LDef) where
+structure _root_.LO.FirstOrder.Arithmetic.LDef.TDef (pL : LDef) where
   ch : 𝚫₁.Semisentence 1
 
 protected structure Language.Theory (L : Metamath.Language V) {pL : LDef} [Metamath.Language.Defined L pL] where

@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Basic
+import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.FirstOrder.R0.Basic
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Data.Nat.Cast.Order.Basic
@@ -59,7 +59,7 @@ notation "𝐏𝐀⁻" => PeanoMinus
 
 namespace PeanoMinus
 
-open FirstOrder Arith Language
+open FirstOrder Arithmetic Language
 
 @[simp] lemma finite : Set.Finite 𝐏𝐀⁻ := by
   have : 𝐏𝐀⁻ =

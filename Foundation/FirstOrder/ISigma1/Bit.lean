@@ -7,7 +7,7 @@ import Foundation.FirstOrder.ISigma0.Exponential
 
 namespace LO.ISigma1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -15,7 +15,7 @@ def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
 
 instance : Membership V V := ⟨fun a i ↦ Bit i a⟩
 
-def _root_.LO.FirstOrder.Arith.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y” (by simp)
 
 set_option linter.flexible false in
@@ -67,7 +67,7 @@ end
 
 end LO.ISigma1
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Arithmetic
 
 variable {ξ : Type*} {n}
 
@@ -85,12 +85,12 @@ def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
 
 @[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
-  simp only [Arith.ballIn, Rew.bshift_positive, Hierarchy.ball_iff, Hierarchy.imp_iff, and_iff_right_iff_imp]
+  simp only [Arithmetic.ballIn, Rew.bshift_positive, Hierarchy.ball_iff, Hierarchy.imp_iff, and_iff_right_iff_imp]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 @[simp] lemma Hieralchy.bexIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (bexIn t p) ↔ Hierarchy Γ m p := by
-  simp only [Arith.bexIn, Rew.bshift_positive, Hierarchy.bex_iff, Hierarchy.and_iff, and_iff_right_iff_imp]
+  simp only [Arithmetic.bexIn, Rew.bshift_positive, Hierarchy.bex_iff, Hierarchy.and_iff, and_iff_right_iff_imp]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 def memRel : 𝚺₀.Semisentence 3 := .mkSigma
@@ -142,7 +142,7 @@ end
 @[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
   simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def, memRel₃Opr]
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -182,11 +182,11 @@ lemma memRel₃_defined : 𝚺₀-Relation₄ (fun r x y z : V ↦ ⟪x, y, z⟫
   unfold Semiformula.Operator.val
   simp [memRel₃Opr, pair_defined.df.iff, memRel₃_defined.df.iff]
 
-end LO.FirstOrder.Arith
+end LO.FirstOrder.Arithmetic
 
 namespace LO.ISigma1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -259,7 +259,7 @@ lemma insert_graph (b i a : V) :
         not_false_eq_true, true_and, false_or, forall_exists_index, and_imp]
       rintro x _ rfl rfl; rfl ⟩
 
-def _root_.LO.FirstOrder.Arith.insertDef : 𝚺₀.Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.insertDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b i a. (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)” (by simp)
 
 lemma insert_defined : 𝚺₀-Function₂ (insert : V → V → V) via insertDef := by
@@ -322,7 +322,7 @@ lemma lt_exp_iff {a i : V} : a < Exp.exp i ↔ ∀ j ∈ a, j < i :=
 
 instance : HasSubset V := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
-def _root_.LO.FirstOrder.Arith.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
   “a b. ∀ i < a, i ∈ a → i ∈ b” (by simp)
 
 lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : V → V → Prop) via bitSubsetDef := by
@@ -385,7 +385,7 @@ private lemma under_graph (x y : V) : y = under x ↔ y + 1 = Exp.exp x := by
     have := congr_arg (· - 1) h
     simpa [under] using this
 
-def _root_.LO.FirstOrder.Arith.underDef : 𝚺₀.Semisentence 2 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.underDef : 𝚺₀.Semisentence 2 := .mkSigma
   “y x. !expDef.val (y + 1) x” (by simp)
 
 lemma under_defined : 𝚺₀-Function₁ (under : V → V) via underDef := by

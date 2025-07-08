@@ -102,7 +102,7 @@ end LO
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 namespace SolovaySentences
 
@@ -514,7 +514,7 @@ end LO.ISigma1.Metamath
 namespace LO.ProvabilityLogic
 
 open Entailment Entailment.FiniteContext
-open FirstOrder Arith
+open FirstOrder Arithmetic
 open Modal
 open Modal.Kripke
 

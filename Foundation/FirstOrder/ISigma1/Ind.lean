@@ -7,7 +7,7 @@ import Foundation.FirstOrder.ISigma1.Bit
 
 namespace LO.Induction
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
 
 variable {V : Type*} [ORingStruc V]
 
@@ -50,16 +50,16 @@ lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
     intro x hx
     induction x using ISigma1.sigma1_order_induction
     · clear hp hq ind
-      apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.imp
+      apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-        apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
+        apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₂
         · simp [Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
         · simp [HierarchySymbol.BoldfaceFunction.const]
-      · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.or
-        · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
+      · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.or
+        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₂
           · simp [Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
           · simp [HierarchySymbol.BoldfaceFunction.const]
-        · apply LO.FirstOrder.Arith.HierarchySymbol.Boldface.comp₂
+        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₂
           · simp [Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
           · simp [HierarchySymbol.BoldfaceFunction.const]
     case ind z ih =>
