@@ -84,7 +84,6 @@ open Formula
 open Entailment
 open Kripke
 
-lemma GrzPoint3.Kripke.finite_connected_partial_order : Modal.GrzPoint3 = FrameClass.finite_GrzPoint3.logic := eq_hilbert_logic_frameClass_logic
 
 theorem GrzPoint3.proper_extension_of_GrzPoint2: Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
   constructor;

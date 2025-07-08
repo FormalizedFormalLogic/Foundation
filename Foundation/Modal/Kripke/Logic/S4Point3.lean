@@ -93,8 +93,6 @@ instance : Complete Hilbert.S4Point3 FrameClass.finite_S4Point3 := ⟨by
 
 end FFP
 
-lemma connected_preorder : Modal.S4Point3 = FrameClass.S4Point3.logic := eq_hilbert_logic_frameClass_logic
-lemma finite_connected_preorder : Modal.S4Point3 = FrameClass.finite_S4Point3.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.S4Point2 ⪱ Hilbert.S4Point3 := by
   constructor;

@@ -56,7 +56,6 @@ instance : Complete Hilbert.KT4B FrameClass.finite_KT4B := ⟨by
 
 end Hilbert.KT4B.Kripke
 
-lemma KT4B.Kripke.symm_preorder : Modal.KT4B = FrameClass.KT4B.logic := eq_hilbert_logic_frameClass_logic
 
 
 end LO.Modal

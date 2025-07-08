@@ -53,7 +53,6 @@ instance : Complete Hilbert.S4 FrameClass.finite_S4 := ⟨by
   }
 ⟩
 
-lemma preorder : Modal.S4 = FrameClass.S4.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.KT ⪱ Hilbert.S4 := by
   constructor;

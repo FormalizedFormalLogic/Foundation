@@ -58,7 +58,6 @@ instance : Complete Hilbert.KTB FrameClass.finite_KTB := ⟨by
   }
 ⟩
 
-lemma refl_symm : Modal.KTB = FrameClass.KTB.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.KT ⪱ Hilbert.KTB := by
   constructor;

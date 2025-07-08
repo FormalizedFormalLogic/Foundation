@@ -37,7 +37,6 @@ instance : Entailment.Consistent Hilbert.GLPoint3 :=
 
 instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := by sorry;
 
-lemma finite_strict_linear_order : Modal.GLPoint3 = FrameClass.finite_GLPoint3.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.GL ⪱ Hilbert.GLPoint3 := by
   constructor;

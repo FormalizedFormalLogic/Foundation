@@ -63,6 +63,5 @@ end Hilbert
 
 instance : Modal.K ⪱ Modal.KB := inferInstance
 
-lemma KB.Kripke.eq_symm : Modal.KB = FrameClass.KB.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

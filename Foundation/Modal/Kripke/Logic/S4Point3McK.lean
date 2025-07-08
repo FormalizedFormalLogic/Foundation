@@ -40,7 +40,6 @@ instance : Canonical (Hilbert.S4Point3McK) FrameClass.S4Point3McK := ⟨by const
 
 instance : Complete (Hilbert.S4Point3McK) FrameClass.S4Point3McK := inferInstance
 
-lemma preorder_connected_mckinsey : Modal.S4Point3McK = FrameClass.S4Point3McK.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.S4Point2McK ⪱ Hilbert.S4Point3McK := by
   constructor;

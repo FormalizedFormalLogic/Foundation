@@ -37,7 +37,6 @@ instance : Canonical (Hilbert.KDB) Kripke.FrameClass.KDB := ⟨by constructor⟩
 
 instance : Complete (Hilbert.KDB) Kripke.FrameClass.KDB := inferInstance
 
-lemma serial_symm : Modal.KDB = Kripke.FrameClass.KDB.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.KD ⪱ Hilbert.KDB := by
   constructor;

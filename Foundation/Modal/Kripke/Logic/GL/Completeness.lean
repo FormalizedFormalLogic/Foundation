@@ -210,7 +210,6 @@ open Formula
 open Entailment
 open Kripke
 
-lemma GL.Kripke.finite_trans_irrefl : Modal.GL = FrameClass.finite_GL.logic := eq_hilbert_logic_frameClass_logic
 
 end Logic
 

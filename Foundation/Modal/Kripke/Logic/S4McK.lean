@@ -40,7 +40,6 @@ instance : Canonical Hilbert.S4McK FrameClass.S4McK := ⟨by constructor⟩
 
 instance : Complete Hilbert.S4McK FrameClass.S4McK := inferInstance
 
-lemma preorder_mckinsey : Modal.S4McK = FrameClass.S4McK.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.S4 ⪱ Hilbert.S4McK := by
   constructor;

@@ -77,8 +77,6 @@ instance : Complete (Hilbert.Ver) Kripke.FrameClass.finite_Ver := ⟨by
   }
 ⟩
 
-lemma isolated : Modal.Ver = FrameClass.Ver.logic := eq_hilbert_logic_frameClass_logic
-lemma finite_Ver : Modal.Ver = FrameClass.finite_Ver.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.KTc ⪱ Hilbert.Ver := by
   constructor;

@@ -256,7 +256,6 @@ instance : Complete Hilbert.Grz FrameClass.finite_Grz := complete_of_mem_miniCan
   intro φ;
   infer_instance;
 
-lemma finite_partial_order : Modal.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.S4McK ⪱ Hilbert.Grz := by
   constructor;

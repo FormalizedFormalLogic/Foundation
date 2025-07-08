@@ -42,7 +42,6 @@ instance : Canonical (Hilbert.KTc) Kripke.FrameClass.KTc := ⟨by
 
 instance : Complete (Hilbert.KTc) Kripke.FrameClass.KTc := inferInstance
 
-lemma corefl : Modal.KTc = Kripke.FrameClass.KTc.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.KB4 ⪱ Hilbert.KTc := by
   constructor;

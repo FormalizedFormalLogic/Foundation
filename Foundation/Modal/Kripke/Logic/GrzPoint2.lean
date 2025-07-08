@@ -292,7 +292,6 @@ instance : Complete Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
 
 end
 
-lemma finite_confluent_partial_order : Modal.GrzPoint2 = FrameClass.finite_GrzPoint2.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.Grz ⪱ Hilbert.GrzPoint2 := by
   constructor;

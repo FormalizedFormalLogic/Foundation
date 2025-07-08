@@ -64,6 +64,5 @@ end Hilbert
 
 instance : Modal.K ⪱ Modal.K5 := inferInstance
 
-lemma K5.Kripke.eq_eucl : Modal.K5 = FrameClass.K5.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

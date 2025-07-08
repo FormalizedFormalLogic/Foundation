@@ -37,7 +37,6 @@ instance : Canonical (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 :=  ⟨by con
 
 instance : Complete (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 := inferInstance
 
-lemma K4Point2 : Modal.K4Point2 = FrameClass.K4Point2.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.K4 ⪱ Hilbert.K4Point2 := by
   constructor;

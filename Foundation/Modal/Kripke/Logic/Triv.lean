@@ -83,8 +83,6 @@ instance : Complete Hilbert.Triv Kripke.FrameClass.finite_Triv := ⟨by
 
 end FFP
 
-lemma equality : Modal.Triv = FrameClass.Triv.logic := eq_hilbert_logic_frameClass_logic
-lemma finite_equality : Modal.Triv = FrameClass.finite_Triv.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.KTc ⪱ Hilbert.Triv := by
   constructor;

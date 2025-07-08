@@ -44,7 +44,5 @@ instance : Complete (Hilbert.K) (FrameClass.finite_K) := ⟨by
 end Hilbert.K.Kripke
 
 
-lemma K.Kripke.eq_K : Modal.K = FrameClass.K.logic := eq_hilbert_logic_frameClass_logic
-lemma K.Kripke.eq_finite_K : Modal.K = FrameClass.finite_K.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

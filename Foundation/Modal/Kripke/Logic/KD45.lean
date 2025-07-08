@@ -39,7 +39,6 @@ instance : Canonical Hilbert.KD45 FrameClass.KD45 := ⟨by constructor⟩
 
 instance : Complete Hilbert.KD45 FrameClass.KD45 := inferInstance
 
-lemma serial_trans_eucl : Modal.KD45 = FrameClass.KD45.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.KD4 ⪱ Hilbert.KD45 := by
   constructor;

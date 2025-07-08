@@ -50,7 +50,6 @@ open Formula
 open Entailment
 open Kripke
 
-lemma KB4.Kripke.refl_trans : Modal.KB4 = FrameClass.KB4.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.K45 ⪱ Hilbert.KB4 := by
   constructor;

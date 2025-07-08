@@ -90,8 +90,6 @@ instance : Complete Hilbert.S4Point2 FrameClass.finite_S4Point2 := ⟨by
 
 end FFP
 
-protected lemma confluent_preorder : Modal.S4Point2 = FrameClass.S4Point2.logic := eq_hilbert_logic_frameClass_logic
-protected lemma finite_confluent_preorder : Modal.S4Point2 = FrameClass.finite_S4Point2.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.S4 ⪱ Hilbert.S4Point2 := by
   constructor;

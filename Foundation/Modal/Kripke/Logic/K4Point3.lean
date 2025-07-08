@@ -37,7 +37,6 @@ instance : Canonical Hilbert.K4Point3 FrameClass.K4Point3 :=  ⟨by constructor�
 
 instance : Complete Hilbert.K4Point3 FrameClass.K4Point3 := inferInstance
 
-lemma trans_weakConnected : Modal.K4Point3 = FrameClass.K4Point3.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.K4 ⪱ Hilbert.K4Point3 := by
   constructor;

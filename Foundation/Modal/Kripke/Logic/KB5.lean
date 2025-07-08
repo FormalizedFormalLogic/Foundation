@@ -36,6 +36,5 @@ instance : Complete (Hilbert.KB5) Kripke.FrameClass.KB5 := inferInstance
 
 end Logic.KB5.Kripke
 
-lemma Logic.KB5.Kripke.symm : Logic.KB5 = Kripke.FrameClass.KB5.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

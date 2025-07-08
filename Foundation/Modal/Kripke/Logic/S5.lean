@@ -96,8 +96,6 @@ open Formula
 open Entailment
 open Kripke
 
-lemma S5.Kripke.refl_eucl : Modal.S5 = FrameClass.S5.logic := eq_hilbert_logic_frameClass_logic
-lemma S5.Kripke.universal : Modal.S5 = FrameClass.universal.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.KTB ⪱ Hilbert.S5 := by
   constructor;

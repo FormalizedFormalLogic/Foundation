@@ -77,6 +77,5 @@ instance : Modal.KD ⪱ Modal.KD5 := inferInstance
 
 instance : Modal.K5 ⪱ Modal.KD5 := inferInstance
 
-lemma KD5.Kripke.eq_KD5 : Modal.KD5 = Kripke.FrameClass.KD5.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal
