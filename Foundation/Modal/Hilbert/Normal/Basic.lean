@@ -871,13 +871,12 @@ instance : (Hilbert.S5Grz).HasFive where p := 0
 instance : (Hilbert.S5Grz).HasGrz where p := 0
 instance : Entailment.S5Grz (Hilbert.S5Grz) where
 
-
-instance : Modal.S5Grz ≊ Modal.Triv := by
-  suffices Hilbert.S5Grz ≊ Hilbert.Triv by infer_instance;
+instance : Hilbert.S5Grz ≊ Hilbert.Triv := by
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl | rfl) <;> simp;
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl) <;> simp;
+instance : Modal.S5Grz ≊ Modal.Triv := inferInstance
 
 end
 

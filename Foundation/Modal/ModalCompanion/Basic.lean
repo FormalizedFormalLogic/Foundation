@@ -28,21 +28,19 @@ variable {IL : Propositional.Logic ℕ}
 
 variable (IL : Propositional.Logic ℕ)
 
-abbrev smallestMC (IL : Propositional.Logic ℕ) : Modal.Logic ℕ := Modal.Logic.sumNormal Modal.Logic.S4 ((Entailment.theory IL).image (·ᵍ))
+abbrev smallestMC (IL : Propositional.Logic ℕ) : Modal.Logic ℕ := Modal.Logic.sumNormal Modal.S4 ((Entailment.theory IL).image (·ᵍ))
 
 instance : Modal.Entailment.S4 IL.smallestMC where
   T φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (φ := Modal.Axioms.T (.atom 0)) (s := λ _ => φ);
     apply Modal.Logic.sumNormal.mem₁!;
-    simp;
+    simp [Modal.Logic.iff_provable, Entailment.theory];
   Four φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (φ := Modal.Axioms.Four (.atom 0)) (s := λ _ => φ);
     apply Modal.Logic.sumNormal.mem₁!;
-    simp;
+    simp [Modal.Logic.iff_provable, Entailment.theory];
 
 lemma smallestMC.mdp_S4 (hφψ : Modal.Logic.S4 ⊢! φ ➝ ψ) (hφ : IL.smallestMC ⊢! φ) : IL.smallestMC ⊢! ψ := by
   exact (Modal.Logic.sumNormal.mem₁! hφψ) ⨀ hφ;
@@ -210,7 +208,7 @@ lemma goedelTranslated_OrElim : ML ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ �
   exact nec! $ C!_trans axiomFour! $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! $ or₃!) axiomK!;
 
 lemma provable_goedelTranslated_of_provable
-  (IH : Propositional.Hilbert.Normal ℕ) (ML : Modal.Logic ℕ) [Entailment.S4 ML]
+  (IH : Propositional.Hilbert ℕ) (ML : Modal.Logic ℕ) [Entailment.S4 ML]
   (hAx : ∀ φ ∈ IH.axiomInstances, ML ⊢! φᵍ)
   : IH ⊢! φ → ML ⊢! φᵍ := by
   intro h;

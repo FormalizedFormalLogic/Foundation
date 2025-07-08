@@ -40,7 +40,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open ComplementClosedConsistentFinset
 open Kripke
 
-namespace Logic.Grz.Kripke
+namespace Hilbert.Grz.Kripke
 
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Grz 𝓢]
@@ -251,27 +251,24 @@ lemma complete_of_mem_miniCanonicalFrame
       tauto;
 ⟩
 
-instance complete : Complete Logic.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
+instance complete : Complete Hilbert.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
   simp only [Set.mem_setOf_eq];
   intro φ;
   infer_instance;
 
-lemma finite_partial_order : Logic.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
+lemma finite_partial_order : Modal.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.S4McK ⪱ Logic.Grz := by
+instance : Hilbert.S4McK ⪱ Hilbert.Grz := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.S4McK ⊧ φ → FrameClass.finite_Grz ⊧ φ by
-      simpa [S4McK.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.S4McK FrameClass.finite_Grz
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0)
     constructor;
     . simp;
-    . suffices ¬FrameClass.S4McK ⊧ (Axioms.Grz (.atom 0)) by simpa [S4McK.Kripke.preorder_mckinsey];
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4McK)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
       constructor;
@@ -288,10 +285,10 @@ instance : Logic.S4McK ⪱ Logic.Grz := by
         . contradiction;
         . contradiction;
 
-instance : Logic.S4 ⪱ Logic.Grz := calc
-  Logic.S4 ⪱ Logic.S4McK := by infer_instance
-  _        ⪱ Logic.Grz := by infer_instance
+instance : Hilbert.S4 ⪱ Hilbert.Grz := calc
+  Hilbert.S4 ⪱ Hilbert.S4McK := by infer_instance
+  _          ⪱ Hilbert.Grz   := by infer_instance
 
-end Logic.Grz.Kripke
+end Hilbert.Grz.Kripke
 
 end LO.Modal

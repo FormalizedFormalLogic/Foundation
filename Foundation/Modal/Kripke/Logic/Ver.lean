@@ -82,20 +82,16 @@ lemma finite_Ver : Modal.Ver = FrameClass.finite_Ver.logic := eq_hilbert_logic_f
 
 instance : Hilbert.KTc ⪱ Hilbert.Ver := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.KTc ⊧ φ → FrameClass.Ver ⊧ φ by
-      simpa [KTc.Kripke.corefl, Ver.Kripke.isolated];
-    rintro φ hφ F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply hφ;
-    apply Set.mem_setOf_eq.mpr;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.KTc FrameClass.Ver;
+    intro F hF;
+    simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.KTc ⊧ φ by simpa [KTc.Kripke.corefl];
     use (Axioms.Ver ⊥);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.KTc);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩;
       use M, 0;
       constructor;
@@ -106,20 +102,16 @@ instance : Hilbert.KTc ⪱ Hilbert.Ver := by
 
 instance : Hilbert.GLPoint3 ⪱ Hilbert.Ver := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.finite_GLPoint3 ⊧ φ → FrameClass.finite_Ver ⊧ φ by
-      simpa [GLPoint3.Kripke.finite_strict_linear_order, Ver.Kripke.finite_Ver];
-    rintro φ hφ F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply hφ;
-    apply Set.mem_setOf_eq.mpr;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GLPoint3 FrameClass.finite_Ver;
+    intro F hF;
+    simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.finite_GLPoint3 ⊧ φ by simpa [GLPoint3.Kripke.finite_strict_linear_order];
     use (Axioms.Ver ⊥);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GLPoint3);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => x < y⟩, (λ w a => False)⟩, 0;
       constructor;
       . exact {}

@@ -15,8 +15,6 @@ instance [F.IsFiniteGrz] : (F^≠).IsFiniteGL where
 end Kripke
 
 
-namespace Logic
-
 open Kripke
 open Formula.Kripke
 open Formula (boxdotTranslate)
@@ -24,16 +22,16 @@ open Modal.Kripke
 open Entailment
 
 
-lemma provable_boxdot_GL_of_provable_Grz : Logic.Grz ⊢! φ → Logic.GL ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
+lemma provable_boxdot_GL_of_provable_Grz : Hilbert.Grz ⊢! φ → Hilbert.GL ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
   intro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
   . exact boxdot_Grz_of_L!
 
-lemma provable_Grz_of_provable_boxdot_GL : Logic.GL ⊢! φᵇ → Logic.Grz ⊢! φ := by
+lemma provable_Grz_of_provable_boxdot_GL : Hilbert.GL ⊢! φᵇ → Hilbert.Grz ⊢! φ := by
   contrapose;
   intro h;
-  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Logic.Grz.Kripke.complete |>.complete) h;
+  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply not_imp_not.mpr $ Logic.GL.Kripke.finite_sound.sound;
   apply iff_not_validOnFrameClass_exists_frame.mpr;
@@ -44,11 +42,9 @@ lemma provable_Grz_of_provable_boxdot_GL : Logic.GL ⊢! φᵇ → Logic.Grz ⊢
     apply iff_reflexivize_irreflexivize'.not.mp;
     assumption;
 
-theorem iff_provable_boxdot_GL_provable_Grz : Logic.GL ⊢! φᵇ ↔ Logic.Grz ⊢! φ := ⟨
+theorem iff_provable_boxdot_GL_provable_Grz : Hilbert.GL ⊢! φᵇ ↔ Hilbert.Grz ⊢! φ := ⟨
   provable_Grz_of_provable_boxdot_GL,
   provable_boxdot_GL_of_provable_Grz
 ⟩
-
-end Logic
 
 end LO.Modal

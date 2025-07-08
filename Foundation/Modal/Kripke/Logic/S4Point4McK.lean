@@ -22,9 +22,9 @@ protected abbrev FrameClass.S4Point4McK : FrameClass := { F | F.IsS4Point4McK }
 end Kripke
 
 
-namespace Logic.S4Point4McK.Kripke
+namespace Hilbert.S4Point4McK.Kripke
 
-instance : Sound Logic.S4Point4McK FrameClass.S4Point4McK := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.S4Point4McK FrameClass.S4Point4McK := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_⟩ _ (rfl | rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
@@ -32,32 +32,29 @@ instance : Sound Logic.S4Point4McK FrameClass.S4Point4McK := instSound_of_valida
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_axiomPoint4_of_satisfiesSobocinskiCondition;
 
-instance : Entailment.Consistent Logic.S4Point4McK :=
+instance : Entailment.Consistent Hilbert.S4Point4McK :=
   consistent_of_sound_frameclass FrameClass.S4Point4McK $ by
     use whitepoint;
     constructor;
 
-instance : Canonical Logic.S4Point4McK FrameClass.S4Point4McK := ⟨by constructor⟩
+instance : Canonical Hilbert.S4Point4McK FrameClass.S4Point4McK := ⟨by constructor⟩
 
-instance : Complete Logic.S4Point4McK FrameClass.S4Point4McK := inferInstance
+instance : Complete Hilbert.S4Point4McK FrameClass.S4Point4McK := inferInstance
 
-lemma preorder_sobocinski_mckinsey : Logic.S4Point4McK = FrameClass.S4Point4McK.logic := eq_hilbert_logic_frameClass_logic
+lemma preorder_sobocinski_mckinsey : Modal.S4Point4McK = FrameClass.S4Point4McK.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.S4Point3McK ⪱ Logic.S4Point4McK := by
+instance : Hilbert.S4Point3McK ⪱ Hilbert.S4Point4McK := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.S4Point3McK ⊧ φ → FrameClass.S4Point4McK ⊧ φ by
-      simpa [S4Point3McK.Kripke.preorder_connected_mckinsey, S4Point4McK.Kripke.preorder_sobocinski_mckinsey];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.S4Point3McK FrameClass.S4Point4McK;
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S4Point4McK ⊢! φ ∧ ¬Kripke.FrameClass.S4Point3McK ⊧ φ by simpa [S4Point3McK.Kripke.preorder_connected_mckinsey];
     use (Axioms.Point4 (.atom 0));
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point3McK);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ w a => w ≠ 1⟩;
       use M, 0;
       constructor
@@ -75,14 +72,14 @@ instance : Logic.S4Point3McK ⪱ Logic.S4Point4McK := by
         use 2;
         omega;
 
-instance : Logic.S4Point4 ⪱ Logic.S4Point4McK := by
+instance : Hilbert.S4Point4 ⪱ Hilbert.S4Point4McK := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.McK (.atom 0))
     constructor;
     . simp;
-    . suffices ¬FrameClass.S4Point4 ⊧ Axioms.McK (atom 0) by simpa [S4Point4.Kripke.preorder_sobocinski];
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point4);
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;
@@ -96,6 +93,6 @@ instance : Logic.S4Point4 ⪱ Logic.S4Point4McK := by
         use 1;
         trivial;
 
-end Logic.S4Point4McK.Kripke
+end Hilbert.S4Point4McK.Kripke
 
 end LO.Modal

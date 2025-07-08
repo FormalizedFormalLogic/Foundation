@@ -522,7 +522,7 @@ variable {T : ArithmeticTheory} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.Sound
 
 /-- Arithmetical completeness of GL-/
 theorem GL.arithmetical_completeness :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) → Logic.GL ⊢! A := by
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) → Hilbert.GL ⊢! A := by
   contrapose;
   intro hA;
   push_neg;
@@ -543,7 +543,7 @@ theorem GL.arithmetical_completeness :
   exact σ.SC4 _ (by rintro ⟨⟩) this;
 
 theorem GL.arithmetical_completeness_iff :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) ↔ Logic.GL ⊢! A :=
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) ↔ Hilbert.GL ⊢! A :=
   ⟨GL.arithmetical_completeness, GL.arithmetical_soundness⟩
 
 end LO.ProvabilityLogic

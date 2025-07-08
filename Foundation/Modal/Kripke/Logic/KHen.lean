@@ -347,11 +347,11 @@ end Kripke
 
 namespace Logic.KHen
 
-lemma Kripke.valid_cresswellModel_of_provable : Logic.KHen ⊢! φ → cresswellModel ⊧ φ := by
+lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢! φ → cresswellModel ⊧ φ := by
   intro h;
-  induction h with
-  | maxm h =>
-    rcases (by simpa using h) with (⟨_, rfl⟩ | ⟨_, rfl⟩);
+  induction h using Hilbert.Normal.rec! with
+  | axm s h =>
+    rcases h with (⟨_, rfl⟩ | ⟨_, rfl⟩);
     . exact Kripke.ValidOnModel.axiomK;
     . exact cresswellModel.valid_axiomHen;
   | mdp ihφψ ihφ => exact Kripke.ValidOnModel.mdp ihφψ ihφ;
@@ -360,15 +360,15 @@ lemma Kripke.valid_cresswellModel_of_provable : Logic.KHen ⊢! φ → cresswell
   | imply₂ => exact Kripke.ValidOnModel.imply₂;
   | ec => exact Kripke.ValidOnModel.elimContra;
 
-lemma unprovable_atomic_axiomFour : Logic.KHen ⊬ Axioms.Four (atom a) := by
+lemma unprovable_atomic_axiomFour : Hilbert.KHen ⊬ Axioms.Four (atom a) := by
   by_contra hC;
   exact cresswellModel.not_valid_axiomFour $ Kripke.valid_cresswellModel_of_provable hC 2♯;
 
-theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Logic.KHen ⊢! φ ↔ C ⊧ φ := by
+theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Hilbert.KHen ⊢! φ ↔ C ⊧ φ := by
   rintro ⟨C, h⟩;
   have : C ⊧ Axioms.Hen (atom 0) := @h (Axioms.Hen (atom 0)) |>.mp $ by simp;
   have : C ⊧ Axioms.Four (atom 0) := fun {F} hF => valid_atomic_axiomFour_of_valid_atomic_axiomH (this hF);
-  have : Logic.KHen ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
+  have : Hilbert.KHen ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
   exact @unprovable_atomic_axiomFour _ this;
 
 end Logic.KHen
@@ -380,20 +380,20 @@ open Formula
 open Entailment
 open Kripke
 
-instance : Logic.K ⪱ Logic.KHen := by
+instance : Hilbert.K ⪱ Hilbert.KHen := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.KHen ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.Kripke.all];
     use (Axioms.Hen (.atom 0));
     constructor;
     . exact axiomHen!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.all)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩, 0;
       simp [Satisfies, Semantics.Realize];
       constructor <;> tauto;
 
-instance : Logic.KHen ⪱ Logic.GL := by
+instance : Hilbert.KHen ⪱ Hilbert.GL := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;

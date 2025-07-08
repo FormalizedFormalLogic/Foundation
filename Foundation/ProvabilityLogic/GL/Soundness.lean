@@ -13,10 +13,10 @@ variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L
          {T U : FirstOrder.Theory L} [Diagonalization T]  [T ⪯ U]
          {𝔅 : ProvabilityPredicate T U} [𝔅.HBL]
 
-lemma GL.arithmetical_soundness (h : Logic.GL ⊢! A) {f : Realization L} : U ⊢!. f.interpret 𝔅 A := by
-  induction h with
-  | maxm hp =>
-    rcases (by simpa using hp) with (⟨_, rfl⟩ | ⟨_, rfl⟩)
+lemma GL.arithmetical_soundness (h : Hilbert.GL ⊢! A) {f : Realization L} : U ⊢!. f.interpret 𝔅 A := by
+  induction h using Hilbert.Normal.rec! with
+  | axm _ hp =>
+    rcases hp with (⟨_, rfl⟩ | ⟨_, rfl⟩)
     . exact D2_shift;
     . exact FLT_shift;
   | nec ihp => exact D1_shift ihp;
