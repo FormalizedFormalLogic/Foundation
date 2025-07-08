@@ -23,8 +23,8 @@ open Modal.Formula.Kripke
 section S4Point2
 
 open Formula.Kripke in
-lemma Logic.S4Point2.goedelTranslated_axiomWLEM : Logic.S4Point2 ⊢! □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
-  suffices Logic.S4Point2 ⊢! □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
+lemma Logic.S4Point2.goedelTranslated_axiomWLEM : Hilbert.S4Point2 ⊢! □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
+  suffices Hilbert.S4Point2 ⊢! □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
     apply A!_replace this;
     . apply axiomK'!;
       apply nec!;
@@ -37,11 +37,12 @@ lemma Logic.S4Point2.goedelTranslated_axiomWLEM : Logic.S4Point2 ⊢! □(∼φ�
       apply nec!;
       apply contra!;
       exact axiomT!
-  apply Logic.S4Point2.Kripke.complete.complete;
-  rintro F ⟨_, _⟩ V x;
+  apply Complete.complete (𝓜 := FrameClass.S4Point2);
+  rintro F hF V x;
+  replace hF := Set.mem_setOf_eq.mp hF;
+
   apply Formula.Kripke.Satisfies.or_def.mpr;
-  by_contra hC;
-  push_neg at hC;
+  by_contra! hC;
   rcases hC with ⟨h₁, h₂⟩;
 
   replace h₁ := Formula.Kripke.Satisfies.dia_def.mp h₁;
@@ -73,8 +74,8 @@ instance : Entailment.HasAxiomPoint2 (smallestMC 𝐊𝐂) where
       . simp [theory];
       . tauto;
     apply ?_ ⨀ this;
-    apply Entailment.WeakerThan.pbl (𝓢 := Logic.S4);
-    apply Logic.S4.Kripke.complete.complete;
+    apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
+    apply Complete.complete (𝓜 := FrameClass.S4);
     rintro F ⟨_, _⟩ V x h₁ h₂ y Rxy;
     replace h₁ := Satisfies.or_def.mp h₁;
     replace h₂ := Satisfies.dia_def.mp h₂;
@@ -93,15 +94,16 @@ instance : Entailment.HasAxiomPoint2 (smallestMC 𝐊𝐂) where
       . apply Satisfies.negneg_def.mp h u
         apply IsRefl.refl;
 
-lemma S4Point2.is_smallestMC_of_KC : Logic.S4Point2 = (smallestMC 𝐊𝐂) := by
+lemma S4Point2.is_smallestMC_of_KC : Modal.S4Point2 = (smallestMC 𝐊𝐂) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
     intro φ hφ;
-    induction hφ using Modal.Hilbert.rec! with
-    | maxm h =>
-      rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩) <;> simp;
+    simp only [Hilbert.Normal.iff_logic_provable_provable] at hφ;
+    induction hφ using Modal.Hilbert.Normal.rec! with
+    | axm s h =>
+      rcases h with (rfl | rfl | rfl | rfl) <;> simp;
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
     | nec ihφ => exact nec! ihφ;
     | _ => simp;
@@ -113,25 +115,27 @@ lemma S4Point2.is_smallestMC_of_KC : Logic.S4Point2 = (smallestMC 𝐊𝐂) := b
     | nec ihφ => exact nec! ihφ;
     | subst ihφ => apply subst! _ ihφ;
     | mem₂ h =>
+      apply Hilbert.Normal.iff_logic_provable_provable.mpr;
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable Hilbert.KC Logic.S4Point2;
-      . rintro _ ⟨_, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩;
-        . exact WeakerThan.pbl $ modalCompanion_Int_S4.companion.mp (by simp [theory]);
-        . suffices Logic.S4Point2 ⊢! □(∼(s 0)ᵍ) ⋎ □(∼□(∼(s 0)ᵍ)) by simpa;
-          exact Logic.S4Point2.goedelTranslated_axiomWLEM;
+      apply provable_goedelTranslated_of_provable Hilbert.KC Hilbert.S4Point2;
+      . rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
+        . simp;
+        . simpa using Logic.S4Point2.goedelTranslated_axiomWLEM;
       . simpa [theory] using hφ;
 
 instance : Sound (smallestMC 𝐊𝐂) FrameClass.S4Point2 := by
   rw [←Logic.S4Point2.is_smallestMC_of_KC];
   infer_instance;
 
-instance modalCompanion_KC_S4Point2 : ModalCompanion 𝐊𝐂 Logic.S4Point2 := by
+instance modalCompanion_KC_S4Point2 : ModalCompanion 𝐊𝐂 Modal.S4Point2 := by
   rw [Logic.S4Point2.is_smallestMC_of_KC];
-  exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
+  apply Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IL := 𝐊𝐂)
     (IC := Propositional.Kripke.FrameClass.KC)
     (MC := Modal.Kripke.FrameClass.S4Point2)
-    $ by rintro F hF; simp_all only [Set.mem_setOf_eq]; exact {};
+  rintro F hF;
+  simp_all only [Set.mem_setOf_eq];
+  exact {};
 
 end Logic
 
@@ -140,22 +144,24 @@ end S4Point2
 
 section GrzPoint2
 
-lemma Logic.gGrzPoint2_of_KC : 𝐊𝐂 ⊢! φ → Logic.GrzPoint2 ⊢! φᵍ := by
+lemma Logic.gGrzPoint2_of_KC : 𝐊𝐂 ⊢! φ → Modal.GrzPoint2 ⊢! φᵍ := by
   intro h;
   apply WeakerThan.pbl $ modalCompanion_KC_S4Point2.companion.mp h;
 
-lemma Logic.GrzPoint2.is_largestMC_of_KC : Logic.GrzPoint2 = (Logic.largestMC 𝐊𝐂) := by
+lemma Logic.GrzPoint2.is_largestMC_of_KC : Modal.GrzPoint2 = (Logic.largestMC 𝐊𝐂) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
     intro _ hφ;
-    induction hφ using Modal.Hilbert.rec! with
-    | maxm h =>
-      rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
+    simp only [Hilbert.Normal.iff_logic_provable_provable] at hφ;
+    induction hφ using Modal.Hilbert.Normal.rec! with
+    | axm s h =>
+      rcases h with (rfl | rfl | rfl);
       . simp;
       . simp;
-      . apply WeakerThan.pbl (𝓢 := (smallestMC 𝐊𝐂)); simp;
+      . apply WeakerThan.pbl (𝓢 := (smallestMC 𝐊𝐂));
+        simp;
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
     | nec ihφ => exact nec! ihφ;
     | _ => simp;
@@ -172,7 +178,7 @@ instance : Sound (Logic.largestMC 𝐊𝐂) FrameClass.finite_GrzPoint2 := by
   rw [←Logic.GrzPoint2.is_largestMC_of_KC];
   infer_instance;
 
-instance modalCompanion_KC_GrzPoint2 : ModalCompanion 𝐊𝐂 Logic.GrzPoint2 := by
+instance modalCompanion_KC_GrzPoint2 : ModalCompanion 𝐊𝐂 Modal.GrzPoint2 := by
   rw [Logic.GrzPoint2.is_largestMC_of_KC];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     Propositional.Kripke.FrameClass.finite_KC

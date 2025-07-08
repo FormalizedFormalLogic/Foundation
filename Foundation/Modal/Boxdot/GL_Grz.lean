@@ -47,4 +47,7 @@ theorem iff_provable_boxdot_GL_provable_Grz : Hilbert.GL ⊢! φᵇ ↔ Hilbert.
   provable_boxdot_GL_of_provable_Grz
 ⟩
 
+theorem iff_boxdot_GL_Grz : Modal.GL ⊢! φᵇ ↔ Modal.Grz ⊢! φ := by
+  simpa using iff_provable_boxdot_GL_provable_Grz;
+
 end LO.Modal

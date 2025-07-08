@@ -109,10 +109,12 @@ instance : Hilbert.KD ⪱ Hilbert.S4 := calc
 
 end Hilbert.S4.Kripke
 
+
 instance : Modal.KT ⪱ Modal.S4 := inferInstance
-
 instance : Modal.KD4 ⪱ Modal.S4 := inferInstance
-
 instance : Modal.KD ⪱ Modal.S4 := inferInstance
+
+instance : Sound Modal.S4 FrameClass.S4 := inferInstance
+instance : Complete Modal.S4 FrameClass.S4 := inferInstance
 
 end LO.Modal

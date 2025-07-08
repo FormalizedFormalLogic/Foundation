@@ -20,7 +20,9 @@ lemma eq_hilbert_logic_frameClass_logic {H : Hilbert.Normal ℕ} {C : FrameClass
   . intro h;
     simpa using complete.complete h;
 
+
 namespace Hilbert.Kripke
+
 
 lemma soundness_of_validates_axioms (hV : C.Validates H.axioms) : H ⊢! φ → C ⊧ φ := by
   intro hφ F hF;
@@ -49,6 +51,16 @@ lemma consistent_of_sound_frameclass (C : Kripke.FrameClass) (C_nonempty: C.None
   constructor;
   . assumption;
   . simp;
+
+instance [Sound H C] : Sound H.logic C := by
+  constructor;
+  intro φ hφ;
+  apply Sound.sound $ by simpa using hφ;
+
+instance [Complete H C] : Complete H.logic C := by
+  constructor;
+  intro φ hφ;
+  simpa using Complete.complete hφ;
 
 
 lemma soundness_of_frame_validates_axioms (hV : F ⊧* H.axioms) : H ⊢! φ → F ⊧ φ := by
@@ -80,6 +92,16 @@ lemma weakerThan_of_subset_frameClass (C₁ C₂ : FrameClass) (hC : C₂ ⊆ C�
   intro F hF;
   apply Sound.sound (𝓢 := H₁) (𝓜 := C₁) hφ;
   apply hC hF;
+
+instance [Sound H F] : Sound H.logic F := by
+  constructor;
+  intro φ hφ;
+  apply Sound.sound $ by simpa using hφ;
+
+instance [Complete H F] : Complete H.logic F := by
+  constructor;
+  intro φ hφ;
+  simpa using Complete.complete hφ;
 
 end Hilbert.Kripke
 

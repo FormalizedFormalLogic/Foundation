@@ -54,12 +54,11 @@ instance : Hilbert.S4 ⪱ Hilbert.Triv := calc
   _          ⪱ Hilbert.S5Grz := by infer_instance
   _          ≊ Hilbert.Triv  := by infer_instance
 
-/-
 instance : Sound Hilbert.S5Grz FrameClass.finite_Triv := by
-  suffices Sound Hilbert.Triv FrameClass.finite_Triv by
-    convert this;
-    infer_instance;
+  suffices Hilbert.S5Grz ≊ Hilbert.Triv by
+    constructor;
+    intro φ h;
+    apply Sound.sound $ Entailment.Equiv.iff.mp this φ |>.mp h;
   infer_instance;
--/
 
 end LO.Modal.Logic
