@@ -60,16 +60,16 @@ end Kripke
 
 namespace Hilbert.S5.Kripke
 
-instance sound_refl_eucl : Sound Hilbert.S5 FrameClass.S5 := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.S5 FrameClass.S5 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance sound_universal : Sound Hilbert.S5 FrameClass.universal := ⟨by
+instance : Sound Hilbert.S5 FrameClass.universal := ⟨by
   intro φ hF;
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mpr;
-  exact sound_refl_eucl.sound hF;
+  exact Sound.sound (𝓜 := FrameClass.S5) hF;
 ⟩
 
 instance : Entailment.Consistent Hilbert.S5 := consistent_of_sound_frameclass FrameClass.S5 $ by
@@ -78,11 +78,11 @@ instance : Entailment.Consistent Hilbert.S5 := consistent_of_sound_frameclass Fr
 
 instance : Canonical Hilbert.S5 FrameClass.S5 := ⟨by constructor⟩
 
-instance complete_refl_eucl : Complete Hilbert.S5 FrameClass.S5 := inferInstance
+instance : Complete Hilbert.S5 FrameClass.S5 := inferInstance
 
-instance complete_universal : Complete Hilbert.S5 FrameClass.universal := ⟨by
+instance : Complete Hilbert.S5 FrameClass.universal := ⟨by
   intro φ hF;
-  apply Kripke.complete_refl_eucl.complete;
+  apply Complete.complete (𝓜 := FrameClass.S5);
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mp;
   exact hF;
 ⟩

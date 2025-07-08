@@ -32,7 +32,7 @@ end Kripke
 
 namespace Logic.GrzPoint3.Kripke
 
-instance finite_sound : Sound Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl);
   . exact validate_AxiomGrz_of_finite_strict_preorder;
@@ -43,7 +43,7 @@ instance : Entailment.Consistent Hilbert.GrzPoint3 :=
     use whitepoint;
     constructor;
 
-instance finite_complete : Complete Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 :=
+instance : Complete Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 :=
   Hilbert.Grz.Kripke.complete_of_mem_miniCanonicalFrame FrameClass.finite_GrzPoint3 $ by
     sorry;
     /-

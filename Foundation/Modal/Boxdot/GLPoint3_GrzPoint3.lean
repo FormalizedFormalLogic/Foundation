@@ -75,11 +75,12 @@ lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : Hilbert.GrzPoint3 ⊢! �
       . exact hC₁₂ $ hC₂₁₂ y Rzy;
 
 lemma provable_GrzPoint3_of_boxdotTranslated_GLPoint3 : Hilbert.GLPoint3 ⊢! φᵇ → Hilbert.GrzPoint3 ⊢! φ := by
-  contrapose;
   intro h;
-  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Logic.GrzPoint3.Kripke.finite_complete |>.complete) h;
+  replace h := Sound.sound (𝓜 := FrameClass.finite_GLPoint3) h;
+  apply Complete.complete (𝓜 := FrameClass.finite_GrzPoint3);
+  contrapose! h;
+  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ h;
   replace hF := Set.mem_setOf_eq.mp hF;
-  apply not_imp_not.mpr $ Sound.sound (𝓢 := Hilbert.GLPoint3) (𝓜 := FrameClass.finite_GLPoint3);
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use F^≠;
   constructor;

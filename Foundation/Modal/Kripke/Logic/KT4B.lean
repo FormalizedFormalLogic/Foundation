@@ -37,7 +37,7 @@ instance : Canonical Hilbert.KT4B FrameClass.KT4B := ⟨by constructor⟩
 instance : Complete Hilbert.KT4B FrameClass.KT4B := inferInstance
 
 open finestFiltrationTransitiveClosureModel in
-instance finite_complete : Complete Hilbert.KT4B FrameClass.finite_KT4B := ⟨by
+instance : Complete Hilbert.KT4B FrameClass.finite_KT4B := ⟨by
   intro φ hp;
   apply Complete.complete (𝓜 := FrameClass.KT4B);
   intro F F_equiv V x;

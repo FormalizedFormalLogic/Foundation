@@ -126,7 +126,7 @@ end Kripke
 
 namespace Logic.GrzPoint2.Kripke
 
-instance finite_sound : Sound Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl);
   . exact validate_AxiomGrz_of_finite_strict_preorder;
@@ -142,7 +142,7 @@ section
 
 open Relation
 
-instance finite_complete : Complete Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
+instance : Complete Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
   intro φ;
   contrapose;
   intro hφ;

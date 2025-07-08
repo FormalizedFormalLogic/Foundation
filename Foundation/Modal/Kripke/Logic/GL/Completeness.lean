@@ -172,7 +172,7 @@ lemma truthlemma {X : (miniCanonicalModel φ).World} (q_sub : ψ ∈ φ.subformu
       refine RXY.1 ψ ?_ h |>.1;
       simpa;
 
-instance finiteComplete : Complete Hilbert.GL Kripke.FrameClass.finite_GL := ⟨by
+instance : Complete Hilbert.GL Kripke.FrameClass.finite_GL := ⟨by
   intro φ;
   contrapose;
   intro h;

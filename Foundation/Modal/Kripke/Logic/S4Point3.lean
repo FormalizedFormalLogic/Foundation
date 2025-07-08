@@ -68,14 +68,14 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance finite_sound : Sound Hilbert.S4Point3 FrameClass.finite_S4Point3 := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.S4Point3 FrameClass.finite_S4Point3 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance finite_complete : Complete Hilbert.S4Point3 FrameClass.finite_S4Point3 := ⟨by
+instance : Complete Hilbert.S4Point3 FrameClass.finite_S4Point3 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.S4Point3);
   rintro F hF V r;

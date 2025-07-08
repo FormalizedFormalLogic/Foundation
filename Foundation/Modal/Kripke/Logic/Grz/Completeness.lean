@@ -251,7 +251,7 @@ lemma complete_of_mem_miniCanonicalFrame
       tauto;
 ⟩
 
-instance complete : Complete Hilbert.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
+instance : Complete Hilbert.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
   simp only [Set.mem_setOf_eq];
   intro φ;
   infer_instance;

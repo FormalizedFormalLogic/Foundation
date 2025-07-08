@@ -32,34 +32,34 @@ end Kripke
 
 namespace Hilbert.Triv.Kripke
 
-instance sound_Triv : Sound Hilbert.Triv Kripke.FrameClass.Triv :=
+instance : Sound Hilbert.Triv Kripke.FrameClass.Triv :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F ⟨_⟩ _ (rfl | rfl);
     . exact validate_AxiomT_of_reflexive;
     . exact validate_AxiomTc_of_coreflexive;
 
-instance sound_finite_Triv : Sound Hilbert.Triv Kripke.FrameClass.finite_Triv :=
+instance : Sound Hilbert.Triv Kripke.FrameClass.finite_Triv :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F ⟨_, _⟩ _ (rfl | rfl);
     . exact validate_AxiomT_of_reflexive;
     . exact validate_AxiomTc_of_coreflexive;
 
-instance consistent : Entailment.Consistent Hilbert.Triv := consistent_of_sound_frameclass Kripke.FrameClass.Triv $ by
+instance : Entailment.Consistent Hilbert.Triv := consistent_of_sound_frameclass Kripke.FrameClass.Triv $ by
   use whitepoint;
   constructor;
 
 instance : Canonical Hilbert.Triv Kripke.FrameClass.Triv := ⟨by constructor⟩
 
-instance complete_Triv : Complete Hilbert.Triv Kripke.FrameClass.Triv := inferInstance
+instance : Complete Hilbert.Triv Kripke.FrameClass.Triv := inferInstance
 
 section FFP
 
 open Relation in
-instance complete_finite_Triv : Complete Hilbert.Triv Kripke.FrameClass.finite_Triv := ⟨by
+instance : Complete Hilbert.Triv Kripke.FrameClass.finite_Triv := ⟨by
   intro φ hφ;
-  apply Kripke.complete_Triv.complete;
+  apply Complete.complete (𝓜 := Kripke.FrameClass.Triv);
   intro F F_eq V r;
   replace F_eq := Set.mem_setOf_eq.mp F_eq;
   apply Model.pointGenerate.modal_equivalent_at_root (r := r) |>.mp;

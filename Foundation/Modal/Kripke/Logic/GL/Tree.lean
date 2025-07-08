@@ -51,7 +51,7 @@ namespace Logic.GL.Kripke
 theorem iff_provable_satisfies_FiniteTransitiveTree : Hilbert.GL ⊢! φ ↔ (∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → Satisfies M r φ) := by
   constructor;
   . intro h M r M_tree;
-    have : FrameClass.finite_GL ⊧ φ := Kripke.finite_sound.sound h;
+    have : FrameClass.finite_GL ⊧ φ := Sound.sound (𝓜 := FrameClass.finite_GL) h;
     apply valid_on_FiniteTransitiveTreeClass_of_valid_on_TransitiveIrreflexiveFrameClass this M.toFrame r;
   . intro h;
     apply Complete.complete (𝓜 := FrameClass.finite_GL);

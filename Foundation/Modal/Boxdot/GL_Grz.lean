@@ -31,9 +31,9 @@ lemma provable_boxdot_GL_of_provable_Grz : Hilbert.Grz ⊢! φ → Hilbert.GL �
 lemma provable_Grz_of_provable_boxdot_GL : Hilbert.GL ⊢! φᵇ → Hilbert.Grz ⊢! φ := by
   contrapose;
   intro h;
-  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Hilbert.Grz.Kripke.complete |>.complete) h;
+  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Complete.complete (𝓜 := FrameClass.finite_Grz)) h;
   replace hF := Set.mem_setOf_eq.mp hF;
-  apply not_imp_not.mpr $ Logic.GL.Kripke.finite_sound.sound;
+  apply not_imp_not.mpr $ Sound.sound (𝓜 := FrameClass.finite_GL);
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use F^≠;
   constructor;

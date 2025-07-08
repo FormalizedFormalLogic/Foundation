@@ -24,7 +24,7 @@ end Kripke
 
 namespace Hilbert.GLPoint3.Kripke
 
-instance finite_sound : Sound Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl);
   . exact validate_AxiomL_of_finite_trans_irrefl;
@@ -35,7 +35,7 @@ instance : Entailment.Consistent Hilbert.GLPoint3 :=
     use blackpoint;
     constructor;
 
-instance finite_complete : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := by sorry;
+instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := by sorry;
 
 lemma finite_strict_linear_order : Modal.GLPoint3 = FrameClass.finite_GLPoint3.logic := eq_hilbert_logic_frameClass_logic
 
