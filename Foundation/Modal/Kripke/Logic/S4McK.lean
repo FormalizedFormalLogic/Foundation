@@ -44,13 +44,13 @@ lemma preorder_mckinsey : Modal.S4McK = FrameClass.S4McK.logic := eq_hilbert_log
 
 instance : Hilbert.S4 ⪱ Hilbert.S4McK := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Hilbert.S4McK ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by simpa [S4.Kripke.preorder];
     use (Axioms.McK (.atom 0));
     constructor;
     . exact axiomMcK!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -64,13 +64,13 @@ instance : Hilbert.S4 ⪱ Hilbert.S4McK := by
 
 instance : Hilbert.K4McK ⪱ Hilbert.S4McK := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Hilbert.S4McK ⊢! φ ∧ ¬FrameClass.K4McK ⊧ φ by simpa [K4McK.Kripke.trans_mckinsey];
     use (Axioms.T (.atom 0));
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4McK)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;

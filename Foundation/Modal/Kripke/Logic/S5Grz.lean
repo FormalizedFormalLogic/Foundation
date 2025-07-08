@@ -11,7 +11,7 @@ open Hilbert.Kripke
 
 instance : Logic.S5 ⪱ Logic.S5Grz := by
   constructor;
-  . exact Hilbert.weakerThan_of_subset_axioms (by simp)
+  . exact Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0);
     constructor;
@@ -26,7 +26,7 @@ instance : Logic.S5 ⪱ Logic.S5Grz := by
 
 instance : Logic.Grz ⪱ Logic.S5Grz := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Five (.atom 0)

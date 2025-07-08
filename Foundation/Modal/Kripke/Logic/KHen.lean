@@ -382,7 +382,7 @@ open Kripke
 
 instance : Logic.K ⪱ Logic.KHen := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.KHen ⊢! φ ∧ ¬FrameClass.all ⊧ φ by simpa [K.Kripke.all];
     use (Axioms.Hen (.atom 0));
@@ -395,7 +395,7 @@ instance : Logic.K ⪱ Logic.KHen := by
 
 instance : Logic.KHen ⪱ Logic.GL := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Four (.atom 0));

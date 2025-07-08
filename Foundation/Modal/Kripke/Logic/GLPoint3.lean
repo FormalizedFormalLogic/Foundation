@@ -41,7 +41,7 @@ lemma finite_strict_linear_order : Logic.GLPoint3 = FrameClass.finite_GLPoint3.l
 
 instance : Logic.GL ⪱ Logic.GLPoint3 := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.GLPoint3 ⊢! φ ∧ ¬Kripke.FrameClass.finite_GL ⊧ φ by simpa [GL.Kripke.finite_trans_irrefl];
@@ -64,7 +64,7 @@ instance : Logic.GL ⪱ Logic.GLPoint3 := by
 
 instance : Logic.K4Point3 ⪱ Logic.GLPoint3 := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.GLPoint3 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by simpa [K4Point3.Kripke.trans_weakConnected];

@@ -42,7 +42,7 @@ lemma preorder_confluent_mckinsey : Logic.S4Point2McK = FrameClass.preorder_conf
 
 instance : Logic.S4McK ⪱ Logic.S4Point2McK := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.S4Point2McK ⊢! φ ∧ ¬Kripke.FrameClass.S4McK ⊧ φ by simpa [S4McK.Kripke.preorder_mckinsey];
     use (Axioms.Point2 (.atom 0));
@@ -75,7 +75,7 @@ instance : Logic.S4McK ⪱ Logic.S4Point2McK := by
 
 instance : Logic.S4Point2 ⪱ Logic.S4Point2McK := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.S4Point2McK ⊢! φ ∧ ¬FrameClass.S4Point2 ⊧ φ by simpa [S4Point2.Kripke.confluent_preorder];
     use (Axioms.McK (.atom 0))

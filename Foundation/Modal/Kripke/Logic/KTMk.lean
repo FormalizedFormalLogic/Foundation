@@ -196,7 +196,7 @@ open Kripke
 
 instance : Logic.KT ⪱ Logic.KTMk := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.KTMk ⊢! φ ∧ ¬FrameClass.KT ⊧ φ by simpa [KT.Kripke.refl];
     use (Axioms.Mk (.atom 0) (.atom 1));
@@ -217,7 +217,7 @@ instance : Logic.KT ⪱ Logic.KTMk := by
 
 instance : Logic.KTMk ⪱ Logic.S4 := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     intro φ hφ;
     rcases (by simpa using hφ) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, _, rfl⟩);
     . simp;

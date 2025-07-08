@@ -77,7 +77,7 @@ instance : Logic.S4Point3McK ⪱ Logic.S4Point4McK := by
 
 instance : Logic.S4Point4 ⪱ Logic.S4Point4McK := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.McK (.atom 0))
     constructor;

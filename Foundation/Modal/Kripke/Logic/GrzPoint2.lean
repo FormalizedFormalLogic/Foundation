@@ -89,7 +89,7 @@ namespace Logic
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-instance : Logic.Grz ⪯ Logic.GrzPoint2 := Hilbert.weakerThan_of_subset_axioms $ by simp;
+instance : Logic.Grz ⪯ Logic.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
 
 lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Logic.Grz]! φ) : Logic.GrzPoint2 ⊢! φ := by
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;

@@ -88,7 +88,7 @@ lemma finite_equality : Logic.Triv = FrameClass.finite_Triv.logic := eq_hilbert_
 
 instance : Logic.KTc ⪱ Logic.Triv := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬Kripke.FrameClass.KTc ⊧ φ by simpa [KTc.Kripke.corefl];
     use (Axioms.T (.atom 0));

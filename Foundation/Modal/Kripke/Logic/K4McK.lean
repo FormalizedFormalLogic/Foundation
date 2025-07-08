@@ -37,13 +37,13 @@ lemma trans_mckinsey : Modal.K4McK = FrameClass.K4McK.logic := eq_hilbert_logic_
 
 instance : Hilbert.K4 ⪱ Hilbert.K4McK := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Hilbert.K4McK ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by simpa [K4.Kripke.trans];
     use (Axioms.McK (.atom 0));
     constructor;
     . exact axiomMcK!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
       constructor;
       . simp only [Set.mem_setOf_eq]; refine { trans := by simp; }

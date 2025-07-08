@@ -87,7 +87,7 @@ instance : Logic.S4Point2McK ⪱ Logic.S4Point3McK := by
 
 instance : Logic.S4Point3 ⪱ Logic.S4Point3McK := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms; intro φ; aesop;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.S4Point3McK ⊢! φ ∧ ¬FrameClass.S4Point3 ⊧ φ by simpa [S4Point3.Kripke.connected_preorder];
     use (Axioms.McK (.atom 0))

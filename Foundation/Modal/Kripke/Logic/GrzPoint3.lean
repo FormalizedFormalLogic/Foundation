@@ -143,7 +143,7 @@ theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⪱ Logic.GrzPo
 
 instance : Logic.S4Point3 ⪱ Logic.GrzPoint3 := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     suffices ∃ φ, Logic.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_S4Point3 ⊧ φ by simpa [S4Point3.Kripke.finite_connected_preorder];
