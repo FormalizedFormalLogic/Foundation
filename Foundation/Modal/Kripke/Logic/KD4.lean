@@ -49,7 +49,7 @@ instance : Hilbert.KD ⪱ Hilbert.KD4 := by
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.IsKD)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
       constructor;

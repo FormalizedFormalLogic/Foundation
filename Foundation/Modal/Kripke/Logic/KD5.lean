@@ -44,7 +44,7 @@ instance : Hilbert.KD ⪱ Hilbert.KD5 := by
     use (Axioms.Five (.atom 0));
     constructor;
     . exact axiomFive!;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.IsKD)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
       use M, 0;

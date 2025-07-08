@@ -15,29 +15,29 @@ namespace Kripke
 
 protected class Frame.IsK4Point3 (F : Kripke.Frame) extends F.IsTransitive, F.IsPiecewiseConnected
 
-abbrev FrameClass.IsK4Point3 : FrameClass := { F | F.IsK4Point3 }
+abbrev FrameClass.K4Point3 : FrameClass := { F | F.IsK4Point3 }
 
 end Kripke
 
 
 namespace Logic.K4Point3.Kripke
 
-instance : Sound Hilbert.K4Point3 FrameClass.IsK4Point3 := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.K4Point3 FrameClass.K4Point3 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_WeakPoint3_of_weakConnected;
 
 instance : Entailment.Consistent Hilbert.K4Point3 :=
-  consistent_of_sound_frameclass FrameClass.IsK4Point3 $ by
+  consistent_of_sound_frameclass FrameClass.K4Point3 $ by
     use whitepoint;
     constructor;
 
-instance : Canonical Hilbert.K4Point3 FrameClass.IsK4Point3 :=  ⟨by constructor⟩
+instance : Canonical Hilbert.K4Point3 FrameClass.K4Point3 :=  ⟨by constructor⟩
 
-instance : Complete Hilbert.K4Point3 FrameClass.IsK4Point3 := inferInstance
+instance : Complete Hilbert.K4Point3 FrameClass.K4Point3 := inferInstance
 
-lemma trans_weakConnected : Modal.K4Point3 = FrameClass.IsK4Point3.logic := eq_hilbert_logic_frameClass_logic
+lemma trans_weakConnected : Modal.K4Point3 = FrameClass.K4Point3.logic := eq_hilbert_logic_frameClass_logic
 
 instance : Hilbert.K4 ⪱ Hilbert.K4Point3 := by
   constructor;

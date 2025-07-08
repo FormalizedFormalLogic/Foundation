@@ -47,14 +47,14 @@ lemma corefl : Logic.KTc = Kripke.FrameClass.KTc.logic := eq_hilbert_logic_frame
 instance : Logic.KB4 ⪱ Logic.KTc := by
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.IsKB4 ⊧ φ → FrameClass.KTc ⊧ φ by
+    suffices ∀ φ, FrameClass.KB4 ⊧ φ → FrameClass.KTc ⊧ φ by
       simpa [KB4.Kripke.refl_trans, KTc.Kripke.corefl];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.KTc ⊢! φ ∧ ¬FrameClass.IsKB4 ⊧ φ by simpa [KB4.Kripke.refl_trans];
+    suffices ∃ φ, Logic.KTc ⊢! φ ∧ ¬FrameClass.KB4 ⊧ φ by simpa [KB4.Kripke.refl_trans];
     use (Axioms.Tc (.atom 0));
     constructor;
     . exact axiomTc!;

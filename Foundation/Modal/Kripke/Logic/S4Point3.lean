@@ -148,7 +148,7 @@ instance : Logic.K4Point3 ⪱ Logic.S4Point3 := by
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S4Point3 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by simpa [K4Point3.Kripke.trans_weakConnected];
+    suffices ∃ φ, Logic.S4Point3 ⊢! φ ∧ ¬FrameClass.K4Point3 ⊧ φ by simpa [K4Point3.Kripke.trans_weakConnected];
     use (Axioms.Point3 (.atom 0) (.atom 1));
     constructor;
     . exact axiomPoint3!;

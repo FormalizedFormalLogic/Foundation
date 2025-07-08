@@ -53,7 +53,7 @@ instance : Hilbert.KD ⪱ Hilbert.KT := by
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.IsKD)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩, 0;
       constructor;

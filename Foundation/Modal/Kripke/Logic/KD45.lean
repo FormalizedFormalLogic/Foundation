@@ -106,7 +106,7 @@ instance : Logic.K45 ⪱ Logic.KD45 := by
   constructor;
   . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.KD45 ⊢! φ ∧ ¬FrameClass.IsK45 ⊧ φ by simpa [K45.Kripke.trans_eucl];
+    suffices ∃ φ, Logic.KD45 ⊢! φ ∧ ¬FrameClass.K45 ⊧ φ by simpa [K45.Kripke.trans_eucl];
     use Axioms.D (.atom 0);
     constructor;
     . exact axiomD!;

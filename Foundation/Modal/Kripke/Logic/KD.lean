@@ -14,7 +14,7 @@ namespace Kripke
 
 protected abbrev Frame.IsKD := Frame.IsSerial
 
-protected abbrev FrameClass.IsKD : FrameClass := { F | F.IsKD }
+protected abbrev FrameClass.KD : FrameClass := { F | F.IsKD }
 
 end Kripke
 
@@ -23,24 +23,24 @@ namespace Hilbert
 
 namespace KD.Kripke
 
-instance : Sound Hilbert.KD FrameClass.IsKD :=
+instance : Sound Hilbert.KD FrameClass.KD :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
     rintro F F_serial φ rfl;
     apply validate_AxiomD_of_serial (ser := F_serial);
 
 instance : Entailment.Consistent Hilbert.KD :=
-  consistent_of_sound_frameclass FrameClass.IsKD $ by
+  consistent_of_sound_frameclass FrameClass.KD $ by
     use whitepoint;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
 
-instance : Canonical Hilbert.KD FrameClass.IsKD := ⟨by
+instance : Canonical Hilbert.KD FrameClass.KD := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete Hilbert.KD FrameClass.IsKD := inferInstance
+instance : Complete Hilbert.KD FrameClass.KD := inferInstance
 
 end KD.Kripke
 
@@ -62,6 +62,6 @@ end Hilbert
 
 instance : Modal.K ⪱ Modal.KD := inferInstance
 
-lemma KD.Kripke.eq_serial : Modal.KD = FrameClass.IsKD.logic := eq_hilbert_logic_frameClass_logic
+lemma KD.Kripke.eq_serial : Modal.KD = FrameClass.KD.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

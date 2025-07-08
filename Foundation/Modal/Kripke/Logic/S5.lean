@@ -154,14 +154,14 @@ instance : Hilbert.KD45 ⪱ Hilbert.S5 := by
 instance : Hilbert.KB4 ⪱ Hilbert.S5 := by
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.IsKB4 ⊧ φ → FrameClass.S5 ⊧ φ by
+    suffices ∀ φ, FrameClass.KB4 ⊧ φ → FrameClass.S5 ⊧ φ by
       simpa [KB4.Kripke.refl_trans, S5.Kripke.refl_eucl];
     rintro φ hφ F hF;
     apply hφ;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.IsKB4 ⊧ φ by simpa [KB4.Kripke.refl_trans];
+    suffices ∃ φ, Hilbert.S5 ⊢! φ ∧ ¬FrameClass.KB4 ⊧ φ by simpa [KB4.Kripke.refl_trans];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
