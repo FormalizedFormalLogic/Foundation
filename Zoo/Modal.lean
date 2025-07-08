@@ -1,5 +1,5 @@
 import Zoo.Basic
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 -- import Foundation.Modal.Kripke.Logic.S5
 
 open Lean Meta Qq Elab Command

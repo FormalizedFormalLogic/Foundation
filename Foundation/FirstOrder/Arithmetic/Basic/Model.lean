@@ -1,10 +1,10 @@
-import Foundation.FirstOrder.Arith.Basic.ORingStruc
+import Foundation.FirstOrder.Arithmetic.Basic.ORingStruc
 
 namespace LO
 
 namespace FirstOrder
 
-namespace Arith
+namespace Arithmetic
 open Language
 
 section
@@ -170,7 +170,7 @@ lemma oRing_weakerThan_of (T S : Theory ℒₒᵣ) [𝐄𝐐 ⪯ S]
            M ⊧ₘ* T) : T ⪯ S :=
   Entailment.weakerThan_iff.mpr fun h ↦ complete <| oRing_consequence_of _ _ fun M _ _ ↦ sound! h (H M)
 
-end Arith
+end Arithmetic
 
 class ArithmeticTheory.SoundOn (T : ArithmeticTheory) (F : Sentence ℒₒᵣ → Prop) where
   sound : ∀ {σ}, T ⊢!. σ → F σ → ℕ ⊧ₘ₀ σ

@@ -3,9 +3,9 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 open Classical
 
-namespace LO.ISigma1.Metamath.Arithmetization
+namespace LO.ISigma1.Metamath.InternalArithmetic
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -41,7 +41,7 @@ lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k 
 
 section
 
-noncomputable def _root_.LO.FirstOrder.Arith.ssnum : 𝚺₁.Semisentence 3 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.ssnum : 𝚺₁.Semisentence 3 := .mkSigma
   “y p x. ∃ n, !numeralDef n x ∧ !p⌜ℒₒᵣ⌝.substs₁Def y n p” (by simp)
 
 lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
@@ -50,13 +50,13 @@ lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) 
 @[simp] lemma eval_ssnum (v) :
     Semiformula.Evalbm V v ssnum.val ↔ v 0 = substNumeral (v 1) (v 2) := substNumeral_defined.df.iff v
 
-noncomputable def _root_.LO.FirstOrder.Arith.ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “y p. ∃ n, !lenDef ↑k n ∧
     (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k) ∧ !numeralDef z #i.succ.succ.succ.succ) ∧
     !p⌜ℒₒᵣ⌝.substsDef y n p” (by simp)
 
 lemma substNumerals_defined :
-    Arith.HierarchySymbol.DefinedFunction (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := by
+    Arithmetic.HierarchySymbol.DefinedFunction (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := by
   intro v
   suffices
     (v 0 = ⌜ℒₒᵣ⌝.substs ⌜fun (i : Fin k) ↦ numeral (v i.succ.succ)⌝ (v 1)) ↔
@@ -75,19 +75,19 @@ lemma substNumerals_defined :
 
 end
 
-end LO.ISigma1.Metamath.Arithmetization
+end LO.ISigma1.Metamath.InternalArithmetic
 
 namespace LO.ISigma1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0 Metamath Arithmetization
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath InternalArithmetic
 
 variable {T : Theory ℒₒᵣ} [𝐈𝚺₁ ⪯ T]
 
 section Diagonalization
 
-noncomputable def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 := “x. ∀ y, !ssnum y x x → !θ y”
+def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 := “x. ∀ y, !ssnum y x x → !θ y”
 
-noncomputable def fixpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
+def fixpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
 
 lemma substs_diag (θ σ : Semisentence ℒₒᵣ 1) :
     “!(diag θ) !!(⌜σ⌝ : Semiterm ℒₒᵣ Empty 0)” = (“∀ x, !ssnum x !!⌜σ⌝ !!⌜σ⌝ → !θ x” : Sentence ℒₒᵣ) := by
@@ -126,12 +126,12 @@ end Diagonalization
 section Multidiagonalization
 
 /-- $\mathrm{diag}_i(\vec{x}) := (\forall \vec{y})\left[ \left(\bigwedge_j \mathrm{ssnums}(y_j, x_j, \vec{x})\right) \to \theta_i(\vec{y}) \right]$ -/
-noncomputable def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒₒᵣ k :=
+def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒₒᵣ k :=
   ∀^[k] (
     (Matrix.conj fun j : Fin k ↦ (Rew.substs <| #(j.addCast k) :> #(j.addNat k) :> fun l ↦ #(l.addNat k)) ▹ ssnums.val) ➝
     (Rew.substs fun j ↦ #(j.addCast k)) ▹ θ)
 
-noncomputable def multifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.substs fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
+def multifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.substs fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
 
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢!. multifixpoint θ i ⭤ (Rew.substs fun j ↦ ⌜multifixpoint θ j⌝) ▹ (θ i) :=
@@ -147,7 +147,7 @@ theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
       _                      ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
       _                      ↔ V ⊧/(fun i ↦ ⌜multifixpoint θ i⌝) (θ i)   := by simp [ht]
 
-noncomputable def exclusiveMultifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
+def exclusiveMultifixpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
   multifixpoint (fun j ↦ (θ j).padding j) i
 
 @[simp] lemma exclusiveMultifixpoint_inj_iff (θ : Fin k → Semisentence ℒₒᵣ k) :

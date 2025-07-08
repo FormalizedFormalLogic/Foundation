@@ -778,6 +778,8 @@ protected class S5 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢
 instance [Entailment.S5 𝓢] : Entailment.KT 𝓢 where
 instance [Entailment.S5 𝓢] : Entailment.K5 𝓢 where
 
+protected class S5Grz (𝓢 : S) extends Entailment.S5 𝓢, HasAxiomGrz 𝓢
+
 protected class GL extends Entailment.K 𝓢, HasAxiomL 𝓢
 protected class GLPoint2 extends Entailment.GL 𝓢, HasAxiomWeakPoint2 𝓢
 protected class GLPoint3 extends Entailment.GL 𝓢, HasAxiomWeakPoint3 𝓢

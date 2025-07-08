@@ -5,7 +5,7 @@ import Foundation.Modal.Kripke.Logic.S5
 namespace LO.Modal
 
 
-namespace Logic.S5
+namespace S5
 
 set_option linter.style.multiGoal false
 
@@ -19,39 +19,38 @@ open Modalities
 
 protected abbrev modalities : Modalities := {-, ∼, □, ◇, ∼□, ∼◇}
 
-lemma modal_reduction_0 : ModalReduction Logic.S5 0 Logic.S5.modalities := ModalReduction.reducible_0_of_mem $ by simp;
+lemma modal_reduction_0 : ModalReduction Modal.S5 0 Modal.S5.modalities := ModalReduction.reducible_0_of_mem $ by simp;
 
-lemma modal_reduction_1 : ModalReduction Logic.S5 1 Logic.S5.modalities := ModalReduction.reducible_1_of_mem (by simp) (by simp) (by simp)
+lemma modal_reduction_1 : ModalReduction Modal.S5 1 Modal.S5.modalities := ModalReduction.reducible_1_of_mem (by simp) (by simp) (by simp)
 
-instance : (□□) ≅[Logic.S5] (□) := by
+instance : (□□) ≅[Modal.S5] (□) := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
+  . apply translation_of_axiomInstance (a := 0); simp;
   . apply translation_of_axiomInstance (a := 0);
+    apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
     simp;
-  . apply translation_of_axiomInstance (a := 0);
-    apply Entailment.WeakerThan.pbl (𝓢 := Logic.S4);
-    simp;
-instance : (□◇) ≅[Logic.S5] (◇) := by
+instance : (□◇) ≅[Modal.S5] (◇) := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
   . apply translation_of_axiomInstance (a := 0); simp;
   . apply translation_of_axiomInstance (a := 0); simp;
-instance : (◇◇) ≅[Logic.S5] (◇) := by
+instance : (◇◇) ≅[Modal.S5] (◇) := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
   . apply translation_of_axiomInstance (a := 0);
-    apply Entailment.WeakerThan.pbl (𝓢 := Logic.S4);
+    apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
     simp;
   . apply translation_of_axiomInstance (a := 0);
-    apply Entailment.WeakerThan.pbl (𝓢 := Logic.S4);
+    apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
     simp;
-instance : (◇□) ≅[Logic.S5] (□) := by
+instance : (◇□) ≅[Modal.S5] (□) := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
   . apply translation_of_axiomInstance (a := 0); simp;
   . apply translation_of_axiomInstance (a := 0); simp;
 
-lemma modal_reduction_2 : ModalReduction Logic.S5 2 S5.modalities := by
+lemma modal_reduction_2 : ModalReduction Modal.S5 2 S5.modalities := by
   apply ModalReduction.of_allOfSize;
   intro m hm;
   simp only [
@@ -69,22 +68,22 @@ lemma modal_reduction_2 : ModalReduction Logic.S5 2 S5.modalities := by
   . reduce_to (□);
   . reduce_to (◇);
 
-instance : (∼□∼) ≅[Logic.S5] (◇)  := by trans (∼∼◇); exact equivalence_expand_left (□∼) (∼◇) (∼); exact equivalence_expand_right (∼∼) (-) (◇)
-instance : (∼□□) ≅[Logic.S5] (∼□) := equivalence_expand_left (□□) (□) (∼)
-instance : (∼◇◇) ≅[Logic.S5] (∼◇) := equivalence_expand_left (◇◇) (◇) (∼)
-instance : (∼□◇) ≅[Logic.S5] (∼◇) := equivalence_expand_left (□◇) (◇) (∼)
-instance : (∼◇□) ≅[Logic.S5] (∼□) := equivalence_expand_left (◇□) (□) (∼)
-instance : (◇∼∼) ≅[Logic.S5] (◇)  := by trans (∼□∼); exact equivalence_expand_right (◇∼) (∼□) (∼); infer_instance;
-instance : (◇∼□) ≅[Logic.S5] (∼□) := by trans (∼□□); exact equivalence_expand_right (◇∼) (∼□) (□); exact equivalence_expand_left (□□) (□) (∼)
-instance : (◇∼◇) ≅[Logic.S5] (∼◇) := by trans (∼□◇); exact equivalence_expand_right (◇∼) (∼□) (◇); infer_instance;
-instance : (◇□□) ≅[Logic.S5] (□)  := by trans (◇□); exact equivalence_expand_left (□□) (□) (◇); infer_instance;
-instance : (◇□◇) ≅[Logic.S5] (◇)  := by trans (◇◇); exact equivalence_expand_left (□◇) (◇) (◇);  infer_instance;
-instance : (◇□∼) ≅[Logic.S5] (∼◇) := by trans (□∼); exact equivalence_expand_right (◇□) (□) (∼); infer_instance;
-instance : (◇◇∼) ≅[Logic.S5] (∼□) := by trans (◇∼); exact equivalence_expand_right (◇◇) (◇) (∼); infer_instance;
-instance : (◇◇□) ≅[Logic.S5] (◇□) := by trans (◇□); exact equivalence_expand_right (◇◇) (◇) (□); infer_instance;
-instance : (◇◇◇) ≅[Logic.S5] (◇)  := by trans (◇◇); exact equivalence_expand_left (◇◇) (◇) (◇); infer_instance;
+instance : (∼□∼) ≅[Modal.S5] (◇)  := by trans (∼∼◇); exact equivalence_expand_left (□∼) (∼◇) (∼); exact equivalence_expand_right (∼∼) (-) (◇)
+instance : (∼□□) ≅[Modal.S5] (∼□) := equivalence_expand_left (□□) (□) (∼)
+instance : (∼◇◇) ≅[Modal.S5] (∼◇) := equivalence_expand_left (◇◇) (◇) (∼)
+instance : (∼□◇) ≅[Modal.S5] (∼◇) := equivalence_expand_left (□◇) (◇) (∼)
+instance : (∼◇□) ≅[Modal.S5] (∼□) := equivalence_expand_left (◇□) (□) (∼)
+instance : (◇∼∼) ≅[Modal.S5] (◇)  := by trans (∼□∼); exact equivalence_expand_right (◇∼) (∼□) (∼); infer_instance;
+instance : (◇∼□) ≅[Modal.S5] (∼□) := by trans (∼□□); exact equivalence_expand_right (◇∼) (∼□) (□); exact equivalence_expand_left (□□) (□) (∼)
+instance : (◇∼◇) ≅[Modal.S5] (∼◇) := by trans (∼□◇); exact equivalence_expand_right (◇∼) (∼□) (◇); infer_instance;
+instance : (◇□□) ≅[Modal.S5] (□)  := by trans (◇□); exact equivalence_expand_left (□□) (□) (◇); infer_instance;
+instance : (◇□◇) ≅[Modal.S5] (◇)  := by trans (◇◇); exact equivalence_expand_left (□◇) (◇) (◇);  infer_instance;
+instance : (◇□∼) ≅[Modal.S5] (∼◇) := by trans (□∼); exact equivalence_expand_right (◇□) (□) (∼); infer_instance;
+instance : (◇◇∼) ≅[Modal.S5] (∼□) := by trans (◇∼); exact equivalence_expand_right (◇◇) (◇) (∼); infer_instance;
+instance : (◇◇□) ≅[Modal.S5] (◇□) := by trans (◇□); exact equivalence_expand_right (◇◇) (◇) (□); infer_instance;
+instance : (◇◇◇) ≅[Modal.S5] (◇)  := by trans (◇◇); exact equivalence_expand_left (◇◇) (◇) (◇); infer_instance;
 
-lemma modal_reduction_3 : ModalReduction Logic.S5 3 S5.modalities := by
+lemma modal_reduction_3 : ModalReduction Modal.S5 3 S5.modalities := by
   intro m hm;
   rcases split_left₁' hm with ⟨m₂, hm₂, (rfl | rfl | rfl)⟩;
   . obtain ⟨m', _, _⟩ := modal_reduction_2 m₂ hm₂;
@@ -125,7 +124,7 @@ lemma modal_reduction_3 : ModalReduction Logic.S5 3 S5.modalities := by
       . rcases iff_size_1.mp hm₂' with (rfl | rfl | rfl) <;> tauto;
       . apply translation_expand_right (∼∼) (-);
 
-theorem modal_reduction : ∀ n, ModalReduction Logic.S5 n S5.modalities := ModalReduction.forall_of_reducible_to_max (by simp) $ by
+theorem modal_reduction : ∀ n, ModalReduction Modal.S5 n S5.modalities := ModalReduction.forall_of_reducible_to_max (by simp) $ by
   intro n hn;
   match n with
   | 0 => exact modal_reduction_0;
@@ -133,6 +132,6 @@ theorem modal_reduction : ∀ n, ModalReduction Logic.S5 n S5.modalities := Moda
   | 2 => exact modal_reduction_2;
   | 3 => exact modal_reduction_3;
 
-end Logic.S5
+end S5
 
 end LO.Modal

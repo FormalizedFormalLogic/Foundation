@@ -84,7 +84,7 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
  
 [`x ≤ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/PeanoMinus/Basic.html#LO.PeanoMinus.instLE
 [`x - y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/PeanoMinus/Functions.html#LO.PeanoMinus.sub
-[`x ∣ y`]: https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/Basic/PeanoMinus.html#LO.FirstOrder.Arith.dvd
+[`x ∣ y`]: https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/Basic/PeanoMinus.html#LO.FirstOrder.Arithmetic.dvd
 [`x % y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/IOpen/Basic.html#LO.IOpen.rem
 [`√x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/IOpen/Basic.html#LO.IOpen.sqrt
 [`⟪x, y⟫`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/IOpen/Basic.html#LO.IOpen.pair

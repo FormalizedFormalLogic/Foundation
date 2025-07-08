@@ -29,7 +29,7 @@ open LO.ISigma1.Metamath
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
-class Delta1Definable (T : Theory L) extends Arith.LDef.TDef L.lDef where
+class Delta1Definable (T : Theory L) extends Arithmetic.LDef.TDef L.lDef where
   mem_iff {φ} : ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T
   isDelta1 : ch.ProvablyProperOn 𝐈𝚺₁
 
@@ -54,7 +54,7 @@ variable {T V}
 @[simp] lemma mem_codeIn_iff {σ} : ⌜σ⌝ ∈ T.codeIn V ↔ σ ∈ T :=
   have : V ⊧/![⌜σ⌝] T.tDef.ch.val ↔ ℕ ⊧/![⌜σ⌝] T.tDef.ch.val := by
     simpa [coe_quote, Matrix.constant_eq_singleton]
-      using FirstOrder.Arith.models_iff_of_Delta1 (V := V) (σ := T.tDef.ch) (by simp) (by simp) (e := ![⌜σ⌝])
+      using FirstOrder.Arithmetic.models_iff_of_Delta1 (V := V) (σ := T.tDef.ch) (by simp) (by simp) (e := ![⌜σ⌝])
   Iff.trans this Theory.Delta1Definable.mem_iff
 
 instance tDef_defined : (T.codeIn V).Defined T.tDef where
@@ -78,9 +78,9 @@ variable {U : Theory L}
 
 namespace Delta1Definable
 
-open Arith.HierarchySymbol.Semiformula LO.FirstOrder.Theory
+open Arithmetic.HierarchySymbol.Semiformula LO.FirstOrder.Theory
 
-def add (dT : T.Delta1Definable) (dU : U.Delta1Definable) : (T + U).Delta1Definable where
+instance add (dT : T.Delta1Definable) (dU : U.Delta1Definable) : (T + U).Delta1Definable where
   ch := T.tDef.ch ⋎ U.tDef.ch
   mem_iff {φ} := by simp
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
@@ -109,8 +109,6 @@ instance empty : Theory.Delta1Definable (∅ : Theory L) where
   mem_iff {ψ} := by simp
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
-/-! memo: This noncomputable is *not* essetial. -/
-noncomputable
 def singleton (φ : SyntacticFormula L) : Theory.Delta1Definable {φ} where
   ch := .ofZero (.mkSigma “x. x = ↑⌜φ⌝” (by simp)) _
   mem_iff {ψ} := by simp
@@ -128,6 +126,10 @@ def ofList (l : List (SyntacticFormula L)) : Delta1Definable {φ | φ ∈ l} :=
 
 noncomputable
 def ofFinite (T : Theory L) (h : Set.Finite T) : T.Delta1Definable := (ofList h.toFinset.toList).ofEq (by ext; simp)
+
+instance [T.Delta1Definable] [U.Delta1Definable] : (T + U).Delta1Definable := add inferInstance inferInstance
+
+instance (φ : SyntacticFormula L) : Theory.Delta1Definable {φ} := singleton φ
 
 end Delta1Definable
 

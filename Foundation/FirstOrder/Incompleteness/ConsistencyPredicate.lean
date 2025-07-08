@@ -10,7 +10,7 @@ open Classical
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -30,14 +30,14 @@ lemma _root_.LO.FirstOrder.Theory.Consistency.quote_iff {φ : Sentence ℒₒᵣ
 
 section
 
-noncomputable def _root_.LO.FirstOrder.ArithmeticTheory.isConsistent : 𝚷₁.Sentence :=
-  .mkPi (∼T.provabilityPred ⊥) (by simp)
+def _root_.LO.FirstOrder.ArithmeticTheory.isConsistent : 𝚷₁.Sentence :=
+  .mkPi (∼T.provabilityPred ⊥)
 
 @[simp] lemma isConsistent_defined : Semiformula.Evalbm V ![] (T.isConsistent : Sentence ℒₒᵣ) ↔ T.IsConsistent V := by
-  simp [models₀_iff, ArithmeticTheory.isConsistent, ArithmeticTheory.IsConsistent]
+  simp [ArithmeticTheory.isConsistent, ArithmeticTheory.IsConsistent]
 
-noncomputable def _root_.LO.FirstOrder.ArithmeticTheory.consistency : 𝚷₁.Semisentence 1 := .mkPi
-  “φ. ∀ nφ, !(ℒₒᵣ).lDef.negDef nφ φ → ¬!T.provable nφ” (by simp)
+def _root_.LO.FirstOrder.ArithmeticTheory.consistency : 𝚷₁.Semisentence 1 := .mkPi
+  “φ. ∀ nφ, !(ℒₒᵣ).lDef.negDef nφ φ → ¬!T.provable nφ”
 
 lemma consistency_defined : 𝚷₁-Predicate (T.Consistency : V → Prop) via T.consistency := by
   intro v
@@ -57,4 +57,27 @@ def isConsistent_eq : T.isConsistent = T.standardPr.con := rfl
 
 end WitnessComparisons
 
+
+
 end LO.ISigma1.Metamath
+
+namespace LO.FirstOrder.Arithmetic
+
+open Entailment ProvabilityLogic
+
+variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Delta1Definable]
+
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.Con : ArithmeticTheory := {↑T.isConsistent}
+
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.Incon : ArithmeticTheory := {∼↑T.isConsistent}
+
+instance : T.Con.Delta1Definable := Theory.Delta1Definable.singleton _
+
+instance : T.Incon.Delta1Definable := Theory.Delta1Definable.singleton _
+
+instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T + T.Con := by
+  have : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
+  have : Entailment.Consistent T := ArithmeticTheory.consistent_of_sound T (Eq ⊥) rfl
+  simp [models_iff, *]
+
+end LO.FirstOrder.Arithmetic

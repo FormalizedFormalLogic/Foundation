@@ -28,23 +28,21 @@ variable {IL : Propositional.Logic ℕ}
 
 variable (IL : Propositional.Logic ℕ)
 
-abbrev smallestMC (IL : Propositional.Logic ℕ) : Modal.Logic ℕ := Modal.Logic.sumNormal Modal.Logic.S4 ((Entailment.theory IL).image (·ᵍ))
+abbrev smallestMC (IL : Propositional.Logic ℕ) : Modal.Logic ℕ := Modal.Logic.sumNormal Modal.S4 ((Entailment.theory IL).image (·ᵍ))
 
 instance : Modal.Entailment.S4 IL.smallestMC where
   T φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (φ := Modal.Axioms.T (.atom 0)) (s := λ _ => φ);
     apply Modal.Logic.sumNormal.mem₁!;
-    simp;
+    simp [Modal.Logic.iff_provable, Entailment.theory];
   Four φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (φ := Modal.Axioms.Four (.atom 0)) (s := λ _ => φ);
     apply Modal.Logic.sumNormal.mem₁!;
-    simp;
+    simp [Modal.Logic.iff_provable, Entailment.theory];
 
-lemma smallestMC.mdp_S4 (hφψ : Modal.Logic.S4 ⊢! φ ➝ ψ) (hφ : IL.smallestMC ⊢! φ) : IL.smallestMC ⊢! ψ := by
+lemma smallestMC.mdp_S4 (hφψ : Modal.S4 ⊢! φ ➝ ψ) (hφ : IL.smallestMC ⊢! φ) : IL.smallestMC ⊢! ψ := by
   exact (Modal.Logic.sumNormal.mem₁! hφψ) ⨀ hφ;
 
 abbrev largestMC (IL : Propositional.Logic ℕ) : Modal.Logic ℕ := Modal.Logic.sumNormal IL.smallestMC ({ Modal.Axioms.Grz (.atom 0) })
@@ -178,41 +176,46 @@ namespace Modal
 
 open Propositional.Formula (goedelTranslate)
 
-variable {IL : Propositional.Logic ℕ} {ML : Modal.Logic ℕ}
+variable {IL : Propositional.Logic ℕ}
+variable {MS} [Entailment (Modal.Formula ℕ) MS]
+variable {𝓜𝓢 : MS}  [Entailment.S4 𝓜𝓢]
 variable {φ ψ χ : Propositional.Formula ℕ}
 
-variable [Entailment.S4 ML]
+@[simp]
+lemma goedelTranslated_efq : 𝓜𝓢 ⊢! (⊥ ➝ φ)ᵍ := by
+  apply nec!;
+  simp [goedelTranslate];
 
-lemma goedelTranslated_axiomTc : ML ⊢! φᵍ ➝ □φᵍ := by
+lemma goedelTranslated_axiomTc : 𝓜𝓢 ⊢! φᵍ ➝ □φᵍ := by
   induction φ using Propositional.Formula.rec' with
   | hfalsum => simp only [goedelTranslate, efq!];
   | hand φ ψ ihp ihq => exact C!_trans (CKK!_of_C!_of_C! ihp ihq) collect_box_and!
   | hor φ ψ ihp ihq => exact C!_trans (left_A!_intro (right_A!_intro_left ihp) (right_A!_intro_right ihq)) collect_box_or!
   | _ => simp only [goedelTranslate, axiomFour!];
 
-lemma goedelTranslated_implyS : ML ⊢! (φ ➝ ψ ➝ φ)ᵍ := by
+lemma goedelTranslated_implyS : 𝓜𝓢 ⊢! (φ ➝ ψ ➝ φ)ᵍ := by
   exact nec! $ C!_trans goedelTranslated_axiomTc $ axiomK'! $ nec! $ imply₁!;
 
-lemma goedelTranslated_implyK : ML ⊢! ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
+lemma goedelTranslated_implyK : 𝓜𝓢 ⊢! ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
   apply nec! $ C!_trans (C!_trans (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! imply₂!) axiomK!;
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
   apply deduct_iff.mpr;
-  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[ML]! φᵍ := by_axm!;
-  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[ML]! (φᵍ ➝ □(ψᵍ ➝ χᵍ)) := by_axm!;
-  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[ML]! □(ψᵍ ➝ χᵍ) := (by assumption) ⨀ (by assumption);
+  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[𝓜𝓢]! φᵍ := by_axm!;
+  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[𝓜𝓢]! (φᵍ ➝ □(ψᵍ ➝ χᵍ)) := by_axm!;
+  have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[𝓜𝓢]! □(ψᵍ ➝ χᵍ) := (by assumption) ⨀ (by assumption);
   exact axiomT'! this;
 
-lemma goedelTranslated_AndIntro : ML ⊢! (φ ➝ ψ ➝ φ ⋏ ψ)ᵍ := by
+lemma goedelTranslated_AndIntro : 𝓜𝓢 ⊢! (φ ➝ ψ ➝ φ ⋏ ψ)ᵍ := by
   exact nec! $ C!_trans goedelTranslated_axiomTc $ axiomK'! $ nec! $ and₃!
 
-lemma goedelTranslated_OrElim : ML ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)))ᵍ := by
+lemma goedelTranslated_OrElim : 𝓜𝓢 ⊢! (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)))ᵍ := by
   exact nec! $ C!_trans axiomFour! $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! $ or₃!) axiomK!;
 
 lemma provable_goedelTranslated_of_provable
-  (IH : Propositional.Hilbert ℕ) (ML : Modal.Logic ℕ) [Entailment.S4 ML]
-  (hAx : ∀ φ ∈ IH.axiomInstances, ML ⊢! φᵍ)
-  : IH ⊢! φ → ML ⊢! φᵍ := by
+  (IH : Propositional.Hilbert ℕ) (𝓜𝓢 : MS) [Entailment.S4 𝓜𝓢]
+  (hAx : ∀ φ ∈ IH.axiomInstances, 𝓜𝓢 ⊢! φᵍ)
+  : IH ⊢! φ → 𝓜𝓢 ⊢! φᵍ := by
   intro h;
   induction h using Propositional.Hilbert.rec! with
   | @axm φ _ ih =>

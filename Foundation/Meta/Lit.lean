@@ -85,7 +85,7 @@ partial def denote : Q($F) → MetaM Lit
   |     ~q(∼$φ) => return ∼(←denote φ)
   |      ~q($e) => return atom e
 
-def complexity : Litform α → ℕ
+@[simp] def complexity : Litform α → ℕ
   |  atom _ => 0
   |       ⊤ => 0
   |       ⊥ => 0
@@ -96,5 +96,28 @@ def complexity : Litform α → ℕ
   | iff φ ψ => max φ.complexity ψ.complexity + 1
 
 end Litform
+
+namespace Lit
+
+def DEq : Lit → Lit → MetaM Bool
+  |    .atom e,   .atom e' => Lean.Meta.isDefEq e e'
+  |          ⊤,          ⊤ => return true
+  |          ⊥,          ⊥ => return true
+  |         ∼φ,         ∼ψ => return (← DEq φ ψ)
+  |    φ₁ ⋏ ψ₁,    φ₂ ⋏ ψ₂ => return (← DEq φ₁ φ₂) && (← DEq ψ₁ ψ₂)
+  |    φ₁ ⋎ ψ₁,    φ₂ ⋎ ψ₂ => return (← DEq φ₁ φ₂) && (← DEq ψ₁ ψ₂)
+  |    φ₁ ➝ ψ₁,    φ₂ ➝ ψ₂ => return (← DEq φ₁ φ₂) && (← DEq ψ₁ ψ₂)
+  | .iff φ₁ ψ₁, .iff φ₂ ψ₂ => return (← DEq φ₁ φ₂) && (← DEq ψ₁ ψ₂)
+  |          _,          _ => return false
+
+def dMem (φ : Lit) (Δ : List Lit) : MetaM Bool :=
+  Δ.foldrM (fun ψ ih ↦ return (←DEq φ ψ) || ih) false
+
+def dSubsetList (Γ Δ : List Lit) : MetaM Bool := do
+  match Γ with
+  |     [] => return true
+  | φ :: Γ => return (←φ.dMem Γ) && (←dSubsetList Γ Δ)
+
+end Lit
 
 end LO.Meta

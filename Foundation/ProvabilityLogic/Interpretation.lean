@@ -2,7 +2,7 @@ import Foundation.ProvabilityLogic.Incompleteness
 import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.FirstOrder.Incompleteness.Delta1
 import Foundation.Logic.HilbertStyle.Cl
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 
 namespace LO
 

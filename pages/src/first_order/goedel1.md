@@ -23,7 +23,7 @@ lemma re_complete
     {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
     p x ↔ T ⊢! (codeOfRePred p)/[‘↑x’] 
 ```
-- [re_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/R0/Representation.html#LO.FirstOrder.Arith.re_complete)
+- [re_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/R0/Representation.html#LO.FirstOrder.Arithmetic.re_complete)
 
 ### Main Theorem
 

@@ -9,7 +9,7 @@ open ProvabilityLogic
 open Entailment
 open Kripke Formula.Kripke
 
-lemma iff_provable_GL_provable_box_S {A : Modal.Formula _} : Logic.GL ⊢! A ↔ Logic.S ⊢! □A := by
+lemma iff_provable_GL_provable_box_S {A : Modal.Formula _} : Modal.GL ⊢! A ↔ Modal.S ⊢! □A := by
   constructor;
   . intro h;
     apply Logic.sumQuasiNormal.mem₁!;
@@ -19,9 +19,11 @@ lemma iff_provable_GL_provable_box_S {A : Modal.Formula _} : Logic.GL ⊢! A ↔
     intro f;
     exact Iff.mp 𝐈𝚺₁.standardPr.sound (S.arithmetical_soundness h f)
 
-theorem S.no_boxbot : Logic.S ⊬ □⊥ := iff_provable_GL_provable_box_S.not.mp $ by simp;
+theorem S.no_boxbot : Modal.S ⊬ □⊥ := iff_provable_GL_provable_box_S.not.mp $ by
+  simp only [Hilbert.Normal.iff_logic_provable_provable];
+  apply Entailment.Consistent.not_bot inferInstance;
 
-instance : Entailment.Consistent Logic.S := Entailment.Consistent.of_unprovable S.no_boxbot
+instance : Entailment.Consistent Modal.S := Entailment.Consistent.of_unprovable S.no_boxbot
 
 end Modal.Logic
 

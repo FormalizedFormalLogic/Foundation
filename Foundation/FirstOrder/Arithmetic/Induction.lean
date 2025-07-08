@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Definability
+import Foundation.FirstOrder.Arithmetic.Definability
 import Foundation.FirstOrder.PeanoMinus.Functions
 import Foundation.FirstOrder.TrueArithmetic.Basic
 
@@ -32,7 +32,7 @@ abbrev IOpen : ArithmeticTheory := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ Semif
 
 notation "𝐈Open" => IOpen
 
-abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : ArithmeticTheory := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ (Arith.Hierarchy Γ k)
+abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : ArithmeticTheory := 𝐏𝐀⁻ + InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ k)
 
 prefix:max "𝐈𝐍𝐃 " => InductionOnHierarchy
 
@@ -76,7 +76,7 @@ instance : 𝐄𝐐 ⪯ 𝐈𝐍𝐃 Γ n := Entailment.WeakerThan.trans (inferI
 instance : 𝐄𝐐 ⪯ 𝐈Open := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
 instance : 𝐈Open ⪯ 𝐈𝐍𝐃 Γ n :=
-  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arith.Hierarchy.of_open
+  Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arithmetic.Hierarchy.of_open
 
 instance : 𝐈𝚺₀ ⪯ 𝐈𝚺₁ :=
   ISigma_weakerThan_of_le (by decide)
@@ -102,7 +102,7 @@ end LO
 
 namespace LO
 
-open FirstOrder Arith PeanoMinus
+open FirstOrder Arithmetic PeanoMinus
 
 variable {V : Type*} [ORingStruc V]
 
@@ -141,7 +141,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
   InductionScheme.succ_induction (P := P) (C := Hierarchy Γ m) (by
     rcases hP with ⟨φ, hp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
-    exact ⟨φ.val.enumarateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val, by simp [hp],
+    exact ⟨φ.val.enumarateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val, by simp,
       by  intro x; simp [Semiformula.eval_rewriteMap]
           have : (Semiformula.Evalm V ![x] fun x ↦ φ.val.enumarateFVar (φ.val.idxOfFVar x)) φ.val ↔ (Semiformula.Evalm V ![x] id) φ.val :=
             Semiformula.eval_iff_of_funEqOn _ (by
@@ -194,7 +194,7 @@ private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
   have : P 0 := by simpa using this a (by rfl)
   contradiction
 
-instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arith.Hierarchy Γ.alt m) := by
+instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ.alt m) := by
   suffices
       ∀ (φ : Semiformula ℒₒᵣ ℕ 1), Hierarchy Γ.alt m φ →
       ∀ (f : ℕ → V),
@@ -359,10 +359,13 @@ instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ := inferInstance
 def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝐈𝚺 n₂] : V ⊧ₘ* 𝐈𝚺 n₁ :=
   ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
 
-set_option linter.flexible false in
 lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ := by
-  simp [Empty.eq_elim, succInd, models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons',
-    Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp]
+  suffices
+    ∀ f : ℕ → ℕ,
+      Semiformula.Evalm ℕ ![0] f φ →
+      (∀ x, Semiformula.Evalm ℕ ![x] f φ → Semiformula.Evalm ℕ ![x + 1] f φ) →
+        ∀ x, Semiformula.Evalm ℕ ![x] f φ by
+    simpa [succInd, models_iff, Matrix.constant_eq_singleton, Semiformula.eval_substs]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih
@@ -386,5 +389,17 @@ instance : Entailment.Consistent (𝐈𝐍𝐃 Γ k) := (𝐈𝐍𝐃 Γ k).cons
 instance : Entailment.Consistent 𝐏𝐀 := 𝐏𝐀.consistent_of_sound (Eq ⊥) rfl
 
 instance : 𝐏𝐀 ⪯ 𝐓𝐀 := inferInstance
+
+instance (T : ArithmeticTheory) [𝐏𝐀⁻ ⪯ T] : 𝐑₀ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐏𝐀⁻)) inferInstance
+
+instance (T : ArithmeticTheory) [𝐈𝚺₀ ⪯ T] : 𝐑₀ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₀)) inferInstance
+
+instance (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] : 𝐑₀ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
+
+instance (T : ArithmeticTheory) [𝐏𝐀 ⪯ T] : 𝐑₀ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐏𝐀)) inferInstance
 
 end LO

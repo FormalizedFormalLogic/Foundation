@@ -7,11 +7,11 @@ import Foundation.FirstOrder.Incompleteness.StandardProvability.D1
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 variable {T : LOR.TTheory (V := V)} [R₀Theory T]
 
@@ -86,7 +86,7 @@ noncomputable def termEqComplete {n : ℕ} (e : Fin n → V) :
 lemma termEq_complete! {n : ℕ} (e : Fin n → V) (t : Semiterm ℒₒᵣ Empty n) :
     T ⊢! ⌜Rew.embs t⌝^ᵗ/[toNumVec e] =' ↑(t.valbm V e) := ⟨termEqComplete T e t⟩
 
-open FirstOrder.Arith
+open FirstOrder.Arithmetic
 
 theorem bold_sigma₁_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierarchy 𝚺 1 φ) {e} :
     V ⊧/e φ → T ⊢! ⌜Rew.embs ▹ φ⌝^/[toNumVec e] := by
@@ -173,7 +173,7 @@ theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) 
 
 end TProof
 
-end Arithmetization
+end InternalArithmetic
 
 section
 
@@ -181,11 +181,11 @@ variable {T : ArithmeticTheory} [T.Delta1Definable]
 
 theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
-  simpa [provable_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
+  simpa [provable_iff] using InternalArithmetic.TProof.sigma₁_complete _ hσ h
 
 theorem sigma₁_complete_provable {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T†V ⊢! ⌜σ⌝ := fun h ↦ by
-  simpa [provable_iff] using Arithmetization.TProof.sigma₁_complete _ hσ h
+  simpa [provable_iff] using InternalArithmetic.TProof.sigma₁_complete _ hσ h
 
 end
 

@@ -8,7 +8,7 @@ import Foundation.FirstOrder.ISigma1.Metamath.Term.Functions
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -265,7 +265,7 @@ end Language.Semiterm
 
 end typed_isfvfree
 
-namespace Arithmetization
+namespace InternalArithmetic
 
 noncomputable def typedNumeral (n m : V) : ⌜ℒₒᵣ⌝.Semiterm n := ⟨numeral m, by simp⟩
 
@@ -367,4 +367,4 @@ lemma semiterm_induction (Γ) {n : V} {P : ⌜ℒₒᵣ⌝.Semiterm n → Prop}
         (by simpa using ih 1 (by simp) (by simp [ht₂]))
 -/
 
-end LO.ISigma1.Metamath.Arithmetization
+end LO.ISigma1.Metamath.InternalArithmetic

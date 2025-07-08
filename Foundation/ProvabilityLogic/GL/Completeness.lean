@@ -102,7 +102,7 @@ end LO
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 namespace SolovaySentences
 
@@ -514,7 +514,7 @@ end LO.ISigma1.Metamath
 namespace LO.ProvabilityLogic
 
 open Entailment Entailment.FiniteContext
-open FirstOrder Arith
+open FirstOrder Arithmetic
 open Modal
 open Modal.Kripke
 
@@ -522,7 +522,8 @@ variable {T : ArithmeticTheory} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.Sound
 
 /-- Arithmetical completeness of GL-/
 theorem GL.arithmetical_completeness :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) → Logic.GL ⊢! A := by
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) → Modal.GL ⊢! A := by
+  simp only [Hilbert.Normal.iff_logic_provable_provable];
   contrapose;
   intro hA;
   push_neg;
@@ -543,7 +544,7 @@ theorem GL.arithmetical_completeness :
   exact σ.SC4 _ (by rintro ⟨⟩) this;
 
 theorem GL.arithmetical_completeness_iff :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) ↔ Logic.GL ⊢! A :=
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) ↔ Modal.GL ⊢! A :=
   ⟨GL.arithmetical_completeness, GL.arithmetical_soundness⟩
 
 end LO.ProvabilityLogic

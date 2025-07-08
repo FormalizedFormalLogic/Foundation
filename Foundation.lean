@@ -35,10 +35,10 @@ import Foundation.FirstOrder.Completeness.Completeness
 import Foundation.FirstOrder.Order.Le
 import Foundation.FirstOrder.Interpretation
 
-import Foundation.FirstOrder.Arith.Basic
-import Foundation.FirstOrder.Arith.BoundedQuantifier
-import Foundation.FirstOrder.Arith.Definability
-import Foundation.FirstOrder.Arith.Induction
+import Foundation.FirstOrder.Arithmetic.Basic
+import Foundation.FirstOrder.Arithmetic.BoundedQuantifier
+import Foundation.FirstOrder.Arithmetic.Definability
+import Foundation.FirstOrder.Arithmetic.Induction
 
 import Foundation.FirstOrder.R0.Basic
 import Foundation.FirstOrder.R0.Representation
@@ -81,11 +81,8 @@ import Foundation.IntFO.Translation
 -- import Foundation.Propositional.Dialectica.Basic
 
 -- Modal
-import Foundation.Modal.Hilbert.KP
-import Foundation.Modal.Hilbert.S5Grz
-import Foundation.Modal.Hilbert.GL.Alternatives
-import Foundation.Modal.Hilbert.Minimal.Basic
 import Foundation.Modal.Hilbert.K_EMCN
+import Foundation.Modal.Hilbert.GL_K4Loeb_K4Henkin_K4Hen
 
 import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
 import Foundation.Modal.Kripke.Logic.GL.MDP
@@ -153,3 +150,4 @@ import Foundation.ProvabilityLogic.S.Completeness
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit
 import Foundation.Meta.ClProver
+import Foundation.Meta.IntProver

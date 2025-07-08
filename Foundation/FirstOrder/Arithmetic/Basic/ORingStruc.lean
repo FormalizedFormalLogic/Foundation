@@ -211,7 +211,7 @@ macro_rules
 
 end BinderNotation
 
-namespace Arith
+namespace Arithmetic
 
 section
 
@@ -258,7 +258,7 @@ lemma goedelNumber'_eq_coe_encode (a : α) :
 
 end
 
-end Arith
+end Arithmetic
 
 namespace Theory
 
