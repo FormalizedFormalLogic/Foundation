@@ -24,26 +24,26 @@ protected abbrev FrameClass.finite_KTB: FrameClass := { F | F.IsFiniteKTB }
 end Kripke
 
 
-namespace Logic.KTB.Kripke
+namespace Hilbert.KTB.Kripke
 
-instance sound : Sound Logic.KTB FrameClass.KTB := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.KTB FrameClass.KTB := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomB_of_symmetric;
 
-instance consistent : Entailment.Consistent Logic.KTB := consistent_of_sound_frameclass FrameClass.KTB $ by
+instance : Entailment.Consistent Hilbert.KTB := consistent_of_sound_frameclass FrameClass.KTB $ by
   use whitepoint;
   constructor;
 
 
-instance canonical : Canonical Logic.KTB FrameClass.KTB := ⟨by constructor⟩
+instance : Canonical Hilbert.KTB FrameClass.KTB := ⟨by constructor⟩
 
-instance complete : Complete Logic.KTB FrameClass.KTB := inferInstance
+instance : Complete Hilbert.KTB FrameClass.KTB := inferInstance
 
-instance finite_complete : Complete Logic.KTB FrameClass.finite_KTB := ⟨by
+instance : Complete Hilbert.KTB FrameClass.finite_KTB := ⟨by
   intro φ hp;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.KTB);
   intro F hF V x;
   replace hF := Set.mem_setOf_eq.mp hF;
   let M : Kripke.Model := ⟨F, V⟩;
@@ -58,17 +58,16 @@ instance finite_complete : Complete Logic.KTB FrameClass.finite_KTB := ⟨by
   }
 ⟩
 
-lemma refl_symm : Logic.KTB = FrameClass.KTB.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.KT ⪱ Logic.KTB := by
+instance : Hilbert.KT ⪱ Hilbert.KTB := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.KTB ⊢! φ ∧ ¬Kripke.FrameClass.KT ⊧ φ by simpa [KT.Kripke.refl];
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KT);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -78,20 +77,18 @@ instance : Logic.KT ⪱ Logic.KTB := by
         use 1;
         omega;
 
-instance : Logic.KDB ⪱ Logic.KTB := by
+instance : Hilbert.KDB ⪱ Hilbert.KTB := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    simp only [iff_provable, Set.mem_setOf_eq, KDB.Kripke.serial_symm, KTB.Kripke.refl_symm];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.KDB FrameClass.KTB;
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.KTB ⊢! φ ∧ ¬Kripke.FrameClass.KDB ⊧ φ by simpa [KDB.Kripke.serial_symm];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KDB);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ x _ => x = 1⟩, 0;
       constructor;
       . refine {
@@ -105,6 +102,10 @@ instance : Logic.KDB ⪱ Logic.KTB := by
       . simp [Semantics.Realize, Satisfies];
         omega;
 
-end Logic.KTB.Kripke
+end Hilbert.KTB.Kripke
+
+instance : Modal.KT ⪱ Modal.KTB := inferInstance
+
+instance : Modal.KDB ⪱ Modal.KTB := inferInstance
 
 end LO.Modal

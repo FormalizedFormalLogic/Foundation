@@ -1,24 +1,22 @@
 import Foundation.Modal.Hilbert.Minimal.Basic
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 
 
 namespace LO.Modal
 
 open LO.Modal.Entailment
 
-instance : Logic.K ≊ 𝐄𝐌𝐂𝐍 := by
+instance : Modal.K ≊ 𝐄𝐌𝐂𝐍 := by
   apply Entailment.Equiv.iff.mpr;
   intro φ;
-  suffices Logic.K ⊢! φ ↔ Hilbert.EMCN ⊢! φ by
+  suffices Hilbert.K ⊢! φ ↔ Hilbert.EMCN ⊢! φ by
     simpa [Entailment.theory, Set.mem_setOf_eq];
   constructor;
   . intro h;
-    induction h using Hilbert.rec! with
+    induction h using Hilbert.Normal.rec! with
     | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ;
     | nec ihφ => apply Entailment.nec! ihφ;
-    | maxm h =>
-      rcases (by simpa using h) with ⟨_, rfl⟩;
-      . simp;
+    | axm s h => rcases h with rfl; simp;
     | imply₁ | imply₂ | ec => simp;
   . intro h;
     induction h using Hilbert.WithRE.rec! with

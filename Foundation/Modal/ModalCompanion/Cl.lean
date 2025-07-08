@@ -62,14 +62,15 @@ section S5
 
 namespace Logic
 
-lemma S5.is_smallestMC_of_Cl : Logic.S5 = (smallestMC 𝐂𝐥) := by
+lemma S5.is_smallestMC_of_Cl : Modal.S5 = (smallestMC 𝐂𝐥) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
     intro φ hφ;
-    induction hφ using Modal.Hilbert.rec! with
-    | maxm h => rcases (by simpa using h) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩) <;> simp;
+    simp only [Hilbert.Normal.iff_logic_provable_provable] at hφ;
+    induction hφ using Modal.Hilbert.Normal.rec! with
+    | axm _ h => rcases h with (rfl | rfl | rfl) <;> simp;
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
     | nec ihφ => exact nec! ihφ;
     | _ => simp;
@@ -81,22 +82,24 @@ lemma S5.is_smallestMC_of_Cl : Logic.S5 = (smallestMC 𝐂𝐥) := by
     | nec ihφ => exact nec! ihφ;
     | subst ihφ => apply subst! _ ihφ;
     | mem₂ h =>
+      apply Hilbert.Normal.iff_logic_provable_provable.mpr;
       rcases h with ⟨φ, hφ, rfl⟩;
-      haveI : Logic.S4 ⊢! ◇φᵍ := iff_provable_Cl_provable_dia_gS4.mp hφ;
-      haveI : Logic.S4 ⊢! ◇□φᵍ := (diaK'! $ goedelTranslated_axiomTc) ⨀ this;
       apply rm_diabox'!;
-      apply WeakerThan.pbl this;
+      apply WeakerThan.pbl (𝓢 := Hilbert.S4);
+      exact (diaK'! $ goedelTranslated_axiomTc) ⨀ (iff_provable_Cl_provable_dia_gS4.mp hφ);
 
 instance : Sound (smallestMC 𝐂𝐥) FrameClass.S5 := by
   rw [←Logic.S5.is_smallestMC_of_Cl];
   infer_instance;
 
-instance modalCompanion_Cl_S5 : ModalCompanion 𝐂𝐥 Logic.S5 := by
+instance modalCompanion_Cl_S5 : ModalCompanion 𝐂𝐥 Modal.S5 := by
   rw [Logic.S5.is_smallestMC_of_Cl];
-  exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
+  apply Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.Cl)
     (MC := Modal.Kripke.FrameClass.S5)
-    (by intro F hF; simp_all only [Set.mem_setOf_eq]; constructor);
+  intro F hF;
+  simp_all only [Set.mem_setOf_eq];
+  constructor;
 
 end Logic
 
@@ -105,19 +108,20 @@ end S5
 
 section S5Grz
 
-lemma Logic.gS5Grz_of_Cl : 𝐂𝐥 ⊢! φ → Logic.S5Grz ⊢! φᵍ := by
+lemma Logic.gS5Grz_of_Cl : 𝐂𝐥 ⊢! φ → Modal.S5Grz ⊢! φᵍ := by
   intro h;
   apply WeakerThan.pbl $ modalCompanion_Cl_S5.companion.mp h;
 
-lemma Logic.S5Grz.is_largestMC_of_Cl : Logic.S5Grz = (Logic.largestMC 𝐂𝐥) := by
+lemma Logic.S5Grz.is_largestMC_of_Cl : Modal.S5Grz = (Logic.largestMC 𝐂𝐥) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply Entailment.weakerThan_iff.mpr;
     intro _ hφ;
-    induction hφ using Modal.Hilbert.rec! with
-    | maxm h =>
-      rcases (by simpa using h) with (⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
+    simp only [Hilbert.Normal.iff_logic_provable_provable] at hφ;
+    induction hφ using Modal.Hilbert.Normal.rec! with
+    | axm _ h =>
+      rcases h with (rfl | rfl | rfl | rfl);
       . simp;
       . simp;
       . apply WeakerThan.pbl (𝓢 := (smallestMC 𝐂𝐥));
@@ -139,14 +143,14 @@ instance : Sound (Logic.largestMC 𝐂𝐥) FrameClass.finite_Triv := by
   rw [←Logic.S5Grz.is_largestMC_of_Cl];
   infer_instance;
 
-instance modalCompanion_Cl_S5Grz : ModalCompanion 𝐂𝐥 Logic.S5Grz := by
+instance modalCompanion_Cl_S5Grz : ModalCompanion 𝐂𝐥 Modal.S5Grz := by
   rw [Logic.S5Grz.is_largestMC_of_Cl];
   apply Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_Cl)
     (MC := Modal.Kripke.FrameClass.finite_Triv);
   . intro F hF; simp_all only [Set.mem_setOf_eq]; exact {};
 
-instance modalCompanion_Cl_Triv : ModalCompanion 𝐂𝐥 Logic.Triv := by
+instance modalCompanion_Cl_Triv : ModalCompanion 𝐂𝐥 Modal.Triv := by
   convert modalCompanion_Cl_S5Grz;
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.symm
@@ -157,8 +161,9 @@ end S5Grz
 
 section boxdot
 
-theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ ↔ Logic.Ver ⊢! φᵍᵇ := by
-  exact Iff.trans modalCompanion_Cl_Triv.companion Logic.iff_boxdotTranslated_Ver_Triv.symm
+theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ ↔ Hilbert.Ver ⊢! φᵍᵇ := by
+  apply Iff.trans modalCompanion_Cl_Triv.companion;
+  simpa using Logic.iff_boxdotTranslated_Ver_Triv.symm;
 
 end boxdot
 
