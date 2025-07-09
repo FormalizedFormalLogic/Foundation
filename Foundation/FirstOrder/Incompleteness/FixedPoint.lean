@@ -42,7 +42,7 @@ lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k 
 section
 
 def _root_.LO.FirstOrder.Arithmetic.ssnum : 𝚺₁.Semisentence 3 := .mkSigma
-  “y p x. ∃ n, !numeralDef n x ∧ !p⌜ℒₒᵣ⌝.substs₁Def y n p” (by simp)
+  “y p x. ∃ n, !numeralGraph n x ∧ !p⌜ℒₒᵣ⌝.substs₁Def y n p” (by simp)
 
 lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
   intro v; simp [ssnum, ⌜ℒₒᵣ⌝.substs₁_defined.df.iff, substNumeral]
@@ -52,7 +52,7 @@ lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) 
 
 def _root_.LO.FirstOrder.Arithmetic.ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “y p. ∃ n, !lenDef ↑k n ∧
-    (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k) ∧ !numeralDef z #i.succ.succ.succ.succ) ∧
+    (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k) ∧ !numeralGraph z #i.succ.succ.succ.succ) ∧
     !p⌜ℒₒᵣ⌝.substsDef y n p” (by simp)
 
 lemma substNumerals_defined :

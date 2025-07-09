@@ -8,18 +8,16 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section
 
-variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 namespace TermSubst
 
-def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 1 where
+def blueprint : Language.TermRec.Blueprint 1 where
   bvar := .mkSigma “y z w. !nthDef y w z” (by simp)
   fvar := .mkSigma “y x w. !qqFvarDef y x” (by simp)
   func := .mkSigma “y k f v v' w. !qqFuncDef y k f v'” (by simp)
 
-variable (L)
-
-noncomputable def construction : Language.TermRec.Construction V L (blueprint pL) where
+noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (param z)        := (param 1).[z]
   fvar (_     x)        := ^&x
   func (_     k f _ v') := ^func k f v'
@@ -35,126 +33,123 @@ open TermSubst
 
 variable (L)
 
-noncomputable def Language.termSubst (w t : V) : V := (construction L).result ![w] t
+noncomputable def termSubst (w t : V) : V := construction.result L ![w] t
 
-noncomputable def Language.termSubstVec (k w v : V) : V := (construction L).resultVec ![w] k v
+noncomputable def termSubstVec (k w v : V) : V := construction.resultVec L ![w] k v
+
+def termSubstGraph : 𝚺₁.Semisentence 3 := (blueprint.result L).rew <| Rew.substs ![#0, #2, #1]
+
+def termSubstVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec L).rew <| Rew.substs ![#0, #1, #3, #2]
 
 variable {L}
 
 variable {n m w : V}
 
-@[simp] lemma Language.termSubst_bvar (z) :
-    L.termSubst w ^#z = w.[z] := by simp [Language.termSubst, construction]
+@[simp] lemma termSubst_bvar (z) :
+    termSubst L w ^#z = w.[z] := by simp [termSubst, construction]
 
-@[simp] lemma Language.termSubst_fvar (x) :
-    L.termSubst w ^&x = ^&x := by simp [Language.termSubst, construction]
+@[simp] lemma termSubst_fvar (x) :
+    termSubst L w ^&x = ^&x := by simp [termSubst, construction]
 
-@[simp] lemma Language.termSubst_func {k f v} (hkf : L.Func k f) (hv : L.IsUTermVec k v) :
-    L.termSubst w (^func k f v) = ^func k f (L.termSubstVec k w v) := by
-  simp [Language.termSubst, construction, hkf, hv]; rfl
+@[simp] lemma termSubst_func {k f v} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+    termSubst L w (^func k f v) = ^func k f (termSubstVec L k w v) := by
+  simp [termSubst, construction, hkf, hv]; rfl
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.LDef.termSubstDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).result.rew <| Rew.substs ![#0, #2, #1]
-
-def _root_.LO.FirstOrder.Arithmetic.LDef.termSubstVecDef (pL : LDef) : 𝚺₁.Semisentence 4 := (blueprint pL).resultVec.rew <| Rew.substs ![#0, #1, #3, #2]
-
-variable (L)
-
-lemma Language.termSubst_defined : 𝚺₁-Function₂ L.termSubst via pL.termSubstDef := by
+lemma termSubst.defined : 𝚺₁-Function₂ termSubst (V := V) L via termSubstGraph L := by
   intro v
-  simpa [LDef.termSubstDef, Language.termSubst, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
-    using (construction L).result_defined ![v 0, v 2, v 1]
+  simpa [termSubstGraph, termSubst, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    using construction.result_defined ![v 0, v 2, v 1]
 
-instance Language.termSubst_definable : 𝚺₁-Function₂ L.termSubst := (termSubst_defined L).to_definable
+instance termSubst.definable : 𝚺₁-Function₂ termSubst (V := V) L := termSubst.defined.to_definable
 
-instance Language.termSubst_definable' : Γ-[k + 1]-Function₂ L.termSubst := L.termSubst_definable.of_sigmaOne
+instance termSubst.definable' : Γ-[k + 1]-Function₂ termSubst (V := V) L := termSubst.definable.of_sigmaOne
 
-lemma Language.termSubstVec_defined : 𝚺₁-Function₃ L.termSubstVec via pL.termSubstVecDef := by
-  intro v; simpa [LDef.termSubstVecDef, Language.termSubstVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
-    using (construction L).resultVec_defined ![v 0, v 1, v 3, v 2]
+lemma termSubstVec.defined : 𝚺₁-Function₃ termSubstVec (V := V) L via termSubstVecGraph L := by
+  intro v; simpa [termSubstVecGraph, termSubstVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    using construction.resultVec_defined ![v 0, v 1, v 3, v 2]
 
-instance Language.termSubstVec_definable : 𝚺₁-Function₃ L.termSubstVec := L.termSubstVec_defined.to_definable
+instance termSubstVec.definable : 𝚺₁-Function₃ termSubstVec (V := V) L := termSubstVec.defined.to_definable
 
-instance Language.termSubstVec_definable' : Γ-[i + 1]-Function₃ L.termSubstVec := L.termSubstVec_definable.of_sigmaOne
+instance termSubstVec.definable' : Γ-[i + 1]-Function₃ termSubstVec (V := V) L := termSubstVec.definable.of_sigmaOne
 
 end
 
-@[simp] lemma len_termSubstVec {k ts : V} (hts : L.IsUTermVec k ts) :
-    len (L.termSubstVec k w ts) = k := (construction L).resultVec_lh _ hts
+@[simp] lemma len_termSubstVec {k ts : V} (hts : IsUTermVec L k ts) :
+    len (termSubstVec L k w ts) = k := construction.resultVec_lh L _ hts
 
-@[simp] lemma nth_termSubstVec {k ts i : V} (hts : L.IsUTermVec k ts) (hi : i < k) :
-    (L.termSubstVec k w ts).[i] = L.termSubst w ts.[i] :=
-  (construction L).nth_resultVec _ hts hi
+@[simp] lemma nth_termSubstVec {k ts i : V} (hts : IsUTermVec L k ts) (hi : i < k) :
+    (termSubstVec L k w ts).[i] = termSubst L w ts.[i] :=
+  construction.nth_resultVec L _ hts hi
 
-@[simp] lemma termSubstVec_nil (w : V) : L.termSubstVec 0 w 0 = 0 :=
-  (construction L).resultVec_nil _
+@[simp] lemma termSubstVec_nil (w : V) : termSubstVec L 0 w 0 = 0 := construction.resultVec_nil L _
 
-lemma termSubstVec_cons {k t ts : V} (ht : L.IsUTerm t) (hts : L.IsUTermVec k ts) :
-    L.termSubstVec (k + 1) w (t ∷ ts) = L.termSubst w t ∷ L.termSubstVec k w ts :=
-  (construction L).resultVec_cons ![w] hts ht
+lemma termSubstVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts) :
+    termSubstVec L (k + 1) w (t ∷ ts) = termSubst L w t ∷ termSubstVec L k w ts :=
+  construction.resultVec_cons L ![w] hts ht
 
-@[simp] lemma termSubstVec_cons₁ {t : V} (ht : L.IsUTerm t) :
-    L.termSubstVec 1 w ?[t] = ?[L.termSubst w t] := by
+@[simp] lemma termSubstVec_cons₁ {t : V} (ht : IsUTerm L t) :
+    termSubstVec L 1 w ?[t] = ?[termSubst L w t] := by
   rw [show (1 : V) = 0 + 1  by simp, termSubstVec_cons] <;> simp [*]
 
-@[simp] lemma termSubstVec_cons₂ {t₁ t₂ : V} (ht₁ : L.IsUTerm t₁) (ht₂ : L.IsUTerm t₂) :
-    L.termSubstVec 2 w ?[t₁, t₂] = ?[L.termSubst w t₁, L.termSubst w t₂] := by
+@[simp] lemma termSubstVec_cons₂ {t₁ t₂ : V} (ht₁ : IsUTerm L t₁) (ht₂ : IsUTerm L t₂) :
+    termSubstVec L 2 w ?[t₁, t₂] = ?[termSubst L w t₁, termSubst L w t₂] := by
   rw [show (2 : V) = 0 + 1 + 1  by simp [one_add_one_eq_two], termSubstVec_cons] <;> simp [*]
 
-@[simp] lemma Language.IsSemitermVec.termSubst {t} (hw : L.IsSemitermVec n m w) (ht : L.IsSemiterm n t) : L.IsSemiterm m (L.termSubst w t) := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+@[simp] lemma IsSemitermVec.termSubst {t} (hw : IsSemitermVec L n m w) (ht : IsSemiterm L n t) : IsSemiterm L m (termSubst L w t) := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz; simpa using hw.nth hz
   · intro x; simp
   · intro k f v hkf hv ih
-    simp only [hkf, hv.isUTerm, Language.termSubst_func, Language.IsSemiterm.func, true_and]
-    exact Language.IsSemitermVec.iff.mpr
+    simp only [hkf, hv.isUTerm, termSubst_func, IsSemiterm.func, true_and]
+    exact IsSemitermVec.iff.mpr
       ⟨by simp [hv.isUTerm], fun i hi ↦ by rw [nth_termSubstVec hv.isUTerm hi]; exact ih i hi⟩
 
-@[simp] lemma Language.IsUTermVec.termSubst {t} (hw : L.IsUTermVec n w) (ht : L.IsSemiterm n t) : L.IsUTerm (L.termSubst w t) :=
-  Language.IsSemitermVec.termSubst hw.isSemitermVec ht |>.isUTerm
+@[simp] lemma IsUTermVec.termSubst {t} (hw : IsUTermVec L n w) (ht : IsSemiterm L n t) : IsUTerm L (termSubst L w t) :=
+  IsSemitermVec.termSubst hw.isSemitermVec ht |>.isUTerm
 
-@[simp] lemma Language.IsSemitermVec.termSubstVec {k n m v} (hw : L.IsSemitermVec n m w) (hv : L.IsSemitermVec k n v) :
-    L.IsSemitermVec k m (L.termSubstVec k w v) := Language.IsSemitermVec.iff.mpr
+@[simp] lemma IsSemitermVec.termSubstVec {k n m v} (hw : IsSemitermVec L n m w) (hv : IsSemitermVec L k n v) :
+    IsSemitermVec L k m (termSubstVec L k w v) := IsSemitermVec.iff.mpr
   ⟨by simp [hv.isUTerm], fun i hi ↦ by rw [nth_termSubstVec hv.isUTerm hi]; exact hw.termSubst (hv.nth hi)⟩
 
-@[simp] lemma substs_nil {t} (ht : L.IsSemiterm 0 t) : L.termSubst 0 t = t := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+@[simp] lemma substs_nil {t} (ht : IsSemiterm L 0 t) : termSubst L 0 t = t := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z; simp
   · intro x; simp
   · intro k f v hf hv ih
-    simp only [hf, hv.isUTerm, Language.termSubst_func, qqFunc_inj, true_and]
+    simp only [hf, hv.isUTerm, termSubst_func, qqFunc_inj, true_and]
     apply nth_ext' k (by simp [hv.isUTerm]) (by simp [hv.lh])
     intro i hi
     simp [nth_termSubstVec hv.isUTerm hi, ih i hi]
 
-lemma termSubst_termSubst {l n w v t : V} (hv : L.IsSemitermVec l n v) (ht : L.IsSemiterm l t) :
-    L.termSubst w (L.termSubst v t) = L.termSubst (L.termSubstVec l w v) t := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+lemma termSubst_termSubst {l n w v t : V} (hv : IsSemitermVec L l n v) (ht : IsSemiterm L l t) :
+    termSubst L w (termSubst L v t) = termSubst L (termSubstVec L l w v) t := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz
-    rw [Language.termSubst_bvar z, Language.termSubst_bvar z, nth_termSubstVec hv.isUTerm hz]
+    rw [termSubst_bvar z, termSubst_bvar z, nth_termSubstVec hv.isUTerm hz]
   · intro x; simp
   · intro k f ts hf hts ih
-    rw [Language.termSubst_func hf hts.isUTerm,
-      Language.termSubst_func hf (hv.termSubstVec hts).isUTerm,
-      Language.termSubst_func hf hts.isUTerm]
+    rw [termSubst_func hf hts.isUTerm,
+      termSubst_func hf (hv.termSubstVec hts).isUTerm,
+      termSubst_func hf hts.isUTerm]
     simp only [qqFunc_inj, true_and]
     apply nth_ext' k (by rw [len_termSubstVec (hv.termSubstVec hts).isUTerm]) (by rw [len_termSubstVec hts.isUTerm])
     intro i hi
     rw [nth_termSubstVec (hv.termSubstVec hts).isUTerm hi,
       nth_termSubstVec hts.isUTerm hi, nth_termSubstVec hts.isUTerm hi, ih i hi]
 
-lemma termSubst_eq_self {n w t : V} (ht : L.IsSemiterm n t) (H : ∀ i < n, w.[i] = ^#i) :
-    L.termSubst w t = t := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+lemma termSubst_eq_self {n w t : V} (ht : IsSemiterm L n t) (H : ∀ i < n, w.[i] = ^#i) :
+    termSubst L w t = t := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz; simp [hz, H]
   · intro x; simp
   · intro k f v hf hv ih
-    rw [Language.termSubst_func hf hv.isUTerm]
+    rw [termSubst_func hf hv.isUTerm]
     simp only [qqFunc_inj, true_and]
     apply nth_ext' k (by rw [len_termSubstVec hv.isUTerm]) (by simp [hv.lh])
     intro i hi
@@ -164,14 +159,12 @@ end termSubst
 
 namespace TermShift
 
-def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
+def blueprint : Language.TermRec.Blueprint 0 where
   bvar := .mkSigma “y z. !qqBvarDef y z” (by simp)
   fvar := .mkSigma “y x. !qqFvarDef y (x + 1)” (by simp)
   func := .mkSigma “y k f v v'. !qqFuncDef y k f v'” (by simp)
 
-variable (L)
-
-noncomputable def construction : Language.TermRec.Construction V L (blueprint pL) where
+noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (_ z)        := ^#z
   fvar (_ x)        := ^&(x + 1)
   func (_ k f _ v') := ^func k f v'
@@ -187,70 +180,68 @@ open TermShift
 
 variable (L)
 
-noncomputable def Language.termShift (t : V) : V := (construction L).result ![] t
+noncomputable def termShift (t : V) : V := construction.result L ![] t
 
-noncomputable def Language.termShiftVec (k v : V) : V := (construction L).resultVec ![] k v
+noncomputable def termShiftVec (k v : V) : V := construction.resultVec L ![] k v
+
+def termShiftGraph : 𝚺₁.Semisentence 2 := blueprint.result L
+
+def termShiftVecGraph : 𝚺₁.Semisentence 3 := blueprint.resultVec L
 
 variable {L}
 
 variable {n : V}
 
-@[simp] lemma Language.termShift_bvar (z) :
-    L.termShift ^#z = ^#z := by simp [Language.termShift, construction]
+@[simp] lemma termShift_bvar (z : V) :
+    termShift L ^#z = ^#z := by simp [termShift, construction]
 
-@[simp] lemma Language.termShift_fvar (x) :
-    L.termShift ^&x = ^&(x + 1) := by simp [Language.termShift, construction]
+@[simp] lemma termShift_fvar (x : V) :
+    termShift L ^&x = ^&(x + 1) := by simp [termShift, construction]
 
-@[simp] lemma Language.termShift_func {k f v} (hkf : L.Func k f) (hv : L.IsUTermVec k v) :
-    L.termShift (^func k f v) = ^func k f (L.termShiftVec k v) := by
-  simp [Language.termShift, construction, hkf, hv]; rfl
+@[simp] lemma termShift_func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+    termShift L (^func k f v) = ^func k f (termShiftVec L k v) := by
+  simp [termShift, construction, hkf, hv]; rfl
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.LDef.termShiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result
+lemma termShift.defined : 𝚺₁-Function₁ termShift (V := V) L via termShiftGraph L := by
+  intro v; simpa [termShiftGraph, termShift] using construction.result_defined v
 
-def _root_.LO.FirstOrder.Arithmetic.LDef.termShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).resultVec
+instance termShift.definable : 𝚺₁-Function₁ termShift (V := V) L := termShift.defined.to_definable
 
-variable (L)
+instance termShift.definable' : Γ-[i + 1]-Function₁ termShift (V := V) L := termShift.definable.of_sigmaOne
 
-lemma Language.termShift_defined : 𝚺₁-Function₁ L.termShift via pL.termShiftDef := by
-  intro v; simpa [LDef.termShiftDef, Language.termShift] using (construction L).result_defined v
+lemma termShiftVec.defined : 𝚺₁-Function₂ termShiftVec (V := V) L via termShiftVecGraph L := by
+  intro v; simpa [termShiftVecGraph, termShiftVec] using construction.resultVec_defined v
 
-instance Language.termShift_definable : 𝚺₁-Function₁ L.termShift := L.termShift_defined.to_definable
+instance termShiftVec.definable : 𝚺₁-Function₂ termShiftVec (V := V) L := termShiftVec.defined.to_definable
 
-instance Language.termShift_definable' : Γ-[i + 1]-Function₁ L.termShift := L.termShift_definable.of_sigmaOne
-
-lemma Language.termShiftVec_defined : 𝚺₁-Function₂ L.termShiftVec via pL.termShiftVecDef := by
-  intro v; simpa [LDef.termShiftVecDef, Language.termShiftVec] using (construction L).resultVec_defined v
-
-instance Language.termShiftVec_definable : 𝚺₁-Function₂ L.termShiftVec := L.termShiftVec_defined.to_definable
-
-instance Language.termShiftVec_definable' : Γ-[i + 1]-Function₂ L.termShiftVec := L.termShiftVec_definable.of_sigmaOne
+instance termShiftVec.definable' : Γ-[i + 1]-Function₂ termShiftVec (V := V) L := termShiftVec.definable.of_sigmaOne
 
 end
 
-@[simp] lemma len_termShiftVec {k ts : V} (hts : L.IsUTermVec k ts) :
-    len (L.termShiftVec k ts) = k := (construction L).resultVec_lh _ hts
+@[simp] lemma len_termShiftVec {k ts : V} (hts : IsUTermVec L k ts) :
+    len (termShiftVec L k ts) = k := construction.resultVec_lh L _ hts
 
-@[simp] lemma nth_termShiftVec {k ts i : V} (hts : L.IsUTermVec k ts) (hi : i < k) :
-    (L.termShiftVec k ts).[i] = L.termShift ts.[i] := (construction L).nth_resultVec _ hts hi
+@[simp] lemma nth_termShiftVec {k ts i : V} (hts : IsUTermVec L k ts) (hi : i < k) :
+    (termShiftVec L k ts).[i] = termShift L ts.[i] := construction.nth_resultVec L _ hts hi
 
-@[simp] lemma termShiftVec_nil : L.termShiftVec 0 0 = 0 := (construction L).resultVec_nil ![]
+@[simp] lemma termShiftVec_nil : termShiftVec (V := V) L 0 0 = 0 := construction.resultVec_nil L ![]
 
-lemma termShiftVec_cons {k t ts : V} (ht : L.IsUTerm t) (hts : L.IsUTermVec k ts) :
-    L.termShiftVec (k + 1) (t ∷ ts) = L.termShift t ∷ L.termShiftVec k ts :=
-  (construction L).resultVec_cons ![] hts ht
+lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts) :
+    termShiftVec L (k + 1) (t ∷ ts) = termShift L t ∷ termShiftVec L k ts :=
+  construction.resultVec_cons L ![] hts ht
 
-@[simp] lemma termShiftVec_cons₁ {t₁ : V} (ht₁ : L.IsUTerm t₁) :
-    L.termShiftVec 1 ?[t₁] = ?[L.termShift t₁] := by
+@[simp] lemma termShiftVec_cons₁ {t₁ : V} (ht₁ : IsUTerm L t₁) :
+    termShiftVec L 1 (?[t₁] : V) = ?[termShift L t₁] := by
   rw [show (1 : V) = 0 + 1  by simp, termShiftVec_cons] <;> simp [*]
 
-@[simp] lemma termShiftVec_cons₂ {t₁ t₂ : V} (ht₁ : L.IsUTerm t₁) (ht₂ : L.IsUTerm t₂) :
-    L.termShiftVec 2 ?[t₁, t₂] = ?[L.termShift t₁, L.termShift t₂] := by
+@[simp] lemma termShiftVec_cons₂ {t₁ t₂ : V} (ht₁ : IsUTerm L t₁) (ht₂ : IsUTerm L t₂) :
+    termShiftVec L 2 (?[t₁, t₂] : V) = ?[termShift L t₁, termShift L t₂] := by
   rw [show (2 : V) = 0 + 1 + 1  by simp [one_add_one_eq_two], termShiftVec_cons] <;> simp [ht₁, ht₂]
 
-@[simp] lemma Language.IsUTerm.termShift {t} (ht : L.IsUTerm t) : L.IsUTerm (L.termShift t) := by
-  apply Language.IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+@[simp] lemma IsUTerm.termShift {t} (ht : IsUTerm L t) : IsUTerm L (termShift L t : V) := by
+  apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z; simp
   · intro x; simp
@@ -258,29 +249,29 @@ lemma termShiftVec_cons {k t ts : V} (ht : L.IsUTerm t) (hts : L.IsUTermVec k ts
     simp only [hkf, hv, termShift_func, func_iff, true_and]
     exact ⟨by simp [hv], by intro i hi; rw [nth_termShiftVec hv hi]; exact ih i hi⟩
 
-@[simp] lemma Language.IsSemiterm.termShift {t} (ht : L.IsSemiterm n t) : L.IsSemiterm n (L.termShift t) := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+@[simp] lemma IsSemiterm.termShift {t : V} (ht : IsSemiterm L n t) : IsSemiterm L n (termShift L t) := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz; simp [hz]
   · intro x; simp
   · intro k f v hkf hv ih;
     simp only [hkf, hv.isUTerm, termShift_func, func, true_and]
-    refine Language.IsSemitermVec.iff.mpr ⟨?_, ?_⟩
+    refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
     · simp [termShiftVec, hv.isUTerm]
     · intro i hi
       rw [nth_termShiftVec hv.isUTerm hi]
       exact ih i hi
 
-@[simp] lemma Language.IsUTermVec.termShiftVec {k v} (hv : L.IsUTermVec k v) : L.IsUTermVec k (L.termShiftVec k v) :=
+@[simp] lemma IsUTermVec.termShiftVec {k v : V} (hv : IsUTermVec L k v) : IsUTermVec L k (termShiftVec L k v) :=
     ⟨by simp [hv], fun i hi ↦ by rw [nth_termShiftVec hv hi]; exact (hv.nth hi).termShift⟩
 
-@[simp] lemma Language.IsSemitermVec.termShiftVec {k n v} (hv : L.IsSemitermVec k n v) : L.IsSemitermVec k n (L.termShiftVec k v) :=
-  Language.IsSemitermVec.iff.mpr
+@[simp] lemma IsSemitermVec.termShiftVec {k n v : V} (hv : IsSemitermVec L k n v) : IsSemitermVec L k n (termShiftVec L k v) :=
+  IsSemitermVec.iff.mpr
     ⟨by simp [hv.isUTerm], fun i hi ↦ by
       rw [nth_termShiftVec hv.isUTerm hi]; exact (hv.nth hi).termShift⟩
 
-@[simp] lemma Language.IsUTerm.termBVtermShift {t} (ht : L.IsUTerm t) : L.termBV (L.termShift t) = L.termBV t := by
-  apply Language.IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+@[simp] lemma IsUTerm.termBVtermShift {t : V} (ht : IsUTerm L t) : termBV L (Metamath.termShift L t) = termBV L t := by
+  apply IsUTerm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · simp
   · simp
@@ -293,24 +284,22 @@ lemma termShiftVec_cons {k t ts : V} (ht : L.IsUTerm t) (hts : L.IsUTermVec k ts
     intro i hi
     simp [*]
 
-@[simp] lemma Language.IsUTermVec.termBVVectermShiftVec {v} (hv : L.IsUTermVec k v) :
-    L.termBVVec k (L.termShiftVec k v) = L.termBVVec k v := by
+@[simp] lemma IsUTermVec.termBVVectermShiftVec {v : V} (hv : IsUTermVec L k v) :
+    termBVVec L k (Metamath.termShiftVec L k v) = termBVVec L k v := by
   apply nth_ext' k (by simp [*]) (by simp [*])
   intro i hi
-  simp [*, Language.IsUTerm.termBVtermShift (hv.nth hi)]
+  simp [*, IsUTerm.termBVtermShift (hv.nth hi)]
 
 end termShift
 
 namespace TermBShift
 
-def blueprint (pL : LDef) : Language.TermRec.Blueprint pL 0 where
+def blueprint : Language.TermRec.Blueprint 0 where
   bvar := .mkSigma “y z. !qqBvarDef y (z + 1)” (by simp)
   fvar := .mkSigma “y x. !qqFvarDef y x” (by simp)
   func := .mkSigma “y k f v v'. !qqFuncDef y k f v'” (by simp)
 
-variable (L)
-
-noncomputable def construction : Language.TermRec.Construction V L (blueprint pL) where
+noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (_ z)        := ^#(z + 1)
   fvar (_ x)        := ^&x
   func (_ k f _ v') := ^func k f v'
@@ -326,96 +315,94 @@ open TermBShift
 
 variable (L)
 
-noncomputable def Language.termBShift (t : V) : V := (construction L).result ![] t
+noncomputable def termBShift (t : V) : V := construction.result L ![] t
 
-noncomputable def Language.termBShiftVec (k v : V) : V := (construction L).resultVec ![] k v
+noncomputable def termBShiftVec (k v : V) : V := construction.resultVec L ![] k v
+
+def termBShiftGraph : 𝚺₁.Semisentence 2 := blueprint.result L
+
+def termBShiftVecGraph : 𝚺₁.Semisentence 3 := blueprint.resultVec L
 
 variable {L}
 
-@[simp] lemma Language.termBShift_bvar (z) :
-    L.termBShift ^#z = ^#(z + 1) := by simp [Language.termBShift, construction]
+@[simp] lemma termBShift_bvar (z : V) :
+    termBShift L ^#z = ^#(z + 1) := by simp [termBShift, construction]
 
-@[simp] lemma Language.termBShift_fvar (x) :
-    L.termBShift ^&x = ^&x := by simp [Language.termBShift, construction]
+@[simp] lemma termBShift_fvar (x : V) :
+    termBShift L ^&x = ^&x := by simp [termBShift, construction]
 
-@[simp] lemma Language.termBShift_func {k f v} (hkf : L.Func k f) (hv : L.IsUTermVec k v) :
-    L.termBShift (^func k f v) = ^func k f (L.termBShiftVec k v) := by
-  simp [Language.termBShift, construction, hkf, hv]; rfl
+@[simp] lemma termBShift_func {k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+    termBShift L (^func k f v) = ^func k f (termBShiftVec L k v) := by
+  simp [termBShift, construction, hkf, hv]; rfl
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.LDef.termBShiftDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result
+lemma termBShift.defined : 𝚺₁-Function₁ termBShift (V := V) L via termBShiftGraph L := by
+  intro v; simpa using construction.result_defined v
 
-def _root_.LO.FirstOrder.Arithmetic.LDef.termBShiftVecDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).resultVec
+instance termBShift.definable : 𝚺₁-Function₁ termBShift (V := V) L := termBShift.defined.to_definable
 
-variable (L)
+instance termBShift.definable' : Γ-[i + 1]-Function₁ termBShift (V := V) L := termBShift.definable.of_sigmaOne
 
-lemma Language.termBShift_defined : 𝚺₁-Function₁ L.termBShift via pL.termBShiftDef := by
-  intro v; simpa using (construction L).result_defined v
+lemma termBShiftVec.defined : 𝚺₁-Function₂ termBShiftVec (V := V) L via termBShiftVecGraph L := by
+  intro v; simpa using construction.resultVec_defined v
 
-instance Language.termBShift_definable : 𝚺₁-Function₁ L.termBShift := L.termBShift_defined.to_definable
+instance termBShiftVec.definable : 𝚺₁-Function₂ termBShiftVec (V := V) L := termBShiftVec.defined.to_definable
 
-instance Language.termBShift_definable' : Γ-[i + 1]-Function₁ L.termBShift := L.termBShift_definable.of_sigmaOne
-
-lemma Language.termBShiftVec_defined : 𝚺₁-Function₂ L.termBShiftVec via pL.termBShiftVecDef := by
-  intro v; simpa using (construction L).resultVec_defined v
-
-instance Language.termBShiftVec_definable : 𝚺₁-Function₂ L.termBShiftVec := L.termBShiftVec_defined.to_definable
-
-instance Language.termBShiftVec_definable' : Γ-[i + 1]-Function₂ L.termBShiftVec := L.termBShiftVec_definable.of_sigmaOne
+instance termBShiftVec.definable' : Γ-[i + 1]-Function₂ termBShiftVec (V := V) L := termBShiftVec.definable.of_sigmaOne
 
 end
 
-@[simp] lemma len_termBShiftVec {k ts : V} (hts : L.IsUTermVec k ts) :
-    len (L.termBShiftVec k ts) = k := (construction L).resultVec_lh _ hts
+@[simp] lemma len_termBShiftVec {k ts : V} (hts : IsUTermVec L k ts) :
+    len (termBShiftVec L k ts) = k := construction.resultVec_lh L _ hts
 
-@[simp] lemma nth_termBShiftVec {k ts i : V} (hts : L.IsUTermVec k ts) (hi : i < k) :
-    (L.termBShiftVec k ts).[i] = L.termBShift ts.[i] :=
-  (construction L).nth_resultVec _ hts hi
+@[simp] lemma nth_termBShiftVec {k ts i : V} (hts : IsUTermVec L k ts) (hi : i < k) :
+    (termBShiftVec L k ts).[i] = termBShift L ts.[i] :=
+  construction.nth_resultVec L _ hts hi
 
-@[simp] lemma termBShiftVec_nil : L.termBShiftVec 0 0 = 0 :=
-  (construction L).resultVec_nil ![]
+@[simp] lemma termBShiftVec_nil : termBShiftVec (V := V) L 0 0 = 0 :=
+  construction.resultVec_nil L ![]
 
-lemma termBShiftVec_cons {k t ts : V} (ht : L.IsUTerm t) (hts : L.IsUTermVec k ts) :
-    L.termBShiftVec (k + 1) (t ∷ ts) = L.termBShift t ∷ L.termBShiftVec k ts :=
-  (construction L).resultVec_cons ![] hts ht
+lemma termBShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts) :
+    termBShiftVec L (k + 1) (t ∷ ts) = termBShift L t ∷ termBShiftVec L k ts :=
+  construction.resultVec_cons L ![] hts ht
 
-@[simp] lemma termBShiftVec_cons₁ {t₁ : V} (ht₁ : L.IsUTerm t₁) :
-    L.termBShiftVec 1 ?[t₁] = ?[L.termBShift t₁] := by
+@[simp] lemma termBShiftVec_cons₁ {t₁ : V} (ht₁ : IsUTerm L t₁) :
+    termBShiftVec L 1 (?[t₁] : V) = ?[termBShift L t₁] := by
   rw [show (1 : V) = 0 + 1  by simp, termBShiftVec_cons] <;> simp [*]
 
-@[simp] lemma termBShiftVec_cons₂ {t₁ t₂ : V} (ht₁ : L.IsUTerm t₁) (ht₂ : L.IsUTerm t₂) :
-    L.termBShiftVec 2 ?[t₁, t₂] = ?[L.termBShift t₁, L.termBShift t₂] := by
+@[simp] lemma termBShiftVec_cons₂ {t₁ t₂ : V} (ht₁ : IsUTerm L t₁) (ht₂ : IsUTerm L t₂) :
+    termBShiftVec L 2 (?[t₁, t₂] : V) = ?[termBShift L t₁, termBShift L t₂] := by
   rw [show (2 : V) = 0 + 1 + 1  by simp [one_add_one_eq_two], termBShiftVec_cons] <;> simp [*]
 
-@[simp] lemma Language.IsSemiterm.termBShift {t} (ht : L.IsSemiterm n t) : L.IsSemiterm (n + 1) (L.termBShift t) := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+@[simp] lemma IsSemiterm.termBShift {t : V} (ht : IsSemiterm L n t) : IsSemiterm L (n + 1) (termBShift L t) := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz; simp [hz]
   · intro x; simp
   · intro k f v hkf hv ih;
     simp only [hkf, hv.isUTerm, termBShift_func, func, true_and]
-    refine Language.IsSemitermVec.iff.mpr ⟨?_, ?_⟩
+    refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
     · simp [hv.isUTerm]
     · intro i hi
       rw [nth_termBShiftVec hv.isUTerm hi]
       exact ih i hi
 
-@[simp] lemma Language.IsSemitermVec.termBShiftVec {k n v} (hv : L.IsSemitermVec k n v) : L.IsSemitermVec k (n + 1) (L.termBShiftVec k v) :=
-  Language.IsSemitermVec.iff.mpr
+@[simp] lemma IsSemitermVec.termBShiftVec {k n v : V} (hv : IsSemitermVec L k n v) : IsSemitermVec L k (n + 1) (termBShiftVec L k v) :=
+  IsSemitermVec.iff.mpr
   ⟨by simp [hv.isUTerm], fun i hi ↦ by
     rw [nth_termBShiftVec hv.isUTerm hi]; exact (hv.nth hi).termBShift⟩
 
-lemma termBShift_termShift {t} (ht : L.IsSemiterm n t) : L.termBShift (L.termShift t) = L.termShift (L.termBShift t) := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+lemma termBShift_termShift {t : V} (ht : IsSemiterm L n t) : termBShift L (termShift L t) = termShift L (termBShift L t) := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz; simp
   · intro x; simp
   · intro k f v hkf hv ih
-    rw [L.termShift_func hkf hv.isUTerm,
-      L.termBShift_func hkf hv.termShiftVec.isUTerm,
-      L.termBShift_func hkf hv.isUTerm,
-      L.termShift_func hkf hv.termBShiftVec.isUTerm]
+    rw [termShift_func hkf hv.isUTerm,
+      termBShift_func hkf hv.termShiftVec.isUTerm,
+      termBShift_func hkf hv.isUTerm,
+      termShift_func hkf hv.termBShiftVec.isUTerm]
     simp only [qqFunc_inj, true_and]
     apply nth_ext' k
       (by rw [len_termBShiftVec hv.termShiftVec.isUTerm]) (by rw [len_termShiftVec hv.termBShiftVec.isUTerm])
@@ -427,33 +414,33 @@ end termBShift
 
 variable (L)
 
-noncomputable def Language.qVec (w : V) : V := ^#0 ∷ L.termBShiftVec (len w) w
+noncomputable def qVec (w : V) : V := ^#0 ∷ termBShiftVec L (len w) w
 
 variable {L}
 
-@[simp] lemma len_qVec {k w : V} (h : L.IsUTermVec k w) : len (L.qVec w) = k + 1 := by
-  rcases h.lh; simp [Language.qVec, h]
+@[simp] lemma len_qVec {k w : V} (h : IsUTermVec L k w) : len (qVec L w) = k + 1 := by
+  rcases h.lh; simp [qVec, h]
 
-lemma Language.IsSemitermVec.qVec {k n w : V} (h : L.IsSemitermVec k n w) : L.IsSemitermVec (k + 1) (n + 1) (L.qVec w) := by
+lemma IsSemitermVec.qVec {k n w : V} (h : IsSemitermVec L k n w) : IsSemitermVec L (k + 1) (n + 1) (qVec L w) := by
   rcases h.lh
-  refine Language.IsSemitermVec.iff.mpr ⟨?_, ?_⟩
-  · simp [h.isUTerm, Language.qVec]
+  refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
+  · simp [h.isUTerm, Metamath.qVec]
   · intro i hi
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
-    · simp [Language.qVec]
-    · simpa [Language.qVec, nth_termBShiftVec h.isUTerm (by simpa using hi)] using
+    · simp [Metamath.qVec]
+    · simpa [Metamath.qVec, nth_termBShiftVec h.isUTerm (by simpa using hi)] using
         h.nth (by simpa using hi) |>.termBShift
 
-lemma substs_cons_bShift {u t w} (ht : L.IsSemiterm n t) :
-    L.termSubst (u ∷ w) (L.termBShift t) = L.termSubst w t := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+lemma substs_cons_bShift {u t w : V} (ht : IsSemiterm L n t) :
+    termSubst L (u ∷ w) (termBShift L t) = termSubst L w t := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz; simp
   · intro x; simp
   · intro k f v hf hv ih
-    rw [Language.termBShift_func hf hv.isUTerm,
-      Language.termSubst_func hf hv.termBShiftVec.isUTerm,
-      Language.termSubst_func hf hv.isUTerm]
+    rw [termBShift_func hf hv.isUTerm,
+      termSubst_func hf hv.termBShiftVec.isUTerm,
+      termSubst_func hf hv.isUTerm]
     simp only [qqFunc_inj, true_and]
     apply nth_ext' k
       (by rw [len_termSubstVec hv.termBShiftVec.isUTerm])
@@ -464,17 +451,17 @@ lemma substs_cons_bShift {u t w} (ht : L.IsSemiterm n t) :
       nth_termBShiftVec hv.isUTerm hi,
       ih i hi]
 
-lemma termShift_termSubsts {n m w t} (ht : L.IsSemiterm n t) (hw : L.IsSemitermVec n m w) :
-    L.termShift (L.termSubst w t) = L.termSubst (L.termShiftVec n w) (L.termShift t) := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+lemma termShift_termSubsts {n m w t : V} (ht : IsSemiterm L n t) (hw : IsSemitermVec L n m w) :
+    termShift L (termSubst L w t) = termSubst L (termShiftVec L n w) (termShift L t) := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz; simp [nth_termShiftVec hw.isUTerm hz]
   · intro x; simp
   · intro k f v hf hv ih
-    rw [L.termSubst_func hf hv.isUTerm,
-      L.termShift_func hf (hw.termSubstVec hv).isUTerm,
-      L.termShift_func hf hv.isUTerm,
-      L.termSubst_func hf hv.termShiftVec.isUTerm]
+    rw [termSubst_func hf hv.isUTerm,
+      termShift_func hf (hw.termSubstVec hv).isUTerm,
+      termShift_func hf hv.isUTerm,
+      termSubst_func hf hv.termShiftVec.isUTerm]
     simp only [qqFunc_inj, true_and]
     apply nth_ext' k
       (by rw [len_termShiftVec (hw.termSubstVec hv).isUTerm])
@@ -485,16 +472,16 @@ lemma termShift_termSubsts {n m w t} (ht : L.IsSemiterm n t) (hw : L.IsSemitermV
       nth_termSubstVec hv.termShiftVec.isUTerm hi,
       nth_termShiftVec hv.isUTerm hi, ih i hi]
 
-lemma bShift_substs {n m w t} (ht : L.IsSemiterm n t) (hw : L.IsSemitermVec n m w) :
-    L.termBShift (L.termSubst w t) = L.termSubst (L.termBShiftVec n w) t := by
-  apply Language.IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
+lemma bShift_substs {n m w t : V} (ht : IsSemiterm L n t) (hw : IsSemitermVec L n m w) :
+    termBShift L (termSubst L w t) = termSubst L (termBShiftVec L n w) t := by
+  apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z hz; simp [nth_termBShiftVec hw.isUTerm hz]
   · intro x; simp
   · intro k f v hf hv ih
-    rw [L.termSubst_func hf hv.isUTerm,
-      L.termBShift_func hf (hw.termSubstVec hv).isUTerm,
-      L.termSubst_func hf hv.isUTerm]
+    rw [termSubst_func hf hv.isUTerm,
+      termBShift_func hf (hw.termSubstVec hv).isUTerm,
+      termSubst_func hf hv.isUTerm]
     simp only [qqFunc_inj, true_and]
     apply nth_ext' k
       (by rw [len_termBShiftVec (hw.termSubstVec hv).isUTerm])
@@ -502,18 +489,18 @@ lemma bShift_substs {n m w t} (ht : L.IsSemiterm n t) (hw : L.IsSemitermVec n m 
     intro i hi
     simp [nth_termBShiftVec (hw.termSubstVec hv).isUTerm hi, nth_termSubstVec hv.isUTerm hi, ih i hi]
 
-lemma substs_qVec_bShift {n t m w} (ht : L.IsSemiterm n t) (hw : L.IsSemitermVec n m w) :
-    L.termSubst (L.qVec w) (L.termBShift t) = L.termBShift (L.termSubst w t) := by
+lemma substs_qVec_bShift {n t m w : V} (ht : IsSemiterm L n t) (hw : IsSemitermVec L n m w) :
+    termSubst L (qVec L w) (termBShift L t) = termBShift L (termSubst L w t) := by
   rcases hw.lh
-  simp [Language.qVec, substs_cons_bShift ht, bShift_substs ht hw]
+  simp [qVec, substs_cons_bShift ht, bShift_substs ht hw]
 
-lemma termSubstVec_qVec_qVec {l n m : V} (hv : L.IsSemitermVec l n v) (hw : L.IsSemitermVec n m w) :
-    L.termSubstVec (l + 1) (L.qVec w) (L.qVec v) = L.qVec (L.termSubstVec l w v) := by
+lemma termSubstVec_qVec_qVec {l n m : V} (hv : IsSemitermVec L l n v) (hw : IsSemitermVec L n m w) :
+    termSubstVec L (l + 1) (qVec L w) (qVec L v) = qVec L (termSubstVec L l w v) := by
   apply nth_ext' (len v + 1)
     (by rw [len_termSubstVec hv.qVec.isUTerm, hv.lh])
     (by rw [len_qVec (hw.termSubstVec hv).isUTerm, hv.lh])
   intro i hi
-  unfold Language.qVec
+  unfold qVec
   rcases hv.lh; rcases hw.lh
   rw [(hw.termSubstVec hv).lh]
   rw [termSubstVec_cons (by simp) (by rcases hv.lh; exact hv.termBShiftVec.isUTerm)]
@@ -527,14 +514,14 @@ lemma termSubstVec_qVec_qVec {l n m : V} (hv : L.IsSemitermVec l n v) (hw : L.Is
       substs_cons_bShift (hv.nth hi),
       bShift_substs (hv.nth hi) hw]
 
-lemma termShift_qVec {n m w : V} (hw : L.IsSemitermVec n m w) :
-    L.termShiftVec (n + 1) (L.qVec w) = L.qVec (L.termShiftVec n w) := by
+lemma termShift_qVec {n m w : V} (hw : IsSemitermVec L n m w) :
+    termShiftVec L (n + 1) (qVec L w) = qVec L (termShiftVec L n w) := by
   apply nth_ext' (n + 1)
     (by rw [len_termShiftVec hw.qVec.isUTerm])
     (by rw [len_qVec hw.termShiftVec.isUTerm])
   intro i hi
   rw [nth_termShiftVec hw.qVec.isUTerm hi]
-  unfold Language.qVec
+  unfold qVec
   rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
   · simp
   · rcases hw.lh
@@ -548,15 +535,15 @@ section fvfree
 
 variable (L)
 
-def Language.IsTermFVFree (n t : V) : Prop := L.IsSemiterm n t ∧ L.termShift t = t
+def IsTermFVFree (n t : V) : Prop := IsSemiterm L n t ∧ termShift L t = t
 
 variable {L}
 
-@[simp] lemma Language.IsTermFVFree.bvar (x : V) : L.IsTermFVFree n ^#x ↔ x < n := by
-  simp [Language.IsTermFVFree]
+@[simp] lemma IsTermFVFree.bvar (x : V) : IsTermFVFree L n ^#x ↔ x < n := by
+  simp [IsTermFVFree]
 
-@[simp] lemma Language.IsTermFVFree.fvar (x : V) : ¬L.IsTermFVFree n ^&x := by
-  simp [Language.IsTermFVFree]
+@[simp] lemma IsTermFVFree.fvar (x : V) : ¬IsTermFVFree L n ^&x := by
+  simp [IsTermFVFree]
 
 end fvfree
 
@@ -582,27 +569,27 @@ infixl:82 " ^* " => qqMul
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.qqAddDef : 𝚺₁.Semisentence 3 :=
+def qqAddGraph : 𝚺₁.Semisentence 3 :=
   .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑addIndex v” (by simp)
 
-def _root_.LO.FirstOrder.Arithmetic.qqMulDef : 𝚺₁.Semisentence 3 :=
+def qqMulGraph : 𝚺₁.Semisentence 3 :=
   .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑mulIndex v” (by simp)
 
-lemma qqAdd_defined : 𝚺₁-Function₂ (qqAdd : V → V → V) via qqAddDef := by
-  intro v; simp [qqAddDef, numeral_eq_natCast, qqAdd]
+lemma qqAdd_defined : 𝚺₁-Function₂ (qqAdd : V → V → V) via qqAddGraph := by
+  intro v; simp [qqAddGraph, numeral_eq_natCast, qqAdd]
 
-lemma qqMul_defined : 𝚺₁-Function₂ (qqMul : V → V → V) via qqMulDef := by
-  intro v; simp [qqMulDef, numeral_eq_natCast, qqMul]
+lemma qqMul_defined : 𝚺₁-Function₂ (qqMul : V → V → V) via qqMulGraph := by
+  intro v; simp [qqMulGraph, numeral_eq_natCast, qqMul]
 
 instance : Γ-[m + 1]-Function₂ (qqAdd : V → V → V) := .of_sigmaOne qqAdd_defined.to_definable
 
 instance : Γ-[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_defined.to_definable
 
-@[simp] lemma eval_qqAddDef (v) :
-    Semiformula.Evalbm V v qqAddDef.val ↔ v 0 = (v 1) ^+ (v 2) := qqAdd_defined.df.iff v
+@[simp] lemma eval_qqAddGraph (v) :
+    Semiformula.Evalbm V v qqAddGraph.val ↔ v 0 = (v 1) ^+ (v 2) := qqAdd_defined.df.iff v
 
-@[simp] lemma eval_qqMulDef (v) :
-    Semiformula.Evalbm V v qqMulDef.val ↔ v 0 = (v 1) ^* (v 2) := qqMul_defined.df.iff v
+@[simp] lemma eval_qqMulGraph (v) :
+    Semiformula.Evalbm V v qqMulGraph.val ↔ v 0 = (v 1) ^* (v 2) := qqMul_defined.df.iff v
 
 end
 
@@ -620,17 +607,17 @@ end
 
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
-@[simp] lemma zero_semiterm : ⌜ℒₒᵣ⌝.IsSemiterm n (𝟎 : V) := by
+@[simp] lemma zero_semiterm : IsSemiterm ℒₒᵣ n (𝟎 : V) := by
   simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
-@[simp] lemma one_semiterm : ⌜ℒₒᵣ⌝.IsSemiterm n (𝟏 : V) := by
+@[simp] lemma one_semiterm : IsSemiterm ℒₒᵣ n (𝟏 : V) := by
   simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 namespace Numeral
 
 def blueprint : PR.Blueprint 0 where
   zero := .mkSigma “y. y = ↑InternalArithmetic.one” (by simp)
-  succ := .mkSigma “y t n. !qqAddDef y t ↑InternalArithmetic.one” (by simp)
+  succ := .mkSigma “y t n. !qqAddGraph y t ↑InternalArithmetic.one” (by simp)
 
 noncomputable def construction : PR.Construction V blueprint where
   zero := fun _ ↦ 𝟏
@@ -646,15 +633,15 @@ noncomputable def numeralAux (x : V) : V := construction.result ![] x
 
 section
 
-def numeralAuxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def numeralAuxGraph : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
-lemma numeralAux_defined : 𝚺₁-Function₁ (numeralAux : V → V) via numeralAuxDef :=
-  fun v ↦ by simp [construction.result_defined_iff, numeralAuxDef]; rfl
+lemma numeralAux.defined : 𝚺₁-Function₁ (numeralAux : V → V) via numeralAuxGraph :=
+  fun v ↦ by simp [construction.result_defined_iff, numeralAuxGraph]; rfl
 
-@[simp] lemma eval_numeralAuxDef (v) :
-    Semiformula.Evalbm V v numeralAuxDef.val ↔ v 0 = numeralAux (v 1) := numeralAux_defined.df.iff v
+@[simp] lemma numeralAuxGraph.eval (v) :
+    Semiformula.Evalbm V v numeralAuxGraph.val ↔ v 0 = numeralAux (v 1) := numeralAux.defined.df.iff v
 
-instance seqExp_definable : 𝚺-[0 + 1]-Function₁ (numeralAux : V → V) := numeralAux_defined.to_definable
+instance numeralAux.definable : 𝚺-[0 + 1]-Function₁ (numeralAux : V → V) := numeralAux.defined.to_definable
 
 end
 
@@ -665,7 +652,7 @@ end
     case succ n ih =>
       refine lt_of_lt_of_le ((add_lt_add_iff_right 1).mpr ih) (by simp [succ_le_iff_lt])
 
-@[simp] lemma numeralAux_semiterm (n x : V) : ⌜ℒₒᵣ⌝.IsSemiterm n (numeralAux x) := by
+@[simp] lemma numeralAux_semiterm (n x : V) : IsSemiterm ℒₒᵣ n (numeralAux x) := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -679,6 +666,11 @@ open Numeral
 
 noncomputable def numeral (x : V) : V := if x = 0 then 𝟎 else numeralAux (x - 1)
 
+def numeralGraph : 𝚺₁.Semisentence 2 := .mkSigma
+  “t x.
+    (x = 0 → t = ↑InternalArithmetic.zero) ∧
+    (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxGraph t x')”
+
 @[simp] lemma numeral_zero : numeral (0 : V) = 𝟎 := by simp [numeral]
 
 @[simp] lemma numeral_one : numeral (1 : V) = 𝟏 := by simp [numeral]
@@ -690,10 +682,10 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
   · simp at pos
   simp [numeral]
 
-@[simp] lemma numeral_semiterm (n x : V) : ⌜ℒₒᵣ⌝.IsSemiterm n (numeral x) := by
+@[simp] lemma numeral_semiterm (n x : V) : IsSemiterm ℒₒᵣ n (numeral x) := by
   by_cases hx : x = 0 <;> simp [hx, numeral]
 
-@[simp] lemma numeral_uterm (x : V) : ⌜ℒₒᵣ⌝.IsUTerm (numeral x) := (numeral_semiterm 0 x).isUTerm
+@[simp] lemma numeral_uterm (x : V) : IsUTerm ℒₒᵣ (numeral x) := (numeral_semiterm 0 x).isUTerm
 
 @[simp] lemma le_numeral_self (n : V) : n ≤ numeral n := by
   rcases zero_or_succ n with (rfl | ⟨n, rfl⟩)
@@ -702,18 +694,14 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.numeralDef : 𝚺₁.Semisentence 2 := .mkSigma
-  “t x.
-    (x = 0 → t = ↑InternalArithmetic.zero) ∧
-    (x ≠ 0 → ∃ x', !subDef x' x 1 ∧ !numeralAuxDef t x')”
-  (by simp)
 
-lemma numeral_defined : 𝚺₁-Function₁ (numeral : V → V) via numeralDef := fun v ↦ by
-  simp [numeralDef, numeral_eq_natCast]
+
+lemma numeral_defined : 𝚺₁-Function₁ (numeral : V → V) via numeralGraph := fun v ↦ by
+  simp [numeralGraph, numeral_eq_natCast]
   by_cases hv1 : v 1 = 0 <;> simp [hv1, numeral]
 
-@[simp] lemma eval_numeralDef (v) :
-    Semiformula.Evalbm V v numeralDef.val ↔ v 0 = numeral (v 1) := numeral_defined.df.iff v
+@[simp] lemma eval_numeralGraph (v) :
+    Semiformula.Evalbm V v numeralGraph.val ↔ v 0 = numeral (v 1) := numeral_defined.df.iff v
 
 instance numeral_definable : 𝚺₁-Function₁ (numeral : V → V) := numeral_defined.to_definable
 
@@ -721,8 +709,8 @@ instance numeral_definable' : Γ-[m + 1]-Function₁ (numeral : V → V) := .of_
 
 end
 
-@[simp] lemma numeral_substs {w : V} (_ : ⌜ℒₒᵣ⌝.IsSemitermVec n m w) (x : V) :
-    ⌜ℒₒᵣ⌝.termSubst w (numeral x) = numeral x := by
+@[simp] lemma numeral_substs {w : V} (_ : IsSemitermVec ℒₒᵣ n m w) (x : V) :
+    termSubst ℒₒᵣ w (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
@@ -730,11 +718,11 @@ end
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
     · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
     · simp only [numeral_add_two, qqAdd]
-      rw [Language.termSubst_func (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      rw [termSubst_func (L := ℒₒᵣ) (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
       simp [ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_shift (x : V) :
-    ⌜ℒₒᵣ⌝.termShift (numeral x) = numeral x := by
+    termShift ℒₒᵣ (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
@@ -742,11 +730,11 @@ end
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
     · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
     · simp only [numeral_add_two, qqAdd]
-      rw [Language.termShift_func (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      rw [termShift_func (L := ℒₒᵣ) (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
       simp [ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_bShift (x : V) :
-    ⌜ℒₒᵣ⌝.termBShift (numeral x) = numeral x := by
+    termBShift ℒₒᵣ (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]

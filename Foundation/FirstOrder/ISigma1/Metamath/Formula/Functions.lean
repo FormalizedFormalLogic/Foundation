@@ -959,24 +959,24 @@ instance (Γ m) : Γ-[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne
 
 @[simp] lemma eval_qqNLTDef (v) : Semiformula.Evalbm V v qqNLTDef.val ↔ v 0 = v 1 ^≮ v 2 := qqNLT_defined.df.iff v
 
-lemma neg_eq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^= u) = t ^≠ u := by
+lemma neg_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : ⌜ℒₒᵣ⌝.neg (t ^= u) = t ^≠ u := by
   simp only [qqEQ, LOR_rel_eqIndex, qqNEQ]
   rw [neg_rel (by simp) (by simp [ht, hu])]
 
-lemma neg_neq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^≠ u) = t ^= u := by
+lemma neg_neq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : ⌜ℒₒᵣ⌝.neg (t ^≠ u) = t ^= u := by
   simp only [qqNEQ, LOR_rel_eqIndex, qqEQ]
   rw [neg_nrel (by simp) (by simp [ht, hu])]
 
-lemma neg_lt {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^< u) = t ^≮ u := by
+lemma neg_lt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : ⌜ℒₒᵣ⌝.neg (t ^< u) = t ^≮ u := by
   simp only [qqLT, LOR_rel_ltIndex, qqNLT]
   rw [neg_rel (by simp) (by simp [ht, hu])]
 
-lemma neg_nlt {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) : ⌜ℒₒᵣ⌝.neg (t ^≮ u) = t ^< u := by
+lemma neg_nlt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : ⌜ℒₒᵣ⌝.neg (t ^≮ u) = t ^< u := by
   simp only [qqNLT, LOR_rel_ltIndex, qqLT]
   rw [neg_nrel (by simp) (by simp [ht, hu])]
 
-lemma substs_eq {t u : V} (ht : ⌜ℒₒᵣ⌝.IsUTerm t) (hu : ⌜ℒₒᵣ⌝.IsUTerm u) :
-    ⌜ℒₒᵣ⌝.substs w (t ^= u) = (⌜ℒₒᵣ⌝.termSubst w t) ^= (⌜ℒₒᵣ⌝.termSubst w u) := by
+lemma substs_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
+    ⌜ℒₒᵣ⌝.substs w (t ^= u) = (termSubst ℒₒᵣ w t) ^= (termSubst ℒₒᵣ w u) := by
   simp only [qqEQ, LOR_rel_eqIndex]
   rw [substs_rel (by simp) (by simp [ht, hu])]
   simp [termSubstVec_cons₂ ht hu]

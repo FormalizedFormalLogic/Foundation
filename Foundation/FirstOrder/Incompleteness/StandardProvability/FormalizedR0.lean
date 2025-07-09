@@ -296,17 +296,17 @@ def Ω₁ :
   ch := .mkDelta
     (.mkSigma “p.
       ∃ n < p, ∃ m < p,
-      let numn := numeralDef n;
-      let numm := numeralDef m;
-      let lhd := qqAddDef numn numm;
-      let rhd := numeralDef (n + m);
+      let numn := numeralGraph n;
+      let numm := numeralGraph m;
+      let lhd := qqAddGraph numn numm;
+      let rhd := numeralGraph (n + m);
       !qqEQDef p lhd rhd” (by simp))
     (.mkPi “p.
       ∃ n < p, ∃ m < p,
-      let' numn := numeralDef n;
-      let' numm := numeralDef m;
-      let' lhd := qqAddDef numn numm;
-      let' rhd := numeralDef (n + m);
+      let' numn := numeralGraph n;
+      let' numm := numeralGraph m;
+      let' lhd := qqAddGraph numn numm;
+      let' rhd := numeralGraph (n + m);
       ∀ p', !qqEQDef p' lhd rhd → p = p'” (by simp))
   mem_iff {φ} := by
     /-
@@ -319,7 +319,7 @@ def Ω₁ :
       Matrix.vecHead, Semiformula.eval_ex, LogicalConnective.HomClass.map_and,
       Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.cons_val_zero, Matrix.cons_val_two,
       Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.constant_eq_singleton,
-      eval_numeralDef, eval_qqAddDef, Semiterm.val_operator₂, Matrix.cons_app_five,
+      eval_numeralGraph, eval_qqAddGraph, Semiterm.val_operator₂, Matrix.cons_app_five,
       Matrix.cons_val_four, Fin.succ_one_eq_two, Matrix.cons_val_succ, Structure.Add.add,
       Matrix.cons_app_six, eval_qqEQDef, LogicalConnective.Prop.and_eq, exists_eq_left]
     constructor
@@ -348,7 +348,7 @@ def Ω₁ :
       Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs,
       Matrix.comp_vecCons', Matrix.cons_val_zero, Matrix.cons_val_fin_one, Matrix.cons_val_two,
       Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.constant_eq_singleton,
-      eval_numeralDef, eval_qqAddDef, Semiterm.val_operator₂, Matrix.cons_app_five,
+      eval_numeralGraph, eval_qqAddGraph, Semiterm.val_operator₂, Matrix.cons_app_five,
       Matrix.cons_val_four, Fin.succ_one_eq_two, Matrix.cons_val_succ, Structure.Add.add,
       Matrix.cons_app_six, eval_qqEQDef, LogicalConnective.Prop.and_eq, exists_eq_left,
       HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi,
@@ -360,17 +360,17 @@ def Ω₂ :
   ch := .mkDelta
     (.mkSigma “p.
       ∃ n < p, ∃ m < p,
-      let numn := numeralDef n;
-      let numm := numeralDef m;
-      let lhd := qqMulDef numn numm;
-      let rhd := numeralDef (n * m);
+      let numn := numeralGraph n;
+      let numm := numeralGraph m;
+      let lhd := qqMulGraph numn numm;
+      let rhd := numeralGraph (n * m);
       !qqEQDef p lhd rhd” (by simp))
     (.mkPi “p.
       ∃ n < p, ∃ m < p,
-      let' numn := numeralDef n;
-      let' numm := numeralDef m;
-      let' lhd := qqMulDef numn numm;
-      let' rhd := numeralDef (n * m);
+      let' numn := numeralGraph n;
+      let' numm := numeralGraph m;
+      let' lhd := qqMulGraph numn numm;
+      let' rhd := numeralGraph (n * m);
       ∀ p', !qqEQDef p' lhd rhd → p = p'” (by simp))
   mem_iff {φ} := by
     /-
@@ -383,7 +383,7 @@ def Ω₂ :
       Matrix.vecHead, Semiformula.eval_ex, LogicalConnective.HomClass.map_and,
       Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.cons_val_zero, Matrix.cons_val_two,
       Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.constant_eq_singleton,
-      eval_numeralDef, eval_qqMulDef, Semiterm.val_operator₂, Matrix.cons_app_five,
+      eval_numeralGraph, eval_qqMulGraph, Semiterm.val_operator₂, Matrix.cons_app_five,
       Matrix.cons_val_four, Fin.succ_one_eq_two, Matrix.cons_val_succ, Structure.Mul.mul,
       Matrix.cons_app_six, eval_qqEQDef, LogicalConnective.Prop.and_eq, exists_eq_left]
     constructor
@@ -412,7 +412,7 @@ def Ω₂ :
       Semiformula.eval_ex, LogicalConnective.HomClass.map_and, Semiformula.eval_substs,
       Matrix.comp_vecCons', Matrix.cons_val_zero, Matrix.cons_val_fin_one, Matrix.cons_val_two,
       Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.constant_eq_singleton,
-      eval_numeralDef, eval_qqMulDef, Semiterm.val_operator₂, Matrix.cons_app_five,
+      eval_numeralGraph, eval_qqMulGraph, Semiterm.val_operator₂, Matrix.cons_app_five,
       Matrix.cons_val_four, Fin.succ_one_eq_two, Matrix.cons_val_succ, Structure.Mul.mul,
       Matrix.cons_app_six, eval_qqEQDef, LogicalConnective.Prop.and_eq, exists_eq_left,
       HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi,
@@ -423,12 +423,12 @@ def Ω₃ :
     FirstOrder.Theory.Delta1Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, n ≠ m ∧ φ = “↑n ≠ ↑m”} where
   ch := .mkDelta
     (.mkSigma “p. ∃ n < p, ∃ m < p, n ≠ m ∧
-      let numn := numeralDef n;
-      let numm := numeralDef m;
+      let numn := numeralGraph n;
+      let numm := numeralGraph m;
       !qqNEQDef p numn numm” (by simp))
     (.mkPi “p. ∃ n < p, ∃ m < p, n ≠ m ∧
-      let' numn := numeralDef n;
-      let' numm := numeralDef m;
+      let' numn := numeralGraph n;
+      let' numm := numeralGraph m;
       ∀ p', !qqNEQDef p' numn numm → p = p'” (by simp))
   mem_iff {φ} := by
     /-
@@ -441,7 +441,7 @@ def Ω₃ :
       Semiformula.eval_operator_two, Matrix.cons_val_zero, Structure.Eq.eq,
       LogicalConnective.Prop.neg_eq, Semiformula.eval_ex, Semiformula.eval_substs,
       Matrix.comp_vecCons', Matrix.cons_val_two, Matrix.vecTail, Function.comp_apply,
-      Fin.succ_zero_eq_one, Matrix.constant_eq_singleton, eval_numeralDef, Matrix.cons_val_four,
+      Fin.succ_zero_eq_one, Matrix.constant_eq_singleton, eval_numeralGraph, Matrix.cons_val_four,
       Fin.succ_one_eq_two, Matrix.cons_val_succ, eval_qqNEQDef, LogicalConnective.Prop.and_eq,
       exists_eq_left]
     constructor
@@ -477,7 +477,7 @@ def Ω₄ :
     FirstOrder.Theory.Delta1Definable {(“∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i” : SyntacticFormula ℒₒᵣ) | n} where
   ch := .mkDelta
     (.mkSigma “p. ∃ n < p,
-      let numn := numeralDef n;
+      let numn := numeralGraph n;
       let x₀ := qqBvarDef 0;
       let x₁ := qqBvarDef 1;
       let lhd := qqLTDef x₀ numn;
@@ -488,7 +488,7 @@ def Ω₄ :
       let iff := p⌜ℒₒᵣ⌝.qqIffDef lhd rhd;
       !qqAllDef p iff” (by simp))
     (.mkPi “p. ∃ n < p,
-      let' numn := numeralDef n;
+      let' numn := numeralGraph n;
       let' x₀ := qqBvarDef 0;
       let' x₁ := qqBvarDef 1;
       let' lhd := qqLTDef x₀ numn;
@@ -509,7 +509,7 @@ def Ω₄ :
       Semiformula.eval_bexLT, Semiterm.val_bvar, Matrix.cons_val_fin_one, Semiformula.eval_ex,
       LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp_vecCons',
       Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.vecHead, Matrix.constant_eq_singleton,
-      eval_numeralDef, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
+      eval_numeralGraph, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
       ORingStruc.zero_eq_zero, eval_qqBvarDef, ORingStruc.one_eq_one, Matrix.cons_val_two,
       Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.cons_val_three,
       Fin.succ_one_eq_two, eval_qqLTDef, eval_cons, Matrix.cons_val_four, Matrix.cons_val_succ,
@@ -543,7 +543,7 @@ def Ω₄ :
       Semiformula.eval_bexLT, Semiterm.val_bvar, Semiformula.eval_ex,
       LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp_vecCons',
       Matrix.cons_val_zero, Matrix.cons_val_fin_one, Matrix.cons_val_one, Matrix.vecHead,
-      Matrix.constant_eq_singleton, eval_numeralDef, Semiterm.val_operator₀,
+      Matrix.constant_eq_singleton, eval_numeralGraph, Semiterm.val_operator₀,
       Structure.numeral_eq_numeral, ORingStruc.zero_eq_zero, eval_qqBvarDef, ORingStruc.one_eq_one,
       Matrix.cons_val_two, Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one,
       Matrix.cons_val_three, Fin.succ_one_eq_two, eval_qqLTDef, eval_cons, Matrix.cons_val_four,

@@ -251,7 +251,7 @@ section typed_isfvfree
 
 namespace Language.Semiterm
 
-def FVFree (t : L.Semiterm n) : Prop := L.IsTermFVFree n t.val
+def FVFree (t : L.Semiterm n) : Prop := IsTermFVFree L n t.val
 
 lemma FVFree.iff {t : L.Semiterm n} : t.FVFree ↔ t.shift = t := by
   simp [FVFree, Language.IsTermFVFree, Semiterm.ext_iff]
@@ -337,7 +337,7 @@ variable {n : V}
 lemma replace {P : α → Prop} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx
 
 lemma semiterm_induction (Γ) {n : V} {P : ⌜ℒₒᵣ⌝.Semiterm n → Prop}
-    (hP : Γ-[1]-Predicate (fun x ↦ (h : ⌜ℒₒᵣ⌝.IsSemiterm n x) → P ⟨x, h⟩))
+    (hP : Γ-[1]-Predicate (fun x ↦ (h : IsSemiterm ℒₒᵣ n x) → P ⟨x, h⟩))
     (hBvar : ∀ (z : V) (h : z < n), P (⌜ℒₒᵣ⌝.bvar z h))
     (hFvar : ∀ x, P (⌜ℒₒᵣ⌝.fvar x))
     (hZero : P ((0 : V) : ⌜ℒₒᵣ⌝.Semiterm n))
@@ -345,8 +345,8 @@ lemma semiterm_induction (Γ) {n : V} {P : ⌜ℒₒᵣ⌝.Semiterm n → Prop}
     (hAdd : ∀ t₁ t₂, P t₁ → P t₂ → P (t₁ + t₂))
     (hMul : ∀ t₁ t₂, P t₁ → P t₂ → P (t₁ * t₂)) :
     ∀ (t : ⌜ℒₒᵣ⌝[V].Semiterm n), P t := by
-  let Q := fun x ↦ (h : ⌜ℒₒᵣ⌝.IsSemiterm n x) → P ⟨x, h⟩
-  suffices ∀ t, ⌜ℒₒᵣ⌝.IsSemiterm n t → Q t by intro t; exact this t.val t.prop t.prop
+  let Q := fun x ↦ (h : IsSemiterm ℒₒᵣ n x) → P ⟨x, h⟩
+  suffices ∀ t, IsSemiterm ℒₒᵣ n t → Q t by intro t; exact this t.val t.prop t.prop
   apply Language.IsSemiterm.induction Γ hP
   case hbvar => intro z hz _; exact hBvar z hz
   case hfvar => intro x _; exact hFvar x

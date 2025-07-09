@@ -360,11 +360,11 @@ variable {n m : V}
   ext; simp [Language.Semiterm.notLessThan, Language.Semiterm.substs, Language.Semiformula.substs, qqNLT]
 
 @[simp] lemma val_ball {n : V} (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) :
-    (p.ball t).val = ^∀ (^#0 ^≮ ⌜ℒₒᵣ⌝.termBShift t.val) ^⋎ p.val := by
+    (p.ball t).val = ^∀ (^#0 ^≮ termBShift ℒₒᵣ t.val) ^⋎ p.val := by
   simp [Language.Semiformula.ball]
 
 @[simp] lemma val_bex {n : V} (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) :
-    (p.bex t).val = ^∃ (^#0 ^< ⌜ℒₒᵣ⌝.termBShift t.val) ^⋏ p.val := by
+    (p.bex t).val = ^∃ (^#0 ^< termBShift ℒₒᵣ t.val) ^⋏ p.val := by
   simp [Language.Semiformula.bex]
 
 lemma neg_ball (t : ⌜ℒₒᵣ⌝.Semiterm n) (p : ⌜ℒₒᵣ⌝.Semiformula (n + 1)) :
