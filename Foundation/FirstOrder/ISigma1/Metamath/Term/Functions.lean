@@ -416,7 +416,21 @@ variable (L)
 
 noncomputable def qVec (w : V) : V := ^#0 ∷ termBShiftVec L (len w) w
 
+def qVecGraph : 𝚺₁.Semisentence 2 := .mkSigma
+  “w' w. ∃ k, !lenDef k w ∧ ∃ sw, !(termBShiftVecGraph L) sw k w ∧ ∃ t, !qqBvarDef t 0 ∧ !consDef w' t sw”
+
 variable {L}
+
+section
+
+lemma qVec.defined : 𝚺₁-Function₁[V] qVec L via qVecGraph L := by
+  intro v; simp [qVecGraph, termBShiftVec.defined.df.iff]; rfl
+
+instance qVec.definable : 𝚺₁-Function₁[V] qVec L := qVec.defined.to_definable
+
+instance qVec.definable' : Γ-[m + 1]-Function₁[V] qVec L := qVec.definable.of_sigmaOne
+
+end
 
 @[simp] lemma len_qVec {k w : V} (h : IsUTermVec L k w) : len (qVec L w) = k + 1 := by
   rcases h.lh; simp [qVec, h]

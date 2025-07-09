@@ -116,7 +116,7 @@ section model
 
 variable (T) {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonₐ (⌜ℒₒᵣ⌝.neg φ) (⌜ℒₒᵣ⌝.neg ψ)
+def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonₐ (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
 lemma NegativeSuccessor.quote_iff_provabilityComparison {φ ψ : Sentence ℒₒᵣ} :
     NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparisonₐ (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by

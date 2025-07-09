@@ -22,7 +22,7 @@ def _root_.LO.FirstOrder.ArithmeticTheory.IsConsistent : Prop := ¬T.Provable (�
 
 variable {V}
 
-def _root_.LO.FirstOrder.ArithmeticTheory.Consistency (φ : V) : Prop := ¬T.Provable (⌜ℒₒᵣ⌝.neg φ)
+def _root_.LO.FirstOrder.ArithmeticTheory.Consistency (φ : V) : Prop := ¬T.Provable (neg ℒₒᵣ φ)
 
 lemma _root_.LO.FirstOrder.Theory.Consistency.quote_iff {φ : Sentence ℒₒᵣ} :
     T.Consistency (⌜φ⌝ : V) ↔ ¬T.Provable (⌜∼φ⌝ : V) := by

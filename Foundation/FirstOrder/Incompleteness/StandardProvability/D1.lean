@@ -177,7 +177,7 @@ lemma quote_image_shift [L.DecidableEq] (Γ : Finset (SyntacticFormula L)) : (L.
     apply Language.Theory.Derivation.exIntro
       (by simpa [quote_ex] using (Sequent.mem_codeIn_iff (V := V)).mpr h)
       (semiterm_codeIn t)
-      ⟨by simp [fstidx_quote, Language.substs₁, Matrix.constant_eq_singleton], ih⟩
+      ⟨by simp [fstidx_quote, substs1, Matrix.constant_eq_singleton], ih⟩
   case wk Δ Γ d h ih =>
     apply Language.Theory.Derivation.wkRule (s' := ⌜Δ⌝)
       (by simp)
@@ -354,7 +354,7 @@ lemma Language.Theory.Derivation.sound {d : ℕ} (h : (T.codeIn ℕ).Derivation 
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
     refine ⟨Derivation2.ex (φ := φ)
       (by simp [←Sequent.mem_codeIn_iff (V := ℕ), Semiformula.quote_ex, hps]) t
-      (b.cast <| Sequent.quote_inj (V := ℕ) <| by simp [hΔ, hd, Language.substs₁, Matrix.constant_eq_singleton])⟩
+      (b.cast <| Sequent.quote_inj (V := ℕ) <| by simp [hΔ, hd, substs1, Matrix.constant_eq_singleton])⟩
   · rcases by simpa using hΓ
     rcases ih d (by simp) dd with ⟨Δ, hΔ, ⟨b⟩⟩
     refine ⟨Derivation2.wk (Δ := Δ) b

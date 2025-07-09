@@ -152,6 +152,45 @@ notation Γ "-Function₃ " f => BoldfaceFunction₃ Γ f
 notation Γ "-Function₄ " f => BoldfaceFunction₄ Γ f
 
 
+
+notation Γ "-Predicate[" V "] " P " via " φ => DefinedPred (V := V) Γ P φ
+
+notation Γ "-Relation[" V "] " P " via " φ => DefinedRel (V := V) Γ P φ
+
+notation Γ "-Relation₃[" V "] " P " via " φ => DefinedRel₃ (V := V) Γ P φ
+
+notation Γ "-Relation₄[" V "] " P " via " φ => DefinedRel₄ (V := V) Γ P φ
+
+notation Γ "-Function₀[" V "] " c " via " φ => DefinedFunction₀ (V := V) Γ c φ
+
+notation Γ "-Function₁[" V "] " f " via " φ => DefinedFunction₁ (V := V) Γ f φ
+
+notation Γ "-Function₂[" V "] " f " via " φ => DefinedFunction₂ (V := V) Γ f φ
+
+notation Γ "-Function₃[" V "] " f " via " φ => DefinedFunction₃ (V := V) Γ f φ
+
+notation Γ "-Function₄[" V "] " f " via " φ => DefinedFunction₄ (V := V) Γ f φ
+
+notation Γ "-Function₅[" V "] " f " via " φ => DefinedFunction₅ (V := V) Γ f φ
+
+notation Γ "-Predicate[" V "] " P => BoldfacePred (V := V) Γ P
+
+notation Γ "-Relation[" V "] " P => BoldfaceRel (V := V) Γ P
+
+notation Γ "-Relation₃[" V "] " P => BoldfaceRel₃ (V := V) Γ P
+
+notation Γ "-Relation₄[" V "] " P => BoldfaceRel₄ (V := V) Γ P
+
+notation Γ "-Relation₅[" V "] " P => BoldfaceRel₅ (V := V) Γ P
+
+notation Γ "-Function₁[" V "] " f => BoldfaceFunction₁ (V := V) Γ f
+
+notation Γ "-Function₂[" V "] " f => BoldfaceFunction₂ (V := V) Γ f
+
+notation Γ "-Function₃[" V "] " f => BoldfaceFunction₃ (V := V) Γ f
+
+notation Γ "-Function₄[" V "] " f => BoldfaceFunction₄ (V := V) Γ f
+
 end
 
 section

@@ -45,8 +45,8 @@ noncomputable scoped instance : LogicalConnective (L.Semiformula n) where
   bot := ⟨^⊥, by simp⟩
   wedge (p q) := ⟨p.val ^⋏ q.val, by simp⟩
   vee (p q) := ⟨p.val ^⋎ q.val, by simp⟩
-  tilde (p) := ⟨L.neg p.val, by simp⟩
-  arrow (p q) := ⟨L.imp p.val q.val, by simp⟩
+  tilde (p) := ⟨neg L p.val, by simp⟩
+  arrow (p q) := ⟨imp L p.val q.val, by simp⟩
 
 def Language.Semiformula.cast (p : L.Semiformula n) (eq : n = n' := by simp) : L.Semiformula n' := eq ▸ p
 
@@ -72,10 +72,10 @@ namespace Language.Semiformula
     (p ⋎ q).val = p.val ^⋎ q.val := rfl
 
 @[simp] lemma val_neg (p : L.Semiformula n) :
-    (∼p).val = L.neg p.val := rfl
+    (∼p).val = neg L p.val := rfl
 
 @[simp] lemma val_imp (p q : L.Semiformula n) :
-    (p ➝ q).val = L.imp p.val q.val := rfl
+    (p ➝ q).val = imp L p.val q.val := rfl
 
 @[simp] lemma val_all (p : L.Semiformula (n + 1)) :
     p.all.val = ^∀ p.val := rfl
@@ -84,7 +84,7 @@ namespace Language.Semiformula
     p.ex.val = ^∃ p.val := rfl
 
 @[simp] lemma val_iff (p q : L.Semiformula n) :
-    (p ⭤ q).val = L.iff p.val q.val := rfl
+    (p ⭤ q).val = iff L p.val q.val := rfl
 
 lemma val_inj {p q : L.Semiformula n} :
     p.val = q.val ↔ p = q := by rcases p; rcases q; simp
@@ -121,13 +121,13 @@ lemma imp_def (p q : L.Semiformula n) : p ➝ q = ∼p ⋎ q := by ext; simp [im
 @[simp] lemma neg_neg (p : L.Semiformula n) : ∼∼p = p := by
   ext; simp [shift, IsUFormula.neg_neg]
 
-noncomputable def shift (p : L.Semiformula n) : L.Semiformula n := ⟨L.shift p.val, p.prop.shift⟩
+noncomputable def shift (p : L.Semiformula n) : L.Semiformula n := ⟨shift L p.val, p.prop.shift⟩
 
 noncomputable def substs (p : L.Semiformula n) (w : SemitermVec L n m) : L.Semiformula m :=
-  ⟨L.substs w.val p.val, p.prop.substs w.prop⟩
+  ⟨substs L w.val p.val, p.prop.substs w.prop⟩
 
-@[simp] lemma val_shift (p : L.Semiformula n) : p.shift.val = L.shift p.val := rfl
-@[simp] lemma val_substs (p : L.Semiformula n) (w : SemitermVec L n m) : (p.substs w).val = L.substs w.val p.val := rfl
+@[simp] lemma val_shift (p : L.Semiformula n) : p.shift.val = shift L p.val := rfl
+@[simp] lemma val_substs (p : L.Semiformula n) (w : SemitermVec L n m) : (p.substs w).val = substs L w.val p.val := rfl
 
 @[simp] lemma shift_verum : (⊤ : L.Semiformula n).shift = ⊤ := by ext; simp [shift]
 @[simp] lemma shift_falsum : (⊥ : L.Semiformula n).shift = ⊥ := by ext; simp [shift]
@@ -157,10 +157,10 @@ noncomputable def substs (p : L.Semiformula n) (w : SemitermVec L n m) : L.Semif
     (p ⋎ q).substs w = p.substs w ⋎ q.substs w := by ext; simp [substs]
 @[simp] lemma substs_all (w : SemitermVec L n m) (p : L.Semiformula (n + 1)) :
     p.all.substs w = (p.substs w.q).all := by
-  ext; simp [substs, Semiterm.bvar, Language.qVec, SemitermVec.bShift, SemitermVec.q, w.prop.lh]
+  ext; simp [substs, Semiterm.bvar, qVec, SemitermVec.bShift, SemitermVec.q, w.prop.lh]
 @[simp] lemma substs_ex (w : SemitermVec L n m) (p : L.Semiformula (n + 1)) :
     p.ex.substs w = (p.substs w.q).ex := by
-  ext; simp [substs, Semiterm.bvar, Language.qVec, SemitermVec.bShift, SemitermVec.q, w.prop.lh]
+  ext; simp [substs, Semiterm.bvar, qVec, SemitermVec.bShift, SemitermVec.q, w.prop.lh]
 
 @[simp] lemma substs_neg (w : SemitermVec L n m) (p : L.Semiformula n) : (∼p).substs w = ∼(p.substs w) := by
   ext; simp [substs, val_neg, SemitermVec.prop, Metamath.substs_neg p.prop w.prop]

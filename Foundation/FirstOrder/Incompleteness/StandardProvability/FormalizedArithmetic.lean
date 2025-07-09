@@ -64,7 +64,7 @@ variable [R₀Theory T]
 
 noncomputable def eqRefl (t : ⌜ℒₒᵣ⌝.Term) : T ⊢ t =' t := by
   have : T ⊢ (#'0 =' #'0).all := R₀Theory.refl
-  simpa [Language.Semiformula.substs₁] using specialize this t
+  simpa [Language.Semiformula.substs1] using specialize this t
 
 lemma eq_refl! (t : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' t := ⟨eqRefl T t⟩
 
@@ -72,7 +72,7 @@ noncomputable def replace (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜�
     T ⊢ t =' u ➝ φ^/[t.sing] ➝ φ^/[u.sing] := by
   have : T ⊢ (#'1 =' #'0 ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all := R₀Theory.replace φ
   have := by simpa using specialize this t
-  simpa [SemitermVec.q_of_pos, Language.Semiformula.substs₁,
+  simpa [SemitermVec.q_of_pos, Language.Semiformula.substs1,
     Language.TSemifromula.substs_substs] using specialize this u
 
 lemma replace! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' u ➝ φ^/[t.sing] ➝ φ^/[u.sing] := ⟨replace T φ t u⟩
@@ -240,7 +240,7 @@ lemma ne_complete! {n m : V} (h : n ≠ m) : T ⊢! ↑n ≠' ↑m := ⟨neCompl
 
 noncomputable def ltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t <' ↑n ⭤ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
   have : T ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := R₀Theory.ltNumeral n
-  simpa [SemitermVec.q_of_pos, Language.Semiformula.substs₁] using specialize this t
+  simpa [SemitermVec.q_of_pos, Language.Semiformula.substs1] using specialize this t
 
 noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t ≮' ↑n ⭤ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by
   simpa using ENN_of_E <| ltNumeral T t n
@@ -270,7 +270,7 @@ noncomputable def ballIntro (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (n : V)
     T ⊢ φ.ball ↑n := by
   apply all
   suffices T ⊢ &'0 ≮' ↑n ⋎ φ.shift^/[(&'0).sing] by
-    simpa [Language.Semiformula.free, Language.Semiformula.substs₁]
+    simpa [Language.Semiformula.free, Language.Semiformula.substs1]
   have : T ⊢ (tSubstItr (&'0).sing (#'1 ≠' #'0) n).conj ⋎ φ.shift^/[(&'0).sing] := by
     apply conjOr'
     intro i hi

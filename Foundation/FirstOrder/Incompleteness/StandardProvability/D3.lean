@@ -48,8 +48,8 @@ noncomputable def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V)
     intro i hi
     rw [nth_termSubstVec (by simpa using (toNumVec e).prop.qVec.isUTerm) hi]
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
-    · simp [Language.qVec]
-    · simp only [Language.qVec, nth_cons_succ, SemitermVec.prop]
+    · simp [qVec]
+    · simp only [qVec, nth_cons_succ, SemitermVec.prop]
       rcases eq_fin_of_lt_nat (by simpa using hi) with ⟨i, rfl⟩
       rw [nth_termBShiftVec (by simp),
         toNumVec_val_nth, numeral_bShift,

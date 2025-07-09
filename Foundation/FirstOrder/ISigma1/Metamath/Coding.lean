@@ -423,11 +423,11 @@ lemma qVec_quote (w : Fin n → SyntacticSemiterm L m) :
     (semitermVec_codeIn w).qVec
   apply nth_ext (by simp [←HqVec.lh])
   intro i hi
-  have : i < ↑(n + 1) := by simpa [Language.qVec, Hw.lh] using hi
+  have : i < ↑(n + 1) := by simpa [qVec, Hw.lh] using hi
   rcases eq_fin_of_lt_nat this with ⟨i, rfl⟩
   cases' i using Fin.cases with i
-  · simp [Language.qVec]
-  · simp [Language.qVec, quote_termBShift]
+  · simp [qVec]
+  · simp [qVec, quote_termBShift]
 
 @[simp] lemma quote_substs {n m} (w : Fin n → SyntacticSemiterm L m) (φ : SyntacticSemiformula L n) :
     ⌜φ ⇜ w⌝  = (L.codeIn V).substs ⌜fun i ↦ ⌜w i⌝⌝ ⌜φ⌝ := by
@@ -468,7 +468,7 @@ lemma quote_substs' {n m} (w : Fin n → Semiterm L Empty m) (σ : Semisentence 
 @[simp] lemma free_quote (φ : SyntacticSemiformula L 1) :
     ⌜Rewriting.free φ⌝ = (L.codeIn V).free ⌜φ⌝ := by
   rw [← LawfulSyntacticRewriting.app_substs_fbar_zero_comp_shift_eq_free, quote_substs, quote_shift]
-  simp [Language.free, Language.substs₁, Semiterm.quote_fvar, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+  simp [Language.free, substs1, Semiterm.quote_fvar, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
 end LO.ISigma1.Metamath
 

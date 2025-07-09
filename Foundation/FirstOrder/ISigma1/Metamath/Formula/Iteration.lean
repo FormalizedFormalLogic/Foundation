@@ -168,9 +168,9 @@ def blueprint : PR.Blueprint 2 where
 
 noncomputable def construction : PR.Construction V blueprint where
   zero _ := 0
-  succ param k ih := (⌜ℒₒᵣ⌝.substs (numeral k ∷ param 0) (param 1)) ∷ ih
+  succ param k ih := (substs ℒₒᵣ (numeral k ∷ param 0) (param 1)) ∷ ih
   zero_defined := by intro v; simp [blueprint]
-  succ_defined := by intro v; simp [blueprint, ⌜ℒₒᵣ⌝.substs_defined.df.iff]
+  succ_defined := by intro v; simp [blueprint, substs ℒₒᵣ_defined.df.iff]
 
 end SubstItr
 
@@ -180,7 +180,7 @@ noncomputable def substItr (w p k : V) : V := construction.result ![w, p] k
 
 @[simp] lemma substItr_zero (w p : V) : substItr w p 0 = 0 := by simp [substItr, construction]
 
-@[simp] lemma substItr_succ (w p k : V) : substItr w p (k + 1) = ⌜ℒₒᵣ⌝.substs (numeral k ∷ w) p ∷ substItr w p k := by simp [substItr, construction]
+@[simp] lemma substItr_succ (w p k : V) : substItr w p (k + 1) = substs ℒₒᵣ (numeral k ∷ w) p ∷ substItr w p k := by simp [substItr, construction]
 
 section
 
@@ -205,7 +205,7 @@ end
   case succ k ih => simp [ih]
 
 @[simp] lemma substItr_nth (w p k : V) {i} (hi : i < k) :
-    (substItr w p k).[i] = ⌜ℒₒᵣ⌝.substs (numeral (k - (i + 1)) ∷ w) p := by
+    (substItr w p k).[i] = substs ℒₒᵣ (numeral (k - (i + 1)) ∷ w) p := by
   induction k using ISigma1.sigma1_succ_induction generalizing i
   · definability
   case zero => simp at hi
@@ -216,7 +216,7 @@ end
     · simp [ih (by simpa using hi)]
 
 lemma neg_conj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) :
-    ⌜ℒₒᵣ⌝.neg (^⋀ (substItr w p k)) = ^⋁ (substItr w (⌜ℒₒᵣ⌝.neg p) k) := by
+    neg ℒₒᵣ (^⋀ (substItr w p k)) = ^⋁ (substItr w (neg ℒₒᵣ p) k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -232,7 +232,7 @@ lemma neg_conj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1
       apply hp.substs (by simp [hw])
 
 lemma neg_disj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) :
-    ⌜ℒₒᵣ⌝.neg (^⋁ (substItr w p k)) = ^⋀ (substItr w (⌜ℒₒᵣ⌝.neg p) k) := by
+    neg ℒₒᵣ (^⋁ (substItr w p k)) = ^⋀ (substItr w (neg ℒₒᵣ p) k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -248,7 +248,7 @@ lemma neg_disj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1
       apply hp.substs (by simp [hw])
 
 lemma substs_conj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (hv : IsSemitermVec ℒₒᵣ m l v) :
-    ⌜ℒₒᵣ⌝.substs v (^⋀ (substItr w p k)) = ^⋀ (substItr (termSubst ℒₒᵣVec n v w) p k) := by
+    substs ℒₒᵣ v (^⋀ (substItr w p k)) = ^⋀ (substItr (termSubst ℒₒᵣVec n v w) p k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
@@ -265,7 +265,7 @@ lemma substs_conj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula
     simp [ih]
 
 lemma substs_disj_substItr {n m l w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (hv : IsSemitermVec ℒₒᵣ m l v) :
-    ⌜ℒₒᵣ⌝.substs v (^⋁ (substItr w p k)) = ^⋁ (substItr (termSubst ℒₒᵣVec n v w) p k) := by
+    substs ℒₒᵣ v (^⋁ (substItr w p k)) = ^⋁ (substItr (termSubst ℒₒᵣVec n v w) p k) := by
   induction k using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp

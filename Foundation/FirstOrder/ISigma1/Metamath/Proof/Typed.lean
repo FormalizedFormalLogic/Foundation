@@ -18,24 +18,24 @@ variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
 
 section typed_formula
 
-noncomputable abbrev Language.Semiformula.substs₁ (p : L.Semiformula (0 + 1)) (t : Term V L) : L.Formula := p.substs t.sing
+noncomputable abbrev Language.Semiformula.substs1 (p : L.Semiformula (0 + 1)) (t : Term V L) : L.Formula := p.substs t.sing
 
-noncomputable abbrev Language.Semiformula.free (p : L.Semiformula (0 + 1)) : L.Formula := p.shift.substs₁ (Semiterm.fvar L 0)
+noncomputable abbrev Language.Semiformula.free (p : L.Semiformula (0 + 1)) : L.Formula := p.shift.substs1 (Semiterm.fvar L 0)
 
-@[simp] lemma Language.Semiformula.val_substs₁ (p : L.Semiformula (0 + 1)) (t : Term V L) :
-    (p.substs₁ t).val = L.substs ?[t.val] p.val := by simp [substs₁, substs]
+@[simp] lemma Language.Semiformula.val_substs1 (p : L.Semiformula (0 + 1)) (t : Term V L) :
+    (p.substs1 t).val = substs L ?[t.val] p.val := by simp [substs1, substs]
 
 @[simp] lemma Language.Semiformula.val_free (p : L.Semiformula (0 + 1)) :
-    p.free.val = L.substs ?[^&0] (L.shift p.val) := by simp [free, substs₁, substs, shift, fvar]
+    p.free.val = substs L ?[^&0] (shift L p.val) := by simp [free, substs1, substs, shift, fvar]
 
-@[simp] lemma substs₁_neg (p : L.Semiformula (0 + 1)) (t : Term V L) :
-    (∼p).substs₁ t = ∼(p.substs₁ t) := by simp [Language.Semiformula.substs₁]
+@[simp] lemma substs1_neg (p : L.Semiformula (0 + 1)) (t : Term V L) :
+    (∼p).substs1 t = ∼(p.substs1 t) := by simp [Language.Semiformula.substs1]
 
-@[simp] lemma substs₁_all (p : L.Semiformula (0 + 1 + 1)) (t : Term V L) :
-    p.all.substs₁ t = (p.substs t.sing.q).all := by simp [Language.Semiformula.substs₁]
+@[simp] lemma substs1_all (p : L.Semiformula (0 + 1 + 1)) (t : Term V L) :
+    p.all.substs1 t = (p.substs t.sing.q).all := by simp [Language.Semiformula.substs1]
 
-@[simp] lemma substs₁_ex (p : L.Semiformula (0 + 1 + 1)) (t : Term V L) :
-    p.ex.substs₁ t = (p.substs t.sing.q).ex := by simp [Language.Semiformula.substs₁]
+@[simp] lemma substs1_ex (p : L.Semiformula (0 + 1 + 1)) (t : Term V L) :
+    p.ex.substs1 t = (p.substs t.sing.q).ex := by simp [Language.Semiformula.substs1]
 
 end typed_formula
 
@@ -53,7 +53,7 @@ variable (L)
 
 structure Language.Sequent where
   val : V
-  val_formulaSet : L.IsFormulaSet val
+  val_formulaSet : IsFormula LSet val
 
 attribute [simp] Language.Sequent.val_formulaSet
 
@@ -190,7 +190,7 @@ noncomputable def all {p : L.Semiformula (0 + 1)} (dp : T ⊢¹ insert p.free Γ
   Language.Theory.Derivable.toTDerivation _ <| by
     simpa using Language.Theory.Derivable.all (by simpa using p.prop) (by simpa using dp.toDerivable)
 
-noncomputable def ex {p : L.Semiformula (0 + 1)} (t : Term V L) (dp : T ⊢¹ insert (p.substs₁ t) Γ) : T ⊢¹ insert p.ex Γ :=
+noncomputable def ex {p : L.Semiformula (0 + 1)} (t : Term V L) (dp : T ⊢¹ insert (p.substs1 t) Γ) : T ⊢¹ insert p.ex Γ :=
   Language.Theory.Derivable.toTDerivation _ <| by
     simpa using Language.Theory.Derivable.ex (by simpa using p.prop) t.prop (by simpa using dp.toDerivable)
 
@@ -250,12 +250,12 @@ noncomputable def orInv (d : T ⊢¹ p ⋎ q ⫽ Γ) : T ⊢¹ p ⫽ q ⫽ Γ :=
     apply and (em p) (em q)
   exact cut b this
 
-noncomputable def specialize {p : L.Semiformula (0 + 1)} (b : T ⊢¹ p.all ⫽ Γ) (t : Term V L) : T ⊢¹ p.substs₁ t ⫽ Γ := by
+noncomputable def specialize {p : L.Semiformula (0 + 1)} (b : T ⊢¹ p.all ⫽ Γ) (t : Term V L) : T ⊢¹ p.substs1 t ⫽ Γ := by
   apply TDerivation.cut (p := p.all)
   · exact (TDerivation.wk b <| by intro x; simp; tauto)
   · rw [Semiformula.neg_all]
     apply TDerivation.ex t
-    apply TDerivation.em (p.substs₁ t)
+    apply TDerivation.em (p.substs1 t)
 
 end Language.Theory.TDerivation
 
@@ -366,13 +366,13 @@ noncomputable instance : Entailment.Minimal T where
 noncomputable instance : Entailment.Cl T where
   dne p := by simpa [Axioms.DNE, Semiformula.imp_def] using TDerivation.or (TDerivation.em p)
 
-noncomputable def exIntro (p : L.Semiformula (0 + 1)) (t : Term V L) (b : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t b
+noncomputable def exIntro (p : L.Semiformula (0 + 1)) (t : Term V L) (b : T ⊢ p.substs1 t) : T ⊢ p.ex := TDerivation.ex t b
 
-lemma ex_intro! (p : L.Semiformula (0 + 1)) (t : Term V L) (b : T ⊢! p.substs₁ t) : T ⊢! p.ex := ⟨exIntro _ t b.get⟩
+lemma ex_intro! (p : L.Semiformula (0 + 1)) (t : Term V L) (b : T ⊢! p.substs1 t) : T ⊢! p.ex := ⟨exIntro _ t b.get⟩
 
-noncomputable def specialize {p : L.Semiformula (0 + 1)} (b : T ⊢ p.all) (t : Term V L) : T ⊢ p.substs₁ t := TDerivation.specialize b t
+noncomputable def specialize {p : L.Semiformula (0 + 1)} (b : T ⊢ p.all) (t : Term V L) : T ⊢ p.substs1 t := TDerivation.specialize b t
 
-lemma specialize! {p : L.Semiformula (0 + 1)} (b : T ⊢! p.all) (t : Term V L) : T ⊢! p.substs₁ t := ⟨TDerivation.specialize b.get t⟩
+lemma specialize! {p : L.Semiformula (0 + 1)} (b : T ⊢! p.all) (t : Term V L) : T ⊢! p.substs1 t := ⟨TDerivation.specialize b.get t⟩
 
 noncomputable def conj (ps : L.SemiformulaVec 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth i hi) : T ⊢ ps.conj := TDerivation.conj ps ds
 
@@ -418,20 +418,20 @@ noncomputable def generalize {Γ} {p : L.Semiformula (0 + 1)} (d : Γ.map .shift
 
 lemma generalize! {Γ} {p : L.Semiformula (0 + 1)} (d : Γ.map .shift ⊢[T]! p.free) : Γ ⊢[T]! p.all := ⟨generalize d.get⟩
 
-noncomputable def specializeWithCtxAux {C : L.Formula} {p : L.Semiformula (0 + 1)} (d : T ⊢ C ➝ p.all) (t : Term V L) : T ⊢ C ➝ p.substs₁ t := by
+noncomputable def specializeWithCtxAux {C : L.Formula} {p : L.Semiformula (0 + 1)} (d : T ⊢ C ➝ p.all) (t : Term V L) : T ⊢ C ➝ p.substs1 t := by
   rw [Semiformula.imp_def] at d ⊢
   apply TDerivation.or
   apply TDerivation.rotate₁
   apply TDerivation.specialize
   exact TDerivation.wk (TDerivation.orInv d) (by intro x; simp; tauto)
 
-noncomputable def specializeWithCtx {Γ} {p : L.Semiformula (0 + 1)} (d : Γ ⊢[T] p.all) (t) : Γ ⊢[T] p.substs₁ t := specializeWithCtxAux d t
+noncomputable def specializeWithCtx {Γ} {p : L.Semiformula (0 + 1)} (d : Γ ⊢[T] p.all) (t) : Γ ⊢[T] p.substs1 t := specializeWithCtxAux d t
 
-lemma specialize_with_ctx! {Γ} {p : L.Semiformula (0 + 1)} (d : Γ ⊢[T]! p.all) (t) : Γ ⊢[T]! p.substs₁ t := ⟨specializeWithCtx d.get t⟩
+lemma specialize_with_ctx! {Γ} {p : L.Semiformula (0 + 1)} (d : Γ ⊢[T]! p.all) (t) : Γ ⊢[T]! p.substs1 t := ⟨specializeWithCtx d.get t⟩
 
-noncomputable def ex {p : L.Semiformula (0 + 1)} (t) (dp : T ⊢ p.substs₁ t) : T ⊢ p.ex := TDerivation.ex t (by simpa using dp)
+noncomputable def ex {p : L.Semiformula (0 + 1)} (t) (dp : T ⊢ p.substs1 t) : T ⊢ p.ex := TDerivation.ex t (by simpa using dp)
 
-lemma ex! {p : L.Semiformula (0 + 1)} (t) (dp : T ⊢! p.substs₁ t) : T ⊢! p.ex := ⟨ex t dp.get⟩
+lemma ex! {p : L.Semiformula (0 + 1)} (t) (dp : T ⊢! p.substs1 t) : T ⊢! p.ex := ⟨ex t dp.get⟩
 
 end Language.Theory.TProof
 

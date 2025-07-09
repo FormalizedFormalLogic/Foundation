@@ -212,8 +212,8 @@ def replace :
       let eq := qqEQDef x1 x0;
       let v0 := mkVec₁Def x0;
       let v1 := mkVec₁Def x1;
-      let q0 := p⌜ℒₒᵣ⌝.substsDef v1 q;
-      let q1 := p⌜ℒₒᵣ⌝.substsDef v0 q;
+      let q0 := psubsts ℒₒᵣDef v1 q;
+      let q1 := psubsts ℒₒᵣDef v0 q;
       let imp0 := p⌜ℒₒᵣ⌝.impDef q0 q1;
       let imp1 := p⌜ℒₒᵣ⌝.impDef eq imp0;
       let all0 := qqAllDef imp1;
@@ -226,8 +226,8 @@ def replace :
       let' eq := qqEQDef x1 x0;
       let' v0 := mkVec₁Def x0;
       let' v1 := mkVec₁Def x1;
-      let' q0 := p⌜ℒₒᵣ⌝.substsDef v1 q;
-      let' q1 := p⌜ℒₒᵣ⌝.substsDef v0 q;
+      let' q0 := psubsts ℒₒᵣDef v1 q;
+      let' q1 := psubsts ℒₒᵣDef v0 q;
       let' imp0 := p⌜ℒₒᵣ⌝.impDef q0 q1;
       let' imp1 := p⌜ℒₒᵣ⌝.impDef eq imp0;
       let' all0 := qqAllDef imp1;
@@ -470,7 +470,7 @@ private lemma quote_disjLt_eq (n : ℕ) :
   induction n
   case zero => simp
   case succ n ih =>
-    suffices ^#0 ^= numeral n = ⌜ℒₒᵣ⌝.substs (numeral n ∷ ^#0 ∷ 0) (^#1 ^= ^#0) by simpa [ih]
+    suffices ^#0 ^= numeral n = substs ℒₒᵣ (numeral n ∷ ^#0 ∷ 0) (^#1 ^= ^#0) by simpa [ih]
     rw [substs_eq (by simp) (by simp)]; simp
 
 def Ω₄ :
@@ -502,7 +502,7 @@ def Ω₄ :
     /-
     simp? [HierarchySymbol.Semiformula.val_sigma, (Language.isSemiformula_defined (LOR (V := ℕ))).df.iff,
       (Language.substs_defined (LOR (V := ℕ))).df.iff, (Language.imp_defined (LOR (V := ℕ))).df.iff,
-      (Language.iff_defined (LOR (V := ℕ))).df.iff]
+      (iff_defined (LOR (V := ℕ))).df.iff]
     -/
     simp only [Nat.reduceAdd, Fin.isValue, Set.mem_setOf_eq, Nat.succ_eq_add_one,
       HierarchySymbol.Semiformula.val_mkDelta, HierarchySymbol.Semiformula.val_mkSigma,
@@ -514,7 +514,7 @@ def Ω₄ :
       Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one, Matrix.cons_val_three,
       Fin.succ_one_eq_two, eval_qqLTDef, eval_cons, Matrix.cons_val_four, Matrix.cons_val_succ,
       eval_qqEQDef, Matrix.cons_app_seven, Matrix.cons_app_six, Matrix.cons_app_five,
-      substItr_defined_iff, eval_qqDisj, (Language.iff_defined (LOR (V := ℕ))).df.iff,
+      substItr_defined_iff, eval_qqDisj, (iff_defined (LOR (V := ℕ))).df.iff,
       Language.TermRec.Construction.cons_app_10, Language.TermRec.Construction.cons_app_9,
       Matrix.cons_app_eight, eval_qqAllDef, LogicalConnective.Prop.and_eq, exists_eq_left]
     constructor
@@ -536,7 +536,7 @@ def Ω₄ :
     simp? [HierarchySymbol.Semiformula.val_sigma,
       (Language.isSemiformula_defined (LOR (V := V))).df.iff, (Language.isSemiformula_defined (LOR (V := V))).proper.iff',
       (Language.substs_defined (LOR (V := V))).df.iff, (Language.imp_defined (LOR (V := V))).df.iff,
-      (Language.iff_defined (LOR (V := V))).df.iff]
+      (iff_defined (LOR (V := V))).df.iff]
     -/
     simp only [Fin.isValue, Nat.reduceAdd, Nat.succ_eq_add_one,
       HierarchySymbol.Semiformula.sigma_mkDelta, HierarchySymbol.Semiformula.val_mkSigma,
@@ -549,7 +549,7 @@ def Ω₄ :
       Matrix.cons_val_three, Fin.succ_one_eq_two, eval_qqLTDef, eval_cons, Matrix.cons_val_four,
       Matrix.cons_val_succ, eval_qqEQDef, Matrix.cons_app_seven, Matrix.cons_app_six,
       Matrix.cons_app_five, substItr_defined_iff, eval_qqDisj,
-      (Language.iff_defined (LOR (V := V))).df.iff, Language.TermRec.Construction.cons_app_10,
+      (iff_defined (LOR (V := V))).df.iff, Language.TermRec.Construction.cons_app_10,
       Language.TermRec.Construction.cons_app_9, Matrix.cons_app_eight, eval_qqAllDef,
       LogicalConnective.Prop.and_eq, exists_eq_left, HierarchySymbol.Semiformula.pi_mkDelta,
       HierarchySymbol.Semiformula.val_mkPi, Semiformula.eval_all,
@@ -597,10 +597,10 @@ noncomputable def replace.proof (φ : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1)) :
   apply FirstOrder.Semiformula.curve_mem_left
   unfold replace
   suffices
-    ∃ x < ^∀ ^∀ (^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#1 ∷ 0) φ.val ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#0 ∷ 0) φ.val),
+    ∃ x < ^∀ ^∀ (^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#1 ∷ 0) φ.val ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#0 ∷ 0) φ.val),
       ⌜ℒₒᵣ⌝.IsSemiformula 1 x ∧
-        ^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#1 ∷ 0) φ.val ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#0 ∷ 0) φ.val =
-          ^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#1 ∷ 0) x ^→[⌜ℒₒᵣ⌝] ⌜ℒₒᵣ⌝.substs (^#0 ∷ 0) x by
+        ^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#1 ∷ 0) φ.val ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#0 ∷ 0) φ.val =
+          ^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#1 ∷ 0) x ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#0 ∷ 0) x by
     simpa [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve,
       (Language.isSemiformula_defined (LOR (V := V))).df.iff,
       (Language.substs_defined (LOR (V := V))).df.iff, (Language.imp_defined (LOR (V := V))).df.iff]
@@ -673,7 +673,7 @@ noncomputable def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (t
       ⌜ℒₒᵣ⌝.iff (^#0 ^< numeral n) (^⋁ substItr (^#0 ∷ 0) (^#1 ^= ^#0) n) =
         ⌜ℒₒᵣ⌝.iff (^#0 ^< numeral x) (^⋁ substItr (^#0 ∷ 0) (^#1 ^= ^#0) x) by
     simpa [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve,
-      (Language.iff_defined (LOR (V := V))).df.iff]
+      (iff_defined (LOR (V := V))).df.iff]
   refine ⟨n, ?_, rfl⟩
   apply lt_trans ?_ (lt_forall _)
   apply lt_trans ?_ (lt_iff_left _ _)
