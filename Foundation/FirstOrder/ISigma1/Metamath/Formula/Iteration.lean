@@ -68,12 +68,12 @@ end
 
 @[simp]
 lemma qqConj_semiformula {n ps : V} :
-    L.IsSemiformula n (^⋀ ps) ↔ (∀ i < len ps, L.IsSemiformula n ps.[i]) := by
+    IsSemiformula L n (^⋀ ps) ↔ (∀ i < len ps, IsSemiformula L n ps.[i]) := by
   induction ps using cons_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
   case cons p ps ih =>
-    simp only [qqConj_cons, Language.IsSemiformula.and, ih, len_cons]
+    simp only [qqConj_cons, IsSemiformula.and, ih, len_cons]
     constructor
     · rintro ⟨hp, hps⟩ i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -137,12 +137,12 @@ end
 
 @[simp]
 lemma qqDisj_semiformula {ps : V} :
-    L.IsSemiformula n (^⋁ ps) ↔ (∀ i < len ps, L.IsSemiformula n ps.[i]) := by
+    IsSemiformula L n (^⋁ ps) ↔ (∀ i < len ps, IsSemiformula L n ps.[i]) := by
   induction ps using cons_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
   case cons p ps ih =>
-    simp only [qqDisj_cons, Language.IsSemiformula.or, ih, len_cons]
+    simp only [qqDisj_cons, IsSemiformula.or, ih, len_cons]
     constructor
     · rintro ⟨hp, hps⟩ i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -224,8 +224,8 @@ lemma neg_conj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1
     simp only [substItr_succ, qqConj_cons, qqDisj_cons]
     rw [neg_and, ←substs_neg hp (m := m), ih]
     · simp [hw]
-    · exact Language.IsSemiformula.isUFormula <| hp.substs (by simpa [hw])
-    · apply Language.IsSemiformula.isUFormula (n := m)
+    · exact IsSemiformula.isUFormula <| hp.substs (by simpa [hw])
+    · apply IsSemiformula.isUFormula (n := m)
       simp only [qqConj_semiformula, len_substItr]
       intro i hi
       simp only [gt_iff_lt, hi, substItr_nth]
@@ -240,8 +240,8 @@ lemma neg_disj_substItr {n w p k : V} (hp : ⌜ℒₒᵣ⌝.IsSemiformula (n + 1
     simp only [substItr_succ, qqDisj_cons, qqConj_cons]
     rw [neg_or, ←substs_neg hp (m := m), ih]
     · simp [hw]
-    · apply Language.IsSemiformula.isUFormula <| hp.substs (by simpa [hw])
-    · apply Language.IsSemiformula.isUFormula (n := m)
+    · apply IsSemiformula.isUFormula <| hp.substs (by simpa [hw])
+    · apply IsSemiformula.isUFormula (n := m)
       simp only [qqDisj_semiformula, len_substItr]
       intro i hi
       simp only [gt_iff_lt, hi, substItr_nth]
@@ -309,7 +309,7 @@ instance qqVerums_definable' : Γ-[m + 1]-Function₁ (qqVerums : V → V) := .o
 
 end
 
-@[simp] protected lemma Language.IsSemiformula.qqVerums (k : V) : L.IsSemiformula n (qqVerums k) := by
+@[simp] protected lemma IsSemiformula.qqVerums (k : V) : IsSemiformula L n (qqVerums k) := by
   simp only [qqVerums, qqConj_semiformula, len_repeatVec]
   intro i hi; simp [nth_repeatVec _ _ hi]
 

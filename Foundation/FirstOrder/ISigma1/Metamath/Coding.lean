@@ -634,10 +634,10 @@ lemma IsSemiterm.sound {n t : ℕ} (ht : (L.codeIn ℕ).IsSemiterm n t) : ∃ T 
       apply nth_ext' k (by simp) (by simp [hv.lh])
       intro i hi; simpa [hv'] using quote_nth_fin (fun i : Fin k ↦ v.[i]) ⟨i, hi⟩
 
-lemma Language.IsSemiformula.sound {n φ : ℕ} (h : (L.codeIn ℕ).IsSemiformula n φ) : ∃ F : FirstOrder.SyntacticSemiformula L n, ⌜F⌝ = φ := by
+lemma IsSemiformula.sound {n φ : ℕ} (h : (L.codeIn ℕ).IsSemiformula n φ) : ∃ F : FirstOrder.SyntacticSemiformula L n, ⌜F⌝ = φ := by
   induction φ using Nat.strongRec generalizing n
   case ind φ ih =>
-    rcases Language.IsSemiformula.case_iff.mp h with
+    rcases IsSemiformula.case_iff.mp h with
       (⟨k, r, v, hr, hv, rfl⟩ | ⟨k, r, v, hr, hv, rfl⟩ | rfl | rfl |
        ⟨φ, ψ, hp, hq, rfl⟩ | ⟨φ, ψ, hp, hq, rfl⟩ | ⟨φ, hp, rfl⟩ | ⟨φ, hp, rfl⟩)
     · have : ∀ i : Fin k, ∃ t : FirstOrder.SyntacticSemiterm L n, ⌜t⌝ = v.[i] := fun i ↦ (hv.nth i.prop).sound

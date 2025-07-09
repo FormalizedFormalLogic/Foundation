@@ -206,7 +206,7 @@ def replace :
   ch := .mkDelta
     (.mkSigma
       “p.
-      ∃ q < p, !p⌜ℒₒᵣ⌝.isSemiformulaDef.sigma 1 q ∧
+      ∃ q < p, !p⌜ℒₒᵣ⌝.isSemiformula.sigma 1 q ∧
       let x0 := qqBvarDef 0;
       let x1 := qqBvarDef 1;
       let eq := qqEQDef x1 x0;
@@ -220,7 +220,7 @@ def replace :
       !qqAllDef p all0” (by simp))
     (.mkPi
       “p.
-      ∃ q < p, !p⌜ℒₒᵣ⌝.isSemiformulaDef.pi 1 q ∧
+      ∃ q < p, !p⌜ℒₒᵣ⌝.isSemiformula.pi 1 q ∧
       let' x0 := qqBvarDef 0;
       let' x1 := qqBvarDef 1;
       let' eq := qqEQDef x1 x0;

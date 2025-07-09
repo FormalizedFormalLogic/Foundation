@@ -14,15 +14,15 @@ section derivation
 
 variable (L)
 
-def Language.IsFormulaSet (s : V) : Prop := ∀ p ∈ s, L.IsFormula p
+def IsFormulaSet (s : V) : Prop := ∀ p ∈ s, L.IsFormula p
 
 variable {L}
 
 section
 
 def _root_.LO.FirstOrder.Arithmetic.LDef.isFormulaSetDef (pL : LDef) : 𝚫₁.Semisentence 1 := .mkDelta
-  (.mkSigma “s. ∀ p ∈' s, !pL.isSemiformulaDef.sigma 0 p” (by simp))
-  (.mkPi “s. ∀ p ∈' s, !pL.isSemiformulaDef.pi 0 p” (by simp))
+  (.mkSigma “s. ∀ p ∈' s, !pL.isSemiformula.sigma 0 p” (by simp))
+  (.mkPi “s. ∀ p ∈' s, !pL.isSemiformula.pi 0 p” (by simp))
 
 variable (L)
 
@@ -36,22 +36,22 @@ instance Language.isFormulaSet_definable' : Γ-[m + 1]-Predicate L.IsFormulaSet 
 
 end
 
-@[simp] lemma Language.IsFormulaSet.empty : L.IsFormulaSet ∅ := fun p ↦ by simp
+@[simp] lemma IsFormulaSet.empty : L.IsFormulaSet ∅ := fun p ↦ by simp
 
-@[simp] lemma Language.IsFormulaSet.singleton {p} : L.IsFormulaSet {p} ↔ L.IsFormula p :=
+@[simp] lemma IsFormulaSet.singleton {p} : L.IsFormulaSet {p} ↔ L.IsFormula p :=
   ⟨fun h ↦  h p (by simp), fun h p ↦ by
   simp only [mem_singleton_iff]
   rintro rfl; exact h⟩
 
-@[simp] lemma Language.IsFormulaSet.insert_iff {p s} : L.IsFormulaSet (insert p s) ↔ L.IsFormula p ∧ L.IsFormulaSet s :=
+@[simp] lemma IsFormulaSet.insert_iff {p s} : L.IsFormulaSet (insert p s) ↔ L.IsFormula p ∧ L.IsFormulaSet s :=
   ⟨fun h ↦ ⟨h p (by simp), fun q hq ↦ h q (by simp [hq])⟩,
    by rintro ⟨hp, hs⟩ q; simp only [mem_bitInsert_iff]; rintro (rfl | hqs)
       · exact hp
       · exact hs q hqs⟩
 
-alias ⟨Language.IsFormulaSet.insert, _⟩ := Language.IsFormulaSet.insert_iff
+alias ⟨IsFormulaSet.insert, _⟩ := IsFormulaSet.insert_iff
 
-@[simp] lemma Language.IsFormulaSet.union {s₁ s₂} : L.IsFormulaSet (s₁ ∪ s₂) ↔ L.IsFormulaSet s₁ ∧ L.IsFormulaSet s₂ :=
+@[simp] lemma IsFormulaSet.union {s₁ s₂} : L.IsFormulaSet (s₁ ∪ s₂) ↔ L.IsFormulaSet s₁ ∧ L.IsFormulaSet s₂ :=
   ⟨fun h ↦ ⟨fun p hp ↦ h p (by simp [hp]), fun p hp ↦ h p (by simp [hp])⟩,
    fun h p hp ↦ by
     rcases mem_cup_iff.mp hp with (h₁ | h₂)
@@ -73,16 +73,16 @@ section setShift
 lemma mem_setShift_iff {s y : V} : y ∈ L.setShift s ↔ ∃ x ∈ s, y = L.shift x :=
   Classical.choose!_spec (setShift_existsUnique L s) y
 
-lemma Language.IsFormulaSet.setShift {s : V} (h : L.IsFormulaSet s) : L.IsFormulaSet (L.setShift s) := by
+lemma IsFormulaSet.setShift {s : V} (h : L.IsFormulaSet s) : L.IsFormulaSet (L.setShift s) := by
   simp only [IsFormulaSet, mem_setShift_iff, forall_exists_index, and_imp]
   rintro _ p hp rfl; exact (h p hp).shift
 
 lemma shift_mem_setShift {p s : V} (h : p ∈ s) : L.shift p ∈ L.setShift s :=
   mem_setShift_iff.mpr ⟨p, h, rfl⟩
 
-@[simp] lemma Language.IsFormulaSet.setShift_iff {s : V} :
+@[simp] lemma IsFormulaSet.setShift_iff {s : V} :
     L.IsFormulaSet (L.setShift s) ↔ L.IsFormulaSet s :=
-  ⟨by intro h p hp; simpa using h (L.shift p) (shift_mem_setShift hp), Language.IsFormulaSet.setShift⟩
+  ⟨by intro h p hp; simpa using h (L.shift p) (shift_mem_setShift hp), IsFormulaSet.setShift⟩
 
 @[simp] lemma mem_setShift_union {s t : V} : L.setShift (s ∪ t) = L.setShift s ∪ L.setShift t := mem_ext <| by
   simp only [mem_setShift_iff, mem_cup_iff]; intro x
@@ -892,10 +892,10 @@ lemma disj (ps s : V) {i} (hps : ∀ i < len ps, L.IsFormula ps.[i])
       · left; exact mem_vecToSet_iff.mpr ⟨i, hi, rfl⟩
       · right; exact hx) d
 
-lemma all {p : V} (hp : L.IsSemiformula 1 p) (dp : T.Derivable (insert (L.free p) (L.setShift s))) : T.Derivable (insert (^∀ p) s) :=
+lemma all {p : V} (hp : IsSemiformula L 1 p) (dp : T.Derivable (insert (L.free p) (L.setShift s))) : T.Derivable (insert (^∀ p) s) :=
   all_m (p := p) (by simp) (wk (by simp [hp, by simpa using dp.isFormulaSet]) (by intro x; simp; tauto) dp)
 
-lemma ex {p t : V} (hp : L.IsSemiformula 1 p) (ht : L.IsTerm t)
+lemma ex {p t : V} (hp : IsSemiformula L 1 p) (ht : L.IsTerm t)
     (dp : T.Derivable (insert (L.substs₁ t p) s)) : T.Derivable (insert (^∃ p) s) :=
   ex_m (p := p) (by simp) ht (wk (by simp [ht, hp, by simpa using dp.isFormulaSet]) (by intro x; simp; tauto) dp)
 

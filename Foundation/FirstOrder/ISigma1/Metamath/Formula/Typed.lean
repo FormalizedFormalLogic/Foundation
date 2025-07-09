@@ -30,7 +30,7 @@ variable (L)
 
 structure Language.Semiformula (n : V) where
   val : V
-  prop : L.IsSemiformula n val
+  prop : IsSemiformula L n val
 
 attribute [simp] Language.Semiformula.prop
 
@@ -38,7 +38,7 @@ abbrev Language.Formula := L.Semiformula 0
 
 variable {L}
 
-@[simp] lemma Language.Semiformula.isUFormula (p : L.Semiformula n) : L.IsUFormula p.val := p.prop.isUFormula
+@[simp] lemma Language.Semiformula.isUFormula (p : L.Semiformula n) : IsUFormula L p.val := p.prop.isUFormula
 
 noncomputable scoped instance : LogicalConnective (L.Semiformula n) where
   top := ⟨^⊤, by simp⟩
@@ -119,7 +119,7 @@ lemma val_inj {p q : L.Semiformula n} :
 lemma imp_def (p q : L.Semiformula n) : p ➝ q = ∼p ⋎ q := by ext; simp [imp]
 
 @[simp] lemma neg_neg (p : L.Semiformula n) : ∼∼p = p := by
-  ext; simp [shift, Language.IsUFormula.neg_neg]
+  ext; simp [shift, IsUFormula.neg_neg]
 
 noncomputable def shift (p : L.Semiformula n) : L.Semiformula n := ⟨L.shift p.val, p.prop.shift⟩
 
@@ -175,7 +175,7 @@ notation p:max "^/[" w "]" => Language.Semiformula.substs p w
 
 structure Language.SemiformulaVec (n : V) where
   val : V
-  prop : ∀ i < len val, L.IsSemiformula n val.[i]
+  prop : ∀ i < len val, IsSemiformula L n val.[i]
 
 namespace Language.SemiformulaVec
 
