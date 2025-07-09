@@ -181,7 +181,7 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 def singleton (φ : SyntacticFormula L) :
     Theory.Delta1Definable {φ} where

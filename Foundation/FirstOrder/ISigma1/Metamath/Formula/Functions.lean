@@ -804,7 +804,7 @@ def Language.IsFVFree (n p : V) : Prop := IsSemiformula L n p ∧ shift L p = p
 section
 
 def _root_.LO.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semisentence 2 :=
-  .mkSigma “n p | !pL.isSemiformula.sigma n p ∧ !pshift LDef p p” (by simp)
+  .mkSigma “n p | !(isSemiformula L).sigma n p ∧ !pshift LDef p p” (by simp)
 
 lemma isFVFree_defined : 𝚺₁-Relation L.IsFVFree via pL.isFVFreeDef := by
   intro v; simp [LDef.isFVFreeDef, HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff, (shift_defined L).df.iff]

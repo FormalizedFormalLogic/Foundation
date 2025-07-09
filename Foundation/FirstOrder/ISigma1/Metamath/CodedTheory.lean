@@ -27,7 +27,7 @@ namespace LO.FirstOrder.Theory
 
 open LO.ISigma1.Metamath
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 class Delta1Definable (T : Theory L) extends Arithmetic.LDef.TDef L.lDef where
   mem_iff {φ} : ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T

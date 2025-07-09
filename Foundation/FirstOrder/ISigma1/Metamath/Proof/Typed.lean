@@ -107,7 +107,7 @@ lemma subset_iff : Γ ⊆ Δ ↔ Γ.val ⊆ Δ.val := iff_of_eq rfl
 
 lemma ext' (h : Γ.val = Δ.val) : Γ = Δ := by rcases Γ; rcases Δ; simpa using h
 
-noncomputable def shift (s : L.Sequent) : L.Sequent := ⟨L.setShift s.val, by simp⟩
+noncomputable def shift (s : L.Sequent) : L.Sequent := ⟨setShift L s.val, by simp⟩
 
 @[simp] lemma shift_empty : (∅ : L.Sequent).shift = ∅ := ext' <| by simp [shift]
 

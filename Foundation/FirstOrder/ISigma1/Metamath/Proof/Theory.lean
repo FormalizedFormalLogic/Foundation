@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Formula.Functions
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Coding
 import Foundation.FirstOrder.ISigma1.Metamath.Formula.Iteration
 
 namespace LO.ISigma1.Metamath
@@ -7,40 +7,39 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-section theory
-
-variable (L)
-
-structure _root_.LO.FirstOrder.Arithmetic.LDef.TDef (pL : LDef) where
+class _root_.LO.FirstOrder.Theory.Δ₁Definable (T : Theory L) where
   ch : 𝚫₁.Semisentence 1
+  mem_iff : ∀ φ, ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T
+  isDelta1 : ch.ProvablyProperOn 𝐈𝚺₁
 
-protected structure Language.Theory (L : Metamath.Language V) {pL : LDef} [Metamath.Language.Defined L pL] where
-  set : Set V
+abbrev _root_.LO.FirstOrder.Theory.Δ₁ch (T : Theory L) [T.Δ₁Definable] : 𝚫₁.Semisentence 1 := Theory.Δ₁Definable.ch T
 
-instance : Membership V L.Theory := ⟨fun T x ↦ x ∈ T.set⟩
+def _root_.LO.FirstOrder.Theory.Δ₁Class (T : Theory L) [T.Δ₁Definable] : Set V := { φ : V | V ⊧/![φ] T.Δ₁ch.val }
 
-instance : HasSubset L.Theory := ⟨fun T U ↦ T.set ⊆ U.set⟩
+variable {T : Theory L} [T.Δ₁Definable]
 
-omit [V ⊧ₘ* 𝐈𝚺₁] in
-lemma Language.Theory.mem_def {T : L.Theory} {p} : p ∈ T ↔ p ∈ T.set := by rfl
+instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.Δ₁ch := by
+  constructor
+  · intro v
+    have : V ⊧/![v 0] (Theory.Δ₁Definable.ch T).sigma.val ↔ V ⊧/![v 0] (Theory.Δ₁Definable.ch T).pi.val := by
+      have := (consequence_iff (T := 𝐈𝚺₁)).mp (sound!₀ <| FirstOrder.Theory.Δ₁Definable.isDelta1 (T := T)) V inferInstance
+      simp [models_iff] at this ⊢
+      simpa [Matrix.constant_eq_singleton] using this ![v 0]
+    rwa [show v = ![v 0] from Matrix.fun_eq_vec_one]
+  · intro v; simp [←Matrix.fun_eq_vec_one, Theory.Δ₁Class]
 
-variable {L}
+instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ₁Class.defined.to_definable
 
-namespace Language.Theory
+omit [L.LORDefinable]
 
-protected class Defined (T : L.Theory) (pT : outParam pL.TDef) where
-  defined : 𝚫₁-Predicate (· ∈ T.set) via pT.ch
+@[simp] lemma Δ₁Class.proper : T.Δ₁ch.ProperOn V := (Theory.Δ₁Definable.isDelta1 (T := T)).properOn V
 
-variable (T : L.Theory) {pT : pL.TDef} [T.Defined pT]
-
-instance mem_defined : 𝚫₁-Predicate (· ∈ T) via pT.ch := Defined.defined
-
-instance mem_definable : 𝚫₁-Predicate (· ∈ T) := (mem_defined T).to_definable
-
-end Language.Theory
-
-end theory
+@[simp] lemma Δ₁Class.mem_iff {φ : SyntacticFormula L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
+  have : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ℕ ⊧/![⌜φ⌝] T.Δ₁ch.val := by
+    simpa [coe_quote, Matrix.constant_eq_singleton]
+      using FirstOrder.Arithmetic.models_iff_of_Delta1 (V := V) (σ := T.Δ₁ch) (by simp) (by simp) (e := ![⌜φ⌝])
+  Iff.trans this (Theory.Δ₁Definable.mem_iff _)
 
 end LO.ISigma1.Metamath

@@ -14,7 +14,7 @@ open Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [L.DecidableEq] [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
+variable {L : Language} [L.DecidableEq] [L.Encodable]
 
 variable (V)
 
@@ -83,7 +83,7 @@ lemma Sequent.mem_codeIn_iff' {Γ : Finset (SyntacticFormula L)} : x ∈ (⌜Γ�
   · intro h; exact Sequent.mem_codeIn h
   · rintro ⟨p, hp, rfl⟩; simp [Sequent.mem_codeIn_iff, hp]
 
-lemma setShift_quote [DefinableLanguage L] (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift ⌜Γ⌝ = ⌜Finset.image Rewriting.shift Γ⌝ := by
+lemma setShift_quote [L.LORDefinable] (Γ : Finset (SyntacticFormula L)) : (L.codeIn V).setShift ⌜Γ⌝ = ⌜Finset.image Rewriting.shift Γ⌝ := by
   apply mem_ext
   intro x; simp only [mem_setShift_iff]
   constructor
@@ -129,7 +129,7 @@ open FirstOrder Semiformula Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {T : Theory L} [T.Delta1Definable]
 
@@ -278,7 +278,7 @@ end LO.FirstOrder
 
 namespace LO.ISigma1.Metamath
 
-variable {L : Language} [L.DecidableEq] [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language} [L.DecidableEq] [L.Encodable] [L.LORDefinable]
 
 lemma isFormulaSet_sound {s : ℕ} : (L.codeIn ℕ).IsFormulaSet s → ∃ S : Finset (SyntacticFormula L), ⌜S⌝ = s := by
   intro h

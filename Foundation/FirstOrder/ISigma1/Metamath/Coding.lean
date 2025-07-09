@@ -79,10 +79,10 @@ lemma coe_quote (x : α) : ↑(⌜x⌝ : ℕ) = (⌜x⌝ : V) := by simp [quote_
 
 lemma quote_eq_encode (x : α) : (⌜x⌝ : ℕ) = Encodable.encode x := by simp [quote_eq_coe_encode]
 
-@[simp] lemma val_quote {ξ n e ε} (x : α) : Semiterm.valm V e ε (⌜x⌝ : Semiterm ℒₒᵣ ξ n) = ⌜x⌝ := by
+@[simp] lemma val_quote {ξ n e ε} (x : α) : Semiterm.valm V e ε (⌜x⌝ : FirstOrder.Semiterm ℒₒᵣ ξ n) = ⌜x⌝ := by
   simp [goedelNumber'_def, quote_eq_coe_encode, numeral_eq_natCast]
 
-lemma numeral_quote (x : α) : Semiterm.Operator.numeral ℒₒᵣ (⌜x⌝ : ℕ) = (⌜x⌝ : Semiterm ℒₒᵣ ξ n) := by simp [quote_eq_coe_encode]; rfl
+lemma numeral_quote (x : α) : Semiterm.Operator.numeral ℒₒᵣ (⌜x⌝ : ℕ) = (⌜x⌝ : FirstOrder.Semiterm ℒₒᵣ ξ n) := by simp [quote_eq_coe_encode]; rfl
 
 @[simp] lemma quote_inj_iff {x y : α} : (⌜x⌝ : V) = ⌜y⌝ ↔ x = y := by simp [quote_eq_coe_encode]
 
@@ -94,11 +94,9 @@ namespace LO.FirstOrder.Semiterm
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language}
+variable {L : Language} [L.Encodable]
 
 variable (V)
-
-variable [(k : ℕ) → Encodable (L.Func k)]
 
 lemma quote_eq_toNat (t : SyntacticSemiterm L n) : (⌜t⌝ : V) = toNat t := rfl
 
@@ -118,8 +116,8 @@ lemma quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
   case fvar x => rcases u <;> simp [quote_bvar, quote_fvar, quote_func, qqBvar, qqFvar, qqFunc]
   case func k f v ih =>
     rcases u
-    · simp [quote_bvar, quote_fvar, quote_func, qqBvar, qqFvar, qqFunc]
-    · simp [quote_bvar, quote_fvar, quote_func, qqBvar, qqFvar, qqFunc]
+    · simp [quote_bvar, quote_func, qqBvar, qqFunc]
+    · simp [quote_fvar, quote_func, qqFvar, qqFunc]
     case func w =>
       simp only [quote_func, qqFunc, add_left_inj, pair_ext_iff, Nat.cast_inj, true_and, func.injEq,
         and_congr_right_iff]
@@ -152,7 +150,7 @@ lemma quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
 
 @[simp] lemma quote_absolute (t : SyntacticSemiterm L n) :
     ((⌜t⌝ : ℕ) : V) = ⌜t⌝ := by
-  induction t <;> simp [quote_bvar, quote_fvar, quote_func, qqBvar, qqFvar, qqFunc, Fin.val_inj, nat_cast_pair, *]
+  induction t <;> simp [quote_bvar, quote_fvar, quote_func, qqBvar, qqFvar, qqFunc, nat_cast_pair, *]
 
 lemma quote_eq_encode (t : SyntacticSemiterm L n) : ⌜t⌝ = Encodable.encode t := by
   induction t
@@ -169,18 +167,13 @@ open FirstOrder.Semiterm
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
-
-/-- TODO: move-/
-lemma eq_fin_of_lt_nat {n : ℕ} {x : V} (hx : x < n) : ∃ i : Fin n, x = i := by
-  rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩
-  exact ⟨⟨x, by simpa using hx⟩, by simp⟩
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 @[simp] lemma semiterm_codeIn {n} (t : SyntacticSemiterm L n) :
-    (L.codeIn V).IsSemiterm n ⌜t⌝ := by
+    IsSemiterm (V := V) L n ⌜t⌝ := by
   induction t
-  · simp [quote_bvar, quote_fvar, quote_func]
-  · simp [quote_bvar, quote_fvar, quote_func]
+  · simp [quote_bvar]
+  · simp [quote_fvar]
   case func k f v ih =>
     simpa [quote_bvar, quote_fvar, quote_func]
     using IsSemitermVec.iff.mpr
@@ -190,21 +183,21 @@ lemma eq_fin_of_lt_nat {n : ℕ} {x : V} (hx : x < n) : ∃ i : Fin n, x = i := 
           simpa using ih i⟩
 
 @[simp] lemma semitermVec_codeIn {k n} (v : Fin k → SyntacticSemiterm L n) :
-    (L.codeIn V).IsSemitermVec k n ⌜fun i ↦ ⌜v i⌝⌝ := IsSemitermVec.iff.mpr
+    IsSemitermVec (V := V) L k n ⌜fun i ↦ ⌜v i⌝⌝ := IsSemitermVec.iff.mpr
   ⟨by simp, by intro i hi; rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩; simp⟩
 
 @[simp] lemma isUTermVec_codeIn {k n} (v : Fin k → SyntacticSemiterm L n) :
-    (L.codeIn V).IsUTermVec k ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v |>.isUTerm
+    IsUTermVec (V := V) L k ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v |>.isUTerm
 
 @[simp] lemma quote_termSubst {n m} (t : SyntacticSemiterm L n) (w : Fin n → SyntacticSemiterm L m) :
-    ⌜Rew.substs w t⌝ = (L.codeIn V).termSubst ⌜fun i ↦ ⌜w i⌝⌝ ⌜t⌝ := by
+    (⌜Rew.substs w t⌝ : V) = termSubst L ⌜fun i ↦ ⌜w i⌝⌝ ⌜t⌝ := by
   induction t
-  case bvar z => simp [quote_bvar, quote_fvar, quote_func]
-  case fvar x => simp [quote_bvar, quote_fvar, quote_func]
+  case bvar z => simp [quote_bvar]
+  case fvar x => simp [quote_fvar]
   case func k f v ih =>
-    have Hw : (L.codeIn V).IsSemitermVec n m ⌜fun i ↦ ⌜w i⌝⌝ := semitermVec_codeIn w
-    have Hv : (L.codeIn V).IsSemitermVec k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
-    simp only [Rew.func, Semiterm.quote_func, codeIn_func_quote, Language.termSubst_func (codeIn_func_quote f) Hv.isUTerm]
+    have Hw : IsSemitermVec (V := V) L n m ⌜fun i ↦ ⌜w i⌝⌝ := semitermVec_codeIn w
+    have Hv : IsSemitermVec (V := V) L k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
+    simp only [Rew.func, Semiterm.quote_func, termSubst_func (codeIn_func_quote f) Hv.isUTerm]
     congr
     apply nth_ext (by simp [(Hw.termSubstVec Hv).lh])
     intro i hi
@@ -214,9 +207,9 @@ lemma eq_fin_of_lt_nat {n : ℕ} {x : V} (hx : x < n) : ∃ i : Fin n, x = i := 
     simpa using ih i
 
 lemma quote_termSubstVec {k n m} (w : Fin n → SyntacticSemiterm L m) (v : Fin k → SyntacticSemiterm L n) :
-    ⌜fun i ↦ ⌜(Rew.substs w) (v i)⌝⌝ = (L.codeIn V).termSubstVec ↑k ⌜fun i ↦ ⌜w i⌝⌝ ⌜fun i => ⌜v i⌝⌝ := by
-  have Hw : (L.codeIn V).IsSemitermVec n m ⌜fun i ↦ ⌜w i⌝⌝ := semitermVec_codeIn w
-  have Hv : (L.codeIn V).IsSemitermVec k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
+    (⌜fun i ↦ ⌜(Rew.substs w) (v i)⌝⌝ : V) = termSubstVec L ↑k ⌜fun i ↦ ⌜w i⌝⌝ ⌜fun i ↦ ⌜v i⌝⌝ := by
+  have Hw : IsSemitermVec (V := V) L n m ⌜fun i ↦ ⌜w i⌝⌝ := semitermVec_codeIn w
+  have Hv : IsSemitermVec (V := V) L k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
   apply nth_ext (by simp [Hw.termSubstVec Hv |>.lh])
   intro i hi
   have hi : i < k := by simpa [Hw.termSubstVec Hv |>.lh] using hi
@@ -224,13 +217,13 @@ lemma quote_termSubstVec {k n m} (w : Fin n → SyntacticSemiterm L m) (v : Fin 
   simp [nth_termSubstVec Hv.isUTerm hi]
 
 @[simp] lemma quote_termShift {n} (t : SyntacticSemiterm L n) :
-    ⌜Rew.shift t⌝ = (L.codeIn V).termShift ⌜t⌝ := by
+    (⌜Rew.shift t⌝ : V) = termShift L ⌜t⌝ := by
   induction t
-  case bvar => simp [quote_bvar, quote_fvar, quote_func]
-  case fvar => simp [quote_bvar, quote_fvar, quote_func]
+  case bvar => simp [quote_bvar]
+  case fvar => simp [quote_fvar]
   case func k f v ih =>
-    have Hv : (L.codeIn V).IsSemitermVec k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
-    simp only [Rew.func, Semiterm.quote_func, codeIn_func_quote, Language.termShift_func (codeIn_func_quote f) Hv.isUTerm]
+    have Hv : IsSemitermVec (V := V) L k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
+    simp only [Rew.func, Semiterm.quote_func, termShift_func (codeIn_func_quote f) Hv.isUTerm]
     congr
     apply nth_ext (by simp [Hv.termShiftVec |>.lh])
     intro i hi
@@ -240,8 +233,8 @@ lemma quote_termSubstVec {k n m} (w : Fin n → SyntacticSemiterm L m) (v : Fin 
     simpa using ih i
 
 lemma quote_termShiftVec {k n} (v : Fin k → SyntacticSemiterm L n) :
-    ⌜fun i ↦ ⌜Rew.shift (v i)⌝⌝ = (L.codeIn V).termShiftVec k ⌜fun i ↦ ⌜v i⌝⌝ := by
-  have Hv : (L.codeIn V).IsSemitermVec k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
+    (⌜fun i ↦ ⌜Rew.shift (v i)⌝⌝ : V) = termShiftVec (V := V) L k ⌜fun i ↦ ⌜v i⌝⌝ := by
+  have Hv : IsSemitermVec (V := V) L k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
   apply nth_ext (by simp [Hv.termShiftVec |>.lh])
   intro i hi
   have hi : i < k := by simpa [Hv.termShiftVec |>.lh] using hi
@@ -249,13 +242,13 @@ lemma quote_termShiftVec {k n} (v : Fin k → SyntacticSemiterm L n) :
   simp [nth_termShiftVec Hv.isUTerm hi]
 
 @[simp] lemma quote_termBShift {n} (t : SyntacticSemiterm L n) :
-    ⌜Rew.bShift t⌝ = (L.codeIn V).termBShift ⌜t⌝ := by
+    (⌜Rew.bShift t⌝ : V) = termBShift (V := V) L ⌜t⌝ := by
   induction t
-  case bvar => simp [quote_bvar, quote_fvar, quote_func]
-  case fvar => simp [quote_bvar, quote_fvar, quote_func]
+  case bvar => simp [quote_bvar]
+  case fvar => simp [quote_fvar]
   case func k f v ih =>
-    have Hv : (L.codeIn V).IsSemitermVec k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
-    simp only [Rew.func, Semiterm.quote_func, codeIn_func_quote, Language.termBShift_func (codeIn_func_quote f) Hv.isUTerm]
+    have Hv : IsSemitermVec (V := V) L k n ⌜fun i ↦ ⌜v i⌝⌝ := semitermVec_codeIn v
+    simp only [Rew.func, Semiterm.quote_func, termBShift_func (codeIn_func_quote f) Hv.isUTerm]
     congr
     apply nth_ext (by simp [Hv.termBShiftVec |>.lh])
     intro i hi
@@ -281,19 +274,19 @@ lemma quote_termShiftVec {k n} (v : Fin k → SyntacticSemiterm L n) :
         _ = numeral ((k + 1 : ℕ) : V) ^+ ↑𝟏 := by
           rw [←quote_one']
           congr
-        _ = numeral ((k : V) + 1) ^+ ↑𝟏 := by rfl
-        _ = numeral ((k + 1 : V) + 1) := by
-          simp [Operator.numeral_succ, Matrix.comp_vecCons']
+        _ = numeral ((k : V) + 1) ^+ ↑𝟏     := by rfl
+        _ = numeral ((k + 1 : V) + 1)       := by simp
 
-omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
-lemma quote_eterm_eq_quote_emb (t : Semiterm L Empty n) : (⌜t⌝ : V) = (⌜Rew.embs t⌝ : V) := by
+omit [L.LORDefinable] in
+lemma quote_eterm_eq_quote_emb (t : FirstOrder.Semiterm L Empty n) : (⌜t⌝ : V) = (⌜Rew.embs t⌝ : V) := by
   simp [quote_eq_coe_encode]
 
 @[simp] lemma InternalArithmetic.quote_numeral_eq_numeral' (k : ℕ) :
-    (⌜(‘↑k’ : Semiterm ℒₒᵣ Empty n)⌝ : V) = InternalArithmetic.numeral (k : V) := by
+    (⌜(‘↑k’ : FirstOrder.Semiterm ℒₒᵣ Empty n)⌝ : V) = InternalArithmetic.numeral (k : V) := by
   simp [quote_eterm_eq_quote_emb]
 
-@[simp] lemma quote_quote_eq_numeral {α : Type*} [Encodable α] {x : α} : (⌜(⌜x⌝ : Semiterm ℒₒᵣ ℕ n)⌝ : V) = InternalArithmetic.numeral ⌜x⌝ := by
+@[simp] lemma quote_quote_eq_numeral {α : Type*} [Encodable α] {x : α} :
+    (⌜(⌜x⌝ : FirstOrder.Semiterm ℒₒᵣ ℕ n)⌝ : V) = InternalArithmetic.numeral ⌜x⌝ := by
   simp [goedelNumber'_def]; simp [quote_eq_coe_encode]
 
 end LO.ISigma1.Metamath
@@ -302,26 +295,33 @@ namespace LO.FirstOrder.Semiformula
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
+variable {L : Language} [L.Encodable]
 
 lemma quote_eq_toNat (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = toNat φ := rfl
 
 lemma quote_rel {k} (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) : (⌜rel R v⌝ : V) = ^rel ↑k ⌜R⌝ ⌜fun i ↦ ⌜v i⌝⌝ := by
   simp [Semiterm.quote_eq_toNat, quote_eq_toNat, toNat, qqRel, ←nat_pair_eq, nat_cast_pair, quote_rel_def, ←quote_eq_vecToNat]; rfl
+
 lemma quote_nrel {k} (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) : (⌜nrel R v⌝ : V) = ^nrel ↑k ⌜R⌝ ⌜fun i ↦ ⌜v i⌝⌝ := by
-  simp [Semiterm.quote_eq_toNat, quote_eq_toNat, toNat, qqRel, ←nat_pair_eq, nat_cast_pair, quote_rel_def, ←quote_eq_vecToNat]; rfl
+  simp [Semiterm.quote_eq_toNat, quote_eq_toNat, toNat, ←nat_pair_eq, nat_cast_pair, quote_rel_def, ←quote_eq_vecToNat]; rfl
+
 @[simp] lemma quote_verum (n : ℕ) : ⌜(⊤ : SyntacticSemiformula L n)⌝ = (^⊤ : V) := by
-  simp [quote_eq_toNat, toNat, qqVerum, pair_coe_eq_coe_pair, ←pair_coe_eq_coe_pair, nat_cast_pair]
+  simp [quote_eq_toNat, toNat, qqVerum, ←pair_coe_eq_coe_pair, nat_cast_pair]
+
 @[simp] lemma quote_falsum (n : ℕ) : ⌜(⊥ : SyntacticSemiformula L n)⌝ = (^⊥ : V) := by
-  simp [quote_eq_toNat, toNat, qqFalsum, pair_coe_eq_coe_pair, ←pair_coe_eq_coe_pair, nat_cast_pair]
+  simp [quote_eq_toNat, toNat, qqFalsum, ←pair_coe_eq_coe_pair, nat_cast_pair]
+
 @[simp] lemma quote_and (φ ψ : SyntacticSemiformula L n) : (⌜φ ⋏ ψ⌝ : V) = ⌜φ⌝ ^⋏ ⌜ψ⌝ := by
-  simp [quote_eq_toNat, toNat, qqAnd, pair_coe_eq_coe_pair, ←pair_coe_eq_coe_pair, nat_cast_pair]
+  simp [quote_eq_toNat, toNat, qqAnd, ←pair_coe_eq_coe_pair, nat_cast_pair]
+
 @[simp] lemma quote_or (φ ψ : SyntacticSemiformula L n) : (⌜φ ⋎ ψ⌝ : V) = ⌜φ⌝ ^⋎ ⌜ψ⌝ := by
-  simp [quote_eq_toNat, toNat, qqOr, pair_coe_eq_coe_pair, ←pair_coe_eq_coe_pair, nat_cast_pair]
+  simp [quote_eq_toNat, toNat, qqOr, ←pair_coe_eq_coe_pair, nat_cast_pair]
+
 @[simp] lemma quote_all (φ : SyntacticSemiformula L (n + 1)) : (⌜∀' φ⌝ : V) = ^∀ ⌜φ⌝ := by
-  simp [quote_eq_toNat, toNat, qqAll, pair_coe_eq_coe_pair, ←pair_coe_eq_coe_pair, nat_cast_pair]
+  simp [quote_eq_toNat, toNat, qqAll, ←pair_coe_eq_coe_pair, nat_cast_pair]
+
 @[simp] lemma quote_ex (φ : SyntacticSemiformula L (n + 1)) : (⌜∃' φ⌝ : V) = ^∃ ⌜φ⌝ := by
-  simp [quote_eq_toNat, toNat, qqEx, pair_coe_eq_coe_pair, ←pair_coe_eq_coe_pair, nat_cast_pair]
+  simp [quote_eq_toNat, toNat, qqEx, ←pair_coe_eq_coe_pair, nat_cast_pair]
 
 @[simp] lemma quote_eq (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜Semiformula.rel Language.Eq.eq ![t, u]⌝ : V) = (⌜t⌝ ^= ⌜u⌝) := by simp [FirstOrder.Semiformula.quote_rel]; rfl
@@ -367,10 +367,10 @@ open FirstOrder.Semiformula
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 @[simp] lemma semiformula_quote {n} (φ : SyntacticSemiformula L n) :
-    (L.codeIn V).IsSemiformula n ⌜φ⌝ := by
+    IsSemiformula (V := V) L n (⌜φ⌝ : V) := by
   induction φ using Semiformula.rec'
   case hrel n k r v => simp [Semiformula.quote_rel]
   case hnrel n k r v => simp [Semiformula.quote_nrel]
@@ -382,44 +382,44 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Enco
   case hex n φ ihp => simpa [Semiformula.quote_ex] using ihp
 
 @[simp] lemma semiformula_quote0 (φ : SyntacticFormula L) :
-    (L.codeIn V).IsFormula ⌜φ⌝ := by simpa using semiformula_quote φ
+    IsFormula (V := V) L ⌜φ⌝ := by simpa using semiformula_quote φ
 
 @[simp] lemma semiformula_quote1 (φ : SyntacticSemiformula L 1) :
-    (L.codeIn V).IsSemiformula 1 ⌜φ⌝ := by simpa using semiformula_quote (V := V) φ
+    IsSemiformula (V := V) L 1 ⌜φ⌝ := by simpa using semiformula_quote (V := V) φ
 
 @[simp] lemma semiformula_quote2 (φ : SyntacticSemiformula L 2) :
-    (L.codeIn V).IsSemiformula 2 ⌜φ⌝ := by simpa using semiformula_quote (V := V) φ
+    IsSemiformula (V := V) L 2 ⌜φ⌝ := by simpa using semiformula_quote (V := V) φ
 
 @[simp] lemma isUFormula_quote {n} (φ : SyntacticSemiformula L n) :
-    (L.codeIn V).IsUFormula ⌜φ⌝ := semiformula_quote φ |>.isUFormula
+    IsUFormula (V := V) L ⌜φ⌝ := semiformula_quote φ |>.isUFormula
 
 @[simp] lemma semiformula_quote_succ {n} (φ : SyntacticSemiformula L (n + 1)) :
-    (L.codeIn V).IsSemiformula (n + 1) ⌜φ⌝ := by simpa using semiformula_quote φ
+    IsSemiformula (V := V) L (n + 1) ⌜φ⌝ := by simpa using semiformula_quote φ
 
 @[simp] lemma quote_neg {n} (φ : SyntacticSemiformula L n) :
-    ⌜∼φ⌝ = (L.codeIn V).neg ⌜φ⌝ := by
+    (⌜∼φ⌝ : V) = neg L ⌜φ⌝ := by
   induction φ using Semiformula.rec' <;>
     simp [*, quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex]
 
 @[simp] lemma quote_imply {n} (φ ψ : SyntacticSemiformula L n) :
-    ⌜φ ➝ ψ⌝ = (L.codeIn V).imp ⌜φ⌝ ⌜ψ⌝ := by
-  simp [Semiformula.imp_eq, Semiformula.imp_def, Semiformula.quote_or, quote_neg]; rfl
+    (⌜φ ➝ ψ⌝ : V) = imp L ⌜φ⌝ ⌜ψ⌝ := by
+  simp [Semiformula.imp_eq, Semiformula.quote_or, quote_neg]; rfl
 
 @[simp] lemma quote_iff {n} (φ ψ : SyntacticSemiformula L n) :
-    ⌜φ ⭤ ψ⌝ = (L.codeIn V).iff ⌜φ⌝ ⌜ψ⌝ := by
+    (⌜φ ⭤ ψ⌝ : V) = iff L ⌜φ⌝ ⌜ψ⌝ := by
   simp [Semiformula.imp_eq, LogicalConnective.iff, Semiformula.quote_or, quote_neg]; rfl
 
 @[simp] lemma quote_shift {n} (φ : SyntacticSemiformula L n) :
-    ⌜Rewriting.shift φ⌝ = (L.codeIn V).shift ⌜φ⌝ := by
+    (⌜Rewriting.shift φ⌝ : V) = shift L ⌜φ⌝ := by
   induction φ using Semiformula.rec' <;>
     simp [*, quote_rel, quote_nrel, quote_verum, quote_falsum, quote_and, quote_or, quote_all, quote_ex,
       rew_rel, rew_nrel, ←quote_termShiftVec]
 
 lemma qVec_quote (w : Fin n → SyntacticSemiterm L m) :
-    (L.codeIn V).qVec ⌜fun i => ⌜w i⌝⌝ = ⌜^#0 :> fun i ↦ (⌜Rew.bShift (w i)⌝ : V)⌝ := by
-  have Hw : (L.codeIn V).IsSemitermVec ↑n (↑m + 1) ((L.codeIn V).termBShiftVec ↑n ⌜fun i ↦ ⌜w i⌝⌝) :=
+    qVec (V := V) L ⌜fun i ↦ ⌜w i⌝⌝ = ⌜^#0 :> fun i ↦ (⌜Rew.bShift (w i)⌝ : V)⌝ := by
+  have Hw : IsSemitermVec (V := V) L ↑n (↑m + 1) (termBShiftVec L ↑n ⌜fun i ↦ ⌜w i⌝⌝) :=
     (semitermVec_codeIn w).termBShiftVec
-  have HqVec : (L.codeIn V).IsSemitermVec (↑n + 1) (↑m + 1) ((L.codeIn V).qVec ⌜fun i ↦ ⌜w i⌝⌝) :=
+  have HqVec : IsSemitermVec (V := V) L (↑n + 1) (↑m + 1) (qVec L ⌜fun i ↦ ⌜w i⌝⌝) :=
     (semitermVec_codeIn w).qVec
   apply nth_ext (by simp [←HqVec.lh])
   intro i hi
@@ -430,26 +430,24 @@ lemma qVec_quote (w : Fin n → SyntacticSemiterm L m) :
   · simp [qVec, quote_termBShift]
 
 @[simp] lemma quote_substs {n m} (w : Fin n → SyntacticSemiterm L m) (φ : SyntacticSemiformula L n) :
-    ⌜φ ⇜ w⌝  = (L.codeIn V).substs ⌜fun i ↦ ⌜w i⌝⌝ ⌜φ⌝ := by
+    ⌜φ ⇜ w⌝ = substs (V := V) L ⌜fun i ↦ ⌜w i⌝⌝ ⌜φ⌝ := by
   induction φ using Semiformula.rec' generalizing m
   case hrel => simp [quote_rel, rew_rel, ←quote_termSubstVec]
   case hnrel => simp [quote_nrel, rew_nrel, ←quote_termSubstVec]
-  case hverum => simp [←quote_termSubstVec]
-  case hfalsum => simp [←quote_termSubstVec]
-  case hand => simp [←quote_termSubstVec, *]
-  case hor => simp [←quote_termSubstVec, *]
+  case hverum => simp
+  case hfalsum => simp
+  case hand => simp [*]
+  case hor => simp [*]
   case hall φ ih =>
-    simp [*, quote_all, quote_ex, ←quote_termSubstVec, Rew.q_substs,
-       ←ih, qVec_quote, Semiterm.quote_bvar, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+    simp [*, quote_all, Rew.q_substs, qVec_quote, Semiterm.quote_bvar, Matrix.comp_vecCons']
   case hex φ ih =>
-    simp [*, quote_all, quote_ex, ←quote_termSubstVec, Rew.q_substs,
-      ←ih, qVec_quote, Semiterm.quote_bvar, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+    simp [*, quote_ex, Rew.q_substs, qVec_quote, Semiterm.quote_bvar, Matrix.comp_vecCons']
 
-omit  [DefinableLanguage L] in
+omit  [L.LORDefinable] in
 lemma quote_sentence_eq_quote_emb (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜Rew.embs ▹ σ⌝ := by simp [quote_eq_coe_encode]
 
-lemma quote_substs' {n m} (w : Fin n → Semiterm L Empty m) (σ : Semisentence L n) :
-    ⌜σ ⇜ w⌝ = (L.codeIn V).substs ⌜fun i ↦ ⌜w i⌝⌝ ⌜σ⌝ := by
+lemma quote_substs' {n m} (w : Fin n → FirstOrder.Semiterm L Empty m) (σ : Semisentence L n) :
+    ⌜σ ⇜ w⌝ = substs (V := V) L ⌜fun i ↦ ⌜w i⌝⌝ ⌜σ⌝ := by
   let w' : Fin n → SyntacticSemiterm L m := fun i ↦ Rew.emb (w i)
   suffices (Rew.substs w').comp Rew.embs = Rew.embs.comp (Rew.substs w) by
     have : (⌜fun i ↦ ⌜w i⌝⌝ : V) = ⌜fun i ↦ ⌜w' i⌝⌝ := by
@@ -466,19 +464,18 @@ lemma quote_substs' {n m} (w : Fin n → Semiterm L Empty m) (σ : Semisentence 
   · contradiction
 
 @[simp] lemma free_quote (φ : SyntacticSemiformula L 1) :
-    ⌜Rewriting.free φ⌝ = (L.codeIn V).free ⌜φ⌝ := by
+    ⌜Rewriting.free φ⌝ = free (V := V) L ⌜φ⌝ := by
   rw [← LawfulSyntacticRewriting.app_substs_fbar_zero_comp_shift_eq_free, quote_substs, quote_shift]
-  simp [Language.free, substs1, Semiterm.quote_fvar, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+  simp [free, substs1, Semiterm.quote_fvar, Matrix.constant_eq_singleton]
 
 end LO.ISigma1.Metamath
-
 
 namespace LO.FirstOrder.Derivation2
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
-  [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+  [L.Encodable] [L.LORDefinable]
 
 variable (V)
 
@@ -496,7 +493,7 @@ namespace LO.FirstOrder
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable (V)
 
@@ -616,7 +613,7 @@ lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
     · cases' x with x <;> simp [ih]
     · cases' x with x <;> simp [ih]
 
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 lemma IsSemiterm.sound {n t : ℕ} (ht : (L.codeIn ℕ).IsSemiterm n t) : ∃ T : FirstOrder.SyntacticSemiterm L n, ⌜T⌝ = t := by
   induction t using Nat.strongRec
