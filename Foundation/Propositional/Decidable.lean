@@ -74,7 +74,7 @@ lemma weight_remove [DecidableEq α] (Γ : Sequent α) (φ) :
     by_cases e : φ = ψ
     · rcases e
       simp [add_mul, ←add_assoc, add_comm φ.weight, ih]
-    · simp [e, Γ.remove_cons_of_ne (Ne.symm e), add_assoc, ih, List.count_cons_of_ne (Ne.symm e)]
+    · simp [Γ.remove_cons_of_ne (Ne.symm e), add_assoc, ih, List.count_cons_of_ne (Ne.symm e)]
 
 lemma weight_remove_le_of_mem [DecidableEq α] {φ} {Γ : Sequent α} (h : φ ∈ Γ) :
     weight (Γ.remove φ) ≤ Γ.weight - φ.weight := calc

@@ -26,7 +26,7 @@ theorem exists_neg_zeroSubst_of_not_isTautology (h : ¬φ.isTautology)
   apply eq_fml_of_eq_atom (v := v) ?_ |>.not.mp
   . exact hv;
   . intro a;
-    simp [val, vfSubst];
+    simp [vfSubst];
     split <;> tauto;
 
 lemma isTautology_of_forall_zeroSubst : (∀ s : ZeroSubstitution α, ¬(∼(φ⟦s.1⟧)).isTautology) → φ.isTautology := by
@@ -35,7 +35,7 @@ lemma isTautology_of_forall_zeroSubst : (∀ s : ZeroSubstitution α, ¬(∼(φ�
 
 set_option push_neg.use_distrib true in
 lemma isTautology_vfSubst : v ⊧ φ ↔ (φ⟦(vfSubst v).1⟧.isTautology) := by
-  simp only [Formula.isTautology, Valid, Formula.subst.subst_atom, not_forall];
+  simp only [Formula.isTautology, Valid, Formula.subst.subst_atom];
   induction φ with
   | hatom a =>
     dsimp [vfSubst];

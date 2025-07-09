@@ -200,7 +200,7 @@ def ofNat : ℕ → Option (Formula α)
     | _ => none
 
 lemma ofNat_toNat : ∀ (φ : Formula α), ofNat (toNat φ) = some φ
-  | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek, Option.map_some'];
+  | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek];
   | ⊥       => by simp [toNat, ofNat]
   | φ ➝ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
   | φ ⋏ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
@@ -280,7 +280,7 @@ protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subform
 @[grind ⇒]
 protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
-  | himp => simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union]; tauto;
+  | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hand =>
     simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
@@ -290,7 +290,7 @@ protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subform
 @[grind ⇒]
 protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
-  | himp => simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union]; tauto;
+  | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
   | hor =>
     simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
     rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;

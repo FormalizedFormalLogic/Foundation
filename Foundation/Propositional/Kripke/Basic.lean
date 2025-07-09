@@ -122,8 +122,8 @@ lemma formula_hereditary
   | himp =>
     intro hpq v hv;
     exact hpq $ M.trans hw hv;
-  | hor => simp_all [Satisfies]; tauto;
-  | _ => simp_all [Satisfies];
+  | hor => simp_all; tauto;
+  | _ => simp_all;
 
 lemma formula_hereditary_not (hw : w ≺ w') : ¬w' ⊧ φ → ¬w ⊧ φ := by
   contrapose;
@@ -187,12 +187,12 @@ variable {M : Model} {φ ψ χ : Formula ℕ}
 @[simp] protected lemma iff_models : M ⊧ φ ↔ Formula.Kripke.ValidOnModel M φ := iff_of_eq rfl
 
 
-protected lemma verum : M ⊧ ⊤ := by simp [ValidOnModel, Satisfies];
+protected lemma verum : M ⊧ ⊤ := by simp [ValidOnModel];
 
 instance : Semantics.Top (Model) := ⟨λ _ => ValidOnModel.verum⟩
 
 
-protected lemma bot : ¬M ⊧ ⊥ := by simp [ValidOnModel, Satisfies];
+protected lemma bot : ¬M ⊧ ⊥ := by simp [ValidOnModel];
 
 instance : Semantics.Bot (Model) := ⟨λ _ => ValidOnModel.bot⟩
 
@@ -269,7 +269,7 @@ alias ⟨exists_valuation_of_not, not_of_exists_valuation⟩ := iff_not_exists_v
 
 
 lemma iff_not_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ∃ x : (⟨F, V⟩ : Kripke.Model).World, ¬Satisfies _ x φ) := by
-  simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Realize];
+  simp [ValidOnFrame, ValidOnModel, Semantics.Realize];
 
 alias ⟨exists_valuation_world_of_not, not_of_exists_valuation_world⟩ := iff_not_exists_valuation_world
 

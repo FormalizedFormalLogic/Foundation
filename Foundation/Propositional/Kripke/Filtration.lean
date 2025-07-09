@@ -53,7 +53,7 @@ lemma finite (T_finite : T.Finite) : Finite (FilterEqvQuotient M T) := by
       exact this φ hp hpx |>.2;
     . intro hpy;
       have := h.symm.subset;
-      simp only [Set.setOf_subset_setOf, and_imp, f] at this;
+      simp only [Set.setOf_subset_setOf, and_imp] at this;
       exact this φ hp hpy |>.2;
   exact Finite.of_injective f hf
 

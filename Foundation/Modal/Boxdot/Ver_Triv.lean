@@ -18,7 +18,7 @@ lemma provable_boxdotTranslated_Ver_of_Triv : Hilbert.Triv ⊢! φ → Hilbert.V
   rintro φ hp;
   rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
-  . simp only [boxdotTranslate, axiomVer!, and₁!];
+  . simp only [boxdotTranslate, and₁!];
   . apply deduct'!;
     apply K!_intro <;> simp;
 

@@ -128,7 +128,7 @@ lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ �
   . contrapose;
     intro h;
     have : Tableau.Consistent 𝓢 (∅, {φ}) := by
-      simp only [Tableau.Consistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
+      simp only [Tableau.Consistent];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
       apply h;
