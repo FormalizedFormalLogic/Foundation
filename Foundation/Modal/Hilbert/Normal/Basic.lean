@@ -444,6 +444,18 @@ instance [H.HasMk] : Entailment.HasAxiomMk H where
       HasMk.mem_Mk;
 
 
+class HasH1 (H : Hilbert.Normal α) where
+  p : α
+  mem_H1 : Axioms.H (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasH1] : Entailment.HasAxiomH H where
+  H1 φ := by
+    simpa using Deduction.axm
+      (φ := Axioms.H (.atom (HasH1.p H)))
+      (s := λ b => if (HasH1.p H) = b then φ else (.atom b))
+      HasH1.mem_H1;
+
+
 class HasGeach (g) (H : Hilbert.Normal α) where
   p : α
   mem_Geach : Axioms.Geach g (.atom p) ∈ H.axioms := by tauto;
@@ -894,6 +906,20 @@ instance : (Hilbert.KTMk).HasMk where p := 0; q := 1
 instance : Entailment.KTMk (Hilbert.KTMk) where
 
 
+protected abbrev Hilbert.S4H : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.H (.atom 0)}⟩
+/--
+  - `S4H` in Segerberg 1971.
+  - `K1.2` in Sobocinski 1964, "Family $K$ of the non-Lewis modal systems"
+-/
+protected abbrev Logic.S4H := Hilbert.S4H.logic
+
+instance : (Hilbert.S4H).HasK where p := 0; q := 1;
+instance : (Hilbert.S4H).HasT where p := 0
+instance : (Hilbert.S4H).HasFour where p := 0
+instance : (Hilbert.S4H).HasH1 where p := 0
+instance : Entailment.S4H (Hilbert.S4H) where
+
+
 protected abbrev Hilbert.N : Hilbert.Normal ℕ := ⟨{}⟩
 protected abbrev N := Hilbert.N.logic
 
@@ -928,6 +954,7 @@ instance : Hilbert.S5Grz ≊ Hilbert.Triv := by
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl | rfl) <;> simp;
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl) <;> simp;
 instance : Modal.S5Grz ≊ Modal.Triv := inferInstance
+
 
 end
 

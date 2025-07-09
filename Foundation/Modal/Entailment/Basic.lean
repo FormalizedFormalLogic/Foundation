@@ -624,6 +624,24 @@ instance (Γ : Context F 𝓢) : HasAxiomPoint4 Γ := ⟨fun _ ↦ Context.of ax
 end HasAxiomPoint4
 
 
+class HasAxiomH [LogicalConnective F] [Box F] (𝓢 : S) where
+  H1 (φ : F) : 𝓢 ⊢ Axioms.H φ
+
+section
+
+variable [HasAxiomH 𝓢]
+
+def axiomH : 𝓢 ⊢ φ ➝ □(◇φ ➝ φ) := HasAxiomH.H1 _
+@[simp] lemma axiomH! : 𝓢 ⊢! φ ➝ □(◇φ ➝ φ) := ⟨axiomH⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ FiniteContext.of axiomH⟩
+instance (Γ : Context F 𝓢) : HasAxiomH Γ := ⟨fun _ ↦ Context.of axiomH⟩
+
+end
+
+
 class HasAxiomGeach [LogicalConnective F] (g) (𝓢 : S) where
   Geach (φ : F) : 𝓢 ⊢ Axioms.Geach g φ
 
@@ -773,6 +791,8 @@ protected class S4McK extends Entailment.S4 𝓢, HasAxiomMcK 𝓢
 protected class S4Point2McK extends Entailment.S4McK 𝓢, HasAxiomPoint2 𝓢
 protected class S4Point3McK extends Entailment.S4McK 𝓢, HasAxiomPoint3 𝓢
 protected class S4Point4McK extends Entailment.S4McK 𝓢, HasAxiomPoint4 𝓢
+
+protected class S4H extends Entailment.S4 𝓢, HasAxiomH 𝓢
 
 protected class S5 extends Entailment.K 𝓢, HasAxiomT 𝓢, HasAxiomFive 𝓢
 instance [Entailment.S5 𝓢] : Entailment.KT 𝓢 where

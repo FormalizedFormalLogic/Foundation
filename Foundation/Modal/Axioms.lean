@@ -96,6 +96,10 @@ protected abbrev Hen := □(□φ ⭤ φ) ➝ □φ
 
 protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
 
+/--
+  For Sobocinski's `K1.2`.
+-/
+protected abbrev H := φ ➝ □(◇φ ➝ φ)
 
 protected structure Geach.Taple where
   i : ℕ
