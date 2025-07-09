@@ -1,7 +1,7 @@
 import Foundation.FirstOrder.ISigma1.Metamath.Formula.Typed
 import Mathlib.Combinatorics.Colex
 
-open Encodable LO FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open Encodable LO FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 namespace LO.ISigma1.Metamath
 
@@ -130,13 +130,13 @@ lemma quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
 
 @[simp] lemma quote_zero (n) :
     (⌜(Semiterm.func Language.Zero.zero ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 := by
-  simp [FirstOrder.Semiterm.quote_func, Arithmetization.zero, Arithmetization.qqFunc_absolute]; rfl
+  simp [FirstOrder.Semiterm.quote_func, InternalArithmetic.zero, InternalArithmetic.qqFunc_absolute, qqFuncN_eq_qqFunc]; rfl
 
 @[simp] lemma quote_zero' (n) : (⌜(‘0’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟎 := quote_zero V n
 
 @[simp] lemma quote_one (n) :
     (⌜(Semiterm.func Language.One.one ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 := by
-  simp [FirstOrder.Semiterm.quote_func, Arithmetization.one, Arithmetization.qqFunc_absolute]; rfl
+  simp [FirstOrder.Semiterm.quote_func, InternalArithmetic.one, InternalArithmetic.qqFunc_absolute, qqFuncN_eq_qqFunc]; rfl
 
 @[simp] lemma quote_one' (n) : (⌜(‘1’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = 𝟏 := quote_one V n
 
@@ -264,8 +264,8 @@ lemma quote_termShiftVec {k n} (v : Fin k → SyntacticSemiterm L n) :
     rw [nth_termBShiftVec Hv.isUTerm hi]
     simpa using ih i
 
-@[simp] lemma Arithmetization.quote_numeral_eq_numeral (k : ℕ) :
-    (⌜(‘↑k’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = Arithmetization.numeral (k : V) := by
+@[simp] lemma InternalArithmetic.quote_numeral_eq_numeral (k : ℕ) :
+    (⌜(‘↑k’ : SyntacticSemiterm ℒₒᵣ n)⌝ : V) = InternalArithmetic.numeral (k : V) := by
   induction k
   case zero => simp
   case succ k ih =>
@@ -289,11 +289,11 @@ omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
 lemma quote_eterm_eq_quote_emb (t : Semiterm L Empty n) : (⌜t⌝ : V) = (⌜Rew.embs t⌝ : V) := by
   simp [quote_eq_coe_encode]
 
-@[simp] lemma Arithmetization.quote_numeral_eq_numeral' (k : ℕ) :
-    (⌜(‘↑k’ : Semiterm ℒₒᵣ Empty n)⌝ : V) = Arithmetization.numeral (k : V) := by
+@[simp] lemma InternalArithmetic.quote_numeral_eq_numeral' (k : ℕ) :
+    (⌜(‘↑k’ : Semiterm ℒₒᵣ Empty n)⌝ : V) = InternalArithmetic.numeral (k : V) := by
   simp [quote_eterm_eq_quote_emb]
 
-@[simp] lemma quote_quote_eq_numeral {α : Type*} [Encodable α] {x : α} : (⌜(⌜x⌝ : Semiterm ℒₒᵣ ℕ n)⌝ : V) = Arithmetization.numeral ⌜x⌝ := by
+@[simp] lemma quote_quote_eq_numeral {α : Type*} [Encodable α] {x : α} : (⌜(⌜x⌝ : Semiterm ℒₒᵣ ℕ n)⌝ : V) = InternalArithmetic.numeral ⌜x⌝ := by
   simp [goedelNumber'_def]; simp [quote_eq_coe_encode]
 
 end LO.ISigma1.Metamath
@@ -350,10 +350,10 @@ lemma quote_nrel {k} (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) : (⌜n
   simp [quote_eq_coe_encode]
 
 lemma sentence_goedelNumber_def (σ : Sentence L) :
-  (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜σ⌝ := by simp [Arith.goedelNumber'_def, quote_eq_encode]
+  (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜σ⌝ := by simp [Arithmetic.goedelNumber'_def, quote_eq_encode]
 
 lemma syntacticformula_goedelNumber_def (φ : SyntacticFormula L) :
-  (⌜φ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜φ⌝ := by simp [Arith.goedelNumber'_def, quote_eq_encode]
+  (⌜φ⌝ : Semiterm ℒₒᵣ ξ n) = Semiterm.Operator.numeral ℒₒᵣ ⌜φ⌝ := by simp [Arithmetic.goedelNumber'_def, quote_eq_encode]
 
 @[simp] lemma quote_weight (n : ℕ) : ⌜(weight k : SyntacticSemiformula L n)⌝ = (qqVerums k : V) := by
   unfold weight
@@ -556,7 +556,7 @@ instance goedelQuoteSyntacticFormulaToCodedFormula : GoedelQuote (SyntacticFormu
     (⌜(weight k : SyntacticSemiformula L n)⌝ : (L.codeIn V).Semiformula n) = (verums (L := L.codeIn V) k) := by
   ext; simp
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 @[simp] lemma codeIn'_eq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜rel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ =' ⌜v 1⌝) := by

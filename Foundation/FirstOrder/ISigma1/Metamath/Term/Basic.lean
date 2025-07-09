@@ -3,7 +3,7 @@ import Foundation.FirstOrder.ISigma1.HFS
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -17,11 +17,15 @@ noncomputable def qqFvar (x : V) : V := ⟪1, x⟫ + 1
 
 noncomputable def qqFunc (k f v : V) : V := ⟪2, k, f, v⟫ + 1
 
+def qqFuncN (k f v : ℕ) : ℕ := (Nat.pair 2 <| Nat.pair k <| Nat.pair f v) + 1
+
 scoped prefix:max "^#" => qqBvar
 
 scoped prefix:max "^&" => qqFvar
 
 scoped prefix:max "^func " => qqFunc
+
+lemma qqFuncN_eq_qqFunc (k f v : ℕ) : qqFuncN k f v = qqFunc k f v := by simp [qqFunc, qqFuncN, nat_pair_eq]
 
 @[simp] lemma var_lt_qqBvar (z : V) : z < ^#z := lt_succ_iff_le.mpr <| le_pair_right 0 z
 
@@ -45,7 +49,7 @@ lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :
 
 @[simp] lemma qqFunc_inj {k f v k' f' w : V} : ^func k f v = ^func k' f' w ↔ k = k' ∧ f = f' ∧ v = w := by simp [qqFunc]
 
-def _root_.LO.FirstOrder.Arith.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1” (by simp)
 
 lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := by
   intro v; simp_all [qqBvarDef, qqBvar]
@@ -53,7 +57,7 @@ lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := b
 @[simp] lemma eval_qqBvarDef (v) :
     Semiformula.Evalbm V v qqBvarDef.val ↔ v 0 = ^#(v 1) := qqBvar_defined.df.iff v
 
-def _root_.LO.FirstOrder.Arith.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1” (by simp)
 
 lemma qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef := by
   intro v; simp_all [qqFvarDef, qqFvar]
@@ -69,7 +73,7 @@ private lemma qqFunc_graph {x k f v : V} :
         ⟪2, k, f, v⟫, by simp [qqFunc], rfl, rfl⟩,
    by rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, rfl⟩; rfl⟩
 
-def _root_.LO.FirstOrder.Arith.qqFuncDef : 𝚺₀.Semisentence 4 := .mkSigma
+def _root_.LO.FirstOrder.Arithmetic.qqFuncDef : 𝚺₀.Semisentence 4 := .mkSigma
   “x k f v. ∃ fv < x, !pairDef fv f v ∧ ∃ kfv < x, !pairDef kfv k fv ∧ ∃ x' < x, !pairDef x' 2 kfv ∧ x = x' + 1” (by simp)
 
 lemma qqFunc_defined : 𝚺₀-Function₃ (qqFunc : V → V → V → V) via qqFuncDef := by
@@ -143,7 +147,7 @@ variable (L)
 
 def Language.IsUTerm : V → Prop := (construction L).Fixpoint ![]
 
-def _root_.LO.FirstOrder.Arith.LDef.isUTermDef (pL : LDef) : 𝚫₁.Semisentence 1 := (blueprint pL).fixpointDefΔ₁
+def _root_.LO.FirstOrder.Arithmetic.LDef.isUTermDef (pL : LDef) : 𝚫₁.Semisentence 1 := (blueprint pL).fixpointDefΔ₁
 
 lemma Language.isUTerm_defined : 𝚫₁-Predicate L.IsUTerm via pL.isUTermDef := (construction L).fixpoint_definedΔ₁
 
@@ -197,7 +201,7 @@ lemma Language.IsUTermVec.two_iff {v : V} : L.IsUTermVec 2 v ↔ ∃ t₁ t₂, 
 
 section
 
-def _root_.LO.FirstOrder.Arith.LDef.isUTermVecDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
+def _root_.LO.FirstOrder.Arithmetic.LDef.isUTermVecDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma
     “n w. !lenDef n w ∧ ∀ i < n, ∃ u, !nthDef u w i ∧ !pL.isUTermDef.sigma u”
     (by simp))
@@ -715,9 +719,9 @@ section
 
 variable (L)
 
-def _root_.LO.FirstOrder.Arith.LDef.termBVDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result
+def _root_.LO.FirstOrder.Arithmetic.LDef.termBVDef (pL : LDef) : 𝚺₁.Semisentence 2 := (blueprint pL).result
 
-def _root_.LO.FirstOrder.Arith.LDef.termBVVecDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).resultVec
+def _root_.LO.FirstOrder.Arithmetic.LDef.termBVVecDef (pL : LDef) : 𝚺₁.Semisentence 3 := (blueprint pL).resultVec
 
 lemma Language.termBV_defined : 𝚺₁-Function₁ L.termBV via pL.termBVDef := (construction L).result_defined
 
@@ -831,38 +835,38 @@ section
 
 variable (L)
 
-def _root_.LO.FirstOrder.Arith.LDef.isSemitermDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
+def _root_.LO.FirstOrder.Arithmetic.LDef.isSemitermDef (pL : LDef) : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p. !pL.isUTermDef.sigma p ∧ ∃ b, !pL.termBVDef b p ∧ b ≤ n” (by simp))
   (.mkPi “n p. !pL.isUTermDef.pi p ∧ ∀ b, !pL.termBVDef b p → b ≤ n” (by simp))
 
 lemma Language.isSemiterm_defined : 𝚫₁-Relation L.IsSemiterm via pL.isSemitermDef where
   left := by
     intro v
-    simp [Arith.LDef.isSemitermDef, HierarchySymbol.Semiformula.val_sigma,
+    simp [Arithmetic.LDef.isSemitermDef, HierarchySymbol.Semiformula.val_sigma,
       L.isUTerm_defined.df.iff, L.isUTerm_defined.proper.iff',
       L.termBV_defined.df.iff]
   right := by
     intro v
-    simp [Arith.LDef.isSemitermDef, HierarchySymbol.Semiformula.val_sigma,
+    simp [Arithmetic.LDef.isSemitermDef, HierarchySymbol.Semiformula.val_sigma,
       L.isUTerm_defined.df.iff, L.termBV_defined.df.iff]; rfl
 
 instance Language.isSemiterm_definable : 𝚫₁-Relation L.IsSemiterm := L.isSemiterm_defined.to_definable
 
 instance Language.isSemiterm_defined' (Γ m) : Γ-[m + 1]-Relation L.IsSemiterm := L.isSemiterm_definable.of_deltaOne
 
-def _root_.LO.FirstOrder.Arith.LDef.isSemitermVecDef (pL : LDef) : 𝚫₁.Semisentence 3 := .mkDelta
+def _root_.LO.FirstOrder.Arithmetic.LDef.isSemitermVecDef (pL : LDef) : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “k n ps. !pL.isUTermVecDef.sigma k ps ∧ ∀ i < k, ∃ p, !nthDef p ps i ∧ ∃ b, !pL.termBVDef b p ∧ b ≤ n” (by simp))
   (.mkPi “k n ps. !pL.isUTermVecDef.pi k ps ∧ ∀ i < k, ∀ p, !nthDef p ps i → ∀ b, !pL.termBVDef b p → b ≤ n” (by simp))
 
 lemma Language.isSemitermVec_defined : 𝚫₁-Relation₃ L.IsSemitermVec via pL.isSemitermVecDef where
   left := by
     intro v
-    simp [Arith.LDef.isSemitermVecDef, HierarchySymbol.Semiformula.val_sigma,
+    simp [Arithmetic.LDef.isSemitermVecDef, HierarchySymbol.Semiformula.val_sigma,
       L.isUTermVec_defined.df.iff, L.isUTermVec_defined.proper.iff',
       L.termBV_defined.df.iff]
   right := by
     intro v
-    simp [Arith.LDef.isSemitermVecDef, HierarchySymbol.Semiformula.val_sigma,
+    simp [Arithmetic.LDef.isSemitermVecDef, HierarchySymbol.Semiformula.val_sigma,
       L.isUTermVec_defined.df.iff, L.termBV_defined.df.iff]; rfl
 
 instance Language.isSemitermVec_definable : 𝚫₁-Relation₃ L.IsSemitermVec := L.isSemitermVec_defined.to_definable

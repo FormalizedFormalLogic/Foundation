@@ -8,15 +8,17 @@ open Kripke Formula.Kripke
 
 variable {φ : Formula _}
 
-lemma iff_provable_rflSubformula_GL_provable_S : Logic.GL ⊢! (φ.rflSubformula.conj ➝ φ) ↔ Logic.S ⊢! φ := ProvabilityLogic.GL_S_TFAE (T := 𝐈𝚺₁) |>.out 0 1
+lemma iff_provable_rflSubformula_GL_provable_S : Modal.GL ⊢! (φ.rflSubformula.conj ➝ φ) ↔ Modal.S ⊢! φ := ProvabilityLogic.GL_S_TFAE (T := 𝐈𝚺₁) |>.out 0 1
 
-lemma iff_provable_boxdot_GL_provable_boxdot_S : Logic.GL ⊢! φᵇ ↔ Logic.S ⊢! φᵇ := by
+lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢! φᵇ ↔ Modal.S ⊢! φᵇ := by
   constructor;
   . apply Entailment.WeakerThan.wk;
     infer_instance;
   . intro h;
+    simp only [Hilbert.Normal.iff_logic_provable_provable];
     apply Logic.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mpr;
     replace h := iff_provable_rflSubformula_GL_provable_S.mpr h;
+    replace h := Hilbert.Normal.iff_logic_provable_provable.mp h;
     replace h := Logic.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
     intro M r _;
     obtain ⟨i, hi⟩ := Kripke.Model.extendRoot.inr_satisfies_axiomT_set (M := M) (Γ := φᵇ.subformulas.prebox);

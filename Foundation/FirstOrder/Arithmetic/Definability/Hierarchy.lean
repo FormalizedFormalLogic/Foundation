@@ -13,7 +13,7 @@ This file defines the $\Sigma_n / \Pi_n / \Delta_n$ formulas of arithmetic of fi
 
 -/
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Arithmetic
 
 structure HierarchySymbol where
   Γ : SigmaPiDelta
@@ -50,8 +50,8 @@ namespace HierarchySymbol
 variable (ξ : Type*) (n : ℕ)
 
 protected inductive Semiformula : HierarchySymbol → Type _ where
-  | mkSigma {m} : (φ : Semiformula ℒₒᵣ ξ n) → Hierarchy 𝚺 m φ → 𝚺-[m].Semiformula
-  | mkPi {m}    : (φ : Semiformula ℒₒᵣ ξ n) → Hierarchy 𝚷 m φ → 𝚷-[m].Semiformula
+  | mkSigma {m} (φ : Semiformula ℒₒᵣ ξ n) (hφ : Hierarchy 𝚺 m φ := by simp) : 𝚺-[m].Semiformula
+  | mkPi {m} (φ : Semiformula ℒₒᵣ ξ n) (hφ : Hierarchy 𝚷 m φ := by simp) : 𝚷-[m].Semiformula
   | mkDelta {m} : 𝚺-[m].Semiformula → 𝚷-[m].Semiformula → 𝚫-[m].Semiformula
 
 protected abbrev Semisentence (Γ : HierarchySymbol) (n : ℕ) := Γ.Semiformula Empty n
@@ -159,7 +159,7 @@ variable (T : Theory ℒₒᵣ)
 
 lemma ProvablyProperOn.ofProperOn [𝐄𝐐 ⪯ T] {φ : 𝚫-[m].Semisentence n}
     (h : ∀ (M : Type w) [ORingStruc M] [M ⊧ₘ* T], φ.ProperOn M) : φ.ProvablyProperOn T := by
-  apply complete₀ <| FirstOrder.Arith.oRing_consequence_of.{w} T _ ?_
+  apply complete₀ <| FirstOrder.Arithmetic.oRing_consequence_of.{w} T _ ?_
   intro M _ _
   simpa [models_iff] using (h M).iff
 
@@ -439,4 +439,4 @@ end Semiformula
 
 end HierarchySymbol
 
-end LO.FirstOrder.Arith
+end LO.FirstOrder.Arithmetic

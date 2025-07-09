@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Basic.ORingStruc
+import Foundation.FirstOrder.Arithmetic.Basic.ORingStruc
 
 namespace LO.FirstOrder
 

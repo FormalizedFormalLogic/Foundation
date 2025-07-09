@@ -53,9 +53,9 @@ lemma iff_satisfy_complexityLimitedModel_aux
     simp [Formula.complexity] at hn;
     constructor;
     . rintro hq₁ hq₂;
-      apply ihq₂ (subformulas.mem_imp (by assumption) |>.2) ?_ |>.mp;
+      apply ihq₂ (by grind) ?_ |>.mp;
       apply hq₁;
-      apply ihq₁ (subformulas.mem_imp (by assumption) |>.1) ?_ |>.mpr hq₂;
+      apply ihq₁ (by grind) ?_ |>.mpr hq₂;
       use n; constructor; omega; assumption;
       use n; constructor; omega; assumption;
     . rintro hq₁ hq₂;

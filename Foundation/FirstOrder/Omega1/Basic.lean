@@ -7,7 +7,7 @@ import Foundation.FirstOrder.ISigma0.Exponential
 
 namespace LO.Omega1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
 def _root_.LO.Omega1.omega1 : SyntacticFormula ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”

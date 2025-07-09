@@ -5,31 +5,32 @@ import Foundation.FirstOrder.R0.Representation
 # Gödel's first incompleteness theorem for arithmetic theories stronger than $\mathsf{R_0}$
 -/
 
-namespace LO
+namespace LO.FirstOrder.Arithmetic
 
-lemma FirstOrder.Arith.re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
+lemma re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
   constructor
   · intro h
-    exact ⟨.mkSigma (codeOfREPred P) (by simp [codeOfREPred, codeOfPartrec']), by
-      intro v; symm; simp; simpa [←Matrix.fun_eq_vec_one] using codeOfREPred_spec h (x := v 0)⟩
+    refine ⟨.mkSigma (codeOfREPred P) (by simp [codeOfREPred, codeOfPartrec']), ?_⟩
+    intro v; symm
+    simpa [←Matrix.fun_eq_vec_one] using codeOfREPred_spec h (x := v 0)
   · rintro ⟨φ, hφ⟩
     have : REPred fun x ↦ (Semiformula.Evalm ℕ (x ::ᵥ List.Vector.nil).get id) _ :=
       (sigma1_re id (φ.sigma_prop)).comp
-        (f := fun x : ℕ ↦ x ::ᵥ List.Vector.nil) (Primrec.to_comp <| Primrec.vector_cons.comp .id (.const _))
+        (Primrec.to_comp <| Primrec.vector_cons.comp .id <| .const _)
     exact this.of_eq <| by intro x; symm; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
 
-open Entailment FirstOrder Arith R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open LO.Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 /-- Gödel's first incompleteness theorem-/
-theorem R0.goedel_first_incompleteness
-    (T : ArithmeticTheory) [𝐑₀ ⪯ T] [T.Sigma1Sound] [T.Delta1Definable] :
+theorem incomplete
+    (T : ArithmeticTheory) [T.Delta1Definable] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
   have con : Consistent (T : Axiom ℒₒᵣ) := inferInstance
   let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : SyntacticSemiformula ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦
         ⌜ℒₒᵣ⌝.IsSemiformula 1 φ ∧
-          (T.codeIn ℕ).Provable (⌜ℒₒᵣ⌝.neg <| ⌜ℒₒᵣ⌝.substs ?[Arithmetization.numeral φ] φ) := by
+          (T.codeIn ℕ).Provable (⌜ℒₒᵣ⌝.neg <| ⌜ℒₒᵣ⌝.substs ?[InternalArithmetic.numeral φ] φ) := by
       definability
     exact REPred.of_eq (re_iff_sigma1.mpr this) <| by
       intro φ; constructor
@@ -41,7 +42,7 @@ theorem R0.goedel_first_incompleteness
   let σ : Semisentence ℒₒᵣ 1 := codeOfREPred D
   let ρ : Sentence ℒₒᵣ := σ/[⌜σ⌝]
   have : ∀ n : ℕ, D n ↔ T ⊢!. σ/[↑n] := fun n ↦ by
-    simpa [Semiformula.coe_substs_eq_substs_coe₁, Axiom.provable_iff] using re_complete (T := T) D_re (x := n)
+    simpa [Semiformula.coe_substs_eq_substs_coe₁, Axiom.provable_iff] using re_complete D_re
   have : T ⊢!. ∼ρ ↔ T ⊢!. ρ := by
     have : T ⊢! ∼↑σ/[↑(Encodable.encode σ)] ↔ T ⊢! ↑σ/[↑(Encodable.encode σ)] := by
       simpa [Axiom.provable_iff, quote_eq_encode,
@@ -54,4 +55,4 @@ theorem R0.goedel_first_incompleteness
     , fun h ↦ not_consistent_iff_inconsistent.mpr
       (inconsistent_of_provable_of_unprovable (this.mp h) h) inferInstance ⟩
 
-end LO
+end LO.FirstOrder.Arithmetic

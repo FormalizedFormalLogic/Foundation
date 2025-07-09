@@ -89,19 +89,19 @@ namespace Logic
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-instance : Logic.Grz ⪯ Logic.GrzPoint2 := Hilbert.weakerThan_of_subset_axioms $ by simp;
+instance : Hilbert.Grz ⪯ Hilbert.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
 
-lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Logic.Grz]! φ) : Logic.GrzPoint2 ⊢! φ := by
+lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Hilbert.Grz]! φ) : Hilbert.GrzPoint2 ⊢! φ := by
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
   simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe] at hΓ₁;
-  replace hΓ₂ : Logic.GrzPoint2 ⊢! ⋀Γ ➝ φ := WeakerThan.pbl $ FiniteContext.provable_iff.mp hΓ₂;
+  replace hΓ₂ : Hilbert.GrzPoint2 ⊢! ⋀Γ ➝ φ := WeakerThan.pbl $ FiniteContext.provable_iff.mp hΓ₂;
   exact hΓ₂ ⨀ by
     apply Conj₂!_intro;
     intro γ hγ;
     obtain ⟨a, ha, rfl⟩ := hΓ₁ _ hγ;
     exact axiomPoint2!;
 
-lemma not_Grz_of_not_GrzPoint2 (h : Logic.GrzPoint2 ⊬ φ) : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList ⊬[Logic.Grz] φ := by
+lemma not_Grz_of_not_GrzPoint2 (h : Hilbert.GrzPoint2 ⊬ φ) : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList ⊬[Hilbert.Grz] φ := by
   have := Context.provable_iff.not.mp $ not_imp_not.mpr GrzPoint2_of_Grz h;
   push_neg at this;
   convert this ((φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList) $ by simp;
@@ -126,13 +126,13 @@ end Kripke
 
 namespace Logic.GrzPoint2.Kripke
 
-instance finite_sound : Sound Logic.GrzPoint2 FrameClass.finite_GrzPoint2 := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl);
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance consistent : Entailment.Consistent Logic.GrzPoint2 :=
+instance : Entailment.Consistent Hilbert.GrzPoint2 :=
   consistent_of_sound_frameclass FrameClass.finite_GrzPoint2 $ by
     use whitepoint;
     constructor;
@@ -142,14 +142,14 @@ section
 
 open Relation
 
-instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
+instance : Complete Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
   intro φ;
   contrapose;
   intro hφ;
 
-  replace hφ : Logic.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
+  replace hφ : Hilbert.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
   generalize eΓ : (φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList = Γ at hφ;
-  obtain ⟨M, r, hM, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (@Logic.Grz.Kripke.complete.complete _) hφ;
+  obtain ⟨M, r, hM, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (Complete.complete (𝓢 := Hilbert.Grz) (𝓜 := FrameClass.finite_Grz)) hφ;
   replace hM := Set.mem_setOf_eq.mp hM;
   -- have : IsPartialOrder _ M.toFrame := IsPartialOrder.mk
 
@@ -242,14 +242,14 @@ instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 
       | himp χ ξ ihχ ihξ =>
         constructor;
         . intro h hχ;
-          apply ihξ (Formula.subformulas.mem_imp ψ_sub |>.2) |>.mp;
+          apply ihξ (by grind) |>.mp;
           apply h;
-          apply ihχ (Formula.subformulas.mem_imp ψ_sub |>.1) |>.mpr;
+          apply ihχ (by grind) |>.mpr;
           assumption;
         . intro h hχ;
-          apply ihξ (Formula.subformulas.mem_imp ψ_sub |>.2) |>.mpr;
+          apply ihξ (by grind) |>.mpr;
           apply h;
-          apply ihχ (Formula.subformulas.mem_imp ψ_sub |>.1) |>.mp;
+          apply ihχ (by grind) |>.mp;
           assumption;
       | hbox ψ ihψ =>
         constructor;
@@ -257,12 +257,12 @@ instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 
           match u with
           | Sum.inl x => simp [M', Frame.Rel'] at Ru;
           | Sum.inr _ =>
-            apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mp;
+            apply ihψ (by grind) |>.mp;
             apply ht;
             apply Frame.refl;
         . intro ht u Rtu;
           have := t_terminal Rtu; subst this;
-          apply ihψ (Formula.subformulas.mem_box ψ_sub) |>.mpr;
+          apply ihψ (by grind) |>.mpr;
           apply ht;
           tauto;
     have : ∀ y : RM.World, ∀ ψ ∈ φ.subformulas, y ⊧ ψ ↔ (Satisfies M' (Sum.inl y) ψ) := by
@@ -274,17 +274,17 @@ instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 
           match v with
           | Sum.inl x =>
             simp only [Frame.Rel', M', RM] at Ruv;
-            exact ihψ x (Formula.subformulas.mem_box ψ_sub) |>.mp $ hψ _ Ruv;
+            exact ihψ x (by grind) |>.mp $ hψ _ Ruv;
           | Sum.inr x =>
             obtain ⟨t, t_terminal, Rut⟩ : ∃ t ∈ RM.terminals, y ≺ t := Frame.exists_terminal;
-            apply H₂ t t_terminal ψ (Formula.subformulas.mem_box ψ_sub) |>.mp;
+            apply H₂ t t_terminal ψ (by grind) |>.mp;
             apply hψ;
             exact Rut;
         . intro h v Ruv;
-          exact ihψ v (Formula.subformulas.mem_box ψ_sub) |>.mpr $ @h (Sum.inl v) Ruv;
+          exact ihψ v (by grind) |>.mpr $ @h (Sum.inl v) Ruv;
       | himp _ _ ihχ ihξ =>
-        have := ihχ y (Formula.subformulas.mem_imp ψ_sub |>.1);
-        have := ihξ y (Formula.subformulas.mem_imp ψ_sub |>.2);
+        have := ihχ y (by grind);
+        have := ihξ y (by grind);
         tauto;
       | _ => tauto;
     exact this r' φ (by simp) |>.not.mp hφ;
@@ -292,17 +292,16 @@ instance finite_complete : Complete Logic.GrzPoint2 FrameClass.finite_GrzPoint2 
 
 end
 
-lemma finite_confluent_partial_order : Logic.GrzPoint2 = FrameClass.finite_GrzPoint2.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.Grz ⪱ Logic.GrzPoint2 := by
+instance : Hilbert.Grz ⪱ Hilbert.GrzPoint2 := by
   constructor;
   . infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.GrzPoint2 ⊢! φ ∧ ¬FrameClass.finite_Grz ⊧ φ by simpa [Grz.Kripke.finite_partial_order];
     use Axioms.Point2 (.atom 0);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_Grz);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x = 0 ∨ x = y⟩,
         λ x a => x = 1
@@ -332,21 +331,18 @@ instance : Logic.Grz ⪱ Logic.GrzPoint2 := by
             push_neg;
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
 
-instance : Logic.S4Point2McK ⪱ Logic.GrzPoint2 := by
+instance : Hilbert.S4Point2McK ⪱ Hilbert.GrzPoint2 := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.preorder_confluent_mckinsey ⊧ φ → FrameClass.finite_GrzPoint2 ⊧ φ by
-      simpa [S4Point2McK.Kripke.preorder_confluent_mckinsey, GrzPoint2.Kripke.finite_confluent_partial_order];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.S4Point2McK FrameClass.finite_GrzPoint2;
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.GrzPoint2 ⊢! φ ∧ ¬FrameClass.preorder_confluent_mckinsey ⊧ φ by simpa [S4Point2McK.Kripke.preorder_confluent_mckinsey];
     use Axioms.Grz (.atom 0);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point2McK);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
       constructor;
       . apply Set.mem_setOf_eq.mpr;
@@ -367,9 +363,9 @@ instance : Logic.S4Point2McK ⪱ Logic.GrzPoint2 := by
         . contradiction;
         . contradiction;
 
-instance : Logic.S4Point2 ⪱ Logic.GrzPoint2 := calc
-  Logic.S4Point2 ⪱ Logic.S4Point2McK := by infer_instance
-  _              ⪱ Logic.GrzPoint2 := by infer_instance
+instance : Hilbert.S4Point2 ⪱ Hilbert.GrzPoint2 := calc
+  Hilbert.S4Point2 ⪱ Hilbert.S4Point2McK := by infer_instance
+  _                ⪱ Hilbert.GrzPoint2 := by infer_instance
 
 end Logic.GrzPoint2.Kripke
 
