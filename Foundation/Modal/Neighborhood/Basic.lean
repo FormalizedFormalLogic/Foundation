@@ -102,15 +102,19 @@ protected instance semantics {M : Model} : Semantics (Formula ℕ) M.World := �
 
 variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 
+lemma def_imp : x ⊧ φ ➝ ψ ↔ (x ⊧ φ → x ⊧ ψ) := by
+  simp [Semantics.Realize, Satisfies];
+  tauto;
+
+lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.ν x) := by simp [Semantics.Realize, Satisfies];
+
 protected instance : Semantics.Tarski (M.World) where
   realize_top := by simp [Semantics.Realize, Satisfies]
   realize_bot := by simp [Semantics.Realize, Satisfies]
-  realize_imp := by simp [Semantics.Realize, Satisfies]; tauto;
+  realize_imp := def_imp
   realize_not := by simp [Semantics.Realize, Satisfies]
   realize_or  := by simp [Semantics.Realize, Satisfies]
   realize_and := by simp [Semantics.Realize, Satisfies]
-
-lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.ν x) := by simp [Semantics.Realize, Satisfies];
 
 @[simp] protected lemma imply₁ : x ⊧ Axioms.Imply₁ φ ψ := by simp [Satisfies]; tauto;
 @[simp] protected lemma imply₂ : x ⊧ Axioms.Imply₂ φ ψ ξ := by simp [Satisfies]; tauto;
