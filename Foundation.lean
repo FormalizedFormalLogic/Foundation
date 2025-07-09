@@ -105,7 +105,7 @@ import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Kripke.Logic.S4Point4
 import Foundation.Modal.Kripke.Logic.S5
 import Foundation.Modal.Kripke.Logic.S5Grz
-import Foundation.Modal.Kripke.Logic.SobK1Point2
+import Foundation.Modal.Kripke.Logic.S4H
 
 import Foundation.Modal.Kripke.NNFormula
 import Foundation.Modal.Kripke.ComplexityLimited
