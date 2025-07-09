@@ -72,7 +72,7 @@ noncomputable def replace (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜�
     T ⊢ t =' u ➝ φ^/[t.sing] ➝ φ^/[u.sing] := by
   have : T ⊢ (#'1 =' #'0 ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all := R₀Theory.replace φ
   have := by simpa using specialize this t
-  simpa [Language.SemitermVec.q_of_pos, Language.Semiformula.substs₁,
+  simpa [SemitermVec.q_of_pos, Language.Semiformula.substs₁,
     Language.TSemifromula.substs_substs] using specialize this u
 
 lemma replace! (φ : ⌜ℒₒᵣ⌝.Semiformula (0 + 1)) (t u : ⌜ℒₒᵣ⌝.Term) : T ⊢! t =' u ➝ φ^/[t.sing] ➝ φ^/[u.sing] := ⟨replace T φ t u⟩
@@ -240,7 +240,7 @@ lemma ne_complete! {n m : V} (h : n ≠ m) : T ⊢! ↑n ≠' ↑m := ⟨neCompl
 
 noncomputable def ltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t <' ↑n ⭤ (tSubstItr t.sing (#'1 =' #'0) n).disj := by
   have : T ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := R₀Theory.ltNumeral n
-  simpa [Language.SemitermVec.q_of_pos, Language.Semiformula.substs₁] using specialize this t
+  simpa [SemitermVec.q_of_pos, Language.Semiformula.substs₁] using specialize this t
 
 noncomputable def nltNumeral (t : ⌜ℒₒᵣ⌝.Term) (n : V) : T ⊢ t ≮' ↑n ⭤ (tSubstItr t.sing (#'1 ≠' #'0) n).conj := by
   simpa using ENN_of_E <| ltNumeral T t n

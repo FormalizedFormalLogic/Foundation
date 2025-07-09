@@ -75,10 +75,10 @@ instance Language.neg_definable' (Γ) : Γ-[m + 1]-Function₁ L.neg :=
 
 end
 
-@[simp] lemma neg_rel {k R v} (hR : L.Rel k R) (hv : L.IsUTermVec k v) :
+@[simp] lemma neg_rel {k R v} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     L.neg (^rel k R v) = ^nrel k R v := by simp [Language.neg, hR, hv, construction]
 
-@[simp] lemma neg_nrel {k R v} (hR : L.Rel k R) (hv : L.IsUTermVec k v) :
+@[simp] lemma neg_nrel {k R v} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     L.neg (^nrel k R v) = ^rel k R v := by simp [Language.neg, hR, hv, construction]
 
 @[simp] lemma neg_verum :
@@ -299,10 +299,10 @@ instance language.shift_definable' : Γ-[m + 1]-Function₁ L.shift := L.shift_d
 
 end
 
-@[simp] lemma shift_rel {k R v} (hR : L.Rel k R) (hv : L.IsUTermVec k v) :
+@[simp] lemma shift_rel {k R v} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     L.shift (^relk R v) = ^relk R (L.termShiftVec k v) := by simp [Language.shift, hR, hv, construction]
 
-@[simp] lemma shift_nrel {k R v} (hR : L.Rel k R) (hv : L.IsUTermVec k v) :
+@[simp] lemma shift_nrel {k R v} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     L.shift (^nrelk R v) = ^nrelk R (L.termShiftVec k v) := by simp [Language.shift, hR, hv, construction]
 
 @[simp] lemma shift_verum : L.shift ^⊤ = ^⊤ := by simp [Language.shift, construction]
@@ -390,12 +390,12 @@ variable (L)
 def _root_.LO.FirstOrder.Arithmetic.LDef.qVecDef (pL : LDef) : 𝚺₁.Semisentence 2 := .mkSigma
   “w' w. ∃ k, !lenDef k w ∧ ∃ sw, !pL.termBShiftVecDef sw k w ∧ ∃ t, !qqBvarDef t 0 ∧ !consDef w' t sw” (by simp)
 
-lemma Language.qVec_defined : 𝚺₁-Function₁ L.qVec via pL.qVecDef := by
+lemma Language.qVec_defined : 𝚺₁-Function₁ qVec L via pL.qVecDef := by
   intro v; simp [LDef.qVecDef, L.termBShiftVec_defined.df.iff]; rfl
 
-instance Language.qVec_definable : 𝚺₁-Function₁ L.qVec := L.qVec_defined.to_definable
+instance Language.qVec_definable : 𝚺₁-Function₁ qVec L := L.qVec_defined.to_definable
 
-instance Language.qVec_definable' : Γ-[m + 1]-Function₁ L.qVec := L.qVec_definable.of_sigmaOne
+instance Language.qVec_definable' : Γ-[m + 1]-Function₁ qVec L := L.qVec_definable.of_sigmaOne
 
 end
 
@@ -424,8 +424,8 @@ noncomputable def construction : Language.UformulaRec1.Construction V L (bluepri
   or _         := fun _ _ y₁ y₂ ↦ y₁ ^⋎ y₂
   all _        := fun _ y₁ ↦ ^∀ y₁
   ex _         := fun _ y₁ ↦ ^∃ y₁
-  allChanges (param) := L.qVec param
-  exChanges (param) := L.qVec param
+  allChanges (param) := qVec L param
+  exChanges (param) := qVec L param
   rel_defined := by intro v; simp [blueprint, L.termSubstVec_defined.df.iff]
   nrel_defined := by intro v; simp [blueprint, L.termSubstVec_defined.df.iff]
   verum_defined := by intro v; simp [blueprint]
@@ -463,10 +463,10 @@ end
 
 variable {m w : V}
 
-@[simp] lemma substs_rel {k R v} (hR : L.Rel k R) (hv : L.IsUTermVec k v) :
+@[simp] lemma substs_rel {k R v} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     L.substs w (^relk R v) = ^rel k R (L.termSubstVec k w v) := by simp [Language.substs, hR, hv, construction]
 
-@[simp] lemma substs_nrel {k R v} (hR : L.Rel k R) (hv : L.IsUTermVec k v) :
+@[simp] lemma substs_nrel {k R v} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
     L.substs w (^nrelk R v) = ^nrel k R (L.termSubstVec k w v) := by simp [Language.substs, hR, hv, construction]
 
 @[simp] lemma substs_verum (w) : L.substs w ^⊤ = ^⊤ := by simp [Language.substs, construction]
@@ -480,22 +480,22 @@ variable {m w : V}
     L.substs w (p ^⋎ q) = L.substs w p ^⋎ L.substs w q := by simp [Language.substs, hp, hq, construction]
 
 @[simp] lemma substs_all {p} (hp : L.IsUFormula p) :
-    L.substs w (^∀ p) = ^∀ (L.substs (L.qVec w) p) := by simp [Language.substs, hp, construction]
+    L.substs w (^∀ p) = ^∀ (L.substs (qVec L w) p) := by simp [Language.substs, hp, construction]
 
 @[simp] lemma substs_ex {p} (hp : L.IsUFormula p) :
-    L.substs w (^∃ p) = ^∃ (L.substs (L.qVec w) p) := by simp [Language.substs, hp, construction]
+    L.substs w (^∃ p) = ^∃ (L.substs (qVec L w) p) := by simp [Language.substs, hp, construction]
 
 lemma isUFormula_subst_ISigma1.sigma1_succ_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
-    (hRel : ∀ w k R v, L.Rel k R → L.IsUTermVec k v → P w (^relk R v) (^rel k R (L.termSubstVec k w v)))
-    (hNRel : ∀ w k R v, L.Rel k R → L.IsUTermVec k v → P w (^nrelk R v) (^nrel k R (L.termSubstVec k w v)))
+    (hRel : ∀ w k R v, L.IsRel k R → IsUTermVec L k v → P w (^relk R v) (^rel k R (L.termSubstVec k w v)))
+    (hNRel : ∀ w k R v, L.IsRel k R → IsUTermVec L k v → P w (^nrelk R v) (^nrel k R (L.termSubstVec k w v)))
     (hverum : ∀ w, P w ^⊤ ^⊤)
     (hfalsum : ∀ w, P w ^⊥ ^⊥)
     (hand : ∀ w p q, L.IsUFormula p → L.IsUFormula q →
       P w p (L.substs w p) → P w q (L.substs w q) → P w (p ^⋏ q) (L.substs w p ^⋏ L.substs w q))
     (hor : ∀ w p q, L.IsUFormula p → L.IsUFormula q →
       P w p (L.substs w p) → P w q (L.substs w q) → P w (p ^⋎ q) (L.substs w p ^⋎ L.substs w q))
-    (hall : ∀ w p, L.IsUFormula p → P (L.qVec w) p (L.substs (L.qVec w) p) → P w (^∀ p) (^∀ (L.substs (L.qVec w) p)))
-    (hex : ∀ w p, L.IsUFormula p → P (L.qVec w) p (L.substs (L.qVec w) p) → P w (^∃ p) (^∃ (L.substs (L.qVec w) p))) :
+    (hall : ∀ w p, L.IsUFormula p → P (qVec L w) p (L.substs (qVec L w) p) → P w (^∀ p) (^∀ (L.substs (qVec L w) p)))
+    (hex : ∀ w p, L.IsUFormula p → P (qVec L w) p (L.substs (qVec L w) p) → P w (^∃ p) (^∃ (L.substs (qVec L w) p))) :
     ∀ {w p}, L.IsUFormula p → P w p (L.substs w p) := by
   suffices ∀ param p, L.IsUFormula p → P param p ((construction L).result param p) by
     intro w p hp; simpa using this w p hp
@@ -517,8 +517,8 @@ lemma isUFormula_subst_ISigma1.sigma1_succ_induction {P : V → V → V → Prop
     simpa using hex param p hp (by simpa [construction] using ihp)
 
 lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
-    (hRel : ∀ n w k R v, L.Rel k R → L.IsSemitermVec k n v → P n w (^relk R v) (^rel k R (L.termSubstVec k w v)))
-    (hNRel : ∀ n w k R v, L.Rel k R → L.IsSemitermVec k n v → P n w (^nrelk R v) (^nrel k R (L.termSubstVec k w v)))
+    (hRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v → P n w (^relk R v) (^rel k R (L.termSubstVec k w v)))
+    (hNRel : ∀ n w k R v, L.IsRel k R → IsSemitermVec L k n v → P n w (^nrelk R v) (^nrel k R (L.termSubstVec k w v)))
     (hverum : ∀ n w, P n w ^⊤ ^⊤)
     (hfalsum : ∀ n w, P n w ^⊥ ^⊥)
     (hand : ∀ n w p q, L.IsSemiformula n p → L.IsSemiformula n q →
@@ -526,9 +526,9 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
     (hor : ∀ n w p q, L.IsSemiformula n p → L.IsSemiformula n q →
       P n w p (L.substs w p) → P n w q (L.substs w q) → P n w (p ^⋎ q) (L.substs w p ^⋎ L.substs w q))
     (hall : ∀ n w p, L.IsSemiformula (n + 1) p →
-      P (n + 1) (L.qVec w) p (L.substs (L.qVec w) p) → P n w (^∀ p) (^∀ (L.substs (L.qVec w) p)))
+      P (n + 1) (qVec L w) p (L.substs (qVec L w) p) → P n w (^∀ p) (^∀ (L.substs (qVec L w) p)))
     (hex : ∀ n w p, L.IsSemiformula (n + 1) p →
-      P (n + 1) (L.qVec w) p (L.substs (L.qVec w) p) → P n w (^∃ p) (^∃ (L.substs (L.qVec w) p))) :
+      P (n + 1) (qVec L w) p (L.substs (qVec L w) p) → P n w (^∃ p) (^∃ (L.substs (qVec L w) p))) :
     ∀ {n p w}, L.IsSemiformula n p → P n w p (L.substs w p) := by
   suffices ∀ param n p, L.IsSemiformula n p → P n param p ((construction L).result param p) by
     intro n p w hp; simpa using this w n p hp
@@ -550,8 +550,8 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
     simpa using hex n param p hp (by simpa [construction] using ihp)
 
 @[simp] lemma Language.IsSemiformula.substs {n p m w : V} :
-    L.IsSemiformula n p → L.IsSemitermVec n m w → L.IsSemiformula m (L.substs w p) := by
-  let fw : V → V → V → V → V := fun _ w _ _ ↦ Max.max w (L.qVec w)
+    L.IsSemiformula n p → IsSemitermVec L n m w → L.IsSemiformula m (L.substs w p) := by
+  let fw : V → V → V → V → V := fun _ w _ _ ↦ Max.max w (qVec L w)
   have hfw : 𝚺₁-Function₄ fw := by definability
   let fn : V → V → V → V → V := fun _ _ n _ ↦ n + 1
   have hfn : 𝚺₁-Function₄ fn := by definability
@@ -572,14 +572,14 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
   · have ih₁ : L.IsSemiformula m (L.substs w p₁) := ih p₁ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₁ hw
     have ih₂ : L.IsSemiformula m (L.substs w p₂) := ih p₂ (by simp) w (by simp [fw]) n (by simp [fn]) m (by simp [fm]) h₂ hw
     simp [h₁.isUFormula, h₂.isUFormula, ih₁, ih₂]
-  · simpa [h₁.isUFormula] using ih p₁ (by simp) (L.qVec w) (by simp [fw]) (n + 1) (by simp [fn]) (m + 1) (by simp [fm]) h₁ hw.qVec
-  · simpa [h₁.isUFormula] using ih p₁ (by simp) (L.qVec w) (by simp [fw]) (n + 1) (by simp [fn]) (m + 1) (by simp [fm]) h₁ hw.qVec
+  · simpa [h₁.isUFormula] using ih p₁ (by simp) (qVec L w) (by simp [fw]) (n + 1) (by simp [fn]) (m + 1) (by simp [fm]) h₁ hw.qVec
+  · simpa [h₁.isUFormula] using ih p₁ (by simp) (qVec L w) (by simp [fw]) (n + 1) (by simp [fn]) (m + 1) (by simp [fm]) h₁ hw.qVec
 
 lemma substs_not_uformula {w x} (h : ¬L.IsUFormula x) :
     L.substs w x = 0 := (construction L).result_prop_not _ h
 
 lemma substs_neg {p} (hp : L.IsSemiformula n p) :
-    L.IsSemitermVec n m w → L.substs w (L.neg p) = L.neg (L.substs w p) := by
+    IsSemitermVec L n m w → L.substs w (L.neg p) = L.neg (L.substs w p) := by
   revert m w
   apply Language.IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
@@ -609,7 +609,7 @@ lemma substs_neg {p} (hp : L.IsSemiformula n p) :
       substs_ex hp.isUFormula, neg_ex (hp.substs hw.qVec).isUFormula, ih hw.qVec]
 
 lemma shift_substs {p} (hp : L.IsSemiformula n p) :
-    L.IsSemitermVec n m w → L.shift (L.substs w p) = L.substs (L.termShiftVec n w) (L.shift p) := by
+    IsSemitermVec L n m w → L.shift (L.substs w p) = L.substs (L.termShiftVec n w) (L.shift p) := by
   revert m w
   apply Language.IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
@@ -673,7 +673,7 @@ lemma shift_substs {p} (hp : L.IsSemiformula n p) :
       termShift_qVec hw]
 
 lemma substs_substs {p} (hp : L.IsSemiformula l p) :
-    L.IsSemitermVec n m w → L.IsSemitermVec l n v → L.substs w (L.substs v p) = L.substs (L.termSubstVec l w v) p := by
+    IsSemitermVec L n m w → IsSemitermVec L l n v → L.substs w (L.substs v p) = L.substs (L.termSubstVec l w v) p := by
   revert m w n v
   apply Language.IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
@@ -724,7 +724,7 @@ lemma substs_substs {p} (hp : L.IsSemiformula l p) :
       ih hw.qVec hv.qVec,
       termSubstVec_qVec_qVec hv hw]
 
-lemma subst_eq_self {n w : V} (hp : L.IsSemiformula n p) (hw : L.IsSemitermVec n n w) (H : ∀ i < n, w.[i] = ^#i) :
+lemma subst_eq_self {n w : V} (hp : L.IsSemiformula n p) (hw : IsSemitermVec L n n w) (H : ∀ i < n, w.[i] = ^#i) :
     L.substs w p = p := by
   revert w
   apply Language.IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
@@ -746,7 +746,7 @@ lemma subst_eq_self {n w : V} (hp : L.IsSemiformula n p) (hw : L.IsSemitermVec n
   · intro n p q hp hq ihp ihq w hw H
     simp [*, hp.isUFormula, hq.isUFormula, ihp hw H, ihq hw H]
   · intro n p hp ih w hw H
-    have H : ∀ i < n + 1, (L.qVec w).[i] = ^#i := by
+    have H : ∀ i < n + 1, (qVec L w).[i] = ^#i := by
       intro i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
       · simp [Language.qVec]
@@ -756,7 +756,7 @@ lemma subst_eq_self {n w : V} (hp : L.IsSemiformula n p) (hw : L.IsSemitermVec n
         simp [hw.lh, H i hi, hi]
     simp [*, hp.isUFormula, ih hw.qVec H]
   · intro n p hp ih w hw H
-    have H : ∀ i < n + 1, (L.qVec w).[i] = ^#i := by
+    have H : ∀ i < n + 1, (qVec L w).[i] = ^#i := by
       intro i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
       · simp [Language.qVec]
@@ -795,7 +795,7 @@ instance : Γ-[m + 1]-Function₂ L.substs₁ := L.substs₁_definable.of_sigmaO
 
 end
 
-lemma Language.IsSemiformula.substs₁ (ht : L.IsSemiterm n t) (hp : L.IsSemiformula 1 p) : L.IsSemiformula n (L.substs₁ t p) :=
+lemma Language.IsSemiformula.substs₁ (ht : IsSemiterm L n t) (hp : L.IsSemiformula 1 p) : L.IsSemiformula n (L.substs₁ t p) :=
   Language.IsSemiformula.substs hp (by simp [ht])
 
 end substs₁

@@ -17,7 +17,7 @@ variable {T : LOR.TTheory (V := V)} [R₀Theory T]
 
 noncomputable def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V).SemitermVec n 0 :=
   ⟨⌜fun i ↦ numeral (e i)⌝,
-   Language.IsSemitermVec.iff.mpr <| ⟨by simp, by
+   IsSemitermVec.iff.mpr <| ⟨by simp, by
     intro i hi
     rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
     simp [quote_nth_fin (fun i ↦ numeral (e i)) i]⟩⟩
@@ -33,7 +33,7 @@ noncomputable def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V)
   calc (i : V) < (i : V) + (n - i : V) := by simp
   _  = (n : V) := by simp
 
-@[simp] lemma len_semitermvec {L : Metamath.Language V} {pL} [L.Defined pL] (v : L.SemitermVec k n) : len v.val = k := v.prop.lh
+@[simp] lemma len_semitermvec {L : Metamath.Language V} {pL} [L.Defined pL] (v : SemitermVec L k n) : len v.val = k := v.prop.lh
 
 @[simp] lemma cast_substs_numVec (φ : Semisentence ℒₒᵣ (n + 1)) :
     ((.cast (V := V) (n := ↑(n + 1)) (n' := ↑n + 1) ⌜Rew.embs ▹ φ⌝ (by simp)) ^/[(toNumVec e).q.substs (typedNumeral 0 x).sing]) =
@@ -49,7 +49,7 @@ noncomputable def toNumVec {n} (e : Fin n → V) : (Language.codeIn ℒₒᵣ V)
     rw [nth_termSubstVec (by simpa using (toNumVec e).prop.qVec.isUTerm) hi]
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp [Language.qVec]
-    · simp only [Language.qVec, nth_cons_succ, Language.SemitermVec.prop]
+    · simp only [Language.qVec, nth_cons_succ, SemitermVec.prop]
       rcases eq_fin_of_lt_nat (by simpa using hi) with ⟨i, rfl⟩
       rw [nth_termBShiftVec (by simp),
         toNumVec_val_nth, numeral_bShift,

@@ -114,7 +114,7 @@ lemma termSubstVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
     IsSemitermVec L k m (termSubstVec L k w v) := IsSemitermVec.iff.mpr
   ⟨by simp [hv.isUTerm], fun i hi ↦ by rw [nth_termSubstVec hv.isUTerm hi]; exact hw.termSubst (hv.nth hi)⟩
 
-@[simp] lemma substs_nil {t} (ht : IsSemiterm L 0 t) : termSubst L 0 t = t := by
+@[simp] lemma substs_nil {t : V} (ht : IsSemiterm L 0 t) : termSubst L 0 t = t := by
   apply IsSemiterm.induction 𝚺 ?_ ?_ ?_ ?_ t ht
   · definability
   · intro z; simp

@@ -183,14 +183,14 @@ lemma eq_fin_of_lt_nat {n : ℕ} {x : V} (hx : x < n) : ∃ i : Fin n, x = i := 
   · simp [quote_bvar, quote_fvar, quote_func]
   case func k f v ih =>
     simpa [quote_bvar, quote_fvar, quote_func]
-    using Language.IsSemitermVec.iff.mpr
+    using IsSemitermVec.iff.mpr
       ⟨by simp, by
           rintro i hi
           rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
           simpa using ih i⟩
 
 @[simp] lemma semitermVec_codeIn {k n} (v : Fin k → SyntacticSemiterm L n) :
-    (L.codeIn V).IsSemitermVec k n ⌜fun i ↦ ⌜v i⌝⌝ := Language.IsSemitermVec.iff.mpr
+    (L.codeIn V).IsSemitermVec k n ⌜fun i ↦ ⌜v i⌝⌝ := IsSemitermVec.iff.mpr
   ⟨by simp, by intro i hi; rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩; simp⟩
 
 @[simp] lemma isUTermVec_codeIn {k n} (v : Fin k → SyntacticSemiterm L n) :
@@ -519,7 +519,7 @@ noncomputable instance {k n} : GoedelQuote (Fin k → SyntacticSemiterm L n) ((L
 @[simp] lemma codeIn'_bvar (z : Fin n) : (⌜(#z : SyntacticSemiterm L n)⌝ : (L.codeIn V).Semiterm n) = (L.codeIn V).bvar z := by ext; simp [quote_bvar]
 @[simp] lemma codeIn'_fvar (x : ℕ) : (⌜(&x : SyntacticSemiterm L n)⌝ : (L.codeIn V).Semiterm n) = (L.codeIn V).fvar x := by ext; simp [quote_fvar]
 lemma codeIn'_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
-    (⌜func f v⌝ : (L.codeIn V).Semiterm n) = (L.codeIn V).func (k := k) (f := ⌜f⌝) (by simp) ⌜v⌝ := by ext; simp [quote_func, Language.func]
+    (⌜func f v⌝ : (L.codeIn V).Semiterm n) = (L.codeIn V).func (k := k) (f := ⌜f⌝) (by simp) ⌜v⌝ := by ext; simp [quote_func, Semiterm.func]
 @[simp] lemma codeIn'_zero (n : ℕ) :
     (⌜(func Language.Zero.zero ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : (Language.codeIn ℒₒᵣ V).Semiterm n) = ↑(0 : V) := by ext; simp
 @[simp] lemma codeIn'_one (n : ℕ) :
@@ -560,16 +560,16 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 @[simp] lemma codeIn'_eq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜rel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ =' ⌜v 1⌝) := by
-  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Language.Semiterm.equals]
+  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.equals]
 @[simp] lemma codeIn'_neq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜nrel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ ≠' ⌜v 1⌝) := by
-  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Language.Semiterm.notEquals]
+  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.notEquals]
 @[simp] lemma codeIn'_lt (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜rel Language.LT.lt v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ <' ⌜v 1⌝) := by
-  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Language.Semiterm.lessThan]
+  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.lessThan]
 @[simp] lemma codeIn'_nlt (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜nrel Language.LT.lt v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ ≮' ⌜v 1⌝) := by
-  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Language.Semiterm.notLessThan]
+  ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.notLessThan]
 @[simp] lemma codeIn'_ball (t : SyntacticSemiterm ℒₒᵣ n) (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
     (⌜∀[“#0 < !!(Rew.bShift t)”] φ⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = Language.Semiformula.ball ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
   ext; simp [LO.ball, imp_eq, Language.Semiformula.cast,
@@ -618,7 +618,7 @@ lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
 
 variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L]
 
-lemma Language.IsSemiterm.sound {n t : ℕ} (ht : (L.codeIn ℕ).IsSemiterm n t) : ∃ T : FirstOrder.SyntacticSemiterm L n, ⌜T⌝ = t := by
+lemma IsSemiterm.sound {n t : ℕ} (ht : (L.codeIn ℕ).IsSemiterm n t) : ∃ T : FirstOrder.SyntacticSemiterm L n, ⌜T⌝ = t := by
   induction t using Nat.strongRec
   case ind t ih =>
     rcases ht.case with (⟨z, hz, rfl⟩ | ⟨x, rfl⟩ | ⟨k, f, v, hf, hv, rfl⟩)
