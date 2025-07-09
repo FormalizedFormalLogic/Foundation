@@ -907,6 +907,10 @@ instance : Entailment.KTMk (Hilbert.KTMk) where
 
 
 protected abbrev Hilbert.S4H : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.H (.atom 0)}⟩
+/--
+  - `S4H` in Segerberg 1971.
+  - `K1.2` in Sobocinski 1964, "Family $K$ of the non-Lewis modal systems"
+-/
 protected abbrev Logic.S4H := Hilbert.S4H.logic
 
 instance : (Hilbert.S4H).HasK where p := 0; q := 1;
