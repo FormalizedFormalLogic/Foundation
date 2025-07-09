@@ -1,5 +1,6 @@
 import Foundation.Modal.Kripke.Preservation
 import Foundation.Modal.Kripke.Rooted
+import Foundation.Modal.Kripke.AxiomWeakPoint3
 import Mathlib.Order.Interval.Finset.Defs
 import Mathlib.Order.Interval.Finset.Nat
 
@@ -15,23 +16,20 @@ instance : IsTrans _ natLT := by
   dsimp only [natLT];
   infer_instance;
 
-instance : IsSerial _ natLT := ⟨by
+instance : natLT.IsSerial := ⟨by
   intro x;
   use x + 1;
   omega;
 ⟩
 
-instance : IsWeakConnected _ natLT := ⟨by
-  rintro x y z ⟨Rxy, Ryx, nyz⟩;
-  rcases lt_trichotomy y z with Rxy | rfl | rxy;
-  . left; assumption;
-  . contradiction;
-  . right; assumption;
+instance : natLT.IsPiecewiseConnected := ⟨by
+  rintro x y z Rxy Ryx;
+  rcases lt_trichotomy y z with Rxy | rfl | rxy <;> tauto;
 ⟩
 
 abbrev min : natLT.World := 0
 
-instance : Frame.IsRooted natLT natLT.min where
+instance : Frame.IsRootedBy natLT natLT.min where
   root_generates := by
     intro x hx;
     apply Relation.TransGen.single;
@@ -57,7 +55,7 @@ instance : IsRefl _ natLE := by
 
 abbrev min : natLE.World := 0
 
-instance : Frame.IsRooted natLE natLE.min where
+instance : Frame.IsRootedBy natLE natLE.min where
   root_generates := by
     intro x _;
     apply Relation.TransGen.single;

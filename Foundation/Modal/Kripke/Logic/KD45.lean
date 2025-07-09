@@ -1,65 +1,62 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.KD4
 import Foundation.Modal.Kripke.Logic.KD5
 import Foundation.Modal.Kripke.Logic.K45
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
 open Hilbert.Kripke
-open GeachConfluent
 
-abbrev Kripke.FrameClass.serial_trans_eucl : FrameClass := { F | IsSerial _ F ∧ IsTrans _ F ∧ IsEuclidean _ F }
+namespace Kripke
+
+protected class Frame.IsKD45 (F : Kripke.Frame) extends F.IsSerial, F.IsTransitive, F.IsEuclidean
+
+protected abbrev FrameClass.KD45 : FrameClass := { F | F.IsKD45 }
+
+end Kripke
+
+
 
 namespace Hilbert.KD45.Kripke
 
-instance sound : Sound (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.KD45 FrameClass.KD45 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent (Hilbert.KD45) := consistent_of_sound_frameclass Kripke.FrameClass.serial_trans_eucl $ by
+instance : Entailment.Consistent Hilbert.KD45 := consistent_of_sound_frameclass FrameClass.KD45 $ by
   use whitepoint;
-  refine ⟨inferInstance, inferInstance, inferInstance⟩;
-
-instance canonical : Canonical (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := ⟨by
-  apply Set.mem_setOf_eq.mpr;
-  refine ⟨inferInstance, inferInstance, inferInstance⟩;
-⟩
-
-instance complete : Complete (Hilbert.KD45) Kripke.FrameClass.serial_trans_eucl := inferInstance
-
-end Hilbert.KD45.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KD45.Kripke.serial_trans_eucl : Logic.KD45 = FrameClass.serial_trans_eucl.logic := eq_hilbert_logic_frameClass_logic
-
-theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_trans ⊧ φ by
-      rw [KD4.Kripke.serial_trans];
-      tauto;
+
+instance : Canonical Hilbert.KD45 FrameClass.KD45 := ⟨by constructor⟩
+
+instance : Complete Hilbert.KD45 FrameClass.KD45 := inferInstance
+
+
+instance : Hilbert.KD4 ⪱ Hilbert.KD45 := by
+  constructor;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Fin 3, λ x y => x = y ∨ x < y⟩,
           λ w _ => w = 0
         ⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by omega⟩⟩;
+      . simp only [Set.mem_setOf_eq];
+        refine { serial := by tauto, trans := by omega };
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -67,25 +64,27 @@ theorem KD45.proper_extension_of_K5 : Logic.KD4 ⊂ Logic.KD45 := by
         . use 1;
           constructor <;> omega;
 
-theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
+instance : Hilbert.KD5 ⪱ Hilbert.KD45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.serial_eucl ⊧ φ by
-      rw [KD5.Kripke.serial_eucl];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD5)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
-      . refine ⟨⟨?_⟩, ⟨by unfold Euclidean; omega⟩⟩;
-        . intro x;
-          match x with
-          | 0 => use 1; tauto;
-          | 1 => use 1; omega;
-          | 2 => use 2; omega;
+      . refine {
+          serial := by
+            intro x;
+            match x with
+            | 0 => use 1; tauto;
+            | 1 => use 1; omega;
+            | 2 => use 2; omega;
+          reucl := by simp [RightEuclidean]; omega;
+        };
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 by
           simpa [M, Semantics.Realize, Satisfies];
         constructor;
@@ -102,22 +101,27 @@ theorem KD45.proper_extension_of_KD5 : Logic.KD5 ⊂ Logic.KD45 := by
             . omega;
             . trivial;
 
-theorem KD45.proper_extension_of_K45 : Logic.K45 ⊂ Logic.KD45 := by
+instance : Hilbert.K45 ⪱ Hilbert.KD45 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD45 ⊢! φ ∧ ¬FrameClass.trans_eucl ⊧ φ by
-      rw [K45.Kripke.trans_eucl];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.D (.atom 0);
     constructor;
     . exact axiomD!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K45)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => True⟩, 0;
       constructor;
-      . refine ⟨⟨by tauto⟩, ⟨by tauto⟩⟩;
+      . simp only [Set.mem_setOf_eq];
+        refine { trans := by simp, reucl := by simp [RightEuclidean] }
       . simp [Semantics.Realize, Satisfies];
 
-end Logic
+end Hilbert.KD45.Kripke
 
+instance : Modal.KD4 ⪱ Modal.KD45 := inferInstance
+
+instance : Modal.KD5 ⪱ Modal.KD45 := inferInstance
+
+instance : Modal.K45 ⪱ Modal.KD45 := inferInstance
 
 end LO.Modal

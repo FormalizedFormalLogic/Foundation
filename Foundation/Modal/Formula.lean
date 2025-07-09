@@ -2,11 +2,11 @@ import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Vorspiel.Collection
 import Foundation.Modal.LogicSymbol
 import Foundation.Propositional.ClassicalSemantics.ZeroSubst
-import Foundation.Subformula
 import Mathlib.Data.Set.Finite.Lattice
 
 namespace LO.Modal
 
+@[grind]
 inductive Formula (α : Type*) where
   | atom   : α → Formula α
   | falsum : Formula α
@@ -115,11 +115,11 @@ lemma iff_eq (φ ψ : Formula α) : φ ⭤ ψ = (φ ➝ ψ) ⋏ (ψ ➝ φ) := r
 
 lemma falsum_eq : (falsum : Formula α) = ⊥ := rfl
 
-@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Wedge.wedge]
+@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
 
-@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Vee.vee]
+@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
 
-@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Arrow.arrow]
+@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 
 @[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
 
@@ -129,7 +129,7 @@ instance : ModalDeMorgan (Formula α) where
   falsum := rfl
   and := by simp
   or := by simp
-  imply := by simp[imp_eq]
+  imply := by simp [imp_eq]
   neg := by simp
   dia := by simp
   box := by simp
@@ -177,7 +177,7 @@ def rec' {C : Formula α → Sort w}
   | □φ     => hbox φ (rec' hfalsum hatom himp hbox φ)
 
 -- @[simp] lemma complexity_neg (φ : Formula α) : complexity (∼φ) = φ.complexity + 1 :=
---   by induction φ using rec' <;> try { simp[neg_eq, neg, *]; rfl;}
+--   by induction φ using rec' <;> try { simp [neg_eq, neg, *]; rfl;}
 
 section Decidable
 
@@ -197,14 +197,14 @@ def hasDecEq : (φ ψ : Formula α) → Decidable (φ = ψ)
       | isTrue hp =>
         match hasDecEq ψ ψ' with
         | isTrue hq  => isTrue (hp ▸ hq ▸ rfl)
-        | isFalse hq => isFalse (by simp[hp, hq])
-      | isFalse hp => isFalse (by simp[hp])
+        | isFalse hq => isFalse (by simp [hp, hq])
+      | isFalse hp => isFalse (by simp [hp])
   | □φ, ψ => by
     cases ψ <;> try { simp; exact isFalse not_false }
     case box φ' =>
       exact match hasDecEq φ φ' with
       | isTrue hp  => isTrue (hp ▸ rfl)
-      | isFalse hp => isFalse (by simp[hp, box_eq])
+      | isFalse hp => isFalse (by simp [hp, box_eq])
 instance : DecidableEq (Formula α) := hasDecEq
 
 end Decidable
@@ -411,6 +411,7 @@ namespace Modal
 section Substitution
 section Subformula
 
+@[grind]
 def Formula.subformulas [DecidableEq α] : Formula α → FormulaFinset α
   | atom a => {(atom a)}
   | ⊥      => {⊥}
@@ -419,49 +420,55 @@ def Formula.subformulas [DecidableEq α] : Formula α → FormulaFinset α
 
 namespace Formula.subformulas
 
-variable [DecidableEq α] {φ ψ χ : Formula α}
+variable [DecidableEq α] {φ ψ χ ξ : Formula α}
 
-@[simp] lemma mem_self {φ : Formula α} : φ ∈ φ.subformulas := by induction φ <;> { simp [subformulas]; try tauto; }
+@[simp, grind] lemma mem_self {φ : Formula α} : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas]
 
-@[subformula]
+@[grind ⇒]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
-  | himp => simp_all [subformulas]; rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
+  | himp ψ χ ihψ ihχ =>
+    simp only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union] at h;
+    rcases h with ⟨rfl, rfl⟩ | h | h;
+    . simp_all [subformulas];
+    . simp_all [subformulas];
+    . simp_all [subformulas];
   | _ => simp_all [subformulas];
 
-protected lemma of_mem_imp₁ (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas := subformulas.mem_imp h |>.1
-protected lemma of_mem_imp₂ (h : (ψ ➝ χ) ∈ φ.subformulas) : χ ∈ φ.subformulas := subformulas.mem_imp h |>.2
-
-@[subformula]
+@[grind ⇒]
 protected lemma mem_box (h : □ψ ∈ φ.subformulas) : ψ ∈ φ.subformulas := by
-  induction φ <;> {
-    simp_all [subformulas];
-    try rcases h with (hq | hr) <;> simp_all;
-  };
+  induction φ with
+  | hbox ψ ihψ =>
+    simp only [subformulas, Finset.mem_insert, Box.box_injective'] at h;
+    rcases h with rfl | h <;> simp_all [subformulas];
+  | himp ψ χ ihψ ihχ =>
+    simp_all only [subformulas, Finset.mem_insert, reduceCtorEq, Finset.mem_union, false_or];
+    grind;
+  | _ => simp_all [subformulas];
 
-@[subformula]
+@[grind ⇒]
 protected lemma mem_neg (h : (∼ψ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ ⊥ ∈ φ.subformulas := subformulas.mem_imp h
 
-@[subformula]
+@[grind ⇒]
 protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
-  rcases subformulas.mem_imp (subformulas.mem_imp h |>.1) with ⟨hψ, hχ⟩;
-  rw [neg_eq] at hχ;
-  constructor <;> subformula;
+  simp [LukasiewiczAbbrev.and] at h;
+  grind;
 
-@[subformula] protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
-  rcases (subformulas.mem_imp h) with ⟨hψ, hχ⟩;
-  rw [neg_eq] at hψ;
-  constructor <;> subformula;
+@[grind ⇒]
+protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
+  simp [LukasiewiczAbbrev.or] at h;
+  grind;
 
-example {_ : φ ∈ φ.subformulas} : φ ∈ φ.subformulas := by subformula;
-example {_ : ψ ➝ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
-example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
-example {_ : □ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
-example {_ : ∼ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
-example {_ : ∼ψ ∈ φ.subformulas} : ⊥ ∈ φ.subformulas := by subformula;
-example {_ : ψ ⋏ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by subformula;
-example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
--- example {_ : ψ ⋏ (ψ ⋎ □(□χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by subformula;
+example {_ : φ ∈ φ.subformulas} : φ ∈ φ.subformulas := by grind;
+example {_ : ψ ➝ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
+example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind
+example {_ : □ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind;
+example {_ : ∼ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind;
+example {_ : ∼ψ ∈ φ.subformulas} : ⊥ ∈ φ.subformulas := by grind;
+example {_ : ψ ⋏ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
+example {_ : ψ ⋎ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
+example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind
+example {_ : ψ ⋏ (ψ ⋎ □(□χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind;
 
 lemma complexity_lower (h : ψ ∈ φ.subformulas) : ψ.complexity ≤ φ.complexity := by
   induction φ using Formula.rec' with
@@ -491,21 +498,10 @@ lemma subset_of_mem (hψ : ψ ∈ φ.subformulas) : (ψ.subformulas ⊆ φ.subfo
   | hfalsum => simp_all [Formula.subformulas];
   | himp ψ₁ ψ₂ ihψ₁ ihψ₂ =>
     simp only [subformulas, Finset.mem_insert, Finset.mem_union] at hξ;
-    rcases hξ with rfl | hξ | hξ;
-    . assumption;
-    . apply ihψ₁;
-      . exact Formula.subformulas.of_mem_imp₁ hψ;
-      . assumption;
-    . apply ihψ₂;
-      . exact Formula.subformulas.of_mem_imp₂ hψ;
-      . assumption;
+    rcases hξ with rfl | hξ | hξ <;> grind;
   | hbox ψ ihψ =>
     simp only [subformulas, Finset.mem_insert] at hξ;
-    rcases hξ with rfl | hξ;
-    . assumption;
-    . apply ihψ;
-      . exact Formula.subformulas.mem_box hψ;
-      . assumption;
+    rcases hξ with rfl | hξ <;> grind;
 
 end Formula.subformulas
 

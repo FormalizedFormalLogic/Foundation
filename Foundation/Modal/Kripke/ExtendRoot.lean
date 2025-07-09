@@ -11,7 +11,7 @@ namespace LO.Modal
 
 namespace Kripke
 
-def Frame.extendRoot (F : Kripke.Frame) (r : outParam F.World) [F.IsRooted r] (n : ℕ+) : Kripke.Frame where
+def Frame.extendRoot (F : Kripke.Frame) (r : outParam F.World) [F.IsRootedBy r] (n : ℕ+) : Kripke.Frame where
   World := Fin n ⊕ F.World
   Rel x y :=
     match x, y with
@@ -22,7 +22,7 @@ def Frame.extendRoot (F : Kripke.Frame) (r : outParam F.World) [F.IsRooted r] (n
 
 namespace Frame.extendRoot
 
-variable {F : Frame} {r : outParam F.World} [F.IsRooted r] {x y : F.World} {n : ℕ+}
+variable {F : Frame} {r : outParam F.World} [F.IsRootedBy r] {x y : F.World} {n : ℕ+}
 
 instance : Coe (F.World) ((F.extendRoot r n).World) := ⟨Sum.inr⟩
 
@@ -32,7 +32,7 @@ instance isFinite [F.IsFinite] : (F.extendRoot r n).IsFinite := by
 
 protected abbrev root : (F.extendRoot r n).World := .inl 0
 
-instance instIsRooted : (F.extendRoot r n).IsRooted extendRoot.root where
+instance instIsRooted : (F.extendRoot r n).IsRootedBy extendRoot.root where
   root_generates := by
     intro x h;
     match x with
@@ -58,7 +58,7 @@ lemma chain_Chain' : List.Chain' (· ≺ ·) (extendRoot.chain (F := F) (r := r)
   . simp;
 
 
-instance isAsymm [IsAsymm _ F.Rel] : IsAsymm _ (F.extendRoot r n).Rel := ⟨by
+instance isAsymmetric [F.IsAsymmetric] : (F.extendRoot r n).IsAsymmetric := ⟨by
   intro x y hxy;
   match x, y with
   | .inr x, .inr y =>
@@ -69,7 +69,7 @@ instance isAsymm [IsAsymm _ F.Rel] : IsAsymm _ (F.extendRoot r n).Rel := ⟨by
   | .inr _, .inl _ => simp_all [Frame.Rel', Frame.extendRoot];
 ⟩
 
-instance isTrans [IsTrans _ F.Rel] : IsTrans _ (F.extendRoot r n).Rel := ⟨by
+instance isTransitive [F.IsTransitive] : (F.extendRoot r n).IsTransitive := ⟨by
   intro x y z hxy hyz;
   match x, y, z with
   | .inr x, .inr y, .inr z =>
@@ -81,13 +81,13 @@ instance isTrans [IsTrans _ F.Rel] : IsTrans _ (F.extendRoot r n).Rel := ⟨by
   | .inl _, .inl _, .inl _ => simp_all [Frame.extendRoot]; omega;
 ⟩
 
-lemma rooted_original [IsTrans _ F.Rel] {x : F.World} : (extendRoot.root (F := F) (r := r) (n := n)) ≺ x := by
-  apply extendRoot.instIsRooted (F := F) (r := r) |>.direct_rooted_of_trans x;
+lemma rooted_original [F.IsTransitive] {x : F.World} : (extendRoot.root (F := F) (r := r) (n := n)) ≺ x := by
+  apply Frame.root_genaretes'!;
   tauto;
 
-instance [F.IsTree r] : (F.extendRoot r n).IsTree extendRoot.root where
+instance isTree [F.IsTree r] : (F.extendRoot r n).IsTree extendRoot.root where
 
-instance instIsFiniteTree [F.IsFiniteTree r] : (F.extendRoot r n).IsFiniteTree extendRoot.root where
+instance isFiniteTree [F.IsFiniteTree r] : (F.extendRoot r n).IsFiniteTree extendRoot.root where
 
 def pMorphism : F →ₚ (F.extendRoot r n) where
   toFun := Sum.inr
@@ -113,7 +113,7 @@ lemma not_root_of_from_root [F.IsTree r] {x : (F.extendRoot r n).World} (h : ext
       right;
       apply Relation.TransGen.single;
       apply pMorphism (F := F).forth;
-      exact IsRooted.root_generates x (by tauto) |>.unwrap;
+      apply Frame.root_genaretes'! (x := x) (by tauto);
 
 lemma not_root_of_from_root₁ [F.IsTree r] {x : (F.extendRoot r 1).World} (h : extendRoot.root ≺ x)
   : (x = r) ∨ (Sum.inr r ≺^+ x) := by
@@ -122,7 +122,7 @@ lemma not_root_of_from_root₁ [F.IsTree r] {x : (F.extendRoot r 1).World} (h : 
 end Frame.extendRoot
 
 
-def Model.extendRoot (M : Kripke.Model) (r : M.World) [M.IsRooted r] (n : ℕ+) : Kripke.Model where
+def Model.extendRoot (M : Kripke.Model) (r : M.World) [M.IsRootedBy r] (n : ℕ+) : Kripke.Model where
   toFrame := M.toFrame.extendRoot r n
   Val x a :=
     match x with
@@ -131,13 +131,23 @@ def Model.extendRoot (M : Kripke.Model) (r : M.World) [M.IsRooted r] (n : ℕ+) 
 
 namespace Model.extendRoot
 
-variable {M : Model} {r : M.World} [M.IsRooted r] {x y : M.World} {n : ℕ+} {φ}
+variable {M : Model} {r : M.World} [M.IsRootedBy r] {x y : M.World} {n : ℕ+} {φ}
 
 instance : Coe (M.World) ((M.extendRoot r n).World) := ⟨Sum.inr⟩
 
 protected abbrev root := Frame.extendRoot.root (F := M.toFrame) (r := r) (n := n)
 
-lemma rooted_original [IsTrans _ M.Rel] : (extendRoot.root (M := M) (r := r) (n := n)) ≺ (Sum.inr x) := Frame.extendRoot.rooted_original
+lemma rooted_original [M.IsTransitive] : (extendRoot.root (M := M) (r := r) (n := n)) ≺ (Sum.inr x) := Frame.extendRoot.rooted_original
+
+instance isFinite [M.IsFinite] : (M.extendRoot r n).IsFinite := Frame.extendRoot.isFinite
+
+instance isTransitive [M.IsTransitive] : (M.extendRoot r n).IsTransitive := Frame.extendRoot.isTransitive
+
+instance isAsymmetric [M.IsAsymmetric] : (M.extendRoot r n).IsAsymmetric := Frame.extendRoot.isAsymmetric
+
+instance isTree [M.IsTree r] : (M.extendRoot r n).IsTree extendRoot.root := Frame.extendRoot.isTree
+
+instance isFiniteTree [M.IsFiniteTree r] : (M.extendRoot r n).IsFiniteTree extendRoot.root := Frame.extendRoot.isFiniteTree
 
 def pMorphism : Model.PseudoEpimorphism M (M.extendRoot r n) := PseudoEpimorphism.ofAtomic (Frame.extendRoot.pMorphism) $ by
   intros;
@@ -175,7 +185,7 @@ lemma inl_satisfies_boxdot_iff [IsTrans _ M.Rel] : r ⊧ (φᵇ) ↔ Satisfies (
           . subst erx;
             exact h₁;
           . apply h₂;
-            apply Frame.IsRooted.direct_rooted_of_trans;
+            apply Frame.root_genaretes'!;
             tauto;
     . intro h;
       replace ⟨h₁, h₂⟩ := Satisfies.and_def.mp h;
@@ -295,7 +305,7 @@ namespace Model.extendRoot
 
 open Classical
 
-variable {M : Model} {r : M.World} [M.IsFinite] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel] [M.IsRooted r] {x y : M.World}
+variable {M : Model} {r : M.World} [M.IsFinite] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel] [M.IsRootedBy r] {x y : M.World}
 
 lemma inr_satisfies_axiomT_set
   {Γ : Finset (Modal.Formula ℕ)} :
@@ -309,8 +319,8 @@ lemma inr_satisfies_axiomT_set
     infer_instance;
   obtain ⟨x, hx₁, hx₂⟩ := @validates_axiomT_set_in_irrefl_trans_chain (M := M')
     (by infer_instance)
-    (by apply Frame.extendRoot.isTrans)
-    (by apply Frame.extendRoot.isAsymm.isIrrefl)
+    (by apply isTransitive)
+    (by apply isAsymmetric.isIrrefl)
     (l := Frame.extendRoot.chain)
     (Γ := Γ)
     (Frame.extendRoot.chain_length)

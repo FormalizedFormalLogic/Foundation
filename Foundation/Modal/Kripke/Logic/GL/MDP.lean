@@ -14,10 +14,10 @@ abbrev mdpCounterexmpleFrame (F₁ F₂ : Frame) (r₁ r₂) [F₁.IsFiniteTree 
   World := Unit ⊕ F₁.World ⊕ F₂.World
   Rel := λ x y =>
     match x, y with
-    | .inr (.inl x), .inr (.inl y) => x ≺ y -- M₁
-    | .inr (.inr x), .inr (.inr y) => x ≺ y -- M₂
+    | .inr (.inl x), .inr (.inl y) => x ≺ y -- F₁
+    | .inr (.inr x), .inr (.inr y) => x ≺ y -- F₂
     | .inl _, .inl _ => False -- r ⊀ r
-    | .inl _, _ => True -- r ≺ w₁ and r ≺ w₂ : w₁ ∈ M₁, w₂ ∈ M₂
+    | .inl _, _ => True -- r ≺ w₁ and r ≺ w₂ : w₁ ∈ F₁, w₂ ∈ F₂
     | _, _ => False
 
 namespace mdpCounterexmpleFrame
@@ -27,8 +27,8 @@ variable {F₁ F₂ : Frame} {r₁ : F₁.World} {r₂ : F₂.World} [F₁.IsFin
 instance : Coe (F₁.World) (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).World := ⟨Sum.inr ∘ Sum.inl⟩
 instance : Coe (F₂.World) (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).World := ⟨Sum.inr ∘ Sum.inr⟩
 
-instance
-  {F₁ F₂ : Frame} {r₁ : F₁.World} {r₂ : F₂.World} [tree₁ : F₁.IsFiniteTree r₁] [tree₂ : F₂.IsFiniteTree r₂]
+instance {F₁ F₂ : Frame} {r₁ : outParam F₁.World} {r₂ : outParam F₂.World}
+  [tree₁ : F₁.IsFiniteTree r₁] [tree₂ : F₂.IsFiniteTree r₂]
   : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).IsFiniteTree (.inl ()) where
   root_generates := by
     intro x hx;
@@ -49,8 +49,12 @@ instance
     match x, y, z with
     | .inr (.inl x), .inr (.inl y), .inr (.inl z) => apply tree₁.trans _ _ _ hxy hyz;
     | .inr (.inr x), .inr (.inr y), .inr (.inr z) => apply tree₂.trans _ _ _ hxy hyz;
-    | .inl _, .inr (.inr _), .inr (.inr _) => simp;
-    | .inl _, .inr (.inl _), .inr (.inl _) => simp;
+    | .inl _, .inr (.inr _), .inr (.inr _) => simp [Frame.Rel'];
+    | .inl _, .inr (.inl _), .inr (.inl _) => simp [Frame.Rel'];
+
+-- TODO: remove?
+instance : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).IsIrreflexive := ⟨by simp⟩
+
 
 protected abbrev root : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).World := .inl ()
 
@@ -68,20 +72,19 @@ lemma through_original_root {x : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).Wor
   : (x = r₁ ∨ (Sum.inr (Sum.inl r₁) ≺ x)) ∨ (x = r₂ ∨ (Sum.inr (Sum.inr r₂) ≺ x)) := by
   match x with
   | .inl x =>
-    have := (@Frame.IsTree.rel_irreflexive (mdpCounterexmpleFrame F₁ F₂ r₁ r₂) mdpCounterexmpleFrame.root _);
-    simp;
-    simp at this;
+    simp only [Function.comp_apply, reduceCtorEq, or_self];
+    apply (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).irrefl mdpCounterexmpleFrame.root;
     contradiction;
   | .inr (.inl x) =>
     by_cases e : x = r₁;
     . subst e; left; tauto;
     . left; right;
-      exact pMorphism₁.forth $ Frame.IsRooted.direct_rooted_of_trans x e
+      exact pMorphism₁.forth $ Frame.root_genaretes'! x e
   | .inr (.inr x) =>
     by_cases h : x = r₂;
     . subst h; right; tauto;
     . right; right;
-      exact pMorphism₂.forth $ Frame.IsRooted.direct_rooted_of_trans x h
+      exact pMorphism₂.forth $ Frame.root_genaretes'! x h
 
 end mdpCounterexmpleFrame
 
@@ -129,12 +132,12 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) 
   have : Hilbert.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
-  have : (Hilbert.GL ⊢! ⊡c ➝ φ₁) ⋎ (Hilbert.GL ⊢! ⊡c ➝ φ₂) := by
-    by_contra hC;
-    have ⟨h₁, h₂⟩ : (Hilbert.GL ⊬ ⊡c ➝ φ₁) ∧ (Hilbert.GL ⊬ ⊡c ➝ φ₂) := not_or.mp hC;
+  have : (Hilbert.GL ⊢! ⊡c ➝ φ₁) ∨ (Hilbert.GL ⊢! ⊡c ➝ φ₂) := by
+    by_contra! hC;
+    have ⟨h₁, h₂⟩ : (Hilbert.GL ⊬ ⊡c ➝ φ₁) ∧ (Hilbert.GL ⊬ ⊡c ➝ φ₂) := hC;
 
-    obtain ⟨M₁, r₁, _, hM₁⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₁;
-    obtain ⟨M₂, r₂, _, hM₂⟩ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₂;
+    obtain ⟨M₁, r₁, _, hM₁⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₁;
+    obtain ⟨M₂, r₂, _, hM₂⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₂;
 
     let M₀ := Kripke.mdpCounterexmpleModel M₁ M₂ r₁ r₂;
     let r₀ := Kripke.mdpCounterexmpleModel.root (M₁ := M₁) (M₂ := M₂) (r₁ := r₁) (r₂ := r₂)
@@ -169,7 +172,7 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Hilbert.GL]! □φ₁ ⋎ □φ₂) 
       push_neg;
       exact ⟨hp₁, hp₂⟩;
     have : ¬(Satisfies M₀ r₀ (□c ➝ (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
-    have : Hilbert.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := Hilbert.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr $ by
+    have : Hilbert.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr $ by
       use M₀, r₀;
       constructor;
       . infer_instance;
@@ -191,6 +194,11 @@ theorem modal_disjunctive (h : Hilbert.GL ⊢! □φ₁ ⋎ □φ₂) : Hilbert.
     have := unnec! $ Context.emptyPrf! h;
     tauto;
   }
+instance : ModalDisjunctive Hilbert.GL := ⟨modal_disjunctive⟩
+instance : ModalDisjunctive Modal.GL where
+  modal_disjunctive := by
+    simp only [Normal.iff_logic_provable_provable];
+    apply modal_disjunctive;
 
 end Hilbert.GL
 

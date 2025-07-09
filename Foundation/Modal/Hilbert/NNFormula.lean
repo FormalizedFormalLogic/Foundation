@@ -1,6 +1,6 @@
 import Foundation.Modal.NNFormula
-import Foundation.Modal.Hilbert.K
 import Foundation.Modal.Entailment.K
+import Foundation.Modal.Hilbert.Normal.Basic
 
 namespace LO.Modal.Hilbert
 

@@ -37,12 +37,12 @@ jobs:
         uses: baptiste0928/cargo-install@v3
         with:
           crate: mdbook
-          version: "0.4.47"
+          version: "0.4.51"
       - name: Setup mdbook-katex
         uses: baptiste0928/cargo-install@v3
         with:
           crate: mdbook-katex
-          version: "0.9.3"
+          version: "0.9.4"
       - name: Print tools version
         run: |
           lake --version
@@ -79,14 +79,20 @@ jobs:
           cp ./import_graph.pdf ./pages/src/assets
           cp ./import_graph.html ./pages/src/assets
 
-      # Build kites
-      # temporary kite generating suspended
-      # - name: Generate kites
+      # Build zoos
+      # 2025/07/07: Generating zoo is temporarily disabled for updating `v4.22.0-rc3`
+      # - name: Generate Propositional Zoo
       #   run: |
-      #     lake exe generate_modal_kite
-      # - name: Copy kites to pages
+      #     lake exe generate_propositional_zoo
+      #     typst compile ./Zoo/propositional.typ ./pages/src/assets/propositional_zoo.png
+      # - name: Generate Modal Zoo
       #   run: |
-      #     cp ./scripts/modal_kite.png ./pages/src/assets
+      #     lake exe generate_modal_zoo
+      #     typst compile ./Zoo/modal.typ ./pages/src/assets/modal_zoo.png
+      # - name: Generate Arith Zoo
+      #   run: |
+      #     lake exe generate_arith_zoo
+      #     typst compile ./Zoo/arith.typ ./pages/src/assets/arith_zoo.png
 
       # Build doc
       - name: Build docs

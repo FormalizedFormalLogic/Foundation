@@ -1,5 +1,4 @@
 import Mathlib.Data.Set.Finite.Powerset
-import Foundation.Vorspiel.Relation.Iterate
 import Foundation.Propositional.Kripke.Preservation
 
 universe u v
@@ -11,7 +10,7 @@ namespace Kripke
 open Formula (atom)
 open Formula.Kripke
 
-def filterEquiv (M : Kripke.Model) (T : FormulaSet ℕ) [T.SubformulaClosed] (x y : M.World) := ∀ φ, (_ : φ ∈ T := by subformula) → x ⊧ φ ↔ y ⊧ φ
+def filterEquiv (M : Kripke.Model) (T : FormulaSet ℕ) [T.SubformulaClosed] (x y : M.World) := ∀ φ, (_ : φ ∈ T := by grind) → x ⊧ φ ↔ y ⊧ φ
 
 variable (M : Kripke.Model) (T : FormulaSet ℕ) [T.SubformulaClosed]
 
@@ -71,7 +70,7 @@ class FilterOf (FM : Model) (M : Model) (T : FormulaSet ℕ) [T.SubformulaClosed
   def_world : FM.World = FilterEqvQuotient M T := by rfl
   def_rel_forth : ∀ {x y : M.World}, x ≺ y → (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧)
   def_rel_back : ∀ {x y : M.World}, (cast def_world.symm ⟦x⟧) ≺ (cast def_world.symm ⟦y⟧) → ∀ φ ∈ T, (x ⊧ φ → y ⊧ φ)
-  def_valuation X a : (ha : (atom a) ∈ T := by subformula) →
+  def_valuation X a : (ha : (atom a) ∈ T := by grind) →
     FM X a ↔ Quotient.lift (λ x => M x a) (by
       intro x y h;
       apply eq_iff_iff.mpr;
@@ -87,11 +86,7 @@ section
 
 variable {M T}
 
-lemma reflexive_filterOf_of_reflexive (h_filter : FilterOf FM M T) (hRefl : Reflexive M.toFrame) : Reflexive FM.Rel := by
-  intro X;
-  obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) X);
-  convert h_filter.def_rel_forth $ hRefl x <;> simp_all;
-
+/-
 lemma serial_filterOf_of_serial (h_filter : FilterOf FM M T) (hSerial : Serial M.toFrame) : Serial FM.Rel := by
   intro X;
   obtain ⟨x, hx⟩ := Quotient.exists_rep (cast (h_filter.def_world) X);
@@ -99,6 +94,7 @@ lemma serial_filterOf_of_serial (h_filter : FilterOf FM M T) (hSerial : Serial M
   use (cast (h_filter.def_world.symm) ⟦y⟧);
   convert h_filter.def_rel_forth $ Rxy;
   simp_all;
+-/
 
 end
 
@@ -109,7 +105,7 @@ section
 variable {M : Model} {T : FormulaSet ℕ} [T.SubformulaClosed]
          (FM : Model) (filterOf : FilterOf FM M T)
 
-theorem filtration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subformula) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
+theorem filtration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by grind) : x ⊧ φ ↔ (cast (filterOf.def_world.symm) ⟦x⟧) ⊧ φ := by
   induction φ generalizing x with
   | hatom a =>
     have := filterOf.def_valuation (cast filterOf.def_world.symm ⟦x⟧) a;
@@ -118,20 +114,20 @@ theorem filtration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subform
     constructor;
     . rintro ⟨hφ, hψ⟩;
       constructor;
-      . refine ihφ (by subformula) |>.mp hφ;
-      . refine ihψ (by subformula) |>.mp hψ;
+      . refine ihφ (by grind) |>.mp hφ;
+      . refine ihψ (by grind) |>.mp hψ;
     . rintro ⟨hφ, hψ⟩;
       constructor;
-      . refine ihφ (by subformula) |>.mpr hφ;
-      . refine ihψ (by subformula) |>.mpr hψ;
+      . refine ihφ (by grind) |>.mpr hφ;
+      . refine ihψ (by grind) |>.mpr hψ;
   | hor φ ψ ihφ ihψ =>
     constructor;
     . rintro (hφ | hψ);
-      . left; exact ihφ (by subformula) |>.mp hφ;
-      . right; exact ihψ (by subformula) |>.mp hψ;
+      . left; exact ihφ (by grind) |>.mp hφ;
+      . right; exact ihψ (by grind) |>.mp hψ;
     . rintro (hφ | hψ);
-      . left; exact ihφ (by subformula) |>.mpr hφ;
-      . right; exact ihψ (by subformula) |>.mpr hψ;
+      . left; exact ihφ (by grind) |>.mpr hφ;
+      . right; exact ihψ (by grind) |>.mpr hψ;
   | himp φ ψ ihφ ihψ =>
     constructor;
     . rintro hφψ Y RXY hφ;
@@ -140,14 +136,14 @@ theorem filtration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by subform
       apply this;
       apply filterOf.def_rel_back ?_ (φ := φ ➝ ψ) hs hφψ;
       . apply _root_.refl;
-      . apply ihφ (by subformula) |>.mpr;
+      . apply ihφ (by grind) |>.mpr;
         simpa [ey] using hφ;
       . simpa [ey] using RXY;
     . rintro hφψ y Rxy hφ;
-      apply ihψ (by subformula) |>.mpr;
+      apply ihψ (by grind) |>.mpr;
       apply hφψ;
       . apply filterOf.def_rel_forth Rxy;
-      . apply ihφ (by subformula) |>.mp hφ;
+      . apply ihφ (by grind) |>.mp hφ;
   | _ => tauto
 
 end
@@ -248,7 +244,7 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
       simp only [Quotient.eq, FilterEqvSetoid, filterEquiv];
       intro φ hφ;
       constructor;
-      . obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp Rxy;
+      . obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp Rxy;
         clear Rxy Ryx;
         induction n using PNat.recOn generalizing x with
         | one =>
@@ -265,7 +261,7 @@ abbrev finestFiltrationTransitiveClosureFrame (M : Model) (T : FormulaSet ℕ) [
           have : u' ⊧ φ := formula_hereditary Rx'u' this;
           have : u ⊧ φ := FilterEqvQuotient.iff_of_eq euu' φ hφ |>.mpr this;
           exact ih u RUY this;
-      . obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp Ryx;
+      . obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp Ryx;
         clear Rxy Ryx;
         induction n using PNat.recOn generalizing y with
         | one =>
@@ -292,7 +288,7 @@ abbrev finestFiltrationTransitiveClosureModel (M : Model) (T : FormulaSet ℕ) [
       intro X Y RXY a hX ha;
       obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
       obtain ⟨y, rfl⟩ := Quotient.exists_rep Y;
-      obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp RXY;
+      obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp RXY;
       clear RXY;
       induction n using PNat.recOn generalizing x with
       | one =>
@@ -319,7 +315,7 @@ instance finestFiltrationTransitiveClosureModel.filterOf : FilterOf (finestFiltr
     tauto;
   def_rel_back := by
     rintro x y RXY;
-    obtain ⟨n, hn⟩ := TransGen.exists_iterate'.mp RXY;
+    obtain ⟨n, hn⟩ := HRel.TransGen.exists_iterate.mp RXY;
     clear RXY;
     induction n using PNat.recOn generalizing x with
     | one =>

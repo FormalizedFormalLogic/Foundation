@@ -1,5 +1,6 @@
 import Foundation.Propositional.Entailment.KC
 import Foundation.Propositional.Kripke.Completeness
+import Foundation.Vorspiel.HRel.Convergent
 
 namespace LO.Propositional
 
@@ -9,14 +10,21 @@ open Formula.Kripke
 namespace Kripke
 
 
+protected abbrev Frame.IsPiecewiseStronglyConvergent (F : Frame) := _root_.IsPiecewiseStronglyConvergent F.Rel
+lemma Frame.ps_convergent {F : Frame} [F.IsPiecewiseStronglyConvergent] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → ∃ u, y ≺ u ∧ z ≺ u := by
+  apply IsPiecewiseStronglyConvergent.ps_convergent
+
+instance : whitepoint.IsPiecewiseStronglyConvergent := ⟨by tauto⟩
+
+
 section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_WeakLEM_of_confluent' : Confluent F → F ⊧ (Axioms.WeakLEM (.atom 0)) := by
-  unfold Confluent Axioms.WeakLEM;
-  contrapose;
-  push_neg;
+lemma validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : F ⊧ (Axioms.WeakLEM (.atom 0)) := by
+  have := F.ps_convergent;
+  revert this;
+  contrapose!;
   intro h;
   obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
   unfold Satisfies at h;
@@ -32,20 +40,14 @@ lemma validate_WeakLEM_of_confluent' : Confluent F → F ⊧ (Axioms.WeakLEM (.a
   obtain ⟨z, Rxz, hz⟩ := h₂;
 
   use x, y, z;
-  constructor;
-  . constructor <;> assumption;
+  refine ⟨Rxy, Rxz, ?_⟩;
   . intro u Ryu;
     by_contra Rzu;
     exact (Satisfies.neg_def.mp hz) Rzu $ Satisfies.formula_hereditary Ryu hy;
 
 
-lemma validate_WeakLEM_of_confluent [IsConfluent _ F] : F ⊧ (Axioms.WeakLEM (.atom 0)) := by
-  apply validate_WeakLEM_of_confluent';
-  exact IsConfluent.confluent;
-
-
-lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confluent F := by
-  rintro h x y z ⟨Rxy, Ryz⟩;
+lemma isPiecewiseStronglyConvergent_of_validate_axiomWeakLEM (h : F ⊧ (Axioms.WeakLEM (.atom 0))) : F.IsPiecewiseStronglyConvergent := ⟨by
+  rintro x y z Rxy Ryz;
   let V : Kripke.Valuation F := ⟨λ {v a} => y ≺ v, by
     intro w v Rwv a Ryw;
     apply F.trans Ryw Rwv;
@@ -62,6 +64,7 @@ lemma confluent_of_validate_WeakLEM : F ⊧ (Axioms.WeakLEM (.atom 0)) → Confl
     assumption;
   obtain ⟨w, Rzw, hw⟩ := by simpa [Satisfies] using @this z Ryz;
   use w;
+⟩
 
 end definability
 
@@ -78,10 +81,8 @@ open canonicalModel
 open SaturatedConsistentTableau
 open Classical
 
-namespace Canonical
-
-instance [Entailment.HasAxiomWeakLEM 𝓢] : IsConfluent _ (canonicalFrame 𝓢).Rel := ⟨by
-  rintro x y z ⟨Rxy, Rxz⟩;
+instance [Entailment.HasAxiomWeakLEM 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStronglyConvergent := ⟨by
+  rintro x y z Rxy Rxz;
   suffices Tableau.Consistent 𝓢 (y.1.1 ∪ z.1.1, ∅) by
     obtain ⟨w, hw⟩ := lindenbaum (𝓢 := 𝓢) this;
     use w;
@@ -146,8 +147,6 @@ instance [Entailment.HasAxiomWeakLEM 𝓢] : IsConfluent _ (canonicalFrame 𝓢)
 
   exact mdp₁_mem mem_nnΘz_x $ mdp_mem₁_provable this mem_Θx_x;
 ⟩
-
-end Canonical
 
 end canonicality
 

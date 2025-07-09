@@ -1,5 +1,6 @@
 import Foundation.Propositional.Kripke.Completeness
 import Foundation.Propositional.Entailment.LC
+import Foundation.Vorspiel.HRel.Connected
 
 namespace LO.Propositional
 
@@ -8,17 +9,20 @@ open Formula.Kripke
 
 namespace Kripke
 
+protected abbrev Frame.IsPiecewiseStronglyConnected (F : Frame) := _root_.IsPiecewiseStronglyConnected F.Rel
+lemma Frame.ps_connected {F : Frame} [F.IsPiecewiseStronglyConnected] : ∀ ⦃x y z : F⦄, x ≺ y → x ≺ z → y ≺ z ∨ z ≺ y := by
+  apply IsPiecewiseStronglyConnected.ps_connected
+
 
 section definability
 
 variable {F : Kripke.Frame}
 
-lemma validate_Dummett_of_connected' : Connected F → F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
-  unfold Axioms.Dummett Connected;
-  contrapose;
-  push_neg;
+lemma validate_axiomDummett_of_isPiecewiseStronglyConnected [F.IsPiecewiseStronglyConnected] : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
+  have := F.ps_connected;
+  revert this;
+  contrapose!;
   intro h;
-
   obtain ⟨V, x, h⟩ := ValidOnFrame.exists_valuation_world_of_not h;
   unfold Satisfies at h;
   push_neg at h;
@@ -31,11 +35,10 @@ lemma validate_Dummett_of_connected' : Connected F → F ⊧ (Axioms.Dummett (.a
 
   replace h₂ := Satisfies.imp_def.not.mp h₂;
   push_neg at h₂;
-  obtain ⟨z, Ryz, ⟨hz1, nhz0⟩⟩ := h₂;
+  obtain ⟨z, Rxz, ⟨hz1, nhz0⟩⟩ := h₂;
 
   use x, y, z;
-  constructor;
-  . constructor <;> assumption;
+  refine ⟨Rxy, Rxz, ?_⟩;
   . by_contra hC;
     replace hC := not_and_or.mp hC;
     push_neg at hC;
@@ -43,12 +46,8 @@ lemma validate_Dummett_of_connected' : Connected F → F ⊧ (Axioms.Dummett (.a
     . exact nhz0 $ Satisfies.formula_hereditary Ryz hy0;
     . exact nhy1 $ Satisfies.formula_hereditary Rzy hz1;
 
-lemma validate_Dummett_of_connected [IsConnected _ F] : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) := by
-  apply validate_Dummett_of_connected';
-  exact IsConnected.connected;
-
-lemma connected_of_validate_Dummett : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1)) → Connected F := by
-  rintro h x y z ⟨Rxy, Ryz⟩;
+lemma isPiecewiseStronglyConnected_of_validate_axiomDummett (h : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1))) : F.IsPiecewiseStronglyConnected := ⟨by
+  rintro x y z Rxy Ryz;
   let V : Kripke.Valuation F := ⟨λ {v a} => match a with | 0 => y ≺ v | 1 => z ≺ v | _ => True, by
     intro w v Rwv a ha;
     split at ha;
@@ -64,6 +63,7 @@ lemma connected_of_validate_Dummett : F ⊧ (Axioms.Dummett (.atom 0) (.atom 1))
   . left;
     apply hi Ryz;
     apply F.refl;
+⟩
 
 end definability
 
@@ -80,10 +80,8 @@ open canonicalModel
 open SaturatedConsistentTableau
 open Classical
 
-namespace Canonical
-
-instance [Entailment.HasAxiomDummett 𝓢] : IsConnected _ (canonicalFrame 𝓢).Rel := ⟨by
-  rintro x y z ⟨Rxy, Ryz⟩;
+instance [Entailment.HasAxiomDummett 𝓢] : (canonicalFrame 𝓢).IsPiecewiseStronglyConnected := ⟨by
+  rintro x y z Rxy Ryz;
   apply or_iff_not_imp_left.mpr;
   intro nRyz;
   obtain ⟨φ, hyp, nhzp⟩ := Set.not_subset.mp nRyz;
@@ -99,8 +97,6 @@ instance [Entailment.HasAxiomDummett 𝓢] : IsConnected _ (canonicalFrame 𝓢)
   have : ψ ∈ y.1.1 := mdp₁_mem hyp hpqy;
   exact this;
 ⟩
-
-end Canonical
 
 end canonicality
 

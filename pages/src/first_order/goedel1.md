@@ -15,15 +15,15 @@ Let $T$ be a $\Delta_1$-definable arithmetic theory, stronger than $\mathsf{R}_0
 
 ### Representeation Theorem
 
-#### Theorem: Let $S$ be a r.e. set. Then, there exists a formula $\varphi_S(x)$ such that $n \in S \iff T \vdash \varphi_S(\overline{n})$ for all $n \in \mathbb{N}$.
+#### Theorem: Let $P$ be a r.e. set. There exists a formula $\varphi_P(x)$ such that $n \in P \iff T \vdash \varphi_P(\overline{n})$ for all $n \in \mathbb{N}$.
 
 ```lean
 lemma re_complete
     [𝐑₀ ≼ T] [Sigma1Sound T]
     {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
-    p x ↔ T ⊢! ↑((codeOfRePred p)/[‘↑x’] : Sentence ℒₒᵣ) 
+    p x ↔ T ⊢! (codeOfRePred p)/[‘↑x’] 
 ```
-- [re_complete](https://formalizedformallogic.github.io/Incompleteness/docs/Logic/FirstOrder/Arith/Representation.html#LO.FirstOrder.Arith.re_complete)
+- [re_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/R0/Representation.html#LO.FirstOrder.Arithmetic.re_complete)
 
 ### Main Theorem
 
@@ -47,7 +47,7 @@ lemma re_complete
 
 ```lean
 theorem goedel_first_incompleteness
-  (T : Theory ℒₒᵣ) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Delta1Definable] :
+  (T : ArithmeticTheory) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Delta1Definable] :
   ¬System.Complete T
 ```
-- [goedel_first_incompleteness](https://formalizedformallogic.github.io/Incompleteness/docs/Incompleteness/Arith/First.html#LO.FirstOrder.Arith.goedel_first_incompleteness)
+- [goedel_first_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/First.html#LO.R0.goedel_first_incompleteness)

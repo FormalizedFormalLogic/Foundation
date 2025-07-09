@@ -1,13 +1,12 @@
-import Foundation.Modal.Hilbert.Basic
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Closure
+import Foundation.Modal.Kripke.Irreflexivize
 
 namespace LO.Modal
 
 open LO.Entailment LO.Modal.Entailment
 open Formula
-open Hilbert.Deduction
 
-variable [DecidableEq α]
 variable {φ : Formula α}
 
 def Formula.boxdotTranslate : Formula α → Formula α
@@ -17,15 +16,15 @@ def Formula.boxdotTranslate : Formula α → Formula α
   | □φ => ⊡(boxdotTranslate φ)
 postfix:90 "ᵇ" => Formula.boxdotTranslate
 
-class BoxdotProperty (L₁ L₂ : Logic) where
-  bdp {φ : _} : φᵇ ∈ L₁ ↔ φ ∈ L₂
 
-
-theorem Hilbert.boxdotTranslated_of_dominate {H₁ H₂ : Hilbert α} [Entailment.K H₂]
+theorem Hilbert.of_provable_boxdotTranslated_axiomInstances {H₁ H₂ : Hilbert.Normal α} [Entailment.K H₂]
   (h : ∀ φ ∈ H₁.axiomInstances, H₂ ⊢! φᵇ) : H₁ ⊢! φ → H₂ ⊢! φᵇ := by
   intro d;
-  induction d using Hilbert.Deduction.rec! with
-  | maxm hs => exact h _ hs;
+  induction d using Hilbert.Normal.rec! with
+  | @axm φ s hs =>
+    apply h;
+    use φ;
+    tauto;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | nec ihp => exact boxdot_nec! $ ihp;
   | imply₂ => exact imply₂!;
@@ -71,7 +70,7 @@ lemma iff_frame_boxdot_reflexive_closure : (F ⊧ (φᵇ)) ↔ ((F^=) ⊧ φ) :=
   . intro h V x; apply iff_boxdot_reflexive_closure.mp; exact h V x;
   . intro h V x; apply iff_boxdot_reflexive_closure.mpr; exact h V x;
 
-lemma iff_reflexivize_irreflexivize [IsRefl _ F] {x : F.World} {V} : (Satisfies ⟨F, V⟩ x φ) ↔ (Satisfies ⟨F^≠^=, V⟩ x φ) := by
+lemma iff_reflexivize_irreflexivize [F.IsReflexive] {x : F.World} {V} : (Satisfies ⟨F, V⟩ x φ) ↔ (Satisfies ⟨F^≠^=, V⟩ x φ) := by
   induction φ generalizing x with
   | hatom φ => rfl;
   | hfalsum => rfl;
@@ -90,7 +89,7 @@ lemma iff_reflexivize_irreflexivize [IsRefl _ F] {x : F.World} {V} : (Satisfies 
       exact h y $ by
         induction Rxy with
         | refl => apply IsRefl.refl;
-        | single h => exact h.2;
+        | single h => exact h.1;
     . intro h y Rxy;
       by_cases e : x = y;
       . subst e;
@@ -98,9 +97,9 @@ lemma iff_reflexivize_irreflexivize [IsRefl _ F] {x : F.World} {V} : (Satisfies 
         exact h x ReflGen.refl;
       . apply ihp (x := y) |>.mpr;
         exact h y $ by
-          exact ReflGen.single ⟨(by simpa), Rxy⟩;
+          exact ReflGen.single ⟨Rxy, (by simpa)⟩;
 
-lemma iff_reflexivize_irreflexivize' [IsRefl _ F] : (F ⊧ φ) ↔ ((F^≠^=) ⊧ φ) := by
+lemma iff_reflexivize_irreflexivize' [F.IsReflexive] : (F ⊧ φ) ↔ ((F^≠^=) ⊧ φ) := by
   constructor;
   . intro h V x; apply iff_reflexivize_irreflexivize.mp; exact h V x;
   . intro h V x; apply iff_reflexivize_irreflexivize.mpr; exact h V x;

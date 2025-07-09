@@ -1,128 +1,126 @@
 import Foundation.Modal.Kripke.AxiomVer
-import Foundation.Modal.Hilbert.WellKnown
-import Foundation.Modal.Kripke.Rooted
-import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.GLPoint3
+import Foundation.Modal.Kripke.Logic.KTc
 
 namespace LO.Modal
 
-open Kripke
+open Entailment
+open Entailment.Context
+open Formula
+open Formula.Kripke
 open Hilbert.Kripke
+open Kripke
 
-protected abbrev Kripke.FrameClass.isolated : FrameClass := { F | IsIsolated _ F }
-protected abbrev Kripke.FrameClass.finite_isolated : FrameClass := { F | Finite F.World ∧ IsIsolated _ F }
+namespace Kripke
+
+variable {F : Frame}
+
+protected abbrev Frame.IsVer (F : Frame) := F.IsIsolated
+protected class Frame.IsFiniteVer (F : Frame) extends F.IsFinite, F.IsVer
+
+instance [F.IsFiniteVer] : F.IsFiniteGLPoint3 where
+
+@[simp] lemma Frame.isolated [F.IsVer] {x y : F} : ¬x ≺ y := by apply _root_.isolated;
+
+protected abbrev FrameClass.Ver : FrameClass := { F | F.IsVer }
+protected abbrev FrameClass.finite_Ver : FrameClass := { F | F.IsFiniteVer }
+
+end Kripke
+
 
 namespace Hilbert.Ver.Kripke
 
-instance sound : Sound (Hilbert.Ver) FrameClass.isolated := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.Ver FrameClass.Ver := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F hF _ (rfl | rfl);
-  have := Set.mem_setOf_eq.mp hF;
-  exact Kripke.validate_AxiomVer_of_isolated (F := F);
+  simp_all only [Set.mem_setOf_eq];
+  exact validate_AxiomVer_of_isIsolated;
 
-instance sound_finite_isolated : Sound (Hilbert.Ver) Kripke.FrameClass.finite_isolated :=
+instance : Sound (Hilbert.Ver) Kripke.FrameClass.finite_Ver :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomK;
-    rintro F ⟨_, _⟩ _ (rfl | rfl);
-    exact validate_AxiomVer_of_isolated (F := F);
+    rintro F hF _ (rfl | rfl);
+    simp_all only [Set.mem_setOf_eq];
+    exact validate_AxiomVer_of_isIsolated;
 
-instance consistent : Entailment.Consistent (Hilbert.Ver) := consistent_of_sound_frameclass FrameClass.isolated $ by
+instance : Entailment.Consistent Hilbert.Ver := consistent_of_sound_frameclass FrameClass.Ver $ by
   use blackpoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Kripke.Canonical (Hilbert.Ver) FrameClass.isolated := ⟨by
+instance : Kripke.Canonical Hilbert.Ver FrameClass.Ver := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.Ver) FrameClass.isolated := inferInstance
+instance : Complete Hilbert.Ver FrameClass.Ver := inferInstance
 
-instance complete_finite_isolated : Complete (Hilbert.Ver) Kripke.FrameClass.finite_isolated := ⟨by
+instance : Complete (Hilbert.Ver) Kripke.FrameClass.finite_Ver := ⟨by
   intro φ hφ;
-  apply Kripke.complete.complete;
-  intro F ⟨F_iso⟩ V r;
+  apply LO.Complete.complete (𝓢 := Hilbert.Ver) (𝓜 := FrameClass.Ver);
+  intro F hF V r;
   apply Model.pointGenerate.modal_equivalent_at_root (r := r) |>.mp;
   apply hφ;
-  refine ⟨?_, ?_⟩;
-  . apply finite_iff_exists_equiv_fin.mpr;
-    use 1;
-    constructor;
-    trans Unit;
-    . refine ⟨λ _ => (), λ _ => ⟨r, by tauto⟩, ?_, ?_⟩
-      . simp [Function.LeftInverse];
-        intro x Rrx;
-        exfalso;
-        induction Rrx with
-        | single h => exact F_iso h;
-        | tail _ h => exact F_iso h;
-      . simp [Function.RightInverse, Function.LeftInverse];
-    . exact finOneEquiv.symm;
-  . apply isIsolated_iff _ _ |>.mpr;
-    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ <;> apply F_iso;
+  exact {
+    world_finite := by
+      apply finite_iff_exists_equiv_fin.mpr;
+      use 1;
+      constructor;
+      trans Unit;
+      . refine ⟨λ _ => (), λ _ => ⟨r, by tauto⟩, ?_, ?_⟩
+        . simp only [Function.LeftInverse, Subtype.forall, Subtype.mk.injEq, forall_eq_or_imp, true_and];
+          intro x Rrx;
+          induction Rrx <;> simp_all;
+        . simp [Function.RightInverse, Function.LeftInverse];
+      . exact finOneEquiv.symm;
+    isolated := by rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ <;> simp_all;
+  }
 ⟩
 
-end Hilbert.Ver.Kripke
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma Ver.Kripke.isolated : Logic.Ver = FrameClass.isolated.logic := eq_hilbert_logic_frameClass_logic
-lemma Ver.Kripke.finite_isolated : Logic.Ver = FrameClass.finite_isolated.logic := eq_hilbert_logic_frameClass_logic
-
-theorem Ver.proper_extension_of_Ktc : Logic.KTc ⊂ Logic.Ver := by
+instance : Hilbert.KTc ⪱ Hilbert.Ver := by
   constructor;
-  . rw [KTc.Kripke.corefl, Ver.Kripke.isolated];
-    rintro φ hφ F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply hφ;
-    apply Set.mem_setOf_eq.mpr;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.KTc FrameClass.Ver;
+    intro F hF;
+    simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.corefl ⊧ φ by
-      rw [KTc.Kripke.corefl];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Ver ⊥);
     constructor;
-    . exact axiomVer!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.KTc);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩;
       use M, 0;
       constructor;
       . refine ⟨by unfold Coreflexive; trivial⟩
-      . suffices ∃ x, (0 : M.World) ≺ x by simpa [Satisfies, Semantics.Realize];
+      . suffices ∃ x, (0 : M.World) ≺ x by
+          simpa [Satisfies, Semantics.Realize];
         use 0;
 
-theorem Ver.proper_extension_of_GLPoint3 : Logic.GLPoint3 ⊂ Logic.Ver := by
+instance : Hilbert.GLPoint3 ⪱ Hilbert.Ver := by
   constructor;
-  . rw [GLPoint3.Kripke.finite_strict_linear_order, Ver.Kripke.finite_isolated];
-    rintro φ hφ F ⟨_, _⟩;
-    apply hφ;
-    refine ⟨by tauto, inferInstance, inferInstance⟩;
-  . suffices ∃ φ, Hilbert.Ver ⊢! φ ∧ ¬FrameClass.finite_strict_linear_order ⊧ φ by
-      rw [GLPoint3.Kripke.finite_strict_linear_order];
-      tauto;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GLPoint3 FrameClass.finite_Ver;
+    intro F hF;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Ver ⊥);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GLPoint3);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => x < y⟩, (λ w a => False)⟩, 0;
       constructor;
-      . refine ⟨inferInstance, {irrefl := ?_, trans := ?_}, ⟨?_⟩⟩;
-        . omega;
-        . omega;
-        . simp [WeakConnected];
+      . exact {}
       . simp only [Semantics.Realize, Satisfies, imp_false, not_forall, not_not];
         use 1;
         tauto;
 
-@[simp]
-theorem Univ.proper_extension_of_Ver : Logic.Ver ⊂ Logic.Univ := by  constructor <;> simp;
+end Hilbert.Ver.Kripke
 
-end Logic
+instance : Modal.KTc ⪱ Modal.Ver := inferInstance
 
+instance : Modal.GLPoint3 ⪱ Modal.Ver := inferInstance
 
 end LO.Modal
