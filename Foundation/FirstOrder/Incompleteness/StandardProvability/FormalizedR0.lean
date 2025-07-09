@@ -598,7 +598,7 @@ noncomputable def replace.proof (φ : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1)) :
   unfold replace
   suffices
     ∃ x < ^∀ ^∀ (^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#1 ∷ 0) φ.val ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#0 ∷ 0) φ.val),
-      ⌜ℒₒᵣ⌝.IsSemiformula 1 x ∧
+      IsSemiformula ℒₒᵣ 1 x ∧
         ^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#1 ∷ 0) φ.val ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#0 ∷ 0) φ.val =
           ^#1 ^= ^#0 ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#1 ∷ 0) x ^→[⌜ℒₒᵣ⌝] substs ℒₒᵣ (^#0 ∷ 0) x by
     simpa [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve,

@@ -344,7 +344,7 @@ lemma replace {P : α → Prop} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx
 
 lemma semiterm_induction (Γ) {n : V} {P : Semiterm ℒₒᵣ n → Prop}
     (hP : Γ-[1]-Predicate (fun x ↦ (h : IsSemiterm ℒₒᵣ n x) → P ⟨x, h⟩))
-    (hBvar : ∀ (z : V) (h : z < n), P (⌜ℒₒᵣ⌝.bvar z h))
+    (hBvar : ∀ (z : V) (h : z < n), P (bvar ℒₒᵣ z h))
     (hFvar : ∀ x, P (⌜ℒₒᵣ⌝.fvar x))
     (hZero : P ((0 : V) : Semiterm ℒₒᵣ n))
     (hOne : P ((1 : V) : Semiterm ℒₒᵣ n))

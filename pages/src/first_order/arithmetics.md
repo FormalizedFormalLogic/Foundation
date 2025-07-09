@@ -78,7 +78,7 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 |      $(x)_y$ ($y$-th element of sequence)       | [`znth x`]              |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Sigma_0$ |       $x$        |
 |            $\mathrm{Semiterm}_x (y)$            | [`Semiterm L x y`]      |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
 |                  $t [\vec{w}]$                  | [`L.termSubst w t`]     |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
-|           $\mathrm{Semiformula}_x(y)$           | [`L.Semiformula x y`]   |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
+|           $\mathrm{Semiformula}_x(y)$           | [`Semiformula L x y`]   |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
 |                  $φ [\vec{w}]$                  | [`substs L w φ`]        |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
 |            $\mathrm{Pr}_T(\varphi)$             | [`T.Provable φ`]       |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Sigma_1$ |        -         |
  
@@ -111,7 +111,7 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 [`znth x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.znth
 [`Semiterm L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Basic.html#LO.ISigma1.Metamath.IsSemiterm
 [`L.termSubst w t`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Functions.html#LO.ISigma1.Metamath.Language.termSubst
-[`L.Semiformula x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Basic.html#LO.ISigma1.Metamath.IsSemiformula
+[`Semiformula L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Basic.html#LO.ISigma1.Metamath.IsSemiformula
 [`substs L w φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Functions.html#LO.ISigma1.Metamath.substs
 [`T.Provable φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/FormalizedR0.html#LO.FirstOrder.Theory.Provable%E2%82%90
 

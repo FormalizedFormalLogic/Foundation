@@ -429,25 +429,25 @@ lemma pos {p : V} (h : IsUFormula L p) : 0 < p := by
     ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, _, _, rfl⟩ | ⟨_, _, _, rfl⟩ | ⟨_, _, _, rfl⟩) <;>
     simp [qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
 
---lemma IsSemiformula.pos {n p : V} (h : L.Semiformula n p) : 0 < p := h.1.pos
+--lemma IsSemiformula.pos {n p : V} (h : Semiformula L n p) : 0 < p := h.1.pos
 
 @[simp] lemma not_zero : ¬IsUFormula L (0 : V) := by intro h; simpa using h.pos
 
--- @[simp] lemma IsSemiformula.not_zero (m : V) : ¬L.Semiformula m (0 : V) := by intro h; simpa using h.pos
+-- @[simp] lemma IsSemiformula.not_zero (m : V) : ¬Semiformula L m (0 : V) := by intro h; simpa using h.pos
 
 /-
 @[simp] lemma IsSemiformula.rel {k r v : V} :
     IsUFormula L (^rel k r v) ↔ L.IsRel k r ∧ IsUTermVec L k v := by simp
 @[simp] lemma IsSemiformula.nrel {n k r v : V} :
-    L.Semiformula n (^nrel n k r v) ↔ L.IsRel k r ∧ SemitermVec L k n v := by simp [IsSemiformula]
-@[simp] lemma IsSemiformula.verum (n : V) : L.Semiformula n ^⊤[n] := by simp [IsSemiformula]
-@[simp] lemma IsSemiformula.falsum (n : V) : L.Semiformula n ^⊥[n] := by simp [IsSemiformula]
+    Semiformula L n (^nrel n k r v) ↔ L.IsRel k r ∧ SemitermVec L k n v := by simp [IsSemiformula]
+@[simp] lemma IsSemiformula.verum (n : V) : Semiformula L n ^⊤[n] := by simp [IsSemiformula]
+@[simp] lemma IsSemiformula.falsum (n : V) : Semiformula L n ^⊥[n] := by simp [IsSemiformula]
 @[simp] lemma IsSemiformula.and {n p q : V} :
-    L.Semiformula n (p ^⋏ q) ↔ L.Semiformula n p ∧ L.Semiformula n q := by simp [IsSemiformula]
+    Semiformula L n (p ^⋏ q) ↔ Semiformula L n p ∧ Semiformula L n q := by simp [IsSemiformula]
 @[simp] lemma IsSemiformula.or {n p q : V} :
-    L.Semiformula n (p ^⋎ q) ↔ L.Semiformula n p ∧ L.Semiformula n q := by simp [IsSemiformula]
-@[simp] lemma IsSemiformula.all {n p : V} : L.Semiformula n (^∀ p) ↔ L.Semiformula (n + 1) p := by simp [IsSemiformula]
-@[simp] lemma IsSemiformula.ex {n p : V} : L.Semiformula n (^∃ p) ↔ L.Semiformula (n + 1) p := by simp [IsSemiformula]
+    Semiformula L n (p ^⋎ q) ↔ Semiformula L n p ∧ Semiformula L n q := by simp [IsSemiformula]
+@[simp] lemma IsSemiformula.all {n p : V} : Semiformula L n (^∀ p) ↔ Semiformula L (n + 1) p := by simp [IsSemiformula]
+@[simp] lemma IsSemiformula.ex {n p : V} : Semiformula L n (^∃ p) ↔ Semiformula L (n + 1) p := by simp [IsSemiformula]
 -/
 
 lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
@@ -502,11 +502,11 @@ lemma IsSemiformula.induction (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation 
     (hnrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
     (hfalsum : ∀ n, P n ^⊥[n])
-    (hand : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P n p → P n q → P n (p ^⋏ q))
-    (hor : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P n p → P n q → P n (p ^⋎ q))
-    (hall : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∀ p))
-    (hex : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∃ p)) :
-    ∀ n p, L.Semiformula n p → P n p := by
+    (hand : ∀ n p q, Semiformula L n p → Semiformula L n q → P n p → P n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, Semiformula L n p → Semiformula L n q → P n p → P n q → P n (p ^⋎ q))
+    (hall : ∀ n p, Semiformula L (n + 1) p → P (n + 1) p → P n (^∀ p))
+    (hex : ∀ n p, Semiformula L (n + 1) p → P (n + 1) p → P n (^∃ p)) :
+    ∀ n p, Semiformula L n p → P n p := by
   suffices ∀ p, IsUFormula L p → ∀ n ≤ p, fstIdx p = n → P n p
   by rintro n p ⟨h, rfl⟩; exact this p h (fstIdx p) (by simp) rfl
   apply IsUFormula.induction (P := fun p ↦ ∀ n ≤ p, fstIdx p = n → P n p) Γ
@@ -533,11 +533,11 @@ lemma IsSemiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺₁-Rela
     (hnrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
     (hfalsum : ∀ n, P n ^⊥[n])
-    (hand : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P n p → P n q → P n (p ^⋏ q))
-    (hor : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P n p → P n q → P n (p ^⋎ q))
-    (hall : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∀ p))
-    (hex : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∃ p)) :
-    ∀ n p, L.Semiformula n p → P n p :=
+    (hand : ∀ n p q, Semiformula L n p → Semiformula L n q → P n p → P n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, Semiformula L n p → Semiformula L n q → P n p → P n q → P n (p ^⋎ q))
+    (hall : ∀ n p, Semiformula L (n + 1) p → P (n + 1) p → P n (^∀ p))
+    (hex : ∀ n p, Semiformula L (n + 1) p → P (n + 1) p → P n (^∃ p)) :
+    ∀ n p, Semiformula L n p → P n p :=
   IsSemiformula.induction 𝚺 hP hrel hnrel hverum hfalsum hand hor hall hex
 
 lemma IsSemiformula.ISigma1.pi1_succ_induction {P : V → V → Prop} (hP : 𝚷₁-Relation P)
@@ -545,11 +545,11 @@ lemma IsSemiformula.ISigma1.pi1_succ_induction {P : V → V → Prop} (hP : 𝚷
     (hnrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
     (hfalsum : ∀ n, P n ^⊥[n])
-    (hand : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P n p → P n q → P n (p ^⋏ q))
-    (hor : ∀ n p q, L.Semiformula n p → L.Semiformula n q → P n p → P n q → P n (p ^⋎ q))
-    (hall : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∀ p))
-    (hex : ∀ n p, L.Semiformula (n + 1) p → P (n + 1) p → P n (^∃ p)) :
-    ∀ n p, L.Semiformula n p → P n p :=
+    (hand : ∀ n p q, Semiformula L n p → Semiformula L n q → P n p → P n q → P n (p ^⋏ q))
+    (hor : ∀ n p q, Semiformula L n p → Semiformula L n q → P n p → P n q → P n (p ^⋎ q))
+    (hall : ∀ n p, Semiformula L (n + 1) p → P (n + 1) p → P n (^∀ p))
+    (hex : ∀ n p, Semiformula L (n + 1) p → P (n + 1) p → P n (^∃ p)) :
+    ∀ n p, Semiformula L n p → P n p :=
   IsSemiformula.induction 𝚷 hP hrel hnrel hverum hfalsum hand hor hall hex
 -/
 
@@ -1201,17 +1201,17 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
     (hNRel : ∀ param k R v, L.IsRel k R → SemitermVec L k n v → P param (^nrel n k R v) (c.nrel param k R v))
     (hverum : ∀ param, P param (^⊤[n]) (c.verum param))
     (hfalsum : ∀ param, P param (^⊥[n]) (c.falsum param))
-    (hand : ∀ param p q, L.Semiformula n p → L.Semiformula n q →
+    (hand : ∀ param p q, Semiformula L n p → Semiformula L n q →
       P param p (c.result L param p) → P param q (c.result L param q) → P param (p ^⋏ q) (c.and param p q (c.result L param p) (c.result L param q)))
-    (hor : ∀ param p q, L.Semiformula n p → L.Semiformula n q →
+    (hor : ∀ param p q, Semiformula L n p → Semiformula L n q →
       P param p (c.result L param p) → P param q (c.result L param q) → P param (p ^⋎ q) (c.or param p q (c.result L param p) (c.result L param q)))
-    (hall : ∀ param p, L.Semiformula (n + 1) p →
+    (hall : ∀ param p, Semiformula L (n + 1) p →
       P (c.allChanges param) (n + 1) p (c.result L (c.allChanges param) p) →
       P param (^∀ p) (c.all param p (c.result L (c.allChanges param) p)))
-    (hex : ∀ param p, L.Semiformula (n + 1) p →
+    (hex : ∀ param p, Semiformula L (n + 1) p →
       P (c.exChanges param) (n + 1) p (c.result L (c.exChanges param) p) →
       P param (^∃ p) (c.ex param p (c.result L (c.exChanges param) p))) :
-    ∀ {param p : V}, L.Semiformula n p → P param p (c.result L param p) := by
+    ∀ {param p : V}, Semiformula L n p → P param p (c.result L param p) := by
   suffices ∀ {param p : V}, IsUFormula L p → ∀ n ≤ p, n = fstIdx p → P param p (c.result L param p)
   by intro param p hp; exact @this param p hp.1 n (by simp [hp.2]) hp.2
   intro param p hp

@@ -403,7 +403,7 @@ variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Enco
 
 @[simp] lemma quote_imply {n} (φ ψ : SyntacticSemiformula L n) :
     ⌜φ ➝ ψ⌝ = (L.codeIn V).imp ⌜φ⌝ ⌜ψ⌝ := by
-  simp [Semiformula.imp_eq, Language.Semiformula.imp_def, Semiformula.quote_or, quote_neg]; rfl
+  simp [Semiformula.imp_eq, Semiformula.imp_def, Semiformula.quote_or, quote_neg]; rfl
 
 @[simp] lemma quote_iff {n} (φ ψ : SyntacticSemiformula L n) :
     ⌜φ ⭤ ψ⌝ = (L.codeIn V).iff ⌜φ⌝ ⌜ψ⌝ := by
@@ -550,7 +550,7 @@ instance goedelQuoteSyntacticFormulaToCodedFormula : GoedelQuote (SyntacticFormu
 @[simp] lemma codeIn'_neg (φ : SyntacticSemiformula L n) : (⌜∼φ⌝ : (L.codeIn V).Semiformula n) = ∼⌜φ⌝ := by
   ext; simp
 @[simp] lemma codeIn'_imp (φ ψ : SyntacticSemiformula L n) : (⌜φ ➝ ψ⌝ : (L.codeIn V).Semiformula n) = ⌜φ⌝ ➝ ⌜ψ⌝ := by
-  simp [Semiformula.imp_eq, Language.Semiformula.imp_def]
+  simp [Semiformula.imp_eq, Semiformula.imp_def]
 
 @[simp] lemma codeIn'_weight (k n : ℕ) :
     (⌜(weight k : SyntacticSemiformula L n)⌝ : (L.codeIn V).Semiformula n) = (verums (L := L.codeIn V) k) := by
@@ -571,13 +571,13 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
     (⌜nrel Language.LT.lt v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ ≮' ⌜v 1⌝) := by
   ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.notLessThan]
 @[simp] lemma codeIn'_ball (t : SyntacticSemiterm ℒₒᵣ n) (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
-    (⌜∀[“#0 < !!(Rew.bShift t)”] φ⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = Language.Semiformula.ball ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
-  ext; simp [LO.ball, imp_eq, Language.Semiformula.cast,
-    Language.Semiformula.ball, Semiformula.Operator.lt_def]
+    (⌜∀[“#0 < !!(Rew.bShift t)”] φ⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = Semiformula.ball ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
+  ext; simp [LO.ball, imp_eq, Semiformula.cast,
+    Semiformula.ball, Semiformula.Operator.lt_def]
 @[simp] lemma codeIn'_bex (t : SyntacticSemiterm ℒₒᵣ n) (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
-    (⌜∃[“#0 < !!(Rew.bShift t)”] φ⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = Language.Semiformula.bex ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
-  ext; simp [LO.bex, imp_eq, Language.Semiformula.cast,
-    Language.Semiformula.ball, Semiformula.Operator.lt_def]
+    (⌜∃[“#0 < !!(Rew.bShift t)”] φ⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = Semiformula.bex ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
+  ext; simp [LO.bex, imp_eq, Semiformula.cast,
+    Semiformula.ball, Semiformula.Operator.lt_def]
 
 instance : GoedelQuote (Sentence L) ((L.codeIn V).Formula) := ⟨fun σ ↦ (⌜Rew.embs ▹ σ⌝ : (Language.codeIn L V).Semiformula (0 : ℕ))⟩
 

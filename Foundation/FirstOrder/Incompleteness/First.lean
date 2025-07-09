@@ -29,7 +29,7 @@ theorem incomplete
   let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : SyntacticSemiformula ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦
-        ⌜ℒₒᵣ⌝.IsSemiformula 1 φ ∧
+        IsSemiformula ℒₒᵣ 1 φ ∧
           (T.codeIn ℕ).Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral φ] φ) := by
       definability
     exact REPred.of_eq (re_iff_sigma1.mpr this) <| by

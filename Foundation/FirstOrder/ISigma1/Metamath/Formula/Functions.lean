@@ -833,7 +833,7 @@ lemma Language.IsFVFree.ex {n p : V} (hp : L.IsFVFree (n + 1) p) :
 @[simp] lemma Language.IsFVFree.neg_iff : L.IsFVFree n (neg L p) ↔ L.IsFVFree n p := by
   constructor
   · intro h
-    have hp : L.Semiformula n p := IsSemiformula.neg_iff.mp h.1
+    have hp : Semiformula L n p := IsSemiformula.neg_iff.mp h.1
     have : shift L (neg L p) = neg L p := h.2
     simp [shift_neg hp, neg_inj_iff hp.shift hp] at this
     exact ⟨hp, this⟩
