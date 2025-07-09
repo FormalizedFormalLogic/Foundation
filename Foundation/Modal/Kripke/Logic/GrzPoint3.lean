@@ -156,7 +156,7 @@ instance : Hilbert.S4Point3 ⪱ Hilbert.GrzPoint3 := by
             rintro x y z Rxy Rxz;
             simp;
         };
-      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
+      . simp [Semantics.Realize, Satisfies];
 
 end Logic
 

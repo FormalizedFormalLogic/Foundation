@@ -231,10 +231,10 @@ lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by
   | _ => simp;
 
 lemma fconj_def {Γ : Finset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
-  simp only [Semantics.realize_finset_conj, Satisfies.iff_models];
+  simp only [Semantics.realize_finset_conj];
 
 lemma fdisj_def {Γ : Finset _} : x ⊧ Γ.disj ↔ ∃ φ ∈ Γ, x ⊧ φ := by
-  simp only [Semantics.realize_finset_disj, Satisfies.iff_models];
+  simp only [Semantics.realize_finset_disj];
 
 lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 

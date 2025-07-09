@@ -235,7 +235,7 @@ lemma exists_consistent_maximal_of_consistent (T_consis : Consistent 𝓢 T)
   obtain ⟨Z, h₁, ⟨h₂, h₃⟩⟩ := zorn_subset_nonempty { T : FormulaSet α | Consistent 𝓢 T} (by
     intro c hc chain hnc;
     existsi (⋃₀ c);
-    simp only [Set.mem_setOf_eq, Set.mem_sUnion];
+    simp only [Set.mem_setOf_eq];
     constructor;
     . apply def_consistent.mpr;
       intro Γ hΓ;

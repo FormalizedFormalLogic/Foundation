@@ -91,7 +91,7 @@ instance [Consistent L] : L ⪱ (Set.univ : Logic α) := by
     use φ;
     constructor;
     . assumption;
-    . simp [Entailment.theory]
+    . simp
 
 end
 

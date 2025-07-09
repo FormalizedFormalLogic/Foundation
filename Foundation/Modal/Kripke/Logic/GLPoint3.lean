@@ -75,7 +75,7 @@ instance : Hilbert.K4Point3 ⪱ Hilbert.GLPoint3 := by
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         constructor;
-      . simp [Semantics.Realize, Satisfies, ValidOnFrame];
+      . simp [Semantics.Realize, Satisfies];
         constructor;
         . intro y Rxy;
           use y;

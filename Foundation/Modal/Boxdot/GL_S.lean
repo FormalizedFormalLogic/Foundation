@@ -32,7 +32,7 @@ lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢! φᵇ ↔ Modal.S
       apply Satisfies.fconj_def.mpr;
       intro ψ hψ;
       apply Satisfies.fconj_def.mp hi;
-      simp only [Finset.mem_image, Finset.eq_prebox_premultibox_one, Finset.mem_preimage, Function.iterate_one] at hψ ⊢;
+      simp only [Finset.mem_image, Finset.mem_preimage, Function.iterate_one] at hψ ⊢;
       obtain ⟨ξ, hξ, rfl⟩ := hψ;
       use ξ;
 

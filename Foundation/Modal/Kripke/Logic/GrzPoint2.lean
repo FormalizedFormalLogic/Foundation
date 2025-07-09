@@ -320,7 +320,8 @@ instance : Hilbert.Grz ⪱ Hilbert.GrzPoint2 := by
           use 1;
           constructor;
           . omega;
-          . intro y Rxy; simp_all [M, Semantics.Realize, Satisfies, Frame.Rel'];
+          . intro y Rxy;
+            simp_all [M, Satisfies, Frame.Rel'];
         . apply Satisfies.box_def.not.mpr;
           push_neg;
           use 2;
