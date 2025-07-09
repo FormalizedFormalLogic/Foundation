@@ -46,7 +46,7 @@ instance : Canonical (Hilbert.S4H) FrameClass.S4H := ⟨by constructor⟩
 
 instance : Complete (Hilbert.S4H) FrameClass.S4H := inferInstance
 
-instance : Complete (Hilbert.S4H) FrameClass.finite_S4H := by sorry;
+instance : Complete Hilbert.S4H FrameClass.finite_S4H := by sorry
 
 end S4H.Kripke
 

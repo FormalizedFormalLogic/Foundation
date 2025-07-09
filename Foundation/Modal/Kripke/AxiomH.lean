@@ -1,6 +1,4 @@
-import Foundation.Modal.Kripke.Completeness
-import Foundation.Modal.Kripke.AxiomGrz
-
+import Foundation.Modal.Kripke.Rooted
 
 namespace LO.Modal
 
@@ -38,6 +36,11 @@ instance [F.IsFinite] [F.IsDetourFree] : F.IsAntisymmetric := by
   constructor;
   intro x y Rxy Ryx;
   rcases F.detour_free Rxy Ryx with rfl | rfl <;> trivial;
+
+instance {r : F.World} [F.IsDetourFree] : (F↾r).IsDetourFree := ⟨by
+  rintro ⟨x, (rfl | Rrx)⟩ ⟨u, (rfl | Rru)⟩ ⟨y, (rfl | Rry)⟩ Rxu Ruy <;>
+  rcases F.detour_free Rxu Ruy with h | h <;> simp_all;
+⟩
 
 end
 
