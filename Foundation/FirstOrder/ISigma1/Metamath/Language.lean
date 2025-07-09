@@ -4,135 +4,103 @@ namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V]
+variable {L : Language} [L.Encodable]
 
-variable (V)
+instance (k) : Semiterm.Operator.GoedelNumber ℒₒᵣ (L.Func k) := ⟨fun f ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode f)⟩
 
-structure _root_.LO.FirstOrder.Arithmetic.LDef where
-  func : 𝚺₀.Semisentence 2
-  rel : 𝚺₀.Semisentence 2
-
-protected structure Language where
-  Func (arity : V) : V → Prop
-  Rel (arity : V) : V → Prop
-
-variable {V}
-
-namespace Language
-
-protected class Defined (L : Metamath.Language V) (pL : outParam LDef) where
-  func : 𝚺₀-Relation L.Func via pL.func
-  rel : 𝚺₀-Relation L.Rel via pL.rel
-
-variable {L : Metamath.Language V} {pL : LDef} [L.Defined pL]
-
-@[simp] lemma Defined.eval_func (v) :
-    Semiformula.Evalbm V v pL.func.val ↔ L.Func (v 0) (v 1) := Defined.func.df.iff v
-
-@[simp] lemma Defined.eval_rel_iff (v) :
-    Semiformula.Evalbm V v pL.rel.val ↔ L.Rel (v 0) (v 1) := Defined.rel.df.iff v
-
-instance Defined.func_definable : 𝚺₀-Relation L.Func := Defined.func.to_definable
-
-instance Defined.rel_definable : 𝚺₀-Relation L.Rel := Defined.rel.to_definable
-
-@[simp, definability] instance Defined.func_definable' (ℌ) : ℌ-Relation L.Func :=
-  HierarchySymbol.Boldface.of_zero Defined.func_definable
-
-@[simp, definability] instance Defined.rel_definable' (ℌ) : ℌ-Relation L.Rel :=
-  HierarchySymbol.Boldface.of_zero Defined.rel_definable
-
-end Language
-
-section
-
-variable {L₀ : Language} [L₀.ORing]
-
-variable {L : Language} [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)]
-
-instance (k) : Semiterm.Operator.GoedelNumber L₀ (L.Func k) := ⟨fun f ↦ Semiterm.Operator.numeral L₀ (Encodable.encode f)⟩
-
-instance (k) : Semiterm.Operator.GoedelNumber L₀ (L.Rel k) := ⟨fun r ↦ Semiterm.Operator.numeral L₀ (Encodable.encode r)⟩
+instance (k) : Semiterm.Operator.GoedelNumber ℒₒᵣ (L.Rel k) := ⟨fun r ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode r)⟩
 
 variable (L)
 
-class DefinableLanguage extends Arithmetic.LDef where
+protected class _root_.LO.FirstOrder.Language.LORDefinable where
+  func : 𝚺₀.Semisentence 2
+  rel : 𝚺₀.Semisentence 2
   func_iff {k c : ℕ} :
     c ∈ Set.range (Encodable.encode : L.Func k → ℕ) ↔ ℕ ⊧/![k, c] func.val
   rel_iff {k c : ℕ} :
     c ∈ Set.range (Encodable.encode : L.Rel k → ℕ) ↔ ℕ ⊧/![k, c] rel.val
 
-def _root_.LO.FirstOrder.Language.lDef [d : DefinableLanguage L] : LDef := d.toLDef
+alias _root_.LO.FirstOrder.Language.funcDef := Language.LORDefinable.func
+alias _root_.LO.FirstOrder.Language.relDef := Language.LORDefinable.rel
+alias _root_.LO.FirstOrder.Language.iff_funcDef := Language.LORDefinable.func_iff
+alias _root_.LO.FirstOrder.Language.iff_relDef := Language.LORDefinable.rel_iff
+
+variable {V : Type*} [ORingStruc V] [L.LORDefinable]
+
+def _root_.LO.FirstOrder.Language.IsFunc (arity f : V) : Prop := V ⊧/![arity, f] L.funcDef.val
+
+def _root_.LO.FirstOrder.Language.IsRel (arity f : V) : Prop := V ⊧/![arity, f] L.relDef.val
 
 variable {L}
 
-variable [DefinableLanguage L]
+@[simp] lemma eval_func (v) :
+    Semiformula.Evalbm V v L.funcDef.val ↔ L.IsFunc (v 0) (v 1) := by simp [Language.IsFunc, ← Matrix.fun_eq_vec_two]
 
-variable {V : Type*} [ORingStruc V]
+@[simp] lemma eval_rel_iff (v) :
+    Semiformula.Evalbm V v L.relDef.val ↔ L.IsRel (v 0) (v 1) := by simp [Language.IsRel, ← Matrix.fun_eq_vec_two]
 
-variable (L V)
+lemma _root_.LO.FirstOrder.Language.IsFunc.defined : 𝚺₀-Relation (L.IsFunc (V := V)) via L.funcDef := fun v ↦ by simp
 
-def _root_.LO.FirstOrder.Language.codeIn : Metamath.Language V where
-  Func := fun x y ↦ V ⊧/![x, y] L.lDef.func.val
-  Rel := fun x y ↦ V ⊧/![x, y] L.lDef.rel.val
+lemma _root_.LO.FirstOrder.Language.IsRel.defined : 𝚺₀-Relation (L.IsRel (V := V)) via L.relDef := fun v ↦ by simp
 
-lemma _root_.LO.FirstOrder.Language.codeIn_func_def : (L.codeIn V).Func = fun x y ↦ V ⊧/![x, y] L.lDef.func.val := rfl
+instance _root_.LO.FirstOrder.Language.IsFunc.definable : 𝚺₀-Relation (L.IsFunc (V := V)) := Language.IsFunc.defined.to_definable
 
-variable {L V}
+instance _root_.LO.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsRel (V := V)) := Language.IsRel.defined.to_definable
+
+@[simp, definability] instance _root_.LO.FirstOrder.Language.IsFunc.definable' (ℌ) : ℌ-Relation (L.IsFunc (V := V)) :=
+  HierarchySymbol.Boldface.of_zero Language.IsFunc.definable
+
+@[simp, definability] instance _root_.LO.FirstOrder.Language.IsRel.definable' (ℌ) : ℌ-Relation (L.IsRel (V := V)) :=
+  HierarchySymbol.Boldface.of_zero Language.IsRel.definable
+
+section
 
 variable [V ⊧ₘ* 𝐏𝐀⁻]
-
-instance : (L.codeIn V).Defined L.lDef where
-  func := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec_two]
-  rel := by intro v; simp [Language.codeIn, ←Matrix.fun_eq_vec_two]
 
 instance : GoedelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
 
 instance : GoedelQuote (L.Rel k) V := ⟨fun R ↦ ↑(Encodable.encode R)⟩
 
-omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
+omit [L.LORDefinable] in
 lemma quote_func_def (f : L.Func k) : (⌜f⌝ : V) = ↑(Encodable.encode f) := rfl
 
-omit [(k : ℕ) → Encodable (L.Func k)] [DefinableLanguage L] in
+omit [L.LORDefinable] in
 lemma quote_rel_def (R : L.Rel k) : (⌜R⌝ : V) = ↑(Encodable.encode R) := rfl
 
-lemma codeIn_func_quote_iff {k x : ℕ} : (L.codeIn V).Func k x ↔ ∃ f : L.Func k, Encodable.encode f = x :=
-  have : V ⊧/![k, x] L.lDef.func.val ↔ ℕ ⊧/![k, x] L.lDef.func.val := by
+lemma isFunc_quote_quote {k x : ℕ} : L.IsFunc (V := V) k x ↔ ∃ f : L.Func k, Encodable.encode f = x :=
+  have : V ⊧/![k, x] L.funcDef.val ↔ ℕ ⊧/![k, x] L.funcDef.val := by
     simpa [Matrix.comp_vecCons', Matrix.constant_eq_singleton]
-      using models_iff_of_Sigma0 (V := V) (σ := L.lDef.func.val) (by simp) (e := ![k, x])
-  Iff.trans this <| Iff.trans (DefinableLanguage.func_iff.symm) <| (by simp)
+      using models_iff_of_Sigma0 (V := V) (σ := L.funcDef.val) (by simp) (e := ![k, x])
+  Iff.trans this <| Iff.trans L.iff_funcDef.symm <| by simp
 
-lemma codeIn_rel_quote_iff {k x : ℕ} : (L.codeIn V).Rel k x ↔ ∃ R : L.Rel k, Encodable.encode R = x :=
-  have : V ⊧/![k, x] L.lDef.rel.val ↔ ℕ ⊧/![k, x] L.lDef.rel.val := by
+lemma isRel_quote_quote {k x : ℕ} : L.IsRel (V := V) k x ↔ ∃ R : L.Rel k, Encodable.encode R = x :=
+  have : V ⊧/![k, x] L.relDef.val ↔ ℕ ⊧/![k, x] L.relDef.val := by
     simpa [Matrix.comp_vecCons', Matrix.constant_eq_singleton]
-      using models_iff_of_Sigma0 (V := V) (σ := L.lDef.rel.val) (by simp) (e := ![k, x])
-  Iff.trans this <| Iff.trans (DefinableLanguage.rel_iff.symm) <| (by simp [quote_rel_def])
+      using models_iff_of_Sigma0 (V := V) (σ := L.relDef.val) (by simp) (e := ![k, x])
+  Iff.trans this <| Iff.trans L.iff_relDef.symm <| by simp
 
-@[simp] lemma codeIn_func_quote {k : ℕ} (f : L.Func k) : (L.codeIn V).Func k ⌜f⌝ :=
-  (codeIn_func_quote_iff (V := V)).mpr ⟨f, rfl⟩
+@[simp] lemma codeIn_func_quote {k : ℕ} (f : L.Func k) : L.IsFunc (V := V) k ⌜f⌝ :=
+  (isFunc_quote_quote (V := V)).mpr ⟨f, rfl⟩
 
-@[simp] lemma codeIn_rel_quote {k : ℕ} (r : L.Rel k) : (L.codeIn V).Rel k ⌜r⌝ :=
-  (codeIn_rel_quote_iff (V := V)).mpr ⟨r, rfl⟩
+@[simp] lemma codeIn_rel_quote {k : ℕ} (r : L.Rel k) : L.IsRel (V := V) k ⌜r⌝ :=
+  (isRel_quote_quote (V := V)).mpr ⟨r, rfl⟩
 
-omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
+omit [L.LORDefinable]
+
 @[simp] lemma quote_func_inj (f₁ f₂ : L.Func k) : (⌜f₁⌝ : V) = (⌜f₂⌝ : V) ↔ f₁ = f₂ := by
   simp [quote_func_def]
 
-omit [(k : ℕ) → Encodable (L.Func k)] [DefinableLanguage L] in
 @[simp] lemma quote_rel_inj (R₁ R₂ : L.Rel k) : (⌜R₁⌝ : V) = (⌜R₂⌝ : V) ↔ R₁ = R₂ := by
   simp [quote_rel_def]
 
-omit [(k : ℕ) → Encodable (L.Rel k)] [DefinableLanguage L] in
 @[simp] lemma coe_quote_func_nat (f : L.Func k) : ((⌜f⌝ : ℕ) : V) = (⌜f⌝ : V) := by
   simp [quote_func_def]
 
-omit [(k : ℕ) → Encodable (L.Func k)] [DefinableLanguage L] in
 @[simp] lemma coe_quote_rel_nat (R : L.Rel k) : ((⌜R⌝ : ℕ) : V) = (⌜R⌝ : V) := by
   simp [quote_rel_def]
 
 end
 
-/-- TODO: move to Basic/Syntax/Metamath.Language.lean-/
 lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_func {k f : ℕ} :
     f ∈ Set.range (Encodable.encode : FirstOrder.Language.Func ℒₒᵣ k → ℕ) ↔
     (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1) := by
@@ -162,7 +130,7 @@ lemma _root_.LO.FirstOrder.Language.ORing.of_mem_range_encode_rel {k r : ℕ} :
     · exact ⟨Language.ORing.Rel.eq, rfl⟩
     · exact ⟨Language.ORing.Rel.lt, rfl⟩
 
-instance : DefinableLanguage ℒₒᵣ where
+instance : (ℒₒᵣ).LORDefinable where
   func := .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” (by simp)
   rel  := .mkSigma “k r. (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” (by simp)
   func_iff {k c} := by
@@ -173,22 +141,6 @@ instance : DefinableLanguage ℒₒᵣ where
 namespace InternalArithmetic
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
-
-abbrev LOR : Metamath.Language V := Language.codeIn ℒₒᵣ V
-
-abbrev LOR.code : LDef := Language.lDef ℒₒᵣ
-
-notation "⌜ℒₒᵣ⌝" => LOR
-
-notation "⌜ℒₒᵣ⌝[" V "]" => LOR (V := V)
-
-notation "p⌜ℒₒᵣ⌝" => LOR.code
-
-variable (V)
-
-instance LOR.defined : (⌜ℒₒᵣ⌝ : Metamath.Language V).Defined (Language.lDef ℒₒᵣ) := inferInstance
-
-variable {V}
 
 def zeroIndex : ℕ := Encodable.encode (Language.Zero.zero : (ℒₒᵣ : FirstOrder.Language).Func 0)
 
@@ -202,25 +154,25 @@ def eqIndex : ℕ := Encodable.encode (Language.Eq.eq : (ℒₒᵣ : FirstOrder.
 
 def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ : FirstOrder.Language).Rel 2)
 
-@[simp] lemma LOR_func_zeroIndex : ⌜ℒₒᵣ⌝.Func 0 (zeroIndex : V) := by
+@[simp] lemma LOR_func_zeroIndex : (ℒₒᵣ).IsFunc 0 (zeroIndex : V) := by
   simpa using codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Zero.zero
 
-@[simp] lemma LOR_func_oneIndex : ⌜ℒₒᵣ⌝.Func 0 (oneIndex : V) := by
+@[simp] lemma LOR_func_oneIndex : (ℒₒᵣ).IsFunc 0 (oneIndex : V) := by
   simpa using codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.One.one
 
-@[simp] lemma LOR_func_addIndex : ⌜ℒₒᵣ⌝.Func 2 (addIndex : V) := by
+@[simp] lemma LOR_func_addIndex : (ℒₒᵣ).IsFunc 2 (addIndex : V) := by
   simpa using codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Add.add
 
-@[simp] lemma LOR_func_mulIndex : ⌜ℒₒᵣ⌝.Func 2 (mulIndex : V) := by
+@[simp] lemma LOR_func_mulIndex : (ℒₒᵣ).IsFunc 2 (mulIndex : V) := by
   simpa using codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Mul.mul
 
-@[simp] lemma LOR_rel_eqIndex : ⌜ℒₒᵣ⌝.Rel 2 (eqIndex : V) := by
+@[simp] lemma LOR_rel_eqIndex : (ℒₒᵣ).IsRel 2 (eqIndex : V) := by
   simpa using codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.Eq.eq
 
-@[simp] lemma LOR_rel_ltIndex : ⌜ℒₒᵣ⌝.Rel 2 (ltIndex : V) := by
+@[simp] lemma LOR_rel_ltIndex : (ℒₒᵣ).IsRel 2 (ltIndex : V) := by
   simpa using codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.LT.lt
 
-lemma lDef.func_def : (ℒₒᵣ).lDef.func = .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” (by simp) := rfl
+lemma lDef.func_def : (ℒₒᵣ).funcDef = .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” (by simp) := rfl
 
 lemma coe_zeroIndex_eq : (zeroIndex : V) = 0 := rfl
 
@@ -229,10 +181,6 @@ lemma coe_oneIndex_eq : (oneIndex : V) = 1 := by simp [oneIndex]; rfl
 lemma coe_addIndex_eq : (addIndex : V) = 0 := rfl
 
 lemma coe_mulIndex_eq : (mulIndex : V) = 1 := by simp [mulIndex]; rfl
-
-lemma func_iff {k f : V} : ⌜ℒₒᵣ⌝.Func k f ↔ (k = 0 ∧ f = zeroIndex) ∨ (k = 0 ∧ f = oneIndex) ∨ (k = 2 ∧ f = addIndex) ∨ (k = 2 ∧ f = mulIndex) := by
-  simp [FirstOrder.Language.codeIn_func_def, lDef.func_def,
-    coe_zeroIndex_eq, coe_oneIndex_eq, coe_addIndex_eq, coe_mulIndex_eq]
 
 end InternalArithmetic
 

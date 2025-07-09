@@ -627,7 +627,7 @@ lemma Language.IsSemiterm.sound {n t : ℕ} (ht : (L.codeIn ℕ).IsSemiterm n t)
     · have : ∀ i : Fin k, ∃ t : FirstOrder.SyntacticSemiterm L n, ⌜t⌝ = v.[i] := fun i ↦
         ih v.[i] (nth_lt_qqFunc_of_lt (by simp [hv.lh])) (hv.nth i.prop)
       choose v' hv' using this
-      have : ∃ F, encode F = f := codeIn_func_quote_iff (V := ℕ) (L := L) (x := f) (k := k) |>.mp (by simp [hf])
+      have : ∃ F, encode F = f := isFunc_quote_quote (V := ℕ) (L := L) (x := f) (k := k) |>.mp (by simp [hf])
       rcases this with ⟨f, rfl⟩
       refine ⟨Semiterm.func f v', ?_⟩
       suffices ⌜fun i ↦ ⌜v' i⌝⌝ = v by simpa [Semiterm.quote_func, quote_func_def]
@@ -642,7 +642,7 @@ lemma Language.IsSemiformula.sound {n φ : ℕ} (h : (L.codeIn ℕ).IsSemiformul
        ⟨φ, ψ, hp, hq, rfl⟩ | ⟨φ, ψ, hp, hq, rfl⟩ | ⟨φ, hp, rfl⟩ | ⟨φ, hp, rfl⟩)
     · have : ∀ i : Fin k, ∃ t : FirstOrder.SyntacticSemiterm L n, ⌜t⌝ = v.[i] := fun i ↦ (hv.nth i.prop).sound
       choose v' hv' using this
-      have : ∃ R, encode R = r := codeIn_rel_quote_iff (V := ℕ) (L := L) (x := r) (k := k) |>.mp (by simp [hr])
+      have : ∃ R, encode R = r := isRel_quote_quote (V := ℕ) (L := L) (x := r) (k := k) |>.mp (by simp [hr])
       rcases this with ⟨R, rfl⟩
       refine ⟨Semiformula.rel R v', ?_⟩
       suffices ⌜fun i ↦ ⌜v' i⌝⌝ = v by simpa [Semiformula.quote_rel, quote_rel_def]
@@ -650,7 +650,7 @@ lemma Language.IsSemiformula.sound {n φ : ℕ} (h : (L.codeIn ℕ).IsSemiformul
       intro i hi; simpa [hv'] using quote_nth_fin (fun i : Fin k ↦ v.[i]) ⟨i, hi⟩
     · have : ∀ i : Fin k, ∃ t : FirstOrder.SyntacticSemiterm L n, ⌜t⌝ = v.[i] := fun i ↦ (hv.nth i.prop).sound
       choose v' hv' using this
-      have : ∃ R, encode R = r := codeIn_rel_quote_iff (V := ℕ) (L := L) (x := r) (k := k) |>.mp (by simp [hr])
+      have : ∃ R, encode R = r := isRel_quote_quote (V := ℕ) (L := L) (x := r) (k := k) |>.mp (by simp [hr])
       rcases this with ⟨R, rfl⟩
       refine ⟨Semiformula.nrel R v', ?_⟩
       suffices ⌜fun i ↦ ⌜v' i⌝⌝ = v by simpa [Semiformula.quote_nrel, quote_rel_def]
