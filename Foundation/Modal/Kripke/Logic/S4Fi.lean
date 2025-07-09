@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.Filtration
 import Foundation.Modal.Entailment.KT
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Logic.Basic
 import Foundation.Vorspiel.List.Chain
 
@@ -29,7 +29,7 @@ open Formula (atom)
 open Formula.Kripke
 open Kripke
 
-protected abbrev Hilbert.S4Fi : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Fi (.atom 0) (.atom 1) (.atom 2) (.atom 3)}⟩
+protected abbrev Hilbert.S4Fi : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Fi (.atom 0) (.atom 1) (.atom 2) (.atom 3)}⟩
 protected abbrev S4Fi := Hilbert.S4Fi.logic
 notation "𝐒𝟒𝐅𝐢" => Modal.S4Fi
 
@@ -55,89 +55,168 @@ def S4Fi.unprovable_AxiomFi_ant.countermodel : Kripke.Model where
 
 instance : S4Fi.unprovable_AxiomFi_ant.countermodel.IsReflexive := ⟨by
   intro x;
-  match x with
-  | Sum.inl _ => simp [S4Fi.unprovable_AxiomFi_ant.countermodel];
-  | Sum.inr _ => simp [S4Fi.unprovable_AxiomFi_ant.countermodel];
+  match x with | Sum.inl _ | Sum.inr _ => simp [S4Fi.unprovable_AxiomFi_ant.countermodel]
 ⟩
 
 instance : S4Fi.unprovable_AxiomFi_ant.countermodel.IsTransitive := ⟨by
   intro x y z;
   match x, y, z with
-  | Sum.inl _, _, _ | Sum.inr _, Sum.inl _, _ | Sum.inr _, Sum.inr _, Sum.inl _ =>
-    simp [S4Fi.unprovable_AxiomFi_ant.countermodel];
+  | Sum.inl _, _, _ | Sum.inr _, Sum.inl _, _ | Sum.inr _, Sum.inr _, Sum.inl _ => simp [S4Fi.unprovable_AxiomFi_ant.countermodel]
   | Sum.inr (n, i), Sum.inr (m, j), Sum.inr (k, l) =>
     dsimp [S4Fi.unprovable_AxiomFi_ant.countermodel];
     grind;
 ⟩
 
 /-- if `i ≤ 2`, `x ⊧ i` iff `x = (0, i)` -/
-lemma S4Fi.unprovable_AxiomFi_ant.countermodel.iff_at_level0_satisfies {x : countermodel} {i : Fin 3} : x ⊧ (atom i.1) ↔ x = Sum.inr (0, i) := by
+lemma S4Fi.unprovable_AxiomFi_ant.countermodel.iff_at_level0_satisfies {x : countermodel.World} {i : Fin 3} : Satisfies countermodel x (atom i.1) ↔ x = Sum.inr (0, i) := by
   constructor
   . contrapose!;
-    match i with | 0 | 1 | 2 => simp_all [Semantics.Realize, Satisfies, S4Fi.unprovable_AxiomFi_ant.countermodel];
+    match i with | 0 | 1 | 2 => simp_all [Satisfies, S4Fi.unprovable_AxiomFi_ant.countermodel];
   . rintro rfl;
-    match i with | 0 | 1 | 2 => simp [Semantics.Realize, Satisfies, countermodel];
+    match i with
+    | 0 | 1 | 2 =>
+      simp [countermodel, Satisfies];
 
 /-- if `i ≤ 2`, `(0, i)` can see only `(0, i)` -/
 lemma S4Fi.unprovable_AxiomFi_ant.countermodel.only_self_at_level0 {y : countermodel} {i : Fin 3} : Sum.inr (0, i) ≺ y ↔ y = Sum.inr (0, i) := by
   match y with
-  | Sum.inl _ => simp [Frame.Rel', countermodel];
-  | Sum.inr (m, j) => simp [Frame.Rel', countermodel]; tauto;
+  | Sum.inl _ => simp [S4Fi.unprovable_AxiomFi_ant.countermodel, Frame.Rel'];
+  | Sum.inr (m, j) => simp [Frame.Rel', S4Fi.unprovable_AxiomFi_ant.countermodel]; tauto;
 
+set_option push_neg.use_distrib true in
+lemma S4Fi.unprovable_AxiomFi_ant.valid_AxiomFi : unprovable_AxiomFi_ant.countermodel.toFrame ⊧ Axioms.Fi (atom 0) (atom 1) (atom 2) (atom 3) := by
+  intro V x;
+  apply Satisfies.imp_def.mpr;
 
+  intro h;
+  repeat rw [Satisfies.and_def] at h;
 
-lemma S4Fi.unprovable_AxiomFi_ant.countermodel.countermodel_S4Fi : unprovable_AxiomFi_ant.countermodel ⊧* 𝐒𝟒𝐅𝐢 := by
+  have ⟨h₁, h₂, hy₀, h₃, hy₁, h₄, hy₂, h₅⟩ := h;
+  clear h;
+
+  replace ⟨y₀, Rxy₀, hy₀⟩ := Satisfies.dia_def.mp hy₀;
+  replace ⟨y₁, Rxy₁, hy₁⟩ := Satisfies.dia_def.mp hy₁;
+  replace ⟨y₂, Rxy₂, hy₂⟩ := Satisfies.dia_def.mp hy₂;
+
+  obtain ⟨i, rfl⟩ : ∃ i, x = Sum.inl ((), i) := by
+    match x with
+    | Sum.inl ((), i) => use i;
+    | Sum.inr (n, i)  =>
+      exfalso;
+      sorry;
+  have ⟨Ry₀₁, Ry₀₂⟩ : ¬y₀ ≺ y₁ ∧ ¬y₀ ≺ y₂ := by
+    by_contra! hC;
+    rcases Satisfies.and_def.mp $ @h₃ y₀ (by simp [Frame.Rel', unprovable_AxiomFi_ant.countermodel]) hy₀ with ⟨hy₁, hy₂⟩;
+    rcases hC with (Ry | Ry);
+    . apply (Satisfies.not_dia_def.mp hy₁ _) Ry; simpa;
+    . apply (Satisfies.not_dia_def.mp hy₂ _) Ry; simpa;
+  have ⟨Ry₁₂, Ry₁₀⟩ : ¬y₁ ≺ y₂ ∧ ¬y₁ ≺ y₀ := by
+    by_contra! hC;
+    rcases Satisfies.and_def.mp $ @h₄ y₁ (by simp [Frame.Rel', unprovable_AxiomFi_ant.countermodel]) hy₁ with ⟨hy₂, hy₀⟩;
+    rcases hC with (Ry | Ry);
+    . apply (Satisfies.not_dia_def.mp hy₂ _) Ry; simpa;
+    . apply (Satisfies.not_dia_def.mp hy₀ _) Ry; simpa;
+  have ⟨Ry₂₀, Ry₂₁⟩ : ¬y₂ ≺ y₀ ∧ ¬y₂ ≺ y₁ := by
+    by_contra! hC;
+    rcases Satisfies.and_def.mp $ @h₅ y₂ (by simp [Frame.Rel', unprovable_AxiomFi_ant.countermodel]) hy₂ with ⟨hy₀, hy₁⟩;
+    rcases hC with (Ry | Ry);
+    . apply (Satisfies.not_dia_def.mp hy₀ _) Ry; simpa;
+    . apply (Satisfies.not_dia_def.mp hy₁ _) Ry; simpa;
+
+  match y₀, y₁, y₂ with
+  | Sum.inl y₀, _, _
+  | _, Sum.inl y₁, _
+  | _, _, Sum.inl y₂ =>
+    sorry;
+    -- simp_all [Frame.Rel', countermodel];
+  | Sum.inr (n₀, i₀), Sum.inr (n₁, i₁), Sum.inr (n₂, i₂) =>
+    clear Ry₀₁ Ry₀₂ Ry₁₂ Ry₁₀ Ry₂₀ Ry₂₁ Rxy₀ Rxy₁ Rxy₂;
+    apply Satisfies.dia_def.mpr;
+    let z : unprovable_AxiomFi_ant.countermodel.toFrame.World := Sum.inr (
+      (max n₀ n₁) + 1,
+      match i₀, i₁ with
+      | 0, 0 => 1
+      | 0, 1 => 2
+      | 0, 2 => 1
+      | 1, 0 => 2
+      | 1, 1 => 2
+      | 1, 2 => 0
+      | 2, 0 => 1
+      | 2, 1 => 0
+      | 2, 2 => 0
+    );
+    have Rz₀ : z ≺ (Sum.inr (n₀, i₀)) := by
+      dsimp [z];
+      rcases (show max n₀ n₁ = n₀ ∨ max n₀ n₁ = n₁ by omega) with (h | h);
+      . simp [h, Frame.Rel', countermodel];
+        split <;> trivial;
+      . simp [h, Frame.Rel', countermodel];
+        split;
+        . omega;
+        . split;
+          . split <;> trivial;
+          . omega;
+    have Rz₁ : z ≺ (Sum.inr (n₁, i₁)) := by
+      dsimp [z];
+      rcases (show max n₀ n₁ = n₀ ∨ max n₀ n₁ = n₁ by omega) with (h | h);
+      . simp [h, Frame.Rel', countermodel];
+        split;
+        . omega;
+        . split;
+          . split <;> trivial;
+          . omega;
+      . simp [h, Frame.Rel', countermodel];
+        split <;> trivial;
+    use z;
+    constructor;
+    . simp [Frame.Rel', countermodel]
+    . apply Satisfies.and_def.mpr;
+      constructor;
+      . apply Satisfies.dia_def.mpr;
+        use Sum.inr (n₀, i₀);
+      . apply Satisfies.and_def.mpr;
+        constructor;
+        . apply Satisfies.dia_def.mpr;
+          use Sum.inr (n₁, i₁);
+        . apply Satisfies.not_def.mpr;
+          by_contra! hC;
+          obtain ⟨u, Ryu, hu⟩ := Satisfies.dia_def.mp hC;
+          obtain ⟨hu₀, hu₁⟩ := Satisfies.and_def.mp $ @h₅ u (countermodel.trans (by sorry) Ryu) hu;
+          match u with
+          | Sum.inl u => simp [z, Frame.Rel', countermodel] at Ryu;
+          | Sum.inr (m, j) =>
+            simp [z, Frame.Rel', countermodel] at Ryu;
+            split at Ryu;
+            . rcases (show n₀ + 1 = m ∨ n₁ + 1 = m by omega) with (rfl | rfl);
+              . apply Satisfies.not_dia_def.mp hu₀ (Sum.inr (n₀, i₀)) ?_ $ hy₀;
+                convert Rz₀;
+                . omega;
+                . exact Ryu.symm;
+              . apply Satisfies.not_dia_def.mp hu₁ (Sum.inr (n₁, i₁)) ?_ $ hy₁;
+                convert Rz₁;
+                . omega;
+                . exact Ryu.symm;
+            . split at Ryu;
+              . sorry;
+              . sorry;
+
+lemma S4Fi.unprovable_AxiomFi_ant.countermodel.countermodel_S4Fi : unprovable_AxiomFi_ant.countermodel.toFrame ⊧* 𝐒𝟒𝐅𝐢 := by
   constructor;
   intro φ hφ;
-  replace hφ := Logic.iff_provable.mpr hφ;
-  induction hφ with
-  | mdp ihφψ ihφ => apply ValidOnModel.mdp ihφψ ihφ;
-  | nec ihφ => apply ValidOnModel.nec ihφ;
-  | imply₁ => apply ValidOnModel.imply₁;
-  | imply₂ => apply ValidOnModel.imply₂;
-  | ec => apply ValidOnModel.elimContra;
-  | maxm ih =>
-    rcases (by simpa using ih) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
-    . apply ValidOnModel.axiomK;
+  simp only [Entailment.theory, Set.mem_setOf_eq] at hφ;
+  induction hφ using Hilbert.Normal.rec! with
+  | mdp ihφψ ihφ => apply ValidOnFrame.mdp ihφψ ihφ;
+  | nec ihφ => apply ValidOnFrame.nec ihφ;
+  | imply₁ => apply ValidOnFrame.imply₁;
+  | imply₂ => apply ValidOnFrame.imply₂;
+  | ec => apply ValidOnFrame.elimContra;
+  | axm s ih =>
+    rcases ih with (rfl | rfl | rfl | rfl);
+    . apply ValidOnFrame.axiomK;
     . apply @validate_AxiomT_of_reflexive countermodel.toFrame (s 0);
     . apply @validate_AxiomFour_of_transitive countermodel.toFrame (s 0);
-    . intro x h;
-      apply Satisfies.dia_def.mpr;
-      use Sum.inr (1, 2);
-      constructor;
-      . match x with
-        | Sum.inl _
-        | Sum.inr (2, 0)
-        | Sum.inr (2, 1)
-        | Sum.inr (1, 2)
-        | Sum.inr (n + 3, i) =>
-          simp [Frame.Rel', countermodel];
-        | Sum.inr (0, i)
-        | Sum.inr (1, 0)
-        | Sum.inr (1, 1)
-        | Sum.inr (2, 2) =>
-          have := Satisfies.and_def.mp h |>.1;
-          sorry;
-      . simp only [Semantics.And.realize_and];
-        refine ⟨?_, ?_, ?_⟩;
-        . apply Satisfies.dia_def.mpr;
-          use Sum.inr (0, 0);
-          constructor;
-          . simp [Frame.Rel', countermodel];
-          . sorry;
-        . apply Satisfies.dia_def.mpr;
-          use Sum.inr (0, 1);
-          constructor;
-          . simp [Frame.Rel', countermodel];
-          . sorry;
-        . apply Satisfies.not_def.mpr;
-          apply Satisfies.not_dia_def.mpr;
-          intro y R12y;
-          have : y = Sum.inr (0, 0) ∨ y = Sum.inr (0, 1) ∨ y = Sum.inr (1, 2) := by sorry;
-          rcases this with (rfl | rfl | rfl);
-          . sorry;
-          . sorry;
-          . sorry;
+    . apply Formula.Kripke.ValidOnFrame.subst;
+      apply S4Fi.unprovable_AxiomFi_ant.valid_AxiomFi;
 
 lemma S4Fi.unprovable_AxiomFi_ant : 𝐒𝟒𝐅𝐢 ⊬ ∼Axioms.Fi.ant (.atom 0) (.atom 1) (.atom 2) (.atom 3) := by
   suffices ∃ M : Model, M ⊧* 𝐒𝟒𝐅𝐢 ∧ ∃ x : M, x ⊧ (Axioms.Fi.ant (.atom 0) (.atom 1) (.atom 2) (.atom 3)) by
@@ -148,7 +227,10 @@ lemma S4Fi.unprovable_AxiomFi_ant : 𝐒𝟒𝐅𝐢 ⊬ ∼Axioms.Fi.ant (.atom
     . simpa using hC;
   use S4Fi.unprovable_AxiomFi_ant.countermodel;
   constructor;
-  . exact S4Fi.unprovable_AxiomFi_ant.countermodel.countermodel_S4Fi;
+  . constructor;
+    intro φ hφ;
+    apply S4Fi.unprovable_AxiomFi_ant.countermodel.countermodel_S4Fi.realize;
+    assumption;
   . use Sum.inl ((), 0);
     simp only [Fin.isValue, Semantics.And.realize_and];
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩;
