@@ -12,6 +12,26 @@ variable {F : Neighborhood.Frame} {C : Neighborhood.FrameClass}
 
 namespace Hilbert.Neighborhood
 
+section Frame
+
+lemma soundness_of_axioms_validOnFrame (hC : F ⊧* H.axioms) : H ⊢! φ → F ⊧ φ := by
+  intro hφ;
+  induction hφ using Hilbert.WithRE.rec! with
+  | imply₁ | imply₂ | ec => simp;
+  | mdp ihφψ ihφ => exact ValidOnFrame.mdp ihφψ ihφ;
+  | re ihφ => exact ValidOnFrame.re ihφ;
+  | axm s h =>
+    apply ValidOnFrame.subst s;
+    apply hC.RealizeSet;
+    assumption;
+
+instance instSound_of_axioms_validOnFrame (hV : F ⊧* H.axioms) : Sound H F := ⟨fun {_} => soundness_of_axioms_validOnFrame hV⟩
+
+end Frame
+
+
+section FrameClass
+
 lemma soundness_of_validates_axioms (hC : C ⊧* H.axioms) : H ⊢! φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.WithRE.rec! with
@@ -35,6 +55,8 @@ lemma consistent_of_sound_frameclass
   constructor;
   . exact C_nonempty.choose_spec
   . simp;
+
+end FrameClass
 
 end Hilbert.Neighborhood
 
