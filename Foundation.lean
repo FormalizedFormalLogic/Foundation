@@ -64,6 +64,7 @@ import Foundation.FirstOrder.Omega1.Nuon
 import Foundation.FirstOrder.Incompleteness.FixedPoint
 import Foundation.FirstOrder.Incompleteness.StandardProvability
 import Foundation.FirstOrder.Incompleteness.First
+import Foundation.FirstOrder.Incompleteness.Dense
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
 import Foundation.FirstOrder.Incompleteness.WitnessComparison
