@@ -106,11 +106,12 @@ namespace Logic
 
 variable {α} {L₀ L : Logic α}
 
-def boxdot_preimage (L : Logic α) := { φ ∈ L | L ⊢! φ.boxdotTranslate }
+def boxdot_preimage (L : Logic α) := { φ ∈ L | L ⊢! φᵇ }
+local postfix:100 "ᵇ" => boxdot_preimage
 
-def BoxdotProperty (L₀ : Logic α) := ∀ {L}, L.IsNormal → L.boxdot_preimage = L₀ → L ⊆ L₀
+def BoxdotProperty (L₀ : Logic α) := ∀ {L : Logic _}, L.IsNormal → Lᵇ = L₀ → L ⊆ L₀
 
-def StrongBoxdotProperty (L₀ : Logic α) := ∀ {L}, L.IsNormal → L.boxdot_preimage ⊆ L₀ → L ⊆ L₀
+def StrongBoxdotProperty (L₀ : Logic α) := ∀ {L : Logic _}, L.IsNormal → Lᵇ ⊆ L₀ → L ⊆ L₀
 
 lemma BDP_of_SBDP : StrongBoxdotProperty L₀ → BoxdotProperty L₀ := by
   intro hSBDP;
@@ -147,14 +148,14 @@ theorem jerabek_SBDP
   let X₁ := φ.subformulas.prebox.image (λ ψ => □(∼(.atom q) ➝ ψ) ➝ ψ);
   let X := X₀ ∪ X₁;
 
-  have Claim1 : ∀ ψ ∈ φ.subformulas.prebox, (X.image (·.boxdotTranslate)) *⊢[L]! □ψ.boxdotTranslate ➝ ψ.boxdotTranslate := by sorry;
-  have Claim2 : ∀ ψ ∈ φ.subformulas, (X.image (·.boxdotTranslate)) *⊢[L]! ψ ⭤ ψ.boxdotTranslate := by sorry;
+  have Claim1 : ∀ ψ ∈ φ.subformulas.prebox, (X.image (·ᵇ)) *⊢[L]! □ψᵇ ➝ ψᵇ := by sorry;
+  have Claim2 : ∀ ψ ∈ φ.subformulas, (X.image (·ᵇ)) *⊢[L]! ψ ⭤ ψᵇ := by sorry;
 
-  have : (X.image (·.boxdotTranslate)) *⊢[L]! φ ➝ φ.boxdotTranslate := C_of_E_mp! $ Claim2 φ (by simp);
-  have : (X.image (·.boxdotTranslate)) *⊢[L]! φ.boxdotTranslate := by sorry;
-  have : L ⊢! (X.image (·.boxdotTranslate)).conj ➝ φ.boxdotTranslate := by sorry; -- TODO: it's not!
+  have : (X.image (·ᵇ)) *⊢[L]! φ ➝ φᵇ := C_of_E_mp! $ Claim2 φ (by simp);
+  have : (X.image (·ᵇ)) *⊢[L]! φᵇ := by sorry;
+  have : L ⊢! (X.image (·ᵇ)).conj ➝ φᵇ := by sorry; -- TODO: it's not!
   let χ := X.conj ➝ φ
-  have : L ⊢! χ.boxdotTranslate := by sorry;
+  have : L ⊢! χᵇ := by sorry;
   use χ;
   constructor;
   . constructor;
