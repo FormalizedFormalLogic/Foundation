@@ -43,6 +43,8 @@ import Foundation.FirstOrder.Arithmetic.Induction
 import Foundation.FirstOrder.R0.Basic
 import Foundation.FirstOrder.R0.Representation
 
+import Foundation.FirstOrder.Q.Basic
+
 import Foundation.FirstOrder.PeanoMinus.Basic
 import Foundation.FirstOrder.PeanoMinus.Functions
 
