@@ -12,7 +12,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath InternalArithmetic
 
-variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] (U : ArithmeticTheory) [U.Delta1Definable]
+variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] (U : ArithmeticTheory) [U.Δ₁Definable]
 
 abbrev _root_.LO.FirstOrder.ArithmeticTheory.provabilityPred (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := U.provable/[⌜σ⌝]
 
@@ -68,7 +68,7 @@ open ProvabilityLogic
 
 open PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
 
-variable (T : ArithmeticTheory) [T.Delta1Definable]
+variable (T : ArithmeticTheory) [T.Δ₁Definable]
 
 instance : Diagonalization 𝐈𝚺₁ where
   fixpoint := fixpoint
@@ -88,6 +88,6 @@ instance [T.SoundOnHierarchy 𝚺 1] [𝐑₀ ⪯ T] : T.standardPr.GoedelSound 
 
 lemma standardPr_def (σ : Sentence ℒₒᵣ) : T.standardPr σ = T.provabilityPred σ := rfl
 
-instance [𝐑₀ ⪯ T] [T.Delta1Definable] : T.standardPr.Sound ℕ := ⟨fun {σ} ↦ by simp [Arithmetic.standardPr_def, models₀_iff]⟩
+instance [𝐑₀ ⪯ T] [T.Δ₁Definable] : T.standardPr.Sound ℕ := ⟨fun {σ} ↦ by simp [Arithmetic.standardPr_def, models₀_iff]⟩
 
 end LO.FirstOrder.Arithmetic

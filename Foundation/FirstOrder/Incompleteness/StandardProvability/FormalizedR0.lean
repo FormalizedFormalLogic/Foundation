@@ -184,14 +184,14 @@ section
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 def singleton (φ : SyntacticFormula L) :
-    Theory.Delta1Definable {φ} where
+    Theory.Δ₁Definable {φ} where
   ch := .ofZero (.mkSigma “x. x = ↑⌜φ⌝” (by simp)) _
   mem_iff {ψ} := by simp
   isDelta1 := Arithmetic.HierarchySymbol.Semiformula.ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
 @[simp] lemma singleton_toTDef_ch_val (φ : FirstOrder.SyntacticFormula L) :
     letI := singleton φ
-    (Theory.Delta1Definable.toTDef {φ}).ch.val = “x. x = ↑⌜φ⌝” := rfl
+    (Theory.Δ₁Definable.toTDef {φ}).ch.val = “x. x = ↑⌜φ⌝” := rfl
 
 end
 
@@ -199,10 +199,10 @@ namespace InternalArithmetic
 
 namespace Theory.R0'
 
-def eqRefl : FirstOrder.Theory.Delta1Definable {(“∀ x, x = x” : SyntacticFormula ℒₒᵣ)} := singleton _
+def eqRefl : FirstOrder.Theory.Δ₁Definable {(“∀ x, x = x” : SyntacticFormula ℒₒᵣ)} := singleton _
 
 def replace :
-    FirstOrder.Theory.Delta1Definable {“∀ x y, x = y → !φ x → !φ y” | φ : SyntacticSemiformula ℒₒᵣ 1} where
+    FirstOrder.Theory.Δ₁Definable {“∀ x y, x = y → !φ x → !φ y” | φ : SyntacticSemiformula ℒₒᵣ 1} where
   ch := .mkDelta
     (.mkSigma
       “p.
@@ -292,7 +292,7 @@ def replace :
       LogicalConnective.HomClass.map_imply, LogicalConnective.Prop.arrow_eq, forall_eq]
 
 def Ω₁ :
-    FirstOrder.Theory.Delta1Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, φ = “↑n + ↑m = ↑(n + m)”} where
+    FirstOrder.Theory.Δ₁Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, φ = “↑n + ↑m = ↑(n + m)”} where
   ch := .mkDelta
     (.mkSigma “p.
       ∃ n < p, ∃ m < p,
@@ -356,7 +356,7 @@ def Ω₁ :
       Matrix.cons_app_seven, Structure.Eq.eq, LogicalConnective.Prop.arrow_eq, forall_eq]
 
 def Ω₂ :
-    FirstOrder.Theory.Delta1Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, φ = “↑n * ↑m = ↑(n * m)”} where
+    FirstOrder.Theory.Δ₁Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, φ = “↑n * ↑m = ↑(n * m)”} where
   ch := .mkDelta
     (.mkSigma “p.
       ∃ n < p, ∃ m < p,
@@ -420,7 +420,7 @@ def Ω₂ :
       Matrix.cons_app_seven, Structure.Eq.eq, LogicalConnective.Prop.arrow_eq, forall_eq]
 
 def Ω₃ :
-    FirstOrder.Theory.Delta1Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, n ≠ m ∧ φ = “↑n ≠ ↑m”} where
+    FirstOrder.Theory.Δ₁Definable {φ : SyntacticFormula ℒₒᵣ | ∃ n m : ℕ, n ≠ m ∧ φ = “↑n ≠ ↑m”} where
   ch := .mkDelta
     (.mkSigma “p. ∃ n < p, ∃ m < p, n ≠ m ∧
       let numn := numeralGraph n;
@@ -474,7 +474,7 @@ private lemma quote_disjLt_eq (n : ℕ) :
     rw [substs_eq (by simp) (by simp)]; simp
 
 def Ω₄ :
-    FirstOrder.Theory.Delta1Definable {(“∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i” : SyntacticFormula ℒₒᵣ) | n} where
+    FirstOrder.Theory.Δ₁Definable {(“∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i” : SyntacticFormula ℒₒᵣ) | n} where
   ch := .mkDelta
     (.mkSigma “p. ∃ n < p,
       let numn := numeralGraph n;
@@ -559,7 +559,7 @@ end Theory.R0'
 
 open Theory.R0'
 
-instance Theory.R0'Delta1Definable : 𝐑₀'.Delta1Definable := (eqRefl.add <| replace.add <| Ω₁.add <| Ω₂.add <| Ω₃.add Ω₄).ofEq <| by
+instance Theory.R0'Δ₁Definable : 𝐑₀'.Δ₁Definable := (eqRefl.add <| replace.add <| Ω₁.add <| Ω₂.add <| Ω₃.add Ω₄).ofEq <| by
     ext φ; constructor
     · rintro (hφ | hφ | hφ | hφ | hφ | hφ)
       · rcases hφ; exact Theory.R0'.eq_refl
@@ -681,20 +681,20 @@ noncomputable def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (t
 
 end Theory.R0'
 
-instance Theory.addR0'Delta1Definable (T : ArithmeticTheory) [d : T.Delta1Definable] : (T + 𝐑₀').Delta1Definable :=
-  d.add Theory.R0'Delta1Definable
+instance Theory.addR0'Δ₁Definable (T : ArithmeticTheory) [d : T.Δ₁Definable] : (T + 𝐑₀').Δ₁Definable :=
+  d.add Theory.R0'Δ₁Definable
 section
 
 abbrev _root_.LO.FirstOrder.ArithmeticTheory.AddR₀TTheory
-    (T : ArithmeticTheory) [T.Delta1Definable] (V) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] : ⌜ℒₒᵣ⌝[V].TTheory := (T + 𝐑₀').tCodeIn V
+    (T : ArithmeticTheory) [T.Δ₁Definable] (V) [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] : ⌜ℒₒᵣ⌝[V].TTheory := (T + 𝐑₀').tCodeIn V
 
 scoped [LO.ISigma1.Metamath] infix:100 "†" => LO.FirstOrder.ArithmeticTheory.AddR₀TTheory
 
-variable {T : ArithmeticTheory} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Δ₁Definable]
 
 @[simp] lemma R₀'_subset_AddR₀ : ⌜𝐑₀'⌝[V] ⊆ T†V := Set.subset_union_right
 
-@[simp] lemma theory_subset_AddR₀ : T.tCodeIn V ⊆ T†V := FirstOrder.Theory.Delta1Definable.add_subset_left _ _
+@[simp] lemma theory_subset_AddR₀ : T.tCodeIn V ⊆ T†V := FirstOrder.Theory.Δ₁Definable.add_subset_left _ _
 
 noncomputable instance : R₀Theory (T†V) where
   refl := Language.Theory.TProof.ofSubset (by simp) Theory.R0'.eqRefl.proof
@@ -712,7 +712,7 @@ open InternalArithmetic
 
 section
 
-variable (T : ArithmeticTheory) [T.Delta1Definable]
+variable (T : ArithmeticTheory) [T.Δ₁Definable]
 
 /-- Provability predicate for arithmetic stronger than $\mathbf{R_0}$. -/
 def _root_.LO.FirstOrder.ArithmeticTheory.Provable (φ : V) : Prop := ((T + 𝐑₀').codeIn V).Provable φ

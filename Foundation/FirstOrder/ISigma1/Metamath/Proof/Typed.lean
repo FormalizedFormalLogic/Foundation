@@ -120,27 +120,33 @@ end typed_sequent
 section typed_derivation
 
 /-- Auxiliary theories for the typed internal proof. -/
-structure Δ₁Theory (V : Type*) (L : Language) [L.Encodable] [L.LORDefinable] where
+structure InternalTheory (V : Type*) (L : Language) [L.Encodable] [L.LORDefinable] where
   theory : Theory L
   Δ₁Definable : theory.Δ₁Definable
 
-instance : CoeOut (Δ₁Theory V L) (Theory L) := ⟨Δ₁Theory.theory⟩
+instance : CoeOut (InternalTheory V L) (Theory L) := ⟨InternalTheory.theory⟩
 
-instance (T : Δ₁Theory V L) : T.theory.Δ₁Definable := T.Δ₁Definable
+instance (T : InternalTheory V L) : T.theory.Δ₁Definable := T.Δ₁Definable
 
-structure TDerivation (T : Δ₁Theory V L) (Γ : Sequent V L) where
+variable (V)
+
+def _root_.LO.FirstOrder.Theory.internalize (T : Theory L) [T.Δ₁Definable] : InternalTheory V L := ⟨T, inferInstance⟩
+
+variable {V}
+
+structure TDerivation (T : InternalTheory V L) (Γ : Sequent V L) where
   derivation : V
   derivatioNOf : T.theory.DerivationOf derivation Γ.val
 
 scoped infix:45 " ⊢ᵈᵉʳ " => TDerivation
 
-def TProof (T : Δ₁Theory V L) (p : Formula V L) := T ⊢ᵈᵉʳ insert p ∅
+def TProof (T : InternalTheory V L) (p : Formula V L) := T ⊢ᵈᵉʳ insert p ∅
 
-instance : Entailment (Formula V L) (Δ₁Theory V L) := ⟨TProof⟩
+instance : Entailment (Formula V L) (InternalTheory V L) := ⟨TProof⟩
 
-instance : HasSubset (Δ₁Theory V L) := ⟨fun T U ↦ T.theory.Δ₁Class (V := V) ⊆ U.theory.Δ₁Class⟩
+instance : HasSubset (InternalTheory V L) := ⟨fun T U ↦ T.theory.Δ₁Class (V := V) ⊆ U.theory.Δ₁Class⟩
 
-variable {T U : Δ₁Theory V L}
+variable {T U : InternalTheory V L}
 
 noncomputable def _root_.LO.FirstOrder.Theory.Derivable.toTDerivation (Γ : Sequent V L) (h : T.theory.Derivable Γ.val) : T ⊢ᵈᵉʳ Γ := by
   choose a ha using h; choose d hd using ha.2
@@ -261,7 +267,7 @@ end TDerivation
 
 namespace TProof
 
-variable {T U : Δ₁Theory V L} {p q : Formula V L}
+variable {T U : InternalTheory V L} {p q : Formula V L}
 
 /-- Condition D2 -/
 noncomputable def modusPonens (d : T ⊢ p ➝ q) (b : T ⊢ p) : T ⊢ q := TDerivation.modusPonens d b

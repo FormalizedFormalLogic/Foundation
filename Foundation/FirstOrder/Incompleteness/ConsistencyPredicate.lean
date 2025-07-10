@@ -16,7 +16,7 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 section WitnessComparisons
 
-variable (T : ArithmeticTheory) [T.Delta1Definable] (V)
+variable (T : ArithmeticTheory) [T.Δ₁Definable] (V)
 
 def _root_.LO.FirstOrder.ArithmeticTheory.IsConsistent : Prop := ¬T.Provable (⌜(⊥ : ArithmeticSentence)⌝ : V)
 
@@ -65,15 +65,15 @@ namespace LO.FirstOrder.Arithmetic
 
 open Entailment ProvabilityLogic
 
-variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Delta1Definable]
+variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Δ₁Definable]
 
 abbrev _root_.LO.FirstOrder.ArithmeticTheory.Con : ArithmeticTheory := {↑T.isConsistent}
 
 abbrev _root_.LO.FirstOrder.ArithmeticTheory.Incon : ArithmeticTheory := {∼↑T.isConsistent}
 
-instance : T.Con.Delta1Definable := Theory.Delta1Definable.singleton _
+instance : T.Con.Δ₁Definable := Theory.Δ₁Definable.singleton _
 
-instance : T.Incon.Delta1Definable := Theory.Delta1Definable.singleton _
+instance : T.Incon.Δ₁Definable := Theory.Δ₁Definable.singleton _
 
 instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T + T.Con := by
   have : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance

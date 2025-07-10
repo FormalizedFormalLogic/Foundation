@@ -177,7 +177,7 @@ end InternalArithmetic
 
 section
 
-variable {T : ArithmeticTheory} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Δ₁Definable]
 
 theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
@@ -191,7 +191,7 @@ end
 
 section D2
 
-variable {T : ArithmeticTheory} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Δ₁Definable]
 
 /-- Hilbert–Bernays provability condition D2 -/
 theorem modus_ponens {φ ψ : SyntacticFormula ℒₒᵣ} (hφψ : T.Provable (⌜φ ➝ ψ⌝ : V)) (hφ : T.Provable (⌜φ⌝ : V)) :

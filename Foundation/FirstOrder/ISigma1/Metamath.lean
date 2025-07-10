@@ -8,5 +8,5 @@ import Foundation.FirstOrder.ISigma1.Metamath.Formula.Typed
 import Foundation.FirstOrder.ISigma1.Metamath.Proof.Theory
 import Foundation.FirstOrder.ISigma1.Metamath.Proof.Derivation
 import Foundation.FirstOrder.ISigma1.Metamath.Proof.Typed
-import Foundation.FirstOrder.ISigma1.Metamath.Coding
-import Foundation.FirstOrder.ISigma1.Metamath.CodedTheory
+--import Foundation.FirstOrder.ISigma1.Metamath.Coding
+--import Foundation.FirstOrder.ISigma1.Metamath.CodedTheory

@@ -78,9 +78,6 @@ noncomputable def Semiterm.func {n k f : V} (hf : L.IsFunc k f) (v : SemitermVec
 noncomputable abbrev Semiterm.bv {n : V} (x : V) (h : x < n := by simp) : Semiterm V L n := Semiterm.bvar L x h
 noncomputable abbrev Semiterm.fv {n : V} (x : V) : Semiterm V L n := Semiterm.fvar L x
 
-scoped prefix:max "#'" => Semiterm.bv
-scoped prefix:max "&'" => Semiterm.fv
-
 @[simp] lemma Semiterm.val_bvar {n : V} (z : V) (hz : z < n) : (Semiterm.bvar L z hz).val = ^#z := rfl
 @[simp] lemma Semiterm.val_fvar {n : V} (x : V) : (Semiterm.fvar L x : Semiterm V L n).val = ^&x := rfl
 

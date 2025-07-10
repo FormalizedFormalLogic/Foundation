@@ -14,15 +14,7 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Metamath.Language V} {pL : LDef} [Metamath.Language.Defined L pL]
-
 namespace InternalArithmetic
-
-variable (V)
-
-abbrev LOR.Theory := @Language.Theory V _ ⌜ℒₒᵣ⌝ (Language.lDef ℒₒᵣ) _
-
-variable {V}
 
 /-- TODO: move -/
 @[simp] lemma two_lt_three : (2 : V) < (1 + 1 + 1 : V) := by simp [←one_add_one_eq_two]
@@ -31,14 +23,23 @@ variable {V}
 @[simp] lemma two_sub_one_eq_one : (2 : V) - 1 = 1 := by simp [←one_add_one_eq_two]
 @[simp] lemma three_sub_one_eq_two : (3 : V) - 1 = 2 := by simp [←two_add_one_eq_three]
 
-class R₀Theory (T : LOR.TTheory (V := V)) where
-  refl : T ⊢ (#'0 =' #'0).all
-  replace (φ : Semiformula ℒₒᵣ (0 + 1)) : T ⊢ (#'1 =' #'0 ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all
-  add (n m : V) : T ⊢ (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n + m)
-  mul (n m : V) : T ⊢ (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n * m)
+noncomputable abbrev bv {n : V} (x : V) (h : x < n := by simp) : Semiterm V ℒₒᵣ n := Semiterm.bv x h
+
+noncomputable abbrev fv {n : V} (x : V) : Semiterm V ℒₒᵣ n := Semiterm.fv x
+
+local prefix:max "#'" => bv
+
+local prefix:max "&'" => fv
+
+class R₀Theory (T : InternalTheory V ℒₒᵣ) where
+  refl : T ⊢ (#' 0 =' #'0).all
+  replace (φ : Semiformula V ℒₒᵣ (0 + 1)) : T ⊢ (#'1 =' #'0 ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all
+  add (n m : V) : T ⊢ (n + m : Semiterm V ℒₒᵣ 0) =' ↑(n + m)
+  mul (n m : V) : T ⊢ (n * m : Semiterm V ℒₒᵣ 0) =' ↑(n * m)
   ne {n m : V} : n ≠ m → T ⊢ ↑n ≠' ↑m
   ltNumeral (n : V) : T ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all
 
+/--/
 noncomputable abbrev oneAbbrev {n} : ⌜ℒₒᵣ⌝[V].Semiterm n := (1 : V)
 
 scoped notation "^1" => oneAbbrev
