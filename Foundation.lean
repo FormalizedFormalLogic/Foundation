@@ -107,6 +107,8 @@ import Foundation.Modal.Kripke.Logic.S5
 import Foundation.Modal.Kripke.Logic.S5Grz
 import Foundation.Modal.Kripke.Logic.S4H
 
+import Foundation.Modal.Boxdot.Jerabek
+
 import Foundation.Modal.Kripke.NNFormula
 import Foundation.Modal.Kripke.ComplexityLimited
 import Foundation.Modal.Kripke.Undefinability
