@@ -42,4 +42,72 @@ omit [L.LORDefinable]
       using FirstOrder.Arithmetic.models_iff_of_Delta1 (V := V) (σ := T.Δ₁ch) (by simp) (by simp) (e := ![⌜φ⌝])
   Iff.trans this (Theory.Δ₁Definable.mem_iff _)
 
+@[simp] lemma Δ₁Class.mem_iff' {φ : SyntacticFormula L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ φ ∈ T := Δ₁Class.mem_iff
+
 end LO.ISigma1.Metamath
+
+namespace LO.FirstOrder.Theory
+
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+variable {T U : Theory L}
+
+namespace Δ₁Definable
+
+open Arithmetic.HierarchySymbol.Semiformula LO.FirstOrder.Theory
+
+instance add (dT : T.Δ₁Definable) (dU : U.Δ₁Definable) : (T + U).Δ₁Definable where
+  ch := T.Δ₁ch ⋎ U.Δ₁ch
+  mem_iff {φ} := by simp [Theory.add_def]
+  isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
+
+def ofEq (dT : T.Δ₁Definable) (h : T = U) : U.Δ₁Definable where
+  ch := dT.ch
+  mem_iff := by rcases h; exact dT.mem_iff
+  isDelta1 := by rcases h; exact dT.isDelta1
+
+/-
+def add_subset_left (dT : T.Δ₁Definable) (dU : U.Δ₁Definable) :
+    haveI := dT.add dU
+    T.codeIn V ⊆ (T + U).codeIn V := by
+  intro p hp
+  apply FirstOrder.Semiformula.curve_mem_left
+  simpa [val_sigma] using hp
+
+def add_subset_right (dT : T.Δ₁Definable) (dU : U.Δ₁Definable) :
+    haveI := dT.add dU
+    U.codeIn V ⊆ (T + U).codeIn V := by
+  intro p hp
+  apply FirstOrder.Semiformula.curve_mem_right
+  simpa [val_sigma] using hp
+-/
+
+instance empty : Theory.Δ₁Definable (∅ : Theory L) where
+  ch := ⊥
+  mem_iff {ψ} := by simp
+  isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
+
+def singleton (φ : SyntacticFormula L) : Theory.Δ₁Definable {φ} where
+  ch := .ofZero (.mkSigma “x. x = ↑⌜φ⌝” (by simp)) _
+  mem_iff {ψ} := by simp
+  isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
+
+omit [L.LORDefinable] in
+@[simp] lemma singleton_toTDef_ch_val (φ : FirstOrder.SyntacticFormula L) :
+    letI := Δ₁Definable.singleton φ
+    ({φ} : Theory L).Δ₁ch.val = “x. x = ↑⌜φ⌝” := rfl
+
+def ofList (l : List (SyntacticFormula L)) : Δ₁Definable {φ | φ ∈ l} :=
+  match l with
+  |     [] => empty.ofEq (by ext; simp)
+  | φ :: l => ((singleton φ).add (ofList l)).ofEq (by ext; simp [Theory.add_def])
+
+noncomputable def ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁Definable := (ofList h.toFinset.toList).ofEq (by ext; simp)
+
+instance [T.Δ₁Definable] [U.Δ₁Definable] : (T + U).Δ₁Definable := add inferInstance inferInstance
+
+instance (φ : SyntacticFormula L) : Theory.Δ₁Definable {φ} := singleton φ
+
+end Δ₁Definable
+
+end LO.FirstOrder.Theory

@@ -289,3 +289,51 @@ lemma quote_eterm_eq_quote_emb (t : FirstOrder.Semiterm L Empty n) : (⌜t⌝ : 
   simp [goedelNumber'_def]; simp [quote_eq_coe_encode]
 
 end LO.ISigma1.Metamath
+
+namespace LO.FirstOrder
+
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+variable (V)
+
+variable {n : ℕ}
+
+namespace Semiterm
+
+def typed_quote (t : SyntacticSemiterm L n) : Metamath.Semiterm V L n := ⟨⌜t⌝, by simp⟩
+
+instance : GoedelQuote (SyntacticSemiterm L n) (Metamath.Semiterm V L n) := ⟨Semiterm.typed_quote V⟩
+
+@[simp] lemma typed_quote_val (t : SyntacticSemiterm L n) : (⌜t⌝ : Metamath.Semiterm V L n).val = ⌜t⌝ := rfl
+
+noncomputable def typed_quote_vec {k n} (v : Fin k → SyntacticSemiterm L n) : Metamath.SemitermVec V L k n := ⟨⌜fun i ↦ ⌜v i⌝⌝, by simp⟩
+
+noncomputable instance {k n} : GoedelQuote (Fin k → SyntacticSemiterm L n) (Metamath.SemitermVec V L k n) := ⟨Semiterm.typed_quote_vec V⟩
+
+@[simp] lemma typed_quote_vec_val (v : Fin k → SyntacticSemiterm L n) : (⌜v⌝ : Metamath.SemitermVec V L k n).val = ⌜fun i ↦ ⌜v i⌝⌝ := rfl
+
+@[simp] lemma typed_quote_bvar (z : Fin n) :
+    (⌜(#z : SyntacticSemiterm L n)⌝ : Metamath.Semiterm V L n) = Metamath.Semiterm.bvar L ↑z := by ext; simp [quote_bvar]
+
+@[simp] lemma typed_quote_fvar (x : ℕ) :
+    (⌜(&x : SyntacticSemiterm L n)⌝ : Metamath.Semiterm V L n) = Metamath.Semiterm.fvar L (x : V) := by ext; simp [quote_fvar]
+
+lemma typed_quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) :
+    (⌜func f v⌝ : Metamath.Semiterm V L n) =
+      Metamath.Semiterm.func (V := V) (L := L) (k := k) (f := ⌜f⌝) (by simp) ⌜v⌝ := by ext; simp [quote_func, Metamath.Semiterm.func]
+
+@[simp] lemma typed_quote_zero (n : ℕ) :
+    (⌜(func Language.Zero.zero ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = ↑(0 : V) := by ext; simp
+
+@[simp] lemma typed_quote_one (n : ℕ) :
+    (⌜(func Language.One.one ![] : SyntacticSemiterm ℒₒᵣ n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = ↑(1 : V) := by ext; simp
+
+@[simp] lemma typed_quote_add (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
+    (⌜func Language.Add.add v⌝ : Metamath.Semiterm V ℒₒᵣ n) = ⌜v 0⌝ + ⌜v 1⌝ := by ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [quote_add]
+
+@[simp] lemma typed_quote_mul (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
+    (⌜func Language.Mul.mul v⌝ : Metamath.Semiterm V ℒₒᵣ n) = ⌜v 0⌝ * ⌜v 1⌝ := by ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp
+
+end Semiterm
