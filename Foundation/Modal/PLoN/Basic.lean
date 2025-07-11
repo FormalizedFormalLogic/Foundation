@@ -4,6 +4,8 @@ universe u v
 
 namespace LO.Modal
 
+open Formula (atom)
+
 namespace PLoN
 
 structure Frame where
@@ -18,7 +20,7 @@ scoped notation "﹫" => Frame.default
 instance : CoeFun (PLoN.Frame) (λ F => Formula ℕ → F.World → F.World → Prop) := ⟨Frame.Rel⟩
 
 abbrev Frame.Rel' {F : PLoN.Frame} (φ : Formula ℕ) (x y : F.World) := F.Rel φ x y
-scoped notation:45 x:90 " ≺[" φ "] " y:90 => Frame.Rel' φ x y
+notation:45 x:90 " ≺[" φ "] " y:90 => Frame.Rel' φ x y
 
 
 structure FiniteFrame extends Frame where
@@ -86,12 +88,18 @@ instance : Semantics.Tarski M.World where
   realize_and := Satisfies.and_def
   realize_or  := Satisfies.or_def
 
+protected lemma def_iff : x ⊧ φ ⭤ ψ ↔ ((x ⊧ φ) ↔ (x ⊧ ψ)) := by
+  simp [LogicalConnective.iff]
+  tauto;
+
 end Satisfies
 
 
 def ValidOnModel (M : PLoN.Model) (φ : Formula ℕ) : Prop := ∀ w : M.World, w ⊧ φ
 
 namespace ValidOnModel
+
+variable {M : PLoN.Model} {φ ψ χ : Formula ℕ}
 
 instance : Semantics (Formula ℕ) (PLoN.Model) := ⟨fun M ↦ Formula.PLoN.ValidOnModel M⟩
 
@@ -111,6 +119,33 @@ protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnMode
 protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
 
 protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
+
+protected lemma nec (h : M ⊧ φ) : M ⊧ □φ := by
+  intro x y Rxy;
+  apply h;
+
+protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ ⭤ ψ → M ⊧ □φ ⭤ □ψ := by
+  push_neg;
+  let M : Model := {
+    World := Fin 2,
+    Rel ξ x y := if ξ = (.atom 1) then True else False,
+    Valuation x a := x = 0
+  };
+  use M, (.atom 0), (.atom 1);
+  constructor;
+  . simp [ValidOnModel];
+    tauto;
+  . suffices (∃ x : M.World, ∀ y : M.World, x ≺[atom 0] y → y = 0) ∧ ∃ x : M.World, x ≠ 0 by
+      simpa [M, ValidOnModel, Semantics.Realize, Satisfies] using this;
+    constructor;
+    . use 0;
+      intro x;
+      match x with
+      | 0 => tauto;
+      | 1 => simp [M, Frame.Rel'];
+    . use 1;
+      simp [M];
+
 
 end ValidOnModel
 
