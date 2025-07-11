@@ -6,6 +6,28 @@ open Encodable LO FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamat
 
 namespace LO
 
+class LCIsomorphicGoedelQuote (α β : Type*) [LogicalConnective α] [LogicalConnective β] extends GoedelQuote α β where
+  top : ⌜(⊤ : α)⌝ = (⊤ : β)
+  bot : ⌜(⊥ : α)⌝ = (⊥ : β)
+  and (φ ψ : α) : (⌜φ ⋏ ψ⌝ : β) = ⌜φ⌝ ⋏ ⌜ψ⌝
+  or (φ ψ : α) : (⌜φ ⋎ ψ⌝ : β) = ⌜φ⌝ ⋎ ⌜ψ⌝
+  imply (φ ψ : α) : (⌜φ ➝ ψ⌝ : β) = ⌜φ⌝ ➝ ⌜ψ⌝
+  neg (φ : α) : (⌜∼φ⌝ : β) = ∼⌜φ⌝
+
+namespace LCIsomorphicGoedelQuote
+
+attribute [simp] top bot and or imply neg
+
+variable {α β : Type*} [LogicalConnective α] [LogicalConnective β] [LCIsomorphicGoedelQuote α β]
+
+@[simp] lemma iff (φ ψ : α) : (⌜φ ⭤ ψ⌝ : β) = ⌜φ⌝ ⭤ ⌜ψ⌝ := by simp [LogicalConnective.iff]
+
+end LCIsomorphicGoedelQuote
+
+end LO
+
+namespace LO
+
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [L.Encodable]
@@ -61,7 +83,7 @@ lemma quote_nrel {k} (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) : (⌜n
 @[simp] lemma quote_nlt' (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜“!!t ≮ !!u”⌝ : V) = (⌜t⌝ ^≮ ⌜u⌝) := by simp [Semiformula.Operator.lt_def]
 
-@[simp] lemma quote_semisentence_def (φ : Semisentence L n) : ⌜(Rewriting.embedding φ : SyntacticSemiformula L n)⌝ = (⌜φ⌝ : V) := by
+@[simp] lemma quote_coe_semisentence_def (φ : Semisentence L n) : ⌜(Rewriting.embedding φ : SyntacticSemiformula L n)⌝ = (⌜φ⌝ : V) := by
   simp [quote_eq_coe_encode]
 
 lemma sentence_goedelNumber_def (σ : Sentence L) :
@@ -191,31 +213,31 @@ variable (V)
 
 def typedQuote (φ : SyntacticSemiformula L n) : Metamath.Semiformula V L n := ⟨⌜φ⌝, by simp⟩
 
-variable {V}
+variable {V} {n : ℕ}
 
-instance : GoedelQuote (SyntacticSemiformula L n) (Metamath.Semiformula V L n) := ⟨Semiformula.typedQuote V⟩
+instance : LCIsomorphicGoedelQuote (SyntacticSemiformula L n) (Metamath.Semiformula V L n) where
+  quote := Semiformula.typedQuote V
+  top := by ext; simp [typedQuote]
+  bot := by ext; simp [typedQuote]
+  and _ _ := by ext; simp [typedQuote]
+  or _ _ := by ext; simp [typedQuote]
+  imply _ _ := by ext; simp [typedQuote]
+  neg _ := by ext; simp [typedQuote]
 
-instance : GoedelQuote (SyntacticFormula L) (Metamath.Formula V L) := ⟨Semiformula.typedQuote V⟩
+instance : LCIsomorphicGoedelQuote (SyntacticFormula L) (Metamath.Formula V L) where
+  quote := Semiformula.typedQuote V
+  top := by ext; simp [typedQuote]
+  bot := by ext; simp [typedQuote]
+  and _ _ := by ext; simp [typedQuote]
+  or _ _ := by ext; simp [typedQuote]
+  imply _ _ := by ext; simp [typedQuote]
+  neg _ := by ext; simp [typedQuote]
 
 @[simp] lemma typedQuote_val (φ : SyntacticSemiformula L n) : (⌜φ⌝ : Metamath.Semiformula V L n).val = ⌜φ⌝ := rfl
 
-@[simp] lemma typedQuote_verum (n : ℕ) : (⌜(⊤ : SyntacticSemiformula L n)⌝ : Metamath.Semiformula V L n) = ⊤ := by ext; simp [quote_verum]
+@[simp] lemma typedQuote_all (φ : SyntacticSemiformula L (n + 1)) : (⌜∀' φ⌝ : Metamath.Semiformula V L n) = .all (.sCast ⌜φ⌝) := by ext; simp [quote_all]
 
-@[simp] lemma typedQuote_falsum (n : ℕ) : (⌜(⊥ : SyntacticSemiformula L n)⌝ : Metamath.Semiformula V L n) = ⊥ := by ext; simp [quote_falsum]
-
-@[simp] lemma typedQuote_and (φ ψ : SyntacticSemiformula L n) : (⌜φ ⋏ ψ⌝ : Metamath.Semiformula V L n) = ⌜φ⌝ ⋏ ⌜ψ⌝ := by ext; simp [quote_and]
-
-@[simp] lemma typedQuote_or (φ ψ : SyntacticSemiformula L n) : (⌜φ ⋎ ψ⌝ : Metamath.Semiformula V L n) = ⌜φ⌝ ⋎ ⌜ψ⌝ := by ext; simp [quote_or]
-
-@[simp] lemma typedQuote_all (φ : SyntacticSemiformula L (n + 1)) : (⌜∀' φ⌝ : Metamath.Semiformula V L n) = .all (.cast (n := ↑(n + 1)) ⌜φ⌝) := by ext; simp [quote_all]
-
-@[simp] lemma typedQuote_ex (φ : SyntacticSemiformula L (n + 1)) : (⌜∃' φ⌝ : Metamath.Semiformula V L n) = .ex (.cast (n := ↑(n + 1)) ⌜φ⌝) := by ext; simp [quote_ex]
-
-@[simp] lemma typedQuote_neg (φ : SyntacticSemiformula L n) : (⌜∼φ⌝ : Metamath.Semiformula V L n) = ∼⌜φ⌝ := by
-  ext; simp
-
-@[simp] lemma typedQuote_imp (φ ψ : SyntacticSemiformula L n) : (⌜φ ➝ ψ⌝ : Metamath.Semiformula V L n) = ⌜φ⌝ ➝ ⌜ψ⌝ := by
-  simp [Semiformula.imp_eq, Semiformula.imp_def]
+@[simp] lemma typedQuote_ex (φ : SyntacticSemiformula L (n + 1)) : (⌜∃' φ⌝ : Metamath.Semiformula V L n) = .ex (.sCast ⌜φ⌝) := by ext; simp [quote_ex]
 
 @[simp] lemma typedQuote_weight (k n : ℕ) :
     (⌜(weight k : SyntacticSemiformula L n)⌝ : Metamath.Semiformula V L n) = (verums (L := L) (V := V) k) := by
@@ -223,12 +245,18 @@ instance : GoedelQuote (SyntacticFormula L) (Metamath.Formula V L) := ⟨Semifor
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
+instance : LCIsomorphicGoedelQuote (SyntacticSemiformula ℒₒᵣ n) (Metamath.Semiformula V ℒₒᵣ n) := inferInstance
+
+@[simp] lemma typedQuote_all_arith (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) : (⌜∀' φ⌝ : Metamath.Semiformula V ℒₒᵣ n) = .all (.sCast ⌜φ⌝) := typedQuote_all _
+
+@[simp] lemma typedQuote_ex_arith (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) : (⌜∃' φ⌝ : Metamath.Semiformula V ℒₒᵣ n) = .ex (.sCast ⌜φ⌝) := typedQuote_ex _
+
 @[simp] lemma typedQuote_eq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
-    (⌜rel Language.Eq.eq v⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜v 0⌝ =' ⌜v 1⌝) := by
+    (⌜rel Language.Eq.eq v⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜v 0⌝ ≐ ⌜v 1⌝) := by
   ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.equals]
 
 @[simp] lemma typedQuote_neq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
-    (⌜nrel Language.Eq.eq v⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜v 0⌝ ≠' ⌜v 1⌝) := by
+    (⌜nrel Language.Eq.eq v⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜v 0⌝ ≉ ⌜v 1⌝) := by
   ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.notEquals]
 
 @[simp] lemma typedQuote_lt (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
@@ -240,39 +268,76 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
   ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.notLessThan]
 
 @[simp] lemma typedQuote_ball (t : SyntacticSemiterm ℒₒᵣ n) (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
-    (⌜∀[“#0 < !!(Rew.bShift t)”] φ⌝ : Metamath.Semiformula V ℒₒᵣ n) = Semiformula.ball ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
-  ext; simp [LO.ball, imp_eq, Semiformula.cast,
-    Semiformula.ball, Semiformula.Operator.lt_def]
+    (⌜∀[“#0 < !!(Rew.bShift t)”] φ⌝ : Metamath.Semiformula V ℒₒᵣ n) = Semiformula.ball ⌜t⌝ (.sCast ⌜φ⌝) := by
+  ext; simp [LO.ball, imp_eq, Semiformula.ball, Semiformula.Operator.lt_def]
 
 @[simp] lemma typedQuote_bex (t : SyntacticSemiterm ℒₒᵣ n) (φ : SyntacticSemiformula ℒₒᵣ (n + 1)) :
-    (⌜∃[“#0 < !!(Rew.bShift t)”] φ⌝ : Metamath.Semiformula V ℒₒᵣ n) = Semiformula.bex ⌜t⌝ (.cast (n := ↑(n + 1)) ⌜φ⌝) := by
-  ext; simp [LO.bex, Semiformula.cast, Semiformula.Operator.lt_def]
+    (⌜∃[“#0 < !!(Rew.bShift t)”] φ⌝ : Metamath.Semiformula V ℒₒᵣ n) = Semiformula.bex ⌜t⌝ (.sCast ⌜φ⌝) := by
+  ext; simp [LO.bex, Semiformula.Operator.lt_def]
 
-instance : GoedelQuote (Sentence L) (Metamath.Formula V L) := ⟨fun σ ↦ (⌜Rew.embs ▹ σ⌝ : Metamath.Semiformula V L (0 : ℕ))⟩
+@[simp] lemma typedQuote_eq' (t u : SyntacticSemiterm ℒₒᵣ n) :
+    (⌜“!!t = !!u”⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := by
+  ext; simp
 
-lemma quote_sentence_def' (σ : Sentence L) : (⌜σ⌝ : Metamath.Formula V L) = (⌜Rew.embs ▹ σ⌝ : Metamath.Semiformula V L (0 : ℕ)) := rfl
+@[simp] lemma typedQuote_neq' (t u : SyntacticSemiterm ℒₒᵣ n) :
+    (⌜“!!t ≠ !!u”⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := by
+  ext; simp
+
+@[simp] lemma typedQuote_lt' (t u : SyntacticSemiterm ℒₒᵣ n) :
+    (⌜“!!t < !!u”⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := by
+  ext; simp
+
+@[simp] lemma typedQuote_nlt' (t u : SyntacticSemiterm ℒₒᵣ n) :
+    (⌜“!!t ≮ !!u”⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := by
+  ext; simp
+
+instance (n) : LCIsomorphicGoedelQuote (Semisentence L n) (Metamath.Semiformula V L n) where
+  quote σ := (⌜Rew.embs ▹ σ⌝ : Metamath.Semiformula V L n)
+  top := by ext; simp
+  bot := by ext; simp
+  and _ _ := by ext; simp
+  or _ _ := by ext; simp
+  imply _ _ := by ext; simp
+  neg _ := by ext; simp
+
+instance : LCIsomorphicGoedelQuote (Sentence L) (Metamath.Formula V L) where
+  quote σ := (⌜Rew.embs ▹ σ⌝ : Metamath.Semiformula V L (0 : ℕ))
+  top := by ext; simp
+  bot := by ext; simp
+  and _ _ := by ext; simp
+  or _ _ := by ext; simp
+  imply _ _ := by ext; simp
+  neg _ := by ext; simp
+
+lemma quote_semisentence_def (σ : Semisentence L n) : (⌜σ⌝ : Metamath.Semiformula V L n) = (⌜Rew.embs ▹ σ⌝ : Metamath.Semiformula V L n) := rfl
+
+lemma quote_sentence_def (σ : Sentence L) : (⌜σ⌝ : Metamath.Formula V L) = (⌜Rew.embs ▹ σ⌝ : Metamath.Semiformula V L (0 : ℕ)) := rfl
+
+@[simp] lemma quote_semisentence_val (σ : Semisentence L n) : (⌜σ⌝ : Metamath.Semiformula V L n).val = ⌜σ⌝ := by
+  simp [quote_semisentence_def, quote_eq_coe_encode]
 
 @[simp] lemma quote_sentence_val (σ : Sentence L) : (⌜σ⌝ : Metamath.Formula V L).val = ⌜σ⌝ := by
-  simp [quote_sentence_def', quote_eq_coe_encode]
+  simp [quote_sentence_def, quote_eq_coe_encode]
 
-/-- TODO: refactor names-/
-@[simp] lemma typedQuote'_imp (σ π : Sentence L) : (⌜σ ➝ π⌝ : Metamath.Formula V L) = ⌜σ⌝ ➝ ⌜π⌝ := by
-  simp [quote_sentence_def']
+@[simp] lemma typedQuote_all' (φ : Semisentence L (n + 1)) : (⌜∀' φ⌝ : Metamath.Semiformula V L n) = .all (.sCast ⌜φ⌝) := by
+  ext; simp [quote_semisentence_def]
 
-@[simp] lemma typedQuote'_or (σ π : Sentence L) : (⌜σ ⋎ π⌝ : Metamath.Formula V L) = ⌜σ⌝ ⋎ ⌜π⌝ := by
-  simp [quote_sentence_def']
+@[simp] lemma typedQuote_ex' (φ : Semisentence L (n + 1)) : (⌜∃' φ⌝ : Metamath.Semiformula V L n) = .ex (.sCast ⌜φ⌝) := by
+  ext; simp [quote_semisentence_def]
 
-@[simp] lemma typedQuote'_neg (σ : Sentence L) : (⌜∼σ⌝ : Metamath.Formula V L) = ∼⌜σ⌝ := by
-  simp [quote_sentence_def']
+@[simp] lemma typedQuote_ball' (t : Semiterm ℒₒᵣ Empty n) (φ : Semisentence ℒₒᵣ (n + 1)) :
+    (⌜∀[“#0 < !!(Rew.bShift t)”] φ⌝ : Metamath.Semiformula V ℒₒᵣ n) = Semiformula.ball ⌜t⌝ (.sCast ⌜φ⌝) := by
+  have : (⌜Rew.emb (ξ := ℕ) (Rew.bShift t)⌝ : Metamath.Semiterm V ℒₒᵣ ↑(n + 1)) = (Semiterm.bShift ⌜Rew.embs t⌝ : Metamath.Semiterm V ℒₒᵣ (↑n + 1)) := by
+    ext; simp [←Rew.emb_bShift_term]
+  simp [quote_semisentence_def, LO.ball, imp_eq, Semiformula.ball, Semiterm.typed_quote_empty_def, this]
+  congr
 
-/- Lemmata for `simp`-/
-@[simp] lemma typedQuote_imp0 (φ ψ : SyntacticFormula L) : (⌜φ ➝ ψ⌝ : Metamath.Formula V L) = ⌜φ⌝ ➝ ⌜ψ⌝ := typedQuote_imp _ _
-
-@[simp] lemma typedQuote_or0 (φ ψ : SyntacticFormula L) : (⌜φ ⋎ ψ⌝ : Metamath.Formula V L) = ⌜φ⌝ ⋎ ⌜ψ⌝ := typedQuote_or _ _
-
-@[simp] lemma typedQuote_and0 (φ ψ : SyntacticFormula L) : (⌜φ ⋏ ψ⌝ : Metamath.Formula V L) = ⌜φ⌝ ⋏ ⌜ψ⌝ := typedQuote_and _ _
-
-@[simp] lemma typedQuote_neg0 (φ : SyntacticFormula L) : (⌜∼φ⌝ : Metamath.Formula V L) = ∼⌜φ⌝ := typedQuote_neg _
+@[simp] lemma typedQuote_bex' (t : Semiterm ℒₒᵣ Empty n) (φ : Semisentence ℒₒᵣ (n + 1)) :
+    (⌜∃[“#0 < !!(Rew.bShift t)”] φ⌝ : Metamath.Semiformula V ℒₒᵣ n) = Semiformula.bex ⌜t⌝ (.sCast ⌜φ⌝) := by
+  have : (⌜Rew.emb (ξ := ℕ) (Rew.bShift t)⌝ : Metamath.Semiterm V ℒₒᵣ ↑(n + 1)) = (Semiterm.bShift ⌜Rew.embs t⌝ : Metamath.Semiterm V ℒₒᵣ (↑n + 1)) := by
+    ext; simp [←Rew.emb_bShift_term]
+  simp [quote_semisentence_def, LO.bex, Semiformula.bex, Semiterm.typed_quote_empty_def, this]
+  congr
 
 end Semiformula
 

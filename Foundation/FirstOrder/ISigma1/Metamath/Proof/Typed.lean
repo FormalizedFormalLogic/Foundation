@@ -163,6 +163,9 @@ lemma TProvable.iff_provable {σ : Formula V L} :
   · intro h
     exact ⟨Theory.Derivable.toTDerivation _ <| by simpa [←singleton_eq_insert] using h⟩
 
+lemma internalize_TProvable_iff_provable {T : Theory L} [T.Δ₁Definable] {σ : Formula V L} :
+    T.internalize V ⊢! σ ↔ T.Provable σ.val := TProvable.iff_provable
+
 def TDerivation.toTProof {p} (d : T ⊢ᵈᵉʳ insert p ∅) : T ⊢ p := d
 
 def TDerivation.of_eq (d : T ⊢ᵈᵉʳ Γ) (e : Γ = Δ) : T ⊢ᵈᵉʳ Δ := by rcases e; exact d

@@ -585,14 +585,14 @@ notation "⌜𝐑₀'⌝[" V "]" => TTheory.R0' (V := V)
 
 namespace Theory.R0'
 
-noncomputable def eqRefl.proof : ⌜𝐑₀'⌝[V] ⊢ (#'0 =' #'0).all := Language.Theory.TProof.byAxm <| by
+noncomputable def eqRefl.proof : ⌜𝐑₀'⌝[V] ⊢ (#'0 ≐ #'0).all := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_left
   unfold eqRefl
   simp [HierarchySymbol.Semiformula.val_sigma, Theory.tDef, Semiformula.curve, numeral_eq_natCast]
   simp [qqAll, nat_cast_pair, qqEQ, qqRel, cons_absolute, qqBvar]
 
 noncomputable def replace.proof (φ : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1)) :
-    ⌜𝐑₀'⌝[V] ⊢ (#'1 =' #'0 ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all := Language.Theory.TProof.byAxm <| by
+    ⌜𝐑₀'⌝[V] ⊢ (#'1 ≐ #'0 ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_left
   unfold replace
@@ -612,7 +612,7 @@ noncomputable def replace.proof (φ : ⌜ℒₒᵣ⌝[V].Semiformula (0 + 1)) :
     exact lt_or_right _ _
 
 noncomputable def Ω₁.proof (n m : V) :
-    ⌜𝐑₀'⌝[V] ⊢ (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n + m) := Language.Theory.TProof.byAxm <| by
+    ⌜𝐑₀'⌝[V] ⊢ (n + m : ⌜ℒₒᵣ⌝[V].Semiterm 0) ≐ ↑(n + m) := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_left
@@ -629,7 +629,7 @@ noncomputable def Ω₁.proof (n m : V) :
     apply lt_of_le_of_lt (by simp) (lt_qqAdd_right _ _)
 
 noncomputable def Ω₂.proof (n m : V) :
-    ⌜𝐑₀'⌝[V] ⊢ (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) =' ↑(n * m) := Language.Theory.TProof.byAxm <| by
+    ⌜𝐑₀'⌝[V] ⊢ (n * m : ⌜ℒₒᵣ⌝[V].Semiterm 0) ≐ ↑(n * m) := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
@@ -646,7 +646,7 @@ noncomputable def Ω₂.proof (n m : V) :
   · apply lt_trans ?_ (lt_qqEQ_left _ _)
     apply lt_of_le_of_lt (by simp) (lt_qqMul_right _ _)
 
-noncomputable def Ω₃.proof {n m : V} (ne : n ≠ m) : ⌜𝐑₀'⌝[V] ⊢ ↑n ≠' ↑m := Language.Theory.TProof.byAxm <| by
+noncomputable def Ω₃.proof {n m : V} (ne : n ≠ m) : ⌜𝐑₀'⌝[V] ⊢ ↑n ≉ ↑m := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
@@ -661,7 +661,7 @@ noncomputable def Ω₃.proof {n m : V} (ne : n ≠ m) : ⌜𝐑₀'⌝[V] ⊢ �
   · exact lt_of_le_of_lt (by simp) (lt_qqNEQ_left _ _)
   · exact lt_of_le_of_lt (by simp) (lt_qqNEQ_right _ _)
 
-noncomputable def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 =' #'0) n).disj).all := Language.Theory.TProof.byAxm <| by
+noncomputable def Ω₄.proof (n : V): ⌜𝐑₀'⌝[V] ⊢ (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 ≐ #'0) n).disj).all := Language.Theory.TProof.byAxm <| by
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
   apply FirstOrder.Semiformula.curve_mem_right
@@ -696,7 +696,7 @@ variable {T : ArithmeticTheory} [T.Δ₁Definable]
 
 @[simp] lemma theory_subset_AddR₀ : T.tCodeIn V ⊆ T†V := FirstOrder.Theory.Δ₁Definable.add_subset_left _ _
 
-noncomputable instance : R₀Theory (T†V) where
+noncomputable instance : InternalR₀Theory (T†V) where
   refl := Language.Theory.TProof.ofSubset (by simp) Theory.R0'.eqRefl.proof
   replace := fun φ ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.R0'.replace.proof φ)
   add := fun n m ↦ Language.Theory.TProof.ofSubset (by simp) (Theory.R0'.Ω₁.proof n m)

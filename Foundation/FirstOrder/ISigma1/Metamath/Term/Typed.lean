@@ -296,6 +296,14 @@ variable {n : V}
     t₁ * t₂ = u₁ * u₂ ↔ t₁ = u₁ ∧ t₂ = u₂ := by
   simp [Semiterm.ext_iff, qqMul]
 
+@[simp] lemma numeral_add_two' (x : V) :
+    typedNumeral n (x + 1 + 1) = typedNumeral n (x + 1) + typedNumeral n 1 := by
+  ext; simp [numeral]
+
+lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
+    typedNumeral n (x + 1) = typedNumeral n x + typedNumeral n 1 := by
+  ext; simp [numeral_succ_pos pos]
+
 @[simp] lemma subst_numeral {m n : V} (w : SemitermVec V ℒₒᵣ n m) (x : V) :
     (↑x : Semiterm V ℒₒᵣ n).substs w = ↑x := by
   ext; simp [Semiterm.substs, numeral_substs w.prop]

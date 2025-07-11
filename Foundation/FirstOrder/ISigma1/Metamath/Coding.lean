@@ -556,10 +556,10 @@ instance goedelQuoteSyntacticFormulaToCodedFormula : GoedelQuote (SyntacticFormu
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 @[simp] lemma codeIn'_eq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
-    (⌜rel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ =' ⌜v 1⌝) := by
+    (⌜rel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ ≐ ⌜v 1⌝) := by
   ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.equals]
 @[simp] lemma codeIn'_neq (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
-    (⌜nrel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ ≠' ⌜v 1⌝) := by
+    (⌜nrel Language.Eq.eq v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ ≉ ⌜v 1⌝) := by
   ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp [Semiterm.notEquals]
 @[simp] lemma codeIn'_lt (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜rel Language.LT.lt v⌝ : (Language.codeIn ℒₒᵣ V).Semiformula n) = (⌜v 0⌝ <' ⌜v 1⌝) := by

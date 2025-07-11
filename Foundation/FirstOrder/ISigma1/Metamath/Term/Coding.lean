@@ -95,7 +95,7 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [L.Encodable]
 
-variable (V)
+variable (V) {n : ℕ}
 
 lemma quote_eq_toNat (t : SyntacticSemiterm L n) : (⌜t⌝ : V) = toNat t := rfl
 
@@ -306,9 +306,13 @@ def typed_quote (t : SyntacticSemiterm L n) : Metamath.Semiterm V L n := ⟨⌜t
 
 instance : GoedelQuote (SyntacticSemiterm L n) (Metamath.Semiterm V L n) := ⟨Semiterm.typed_quote V⟩
 
+instance : GoedelQuote (Semiterm L Empty n) (Metamath.Semiterm V L n) := ⟨fun t ↦ ⌜Rew.embs t⌝⟩
+
 @[simp] lemma typed_quote_val (t : SyntacticSemiterm L n) : (⌜t⌝ : Metamath.Semiterm V L n).val = ⌜t⌝ := rfl
 
 noncomputable def typed_quote_vec {k n} (v : Fin k → SyntacticSemiterm L n) : Metamath.SemitermVec V L k n := ⟨⌜fun i ↦ ⌜v i⌝⌝, by simp⟩
+
+lemma typed_quote_empty_def (t : Semiterm L Empty n) : (⌜t⌝ : Metamath.Semiterm V L n) = ⌜Rew.embs t⌝ := rfl
 
 noncomputable instance {k n} : GoedelQuote (Fin k → SyntacticSemiterm L n) (Metamath.SemitermVec V L k n) := ⟨Semiterm.typed_quote_vec V⟩
 
@@ -335,5 +339,19 @@ lemma typed_quote_func {k} (f : L.Func k) (v : Fin k → SyntacticSemiterm L n) 
 
 @[simp] lemma typed_quote_mul (v : Fin 2 → SyntacticSemiterm ℒₒᵣ n) :
     (⌜func Language.Mul.mul v⌝ : Metamath.Semiterm V ℒₒᵣ n) = ⌜v 0⌝ * ⌜v 1⌝ := by ext; rw [Matrix.fun_eq_vec_two (v := v)]; simp
+
+/-! code in arithmetic -/
+
+@[simp] lemma typed_quote_zero' :
+    (⌜(‘0’  : SyntacticSemiterm ℒₒᵣ n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = ↑(0 : V) := by ext; simp
+
+@[simp] lemma typed_quote_one' :
+    (⌜(‘1’ : SyntacticSemiterm ℒₒᵣ n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = ↑(1 : V) := by ext; simp
+
+@[simp] lemma typed_quote_add' (t u : SyntacticSemiterm ℒₒᵣ n) :
+    (⌜‘!!t + !!u’⌝ : Metamath.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := by ext; simp
+
+@[simp] lemma typed_quote_mul' (t u : SyntacticSemiterm ℒₒᵣ n) :
+    (⌜‘!!t * !!u’⌝ : Metamath.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := by ext; simp
 
 end Semiterm

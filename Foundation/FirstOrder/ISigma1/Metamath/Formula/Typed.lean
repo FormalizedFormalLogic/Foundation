@@ -51,10 +51,15 @@ noncomputable scoped instance : LogicalConnective (Semiformula V L n) where
 
 def Semiformula.cast (p : Semiformula V L n) (eq : n = n' := by simp) : Semiformula V L n' := eq ▸ p
 
+def Semiformula.sCast {n : ℕ} (p : Semiformula V L ↑(n + 1)) : Semiformula V L (↑n + 1) := p.cast
+
 noncomputable def verums (k : V) : Semiformula V L n := ⟨qqVerums k, by simp⟩
 
 @[simp] lemma Semiformula.val_cast (p : Semiformula V L n) (eq : n = n') :
     (p.cast eq).val = p.val := by rcases eq; simp [Semiformula.cast]
+
+@[simp] lemma Semiformula.val_sCast {n : ℕ} (p : Semiformula V L ↑(n + 1)) :
+    (p.sCast).val = p.val := by simp [sCast]
 
 noncomputable def Semiformula.all (p : Semiformula V L (n + 1)) : Semiformula V L n := ⟨^∀ p.val, by simp⟩
 
@@ -277,35 +282,35 @@ noncomputable def Semiterm.lessThan {n : V} (t u : Semiterm V ℒₒᵣ n) : Sem
 
 noncomputable def Semiterm.notLessThan {n : V} (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^≮ u.val, by simp [qqNLT]⟩
 
-scoped infix:75 " =' " => Semiterm.equals
+scoped infix:46 " ≐ " => Semiterm.equals
 
-scoped infix:75 " ≠' " => Semiterm.notEquals
+scoped infix:46 " ≉ " => Semiterm.notEquals
 
-scoped infix:75 " <' " => Semiterm.lessThan
+scoped infix:46 " <' " => Semiterm.lessThan
 
-scoped infix:75 " ≮' " => Semiterm.notLessThan
+scoped infix:46 " ≮' " => Semiterm.notLessThan
 
 noncomputable def Semiformula.ball {n : V} (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) : Semiformula V ℒₒᵣ n :=
-  (Semiterm.bvar ℒₒᵣ 0 ≮' t.bShift ⋎ p).all
+  ((Semiterm.bvar ℒₒᵣ 0 ≮' t.bShift) ⋎ p).all
 
 noncomputable def Semiformula.bex {n : V} (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) : Semiformula V ℒₒᵣ n :=
-  (Semiterm.bvar ℒₒᵣ 0 <' t.bShift ⋏ p).ex
+  ((Semiterm.bvar ℒₒᵣ 0 <' t.bShift) ⋏ p).ex
 
 namespace InternalArithmetic
 
 variable {n m : V}
 
-@[simp] lemma val_equals {n : V} (t u : Semiterm V ℒₒᵣ n) : (t =' u).val = t.val ^= u.val := rfl
-@[simp] lemma val_notEquals {n : V} (t u : Semiterm V ℒₒᵣ n) : (t ≠' u).val = t.val ^≠ u.val := rfl
+@[simp] lemma val_equals {n : V} (t u : Semiterm V ℒₒᵣ n) : (t ≐ u).val = t.val ^= u.val := rfl
+@[simp] lemma val_notEquals {n : V} (t u : Semiterm V ℒₒᵣ n) : (t ≉ u).val = t.val ^≠ u.val := rfl
 @[simp] lemma val_lessThan {n : V} (t u : Semiterm V ℒₒᵣ n) : (t <' u).val = t.val ^< u.val := rfl
 @[simp] lemma val_notLessThan {n : V} (t u : Semiterm V ℒₒᵣ n) : (t ≮' u).val = t.val ^≮ u.val := rfl
 
 @[simp] lemma equals_iff {t₁ t₂ u₁ u₂ : Semiterm V ℒₒᵣ n} :
-    (t₁ =' u₁) = (t₂ =' u₂) ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+    (t₁ ≐ u₁) = (t₂ ≐ u₂) ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Semiformula.ext_iff, Semiterm.ext_iff, qqEQ]
 
 @[simp] lemma notequals_iff {t₁ t₂ u₁ u₂ : Semiterm V ℒₒᵣ n} :
-    (t₁ ≠' u₁) = (t₂ ≠' u₂) ↔ t₁ = t₂ ∧ u₁ = u₂ := by
+    (t₁ ≉ u₁) = (t₂ ≉ u₂) ↔ t₁ = t₂ ∧ u₁ = u₂ := by
   simp [Semiformula.ext_iff, Semiterm.ext_iff, qqNEQ]
 
 @[simp] lemma lessThan_iff {t₁ t₂ u₁ u₂ : Semiterm V ℒₒᵣ n} :
@@ -317,11 +322,11 @@ variable {n m : V}
   simp [Semiformula.ext_iff, Semiterm.ext_iff, qqNLT]
 
 @[simp] lemma neg_equals (t₁ t₂ : Semiterm V ℒₒᵣ n) :
-    ∼(t₁ =' t₂) = (t₁ ≠' t₂) := by
+    ∼(t₁ ≐ t₂) = (t₁ ≉ t₂) := by
   ext; simp [Semiterm.equals, Semiterm.notEquals, qqEQ, qqNEQ]
 
 @[simp] lemma neg_notEquals (t₁ t₂ : Semiterm V ℒₒᵣ n) :
-    ∼(t₁ ≠' t₂) = (t₁ =' t₂) := by
+    ∼(t₁ ≉ t₂) = (t₁ ≐ t₂) := by
   ext; simp [Semiterm.equals, Semiterm.notEquals, qqEQ, qqNEQ]
 
 @[simp] lemma neg_lessThan (t₁ t₂ : Semiterm V ℒₒᵣ n) :
@@ -333,11 +338,11 @@ variable {n m : V}
   ext; simp [Semiterm.lessThan, Semiterm.notLessThan, qqLT, qqNLT]
 
 @[simp] lemma shift_equals (t₁ t₂ : Semiterm V ℒₒᵣ n) :
-    (t₁ =' t₂).shift = (t₁.shift =' t₂.shift) := by
+    (t₁ ≐ t₂).shift = (t₁.shift ≐ t₂.shift) := by
   ext; simp [Semiterm.equals, Semiterm.shift, Semiformula.shift, qqEQ]
 
 @[simp] lemma shift_notEquals (t₁ t₂ : Semiterm V ℒₒᵣ n) :
-    (t₁ ≠' t₂).shift = (t₁.shift ≠' t₂.shift) := by
+    (t₁ ≉ t₂).shift = (t₁.shift ≉ t₂.shift) := by
   ext; simp [Semiterm.notEquals, Semiterm.shift, Semiformula.shift, qqNEQ]
 
 @[simp] lemma shift_lessThan (t₁ t₂ : Semiterm V ℒₒᵣ n) :
@@ -349,11 +354,11 @@ variable {n m : V}
   ext; simp [Semiterm.notLessThan, Semiterm.shift, Semiformula.shift, qqNLT]
 
 @[simp] lemma substs_equals (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
-    (t₁ =' t₂).substs w = (t₁.substs w =' t₂.substs w) := by
+    (t₁ ≐ t₂).substs w = (t₁.substs w ≐ t₂.substs w) := by
   ext; simp [Semiterm.equals, Semiterm.substs, Semiformula.substs, qqEQ]
 
 @[simp] lemma substs_notEquals (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
-    (t₁ ≠' t₂).substs w = (t₁.substs w ≠' t₂.substs w) := by
+    (t₁ ≉ t₂).substs w = (t₁.substs w ≉ t₂.substs w) := by
   ext; simp [Semiterm.notEquals, Semiterm.substs, Semiformula.substs, qqNEQ]
 
 @[simp] lemma substs_lessThan (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
@@ -435,6 +440,6 @@ lemma nth_tSubstItr' {n m : V} (w : SemitermVec V ℒₒᵣ n m) (p : Semiformul
 end InternalArithmetic
 
 lemma Semiformula.ball_eq_imp {n : V} (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    p.ball t = (Semiterm.bvar ℒₒᵣ 0 <' t.bShift ➝ p).all := by simp [Semiformula.ball, imp_def]
+    p.ball t = ((Semiterm.bvar ℒₒᵣ 0 <' t.bShift) ➝ p).all := by simp [Semiformula.ball, imp_def]
 
 end LO.ISigma1.Metamath

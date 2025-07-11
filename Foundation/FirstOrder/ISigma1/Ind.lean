@@ -5,6 +5,29 @@ import Foundation.FirstOrder.ISigma1.Bit
 
 -/
 
+namespace LO.ISigma1
+
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+
+@[elab_as_elim] lemma sigma1_pos_succ_induction
+    {P : V → Prop} (hP : 𝚺₁-Predicate P)
+    (zero : P 0) (one : P 1) (succ : ∀ x, P (x + 1) → P (x + 2)) : ∀ x, P x := by
+  have : ∀ x, P (x + 1) := by
+    intro x
+    induction x using ISigma1.sigma1_succ_induction
+    · definability
+    case zero => simpa
+    case succ x ih =>
+      simpa [add_assoc, one_add_one_eq_two] using succ x ih
+  intro x
+  rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
+  · exact zero
+  · exact this x
+
+end LO.ISigma1
+
 namespace LO.Induction
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
@@ -57,11 +80,11 @@ lemma order_induction_sigma_or_pi {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
         · simp [HierarchySymbol.BoldfaceFunction.const]
       · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.or
         · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₂
-          · simp [Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
-          · simp [HierarchySymbol.BoldfaceFunction.const]
+          · simp
+          · simp
         · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₂
-          · simp [Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
-          · simp [HierarchySymbol.BoldfaceFunction.const]
+          · simp
+          · simp
     case ind z ih =>
       have : P z ∨ Q z :=
         ind z (fun y hy ↦ by
