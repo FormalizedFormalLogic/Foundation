@@ -37,196 +37,180 @@ abbrev Formula := Semiformula (V := V) L 0
 
 variable {L V}
 
-variable {k n m : ℕ}
+variable {n m : ℕ}
 
-@[simp] lemma Semiformula.isUFormula (p : Semiformula V L n) : IsUFormula L p.val := p.isSemiformula.isUFormula
+@[simp] lemma Semiformula.isUFormula (φ : Semiformula V L n) : IsUFormula L φ.val := φ.isSemiformula.isUFormula
 
 noncomputable scoped instance : LogicalConnective (Semiformula V L n) where
   top := ⟨^⊤, by simp⟩
   bot := ⟨^⊥, by simp⟩
-  wedge (p q) := ⟨p.val ^⋏ q.val, by simp⟩
-  vee (p q) := ⟨p.val ^⋎ q.val, by simp⟩
-  tilde (p) := ⟨neg L p.val, by simp⟩
-  arrow (p q) := ⟨imp L p.val q.val, by simp⟩
-
-noncomputable def verums (k : V) : Semiformula V L n := ⟨qqVerums k, by simp⟩
-
-noncomputable def Semiformula.all (p : Semiformula V L (n + 1)) : Semiformula V L n := ⟨^∀ p.val, by simpa using p.isSemiformula⟩
-
-noncomputable def Semiformula.ex (p : Semiformula V L (n + 1)) : Semiformula V L n := ⟨^∃ p.val, by simpa using p.isSemiformula⟩
+  wedge (φ ψ) := ⟨φ.val ^⋏ ψ.val, by simp⟩
+  vee (φ ψ) := ⟨φ.val ^⋎ ψ.val, by simp⟩
+  tilde (φ) := ⟨neg L φ.val, by simp⟩
+  arrow (φ ψ) := ⟨imp L φ.val ψ.val, by simp⟩
 
 noncomputable instance : LCWQ (Semiformula V L) where
   connectives := inferInstance
-  univ := Semiformula.all
-  ex := Semiformula.ex
+  univ φ := ⟨^∀ φ.val, by simpa using φ.isSemiformula⟩
+  ex φ := ⟨^∃ φ.val, by simpa using φ.isSemiformula⟩
 
-/--/
+noncomputable def verums (k : V) : Semiformula V L n := ⟨qqVerums k, by simp⟩
+
 namespace Semiformula
 
 @[simp] lemma val_verum : (⊤ : Semiformula V L n).val = ^⊤ := rfl
 
 @[simp] lemma val_falsum : (⊥ : Semiformula V L n).val = ^⊥ := rfl
 
-@[simp] lemma val_and (p q : Semiformula V L n) :
-    (p ⋏ q).val = p.val ^⋏ q.val := rfl
+@[simp] lemma val_and (φ ψ : Semiformula V L n) :
+    (φ ⋏ ψ).val = φ.val ^⋏ ψ.val := rfl
 
-@[simp] lemma val_or (p q : Semiformula V L n) :
-    (p ⋎ q).val = p.val ^⋎ q.val := rfl
+@[simp] lemma val_or (φ ψ : Semiformula V L n) :
+    (φ ⋎ ψ).val = φ.val ^⋎ ψ.val := rfl
 
-@[simp] lemma val_neg (p : Semiformula V L n) :
-    (∼p).val = neg L p.val := rfl
+@[simp] lemma val_neg (φ : Semiformula V L n) :
+    (∼φ).val = neg L φ.val := rfl
 
-@[simp] lemma val_imp (p q : Semiformula V L n) :
-    (p ➝ q).val = imp L p.val q.val := rfl
+@[simp] lemma val_imp (φ ψ : Semiformula V L n) :
+    (φ ➝ ψ).val = imp L φ.val ψ.val := rfl
 
-@[simp] lemma val_all (p : Semiformula V L (n + 1)) :
-    p.all.val = ^∀ p.val := rfl
+@[simp] lemma val_all (φ : Semiformula V L (n + 1)) :
+    (∀' φ).val = ^∀ φ.val := rfl
 
-@[simp] lemma val_ex (p : Semiformula V L (n + 1)) :
-    p.ex.val = ^∃ p.val := rfl
+@[simp] lemma val_ex (φ : Semiformula V L (n + 1)) :
+    (∃' φ).val = ^∃ φ.val := rfl
 
-@[simp] lemma val_iff (p q : Semiformula V L n) :
-    (p ⭤ q).val = iff L p.val q.val := rfl
+@[simp] lemma val_iff (φ ψ : Semiformula V L n) :
+    (φ ⭤ ψ).val = iff L φ.val ψ.val := rfl
 
-lemma val_inj {p q : Semiformula V L n} :
-    p.val = q.val ↔ p = q := by rcases p; rcases q; simp
+lemma val_inj {φ ψ : Semiformula V L n} :
+    φ.val = ψ.val ↔ φ = ψ := by rcases φ; rcases ψ; simp
 
-@[ext] lemma ext {p q : Semiformula V L n} (h : p.val = q.val) : p = q := val_inj.mp h
+@[ext] lemma ext {φ ψ : Semiformula V L n} (h : φ.val = ψ.val) : φ = ψ := val_inj.mp h
 
-@[simp] lemma and_inj {p₁ p₂ q₁ q₂ : Semiformula V L n} :
-    p₁ ⋏ p₂ = q₁ ⋏ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [Semiformula.ext_iff]
+@[simp] lemma and_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformula V L n} :
+    φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Semiformula.ext_iff]
 
-@[simp] lemma or_inj {p₁ p₂ q₁ q₂ : Semiformula V L n} :
-    p₁ ⋎ p₂ = q₁ ⋎ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [Semiformula.ext_iff]
+@[simp] lemma or_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformula V L n} :
+    φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Semiformula.ext_iff]
 
-@[simp] lemma all_inj {p q : Semiformula V L (n + 1)} :
-    p.all = q.all ↔ p = q := by simp [Semiformula.ext_iff]
+@[simp] lemma all_inj {φ ψ : Semiformula V L (n + 1)} :
+    ∀' φ = ∀' ψ ↔ φ = ψ := by simp [Semiformula.ext_iff]
 
-@[simp] lemma ex_inj {p q : Semiformula V L (n + 1)} :
-    p.ex = q.ex ↔ p = q := by simp [Semiformula.ext_iff]
+@[simp] lemma ex_inj {φ ψ : Semiformula V L (n + 1)} :
+    ∃' φ = ∃' ψ ↔ φ = ψ := by simp [Semiformula.ext_iff]
 
-@[simp] lemma val_verums : (verums k : Semiformula V L n).val = qqVerums k := rfl
+@[simp] lemma val_verums (k : V) : (verums k : Semiformula V L n).val = qqVerums k := rfl
 
 @[simp] lemma verums_zero : (verums 0 : Semiformula V L n) = ⊤ := by ext; simp
 
 @[simp] lemma verums_succ (k : V) : (verums (k + 1) : Semiformula V L n) = ⊤ ⋏ verums k := by ext; simp
 
-@[simp] lemma neg_verum : ∼(⊤ : Semiformula V L n) = ⊥ := by ext; simp
-@[simp] lemma neg_falsum : ∼(⊥ : Semiformula V L n) = ⊤ := by ext; simp
-@[simp] lemma neg_and (p q : Semiformula V L n) : ∼(p ⋏ q) = ∼p ⋎ ∼q := by ext; simp
-@[simp] lemma neg_or (p q : Semiformula V L n) : ∼(p ⋎ q) = ∼p ⋏ ∼q := by ext; simp
-@[simp] lemma neg_all (p : Semiformula V L (n + 1)) : ∼p.all = (∼p).ex := by ext; simp
-@[simp] lemma neg_ex (p : Semiformula V L (n + 1)) : ∼p.ex = (∼p).all := by ext; simp
+instance : DeMorgan (Semiformula V L n) where
+  verum := by ext; simp
+  falsum := by ext; simp
+  and _ _ := by ext; simp
+  or _ _ := by ext; simp
+  imply _ _ := by ext; simp; rfl
+  neg _ := by ext; simp
 
-lemma imp_def (p q : Semiformula V L n) : p ➝ q = ∼p ⋎ q := by ext; simp [imp]
+@[simp] lemma neg_all (φ : Semiformula V L (n + 1)) : ∼(∀' φ) = ∃' (∼φ) := by ext; simp
+@[simp] lemma neg_ex (φ : Semiformula V L (n + 1)) : ∼(∃' φ) = ∀' (∼φ) := by ext; simp
 
-@[simp] lemma neg_neg (p : Semiformula V L n) : ∼∼p = p := by
-  ext; simp [IsUFormula.neg_neg]
+lemma imp_def (φ ψ : Semiformula V L n) : φ ➝ ψ = ∼φ ⋎ ψ := by ext; simp [imp]
 
-noncomputable def shift (p : Semiformula V L n) : Semiformula V L n := ⟨Metamath.shift L p.val, p.isSemiformula.shift⟩
+noncomputable def shift (φ : Semiformula V L n) : Semiformula V L n := ⟨Metamath.shift L φ.val, φ.isSemiformula.shift⟩
 
-noncomputable def substs (p : Semiformula V L n) (w : SemitermVec V L n m) : Semiformula V L m :=
-  ⟨Metamath.substs L w.val p.val, p.isSemiformula.substs w.isSemiformula⟩
+noncomputable def substs (w : SemitermVec V L n m) (φ : Semiformula V L n) : Semiformula V L m :=
+  ⟨Metamath.substs L w.val φ.val, φ.isSemiformula.substs w.isSemitermVec⟩
 
-@[simp] lemma val_shift (p : Semiformula V L n) : p.shift.val = Metamath.shift L p.val := rfl
-@[simp] lemma val_substs (p : Semiformula V L n) (w : SemitermVec V L n m) : (p.substs w).val = Metamath.substs L w.val p.val := rfl
+@[simp] lemma val_shift (φ : Semiformula V L n) : φ.shift.val = Metamath.shift L φ.val := rfl
+@[simp] lemma val_substs (φ : Semiformula V L n) (w : SemitermVec V L n m) : (φ.substs w).val = Metamath.substs L w.val φ.val := rfl
 
 @[simp] lemma shift_verum : (⊤ : Semiformula V L n).shift = ⊤ := by ext; simp [shift]
 @[simp] lemma shift_falsum : (⊥ : Semiformula V L n).shift = ⊥ := by ext; simp [shift]
-@[simp] lemma shift_and (p q : Semiformula V L n) : (p ⋏ q).shift = p.shift ⋏ q.shift := by ext; simp [shift]
-@[simp] lemma shift_or (p q : Semiformula V L n) : (p ⋎ q).shift = p.shift ⋎ q.shift := by ext; simp [shift]
-@[simp] lemma shift_all (p : Semiformula V L (n + 1)) : p.all.shift = p.shift.all := by ext; simp [shift]
-@[simp] lemma shift_ex (p : Semiformula V L (n + 1)) : p.ex.shift = p.shift.ex := by ext; simp [shift]
+@[simp] lemma shift_and (φ ψ : Semiformula V L n) : (φ ⋏ ψ).shift = φ.shift ⋏ ψ.shift := by ext; simp [shift]
+@[simp] lemma shift_or (φ ψ : Semiformula V L n) : (φ ⋎ ψ).shift = φ.shift ⋎ ψ.shift := by ext; simp [shift]
+@[simp] lemma shift_all (φ : Semiformula V L (n + 1)) : (∀' φ).shift = ∀' φ.shift := by ext; simp [shift]
+@[simp] lemma shift_ex (φ : Semiformula V L (n + 1)) : (∃' φ).shift = ∃' φ.shift := by ext; simp [shift]
 
-@[simp] lemma neg_inj {p q : Semiformula V L n} :
-    ∼p = ∼q ↔ p = q :=
+@[simp] lemma neg_inj {φ ψ : Semiformula V L n} :
+    ∼φ = ∼ψ ↔ φ = ψ :=
   ⟨by intro h; simpa using congr_arg (∼·) h, by rintro rfl; rfl⟩
 
-@[simp] lemma imp_inj {p₁ p₂ q₁ q₂ : Semiformula V L n} :
-    p₁ ➝ p₂ = q₁ ➝ q₂ ↔ p₁ = q₁ ∧ p₂ = q₂ := by simp [imp_def]
+@[simp] lemma imp_inj {φ₁ φ₂ ψ₁ ψ₂ : Semiformula V L n} :
+    φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [imp_def]
 
-@[simp] lemma shift_neg (p : Semiformula V L n) : (∼p).shift = ∼(p.shift) := by
-  ext; simp [shift, val_neg]; simp [Metamath.shift_neg p.isSemiformula]
+@[simp] lemma shift_neg (φ : Semiformula V L n) : (∼φ).shift = ∼(φ.shift) := by
+  ext; simp [shift, val_neg]; simp [Metamath.shift_neg φ.isSemiformula]
 
-@[simp] lemma shift_imp (p q : Semiformula V L n) : (p ➝ q).shift = p.shift ➝ q.shift := by
+@[simp] lemma shift_imp (φ ψ : Semiformula V L n) : (φ ➝ ψ).shift = φ.shift ➝ ψ.shift := by
   simp [imp_def]
 
 @[simp] lemma substs_verum (w : SemitermVec V L n m) : (⊤ : Semiformula V L n).substs w = ⊤ := by ext; simp [substs]
 @[simp] lemma substs_falsum (w : SemitermVec V L n m) : (⊥ : Semiformula V L n).substs w = ⊥ := by ext; simp [substs]
-@[simp] lemma substs_and (w : SemitermVec V L n m) (p q : Semiformula V L n) :
-    (p ⋏ q).substs w = p.substs w ⋏ q.substs w := by ext; simp [substs]
-@[simp] lemma substs_or (w : SemitermVec V L n m) (p q : Semiformula V L n) :
-    (p ⋎ q).substs w = p.substs w ⋎ q.substs w := by ext; simp [substs]
-@[simp] lemma substs_all (w : SemitermVec V L n m) (p : Semiformula V L (n + 1)) :
-    p.all.substs w = (p.substs w.q).all := by
-  ext; simp [substs, Semiterm.bvar, qVec, SemitermVec.bShift, SemitermVec.q, w.isSemiformula.lh]
-@[simp] lemma substs_ex (w : SemitermVec V L n m) (p : Semiformula V L (n + 1)) :
-    p.ex.substs w = (p.substs w.q).ex := by
-  ext; simp [substs, Semiterm.bvar, qVec, SemitermVec.bShift, SemitermVec.q, w.isSemiformula.lh]
+@[simp] lemma substs_and (w : SemitermVec V L n m) (φ ψ : Semiformula V L n) :
+    (φ ⋏ ψ).substs w = φ.substs w ⋏ ψ.substs w := by ext; simp [substs]
+@[simp] lemma substs_or (w : SemitermVec V L n m) (φ ψ : Semiformula V L n) :
+    (φ ⋎ ψ).substs w = φ.substs w ⋎ ψ.substs w := by ext; simp [substs]
+@[simp] lemma substs_all (w : SemitermVec V L n m) (φ : Semiformula V L (n + 1)) :
+    (∀' φ).substs w = ∀' (φ.substs w.q) := by
+  ext; simp [substs, Semiterm.bvar, qVec, SemitermVec.q, w.isSemitermVec.lh]
+@[simp] lemma substs_ex (w : SemitermVec V L n m) (φ : Semiformula V L (n + 1)) :
+    (∃' φ).substs w = ∃' (φ.substs w.q) := by
+  ext; simp [substs, Semiterm.bvar, qVec, SemitermVec.q, w.isSemitermVec.lh]
 
-@[simp] lemma substs_neg (w : SemitermVec V L n m) (p : Semiformula V L n) : (∼p).substs w = ∼(p.substs w) := by
-  ext; simp [substs, val_neg, Metamath.substs_neg p.isSemiformula w.isSemiformula]
-@[simp] lemma substs_imp (w : SemitermVec V L n m) (p q : Semiformula V L n) : (p ➝ q).substs w = p.substs w ➝ q.substs w := by
+@[simp] lemma substs_neg (w : SemitermVec V L n m) (φ : Semiformula V L n) : (∼φ).substs w = ∼(φ.substs w) := by
+  ext; simp [substs, val_neg, Metamath.substs_neg φ.isSemiformula w.isSemitermVec]
+@[simp] lemma substs_imp (w : SemitermVec V L n m) (φ ψ : Semiformula V L n) : (φ ➝ ψ).substs w = φ.substs w ➝ ψ.substs w := by
   simp [imp_def]
-@[simp] lemma substs_imply (w : SemitermVec V L n m) (p q : Semiformula V L n) : (p ⭤ q).substs w = p.substs w ⭤ q.substs w := by
+@[simp] lemma substs_imply (w : SemitermVec V L n m) (φ ψ : Semiformula V L n) : (φ ⭤ ψ).substs w = φ.substs w ⭤ ψ.substs w := by
   simp [LogicalConnective.iff]
 
-end Semiformula
+scoped notation φ:max " ⫽ " w:max => Semiformula.substs w φ
 
-notation p:max "^/[" w "]" => Semiformula.substs p w
-
-variable (L)
-
-structure SemiformulaVec (n : V) where
-  val : V
-  prop : ∀ i < len val, IsSemiformula L n val.[i]
-
-variable {L}
-
-namespace SemiformulaVec
-
-noncomputable def conj (ps : SemiformulaVec L n) : Semiformula V L n := ⟨^⋀ ps.val, by simpa using ps.isSemiformula⟩
-
-noncomputable def disj (ps : SemiformulaVec L n) : Semiformula V L n := ⟨^⋁ ps.val, by simpa using ps.isSemiformula⟩
-
-noncomputable def nth (ps : SemiformulaVec L n) (i : V) (hi : i < len ps.val) : Semiformula V L n :=
-  ⟨ps.val.[i], ps.isSemiformula i hi⟩
-
-@[simp] lemma val_conj (ps : SemiformulaVec L n) : ps.conj.val = ^⋀ ps.val := rfl
-
-@[simp] lemma val_disj (ps : SemiformulaVec L n) : ps.disj.val = ^⋁ ps.val := rfl
-
-@[simp] lemma val_nth (ps : SemiformulaVec L n) (i : V) (hi : i < len ps.val) :
-    (ps.nth i hi).val = ps.val.[i] := rfl
-
-end SemiformulaVec
-
-namespace Language.TSemifromula
-
-lemma subst_eq_self {n : V} (w : SemitermVec V L n n) (p : Semiformula V L n) (H : ∀ i, (hi : i < n) → w.nth i hi = Semiterm.bvar L i hi) :
-    p^/[w] = p := by
-  suffices ∀ i < n, w.val.[i] = ^#i by
-    ext; simp only [Semiformula.val_substs]; rw [Metamath.subst_eq_self p.isSemiformula w.isSemiformula]; simpa
+lemma subst_eq_self {n : ℕ} (w : SemitermVec V L n n) (φ : Semiformula V L n) (H : ∀ i, w i = Semiterm.bvar i) :
+    φ ⫽ w = φ := by
+  suffices ∀ i < ↑n, w.val.[i] = ^#i by
+    ext; simp only [Semiformula.val_substs]; rw [Metamath.subst_eq_self φ.isSemiformula w.isSemitermVec]; simpa
   intro i hi
-  simpa using congr_arg Semiterm.val (H i hi)
+  rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
+  simpa using congr_arg Semiterm.val <| H i
 
-@[simp] lemma subst_eq_self₁ (p : Semiformula V L (0 + 1)) :
-    p^/[(Semiterm.bvar L 0 (by simp)).sing] = p := by
+@[simp] lemma subst_eq_self₁ (φ : Semiformula V L 1) :
+    φ ⫽ ![Semiterm.bvar 0] = φ := by
   apply subst_eq_self
-  simp only [zero_add, lt_one_iff_eq_zero]
-  rintro _ rfl
-  simp
+  simp [Fin.fin_one_eq_zero]
 
-@[simp] lemma subst_nil_eq_self (w : SemitermVec V L 0 0) :
-    p^/[w] = p := subst_eq_self _ _ (by simp)
+@[simp] lemma subst_nil_eq_self (w : SemitermVec V L 0 0) (φ : Semiformula V L 0) :
+    φ ⫽ w = φ := subst_eq_self _ _ (by simp)
 
-lemma shift_substs {n m : V} (w : SemitermVec V L n m) (p : Semiformula V L n) :
-    (p^/[w]).shift = p.shift^/[w.shift] := by ext; simp [Metamath.shift_substs p.isSemiformula w.isSemiformula]
+lemma shift_substs (w : SemitermVec V L n m) (φ : Semiformula V L n) :
+    (φ ⫽ w).shift = φ.shift⫽(Semiterm.shift⨟ w) := by ext; simp [Metamath.shift_substs φ.isSemiformula w.isSemitermVec]
 
-lemma substs_substs {n m l : V} (v : SemitermVec V L m l) (w : SemitermVec V L n m) (p : Semiformula V L n) :
-    (p^/[w])^/[v] = p^/[w.substs v] := by ext; simp [Metamath.substs_substs p.isSemiformula v.isSemiformula w.isSemiformula]
+lemma substs_substs {n m l : ℕ} (v : SemitermVec V L m l) (w : SemitermVec V L n m) (φ : Semiformula V L n) :
+    (φ ⫽ w) ⫽ v = φ ⫽ ((Semiterm.substs v)⨟ w) := by ext; simp [Metamath.substs_substs φ.isSemiformula v.isSemitermVec w.isSemitermVec]
 
-end Language.TSemifromula
+open InternalArithmetic
+
+noncomputable def disjSeqSubst (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) : Semiformula V ℒₒᵣ n :=
+  ⟨InternalArithmetic.disjSeqSubst w.val φ.val z, by
+    have : IsSemiformula ℒₒᵣ (↑m + 1 : V) φ.val := by simpa using φ.isSemiformula
+    exact this.disjSeqSubst w.isSemitermVec z⟩
+
+section disjSeqSubst
+
+variable (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V)
+
+@[simp] lemma disjSeqSubst_val : (φ.disjSeqSubst w z).val = InternalArithmetic.disjSeqSubst w.val φ.val z := rfl
+
+@[simp] lemma disjSeqSubst_zero : φ.disjSeqSubst w 0 = ⊥ := by ext; simp
+
+@[simp] lemma disjSeqSubst_succ : φ.disjSeqSubst w (z + 1) = φ.substs (↑z :> w) ⋎ φ.disjSeqSubst w z := by ext; simp
+
+end disjSeqSubst
+
+end Semiformula
 
 end typed_formula
 
@@ -235,32 +219,32 @@ section typed_isfvfree
 
 namespace Semiformula
 
-def FVFree (p : Semiformula V L n) : Prop := L.IsFVFree n p.val
+def FVFree (φ : Semiformula V L n) : Prop := L.IsFVFree n φ.val
 
-lemma FVFree.iff {p : Semiformula V L n} : p.FVFree ↔ p.shift = p := by
+lemma FVFree.iff {φ : Semiformula V L n} : φ.FVFree ↔ φ.shift = φ := by
   simp [FVFree, Language.IsFVFree, ext_iff]
 
 @[simp] lemma Fvfree.verum : (⊤ : Semiformula V L n).FVFree := by simp [FVFree]
 
 @[simp] lemma Fvfree.falsum : (⊥ : Semiformula V L n).FVFree := by simp [FVFree]
 
-@[simp] lemma Fvfree.and {p q : Semiformula V L n} :
-    (p ⋏ q).FVFree ↔ p.FVFree ∧ q.FVFree := by
+@[simp] lemma Fvfree.and {φ ψ : Semiformula V L n} :
+    (φ ⋏ ψ).FVFree ↔ φ.FVFree ∧ ψ.FVFree := by
   simp [FVFree.iff, FVFree.iff]
 
-@[simp] lemma Fvfree.or {p q : Semiformula V L n} : (p ⋎ q).FVFree ↔ p.FVFree ∧ q.FVFree := by
+@[simp] lemma Fvfree.or {φ ψ : Semiformula V L n} : (φ ⋎ ψ).FVFree ↔ φ.FVFree ∧ ψ.FVFree := by
   simp [FVFree.iff]
 
-@[simp] lemma Fvfree.neg {p : Semiformula V L n} : (∼p).FVFree ↔ p.FVFree := by
+@[simp] lemma Fvfree.neg {φ : Semiformula V L n} : (∼φ).FVFree ↔ φ.FVFree := by
   simp [FVFree.iff]
 
-@[simp] lemma Fvfree.all {p : Semiformula V L (n + 1)} : p.all.FVFree ↔ p.FVFree := by
+@[simp] lemma Fvfree.all {φ : Semiformula V L (n + 1)} : ∀' φ.FVFree ↔ φ.FVFree := by
   simp [FVFree.iff]
 
-@[simp] lemma Fvfree.ex {p : Semiformula V L (n + 1)} : p.ex.FVFree ↔ p.FVFree := by
+@[simp] lemma Fvfree.ex {φ : Semiformula V L (n + 1)} : ∃' φ.FVFree ↔ φ.FVFree := by
   simp [FVFree.iff]
 
-@[simp] lemma Fvfree.imp {p q : Semiformula V L n} : (p ➝ q).FVFree ↔ p.FVFree ∧ q.FVFree := by
+@[simp] lemma Fvfree.imp {φ ψ : Semiformula V L n} : (φ ➝ ψ).FVFree ↔ φ.FVFree ∧ ψ.FVFree := by
   simp [FVFree.iff]
 
 end Semiformula
@@ -270,13 +254,15 @@ end typed_isfvfree
 
 open InternalArithmetic
 
-noncomputable def Semiterm.equals {n : V} (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^= u.val, by simp [qqEQ]⟩
+variable {k n m : ℕ}
 
-noncomputable def Semiterm.notEquals {n : V} (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^≠ u.val, by simp [qqNEQ]⟩
+noncomputable def Semiterm.equals (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^= u.val, by simp [qqEQ]⟩
 
-noncomputable def Semiterm.lessThan {n : V} (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^< u.val, by simp [qqLT]⟩
+noncomputable def Semiterm.notEquals (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^≠ u.val, by simp [qqNEQ]⟩
 
-noncomputable def Semiterm.notLessThan {n : V} (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^≮ u.val, by simp [qqNLT]⟩
+noncomputable def Semiterm.lessThan (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^< u.val, by simp [qqLT]⟩
+
+noncomputable def Semiterm.notLessThan (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^≮ u.val, by simp [qqNLT]⟩
 
 scoped infix:46 " ≐ " => Semiterm.equals
 
@@ -286,20 +272,20 @@ scoped infix:46 " <' " => Semiterm.lessThan
 
 scoped infix:46 " ≮' " => Semiterm.notLessThan
 
-noncomputable def Semiformula.ball {n : V} (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) : Semiformula V ℒₒᵣ n :=
-  ((Semiterm.bvar ℒₒᵣ 0 ≮' t.bShift) ⋎ p).all
+noncomputable def Semiformula.ball (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) : Semiformula V ℒₒᵣ n :=
+  ∀' ((Semiterm.bvar 0 ≮' t.bShift) ⋎ φ)
 
-noncomputable def Semiformula.bex {n : V} (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) : Semiformula V ℒₒᵣ n :=
-  ((Semiterm.bvar ℒₒᵣ 0 <' t.bShift) ⋏ p).ex
+noncomputable def Semiformula.bex (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) : Semiformula V ℒₒᵣ n :=
+  ∃' ((Semiterm.bvar 0 <' t.bShift) ⋏ φ)
 
 namespace InternalArithmetic
 
-variable {n m : V}
+variable {n m : ℕ}
 
-@[simp] lemma val_equals {n : V} (t u : Semiterm V ℒₒᵣ n) : (t ≐ u).val = t.val ^= u.val := rfl
-@[simp] lemma val_notEquals {n : V} (t u : Semiterm V ℒₒᵣ n) : (t ≉ u).val = t.val ^≠ u.val := rfl
-@[simp] lemma val_lessThan {n : V} (t u : Semiterm V ℒₒᵣ n) : (t <' u).val = t.val ^< u.val := rfl
-@[simp] lemma val_notLessThan {n : V} (t u : Semiterm V ℒₒᵣ n) : (t ≮' u).val = t.val ^≮ u.val := rfl
+@[simp] lemma val_equals (t u : Semiterm V ℒₒᵣ n) : (t ≐ u).val = t.val ^= u.val := rfl
+@[simp] lemma val_notEquals (t u : Semiterm V ℒₒᵣ n) : (t ≉ u).val = t.val ^≠ u.val := rfl
+@[simp] lemma val_lessThan (t u : Semiterm V ℒₒᵣ n) : (t <' u).val = t.val ^< u.val := rfl
+@[simp] lemma val_notLessThan (t u : Semiterm V ℒₒᵣ n) : (t ≮' u).val = t.val ^≮ u.val := rfl
 
 @[simp] lemma equals_iff {t₁ t₂ u₁ u₂ : Semiterm V ℒₒᵣ n} :
     (t₁ ≐ u₁) = (t₂ ≐ u₂) ↔ t₁ = t₂ ∧ u₁ = u₂ := by
@@ -365,77 +351,41 @@ variable {n m : V}
     (t₁ ≮' t₂).substs w = (t₁.substs w ≮' t₂.substs w) := by
   ext; simp [Semiterm.notLessThan, Semiterm.substs, Semiformula.substs, qqNLT]
 
-@[simp] lemma val_ball {n : V} (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    (p.ball t).val = ^∀ (^#0 ^≮ termBShift ℒₒᵣ t.val) ^⋎ p.val := by
+@[simp] lemma val_ball (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    (φ.ball t).val = ^∀ (^#0 ^≮ termBShift ℒₒᵣ t.val) ^⋎ φ.val := by
   simp [Semiformula.ball]
 
-@[simp] lemma val_bex {n : V} (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    (p.bex t).val = ^∃ (^#0 ^< termBShift ℒₒᵣ t.val) ^⋏ p.val := by
+@[simp] lemma val_bex (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    (φ.bex t).val = ^∃ (^#0 ^< termBShift ℒₒᵣ t.val) ^⋏ φ.val := by
   simp [Semiformula.bex]
 
-lemma neg_ball (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    ∼(p.ball t) = (∼p).bex t := by
-  ext; simp [neg_all, neg_or, qqNLT, qqLT, t.isSemiformula.termBShift.isUTerm]
+lemma neg_ball (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    ∼(φ.ball t) = (∼φ).bex t := by
+  ext; simp [neg_all, neg_or, qqNLT, qqLT, t.isSemiterm.termBShift.isUTerm]
 
-lemma neg_bex (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    ∼(p.bex t) = (∼p).ball t := by
-  ext; simp [neg_ex, neg_and, qqNLT, qqLT, t.isSemiformula.termBShift.isUTerm]
+lemma neg_bex (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    ∼(φ.bex t) = (∼φ).ball t := by
+  ext; simp [neg_ex, neg_and, qqNLT, qqLT, t.isSemiterm.termBShift.isUTerm]
 
-@[simp] lemma shifts_ball (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    (p.ball t).shift = p.shift.ball t.shift := by
+@[simp] lemma shifts_ball (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    (φ.ball t).shift = φ.shift.ball t.shift := by
   simp [Semiformula.ball, Semiterm.bShift_shift_comm]
 
-@[simp] lemma shifts_bex (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    (p.bex t).shift = p.shift.bex t.shift := by
+@[simp] lemma shifts_bex (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    (φ.bex t).shift = φ.shift.bex t.shift := by
   simp [Semiformula.bex, Semiterm.bShift_shift_comm]
 
-@[simp] lemma substs_ball (w : SemitermVec V ℒₒᵣ n m) (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    (p.ball t)^/[w] = (p^/[w.q]).ball (t^ᵗ/[w]) := by
+@[simp] lemma substs_ball (w : SemitermVec V ℒₒᵣ n m) (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    (φ.ball t).substs w = (φ.substs w.q).ball (t.substs w) := by
   simp [Semiformula.ball]
 
-@[simp] lemma substs_bex (w : SemitermVec V ℒₒᵣ n m) (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    (p.bex t)^/[w] = (p^/[w.q]).bex (t^ᵗ/[w]) := by
+@[simp] lemma substs_bex (w : SemitermVec V ℒₒᵣ n m) (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    (φ.bex t).substs w = (φ.substs w.q).bex (t.substs w) := by
   simp [Semiformula.bex]
-
-noncomputable def tSubstItr {n m : V} (w : SemitermVec V ℒₒᵣ n m) (p : Semiformula V ℒₒᵣ (n + 1)) (k : V) :
-    SemiformulaVec ℒₒᵣ m := ⟨substItr w.val p.val k, by
-  intro i hi
-  have : i < k := by simpa using hi
-  simp only [this, substItr_nth]
-  exact p.isSemiformula.substs (w.isSemiformula.cons (by simp))⟩
-
-@[simp] lemma val_tSubstItr {n m : V} (w : SemitermVec V ℒₒᵣ n m) (p : Semiformula V ℒₒᵣ (n + 1)) (k : V) :
-    (tSubstItr w p k).val = substItr w.val p.val k := by simp [tSubstItr]
-
-@[simp] lemma len_tSubstItr {n m : V} (w : SemitermVec V ℒₒᵣ n m) (p : Semiformula V ℒₒᵣ (n + 1)) (k : V) :
-    len (tSubstItr w p k).val = k := by simp
-
-lemma nth_tSubstItr {n m : V} (w : SemitermVec V ℒₒᵣ n m) (p : Semiformula V ℒₒᵣ (n + 1)) (k : V) {i} (hi : i < k) :
-    (tSubstItr w p k).nth i (by simp [hi]) = p.substs (↑(k - (i + 1)) ∷ᵗ w) := by ext; simp [tSubstItr, Semiformula.substs, hi]
-
-lemma nth_tSubstItr' {n m : V} (w : SemitermVec V ℒₒᵣ n m) (p : Semiformula V ℒₒᵣ (n + 1)) (k : V) {i} (hi : i < k) :
-    (tSubstItr w p k).nth (k - (i + 1)) (by simpa using sub_succ_lt_self hi) = p.substs (↑i ∷ᵗ w) := by
-  ext; simp [tSubstItr, Semiformula.substs, sub_succ_lt_self hi, sub_succ_lt_selfs hi]
-
-@[simp] lemma neg_conj_tSubstItr {n m : V} (w : SemitermVec V ℒₒᵣ n m) (p : Semiformula V ℒₒᵣ (n + 1)) (k : V) :
-    ∼(tSubstItr w p k).conj = (tSubstItr w (∼p) k).disj := by
-  ext; simp [neg_conj_substItr p.isSemiformula w.isSemiformula]
-
-@[simp] lemma neg_disj_tSubstItr {n m : V} (w : SemitermVec V ℒₒᵣ n m) (p : Semiformula V ℒₒᵣ (n + 1)) (k : V) :
-    ∼(tSubstItr w p k).disj = (tSubstItr w (∼p) k).conj := by
-  ext; simp [neg_disj_substItr p.isSemiformula w.isSemiformula]
-
-@[simp] lemma substs_conj_tSubstItr {n m l : V} (v : SemitermVec V ℒₒᵣ m l) (w : SemitermVec V ℒₒᵣ n m) (p : Semiformula V ℒₒᵣ (n + 1)) (k : V) :
-    (tSubstItr w p k).conj.substs v = (tSubstItr (w.substs v) p k).conj := by
-  ext; simp [Semiformula.substs, SemitermVec.substs, substs_conj_substItr p.isSemiformula w.isSemiformula v.isSemiformula]
-
-@[simp] lemma substs_disj_tSubstItr {n m l : V} (v : SemitermVec V ℒₒᵣ m l) (w : SemitermVec V ℒₒᵣ n m) (p : Semiformula V ℒₒᵣ (n + 1)) (k : V) :
-    (tSubstItr w p k).disj.substs v = (tSubstItr (w.substs v) p k).disj := by
-  ext; simp [Semiformula.substs, SemitermVec.substs, substs_disj_substItr p.isSemiformula w.isSemiformula v.isSemiformula]
 
 end InternalArithmetic
 
-lemma Semiformula.ball_eq_imp {n : V} (t : Semiterm V ℒₒᵣ n) (p : Semiformula V ℒₒᵣ (n + 1)) :
-    p.ball t = ((Semiterm.bvar ℒₒᵣ 0 <' t.bShift) ➝ p).all := by simp [Semiformula.ball, imp_def]
+lemma Semiformula.ball_eqss_imp (t : Semiterm V ℒₒᵣ n) (φ : Semiformula V ℒₒᵣ (n + 1)) :
+    φ.ball t = ∀' ((Semiterm.bvar 0 <' t.bShift) ➝ φ) := by simp [Semiformula.ball, imp_def]
 
 end LO.ISigma1.Metamath
