@@ -1,4 +1,5 @@
 import Foundation.FirstOrder.ISigma1.Metamath.Term.Basic
+import Foundation.FirstOrder.ISigma1.Ind
 
 namespace LO.ISigma1.Metamath
 
@@ -540,7 +541,7 @@ lemma IsSemiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺₁-Rela
     ∀ n p, Semiformula L n p → P n p :=
   IsSemiformula.induction 𝚺 hP hrel hnrel hverum hfalsum hand hor hall hex
 
-lemma IsSemiformula.ISigma1.pi1_succ_induction {P : V → V → Prop} (hP : 𝚷₁-Relation P)
+lemma IsSemiformula.pi1_structural_induction {P : V → V → Prop} (hP : 𝚷₁-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^rel n k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
@@ -1508,7 +1509,7 @@ lemma IsSemiformula.case {P : V → V → Prop} {n p} (hp : IsSemiformula L n p)
   · exact hall _ _ h₁
   · exact hex _ _ h₁
 
-lemma IsSemiformula.ISigma1.sigma1_succ_induction {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+lemma IsSemiformula.sigma1_structural_induction {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
     (hverum : ∀ n, P n ^⊤)
@@ -1535,7 +1536,7 @@ lemma IsSemiformula.ISigma1.sigma1_succ_induction {P : V → V → Prop} (hP : �
   · apply hall _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁)
   · apply hex _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁)
 
-lemma IsSemiformula.ISigma1.pi1_succ_induction {P : V → V → Prop} (hP : 𝚷₁-Relation P)
+lemma IsSemiformula.pi1_structural_induction {P : V → V → Prop} (hP : 𝚷₁-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
     (hverum : ∀ n, P n ^⊤)
@@ -1580,9 +1581,9 @@ lemma IsSemiformula.induction1 (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation
     (hex : ∀ n p, IsSemiformula L (n + 1) p → P (n + 1) p → P n (^∃ p)) {n p} :
     IsSemiformula L n p → P n p :=
   match Γ with
-  | 𝚺 => IsSemiformula.ISigma1.sigma1_succ_induction hP hrel hnrel hverum hfalsum hand hor hall hex
-  | 𝚷 => IsSemiformula.ISigma1.pi1_succ_induction hP hrel hnrel hverum hfalsum hand hor hall hex
-  | 𝚫 => IsSemiformula.ISigma1.sigma1_succ_induction hP.of_delta hrel hnrel hverum hfalsum hand hor hall hex
+  | 𝚺 => IsSemiformula.sigma1_structural_induction hP hrel hnrel hverum hfalsum hand hor hall hex
+  | 𝚷 => IsSemiformula.pi1_structural_induction hP hrel hnrel hverum hfalsum hand hor hall hex
+  | 𝚫 => IsSemiformula.sigma1_structural_induction hP.of_delta hrel hnrel hverum hfalsum hand hor hall hex
 
 
 lemma IsSemiformula.pos {n p : V} (h : IsSemiformula L n p) : 0 < p := h.isUFormula.pos
