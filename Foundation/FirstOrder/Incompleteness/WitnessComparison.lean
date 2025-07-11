@@ -109,7 +109,7 @@ end WitnessComparisons
 
 section ProvabilityComparisonOnArithmetic
 
-variable (T : ArithmeticTheory) [T.Delta1Definable]
+variable (T : ArithmeticTheory) [T.Δ₁Definable]
 
 /-- Provability predicate for arithmetic stronger than $\mathbf{R_0}$. -/
 def _root_.LO.FirstOrder.Theory.ProvabilityComparisonₐ (φ ψ : V) : Prop := ((T + 𝐑₀').codeIn V).ProvabilityComparison φ ψ

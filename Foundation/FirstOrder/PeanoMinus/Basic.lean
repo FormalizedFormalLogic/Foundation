@@ -142,7 +142,7 @@ open FirstOrder Arithmetic Language
 set_option linter.flexible false in
 @[simp] instance : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
   intro σ h
-  rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
+  rcases h <;> simp [models_def]
   case addAssoc => intro f; exact add_assoc _ _ _
   case addComm  => intro f; exact add_comm _ _
   case mulAssoc => intro f; exact mul_assoc _ _ _
@@ -383,7 +383,7 @@ lemma le_two_iff_eq_zero_or_one_or_two : a ≤ 2 ↔ a = 0 ∨ a = 1 ∨ a = 2 :
       · rcases lt_two_iff_le_one.mp lt with (rfl | lt)
         · simp
         · simp [show a = 0 from by simpa using lt],
-   by rintro (rfl | rfl | rfl) <;> simp [one_le_two]⟩
+   by rintro (rfl | rfl | rfl) <;> simp⟩
 
 lemma le_three_iff_eq_zero_or_one_or_two_or_three : a ≤ 3 ↔ a = 0 ∨ a = 1 ∨ a = 2 ∨ a = 3 :=
   ⟨by intro h; rcases h with (rfl | lt)
@@ -394,7 +394,7 @@ lemma le_three_iff_eq_zero_or_one_or_two_or_three : a ≤ 3 ↔ a = 0 ∨ a = 1 
         · rcases lt_two_iff_le_one.mp lt with (rfl | lt)
           · simp
           · simp [show a = 0 from by simpa using lt],
-   by rintro (rfl | rfl | rfl | rfl) <;> simp [one_le_two, ←two_add_one_eq_three]⟩
+   by rintro (rfl | rfl | rfl | rfl) <;> simp [←two_add_one_eq_three]⟩
 
 lemma two_mul_two_eq_four : 2 * 2 = (4 : M) := by
   rw [←one_add_one_eq_two, mul_add, add_mul, mul_one, ←add_assoc,
@@ -476,7 +476,7 @@ lemma succ_le_double_of_pos {a : M} (h : 0 < a) : a + 1 ≤ 2 * a := by
   simpa [two_mul] using pos_iff_one_le.mp h
 
 lemma two_mul_add_one_lt_two_mul_of_lt (h : a < b) : 2 * a + 1 < 2 * b := calc
-  2 * a + 1 < 2 * (a + 1) := by simp [mul_add, one_lt_two]
+  2 * a + 1 < 2 * (a + 1) := by simp [mul_add]
   _         ≤ 2 * b       := by simp [←lt_iff_succ_le, h]
 
 @[simp] lemma le_add_add_left (a b c : M) : a ≤ a + b + c := by simp [add_assoc]
@@ -493,9 +493,9 @@ open FirstOrder FirstOrder.Semiterm
   case zero =>
     simp [Operator.npow_zero, Operator.val_comp, Matrix.empty_eq]
   case succ k IH =>
-    simp [Operator.npow_succ, Operator.val_comp, Matrix.comp_vecCons']
+    simp [Operator.npow_succ, Operator.val_comp]
     simp [Matrix.fun_eq_vec_two, pow_succ]
-    simp [npowRec, mul_comm a, IH]
+    simp [IH]
 
 instance : Structure.Monotone ℒₒᵣ M := ⟨
   fun {k} f v₁ v₂ h ↦
@@ -518,6 +518,10 @@ instance : Structure.Monotone ℒₒᵣ M := ⟨
   · cases m <;> simp
 
 lemma coe_add_one (x : ℕ) : ((x + 1 : ℕ) : M) = (x : M) + 1 := by simp
+
+lemma eq_fin_of_lt_nat {n : ℕ} {x : M} (hx : x < (n : M)) : ∃ i : Fin n, x = i := by
+  rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩
+  exact ⟨⟨x, by simpa using hx⟩, by simp⟩
 
 variable (M)
 

@@ -110,13 +110,13 @@ open Modal ProvabilityLogic Kripke
 
 variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
 
-variable {T : ArithmeticTheory} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Δ₁Definable]
 
 section model
 
 variable (T) {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonₐ (⌜ℒₒᵣ⌝.neg φ) (⌜ℒₒᵣ⌝.neg ψ)
+def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonₐ (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
 lemma NegativeSuccessor.quote_iff_provabilityComparison {φ ψ : Sentence ℒₒᵣ} :
     NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparisonₐ (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
@@ -518,7 +518,7 @@ open FirstOrder Arithmetic
 open Modal
 open Modal.Kripke
 
-variable {T : ArithmeticTheory} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {A : Modal.Formula _}
+variable {T : ArithmeticTheory} [T.Δ₁Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {A : Modal.Formula _}
 
 /-- Arithmetical completeness of GL-/
 theorem GL.arithmetical_completeness :

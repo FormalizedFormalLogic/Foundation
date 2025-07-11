@@ -9,7 +9,7 @@ namespace LO.FirstOrder.Arithmetic
 
 open LO.Entailment ProvabilityLogic
 
-variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Delta1Definable]
+variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Δ₁Definable]
 
 /-- Gödel's second incompleteness theorem-/
 theorem consistent_unprovable [Consistent T] :

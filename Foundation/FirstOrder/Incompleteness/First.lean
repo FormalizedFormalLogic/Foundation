@@ -23,14 +23,14 @@ open LO.Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Met
 
 /-- Gödel's first incompleteness theorem-/
 theorem incomplete
-    (T : ArithmeticTheory) [T.Delta1Definable] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    (T : ArithmeticTheory) [T.Δ₁Definable] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
   have con : Consistent (T : Axiom ℒₒᵣ) := inferInstance
   let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : SyntacticSemiformula ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦
-        ⌜ℒₒᵣ⌝.IsSemiformula 1 φ ∧
-          (T.codeIn ℕ).Provable (⌜ℒₒᵣ⌝.neg <| ⌜ℒₒᵣ⌝.substs ?[InternalArithmetic.numeral φ] φ) := by
+        IsSemiformula ℒₒᵣ 1 φ ∧
+          (T.codeIn ℕ).Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral φ] φ) := by
       definability
     exact REPred.of_eq (re_iff_sigma1.mpr this) <| by
       intro φ; constructor

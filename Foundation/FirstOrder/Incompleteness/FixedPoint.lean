@@ -9,7 +9,7 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-noncomputable def substNumeral (φ x : V) : V := ⌜ℒₒᵣ⌝.substs₁ (numeral x) φ
+noncomputable def substNumeral (φ x : V) : V := substs ℒₒᵣ1 (numeral x) φ
 
 lemma substNumeral_app_quote (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
     substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[‘↑n’] : Sentence ℒₒᵣ)⌝ := by
@@ -17,13 +17,13 @@ lemma substNumeral_app_quote (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
   let w : Fin 1 → Semiterm ℒₒᵣ Empty 0 := ![‘↑n’]
   have : ?[numeral (n : V)] = (⌜fun i : Fin 1 ↦ ⌜w i⌝⌝ : V) :=
     nth_ext' 1 (by simp) (by simp) (by simp [w, Matrix.constant_eq_singleton])
-  rw [Language.substs₁, this, quote_substs' (L := ℒₒᵣ)]
+  rw [substs1, this, quote_substs' (L := ℒₒᵣ)]
 
 lemma substNumeral_app_quote_quote (σ π : Semisentence ℒₒᵣ 1) :
     substNumeral (⌜σ⌝ : V) ⌜π⌝ = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
   simpa [coe_quote, quote_eq_encode] using substNumeral_app_quote σ ⌜π⌝
 
-noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := ⌜ℒₒᵣ⌝.substs ⌜fun i ↦ numeral (v i)⌝ φ
+noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := substs ℒₒᵣ ⌜fun i ↦ numeral (v i)⌝ φ
 
 lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ) :
     (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.substs (fun i ↦ ‘↑(v i)’)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
@@ -42,26 +42,26 @@ lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k 
 section
 
 def _root_.LO.FirstOrder.Arithmetic.ssnum : 𝚺₁.Semisentence 3 := .mkSigma
-  “y p x. ∃ n, !numeralDef n x ∧ !p⌜ℒₒᵣ⌝.substs₁Def y n p” (by simp)
+  “y p x. ∃ n, !numeralGraph n x ∧ !psubsts ℒₒᵣ1Def y n p” (by simp)
 
 lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
-  intro v; simp [ssnum, ⌜ℒₒᵣ⌝.substs₁_defined.df.iff, substNumeral]
+  intro v; simp [ssnum, substs ℒₒᵣ1_defined.df.iff, substNumeral]
 
 @[simp] lemma eval_ssnum (v) :
     Semiformula.Evalbm V v ssnum.val ↔ v 0 = substNumeral (v 1) (v 2) := substNumeral_defined.df.iff v
 
 def _root_.LO.FirstOrder.Arithmetic.ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “y p. ∃ n, !lenDef ↑k n ∧
-    (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k) ∧ !numeralDef z #i.succ.succ.succ.succ) ∧
-    !p⌜ℒₒᵣ⌝.substsDef y n p” (by simp)
+    (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k) ∧ !numeralGraph z #i.succ.succ.succ.succ) ∧
+    !psubsts ℒₒᵣDef y n p” (by simp)
 
 lemma substNumerals_defined :
     Arithmetic.HierarchySymbol.DefinedFunction (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := by
   intro v
   suffices
-    (v 0 = ⌜ℒₒᵣ⌝.substs ⌜fun (i : Fin k) ↦ numeral (v i.succ.succ)⌝ (v 1)) ↔
-      ∃ x, ↑k = len x ∧ (∀ (i : Fin k), x.[↑↑i] = numeral (v i.succ.succ)) ∧ v 0 = ⌜ℒₒᵣ⌝.substs x (v 1) by
-    simpa [ssnums, ⌜ℒₒᵣ⌝.substs_defined.df.iff, substNumerals, numeral_eq_natCast] using this
+    (v 0 = substs ℒₒᵣ ⌜fun (i : Fin k) ↦ numeral (v i.succ.succ)⌝ (v 1)) ↔
+      ∃ x, ↑k = len x ∧ (∀ (i : Fin k), x.[↑↑i] = numeral (v i.succ.succ)) ∧ v 0 = substs ℒₒᵣ x (v 1) by
+    simpa [ssnums, substs ℒₒᵣ_defined.df.iff, substNumerals, numeral_eq_natCast] using this
   constructor
   · intro e
     refine ⟨_, by simp, by intro i; simp, e⟩

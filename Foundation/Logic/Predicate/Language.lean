@@ -402,6 +402,18 @@ instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Lan
 
 instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
 
+protected class Language.Encodable (L : Language) where
+  func : (k : ℕ) → Encodable (L.Func k)
+  rel : (k : ℕ) → Encodable (L.Rel k)
+
+instance (L : Language) [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] : L.Encodable := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+
+instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Func k) := Language.Encodable.func k
+
+instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Rel k) := Language.Encodable.rel k
+
+instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Rel k) := Language.Encodable.rel k
+
 class Language.Finite (L : Language) where
   func : Fintype ((k : ℕ) × L.Func k)
   rel : Fintype ((k : ℕ) × L.Rel k)

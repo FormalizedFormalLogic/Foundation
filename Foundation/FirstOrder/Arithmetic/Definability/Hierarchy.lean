@@ -153,6 +153,11 @@ lemma ProperWithParamOn.iff' {φ : 𝚫-[m].Semiformula M n}
     (h : φ.ProperWithParamOn M) (e : Fin n → M) :
     Semiformula.Evalm M e id φ.pi.val ↔ Semiformula.Evalm (L := ℒₒᵣ) M e id φ.val := by simp [←h.iff, val_sigma]
 
+inductive ProvablyProperOn' (T : Theory ℒₒᵣ) : {Γ : HierarchySymbol} → {n : ℕ} → (φ : Γ.Semisentence n) → Prop
+  | sigma (φ : 𝚺-[m].Semisentence n) : φ.ProvablyProperOn' T
+  | pi (φ : 𝚷-[m].Semisentence n) : φ.ProvablyProperOn' T
+  | delta (φ : 𝚫-[m].Semisentence n) : φ.ProvablyProperOn T → φ.ProvablyProperOn' T
+
 section ProvablyProperOn
 
 variable (T : Theory ℒₒᵣ)
