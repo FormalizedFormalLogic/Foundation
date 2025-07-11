@@ -68,7 +68,7 @@ instance : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐄�
 
 #check Semiformula.cast
 
-
+lemma replace (φ : Semiformula V ℒₒᵣ (0 + 1)) : T.internalize V ⊢! ((#'1 ≐ #'0) ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all := by {  }
 
 @[simp] lemma eq_refl (t : Term V ℒₒᵣ) : T.internalize V ⊢! t ≐ t := by
   have : T ⊢! (“∀ x, x = x” : SyntacticFormula ℒₒᵣ) := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
