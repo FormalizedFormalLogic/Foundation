@@ -527,7 +527,7 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
   have hfn : 𝚺₁-Function₄ fn := by definability
   let fm : V → V → V → V → V := fun _ _ _ m ↦ m + 1
   have hfm : 𝚺₁-Function₄ fm := by definability
-  apply order_ball_induction₃_sigma1 hfw hfn hfm ?_ ?_ p w n m
+  apply bounded_all_sigma1_order_induction₃ hfw hfn hfm ?_ ?_ p w n m
   · definability
   intro p w n m ih hp hw
   rcases IsSemiformula.case_iff.mp hp with
