@@ -6,6 +6,63 @@ import Foundation.FirstOrder.ISigma1.Metamath.Term.Functions
 
 -/
 
+-- TODO: move to Vorspiel
+namespace Matrix
+
+variable {α β : Type*}
+
+def foldr (f : α → β → β) (init : β) : {k : ℕ} → (Fin k → α) → β
+  |     0, _ => init
+  | _ + 1, v => f (vecHead v) (Matrix.foldr f init (vecTail v))
+
+section foldr
+
+variable (f : α → β → β) (init : β)
+
+@[simp] lemma foldr_zero (v : Fin 0 → α) : foldr f init v = init := rfl
+
+@[simp] lemma foldr_succ (v : Fin (k + 1) → α) : foldr f init v = f (vecHead v) (foldr f init (vecTail v)) := rfl
+
+end foldr
+
+def foldl (f : α → β → α) : (init : α) → {k : ℕ} → (Fin k → β) → α
+  | a,     0, _ => a
+  | a, _ + 1, v => Matrix.foldl f (f a (vecHead v)) (vecTail v)
+
+section foldr
+
+variable (f : α → β → α) (init : α)
+
+@[simp] lemma foldl_zero (v : Fin 0 → β) : foldl f init v = init := rfl
+
+@[simp] lemma foldl_succ (v : Fin (k + 1) → β) : foldl f init v = foldl f (f init (vecHead v)) (vecTail v) := rfl
+
+end foldr
+
+def map (f : α → β) : (Fin k → α) → (Fin k → β) := fun v ↦ f ∘ v
+
+section map
+
+postfix:max "⨟" => map
+
+variable (f : α → β)
+
+@[simp] lemma map_nil (v : Fin 0 → α) : f⨟ v = ![] := empty_eq (f⨟ v)
+
+@[simp] lemma map_cons (a : α) (v : Fin k → α) : f⨟ (a :> v) = f a :> f⨟ v := by
+  ext i
+  cases i using Fin.cases <;> simp [map]
+
+@[simp] lemma map_cons' (v : Fin (k + 1) → α) : f⨟ v = f (vecHead v) :> f⨟ (vecTail v) := by
+  ext i
+  cases i using Fin.cases <;> { simp [map]; rfl }
+
+@[simp] lemma map_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
+
+end map
+
+end Matrix
+
 namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
@@ -19,9 +76,9 @@ section typed_fin
 
 structure TFin (n : V) where
   val : V
-  prop : val < n
+  isSemiterm : val < n
 
-attribute [simp] TFin.prop
+attribute [simp] TFin.isSemiterm
 
 namespace TFin
 
@@ -40,76 +97,75 @@ section typed_term
 
 variable (V L)
 
-structure Semiterm (n : V) where
+structure Semiterm (n : ℕ) where
   val : V
-  prop : IsSemiterm L n val
+  isSemiterm : IsSemiterm (V := V) L n val
 
-structure SemitermVec (m n : V) where
-  val : V
-  prop : IsSemitermVec L m n val
+abbrev SemitermVec (m n : ℕ) := Fin m → Semiterm V L (n : ℕ)
 
-attribute [simp] Semiterm.prop SemitermVec.prop
+attribute [simp] Semiterm.isSemiterm
 
 abbrev Term := Semiterm (V := V) L 0
 
-variable {V} {n k : V}
+abbrev TermVec (m : ℕ) := SemitermVec (V := V) L m 0
+
+variable {V L} {k n m : ℕ}
 
 @[ext]
-lemma Semiterm.ext {n : V} {t u : Semiterm V L n}
+lemma Semiterm.ext {t u : Semiterm V L n}
     (h : t.val = u.val) : t = u := by rcases t; rcases u; simpa using h
 
-@[simp] lemma Semiterm.isUTerm {n : V} (t : Semiterm V L n) : IsUTerm L t.val := t.prop.isUTerm
+@[simp] lemma Semiterm.isUTerm (t : Semiterm V L n) : IsUTerm L t.val := t.isSemiterm.isUTerm
 
-@[simp] lemma SemitermVec.isUTerm {k n : V} (v : SemitermVec V L k n) : IsUTermVec L k v.val := v.prop.isUTerm
+noncomputable def SemitermVec.val (v : SemitermVec V L k n) : V := Matrix.foldr (fun t w ↦ t.val ∷ w) 0 v
 
-@[ext]
-lemma SemitermVec.ext {v w : SemitermVec V L k n}
-    (h : v.val = w.val) : v = w := by rcases v; rcases w; simpa using h
+@[simp] lemma SemitermVec.val_nil (v : SemitermVec V L 0 n) : v.val = 0 := rfl
 
-noncomputable def Semiterm.bvar {n : V} (z : V) (hz : z < n := by simp) : Semiterm V L n := ⟨^#z, by simp [hz]⟩
+@[simp] lemma SemitermVec.val_cons (t : Semiterm V L n) (v : SemitermVec V L k n) :
+    SemitermVec.val (t :> v : SemitermVec V L (k + 1) n) = t.val ∷ v.val := by rfl
 
-noncomputable def Semiterm.fvar {n : V} (x : V) : Semiterm V L n := ⟨^&x, by simp⟩
+@[simp] lemma SemitermVec.val_succ (v : SemitermVec V L (k + 1) n) :
+    SemitermVec.val (v : SemitermVec V L (k + 1) n) = (Matrix.vecHead v).val ∷ SemitermVec.val (Matrix.vecTail v) := by rfl
 
-variable {L}
+@[simp] lemma SemitermVec.isSemitermVec {k} (v : SemitermVec V L k n) : IsSemitermVec (V := V) L k n v.val := by
+  induction k <;> simp [*]
 
-noncomputable def Semiterm.func {n k f : V} (hf : L.IsFunc k f) (v : SemitermVec V L k n) :
-    Semiterm V L n := ⟨^func k f v.val , by simp [hf]⟩
+@[simp] lemma SemitermVec.isUTermVec {k} (v : SemitermVec V L k n) : IsUTermVec (V := V) L k v.val := by
+  induction k <;> simp [*]
 
-noncomputable abbrev Semiterm.bv {n : V} (x : V) (h : x < n := by simp) : Semiterm V L n := Semiterm.bvar L x h
-noncomputable abbrev Semiterm.fv {n : V} (x : V) : Semiterm V L n := Semiterm.fvar L x
+@[simp] lemma SemitermVec.len_eq (v : SemitermVec V L k n) : len v.val = ↑k := by
+  induction k <;> simp [*]
 
-@[simp] lemma Semiterm.val_bvar {n : V} (z : V) (hz : z < n) : (Semiterm.bvar L z hz).val = ^#z := rfl
-@[simp] lemma Semiterm.val_fvar {n : V} (x : V) : (Semiterm.fvar L x : Semiterm V L n).val = ^&x := rfl
+@[simp] lemma SemitermVec.val_nth_eq (v : SemitermVec V L k n) (i : Fin k) :
+    v.val.[(i : V)] = (v i).val := by
+  induction k
+  · apply finZeroElim i
+  · cases i using Fin.cases
+    · simp; rfl
+    · simp [*]; rfl
 
-noncomputable def Semiterm.cons {m n : V} (t : Semiterm V L n) (v : SemitermVec V L m n) :
-    SemitermVec V L (m + 1) n := ⟨t.val ∷ v.val, by simp⟩
+noncomputable def Semiterm.bvar (z : Fin n) : Semiterm V L n := ⟨^#z, by simp⟩
 
-scoped infixr:67 " ∷ᵗ " => Semiterm.cons
+noncomputable def Semiterm.fvar (x : V) : Semiterm V L n := ⟨^&x, by simp⟩
 
-@[simp] lemma SemitermVec.val_cons {m n : V} (t : Semiterm V L n) (v : SemitermVec V L m n) :
-    (t ∷ᵗ v).val = t.val ∷ v.val := by simp [Semiterm.cons]
+noncomputable def Semiterm.func (f : L.Func k) (v : SemitermVec V L k n) :
+    Semiterm V L n := ⟨^func ↑k ⌜f⌝ v.val , by simp⟩
+noncomputable abbrev Semiterm.bv (x : Fin n) : Semiterm V L n := Semiterm.bvar x
+noncomputable abbrev Semiterm.fv (x : V) : Semiterm V L n := Semiterm.fvar x
 
-variable (L)
-
-def SemitermVec.nil (n : V) : SemitermVec V L 0 n := ⟨0, by simp⟩
-
-variable {L}
-
-@[simp] lemma SemitermVec.val_nil (n : V) :
-    (SemitermVec.nil L n).val = 0 := rfl
-
-noncomputable abbrev Semiterm.sing {n : V} (t : Semiterm V L n) : SemitermVec V L (0 + 1) n := t ∷ᵗ .nil L n
+@[simp] lemma Semiterm.val_bvar (z : Fin n) : (Semiterm.bvar z : Semiterm V L n).val = ^#(z : V) := rfl
+@[simp] lemma Semiterm.val_fvar (x : V) : (Semiterm.fvar x : Semiterm V L n).val = ^&x := rfl
 
 namespace Semiterm
 
 noncomputable def shift (t : Semiterm V L n) : Semiterm V L n :=
-  ⟨termShift L t.val, IsSemiterm.termShift t.prop⟩
+  ⟨termShift L t.val, IsSemiterm.termShift t.isSemiterm⟩
 
 noncomputable def bShift (t : Semiterm V L n) : Semiterm V L (n + 1) :=
-  ⟨termBShift L t.val, IsSemiterm.termBShift t.prop⟩
+  ⟨termBShift L t.val, IsSemiterm.termBShift t.isSemiterm⟩
 
-noncomputable def substs (t : Semiterm V L n) (w : SemitermVec V L n m) : Semiterm V L m :=
-  ⟨termSubst L w.val t.val, w.prop.termSubst t.prop⟩
+noncomputable def substs (w : SemitermVec V L n m) (t : Semiterm V L n) : Semiterm V L m :=
+  ⟨termSubst L w.val t.val, w.isSemitermVec.termSubst t.isSemiterm⟩
 
 @[simp] lemma val_shift (t : Semiterm V L n) : t.shift.val = termShift L t.val := rfl
 @[simp] lemma val_bShift (t : Semiterm V L n) : t.bShift.val = termBShift L t.val := rfl
@@ -117,130 +173,68 @@ noncomputable def substs (t : Semiterm V L n) (w : SemitermVec V L n m) : Semite
 
 end Semiterm
 
-notation t:max "^ᵗ/[" w "]" => Semiterm.substs t w
-
 namespace SemitermVec
 
-noncomputable def shift (v : SemitermVec V L k n) : SemitermVec V L k n :=
-  ⟨termShiftVec L k v.val, IsSemitermVec.termShiftVec v.prop⟩
+@[simp] lemma val_shift (v : SemitermVec V L k n) : val (Semiterm.shift⨟ v) = termShiftVec L ↑k v.val := by
+  induction k <;> simp [termShiftVec_cons, *]
 
-noncomputable def bShift (v : SemitermVec V L k n) : SemitermVec V L k (n + 1) :=
-  ⟨termBShiftVec L k v.val, IsSemitermVec.termBShiftVec v.prop⟩
+@[simp] lemma val_bShift (v : SemitermVec V L k n) : val (Semiterm.bShift⨟ v) = termBShiftVec L ↑k v.val := by
+  induction k <;> simp [termBShiftVec_cons, *]
 
-noncomputable def substs (v : SemitermVec V L k n) (w : SemitermVec V L n m) : SemitermVec V L k m :=
-  ⟨termSubstVec L k w.val v.val, IsSemitermVec.termSubstVec w.prop v.prop⟩
+@[simp] lemma val_substs (v : SemitermVec V L k n) (w : SemitermVec V L n m) :
+    val ((Semiterm.substs w)⨟ v) = termSubstVec L ↑k w.val v.val := by
+  induction k <;> simp [termSubstVec_cons, *]
 
-@[simp] lemma val_shift (v : SemitermVec V L k n) : v.shift.val = termShiftVec L k v.val := rfl
-@[simp] lemma val_bShift (v : SemitermVec V L k n) : v.bShift.val = termBShiftVec L k v.val := rfl
-@[simp] lemma val_substs (v : SemitermVec V L k n) (w : SemitermVec V L n m) : (v.substs w).val = termSubstVec L k w.val v.val := rfl
+noncomputable def q (w : SemitermVec V L k n) : SemitermVec V L (k + 1) (n + 1) := Semiterm.bvar 0 :> Semiterm.bShift⨟ w
 
-@[simp] lemma bShift_nil (n : V) :
-    (nil L n).bShift = nil L (n + 1) := by
-  ext; simp [bShift]
+@[simp] lemma q_zero (w : SemitermVec V L k n) : w.q 0 = Semiterm.bvar 0 := rfl
 
-@[simp] lemma bShift_cons (t : Semiterm V L n) (v : SemitermVec V L k n) :
-    (t ∷ᵗ v).bShift = t.bShift ∷ᵗ v.bShift := by
-  ext; simp [bShift, Semiterm.bShift, termBShiftVec_cons t.prop.isUTerm v.prop.isUTerm]
+@[simp] lemma q_succ (w : SemitermVec V L k n) (i : Fin k) : w.q i.succ = Semiterm.bShift (w i) := rfl
 
-@[simp] lemma shift_nil (n : V) :
-    (nil L n).shift = nil L n := by
-  ext; simp [shift]
-
-@[simp] lemma shift_cons (t : Semiterm V L n) (v : SemitermVec V L k n) :
-    (t ∷ᵗ v).shift = t.shift ∷ᵗ v.shift := by
-  ext; simp [shift, Semiterm.shift, termShiftVec_cons t.prop.isUTerm v.prop.isUTerm]
-
-@[simp] lemma substs_nil (w : SemitermVec V L n m) :
-    (nil L n).substs w = nil L m := by
-  ext; simp [substs]
-
-@[simp] lemma substs_cons (w : SemitermVec V L n m) (t : Semiterm V L n) (v : SemitermVec V L k n) :
-    (t ∷ᵗ v).substs w = t.substs w ∷ᵗ v.substs w := by
-  ext; simp [substs, Semiterm.substs, termSubstVec_cons t.prop.isUTerm v.prop.isUTerm]
-
-noncomputable def nth (t : SemitermVec V L k n) (i : V) (hi : i < k := by simp) : Semiterm V L n :=
-  ⟨t.val.[i], t.prop.nth hi⟩
-
-@[simp] lemma nth_val (v : SemitermVec V L k n) (i : V) (hi : i < k) : (v.nth i hi).val = v.val.[i] := by simp [nth]
-
-@[simp] lemma nth_zero (t : Semiterm V L n) (v : SemitermVec V L k n) : (t ∷ᵗ v).nth 0 = t := by ext; simp [nth]
-
-@[simp] lemma nth_succ (t : Semiterm V L n) (v : SemitermVec V L k n) (i : V) (hi : i < k) :
-    (t ∷ᵗ v).nth (i + 1) (by simp [hi]) = v.nth i hi := by ext; simp [nth]
-
-@[simp] lemma nth_one (t : Semiterm V L n) (v : SemitermVec V L (k + 1) n)  :
-    (t ∷ᵗ v).nth 1 (by simp) = v.nth 0 (by simp) := by ext; simp [nth]
-
-lemma nth_of_pos (t : Semiterm V L n) (v : SemitermVec V L k n) (i : V) (ipos : 0 < i) (hi : i < k + 1) :
-    (t ∷ᵗ v).nth i (by simp [hi]) = v.nth (i - 1) (PeanoMinus.tsub_lt_iff_left (one_le_of_zero_lt i ipos) |>.mpr hi) := by
-  ext; simp only [nth, SemitermVec.val_cons]
-  rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
-  · simp at ipos
-  · simp
-
-noncomputable def q (w : SemitermVec V L k n) : SemitermVec V L (k + 1) (n + 1) := Semiterm.bvar L (0 : V) ∷ᵗ w.bShift
-
-@[simp] lemma q_zero (w : SemitermVec V L k n) : w.q.nth 0 = Semiterm.bvar L 0 := by simp [q]
-
-@[simp] lemma q_succ (w : SemitermVec V L k n) {i} (hi : i < k) :
-    w.q.nth (i + 1) (by simp [hi]) = (w.nth i hi).bShift := by
-  simp only [q, hi, nth_succ]
-  ext; simp [bShift, nth, Semiterm.bShift, hi]
-
-@[simp] lemma q_one (w : SemitermVec V L k n) (h : 0 < k) : w.q.nth 1 (by simp [h]) = (w.nth 0 h).bShift := by
-  simpa using q_succ w h
-
-lemma q_of_pos (w : SemitermVec V L k n) (i) (ipos : 0 < i) (hi : i < k + 1) :
-    w.q.nth i (by simp [hi]) = (w.nth (i - 1) (PeanoMinus.tsub_lt_iff_left (one_le_of_zero_lt i ipos) |>.mpr hi)).bShift := by
-  rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
-  · simp at ipos
-  · simp [q_succ w (by simpa using hi)]
-
-@[simp] lemma q_val_eq_qVec (w : SemitermVec V L k n) : w.q.val = qVec L w.val := by simp [q, qVec, Semiterm.bvar, bShift, w.prop.lh]
+@[simp] lemma q_val_eq_qVec (w : SemitermVec V L k n) : w.q.val = qVec L w.val := by simp [q, qVec]
 
 end SemitermVec
 
 namespace Semiterm
 
-@[simp] lemma shift_bvar {z n : V} (hz : z < n) :
-    shift (Semiterm.bvar L z hz) = Semiterm.bvar L z hz := by ext; simp [Semiterm.bvar, shift]
+@[simp] lemma shift_bvar (z : Fin n) :
+    shift (Semiterm.bvar z : Semiterm V L n) = Semiterm.bvar z := by ext; simp [Semiterm.bvar, shift]
 
 @[simp] lemma shift_fvar (x : V) :
-    shift (Semiterm.fvar L x : Semiterm V L n) = Semiterm.fvar L (x + 1) := by ext; simp [Semiterm.fvar, shift]
+    shift (Semiterm.fvar x : Semiterm V L n) = Semiterm.fvar (x + 1) := by ext; simp [Semiterm.fvar, shift]
 
-@[simp] lemma shift_func {k f : V} (hf : L.IsFunc k f) (v : SemitermVec V L k n) :
-    shift (func hf v) = func hf v.shift := by ext; simp [Semiterm.func, shift, SemitermVec.shift, hf]
+@[simp] lemma shift_func (f : L.Func k) (v : SemitermVec V L k n) :
+    shift (func f v) = func f (shift⨟ v) := by ext; simp [Semiterm.func, shift]
 
-@[simp] lemma bShift_bvar {z n : V} (hz : z < n) :
-    bShift (Semiterm.bvar L z hz) = Semiterm.bvar L (z + 1) (by simpa using hz) := by ext; simp [Semiterm.bvar, bShift]
+@[simp] lemma bShift_bvar (z : Fin n) :
+    bShift (Semiterm.bvar z : Semiterm V L n) = Semiterm.bvar z.succ := by ext; simp [Semiterm.bvar, bShift]
 
 @[simp] lemma bShift_fvar (x : V) :
-    bShift (Semiterm.fvar L x : Semiterm V L n) = Semiterm.fvar L x := by ext; simp [Semiterm.fvar, bShift]
+    bShift (Semiterm.fvar x : Semiterm V L n) = Semiterm.fvar x := by ext; simp [Semiterm.fvar, bShift]
 
-@[simp] lemma bShift_func {k f : V} (hf : L.IsFunc k f) (v : SemitermVec V L k n) :
-    bShift (func hf v) = func hf v.bShift := by ext; simp [Semiterm.func, bShift, SemitermVec.bShift, hf]
+@[simp] lemma bShift_func (f : L.Func k) (v : SemitermVec V L k n) :
+    bShift (func f v) = func f (bShift⨟ v) := by ext; simp [Semiterm.func, bShift]
 
-@[simp] lemma substs_bvar {z m : V} (w : SemitermVec V L n m) (hz : z < n) :
-    (Semiterm.bvar L z hz).substs w = w.nth z hz := by ext; simp [Semiterm.bvar, substs, SemitermVec.nth]
+@[simp] lemma substs_bvar (z : Fin n) (w : SemitermVec V L n m) :
+    (Semiterm.bvar z).substs w = w z := by ext; simp [substs]
 
 @[simp] lemma substs_fvar (w : SemitermVec V L n m) (x : V) :
-    (Semiterm.fvar L x : Semiterm V L n).substs w = Semiterm.fvar L x := by ext; simp [Semiterm.fvar, substs]
+    (Semiterm.fvar x : Semiterm V L n).substs w = Semiterm.fvar x := by ext; simp [Semiterm.fvar, substs]
 
-@[simp] lemma substs_func {k f : V} (w : SemitermVec V L n m) (hf : L.IsFunc k f) (v : SemitermVec V L k n) :
-    (func hf v).substs w = func hf (v.substs w) := by
-  ext; simp [Semiterm.func, substs, SemitermVec.substs, hf]
+@[simp] lemma substs_func (f : L.Func k) (w : SemitermVec V L n m) (v : SemitermVec V L k n) :
+    (func f v).substs w = func f ((substs w)⨟ v) := by ext; simp [Semiterm.func, substs]
 
 @[simp] lemma bShift_substs_q (t : Semiterm V L n) (w : SemitermVec V L n m) :
     t.bShift.substs w.q = (t.substs w).bShift := by
-  ext; simp only [substs, SemitermVec.q_val_eq_qVec, bShift, substs_qVec_bShift t.prop w.prop]
+  ext; simp only [substs, SemitermVec.q_val_eq_qVec, bShift, substs_qVec_bShift t.isSemiterm w.isSemitermVec]
 
 @[simp] lemma bShift_substs_sing (t u : Term V L) :
-    t.bShift.substs u.sing = t := by
-  ext; simp [substs, bShift, substs_cons_bShift t.prop]
+    t.bShift.substs ![u] = t := by
+  ext; simp [substs, bShift, substs_cons_bShift t.isSemiterm, substs_nil t.isSemiterm]
 
 lemma bShift_shift_comm (t : Semiterm V L n) :
     t.shift.bShift = t.bShift.shift := by
-  ext; simp [termBShift_termShift t.prop]
+  ext; simp [termBShift_termShift t.isSemiterm]
 
 end Semiterm
 
@@ -248,16 +242,16 @@ end typed_term
 
 section typed_isfvfree
 
+variable {k n m : ℕ}
+
 namespace Semiterm
 
-variable {n k : V}
-
-def FVFree (t : Semiterm V L n) : Prop := IsTermFVFree L n t.val
+def FVFree (t : Semiterm V L n) : Prop := IsTermFVFree L ↑n t.val
 
 lemma FVFree.iff {t : Semiterm V L n} : t.FVFree ↔ t.shift = t := by
   simp [FVFree, IsTermFVFree, Semiterm.ext_iff]
 
-@[simp] lemma FVFree.bvar (z : V) (h : z < n) : (Semiterm.bvar L z h).FVFree := by simp [FVFree, h]
+@[simp] lemma FVFree.bvar (i : Fin n) : (Semiterm.bvar i : Semiterm V L n).FVFree := by simp [FVFree]
 
 @[simp] lemma FVFree.bShift (t : Semiterm V L n) (ht : t.FVFree) :
     t.bShift.FVFree := by simp [FVFree.iff, ←bShift_shift_comm, FVFree.iff.mp ht]
@@ -268,19 +262,19 @@ end typed_isfvfree
 
 namespace InternalArithmetic
 
-noncomputable def typedNumeral (n m : V) : Semiterm V ℒₒᵣ n := ⟨numeral m, by simp⟩
+variable {k n m : ℕ}
 
-noncomputable def add {n : V} (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n := ⟨t.val ^+ u.val, by simp [qqAdd]⟩
+noncomputable def typedNumeral (m : V) : Semiterm V ℒₒᵣ n := ⟨numeral m, by simp⟩
 
-noncomputable def mul {n : V} (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n := ⟨t.val ^* u.val, by simp [qqMul]⟩
+noncomputable def add (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n := ⟨t.val ^+ u.val, by simp [qqAdd]⟩
 
-noncomputable instance (n : V) : Add (Semiterm V ℒₒᵣ n) := ⟨add⟩
+noncomputable def mul (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n := ⟨t.val ^* u.val, by simp [qqMul]⟩
 
-noncomputable instance (n : V) : Mul (Semiterm V ℒₒᵣ n) := ⟨mul⟩
+noncomputable instance (n : ℕ) : Add (Semiterm V ℒₒᵣ n) := ⟨add⟩
 
-noncomputable instance coeNumeral (n : V) : Coe V (Semiterm V ℒₒᵣ n) := ⟨typedNumeral n⟩
+noncomputable instance (n : ℕ) : Mul (Semiterm V ℒₒᵣ n) := ⟨mul⟩
 
-variable {n : V}
+noncomputable instance coeNumeral (n : ℕ) : Coe V (Semiterm V ℒₒᵣ n) := ⟨typedNumeral⟩
 
 @[simp] lemma val_numeral (x : V) : (↑x : Semiterm V ℒₒᵣ n).val = numeral x := rfl
 
@@ -297,22 +291,22 @@ variable {n : V}
   simp [Semiterm.ext_iff, qqMul]
 
 @[simp] lemma numeral_add_two' (x : V) :
-    typedNumeral n (x + 1 + 1) = typedNumeral n (x + 1) + typedNumeral n 1 := by
+    (typedNumeral (x + 1 + 1) : Semiterm V ℒₒᵣ n) = typedNumeral (x + 1) + typedNumeral 1 := by
   ext; simp [numeral]
 
 lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
-    typedNumeral n (x + 1) = typedNumeral n x + typedNumeral n 1 := by
+    (typedNumeral (x + 1) : Semiterm V ℒₒᵣ n) = typedNumeral x + typedNumeral 1 := by
   ext; simp [numeral_succ_pos pos]
 
-@[simp] lemma subst_numeral {m n : V} (w : SemitermVec V ℒₒᵣ n m) (x : V) :
+@[simp] lemma subst_numeral (w : SemitermVec V ℒₒᵣ n m) (x : V) :
     (↑x : Semiterm V ℒₒᵣ n).substs w = ↑x := by
-  ext; simp [Semiterm.substs, numeral_substs w.prop]
+  ext; simp [Semiterm.substs, numeral_substs w.isSemitermVec]
 
-@[simp] lemma subst_add {m n : V} (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
+@[simp] lemma subst_add (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ + t₂).substs w = t₁.substs w + t₂.substs w := by
   ext; simp [qqAdd, Semiterm.substs]
 
-@[simp] lemma subst_mul {m n : V} (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
+@[simp] lemma subst_mul (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ * t₂).substs w = t₁.substs w * t₂.substs w := by
   ext; simp [qqMul, Semiterm.substs]
 
@@ -343,9 +337,9 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
     (t₁ * t₂).FVFree ↔ t₁.FVFree ∧ t₂.FVFree := by simp [Semiterm.FVFree.iff]
 
 /-
-lemma replace {P : α → Prop} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx
+lemma replace {P : α → isSemiterm} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx
 
-lemma semiterm_induction (Γ) {n : V} {P : Semiterm V ℒₒᵣ n → Prop}
+lemma semiterm_induction (Γ) {n : V} {P : Semiterm V ℒₒᵣ n → isSemiterm}
     (hP : Γ-[1]-Predicate (fun x ↦ (h : IsSemiterm ℒₒᵣ n x) → P ⟨x, h⟩))
     (hBvar : ∀ (z : V) (h : z < n), P (bvar ℒₒᵣ z h))
     (hFvar : ∀ x, P (⌜ℒₒᵣ⌝.fvar x))
@@ -355,7 +349,7 @@ lemma semiterm_induction (Γ) {n : V} {P : Semiterm V ℒₒᵣ n → Prop}
     (hMul : ∀ t₁ t₂, P t₁ → P t₂ → P (t₁ * t₂)) :
     ∀ (t : ⌜ℒₒᵣ⌝[V].Semiterm n), P t := by
   let Q := fun x ↦ (h : IsSemiterm ℒₒᵣ n x) → P ⟨x, h⟩
-  suffices ∀ t, IsSemiterm ℒₒᵣ n t → Q t by intro t; exact this t.val t.prop t.prop
+  suffices ∀ t, IsSemiterm ℒₒᵣ n t → Q t by intro t; exact this t.val t.isSemiterm t.isSemiterm
   apply IsSemiterm.induction Γ hP
   case hbvar => intro z hz _; exact hBvar z hz
   case hfvar => intro x _; exact hFvar x
