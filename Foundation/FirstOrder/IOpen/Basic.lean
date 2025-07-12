@@ -795,7 +795,7 @@ lemma nat_cast_pair (n m : ℕ) : (⟪n, m⟫ : ℕ) = ⟪(↑n : V), (↑m : V)
 
 lemma nat_pair_eq (m n : ℕ) : ⟪n, m⟫ = Nat.pair n m := by simp [pair, Nat.pair]
 
-lemma pair_coe_eq_coe_pair (m n : ℕ) :  ⟪n, m⟫ = (Nat.pair n m : V) := by simp [nat_cast_pair, nat_pair_eq]
+lemma coe_pair_eq_pair_coe (n m : ℕ) : (Nat.pair n m : V) = ⟪(↑n : V), (↑m : V)⟫ := by simp [←nat_pair_eq, nat_cast_pair]
 
 end pair
 

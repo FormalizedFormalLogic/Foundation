@@ -9,6 +9,8 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
+/-! ### Negation function -/
+
 section negation
 
 namespace Negation
@@ -224,6 +226,8 @@ end
 
 end iff
 
+/-! ### Shift function -/
+
 section shift
 
 namespace Shift
@@ -337,7 +341,7 @@ lemma IsUFormula.bv_shift {p : V} : IsUFormula L p → bv L (Metamath.shift L p)
   · intro p hp ihp; simp [hp, ihp, hp.shift]
 
 lemma IsSemiformula.shift {p : V} : IsSemiformula L n p → IsSemiformula L n (shift L p) := by
-  apply IsSemiformula.ISigma1.sigma1_succ_induction
+  apply IsSemiformula.sigma1_structural_induction
   · definability
   · intro n k r v hr hv; simp [hr, hv, hv.isUTerm]
   · intro n k r v hr hv; simp [hr, hv, hv.isUTerm]
@@ -348,6 +352,12 @@ lemma IsSemiformula.shift {p : V} : IsSemiformula L n p → IsSemiformula L n (s
   · intro n p hp ihp; simp [hp.isUFormula, ihp]
   · intro n p hp ihp; simp [hp.isUFormula, ihp]
 
+@[simp] lemma IsUFormula.shift_iff {p : V} : IsUFormula L (Metamath.shift L p) ↔ IsUFormula L p := by
+  constructor
+  · intro h; by_contra hp
+    have Hp : IsUFormula L p := by by_contra hp; simp [shift_not_uformula hp] at h
+    contradiction
+  · exact IsUFormula.shift
 
 @[simp] lemma IsSemiformula.shift_iff {p : V} : IsSemiformula L n (Metamath.shift L p) ↔ IsSemiformula L n p :=
   ⟨fun h ↦ by
@@ -356,7 +366,7 @@ lemma IsSemiformula.shift {p : V} : IsSemiformula L n p → IsSemiformula L n (s
     IsSemiformula.shift⟩
 
 lemma shift_neg {p : V} (hp : IsSemiformula L n p) : shift L (neg L p) = neg L (shift L p) := by
-  apply IsSemiformula.ISigma1.sigma1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply IsSemiformula.sigma1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro n k R v hR hv; simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
   · intro n k R v hR hv; simp [hR, hv.isUTerm, hv.termShiftVec.isUTerm]
@@ -368,6 +378,8 @@ lemma shift_neg {p : V} (hp : IsSemiformula L n p) : shift L (neg L p) = neg L (
   · intro n p hp ih; simp [hp.isUFormula, hp.shift.isUFormula, ih]
 
 end shift
+
+/-! ### Substitution function -/
 
 section substs
 
@@ -527,7 +539,7 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
   have hfn : 𝚺₁-Function₄ fn := by definability
   let fm : V → V → V → V → V := fun _ _ _ m ↦ m + 1
   have hfm : 𝚺₁-Function₄ fm := by definability
-  apply order_ball_induction₃_sigma1 hfw hfn hfm ?_ ?_ p w n m
+  apply bounded_all_sigma1_order_induction₃ hfw hfn hfm ?_ ?_ p w n m
   · definability
   intro p w n m ih hp hw
   rcases IsSemiformula.case_iff.mp hp with
@@ -545,13 +557,13 @@ lemma semiformula_subst_induction {P : V → V → V → V → Prop} (hP : 𝚺�
   · simpa [h₁.isUFormula] using ih p₁ (by simp) (qVec L w) (by simp [fw]) (n + 1) (by simp [fn]) (m + 1) (by simp [fm]) h₁ hw.qVec
   · simpa [h₁.isUFormula] using ih p₁ (by simp) (qVec L w) (by simp [fw]) (n + 1) (by simp [fn]) (m + 1) (by simp [fm]) h₁ hw.qVec
 
-lemma substs_not_uformula {w x} (h : ¬IsUFormula L x) :
+lemma substs_not_uformula {w x : V} (h : ¬IsUFormula L x) :
     substs L w x = 0 := (construction L).result_prop_not _ h
 
 lemma substs_neg {p} (hp : IsSemiformula L n p) :
     IsSemitermVec L n m w → substs L w (neg L p) = neg L (substs L w p) := by
   revert m w
-  apply IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intros n k R v hR hv m w hw
     rw [neg_rel hR hv.isUTerm, substs_nrel hR hv.isUTerm, substs_rel hR hv.isUTerm, neg_rel hR (hw.termSubstVec hv).isUTerm]
@@ -581,7 +593,7 @@ lemma substs_neg {p} (hp : IsSemiformula L n p) :
 lemma shift_substs {p} (hp : IsSemiformula L n p) :
     IsSemitermVec L n m w → shift L (substs L w p) = substs L (termShiftVec L n w) (shift L p) := by
   revert m w
-  apply IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro n k R v hR hv m w hw
     rw [substs_rel hR hv.isUTerm,
@@ -645,7 +657,7 @@ lemma shift_substs {p} (hp : IsSemiformula L n p) :
 lemma substs_substs {p} (hp : IsSemiformula L l p) :
     IsSemitermVec L n m w → IsSemitermVec L l n v → substs L w (substs L v p) = substs L (termSubstVec L l w v) p := by
   revert m w n v
-  apply IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro l k R ts hR hts m w n v _ hv
     rw [substs_rel hR hts.isUTerm,
@@ -697,7 +709,7 @@ lemma substs_substs {p} (hp : IsSemiformula L l p) :
 lemma subst_eq_self {n w : V} (hp : IsSemiformula L n p) (hw : IsSemitermVec L n n w) (H : ∀ i < n, w.[i] = ^#i) :
     substs L w p = p := by
   revert w
-  apply IsSemiformula.ISigma1.pi1_succ_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
   · definability
   · intro n k R v hR hv w _ H
     simp only [substs_rel, qqRel_inj, true_and, hR, hv.isUTerm]
@@ -762,7 +774,7 @@ instance substs1.definable' : Γ-[m + 1]-Function₂[V] substs1 L := substs1.def
 
 end
 
-lemma IsSemiformula.substs1 (ht : IsSemiterm L n t) (hp : IsSemiformula L 1 p) : IsSemiformula L n (substs1 L t p) :=
+lemma IsSemiformula.substs1 {n t p : V} (ht : IsSemiterm L n t) (hp : IsSemiformula L 1 p) : IsSemiformula L n (substs1 L t p) :=
   IsSemiformula.substs hp (by simp [ht])
 
 end substs1
@@ -775,6 +787,8 @@ def freeGraph : 𝚺₁.Semisentence 2 := .mkSigma
   “q p. ∃ fz, !qqFvarDef fz 0 ∧ ∃ sp, !(shiftGraph L) sp p ∧ !(substs1Graph L) q fz sp”
 
 variable {L}
+
+/-! ### free function -/
 
 section free
 
@@ -789,10 +803,225 @@ instance free.definable' : Γ-[m + 1]-Function₁[V] free L := free.definable.of
 
 end
 
-@[simp] lemma IsSemiformula.free (hp : IsSemiformula L 1 p) : IsFormula L (free L p) :=
+@[simp] lemma IsSemiformula.free {p : V} (hp : IsSemiformula L 1 p) : IsFormula L (free L p) :=
   IsSemiformula.substs1 (by simp) hp.shift
 
 end free
+
+/-! ### Complexity of formula -/
+
+section complexity
+
+namespace FormulaComplexity
+
+def blueprint : UformulaRec1.Blueprint where
+  rel := .mkSigma “y param k R v. y = 0” (by simp)
+  nrel := .mkSigma “y param k R v. y = 0” (by simp)
+  verum := .mkSigma “y param. y = 0” (by simp)
+  falsum := .mkSigma “y param. y = 0” (by simp)
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y (y₁ + 1) (y₂ + 1)” (by simp)
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y (y₁ + 1) (y₂ + 1)” (by simp)
+  all := .mkSigma “y param p₁ y₁. y = y₁ + 1” (by simp)
+  ex := .mkSigma “y param p₁ y₁. y = y₁ + 1” (by simp)
+  allChanges := .mkSigma “param' param. param' = 0” (by simp)
+  exChanges := .mkSigma “param' param. param' = 0” (by simp)
+
+noncomputable def construction : UformulaRec1.Construction V blueprint where
+  rel {_} := fun k R v ↦ 0
+  nrel {_} := fun k R v ↦ 0
+  verum {_} := 0
+  falsum {_} := 0
+  and {_} := fun _ _ y₁ y₂ ↦ max y₁ y₂ + 1
+  or {_} := fun _ _ y₁ y₂ ↦ max y₁ y₂ + 1
+  all {_} := fun _ y₁ ↦ y₁ + 1
+  ex {_} := fun _ y₁ ↦ y₁ + 1
+  allChanges := fun _ ↦ 0
+  exChanges := fun _ ↦ 0
+  rel_defined := by intro v; simp [blueprint]
+  nrel_defined := by intro v; simp [blueprint]
+  verum_defined := by intro v; simp [blueprint]
+  falsum_defined := by intro v; simp [blueprint]
+  and_defined := by intro v; simp [blueprint, max_add_add_right]
+  or_defined := by intro v; simp [blueprint, max_add_add_right]
+  all_defined := by intro v; simp [blueprint]
+  ex_defined := by intro v; simp [blueprint]
+  allChanges_defined := by intro v; simp [blueprint]
+  exChanges_defined := by intro v; simp [blueprint]
+
+end FormulaComplexity
+
+open FormulaComplexity
+
+variable (L)
+
+noncomputable def formulaComplexity (p : V) : V := construction.result L 0 p
+
+def formulaComplexityGraph : 𝚺₁.Semisentence 2 := (blueprint.result L).rew (Rew.substs ![#0, ‘0’, #1])
+
+variable {L}
+
+section
+
+lemma formulaComplexity.defined : 𝚺₁-Function₁[V] formulaComplexity L via formulaComplexityGraph L  := fun v ↦ by
+  simpa [formulaComplexityGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using construction.result_defined ![v 0, 0, v 1]
+
+instance formulaComplexity.definable : 𝚺₁-Function₁[V] formulaComplexity L := formulaComplexity.defined.to_definable
+
+instance formulaComplexity.definable' : Γ-[m + 1]-Function₁[V] formulaComplexity L := .of_sigmaOne formulaComplexity.definable
+
+end
+
+@[simp] lemma formulaComplexity_rel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+    formulaComplexity L (^rel k R v) = 0 := by simp [formulaComplexity, hR, hv, construction]
+
+@[simp] lemma formulaComplexity_nrel {k R v : V} (hR : L.IsRel k R) (hv : IsUTermVec L k v) :
+    formulaComplexity L (^nrel k R v) = 0 := by simp [formulaComplexity, hR, hv, construction]
+
+@[simp] lemma formulaComplexity_verum :
+    formulaComplexity L (^⊤ : V) = 0 := by simp [formulaComplexity, construction]
+
+@[simp] lemma formulaComplexity_falsum :
+    formulaComplexity L (^⊥ : V) = 0 := by simp [formulaComplexity, construction]
+
+@[simp] lemma formulaComplexity_and {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+    formulaComplexity L (p ^⋏ q) = max (formulaComplexity L p) (formulaComplexity L q) + 1 := by simp [formulaComplexity, hp, hq, construction]
+
+@[simp] lemma formulaComplexity_or {p q : V} (hp : IsUFormula L p) (hq : IsUFormula L q) :
+    formulaComplexity L (p ^⋎ q) = max (formulaComplexity L p) (formulaComplexity L q) + 1 := by simp [formulaComplexity, hp, hq, construction]
+
+@[simp] lemma formulaComplexity_all {p : V} (hp : IsUFormula L p) :
+    formulaComplexity L (^∀ p) = formulaComplexity L p + 1 := by simp [formulaComplexity, hp, construction]
+
+@[simp] lemma formulaComplexity_ex {p : V} (hp : IsUFormula L p) :
+    formulaComplexity L (^∃ p) = formulaComplexity L p + 1 := by simp [formulaComplexity, hp, construction]
+
+lemma formulaComplexity_not_uformula {x : V} (h : ¬IsUFormula L x) :
+    formulaComplexity L x = 0 := construction.result_prop_not _ h
+
+@[simp] lemma formulaComplexity_neg {p : V} : IsUFormula L p → formulaComplexity L (neg L p) = formulaComplexity L p := by
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
+
+@[simp] lemma formulaComplexity_shift {p : V} : IsUFormula L p → formulaComplexity L (shift L p) = formulaComplexity L p := by
+  apply IsUFormula.ISigma1.sigma1_succ_induction
+  · definability
+  · intro k r v hr hv; simp [hr, hv]
+  · intro k r v hr hv; simp [hr, hv]
+  · simp
+  · simp
+  · intro p q hp hq ihp ihq
+    simp [hp, hq, ihp, ihq]
+  · intro p q hp hq ihp ihq; simp [hp, hq, ihp, ihq]
+  · intro p hp ihp; simp [hp, ihp]
+  · intro p hp ihp; simp [hp, ihp]
+
+lemma fomulaComplexity_substs {p : V} (hp : IsSemiformula L n p) :
+    IsSemitermVec L n m w → formulaComplexity L (substs L w p) = formulaComplexity L p := by
+  revert m w
+  apply IsSemiformula.pi1_structural_induction ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ ?_ hp
+  · definability
+  · intro n k R v hR hv m w hw
+    rw [formulaComplexity_rel hR hv.isUTerm, substs_rel hR hv.isUTerm, formulaComplexity_rel hR (hw.termSubstVec hv).isUTerm]
+  · intro n k R v hR hv m w hw
+    rw [formulaComplexity_nrel hR hv.isUTerm, substs_nrel hR hv.isUTerm, formulaComplexity_nrel hR (hw.termSubstVec hv).isUTerm]
+  · intro n m w hw
+    rw [substs_verum]
+  · intro n m w hw
+    rw [substs_falsum]
+  · intro n p q hp hq ihp ihq m w hw
+    rw [substs_and hp.isUFormula hq.isUFormula,
+      formulaComplexity_and (hp.substs hw).isUFormula (hq.substs hw).isUFormula,
+      ihp hw, ihq hw,
+      formulaComplexity_and hp.isUFormula hq.isUFormula]
+  · intro n p q hp hq ihp ihq m w hw
+    rw [substs_or hp.isUFormula hq.isUFormula,
+      formulaComplexity_or (hp.substs hw).isUFormula (hq.substs hw).isUFormula,
+      ihp hw, ihq hw,
+      formulaComplexity_or hp.isUFormula hq.isUFormula]
+  · intro n p hp ihp m w hw
+    rw [substs_all hp.isUFormula,
+     formulaComplexity_all (hp.substs hw.qVec).isUFormula,
+     ihp (hw.qVec),
+     formulaComplexity_all hp.isUFormula]
+  · intro n p hp ihp m w hw
+    rw [substs_ex hp.isUFormula,
+     formulaComplexity_ex (hp.substs hw.qVec).isUFormula,
+     ihp (hw.qVec),
+     formulaComplexity_ex hp.isUFormula]
+
+lemma fomulaComplexity_substs1 {p : V} (hp : IsSemiformula L 1 p) (ht : IsSemiterm L m t) :
+    formulaComplexity L (substs1 L t p) = formulaComplexity L p := by
+  unfold substs1
+  rw [fomulaComplexity_substs hp (IsSemitermVec.singleton.mpr ht)]
+
+
+lemma fomulaComplexity_free {p : V} (hp : IsSemiformula L 1 p) :
+    formulaComplexity L (free L p) = formulaComplexity L p := by
+  unfold free
+  have : IsSemiterm (V := V) L 0 ^&0 := by simp
+  rw [fomulaComplexity_substs1 hp.shift this,
+    formulaComplexity_shift hp.isUFormula]
+
+end complexity
+
+@[simp] lemma lt_max_succ_left (a b : V) : a < max a b + 1 := lt_succ_iff_le.mpr <| by simp
+
+@[simp] lemma lt_max_succ_right (a b : V) : b < max a b + 1 := lt_succ_iff_le.mpr <| by simp
+
+/-! A structural induction correspondence to `LO.FirstOrder.Semiformula.formulaRec`.  -/
+lemma IsFormula.sigma1_structural_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
+    (hrel : ∀ k r v, L.IsRel k r → IsTermVec L k v → P (^rel k r v))
+    (hnrel : ∀ k r v, L.IsRel k r → IsTermVec L k v → P (^nrel k r v))
+    (hverum : P ^⊤)
+    (hfalsum : P ^⊥)
+    (hand : ∀ p q, IsFormula L p → IsFormula L q → P p → P q → P (p ^⋏ q))
+    (hor : ∀ p q, IsFormula L p → IsFormula L q → P p → P q → P (p ^⋎ q))
+    (hall : ∀ p, IsSemiformula L 1 p → P (free L p) → P (^∀ p))
+    (hex : ∀ p, IsSemiformula L 1 p → P (free L p) → P (^∃ p)) {p} :
+    IsFormula L p → P p := by
+  have hm : 𝚺₁-Function₁[V] formulaComplexity L := inferInstance
+  let f : V → V := fun p ↦ max p (free L (π₂ (p - 1)))
+  have hf : 𝚺₁-Function₁ f := by unfold f; definability
+  apply measured_bounded_sigma1_order_induction hm hf ?_ ?_ p
+  · definability
+  intro p ih hp
+  rcases IsSemiformula.case_iff.mp hp with
+    (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩
+      | rfl | rfl
+      | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂, h₁, h₂, rfl⟩
+      | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩)
+  · exact hrel _ _ _ hR hv
+  · exact hnrel _ _ _ hR hv
+  · exact hverum
+  · exact hfalsum
+  · have ih₁ : P p₁ :=
+      ih p₁ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₁
+    have ih₂ : P p₂ :=
+      ih p₂ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₂
+    exact hand _ _ h₁ h₂ ih₁ ih₂
+  · have ih₁ : P p₁ :=
+      ih p₁ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₁
+    have ih₂ : P p₂ :=
+      ih p₂ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₂
+    exact hor _ _ h₁ h₂ ih₁ ih₂
+  · have h₁ : IsSemiformula L 1 p₁ := by simpa using h₁
+    have : P (free L p₁) := ih (free L p₁) (by simp only [le_sup_iff, f]; right; simp [qqAll])
+      (by simp [fomulaComplexity_free h₁, h₁.isUFormula])
+      (h₁.free)
+    exact hall _ h₁ this
+  · have h₁ : IsSemiformula L 1 p₁ := by simpa using h₁
+    have : P (free L p₁) := ih (free L p₁) (by simp only [le_sup_iff, f]; right; simp [qqEx])
+      (by simp [fomulaComplexity_free h₁, h₁.isUFormula])
+      (h₁.free)
+    exact hex _ h₁ this
 
 /-
 section fvfree
