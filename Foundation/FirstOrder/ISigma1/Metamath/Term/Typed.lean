@@ -6,63 +6,6 @@ import Foundation.FirstOrder.ISigma1.Metamath.Term.Functions
 
 -/
 
--- TODO: move to Vorspiel
-namespace Matrix
-
-variable {α β : Type*}
-
-def foldr (f : α → β → β) (init : β) : {k : ℕ} → (Fin k → α) → β
-  |     0, _ => init
-  | _ + 1, v => f (vecHead v) (Matrix.foldr f init (vecTail v))
-
-section foldr
-
-variable (f : α → β → β) (init : β)
-
-@[simp] lemma foldr_zero (v : Fin 0 → α) : foldr f init v = init := rfl
-
-@[simp] lemma foldr_succ (v : Fin (k + 1) → α) : foldr f init v = f (vecHead v) (foldr f init (vecTail v)) := rfl
-
-end foldr
-
-def foldl (f : α → β → α) : (init : α) → {k : ℕ} → (Fin k → β) → α
-  | a,     0, _ => a
-  | a, _ + 1, v => Matrix.foldl f (f a (vecHead v)) (vecTail v)
-
-section foldr
-
-variable (f : α → β → α) (init : α)
-
-@[simp] lemma foldl_zero (v : Fin 0 → β) : foldl f init v = init := rfl
-
-@[simp] lemma foldl_succ (v : Fin (k + 1) → β) : foldl f init v = foldl f (f init (vecHead v)) (vecTail v) := rfl
-
-end foldr
-
-def map (f : α → β) : (Fin k → α) → (Fin k → β) := fun v ↦ f ∘ v
-
-section map
-
-postfix:max "⨟" => map
-
-variable (f : α → β)
-
-@[simp] lemma map_nil (v : Fin 0 → α) : f⨟ v = ![] := empty_eq (f⨟ v)
-
-@[simp] lemma map_cons (a : α) (v : Fin k → α) : f⨟ (a :> v) = f a :> f⨟ v := by
-  ext i
-  cases i using Fin.cases <;> simp [map]
-
-@[simp] lemma map_cons' (v : Fin (k + 1) → α) : f⨟ v = f (vecHead v) :> f⨟ (vecTail v) := by
-  ext i
-  cases i using Fin.cases <;> { simp [map]; rfl }
-
-@[simp] lemma map_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
-
-end map
-
-end Matrix
-
 namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
@@ -112,7 +55,7 @@ abbrev TermVec (m : ℕ) := SemitermVec (V := V) L m 0
 variable {V L} {k n m : ℕ}
 
 @[ext]
-lemma Semiterm.ext {t u : Semiterm V L n}
+lemma Semiterm.ext (t u : Semiterm V L n)
     (h : t.val = u.val) : t = u := by rcases t; rcases u; simpa using h
 
 @[simp] lemma Semiterm.isUTerm (t : Semiterm V L n) : IsUTerm L t.val := t.isSemiterm.isUTerm
@@ -126,6 +69,12 @@ noncomputable def SemitermVec.val (v : SemitermVec V L k n) : V := Matrix.foldr 
 
 @[simp] lemma SemitermVec.val_succ (v : SemitermVec V L (k + 1) n) :
     SemitermVec.val (v : SemitermVec V L (k + 1) n) = (Matrix.vecHead v).val ∷ SemitermVec.val (Matrix.vecTail v) := by rfl
+
+lemma SemitermVec.val_inj (v₁ v₂ : SemitermVec V L k n) : v₁ = v₂ ↔ v₁.val = v₂.val := by
+    induction k
+    · simp [Matrix.empty_eq]
+    case succ k ih =>
+      simp [← Semiterm.ext_iff, ←ih, Matrix.eq_iff_eq_vecHead_of_eq_vecTail]
 
 @[simp] lemma SemitermVec.isSemitermVec {k} (v : SemitermVec V L k n) : IsSemitermVec (V := V) L k n v.val := by
   induction k <;> simp [*]
@@ -153,10 +102,23 @@ noncomputable def Semiterm.func (f : L.Func k) (v : SemitermVec V L k n) :
 noncomputable abbrev Semiterm.bv (x : Fin n) : Semiterm V L n := Semiterm.bvar x
 noncomputable abbrev Semiterm.fv (x : V) : Semiterm V L n := Semiterm.fvar x
 
-@[simp] lemma Semiterm.val_bvar (z : Fin n) : (Semiterm.bvar z : Semiterm V L n).val = ^#(z : V) := rfl
-@[simp] lemma Semiterm.val_fvar (x : V) : (Semiterm.fvar x : Semiterm V L n).val = ^&x := rfl
+@[simp] lemma Semiterm.bvar_val (z : Fin n) : (Semiterm.bvar z : Semiterm V L n).val = ^#(z : V) := rfl
+@[simp] lemma Semiterm.fvar_val (x : V) : (Semiterm.fvar x : Semiterm V L n).val = ^&x := rfl
+@[simp] lemma Semiterm.func_val (f : L.Func k) (v : SemitermVec V L k n) :
+    (Semiterm.func f v).val = ^func ↑k ⌜f⌝ v.val := rfl
+
 
 namespace Semiterm
+
+@[simp] lemma bvar_inj_iff (z x : Fin n) :
+    (bvar z : Semiterm V L n) = bvar x ↔ z = x := ⟨by simpa [bvar] using Fin.eq_of_val_eq, by rintro rfl; rfl⟩
+
+@[simp] lemma fvar_inj_iff (z x : V) : (fvar z : Semiterm V L n) = fvar x ↔ z = x := by simp [fvar]
+
+@[simp] lemma func_inj_iff (f₁ f₂ : L.Func k) (v₁ v₂ : SemitermVec V L k n) : func f₁ v₁ = func f₂ v₂ ↔ f₁ = f₂ ∧ v₁ = v₂ := by
+  simp only [func, Semiterm.ext_iff, qqFunc_inj, quote_func_inj, true_and, and_congr_right_iff]
+  rintro rfl
+  symm; exact SemitermVec.val_inj v₁ v₂
 
 noncomputable def shift (t : Semiterm V L n) : Semiterm V L n :=
   ⟨termShift L t.val, IsSemiterm.termShift t.isSemiterm⟩
