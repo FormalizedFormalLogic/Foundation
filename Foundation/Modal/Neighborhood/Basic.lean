@@ -12,16 +12,16 @@ namespace Neighborhood
 structure Frame where
   World : Type
   [world_nonempty : Nonempty World]
-  N : World → Set (Set World)
+  𝒩 : World → Set (Set World)
 attribute [simp] Frame.world_nonempty
 
 instance : CoeSort Frame Type := ⟨Frame.World⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
-@[reducible] def Frame.β (F : Frame) : Set F.World → Set F.World := λ X => { w | X ∈ F.N w }
+@[reducible] def Frame.ℬ (F : Frame) : Set F.World → Set F.World := λ X => { w | X ∈ F.𝒩 w }
 
 @[simp]
-lemma Frame.eq_β_N {F : Frame} {X Y : Set F.World} : (F.β X) = Y ↔ (∀ x, X ∈ F.N x ↔ x ∈ Y) := by
+lemma Frame.eq_ℬ_𝒩 {F : Frame} {X Y : Set F.World} : (F.ℬ X) = Y ↔ (∀ x, X ∈ F.𝒩 x ↔ x ∈ Y) := by
   constructor;
   . rintro rfl;
     tauto;
@@ -29,9 +29,9 @@ lemma Frame.eq_β_N {F : Frame} {X Y : Set F.World} : (F.β X) = Y ↔ (∀ x, X
     ext x;
     apply h;
 
-def Frame.mk_β (World : Type) [Nonempty World] (β : Set World → Set World) : Frame where
+def Frame.mk_B (World : Type) [Nonempty World] (B : Set World → Set World) : Frame where
   World := World
-  N x := { X | x ∈ β X }
+  𝒩 x := { X | x ∈ B X }
 
 section
 
@@ -60,7 +60,7 @@ def Model.truthset (M : Model) : Formula ℕ → Set M.World
 | .atom n => M.Val n
 | ⊥       => ∅
 | φ ➝ ψ  => (truthset M φ)ᶜ ∪ truthset M ψ
-| □φ      => M.β (truthset M φ)
+| □φ      => M.ℬ (truthset M φ)
 
 namespace Model.truthset
 
@@ -79,8 +79,8 @@ instance : CoeFun Model (λ M => Formula ℕ → Set M.World) := ⟨λ M => trut
   M (φ ⭤ ψ) = M (φ ➝ ψ) ∩ (M (ψ ➝ φ))             := by simp [LogicalConnective.iff];
   _         = ((M φ)ᶜ ∪ (M ψ)) ∩ ((M ψ)ᶜ ∪ (M φ)) := by simp;
   _         = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)     := by tauto_set;
-@[simp, grind] lemma eq_box  : M (□φ) = M.β (M φ) := rfl
-@[simp, grind] lemma eq_dia  : M (◇φ) = (M.β (M φ)ᶜ)ᶜ := by simp [truthset]
+@[simp, grind] lemma eq_box  : M (□φ) = M.ℬ (M φ) := rfl
+@[simp, grind] lemma eq_dia  : M (◇φ) = (M.ℬ (M φ)ᶜ)ᶜ := by simp [truthset]
 
 @[grind]
 lemma eq_subst :
@@ -113,8 +113,8 @@ variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 @[grind] lemma def_and : x ⊧ φ ⋏ ψ ↔ (x ⊧ φ ∧ x ⊧ ψ) := by simp [Semantics.Realize, Satisfies];
 @[grind] lemma def_or  : x ⊧ φ ⋎ ψ ↔ (x ⊧ φ ∨ x ⊧ ψ) := by simp [Semantics.Realize, Satisfies];
 
-@[grind] lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.N x) := by simp [Semantics.Realize, Satisfies];
-@[grind] lemma def_dia : x ⊧ ◇φ ↔ (M φ)ᶜ ∈ (M.N x)ᶜ := by simp [Semantics.Realize, Satisfies];
+@[grind] lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.𝒩 x) := by simp [Semantics.Realize, Satisfies];
+@[grind] lemma def_dia : x ⊧ ◇φ ↔ (M φ)ᶜ ∈ (M.𝒩 x)ᶜ := by simp [Semantics.Realize, Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
   realize_top := by grind

@@ -8,9 +8,9 @@ open Formula.Neighborhood
 variable {F : Frame}
 
 class Frame.IsReflexive (F : Frame) : Prop where
-  reflexive : ∀ X : Set F, F.β X ⊆ X
+  reflexive : ∀ X : Set F, F.ℬ X ⊆ X
 
-lemma Frame.refl [Frame.IsReflexive F] {X : Set F} : F.β X ⊆ X := IsReflexive.reflexive X
+lemma Frame.refl [Frame.IsReflexive F] {X : Set F} : F.ℬ X ⊆ X := IsReflexive.reflexive X
 
 lemma valid_axiomT_of_isReflexive [Frame.IsReflexive F] : F ⊧ Axioms.T (.atom 0) := by
   intro V x;

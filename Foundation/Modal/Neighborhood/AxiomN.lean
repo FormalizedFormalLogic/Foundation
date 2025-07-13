@@ -9,9 +9,9 @@ variable {F : Frame}
 
 /-- Most inside keeps most-insideness -/
 class Frame.ContainsUnit (F : Frame) : Prop where
-  contains_unit : ∀ x, Set.univ ∈ F.N x
+  contains_unit : ∀ x, Set.univ ∈ F.𝒩 x
 
-lemma Frame.contains_unit [Frame.ContainsUnit F] {x : F} : Set.univ ∈ F.N x := Frame.ContainsUnit.contains_unit x
+lemma Frame.contains_unit [Frame.ContainsUnit F] {x : F} : Set.univ ∈ F.𝒩 x := Frame.ContainsUnit.contains_unit x
 
 instance : Frame.simple_blackhole.ContainsUnit := ⟨by simp⟩
 
