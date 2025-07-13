@@ -167,6 +167,10 @@ noncomputable def q (w : SemitermVec V L k n) : SemitermVec V L (k + 1) (n + 1) 
 
 @[simp] lemma q_val_eq_qVec (w : SemitermVec V L k n) : w.q.val = qVec L w.val := by simp [q, qVec]
 
+@[simp] lemma q_vecHead (w : SemitermVec V L k n) : Matrix.vecHead w.q = Semiterm.bvar 0 := rfl
+
+@[simp] lemma q_vecTail (w : SemitermVec V L k n) : Matrix.vecTail w.q = Semiterm.bShift⨟ w := rfl
+
 end SemitermVec
 
 namespace Semiterm

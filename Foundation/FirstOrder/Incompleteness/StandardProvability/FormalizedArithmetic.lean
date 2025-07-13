@@ -25,9 +25,9 @@ namespace InternalArithmetic
 @[simp] lemma two_sub_one_eq_one : (2 : V) - 1 = 1 := by simp [←one_add_one_eq_two]
 @[simp] lemma three_sub_one_eq_two : (3 : V) - 1 = 2 := by simp [←two_add_one_eq_three]
 
-noncomputable abbrev bv {n : V} (x : V) (h : x < n := by simp) : Semiterm V ℒₒᵣ n := Semiterm.bv x h
+noncomputable abbrev bv (x : Fin n) : Semiterm V ℒₒᵣ n := Semiterm.bv x
 
-noncomputable abbrev fv {n : V} (x : V) : Semiterm V ℒₒᵣ n := Semiterm.fv x
+noncomputable abbrev fv (x : V) : Semiterm V ℒₒᵣ n := Semiterm.fv x
 
 local prefix:max "#'" => bv
 
@@ -35,7 +35,7 @@ local prefix:max "&'" => fv
 
 class InternalR₀Theory (T : InternalTheory V ℒₒᵣ) where
   refl : T.internalize V ⊢! (#' 0 ≐ #'0).all
-  replace (φ : Semiformula V ℒₒᵣ (0 + 1)) : T.internalize V ⊢! ((#'1 ≐ #'0) ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all
+  replace (φ : Semiformula V ℒₒᵣ (0 + 1)) : T ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ.substs ![#'1] ➝ φ.substs ![#'0])
   add (n m : V) : T.internalize V ⊢! (n + m : Semiterm V ℒₒᵣ 0) ≐ ↑(n + m)
   mul (n m : V) : T.internalize V ⊢! (n * m : Semiterm V ℒₒᵣ 0) ≐ ↑(n * m)
   ne {n m : V} : n ≠ m → T.internalize V ⊢! ↑n ≉ ↑m
@@ -66,17 +66,86 @@ section InternalR₀Theory
 
 instance : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
-#check Semiformula.cast
+lemma replace_aux_aux (φ : V) :
+    IsSemiformula ℒₒᵣ 1 φ →
+    T.Provable (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (imp ℒₒᵣ (substs ℒₒᵣ (^#1 ∷ 0) φ) (substs ℒₒᵣ (^#0 ∷ 0) φ))) := by {
+  apply IsFormula.sigma1_structural_induction₂
+  · sorry
+  case hall =>
+    intro p hp ih
+    let φ : Semiformula V ℒₒᵣ 2 := ⟨p, hp⟩
+    suffices T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (∀' φ).substs ![#'1] ➝ (∀' φ).substs ![#'0]) by
+      have := (internalize_TProvable_iff_provable (T := T)).mp this
+      simpa only [Nat.reduceAdd, Fin.isValue, Nat.succ_eq_add_one, -Semiformula.substs_all, val_all,
+        val_imp, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Nat.cast_one,
+        Nat.zero_mod, Nat.cast_zero, val_substs, SemitermVec.val_succ, Matrix.head_cons,
+        Matrix.tail_cons, SemitermVec.val_nil] using this
+    have ih : T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ.free1.substs ![#'1] ➝ φ.free1.substs ![#'0]) := by
+      apply (internalize_TProvable_iff_provable (T := T)).mpr
+      simpa using ih
+    apply TProof.all!; simp [Semiformula.free, ]
+    apply TProof.all!; simp [Semiformula.free]
+
+
+
+
+
+     }
+
+lemma replace_aux_aux (φ : V) :
+    IsSemiformula ℒₒᵣ 1 φ →
+    T.Provable (imp ℒₒᵣ (^&0 ^= ^&1) (imp ℒₒᵣ (substs ℒₒᵣ (^&0 ∷ 0) φ) (substs ℒₒᵣ (^&1 ∷ 0) φ))) := by {
+  apply IsFormula.sigma1_structural_induction₂
+  · sorry
+  case hall =>
+    intro p hp ih
+    let φ : Semiformula V ℒₒᵣ 2 := ⟨p, hp⟩
+    suffices T.internalize V ⊢! (&'0 ≐ &'1) ➝ (∀' φ).substs ![&'0] ➝ (∀' φ).substs ![&'1] by
+      have := (internalize_TProvable_iff_provable (T := T)).mp this
+      simpa only [Nat.succ_eq_add_one, Nat.reduceAdd, val_imp, val_equals,
+        Semiterm.fvar_val, val_all, val_substs, SemitermVec.val_succ,
+        Matrix.head_cons, Matrix.tail_cons, SemitermVec.val_nil] using this
+    have ih : T.internalize V ⊢! (&'0 ≐ &'1) ➝ φ.free1.substs ![&'0] ➝ φ.free1.substs ![&'1] := by {  }
+
+
+
+
+
+     }
+
+
+lemma replace_aux (ψ : Semiformula V ℒₒᵣ 1) (φ : Semiformula V ℒₒᵣ 2) : T.internalize V ⊢! (&'0 ≐ &'1) ➝ (∀' φ).substs ![&'0] ➝ (∀' φ).substs ![&'1] := by {
+  apply deduct'!
+  apply deduct!
+  simp []
+  apply TProof.generalize!
+  simp [Semiformula.free, Semiformula.shift_substs, SemitermVec.q]
+  simp [Semiformula.substs_substs]
+  let Φ : Semiformula V ℒₒᵣ 0 := ∀' ∀' ((#'1 ≐ #'0) ➝ ψ.substs ![#'1] ➝ ψ.substs ![#'0])
+  have : Φ.val = 0 := by { simp [Φ] }
+ }
+
+/--/
+lemma replace_aux (φ : Semiformula V ℒₒᵣ 1) : T.internalize V ⊢! (&'0 ≐ &'1) ➝ φ.substs ![&'0] ➝ φ.substs ![&'1] := by {
+
+ }
+
+
+lemma replace (φ : Semiformula V ℒₒᵣ 1) : T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ.substs ![#'1] ➝ φ.substs ![#'0]) := by {
+
+
+
+ }
 
 lemma replace (φ : Semiformula V ℒₒᵣ (0 + 1)) : T.internalize V ⊢! ((#'1 ≐ #'0) ➝ φ^/[(#'1).sing] ➝ φ^/[(#'0).sing]).all.all := by {  }
 
 @[simp] lemma eq_refl (t : Term V ℒₒᵣ) : T.internalize V ⊢! t ≐ t := by
   have : T ⊢! (“∀ x, x = x” : SyntacticFormula ℒₒᵣ) := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
-  have : T.internalize V ⊢! (#'0 ≐ #'0).all := by
-    have := internal_provable_of_outer_provable_arith (V := V) this
-    simpa [Semiformula.typedQuote_all (L := ℒₒᵣ)] using this
-  simpa [Semiformula.substs1] using TProof.specialize! this t
+  have : T.internalize V ⊢! ∀' (#'0 ≐ #'0) := by
+    simpa using internal_provable_of_outer_provable_arith this
+  simpa using TProof.specialize! this t
 
+/--/
 lemma numeral_add (n m : V) :
     T.internalize V ⊢! (num n + num m) ≐ num (n + m) := by {
   induction m using ISigma1.sigma1_pos_succ_induction
