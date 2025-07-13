@@ -48,7 +48,7 @@ instance : Hilbert.E ⪱ Hilbert.EN := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 1,
-        ν := λ w => ∅,
+        N := λ w => ∅,
         Val := λ w => Set.univ
       };
       use M, 0;

@@ -46,7 +46,7 @@ instance : Hilbert.E ⪱ Hilbert.EM := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 3,
-        ν := λ w =>
+        N := λ w =>
           match w with
           | 0 => {{1}}
           | 1 => {{0}, {0, 1}}

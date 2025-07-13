@@ -12,16 +12,16 @@ namespace Neighborhood
 structure Frame where
   World : Type
   [world_nonempty : Nonempty World]
-  ν : World → Set (Set World)
+  N : World → Set (Set World)
 attribute [simp] Frame.world_nonempty
 
 instance : CoeSort Frame Type := ⟨Frame.World⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
-@[reducible] def Frame.η (F : Frame) : Set F.World → Set F.World := λ X => { w | X ∈ F.ν w }
+@[reducible] def Frame.β (F : Frame) : Set F.World → Set F.World := λ X => { w | X ∈ F.N w }
 
 @[simp]
-lemma Frame.eq_η_ν {F : Frame} {X Y : Set F.World} : (F.η X) = Y ↔ (∀ x, X ∈ F.ν x ↔ x ∈ Y) := by
+lemma Frame.eq_β_N {F : Frame} {X Y : Set F.World} : (F.β X) = Y ↔ (∀ x, X ∈ F.N x ↔ x ∈ Y) := by
   constructor;
   . rintro rfl;
     tauto;
@@ -29,6 +29,9 @@ lemma Frame.eq_η_ν {F : Frame} {X Y : Set F.World} : (F.η X) = Y ↔ (∀ x, 
     ext x;
     apply h;
 
+def Frame.mk_β (World : Type) [Nonempty World] (β : Set World → Set World) : Frame where
+  World := World
+  N x := { X | x ∈ β X }
 
 section
 
@@ -57,7 +60,7 @@ def Model.truthset (M : Model) : Formula ℕ → Set M.World
 | .atom n => M.Val n
 | ⊥       => ∅
 | φ ➝ ψ  => (truthset M φ)ᶜ ∪ truthset M ψ
-| □φ      => M.η (truthset M φ)
+| □φ      => M.β (truthset M φ)
 
 namespace Model.truthset
 
@@ -65,20 +68,21 @@ variable {M : Model} {n : ℕ} {φ ψ : Formula ℕ}
 
 instance : CoeFun Model (λ M => Formula ℕ → Set M.World) := ⟨λ M => truthset M⟩
 
-@[simp] lemma eq_atom : M (.atom n) = M.Val n := rfl
-@[simp] lemma eq_bot  : M ⊥ = ∅ := rfl
-@[simp] lemma eq_top  : M ⊤ = Set.univ := by simp [truthset]
-@[simp] lemma eq_imp  : M (φ ➝ ψ) = (M φ)ᶜ ∪ (M ψ) := rfl
-@[simp] lemma eq_or   : M (φ ⋎ ψ) = (M φ) ∪ (M ψ) := by simp [truthset];
-@[simp] lemma eq_and  : M (φ ⋏ ψ) = (M φ) ∩ (M ψ) := by simp [truthset];
-@[simp] lemma eq_neg  : M (∼φ) = (M φ)ᶜ := by simp [truthset]
-@[simp] lemma eq_iff  : M (φ ⭤ ψ) = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ) := calc
+@[simp, grind] lemma eq_atom : M (.atom n) = M.Val n := rfl
+@[simp, grind] lemma eq_bot  : M ⊥ = ∅ := rfl
+@[simp, grind] lemma eq_top  : M ⊤ = Set.univ := by simp [truthset]
+@[simp, grind] lemma eq_imp  : M (φ ➝ ψ) = (M φ)ᶜ ∪ (M ψ) := rfl
+@[simp, grind] lemma eq_or   : M (φ ⋎ ψ) = (M φ) ∪ (M ψ) := by simp [truthset];
+@[simp, grind] lemma eq_and  : M (φ ⋏ ψ) = (M φ) ∩ (M ψ) := by simp [truthset];
+@[simp, grind] lemma eq_neg  : M (∼φ) = (M φ)ᶜ := by simp [truthset]
+@[simp, grind] lemma eq_iff  : M (φ ⭤ ψ) = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ) := calc
   M (φ ⭤ ψ) = M (φ ➝ ψ) ∩ (M (ψ ➝ φ))             := by simp [LogicalConnective.iff];
   _         = ((M φ)ᶜ ∪ (M ψ)) ∩ ((M ψ)ᶜ ∪ (M φ)) := by simp;
   _         = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)     := by tauto_set;
-@[simp] lemma eq_box  : M (□φ) = M.η (M φ) := rfl
-@[simp] lemma eq_dia  : M (◇φ) = (M.η (M φ)ᶜ)ᶜ := by simp [truthset]
+@[simp, grind] lemma eq_box  : M (□φ) = M.β (M φ) := rfl
+@[simp, grind] lemma eq_dia  : M (◇φ) = (M.β (M φ)ᶜ)ᶜ := by simp [truthset]
 
+@[grind]
 lemma eq_subst :
   letI U : Valuation M.toFrame := λ a => M ((atom a)⟦s⟧)
   M (φ⟦s⟧) = (⟨M.toFrame, U⟩ : Model) φ := by
@@ -102,24 +106,28 @@ protected instance semantics {M : Model} : Semantics (Formula ℕ) M.World := �
 
 variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 
-lemma def_imp : x ⊧ φ ➝ ψ ↔ (x ⊧ φ → x ⊧ ψ) := by
-  simp [Semantics.Realize, Satisfies];
-  tauto;
+@[grind] lemma def_top : x ⊧ ⊤ := by simp [Semantics.Realize, Satisfies];
+@[grind] lemma def_bot : ¬x ⊧ ⊥ := by simp [Semantics.Realize, Satisfies];
+@[grind] lemma def_neg : x ⊧ ∼φ ↔ ¬x ⊧ φ := by simp [Semantics.Realize, Satisfies];
+@[grind] lemma def_imp : x ⊧ φ ➝ ψ ↔ (x ⊧ φ → x ⊧ ψ) := by simp [Semantics.Realize, Satisfies]; tauto;
+@[grind] lemma def_and : x ⊧ φ ⋏ ψ ↔ (x ⊧ φ ∧ x ⊧ ψ) := by simp [Semantics.Realize, Satisfies];
+@[grind] lemma def_or  : x ⊧ φ ⋎ ψ ↔ (x ⊧ φ ∨ x ⊧ ψ) := by simp [Semantics.Realize, Satisfies];
 
-lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.ν x) := by simp [Semantics.Realize, Satisfies];
+@[grind] lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.N x) := by simp [Semantics.Realize, Satisfies];
+@[grind] lemma def_dia : x ⊧ ◇φ ↔ (M φ)ᶜ ∈ (M.N x)ᶜ := by simp [Semantics.Realize, Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
-  realize_top := by simp [Semantics.Realize, Satisfies]
-  realize_bot := by simp [Semantics.Realize, Satisfies]
-  realize_imp := def_imp
-  realize_not := by simp [Semantics.Realize, Satisfies]
-  realize_or  := by simp [Semantics.Realize, Satisfies]
-  realize_and := by simp [Semantics.Realize, Satisfies]
+  realize_top := by grind
+  realize_bot := by grind
+  realize_imp := by grind
+  realize_not := by grind
+  realize_or  := by grind
+  realize_and := by grind
 
-@[simp] protected lemma imply₁ : x ⊧ Axioms.Imply₁ φ ψ := by simp [Satisfies]; tauto;
-@[simp] protected lemma imply₂ : x ⊧ Axioms.Imply₂ φ ψ ξ := by simp [Satisfies]; tauto;
-@[simp] protected lemma elimContra : x ⊧ Axioms.ElimContra φ ψ := by simp [Satisfies]; tauto;
-protected lemma mdp (hφψ : x ⊧ φ ➝ ψ) (hψ : x ⊧ φ) : x ⊧ ψ := by simp_all [Satisfies];
+@[simp] protected lemma imply₁ : x ⊧ Axioms.Imply₁ φ ψ := by grind
+@[simp] protected lemma imply₂ : x ⊧ Axioms.Imply₂ φ ψ ξ := by grind
+@[simp] protected lemma elimContra : x ⊧ Axioms.ElimContra φ ψ := by grind
+protected lemma mdp (hφψ : x ⊧ φ ➝ ψ) (hψ : x ⊧ φ) : x ⊧ ψ := by grind
 
 lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Semantics.Realize, Satisfies];
 lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Semantics.Realize, Satisfies];
@@ -169,11 +177,11 @@ lemma valid_iff : M ⊧ φ ⭤ ψ ↔ (M φ = M ψ) := by
   . intro h x;
     simp [Satisfies, Set.mem_union, Set.mem_inter_iff, Set.mem_compl_iff, h];
 
-protected lemma imply₁ : M ⊧ Axioms.Imply₁ φ ψ := λ _ ↦ Satisfies.imply₁
+@[simp] protected lemma imply₁ : M ⊧ Axioms.Imply₁ φ ψ := λ _ ↦ Satisfies.imply₁
 
-protected lemma imply₂ : M ⊧ Axioms.Imply₂ φ ψ ξ := λ _ ↦ Satisfies.imply₂
+@[simp] protected lemma imply₂ : M ⊧ Axioms.Imply₂ φ ψ ξ := λ _ ↦ Satisfies.imply₂
 
-protected lemma elimContra : M ⊧ Axioms.ElimContra φ ψ := λ _ ↦ Satisfies.elimContra
+@[simp] protected lemma elimContra : M ⊧ Axioms.ElimContra φ ψ := λ _ ↦ Satisfies.elimContra
 
 protected lemma mdp (hφψ : M ⊧ φ ➝ ψ) (hψ : M ⊧ φ) : M ⊧ ψ := by
   intro x;
