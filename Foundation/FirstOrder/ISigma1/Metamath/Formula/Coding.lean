@@ -132,6 +132,61 @@ open InternalArithmetic
 @[simp] lemma typed_quote_nlt (t u : SyntacticSemiterm ℒₒᵣ n) :
     (⌜(“!!t ≮ !!u” : SyntacticSemiformula ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
+lemma ne_iff_val_ne (φ ψ : Metamath.Semiformula V L n) : φ ≠ ψ ↔ φ.val ≠ ψ.val := Iff.ne Semiformula.ext_iff
+
+lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁⌝ : Metamath.Semiformula V L n) = ⌜φ₂⌝ → φ₁ = φ₂ :=
+  match φ₁, φ₂ with
+  | rel R₁ v₁, rel R₂ v₂ => by
+    simp only [typed_quote_rel, Metamath.Semiformula.rel, Semiformula.mk.injEq, qqRel_inj,
+      Nat.cast_inj, rel.injEq, and_imp]
+    rintro rfl
+    simp only [quote_rel_inj, heq_eq_eq, true_and]
+    rintro rfl
+    suffices ((fun i ↦ ⌜v₁ i⌝) = fun i ↦ ⌜v₂ i⌝) → v₁ = v₂ by
+      simpa [←SemitermVec.val_inj]
+    intro h
+    ext i
+    exact Semiterm.typed_quote_inj (congr_fun h i)
+  | nrel R₁ v₁, nrel R₂ v₂ => by
+    simp only [typed_quote_nrel, Metamath.Semiformula.nrel, Semiformula.mk.injEq, qqNRel_inj,
+      Nat.cast_inj, nrel.injEq, and_imp]
+    rintro rfl
+    simp only [quote_rel_inj, heq_eq_eq, true_and]
+    rintro rfl
+    suffices ((fun i ↦ ⌜v₁ i⌝) = fun i ↦ ⌜v₂ i⌝) → v₁ = v₂ by
+      simpa [←SemitermVec.val_inj]
+    intro h
+    ext i
+    exact Semiterm.typed_quote_inj (congr_fun h i)
+  |         ⊤,         ⊤ => by simp
+  |         ⊥,         ⊥ => by simp
+  |   φ₁ ⋏ ψ₁,   φ₂ ⋏ ψ₂ => by
+    simp only [LCWQIsoGoedelQuote.and, Metamath.Semiformula.and_inj, and_inj, and_imp]
+    intro hφ hψ
+    refine ⟨typed_quote_inj hφ, typed_quote_inj hψ⟩
+  |   φ₁ ⋎ ψ₁,   φ₂ ⋎ ψ₂ => by
+    simp only [LCWQIsoGoedelQuote.or, Metamath.Semiformula.or_inj, or_inj, and_imp]
+    intro hφ hψ
+    refine ⟨typed_quote_inj hφ, typed_quote_inj hψ⟩
+  |     ∀' φ₁,     ∀' φ₂ => by
+    simp only [LCWQIsoGoedelQuote.all, Metamath.Semiformula.all_inj, all_inj]
+    exact typed_quote_inj
+  |     ∃' φ₁,     ∃' φ₂ => by
+    simp only [LCWQIsoGoedelQuote.ex, Metamath.Semiformula.ex_inj, ex_inj]
+    exact typed_quote_inj
+  | rel _ _, nrel _ _ | rel _ _, ⊤ | rel _ _, ⊥ | rel _ _, _ ⋏ _ | rel _ _, _ ⋎ _ | rel _ _, ∀' _ | rel _ _, ∃' _
+  | nrel _ _, rel _ _ | nrel _ _, ⊤ | nrel _ _, ⊥ | nrel _ _, _ ⋏ _ | nrel _ _, _ ⋎ _ | nrel _ _, ∀' _ | nrel _ _, ∃' _
+  | ⊤, rel _ _ | ⊤, nrel _ _ | ⊤, ⊥ | ⊤, _ ⋏ _ | ⊤, _ ⋎ _ | ⊤, ∀' _ | ⊤, ∃' _
+  | ⊥, rel _ _ | ⊥, nrel _ _ | ⊥, ⊤ | ⊥, _ ⋏ _ | ⊥, _ ⋎ _ | ⊥, ∀' _ | ⊥, ∃' _
+  | _ ⋏ _, rel _ _ | _ ⋏ _, nrel _ _ | _ ⋏ _, ⊤ | _ ⋏ _, ⊥ | _ ⋏ _, _ ⋎ _ | _ ⋏ _, ∀' _ | _ ⋏ _, ∃' _
+  | _ ⋎ _, rel _ _ | _ ⋎ _, nrel _ _ | _ ⋎ _, ⊤ | _ ⋎ _, ⊥ | _ ⋎ _, _ ⋏ _ | _ ⋎ _, ∀' _ | _ ⋎ _, ∃' _
+  | ∀' _, rel _ _ | ∀' _, nrel _ _ | ∀' _, ⊤ | ∀' _, ⊥ | ∀' _, _ ⋏ _ | ∀' _, _ ⋎ _ | ∀' _, ∃' _
+  | ∃' _, rel _ _ | ∃' _, nrel _ _ | ∃' _, ⊤ | ∃' _, ⊥ | ∃' _, _ ⋏ _ | ∃' _, _ ⋎ _ | ∃' _, ∀' _ => by
+    simp [ne_iff_val_ne, qqRel, qqNRel, qqVerum, qqFalsum, qqAnd, qqOr, qqAll, qqEx]
+
+@[simp] lemma typed_quote_inj_iff {φ₁ φ₂ : SyntacticSemiformula L n} :
+    (⌜φ₁⌝ : Metamath.Semiformula V L n) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := ⟨typed_quote_inj, by rintro rfl; rfl⟩
+
 noncomputable instance : GoedelQuote (SyntacticSemiformula L n) V where
   quote φ := (⌜φ⌝ : Metamath.Semiformula V L n).val
 
@@ -155,6 +210,9 @@ def quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : Met
 
 @[simp] lemma quote_ex (φ : SyntacticSemiformula L (n + 1)) : (⌜∃' φ⌝ : V) = ^∃ ⌜φ⌝ := rfl
 
+lemma quote_shift (φ : SyntacticSemiformula L n) :
+    (⌜Rewriting.shift φ⌝ : V) = Metamath.shift L ⌜φ⌝ := by simp [quote_def]
+
 lemma quote_eq_encode (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = ↑(encode φ) := by
   suffices (⌜φ⌝ : Metamath.Semiformula V L n).val = ↑(encode φ) from this
   induction φ using rec'
@@ -169,6 +227,9 @@ lemma quote_eq_encode (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = ↑(enc
 
 lemma coe_quote_eq_quote (φ : SyntacticSemiformula L n) : (↑(⌜φ⌝ : ℕ) : V) = ⌜φ⌝ := by
   simp [quote_eq_encode]
+
+@[simp] lemma quote_inj_iff {φ₁ φ₂ : SyntacticSemiformula L n} :
+    (⌜φ₁⌝ : V) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := by simp [quote_eq_encode]
 
 noncomputable instance : LCWQIsoGoedelQuote (Semisentence L) (Metamath.Semiformula V L) where
   gq n := ⟨fun σ ↦ (⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝)⟩

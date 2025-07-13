@@ -5,6 +5,7 @@ import Foundation.FirstOrder.ISigma1.Metamath.Formula.Basic
 import Foundation.FirstOrder.ISigma1.Metamath.Formula.Functions
 import Foundation.FirstOrder.ISigma1.Metamath.Formula.Iteration
 import Foundation.FirstOrder.ISigma1.Metamath.Formula.Typed
+import Foundation.FirstOrder.ISigma1.Metamath.Formula.Coding
 import Foundation.FirstOrder.ISigma1.Metamath.Proof.Theory
 import Foundation.FirstOrder.ISigma1.Metamath.Proof.Derivation
 import Foundation.FirstOrder.ISigma1.Metamath.Proof.Typed

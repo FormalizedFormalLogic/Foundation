@@ -90,6 +90,9 @@ noncomputable def shift (s : (Sequent V L)) : (Sequent V L) := ⟨setShift L s.v
 
 @[simp] lemma shift_insert : (insert φ Γ).shift = insert φ.shift Γ.shift := ext' <| by simp [shift]
 
+lemma insert_eq_of_mem (h : φ ∈ Γ) : insert φ Γ = Γ := by
+  ext; simp only [mem_insert_iff, or_iff_right_iff_imp]; rintro rfl; simpa
+
 end Sequent
 
 end typed_sequent
@@ -111,9 +114,14 @@ def _root_.LO.FirstOrder.Theory.internalize (T : Theory L) [T.Δ₁Definable] : 
 
 variable {V}
 
+omit [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] in
+@[simp] lemma internalize_theory (T : Theory L) [T.Δ₁Definable] : (T.internalize V).theory = T := rfl
+
 structure TDerivation (T : InternalTheory V L) (Γ : Sequent V L) where
   derivation : V
-  derivatioNOf : T.theory.DerivationOf derivation Γ.val
+  derivationOf : T.theory.DerivationOf derivation Γ.val
+
+attribute [simp] TDerivation.derivationOf
 
 scoped infix:45 " ⊢ᵈᵉʳ " => TDerivation
 
@@ -130,7 +138,7 @@ noncomputable def _root_.LO.FirstOrder.Theory.Derivable.toTDerivation (Γ : Sequ
   exact ⟨a, ha.1, d, hd⟩
 
 lemma TDerivation.toDerivable {Γ : (Sequent V L)} (d : T ⊢ᵈᵉʳ Γ) : T.theory.Derivable Γ.val :=
-  ⟨d.derivation, d.derivatioNOf⟩
+  ⟨d.derivation, d.derivationOf⟩
 
 lemma TProvable.iff_provable {σ : Formula V L} :
     T ⊢! σ ↔ T.theory.Provable σ.val := by
@@ -178,11 +186,11 @@ noncomputable def or (dpq : T ⊢ᵈᵉʳ insert φ (insert ψ Γ)) : T ⊢ᵈ�
 
 noncomputable def all {φ : Semiformula V L 1} (dp : T ⊢ᵈᵉʳ insert φ.free Γ.shift) : T ⊢ᵈᵉʳ insert (∀' φ) Γ :=
   Theory.Derivable.toTDerivation _ <| by
-    simpa using Theory.Derivable.all (by simpa using φ.isSemiformula) (by simpa using dp.toDerivable)
+    simpa using Theory.Derivable.all (by simp) (by simpa using dp.toDerivable)
 
 noncomputable def ex {φ : Semiformula V L 1} (t : Term V L) (dp : T ⊢ᵈᵉʳ insert (φ.substs ![t]) Γ) : T ⊢ᵈᵉʳ insert (∃' φ) Γ :=
   Theory.Derivable.toTDerivation _ <| by
-    simpa using Theory.Derivable.ex (by simpa using φ.isSemiformula) t.isSemiterm (by simpa using dp.toDerivable)
+    simpa using Theory.Derivable.ex (by simp) t.isSemiterm (by simpa using dp.toDerivable)
 
 noncomputable def wk (d : T ⊢ᵈᵉʳ Δ) (h : Δ ⊆ Γ) : T ⊢ᵈᵉʳ Γ :=
   Theory.Derivable.toTDerivation _ <| by
@@ -198,7 +206,7 @@ noncomputable def cut (d₁ : T ⊢ᵈᵉʳ insert φ Γ) (d₂ : T ⊢ᵈᵉʳ 
 
 def ofSubset (h : T ⊆ U) (d : T ⊢ᵈᵉʳ Γ) : U ⊢ᵈᵉʳ Γ where
   derivation := d.derivation
-  derivatioNOf := ⟨d.derivatioNOf.1, d.derivatioNOf.2.of_ss h⟩
+  derivationOf := ⟨d.derivationOf.1, d.derivationOf.2.of_ss h⟩
 
 noncomputable def cut' (d₁ : T ⊢ᵈᵉʳ insert φ Γ) (d₂ : T ⊢ᵈᵉʳ insert (∼φ) Δ) : T ⊢ᵈᵉʳ Γ ∪ Δ :=
   cut (φ := φ) (d₁.wk (by intro x; simp; tauto)) (d₂.wk (by intro x; simp; tauto))

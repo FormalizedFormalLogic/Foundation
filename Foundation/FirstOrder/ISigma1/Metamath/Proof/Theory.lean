@@ -42,6 +42,9 @@ instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ
 
 @[simp] lemma Δ₁Class.mem_iff' {φ : SyntacticFormula L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ φ ∈ T := Δ₁Class.mem_iff
 
+@[simp] lemma Δ₁Class.mem_iff'' {φ : SyntacticFormula L} : ((⌜φ⌝ : Metamath.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
+  Δ₁Class.mem_iff
+
 end LO.ISigma1.Metamath
 
 namespace LO.FirstOrder.Theory
