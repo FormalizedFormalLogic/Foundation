@@ -823,6 +823,9 @@ lemma ofSetEq {s s' : V} (h : ∀ x, x ∈ s' ↔ x ∈ s) (hd : T.Derivable s')
   have : s' = s := mem_ext h
   rcases this; exact hd
 
+lemma exchange {s p q : V} (h : T.Derivable (insert p <| insert q s)) :
+    T.Derivable (insert q <| insert p s) := h.ofSetEq (fun x ↦ by simp; tauto)
+
 lemma cut {s : V} (p) (hd₁ : T.Derivable (insert p s)) (hd₂ : T.Derivable (insert (neg L p) s)) :
     T.Derivable s := by
   rcases hd₁ with ⟨d₁, hd₁⟩; rcases hd₂ with ⟨d₂, hd₂⟩
@@ -922,5 +925,26 @@ lemma ex {p t s : V} (hp : IsSemiformula L 1 p) (ht : IsTerm L t)
   ex_m (p := p) (by simp) ht <| wk (by simp [hp, by simpa using dp.isFormulaSet]) (by intro x; simp; tauto) dp
 
 end Derivable
+
+lemma internal_provable_iff_internal_derivable {φ : V} : T.Provable φ ↔ T.Derivable (insert φ ∅ : V) := by
+  constructor
+  · rintro ⟨b, hb⟩
+    exact ⟨b, by simpa using hb⟩
+  · rintro ⟨b, hb⟩
+    exact ⟨b, by simpa using hb⟩
+
+alias ⟨Provable.toDerivable, Derivable.toProvable⟩ := internal_provable_iff_internal_derivable
+
+namespace Provable
+
+lemma conj (ps : V)
+    (ds : ∀ i < len ps, T.Provable ps.[i]) : T.Provable (^⋀ ps) :=
+  Derivable.toProvable <| Derivable.conj _ (by simp) fun i hi ↦ (ds i hi).toDerivable
+
+lemma disj (ps : V) {i} (hps : ∀ i < len ps, IsFormula L ps.[i])
+    (hi : i < len ps) (d : T.Provable ps.[i]) : T.Provable (^⋁ ps) :=
+  Derivable.toProvable <| Derivable.disj _ _ hps hi d.toDerivable
+
+end Provable
 
 end LO.FirstOrder.Theory

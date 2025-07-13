@@ -167,6 +167,9 @@ lemma quote_eq_encode (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = ↑(enc
   case hall => simp [encode_all, qqAll, coe_pair_eq_pair_coe, *]; simp [encode_eq_toNat]
   case hex => simp [encode_ex, qqEx, coe_pair_eq_pair_coe, *]; simp [encode_eq_toNat]
 
+lemma coe_quote_eq_quote (φ : SyntacticSemiformula L n) : (↑(⌜φ⌝ : ℕ) : V) = ⌜φ⌝ := by
+  simp [quote_eq_encode]
+
 noncomputable instance : LCWQIsoGoedelQuote (Semisentence L) (Metamath.Semiformula V L) where
   gq n := ⟨fun σ ↦ (⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝)⟩
   top := by simp

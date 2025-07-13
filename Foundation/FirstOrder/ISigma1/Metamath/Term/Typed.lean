@@ -58,6 +58,15 @@ variable {V L} {k n m : ℕ}
 lemma Semiterm.ext (t u : Semiterm V L n)
     (h : t.val = u.val) : t = u := by rcases t; rcases u; simpa using h
 
+@[simp] lemma Semiterm.isSemiterm_zero (t : Term V L) :
+   IsSemiterm L 0 t.val := by simpa using t.isSemiterm
+
+@[simp] lemma Semiterm.isSemiterm_one (t : Semiterm V L 1) :
+   IsSemiterm L 1 t.val := by simpa using t.isSemiterm
+
+@[simp] lemma Semiterm.isSemiterm_succ (t : Semiterm V L (n + 1)) :
+    IsSemiterm L (↑n + 1 : V) t.val := by simpa using t.isSemiterm
+
 @[simp] lemma Semiterm.isUTerm (t : Semiterm V L n) : IsUTerm L t.val := t.isSemiterm.isUTerm
 
 noncomputable def SemitermVec.val (v : SemitermVec V L k n) : V := Matrix.foldr (fun t w ↦ t.val ∷ w) 0 v
@@ -129,6 +138,9 @@ noncomputable def bShift (t : Semiterm V L n) : Semiterm V L (n + 1) :=
 noncomputable def substs (w : SemitermVec V L n m) (t : Semiterm V L n) : Semiterm V L m :=
   ⟨termSubst L w.val t.val, w.isSemitermVec.termSubst t.isSemiterm⟩
 
+noncomputable def free (t : Semiterm V L 1) : Semiterm V L 0 :=
+  t.shift.substs ![fvar 0]
+
 @[simp] lemma val_shift (t : Semiterm V L n) : t.shift.val = termShift L t.val := rfl
 @[simp] lemma val_bShift (t : Semiterm V L n) : t.bShift.val = termBShift L t.val := rfl
 @[simp] lemma val_substs (w : SemitermVec V L n m) (t : Semiterm V L n) : (t.substs w).val = termSubst L w.val t.val := rfl
@@ -185,6 +197,10 @@ namespace Semiterm
 
 @[simp] lemma substs_func (f : L.Func k) (w : SemitermVec V L n m) (v : SemitermVec V L k n) :
     (func f v).substs w = func f ((substs w)⨟ v) := by ext; simp [Semiterm.func, substs]
+
+@[simp] lemma free_bvar (z : Fin 1) : free (bvar z : Semiterm V L 1) = fvar 0 := by simp [free]
+
+@[simp] lemma free_fvar (x : V) : free (Semiterm.fvar x : Semiterm V L 1) = fvar (x + 1) := by simp [free]
 
 @[simp] lemma bShift_substs_q (t : Semiterm V L n) (w : SemitermVec V L n m) :
     t.bShift.substs w.q = (t.substs w).bShift := by
@@ -297,6 +313,14 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
 
 @[simp] lemma fvFree_mul (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ * t₂).FVFree ↔ t₁.FVFree ∧ t₂.FVFree := by simp [Semiterm.FVFree.iff]
+
+@[simp] lemma free_add (t₁ t₂ : Semiterm V ℒₒᵣ 1) : (t₁ + t₂).free = t₁.free + t₂.free := by
+  simp [Semiterm.free]
+
+@[simp] lemma free_mul (t₁ t₂ : Semiterm V ℒₒᵣ 1) : (t₁ * t₂).free = t₁.free * t₂.free := by
+  simp [Semiterm.free]
+
+@[simp] lemma free_numeral (x : V) : (↑x : Semiterm V ℒₒᵣ 1).free = ↑x := by simp [Semiterm.free]
 
 /-
 lemma replace {P : α → isSemiterm} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx

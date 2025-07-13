@@ -16,32 +16,9 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 namespace ISigma1.Metamath
 
-section typed_formula
-
-noncomputable abbrev Semiformula.substs1 (p : Semiformula V L (0 + 1)) (t : Term V L) : Formula V L := p.substs t.sing
-
-noncomputable abbrev Semiformula.free (p : Semiformula V L (0 + 1)) : Formula V L := p.shift.substs1 (Semiterm.fvar L 0)
-
-@[simp] lemma Semiformula.val_substs1 (p : Semiformula V L (0 + 1)) (t : Term V L) :
-    (p.substs1 t).val = Metamath.substs L ?[t.val] p.val := by simp [substs1, substs]
-
-@[simp] lemma Semiformula.val_free (p : Semiformula V L (0 + 1)) :
-    p.free.val = Metamath.substs L ?[^&0] (Metamath.shift L p.val) := by simp [free, substs1, substs, shift]
-
-@[simp] lemma substs1_neg (p : Semiformula V L (0 + 1)) (t : Term V L) :
-    (∼p).substs1 t = ∼(p.substs1 t) := by simp [Semiformula.substs1]
-
-@[simp] lemma substs1_all (p : Semiformula V L (0 + 1 + 1)) (t : Term V L) :
-    p.all.substs1 t = (p.substs t.sing.q).all := by simp [Semiformula.substs1]
-
-@[simp] lemma substs1_ex (p : Semiformula V L (0 + 1 + 1)) (t : Term V L) :
-    p.ex.substs1 t = (p.substs t.sing.q).ex := by simp [Semiformula.substs1]
-
-end typed_formula
-
 section typed_theory
 
-abbrev tmem (p : Formula V L) (T : Theory L) [T.Δ₁Definable] : Prop := p.val ∈ T.Δ₁Class
+abbrev tmem (φ : Formula V L) (T : Theory L) [T.Δ₁Definable] : Prop := φ.val ∈ T.Δ₁Class
 
 scoped infix:50 " ∈' " => tmem
 
@@ -61,13 +38,13 @@ variable {V L}
 
 instance : EmptyCollection (Sequent V L) := ⟨⟨∅, by simp⟩⟩
 
-noncomputable instance : Singleton (Formula V L) (Sequent V L) := ⟨fun p ↦ ⟨{p.val}, by simp⟩⟩
+noncomputable instance : Singleton (Formula V L) (Sequent V L) := ⟨fun φ ↦ ⟨{φ.val}, by simp⟩⟩
 
-noncomputable instance : Insert (Formula V L) (Sequent V L) := ⟨fun p Γ ↦ ⟨insert p.val Γ.val, by simp⟩⟩
+noncomputable instance : Insert (Formula V L) (Sequent V L) := ⟨fun φ Γ ↦ ⟨insert φ.val Γ.val, by simp⟩⟩
 
 noncomputable instance : Union (Sequent V L) := ⟨fun Γ Δ ↦ ⟨Γ.val ∪ Δ.val, by simp⟩⟩
 
-instance : Membership (Formula V L) (Sequent V L) := ⟨fun Γ p ↦ (p.val ∈ Γ.val)⟩
+instance : Membership (Formula V L) (Sequent V L) := ⟨fun Γ φ ↦ (φ.val ∈ Γ.val)⟩
 
 instance : HasSubset (Sequent V L) := ⟨(·.val ⊆ ·.val)⟩
 
@@ -75,27 +52,27 @@ scoped infixr:50 " ⫽ " => Insert.insert
 
 namespace Sequent
 
-variable {Γ Δ : (Sequent V L)} {p q : Formula V L}
+variable {Γ Δ : Sequent V L} {φ ψ : Formula V L}
 
-lemma mem_iff : p ∈ Γ ↔ p.val ∈ Γ.val := iff_of_eq rfl
+lemma mem_iff : φ ∈ Γ ↔ φ.val ∈ Γ.val := iff_of_eq rfl
 
 lemma subset_iff : Γ ⊆ Δ ↔ Γ.val ⊆ Δ.val := iff_of_eq rfl
 
 @[simp] lemma val_empty : (∅ : (Sequent V L)).val = ∅ := rfl
 
-@[simp] lemma val_singleton (p : Formula V L) : ({p} : (Sequent V L)).val = {p.val} := rfl
+@[simp] lemma val_singleton (φ : Formula V L) : ({φ} : (Sequent V L)).val = {φ.val} := rfl
 
-@[simp] lemma val_insert (p : Formula V L) (Γ : (Sequent V L)) : (insert p Γ).val = insert p.val Γ.val := rfl
+@[simp] lemma val_insert (φ : Formula V L) (Γ : (Sequent V L)) : (insert φ Γ).val = insert φ.val Γ.val := rfl
 
 @[simp] lemma val_union (Γ Δ : (Sequent V L)) : (Γ ∪ Δ).val = Γ.val ∪ Δ.val := rfl
 
-@[simp] lemma not_mem_empty (p : Formula V L) : p ∉ (∅ : (Sequent V L)) := by simp [mem_iff]
+@[simp] lemma not_mem_empty (φ : Formula V L) : φ ∉ (∅ : (Sequent V L)) := by simp [mem_iff]
 
-@[simp] lemma mem_singleton_iff : p ∈ ({q} : (Sequent V L)) ↔ p = q := by simp [mem_iff, Semiformula.val_inj]
+@[simp] lemma mem_singleton_iff : φ ∈ ({ψ} : (Sequent V L)) ↔ φ = ψ := by simp [mem_iff, Semiformula.val_inj]
 
-@[simp] lemma mem_insert_iff : p ∈ insert q Γ ↔ p = q ∨ p ∈ Γ := by simp [mem_iff, Semiformula.val_inj]
+@[simp] lemma mem_insert_iff : φ ∈ insert ψ Γ ↔ φ = ψ ∨ φ ∈ Γ := by simp [mem_iff, Semiformula.val_inj]
 
-@[simp] lemma mem_union_iff : p ∈ Γ ∪ Δ ↔ p ∈ Γ ∨ p ∈ Δ := by simp [mem_iff]
+@[simp] lemma mem_union_iff : φ ∈ Γ ∪ Δ ↔ φ ∈ Γ ∨ φ ∈ Δ := by simp [mem_iff]
 
 @[ext] lemma ext (h : ∀ x, x ∈ Γ ↔ x ∈ Δ) : Γ = Δ := by
   rcases Γ with ⟨Γ, hΓ⟩; rcases Δ with ⟨Δ, hΔ⟩
@@ -111,7 +88,7 @@ noncomputable def shift (s : (Sequent V L)) : (Sequent V L) := ⟨setShift L s.v
 
 @[simp] lemma shift_empty : (∅ : (Sequent V L)).shift = ∅ := ext' <| by simp [shift]
 
-@[simp] lemma shift_insert : (insert p Γ).shift = insert p.shift Γ.shift := ext' <| by simp [shift]
+@[simp] lemma shift_insert : (insert φ Γ).shift = insert φ.shift Γ.shift := ext' <| by simp [shift]
 
 end Sequent
 
@@ -140,7 +117,7 @@ structure TDerivation (T : InternalTheory V L) (Γ : Sequent V L) where
 
 scoped infix:45 " ⊢ᵈᵉʳ " => TDerivation
 
-def TProof (T : InternalTheory V L) (p : Formula V L) := T ⊢ᵈᵉʳ insert p ∅
+def TProof (T : InternalTheory V L) (φ : Formula V L) := T ⊢ᵈᵉʳ insert φ ∅
 
 instance : Entailment (Formula V L) (InternalTheory V L) := ⟨TProof⟩
 
@@ -163,45 +140,49 @@ lemma TProvable.iff_provable {σ : Formula V L} :
   · intro h
     exact ⟨Theory.Derivable.toTDerivation _ <| by simpa [←singleton_eq_insert] using h⟩
 
+alias ⟨toProvable, _root_.LO.FirstOrder.Theory.Provable.toTProvable⟩ := TProvable.iff_provable
+
+def proof_to_tDerivation {σ : Formula V L} : T ⊢ σ → T ⊢ᵈᵉʳ insert σ ∅ := fun x ↦ x
+
 lemma internalize_TProvable_iff_provable {T : Theory L} [T.Δ₁Definable] {σ : Formula V L} :
     T.internalize V ⊢! σ ↔ T.Provable σ.val := TProvable.iff_provable
 
-def TDerivation.toTProof {p} (d : T ⊢ᵈᵉʳ insert p ∅) : T ⊢ p := d
+def TDerivation.toTProof {φ} (d : T ⊢ᵈᵉʳ insert φ ∅) : T ⊢ φ := d
 
 def TDerivation.of_eq (d : T ⊢ᵈᵉʳ Γ) (e : Γ = Δ) : T ⊢ᵈᵉʳ Δ := by rcases e; exact d
 
-def TProof.toTDerivation {p} (d : T ⊢ p) : T ⊢ᵈᵉʳ insert p ∅ := d
+def TProof.toTDerivation {φ} (d : T ⊢ φ) : T ⊢ᵈᵉʳ insert φ ∅ := d
 
 namespace TDerivation
 
-variable {Γ Δ : (Sequent V L)} {p q p₀ p₁ p₂ p₃ p₄ : Formula V L}
+variable {Γ Δ : (Sequent V L)} {φ ψ p₀ p₁ p₂ p₃ p₄ : Formula V L}
 
-noncomputable def byAxm (p) (h : p ∈' T.theory) (hΓ : p ∈ Γ) : T ⊢ᵈᵉʳ Γ :=
+noncomputable def byAxm (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) : T ⊢ᵈᵉʳ Γ :=
   Theory.Derivable.toTDerivation _
     <| Theory.Derivable.by_axm (by simp) _ hΓ h
 
-noncomputable def em (p) (h : p ∈ Γ := by simp) (hn : ∼p ∈ Γ := by simp) : T ⊢ᵈᵉʳ Γ :=
+noncomputable def em (φ) (h : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : T ⊢ᵈᵉʳ Γ :=
   Theory.Derivable.toTDerivation _
-    <| Theory.Derivable.em (by simp) p.val (Sequent.mem_iff.mp h) (by simpa using Sequent.mem_iff.mp hn)
+    <| Theory.Derivable.em (by simp) φ.val (Sequent.mem_iff.mp h) (by simpa using Sequent.mem_iff.mp hn)
 
 noncomputable def verum (h : ⊤ ∈ Γ := by simp) : T ⊢ᵈᵉʳ Γ :=
   Theory.Derivable.toTDerivation _
     <| Theory.Derivable.verum (by simp) (by simpa using Sequent.mem_iff.mp h)
 
-noncomputable def and (dp : T ⊢ᵈᵉʳ insert p Γ) (dq : T ⊢ᵈᵉʳ insert q Γ) : T ⊢ᵈᵉʳ insert (p ⋏ q) Γ :=
+noncomputable def and (dp : T ⊢ᵈᵉʳ insert φ Γ) (dq : T ⊢ᵈᵉʳ insert ψ Γ) : T ⊢ᵈᵉʳ insert (φ ⋏ ψ) Γ :=
   Theory.Derivable.toTDerivation _
     <| by simpa using Theory.Derivable.and (by simpa using dp.toDerivable) (by simpa using dq.toDerivable)
 
-noncomputable def or (dpq : T ⊢ᵈᵉʳ insert p (insert q Γ)) : T ⊢ᵈᵉʳ insert (p ⋎ q) Γ :=
+noncomputable def or (dpq : T ⊢ᵈᵉʳ insert φ (insert ψ Γ)) : T ⊢ᵈᵉʳ insert (φ ⋎ ψ) Γ :=
   Theory.Derivable.toTDerivation _ <| by simpa using Theory.Derivable.or (by simpa using dpq.toDerivable)
 
-noncomputable def all {p : Semiformula V L (0 + 1)} (dp : T ⊢ᵈᵉʳ insert p.free Γ.shift) : T ⊢ᵈᵉʳ insert p.all Γ :=
+noncomputable def all {φ : Semiformula V L 1} (dp : T ⊢ᵈᵉʳ insert φ.free Γ.shift) : T ⊢ᵈᵉʳ insert (∀' φ) Γ :=
   Theory.Derivable.toTDerivation _ <| by
-    simpa using Theory.Derivable.all (by simpa using p.prop) (by simpa using dp.toDerivable)
+    simpa using Theory.Derivable.all (by simpa using φ.isSemiformula) (by simpa using dp.toDerivable)
 
-noncomputable def ex {p : Semiformula V L (0 + 1)} (t : Term V L) (dp : T ⊢ᵈᵉʳ insert (p.substs1 t) Γ) : T ⊢ᵈᵉʳ insert p.ex Γ :=
+noncomputable def ex {φ : Semiformula V L 1} (t : Term V L) (dp : T ⊢ᵈᵉʳ insert (φ.substs ![t]) Γ) : T ⊢ᵈᵉʳ insert (∃' φ) Γ :=
   Theory.Derivable.toTDerivation _ <| by
-    simpa using Theory.Derivable.ex (by simpa using p.prop) t.prop (by simpa using dp.toDerivable)
+    simpa using Theory.Derivable.ex (by simpa using φ.isSemiformula) t.isSemiterm (by simpa using dp.toDerivable)
 
 noncomputable def wk (d : T ⊢ᵈᵉʳ Δ) (h : Δ ⊆ Γ) : T ⊢ᵈᵉʳ Γ :=
   Theory.Derivable.toTDerivation _ <| by
@@ -211,34 +192,23 @@ noncomputable def shift (d : T ⊢ᵈᵉʳ Γ) : T ⊢ᵈᵉʳ Γ.shift :=
   Theory.Derivable.toTDerivation _ <| by
     simpa using Theory.Derivable.shift (by simpa using d.toDerivable)
 
-noncomputable def cut (d₁ : T ⊢ᵈᵉʳ insert p Γ) (d₂ : T ⊢ᵈᵉʳ insert (∼p) Γ) : T ⊢ᵈᵉʳ Γ :=
+noncomputable def cut (d₁ : T ⊢ᵈᵉʳ insert φ Γ) (d₂ : T ⊢ᵈᵉʳ insert (∼φ) Γ) : T ⊢ᵈᵉʳ Γ :=
   Theory.Derivable.toTDerivation _ <| by
-    simpa using Theory.Derivable.cut p.val (by simpa using d₁.toDerivable) (by simpa using d₂.toDerivable)
+    simpa using Theory.Derivable.cut φ.val (by simpa using d₁.toDerivable) (by simpa using d₂.toDerivable)
 
 def ofSubset (h : T ⊆ U) (d : T ⊢ᵈᵉʳ Γ) : U ⊢ᵈᵉʳ Γ where
   derivation := d.derivation
   derivatioNOf := ⟨d.derivatioNOf.1, d.derivatioNOf.2.of_ss h⟩
 
-noncomputable def cut' (d₁ : T ⊢ᵈᵉʳ insert p Γ) (d₂ : T ⊢ᵈᵉʳ insert (∼p) Δ) : T ⊢ᵈᵉʳ Γ ∪ Δ :=
-  cut (p := p) (d₁.wk (by intro x; simp; tauto)) (d₂.wk (by intro x; simp; tauto))
+noncomputable def cut' (d₁ : T ⊢ᵈᵉʳ insert φ Γ) (d₂ : T ⊢ᵈᵉʳ insert (∼φ) Δ) : T ⊢ᵈᵉʳ Γ ∪ Δ :=
+  cut (φ := φ) (d₁.wk (by intro x; simp; tauto)) (d₂.wk (by intro x; simp; tauto))
 
-noncomputable def conj (ps : SemiformulaVec L 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ᵈᵉʳ insert (ps.nth i hi) Γ) : T ⊢ᵈᵉʳ insert ps.conj Γ := by
-  have : ∀ i < len ps.val, T.theory.Derivable (insert (ps.val.[i]) Γ.val) := by intro i hi; simpa using (ds i hi).toDerivable
-  have : T.theory.Derivable (insert (^⋀ ps.val) Γ.val) := Theory.Derivable.conj ps.val (by simp) this
-  exact Theory.Derivable.toTDerivation _ (by simpa using this)
-
-noncomputable def disj (ps : SemiformulaVec L 0) {i} (hi : i < len ps.val)
-    (d : T ⊢ᵈᵉʳ insert (ps.nth i hi) Γ) : T ⊢ᵈᵉʳ insert ps.disj Γ := by
-  have : T.theory.Derivable (insert (^⋁ ps.val) Γ.val) :=
-    Theory.Derivable.disj ps.val Γ.val ps.prop hi (by simpa using d.toDerivable)
-  apply Theory.Derivable.toTDerivation _ (by simpa using this)
-
-noncomputable def modusPonens (dpq : T ⊢ᵈᵉʳ insert (p ➝ q) Γ) (dp : T ⊢ᵈᵉʳ insert p Γ) : T ⊢ᵈᵉʳ insert q Γ := by
-  let d : T ⊢ᵈᵉʳ insert (p ➝ q) (insert q Γ) := dpq.wk (insert_subset_insert_of_subset _ <| by simp)
-  let b : T ⊢ᵈᵉʳ insert (∼(p ➝ q)) (insert q Γ) := by
-    simp only [Semiformula.imp_def, Semiformula.neg_or, Semiformula.neg_neg]
+noncomputable def modusPonens (dpq : T ⊢ᵈᵉʳ insert (φ ➝ ψ) Γ) (dp : T ⊢ᵈᵉʳ insert φ Γ) : T ⊢ᵈᵉʳ insert ψ Γ := by
+  let d : T ⊢ᵈᵉʳ insert (φ ➝ ψ) (insert ψ Γ) := dpq.wk (insert_subset_insert_of_subset _ <| by simp)
+  let b : T ⊢ᵈᵉʳ insert (∼(φ ➝ ψ)) (insert ψ Γ) := by
+    simp only [Semiformula.imp_def, DeMorgan.or, DeMorgan.neg]
     exact and (dp.wk (insert_subset_insert_of_subset _ <| by simp))
-      (em q (by simp) (by simp))
+      (em ψ (by simp) (by simp))
   exact cut d b
 
 def ofEq (d : T ⊢ᵈᵉʳ Γ) (h : Γ = Δ) : T ⊢ᵈᵉʳ Δ := h ▸ d
@@ -252,62 +222,62 @@ def rotate₂ (d : T ⊢ᵈᵉʳ p₀ ⫽ p₁ ⫽ p₂ ⫽ Γ) : T ⊢ᵈᵉʳ 
 def rotate₃ (d : T ⊢ᵈᵉʳ p₀ ⫽ p₁ ⫽ p₂ ⫽ p₃ ⫽ Γ) : T ⊢ᵈᵉʳ p₃ ⫽ p₁ ⫽ p₂ ⫽ p₀ ⫽ Γ :=
   ofEq d (by ext x; simp; tauto)
 
-noncomputable def orInv (d : T ⊢ᵈᵉʳ p ⋎ q ⫽ Γ) : T ⊢ᵈᵉʳ p ⫽ q ⫽ Γ := by
-  have b : T ⊢ᵈᵉʳ p ⋎ q ⫽ p ⫽ q ⫽ Γ := wk d (by intro x; simp; tauto)
-  have : T ⊢ᵈᵉʳ ∼(p ⋎ q) ⫽ p ⫽ q ⫽ Γ := by
-    simp only [Semiformula.neg_or]
-    apply and (em p) (em q)
+noncomputable def orInv (d : T ⊢ᵈᵉʳ φ ⋎ ψ ⫽ Γ) : T ⊢ᵈᵉʳ φ ⫽ ψ ⫽ Γ := by
+  have b : T ⊢ᵈᵉʳ φ ⋎ ψ ⫽ φ ⫽ ψ ⫽ Γ := wk d (by intro x; simp; tauto)
+  have : T ⊢ᵈᵉʳ ∼(φ ⋎ ψ) ⫽ φ ⫽ ψ ⫽ Γ := by
+    simp only [DeMorgan.or]
+    apply and (em φ) (em ψ)
   exact cut b this
 
-noncomputable def specialize {p : Semiformula V L (0 + 1)} (b : T ⊢ᵈᵉʳ p.all ⫽ Γ) (t : Term V L) : T ⊢ᵈᵉʳ p.substs1 t ⫽ Γ := by
-  apply TDerivation.cut (p := p.all)
+noncomputable def specialize {φ : Semiformula V L 1} (b : T ⊢ᵈᵉʳ (∀' φ) ⫽ Γ) (t : Term V L) : T ⊢ᵈᵉʳ φ.substs ![t] ⫽ Γ := by
+  apply TDerivation.cut (φ := (∀' φ))
   · exact (TDerivation.wk b <| by intro x; simp; tauto)
   · rw [Semiformula.neg_all]
     apply TDerivation.ex t
-    apply TDerivation.em (p.substs1 t)
+    apply TDerivation.em (φ.substs ![t])
 
 end TDerivation
 
 namespace TProof
 
-variable {T U : InternalTheory V L} {p q : Formula V L}
+variable {T U : InternalTheory V L} {φ ψ : Formula V L}
 
 /-- Condition D2 -/
-noncomputable def modusPonens (d : T ⊢ p ➝ q) (b : T ⊢ p) : T ⊢ q := TDerivation.modusPonens d b
+noncomputable def modusPonens (d : T ⊢ φ ➝ ψ) (b : T ⊢ φ) : T ⊢ ψ := TDerivation.modusPonens d b
 
-noncomputable def byAxm {p : Formula V L} (h : p ∈' T.theory) : T ⊢ p := TDerivation.byAxm p h (by simp)
+noncomputable def byAxm {φ : Formula V L} (h : φ ∈' T.theory) : T ⊢ φ := TDerivation.byAxm φ h (by simp)
 
-noncomputable def ofSubset (h : T ⊆ U) {p : Formula V L} : T ⊢ p → U ⊢ p := TDerivation.ofSubset h
+noncomputable def ofSubset (h : T ⊆ U) {φ : Formula V L} : T ⊢ φ → U ⊢ φ := TDerivation.ofSubset h
 
-lemma of_subset (h : T ⊆ U) {p : Formula V L} : T ⊢! p → U ⊢! p := by
+lemma of_subset (h : T ⊆ U) {φ : Formula V L} : T ⊢! φ → U ⊢! φ := by
   rintro ⟨b⟩; exact ⟨ofSubset h b⟩
 
 noncomputable instance : Entailment.ModusPonens T := ⟨modusPonens⟩
 
 noncomputable instance : Entailment.NegationEquiv T where
-  negEquiv p := by
-    suffices T ⊢ (p ⋎ ∼p ⋎ ⊥) ⋏ (p ⋏ ⊤ ⋎ ∼p) by
+  negEquiv φ := by
+    suffices T ⊢ (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) by
       simpa [Axioms.NegEquiv, LO.LogicalConnective.iff, Semiformula.imp_def]
     apply TDerivation.and
     · apply TDerivation.or
       apply TDerivation.rotate₁
       apply TDerivation.or
-      exact TDerivation.em p
+      exact TDerivation.em φ
     · apply TDerivation.or
       apply TDerivation.and
-      · exact TDerivation.em p
+      · exact TDerivation.em φ
       · exact TDerivation.verum
 
 noncomputable instance : Entailment.Minimal T where
   verum := TDerivation.toTProof <| TDerivation.verum
-  imply₁ (p q) := by
+  imply₁ (φ ψ) := by
     simp only [Axioms.Imply₁, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
-    exact TDerivation.em p
-  imply₂ (p q r) := by
-    simp only [Axioms.Imply₂, Semiformula.imp_def, Semiformula.neg_or, Semiformula.neg_neg]
+    exact TDerivation.em φ
+  imply₂ (φ ψ r) := by
+    simp only [Axioms.Imply₂, Semiformula.imp_def, DeMorgan.or, DeMorgan.neg]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
@@ -315,47 +285,47 @@ noncomputable instance : Entailment.Minimal T where
     apply TDerivation.or
     apply TDerivation.rotate₂
     apply TDerivation.and
-    · exact TDerivation.em p
+    · exact TDerivation.em φ
     · apply TDerivation.rotate₃
       apply TDerivation.and
-      · exact TDerivation.em p
+      · exact TDerivation.em φ
       · apply TDerivation.and
-        · exact TDerivation.em q
+        · exact TDerivation.em ψ
         · exact TDerivation.em r
-  and₁ (p q) := by
-    simp only [Axioms.AndElim₁, Semiformula.imp_def, Semiformula.neg_and]
+  and₁ (φ ψ) := by
+    simp only [Axioms.AndElim₁, Semiformula.imp_def, DeMorgan.and]
     apply TDerivation.or
     apply TDerivation.or
-    exact TDerivation.em p
-  and₂ (p q) := by
-    simp only [Axioms.AndElim₂, Semiformula.imp_def, Semiformula.neg_and]
+    exact TDerivation.em φ
+  and₂ (φ ψ) := by
+    simp only [Axioms.AndElim₂, Semiformula.imp_def, DeMorgan.and]
     apply TDerivation.or
     apply TDerivation.or
-    exact TDerivation.em q
-  and₃ (p q) := by
+    exact TDerivation.em ψ
+  and₃ (φ ψ) := by
     simp only [Axioms.AndInst, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.and
-    · exact TDerivation.em p
-    · exact TDerivation.em q
-  or₁ (p q) := by
+    · exact TDerivation.em φ
+    · exact TDerivation.em ψ
+  or₁ (φ ψ) := by
     simp only [Axioms.OrInst₁, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
-    exact TDerivation.em p
-  or₂ (p q) := by
-    suffices T ⊢ ∼q ⋎ p ⋎ q by
+    exact TDerivation.em φ
+  or₂ (φ ψ) := by
+    suffices T ⊢ ∼ψ ⋎ φ ⋎ ψ by
       simpa [Axioms.OrInst₂, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
     apply TDerivation.or
-    exact TDerivation.em q
-  or₃ (p q r) := by
-    suffices T ⊢ p ⋏ ∼r ⋎ q ⋏ ∼r ⋎ ∼p ⋏ ∼q ⋎ r by
+    exact TDerivation.em ψ
+  or₃ (φ ψ r) := by
+    suffices T ⊢ φ ⋏ ∼r ⋎ ψ ⋏ ∼r ⋎ ∼φ ⋏ ∼ψ ⋎ r by
       simpa [Axioms.OrElim, Semiformula.imp_def]
     apply TDerivation.or
     apply TDerivation.rotate₁
@@ -365,58 +335,33 @@ noncomputable instance : Entailment.Minimal T where
     apply TDerivation.and
     · apply TDerivation.rotate₃
       apply TDerivation.and
-      · exact TDerivation.em p
+      · exact TDerivation.em φ
       · exact TDerivation.em r
     · apply TDerivation.rotate₂
       apply TDerivation.and
-      · exact TDerivation.em q
+      · exact TDerivation.em ψ
       · exact TDerivation.em r
 
 noncomputable instance : Entailment.Cl T where
-  dne p := by simpa [Axioms.DNE, Semiformula.imp_def] using TDerivation.or (TDerivation.em p)
+  dne φ := by simpa [Axioms.DNE, Semiformula.imp_def] using TDerivation.or (TDerivation.em φ)
 
-noncomputable def exIntro (p : Semiformula V L (0 + 1)) (t : Term V L) (b : T ⊢ p.substs1 t) : T ⊢ p.ex := TDerivation.ex t b
+noncomputable def exIntro (φ : Semiformula V L 1) (t : Term V L) (b : T ⊢ φ.substs ![t]) : T ⊢ (∃' φ) := TDerivation.ex t b
 
-lemma ex_intro! (p : Semiformula V L (0 + 1)) (t : Term V L) (b : T ⊢! p.substs1 t) : T ⊢! p.ex := ⟨exIntro _ t b.get⟩
+lemma ex_intro! (φ : Semiformula V L 1) (t : Term V L) (b : T ⊢! φ.substs ![t]) : T ⊢! (∃' φ) := ⟨exIntro _ t b.get⟩
 
-noncomputable def specialize {p : Semiformula V L (0 + 1)} (b : T ⊢ p.all) (t : Term V L) : T ⊢ p.substs1 t := TDerivation.specialize b t
+noncomputable def specialize {φ : Semiformula V L 1} (b : T ⊢ (∀' φ)) (t : Term V L) : T ⊢ φ.substs ![t] := TDerivation.specialize b t
 
-lemma specialize! {p : Semiformula V L (0 + 1)} (b : T ⊢! p.all) (t : Term V L) : T ⊢! p.substs1 t := ⟨TDerivation.specialize b.get t⟩
+lemma specialize! {φ : Semiformula V L 1} (b : T ⊢! (∀' φ)) (t : Term V L) : T ⊢! φ.substs ![t] := ⟨TDerivation.specialize b.get t⟩
 
-noncomputable def conj (ps : SemiformulaVec L 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth i hi) : T ⊢ ps.conj := TDerivation.conj ps ds
+noncomputable def shift {φ : Formula V L} (d : T ⊢ φ) : T ⊢ φ.shift := by simpa using TDerivation.shift d
 
-lemma conj! (ps : SemiformulaVec L 0) (ds : ∀ i, (hi : i < len ps.val) → T ⊢! ps.nth i hi) : T ⊢! ps.conj := ⟨conj ps fun i hi ↦ (ds i hi).get⟩
+lemma shift! {φ : Formula V L} (d : T ⊢! φ) : T ⊢! φ.shift := ⟨by simpa using TDerivation.shift d.get⟩
 
-noncomputable def conj'
-    (ps : SemiformulaVec L 0)
-    (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth (len ps.val - (i + 1)) (sub_succ_lt_self hi)) :
-    T ⊢ ps.conj :=
-  TDerivation.conj ps <| fun i hi ↦ by
-    have : T ⊢ ps.nth (len ps.val - (len ps.val - (i + 1) + 1)) _ :=
-      ds (len ps.val - (i + 1)) (sub_succ_lt_self hi)
-    exact this.of_eq <| by congr; exact sub_succ_lt_selfs hi
+noncomputable def all {φ : Semiformula V L 1} (dp : T ⊢ φ.free) : T ⊢ ∀' φ := TDerivation.all (by simpa using dp)
 
-noncomputable def conjOr'
-    (ps : SemiformulaVec L 0) (q)
-    (ds : ∀ i, (hi : i < len ps.val) → T ⊢ ps.nth (len ps.val - (i + 1)) (sub_succ_lt_self hi) ⋎ q) :
-    T ⊢ ps.conj ⋎ q :=
-  TDerivation.or <| TDerivation.conj ps <| fun i hi ↦ by
-    have : T ⊢ᵈᵉʳ ps.nth (len ps.val - (len ps.val - (i + 1) + 1)) _ ⫽ q ⫽ ∅ :=
-      TDerivation.orInv <| ds (len ps.val - (i + 1)) (sub_succ_lt_self hi)
-    exact this.of_eq <| by congr; exact sub_succ_lt_selfs hi
+lemma all! {φ : Semiformula V L 1} (dp : T ⊢! φ.free) : T ⊢! ∀' φ := ⟨all dp.get⟩
 
-noncomputable def disj (ps : SemiformulaVec L 0) {i} (hi : i < len ps.val) (d : T ⊢ ps.nth i hi) : T ⊢ ps.disj :=
-  TDerivation.disj ps hi d
-
-noncomputable def shift {p : Formula V L} (d : T ⊢ p) : T ⊢ p.shift := by simpa using TDerivation.shift d
-
-lemma shift! {p : Formula V L} (d : T ⊢! p) : T ⊢! p.shift := ⟨by simpa using TDerivation.shift d.get⟩
-
-noncomputable def all {p : Semiformula V L (0 + 1)} (dp : T ⊢ p.free) : T ⊢ p.all := TDerivation.all (by simpa using dp)
-
-lemma all! {p : Semiformula V L (0 + 1)} (dp : T ⊢! p.free) : T ⊢! p.all := ⟨all dp.get⟩
-
-noncomputable def generalizeAux {C : Formula V L} {p : Semiformula V L (0 + 1)} (dp : T ⊢ C.shift ➝ p.free) : T ⊢ C ➝ p.all := by
+noncomputable def generalizeAux {C : Formula V L} {φ : Semiformula V L 1} (dp : T ⊢ C.shift ➝ φ.free) : T ⊢ C ➝ ∀' φ := by
   rw [Semiformula.imp_def] at dp ⊢
   apply TDerivation.or
   apply TDerivation.rotate₁
@@ -427,30 +372,89 @@ lemma conj_shift (Γ : List (Formula V L)) : (⋀Γ).shift = ⋀(Γ.map .shift) 
     induction Γ using List.induction_with_singleton
     case hnil => simp
     case hsingle => simp [List.conj₂]
-    case hcons p ps hps ih =>
+    case hcons φ ps hps ih =>
       simp [hps, ih]
 
-noncomputable def generalize {Γ} {p : Semiformula V L (0 + 1)} (d : Γ.map .shift ⊢[T] p.free) : Γ ⊢[T] p.all := by
+noncomputable def generalize {Γ} {φ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free) : Γ ⊢[T] ∀' φ := by
   apply Entailment.FiniteContext.ofDef
   apply generalizeAux
   simpa [conj_shift] using Entailment.FiniteContext.toDef d
 
-lemma generalize! {Γ} {p : Semiformula V L (0 + 1)} (d : Γ.map .shift ⊢[T]! p.free) : Γ ⊢[T]! p.all := ⟨generalize d.get⟩
+lemma generalize! {Γ} {φ : Semiformula V L 1} (d : Γ.map .shift ⊢[T]! φ.free) : Γ ⊢[T]! ∀' φ := ⟨generalize d.get⟩
 
-noncomputable def specializeWithCtxAux {C : Formula V L} {p : Semiformula V L (0 + 1)} (d : T ⊢ C ➝ p.all) (t : Term V L) : T ⊢ C ➝ p.substs1 t := by
+noncomputable def specializeWithCtxAux {C : Formula V L} {φ : Semiformula V L 1} (d : T ⊢ C ➝ ∀' φ) (t : Term V L) : T ⊢ C ➝ φ.substs ![t] := by
   rw [Semiformula.imp_def] at d ⊢
   apply TDerivation.or
   apply TDerivation.rotate₁
   apply TDerivation.specialize
   exact TDerivation.wk (TDerivation.orInv d) (by intro x; simp; tauto)
 
-noncomputable def specializeWithCtx {Γ} {p : Semiformula V L (0 + 1)} (d : Γ ⊢[T] p.all) (t) : Γ ⊢[T] p.substs1 t := specializeWithCtxAux d t
+noncomputable def specializeWithCtx {Γ} {φ : Semiformula V L 1} (d : Γ ⊢[T] (∀' φ)) (t) : Γ ⊢[T] φ.substs ![t] := specializeWithCtxAux d t
 
-lemma specialize_with_ctx! {Γ} {p : Semiformula V L (0 + 1)} (d : Γ ⊢[T]! p.all) (t) : Γ ⊢[T]! p.substs1 t := ⟨specializeWithCtx d.get t⟩
+lemma specialize_with_ctx! {Γ} {φ : Semiformula V L 1} (d : Γ ⊢[T]! (∀' φ)) (t) : Γ ⊢[T]! φ.substs ![t] := ⟨specializeWithCtx d.get t⟩
 
-noncomputable def ex {p : Semiformula V L (0 + 1)} (t) (dp : T ⊢ p.substs1 t) : T ⊢ p.ex := TDerivation.ex t (by simpa using dp)
+noncomputable def ex {φ : Semiformula V L 1} (t) (dp : T ⊢ φ.substs ![t]) : T ⊢ ∃' φ := TDerivation.ex t (by simpa using dp)
 
-lemma ex! {p : Semiformula V L (0 + 1)} (t) (dp : T ⊢! p.substs1 t) : T ⊢! p.ex := ⟨ex t dp.get⟩
+lemma ex! {φ : Semiformula V L 1} (t) (dp : T ⊢! φ.substs ![t]) : T ⊢! ∃' φ := ⟨ex t dp.get⟩
+
+variable (A : InternalTheory V ℒₒᵣ)
+
+open InternalArithmetic
+
+open Entailment Theory.Derivation
+
+lemma substItrDisj_right {i z : V}
+    (w : TermVec V ℒₒᵣ m) (φ : Semiformula V ℒₒᵣ (m + 1)) (hi : i < z) :
+    A ⊢! φ.substs (↑i :> w) ➝ φ.substItrDisj w z := Theory.Provable.toTProvable <| Theory.Derivable.toProvable <| by
+  apply Theory.Derivable.or
+  apply Theory.Derivable.exchange
+  apply Theory.Derivable.disj (L := ℒₒᵣ) (i := z - (i + 1)) _
+  · intro i hi
+    have hi : i < z := by simpa using hi
+    rw [substItr_nth _ _ _ hi]
+    exact φ.isSemiformula.substs (w.isSemitermVec.cons (by simp))
+  · simpa using pos_of_gt hi
+  · have : z - (i + 1) < z := by simpa using pos_of_gt hi
+    rw [substItr_nth _ _ _ this]
+    have : z - (z - (i + 1) + 1) = i := sub_succ_lt_selfs hi
+    simp only [this, Nat.succ_eq_add_one, Semiformula.val_substs, SemitermVec.val_succ,
+      Matrix.head_cons, val_numeral, Matrix.tail_cons]
+    apply Theory.Derivable.em (L := ℒₒᵣ) (p := substs ℒₒᵣ (numeral i ∷ SemitermVec.val w) φ.val)
+    · simpa using φ.isSemiformula_succ.substs (w.isSemitermVec.cons (numeral_semiterm 0 i))
+    · simp
+    · simp
+
+lemma substItrDisj_right_intro {ψ} {i z : V} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)}
+    (hi : i < z) (h : A ⊢! ψ ➝ φ.substs (↑i :> w)) :
+     A ⊢! ψ ➝ φ.substItrDisj w z :=
+  Entailment.C!_trans h (substItrDisj_right A w φ hi)
+
+lemma substItrConj_right_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
+    (h : ∀ i < z, A ⊢! ψ ➝ φ.substs (↑i :> w)) :
+    A ⊢! ψ ➝ φ.substItrConj w z := Theory.Provable.toTProvable <| Theory.Derivable.toProvable <| by
+  apply Theory.Derivable.or
+  apply Theory.Derivable.exchange
+  apply Theory.Derivable.conj
+  · simp
+  · intro i hi
+    have hi : i < z := by simpa using hi
+    rw [substItr_nth _ _ _ hi]
+    apply Theory.Derivable.exchange
+    suffices A ⊢ᵈᵉʳ (∼ψ ⫽ φ.substs (↑(z - (i + 1)) :> w) ⫽ ∅) by
+      simpa using this.toDerivable
+    have : A ⊢! ∼ψ ⋎ Semiformula.substs (typedNumeral (z - (i + 1)) :> w) φ := h (z - (i + 1)) (by simp [pos_of_gt hi])
+    exact TDerivation.orInv (proof_to_tDerivation this.get)
+
+open Classical in
+lemma substItrDisj_left_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
+    (h : ∀ i < z, A ⊢! φ.substs (↑i :> w) ➝ ψ) :
+    A ⊢! φ.substItrDisj w z ➝ ψ := by
+  apply C!_of_CNN!
+  simp only [Semiformula.substItrDisj_neg]
+  apply substItrConj_right_intro
+  intro i hi
+  apply C!_of_CNN!
+  simpa using h i hi
 
 end TProof
 

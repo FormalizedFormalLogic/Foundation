@@ -302,6 +302,12 @@ variable (f : α → β)
 
 @[simp] lemma map_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
 
+lemma map_map_comp (g : β → γ) (f : α → β) (v : Fin k → α) :
+    g⨟ (f⨟ v) = (g ∘ f)⨟ v := by ext x; simp
+
+lemma map_map_comp' (g : β → γ) (f : α → β) (v : Fin k → α) :
+    g⨟ (f⨟ v) = (fun x ↦ g (f x))⨟ v := by ext x; simp
+
 end map
 section foldr
 
