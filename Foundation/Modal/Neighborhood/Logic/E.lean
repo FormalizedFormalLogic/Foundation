@@ -1,4 +1,5 @@
 import Foundation.Modal.Neighborhood.Hilbert
+import Foundation.Modal.Neighborhood.Completeness
 
 namespace LO.Modal
 
@@ -20,6 +21,8 @@ instance : Sound Hilbert.E FrameClass.E := instSound_of_validates_axioms $ by si
 instance : Entailment.Consistent Hilbert.E := consistent_of_sound_frameclass FrameClass.E $ by
   use ⟨Unit, λ _ => {}⟩;
   simp;
+
+instance : Complete Hilbert.E FrameClass.E := complete_of_canonical_frame FrameClass.E (canonical_minimal_ℬ (Hilbert.E)) (by tauto)
 
 instance : Hilbert.E ⪱ Hilbert.EK := by
   constructor;

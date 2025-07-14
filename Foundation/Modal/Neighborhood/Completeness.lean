@@ -73,48 +73,50 @@ end
 
 section
 
-variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Cl 𝓢]
-
 namespace Neighborhood
 
 open Formula (atom)
 open Formula.Neighborhood
 open MaximalConsistentSet
 
+variable {S} [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Cl 𝓢] [Entailment.Consistent 𝓢]
 variable {φ ψ ξ : Formula ℕ}
 
-class Frame.IsCanonical (𝓢 : S) (F : Frame) where
-  def_equiv : F.World = (MaximalConsistentSet 𝓢)
-  def_ℬ : ∀ φ, (F.ℬ (def_equiv ▸ (proofset 𝓢 φ))) = (def_equiv ▸ proofset 𝓢 (□φ))
+structure Canonicalℬ (𝓢 : S) where
+  fn : Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)
+  canonicity : ∀ φ, (fn ((proofset 𝓢 φ))) = (proofset 𝓢 (□φ))
 
-variable {F : Frame} [canonical : F.IsCanonical 𝓢]
+instance : CoeFun (Canonicalℬ 𝓢) (fun _ => Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)) := ⟨Canonicalℬ.fn⟩
 
-abbrev canonicalModel (𝓢 : S) (F : Frame) [canonical : F.IsCanonical 𝓢] : Model where
-  toFrame := F
-  Val a := canonical.def_equiv ▸ proofset 𝓢 (.atom a)
+def mkCanonicalFrame
+  (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢]
+  (ℬ : Canonicalℬ 𝓢)
+  : Frame := Frame.mk_B (MaximalConsistentSet 𝓢) ℬ
 
-instance : Coe (Set (MaximalConsistentSet 𝓢)) (Set (canonicalModel 𝓢 F).World) := ⟨λ Γ => canonical.def_equiv ▸ Γ⟩
+def mkCanonicalModel
+  (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢]
+  (ℬ : Canonicalℬ 𝓢)
+  : Model where
+  toFrame := mkCanonicalFrame 𝓢 ℬ
+  Val a := proofset 𝓢 (.atom a)
 
-@[reducible]
-instance : Semantics (Formula ℕ) (canonicalModel 𝓢 F).World := Formula.Neighborhood.Satisfies.semantics (M := canonicalModel 𝓢 F)
+@[simp] lemma mkCanonicalModel.eq_ℬ_self : (mkCanonicalModel 𝓢 ℬ).ℬ = ℬ := by tauto;
 
-set_option pp.proofs true
-
-lemma truthlemma : ↑(proofset 𝓢 φ) = ((canonicalModel 𝓢 F).truthset φ) := by
+lemma truthlemma : ↑(proofset 𝓢 φ) = ((mkCanonicalModel 𝓢 ℬ).truthset φ) := by
   induction φ with
-  | hatom => simp
+  | hatom =>
+    simp [mkCanonicalModel]
   | hfalsum =>
-    sorry;
+    simp [mkCanonicalModel]
   | himp φ ψ ihφ ihψ =>
     simp_all [MaximalConsistentSet.proofset.eq_imp, ←ihφ, ←ihψ];
-    sorry;
   | hbox φ ihφ =>
-    rw [Model.truthset.eq_box, ←ihφ, canonical.def_ℬ];
+    rw [Model.truthset.eq_box, ←ihφ, mkCanonicalModel.eq_ℬ_self, (@ℬ.canonicity φ)];
 
 lemma complete_of_canonical_frame
-  (C : FrameClass)
-  (F : Frame) [F_canonical : F.IsCanonical 𝓢] (hFC : F ∈ C)
+  (C : FrameClass) (ℬ)
+  (hC : (mkCanonicalFrame 𝓢 ℬ) ∈ C)
   : LO.Complete 𝓢 C := by
   constructor;
   intro φ;
@@ -123,13 +125,24 @@ lemma complete_of_canonical_frame
   have := FormulaSet.unprovable_iff_singleton_neg_consistent.mpr hφ;
   obtain ⟨Γ, hΓ⟩ := lindenbaum this;
   apply not_validOnFrameClass_of_exists_model_world;
-  use (canonicalModel 𝓢 F), (F_canonical.def_equiv ▸ Γ);
+  use (mkCanonicalModel 𝓢 ℬ), Γ;
   constructor;
-  . apply hFC;
+  . assumption;
   . simp only [Semantics.Realize, Satisfies, ←truthlemma];
-    suffices Γ ∉ proofset 𝓢 φ by
+    suffices Γ ∈ (proofset 𝓢 (∼φ)) by simpa;
+    apply hΓ;
+    tauto;
+
+open Classical in
+def canonical_minimal_ℬ (𝓢 : S) : Canonicalℬ 𝓢 where
+  fn := λ Γ => if h : ∃ φ, Γ = (proofset 𝓢 φ) then (proofset 𝓢 (□(h.choose))) else ∅
+  canonicity := by
+    intro ψ;
+    split;
+    . rename_i h;
+      obtain ⟨φ, hφ⟩ := h;
       sorry;
-    simpa [proofset, ←iff_mem_neg] using hΓ;
+    . tauto;
 
 end Neighborhood
 
