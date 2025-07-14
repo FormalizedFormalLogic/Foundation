@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Term.Functions
+import Foundation.FirstOrder.Internal.Term.Functions
 
 /-!
 

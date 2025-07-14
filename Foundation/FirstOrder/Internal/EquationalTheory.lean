@@ -1,7 +1,6 @@
 import Foundation.Meta.ClProver
 import Foundation.FirstOrder.ISigma1.Ind
-import Foundation.FirstOrder.ISigma1.Metamath
-import Foundation.FirstOrder.Incompleteness.StandardProvability.D1
+import Foundation.FirstOrder.Internal.D1
 
 /-!
 
@@ -23,15 +22,13 @@ local prefix:max "#'" => Semiterm.bvar (V := V) (L := ℒₒᵣ)
 
 local prefix:max "&'" => Semiterm.fvar (V := V) (L := ℒₒᵣ)
 
-scoped postfix:max "⇞" => Semiterm.shift
+local postfix:max "⇞" => Semiterm.shift
 
-scoped postfix:max "⤉" => Semiformula.shift
+local postfix:max "⤉" => Semiformula.shift
 
-variable (T : ArithmeticTheory) [Theory.Δ₁Definable T] [𝐏𝐀⁻ ⪯ T]
+variable (T : ArithmeticTheory) [Theory.Δ₁Definable T] [𝐄𝐐 ⪯ T]
 
 open Entailment Entailment.FiniteContext Semiformula
-
-instance : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
 @[simp] lemma eq_refl (t : Term V ℒₒᵣ) : T.internalize V ⊢! t ≐ t := by
   have : T ⊢! (“∀ x, x = x” : SyntacticFormula ℒₒᵣ) := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]

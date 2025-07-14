@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Formula.Coding
-import Foundation.FirstOrder.ISigma1.Metamath.Formula.Iteration
+import Foundation.FirstOrder.Internal.Formula.Coding
+import Foundation.FirstOrder.Internal.Formula.Iteration
 
 namespace LO.ISigma1.Metamath
 

@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Term.Typed
-import Foundation.FirstOrder.ISigma1.Metamath.Formula.Iteration
+import Foundation.FirstOrder.Internal.Term.Typed
+import Foundation.FirstOrder.Internal.Formula.Iteration
 
 /-!
 # Typed Formalized Semiformula/Formula

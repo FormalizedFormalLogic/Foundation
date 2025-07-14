@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Term.Basic
+import Foundation.FirstOrder.Internal.Term.Basic
 
 namespace LO.ISigma1.Metamath
 

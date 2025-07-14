@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Formula.Basic
-import Foundation.FirstOrder.ISigma1.Metamath.Term.Functions
+import Foundation.FirstOrder.Internal.Formula.Basic
+import Foundation.FirstOrder.Internal.Term.Functions
 
 namespace LO.ISigma1.Metamath
 

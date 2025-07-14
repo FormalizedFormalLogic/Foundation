@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Proof.Theory
+import Foundation.FirstOrder.Internal.Proof.Theory
 
 namespace LO
 

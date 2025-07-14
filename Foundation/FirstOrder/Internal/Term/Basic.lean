@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Language
+import Foundation.FirstOrder.Internal.Language
 import Foundation.FirstOrder.ISigma1.HFS
 
 namespace LO.ISigma1.Metamath

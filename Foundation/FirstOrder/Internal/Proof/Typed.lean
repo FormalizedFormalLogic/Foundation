@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Formula.Typed
-import Foundation.FirstOrder.ISigma1.Metamath.Proof.Derivation
+import Foundation.FirstOrder.Internal.Formula.Typed
+import Foundation.FirstOrder.Internal.Proof.Derivation
 import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!

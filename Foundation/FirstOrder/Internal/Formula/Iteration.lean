@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Formula.Functions
+import Foundation.FirstOrder.Internal.Formula.Functions
 
 namespace LO.FirstOrder.Semiformula
 

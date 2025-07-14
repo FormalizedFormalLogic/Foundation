@@ -1,5 +1,7 @@
 import Foundation.FirstOrder.ISigma1.HFS
 
+/-! # Internalized languages of first-order logic -/
+
 namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0

@@ -1,6 +1,4 @@
---import Foundation.FirstOrder.Incompleteness.StandardProvability.FormalizedR0
---import Foundation.FirstOrder.ISigma1.Metamath.CodedTheory
-import Foundation.FirstOrder.ISigma1.Metamath
+import Foundation.FirstOrder.Internal.Proof.Typed
 
 /-!
 # Derivability condition D1 and soundness of internal provability.
