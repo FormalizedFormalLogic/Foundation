@@ -54,7 +54,7 @@ instance : Hilbert.EMC ⪱ Hilbert.EMCN := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 1,
-        ν := λ w => ∅,
+        𝒩 := λ w => ∅,
         Val := λ w => Set.univ
       };
       use M, 0;
@@ -81,7 +81,7 @@ instance : Hilbert.ECN ⪱ Hilbert.EMCN := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 2,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {∅, {0, 1}}
           | 1 => {∅, {0, 1}},
@@ -121,7 +121,7 @@ instance : Hilbert.EMN ⪱ Hilbert.EMCN := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 2,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{0}, {1}, {0, 1}}
           | 1 => {{0}, {0, 1}},

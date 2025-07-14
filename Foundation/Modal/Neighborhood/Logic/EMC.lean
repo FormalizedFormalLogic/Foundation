@@ -17,7 +17,7 @@ protected abbrev FrameClass.EMC : FrameClass := { F | F.IsEMC }
 
 abbrev EK_counterframe_for_M_and_C : Frame := {
   World := Fin 4,
-  ν := λ _ => {{0, 1}, {0, 2}}
+  𝒩 := λ _ => {{0, 1}, {0, 2}}
 }
 
 lemma EK_counterframe_for_M_and_C.validate_axiomK : EK_counterframe_for_M_and_C ⊧ Axioms.K (atom 0) (atom 1) := by
@@ -98,7 +98,7 @@ instance : Hilbert.EC ⪱ Hilbert.EMC := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 3,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{1}}
           | 1 => {{0}, {0, 1}}
@@ -142,7 +142,7 @@ instance : Hilbert.EM ⪱ Hilbert.EMC := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 2,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{0}, {1}, {0, 1}}
           | 1 => {{1}, {0, 1}},

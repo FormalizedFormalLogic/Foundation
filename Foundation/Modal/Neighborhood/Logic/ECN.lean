@@ -49,7 +49,7 @@ instance : Hilbert.EC ⪱ Hilbert.ECN := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 3,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{1}}
           | 1 => {{0}, {0, 1}}
@@ -91,7 +91,7 @@ instance : Hilbert.EN ⪱ Hilbert.ECN := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 2,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{0}, {1}, {0, 1}, Set.univ}
           | 1 => {{1}, {0, 1}, Set.univ},

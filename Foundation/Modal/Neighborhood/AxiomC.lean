@@ -8,9 +8,9 @@ open Formula.Neighborhood
 variable {F : Frame}
 
 class Frame.IsRegular (F : Frame) : Prop where
-  regular : ∀ X Y : Set F, (F.η X) ∩ (F.η Y) ⊆ F.η (X ∩ Y)
+  regular : ∀ X Y : Set F, (F.ℬ X) ∩ (F.ℬ Y) ⊆ F.ℬ (X ∩ Y)
 
-lemma Frame.regular [Frame.IsRegular F] {X Y : Set F} : (F.η X) ∩ (F.η Y) ⊆ F.η (X ∩ Y) := by apply IsRegular.regular
+lemma Frame.regular [Frame.IsRegular F] {X Y : Set F} : (F.ℬ X) ∩ (F.ℬ Y) ⊆ F.ℬ (X ∩ Y) := by apply IsRegular.regular
 
 instance : Frame.simple_blackhole.IsRegular := ⟨by
   intro X Y e;
