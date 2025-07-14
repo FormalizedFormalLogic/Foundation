@@ -322,16 +322,6 @@ lemma membership_iff : (φ ∈ Ω) ↔ (Ω.1 *⊢[𝓢]! φ) := by
     have : Ω.1 *⊬[𝓢] ⊥ := Ω.consistent;
     contradiction;
 
-/-
-lemma subset_axiomset : H.axioms ⊆ Ω.1 := by
-  intro φ hp;
-  apply membership_iff.mpr;
-  apply Context.of!;
-  apply maxm!;
-  apply Hilbert.mem_axiomInstances_of_mem_axioms;
-  assumption;
--/
-
 @[simp]
 lemma not_mem_falsum : ⊥ ∉ Ω := not_mem_falsum_of_consistent Ω.consistent
 
@@ -359,10 +349,25 @@ lemma iff_mem_neg : (∼φ ∈ Ω) ↔ (φ ∉ Ω) := by
     apply this;
     tauto_set;
 
+lemma iff_forall_mem_provable : (∀ Ω : MaximalConsistentSet 𝓢, φ ∈ Ω) ↔ 𝓢 ⊢! φ := by
+  constructor;
+  . contrapose!;
+    intro h;
+    obtain ⟨Ω, hΩ⟩ := lindenbaum $ unprovable_iff_singleton_neg_consistent.mpr h;
+    use Ω;
+    apply iff_mem_neg.mp;
+    tauto;
+  . intro h Ω;
+    apply membership_iff.mpr;
+    exact Context.of! h;
+
+@[grind]
+lemma mem_of_prove (h : 𝓢 ⊢! φ) : φ ∈ Ω := by apply iff_forall_mem_provable.mpr h;
+
 @[simp]
 lemma iff_mem_negneg : (∼∼φ ∈ Ω) ↔ (φ ∈ Ω) := by simp;
 
-@[simp]
+@[simp, grind]
 lemma iff_mem_imp : ((φ ➝ ψ) ∈ Ω) ↔ (φ ∈ Ω) → (ψ ∈ Ω) := by
   constructor;
   . intro hpq hp;
