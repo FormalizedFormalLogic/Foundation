@@ -230,10 +230,6 @@ noncomputable def free1 (φ : Semiformula V L 2) : Semiformula V L 1 := φ.shift
 @[simp] lemma free1_val (φ : Semiformula V L 2) : φ.free1.val = Metamath.free1 L φ.val := by
   simp [free1]; rfl
 
-@[simp] lemma free_all (φ : Semiformula V L 2) :
-    (∀' φ).free = ∀' ⊤ := by { simp [free, SemitermVec.q] }
-
-/--/
 open InternalArithmetic
 
 noncomputable def substItrConj (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) : Semiformula V ℒₒᵣ n :=

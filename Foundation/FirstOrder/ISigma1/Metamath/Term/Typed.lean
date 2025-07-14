@@ -214,9 +214,24 @@ namespace Semiterm
     t.bShift.substs ![u] = t := by
   ext; simp [substs, bShift, substs_cons_bShift t.isSemiterm, substs_nil t.isSemiterm]
 
+lemma bShift_substs_succ (w : SemitermVec V L (n + 1) m) (t : Semiterm V L n) :
+    t.bShift.substs w = t.substs (Matrix.vecTail w) := by
+  ext; simp [substs, bShift, substs_cons_bShift t.isSemiterm]
+
+@[simp] lemma bShift_substs_zero (t : Term V L) :
+    t.substs ![] = t := by
+  ext; simp [substs]
+
 lemma bShift_shift_comm (t : Semiterm V L n) :
     t.shift.bShift = t.bShift.shift := by
   ext; simp [termBShift_termShift t.isSemiterm]
+
+lemma shift_substs (w : SemitermVec V L n m) (t : Semiterm V L n) :
+    (t.substs w).shift = t.shift.substs (Semiterm.shift⨟ w) := by ext; simp [Metamath.termShift_termSubsts t.isSemiterm w.isSemitermVec]
+
+lemma substs_substs {n m l : ℕ} (v : SemitermVec V L m l) (w : SemitermVec V L n m) (t : Semiterm V L n) :
+    (t.substs w).substs v = t.substs ((Semiterm.substs v)⨟ w) := by
+  ext;simp [Metamath.termSubst_termSubst w.isSemitermVec t.isSemiterm]
 
 end Semiterm
 

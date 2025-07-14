@@ -25,27 +25,15 @@ namespace InternalArithmetic
 @[simp] lemma two_sub_one_eq_one : (2 : V) - 1 = 1 := by simp [←one_add_one_eq_two]
 @[simp] lemma three_sub_one_eq_two : (3 : V) - 1 = 2 := by simp [←two_add_one_eq_three]
 
-noncomputable abbrev bv (x : Fin n) : Semiterm V ℒₒᵣ n := Semiterm.bv x
+local prefix:max "#'" => Semiterm.bvar (V := V) (L := ℒₒᵣ)
 
-noncomputable abbrev fv (x : V) : Semiterm V ℒₒᵣ n := Semiterm.fv x
+local prefix:max "&'" => Semiterm.fvar (V := V) (L := ℒₒᵣ)
 
-local prefix:max "#'" => bv
+noncomputable abbrev num (n : V) : Semiterm V ℒₒᵣ k := typedNumeral n
 
-local prefix:max "&'" => fv
+scoped postfix:max "↟" => Semiformula.shift
 
-class InternalR₀Theory (T : InternalTheory V ℒₒᵣ) where
-  refl : T.internalize V ⊢! (#' 0 ≐ #'0).all
-  replace (φ : Semiformula V ℒₒᵣ (0 + 1)) : T ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ.substs ![#'1] ➝ φ.substs ![#'0])
-  add (n m : V) : T.internalize V ⊢! (n + m : Semiterm V ℒₒᵣ 0) ≐ ↑(n + m)
-  mul (n m : V) : T.internalize V ⊢! (n * m : Semiterm V ℒₒᵣ 0) ≐ ↑(n * m)
-  ne {n m : V} : n ≠ m → T.internalize V ⊢! ↑n ≉ ↑m
-  ltNumeral (n : V) : T.internalize V ⊢! (#'0 <' ↑n ⭤ (tSubstItr (#'0).sing (#'1 ≐ #'0) n).disj).all
 
-noncomputable abbrev oneAbbrev {n} : Semiterm V ℒₒᵣ n := (1 : V)
-
-scoped notation "^1" => oneAbbrev
-
-noncomputable abbrev num (n : V) := typedNumeral 0 n
 
 /-
 section
@@ -66,52 +54,237 @@ section InternalR₀Theory
 
 instance : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
-lemma replace_aux_aux (φ : V) :
+@[simp] lemma eq_refl (t : Term V ℒₒᵣ) : T.internalize V ⊢! t ≐ t := by
+  have : T ⊢! (“∀ x, x = x” : SyntacticFormula ℒₒᵣ) := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+  have : T.internalize V ⊢! ∀' (#'0 ≐ #'0) := by
+    simpa using internal_provable_of_outer_provable_arith this
+  simpa using TProof.specialize! this t
+
+@[simp] lemma eq_symm (t u : Term V ℒₒᵣ) : T.internalize V ⊢! (t ≐ u) ➝ (u ≐ t) := by
+  have : T ⊢! “∀ x y, x = y → y = x” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+  have : T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (#'0 ≐ #'1)) := by
+    simpa using internal_provable_of_outer_provable_arith this
+  simpa using TProof.specialize₂! this u t
+
+variable {T}
+
+lemma eq_comm_ctx {t u : Term V ℒₒᵣ} :
+    Γ ⊢[T.internalize V]! t ≐ u → Γ ⊢[T.internalize V]! u ≐ t := fun b ↦
+  of'! (eq_symm T t u) ⨀ b
+
+variable (T)
+
+lemma subst_eq (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢! (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ ≐ u₁) ➝ (t₂ ≐ u₂) := by
+  have : T ⊢! “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ = y₁ → x₂ = y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+  have := by simpa using internal_provable_of_outer_provable_arith this (V := V)
+  simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
+
+lemma subst_lt (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢! (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ <' u₁) ➝ (t₂ <' u₂) := by
+  have : T ⊢! “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ < y₁ → x₂ < y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+    simpa [models_iff] using fun a b c e h ↦ e ▸ h
+  have := by simpa using internal_provable_of_outer_provable_arith this (V := V)
+  simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
+
+lemma subst_ne (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢! (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ ≉ u₁) ➝ (t₂ ≉ u₂) := by
+  have : T ⊢! “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ ≠ y₁ → x₂ ≠ y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+    simpa [models_iff] using fun a b c e h ↦ e ▸ h
+  have := by simpa using internal_provable_of_outer_provable_arith this (V := V)
+  simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
+
+lemma subst_nlt (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢! (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ ≮' u₁) ➝ (t₂ ≮' u₂) := by
+  have : T ⊢! “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ ≮ y₁ → x₂ ≮ y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+    simpa [models_iff] using fun a b c e h ↦ e ▸ h
+  have := by simpa using internal_provable_of_outer_provable_arith this (V := V)
+  simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
+
+lemma vec2_eq {v : V} (h : len v = 2) : ?[v.[0], v.[1]] = v :=
+  nth_ext' 2 (by simp [one_add_one_eq_two]) h (by
+    intro i hi
+    have : i = 0 ∨ i = 1 := le_one_iff_eq_zero_or_one.mp (lt_two_iff_le_one.mp hi)
+    rcases this with (rfl | rfl) <;> simp)
+
+
+
+lemma term_replace_aux (t : V) :
+    IsSemiterm ℒₒᵣ 1 t →
+    T.Provable (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (termSubst ℒₒᵣ (^#1 ∷ 0) t ^= termSubst ℒₒᵣ (^#0 ∷ 0) t)) := by {
+  sorry
+     }
+
+lemma term_replace (t : Semiterm V ℒₒᵣ 1) :
+    T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (t.substs ![#'1] ≐ t.substs ![#'0])) := by
+  apply (internalize_TProvable_iff_provable (T := T)).mpr
+  simpa using term_replace_aux T t.val
+
+lemma term_replace' (t : Semiterm V ℒₒᵣ 1) (u₁ u₂ : Term V ℒₒᵣ) :
+    T.internalize V ⊢! (u₁ ≐ u₂) ➝ (t.substs ![u₁] ≐ t.substs ![u₂]) := by
+  have := TProof.specialize₂! (term_replace T t) u₂ u₁
+  simpa [Semiterm.substs_substs] using this
+
+lemma replace_eq (t u : Semiterm V ℒₒᵣ 1) :
+    T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (t ≐ u).substs ![#'1] ➝ (t ≐ u).substs ![#'0]) := by
+  suffices
+      T.internalize V ⊢!
+        ∀' ((&'0 ≐ #'0) ➝ (t.shift.substs ![&'0] ≐ u.shift.substs ![&'0]) ➝ (t.shift.substs ![#'0] ≐ u.shift.substs ![#'0])) by
+    apply TProof.all!
+    simpa [Semiformula.free, SemitermVec.q, Semiterm.shift_substs, Semiterm.substs_substs]
+  suffices
+      T.internalize V ⊢!
+        (&'1 ≐ &'0) ➝
+        (t.shift.shift.substs ![&'1] ≐ u.shift.shift.substs ![&'1]) ➝
+        (t.shift.shift.substs ![&'0] ≐ u.shift.shift.substs ![&'0]) by
+    apply TProof.all!
+    simpa [Semiformula.free, SemitermVec.q, Semiterm.shift_substs, Semiterm.substs_substs]
+  let Γ : List (Formula V ℒₒᵣ) := [t.shift.shift.substs ![&'1] ≐ u.shift.shift.substs ![&'1], &'1 ≐ &'0]
+  suffices
+      Γ ⊢[T.internalize V]! t.shift.shift.substs ![&'0] ≐ u.shift.shift.substs ![&'0] by
+    apply deduct'!
+    apply deduct!
+    exact this
+  have hh : Γ ⊢[T.internalize V]! t.shift.shift.substs ![&'1] ≐ u.shift.shift.substs ![&'1] :=
+    by_axm₀!
+  have ht : Γ ⊢[T.internalize V]! t.shift.shift.substs ![&'1] ≐ t.shift.shift.substs ![&'0] :=
+    of'! (term_replace' T t.shift.shift &'1 &'0) ⨀ by_axm₁!
+  have hu : Γ ⊢[T.internalize V]! u.shift.shift.substs ![&'1] ≐ u.shift.shift.substs ![&'0] :=
+    of'! (term_replace' T u.shift.shift &'1 &'0) ⨀ by_axm₁!
+  exact of'!
+    (subst_eq T (t.shift.shift.substs ![&'1]) (t.shift.shift.substs ![&'0])
+      (u.shift.shift.substs ![&'1]) (u.shift.shift.substs ![&'0]))
+    ⨀ ht ⨀ hu ⨀ hh
+
+lemma replace_lt (t u : Semiterm V ℒₒᵣ 1) :
+    T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (t <' u).substs ![#'1] ➝ (t <' u).substs ![#'0]) := by
+  suffices
+      T.internalize V ⊢!
+        ∀' ((&'0 ≐ #'0) ➝ (t.shift.substs ![&'0] <' u.shift.substs ![&'0]) ➝ (t.shift.substs ![#'0] <' u.shift.substs ![#'0])) by
+    apply TProof.all!
+    simpa [Semiformula.free, SemitermVec.q, Semiterm.shift_substs, Semiterm.substs_substs]
+  suffices
+      T.internalize V ⊢!
+        (&'1 ≐ &'0) ➝
+        (t.shift.shift.substs ![&'1] <' u.shift.shift.substs ![&'1]) ➝
+        (t.shift.shift.substs ![&'0] <' u.shift.shift.substs ![&'0]) by
+    apply TProof.all!
+    simpa [Semiformula.free, SemitermVec.q, Semiterm.shift_substs, Semiterm.substs_substs]
+  let Γ : List (Formula V ℒₒᵣ) := [t.shift.shift.substs ![&'1] <' u.shift.shift.substs ![&'1], &'1 ≐ &'0]
+  suffices
+      Γ ⊢[T.internalize V]! t.shift.shift.substs ![&'0] <' u.shift.shift.substs ![&'0] by
+    apply deduct'!
+    apply deduct!
+    exact this
+  have hh : Γ ⊢[T.internalize V]! t.shift.shift.substs ![&'1] <' u.shift.shift.substs ![&'1] :=
+    by_axm₀!
+  have ht : Γ ⊢[T.internalize V]! t.shift.shift.substs ![&'1] ≐ t.shift.shift.substs ![&'0] :=
+    of'! (term_replace' T t.shift.shift &'1 &'0) ⨀ by_axm₁!
+  have hu : Γ ⊢[T.internalize V]! u.shift.shift.substs ![&'1] ≐ u.shift.shift.substs ![&'0] :=
+    of'! (term_replace' T u.shift.shift &'1 &'0) ⨀ by_axm₁!
+  exact of'!
+    (subst_lt T (t.shift.shift.substs ![&'1]) (t.shift.shift.substs ![&'0])
+      (u.shift.shift.substs ![&'1]) (u.shift.shift.substs ![&'0]))
+    ⨀ ht ⨀ hu ⨀ hh
+
+
+
+/--/
+lemma replacse_aux_aux (φ : V) :
     IsSemiformula ℒₒᵣ 1 φ →
     T.Provable (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (imp ℒₒᵣ (substs ℒₒᵣ (^#1 ∷ 0) φ) (substs ℒₒᵣ (^#0 ∷ 0) φ))) := by {
-  apply IsFormula.sigma1_structural_induction₂
+  apply IsFormula.sigma1_structural_induction₂_ss
   · sorry
+  case hrel =>
+    intro k R v hR hv
+    rcases isRel_iff_LOR.mp hR with (⟨rfl, rfl⟩ | ⟨rfl, rfl⟩)
+    · let t : Semiterm V ℒₒᵣ 1 := ⟨v.[0], by simpa using hv.nth (by simp)⟩
+      let u : Semiterm V ℒₒᵣ 1 := ⟨v.[1], by simpa using hv.nth (by simp)⟩
+      have veq : v = ?[t.val, u.val] := by simp [t, u, vec2_eq hv.lh]
+      suffices T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (t ≐ u).substs ![#'1] ➝ (t ≐ u).substs ![#'0]) by
+        have := (internalize_TProvable_iff_provable (T := T)).mp this
+        simpa [-substs_equals, veq, val_all] using this
+      simpa using replace_eq T t u
+    · let t : Semiterm V ℒₒᵣ 1 := ⟨v.[0], by simpa using hv.nth (by simp)⟩
+      let u : Semiterm V ℒₒᵣ 1 := ⟨v.[1], by simpa using hv.nth (by simp)⟩
+      have veq : v = ?[t.val, u.val] := by simp [t, u, vec2_eq hv.lh]
+      suffices T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (t <' u).substs ![#'1] ➝ (t <' u).substs ![#'0]) by
+        have := (internalize_TProvable_iff_provable (T := T)).mp this
+        simpa [-substs_lessThan, veq, val_all] using this
+      --simpa using replace_eq T t u
+
+
+
+
+
+
+
+
+
+
+      --apply TProof.all!;
+
+
+
+
+  /-
   case hall =>
     intro p hp ih
     let φ : Semiformula V ℒₒᵣ 2 := ⟨p, hp⟩
     suffices T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (∀' φ).substs ![#'1] ➝ (∀' φ).substs ![#'0]) by
       have := (internalize_TProvable_iff_provable (T := T)).mp this
-      simpa only [Nat.reduceAdd, Fin.isValue, Nat.succ_eq_add_one, -Semiformula.substs_all, val_all,
+      simpa only [Nat.reduceAdd, Fin.isValue, Nat.succ_eq_add_one, val_all,
         val_imp, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Nat.cast_one,
         Nat.zero_mod, Nat.cast_zero, val_substs, SemitermVec.val_succ, Matrix.head_cons,
         Matrix.tail_cons, SemitermVec.val_nil] using this
-    have ih : T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ.free1.substs ![#'1] ➝ φ.free1.substs ![#'0]) := by
+    have ih : T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ↟↟.free1.substs ![#'1] ➝ φ↟↟.free1.substs ![#'0]) := by
       apply (internalize_TProvable_iff_provable (T := T)).mpr
       simpa using ih
-    apply TProof.all!; simp [Semiformula.free, ]
-    apply TProof.all!; simp [Semiformula.free]
-
-
-
-
-
-     }
-
-lemma replace_aux_aux (φ : V) :
-    IsSemiformula ℒₒᵣ 1 φ →
-    T.Provable (imp ℒₒᵣ (^&0 ^= ^&1) (imp ℒₒᵣ (substs ℒₒᵣ (^&0 ∷ 0) φ) (substs ℒₒᵣ (^&1 ∷ 0) φ))) := by {
-  apply IsFormula.sigma1_structural_induction₂
-  · sorry
-  case hall =>
+    suffices
+        T.internalize V ⊢! ∀' ((&'0 ≐ #'0) ➝ ∀' φ↟.substs ![#'0, &'0] ➝ ∀' φ↟.substs ![#'0, #'1]) by
+      apply TProof.all!; simpa [Semiformula.free, SemitermVec.q, Semiformula.shift_substs, Semiformula.substs_substs]
+    suffices
+        T.internalize V ⊢! (&'1 ≐ &'0) ➝ ∀' φ↟↟.substs ![#'0, &'1] ➝ ∀' φ↟↟.substs ![#'0, &'0] by
+      apply TProof.all!; simpa [Semiformula.free, SemitermVec.q, Semiformula.shift_substs, Semiformula.substs_substs]
+    apply deduct'!
+    apply TProof.all_imp_all!
+    apply deductInv'!
+    simpa [Semiformula.free1, Semiformula.free, SemitermVec.q,
+      Semiformula.shift_substs, Semiformula.substs_substs, one_add_one_eq_two]
+    using TProof.specialize₂! ih (&'1) (&'2)
+  case hex =>
     intro p hp ih
     let φ : Semiformula V ℒₒᵣ 2 := ⟨p, hp⟩
-    suffices T.internalize V ⊢! (&'0 ≐ &'1) ➝ (∀' φ).substs ![&'0] ➝ (∀' φ).substs ![&'1] by
+    suffices T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (∃' φ).substs ![#'1] ➝ (∃' φ).substs ![#'0]) by
       have := (internalize_TProvable_iff_provable (T := T)).mp this
-      simpa only [Nat.succ_eq_add_one, Nat.reduceAdd, val_imp, val_equals,
-        Semiterm.fvar_val, val_all, val_substs, SemitermVec.val_succ,
-        Matrix.head_cons, Matrix.tail_cons, SemitermVec.val_nil] using this
-    have ih : T.internalize V ⊢! (&'0 ≐ &'1) ➝ φ.free1.substs ![&'0] ➝ φ.free1.substs ![&'1] := by {  }
+      simpa only [Nat.reduceAdd, Fin.isValue, Nat.succ_eq_add_one, val_all,
+        val_imp, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Nat.cast_one,
+        Nat.zero_mod, Nat.cast_zero, val_substs, SemitermVec.val_succ, Matrix.head_cons,
+        Matrix.tail_cons, SemitermVec.val_nil] using this
+    have ih : T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ↟↟.free1.substs ![#'1] ➝ φ↟↟.free1.substs ![#'0]) := by
+      apply (internalize_TProvable_iff_provable (T := T)).mpr
+      simpa using ih
+    suffices
+        T.internalize V ⊢! ∀' ((&'0 ≐ #'0) ➝ ∃' φ↟.substs ![#'0, &'0] ➝ ∃' φ↟.substs ![#'0, #'1]) by
+      apply TProof.all!; simpa [Semiformula.free, SemitermVec.q, Semiformula.shift_substs, Semiformula.substs_substs]
+    suffices
+        T.internalize V ⊢! (&'1 ≐ &'0) ➝ ∃' φ↟↟.substs ![#'0, &'1] ➝ ∃' φ↟↟.substs ![#'0, &'0] by
+      apply TProof.all!; simpa [Semiformula.free, SemitermVec.q, Semiformula.shift_substs, Semiformula.substs_substs]
+    apply deduct'!
+    apply TProof.ex_imp_ex!
+    apply deductInv'!
+    simpa [Semiformula.free1, Semiformula.free, SemitermVec.q,
+      Semiformula.shift_substs, Semiformula.substs_substs, one_add_one_eq_two]
+      using TProof.specialize₂! ih (&'1) (&'2) -/
+
+
+
+
+
+
 
 
 
 
 
      }
+
 
 
 lemma replace_aux (ψ : Semiformula V ℒₒᵣ 1) (φ : Semiformula V ℒₒᵣ 2) : T.internalize V ⊢! (&'0 ≐ &'1) ➝ (∀' φ).substs ![&'0] ➝ (∀' φ).substs ![&'1] := by {
@@ -121,7 +294,8 @@ lemma replace_aux (ψ : Semiformula V ℒₒᵣ 1) (φ : Semiformula V ℒₒᵣ
   apply TProof.generalize!
   simp [Semiformula.free, Semiformula.shift_substs, SemitermVec.q]
   simp [Semiformula.substs_substs]
-  let Φ : Semiformula V ℒₒᵣ 0 := ∀' ∀' ((#'1 ≐ #'0) ➝ ψ.substs ![#'1] ➝ ψ.substs ![#'0])
+  let t : Semiterm V ℒₒᵣ 1 := sorry
+  let Φ : Semiformula V ℒₒᵣ 0 := ∀' ∀' ((#'1 ≐ #'0) ➝ (t.substs ![#'1] ≐ t.substs ![#'0]))
   have : Φ.val = 0 := by { simp [Φ] }
  }
 

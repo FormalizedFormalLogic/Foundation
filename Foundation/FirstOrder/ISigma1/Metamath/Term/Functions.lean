@@ -412,6 +412,63 @@ lemma termBShift_termShift {t : V} (ht : IsSemiterm L n t) : termBShift L (termS
 
 end termBShift
 
+/-
+namespace TermFreeAt
+
+def blueprint : Language.TermRec.Blueprint 1 where
+  bvar := .mkSigma “y z m. (z < m → !qqBvarDef y z) ∧ (¬z < m → !qqFvarDef y 0)”
+  fvar := .mkSigma “y x m. !qqFvarDef y (x + 1)” (by simp)
+  func := .mkSigma “y k f v v' m. !qqFuncDef y k f v'” (by simp)
+
+noncomputable def construction : Language.TermRec.Construction V blueprint where
+  bvar param z        := if z < param 0 then ^#z else ^&0
+  fvar param x        := ^&(x + 1)
+  func param k f _ v' := ^func k f v'
+  bvar_defined := by
+    intro v
+    by_cases C : v 1 < v 2 <;> simp [blueprint, C]
+  fvar_defined := by intro v; simp [blueprint]
+  func_defined := by intro v; simp [blueprint]
+
+end TermFreeAt
+
+section termFreeAt
+
+open TermFreeAt
+
+variable (L)
+
+noncomputable def termFreeAt (m t : V) : V := construction.result L ![m] t
+
+noncomputable def termFreeAtVec (m k v : V) : V := construction.resultVec L ![m] k v
+
+def termFreeAtGraph : 𝚺₁.Semisentence 3 := (blueprint.result L).rew <| Rew.substs ![#0, #2, #1]
+
+def termFreeAtVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec L).rew <| Rew.substs ![#0, #1, #3, #2]
+
+variable {L}
+
+@[simp] lemma termFreeAt_bvar (m z : V) :
+    termFreeAt L m ^#z = if z < m then ^#z else ^&0 := by simp [termFreeAt, construction]
+
+@[simp] lemma termFreeAt_fvar (m x : V) :
+    termFreeAt L m ^&x = ^&(x + 1) := by simp [termFreeAt, construction]
+
+@[simp] lemma termFreeAt_func {m k f v : V} (hkf : L.IsFunc k f) (hv : IsUTermVec L k v) :
+    termFreeAt L m (^func k f v) = ^func k f (termFreeAtVec L m k v) := by
+  simp [termFreeAt, construction, hkf, hv]; rfl
+
+section
+
+lemma termFreeAt.defined : 𝚺₁-Function₂[V] termFreeAt L via termFreeAtGraph L := by
+  intro v
+  simpa [termFreeAtGraph, termFreeAt, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    using construction.result_defined (L := L) ![v 0, v 2, v 1]
+
+end
+
+end termFreeAt
+-/
 variable (L)
 
 noncomputable def qVec (w : V) : V := ^#0 ∷ termBShiftVec L (len w) w
@@ -622,10 +679,16 @@ end
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
 @[simp] lemma zero_semiterm : IsSemiterm ℒₒᵣ n (𝟎 : V) := by
-  simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  simp [-isFunc_iff_LOR, InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma one_semiterm : IsSemiterm ℒₒᵣ n (𝟏 : V) := by
-  simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  simp [-isFunc_iff_LOR, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+
+lemma coe_zero_eq : (𝟎 : V) = (^func 0 ⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ 0) := by
+  simp [InternalArithmetic.zero, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
+
+lemma coe_one_eq : (𝟏 : V) = (^func 0 ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ 0) := by
+  simp [InternalArithmetic.one, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
 
 namespace Numeral
 
@@ -670,7 +733,7 @@ end
   induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
-  case succ x ih => simp [qqAdd, ih]
+  case succ x ih => simp [-isFunc_iff_LOR, qqAdd, ih]
 
 end Numeral
 

@@ -808,6 +808,19 @@ end
 
 end free
 
+section free1
+
+variable (L)
+
+noncomputable def free1 (p : V) : V := substs L ?[^&0, ^#0] (shift L p)
+
+variable {L}
+
+@[simp] lemma IsSemiformula.free1 {p : V} (hp : IsSemiformula L 2 p) : IsSemiformula L 1 (free1 L p) :=
+  IsSemiformula.substs (m := 1) hp.shift (SemitermVec.cons (SemitermVec.cons (IsSemitermVec.empty _) (by simp)) (by simp))
+
+end free1
+
 /-! ### Complexity of formula -/
 
 section complexity
@@ -970,6 +983,16 @@ lemma fomulaComplexity_free {p : V} (hp : IsSemiformula L 1 p) :
   rw [fomulaComplexity_substs1 hp.shift this,
     formulaComplexity_shift hp.isUFormula]
 
+lemma fomulaComplexity_free1 {p : V} (hp : IsSemiformula L 2 p) :
+    formulaComplexity L (free1 L p) = formulaComplexity L p := by
+  unfold free1
+  have : IsSemiterm (V := V) L 0 ^&0 := by simp
+  rw [fomulaComplexity_substs (m := 1) (V := V) hp.shift]
+  · rw [formulaComplexity_shift hp.isUFormula]
+  · apply IsSemitermVec.cons ?_ (by simp)
+    apply IsSemitermVec.cons ?_ (by simp)
+    exact IsSemitermVec.nil _
+
 end complexity
 
 @[simp] lemma lt_max_succ_left (a b : V) : a < max a b + 1 := lt_succ_iff_le.mpr <| by simp
@@ -1021,6 +1044,102 @@ lemma IsFormula.sigma1_structural_induction {P : V → Prop} (hP : 𝚺₁-Predi
     have : P (free L p₁) := ih (free L p₁) (by simp only [le_sup_iff, f]; right; simp [qqEx])
       (by simp [fomulaComplexity_free h₁, h₁.isUFormula])
       (h₁.free)
+    exact hex _ h₁ this
+
+lemma IsFormula.sigma1_structural_induction₂ {P : V → Prop} (hP : 𝚺₁-Predicate P)
+    (hrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^rel k r v))
+    (hnrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^nrel k r v))
+    (hverum : P ^⊤)
+    (hfalsum : P ^⊥)
+    (hand : ∀ p q, IsSemiformula L 1 p → IsSemiformula L 1 q → P p → P q → P (p ^⋏ q))
+    (hor : ∀ p q, IsSemiformula L 1 p → IsSemiformula L 1 q → P p → P q → P (p ^⋎ q))
+    (hall : ∀ p, IsSemiformula L 2 p → P (free1 L p) → P (^∀ p))
+    (hex : ∀ p, IsSemiformula L 2 p → P (free1 L p) → P (^∃ p)) {p} :
+    IsSemiformula L 1 p → P p := by
+  have hm : 𝚺₁-Function₁[V] formulaComplexity L := inferInstance
+  let f : V → V := fun p ↦ max p (free1 L (π₂ (p - 1)))
+  have hf : 𝚺₁-Function₁ f := by unfold f; definability
+  apply measured_bounded_sigma1_order_induction hm hf ?_ ?_ p
+  · definability
+  intro p ih hp
+  rcases IsSemiformula.case_iff.mp hp with
+    (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩
+      | rfl | rfl
+      | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂, h₁, h₂, rfl⟩
+      | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩)
+  · exact hrel _ _ _ hR hv
+  · exact hnrel _ _ _ hR hv
+  · exact hverum
+  · exact hfalsum
+  · have ih₁ : P p₁ :=
+      ih p₁ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₁
+    have ih₂ : P p₂ :=
+      ih p₂ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₂
+    exact hand _ _ h₁ h₂ ih₁ ih₂
+  · have ih₁ : P p₁ :=
+      ih p₁ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₁
+    have ih₂ : P p₂ :=
+      ih p₂ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₂
+    exact hor _ _ h₁ h₂ ih₁ ih₂
+  · have h₁ : IsSemiformula L 2 p₁ := by simpa [one_add_one_eq_two] using h₁
+    have : P (free1 L p₁) := ih (free1 L p₁) (by simp only [le_sup_iff, f]; right; simp [qqAll])
+      (by simp [fomulaComplexity_free1 h₁, h₁.isUFormula])
+      h₁.free1
+    exact hall _ h₁ this
+  · have h₁ : IsSemiformula L 2 p₁ := by simpa  [one_add_one_eq_two] using h₁
+    have : P (free1 L p₁) := ih (free1 L p₁) (by simp only [le_sup_iff, f]; right; simp [qqEx])
+      (by simp [fomulaComplexity_free1 h₁, h₁.isUFormula])
+      h₁.free1
+    exact hex _ h₁ this
+
+lemma IsFormula.sigma1_structural_induction₂_ss {P : V → Prop} (hP : 𝚺₁-Predicate P)
+    (hrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^rel k r v))
+    (hnrel : ∀ k r v, L.IsRel k r → IsSemitermVec L k 1 v → P (^nrel k r v))
+    (hverum : P ^⊤)
+    (hfalsum : P ^⊥)
+    (hand : ∀ p q, IsSemiformula L 1 p → IsSemiformula L 1 q → P p → P q → P (p ^⋏ q))
+    (hor : ∀ p q, IsSemiformula L 1 p → IsSemiformula L 1 q → P p → P q → P (p ^⋎ q))
+    (hall : ∀ p, IsSemiformula L 2 p → P (free1 L <| shift L <| shift L <| p) → P (^∀ p))
+    (hex : ∀ p, IsSemiformula L 2 p → P (free1 L <| shift L <| shift L <| p) → P (^∃ p)) {p} :
+    IsSemiformula L 1 p → P p := by
+  have hm : 𝚺₁-Function₁[V] formulaComplexity L := inferInstance
+  let f : V → V := fun p ↦ max p (free1 L <| shift L <| shift L <| (π₂ (p - 1)))
+  have hf : 𝚺₁-Function₁ f := by unfold f; definability
+  apply measured_bounded_sigma1_order_induction hm hf ?_ ?_ p
+  · definability
+  intro p ih hp
+  rcases IsSemiformula.case_iff.mp hp with
+    (⟨k, R, v, hR, hv, rfl⟩ | ⟨k, R, v, hR, hv, rfl⟩
+      | rfl | rfl
+      | ⟨p₁, p₂, h₁, h₂, rfl⟩ | ⟨p₁, p₂, h₁, h₂, rfl⟩
+      | ⟨p₁, h₁, rfl⟩ | ⟨p₁, h₁, rfl⟩)
+  · exact hrel _ _ _ hR hv
+  · exact hnrel _ _ _ hR hv
+  · exact hverum
+  · exact hfalsum
+  · have ih₁ : P p₁ :=
+      ih p₁ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₁
+    have ih₂ : P p₂ :=
+      ih p₂ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₂
+    exact hand _ _ h₁ h₂ ih₁ ih₂
+  · have ih₁ : P p₁ :=
+      ih p₁ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₁
+    have ih₂ : P p₂ :=
+      ih p₂ (by simp only [le_sup_iff, f]; left; exact le_of_lt <| by simp) (by simp [h₁.isUFormula, h₂.isUFormula]) h₂
+    exact hor _ _ h₁ h₂ ih₁ ih₂
+  · have h₁ : IsSemiformula L 2 p₁ := by simpa [one_add_one_eq_two] using h₁
+    have : P (free1 L <| shift L <| shift L <| p₁) :=
+      ih (free1 L <| shift L <| shift L <| p₁) (by simp only [le_sup_iff, f]; right; simp [qqAll])
+      (by rw [fomulaComplexity_free1 h₁.shift.shift, formulaComplexity_shift h₁.shift.isUFormula,
+          formulaComplexity_shift h₁.isUFormula]; simp [h₁.isUFormula])
+      h₁.shift.shift.free1
+    exact hall _ h₁ this
+  · have h₁ : IsSemiformula L 2 p₁ := by simpa [one_add_one_eq_two] using h₁
+    have : P (free1 L <| shift L <| shift L <| p₁) :=
+      ih (free1 L <| shift L <| shift L <| p₁) (by simp only [le_sup_iff, f]; right; simp [qqEx])
+      (by rw [fomulaComplexity_free1 h₁.shift.shift, formulaComplexity_shift h₁.shift.isUFormula,
+          formulaComplexity_shift h₁.isUFormula]; simp [h₁.isUFormula])
+      h₁.shift.shift.free1
     exact hex _ h₁ this
 
 /-
