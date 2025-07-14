@@ -5,7 +5,7 @@ import Foundation.FirstOrder.Incompleteness.StandardProvability.D1
 
 /-!
 
-# Formalized Theory $\mathsf{R_0}$
+# Internal theory of equality
 
 -/
 
@@ -23,19 +23,13 @@ local prefix:max "#'" => Semiterm.bvar (V := V) (L := ℒₒᵣ)
 
 local prefix:max "&'" => Semiterm.fvar (V := V) (L := ℒₒᵣ)
 
-noncomputable abbrev num (n : V) : Semiterm V ℒₒᵣ k := typedNumeral n
-
 scoped postfix:max "⇞" => Semiterm.shift
 
 scoped postfix:max "⤉" => Semiformula.shift
 
 variable (T : ArithmeticTheory) [Theory.Δ₁Definable T] [𝐏𝐀⁻ ⪯ T]
 
-namespace TProof
-
 open Entailment Entailment.FiniteContext Semiformula
-
-section InternalR₀Theory
 
 instance : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐄𝐐 ⪯ 𝐏𝐀⁻)) inferInstance
 
@@ -58,6 +52,8 @@ lemma eq_comm_ctx {t u : Term V ℒₒᵣ} :
   of'! (eq_symm T t u) ⨀ b
 
 variable (T)
+
+section replace
 
 lemma subst_eq (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢! (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ ≐ u₁) ➝ (t₂ ≐ u₂) := by
   have : T ⊢! “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ = y₁ → x₂ = y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
@@ -317,11 +313,11 @@ lemma replace_nlt (t u : Semiterm V ℒₒᵣ 1) :
       (u⇞⇞.substs ![&'1]) (u⇞⇞.substs ![&'0]))
     ⨀ ht ⨀ hu ⨀ hh
 
-lemma replacse_aux_aux (φ : V) :
+lemma replace_aux (φ : V) :
     IsSemiformula ℒₒᵣ 1 φ →
     T.Provable (^∀ ^∀ imp ℒₒᵣ (^#1 ^= ^#0) (imp ℒₒᵣ (substs ℒₒᵣ (^#1 ∷ 0) φ) (substs ℒₒᵣ (^#0 ∷ 0) φ))) := by
   apply IsFormula.sigma1_structural_induction₂_ss
-  · sorry
+  · definability
   case hand =>
     intro p q hp hq ihp ihq
     let φ : Semiformula V ℒₒᵣ 1 := ⟨p, by simpa using hp⟩
@@ -468,3 +464,17 @@ lemma replacse_aux_aux (φ : V) :
     simpa [Semiformula.free1, Semiformula.free, SemitermVec.q,
       Semiformula.shift_substs, Semiformula.substs_substs, one_add_one_eq_two]
       using TProof.specialize₂! ih (&'1) (&'2)
+
+lemma replace (φ : Semiformula V ℒₒᵣ 1) :
+    T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ.substs ![#'1] ➝ φ.substs ![#'0]) := by
+  apply (internalize_TProvable_iff_provable (T := T)).mpr
+  simpa using replace_aux T φ.val
+
+lemma replace' (φ : Semiformula V ℒₒᵣ 1) (u₁ u₂ : Term V ℒₒᵣ) :
+    T.internalize V ⊢! (u₁ ≐ u₂) ➝ φ.substs ![u₁] ➝ φ.substs ![u₂] := by
+  have := TProof.specialize₂! (replace T φ) u₂ u₁
+  simpa [Semiformula.substs_substs] using this
+
+end replace
+
+end InternalArithmetic
