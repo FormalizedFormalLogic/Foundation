@@ -3,8 +3,7 @@ import Foundation.Modal.Neighborhood.Basic
 
 namespace LO.Modal
 
-open LO.Entailment
-
+open LO.Entailment LO.Modal.Entailment
 
 section
 
@@ -66,6 +65,13 @@ lemma iff_subset : 𝓢 ⊢! φ ⭤ ψ ↔ ‖φ‖ = ‖ψ‖ := by
     replace h₂ := imp_subset.mpr h₂;
     cl_prover [h₁, h₂];
 
+lemma eq_boxed_of_eq [Entailment.E 𝓢] : ‖φ‖ = ‖ψ‖ → ‖□φ‖ = ‖□ψ‖ := by
+  intro h;
+  apply iff_subset.mp;
+  apply re!;
+  apply iff_subset.mpr;
+  assumption;
+
 end MaximalConsistentSet.proofset
 
 end
@@ -84,10 +90,10 @@ variable {𝓢 : S} [Entailment.Cl 𝓢] [Entailment.Consistent 𝓢]
 variable {φ ψ ξ : Formula ℕ}
 
 structure Canonicalℬ (𝓢 : S) where
-  fn : Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)
-  canonicity : ∀ φ, (fn ((proofset 𝓢 φ))) = (proofset 𝓢 (□φ))
+  ℬ : Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)
+  canonicity : ∀ φ, ℬ (proofset 𝓢 φ) = proofset 𝓢 (□φ)
 
-instance : CoeFun (Canonicalℬ 𝓢) (fun _ => Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)) := ⟨Canonicalℬ.fn⟩
+instance : CoeFun (Canonicalℬ 𝓢) (fun _ => Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)) := ⟨Canonicalℬ.ℬ⟩
 
 def mkCanonicalFrame
   (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢]
@@ -134,14 +140,14 @@ lemma complete_of_canonical_frame
     tauto;
 
 open Classical in
-def canonical_minimal_ℬ (𝓢 : S) : Canonicalℬ 𝓢 where
-  fn := λ Γ => if h : ∃ φ, Γ = (proofset 𝓢 φ) then (proofset 𝓢 (□(h.choose))) else ∅
+def canonical_minimal_ℬ (𝓢 : S) [Entailment.E 𝓢] : Canonicalℬ 𝓢 where
+  ℬ Γ := if h : ∃ φ, Γ = (proofset 𝓢 φ) then (proofset 𝓢 (□(h.choose))) else ∅
   canonicity := by
-    intro ψ;
+    intro φ;
     split;
     . rename_i h;
-      obtain ⟨φ, hφ⟩ := h;
-      sorry;
+      apply proofset.eq_boxed_of_eq;
+      apply h.choose_spec.symm;
     . tauto;
 
 end Neighborhood
