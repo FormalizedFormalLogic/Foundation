@@ -1,7 +1,7 @@
 import Foundation.FirstOrder.Internal.Proof.Typed
 
 /-!
-# Derivability condition D1 and soundness of internal provability.
+# Hilbert-Bernays-Löb derivability condition $\mathbf{D1}$ and soundness of internal provability.
 -/
 
 open Encodable LO FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath

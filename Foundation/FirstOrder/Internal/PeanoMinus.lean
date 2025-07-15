@@ -1,7 +1,7 @@
 import Foundation.FirstOrder.Internal.EquationalTheory
 
 /-!
-# Internal theory of $\mathsf{PA}^-$, $\mathsf{R_0}$
+# Internal theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
 -/
 
 namespace LO.PeanoMinus
@@ -15,13 +15,11 @@ lemma lt_succ_iff_eq_or_succ {a b : V} : a < b + 1 ↔ a = b ∨ a < b := by
 
 end LO.PeanoMinus
 
-namespace LO.ISigma1.Metamath
+namespace LO.ISigma1.Metamath.InternalArithmetic
 
 open Classical FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
-
-namespace InternalArithmetic
 
 local prefix:max "#'" => Semiterm.bvar  (V := V) (L := ℒₒᵣ)
 
@@ -30,8 +28,6 @@ local prefix:max "&'" => Semiterm.fvar (V := V) (L := ℒₒᵣ)
 local postfix:max "⇞" => Semiterm.shift
 
 local postfix:max "⤉" => Semiformula.shift
-
-scoped prefix:max "𝕹" => typedNumeral
 
 variable (T : ArithmeticTheory) [Theory.Δ₁Definable T] [𝐏𝐀⁻ ⪯ T]
 
@@ -52,7 +48,7 @@ lemma term_add_assoc (t₁ t₂ t₃ : Term V ℒₒᵣ) :
 lemma numeral_add (n m : V) :
     T.internalize V ⊢! (𝕹 n + 𝕹 m) ≐ 𝕹 (n + m) := by
   induction m using ISigma1.sigma1_pos_succ_induction
-  · simp only [internalize_TProvable_iff_provable, val_equals, val_add, val_numeral]
+  · simp only [tprovable_iff_provable, val_equals, val_add, val_numeral]
     definability
   case zero =>
     have : T.internalize V ⊢! ∀' ((#'0 + 𝕹 0) ≐ #'0) := by
@@ -84,7 +80,7 @@ lemma numeral_add (n m : V) :
 lemma numeral_mul (n m : V) :
     T.internalize V ⊢! 𝕹 n * 𝕹 m ≐ 𝕹 (n * m) := by
   induction m using ISigma1.sigma1_pos_succ_induction
-  · simp only [internalize_TProvable_iff_provable, val_equals, val_mul, val_numeral]
+  · simp only [tprovable_iff_provable, val_equals, val_mul, val_numeral]
     definability
   case zero =>
     have : T.internalize V ⊢! ∀' ((#'0 * 𝕹 0) ≐ 𝕹 0) := by
@@ -119,6 +115,10 @@ lemma numeral_mul (n m : V) :
       subst_add_eq_add T _ _ _ _ ⨀! ih ⨀! (eq_refl T (𝕹 n))
     have e3 : T.internalize V ⊢! 𝕹 (n * (m + 1)) + 𝕹 n ≐ 𝕹 (n * (m + 1) + n) := numeral_add T _ _
     exact eq_trans (eq_trans e1 e2) e3
+
+lemma numeral_eq {n m : V} :
+    n = m → T.internalize V ⊢! 𝕹 n ≐ 𝕹 m := by
+  rintro rfl; exact eq_refl T (𝕹 n)
 
 lemma numeral_lt {n m : V} :
     n < m → T.internalize V ⊢! 𝕹 n <' 𝕹 m := fun h ↦ by
@@ -178,7 +178,7 @@ lemma numeral_nlt {n m : V} :
 lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
     T.internalize V ⊢! (t <' 𝕹 m) ⭤ substItrDisj ![t] (#'1 ≐ #'0) m := by
   induction m using ISigma1.sigma1_pos_succ_induction
-  · simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, internalize_TProvable_iff_provable,
+  · simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, tprovable_iff_provable,
       val_iff, val_lessThan, val_numeral, substItrDisj_val, SemitermVec.val_succ, Matrix.head_cons,
       Matrix.tail_cons, SemitermVec.val_nil, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod,
       Nat.mod_succ, Nat.cast_one, Nat.zero_mod, Nat.cast_zero]
@@ -238,7 +238,7 @@ lemma bex_intro (φ : Semiformula V ℒₒᵣ 1) (n : V) {i}
     (hi : i < n) (b : T.internalize V ⊢! φ.substs ![𝕹 i]) :
     T.internalize V ⊢! φ.bex (𝕹 n) := by
   apply TProof.ex! (𝕹 i)
-  suffices Theory.internalize V T ⊢! (𝕹 i <' 𝕹 n) ⋏ φ.substs ![𝕹 i] by simpa
+  suffices T.internalize V ⊢! (𝕹 i <' 𝕹 n) ⋏ φ.substs ![𝕹 i] by simpa
   apply K!_intro
   · exact numeral_lt T hi
   · exact b
@@ -251,6 +251,4 @@ lemma bex_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
     T.internalize V ⊢! (t ≐ u) ➝ φ.bex t ➝ φ.bex u := by
   simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.substs ![#'0]).bex #'0) t u
 
-end InternalArithmetic
-
-end LO.ISigma1.Metamath
+end LO.ISigma1.Metamath.InternalArithmetic

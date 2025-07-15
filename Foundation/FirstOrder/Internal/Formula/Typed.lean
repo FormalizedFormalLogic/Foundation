@@ -199,6 +199,13 @@ noncomputable def substs (w : SemitermVec V L n m) (φ : Semiformula V L n) : Se
 @[simp] lemma substs_imply (w : SemitermVec V L n m) (φ ψ : Semiformula V L n) : (φ ⭤ ψ).substs w = φ.substs w ⭤ ψ.substs w := by
   simp [LogicalConnective.iff]
 
+@[simp] lemma substs_ball (t) (w : SemitermVec V L n m) (φ : Semiformula V L (n + 1)) :
+    (∀[t] φ).substs w = ∀[t.substs w.q] (φ.substs w.q) := by
+  simp [ball]
+@[simp] lemma substs_bex (t) (w : SemitermVec V L n m) (φ : Semiformula V L (n + 1)) :
+    (∃[t] φ).substs w = ∃[t.substs w.q] (φ.substs w.q) := by
+  simp [bex]
+
 lemma subst_eq_self {n : ℕ} (w : SemitermVec V L n n) (φ : Semiformula V L n) (H : ∀ i, w i = Semiterm.bvar i) :
     φ.substs w = φ := by
   suffices ∀ i < ↑n, w.val.[i] = ^#i by
@@ -377,6 +384,22 @@ noncomputable def Semiformula.bex (t : Semiterm V ℒₒᵣ n) (φ : Semiformula
 namespace InternalArithmetic
 
 variable {n m : ℕ}
+
+@[simp] lemma rel_eq_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
+    Semiformula.rel (Language.Eq.eq : (ℒₒᵣ).Rel 2) v = (v 0 ≐ v 1) := by
+  ext; rfl
+
+@[simp] lemma nrel_eq_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
+    Semiformula.nrel (Language.Eq.eq : (ℒₒᵣ).Rel 2) v = (v 0 ≉ v 1) := by
+  ext; rfl
+
+@[simp] lemma rel_lt_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
+    Semiformula.rel (Language.LT.lt : (ℒₒᵣ).Rel 2) v = (v 0 <' v 1) := by
+  ext; rfl
+
+@[simp] lemma nrel_lt_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
+    Semiformula.nrel (Language.LT.lt : (ℒₒᵣ).Rel 2) v = (v 0 ≮' v 1) := by
+  ext; rfl
 
 @[simp] lemma val_equals (t u : Semiterm V ℒₒᵣ n) : (t ≐ u).val = t.val ^= u.val := rfl
 @[simp] lemma val_notEquals (t u : Semiterm V ℒₒᵣ n) : (t ≉ u).val = t.val ^≠ u.val := rfl

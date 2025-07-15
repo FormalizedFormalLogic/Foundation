@@ -5,23 +5,25 @@ import Foundation.FirstOrder.Incompleteness.StandardProvability.D1
 
 -/
 
-namespace LO.ISigma1.Metamath
+namespace LO.ISigma1.Metamath.InternalArithmetic
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+open Classical FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-namespace InternalArithmetic
+local prefix:max "#'" => Semiterm.bvar  (V := V) (L := ℒₒᵣ)
 
-variable {T : ArithmeticTheory} [T.Δ₁Definable]
+local prefix:max "&'" => Semiterm.fvar (V := V) (L := ℒₒᵣ)
 
-noncomputable abbrev bv {n : V} (x : V) (h : x < n := by simp) : Semiterm V ℒₒᵣ n := Semiterm.bv x h
+local postfix:max "⇞" => Semiterm.shift
 
-noncomputable abbrev fv {n : V} (x : V) : Semiterm V ℒₒᵣ n := Semiterm.fv x
+local postfix:max "⤉" => Semiformula.shift
 
-local prefix:max "#'" => bv
+scoped prefix:max "𝕹" => typedNumeral
 
-local prefix:max "&'" => fv
+variable (T : ArithmeticTheory) [Theory.Δ₁Definable T] [𝐏𝐀⁻ ⪯ T]
+
+open Entailment Entailment.FiniteContext Semiformula
 
 noncomputable def toNumVec {n} (e : Fin n → V) : SemitermVec V ℒₒᵣ n 0 :=
   ⟨⌜fun i ↦ numeral (e i)⌝,
@@ -140,7 +142,7 @@ theorem term_complete {n : ℕ} (t : FirstOrder.Semiterm ℒₒᵣ Empty n) (e :
 
 open FirstOrder.Arithmetic
 
-theorem bold_sigma₁_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierarchy 𝚺 1 φ) {e} :
+theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierarchy 𝚺 1 φ) {e} :
     V ⊧/e φ → T.internalize V ⊢! ⌜φ⌝^/[toNumVec e] := by
   revert e
   apply sigma₁_induction' hp
@@ -278,8 +280,8 @@ theorem bold_sigma₁_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierarc
     simpa [Language.TSemifromula.substs_substs] using ihp hx
 
 /-- Hilbert–Bernays provability condition D3 -/
-theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) : V ⊧ₘ₀ σ → T.internalize V ⊢! ⌜σ⌝ := by
-  intro h; simpa using bold_sigma₁_complete T hσ (e := ![]) (by simpa [models₀_iff] using h)
+theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) : V ⊧ₘ₀ σ → T.internalize V ⊢! ⌜σ⌝ := by
+  intro h; simpa using bold_sigma_one_complete T hσ (e := ![]) (by simpa [models₀_iff] using h)
 
 end TProof
 
@@ -289,13 +291,13 @@ section
 
 variable {T : ArithmeticTheory} [T.Δ₁Definable]
 
-theorem sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
-  simpa [provable_iff] using InternalArithmetic.TProof.sigma₁_complete _ hσ h
+  simpa [provable_iff] using InternalArithmetic.TProof.sigma_one_complete _ hσ h
 
-theorem sigma₁_complete_provable {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+theorem sigma_one_complete_provable {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     V ⊧ₘ₀ σ → T†V ⊢! ⌜σ⌝ := fun h ↦ by
-  simpa [provable_iff] using InternalArithmetic.TProof.sigma₁_complete _ hσ h
+  simpa [provable_iff] using InternalArithmetic.TProof.sigma_one_complete _ hσ h
 
 end
 

@@ -33,15 +33,15 @@ theorem provable_D2 {σ π} : T ⊢!. □(σ ➝ π) ➝ □σ ➝ □π :=
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
     simpa [models_iff] using modus_ponens₀
 
-lemma provable_sigma₁_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+lemma provable_sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     T ⊢!. σ ➝ □σ :=
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
   complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
-    simpa [models_iff] using sigma₁_complete (T := U) (V := V) hσ
+    simpa [models_iff] using sigma_one_complete (T := U) (V := V) hσ
 
 theorem provable_D3 {σ : Sentence ℒₒᵣ} :
-    T ⊢!. □σ ➝ □□σ := provable_sigma₁_complete (by simp)
+    T ⊢!. □σ ➝ □□σ := provable_sigma_one_complete (by simp)
 
 open LO.Entailment LO.Entailment.FiniteContext
 

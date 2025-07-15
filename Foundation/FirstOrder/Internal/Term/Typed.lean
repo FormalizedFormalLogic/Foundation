@@ -263,6 +263,8 @@ variable {k n m : ℕ}
 
 noncomputable def typedNumeral (m : V) : Semiterm V ℒₒᵣ n := ⟨numeral m, by simp⟩
 
+scoped prefix:max "𝕹" => typedNumeral
+
 noncomputable def add (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n := ⟨t.val ^+ u.val, by simp [qqAdd]⟩
 
 noncomputable def mul (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n := ⟨t.val ^* u.val, by simp [qqMul]⟩
@@ -271,13 +273,27 @@ noncomputable instance (n : ℕ) : Add (Semiterm V ℒₒᵣ n) := ⟨add⟩
 
 noncomputable instance (n : ℕ) : Mul (Semiterm V ℒₒᵣ n) := ⟨mul⟩
 
-noncomputable instance coeNumeral (n : ℕ) : Coe V (Semiterm V ℒₒᵣ n) := ⟨typedNumeral⟩
-
-@[simp] lemma val_numeral (x : V) : (↑x : Semiterm V ℒₒᵣ n).val = numeral x := rfl
+@[simp] lemma val_numeral (x : V) : (𝕹 x : Semiterm V ℒₒᵣ n).val = numeral x := rfl
 
 @[simp] lemma val_add (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ + t₂).val = t₁.val ^+ t₂.val := rfl
 
 @[simp] lemma val_mul (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ * t₂).val = t₁.val ^* t₂.val := rfl
+
+@[simp] lemma zero_eq (v) :
+    Semiterm.func (V := V) (n := n) (Language.Zero.zero : (ℒₒᵣ).Func 0) v = typedNumeral 0 := by
+  ext; simp [coe_zero_eq]
+
+@[simp] lemma one_eq (v) :
+    Semiterm.func (V := V) (n := n) (Language.One.one : (ℒₒᵣ).Func 0) v = typedNumeral 1 := by
+  ext; simp [coe_one_eq]
+
+@[simp] lemma add_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
+    Semiterm.func (Language.Add.add : (ℒₒᵣ).Func 2) v = v 0 + v 1 := by
+  ext; rfl
+
+@[simp] lemma mul_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
+    Semiterm.func (Language.Mul.mul : (ℒₒᵣ).Func 2) v = v 0 * v 1 := by
+  ext; rfl
 
 @[simp] lemma add_inj_iff {t₁ t₂ u₁ u₂ : Semiterm V ℒₒᵣ n} :
     t₁ + t₂ = u₁ + u₂ ↔ t₁ = u₁ ∧ t₂ = u₂ := by
@@ -296,7 +312,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
   ext; simp [numeral_succ_pos pos]
 
 @[simp] lemma subst_numeral (w : SemitermVec V ℒₒᵣ n m) (x : V) :
-    (↑x : Semiterm V ℒₒᵣ n).substs w = ↑x := by
+    (𝕹 x : Semiterm V ℒₒᵣ n).substs w = 𝕹 x := by
   ext; simp [Semiterm.substs, numeral_substs w.isSemitermVec]
 
 @[simp] lemma subst_add (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
@@ -307,7 +323,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
     (t₁ * t₂).substs w = t₁.substs w * t₂.substs w := by
   ext; simp [qqMul, Semiterm.substs]
 
-@[simp] lemma shift_numeral (x : V) : (↑x : Semiterm V ℒₒᵣ n).shift = ↑x := by
+@[simp] lemma shift_numeral (x : V) : (𝕹 x : Semiterm V ℒₒᵣ n).shift = 𝕹 x := by
   ext; simp [Semiterm.shift]
 
 @[simp] lemma shift_add (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ + t₂).shift = t₁.shift + t₂.shift := by
@@ -316,7 +332,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
 @[simp] lemma shift_mul (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ * t₂).shift = t₁.shift * t₂.shift := by
   ext; simp [qqMul, Semiterm.shift]
 
-@[simp] lemma bShift_numeral (x : V) : (↑x : Semiterm V ℒₒᵣ n).bShift = ↑x := by
+@[simp] lemma bShift_numeral (x : V) : (𝕹 x : Semiterm V ℒₒᵣ n).bShift = 𝕹 x := by
   ext; simp [Semiterm.bShift]
 
 @[simp] lemma bShift_add (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ + t₂).bShift = t₁.bShift + t₂.bShift := by
@@ -325,7 +341,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
 @[simp] lemma bShift_mul (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ * t₂).bShift = t₁.bShift * t₂.bShift := by
   ext; simp [qqMul, Semiterm.bShift]
 
-@[simp] lemma fvFree_numeral (x : V) : (↑x : Semiterm V ℒₒᵣ n).FVFree := by simp [Semiterm.FVFree.iff]
+@[simp] lemma fvFree_numeral (x : V) : (𝕹 x : Semiterm V ℒₒᵣ n).FVFree := by simp [Semiterm.FVFree.iff]
 
 @[simp] lemma fvFree_add (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ + t₂).FVFree ↔ t₁.FVFree ∧ t₂.FVFree := by simp [Semiterm.FVFree.iff]
@@ -339,7 +355,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
 @[simp] lemma free_mul (t₁ t₂ : Semiterm V ℒₒᵣ 1) : (t₁ * t₂).free = t₁.free * t₂.free := by
   simp [Semiterm.free]
 
-@[simp] lemma free_numeral (x : V) : (↑x : Semiterm V ℒₒᵣ 1).free = ↑x := by simp [Semiterm.free]
+@[simp] lemma free_numeral (x : V) : (𝕹 x : Semiterm V ℒₒᵣ 1).free = 𝕹 x := by simp [Semiterm.free]
 
 /-
 lemma replace {P : α → isSemiterm} {x y} (hx : P x) (h : x = y) : P y := h ▸ hx

@@ -441,7 +441,7 @@ lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
         simpa [models_iff] using Θ.disjunction i
     exact Entailment.WeakerThan.pbl this
   have Tθ : T†V ⊢! ⌜θ T i⌝ :=
-    sigma₁_complete_provable (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
+    sigma_one_complete_provable (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
   have hP : T†V ⊢! ⌜T.solovay i⌝ ⋎ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := (by simpa using TP) ⨀ Tθ
   have : T†V ⊢! ∼⌜T.solovay i⌝ := by simpa using provable_iff.mp (Solovay.refute ne hS)
   have : T†V ⊢! ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this

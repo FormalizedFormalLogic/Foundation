@@ -113,7 +113,7 @@ lemma term_replace_aux (t : V) :
 
 lemma term_replace (t : Semiterm V ℒₒᵣ 1) :
     T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (t.substs ![#'1] ≐ t.substs ![#'0])) := by
-  apply (internalize_TProvable_iff_provable (T := T)).mpr
+  apply (tprovable_iff_provable (T := T)).mpr
   simpa using term_replace_aux T t.val
 
 lemma term_replace' (t : Semiterm V ℒₒᵣ 1) (u₁ u₂ : Term V ℒₒᵣ) :
@@ -198,14 +198,14 @@ lemma replacse_aux_aux (φ : V) :
       let u : Semiterm V ℒₒᵣ 1 := ⟨v.[1], by simpa using hv.nth (by simp)⟩
       have veq : v = ?[t.val, u.val] := by simp [t, u, vec2_eq hv.lh]
       suffices T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (t ≐ u).substs ![#'1] ➝ (t ≐ u).substs ![#'0]) by
-        have := (internalize_TProvable_iff_provable (T := T)).mp this
+        have := (tprovable_iff_provable (T := T)).mp this
         simpa [-substs_equals, veq, val_all] using this
       simpa using replace_eq T t u
     · let t : Semiterm V ℒₒᵣ 1 := ⟨v.[0], by simpa using hv.nth (by simp)⟩
       let u : Semiterm V ℒₒᵣ 1 := ⟨v.[1], by simpa using hv.nth (by simp)⟩
       have veq : v = ?[t.val, u.val] := by simp [t, u, vec2_eq hv.lh]
       suffices T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (t <' u).substs ![#'1] ➝ (t <' u).substs ![#'0]) by
-        have := (internalize_TProvable_iff_provable (T := T)).mp this
+        have := (tprovable_iff_provable (T := T)).mp this
         simpa [-substs_lessThan, veq, val_all] using this
       --simpa using replace_eq T t u
 
@@ -228,13 +228,13 @@ lemma replacse_aux_aux (φ : V) :
     intro p hp ih
     let φ : Semiformula V ℒₒᵣ 2 := ⟨p, hp⟩
     suffices T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (∀' φ).substs ![#'1] ➝ (∀' φ).substs ![#'0]) by
-      have := (internalize_TProvable_iff_provable (T := T)).mp this
+      have := (tprovable_iff_provable (T := T)).mp this
       simpa only [Nat.reduceAdd, Fin.isValue, Nat.succ_eq_add_one, val_all,
         val_imp, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Nat.cast_one,
         Nat.zero_mod, Nat.cast_zero, val_substs, SemitermVec.val_succ, Matrix.head_cons,
         Matrix.tail_cons, SemitermVec.val_nil] using this
     have ih : T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ↟↟.free1.substs ![#'1] ➝ φ↟↟.free1.substs ![#'0]) := by
-      apply (internalize_TProvable_iff_provable (T := T)).mpr
+      apply (tprovable_iff_provable (T := T)).mpr
       simpa using ih
     suffices
         T.internalize V ⊢! ∀' ((&'0 ≐ #'0) ➝ ∀' φ↟.substs ![#'0, &'0] ➝ ∀' φ↟.substs ![#'0, #'1]) by
@@ -252,13 +252,13 @@ lemma replacse_aux_aux (φ : V) :
     intro p hp ih
     let φ : Semiformula V ℒₒᵣ 2 := ⟨p, hp⟩
     suffices T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (∃' φ).substs ![#'1] ➝ (∃' φ).substs ![#'0]) by
-      have := (internalize_TProvable_iff_provable (T := T)).mp this
+      have := (tprovable_iff_provable (T := T)).mp this
       simpa only [Nat.reduceAdd, Fin.isValue, Nat.succ_eq_add_one, val_all,
         val_imp, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod, Nat.mod_succ, Nat.cast_one,
         Nat.zero_mod, Nat.cast_zero, val_substs, SemitermVec.val_succ, Matrix.head_cons,
         Matrix.tail_cons, SemitermVec.val_nil] using this
     have ih : T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ↟↟.free1.substs ![#'1] ➝ φ↟↟.free1.substs ![#'0]) := by
-      apply (internalize_TProvable_iff_provable (T := T)).mpr
+      apply (tprovable_iff_provable (T := T)).mpr
       simpa using ih
     suffices
         T.internalize V ⊢! ∀' ((&'0 ≐ #'0) ➝ ∃' φ↟.substs ![#'0, &'0] ➝ ∃' φ↟.substs ![#'0, #'1]) by
@@ -323,7 +323,7 @@ lemma replace (φ : Semiformula V ℒₒᵣ (0 + 1)) : T.internalize V ⊢! ((#'
 lemma numeral_add (n m : V) :
     T.internalize V ⊢! (num n + num m) ≐ num (n + m) := by {
   induction m using ISigma1.sigma1_pos_succ_induction
-  · -- simp only [internalize_TProvable_iff_provable, val_equals, val_add, val_numeral]
+  · -- simp only [tprovable_iff_provable, val_equals, val_add, val_numeral]
     -- definability
     sorry
   case zero =>

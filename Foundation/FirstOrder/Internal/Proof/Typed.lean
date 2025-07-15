@@ -152,8 +152,14 @@ alias ⟨toProvable, _root_.LO.FirstOrder.Theory.Provable.toTProvable⟩ := TPro
 
 def proof_to_tDerivation {σ : Formula V L} : T ⊢ σ → T ⊢ᵈᵉʳ insert σ ∅ := fun x ↦ x
 
-lemma internalize_TProvable_iff_provable {T : Theory L} [T.Δ₁Definable] {σ : Formula V L} :
+lemma tprovable_iff_provable {T : Theory L} [T.Δ₁Definable] {σ : Formula V L} :
     T.internalize V ⊢! σ ↔ T.Provable σ.val := TProvable.iff_provable
+
+lemma tprovable_tquote_iff_provable_quote {T : Theory L} [T.Δ₁Definable] {φ : SyntacticFormula L} :
+    T.internalize V ⊢! ⌜φ⌝ ↔ T.Provable (⌜φ⌝ : V) := TProvable.iff_provable
+
+lemma tprovable_tquote_iff_provable_quote_sentence {T : Theory L} [T.Δ₁Definable] {σ : Sentence L} :
+    T.internalize V ⊢! ⌜σ⌝ ↔ T.Provable (⌜σ⌝ : V) := TProvable.iff_provable
 
 def TDerivation.toTProof {φ} (d : T ⊢ᵈᵉʳ insert φ ∅) : T ⊢ φ := d
 
@@ -497,7 +503,7 @@ open Entailment Theory.Derivation
 
 lemma substItrDisj_right {i z : V}
     (w : TermVec V ℒₒᵣ m) (φ : Semiformula V ℒₒᵣ (m + 1)) (hi : i < z) :
-    A ⊢! φ.substs (↑i :> w) ➝ φ.substItrDisj w z := Theory.Provable.toTProvable <| Theory.Derivable.toProvable <| by
+    A ⊢! φ.substs (𝕹 i :> w) ➝ φ.substItrDisj w z := Theory.Provable.toTProvable <| Theory.Derivable.toProvable <| by
   apply Theory.Derivable.or
   apply Theory.Derivable.exchange
   apply Theory.Derivable.disj (L := ℒₒᵣ) (i := z - (i + 1)) _
@@ -517,12 +523,12 @@ lemma substItrDisj_right {i z : V}
     · simp
 
 lemma substItrDisj_right_intro {ψ} {i z : V} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)}
-    (hi : i < z) (h : A ⊢! ψ ➝ φ.substs (↑i :> w)) :
+    (hi : i < z) (h : A ⊢! ψ ➝ φ.substs (𝕹 i :> w)) :
      A ⊢! ψ ➝ φ.substItrDisj w z :=
   Entailment.C!_trans h (substItrDisj_right A w φ hi)
 
 lemma substItrConj_right_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
-    (h : ∀ i < z, A ⊢! ψ ➝ φ.substs (↑i :> w)) :
+    (h : ∀ i < z, A ⊢! ψ ➝ φ.substs (𝕹 i :> w)) :
     A ⊢! ψ ➝ φ.substItrConj w z := Theory.Provable.toTProvable <| Theory.Derivable.toProvable <| by
   apply Theory.Derivable.or
   apply Theory.Derivable.exchange
@@ -532,14 +538,14 @@ lemma substItrConj_right_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformul
     have hi : i < z := by simpa using hi
     rw [substItr_nth _ _ _ hi]
     apply Theory.Derivable.exchange
-    suffices A ⊢ᵈᵉʳ (∼ψ ⫽ φ.substs (↑(z - (i + 1)) :> w) ⫽ ∅) by
+    suffices A ⊢ᵈᵉʳ (∼ψ ⫽ φ.substs (𝕹 (z - (i + 1)) :> w) ⫽ ∅) by
       simpa using this.toDerivable
     have : A ⊢! ∼ψ ⋎ Semiformula.substs (typedNumeral (z - (i + 1)) :> w) φ := h (z - (i + 1)) (by simp [pos_of_gt hi])
     exact TDerivation.orInv (proof_to_tDerivation this.get)
 
 open Classical in
 lemma substItrDisj_left_intro {ψ} {w : TermVec V ℒₒᵣ m} {φ : Semiformula V ℒₒᵣ (m + 1)} {z : V}
-    (h : ∀ i < z, A ⊢! φ.substs (↑i :> w) ➝ ψ) :
+    (h : ∀ i < z, A ⊢! φ.substs (𝕹 i :> w) ➝ ψ) :
     A ⊢! φ.substItrDisj w z ➝ ψ := by
   apply C!_of_CNN!
   simp only [Semiformula.substItrDisj_neg]
