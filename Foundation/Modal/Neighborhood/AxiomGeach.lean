@@ -37,6 +37,7 @@ instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ := ⟨by simp�
 
 instance [F.IsGeachConvergent ⟨0, 2, 1, 0⟩] : F.IsTransitive := ⟨λ _ => F.gconv (g := ⟨0, 2, 1, 0⟩)⟩
 
+end Frame
 
 
 section
@@ -50,8 +51,22 @@ lemma valid_axiomGeach_of_isGeachConvergent [F.IsGeachConvergent g] : F ⊧ Axio
 lemma valid_axiomT_of_isReflexive [F.IsReflexive] : F ⊧ Axioms.T (.atom 0) := valid_axiomGeach_of_isGeachConvergent (g := ⟨0, 0, 1, 0⟩)
 lemma valid_axiomFour_of_isTransitive [F.IsTransitive] : F ⊧ Axioms.Four (.atom 0) := valid_axiomGeach_of_isGeachConvergent (g := ⟨0, 2, 1, 0⟩)
 
-end
+lemma isGeachConvergent_of_valid_axiomGeach (h : F ⊧ Axioms.Geach g (.atom 0)) : F.IsGeachConvergent g := by
+  constructor;
+  intro X x hx;
+  have : x ∈ 𝒟^[g.i] (ℬ^[g.m] X) → x ∈ ℬ^[g.j] (𝒟^[g.n] X) := by
+    simpa [Semantics.Realize, Satisfies] using Satisfies.def_imp.mp $ @h (λ _ => X) x;
+  apply this;
+  apply hx;
 
-end Frame
+lemma isReflexive_of_valid_axiomT (h : F ⊧ Axioms.T (.atom 0)) : F.IsReflexive := by
+  have := isGeachConvergent_of_valid_axiomGeach (g := ⟨0, 0, 1, 0⟩) h;
+  infer_instance;
+
+lemma isTransitive_of_valid_axiomFour (h : F ⊧ Axioms.Four (.atom 0)) : F.IsTransitive := by
+  have := isGeachConvergent_of_valid_axiomGeach (g := ⟨0, 2, 1, 0⟩) h;
+  infer_instance;
+
+end
 
 end LO.Modal.Neighborhood

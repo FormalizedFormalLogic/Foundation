@@ -22,28 +22,28 @@ variable {F : Frame} {X Y : Set F.World}
 instance : CoeSort Frame Type := ⟨Frame.World⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
-@[reducible] def ℬ {F : Frame} : Set F.World → Set F.World := λ X => { w | X ∈ F.𝒩 w }
-@[reducible] def 𝒟 {F : Frame} := λ X => (F.ℬ Xᶜ)ᶜ
+@[reducible] def box {F : Frame} : Set F.World → Set F.World := λ X => { w | X ∈ F.𝒩 w }
+@[reducible] def dia {F : Frame} := λ X => (F.box Xᶜ)ᶜ
 
-prefix:max "ℬ" => Frame.ℬ
-prefix:max "𝒟" => Frame.𝒟
+prefix:max "ℬ" => Frame.box
+prefix:max "𝒟" => Frame.dia
 
-def ℬ_iterate {F : Frame} : ℕ → Set F.World → Set F.World
+def box_iterate {F : Frame} : ℕ → Set F.World → Set F.World
 | 0     => id
-| n + 1 => λ X => ℬ (F.ℬ_iterate n X)
-notation:max "ℬ^[" n:80 "]" => Frame.ℬ_iterate n
+| n + 1 => λ X => ℬ (F.box_iterate n X)
+notation:max "ℬ^[" n:80 "]" => Frame.box_iterate n
 
-def 𝒟_iterate {F : Frame} : ℕ → Set F.World → Set F.World
+def dia_iterate {F : Frame} : ℕ → Set F.World → Set F.World
 | 0     => id
-| n + 1 => λ X => 𝒟 (F.𝒟_iterate n X)
-notation:max "𝒟^[" n:80 "]" => Frame.𝒟_iterate n
+| n + 1 => λ X => 𝒟 (F.dia_iterate n X)
+notation:max "𝒟^[" n:80 "]" => Frame.dia_iterate n
 
-@[simp] lemma ℬ_iterate_zero : ℬ^[0] X = X := rfl
-@[simp] lemma 𝒟_iterate_zero : 𝒟^[0] X = X := rfl
-@[simp] lemma ℬ_iterate_one : ℬ^[1] X = ℬ X := rfl
-@[simp] lemma 𝒟_iterate_one : 𝒟^[1] X = 𝒟 X := rfl
+@[simp] lemma box_iterate_zero : ℬ^[0] X = X := rfl
+@[simp] lemma dia_iterate_zero : 𝒟^[0] X = X := rfl
+@[simp] lemma box_iterate_one : ℬ^[1] X = ℬ X := rfl
+@[simp] lemma dia_iterate_one : 𝒟^[1] X = 𝒟 X := rfl
 
-lemma eq_ℬ_𝒩 {F : Frame} {X Y : Set F.World} : (F.ℬ X) = Y ↔ (∀ x, X ∈ F.𝒩 x ↔ x ∈ Y) := by
+lemma eq_ℬ_𝒩 {F : Frame} {X Y : Set F.World} : (ℬ X) = Y ↔ (∀ x, X ∈ F.𝒩 x ↔ x ∈ Y) := by
   constructor;
   . rintro rfl;
     tauto;
@@ -84,7 +84,7 @@ def Model.truthset (M : Model) : Formula ℕ → Set M.World
 | .atom n => M.Val n
 | ⊥       => ∅
 | φ ➝ ψ  => (truthset M φ)ᶜ ∪ truthset M ψ
-| □φ      => M.ℬ (truthset M φ)
+| □φ      => ℬ (truthset M φ)
 
 namespace Model.truthset
 
@@ -108,7 +108,7 @@ instance : CoeFun Model (λ M => Formula ℕ → Set M.World) := ⟨λ M => trut
 lemma eq_multibox {n : ℕ} : M (□^[n] φ) = ℬ^[n] (M φ) := by
   induction n with
   | zero => simp
-  | succ n ih => simp [ih, truthset, Frame.ℬ_iterate]
+  | succ n ih => simp [ih, truthset, Frame.box_iterate]
 
 @[simp, grind] lemma eq_box : M (□φ) = ℬ (M φ) := eq_multibox (n := 1)
 
@@ -116,7 +116,7 @@ lemma eq_multibox {n : ℕ} : M (□^[n] φ) = ℬ^[n] (M φ) := by
 lemma eq_multidia {n : ℕ} : M (◇^[n] φ) = 𝒟^[n] (M φ) := by
   induction n with
   | zero => simp
-  | succ n ih => simp [ih, truthset, Frame.𝒟_iterate]
+  | succ n ih => simp [ih, truthset, Frame.dia_iterate]
 
 @[simp, grind] lemma eq_dia : M (◇φ) = 𝒟 (M φ) := eq_multidia (n := 1)
 
@@ -298,6 +298,12 @@ lemma iff_not_validOnFrameClass_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : M
   push_neg;
   tauto;
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
+
+lemma iff_not_validOnFrameClass_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 end
 
