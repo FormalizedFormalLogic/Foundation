@@ -310,6 +310,13 @@ instance : Hilbert.EK4.HasFour where p := 0
 instance : Entailment.EK4 Hilbert.EK4 where
 
 
+protected abbrev Hilbert.EMT : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.T (.atom 0)}⟩
+protected abbrev EMT : Logic ℕ := Entailment.theory Hilbert.EMT
+notation "𝐄𝐌𝐓" => Modal.EMT
+instance : Hilbert.EMT.HasM where p := 0; q := 1
+instance : Hilbert.EMT.HasT where p := 0
+
+
 protected abbrev Hilbert.EMT4 : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.T (.atom 0)}⟩
 /--
   - Sometimes called `S04`?
@@ -319,7 +326,60 @@ notation "𝐄𝐌𝐓𝟒" => Modal.EMT4
 instance : Hilbert.EMT4.HasM where p := 0; q := 1
 instance : Hilbert.EMT4.HasFour where p := 0
 instance : Hilbert.EMT4.HasT where p := 0
-instance : Entailment.S04 Hilbert.EMT4 where
+instance : Entailment.EMT4 Hilbert.EMT4 where
+
+
+protected abbrev Hilbert.EMCN4 : Hilbert.WithRE ℕ := ⟨{
+  Axioms.M (.atom 0) (.atom 1),
+  Axioms.C (.atom 0) (.atom 1),
+  Axioms.N,
+  Axioms.Four (.atom 0)
+}⟩
+protected abbrev EMCN4 : Logic ℕ := Entailment.theory Hilbert.EMCN4
+notation "𝐄𝐌𝐂𝐍𝟒" => Modal.EMCN4
+instance : Hilbert.EMCN4.HasM where p := 0; q := 1
+instance : Hilbert.EMCN4.HasC where p := 0; q := 1
+instance : Hilbert.EMCN4.HasN where
+instance : Hilbert.EMCN4.HasFour where p := 0
+instance : Entailment.EMCN Hilbert.EMCN4 where
+
+
+protected abbrev Hilbert.EMCNT : Hilbert.WithRE ℕ := ⟨{
+  Axioms.M (.atom 0) (.atom 1),
+  Axioms.C (.atom 0) (.atom 1),
+  Axioms.N,
+  Axioms.T (.atom 0)
+}⟩
+/--
+  Equivalent to `KT`
+-/
+protected abbrev EMCNT : Logic ℕ := Entailment.theory Hilbert.EMCNT
+notation "𝐄𝐌𝐂𝐍𝐓" => Modal.EMCNT
+instance : Hilbert.EMCNT.HasM where p := 0; q := 1
+instance : Hilbert.EMCNT.HasC where p := 0; q := 1
+instance : Hilbert.EMCNT.HasN where
+instance : Hilbert.EMCNT.HasT where p := 0
+instance : Entailment.EMCN Hilbert.EMCNT where
+
+
+protected abbrev Hilbert.EMCNT4 : Hilbert.WithRE ℕ := ⟨{
+  Axioms.M (.atom 0) (.atom 1),
+  Axioms.C (.atom 0) (.atom 1),
+  Axioms.N,
+  Axioms.T (.atom 0),
+  Axioms.Four (.atom 0)
+}⟩
+/--
+  Equivalent to `S4`
+-/
+protected abbrev EMCNT4 : Logic ℕ := Entailment.theory Hilbert.EMCNT4
+notation "𝐄𝐌𝐂𝐍𝐓𝟒" => Modal.EMCNT4
+instance : Hilbert.EMCNT4.HasM where p := 0; q := 1
+instance : Hilbert.EMCNT4.HasC where p := 0; q := 1
+instance : Hilbert.EMCNT4.HasN where
+instance : Hilbert.EMCNT4.HasT where p := 0
+instance : Hilbert.EMCNT4.HasFour where p := 0
+instance : Entailment.EMCN Hilbert.EMCNT4 where
 
 
 end LO.Modal
