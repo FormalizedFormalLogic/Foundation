@@ -269,11 +269,23 @@ lemma empty_quote_eq_encode (σ : Semisentence L n) : (⌜σ⌝ : V) = ↑(encod
 lemma coe_empty_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = ⌜σ⌝ := by
   simp [empty_quote_eq_encode]
 
-@[simp] lemma val_empty_quote {ξ n e ε} (σ : Semisentence L n) : Semiterm.valm V e ε (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) = ⌜σ⌝ := by
+@[simp] lemma val_empty_quote {ξ n e ε} (σ : Semisentence L n) :
+    Semiterm.valm V e ε (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) = ⌜σ⌝ := by
   simp [goedelNumber'_def, empty_quote_eq_encode, numeral_eq_natCast]
 
-@[simp] lemma coe_empty_quote {ξ n} (σ : Semisentence L n) : ↑(⌜σ⌝ : ℕ) = (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) := by
+@[simp] lemma coe_quote {ξ n} (φ : SyntacticSemiformula L n) : ↑(⌜φ⌝ : ℕ) = (⌜φ⌝ : Semiterm ℒₒᵣ ξ m) := by
+  simp [goedelNumber'_def, quote_eq_encode]
+
+@[simp] lemma coe_empty_quote {ξ n} (σ : Semisentence L n) : ↑(⌜σ⌝ : ℕ) = (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) := by
   simp [goedelNumber'_def, empty_quote_eq_encode]
+
+@[simp] lemma quote_quote_eq_numeral (φ : SyntacticSemiformula L n) :
+    (⌜(⌜φ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Metamath.Semiterm V ℒₒᵣ m) = InternalArithmetic.typedNumeral ⌜φ⌝ := by
+  simp [←coe_quote, coe_quote_eq_quote]
+
+@[simp] lemma empty_quote_quote_eq_numeral (σ : Semisentence L n) :
+    (⌜(⌜σ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Metamath.Semiterm V ℒₒᵣ m) = InternalArithmetic.typedNumeral ⌜σ⌝ := by
+  simp [←coe_empty_quote, coe_empty_quote_eq_quote]
 
 end Semiformula
 

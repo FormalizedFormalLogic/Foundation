@@ -626,6 +626,12 @@ instance Provable.definable : 𝚺₁-Predicate[V] T.Provable := Provable.define
 /-- instance for definability tactic-/
 instance Provable.definable' : 𝚺-[0 + 1]-Predicate[V] T.Provable := Provable.definable
 
+@[simp] lemma Proof.eval (v) :
+    Semiformula.Evalbm V v T.proof.val ↔ T.Proof (v 0) (v 1) := Proof.defined.df.iff v
+
+@[simp] lemma Provable.eval (v) :
+    Semiformula.Evalbm V v T.provable.val ↔ T.Provable (v 0) := Provable.defined.df.iff v
+
 end
 
 namespace Derivation

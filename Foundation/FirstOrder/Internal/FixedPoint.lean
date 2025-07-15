@@ -42,7 +42,7 @@ lemma substNumeral_app_quote (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
     Rewriting.embedding_substs_eq_substs_coe₁]
 
 lemma substNumeral_app_quote_quote (σ π : Semisentence ℒₒᵣ 1) :
-    substNumeral ⌜σ⌝ (⌜π⌝ : V) = ⌜(σ/[↑(⌜π⌝ : ℕ)] : Sentence ℒₒᵣ)⌝ := by
+    substNumeral ⌜σ⌝ (⌜π⌝ : V) = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
   simpa [Semiformula.coe_empty_quote_eq_quote] using substNumeral_app_quote (V := V) σ ⌜π⌝
 
 noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := substs ℒₒᵣ (matrixToVec (fun i ↦ numeral (v i))) φ
@@ -54,7 +54,7 @@ lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ
   rfl
 
 lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k → Semisentence ℒₒᵣ k) :
-    substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) = ⌜((Rew.substs (fun i ↦ ↑(⌜π i⌝ : ℕ))) ▹ σ : Sentence ℒₒᵣ)⌝ := by
+    substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) = ⌜((Rew.substs (fun i ↦ ⌜π i⌝)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
   simpa [Semiformula.coe_empty_quote_eq_quote] using substNumerals_app_quote (V := V) σ (fun i ↦ ⌜π i⌝)
 
 section
@@ -64,6 +64,8 @@ def ssnum : 𝚺₁.Semisentence 3 := .mkSigma
 
 lemma substNumeral.defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
   intro v; simp [ssnum, (substs.defined (L := ℒₒᵣ)).df.iff, substNumeral]
+
+attribute [irreducible] ssnum
 
 @[simp] lemma substNumeral.eval (v) :
     Semiformula.Evalbm V v ssnum.val ↔ v 0 = substNumeral (v 1) (v 2) := substNumeral.defined.df.iff v
@@ -93,6 +95,8 @@ lemma substNumerals.defined :
     · intro i hi
       rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
       simp [h]
+
+attribute [irreducible] ssnums
 
 @[simp] lemma substNumerals.eval (v : Fin (k + 2) → V) :
     Semiformula.Evalbm V v ssnums.val ↔ v 0 = substNumerals (v 1) (fun i ↦ v i.succ.succ) := substNumerals.defined.df.iff v
@@ -143,14 +147,8 @@ theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     calc
       V ⊧/![] (fixpoint θ)
       ↔ Θ (substNumeral ⌜diag θ⌝ ⌜diag θ⌝) := val_fixpoint θ --simp [Θ, fixpoint_eq]
-    _ ↔ Θ ⌜fixpoint θ⌝                     := by
-      simp [substNumeral_app_quote_quote, fixpoint]
-      have := Semiformula.coe_empty_quote (L := ℒₒᵣ) (σ := diag θ) (ξ := Empty)
-      apply iff_of_eq
-      have := congr_arg (fun x : FirstOrder.Semiterm ℒₒᵣ Empty 0 ↦ Θ ⌜(diag θ)/[x]⌝) this --???????????????????????????????/
+    _ ↔ Θ ⌜fixpoint θ⌝                     := by simp [substNumeral_app_quote_quote, fixpoint]
 
-
-/--/
 end Diagonalization
 
 section Multidiagonalization

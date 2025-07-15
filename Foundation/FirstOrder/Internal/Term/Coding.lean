@@ -173,6 +173,12 @@ def empty_quote_eq (t : Semiterm L Empty n) : (⌜t⌝ : V) = (⌜t⌝ : Metamat
 
 lemma empty_quote_eq_encode (t : Semiterm L Empty n) : (⌜t⌝ : V) = ↑(encode t) := by simp [empty_quote_def, quote_eq_encode]
 
+@[simp] lemma coe_quote {ξ n} (t : SyntacticSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : Semiterm ℒₒᵣ ξ m) := by
+  simp [goedelNumber'_def, quote_eq_encode]
+
+@[simp] lemma coe_empty_quote {ξ n} (t : Semiterm L Empty n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : Semiterm ℒₒᵣ ξ m) := by
+  simp [goedelNumber'_def, empty_quote_eq_encode]
+
 end LO.FirstOrder.Semiterm
 
 namespace LO.ISigma1.Metamath

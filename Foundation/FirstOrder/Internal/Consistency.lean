@@ -1,9 +1,8 @@
-import Foundation.FirstOrder.Incompleteness.StandardProvability
+import Foundation.FirstOrder.Internal.D3
 import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!
 # Consistency predicate
-
 -/
 
 open Classical
@@ -24,9 +23,9 @@ variable {V}
 
 def _root_.LO.FirstOrder.ArithmeticTheory.Consistency (φ : V) : Prop := ¬T.Provable (neg ℒₒᵣ φ)
 
-lemma _root_.LO.FirstOrder.Theory.Consistency.quote_iff {φ : Sentence ℒₒᵣ} :
-    T.Consistency (⌜φ⌝ : V) ↔ ¬T.Provable (⌜∼φ⌝ : V) := by
-  simp [ArithmeticTheory.Consistency, quote_sentence_eq_quote_emb (∼φ)]
+lemma _root_.LO.FirstOrder.Theory.Consistency.quote_iff {σ : Sentence ℒₒᵣ} :
+    T.Consistency (⌜σ⌝ : V) ↔ ¬T.Provable (⌜∼σ⌝ : V) := by
+  simp [ArithmeticTheory.Consistency, Semiformula.empty_quote_def, Semiformula.quote_def]
 
 section
 

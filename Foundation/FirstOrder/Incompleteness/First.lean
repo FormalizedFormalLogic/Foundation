@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Incompleteness.StandardProvability
+import Foundation.FirstOrder.Internal.D3
 import Foundation.FirstOrder.R0.Representation
 
 /-!
@@ -30,22 +30,23 @@ theorem incomplete
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦
         IsSemiformula ℒₒᵣ 1 φ ∧
-          (T.codeIn ℕ).Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral φ] φ) := by
+          T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral φ] φ) := by
       definability
     exact REPred.of_eq (re_iff_sigma1.mpr this) <| by
       intro φ; constructor
       · rintro ⟨hφ, b⟩
         rcases hφ.sound with ⟨φ, rfl⟩
-        refine ⟨φ, rfl, Language.Theory.Provable.sound (by simpa)⟩
+        refine ⟨φ, rfl, Theory.Provable.sound (by simpa [Semiformula.quote_def])⟩
       · rintro ⟨φ, rfl, b⟩
-        exact ⟨by simp, by simpa using provable_of_provable (V := ℕ) b⟩
+        exact ⟨by simp [Semiformula.quote_def], by
+          simpa [Semiformula.quote_def] using  internalize_provability (V := ℕ) b⟩
   let σ : Semisentence ℒₒᵣ 1 := codeOfREPred D
   let ρ : Sentence ℒₒᵣ := σ/[⌜σ⌝]
   have : ∀ n : ℕ, D n ↔ T ⊢!. σ/[↑n] := fun n ↦ by
     simpa [Semiformula.coe_substs_eq_substs_coe₁, Axiom.provable_iff] using re_complete D_re
   have : T ⊢!. ∼ρ ↔ T ⊢!. ρ := by
     have : T ⊢! ∼↑σ/[↑(Encodable.encode σ)] ↔ T ⊢! ↑σ/[↑(Encodable.encode σ)] := by
-      simpa [Axiom.provable_iff, quote_eq_encode,
+      simpa [Axiom.provable_iff, Semiformula.quote_eq_encode, Semiformula.empty_quote_eq_encode,
         goedelNumber'_eq_coe_encode, D, Rewriting.embedding_substs_eq_substs_coe₁] using this ⌜σ⌝
     simpa [Axiom.provable_iff, ρ, Rewriting.embedding_substs_eq_substs_coe₁]
   refine incomplete_iff_exists_undecidable.mpr
