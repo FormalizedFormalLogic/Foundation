@@ -129,13 +129,15 @@ end
 
 section
 
+variable [DecidableEq α]
+
 class HasM (H : Hilbert.WithRE α) where
   p : α
   q : α
   ne_pq : p ≠ q := by trivial;
   mem_m : Axioms.M (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [DecidableEq α] [H.HasM] : Entailment.HasAxiomM H where
+instance [H.HasM] : Entailment.HasAxiomM H where
   M φ ψ := by
     simpa [HasM.ne_pq] using Deduction.axm
       (φ := Axioms.M (.atom (HasM.p H)) (.atom (HasM.q H)))
@@ -152,7 +154,7 @@ class HasC (H : Hilbert.WithRE α) where
   ne_pq : p ≠ q := by trivial;
   mem_c : Axioms.C (.atom p) (.atom q) ∈ H.axioms := by tauto;
 
-instance [DecidableEq α] [H.HasC] : Entailment.HasAxiomC H where
+instance [H.HasC] : Entailment.HasAxiomC H where
   C φ ψ := by
     simpa [HasC.ne_pq] using Deduction.axm
       (φ := Axioms.C (.atom (HasC.p H)) (.atom (HasC.q H)))
@@ -185,6 +187,30 @@ instance [DecidableEq α] [H.HasK] : Entailment.HasAxiomK H where
         else if (HasK.q H) = b then ψ
         else (.atom b))
       HasK.mem_K;
+
+
+class HasT (H : Hilbert.WithRE α) where
+  p : α
+  mem_T : Axioms.T (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasT] : Entailment.HasAxiomT H where
+  T φ := by
+    simpa using Deduction.axm
+      (φ := Axioms.T (.atom (HasT.p H)))
+      (s := λ b => if (HasT.p H) = b then φ else (.atom b))
+      HasT.mem_T;
+
+
+class HasFour (H : Hilbert.WithRE α) where
+  p : α
+  mem_Four : Axioms.Four (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasFour] : Entailment.HasAxiomFour H where
+  Four φ := by
+    simpa using Deduction.axm
+      (φ := Axioms.Four (.atom (HasFour.p H)))
+      (s := λ b => if (HasFour.p H) = b then φ else (.atom b))
+      HasFour.mem_Four;
 
 end
 
@@ -258,5 +284,39 @@ instance : Hilbert.EMCN.HasM where p := 0; q := 1
 instance : Hilbert.EMCN.HasC where p := 0; q := 1
 instance : Hilbert.EMCN.HasN where
 instance : Entailment.EMCN Hilbert.EMCN where
+
+
+protected abbrev Hilbert.E4 : Hilbert.WithRE ℕ := ⟨{Axioms.Four (.atom 0)}⟩
+protected abbrev E4 : Logic ℕ := Entailment.theory Hilbert.E4
+notation "𝐄𝟒" => Modal.E4
+instance : Hilbert.E4.HasFour where p := 0
+instance : Entailment.E4 Hilbert.E4 where
+
+
+protected abbrev Hilbert.EMC4 : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
+protected abbrev EMC4 : Logic ℕ := Entailment.theory Hilbert.EMC4
+notation "𝐄𝐌𝐂𝟒" => Modal.EMC4
+instance : Hilbert.EMC4.HasM where p := 0; q := 1
+instance : Hilbert.EMC4.HasC where p := 0; q := 1
+instance : Hilbert.EMC4.HasFour where p := 0
+instance : Entailment.EMC4 Hilbert.EMC4 where
+
+
+protected abbrev Hilbert.EK4 : Hilbert.WithRE ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
+protected abbrev EK4 : Logic ℕ := Entailment.theory Hilbert.EK4
+notation "𝐄𝐊𝟒" => Modal.EK4
+instance : Hilbert.EK4.HasK where p := 0; q := 1
+instance : Hilbert.EK4.HasFour where p := 0
+instance : Entailment.EK4 Hilbert.EK4 where
+
+
+protected abbrev Hilbert.S04 : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.T (.atom 0)}⟩
+protected abbrev S04 : Logic ℕ := Entailment.theory Hilbert.S04
+notation "𝐒𝟎𝟒" => Modal.S04
+instance : Hilbert.S04.HasM where p := 0; q := 1
+instance : Hilbert.S04.HasFour where p := 0
+instance : Hilbert.S04.HasT where p := 0
+instance : Entailment.S04 Hilbert.S04 where
+
 
 end LO.Modal

@@ -98,7 +98,7 @@ instance : CoeFun (Canonicalℬ 𝓢) (fun _ => Set (MaximalConsistentSet 𝓢) 
 def mkCanonicalFrame
   (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢]
   (ℬ : Canonicalℬ 𝓢)
-  : Frame := Frame.mk_B (MaximalConsistentSet 𝓢) ℬ
+  : Frame := Frame.mk_ℬ (MaximalConsistentSet 𝓢) ℬ
 
 def mkCanonicalModel
   (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢]
