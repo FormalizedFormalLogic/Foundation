@@ -172,6 +172,8 @@ noncomputable def substs (w : SemitermVec V L n m) (φ : Semiformula V L n) : Se
 
 @[simp] lemma shift_imp (φ ψ : Semiformula V L n) : (φ ➝ ψ).shift = φ.shift ➝ ψ.shift := by
   simp [imp_def]
+@[simp] lemma shift_iff (φ ψ : Semiformula V L n) : (φ ⭤ ψ).shift = φ.shift ⭤ ψ.shift := by
+  simp [LogicalConnective.iff]
 
 @[simp] lemma substs_verum (w : SemitermVec V L n m) : (⊤ : Semiformula V L n).substs w = ⊤ := by ext; simp [substs]
 @[simp] lemma substs_falsum (w : SemitermVec V L n m) : (⊥ : Semiformula V L n).substs w = ⊥ := by ext; simp [substs]
@@ -241,6 +243,32 @@ noncomputable def substItrDisj (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformu
   ⟨^⋁ InternalArithmetic.substItr w.val φ.val z, by
     have : IsSemiformula ℒₒᵣ (↑m + 1 : V) φ.val := by simp
     exact this.substItrDisj w.isSemitermVec z⟩
+
+@[simp] lemma substItrConj_val (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
+    (φ.substItrConj w z).val = ^⋀ InternalArithmetic.substItr w.val φ.val z := rfl
+
+@[simp] lemma substItrDisj_val (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
+    (φ.substItrDisj w z).val = ^⋁ InternalArithmetic.substItr w.val φ.val z := rfl
+
+@[simp] lemma substItrConj_zero (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) :
+    φ.substItrConj w 0 = ⊤ := by ext; simp
+
+@[simp] lemma substItrConj_succ (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
+    φ.substItrConj w (z + 1) = φ.substs (typedNumeral z :> w) ⋏ φ.substItrConj w z := by ext; simp
+
+@[simp] lemma substItrConj_one (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) :
+    φ.substItrConj w 1 = φ.substs (typedNumeral 0 :> w) ⋏ ⊤ := by
+  simpa using substItrConj_succ w φ 0
+
+@[simp] lemma substItrDisj_zero (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) :
+    φ.substItrDisj w 0 = ⊥ := by ext; simp
+
+@[simp] lemma substItrDisj_succ (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
+    φ.substItrDisj w (z + 1) = φ.substs (typedNumeral z :> w) ⋎ φ.substItrDisj w z := by ext; simp
+
+@[simp] lemma substItrDisj_one (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) :
+    φ.substItrDisj w 1 = φ.substs (typedNumeral 0 :> w) ⋎ ⊥ := by
+  simpa using substItrDisj_succ w φ 0
 
 @[simp] lemma substItrConj_neg (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
     ∼(φ.substItrConj w z) = (∼φ).substItrDisj w z := by

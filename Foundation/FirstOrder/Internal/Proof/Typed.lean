@@ -386,6 +386,9 @@ lemma specialize! {φ : Semiformula V L 1} (b : T ⊢! (∀' φ)) (t : Term V L)
 lemma specialize₂! {φ : Semiformula V L 2} (b : T ⊢! ∀' ∀' φ) (t u : Term V L) :
     T ⊢! φ.substs ![t, u] := ⟨specialize₂ b.get t u⟩
 
+lemma specialize₃! {φ : Semiformula V L 3} (b : T ⊢! ∀' ∀' ∀' φ) (t₁ t₂ t₃ : Term V L) :
+    T ⊢! φ.substs ![t₁, t₂, t₃] := ⟨specialize₃ b.get t₁ t₂ t₃⟩
+
 lemma specialize₄! {φ : Semiformula V L 4} (b : T ⊢! ∀' ∀' ∀' ∀' φ) (t₁ t₂ t₃ t₄ : Term V L) :
     T ⊢! φ.substs ![t₁, t₂, t₃, t₄] := ⟨specialize₄ b.get _ _ _ _⟩
 

@@ -3,16 +3,12 @@ import Foundation.FirstOrder.ISigma1.Ind
 import Foundation.FirstOrder.Internal.D1
 
 /-!
-
 # Internal theory of equality
-
 -/
-
-open Classical
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+open Classical FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -42,11 +38,28 @@ open Entailment Entailment.FiniteContext Semiformula
     simpa using internal_provable_of_outer_provable_arith this
   simpa using TProof.specialize₂! this u t
 
+@[simp] lemma ne_symm (t u : Term V ℒₒᵣ) : T.internalize V ⊢! (t ≉ u) ➝ (u ≉ t) := by
+  have : T ⊢! “∀ x y, x ≠ y → y ≠ x” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+    simp [models_iff, ne_comm]
+  have : T.internalize V ⊢! ∀' ∀' ((#'1 ≉ #'0) ➝ (#'0 ≉ #'1)) := by
+    simpa using internal_provable_of_outer_provable_arith (V := V) this
+  simpa using TProof.specialize₂! this u t
+
+@[simp] lemma eq_uniform_trans (t₁ t₂ t₃ : Term V ℒₒᵣ) : T.internalize V ⊢! (t₁ ≐ t₂) ➝ (t₂ ≐ t₃) ➝ (t₁ ≐ t₃) := by
+  have : T ⊢! “∀ x y z, x = y → y = z → x = z” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+  have : T.internalize V ⊢! ∀' ∀' ∀' ((#'2 ≐ #'1) ➝ (#'1 ≐ #'0) ➝ (#'2 ≐ #'0)) := by
+    simpa using internal_provable_of_outer_provable_arith this
+  simpa using TProof.specialize₃! this t₃ t₂ t₁
+
 variable {T}
 
 lemma eq_comm_ctx {t u : Term V ℒₒᵣ} :
     Γ ⊢[T.internalize V]! t ≐ u → Γ ⊢[T.internalize V]! u ≐ t := fun b ↦
   of'! (eq_symm T t u) ⨀ b
+
+lemma eq_trans {t₁ t₂ t₃ : Term V ℒₒᵣ} :
+    T.internalize V ⊢! t₁ ≐ t₂ → T.internalize V ⊢! t₂ ≐ t₃ → T.internalize V ⊢! t₁ ≐ t₃ := fun h₁ h₂ ↦
+  eq_uniform_trans T t₁ t₂ t₃ ⨀ h₁ ⨀ h₂
 
 variable (T)
 
@@ -86,7 +99,6 @@ lemma subst_mul_eq_mul (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize 
     simpa [models_iff] using fun a b c e ↦ by simp [e]
   have := by simpa using internal_provable_of_outer_provable_arith this (V := V)
   simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
-
 
 lemma vec2_eq {v : V} (h : len v = 2) : ?[v.[0], v.[1]] = v :=
   nth_ext' 2 (by simp [one_add_one_eq_two]) h (by
@@ -462,14 +474,14 @@ lemma replace_aux (φ : V) :
       Semiformula.shift_substs, Semiformula.substs_substs, one_add_one_eq_two]
       using TProof.specialize₂! ih (&'1) (&'2)
 
-lemma replace (φ : Semiformula V ℒₒᵣ 1) :
+lemma replace' (φ : Semiformula V ℒₒᵣ 1) :
     T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ φ.substs ![#'1] ➝ φ.substs ![#'0]) := by
   apply (internalize_TProvable_iff_provable (T := T)).mpr
   simpa using replace_aux T φ.val
 
-lemma replace' (φ : Semiformula V ℒₒᵣ 1) (u₁ u₂ : Term V ℒₒᵣ) :
+lemma replace (φ : Semiformula V ℒₒᵣ 1) (u₁ u₂ : Term V ℒₒᵣ) :
     T.internalize V ⊢! (u₁ ≐ u₂) ➝ φ.substs ![u₁] ➝ φ.substs ![u₂] := by
-  have := TProof.specialize₂! (replace T φ) u₂ u₁
+  have := TProof.specialize₂! (replace' T φ) u₂ u₁
   simpa [Semiformula.substs_substs] using this
 
 end replace
