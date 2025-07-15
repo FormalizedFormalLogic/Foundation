@@ -17,6 +17,7 @@ instance : Frame.simple_blackhole.IsRegular := ⟨by
   simp_all;
 ⟩
 
+@[simp]
 lemma valid_axiomC_of_isRegular [F.IsRegular] : F ⊧ Axioms.C (.atom 0) (.atom 1) := by
   intro V x;
   simp only [

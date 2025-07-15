@@ -70,14 +70,8 @@ namespace Hilbert
 namespace EMC.Neighborhood
 
 instance : Sound Hilbert.EMC FrameClass.EMC := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.insert_iff, Semantics.RealizeSet.singleton_iff];
-  refine ⟨?_, ?_⟩;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomM_of_isMonotonic;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomC_of_isRegular;
+  constructor;
+  rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
 instance : Entailment.Consistent Hilbert.EMC := consistent_of_sound_frameclass FrameClass.EMC $ by
   use Frame.simple_blackhole;

@@ -23,17 +23,8 @@ namespace Hilbert
 namespace EMCN.Neighborhood
 
 instance : Sound Hilbert.EMCN FrameClass.EMCN := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.insert_iff, Semantics.RealizeSet.singleton_iff];
-  refine ⟨?_, ?_, ?_⟩;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomM_of_isMonotonic;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomC_of_isRegular;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomN_of_ContainsUnit;
+  constructor;
+  rintro _ (rfl | rfl | rfl) F (rfl | rfl | rfl) <;> simp;
 
 instance : Entailment.Consistent Hilbert.EMCN := consistent_of_sound_frameclass FrameClass.EMCN $ by
   use Frame.simple_blackhole;

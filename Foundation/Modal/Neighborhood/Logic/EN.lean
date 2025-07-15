@@ -24,10 +24,9 @@ namespace Hilbert
 namespace EN.Neighborhood
 
 instance : Sound Hilbert.EN FrameClass.EN := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.singleton_iff];
-  intro F hF;
-  replace hF := Set.mem_setOf_eq.mp hF;
-  apply valid_axiomN_of_ContainsUnit;
+  constructor;
+  rintro _ (rfl | rfl) F hF;
+  simp_all;
 
 instance : Entailment.Consistent Hilbert.EN := consistent_of_sound_frameclass FrameClass.EN $ by
   use Frame.simple_blackhole;

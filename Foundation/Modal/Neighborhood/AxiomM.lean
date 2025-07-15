@@ -19,6 +19,7 @@ instance : Frame.simple_blackhole.IsMonotonic := ⟨by
     tauto_set;
 ⟩
 
+@[simp]
 lemma valid_axiomM_of_isMonotonic [F.IsMonotonic] : F ⊧ Axioms.M (.atom 0) (.atom 1) := by
   intro V x;
   simp only [

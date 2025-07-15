@@ -42,16 +42,18 @@ end Frame
 
 section
 
-lemma valid_axiomGeach_of_isGeachConvergent [F.IsGeachConvergent g] : F ⊧ Axioms.Geach g (.atom 0) := by
+variable {a : ℕ}
+
+lemma valid_axiomGeach_of_isGeachConvergent [F.IsGeachConvergent g] : F ⊧ Axioms.Geach g (.atom a) := by
   intro V x;
   apply Satisfies.def_imp.mpr;
-  suffices x ∈ 𝒟^[g.i] (ℬ^[g.m] (V 0)) → x ∈ ℬ^[g.j] (𝒟^[g.n] (V 0)) by simpa [Semantics.Realize, Satisfies];
+  suffices x ∈ 𝒟^[g.i] (ℬ^[g.m] (V a)) → x ∈ ℬ^[g.j] (𝒟^[g.n] (V a)) by simpa [Semantics.Realize, Satisfies];
   apply F.gconv;
 
-lemma valid_axiomT_of_isReflexive [F.IsReflexive] : F ⊧ Axioms.T (.atom 0) := valid_axiomGeach_of_isGeachConvergent (g := ⟨0, 0, 1, 0⟩)
-lemma valid_axiomFour_of_isTransitive [F.IsTransitive] : F ⊧ Axioms.Four (.atom 0) := valid_axiomGeach_of_isGeachConvergent (g := ⟨0, 2, 1, 0⟩)
+@[simp] lemma valid_axiomT_of_isReflexive [F.IsReflexive] : F ⊧ Axioms.T (.atom a) := valid_axiomGeach_of_isGeachConvergent (g := ⟨0, 0, 1, 0⟩)
+@[simp] lemma valid_axiomFour_of_isTransitive [F.IsTransitive] : F ⊧ Axioms.Four (.atom a) := valid_axiomGeach_of_isGeachConvergent (g := ⟨0, 2, 1, 0⟩)
 
-lemma isGeachConvergent_of_valid_axiomGeach (h : F ⊧ Axioms.Geach g (.atom 0)) : F.IsGeachConvergent g := by
+lemma isGeachConvergent_of_valid_axiomGeach (h : F ⊧ Axioms.Geach g (.atom a)) : F.IsGeachConvergent g := by
   constructor;
   intro X x hx;
   have : x ∈ 𝒟^[g.i] (ℬ^[g.m] X) → x ∈ ℬ^[g.j] (𝒟^[g.n] X) := by
@@ -59,11 +61,11 @@ lemma isGeachConvergent_of_valid_axiomGeach (h : F ⊧ Axioms.Geach g (.atom 0))
   apply this;
   apply hx;
 
-lemma isReflexive_of_valid_axiomT (h : F ⊧ Axioms.T (.atom 0)) : F.IsReflexive := by
+lemma isReflexive_of_valid_axiomT (h : F ⊧ Axioms.T (.atom a)) : F.IsReflexive := by
   have := isGeachConvergent_of_valid_axiomGeach (g := ⟨0, 0, 1, 0⟩) h;
   infer_instance;
 
-lemma isTransitive_of_valid_axiomFour (h : F ⊧ Axioms.Four (.atom 0)) : F.IsTransitive := by
+lemma isTransitive_of_valid_axiomFour (h : F ⊧ Axioms.Four (.atom a)) : F.IsTransitive := by
   have := isGeachConvergent_of_valid_axiomGeach (g := ⟨0, 2, 1, 0⟩) h;
   infer_instance;
 
