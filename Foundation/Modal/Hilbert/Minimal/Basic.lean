@@ -310,13 +310,16 @@ instance : Hilbert.EK4.HasFour where p := 0
 instance : Entailment.EK4 Hilbert.EK4 where
 
 
-protected abbrev Hilbert.S04 : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.T (.atom 0)}⟩
-protected abbrev S04 : Logic ℕ := Entailment.theory Hilbert.S04
-notation "𝐒𝟎𝟒" => Modal.S04
-instance : Hilbert.S04.HasM where p := 0; q := 1
-instance : Hilbert.S04.HasFour where p := 0
-instance : Hilbert.S04.HasT where p := 0
-instance : Entailment.S04 Hilbert.S04 where
+protected abbrev Hilbert.EMT4 : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.T (.atom 0)}⟩
+/--
+  - Sometimes called `S04`?
+-/
+protected abbrev EMT4 : Logic ℕ := Entailment.theory Hilbert.EMT4
+notation "𝐄𝐌𝐓𝟒" => Modal.EMT4
+instance : Hilbert.EMT4.HasM where p := 0; q := 1
+instance : Hilbert.EMT4.HasFour where p := 0
+instance : Hilbert.EMT4.HasT where p := 0
+instance : Entailment.S04 Hilbert.EMT4 where
 
 
 end LO.Modal
