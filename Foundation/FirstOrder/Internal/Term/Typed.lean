@@ -6,35 +6,32 @@ import Foundation.FirstOrder.Internal.Term.Functions
 
 -/
 
-namespace LO.ISigma1.Metamath
+namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
+noncomputable def matrixToVec (v : Fin k → V) : V := Matrix.foldr (fun t w ↦ t ∷ w) 0 v
+
+@[simp] lemma matrixToVec_nil (v : Fin 0 → V) : matrixToVec v = 0 := rfl
+
+@[simp] lemma matrixToVec_succ (v : Fin (k + 1) → V) : matrixToVec v = Matrix.vecHead v ∷ matrixToVec (Matrix.vecTail v) := rfl
+
+@[simp] lemma matrixToVec_len (v : Fin k → V) : len (matrixToVec v) = k := by
+  induction k <;> simp [*]
+
+@[simp] lemma matrixToVec_nth (v : Fin k → V) (i : Fin k) : (matrixToVec v).[↑i] = v i := by
+  induction k
+  · exact i.elim0
+  · cases i using Fin.cases
+    · simp; rfl
+    · simp [*]; rfl
+
+namespace Metamath
+
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-/-
-section typed_fin
-
-structure TFin (n : V) where
-  val : V
-  isSemiterm : val < n
-
-attribute [simp] TFin.isSemiterm
-
-namespace TFin
-
-variable {n : V}
-
-lemma ext_iff {i j : TFin n} : i = j ↔ i.val = j.val := by rcases i; rcases j; simp
-
-@[ext] lemma ext {i j : TFin n} (h : i.val = j.val) : i = j := ext_iff.mpr h
-
-end TFin
-
-end typed_fin
--/
 
 section typed_term
 
@@ -69,7 +66,7 @@ lemma Semiterm.ext (t u : Semiterm V L n)
 
 @[simp] lemma Semiterm.isUTerm (t : Semiterm V L n) : IsUTerm L t.val := t.isSemiterm.isUTerm
 
-noncomputable def SemitermVec.val (v : SemitermVec V L k n) : V := Matrix.foldr (fun t w ↦ t.val ∷ w) 0 v
+noncomputable def SemitermVec.val (v : SemitermVec V L k n) : V := matrixToVec ((fun t ↦ t.val)⨟ v)
 
 @[simp] lemma SemitermVec.val_nil (v : SemitermVec V L 0 n) : v.val = 0 := rfl
 

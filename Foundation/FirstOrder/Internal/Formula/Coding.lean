@@ -266,6 +266,15 @@ def empty_quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Metama
 
 lemma empty_quote_eq_encode (σ : Semisentence L n) : (⌜σ⌝ : V) = ↑(encode σ) := by simp [empty_quote_def, quote_eq_encode]
 
+lemma coe_empty_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = ⌜σ⌝ := by
+  simp [empty_quote_eq_encode]
+
+@[simp] lemma val_empty_quote {ξ n e ε} (σ : Semisentence L n) : Semiterm.valm V e ε (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) = ⌜σ⌝ := by
+  simp [goedelNumber'_def, empty_quote_eq_encode, numeral_eq_natCast]
+
+@[simp] lemma coe_empty_quote {ξ n} (σ : Semisentence L n) : ↑(⌜σ⌝ : ℕ) = (⌜σ⌝ : Semiterm ℒₒᵣ ξ n) := by
+  simp [goedelNumber'_def, empty_quote_eq_encode]
+
 end Semiformula
 
 end FirstOrder
