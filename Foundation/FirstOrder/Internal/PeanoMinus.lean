@@ -4,6 +4,17 @@ import Foundation.FirstOrder.Internal.EquationalTheory
 # Internal theory of $\mathsf{PA}^-$, $\mathsf{R_0}$
 -/
 
+namespace LO.PeanoMinus
+
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
+
+lemma lt_add_self_add_one (a b : V) : a < b + a + 1 := lt_succ_iff_le.mpr <| le_add_self
+
+lemma lt_succ_iff_eq_or_succ {a b : V} : a < b + 1 ↔ a = b ∨ a < b := by
+  simp [lt_succ_iff_le, le_iff_eq_or_lt]
+
+end LO.PeanoMinus
+
 namespace LO.ISigma1.Metamath
 
 open Classical FirstOrder Arithmetic PeanoMinus IOpen ISigma0
@@ -30,7 +41,10 @@ instance : 𝐄𝐐 ⪯ T := WeakerThan.trans inferInstance (inferInstanceAs (�
 
 lemma term_add_assoc (t₁ t₂ t₃ : Term V ℒₒᵣ) :
     T.internalize V ⊢! t₁ + (t₂ + t₃) ≐ (t₁ + t₂) + t₃ := by
-  have : T ⊢! “∀ x y z, x + (y + z) = (x + y) + z” := sorry
+  have : T ⊢! “∀ x y z, x + (y + z) = (x + y) + z” :=
+    oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+      have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+      simp [models_iff, add_assoc]
   have : T.internalize V ⊢! ∀' ∀' ∀' (#'2 + (#'1 + #'0) ≐ #'2 + #'1 + #'0) := by
     simpa using internal_provable_of_outer_provable_arith (V := V) this
   simpa using TProof.specialize₃! this t₃ t₂ t₁
@@ -38,19 +52,24 @@ lemma term_add_assoc (t₁ t₂ t₃ : Term V ℒₒᵣ) :
 lemma numeral_add (n m : V) :
     T.internalize V ⊢! (𝕹 n + 𝕹 m) ≐ 𝕹 (n + m) := by
   induction m using ISigma1.sigma1_pos_succ_induction
-  · -- simp only [internalize_TProvable_iff_provable, val_equals, val_add, val_numeral]
-    -- definability
-    sorry
+  · simp only [internalize_TProvable_iff_provable, val_equals, val_add, val_numeral]
+    definability
   case zero =>
     have : T.internalize V ⊢! ∀' ((#'0 + 𝕹 0) ≐ #'0) := by
-      have : T ⊢! “∀ x, x + 0 = x” := sorry
+      have : T ⊢! “∀ x, x + 0 = x” :=
+        oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+          have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+          simp [models_iff]
       have := internal_provable_of_outer_provable_arith (V := V) this
       simpa using this
     simpa using TProof.specialize! this <| 𝕹 n
   case one =>
     rcases eq_zero_or_pos n with (rfl | pos)
     · have : T.internalize V ⊢! (𝕹 0 + 𝕹 1) ≐ 𝕹 1 := by
-        have : T ⊢! “0 + 1 = 1” := sorry
+        have : T ⊢! “0 + 1 = 1” :=
+          oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+            have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+            simp [models_iff]
         simpa using internal_provable_of_outer_provable_arith (V := V) this
       simpa using this
     · simp [numeral_succ_pos' pos]
@@ -65,25 +84,35 @@ lemma numeral_add (n m : V) :
 lemma numeral_mul (n m : V) :
     T.internalize V ⊢! 𝕹 n * 𝕹 m ≐ 𝕹 (n * m) := by
   induction m using ISigma1.sigma1_pos_succ_induction
-  · sorry
+  · simp only [internalize_TProvable_iff_provable, val_equals, val_mul, val_numeral]
+    definability
   case zero =>
     have : T.internalize V ⊢! ∀' ((#'0 * 𝕹 0) ≐ 𝕹 0) := by
-      have : T ⊢! “∀ x, x * 0 = 0” := sorry
+      have : T ⊢! “∀ x, x * 0 = 0” :=
+        oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+          have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+          simp [models_iff]
       have := internal_provable_of_outer_provable_arith (V := V) this
       simpa using this
-    simpa using TProof.specialize! this <| 𝕹 n
+    simpa using TProof.specialize! this (𝕹 n)
   case one =>
     have : T.internalize V ⊢! ∀' ((#'0 * 𝕹 1) ≐ #'0) := by
-      have : T ⊢! “∀ x, x * 1 = x” := sorry
+      have : T ⊢! “∀ x, x * 1 = x” :=
+        oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+          have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+          simp [models_iff]
       have := internal_provable_of_outer_provable_arith (V := V) this
       simpa using this
-    simpa using TProof.specialize! this <| 𝕹 n
+    simpa using TProof.specialize! this (𝕹 n)
   case succ m ih =>
     suffices
         T.internalize V ⊢! 𝕹 n * (𝕹(m + 1) + 𝕹 1) ≐ 𝕹(n * (m + 1) + n) by
       simpa [←one_add_one_eq_two, ←add_assoc, mul_add]
     have e1 : T.internalize V ⊢! 𝕹 n * (𝕹(m + 1) + 𝕹 1) ≐ 𝕹 n * 𝕹(m + 1) + 𝕹 n := by
-      have : T ⊢! “∀ x y, x * (y + 1) = x * y + x” := sorry
+      have : T ⊢! “∀ x y, x * (y + 1) = x * y + x” :=
+        oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+          have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+          simp [models_iff, mul_add]
       have := by simpa using internal_provable_of_outer_provable_arith (V := V) this
       simpa using TProof.specialize₂! this 𝕹(m + 1) (𝕹 n)
     have e2 : T.internalize V ⊢! 𝕹 n * 𝕹(m + 1) + 𝕹 n ≐ 𝕹 (n * (m + 1)) + 𝕹 n :=
@@ -98,7 +127,10 @@ lemma numeral_lt {n m : V} :
     simpa [d, add_assoc] using Eq.symm <| sub_add_self_of_le <| succ_le_iff_lt.mpr h
   suffices T.internalize V ⊢! 𝕹 n <' 𝕹 (d + n + 1) by simpa [hm]
   have l₁ : T.internalize V ⊢! 𝕹 n <' 𝕹 d + 𝕹 n + 𝕹 1 := by
-    have : T ⊢! “∀ x y, x < y + x + 1” := sorry
+    have : T ⊢! “∀ x y, x < y + x + 1” :=
+      oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+        have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+        simp [models_iff, PeanoMinus.lt_add_self_add_one]
     have := by simpa using internal_provable_of_outer_provable_arith (V := V) this
     simpa using TProof.specialize₂! this (𝕹 d) (𝕹 n)
   have l₂ : T.internalize V ⊢! 𝕹 d + 𝕹 n + 𝕹 1 ≐ 𝕹 (d + n + 1) := by
@@ -116,7 +148,10 @@ lemma numeral_ne {n m : V} :
     exact ne_symm T _ _ ⨀ (this T (Ne.symm h) hmn)
   have l₁ : T.internalize V ⊢! 𝕹 n <' 𝕹 m := numeral_lt T hnm
   have l₂ : T.internalize V ⊢! (𝕹 n <' 𝕹 m) ➝ (𝕹 n ≉ 𝕹 m) := by
-    have : T ⊢! “∀ x y, x < y → x ≠ y” := sorry
+    have : T ⊢! “∀ x y, x < y → x ≠ y” :=
+      oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+        have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+        simpa [models_iff] using fun _ _ ↦ ne_of_lt
     have := by simpa using internal_provable_of_outer_provable_arith (V := V) this
     simpa using TProof.specialize₂! this (𝕹 m) (𝕹 n)
   exact l₂ ⨀ l₁
@@ -124,12 +159,18 @@ lemma numeral_ne {n m : V} :
 lemma numeral_nlt {n m : V} :
     n ≥ m → T.internalize V ⊢! 𝕹 n ≮' 𝕹 m := fun h ↦ by
   rcases eq_or_lt_of_le h with (rfl | lt)
-  · have : T ⊢! “∀ x, x ≮ x” := sorry
+  · have : T ⊢! “∀ x, x ≮ x” :=
+      oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+        have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+        simp [models_iff]
     have := by simpa using internal_provable_of_outer_provable_arith (V := V) this
     simpa using TProof.specialize! this (𝕹 m)
   · have l₁ : T.internalize V ⊢! 𝕹 m <' 𝕹 n := numeral_lt T lt
     have l₂ : T.internalize V ⊢! (𝕹 m <' 𝕹 n) ➝ (𝕹 n ≮' 𝕹 m) := by
-      have : T ⊢! “∀ x y, x < y → y ≮ x” := sorry
+      have : T ⊢! “∀ x y, x < y → y ≮ x” :=
+        oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+          have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+          simpa [models_iff] using fun _ _ ↦ le_of_lt
       have := by simpa using internal_provable_of_outer_provable_arith (V := V) this
       simpa using TProof.specialize₂! this (𝕹 n) (𝕹 m)
     exact l₂ ⨀ l₁
@@ -137,17 +178,27 @@ lemma numeral_nlt {n m : V} :
 lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
     T.internalize V ⊢! (t <' 𝕹 m) ⭤ substItrDisj ![t] (#'1 ≐ #'0) m := by
   induction m using ISigma1.sigma1_pos_succ_induction
-  · sorry
+  · simp only [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, internalize_TProvable_iff_provable,
+      val_iff, val_lessThan, val_numeral, substItrDisj_val, SemitermVec.val_succ, Matrix.head_cons,
+      Matrix.tail_cons, SemitermVec.val_nil, val_equals, Semiterm.bvar_val, Fin.coe_ofNat_eq_mod,
+      Nat.mod_succ, Nat.cast_one, Nat.zero_mod, Nat.cast_zero]
+    definability
   case zero =>
     suffices T.internalize V ⊢! (t <' 𝕹 0) ⭤ ⊥ by simpa
     have : T.internalize V ⊢! ∀' ((#'0 <' 𝕹 0) ⭤ ⊥) := by
-      have : T ⊢! “∀ x, x < 0 ↔ ⊥” := sorry
+      have : T ⊢! “∀ x, x < 0 ↔ ⊥” :=
+        oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+          have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+          simp [models_iff]
       simpa using internal_provable_of_outer_provable_arith (V := V) this
     simpa using TProof.specialize! this t
   case one =>
     suffices T.internalize V ⊢! (t <' 𝕹 1) ⭤ (t ≐ 𝕹 0) ⋎ ⊥ by simpa
     have : T.internalize V ⊢! ∀' ((#'0 <' 𝕹 1) ⭤ (#'0 ≐ 𝕹 0) ⋎ ⊥) := by
-      have : T ⊢! “∀ x, x < 1 ↔ x = 0 ∨ ⊥” := sorry
+      have : T ⊢! “∀ x, x < 1 ↔ x = 0 ∨ ⊥” :=
+        oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+          have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+          simp [models_iff]
       simpa using internal_provable_of_outer_provable_arith (V := V) this
     simpa using TProof.specialize! this t
   case succ m ih =>
@@ -157,7 +208,10 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
       simpa [←one_add_one_eq_two, ←add_assoc]
     have : T.internalize V ⊢! (t <' 𝕹(m + 1) + 𝕹 1) ⭤ (t ≐ 𝕹(m + 1)) ⋎ (t <' 𝕹(m + 1)) := by
       have : T.internalize V ⊢! ∀' ∀' ((#'0 <' #'1 + 𝕹 1) ⭤ (#'0 ≐ #'1) ⋎ (#'0 <' #'1)) := by
-        have : T ⊢! “∀ m x, x < m + 1 ↔ x = m ∨ x < m” := sorry
+        have : T ⊢! “∀ m x, x < m + 1 ↔ x = m ∨ x < m” :=
+          oRing_provable_of.{0} _ _ fun M _ hM ↦ by
+            have : M ⊧ₘ* 𝐏𝐀⁻ := models_of_subtheory hM
+            simp [models_iff, PeanoMinus.lt_succ_iff_eq_or_succ]
         simpa using internal_provable_of_outer_provable_arith (V := V) this
       simpa using TProof.specialize₂! this t 𝕹(m + 1)
     cl_prover [ih, this]
