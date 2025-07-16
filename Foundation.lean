@@ -121,6 +121,8 @@ import Foundation.Modal.Neighborhood.Logic.EMCN
 import Foundation.Modal.Neighborhood.Logic.E4
 import Foundation.Modal.Neighborhood.Logic.EMT4
 import Foundation.Modal.Neighborhood.Logic.EMC4
+import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
+import Foundation.Modal.Neighborhood.Logic.END
 
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.ModalCompanion.KC

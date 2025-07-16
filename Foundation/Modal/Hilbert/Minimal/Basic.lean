@@ -1,7 +1,9 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.K
 import Foundation.Modal.Entailment.EMCN
+import Foundation.Modal.Entailment.END
 import Foundation.Logic.HilbertStyle.Lukasiewicz
+import Foundation.Logic.Incomparable
 import Foundation.Modal.Logic.Basic
 
 namespace LO.Modal
@@ -124,6 +126,16 @@ instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := by
   apply Equiv.iff.mp;
   infer_instance;
 
+instance [h : Incomparable H₁ H₂]
+  : Incomparable H₁.logic H₂.logic := by
+  apply Incomparable.of_unprovable;
+  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₁;
+    use φ;
+    simpa;
+  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₂;
+    use φ;
+    simpa;
+
 end
 
 
@@ -199,6 +211,23 @@ instance [H.HasT] : Entailment.HasAxiomT H where
       (φ := Axioms.T (.atom (HasT.p H)))
       (s := λ b => if (HasT.p H) = b then φ else (.atom b))
       HasT.mem_T;
+
+class HasD (H : Hilbert.WithRE α) where
+  p : α
+  mem_D : Axioms.D (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasD] : Entailment.HasAxiomD H where
+  D φ := by
+    simpa using Deduction.axm
+      (φ := Axioms.D (.atom (HasD.p H)))
+      (s := λ b => if (HasD.p H) = b then φ else (.atom b))
+      HasD.mem_D;
+
+class HasP (H : Hilbert.WithRE α) where
+  mem_P : Axioms.P ∈ H.axioms := by tauto;
+
+instance [H.HasP] : Entailment.HasAxiomP H where
+  P := by simpa using Deduction.axm' (h := HasP.mem_P);
 
 
 class HasFour (H : Hilbert.WithRE α) where
@@ -291,6 +320,26 @@ protected abbrev E4 : Logic ℕ := Entailment.theory Hilbert.E4
 notation "𝐄𝟒" => Modal.E4
 instance : Hilbert.E4.HasFour where p := 0
 instance : Entailment.E4 Hilbert.E4 where
+
+
+protected abbrev Hilbert.ED : Hilbert.WithRE ℕ := ⟨{Axioms.D (.atom 0)}⟩
+protected abbrev ED : Logic ℕ := Entailment.theory Hilbert.ED
+instance : Hilbert.ED.HasD where p := 0
+notation "𝐄𝐃" => Modal.ED
+
+
+protected abbrev Hilbert.END : Hilbert.WithRE ℕ := ⟨{Axioms.N, Axioms.D (.atom 0)}⟩
+protected abbrev END : Logic ℕ := Entailment.theory Hilbert.END
+notation "𝐄𝐍𝐃" => Modal.END
+instance : Hilbert.END.HasN where
+instance : Hilbert.END.HasD where p := 0
+instance : Entailment.END Hilbert.END where
+
+
+protected abbrev Hilbert.EP : Hilbert.WithRE ℕ := ⟨{Axioms.P}⟩
+protected abbrev EP : Logic ℕ := Entailment.theory Hilbert.EP
+notation "𝐄𝐏" => Modal.EP
+instance : Hilbert.EP.HasP where
 
 
 protected abbrev Hilbert.EMC4 : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1), Axioms.Four (.atom 0)}⟩
