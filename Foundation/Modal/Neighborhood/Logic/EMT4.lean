@@ -1,10 +1,6 @@
 import Foundation.Modal.Neighborhood.Logic.EMT
 import Foundation.Modal.Neighborhood.Logic.E4
 
-@[simp]
-lemma Set.inter_eq_univ {s t : Set α} : s ∩ t = Set.univ ↔ s = Set.univ ∧ t = Set.univ := by
-  simpa using @Set.sInter_eq_univ _ {s, t};
-
 namespace LO.Modal
 
 open Neighborhood
@@ -44,22 +40,10 @@ instance : Hilbert.EMT ⪱ Hilbert.EMT4 := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMT);
       apply not_validOnFrameClass_of_exists_frame;
-      use ⟨
-        Fin 2,
-        λ w => match w with | 0 => ∅ | 1 => {Set.univ},
-      ⟩;
+      use Frame.trivial_nontransitive;
       constructor;
-      . exact {
-          mono := by rintro X Y x; match x with | 0 | 1 => simp;
-          refl := by rintro X x; match x with | 0 | 1 => first | tauto_set | simp_all;
-        };
-      . apply not_imp_not.mpr isTransitive_of_valid_axiomFour;
-        by_contra! hC;
-        have := (@hC.trans Set.univ);
-        have := @this 1 ?_;
-        . have := Set.Subset.antisymm_iff.mp this |>.2;
-          simpa using @this 0;
-        . simp;
+      . constructor;
+      . simp;
 
 end Hilbert
 
