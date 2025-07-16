@@ -2,6 +2,7 @@ import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.K
 import Foundation.Modal.Entailment.EMCN
 import Foundation.Logic.HilbertStyle.Lukasiewicz
+import Foundation.Logic.Incomparable
 import Foundation.Modal.Logic.Basic
 
 namespace LO.Modal
@@ -123,6 +124,16 @@ instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := by
   simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];
   apply Equiv.iff.mp;
   infer_instance;
+
+instance [h : Incomparable H₁ H₂]
+  : Incomparable H₁.logic H₂.logic := by
+  apply Incomparable.of_unprovable;
+  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₁;
+    use φ;
+    simpa;
+  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₂;
+    use φ;
+    simpa;
 
 end
 
