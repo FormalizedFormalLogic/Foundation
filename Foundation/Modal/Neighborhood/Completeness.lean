@@ -89,27 +89,27 @@ variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.Cl 𝓢] [Entailment.Consistent 𝓢]
 variable {φ ψ ξ : Formula ℕ}
 
-structure Canonicalℬ (𝓢 : S) where
-  ℬ : Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)
-  canonicity : ∀ φ, ℬ (proofset 𝓢 φ) = proofset 𝓢 (□φ)
+structure CanonicalBox (𝓢 : S) where
+  box : Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)
+  canonicity : ∀ φ, box (proofset 𝓢 φ) = proofset 𝓢 (□φ)
 
-instance : CoeFun (Canonicalℬ 𝓢) (fun _ => Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)) := ⟨Canonicalℬ.ℬ⟩
+instance : CoeFun (CanonicalBox 𝓢) (fun _ => Set (MaximalConsistentSet 𝓢) → Set (MaximalConsistentSet 𝓢)) := ⟨CanonicalBox.box⟩
 
 def mkCanonicalFrame
   (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢]
-  (ℬ : Canonicalℬ 𝓢)
-  : Frame := Frame.mk_B (MaximalConsistentSet 𝓢) ℬ
+  (box : CanonicalBox 𝓢)
+  : Frame := Frame.mk_ℬ (MaximalConsistentSet 𝓢) box
 
 def mkCanonicalModel
   (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢]
-  (ℬ : Canonicalℬ 𝓢)
+  (box : CanonicalBox 𝓢)
   : Model where
-  toFrame := mkCanonicalFrame 𝓢 ℬ
+  toFrame := mkCanonicalFrame 𝓢 box
   Val a := proofset 𝓢 (.atom a)
 
-@[simp] lemma mkCanonicalModel.eq_ℬ_self : (mkCanonicalModel 𝓢 ℬ).ℬ = ℬ := by tauto;
+@[simp] lemma mkCanonicalModel.eq_ℬ_self : (mkCanonicalModel 𝓢 box).box = box := by tauto;
 
-lemma truthlemma : ↑(proofset 𝓢 φ) = ((mkCanonicalModel 𝓢 ℬ).truthset φ) := by
+lemma truthlemma : ↑(proofset 𝓢 φ) = ((mkCanonicalModel 𝓢 box).truthset φ) := by
   induction φ with
   | hatom =>
     simp [mkCanonicalModel]
@@ -118,11 +118,11 @@ lemma truthlemma : ↑(proofset 𝓢 φ) = ((mkCanonicalModel 𝓢 ℬ).truthset
   | himp φ ψ ihφ ihψ =>
     simp_all [MaximalConsistentSet.proofset.eq_imp, ←ihφ, ←ihψ];
   | hbox φ ihφ =>
-    rw [Model.truthset.eq_box, ←ihφ, mkCanonicalModel.eq_ℬ_self, (@ℬ.canonicity φ)];
+    rw [Model.truthset.eq_box, ←ihφ, mkCanonicalModel.eq_ℬ_self, (@box.canonicity φ)];
 
 lemma complete_of_canonical_frame
-  (C : FrameClass) (ℬ)
-  (hC : (mkCanonicalFrame 𝓢 ℬ) ∈ C)
+  (C : FrameClass) (box)
+  (hC : (mkCanonicalFrame 𝓢 box) ∈ C)
   : LO.Complete 𝓢 C := by
   constructor;
   intro φ;
@@ -131,7 +131,7 @@ lemma complete_of_canonical_frame
   have := FormulaSet.unprovable_iff_singleton_neg_consistent.mpr hφ;
   obtain ⟨Γ, hΓ⟩ := lindenbaum this;
   apply not_validOnFrameClass_of_exists_model_world;
-  use (mkCanonicalModel 𝓢 ℬ), Γ;
+  use (mkCanonicalModel 𝓢 box), Γ;
   constructor;
   . assumption;
   . simp only [Semantics.Realize, Satisfies, ←truthlemma];
@@ -140,8 +140,8 @@ lemma complete_of_canonical_frame
     tauto;
 
 open Classical in
-def canonical_minimal_ℬ (𝓢 : S) [Entailment.E 𝓢] : Canonicalℬ 𝓢 where
-  ℬ Γ := if h : ∃ φ, Γ = (proofset 𝓢 φ) then (proofset 𝓢 (□(h.choose))) else ∅
+def minimal_canonical_box (𝓢 : S) [Entailment.E 𝓢] : CanonicalBox 𝓢 where
+  box Γ := if h : ∃ φ, Γ = (proofset 𝓢 φ) then (proofset 𝓢 (□(h.choose))) else ∅
   canonicity := by
     intro φ;
     split;

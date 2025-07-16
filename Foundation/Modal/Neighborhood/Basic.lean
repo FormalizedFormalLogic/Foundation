@@ -15,13 +15,35 @@ structure Frame where
   𝒩 : World → Set (Set World)
 attribute [simp] Frame.world_nonempty
 
+namespace Frame
+
+variable {F : Frame} {X Y : Set F.World}
+
 instance : CoeSort Frame Type := ⟨Frame.World⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
-@[reducible] def Frame.ℬ (F : Frame) : Set F.World → Set F.World := λ X => { w | X ∈ F.𝒩 w }
+@[reducible] def box {F : Frame} : Set F.World → Set F.World := λ X => { w | X ∈ F.𝒩 w }
+@[reducible] def dia {F : Frame} := λ X => (F.box Xᶜ)ᶜ
 
-@[simp]
-lemma Frame.eq_ℬ_𝒩 {F : Frame} {X Y : Set F.World} : (F.ℬ X) = Y ↔ (∀ x, X ∈ F.𝒩 x ↔ x ∈ Y) := by
+prefix:max "ℬ" => Frame.box
+prefix:max "𝒟" => Frame.dia
+
+def box_iterate {F : Frame} : ℕ → Set F.World → Set F.World
+| 0     => id
+| n + 1 => λ X => ℬ (F.box_iterate n X)
+notation:max "ℬ^[" n:80 "]" => Frame.box_iterate n
+
+def dia_iterate {F : Frame} : ℕ → Set F.World → Set F.World
+| 0     => id
+| n + 1 => λ X => 𝒟 (F.dia_iterate n X)
+notation:max "𝒟^[" n:80 "]" => Frame.dia_iterate n
+
+@[simp] lemma box_iterate_zero : ℬ^[0] X = X := rfl
+@[simp] lemma dia_iterate_zero : 𝒟^[0] X = X := rfl
+@[simp] lemma box_iterate_one : ℬ^[1] X = ℬ X := rfl
+@[simp] lemma dia_iterate_one : 𝒟^[1] X = 𝒟 X := rfl
+
+lemma eq_ℬ_𝒩 {F : Frame} {X Y : Set F.World} : (ℬ X) = Y ↔ (∀ x, X ∈ F.𝒩 x ↔ x ∈ Y) := by
   constructor;
   . rintro rfl;
     tauto;
@@ -29,16 +51,18 @@ lemma Frame.eq_ℬ_𝒩 {F : Frame} {X Y : Set F.World} : (F.ℬ X) = Y ↔ (∀
     ext x;
     apply h;
 
-def Frame.mk_B (World : Type) [Nonempty World] (B : Set World → Set World) : Frame where
+def mk_ℬ (World : Type) [Nonempty World] (B : Set World → Set World) : Frame where
   World := World
   𝒩 x := { X | x ∈ B X }
 
+
 section
 
-abbrev Frame.simple_blackhole : Frame := ⟨Unit, λ _ => { Set.univ }⟩
+abbrev simple_blackhole : Frame := ⟨Unit, λ _ => { Set.univ }⟩
 
 end
 
+end Frame
 
 abbrev FrameClass := Set Frame
 
@@ -60,7 +84,7 @@ def Model.truthset (M : Model) : Formula ℕ → Set M.World
 | .atom n => M.Val n
 | ⊥       => ∅
 | φ ➝ ψ  => (truthset M φ)ᶜ ∪ truthset M ψ
-| □φ      => M.ℬ (truthset M φ)
+| □φ      => ℬ (truthset M φ)
 
 namespace Model.truthset
 
@@ -79,8 +103,23 @@ instance : CoeFun Model (λ M => Formula ℕ → Set M.World) := ⟨λ M => trut
   M (φ ⭤ ψ) = M (φ ➝ ψ) ∩ (M (ψ ➝ φ))             := by simp [LogicalConnective.iff];
   _         = ((M φ)ᶜ ∪ (M ψ)) ∩ ((M ψ)ᶜ ∪ (M φ)) := by simp;
   _         = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)     := by tauto_set;
-@[simp, grind] lemma eq_box  : M (□φ) = M.ℬ (M φ) := rfl
-@[simp, grind] lemma eq_dia  : M (◇φ) = (M.ℬ (M φ)ᶜ)ᶜ := by simp [truthset]
+
+@[simp, grind]
+lemma eq_multibox {n : ℕ} : M (□^[n] φ) = ℬ^[n] (M φ) := by
+  induction n with
+  | zero => simp
+  | succ n ih => simp [ih, truthset, Frame.box_iterate]
+
+@[simp, grind] lemma eq_box : M (□φ) = ℬ (M φ) := eq_multibox (n := 1)
+
+@[simp, grind]
+lemma eq_multidia {n : ℕ} : M (◇^[n] φ) = 𝒟^[n] (M φ) := by
+  induction n with
+  | zero => simp
+  | succ n ih => simp [ih, truthset, Frame.dia_iterate]
+
+@[simp, grind] lemma eq_dia : M (◇φ) = 𝒟 (M φ) := eq_multidia (n := 1)
+
 
 @[grind]
 lemma eq_subst :
@@ -115,6 +154,11 @@ variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 
 @[grind] lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.𝒩 x) := by simp [Semantics.Realize, Satisfies];
 @[grind] lemma def_dia : x ⊧ ◇φ ↔ (M φ)ᶜ ∈ (M.𝒩 x)ᶜ := by simp [Semantics.Realize, Satisfies];
+
+@[grind] lemma def_multibox' : x ⊧ □^[n]φ ↔ x ∈ ℬ^[n] (M φ) := by simp [Semantics.Realize, Satisfies]
+@[grind] lemma def_mutlidia' : x ⊧ ◇^[n]φ ↔ x ∈ 𝒟^[n] (M φ) := by simp [Semantics.Realize, Satisfies]
+@[grind] lemma def_box' : x ⊧ □φ ↔ x ∈ ℬ (M φ) := def_multibox' (n := 1)
+@[grind] lemma def_dia' : x ⊧ ◇φ ↔ x ∈ 𝒟 (M φ) := def_mutlidia' (n := 1)
 
 protected instance : Semantics.Tarski (M.World) where
   realize_top := by grind
@@ -175,7 +219,7 @@ lemma valid_iff : M ⊧ φ ⭤ ψ ↔ (M φ = M ψ) := by
     simp [Satisfies] at this;
     tauto;
   . intro h x;
-    simp [Satisfies, Set.mem_union, Set.mem_inter_iff, Set.mem_compl_iff, h];
+    simp [Satisfies, h];
 
 @[simp] protected lemma imply₁ : M ⊧ Axioms.Imply₁ φ ψ := λ _ ↦ Satisfies.imply₁
 
@@ -192,7 +236,7 @@ protected lemma mdp (hφψ : M ⊧ φ ➝ ψ) (hψ : M ⊧ φ) : M ⊧ ψ := by
 protected lemma re (hφ : M ⊧ φ ⭤ ψ) : M ⊧ □φ ⭤ □ψ := by
   rw [valid_iff] at ⊢ hφ;
   ext x;
-  simp [Satisfies, hφ];
+  simp_all;
 
 end ValidOnModel
 
@@ -254,6 +298,12 @@ lemma iff_not_validOnFrameClass_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : M
   push_neg;
   tauto;
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
+
+lemma iff_not_validOnFrameClass_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
+  apply not_iff_not.mp;
+  push_neg;
+  tauto;
+alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 end
 

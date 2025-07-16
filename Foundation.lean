@@ -83,7 +83,7 @@ import Foundation.IntFO.Translation
 -- import Foundation.Propositional.Dialectica.Basic
 
 -- Modal
-import Foundation.Modal.Hilbert.K_EMCN
+import Foundation.Modal.Hilbert.Minimal_Normal
 import Foundation.Modal.Hilbert.GL_K4Loeb_K4Henkin_K4Hen
 
 import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
@@ -118,6 +118,9 @@ import Foundation.Modal.Kripke.LinearFrame
 import Foundation.Modal.PLoN.Logic.N
 
 import Foundation.Modal.Neighborhood.Logic.EMCN
+import Foundation.Modal.Neighborhood.Logic.E4
+import Foundation.Modal.Neighborhood.Logic.EMT4
+import Foundation.Modal.Neighborhood.Logic.EMC4
 
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.ModalCompanion.KC

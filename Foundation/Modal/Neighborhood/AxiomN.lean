@@ -15,6 +15,7 @@ lemma Frame.contains_unit [Frame.ContainsUnit F] {x : F} : Set.univ ∈ F.𝒩 x
 
 instance : Frame.simple_blackhole.ContainsUnit := ⟨by simp⟩
 
+@[simp]
 lemma valid_axiomN_of_ContainsUnit [F.ContainsUnit] : F ⊧ Axioms.N := by
   intro V x;
   simp [Satisfies, F.contains_unit];
