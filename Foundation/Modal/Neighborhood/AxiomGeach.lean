@@ -1,4 +1,3 @@
-import Foundation.Modal.Tableau
 import Foundation.Modal.Neighborhood.Basic
 
 namespace LO.Modal.Neighborhood

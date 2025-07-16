@@ -1,6 +1,7 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.K
 import Foundation.Modal.Entailment.EMCN
+import Foundation.Modal.Entailment.END
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Logic.Incomparable
 import Foundation.Modal.Logic.Basic
@@ -325,6 +326,14 @@ protected abbrev Hilbert.ED : Hilbert.WithRE ℕ := ⟨{Axioms.D (.atom 0)}⟩
 protected abbrev ED : Logic ℕ := Entailment.theory Hilbert.ED
 instance : Hilbert.ED.HasD where p := 0
 notation "𝐄𝐃" => Modal.ED
+
+
+protected abbrev Hilbert.END : Hilbert.WithRE ℕ := ⟨{Axioms.N, Axioms.D (.atom 0)}⟩
+protected abbrev END : Logic ℕ := Entailment.theory Hilbert.END
+notation "𝐄𝐍𝐃" => Modal.END
+instance : Hilbert.END.HasN where
+instance : Hilbert.END.HasD where p := 0
+instance : Entailment.END Hilbert.END where
 
 
 protected abbrev Hilbert.EP : Hilbert.WithRE ℕ := ⟨{Axioms.P}⟩

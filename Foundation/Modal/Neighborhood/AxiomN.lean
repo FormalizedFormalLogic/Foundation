@@ -1,4 +1,3 @@
-import Foundation.Modal.Tableau
 import Foundation.Modal.Neighborhood.Basic
 
 namespace LO.Modal.Neighborhood
@@ -19,5 +18,10 @@ instance : Frame.simple_blackhole.ContainsUnit := ⟨by simp⟩
 lemma valid_axiomN_of_ContainsUnit [F.ContainsUnit] : F ⊧ Axioms.N := by
   intro V x;
   simp [Satisfies, F.contains_unit];
+
+lemma containsUnit_of_valid_axiomN (h : F ⊧ Axioms.N) : F.ContainsUnit := by
+  constructor;
+  intro x;
+  simpa [Satisfies] using @h (λ _ => Set.univ) x;
 
 end LO.Modal.Neighborhood
