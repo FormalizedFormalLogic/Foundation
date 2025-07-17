@@ -287,6 +287,9 @@ lemma coe_empty_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : 
     (⌜(⌜σ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Metamath.Semiterm V ℒₒᵣ m) = InternalArithmetic.typedNumeral ⌜σ⌝ := by
   simp [←coe_empty_quote, coe_empty_quote_eq_quote]
 
+@[simp] lemma empty_quote_inj_iff {σ₁ σ₂ : Semisentence L n} :
+    (⌜σ₁⌝ : V) = ⌜σ₂⌝ ↔ σ₁ = σ₂ := by simp [empty_quote_eq_encode]
+
 end Semiformula
 
 end FirstOrder

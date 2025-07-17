@@ -4,7 +4,6 @@ import Foundation.FirstOrder.Incompleteness.Second
 # $\Delta_1$-definability of theories
 
 *TODO: Prove `𝐈𝚺₁` and `𝐏𝐀` are $\Delta_1$-definable.*
-
 -/
 
 namespace LO.FirstOrder

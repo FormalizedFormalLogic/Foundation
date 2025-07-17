@@ -13,11 +13,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath InternalArithmetic
 
-variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] (U : ArithmeticTheory) [U.Δ₁Definable]
-
-abbrev _root_.LO.FirstOrder.ArithmeticTheory.provabilityPred (σ : Sentence ℒₒᵣ) : Sentence ℒₒᵣ := U.provable/[⌜σ⌝]
-
-variable {U}
+variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] {U : ArithmeticTheory} [U.Δ₁Definable]
 
 local prefix:90 "□" => U.provabilityPred
 

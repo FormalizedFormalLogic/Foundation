@@ -583,6 +583,8 @@ def proof : 𝚫₁.Semisentence 2 := .mkDelta
 def provable : 𝚺₁.Semisentence 1 := .mkSigma
   “φ. ∃ d, !T.proof.sigma d φ”
 
+abbrev provabilityPred (σ : Sentence L) : Sentence ℒₒᵣ := T.provable.val/[⌜σ⌝]
+
 variable {T}
 
 section
