@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.Term.Functions
+import Foundation.FirstOrder.Internal.Syntax.Term.Functions
 
 /-!
 

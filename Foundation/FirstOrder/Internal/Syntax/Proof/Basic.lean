@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.Proof.Theory
+import Foundation.FirstOrder.Internal.Syntax.Theory
 
 namespace LO
 
@@ -155,7 +155,7 @@ noncomputable def root (s p : V) : V := ⟪s, 9, p⟫ + 1
 section
 
 def axLGraph : 𝚺₀.Semisentence 3 :=
-  .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 0 p ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 0 p ∧ y = y' + 1”
 
 lemma axL.defined : 𝚺₀-Function₂[V] axL via axLGraph := by
   intro v; simp_all [axLGraph, axL]
@@ -164,7 +164,7 @@ lemma axL.defined : 𝚺₀-Function₂[V] axL via axLGraph := by
     Semiformula.Evalbm V v axLGraph.val ↔ v 0 = axL (v 1) (v 2) := axL.defined.df.iff v
 
 def verumIntroGraph : 𝚺₀.Semisentence 2 :=
-  .mkSigma “y s. ∃ y' < y, !pair₃Def y' s 1 0 ∧ y = y' + 1” (by simp)
+  .mkSigma “y s. ∃ y' < y, !pair₃Def y' s 1 0 ∧ y = y' + 1”
 
 lemma verumIntro.defined : 𝚺₀-Function₁[V] verumIntro via verumIntroGraph := by
   intro v; simp_all [verumIntroGraph, verumIntro]
@@ -173,7 +173,7 @@ lemma verumIntro.defined : 𝚺₀-Function₁[V] verumIntro via verumIntroGraph
     Semiformula.Evalbm V v verumIntroGraph.val ↔ v 0 = verumIntro (v 1) := verumIntro.defined.df.iff v
 
 def andIntroGraph : 𝚺₀.Semisentence 6 :=
-  .mkSigma “y s p q dp dq. ∃ y' < y, !pair₆Def y' s 2 p q dp dq ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p q dp dq. ∃ y' < y, !pair₆Def y' s 2 p q dp dq ∧ y = y' + 1”
 
 lemma andIntro.defined : 𝚺₀-Function₅ (andIntro : V → V → V → V → V → V) via andIntroGraph := by
   intro v; simp_all [andIntroGraph, andIntro]
@@ -182,7 +182,7 @@ lemma andIntro.defined : 𝚺₀-Function₅ (andIntro : V → V → V → V →
     Semiformula.Evalbm V v andIntroGraph.val ↔ v 0 = andIntro (v 1) (v 2) (v 3) (v 4) (v 5) := andIntro.defined.df.iff v
 
 def orIntroGraph : 𝚺₀.Semisentence 5 :=
-  .mkSigma “y s p q d. ∃ y' < y, !pair₅Def y' s 3 p q d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p q d. ∃ y' < y, !pair₅Def y' s 3 p q d ∧ y = y' + 1”
 
 lemma orIntro.defined : 𝚺₀-Function₄ (orIntro : V → V → V → V → V) via orIntroGraph := by
   intro v; simp_all [orIntroGraph, orIntro]
@@ -191,7 +191,7 @@ lemma orIntro.defined : 𝚺₀-Function₄ (orIntro : V → V → V → V → V
     Semiformula.Evalbm V v orIntroGraph.val ↔ v 0 = orIntro (v 1) (v 2) (v 3) (v 4) := orIntro.defined.df.iff v
 
 def allIntroGraph : 𝚺₀.Semisentence 4 :=
-  .mkSigma “y s p d. ∃ y' < y, !pair₄Def y' s 4 p d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p d. ∃ y' < y, !pair₄Def y' s 4 p d ∧ y = y' + 1”
 
 lemma allIntro.defined : 𝚺₀-Function₃ (allIntro : V → V → V → V) via allIntroGraph := by
   intro v; simp_all [allIntroGraph, allIntro]
@@ -200,7 +200,7 @@ lemma allIntro.defined : 𝚺₀-Function₃ (allIntro : V → V → V → V) vi
     Semiformula.Evalbm V v allIntroGraph.val ↔ v 0 = allIntro (v 1) (v 2) (v 3) := allIntro.defined.df.iff v
 
 def exIntroGraph : 𝚺₀.Semisentence 5 :=
-  .mkSigma “y s p t d. ∃ y' < y, !pair₅Def y' s 5 p t d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p t d. ∃ y' < y, !pair₅Def y' s 5 p t d ∧ y = y' + 1”
 
 lemma exIntro.defined : 𝚺₀-Function₄ (exIntro : V → V → V → V → V) via exIntroGraph := by
   intro v; simp_all [exIntroGraph, numeral_eq_natCast, exIntro]
@@ -209,7 +209,7 @@ lemma exIntro.defined : 𝚺₀-Function₄ (exIntro : V → V → V → V → V
     Semiformula.Evalbm V v exIntroGraph.val ↔ v 0 = exIntro (v 1) (v 2) (v 3) (v 4) := exIntro.defined.df.iff v
 
 def wkRuleGraph : 𝚺₀.Semisentence 3 :=
-  .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 6 d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 6 d ∧ y = y' + 1”
 
 lemma wkRule.defined : 𝚺₀-Function₂ (wkRule : V → V → V) via wkRuleGraph := by
   intro v; simp_all [wkRuleGraph, numeral_eq_natCast, wkRule]
@@ -218,7 +218,7 @@ lemma wkRule.defined : 𝚺₀-Function₂ (wkRule : V → V → V) via wkRuleGr
     Semiformula.Evalbm V v wkRuleGraph.val ↔ v 0 = wkRule (v 1) (v 2) := wkRule.defined.df.iff v
 
 def shiftRuleGraph : 𝚺₀.Semisentence 3 :=
-  .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 7 d ∧ y = y' + 1” (by simp)
+  .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 7 d ∧ y = y' + 1”
 
 lemma shiftRule.defined : 𝚺₀-Function₂ (shiftRule : V → V → V) via shiftRuleGraph := by
   intro v; simp_all [shiftRuleGraph, numeral_eq_natCast, shiftRule]
@@ -227,7 +227,7 @@ lemma shiftRule.defined : 𝚺₀-Function₂ (shiftRule : V → V → V) via sh
     Semiformula.Evalbm V v shiftRuleGraph.val ↔ v 0 = shiftRule (v 1) (v 2) := shiftRule.defined.df.iff v
 
 def cutRuleGraph : 𝚺₀.Semisentence 5 :=
-  .mkSigma “y s p d₁ d₂. ∃ y' < y, !pair₅Def y' s 8 p d₁ d₂ ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p d₁ d₂. ∃ y' < y, !pair₅Def y' s 8 p d₁ d₂ ∧ y = y' + 1”
 
 lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V) via cutRuleGraph := by
   intro v; simp_all [cutRuleGraph, numeral_eq_natCast, cutRule]
@@ -236,7 +236,7 @@ lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V
     Semiformula.Evalbm V v cutRuleGraph.val ↔ v 0 = cutRule (v 1) (v 2) (v 3) (v 4) := cutRule_defined.df.iff v
 
 def rootGraph : 𝚺₀.Semisentence 3 :=
-  .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 9 p ∧ y = y' + 1” (by simp)
+  .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 9 p ∧ y = y' + 1”
 
 lemma root_defined : 𝚺₀-Function₂ (root : V → V → V) via rootGraph := by
   intro v; simp_all [rootGraph, numeral_eq_natCast, root]

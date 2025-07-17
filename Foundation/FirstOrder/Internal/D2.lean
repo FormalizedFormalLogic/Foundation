@@ -1,5 +1,4 @@
-import Foundation.FirstOrder.Internal.D1
-import Foundation.FirstOrder.Internal.PeanoMinus
+import Foundation.FirstOrder.Internal.Syntax
 
 /-!
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D2}$
@@ -7,7 +6,7 @@ import Foundation.FirstOrder.Internal.PeanoMinus
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+open FirstOrder
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 

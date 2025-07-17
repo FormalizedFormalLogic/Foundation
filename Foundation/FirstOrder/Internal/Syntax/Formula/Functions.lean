@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.Internal.Formula.Basic
-import Foundation.FirstOrder.Internal.Term.Functions
+import Foundation.FirstOrder.Internal.Syntax.Formula.Basic
+import Foundation.FirstOrder.Internal.Syntax.Term.Functions
 
 namespace LO.ISigma1.Metamath
 
@@ -16,16 +16,16 @@ section negation
 namespace Negation
 
 def blueprint : UformulaRec1.Blueprint where
-  rel := .mkSigma “y param k R v. !qqNRelDef y k R v” (by simp)
-  nrel := .mkSigma “y param k R v. !qqRelDef y k R v” (by simp)
-  verum := .mkSigma “y param. !qqFalsumDef y” (by simp)
-  falsum := .mkSigma “y param. !qqVerumDef y” (by simp)
-  and := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂” (by simp)
-  or := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂” (by simp)
-  all := .mkSigma “y param p₁ y₁. !qqExDef y y₁” (by simp)
-  ex := .mkSigma “y param p₁ y₁. !qqAllDef y y₁” (by simp)
-  allChanges := .mkSigma “param' param. param' = 0” (by simp)
-  exChanges := .mkSigma “param' param. param' = 0” (by simp)
+  rel := .mkSigma “y param k R v. !qqNRelDef y k R v”
+  nrel := .mkSigma “y param k R v. !qqRelDef y k R v”
+  verum := .mkSigma “y param. !qqFalsumDef y”
+  falsum := .mkSigma “y param. !qqVerumDef y”
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂”
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂”
+  all := .mkSigma “y param p₁ y₁. !qqExDef y y₁”
+  ex := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
+  allChanges := .mkSigma “param' param. param' = 0”
+  exChanges := .mkSigma “param' param. param' = 0”
 
 noncomputable def construction : UformulaRec1.Construction V blueprint where
   rel {_} := fun k R v ↦ ^nrel k R v
@@ -237,14 +237,14 @@ variable (L)
 def blueprint : UformulaRec1.Blueprint where
   rel := .mkSigma “y param k R v. ∃ v', !(termShiftVecGraph L) v' k v ∧ !qqRelDef y k R v'”
   nrel := .mkSigma “y param k R v. ∃ v', !(termShiftVecGraph L) v' k v ∧ !qqNRelDef y k R v'”
-  verum := .mkSigma “y param. !qqVerumDef y” (by simp)
-  falsum := .mkSigma “y param. !qqFalsumDef y” (by simp)
-  and := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂” (by simp)
-  or := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂” (by simp)
-  all := .mkSigma “y param p₁ y₁. !qqAllDef y y₁” (by simp)
-  ex := .mkSigma “y param p₁ y₁. !qqExDef y y₁” (by simp)
-  allChanges := .mkSigma “param' param. param' = 0” (by simp)
-  exChanges := .mkSigma “param' param. param' = 0” (by simp)
+  verum := .mkSigma “y param. !qqVerumDef y”
+  falsum := .mkSigma “y param. !qqFalsumDef y”
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂”
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂”
+  all := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
+  ex := .mkSigma “y param p₁ y₁. !qqExDef y y₁”
+  allChanges := .mkSigma “param' param. param' = 0”
+  exChanges := .mkSigma “param' param. param' = 0”
 
 noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   rel {_} := fun k R v ↦ ^rel k R (termShiftVec L k v)
@@ -390,12 +390,12 @@ variable (L)
 def blueprint : UformulaRec1.Blueprint where
   rel    := .mkSigma “y param k R v. ∃ v', !(termSubstVecGraph L) v' k param v ∧ !qqRelDef y k R v'”
   nrel   := .mkSigma “y param k R v. ∃ v', !(termSubstVecGraph L) v' k param v ∧ !qqNRelDef y k R v'”
-  verum  := .mkSigma “y param. !qqVerumDef y” (by simp)
-  falsum := .mkSigma “y param. !qqFalsumDef y” (by simp)
-  and    := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂” (by simp)
-  or     := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂” (by simp)
-  all    := .mkSigma “y param p₁ y₁. !qqAllDef y y₁” (by simp)
-  ex     := .mkSigma “y param p₁ y₁. !qqExDef y y₁” (by simp)
+  verum  := .mkSigma “y param. !qqVerumDef y”
+  falsum := .mkSigma “y param. !qqFalsumDef y”
+  and    := .mkSigma “y param p₁ p₂ y₁ y₂. !qqAndDef y y₁ y₂”
+  or     := .mkSigma “y param p₁ p₂ y₁ y₂. !qqOrDef y y₁ y₂”
+  all    := .mkSigma “y param p₁ y₁. !qqAllDef y y₁”
+  ex     := .mkSigma “y param p₁ y₁. !qqExDef y y₁”
   allChanges := .mkSigma “param' param. !(qVecGraph L) param' param”
   exChanges  := .mkSigma “param' param. !(qVecGraph L) param' param”
 
@@ -828,16 +828,16 @@ section complexity
 namespace FormulaComplexity
 
 def blueprint : UformulaRec1.Blueprint where
-  rel := .mkSigma “y param k R v. y = 0” (by simp)
-  nrel := .mkSigma “y param k R v. y = 0” (by simp)
-  verum := .mkSigma “y param. y = 0” (by simp)
-  falsum := .mkSigma “y param. y = 0” (by simp)
-  and := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y (y₁ + 1) (y₂ + 1)” (by simp)
-  or := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y (y₁ + 1) (y₂ + 1)” (by simp)
-  all := .mkSigma “y param p₁ y₁. y = y₁ + 1” (by simp)
-  ex := .mkSigma “y param p₁ y₁. y = y₁ + 1” (by simp)
-  allChanges := .mkSigma “param' param. param' = 0” (by simp)
-  exChanges := .mkSigma “param' param. param' = 0” (by simp)
+  rel := .mkSigma “y param k R v. y = 0”
+  nrel := .mkSigma “y param k R v. y = 0”
+  verum := .mkSigma “y param. y = 0”
+  falsum := .mkSigma “y param. y = 0”
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y (y₁ + 1) (y₂ + 1)”
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y (y₁ + 1) (y₂ + 1)”
+  all := .mkSigma “y param p₁ y₁. y = y₁ + 1”
+  ex := .mkSigma “y param p₁ y₁. y = y₁ + 1”
+  allChanges := .mkSigma “param' param. param' = 0”
+  exChanges := .mkSigma “param' param. param' = 0”
 
 noncomputable def construction : UformulaRec1.Construction V blueprint where
   rel {_} := fun k R v ↦ 0
@@ -1152,7 +1152,7 @@ def Language.IsFVFree (n p : V) : Prop := IsSemiformula L n p ∧ shift L p = p
 section
 
 def _root_.LO.FirstOrder.Arithmetic.LDef.isFVFreeDef (pL : LDef) : 𝚺₁.Semisentence 2 :=
-  .mkSigma “n p | !(isSemiformula L).sigma n p ∧ !pshift LDef p p” (by simp)
+  .mkSigma “n p | !(isSemiformula L).sigma n p ∧ !pshift LDef p p”
 
 lemma isFVFree_defined : 𝚺₁-Relation L.IsFVFree via pL.isFVFreeDef := by
   intro v; simp [LDef.isFVFreeDef, HierarchySymbol.Semiformula.val_sigma, (semiformula_defined L).df.iff, (shift_defined L).df.iff]
@@ -1233,16 +1233,16 @@ notation:78 x:78 " ^≮ " y:79 => qqNLT x y
   simpa using nth_lt_qqNRel_of_lt (i := 1) (k := 2) (r := (ltIndex : V)) (v := ?[x, y]) (by simp)
 
 def _root_.LO.FirstOrder.Arithmetic.qqEQDef : 𝚺₁.Semisentence 3 :=
-  .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑eqIndex v” (by simp)
+  .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑eqIndex v”
 
 def _root_.LO.FirstOrder.Arithmetic.qqNEQDef : 𝚺₁.Semisentence 3 :=
-  .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑eqIndex v” (by simp)
+  .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑eqIndex v”
 
 def _root_.LO.FirstOrder.Arithmetic.qqLTDef : 𝚺₁.Semisentence 3 :=
-  .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑ltIndex v” (by simp)
+  .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqRelDef p 2 ↑ltIndex v”
 
 def _root_.LO.FirstOrder.Arithmetic.qqNLTDef : 𝚺₁.Semisentence 3 :=
-  .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑ltIndex v” (by simp)
+  .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑ltIndex v”
 
 lemma qqEQ_defined : 𝚺₁-Function₂ (qqEQ : V → V → V) via qqEQDef := by
   intro v; simp [qqEQDef, numeral_eq_natCast, qqEQ]

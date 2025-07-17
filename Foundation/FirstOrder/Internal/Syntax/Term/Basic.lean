@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.Language
+import Foundation.FirstOrder.Internal.Syntax.Language
 import Foundation.FirstOrder.ISigma1.HFS
 
 namespace LO.ISigma1.Metamath
@@ -49,7 +49,7 @@ lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :
 
 @[simp] lemma qqFunc_inj {k f v k' f' w : V} : ^func k f v = ^func k' f' w ↔ k = k' ∧ f = f' ∧ v = w := by simp [qqFunc]
 
-def _root_.LO.FirstOrder.Arithmetic.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1”
 
 lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := by
   intro v; simp_all [qqBvarDef, qqBvar]
@@ -57,7 +57,7 @@ lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := b
 @[simp] lemma eval_qqBvarDef (v) :
     Semiformula.Evalbm V v qqBvarDef.val ↔ v 0 = ^#(v 1) := qqBvar_defined.df.iff v
 
-def _root_.LO.FirstOrder.Arithmetic.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1”
 
 lemma qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef := by
   intro v; simp_all [qqFvarDef, qqFvar]
@@ -74,7 +74,7 @@ private lemma qqFunc_graph {x k f v : V} :
    by rintro ⟨_, _, rfl, _, _, rfl, _, _, rfl, rfl⟩; rfl⟩
 
 def _root_.LO.FirstOrder.Arithmetic.qqFuncDef : 𝚺₀.Semisentence 4 := .mkSigma
-  “x k f v. ∃ fv < x, !pairDef fv f v ∧ ∃ kfv < x, !pairDef kfv k fv ∧ ∃ x' < x, !pairDef x' 2 kfv ∧ x = x' + 1” (by simp)
+  “x k f v. ∃ fv < x, !pairDef fv f v ∧ ∃ kfv < x, !pairDef kfv k fv ∧ ∃ x' < x, !pairDef x' 2 kfv ∧ x = x' + 1”
 
 lemma qqFunc_defined : 𝚺₀-Function₃ (qqFunc : V → V → V → V) via qqFuncDef := by
   intro v; simp [qqFuncDef, qqFunc_graph]
@@ -671,9 +671,9 @@ end Language.TermRec
 namespace IsUTerm.BV
 
 def blueprint : Language.TermRec.Blueprint 0 where
-  bvar := .mkSigma “y z. y = z + 1” (by simp)
-  fvar := .mkSigma “y x. y = 0” (by simp)
-  func := .mkSigma “y k f v v'. !listMaxDef y v'” (by simp)
+  bvar := .mkSigma “y z. y = z + 1”
+  fvar := .mkSigma “y x. y = 0”
+  func := .mkSigma “y k f v v'. !listMaxDef y v'”
 
 variable (L)
 

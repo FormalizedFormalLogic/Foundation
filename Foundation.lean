@@ -62,7 +62,7 @@ import Foundation.FirstOrder.ISigma1.Ind
 import Foundation.FirstOrder.Omega1.Basic
 import Foundation.FirstOrder.Omega1.Nuon
 
-import Foundation.FirstOrder.Internal.Language
+import Foundation.FirstOrder.Internal.Syntax
 import Foundation.FirstOrder.Internal.D1
 import Foundation.FirstOrder.Internal.D2
 import Foundation.FirstOrder.Internal.D3

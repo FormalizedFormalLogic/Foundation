@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.Internal.Formula.Typed
-import Foundation.FirstOrder.Internal.Proof.Derivation
+import Foundation.FirstOrder.Internal.Syntax.Formula.Typed
+import Foundation.FirstOrder.Internal.Syntax.Proof.Basic
 import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!

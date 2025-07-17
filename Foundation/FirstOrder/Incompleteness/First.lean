@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.D3
+import Foundation.FirstOrder.Internal.DerivabilityCondition
 import Foundation.FirstOrder.R0.Representation
 
 /-!

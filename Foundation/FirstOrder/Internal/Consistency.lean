@@ -2,7 +2,7 @@ import Foundation.FirstOrder.Internal.DerivabilityCondition
 import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!
-# Consistency predicate
+# ConsistentWith predicate
 -/
 
 open Classical
@@ -21,41 +21,41 @@ section
 
 variable (T : Theory L) [T.Δ₁Definable] (V)
 
-def _root_.LO.FirstOrder.Theory.IsConsistent : Prop := ¬T.Provable (⌜(⊥ : Sentence L)⌝ : V)
+def _root_.LO.FirstOrder.Theory.Consistent : Prop := ¬T.Provable (⌜(⊥ : Sentence L)⌝ : V)
 
 variable {V}
 
-def _root_.LO.FirstOrder.Theory.Consistency (φ : V) : Prop := ¬T.Provable (neg L φ)
+def _root_.LO.FirstOrder.Theory.ConsistentWith (φ : V) : Prop := ¬T.Provable (neg L φ)
 
-lemma _root_.LO.FirstOrder.Theory.Consistency.quote_iff {σ : Sentence L} :
-    T.Consistency (⌜σ⌝ : V) ↔ ¬T.Provable (⌜∼σ⌝ : V) := by
-  simp [Theory.Consistency, Semiformula.empty_quote_def, Semiformula.quote_def]
+lemma _root_.LO.FirstOrder.Theory.ConsistentWith.quote_iff {σ : Sentence L} :
+    T.ConsistentWith (⌜σ⌝ : V) ↔ ¬T.Provable (⌜∼σ⌝ : V) := by
+  simp [Theory.ConsistentWith, Semiformula.empty_quote_def, Semiformula.quote_def]
 
 section
 
-def _root_.LO.FirstOrder.Theory.isConsistent : 𝚷₁.Sentence :=
+def _root_.LO.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
   .mkPi (∼T.provabilityPred ⊥)
 
-@[simp] lemma isConsistent.defined : Semiformula.Evalbm V ![] (T.isConsistent : Sentence ℒₒᵣ) ↔ T.IsConsistent V := by
-  simp [Theory.isConsistent, Theory.IsConsistent]
+@[simp] lemma consistent.defined : Semiformula.Evalbm V ![] (T.consistent : Sentence ℒₒᵣ) ↔ T.Consistent V := by
+  simp [Theory.consistent, Theory.Consistent]
 
-def _root_.LO.FirstOrder.Theory.consistency : 𝚷₁.Semisentence 1 := .mkPi
+def _root_.LO.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi
   “φ. ∀ nφ, !(negGraph L) nφ φ → ¬!T.provable nφ”
 
-lemma consistency.defined : 𝚷₁-Predicate (T.Consistency : V → Prop) via T.consistency := by
+lemma consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith := by
   intro v
-  simp [Theory.Consistency, Theory.consistency, neg.defined.df.iff]
+  simp [Theory.ConsistentWith, Theory.consistentWith, neg.defined.df.iff]
 
-@[simp] lemma consistency.eval (v) :
-    Semiformula.Evalbm V v T.consistency.val ↔ T.Consistency (v 0) := (consistency.defined T).df.iff v
+@[simp] lemma consistentWith.eval (v) :
+    Semiformula.Evalbm V v T.consistentWith.val ↔ T.ConsistentWith (v 0) := (consistentWith.defined T).df.iff v
 
-instance consistency.definable : 𝚷₁-Predicate (T.Consistency : V → Prop) := (consistency.defined T).to_definable
+instance consistentWith.definable : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) := (consistentWith.defined T).to_definable
 
 end
 
-abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {↑T.isConsistent}
+abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {↑T.consistent}
 
-abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼↑T.isConsistent}
+abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼↑T.consistent}
 
 instance : T.Con.Δ₁Definable := Theory.Δ₁Definable.singleton _
 
@@ -65,10 +65,10 @@ end
 
 variable (T : ArithmeticTheory) [T.Δ₁Definable] (V)
 
-def isConsistent_eq : T.isConsistent = T.standardPr.con := rfl
+def consistent_eq : T.consistent = T.standardPr.con := rfl
 
-@[simp] lemma standard_isConsistent [𝐑₀ ⪯ T] : T.IsConsistent ℕ ↔ Entailment.Consistent T := by
-  simp [Theory.IsConsistent, Entailment.consistent_iff_unprovable_bot, Axiom.provable_iff]
+@[simp] lemma standard_consistent [𝐑₀ ⪯ T] : T.Consistent ℕ ↔ Entailment.Consistent T := by
+  simp [Theory.Consistent, Entailment.consistent_iff_unprovable_bot, Axiom.provable_iff]
 
 end WitnessComparisons
 

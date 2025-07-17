@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.Term.Typed
+import Foundation.FirstOrder.Internal.Syntax.Term.Typed
 import Mathlib.Combinatorics.Colex
 
 open Encodable LO FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
