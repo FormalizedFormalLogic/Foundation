@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.Internal.Formula.Typed
-import Foundation.FirstOrder.Internal.Term.Coding
+import Foundation.FirstOrder.Internal.Syntax.Formula.Typed
+import Foundation.FirstOrder.Internal.Syntax.Term.Coding
 import Mathlib.Combinatorics.Colex
 
 open Encodable LO FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath

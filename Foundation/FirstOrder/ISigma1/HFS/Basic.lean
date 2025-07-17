@@ -80,7 +80,7 @@ lemma sUnion_graph {u s : V} : u = ⋃ʰᶠ s ↔ ∀ x < u + s, (x ∈ u ↔ �
       exact h x (lt_of_lt_of_le (lt_trans (lt_of_mem hx) (lt_of_mem hc)) (by simp)) |>.mpr ⟨c, hc, hx⟩⟩
 
 def _root_.LO.FirstOrder.Arithmetic.sUnionDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “u s. ∀ x < u + s, (x ∈ u ↔ ∃ t ∈' s, x ∈ t)” (by simp)
+  “u s. ∀ x < u + s, (x ∈ u ↔ ∃ t ∈' s, x ∈ t)”
 
 lemma sUnion_defined : 𝚺₀-Function₁ ((⋃ʰᶠ ·) : V → V) via sUnionDef := by
   intro v; simp [sUnionDef, sUnion_graph]
@@ -114,7 +114,7 @@ private lemma union_graph {u s t : V} : u = s ∪ t ↔ ∀ x < u + s + t, (x �
       · exact h x (lt_of_lt_of_le (lt_of_mem hx) (by simp )) |>.mpr (Or.inr hx)⟩
 
 def _root_.LO.FirstOrder.Arithmetic.unionDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “∀[#0 < #1 + #2 + #3](#0 ∈ #1 ↔ #0 ∈ #2 ∨ #0 ∈ #3)” (by simp)
+  “∀[#0 < #1 + #2 + #3](#0 ∈ #1 ↔ #0 ∈ #2 ∨ #0 ∈ #3)”
 
 lemma union_defined : 𝚺₀-Function₂ ((· ∪ ·) : V → V → V) via unionDef := by
   intro v; simp [unionDef, union_graph]
@@ -237,7 +237,7 @@ private lemma product_graph {u a b : V} : u = a ×ʰᶠ b ↔ ∀ x < u + (a + b
         (le_trans (pair_polybound a b) <| by simp)) |>.mpr ⟨y, hy, z, hz, rfl⟩⟩
 
 def _root_.LO.FirstOrder.Arithmetic.productDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “u a b. ∀ x < u + (a + b + 1)², (x ∈ u ↔ ∃ y ∈' a, ∃ z ∈' b, !pairDef x y z)” (by simp)
+  “u a b. ∀ x < u + (a + b + 1)², (x ∈ u ↔ ∃ y ∈' a, ∃ z ∈' b, !pairDef x y z)”
 
 lemma product_defined : 𝚺₀-Function₂ ((· ×ʰᶠ ·) : V → V → V) via productDef := by
   intro v; simp [productDef, product_graph]
@@ -284,7 +284,7 @@ private lemma domain_graph {u s : V} : u = domain s ↔ ∀ x < u + s, (x ∈ u 
         |>.mpr ⟨y, lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hy), _, hy, rfl⟩
 
 def _root_.LO.FirstOrder.Arithmetic.domainDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “u s. ∀ x < u + s, (x ∈ u ↔ ∃ y < s, ∃ z ∈' s, !pairDef z x y)” (by simp)
+  “u s. ∀ x < u + s, (x ∈ u ↔ ∃ y < s, ∃ z ∈' s, !pairDef z x y)”
 
 lemma domain_defined : 𝚺₀-Function₁ (domain : V → V) via domainDef := by
   intro v; simp [domainDef, domain_graph]
@@ -378,7 +378,7 @@ private lemma range_graph {s' s : V} : s' = range s ↔ ∀ y < s' + s, (y ∈ s
           |>.mpr ⟨x, lt_of_mem_dom hx, _, hx, rfl⟩⟩
 
 def _root_.LO.FirstOrder.Arithmetic.rangeDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “s' s. ∀ y < s' + s, (y ∈ s' ↔ ∃ x < s, ∃ z ∈' s, !pairDef z x y)” (by simp)
+  “s' s. ∀ y < s' + s, (y ∈ s' ↔ ∃ x < s, ∃ z ∈' s, !pairDef z x y)”
 
 lemma range_defined : 𝚺₀-Function₁ (range : V → V) via rangeDef := by
   intro v; simp [rangeDef, range_graph]
@@ -430,7 +430,7 @@ private lemma isMapping_iff {m : V} :
       exact ExistsUnique.intro y hxy (fun y' hxy' ↦ h y' (lt_of_mem_rng hxy') hxy')⟩
 
 def _root_.LO.FirstOrder.Arithmetic.isMappingDef : 𝚺₀.Semisentence 1 := .mkSigma
-  “m. ∃ d <⁺ 2 * m, !domainDef d m ∧ ∀ x ∈' d, ∃ y < m, x ∼[m] y ∧ ∀ y' < m, x ∼[m] y' → y' = y” (by simp)
+  “m. ∃ d <⁺ 2 * m, !domainDef d m ∧ ∀ x ∈' d, ∃ y < m, x ∼[m] y ∧ ∀ y' < m, x ∼[m] y' → y' = y”
 
 lemma isMapping_defined : 𝚺₀-Predicate (IsMapping : V → Prop) via isMappingDef := by
   intro v; simp [isMappingDef, isMapping_iff, lt_succ_iff_le]
@@ -607,7 +607,7 @@ noncomputable def fstIdx (p : V) : V := π₁ (p - 1)
 @[simp] lemma fstIdx_le_self (p : V) : fstIdx p ≤ p := le_trans (by simp [fstIdx]) (show p - 1 ≤ p by simp)
 
 def _root_.LO.FirstOrder.Arithmetic.fstIdxDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “n p. ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₁Def n p'” (by simp)
+  .mkSigma “n p. ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₁Def n p'”
 
 lemma fstIdx_defined : 𝚺₀-Function₁ (fstIdx : V → V) via fstIdxDef := by
   intro v; simp [fstIdxDef, fstIdx]
@@ -628,7 +628,7 @@ noncomputable def sndIdx (p : V) : V := π₂ (p - 1)
 @[simp] lemma sndIdx_le_self (p : V) : sndIdx p ≤ p := le_trans (by simp [sndIdx]) (show p - 1 ≤ p by simp)
 
 def _root_.LO.FirstOrder.Arithmetic.sndIdxDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “n p. ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₂Def n p'” (by simp)
+  .mkSigma “n p. ∃ p' <⁺ p, !subDef p' p 1 ∧ !pi₂Def n p'”
 
 lemma sndIdx_defined : 𝚺₀-Function₁ (sndIdx : V → V) via sndIdxDef := by
   intro v; simp [sndIdxDef, sndIdx]

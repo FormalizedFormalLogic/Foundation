@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.Term.Basic
+import Foundation.FirstOrder.Internal.Syntax.Term.Basic
 import Foundation.FirstOrder.ISigma1.Ind
 
 namespace LO.ISigma1.Metamath
@@ -44,28 +44,28 @@ scoped notation "^∃ " p:64 => qqEx p
 section
 
 def _root_.LO.FirstOrder.Arithmetic.qqRelDef : 𝚺₀.Semisentence 4 :=
-  .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 0 k r v ∧ p = p' + 1” (by simp)
+  .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 0 k r v ∧ p = p' + 1”
 
 def _root_.LO.FirstOrder.Arithmetic.qqNRelDef : 𝚺₀.Semisentence 4 :=
-  .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 1 k r v ∧ p = p' + 1” (by simp)
+  .mkSigma “p k r v. ∃ p' < p, !pair₄Def p' 1 k r v ∧ p = p' + 1”
 
 def _root_.LO.FirstOrder.Arithmetic.qqVerumDef : 𝚺₀.Semisentence 1 :=
-  .mkSigma “p. ∃ p' < p, !pairDef p' 2 0 ∧ p = p' + 1” (by simp)
+  .mkSigma “p. ∃ p' < p, !pairDef p' 2 0 ∧ p = p' + 1”
 
 def _root_.LO.FirstOrder.Arithmetic.qqFalsumDef : 𝚺₀.Semisentence 1 :=
-  .mkSigma “p. ∃ p' < p, !pairDef p' 3 0 ∧ p = p' + 1” (by simp)
+  .mkSigma “p. ∃ p' < p, !pairDef p' 3 0 ∧ p = p' + 1”
 
 def _root_.LO.FirstOrder.Arithmetic.qqAndDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 4 p q ∧ r = r' + 1” (by simp)
+  .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 4 p q ∧ r = r' + 1”
 
 def _root_.LO.FirstOrder.Arithmetic.qqOrDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 5 p q ∧ r = r' + 1” (by simp)
+  .mkSigma “r p q. ∃ r' < r, !pair₃Def r' 5 p q ∧ r = r' + 1”
 
 def _root_.LO.FirstOrder.Arithmetic.qqAllDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “r p. ∃ r' < r, !pairDef r' 6 p ∧ r = r' + 1” (by simp)
+  .mkSigma “r p. ∃ r' < r, !pairDef r' 6 p ∧ r = r' + 1”
 
 def _root_.LO.FirstOrder.Arithmetic.qqExDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “r p. ∃ r' < r, !pairDef r' 7 p ∧ r = r' + 1” (by simp)
+  .mkSigma “r p. ∃ r' < r, !pairDef r' 7 p ∧ r = r' + 1”
 
 lemma qqRel_defined : 𝚺₀-Function₃ (qqRel : V → V → V → V) via qqRelDef := by
   intro v; simp_all [qqRelDef, qqRel]
@@ -1266,16 +1266,16 @@ namespace BV
 variable (L)
 
 def blueprint : UformulaRec1.Blueprint where
-  rel := .mkSigma “y param k R v. ∃ M, !(termBVVecGraph L) M k v ∧ !listMaxDef y M” (by simp)
-  nrel := .mkSigma “y param k R v. ∃ M, !(termBVVecGraph L) M k v ∧ !listMaxDef y M” (by simp)
-  verum := .mkSigma “y param. y = 0” (by simp)
-  falsum := .mkSigma “y param. y = 0” (by simp)
-  and := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y y₁ y₂” (by simp)
-  or := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y y₁ y₂” (by simp)
-  all := .mkSigma “y param p₁ y₁. !subDef y y₁ 1” (by simp)
-  ex := .mkSigma “y param p₁ y₁. !subDef y y₁ 1” (by simp)
-  allChanges := .mkSigma “param' param. param' = 0” (by simp)
-  exChanges := .mkSigma “param' param. param' = 0” (by simp)
+  rel := .mkSigma “y param k R v. ∃ M, !(termBVVecGraph L) M k v ∧ !listMaxDef y M”
+  nrel := .mkSigma “y param k R v. ∃ M, !(termBVVecGraph L) M k v ∧ !listMaxDef y M”
+  verum := .mkSigma “y param. y = 0”
+  falsum := .mkSigma “y param. y = 0”
+  and := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y y₁ y₂”
+  or := .mkSigma “y param p₁ p₂ y₁ y₂. !Arithmetic.max y y₁ y₂”
+  all := .mkSigma “y param p₁ y₁. !subDef y y₁ 1”
+  ex := .mkSigma “y param p₁ y₁. !subDef y y₁ 1”
+  allChanges := .mkSigma “param' param. param' = 0”
+  exChanges := .mkSigma “param' param. param' = 0”
 
 noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   rel {_} := fun k _ v ↦ listMax (termBVVec L k v)

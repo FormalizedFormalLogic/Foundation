@@ -24,10 +24,10 @@ def Blueprint.cseqDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSig
     ∧ (∃ z < s, !p.zero z ⋯ ∧ 0 ∼[s] z)
     ∧ (∀ i < 2 * s,
         (∃ l <⁺ 2 * s, !lhDef l s ∧ i + 1 < l) →
-        ∀ z < s, i ∼[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ∼[s] u)” (by simp)
+        ∀ z < s, i ∼[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ∼[s] u)”
 
 def Blueprint.resultDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 2) := .mkSigma
-  “z u. ∃ s, !p.cseqDef s ⋯ ∧ u ∼[s] z” (by simp)
+  “z u. ∃ s, !p.cseqDef s ⋯ ∧ u ∼[s] z”
 
 def Blueprint.resultDeltaDef (p : Blueprint k) : 𝚫₁.Semisentence (k + 2) := p.resultDef.graphDelta
 

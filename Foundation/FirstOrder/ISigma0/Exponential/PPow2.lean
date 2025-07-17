@@ -18,7 +18,7 @@ def _root_.LO.FirstOrder.Arithmetic.sppow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma
   “ m. ¬!lenbitDef 1 m ∧ !lenbitDef 2 m ∧
     ∀ i <⁺ m, !pow2Def i → 2 < i → (!lenbitDef i m ↔ ∃ s <⁺ i, !sqrtDef s i ∧ s * s = i ∧ !lenbitDef s m)
-  ” (by simp)
+  ”
 
 lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : V → Prop) via sppow2Def := by
   intro v
@@ -28,7 +28,7 @@ lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : V → Prop) via sppow2Def := 
 def PPow2 (i : V) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
 def _root_.LO.FirstOrder.Arithmetic.ppow2Def : 𝚺₀.Semisentence 1 :=
-  .mkSigma “i. !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m” (by simp)
+  .mkSigma “i. !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m”
 
 lemma ppow2_defined : 𝚺₀-Predicate (PPow2 : V → Prop) via ppow2Def := by
   intro v; simp [PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail,

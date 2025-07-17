@@ -113,7 +113,7 @@ section LenBit
 def LenBit (i a : V) : Prop := ¬2 ∣ (a / i)
 
 def _root_.LO.FirstOrder.Arithmetic.lenbitDef : 𝚺₀.Semisentence 2 :=
-  .mkSigma “i a. ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z” (by simp)
+  .mkSigma “i a. ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z”
 
 lemma lenbit_defined : 𝚺₀-Relation (LenBit : V → V → Prop) via lenbitDef := by
   intro v; simp [sqrt_graph, lenbitDef, Matrix.vecHead, Matrix.vecTail, LenBit, ←le_iff_lt_succ, numeral_eq_natCast]

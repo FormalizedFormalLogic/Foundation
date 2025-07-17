@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.Internal.Formula.Coding
-import Foundation.FirstOrder.Internal.Formula.Iteration
+import Foundation.FirstOrder.Internal.Syntax.Formula.Coding
+import Foundation.FirstOrder.Internal.Syntax.Formula.Iteration
 
 namespace LO.ISigma1.Metamath
 
@@ -90,7 +90,7 @@ instance empty : Theory.Δ₁Definable (∅ : Theory L) where
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
 def singleton (φ : SyntacticFormula L) : Theory.Δ₁Definable {φ} where
-  ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)” (by simp)) _
+  ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)”) _
   mem_iff {ψ} := by simp [Semiformula.quote_eq_encode]
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 

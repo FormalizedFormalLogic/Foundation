@@ -26,7 +26,7 @@ lemma ext_graph (a b c : V) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x %
   simp [ext]
 
 def _root_.LO.FirstOrder.Arithmetic.extDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “a b c. ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b” (by simp)
+  .mkSigma “a b c. ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b”
 
 lemma ext_defined : 𝚺₀-Function₂ (λ a b : V ↦ ext a b) via extDef := by
   intro v; simp [Matrix.vecHead, Matrix.vecTail, extDef,
@@ -88,7 +88,7 @@ def Exponential.Seqₛ.def : 𝚺₀.Semisentence 3 := .mkSigma
       ( (∃ ext_u_X <⁺ X, !extDef ext_u_X u X ∧ !extDef (2 * ext_u_X) u² X) ∧
         (∃ ext_u_Y <⁺ Y, !extDef ext_u_Y u Y ∧ !extDef ext_u_Y² u² Y)  ) ∨
       ( (∃ ext_u_X <⁺ X, !extDef ext_u_X u X ∧ !extDef (2 * ext_u_X + 1) u² X) ∧
-        (∃ ext_u_Y <⁺ Y, !extDef ext_u_Y u Y ∧ !extDef (2 * ext_u_Y²) u² Y) ) ” (by simp)
+        (∃ ext_u_Y <⁺ Y, !extDef ext_u_Y u Y ∧ !extDef (2 * ext_u_Y²) u² Y) ) ”
 
 lemma Exponential.Seqₛ.defined : 𝚺₀-Relation₃ (Exponential.Seqₛ : V → V → V → Prop) via Exponential.Seqₛ.def := by
   intro v; simp [Exponential.Seqₛ.iff, Exponential.Seqₛ.def, ppow2_defined.df.iff,
@@ -112,7 +112,7 @@ def _root_.LO.FirstOrder.Arithmetic.exponentialDef : 𝚺₀.Semisentence 2 := .
     (x = 0 ∧ y = 1) ∨ ∃ X <⁺ y⁴, ∃ Y <⁺ y⁴,
       (!extDef 1 4 X ∧ !extDef 2 4 Y) ∧
       !Exponential.Seqₛ.def y X Y ∧
-      ∃ u <⁺ y², u ≠ 2 ∧ !ppow2Def u ∧ !extDef x u X ∧ !extDef y u Y” (by simp)
+      ∃ u <⁺ y², u ≠ 2 ∧ !ppow2Def u ∧ !extDef x u X ∧ !extDef y u Y”
 
 lemma Exponential.defined : 𝚺₀-Relation (Exponential : V → V → Prop) via exponentialDef := by
   intro v; simp [Exponential.graph_iff, exponentialDef, ppow2_defined.df.iff, ext_defined.df.iff,
@@ -743,7 +743,7 @@ lemma exponential_exp (a : V) : Exponential a (Exp.exp a) := Classical.choose!_s
 
 lemma exponential_graph {a b : V} : a = Exp.exp b ↔ Exponential b a := Classical.choose!_eq_iff _
 
-def _root_.LO.FirstOrder.Arithmetic.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y. !exponentialDef.val y x” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y. !exponentialDef.val y x”
 
 lemma exp_defined_deltaZero : 𝚺₀-Function₁ (Exp.exp : V → V) via expDef := by
   intro v; simp [expDef, exponential_graph]

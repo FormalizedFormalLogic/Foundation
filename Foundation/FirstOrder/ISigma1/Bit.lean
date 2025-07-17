@@ -16,7 +16,7 @@ def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
 instance : Membership V V := ⟨fun a i ↦ Bit i a⟩
 
 def _root_.LO.FirstOrder.Arithmetic.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y” (by simp)
+  “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y”
 
 set_option linter.flexible false in
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) via bitDef := by
@@ -94,10 +94,10 @@ def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 def memRel : 𝚺₀.Semisentence 3 := .mkSigma
-  “R x y. ∃ p <⁺ (x + y + 1)², !pairDef p x y ∧ p ∈ R” (by simp)
+  “R x y. ∃ p <⁺ (x + y + 1)², !pairDef p x y ∧ p ∈ R”
 
 def memRel₃ : 𝚺₀.Semisentence 4 := .mkSigma
-  “R x y z. ∃ yz <⁺ (y + z + 1)², !pairDef yz y z ∧ ∃ xyz <⁺ (x + yz + 1)², !pairDef xyz x yz ∧ xyz ∈ R” (by simp)
+  “R x y z. ∃ yz <⁺ (y + z + 1)², !pairDef yz y z ∧ ∃ xyz <⁺ (x + yz + 1)², !pairDef xyz x yz ∧ xyz ∈ R”
 
 def memRelOpr : Semiformula.Operator ℒₒᵣ 3 := ⟨memRel.val⟩
 
@@ -260,7 +260,7 @@ lemma insert_graph (b i a : V) :
       rintro x _ rfl rfl; rfl ⟩
 
 def _root_.LO.FirstOrder.Arithmetic.insertDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “b i a. (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)” (by simp)
+  “b i a. (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)”
 
 lemma insert_defined : 𝚺₀-Function₂ (insert : V → V → V) via insertDef := by
   intro v; simp [insertDef, insert_graph]
@@ -323,7 +323,7 @@ lemma lt_exp_iff {a i : V} : a < Exp.exp i ↔ ∀ j ∈ a, j < i :=
 instance : HasSubset V := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
 def _root_.LO.FirstOrder.Arithmetic.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “a b. ∀ i < a, i ∈ a → i ∈ b” (by simp)
+  “a b. ∀ i < a, i ∈ a → i ∈ b”
 
 lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : V → V → Prop) via bitSubsetDef := by
   intro v
@@ -386,7 +386,7 @@ private lemma under_graph (x y : V) : y = under x ↔ y + 1 = Exp.exp x := by
     simpa [under] using this
 
 def _root_.LO.FirstOrder.Arithmetic.underDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “y x. !expDef.val (y + 1) x” (by simp)
+  “y x. !expDef.val (y + 1) x”
 
 lemma under_defined : 𝚺₀-Function₁ (under : V → V) via underDef := by
   intro v; simp [underDef, under_graph]

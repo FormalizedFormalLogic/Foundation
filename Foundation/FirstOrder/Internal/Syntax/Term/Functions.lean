@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.Term.Basic
+import Foundation.FirstOrder.Internal.Syntax.Term.Basic
 
 namespace LO.ISigma1.Metamath
 
@@ -13,9 +13,9 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 namespace TermSubst
 
 def blueprint : Language.TermRec.Blueprint 1 where
-  bvar := .mkSigma “y z w. !nthDef y w z” (by simp)
-  fvar := .mkSigma “y x w. !qqFvarDef y x” (by simp)
-  func := .mkSigma “y k f v v' w. !qqFuncDef y k f v'” (by simp)
+  bvar := .mkSigma “y z w. !nthDef y w z”
+  fvar := .mkSigma “y x w. !qqFvarDef y x”
+  func := .mkSigma “y k f v v' w. !qqFuncDef y k f v'”
 
 noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (param z)        := (param 1).[z]
@@ -160,9 +160,9 @@ end termSubst
 namespace TermShift
 
 def blueprint : Language.TermRec.Blueprint 0 where
-  bvar := .mkSigma “y z. !qqBvarDef y z” (by simp)
-  fvar := .mkSigma “y x. !qqFvarDef y (x + 1)” (by simp)
-  func := .mkSigma “y k f v v'. !qqFuncDef y k f v'” (by simp)
+  bvar := .mkSigma “y z. !qqBvarDef y z”
+  fvar := .mkSigma “y x. !qqFvarDef y (x + 1)”
+  func := .mkSigma “y k f v v'. !qqFuncDef y k f v'”
 
 noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (_ z)        := ^#z
@@ -295,9 +295,9 @@ end termShift
 namespace TermBShift
 
 def blueprint : Language.TermRec.Blueprint 0 where
-  bvar := .mkSigma “y z. !qqBvarDef y (z + 1)” (by simp)
-  fvar := .mkSigma “y x. !qqFvarDef y x” (by simp)
-  func := .mkSigma “y k f v v'. !qqFuncDef y k f v'” (by simp)
+  bvar := .mkSigma “y z. !qqBvarDef y (z + 1)”
+  fvar := .mkSigma “y x. !qqFvarDef y x”
+  func := .mkSigma “y k f v v'. !qqFuncDef y k f v'”
 
 noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (_ z)        := ^#(z + 1)
@@ -417,8 +417,8 @@ namespace TermFreeAt
 
 def blueprint : Language.TermRec.Blueprint 1 where
   bvar := .mkSigma “y z m. (z < m → !qqBvarDef y z) ∧ (¬z < m → !qqFvarDef y 0)”
-  fvar := .mkSigma “y x m. !qqFvarDef y (x + 1)” (by simp)
-  func := .mkSigma “y k f v v' m. !qqFuncDef y k f v'” (by simp)
+  fvar := .mkSigma “y x m. !qqFvarDef y (x + 1)”
+  func := .mkSigma “y k f v v' m. !qqFuncDef y k f v'”
 
 noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar param z        := if z < param 0 then ^#z else ^&0
@@ -641,10 +641,10 @@ infixl:82 " ^* " => qqMul
 section
 
 def qqAddGraph : 𝚺₁.Semisentence 3 :=
-  .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑addIndex v” (by simp)
+  .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑addIndex v”
 
 def qqMulGraph : 𝚺₁.Semisentence 3 :=
-  .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑mulIndex v” (by simp)
+  .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑mulIndex v”
 
 lemma qqAdd_defined : 𝚺₁-Function₂ (qqAdd : V → V → V) via qqAddGraph := by
   intro v; simp [qqAddGraph, numeral_eq_natCast, qqAdd]
@@ -693,8 +693,8 @@ lemma coe_one_eq : (𝟏 : V) = (^func 0 ⌜(Language.One.one : (ℒₒᵣ).Func
 namespace Numeral
 
 def blueprint : PR.Blueprint 0 where
-  zero := .mkSigma “y. y = ↑InternalArithmetic.one” (by simp)
-  succ := .mkSigma “y t n. !qqAddGraph y t ↑InternalArithmetic.one” (by simp)
+  zero := .mkSigma “y. y = ↑InternalArithmetic.one”
+  succ := .mkSigma “y t n. !qqAddGraph y t ↑InternalArithmetic.one”
 
 noncomputable def construction : PR.Construction V blueprint where
   zero := fun _ ↦ 𝟏

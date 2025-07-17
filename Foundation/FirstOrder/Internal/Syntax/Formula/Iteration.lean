@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.Formula.Functions
+import Foundation.FirstOrder.Internal.Syntax.Formula.Functions
 
 namespace LO.FirstOrder.Semiformula
 
@@ -27,8 +27,8 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 namespace QQConj
 
 def blueprint : VecRec.Blueprint 0 where
-  nil := .mkSigma “y. !qqVerumDef y” (by simp)
-  cons := .mkSigma “y p ps ih. !qqAndDef y p ih” (by simp)
+  nil := .mkSigma “y. !qqVerumDef y”
+  cons := .mkSigma “y p ps ih. !qqAndDef y p ih”
 
 noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ^⊤
@@ -96,8 +96,8 @@ end qqConj
 namespace QQDisj
 
 def blueprint : VecRec.Blueprint 0 where
-  nil := .mkSigma “y. !qqFalsumDef y” (by simp)
-  cons := .mkSigma “y p ps ih. !qqOrDef y p ih” (by simp)
+  nil := .mkSigma “y. !qqFalsumDef y”
+  cons := .mkSigma “y p ps ih. !qqOrDef y p ih”
 
 noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ^⊥
@@ -168,9 +168,9 @@ section disjSeqSubst
 namespace DisjSeqSubst
 
 def blueprint : PR.Blueprint 2 where
-  zero := .mkSigma “y w p. !qqFalsumDef y” (by simp)
+  zero := .mkSigma “y w p. !qqFalsumDef y”
   succ := .mkSigma “y ih k w p. ∃ numeral, !numeralGraph numeral k ∧ ∃ v, !consDef v numeral w ∧
-    ∃ q, !(substsGraph ℒₒᵣ) q v p ∧ !qqOrDef y q ih” (by simp)
+    ∃ q, !(substsGraph ℒₒᵣ) q v p ∧ !qqOrDef y q ih”
 
 noncomputable def construction : PR.Construction V blueprint where
   zero _ := ^⊥
@@ -236,9 +236,9 @@ section substItr
 namespace SubstItr
 
 def blueprint : PR.Blueprint 2 where
-  zero := .mkSigma “y w p. y = 0” (by simp)
+  zero := .mkSigma “y w p. y = 0”
   succ := .mkSigma “y ih k w p. ∃ numeral, !numeralGraph numeral k ∧ ∃ v, !consDef v numeral w ∧
-    ∃ sp, !(substsGraph ℒₒᵣ) sp v p ∧ !consDef y sp ih” (by simp)
+    ∃ sp, !(substsGraph ℒₒᵣ) sp v p ∧ !consDef y sp ih”
 
 noncomputable def construction : PR.Construction V blueprint where
   zero _ := 0
