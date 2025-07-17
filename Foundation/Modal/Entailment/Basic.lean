@@ -729,8 +729,7 @@ protected class E4 extends Entailment.E 𝓢, HasAxiomFour 𝓢
 protected class EMC4 extends Entailment.EMC 𝓢, HasAxiomFour 𝓢
 protected class EK4 extends Entailment.E4 𝓢, HasAxiomK 𝓢
 
-protected class S04 extends Entailment.E4 𝓢, HasAxiomT 𝓢, HasAxiomM 𝓢
-
+protected class EMT4 extends Entailment.E4 𝓢, HasAxiomT 𝓢, HasAxiomM 𝓢
 
 protected class K extends Entailment.Cl 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
 

@@ -5,6 +5,7 @@ import Foundation.Modal.Neighborhood.Logic.EC
 
 namespace LO.Modal
 
+open Formula (atom)
 open Neighborhood
 open Hilbert.Neighborhood
 open Formula.Neighborhood
@@ -14,6 +15,53 @@ namespace Neighborhood
 protected class Frame.IsEMC (F) extends Frame.IsMonotonic F, Frame.IsRegular F where
 protected abbrev FrameClass.EMC : FrameClass := { F | F.IsEMC }
 
+abbrev EK_counterframe_for_M_and_C : Frame := {
+  World := Fin 4,
+  𝒩 := λ _ => {{0, 1}, {0, 2}}
+}
+
+lemma EK_counterframe_for_M_and_C.validate_axiomK : EK_counterframe_for_M_and_C ⊧ Axioms.K (atom 0) (atom 1) := by
+  intro V x;
+  apply Satisfies.def_imp.mpr;
+  intro h₁; replace h₁ := Satisfies.def_box.mp h₁;
+  apply Satisfies.def_imp.mpr;
+  intro h₂; replace h₂ := Satisfies.def_box.mp h₂;
+  apply Satisfies.def_box.mpr;
+  simp_all only [Fin.isValue, Model.truthset.eq_imp, Model.truthset.eq_atom, Set.mem_insert_iff, Set.mem_singleton_iff];
+  rcases h₂ with h₂ | h₂ <;> rcases h₁ with h₁ | h₁ <;>
+  . have := h₁.subset;
+    have := @this 3 $ by simp [h₂];
+    simp at this;
+
+lemma EK_counterframe_for_M_and_C.validate_axiomC : ¬EK_counterframe_for_M_and_C ⊧ Axioms.C (atom 0) (atom 1) := by
+  apply ValidOnFrame.not_of_exists_valuation_world;
+  use (λ a =>
+    match a with
+    | 0 => {0, 1}
+    | 1 => {0, 2}
+    | _ => ∅
+  ), 0;
+  simp [Satisfies];
+
+lemma EK_counterframe_for_M_and_C.validate_axiomM : ¬EK_counterframe_for_M_and_C ⊧ Axioms.M ((atom 0) ⋎ (atom 1)) (atom 1) := by
+  apply ValidOnFrame.not_of_exists_valuation_world;
+  use (λ a =>
+    match a with
+    | 0 => {0, 1}
+    | 1 => {0, 2}
+    | _ => ∅
+  ), 0;
+  suffices (({0, 2} : Set (Fin 4)) ⊆ {2, 0, 1}) ∧ ({2, 0, 1} : Set (Fin 4)) ≠ {0, 2} by
+    simp [Satisfies];
+    grind;
+  constructor;
+  . intro x;
+    simp only [Set.mem_insert_iff, Set.mem_singleton_iff];
+    tauto;
+  . by_contra hC;
+    have := hC.subset;
+    simpa using @this 1 (by simp)
+
 end Neighborhood
 
 
@@ -22,14 +70,8 @@ namespace Hilbert
 namespace EMC.Neighborhood
 
 instance : Sound Hilbert.EMC FrameClass.EMC := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.insert_iff, Semantics.RealizeSet.singleton_iff];
-  refine ⟨?_, ?_⟩;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomM_of_isMonotonic;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomC_of_isRegular;
+  constructor;
+  rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
 instance : Entailment.Consistent Hilbert.EMC := consistent_of_sound_frameclass FrameClass.EMC $ by
   use Frame.simple_blackhole;
@@ -50,7 +92,7 @@ instance : Hilbert.EC ⪱ Hilbert.EMC := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 3,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{1}}
           | 1 => {{0}, {0, 1}}
@@ -94,7 +136,7 @@ instance : Hilbert.EM ⪱ Hilbert.EMC := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 2,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{0}, {1}, {0, 1}}
           | 1 => {{1}, {0, 1}},
@@ -128,9 +170,28 @@ instance : Hilbert.EM ⪱ Hilbert.EMC := by
       . simp! [M, Semantics.Realize, Satisfies];
         tauto_set;
 
+
+section
+
+instance : Hilbert.EK ⪱ Hilbert.EMC := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
+    rintro φ rfl; simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.C (.atom 0) (.atom 1));
+    constructor;
+    . simp;
+    . apply not_imp_not.mpr $ soundness_of_axioms_validOnFrame (F := EK_counterframe_for_M_and_C) ?_;
+      . apply EK_counterframe_for_M_and_C.validate_axiomC;
+      . simp only [Semantics.RealizeSet.singleton_iff];
+        apply EK_counterframe_for_M_and_C.validate_axiomK;
+
+end
+
 end Hilbert
 
 instance : 𝐄𝐂 ⪱ 𝐄𝐌𝐂 := inferInstance
 instance : 𝐄𝐌 ⪱ 𝐄𝐌𝐂 := inferInstance
+instance : 𝐄𝐊 ⪱ 𝐄𝐌𝐂 := inferInstance
 
 end LO.Modal

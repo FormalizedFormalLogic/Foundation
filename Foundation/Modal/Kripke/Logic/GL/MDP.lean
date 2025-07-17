@@ -49,8 +49,8 @@ instance {F₁ F₂ : Frame} {r₁ : outParam F₁.World} {r₂ : outParam F₂.
     match x, y, z with
     | .inr (.inl x), .inr (.inl y), .inr (.inl z) => apply tree₁.trans _ _ _ hxy hyz;
     | .inr (.inr x), .inr (.inr y), .inr (.inr z) => apply tree₂.trans _ _ _ hxy hyz;
-    | .inl _, .inr (.inr _), .inr (.inr _) => simp [Frame.Rel'];
-    | .inl _, .inr (.inl _), .inr (.inl _) => simp [Frame.Rel'];
+    | .inl _, .inr (.inr _), .inr (.inr _) => simp;
+    | .inl _, .inr (.inl _), .inr (.inl _) => simp;
 
 -- TODO: remove?
 instance : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).IsIrreflexive := ⟨by simp⟩

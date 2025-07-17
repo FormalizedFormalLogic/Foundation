@@ -21,14 +21,8 @@ namespace Hilbert
 namespace ECN.Neighborhood
 
 instance : Sound Hilbert.ECN FrameClass.ECN := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.insert_iff, Semantics.RealizeSet.singleton_iff];
-  refine ⟨?_, ?_⟩;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomC_of_isRegular;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomN_of_ContainsUnit;
+  constructor;
+  rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
 instance : Entailment.Consistent Hilbert.ECN := consistent_of_sound_frameclass FrameClass.ECN $ by
   use Frame.simple_blackhole;
@@ -49,7 +43,7 @@ instance : Hilbert.EC ⪱ Hilbert.ECN := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 3,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{1}}
           | 1 => {{0}, {0, 1}}
@@ -91,7 +85,7 @@ instance : Hilbert.EN ⪱ Hilbert.ECN := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 2,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{0}, {1}, {0, 1}, Set.univ}
           | 1 => {{1}, {0, 1}, Set.univ},

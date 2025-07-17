@@ -92,7 +92,7 @@ protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
   | _ => simp [Satisfies.iff_models, Satisfies];
 
 protected lemma imp_def : x ⊧ φ ➝ ψ ↔ x ⊧ φ → x ⊧ ψ := by
-  simp [←NNFormula.imp_eq, NNFormula.imp, Satisfies.or_def, Satisfies.neg_def];
+  simp [Satisfies.or_def, Satisfies.neg_def];
   tauto;
 
 protected instance : Semantics.Tarski (M.World) where

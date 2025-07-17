@@ -119,7 +119,7 @@ lemma iff_consistent_insert₁
       exact hΓ;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
-    simp_all only [Set.mem_insert_iff];
+    simp_all only [];
     apply h (Γ := Γ.erase φ) (Δ := Δ) (by simpa) hΔ;
     refine C!_trans ?_ hC;
     . exact C!_trans CKFConjinsertFConj! $ CFConj_FConj!_of_subset $ Finset.insert_erase_subset φ Γ
@@ -330,7 +330,7 @@ lemma exists_consistent_saturated_tableau [Entailment.Cl 𝓢] (hCon : t.Consist
     . right; simp only [lindenbaum_max, Set.mem_iUnion];  use (encode φ + 1);
   case consistent =>
     intro Γ Δ hΓ hΔ;
-    simp_all only [lindenbaum_max, Set.mem_iUnion];
+    simp_all only [lindenbaum_max];
     obtain ⟨m, hΓ⟩ := exists_finset_lindenbaum_index₁ hΓ;
     obtain ⟨n, hΔ⟩ := exists_finset_lindenbaum_index₂ hΔ;
     rcases (lt_trichotomy m n) with hm | hmn | hn;

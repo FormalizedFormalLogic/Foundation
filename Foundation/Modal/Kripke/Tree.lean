@@ -120,7 +120,7 @@ instance : (F.mkTreeUnravelling r).IsRootedBy treeUnravelling.root where
   root_generates := by
     rintro ⟨_, ⟨l, rfl⟩, l_chain⟩ hn;
     apply transrel_def.mpr;
-    simp only [ne_eq, List.cons_append, List.nil_append, List.cons.injEq, true_and, List.head_cons, existsAndEq];
+    simp only [ne_eq, List.cons_append, List.nil_append, List.cons.injEq, true_and, existsAndEq];
     constructor;
     . by_contra hC;
       subst hC;

@@ -1,4 +1,3 @@
-import Foundation.Modal.Tableau
 import Foundation.Modal.Neighborhood.Basic
 
 namespace LO.Modal.Neighborhood
@@ -8,15 +7,16 @@ open Formula.Neighborhood
 variable {F : Frame}
 
 class Frame.IsRegular (F : Frame) : Prop where
-  regular : ∀ X Y : Set F, (F.η X) ∩ (F.η Y) ⊆ F.η (X ∩ Y)
+  regular : ∀ X Y : Set F, (ℬ X) ∩ (ℬ Y) ⊆ ℬ (X ∩ Y)
 
-lemma Frame.regular [Frame.IsRegular F] {X Y : Set F} : (F.η X) ∩ (F.η Y) ⊆ F.η (X ∩ Y) := by apply IsRegular.regular
+lemma Frame.regular [Frame.IsRegular F] {X Y : Set F} : (ℬ X) ∩ (ℬ Y) ⊆ ℬ (X ∩ Y) := by apply IsRegular.regular
 
 instance : Frame.simple_blackhole.IsRegular := ⟨by
   intro X Y e;
   simp_all;
 ⟩
 
+@[simp]
 lemma valid_axiomC_of_isRegular [F.IsRegular] : F ⊧ Axioms.C (.atom 0) (.atom 1) := by
   intro V x;
   simp only [

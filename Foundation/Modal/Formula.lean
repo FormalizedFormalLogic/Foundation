@@ -149,8 +149,8 @@ def degree : Formula α → Nat
   | φ ➝ ψ => max φ.degree ψ.degree
   | □φ => φ.degree + 1
 
-@[simp] lemma degree_neg (φ : Formula α) : degree (∼φ) = degree φ := by induction φ <;> simp_all [degree, neg, neg_eq]
-@[simp] lemma degree_imp (φ ψ : Formula α) : degree (φ ➝ ψ) = max (degree φ) (degree ψ) := by simp [degree, imp_eq]
+@[simp] lemma degree_neg (φ : Formula α) : degree (∼φ) = degree φ := by induction φ <;> simp_all [degree, neg]
+@[simp] lemma degree_imp (φ ψ : Formula α) : degree (φ ➝ ψ) = max (degree φ) (degree ψ) := by simp [degree]
 
 @[elab_as_elim]
 def cases' {C : Formula α → Sort w}
@@ -256,7 +256,7 @@ def negated : Formula α → Bool
 
 @[simp]
 lemma negated_imp : (φ ➝ ψ).negated ↔ (ψ = ⊥) := by
-  simp [negated, Formula.imp_eq];
+  simp [negated];
   split;
   . simp_all [Formula.imp_eq]; rfl;
   . simp_all [Formula.imp_eq]; simpa;
@@ -326,7 +326,7 @@ def ofNat : ℕ → Option (Formula α)
     | _ => none
 
 lemma ofNat_toNat : ∀ (φ : Formula α), ofNat (toNat φ) = some φ
-  | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek, Option.map_some'];
+  | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek];
   | ⊥       => by simp [toNat, ofNat]
   | □φ      => by simp [toNat, ofNat, ofNat_toNat φ]
   | φ ➝ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
@@ -567,6 +567,7 @@ variable {s : Substitution α} {φ ψ ξ : Formula α}
 
 @[simp] lemma subst_atom {a} : (.atom a)⟦s⟧ = s a := rfl
 @[simp] lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
+@[simp] lemma subst_top : (⊤ : Formula α)⟦s⟧ = ⊤ := rfl
 @[simp] lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
 @[simp] lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
 @[simp] lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl
