@@ -1,4 +1,5 @@
 import Foundation.Modal.Neighborhood.Basic
+import Foundation.Modal.Neighborhood.Completeness
 
 namespace LO.Modal.Neighborhood
 
@@ -23,5 +24,8 @@ lemma containsUnit_of_valid_axiomN (h : F ⊧ Axioms.N) : F.ContainsUnit := by
   constructor;
   intro x;
   simpa [Satisfies] using @h (λ _ => Set.univ) x;
+
+
+
 
 end LO.Modal.Neighborhood

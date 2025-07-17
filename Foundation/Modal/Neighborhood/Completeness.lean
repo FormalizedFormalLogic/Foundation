@@ -150,6 +150,61 @@ def minimal_canonical_box (𝓢 : S) [Entailment.E 𝓢] : CanonicalBox 𝓢 whe
       apply h.choose_spec.symm;
     . tauto;
 
+namespace minimal_canonical_box
+
+variable {𝓢 : S} [Entailment.E 𝓢] [Consistent 𝓢]
+
+lemma exists_box (X) (Γ : (mkCanonicalFrame 𝓢 (minimal_canonical_box 𝓢)).World) (hΓ : Γ ∈ ℬ X)
+  : ∃ φ, X = proofset 𝓢 φ ∧ ℬ X = proofset 𝓢 (□φ)
+  := by
+    simp [mkCanonicalFrame, Frame.mk_ℬ, minimal_canonical_box] at hΓ;
+    split at hΓ;
+    . rename_i h;
+      obtain ⟨φ, hφ⟩ := h;
+      use φ;
+      constructor;
+      . assumption;
+      . convert minimal_canonical_box 𝓢 |>.canonicity φ;
+    . contradiction;
+
+lemma exists_dia (X) (Γ : (mkCanonicalFrame 𝓢 (minimal_canonical_box 𝓢)).World) (hΓ : Γ ∈ ℬ X)
+  : ∃ φ, X = proofset 𝓢 φ ∧ 𝒟 X = proofset 𝓢 (◇φ)
+  := by
+    obtain ⟨φ, hφ, hΓ⟩ := exists_box X Γ hΓ;
+    use φ;
+    constructor;
+    . assumption;
+    . ext Γ;
+      rw [(show ◇φ = ∼□(∼φ) by rfl)];
+      simp only [
+        minimal_canonical_box, mkCanonicalFrame, Frame.mk_ℬ, Set.mem_compl_iff,
+        Set.mem_setOf_eq, proofset.eq_neg
+      ];
+      constructor;
+      . intro h;
+        split at h;
+        . rename_i h₂;
+          suffices proofset 𝓢 (□h₂.choose) = proofset 𝓢 (□(∼φ)) by rw [this] at h; simpa;
+          apply proofset.eq_boxed_of_eq;
+          rw [←h₂.choose_spec, hφ];
+          simp;
+        . exfalso;
+          rename_i h₂;
+          push_neg at h₂;
+          apply @h₂ (∼φ);
+          simpa;
+      . intro h;
+        split;
+        . rename_i h₂;
+          suffices proofset 𝓢 (□h₂.choose) = proofset 𝓢 (□(∼φ)) by rw [←this] at h; simpa;
+          apply proofset.eq_boxed_of_eq;
+          rw [←h₂.choose_spec, hφ];
+          simp;
+        . tauto;
+
+end minimal_canonical_box
+
+
 end Neighborhood
 
 end

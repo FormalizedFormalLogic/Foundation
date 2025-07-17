@@ -1,4 +1,4 @@
-import Foundation.Modal.Neighborhood.Basic
+import Foundation.Modal.Neighborhood.Completeness
 
 namespace LO.Modal.Neighborhood
 
@@ -82,5 +82,25 @@ lemma isSerial_of_valid_axiomD (h : F ⊧ Axioms.D (.atom a)) : F.IsSerial := by
   infer_instance;
 
 end
+
+
+
+section
+
+variable [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E4 𝓢]
+
+open Entailment
+open MaximalConsistentSet
+
+instance : (mkCanonicalFrame 𝓢 (minimal_canonical_box 𝓢)).IsTransitive := by
+  constructor;
+  intro X Γ hΓ;
+  obtain ⟨φ, rfl, hφ⟩ := minimal_canonical_box.exists_box X Γ hΓ;
+  have : proofset 𝓢 (□φ) ⊆ proofset 𝓢 (□□φ) := proofset.imp_subset.mp (by simp);
+  apply hφ ▸ (minimal_canonical_box 𝓢 |>.canonicity (□φ) ▸ (this (hφ ▸ hΓ)));
+
+end
+
 
 end LO.Modal.Neighborhood

@@ -11,6 +11,12 @@ class Frame.IsMonotonic (F : Frame) : Prop where
 
 lemma Frame.mono [Frame.IsMonotonic F] {X Y : Set F} : ℬ (X ∩ Y) ⊆ ℬ X ∩ ℬ Y := by apply IsMonotonic.mono
 
+lemma Frame.mono' [Frame.IsMonotonic F] {X Y : Set F} : X ⊆ Y → ℬ X ⊆ ℬ Y := by
+  intro h x hX;
+  apply @F.mono (X := X) (Y := Y) ?_ x ?_ |>.2;
+  . assumption;
+  . sorry;
+
 instance : Frame.simple_blackhole.IsMonotonic := ⟨by
   intro X Y e he;
   constructor <;>
