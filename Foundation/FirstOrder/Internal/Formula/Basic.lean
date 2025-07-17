@@ -1,4 +1,5 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Term.Basic
+import Foundation.FirstOrder.Internal.Term.Basic
+import Foundation.FirstOrder.ISigma1.Ind
 
 namespace LO.ISigma1.Metamath
 
@@ -540,7 +541,7 @@ lemma IsSemiformula.induction_sigma₁ {P : V → V → Prop} (hP : 𝚺₁-Rela
     ∀ n p, Semiformula L n p → P n p :=
   IsSemiformula.induction 𝚺 hP hrel hnrel hverum hfalsum hand hor hall hex
 
-lemma IsSemiformula.ISigma1.pi1_succ_induction {P : V → V → Prop} (hP : 𝚷₁-Relation P)
+lemma IsSemiformula.pi1_structural_induction {P : V → V → Prop} (hP : 𝚷₁-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^rel n k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → SemitermVec L k n v → P n (^nrel n k r v))
     (hverum : ∀ n, P n ^⊤[n])
@@ -1027,7 +1028,7 @@ lemma graph_exists {p : V} : IsUFormula L p → ∃ y, c.Graph L param p y := by
   haveI : 𝚺₁-Function₁ c.exChanges := c.exChanges_defined.to_definable
   let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exChanges param))
   have hf : 𝚺₁-Function₂ f := by definability
-  apply order_ball_ISigma1.sigma1_succ_induction hf ?_ ?_ p param
+  apply bounded_all_sigma1_order_induction hf ?_ ?_ p param
   · definability
   intro p param ih hp
   rcases hp.case with
@@ -1172,7 +1173,7 @@ lemma uformula_result_induction {P : V → V → V → Prop} (hP : 𝚺₁-Relat
   let f : V → V → V := fun _ param ↦ Max.max param (Max.max (c.allChanges param) (c.exChanges param))
   have hf : 𝚺₁-Function₂ f := by definability
   intro param p
-  apply order_ball_ISigma1.sigma1_succ_induction hf ?_ ?_ p param
+  apply bounded_all_sigma1_order_induction hf ?_ ?_ p param
   · apply HierarchySymbol.Boldface.imp
       (HierarchySymbol.Boldface.comp₁ (HierarchySymbol.BoldfaceFunction.var _))
       (HierarchySymbol.Boldface.comp₃
@@ -1508,7 +1509,7 @@ lemma IsSemiformula.case {P : V → V → Prop} {n p} (hp : IsSemiformula L n p)
   · exact hall _ _ h₁
   · exact hex _ _ h₁
 
-lemma IsSemiformula.ISigma1.sigma1_succ_induction {P : V → V → Prop} (hP : 𝚺₁-Relation P)
+lemma IsSemiformula.sigma1_structural_induction {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
     (hverum : ∀ n, P n ^⊤)
@@ -1519,7 +1520,7 @@ lemma IsSemiformula.ISigma1.sigma1_succ_induction {P : V → V → Prop} (hP : �
     (hex : ∀ n p, IsSemiformula L (n + 1) p → P (n + 1) p → P n (^∃ p)) {n p} :
     IsSemiformula L n p → P n p := by
   have : 𝚺₁-Function₂ (fun _ (n : V) ↦ n + 1) := by definability
-  apply order_ball_ISigma1.sigma1_succ_induction this ?_ ?_ p n
+  apply bounded_all_sigma1_order_induction this ?_ ?_ p n
   · apply HierarchySymbol.Boldface.imp
     · apply HierarchySymbol.Boldface.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)
     · apply HierarchySymbol.Boldface.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)
@@ -1535,7 +1536,7 @@ lemma IsSemiformula.ISigma1.sigma1_succ_induction {P : V → V → Prop} (hP : �
   · apply hall _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁)
   · apply hex _ _ h₁ (ih p₁ (by simp) (n + 1) (by simp) h₁)
 
-lemma IsSemiformula.ISigma1.pi1_succ_induction {P : V → V → Prop} (hP : 𝚷₁-Relation P)
+lemma IsSemiformula.pi1_structural_induction {P : V → V → Prop} (hP : 𝚷₁-Relation P)
     (hrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^rel k r v))
     (hnrel : ∀ n k r v, L.IsRel k r → IsSemitermVec L k n v → P n (^nrel k r v))
     (hverum : ∀ n, P n ^⊤)
@@ -1580,9 +1581,9 @@ lemma IsSemiformula.induction1 (Γ) {P : V → V → Prop} (hP : Γ-[1]-Relation
     (hex : ∀ n p, IsSemiformula L (n + 1) p → P (n + 1) p → P n (^∃ p)) {n p} :
     IsSemiformula L n p → P n p :=
   match Γ with
-  | 𝚺 => IsSemiformula.ISigma1.sigma1_succ_induction hP hrel hnrel hverum hfalsum hand hor hall hex
-  | 𝚷 => IsSemiformula.ISigma1.pi1_succ_induction hP hrel hnrel hverum hfalsum hand hor hall hex
-  | 𝚫 => IsSemiformula.ISigma1.sigma1_succ_induction hP.of_delta hrel hnrel hverum hfalsum hand hor hall hex
+  | 𝚺 => IsSemiformula.sigma1_structural_induction hP hrel hnrel hverum hfalsum hand hor hall hex
+  | 𝚷 => IsSemiformula.pi1_structural_induction hP hrel hnrel hverum hfalsum hand hor hall hex
+  | 𝚫 => IsSemiformula.sigma1_structural_induction hP.of_delta hrel hnrel hverum hfalsum hand hor hall hex
 
 
 lemma IsSemiformula.pos {n p : V} (h : IsSemiformula L n p) : 0 < p := h.isUFormula.pos
@@ -1619,7 +1620,7 @@ lemma semiformula_result_induction {P : V → V → V → V → Prop} (hP : 𝚺
   let g : V → V → V → V := fun _ _ n ↦ n + 1
   have hg : 𝚺₁-Function₃ g := by definability
   intro param n p
-  apply order_ball_induction₂_sigma1 hf hg ?_ ?_ p param n
+  apply bounded_all_sigma1_order_induction₂ hf hg ?_ ?_ p param n
   · apply HierarchySymbol.Boldface.imp
     · apply HierarchySymbol.Boldface.comp₂ (HierarchySymbol.BoldfaceFunction.var _) (HierarchySymbol.BoldfaceFunction.var _)
     · apply HierarchySymbol.Boldface.comp₄

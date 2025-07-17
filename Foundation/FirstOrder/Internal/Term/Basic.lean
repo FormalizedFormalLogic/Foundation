@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Language
+import Foundation.FirstOrder.Internal.Language
 import Foundation.FirstOrder.ISigma1.HFS
 
 namespace LO.ISigma1.Metamath
@@ -917,6 +917,11 @@ lemma IsSemiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp [ht.bv]
     · simp [h.bv (by simpa using hi)]⟩
+
+lemma IsSemiterm.sigma1_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
+    (hbvar : ∀ z < n, P (^#z)) (hfvar : ∀ x, P (^&x))
+    (hfunc : ∀ k f v, L.IsFunc k f → IsSemitermVec L k n v → (∀ i < k, P v.[i]) → P (^func k f v)) :
+    ∀ t, IsSemiterm L n t → P t := IsSemiterm.induction _ hP hbvar hfvar hfunc
 
 end isSemiterm
 

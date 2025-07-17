@@ -1,6 +1,6 @@
 import Foundation.ProvabilityLogic.Incompleteness
-import Foundation.FirstOrder.Incompleteness.StandardProvability
-import Foundation.FirstOrder.Incompleteness.Delta1
+import Foundation.FirstOrder.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.Logic.HilbertStyle.Cl
 import Foundation.Modal.Hilbert.Normal.Basic
 

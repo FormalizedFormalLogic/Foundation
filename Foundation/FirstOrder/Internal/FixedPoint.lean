@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.ISigma1.Metamath
+import Foundation.FirstOrder.Internal.D1
 import Foundation.Logic.HilbertStyle.Supplemental
 
 open Classical
@@ -9,69 +9,97 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-noncomputable def substNumeral (φ x : V) : V := substs ℒₒᵣ1 (numeral x) φ
-
+/-
 lemma substNumeral_app_quote (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
-    substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[‘↑n’] : Sentence ℒₒᵣ)⌝ := by
-  dsimp [substNumeral]
-  let w : Fin 1 → Semiterm ℒₒᵣ Empty 0 := ![‘↑n’]
-  have : ?[numeral (n : V)] = (⌜fun i : Fin 1 ↦ ⌜w i⌝⌝ : V) :=
-    nth_ext' 1 (by simp) (by simp) (by simp [w, Matrix.constant_eq_singleton])
-  rw [substs1, this, quote_substs' (L := ℒₒᵣ)]
+    substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[↑n] : Sentence ℒₒᵣ)⌝ := by
+  simp [substNumeral, Semiformula.empty_typed_quote_def,
+    Rewriting.embedding_substs_eq_substs_coe₁, Matrix.constant_eq_singleton]
 
 lemma substNumeral_app_quote_quote (σ π : Semisentence ℒₒᵣ 1) :
-    substNumeral (⌜σ⌝ : V) ⌜π⌝ = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
-  simpa [coe_quote, quote_eq_encode] using substNumeral_app_quote σ ⌜π⌝
+    substNumeral ⌜σ⌝ (⌜π⌝ : V) = ⌜(σ/[↑(⌜π⌝ : ℕ)] : Sentence ℒₒᵣ)⌝ := by
+  simpa [Semiformula.coe_empty_quote_eq_quote] using substNumeral_app_quote (V := V) σ ⌜π⌝
 
-noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := substs ℒₒᵣ ⌜fun i ↦ numeral (v i)⌝ φ
+noncomputable def substNumerals (φ : Semiformula V ℒₒᵣ k) (v : Fin k → V) : Formula V ℒₒᵣ :=
+    φ.substs ((𝕹 ·)⨟ v)
 
 lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ) :
-    (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.substs (fun i ↦ ‘↑(v i)’)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
-  dsimp [substNumerals]
-  let w : Fin k → Semiterm ℒₒᵣ Empty 0 := fun i ↦ ‘↑(v i)’
-  have : ⌜fun i ↦ numeral (v i : V)⌝ = (⌜fun i : Fin k ↦ ⌜w i⌝⌝ : V) := by
-    apply nth_ext' (k : V) (by simp) (by simp)
-    intro i hi; rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
-    simp [w]
-  rw [this, quote_substs' (L := ℒₒᵣ)]
+    substNumerals (V := V) ⌜σ⌝ (v ·) = ⌜((Rew.substs (v ·)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
+  simp [substNumerals, Semiformula.empty_typed_quote_def, Rewriting.embedding_substitute_eq_substitute_embedding]
+  simp [Matrix.map, Function.comp_def]
+
+lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k → Semisentence ℒₒᵣ k) :
+    substNumerals (V := V) ⌜σ⌝ (fun i ↦ ↑(⌜π i⌝ : ℕ)) = ⌜((Rew.substs (fun i ↦ ↑(⌜π i⌝ : ℕ))) ▹ σ : Sentence ℒₒᵣ)⌝ := by
+  simpa [Semiformula.coe_empty_quote_eq_quote] using substNumerals_app_quote (V := V) σ (fun i ↦ ⌜π i⌝)
+
+
+-/
+
+noncomputable def substNumeral (φ x : V) : V := substs ℒₒᵣ ?[numeral x] φ
+
+lemma substNumeral_app_quote (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
+    substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[↑n] : Sentence ℒₒᵣ)⌝ := by
+  simp [substNumeral, Semiformula.empty_quote_def, Semiformula.quote_def,
+    Rewriting.embedding_substs_eq_substs_coe₁]
+
+lemma substNumeral_app_quote_quote (σ π : Semisentence ℒₒᵣ 1) :
+    substNumeral ⌜σ⌝ (⌜π⌝ : V) = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
+  simpa [Semiformula.coe_empty_quote_eq_quote] using substNumeral_app_quote (V := V) σ ⌜π⌝
+
+noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := substs ℒₒᵣ (matrixToVec (fun i ↦ numeral (v i))) φ
+
+lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ) :
+    (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.substs (fun i ↦ ↑(v i))) ▹ σ : Sentence ℒₒᵣ)⌝ := by
+  simp [substNumerals, Semiformula.empty_quote_def, Semiformula.quote_def,
+    Rewriting.embedding_substitute_eq_substitute_embedding]
+  rfl
 
 lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k → Semisentence ℒₒᵣ k) :
     substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) = ⌜((Rew.substs (fun i ↦ ⌜π i⌝)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
-  simpa [coe_quote, quote_eq_encode] using substNumerals_app_quote σ (fun i ↦ ⌜π i⌝)
+  simpa [Semiformula.coe_empty_quote_eq_quote] using substNumerals_app_quote (V := V) σ (fun i ↦ ⌜π i⌝)
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.ssnum : 𝚺₁.Semisentence 3 := .mkSigma
-  “y p x. ∃ n, !numeralGraph n x ∧ !psubsts ℒₒᵣ1Def y n p” (by simp)
+def ssnum : 𝚺₁.Semisentence 3 := .mkSigma
+  “y p x. ∃ n, !numeralGraph n x ∧ ∃ v, !consDef v n 0 ∧ !(substsGraph ℒₒᵣ) y v p”
 
-lemma substNumeral_defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
-  intro v; simp [ssnum, substs ℒₒᵣ1_defined.df.iff, substNumeral]
+lemma substNumeral.defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
+  intro v; simp [ssnum, (substs.defined (L := ℒₒᵣ)).df.iff, substNumeral]
 
-@[simp] lemma eval_ssnum (v) :
-    Semiformula.Evalbm V v ssnum.val ↔ v 0 = substNumeral (v 1) (v 2) := substNumeral_defined.df.iff v
+attribute [irreducible] ssnum
 
-def _root_.LO.FirstOrder.Arithmetic.ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
+@[simp] lemma substNumeral.eval (v) :
+    Semiformula.Evalbm V v ssnum.val ↔ v 0 = substNumeral (v 1) (v 2) := substNumeral.defined.df.iff v
+
+def ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “y p. ∃ n, !lenDef ↑k n ∧
-    (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k) ∧ !numeralGraph z #i.succ.succ.succ.succ) ∧
-    !psubsts ℒₒᵣDef y n p” (by simp)
+    (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k).val ∧ !numeralGraph z #i.succ.succ.succ.succ) ∧
+    !(substsGraph ℒₒᵣ) y n p”
 
-lemma substNumerals_defined :
+lemma substNumerals.defined :
     Arithmetic.HierarchySymbol.DefinedFunction (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := by
   intro v
+  unfold ssnums
   suffices
-    (v 0 = substs ℒₒᵣ ⌜fun (i : Fin k) ↦ numeral (v i.succ.succ)⌝ (v 1)) ↔
-      ∃ x, ↑k = len x ∧ (∀ (i : Fin k), x.[↑↑i] = numeral (v i.succ.succ)) ∧ v 0 = substs ℒₒᵣ x (v 1) by
-    simpa [ssnums, substs ℒₒᵣ_defined.df.iff, substNumerals, numeral_eq_natCast] using this
+      v 0 = substs ℒₒᵣ (matrixToVec fun i ↦ numeral (v i.succ.succ)) (v 1) ↔
+      ∃ x, ↑k = len x ∧ (∀ i : Fin k, x.[↑↑i] = numeral (v i.succ.succ)) ∧ v 0 = substs ℒₒᵣ x (v 1) by
+    simpa [ssnums, substNumerals, (substs.defined (L := ℒₒᵣ)).df.iff, numeral_eq_natCast]
   constructor
-  · intro e
-    refine ⟨_, by simp, by intro i; simp, e⟩
-  · rintro ⟨w, hk, h, e⟩
-    have : w = ⌜fun (i : Fin k) ↦ numeral (v i.succ.succ)⌝ := nth_ext' (k : V) hk.symm (by simp)
-      (by intro i hi; rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩; simp [h])
-    rcases this; exact e
+  · intro h
+    refine ⟨matrixToVec fun i ↦ numeral (v i.succ.succ), ?_⟩
+    simpa
+  · rintro ⟨x, hx, h, e⟩
+    suffices (matrixToVec fun i ↦ numeral (v i.succ.succ)) = x by simpa [this]
+    apply nth_ext' (k : V)
+    · simp
+    · simp [hx]
+    · intro i hi
+      rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
+      simp [h]
 
-@[simp] lemma eval_ssnums (v : Fin (k + 2) → V) :
-    Semiformula.Evalbm V v ssnums.val ↔ v 0 = substNumerals (v 1) (fun i ↦ v i.succ.succ) := substNumerals_defined.df.iff v
+attribute [irreducible] ssnums
+
+@[simp] lemma substNumerals.eval (v : Fin (k + 2) → V) :
+    Semiformula.Evalbm V v ssnums.val ↔ v 0 = substNumerals (v 1) (fun i ↦ v i.succ.succ) := substNumerals.defined.df.iff v
 
 end
 
@@ -105,8 +133,8 @@ lemma val_fixpoint (θ : Semisentence ℒₒᵣ 1) {V : Type*} [ORingStruc V] [V
   have e2 : ∀ x : V, (![x, ⌜diag θ⌝, ⌜diag θ⌝] 2) = ⌜diag θ⌝ := fun x ↦ E2 _ _ _
   simp only [Nat.reduceAdd, Fin.isValue, fixpoint_eq, Nat.succ_eq_add_one, Fin.isValue, Semiformula.eval_all,
     LogicalConnective.HomClass.map_imply, Semiformula.eval_substs, Matrix.comp_vecCons',
-    Semiterm.val_bvar, Matrix.cons_val_fin_one, val_quote, Matrix.constant_eq_singleton,
-    LogicalConnective.Prop.arrow_eq, eval_ssnum, Matrix.cons_val_zero, e1, e2, forall_eq]
+    Semiterm.val_bvar, Matrix.cons_val_fin_one, Semiformula.val_empty_quote, Matrix.constant_eq_singleton,
+    LogicalConnective.Prop.arrow_eq, substNumeral.eval, Matrix.cons_val_zero, e1, e2, forall_eq]
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝] :=
@@ -119,7 +147,7 @@ theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     calc
       V ⊧/![] (fixpoint θ)
       ↔ Θ (substNumeral ⌜diag θ⌝ ⌜diag θ⌝) := val_fixpoint θ --simp [Θ, fixpoint_eq]
-    _ ↔ Θ ⌜fixpoint θ⌝                     := by simp [substNumeral_app_quote_quote]; rfl
+    _ ↔ Θ ⌜fixpoint θ⌝                     := by simp [substNumeral_app_quote_quote, fixpoint]
 
 end Diagonalization
 

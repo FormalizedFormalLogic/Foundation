@@ -1,5 +1,7 @@
 import Foundation.FirstOrder.ISigma1.HFS
 
+/-! # Internalized languages of first-order logic -/
+
 namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
@@ -33,6 +35,10 @@ def _root_.LO.FirstOrder.Language.IsRel (arity f : V) : Prop := V ⊧/![arity, f
 
 variable {L}
 
+lemma isFunc_def (k f : V) : L.IsFunc k f ↔ V ⊧/![k, f] L.isFunc.val := by rfl
+
+lemma isRel_def (k R : V) : L.IsRel k R ↔ V ⊧/![k, R] L.isRel.val := by rfl
+
 @[simp] lemma eval_func (v) :
     Semiformula.Evalbm V v L.isFunc.val ↔ L.IsFunc (v 0) (v 1) := by simp [Language.IsFunc, ← Matrix.fun_eq_vec_two]
 
@@ -57,9 +63,9 @@ section
 
 variable [V ⊧ₘ* 𝐏𝐀⁻]
 
-instance : GoedelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
+instance  goedelQuoteFunc (k) : GoedelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
 
-instance : GoedelQuote (L.Rel k) V := ⟨fun R ↦ ↑(Encodable.encode R)⟩
+instance goedelQuoteRel (k) : GoedelQuote (L.Rel k) V := ⟨fun R ↦ ↑(Encodable.encode R)⟩
 
 omit [L.LORDefinable] in
 lemma quote_func_def (f : L.Func k) : (⌜f⌝ : V) = ↑(Encodable.encode f) := rfl
@@ -172,7 +178,9 @@ def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ : FirstOrder.
 @[simp] lemma LOR_rel_ltIndex : (ℒₒᵣ).IsRel 2 (ltIndex : V) := by
   simpa using codeIn_rel_quote (V := V) (L := ℒₒᵣ) Language.LT.lt
 
-lemma lDef.func_def : (ℒₒᵣ).isFunc = .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” (by simp) := rfl
+lemma func_def_LOR : (ℒₒᵣ).isFunc = .mkSigma “k f. (k = 0 ∧ f = 0) ∨ (k = 0 ∧ f = 1) ∨ (k = 2 ∧ f = 0) ∨ (k = 2 ∧ f = 1)” := rfl
+
+lemma rel_def_LOR : (ℒₒᵣ).isRel = .mkSigma “k r. (k = 2 ∧ r = 0) ∨ (k = 2 ∧ r = 1)” := rfl
 
 lemma coe_zeroIndex_eq : (zeroIndex : V) = 0 := rfl
 
@@ -181,6 +189,39 @@ lemma coe_oneIndex_eq : (oneIndex : V) = 1 := by simp [oneIndex]; rfl
 lemma coe_addIndex_eq : (addIndex : V) = 0 := rfl
 
 lemma coe_mulIndex_eq : (mulIndex : V) = 1 := by simp [mulIndex]; rfl
+
+@[instance] abbrev goedelQuoteFuncLOR (k) : GoedelQuote ((ℒₒᵣ).Func k) V := goedelQuoteFunc k
+
+@[instance] abbrev goedelQuoteRelLOR (k) : GoedelQuote ((ℒₒᵣ).Rel k) V := goedelQuoteRel k
+
+lemma isFunc_iff_LOR {k f : V} :
+    (ℒₒᵣ).IsFunc k f ↔
+    (k = 0 ∧ f = ⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝) ∨
+    (k = 0 ∧ f = ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝) ∨
+    (k = 2 ∧ f = ⌜(Language.Add.add : (ℒₒᵣ).Func 2)⌝) ∨
+    (k = 2 ∧ f = ⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝) := by
+  rw [isFunc_def (L := ℒₒᵣ), func_def_LOR]
+  suffices
+    k = 0 ∧ f = 0 ∨ k = 0 ∧ f = 1 ∨ k = 2 ∧ f = 0 ∨ k = 2 ∧ f = 1 ↔ _ by simpa
+  apply iff_of_eq
+  congr
+  · calc
+      (1 : V) = (1 : ℕ) := by simp
+      _       = ⌜(Language.One.one : (ℒₒᵣ).Func 0)⌝ := by rfl
+  · calc
+      (1 : V) = (1 : ℕ) := by simp
+      _       = ⌜(Language.Mul.mul : (ℒₒᵣ).Func 2)⌝ := by rfl
+
+lemma isRel_iff_LOR {k R : V} :
+    (ℒₒᵣ).IsRel k R ↔
+    (k = 2 ∧ R = ⌜(Language.Eq.eq : (ℒₒᵣ).Rel 2)⌝) ∨
+    (k = 2 ∧ R = ⌜(Language.LT.lt : (ℒₒᵣ).Rel 2)⌝) := by
+  rw [isRel_def (L := ℒₒᵣ), rel_def_LOR]
+  suffices
+    k = 2 ∧ R = 0 ∨ k = 2 ∧ R = 1 ↔ _ by simpa
+  apply iff_of_eq
+  congr
+  · calc (1 : V) = (1 : ℕ) := by simp
 
 end InternalArithmetic
 

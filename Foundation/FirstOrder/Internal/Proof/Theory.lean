@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.ISigma1.Metamath.Formula.Coding
-import Foundation.FirstOrder.ISigma1.Metamath.Formula.Iteration
+import Foundation.FirstOrder.Internal.Formula.Coding
+import Foundation.FirstOrder.Internal.Formula.Iteration
 
 namespace LO.ISigma1.Metamath
 
@@ -32,17 +32,18 @@ instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.�
 
 instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ₁Class.defined.to_definable
 
-omit [L.LORDefinable]
-
 @[simp] lemma Δ₁Class.proper : T.Δ₁ch.ProperOn V := (Theory.Δ₁Definable.isDelta1 (T := T)).properOn V
 
 @[simp] lemma Δ₁Class.mem_iff {φ : SyntacticFormula L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
   have : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ℕ ⊧/![⌜φ⌝] T.Δ₁ch.val := by
-    simpa [coe_quote, Matrix.constant_eq_singleton]
+    simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
       using FirstOrder.Arithmetic.models_iff_of_Delta1 (V := V) (σ := T.Δ₁ch) (by simp) (by simp) (e := ![⌜φ⌝])
   Iff.trans this (Theory.Δ₁Definable.mem_iff _)
 
 @[simp] lemma Δ₁Class.mem_iff' {φ : SyntacticFormula L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ φ ∈ T := Δ₁Class.mem_iff
+
+@[simp] lemma Δ₁Class.mem_iff'' {φ : SyntacticFormula L} : ((⌜φ⌝ : Metamath.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
+  Δ₁Class.mem_iff
 
 end LO.ISigma1.Metamath
 
@@ -82,20 +83,20 @@ def add_subset_right (dT : T.Δ₁Definable) (dU : U.Δ₁Definable) :
   simpa [val_sigma] using hp
 -/
 
+
 instance empty : Theory.Δ₁Definable (∅ : Theory L) where
   ch := ⊥
   mem_iff {ψ} := by simp
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
 def singleton (φ : SyntacticFormula L) : Theory.Δ₁Definable {φ} where
-  ch := .ofZero (.mkSigma “x. x = ↑⌜φ⌝” (by simp)) _
-  mem_iff {ψ} := by simp
+  ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)” (by simp)) _
+  mem_iff {ψ} := by simp [Semiformula.quote_eq_encode]
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
-omit [L.LORDefinable] in
 @[simp] lemma singleton_toTDef_ch_val (φ : FirstOrder.SyntacticFormula L) :
     letI := Δ₁Definable.singleton φ
-    ({φ} : Theory L).Δ₁ch.val = “x. x = ↑⌜φ⌝” := rfl
+    ({φ} : Theory L).Δ₁ch.val = “x. x = ↑(Encodable.encode φ)” := by rfl
 
 def ofList (l : List (SyntacticFormula L)) : Δ₁Definable {φ | φ ∈ l} :=
   match l with
