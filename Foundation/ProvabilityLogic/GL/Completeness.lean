@@ -1,9 +1,9 @@
 import Foundation.ProvabilityLogic.Interpretation
 import Foundation.Modal.Kripke.Logic.GL.Tree
 import Foundation.Modal.Kripke.ExtendRoot
-import Foundation.FirstOrder.Incompleteness.WitnessComparison
-import Foundation.FirstOrder.Incompleteness.FixedPoint
-import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
+import Foundation.FirstOrder.Internal.WitnessComparison
+import Foundation.FirstOrder.Internal.FixedPoint
+import Foundation.FirstOrder.Internal.Consistency
 import Foundation.ProvabilityLogic.GL.Soundness
 
 /-!
@@ -110,29 +110,29 @@ open Modal ProvabilityLogic Kripke
 
 variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
 
-variable {T : ArithmeticTheory} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Δ₁Definable]
 
 section model
 
 variable (T) {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparisonₐ (⌜ℒₒᵣ⌝.neg φ) (⌜ℒₒᵣ⌝.neg ψ)
+def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparison (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
 lemma NegativeSuccessor.quote_iff_provabilityComparison {φ ψ : Sentence ℒₒᵣ} :
-    NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparisonₐ (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
-  simp [NegativeSuccessor, quote_sentence_eq_quote_emb (∼φ), quote_sentence_eq_quote_emb (∼ψ)]
+    NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparison (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
+  simp [NegativeSuccessor, Semiformula.empty_quote_def, Semiformula.quote_def]
 
 section
 
-def negativeSuccessorDef : 𝚺₁.Semisentence 2 := .mkSigma
-  “φ ψ. ∃ nφ, ∃ nψ, !(ℒₒᵣ).lDef.negDef nφ φ ∧ !(ℒₒᵣ).lDef.negDef nψ ψ ∧ !T.provabilityComparisonₐDef nφ nψ” (by simp)
+def negativeSuccessor : 𝚺₁.Semisentence 2 := .mkSigma
+  “φ ψ. ∃ nφ, ∃ nψ, !(negGraph ℒₒᵣ) nφ φ ∧ !(negGraph ℒₒᵣ) nψ ψ ∧ !T.provabilityComparison nφ nψ” (by simp)
 
-lemma negativeSuccessor_defined : 𝚺₁-Relation (NegativeSuccessor T : V → V → Prop) via (negativeSuccessorDef T) := by
+lemma negativeSuccessor_defined : 𝚺₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := by
   intro v
-  simp [negativeSuccessorDef, NegativeSuccessor, ((ℒₒᵣ).codeIn V).neg_defined.df.iff]
+  simp [negativeSuccessor, NegativeSuccessor, (neg.defined (L := ℒₒᵣ)).df.iff]
 
 @[simp] lemma eval_negativeSuccessorDef (v) :
-    Semiformula.Evalbm V v (negativeSuccessorDef T).val ↔ NegativeSuccessor T (v 0) (v 1) := (negativeSuccessor_defined T).df.iff v
+    Semiformula.Evalbm V v (negativeSuccessor T).val ↔ NegativeSuccessor T (v 0) (v 1) := (negativeSuccessor_defined T).df.iff v
 
 instance negativeSuccessor_definable : 𝚺₁-Relation (NegativeSuccessor T : V → V → Prop) := (negativeSuccessor_defined T).to_definable
 
@@ -156,31 +156,31 @@ instance (i j : F) : Finite (WChain j i) :=
         exact IsTrans.trans (r := (· ≺ ·)) z y x hyz hxy)
     i j
 
-def twoPointAux (t : F → Semiterm ℒₒᵣ Empty N) (i j : F) : Semisentence ℒₒᵣ N :=
-  ⩕ k ∈ { k : F | i ≺ k }, (negativeSuccessorDef T)/[t j, t k]
+def twoPointAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i j : F) : Semisentence ℒₒᵣ N :=
+  ⩕ k ∈ { k : F | i ≺ k }, (negativeSuccessor T)/[t j, t k]
 
-def θChainAux (t : F → Semiterm ℒₒᵣ Empty N) : List F → Semisentence ℒₒᵣ N
+def θChainAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) : List F → Semisentence ℒₒᵣ N
   |          [] => ⊥
   |         [_] => ⊤
   | j :: i :: ε => θChainAux t (i :: ε) ⋏ twoPointAux T t i j
 
-def θAux (t : F → Semiterm ℒₒᵣ Empty N) (i : F) : Semisentence ℒₒᵣ N :=
+def θAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) : Semisentence ℒₒᵣ N :=
   haveI := Fintype.ofFinite (WChain r i)
   ⩖ ε : WChain r i, θChainAux T t ε
 
-lemma rew_twoPointAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : F → Semiterm ℒₒᵣ Empty N) :
+lemma rew_twoPointAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) :
     Rew.substs w ▹ twoPointAux T t i j = twoPointAux T (fun i ↦ Rew.substs w (t i)) i j := by
   simp [twoPointAux, Finset.map_conj', Function.comp_def, ←TransitiveRewriting.comp_app,
     Rew.substs_comp_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
-lemma rew_θChainAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : F → Semiterm ℒₒᵣ Empty N) (ε : List F) :
+lemma rew_θChainAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (ε : List F) :
     Rew.substs w ▹ θChainAux T t ε = θChainAux T (fun i ↦ Rew.substs w (t i)) ε := by
   match ε with
   |          [] => simp [θChainAux]
   |         [_] => simp [θChainAux]
   | j :: i :: ε => simp [θChainAux, rew_θChainAux w _ (i :: ε), rew_twoPointAux]
 
-lemma rew_θAux (w : Fin N → Semiterm ℒₒᵣ Empty N') (t : F → Semiterm ℒₒᵣ Empty N) (i : F) :
+lemma rew_θAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) :
     Rew.substs w ▹ θAux T t i = θAux T (fun i ↦ Rew.substs w (t i)) i := by
   simp [Finset.map_udisj, θAux, rew_θChainAux]
 
@@ -297,7 +297,7 @@ section
 @[simp] lemma val_θ {i : F} : V ⊧/![] (θ T i) ↔ Θ T V i := by
   suffices (∃ ε, List.ChainI (· ≻ ·) i r ε ∧ V ⊧/![] (θChain T ε)) ↔ Θ T V i by
     simpa [-val_θChain, θ, θAux]
-  simp [θ, θAux, Θ]
+  simp [Θ]
 
 @[simp] lemma val_solovay {i : F} : V ⊧/![] (T.solovay i) ↔ T.Solovay V i := by
   simpa [models_iff] using
@@ -340,9 +340,9 @@ private lemma Solovay.exclusive.comparable {i₁ i₂ : F} {ε₁ ε₂ : List F
       rcases hji₁ε₂ with ⟨η₁, η₂, rfl⟩
       have Θε₂ : ΘChain T V (η₁ ++ j :: i₁ :: η₂) := by simpa using Θε₂
       exact ΘChain.cons_cons_iff'.mp (ΘChain.append_iff.mp Θε₂).2 |>.1
-    have : ∀ k, i₁ ≺ k → T.ProvabilityComparisonₐ (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
+    have : ∀ k, i₁ ≺ k → T.ProvabilityComparison (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
       simpa [NegativeSuccessor.quote_iff_provabilityComparison] using ΘChain.cons_cons_iff.mp this
-    exact ProvabilityComparisonₐ.refl_iff_provable.mp (this j hij₁)
+    exact (ProvabilityComparison.refl_iff_provable (L := ℒₒᵣ)).mp (this j hij₁)
   contradiction
 
 /-- Condition 1.-/
@@ -372,29 +372,29 @@ lemma Solovay.exclusive {i₁ i₂ : F} (ne : i₁ ≠ i₂) : T.Solovay V i₁ 
     rcases hj₂ with ⟨_, rfl⟩
     have : ΘChain T V ([j₂] ++ k :: ε) := (ΘChain.append_iff.mp Θε₂).2
     simpa using (ΘChain.append_iff.mp this).1
-  have P₁ : T.ProvabilityComparisonₐ (V := V) ⌜∼T.solovay j₁⌝ ⌜∼T.solovay j₂⌝ := by
+  have P₁ : T.ProvabilityComparison (V := V) ⌜∼T.solovay j₁⌝ ⌜∼T.solovay j₂⌝ := by
     simpa [NegativeSuccessor.quote_iff_provabilityComparison] using
       ΘChain.doubleton_iff.mp C₁ j₂
         (cε₂.rel_of_infix _ _ <| List.infix_iff_prefix_suffix.mpr ⟨j₂ :: k :: ε, by simp, hj₂⟩)
-  have P₂ : T.ProvabilityComparisonₐ (V := V) ⌜∼T.solovay j₂⌝ ⌜∼T.solovay j₁⌝ := by
+  have P₂ : T.ProvabilityComparison (V := V) ⌜∼T.solovay j₂⌝ ⌜∼T.solovay j₁⌝ := by
     simpa [NegativeSuccessor.quote_iff_provabilityComparison] using
       ΘChain.doubleton_iff.mp C₂ j₁
         (cε₁.rel_of_infix _ _ <| List.infix_iff_prefix_suffix.mpr ⟨j₁ :: k :: ε, by simp, hj₁⟩)
-  have : j₁ = j₂ := by simpa using ProvabilityComparisonₐ.antisymm P₁ P₂
+  have : j₁ = j₂ := by simpa using ProvabilityComparison.antisymm (V := V) P₁ P₂
   contradiction
 
 /-- Condition 2.-/
 lemma Solovay.consistent {i j : F} (hij : i ≺ j) : T.Solovay V i → ¬T.Provable (⌜∼T.solovay j⌝ : V) := fun h ↦
-  (Theory.Consistency.quote_iff _).mp (h.2 j hij)
+  (Theory.Consistency.quote_iff T).mp (h.2 j hij)
 
 lemma Solovay.refute (ne : r ≠ i) : T.Solovay V i → T.Provable (⌜∼T.solovay i⌝ : V) := by
   intro h
   rcases show Θ T V i from h.1 with ⟨ε, hε, cε⟩
   rcases List.ChainI.prec_exists_of_ne hε (Ne.symm ne) with ⟨ε', i', hii', rfl, hε'⟩
   have : ∀ k, i' ≺ k → NegativeSuccessor T ⌜T.solovay i⌝ ⌜T.solovay k⌝ := (ΘChain.cons_cons_iff.mp cε).2
-  have : T.ProvabilityComparisonₐ (V := V) ⌜∼T.solovay i⌝ ⌜∼T.solovay i⌝ := by
+  have : T.ProvabilityComparison (V := V) ⌜∼T.solovay i⌝ ⌜∼T.solovay i⌝ := by
     simpa [NegativeSuccessor.quote_iff_provabilityComparison] using this i hii'
-  exact ProvabilityComparisonₐ.refl_iff_provable.mp this
+  exact (ProvabilityComparison.refl_iff_provable (T := T)).mp this
 
 lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧ T.Solovay V j := by
   have : IsConverseWellFounded F (· ≺ ·) := inferInstance
@@ -403,13 +403,13 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
   by_cases hS : T.Solovay V i
   · left; exact hS
   · right
-    have : ∃ j, i ≺ j ∧ ∀ k, i ≺ k → T.ProvabilityComparisonₐ (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
+    have : ∃ j, i ≺ j ∧ ∀ k, i ≺ k → T.ProvabilityComparison (V := V) ⌜∼T.solovay j⌝ ⌜∼T.solovay k⌝ := by
       have : ∃ j, i ≺ j ∧ T.Provable (⌜∼T.solovay j⌝ : V) := by
         have : Θ T V i → ∃ x, i ≺ x ∧ T.Provable (⌜∼T.solovay x⌝ : V) := by
           simpa [Theory.Consistency.quote_iff, Theory.Solovay] using hS
         exact this hΘ
       rcases this with ⟨j', hij', hj'⟩
-      have := ProvabilityComparisonₐ.find_minimal_proof_fintype (T := T) (ι := {j : F // i ≺ j}) (i := ⟨j', hij'⟩)
+      have := ProvabilityComparison.find_minimal_proof_fintype (T := T) (ι := {j : F // i ≺ j}) (i := ⟨j', hij'⟩)
         (fun k ↦ ⌜∼T.solovay k.val⌝) (by simpa)
       simpa using this
     rcases this with ⟨j, hij, hj⟩
@@ -435,17 +435,18 @@ lemma solovay_disjunction : ∃ i : F, T.Solovay V i := by
 lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
     T.Solovay V i → T.Provable (⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ : V) := by
   intro hS
-  have TP : T†V ⊢! ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := provable_of_provable_arith'₀ <| by
-    have : 𝐈𝚺₁ ⊢!. θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
-      oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
-        simpa [models_iff] using Θ.disjunction i
-    exact Entailment.WeakerThan.pbl this
-  have Tθ : T†V ⊢! ⌜θ T i⌝ :=
-    sigma₁_complete_provable (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
-  have hP : T†V ⊢! ⌜T.solovay i⌝ ⋎ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := (by simpa using TP) ⨀ Tθ
-  have : T†V ⊢! ∼⌜T.solovay i⌝ := by simpa using provable_iff.mp (Solovay.refute ne hS)
-  have : T†V ⊢! ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
-  exact provable_iff.mpr this
+  have TP : T.internalize V ⊢! ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ :=
+    internal_sentence_provable_of_outer_sentence_provable_arith <| by
+      have : 𝐈𝚺₁ ⊢!. θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
+        oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
+          simpa [models_iff] using Θ.disjunction i
+      exact Entailment.WeakerThan.pbl this
+  have Tθ : T.internalize V ⊢! ⌜θ T i⌝ :=
+    InternalArithmetic.sigma_one_provable_of_models T (show Hierarchy 𝚺 1 (θ T i) by simp) (by simpa [models_iff] using hS.1)
+  have hP : T.internalize V ⊢! ⌜T.solovay i⌝ ⋎ ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := (by simpa using TP) ⨀ Tθ
+  have : T.internalize V ⊢! ∼⌜T.solovay i⌝ := by simpa using (tprovable_tquote_iff_provable_quote (T := T)).mpr (Solovay.refute ne hS)
+  have : T.internalize V ⊢! ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
+  exact (tprovable_tquote_iff_provable_quote (T := T)).mp this
 
 end model
 
@@ -518,7 +519,7 @@ open FirstOrder Arithmetic
 open Modal
 open Modal.Kripke
 
-variable {T : ArithmeticTheory} [T.Delta1Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {A : Modal.Formula _}
+variable {T : ArithmeticTheory} [T.Δ₁Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {A : Modal.Formula _}
 
 /-- Arithmetical completeness of GL-/
 theorem GL.arithmetical_completeness :

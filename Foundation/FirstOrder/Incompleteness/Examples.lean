@@ -4,14 +4,13 @@ import Foundation.FirstOrder.Incompleteness.Second
 # $\Delta_1$-definability of theories
 
 *TODO: Prove `𝐈𝚺₁` and `𝐏𝐀` are $\Delta_1$-definable.*
-
 -/
 
 namespace LO.FirstOrder
 
-axiom ISigma1_delta1Definable : 𝐈𝚺₁.Delta1Definable
+axiom ISigma1_delta1Definable : 𝐈𝚺₁.Δ₁Definable
 
-axiom PA_delta1Definable : 𝐏𝐀.Delta1Definable
+axiom PA_delta1Definable : 𝐏𝐀.Δ₁Definable
 
 attribute [instance] ISigma1_delta1Definable PA_delta1Definable
 

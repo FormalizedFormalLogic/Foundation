@@ -58,19 +58,23 @@ import Foundation.FirstOrder.ISigma0.Exponential
 import Foundation.FirstOrder.ISigma1.Bit
 import Foundation.FirstOrder.ISigma1.HFS
 import Foundation.FirstOrder.ISigma1.Ind
-import Foundation.FirstOrder.ISigma1.Metamath
 
 import Foundation.FirstOrder.Omega1.Basic
 import Foundation.FirstOrder.Omega1.Nuon
 
-import Foundation.FirstOrder.Incompleteness.FixedPoint
-import Foundation.FirstOrder.Incompleteness.StandardProvability
+import Foundation.FirstOrder.Internal.Language
+import Foundation.FirstOrder.Internal.D1
+import Foundation.FirstOrder.Internal.D2
+import Foundation.FirstOrder.Internal.D3
+import Foundation.FirstOrder.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Internal.EquationalTheory
+import Foundation.FirstOrder.Internal.PeanoMinus
+import Foundation.FirstOrder.Internal.Consistency
+import Foundation.FirstOrder.Internal.WitnessComparison
+
 import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Second
-import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
-import Foundation.FirstOrder.Incompleteness.WitnessComparison
-import Foundation.FirstOrder.Incompleteness.Delta1
-
+import Foundation.FirstOrder.Incompleteness.Examples
 
 import Foundation.FirstOrder.Hauptsatz
 

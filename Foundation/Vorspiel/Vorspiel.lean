@@ -269,21 +269,6 @@ def appendr {n m} (v : Fin n → α) (w : Fin m → α) : Fin (m + n) → α := 
 
 @[simp] lemma appendr_cons {m n} (x : α) (v : Fin n → α) (w : Fin m → α) : appendr (x :> v) w = x :> appendr v w := by funext i; simp [appendr]
 
-section vecToNat
-
-def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
-  | 0,     _ => 0
-  | _ + 1, v => Nat.pair (v 0) (vecToNat $ v ∘ Fin.succ) + 1
-
-open Encodable
-
-@[simp] lemma vecToNat_empty (v : Fin 0 → ℕ) : vecToNat v = 0 := by rfl
-
-@[simp] lemma encode_succ {n} (x : ℕ) (v : Fin n → ℕ) : vecToNat (x :> v) = Nat.pair x (vecToNat v) + 1 := by
-  simp [vecToNat, Function.comp_def]
-
-end vecToNat
-
 lemma forall_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
     (∀ v, φ v) ↔ (∀ a, ∀ v, φ (a :> v)) :=
   ⟨fun h a v ↦ h (a :> v), fun h v ↦ by simpa [eq_vecCons v] using h (v 0) (v ∘ Fin.succ)⟩
@@ -292,6 +277,83 @@ lemma exists_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
     (∃ v, φ v) ↔ (∃ a, ∃ v, φ (a :> v)) :=
   ⟨by rintro ⟨v, hv⟩; exact ⟨v 0, v ∘ Fin.succ, by simpa [eq_vecCons] using hv⟩,
    by rintro ⟨a, v, hv⟩; exact ⟨_, hv⟩⟩
+
+def foldr (f : α → β → β) (init : β) : {k : ℕ} → (Fin k → α) → β
+  |     0, _ => init
+  | _ + 1, v => f (vecHead v) (Matrix.foldr f init (vecTail v))
+
+def map (f : α → β) : (Fin k → α) → (Fin k → β) := fun v ↦ f ∘ v
+
+section map
+
+postfix:max "⨟" => map
+
+variable (f : α → β)
+
+@[simp] lemma map_nil (v : Fin 0 → α) : f⨟ v = ![] := empty_eq (f⨟ v)
+
+@[simp] lemma map_cons (a : α) (v : Fin k → α) : f⨟ (a :> v) = f a :> f⨟ v := by
+  ext i
+  cases i using Fin.cases <;> simp [map]
+
+@[simp] lemma map_cons' (v : Fin (k + 1) → α) : f⨟ v = f (vecHead v) :> f⨟ (vecTail v) := by
+  ext i
+  cases i using Fin.cases <;> { simp [map]; rfl }
+
+@[simp] lemma map_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
+
+lemma map_map_comp (g : β → γ) (f : α → β) (v : Fin k → α) :
+    g⨟ (f⨟ v) = (g ∘ f)⨟ v := by ext x; simp
+
+lemma map_map_comp' (g : β → γ) (f : α → β) (v : Fin k → α) :
+    g⨟ (f⨟ v) = (fun x ↦ g (f x))⨟ v := by ext x; simp
+
+end map
+section foldr
+
+variable (f : α → β → β) (init : β)
+
+@[simp] lemma foldr_zero (v : Fin 0 → α) : foldr f init v = init := rfl
+
+@[simp] lemma foldr_succ (v : Fin (k + 1) → α) : foldr f init v = f (vecHead v) (foldr f init (vecTail v)) := rfl
+
+end foldr
+
+def foldl (f : α → β → α) : (init : α) → {k : ℕ} → (Fin k → β) → α
+  | a,     0, _ => a
+  | a, _ + 1, v => Matrix.foldl f (f a (vecHead v)) (vecTail v)
+
+section foldl
+
+variable (f : α → β → α) (init : α)
+
+@[simp] lemma foldl_zero (v : Fin 0 → β) : foldl f init v = init := rfl
+
+@[simp] lemma foldl_succ (v : Fin (k + 1) → β) : foldl f init v = foldl f (f init (vecHead v)) (vecTail v) := rfl
+
+end foldl
+
+lemma eq_iff_eq_vecHead_of_eq_vecTail {v₁ v₂ : Fin (n + 1) → α} :
+    Matrix.vecHead v₁ = Matrix.vecHead v₂ ∧ Matrix.vecTail v₁ = Matrix.vecTail v₂ ↔ v₁ = v₂ := by
+  constructor
+  · rintro ⟨h, t⟩
+    ext i; cases i using Fin.cases
+    · exact h
+    · exact congr_fun t _
+  · rintro rfl; simp
+
+section vecToNat
+
+def vecToNat (v : Fin n → ℕ) : ℕ := foldr (fun x ih ↦ Nat.pair x ih + 1) 0 v
+
+open Encodable
+
+@[simp] lemma vecToNat_empty (v : Fin 0 → ℕ) : vecToNat v = 0 := by rfl
+
+@[simp] lemma encode_succ {n} (x : ℕ) (v : Fin n → ℕ) : vecToNat (x :> v) = Nat.pair x (vecToNat v) + 1 := by
+  simp [vecToNat]
+
+end vecToNat
 
 end Matrix
 
@@ -353,8 +415,12 @@ variable {n : ℕ}
 @[simp] lemma natToVec_vecToNat (v : Fin n → ℕ) : (vecToNat v).natToVec n = some v := by
   induction n
   · simp [*, Nat.natToVec, vecToNat, Matrix.empty_eq]
-  · suffices v 0 :> v ∘ Fin.succ = v by simp [*, Nat.natToVec, vecToNat]
-    exact funext (fun i ↦ i.cases (by simp [Matrix.empty_eq]) (by simp [Matrix.empty_eq]))
+  case succ _ ih =>
+    suffices v 0 :> v ∘ Fin.succ = v by
+      simp only [vecToNat, foldr_succ, natToVec, unpair_pair, Option.map_eq_some_iff]
+      use vecTail v
+      simpa using ih (vecTail v)
+    exact funext (fun i ↦ i.cases (by simp) (by simp))
 
 lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v) (i : Fin n) : v i < e := by
   induction' n with n ih generalizing e
@@ -369,7 +435,7 @@ lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v
         exact lt_trans (ih hnv i) (lt_succ.mpr <| unpair_right_le e)
 
 lemma one_le_of_bodd {n : ℕ} (h : n.bodd = true) : 1 ≤ n :=
-by induction n <;> simp [←Nat.add_one] at h ⊢
+by induction n <;> simp at h ⊢
 
 lemma pair_le_pair_of_le {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ ≤ a₂) (hb : b₁ ≤ b₂) : a₁.pair b₁ ≤ a₂.pair b₂ := by
   rcases lt_or_eq_of_le ha with (ha | rfl) <;> rcases lt_or_eq_of_le hb with (hb | rfl)

@@ -53,7 +53,7 @@ open FirstOrder FirstOrder.Arithmetic
 open Modal Logic
 open Entailment
 
-variable {T : ArithmeticTheory} [T.Delta1Definable]
+variable {T : ArithmeticTheory} [T.Δ₁Definable]
          {f : Realization ℒₒᵣ}
          {A B : Modal.Formula _}
 
