@@ -25,8 +25,6 @@ lemma Sequent.quote_def (Γ : Finset (SyntacticFormula L)) : ⌜Γ⌝ = ∑ φ �
 
 variable {V}
 
-open Classical
-
 omit [L.DecidableEq] in
 @[simp] lemma Sequent.quote_empty : (⌜(∅ : Finset (SyntacticFormula L))⌝ : V) = ∅ := by
   simp [Sequent.quote_def, emptyset_def]
@@ -141,8 +139,6 @@ lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (Syntac
       simpa [Derivation2.Sequent.mem_quote_iff, ←mem_iff_mem_bitIndices] using ⟨x, h, rfl⟩⟩
 
 variable (V)
-
-variable {T : Theory L} [T.Δ₁Definable]
 
 noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⊢₂ Γ → T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝
   |                   closed Δ φ h hn => TDerivation.em ⌜φ⌝ (by simpa) (by simpa using Sequent.quote_mem_quote.mpr hn)

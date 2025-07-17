@@ -827,7 +827,7 @@ lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[le
   case nil => simp at h
   case cons x v ih =>
     rcases show i = len v ∨ i < len v from eq_or_lt_of_le (by simpa [lt_succ_iff_le] using h) with (rfl | hi)
-    · simp [takeLast_cons, lt_succ_iff_le]
+    · simp [takeLast_cons]
     · have : len v - i = len v - (i + 1) + 1 := by
         rw [←PeanoMinus.sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
       simpa [takeLast_cons, lt_succ_iff_le, not_le_of_gt hi, this, not_lt_of_gt hi] using ih hi

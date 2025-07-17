@@ -20,7 +20,7 @@ def _root_.LO.FirstOrder.Arithmetic.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
 
 set_option linter.flexible false in
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) via bitDef := by
-  intro v; simp [bitDef, ←le_iff_lt_succ]
+  intro v; simp [bitDef]
   constructor
   · intro h; exact ⟨by simp [h.le], h⟩
   · rintro ⟨_, h⟩; exact h
@@ -74,7 +74,7 @@ variable {ξ : Type*} {n}
 instance : Semiformula.Operator.Mem ℒₒᵣ := ⟨⟨bitDef.val⟩⟩
 
 lemma operator_mem_def : Semiformula.Operator.Mem.mem.sentence = bitDef.val := by
-  simp [Semiformula.Operator.Mem.mem, Semiformula.Operator.operator]
+  simp [Semiformula.Operator.Mem.mem]
 
 def ballIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∀ x < !!t, x ∈ !!(Rew.bShift t) → !p x ⋯”
 
@@ -85,12 +85,12 @@ def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
 
 @[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
-  simp only [Arithmetic.ballIn, Rew.bshift_positive, Hierarchy.ball_iff, Hierarchy.imp_iff, and_iff_right_iff_imp]
+  simp only [Arithmetic.ballIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 @[simp] lemma Hieralchy.bexIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (bexIn t p) ↔ Hierarchy Γ m p := by
-  simp only [Arithmetic.bexIn, Rew.bshift_positive, Hierarchy.bex_iff, Hierarchy.and_iff, and_iff_right_iff_imp]
+  simp only [Arithmetic.bexIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 def memRel : 𝚺₀.Semisentence 3 := .mkSigma
@@ -137,10 +137,10 @@ macro_rules
 end
 
 @[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def, memRelOpr]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRelOpr]
 
 @[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def, memRel₃Opr]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRel₃Opr]
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
 
@@ -167,20 +167,20 @@ scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformul
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
 
 lemma memRel_defined : 𝚺₀-Relation₃ (fun r x y : V ↦ ⟪x, y⟫ ∈ r) via memRel := by
-  intro v; simp [memRel, pair_defined.df.iff, lt_succ_iff_le]
+  intro v; simp [memRel, pair_defined.df.iff]
 
 lemma memRel₃_defined : 𝚺₀-Relation₄ (fun r x y z : V ↦ ⟪x, y, z⟫ ∈ r) via memRel₃ := by
-  intro v; simp [memRel₃, pair_defined.df.iff, lt_succ_iff_le]
+  intro v; simp [memRel₃, pair_defined.df.iff]
 
 @[simp] lemma eval_memRel {x y r : V} :
     memRelOpr.val ![r, x, y] ↔ ⟪x, y⟫ ∈ r := by
   unfold Semiformula.Operator.val
-  simp [memRelOpr, pair_defined.df.iff, memRel_defined.df.iff]
+  simp [memRelOpr, memRel_defined.df.iff]
 
 @[simp] lemma eval_memRel₃ {x y z r : V} :
     memRel₃Opr.val ![r, x, y, z] ↔ ⟪x, y, z⟫ ∈ r := by
   unfold Semiformula.Operator.val
-  simp [memRel₃Opr, pair_defined.df.iff, memRel₃_defined.df.iff]
+  simp [memRel₃Opr, memRel₃_defined.df.iff]
 
 end LO.FirstOrder.Arithmetic
 

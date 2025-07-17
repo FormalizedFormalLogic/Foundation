@@ -679,10 +679,10 @@ end
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
 @[simp] lemma zero_semiterm : IsSemiterm ℒₒᵣ n (𝟎 : V) := by
-  simp [-isFunc_iff_LOR, InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma one_semiterm : IsSemiterm ℒₒᵣ n (𝟏 : V) := by
-  simp [-isFunc_iff_LOR, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 lemma coe_zero_eq : (𝟎 : V) = (^func 0 ⌜(Language.Zero.zero : (ℒₒᵣ).Func 0)⌝ 0) := by
   simp [InternalArithmetic.zero, qqFuncN_eq_qqFunc, qqFunc, nat_cast_pair]; rfl
@@ -733,7 +733,7 @@ end
   induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
-  case succ x ih => simp [-isFunc_iff_LOR, qqAdd, ih]
+  case succ x ih => simp [qqAdd, ih]
 
 end Numeral
 
