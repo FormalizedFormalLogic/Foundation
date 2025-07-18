@@ -1,9 +1,8 @@
-import Foundation.FirstOrder.Incompleteness.Second
+import Foundation.FirstOrder.Internal.DerivabilityCondition
 import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!
 # Witness comparisons of provability
-
 -/
 
 namespace LO.ISigma1.Metamath
@@ -16,34 +15,21 @@ section WitnessComparisons
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable (T : Theory L) [T.Δ₁Definable]
-
-def _root_.LO.FirstOrder.Theory.DerivabilityComparison (s₁ s₂ : V) : Prop :=
-  ∃ d₁, T.DerivationOf d₁ s₁ ∧ ∀ d₂ < d₁, ¬T.DerivationOf d₂ s₂
+variable (T : Theory L) [T.Δ₁]
 
 def _root_.LO.FirstOrder.Theory.ProvabilityComparison (φ ψ : V) : Prop :=
-  T.DerivabilityComparison (V := V) {φ} {ψ}
+  ∃ b, T.Proof b φ ∧ ∀ b' < b, ¬T.Proof b' ψ
 
 section
 
-def _root_.LO.FirstOrder.Theory.derivabilityComparison : 𝚺₁.Semisentence 2 := .mkSigma
-  “s₁ s₂. ∃ d₁, !T.derivationOf.sigma d₁ s₁ ∧ ∀ d₂ < d₁, ¬!T.derivationOf.pi d₂ s₂”
-
-lemma _root_.LO.FirstOrder.Theory.derivability_comparison_defined :
-    𝚺₁-Relation[V] T.DerivabilityComparison via T.derivabilityComparison := by
-  intro v
-  simp [Theory.derivabilityComparison, HierarchySymbol.Semiformula.val_sigma,
-    Theory.DerivationOf.defined.df.iff, Theory.DerivationOf.defined.proper.iff', Theory.DerivabilityComparison]
-
-instance _root_.LO.FirstOrder.Theory.derivability_comparison_definable : 𝚺₁-Relation[V] T.DerivabilityComparison :=
-  T.derivability_comparison_defined.to_definable
-
 def _root_.LO.FirstOrder.Theory.provabilityComparison : 𝚺₁.Semisentence 2 := .mkSigma
-  “φ ψ. ∃ sφ sψ, !insertDef sφ φ 0 ∧ !insertDef sψ ψ 0 ∧ !T.derivabilityComparison sφ sψ”
+  “φ ψ. ∃ b, !T.proof.sigma b φ ∧ ∀ b' < b, ¬!T.proof.pi b' ψ”
 
-lemma _root_.LO.FirstOrder.Theory.provability_comparison_defined : 𝚺₁-Relation[V] T.ProvabilityComparison via T.provabilityComparison := by
-  intro v; simp [Theory.provabilityComparison, T.derivability_comparison_defined.df.iff,
-    Theory.ProvabilityComparison, singleton_eq_insert, emptyset_def]
+lemma _root_.LO.FirstOrder.Theory.provability_comparison_defined :
+    𝚺₁-Relation[V] T.ProvabilityComparison via T.provabilityComparison := by
+  intro v
+  simp [Theory.provabilityComparison, HierarchySymbol.Semiformula.val_sigma,
+    Theory.Proof.defined.df.iff, Theory.Proof.defined.proper.iff', Theory.ProvabilityComparison]
 
 instance _root_.LO.FirstOrder.Theory.provability_comparison_definable : 𝚺₁-Relation[V] T.ProvabilityComparison :=
   T.provability_comparison_defined.to_definable
@@ -60,59 +46,44 @@ end
 
 variable {T}
 
-namespace DerivabilityComparison
-
-variable {Γ Δ : V}
-
-lemma refl_iff_derivable : T.DerivabilityComparison Γ Γ ↔ T.Derivable Γ := by
-  constructor
-  · rintro ⟨d, dd, hd⟩
-    exact ⟨d, dd⟩
-  · rintro ⟨d, dd⟩
-    have : ∃ b, T.DerivationOf b Γ ∧ ∀ z < b, ¬T.DerivationOf z Γ :=
-      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := (T.DerivationOf · Γ)) (by definability) dd
-    rcases this with ⟨b, bd, h⟩
-    exact ⟨b, bd, h⟩
-
-lemma antisymm : T.DerivabilityComparison Γ Δ → T.DerivabilityComparison Δ Γ → Γ = Δ := by
-  rintro ⟨dΓ, dΓd, HΓ⟩ ⟨dΔ, dΔd, HΔ⟩
-  have : dΓ = dΔ := by
-    by_contra ne
-    wlog lt : dΓ < dΔ
-    · have : dΓ ≤ dΔ := le_of_not_gt <| this dΔ dΔd HΔ dΓ dΓd HΓ (Ne.symm ne)
-      have : dΔ ≤ dΓ := le_of_not_gt lt
-      have : dΓ = dΔ := le_antisymm (by assumption) (by assumption)
-      contradiction
-    have : ¬T.DerivationOf dΓ Γ := HΔ dΓ lt
-    contradiction
-  have : fstIdx dΔ = Δ := dΔd.1
-  have : fstIdx dΓ = Γ := dΓd.1
-  simp_all
-
-lemma find_minimal_proof_fintype [Fintype ι] (Γ : ι → V) (H : T.Derivable (Γ i)) :
-    ∃ j, ∀ k, T.DerivabilityComparison (Γ j) (Γ k) := by
-  rcases show ∃ dᵢ, T.DerivationOf dᵢ (Γ i)from H with ⟨dᵢ, Hdᵢ⟩
-  have : ∃ z, (∃ j, T.DerivationOf z (Γ j)) ∧ ∀ w < z, ∀ (x : ι), ¬T.DerivationOf w (Γ x) := by
-    simpa using
-      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, T.DerivationOf z (Γ j))
-        (HierarchySymbol.Boldface.fintype_ex fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
-  rcases this with ⟨z, ⟨j, hj⟩, H⟩
-  exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩
-
-end DerivabilityComparison
-
 namespace ProvabilityComparison
 
 variable {φ ψ : V}
 
-lemma refl_iff_provable : T.ProvabilityComparison φ φ ↔ T.Provable φ := DerivabilityComparison.refl_iff_derivable
+lemma to_provable : T.ProvabilityComparison φ ψ → T.Provable φ := by rintro ⟨b, hb, _⟩; exact ⟨b, hb⟩
 
-lemma antisymm : T.ProvabilityComparison φ ψ → T.ProvabilityComparison ψ φ → φ = ψ :=
-  fun h₁ h₂ ↦ by
-    simpa using mem_ext_iff.mp (DerivabilityComparison.antisymm h₁ h₂) φ
+lemma refl_iff_provable : T.ProvabilityComparison φ φ ↔ T.Provable φ := by
+  constructor
+  · exact to_provable
+  · rintro ⟨b, hb⟩
+    have : ∃ b, T.Proof b φ ∧ ∀ z < b, ¬T.Proof z φ :=
+      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := (T.Proof · φ)) (by definability) hb
+    rcases this with ⟨b, bd, h⟩
+    exact ⟨b, bd, h⟩
+
+lemma antisymm : T.ProvabilityComparison φ ψ → T.ProvabilityComparison ψ φ → φ = ψ := by
+  rintro ⟨b, hb, Hb⟩ ⟨d, hd, Hd⟩
+  have : b = d := by
+    by_contra ne
+    wlog lt : b < d
+    · have : b ≤ d := le_of_not_gt <| this d hd Hd b hb Hb (Ne.symm ne)
+      have : d ≤ b := le_of_not_gt lt
+      have : b = d := le_antisymm (by assumption) (by assumption)
+      contradiction
+    have : ¬T.Proof b φ := Hd b lt
+    contradiction
+  have : ({φ} : V) = {ψ} := by simp [←hb.1, ←hd.1, this]
+  simpa using this
 
 lemma find_minimal_proof_fintype [Fintype ι] (φ : ι → V) (H : T.Provable (φ i)) :
-    ∃ j, ∀ k, T.ProvabilityComparison (φ j) (φ k) := DerivabilityComparison.find_minimal_proof_fintype _ H
+    ∃ j, ∀ k, T.ProvabilityComparison (φ j) (φ k) := by
+  rcases show ∃ dᵢ, T.Proof dᵢ (φ i)from H with ⟨dᵢ, Hdᵢ⟩
+  have : ∃ z, (∃ j, T.Proof z (φ j)) ∧ ∀ w < z, ∀ x, ¬T.Proof w (φ x) := by
+    simpa using
+      InductionOnHierarchy.least_number_sigma 𝚺 1 (P := fun z ↦ ∃ j, T.Proof z (φ j))
+        (HierarchySymbol.Boldface.fintype_ex fun j ↦ by definability) (x := dᵢ) ⟨i, Hdᵢ⟩
+  rcases this with ⟨z, ⟨j, hj⟩, H⟩
+  exact ⟨j, fun k ↦ ⟨z, hj, fun w hw ↦ H w hw k⟩⟩
 
 end ProvabilityComparison
 

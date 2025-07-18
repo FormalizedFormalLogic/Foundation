@@ -8,7 +8,7 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {T U : Theory L} [T.Δ₁Definable] [U.Δ₁Definable]
+variable {T U : Theory L} [T.Δ₁] [U.Δ₁]
 
 namespace ISigma1.Metamath
 
@@ -758,7 +758,7 @@ lemma root {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁C
     ⟨by simpa using hs,
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨s, p, rfl, hp, hT⟩⟩
 
-variable {U : Theory L} [U.Δ₁Definable]
+variable {U : Theory L} [U.Δ₁]
 
 lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {d : V} : T.Derivation d → U.Derivation d := by
   intro hd

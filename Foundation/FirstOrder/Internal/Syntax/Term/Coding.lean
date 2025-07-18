@@ -131,6 +131,13 @@ lemma quote_eq_encode' (v : Fin k → Semiterm L ℕ n) :
 
 lemma quote_eq_encode_standard (t : SyntacticSemiterm L n) : (⌜t⌝ : ℕ) = encode t := by simp [quote_eq_encode]
 
+lemma coe_quote_eq_quote (t : SyntacticSemiterm L n) : (↑(⌜t⌝ : ℕ) : V) = ⌜t⌝ := by
+  simp [quote_eq_encode]
+
+lemma coe_quote_eq_quote' (t : SyntacticSemiterm L n) :
+    (↑(⌜t⌝ : Metamath.Semiterm ℕ L n).val : V) = (⌜t⌝ : Metamath.Semiterm V L n).val :=
+  coe_quote_eq_quote t
+
 @[simp] lemma quote_bvar (x : Fin n) : (⌜(#x : SyntacticSemiterm L n)⌝ : V) = ^#↑x := rfl
 
 @[simp] lemma quote_fvar (x : ℕ) : (⌜(&x : SyntacticSemiterm L n)⌝ : V) = ^&↑x := rfl

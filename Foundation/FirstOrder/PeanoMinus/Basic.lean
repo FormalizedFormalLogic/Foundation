@@ -319,7 +319,11 @@ lemma eq_nat_of_lt_nat : ∀ {n : ℕ} {x : M}, x < n → ∃ m : ℕ, x = m
     · exact ⟨n, rfl⟩
     · exact eq_nat_of_lt_nat hx
 
-instance qq : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
+lemma eq_nat_of_le_nat {n : ℕ} {x : M} : x ≤ n → ∃ m : ℕ, x = m := fun h ↦ by
+  have : x < ↑(n + 1) := by simpa [←le_iff_lt_succ] using h
+  exact eq_nat_of_lt_nat this
+
+instance : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
   intro φ h
   rcases h
   case equal h =>

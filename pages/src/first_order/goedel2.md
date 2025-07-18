@@ -269,11 +269,11 @@ theorem goedel_iff_consistency
 
 ```lean
 theorem LO.ISigma1.goedel_second_incompleteness
-    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Δ₁Definable] [System.Consistent T] :
+    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Δ₁] [System.Consistent T] :
     T ⊬. T.consistent 
 
 theorem LO.ISigma1.inconsistent_undecidable
-    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Δ₁Definable] [T.Sigma1Sound] :
+    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Δ₁] [T.Sigma1Sound] :
     Independent (T : Axiom ℒₒᵣ) (T.consistent : Sentence ℒₒᵣ)
 ```
 - [LO.ISigma1.goedel_second_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.goedel_second_incompleteness)

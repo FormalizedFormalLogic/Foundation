@@ -1,8 +1,7 @@
 import Foundation.FirstOrder.Internal.DerivabilityCondition
-import Foundation.Logic.HilbertStyle.Supplemental
 
 /-!
-# ConsistentWith predicate
+# Consistency predicate
 -/
 
 open Classical
@@ -19,7 +18,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 section
 
-variable (T : Theory L) [T.Δ₁Definable] (V)
+variable (T : Theory L) [T.Δ₁] (V)
 
 def _root_.LO.FirstOrder.Theory.Consistent : Prop := ¬T.Provable (⌜(⊥ : Sentence L)⌝ : V)
 
@@ -57,13 +56,13 @@ abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {↑T.consistent}
 
 abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼↑T.consistent}
 
-instance : T.Con.Δ₁Definable := Theory.Δ₁Definable.singleton _
+instance : T.Con.Δ₁ := Theory.Δ₁.singleton _
 
-instance : T.Incon.Δ₁Definable := Theory.Δ₁Definable.singleton _
+instance : T.Incon.Δ₁ := Theory.Δ₁.singleton _
 
 end
 
-variable (T : ArithmeticTheory) [T.Δ₁Definable] (V)
+variable (T : ArithmeticTheory) [T.Δ₁] (V)
 
 def consistent_eq : T.consistent = T.standardPr.con := rfl
 
@@ -78,7 +77,7 @@ namespace LO.FirstOrder.Arithmetic
 
 open Entailment ProvabilityLogic
 
-variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Δ₁Definable]
+variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Δ₁]
 
 instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T + T.Con := by
   have : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance

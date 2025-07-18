@@ -27,7 +27,7 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 open Arithmetic
 
-variable [T.Δ₁Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)]
+variable [T.Δ₁] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)]
 
 lemma GL_S_TFAE :
     [

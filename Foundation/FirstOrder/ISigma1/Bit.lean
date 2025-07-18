@@ -215,6 +215,12 @@ noncomputable scoped instance : Singleton V V := ⟨fun a ↦ Exp.exp a⟩
 
 lemma singleton_def (a : V) : {a} = Exp.exp a := rfl
 
+@[simp] lemma singleton_injective (a b : V) : ({a} : V) = {b} ↔ a = b := by
+  constructor
+  · intro h
+    simpa [singleton_def] using congr_arg log h
+  · rintro rfl; rfl
+
 end singleton
 
 section insert
@@ -278,6 +284,12 @@ lemma insert_le_of_le_of_le {i j a b : V} (hij : i ≤ j) (hab : a ≤ b) : inse
   by_cases hi : i ∈ a
   · simpa [hi] using le_trans hab (by simp)
   · simpa [hi] using add_le_add hab (exp_monotone_le.mpr hij)
+
+lemma insert_absolute (x s : ℕ) :
+    ((insert x s : ℕ) : V) = insert (x : V) (s : V) := by
+  have := DefinedFunction.shigmaZero_absolute_func V (k := 2) (f := fun v ↦ insert (v 0) (v 1)) (f' := fun v ↦ insert (v 0) (v 1))
+      (φ := insertDef) insert_defined insert_defined ![x, s]
+  simpa using this
 
 end insert
 
