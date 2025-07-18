@@ -12,7 +12,7 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable (T : Theory L) [T.Δ₁Definable]
+variable (T : Theory L) [T.Δ₁]
 
 def _root_.LO.FirstOrder.Theory.RosserProvable (φ : V) : Prop := T.ProvabilityComparison φ (neg L φ)
 
@@ -101,7 +101,7 @@ section
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {T : Theory L} [T.Δ₁Definable] [Entailment.Consistent T]
+variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 
 local prefix:90 "𝗥" => T.rosserPred
 
@@ -117,7 +117,7 @@ end
 
 open ProvabilityLogic
 
-variable {T : ArithmeticTheory} [T.Δ₁Definable] [Entailment.Consistent T]
+variable {T : ArithmeticTheory} [T.Δ₁] [Entailment.Consistent T]
 
 variable (T)
 

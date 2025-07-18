@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.D1
+import Foundation.FirstOrder.Internal.Syntax
 import Foundation.Logic.HilbertStyle.Supplemental
 
 open Classical

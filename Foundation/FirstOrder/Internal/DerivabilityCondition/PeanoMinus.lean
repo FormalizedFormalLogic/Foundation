@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Internal.EquationalTheory
+import Foundation.FirstOrder.Internal.DerivabilityCondition.EquationalTheory
 
 /-!
 # Internal theory $\mathsf{PA}^-$, $\mathsf{R_0}$ in $\mathsf{I}\Sigma_1$
@@ -29,7 +29,7 @@ local postfix:max "⇞" => Semiterm.shift
 
 local postfix:max "⤉" => Semiformula.shift
 
-variable (T : ArithmeticTheory) [Theory.Δ₁Definable T] [𝐏𝐀⁻ ⪯ T]
+variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝐏𝐀⁻ ⪯ T]
 
 open Entailment Entailment.FiniteContext Semiformula
 

@@ -1,6 +1,6 @@
 import Foundation.Meta.ClProver
 import Foundation.FirstOrder.ISigma1.Ind
-import Foundation.FirstOrder.Internal.D1
+import Foundation.FirstOrder.Internal.DerivabilityCondition.D1
 
 /-!
 # Internal theory of equality
@@ -22,7 +22,7 @@ local postfix:max "⇞" => Semiterm.shift
 
 local postfix:max "⤉" => Semiformula.shift
 
-variable (T : ArithmeticTheory) [Theory.Δ₁Definable T] [𝐄𝐐 ⪯ T]
+variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝐄𝐐 ⪯ T]
 
 open Entailment Entailment.FiniteContext Semiformula
 

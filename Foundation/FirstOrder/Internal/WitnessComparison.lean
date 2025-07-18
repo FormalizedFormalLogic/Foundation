@@ -15,7 +15,7 @@ section WitnessComparisons
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable (T : Theory L) [T.Δ₁Definable]
+variable (T : Theory L) [T.Δ₁]
 
 def _root_.LO.FirstOrder.Theory.ProvabilityComparison (φ ψ : V) : Prop :=
   ∃ b, T.Proof b φ ∧ ∀ b' < b, ¬T.Proof b' ψ

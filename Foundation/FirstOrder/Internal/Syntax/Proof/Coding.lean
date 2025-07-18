@@ -8,7 +8,7 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
 variable {L : Language} [L.DecidableEq] [L.Encodable] [L.LORDefinable]
 
-variable {T : Theory L} [T.Δ₁Definable]
+variable {T : Theory L} [T.Δ₁]
 
 namespace Derivation2
 

@@ -18,7 +18,7 @@ namespace ISigma1.Metamath
 
 section typed_theory
 
-abbrev tmem (φ : Formula V L) (T : Theory L) [T.Δ₁Definable] : Prop := φ.val ∈ T.Δ₁Class
+abbrev tmem (φ : Formula V L) (T : Theory L) [T.Δ₁] : Prop := φ.val ∈ T.Δ₁Class
 
 scoped infix:50 " ∈' " => tmem
 
@@ -104,20 +104,20 @@ section typed_derivation
 /-- Auxiliary theories for the typed internal proof. -/
 structure InternalTheory (V : Type*) (L : Language) [L.Encodable] [L.LORDefinable] where
   theory : Theory L
-  Δ₁Definable : theory.Δ₁Definable
+  Δ₁ : theory.Δ₁
 
 instance : CoeOut (InternalTheory V L) (Theory L) := ⟨InternalTheory.theory⟩
 
-instance (T : InternalTheory V L) : T.theory.Δ₁Definable := T.Δ₁Definable
+instance (T : InternalTheory V L) : T.theory.Δ₁ := T.Δ₁
 
 variable (V)
 
-def _root_.LO.FirstOrder.Theory.internalize (T : Theory L) [T.Δ₁Definable] : InternalTheory V L := ⟨T, inferInstance⟩
+def _root_.LO.FirstOrder.Theory.internalize (T : Theory L) [T.Δ₁] : InternalTheory V L := ⟨T, inferInstance⟩
 
 variable {V}
 
 omit [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] in
-@[simp] lemma internalize_theory (T : Theory L) [T.Δ₁Definable] : (T.internalize V).theory = T := rfl
+@[simp] lemma internalize_theory (T : Theory L) [T.Δ₁] : (T.internalize V).theory = T := rfl
 
 structure TDerivation (T : InternalTheory V L) (Γ : Sequent V L) where
   val : V
@@ -154,13 +154,13 @@ alias ⟨toProvable, _root_.LO.FirstOrder.Theory.Provable.toTProvable⟩ := TPro
 
 def proof_to_tDerivation {σ : Formula V L} : T ⊢ σ → T ⊢ᵈᵉʳ insert σ ∅ := fun x ↦ x
 
-lemma tprovable_iff_provable {T : Theory L} [T.Δ₁Definable] {σ : Formula V L} :
+lemma tprovable_iff_provable {T : Theory L} [T.Δ₁] {σ : Formula V L} :
     T.internalize V ⊢! σ ↔ T.Provable σ.val := TProvable.iff_provable
 
-lemma tprovable_tquote_iff_provable_quote {T : Theory L} [T.Δ₁Definable] {φ : SyntacticFormula L} :
+lemma tprovable_tquote_iff_provable_quote {T : Theory L} [T.Δ₁] {φ : SyntacticFormula L} :
     T.internalize V ⊢! ⌜φ⌝ ↔ T.Provable (⌜φ⌝ : V) := TProvable.iff_provable
 
-lemma tprovable_tquote_iff_provable_quote_sentence {T : Theory L} [T.Δ₁Definable] {σ : Sentence L} :
+lemma tprovable_tquote_iff_provable_quote_sentence {T : Theory L} [T.Δ₁] {σ : Sentence L} :
     T.internalize V ⊢! ⌜σ⌝ ↔ T.Provable (⌜σ⌝ : V) := TProvable.iff_provable
 
 def TDerivation.toTProof {φ} (d : T ⊢ᵈᵉʳ insert φ ∅) : T ⊢ φ := d

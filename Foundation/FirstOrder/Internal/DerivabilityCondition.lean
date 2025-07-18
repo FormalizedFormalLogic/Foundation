@@ -1,6 +1,6 @@
-import Foundation.FirstOrder.Internal.D1
-import Foundation.FirstOrder.Internal.D2
-import Foundation.FirstOrder.Internal.D3
+import Foundation.FirstOrder.Internal.DerivabilityCondition.D1
+import Foundation.FirstOrder.Internal.DerivabilityCondition.D2
+import Foundation.FirstOrder.Internal.DerivabilityCondition.D3
 import Foundation.ProvabilityLogic.Incompleteness
 import Foundation.FirstOrder.Internal.FixedPoint
 
@@ -15,7 +15,7 @@ open ISigma1 Metamath
 
 section
 
-variable {T : ArithmeticTheory} [T.Δ₁Definable]
+variable {T : ArithmeticTheory} [T.Δ₁]
 
 local prefix:90 "□" => T.provabilityPred
 
@@ -50,7 +50,7 @@ end
 
 open ProvabilityLogic
 
-variable (T : ArithmeticTheory) [T.Δ₁Definable]
+variable (T : ArithmeticTheory) [T.Δ₁]
 
 instance : Diagonalization 𝐈𝚺₁ where
   fixpoint := fixpoint
@@ -70,6 +70,6 @@ instance [T.SoundOnHierarchy 𝚺 1] : T.standardPr.GoedelSound := ⟨fun h ↦ 
 
 lemma standardPr_def (σ : Sentence ℒₒᵣ) : T.standardPr σ = T.provabilityPred σ := rfl
 
-instance [T.Δ₁Definable] : T.standardPr.Sound ℕ := ⟨fun {σ} ↦ by simp [Arithmetic.standardPr_def, models₀_iff]⟩
+instance [T.Δ₁] : T.standardPr.Sound ℕ := ⟨fun {σ} ↦ by simp [Arithmetic.standardPr_def, models₀_iff]⟩
 
 end LO.FirstOrder.Arithmetic

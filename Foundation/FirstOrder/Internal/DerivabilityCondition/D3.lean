@@ -1,5 +1,5 @@
-import Foundation.FirstOrder.Internal.D1
-import Foundation.FirstOrder.Internal.PeanoMinus
+import Foundation.FirstOrder.Internal.DerivabilityCondition.D1
+import Foundation.FirstOrder.Internal.DerivabilityCondition.PeanoMinus
 
 /-!
 # Hilbert-Bernays-Löb derivability condition $\mathbf{D3}$ and formalized $\Sigma_1$-completeness
@@ -25,7 +25,7 @@ local infix:40 " ⤕ " => Semiterm.substs
 
 local infix:40 " ⤔ " => Semiformula.substs
 
-variable (T : ArithmeticTheory) [Theory.Δ₁Definable T] [𝐏𝐀⁻ ⪯ T]
+variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝐏𝐀⁻ ⪯ T]
 
 variable {T}
 
