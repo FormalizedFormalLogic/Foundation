@@ -22,28 +22,10 @@ variable {F : Frame} {X Y : Set F.World}
 instance : CoeSort Frame Type := ⟨Frame.World⟩
 instance {F : Frame} : Nonempty F.World := F.world_nonempty
 
-@[reducible] def box {F : Frame} : Set F.World → Set F.World := λ X => { w | X ∈ F.𝒩 w }
-@[reducible] def dia {F : Frame} := λ X => (F.box Xᶜ)ᶜ
+@[reducible] def box (F : Frame) : Set F.World → Set F.World := λ X => { w | X ∈ F.𝒩 w }
+@[reducible] def dia (F : Frame) := λ X => (F.box Xᶜ)ᶜ
 
-prefix:max "ℬ" => Frame.box
-prefix:max "𝒟" => Frame.dia
-
-def box_iterate {F : Frame} : ℕ → Set F.World → Set F.World
-| 0     => id
-| n + 1 => λ X => ℬ (F.box_iterate n X)
-notation:max "ℬ^[" n:80 "]" => Frame.box_iterate n
-
-def dia_iterate {F : Frame} : ℕ → Set F.World → Set F.World
-| 0     => id
-| n + 1 => λ X => 𝒟 (F.dia_iterate n X)
-notation:max "𝒟^[" n:80 "]" => Frame.dia_iterate n
-
-@[simp] lemma box_iterate_zero : ℬ^[0] X = X := rfl
-@[simp] lemma dia_iterate_zero : 𝒟^[0] X = X := rfl
-@[simp] lemma box_iterate_one : ℬ^[1] X = ℬ X := rfl
-@[simp] lemma dia_iterate_one : 𝒟^[1] X = 𝒟 X := rfl
-
-lemma eq_ℬ_𝒩 {F : Frame} {X Y : Set F.World} : (ℬ X) = Y ↔ (∀ x, X ∈ F.𝒩 x ↔ x ∈ Y) := by
+lemma eq_ℬ_𝒩 {F : Frame} {X Y : Set F.World} : (F.box X) = Y ↔ (∀ x, X ∈ F.𝒩 x ↔ x ∈ Y) := by
   constructor;
   . rintro rfl;
     tauto;
@@ -84,7 +66,7 @@ def Model.truthset (M : Model) : Formula ℕ → Set M.World
 | .atom n => M.Val n
 | ⊥       => ∅
 | φ ➝ ψ  => (truthset M φ)ᶜ ∪ truthset M ψ
-| □φ      => ℬ (truthset M φ)
+| □φ      => M.box (truthset M φ)
 
 namespace Model.truthset
 
@@ -105,20 +87,20 @@ instance : CoeFun Model (λ M => Formula ℕ → Set M.World) := ⟨λ M => trut
   _         = (M φ ∩ M ψ) ∪ ((M φ)ᶜ ∩ (M ψ)ᶜ)     := by tauto_set;
 
 @[simp, grind]
-lemma eq_multibox {n : ℕ} : M (□^[n] φ) = ℬ^[n] (M φ) := by
+lemma eq_multibox {n : ℕ} : M (□^[n] φ) = M.box^[n] (M φ) := by
   induction n with
   | zero => simp
-  | succ n ih => simp [ih, truthset, Frame.box_iterate]
+  | succ n ih => rw [Function.iterate_succ']; simp [ih, truthset]
 
-@[simp, grind] lemma eq_box : M (□φ) = ℬ (M φ) := eq_multibox (n := 1)
+@[simp, grind] lemma eq_box : M (□φ) = M.box (M φ) := eq_multibox (n := 1)
 
 @[simp, grind]
-lemma eq_multidia {n : ℕ} : M (◇^[n] φ) = 𝒟^[n] (M φ) := by
+lemma eq_multidia {n : ℕ} : M (◇^[n] φ) = M.dia^[n] (M φ) := by
   induction n with
   | zero => simp
-  | succ n ih => simp [ih, truthset, Frame.dia_iterate]
+  | succ n ih => rw [Function.iterate_succ']; simp [ih, truthset]
 
-@[simp, grind] lemma eq_dia : M (◇φ) = 𝒟 (M φ) := eq_multidia (n := 1)
+@[simp, grind] lemma eq_dia : M (◇φ) = M.dia (M φ) := eq_multidia (n := 1)
 
 
 @[grind]
@@ -155,10 +137,10 @@ variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 @[grind] lemma def_box : x ⊧ □φ ↔ M φ ∈ (M.𝒩 x) := by simp [Semantics.Realize, Satisfies];
 @[grind] lemma def_dia : x ⊧ ◇φ ↔ (M φ)ᶜ ∈ (M.𝒩 x)ᶜ := by simp [Semantics.Realize, Satisfies];
 
-@[grind] lemma def_multibox' : x ⊧ □^[n]φ ↔ x ∈ ℬ^[n] (M φ) := by simp [Semantics.Realize, Satisfies]
-@[grind] lemma def_mutlidia' : x ⊧ ◇^[n]φ ↔ x ∈ 𝒟^[n] (M φ) := by simp [Semantics.Realize, Satisfies]
-@[grind] lemma def_box' : x ⊧ □φ ↔ x ∈ ℬ (M φ) := def_multibox' (n := 1)
-@[grind] lemma def_dia' : x ⊧ ◇φ ↔ x ∈ 𝒟 (M φ) := def_mutlidia' (n := 1)
+@[grind] lemma def_multibox' : x ⊧ □^[n]φ ↔ x ∈ M.box^[n] (M φ) := by simp [Semantics.Realize, Satisfies]
+@[grind] lemma def_mutlidia' : x ⊧ ◇^[n]φ ↔ x ∈ M.dia^[n] (M φ) := by simp [Semantics.Realize, Satisfies]
+@[grind] lemma def_box' : x ⊧ □φ ↔ x ∈ M.box (M φ) := def_multibox' (n := 1)
+@[grind] lemma def_dia' : x ⊧ ◇φ ↔ x ∈ M.dia (M φ) := def_mutlidia' (n := 1)
 
 protected instance : Semantics.Tarski (M.World) where
   realize_top := by grind
