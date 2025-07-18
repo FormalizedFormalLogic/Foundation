@@ -60,7 +60,7 @@ abbrev counterexampleDPFrame (F₁ : Kripke.Frame) (F₂ : Kripke.Frame) (w₁ :
     | (Sum.inr $ Sum.inr x), (Sum.inr $ Sum.inr y) => F₂.Rel x y
     | _, _ => False
   rel_partial_order := {
-    refl := by simp [Reflexive];
+    refl := by simp;
     trans := by
       simp only [Sum.forall, true_implies, imp_self, implies_true, true_and, false_implies, and_true, and_self, forall_const, imp_false];
       constructor;

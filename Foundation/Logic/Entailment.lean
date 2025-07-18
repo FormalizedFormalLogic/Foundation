@@ -338,12 +338,12 @@ variable (𝓢 : S)
 
 def Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ∼f
 
-def Undecidable (f : F) : Prop := 𝓢 ⊬ f ∧ 𝓢 ⊬ ∼f
+def Independent (f : F) : Prop := 𝓢 ⊬ f ∧ 𝓢 ⊬ ∼f
 
 end
 
 lemma incomplete_iff_exists_undecidable [LogicalConnective F] {𝓢 : S} :
-    ¬Entailment.Complete 𝓢 ↔ ∃ f, Undecidable 𝓢 f := by simp [Complete, Undecidable, not_or]
+    ¬Entailment.Complete 𝓢 ↔ ∃ f, Independent 𝓢 f := by simp [Complete, Independent, not_or]
 
 variable (S T)
 
@@ -368,6 +368,10 @@ variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
 @[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢!* Collection.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
 
 lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
+
+protected def cons (φ : F) (𝓢 : S) : cons φ 𝓢 ⊢ φ := prfAxm (by simp)
+
+@[simp] def cons! (φ : F) (𝓢 : S) : cons φ 𝓢 ⊢! φ := provable_axm _ (by simp)
 
 lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro f ⟨b⟩; exact ⟨weakening h b⟩⟩
 

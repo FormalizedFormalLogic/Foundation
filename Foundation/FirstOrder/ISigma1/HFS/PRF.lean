@@ -8,7 +8,7 @@ import Foundation.FirstOrder.ISigma1.HFS.Seq
 
 namespace LO.ISigma1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -24,10 +24,10 @@ def Blueprint.cseqDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 1) := .mkSig
     ∧ (∃ z < s, !p.zero z ⋯ ∧ 0 ∼[s] z)
     ∧ (∀ i < 2 * s,
         (∃ l <⁺ 2 * s, !lhDef l s ∧ i + 1 < l) →
-        ∀ z < s, i ∼[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ∼[s] u)” (by simp)
+        ∀ z < s, i ∼[s] z → ∃ u < s, !p.succ u z i ⋯ ∧ i + 1 ∼[s] u)”
 
 def Blueprint.resultDef (p : Blueprint k) : 𝚺₁.Semisentence (k + 2) := .mkSigma
-  “z u. ∃ s, !p.cseqDef s ⋯ ∧ u ∼[s] z” (by simp)
+  “z u. ∃ s, !p.cseqDef s ⋯ ∧ u ∼[s] z”
 
 def Blueprint.resultDeltaDef (p : Blueprint k) : 𝚫₁.Semisentence (k + 2) := p.resultDef.graphDelta
 
@@ -61,7 +61,7 @@ private lemma cseq_iff (s : V) : c.CSeq v s ↔
       exact ⟨Hs, hz, fun i hi z hiz ↦ by
         rcases h i
           (lt_of_lt_of_le hi (by simpa using le_trans (lh_bound _) (by simp)))
-          ⟨lh s, by simp [lt_succ_iff_le], rfl, by simpa [lt_tsub_iff_right] using hi⟩ z (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
+          ⟨lh s, by simp, rfl, by simpa [lt_tsub_iff_right] using hi⟩ z (lt_of_mem_rng hiz) hiz with ⟨_, _, rfl, h⟩
         exact h⟩⟩
 
 lemma cseq_defined : 𝚺₁.Defined (fun v ↦ c.CSeq (v ·.succ) (v 0) : (Fin (k + 1) → V) → Prop) p.cseqDef := by
@@ -100,7 +100,7 @@ lemma unique {s₁ s₂ : V} (H₁ : c.CSeq v s₁) (H₂ : c.CSeq v s₂) (h₁
     have ih₁ : ⟪i, z'⟫ ∈ s₁ := H₁.seq.nth_mem hi'
     have ih₂ : ⟪i, z'⟫ ∈ s₂ := by
       have : z' = H₂.seq.nth (lt_of_lt_of_le hi' h₁₂) :=
-        ih hi' z' (by simp [z']) (H₂.seq.nth (lt_of_lt_of_le hi' h₁₂)) (by simp [z']) (by simp [z']) (by simp)
+        ih hi' z' (by simp [z']) (H₂.seq.nth (lt_of_lt_of_le hi' h₁₂)) (by simp) (by simp [z']) (by simp)
       simp [this]
     have h₁' : ⟪i + 1, c.succ v i z'⟫ ∈ s₁ := H₁.succ i (by simp [lt_tsub_iff_right, hi]) z' ih₁
     have h₂' : ⟪i + 1, c.succ v i z'⟫ ∈ s₂ :=

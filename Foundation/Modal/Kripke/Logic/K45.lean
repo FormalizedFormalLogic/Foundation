@@ -12,7 +12,7 @@ namespace Kripke
 
 protected class Frame.IsK45 (F : Kripke.Frame) extends F.IsTransitive, F.IsEuclidean
 
-protected abbrev FrameClass.IsK45 : FrameClass := { F | F.IsK45 }
+protected abbrev FrameClass.K45 : FrameClass := { F | F.IsK45 }
 
 instance {F : Kripke.Frame} [F.IsK45] : F.IsK4Point3 where
 
@@ -21,32 +21,31 @@ end Kripke
 
 namespace Logic.K45.Kripke
 
-instance sound : Sound Logic.K45 FrameClass.IsK45 := instSound_of_validates_axioms $ by
+instance : Sound Hilbert.K45 FrameClass.K45 := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomK;
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent Logic.K45 := consistent_of_sound_frameclass FrameClass.IsK45 $ by
+instance : Entailment.Consistent Hilbert.K45 := consistent_of_sound_frameclass FrameClass.K45 $ by
   use whitepoint;
   constructor;
 
 
-instance canonical : Canonical Logic.K45 FrameClass.IsK45 := ⟨by constructor⟩
+instance : Canonical Hilbert.K45 FrameClass.K45 := ⟨by constructor⟩
 
-instance complete : Complete Logic.K45 FrameClass.IsK45 := inferInstance
+instance : Complete Hilbert.K45 FrameClass.K45 := inferInstance
 
-lemma trans_eucl : Logic.K45 = FrameClass.IsK45.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.K5 ⪱ Logic.K45 := by
+instance : Hilbert.K5 ⪱ Hilbert.K45 := by
   constructor;
-  . apply Hilbert.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.K45 ⊢! φ ∧ ¬Kripke.FrameClass.K5 ⊧ φ by simpa [K5.Kripke.eucl];
     use (Axioms.Four (.atom 0));
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K5);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0 ∧ y = 1) ∨ (x ≠ 0 ∧ y ≠ 0)⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
@@ -58,20 +57,18 @@ instance : Logic.K5 ⪱ Logic.K45 := by
         . intro y; tauto;
         . exact ⟨1, by omega, 2, by omega, by trivial⟩;
 
-instance : Logic.K4Point3 ⪱ Logic.K45 := by
+instance : Hilbert.K4Point3 ⪱ Hilbert.K45 := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    simp only [iff_provable, Set.mem_setOf_eq, K4Point3.Kripke.trans_weakConnected, K45.Kripke.trans_eucl];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.K4Point3 FrameClass.K45;
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.K45 ⊢! φ ∧ ¬FrameClass.IsK4Point3 ⊧ φ by simpa [K4Point3.Kripke.trans_weakConnected];
     use (Axioms.Five (.atom 0));
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4Point3);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x < y⟩,
         λ w a => w = 2

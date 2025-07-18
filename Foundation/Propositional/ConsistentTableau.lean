@@ -67,7 +67,7 @@ lemma iff_consistent_insert₁
       exact hΓ;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
-    simp_all only [Set.mem_insert_iff];
+    simp_all only;
     apply h (Γ := Γ.erase φ) (Δ := Δ) (by simpa) hΔ;
     refine C!_trans ?_ hC;
     . exact C!_trans CKFConjinsertFConj! $ CFConj_FConj!_of_subset $ Finset.insert_erase_subset φ Γ

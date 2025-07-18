@@ -1,20 +1,13 @@
 import Foundation.Modal.Entailment.K
+import Foundation.Modal.Entailment.END
 
 namespace LO.Modal.Entailment
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
-variable {𝓢 : S} [Entailment.KD 𝓢]
+variable {𝓢 : S}
 
-namespace KD
-
-protected def axiomP : 𝓢 ⊢ Axioms.P := by
-  have : 𝓢 ⊢ ∼∼□(∼⊥) := dni' $ nec NO;
-  have : 𝓢 ⊢ ∼◇⊥ := (contra $ K_left diaDuality) ⨀ this;
-  exact (contra axiomD) ⨀ this;
-instance : HasAxiomP 𝓢 := ⟨KD.axiomP⟩
-
-end KD
+noncomputable instance [Entailment.KD 𝓢] : Entailment.END 𝓢 where
 
 end LO.Modal.Entailment

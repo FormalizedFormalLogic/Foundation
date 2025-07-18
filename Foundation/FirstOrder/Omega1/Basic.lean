@@ -7,7 +7,7 @@ import Foundation.FirstOrder.ISigma0.Exponential
 
 namespace LO.Omega1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
 def _root_.LO.Omega1.omega1 : SyntacticFormula ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
@@ -62,7 +62,7 @@ lemma exponential_smash (a b : V) : Exponential (‖a‖ * ‖b‖) (a ⨳ b) :=
 lemma exponential_smash_one (a : V) : Exponential ‖a‖ (a ⨳ 1) := by simpa using exponential_smash a 1
 
 def smashDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “z x y. ∃ lx <⁺ x, ∃ ly <⁺ y, !lengthDef lx x ∧ !lengthDef ly y ∧ !exponentialDef (lx * ly) z” (by simp)
+  “z x y. ∃ lx <⁺ x, ∃ ly <⁺ y, !lengthDef lx x ∧ !lengthDef ly y ∧ !exponentialDef (lx * ly) z”
 
 lemma smash_defined : 𝚺₀-Function₂ (Smash.smash : V → V → V) via smashDef := by
   intro v

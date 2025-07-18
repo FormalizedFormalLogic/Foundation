@@ -11,9 +11,7 @@ The quantification is represented by de Bruijn index.
 
 -/
 
-namespace LO
-
-namespace FirstOrder
+namespace LO.FirstOrder
 
 inductive Semiformula (L : Language) (ξ : Type*) : ℕ → Type _ where
   |  verum {n} : Semiformula L ξ n
@@ -34,6 +32,18 @@ abbrev Semisentence (L : Language) (n : ℕ) := Semiformula L Empty n
 abbrev SyntacticSemiformula (L : Language) (n : ℕ) := Semiformula L ℕ n
 
 abbrev SyntacticFormula (L : Language) := SyntacticSemiformula L 0
+
+abbrev ArithmeticSemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₒᵣ ξ n
+
+abbrev ArithmeticFormula (ξ : Type*) := Formula ℒₒᵣ ξ
+
+abbrev ArithmeticSemisentence (n : ℕ) := Semisentence ℒₒᵣ n
+
+abbrev ArithmeticSentence := Sentence ℒₒᵣ
+
+abbrev ArithmeticSyntacticSemiformula (n : ℕ) := SyntacticSemiformula ℒₒᵣ n
+
+abbrev ArithmeticSyntacticFormula := SyntacticFormula ℒₒᵣ
 
 namespace Semiformula
 
@@ -680,6 +690,6 @@ lemma add_def : T + U = T ∪ U := rfl
 
 end Theory
 
-end FirstOrder
+abbrev ArithmeticTheory := Theory ℒₒᵣ
 
-end LO
+end LO.FirstOrder

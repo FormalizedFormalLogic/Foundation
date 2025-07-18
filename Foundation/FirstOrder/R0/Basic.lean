@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arith.Basic
+import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.Vorspiel.ExistsUnique
 import Mathlib.Algebra.Order.Monoid.Canonical.Defs
 import Mathlib.Data.Nat.Cast.Order.Basic
@@ -12,9 +12,9 @@ noncomputable section
 
 namespace LO
 
-open FirstOrder FirstOrder.Arith
+open FirstOrder FirstOrder.Arithmetic
 
-inductive R0 : Theory ℒₒᵣ
+inductive R0 : ArithmeticTheory
   | equal : ∀ φ ∈ 𝐄𝐐, R0 φ
   | Ω₁ (n m : ℕ) : R0 “↑n + ↑m = ↑(n + m)”
   | Ω₂ (n m : ℕ) : R0 “↑n * ↑m = ↑(n * m)”
@@ -29,9 +29,9 @@ instance : 𝐄𝐐 ⪯ 𝐑₀ := Entailment.WeakerThan.ofSubset <| fun φ hp �
 
 instance : ℕ ⊧ₘ* 𝐑₀ := ⟨by
   intro σ h
-  rcases h <;> try { simp [models_def, ←le_iff_eq_or_lt]; done }
+  rcases h <;> try { simp [models_def]; done }
   case equal h =>
-    have : ℕ ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    have : ℕ ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
     simpa [models_def] using modelsTheory_iff.mp this h
   case Ω₃ h =>
     simpa [models_def, ←le_iff_eq_or_lt] using h⟩
@@ -88,7 +88,7 @@ lemma bold_sigma_one_completeness {n} {φ : Semiformula ℒₒᵣ ξ n} (hp : Hi
   case hFalsum => simp
   case hEQ => intro n t₁ t₂ e; simp [val_numeral]
   case hNEQ => intro n t₁ t₂ e; simp [val_numeral]
-  case hLT => intro n t₁ t₂ e; simp [val_numeral, Nat.cast_lt]
+  case hLT => intro n t₁ t₂ e; simp [val_numeral]
   case hNLT => intro n t₁ t₂ e; simp [val_numeral]
   case hAnd =>
     simp only [LogicalConnective.HomClass.map_and, LogicalConnective.Prop.and_eq, and_imp]
@@ -138,23 +138,24 @@ instance consistent : Entailment.Consistent 𝐑₀ :=
 
 end R0
 
-namespace FirstOrder.Arith
+namespace FirstOrder.Arithmetic
 
-variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T]
+variable {T : ArithmeticTheory} [𝐑₀ ⪯ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ → T ⊢! ↑σ := fun H =>
+    ℕ ⊧ₘ₀ σ → T ⊢!. σ := fun H =>
   haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐑₀) inferInstance inferInstance
-  complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ ↦ by
+  complete₀ <| oRing_consequence_of.{0} _ _ <| fun M _ _ ↦ by
     haveI : M ⊧ₘ* 𝐑₀ := ModelsTheory.of_provably_subtheory M 𝐑₀ T inferInstance
     exact R0.sigma_one_completeness hσ H
 
-theorem sigma_one_completeness_iff [ss : Sigma1Sound T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ ↔ T ⊢! ↑σ :=
+open Classical in
+theorem sigma_one_completeness_iff [T.SoundOnHierarchy 𝚺 1] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+    ℕ ⊧ₘ₀ σ ↔ T ⊢!. σ :=
   haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := T) inferInstance inferInstance
-  ⟨fun h ↦ sigma_one_completeness (T := T) hσ h, fun h ↦ ss.sound (by simp [hσ]) h⟩
+  ⟨fun h ↦ sigma_one_completeness hσ h, fun h ↦ T.soundOnHierarchy 𝚺 1 h (by simp [hσ])⟩
 
-end FirstOrder.Arith
+end FirstOrder.Arithmetic
 
 /-!
 ## Unprovable theorems of $\mathsf{R}_0$
@@ -225,9 +226,9 @@ def cases' {P : OmegaAddOne → Sort*}
 set_option linter.flexible false in
 instance : OmegaAddOne ⊧ₘ* 𝐑₀ := ⟨by
   intro σ h
-  rcases h <;> simp [models_def, ←le_iff_eq_or_lt]
+  rcases h <;> simp [models_def]
   case equal h =>
-    have : OmegaAddOne ⊧ₘ* (𝐄𝐐 : Theory ℒₒᵣ) := inferInstance
+    have : OmegaAddOne ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case Ω₃ h => exact h
   case Ω₄ n =>

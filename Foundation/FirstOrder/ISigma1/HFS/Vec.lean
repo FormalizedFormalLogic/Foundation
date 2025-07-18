@@ -8,7 +8,7 @@ import Foundation.FirstOrder.ISigma1.HFS.Fixpoint
 
 namespace LO.ISigma1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
@@ -62,8 +62,8 @@ lemma cons_le_cons {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤
 
 section
 
-def _root_.LO.FirstOrder.Arith.consDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “w x v. ∃ xv < w, !pairDef xv x v ∧ w = xv + 1” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.consDef : 𝚺₀.Semisentence 3 :=
+  .mkSigma “w x v. ∃ xv < w, !pairDef xv x v ∧ w = xv + 1”
 
 lemma cons_defined : 𝚺₀-Function₂ (cons : V → V → V) via consDef := by
   intro v; simp_all [consDef, cons_def]
@@ -75,8 +75,8 @@ instance cons_definable : 𝚺₀-Function₂ (cons : V → V → V) := cons_def
 
 instance cons_definable' (ℌ) : ℌ-Function₂ (cons : V → V → V) := cons_definable.of_zero
 
-def _root_.LO.FirstOrder.Arith.mkVec₁Def : 𝚺₀.Semisentence 2 := .mkSigma
-  “s x. !consDef s x 0” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.mkVec₁Def : 𝚺₀.Semisentence 2 := .mkSigma
+  “s x. !consDef s x 0”
 
 lemma mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := by
   intro v; simp [mkVec₁Def]
@@ -88,8 +88,8 @@ instance mkVec₁_definable : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) := mkVec�
 
 instance mkVec₁_definable' (ℌ) : ℌ-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_definable.of_zero
 
-def _root_.LO.FirstOrder.Arith.mkVec₂Def : 𝚺₁.Semisentence 3 := .mkSigma
-  “s x y. ∃ sy, !mkVec₁Def sy y ∧ !consDef s x sy” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.mkVec₂Def : 𝚺₁.Semisentence 3 := .mkSigma
+  “s x y. ∃ sy, !mkVec₁Def sy y ∧ !consDef s x sy”
 
 lemma mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := by
   intro v; simp [mkVec₂Def]
@@ -276,8 +276,8 @@ lemma cons_ISigma1.pi1_succ_induction {P : V → Prop} (hP : 𝚷₁-Predicate P
 
 section
 
-def _root_.LO.FirstOrder.Arith.nthDef : 𝚺₁.Semisentence 3 :=
-  .mkSigma “y v i. ∃ pr, !pair₃Def pr v i y ∧ !graphDef pr” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.nthDef : 𝚺₁.Semisentence 3 :=
+  .mkSigma “y v i. ∃ pr, !pair₃Def pr v i y ∧ !graphDef pr”
 
 set_option linter.flexible false in
 lemma nth_defined : 𝚺₁-Function₂ (nth : V → V → V) via nthDef := by
@@ -368,7 +368,7 @@ def blueprint : Fixpoint.Blueprint arity where
 def graphDef : 𝚺₁.Semisentence (arity + 1) := β.blueprint.fixpointDef
 
 def resultDef : 𝚺₁.Semisentence (arity + 2) :=
-  .mkSigma “y xs. ∃ pr, !pairDef pr xs y ∧ !β.graphDef pr ⋯” (by simp)
+  .mkSigma “y xs. ∃ pr, !pairDef pr xs y ∧ !β.graphDef pr ⋯”
 
 end Blueprint
 
@@ -537,8 +537,8 @@ end VecRec
 namespace Len
 
 def blueprint : VecRec.Blueprint 0 where
-  nil := .mkSigma “y. y = 0” (by simp)
-  cons := .mkSigma “y x xs ih. y = ih + 1” (by simp)
+  nil := .mkSigma “y. y = 0”
+  cons := .mkSigma “y x xs ih. y = ih + 1”
 
 def construction : VecRec.Construction V blueprint where
   nil _ := 0
@@ -560,7 +560,7 @@ noncomputable def len (v : V) : V := construction.result ![] v
 
 section
 
-def _root_.LO.FirstOrder.Arith.lenDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arithmetic.lenDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := construction.result_defined
 
@@ -669,8 +669,8 @@ lemma eq_doubleton_of_len_eq_two {v : V} : len v = 2 ↔ ∃ x y, v = ?[x, y] :=
 namespace ListMax
 
 def blueprint : VecRec.Blueprint 0 where
-  nil := .mkSigma “y. y = 0” (by simp)
-  cons := .mkSigma “y x xs ih. !FirstOrder.Arith.max y x ih” (by simp)
+  nil := .mkSigma “y. y = 0”
+  cons := .mkSigma “y x xs ih. !FirstOrder.Arithmetic.max y x ih”
 
 noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := 0
@@ -692,7 +692,7 @@ noncomputable def listMax (v : V) : V := construction.result ![] v
 
 section
 
-def _root_.LO.FirstOrder.Arith.listMaxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arithmetic.listMaxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma listMax_defined : 𝚺₁-Function₁ (listMax : V → V) via listMaxDef := construction.result_defined
 
@@ -749,10 +749,10 @@ end listMax
 namespace TakeLast
 
 def blueprint : VecRec.Blueprint 1 where
-  nil := .mkSigma “y k. y = 0” (by simp)
+  nil := .mkSigma “y k. y = 0”
   cons := .mkSigma “y x xs ih k.
     ∃ l, !lenDef l xs ∧
-    (l < k → !consDef y x xs) ∧ (k ≤ l → y = ih)” (by simp)
+    (l < k → !consDef y x xs) ∧ (k ≤ l → y = ih)”
 
 noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := 0
@@ -783,7 +783,7 @@ lemma takeLast_cons (x v : V) :
 
 section
 
-def _root_.LO.FirstOrder.Arith.takeLastDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arithmetic.takeLastDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
 
 lemma takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via takeLastDef := construction.result_defined
 
@@ -827,7 +827,7 @@ lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[le
   case nil => simp at h
   case cons x v ih =>
     rcases show i = len v ∨ i < len v from eq_or_lt_of_le (by simpa [lt_succ_iff_le] using h) with (rfl | hi)
-    · simp [takeLast_cons, lt_succ_iff_le]
+    · simp [takeLast_cons]
     · have : len v - i = len v - (i + 1) + 1 := by
         rw [←PeanoMinus.sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
       simpa [takeLast_cons, lt_succ_iff_le, not_le_of_gt hi, this, not_lt_of_gt hi] using ih hi
@@ -843,8 +843,8 @@ end takeLast
 namespace Concat
 
 def blueprint : VecRec.Blueprint 1 where
-  nil := .mkSigma “y z. !consDef y z 0” (by simp)
-  cons := .mkSigma “y x xs ih z. !consDef y x ih” (by simp)
+  nil := .mkSigma “y z. !consDef y z 0”
+  cons := .mkSigma “y x xs ih z. !consDef y x ih”
 
 noncomputable def construction : VecRec.Construction V blueprint where
   nil param := ?[param 0]
@@ -867,7 +867,7 @@ noncomputable def concat (v z : V) : V := construction.result ![z] v
 
 section
 
-def _root_.LO.FirstOrder.Arith.concatDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arithmetic.concatDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
 
 lemma concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDef := construction.result_defined
 
@@ -940,9 +940,9 @@ lemma le_of_memVec {x v : V} (h : x ∈ᵥ v) : x ≤ v := by
 
 section
 
-def _root_.LO.FirstOrder.Arith.memVecDef : 𝚫₁.Semisentence 2 := .mkDelta
-  (.mkSigma “x v. ∃ l, !lenDef l v ∧ ∃ i < l, !nthDef x v i” (by simp))
-  (.mkPi “x v. ∀ l, !lenDef l v → ∃ i < l, ∀ vi, !nthDef vi v i → x = vi” (by simp))
+def _root_.LO.FirstOrder.Arithmetic.memVecDef : 𝚫₁.Semisentence 2 := .mkDelta
+  (.mkSigma “x v. ∃ l, !lenDef l v ∧ ∃ i < l, !nthDef x v i”)
+  (.mkPi “x v. ∀ l, !lenDef l v → ∃ i < l, ∀ vi, !nthDef vi v i → x = vi”)
 
 lemma memVec_defined : 𝚫₁-Relation (MemVec : V → V → Prop) via memVecDef :=
   ⟨by intro v; simp [memVecDef], by intro v; simp [memVecDef, MemVec]⟩
@@ -976,9 +976,9 @@ scoped infix:30 " ⊆ᵥ " => SubsetVec
 
 section
 
-def _root_.LO.FirstOrder.Arith.subsetVecDef : 𝚫₁.Semisentence 2 := .mkDelta
-  (.mkSigma “v w. ∀ x <⁺ v, !memVecDef.pi x v → !memVecDef.sigma x w” (by simp))
-  (.mkPi “v w. ∀ x <⁺ v, !memVecDef.sigma x v → !memVecDef.pi x w” (by simp))
+def _root_.LO.FirstOrder.Arithmetic.subsetVecDef : 𝚫₁.Semisentence 2 := .mkDelta
+  (.mkSigma “v w. ∀ x <⁺ v, !memVecDef.pi x v → !memVecDef.sigma x w”)
+  (.mkPi “v w. ∀ x <⁺ v, !memVecDef.sigma x v → !memVecDef.pi x w”)
 
 set_option linter.flexible false in
 lemma subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
@@ -1009,8 +1009,8 @@ end vec_subset
 section repaetVec
 
 def repeatVec.blueprint : PR.Blueprint 1 where
-  zero := .mkSigma “y x. y = 0” (by simp)
-  succ := .mkSigma “y ih n x. !consDef y x ih” (by simp)
+  zero := .mkSigma “y x. y = 0”
+  succ := .mkSigma “y ih n x. !consDef y x ih”
 
 noncomputable def repeatVec.construction : PR.Construction V repeatVec.blueprint where
   zero := fun _ ↦ 0
@@ -1027,7 +1027,7 @@ noncomputable def repeatVec (x k : V) : V := repeatVec.construction.result ![x] 
 
 section
 
-def _root_.LO.FirstOrder.Arith.repeatVecDef : 𝚺₁.Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.substs ![#0, #2, #1])
+def _root_.LO.FirstOrder.Arithmetic.repeatVecDef : 𝚺₁.Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.substs ![#0, #2, #1])
 
 lemma repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via repeatVecDef :=
   fun v ↦ by simp [repeatVec.construction.result_defined_iff, repeatVecDef]; rfl
@@ -1073,8 +1073,8 @@ end repaetVec
 namespace VecToSet
 
 def blueprint : VecRec.Blueprint 0 where
-  nil := .mkSigma “y. y = 0” (by simp)
-  cons := .mkSigma “y x xs ih. !insertDef y x ih” (by simp)
+  nil := .mkSigma “y. y = 0”
+  cons := .mkSigma “y x xs ih. !insertDef y x ih”
 
 noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ∅
@@ -1097,7 +1097,7 @@ noncomputable def vecToSet (v : V) : V := construction.result ![] v
 
 section
 
-def _root_.LO.FirstOrder.Arith.vecToSetDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
+def _root_.LO.FirstOrder.Arithmetic.vecToSetDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
 lemma vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDef := construction.result_defined
 

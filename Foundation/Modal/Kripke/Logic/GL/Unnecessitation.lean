@@ -11,7 +11,7 @@ open Relation
 namespace Logic.GL
 
 open Model in
-lemma imply_boxdot_plain_of_imply_box_box : Logic.GL ⊢! □φ ➝ □ψ → Logic.GL ⊢! ⊡φ ➝ ψ := by
+lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → Hilbert.GL ⊢! ⊡φ ➝ ψ := by
   contrapose;
   intro h;
   have := Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h;
@@ -20,7 +20,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Logic.GL ⊢! □φ ➝ □ψ → Lo
   let M₀ := M.extendRoot r 1;
   let r₀ : M₀.World := extendRoot.root;
 
-  have hs : Satisfies M r (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies, Semantics.Realize];
+  have hs : Satisfies M r (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies];
   replace hs := @Model.extendRoot.modal_equivalence_original_world (M := M) (r := r) (n := 1) inferInstance r (⊡φ ⋏ ∼ψ) |>.mp hs;
   have ⟨hs₁₂, hs₃⟩ := Satisfies.and_def.mp hs;
   have ⟨hs₁, hs₂⟩ := Satisfies.and_def.mp hs₁₂;
@@ -44,13 +44,13 @@ lemma imply_boxdot_plain_of_imply_box_box : Logic.GL ⊢! □φ ➝ □ψ → Lo
   . exact {};
   . tauto;
 
-theorem unnecessitation! : Logic.GL ⊢! □φ → Logic.GL ⊢! φ := by
+theorem unnecessitation! : Hilbert.GL ⊢! □φ → Hilbert.GL ⊢! φ := by
   intro h;
-  have : Logic.GL ⊢! □⊤ ➝ □φ := C!_of_conseq! (ψ := □⊤) h;
-  have : Logic.GL ⊢! ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
+  have : Hilbert.GL ⊢! □⊤ ➝ □φ := C!_of_conseq! (ψ := □⊤) h;
+  have : Hilbert.GL ⊢! ⊡⊤ ➝ φ := imply_boxdot_plain_of_imply_box_box this;
   exact this ⨀ boxdotverum!;
 
-noncomputable instance : Entailment.Unnecessitation Logic.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩
+noncomputable instance : Entailment.Unnecessitation Hilbert.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩
 
 end Logic.GL
 
