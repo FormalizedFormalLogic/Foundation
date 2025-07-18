@@ -94,12 +94,17 @@ variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E4 𝓢]
 open Entailment
 open MaximalConsistentSet
 
-instance : (CanonicalBox.minimal 𝓢).frame.IsTransitive := by
+instance : (minimalCanonicalFrame 𝓢).IsTransitive := by
   constructor;
   intro X Γ hΓ;
-  obtain ⟨φ, rfl, hφ⟩ := CanonicalBox.minimal.exists_box X Γ hΓ;
+  obtain ⟨φ, rfl, hφ⟩ := minimalCanonicalFrame.exists_box X Γ hΓ;
   have : proofset 𝓢 (□φ) ⊆ proofset 𝓢 (□□φ) := proofset.imp_subset.mp (by simp);
-  apply hφ ▸ (CanonicalBox.minimal 𝓢 |>.canonicity (□φ) ▸ (this (hφ ▸ hΓ)));
+  have := Frame.IsCanonical.iff_mem (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) |>.mp $ this (hφ ▸ hΓ);
+  rw [
+    ←(Frame.IsCanonical.box_proofset (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) (□φ)),
+    ←(Frame.IsCanonical.box_proofset (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) φ)
+  ] at this;
+  exact Frame.IsCanonical.iff_mem (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) |>.mpr this;
 
 end
 

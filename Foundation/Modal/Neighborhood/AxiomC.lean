@@ -40,11 +40,11 @@ variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.EC 𝓢]
 open Entailment
 open MaximalConsistentSet
 
-instance : (CanonicalBox.minimal 𝓢).frame.IsRegular := by
+instance : (minimalCanonicalFrame 𝓢).IsRegular := by
   constructor;
   rintro X Y Γ ⟨hX, hY⟩;
-  obtain ⟨φ, rfl, hφ⟩ := CanonicalBox.minimal.exists_box X Γ hX;
-  obtain ⟨ψ, rfl, hψ⟩ := CanonicalBox.minimal.exists_box Y Γ hY;
+  obtain ⟨φ, rfl, hφ⟩ := minimalCanonicalFrame.exists_box X Γ hX;
+  obtain ⟨ψ, rfl, hψ⟩ := minimalCanonicalFrame.exists_box Y Γ hY;
   rw [(show proofset 𝓢 φ ∩ proofset 𝓢 ψ = proofset 𝓢 (φ ⋏ ψ) by simp)];
   have : proofset 𝓢 (□φ ⋏ □ψ) ⊆ proofset 𝓢 (□(φ ⋏ ψ)) := proofset.imp_subset |>.mp (by simp);
   have : Γ ∈ proofset 𝓢 (□(φ ⋏ ψ)) := this $ by
@@ -52,7 +52,8 @@ instance : (CanonicalBox.minimal 𝓢).frame.IsRegular := by
     constructor;
     . apply hφ ▸ hX;
     . apply hψ ▸ hY;
-  apply CanonicalBox.minimal 𝓢 |>.canonicity _ ▸ this;
+  convert this;
+  convert Frame.IsCanonical.box_proofset (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) (φ ⋏ ψ);
 
 end
 
