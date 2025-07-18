@@ -228,6 +228,10 @@ lemma quote_eq_encode (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = ↑(enc
 lemma coe_quote_eq_quote (φ : SyntacticSemiformula L n) : (↑(⌜φ⌝ : ℕ) : V) = ⌜φ⌝ := by
   simp [quote_eq_encode]
 
+lemma coe_quote_eq_quote' (φ : SyntacticSemiformula L n) :
+    (↑(⌜φ⌝ : Metamath.Semiformula ℕ L n).val : V) = (⌜φ⌝ : Metamath.Semiformula V L n).val :=
+  coe_quote_eq_quote φ
+
 @[simp] lemma quote_inj_iff {φ₁ φ₂ : SyntacticSemiformula L n} :
     (⌜φ₁⌝ : V) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := by simp [quote_eq_encode]
 
