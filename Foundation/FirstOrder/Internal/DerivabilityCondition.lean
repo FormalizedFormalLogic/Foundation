@@ -9,61 +9,46 @@ import Foundation.FirstOrder.Internal.FixedPoint
 
 -/
 
-namespace LO.ISigma1
+namespace LO.FirstOrder.Arithmetic
 
-open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 Metamath InternalArithmetic
+open ISigma1 Metamath
 
-variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] {U : ArithmeticTheory} [U.Δ₁Definable]
+section
 
-local prefix:90 "□" => U.provabilityPred
+variable {T : ArithmeticTheory} [T.Δ₁Definable]
 
-theorem provable_D1 {σ} : U ⊢!. σ → T ⊢!. □σ := by
-  intro h
-  haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
-  apply complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
-    simpa [models_iff] using provable_of_provable_arith₀ (T := U) (V := V) h
+local prefix:90 "□" => T.provabilityPred
 
-theorem provable_D2 {σ π} : T ⊢!. □(σ ➝ π) ➝ □σ ➝ □π :=
-  haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+theorem provable_D1 {σ} : T ⊢!. σ → 𝐈𝚺₁ ⊢!. □σ := fun h ↦
   complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
-    simpa [models_iff] using modus_ponens_sentence U
+    simpa [models_iff] using provable_of_provable_arith₀ (V := V) h
 
-lemma provable_sigma_one_complete [𝐏𝐀⁻ ⪯ U] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    T ⊢!. σ ➝ □σ :=
-  haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
+theorem provable_D2 {σ π} : 𝐈𝚺₁ ⊢!. □(σ ➝ π) ➝ □σ ➝ □π :=
   complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V _ T inferInstance
-    simpa [models_iff] using sigma_one_complete (T := U) (V := V) hσ
+    simpa [models_iff] using modus_ponens_sentence T
 
-theorem provable_D3 [𝐏𝐀⁻ ⪯ U] {σ : Sentence ℒₒᵣ} :
-    T ⊢!. □σ ➝ □□σ := provable_sigma_one_complete (by simp)
+lemma provable_sigma_one_complete [𝐏𝐀⁻ ⪯ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+    𝐈𝚺₁ ⊢!. σ ➝ □σ :=
+  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+    simpa [models_iff] using InternalArithmetic.sigma_one_complete (T := T) (V := V) hσ
+
+theorem provable_D3 [𝐏𝐀⁻ ⪯ T] {σ : Sentence ℒₒᵣ} :
+    𝐈𝚺₁ ⊢!. □σ ➝ □□σ := provable_sigma_one_complete (by simp)
 
 open LO.Entailment LO.Entailment.FiniteContext
 
-lemma provable_D2_context {Γ σ π} (hσπ : Γ ⊢[T.toAxiom]! (□(σ ➝ π))) (hσ : Γ ⊢[T.toAxiom]! □σ) :
-    Γ ⊢[T.toAxiom]! □π := of'! provable_D2 ⨀ hσπ ⨀ hσ
+variable {U : ArithmeticTheory} [U.SoundOnHierarchy 𝚺 1]
 
-lemma provable_D3_context [𝐏𝐀⁻ ⪯ U] {Γ σ} (hσπ : Γ ⊢[T.toAxiom]! □σ) : Γ ⊢[T.toAxiom]! □(□σ) := of'! provable_D3 ⨀ hσπ
-
-variable [T.SoundOnHierarchy 𝚺 1]
-
-omit [𝐈𝚺₁ ⪯ T] in
-lemma provable_sound {σ} : T ⊢!. □σ → U ⊢!. σ := by
-  intro h
-  have : ℕ ⊧ₘ₀ U.provabilityPred σ := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h (by simp)
+lemma provable_sound {σ} : U ⊢!. □σ → T ⊢!. σ := fun h ↦ by
+  have : ℕ ⊧ₘ₀ T.provabilityPred σ := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h (by simp)
   simpa [models₀_iff] using this
 
-lemma provable_complete {σ} : U ⊢!. σ ↔ T ⊢!. □σ := ⟨provable_D1, provable_sound⟩
+lemma provable_complete [𝐈𝚺₁ ⪯ U] {σ} : T ⊢!. σ ↔ U ⊢!. □σ :=
+  ⟨fun h ↦ Entailment.weakening inferInstance (provable_D1 h), provable_sound⟩
 
-end LO.ISigma1
-
-namespace LO.FirstOrder.Arithmetic
+end
 
 open ProvabilityLogic
-
-open PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁Definable]
 
