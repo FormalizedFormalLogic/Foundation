@@ -8,9 +8,9 @@ open Formula.Neighborhood
 variable {F : Frame}
 
 class Frame.IsRegular (F : Frame) : Prop where
-  regular : ∀ X Y : Set F, (ℬ X) ∩ (ℬ Y) ⊆ ℬ (X ∩ Y)
+  regular : ∀ X Y, (F.box X) ∩ (F.box Y) ⊆ F.box (X ∩ Y)
 
-lemma Frame.regular [Frame.IsRegular F] {X Y : Set F} : (ℬ X) ∩ (ℬ Y) ⊆ ℬ (X ∩ Y) := by apply IsRegular.regular
+lemma Frame.regular [Frame.IsRegular F] {X Y : Set F} : (F.box X) ∩ (F.box Y) ⊆ F.box (X ∩ Y) := by apply IsRegular.regular
 
 instance : Frame.simple_blackhole.IsRegular := ⟨by
   intro X Y e;
@@ -40,11 +40,11 @@ variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.EC 𝓢]
 open Entailment
 open MaximalConsistentSet
 
-instance : (mkCanonicalFrame 𝓢 (minimal_canonical_box 𝓢)).IsRegular := by
+instance : (CanonicalBox.minimal 𝓢).frame.IsRegular := by
   constructor;
   rintro X Y Γ ⟨hX, hY⟩;
-  obtain ⟨φ, rfl, hφ⟩ := minimal_canonical_box.exists_box X Γ hX;
-  obtain ⟨ψ, rfl, hψ⟩ := minimal_canonical_box.exists_box Y Γ hY;
+  obtain ⟨φ, rfl, hφ⟩ := CanonicalBox.minimal.exists_box X Γ hX;
+  obtain ⟨ψ, rfl, hψ⟩ := CanonicalBox.minimal.exists_box Y Γ hY;
   rw [(show proofset 𝓢 φ ∩ proofset 𝓢 ψ = proofset 𝓢 (φ ⋏ ψ) by simp)];
   have : proofset 𝓢 (□φ ⋏ □ψ) ⊆ proofset 𝓢 (□(φ ⋏ ψ)) := proofset.imp_subset |>.mp (by simp);
   have : Γ ∈ proofset 𝓢 (□(φ ⋏ ψ)) := this $ by
@@ -52,7 +52,7 @@ instance : (mkCanonicalFrame 𝓢 (minimal_canonical_box 𝓢)).IsRegular := by
     constructor;
     . apply hφ ▸ hX;
     . apply hψ ▸ hY;
-  apply minimal_canonical_box 𝓢 |>.canonicity _ ▸ this;
+  apply CanonicalBox.minimal 𝓢 |>.canonicity _ ▸ this;
 
 end
 

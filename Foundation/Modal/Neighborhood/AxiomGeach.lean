@@ -11,16 +11,16 @@ variable {F : Frame} {X Y : Set F.World} {g : Axioms.Geach.Taple}
 namespace Frame
 
 class IsGeachConvergent (g : Axioms.Geach.Taple) (F : Frame) : Prop where
-  gconv : ∀ X : Set F, 𝒟^[g.i] (ℬ^[g.m] X) ⊆ ℬ^[g.j] (𝒟^[g.n] X)
+  gconv : ∀ X : Set F, F.dia^[g.i] (F.box^[g.m] X) ⊆ F.box^[g.j] (F.dia^[g.n] X)
 
 @[simp, grind]
-lemma gconv [F.IsGeachConvergent g] : 𝒟^[g.i] (ℬ^[g.m] X) ⊆ ℬ^[g.j] (𝒟^[g.n] X) := IsGeachConvergent.gconv X
+lemma gconv [F.IsGeachConvergent g] : F.dia^[g.i] (F.box^[g.m] X) ⊆ F.box^[g.j] (F.dia^[g.n] X) := IsGeachConvergent.gconv X
 
 
 class IsReflexive (F : Frame) : Prop where
-  refl : ∀ X : Set F, ℬ X ⊆ X
+  refl : ∀ X : Set F, F.box X ⊆ X
 
-@[simp, grind] lemma refl [F.IsReflexive] : ℬ X ⊆ X := IsReflexive.refl X
+@[simp, grind] lemma refl [F.IsReflexive] : F.box X ⊆ X := IsReflexive.refl X
 
 instance [F.IsReflexive] : F.IsGeachConvergent ⟨0, 0, 1, 0⟩ := ⟨by simp⟩
 
@@ -28,18 +28,18 @@ instance [F.IsGeachConvergent ⟨0, 0, 1, 0⟩] : F.IsReflexive := ⟨λ _ => F.
 
 
 class IsTransitive (F : Frame) : Prop where
-  trans : ∀ X : Set F, ℬ X ⊆ ℬ^[2] X
+  trans : ∀ X : Set F, F.box X ⊆ F.box^[2] X
 
-@[simp, grind] lemma trans [F.IsTransitive] : ℬ X ⊆ ℬ^[2] X := IsTransitive.trans X
+@[simp, grind] lemma trans [F.IsTransitive] : F.box X ⊆ F.box^[2] X := IsTransitive.trans X
 
-instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ := ⟨by simp⟩
+instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ := ⟨fun _ ↦ trans⟩
 
 instance [F.IsGeachConvergent ⟨0, 2, 1, 0⟩] : F.IsTransitive := ⟨λ _ => F.gconv (g := ⟨0, 2, 1, 0⟩)⟩
 
 
 class IsSerial (F : Frame) : Prop where
-  serial : ∀ X : Set F, ℬ X ⊆ 𝒟 X
-@[simp] lemma serial [F.IsSerial] : ℬ X ⊆ 𝒟 X := IsSerial.serial X
+  serial : ∀ X : Set F, F.box X ⊆ F.dia X
+@[simp] lemma serial [F.IsSerial] : F.box X ⊆ F.dia X := IsSerial.serial X
 instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ := ⟨by simp⟩
 instance [F.IsGeachConvergent ⟨0, 0, 1, 1⟩] : F.IsSerial := ⟨λ _ => F.gconv (g := ⟨0, 0, 1, 1⟩)⟩
 
@@ -53,7 +53,8 @@ variable {a : ℕ}
 lemma valid_axiomGeach_of_isGeachConvergent [F.IsGeachConvergent g] : F ⊧ Axioms.Geach g (.atom a) := by
   intro V x;
   apply Satisfies.def_imp.mpr;
-  suffices x ∈ 𝒟^[g.i] (ℬ^[g.m] (V a)) → x ∈ ℬ^[g.j] (𝒟^[g.n] (V a)) by simpa [Semantics.Realize, Satisfies];
+  suffices x ∈ F.dia^[g.i] (F.box^[g.m] (V a)) → x ∈ F.box^[g.j] (F.dia^[g.n] (V a)) by
+    simpa [Semantics.Realize, Satisfies];
   apply F.gconv;
 
 @[simp] lemma valid_axiomT_of_isReflexive [F.IsReflexive] : F ⊧ Axioms.T (.atom a) := valid_axiomGeach_of_isGeachConvergent (g := ⟨0, 0, 1, 0⟩)
@@ -64,7 +65,7 @@ lemma valid_axiomGeach_of_isGeachConvergent [F.IsGeachConvergent g] : F ⊧ Axio
 lemma isGeachConvergent_of_valid_axiomGeach (h : F ⊧ Axioms.Geach g (.atom a)) : F.IsGeachConvergent g := by
   constructor;
   intro X x hx;
-  have : x ∈ 𝒟^[g.i] (ℬ^[g.m] X) → x ∈ ℬ^[g.j] (𝒟^[g.n] X) := by
+  have : x ∈ F.dia^[g.i] (F.box^[g.m] X) → x ∈ F.box^[g.j] (F.dia^[g.n] X) := by
     simpa [Semantics.Realize, Satisfies] using Satisfies.def_imp.mp $ @h (λ _ => X) x;
   apply this;
   apply hx;
@@ -93,12 +94,12 @@ variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E4 𝓢]
 open Entailment
 open MaximalConsistentSet
 
-instance : (mkCanonicalFrame 𝓢 (minimal_canonical_box 𝓢)).IsTransitive := by
+instance : (CanonicalBox.minimal 𝓢).frame.IsTransitive := by
   constructor;
   intro X Γ hΓ;
-  obtain ⟨φ, rfl, hφ⟩ := minimal_canonical_box.exists_box X Γ hΓ;
+  obtain ⟨φ, rfl, hφ⟩ := CanonicalBox.minimal.exists_box X Γ hΓ;
   have : proofset 𝓢 (□φ) ⊆ proofset 𝓢 (□□φ) := proofset.imp_subset.mp (by simp);
-  apply hφ ▸ (minimal_canonical_box 𝓢 |>.canonicity (□φ) ▸ (this (hφ ▸ hΓ)));
+  apply hφ ▸ (CanonicalBox.minimal 𝓢 |>.canonicity (□φ) ▸ (this (hφ ▸ hΓ)));
 
 end
 
