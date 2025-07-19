@@ -6,13 +6,13 @@ import Foundation.FirstOrder.Internal.Syntax
 
 namespace LO.ISigma1.Metamath
 
-open FirstOrder
+open Classical FirstOrder
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-variable {L : Language} [L.Encodable] [L.DecidableEq] [L.LORDefinable]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
 
-variable {T : Theory L} [T.Δ₁Definable]
+variable {T : Theory L} [T.Δ₁]
 
 lemma derivable_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : T.Derivable (⌜Γ⌝ : V) :=
   ⟨⌜d⌝, by simpa [Semiformula.quote_def] using (⌜d⌝ : Theory.internalize V T ⊢ᵈᵉʳ ⌜Γ⌝).derivationOf⟩
@@ -40,7 +40,10 @@ theorem internal_sentence_provable_of_outer_sentence_provable {σ} :
   Iff.trans ⟨by simpa [TProvable.iff_provable] using Theory.Provable.smallSound, internal_provable_of_outer_provable⟩
   Axiom.provable_iff.symm
 
-@[simp] lemma provable_iff_provable₀ {T : Theory L} [T.Δ₁Definable] {σ : Sentence L} :
+@[simp] lemma provable_iff_provable {T : Theory L} [T.Δ₁] {φ : SyntacticFormula L} :
+    T.Provable (⌜φ⌝ : ℕ) ↔ T ⊢! φ := by simpa [TProvable.iff_provable] using Theory.Provable.complete
+
+@[simp] lemma provable_iff_provable₀ {T : Theory L} [T.Δ₁] {σ : Sentence L} :
     T.Provable (⌜σ⌝ : ℕ) ↔ T ⊢!. σ := by simpa [TProvable.iff_provable] using Theory.Provable.complete₀
 
 end LO.ISigma1.Metamath

@@ -63,16 +63,14 @@ import Foundation.FirstOrder.Omega1.Basic
 import Foundation.FirstOrder.Omega1.Nuon
 
 import Foundation.FirstOrder.Internal.Syntax
-import Foundation.FirstOrder.Internal.D1
-import Foundation.FirstOrder.Internal.D2
-import Foundation.FirstOrder.Internal.D3
+import Foundation.FirstOrder.Internal.FixedPoint
 import Foundation.FirstOrder.Internal.DerivabilityCondition
-import Foundation.FirstOrder.Internal.EquationalTheory
-import Foundation.FirstOrder.Internal.PeanoMinus
 import Foundation.FirstOrder.Internal.Consistency
 import Foundation.FirstOrder.Internal.WitnessComparison
+import Foundation.FirstOrder.Internal.RosserProvability
 
 import Foundation.FirstOrder.Incompleteness.First
+import Foundation.FirstOrder.Incompleteness.Dense
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Examples
 

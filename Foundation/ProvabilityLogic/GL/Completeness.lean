@@ -110,7 +110,7 @@ open Modal ProvabilityLogic Kripke
 
 variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
 
-variable {T : ArithmeticTheory} [T.Δ₁Definable]
+variable {T : ArithmeticTheory} [T.Δ₁]
 
 section model
 
@@ -519,7 +519,7 @@ open FirstOrder Arithmetic
 open Modal
 open Modal.Kripke
 
-variable {T : ArithmeticTheory} [T.Δ₁Definable] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {A : Modal.Formula _}
+variable {T : ArithmeticTheory} [T.Δ₁] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {A : Modal.Formula _}
 
 /-- Arithmetical completeness of GL-/
 theorem GL.arithmetical_completeness :

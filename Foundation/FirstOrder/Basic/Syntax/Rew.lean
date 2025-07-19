@@ -465,6 +465,12 @@ scoped [LO.FirstOrder] prefix:max "∀∀₀" => LO.FirstOrder.Semiformula.close
 
 @[simp] lemma coe_close₀_eq_close (φ : SyntacticFormula L) : (∀∀₀φ : SyntacticFormula L) = ∀∀φ := by simp [close₀]
 
+@[simp] lemma close₀_coe_sentence (σ : Sentence L) : ∀∀₀(↑σ : SyntacticFormula L) = σ := by
+  unfold close₀
+  refine (Semiformula.coe_inj _ _).mp ?_
+  rw [emb_toEmpty]
+  simp
+
 end close
 
 section lMap
