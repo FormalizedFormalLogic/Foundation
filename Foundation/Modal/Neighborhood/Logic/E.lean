@@ -22,7 +22,7 @@ instance : Entailment.Consistent Hilbert.E := consistent_of_sound_frameclass Fra
   use ⟨Unit, λ _ => {}⟩;
   simp;
 
-instance : Complete Hilbert.E FrameClass.E := complete_of_canonical_frame FrameClass.E (minimal_canonical_box (Hilbert.E)) (by tauto)
+instance : Complete Hilbert.E FrameClass.E := complete_of_canonical_frame FrameClass.E (minimalCanonicalFrame (Hilbert.E)) (by tauto)
 
 instance : Hilbert.E ⪱ Hilbert.EK := by
   constructor;

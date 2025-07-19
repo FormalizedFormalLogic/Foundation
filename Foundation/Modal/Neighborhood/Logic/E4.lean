@@ -18,7 +18,7 @@ namespace Neighborhood
 
 instance : Frame.simple_blackhole.IsTransitive := by
   constructor;
-  simp [Frame.box, Frame.box_iterate];
+  simp [Frame.box];
 
 @[reducible] protected alias Frame.IsE4 := Frame.IsTransitive
 protected abbrev FrameClass.E4 : FrameClass := { F | F.IsE4 }
@@ -80,6 +80,10 @@ instance : Sound Hilbert.E4 FrameClass.E4 := instSound_of_validates_axioms $ by
 instance : Entailment.Consistent Hilbert.E4 := consistent_of_sound_frameclass FrameClass.E4 $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
+  infer_instance;
+
+instance : Complete Hilbert.E4 FrameClass.E4 := complete_of_canonical_frame FrameClass.E4 (minimalCanonicalFrame (Hilbert.E4)) $ by
+  apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
 end E4.Neighborhood

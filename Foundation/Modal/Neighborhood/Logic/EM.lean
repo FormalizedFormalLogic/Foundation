@@ -1,7 +1,5 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.AxiomM
 import Foundation.Modal.Neighborhood.Logic.E
-import Foundation.Vorspiel.Set.Fin
+import Foundation.Modal.Neighborhood.Supplementation
 
 namespace LO.Modal
 
@@ -29,6 +27,10 @@ instance : Sound Hilbert.EM FrameClass.EM := instSound_of_validates_axioms $ by
 instance : Entailment.Consistent Hilbert.EM := consistent_of_sound_frameclass FrameClass.EM $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
+  infer_instance;
+
+instance : Complete Hilbert.EM FrameClass.EM := complete_of_canonical_frame FrameClass.EM (supplementalMinimalCanonicalFrame (Hilbert.EM)) $ by
+  apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
 end EM.Neighborhood

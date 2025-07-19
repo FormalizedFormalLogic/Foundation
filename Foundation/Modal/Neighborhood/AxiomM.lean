@@ -7,9 +7,9 @@ open Formula.Neighborhood
 variable {F : Frame}
 
 class Frame.IsMonotonic (F : Frame) : Prop where
-  mono : ∀ X Y : Set F, ℬ (X ∩ Y) ⊆ ℬ X ∩ ℬ Y
+  mono : ∀ X Y : Set F, F.box (X ∩ Y) ⊆ F.box X ∩ F.box Y
 
-lemma Frame.mono [Frame.IsMonotonic F] {X Y : Set F} : ℬ (X ∩ Y) ⊆ ℬ X ∩ ℬ Y := by apply IsMonotonic.mono
+lemma Frame.mono [Frame.IsMonotonic F] {X Y : Set F} : F.box (X ∩ Y) ⊆ F.box X ∩ F.box Y := by apply IsMonotonic.mono
 
 instance : Frame.simple_blackhole.IsMonotonic := ⟨by
   intro X Y e he;

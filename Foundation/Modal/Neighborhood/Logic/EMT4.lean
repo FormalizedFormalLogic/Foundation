@@ -9,7 +9,7 @@ open Formula.Neighborhood
 
 namespace Neighborhood
 
-protected class Frame.IsEMT4 (F : Frame) extends F.IsMonotonic, F.IsReflexive, F.IsTransitive
+protected class Frame.IsEMT4 (F : Frame) extends F.IsMonotonic, F.IsReflexive, F.IsTransitive where
 protected abbrev FrameClass.EMT4 : FrameClass := { F | F.IsEMT4 }
 
 end Neighborhood
@@ -25,6 +25,10 @@ instance : Sound Hilbert.EMT4 FrameClass.EMT4 := instSound_of_validates_axioms $
 
 instance : Entailment.Consistent Hilbert.EMT4 := consistent_of_sound_frameclass FrameClass.EMT4 $ by
   use Frame.simple_blackhole;
+  apply Set.mem_setOf_eq.mpr;
+  constructor;
+
+instance : Complete Hilbert.EMT4 FrameClass.EMT4 := complete_of_canonical_frame FrameClass.EMT4 (supplementalMinimalCanonicalFrame (Hilbert.EMT4)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
