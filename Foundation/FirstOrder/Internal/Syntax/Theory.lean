@@ -109,6 +109,8 @@ instance [T.Δ₁] [U.Δ₁] : (T + U).Δ₁ := add inferInstance inferInstance
 
 instance (φ : SyntacticFormula L) : Theory.Δ₁ {φ} := singleton φ
 
+instance insert [d : T.Δ₁] : (insert φ T).Δ₁ := (d.add (singleton φ)).ofEq (by ext; simp [Theory.add_def])
+
 end Δ₁
 
 end LO.FirstOrder.Theory
