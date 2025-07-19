@@ -148,7 +148,7 @@ instance [Entailment.HasAxiomKrieselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
                 rintro _ _ _ _ rfl;
                 assumption;
         . intro φ hφ;
-          simp only [Finset.coe_filter, Set.mem_setOf_eq, Γx, Δy, Δz] at hφ;
+          simp only [Finset.coe_filter, Set.mem_setOf_eq, Γx] at hφ;
           exact hφ.2;
       . apply Context.of!;
         apply right_Fconj!_intro;

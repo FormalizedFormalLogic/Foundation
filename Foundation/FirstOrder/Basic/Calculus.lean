@@ -428,41 +428,130 @@ instance {T U : Theory L} : U ⪯ T + U := Entailment.Axiomatized.weakerThanOfSu
 
 end Theory
 
+def Theory.deduction [L.DecidableEq] {T : Theory L} {φ ψ} (b : insert φ T ⊢ ψ) : T ⊢ ∀∀φ ➝ ψ :=
+  have : T ⟹ [∼∀∀φ, ψ] := Derivation.deduction b
+  (Tait.or this).cast (by simp; rfl)
+
+theorem Theory.deduction! [L.DecidableEq] {T : Theory L} {φ ψ} (b : insert φ T ⊢! ψ) : T ⊢! ∀∀φ ➝ ψ :=
+  ⟨Theory.deduction b.get⟩
+
+lemma Theory.close!_iff [L.DecidableEq] {T : Theory L} {φ} : T ⊢! ∀∀φ ↔ T ⊢! φ := by
+  constructor
+  · intro h
+    apply Theory.deduction! (Entailment.Axiomatized.cons! _ _) ⨀ h
+  · intro h
+    exact Derivation.toClose! h
+
+/-!
+  ### Axiom (A set of sentences)
+-/
 variable (L)
 
-/--
-  An auxiliary structure to provide systems of provability of sentence.
--/
-structure Theory.Alt where
-  thy : Theory L
+abbrev Axiom := Set (Sentence L)
 
 variable {L}
 
-alias Theory.alt := Theory.Alt.mk
+abbrev ArithmeticAxiom := Axiom ℒₒᵣ
 
-instance : Entailment (Sentence L) (Theory.Alt L) := ⟨fun T σ ↦ T.thy ⊢ ↑σ⟩
+@[coe] def Theory.toAxiom (T : Theory L) : Axiom L := Semiformula.close₀ '' T
 
-@[simp] lemma Theory.alt_thy (T : Theory L) : T.alt.thy = T := rfl
+@[coe] def Axiom.toTheory (A : Axiom L) : Theory L := Rewriting.embedding '' A
 
-section
+instance : CoeOut (Theory L) (Axiom L) := ⟨Theory.toAxiom⟩
 
-abbrev Provable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊢! σ
+instance : Coe (Axiom L) (Theory L) := ⟨Axiom.toTheory⟩
+
+instance : Entailment (Sentence L) (Axiom L) := ⟨fun A σ ↦ (A : Theory L) ⊢ ↑σ⟩
+
+abbrev Provable₀ (T : Theory L) (σ : Sentence L) : Prop := (T : Axiom L) ⊢! σ
+
+abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := (T : Axiom L) ⊬ σ
 
 infix:45 " ⊢!. " => Provable₀
 
-abbrev Unprovable₀ (T : Theory L) (σ : Sentence L) : Prop := T.alt ⊬ σ
-
 infix:45 " ⊬. " => Unprovable₀
 
-instance (T : Theory.Alt L) : Entailment.Cl T := Entailment.Cl.ofEquiv T.thy T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
+instance (A : Axiom L) : Entailment.Cl A := Entailment.Cl.ofEquiv (A : Theory L) A (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
 
-variable {T : Theory L} {σ : Sentence L}
+def ofAxiomProof {A : Axiom L} {σ} : A ⊢ σ → (A : Theory L) ⊢ ↑σ := fun b ↦ b
 
-lemma provable₀_iff : T ⊢!. σ ↔ T ⊢! ↑σ := iff_of_eq rfl
+def toAxiomProof {A : Axiom L} {σ} : (A : Theory L) ⊢ ↑σ → A ⊢ σ := fun b ↦ b
 
-lemma unprovable₀_iff : T ⊬. σ ↔ T ⊬ ↑σ := iff_of_eq rfl
+def toAxiomProof! {A : Axiom L} {σ} : (A : Theory L) ⊢! ↑σ → A ⊢! σ := fun b ↦ b
 
-end
+namespace Axiom
+
+@[simp] lemma coe_mem_coe {σ : Sentence L} {A : Axiom L} : (σ : SyntacticFormula L) ∈ (A : Theory L) ↔ σ ∈ A := by
+  simp [Axiom.toTheory]
+
+@[simp] lemma coe_subset_coe {A B : Axiom L} : (A : Theory L) ⊆ (B : Theory L) ↔ A ⊆ B := by
+  constructor
+  · intro h σ hσ
+    simpa using h (Axiom.coe_mem_coe.mpr hσ)
+  · simp only [toTheory, Set.image_subset_iff]
+    intro h σ hσ
+    refine Set.mem_preimage.mpr (Axiom.coe_mem_coe.mpr (h hσ))
+
+@[simp] lemma coe_insert (σ : Sentence L) (A : Axiom L) : (insert σ A).toTheory = insert ↑σ ↑A := by
+  ext; simp [Axiom.toTheory]; tauto
+
+open Entailment
+
+instance : Axiomatized (Axiom L) where
+  prfAxm {A} σ h := toAxiomProof <| Axiomatized.prfAxm (by simpa using h)
+  weakening {σ A B} h b := toAxiomProof <| Axiomatized.weakening (by simpa using h) b
+
+def deduction [L.DecidableEq] {A : Axiom L} {σ τ} (b : insert σ A ⊢ τ) : A ⊢ σ ➝ τ :=
+  have : insert ↑σ A.toTheory ⊢ ↑τ := by simpa using ofAxiomProof b
+  (Theory.deduction this).cast (by simp)
+
+instance [L.DecidableEq] : Entailment.Deduction (Axiom L) where
+  ofInsert := Axiom.deduction
+  inv {σ τ A} b :=
+    have : cons σ A ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
+    this ⨀ (Axiomatized.cons _ _)
+
+variable [L.DecidableEq] {T : Theory L}
+
+def provable_iff {σ : Sentence L} :
+    (T : Axiom L) ⊢! σ ↔ T ⊢! ↑σ := by
+  constructor
+  · intro b
+    have : T.toAxiom.toTheory ⊢! ↑σ := b
+    apply Entailment.StrongCut.cut! ?_ this
+    intro τ hτ
+    have : ∃ τ' ∈ T, ∀∀ τ' = τ := by simpa [Theory.toAxiom, Axiom.toTheory] using hτ
+    rcases this with ⟨τ, h, rfl⟩
+    exact Derivation.toClose! <| by_axm _ <| by simpa
+  · intro b
+    apply toAxiomProof!
+    apply Entailment.StrongCut.cut! ?_ b
+    intro φ hφ
+    have : T.toAxiom.toTheory ⊢! ∀∀φ :=
+      by_axm _ <| by simpa [Theory.toAxiom, Axiom.toTheory] using ⟨φ, by simpa, rfl⟩
+    exact Theory.close!_iff.mp this
+
+def unprovable_iff {σ} :
+    (T : Axiom L) ⊬ σ ↔ T ⊬ ↑σ := provable_iff.not
+
+def provable_close₀_iff {φ : SyntacticFormula L} :
+    (T : Axiom L) ⊢! ∀∀₀ φ ↔ T ⊢! φ := Iff.trans provable_iff (by simp [Theory.close!_iff])
+
+def unprovable_close₀_iff {φ : SyntacticFormula L} :
+    (T : Axiom L) ⊬ ∀∀₀ φ ↔ T ⊬ φ := provable_close₀_iff.not
+
+instance (T U : Theory L) [T ⪯ U] : T.toAxiom ⪯ U.toAxiom :=
+  ⟨fun _ b ↦ Axiom.provable_iff.mpr <| (inferInstanceAs (T ⪯ U)).pbl (Axiom.provable_iff.mp b)⟩
+
+@[simp] lemma consistent_iff :
+    Consistent (T : Axiom L) ↔ Consistent T := calc
+  Consistent (T : Axiom L) ↔ (T : Axiom L) ⊬ ⊥ := consistent_iff_unprovable_bot
+  _                        ↔ T ⊬ ⊥             := by simp [unprovable_iff]
+  _                        ↔ Consistent T      := consistent_iff_unprovable_bot.symm
+
+instance [Consistent T] : Consistent (T : Axiom L) := by simp_all
+
+end Axiom
 
 end FirstOrder
 

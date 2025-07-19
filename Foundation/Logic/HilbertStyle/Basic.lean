@@ -339,7 +339,7 @@ def right_Conj!_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → �
 def CConjConj [DecidableEq F] (h : Δ ⊆ Γ) : 𝓢 ⊢ Γ.conj ➝ Δ.conj := right_Conj_intro _ _ (fun _ hq ↦ left_Conj_intro (h hq))
 
 def left_Conj₂_intro [DecidableEq F] {Γ : List F} {φ : F} (h : φ ∈ Γ) : 𝓢 ⊢ ⋀Γ ➝ φ :=
-  have : Γ.idxOf φ < Γ.length := List.idxOf_lt_length h
+  have : Γ.idxOf φ < Γ.length := List.idxOf_lt_length_of_mem h
   have : Γ[Γ.idxOf φ] = φ := List.getElem_idxOf this
   cast (by rw [this]) <| conj₂Nth Γ (Γ.idxOf φ) (by assumption)
 lemma left_Conj₂!_intro [DecidableEq F] (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ φ := ⟨left_Conj₂_intro h⟩

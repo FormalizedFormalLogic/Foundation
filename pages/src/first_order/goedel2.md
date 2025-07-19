@@ -162,7 +162,7 @@ Following holds for all formula (not coded one) $\varphi$ and finite set $\Gamma
     V \models \mathrm{Provable}_{T + \mathsf{R_0}} (\ulcorner \sigma \urcorner)$
   ```lean
   theorem LO.ISigma1.Metamath.sigma1_complete (hσ : Hierarchy 𝚺 1 σ) :
-      V ⊧ₘ₀ σ → T.Provableₐ ⌜σ⌝
+      V ⊧ₘ₀ σ → T.Provable ⌜σ⌝
   ```
   - [LO.ISigma1.Metamath.sigma1_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D3.html#LO.ISigma1.Metamath.sigma1_complete)
 
@@ -170,11 +170,11 @@ Now assume that $U$ is a theory of arithmetic stronger than $\mathsf{R_0}$ and
 $T$ be a theory  of arithmetic stronger than $\mathsf{I}\Sigma_1$.
 The following holds, thanks to the completeness theorem.
 - $U \vdash \sigma \iff T \vdash \mathrm{Provable}_U(\ulcorner \sigma \urcorner)$
-  - [LO.ISigma1.provableₐ_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_complete)
+  - [LO.ISigma1.provable_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_complete)
 - $T \vdash \mathrm{Provable}_U(\ulcorner \sigma \to \pi \urcorner) \to \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \to \mathrm{Provable}_U(\ulcorner \pi \urcorner)$
-  - [LO.ISigma1.provableₐ_D2](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D2)
+  - [LO.ISigma1.provable_D2](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D2)
 - $T \vdash \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \to \mathrm{Provable}_U(\ulcorner \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \urcorner)$
-  - [LO.ISigma1.provableₐ_D3](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D3)
+  - [LO.ISigma1.provable_D3](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/DerivabilityCondition.html#LO.ISigma1.provable%E2%82%90_D3)
 
 ## Second Incompleteness Theorem
 
@@ -241,16 +241,16 @@ $$
 #### Lemma: Gödel sentence is undecidable, i.e., $T \nvdash \mathrm{G}$ if $T$ is consistent, and $T \nvdash \lnot\mathrm{G}$ if $\mathbb{N} \models T$.
 
 ```lean
-lemma LO.ISigma1.goedel_unprovable
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [System.Consistent T] :
-    T ⊬ ↑𝗚
+theorem unprovable_goedel
+    (𝔅 : ProvabilityPredicate T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] :
+    T ⊬. 𝔅.goedel
 
-lemma LO.ISigma1.not_goedel_unprovable
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [ℕ ⊧ₘ* T] :
-    T ⊬ ∼↑𝗚
+theorem unrefutable_goedel
+    (𝔅 : ProvabilityPredicate T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] [𝔅.GoedelSound] :
+    T ⊬. ∼𝔅.goedel
 ```
-- [LO.ISigma1.goedel_unprovable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.goedel_unprovable)
-- [LO.ISigma1.not_goedel_unprovable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.not_goedel_unprovable)
+- [LO.ProvabilityLogic.ProvabilityPredicate.unprovable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.ProvabilityPredicate.unprovable_goedel)
+- [LO.ProvabilityLogic.ProvabilityPredicate.unrefutable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.ProvabilityPredicate.unrefutable_goedel)
 
 Define formalized incompleteness sentence $\mathrm{Con}_T$:
 $$
@@ -259,22 +259,22 @@ $$
 
 #### Lemma: $T \vdash \mathrm{Con}_T \leftrightarrow G_T$
 ```lean
-lemma LO.ISigma1.consistent_iff_goedel
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] :
-    T ⊢! ↑𝗖𝗼𝗻 ⭤ ↑𝗚
+theorem goedel_iff_consistency
+    (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL] [T₀ ⪯ T] [Diagonalization T₀] :
+    T₀ ⊢!. 𝔅.goedel ⭤ 𝔅.con
 ```
-- [LO.ISigma1.consistent_iff_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.consistent_iff_goedel)
+- [LO.ProvabilityLogic.ProvabilityPredicate.goedel_iff_consistency](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.ProvabilityPredicate.goedel_iff_consistency)
 
 #### Theorem: $T$ cannot prove its own consistency, i.e., $T \nvdash \mathrm{Con}_T$ if $T$ is consistent. Moreover, $\mathrm{Con}_T$ is undecidable from $T$ if $\mathbb{N} \models T$.
 
 ```lean
 theorem LO.ISigma1.goedel_second_incompleteness
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [System.Consistent T] :
-    T ⊬ ↑𝗖𝗼𝗻 
+    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Δ₁] [System.Consistent T] :
+    T ⊬. T.consistent 
 
 theorem LO.ISigma1.inconsistent_undecidable
-    (T : Theory ℒₒᵣ) [𝐈𝚺₁ ≼ T] [T.Delta1Definable] [ℕ ⊧ₘ* T] :
-    System.Undecidable T ↑𝗖𝗼𝗻
+    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Δ₁] [T.Sigma1Sound] :
+    Independent (T : Axiom ℒₒᵣ) (T.consistent : Sentence ℒₒᵣ)
 ```
 - [LO.ISigma1.goedel_second_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.goedel_second_incompleteness)
 - [LO.ISigma1.inconsistent_undecidable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.inconsistent_undecidable)

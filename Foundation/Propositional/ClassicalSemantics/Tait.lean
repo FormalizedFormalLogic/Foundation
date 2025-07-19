@@ -14,9 +14,9 @@ theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
   intro d v hv
   induction d
   case axL Γ a =>
-    simp [List.map_disj]
+    simp
     by_cases v a <;> simp [*]
-  case verum => simp [List.map_disj]
+  case verum => simp
   case and Γ φ ψ _ _ ihp ihq =>
     by_cases hv : v ⊧ Γ.disj
     · simp [hv]
@@ -28,7 +28,7 @@ theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
   case wk Γ Ξ _ ss ih =>
     have : ∃ φ ∈ Γ, v ⊧ φ := by simpa [List.map_disj] using ih
     rcases this with ⟨φ, hp, hvp⟩
-    simp [List.map_disj]; exact ⟨φ, ss hp, hvp⟩
+    simp; exact ⟨φ, ss hp, hvp⟩
   case cut Γ φ _ _ ihp ihn =>
     by_cases hv : v ⊧ Γ.disj
     · simp [hv]

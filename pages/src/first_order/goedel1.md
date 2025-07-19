@@ -23,7 +23,7 @@ lemma re_complete
     {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
     p x ↔ T ⊢! (codeOfRePred p)/[‘↑x’] 
 ```
-- [re_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/R0/Representation.html#LO.FirstOrder.Arith.re_complete)
+- [re_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/R0/Representation.html#LO.FirstOrder.Arithmetic.re_complete)
 
 ### Main Theorem
 
@@ -47,7 +47,7 @@ lemma re_complete
 
 ```lean
 theorem goedel_first_incompleteness
-  (T : Theory ℒₒᵣ) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Delta1Definable] :
+  (T : ArithmeticTheory) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Δ₁] :
   ¬System.Complete T
 ```
 - [goedel_first_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/First.html#LO.R0.goedel_first_incompleteness)

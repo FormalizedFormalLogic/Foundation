@@ -297,7 +297,7 @@ lemma translate_iff₀ {σ : Sentence L₂} :
 @[simp] lemma translate_close₀_iff {φ : SyntacticFormula L₂} :
     M ⊧ₘ₀ π.translate (∀∀₀ φ) ↔ π.Model M ⊧ₘ φ := by
   simp only [translate_iff₀]
-  simp [models₀_iff, models_iff, eval_close₀]
+  simp [models_iff, eval_close]
 
 end Model
 
@@ -309,10 +309,10 @@ protected def id : Translation T L₁ where
   domain := ⊤
   rel R := Semiformula.rel R (#·)
   func f := “z. z = !!(Semiterm.func f (#·.succ))”
-  domain_nonempty := complete (T := T) <| EQ.provOf.{_,0} _ fun _ _ _ _ ↦ (by simp [models_iff])
-  func_defined {k} f := complete (T := T) <| EQ.provOf.{_,0} _ fun _ _ _ _ _ ↦ by
+  domain_nonempty := complete₀ <| EQ.provOf.{_,0} _ fun _ _ _ _ ↦ (by simp [models_iff])
+  func_defined {k} f := complete₀ <| EQ.provOf.{_,0} _ fun _ _ _ _ _ ↦ by
     simp [models_iff, Semiterm.val_func]
-  preserve_eq := complete (T := T) <| EQ.provOf.{_,0} _ fun M _ _ _ _ ↦ by
+  preserve_eq := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ _ ↦ by
     simp [models_iff, Matrix.comp_vecCons', Matrix.constant_eq_singleton, Semiformula.eval_rel]
 
 lemma id_func_def : (Translation.id T).func f = “z. z = !!(Semiterm.func f (#·.succ))” := rfl
@@ -397,24 +397,26 @@ abbrev translate (φ : Semiformula L₂ ξ n) : Semiformula L₁ ξ n := π.trln
 
 abbrev Model (M : Type*) [Structure L₁ M] : Type _ := π.trln.Model M
 
+open Classical in
 instance model_models_theory {M : Type v} [Nonempty M] [Structure L₁ M] [Structure.Eq L₁ M] (hT : M ⊧ₘ* T) :
     π.Model M ⊧ₘ* U :=
   modelsTheory_iff.mpr fun {σ} hσ ↦
-    Model.translate_close₀_iff.mp (consequence_iff'.mp (sound! (T := T) (π.interpret_theory σ hσ)) M)
+    Model.translate_close₀_iff.mp <| consequence_iff'.mp (sound!₀ (π.interpret_theory σ hσ)) M
 
 lemma of_provability {φ : SyntacticFormula L₂} (h : U ⊢! φ) : T ⊢!. π.translate (∀∀₀ φ) :=
-  complete (T := T) <| EQ.provOf.{_,0} _ fun _ _ _ _ hT ↦
+  complete₀ <| EQ.provOf.{_,0} _ fun _ _ _ _ hT ↦
     Model.translate_close₀_iff.mpr <| models_of_provable (π.model_models_theory hT) h
 
+open Classical in
 lemma of_provability₀ {σ : Sentence L₂} (h : U ⊢!. σ) : T ⊢!. π.translate σ :=
-  complete (T := T) <| EQ.provOf.{_,0} _ fun _ _ _ _ hT ↦
-    Model.translate_iff₀.mpr <| models_of_provable (π.model_models_theory hT) h
+  complete₀ <| EQ.provOf.{_,0} _ fun _ _ _ _ hT ↦
+    Model.translate_iff₀.mpr <| models_of_provable (π.model_models_theory hT) (Axiom.provable_iff.mp h)
 
 end
 
 def ofWeakerThan {L : Language} [L.Eq] (T U : Theory L) [𝐄𝐐 ⪯ T] [U ⪯ T] : U ⊲ T where
   trln := Translation.id T
-  interpret_theory φ hφ := complete (T := T) <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦
+  interpret_theory φ hφ := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦
     Model.translate_close₀_iff.mpr <| by
       simp only [models_iff, id_models_iff, Matrix.empty_eq]
       intro f
@@ -432,7 +434,7 @@ def compTranslation (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂) : Translat
   domain_nonempty := by simpa [exs] using π.of_provability₀ τ.domain_nonempty
   rel R := π.translate (τ.rel R)
   func {k} f := π.translate (τ.func f)
-  func_defined {k} f := complete (T := T₁) <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
+  func_defined {k} f := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
     apply models_iff.mpr
     intro x
     suffices
@@ -454,7 +456,7 @@ def compTranslation (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂) : Translat
       let y' : τ.Model (π.Model M) := ⟨⟨y, hy⟩, Model.evalb_translate_iff.mp <| by simpa [Matrix.constant_eq_singleton] using hhy⟩
       suffices y' = Structure.func f w' by simpa [y'] using congr_arg Model.val <| congr_arg Model.val this
       apply Model.func_iff.mpr <| Model.evalb_cons_translate_iff.mp <| by simpa [y', w'] using hf
-  preserve_eq := complete (T := T₁) <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
+  preserve_eq := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
     apply models_iff.mpr
     have : π.Model M ⊧ₘ* T₂ := π.model_models_theory hT
     intro x
@@ -565,7 +567,7 @@ end semantics
 
 protected def comp (τ : T₂ ⊳ T₃) (π : T₁ ⊳ T₂) : T₁ ⊳ T₃ where
   trln := compTranslation τ.trln π
-  interpret_theory φ hφ := complete (T := T₁) <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
+  interpret_theory φ hφ := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦ by
     apply models_iff.mpr
     intro x
     suffices τ.Model (π.Model M) ⊧ₘ φ by

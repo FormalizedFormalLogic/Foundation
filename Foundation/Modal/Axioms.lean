@@ -10,6 +10,12 @@ protected abbrev DiaDuality := ◇φ ⭤ ∼(□(∼φ))
 
 protected abbrev K := □(φ ➝ ψ) ➝ □φ ➝ □ψ
 
+protected abbrev M := □(φ ⋏ ψ) ➝ (□φ ⋏ □ψ)
+
+protected abbrev C := (□φ ⋏ □ψ) ➝ □(φ ⋏ ψ)
+
+protected abbrev N := □(⊤ : F)
+
 /-- Axiom for reflexive -/
 protected abbrev T := □φ ➝ φ
 
@@ -75,7 +81,7 @@ protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
 /--
   Axiom for McKinsey condition
 -/
-protected abbrev M := □◇φ ➝ ◇□φ
+protected abbrev McK := □◇φ ➝ ◇□φ
 
 /--
   Axiom for
@@ -90,6 +96,10 @@ protected abbrev Hen := □(□φ ⭤ φ) ➝ □φ
 
 protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
 
+/--
+  For Sobocinski's `K1.2`.
+-/
+protected abbrev H := φ ➝ □(◇φ ➝ φ)
 
 protected structure Geach.Taple where
   i : ℕ
