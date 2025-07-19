@@ -90,4 +90,51 @@ instance [F.IsRegular] : F♯.IsRegular := by
 
 end Frame.Supplementation
 
+
+section
+
+open MaximalConsistentSet (proofset)
+open MaximalConsistentSet.proofset
+
+variable {S} [Entailment (Formula ℕ) S]
+variable {𝓢 : S} [Entailment.Consistent 𝓢]
+
+abbrev supplementalMinimalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Frame := (minimalCanonicalFrame 𝓢)♯
+
+variable [Entailment.EM 𝓢]
+
+instance : (supplementalMinimalCanonicalFrame 𝓢).IsCanonical 𝓢 where
+  box_proofset := by
+    intro φ;
+    apply Set.eq_of_subset_of_subset;
+    . intro Γ;
+      simp only [
+        Frame.Supplementation, Frame.mk_ℬ, Set.mem_setOf_eq, Set.mem_sUnion,
+        exists_exists_and_eq_and, forall_exists_index, and_imp
+      ];
+      intro X hX h;
+      split at h;
+      . rename_i hψ;
+        rw [hψ.choose_spec] at hX;
+        apply box_subset_of_subset hX;
+        apply h;
+      . contradiction;
+    . intro Γ;
+      simp only [
+        Frame.Supplementation, Frame.mk_ℬ, Set.mem_setOf_eq, Set.mem_sUnion,
+        exists_exists_and_eq_and
+      ];
+      intro hΓ;
+      use proofset 𝓢 φ;
+      constructor
+      . rfl;
+      . split;
+        . rename_i hψ;
+          rw [←eq_boxed_of_eq hψ.choose_spec];
+          apply hΓ;
+        . simp_all;
+
+end
+
+
 end LO.Modal.Neighborhood

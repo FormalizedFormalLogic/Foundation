@@ -1,5 +1,6 @@
 import Foundation.Modal.MaximalConsistentSet
 import Foundation.Modal.Neighborhood.Basic
+import Foundation.Modal.Entailment.EM
 
 namespace LO.Modal
 
@@ -71,6 +72,12 @@ lemma eq_boxed_of_eq [Entailment.E 𝓢] : ‖φ‖ = ‖ψ‖ → ‖□φ‖ =
   apply re!;
   apply iff_subset.mpr;
   assumption;
+
+@[grind]
+lemma box_subset_of_subset [Entailment.EM 𝓢] : ‖φ‖ ⊆ ‖ψ‖ → ‖□φ‖ ⊆ ‖□ψ‖ := by
+  intro h;
+  apply imp_subset.mp;
+  exact Entailment.rm! $ imp_subset.mpr h;
 
 end MaximalConsistentSet.proofset
 
