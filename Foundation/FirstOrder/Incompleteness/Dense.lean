@@ -76,4 +76,7 @@ lemma ISigma1.dense (T : Theory ℒₒᵣ) [𝐈𝚺₁ ⪯ T] [T.Δ₁] {φ ψ 
   have : Consistent (insert ↑σ T) := (Axiom.consistent_iff (L := ℒₒᵣ)).mp <| by simpa [-Axiom.consistent_iff] using con
   simpa using Arithmetic.incomplete' (insert ↑σ T)
 
+instance (T : Theory ℒₒᵣ) [𝐈𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra (T : Axiom ℒₒᵣ)) where
+  dense _ _ := ISigma1.dense T
+
 end LO
