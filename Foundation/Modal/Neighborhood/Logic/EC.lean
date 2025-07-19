@@ -1,6 +1,7 @@
 import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.AxiomC
 import Foundation.Modal.Neighborhood.Logic.E
+import Foundation.Modal.Neighborhood.Supplementation
 
 namespace LO.Modal
 

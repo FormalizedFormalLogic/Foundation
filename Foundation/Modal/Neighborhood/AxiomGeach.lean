@@ -89,12 +89,19 @@ end
 section
 
 variable [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E4 𝓢]
+variable {𝓢 : S} [Entailment.Consistent 𝓢]
 
 open Entailment
 open MaximalConsistentSet
 
-instance : (minimalCanonicalFrame 𝓢).IsTransitive := by
+instance [Entailment.ET 𝓢] : (minimalCanonicalFrame 𝓢).IsReflexive := by
+  constructor;
+  intro X Γ hΓ;
+  obtain ⟨φ, rfl, hφ⟩ := minimalCanonicalFrame.exists_box X Γ hΓ;
+  have : proofset 𝓢 (□φ) ⊆ proofset 𝓢 φ := proofset.imp_subset.mp (by simp);
+  exact Frame.IsCanonical.iff_mem (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) |>.mp $ this (hφ ▸ hΓ);
+
+instance [Entailment.E4 𝓢] : (minimalCanonicalFrame 𝓢).IsTransitive := by
   constructor;
   intro X Γ hΓ;
   obtain ⟨φ, rfl, hφ⟩ := minimalCanonicalFrame.exists_box X Γ hΓ;

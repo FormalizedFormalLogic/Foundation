@@ -364,6 +364,7 @@ protected abbrev EMT : Logic ℕ := Entailment.theory Hilbert.EMT
 notation "𝐄𝐌𝐓" => Modal.EMT
 instance : Hilbert.EMT.HasM where p := 0; q := 1
 instance : Hilbert.EMT.HasT where p := 0
+instance : Entailment.EMT Hilbert.EMT where
 
 
 protected abbrev Hilbert.EMT4 : Hilbert.WithRE ℕ := ⟨{Axioms.M (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.T (.atom 0)}⟩

@@ -14,7 +14,7 @@ instance : Frame.simple_blackhole.IsReflexive := by
   intro X x;
   simp_all;
 
-protected class Frame.IsEMT (F : Frame) extends F.IsMonotonic, F.IsReflexive
+protected class Frame.IsEMT (F : Frame) extends F.IsMonotonic, F.IsReflexive where
 protected abbrev FrameClass.EMT : FrameClass := { F | F.IsEMT }
 
 end Neighborhood
@@ -30,6 +30,10 @@ instance : Sound Hilbert.EMT FrameClass.EMT := instSound_of_validates_axioms $ b
 
 instance : Entailment.Consistent Hilbert.EMT := consistent_of_sound_frameclass FrameClass.EMT $ by
   use Frame.simple_blackhole;
+  apply Set.mem_setOf_eq.mpr;
+  constructor;
+
+instance : Complete Hilbert.EMT FrameClass.EMT := complete_of_canonical_frame FrameClass.EMT (supplementalMinimalCanonicalFrame (Hilbert.EMT)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 

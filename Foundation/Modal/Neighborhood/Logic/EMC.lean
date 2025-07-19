@@ -1,6 +1,7 @@
 import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.Logic.EM
 import Foundation.Modal.Neighborhood.Logic.EC
+import Foundation.Vorspiel.Set.Fin
 
 
 namespace LO.Modal
@@ -78,6 +79,10 @@ instance : Entailment.Consistent Hilbert.EMC := consistent_of_sound_frameclass F
   simp;
   constructor;
 
+instance : Complete Hilbert.EMC FrameClass.EMC := complete_of_canonical_frame FrameClass.EMC (supplementalMinimalCanonicalFrame (Hilbert.EMC)) $ by
+  apply Set.mem_setOf_eq.mpr;
+  constructor;
+
 end EMC.Neighborhood
 
 instance : Hilbert.EC ⪱ Hilbert.EMC := by
@@ -149,6 +154,7 @@ instance : Hilbert.EM ⪱ Hilbert.EMC := by
       use M, 0;
       constructor;
       . exact {
+          -- TODO: need golf!
           mono := by
             rintro X Y w hw;
             constructor;
