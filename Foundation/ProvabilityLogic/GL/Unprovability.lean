@@ -5,16 +5,16 @@ namespace LO.ProvabilityLogic
 
 open Modal.Logic FirstOrder
 
-namespace ProvabilityPredicate
+namespace Provability
 
 open LO.Entailment
 
-variable {L : Language} [L.DecidableEq] [Semiterm.Operator.GoedelNumber L (Sentence L)] [DecidableEq (Sentence L)]
+variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L] [DecidableEq (Sentence L)]
          {T₀ T : Theory L} [T₀ ⪯ T]
-         {𝔅 : ProvabilityPredicate T₀ T}
+         {𝔅 : Provability T₀ T}
          {σ π : Sentence L}
 
-def indep (𝔅 : ProvabilityPredicate T₀ T) (σ : Sentence L) : Sentence L := ∼(𝔅 σ) ⋏ ∼(𝔅 (∼σ))
+def indep (𝔅 : Provability T₀ T) (σ : Sentence L) : Sentence L := ∼(𝔅 σ) ⋏ ∼(𝔅 (∼σ))
 
 lemma indep_distribute [𝔅.HBL2] (h : T ⊢!. σ ⭤ π) :
     T ⊢!. 𝔅.indep σ ➝ 𝔅.indep π := by
@@ -42,7 +42,7 @@ lemma indep_iff_distribute [𝔅.HBL2] (h : T ⊢!. σ ⭤ π) :
   . intro H; exact K!_left (indep_iff_distribute_inside h) ⨀ H;
   . intro H; exact K!_right (indep_iff_distribute_inside h) ⨀ H;
 
-end ProvabilityPredicate
+end Provability
 
 end ProvabilityLogic
 
@@ -61,7 +61,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 section Corollary
 
 /-- Gödel's Second Incompleteness Theorem -/
-example [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T ⊬. T.standardPr.con := by
+example [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T ⊬. T.standardProvability.con := by
   have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
@@ -72,7 +72,7 @@ end Corollary
 section Independency
 
 lemma iff_modalConsis_bewConsis_inside :
-    T ⊢!. f.interpret T.standardPr (∼□⊥) ⭤ T.standardPr.con := by
+    T ⊢!. f.interpret T.standardProvability (∼□⊥) ⭤ T.standardProvability.con := by
   apply K!_intro;
   . refine C!_trans (K!_left Realization.iff_interpret_neg_inside) ?_;
     apply contra!;
@@ -84,7 +84,7 @@ lemma iff_modalConsis_bewConsis_inside :
 variable [𝐈𝚺₁ ⪯ T]
 
 lemma iff_modalIndep_bewIndep_inside :
-    T ⊢!. f.interpret T.standardPr (Modal.independency A) ⭤ T.standardPr.indep (f.interpret T.standardPr A) := by
+    T ⊢!. f.interpret T.standardProvability (Modal.independency A) ⭤ T.standardProvability.indep (f.interpret T.standardProvability A) := by
   apply K!_intro;
   . refine C!_trans (K!_left $ Realization.iff_interpret_and_inside) ?_;
     apply CKK!_of_C!_of_C!;
@@ -92,7 +92,7 @@ lemma iff_modalIndep_bewIndep_inside :
     . apply C!_trans (K!_left $ Realization.iff_interpret_neg_inside (A := □(∼A))) ?_;
       apply contra!;
       apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
-      apply T.standardPr.prov_distribute_imply;
+      apply T.standardProvability.prov_distribute_imply;
       apply K!_right $ Realization.iff_interpret_neg_inside;
   . refine C!_trans ?_ (K!_right $ Realization.iff_interpret_and_inside);
     apply CKK!_of_C!_of_C!;
@@ -100,21 +100,21 @@ lemma iff_modalIndep_bewIndep_inside :
     . apply C!_trans ?_ (K!_right $ Realization.iff_interpret_neg_inside (A := □(∼A)));
       apply contra!;
       apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
-      apply T.standardPr.prov_distribute_imply;
+      apply T.standardProvability.prov_distribute_imply;
       apply K!_left $ Realization.iff_interpret_neg_inside;
 
 lemma iff_modalIndep_bewIndep :
-    T ⊢!. f.interpret T.standardPr (Modal.independency A) ↔ T ⊢!. T.standardPr.indep (f.interpret T.standardPr A) := by
+    T ⊢!. f.interpret T.standardProvability (Modal.independency A) ↔ T ⊢!. T.standardProvability.indep (f.interpret T.standardProvability A) := by
   constructor;
   . intro h; exact (K!_left iff_modalIndep_bewIndep_inside) ⨀ h;
   . intro h; exact (K!_right iff_modalIndep_bewIndep_inside) ⨀ h;
 
 lemma iff_not_modalIndep_not_bewIndep_inside :
-    T ⊢!. ∼f.interpret T.standardPr (Modal.independency A) ⭤ ∼T.standardPr.indep (f.interpret T.standardPr A) :=
+    T ⊢!. ∼f.interpret T.standardProvability (Modal.independency A) ⭤ ∼T.standardProvability.indep (f.interpret T.standardProvability A) :=
   ENN!_of_E! iff_modalIndep_bewIndep_inside
 
 lemma iff_not_modalIndep_not_bewIndep :
-    T ⊢!. ∼f.interpret T.standardPr (Modal.independency A) ↔ T ⊢!. ∼T.standardPr.indep (f.interpret T.standardPr A) := by
+    T ⊢!. ∼f.interpret T.standardProvability (Modal.independency A) ↔ T ⊢!. ∼T.standardProvability.indep (f.interpret T.standardProvability A) := by
   constructor;
   . intro h; exact (K!_left iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
   . intro h; exact (K!_right iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
@@ -122,13 +122,13 @@ lemma iff_not_modalIndep_not_bewIndep :
 variable [T.SoundOn (Hierarchy 𝚷 2)]
 
 lemma unprovable_independency_of_consistency :
-    T ⊬. T.standardPr.indep (T.standardPr.con) := by
+    T ⊬. T.standardProvability.indep (T.standardProvability.con) := by
   let g : Realization ℒₒᵣ := λ _ => ⊥;
-  suffices T ⊬. g.interpret T.standardPr (Modal.independency (∼□⊥)) by
+  suffices T ⊬. g.interpret T.standardProvability (Modal.independency (∼□⊥)) by
     have H₁ := iff_modalIndep_bewIndep (f := g) (T := T) (A := ∼□⊥);
-    have H₂ := T.standardPr.indep_iff_distribute (T := T)
-      (σ := g.interpret T.standardPr (∼□⊥))
-      (π := T.standardPr.con)
+    have H₂ := T.standardProvability.indep_iff_distribute (T := T)
+      (σ := g.interpret T.standardProvability (∼□⊥))
+      (π := T.standardProvability.con)
       iff_modalConsis_bewConsis_inside;
     exact Iff.trans H₁ H₂ |>.not.mp this;
   have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_independency (φ := ∼□⊥);
@@ -137,20 +137,20 @@ lemma unprovable_independency_of_consistency :
   congr;
 
 lemma unrefutable_independency_of_consistency :
-    T ⊬. ∼T.standardPr.indep (T.standardPr.con) := by
+    T ⊬. ∼T.standardProvability.indep (T.standardProvability.con) := by
   let g : Realization ℒₒᵣ := λ _ => ⊥;
-  suffices T ⊬. ∼g.interpret T.standardPr (Modal.independency (∼□⊥)) by
+  suffices T ⊬. ∼g.interpret T.standardProvability (Modal.independency (∼□⊥)) by
     have H₁ := iff_not_modalIndep_not_bewIndep (f := g) (T := T) (A := ∼□⊥);
     have H₂ : T ⊢!.
-      ∼T.standardPr.indep (g.interpret T.standardPr (∼□⊥)) ⭤
-      ∼T.standardPr.indep T.standardPr.con
-      := ENN!_of_E! $ T.standardPr.indep_iff_distribute_inside (T := T)
-      (σ := g.interpret T.standardPr (∼□⊥))
-      (π := T.standardPr.con)
+      ∼T.standardProvability.indep (g.interpret T.standardProvability (∼□⊥)) ⭤
+      ∼T.standardProvability.indep T.standardProvability.con
+      := ENN!_of_E! $ T.standardProvability.indep_iff_distribute_inside (T := T)
+      (σ := g.interpret T.standardProvability (∼□⊥))
+      (π := T.standardProvability.con)
       iff_modalConsis_bewConsis_inside;
     replace H₂ :
-      T ⊢!. ∼T.standardPr.indep (g.interpret T.standardPr (∼□⊥)) ↔
-      T ⊢!. ∼T.standardPr.indep T.standardPr.con
+      T ⊢!. ∼T.standardProvability.indep (g.interpret T.standardProvability (∼□⊥)) ↔
+      T ⊢!. ∼T.standardProvability.indep T.standardProvability.con
       := by
       constructor;
       . intro H; exact K!_left H₂ ⨀ H;
@@ -163,7 +163,7 @@ lemma unrefutable_independency_of_consistency :
   congr;
 
 theorem undecidable_independency_of_consistency :
-    Independent T.toAxiom (T.standardPr.indep (T.standardPr.con)) := by
+    Independent T.toAxiom (T.standardProvability.indep (T.standardProvability.con)) := by
   constructor;
   . exact unprovable_independency_of_consistency;
   . exact unrefutable_independency_of_consistency;

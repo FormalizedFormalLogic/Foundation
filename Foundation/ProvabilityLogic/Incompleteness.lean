@@ -6,54 +6,56 @@ import Foundation.Meta.ClProver
 # Abstract incompleteness theorems and related results
 -/
 
-namespace LO.ProvabilityLogic
+namespace LO
+
+abbrev FirstOrder.Language.ReferenceableBy (L L₀ : Language) := Semiterm.Operator.GoedelNumber L₀ (Sentence L)
+
+namespace ProvabilityLogic
 
 open FirstOrder
 
-variable {L : Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
+variable {L₀ L : Language}
 
-structure ProvabilityPredicate (T₀ : Theory L) (T : Theory L) where
-  prov : Semisentence L 1
+structure Provability [L.ReferenceableBy L₀] (T₀ : Theory L₀) (T : Theory L) where
+  prov : Semisentence L₀ 1
   protected D1 {σ : Sentence L} : T ⊢!. σ → T₀ ⊢!. prov/[⌜σ⌝]
 
-namespace ProvabilityPredicate
+namespace Provability
 
-variable {T₀ T : Theory L}
+variable [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
 
-@[coe] def pr (𝔅 : ProvabilityPredicate T₀ T) (σ : Sentence L) : Sentence L := 𝔅.prov/[⌜σ⌝]
+@[coe] def pr (𝔅 : Provability T₀ T) (σ : Sentence L) : Sentence L₀ := 𝔅.prov/[⌜σ⌝]
 
-instance : CoeFun (ProvabilityPredicate T₀ T) (fun _ ↦ Sentence L → Sentence L) := ⟨pr⟩
+instance : CoeFun (Provability T₀ T) (fun _ ↦ Sentence L → Sentence L₀) := ⟨pr⟩
 
-def con (𝔅 : ProvabilityPredicate T₀ T) : Sentence L := ∼𝔅 ⊥
+def con (𝔅 : Provability T₀ T) : Sentence L₀ := ∼𝔅 ⊥
 
-end ProvabilityPredicate
+end Provability
 
-class Diagonalization (T : Theory L) where
+class Diagonalization [L.ReferenceableBy L] (T : Theory L) where
   fixpoint : Semisentence L 1 → Sentence L
   diag (θ) : T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝]
 
-namespace ProvabilityPredicate
+namespace Provability
 
-variable {T₀ T : Theory L}
-
-class HBL2 (𝔅 : ProvabilityPredicate T₀ T) where
+class HBL2 [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   protected D2 (σ τ : Sentence L) : T₀ ⊢!. 𝔅 (σ ➝ τ) ➝ 𝔅 σ ➝ 𝔅 τ
 
-class HBL3 (𝔅 : ProvabilityPredicate T₀ T) where
+class HBL3 [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) where
   protected D3 (σ : Sentence L) : T₀ ⊢!. 𝔅 σ ➝ 𝔅 (𝔅 σ)
 
-class HBL (𝔅 : ProvabilityPredicate T₀ T) extends 𝔅.HBL2, 𝔅.HBL3
+class HBL [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) extends 𝔅.HBL2, 𝔅.HBL3
 
-class Loeb (𝔅 : ProvabilityPredicate T₀ T) where
+class Loeb [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) where
   protected LT {σ : Sentence L} : T ⊢!. 𝔅 σ ➝ σ → T ⊢!. σ
 
-class FormalizedLoeb (𝔅 : ProvabilityPredicate T₀ T) where
+class FormalizedLoeb [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) where
   protected FLT (σ : Sentence L) : T₀ ⊢!. 𝔅 (𝔅 σ ➝ σ) ➝ 𝔅 σ
 
-class Rosser (𝔅 : ProvabilityPredicate T₀ T) where
+class Rosser [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   protected Ro {σ : Sentence L} : T ⊢!. ∼σ → T₀ ⊢!. ∼𝔅 σ
 
-class Sound (𝔅 : ProvabilityPredicate T₀ T) (N : outParam Type*) [Nonempty N] [Structure L N] where
+class Sound [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) (N : outParam Type*) [Nonempty N] [Structure L₀ N] where
   protected sound {σ : Sentence L} : N ⊧ₘ₀ 𝔅 σ ↔ T ⊢!. σ
 
 protected alias sound := Sound.sound
@@ -64,32 +66,15 @@ section
 
 open LO.Entailment
 
-variable {T₀ T : Theory L}
-         {𝔅 : ProvabilityPredicate T₀ T}
-         {σ τ : Sentence L}
-
 protected alias D2 := HBL2.D2
 protected alias D3 := HBL3.D3
 protected alias LT := Loeb.LT
 protected alias FLT := FormalizedLoeb.FLT
 protected alias Ro := Rosser.Ro
 
-lemma D1_shift [L.DecidableEq] [T₀ ⪯ T] : T ⊢!. σ → T ⊢!. 𝔅 σ := by
-  intro h;
-  apply Entailment.WeakerThan.pbl (𝓢 := T₀.toAxiom);
-  apply 𝔅.D1 h;
+section irreflexsive_syntactic_language
 
-lemma D2_shift [L.DecidableEq] [T₀ ⪯ T] [𝔅.HBL2] : T ⊢!. 𝔅 (σ ➝ τ) ➝ 𝔅 σ ➝ 𝔅 τ := by
-  apply Entailment.WeakerThan.pbl (𝓢 := T₀.toAxiom);
-  apply 𝔅.D2;
-
-lemma D3_shift [L.DecidableEq] [T₀ ⪯ T] [𝔅.HBL3] : T ⊢!. 𝔅 σ ➝ 𝔅 (𝔅 σ) := by
-  apply Entailment.WeakerThan.pbl (𝓢 := T₀.toAxiom);
-  apply 𝔅.D3;
-
-lemma FLT_shift [L.DecidableEq] [T₀ ⪯ T] [𝔅.FormalizedLoeb] : T ⊢!. 𝔅 (𝔅 σ ➝ σ) ➝ 𝔅 σ := by
-  apply Entailment.WeakerThan.pbl (𝓢 := T₀.toAxiom);
-  apply 𝔅.FLT;
+variable [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} {𝔅 : Provability T₀ T}
 
 lemma D2' [𝔅.HBL2] (σ τ) : T₀ ⊢!. 𝔅 (σ ➝ τ) → T₀ ⊢!. 𝔅 σ ➝ 𝔅 τ := by
   intro h;
@@ -97,42 +82,62 @@ lemma D2' [𝔅.HBL2] (σ τ) : T₀ ⊢!. 𝔅 (σ ➝ τ) → T₀ ⊢!. 𝔅 
 
 lemma prov_distribute_imply [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) : T₀ ⊢!. 𝔅 σ ➝ 𝔅 τ := 𝔅.D2' σ τ <| 𝔅.D1 h
 
-lemma prov_distribute_imply' [L.DecidableEq] [T₀ ⪯ T] [𝔅.HBL2] (h : T₀ ⊢!. σ ➝ τ) :
-    T₀ ⊢!. 𝔅 σ ➝ 𝔅 τ := prov_distribute_imply $ WeakerThan.pbl h
-
-lemma prov_distribute_imply'' [L.DecidableEq] [T₀ ⪯ T] [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) :
-    T ⊢!. 𝔅 σ ➝ 𝔅 τ := WeakerThan.pbl $ prov_distribute_imply h
-
 lemma prov_distribute_iff [𝔅.HBL2] (h : T ⊢!. σ ⭤ τ) : T₀ ⊢!. 𝔅 σ ⭤ 𝔅 τ := by
   apply E!_intro;
   . exact prov_distribute_imply $ K!_left h;
   . exact prov_distribute_imply $ K!_right h;
 
-lemma prov_distribute_and  [𝔅.HBL2] [DecidableEq (Sentence L)] : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ 𝔅 σ ⋏ 𝔅 τ := by
+lemma prov_distribute_and [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ 𝔅 σ ⋏ 𝔅 τ := by
   have h₁ : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ 𝔅 σ := 𝔅.D2' _ _ <| 𝔅.D1 and₁!;
   have h₂ : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ 𝔅 τ := 𝔅.D2' _ _ <| 𝔅.D1 and₂!;
   exact right_K!_intro h₁ h₂;
 
-def prov_distribute_and' [𝔅.HBL2] [DecidableEq (Sentence L)] : T₀ ⊢!. 𝔅 (σ ⋏ τ) → T₀ ⊢!. 𝔅 σ ⋏ 𝔅 τ := λ h => prov_distribute_and ⨀ h
+def prov_distribute_and' [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢!. 𝔅 (σ ⋏ τ) → T₀ ⊢!. 𝔅 σ ⋏ 𝔅 τ := λ h => prov_distribute_and ⨀ h
 
-def prov_collect_and [𝔅.HBL2] [DecidableEq (Sentence L)] : T₀ ⊢!. 𝔅 σ ⋏ 𝔅 τ ➝ 𝔅 (σ ⋏ τ) := by
+def prov_collect_and [𝔅.HBL2] [L₀.DecidableEq] [L.DecidableEq] : T₀ ⊢!. 𝔅 σ ⋏ 𝔅 τ ➝ 𝔅 (σ ⋏ τ) := by
   have : T₀ ⊢!. 𝔅 σ ➝ 𝔅 (τ ➝ σ ⋏ τ) := prov_distribute_imply (by cl_prover)
   cl_prover [this, 𝔅.D2 τ (σ ⋏ τ)]
 
+end irreflexsive_syntactic_language
+section reflexive_syntactic_language
+
+variable [L.DecidableEq] [L.ReferenceableBy L] {T₀ T : Theory L} [T₀ ⪯ T] {𝔅 : Provability T₀ T}
+
+lemma D1_shift : T ⊢!. σ → T ⊢!. 𝔅 σ := by
+  intro h;
+  apply Entailment.WeakerThan.pbl (𝓢 := T₀.toAxiom);
+  apply 𝔅.D1 h;
+
+lemma D2_shift [𝔅.HBL2] : T ⊢!. 𝔅 (σ ➝ τ) ➝ 𝔅 σ ➝ 𝔅 τ := by
+  apply Entailment.WeakerThan.pbl (𝓢 := T₀.toAxiom);
+  apply 𝔅.D2;
+
+lemma D3_shift [𝔅.HBL3] : T ⊢!. 𝔅 σ ➝ 𝔅 (𝔅 σ) := by
+  apply Entailment.WeakerThan.pbl (𝓢 := T₀.toAxiom);
+  apply 𝔅.D3;
+
+lemma FLT_shift [𝔅.FormalizedLoeb] : T ⊢!. 𝔅 (𝔅 σ ➝ σ) ➝ 𝔅 σ := by
+  apply Entailment.WeakerThan.pbl (𝓢 := T₀.toAxiom);
+  apply 𝔅.FLT;
+
+lemma prov_distribute_imply' [𝔅.HBL2] (h : T₀ ⊢!. σ ➝ τ) :
+    T₀ ⊢!. 𝔅 σ ➝ 𝔅 τ := prov_distribute_imply $ WeakerThan.pbl h
+
+lemma prov_distribute_imply'' [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) :
+    T ⊢!. 𝔅 σ ➝ 𝔅 τ := WeakerThan.pbl $ prov_distribute_imply h
+
+end reflexive_syntactic_language
+
 end
 
-variable {T₀ T : Theory L} {𝔅 : ProvabilityPredicate T₀ T}
+open LO.Entailment Diagonalization Provability
 
-open LO.Entailment
-open Diagonalization
-open ProvabilityPredicate
-
-def goedel [Diagonalization T₀] (𝔅 : ProvabilityPredicate T₀ T) : Sentence L :=
+def goedel [L.ReferenceableBy L] {T₀ T : Theory L} [Diagonalization T₀] (𝔅 : Provability T₀ T) : Sentence L :=
   fixpoint T₀ “x. ¬!𝔅.prov x”
 
 section GoedelSentence
 
-variable [Diagonalization T₀]
+variable [L.ReferenceableBy L] {T₀ T : Theory L} [Diagonalization T₀] {𝔅 : Provability T₀ T}
 
 local notation "𝗚" => 𝔅.goedel
 
@@ -147,12 +152,14 @@ variable {𝔅}
 
 end GoedelSentence
 
-class GoedelSound (𝔅 : ProvabilityPredicate T₀ T) [Diagonalization T₀] where
+class GoedelSound [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) [Diagonalization T₀] where
   goedel_sound : T ⊢!. 𝔅 𝔅.goedel → T ⊢!. 𝔅.goedel
 
 section First
 
-variable (𝔅) [T₀ ⪯ T] [Diagonalization T₀] [L.DecidableEq] [Consistent T]
+variable [L.DecidableEq] [L.ReferenceableBy L] {T₀ T : Theory L} [T₀ ⪯ T] [Diagonalization T₀] [Consistent T]
+
+variable (𝔅 : Provability T₀ T)
 
 local notation "𝗚" => 𝔅.goedel
 
@@ -185,7 +192,7 @@ end First
 
 section Second
 
-variable [L.DecidableEq] [𝔅.HBL]
+variable [L.DecidableEq] [L.ReferenceableBy L] {T₀ T : Theory L} {𝔅 : Provability T₀ T} [𝔅.HBL]
 
 lemma formalized_consistent_of_existance_unprovable (σ) : T₀ ⊢!. ∼𝔅 σ ➝ 𝔅.con := contra! $ 𝔅.D2 _ _ ⨀ (𝔅.D1 efq!)
 
@@ -228,13 +235,13 @@ end Second
 
 section Loeb
 
-def kreisel [Diagonalization T₀]
-    (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL]
-    (σ : Sentence L) : Sentence L := fixpoint T₀ “x. !𝔅.prov x → !σ”
+variable [L.ReferenceableBy L] {T₀ T : Theory L}
+
+def kreisel [Diagonalization T₀] (𝔅 : Provability T₀ T) [𝔅.HBL] (σ : Sentence L) : Sentence L := fixpoint T₀ “x. !𝔅.prov x → !σ”
 
 section KrieselSentence
 
-variable {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [Diagonalization T₀]
+variable [Diagonalization T₀] {𝔅 : Provability T₀ T} [𝔅.HBL]
 
 local prefix:80 "𝗞" => 𝔅.kreisel
 
@@ -257,7 +264,7 @@ end KrieselSentence
 
 section LoebTheorem
 
-variable [L.DecidableEq] [T₀ ⪯ T] [Diagonalization T₀] [𝔅.HBL]
+variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] {𝔅 : Provability T₀ T} [𝔅.HBL]
 
 local notation "𝗞" => 𝔅.kreisel
 
@@ -278,7 +285,7 @@ instance [L.DecidableEq] : 𝔅.FormalizedLoeb := ⟨formalized_loeb_theorem (T 
 
 end LoebTheorem
 
-variable [Consistent T]
+variable  {𝔅 : Provability T₀ T} [Consistent T]
 
 lemma unprovable_con_via_loeb [L.DecidableEq] [𝔅.Loeb] : T ⊬. 𝔅.con := by
   by_contra hC;
@@ -308,7 +315,7 @@ end Loeb
 
 section Rosser
 
-variable [L.DecidableEq] [Diagonalization T₀] [T₀ ⪯ T] [Consistent T]
+variable [L.DecidableEq] [L.ReferenceableBy L] {T₀ T : Theory L} [Diagonalization T₀] [T₀ ⪯ T] [Consistent T] {𝔅 : Provability T₀ T}
 
 local notation "𝗥" => 𝔅.goedel
 
@@ -326,8 +333,10 @@ theorem rosser_independent : Independent (T : Axiom L) 𝗥 := by
   . apply unprovable_goedel
   . apply unrefutable_rosser
 
-theorem rosser_first_incompleteness (𝔅 : ProvabilityPredicate T₀ T) [𝔅.Rosser] : ¬Entailment.Complete (T : Axiom L) :=
+theorem rosser_first_incompleteness (𝔅 : Provability T₀ T) [𝔅.Rosser] : ¬Entailment.Complete (T : Axiom L) :=
   Entailment.incomplete_iff_exists_undecidable.mpr ⟨𝔅.goedel, rosser_independent⟩
+
+variable (𝔅)
 
 omit [Diagonalization T₀] [Consistent T] in
 /-- If `𝔅` satisfies Rosser provability condition, then `𝔅.con` is provable from `T`. -/
@@ -337,4 +346,4 @@ theorem kriesel_remark : T ⊢!. 𝔅.con := by
 
 end Rosser
 
-end LO.ProvabilityLogic.ProvabilityPredicate
+end LO.ProvabilityLogic.Provability

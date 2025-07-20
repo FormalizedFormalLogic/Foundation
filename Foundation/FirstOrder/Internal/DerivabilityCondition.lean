@@ -11,11 +11,15 @@ import Foundation.FirstOrder.Internal.FixedPoint
 
 namespace LO.FirstOrder.Arithmetic
 
-open ISigma1 Metamath
+open ISigma1 Metamath ProvabilityLogic
+
+instance : Diagonalization 𝐈𝚺₁ where
+  fixpoint := fixpoint
+  diag θ := diagonal θ
 
 section
 
-variable {T : ArithmeticTheory} [T.Δ₁]
+variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
 
 local prefix:90 "□" => T.provabilityPred
 
@@ -26,6 +30,28 @@ theorem provable_D1 {σ} : T ⊢!. σ → 𝐈𝚺₁ ⊢!. □σ := fun h ↦
 theorem provable_D2 {σ π} : 𝐈𝚺₁ ⊢!. □(σ ➝ π) ➝ □σ ➝ □π :=
   complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using modus_ponens_sentence T
+
+variable (T)
+
+abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝐈𝚺₁ T where
+  prov := T.provable
+  D1 := provable_D1
+
+variable {T}
+
+instance : T.standardProvability.HBL2 := ⟨fun _ _ ↦ provable_D2⟩
+
+lemma standardProvability_def (σ : Sentence L) : T.standardProvability σ = T.provabilityPred σ := rfl
+
+instance [T.Δ₁] : T.standardProvability.Sound ℕ := ⟨fun {σ} ↦ by simp [Arithmetic.standardProvability_def, models₀_iff]⟩
+
+end
+
+section arithmetic
+
+variable {T : Theory ℒₒᵣ} [T.Δ₁]
+
+local prefix:90 "□" => T.provabilityPred
 
 lemma provable_sigma_one_complete [𝐏𝐀⁻ ⪯ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     𝐈𝚺₁ ⊢!. σ ➝ □σ :=
@@ -46,30 +72,14 @@ lemma provable_sound {σ} : U ⊢!. □σ → T ⊢!. σ := fun h ↦ by
 lemma provable_complete [𝐈𝚺₁ ⪯ U] {σ} : T ⊢!. σ ↔ U ⊢!. □σ :=
   ⟨fun h ↦ Entailment.weakening inferInstance (provable_D1 h), provable_sound⟩
 
-end
+instance [𝐏𝐀⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨fun _ ↦ provable_D3⟩
+
+instance [𝐏𝐀⁻ ⪯ T] : T.standardProvability.HBL where
+
+instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.GoedelSound := ⟨fun h ↦ by simpa using provable_sound h⟩
+
+end arithmetic
 
 open ProvabilityLogic
-
-variable (T : ArithmeticTheory) [T.Δ₁]
-
-instance : Diagonalization 𝐈𝚺₁ where
-  fixpoint := fixpoint
-  diag θ := diagonal θ
-
-abbrev _root_.LO.FirstOrder.ArithmeticTheory.standardPr : ProvabilityPredicate 𝐈𝚺₁ T where
-  prov := T.provable
-  D1 := provable_D1
-
-instance : T.standardPr.HBL2 := ⟨fun _ _ ↦ provable_D2⟩
-
-instance [𝐏𝐀⁻ ⪯ T] : T.standardPr.HBL3 := ⟨fun _ ↦ provable_D3⟩
-
-instance [𝐏𝐀⁻ ⪯ T] : T.standardPr.HBL where
-
-instance [T.SoundOnHierarchy 𝚺 1] : T.standardPr.GoedelSound := ⟨fun h ↦ by simpa using provable_sound h⟩
-
-lemma standardPr_def (σ : Sentence ℒₒᵣ) : T.standardPr σ = T.provabilityPred σ := rfl
-
-instance [T.Δ₁] : T.standardPr.Sound ℕ := ⟨fun {σ} ↦ by simp [Arithmetic.standardPr_def, models₀_iff]⟩
 
 end LO.FirstOrder.Arithmetic

@@ -10,7 +10,7 @@ open Entailment FiniteContext
 open FirstOrder ProvabilityLogic
 open Modal Modal.Hilbert
 
-variable {L : Language} [Semiterm.Operator.GoedelNumber L (Sentence L)] {T₀ T : Theory L}
+variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
 
 namespace ProvabilityLogic
 
@@ -21,7 +21,7 @@ namespace Realization
 
 /-- Mapping modal formulae to first-order sentence -/
 def interpret
-  (f : Realization L) (𝔅 : ProvabilityPredicate T₀ T) : Formula ℕ → FirstOrder.Sentence L
+  (f : Realization L) (𝔅 : Provability T₀ T) : Formula ℕ → FirstOrder.Sentence L
   | .atom a => f a
   | □φ => 𝔅 (f.interpret 𝔅 φ)
   | ⊥ => ⊥
@@ -30,7 +30,7 @@ def interpret
 
 section
 
-variable {𝔅 : ProvabilityPredicate T₀ T} {f : Realization L} {A B : Modal.Formula _}
+variable {𝔅 : Provability T₀ T} {f : Realization L} {A B : Modal.Formula _}
 
 lemma iff_interpret_atom : T ⊢!. f.interpret 𝔅 (.atom a) ↔ T ⊢!. f a := by  simp [Realization.interpret];
 lemma iff_interpret_imp : T ⊢!. f.interpret 𝔅 (A ➝ B) ↔ T ⊢!. (f.interpret 𝔅 A) ➝ (f.interpret 𝔅 B) := by simp [Realization.interpret];

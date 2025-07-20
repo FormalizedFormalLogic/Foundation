@@ -117,16 +117,18 @@ end
 
 open ProvabilityLogic
 
-variable {T : ArithmeticTheory} [T.Δ₁] [Entailment.Consistent T]
+variable {L : Language} [L.Encodable] [L.LORDefinable]
+
+variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 
 variable (T)
 
-abbrev _root_.LO.FirstOrder.ArithmeticTheory.rosserPr : ProvabilityPredicate 𝐈𝚺₁ T where
+abbrev _root_.LO.FirstOrder.Theory.rosserProvability : Provability 𝐈𝚺₁ T where
   prov := T.rosserProvable
   D1 := rosserProvable_D1
 
-instance : T.rosserPr.Rosser := ⟨rosserProvable_rosser⟩
+instance : T.rosserProvability.Rosser := ⟨rosserProvable_rosser⟩
 
-lemma rosserPr_def (σ : Sentence ℒₒᵣ) : T.rosserPr σ = T.rosserPred σ := rfl
+lemma rosserProvability_def (σ : Sentence L) : T.rosserProvability σ = T.rosserPred σ := rfl
 
 end LO.FirstOrder.Arithmetic

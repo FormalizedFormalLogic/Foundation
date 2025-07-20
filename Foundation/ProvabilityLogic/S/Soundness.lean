@@ -6,10 +6,10 @@ namespace LO.ProvabilityLogic
 open Entailment
 open Modal
 open FirstOrder
-open ProvabilityPredicate
+open Provability
 
 variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T₀]
-         {𝔅 : ProvabilityPredicate T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.Sound ℕ]
+         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.Sound ℕ]
          {A B : Formula ℕ}
 
 theorem S.arithmetical_soundness (h : Modal.S ⊢! A) (f : Realization ℒₒᵣ) : ℕ ⊧ₘ₀ f.interpret 𝔅 A := by
