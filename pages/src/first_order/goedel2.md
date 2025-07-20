@@ -242,15 +242,15 @@ $$
 
 ```lean
 theorem unprovable_goedel
-    (𝔅 : ProvabilityPredicate T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] :
+    (𝔅 : Provability T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] :
     T ⊬. 𝔅.goedel
 
 theorem unrefutable_goedel
-    (𝔅 : ProvabilityPredicate T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] [𝔅.GoedelSound] :
+    (𝔅 : Provability T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] [𝔅.GoedelSound] :
     T ⊬. ∼𝔅.goedel
 ```
-- [LO.ProvabilityLogic.ProvabilityPredicate.unprovable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.ProvabilityPredicate.unprovable_goedel)
-- [LO.ProvabilityLogic.ProvabilityPredicate.unrefutable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.ProvabilityPredicate.unrefutable_goedel)
+- [LO.ProvabilityLogic.Provability.unprovable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.Provability.unprovable_goedel)
+- [LO.ProvabilityLogic.Provability.unrefutable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.Provability.unrefutable_goedel)
 
 Define formalized incompleteness sentence $\mathrm{Con}_T$:
 $$
@@ -260,10 +260,10 @@ $$
 #### Lemma: $T \vdash \mathrm{Con}_T \leftrightarrow G_T$
 ```lean
 theorem goedel_iff_consistency
-    (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL] [T₀ ⪯ T] [Diagonalization T₀] :
+    (𝔅 : Provability T₀ T) [𝔅.HBL] [T₀ ⪯ T] [Diagonalization T₀] :
     T₀ ⊢!. 𝔅.goedel ⭤ 𝔅.con
 ```
-- [LO.ProvabilityLogic.ProvabilityPredicate.goedel_iff_consistency](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.ProvabilityPredicate.goedel_iff_consistency)
+- [LO.ProvabilityLogic.Provability.goedel_iff_consistency](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.Provability.goedel_iff_consistency)
 
 #### Theorem: $T$ cannot prove its own consistency, i.e., $T \nvdash \mathrm{Con}_T$ if $T$ is consistent. Moreover, $\mathrm{Con}_T$ is undecidable from $T$ if $\mathbb{N} \models T$.
 

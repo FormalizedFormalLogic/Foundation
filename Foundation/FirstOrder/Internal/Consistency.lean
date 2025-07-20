@@ -64,7 +64,7 @@ end
 
 variable (T : ArithmeticTheory) [T.Δ₁] (V)
 
-def consistent_eq : T.consistent = T.standardPr.con := rfl
+def consistent_eq : T.consistent = T.standardProvability.con := rfl
 
 @[simp] lemma standard_consistent [𝐑₀ ⪯ T] : T.Consistent ℕ ↔ Entailment.Consistent T := by
   simp [Theory.Consistent, Entailment.consistent_iff_unprovable_bot, Axiom.provable_iff]

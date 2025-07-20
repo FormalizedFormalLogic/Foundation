@@ -25,8 +25,8 @@ open Modal
 open Modal.Kripke
 open Modal.Formula.Kripke
 
-variable {L : Language} [L.DecidableEq] [Semiterm.Operator.GoedelNumber L (Sentence L)]
-         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : ProvabilityPredicate T₀ T) [𝔅.HBL]
+variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
+         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
          {A B : Modal.Formula _}
 
 structure SolovaySentences (F : Kripke.Frame) (r : F) [F.IsFiniteTree r] [Fintype F] where
@@ -489,7 +489,7 @@ lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i :
 variable (T F r)
 
 instance _root_.LO.ProvabilityLogic.SolovaySentences.standard
-    [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : SolovaySentences T.standardPr F r where
+    [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : SolovaySentences T.standardProvability F r where
   σ := T.solovay
   SC1 i j ne :=
     have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
@@ -498,11 +498,11 @@ instance _root_.LO.ProvabilityLogic.SolovaySentences.standard
   SC2 i j h :=
     have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
     oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
-      simpa [models_iff, standardPr_def] using Solovay.consistent h
+      simpa [models_iff, standardProvability_def] using Solovay.consistent h
   SC3 i h :=
     have : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐈𝚺₁) inferInstance inferInstance
     oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff, standardPr_def] using Solovay.box_disjunction h
+    simpa [models_iff, standardProvability_def] using Solovay.box_disjunction h
   SC4 i ne := solovay_unprovable ne
 
 lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] :
@@ -523,29 +523,29 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierar
 
 /-- Arithmetical completeness of GL-/
 theorem GL.arithmetical_completeness :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) → Modal.GL ⊢! A := by
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardProvability A) → Modal.GL ⊢! A := by
   simp only [Hilbert.Normal.iff_logic_provable_provable];
   contrapose;
   intro hA;
   push_neg;
   obtain ⟨M₁, r₁, _, hA₁⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
   have : Fintype (M₁.extendRoot r₁ 1).World := Fintype.ofFinite _
-  let σ : SolovaySentences T.standardPr (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root :=
+  let σ : SolovaySentences T.standardProvability (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root :=
     SolovaySentences.standard (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root T
   use σ.realization;
-  have : 𝐈𝚺₁ ⊢!. σ r₁ ➝ σ.realization.interpret T.standardPr (∼A) :=
+  have : 𝐈𝚺₁ ⊢!. σ r₁ ➝ σ.realization.interpret T.standardProvability (∼A) :=
     σ.mainlemma (A := ∼A) (i := r₁) (by trivial) |>.1 $ Model.extendRoot.inr_satisfies_iff |>.not.mpr hA₁;
-  replace : 𝐈𝚺₁ ⊢!. σ.realization.interpret T.standardPr A ➝ ∼(σ r₁) := by
+  replace : 𝐈𝚺₁ ⊢!. σ.realization.interpret T.standardProvability A ➝ ∼(σ r₁) := by
     apply CN!_of_CN!_right;
     apply C!_trans this;
     apply K!_right neg_equiv!;
-  replace : T ⊢!. σ.realization.interpret T.standardPr A ➝ ∼(σ r₁) := WeakerThan.pbl this;
+  replace : T ⊢!. σ.realization.interpret T.standardProvability A ➝ ∼(σ r₁) := WeakerThan.pbl this;
   by_contra hC;
   have : T ⊢!. ∼(σ r₁) := this ⨀ hC;
   exact σ.SC4 _ (by rintro ⟨⟩) this;
 
 theorem GL.arithmetical_completeness_iff :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardPr A) ↔ Modal.GL ⊢! A :=
+    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardProvability A) ↔ Modal.GL ⊢! A :=
   ⟨GL.arithmetical_completeness, GL.arithmetical_soundness⟩
 
 end LO.ProvabilityLogic

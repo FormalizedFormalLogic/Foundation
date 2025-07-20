@@ -6,12 +6,12 @@ open Entailment
 open Modal
 open Modal.Hilbert
 open FirstOrder
-open ProvabilityPredicate
+open Provability
 
-variable {L : FirstOrder.Language} [Semiterm.Operator.GoedelNumber L (Sentence L)]
+variable {L : FirstOrder.Language} [L.ReferenceableBy L]
          [L.DecidableEq]
          {T U : FirstOrder.Theory L} [Diagonalization T]  [T ⪯ U]
-         {𝔅 : ProvabilityPredicate T U} [𝔅.HBL]
+         {𝔅 : Provability T U} [𝔅.HBL]
 
 lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization L} : U ⊢!. f.interpret 𝔅 A := by
   replace h := Normal.iff_logic_provable_provable.mp h;
