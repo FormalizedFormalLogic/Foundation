@@ -144,6 +144,8 @@ import Foundation.Modal.Logic.Dz.Basic
 
 import Foundation.Modal.Maximal.Makinson
 
+import Foundation.Modal.VanBentham.Makinson
+
 -- Provability Logic
 import Foundation.ProvabilityLogic.Incompleteness
 
