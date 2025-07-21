@@ -31,6 +31,10 @@ instance : Entailment.Consistent Hilbert.EC := consistent_of_sound_frameclass Fr
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
+instance : Complete Hilbert.EC FrameClass.EC := complete_of_canonical_frame FrameClass.EC (minimalCanonicalFrame (Hilbert.EC)) $ by
+  apply Set.mem_setOf_eq.mpr;
+  infer_instance;
+
 end EC.Neighborhood
 
 instance : Hilbert.E ⪱ Hilbert.EC := by

@@ -18,7 +18,11 @@ namespace MaximalConsistentSet.proofset
 
 local notation "‖" φ "‖" => MaximalConsistentSet.proofset 𝓢 φ
 
-variable {φ ψ : Formula α}
+variable {φ ψ : Formula α} {Γ : MaximalConsistentSet 𝓢}
+
+omit [DecidableEq α] [Entailment.Cl 𝓢] in
+@[grind]
+lemma iff_mem : φ ∈ Γ ↔ Γ ∈ ‖φ‖ := by simp [proofset];
 
 lemma eq_top : ‖⊤‖ = Set.univ := by simp [proofset];
 
@@ -42,6 +46,20 @@ attribute [simp, grind]
   eq_imp
   eq_and
   eq_or
+
+lemma iff_provable_eq_univ : 𝓢 ⊢! φ ↔ ‖φ‖ = Set.univ := by
+  constructor;
+  . intro h;
+    apply Set.eq_univ_of_forall;
+    intro Γ;
+    apply iff_mem.mp;
+    grind;
+  . intro h;
+    apply iff_forall_mem_provable.mp;
+    intro Γ;
+    apply iff_mem.mpr;
+    rw [h];
+    tauto;
 
 @[grind]
 lemma imp_subset : 𝓢 ⊢! φ ➝ ψ ↔ ‖φ‖ ⊆ ‖ψ‖ := by
@@ -181,6 +199,7 @@ abbrev minimalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consiste
 namespace minimalCanonicalFrame
 
 variable {𝓢 : S} [Entailment.E 𝓢] [Entailment.Consistent 𝓢]
+
 
 instance : (minimalCanonicalFrame 𝓢).IsCanonical 𝓢 where
   box_proofset := by

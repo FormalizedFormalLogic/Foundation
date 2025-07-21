@@ -40,17 +40,18 @@ instance : Hilbert.ED ⪱ Hilbert.END := by
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.ED);
       apply not_validOnFrameClass_of_exists_frame;
-      use {
+      let F : Frame := {
         World := Fin 1,
         𝒩 := λ w => ∅,
       };
+      use F;
       constructor;
       . constructor;
         intro X x;
-        simp [Frame.box, Frame.dia];
+        simp [Frame.box, Frame.dia, F];
       . apply not_imp_not.mpr containsUnit_of_valid_axiomN;
         by_contra! hC;
-        simpa using @hC.contains_unit 0;
+        simpa [F] using F.univ_mem 0;
 
 instance : Hilbert.EP ⪱ Hilbert.END := by
   constructor;

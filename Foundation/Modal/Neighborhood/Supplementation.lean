@@ -1,6 +1,7 @@
 import Foundation.Modal.Neighborhood.Basic
 import Foundation.Modal.Neighborhood.AxiomM
 import Foundation.Modal.Neighborhood.AxiomC
+import Foundation.Modal.Neighborhood.AxiomN
 import Foundation.Modal.Neighborhood.AxiomGeach
 
 namespace LO.Modal.Neighborhood
@@ -68,6 +69,13 @@ instance [F.IsReflexive] : F♯.IsReflexive := by
   apply F.refl;
   exact hY₂;
 
+instance [F.ContainsUnit] : F♯.ContainsUnit := by
+  constructor;
+  ext x;
+  suffices ∃ a, a ∈ F.𝒩 x by simpa [Supplementation, mk_ℬ];
+  use Set.univ;
+  simp;
+
 instance [F.IsTransitive] : F♯.IsTransitive := by
   constructor;
   intro X w hw;
@@ -99,11 +107,11 @@ open MaximalConsistentSet.proofset
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.Consistent 𝓢]
 
-abbrev supplementalMinimalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Frame := (minimalCanonicalFrame 𝓢)♯
+abbrev maximalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Frame := (minimalCanonicalFrame 𝓢)♯
 
 variable [Entailment.EM 𝓢]
 
-instance : (supplementalMinimalCanonicalFrame 𝓢).IsCanonical 𝓢 where
+instance : (maximalCanonicalFrame 𝓢).IsCanonical 𝓢 where
   box_proofset := by
     intro φ;
     apply Set.eq_of_subset_of_subset;
