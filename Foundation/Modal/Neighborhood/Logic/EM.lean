@@ -29,7 +29,7 @@ instance : Entailment.Consistent Hilbert.EM := consistent_of_sound_frameclass Fr
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Hilbert.EM FrameClass.EM := complete_of_canonical_frame FrameClass.EM (supplementalMinimalCanonicalFrame (Hilbert.EM)) $ by
+instance : Complete Hilbert.EM FrameClass.EM := complete_of_canonical_frame FrameClass.EM (maximalCanonicalFrame (Hilbert.EM)) $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 

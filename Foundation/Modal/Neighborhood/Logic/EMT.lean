@@ -33,7 +33,7 @@ instance : Entailment.Consistent Hilbert.EMT := consistent_of_sound_frameclass F
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Hilbert.EMT FrameClass.EMT := complete_of_canonical_frame FrameClass.EMT (supplementalMinimalCanonicalFrame (Hilbert.EMT)) $ by
+instance : Complete Hilbert.EMT FrameClass.EMT := complete_of_canonical_frame FrameClass.EMT (maximalCanonicalFrame (Hilbert.EMT)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 

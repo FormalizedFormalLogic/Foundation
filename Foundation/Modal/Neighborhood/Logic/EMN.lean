@@ -31,6 +31,10 @@ instance : Entailment.Consistent Hilbert.EMN := consistent_of_sound_frameclass F
   simp only [Set.mem_setOf_eq];
   constructor;
 
+instance : Complete Hilbert.EMN FrameClass.EMN := complete_of_canonical_frame FrameClass.EMN (maximalCanonicalFrame (Hilbert.EMN)) $ by
+  apply Set.mem_setOf_eq.mpr;
+  constructor;
+
 end EMN.Neighborhood
 
 instance : Hilbert.EM ⪱ Hilbert.EMN := by
@@ -79,7 +83,7 @@ instance : Hilbert.EN ⪱ Hilbert.EMN := by
       constructor;
       . exact {
           contains_unit := by
-            intro x;
+            ext x;
             match x with | 0 | 1 => simp_all [M]
         }
       . simp! [M, Semantics.Realize, Satisfies];

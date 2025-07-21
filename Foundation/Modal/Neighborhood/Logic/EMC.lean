@@ -79,7 +79,7 @@ instance : Entailment.Consistent Hilbert.EMC := consistent_of_sound_frameclass F
   simp;
   constructor;
 
-instance : Complete Hilbert.EMC FrameClass.EMC := complete_of_canonical_frame FrameClass.EMC (supplementalMinimalCanonicalFrame (Hilbert.EMC)) $ by
+instance : Complete Hilbert.EMC FrameClass.EMC := complete_of_canonical_frame FrameClass.EMC (maximalCanonicalFrame (Hilbert.EMC)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 

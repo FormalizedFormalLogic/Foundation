@@ -30,7 +30,7 @@ instance : Entailment.Consistent Hilbert.EMC4 := consistent_of_sound_frameclass 
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Hilbert.EMC4 FrameClass.EMC4 := complete_of_canonical_frame FrameClass.EMC4 (supplementalMinimalCanonicalFrame (Hilbert.EMC4)) $ by
+instance : Complete Hilbert.EMC4 FrameClass.EMC4 := complete_of_canonical_frame FrameClass.EMC4 (maximalCanonicalFrame (Hilbert.EMC4)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
