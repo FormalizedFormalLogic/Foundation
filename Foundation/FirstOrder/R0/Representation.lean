@@ -181,24 +181,24 @@ private lemma models_codeAux {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc :
   induction hc generalizing y
   case zero =>
     have : (0 : Part ℕ) = Part.some 0 := rfl
-    simp [code, codeAux, models_iff, this, eq_comm]
+    simp [codeAux, this, eq_comm]
   case one =>
     have : (1 : Part ℕ) = Part.some 1 := rfl
-    simp [code, codeAux, models_iff, this, eq_comm]
+    simp [codeAux, this, eq_comm]
   case equal i j =>
-    by_cases hv : v i = v j <;> simp [code, codeAux, models_iff, hv, Nat.isEqNat, eq_comm]
+    by_cases hv : v i = v j <;> simp [codeAux, hv, Nat.isEqNat, eq_comm]
   case lt i j =>
-    simp [code, codeAux, models_iff]
+    simp [codeAux]
     by_cases hv : v i < v j <;> simp [hv, Nat.isLtNat, eq_comm, Nat.not_lt.mp]
-  case add => simp [code, codeAux, models_iff, eq_comm]
-  case mul => simp [code, codeAux, models_iff, eq_comm]
-  case proj => simp [code, codeAux, models_iff, eq_comm]
+  case add => simp [codeAux, eq_comm]
+  case mul => simp [codeAux, eq_comm]
+  case proj => simp [codeAux, eq_comm]
   case comp m n c d f g _ _ ihf ihg =>
     suffices
       (∃ e' : Fin n → ℕ, (Semiformula.Evalfm ℕ (y :> e')) (codeAux c) ∧
         ∀ i, (Semiformula.Evalfm ℕ (e' i :> v)) (codeAux (d i)))
       ↔ (List.Vector.mOfFn (g · (List.Vector.ofFn v))).bind f = Part.some y by
-        simp [code, codeAux, models_iff]
+        simp [codeAux]
         simpa [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons']
     constructor
     · rintro ⟨e, hf, hg⟩
@@ -215,7 +215,7 @@ private lemma models_codeAux {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc :
     suffices
       (f (y ::ᵥ List.Vector.ofFn v) = 0 ∧ ∀ x < y, 0 < f (x ::ᵥ List.Vector.ofFn v))
       ↔ (Nat.rfind fun n ↦ Part.some (decide (f (n ::ᵥ List.Vector.ofFn v) = 0))) = Part.some y by
-      simp [code, codeAux, models_iff]
+      simp [codeAux]
       simpa [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons', ihf, List.Vector.ofFn_vecCons]
     constructor
     · rintro ⟨hy, h⟩

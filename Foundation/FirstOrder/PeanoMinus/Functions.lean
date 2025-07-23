@@ -42,14 +42,14 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 @[simp] lemma sub_le_self (a b : V) : a - b ≤ a := by
   have : b ≤ a ∨ a < b := le_or_gt b a
-  rcases this with (hxy | hxy) <;> simp [hxy]
+  rcases this with (hxy | hxy) <;> simp
   · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
   · simp [sub_spec_of_lt hxy]
 
 open FirstOrder.Arithmetic.HierarchySymbol.Boldface
 
 def _root_.LO.FirstOrder.Arithmetic.subDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)”
 
 lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef := by
   intro v; simp [FirstOrder.Arithmetic.subDef, sub_eq_iff]
@@ -177,11 +177,11 @@ lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
 def _root_.LO.FirstOrder.Arithmetic.dvd : 𝚺₀.Semisentence 2 :=
-  .mkSigma “x y. ∃ z <⁺ y, y = x * z” (by simp)
+  .mkSigma “x y. ∃ z <⁺ y, y = x * z”
 
 lemma dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd :=
   fun v ↦ by
-    simp [dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, dvd]
+    simp [dvd_iff_bounded, dvd]
 
 @[simp] lemma dvd_defined_iff (v) :
     Semiformula.Evalbm V v dvd.val ↔ v 0 ∣ v 1 := dvd_defined.df.iff v
@@ -240,11 +240,11 @@ def IsPrime (a : V) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 -- TODO: prove IsPrime a ↔ Prime a
 
 def _root_.LO.FirstOrder.Arithmetic.isPrime : 𝚺₀.Semisentence 1 :=
-  .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
+  .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x”
 
 lemma isPrime_defined : 𝚺₀-Predicate (λ a : V ↦ IsPrime a) via isPrime := by
   intro v
-  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
+  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton,
     IsPrime, isPrime]
 
 end Prime
@@ -254,7 +254,7 @@ end Prime
 section min
 
 def _root_.LO.FirstOrder.Arithmetic.min : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y. (x ≤ y → z = x) ∧ (x ≥ y → z = y)” (by simp)
+  .mkSigma “z x y. (x ≤ y → z = x) ∧ (x ≥ y → z = y)”
 
 set_option linter.flexible false in
 lemma min_defined : 𝚺₀-Function₂ (min : V → V → V) via min := by
@@ -279,7 +279,7 @@ end min
 section max
 
 def _root_.LO.FirstOrder.Arithmetic.max : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)” (by simp)
+  .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)”
 
 set_option linter.flexible false in
 lemma max_defined : 𝚺₀-Function₂ (max : V → V → V) via max := by

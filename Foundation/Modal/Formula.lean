@@ -567,6 +567,7 @@ variable {s : Substitution α} {φ ψ ξ : Formula α}
 
 @[simp] lemma subst_atom {a} : (.atom a)⟦s⟧ = s a := rfl
 @[simp] lemma subst_bot : ⊥⟦s⟧ = ⊥ := rfl
+@[simp] lemma subst_top : (⊤ : Formula α)⟦s⟧ = ⊤ := rfl
 @[simp] lemma subst_imp : (φ ➝ ψ)⟦s⟧ = φ⟦s⟧ ➝ ψ⟦s⟧ := rfl
 @[simp] lemma subst_neg : (∼φ)⟦s⟧ = ∼(φ⟦s⟧) := rfl
 @[simp] lemma subst_and : (φ ⋏ ψ)⟦s⟧ = φ⟦s⟧ ⋏ ψ⟦s⟧ := rfl

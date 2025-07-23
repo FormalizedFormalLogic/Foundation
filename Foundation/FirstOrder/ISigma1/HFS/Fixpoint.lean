@@ -24,20 +24,20 @@ variable {k} (φ : Blueprint k)
 instance : Coe (Blueprint k) (𝚫₁.Semisentence (k + 2)) := ⟨Blueprint.core⟩
 
 def succDef : 𝚺₁.Semisentence (k + 3) := .mkSigma
-  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ s ∧ !φ.core.pi x ih ⋯ → x ∈ u)” (by simp)
+  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ s ∧ !φ.core.pi x ih ⋯ → x ∈ u)”
 
 def prBlueprint : PR.Blueprint k where
-  zero := .mkSigma “x. x = 0” (by simp)
+  zero := .mkSigma “x. x = 0”
   succ := φ.succDef
 
 def limSeqDef : 𝚺₁.Semisentence (k + 2) := (φ.prBlueprint).resultDef
 
 def fixpointDef : 𝚺₁.Semisentence (k + 1) :=
-  .mkSigma “x. ∃ s L, !φ.limSeqDef L s ⋯  ∧ x ∈ L” (by simp)
+  .mkSigma “x. ∃ s L, !φ.limSeqDef L s ⋯  ∧ x ∈ L”
 
 def fixpointDefΔ₁ : 𝚫₁.Semisentence (k + 1) := .mkDelta
-  (.mkSigma “x. ∃ L, !φ.limSeqDef L (x + 1) ⋯  ∧ x ∈ L” (by simp))
-  (.mkPi “x. ∀ L, !φ.limSeqDef L (x + 1) ⋯  → x ∈ L” (by simp))
+  (.mkSigma “x. ∃ L, !φ.limSeqDef L (x + 1) ⋯  ∧ x ∈ L”)
+  (.mkPi “x. ∀ L, !φ.limSeqDef L (x + 1) ⋯  → x ∈ L”)
 
 end Blueprint
 

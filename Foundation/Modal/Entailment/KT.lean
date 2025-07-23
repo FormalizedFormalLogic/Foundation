@@ -34,7 +34,7 @@ protected def axiomT : 𝓢 ⊢ □φ ➝ φ := C_trans box_dni (C_of_CNN (C_tra
 
 instance : HasAxiomT 𝓢 := ⟨fun _ ↦ KT'.axiomT⟩
 instance : Entailment.KT 𝓢 where
-instance : Entailment.KD 𝓢 where
+noncomputable instance : Entailment.KD 𝓢 where
 
 end KT'
 

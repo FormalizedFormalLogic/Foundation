@@ -495,6 +495,12 @@ namespace Axiom
 @[simp] lemma coe_insert (σ : Sentence L) (A : Axiom L) : (insert σ A).toTheory = insert ↑σ ↑A := by
   ext; simp [Axiom.toTheory]; tauto
 
+@[simp] lemma coe_insert_eq (σ : Sentence L) (T : Theory L) : ((insert ↑σ T : Theory L) : Axiom L) = insert σ ↑T := by
+  ext τ
+  simp [Theory.toAxiom]
+  simp [Semiformula.close₀]
+  tauto
+
 open Entailment
 
 instance : Axiomatized (Axiom L) where

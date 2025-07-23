@@ -43,6 +43,8 @@ import Foundation.FirstOrder.Arithmetic.Induction
 import Foundation.FirstOrder.R0.Basic
 import Foundation.FirstOrder.R0.Representation
 
+import Foundation.FirstOrder.Q.Basic
+
 import Foundation.FirstOrder.PeanoMinus.Basic
 import Foundation.FirstOrder.PeanoMinus.Functions
 
@@ -56,19 +58,21 @@ import Foundation.FirstOrder.ISigma0.Exponential
 import Foundation.FirstOrder.ISigma1.Bit
 import Foundation.FirstOrder.ISigma1.HFS
 import Foundation.FirstOrder.ISigma1.Ind
-import Foundation.FirstOrder.ISigma1.Metamath
 
 import Foundation.FirstOrder.Omega1.Basic
 import Foundation.FirstOrder.Omega1.Nuon
 
-import Foundation.FirstOrder.Incompleteness.FixedPoint
-import Foundation.FirstOrder.Incompleteness.StandardProvability
-import Foundation.FirstOrder.Incompleteness.First
-import Foundation.FirstOrder.Incompleteness.Second
-import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
-import Foundation.FirstOrder.Incompleteness.WitnessComparison
-import Foundation.FirstOrder.Incompleteness.Delta1
+import Foundation.FirstOrder.Internal.Syntax
+import Foundation.FirstOrder.Internal.FixedPoint
+import Foundation.FirstOrder.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Internal.Consistency
+import Foundation.FirstOrder.Internal.WitnessComparison
+import Foundation.FirstOrder.Internal.RosserProvability
 
+import Foundation.FirstOrder.Incompleteness.First
+import Foundation.FirstOrder.Incompleteness.Dense
+import Foundation.FirstOrder.Incompleteness.Second
+import Foundation.FirstOrder.Incompleteness.Examples
 
 import Foundation.FirstOrder.Hauptsatz
 
@@ -81,7 +85,7 @@ import Foundation.IntFO.Translation
 -- import Foundation.Propositional.Dialectica.Basic
 
 -- Modal
-import Foundation.Modal.Hilbert.K_EMCN
+import Foundation.Modal.Hilbert.Minimal_Normal
 import Foundation.Modal.Hilbert.GL_K4Loeb_K4Henkin_K4Hen
 
 import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
@@ -118,6 +122,11 @@ import Foundation.Modal.Kripke.LinearFrame
 import Foundation.Modal.PLoN.Logic.N
 
 import Foundation.Modal.Neighborhood.Logic.EMCN
+import Foundation.Modal.Neighborhood.Logic.E4
+import Foundation.Modal.Neighborhood.Logic.EMT4
+import Foundation.Modal.Neighborhood.Logic.EMC4
+import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
+import Foundation.Modal.Neighborhood.Logic.END
 
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.ModalCompanion.KC

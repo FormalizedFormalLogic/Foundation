@@ -724,13 +724,21 @@ instance [Entailment.EMCN 𝓢] : Entailment.ECN 𝓢 where
 
 protected class EK extends Entailment.E 𝓢, HasAxiomK 𝓢
 
+protected class ET extends Entailment.E 𝓢, HasAxiomT 𝓢
+protected class EMT extends Entailment.E 𝓢, HasAxiomM 𝓢, HasAxiomT 𝓢
+instance [Entailment.EMT 𝓢] : Entailment.EM 𝓢 where
+instance [Entailment.EMT 𝓢] : Entailment.ET 𝓢 where
+
 protected class E4 extends Entailment.E 𝓢, HasAxiomFour 𝓢
 
 protected class EMC4 extends Entailment.EMC 𝓢, HasAxiomFour 𝓢
+instance [Entailment.EMC4 𝓢] : Entailment.E4 𝓢 where
+
 protected class EK4 extends Entailment.E4 𝓢, HasAxiomK 𝓢
 
-protected class S04 extends Entailment.E4 𝓢, HasAxiomT 𝓢, HasAxiomM 𝓢
-
+protected class EMT4 extends Entailment.E4 𝓢, HasAxiomT 𝓢, HasAxiomM 𝓢
+instance [Entailment.EMT4 𝓢] : Entailment.EMT 𝓢 where
+instance [Entailment.EMT4 𝓢] : Entailment.E4 𝓢 where
 
 protected class K extends Entailment.Cl 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
 

@@ -16,11 +16,11 @@ def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
 instance : Membership V V := ⟨fun a i ↦ Bit i a⟩
 
 def _root_.LO.FirstOrder.Arithmetic.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y” (by simp)
+  “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y”
 
 set_option linter.flexible false in
 lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) via bitDef := by
-  intro v; simp [bitDef, ←le_iff_lt_succ]
+  intro v; simp [bitDef]
   constructor
   · intro h; exact ⟨by simp [h.le], h⟩
   · rintro ⟨_, h⟩; exact h
@@ -74,7 +74,7 @@ variable {ξ : Type*} {n}
 instance : Semiformula.Operator.Mem ℒₒᵣ := ⟨⟨bitDef.val⟩⟩
 
 lemma operator_mem_def : Semiformula.Operator.Mem.mem.sentence = bitDef.val := by
-  simp [Semiformula.Operator.Mem.mem, Semiformula.Operator.operator]
+  simp [Semiformula.Operator.Mem.mem]
 
 def ballIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) : Semiformula ℒₒᵣ ξ n := “∀ x < !!t, x ∈ !!(Rew.bShift t) → !p x ⋯”
 
@@ -85,19 +85,19 @@ def bexIn (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
 
 @[simp] lemma Hieralchy.ballIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (ballIn t p) ↔ Hierarchy Γ m p := by
-  simp only [Arithmetic.ballIn, Rew.bshift_positive, Hierarchy.ball_iff, Hierarchy.imp_iff, and_iff_right_iff_imp]
+  simp only [Arithmetic.ballIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 @[simp] lemma Hieralchy.bexIn {Γ m} (t : Semiterm ℒₒᵣ ξ n) (p : Semiformula ℒₒᵣ ξ (n + 1)) :
     Hierarchy Γ m (bexIn t p) ↔ Hierarchy Γ m p := by
-  simp only [Arithmetic.bexIn, Rew.bshift_positive, Hierarchy.bex_iff, Hierarchy.and_iff, and_iff_right_iff_imp]
+  simp only [Arithmetic.bexIn]
   simp [Semiformula.Operator.operator, operator_mem_def]
 
 def memRel : 𝚺₀.Semisentence 3 := .mkSigma
-  “R x y. ∃ p <⁺ (x + y + 1)², !pairDef p x y ∧ p ∈ R” (by simp)
+  “R x y. ∃ p <⁺ (x + y + 1)², !pairDef p x y ∧ p ∈ R”
 
 def memRel₃ : 𝚺₀.Semisentence 4 := .mkSigma
-  “R x y z. ∃ yz <⁺ (y + z + 1)², !pairDef yz y z ∧ ∃ xyz <⁺ (x + yz + 1)², !pairDef xyz x yz ∧ xyz ∈ R” (by simp)
+  “R x y z. ∃ yz <⁺ (y + z + 1)², !pairDef yz y z ∧ ∃ xyz <⁺ (x + yz + 1)², !pairDef xyz x yz ∧ xyz ∈ R”
 
 def memRelOpr : Semiformula.Operator ℒₒᵣ 3 := ⟨memRel.val⟩
 
@@ -137,10 +137,10 @@ macro_rules
 end
 
 @[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def, memRelOpr]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRelOpr]
 
 @[simp] lemma Hierarchy.memRel₃ {t₁ t₂ t₃ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “:⟪!!t₁, !!t₂, !!t₃⟫:∈ !!u” := by
-  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, operator_mem_def, memRel₃Opr]
+  simp [Semiformula.Operator.operator, Matrix.fun_eq_vec_two, memRel₃Opr]
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
 
@@ -167,20 +167,20 @@ scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformul
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
 
 lemma memRel_defined : 𝚺₀-Relation₃ (fun r x y : V ↦ ⟪x, y⟫ ∈ r) via memRel := by
-  intro v; simp [memRel, pair_defined.df.iff, lt_succ_iff_le]
+  intro v; simp [memRel, pair_defined.df.iff]
 
 lemma memRel₃_defined : 𝚺₀-Relation₄ (fun r x y z : V ↦ ⟪x, y, z⟫ ∈ r) via memRel₃ := by
-  intro v; simp [memRel₃, pair_defined.df.iff, lt_succ_iff_le]
+  intro v; simp [memRel₃, pair_defined.df.iff]
 
 @[simp] lemma eval_memRel {x y r : V} :
     memRelOpr.val ![r, x, y] ↔ ⟪x, y⟫ ∈ r := by
   unfold Semiformula.Operator.val
-  simp [memRelOpr, pair_defined.df.iff, memRel_defined.df.iff]
+  simp [memRelOpr, memRel_defined.df.iff]
 
 @[simp] lemma eval_memRel₃ {x y z r : V} :
     memRel₃Opr.val ![r, x, y, z] ↔ ⟪x, y, z⟫ ∈ r := by
   unfold Semiformula.Operator.val
-  simp [memRel₃Opr, pair_defined.df.iff, memRel₃_defined.df.iff]
+  simp [memRel₃Opr, memRel₃_defined.df.iff]
 
 end LO.FirstOrder.Arithmetic
 
@@ -214,6 +214,12 @@ section singleton
 noncomputable scoped instance : Singleton V V := ⟨fun a ↦ Exp.exp a⟩
 
 lemma singleton_def (a : V) : {a} = Exp.exp a := rfl
+
+@[simp] lemma singleton_injective (a b : V) : ({a} : V) = {b} ↔ a = b := by
+  constructor
+  · intro h
+    simpa [singleton_def] using congr_arg log h
+  · rintro rfl; rfl
 
 end singleton
 
@@ -260,7 +266,7 @@ lemma insert_graph (b i a : V) :
       rintro x _ rfl rfl; rfl ⟩
 
 def _root_.LO.FirstOrder.Arithmetic.insertDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “b i a. (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)” (by simp)
+  “b i a. (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)”
 
 lemma insert_defined : 𝚺₀-Function₂ (insert : V → V → V) via insertDef := by
   intro v; simp [insertDef, insert_graph]
@@ -278,6 +284,12 @@ lemma insert_le_of_le_of_le {i j a b : V} (hij : i ≤ j) (hab : a ≤ b) : inse
   by_cases hi : i ∈ a
   · simpa [hi] using le_trans hab (by simp)
   · simpa [hi] using add_le_add hab (exp_monotone_le.mpr hij)
+
+lemma insert_absolute (x s : ℕ) :
+    ((insert x s : ℕ) : V) = insert (x : V) (s : V) := by
+  have := DefinedFunction.shigmaZero_absolute_func V (k := 2) (f := fun v ↦ insert (v 0) (v 1)) (f' := fun v ↦ insert (v 0) (v 1))
+      (φ := insertDef) insert_defined insert_defined ![x, s]
+  simpa using this
 
 end insert
 
@@ -323,7 +335,7 @@ lemma lt_exp_iff {a i : V} : a < Exp.exp i ↔ ∀ j ∈ a, j < i :=
 instance : HasSubset V := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 
 def _root_.LO.FirstOrder.Arithmetic.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “a b. ∀ i < a, i ∈ a → i ∈ b” (by simp)
+  “a b. ∀ i < a, i ∈ a → i ∈ b”
 
 lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : V → V → Prop) via bitSubsetDef := by
   intro v
@@ -386,7 +398,7 @@ private lemma under_graph (x y : V) : y = under x ↔ y + 1 = Exp.exp x := by
     simpa [under] using this
 
 def _root_.LO.FirstOrder.Arithmetic.underDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “y x. !expDef.val (y + 1) x” (by simp)
+  “y x. !expDef.val (y + 1) x”
 
 lemma under_defined : 𝚺₀-Function₁ (under : V → V) via underDef := by
   intro v; simp [underDef, under_graph]

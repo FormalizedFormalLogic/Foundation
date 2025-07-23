@@ -1,5 +1,0 @@
-import Foundation.FirstOrder.Incompleteness.StandardProvability.FormalizedArithmetic
-import Foundation.FirstOrder.Incompleteness.StandardProvability.FormalizedR0
-import Foundation.FirstOrder.Incompleteness.StandardProvability.D1
-import Foundation.FirstOrder.Incompleteness.StandardProvability.D3
-import Foundation.FirstOrder.Incompleteness.StandardProvability.DerivabilityCondition

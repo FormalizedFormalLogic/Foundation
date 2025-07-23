@@ -17,7 +17,7 @@ lemma iff_provable_GL_provable_box_S {A : Modal.Formula _} : Modal.GL ⊢! A ↔
   . intro h;
     apply GL.arithmetical_completeness (T := 𝐈𝚺₁);
     intro f;
-    exact Iff.mp 𝐈𝚺₁.standardPr.sound (S.arithmetical_soundness h f)
+    exact Iff.mp 𝐈𝚺₁.standardProvability.sound (S.arithmetical_soundness h f)
 
 theorem S.no_boxbot : Modal.S ⊬ □⊥ := iff_provable_GL_provable_box_S.not.mp $ by
   simp only [Hilbert.Normal.iff_logic_provable_provable];

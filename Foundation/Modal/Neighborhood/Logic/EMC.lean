@@ -1,6 +1,7 @@
 import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.Logic.EM
 import Foundation.Modal.Neighborhood.Logic.EC
+import Foundation.Vorspiel.Set.Fin
 
 
 namespace LO.Modal
@@ -17,7 +18,7 @@ protected abbrev FrameClass.EMC : FrameClass := { F | F.IsEMC }
 
 abbrev EK_counterframe_for_M_and_C : Frame := {
   World := Fin 4,
-  ν := λ _ => {{0, 1}, {0, 2}}
+  𝒩 := λ _ => {{0, 1}, {0, 2}}
 }
 
 lemma EK_counterframe_for_M_and_C.validate_axiomK : EK_counterframe_for_M_and_C ⊧ Axioms.K (atom 0) (atom 1) := by
@@ -70,18 +71,16 @@ namespace Hilbert
 namespace EMC.Neighborhood
 
 instance : Sound Hilbert.EMC FrameClass.EMC := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.insert_iff, Semantics.RealizeSet.singleton_iff];
-  refine ⟨?_, ?_⟩;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomM_of_isMonotonic;
-  . intro F hF;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply valid_axiomC_of_isRegular;
+  constructor;
+  rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
 instance : Entailment.Consistent Hilbert.EMC := consistent_of_sound_frameclass FrameClass.EMC $ by
   use Frame.simple_blackhole;
   simp;
+  constructor;
+
+instance : Complete Hilbert.EMC FrameClass.EMC := complete_of_canonical_frame FrameClass.EMC (maximalCanonicalFrame (Hilbert.EMC)) $ by
+  apply Set.mem_setOf_eq.mpr;
   constructor;
 
 end EMC.Neighborhood
@@ -98,7 +97,7 @@ instance : Hilbert.EC ⪱ Hilbert.EMC := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 3,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{1}}
           | 1 => {{0}, {0, 1}}
@@ -142,7 +141,7 @@ instance : Hilbert.EM ⪱ Hilbert.EMC := by
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
         World := Fin 2,
-        ν := λ w =>
+        𝒩 := λ w =>
           match w with
           | 0 => {{0}, {1}, {0, 1}}
           | 1 => {{1}, {0, 1}},
@@ -155,6 +154,7 @@ instance : Hilbert.EM ⪱ Hilbert.EMC := by
       use M, 0;
       constructor;
       . exact {
+          -- TODO: need golf!
           mono := by
             rintro X Y w hw;
             constructor;

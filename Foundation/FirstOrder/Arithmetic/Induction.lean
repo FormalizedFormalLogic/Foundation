@@ -393,13 +393,13 @@ instance : 𝐏𝐀 ⪯ 𝐓𝐀 := inferInstance
 instance (T : ArithmeticTheory) [𝐏𝐀⁻ ⪯ T] : 𝐑₀ ⪯ T :=
   Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐏𝐀⁻)) inferInstance
 
-instance (T : ArithmeticTheory) [𝐈𝚺₀ ⪯ T] : 𝐑₀ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₀)) inferInstance
+instance (T : ArithmeticTheory) [𝐈𝚺₀ ⪯ T] : 𝐏𝐀⁻ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstanceAs (𝐏𝐀⁻ ⪯ 𝐈𝚺₀)) inferInstance
 
-instance (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] : 𝐑₀ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
+instance (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] : 𝐏𝐀⁻ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstanceAs (𝐏𝐀⁻ ⪯ 𝐈𝚺₁)) inferInstance
 
-instance (T : ArithmeticTheory) [𝐏𝐀 ⪯ T] : 𝐑₀ ⪯ T :=
-  Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐏𝐀)) inferInstance
+instance (T : ArithmeticTheory) [𝐏𝐀 ⪯ T] : 𝐏𝐀⁻ ⪯ T :=
+  Entailment.WeakerThan.trans (inferInstanceAs (𝐏𝐀⁻ ⪯ 𝐏𝐀)) inferInstance
 
 end LO
