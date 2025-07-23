@@ -71,6 +71,9 @@ local postfix:80 "¹" => standardTranslation
 
 namespace Kripke
 
+open FirstOrder.Frame (pmem)
+open FirstOrder.Semiterm
+
 variable {M : Kripke.Model} {x : M.World} {φ : NNFormula ℕ}
 
 noncomputable instance {M : Model} : FirstOrder.Structure 𝓛𝓕 M.World where
@@ -80,9 +83,9 @@ noncomputable instance {M : Model} : FirstOrder.Structure 𝓛𝓕 M.World where
     | .pred p => fun v => M (v 0) p
     | .lt     => fun v => v 0 ≺ v 1
 
-open FirstOrder.Frame (pmem)
-
 lemma standardTranslation_satisfies : x ⊧ φ ↔ M ⊧ₘ₀ !(φ¹)/[x] := by sorry;
+
+#check LO.FirstOrder.models₀_and_iff
 
 lemma standardTranslation_validOnModel : M ⊧ φ ↔ M ⊧ₘ₀ “∀ x, !(φ¹) x” := by
   induction φ with
@@ -95,6 +98,7 @@ lemma standardTranslation_validOnModel : M ⊧ φ ↔ M ⊧ₘ₀ “∀ x, !(φ
     . sorry;
   | natom a => sorry;
   | and φ ψ ihφ ihψ =>
+    simp_all [standardTranslation]
     constructor;
     . intro h;
       replace ihφ := ihφ.mp $ by intro x; exact h x |>.1;
@@ -107,9 +111,9 @@ lemma standardTranslation_validOnModel : M ⊧ φ ↔ M ⊧ₘ₀ “∀ x, !(φ
       sorry;
     . sorry;
   | box φ ihφ =>
+    simp_all [standardTranslation];
     constructor;
     . intro h;
-      dsimp [standardTranslation];
       sorry;
     . intro h;
       sorry;
