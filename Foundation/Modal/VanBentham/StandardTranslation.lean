@@ -16,7 +16,7 @@ inductive Rel : ℕ → Type _
 
 end Frame
 
-/-- Language of Kripke frame for mono modal logic. -/
+/-- Language of Kripke frame for basic modal logic. -/
 @[reducible]
 def frame : Language where
   Func _ := PEmpty
@@ -54,7 +54,7 @@ namespace LO.Modal
 
 open NNFormula
 
-def standardTranslation : NNFormula ℕ → LO.FirstOrder.Semisentence 𝓛𝓕 1
+def standardTranslation : NNFormula ℕ → FirstOrder.Semisentence 𝓛𝓕 1
   | .atom  a => “x. x ⊩ a”
   | .natom a => “x. ¬x ⊩ a”
   | .verum   => “⊤”
@@ -71,11 +71,54 @@ local postfix:80 "¹" => standardTranslation
 
 namespace Kripke
 
-variable {φ : NNFormula ℕ} {M : Kripke.Model}
+variable {M : Kripke.Model} {x : M.World} {φ : NNFormula ℕ}
 
-lemma standardTranslation_satisfies {M : Model} {x : M} : x ⊧ φ := by sorry;
+noncomputable instance {M : Model} : FirstOrder.Structure 𝓛𝓕 M.World where
+  func := fun _ f a => M.world_nonempty.some -- TODO: ?
+  rel := fun _ r =>
+    match r with
+    | .pred p => fun v => M (v 0) p
+    | .lt     => fun v => v 0 ≺ v 1
 
-lemma standardTranslation_validOnModel {M : Model} : M ⊧ φ := by sorry;
+open FirstOrder.Frame (pmem)
+
+lemma standardTranslation_satisfies : x ⊧ φ ↔ M ⊧ₘ₀ !(φ¹)/[x] := by sorry;
+
+lemma standardTranslation_validOnModel : M ⊧ φ ↔ M ⊧ₘ₀ “∀ x, !(φ¹) x” := by
+  induction φ with
+  | verum   => tauto;
+  | falsum  => tauto;
+  | atom a =>
+    constructor;
+    . intro h;
+      sorry;
+    . sorry;
+  | natom a => sorry;
+  | and φ ψ ihφ ihψ =>
+    constructor;
+    . intro h;
+      replace ihφ := ihφ.mp $ by intro x; exact h x |>.1;
+      replace ihψ := ihψ.mp $ by intro x; exact h x |>.2;
+      sorry;
+    . sorry;
+  | or φ ψ ihφ ihψ =>
+    constructor;
+    . intro h;
+      sorry;
+    . sorry;
+  | box φ ihφ =>
+    constructor;
+    . intro h;
+      dsimp [standardTranslation];
+      sorry;
+    . intro h;
+      sorry;
+  | dia φ ihφ =>
+    constructor;
+    . intro h;
+      dsimp [standardTranslation];
+      sorry;
+    . sorry;
 
 end Kripke
 
