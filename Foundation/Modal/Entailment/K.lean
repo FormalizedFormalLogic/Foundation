@@ -661,6 +661,16 @@ lemma nec! {Γ : Set F} (h : Γ *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! □φ := by
     simp_all;
   . assumption;
 
+lemma box_regularity! (h : Γ *⊢[𝓢]! φ ➝ ψ) : Γ.box *⊢[𝓢]! □φ ➝ □ψ := by
+  have H₁ := Context.nec! h;
+  have H₂ : Γ.box *⊢[𝓢]! □(φ ➝ ψ) ➝ (□φ ➝ □ψ) := by simp;
+  exact H₂ ⨀ H₁;
+
+lemma box_congruence! (h : Γ *⊢[𝓢]! φ ⭤ ψ) : Γ.box *⊢[𝓢]! □φ ⭤ □ψ := by
+  apply E!_intro;
+  . apply box_regularity!; exact C_of_E_mp! h;
+  . apply box_regularity!; exact C_of_E_mpr! h;
+
 end Context
 
 end LO.Modal.Entailment

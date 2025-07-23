@@ -75,30 +75,76 @@ namespace Formula
 
 variable {α : Type*} {φ : Formula _}
 
-def flag : Bool → Formula α → Formula α
-  | true,  φ => φ
-  | false, φ => ∼φ
+def flag (φ : Formula α) : Bool → Formula α
+  | true  => φ
+  | false => ∼φ
+
+@[simp]
+lemma atom_flag_boxdotTranslated : (flag (.atom a) b)ᵇ = (flag (.atom a) b) := by
+  match b with | true | false => rfl;
 
 def freshAtom : Formula ℕ → ℕ
   | ⊥ => 0
   | .atom a => a + 1
-  | φ ➝ ψ => (max φ.freshAtom ψ.freshAtom)
+  | φ ➝ ψ => max φ.freshAtom ψ.freshAtom
   | □φ => φ.freshAtom
 
-#eval freshAtom (□(.atom 5) ⋏ (.atom 2))
+lemma le_max_atoms_of_mem_atoms {a : ℕ} (ha : a ∈ φ.atoms) : a ≤ φ.atoms.max' (⟨a, ha⟩) := by
+  induction φ with
+  | hfalsum => simp [atoms] at ha;
+  | hatom b => simp [atoms] at ha ⊢; omega;
+  | hbox φ ihφ => apply ihφ; simpa using ha;
+  | himp φ ψ ihφ ihψ =>
+    rcases (show a ∈ φ.atoms ∨ a ∈ ψ.atoms by simpa [atoms] using ha) with (hφ | hψ);
+    . by_cases hψ : ψ.atoms.Nonempty;
+      . simp [atoms, Finset.max'_union ⟨_, hφ⟩ hψ, ihφ hφ];
+      . simp [atoms, Finset.not_nonempty_iff_eq_empty.mp hψ, ihφ hφ];
+    . by_cases hφ : φ.atoms.Nonempty;
+      . simp [atoms, Finset.max'_union hφ ⟨_, hψ⟩, ihψ hψ];
+      . simp [atoms, Finset.not_nonempty_iff_eq_empty.mp hφ, ihψ hψ];
+
+lemma le_max_atoms_freshAtom (h : φ.atoms.Nonempty) : Finset.max' φ.atoms h < φ.freshAtom  := by
+  induction φ with
+  | hfalsum => simp [atoms] at h;
+  | hatom a => simp [atoms, freshAtom];
+  | hbox φ ihφ =>
+    suffices ∀ a ∈ φ.atoms, a < φ.freshAtom by simpa [atoms, freshAtom];
+    intro a ha;
+    calc
+      a ≤ φ.atoms.max' h := by apply le_max_atoms_of_mem_atoms ha;
+      _ < φ.freshAtom    := by apply ihφ;
+  | himp φ ψ ihφ ihψ =>
+    simp [atoms, freshAtom] at h ⊢;
+    rcases h with (⟨a, ha⟩ | ⟨a, ha⟩);
+    . left;
+      rintro b (hb | hb);
+      . calc
+          b ≤ φ.atoms.max' (⟨a, ha⟩) := by apply le_max_atoms_of_mem_atoms hb;
+          _ < φ.freshAtom            := @ihφ ⟨b, hb⟩;
+      . have := le_max_atoms_of_mem_atoms ha;
+        have := le_max_atoms_of_mem_atoms hb;
+        have := @ihφ ⟨a, ha⟩;
+        sorry;
+    . sorry;
 
 lemma not_mem_freshAtom_atoms : φ.freshAtom ∉ φ.atoms := by
   induction φ with
   | hfalsum => simp [atoms];
-  | hatom a =>
+  | hatom a => simp [atoms, freshAtom];
+  | hbox φ ihφ => simp_all [atoms, freshAtom];
+  | himp φ ψ ihφ ihψ =>
     simp [atoms, freshAtom];
-  | himp φ ψ ih₁ ih₂ =>
-    simp [atoms, freshAtom];
-    rcases (show max φ.freshAtom ψ.freshAtom = φ.freshAtom ∨ max φ.freshAtom ψ.freshAtom = ψ.freshAtom by omega) with (h | h);
+    constructor;
+    . have : max φ.freshAtom ψ.freshAtom = φ.freshAtom ∨ max φ.freshAtom ψ.freshAtom = ψ.freshAtom := by omega;
+      rcases this with (h | h);
+      . simpa [h];
+      . rw [h];
+
+        sorry;
     . sorry;
-    . sorry;
-  | hbox φ ih =>
-    simp_all [atoms, freshAtom];
+    -- rcases (show max φ.freshAtom ψ.freshAtom = φ.freshAtom ∨ max φ.freshAtom ψ.freshAtom = ψ.freshAtom by omega) with (h | h);
+    -- . sorry;
+    -- . sorry;
 
 end Formula
 
@@ -124,10 +170,54 @@ end Logic
 
 section
 
+
+
 open LO.Entailment
-open Formula (atom)
+open LO.Modal.Entailment
+open Formula (atom flag boxdotTranslate)
 open Formula.Kripke
 open Kripke
+
+def Formula.Kripke.Satisfies.neither_flag {M : Model} {x : M} {φ : Formula ℕ} : ¬(x ⊧ φ.flag b ∧ x ⊧ φ.flag !b) := by
+  match b with
+  | true  => simp [Formula.flag];
+  | false => simp [Formula.flag];
+
+section
+
+open Modal.Entailment in
+lemma normal_provable_of_K_provable {L : Logic ℕ} [L.IsNormal] (h : Modal.K ⊢! φ) : L ⊢! φ := by
+  simp only [Hilbert.Normal.iff_logic_provable_provable] at h;
+  induction h using Hilbert.Normal.rec! with
+  | axm s h => rcases h with rfl; simp;
+  | mdp hφψ hψ => exact hφψ ⨀ hψ;
+  | nec ihφ => apply nec!; exact ihφ;
+  | _ => simp;
+
+private lemma jerabek_SBDP.lemma₁
+  {p : ℕ} {φ : Formula ℕ} {b : Bool} : Hilbert.K ⊢! (flag (.atom p) b) ⋏ □φᵇ ➝ ⊡((flag (.atom p) !b) ➝ φᵇ) := by
+  apply Complete.complete (𝓜 := Kripke.FrameClass.all);
+  intro F hF V x hx;
+  replace hF := Set.mem_setOf_eq.mp hF;
+  apply Satisfies.and_def.mpr;
+  constructor;
+  . intro hx₁;
+    by_contra hC;
+    apply Satisfies.neither_flag;
+    constructor;
+    . exact Satisfies.and_def.mp hx |>.1;
+    . assumption;
+  . replace hx := Satisfies.and_def.mp hx |>.2;
+    intro y Rxy h;
+    apply hx;
+    assumption;
+
+private lemma jerabek_SBDP.lemma₂
+  {L : Logic ℕ} [L.IsNormal]
+  {p : ℕ} {φ : Formula ℕ} {b : Bool} : L ⊢! (flag (.atom p) b) ⋏ □φᵇ ➝ ⊡((flag (.atom p) !b) ➝ φᵇ) := by
+  apply normal_provable_of_K_provable;
+  simpa using lemma₁;
+end
 
 /--
   Every Logic `L₀` which is `Modal.KT ⪯ L₀` and sound and complete to frame class `C` satisfies Jeřábek's assumption, has strong boxdot property.
@@ -147,13 +237,69 @@ theorem jerabek_SBDP
   let X₀ := φ.subformulas.prebox.image (λ ψ => □((.atom q) ➝ ψ) ➝ ψ);
   let X₁ := φ.subformulas.prebox.image (λ ψ => □(∼(.atom q) ➝ ψ) ➝ ψ);
   let X := X₀ ∪ X₁;
+  let XB := X.image (·ᵇ);
 
-  have Claim1 : ∀ ψ ∈ φ.subformulas.prebox, (X.image (·ᵇ)) *⊢[L]! □ψᵇ ➝ ψᵇ := by sorry;
-  have Claim2 : ∀ ψ ∈ φ.subformulas, (X.image (·ᵇ)) *⊢[L]! ψ ⭤ ψᵇ := by sorry;
+  have Claim1 : ∀ ψ ∈ φ.subformulas.prebox, XB *⊢[L]! □ψᵇ ➝ ψᵇ := by
+    intro ψ hψ;
+    have H₁ : ∀ b, XB *⊢[L]! (flag (.atom q) b) ⋏ □ψᵇ ➝ ⊡((flag (.atom q) !b) ➝ ψᵇ) := by
+      intro b;
+      apply Context.of!;
+      apply jerabek_SBDP.lemma₂;
+    have H₂ : ∀ b, ↑XB *⊢[L]! ⊡((flag (.atom q) b) ➝ ψᵇ) ➝ ψᵇ := by
+      intro b;
+      suffices ↑XB *⊢[L]! (□((flag (.atom q) b) ➝ ψ) ➝ ψ)ᵇ by
+        simpa only [Formula.boxdotTranslate, Formula.atom_flag_boxdotTranslated] using this;
+      apply Context.by_axm!;
+      match b with
+      | true =>
+        simp only [Finset.coe_image, flag, Set.mem_image, Finset.mem_coe, XB];
+        use (□(atom q ➝ ψ) ➝ ψ);
+        constructor;
+        . simpa [X, X₀, X₁] using hψ;
+        . rfl;
+      | false =>
+        simp only [Finset.coe_image, flag, Set.mem_image, Finset.mem_coe, XB];
+        use (□(∼(atom q) ➝ ψ) ➝ ψ);
+        constructor;
+        . simpa [X, X₀, X₁] using hψ;
+        . rfl;
+    have H₃ : ∀ b, ↑XB *⊢[L]! (flag (.atom q) b) ➝ (□ψᵇ ➝ ψᵇ) := by
+      intro b;
+      cl_prover [(H₁ b), (H₂ !b)];
+    have H₄ : ↑XB *⊢[L]!  atom q ➝ □ψᵇ ➝ ψᵇ := H₃ true;
+    have H₅ : ↑XB *⊢[L]! ∼atom q ➝ □ψᵇ ➝ ψᵇ := H₃ false;
+    cl_prover [H₄, H₅];
+  have Claim2 : ∀ ψ ∈ φ.subformulas, XB *⊢[L]! ψ ⭤ ψᵇ := by
+    intro ψ hψ;
+    induction ψ with
+    | hfalsum => simp [Formula.boxdotTranslate];
+    | hatom a => simp [Formula.boxdotTranslate];
+    | himp ψ₁ ψ₂ ihψ₁ ihψ₂ =>
+      replace ihψ₁ := ihψ₁ (by grind);
+      replace ihψ₂ := ihψ₂ (by grind);
+      dsimp [Formula.boxdotTranslate];
+      cl_prover [ihψ₁, ihψ₂];
+    | hbox ψ ihψ =>
+      replace ihψ : ↑XB *⊢[L]! ψ ⭤ ψᵇ := ihψ (by grind);
+      have H₁ : ↑XB *⊢[L]! □ψ ⭤ □ψᵇ := by
+        apply Context.provable_iff.mpr;
+        obtain ⟨Δ, hΔ₁, hΔ₂⟩ := Context.provable_iff.mp ihψ;
+        use Δ;
+        constructor;
+        . assumption;
+        . replace hΔ₂ := FiniteContext.provable_iff.mp hΔ₂;
+          apply FiniteContext.provable_iff.mpr;
+          sorry;
+      have H₂ : ↑XB *⊢[L]! □ψᵇ ⭤ ⊡ψᵇ := by
+        apply Entailment.E!_intro;
+        . have : ↑XB *⊢[L]! □ψᵇ ➝ ψᵇ := Claim1 ψ (by simpa);
+          cl_prover [this];
+        . cl_prover;
+      cl_prover [H₁, H₂];
 
-  have : (X.image (·ᵇ)) *⊢[L]! φ ➝ φᵇ := C_of_E_mp! $ Claim2 φ (by simp);
-  have : (X.image (·ᵇ)) *⊢[L]! φᵇ := by sorry;
-  have : L ⊢! (X.image (·ᵇ)).conj ➝ φᵇ := by sorry; -- TODO: it's not!
+  have : XB *⊢[L]! φ ➝ φᵇ := C_of_E_mp! $ Claim2 φ (by simp);
+  have : XB *⊢[L]! φᵇ := by sorry;
+  have : L ⊢! XB.conj ➝ φᵇ := by sorry; -- TODO: it's not!
   let χ := X.conj ➝ φ
   have : L ⊢! χᵇ := by sorry;
   use χ;
