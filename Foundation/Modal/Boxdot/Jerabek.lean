@@ -296,9 +296,10 @@ theorem jerabek_SBDP
           cl_prover [this];
         . cl_prover;
       cl_prover [H₁, H₂];
-
-  have : XB *⊢[L]! φ ➝ φᵇ := C_of_E_mp! $ Claim2 φ (by simp);
-  have : XB *⊢[L]! φᵇ := by sorry;
+  have : XB *⊢[L]! φᵇ := by
+    have h₁ : XB *⊢[L]! φ ➝ φᵇ := C_of_E_mp! $ Claim2 φ (by grind);
+    have h₂ : XB *⊢[L]! φ := Context.of! $ by simpa using hφL;
+    exact h₁ ⨀ h₂;
   have : L ⊢! XB.conj ➝ φᵇ := by sorry; -- TODO: it's not!
   let χ := X.conj ➝ φ
   have : L ⊢! χᵇ := by sorry;
