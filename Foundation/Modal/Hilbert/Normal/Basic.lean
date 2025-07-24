@@ -778,8 +778,12 @@ instance : (Hilbert.K4Z).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Z).HasFour where p := 0
 instance : (Hilbert.K4Z).HasZ where p := 0
 instance : Entailment.K4Z (Hilbert.K4Z) where
+
 instance : Hilbert.K4 ⪯ Hilbert.K4Z := weakerThan_of_subset_axioms $ by simp
+instance : Modal.K4 ⪯ Modal.K4Z := inferInstance
+
 instance : Hilbert.K4Z ⪯ Hilbert.GL := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+instance : Modal.K4Z ⪯ Modal.GL := inferInstance
 
 
 protected abbrev Hilbert.K4Point2Z : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Z (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}⟩
@@ -789,9 +793,15 @@ instance : (Hilbert.K4Point2Z).HasFour where p := 0
 instance : (Hilbert.K4Point2Z).HasZ where p := 0
 instance : (Hilbert.K4Point2Z).HasWeakPoint2 where p := 0; q := 1;
 instance : Entailment.K4Point2Z (Hilbert.K4Point2Z) where
+
 instance : Hilbert.K4Point2 ⪯ Hilbert.K4Point2Z := weakerThan_of_subset_axioms (by simp)
+instance : Modal.K4Point2 ⪯ Modal.K4Point2Z := inferInstance
+
 instance : Hilbert.K4Z ⪯ Hilbert.K4Point2Z := weakerThan_of_subset_axioms (by simp)
+instance : Modal.K4Z ⪯ Modal.K4Point2Z := inferInstance
+
 instance : Hilbert.K4Point2Z ⪯ Hilbert.GLPoint2 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
+instance : Modal.K4Point2Z ⪯ Modal.GLPoint2 := inferInstance
 
 
 protected abbrev Hilbert.K4Point3Z : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Z (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}⟩
@@ -801,9 +811,15 @@ instance : (Hilbert.K4Point3Z).HasFour where p := 0
 instance : (Hilbert.K4Point3Z).HasZ where p := 0
 instance : (Hilbert.K4Point3Z).HasWeakPoint3 where p := 0; q := 1;
 instance : Entailment.K4Point3Z (Hilbert.K4Point3Z) where
+
 instance : Hilbert.K4Point3 ⪯ Hilbert.K4Point3Z := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+instance : Modal.K4Point3 ⪯ Modal.K4Point3Z := inferInstance
+
 instance : Hilbert.K4Z ⪯ Hilbert.K4Point3Z := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+instance : Modal.K4Z ⪯ Modal.K4Point3Z := inferInstance
+
 instance : Hilbert.K4Point3Z ⪯ Hilbert.GLPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
+instance : Modal.K4Point3Z ⪯ Modal.GLPoint3 := inferInstance
 
 
 protected abbrev Hilbert.KHen : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Hen (.atom 0)}⟩
@@ -851,8 +867,12 @@ instance : (Hilbert.Dum).HasT where p := 0
 instance : (Hilbert.Dum).HasFour where p := 0
 instance : (Hilbert.Dum).HasDum where p := 0
 instance : Entailment.Dum (Hilbert.Dum) where
+
 instance : Hilbert.S4 ⪯ Hilbert.Dum := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+instance : Modal.S4 ⪯ Modal.Dum := inferInstance
+
 instance : Hilbert.Dum ⪯ Hilbert.Grz := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
+instance : Modal.Dum ⪯ Modal.Grz := inferInstance
 
 
 protected abbrev Hilbert.DumPoint2 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dum (.atom 0), Axioms.Point2 (.atom 0)}⟩
@@ -863,9 +883,15 @@ instance : (Hilbert.DumPoint2).HasFour where p := 0
 instance : (Hilbert.DumPoint2).HasDum where p := 0
 instance : (Hilbert.DumPoint2).HasPoint2 where p := 0
 instance : Entailment.DumPoint2 (Hilbert.DumPoint2) where
+
 instance : Hilbert.Dum ⪯ Hilbert.DumPoint2 := weakerThan_of_subset_axioms (by simp)
+instance : Modal.Dum ⪯ Modal.DumPoint2 := inferInstance
+
 instance : Hilbert.S4Point2 ⪯ Hilbert.DumPoint2 := weakerThan_of_subset_axioms (by simp)
+instance : Modal.S4Point2 ⪯ Modal.DumPoint2 := inferInstance
+
 instance : Hilbert.DumPoint2 ⪯ Hilbert.GrzPoint2 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
+instance : Modal.DumPoint2 ⪯ Modal.GrzPoint2 := inferInstance
 
 
 protected abbrev Hilbert.DumPoint3 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dum (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
@@ -876,9 +902,15 @@ instance : (Hilbert.DumPoint3).HasFour where p := 0
 instance : (Hilbert.DumPoint3).HasDum where p := 0
 instance : (Hilbert.DumPoint3).HasPoint3 where p := 0; q := 1;
 instance : Entailment.DumPoint3 (Hilbert.DumPoint3) where
+
 instance : Hilbert.Dum ⪯ Hilbert.DumPoint3 := weakerThan_of_subset_axioms (by simp)
+instance : Modal.Dum ⪯ Modal.DumPoint3 := inferInstance
+
 instance : Hilbert.S4Point3 ⪯ Hilbert.DumPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
+instance : Modal.S4Point3 ⪯ Modal.DumPoint3 := inferInstance
+
 instance : Hilbert.DumPoint3 ⪯ Hilbert.GrzPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
+instance : Modal.DumPoint3 ⪯ Modal.GrzPoint3 := inferInstance
 
 
 protected abbrev Hilbert.KTc : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Tc (.atom 0)}⟩
