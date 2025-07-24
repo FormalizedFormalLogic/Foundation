@@ -64,4 +64,6 @@ instance : Hilbert.K4 ⪱ Hilbert.K4Point2 := by
 
 end Hilbert.K4Point2.Kripke
 
+instance : Modal.K4 ⪱ Modal.K4Point2 := inferInstance
+
 end LO.Modal

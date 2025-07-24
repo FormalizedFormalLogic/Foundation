@@ -103,4 +103,8 @@ instance : Hilbert.S4Point3 ⪱ Hilbert.S4Point3McK := by
 
 end Hilbert.S4Point3McK.Kripke
 
+instance : Modal.S4Point2McK ⪱ Modal.S4Point3McK := inferInstance
+
+instance : Modal.S4Point3 ⪱ Modal.S4Point3McK := inferInstance
+
 end LO.Modal

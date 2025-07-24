@@ -1,10 +1,6 @@
-#import "@preview/diagraph:0.3.1": *
-#import "@preview/oxifmt:0.2.1": strfmt
+#import "template.typ": *
 
 #set page(width: auto, height: auto, margin: 24pt)
-
-#let Logic(L) = $upright(bold(#L))$
-#let Axiom(A) = $upright(sans(#A))$
 
 #let omitLabels = ("𝐄𝐐", "𝐑₀'")
 
@@ -20,11 +16,17 @@
   }
 })
 
+#let TheoryPA = $Theory("PA")$
+#let TheoryISigma0 = $Theory(I Sigma_0)$
+#let TheoryISigma1 = $Theory(I Sigma_1)$
+
+#let Con(T) = $op("Con")(#T)$
+
 #figure(caption: [Arithmetic Theory Zoo], numbering: none)[
   #raw-render(
     raw(
       "
-  digraph ModalLogicsZoo {
+  digraph ModalTheorysZoo {
     rankdir = BT;
 
     node [
@@ -45,20 +47,21 @@
         + "}",
     ),
     labels: (
-      "𝐈Open": $Logic("IOpen")$,
-      "𝐈𝚺₀ + 𝛀₁": $Logic(I Sigma_0 + Omega_1)$,
-      "𝐈𝚺₀": $Logic(I Sigma_0)$,
-      "𝐈𝚺₁": $Logic(I Sigma_1)$,
-      "𝐏𝐀": $Logic("PA")$,
-      "𝐏𝐀⁻": $Logic("PA"^-)$,
-      "𝐑₀'": $Logic(R'_0)$,
-      "𝐑₀": $Logic(R_0)$,
-      "𝐓𝐀": $Logic("TA")$,
-      "𝐄𝐐": $Logic("EQ")$,
-      "𝐈𝚺₁.AddSelfConsistency": $Logic(I Sigma_1 + "Con"(I Sigma_1))$,
-      "𝐈𝚺₁.AddSelfInconsistency": $Logic(I Sigma_1 + not"Con"(I Sigma_1))$,
-      "𝐏𝐀.AddSelfConsistency": $Logic("PA" + "Con"("PA"))$,
-      "𝐏𝐀.AddSelfInconsistency": $Logic("PA" + not"Con"("PA"))$,
+      "𝐈Open": $Theory("IOpen")$,
+      "𝐈𝚺₀ + 𝛀₁": $Theory(I Sigma_0 + Omega_1)$,
+      "𝐈𝚺₀": $TheoryISigma0$,
+      "𝐈𝚺₁": $TheoryISigma0$,
+      "𝐏𝐀": $TheoryPA$,
+      "𝐏𝐀⁻": $Theory("PA"^-)$,
+      "𝐑₀'": $Theory(R'_0)$,
+      "𝐑₀": $Theory(R_0)$,
+      "𝐓𝐀": $Theory("TA")$,
+      "𝐄𝐐": $Theory("EQ")$,
+      "𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀 + LO.FirstOrder.Theory.Incon (𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀)": $TheoryPA + Con(TheoryPA) + not Con(TheoryPA)$,
+      "𝐏𝐀 + LO.FirstOrder.Theory.Incon 𝐏𝐀": $TheoryPA + not Con(TheoryPA)$,
+      "𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀": $TheoryPA + Con(TheoryPA)$,
+      "𝐈𝚺₁ + LO.FirstOrder.Theory.Con 𝐈𝚺₁": $TheoryISigma1 + Con(TheoryISigma1)$,
+      "𝐈𝚺₁ + LO.FirstOrder.Theory.Incon 𝐈𝚺₁": $TheoryISigma1 + not Con(TheoryISigma1)$,
     ),
     width: 240pt,
   )

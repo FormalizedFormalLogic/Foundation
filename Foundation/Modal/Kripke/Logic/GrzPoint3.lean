@@ -85,7 +85,7 @@ open Entailment
 open Kripke
 
 
-theorem GrzPoint3.proper_extension_of_GrzPoint2: Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
+instance : Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
   constructor;
   . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GrzPoint2 FrameClass.finite_GrzPoint3;
     intro F hF;
@@ -160,5 +160,8 @@ instance : Hilbert.S4Point3 ⪱ Hilbert.GrzPoint3 := by
 
 end Logic
 
+instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := inferInstance
+
+instance : Modal.S4Point3 ⪱ Modal.GrzPoint3 := inferInstance
 
 end LO.Modal
