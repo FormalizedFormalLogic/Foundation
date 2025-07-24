@@ -1,7 +1,7 @@
 import Mathlib.Data.PNat.Basic
 import Mathlib.Data.Rel
 
-def HRel (α) := Rel α α
+def HRel (α : Type*) := α → α → Prop
 
 
 namespace HRel
@@ -145,6 +145,8 @@ lemma trans {x y z : α} (Rxy : x ≺^+ y) (Ryz : y ≺^+ z) : x ≺^+ z := Rela
 
 lemma single (Rxy : x ≺ y) : x ≺^+ y := Relation.TransGen.single Rxy
 
+lemma head (Rxy : x ≺ y) (Ryz : y ≺^+ z) : x ≺^+ z := Relation.TransGen.head Rxy Ryz
+
 lemma tail (Rxy : x ≺^+ y) (Ryz : y ≺ z) : x ≺^+ z := Relation.TransGen.tail Rxy Ryz
 
 lemma exists_iterate : TransGen R x y ↔ ∃ n : ℕ+, R.iterate n x y := by
@@ -160,11 +162,11 @@ lemma exists_iterate : TransGen R x y ↔ ∃ n : ℕ+, R.iterate n x y := by
   . rintro ⟨n, Rxy⟩;
     induction n using PNat.recOn generalizing x with
     | one =>
-      apply Relation.TransGen.single;
+      apply single;
       simpa using Rxy;
     | succ n ih =>
       obtain ⟨z, Rxz, Rzy⟩ := Rxy;
-      apply Relation.TransGen.head;
+      apply head;
       . exact Rxz;
       . apply ih;
         exact Rzy;
@@ -182,10 +184,10 @@ instance [IsSymm _ R] : IsSymm α (R.TransGen) := ⟨by
   rintro x y Rxy;
   induction Rxy with
   | single Rxy =>
-    apply Relation.TransGen.single;
+    apply single;
     apply IsSymm.symm _ _ Rxy;
   | tail _ hyz ih =>
-    exact Relation.TransGen.trans (Relation.TransGen.single $ (IsSymm.symm _ _) hyz) ih
+    exact trans (Relation.TransGen.single $ (IsSymm.symm _ _) hyz) ih
 ⟩
 
 instance [IsTrans _ R] [IsAntisymm _ R] : IsAntisymm α (R.TransGen) := ⟨by

@@ -9,7 +9,7 @@ open Formula.Kripke
 section Bisimulation
 
 structure Model.Bisimulation (M₁ M₂ : Kripke.Model) where
-  toRel : Rel M₁.World M₂.World
+  toRel : M₁.World → M₂.World → Prop
   atomic {x₁ : M₁.World} {x₂ : M₂.World} {a : ℕ} : toRel x₁ x₂ → ((M₁ x₁ a) ↔ (M₂ x₂ a))
   forth {x₁ y₁ : M₁.World} {x₂ : M₂.World} : toRel x₁ x₂ → x₁ ≺ y₁ → ∃ y₂ : M₂.World, toRel y₁ y₂ ∧ x₂ ≺ y₂
   back {x₁ : M₁.World} {x₂ y₂ : M₂.World} : toRel x₁ x₂ → x₂ ≺ y₂ → ∃ y₁ : M₁.World, toRel y₁ y₂ ∧ x₁ ≺ y₁
@@ -151,18 +151,17 @@ def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := ofA
     assumption;
 
 def bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ where
-  toRel := Function.graph f
+  toRel x y := y = f x
   atomic := by
     rintro x₁ x₂ a rfl;
     constructor;
     . apply f.atomic.mp;
     . apply f.atomic.mpr;
   forth := by
-    simp only [Function.graph_def, exists_eq_left', forall_eq'];
+    simp only [exists_eq_left, forall_eq];
     intro x₁ y₁ rx₁y₁;
     exact f.forth rx₁y₁;
   back := by
-    simp only [Function.graph_def];
     rintro x₁ x₂ y₂ rfl rx₂y₂;
     obtain ⟨y₁, ⟨rfl, _⟩⟩ := f.back rx₂y₂;
     use y₁;
