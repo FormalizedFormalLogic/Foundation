@@ -89,7 +89,7 @@ instance {M : Model} : FirstOrder.Structure 𝓛𝓕 M.World where
 lemma correspondence_satisfies : x ⊧ φ ↔ M ⊧/![x] φ¹ := by
   induction φ using NNFormula.rec' generalizing x with
   | hBox φ ihφ =>
-    suffices  x ⊧ □φ ↔ ∀ y, x ≺ y → M ⊧/![y] (φ¹) by
+    suffices x ⊧ □φ ↔ ∀ y, x ≺ y → M ⊧/![y] (φ¹) by
       simp [standardTranslation];
       convert this;
       simp;
@@ -99,7 +99,7 @@ lemma correspondence_satisfies : x ⊧ φ ↔ M ⊧/![x] φ¹ := by
     . intro h y Rxy;
       exact ihφ.mpr $ h y Rxy;
   | hDia φ ihφ =>
-    suffices  x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ M ⊧/![y] (φ¹) by
+    suffices x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ M ⊧/![y] (φ¹) by
       simp [standardTranslation];
       convert this;
       simp;
@@ -117,79 +117,11 @@ lemma correspondence_satisfies : x ⊧ φ ↔ M ⊧/![x] φ¹ := by
   | _ => simp_all [standardTranslation];
 
 /-- BdRV Prop 2.47 (ii) -/
-lemma correspondence_validOnModel : M ⊧ φ ↔ M ⊧ₘ₀ “∀ x, !φ¹ x” := by
-  induction φ using NNFormula.cases' with
-  | hVerum => tauto;
-  | hFalsum => tauto;
-  | hAtom a => simp [standardTranslation, Kripke.ValidOnModel, FirstOrder.models₀_iff]; tauto;
-  | hNatom a => simp [standardTranslation, Kripke.ValidOnModel, FirstOrder.models₀_iff]; tauto;
-  | hAnd φ ψ =>
-    suffices (∀ x : M.World, x ⊧ φ ∧ x ⊧ ψ) ↔ (∀ x : M.World, M ⊧/![x] φ¹ ∧ M ⊧/![x] ψ¹) by
-      simpa [Kripke.ValidOnModel, FirstOrder.models₀_iff, standardTranslation];
-    constructor;
-    · intro h x;
-      constructor;
-      . apply correspondence_satisfies.mp; exact h x |>.1;
-      . apply correspondence_satisfies.mp; exact h x |>.2;
-    . intro h x;
-      constructor;
-      . apply correspondence_satisfies.mpr; exact h x |>.1;
-      . apply correspondence_satisfies.mpr; exact h x |>.2;
-  | hOr φ ψ =>
-    suffices (∀ x : M.World, x ⊧ φ ∨ x ⊧ ψ) ↔ (∀ x : M.World, M ⊧/![x] φ¹ ∨ M ⊧/![x] ψ¹) by
-      simpa [Kripke.ValidOnModel, FirstOrder.models₀_iff, standardTranslation];
-    constructor;
-    . intro h x;
-      rcases h x with (hφ | hψ);
-      . left; apply correspondence_satisfies.mp hφ;
-      . right; apply correspondence_satisfies.mp hψ;
-    . intro h x;
-      rcases h x with (hφ | hψ);
-      . left; apply correspondence_satisfies.mpr hφ;
-      . right; apply correspondence_satisfies.mpr hψ;
-  | hBox φ =>
-    /-
-    suffices (∀ x : M.World, x ⊧ □φ) ↔ ∀ x : M.World, ∀ y, x ≺ y → M ⊧/![y] φ¹ by
-      simpa [standardTranslation, Kripke.ValidOnModel, FirstOrder.models₀_iff];
-    -/
-    suffices (∀ x : M.World, x ⊧ □φ) ↔ ∀ x : M.World, ∀ y, x ≺ y →
-      (FirstOrder.Semiformula.Eval instStructureFrameWorld ![y, x] Empty.elim)
-      ((FirstOrder.Rewriting.app (FirstOrder.Rew.substs ![FirstOrder.Semiterm.bvar 0]).q)
-      (φ¹/[FirstOrder.Semiterm.bvar 0])) by
-      simpa [standardTranslation, Kripke.ValidOnModel, FirstOrder.models₀_iff];
-    constructor;
-    . intro h x y Rxy;
-      have := correspondence_satisfies.mp $ @h x y Rxy;
-      sorry;
-    . intro h x y Rxy;
-      apply correspondence_satisfies.mpr;
-      have := h x y Rxy;
-      sorry;
-  | hDia φ =>
-    /-
-    suffices (∀ x : M.World, x ⊧ ◇φ) ↔ ∀ x : M.World, ∃ y, x ≺ y ∧ M ⊧/![y] φ¹ by
-      simpa [standardTranslation, Kripke.ValidOnModel, FirstOrder.models₀_iff];
-    -/
-    suffices (∀ x : M.World, x ⊧ ◇φ) ↔ ∀ x : M.World, ∃ y, x ≺ y ∧
-      (FirstOrder.Semiformula.Eval instStructureFrameWorld ![y, x] Empty.elim)
-      ((FirstOrder.Rewriting.app (FirstOrder.Rew.substs ![FirstOrder.Semiterm.bvar 0]).q)
-      (φ¹/[FirstOrder.Semiterm.bvar 0])) by
-      simpa [standardTranslation, Kripke.ValidOnModel, FirstOrder.models₀_iff];
-    constructor;
-    . intro h x;
-      obtain ⟨y, Rxy, hy⟩ := @h x;
-      use y;
-      constructor;
-      . exact Rxy;
-      . have := correspondence_satisfies.mp hy;
-        sorry;
-    . intro h x;
-      obtain ⟨y, Rxy, hy⟩ := @h x;
-      use y;
-      constructor;
-      . exact Rxy;
-      . apply correspondence_satisfies.mpr;
-        sorry;
+lemma correspondence_validOnModel : M ⊧ φ ↔ M ⊧ₘ₀ ∀' φ¹ := by
+  suffices M ⊧ φ ↔ ∀ x : M.World, M ⊧/![x] φ¹ by simpa [FirstOrder.models₀_iff];
+  constructor;
+  . intro h x; apply correspondence_satisfies.mp $ h x;
+  . intro h x; exact correspondence_satisfies.mpr $ h x;
 
 end Kripke.FirstOrder
 
