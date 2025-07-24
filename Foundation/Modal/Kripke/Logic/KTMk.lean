@@ -247,4 +247,8 @@ instance : Hilbert.KTMk ⪱ Hilbert.S4 := by
 
 end Logic
 
+instance : Modal.KT ⪱ Modal.KTMk := inferInstance
+
+instance : Modal.KTMk ⪱ Modal.S4 := inferInstance
+
 end LO.Modal

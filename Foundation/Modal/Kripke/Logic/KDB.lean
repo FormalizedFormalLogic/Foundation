@@ -71,4 +71,8 @@ instance : Hilbert.KB ⪱ Hilbert.KDB := by
 
 end Hilbert.KDB.Kripke
 
+instance : Modal.KD ⪱ Modal.KDB := inferInstance
+
+instance : Modal.KB ⪱ Modal.KDB := inferInstance
+
 end LO.Modal

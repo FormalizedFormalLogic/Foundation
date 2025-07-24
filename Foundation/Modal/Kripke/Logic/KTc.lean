@@ -70,4 +70,6 @@ instance : Hilbert.KB4 ⪱ Hilbert.KTc := by
 
 end Hilbert.KTc.Kripke
 
+instance : Modal.KB4 ⪱ Modal.KTc := inferInstance
+
 end LO.Modal

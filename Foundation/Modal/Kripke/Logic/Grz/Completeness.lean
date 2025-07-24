@@ -290,4 +290,6 @@ instance : Hilbert.S4 ⪱ Hilbert.Grz := calc
 
 end Hilbert.Grz.Kripke
 
+instance : Modal.S4McK ⪱ Modal.Grz := inferInstance
+
 end LO.Modal

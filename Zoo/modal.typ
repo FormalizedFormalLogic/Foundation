@@ -40,8 +40,7 @@
     {rank = same; \"LO.Modal.KT\"; \"LO.Modal.KDB\"; \"LO.Modal.KD4\"; \"LO.Modal.KD5\"; \"LO.Modal.K45\";}
     {rank = same; \"LO.Modal.KTB\"; \"LO.Modal.S4\"; \"LO.Modal.KD45\"; \"LO.Modal.KB4\";}
     {rank = same; \"LO.Modal.GL\"; \"LO.Modal.Grz\";}
-    {rank = same; \"LO.Modal.GLPoint2\"; \"LO.Modal.GrzPoint2\";}
-    {rank = same; \"LO.Modal.GLPoint3\"; \"LO.Modal.GrzPoint3\";}
+    {rank = same; \"LO.Modal.Triv\"; \"LO.Modal.Ver\";}
   "
         + arrows.join("\n")
         + "}",
@@ -99,6 +98,7 @@
       "LO.Modal.N": $Logic("N")$,
       "LO.Modal.S": $Logic("S")$,
       "LO.Modal.S4": $Logic("S4")$,
+      "LO.Modal.S4H": $Logic("S4H")$,
       "LO.Modal.S4McK": $Logic("S4McK")$,
       "LO.Modal.S4Point2": $Logic("S4.2")$,
       "LO.Modal.S4Point2McK": $Logic("S4.2McK")$,

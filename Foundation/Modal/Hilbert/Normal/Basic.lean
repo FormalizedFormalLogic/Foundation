@@ -813,7 +813,7 @@ instance : (Hilbert.KHen).HasHen where p := 0;
 
 
 protected abbrev Hilbert.K4Hen : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Hen (.atom 0)}⟩
-protected abbrev Logic.K4Hen := Hilbert.K4Hen.logic
+protected abbrev K4Hen := Hilbert.K4Hen.logic
 instance : (Hilbert.K4Hen).HasK where p := 0; q := 1;
 instance : (Hilbert.K4Hen).HasFour where p := 0
 instance : (Hilbert.K4Hen).HasHen where p := 0
@@ -911,7 +911,7 @@ protected abbrev Hilbert.S4H : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.at
   - `S4H` in Segerberg 1971.
   - `K1.2` in Sobocinski 1964, "Family $K$ of the non-Lewis modal systems"
 -/
-protected abbrev Logic.S4H := Hilbert.S4H.logic
+protected abbrev S4H := Hilbert.S4H.logic
 
 instance : (Hilbert.S4H).HasK where p := 0; q := 1;
 instance : (Hilbert.S4H).HasT where p := 0

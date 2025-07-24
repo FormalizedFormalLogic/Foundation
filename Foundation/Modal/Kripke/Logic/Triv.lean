@@ -164,4 +164,10 @@ instance : Hilbert.S4Point4McK ⪱ Hilbert.Triv := by
 
 end Hilbert.Triv.Kripke
 
+instance : Modal.KTc ⪱ Modal.Triv := inferInstance
+
+instance : Modal.GrzPoint3 ⪱ Modal.Triv := inferInstance
+
+instance : Modal.S4Point4McK ⪱ Modal.Triv := inferInstance
+
 end LO.Modal
