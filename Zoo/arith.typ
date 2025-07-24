@@ -50,7 +50,7 @@
       "𝐈Open": $Theory("IOpen")$,
       "𝐈𝚺₀ + 𝛀₁": $Theory(I Sigma_0 + Omega_1)$,
       "𝐈𝚺₀": $TheoryISigma0$,
-      "𝐈𝚺₁": $TheoryISigma0$,
+      "𝐈𝚺₁": $TheoryISigma1$,
       "𝐏𝐀": $TheoryPA$,
       "𝐏𝐀⁻": $Theory("PA"^-)$,
       "𝐑₀'": $Theory(R'_0)$,
