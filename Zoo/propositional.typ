@@ -1,11 +1,6 @@
-
-#import "@preview/diagraph:0.3.1": *
-#import "@preview/oxifmt:0.2.1": strfmt
+#import "template.typ": *
 
 #set page(width: auto, height: auto, margin: 24pt)
-
-#let Logic(L) = $upright(bold(#L))$
-#let Axiom(A) = $upright(sans(#A))$
 
 #let arrows = json("./propositional.json").map(((from, to, type)) => {
   if type == "ssub" {
@@ -24,14 +19,15 @@
   digraph PropositionalLogicZoo {
     rankdir = BT;
     node [
-      shape=none
       margin=0.1
       width=0
       height=0
     ]
+
     edge [
       style = solid
       arrowhead = vee
+      arrowsize = 0.75
     ];
   "
         + arrows.join("\n")
