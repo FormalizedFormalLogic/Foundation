@@ -57,7 +57,7 @@
       "𝐑₀": $Theory(R_0)$,
       "𝐓𝐀": $Theory("TA")$,
       "𝐄𝐐": $Theory("EQ")$,
-      "𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀 + LO.FirstOrder.Theory.Incon (𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀)": $TheoryPA + Con(TheoryPA) + not Con(TheoryPA)$,
+      "𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀 + LO.FirstOrder.Theory.Incon (𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀)": $TheoryPA + Con(TheoryPA) + not Con(TheoryPA + Con(TheoryPA))$,
       "𝐏𝐀 + LO.FirstOrder.Theory.Incon 𝐏𝐀": $TheoryPA + not Con(TheoryPA)$,
       "𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀": $TheoryPA + Con(TheoryPA)$,
       "𝐈𝚺₁ + LO.FirstOrder.Theory.Con 𝐈𝚺₁": $TheoryISigma1 + Con(TheoryISigma1)$,
