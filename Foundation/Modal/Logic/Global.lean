@@ -202,7 +202,10 @@ section
 
 variable {L : Logic ℕ} [L.IsNormal] {X Y : Set (Formula ℕ)} {φ ψ : Formula ℕ}
 
-lemma fact2_7 : ((L, X) ⊢! φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢! (□^≤[n] Γ.conj) ➝ φ) := by
+/--
+  Jeřábek, Fact 2.7
+-/
+lemma iff_finite_boxlt_provable : ((L, X) ⊢! φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢! (□^≤[n] Γ.conj) ➝ φ) := by
   constructor;
   . intro h;
     induction h using GlobalConsequence.rec! with
