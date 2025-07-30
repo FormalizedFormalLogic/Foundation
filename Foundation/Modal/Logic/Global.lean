@@ -141,31 +141,71 @@ namespace Formula
 end Formula
 
 
+inductive GlobalConsequence (L : Logic α) : Set (Formula α) → Formula α → Type*
+  | thm {X φ}      : L ⊢! φ → GlobalConsequence L X φ
+  | ctx {X φ}      : φ ∈ X → GlobalConsequence L X φ
+  | mdp {X Y φ ψ}  : GlobalConsequence L X (φ ➝ ψ) → GlobalConsequence L Y φ → GlobalConsequence L (X ∪ Y) ψ
+  | nec {X φ}      : GlobalConsequence L X φ → GlobalConsequence L X (□φ)
+  | imply₁ X φ ψ   : GlobalConsequence L X $ Axioms.Imply₁ φ ψ
+  | imply₂ X φ ψ χ : GlobalConsequence L X $ Axioms.Imply₂ φ ψ χ
+  | ec X φ ψ       : GlobalConsequence L X $ Axioms.ElimContra φ ψ
 
-inductive GlobalConsequence (L : Logic α) : Set (Formula α) → Formula α → Prop where
-  | thm! {X φ}      : L ⊢! φ → GlobalConsequence L X φ
-  | ctx! {X φ}      : φ ∈ X → GlobalConsequence L X φ
-  | mdp! {X Y φ ψ}  : GlobalConsequence L X (φ ➝ ψ) → GlobalConsequence L Y φ → GlobalConsequence L (X ∪ Y) ψ
-  | nec! {X φ}      : GlobalConsequence L X φ → GlobalConsequence L X (□φ)
-  | imply₁! X φ ψ   : GlobalConsequence L X $ Axioms.Imply₁ φ ψ
-  | imply₂! X φ ψ χ : GlobalConsequence L X $ Axioms.Imply₂ φ ψ χ
-  | ec! X φ ψ       : GlobalConsequence L X $ Axioms.ElimContra φ ψ
-
-notation X:45 " ⊢ᵍ[" L "]! " φ => GlobalConsequence L X φ
+instance : Entailment (Formula α) (Logic α × Set (Formula α)) := ⟨λ (L, Γ) => GlobalConsequence L Γ⟩
 
 namespace GlobalConsequence
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
+variable {L : Logic α} {X Y : Set (Formula α)} {φ ψ : Formula α}
+
+instance : Entailment.Lukasiewicz (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
+  mdp ihφψ ihφ := by simpa using mdp ihφψ ihφ;
+  imply₁ := imply₁ X
+  imply₂ := imply₂ X
+  elimContra := ec X
+
+instance : Entailment.Necessitation (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
+  nec ihφ := by simpa using nec ihφ
+
+lemma thm! (h : L ⊢! φ) : (L, X) ⊢! φ := ⟨thm h⟩
+
+lemma ctx! (h : φ ∈ X) : (L, X) ⊢! φ := ⟨ctx h⟩
+
+protected lemma rec!
+  {motive : (X : Set (Formula α)) → (φ : Formula α) → ((L, X) ⊢! φ) → Sort}
+  (ctx! : ∀ {X φ} (h : φ ∈ X), motive X φ ⟨ctx h⟩)
+  (thm! : ∀ {X φ} (h : L ⊢! φ), motive X φ ⟨thm h⟩)
+  (mdp! : ∀ {X Y φ ψ}
+    {hφψ : (L, X) ⊢! φ ➝ ψ} {hφ : (L, Y) ⊢! φ},
+    motive X (φ ➝ ψ) hφψ → motive Y φ hφ →
+    motive (X ∪ Y) ψ ⟨mdp hφψ.some hφ.some⟩
+  )
+  (nec! : ∀ {X φ}
+    {hφ : (L, X) ⊢! φ},
+    motive X φ hφ → motive X (□φ) ⟨nec hφ.some⟩
+  )
+  (imply₁! : ∀ {X φ ψ}, motive X (Axioms.Imply₁ φ ψ) ⟨imply₁ X φ ψ⟩)
+  (imply₂! : ∀ {X φ ψ ξ}, motive X (Axioms.Imply₂ φ ψ ξ) ⟨imply₂ X φ ψ ξ⟩)
+  (ec! : ∀ {X φ ψ}, motive X (Axioms.ElimContra φ ψ) ⟨ec X φ ψ⟩)
+  : ∀ {X : Set (Formula α)} {φ}, (d : (L, X) ⊢! φ) → motive X φ d := by
+  rintro X φ ⟨d⟩;
+  induction d with
+  | ctx h => apply ctx! h;
+  | thm h => apply thm! h;
+  | mdp _ _ ihφψ ihφ => apply mdp! ihφψ ihφ;
+  | nec _ ihφ => apply nec! ihφ;
+  | imply₁ => apply imply₁!;
+  | imply₂ => apply imply₂!;
+  | ec => apply ec!;
+
+section
+
 variable {L : Logic ℕ} [L.IsNormal] {X Y : Set (Formula ℕ)} {φ ψ : Formula ℕ}
 
-omit [L.IsNormal] in
-lemma mdp'! (h₁ : X ⊢ᵍ[L]! φ ➝ ψ) (h₂ : X ⊢ᵍ[L]! φ) : X ⊢ᵍ[L]! ψ := by simpa using mdp! h₁ h₂
-
-lemma fact2_7 : (X ⊢ᵍ[L]! φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢! (□^≤[n] Γ.conj) ➝ φ) := by
+lemma fact2_7 : ((L, X) ⊢! φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢! (□^≤[n] Γ.conj) ➝ φ) := by
   constructor;
   . intro h;
-    induction h with
+    induction h using GlobalConsequence.rec! with
     | thm! h =>
       use ∅, 0;
       constructor;
@@ -212,16 +252,20 @@ lemma fact2_7 : (X ⊢ᵍ[L]! φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ
         apply C!_of_conseq!;
         simp;
   . rintro ⟨Γ, n, hΓ, hφ⟩;
-    induction n with
-    | zero =>
-      simp only [Box.boxlt_zero] at hφ;
-      sorry;
-    | succ n ih =>
+    apply (thm! hφ) ⨀ _;
+    apply FConj!_iff_forall_provable.mpr;
+    intro ψ hψ;
+    simp only [Finset.mem_image, Finset.mem_range] at hψ;
+    obtain ⟨i, hi, rfl⟩ := hψ;
+    apply multinec!;
+    apply FConj!_iff_forall_provable.mpr;
+    intro ψ hψ;
+    apply ctx!;
+    apply hΓ;
+    simpa;
 
-      sorry;
+end
 
 end GlobalConsequence
-
-
 
 end LO.Modal
