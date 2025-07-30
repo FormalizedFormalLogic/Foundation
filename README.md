@@ -60,8 +60,6 @@ Main Result in this repository. More results and details are in [Book] and [Doc]
 
 Lines represent subset relations of theories/logics. Solid lines are represent _proper_ subset.
 
-**Disclaimer**: [Zoo generators](./Zoo) is broken since 2025/07/07 (Updated to `v4.22.0-rc3`). See [Issue#447](https://github.com/FormalizedFormalLogic/Foundation/issues/447). These figures are snapshot on [`d4f889a`](https://github.com/FormalizedFormalLogic/Foundation/tree/d4f889ae70e6ef5da79e105ecb2bec644d96feb1).
-
 ### Arithmetic Theory Zoo
 
 ![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/arith_zoo.png)

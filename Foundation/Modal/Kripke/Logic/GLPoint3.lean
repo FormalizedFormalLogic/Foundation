@@ -84,4 +84,8 @@ instance : Hilbert.K4Point3 ⪱ Hilbert.GLPoint3 := by
 
 end Hilbert.GLPoint3.Kripke
 
+instance : Modal.GL ⪱ Modal.GLPoint3 := inferInstance
+
+instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := inferInstance
+
 end LO.Modal

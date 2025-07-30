@@ -50,7 +50,7 @@ instance : Complete Hilbert.S4H FrameClass.finite_S4H := by sorry
 
 end S4H.Kripke
 
-theorem S4H.proper_extension_of_Grz : Hilbert.Grz ⪱ Hilbert.S4H := by
+instance : Hilbert.Grz ⪱ Hilbert.S4H := by
   constructor;
   . apply weakerThan_of_subset_frameClass (FrameClass.finite_Grz) (FrameClass.finite_S4H)
     intro F hF;
@@ -77,5 +77,7 @@ theorem S4H.proper_extension_of_Grz : Hilbert.Grz ⪱ Hilbert.S4H := by
           omega;
 
 end Hilbert
+
+instance : Modal.Grz ⪱ Modal.S4H := inferInstance
 
 end LO.Modal

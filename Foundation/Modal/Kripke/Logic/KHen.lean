@@ -405,4 +405,8 @@ instance : Hilbert.KHen ⪱ Hilbert.GL := by
 
 end Logic
 
+instance : Modal.K ⪱ Modal.KHen := inferInstance
+
+instance : Modal.KHen ⪱ Modal.GL := inferInstance
+
 end LO.Modal

@@ -107,6 +107,9 @@ section
 
 abbrev logic (H : Hilbert.WithLoeb α) : Logic α := Entailment.theory H
 
+@[simp high]
+lemma iff_logic_provable_provable : H.logic ⊢! φ ↔ H ⊢! φ := by simp [logic, Entailment.theory, Set.mem_setOf_eq];
+
 instance [H₁ ⪯ H₂] : H₁.logic ⪯ H₂.logic := by
   apply weakerThan_iff.mpr;
   simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];

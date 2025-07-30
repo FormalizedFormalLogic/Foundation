@@ -61,4 +61,10 @@ instance : Sound Hilbert.S5Grz FrameClass.finite_Triv := by
     apply Sound.sound $ Entailment.Equiv.iff.mp this φ |>.mp h;
   infer_instance;
 
+instance : Modal.S5 ⪱ Modal.S5Grz := inferInstance
+
+instance : Modal.Grz ⪱ Modal.S5Grz := inferInstance
+
+instance : Modal.S4 ⪱ Modal.Triv := inferInstance
+
 end LO.Modal.Logic
