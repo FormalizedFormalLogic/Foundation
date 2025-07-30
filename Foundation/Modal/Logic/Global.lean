@@ -142,13 +142,13 @@ end Formula
 
 
 inductive GlobalConsequence (L : Logic α) : Set (Formula α) → Formula α → Type*
-  | thm {X φ}      : L ⊢! φ → GlobalConsequence L X φ
-  | ctx {X φ}      : φ ∈ X → GlobalConsequence L X φ
-  | mdp {X Y φ ψ}  : GlobalConsequence L X (φ ➝ ψ) → GlobalConsequence L Y φ → GlobalConsequence L (X ∪ Y) ψ
-  | nec {X φ}      : GlobalConsequence L X φ → GlobalConsequence L X (□φ)
-  | imply₁ X φ ψ   : GlobalConsequence L X $ Axioms.Imply₁ φ ψ
-  | imply₂ X φ ψ χ : GlobalConsequence L X $ Axioms.Imply₂ φ ψ χ
-  | ec X φ ψ       : GlobalConsequence L X $ Axioms.ElimContra φ ψ
+  | protected thm {X φ}      : L ⊢! φ → GlobalConsequence L X φ
+  | protected ctx {X φ}      : φ ∈ X → GlobalConsequence L X φ
+  | protected mdp {X Y φ ψ}  : GlobalConsequence L X (φ ➝ ψ) → GlobalConsequence L Y φ → GlobalConsequence L (X ∪ Y) ψ
+  | protected nec {X φ}      : GlobalConsequence L X φ → GlobalConsequence L X (□φ)
+  | protected imply₁ X φ ψ   : GlobalConsequence L X $ Axioms.Imply₁ φ ψ
+  | protected imply₂ X φ ψ χ : GlobalConsequence L X $ Axioms.Imply₂ φ ψ χ
+  | protected ec X φ ψ       : GlobalConsequence L X $ Axioms.ElimContra φ ψ
 
 instance : Entailment (Formula α) (Logic α × Set (Formula α)) := ⟨λ (L, Γ) => GlobalConsequence L Γ⟩
 
@@ -159,34 +159,39 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 variable {L : Logic α} {X Y : Set (Formula α)} {φ ψ : Formula α}
 
 instance : Entailment.Lukasiewicz (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
-  mdp ihφψ ihφ := by simpa using mdp ihφψ ihφ;
-  imply₁ := imply₁ X
-  imply₂ := imply₂ X
-  elimContra := ec X
+  mdp ihφψ ihφ := by simpa using GlobalConsequence.mdp ihφψ ihφ;
+  imply₁ := GlobalConsequence.imply₁ X
+  imply₂ := GlobalConsequence.imply₂ X
+  elimContra := GlobalConsequence.ec X
 
 instance : Entailment.Necessitation (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
-  nec ihφ := by simpa using nec ihφ
+  nec ihφ := by simpa using GlobalConsequence.nec ihφ
 
-lemma thm! (h : L ⊢! φ) : (L, X) ⊢! φ := ⟨thm h⟩
+instance [L.IsNormal] : Entailment.K (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
+  K _ _ := by
+    apply GlobalConsequence.thm;
+    simp;
 
-lemma ctx! (h : φ ∈ X) : (L, X) ⊢! φ := ⟨ctx h⟩
+protected lemma thm! (h : L ⊢! φ) : (L, X) ⊢! φ := ⟨GlobalConsequence.thm h⟩
+
+protected lemma ctx! (h : φ ∈ X) : (L, X) ⊢! φ := ⟨GlobalConsequence.ctx h⟩
 
 protected lemma rec!
   {motive : (X : Set (Formula α)) → (φ : Formula α) → ((L, X) ⊢! φ) → Sort}
-  (ctx! : ∀ {X φ} (h : φ ∈ X), motive X φ ⟨ctx h⟩)
-  (thm! : ∀ {X φ} (h : L ⊢! φ), motive X φ ⟨thm h⟩)
+  (ctx! : ∀ {X φ} (h : φ ∈ X), motive X φ ⟨GlobalConsequence.ctx h⟩)
+  (thm! : ∀ {X φ} (h : L ⊢! φ), motive X φ ⟨GlobalConsequence.thm h⟩)
   (mdp! : ∀ {X Y φ ψ}
     {hφψ : (L, X) ⊢! φ ➝ ψ} {hφ : (L, Y) ⊢! φ},
     motive X (φ ➝ ψ) hφψ → motive Y φ hφ →
-    motive (X ∪ Y) ψ ⟨mdp hφψ.some hφ.some⟩
+    motive (X ∪ Y) ψ ⟨GlobalConsequence.mdp hφψ.some hφ.some⟩
   )
   (nec! : ∀ {X φ}
     {hφ : (L, X) ⊢! φ},
-    motive X φ hφ → motive X (□φ) ⟨nec hφ.some⟩
+    motive X φ hφ → motive X (□φ) ⟨GlobalConsequence.nec hφ.some⟩
   )
-  (imply₁! : ∀ {X φ ψ}, motive X (Axioms.Imply₁ φ ψ) ⟨imply₁ X φ ψ⟩)
-  (imply₂! : ∀ {X φ ψ ξ}, motive X (Axioms.Imply₂ φ ψ ξ) ⟨imply₂ X φ ψ ξ⟩)
-  (ec! : ∀ {X φ ψ}, motive X (Axioms.ElimContra φ ψ) ⟨ec X φ ψ⟩)
+  (imply₁! : ∀ {X φ ψ}, motive X (Axioms.Imply₁ φ ψ) ⟨GlobalConsequence.imply₁ X φ ψ⟩)
+  (imply₂! : ∀ {X φ ψ ξ}, motive X (Axioms.Imply₂ φ ψ ξ) ⟨GlobalConsequence.imply₂ X φ ψ ξ⟩)
+  (ec! : ∀ {X φ ψ}, motive X (Axioms.ElimContra φ ψ) ⟨GlobalConsequence.ec X φ ψ⟩)
   : ∀ {X : Set (Formula α)} {φ}, (d : (L, X) ⊢! φ) → motive X φ d := by
   rintro X φ ⟨d⟩;
   induction d with
@@ -255,7 +260,7 @@ lemma iff_finite_boxlt_provable : ((L, X) ⊢! φ) ↔ (∃ Γ : Finset (Formula
         apply C!_of_conseq!;
         simp;
   . rintro ⟨Γ, n, hΓ, hφ⟩;
-    apply (thm! hφ) ⨀ _;
+    apply (GlobalConsequence.thm! hφ) ⨀ _;
     apply FConj!_iff_forall_provable.mpr;
     intro ψ hψ;
     simp only [Finset.mem_image, Finset.mem_range] at hψ;
@@ -263,7 +268,7 @@ lemma iff_finite_boxlt_provable : ((L, X) ⊢! φ) ↔ (∃ Γ : Finset (Formula
     apply multinec!;
     apply FConj!_iff_forall_provable.mpr;
     intro ψ hψ;
-    apply ctx!;
+    apply GlobalConsequence.ctx!;
     apply hΓ;
     simpa;
 

@@ -4,6 +4,7 @@ import Foundation.Modal.Kripke.Logic.S5
 import Foundation.Modal.Kripke.Logic.GL.Completeness
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
 import Foundation.Modal.Kripke.Logic.GrzPoint2
+import Foundation.Modal.Logic.Global
 
 
 
@@ -172,11 +173,12 @@ section
 
 
 
-open LO.Entailment
-open LO.Modal.Entailment
+open LO.Entailment LO.Modal.Entailment
+open GlobalConsequence
 open Formula (atom flag boxdotTranslate)
 open Formula.Kripke
 open Kripke
+
 
 def Formula.Kripke.Satisfies.neither_flag {M : Model} {x : M} {φ : Formula ℕ} : ¬(x ⊧ φ.flag b ∧ x ⊧ φ.flag !b) := by
   match b with
@@ -184,15 +186,6 @@ def Formula.Kripke.Satisfies.neither_flag {M : Model} {x : M} {φ : Formula ℕ}
   | false => simp [Formula.flag];
 
 section
-
-open Modal.Entailment in
-lemma normal_provable_of_K_provable {L : Logic ℕ} [L.IsNormal] (h : Modal.K ⊢! φ) : L ⊢! φ := by
-  simp only [Hilbert.Normal.iff_logic_provable_provable] at h;
-  induction h using Hilbert.Normal.rec! with
-  | axm s h => rcases h with rfl; simp;
-  | mdp hφψ hψ => exact hφψ ⨀ hψ;
-  | nec ihφ => apply nec!; exact ihφ;
-  | _ => simp;
 
 private lemma jerabek_SBDP.lemma₁
   {p : ℕ} {φ : Formula ℕ} {b : Bool} : Hilbert.K ⊢! (flag (.atom p) b) ⋏ □φᵇ ➝ ⊡((flag (.atom p) !b) ➝ φᵇ) := by
@@ -239,17 +232,17 @@ theorem jerabek_SBDP
   let X := X₀ ∪ X₁;
   let XB := X.image (·ᵇ);
 
-  have Claim1 : ∀ ψ ∈ φ.subformulas.prebox, XB *⊢[L]! □ψᵇ ➝ ψᵇ := by
+  have Claim1 : ∀ ψ ∈ φ.subformulas.prebox, (L, XB.toSet) ⊢! □ψᵇ ➝ ψᵇ := by
     intro ψ hψ;
-    have H₁ : ∀ b, XB *⊢[L]! (flag (.atom q) b) ⋏ □ψᵇ ➝ ⊡((flag (.atom q) !b) ➝ ψᵇ) := by
+    have H₁ : ∀ b, (L, XB.toSet) ⊢! (flag (.atom q) b) ⋏ □ψᵇ ➝ ⊡((flag (.atom q) !b) ➝ ψᵇ) := by
       intro b;
-      apply Context.of!;
+      apply GlobalConsequence.thm!;
       apply jerabek_SBDP.lemma₂;
-    have H₂ : ∀ b, ↑XB *⊢[L]! ⊡((flag (.atom q) b) ➝ ψᵇ) ➝ ψᵇ := by
+    have H₂ : ∀ b, (L, XB.toSet) ⊢! ⊡((flag (.atom q) b) ➝ ψᵇ) ➝ ψᵇ := by
       intro b;
-      suffices ↑XB *⊢[L]! (□((flag (.atom q) b) ➝ ψ) ➝ ψ)ᵇ by
+      suffices (L, XB.toSet) ⊢! (□((flag (.atom q) b) ➝ ψ) ➝ ψ)ᵇ by
         simpa only [Formula.boxdotTranslate, Formula.atom_flag_boxdotTranslated] using this;
-      apply Context.by_axm!;
+      apply GlobalConsequence.ctx!;
       match b with
       | true =>
         simp only [Finset.coe_image, flag, Set.mem_image, Finset.mem_coe, XB];
@@ -263,13 +256,13 @@ theorem jerabek_SBDP
         constructor;
         . simpa [X, X₀, X₁] using hψ;
         . rfl;
-    have H₃ : ∀ b, ↑XB *⊢[L]! (flag (.atom q) b) ➝ (□ψᵇ ➝ ψᵇ) := by
+    have H₃ : ∀ b, (L, XB.toSet) ⊢! (flag (.atom q) b) ➝ (□ψᵇ ➝ ψᵇ) := by
       intro b;
       cl_prover [(H₁ b), (H₂ !b)];
-    have H₄ : ↑XB *⊢[L]!  atom q ➝ □ψᵇ ➝ ψᵇ := H₃ true;
-    have H₅ : ↑XB *⊢[L]! ∼atom q ➝ □ψᵇ ➝ ψᵇ := H₃ false;
+    have H₄ : (L, XB.toSet) ⊢!  atom q ➝ □ψᵇ ➝ ψᵇ := H₃ true;
+    have H₅ : (L, XB.toSet) ⊢! ∼atom q ➝ □ψᵇ ➝ ψᵇ := H₃ false;
     cl_prover [H₄, H₅];
-  have Claim2 : ∀ ψ ∈ φ.subformulas, XB *⊢[L]! ψ ⭤ ψᵇ := by
+  have Claim2 : ∀ ψ ∈ φ.subformulas, (L, XB.toSet) ⊢! ψ ⭤ ψᵇ := by
     intro ψ hψ;
     induction ψ with
     | hfalsum => simp [Formula.boxdotTranslate];
@@ -280,25 +273,19 @@ theorem jerabek_SBDP
       dsimp [Formula.boxdotTranslate];
       cl_prover [ihψ₁, ihψ₂];
     | hbox ψ ihψ =>
-      replace ihψ : ↑XB *⊢[L]! ψ ⭤ ψᵇ := ihψ (by grind);
-      have H₁ : ↑XB *⊢[L]! □ψ ⭤ □ψᵇ := by
-        apply Context.provable_iff.mpr;
-        obtain ⟨Δ, hΔ₁, hΔ₂⟩ := Context.provable_iff.mp ihψ;
-        use Δ;
-        constructor;
-        . assumption;
-        . replace hΔ₂ := FiniteContext.provable_iff.mp hΔ₂;
-          apply FiniteContext.provable_iff.mpr;
-          sorry;
-      have H₂ : ↑XB *⊢[L]! □ψᵇ ⭤ ⊡ψᵇ := by
+      replace ihψ : (L, XB.toSet) ⊢! ψ ⭤ ψᵇ := ihψ (by grind);
+      have H₁ : (L, XB.toSet) ⊢! □ψ ⭤ □ψᵇ := box_congruence! ihψ;
+      have H₂ : (L, XB.toSet) ⊢! □ψᵇ ⭤ ⊡ψᵇ := by
         apply Entailment.E!_intro;
-        . have : ↑XB *⊢[L]! □ψᵇ ➝ ψᵇ := Claim1 ψ (by simpa);
+        . have : (L, XB.toSet) ⊢! □ψᵇ ➝ ψᵇ := Claim1 ψ (by simpa);
           cl_prover [this];
         . cl_prover;
       cl_prover [H₁, H₂];
-  have : XB *⊢[L]! φᵇ := by
-    have h₁ : XB *⊢[L]! φ ➝ φᵇ := C_of_E_mp! $ Claim2 φ (by grind);
-    have h₂ : XB *⊢[L]! φ := Context.of! $ by simpa using hφL;
+  have : (L, XB.toSet) ⊢! φᵇ := by
+    have h₁ : (L, XB.toSet) ⊢! φ ➝ φᵇ := C_of_E_mp! $ Claim2 φ (by grind);
+    have h₂ : (L, XB.toSet) ⊢! φ := by
+      apply GlobalConsequence.thm!;
+      simpa using hφL;
     exact h₁ ⨀ h₂;
   have : L ⊢! XB.conj ➝ φᵇ := by sorry; -- TODO: it's not!
   let χ := X.conj ➝ φ
