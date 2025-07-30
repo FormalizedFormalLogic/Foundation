@@ -87,4 +87,8 @@ instance : Hilbert.KB ⪱ Hilbert.KB4 := by
 
 end Logic
 
+instance : Modal.K45 ⪱ Modal.KB4 := inferInstance
+
+instance : Modal.KB ⪱ Modal.KB4 := inferInstance
+
 end LO.Modal

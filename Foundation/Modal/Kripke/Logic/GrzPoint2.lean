@@ -369,4 +369,10 @@ instance : Hilbert.S4Point2 ⪱ Hilbert.GrzPoint2 := calc
 
 end Logic.GrzPoint2.Kripke
 
+instance : Modal.Grz ⪱ Modal.GrzPoint2 := inferInstance
+
+instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := inferInstance
+
+instance : Modal.S4Point2 ⪱ Modal.GrzPoint2 := inferInstance
+
 end LO.Modal

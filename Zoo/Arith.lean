@@ -1,6 +1,5 @@
 import Zoo.Basic
-import Foundation.FirstOrder.Arith.Basic
--- import Foundation.FirstOrder.Incompleteness.StandardProvability.FormalizedArithmetic
+import Foundation.FirstOrder.Arithmetic.Basic
 
 open Lean Meta Qq Elab Command
 open LO.FirstOrder
