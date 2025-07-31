@@ -84,11 +84,7 @@ def flag (φ : Formula α) : Bool → Formula α
 lemma atom_flag_boxdotTranslated : (flag (.atom a) b)ᵇ = (flag (.atom a) b) := by
   match b with | true | false => rfl;
 
-def freshAtom : Formula ℕ → ℕ
-  | ⊥ => 0
-  | .atom a => a + 1
-  | φ ➝ ψ => max φ.freshAtom ψ.freshAtom
-  | □φ => φ.freshAtom
+def freshAtom (φ : Formula ℕ) : ℕ := if h : φ.atoms.Nonempty then φ.atoms.max' (by simpa) + 1 else 0
 
 lemma le_max_atoms_of_mem_atoms {a : ℕ} (ha : a ∈ φ.atoms) : a ≤ φ.atoms.max' (⟨a, ha⟩) := by
   induction φ with
@@ -104,49 +100,31 @@ lemma le_max_atoms_of_mem_atoms {a : ℕ} (ha : a ∈ φ.atoms) : a ≤ φ.atoms
       . simp [atoms, Finset.max'_union hφ ⟨_, hψ⟩, ihψ hψ];
       . simp [atoms, Finset.not_nonempty_iff_eq_empty.mp hφ, ihψ hψ];
 
-lemma le_max_atoms_freshAtom (h : φ.atoms.Nonempty) : Finset.max' φ.atoms h < φ.freshAtom  := by
-  induction φ with
-  | hfalsum => simp [atoms] at h;
-  | hatom a => simp [atoms, freshAtom];
-  | hbox φ ihφ =>
-    suffices ∀ a ∈ φ.atoms, a < φ.freshAtom by simpa [atoms, freshAtom];
-    intro a ha;
-    calc
-      a ≤ φ.atoms.max' h := by apply le_max_atoms_of_mem_atoms ha;
-      _ < φ.freshAtom    := by apply ihφ;
-  | himp φ ψ ihφ ihψ =>
-    simp [atoms, freshAtom] at h ⊢;
-    rcases h with (⟨a, ha⟩ | ⟨a, ha⟩);
-    . left;
-      rintro b (hb | hb);
-      . calc
-          b ≤ φ.atoms.max' (⟨a, ha⟩) := by apply le_max_atoms_of_mem_atoms hb;
-          _ < φ.freshAtom            := @ihφ ⟨b, hb⟩;
-      . have := le_max_atoms_of_mem_atoms ha;
-        have := le_max_atoms_of_mem_atoms hb;
-        have := @ihφ ⟨a, ha⟩;
-        sorry;
-    . sorry;
+lemma le_max_atoms_freshAtom (h : φ.atoms.Nonempty) : Finset.max' φ.atoms h < φ.freshAtom := by
+  simp only [freshAtom, Finset.max'_lt_iff];
+  intro a ha;
+  split;
+  . have := le_max_atoms_of_mem_atoms ha;
+    omega;
+  . exfalso;
+    have : φ.atoms.Nonempty := ⟨a, ha⟩;
+    contradiction;
 
-@[simp]
-lemma not_mem_freshAtom_atoms : φ.freshAtom ∉ φ.atoms := by
+lemma mem_atoms_of_mem_atom_subformulas [DecidableEq α] {φ : Formula α} {a : α} : atom a ∈ φ.subformulas → a ∈ φ.atoms := by
   induction φ with
-  | hfalsum => simp [atoms];
-  | hatom a => simp [atoms, freshAtom];
-  | hbox φ ihφ => simp_all [atoms, freshAtom];
+  | hfalsum => simp [subformulas] at *;
+  | hatom b => simp [subformulas, atoms];
+  | hbox φ ih => simp_all [subformulas, atoms];
   | himp φ ψ ihφ ihψ =>
-    simp [atoms, freshAtom];
-    constructor;
-    . have : max φ.freshAtom ψ.freshAtom = φ.freshAtom ∨ max φ.freshAtom ψ.freshAtom = ψ.freshAtom := by omega;
-      rcases this with (h | h);
-      . simpa [h];
-      . rw [h];
+    suffices atom a ∈ φ.subformulas ∨ atom a ∈ ψ.subformulas → a ∈ φ.atoms ∨ a ∈ ψ.atoms by simpa [subformulas, atoms];
+    rintro (h | h);
+    . left; apply ihφ h;
+    . right; apply ihψ h;
 
-        sorry;
-    . sorry;
-    -- rcases (show max φ.freshAtom ψ.freshAtom = φ.freshAtom ∨ max φ.freshAtom ψ.freshAtom = ψ.freshAtom by omega) with (h | h);
-    -- . sorry;
-    -- . sorry;
+lemma ne_freshAtom_of_mem_subformulas (h : atom a ∈ φ.subformulas) : φ.freshAtom ≠ a := by
+  by_contra hC; subst hC;
+  apply Nat.not_lt.mpr $ le_max_atoms_of_mem_atoms $ mem_atoms_of_mem_atom_subformulas h;
+  apply le_max_atoms_freshAtom;
 
 end Formula
 
@@ -452,9 +430,7 @@ theorem jerabek_SBDP
       induction ψ generalizing w b with
       | hfalsum => simp [Satisfies];
       | hatom a =>
-        have : a ≠ q := by
-          dsimp [q]
-          sorry;
+        have : a ≠ q := Formula.ne_freshAtom_of_mem_subformulas hψ |>.symm;
         simp [Satisfies, M₂, this];
       | himp ψ₁ ψ₂ ihψ₁ ihψ₂ =>
         replace ihψ₁ := ihψ₁ (by grind);
