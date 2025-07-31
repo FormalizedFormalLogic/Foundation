@@ -16,7 +16,7 @@ namespace Kripke
 variable {F : Frame}
 
 def Frame.twice (F : Frame) : Frame where
-  World := F.World × Fin 2
+  World := F.World × Bool
   Rel := λ (x, _) (y, _) => x ≺ y
 
 local postfix:100 "×2" => Frame.twice
@@ -43,7 +43,7 @@ def Frame.twice.PMorphism (F : Frame) : F×2 →ₚ F where
     simpa using h;
   back := by
     intro ⟨x, i⟩ y Rxy;
-    use ⟨y, 0⟩;
+    use ⟨y, true⟩;
     constructor;
     . simp;
     . tauto;
@@ -68,6 +68,11 @@ instance : FrameClass.S4.JerabekAssumption := by
   intro F hF;
   simp_all only [Set.mem_setOf_eq];
   constructor;
+
+
+section Global
+
+end Global
 
 end Kripke
 
@@ -210,6 +215,12 @@ private lemma jerabek_SBDP.lemma₂
   {p : ℕ} {φ : Formula ℕ} {b : Bool} : L ⊢! (flag (.atom p) b) ⋏ □φᵇ ➝ ⊡((flag (.atom p) !b) ➝ φᵇ) := by
   apply normal_provable_of_K_provable;
   simpa using lemma₁;
+
+private lemma jerabek_SBDP.lemma₃
+  {L : Logic ℕ} [L.IsNormal] {Δ : Finset (Formula _)} {n : ℕ}
+  : L ⊢! (□^[n]Δ.conj)ᵇ ➝ □^≤[n](Finset.image (fun x ↦ xᵇ) Δ).conj := by
+  sorry;
+
 end
 
 /--
@@ -243,19 +254,11 @@ theorem jerabek_SBDP
       suffices (L, XB.toSet) ⊢! (□((flag (.atom q) b) ➝ ψ) ➝ ψ)ᵇ by
         simpa only [Formula.boxdotTranslate, Formula.atom_flag_boxdotTranslated] using this;
       apply GlobalConsequence.ctx!;
-      match b with
-      | true =>
-        simp only [Finset.coe_image, flag, Set.mem_image, Finset.mem_coe, XB];
-        use (□(atom q ➝ ψ) ➝ ψ);
-        constructor;
-        . simpa [X, X₀, X₁] using hψ;
-        . rfl;
-      | false =>
-        simp only [Finset.coe_image, flag, Set.mem_image, Finset.mem_coe, XB];
-        use (□(∼(atom q) ➝ ψ) ➝ ψ);
-        constructor;
-        . simpa [X, X₀, X₁] using hψ;
-        . rfl;
+      simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe, XB];
+      use (□((flag (atom q) b) ➝ ψ) ➝ ψ);
+      constructor;
+      . match b with | true | false => simpa [X, X₀, X₁, flag] using hψ;
+      . rfl;
     have H₃ : ∀ b, (L, XB.toSet) ⊢! (flag (.atom q) b) ➝ (□ψᵇ ➝ ψᵇ) := by
       intro b;
       cl_prover [(H₁ b), (H₂ !b)];
@@ -287,9 +290,10 @@ theorem jerabek_SBDP
       apply GlobalConsequence.thm!;
       simpa using hφL;
     exact h₁ ⨀ h₂;
-  have : L ⊢! XB.conj ➝ φᵇ := by sorry; -- TODO: it's not!
-  let χ := X.conj ➝ φ
-  have : L ⊢! χᵇ := by sorry;
+  obtain ⟨Γ, n, hΓ, hφ⟩ := GlobalConsequence.iff_finite_boxlt_provable.mp this;
+  obtain ⟨Δ, hΔ, rfl⟩ := Finset.subset_image_iff.mp hΓ;
+  let χ := (X.conj) ➝ φ;
+  have hχ : L ⊢! χᵇ := by apply C!_trans (by sorry) hφ;
   use χ;
   constructor;
   . constructor;
@@ -297,13 +301,27 @@ theorem jerabek_SBDP
       apply dhyp!;
       simpa using hφL;
     . assumption;
-  . have : ¬C ⊧ φ := complete.exists_countermodel_of_not_provable (by simpa using hφL₀);
-    obtain ⟨M, x, hMC, hF⟩ := Kripke.exists_model_world_of_not_validOnFrameClass this;
+  . suffices (L₀, X.toSet) ⊬ φ by
+      contrapose! this;
+      apply not_not.mpr;
+      have : (L₀, X.toSet) ⊢! X.conj := by
+        apply FConj!_iff_forall_provable.mpr;
+        intro ξ hξ;
+        apply GlobalConsequence.ctx!
+        simpa;
+      apply ?_ ⨀ this;
+      apply GlobalConsequence.thm!;
+      simpa;
+    suffices ∃ M : Model, M.toFrame ∈ C ∧ M ⊧* X ∧ ¬M ⊧ φ by
 
+      sorry;
+
+    have : ¬C ⊧ φ := complete.exists_countermodel_of_not_provable (by simpa using hφL₀);
+    obtain ⟨M, x, hMC, hF⟩ := Kripke.exists_model_world_of_not_validOnFrameClass this;
     let M₂ : Kripke.Model := {
       toFrame := M.toFrame.twice
       Val := λ ⟨w, i⟩ a =>
-        if   a = q then i = 0
+        if   a = q then i = true
         else M.Val w a
     }
     have : M.IsReflexive := by
@@ -312,48 +330,56 @@ theorem jerabek_SBDP
       . apply hKT.pbl;
         simp;
       . assumption;
+    have H2 : ∀ ψ ∈ φ.subformulas, ∀ w : M.World, ∀ b : Bool, Satisfies M₂ (w, b) ψ ↔ Satisfies M w ψ := by
+      intro ψ hψ w b;
+      induction ψ generalizing w b with
+      | hfalsum => simp [Satisfies];
+      | hatom a =>
+        have : a ≠ q := by sorry;
+        simp [Satisfies, M₂, this];
+      | himp ψ₁ ψ₂ ihψ₁ ihψ₂ =>
+        replace ihψ₁ := ihψ₁ (by grind);
+        replace ihψ₂ := ihψ₂ (by grind);
+        simp [Satisfies, ihψ₁, ihψ₂]
+      | hbox ψ ihψ =>
+        replace ihψ := ihψ (by grind);
+        constructor;
+        . intro h v Rwv;
+          apply ihψ v _ |>.mp;
+          apply h (v, b);
+          simpa [Frame.Rel', M₂, Frame.twice]
+        . intro h v Rwv;
+          apply ihψ v.1 v.2 |>.mpr;
+          apply h;
+          simpa [Frame.Rel', M₂, Frame.twice] using Rwv;
 
-    have H2 : ∀ ψ ∈ φ.subformulas, ∀ w : M.World, ∀ i : Fin 2, Satisfies M₂ (w, i) ψ ↔ Satisfies M w ψ := by sorry; -- BdRV 2.14
-    have : ¬Satisfies M₂ (x, 0) φ := @H2 φ (by simp) x 0 |>.not.mpr hF;
-
-    suffices L₀ ⊬ X.conj ➝ φ by simpa;
-
-    apply sound.not_provable_of_countermodel;
-    apply not_validOnFrameClass_of_exists_model_world;
-    use M₂, (x, 0);
-    constructor;
+    use M₂;
+    refine ⟨?_, ?_, ?_⟩;
     . exact Kripke.FrameClass.JerabekAssumption.twice (C := C) _ hMC;
-    . apply Satisfies.not_imp_def.mpr;
-      constructor;
-      . apply Satisfies.fconj_def.mpr;
-        simp only [
-          Finset.mem_union, Finset.mem_image, Finset.mem_preimage, Function.iterate_one,
-          Fin.isValue, X, X₀, X₁
-        ];
-        rintro _ (⟨ξ, _, rfl⟩ | ⟨ξ, _, rfl⟩);
-        . rintro hξ₁;
-          contrapose! hξ₁;
-          apply Satisfies.not_box_def.mpr;
-          use (x, 0);
-          constructor;
-          . simp [M₂, Frame.twice];
-          . apply Satisfies.not_imp_def.mpr;
-            constructor;
-            . simp [Semantics.Realize, Satisfies, M₂];
-            . apply H2 ξ (by grind) x 0 |>.not.mpr;
-              apply H2 ξ (by grind) x 0 |>.not.mp hξ₁;
-        . rintro hξ₁;
-          contrapose! hξ₁;
-          apply Satisfies.not_box_def.mpr;
-          use (x, 1);
-          constructor;
-          . simp [M₂, Frame.twice];
-          . apply Satisfies.not_imp_def.mpr;
-            constructor;
-            . simp [Semantics.Realize, Satisfies, M₂];
-            . apply H2 ξ (by grind) x 1 |>.not.mpr;
-              apply H2 ξ (by grind) x 0 |>.not.mp hξ₁;
-      . exact @H2 φ (by simp) x 0 |>.not.mpr hF;
+    . constructor;
+      rintro ψ hψ x;
+      rcases (by simpa [X, X₀, X₁] using hψ) with (⟨ψ, _, rfl⟩ | ⟨ψ, _, rfl⟩);
+      . intro hψ₁;
+        by_cases hψ : Satisfies M x.1 ψ;
+        . exact H2 _ (by grind) _ _ |>.mpr hψ;
+        . exfalso;
+          apply hψ;
+          apply H2 _ (by grind) _ true |>.mp;
+          apply hψ₁ (x.1, true);
+          . simp [Frame.Rel', M₂, Frame.twice];
+          . simp [Satisfies, M₂];
+      . intro hψ₁;
+        by_cases hψ : Satisfies M x.1 ψ;
+        . exact H2 _ (by grind) _ _ |>.mpr hψ;
+        . exfalso;
+          apply hψ;
+          apply H2 _ (by grind) _ false |>.mp;
+          apply hψ₁ (x.1, false);
+          . simp [Frame.Rel', M₂, Frame.twice];
+          . simp [Satisfies, M₂];
+    . apply ValidOnModel.not_of_exists_world;
+      use (x, true);
+      exact H2 φ (by grind) x _ |>.not.mpr hF;
 
 /--
   Every Logic `L₀` which is `Modal.KT ⪯ L₀` and sound and complete to frame class `C` satisfies Jeřábek's assumption, has boxdot property.
