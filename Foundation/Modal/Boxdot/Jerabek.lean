@@ -1,13 +1,8 @@
 import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Kripke.Logic.KTB
+import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.Logic.S5
-import Foundation.Modal.Kripke.Logic.GL.Completeness
-import Foundation.Modal.Kripke.Logic.Grz.Completeness
-import Foundation.Modal.Kripke.Logic.GrzPoint2
 import Foundation.Modal.Logic.Global
-
-
-
 
 namespace LO.Modal
 
@@ -69,6 +64,12 @@ instance : FrameClass.S4.JerabekAssumption := by
   simp_all only [Set.mem_setOf_eq];
   constructor;
 
+instance : FrameClass.S5.JerabekAssumption := by
+  constructor;
+  intro F hF;
+  simp_all only [Set.mem_setOf_eq];
+  constructor;
+
 end Kripke
 
 
@@ -84,60 +85,19 @@ def flag (φ : Formula α) : Bool → Formula α
 lemma atom_flag_boxdotTranslated : (flag (.atom a) b)ᵇ = (flag (.atom a) b) := by
   match b with | true | false => rfl;
 
-def freshAtom (φ : Formula ℕ) : ℕ := if h : φ.atoms.Nonempty then φ.atoms.max' (by simpa) + 1 else 0
-
-lemma le_max_atoms_of_mem_atoms {a : ℕ} (ha : a ∈ φ.atoms) : a ≤ φ.atoms.max' (⟨a, ha⟩) := by
-  induction φ with
-  | hfalsum => simp [atoms] at ha;
-  | hatom b => simp [atoms] at ha ⊢; omega;
-  | hbox φ ihφ => apply ihφ; simpa using ha;
-  | himp φ ψ ihφ ihψ =>
-    rcases (show a ∈ φ.atoms ∨ a ∈ ψ.atoms by simpa [atoms] using ha) with (hφ | hψ);
-    . by_cases hψ : ψ.atoms.Nonempty;
-      . simp [atoms, Finset.max'_union ⟨_, hφ⟩ hψ, ihφ hφ];
-      . simp [atoms, Finset.not_nonempty_iff_eq_empty.mp hψ, ihφ hφ];
-    . by_cases hφ : φ.atoms.Nonempty;
-      . simp [atoms, Finset.max'_union hφ ⟨_, hψ⟩, ihψ hψ];
-      . simp [atoms, Finset.not_nonempty_iff_eq_empty.mp hφ, ihψ hψ];
-
-lemma le_max_atoms_freshAtom (h : φ.atoms.Nonempty) : Finset.max' φ.atoms h < φ.freshAtom := by
-  simp only [freshAtom, Finset.max'_lt_iff];
-  intro a ha;
-  split;
-  . have := le_max_atoms_of_mem_atoms ha;
-    omega;
-  . exfalso;
-    have : φ.atoms.Nonempty := ⟨a, ha⟩;
-    contradiction;
-
-lemma mem_atoms_of_mem_atom_subformulas [DecidableEq α] {φ : Formula α} {a : α} : atom a ∈ φ.subformulas → a ∈ φ.atoms := by
-  induction φ with
-  | hfalsum => simp [subformulas] at *;
-  | hatom b => simp [subformulas, atoms];
-  | hbox φ ih => simp_all [subformulas, atoms];
-  | himp φ ψ ihφ ihψ =>
-    suffices atom a ∈ φ.subformulas ∨ atom a ∈ ψ.subformulas → a ∈ φ.atoms ∨ a ∈ ψ.atoms by simpa [subformulas, atoms];
-    rintro (h | h);
-    . left; apply ihφ h;
-    . right; apply ihψ h;
-
-lemma ne_freshAtom_of_mem_subformulas (h : atom a ∈ φ.subformulas) : φ.freshAtom ≠ a := by
-  by_contra hC; subst hC;
-  apply Nat.not_lt.mpr $ le_max_atoms_of_mem_atoms $ mem_atoms_of_mem_atom_subformulas h;
-  apply le_max_atoms_freshAtom;
-
 end Formula
+
 
 namespace Logic
 
 variable {α} {L₀ L : Logic α}
 
 def boxdot_preimage (L : Logic α) := { φ ∈ L | L ⊢! φᵇ }
-local postfix:100 "ᵇ" => boxdot_preimage
+local postfix:100 "ᵇ⁻¹" => boxdot_preimage
 
-def BoxdotProperty (L₀ : Logic α) := ∀ {L : Logic _}, L.IsNormal → Lᵇ = L₀ → L ⊆ L₀
+def BoxdotProperty (L₀ : Logic α) := ∀ {L : Logic _}, L.IsNormal → Lᵇ⁻¹ = L₀ → L ⊆ L₀
 
-def StrongBoxdotProperty (L₀ : Logic α) := ∀ {L : Logic _}, L.IsNormal → Lᵇ ⊆ L₀ → L ⊆ L₀
+def StrongBoxdotProperty (L₀ : Logic α) := ∀ {L : Logic _}, L.IsNormal → Lᵇ⁻¹ ⊆ L₀ → L ⊆ L₀
 
 lemma BDP_of_SBDP : StrongBoxdotProperty L₀ → BoxdotProperty L₀ := by
   intro hSBDP;
@@ -189,125 +149,6 @@ private lemma jerabek_SBDP.lemma₂ : L ⊢! (flag (.atom p) b) ⋏ □φᵇ ➝
   apply normal_provable_of_K_provable;
   simpa using lemma₁;
 
-lemma iff_boxdotboxdot {M : Model} {x : M} : x ⊧ φᵇᵇ ↔ x ⊧ φᵇ := by
-  induction φ generalizing x with
-  | hbox φ ih =>
-    suffices x ⊧ (φᵇ) → (x ⊧ (□φᵇᵇ) ↔ x ⊧ (□φᵇ)) by simpa [Formula.boxdotTranslate, Box.boxdot, ih];
-    intro h₁;
-    constructor;
-    . intro h₂ y Rxy; exact ih.mp $ @h₂ y Rxy;
-    . intro h₂ y Rxy; exact ih.mpr $ @h₂ y Rxy;
-  | _ => simp_all [Formula.boxdotTranslate];
-
-lemma Formula.Kripke.ValidOnModel.multinec {M : Model} (n) (h : M ⊧ φ) : M ⊧ □^[n]φ := by
-  induction n with
-  | zero => tauto;
-  | succ n ih => simpa using ValidOnModel.nec ih;
-
-lemma iff_boxdotTranslateMultibox_boxdotTranslateBoxlt {M : Model} {x : M} : x ⊧ (□^[n]φ)ᵇ ↔ x ⊧ □^≤[n] φᵇ := by
-  induction n generalizing x with
-  | zero => simp;
-  | succ n ih =>
-    suffices (∀ k < n + 1, x ⊧ (□^[k]φᵇ)) ∧ x ⊧ (□(□^[n]φ)ᵇ) ↔ (∀ k < n + 2, x ⊧ (□^[k]φᵇ)) by
-      simpa [Box.boxdot, boxdotTranslate, ih];
-    constructor;
-    . rintro ⟨h₁, h₂⟩ k hk;
-      apply Satisfies.multibox_def.mpr;
-      intro y Rxy;
-      by_cases ek : k = n + 1;
-      . subst ek;
-        obtain ⟨u, Ryu, Ruy⟩ := Rxy;
-        apply Satisfies.multibox_def.mp (Satisfies.fconj_def.mp (ih.mp $ h₂ u Ryu) _ ?_) Ruy;
-        . simp;
-          tauto;
-      . exact Satisfies.multibox_def.mp (h₁ k (by omega)) Rxy;
-    . intro h;
-      constructor;
-      . intro k hk;
-        apply Satisfies.multibox_def.mpr;
-        intro y Rxy;
-        apply Satisfies.multibox_def.mp (@h k (by omega)) Rxy;
-      . intro y Rxy;
-        apply ih.mpr;
-        apply Satisfies.fconj_def.mpr;
-        simp only [Finset.mem_image, Finset.mem_range, Satisfies.iff_models, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
-        intro k hk;
-        apply Satisfies.multibox_def.mpr;
-        intro u Ryu;
-        apply Satisfies.multibox_def.mp $ @h (k + 1) (by omega);
-        use y;
-
-
--- attribute [-simp] Logic.iff_provable
-
--- TODO: move
-private lemma jerabek_SBDP.lemma₄' (hs : Γ ⊆ Δ) : L ⊢! (□^≤[n]Δ.conj) ➝ □^≤[n]Γ.conj := by
-  apply boxlt_regularity!;
-  apply CFConj_FConj!_of_subset hs;
-
-lemma boxdot_and {M : Model} {x : M} : x ⊧ (φ ⋏ ψ)ᵇ ↔ x ⊧ φᵇ ⋏ ψᵇ := by simp [boxdotTranslate];
-
-lemma boxdotTranslate_lconj {M : Model} {x : M} {l : List _} : x ⊧ l.conjᵇ ↔ x ⊧ (l.map (·ᵇ)).conj := by
-  induction l with
-  | nil => simp [Formula.boxdotTranslate];
-  | cons φ l ih =>
-    apply Iff.trans boxdot_and;
-    apply Iff.trans Satisfies.and_def;
-    suffices x ⊧ φᵇ → (x ⊧ (l.conjᵇ) ↔ ∀ ψ ∈ l, x ⊧ (ψᵇ)) by simpa;
-    intro hφ;
-    constructor;
-    . intro hl ψ hψ;
-      have := ih.mp hl;
-      apply Satisfies.conj₁_def.mp this;
-      simp;
-      tauto;
-    . intro h;
-      apply ih.mpr;
-      apply Satisfies.conj₁_def.mpr;
-      simpa;
-
-lemma boxdotTranslate_lconj₂ {M : Model} {x : M} {l : List _} : x ⊧ (⋀l)ᵇ ↔ x ⊧ ⋀(l.map (·ᵇ)) := by
-  induction l using List.induction_with_singleton with
-  | hnil => simp [Formula.boxdotTranslate];
-  | hsingle φ => simp;
-  | hcons φ l hl ih =>
-    suffices x ⊧ ((φ ⋏ ⋀l)ᵇ) ↔ x ⊧ (φᵇ) ∧ ∀ a ∈ l, x ⊧ (aᵇ) by simpa [hl, boxdot_and];
-    apply Iff.trans boxdot_and;
-    apply Iff.trans Satisfies.and_def;
-    suffices x ⊧ φᵇ → (x ⊧ (⋀l)ᵇ ↔ ∀ ψ ∈ l, x ⊧ (ψᵇ)) by simpa;
-    intro hφ;
-    constructor;
-    . intro hl ψ hψ;
-      have := ih.mp hl;
-      apply Satisfies.conj_def.mp this;
-      simp;
-      tauto;
-    . intro h;
-      apply ih.mpr;
-      apply Satisfies.conj_def.mpr;
-      simpa;
-
-lemma boxdotTranslate_fconj₂ {M : Model} {x : M} : x ⊧ Γ.conjᵇ ↔ x ⊧ (Γ.image (·ᵇ)).conj := by
-  obtain ⟨l, rfl⟩ : ∃ l : List _, l.toFinset = Γ := ⟨Γ.toList, by simp⟩
-  induction l with
-  | nil => simp [Formula.boxdotTranslate];
-  | cons φ l ih =>
-    apply Iff.trans boxdotTranslate_lconj₂;
-    suffices (∀ ψ, (φᵇ = ψ ∨ ∃ ξ ∈ l, ξᵇ = ψ) → x ⊧ ψ) ↔ x ⊧ (φᵇ) ∧ ∀ ξ ∈ l, x ⊧ (ξᵇ) by simpa;
-    constructor;
-    . intro h;
-      constructor;
-      . apply h;
-        tauto;
-      . intro ψ hψ;
-        apply h;
-        right;
-        use ψ;
-    . rintro ⟨h₁, h₂⟩ _ (rfl | ⟨ψ, hψ, rfl⟩);
-      . assumption;
-      . apply h₂;
-        assumption;
-
 private lemma jerabek_SBDP.lemma₃ : L ⊢! (□^[n]Γ.conj)ᵇ ➝ □^≤[n](Γ.image (·ᵇ)).conj := by
   apply normal_provable_of_K_provable;
   apply Complete.complete (𝓜 := Kripke.FrameClass.all);
@@ -320,8 +161,8 @@ private lemma jerabek_SBDP.lemma₃ : L ⊢! (□^[n]Γ.conj)ᵇ ➝ □^≤[n](
   apply Satisfies.fconj_def.mpr;
   simp only [Finset.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
   intro ξ hξ;
-  replace h : Satisfies _ x (□^[k]Γ.conjᵇ) := Satisfies.fconj_def.mp (iff_boxdotTranslateMultibox_boxdotTranslateBoxlt.mp h) _ ?_;
-  . apply Satisfies.fconj_def.mp (boxdotTranslate_fconj₂.mp $ Satisfies.multibox_def.mp h Rxy) _;
+  replace h : Satisfies _ x (□^[k]Γ.conjᵇ) := Satisfies.fconj_def.mp (Satisfies.iff_boxdotTranslateMultibox_boxdotTranslateBoxlt.mp h) _ ?_;
+  . apply Satisfies.fconj_def.mp (Satisfies.boxdotTranslate_fconj₂.mp $ Satisfies.multibox_def.mp h Rxy) _;
     simp only [Finset.mem_image];
     use ξ;
   . simp only [Finset.mem_image, Finset.mem_range];
@@ -397,7 +238,7 @@ theorem jerabek_SBDP
       simpa using hφL;
     exact h₁ ⨀ h₂;
   obtain ⟨Γ, n, hΓ, hφ⟩ := GlobalConsequence.iff_finite_boxlt_provable.mp this;
-  replace hφ : L ⊢! (□^≤[n]XB.conj) ➝ φᵇ := C!_trans (jerabek_SBDP.lemma₄' hΓ) hφ;
+  replace hφ : L ⊢! (□^≤[n]XB.conj) ➝ φᵇ := C!_trans (boxlt_fconj_regularity_of_subset hΓ) hφ;
   let χ := (□^[n](X.conj) ➝ φ);
   have hχ : L ⊢! χᵇ := by apply C!_trans jerabek_SBDP.lemma₃ hφ;
   use χ;
@@ -497,6 +338,9 @@ theorem KTB.BDP : Modal.KTB.BoxdotProperty := jerabek_BDP Modal.KTB Kripke.Frame
 
 /-- `Modal.S4` has boxdot property. -/
 theorem S4.BDP : Modal.S4.BoxdotProperty := jerabek_BDP Modal.S4 Kripke.FrameClass.S4
+
+/-- `Modal.S5` has boxdot property. -/
+theorem S5.BDP : Modal.S5.BoxdotProperty := jerabek_BDP Modal.S5 Kripke.FrameClass.S5
 
 end
 

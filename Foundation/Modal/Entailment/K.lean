@@ -624,6 +624,89 @@ lemma lemma_Grz₁! : 𝓢 ⊢! (□φ ➝ □(□((φ ⋏ (□φ ➝ □□φ))
 end
 
 
+section Boxlt
+
+variable {n m : ℕ}
+
+lemma boxlt_lt_succ! : 𝓢 ⊢! (□^≤[n + 1] φ) ➝ (□^≤[n] φ) := by
+  apply CFconjFconj!_of_provable;
+  intro ψ hψ;
+  simp only [Finset.mem_image, Finset.mem_range] at hψ;
+  obtain ⟨i, hi, rfl⟩ := hψ;
+  apply Context.by_axm!
+  simp only [Finset.coe_image, Finset.coe_range, Set.mem_image, Set.mem_Iio];
+  use i;
+  constructor;
+  . omega;
+  . simp;
+
+lemma boxlt_lt_add! : 𝓢 ⊢! (□^≤[n + m] φ) ➝ (□^≤[n] φ) := by
+  induction m with
+  | zero => simp;
+  | succ m ih =>
+    rw [(show n + (m + 1) = n + m + 1 by rfl)];
+    apply C!_trans boxlt_lt_succ! ih;
+
+lemma boxlt_lt! (h : n ≥ m) : 𝓢 ⊢! (□^≤[n] φ) ➝ (□^≤[m] φ) := by
+  convert boxlt_lt_add! (𝓢 := 𝓢) (n := m) (m := n - m) (φ := φ);
+  omega;
+
+lemma E_boxlt_succ! : 𝓢 ⊢! (□^≤[n + 1] φ) ⭤ (□^≤[n] φ) ⋏ (□^[(n + 1)] φ) := by
+  apply E!_intro;
+  . apply FConj_DT.mpr;
+    apply K!_intro;
+    . apply FConj_DT.mp;
+      apply boxlt_lt!;
+      omega;
+    . apply Context.by_axm!;
+      simp only [Finset.coe_image, Finset.coe_range, Box.multibox_succ, Set.mem_image, Set.mem_Iio];
+      use n + 1;
+      constructor;
+      . omega;
+      . simp;
+  . suffices 𝓢 ⊢! (□^≤[n]φ) ⋏ (Finset.conj {(□^[(n + 1)]φ)}) ➝ (□^≤[n + 1]φ) by simpa using this;
+    convert CKFconjFconjUnion! (𝓢 := 𝓢) (Γ := Finset.range (n + 1) |>.image (λ i => □^[i] φ)) (Δ := {(□^[(n + 1)]φ)});
+    ext ψ;
+    simp only [Finset.mem_image, Finset.mem_range, Box.multibox_succ, Finset.mem_union, Finset.mem_singleton];
+    constructor;
+    . rintro ⟨k, hk, rfl⟩;
+      by_cases ha : k = n + 1;
+      . right;
+        subst ha;
+        simp;
+      . left;
+        use k;
+        constructor;
+        . omega;
+        . simp;
+    . rintro (⟨k, hk, rfl⟩ | rfl);
+      . use k;
+        constructor;
+        . omega;
+        . simp;
+      . use (n + 1);
+        constructor;
+        . omega;
+        . simp;
+
+lemma boxlt_regularity! (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! (□^≤[n] φ) ➝ (□^≤[n] ψ) := by
+  induction n with
+  | zero => simpa;
+  | succ n ih =>
+    suffices 𝓢 ⊢! ((□^≤[n]φ) ⋏ (□^[(n + 1)]φ)) ➝ ((□^≤[n]ψ) ⋏ (□^[(n + 1)]ψ)) by
+      apply C!_replace ?_ ?_ this;
+      . apply C_of_E_mp! E_boxlt_succ!;
+      . apply C_of_E_mpr! E_boxlt_succ!;
+    apply CKK!_of_C!_of_C! ih $ imply_multibox_distribute'! h;
+
+-- TODO: better name
+lemma boxlt_fconj_regularity_of_subset {Γ Δ : Finset _} (hs : Γ ⊆ Δ) : 𝓢 ⊢! (□^≤[n]Δ.conj) ➝ □^≤[n]Γ.conj := by
+  apply boxlt_regularity!;
+  apply CFConj_FConj!_of_subset hs;
+
+end Boxlt
+
+
 
 namespace Context
 

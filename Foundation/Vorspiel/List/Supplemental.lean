@@ -38,4 +38,11 @@ lemma Nodup.infinite_of_infinite : Infinite {l : List α // l.Nodup} → Infinit
   intro _;
   exact List.Nodup.finite;
 
+lemma exists_of_range (h : a ∈ List.map f (List.range n)) : ∃ i < n, a = f i := by
+  obtain ⟨i, ⟨hi, rfl⟩⟩ := List.exists_of_mem_map h;
+  use i;
+  constructor;
+  . simpa using hi;
+  . simp;
+
 end List

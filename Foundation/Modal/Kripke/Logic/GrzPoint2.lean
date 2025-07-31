@@ -16,23 +16,6 @@ open Formula.Kripke
 open Hilbert.Kripke
 open Kripke
 
-namespace Formula
-
-variable {α} [DecidableEq α]
-variable {φ : Formula α} {a : α}
-
-def atoms : Formula α → Finset α
-  | ⊥ => ∅
-  | .atom v => {v}
-  | □φ => φ.atoms
-  | φ ➝ ψ => φ.atoms ∪ ψ.atoms
-
-lemma iff_mem_atoms_mem_subformula : (a ∈ φ.atoms) ↔ (atom a ∈ φ.subformulas) := by
-  induction φ <;> simp_all [atoms, subformulas];
-
-end Formula
-
-
 section
 
 namespace Kripke

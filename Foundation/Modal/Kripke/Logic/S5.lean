@@ -209,4 +209,8 @@ instance : Modal.S4Point4 ⪱ Modal.S5 := inferInstance
 
 instance : Modal.S4 ⪱ Modal.S5 := inferInstance
 
+instance : Modal.KT ⪱ Modal.S5 := calc
+  Modal.KT ⪱ Modal.S4 := by infer_instance
+  _        ⪱ Modal.S5 := by infer_instance
+
 end LO.Modal

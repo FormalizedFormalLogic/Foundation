@@ -429,6 +429,11 @@ protected lemma nec (h : M ⊧ φ) : M ⊧ □φ := by
   intro x y _;
   exact h y;
 
+lemma multinec (n) (h : M ⊧ φ) : M ⊧ □^[n]φ := by
+  induction n with
+  | zero => tauto;
+  | succ n ih => simpa using ValidOnModel.nec ih;
+
 protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
 
 protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
