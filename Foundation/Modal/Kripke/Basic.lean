@@ -215,6 +215,8 @@ lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by
       . right; exact ih.mpr h;
   | _ => simp;
 
+lemma conj₁_def {Γ : List _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by induction Γ <;> simp;
+
 lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by
   induction Γ using List.induction_with_singleton with
   | hcons φ Γ hΓ ih =>
