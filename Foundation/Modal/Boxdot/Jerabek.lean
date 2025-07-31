@@ -266,6 +266,8 @@ theorem jerabek_SBDP
       . apply hKT.pbl;
         simp;
       . assumption;
+
+    -- Memo: BdRV Prop 2.14
     have H2 : ∀ ψ ∈ φ.subformulas, ∀ w : M.World, ∀ b : Bool, Satisfies M₂ (w, b) ψ ↔ Satisfies M w ψ := by
       intro ψ hψ w b;
       induction ψ generalizing w b with
