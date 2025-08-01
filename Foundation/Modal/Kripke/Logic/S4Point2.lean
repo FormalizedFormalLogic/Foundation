@@ -150,6 +150,10 @@ end Logic.S4Point2.Kripke
 
 instance : Modal.S4 ⪱ Modal.S4Point2 := inferInstance
 
+instance : Modal.KT ⪱ Modal.S4Point2 := calc
+  Modal.KT ⪱ Modal.S4       := by infer_instance
+  _        ⪱ Modal.S4Point2 := by infer_instance
+
 instance : Modal.K4Point2 ⪱ Modal.S4Point2 := inferInstance
 
 end LO.Modal

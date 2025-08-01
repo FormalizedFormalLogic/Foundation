@@ -1,7 +1,13 @@
+/-
+  Jeřábek's proof of boxdot conjecture.
+
+  References:
+  - E. Jeřábek - "Cluster Expansion and the Boxdot Conjecture": https://arxiv.org/abs/1308.0994
+-/
 import Foundation.Modal.Boxdot.Basic
 import Foundation.Modal.Kripke.Logic.KTB
-import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.Logic.S5
+import Foundation.Modal.Kripke.Logic.S4McK
 import Foundation.Modal.Logic.Global
 
 namespace LO.Modal
@@ -31,6 +37,23 @@ instance [F.IsSymmetric] : F×2.IsSymmetric where
     simp only [Frame.twice] at Rxy;
     exact F.symm Rxy;
 
+instance [F.IsPiecewiseStronglyConvergent] : F×2.IsPiecewiseStronglyConvergent := by
+  constructor;
+  rintro ⟨x, i⟩ ⟨y, j⟩ ⟨z, k⟩ Rxy Rxz;
+  simp only [Frame.twice] at Rxy Rxz;
+  obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz;
+  use (u, i);
+  constructor <;> simpa [Frame.twice];
+
+instance [F.IsPiecewiseStronglyConnected] : F×2.IsPiecewiseStronglyConnected := by
+  constructor;
+  rintro ⟨x, i⟩ ⟨y, j⟩ ⟨z, k⟩ Rxy Rxz;
+  simp only [Frame.twice] at Rxy Rxz;
+  rcases F.ps_connected Rxy Rxz with (Ryz | Rzy);
+  . left; simpa;
+  . right; simpa;
+
+
 def Frame.twice.PMorphism (F : Frame) : F×2 →ₚ F where
   toFun := Prod.fst
   forth := by
@@ -59,6 +82,18 @@ instance : FrameClass.KTB.JerabekAssumption := by
   constructor;
 
 instance : FrameClass.S4.JerabekAssumption := by
+  constructor;
+  intro F hF;
+  simp_all only [Set.mem_setOf_eq];
+  constructor;
+
+instance : FrameClass.S4Point2.JerabekAssumption := by
+  constructor;
+  intro F hF;
+  simp_all only [Set.mem_setOf_eq];
+  constructor;
+
+instance : FrameClass.S4Point3.JerabekAssumption := by
   constructor;
   intro F hF;
   simp_all only [Set.mem_setOf_eq];
@@ -331,7 +366,7 @@ theorem jerabek_BDP
   [Sound L₀ C] [Complete L₀ C]
   : L₀.BoxdotProperty := Logic.BDP_of_SBDP $ jerabek_SBDP L₀ C
 
-/-- `Modal.KT` has boxdot property. This is originally boxdot conjecture stated. -/
+/-- `Modal.KT` has boxdot property. This is original boxdot conjecture. -/
 theorem KT.BDP : Modal.KT.BoxdotProperty := jerabek_BDP Modal.KT Kripke.FrameClass.KT
 alias boxdot_conjecture := KT.BDP
 
@@ -340,6 +375,12 @@ theorem KTB.BDP : Modal.KTB.BoxdotProperty := jerabek_BDP Modal.KTB Kripke.Frame
 
 /-- `Modal.S4` has boxdot property. -/
 theorem S4.BDP : Modal.S4.BoxdotProperty := jerabek_BDP Modal.S4 Kripke.FrameClass.S4
+
+/-- `Modal.S4Point2` has boxdot property. -/
+theorem S4Point2.BDP : Modal.S4Point2.BoxdotProperty := jerabek_BDP Modal.S4Point2 Kripke.FrameClass.S4Point2
+
+/-- `Modal.S4Point3` has boxdot property. -/
+theorem S4Point3.BDP : Modal.S4Point3.BoxdotProperty := jerabek_BDP Modal.S4Point3 Kripke.FrameClass.S4Point3
 
 /-- `Modal.S5` has boxdot property. -/
 theorem S5.BDP : Modal.S5.BoxdotProperty := jerabek_BDP Modal.S5 Kripke.FrameClass.S5
