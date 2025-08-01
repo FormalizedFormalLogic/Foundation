@@ -215,6 +215,8 @@ lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by
       . right; exact ih.mpr h;
   | _ => simp;
 
+lemma conj₁_def {Γ : List _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by induction Γ <;> simp;
+
 lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by
   induction Γ using List.induction_with_singleton with
   | hcons φ Γ hΓ ih =>
@@ -426,6 +428,11 @@ protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
 protected lemma nec (h : M ⊧ φ) : M ⊧ □φ := by
   intro x y _;
   exact h y;
+
+lemma multinec (n) (h : M ⊧ φ) : M ⊧ □^[n]φ := by
+  induction n with
+  | zero => tauto;
+  | succ n ih => simpa using ValidOnModel.nec ih;
 
 protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
 

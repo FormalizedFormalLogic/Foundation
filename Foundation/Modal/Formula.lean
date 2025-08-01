@@ -622,6 +622,65 @@ instance : Coe (Propositional.ZeroSubstitution α) (Modal.ZeroSubstitution α) :
 
 end Substitution
 
+
+section Atoms
+
+namespace Formula
+
+variable {α} [DecidableEq α]
+
+def atoms : Formula α → Finset α
+  | ⊥ => ∅
+  | .atom v => {v}
+  | □φ => φ.atoms
+  | φ ➝ ψ => φ.atoms ∪ ψ.atoms
+
+lemma iff_mem_atoms_mem_subformula {a : α} {φ : Formula α} : (a ∈ φ.atoms) ↔ (atom a ∈ φ.subformulas) := by
+  induction φ <;> simp_all [atoms, subformulas];
+
+section
+
+variable {a : ℕ} {φ : Formula ℕ}
+
+def freshAtom (φ : Formula ℕ) : ℕ := if h : φ.atoms.Nonempty then φ.atoms.max' (by simpa) + 1 else 0
+
+lemma le_max_atoms_of_mem_atoms {a : ℕ} (ha : a ∈ φ.atoms) : a ≤ φ.atoms.max' (⟨a, ha⟩) := by
+  induction φ with
+  | hfalsum => simp [atoms] at ha;
+  | hatom b => simp [atoms] at ha ⊢; omega;
+  | hbox φ ihφ => apply ihφ; simpa using ha;
+  | himp φ ψ ihφ ihψ =>
+    rcases (show a ∈ φ.atoms ∨ a ∈ ψ.atoms by simpa [atoms] using ha) with (hφ | hψ);
+    . by_cases hψ : ψ.atoms.Nonempty;
+      . simp [atoms, Finset.max'_union ⟨_, hφ⟩ hψ, ihφ hφ];
+      . simp [atoms, Finset.not_nonempty_iff_eq_empty.mp hψ, ihφ hφ];
+    . by_cases hφ : φ.atoms.Nonempty;
+      . simp [atoms, Finset.max'_union hφ ⟨_, hψ⟩, ihψ hψ];
+      . simp [atoms, Finset.not_nonempty_iff_eq_empty.mp hφ, ihψ hψ];
+
+lemma le_max_atoms_freshAtom (h : φ.atoms.Nonempty) : Finset.max' φ.atoms h < φ.freshAtom := by
+  simp only [freshAtom, Finset.max'_lt_iff];
+  intro a ha;
+  split;
+  . have := le_max_atoms_of_mem_atoms ha;
+    omega;
+  . exfalso;
+    have : φ.atoms.Nonempty := ⟨a, ha⟩;
+    contradiction;
+
+lemma ne_freshAtom_of_mem_subformulas (h : atom a ∈ φ.subformulas) : φ.freshAtom ≠ a := by
+  by_contra hC; subst hC;
+  apply Nat.not_lt.mpr $ le_max_atoms_of_mem_atoms $ iff_mem_atoms_mem_subformula.mpr h;
+  apply le_max_atoms_freshAtom;
+
+end
+
+
+end Formula
+
+end Atoms
+
+
 end Modal
 
 end LO
