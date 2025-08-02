@@ -75,6 +75,7 @@ import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Examples
 
 import Foundation.FirstOrder.Incompleteness.Tarski
+import Foundation.FirstOrder.Incompleteness.Church
 
 import Foundation.FirstOrder.Hauptsatz
 
