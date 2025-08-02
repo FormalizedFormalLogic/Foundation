@@ -74,6 +74,8 @@ import Foundation.FirstOrder.Incompleteness.Dense
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Examples
 
+import Foundation.FirstOrder.Incompleteness.Tarski
+
 import Foundation.FirstOrder.Hauptsatz
 
 -- IntFO
