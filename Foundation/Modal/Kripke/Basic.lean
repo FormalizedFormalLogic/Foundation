@@ -575,55 +575,13 @@ namespace FrameClass
 
 variable {C : FrameClass} {Γ : FormulaSet ℕ} {φ ψ χ : Formula ℕ}
 
-def Validates (C : FrameClass) (Γ : FormulaSet ℕ) := ∀ F ∈ C, ∀ φ ∈ Γ, F ⊧ φ
-
-abbrev ValidatesFormula (C : FrameClass) (φ : Formula ℕ) := Validates C {φ}
-
-lemma ValidatesFormula_of (h : ∀ F ∈ C, F ⊧ φ) : C.ValidatesFormula φ := by
-  rintro F hF _ rfl;
-  apply h;
-  tauto;
-
-variable {C C₁ C₂ : FrameClass} {Γ Γ₁ Γ₂ : FormulaSet ℕ} {φ φ₁ φ₂ : Formula ℕ}
-
-lemma Validates.inter_of (h₁ : C₁.Validates Γ₁) (h₂ : C₂.Validates Γ₂) : (C₁ ∩ C₂).Validates (Γ₁ ∪ Γ₂) := by
-  rintro F;
-  rintro ⟨hF₁, hF₂⟩ φ (hφ₁ | hφ₂);
-  . exact h₁ F hF₁ _ hφ₁;
-  . exact h₂ F hF₂ _ hφ₂;
-
-lemma ValidatesFormula.inter_of (h₁ : C₁.ValidatesFormula φ₁) (h₂ : C₂.ValidatesFormula φ₂) : (C₁ ∩ C₂).Validates {φ₁, φ₂}
-  := Validates.inter_of h₁ h₂
-
-protected abbrev all : FrameClass := Set.univ
-
-@[simp]
-lemma all.IsNonempty : FrameClass.all.Nonempty := by use whitepoint; tauto;
-
-lemma all.validates_axiomK : FrameClass.all.ValidatesFormula (Axioms.K (.atom 0) (.atom 1)) := by
-  suffices ∀ (F : Frame), Formula.Kripke.ValidOnFrame F (Axioms.K (.atom 0) (.atom 1)) by simpa [Validates];
-  intro F;
-  exact Formula.Kripke.ValidOnFrame.axiomK;
-
-
-protected abbrev finite_all : FrameClass := { F | F.IsFinite }
-
-@[simp]
-lemma finite_all.nonempty : FrameClass.finite_all.Nonempty := by
-  use whitepoint;
-  simp only [Set.mem_setOf_eq];
-  infer_instance;
-
-lemma finite_all.validates_axiomK : FrameClass.finite_all.ValidatesFormula (Axioms.K (.atom 0) (.atom 1)) := by
-  suffices ∀ (F : Frame), [F.IsFinite] → Formula.Kripke.ValidOnFrame F (Axioms.K (.atom 0) (.atom 1)) by simpa [Validates];
-  intro F _;
-  apply FrameClass.all.validates_axiomK;
-  . tauto;
-  . tauto;
-
-lemma Validates.withAxiomK (hV : C.Validates Γ) : C.Validates (insert (Axioms.K (.atom 0) (.atom 1)) Γ) := by
-  convert Validates.inter_of all.validates_axiomK hV;
-  tauto_set;
+lemma validates_with_AxiomK_of_validates (hV : C ⊧* Γ) : C ⊧* (insert (Axioms.K (.atom 0) (.atom 1)) Γ) := by
+  constructor;
+  rintro φ (rfl | hφ);
+  . intro F _;
+    apply Formula.Kripke.ValidOnFrame.axiomK;
+  . apply hV.realize;
+    assumption;
 
 end FrameClass
 

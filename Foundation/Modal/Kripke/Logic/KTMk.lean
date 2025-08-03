@@ -27,8 +27,9 @@ open Hilbert.Kripke
 namespace Logic.KTMk.Kripke
 
 instance : Sound (Hilbert.KTMk) Kripke.FrameClass.KTMk := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_axiomMk_of_satisfiesMakinsonCondition;
 

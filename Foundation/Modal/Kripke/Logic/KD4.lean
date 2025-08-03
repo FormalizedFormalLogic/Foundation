@@ -23,8 +23,9 @@ end Kripke
 namespace Hilbert.KD4.Kripke
 
 instance : Sound Hilbert.KD4 FrameClass.KD4 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFour_of_transitive;
 

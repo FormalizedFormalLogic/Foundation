@@ -26,8 +26,10 @@ end Kripke
 namespace Hilbert.KTc.Kripke
 
 instance : Sound (Hilbert.KTc) Kripke.FrameClass.KTc := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F F_corefl _ rfl;
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_corefl;
   exact Kripke.validate_AxiomTc_of_coreflexive (corefl := F_corefl);
 
 instance : Entailment.Consistent (Hilbert.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.KTc $ by

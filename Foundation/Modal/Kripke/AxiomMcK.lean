@@ -22,7 +22,7 @@ open Formula.Kripke
 variable {φ ψ : Formula _}
 
 lemma axiomMcK_DiaCDiaBox! : Hilbert.K ⊢! (□◇φ ➝ ◇□φ) ⭤ ◇(◇φ ➝ □φ) := by
-  apply Complete.complete (𝓜 := Kripke.FrameClass.all);
+  apply Complete.complete (𝓜 := Kripke.FrameClass.K);
   intro F _ V x;
   apply Satisfies.iff_def.mpr;
   constructor;
@@ -51,7 +51,7 @@ lemma axiomMcK_DiaCDiaBox! : Hilbert.K ⊢! (□◇φ ➝ ◇□φ) ⭤ ◇(◇�
     . exact hy $ hx₂ _ Rxy;
 
 lemma CKDiaBoxDiaK! : Hilbert.K ⊢! (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := by
-  apply Complete.complete (𝓜 := Kripke.FrameClass.all);
+  apply Complete.complete (𝓜 := Kripke.FrameClass.K);
   intro F _ V x hx;
   have ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
   have ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp hx₁;
@@ -65,7 +65,7 @@ lemma CKDiaBoxDiaK! : Hilbert.K ⊢! (◇φ ⋏ □ψ) ➝ ◇(φ ⋏ ψ) := by
     . apply hx₂ _ Rxy;
 
 lemma CKBoxDiaDiaK! : Hilbert.K ⊢! (□φ ⋏ ◇ψ) ➝ ◇(φ ⋏ ψ) := by
-  apply Complete.complete (𝓜 := Kripke.FrameClass.all);
+  apply Complete.complete (𝓜 := Kripke.FrameClass.K);
   intro F _ V x hx;
   have ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
   have ⟨y, Rxy, hy⟩ := Satisfies.dia_def.mp hx₂;

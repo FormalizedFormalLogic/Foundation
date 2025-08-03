@@ -26,8 +26,9 @@ end Kripke
 namespace Logic.KB4.Kripke
 
 instance : Sound Hilbert.KB4 FrameClass.KB4 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomB_of_symmetric;
   . exact validate_AxiomFour_of_transitive;
 
