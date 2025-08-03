@@ -32,19 +32,19 @@ end Kripke
 
 namespace Hilbert.Triv.Kripke
 
-instance : Sound Hilbert.Triv Kripke.FrameClass.Triv :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomK;
-    rintro F ⟨_⟩ _ (rfl | rfl);
-    . exact validate_AxiomT_of_reflexive;
-    . exact validate_AxiomTc_of_coreflexive;
+instance : Sound Hilbert.Triv Kripke.FrameClass.Triv := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomTc_of_coreflexive;
 
-instance : Sound Hilbert.Triv Kripke.FrameClass.finite_Triv :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomK;
-    rintro F ⟨_, _⟩ _ (rfl | rfl);
-    . exact validate_AxiomT_of_reflexive;
-    . exact validate_AxiomTc_of_coreflexive;
+instance : Sound Hilbert.Triv Kripke.FrameClass.finite_Triv := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomTc_of_coreflexive;
 
 instance : Entailment.Consistent Hilbert.Triv := consistent_of_sound_frameclass Kripke.FrameClass.Triv $ by
   use whitepoint;

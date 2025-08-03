@@ -22,8 +22,9 @@ end Kripke
 namespace Hilbert.S4Point2McK.Kripke
 
 instance : Sound (Hilbert.S4Point2McK) FrameClass.S4Point2McK := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_⟩ _ (rfl | rfl | rfl | rfl);
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl | rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;

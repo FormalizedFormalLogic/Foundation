@@ -20,7 +20,9 @@ end Kripke
 namespace Logic.KB5.Kripke
 
 instance : Sound (Hilbert.KB5) Kripke.FrameClass.KB5 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomB_of_symmetric;
   . exact validate_AxiomFive_of_euclidean;

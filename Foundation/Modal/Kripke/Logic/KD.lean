@@ -23,11 +23,12 @@ namespace Hilbert
 
 namespace KD.Kripke
 
-instance : Sound Hilbert.KD FrameClass.KD :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomK;
-    rintro F F_serial φ rfl;
-    apply validate_AxiomD_of_serial (ser := F_serial);
+instance : Sound Hilbert.KD FrameClass.KD := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_serial φ;
+  apply validate_AxiomD_of_serial (ser := F_serial);
 
 instance : Entailment.Consistent Hilbert.KD :=
   consistent_of_sound_frameclass FrameClass.KD $ by
@@ -51,7 +52,7 @@ instance : Hilbert.K ⪱ Hilbert.KD := by
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.all)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
       constructor;
