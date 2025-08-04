@@ -1,4 +1,5 @@
 import Foundation.FirstOrder.Incompleteness.First
+import Mathlib.Computability.Reduce
 
 /-!
   # Church's Undecidability of First-Order Logic Theorem
@@ -11,7 +12,7 @@ open Entailment FirstOrder FirstOrder.Arithmetic
 
 variable {T : Theory ℒₒᵣ} [𝐈𝚺₁ ⪯ T] [Entailment.Consistent T]
 
-lemma not_exists_provable_switch : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ, (T ⊢!. σ → T ⊢!. τ/[⌜σ⌝]) ∧ (T ⊬. σ → T ⊢!. ∼τ/[⌜σ⌝]) := by
+lemma not_exists_theorem_representable_predicate : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ, (T ⊢!. σ → T ⊢!. τ/[⌜σ⌝]) ∧ (T ⊬. σ → T ⊢!. ∼τ/[⌜σ⌝]) := by
   rintro ⟨τ, hτ⟩;
   have ⟨h₁, h₂⟩ := hτ $ fixpoint “x. ¬!τ x”;
   by_cases h : T ⊢!. fixpoint (∼τ/[#0]);
@@ -69,31 +70,26 @@ namespace Arithmetic
 variable {T : ArithmeticTheory} [𝐈𝚺₁ ⪯ T] [Entailment.Consistent T] [T.SoundOnHierarchy 𝚺 1]
 variable {σ : Sentence _}
 
-lemma not_RePred_theorems : ¬REPred (fun n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ T ⊢!. σ) := by
-  have := ISigma1.not_exists_provable_switch (T := T);
+open Classical in
+/-- Godel number of theorems of `T` is not computable. -/
+theorem not_computable_theorems : ¬ComputablePred (fun n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ T ⊢!. σ) := by
+  have := ISigma1.not_exists_theorem_representable_predicate (T := T);
   contrapose! this;
+  -- TODO: applying `ComputablePred fun n ↦ ∃ σ, n = ⌜σ⌝ ∧ T ⊢!. σ` to Representation theorem.
+  have ⟨h₁, h₂⟩ := ComputablePred.computable_iff_re_compl_re.mp this;
   use codeOfREPred (λ n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ T ⊢!. σ);
   intro σ;
   constructor;
   . intro hσ;
-    simpa using re_complete (T := T) this (x := ⌜σ⌝) |>.mp $ by use σ;
+    simpa using re_complete h₁ (x := ⌜σ⌝) |>.mp ⟨σ, by tauto⟩;
   . sorry;
 
-lemma firstorder_undecidability_of_finite_theory
-  (T_finite : T.Finite)
-  : ¬REPred (fun n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ ∅ ⊢!. σ) := by
-    by_contra h;
-    apply not_RePred_theorems (T := T);
-    replace h : REPred (fun n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ ∅ ⊢!. (Theory.finite_conjunection T_finite) ➝ σ) := by
-      sorry;
-    have := funext
-      (f := fun n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ ∅ ⊢!. (Theory.finite_conjunection T_finite) ➝ σ)
-      (g := fun n ↦ ∃ σ, n = ⌜σ⌝ ∧ T ⊢!. σ)
-      $ by simp [firstorder_provable_of_finite_provable T_finite];
-    rwa [this] at h;
-
-lemma firstorder_undecidability : ¬REPred (fun n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ ∅ ⊢!. σ) := by
-  apply @firstorder_undecidability_of_finite_theory (T := 𝐏𝐀⁻) (by sorry) inferInstance (by sorry) (by simp);
+open Classical in
+/-- Godel number of theorems of first-order logic on `ℒₒᵣ` is not computable. -/
+theorem firstorder_undecidability : ¬ComputablePred (fun n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ ∅ ⊢!. σ) := by
+  by_contra h;
+  apply @not_computable_theorems (T := 𝐏𝐀⁻) (by sorry) inferInstance inferInstance;
+  sorry;
 
 end Arithmetic
 
