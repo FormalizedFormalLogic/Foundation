@@ -6,6 +6,21 @@ import Mathlib.Computability.Reduce
 -/
 
 
+section
+
+variable {α β} [Primcodable α] [Primcodable β]
+
+lemma ComputablePred.range_subset  {f : α → β} (hf : Computable f) {A} (hA : ComputablePred A) : ComputablePred { x | A (f x) } := by
+  apply computable_iff.mpr;
+  obtain ⟨inA, hinA₁, rfl⟩ := computable_iff.mp hA;
+  use λ x => inA (f x);
+  constructor;
+  . apply Computable.comp <;> assumption;
+  . rfl;
+
+end
+
+
 namespace LO.ISigma1
 
 open Entailment FirstOrder FirstOrder.Arithmetic
@@ -73,16 +88,13 @@ variable {σ : Sentence _}
 open Classical in
 /-- Godel number of theorems of `T` is not computable. -/
 theorem not_computable_theorems : ¬ComputablePred (fun n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ T ⊢!. σ) := by
-  have := ISigma1.not_exists_theorem_representable_predicate (T := T);
-  contrapose! this;
-  -- TODO: applying `ComputablePred fun n ↦ ∃ σ, n = ⌜σ⌝ ∧ T ⊢!. σ` to Representation theorem.
-  have ⟨h₁, h₂⟩ := ComputablePred.computable_iff_re_compl_re.mp this;
-  use codeOfREPred (λ n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ T ⊢!. σ);
-  intro σ;
-  constructor;
-  . intro hσ;
-    simpa using re_complete h₁ (x := ⌜σ⌝) |>.mp ⟨σ, by tauto⟩;
-  . sorry;
+  by_contra hC;
+  let D : ℕ → Prop := fun n : ℕ ↦ ∃ σ : Semisentence ℒₒᵣ 1, n = ⌜σ⌝ ∧ T ⊬. σ/[⌜σ⌝];
+  have : ComputablePred D := by
+    let f : ℕ → ℕ := λ n => if h : ∃ σ : Semisentence ℒₒᵣ 1, n = ⌜σ⌝ then ⌜(h.choose/[⌜h.choose⌝] : Sentence ℒₒᵣ)⌝ else 0;
+    have : ComputablePred (λ x => ¬∃ σ, f x = ⌜σ⌝ ∧ T ⊢!. σ) := ComputablePred.range_subset (f := f) (by sorry) (ComputablePred.not hC);
+    sorry;
+  simpa [D] using re_complete (T := T) (ComputablePred.to_re this) (x := ⌜(codeOfREPred D)⌝);
 
 open Classical in
 /-- Godel number of theorems of first-order logic on `ℒₒᵣ` is not computable. -/
