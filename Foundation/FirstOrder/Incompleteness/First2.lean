@@ -11,7 +11,7 @@ open Classical in
   If r.e. but not recursive set `A` exists, then implies incompleteness.
 -/
 lemma incomplete_of_REPred_not_ComputablePred' {A : Set ℕ} (hRE : REPred A) (hC : ¬ComputablePred A) :
-  ∃ φ : Semisentence ℒₒᵣ 1, ∃ a : ℕ, T ⊬. φ/[a] ∧ T ⊬. ∼φ/[a] := by
+  ∃ φ : ArithmeticSemisentence 1, ∃ a : ℕ, T ⊬. φ/[a] ∧ T ⊬. ∼φ/[a] := by
   let φ := codeOfREPred A;
   use φ;
   have hA : A = { n : ℕ | T ⊢!. φ/[n] } := Set.ext fun x ↦ re_complete hRE;
@@ -33,10 +33,12 @@ lemma incomplete_of_REPred_not_ComputablePred' {A : Set ℕ} (hRE : REPred A) (h
 
       constructor;
       . rintro hP;
-        sorry;
+        suffices T ⊢! ∼(φ : SyntacticSemiformula ℒₒᵣ 1)/[↑a] by sorry;
+        apply Theory.Provable.sound;
+        simpa [Semiformula.quote_def] using hP;
       . rintro hφ;
-        have : Theory.Provable T ⌜∼φ/[a]⌝ := provable_of_provable_arith₀ (V := ℕ) hφ;
-        sorry;
+        have : T ⊢! ∼(φ : SyntacticSemiformula ℒₒᵣ 1)/[↑a] := by sorry;
+        simpa [Semiformula.quote_def] using internalize_provability (V := ℕ) this;
 
   push_neg at hd;
   rcases hd with (⟨hd₁, hd₂⟩ | ⟨hd₁, hd₂⟩);
