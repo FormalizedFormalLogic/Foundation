@@ -13,93 +13,6 @@ import Foundation.ProvabilityLogic.GL.Soundness
 
 open Classical
 
-noncomputable section
-
-namespace LO
-
-namespace ProvabilityLogic
-
-open Entailment Entailment.FiniteContext
-open FirstOrder
-open Modal
-open Modal.Kripke
-open Modal.Formula.Kripke
-
-variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
-         {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
-         {A B : Modal.Formula _}
-
-structure SolovaySentences (F : Kripke.Frame) (r : F) [F.IsFiniteTree r] [Fintype F] where
-  σ : F → Sentence L
-  protected SC1 : ∀ i j, i ≠ j → T₀ ⊢!. σ i ➝ ∼σ j
-  protected SC2 : ∀ i j, i ≺ j → T₀ ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
-  protected SC3 : ∀ i, r ≠ i → T₀ ⊢!. σ i ➝ 𝔅 (⩖ j ∈ { j : F | i ≺ j }, σ j)
-  protected SC4 : T₀ ⊢!. ⩖ j, σ j
-
-variable {𝔅}
-
-namespace SolovaySentences
-
-instance {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F] : CoeFun (SolovaySentences 𝔅 F r) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
-
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M.World]
-
-noncomputable def realization (σ : SolovaySentences 𝔅 M.toFrame r) :
-    Realization L := λ a => ⩖ i ∈ { i : M.World | i ⊧ (.atom a) }, σ i
-
-theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : r ≺ i) :
-  (i ⊧ A → T₀ ⊢!. σ i ➝ σ.realization.interpret 𝔅 A) ∧
-  (¬i ⊧ A → T₀ ⊢!. σ i ➝ ∼σ.realization.interpret 𝔅 A)
-  := by
-  induction A generalizing i with
-  | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
-  | hatom a =>
-    constructor;
-    . intro h;
-      apply right_Fdisj'!_intro;
-      simpa using h;
-    . intro h;
-      apply CN!_of_CN!_right;
-      apply left_Fdisj'!_intro;
-      intro i hi;
-      apply σ.SC1;
-      by_contra hC; subst hC;
-      apply h;
-      simpa using hi;
-  | himp A B ihA ihB =>
-    simp only [Realization.interpret, Semantics.Imp.realize_imp, Classical.not_imp, and_imp];
-    constructor;
-    . intro h;
-      rcases Satisfies.imp_def₂.mp h with (hA | hB);
-      . exact C!_trans ((ihA hri).2 hA) CNC!;
-      . exact C!_trans ((ihB hri).1 hB) imply₁!;
-    . intro hA hB;
-      exact not_imply_prem''! ((ihA hri).1 hA) ((ihB hri).2 hB);
-  | hbox A ihA =>
-    simp only [Realization.interpret];
-    constructor;
-    . intro h;
-      apply C!_trans $ σ.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri);
-      apply 𝔅.prov_distribute_imply';
-      apply left_Fdisj'!_intro;
-      rintro j Rij;
-      replace Rij : i ≺ j := by simpa using Rij
-      exact (ihA (IsTrans.trans _ _ _ hri Rij)).1 (h j Rij)
-    . intro h;
-      have := Satisfies.box_def.not.mp h;
-      push_neg at this;
-      obtain ⟨j, Rij, hA⟩ := this;
-      have := CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
-      have : T₀ ⊢!. ∼𝔅 (∼σ.σ j) ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) :=
-        contra! $ 𝔅.prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
-      exact C!_trans (σ.SC2 i j Rij) this;
-
-end SolovaySentences
-
-end ProvabilityLogic
-
-end LO
-
 namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
@@ -156,15 +69,15 @@ instance (i j : F) : Finite (WChain j i) :=
         exact IsTrans.trans (r := (· ≺ ·)) z y x hyz hxy)
     i j
 
-def twoPointAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i j : F) : Semisentence ℒₒᵣ N :=
+noncomputable def twoPointAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i j : F) : Semisentence ℒₒᵣ N :=
   ⩕ k ∈ { k : F | i ≺ k }, (negativeSuccessor T)/[t j, t k]
 
-def θChainAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) : List F → Semisentence ℒₒᵣ N
+noncomputable def θChainAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) : List F → Semisentence ℒₒᵣ N
   |          [] => ⊥
   |         [_] => ⊤
   | j :: i :: ε => θChainAux t (i :: ε) ⋏ twoPointAux T t i j
 
-def θAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) : Semisentence ℒₒᵣ N :=
+noncomputable def θAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) : Semisentence ℒₒᵣ N :=
   haveI := Fintype.ofFinite (WChain r i)
   ⩖ ε : WChain r i, θChainAux T t ε
 
@@ -184,24 +97,24 @@ lemma rew_θAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F �
     Rew.substs w ▹ θAux T t i = θAux T (fun i ↦ Rew.substs w (t i)) i := by
   simp [Finset.map_udisj, θAux, rew_θChainAux]
 
-def _root_.LO.FirstOrder.Theory.solovay (i : F) : Sentence ℒₒᵣ := exclusiveMultifixpoint
+noncomputable def _root_.LO.FirstOrder.ArithmeticTheory.solovay (i : F) : Sentence ℒₒᵣ := exclusiveMultifixpoint
   (fun j ↦
     let jj := (Fintype.equivFin F).symm j
     θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)])
   (Fintype.equivFin F i)
 
-def twoPoint (i j : F) : Sentence ℒₒᵣ := twoPointAux T (fun i ↦ ⌜T.solovay i⌝) i j
+noncomputable def twoPoint (i j : F) : Sentence ℒₒᵣ := twoPointAux T (fun i ↦ ⌜T.solovay i⌝) i j
 
-def θChain (ε : List F) : Sentence ℒₒᵣ := θChainAux T (fun i ↦ ⌜T.solovay i⌝) ε
+noncomputable def θChain (ε : List F) : Sentence ℒₒᵣ := θChainAux T (fun i ↦ ⌜T.solovay i⌝) ε
 
-def θ (i : F) : Sentence ℒₒᵣ := θAux T (fun i ↦ ⌜T.solovay i⌝) i
+noncomputable def θ (i : F) : Sentence ℒₒᵣ := θAux T (fun i ↦ ⌜T.solovay i⌝) i
 
 lemma solovay_diag (i : F) :
     𝐈𝚺₁ ⊢!. T.solovay i ⭤ θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by
   have : 𝐈𝚺₁ ⊢!. T.solovay i ⭤
       (Rew.substs fun j ↦ ⌜T.solovay ((Fintype.equivFin F).symm j)⌝) ▹
         (θAux T (fun i ↦ #(Fintype.equivFin F i)) i ⋏ ⩕ k ∈ { k : F | i ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)]) := by
-    simpa [Theory.solovay, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
+    simpa [ArithmeticTheory.solovay, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
       exclusiveMultidiagonal (T := 𝐈𝚺₁) (i := Fintype.equivFin F i)
         (fun j ↦
           let jj := (Fintype.equivFin F).symm j
@@ -209,7 +122,7 @@ lemma solovay_diag (i : F) :
   simpa [θ, Finset.map_conj', Function.comp_def, rew_θAux, ←TransitiveRewriting.comp_app,
     Rew.substs_comp_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using this
 
-@[simp] lemma solovay_exclusive {i j : F} : T.solovay i = T.solovay j ↔ i = j := by simp [Theory.solovay]
+@[simp] lemma solovay_exclusive {i j : F} : T.solovay i = T.solovay j ↔ i = j := by simp [ArithmeticTheory.solovay]
 
 private lemma θChainAux_sigma1 (ε : List F) : Hierarchy 𝚺 1 (θChainAux T t ε) := by
   match ε with
@@ -448,6 +361,86 @@ lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
   have : T.internalize V ⊢! ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
   exact (tprovable_tquote_iff_provable_quote (T := T)).mp this
 
+end model
+
+end SolovaySentences
+
+end LO.ISigma1.Metamath
+
+namespace LO.ProvabilityLogic
+
+open Entailment Entailment.FiniteContext
+open FirstOrder Arithmetic
+open Modal
+open Modal.Kripke
+
+variable (M : Model) {r : M} [M.IsFiniteTree r] [Fintype M]
+
+variable (T : ArithmeticTheory) [T.Δ₁]
+
+namespace SolovaySentence
+
+lemma exclusive {i j : M} (ne : i ≠ j) : 𝐈𝚺₁ ⊢!. T.solovay i ➝ ∼T.solovay j := by {  }
+
+lemma dia {i j : M} (ne : i ≺ j) : 𝐈𝚺₁ ⊢!. T.solovay i ➝ ∼T.provable/[⌜∼T.solovay j⌝] := by {  }
+
+end SolovaySentence
+
+noncomputable def _root_.LO.FirstOrder.ArithmeticArithmeticTheory.solovayInterpretation : Realization ℒₒᵣ :=
+  fun a ↦ ⩖ i ∈ { i : M | i ⊧ .atom a }, T.solovay i
+
+@[simp] lemma solovayInterpretation_val : V ⊧/![] (T.solovayInterpretation M a) ↔ ∃ i : M, M i a ∧ T.Solovay V i := by
+  simp [ArithmeticArithmeticTheory.solovayInterpretation]; rfl
+
+theorem mainlemma {i : M.World} (hri : r ≺ i) :
+  (i ⊧ A → T₀ ⊢!. T.solovay i ➝ (T.solovayInterpretation M).interpret 𝔅 A) ∧
+  (¬i ⊧ A → T₀ ⊢!. T.solovay i ➝ ∼((T.solovayInterpretation M)).interpret 𝔅 A)
+  := by
+  induction A generalizing i with
+  | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
+  | hatom a =>
+    constructor;
+    . intro h;
+      apply right_Fdisj'!_intro;
+      simpa using h;
+    . intro h;
+      apply CN!_of_CN!_right;
+      apply left_Fdisj'!_intro;
+      intro i hi;
+      apply σ.SC1;
+      by_contra hC; subst hC;
+      apply h;
+      simpa using hi;
+  | himp A B ihA ihB =>
+    simp only [Realization.interpret, Semantics.Imp.realize_imp, Classical.not_imp, and_imp];
+    constructor;
+    . intro h;
+      rcases Satisfies.imp_def₂.mp h with (hA | hB);
+      . exact C!_trans ((ihA hri).2 hA) CNC!;
+      . exact C!_trans ((ihB hri).1 hB) imply₁!;
+    . intro hA hB;
+      exact not_imply_prem''! ((ihA hri).1 hA) ((ihB hri).2 hB);
+  | hbox A ihA =>
+    simp only [Realization.interpret];
+    constructor;
+    . intro h;
+      apply C!_trans $ σ.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri);
+      apply 𝔅.prov_distribute_imply';
+      apply left_Fdisj'!_intro;
+      rintro j Rij;
+      replace Rij : i ≺ j := by simpa using Rij
+      exact (ihA (IsTrans.trans _ _ _ hri Rij)).1 (h j Rij)
+    . intro h;
+      have := Satisfies.box_def.not.mp h;
+      push_neg at this;
+      obtain ⟨j, Rij, hA⟩ := this;
+      have := CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
+      have : T₀ ⊢!. ∼𝔅 (∼σ.σ j) ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) :=
+        contra! $ 𝔅.prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
+      exact C!_trans (σ.SC2 i j Rij) this;
+
+
+/--/
 end model
 
 lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.Solovay ℕ r := by

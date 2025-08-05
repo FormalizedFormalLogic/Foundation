@@ -29,6 +29,10 @@ variable {V}
 @[simp] lemma IteratedInconsistency.succ :
     T.IteratedInconsistency V (n + 1) ↔ T.Provable (⌜(T.iteratedInconsistency n).val⌝ : V) := by simp [IteratedInconsistency]
 
+@[simp] lemma iteratedInconsistency_val :
+    V ⊧/v (T.iteratedInconsistency n).val ↔ T.IteratedInconsistency V n := by
+  cases n <;> simp [iteratedInconsistency]
+
 end
 
 open Classical
