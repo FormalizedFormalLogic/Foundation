@@ -147,58 +147,6 @@ instance : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
     · rintro ⟨i, hi, rfl⟩; simp [hi]
 -/
 
-
-
-namespace Countermodel
-
-namespace ENat
-
-variable {a b : ℕ∞} {m n : ℕ}
-
-local instance : ORingStruc ENat where
-  add := (· + ·)
-  mul := (· * ·)
-  lt := (· < ·)
-
-end ENat
-
-set_option linter.flexible false in
-instance : ℕ∞ ⊧ₘ* 𝐐 := ⟨by
-  intro σ h;
-  rcases h <;> simp [models_def];
-  case equal h =>
-    have : ℕ∞ ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
-    exact modelsTheory_iff.mp this h
-  case addSucc =>
-    intro f;
-    generalize f 0 = m;
-    generalize f 1 = n;
-    match m, n with
-    | ⊤, _ | _, ⊤ => simp;
-    | .some m, .some n => rfl;
-  case mulSucc =>
-    intro f;
-    generalize f 0 = m;
-    generalize f 1 = n;
-    cases m <;> cases n;
-    case coe.top m => match m with | 0 | m + 1 => simp;
-    case coe.coe m n => rfl;
-    all_goals simp;
-  case succInj =>
-    intro f;
-    generalize f 0 = m;
-    generalize f 1 = n;
-    cases m <;> cases n;
-    case coe.coe m n =>
-      intro h;
-      simpa using ENat.coe_inj.mp h
-    all_goals tauto;
-⟩
-
-lemma unprovable_neSucc : 𝐐 ⊬ “x | x + 1 ≠ x” := unprovable_of_countermodel (M := ℕ∞) (fun x ↦ ⊤) _ (by simp)
-
-end Countermodel
-
 end RobinsonQ
 
 end LO
