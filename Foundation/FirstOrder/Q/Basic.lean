@@ -1,5 +1,6 @@
 import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.FirstOrder.R0.Basic
+import Mathlib.Data.ENat.Basic
 
 /-!
 # Robinson's theory $\mathsf{Q}$
@@ -150,75 +151,24 @@ instance : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
 
 namespace Countermodel
 
-abbrev OmegaAddOne := Option ℕ
+namespace ENat
 
-namespace OmegaAddOne
+variable {a b : ℕ∞} {m n : ℕ}
 
-variable {a b : OmegaAddOne} {m n : ℕ}
+local instance : ORingStruc ENat where
+  add := (· + ·)
+  mul := (· * ·)
+  lt := (· < ·)
 
-instance : NatCast OmegaAddOne := ⟨fun i ↦ .some i⟩
-
-instance (n : ℕ) : OfNat OmegaAddOne n := ⟨.some n⟩
-
-instance : Top OmegaAddOne := ⟨.none⟩
-
-instance : ORingStruc OmegaAddOne where
-  add a b :=
-    match a, b with
-    | .some n, .some m => some (n + m)
-    |   .none,       _ => ⊤
-    |       _,   .none => ⊤
-  mul a b :=
-    match a, b with
-    | .some n, .some m => some (n * m)
-    | .some 0, .none   => some 0
-    | .none  , .some 0 => some 0
-    | _      , _       => ⊤
-  lt a b :=
-    match a, b with
-    | .some n, .some m => n < m
-    |   .none,       _ => False
-    | .some _,   .none => True
-
-@[simp] lemma coe_zero : (↑(0 : ℕ) : OmegaAddOne) = 0 := rfl
-@[simp] lemma coe_one : (↑(1 : ℕ) : OmegaAddOne) = 1 := rfl
-
-@[simp] lemma coe_add (a b : ℕ) : ↑(a + b) = ((↑a + ↑b) : OmegaAddOne) := rfl
-
-
-@[simp] lemma add_nat_nat {m n : ℕ} : (some m : OmegaAddOne) + (some n) = some (m + n) := by rfl;
-@[simp] lemma add_nat_one : (some m : OmegaAddOne) + 1 = some (m + 1) := add_nat_nat
-
-@[simp] lemma add_nat_zero : a + 0 = a := by match a with | ⊤ | .some n => rfl
-@[simp] lemma add_nat_top : a + (⊤ : OmegaAddOne) = ⊤ := by match a with | ⊤ | .some n => rfl
-@[simp] lemma add_top_nat : (⊤ : OmegaAddOne) + a = ⊤ := by match a with | ⊤ | .some n => rfl
-
-
-@[simp] lemma mul_zero_top : (some 0) * (⊤ : OmegaAddOne) = some 0 := by rfl;
-@[simp] lemma mul_succ_top : (some (n + 1) : OmegaAddOne) * ⊤ = ⊤ := by rfl;
-
-@[simp] lemma mul_top_zero : (⊤ : OmegaAddOne) * 0 = 0 := by rfl;
-@[simp] lemma mul_top_succ : (⊤ : OmegaAddOne) * (some (n + 1)) = ⊤ := by rfl;
-
-@[simp] lemma mul_top_top : (⊤ : OmegaAddOne) * ⊤ = ⊤ := by rfl;
-
-@[simp]
-lemma mul_nat_nat : (some m : OmegaAddOne) * (some n) = some (m * n) := by
-  match m, n with | 0, 0 | 0, n + 1 | m + 1, 0 | m + 1, n + 1 => rfl;
-
-@[simp]
-lemma mul_zero {n : OmegaAddOne} : n * 0 = 0 := by match n with | ⊤ | .some 0 | .some (n + 1) => rfl;
-
-end OmegaAddOne
+end ENat
 
 set_option linter.flexible false in
-instance : OmegaAddOne ⊧ₘ* 𝐐 := ⟨by
+instance : ℕ∞ ⊧ₘ* 𝐐 := ⟨by
   intro σ h;
   rcases h <;> simp [models_def];
   case equal h =>
-    have : OmegaAddOne ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
+    have : ℕ∞ ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
-  case zeroAddOne => rfl;
   case addSucc =>
     intro f;
     generalize f 0 = m;
@@ -230,25 +180,22 @@ instance : OmegaAddOne ⊧ₘ* 𝐐 := ⟨by
     intro f;
     generalize f 0 = m;
     generalize f 1 = n;
-    match m, n with
-    | ⊤, ⊤ | some 0, ⊤ | ⊤, some 0 | some (m + 1), ⊤ | ⊤, some (n + 1) => simp;
-    | .some m, .some n => simp; tauto;
-  case succNeZero =>
-    intro f;
-    generalize f 0 = m;
-    match m with
-    | ⊤       => simp;
-    | .some m => apply Option.mem_some_iff.not.mpr; simp;
+    cases m <;> cases n;
+    case coe.top m => match m with | 0 | m + 1 => simp;
+    case coe.coe m n => rfl;
+    all_goals simp;
   case succInj =>
     intro f;
     generalize f 0 = m;
     generalize f 1 = n;
-    match m, n with
-    | .some m, ⊤ | ⊤, .some n | ⊤, ⊤ => simp;
-    | .some m, .some n => simp;
+    cases m <;> cases n;
+    case coe.coe m n =>
+      intro h;
+      simpa using ENat.coe_inj.mp h
+    all_goals tauto;
 ⟩
 
-lemma unprovable_neSucc : 𝐐 ⊬ “x | x + 1 ≠ x” := unprovable_of_countermodel (M := OmegaAddOne) (fun x ↦ ⊤) _ (by simp)
+lemma unprovable_neSucc : 𝐐 ⊬ “x | x + 1 ≠ x” := unprovable_of_countermodel (M := ℕ∞) (fun x ↦ ⊤) _ (by simp)
 
 end Countermodel
 
