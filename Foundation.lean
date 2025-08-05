@@ -70,6 +70,8 @@ import Foundation.FirstOrder.Internal.WitnessComparison
 import Foundation.FirstOrder.Internal.RosserProvability
 
 import Foundation.FirstOrder.Incompleteness.First
+import Foundation.FirstOrder.Incompleteness.First2
+
 import Foundation.FirstOrder.Incompleteness.Dense
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Examples
