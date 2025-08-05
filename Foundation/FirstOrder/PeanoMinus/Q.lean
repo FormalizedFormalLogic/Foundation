@@ -66,8 +66,6 @@ namespace PeanoMinus
 
 variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
 
-lemma ne_succ {x : M} : x + 1 ≠ x := by simp
-
 instance : M ⊧ₘ* 𝐐 := modelsTheory_iff.mpr <| by
   intro φ h
   rcases h
@@ -90,7 +88,10 @@ instance : M ⊧ₘ* 𝐐 := modelsTheory_iff.mpr <| by
 instance : 𝐐 ⪯ 𝐏𝐀⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
 
 instance : 𝐐 ⪱ 𝐏𝐀⁻ := Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc $ by
-  sorry;
+  apply oRing_provable_of.{0};
+  intro _ _ _;
+  simp [models_iff];
+
 
 end PeanoMinus
 
