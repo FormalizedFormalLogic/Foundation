@@ -23,7 +23,7 @@ lemma incomplete_of_REPred_not_ComputablePred' {A : Set ℕ} (hRE : REPred A) (h
     . assumption;
     . suffices REPred fun a : ℕ ↦ T ⊬. φ/[a] by simpa [hA] using this;
 
-      have : 𝚺₁-Predicate fun b : ℕ ↦ T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral b] ⌜φ⌝) := by sorry;
+      have : 𝚺₁-Predicate fun b : ℕ ↦ T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral b] ⌜φ⌝) := by clear hA; definability;
       apply REPred.of_eq (re_iff_sigma1.mpr this);
 
       intro a;
