@@ -68,4 +68,23 @@ theorem exists_true_but_unprovable_sentence (T : ArithmeticTheory) [T.Δ₁] [�
     . simpa;
     . exact hσ.2;
 
+
 end LO.FirstOrder.Arithmetic
+
+namespace LO.FirstOrderTrueArith
+
+open LO.Entailment FirstOrder Arithmetic
+
+instance {T : ArithmeticTheory} [ℕ ⊧ₘ* T] [T.Δ₁] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝐓𝐀 := by
+  constructor;
+  . infer_instance
+  . obtain ⟨σ, σTrue, σUnprov⟩ := exists_true_but_unprovable_sentence T;
+    apply Entailment.not_weakerThan_iff.mpr;
+    use σ;
+    constructor;
+    . apply FirstOrderTrueArith.provable_iff.mpr;
+      simpa;
+    . apply Axiom.provable_iff (σ := σ) |>.not.mp;
+      simpa;
+
+end LO.FirstOrderTrueArith

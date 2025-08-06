@@ -1,3 +1,4 @@
+import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Second
 
 /-!
@@ -16,13 +17,13 @@ attribute [instance] ISigma1_delta1Definable PA_delta1Definable
 
 instance : 𝐈𝚺₁ ⪱ 𝐈𝚺₁ + 𝐈𝚺₁.Con := inferInstance
 
-instance : 𝐈𝚺₁ + 𝐈𝚺₁.Con ⪯ 𝐓𝐀 := inferInstance
+instance : 𝐈𝚺₁ + 𝐈𝚺₁.Con ⪱ 𝐓𝐀 := inferInstance
 
 instance : 𝐈𝚺₁ ⪱ 𝐈𝚺₁ + 𝐈𝚺₁.Incon := inferInstance
 
 instance : 𝐏𝐀 ⪱ 𝐏𝐀 + 𝐏𝐀.Con := inferInstance
 
-instance : 𝐏𝐀 + 𝐏𝐀.Con ⪯ 𝐓𝐀 := inferInstance
+instance : 𝐏𝐀 + 𝐏𝐀.Con ⪱ 𝐓𝐀 := inferInstance
 
 instance : 𝐏𝐀 ⪱ 𝐏𝐀 + 𝐏𝐀.Incon := inferInstance
 
