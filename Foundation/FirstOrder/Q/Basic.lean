@@ -13,15 +13,15 @@ namespace LO
 open FirstOrder FirstOrder.Arithmetic
 
 inductive RobinsonQ : ArithmeticTheory
-  | equal      : ∀ φ ∈ 𝐄𝐐, RobinsonQ φ
-  | succNeZero : RobinsonQ   “a | a + 1 ≠ 0”
-  | succInj    : RobinsonQ “a b | a + 1 = b + 1 → a = b”
-  | addZero    : RobinsonQ   “a | a + 0 = a”
-  | addSucc    : RobinsonQ “a b | a + (b + 1) = (a + b) + 1”
-  | mulZero    : RobinsonQ   “a | a * 0 = 0”
-  | mulSucc    : RobinsonQ “a b | a * (b + 1) = a * b + a”
-  | ltDef      : RobinsonQ “a b | a < b ↔ ∃ c, a + (c + 1) = b”
-  | zeroAddOne : RobinsonQ “0 + 1 = 1”
+  | equal          : ∀ φ ∈ 𝐄𝐐, RobinsonQ φ
+  | succNeZero     : RobinsonQ   “a | a + 1 ≠ 0”
+  | succInj        : RobinsonQ “a b | a + 1 = b + 1 → a = b”
+  | addZero        : RobinsonQ   “a | a + 0 = a”
+  | addSucc        : RobinsonQ “a b | a + (b + 1) = (a + b) + 1”
+  | mulZero        : RobinsonQ   “a | a * 0 = 0”
+  | mulSucc        : RobinsonQ “a b | a * (b + 1) = a * b + a”
+  | existsOfNeZero : RobinsonQ   “a | a ≠ 0 → ∃ b, a = b + 1”
+  | ltDef          : RobinsonQ “a b | a < b ↔ ∃ c, a + (c + 1) = b”
 
 notation "𝐐" => RobinsonQ
 
@@ -40,6 +40,7 @@ open ORingStruc
       omega;
     . rintro ⟨c, hc⟩;
       simp [←hc];
+  case existsOfNeZero => omega;
   case equal h =>
     have : ℕ ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h⟩
@@ -66,8 +67,10 @@ protected lemma add_succ (a b : M) : a + (b + 1) = a + b + 1 := by
 protected lemma mul_succ (a b : M) : a * (b + 1) = a * b + a := by
   simpa [models_iff] using ModelsTheory.models M RobinsonQ.mulSucc (a :>ₙ fun _ ↦ b)
 
-@[simp] protected lemma zero_add_one : (0 + 1 : M) = 1 := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.zeroAddOne (fun _ ↦ 0)
+protected lemma exists_of_ne_zero {a : M} (ha : a ≠ 0) : ∃ b : M, a = b + 1 := by
+  have : ¬a = 0 → ∃ x, a = x + 1 := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.existsOfNeZero (λ _ ↦ a);
+  apply this;
+  assumption;
 
 protected lemma lt_def {a b : M} : a < b ↔ ∃ c : M, a + (c + 1) = b := by
   simpa [models_iff] using ModelsTheory.models M RobinsonQ.ltDef (a :>ₙ fun _ ↦ b)
