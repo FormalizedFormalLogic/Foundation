@@ -33,50 +33,44 @@ section
 variable {𝔅 : Provability T₀ T} {f : Realization L} {A B : Modal.Formula _}
 
 lemma iff_interpret_atom : T ⊢!. f.interpret 𝔅 (.atom a) ↔ T ⊢!. f a := by  simp [Realization.interpret];
-lemma iff_interpret_imp : T ⊢!. f.interpret 𝔅 (A ➝ B) ↔ T ⊢!. (f.interpret 𝔅 A) ➝ (f.interpret 𝔅 B) := by simp [Realization.interpret];
-lemma iff_interpret_bot : T ⊢!. f.interpret 𝔅 ⊥ ↔ T ⊢!. ⊥ := by simp [Realization.interpret];
-lemma iff_interpret_box : T ⊢!. f.interpret 𝔅 (□A) ↔ T ⊢!. 𝔅 (f.interpret 𝔅 A) := by simp [Realization.interpret];
-lemma iff_interpret_neg : T ⊢!. f.interpret 𝔅 (∼A) ↔ T ⊢!. ∼(f.interpret 𝔅 A) := by
-  dsimp [Realization.interpret];
-  apply N!_iff_CO!.symm;
 
-lemma iff_interpret_neg_inside : T ⊢!. f.interpret 𝔅 (∼A) ⭤ ∼(f.interpret 𝔅 A) := by
-  dsimp [Realization.interpret];
-  apply K!_intro;
-  . apply K!_right $ neg_equiv!
-  . apply K!_left $ neg_equiv!
+lemma iff_interpret_imp : T ⊢!. f.interpret 𝔅 (A ➝ B) ↔ T ⊢!. (f.interpret 𝔅 A) ➝ (f.interpret 𝔅 B) := by simp [Realization.interpret];
+
+lemma iff_interpret_bot : T ⊢!. f.interpret 𝔅 ⊥ ↔ T ⊢!. ⊥ := by simp [Realization.interpret];
+
+lemma iff_interpret_box : T ⊢!. f.interpret 𝔅 (□A) ↔ T ⊢!. 𝔅 (f.interpret 𝔅 A) := by simp [Realization.interpret];
 
 variable [DecidableEq (Sentence L)]
 
+lemma iff_interpret_neg_inside : T ⊢!. f.interpret 𝔅 (∼A) ⭤ ∼(f.interpret 𝔅 A) := by
+  dsimp [Realization.interpret];
+  cl_prover;
+
 lemma iff_interpret_or_inside : T ⊢!. f.interpret 𝔅 (A ⋎ B) ⭤ (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
-  apply K!_intro;
-  . apply CCCOA!;
-  . apply CACCO!;
-
-lemma iff_interpret_or : T ⊢!. f.interpret 𝔅 (A ⋎ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
-  constructor;
-  . intro h; apply (K!_left iff_interpret_or_inside) ⨀ h;
-  . intro h; apply (K!_right iff_interpret_or_inside) ⨀ h;
-
-lemma iff_interpret_and : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
-  constructor;
-  . intro h; apply K!_of_CCCO! h;
-  . intro h; apply CCCOO!_of_K! h;
+  dsimp [Realization.interpret];
+  cl_prover;
 
 lemma iff_interpret_and_inside : T ⊢!. f.interpret 𝔅 (A ⋏ B) ⭤ (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
-  apply K!_intro;
-  . apply CCCCOOK!;
-  . apply CKCCCOO!;
+  dsimp [Realization.interpret];
+  cl_prover;
+
+lemma iff_interpret_neg : T ⊢!. f.interpret 𝔅 (∼A) ↔ T ⊢!. ∼(f.interpret 𝔅 A) := by
+  dsimp [Realization.interpret];
+  constructor <;> . intro h; cl_prover [h];
+
+lemma iff_interpret_or : T ⊢!. f.interpret 𝔅 (A ⋎ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋎ (f.interpret 𝔅 B) := by
+  dsimp [Realization.interpret];
+  constructor <;> . intro h; cl_prover [h];
+
+lemma iff_interpret_and : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ⋏ (f.interpret 𝔅 B) := by
+  dsimp [Realization.interpret];
+  constructor <;> . intro h; cl_prover [h];
 
 lemma iff_interpret_and' : T ⊢!. f.interpret 𝔅 (A ⋏ B) ↔ T ⊢!. (f.interpret 𝔅 A) ∧ T ⊢!. (f.interpret 𝔅 B) := by
-  apply Iff.trans iff_interpret_and;
+  dsimp [Realization.interpret];
   constructor;
-  . intro h;
-    constructor;
-    . apply K!_left h;
-    . apply K!_right h;
-  . rintro ⟨_, _⟩;
-    apply K!_intro <;> assumption;
+  . intro h; constructor <;> cl_prover [h];
+  . rintro ⟨hA, hB⟩; cl_prover [hA, hB];
 
 end
 

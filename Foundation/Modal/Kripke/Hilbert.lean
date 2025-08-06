@@ -24,19 +24,21 @@ lemma eq_hilbert_logic_frameClass_logic {H : Hilbert.Normal ℕ} {C : FrameClass
 namespace Hilbert.Kripke
 
 
-lemma soundness_of_validates_axioms (hV : C.Validates H.axioms) : H ⊢! φ → C ⊧ φ := by
+lemma soundness_of_validates_axioms (hV : C ⊧* H.axioms) : H ⊢! φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.Normal.rec! with
-  | axm s h =>
+  | @axm φ s h =>
     apply ValidOnFrame.subst;
-    apply hV F hF _ h;
+    apply hV.realize;
+    . assumption;
+    . assumption;
   | mdp ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
   | nec ih => exact ValidOnFrame.nec ih;
   | imply₁ => exact ValidOnFrame.imply₁;
   | imply₂ => exact ValidOnFrame.imply₂;
   | ec => exact ValidOnFrame.elimContra;
 
-instance instSound_of_validates_axioms (hV : C.Validates H.axioms) : Sound H C := ⟨fun {_} =>
+instance instSound_of_validates_axioms (hV : C ⊧* H.axioms) : Sound H C := ⟨fun {_} =>
   soundness_of_validates_axioms hV
 ⟩
 

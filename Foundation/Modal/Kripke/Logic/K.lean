@@ -10,19 +10,29 @@ open Hilbert.Kripke
 
 namespace Kripke
 
-@[reducible] protected alias FrameClass.K := FrameClass.all
-@[reducible] protected alias FrameClass.finite_K := FrameClass.finite_all
+protected abbrev FrameClass.K : FrameClass := Set.univ
+protected abbrev FrameClass.finite_K : FrameClass := { F | F.IsFinite }
 
 end Kripke
 
 
 namespace Hilbert.K.Kripke
 
-instance : Sound (Hilbert.K) FrameClass.K := instSound_of_validates_axioms FrameClass.all.validates_axiomK
+instance : Sound (Hilbert.K) FrameClass.K := instSound_of_validates_axioms $ by
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  intro F _;
+  exact Formula.Kripke.ValidOnFrame.axiomK;
 
-instance : Sound (Hilbert.K) FrameClass.finite_K := instSound_of_validates_axioms FrameClass.finite_all.validates_axiomK
+instance : Sound (Hilbert.K) FrameClass.finite_K := instSound_of_validates_axioms $ by
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  intro F hF;
+  exact Formula.Kripke.ValidOnFrame.axiomK;
 
-instance : Entailment.Consistent (Hilbert.K) := consistent_of_sound_frameclass FrameClass.K (by simp)
+instance : Entailment.Consistent (Hilbert.K) := consistent_of_sound_frameclass FrameClass.K $ by
+  use whitepoint
+  simp;
 
 instance : Kripke.Canonical (Hilbert.K) FrameClass.K := ⟨by trivial⟩
 

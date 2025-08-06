@@ -28,8 +28,10 @@ namespace Hilbert
 namespace K4.Kripke
 
 instance : Sound Hilbert.K4 FrameClass.K4 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F F_trans φ rfl;
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_trans φ;
   apply validate_AxiomFour_of_transitive (trans := F_trans);
 
 instance : Entailment.Consistent Hilbert.K4 :=
@@ -68,7 +70,7 @@ instance : Hilbert.K ⪱ Hilbert.K4 := by
     use (Axioms.Four (.atom 0));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.all)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ w _ => w = 1⟩;
       use M, 0;

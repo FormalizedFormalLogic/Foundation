@@ -47,6 +47,7 @@ import Foundation.FirstOrder.Q.Basic
 
 import Foundation.FirstOrder.PeanoMinus.Basic
 import Foundation.FirstOrder.PeanoMinus.Functions
+import Foundation.FirstOrder.PeanoMinus.Q
 
 import Foundation.FirstOrder.TrueArithmetic.Basic
 import Foundation.FirstOrder.TrueArithmetic.Nonstandard
@@ -73,6 +74,8 @@ import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Dense
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Examples
+
+import Foundation.FirstOrder.Incompleteness.Tarski
 
 import Foundation.FirstOrder.Hauptsatz
 

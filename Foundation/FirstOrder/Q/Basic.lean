@@ -1,5 +1,6 @@
 import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.FirstOrder.R0.Basic
+import Mathlib.Data.ENat.Basic
 
 /-!
 # Robinson's theory $\mathsf{Q}$
@@ -222,3 +223,5 @@ instance : 𝐑₀ ⪱ 𝐐 :=
     R0.unprovable_addZero (Entailment.by_axm _ RobinsonQ.addZero)
 
 end RobinsonQ
+
+end LO
