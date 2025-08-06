@@ -1,5 +1,6 @@
 import Foundation.FirstOrder.Arithmetic.Basic
 import Foundation.FirstOrder.R0.Basic
+import Mathlib.Data.ENat.Basic
 
 /-!
 # Robinson's theory $\mathsf{Q}$
@@ -147,3 +148,5 @@ instance : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
 -/
 
 end RobinsonQ
+
+end LO
