@@ -3,12 +3,12 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - "!gh-readonly-queue/**"
   merge_group:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
