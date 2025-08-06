@@ -22,19 +22,18 @@ lemma indep_distribute [𝔅.HBL2] (h : T ⊢!. σ ⭤ π) :
   . apply contra!;
     apply WeakerThan.pbl (𝓢 := T₀.toAxiom);
     apply 𝔅.prov_distribute_imply;
-    exact K!_right h;
+    cl_prover [h];
   . apply contra!;
     apply WeakerThan.pbl (𝓢 := T₀.toAxiom);
     apply 𝔅.prov_distribute_imply;
-    apply contra!;
-    exact K!_left h;
+    cl_prover [h];
 
 lemma indep_iff_distribute_inside [𝔅.HBL2] (h : T ⊢!. σ ⭤ π) :
     T ⊢!. 𝔅.indep σ ⭤ 𝔅.indep π := by
   apply K!_intro
   . exact indep_distribute $ h;
   . apply indep_distribute;
-    exact E!_symm h;
+    cl_prover [h];
 
 lemma indep_iff_distribute [𝔅.HBL2] (h : T ⊢!. σ ⭤ π) :
     T ⊢!. 𝔅.indep σ ↔ T ⊢!. 𝔅.indep π := by
@@ -65,7 +64,7 @@ example [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T ⊬. T.standardPr
   have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
-  exact Realization.iff_interpret_neg.not.mp h;
+  exact Realization.iff_interpret_neg (L := ℒₒᵣ) |>.not.mp h;
 
 end Corollary
 
@@ -88,20 +87,20 @@ lemma iff_modalIndep_bewIndep_inside :
   apply K!_intro;
   . refine C!_trans (K!_left $ Realization.iff_interpret_and_inside) ?_;
     apply CKK!_of_C!_of_C!;
-    . apply K!_left Realization.iff_interpret_neg_inside;
-    . apply C!_trans (K!_left $ Realization.iff_interpret_neg_inside (A := □(∼A))) ?_;
+    . apply K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ);
+    . apply C!_trans (K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ) (A := □(∼A))) ?_;
       apply contra!;
       apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
       apply T.standardProvability.prov_distribute_imply;
-      apply K!_right $ Realization.iff_interpret_neg_inside;
+      apply K!_right $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ) ;
   . refine C!_trans ?_ (K!_right $ Realization.iff_interpret_and_inside);
     apply CKK!_of_C!_of_C!;
     . exact C!_trans (K!_right $ Realization.iff_interpret_neg_inside (A := □A)) C!_id;
-    . apply C!_trans ?_ (K!_right $ Realization.iff_interpret_neg_inside (A := □(∼A)));
+    . apply C!_trans ?_ (K!_right $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ) (A := □(∼A)));
       apply contra!;
       apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
       apply T.standardProvability.prov_distribute_imply;
-      apply K!_left $ Realization.iff_interpret_neg_inside;
+      apply K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ);
 
 lemma iff_modalIndep_bewIndep :
     T ⊢!. f.interpret T.standardProvability (Modal.independency A) ↔ T ⊢!. T.standardProvability.indep (f.interpret T.standardProvability A) := by
@@ -159,7 +158,7 @@ lemma unrefutable_independency_of_consistency :
   have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_not_independency_of_consistency;
   push_neg at h;
   obtain ⟨f, h⟩ := h;
-  replace h := Realization.iff_interpret_neg.not.mp h;
+  replace h := Realization.iff_interpret_neg (L := ℒₒᵣ) |>.not.mp h;
   congr;
 
 theorem undecidable_independency_of_consistency :
