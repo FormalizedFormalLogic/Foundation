@@ -585,6 +585,11 @@ def provable : 𝚺₁.Semisentence 1 := .mkSigma
 
 abbrev provabilityPred (σ : Sentence L) : Sentence ℒₒᵣ := T.provable.val/[⌜σ⌝]
 
+def provabilityPred' (σ : Sentence L) : 𝚺₁.Sentence := .mkSigma
+  “!T.provable !!(⌜σ⌝)”
+
+@[simp] lemma provabilityPred'_val (σ : Sentence L) : (T.provabilityPred' σ).val = T.provabilityPred σ := by rfl
+
 variable {T}
 
 section
