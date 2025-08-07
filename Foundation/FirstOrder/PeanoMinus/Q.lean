@@ -10,6 +10,7 @@ lemma Nat.iff_lt_exists_add_succ : n < m ↔ ∃ k, m = n + (k + 1) := by
     apply Nat.lt_add_of_pos_right;
     omega;
 
+
 namespace LO.RobinsonQ
 
 open FirstOrder FirstOrder.Arithmetic
@@ -57,9 +58,9 @@ instance : ORingStruc OmegaAddOne where
 
 @[simp] lemma not_top_lt (n : ℕ) : ¬⊤ < (n : OmegaAddOne) := by rintro ⟨⟩
 
--- @[simp] lemma lt_top (n : ℕ) : (n : OmegaAddOne) < ⊤ := by trivial
+@[simp] lemma lt_top {n : ℕ} : (n : OmegaAddOne) < ⊤ := by trivial
 
--- @[simp] lemma top_add_zero : (⊤ : OmegaAddOne) + 0 = ⊤ := by rfl
+@[simp] lemma top_add_zero : (⊤ : OmegaAddOne) + 0 = ⊤ := by rfl
 
 @[simp] lemma top_lt_top : (⊤ : OmegaAddOne) < ⊤ := by trivial
 
@@ -79,11 +80,14 @@ variable {a b : OmegaAddOne}
 @[simp]
 lemma mul_succ : a * (b + 1) = a * b + a := by
   match a, b with
-  | ⊤, ⊤ => rfl
-  | .some 0, ⊤ | .some (m + 1), ⊤ => rfl;
-  | ⊤, .some 0 | ⊤, .some (n + 1) => rfl;
-  | .some n, .some m =>
-    sorry;
+  | ⊤            , ⊤
+  | ⊤            , .some 0
+  | ⊤            , .some (n + 1)
+  | .some 0      , .some n
+  | .some 0      , ⊤
+  | .some (m + 1), .some n
+  | .some (m + 1), ⊤
+  => rfl
 
 lemma succ_inj : a + 1 = b + 1 → a = b := by
   match a, b with
@@ -111,7 +115,10 @@ lemma lt_def : a < b ↔ ∃ c, a + c + 1 = b := by
   match a, b with
   | ⊤, ⊤ => simp;
   | ⊤, .some n => simp [(show ¬(⊤ : OmegaAddOne) < .some n by tauto)];
-  | .some m, ⊤ => simp [(show .some m < (⊤ : OmegaAddOne) by tauto)]; use ⊤; simp;
+  | .some m, ⊤ =>
+    simp only [(show .some m < (⊤ : OmegaAddOne) by tauto), true_iff];
+    use ⊤;
+    simp;
   | .some m, .some n =>
     apply Iff.trans (show some m < some n ↔ m < n by rfl);
     apply Iff.trans Nat.iff_lt_exists_add_succ;
@@ -197,11 +204,10 @@ instance : M ⊧ₘ* 𝐐 := modelsTheory_iff.mpr <| by
 
 instance : 𝐐 ⪯ 𝐏𝐀⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
 
-instance : 𝐐 ⪱ 𝐏𝐀⁻ := Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc $ by
+instance w : 𝐐 ⪱ 𝐏𝐀⁻ := Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc $ by
   apply oRing_provable_of.{0};
   intro _ _ _;
   simp [models_iff];
-
 
 end PeanoMinus
 
