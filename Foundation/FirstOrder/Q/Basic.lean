@@ -108,6 +108,20 @@ lemma succ_inj_zero {a : M} : a + 1 = 1 → a = 0 := by
   nth_rw 2 [←zero_add_one];
   apply succ_inj;
 
+lemma eq_zero_of_eq_add_zero {a b : M} (h : a + b = 0) : a = 0 ∧ b = 0 := by
+  set_option push_neg.use_distrib true in contrapose! h;
+  rcases h with ha | hb;
+  . obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
+    by_cases hb0 : b = 0;
+    . subst hb0; rwa [RobinsonQ.add_zero]
+    . obtain ⟨d, rfl⟩ := exists_succ_of_ne_zero (M := M) hb0;
+      rw [RobinsonQ.add_succ (a := c + 1) (b := d)];
+      apply RobinsonQ.succ_ne_zero;
+  . obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero' (M := M) hb;
+    rw [RobinsonQ.add_succ];
+    simp;
+
+
 @[simp]
 lemma one_mul_one : (1 : M) * 1 = 1 := calc
   (1 : M) * 1 = 1 * (0 + 1) := by simp
@@ -119,6 +133,35 @@ lemma zero_mul_one : (0 : M) * 1 = 0 := calc
    (0 : M) * 1 = 0 * (0 + 1) := by simp
     _          = 0 * 0 + 0   := by rw [RobinsonQ.mul_succ]
     _          = 0           := by simp
+
+
+@[simp]
+lemma not_le_zero {a : M} : ¬a < 0 := by
+  apply RobinsonQ.lt_def.not.mpr;
+  push_neg;
+  intro b;
+  calc
+    a + (b + 1) = (a + b) + 1 := RobinsonQ.add_succ _ _
+    _           ≠ 0           := by simp;
+
+lemma lt_of_not_zero {a b : M} (ha : b ≠ 0) : a < a + b := by
+  apply RobinsonQ.lt_def.mpr;
+  obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
+  use b;
+
+@[simp]
+lemma iff_le_one_eq_zero {a : M} : a < 1 ↔ a = 0 := by
+  constructor;
+  . rw [RobinsonQ.lt_def];
+    rintro ⟨b, hb⟩;
+    apply eq_zero_of_eq_add_zero (b := b) ?_ |>.1;
+    apply succ_inj_zero;
+    rwa [RobinsonQ.add_succ] at hb;
+  . rintro rfl;
+    apply RobinsonQ.lt_def.mpr;
+    use 0;
+    simp;
+
 
 @[simp] lemma numeral_zero_add (n : ℕ) : 0 + (numeral n : M) = numeral n := by
   match n with
@@ -199,48 +242,6 @@ lemma numeral_ne_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ numeral m
     contrapose! this;
     apply numeral_succ_inj this;
 
-@[simp]
-lemma not_le_zero {a : M} : ¬a < 0 := by
-  apply RobinsonQ.lt_def.not.mpr;
-  push_neg;
-  intro b;
-  calc
-    a + (b + 1) = (a + b) + 1 := RobinsonQ.add_succ _ _
-    _           ≠ 0           := by simp;
-
-lemma eq_zero_of_eq_add_zero {a b : M} (h : a + b = 0) : a = 0 ∧ b = 0 := by
-  set_option push_neg.use_distrib true in contrapose! h;
-  rcases h with ha | hb;
-  . obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
-    by_cases hb0 : b = 0;
-    . subst hb0; rwa [RobinsonQ.add_zero]
-    . obtain ⟨d, rfl⟩ := exists_succ_of_ne_zero (M := M) hb0;
-      rw [RobinsonQ.add_succ (a := c + 1) (b := d)];
-      apply RobinsonQ.succ_ne_zero;
-  . obtain ⟨c, rfl⟩ := exists_succ_of_ne_zero' (M := M) hb;
-    rw [RobinsonQ.add_succ];
-    simp;
-
-lemma lt_of_not_zero {a b : M} (ha : b ≠ 0) : a < a + b := by
-  apply RobinsonQ.lt_def.mpr;
-  obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero (M := M) ha;
-  use b;
-
-@[simp]
-lemma iff_le_one_eq_zero {a : M} : a < 1 ↔ a = 0 := by
-  constructor;
-  . rw [RobinsonQ.lt_def];
-    rintro ⟨b, hb⟩;
-    apply eq_zero_of_eq_add_zero (b := b) ?_ |>.1;
-    apply succ_inj_zero;
-    rwa [RobinsonQ.add_succ] at hb;
-  . rintro rfl;
-    apply RobinsonQ.lt_def.mpr;
-    use 0;
-    simp;
-
-lemma eq_numeral_add_one : (numeral m) + 1 = numeral (m + 1) := by simp;
-
 lemma numeral_lt_of_lt {n m : ℕ} (h : n < m) : (numeral n : M) < numeral m := by
   apply RobinsonQ.lt_def.mpr;
   obtain ⟨k, rfl, hk⟩ := RobinsonQ.lt_def.mp h;
@@ -258,11 +259,6 @@ lemma numeral_lt_add {n m : ℕ} (hm : m ≠ 0) : (numeral n : M) < numeral n + 
 @[simp]
 lemma numeral_lt_succ {n : ℕ} : (numeral n : M) < numeral n + numeral 1 := numeral_lt_add $ by omega;
 
-lemma numeral_lt_add' {n : ℕ} {b : M} (hm : b ≠ 0) : (numeral n : M) < numeral n + b := by
-  apply RobinsonQ.lt_def.mpr;
-  obtain ⟨b, rfl⟩ := exists_succ_of_ne_zero (M := M) hm;
-  use b;
-
 lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m < n, x = numeral m := by
   match n with
   | 0 => simp;
@@ -272,8 +268,8 @@ lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m 
     . intro h;
       obtain ⟨a, ha⟩ := RobinsonQ.lt_def.mp h;
       by_cases ha0 : a = 0;
-      . use n + 1;
-        subst ha0;
+      . subst ha0;
+        use n + 1;
         constructor;
         . omega;
         . apply succ_inj;
