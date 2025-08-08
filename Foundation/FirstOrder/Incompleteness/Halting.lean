@@ -4,7 +4,7 @@ namespace LO.FirstOrder.Arithmetic
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝐈𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-open LO.Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open LO.Entailment FirstOrder Arithmetic ISigma1 Metamath
 
 open Classical in
 /--
@@ -22,24 +22,17 @@ lemma incomplete_of_REPred_not_ComputablePred' {A : Set ℕ} (hRE : REPred A) (h
     constructor;
     . assumption;
     . suffices REPred fun a : ℕ ↦ T ⊬. φ/[a] by simpa [hA] using this;
-
       have : 𝚺₁-Predicate fun b : ℕ ↦ T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral b] ⌜φ⌝) := by clear hA; definability;
       apply REPred.of_eq (re_iff_sigma1.mpr this);
-
       intro a;
       push_neg at h;
-      replace h : T ⊢!. ∼φ/[a] ↔ ¬T ⊢!. φ/[a] := by simpa [hA] using h a |>.symm;
-      apply Iff.trans ?_ h;
-
+      apply Iff.trans ?_ $ show T ⊢!. ∼φ/[a] ↔ ¬T ⊢!. φ/[a] by simpa [hA] using h a |>.symm;
+      apply Iff.trans ?_ $ show T ⊢! ∼(φ : SyntacticSemiformula ℒₒᵣ 1)/[↑a] ↔ T ⊢!. ∼φ/[a] by
+        convert Axiom.provable_iff.symm;
+        simp [Rewriting.embedding_substs_eq_substs_coe₁];
       constructor;
-      . rintro hP;
-        suffices T ⊢! ∼(φ : SyntacticSemiformula ℒₒᵣ 1)/[↑a] by sorry;
-        apply Theory.Provable.sound;
-        simpa [Semiformula.quote_def] using hP;
-      . rintro hφ;
-        have : T ⊢! ∼(φ : SyntacticSemiformula ℒₒᵣ 1)/[↑a] := by sorry;
-        simpa [Semiformula.quote_def] using internalize_provability (V := ℕ) this;
-
+      . rintro hP; apply Theory.Provable.sound; simpa [Semiformula.quote_def] using hP;
+      . rintro hφ; simpa [Semiformula.quote_def] using internalize_provability (V := ℕ) hφ;
   push_neg at hd;
   rcases hd with (⟨hd₁, hd₂⟩ | ⟨hd₁, hd₂⟩);
   . use d;
@@ -51,7 +44,6 @@ lemma incomplete_of_REPred_not_ComputablePred' {A : Set ℕ} (hRE : REPred A) (h
     simp only [hA, Set.mem_compl_iff, Set.mem_setOf_eq, Decidable.not_not] at hd₁;
     cl_prover [hd₁, hd₂];
 
-open LO.Entailment in
 @[inherit_doc incomplete_of_REPred_not_ComputablePred']
 lemma incomplete_of_REPred_not_ComputablePred {A : Set ℕ} (hRE : REPred A) (hC : ¬ComputablePred A) :
   ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
