@@ -47,6 +47,7 @@ import Foundation.FirstOrder.Q.Basic
 
 import Foundation.FirstOrder.PeanoMinus.Basic
 import Foundation.FirstOrder.PeanoMinus.Functions
+import Foundation.FirstOrder.PeanoMinus.Q
 
 import Foundation.FirstOrder.TrueArithmetic.Basic
 import Foundation.FirstOrder.TrueArithmetic.Nonstandard

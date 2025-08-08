@@ -23,8 +23,9 @@ end Kripke
 namespace Logic.K4Point3.Kripke
 
 instance : Sound Hilbert.K4Point3 FrameClass.K4Point3 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_WeakPoint3_of_weakConnected;
 

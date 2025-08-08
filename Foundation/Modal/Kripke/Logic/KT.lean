@@ -27,8 +27,10 @@ namespace Hilbert
 namespace KT.Kripke
 
 instance : Sound Hilbert.KT FrameClass.KT := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F F_refl _ rfl;
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_refl;
   exact Kripke.validate_AxiomT_of_reflexive (refl := F_refl);
 
 instance : Entailment.Consistent Hilbert.KT := consistent_of_sound_frameclass FrameClass.KT $ by

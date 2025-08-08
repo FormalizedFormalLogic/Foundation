@@ -22,8 +22,9 @@ end Kripke
 namespace Logic.K45.Kripke
 
 instance : Sound Hilbert.K45 FrameClass.K45 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomFive_of_euclidean;
 

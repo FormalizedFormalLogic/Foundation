@@ -19,7 +19,7 @@ namespace Logic.KD4Point3Z.Kripke
 instance : Sound Hilbert.KD4Point3Z natLT := instSound_of_frame_validates_axioms $ by
   simp only [Semantics.RealizeSet.insert_iff, ValidOnFrame.models_iff, Semantics.RealizeSet.singleton_iff];
   refine ⟨?_, ?_, ?_, ?_, ?_⟩;
-  . apply FrameClass.all.validates_axiomK <;> tauto;
+  . apply FrameClass.K.validates_axiomK <;> tauto;
   . apply validate_AxiomD_of_serial;
   . apply validate_AxiomFour_of_transitive;
   . apply validate_WeakPoint3_of_weakConnected;

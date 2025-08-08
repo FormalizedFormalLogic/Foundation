@@ -23,8 +23,9 @@ end Kripke
 namespace Hilbert.KDB.Kripke
 
 instance : Sound (Hilbert.KDB) Kripke.FrameClass.KDB := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomB_of_symmetric;
 

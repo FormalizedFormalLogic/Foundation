@@ -25,8 +25,9 @@ end Kripke
 namespace Hilbert.GLPoint3.Kripke
 
 instance : Sound Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _, _⟩ _ (rfl | rfl);
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomL_of_finite_trans_irrefl;
   . exact validate_WeakPoint3_of_weakConnected;
 
