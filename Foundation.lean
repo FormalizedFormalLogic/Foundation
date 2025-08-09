@@ -109,6 +109,7 @@ import Foundation.Modal.Kripke.Logic.KHen
 import Foundation.Modal.Kripke.Logic.KT4B
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.KTMk
+import Foundation.Modal.Kripke.Logic.S4Fi
 import Foundation.Modal.Kripke.Logic.S4Point4McK
 import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Kripke.Logic.S4Point4
