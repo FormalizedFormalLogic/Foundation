@@ -5,10 +5,22 @@ import Mathlib.Computability.Reduce
   # Church's Undecidability of First-Order Logic Theorem
 -/
 
+section
+
+lemma Iff.of_not_not {p q : Prop} (hp : ¬p) (hq : ¬q) : p ↔ q := by {
+  exact (iff_false_right hq).mpr hp
+ }
+
+end
 
 section
 
-variable {α β} [Primcodable α] [Primcodable β]
+lemma Part.cases (p : Part α) : p = Part.none ∨ ∃ a, a ∈ p := by
+  by_cases h : p.Dom
+  · right; exact Part.dom_iff_mem.mp h
+  · left; exact Part.eq_none_iff'.mpr h
+
+variable {α β γ σ} [Primcodable α] [Primcodable β] [Primcodable γ] [Primcodable σ]
 
 lemma ComputablePred.range_subset  {f : α → β} (hf : Computable f) {A} (hA : ComputablePred A) : ComputablePred { x | A (f x) } := by
   apply computable_iff.mpr;
@@ -18,8 +30,88 @@ lemma ComputablePred.range_subset  {f : α → β} (hf : Computable f) {A} (hA :
   . apply Computable.comp <;> assumption;
   . rfl;
 
-end
+open Computable
 
+lemma Computable.of₁ {f : α → γ} (hf : Computable f) : Computable₂ fun (a : α) (_ : β) ↦ f a := Computable.to₂ (hf.comp fst)
+
+lemma Computable.of₂ {f : β → γ} (hf : Computable f) : Computable₂ fun (_ : α) (b : β) ↦ f b := Computable.to₂ (hf.comp snd)
+
+lemma Partrec.of₁ {f : α →. γ} (hf : Partrec f) : Partrec₂ fun (a : α) (_ : β) ↦ f a := Partrec.to₂ (hf.comp Computable.fst)
+
+lemma Partrec.of₂ {f : β →. γ} (hf : Partrec f) : Partrec₂ fun (_ : α) (b : β) ↦ f b := Partrec.to₂ (hf.comp Computable.snd)
+
+theorem Partrec.optionCasesOn {o : α → Option β} {f : α →. σ} {g : α → β →. σ} (ho : Computable o)
+    (hf : Partrec f) (hg : Partrec₂ g) :
+    Partrec fun a ↦ Option.casesOn (o a) (f a) (g a) := by
+  let optToSum : Option β → Unit ⊕ β := fun o ↦ Option.casesOn o (Sum.inl ()) Sum.inr
+  have hOptToSum : Computable optToSum :=
+    Computable.option_casesOn Computable.id (Computable.const (Sum.inl ())) (Computable.of₂ Computable.sumInr)
+  exact (Partrec.sumCasesOn (hOptToSum.comp ho) (Partrec.of₁ hf) hg).of_eq <| by
+    intro a
+    rcases o a <;> simp [optToSum]
+
+theorem Partrec.rfindOpt_unique {α} {f : ℕ → Option α}
+    (H : ∀ {a n}, a ∈ f n → ∀ {b m}, b ∈ f m → a = b) {a} :
+    a ∈ Nat.rfindOpt f ↔ ∃ n, a ∈ f n := by
+  constructor
+  · exact Nat.rfindOpt_spec
+  · rintro ⟨n, h⟩
+    have h' := Nat.rfindOpt_dom.2 ⟨_, _, h⟩
+    obtain ⟨k, hk⟩ := Nat.rfindOpt_spec ⟨h', rfl⟩
+    rcases H h hk
+    exact Part.get_mem h'
+
+lemma ComputablePred.eq {f g : α → β}
+    (hf : Computable f) (hg : Computable g) : ComputablePred fun a : α ↦ f a = g a := by
+  have : DecidableEq β := Encodable.decidableEqOfEncodable β
+  apply ComputablePred.computable_iff.mpr ⟨fun a ↦ f a = g a, ?_, ?_⟩
+  · exact (Primrec.eq (α := β)).to_comp.comp hf hg
+  · ext a; simp
+
+lemma ComputablePred.ne {f g : α → β}
+    (hf : Computable f) (hg : Computable g) : ComputablePred fun a : α ↦ f a ≠ g a :=
+  (ComputablePred.eq hf hg).not
+
+private lemma REPred.toComputable_func {f : α → β} (h : REPred fun p : α × β ↦ f p.1 = p.2) :
+    ComputablePred fun p : α × β ↦ f p.1 = p.2 := by
+  apply ComputablePred.computable_iff_re_compl_re'.mpr ⟨h, ?_⟩
+  have : REPred fun p : (α × β) × β ↦ f p.1.1 = p.2 ∧ p.2 ≠ p.1.2 :=
+    REPred.and
+      (h.comp (α := (α × β) × β) ((fst.comp fst).pair snd))
+      (ComputablePred.ne snd (snd.comp fst)).to_re
+  exact this.projection.of_eq <| by
+    rintro ⟨a, b⟩
+    simp
+
+lemma REPred.toComputable {f : α → β} (h : REPred fun p : α × β ↦ f p.1 = p.2) : Computable f := by
+  have h : ComputablePred fun p : α × β ↦ f p.1 = p.2 := REPred.toComputable_func h
+  rcases ComputablePred.computable_iff.mp h with ⟨c, hc, ec⟩
+  replace ec : ∀ p : α × β, c p = true ↔ f p.1 = p.2 := fun p ↦ by symm; simpa using congr_fun ec p
+  let g : α → ℕ → Option β := fun a n ↦ (Encodable.decode n : Option β).bind fun b ↦ bif c ⟨a, b⟩ then .some b else .none
+  have hg : Computable₂ g := by
+    have : Computable₂ fun (p : α × ℕ) (b : β) ↦ bif c ⟨p.1, b⟩ then some b else none :=
+      (cond (hc.comp (pair (fst.comp fst) snd))
+        (option_some.comp snd) (const none)).to₂ (α := α × ℕ) (β := β)
+    exact (Computable.option_bind (Computable.comp Computable.decode Computable.snd) this).to₂
+  have := Partrec.rfindOpt hg
+  exact this.of_eq <| by
+    intro a
+    refine Part.eq_some_iff.mpr ?_
+    refine (Partrec.rfindOpt_unique ?_).mpr ?_
+    · unfold g
+      intro b₁ n₁
+      rcases (Encodable.decode n₁ : Option β) with (_ | v₁)
+      · simp
+      intro h₁ b₂ n₂
+      rcases (Encodable.decode n₂ : Option β) with (_ | v₂)
+      · simp
+      revert h₁
+      suffices f a = v₁ → v₁ = b₁ → f a = v₂ → v₂ = b₂ → b₁ = b₂ by simpa [Bool.cond_eq_if, ec]
+      grind
+    · use Encodable.encode (f a)
+      simp [g, ec, Bool.cond_eq_if]
+
+end
 
 namespace LO.ISigma1
 
@@ -102,6 +194,20 @@ theorem firstorder_undecidability : ¬ComputablePred (fun n : ℕ ↦ ∃ σ : S
   by_contra h;
   apply @not_computable_theorems (T := 𝐏𝐀⁻) (by sorry) inferInstance inferInstance;
   sorry;
+
+/-
+open LO.Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
+
+private lemma theory_provability_undecidable : ¬ComputablePred fun n : ℕ ↦ ∃ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ ∧ T ⊢!. σ := by {
+  intro hC
+  let U : ℕ → Prop := fun n : ℕ ↦ ∀ σ : Sentence ℒₒᵣ, n = ⌜σ⌝ → T ⊬. σ
+  have U_re : REPred U := by simpa using hC.not.to_re
+  let υ : Semisentence ℒₒᵣ 1 := codeOfREPred U
+  have hυ : ∀ n : ℕ, U n ↔ T ⊢!. υ/[↑n] := fun n ↦ by
+    simpa [Semiformula.coe_substs_eq_substs_coe₁, Axiom.provable_iff] using re_complete U_re
+  let δ : Semisentence ℒₒᵣ 1 := “σ. ∃ τ, !ssnum τ σ σ ∧ ”
+ }
+-/
 
 end Arithmetic
 

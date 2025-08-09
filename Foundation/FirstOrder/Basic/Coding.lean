@@ -45,11 +45,11 @@ lemma ofNat_toNat {n : ℕ} : ∀ t : Semiterm L ξ n, ofNat n (toNat t) = some 
   |       &x => by simp [toNat, ofNat]
   | func f v => by
       suffices (Matrix.getM fun i ↦ ofNat n (v i).toNat) = some v by
-        simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+        simp only [toNat, ofNat, Nat.unpair_pair]
         rw [Nat.unpair_pair, Nat.unpair_pair, Nat.unpair_pair, Nat.natToVec_vecToNat]
         simpa
       have : (fun i ↦ ofNat n (toNat (v i))) = (fun i ↦ pure (v i)) := funext <| fun i ↦ ofNat_toNat (v i)
-      simp [this, Matrix.getM_pure]
+      simp [this]
 
 instance encodable : Encodable (Semiterm L ξ n) where
   encode := toNat
@@ -67,6 +67,36 @@ lemma toNat_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
   · simp [toNat]
   · contradiction
   · simp [Rew.func, toNat_func, *]
+
+variable (L ξ)
+
+def ofNat.isSemiterm (n : ℕ) : ℕ → Bool
+  |     0 => false
+  | e + 1 =>
+    match e.unpair.1 with
+    | 0 => if e.unpair.2 < n then true else false
+    | 1 => (decode e.unpair.2 : Option ξ).isSome
+    | 2 =>
+      let arity := e.unpair.2.unpair.1
+      let ef := e.unpair.2.unpair.2.unpair.1
+      let ev := e.unpair.2.unpair.2.unpair.2
+      match hv : ev.natToVec arity with
+      | some v' =>
+        have : ∀ i, v' i < e + 1 := fun i ↦
+          Nat.lt_succ.mpr
+            <| le_trans (le_of_lt <| Nat.lt_of_eq_natToVec hv i)
+            <| le_trans (Nat.unpair_right_le _)
+            <| le_trans (Nat.unpair_right_le _)
+            <| Nat.unpair_right_le _
+        (decode ef : Option (L.Func arity)).isSome && (∀ i, ofNat.isSemiterm n (v' i))
+      | none => false
+    | _ => false
+  decreasing_by
+    · exact this _
+    · exact this _
+    · exact this _
+
+
 
 end Semiterm
 
@@ -140,13 +170,13 @@ def ofNat : (n : ℕ) → ℕ → Option (Semiformula L ξ n)
 
 lemma ofNat_toNat {n : ℕ} : ∀ φ : Semiformula L ξ n, ofNat n (toNat φ) = some φ
   |  rel R v => by
-    simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+    simp only [toNat, ofNat, Nat.unpair_pair]
     rw [Nat.unpair_pair, Nat.unpair_pair]
-    simp [Matrix.getM_pure]
+    simp
   | nrel R v => by
-    simp only [toNat, ofNat, Nat.unpair_pair, Option.pure_def, Option.bind_eq_bind]
+    simp only [toNat, ofNat, Nat.unpair_pair]
     rw [Nat.unpair_pair, Nat.unpair_pair]
-    simp [Matrix.getM_pure]
+    simp
   |        ⊤ => by simp [toNat, ofNat]
   |        ⊥ => by simp [toNat, ofNat]
   |    φ ⋎ ψ => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
