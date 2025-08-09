@@ -109,12 +109,12 @@ import Foundation.Modal.Kripke.Logic.KHen
 import Foundation.Modal.Kripke.Logic.KT4B
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.KTMk
-import Foundation.Modal.Kripke.Logic.S4Point4McK
+import Foundation.Modal.Kripke.Logic.S4H
 import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Kripke.Logic.S4Point4
+import Foundation.Modal.Kripke.Logic.S4Point4McK
 import Foundation.Modal.Kripke.Logic.S5
 import Foundation.Modal.Kripke.Logic.S5Grz
-import Foundation.Modal.Kripke.Logic.S4H
 
 import Foundation.Modal.Boxdot.Jerabek
 
