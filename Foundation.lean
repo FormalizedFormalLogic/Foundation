@@ -149,7 +149,10 @@ import Foundation.Modal.Logic.S.Consistent
 
 import Foundation.Modal.Logic.Dz.Basic
 
+import Foundation.Modal.Logic.GLPlusBoxbot.Basic
+
 import Foundation.Modal.Maximal.Makinson
+
 
 import Foundation.Modal.VanBentham.StandardTranslation
 
