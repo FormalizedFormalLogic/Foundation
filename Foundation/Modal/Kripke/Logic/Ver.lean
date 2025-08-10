@@ -31,17 +31,20 @@ end Kripke
 namespace Hilbert.Ver.Kripke
 
 instance : Sound Hilbert.Ver FrameClass.Ver := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F hF _ (rfl | rfl);
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F hF
   simp_all only [Set.mem_setOf_eq];
   exact validate_AxiomVer_of_isIsolated;
 
-instance : Sound (Hilbert.Ver) Kripke.FrameClass.finite_Ver :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomK;
-    rintro F hF _ (rfl | rfl);
-    simp_all only [Set.mem_setOf_eq];
-    exact validate_AxiomVer_of_isIsolated;
+instance : Sound (Hilbert.Ver) Kripke.FrameClass.finite_Ver := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F hF;
+  simp_all only [Set.mem_setOf_eq];
+  exact validate_AxiomVer_of_isIsolated;
 
 instance : Entailment.Consistent Hilbert.Ver := consistent_of_sound_frameclass FrameClass.Ver $ by
   use blackpoint;

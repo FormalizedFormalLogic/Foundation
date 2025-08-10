@@ -47,6 +47,7 @@ import Foundation.FirstOrder.Q.Basic
 
 import Foundation.FirstOrder.PeanoMinus.Basic
 import Foundation.FirstOrder.PeanoMinus.Functions
+import Foundation.FirstOrder.PeanoMinus.Q
 
 import Foundation.FirstOrder.TrueArithmetic.Basic
 import Foundation.FirstOrder.TrueArithmetic.Nonstandard
@@ -70,9 +71,13 @@ import Foundation.FirstOrder.Internal.WitnessComparison
 import Foundation.FirstOrder.Internal.RosserProvability
 
 import Foundation.FirstOrder.Incompleteness.First
+import Foundation.FirstOrder.Incompleteness.Halting
+
 import Foundation.FirstOrder.Incompleteness.Dense
 import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Examples
+
+import Foundation.FirstOrder.Incompleteness.Tarski
 
 import Foundation.FirstOrder.Hauptsatz
 
@@ -104,12 +109,12 @@ import Foundation.Modal.Kripke.Logic.KHen
 import Foundation.Modal.Kripke.Logic.KT4B
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.KTMk
-import Foundation.Modal.Kripke.Logic.S4Point4McK
+import Foundation.Modal.Kripke.Logic.S4H
 import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Kripke.Logic.S4Point4
+import Foundation.Modal.Kripke.Logic.S4Point4McK
 import Foundation.Modal.Kripke.Logic.S5
 import Foundation.Modal.Kripke.Logic.S5Grz
-import Foundation.Modal.Kripke.Logic.S4H
 
 import Foundation.Modal.Boxdot.Jerabek
 
@@ -144,7 +149,10 @@ import Foundation.Modal.Logic.S.Consistent
 
 import Foundation.Modal.Logic.Dz.Basic
 
+import Foundation.Modal.Logic.GLPlusBoxBot.Basic
+
 import Foundation.Modal.Maximal.Makinson
+
 
 import Foundation.Modal.VanBentham.StandardTranslation
 

@@ -48,8 +48,9 @@ end Kripke
 namespace Logic.Grz.Kripke
 
 instance : Sound Hilbert.Grz FrameClass.finite_Grz := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ rfl;
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   exact validate_AxiomGrz_of_refl_trans_wcwf;
 
 instance : Entailment.Consistent Hilbert.Grz :=

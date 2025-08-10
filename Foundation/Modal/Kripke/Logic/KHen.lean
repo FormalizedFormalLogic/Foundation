@@ -387,7 +387,7 @@ instance : Hilbert.K ⪱ Hilbert.KHen := by
     use (Axioms.Hen (.atom 0));
     constructor;
     . exact axiomHen!;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.all)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => True⟩, λ w _ => False⟩, 0;
       simp [Satisfies, Semantics.Realize];

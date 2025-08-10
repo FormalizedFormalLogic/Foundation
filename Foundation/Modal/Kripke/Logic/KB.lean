@@ -24,8 +24,10 @@ namespace Hilbert
 namespace KB.Kripke
 
 instance : Sound Hilbert.KB FrameClass.KB := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F F_symm _ rfl;
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_symm;
   exact validate_AxiomB_of_symmetric (sym := F_symm);
 
 instance : Entailment.Consistent Hilbert.KB := consistent_of_sound_frameclass FrameClass.KB $ by
@@ -49,7 +51,7 @@ instance : Hilbert.K ⪱ Hilbert.KB := by
     use (Axioms.B (.atom 0));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.all)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x = 0 ∧ y = 1⟩, λ w _ => w = 0⟩;
       use M, 0;

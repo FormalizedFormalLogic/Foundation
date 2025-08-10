@@ -24,8 +24,10 @@ namespace Hilbert
 namespace K5.Kripke
 
 instance : Sound Hilbert.K5 FrameClass.K5 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F F_eucl _ rfl;
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_eucl;
   exact validate_AxiomFive_of_euclidean (eucl := F_eucl);
 
 instance : Entailment.Consistent Hilbert.K5 :=
@@ -50,7 +52,7 @@ instance : Hilbert.K ⪱ Hilbert.K5 := by
     use (Axioms.Five (.atom 0));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.all)
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x _ => x = 0⟩, λ w _ => w = 0⟩;
       use M, 0;
