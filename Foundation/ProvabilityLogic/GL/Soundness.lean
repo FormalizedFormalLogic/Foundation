@@ -13,7 +13,7 @@ variable {L : FirstOrder.Language} [L.ReferenceableBy L]
          {T U : FirstOrder.Theory L} [Diagonalization T]  [T ⪯ U]
          {𝔅 : Provability T U} [𝔅.HBL]
 
-lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization L} : U ⊢!. f.interpret 𝔅 A := by
+lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization 𝔅} : U ⊢!. f A := by
   replace h := Normal.iff_logic_provable_provable.mp h;
   induction h using Hilbert.Normal.rec! with
   | axm _ hp =>
