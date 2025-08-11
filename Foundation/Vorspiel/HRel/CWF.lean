@@ -70,7 +70,7 @@ lemma cwFinHeight_gt_of {a b} :
   cwFinHeight R a = Finset.sup {x : α | R a x} fun b ↦ cwFinHeight R b + 1 := cwFinHeight_eq a
   _               ≥ cwFinHeight R b + 1 := Finset.le_sup (f := fun b ↦ cwFinHeight R b + 1) (by simp [h])
 
-@[simp] lemma cwFinHeight_eq_zero_iff {a : α} :
+lemma cwFinHeight_eq_zero_iff {a : α} :
     cwFinHeight R a = 0 ↔ ∀ b, ¬R a b := by
   constructor
   · intro h b hb
@@ -82,8 +82,32 @@ lemma cwFinHeight_gt_of {a b} :
       cwFinHeight R a = Finset.sup {x : α | R a x} fun b ↦ cwFinHeight R b + 1 := cwFinHeight_eq a
       _               ≤ 0 := Finset.sup_le fun b hb ↦ False.elim <| ha b (by simpa using hb)
 
-lemma cwFinHeight_eq_succ {a : α} (ha : cwFinHeight R a = k + 1) :
-    ∃ b, R a b ∧ cwFinHeight R b = k := by sorry
+lemma cwFinHeight_eq_succ {a : α} (h : cwFinHeight R a ≠ 0) :
+    ∃ b, R a b ∧ cwFinHeight R a = cwFinHeight R b + 1 := by
+  have : ∃ b, R a b := by
+    by_contra A
+    have : cwFinHeight R a = 0 := cwFinHeight_eq_zero_iff.mpr <| by simpa using A
+    simp_all
+  have : ({x : α | R a x} : Finset α).Nonempty := by simpa [Finset.filter_nonempty_iff] using this
+  simpa [cwFinHeight_eq (R := R) a] using Finset.exists_mem_eq_sup _ this (fun b ↦ cwFinHeight R b + 1)
+
+lemma cwFinHeight_lt (hTrans : Transitive R) {a : α} :
+    ∀ n < cwFinHeight R a, ∃ b, R a b ∧ cwFinHeight R b = n := by
+  apply WellFounded.induction (r := flip R) IsConverseWellFounded.cwf a
+  intro a ih
+  rcases ha : cwFinHeight R a with (_ | n)
+  · simp
+  · intro k hk
+    have : ∃ b, R a b ∧ cwFinHeight R b = n := by
+      rcases cwFinHeight_eq_succ (R := R) (a := a) (by simp [ha]) with ⟨b, hb, e⟩
+      exact ⟨b, hb, by grind⟩
+    rcases this with ⟨b, hb, rfl⟩
+    have : k = cwFinHeight R b ∨ k < cwFinHeight R b := Nat.eq_or_lt_of_le <| Nat.le_of_lt_succ hk
+    rcases this with (rfl | hk)
+    · exact ⟨b, hb, rfl⟩
+    · have : ∃ c, R b c ∧ cwFinHeight R c = k := ih b hb k hk
+      rcases this with ⟨c, hc, rfl⟩
+      exact ⟨c, hTrans hb hc, rfl⟩
 
 end cwFinHeight
 
