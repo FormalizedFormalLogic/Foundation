@@ -1,6 +1,7 @@
 import Mathlib.Data.Fintype.Card
 import Mathlib.Order.WellFounded
 import Foundation.Vorspiel.HRel.Connected
+import Mathlib.Data.Finset.Lattice.Fold
 
 section
 
@@ -32,5 +33,58 @@ lemma Finite.converseWellFounded_of_trans_irrefl'
   @Finite.wellFounded_of_trans_of_irrefl _ _ _
     ⟨by simp [flip]; intro a b c ba cb; exact hTrans cb ba;⟩
     ⟨by simp [flip]; exact hIrrefl⟩
+
+variable (R)
+
+open Classical in
+noncomputable def cwFinHeight [IsConverseWellFounded α R] [Fintype α] : α → ℕ :=
+  WellFounded.fix (r := flip R) (C := fun _ ↦ ℕ) IsConverseWellFounded.cwf fun x ih ↦
+    Finset.univ.sup fun y : {y : α // R x y} ↦ ih y y.prop + 1
+
+variable {R}
+
+section cwFinHeight
+
+variable [Fintype α] [IsConverseWellFounded α R]
+
+open Classical
+
+lemma cwFinHeight_eq (a : α) :
+    cwFinHeight R a = Finset.sup {x : α | R a x} (fun b ↦ cwFinHeight R b + 1) := by
+  have h : cwFinHeight R a = Finset.univ.sup fun b : {y : α // R a y} ↦ cwFinHeight R b + 1 :=
+    WellFounded.fix_eq _ _ a
+  suffices
+    Finset.univ.sup (fun b : {y : α // R a y} ↦ cwFinHeight R b + 1) =
+    Finset.sup {y : α | R a y} fun b ↦ cwFinHeight R b + 1 from h.trans this
+  apply eq_of_le_of_ge
+  · apply Finset.sup_le
+    intro b _
+    exact Finset.le_sup (f := fun b ↦ cwFinHeight R b + 1) (by simp [b.prop])
+  · apply Finset.sup_le
+    intro b hb
+    simpa using Finset.le_sup (f := fun b : {y : α // R a y} ↦ cwFinHeight R b + 1)
+      (b := ⟨b, by simpa using hb⟩) (s := Finset.univ) (by simp)
+
+lemma cwFinHeight_gt_of {a b} :
+    R a b → cwFinHeight R a > cwFinHeight R b := fun h ↦ calc
+  cwFinHeight R a = Finset.sup {x : α | R a x} fun b ↦ cwFinHeight R b + 1 := cwFinHeight_eq a
+  _               ≥ cwFinHeight R b + 1 := Finset.le_sup (f := fun b ↦ cwFinHeight R b + 1) (by simp [h])
+
+@[simp] lemma cwFinHeight_eq_zero_iff {a : α} :
+    cwFinHeight R a = 0 ↔ ∀ b, ¬R a b := by
+  constructor
+  · intro h b hb
+    have : cwFinHeight R a > cwFinHeight R b := cwFinHeight_gt_of hb
+    exact Nat.not_succ_le_zero (cwFinHeight R b) (h ▸ this)
+  · intro ha
+    apply Nat.eq_zero_of_le_zero
+    calc
+      cwFinHeight R a = Finset.sup {x : α | R a x} fun b ↦ cwFinHeight R b + 1 := cwFinHeight_eq a
+      _               ≤ 0 := Finset.sup_le fun b hb ↦ False.elim <| ha b (by simpa using hb)
+
+lemma cwFinHeight_eq_succ {a : α} (ha : cwFinHeight R a = k + 1) :
+    ∃ b, R a b ∧ cwFinHeight R b = k := by sorry
+
+end cwFinHeight
 
 end
