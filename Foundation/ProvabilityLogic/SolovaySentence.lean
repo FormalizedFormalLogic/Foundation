@@ -337,7 +337,7 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
     · exact ⟨j, hij, hSj⟩
     · exact ⟨k, Trans.trans hij hjk, hSk⟩
 
-lemma solovay_disjunction : ∃ i : F, T.Solovay V i := by
+lemma disjunctive : ∃ i : F, T.Solovay V i := by
   have : T.Solovay V r ∨ ∃ j, r ≺ j ∧ T.Solovay V j :=
     Θ.disjunction (V := V) (T := T) r ⟨[r], by simp⟩
   rcases this with  (H | ⟨i, _, H⟩)
@@ -380,24 +380,22 @@ variable (T : ArithmeticTheory) [T.Δ₁]
 
 namespace SolovaySentence
 
+open Modal
+open Modal.Kripke
+open Modal.Formula.Kripke
+
 lemma exclusive {i j : M} (ne : i ≠ j) : 𝐈𝚺₁ ⊢!. T.solovay i ➝ ∼T.solovay j := by {  }
 
 lemma dia {i j : M} (ne : i ≺ j) : 𝐈𝚺₁ ⊢!. T.solovay i ➝ ∼T.provable/[⌜∼T.solovay j⌝] := by {  }
 
-end SolovaySentence
-
-noncomputable def _root_.LO.FirstOrder.ArithmeticArithmeticTheory.solovayInterpretation : Realization ℒₒᵣ :=
+noncomputable def _root_.LO.FirstOrder.ArithmeticTheory.solovayInterpretation : Realization ℒₒᵣ :=
   fun a ↦ ⩖ i ∈ { i : M | i ⊧ .atom a }, T.solovay i
 
-@[simp] lemma solovayInterpretation_val : V ⊧/![] (T.solovayInterpretation M a) ↔ ∃ i : M, M i a ∧ T.Solovay V i := by
-  simp [ArithmeticArithmeticTheory.solovayInterpretation]; rfl
-
 theorem mainlemma {i : M.World} (hri : r ≺ i) :
-  (i ⊧ A → T₀ ⊢!. T.solovay i ➝ (T.solovayInterpretation M).interpret 𝔅 A) ∧
-  (¬i ⊧ A → T₀ ⊢!. T.solovay i ➝ ∼((T.solovayInterpretation M)).interpret 𝔅 A)
-  := by
+    (i ⊧ A → 𝐈𝚺₁ ⊢!. T.solovay i ➝ (T.solovayInterpretation M).interpret 𝔅 A) ∧
+    (¬i ⊧ A → 𝐈𝚺₁ ⊢!. T.solovay i ➝ ∼((T.solovayInterpretation M)).interpret 𝔅 A) := by
   induction A generalizing i with
-  | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
+  | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies]
   | hatom a =>
     constructor;
     . intro h;
@@ -407,7 +405,7 @@ theorem mainlemma {i : M.World} (hri : r ≺ i) :
       apply CN!_of_CN!_right;
       apply left_Fdisj'!_intro;
       intro i hi;
-      apply σ.SC1;
+      apply exclusive;
       by_contra hC; subst hC;
       apply h;
       simpa using hi;
@@ -495,7 +493,7 @@ instance _root_.LO.ProvabilityLogic.SolovaySentences.standard
       simpa [models_iff, standardProvability_def] using Solovay.box_disjunction h
   SC4 :=
     oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
-      simpa [models₀_iff] using solovay_disjunction
+      simpa [models₀_iff] using disjunctive
 
 
 lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] :

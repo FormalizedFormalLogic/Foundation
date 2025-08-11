@@ -5,6 +5,7 @@ import Foundation.FirstOrder.Internal.WitnessComparison
 import Foundation.FirstOrder.Internal.FixedPoint
 import Foundation.FirstOrder.Internal.Consistency
 import Foundation.ProvabilityLogic.GL.Soundness
+import Foundation.ProvabilityLogic.Height
 
 /-!
 # Solovay's arithmetical completeness of $\mathsf{GL}$
@@ -16,6 +17,47 @@ open Classical
 noncomputable section
 
 namespace LO
+
+namespace Modal.Kripke
+
+section
+
+variable {F : Frame} [Fintype F] {r : F} [F.IsTree r]
+
+def Frame.World.finHeight (i : F) : ℕ := fcwHeight (· ≺ ·) i
+
+variable (F)
+
+def Frame.finHeight : ℕ := Frame.World.finHeight r
+
+variable {F}
+
+lemma Frame.World.finHeight_lt_whole_finHeight {i : F} (hi : r ≺ i) :
+    Frame.World.finHeight i < F.finHeight := fcwHeight_gt_of hi
+
+lemma Frame.World.finHeight_le_whole_finHeight (i : F) :
+    Frame.World.finHeight i ≤ F.finHeight := by
+  by_cases hi : i = r
+  · rcases hi; rfl
+  · have : r ≺ i := root_genaretes'! i hi
+    exact le_of_lt (fcwHeight_gt_of this)
+
+end
+
+variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
+
+lemma satisfies_boxbot_of_lt_finHeight {i : M} (hi : Frame.World.finHeight i < n) :
+    i ⊧ □^[n] ⊥ := by
+  match n with
+  |     0 => simp_all
+  | n + 1 =>
+    suffices ∀ (y : M.World), i ≺ y → y ⊧ □^[n]⊥ by
+      simpa [Formula.Kripke.Satisfies.box_def, -Formula.Kripke.Satisfies.iff_models]
+    intro j hij
+    have : Frame.World.finHeight j < n := lt_of_lt_of_le (fcwHeight_gt_of hij) (Nat.le_of_lt_succ hi)
+    exact satisfies_boxbot_of_lt_finHeight this
+
+end Modal.Kripke
 
 namespace ProvabilityLogic
 
@@ -32,9 +74,11 @@ variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
 structure SolovaySentences (F : Kripke.Frame) (r : F) [F.IsFiniteTree r] [Fintype F] where
   σ : F → Sentence L
   protected SC1 : ∀ i j, i ≠ j → T₀ ⊢!. σ i ➝ ∼σ j
-  protected SC2 : ∀ i j, i ≺ j → T₀ ⊢!. σ i ➝ ∼𝔅 (∼(σ j))
+  protected SC2 : ∀ i j, i ≺ j → T₀ ⊢!. σ i ➝ 𝔅.dia (σ j)
   protected SC3 : ∀ i, r ≠ i → T₀ ⊢!. σ i ➝ 𝔅 (⩖ j ∈ { j : F | i ≺ j }, σ j)
   protected SC4 : T₀ ⊢!. ⩖ j, σ j
+
+attribute [coe] SolovaySentences.σ
 
 variable {𝔅}
 
@@ -42,15 +86,16 @@ namespace SolovaySentences
 
 instance {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F] : CoeFun (SolovaySentences 𝔅 F r) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
 
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M.World]
+variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
 
-noncomputable def realization (σ : SolovaySentences 𝔅 M.toFrame r) :
-    Realization L := λ a => ⩖ i ∈ { i : M.World | i ⊧ (.atom a) }, σ i
+variable (S : SolovaySentences 𝔅 M.toFrame r)
 
-theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : r ≺ i) :
-  (i ⊧ A → T₀ ⊢!. σ i ➝ σ.realization.interpret 𝔅 A) ∧
-  (¬i ⊧ A → T₀ ⊢!. σ i ➝ ∼σ.realization.interpret 𝔅 A)
-  := by
+noncomputable def realization :
+    Realization 𝔅 := ⟨fun a ↦ ⩖ i ∈ { i : M | i ⊧ (.atom a) }, S i⟩
+
+private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
+    (i ⊧ A → T₀ ⊢!. S i ➝ S.realization A) ∧
+    (¬i ⊧ A → T₀ ⊢!. S i ➝ ∼S.realization A) := by
   induction A generalizing i with
   | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
   | hatom a =>
@@ -62,7 +107,7 @@ theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : 
       apply CN!_of_CN!_right;
       apply left_Fdisj'!_intro;
       intro i hi;
-      apply σ.SC1;
+      apply S.SC1;
       by_contra hC; subst hC;
       apply h;
       simpa using hi;
@@ -79,7 +124,7 @@ theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : 
     simp only [Realization.interpret];
     constructor;
     . intro h;
-      apply C!_trans $ σ.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri);
+      apply C!_trans $ S.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri);
       apply 𝔅.prov_distribute_imply';
       apply left_Fdisj'!_intro;
       rintro j Rij;
@@ -90,9 +135,42 @@ theorem mainlemma (σ : SolovaySentences 𝔅 M.toFrame r) {i : M.World} (hri : 
       push_neg at this;
       obtain ⟨j, Rij, hA⟩ := this;
       have := CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
-      have : T₀ ⊢!. ∼𝔅 (∼σ.σ j) ➝ ∼𝔅 (σ.realization.interpret 𝔅 A) :=
+      have : T₀ ⊢!. ∼𝔅 (∼S.σ j) ➝ ∼𝔅 (S.realization A) :=
         contra! $ 𝔅.prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
-      exact C!_trans (σ.SC2 i j Rij) this;
+      exact C!_trans (S.SC2 i j Rij) this;
+
+theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
+    i ⊧ A → T₀ ⊢!. S i ➝ S.realization A := (mainlemma_aux S hri).1
+
+theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
+    ¬i ⊧ A → T₀ ⊢!. S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
+
+lemma root_of_iterated_inconsistency : T₀ ⊢!. ∼𝔅^[M.finHeight] ⊥ ➝ S r := by
+  suffices T₀ ⊢!. (⩖ j, S j) ➝ ∼S r ➝ 𝔅^[M.finHeight] ⊥ by
+    cl_prover [this, S.SC4]
+  apply Entailment.left_Udisj!_intro
+  intro i
+  by_cases hir : i = r
+  · rcases hir
+    cl_prover
+  · have hri : r ≺ i := Frame.root_genaretes'! i hir
+    have : T₀ ⊢!. S.σ i ➝ (↑𝔅)^[M.finHeight] ⊥ := by
+      simpa [Realization.interpret_boxItr_def] using
+        S.mainlemma hri (A := □^[M.finHeight] ⊥)
+          <| satisfies_boxbot_of_lt_finHeight (Frame.World.finHeight_lt_whole_finHeight hri)
+    cl_prover [this]
+
+lemma iterated_inconsistency_of_not_dia (h : r ⊧ ◇(∼A)) (b : T ⊢!. S.realization A) :
+    T₀ ⊢!. 𝔅^[M.finHeight] ⊥ := by
+  have : ∃ i, r ≺ i ∧ ¬i ⊧ A := Formula.Kripke.Satisfies.dia_def.mp h
+  rcases this with ⟨i, hi, hiA⟩
+  have b₀ : T₀ ⊢!. 𝔅 (S.realization A) := 𝔅.D1 b
+  have b₁ : T₀ ⊢!. ∼(↑𝔅)^[M.finHeight] ⊥ ➝ S r := S.root_of_iterated_inconsistency
+  have b₂ : T₀ ⊢!. S r ➝ 𝔅.dia (S i) := S.SC2 r i hi
+  have b₃ : T₀ ⊢!. 𝔅.dia (S i) ➝ ∼𝔅 (S.realization A) := by
+    simpa [Provability.dia] using
+      𝔅.dia_distribute_imply <| WeakerThan.pbl <| S.mainlemma_neg hi hiA
+  cl_prover [b₀, b₁, b₂, b₃]
 
 end SolovaySentences
 
@@ -108,9 +186,11 @@ namespace SolovaySentences
 
 open Modal ProvabilityLogic Kripke
 
-variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
-
 variable {T : ArithmeticTheory} [T.Δ₁]
+
+section frame
+
+variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
 
 section model
 
@@ -424,7 +504,7 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
     · exact ⟨j, hij, hSj⟩
     · exact ⟨k, Trans.trans hij hjk, hSk⟩
 
-lemma solovay_disjunction : ∃ i : F, T.Solovay V i := by
+lemma disjunctive : ∃ i : F, T.Solovay V i := by
   have : T.Solovay V r ∨ ∃ j, r ≺ j ∧ T.Solovay V j :=
     Θ.disjunction (V := V) (T := T) r ⟨[r], by simp⟩
   rcases this with  (H | ⟨i, _, H⟩)
@@ -447,6 +527,40 @@ lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
   have : T.internalize V ⊢! ∼⌜T.solovay i⌝ := by simpa using (tprovable_tquote_iff_provable_quote (T := T)).mpr (Solovay.refute ne hS)
   have : T.internalize V ⊢! ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
   exact (tprovable_tquote_iff_provable_quote (T := T)).mp this
+
+local notation:max "∣" i:max "∣" => Frame.World.finHeight i
+
+lemma iIncon {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] [𝐈𝚺₁ ⪯ T] {i : F}
+    (ne : r ≠ i) (hn : ∣i∣ < n) : T.Solovay V i → T.IIncon V n := by
+  match n with
+  |     0 => simp_all
+  | n + 1 =>
+    intro h
+    have : T ⊢!. (⩖ j ∈ {j : F | i ≺ j}, T.solovay j) ➝ T.iIncon n :=
+      oRing_provable₀_of _ _ fun (W : Type _) _ _ ↦ by
+        have : W ⊧ₘ* 𝐈𝚺₁ := models_of_subtheory (inferInstanceAs (W ⊧ₘ* T))
+        suffices
+            ∀ j : F, i ≺ j → Theory.Solovay T W j → T.IIncon W n by
+          simpa [models_iff]
+        intro j hij Sj
+        have nerj : r ≠ j := by
+          rintro rfl
+          have : r ≺ i := Frame.root_genaretes'! i (Ne.symm ne)
+          exact IsIrrefl.irrefl _ <| IsTrans.trans r i r this hij
+        have : ∣j∣ < n :=
+          lt_of_lt_of_le (fcwHeight_gt_of hij) (Nat.le_of_lt_succ hn)
+        exact iIncon (V := W) nerj this Sj
+    exact modus_ponens_sentence T (provable_of_provable_arith₀ this) (Solovay.box_disjunction ne h)
+
+theorem root_of_iterated_consistency [𝐈𝚺₁ ⪯ T] (H : ¬T.IIncon V F.finHeight) : T.Solovay V r := by
+  have : ∃ i : F, T.Solovay V i := disjunctive
+  rcases this with ⟨i, hi⟩
+  by_cases hri : r = i
+  · rcases hri; assumption
+  · have hri' : r ≺ i := by exact Frame.root_genaretes'! i fun a ↦ hri (Eq.symm a)
+    have : T.IIncon V F.finHeight :=
+      iIncon (n := F.finHeight) hri (Frame.World.finHeight_lt_whole_finHeight hri') hi
+    contradiction
 
 end model
 
@@ -488,7 +602,7 @@ lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i :
 
 variable (T F r)
 
-instance _root_.LO.ProvabilityLogic.SolovaySentences.standard
+def _root_.LO.ProvabilityLogic.SolovaySentences.standard
     [𝐈𝚺₁ ⪯ T] : SolovaySentences T.standardProvability F r where
   σ := T.solovay
   SC1 i j ne :=
@@ -502,11 +616,12 @@ instance _root_.LO.ProvabilityLogic.SolovaySentences.standard
       simpa [models_iff, standardProvability_def] using Solovay.box_disjunction h
   SC4 :=
     oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
-      simpa [models₀_iff] using solovay_disjunction
-
+      simpa [models₀_iff] using disjunctive
 
 lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] :
-    (SolovaySentences.standard F r T).σ = T.solovay := rfl
+    (SolovaySentences.standard T F r).σ = T.solovay := rfl
+
+end frame
 
 end SolovaySentences
 
@@ -521,9 +636,22 @@ open Modal.Kripke
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {A : Modal.Formula _}
 
+theorem GL.arithmetical_completeness :
+    Modal.GL ⊢! A → (∀ f : Realization T.standardProvability, T ⊢!. f A) := by {  }
+
+theorem GL.arithmetical_completeness :
+    (∀ f : Realization T.standardProvability, T ⊢!. f A) → Modal.GL ⊢! A := by
+  simp only [Hilbert.Normal.iff_logic_provable_provable]
+  contrapose
+  intro hA
+  push_neg
+
+
+
+/--/
 /-- Arithmetical completeness of GL-/
 theorem GL.arithmetical_completeness :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardProvability A) → Modal.GL ⊢! A := by
+    (∀ {f : Realization T.standardProvability}, T ⊢!. f A) → Modal.GL ⊢! A := by
   simp only [Hilbert.Normal.iff_logic_provable_provable];
   contrapose;
   intro hA;

@@ -128,7 +128,7 @@ lemma GL_S_TFAE :
                 apply Frame.root_genaretes'!;
                 assumption
           have b : 𝐈𝚺₁ ⊢!. ⩖ j, σ j := oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
-            simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_disjunction
+            simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.disjunctive
           exact this ⨀ b
         . intro h;
           have := Satisfies.box_def.not.mp h;

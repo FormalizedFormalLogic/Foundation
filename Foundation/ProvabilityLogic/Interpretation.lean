@@ -38,9 +38,12 @@ lemma interpret_atom_def : f (.atom a) = f.val a := rfl
 
 lemma interpret_imp_def : f (A ➝ B) = (f A) ➝ (f B) := rfl
 
-lemma interpret_bot_def : f ⊥ = ⊥ := rfl
+@[simp] lemma interpret_bot_def : f ⊥ = ⊥ := rfl
 
 lemma interpret_box_def : f (□A) = 𝔅 (f A) := rfl
+
+lemma interpret_boxItr_def (n : ℕ) : f (□^[n] A) = 𝔅^[n] (f A) := by
+  induction n <;> simp [interpret_box_def, -Function.iterate_succ, Function.iterate_succ', *]
 
 variable [DecidableEq (Sentence L)]
 
@@ -73,6 +76,9 @@ lemma iff_interpret_and' : T ⊢!. f (A ⋏ B) ↔ T ⊢!. (f A) ∧ T ⊢!. (f 
   constructor;
   . intro h; constructor <;> cl_prover [h];
   . rintro ⟨hA, hB⟩; cl_prover [hA, hB];
+
+
+
 
 end
 

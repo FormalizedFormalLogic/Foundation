@@ -30,6 +30,8 @@ instance : CoeFun (Provability T₀ T) (fun _ ↦ Sentence L → Sentence L₀) 
 
 def con (𝔅 : Provability T₀ T) : Sentence L₀ := ∼𝔅 ⊥
 
+abbrev dia (𝔅 : Provability T₀ T) (φ : Sentence L) : Sentence L₀ := ∼𝔅 (∼φ)
+
 end Provability
 
 class Diagonalization [L.ReferenceableBy L] (T : Theory L) where
@@ -86,6 +88,13 @@ lemma prov_distribute_iff [𝔅.HBL2] (h : T ⊢!. σ ⭤ τ) : T₀ ⊢!. 𝔅 
   apply E!_intro;
   . exact prov_distribute_imply $ K!_left h;
   . exact prov_distribute_imply $ K!_right h;
+
+lemma dia_distribute_imply [L₀.DecidableEq] [L.DecidableEq] [𝔅.HBL2]
+    (h : T ⊢!. σ ➝ τ) : T₀ ⊢!. 𝔅.dia σ ➝ 𝔅.dia τ := by
+  unfold dia
+  have : T ⊢!. ∼τ ➝ ∼σ := by cl_prover [h]
+  have := 𝔅.prov_distribute_imply this
+  cl_prover [this]
 
 lemma prov_distribute_and [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ 𝔅 σ ⋏ 𝔅 τ := by
   have h₁ : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ 𝔅 σ := 𝔅.D2' _ _ <| 𝔅.D1 and₁!;
