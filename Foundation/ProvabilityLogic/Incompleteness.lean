@@ -57,8 +57,15 @@ class FormalizedLoeb [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provabili
 class Rosser [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   protected Ro {σ : Sentence L} : T ⊢!. ∼σ → T₀ ⊢!. ∼𝔅 σ
 
-class Sound [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) (N : outParam Type*) [Nonempty N] [Structure L₀ N] where
+class SoundOnStandardModel [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
+    (𝔅 : Provability T₀ T) (N : outParam Type*) [Nonempty N] [Structure L₀ N] where
   protected sound {σ : Sentence L} : N ⊧ₘ₀ 𝔅 σ ↔ T ⊢!. σ
+
+class Sound₀ [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
+  protected sound₀ {σ : Sentence L} : T₀ ⊢!. 𝔅 σ → T ⊢!. σ
+
+class Sound [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provability T₀ T) where
+  protected sound {σ : Sentence L} : T ⊢!. 𝔅 σ → T ⊢!. σ
 
 protected alias sound := Sound.sound
 
@@ -101,11 +108,13 @@ lemma prov_distribute_and [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢!. 𝔅 (σ �
   have h₂ : T₀ ⊢!. 𝔅 (σ ⋏ τ) ➝ 𝔅 τ := 𝔅.D2' _ _ <| 𝔅.D1 and₂!;
   exact right_K!_intro h₁ h₂;
 
-def prov_distribute_and' [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢!. 𝔅 (σ ⋏ τ) → T₀ ⊢!. 𝔅 σ ⋏ 𝔅 τ := λ h => prov_distribute_and ⨀ h
+lemma prov_distribute_and' [𝔅.HBL2] [L₀.DecidableEq] : T₀ ⊢!. 𝔅 (σ ⋏ τ) → T₀ ⊢!. 𝔅 σ ⋏ 𝔅 τ := λ h => prov_distribute_and ⨀ h
 
-def prov_collect_and [𝔅.HBL2] [L₀.DecidableEq] [L.DecidableEq] : T₀ ⊢!. 𝔅 σ ⋏ 𝔅 τ ➝ 𝔅 (σ ⋏ τ) := by
+lemma prov_collect_and [𝔅.HBL2] [L₀.DecidableEq] [L.DecidableEq] : T₀ ⊢!. 𝔅 σ ⋏ 𝔅 τ ➝ 𝔅 (σ ⋏ τ) := by
   have : T₀ ⊢!. 𝔅 σ ➝ 𝔅 (τ ➝ σ ⋏ τ) := prov_distribute_imply (by cl_prover)
   cl_prover [this, 𝔅.D2 τ (σ ⋏ τ)]
+
+lemma sound_iff₀ [𝔅.Sound₀] : T₀ ⊢!. 𝔅 σ ↔ T ⊢!. σ := ⟨Sound₀.sound₀, 𝔅.D1⟩
 
 end irreflexsive_syntactic_language
 section reflexive_syntactic_language
@@ -134,6 +143,8 @@ lemma prov_distribute_imply' [𝔅.HBL2] (h : T₀ ⊢!. σ ➝ τ) :
 
 lemma prov_distribute_imply'' [𝔅.HBL2] (h : T ⊢!. σ ➝ τ) :
     T ⊢!. 𝔅 σ ➝ 𝔅 τ := WeakerThan.pbl $ prov_distribute_imply h
+
+lemma sound_iff [𝔅.Sound] : T ⊢!. 𝔅 σ ↔ T ⊢!. σ := ⟨Sound.sound, fun h ↦ WeakerThan.pbl (𝔅.D1 h)⟩
 
 end reflexive_syntactic_language
 

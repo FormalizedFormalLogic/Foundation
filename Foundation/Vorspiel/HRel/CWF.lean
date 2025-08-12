@@ -82,6 +82,31 @@ lemma fcwHeight_eq_zero_iff {a : α} :
       fcwHeight R a = Finset.sup {x : α | R a x} fun b ↦ fcwHeight R b + 1 := fcwHeight_eq a
       _               ≤ 0 := Finset.sup_le fun b hb ↦ False.elim <| ha b (by simpa using hb)
 
+lemma fcwHeight_le {a : α}
+    (h : ∀ b, R a b → fcwHeight R b < n) : fcwHeight R a ≤ n := by
+  rw [fcwHeight_eq]
+  apply Finset.sup_le
+  intro b hab
+  exact h b (by simpa using hab)
+
+lemma lt_fcwHeight {a : α} (hb : R a b) (h : n ≤ fcwHeight R b) : n < fcwHeight R a := by
+  have : fcwHeight R b < fcwHeight R a := by
+    apply Nat.lt_of_succ_le
+    rw [fcwHeight_eq a]
+    exact Finset.le_sup (s := {x : α | R a x})
+      (f := fun b ↦ fcwHeight R b + 1) (b := b) (by simp [hb])
+  exact lt_of_le_of_lt h this
+
+lemma fcwHeight_eq_of_lt_of_le {a : α}
+    (hR : ∀ b, R a b → fcwHeight R b < n) (h : ∃ b, R a b ∧ n ≤ fcwHeight R b + 1) : fcwHeight R a = n := by
+  suffices fcwHeight R a ≤ n ∧ fcwHeight R a ≥ n from Nat.eq_iff_le_and_ge.mpr this
+  constructor
+  · exact fcwHeight_le hR
+  · rcases h with ⟨b, hb, hn⟩
+    suffices n - 1 < fcwHeight R a from Nat.le_of_pred_lt this
+    apply lt_fcwHeight hb
+    exact Nat.sub_le_of_le_add hn
+
 lemma fcwHeight_eq_succ {a : α} (h : fcwHeight R a ≠ 0) :
     ∃ b, R a b ∧ fcwHeight R a = fcwHeight R b + 1 := by
   have : ∃ b, R a b := by

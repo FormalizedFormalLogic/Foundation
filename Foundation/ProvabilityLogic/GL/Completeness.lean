@@ -46,16 +46,30 @@ end
 
 variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
 
-lemma satisfies_boxbot_of_lt_finHeight {i : M} (hi : Frame.World.finHeight i < n) :
-    i ⊧ □^[n] ⊥ := by
+lemma finHeight_lt_nat_iff_satisfies_boxbot {i : M} :
+    Frame.World.finHeight i < n ↔ i ⊧ □^[n] ⊥ := by
   match n with
   |     0 => simp_all
   | n + 1 =>
-    suffices ∀ (y : M.World), i ≺ y → y ⊧ □^[n]⊥ by
-      simpa [Formula.Kripke.Satisfies.box_def, -Formula.Kripke.Satisfies.iff_models]
-    intro j hij
-    have : Frame.World.finHeight j < n := lt_of_lt_of_le (fcwHeight_gt_of hij) (Nat.le_of_lt_succ hi)
-    exact satisfies_boxbot_of_lt_finHeight this
+    suffices Frame.World.finHeight i ≤ n ↔ ∀ j : M.World, i ≺ j → Frame.World.finHeight j < n by
+      simpa [Nat.lt_succ_iff, Formula.Kripke.Satisfies.box_def,
+        -Formula.Kripke.Satisfies.iff_models, finHeight_lt_nat_iff_satisfies_boxbot (n := n)]
+    constructor
+    · exact fun h j hij ↦ lt_of_lt_of_le (fcwHeight_gt_of hij) h
+    · exact fcwHeight_le
+
+lemma finHeight_pos_of_dia {i : M} (hA : i ⊧ ◇ A) : 0 < Frame.World.finHeight i := by
+  have : ∃ j, i ≺ j ∧ j ⊧ A := Formula.Kripke.Satisfies.dia_def.mp hA
+  rcases this with ⟨j, hj, _⟩
+  apply lt_fcwHeight hj (by simp)
+
+namespace Frame.extendRoot
+
+variable {F : Frame} [Fintype F] {r : F} [F.IsTree r]
+
+lemma finHeight : (F.extendRoot n).finHeight = F.finHeight + n := by sorry
+
+end Frame.extendRoot
 
 end Modal.Kripke
 
@@ -157,11 +171,13 @@ lemma root_of_iterated_inconsistency : T₀ ⊢!. ∼𝔅^[M.finHeight] ⊥ ➝ 
     have : T₀ ⊢!. S.σ i ➝ (↑𝔅)^[M.finHeight] ⊥ := by
       simpa [Realization.interpret_boxItr_def] using
         S.mainlemma hri (A := □^[M.finHeight] ⊥)
-          <| satisfies_boxbot_of_lt_finHeight (Frame.World.finHeight_lt_whole_finHeight hri)
+          <| finHeight_lt_nat_iff_satisfies_boxbot.mp
+          <| Frame.World.finHeight_lt_whole_finHeight hri
     cl_prover [this]
 
-lemma iterated_inconsistency_of_not_dia (h : r ⊧ ◇(∼A)) (b : T ⊢!. S.realization A) :
-    T₀ ⊢!. 𝔅^[M.finHeight] ⊥ := by
+lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢!. S.realization A) :
+    𝔅.height < M.finHeight := by
+  apply 𝔅.height_lt_pos_of_boxDot (finHeight_pos_of_dia h)
   have : ∃ i, r ≺ i ∧ ¬i ⊧ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
   have b₀ : T₀ ⊢!. 𝔅 (S.realization A) := 𝔅.D1 b
@@ -528,7 +544,9 @@ lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
   have : T.internalize V ⊢! ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
   exact (tprovable_tquote_iff_provable_quote (T := T)).mp this
 
+/-
 local notation:max "∣" i:max "∣" => Frame.World.finHeight i
+
 
 lemma iIncon {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] [𝐈𝚺₁ ⪯ T] {i : F}
     (ne : r ≠ i) (hn : ∣i∣ < n) : T.Solovay V i → T.IIncon V n := by
@@ -561,6 +579,7 @@ theorem root_of_iterated_consistency [𝐈𝚺₁ ⪯ T] (H : ¬T.IIncon V F.fin
     have : T.IIncon V F.finHeight :=
       iIncon (n := F.finHeight) hri (Frame.World.finHeight_lt_whole_finHeight hri') hi
     contradiction
+-/
 
 end model
 
@@ -600,7 +619,7 @@ lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i :
     Solovay.consistent (V := ℕ) (T := T) (Frame.root_genaretes'! i (Ne.symm h)) solovay_root_sound
   simpa [Theory.ConsistentWith.quote_iff, provable_iff_provable₀, Axiom.unprovable_iff] using this
 
-variable (T F r)
+variable (T F)
 
 def _root_.LO.ProvabilityLogic.SolovaySentences.standard
     [𝐈𝚺₁ ⪯ T] : SolovaySentences T.standardProvability F r where
@@ -618,8 +637,8 @@ def _root_.LO.ProvabilityLogic.SolovaySentences.standard
     oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
       simpa [models₀_iff] using disjunctive
 
-lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] :
-    (SolovaySentences.standard T F r).σ = T.solovay := rfl
+lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝐈𝚺₁ ⪯ T] :
+    (SolovaySentences.standard T F).σ = T.solovay := rfl
 
 end frame
 
@@ -634,46 +653,59 @@ open FirstOrder Arithmetic
 open Modal
 open Modal.Kripke
 
-variable {T : ArithmeticTheory} [T.Δ₁] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {A : Modal.Formula _}
+variable {T : ArithmeticTheory} [T.Δ₁] [𝐈𝚺₁ ⪯ T] {A : Modal.Formula _}
 
-theorem GL.arithmetical_completeness :
-    Modal.GL ⊢! A → (∀ f : Realization T.standardProvability, T ⊢!. f A) := by {  }
+theorem unprovable_realization_exists
+    (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsFiniteTree r₁]
+    (hA : ¬r₁ ⊧ A) (h : M₁.finHeight < T.standardProvability.height) :
+    ∃ f : Realization T.standardProvability, T ⊬. f A := by
+  let M₀ := M₁.extendRoot 1
+  let r₀ : M₀ := Frame.extendRoot.root
+  have : Fintype M₀ := Fintype.ofFinite _
+  have hdnA : r₀ ⊧ ◇(∼A) := by
+    suffices ∃ i, r₀ ≺ i ∧ ¬i ⊧ A by simpa [Formula.Kripke.Satisfies]
+    refine ⟨.inr r₁, ?_, ?_⟩
+    · simpa [r₀] using Frame.extendRoot.rooted_original
+    · exact Model.extendRoot.inr_satisfies_iff |>.not.mpr hA
+  let S : SolovaySentences T.standardProvability M₀.toFrame r₀ :=
+    SolovaySentences.standard T M₀.toFrame
+  use S.realization
+  intro hC
+  have : T.standardProvability.height < M₀.finHeight := S.theory_height hdnA hC
+  have : T.standardProvability.height ≤ M₁.finHeight := sorry
+  exact not_lt_of_ge this h
 
-theorem GL.arithmetical_completeness :
-    (∀ f : Realization T.standardProvability, T ⊢!. f A) → Modal.GL ⊢! A := by
-  simp only [Hilbert.Normal.iff_logic_provable_provable]
-  contrapose
-  intro hA
-  push_neg
-
-
-
-/--/
 /-- Arithmetical completeness of GL-/
-theorem GL.arithmetical_completeness :
-    (∀ {f : Realization T.standardProvability}, T ⊢!. f A) → Modal.GL ⊢! A := by
-  simp only [Hilbert.Normal.iff_logic_provable_provable];
-  contrapose;
-  intro hA;
-  push_neg;
-  obtain ⟨M₁, r₁, _, hA₁⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
-  have : Fintype (M₁.extendRoot r₁ 1).World := Fintype.ofFinite _
-  let σ : SolovaySentences T.standardProvability (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root :=
-    SolovaySentences.standard (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root T
-  use σ.realization;
-  have : 𝐈𝚺₁ ⊢!. σ r₁ ➝ σ.realization.interpret T.standardProvability (∼A) :=
-    σ.mainlemma (A := ∼A) (i := r₁) (by trivial) |>.1 $ Model.extendRoot.inr_satisfies_iff |>.not.mpr hA₁;
-  replace : 𝐈𝚺₁ ⊢!. σ.realization.interpret T.standardProvability A ➝ ∼(σ r₁) := by
-    apply CN!_of_CN!_right;
-    apply C!_trans this;
-    apply K!_right neg_equiv!;
-  replace : T ⊢!. σ.realization.interpret T.standardProvability A ➝ ∼(σ r₁) := WeakerThan.pbl this;
-  by_contra hC;
-  have : T ⊢!. ∼(σ r₁) := this ⨀ hC;
-  exact σ.SC4 _ (by rintro ⟨⟩) this;
+theorem GL.arithmetical_completeness (height : T.standardProvability.height = ⊤) :
+    (∀ f : Realization T.standardProvability, T ⊢!. f A) → Modal.GL ⊢! A := by
+  suffices ¬Hilbert.GL ⊢! A → ∃ f : Realization T.standardProvability, T ⊬. f A by
+    contrapose
+    intro hA
+    simpa using this <| Hilbert.Normal.iff_logic_provable_provable |>.not.mp hA
+  intro hA
+  obtain ⟨M₁, r₁, _, hA₁⟩ :=
+    Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA
+  have : Fintype M₁ := Fintype.ofFinite _
+  exact unprovable_realization_exists M₁ hA₁ <| by simp [height]
 
-theorem GL.arithmetical_completeness_iff :
-    (∀ {f : Realization ℒₒᵣ}, T ⊢!. f.interpret T.standardProvability A) ↔ Modal.GL ⊢! A :=
-  ⟨GL.arithmetical_completeness, GL.arithmetical_soundness⟩
+theorem GLBoxBot'.arithmetical_completeness {n : ℕ} (height : n ≤ T.standardProvability.height) :
+    (∀ f : Realization T.standardProvability, T ⊢!. f A) → Modal.GL ⊢! □^[n] ⊥ ➝ A := by
+  suffices ¬Hilbert.GL ⊢! □^[n]⊥ ➝ A → ∃ f : Realization T.standardProvability, T ⊬. f A by
+    contrapose
+    intro hA
+    simpa using this <| Hilbert.Normal.iff_logic_provable_provable |>.not.mp hA
+  intro hA
+  obtain ⟨M₁, r₁, _, hA₁⟩ :=
+    Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA
+  have : Fintype M₁ := Fintype.ofFinite _
+  have hA₁ : r₁ ⊧ □^[n]⊥ ∧ ¬r₁ ⊧ A := by
+    simpa [Formula.Kripke.Satisfies] using hA₁
+  have M₁_height : M₁.finHeight < n :=
+    finHeight_lt_nat_iff_satisfies_boxbot.mpr hA₁.1
+  exact unprovable_realization_exists M₁ hA₁.2 <| lt_of_lt_of_le (by simp [M₁_height]) height
+
+theorem GL.arithmetical_completeness_iff (height : T.standardProvability.height = ⊤) {A} :
+    (∀ f : Realization T.standardProvability, T ⊢!. f A) ↔ Modal.GL ⊢! A :=
+  ⟨GL.arithmetical_completeness height, GL.arithmetical_soundness⟩
 
 end LO.ProvabilityLogic

@@ -520,9 +520,9 @@ theorem GL.arithmetical_completeness :
   intro hA;
   push_neg;
   obtain ⟨M₁, r₁, _, hA₁⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
-  have : Fintype (M₁.extendRoot r₁ 1).World := Fintype.ofFinite _
-  let σ : SolovaySentences T.standardProvability (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root :=
-    SolovaySentences.standard (M₁.extendRoot r₁ 1).toFrame Frame.extendRoot.root T
+  have : Fintype (M₁.extendRoot₁ 1).World := Fintype.ofFinite _
+  let σ : SolovaySentences T.standardProvability (M₁.extendRoot₁ 1).toFrame Frame.extendRoot.root :=
+    SolovaySentences.standard (M₁.extendRoot₁ 1).toFrame Frame.extendRoot.root T
   use σ.realization;
   have : 𝐈𝚺₁ ⊢!. σ r₁ ➝ σ.realization.interpret T.standardProvability (∼A) :=
     σ.mainlemma (A := ∼A) (i := r₁) (by trivial) |>.1 $ Model.extendRoot.inr_satisfies_iff |>.not.mpr hA₁;
