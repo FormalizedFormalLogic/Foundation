@@ -67,9 +67,17 @@ namespace Frame.extendRoot
 
 variable {F : Frame} [Fintype F] {r : F} [F.IsTree r]
 
-lemma finHeight : (F.extendRoot n).finHeight = F.finHeight + n := by sorry
+@[simp] lemma finHeight : (F.extendRoot n).finHeight = F.finHeight + n := by sorry
 
 end Frame.extendRoot
+
+namespace Model.extendRoot
+
+variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
+
+@[simp] lemma finHeight : (M.extendRoot n).finHeight = M.finHeight + n := Frame.extendRoot.finHeight
+
+end Model.extendRoot
 
 end Modal.Kripke
 
@@ -661,7 +669,6 @@ theorem unprovable_realization_exists
     ∃ f : Realization T.standardProvability, T ⊬. f A := by
   let M₀ := M₁.extendRoot 1
   let r₀ : M₀ := Frame.extendRoot.root
-  have : Fintype M₀ := Fintype.ofFinite _
   have hdnA : r₀ ⊧ ◇(∼A) := by
     suffices ∃ i, r₀ ≺ i ∧ ¬i ⊧ A by simpa [Formula.Kripke.Satisfies]
     refine ⟨.inr r₁, ?_, ?_⟩
@@ -671,8 +678,11 @@ theorem unprovable_realization_exists
     SolovaySentences.standard T M₀.toFrame
   use S.realization
   intro hC
-  have : T.standardProvability.height < M₀.finHeight := S.theory_height hdnA hC
-  have : T.standardProvability.height ≤ M₁.finHeight := sorry
+  have : T.standardProvability.height ≤ M₁.finHeight := by
+    apply PartENat.le_of_lt_add_one
+    calc
+      (Theory.standardProvability T).height < M₀.finHeight := S.theory_height hdnA hC
+      _                                     = M₁.finHeight + 1 := by simp [M₀]
   exact not_lt_of_ge this h
 
 /-- Arithmetical completeness of GL-/

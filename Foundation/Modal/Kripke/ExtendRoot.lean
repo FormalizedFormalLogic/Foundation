@@ -147,6 +147,8 @@ protected abbrev root := Frame.extendRoot.root (F := M.toFrame) (r := r) (n := n
 
 instance isFinite [M.IsFinite] : (M.extendRoot n).IsFinite := Frame.extendRoot.isFinite
 
+instance fintype [Fintype M] : Fintype (M.extendRoot n) := Frame.extendRoot.fintype
+
 instance isTransitive [M.IsTransitive] : (M.extendRoot n).IsTransitive := Frame.extendRoot.isTransitive
 
 instance isAsymmetric [M.IsAsymmetric] : (M.extendRoot n).IsAsymmetric := Frame.extendRoot.isAsymmetric
