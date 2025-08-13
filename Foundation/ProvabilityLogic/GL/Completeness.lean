@@ -1,9 +1,8 @@
 import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.Modal.Kripke.Logic.GL.Tree
-import Foundation.Modal.Kripke.ExtendRoot
+import Foundation.ProvabilityLogic.PL
 
 /-!
-# Solovay's arithmetical completeness of $\mathsf{GL}$
+# Solovay's arithmetical completeness of $\mathsf{GL} and $\mathsf{GL} + \square^n \bot$
 -/
 
 namespace LO.ProvabilityLogic
@@ -37,7 +36,7 @@ theorem unprovable_realization_exists
       _                                     = M₁.finHeight + 1 := by simp [M₀]
   exact not_lt_of_ge this h
 
-/-- Arithmetical completeness of GL-/
+/-- Arithmetical completeness of $\mathsf{GL}$-/
 theorem GL.arithmetical_completeness (height : T.standardProvability.height = ⊤) :
     (∀ f : T.PLRealization, T ⊢!. f A) → Modal.GL ⊢! A := by
   suffices ¬Hilbert.GL ⊢! A → ∃ f : T.PLRealization, T ⊬. f A by
@@ -74,8 +73,16 @@ theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
     (∀ f : T.PLRealization, T ⊢!. f A) ↔ Modal.GL ⊢! A :=
   GL.arithmetical_completeness_iff (Provability.hight_eq_top_of_sigma1_sound T)
 
+/-- Provability logic of $\Sigma_1$-sound theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL}$-/
+theorem pl_eq_GLPlusBoxBot_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
+    T.PL = Modal.GL := by
+  ext A
+  simpa [ArithmeticTheory.PL] using
+    GL.arithmetical_completeness_sound_iff
+
 open Classical
 
+/-- Arithmetical completeness of $\mathsf{GL} + \square^n \bot$-/
 theorem GLBoxBot.arithmetical_completeness (hA : ∀ f : T.PLRealization, T ⊢!. f A) :
     Modal.GLPlusBoxBot T.standardProvability.height.toWithTop ⊢! A := by
   cases h : T.standardProvability.height using PartENat.casesOn
@@ -88,5 +95,12 @@ theorem GLBoxBot.arithmetical_completeness (hA : ∀ f : T.PLRealization, T ⊢!
 theorem GLBoxBot.arithmetical_completeness_iff :
     (∀ f : T.PLRealization, T ⊢!. f A) ↔ Modal.GLPlusBoxBot T.standardProvability.height.toWithTop ⊢! A :=
   ⟨GLBoxBot.arithmetical_completeness, GLBoxBot.arithmetical_soundness⟩
+
+/-- Provability logic of theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL} + \square^{\text{height of } T} \bot$-/
+theorem pl_eq_GLPlusBoxBot :
+    T.PL = Modal.GLPlusBoxBot T.standardProvability.height.toWithTop := by
+  ext A
+  simpa [ArithmeticTheory.PL] using
+    GLBoxBot.arithmetical_completeness_iff
 
 end LO.ProvabilityLogic
