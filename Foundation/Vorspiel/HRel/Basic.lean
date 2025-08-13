@@ -22,6 +22,12 @@ lemma iff_zero {x y : α} : R.iterate 0 x y ↔ x = y := iff_of_eq rfl
 @[simp]
 lemma iff_succ {x y : α} : R.iterate (n + 1) x y ↔ ∃ z, R x z ∧ R.iterate n z y := iff_of_eq rfl
 
+lemma pos_succ_iff (pos : n > 0) {x y : α} : R.iterate n x y ↔ ∃ z, R x z ∧ R.iterate n.pred z y := by
+  have : n.pred + 1 = n := Nat.sub_one_add_one_eq_of_pos pos
+  simpa only [this] using iff_succ (n := n.pred)
+
+lemma succ_left (Rxz : R x z) (Rzy : R.iterate n z y) : R.iterate (n + 1) x y := iff_succ.mp ⟨z, Rxz, Rzy⟩
+
 @[simp]
 lemma eq : HRel.iterate (α := α) (· = ·) n = (· = ·) := by
   induction n with
@@ -86,12 +92,23 @@ lemma unwrap_of_trans {n : ℕ+} [IsTrans _ R] (Rxy : R.iterate n x y) : R x y :
     obtain ⟨z, Rxz, Rzy⟩ := Rxy;
     exact IsTrans.trans _ _ _ Rxz (ih Rzy);
 
+lemma unwrap_of_trans_of_pos {n : ℕ} (h : 0 < n) [IsTrans _ R] (Rxy : R.iterate n x y) : R x y := by
+  have : ∃ m : ℕ+, n = m := ⟨⟨n, h⟩, by simp⟩
+  rcases this with ⟨n, rfl⟩
+  exact unwrap_of_trans Rxy
+
 lemma unwrap_of_refl_trans {n : ℕ} [IsRefl _ R] [IsTrans _ R] (Rxy : R.iterate n x y) : R x y := by
   induction n generalizing x with
   | zero => subst Rxy; apply IsRefl.refl;
   | succ n ih =>
     obtain ⟨z, Rxz, Rzy⟩ := Rxy;
     exact IsTrans.trans _ _ _ Rxz (ih Rzy);
+
+lemma constant_trans_of_pos {n : ℕ} (pos : 0 < n) [IsTrans _ R] (Rzx : R z x) (Rxy : R.iterate n x y) : R.iterate n z y := by
+  rcases (pos_succ_iff pos).mp Rxy with ⟨w, Rxw, hwy⟩
+  have : R z w := IsTrans.trans _ _ _ Rzx Rxw
+  have := succ_left this hwy
+  simpa [Nat.sub_one_add_one_eq_of_pos pos] using this
 
 end iterate
 

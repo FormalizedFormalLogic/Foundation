@@ -36,6 +36,8 @@ protected abbrev root : (F.extendRoot n).World := .inl 0
 
 abbrev extendedWorld (i : Fin n) : F.extendRoot n := .inl i
 
+abbrev embed (x : F) : F.extendRoot n := .inr x
+
 instance instIsRooted : (F.extendRoot n).IsRootedBy extendRoot.root where
   root_generates := by
     intro x h;

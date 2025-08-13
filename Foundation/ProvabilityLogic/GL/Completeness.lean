@@ -42,40 +42,105 @@ lemma Frame.World.finHeight_le_whole_finHeight (i : F) :
   · have : r ≺ i := root_genaretes'! i hi
     exact le_of_lt (fcwHeight_gt_of this)
 
+lemma finHeight_lt_iff_relItr {i : F} :
+    Frame.World.finHeight i < n ↔ ∀ j, ¬i ≺^[n] j  := by
+  match n with
+  |     0 => simp_all
+  | n + 1 =>
+    suffices Frame.World.finHeight i ≤ n ↔ ∀ j : F, i ≺ j → Frame.World.finHeight j < n by
+      calc
+        Frame.World.finHeight i < n + 1
+          ↔ Frame.World.finHeight i ≤ n := Nat.lt_add_one_iff
+        _ ↔ ∀ j, i ≺ j → Frame.World.finHeight j < n := this
+        _ ↔ ∀ j, i ≺ j → ∀ k, ¬j ≺^[n] k := by simp [finHeight_lt_iff_relItr (n := n)]
+        _ ↔ ∀ k j, i ≺ j → ¬j ≺^[n] k    := by grind
+        _ ↔ ∀ j, ¬i ≺^[n + 1] j  := by simp
+    constructor
+    · exact fun h j hij ↦ lt_of_lt_of_le (fcwHeight_gt_of hij) h
+    · exact fcwHeight_le
+
+lemma le_finHeight_iff_relItr {i : F} :
+    n ≤ Frame.World.finHeight i ↔ ∃ j, i ≺^[n] j := calc
+  n ≤ Frame.World.finHeight i ↔ ¬Frame.World.finHeight i < n := Iff.symm Nat.not_lt
+  _                           ↔ ∃ j, i ≺^[n] j := by simp [finHeight_lt_iff_relItr]
+
+lemma finHeight_eq_iff_relItr {i : F} :
+    Frame.World.finHeight i = n ↔ (∃ j, i ≺^[n] j) ∧ (∀ j, i ≺^[n] j → ∀ k, ¬j ≺ k) := calc
+  Frame.World.finHeight i = n
+    ↔ Frame.World.finHeight i < n + 1 ∧ n ≤ Frame.World.finHeight i := by simpa [Nat.lt_succ_iff] using Nat.eq_iff_le_and_ge
+  _ ↔ (∀ j, ¬i ≺^[n + 1] j) ∧ (∃ j, i ≺^[n] j) := by simp [finHeight_lt_iff_relItr, le_finHeight_iff_relItr]
+  _ ↔ (∀ k j, i ≺^[n] j → ¬j ≺ k) ∧ (∃ j, i ≺^[n] j) := by simp only [HRel.iterate.forward, not_exists, not_and]
+  _ ↔ (∃ j, i ≺^[n] j) ∧ (∀ j, i ≺^[n] j → ∀ k, ¬j ≺ k) := by grind
+
+lemma exists_terminal (i : F) : ∃ j, i ≺^[Frame.World.finHeight i] j := le_finHeight_iff_relItr.mp (by simp)
+
+namespace Frame.extendRoot
+
+@[simp] lemma finHeight_pos : 0 < (F.extendRoot 1).finHeight := by
+  apply lt_fcwHeight ?_ (by simp)
+  · exact Sum.inr r
+  trivial
+
+lemma eq_inr_of_root_rel {j : F.extendRoot 1} : extendRoot.root ≺ j → ∃ x : F, j = x := sorry
+
+@[simp] lemma embed_relItr_embed_of_rel {i j : F} :
+    embed (n := 1) i ≺^[n] embed j ↔ i ≺^[n] j := sorry
+
+@[simp] lemma finHeight : (F.extendRoot 1).finHeight = F.finHeight + 1 := by
+  let l := World.finHeight (extendRoot.root : F.extendRoot 1)
+  suffices
+      l ≤ Frame.World.finHeight r + 1 ∧
+      Frame.World.finHeight r < l by
+    simpa using Nat.eq_iff_le_and_ge.mpr this
+  constructor
+  · suffices l - 1 ≤ World.finHeight r from Nat.le_add_of_sub_le this
+    apply le_finHeight_iff_relItr.mpr
+    by_cases hl : l - 1 = 0
+    · exact ⟨r, by simp [hl]⟩
+    have lpos : 0 < l - 1 := Nat.zero_lt_of_ne_zero hl
+    have e : l = (l - 1) + 1 := by
+      symm; exact Nat.sub_add_cancel Frame.extendRoot.finHeight_pos
+    have : ∃ j, extendRoot.root ≺^[l] j := exists_terminal (extendRoot.root : F.extendRoot 1)
+    rcases this with ⟨j, hj⟩
+    have : ∃ z, extendRoot.root ≺ z ∧ z ≺^[(l - 1)] j := by
+      rw [e] at hj
+      simpa using hj
+    rcases this with ⟨z, hz, hzj⟩
+    rcases eq_inr_of_root_rel hz with ⟨z, rfl⟩
+    have : ∃ x, j = Sum.inr x := eq_inr_of_root_rel <| HRel.iterate.unwrap_of_trans_of_pos finHeight_pos hj
+    rcases this with ⟨x, rfl⟩
+    use x
+    have Rzx : z ≺^[l - 1] x := embed_relItr_embed_of_rel.mp hzj
+    by_cases hzr : z = r
+    · simpa [hzr] using Rzx
+    · exact HRel.iterate.constant_trans_of_pos lpos (root_genaretes'! z hzr) Rzx
+  · suffices World.finHeight r + 1 ≤ World.finHeight extendRoot.root from this
+    apply le_finHeight_iff_relItr.mpr
+    rcases exists_terminal r with ⟨j, hj⟩
+    exact ⟨j, r, by trivial, embed_relItr_embed_of_rel.mpr hj⟩
+
+end Frame.extendRoot
+
+
 end
 
 variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
 
-lemma finHeight_lt_nat_iff_satisfies_boxbot {i : M} :
+lemma finHeight_lt_iff_satisfies_boxbot {i : M} :
     Frame.World.finHeight i < n ↔ i ⊧ □^[n] ⊥ := by
-  match n with
-  |     0 => simp_all
-  | n + 1 =>
-    suffices Frame.World.finHeight i ≤ n ↔ ∀ j : M.World, i ≺ j → Frame.World.finHeight j < n by
-      simpa [Nat.lt_succ_iff, Formula.Kripke.Satisfies.box_def,
-        -Formula.Kripke.Satisfies.iff_models, finHeight_lt_nat_iff_satisfies_boxbot (n := n)]
-    constructor
-    · exact fun h j hij ↦ lt_of_lt_of_le (fcwHeight_gt_of hij) h
-    · exact fcwHeight_le
+  simp only [finHeight_lt_iff_relItr, Formula.Kripke.Satisfies.multibox_def]
+  simp
 
 lemma finHeight_pos_of_dia {i : M} (hA : i ⊧ ◇ A) : 0 < Frame.World.finHeight i := by
   have : ∃ j, i ≺ j ∧ j ⊧ A := Formula.Kripke.Satisfies.dia_def.mp hA
   rcases this with ⟨j, hj, _⟩
   apply lt_fcwHeight hj (by simp)
 
-namespace Frame.extendRoot
-
-variable {F : Frame} [Fintype F] {r : F} [F.IsTree r]
-
-@[simp] lemma finHeight : (F.extendRoot n).finHeight = F.finHeight + n := by sorry
-
-end Frame.extendRoot
-
 namespace Model.extendRoot
 
 variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
 
-@[simp] lemma finHeight : (M.extendRoot n).finHeight = M.finHeight + n := Frame.extendRoot.finHeight
+@[simp] lemma finHeight : (M.extendRoot 1).finHeight = M.finHeight + 1 := Frame.extendRoot.finHeight
 
 end Model.extendRoot
 
@@ -179,7 +244,7 @@ lemma root_of_iterated_inconsistency : T₀ ⊢!. ∼𝔅^[M.finHeight] ⊥ ➝ 
     have : T₀ ⊢!. S.σ i ➝ (↑𝔅)^[M.finHeight] ⊥ := by
       simpa [Realization.interpret_boxItr_def] using
         S.mainlemma hri (A := □^[M.finHeight] ⊥)
-          <| finHeight_lt_nat_iff_satisfies_boxbot.mp
+          <| finHeight_lt_iff_satisfies_boxbot.mp
           <| Frame.World.finHeight_lt_whole_finHeight hri
     cl_prover [this]
 
@@ -711,7 +776,7 @@ theorem GLBoxBot'.arithmetical_completeness {n : ℕ} (height : n ≤ T.standard
   have hA₁ : r₁ ⊧ □^[n]⊥ ∧ ¬r₁ ⊧ A := by
     simpa [Formula.Kripke.Satisfies] using hA₁
   have M₁_height : M₁.finHeight < n :=
-    finHeight_lt_nat_iff_satisfies_boxbot.mpr hA₁.1
+    finHeight_lt_iff_satisfies_boxbot.mpr hA₁.1
   exact unprovable_realization_exists M₁ hA₁.2 <| lt_of_lt_of_le (by simp [M₁_height]) height
 
 theorem GL.arithmetical_completeness_iff (height : T.standardProvability.height = ⊤) {A} :
