@@ -1,4 +1,6 @@
 import Foundation.ProvabilityLogic.Interpretation
+import Foundation.Modal.Logic.GLPlusBoxBot.Basic
+import Foundation.ProvabilityLogic.Height
 
 namespace LO.ProvabilityLogic
 
@@ -25,5 +27,21 @@ lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization 𝔅} : U
   | imply₁ => exact imply₁!;
   | imply₂ => exact imply₂!;
   | ec => exact CCCOCOC!;
+
+open Classical
+
+theorem GLBoxBot.arithmetical_soundness
+    (hA : Modal.GLPlusBoxBot 𝔅.height.toWithTop ⊢! A)
+    (f : Realization 𝔅) : U ⊢!. f A := by
+  cases h : 𝔅.height using PartENat.casesOn
+  case _ =>
+    exact GL.arithmetical_soundness (by simpa [h] using hA)
+  case _ n =>
+    have : Modal.GLPlusBoxBot n ⊢! A := by simpa [h] using hA
+    have : Hilbert.GL ⊢! □^[n]⊥ ➝ A := by simpa using iff_provable_GLBB_provable_GL.mp this
+    have : U ⊢!. f (□^[n]⊥ ➝ A) := GL.arithmetical_soundness (f := f) (by simpa using this)
+    have : U ⊢!. 𝔅^[n] ⊥ ➝ f A := by
+      simpa [Realization.interpret_imp_def, Realization.interpret_boxItr_def] using this
+    exact this ⨀ (Provability.height_le_iff_boxDot.mp (by simp [h]))
 
 end LO.ProvabilityLogic

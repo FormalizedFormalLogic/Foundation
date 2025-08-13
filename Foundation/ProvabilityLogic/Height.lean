@@ -72,7 +72,9 @@ lemma height_lt_pos_of_boxDot [𝔅.Sound₀] {n : ℕ} (pos : 0 < n) (h : T₀ 
     exact lt_of_le_of_lt this <| PartENat.coe_lt_coe.mpr <| by simp
   exact this
 
-lemma height_le_iff_boxDot [T₀ ⪯ T] [𝔅.HBL] [𝔅.Sound] {n : ℕ} :
+variable {𝔅}
+
+lemma height_le_iff_boxDot [T₀ ⪯ T] [𝔅.HBL] {n : ℕ} :
     𝔅.height ≤ n ↔ T ⊢!. 𝔅^[n] ⊥ := by
   constructor
   · intro h
@@ -80,6 +82,8 @@ lemma height_le_iff_boxDot [T₀ ⪯ T] [𝔅.HBL] [𝔅.Sound] {n : ℕ} :
     rcases this with ⟨m, hmn, hm⟩
     exact 𝔅.boxBot_monotone hmn ⨀ hm
   · exact 𝔅.height_le_of_boxDot
+
+variable (𝔅)
 
 lemma hight_eq_top_of_sound_and_consistent [𝔅.Sound] [Entailment.Consistent T] : 𝔅.height = ⊤ :=
   height_eq_top_iff.mpr 𝔅.iIncon_unprovable_of_sigma1_sound

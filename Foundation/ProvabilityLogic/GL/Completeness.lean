@@ -2,7 +2,6 @@ import Foundation.ProvabilityLogic.SolovaySentences
 import Foundation.Modal.Kripke.Logic.GL.Tree
 import Foundation.Modal.Kripke.ExtendRoot
 
-
 /-!
 # Solovay's arithmetical completeness of $\mathsf{GL}$
 -/
@@ -51,7 +50,7 @@ theorem GL.arithmetical_completeness (height : T.standardProvability.height = �
   have : Fintype M₁ := Fintype.ofFinite _
   exact unprovable_realization_exists M₁ hA₁ <| by simp [height]
 
-theorem GLBoxBot'.arithmetical_completeness {n : ℕ} (height : n ≤ T.standardProvability.height) :
+theorem GLBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.standardProvability.height) :
     (∀ f : T.PLRealization, T ⊢!. f A) → Modal.GL ⊢! □^[n] ⊥ ➝ A := by
   suffices ¬Hilbert.GL ⊢! □^[n]⊥ ➝ A → ∃ f : T.PLRealization, T ⊬. f A by
     contrapose
@@ -74,5 +73,20 @@ theorem GL.arithmetical_completeness_iff (height : T.standardProvability.height 
 theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
     (∀ f : T.PLRealization, T ⊢!. f A) ↔ Modal.GL ⊢! A :=
   GL.arithmetical_completeness_iff (Provability.hight_eq_top_of_sigma1_sound T)
+
+open Classical
+
+theorem GLBoxBot.arithmetical_completeness (hA : ∀ f : T.PLRealization, T ⊢!. f A) :
+    Modal.GLPlusBoxBot T.standardProvability.height.toWithTop ⊢! A := by
+  cases h : T.standardProvability.height using PartENat.casesOn
+  case _ => simpa using GL.arithmetical_completeness h hA
+  case _ n =>
+    suffices Modal.GLPlusBoxBot n ⊢! A by simpa using this
+    apply iff_provable_GLBB_provable_GL.mpr
+    exact GLBoxBot.arithmetical_completeness_aux (n := n) (by simp [h]) hA
+
+theorem GLBoxBot.arithmetical_completeness_iff :
+    (∀ f : T.PLRealization, T ⊢!. f A) ↔ Modal.GLPlusBoxBot T.standardProvability.height.toWithTop ⊢! A :=
+  ⟨GLBoxBot.arithmetical_completeness, GLBoxBot.arithmetical_soundness⟩
 
 end LO.ProvabilityLogic
