@@ -43,6 +43,9 @@ instance : T.standardProvability.HBL2 := ⟨fun _ _ ↦ provable_D2⟩
 
 lemma standardProvability_def (σ : Sentence L) : T.standardProvability σ = T.provabilityPred σ := rfl
 
+instance [T.Δ₁] : T.standardProvability.SoundOnModel ℕ :=
+  ⟨fun {σ} ↦ by simp [Arithmetic.standardProvability_def, models₀_iff]⟩
+
 end
 
 section arithmetic

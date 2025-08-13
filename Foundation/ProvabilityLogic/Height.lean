@@ -81,9 +81,7 @@ lemma height_le_iff_boxDot [T₀ ⪯ T] [𝔅.HBL] [𝔅.Sound] {n : ℕ} :
     exact 𝔅.boxBot_monotone hmn ⨀ hm
   · exact 𝔅.height_le_of_boxDot
 
-variable {𝔅} (T)
-
-lemma hight_eq_top_of_sigma1_sound [𝔅.Sound] [Entailment.Consistent T] : 𝔅.height = ⊤ :=
+lemma hight_eq_top_of_sound_and_consistent [𝔅.Sound] [Entailment.Consistent T] : 𝔅.height = ⊤ :=
   height_eq_top_iff.mpr 𝔅.iIncon_unprovable_of_sigma1_sound
 
 lemma hight_eq_zero_of_inconsistent (h : Entailment.Inconsistent T) : 𝔅.height = 0 := by
@@ -91,7 +89,9 @@ lemma hight_eq_zero_of_inconsistent (h : Entailment.Inconsistent T) : 𝔅.heigh
   simpa using
     𝔅.height_le_of_boxDot (T := T) (n := 0) (by simpa using Axiom.provable_iff.mpr (h ⊥))
 
-variable {T}
+lemma hight_eq_top_of_sigma1_sound (T : Theory ℒₒᵣ) [T.Δ₁] [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :
+    T.standardProvability.height = ⊤ :=
+  hight_eq_top_of_sound_and_consistent _
 
 @[simp] lemma ISigma1_hight_eq_top : 𝐈𝚺₁.standardProvability.height = ⊤ := hight_eq_top_of_sigma1_sound 𝐈𝚺₁
 

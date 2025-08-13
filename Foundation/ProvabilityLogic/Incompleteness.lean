@@ -57,7 +57,7 @@ class FormalizedLoeb [L.ReferenceableBy L] {T₀ T : Theory L} (𝔅 : Provabili
 class Rosser [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L} (𝔅 : Provability T₀ T) where
   protected Ro {σ : Sentence L} : T ⊢!. ∼σ → T₀ ⊢!. ∼𝔅 σ
 
-class SoundOnStandardModel [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
+class SoundOnModel [L.ReferenceableBy L₀] {T₀ : Theory L₀} {T : Theory L}
     (𝔅 : Provability T₀ T) (N : outParam Type*) [Nonempty N] [Structure L₀ N] where
   protected sound {σ : Sentence L} : N ⊧ₘ₀ 𝔅 σ ↔ T ⊢!. σ
 

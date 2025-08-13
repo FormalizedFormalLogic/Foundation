@@ -18,6 +18,8 @@ namespace ProvabilityLogic
 structure Realization (𝔅 : Provability T₀ T) where
   val : ℕ → FirstOrder.Sentence L
 
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.PLRealization (T : ArithmeticTheory) [T.Δ₁] := Realization T.standardProvability
+
 namespace Realization
 
 /-- Mapping modal formulae to first-order sentence -/
@@ -76,9 +78,6 @@ lemma iff_interpret_and' : T ⊢!. f (A ⋏ B) ↔ T ⊢!. (f A) ∧ T ⊢!. (f 
   constructor;
   . intro h; constructor <;> cl_prover [h];
   . rintro ⟨hA, hB⟩; cl_prover [hA, hB];
-
-
-
 
 end
 
