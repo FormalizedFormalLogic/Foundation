@@ -1,6 +1,5 @@
 import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.Modal.Kripke.Logic.GL.Tree
-import Foundation.Modal.Kripke.ExtendRoot
+import Foundation.ProvabilityLogic.PL
 
 /-!
 # Solovay's arithmetical completeness of $\mathsf{GL}$
@@ -74,6 +73,12 @@ theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
     (∀ f : T.PLRealization, T ⊢!. f A) ↔ Modal.GL ⊢! A :=
   GL.arithmetical_completeness_iff (Provability.hight_eq_top_of_sigma1_sound T)
 
+theorem pl_eq_GLPlusBoxBot_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
+    T.PL = Modal.GL := by
+  ext A
+  simpa [ArithmeticTheory.PL] using
+    GL.arithmetical_completeness_sound_iff
+
 open Classical
 
 theorem GLBoxBot.arithmetical_completeness (hA : ∀ f : T.PLRealization, T ⊢!. f A) :
@@ -88,5 +93,11 @@ theorem GLBoxBot.arithmetical_completeness (hA : ∀ f : T.PLRealization, T ⊢!
 theorem GLBoxBot.arithmetical_completeness_iff :
     (∀ f : T.PLRealization, T ⊢!. f A) ↔ Modal.GLPlusBoxBot T.standardProvability.height.toWithTop ⊢! A :=
   ⟨GLBoxBot.arithmetical_completeness, GLBoxBot.arithmetical_soundness⟩
+
+theorem pl_eq_GLPlusBoxBot :
+    T.PL = Modal.GLPlusBoxBot T.standardProvability.height.toWithTop := by
+  ext A
+  simpa [ArithmeticTheory.PL] using
+    GLBoxBot.arithmetical_completeness_iff
 
 end LO.ProvabilityLogic
