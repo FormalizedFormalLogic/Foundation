@@ -579,6 +579,7 @@ lemma Θ.disjunction (i : F) : Θ T V i → T.Solovay V i ∨ ∃ j, i ≺ j ∧
     · exact ⟨j, hij, hSj⟩
     · exact ⟨k, Trans.trans hij hjk, hSk⟩
 
+/-- Condition 4.-/
 lemma disjunctive : ∃ i : F, T.Solovay V i := by
   have : T.Solovay V r ∨ ∃ j, r ≺ j ∧ T.Solovay V j :=
     Θ.disjunction (V := V) (T := T) r ⟨[r], by simp⟩
@@ -634,7 +635,6 @@ lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.
   · have : ¬T.Solovay ℕ i := NS i (by rintro rfl; exact IsIrrefl.irrefl r hri)
     contradiction
 
-/-- Condition 4.-/
 lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i : F} (h : r ≠ i) : T ⊬. ∼T.solovay i := by
   haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝐈𝚺₁ ⪯ T))
   have : ∼T.Provable ⌜∼T.solovay i⌝ :=
