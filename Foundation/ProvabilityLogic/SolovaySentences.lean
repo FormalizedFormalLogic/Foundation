@@ -238,7 +238,7 @@ lemma root_of_iterated_inconsistency : T₀ ⊢!. ∼𝔅^[M.finHeight] ⊥ ➝ 
 
 lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢!. S.realization A) :
     𝔅.height < M.finHeight := by
-  apply 𝔅.height_lt_pos_of_boxDot (finHeight_pos_of_dia h)
+  apply 𝔅.height_lt_pos_of_boxBot (finHeight_pos_of_dia h)
   have : ∃ i, r ≺ i ∧ ¬i ⊧ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
   have b₀ : T₀ ⊢!. 𝔅 (S.realization A) := 𝔅.D1 b
