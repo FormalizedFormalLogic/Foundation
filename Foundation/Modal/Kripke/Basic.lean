@@ -32,8 +32,8 @@ infix:45 " ≺ " => Frame.Rel'
 abbrev InvRel (x y : F.World) := F.Rel y x
 infix:45 " ≻ " => Frame.InvRel
 
-abbrev RelItr' (n : ℕ) := F.Rel.iterate n
-notation x:45 " ≺^[" n "] " y:46 => Frame.RelItr' n x y
+abbrev RelItr' (n : ℕ) := F.Rel.Iterate n
+notation x:45 " ≺^[" n:0 "] " y:46 => Frame.RelItr' n x y
 
 @[mk_iff]
 class IsFinite (F : Frame) : Prop where [world_finite : Finite F.World]

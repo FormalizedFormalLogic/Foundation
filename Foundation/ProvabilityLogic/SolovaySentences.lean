@@ -68,7 +68,7 @@ lemma finHeight_eq_iff_relItr {i : F} :
   Frame.World.finHeight i = n
     ↔ Frame.World.finHeight i < n + 1 ∧ n ≤ Frame.World.finHeight i := by simpa [Nat.lt_succ_iff] using Nat.eq_iff_le_and_ge
   _ ↔ (∀ j, ¬i ≺^[n + 1] j) ∧ (∃ j, i ≺^[n] j) := by simp [finHeight_lt_iff_relItr, le_finHeight_iff_relItr]
-  _ ↔ (∀ k j, i ≺^[n] j → ¬j ≺ k) ∧ (∃ j, i ≺^[n] j) := by simp only [HRel.iterate.forward, not_exists, not_and]
+  _ ↔ (∀ k j, i ≺^[n] j → ¬j ≺ k) ∧ (∃ j, i ≺^[n] j) := by simp only [HRel.Iterate.forward, not_exists, not_and]
   _ ↔ (∃ j, i ≺^[n] j) ∧ (∀ j, i ≺^[n] j → ∀ k, ¬j ≺ k) := by grind
 
 lemma exists_terminal (i : F) : ∃ j, i ≺^[Frame.World.finHeight i] j := le_finHeight_iff_relItr.mp (by simp)
@@ -79,11 +79,6 @@ namespace Frame.extendRoot
   apply lt_fcwHeight ?_ (by simp)
   · exact Sum.inr r
   trivial
-
-lemma eq_inr_of_root_rel {j : F.extendRoot 1} : extendRoot.root ≺ j → ∃ x : F, j = x := sorry
-
-@[simp] lemma embed_relItr_embed_of_rel {i j : F} :
-    embed (n := 1) i ≺^[n] embed j ↔ i ≺^[n] j := sorry
 
 @[simp] lemma finHeight : (F.extendRoot 1).finHeight = F.finHeight + 1 := by
   let l := World.finHeight (extendRoot.root : F.extendRoot 1)
@@ -101,22 +96,20 @@ lemma eq_inr_of_root_rel {j : F.extendRoot 1} : extendRoot.root ≺ j → ∃ x 
       symm; exact Nat.sub_add_cancel Frame.extendRoot.finHeight_pos
     have : ∃ j, extendRoot.root ≺^[l] j := exists_terminal (extendRoot.root : F.extendRoot 1)
     rcases this with ⟨j, hj⟩
-    have : ∃ z, extendRoot.root ≺ z ∧ z ≺^[(l - 1)] j := by
+    have : ∃ z, extendRoot.root ≺ z ∧ z ≺^[l - 1] j := by
       rw [e] at hj
       simpa using hj
     rcases this with ⟨z, hz, hzj⟩
-    rcases eq_inr_of_root_rel hz with ⟨z, rfl⟩
-    have : ∃ x, j = Sum.inr x := eq_inr_of_root_rel <| HRel.iterate.unwrap_of_trans_of_pos finHeight_pos hj
-    rcases this with ⟨x, rfl⟩
-    use x
-    have Rzx : z ≺^[l - 1] x := embed_relItr_embed_of_rel.mp hzj
-    by_cases hzr : z = r
-    · simpa [hzr] using Rzx
-    · exact HRel.iterate.constant_trans_of_pos lpos (root_genaretes'! z hzr) Rzx
+    have : ∃ x, j = embed x := eq_inr_of_root_rel <| HRel.Iterate.unwrap_of_trans_of_pos finHeight_pos hj
+    rcases this with ⟨j, rfl⟩
+    rcases not_root_of_from_root'₁ hz with (rfl | ⟨z, rfl, Rrz⟩)
+    · exact ⟨j, embed_rel_iterate_embed_of_rel.mp hzj⟩
+    use j
+    exact HRel.Iterate.constant_trans_of_pos lpos Rrz (embed_rel_iterate_embed_of_rel.mp hzj)
   · suffices World.finHeight r + 1 ≤ World.finHeight extendRoot.root from this
     apply le_finHeight_iff_relItr.mpr
     rcases exists_terminal r with ⟨j, hj⟩
-    exact ⟨j, r, by trivial, embed_relItr_embed_of_rel.mpr hj⟩
+    exact ⟨j, r, by trivial, embed_rel_iterate_embed_of_rel.mpr hj⟩
 
 end Frame.extendRoot
 
