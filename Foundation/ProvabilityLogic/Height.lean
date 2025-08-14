@@ -74,7 +74,7 @@ lemma height_lt_pos_of_boxDot [𝔅.Sound₀] {n : ℕ} (pos : 0 < n) (h : T₀ 
 
 variable {𝔅}
 
-lemma height_le_iff_boxDot [T₀ ⪯ T] [𝔅.HBL] {n : ℕ} :
+lemma height_le_iff_boxBot [T₀ ⪯ T] [𝔅.HBL] {n : ℕ} :
     𝔅.height ≤ n ↔ T ⊢!. 𝔅^[n] ⊥ := by
   constructor
   · intro h

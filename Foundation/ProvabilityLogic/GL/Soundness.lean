@@ -30,7 +30,7 @@ lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization 𝔅} : U
 
 open Classical
 
-theorem GLBoxBot.arithmetical_soundness
+theorem GLPlusBoxBot.arithmetical_soundness
     (hA : Modal.GLPlusBoxBot 𝔅.height.toWithTop ⊢! A)
     (f : Realization 𝔅) : U ⊢!. f A := by
   cases h : 𝔅.height using PartENat.casesOn
@@ -42,6 +42,6 @@ theorem GLBoxBot.arithmetical_soundness
     have : U ⊢!. f (□^[n]⊥ ➝ A) := GL.arithmetical_soundness (f := f) (by simpa using this)
     have : U ⊢!. 𝔅^[n] ⊥ ➝ f A := by
       simpa [Realization.interpret_imp_def, Realization.interpret_boxItr_def] using this
-    exact this ⨀ (Provability.height_le_iff_boxDot.mp (by simp [h]))
+    exact this ⨀ (Provability.height_le_iff_boxBot.mp (by simp [h]))
 
 end LO.ProvabilityLogic

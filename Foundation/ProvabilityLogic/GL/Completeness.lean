@@ -49,7 +49,7 @@ theorem GL.arithmetical_completeness (height : T.standardProvability.height = �
   have : Fintype M₁ := Fintype.ofFinite _
   exact unprovable_realization_exists M₁ hA₁ <| by simp [height]
 
-theorem GLBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.standardProvability.height) :
+theorem GLPlusBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.standardProvability.height) :
     (∀ f : T.PLRealization, T ⊢!. f A) → Modal.GL ⊢! □^[n] ⊥ ➝ A := by
   suffices ¬Hilbert.GL ⊢! □^[n]⊥ ➝ A → ∃ f : T.PLRealization, T ⊬. f A by
     contrapose
@@ -83,24 +83,24 @@ theorem pl_eq_GLPlusBoxBot_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
 open Classical
 
 /-- Arithmetical completeness of $\mathsf{GL} + \square^n \bot$-/
-theorem GLBoxBot.arithmetical_completeness (hA : ∀ f : T.PLRealization, T ⊢!. f A) :
+theorem GLPlusBoxBot.arithmetical_completeness (hA : ∀ f : T.PLRealization, T ⊢!. f A) :
     Modal.GLPlusBoxBot T.standardProvability.height.toWithTop ⊢! A := by
   cases h : T.standardProvability.height using PartENat.casesOn
   case _ => simpa using GL.arithmetical_completeness h hA
   case _ n =>
     suffices Modal.GLPlusBoxBot n ⊢! A by simpa using this
     apply iff_provable_GLBB_provable_GL.mpr
-    exact GLBoxBot.arithmetical_completeness_aux (n := n) (by simp [h]) hA
+    exact GLPlusBoxBot.arithmetical_completeness_aux (n := n) (by simp [h]) hA
 
-theorem GLBoxBot.arithmetical_completeness_iff :
+theorem GLPlusBoxBot.arithmetical_completeness_iff :
     (∀ f : T.PLRealization, T ⊢!. f A) ↔ Modal.GLPlusBoxBot T.standardProvability.height.toWithTop ⊢! A :=
-  ⟨GLBoxBot.arithmetical_completeness, GLBoxBot.arithmetical_soundness⟩
+  ⟨GLPlusBoxBot.arithmetical_completeness, GLPlusBoxBot.arithmetical_soundness⟩
 
 /-- Provability logic of theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL} + \square^{\text{height of } T} \bot$-/
 theorem pl_eq_GLPlusBoxBot :
     T.PL = Modal.GLPlusBoxBot T.standardProvability.height.toWithTop := by
   ext A
   simpa [ArithmeticTheory.PL] using
-    GLBoxBot.arithmetical_completeness_iff
+    GLPlusBoxBot.arithmetical_completeness_iff
 
 end LO.ProvabilityLogic
