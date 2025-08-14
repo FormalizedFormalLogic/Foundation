@@ -50,6 +50,15 @@ lemma consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop)
 
 instance consistentWith.definable : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) := (consistentWith.defined T).to_definable
 
+abbrev _root_.LO.FirstOrder.Theory.consistentWithPred (σ : Sentence L) : Sentence ℒₒᵣ := T.consistentWith.val/[⌜σ⌝]
+
+def _root_.LO.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) : 𝚷₁.Sentence := .mkPi
+  “!T.consistentWith !!(⌜σ⌝)”
+
+@[simp] lemma consistentWithPred'_val (σ : Sentence L) : (T.consistentWithPred' σ).val = T.consistentWithPred' σ := by rfl
+
+variable {T}
+
 end
 
 abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {↑T.consistent}

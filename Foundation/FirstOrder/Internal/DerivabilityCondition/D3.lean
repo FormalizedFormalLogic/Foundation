@@ -153,4 +153,9 @@ theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ)
   simpa [tprovable_iff_provable]
     using InternalArithmetic.sigma_one_provable_of_models T hσ h
 
+theorem provable_internalize {σ : Sentence ℒₒᵣ} :
+    T.Provable (⌜σ⌝ : V) → T.Provable (⌜T.provabilityPred σ⌝ : V) := by
+  simpa [models_iff₀] using
+    sigma_one_complete (V := V) (σ := T.provabilityPred σ) T (by simp)
+
 end LO.ISigma1.Metamath.InternalArithmetic

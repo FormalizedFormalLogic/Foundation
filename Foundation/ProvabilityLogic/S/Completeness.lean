@@ -18,7 +18,7 @@ open FirstOrder
 open Provability
 
 variable {T₀ T : ArithmeticTheory} [T₀ ⪯ T] [Diagonalization T₀]
-         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.Sound ℕ]
+         {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.SoundOnModel ℕ]
          {A B : Formula ℕ}
 
 open Entailment FiniteContext
@@ -27,13 +27,13 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 open Arithmetic
 
-variable [T.Δ₁] [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)]
+variable [T.Δ₁] [𝐈𝚺₁ ⪯ T]
 
 lemma GL_S_TFAE :
     [
       Modal.GL ⊢! (A.rflSubformula.conj ➝ A),
       Modal.S ⊢! A,
-      ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret T.standardProvability A)
+      ∀ f : T.PLRealization, ℕ ⊧ₘ₀ (f A)
     ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;
@@ -52,7 +52,7 @@ lemma GL_S_TFAE :
     intro hA;
     replace hA := Hilbert.Normal.iff_logic_provable_provable.not.mp hA;
     obtain ⟨M₁, r₁, _, hA⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
-    let M₀ := Model.extendRoot M₁ r₁ 1;
+    let M₀ := Model.extendRoot M₁ 1;
     let r₀ : M₀.World := Model.extendRoot.root;
     replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
     push_neg at hA;
@@ -64,15 +64,15 @@ lemma GL_S_TFAE :
         $ Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr hA₁) φ hφ;
     have : Fintype M₀.World := Fintype.ofFinite _
     let σ : SolovaySentences T.standardProvability (M₀.toFrame) r₀ :=
-      SolovaySentences.standard M₀.toFrame Frame.extendRoot.root T
+      SolovaySentences.standard T M₀.toFrame
     use σ.realization;
     have H :
       ∀ B ∈ A.subformulas,
-      (r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization.interpret T.standardProvability B)) ∧
-      (¬r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization.interpret T.standardProvability B)) := by
+      (r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization B)) ∧
+      (¬r₁ ⊧ B → 𝐈𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization B)) := by
       intro B B_sub;
       induction B with
-      | hfalsum => simp [Satisfies, Realization.interpret];
+      | hfalsum => simp [Realization.interpret];
       | himp B C ihB ihC =>
         dsimp [Realization.interpret];
         constructor;
@@ -108,36 +108,36 @@ lemma GL_S_TFAE :
           apply C!_of_conseq!;
           apply T.standardProvability.D1;
           apply Entailment.WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
-          have : 𝐈𝚺₁ ⊢!. ((⩖ j, σ j)) ➝ σ.realization.interpret T.standardProvability B := by
+          have : 𝐈𝚺₁ ⊢!. ((⩖ j, σ j)) ➝ σ.realization B := by
             apply left_Fdisj'!_intro;
             have hrfl : r₁ ⊧ □B ➝ B := by
               apply hA₁;
               simpa [Formula.rflSubformula];
             rintro (i | i) _;
             . rw [(show (Sum.inl i) = r₀ by simp [r₀]; omega)]
-              suffices 𝐈𝚺₁ ⊢!. σ r₀ ➝ σ.realization.interpret T.standardProvability B by convert this;
+              suffices 𝐈𝚺₁ ⊢!. σ r₀ ➝ σ.realization B by convert this;
               apply ihB (by grind) |>.1;
               exact hrfl h;
             . by_cases e : i = r₁;
               . rw [e];
-                apply σ.mainlemma (i := r₁) (by trivial) |>.1;
+                apply σ.mainlemma (i := r₁) (by trivial);
                 exact Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr $ hrfl h;
-              . apply σ.mainlemma (i := i) (by trivial) |>.1;
+              . apply σ.mainlemma (i := i) (by trivial);
                 apply Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr;
                 apply h;
                 apply Frame.root_genaretes'!;
                 assumption
           have b : 𝐈𝚺₁ ⊢!. ⩖ j, σ j := oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
-            simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_disjunction
+            simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.disjunctive
           exact this ⨀ b
         . intro h;
           have := Satisfies.box_def.not.mp h;
           push_neg at this;
           obtain ⟨i, Rij, hA⟩ := this;
-          have : 𝐈𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization.interpret T.standardProvability B :=
-            σ.mainlemma (A := B) (i := i) (by trivial) |>.2
+          have : 𝐈𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization B :=
+            σ.mainlemma_neg (A := B) (i := i) (by trivial)
             <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
-          have : 𝐈𝚺₁ ⊢!. ∼T.standardProvability (∼σ (Sum.inr i)) ➝ ∼T.standardProvability (σ.realization.interpret T.standardProvability B) :=
+          have : 𝐈𝚺₁ ⊢!. ∼T.standardProvability (∼σ (Sum.inr i)) ➝ ∼T.standardProvability (σ.realization B) :=
             contra!
             $ T.standardProvability.prov_distribute_imply'
             $ CN!_of_CN!_right $ this;
@@ -145,13 +145,13 @@ lemma GL_S_TFAE :
           apply σ.SC2;
           tauto;
     have : ℕ ⊧ₘ* 𝐈𝚺₁ := models_of_subtheory (U := 𝐈𝚺₁) (T := T) (M := ℕ) inferInstance;
-    have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization.interpret T.standardProvability A := models_of_provable₀ inferInstance $ H A (by simp) |>.2 hA₂;
+    have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization A := models_of_provable₀ inferInstance $ H A (by simp) |>.2 hA₂;
     simp only [models₀_imply_iff, models₀_not_iff] at this;
     exact this <| by
       simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;
 
-theorem S.arithmetical_completeness_iff : Modal.S ⊢! A ↔ ∀ f : Realization ℒₒᵣ, ℕ ⊧ₘ₀ (f.interpret T.standardProvability A) := GL_S_TFAE.out 1 2
+theorem S.arithmetical_completeness_iff : Modal.S ⊢! A ↔ ∀ f : T.PLRealization, ℕ ⊧ₘ₀ f A := GL_S_TFAE.out 1 2
 
 end ProvabilityLogic
 
