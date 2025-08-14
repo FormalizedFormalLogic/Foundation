@@ -144,11 +144,11 @@ lemma eq_inr_of_root_rel [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root 
   · exact ⟨_, rfl⟩
   · exact ⟨_, rfl⟩
 
-@[simp] lemma embed_rel_embed_of_rel {i j : F} :
+@[simp] lemma embed_rel_embed_iff_rel {i j : F} :
     embed (n := n) i ≺ embed j ↔ i ≺ j :=
   pMorphism.toFun_rel_toFun_iff_of_inj Sum.inr_injective
 
-@[simp] lemma embed_rel_iterate_embed_of_rel {i j : F} :
+@[simp] lemma embed_rel_iterate_embed_iff_rel {i j : F} :
     embed (n := n) i ≺^[k] embed j ↔ i ≺^[k] j :=
   pMorphism.toFun_rel_iterate_toFun_iff_of_inj Sum.inr_injective
 

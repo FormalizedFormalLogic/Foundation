@@ -15,11 +15,9 @@ open Classical
 
 noncomputable section
 
-namespace LO
+namespace LO.Modal.Kripke
 
-namespace Modal.Kripke
-
-section
+section frame
 
 variable {F : Frame} [Fintype F] {r : F} [F.IsTree r]
 
@@ -80,7 +78,7 @@ namespace Frame.extendRoot
   · exact Sum.inr r
   trivial
 
-@[simp] lemma finHeight : (F.extendRoot 1).finHeight = F.finHeight + 1 := by
+@[simp] lemma finHeight₁ : (F.extendRoot 1).finHeight = F.finHeight + 1 := by
   let l := World.finHeight (extendRoot.root : F.extendRoot 1)
   suffices
       l ≤ Frame.World.finHeight r + 1 ∧
@@ -103,17 +101,19 @@ namespace Frame.extendRoot
     have : ∃ x, j = embed x := eq_inr_of_root_rel <| HRel.Iterate.unwrap_of_trans_of_pos finHeight_pos hj
     rcases this with ⟨j, rfl⟩
     rcases not_root_of_from_root'₁ hz with (rfl | ⟨z, rfl, Rrz⟩)
-    · exact ⟨j, embed_rel_iterate_embed_of_rel.mp hzj⟩
+    · exact ⟨j, embed_rel_iterate_embed_iff_rel.mp hzj⟩
     use j
-    exact HRel.Iterate.constant_trans_of_pos lpos Rrz (embed_rel_iterate_embed_of_rel.mp hzj)
+    exact HRel.Iterate.constant_trans_of_pos lpos Rrz (embed_rel_iterate_embed_iff_rel.mp hzj)
   · suffices World.finHeight r + 1 ≤ World.finHeight extendRoot.root from this
     apply le_finHeight_iff_relItr.mpr
     rcases exists_terminal r with ⟨j, hj⟩
-    exact ⟨j, r, by trivial, embed_rel_iterate_embed_of_rel.mpr hj⟩
+    exact ⟨j, r, by trivial, embed_rel_iterate_embed_iff_rel.mpr hj⟩
 
 end Frame.extendRoot
 
-end
+end frame
+
+section model
 
 variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
 
@@ -127,17 +127,14 @@ lemma finHeight_pos_of_dia {i : M} (hA : i ⊧ ◇ A) : 0 < Frame.World.finHeigh
   rcases this with ⟨j, hj, _⟩
   apply lt_fcwHeight hj (by simp)
 
-namespace Model.extendRoot
+@[simp] lemma Model.extendRoot.finHeight₁ :
+    (M.extendRoot 1).finHeight = M.finHeight + 1 := Frame.extendRoot.finHeight₁
 
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
+end model
 
-@[simp] lemma finHeight : (M.extendRoot 1).finHeight = M.finHeight + 1 := Frame.extendRoot.finHeight
+end LO.Modal.Kripke
 
-end Model.extendRoot
-
-end Modal.Kripke
-
-namespace ProvabilityLogic
+namespace LO.ProvabilityLogic
 
 open Entailment Entailment.FiniteContext
 open FirstOrder
@@ -254,9 +251,7 @@ lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢!. S.realiza
 
 end SolovaySentences
 
-end ProvabilityLogic
-
-end LO
+end LO.ProvabilityLogic
 
 namespace LO.ISigma1.Metamath
 
@@ -607,43 +602,6 @@ lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
   have : T.internalize V ⊢! ∼⌜T.solovay i⌝ := by simpa using (tprovable_tquote_iff_provable_quote (T := T)).mpr (Solovay.refute ne hS)
   have : T.internalize V ⊢! ⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ := Entailment.of_a!_of_n! hP this
   exact (tprovable_tquote_iff_provable_quote (T := T)).mp this
-
-/-
-local notation:max "∣" i:max "∣" => Frame.World.finHeight i
-
-
-lemma iIncon {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] [𝐈𝚺₁ ⪯ T] {i : F}
-    (ne : r ≠ i) (hn : ∣i∣ < n) : T.Solovay V i → T.IIncon V n := by
-  match n with
-  |     0 => simp_all
-  | n + 1 =>
-    intro h
-    have : T ⊢!. (⩖ j ∈ {j : F | i ≺ j}, T.solovay j) ➝ T.iIncon n :=
-      oRing_provable₀_of _ _ fun (W : Type _) _ _ ↦ by
-        have : W ⊧ₘ* 𝐈𝚺₁ := models_of_subtheory (inferInstanceAs (W ⊧ₘ* T))
-        suffices
-            ∀ j : F, i ≺ j → Theory.Solovay T W j → T.IIncon W n by
-          simpa [models_iff]
-        intro j hij Sj
-        have nerj : r ≠ j := by
-          rintro rfl
-          have : r ≺ i := Frame.root_genaretes'! i (Ne.symm ne)
-          exact IsIrrefl.irrefl _ <| IsTrans.trans r i r this hij
-        have : ∣j∣ < n :=
-          lt_of_lt_of_le (fcwHeight_gt_of hij) (Nat.le_of_lt_succ hn)
-        exact iIncon (V := W) nerj this Sj
-    exact modus_ponens_sentence T (provable_of_provable_arith₀ this) (Solovay.box_disjunction ne h)
-
-theorem root_of_iterated_consistency [𝐈𝚺₁ ⪯ T] (H : ¬T.IIncon V F.finHeight) : T.Solovay V r := by
-  have : ∃ i : F, T.Solovay V i := disjunctive
-  rcases this with ⟨i, hi⟩
-  by_cases hri : r = i
-  · rcases hri; assumption
-  · have hri' : r ≺ i := by exact Frame.root_genaretes'! i fun a ↦ hri (Eq.symm a)
-    have : T.IIncon V F.finHeight :=
-      iIncon (n := F.finHeight) hri (Frame.World.finHeight_lt_whole_finHeight hri') hi
-    contradiction
--/
 
 end model
 
