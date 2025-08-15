@@ -141,7 +141,7 @@ theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
       V ⊧/![] (fixedpoint θ)
     _ ↔ V ⊧/![t] (diag θ)         := by simp [fixedpoint, Matrix.constant_eq_singleton, t]
     _ ↔ V ⊧/![substNumeral t t] θ := by simp [diag, Matrix.constant_eq_singleton]
-    _ ↔ V ⊧/![⌜fixedpoint θ⌝] θ     := by simp [ht]
+    _ ↔ V ⊧/![⌜fixedpoint θ⌝] θ   := by simp [ht]
 
 end Diagonalization
 
@@ -165,9 +165,10 @@ theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     have ht : ∀ i, substNumerals (t i) t = ⌜multifixedpoint θ i⌝ := by
       intro i; simp [t, multifixedpoint, substNumerals_app_quote_quote]
     calc
-      V ⊧/![] (multifixedpoint θ i) ↔ V ⊧/t (multidiag (θ i))              := by simp [t, multifixedpoint]
-      _                      ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
-      _                      ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i)   := by simp [ht]
+      V ⊧/![] (multifixedpoint θ i)
+        ↔ V ⊧/t (multidiag (θ i))                   := by simp [t, multifixedpoint]
+      _ ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
+      _ ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) := by simp [ht]
 
 def exclusiveMultifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
   multifixedpoint (fun j ↦ (θ j).padding j) i
@@ -222,6 +223,11 @@ theorem parameterized_diagonal (θ : Semisentence ℒₒᵣ (k + 1)) :
         ↔ V ⊧/(t :> params) (parameterizedDiag θ)       := by simp [parameterizedFixedpoint, Matrix.comp_vecCons', t]
       _ ↔ V ⊧/(substNumeralParams k t t :> params) θ    := by simp [parameterizedDiag, Matrix.comp_vecCons', BinderNotation.finSuccItr]
       _ ↔ V ⊧/(⌜parameterizedFixedpoint θ⌝ :> params) θ := by simp [ht]
+
+theorem parameterized_diagonal₁ (θ : Semisentence ℒₒᵣ 2) :
+    T ⊢!. ∀' (parameterizedFixedpoint θ ⭤ θ/[⌜parameterizedFixedpoint θ⌝, #0]) := by
+  simpa [univClosure, BinderNotation.finSuccItr, Matrix.fun_eq_vec_one] using
+    parameterized_diagonal (T := T) θ
 
 end ParameterizedDiagonalization
 
