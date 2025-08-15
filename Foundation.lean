@@ -158,7 +158,7 @@ import Foundation.Modal.VanBentham.StandardTranslation
 
 -- Provability Logic
 import Foundation.ProvabilityLogic.Interpretation
-import Foundation.ProvabilityLogic.PL
+import Foundation.ProvabilityLogic.Arithmetic
 import Foundation.ProvabilityLogic.SolovaySentences
 import Foundation.ProvabilityLogic.Incompleteness
 

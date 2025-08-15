@@ -10,14 +10,15 @@ namespace LO.FirstOrder
 variable (T : ArithmeticTheory) [T.Δ₁]
 
 /-- Provability logic of arithmetic theory-/
-def ArithmeticTheory.PL : Modal.Logic ℕ := {A | ∀ f : T.PLRealization, T ⊢!. f A}
+def ArithmeticTheory.ProvabilityLogic : Modal.Logic ℕ := {A | ∀ f : T.PLRealization, T ⊢!. f A}
 
 variable {T}
 
 namespace ArithmeticTheory.ProvabilityLogic
 
 lemma provable_iff :
-    T.PL ⊢! A ↔ ∀ f : T.PLRealization, T ⊢!. f A := by simp [ArithmeticTheory.PL]
+    T.ProvabilityLogic ⊢! A ↔ ∀ f : T.PLRealization, T ⊢!. f A := by
+  simp [ArithmeticTheory.ProvabilityLogic]
 
 end ArithmeticTheory.ProvabilityLogic
 

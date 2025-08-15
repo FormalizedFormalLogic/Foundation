@@ -1,5 +1,5 @@
 import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.ProvabilityLogic.PL
+import Foundation.ProvabilityLogic.Arithmetic
 
 /-!
 # Solovay's arithmetical completeness of $\mathsf{GL} and $\mathsf{GL} + \square^n \bot$
@@ -74,10 +74,10 @@ theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
   GL.arithmetical_completeness_iff (Provability.hight_eq_top_of_sigma1_sound T)
 
 /-- Provability logic of $\Sigma_1$-sound theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL}$-/
-theorem pl_eq_GLPlusBoxBot_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
-    T.PL = Modal.GL := by
+theorem provabilityLogic_eq_GL_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
+    T.ProvabilityLogic = Modal.GL := by
   ext A
-  simpa [ArithmeticTheory.PL] using
+  simpa [ArithmeticTheory.ProvabilityLogic] using
     GL.arithmetical_completeness_sound_iff
 
 open Classical
@@ -97,10 +97,10 @@ theorem GLPlusBoxBot.arithmetical_completeness_iff :
   ⟨GLPlusBoxBot.arithmetical_completeness, GLPlusBoxBot.arithmetical_soundness⟩
 
 /-- Provability logic of theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL} + \square^{\text{height of } T} \bot$-/
-theorem pl_eq_GLPlusBoxBot :
-    T.PL = Modal.GLPlusBoxBot T.standardProvability.height.toWithTop := by
+theorem provabilityLogic_eq_GLPlusBoxBot :
+    T.ProvabilityLogic = Modal.GLPlusBoxBot T.standardProvability.height.toWithTop := by
   ext A
-  simpa [ArithmeticTheory.PL] using
+  simpa [ArithmeticTheory.ProvabilityLogic] using
     GLPlusBoxBot.arithmetical_completeness_iff
 
 end LO.ProvabilityLogic
