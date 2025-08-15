@@ -35,8 +35,8 @@ abbrev dia (𝔅 : Provability T₀ T) (φ : Sentence L) : Sentence L₀ := ∼�
 end Provability
 
 class Diagonalization [L.ReferenceableBy L] (T : Theory L) where
-  fixpoint : Semisentence L 1 → Sentence L
-  diag (θ) : T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝]
+  fixedpoint : Semisentence L 1 → Sentence L
+  diag (θ) : T ⊢!. fixedpoint θ ⭤ θ/[⌜fixedpoint θ⌝]
 
 namespace Provability
 
@@ -153,7 +153,7 @@ end
 open LO.Entailment Diagonalization Provability
 
 def goedel [L.ReferenceableBy L] {T₀ T : Theory L} [Diagonalization T₀] (𝔅 : Provability T₀ T) : Sentence L :=
-  fixpoint T₀ “x. ¬!𝔅.prov x”
+  fixedpoint T₀ “x. ¬!𝔅.prov x”
 
 section GoedelSentence
 
@@ -257,7 +257,7 @@ section Loeb
 
 variable [L.ReferenceableBy L] {T₀ T : Theory L}
 
-def kreisel [Diagonalization T₀] (𝔅 : Provability T₀ T) [𝔅.HBL] (σ : Sentence L) : Sentence L := fixpoint T₀ “x. !𝔅.prov x → !σ”
+def kreisel [Diagonalization T₀] (𝔅 : Provability T₀ T) [𝔅.HBL] (σ : Sentence L) : Sentence L := fixedpoint T₀ “x. !𝔅.prov x → !σ”
 
 section KrieselSentence
 
