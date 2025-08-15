@@ -14,7 +14,7 @@ namespace LO.FirstOrder.Arithmetic
 open ISigma1 Metamath ProvabilityLogic
 
 instance : Diagonalization 𝐈𝚺₁ where
-  fixpoint := fixpoint
+  fixedpoint := fixedpoint
   diag θ := diagonal θ
 
 section
