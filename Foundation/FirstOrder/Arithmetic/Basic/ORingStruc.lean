@@ -149,7 +149,7 @@ end
 
 open Semiterm Semiformula
 
-abbrev Polynomial (n : ℕ) : Type := Semiterm ℒₒᵣ Empty n
+abbrev Polynomial (n : ℕ) : Type := ClosedSemiterm ℒₒᵣ n
 
 class Structure.ORing (L : Language) [L.ORing] (M : Type w) [ORingStruc M] [Structure L M] extends
   Structure.Zero L M, Structure.One L M, Structure.Add L M, Structure.Mul L M, Structure.Eq L M, Structure.LT L M

@@ -10,7 +10,7 @@ variable {L : Language}
 namespace Semiterm
 
 structure Operator (L : Language) (n : ℕ) where
-  term : Semiterm L Empty n
+  term : ClosedSemiterm L n
 
 abbrev Const (L : Language.{u}) := Operator L 0
 
@@ -18,7 +18,7 @@ def fn {k} (f : L.Func k) : Operator L k := ⟨Semiterm.func f (#·)⟩
 
 namespace Operator
 
-def equiv : Operator L n ≃ Semiterm L Empty n where
+def equiv : Operator L n ≃ ClosedSemiterm L n where
   toFun := Operator.term
   invFun := Operator.mk
   left_inv := by intro _; simp

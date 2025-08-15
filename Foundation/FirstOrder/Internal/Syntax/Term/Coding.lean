@@ -147,43 +147,43 @@ lemma coe_quote_eq_quote' (t : SyntacticSemiterm L n) :
 
 variable (V)
 
-noncomputable instance : GoedelQuote (Semiterm L Empty n) (Metamath.Semiterm V L n) where
+noncomputable instance : GoedelQuote (ClosedSemiterm L n) (Metamath.Semiterm V L n) where
   quote t := ⌜(Rew.emb t : SyntacticSemiterm L n)⌝
 
 variable {V}
 
-def empty_typed_quote_def (t : Semiterm L Empty n) :
+def empty_typed_quote_def (t : ClosedSemiterm L n) :
     (⌜t⌝ : Metamath.Semiterm V L n) = ⌜(Rew.emb t : SyntacticSemiterm L n)⌝ := rfl
 
 @[simp] lemma empty_typed_quote_bvar (x : Fin n) :
-    (⌜(#x : Semiterm L Empty n)⌝ : Metamath.Semiterm V L n) = Metamath.Semiterm.bvar x := rfl
+    (⌜(#x : ClosedSemiterm L n)⌝ : Metamath.Semiterm V L n) = Metamath.Semiterm.bvar x := rfl
 
-@[simp] lemma empty_typed_quote_func (f : L.Func k) (v : Fin k → Semiterm L Empty n) :
+@[simp] lemma empty_typed_quote_func (f : L.Func k) (v : Fin k → ClosedSemiterm L n) :
     (⌜func f v⌝ : Metamath.Semiterm V L n) = Metamath.Semiterm.func f fun i ↦ ⌜v i⌝ := rfl
 
-@[simp] lemma empty_typed_quote_add (t u : Semiterm ℒₒᵣ Empty n) :
-    (⌜(‘!!t + !!u’ : Semiterm ℒₒᵣ Empty n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
+@[simp] lemma empty_typed_quote_add (t u : ClosedSemiterm ℒₒᵣ n) :
+    (⌜(‘!!t + !!u’ : ClosedSemiterm ℒₒᵣ n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = ⌜t⌝ + ⌜u⌝ := rfl
 
-@[simp] lemma empty_typed_quote_mul (t u : Semiterm ℒₒᵣ Empty n) :
-    (⌜(‘!!t * !!u’ : Semiterm ℒₒᵣ Empty n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
+@[simp] lemma empty_typed_quote_mul (t u : ClosedSemiterm ℒₒᵣ n) :
+    (⌜(‘!!t * !!u’ : ClosedSemiterm ℒₒᵣ n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = ⌜t⌝ * ⌜u⌝ := rfl
 
 @[simp] lemma empty_typed_quote_numeral_eq_numeral (k : ℕ) :
-    (⌜(↑k : Semiterm ℒₒᵣ Empty n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
+    (⌜(↑k : ClosedSemiterm ℒₒᵣ n)⌝ : Metamath.Semiterm V ℒₒᵣ n) = typedNumeral ↑k := by
   simp [empty_typed_quote_def]
 
-noncomputable instance : GoedelQuote (Semiterm L Empty n) V where
+noncomputable instance : GoedelQuote (ClosedSemiterm L n) V where
   quote t := ⌜(Rew.emb t : SyntacticSemiterm L n)⌝
 
-lemma empty_quote_def (t : Semiterm L Empty n) : (⌜t⌝ : V) = ⌜(Rew.emb t : SyntacticSemiterm L n)⌝ := rfl
+lemma empty_quote_def (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ⌜(Rew.emb t : SyntacticSemiterm L n)⌝ := rfl
 
-def empty_quote_eq (t : Semiterm L Empty n) : (⌜t⌝ : V) = (⌜t⌝ : Metamath.Semiterm V L n).val := rfl
+def empty_quote_eq (t : ClosedSemiterm L n) : (⌜t⌝ : V) = (⌜t⌝ : Metamath.Semiterm V L n).val := rfl
 
-lemma empty_quote_eq_encode (t : Semiterm L Empty n) : (⌜t⌝ : V) = ↑(encode t) := by simp [empty_quote_def, quote_eq_encode]
+lemma empty_quote_eq_encode (t : ClosedSemiterm L n) : (⌜t⌝ : V) = ↑(encode t) := by simp [empty_quote_def, quote_eq_encode]
 
 @[simp] lemma coe_quote {ξ n} (t : SyntacticSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : Semiterm ℒₒᵣ ξ m) := by
   simp [goedelNumber'_def, quote_eq_encode]
 
-@[simp] lemma coe_empty_quote {ξ n} (t : Semiterm L Empty n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : Semiterm ℒₒᵣ ξ m) := by
+@[simp] lemma coe_empty_quote {ξ n} (t : ClosedSemiterm L n) : ↑(⌜t⌝ : ℕ) = (⌜t⌝ : Semiterm ℒₒᵣ ξ m) := by
   simp [goedelNumber'_def, empty_quote_eq_encode]
 
 end LO.FirstOrder.Semiterm

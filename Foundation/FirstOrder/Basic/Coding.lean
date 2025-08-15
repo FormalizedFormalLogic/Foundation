@@ -61,7 +61,7 @@ lemma encode_eq_toNat (t : Semiterm L ξ n) : encode t = toNat t := rfl
 lemma toNat_func {k} (f : L.Func k) (v : Fin k → Semiterm L ξ n) :
     toNat (func f v) = (Nat.pair 2 <| Nat.pair k <| Nat.pair (encode f) <| Matrix.vecToNat fun i ↦ toNat (v i)) + 1 := rfl
 
-@[simp] lemma encode_emb (t : Semiterm L Empty n) : encode (Rew.emb t : Semiterm L ξ n) = encode t := by
+@[simp] lemma encode_emb (t : ClosedSemiterm L n) : encode (Rew.emb t : Semiterm L ξ n) = encode t := by
   simp only [encode_eq_toNat]
   induction t
   · simp [toNat]
