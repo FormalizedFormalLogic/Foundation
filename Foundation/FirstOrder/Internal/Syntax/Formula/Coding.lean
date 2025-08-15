@@ -249,16 +249,16 @@ noncomputable instance : LCWQIsoGoedelQuote (Semisentence L) (Metamath.Semiformu
 def empty_typed_quote_def (σ : Semisentence L n) :
     (⌜σ⌝ : Metamath.Semiformula V L n) = ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝ := rfl
 
-@[simp] lemma empty_typed_quote_eq (t u : Semiterm ℒₒᵣ Empty n) :
+@[simp] lemma empty_typed_quote_eq (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t = !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
 
-@[simp] lemma empty_typed_quote_ne (t u : Semiterm ℒₒᵣ Empty n) :
+@[simp] lemma empty_typed_quote_ne (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t ≠ !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
 
-@[simp] lemma empty_typed_quote_lt (t u : Semiterm ℒₒᵣ Empty n) :
+@[simp] lemma empty_typed_quote_lt (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t < !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
 
-@[simp] lemma empty_typed_quote_nlt (t u : Semiterm ℒₒᵣ Empty n) :
+@[simp] lemma empty_typed_quote_nlt (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t ≮ !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
 noncomputable instance : GoedelQuote (Semisentence L n) V where

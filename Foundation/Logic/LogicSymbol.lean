@@ -145,7 +145,8 @@ variable {α β γ}
 
 instance : FunLike (α →ˡᶜ β) α β where
   coe := toTr
-  coe_injective' := by intro f g h; rcases f; rcases g; simp; exact h
+  coe_injective' := by
+    intro f g h; rcases f; rcases g; simpa using h
 
 instance : CoeFun (α →ˡᶜ β) (fun _ => α → β) := DFunLike.hasCoeToFun
 
@@ -244,15 +245,16 @@ def conjLt (φ : ℕ → α) : ℕ → α
 
 @[simp] lemma hom_conj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (φ : ℕ → α) :
     f (conjLt φ k) ↔ ∀ i < k, f (φ i) := by
-  induction' k with k ih <;> simp [*]
-  constructor
-  · rintro ⟨hk, h⟩
-    intro i hi
-    rcases Nat.eq_or_lt_of_le (Nat.le_of_lt_succ hi) with (rfl | hi)
-    · exact hk
-    · exact h i hi
-  · rintro h
-    exact ⟨h k (by simp), fun i hi ↦ h i (Nat.lt_add_right 1 hi)⟩
+  induction' k with k ih
+  · simp [*]
+  · suffices (f (φ k) ∧ ∀ i < k, f (φ i)) ↔ ∀ i < k + 1, f (φ i) by simp [*]
+    constructor
+    · rintro ⟨hk, h⟩
+      intro i hi
+      rcases Nat.eq_or_lt_of_le (Nat.le_of_lt_succ hi) with (rfl | hi)
+      · exact hk
+      · exact h i hi
+    · grind
 
 def disjLt (φ : ℕ → α) : ℕ → α
   | 0     => ⊥
@@ -264,15 +266,10 @@ def disjLt (φ : ℕ → α) : ℕ → α
 
 @[simp] lemma hom_disj_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (φ : ℕ → α) :
     f (disjLt φ k) ↔ ∃ i < k, f (φ i) := by
-  induction' k with k ih <;> simp [*]
-  constructor
-  · rintro (h | ⟨i, hi, h⟩)
-    · exact ⟨k, by simp, h⟩
-    · exact ⟨i, Nat.lt_add_right 1 hi, h⟩
-  · rintro ⟨i, hi, h⟩
-    rcases Nat.eq_or_lt_of_le (Nat.le_of_lt_succ hi) with (rfl | hi)
-    · left; exact h
-    · right; exact ⟨i, hi, h⟩
+  induction' k with k ih
+  · simp [*]
+  · suffices (f (φ k) ∨ ∃ i < k, f (φ i)) ↔ ∃ i < k + 1, f (φ i) by simp [*]
+    grind
 
 end conjdisj
 
@@ -316,15 +313,19 @@ variable [LogicalConnective α] [LogicalConnective β]
 
 @[simp] lemma conj_hom_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
   (f : F) (v : Fin n → α) : f (conj v) = ∀ i, f (v i) := by
-  induction' n with n ih <;> simp [conj]
-  · simp [ih]; constructor
+  induction' n with n ih
+  · simp [conj]
+  · suffices (f (v 0) ∧ ∀ (i : Fin n), f (vecTail v i)) ↔ ∀ (i : Fin (n + 1)), f (v i) by simpa [conj, ih]
+    constructor
     · intro ⟨hz, hs⟩ i; cases i using Fin.cases; { exact hz }; { exact hs _ }
     · intro h; exact ⟨h 0, fun i => h _⟩
 
 @[simp] lemma disj_hom_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
   (f : F) (v : Fin n → α) : f (disj v) = ∃ i, f (v i) := by
-  induction' n with n ih <;> simp [disj]
-  · simp [ih]; constructor
+  induction' n with n ih
+  · simp [disj]
+  · suffices (f (v 0) ∨ ∃ i, f (vecTail v i)) ↔ ∃ i, f (v i) by simpa [disj, ih]
+    constructor
     · rintro (H | ⟨i, H⟩); { exact ⟨0, H⟩ }; { exact ⟨i.succ, H⟩ }
     · rintro ⟨i, h⟩
       cases i using Fin.cases; { left; exact h }; { right; exact ⟨_, h⟩ }
@@ -600,16 +601,8 @@ variable [LogicalConnective α]
 
 lemma map_conj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
     (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).conj ↔ f (s₁.conj ⋏ s₂.conj) := by
-  simp
-  constructor;
-  . intro h;
-    constructor;
-    . intro a ha;
-      exact h a (Or.inl ha);
-    . intro a ha;
-      exact h a (Or.inr ha);
-  . intro ⟨h₁, h₂⟩ a ha;
-    cases ha <;> simp_all;
+  suffices (∀ (a : α), a ∈ s₁ ∨ a ∈ s₂ → f a) ↔ (∀ a ∈ s₁, f a) ∧ ∀ a ∈ s₂, f a by simpa
+  grind
 
 lemma map_conj' {β : Type*} [LogicalConnective β] [FunLike F α β] [LogicalConnective.HomClass F α β]
     (Φ : F) (s : Finset ι) (f : ι → α) : Φ (⩕ i ∈ s, f i) = ⩕ i ∈ s, Φ (f i) := by
@@ -630,14 +623,8 @@ lemma map_uconj [LogicalConnective β] [FunLike F α β] [LogicalConnective.HomC
 
 lemma map_disj_union [DecidableEq α] [FunLike F α Prop] [LogicalConnective.HomClass F α Prop]
     (f : F) (s₁ s₂ : Finset α) : f (s₁ ∪ s₂).disj ↔ f (s₁.disj ⋎ s₂.disj) := by
-  simp [map_disj_prop];
-  constructor;
-  . rintro ⟨a, h₁ | h₂, hb⟩;
-    . left; use a;
-    . right; use a;
-  . rintro (⟨a₁, h₁⟩ | ⟨a₂, h₂⟩);
-    . use a₁; simp_all;
-    . use a₂; simp_all;
+  suffices (∃ a, (a ∈ s₁ ∨ a ∈ s₂) ∧ f a) ↔ (∃ a ∈ s₁, f a) ∨ ∃ a ∈ s₂, f a by simpa [map_disj_prop]
+  grind
 
 lemma map_disj' [LogicalConnective β] [FunLike F α β] [LogicalConnective.HomClass F α β]
     (Φ : F) (s : Finset ι) (f : ι → α) : Φ (⩖ i ∈ s, f i) = ⩖ i ∈ s, Φ (f i) := by
