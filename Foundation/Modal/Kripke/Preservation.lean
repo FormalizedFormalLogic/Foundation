@@ -117,6 +117,46 @@ def TransitiveClosure (f : F₁ →ₚ F₂) [F₂.IsTransitive] : F₁^+ →ₚ
     . rfl;
     . exact Relation.TransGen.single hxu;
 
+variable (f : F₁ →ₚ F₂)
+
+lemma forth_iterate {x y : F₁} :
+    x ≺^[n] y → f x ≺^[n] f y := by
+  match n with
+  |     0 => simp_all
+  | n + 1 =>
+    intro h
+    have : ∃ z, x ≺ z ∧ z ≺^[n] y := by simpa using h
+    rcases this with ⟨z, rxz, hz⟩
+    exact HRel.Iterate.succ_left (f.forth rxz) (forth_iterate hz)
+
+lemma back_iterate {w v} :
+    f w ≺^[n] v → ∃ u, f u = v ∧ w ≺^[n] u := by
+  match n with
+  | 0 => simp
+  | n + 1 =>
+    intro h
+    have : ∃ z, f w ≺ z ∧ z ≺^[n] v := by simpa using h
+    rcases this with ⟨z, rfwz, hz⟩
+    rcases f.back rfwz with ⟨z, rfl, rwz⟩
+    rcases back_iterate hz with ⟨v, rfl, hzv⟩
+    exact ⟨v, rfl, HRel.Iterate.succ_left rwz hzv⟩
+
+lemma toFun_rel_toFun_iff_of_inj (inj : Function.Injective f) {x y : F₁} :
+    f x ≺ f y ↔ x ≺ y :=
+  ⟨ fun h ↦ by
+      rcases f.back h with ⟨z, he, hz⟩
+      have : z = y := inj he
+      simpa [this] using hz,
+    f.forth ⟩
+
+lemma toFun_rel_iterate_toFun_iff_of_inj (inj : Function.Injective f) {x y : F₁} :
+    f x ≺^[n] f y ↔ x ≺^[n] y :=
+  ⟨ fun h ↦ by
+      rcases f.back_iterate h with ⟨z, he, hz⟩
+      have : z = y := inj he
+      simpa [this] using hz,
+    f.forth_iterate ⟩
+
 end Frame.PseudoEpimorphism
 
 

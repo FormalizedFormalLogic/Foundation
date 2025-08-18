@@ -38,7 +38,7 @@ lemma iff_satisfy_complexityLimitedModel_aux
       . use (n + 1);
         constructor;
         . assumption;
-        . apply HRel.iterate.forward.mpr;
+        . apply HRel.Iterate.forward.mpr;
           use x; constructor; assumption; exact Rxy;
     . rintro h y Rxy;
       apply ihq (subformulas.mem_box hq) ?_ |>.mpr;
@@ -46,7 +46,7 @@ lemma iff_satisfy_complexityLimitedModel_aux
       . use (n + 1);
         constructor;
         . assumption;
-        . apply HRel.iterate.forward.mpr;
+        . apply HRel.Iterate.forward.mpr;
           use x;
   | himp ψ₁ ψ₂ ihq₁ ihq₂ =>
     obtain ⟨n, hn, hx⟩ := hx;

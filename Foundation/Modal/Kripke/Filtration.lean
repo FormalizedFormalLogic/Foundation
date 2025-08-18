@@ -237,7 +237,7 @@ instance filterOf [trans : M.IsTransitive] : FilterOf (finestFiltrationTransitiv
     replace ⟨n, RXY⟩ := HRel.TransGen.exists_iterate.mp RXY;
     induction n using PNat.recOn generalizing x with
     | one =>
-      simp only [PNat.val_ofNat, HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right] at RXY;
+      simp only [PNat.val_ofNat, HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right] at RXY;
       obtain ⟨u, v, exu, eyv, Ruv⟩ := RXY;
       have : u ⊧ □φ := FilterEqvQuotient.iff_of_eq exu hφ |>.mp hx;
       have : v ⊧ φ := this _ Ruv;

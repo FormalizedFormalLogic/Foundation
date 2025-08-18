@@ -75,11 +75,11 @@ def val (s : Structure L M) (e : Fin n → M) (ε : ξ → M) : Semiterm L ξ n 
   | &x       => ε x
   | func f v => s.func f (fun i => (v i).val s e ε)
 
-abbrev valb (s : Structure L M) (e : Fin n → M) (t : Semiterm L Empty n) : M := t.val s e Empty.elim
+abbrev valb (s : Structure L M) (e : Fin n → M) (t : ClosedSemiterm L n) : M := t.val s e Empty.elim
 
 abbrev valm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : ξ → M) : Semiterm L ξ n → M := val s e ε
 
-abbrev valbm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : Semiterm L Empty n → M := valb s e
+abbrev valbm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : ClosedSemiterm L n → M := valb s e
 
 abbrev realize (s : Structure L M) (t : Term L M) : M := t.val s ![] id
 
@@ -141,7 +141,7 @@ lemma val_embSubsts (w : Fin k → Semiterm L ξ n) (t : Semiterm L Empty k) :
     valb s e (Rew.toS t) = val s ![] e t := by
   simp [val_rew, Matrix.empty_eq]; congr
 
-@[simp] lemma val_toF {e : Fin n → M} (t : Semiterm L Empty n) :
+@[simp] lemma val_toF {e : Fin n → M} (t : ClosedSemiterm L n) :
     val s ![] e (Rew.toF t) = valb s e t := by
   simp only [val_rew]; congr; funext i; contradiction
 
@@ -151,7 +151,7 @@ variable (φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : ξ → M)
 
 lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Structure L₂ M) (e : Fin n → M) (ε : ξ → M) {t : Semiterm L₁ ξ n} :
     (t.lMap φ).val s₂ e ε = t.val (s₂.lMap φ) e ε :=
-  by induction t <;> simp [*, valm, Function.comp_def, val_func, Semiterm.lMap_func]
+  by induction t <;> simp [*, val_func, Semiterm.lMap_func]
 
 end Language
 
@@ -231,7 +231,7 @@ def EvalAux (s : Structure L M) (ε : ξ → M) : ∀ {n}, (Fin n → M) → Sem
 
 @[simp] lemma EvalAux_neg (φ : Semiformula L ξ n) :
     EvalAux s ε e (∼φ) = ¬EvalAux s ε e φ :=
-  by induction φ using rec' <;> simp [*, EvalAux, ←neg_eq, or_iff_not_imp_left]
+  by induction φ using rec' <;> simp [*, EvalAux, or_iff_not_imp_left]
 
 def Eval (s : Structure L M) (e : Fin n → M) (ε : ξ → M) : Semiformula L ξ n →ˡᶜ Prop where
   toTr := EvalAux s ε e
@@ -240,7 +240,7 @@ def Eval (s : Structure L M) (e : Fin n → M) (ε : ξ → M) : Semiformula L �
   map_and' := by simp [EvalAux]
   map_or' := by simp [EvalAux]
   map_neg' := by simp [EvalAux_neg]
-  map_imply' := by simp [imp_eq, EvalAux_neg, ←neg_eq, EvalAux, imp_iff_not_or]
+  map_imply' := by simp [EvalAux_neg, ←neg_eq, EvalAux, imp_iff_not_or]
 
 abbrev Evalm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : ξ → M) :
     Semiformula L ξ n →ˡᶜ Prop := Eval s e ε
@@ -647,7 +647,7 @@ noncomputable instance nonemptyModelOfSat (h : Semantics.Satisfiable (Struc.{v, 
   choose i _ _ using Classical.choose_spec (satisfiable_iff.mp h); exact i
 
 noncomputable def StructureModelOfSatAux (h : Semantics.Satisfiable (Struc.{v, u} L) T) :
-    { s : Structure L (ModelOfSat h) // ModelOfSat h ⊧ₘ* T } := by
+    { _s : Structure L (ModelOfSat h) // ModelOfSat h ⊧ₘ* T } := by
   choose _ s h using Classical.choose_spec (satisfiable_iff.mp h)
   exact ⟨s, h⟩
 
@@ -729,7 +729,7 @@ variable {M : Type u} [Nonempty M] [s₂ : Structure L₂ M]
 
 lemma modelsTheory_onTheory₁ {T₁ : Theory L₁} :
     ModelsTheory (s := s₂) M (T₁.lMap Φ) ↔ ModelsTheory (s := s₂.lMap Φ) M T₁ :=
-  by simp [Semiformula.models_lMap, Theory.lMap, modelsTheory_iff, @modelsTheory_iff (T := T₁)]
+  by simp [Semiformula.models_lMap, Theory.lMap, @modelsTheory_iff (T := T₁)]
 
 end Theory
 

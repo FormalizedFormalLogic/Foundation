@@ -17,7 +17,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
   have := Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h;
   obtain ⟨M, r, M_tree, hs⟩ := this;
 
-  let M₀ := M.extendRoot r 1;
+  let M₀ := M.extendRoot 1;
   let r₀ : M₀.World := extendRoot.root;
 
   have hs : Satisfies M r (⊡φ ⋏ ∼ψ) := by simp_all [Satisfies];
@@ -29,7 +29,7 @@ lemma imply_boxdot_plain_of_imply_box_box : Hilbert.GL ⊢! □φ ➝ □ψ → 
     intro x hx;
     rcases Frame.extendRoot.not_root_of_from_root₁ (F := M.toFrame) (x := x) hx with (rfl | hr);
     . tauto;
-    . apply hs₂; exact hr.unwrap;
+    . apply hs₂; exact hr;
   have hbq : ¬(Satisfies M₀ r₀ (□ψ)) := by
     apply Satisfies.box_def.not.mpr;
     push_neg;

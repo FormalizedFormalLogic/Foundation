@@ -14,8 +14,8 @@ lemma not_exists_tarski_predicate : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ,
   rintro ⟨τ, hτ⟩;
   apply Entailment.Consistent.not_bot (𝓢 := T.toAxiom);
   . infer_instance;
-  . have h₁ : T ⊢!. fixpoint (∼τ) ⭤ τ/[⌜fixpoint (∼τ)⌝] := by simpa using hτ $ fixpoint “x. ¬!τ x”;;
-    have h₂ : T ⊢!. fixpoint (∼τ) ⭤ ∼τ/[⌜fixpoint (∼τ)⌝] := by simpa using diagonal (T := T) “x. ¬!τ x”;
+  . have h₁ : T ⊢!. fixedpoint (∼τ) ⭤ τ/[⌜fixedpoint (∼τ)⌝] := by simpa using hτ $ fixedpoint “x. ¬!τ x”;;
+    have h₂ : T ⊢!. fixedpoint (∼τ) ⭤ ∼τ/[⌜fixedpoint (∼τ)⌝] := by simpa using diagonal (T := T) “x. ¬!τ x”;
     cl_prover [h₁, h₂];
 
 end LO.ISigma1

@@ -159,6 +159,9 @@ import Foundation.Modal.Maximal.Makinson
 import Foundation.Modal.VanBentham.StandardTranslation
 
 -- Provability Logic
+import Foundation.ProvabilityLogic.Interpretation
+import Foundation.ProvabilityLogic.Arithmetic
+import Foundation.ProvabilityLogic.SolovaySentences
 import Foundation.ProvabilityLogic.Incompleteness
 
 import Foundation.ProvabilityLogic.N.Soundness

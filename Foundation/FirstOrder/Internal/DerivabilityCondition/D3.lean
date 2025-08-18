@@ -36,7 +36,7 @@ noncomputable abbrev toNumVec (w : Fin n → V) : SemitermVec V ℒₒᵣ n k :=
 
 variable (T)
 
-theorem term_complete {n : ℕ} (t : FirstOrder.Semiterm ℒₒᵣ Empty n) (w : Fin n → V) :
+theorem term_complete {n : ℕ} (t : FirstOrder.ClosedSemiterm ℒₒᵣ n) (w : Fin n → V) :
     T.internalize V ⊢! (toNumVec w ⤕ ⌜t⌝) ≐  𝕹 (t.valbm V w) :=
   match t with
   |                         #z => by simp
@@ -152,5 +152,10 @@ theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ)
     V ⊧ₘ₀ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
   simpa [tprovable_iff_provable]
     using InternalArithmetic.sigma_one_provable_of_models T hσ h
+
+theorem provable_internalize {σ : Sentence ℒₒᵣ} :
+    T.Provable (⌜σ⌝ : V) → T.Provable (⌜T.provabilityPred σ⌝ : V) := by
+  simpa [models_iff₀] using
+    sigma_one_complete (V := V) (σ := T.provabilityPred σ) T (by simp)
 
 end LO.ISigma1.Metamath.InternalArithmetic

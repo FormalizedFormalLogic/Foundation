@@ -236,11 +236,11 @@ lemma coe_rel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο 
 lemma coe_nrel [IsEmpty ο] {k : ℕ} (R : L.Rel k) (v : Fin k → Semiterm L ο n) :
     (Rewriting.embedding (nrel R v) : Semiformula L ξ n) = (nrel R fun i ↦ Rew.emb (v i)) := by rfl
 
-lemma coe_substitute_eq_substitute_coe (φ : Semisentence L k) (v : Fin k → Semiterm L Empty n) :
+lemma coe_substitute_eq_substitute_coe (φ : Semisentence L k) (v : Fin k → ClosedSemiterm L n) :
     (↑(φ ⇜ v) : SyntacticSemiformula L n) = (↑φ : SyntacticSemiformula L k)⇜(fun i ↦ (↑(v i) : Semiterm L ℕ n)) :=
   Rewriting.embedding_substitute_eq_substitute_embedding φ v
 
-lemma coe_substs_eq_substs_coe₁ (φ : Semisentence L 1) (t : Semiterm L Empty n) :
+lemma coe_substs_eq_substs_coe₁ (φ : Semisentence L 1) (t : ClosedSemiterm L n) :
     (↑(φ/[t]) : SyntacticSemiformula L n) = (↑φ : SyntacticSemiformula L 1)/[(↑t : Semiterm L ℕ n)] :=
   Rewriting.embedding_substs_eq_substs_coe₁ φ t
 

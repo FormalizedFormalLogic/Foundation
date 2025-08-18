@@ -14,7 +14,7 @@ namespace LO.FirstOrder.Arithmetic
 open ISigma1 Metamath ProvabilityLogic
 
 instance : Diagonalization 𝐈𝚺₁ where
-  fixpoint := fixpoint
+  fixedpoint := fixedpoint
   diag θ := diagonal θ
 
 section
@@ -43,7 +43,8 @@ instance : T.standardProvability.HBL2 := ⟨fun _ _ ↦ provable_D2⟩
 
 lemma standardProvability_def (σ : Sentence L) : T.standardProvability σ = T.provabilityPred σ := rfl
 
-instance [T.Δ₁] : T.standardProvability.Sound ℕ := ⟨fun {σ} ↦ by simp [Arithmetic.standardProvability_def, models₀_iff]⟩
+instance [T.Δ₁] : T.standardProvability.SoundOnModel ℕ :=
+  ⟨fun {σ} ↦ by simp [Arithmetic.standardProvability_def, models₀_iff]⟩
 
 end
 
@@ -77,6 +78,10 @@ instance [𝐏𝐀⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨fun _ ↦ provab
 instance [𝐏𝐀⁻ ⪯ T] : T.standardProvability.HBL where
 
 instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.GoedelSound := ⟨fun h ↦ by simpa using provable_sound h⟩
+
+instance : T.standardProvability.Sound₀ := ⟨provable_sound⟩
+
+instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.Sound := ⟨fun h ↦ provable_sound h⟩
 
 end arithmetic
 

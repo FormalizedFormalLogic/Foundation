@@ -53,15 +53,15 @@ open Modal Logic
 open Entailment
 
 variable {T : ArithmeticTheory} [T.Δ₁]
-         {f : Realization ℒₒᵣ}
+         {f : T.PLRealization}
          {A B : Modal.Formula _}
 
 
 section Corollary
 
 /-- Gödel's Second Incompleteness Theorem -/
-example [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T ⊬. T.standardProvability.con := by
-  have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
+example [𝐈𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) : T ⊬. T.standardProvability.con := by
+  have h := GL.arithmetical_completeness_iff height (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
   exact Realization.iff_interpret_neg (L := ℒₒᵣ) |>.not.mp h;
@@ -71,7 +71,7 @@ end Corollary
 section Independency
 
 lemma iff_modalConsis_bewConsis_inside :
-    T ⊢!. f.interpret T.standardProvability (∼□⊥) ⭤ T.standardProvability.con := by
+    T ⊢!. f (∼□⊥) ⭤ T.standardProvability.con := by
   apply K!_intro;
   . refine C!_trans (K!_left Realization.iff_interpret_neg_inside) ?_;
     apply contra!;
@@ -83,7 +83,7 @@ lemma iff_modalConsis_bewConsis_inside :
 variable [𝐈𝚺₁ ⪯ T]
 
 lemma iff_modalIndep_bewIndep_inside :
-    T ⊢!. f.interpret T.standardProvability (Modal.independency A) ⭤ T.standardProvability.indep (f.interpret T.standardProvability A) := by
+    T ⊢!. f (Modal.independency A) ⭤ T.standardProvability.indep (f A) := by
   apply K!_intro;
   . refine C!_trans (K!_left $ Realization.iff_interpret_and_inside) ?_;
     apply CKK!_of_C!_of_C!;
@@ -103,69 +103,67 @@ lemma iff_modalIndep_bewIndep_inside :
       apply K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ);
 
 lemma iff_modalIndep_bewIndep :
-    T ⊢!. f.interpret T.standardProvability (Modal.independency A) ↔ T ⊢!. T.standardProvability.indep (f.interpret T.standardProvability A) := by
+    T ⊢!. f (Modal.independency A) ↔ T ⊢!. T.standardProvability.indep (f A) := by
   constructor;
   . intro h; exact (K!_left iff_modalIndep_bewIndep_inside) ⨀ h;
   . intro h; exact (K!_right iff_modalIndep_bewIndep_inside) ⨀ h;
 
 lemma iff_not_modalIndep_not_bewIndep_inside :
-    T ⊢!. ∼f.interpret T.standardProvability (Modal.independency A) ⭤ ∼T.standardProvability.indep (f.interpret T.standardProvability A) :=
+    T ⊢!. ∼f (Modal.independency A) ⭤ ∼T.standardProvability.indep (f A) :=
   ENN!_of_E! iff_modalIndep_bewIndep_inside
 
 lemma iff_not_modalIndep_not_bewIndep :
-    T ⊢!. ∼f.interpret T.standardProvability (Modal.independency A) ↔ T ⊢!. ∼T.standardProvability.indep (f.interpret T.standardProvability A) := by
+    T ⊢!. ∼f (Modal.independency A) ↔ T ⊢!. ∼T.standardProvability.indep (f A) := by
   constructor;
   . intro h; exact (K!_left iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
   . intro h; exact (K!_right iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
 
-variable [T.SoundOn (Hierarchy 𝚷 2)]
-
-lemma unprovable_independency_of_consistency :
+lemma unprovable_independency_of_consistency (height : T.standardProvability.height = ⊤) :
     T ⊬. T.standardProvability.indep (T.standardProvability.con) := by
-  let g : Realization ℒₒᵣ := λ _ => ⊥;
-  suffices T ⊬. g.interpret T.standardProvability (Modal.independency (∼□⊥)) by
+  let g : T.PLRealization := ⟨λ _ => ⊥⟩
+  suffices T ⊬. g (Modal.independency (∼□⊥)) by
     have H₁ := iff_modalIndep_bewIndep (f := g) (T := T) (A := ∼□⊥);
     have H₂ := T.standardProvability.indep_iff_distribute (T := T)
-      (σ := g.interpret T.standardProvability (∼□⊥))
+      (σ := g (∼□⊥))
       (π := T.standardProvability.con)
       iff_modalConsis_bewConsis_inside;
     exact Iff.trans H₁ H₂ |>.not.mp this;
-  have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_independency (φ := ∼□⊥);
+  have h := GL.arithmetical_completeness_iff height |>.not.mpr $ GL.unprovable_independency (φ := ∼□⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
   congr;
 
-lemma unrefutable_independency_of_consistency :
+lemma unrefutable_independency_of_consistency (height : T.standardProvability.height = ⊤):
     T ⊬. ∼T.standardProvability.indep (T.standardProvability.con) := by
-  let g : Realization ℒₒᵣ := λ _ => ⊥;
-  suffices T ⊬. ∼g.interpret T.standardProvability (Modal.independency (∼□⊥)) by
+  let g : T.PLRealization := ⟨λ _ => ⊥⟩
+  suffices T ⊬. ∼g (Modal.independency (∼□⊥)) by
     have H₁ := iff_not_modalIndep_not_bewIndep (f := g) (T := T) (A := ∼□⊥);
     have H₂ : T ⊢!.
-      ∼T.standardProvability.indep (g.interpret T.standardProvability (∼□⊥)) ⭤
+      ∼T.standardProvability.indep (g (∼□⊥)) ⭤
       ∼T.standardProvability.indep T.standardProvability.con
       := ENN!_of_E! $ T.standardProvability.indep_iff_distribute_inside (T := T)
-      (σ := g.interpret T.standardProvability (∼□⊥))
+      (σ := g (∼□⊥))
       (π := T.standardProvability.con)
       iff_modalConsis_bewConsis_inside;
     replace H₂ :
-      T ⊢!. ∼T.standardProvability.indep (g.interpret T.standardProvability (∼□⊥)) ↔
+      T ⊢!. ∼T.standardProvability.indep (g (∼□⊥)) ↔
       T ⊢!. ∼T.standardProvability.indep T.standardProvability.con
       := by
       constructor;
       . intro H; exact K!_left H₂ ⨀ H;
       . intro H; exact K!_right H₂ ⨀ H;
     apply Iff.trans H₁ H₂ |>.not.mp this;
-  have h := GL.arithmetical_completeness_iff (T := T) |>.not.mpr $ GL.unprovable_not_independency_of_consistency;
+  have h := GL.arithmetical_completeness_iff height |>.not.mpr $ GL.unprovable_not_independency_of_consistency;
   push_neg at h;
   obtain ⟨f, h⟩ := h;
   replace h := Realization.iff_interpret_neg (L := ℒₒᵣ) |>.not.mp h;
   congr;
 
-theorem undecidable_independency_of_consistency :
-    Independent T.toAxiom (T.standardProvability.indep (T.standardProvability.con)) := by
+theorem undecidable_independency_of_consistency (height : T.standardProvability.height = ⊤) :
+    Independent T.toAxiom (T.standardProvability.indep T.standardProvability.con) := by
   constructor;
-  . exact unprovable_independency_of_consistency;
-  . exact unrefutable_independency_of_consistency;
+  . exact unprovable_independency_of_consistency height;
+  . exact unrefutable_independency_of_consistency height;
 
 end Independency
 

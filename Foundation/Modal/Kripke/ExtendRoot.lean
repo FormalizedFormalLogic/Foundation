@@ -11,7 +11,7 @@ namespace LO.Modal
 
 namespace Kripke
 
-def Frame.extendRoot (F : Kripke.Frame) (r : outParam F.World) [F.IsRootedBy r] (n : ℕ+) : Kripke.Frame where
+def Frame.extendRoot (F : Kripke.Frame) {r : F.World} [F.IsRootedBy r] (n : ℕ+) : Kripke.Frame where
   World := Fin n ⊕ F.World
   Rel x y :=
     match x, y with
@@ -24,15 +24,21 @@ namespace Frame.extendRoot
 
 variable {F : Frame} {r : outParam F.World} [F.IsRootedBy r] {x y : F.World} {n : ℕ+}
 
-instance : Coe (F.World) ((F.extendRoot r n).World) := ⟨Sum.inr⟩
+abbrev extend (i : Fin n) : F.extendRoot n := .inl i
 
-instance isFinite [F.IsFinite] : (F.extendRoot r n).IsFinite := by
+@[coe] abbrev embed (x : F) : F.extendRoot n := .inr x
+
+instance : Coe (F.World) ((F.extendRoot n).World) := ⟨embed⟩
+
+instance isFinite [F.IsFinite] : (F.extendRoot n).IsFinite := by
   unfold Frame.extendRoot;
   infer_instance;
 
-protected abbrev root : (F.extendRoot r n).World := .inl 0
+instance fintype [Fintype F] : Fintype (F.extendRoot n) := instFintypeSum (Fin n) F
 
-instance instIsRooted : (F.extendRoot r n).IsRootedBy extendRoot.root where
+protected abbrev root : (F.extendRoot n).World := .inl 0
+
+instance instIsRooted : (F.extendRoot n).IsRootedBy extendRoot.root where
   root_generates := by
     intro x h;
     match x with
@@ -46,7 +52,7 @@ instance instIsRooted : (F.extendRoot r n).IsRootedBy extendRoot.root where
       tauto;
 
 
-protected abbrev chain : List (F.extendRoot r n |>.World) := List.finRange n |>.map (Sum.inl ·)
+protected abbrev chain : List (F.extendRoot n) := List.finRange n |>.map (extend ·)
 
 @[simp]
 lemma chain_length : extendRoot.chain (F := F) (r := r) (n := n).length = n := by simp
@@ -58,7 +64,7 @@ lemma chain_Chain' : List.Chain' (· ≺ ·) (extendRoot.chain (F := F) (r := r)
   . simp;
 
 
-instance isAsymmetric [F.IsAsymmetric] : (F.extendRoot r n).IsAsymmetric := ⟨by
+instance isAsymmetric [F.IsAsymmetric] : (F.extendRoot n).IsAsymmetric := ⟨by
   intro x y hxy;
   match x, y with
   | .inr x, .inr y =>
@@ -69,7 +75,7 @@ instance isAsymmetric [F.IsAsymmetric] : (F.extendRoot r n).IsAsymmetric := ⟨b
   | .inr _, .inl _ => simp_all [Frame.extendRoot];
 ⟩
 
-instance isTransitive [F.IsTransitive] : (F.extendRoot r n).IsTransitive := ⟨by
+instance isTransitive [F.IsTransitive] : (F.extendRoot n).IsTransitive := ⟨by
   intro x y z hxy hyz;
   match x, y, z with
   | .inr x, .inr y, .inr z =>
@@ -81,24 +87,25 @@ instance isTransitive [F.IsTransitive] : (F.extendRoot r n).IsTransitive := ⟨b
   | .inl _, .inl _, .inl _ => simp_all [Frame.extendRoot]; omega;
 ⟩
 
-lemma rooted_original [F.IsTransitive] {x : F.World} : (extendRoot.root (F := F) (r := r) (n := n)) ≺ x := by
+@[simp] lemma rooted_original [F.IsTransitive] {x : F.World} :
+    (extendRoot.root (F := F) (r := r) (n := n)) ≺ x := by
   apply Frame.root_genaretes'!;
   tauto;
 
-instance isTree [F.IsTree r] : (F.extendRoot r n).IsTree extendRoot.root where
+instance isTree [F.IsTree r] : (F.extendRoot n).IsTree extendRoot.root where
 
-instance isFiniteTree [F.IsFiniteTree r] : (F.extendRoot r n).IsFiniteTree extendRoot.root where
+instance isFiniteTree [F.IsFiniteTree r] : (F.extendRoot n).IsFiniteTree extendRoot.root where
 
-def pMorphism : F →ₚ (F.extendRoot r n) where
-  toFun := Sum.inr
+def pMorphism : F →ₚ F.extendRoot n where
+  toFun := embed
   forth := by simp [Frame.extendRoot];
   back {x y} h := by
     match y with
     | .inl r => simp [Frame.Rel', Frame.extendRoot] at h;
     | .inr y => use y; simpa using h;
 
-lemma not_root_of_from_root [F.IsTree r] {x : (F.extendRoot r n).World} (h : extendRoot.root ≺ x)
-  : (∃ i > 0, x = (Sum.inl i)) ∨ (x = r) ∨ (Sum.inr r ≺^+ x) := by
+lemma not_root_of_from_root [F.IsTree r] {x : F.extendRoot n} (h : extendRoot.root ≺ x) :
+    (∃ i > 0, x = extend i) ∨ x = r ∨ embed r ≺ x := by
   match x with
   | .inl i =>
     left;
@@ -111,19 +118,44 @@ lemma not_root_of_from_root [F.IsTree r] {x : (F.extendRoot r n).World} (h : ext
     . tauto;
     . right;
       right;
-      apply Relation.TransGen.single;
-      apply pMorphism (F := F).forth;
+      apply pMorphism.forth;
       apply Frame.root_genaretes'! (x := x) (by tauto);
 
-lemma not_root_of_from_root₁ [F.IsTree r] {x : (F.extendRoot r 1).World} (h : extendRoot.root ≺ x)
-  : (x = r) ∨ (Sum.inr r ≺^+ x) := by
-  rcases not_root_of_from_root h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all;
+lemma not_root_of_from_root' [F.IsTree r] {x : F.extendRoot n} (h : extendRoot.root ≺ x) :
+    (∃ i > 0, x = extend i) ∨ x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
+  rcases not_root_of_from_root h with (h | h | h)
+  · aesop
+  · aesop
+  · right; right
+    rcases pMorphism.back h with ⟨x₀, rfl, hx₀⟩
+    exact ⟨x₀, rfl, hx₀⟩
+
+lemma not_root_of_from_root₁ [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
+    x = r ∨ embed r ≺ x := by
+  rcases not_root_of_from_root h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all
+
+lemma not_root_of_from_root'₁ [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
+    x = r ∨ ∃ x₀ : F, x = x₀ ∧ r ≺ x₀ := by
+  rcases not_root_of_from_root' h with (⟨i, hi, rfl⟩ | hr | hr) <;> simp_all
+
+lemma eq_inr_of_root_rel [F.IsTree r] {x : F.extendRoot 1} (h : extendRoot.root ≺ x) :
+    ∃ x₀ : F, x = x₀ := by
+  rcases not_root_of_from_root'₁ h with (rfl | ⟨x₀, rfl, hx₀⟩)
+  · exact ⟨_, rfl⟩
+  · exact ⟨_, rfl⟩
+
+@[simp] lemma embed_rel_embed_iff_rel {i j : F} :
+    embed (n := n) i ≺ embed j ↔ i ≺ j :=
+  pMorphism.toFun_rel_toFun_iff_of_inj Sum.inr_injective
+
+@[simp] lemma embed_rel_iterate_embed_iff_rel {i j : F} :
+    embed (n := n) i ≺^[k] embed j ↔ i ≺^[k] j :=
+  pMorphism.toFun_rel_iterate_toFun_iff_of_inj Sum.inr_injective
 
 end Frame.extendRoot
 
-
-def Model.extendRoot (M : Kripke.Model) (r : M.World) [M.IsRootedBy r] (n : ℕ+) : Kripke.Model where
-  toFrame := M.toFrame.extendRoot r n
+def Model.extendRoot (M : Kripke.Model) {r : M.World} [M.IsRootedBy r] (n : ℕ+) : Kripke.Model where
+  toFrame := M.toFrame.extendRoot n
   Val x a :=
     match x with
     | .inl _ => M.Val r a
@@ -133,41 +165,48 @@ namespace Model.extendRoot
 
 variable {M : Model} {r : M.World} [M.IsRootedBy r] {x y : M.World} {n : ℕ+} {φ}
 
-instance : Coe (M.World) ((M.extendRoot r n).World) := ⟨Sum.inr⟩
+abbrev extend (i : Fin n) : M.extendRoot n := .inl i
+
+@[coe] abbrev embed (x : M) : M.extendRoot n := .inr x
+
+instance : Coe (M.World) ((M.extendRoot n).World) := ⟨embed⟩
 
 protected abbrev root := Frame.extendRoot.root (F := M.toFrame) (r := r) (n := n)
 
-lemma rooted_original [M.IsTransitive] : (extendRoot.root (M := M) (r := r) (n := n)) ≺ (Sum.inr x) := Frame.extendRoot.rooted_original
+@[simp] lemma rooted_original [M.IsTransitive] :
+    (extendRoot.root (M := M) (r := r) (n := n)) ≺ embed x := Frame.extendRoot.rooted_original
 
-instance isFinite [M.IsFinite] : (M.extendRoot r n).IsFinite := Frame.extendRoot.isFinite
+instance isFinite [M.IsFinite] : (M.extendRoot n).IsFinite := Frame.extendRoot.isFinite
 
-instance isTransitive [M.IsTransitive] : (M.extendRoot r n).IsTransitive := Frame.extendRoot.isTransitive
+instance fintype [Fintype M] : Fintype (M.extendRoot n) := Frame.extendRoot.fintype
 
-instance isAsymmetric [M.IsAsymmetric] : (M.extendRoot r n).IsAsymmetric := Frame.extendRoot.isAsymmetric
+instance isTransitive [M.IsTransitive] : (M.extendRoot n).IsTransitive := Frame.extendRoot.isTransitive
 
-instance isTree [M.IsTree r] : (M.extendRoot r n).IsTree extendRoot.root := Frame.extendRoot.isTree
+instance isAsymmetric [M.IsAsymmetric] : (M.extendRoot n).IsAsymmetric := Frame.extendRoot.isAsymmetric
 
-instance isFiniteTree [M.IsFiniteTree r] : (M.extendRoot r n).IsFiniteTree extendRoot.root := Frame.extendRoot.isFiniteTree
+instance isTree [M.IsTree r] : (M.extendRoot n).IsTree extendRoot.root := Frame.extendRoot.isTree
 
-def pMorphism : Model.PseudoEpimorphism M (M.extendRoot r n) := PseudoEpimorphism.ofAtomic (Frame.extendRoot.pMorphism) $ by
+instance isFiniteTree [M.IsFiniteTree r] : (M.extendRoot n).IsFiniteTree extendRoot.root := Frame.extendRoot.isFiniteTree
+
+def pMorphism : M →ₚ M.extendRoot n := PseudoEpimorphism.ofAtomic Frame.extendRoot.pMorphism $ by
   intros;
   rfl;
 
-lemma modal_equivalence_original_world : ModalEquivalent (M₁ := M) (M₂ := M.extendRoot r n) x (Sum.inr x) := by
-  apply Model.PseudoEpimorphism.modal_equivalence pMorphism;
+lemma modal_equivalence_original_world : x ↭ (embed x : M.extendRoot n) :=
+  Model.PseudoEpimorphism.modal_equivalence pMorphism _
 
 @[simp]
-lemma inr_satisfies_iff : Formula.Kripke.Satisfies (M.extendRoot r n) (Sum.inr x) φ ↔ x ⊧ φ := modal_equivalence_original_world.symm
+lemma inr_satisfies_iff : (embed x : M.extendRoot n) ⊧ φ ↔ x ⊧ φ := modal_equivalence_original_world.symm
 
 open Formula.Kripke in
-lemma inl_satisfies_boxdot_iff [IsTrans _ M.Rel] : r ⊧ (φᵇ) ↔ Satisfies (M.extendRoot r n) (Sum.inl i) (φᵇ) := by
+lemma inl_satisfies_boxdot_iff [IsTrans _ M.Rel] : r ⊧ φᵇ ↔ (extend i : M.extendRoot n) ⊧ φᵇ := by
   induction φ generalizing i with
   | hatom φ => rfl;
   | hfalsum => rfl;
   | himp φ ψ ihA ihB =>
     replace ihA := @ihA i;
     replace ihB := @ihB i;
-    simp_all [Satisfies, Formula.boxdotTranslate];
+    simp_all [Formula.boxdotTranslate];
   | hbox φ ih =>
     dsimp [Formula.boxdotTranslate];
     constructor;
@@ -207,8 +246,8 @@ variable {M : Kripke.Model} [Finite M.World] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel
 variable {A : Formula _}
 variable {l : List M.World} {n : ℕ+}
 
-lemma atmost_one_validates_axiomT_in_irrefl_trans_chain' (l_chain : List.Chain' (· ≺ ·) l)
-  : (∀ x ∈ l, x ⊧ (□A ➝ A)) ∨ (∃! x ∈ l, ¬x ⊧ (□A ➝ A)) := by
+lemma atmost_one_validates_axiomT_in_irrefl_trans_chain' (l_chain : List.Chain' (· ≺ ·) l) :
+    (∀ x ∈ l, x ⊧ □A ➝ A) ∨ (∃! x ∈ l, ¬x ⊧ □A ➝ A) := by
   apply or_iff_not_imp_left.mpr;
   push_neg;
   rintro ⟨x, x_l, hx⟩;
@@ -225,9 +264,9 @@ lemma atmost_one_validates_axiomT_in_irrefl_trans_chain' (l_chain : List.Chain' 
     . have : y ⊧ A := hx₁ y Rxy; contradiction;
 
 lemma atmost_one_validates_axiomT_in_irrefl_trans_chain
-  (l_chain : List.Chain' (· ≺ ·) l) :
-  haveI : Fintype M.World := Fintype.ofFinite _;
-  Finset.card { x | x ∈ l ∧ ¬x ⊧ (□A ➝ A) } ≤ 1 := by
+    (l_chain : List.Chain' (· ≺ ·) l) :
+    haveI : Fintype M.World := Fintype.ofFinite _;
+    Finset.card { x | x ∈ l ∧ ¬x ⊧ (□A ➝ A) } ≤ 1 := by
   apply Nat.le_one_iff_eq_zero_or_eq_one.mpr;
   rcases atmost_one_validates_axiomT_in_irrefl_trans_chain' (l_chain := l_chain) (A := A) with h | h;
   . left;
@@ -239,10 +278,10 @@ lemma atmost_one_validates_axiomT_in_irrefl_trans_chain
     simp_all;
 
 lemma validates_axiomT_set_in_irrefl_trans_chain
-  (Γ : Finset (Modal.Formula ℕ))
-  (l_length : l.length = Γ.card + 1)
-  (l_chain : List.Chain' (· ≺ ·) l)
-  : ∃ x ∈ l, x ⊧ (Γ.image (λ γ => □γ ➝ γ)).conj := by
+    (Γ : Finset (Modal.Formula ℕ))
+    (l_length : l.length = Γ.card + 1)
+    (l_chain : List.Chain' (· ≺ ·) l) :
+    ∃ x ∈ l, x ⊧ (Γ.image (λ γ => □γ ➝ γ)).conj := by
   haveI : Fintype M.World := Fintype.ofFinite _;
   let t₁ : Finset M.World := { x | x ∈ l ∧ ∃ A ∈ Γ, ¬x ⊧ (□A ➝ A) };
   let t₂ : Finset M.World := l.toFinset;
@@ -308,12 +347,11 @@ open Classical
 variable {M : Model} {r : M.World} [M.IsFinite] [IsTrans _ M.Rel] [IsIrrefl _ M.Rel] [M.IsRootedBy r] {x y : M.World}
 
 lemma inr_satisfies_axiomT_set
-  {Γ : Finset (Modal.Formula ℕ)} :
-  letI n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
-  ∃ i : Fin n, Formula.Kripke.Satisfies (M.extendRoot r n) (.inl i) (Γ.image (λ γ => □γ ➝ γ) |>.conj)
-  := by
+    {Γ : Finset (Modal.Formula ℕ)} :
+    letI n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
+    ∃ i : Fin n, (extend i : M.extendRoot n) ⊧ (Γ.image (λ γ => □γ ➝ γ)).conj := by
   let n : ℕ+ := ⟨Γ.card + 1, by omega⟩;
-  let M' := M.extendRoot r n;
+  let M' := M.extendRoot n;
   have : Finite M'.World := by
     unfold M' Model.extendRoot Frame.extendRoot;
     infer_instance;
@@ -325,10 +363,9 @@ lemma inr_satisfies_axiomT_set
     (Γ := Γ)
     (Frame.extendRoot.chain_length)
     (Frame.extendRoot.chain_Chain')
-  simp only [List.pure_def, List.bind_eq_flatMap, List.mem_map, List.mem_flatMap, List.mem_range, List.mem_cons, List.not_mem_nil, or_false, M', n] at hx₁;
+  simp only [List.mem_map, M', n] at hx₁;
   obtain ⟨i, _, rfl⟩ := hx₁;
   use i;
-  exact hx₂;
 
 end Model.extendRoot
 
