@@ -16,7 +16,7 @@ namespace K4Henkin
 variable [Entailment.K4Henkin 𝓢]
 
 instance : LoebRule 𝓢 where
-  loeb h := h ⨀ (henkin $ E_intro (axiomK' $ nec h) axiomFour);
+  loeb h := h ⨀ (henkin $ E_intro (axiomK' $ nec h) axiomFour)
 
 end K4Henkin
 

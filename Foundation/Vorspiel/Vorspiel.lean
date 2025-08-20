@@ -724,10 +724,10 @@ variable [DecidableEq α]
 lemma remove_nil (a : α) : [].remove a = [] := by simp [List.remove]
 
 @[simp]
-lemma eq_remove_cons {l : List α} : (ψ :: l).remove ψ = l.remove ψ := by induction l <;> simp_all [List.remove];
+lemma eq_remove_cons {l : List α} : (ψ :: l).remove ψ = l.remove ψ := by induction l <;> simp_all [List.remove]
 
 @[simp]
-lemma remove_singleton_of_ne {φ ψ : α} (h : φ ≠ ψ) : [φ].remove ψ = [φ] := by simp_all [List.remove, Ne.symm];
+lemma remove_singleton_of_ne {φ ψ : α} (h : φ ≠ ψ) : [φ].remove ψ = [φ] := by simp_all [List.remove, Ne.symm]
 
 lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
   simp [List.remove, List.of_mem_filter]
@@ -739,7 +739,7 @@ lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ 
   (a :: l).remove a = l.remove a := by simp [remove]
 
 lemma remove_cons_of_ne (l : List α) {a b} (ne : a ≠ b) :
-  (a :: l).remove b = a :: l.remove b := by simp_all [remove];
+  (a :: l).remove b = a :: l.remove b := by simp_all [remove]
 
 @[simp] lemma remove_subset (a) (l : List α) :
     l.remove a ⊆ l := by
@@ -767,7 +767,7 @@ lemma remove_map_substet_map_remove [DecidableEq β] (f : α → β) (l : List �
     (l.map f).remove (f a) ⊆ (l.remove a).map f := by
   simp only [subset_def, mem_remove_iff, mem_map, ne_eq, and_imp, forall_exists_index,
     forall_apply_eq_imp_iff₂]
-  intro b hb neb;
+  intro b hb neb
   exact ⟨b, ⟨hb, by rintro rfl; exact neb rfl⟩, rfl⟩
 
 end remove
@@ -778,12 +778,12 @@ lemma induction_with_singleton
   (hnil : motive [])
   (hsingle : ∀ a, motive [a])
   (hcons : ∀ a as, as ≠ [] → motive as → motive (a :: as)) : ∀ as, motive as := by
-  intro as;
+  intro as
   induction as with
-  | nil => exact hnil;
+  | nil => exact hnil
   | cons a as ih => cases as with
-    | nil => exact hsingle a;
-    | cons b bs => exact hcons a (b :: bs) (by simp) ih;
+    | nil => exact hsingle a
+    | cons b bs => exact hcons a (b :: bs) (by simp) ih
 
 @[elab_as_elim]
 def induction_with_singleton'
@@ -1002,7 +1002,7 @@ lemma projection {f : ℕ →. ℕ} (hf : Nat.Partrec f) (unif : ∀ {m n₁ n�
       case some i =>
         suffices i = a ↔ ∃ x < n + 1, Code.evaln s cf (Nat.pair m x) = Option.some a by simpa [hC]
         constructor
-        · rintro rfl;
+        · rintro rfl
           rcases (ih _).mp hC with ⟨x, hx, Hx⟩
           exact ⟨x, lt_trans hx (by simp), Hx⟩
         · rintro ⟨x, _, Hx⟩
@@ -1057,7 +1057,7 @@ lemma projection {f : α → β →. γ} (hf : Partrec₂ f) (unif : ∀ {a b₁
   suffices (∃ c' ∈ g (Encodable.encode a), Encodable.decode c' = some c) ↔ ∃ b, c ∈ f a b by simpa [g']
   constructor
   · rintro ⟨c', h, hc⟩
-    rcases H.mp h with ⟨a, b, ae, c, habc, rfl⟩;
+    rcases H.mp h with ⟨a, b, ae, c, habc, rfl⟩
     rcases by simpa using hc
     rcases Encodable.encode_inj.mp ae
     exact ⟨b, habc⟩

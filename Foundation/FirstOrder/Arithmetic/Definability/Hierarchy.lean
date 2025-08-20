@@ -197,7 +197,7 @@ def rew (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → 
 
 @[simp] lemma ProperWithParamOn.rew {φ : 𝚫-[m].Semiformula M n₁}
     (h : φ.ProperWithParamOn M) (f : Fin n₁ → Semiterm ℒₒᵣ M n₂) : (φ.rew (Rew.substs f)).ProperWithParamOn M := by
-  rcases φ; intro e;
+  rcases φ; intro e
   simp only [Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, pi_mkDelta]
   exact h.iff _
 

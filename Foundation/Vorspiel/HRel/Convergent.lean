@@ -16,8 +16,8 @@ class IsStronglyConvergent (R : HRel α) where
   s_convergent : StronglyConvergent R
 
 instance [IsStronglyConvergent R] : IsConvergent R := ⟨by
-  rintro x y _;
-  apply IsStronglyConvergent.s_convergent;
+  rintro x y _
+  apply IsStronglyConvergent.s_convergent
 ⟩
 
 
@@ -33,6 +33,6 @@ class IsPiecewiseStronglyConvergent (R : HRel α) where
   ps_convergent : PiecewiseStronglyConvergent R
 
 instance [IsPiecewiseStronglyConvergent R] : IsPiecewiseConvergent R := ⟨by
-  rintro x y z Rxy Rxz _;
-  apply IsPiecewiseStronglyConvergent.ps_convergent Rxy Rxz;
+  rintro x y z Rxy Rxz _
+  apply IsPiecewiseStronglyConvergent.ps_convergent Rxy Rxz
 ⟩

@@ -302,7 +302,7 @@ def comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) : Operator L l
 lemma operator_comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) (v : Fin l → Semiterm L ξ n) :
   (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
     unfold operator Rewriting.embedding Rewriting.substitute comp
-    simp only [operator, ← TransitiveRewriting.comp_app, Rew.emb_eq_id, Rew.comp_id];
+    simp only [operator, ← TransitiveRewriting.comp_app, Rew.emb_eq_id, Rew.comp_id]
     congr 2
     ext
     · simp [Rew.comp_app]; congr

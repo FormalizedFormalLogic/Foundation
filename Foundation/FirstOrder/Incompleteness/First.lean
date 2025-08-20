@@ -57,16 +57,16 @@ theorem incomplete
       (inconsistent_of_provable_of_unprovable (this.mp h) h) inferInstance ⟩
 
 theorem exists_true_but_unprovable_sentence (T : ArithmeticTheory) [T.Δ₁] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : ∃ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ₀ σ ∧ T ⊬. σ := by
-  obtain ⟨σ, hσ⟩ := incomplete_iff_exists_undecidable.mp $ Arithmetic.incomplete T;
-  by_cases ℕ ⊧ₘ₀ σ;
-  . use σ;
-    constructor;
-    . assumption;
-    . exact hσ.1;
-  . use ∼σ;
-    constructor;
-    . simpa;
-    . exact hσ.2;
+  obtain ⟨σ, hσ⟩ := incomplete_iff_exists_undecidable.mp $ Arithmetic.incomplete T
+  by_cases ℕ ⊧ₘ₀ σ
+  . use σ
+    constructor
+    . assumption
+    . exact hσ.1
+  . use ∼σ
+    constructor
+    . simpa
+    . exact hσ.2
 
 
 end LO.FirstOrder.Arithmetic
@@ -76,15 +76,15 @@ namespace LO.FirstOrderTrueArith
 open LO.Entailment FirstOrder Arithmetic
 
 instance {T : ArithmeticTheory} [ℕ ⊧ₘ* T] [T.Δ₁] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝐓𝐀 := by
-  constructor;
+  constructor
   . infer_instance
-  . obtain ⟨σ, σTrue, σUnprov⟩ := exists_true_but_unprovable_sentence T;
-    apply Entailment.not_weakerThan_iff.mpr;
-    use σ;
-    constructor;
-    . apply FirstOrderTrueArith.provable_iff.mpr;
-      simpa;
-    . apply Axiom.provable_iff (σ := σ) |>.not.mp;
-      simpa;
+  . obtain ⟨σ, σTrue, σUnprov⟩ := exists_true_but_unprovable_sentence T
+    apply Entailment.not_weakerThan_iff.mpr
+    use σ
+    constructor
+    . apply FirstOrderTrueArith.provable_iff.mpr
+      simpa
+    . apply Axiom.provable_iff (σ := σ) |>.not.mp
+      simpa
 
 end LO.FirstOrderTrueArith

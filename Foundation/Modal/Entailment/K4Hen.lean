@@ -16,7 +16,7 @@ namespace K4Hen
 variable [Entailment.K4Hen 𝓢]
 
 instance : HenkinRule 𝓢 where
-  henkin h := (K_left h) ⨀ (axiomHen ⨀ nec h);
+  henkin h := (K_left h) ⨀ (axiomHen ⨀ nec h)
 
 end K4Hen
 

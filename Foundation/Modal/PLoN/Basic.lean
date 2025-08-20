@@ -64,21 +64,21 @@ variable {M : PLoN.Model} {x : M.World} {φ ψ : Formula ℕ}
 
 @[simp] protected lemma iff_models : x ⊧ φ ↔ PLoN.Satisfies M x φ := by rfl
 
-lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺[φ] y → y ⊧ φ := by simp [PLoN.Satisfies];
+lemma box_def : x ⊧ □φ ↔ ∀ y, x ≺[φ] y → y ⊧ φ := by simp [PLoN.Satisfies]
 
 protected lemma not_def : x ⊧ ∼φ ↔ ¬(x ⊧ φ) := by
   induction φ generalizing x with
-  | _ => simp_all [Satisfies];
+  | _ => simp_all [Satisfies]
 
-protected lemma imp_def : x ⊧ φ ➝ ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto;
+protected lemma imp_def : x ⊧ φ ➝ ψ ↔ (x ⊧ φ) → (x ⊧ ψ) := by tauto
 
-protected lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies]; tauto;
+protected lemma or_def : x ⊧ φ ⋎ ψ ↔ x ⊧ φ ∨ x ⊧ ψ := by simp [Satisfies]; tauto
 
-protected lemma and_def : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies];
+protected lemma and_def : x ⊧ φ ⋏ ψ ↔ x ⊧ φ ∧ x ⊧ ψ := by simp [Satisfies]
 
-protected lemma bot_def : ¬(x ⊧ ⊥) := by simp [Satisfies];
+protected lemma bot_def : ¬(x ⊧ ⊥) := by simp [Satisfies]
 
-protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
+protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies]
 
 instance : Semantics.Tarski M.World where
   realize_top := λ _ => Satisfies.top_def
@@ -90,7 +90,7 @@ instance : Semantics.Tarski M.World where
 
 protected lemma def_iff : x ⊧ φ ⭤ ψ ↔ ((x ⊧ φ) ↔ (x ⊧ ψ)) := by
   simp [LogicalConnective.iff]
-  tauto;
+  tauto
 
 end Satisfies
 
@@ -109,42 +109,42 @@ protected lemma iff_models {M : PLoN.Model} {φ : Formula ℕ}
 
 instance : Semantics.Bot (PLoN.Model) where
   realize_bot _ := by
-    simp [Formula.PLoN.ValidOnModel];
-    use ﹫;
+    simp [Formula.PLoN.ValidOnModel]
+    use ﹫
 
 variable {M : PLoN.Model}
 
-protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto;
+protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnModel]; tauto
 
-protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
+protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto
 
-protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
+protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto
 
 protected lemma nec (h : M ⊧ φ) : M ⊧ □φ := by
-  intro x y Rxy;
-  apply h;
+  intro x y Rxy
+  apply h
 
 protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ ⭤ ψ → M ⊧ □φ ⭤ □ψ := by
-  push_neg;
+  push_neg
   let M : Model := {
     World := Fin 2,
     Rel ξ x y := if ξ = (.atom 1) then True else False,
     Valuation x a := x = 0
-  };
-  use M, (.atom 0), (.atom 1);
-  constructor;
-  . simp [ValidOnModel];
-    tauto;
+  }
+  use M, (.atom 0), (.atom 1)
+  constructor
+  . simp [ValidOnModel]
+    tauto
   . suffices (∃ x : M.World, ∀ y : M.World, x ≺[atom 0] y → y = 0) ∧ ∃ x : M.World, x ≠ 0 by
-      simpa [M, ValidOnModel, Semantics.Realize, Satisfies] using this;
-    constructor;
-    . use 0;
-      intro x;
+      simpa [M, ValidOnModel, Semantics.Realize, Satisfies] using this
+    constructor
+    . use 0
+      intro x
       match x with
-      | 0 => tauto;
-      | 1 => simp [M, Frame.Rel'];
-    . use 1;
-      simp [M];
+      | 0 => tauto
+      | 1 => simp [M, Frame.Rel']
+    . use 1
+      simp [M]
 
 
 end ValidOnModel
@@ -163,21 +163,21 @@ protected lemma iff_models {F : PLoN.Frame} {φ : Formula ℕ}
 variable {F : Frame}
 
 instance : Semantics.Bot (PLoN.Frame) where
-  realize_bot _ := by simp [Formula.PLoN.ValidOnFrame];
+  realize_bot _ := by simp [Formula.PLoN.ValidOnFrame]
 
 protected lemma nec (h : F ⊧ φ) : F ⊧ □φ := by
-  intro V x y _;
-  exact h V y;
+  intro V x y _
+  exact h V y
 
 protected lemma mdp (hpq : F ⊧ φ ➝ ψ) (hp : F ⊧ φ) : F ⊧ ψ := by
-  intro V x;
-  exact (hpq V x) (hp V x);
+  intro V x
+  exact (hpq V x) (hp V x)
 
-protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnFrame]; tauto;
+protected lemma imply₁ : F ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnFrame]; tauto
 
-protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnFrame]; tauto;
+protected lemma imply₂ : F ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnFrame]; tauto
 
-protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elimContra;
+protected lemma elimContra : F ⊧ (Axioms.ElimContra φ ψ) := by intro V; exact ValidOnModel.elimContra
 
 end ValidOnFrame
 
@@ -194,33 +194,33 @@ variable {C : FrameClass}
 protected lemma iff_models {C : PLoN.FrameClass} {φ : Formula ℕ} : C ⊧ φ ↔ Formula.PLoN.ValidOnFrameClass C φ := by rfl
 
 protected lemma nec (h : C ⊧ φ) : C ⊧ □φ := by
-  intro _ hF;
-  apply PLoN.ValidOnFrame.nec;
-  exact h hF;
+  intro _ hF
+  apply PLoN.ValidOnFrame.nec
+  exact h hF
 
 protected lemma mdp (hpq : C ⊧ φ ➝ ψ) (hp : C ⊧ φ) : C ⊧ ψ := by
-  intro _ hF;
+  intro _ hF
   exact PLoN.ValidOnFrame.mdp (hpq hF) (hp hF)
 
-protected lemma imply₁ : C ⊧ (Axioms.Imply₁ φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.imply₁;
+protected lemma imply₁ : C ⊧ (Axioms.Imply₁ φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.imply₁
 
-protected lemma imply₂ : C ⊧ (Axioms.Imply₂ φ ψ χ) := by intro _ _; exact PLoN.ValidOnFrame.imply₂;
+protected lemma imply₂ : C ⊧ (Axioms.Imply₂ φ ψ χ) := by intro _ _; exact PLoN.ValidOnFrame.imply₂
 
-protected lemma elimContra : C ⊧ (Axioms.ElimContra φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.elimContra;
+protected lemma elimContra : C ⊧ (Axioms.ElimContra φ ψ) := by intro _ _; exact PLoN.ValidOnFrame.elimContra
 
 
 lemma iff_not_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
+  apply not_iff_not.mp
+  push_neg
+  tauto
 
 alias ⟨exists_frame_of_not, not_of_exists_frame⟩ := iff_not_exists_frame
 
 
 lemma iff_not_exists_model : (¬C ⊧ φ) ↔ (∃ M : PLoN.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
+  apply not_iff_not.mp
+  push_neg
+  tauto
 
 alias ⟨exists_model_of_not, not_of_exists_model⟩ := iff_not_exists_model
 
@@ -247,25 +247,25 @@ abbrev AllFrameClass (α) : FrameClass α := Set.univ
 
 lemma AllFrameClass.nonempty : (AllFrameClass.{_, 0} α).Nonempty := by
   use terminalFrame α
-  trivial;
+  trivial
 
 open Formula
 
 lemma N_defines : (Hilbert.N).DefinesPLoNFrameClass (AllFrameClass α) := by
-  intro F;
-  simp [Hilbert.theorems, Entailment.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel];
-  intro φ hp;
+  intro F
+  simp [Hilbert.theorems, Entailment.theory, PLoN.ValidOnFrame, PLoN.ValidOnModel]
+  intro φ hp
   induction hp using Hilbert.Deduction.inducition_with_necOnly! with
-  | hMaxm h => simp at h;
+  | hMaxm h => simp at h
   | hMdp ihpq ihp =>
-    intro V w;
+    intro V w
     exact (ihpq V w) (ihp V w)
   | hNec ihp =>
-    intro V w w' _;
-    exact ihp V w';
+    intro V w w' _
+    exact ihp V w'
   | _ =>
-    simp_all [PLoN.Satisfies];
-    try tauto;
+    simp_all [PLoN.Satisfies]
+    try tauto
 
 end PLoN
 -/

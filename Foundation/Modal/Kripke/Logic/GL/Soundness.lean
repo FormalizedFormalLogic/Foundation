@@ -30,16 +30,16 @@ end Kripke
 namespace Logic.GL.Kripke
 
 instance : Sound Hilbert.GL FrameClass.finite_GL := instSound_of_validates_axioms $ by
-  apply FrameClass.validates_with_AxiomK_of_validates;
-  constructor;
-  simp only [Set.mem_singleton_iff, forall_eq];
-  rintro F ⟨_, _, _⟩;
-  exact validate_AxiomL_of_trans_cwf;
+  apply FrameClass.validates_with_AxiomK_of_validates
+  constructor
+  simp only [Set.mem_singleton_iff, forall_eq]
+  rintro F ⟨_, _, _⟩
+  exact validate_AxiomL_of_trans_cwf
 
 instance : Entailment.Consistent Hilbert.GL :=
   consistent_of_sound_frameclass FrameClass.finite_GL $ by
-    use blackpoint;
-    constructor;
+    use blackpoint
+    constructor
 
 end Logic.GL.Kripke
 

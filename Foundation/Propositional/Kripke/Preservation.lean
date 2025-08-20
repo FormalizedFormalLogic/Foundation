@@ -21,16 +21,16 @@ instance : CoeFun (Model.Bisimulation M₁ M₂) (λ _ => M₁.World → M₂.Wo
 def Model.Bisimulation.symm (bi : M₁ ⇄ M₂) : M₂ ⇄ M₁ := {
   toRel := λ a b => bi.toRel b a
   atomic := by
-    intro x₂ x₁ a h;
-    exact (bi.atomic h).symm;
+    intro x₂ x₁ a h
+    exact (bi.atomic h).symm
   forth := by
-    intro x₂ y₂ x₁ hxy h;
-    obtain ⟨y₁, ⟨hy₁, hxy⟩⟩ := bi.back hxy h;
-    use y₁;
+    intro x₂ y₂ x₁ hxy h
+    obtain ⟨y₁, ⟨hy₁, hxy⟩⟩ := bi.back hxy h
+    use y₁
   back := by
-    intro x₁ x₂ y₁ hxy h;
-    obtain ⟨y₂, ⟨hy₂, hxy⟩⟩ := bi.forth hxy h;
-    use y₂;
+    intro x₁ x₂ y₁ hxy h
+    obtain ⟨y₂, ⟨hy₂, hxy⟩⟩ := bi.forth hxy h
+    use y₂
 }
 
 end Bisimulation
@@ -42,36 +42,36 @@ def ModalEquivalent {M₁ M₂ : Model} (w₁ : M₁.World) (w₂ : M₂.World) 
 infix:50 " ↭ " => ModalEquivalent
 
 lemma modal_equivalent_of_bisimilar (Bi : M₁ ⇄ M₂) (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
-  intro φ;
+  intro φ
   induction φ generalizing x₁ x₂ with
-  | hatom a => exact Bi.atomic bisx;
+  | hatom a => exact Bi.atomic bisx
   | hand φ ψ ihφ ihψ =>
-    constructor;
-    . rintro ⟨hφ, hψ⟩;
-      constructor;
-      . exact ihφ bisx |>.mp hφ;
-      . exact ihψ bisx |>.mp hψ;
-    . rintro ⟨hφ, hψ⟩;
-      constructor;
-      . exact ihφ bisx |>.mpr hφ;
-      . exact ihψ bisx |>.mpr hψ;
+    constructor
+    . rintro ⟨hφ, hψ⟩
+      constructor
+      . exact ihφ bisx |>.mp hφ
+      . exact ihψ bisx |>.mp hψ
+    . rintro ⟨hφ, hψ⟩
+      constructor
+      . exact ihφ bisx |>.mpr hφ
+      . exact ihψ bisx |>.mpr hψ
   | hor φ ψ ihφ ihψ =>
-    constructor;
-    . rintro (hφ | hψ);
-      . left;  exact ihφ bisx |>.mp hφ;
-      . right; exact ihψ bisx |>.mp hψ;
-    . rintro (hφ | hψ);
-      . left;  exact ihφ bisx |>.mpr hφ;
-      . right; exact ihψ bisx |>.mpr hψ;
+    constructor
+    . rintro (hφ | hψ)
+      . left;  exact ihφ bisx |>.mp hφ
+      . right; exact ihψ bisx |>.mp hψ
+    . rintro (hφ | hψ)
+      . left;  exact ihφ bisx |>.mpr hφ
+      . right; exact ihψ bisx |>.mpr hψ
   | himp φ ψ ihφ ihψ =>
-    constructor;
-    . rintro hφψ y₂ Rx₂y₂ hφ;
-      obtain ⟨y₁, ⟨bisy, Rx₁y₁⟩⟩ := Bi.back bisx Rx₂y₂;
-      exact ihψ bisy |>.mp $ hφψ Rx₁y₁ ((ihφ bisy).mpr hφ);
-    . rintro hφψ y₁ Rx₁y₁ hφ;
-      obtain ⟨y₂, ⟨bisy, Rx₂y₂⟩⟩ := Bi.forth bisx Rx₁y₁;
-      exact ihψ bisy |>.mpr $ hφψ Rx₂y₂ ((ihφ bisy).mp hφ);
-  | _ => simp_all;
+    constructor
+    . rintro hφψ y₂ Rx₂y₂ hφ
+      obtain ⟨y₁, ⟨bisy, Rx₁y₁⟩⟩ := Bi.back bisx Rx₂y₂
+      exact ihψ bisy |>.mp $ hφψ Rx₁y₁ ((ihφ bisy).mpr hφ)
+    . rintro hφψ y₁ Rx₁y₁ hφ
+      obtain ⟨y₂, ⟨bisy, Rx₂y₂⟩⟩ := Bi.forth bisx Rx₁y₁
+      exact ihψ bisy |>.mpr $ hφψ Rx₂y₂ ((ihφ bisy).mp hφ)
+  | _ => simp_all
 
 def ModalEquivalent.symm {M₁ M₂ : Model} {w₁ : M₁.World} {w₂ : M₂.World} (h : w₁ ↭ w₂) : w₂ ↭ w₁ := fun {_} => Iff.symm h
 
@@ -95,22 +95,22 @@ variable {F F₁ F₂ F₃ : Kripke.Frame}
 
 def id : F →ₚ F where
   toFun := _root_.id
-  forth := by simp;
-  back := by simp;
+  forth := by simp
+  back := by simp
 
 def comp (f : F₁ →ₚ F₂) (g : F₂ →ₚ F₃) : F₁ →ₚ F₃ where
   toFun := g ∘ f
   forth := by
-    intro x y hxy;
-    exact g.forth $ f.forth hxy;
+    intro x y hxy
+    exact g.forth $ f.forth hxy
   back := by
-    intro x w hxw;
-    obtain ⟨y, ⟨rfl, hxy⟩⟩ := g.back hxw;
-    obtain ⟨u, ⟨rfl, hfu⟩⟩ := f.back hxy;
-    use u;
-    constructor;
-    . simp_all;
-    . assumption;
+    intro x w hxw
+    obtain ⟨y, ⟨rfl, hxy⟩⟩ := g.back hxw
+    obtain ⟨u, ⟨rfl, hfu⟩⟩ := f.back hxy
+    use u
+    constructor
+    . simp_all
+    . assumption
 
 end Frame.PseudoEpimorphism
 
@@ -134,41 +134,41 @@ def ofAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ w
 
 def id : M →ₚ M where
   toFun := _root_.id
-  forth := by simp;
-  back := by simp;
-  atomic := by simp;
+  forth := by simp
+  back := by simp
+  atomic := by simp
 
 def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := ofAtomic (f.toPseudoEpimorphism.comp (g.toPseudoEpimorphism)) $ by
-  intro x φ;
-  constructor;
-  . intro h;
-    apply g.atomic.mp;
-    apply f.atomic.mp;
-    assumption;
-  . intro h;
-    apply f.atomic.mpr;
-    apply g.atomic.mpr;
-    assumption;
+  intro x φ
+  constructor
+  . intro h
+    apply g.atomic.mp
+    apply f.atomic.mp
+    assumption
+  . intro h
+    apply f.atomic.mpr
+    apply g.atomic.mpr
+    assumption
 
 def bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ where
   toRel x y := y = f x
   atomic := by
-    rintro x₁ x₂ a rfl;
-    constructor;
-    . apply f.atomic.mp;
-    . apply f.atomic.mpr;
+    rintro x₁ x₂ a rfl
+    constructor
+    . apply f.atomic.mp
+    . apply f.atomic.mpr
   forth := by
-    simp only [exists_eq_left, forall_eq];
-    intro x₁ y₁ rx₁y₁;
-    exact f.forth rx₁y₁;
+    simp only [exists_eq_left, forall_eq]
+    intro x₁ y₁ rx₁y₁
+    exact f.forth rx₁y₁
   back := by
-    rintro x₁ x₂ y₂ rfl rx₂y₂;
-    obtain ⟨y₁, ⟨rfl, _⟩⟩ := f.back rx₂y₂;
-    use y₁;
+    rintro x₁ x₂ y₂ rfl rx₂y₂
+    obtain ⟨y₁, ⟨rfl, _⟩⟩ := f.back rx₂y₂
+    use y₁
 
 lemma modal_equivalence (f : M₁ →ₚ M₂) (w : M₁.World) : w ↭ (f w) := by
-  apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.bisimulation f;
-  simp [Model.PseudoEpimorphism.bisimulation];
+  apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.bisimulation f
+  simp [Model.PseudoEpimorphism.bisimulation]
 
 end Model.PseudoEpimorphism
 

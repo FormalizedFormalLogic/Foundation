@@ -248,7 +248,7 @@ noncomputable scoped instance : LinearOrder M where
     rcases PeanoMinus.lt_tri x y with (h | rfl | h) <;> simp [*, le_def]
   lt_iff_le_not_ge := fun x y ↦
     ⟨ fun h => ⟨Or.inr h, by
-      simp only [le_def]; rintro (rfl | h');
+      simp only [le_def]; rintro (rfl | h')
       · exact lt_irrefl y h
       · exact lt_irrefl _ (PeanoMinus.lt_trans _ _ _ h h') ⟩,
      by simp only [le_def, not_or, and_imp]
@@ -336,7 +336,7 @@ instance : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
   case Ω₃ n m h =>
     simp [models_iff, numeral_eq_natCast, h]
   case Ω₄ n =>
-    suffices ∀ x : M, x < ↑n ↔ ∃ i < n, x = ↑i by simpa [models_iff, numeral_eq_natCast];
+    suffices ∀ x : M, x < ↑n ↔ ∃ i < n, x = ↑i by simpa [models_iff, numeral_eq_natCast]
     intro x
     constructor
     · intro hx; rcases eq_nat_of_lt_nat hx with ⟨x, rfl⟩; exact ⟨x, by simpa using hx, by simp⟩

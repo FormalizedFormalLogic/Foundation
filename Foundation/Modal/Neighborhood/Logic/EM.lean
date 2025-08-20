@@ -20,31 +20,31 @@ namespace Hilbert
 namespace EM.Neighborhood
 
 instance : Sound Hilbert.EM FrameClass.EM := instSound_of_validates_axioms $ by
-  constructor;
-  rintro _ rfl F hF;
-  simp_all;
+  constructor
+  rintro _ rfl F hF
+  simp_all
 
 instance : Entailment.Consistent Hilbert.EM := consistent_of_sound_frameclass FrameClass.EM $ by
-  use Frame.simple_blackhole;
-  simp only [Set.mem_setOf_eq];
-  infer_instance;
+  use Frame.simple_blackhole
+  simp only [Set.mem_setOf_eq]
+  infer_instance
 
 instance : Complete Hilbert.EM FrameClass.EM := complete_of_canonical_frame FrameClass.EM (maximalCanonicalFrame (Hilbert.EM)) $ by
-  apply Set.mem_setOf_eq.mpr;
-  infer_instance;
+  apply Set.mem_setOf_eq.mpr
+  infer_instance
 
 end EM.Neighborhood
 
 instance : Hilbert.E ⪱ Hilbert.EM := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.M (.atom 0) (.atom 1));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
-      apply not_validOnFrameClass_of_exists_model_world;
+  constructor
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms
+    simp
+  . apply Entailment.not_weakerThan_iff.mpr
+    use (Axioms.M (.atom 0) (.atom 1))
+    constructor
+    . simp
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E)
+      apply not_validOnFrameClass_of_exists_model_world
       let M : Model := {
         World := Fin 3,
         𝒩 := λ w =>
@@ -57,14 +57,14 @@ instance : Hilbert.E ⪱ Hilbert.EM := by
           | 0 => {0, 1}
           | 1 => {1, 2}
           | _ => Set.univ
-      };
-      use M, 0;
-      constructor;
-      . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
-        ext x;
-        simp;
-        omega;
+      }
+      use M, 0
+      constructor
+      . tauto
+      . simp! [M, Semantics.Realize, Satisfies]
+        ext x
+        simp
+        omega
 
 end Hilbert
 

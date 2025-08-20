@@ -26,15 +26,15 @@ instance : (F^≠).IsIrreflexive := ⟨IsIrrefl.irrefl⟩
 instance [F.IsAntisymmetric] [F.IsTransitive] : (F^≠).IsTransitive := inferInstance
 
 instance [F.IsAntisymmetric] : F^≠.IsAntisymmetric := ⟨by
-  rintro x y ⟨Rxy, _⟩ ⟨Ryx, _⟩;
-  exact F.antisymm Rxy Ryx;
+  rintro x y ⟨Rxy, _⟩ ⟨Ryx, _⟩
+  exact F.antisymm Rxy Ryx
 ⟩
 
 instance [F.IsPiecewiseStronglyConnected] : (F^≠).IsPiecewiseConnected := ⟨by
-  rintro x y z ⟨Rxy, _⟩ ⟨Ryz, _⟩;
-  suffices y ≠ z → F^≠.Rel y z ∨ F^≠.Rel z y by tauto;
-  intro nyz;
-  rcases F.ps_connected Rxy Ryz with (Ryz | Rzy) <;> tauto;
+  rintro x y z ⟨Rxy, _⟩ ⟨Ryz, _⟩
+  suffices y ≠ z → F^≠.Rel y z ∨ F^≠.Rel z y by tauto
+  intro nyz
+  rcases F.ps_connected Rxy Ryz with (Ryz | Rzy) <;> tauto
 ⟩
 
 end IrreflGen

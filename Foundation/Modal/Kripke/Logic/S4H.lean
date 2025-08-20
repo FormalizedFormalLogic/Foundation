@@ -32,16 +32,16 @@ namespace Hilbert
 namespace S4H.Kripke
 
 instance : Sound (Hilbert.S4H) FrameClass.S4H := instSound_of_validates_axioms $ by
-  apply FrameClass.validates_with_AxiomK_of_validates;
-  constructor;
-  rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
-  . exact validate_AxiomT_of_reflexive;
-  . exact validate_AxiomFour_of_transitive;
-  . exact validate_axiomH_of_isDetourFree;
+  apply FrameClass.validates_with_AxiomK_of_validates
+  constructor
+  rintro _ (rfl | rfl | rfl) F ⟨_, _⟩
+  . exact validate_AxiomT_of_reflexive
+  . exact validate_AxiomFour_of_transitive
+  . exact validate_axiomH_of_isDetourFree
 
 instance : Entailment.Consistent (Hilbert.S4H) := consistent_of_sound_frameclass FrameClass.S4H $ by
-  use whitepoint;
-  constructor;
+  use whitepoint
+  constructor
 
 instance : Canonical (Hilbert.S4H) FrameClass.S4H := ⟨by constructor⟩
 
@@ -52,30 +52,30 @@ instance : Complete Hilbert.S4H FrameClass.finite_S4H := by sorry
 end S4H.Kripke
 
 instance : Hilbert.Grz ⪱ Hilbert.S4H := by
-  constructor;
+  constructor
   . apply weakerThan_of_subset_frameClass (FrameClass.finite_Grz) (FrameClass.finite_S4H)
-    intro F hF;
-    simp_all only [Set.mem_setOf_eq];
-    infer_instance;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.H (.atom 0);
-    constructor;
-    . simp;
+    intro F hF
+    simp_all only [Set.mem_setOf_eq]
+    infer_instance
+  . apply Entailment.not_weakerThan_iff.mpr
+    use Axioms.H (.atom 0)
+    constructor
+    . simp
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.finite_Grz)
-      apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ w a => w ≠ 1⟩;
-      use M, 0;
-      constructor;
-      . simp only [Set.mem_setOf_eq];
+      apply Kripke.not_validOnFrameClass_of_exists_model_world
+      let M : Model := ⟨⟨Fin 3, λ x y => x ≤ y⟩, λ w a => w ≠ 1⟩
+      use M, 0
+      constructor
+      . simp only [Set.mem_setOf_eq]
         exact {}
       . suffices ∃ x : M, (0 : M) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 ∧ x = 1 by
-          simpa [Semantics.Realize, Satisfies, M];
-        use 1;
-        constructor;
-        . tauto;
-        . use 2;
-          simp [M];
-          omega;
+          simpa [Semantics.Realize, Satisfies, M]
+        use 1
+        constructor
+        . tauto
+        . use 2
+          simp [M]
+          omega
 
 end Hilbert
 

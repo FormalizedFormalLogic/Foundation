@@ -52,7 +52,7 @@ lemma ext_graph (z S L i : V) : z = S{L}[i] ↔
       ↔ ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ ∃ hL ≤ 2 * L + 1, Exponential ‖L‖ hL ∧ z = S / b % hL
     by simpa [lt, not_le.mpr lt]
     constructor
-    · rintro ⟨b, hb, Hb, rfl⟩;
+    · rintro ⟨b, hb, Hb, rfl⟩
       refine ⟨b, hb, Hb, L ⨳ 1, by simp, exponential_smash_one L, rfl⟩
     · rintro ⟨b, hb, Hb, hL, _, HhL, _, _, rfl, rfl⟩
       exact ⟨b, hb, Hb, by rw [HhL.uniq (exponential_smash_one L)]⟩
@@ -439,7 +439,7 @@ lemma four_mul_smash_self (a : V) : (4 * a) ⨳ (4 * a) ≤ (a ⨳ a) ^ 16 := ca
 
 @[simp] lemma pos_sq_iff {a : V} : 0 < √a ↔ 0 < a :=
   ⟨fun h ↦ lt_of_lt_of_le h (by simp),
-    by intro h; by_contra A; simp at A;
+    by intro h; by_contra A; simp at A
        simp [show a = 0 from by simpa [A] using sqrt_lt_sq a] at h⟩
 
 @[simp] lemma pow_four_le_pow_four {a b : V} : a ^ 4 ≤ b ^ 4 ↔ a ≤ b := by simp [pow_four_eq_sq_sq]

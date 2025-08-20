@@ -15,20 +15,20 @@ lemma Frame.contains_unit [Frame.ContainsUnit F] : F.box Set.univ = Set.univ := 
 
 @[simp]
 lemma Frame.univ_mem [Frame.ContainsUnit F] (x) : Set.univ ∈ F.𝒩 x := by
-  haveI := @F.contains_unit.symm.subset;
-  simpa using @this x;
+  haveI := @F.contains_unit.symm.subset
+  simpa using @this x
 
 instance : Frame.simple_blackhole.ContainsUnit := ⟨by ext x; simp⟩
 
 @[simp]
 lemma valid_axiomN_of_ContainsUnit [F.ContainsUnit] : F ⊧ Axioms.N := by
-  intro V x;
-  simp [Satisfies, F.contains_unit];
+  intro V x
+  simp [Satisfies, F.contains_unit]
 
 lemma containsUnit_of_valid_axiomN (h : F ⊧ Axioms.N) : F.ContainsUnit := by
-  constructor;
-  ext x;
-  simpa [Satisfies] using @h (λ _ => Set.univ) x;
+  constructor
+  ext x
+  simpa [Satisfies] using @h (λ _ => Set.univ) x
 
 
 section
@@ -41,17 +41,17 @@ open MaximalConsistentSet
 open MaximalConsistentSet.proofset
 
 instance : (minimalCanonicalFrame 𝓢).ContainsUnit := by
-  constructor;
-  dsimp [minimalCanonicalFrame, Frame.mk_ℬ, Frame.box];
-  split;
-  . rename_i h;
-    apply iff_provable_eq_univ.mp;
-    apply nec!;
-    apply iff_provable_eq_univ.mpr;
-    apply h.choose_spec.symm;
-  . rename_i h;
-    push_neg at h;
-    simpa using @h ⊤;
+  constructor
+  dsimp [minimalCanonicalFrame, Frame.mk_ℬ, Frame.box]
+  split
+  . rename_i h
+    apply iff_provable_eq_univ.mp
+    apply nec!
+    apply iff_provable_eq_univ.mpr
+    apply h.choose_spec.symm
+  . rename_i h
+    push_neg at h
+    simpa using @h ⊤
 
 end
 

@@ -144,7 +144,7 @@ private lemma znth_graph {x s i : V} : x = znth s i ↔ ∃ l ≤ 2 * s, l = lh 
   simp [znth, Classical.choose!_eq_iff]
 
 lemma znth_defined : 𝚺₀-Function₂ (znth : V → V → V) via znthDef := by
-  intro v;
+  intro v
   simpa [znthDef, -not_and, not_and_or] using znth_graph (V := V)
 
 @[simp] lemma eval_znthDef (v) :

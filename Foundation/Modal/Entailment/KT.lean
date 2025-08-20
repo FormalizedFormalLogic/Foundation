@@ -14,8 +14,8 @@ namespace KT
 variable [Entailment.KT 𝓢]
 
 def axiomDiaTc : 𝓢 ⊢ φ ➝ ◇φ := by
-  apply C_trans ?_ (K_right diaDuality);
-  exact C_trans dni $ contra axiomT;
+  apply C_trans ?_ (K_right diaDuality)
+  exact C_trans dni $ contra axiomT
 instance : HasAxiomDiaTc 𝓢 := ⟨fun _ ↦ KT.axiomDiaTc⟩
 
 protected def axiomP : 𝓢 ⊢ ∼□⊥ := N_of_CO axiomT
@@ -46,11 +46,11 @@ variable [Entailment.KT 𝓢]
 omit [DecidableEq F] in
 @[simp] lemma reduce_box_in_CAnt! : 𝓢 ⊢! □^[(i + n)]φ ➝ □^[i]φ := by
   induction n with
-  | zero => simp;
+  | zero => simp
   | succ n ih =>
-    simp only [show (i + (n + 1)) = (i + n) + 1 by omega, Box.multibox_succ];
-    apply C!_trans ?_ ih;
-    apply axiomT!;
+    simp only [show (i + (n + 1)) = (i + n) + 1 by omega, Box.multibox_succ]
+    apply C!_trans ?_ ih
+    apply axiomT!
 
 end
 

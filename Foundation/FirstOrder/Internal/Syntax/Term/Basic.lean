@@ -590,7 +590,7 @@ lemma graph_existsUnique_vec {k w : V} (hw : IsUTermVec L k w) :
   refine ExistsUnique.intro w' ⟨hw'k.symm, hw'⟩ ?_
   intro w'' ⟨hkw'', hw''⟩
   refine nth_ext (by simp [hw'k, ←hkw'']) (by
-    intro i hi;
+    intro i hi
     exact c.graph_unique param (hw'' i (by simpa [hkw''] using hi)) (hw' i (by simpa [hkw''] using hi)))
 
 variable (L c param)

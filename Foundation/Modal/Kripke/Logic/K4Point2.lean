@@ -23,16 +23,16 @@ end Kripke
 namespace Hilbert.K4Point2.Kripke
 
 instance : Sound (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 := instSound_of_validates_axioms $ by
-  apply FrameClass.validates_with_AxiomK_of_validates;
-  constructor;
-  rintro _ (rfl | rfl) F ⟨_, _⟩;
-  . exact validate_AxiomFour_of_transitive;
-  . exact validate_WeakPoint2_of_weakConfluent;
+  apply FrameClass.validates_with_AxiomK_of_validates
+  constructor
+  rintro _ (rfl | rfl) F ⟨_, _⟩
+  . exact validate_AxiomFour_of_transitive
+  . exact validate_WeakPoint2_of_weakConfluent
 
 instance : Entailment.Consistent Hilbert.K4Point2 :=
   consistent_of_sound_frameclass Kripke.FrameClass.K4Point2 $ by
-    use whitepoint;
-    constructor;
+    use whitepoint
+    constructor
 
 instance : Canonical (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 :=  ⟨by constructor⟩
 
@@ -40,28 +40,28 @@ instance : Complete (Hilbert.K4Point2) Kripke.FrameClass.K4Point2 := inferInstan
 
 
 instance : Hilbert.K4 ⪱ Hilbert.K4Point2 := by
-  constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.WeakPoint2 (.atom 0) (.atom 1));
-    constructor;
-    . exact axiomWeakPoint2!;
+  constructor
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp
+  . apply Entailment.not_weakerThan_iff.mpr
+    use (Axioms.WeakPoint2 (.atom 0) (.atom 1))
+    constructor
+    . exact axiomWeakPoint2!
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4)
-      apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      apply Kripke.not_validOnFrameClass_of_exists_model_world
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x = 0⟩,
         λ w a => if a = 0 then True else w = 0
-      ⟩;
-      use M, 0;
-      constructor;
-      . simp only [Set.mem_setOf_eq];
-        exact { trans := by omega };
+      ⟩
+      use M, 0
+      constructor
+      . simp only [Set.mem_setOf_eq]
+        exact { trans := by omega }
       . suffices ∃ (x : M.World), (∀ y, ¬x ≺ y) ∧ x ≠ 0 by
-          simpa [M, Semantics.Realize, Satisfies];
-        use 1;
-        constructor;
-        . omega;
-        . trivial;
+          simpa [M, Semantics.Realize, Satisfies]
+        use 1
+        constructor
+        . omega
+        . trivial
 
 end Hilbert.K4Point2.Kripke
 

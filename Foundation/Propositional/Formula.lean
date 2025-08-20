@@ -29,7 +29,7 @@ instance : LogicalConnective (Formula α) where
   top := verum
   bot := falsum
 
-instance : LO.NegAbbrev (Formula α) := by tauto;
+instance : LO.NegAbbrev (Formula α) := by tauto
 
 section ToString
 
@@ -200,7 +200,7 @@ def ofNat : ℕ → Option (Formula α)
     | _ => none
 
 lemma ofNat_toNat : ∀ (φ : Formula α), ofNat (toNat φ) = some φ
-  | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek];
+  | atom a  => by simp [toNat, ofNat, Nat.unpair_pair, encodek]
   | ⊥       => by simp [toNat, ofNat]
   | φ ➝ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
   | φ ⋏ ψ   => by simp [toNat, ofNat, ofNat_toNat φ, ofNat_toNat ψ]
@@ -265,52 +265,52 @@ namespace Formula.subformulas
 
 variable {φ ψ χ : Formula α}
 
-@[simp, grind] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas];
+@[simp, grind] lemma mem_self : φ ∈ φ.subformulas := by induction φ <;> simp [subformulas]
 
 @[grind ⇒]
 protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
   | himp =>
-    simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union];
-    rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
-  | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
-  | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
-  | _ => simp_all [subformulas];
+    simp_all only [subformulas, Finset.mem_insert, imp_inj, Finset.mem_union]
+    rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
+  | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto
+  | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto
+  | _ => simp_all [subformulas]
 
 @[grind ⇒]
 protected lemma mem_and (h : (ψ ⋏ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
-  | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
-  | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
+  | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto
+  | hor => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto
   | hand =>
-    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
-    rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
-  | _ => simp_all [subformulas];
+    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]
+    rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
+  | _ => simp_all [subformulas]
 
 @[grind ⇒]
 protected lemma mem_or (h : (ψ ⋎ χ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ χ ∈ φ.subformulas := by
   induction φ with
-  | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
+  | himp => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto
   | hor =>
-    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union];
-    rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all;
-  | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto;
-  | _ => simp_all [subformulas];
+    simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]
+    rcases h with ⟨_⟩ | ⟨⟨_⟩ | ⟨_⟩⟩ <;> simp_all
+  | hand => simp_all only [subformulas, Finset.mem_insert, Finset.mem_union]; tauto
+  | _ => simp_all [subformulas]
 
 @[grind ⇒]
 protected lemma mem_neg (h : (∼ψ) ∈ φ.subformulas) : ψ ∈ φ.subformulas ∧ ⊥ ∈ φ.subformulas := by
-  rw [neg_def] at h;
-  grind;
+  rw [neg_def] at h
+  grind
 
-example {_ : φ ∈ φ.subformulas} : φ ∈ φ.subformulas := by grind;
+example {_ : φ ∈ φ.subformulas} : φ ∈ φ.subformulas := by grind
 example {_ : ψ ➝ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
 example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind
-example {_ : ∼ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind;
-example {_ : ∼ψ ∈ φ.subformulas} : ⊥ ∈ φ.subformulas := by grind;
+example {_ : ∼ψ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
+example {_ : ∼ψ ∈ φ.subformulas} : ⊥ ∈ φ.subformulas := by grind
 example {_ : ψ ⋏ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
 example {_ : ψ ⋎ χ ∈ φ.subformulas} : ψ ∈ φ.subformulas := by grind
 example {_ : ψ ➝ χ ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind
-example {_ : ψ ⋏ (ψ ⋎ (χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind;
+example {_ : ψ ⋏ (ψ ⋎ (χ ➝ ξ)) ∈ φ.subformulas} : χ ∈ φ.subformulas := by grind
 
 end Formula.subformulas
 
@@ -322,47 +322,47 @@ namespace FormulaFinset.SubformulaClosed
 
 variable {φ ψ χ : Formula α} {Γ : FormulaFinset α} [Γ.SubformulaClosed]
 
-@[grind ⇒] lemma mem_and₁ (h : φ ⋏ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_and₂ (h : φ ⋏ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_or₁ (h : φ ⋎ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_or₂ (h : φ ⋎ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_imp₁ (h : φ ➝ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
-@[grind ⇒] lemma mem_imp₂ (h : φ ➝ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas];
+@[grind ⇒] lemma mem_and₁ (h : φ ⋏ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas]
+@[grind ⇒] lemma mem_and₂ (h : φ ⋏ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas]
+@[grind ⇒] lemma mem_or₁ (h : φ ⋎ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas]
+@[grind ⇒] lemma mem_or₂ (h : φ ⋎ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas]
+@[grind ⇒] lemma mem_imp₁ (h : φ ➝ ψ ∈ Γ) : φ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas]
+@[grind ⇒] lemma mem_imp₂ (h : φ ➝ ψ ∈ Γ) : ψ ∈ Γ := by apply SubformulaClosed.closed _ h; simp [Formula.subformulas]
 
 instance subformulaClosed_subformulas [DecidableEq α] {φ : Formula α} : SubformulaClosed (φ.subformulas) := ⟨by
   induction φ with
-  | hatom => simp [Formula.subformulas];
-  | hfalsum => simp [Formula.subformulas];
+  | hatom => simp [Formula.subformulas]
+  | hfalsum => simp [Formula.subformulas]
   | himp φ ψ ihφ ihψ =>
-    rintro ξ hξ;
-    rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ);
-    . tauto;
-    . trans φ.subformulas;
-      . exact ihφ _ hξ;
-      . intro; simp_all [Formula.subformulas];
-    . trans ψ.subformulas;
-      . exact ihψ _ hξ;
-      . intro; simp_all [Formula.subformulas];
+    rintro ξ hξ
+    rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ)
+    . tauto
+    . trans φ.subformulas
+      . exact ihφ _ hξ
+      . intro; simp_all [Formula.subformulas]
+    . trans ψ.subformulas
+      . exact ihψ _ hξ
+      . intro; simp_all [Formula.subformulas]
   | hand φ ψ ihφ ihψ =>
-    rintro ξ hξ;
-    rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ);
-    . tauto;
-    . trans φ.subformulas;
-      . exact ihφ _ hξ;
-      . intro; simp_all [Formula.subformulas];
-    . trans ψ.subformulas;
-      . exact ihψ _ hξ;
-      . intro; simp_all [Formula.subformulas];
+    rintro ξ hξ
+    rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ)
+    . tauto
+    . trans φ.subformulas
+      . exact ihφ _ hξ
+      . intro; simp_all [Formula.subformulas]
+    . trans ψ.subformulas
+      . exact ihψ _ hξ
+      . intro; simp_all [Formula.subformulas]
   | hor φ ψ ihφ ihψ =>
-    rintro ξ hξ;
-    rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ);
-    . tauto;
-    . trans φ.subformulas;
-      . exact ihφ _ hξ;
-      . intro; simp_all [Formula.subformulas];
-    . trans ψ.subformulas;
-      . exact ihψ _ hξ;
-      . intro; simp_all [Formula.subformulas];
+    rintro ξ hξ
+    rcases (by simpa [Formula.subformulas] using hξ) with (rfl | hξ | hξ)
+    . tauto
+    . trans φ.subformulas
+      . exact ihφ _ hξ
+      . intro; simp_all [Formula.subformulas]
+    . trans ψ.subformulas
+      . exact ihψ _ hξ
+      . intro; simp_all [Formula.subformulas]
 ⟩
 
 end FormulaFinset.SubformulaClosed
@@ -376,16 +376,16 @@ namespace FormulaSet.SubformulaClosed
 
 variable {φ ψ χ : Formula α} {T : FormulaSet α} [T.SubformulaClosed]
 
-@[grind ⇒] protected lemma mem_and₁ (h : φ ⋏ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_and₂ (h : φ ⋏ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_or₁ (h : φ ⋎ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_or₂ (h : φ ⋎ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_imp₁ (h : φ ➝ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas];
-@[grind ⇒] protected lemma mem_imp₂ (h : φ ➝ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas];
+@[grind ⇒] protected lemma mem_and₁ (h : φ ⋏ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas]
+@[grind ⇒] protected lemma mem_and₂ (h : φ ⋏ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas]
+@[grind ⇒] protected lemma mem_or₁ (h : φ ⋎ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas]
+@[grind ⇒] protected lemma mem_or₂ (h : φ ⋎ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas]
+@[grind ⇒] protected lemma mem_imp₁ (h : φ ➝ ψ ∈ T) : φ ∈ T := by apply closed _ h; simp [Formula.subformulas]
+@[grind ⇒] protected lemma mem_imp₂ (h : φ ➝ ψ ∈ T) : ψ ∈ T := by apply closed _ h; simp [Formula.subformulas]
 
 
 instance [DecidableEq α] {φ : Formula α} : SubformulaClosed φ.subformulas.toSet := ⟨by
-  simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed;
+  simpa using FormulaFinset.SubformulaClosed.subformulaClosed_subformulas (φ := φ) |>.closed
 ⟩
 
 example {_ : φ ⋏ ψ ∈ T} : φ ∈ T := by grind
@@ -442,20 +442,20 @@ end subst
 end Formula
 
 @[simp]
-lemma Formula.subst_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ <;> simp_all;
+lemma Formula.subst_id {φ : Formula α} : φ⟦.id⟧ = φ := by induction φ <;> simp_all
 
 def Substitution.comp (s₁ s₂ : Substitution α) : Substitution α := λ a => (s₁ a)⟦s₂⟧
 infixr:80 " ∘ " => Substitution.comp
 
 @[simp]
 lemma Formula.subst_comp {s₁ s₂ : Substitution α} {φ : Formula α} : φ⟦s₁ ∘ s₂⟧ = φ⟦s₁⟧⟦s₂⟧ := by
-  induction φ <;> simp_all [Substitution.comp];
+  induction φ <;> simp_all [Substitution.comp]
 
 def ZeroSubstitution (α) := { s : Substitution α // ∀ {a : α}, ((.atom a)⟦s⟧).letterless }
 
 lemma Formula.letterless_zeroSubst {φ : Formula α} {s : ZeroSubstitution α} : (φ⟦s.1⟧).letterless := by
-  induction φ <;> simp [Formula.letterless, *];
-  case hatom => exact s.2;
+  induction φ <;> simp [Formula.letterless, *]
+  case hatom => exact s.2
 
 
 class SubstitutionClosed (S : Set (Formula α)) where

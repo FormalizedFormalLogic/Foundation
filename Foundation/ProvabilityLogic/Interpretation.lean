@@ -50,49 +50,49 @@ lemma interpret_boxItr_def (n : ℕ) : f (□^[n] A) = 𝔅^[n] (f A) := by
 variable [DecidableEq (Sentence L)]
 
 lemma iff_interpret_neg_inside : T ⊢!. f (∼A) ⭤ ∼(f A) := by
-  dsimp [Realization.interpret];
-  cl_prover;
+  dsimp [Realization.interpret]
+  cl_prover
 
 lemma iff_interpret_or_inside : T ⊢!. f (A ⋎ B) ⭤ (f A) ⋎ (f B) := by
-  dsimp [Realization.interpret];
-  cl_prover;
+  dsimp [Realization.interpret]
+  cl_prover
 
 lemma iff_interpret_and_inside : T ⊢!. f (A ⋏ B) ⭤ (f A) ⋏ (f B) := by
-  dsimp [Realization.interpret];
-  cl_prover;
+  dsimp [Realization.interpret]
+  cl_prover
 
 lemma iff_interpret_neg : T ⊢!. f (∼A) ↔ T ⊢!. ∼(f A) := by
-  dsimp [Realization.interpret];
-  constructor <;> . intro h; cl_prover [h];
+  dsimp [Realization.interpret]
+  constructor <;> . intro h; cl_prover [h]
 
 lemma iff_interpret_or : T ⊢!. f (A ⋎ B) ↔ T ⊢!. (f A) ⋎ (f B) := by
-  dsimp [Realization.interpret];
-  constructor <;> . intro h; cl_prover [h];
+  dsimp [Realization.interpret]
+  constructor <;> . intro h; cl_prover [h]
 
 lemma iff_interpret_and : T ⊢!. f (A ⋏ B) ↔ T ⊢!. (f A) ⋏ (f B) := by
-  dsimp [Realization.interpret];
-  constructor <;> . intro h; cl_prover [h];
+  dsimp [Realization.interpret]
+  constructor <;> . intro h; cl_prover [h]
 
 lemma iff_interpret_and' : T ⊢!. f (A ⋏ B) ↔ T ⊢!. (f A) ∧ T ⊢!. (f B) := by
-  dsimp [Realization.interpret];
-  constructor;
-  . intro h; constructor <;> cl_prover [h];
-  . rintro ⟨hA, hB⟩; cl_prover [hA, hB];
+  dsimp [Realization.interpret]
+  constructor
+  . intro h; constructor <;> cl_prover [h]
+  . rintro ⟨hA, hB⟩; cl_prover [hA, hB]
 
 end
 
 lemma letterless_interpret {𝔅 : Provability T₀ T}
     {f₁ f₂ : Realization 𝔅} (A_letterless : A.letterless) : f₁ A = f₂ A := by
   induction A with
-  | hatom a => simp at A_letterless;
-  | hfalsum => simp_all [Realization.interpret];
+  | hatom a => simp at A_letterless
+  | hfalsum => simp_all [Realization.interpret]
   | himp A B ihA ihB =>
-    replace ihA := ihA $ Modal.Formula.letterless.def_imp₁ A_letterless;
-    replace ihB := ihB $ Modal.Formula.letterless.def_imp₂ A_letterless;
-    simp_all [Realization.interpret];
+    replace ihA := ihA $ Modal.Formula.letterless.def_imp₁ A_letterless
+    replace ihB := ihB $ Modal.Formula.letterless.def_imp₂ A_letterless
+    simp_all [Realization.interpret]
   | hbox A ihA =>
-    replace ihA := ihA $ Modal.Formula.letterless.def_box A_letterless;
-    simp_all [Realization.interpret];
+    replace ihA := ihA $ Modal.Formula.letterless.def_box A_letterless
+    simp_all [Realization.interpret]
 
 
 end Realization

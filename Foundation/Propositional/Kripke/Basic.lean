@@ -87,89 +87,89 @@ variable {M : Kripke.Model} {w w' : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 
 @[simp] protected lemma iff_models : w ⊧ φ ↔ Formula.Kripke.Satisfies M w φ := iff_of_eq rfl
 
-@[simp] lemma atom_def : w ⊧ atom a ↔ M w a := by simp [Satisfies];
+@[simp] lemma atom_def : w ⊧ atom a ↔ M w a := by simp [Satisfies]
 
-@[simp] lemma top_def  : w ⊧ ⊤ ↔ True := by simp [Satisfies];
+@[simp] lemma top_def  : w ⊧ ⊤ ↔ True := by simp [Satisfies]
 
-@[simp] lemma bot_def  : w ⊧ ⊥ ↔ False := by simp [Satisfies];
+@[simp] lemma bot_def  : w ⊧ ⊥ ↔ False := by simp [Satisfies]
 
-@[simp] lemma and_def  : w ⊧ φ ⋏ ψ ↔ w ⊧ φ ∧ w ⊧ ψ := by simp [Satisfies];
+@[simp] lemma and_def  : w ⊧ φ ⋏ ψ ↔ w ⊧ φ ∧ w ⊧ ψ := by simp [Satisfies]
 
-@[simp] lemma or_def   : w ⊧ φ ⋎ ψ ↔ w ⊧ φ ∨ w ⊧ ψ := by simp [Satisfies];
+@[simp] lemma or_def   : w ⊧ φ ⋎ ψ ↔ w ⊧ φ ∨ w ⊧ ψ := by simp [Satisfies]
 
-@[simp] lemma imp_def  : w ⊧ φ ➝ ψ ↔ ∀ {w' : M.World}, (w ≺ w') → (w' ⊧ φ → w' ⊧ ψ) := by simp [Satisfies, imp_iff_not_or];
+@[simp] lemma imp_def  : w ⊧ φ ➝ ψ ↔ ∀ {w' : M.World}, (w ≺ w') → (w' ⊧ φ → w' ⊧ ψ) := by simp [Satisfies, imp_iff_not_or]
 
-@[simp] lemma neg_def  : w ⊧ ∼φ ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ φ) := by simp [Satisfies];
+@[simp] lemma neg_def  : w ⊧ ∼φ ↔ ∀ {w' : M.World}, (w ≺ w') → ¬(w' ⊧ φ) := by simp [Satisfies]
 
 lemma not_of_neg : w ⊧ ∼φ → ¬w ⊧ φ := fun h hC ↦ h (refl w) hC
 
 instance : Semantics.Top M.World where
-  realize_top := by simp [Satisfies];
+  realize_top := by simp [Satisfies]
 
 instance : Semantics.Bot M.World where
-  realize_bot := by simp [Satisfies];
+  realize_bot := by simp [Satisfies]
 
 instance : Semantics.And M.World where
-  realize_and := by simp [Satisfies];
+  realize_and := by simp [Satisfies]
 
 instance : Semantics.Or M.World where
-  realize_or := by simp [Satisfies];
+  realize_or := by simp [Satisfies]
 
 lemma formula_hereditary
   (hw : w ≺ w') : w ⊧ φ → w' ⊧ φ := by
   induction φ with
-  | hatom => apply M.Val.hereditary hw;
+  | hatom => apply M.Val.hereditary hw
   | himp =>
-    intro hpq v hv;
-    exact hpq $ M.trans hw hv;
-  | hor => simp_all; tauto;
-  | _ => simp_all;
+    intro hpq v hv
+    exact hpq $ M.trans hw hv
+  | hor => simp_all; tauto
+  | _ => simp_all
 
 lemma formula_hereditary_not (hw : w ≺ w') : ¬w' ⊧ φ → ¬w ⊧ φ := by
-  contrapose;
-  push_neg;
-  exact formula_hereditary hw;
+  contrapose
+  push_neg
+  exact formula_hereditary hw
 
-lemma negEquiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies];
+lemma negEquiv : w ⊧ ∼φ ↔ w ⊧ φ ➝ ⊥ := by simp_all [Satisfies]
 
 lemma iff_subst_self {F : Frame} {V : Valuation F} {x : F.World} (s) :
   letI U : Kripke.Valuation F := ⟨
     λ w a => Satisfies ⟨F, V⟩ w ((.atom a)⟦s⟧),
     fun {_ _} Rwv {_} => formula_hereditary Rwv
-  ⟩;
+  ⟩
   Satisfies ⟨F, U⟩ x φ ↔ Satisfies ⟨F, V⟩ x (φ⟦s⟧) := by
   induction φ generalizing x with
-  | hatom a => simp [Satisfies];
-  | hfalsum => simp [Satisfies];
+  | hatom a => simp [Satisfies]
+  | hfalsum => simp [Satisfies]
   | himp φ ψ ihφ ihψ =>
-    constructor;
-    . intro hφψ y Rxy hφs;
-      apply ihψ.mp;
-      apply hφψ Rxy;
-      apply ihφ.mpr hφs;
-    . intro hφψs y Rxy hφ;
-      apply ihψ.mpr;
-      apply hφψs Rxy;
-      apply ihφ.mp hφ;
+    constructor
+    . intro hφψ y Rxy hφs
+      apply ihψ.mp
+      apply hφψ Rxy
+      apply ihφ.mpr hφs
+    . intro hφψs y Rxy hφ
+      apply ihψ.mpr
+      apply hφψs Rxy
+      apply ihφ.mp hφ
   | hand φ ψ ihφ ihψ =>
-    constructor;
-    . rintro ⟨hφ, hψ⟩;
-      constructor;
-      . apply ihφ.mp hφ;
-      . apply ihψ.mp hψ;
-    . rintro ⟨hφ, hψ⟩;
-      apply Satisfies.and_def.mpr;
-      constructor;
-      . apply ihφ.mpr hφ;
-      . apply ihψ.mpr hψ;
+    constructor
+    . rintro ⟨hφ, hψ⟩
+      constructor
+      . apply ihφ.mp hφ
+      . apply ihψ.mp hψ
+    . rintro ⟨hφ, hψ⟩
+      apply Satisfies.and_def.mpr
+      constructor
+      . apply ihφ.mpr hφ
+      . apply ihψ.mpr hψ
   | hor φ ψ ihφ ihψ =>
-    constructor;
-    . rintro (hφ | hψ);
-      . left; apply ihφ.mp hφ;
-      . right; apply ihψ.mp hψ;
-    . rintro (hφ | hψ);
-      . left; apply ihφ.mpr hφ;
-      . right; apply ihψ.mpr hψ;
+    constructor
+    . rintro (hφ | hψ)
+      . left; apply ihφ.mp hφ
+      . right; apply ihψ.mp hψ
+    . rintro (hφ | hψ)
+      . left; apply ihφ.mpr hφ
+      . right; apply ihψ.mpr hψ
 
 end Satisfies
 
@@ -187,57 +187,57 @@ variable {M : Model} {φ ψ χ : Formula ℕ}
 @[simp] protected lemma iff_models : M ⊧ φ ↔ Formula.Kripke.ValidOnModel M φ := iff_of_eq rfl
 
 
-protected lemma verum : M ⊧ ⊤ := by simp [ValidOnModel];
+protected lemma verum : M ⊧ ⊤ := by simp [ValidOnModel]
 
 instance : Semantics.Top (Model) := ⟨λ _ => ValidOnModel.verum⟩
 
 
-protected lemma bot : ¬M ⊧ ⊥ := by simp [ValidOnModel];
+protected lemma bot : ¬M ⊧ ⊥ := by simp [ValidOnModel]
 
 instance : Semantics.Bot (Model) := ⟨λ _ => ValidOnModel.bot⟩
 
 
 lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
+  apply not_iff_not.mp
+  push_neg
+  tauto
 
 alias ⟨exists_world_of_not, not_of_exists_world⟩ := iff_not_exists_world
 
-protected lemma andElim₁ : M ⊧ φ ⋏ ψ ➝ φ := by simp_all [ValidOnModel, Satisfies];
+protected lemma andElim₁ : M ⊧ φ ⋏ ψ ➝ φ := by simp_all [ValidOnModel, Satisfies]
 
-protected lemma andElim₂ : M ⊧ φ ⋏ ψ ➝ ψ := by simp_all [ValidOnModel, Satisfies];
+protected lemma andElim₂ : M ⊧ φ ⋏ ψ ➝ ψ := by simp_all [ValidOnModel, Satisfies]
 
 protected lemma andInst₃ : M ⊧ φ ➝ ψ ➝ φ ⋏ ψ := by
-  intro x y _ hp z Ryz hq;
-  replace hp : Satisfies M z φ := formula_hereditary Ryz hp;
-  exact ⟨hp, hq⟩;
+  intro x y _ hp z Ryz hq
+  replace hp : Satisfies M z φ := formula_hereditary Ryz hp
+  exact ⟨hp, hq⟩
 
-protected lemma orInst₁ : M ⊧ φ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
+protected lemma orInst₁ : M ⊧ φ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies]
 
-protected lemma orInst₂ : M ⊧ ψ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies];
+protected lemma orInst₂ : M ⊧ ψ ➝ φ ⋎ ψ := by simp_all [ValidOnModel, Satisfies]
 
 protected lemma orElim : M ⊧ (φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ) := by
-  intro w₁ w₂ _ hpr w₃ hw₂₃ hqr w₄ hw₃₄ hpq;
+  intro w₁ w₂ _ hpr w₃ hw₂₃ hqr w₄ hw₃₄ hpq
   cases hpq with
-  | inl hp => exact hpr (M.trans hw₂₃ hw₃₄) hp;
-  | inr hq => exact hqr hw₃₄ hq;
+  | inl hp => exact hpr (M.trans hw₂₃ hw₃₄) hp
+  | inr hq => exact hqr hw₃₄ hq
 
 protected lemma imply₁ : M ⊧ φ ➝ ψ ➝ φ := by
-  intro x y _ hp z Ryz _;
-  exact formula_hereditary Ryz hp;
+  intro x y _ hp z Ryz _
+  exact formula_hereditary Ryz hp
 
 protected lemma imply₂ : M ⊧ (φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ := by
-  intro x y _ hpqr z Ryz hpq w Rzw hp;
-  have Ryw : y ≺ w := M.trans Ryz Rzw;
-  have Rww : w ≺ w := M.refl;
-  exact hpqr Ryw hp Rww (hpq Rzw hp);
+  intro x y _ hpqr z Ryz hpq w Rzw hp
+  have Ryw : y ≺ w := M.trans Ryz Rzw
+  have Rww : w ≺ w := M.refl
+  exact hpqr Ryw hp Rww (hpq Rzw hp)
 
 protected lemma mdp (hpq : M ⊧ φ ➝ ψ) (hp : M ⊧ φ) : M ⊧ ψ := by
-  intro w;
-  exact hpq w M.refl $ hp w;
+  intro w
+  exact hpq w M.refl $ hp w
 
-protected lemma efq : M ⊧ Axioms.EFQ φ := by simp [ValidOnModel, Satisfies];
+protected lemma efq : M ⊧ Axioms.EFQ φ := by simp [ValidOnModel, Satisfies]
 
 end ValidOnModel
 
@@ -253,44 +253,44 @@ variable {F : Frame} {φ ψ χ : Formula ℕ}
 
 @[simp] protected lemma models_iff : F ⊧ φ ↔ ValidOnFrame F φ := iff_of_eq rfl
 
-protected lemma top : F ⊧ ⊤ := by tauto;
+protected lemma top : F ⊧ ⊤ := by tauto
 instance : Semantics.Top (Frame) := ⟨λ _ => ValidOnFrame.top⟩
 
 protected lemma bot : ¬F ⊧ ⊥ := by
-  simp [ValidOnFrame.models_iff, ValidOnFrame];
-  exact ⟨(λ _ _ => True), by tauto⟩;
+  simp [ValidOnFrame.models_iff, ValidOnFrame]
+  exact ⟨(λ _ _ => True), by tauto⟩
 instance : Semantics.Bot (Frame) := ⟨λ _ => ValidOnFrame.bot⟩
 
 
 lemma iff_not_exists_valuation : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ¬(⟨F, V⟩ : Kripke.Model) ⊧ φ) := by
-  simp [ValidOnFrame];
+  simp [ValidOnFrame]
 
 alias ⟨exists_valuation_of_not, not_of_exists_valuation⟩ := iff_not_exists_valuation
 
 
 lemma iff_not_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ∃ x : (⟨F, V⟩ : Kripke.Model).World, ¬Satisfies _ x φ) := by
-  simp [ValidOnFrame, ValidOnModel, Semantics.Realize];
+  simp [ValidOnFrame, ValidOnModel, Semantics.Realize]
 
 alias ⟨exists_valuation_world_of_not, not_of_exists_valuation_world⟩ := iff_not_exists_valuation_world
 
 
 lemma iff_not_exists_model_world :  (¬F ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame = F ∧ ¬(x ⊧ φ)) := by
-  constructor;
-  . intro h;
-    obtain ⟨V, x, h⟩ := iff_not_exists_valuation_world.mp h;
-    use ⟨F, V⟩, x;
-    tauto;
-  . rintro ⟨M, x, rfl, h⟩;
-    exact iff_not_exists_valuation_world.mpr ⟨M.Val, x, h⟩;
+  constructor
+  . intro h
+    obtain ⟨V, x, h⟩ := iff_not_exists_valuation_world.mp h
+    use ⟨F, V⟩, x
+    tauto
+  . rintro ⟨M, x, rfl, h⟩
+    exact iff_not_exists_valuation_world.mpr ⟨M.Val, x, h⟩
 
 alias ⟨exists_model_world_of_not, not_of_exists_model_world⟩ := iff_not_exists_model_world
 
 
 protected lemma subst (h : F ⊧ φ) : F ⊧ φ⟦s⟧ := by
-  by_contra hC;
-  obtain ⟨V, ⟨x, hx⟩⟩ := exists_valuation_world_of_not hC;
-  apply Satisfies.iff_subst_self s |>.not.mpr hx;
-  apply h;
+  by_contra hC
+  obtain ⟨V, ⟨x, hx⟩⟩ := exists_valuation_world_of_not hC
+  apply Satisfies.iff_subst_self s |>.not.mpr hx
+  apply h
 
 protected lemma andElim₁ : F ⊧ φ ⋏ ψ ➝ φ := fun _ => ValidOnModel.andElim₁
 
@@ -325,21 +325,21 @@ section
 variable {C : Kripke.FrameClass} {φ ψ χ : Formula ℕ}
 
 lemma iff_not_validOnFrameClass_exists_frame : (¬C ⊧ φ) ↔ (∃ F ∈ C, ¬F ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
+  apply not_iff_not.mp
+  push_neg
+  tauto
 alias ⟨exists_frame_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_frame⟩ := iff_not_validOnFrameClass_exists_frame
 
 lemma iff_not_validOnFrameClass_exists_model : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, M.toFrame ∈ C ∧ ¬M ⊧ φ) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
+  apply not_iff_not.mp
+  push_neg
+  tauto
 alias ⟨exists_model_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model⟩ := iff_not_validOnFrameClass_exists_model
 
 lemma iff_not_validOnFrameClass_exists_model_world : (¬C ⊧ φ) ↔ (∃ M : Kripke.Model, ∃ x : M.World, M.toFrame ∈ C ∧ ¬(x ⊧ φ)) := by
-  apply not_iff_not.mp;
-  push_neg;
-  tauto;
+  apply not_iff_not.mp
+  push_neg
+  tauto
 alias ⟨exists_model_world_of_not_validOnFrameClass, not_validOnFrameClass_of_exists_model_world⟩ := iff_not_validOnFrameClass_exists_model_world
 
 end
@@ -359,10 +359,10 @@ abbrev ValidatesFormula (C : FrameClass) (φ : Formula ℕ) := Validates C {φ}
 variable {C C₁ C₂ : FrameClass} {Γ Γ₁ Γ₂ : FormulaSet ℕ} {φ φ₁ φ₂ : Formula ℕ}
 
 lemma Validates.inter_of (h₁ : C₁.Validates Γ₁) (h₂ : C₂.Validates Γ₂) : (C₁ ∩ C₂).Validates (Γ₁ ∪ Γ₂) := by
-  rintro F;
-  rintro ⟨hF₁, hF₂⟩ φ (hφ₁ | hφ₂);
-  . exact h₁ F hF₁ _ hφ₁;
-  . exact h₂ F hF₂ _ hφ₂;
+  rintro F
+  rintro ⟨hF₁, hF₂⟩ φ (hφ₁ | hφ₂)
+  . exact h₁ F hF₁ _ hφ₁
+  . exact h₂ F hF₂ _ hφ₂
 
 lemma ValidatesFormula.inter_of (h₁ : C₁.ValidatesFormula φ₁) (h₂ : C₂.ValidatesFormula φ₂) : (C₁ ∩ C₂).Validates {φ₁, φ₂}
   := Validates.inter_of h₁ h₂
@@ -371,26 +371,26 @@ lemma ValidatesFormula.inter_of (h₁ : C₁.ValidatesFormula φ₁) (h₂ : C�
 protected abbrev all : FrameClass := Set.univ
 
 @[simp]
-lemma all.IsNonempty : FrameClass.all.Nonempty := by use whitepoint; tauto;
+lemma all.IsNonempty : FrameClass.all.Nonempty := by use whitepoint; tauto
 
 lemma all.validates_AxiomEFQ : FrameClass.all.ValidatesFormula (Axioms.EFQ (.atom 0)) := by
-  suffices ∀ (F : Frame), Formula.Kripke.ValidOnFrame F (Axioms.EFQ (.atom 0)) by simpa [Validates];
-  intro F;
-  exact Formula.Kripke.ValidOnFrame.efq;
+  suffices ∀ (F : Frame), Formula.Kripke.ValidOnFrame F (Axioms.EFQ (.atom 0)) by simpa [Validates]
+  intro F
+  exact Formula.Kripke.ValidOnFrame.efq
 
 lemma Validates.withAxiomEFQ (hV : C.Validates Γ) : C.Validates (insert (Axioms.EFQ (.atom 0)) Γ) := by
-  convert Validates.inter_of all.validates_AxiomEFQ hV;
-  tauto_set;
+  convert Validates.inter_of all.validates_AxiomEFQ hV
+  tauto_set
 
 protected abbrev finite_all : FrameClass := { F | F.IsFinite }
 
 @[simp]
-lemma finite_all.nonempty : FrameClass.finite_all.Nonempty := by use whitepoint; tauto;
+lemma finite_all.nonempty : FrameClass.finite_all.Nonempty := by use whitepoint; tauto
 
 lemma finite_all.validates_AxiomEFQ : FrameClass.finite_all.ValidatesFormula (Axioms.EFQ (.atom 0)) := by
-  suffices ∀ (F : Frame), F.IsFinite → Formula.Kripke.ValidOnFrame F (Axioms.EFQ (.atom 0)) by simpa [Validates];
-  intro F _;
-  exact Formula.Kripke.ValidOnFrame.efq;
+  suffices ∀ (F : Frame), F.IsFinite → Formula.Kripke.ValidOnFrame F (Axioms.EFQ (.atom 0)) by simpa [Validates]
+  intro F _
+  exact Formula.Kripke.ValidOnFrame.efq
 
 end FrameClass
 

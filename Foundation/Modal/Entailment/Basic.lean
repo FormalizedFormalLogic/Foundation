@@ -24,10 +24,10 @@ alias nec := Necessitation.nec
 lemma nec! : 𝓢 ⊢! φ → 𝓢 ⊢! □φ := by rintro ⟨hp⟩; exact ⟨nec hp⟩
 
 def multinec : 𝓢 ⊢ φ → 𝓢 ⊢ □^[n]φ := by
-  intro h;
+  intro h
   induction n with
-  | zero => simpa;
-  | succ n ih => simpa using nec ih;
+  | zero => simpa
+  | succ n ih => simpa using nec ih
 lemma multinec! : 𝓢 ⊢! φ → 𝓢 ⊢! □^[n]φ := by rintro ⟨hp⟩; exact ⟨multinec hp⟩
 
 end Necessitation
@@ -45,10 +45,10 @@ alias unnec := Unnecessitation.unnec
 lemma unnec! : 𝓢 ⊢! □φ → 𝓢 ⊢! φ := by rintro ⟨hp⟩; exact ⟨unnec hp⟩
 
 def multiunnec : 𝓢 ⊢ □^[n]φ → 𝓢 ⊢ φ := by
-  intro h;
+  intro h
   induction n generalizing φ with
-  | zero => simpa;
-  | succ n ih => exact unnec $ @ih (□φ) h;
+  | zero => simpa
+  | succ n ih => exact unnec $ @ih (□φ) h
 lemma multiunnec! : 𝓢 ⊢! □^[n]φ → 𝓢 ⊢! φ := by rintro ⟨hp⟩; exact ⟨multiunnec hp⟩
 
 end Unnecessitation
@@ -677,20 +677,20 @@ variable {φ ψ χ : F} {Γ Δ : List F}
 variable {𝓢 : S}
 
 instance [Entailment.Minimal 𝓢] [ModalDeMorgan F] [HasAxiomDNE 𝓢] : HasDiaDuality 𝓢 := ⟨by
-  intro φ;
-  simp only [Axioms.DiaDuality, ModalDeMorgan.box, DeMorgan.neg];
-  apply E_Id;
+  intro φ
+  simp only [Axioms.DiaDuality, ModalDeMorgan.box, DeMorgan.neg]
+  apply E_Id
 ⟩
 
 instance [Entailment.Minimal 𝓢] [DiaAbbrev F] : HasDiaDuality 𝓢 := ⟨by
-  intro φ;
-  simp only [Axioms.DiaDuality, DiaAbbrev.dia_abbrev];
-  apply E_Id;
+  intro φ
+  simp only [Axioms.DiaDuality, DiaAbbrev.dia_abbrev]
+  apply E_Id
 ⟩
 
 instance [ModusPonens 𝓢] [HasAxiomT 𝓢] : Unnecessitation 𝓢 := ⟨by
-  intro φ hp;
-  exact axiomT ⨀ hp;
+  intro φ hp
+  exact axiomT ⨀ hp
 ⟩
 
 end
@@ -840,13 +840,13 @@ variable {𝓢 : S} [Entailment.Minimal 𝓢]
 
 instance [Disjunctive 𝓢] [Unnecessitation 𝓢] : ModalDisjunctive 𝓢 where
   modal_disjunctive h := by
-    rcases disjunctive h with (h | h);
-    . left; exact unnec! h;
-    . right; exact unnec! h;
+    rcases disjunctive h with (h | h)
+    . left; exact unnec! h
+    . right; exact unnec! h
 
 private lemma unnec_of_mdp_aux [ModalDisjunctive 𝓢] (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! φ := by
-    have : 𝓢 ⊢! □φ ⋎ □φ := A!_intro_left h;
-    rcases modal_disjunctive this with (h | h) <;> tauto;
+    have : 𝓢 ⊢! □φ ⋎ □φ := A!_intro_left h
+    rcases modal_disjunctive this with (h | h) <;> tauto
 
 noncomputable instance unnecessitation_of_modalDisjunctive [ModalDisjunctive 𝓢] : Unnecessitation 𝓢 where
   unnec h := (unnec_of_mdp_aux ⟨h⟩).some

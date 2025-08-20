@@ -245,7 +245,7 @@ lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
   · definability
   · intro z; simp
   · intro x; simp
-  · intro k f v hkf hv ih;
+  · intro k f v hkf hv ih
     simp only [hkf, hv, termShift_func, func_iff, true_and]
     exact ⟨by simp [hv], by intro i hi; rw [nth_termShiftVec hv hi]; exact ih i hi⟩
 
@@ -254,7 +254,7 @@ lemma termShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts
   · definability
   · intro z hz; simp [hz]
   · intro x; simp
-  · intro k f v hkf hv ih;
+  · intro k f v hkf hv ih
     simp only [hkf, hv.isUTerm, termShift_func, func, true_and]
     refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
     · simp [termShiftVec, hv.isUTerm]
@@ -380,7 +380,7 @@ lemma termBShiftVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k t
   · definability
   · intro z hz; simp [hz]
   · intro x; simp
-  · intro k f v hkf hv ih;
+  · intro k f v hkf hv ih
     simp only [hkf, hv.isUTerm, termBShift_func, func, true_and]
     refine IsSemitermVec.iff.mpr ⟨?_, ?_⟩
     · simp [hv.isUTerm]

@@ -172,47 +172,47 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
     (i ⊧ A → T₀ ⊢!. S i ➝ S.realization A) ∧
     (¬i ⊧ A → T₀ ⊢!. S i ➝ ∼S.realization A) := by
   induction A generalizing i with
-  | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
+  | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies]
   | hatom a =>
-    constructor;
-    . intro h;
-      apply right_Fdisj'!_intro;
-      simpa using h;
-    . intro h;
-      apply CN!_of_CN!_right;
-      apply left_Fdisj'!_intro;
-      intro i hi;
-      apply S.SC1;
-      by_contra hC; subst hC;
-      apply h;
-      simpa using hi;
+    constructor
+    . intro h
+      apply right_Fdisj'!_intro
+      simpa using h
+    . intro h
+      apply CN!_of_CN!_right
+      apply left_Fdisj'!_intro
+      intro i hi
+      apply S.SC1
+      by_contra hC; subst hC
+      apply h
+      simpa using hi
   | himp A B ihA ihB =>
-    simp only [Realization.interpret, Semantics.Imp.realize_imp, Classical.not_imp, and_imp];
-    constructor;
-    . intro h;
-      rcases Satisfies.imp_def₂.mp h with (hA | hB);
-      . exact C!_trans ((ihA hri).2 hA) CNC!;
-      . exact C!_trans ((ihB hri).1 hB) imply₁!;
-    . intro hA hB;
-      exact not_imply_prem''! ((ihA hri).1 hA) ((ihB hri).2 hB);
+    simp only [Realization.interpret, Semantics.Imp.realize_imp, Classical.not_imp, and_imp]
+    constructor
+    . intro h
+      rcases Satisfies.imp_def₂.mp h with (hA | hB)
+      . exact C!_trans ((ihA hri).2 hA) CNC!
+      . exact C!_trans ((ihB hri).1 hB) imply₁!
+    . intro hA hB
+      exact not_imply_prem''! ((ihA hri).1 hA) ((ihB hri).2 hB)
   | hbox A ihA =>
-    simp only [Realization.interpret];
-    constructor;
-    . intro h;
-      apply C!_trans $ S.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri);
-      apply 𝔅.prov_distribute_imply';
-      apply left_Fdisj'!_intro;
-      rintro j Rij;
+    simp only [Realization.interpret]
+    constructor
+    . intro h
+      apply C!_trans $ S.SC3 i $ (by rintro rfl; exact IsIrrefl.irrefl _ hri)
+      apply 𝔅.prov_distribute_imply'
+      apply left_Fdisj'!_intro
+      rintro j Rij
       replace Rij : i ≺ j := by simpa using Rij
       exact (ihA (IsTrans.trans _ _ _ hri Rij)).1 (h j Rij)
-    . intro h;
-      have := Satisfies.box_def.not.mp h;
-      push_neg at this;
-      obtain ⟨j, Rij, hA⟩ := this;
+    . intro h
+      have := Satisfies.box_def.not.mp h
+      push_neg at this
+      obtain ⟨j, Rij, hA⟩ := this
       have := CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
       have : T₀ ⊢!. ∼𝔅 (∼S.σ j) ➝ ∼𝔅 (S.realization A) :=
-        contra! $ 𝔅.prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA;
-      exact C!_trans (S.SC2 i j Rij) this;
+        contra! $ 𝔅.prov_distribute_imply' $ CN!_of_CN!_right $ (ihA (IsTrans.trans _ _ _ hri Rij)).2 hA
+      exact C!_trans (S.SC2 i j Rij) this
 
 theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
     i ⊧ A → T₀ ⊢!. S i ➝ S.realization A := (mainlemma_aux S hri).1

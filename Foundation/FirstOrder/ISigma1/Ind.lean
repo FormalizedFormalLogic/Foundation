@@ -30,7 +30,7 @@ open HierarchySymbol
 theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Function₂ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f x y, P x' y') → P x y) : ∀ x y, P x y := by
   have maxf : ∀ x y, ∃ m, ∀ x' ≤ x, ∀ y' ≤ y, f x' y' ≤ m := by
-    intro x y;
+    intro x y
     rcases sigma₁_replacement₂ hf (under (x + 1)) (under (y + 1)) |>.exists with ⟨m, hm⟩
     exact ⟨m, fun x' hx' y' hy' ↦
       le_of_lt <| lt_of_mem <| hm (f x' y') |>.mpr

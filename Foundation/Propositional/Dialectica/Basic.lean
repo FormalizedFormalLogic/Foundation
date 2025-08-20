@@ -76,7 +76,7 @@ lemma not_valid_iff_notValid {φ : Formula α} : (¬⊩ φ) ↔ (⊮ φ) := by
 @[simp] lemma interpret_imply {φ ψ : Formula α} {V f π} :
     ⟦f | π⟧⊩[V] φ ➝ ψ ↔ (⟦π.1 | f.2 π.1 π.2⟧⊩[V] φ → ⟦f.1 π.1 | π.2⟧⊩[V] ψ) := Eq.to_iff rfl
 
-@[simp] lemma interpret_verum {w c V} : ⟦w | c⟧⊩[V] (⊤ : Formula α) := by simp;
+@[simp] lemma interpret_verum {w c V} : ⟦w | c⟧⊩[V] (⊤ : Formula α) := by simp
 
 @[simp] lemma interpret_not {φ : Formula α} {V θ f} : ⟦f | θ⟧⊩[V] ∼φ ↔ ¬⟦θ | f θ⟧⊩[V] φ := Eq.to_iff rfl
 

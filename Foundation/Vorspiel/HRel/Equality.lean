@@ -7,10 +7,10 @@ class IsEquality (R : HRel α) extends IsRefl α R, IsCoreflexive R
 
 @[simp]
 lemma equality [IsEquality R] : ∀ ⦃x y⦄, R x y ↔ x = y := by
-  intro x y;
-  constructor;
-  . apply IsCoreflexive.corefl;
-  . rintro rfl; apply IsRefl.refl;
+  intro x y
+  constructor
+  . apply IsCoreflexive.corefl
+  . rintro rfl; apply IsRefl.refl
 
 instance [IsEquality R] : IsSymm α R := ⟨by simp_all⟩
 

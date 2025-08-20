@@ -10,17 +10,17 @@ variable {𝓢 : S} [Entailment.S5 𝓢]
 
 -- MEMO: need more simple proof
 def diabox_box : 𝓢 ⊢ ◇□φ ➝ □φ := by
-  have : 𝓢 ⊢ ◇(∼φ) ➝ □◇(∼φ) := axiomFive;
-  have : 𝓢 ⊢ ∼□◇(∼φ) ➝ ∼◇(∼φ) := contra this;
-  have : 𝓢 ⊢ ∼□◇(∼φ) ➝ □φ := C_trans this boxDuality_mpr;
-  refine C_trans ?_ this;
+  have : 𝓢 ⊢ ◇(∼φ) ➝ □◇(∼φ) := axiomFive
+  have : 𝓢 ⊢ ∼□◇(∼φ) ➝ ∼◇(∼φ) := contra this
+  have : 𝓢 ⊢ ∼□◇(∼φ) ➝ □φ := C_trans this boxDuality_mpr
+  refine C_trans ?_ this
   refine C_trans diaDuality_mp $ ?_
-  apply contra;
-  apply implyBoxDistribute';
-  refine C_trans diaDuality_mp ?_;
-  apply contra;
-  apply implyBoxDistribute';
-  apply dni;
+  apply contra
+  apply implyBoxDistribute'
+  refine C_trans diaDuality_mp ?_
+  apply contra
+  apply implyBoxDistribute'
+  apply dni
 @[simp] lemma diabox_box! : 𝓢 ⊢! ◇□φ ➝ □φ := ⟨diabox_box⟩
 
 def diabox_box' (h : 𝓢 ⊢ ◇□φ) : 𝓢 ⊢ □φ := diabox_box ⨀ h

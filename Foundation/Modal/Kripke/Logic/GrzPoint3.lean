@@ -33,48 +33,48 @@ end Kripke
 namespace Logic.GrzPoint3.Kripke
 
 instance : Sound Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 := instSound_of_validates_axioms $ by
-  apply FrameClass.validates_with_AxiomK_of_validates;
-  constructor;
-  rintro _ (rfl | rfl) F ⟨_, _⟩;
-  . exact validate_AxiomGrz_of_finite_strict_preorder;
-  . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
+  apply FrameClass.validates_with_AxiomK_of_validates
+  constructor
+  rintro _ (rfl | rfl) F ⟨_, _⟩
+  . exact validate_AxiomGrz_of_finite_strict_preorder
+  . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected
 
 instance : Entailment.Consistent Hilbert.GrzPoint3 :=
   consistent_of_sound_frameclass FrameClass.finite_GrzPoint3 $ by
-    use whitepoint;
-    constructor;
+    use whitepoint
+    constructor
 
 instance : Complete Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 :=
   Hilbert.Grz.Kripke.complete_of_mem_miniCanonicalFrame FrameClass.finite_GrzPoint3 $ by
-    sorry;
+    sorry
     /-
-    intro φ;
-    refine ⟨miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm, ?_⟩;
-    intro x y z ⟨⟨Rxy₁, Rxy₂⟩, ⟨Rxz₁, Rxz₂⟩⟩;
-    apply or_iff_not_imp_left.mpr;
-    intro nRyz;
-    rcases (not_and_or.mp nRyz) with (nRyz | nRyz);
-    . push_neg at nRyz;
-      obtain ⟨ψ, hψ, ⟨hψy, hψz⟩⟩ := nRyz;
-      constructor;
-      . intro ξ hξ₁ hξ₂;
-        apply Rxy₁;
-        . exact hξ₁;
-        . sorry;
-      . intro hyz;
-        have exy := Rxy₂ ?_;
-        have exz := Rxz₂ ?_;
-        tauto;
-        . subst exy;
-          intro ξ hξ hξz;
-          sorry;
-        . intro ξ hξ hξy;
-          sorry;
-    . push_neg at nRyz;
-      replace ⟨nRyz₁, nRyz₂⟩ := nRyz;
-      constructor;
-      . sorry;
-      . sorry;
+    intro φ
+    refine ⟨miniCanonicalFrame.reflexive, miniCanonicalFrame.transitive, miniCanonicalFrame.antisymm, ?_⟩
+    intro x y z ⟨⟨Rxy₁, Rxy₂⟩, ⟨Rxz₁, Rxz₂⟩⟩
+    apply or_iff_not_imp_left.mpr
+    intro nRyz
+    rcases (not_and_or.mp nRyz) with (nRyz | nRyz)
+    . push_neg at nRyz
+      obtain ⟨ψ, hψ, ⟨hψy, hψz⟩⟩ := nRyz
+      constructor
+      . intro ξ hξ₁ hξ₂
+        apply Rxy₁
+        . exact hξ₁
+        . sorry
+      . intro hyz
+        have exy := Rxy₂ ?_
+        have exz := Rxz₂ ?_
+        tauto
+        . subst exy
+          intro ξ hξ hξz
+          sorry
+        . intro ξ hξ hξy
+          sorry
+    . push_neg at nRyz
+      replace ⟨nRyz₁, nRyz₂⟩ := nRyz
+      constructor
+      . sorry
+      . sorry
     -/
 
 end Logic.GrzPoint3.Kripke
@@ -87,77 +87,77 @@ open Kripke
 
 
 instance : Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
-  constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GrzPoint2 FrameClass.finite_GrzPoint3;
-    intro F hF;
-    simp_all only [Set.mem_setOf_eq];
-    infer_instance;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.Point3 (.atom 0) (.atom 1);
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GrzPoint2);
-      apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      let F : Frame := ⟨Fin 4, λ x y => x = 0 ∨ x = y ∨ y = 3⟩;
+  constructor
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GrzPoint2 FrameClass.finite_GrzPoint3
+    intro F hF
+    simp_all only [Set.mem_setOf_eq]
+    infer_instance
+  . apply Entailment.not_weakerThan_iff.mpr
+    use Axioms.Point3 (.atom 0) (.atom 1)
+    constructor
+    . simp
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GrzPoint2)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world
+      let F : Frame := ⟨Fin 4, λ x y => x = 0 ∨ x = y ∨ y = 3⟩
       let M : Model := ⟨
         F,
         λ x a => match a with | 0 => (1 : F.World) ≺ x | 1 => (2 : F.World) ≺ x | _ => False
-      ⟩;
-      use M, 0;
-      constructor;
+      ⟩
+      use M, 0
+      constructor
       . exact {
           refl := by omega,
           trans := by omega,
           antisymm := by simp [M, F]; omega,
           ps_convergent := by
-            rintro x y z Rxy Rxz;
-            use 3;
-            tauto;
+            rintro x y z Rxy Rxz
+            use 3
+            tauto
         }
       . apply Satisfies.or_def.not.mpr
-        push_neg;
-        constructor;
-        . apply Satisfies.box_def.not.mpr;
-          push_neg;
-          use 1;
-          constructor;
-          . tauto;
-          . apply Satisfies.imp_def₂.not.mpr;
-            push_neg;
-            constructor;
-            . tauto;
-            . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
-        . apply Satisfies.box_def.not.mpr;
-          push_neg;
-          use 2;
-          constructor;
-          . tauto;
-          . apply Satisfies.imp_def₂.not.mpr;
-            push_neg;
-            constructor;
-            . tauto;
-            . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
+        push_neg
+        constructor
+        . apply Satisfies.box_def.not.mpr
+          push_neg
+          use 1
+          constructor
+          . tauto
+          . apply Satisfies.imp_def₂.not.mpr
+            push_neg
+            constructor
+            . tauto
+            . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F]
+        . apply Satisfies.box_def.not.mpr
+          push_neg
+          use 2
+          constructor
+          . tauto
+          . apply Satisfies.imp_def₂.not.mpr
+            push_neg
+            constructor
+            . tauto
+            . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F]
 
 instance : Hilbert.S4Point3 ⪱ Hilbert.GrzPoint3 := by
-  constructor;
-  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
-    rintro _ (rfl | rfl | rfl | rfl) <;> simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.Grz (.atom 0);
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point3);
-      apply Kripke.not_validOnFrameClass_of_exists_model_world;
-      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
-      constructor;
+  constructor
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms
+    rintro _ (rfl | rfl | rfl | rfl) <;> simp
+  . apply Entailment.not_weakerThan_iff.mpr
+    use Axioms.Grz (.atom 0)
+    constructor
+    . simp
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point3)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world
+      use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0
+      constructor
       . exact {
           refl := by simp,
           trans := by simp,
           ps_connected := by
-            rintro x y z Rxy Rxz;
-            simp;
-        };
-      . simp [Semantics.Realize, Satisfies];
+            rintro x y z Rxy Rxz
+            simp
+        }
+      . simp [Semantics.Realize, Satisfies]
 
 end Logic
 

@@ -138,7 +138,7 @@ lemma provable_iff_eq_top {φ : F} : 𝓢 ⊢! φ ↔ (⟦φ⟧ : LindenbaumAlge
 lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ φ : LindenbaumAlgebra 𝓢, φ = ⊤) := by
   simp only [Inconsistent, provable_iff_eq_top]
   constructor
-  · intro h φ;
+  · intro h φ
     induction φ using Quotient.ind
     simp [h]
   · intro h f; simp [h]

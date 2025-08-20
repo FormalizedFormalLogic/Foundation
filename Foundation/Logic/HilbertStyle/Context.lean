@@ -327,28 +327,28 @@ def mdp [DecidableEq F] {Γ : Set F} (bpq : Γ *⊢[𝓢] φ ➝ ψ) (bp : Γ *�
 lemma by_axm! [DecidableEq F] (h : φ ∈ Γ) : Γ *⊢[𝓢]! φ := Entailment.by_axm _ (by simpa)
 
 def emptyPrf {φ : F} : ∅ *⊢[𝓢] φ → 𝓢 ⊢ φ := by
-  rintro ⟨Γ, hΓ, h⟩;
-  have := List.eq_nil_iff_forall_not_mem.mpr hΓ;
-  subst this;
-  exact FiniteContext.emptyPrf h;
+  rintro ⟨Γ, hΓ, h⟩
+  have := List.eq_nil_iff_forall_not_mem.mpr hΓ
+  subst this
+  exact FiniteContext.emptyPrf h
 
 lemma emptyPrf! {φ : F} : ∅ *⊢[𝓢]! φ → 𝓢 ⊢! φ := fun h ↦ ⟨emptyPrf h.some⟩
 
 lemma provable_iff_provable {φ : F} : 𝓢 ⊢! φ ↔ ∅ *⊢[𝓢]! φ := ⟨of!, emptyPrf!⟩
 
 lemma iff_provable_context_provable_finiteContext_toList [DecidableEq F] {Δ : Finset F} : ↑Δ *⊢[𝓢]! φ ↔ Δ.toList ⊢[𝓢]! φ := by
-  constructor;
-  . intro h;
-    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
-    apply FiniteContext.weakening! ?_ hΓ₂;
-    intro ψ hψ;
-    simpa using hΓ₁ ψ hψ;
-  . intro h;
-    apply Context.provable_iff.mpr;
-    use Δ.toList;
-    constructor;
-    . simp;
-    . assumption;
+  constructor
+  . intro h
+    obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h
+    apply FiniteContext.weakening! ?_ hΓ₂
+    intro ψ hψ
+    simpa using hΓ₁ ψ hψ
+  . intro h
+    apply Context.provable_iff.mpr
+    use Δ.toList
+    constructor
+    . simp
+    . assumption
 
 instance minimal [DecidableEq F] (Γ : Context F 𝓢) : Entailment.Minimal Γ where
   mdp := mdp

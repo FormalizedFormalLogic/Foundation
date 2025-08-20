@@ -134,7 +134,7 @@ private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     · rintro rfl rfl; rfl
   case comp m n c d ihc ihd =>
     simp [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons']
-    intro w₁ hc₁ hd₁ w₂ hc₂ hd₂;
+    intro w₁ hc₁ hd₁ w₂ hc₂ hd₂
     have : w₁ = w₂ := funext fun i => ihd i (hd₁ i) (hd₂ i)
     rcases this with rfl
     exact ihc hc₁ hc₂

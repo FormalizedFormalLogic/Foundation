@@ -30,7 +30,7 @@ alias mdp := ModusPonens.mdp
 infixl:90 "⨀" => mdp
 
 lemma mdp! [ModusPonens 𝓢] : 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! φ → 𝓢 ⊢! ψ := by
-  rintro ⟨hpq⟩ ⟨hp⟩;
+  rintro ⟨hpq⟩ ⟨hp⟩
   exact ⟨hpq ⨀ hp⟩
 infixl:90 "⨀" => mdp!
 infixl:90 "⨀!" => mdp!
@@ -195,8 +195,8 @@ lemma K!_intro_iff [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! φ 
 
 lemma E!_intro_iff [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢! φ ⭤ ψ ↔ 𝓢 ⊢! φ ➝ ψ ∧ 𝓢 ⊢! ψ ➝ φ := ⟨fun h ↦ ⟨K!_left h, K!_right h⟩, fun h ↦ K!_intro h.1 h.2⟩
 
-lemma C_of_E_mp! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! φ ➝ ψ := by exact E!_intro_iff.mp h |>.1;
-lemma C_of_E_mpr! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ψ ➝ φ := by exact E!_intro_iff.mp h |>.2;
+lemma C_of_E_mp! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! φ ➝ ψ := by exact E!_intro_iff.mp h |>.1
+lemma C_of_E_mpr! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ψ ➝ φ := by exact E!_intro_iff.mp h |>.2
 
 lemma iff_of_E!  [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! φ ↔ 𝓢 ⊢! ψ := ⟨fun hp ↦ K!_left h ⨀ hp, fun hq ↦ K!_right h ⨀ hq⟩
 
@@ -207,7 +207,7 @@ def E_Id [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] 
 @[simp] def E!_id [HasAxiomAndInst 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! φ ⭤ φ := ⟨E_Id φ⟩
 
 instance [NegAbbrev F] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [HasAxiomAndInst 𝓢] : Entailment.NegationEquiv 𝓢 where
-  negEquiv := by intro φ; simp [Axioms.NegEquiv, NegAbbrev.neg]; apply E_Id;
+  negEquiv := by intro φ; simp [Axioms.NegEquiv, NegAbbrev.neg]; apply E_Id
 
 
 def NO [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] [NegationEquiv 𝓢] [HasAxiomAndElim 𝓢] : 𝓢 ⊢ ∼⊥ := N_of_CO (C_id ⊥)
@@ -242,19 +242,19 @@ lemma C!_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢! 
 lemma C!_replace [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! φ₁ ➝ φ₂ → 𝓢 ⊢! ψ₁ ➝ ψ₂ := λ h => C!_trans h₁ $ C!_trans h h₂
 
 lemma unprovable_C!_trans [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (hpq : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊬ φ ➝ χ → 𝓢 ⊬ ψ ➝ χ := by
-  contrapose; simp [neg_neg];
-  exact C!_trans hpq;
+  contrapose; simp [neg_neg]
+  exact C!_trans hpq
 
 def E_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢ φ ⭤ ψ) (h₂ : 𝓢 ⊢ ψ ⭤ χ) : 𝓢 ⊢ φ ⭤ χ := by
-  apply E_intro;
-  . exact C_trans (K_left h₁) (K_left h₂);
-  . exact C_trans (K_right h₂) (K_right h₁);
+  apply E_intro
+  . exact C_trans (K_left h₁) (K_left h₂)
+  . exact C_trans (K_right h₂) (K_right h₁)
 lemma E!_trans [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢]  (h₁ : 𝓢 ⊢! φ ⭤ ψ) (h₂ : 𝓢 ⊢! ψ ⭤ χ) : 𝓢 ⊢! φ ⭤ χ := ⟨E_trans h₁.some h₂.some⟩
 
 lemma uniff_of_E! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (H : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊬ φ ↔ 𝓢 ⊬ ψ := by
-  constructor;
-  . intro hp hq; have := K!_right H ⨀ hq; contradiction;
-  . intro hq hp; have := K!_left H ⨀ hp; contradiction;
+  constructor
+  . intro hp hq; have := K!_right H ⨀ hq; contradiction
+  . intro hq hp; have := K!_left H ⨀ hp; contradiction
 
 def CCCC [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢ φ ➝ ψ ➝ χ ➝ φ := C_trans imply₁ imply₁
 @[simp] lemma CCCC! [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (φ ψ χ : F) : 𝓢 ⊢! φ ➝ ψ ➝ χ ➝ φ := ⟨CCCC φ ψ χ⟩
@@ -282,7 +282,7 @@ def ECKCC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] 
   let b₁ : 𝓢 ⊢ (φ ⋏ ψ ➝ χ) ➝ φ ➝ ψ ➝ χ :=
     CCCC (φ ⋏ ψ ➝ χ) φ ψ ⨀₃ C_of_conseq (ψ := φ ⋏ ψ ➝ χ) and₃
   let b₂ : 𝓢 ⊢ (φ ➝ ψ ➝ χ) ➝ φ ⋏ ψ ➝ χ :=
-    imply₁ ⨀₂ (C_of_conseq (ψ := φ ➝ ψ ➝ χ) and₁) ⨀₂ (C_of_conseq (ψ := φ ➝ ψ ➝ χ) and₂);
+    imply₁ ⨀₂ (C_of_conseq (ψ := φ ➝ ψ ➝ χ) and₁) ⨀₂ (C_of_conseq (ψ := φ ➝ ψ ➝ χ) and₂)
   exact E_intro b₁ b₂
 lemma ECKCC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] : 𝓢 ⊢! (φ ⋏ ψ ➝ χ) ⭤ (φ ➝ ψ ➝ χ) := ⟨ECKCC φ ψ χ⟩
 
@@ -290,7 +290,7 @@ def CC_of_CK [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ �
 def CK_of_CC [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (d : 𝓢 ⊢ φ ➝ ψ ➝ χ) : 𝓢 ⊢ φ ⋏ ψ ➝ χ := (K_right $ ECKCC φ ψ χ) ⨀ d
 
 lemma CK!_iff_CC! [HasAxiomAndInst 𝓢] [HasAxiomAndElim 𝓢] [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢]: (𝓢 ⊢! φ ⋏ ψ ➝ χ) ↔ (𝓢 ⊢! φ ➝ ψ ➝ χ) := by
-  apply Iff.intro;
+  apply Iff.intro
   . intro ⟨h⟩; exact ⟨CC_of_CK h⟩
   . intro ⟨h⟩; exact ⟨CK_of_CC h⟩
 
@@ -347,19 +347,19 @@ lemma left_Conj₂!_intro [DecidableEq F] (h : φ ∈ Γ) : 𝓢 ⊢! ⋀Γ ➝ 
 def Conj₂_intro (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢ φ) : 𝓢 ⊢ ⋀Γ :=
   match Γ with
   |          [] => verum
-  |         [ψ] => by apply b; simp;
+  |         [ψ] => by apply b; simp
   | ψ :: χ :: Γ => by
-    simp;
+    simp
     exact K_intro (b ψ (by simp)) (Conj₂_intro _ (by aesop))
 lemma Conj₂!_intro (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢! φ) : 𝓢 ⊢! ⋀Γ := ⟨Conj₂_intro Γ (λ φ hp => (b φ hp).some)⟩
 
 def right_Conj₂_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ ⋀Γ :=
   match Γ with
   |          [] => C_of_conseq verum
-  |         [ψ] => by apply b; simp;
+  |         [ψ] => by apply b; simp
   | ψ :: χ :: Γ => by
-    simp;
-    apply CK_of_C_of_C (b ψ (by simp)) (right_Conj₂_intro φ _ (fun ψ hq ↦ b ψ (by simp [hq])));
+    simp
+    apply CK_of_C_of_C (b ψ (by simp)) (right_Conj₂_intro φ _ (fun ψ hq ↦ b ψ (by simp [hq])))
 lemma right_Conj₂!_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ ⋀Γ := ⟨right_Conj₂_intro φ Γ (λ ψ hq => (b ψ hq).some)⟩
 
 def CConj₂Conj₂ [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢ ⋀Γ ➝ ⋀Δ :=

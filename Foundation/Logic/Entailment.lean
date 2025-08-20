@@ -106,7 +106,7 @@ instance : Trans (α := S) (β := T) (γ := U) (· ⪯ ·) (· ⪯ ·) (· ⪯ �
 lemma weakerThan_iff : 𝓢 ⪯ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) :=
   ⟨fun h _ hf ↦ h.subset hf, fun h ↦ ⟨fun _ hf ↦ h hf⟩⟩
 
-lemma not_weakerThan_iff : ¬𝓢 ⪯ 𝓣 ↔ (∃ f, 𝓢 ⊢! f ∧ 𝓣 ⊬ f) := by simp [weakerThan_iff, Unprovable];
+lemma not_weakerThan_iff : ¬𝓢 ⪯ 𝓣 ↔ (∃ f, 𝓢 ⊢! f ∧ 𝓣 ⊬ f) := by simp [weakerThan_iff, Unprovable]
 
 lemma strictlyWeakerThan_iff : 𝓢 ⪱ 𝓣 ↔ (∀ {f}, 𝓢 ⊢! f → 𝓣 ⊢! f) ∧ (∃ f, 𝓢 ⊬ f ∧ 𝓣 ⊢! f) := by
   constructor
@@ -568,8 +568,8 @@ section
 variable {𝓢 : S} {𝓜 : M} [Complete 𝓢 𝓜]
 
 lemma exists_countermodel_of_not_provable {f : F} (h : 𝓢 ⊬ f) : ¬𝓜 ⊧ f := by
-  contrapose! h;
-  simpa using Complete.complete (𝓢 := 𝓢) h;
+  contrapose! h
+  simpa using Complete.complete (𝓢 := 𝓢) h
 
 lemma meaningful_of_consistent : Entailment.Consistent 𝓢 → Semantics.Meaningful 𝓜 := by
   contrapose

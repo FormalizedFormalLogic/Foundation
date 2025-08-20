@@ -376,7 +376,7 @@ prefix:80 "⋀" => List.conj₂
 
 @[simp] lemma conj₂_cons_nonempty {a : α} {as : List α} (h : as ≠ [] := by assumption) : ⋀(a :: as) = a ⋏ ⋀as := by
   cases as with
-  | nil => contradiction;
+  | nil => contradiction
   | cons ψ rs => simp [List.conj₂]
 
 def conj' (f : ι → α) (l : List ι) : α := (l.map f).conj₂
@@ -417,7 +417,7 @@ prefix:80 "⋁" => disj₂
 
 @[simp] lemma disj₂_cons_nonempty {a : α} {as : List α} (h : as ≠ [] := by assumption) : ⋁(a :: as) = a ⋎ ⋁as := by
   cases as with
-  | nil => contradiction;
+  | nil => contradiction
   | cons ψ rs => simp [disj₂]
 
 def disj' (f : ι → α) (l : List ι) : α := (l.map f).disj₂
@@ -450,7 +450,7 @@ lemma map_conj₂ [LogicalConnective β] [FunLike G α β] [LogicalConnective.Ho
 
 lemma map_conj_append_prop [FunLike G α Prop] [LogicalConnective.HomClass G α Prop]
     (f : G) (l₁ l₂ : List α) : f (l₁ ++ l₂).conj ↔ f (l₁.conj ⋏ l₂.conj) := by
-  induction l₁ <;> induction l₂ <;> aesop;
+  induction l₁ <;> induction l₂ <;> aesop
 
 lemma map_conj' [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
     (F : G) (l : List ι) (f : ι → α) : F (l.conj' f) = l.conj' (F ∘ f) := by
@@ -477,7 +477,7 @@ lemma map_disj₂ [LogicalConnective β] [FunLike G α β] [LogicalConnective.Ho
   induction l using List.induction_with_singleton' <;> simp [*]
 
 lemma map_disj_append_prop [FunLike F α Prop] [LogicalConnective.HomClass F α Prop] (f : F) (l₁ l₂ : List α) : f (l₁ ++ l₂).disj ↔ f (l₁.disj ⋎ l₂.disj) := by
-  induction l₁ <;> induction l₂ <;> aesop;
+  induction l₁ <;> induction l₂ <;> aesop
 
 lemma map_disj' [LogicalConnective β] [FunLike G α β] [LogicalConnective.HomClass G α β]
     (F : G) (l : List ι) (f : ι → α) : F (l.disj' f) = l.disj' (F ∘ f) := by

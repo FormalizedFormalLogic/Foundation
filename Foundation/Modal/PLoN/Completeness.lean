@@ -27,64 +27,64 @@ variable {φ : Formula ℕ}
 lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊧ φ ↔ (φ ∈ X) := by
   induction φ with
   | hfalsum =>
-    simp only [Semantics.Realize, PLoN.Satisfies, false_iff];
-    exact not_mem_falsum;
+    simp only [Semantics.Realize, PLoN.Satisfies, false_iff]
+    exact not_mem_falsum
   | hatom =>
-    simp_all [Semantics.Realize, PLoN.Satisfies];
+    simp_all [Semantics.Realize, PLoN.Satisfies]
   | himp φ ψ ihp ihq =>
-    intro Ω;
-    constructor;
-    . intro h;
-      apply iff_mem_imp.mpr;
-      intro hp; replace hp := ihp.mpr hp;
-      exact ihq.mp $ h hp;
-    . intro h;
-      have := iff_mem_imp.mp h;
-      intro hp; replace hp := ihp.mp hp;
+    intro Ω
+    constructor
+    . intro h
+      apply iff_mem_imp.mpr
+      intro hp; replace hp := ihp.mpr hp
+      exact ihq.mp $ h hp
+    . intro h
+      have := iff_mem_imp.mp h
+      intro hp; replace hp := ihp.mp hp
       exact ihq.mpr $ this hp
   | hbox φ ih =>
-    intro X;
-    constructor;
-    . intro h;
-      by_contra hC;
-      obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (T := {∼φ}) (not_singleton_consistent X.consistent (iff_mem_neg.mpr hC));
-      suffices ¬X ⊧ □φ by contradiction;
+    intro X
+    constructor
+    . intro h
+      by_contra hC
+      obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (T := {∼φ}) (not_singleton_consistent X.consistent (iff_mem_neg.mpr hC))
+      suffices ¬X ⊧ □φ by contradiction
       suffices ∃ Y, (X ≺[φ] Y) ∧ (¬Y ⊧ φ) by
-        apply PLoN.Satisfies.box_def.not.mpr;
-        push_neg;
-        exact this;
-      use Y;
-      constructor;
-      . constructor;
-        . exact iff_mem_neg.mpr hC;
-        . tauto_set;
-      . apply (@ih Y).not.mpr;
-        apply iff_mem_neg.mp;
-        tauto_set;
-    . intro h Y RXY;
-      have : □φ ∉ X := iff_mem_neg.mp RXY.1;
-      contradiction;
+        apply PLoN.Satisfies.box_def.not.mpr
+        push_neg
+        exact this
+      use Y
+      constructor
+      . constructor
+        . exact iff_mem_neg.mpr hC
+        . tauto_set
+      . apply (@ih Y).not.mpr
+        apply iff_mem_neg.mp
+        tauto_set
+    . intro h Y RXY
+      have : □φ ∉ X := iff_mem_neg.mp RXY.1
+      contradiction
 
 class Canonical (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢] (C : FrameClass) : Prop where
   canonical : (canonicalFrame 𝓢) ∈ C
 
 instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
-  intro φ;
-  contrapose;
-  intro h;
-  apply PLoN.ValidOnFrameClass.not_of_exists_model;
-  use (canonicalModel 𝓢);
-  constructor;
-  . exact Canonical.canonical;
+  intro φ
+  contrapose
+  intro h
+  apply PLoN.ValidOnFrameClass.not_of_exists_model
+  use (canonicalModel 𝓢)
+  constructor
+  . exact Canonical.canonical
   . suffices ∃ X, ¬(PLoN.Satisfies (canonicalModel 𝓢) X φ) by
-      simpa [PLoN.ValidOnModel];
+      simpa [PLoN.ValidOnModel]
     obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (T := {∼φ}) $ by
-      apply unprovable_iff_singleton_neg_consistent.mpr;
-      exact h;
-    use Y;
-    apply truthlemma.not.mpr;
-    apply iff_mem_neg.mp;
-    tauto_set;
+      apply unprovable_iff_singleton_neg_consistent.mpr
+      exact h
+    use Y
+    apply truthlemma.not.mpr
+    apply iff_mem_neg.mp
+    tauto_set
 ⟩
 
 end PLoN

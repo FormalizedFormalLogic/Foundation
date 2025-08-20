@@ -20,7 +20,7 @@ lemma ConverseWellFounded.iff_has_max : ConverseWellFounded R ↔ (∀ (s : Set 
   simp [ConverseWellFounded, WellFounded.wellFounded_iff_has_min, flip]
 
 lemma ConverseWellFounded.has_max (h : ConverseWellFounded R) : ∀ (s : Set α), Set.Nonempty s → ∃ m ∈ s, ∀ x ∈ s, ¬(R m x) := by
-  apply ConverseWellFounded.iff_has_max.mp h;
+  apply ConverseWellFounded.iff_has_max.mp h
 
 instance [Finite α] [IsTrans α R] [IsIrrefl α R] : IsConverseWellFounded _ R := ⟨by
   apply @Finite.wellFounded_of_trans_of_irrefl _ _ _

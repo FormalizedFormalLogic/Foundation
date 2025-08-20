@@ -71,7 +71,7 @@ instance [Finite F.World] : Finite (F^*).World := inferInstance
 
 instance : (F^*).IsPreorder where
 
-instance [F.IsSymmetric] : F^*.IsSymmetric where symm := by simp only; apply IsSymm.symm;
+instance [F.IsSymmetric] : F^*.IsSymmetric where symm := by simp only; apply IsSymm.symm
 
 instance [F.IsSymmetric] : F^*.IsEquivalence where
 

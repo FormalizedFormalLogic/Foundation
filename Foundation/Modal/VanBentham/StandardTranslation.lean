@@ -90,38 +90,38 @@ lemma correspondence_satisfies : x ⊧ φ ↔ M ⊧/![x] φ¹ := by
   induction φ using NNFormula.rec' generalizing x with
   | hBox φ ihφ =>
     suffices x ⊧ □φ ↔ ∀ y, x ≺ y → M ⊧/![y] (φ¹) by
-      simp [standardTranslation];
-      convert this;
-      simp;
-    constructor;
-    . intro h y Rxy;
-      exact ihφ.mp $ h y Rxy;
-    . intro h y Rxy;
-      exact ihφ.mpr $ h y Rxy;
+      simp [standardTranslation]
+      convert this
+      simp
+    constructor
+    . intro h y Rxy
+      exact ihφ.mp $ h y Rxy
+    . intro h y Rxy
+      exact ihφ.mpr $ h y Rxy
   | hDia φ ihφ =>
     suffices x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ M ⊧/![y] (φ¹) by
-      simp [standardTranslation];
-      convert this;
-      simp;
-    constructor;
-    . rintro ⟨y, Rxy, hy⟩;
-      use y;
-      constructor;
-      . assumption;
-      . exact ihφ.mp hy;
-    . rintro ⟨y, Rxy, hy⟩;
-      use y;
-      constructor;
-      . assumption;
-      . exact ihφ.mpr hy;
-  | _ => simp_all [standardTranslation];
+      simp [standardTranslation]
+      convert this
+      simp
+    constructor
+    . rintro ⟨y, Rxy, hy⟩
+      use y
+      constructor
+      . assumption
+      . exact ihφ.mp hy
+    . rintro ⟨y, Rxy, hy⟩
+      use y
+      constructor
+      . assumption
+      . exact ihφ.mpr hy
+  | _ => simp_all [standardTranslation]
 
 /-- BdRV Prop 2.47 (ii) -/
 lemma correspondence_validOnModel : M ⊧ φ ↔ M ⊧ₘ₀ ∀' φ¹ := by
-  suffices M ⊧ φ ↔ ∀ x : M.World, M ⊧/![x] φ¹ by simpa [FirstOrder.models₀_iff];
-  constructor;
-  . intro h x; apply correspondence_satisfies.mp $ h x;
-  . intro h x; exact correspondence_satisfies.mpr $ h x;
+  suffices M ⊧ φ ↔ ∀ x : M.World, M ⊧/![x] φ¹ by simpa [FirstOrder.models₀_iff]
+  constructor
+  . intro h x; apply correspondence_satisfies.mp $ h x
+  . intro h x; exact correspondence_satisfies.mpr $ h x
 
 end Kripke.FirstOrder
 

@@ -22,11 +22,11 @@ variable {H H₁ H₂ : Hilbert.WithRE α} {φ ψ : Formula α}
 abbrev axiomInstances (H : Hilbert.WithRE α) : Set (Formula α) := { φ⟦s⟧ | (φ ∈ H.axioms) (s : Substitution α) }
 
 lemma mem_axiomInstances_of_mem_axioms {φ} (h : φ ∈ H.axioms) : φ ∈ H.axiomInstances := by
-  use φ;
-  constructor;
-  . assumption;
-  . use Substitution.id;
-    simp;
+  use φ
+  constructor
+  . assumption
+  . use Substitution.id
+    simp
 
 inductive Deduction (H : Hilbert.WithRE α) : (Formula α) → Type u
   | axm {φ} (s : Substitution _) : φ ∈ H.axioms → Deduction H (φ⟦s⟧)
@@ -40,7 +40,7 @@ instance : Entailment (Formula α) (Hilbert.WithRE α) := ⟨Deduction⟩
 
 def Deduction.axm' {H : Hilbert.WithRE α} {φ} (h : φ ∈ H.axioms) : Deduction H φ := by
   rw [(show φ = φ⟦.id⟧ by simp)]
-  apply Deduction.axm _ h;
+  apply Deduction.axm _ h
 
 section
 
@@ -63,14 +63,14 @@ protected lemma rec!
   (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
   : ∀ {φ}, (d : H ⊢! φ) → motive φ d := by
-  rintro φ ⟨d⟩;
+  rintro φ ⟨d⟩
   induction d with
-  | axm s h => apply axm s h;
-  | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
+  | axm s h => apply axm s h
+  | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ
   | re hφψ ihφψ => apply re ihφψ
   | imply₁ φ ψ => apply imply₁
   | imply₂ φ ψ χ => apply imply₂
-  | ec φ ψ => apply ec;
+  | ec φ ψ => apply ec
 
 lemma axm! {φ} (s) (h : φ ∈ H.axioms) : H ⊢! (φ⟦s⟧) := ⟨.axm s h⟩
 
@@ -78,25 +78,25 @@ lemma axm'! {φ} (h : φ ∈ H.axioms) : H ⊢! φ := by simpa using axm! Substi
 
 lemma subst! {φ} (s) (h : H ⊢! φ) : H ⊢! (φ⟦s⟧) := by
   induction h using WithRE.rec! with
-  | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ;
-  | @axm φ s' h => rw [(show φ⟦s'⟧⟦s⟧ = φ⟦s' ∘ s⟧ by simp)]; apply axm!; exact h;
-  | @re φ ψ h => apply re!; simpa;
-  | _ => simp;
+  | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ
+  | @axm φ s' h => rw [(show φ⟦s'⟧⟦s⟧ = φ⟦s' ∘ s⟧ by simp)]; apply axm!; exact h
+  | @re φ ψ h => apply re!; simpa
+  | _ => simp
 
 lemma weakerThan_of_provable_axioms (hs : H₂ ⊢!* H₁.axioms) : H₁ ⪯ H₂ := by
-  apply weakerThan_iff.mpr;
-  intro φ h;
+  apply weakerThan_iff.mpr
+  intro φ h
   induction h using WithRE.rec! with
-  | @axm φ s h => apply subst!; apply @hs φ h;
-  | @re φ ψ h => apply re!; simpa;
-  | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
-  | _ => simp;
+  | @axm φ s h => apply subst!; apply @hs φ h
+  | @re φ ψ h => apply re!; simpa
+  | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂
+  | _ => simp
 
 lemma weakerThan_of_subset_axioms (hs : H₁.axioms ⊆ H₂.axioms) : H₁ ⪯ H₂ := by
-  apply weakerThan_of_provable_axioms;
-  intro φ h;
-  apply axm'!;
-  exact hs h;
+  apply weakerThan_of_provable_axioms
+  intro φ h
+  apply axm'!
+  exact hs h
 
 end
 
@@ -106,35 +106,35 @@ section
 abbrev logic (H : Hilbert.WithRE α) : Logic α := Entailment.theory H
 
 @[simp high]
-lemma iff_logic_provable_provable : H.logic ⊢! φ ↔ H ⊢! φ := by simp [Entailment.theory, Logic.iff_provable];
+lemma iff_logic_provable_provable : H.logic ⊢! φ ↔ H ⊢! φ := by simp [Entailment.theory, Logic.iff_provable]
 
 instance [H₁ ⪯ H₂] : H₁.logic ⪯ H₂.logic := by
-  apply weakerThan_iff.mpr;
-  simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];
-  apply WeakerThan.wk;
-  infer_instance;
+  apply weakerThan_iff.mpr
+  simp only [theory, Logic.iff_provable, Set.mem_setOf_eq]
+  apply WeakerThan.wk
+  infer_instance
 
 instance [H₁ ⪱ H₂] : H₁.logic ⪱ H₂.logic := by
-  apply strictlyWeakerThan_iff.mpr;
-  simp only [theory, Logic.iff_provable, Set.mem_setOf_eq, Logic.iff_unprovable];
-  apply strictlyWeakerThan_iff.mp;
-  infer_instance;
+  apply strictlyWeakerThan_iff.mpr
+  simp only [theory, Logic.iff_provable, Set.mem_setOf_eq, Logic.iff_unprovable]
+  apply strictlyWeakerThan_iff.mp
+  infer_instance
 
 instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := by
-  apply Equiv.iff.mpr;
-  simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];
-  apply Equiv.iff.mp;
-  infer_instance;
+  apply Equiv.iff.mpr
+  simp only [theory, Logic.iff_provable, Set.mem_setOf_eq]
+  apply Equiv.iff.mp
+  infer_instance
 
 instance [h : Incomparable H₁ H₂]
   : Incomparable H₁.logic H₂.logic := by
-  apply Incomparable.of_unprovable;
-  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₁;
-    use φ;
-    simpa;
-  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₂;
-    use φ;
-    simpa;
+  apply Incomparable.of_unprovable
+  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₁
+    use φ
+    simpa
+  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₂
+    use φ
+    simpa
 
 end
 
@@ -146,8 +146,8 @@ variable [DecidableEq α]
 class HasM (H : Hilbert.WithRE α) where
   p : α
   q : α
-  ne_pq : p ≠ q := by trivial;
-  mem_m : Axioms.M (.atom p) (.atom q) ∈ H.axioms := by tauto;
+  ne_pq : p ≠ q := by trivial
+  mem_m : Axioms.M (.atom p) (.atom q) ∈ H.axioms := by tauto
 
 instance [H.HasM] : Entailment.HasAxiomM H where
   M φ ψ := by
@@ -157,14 +157,14 @@ instance [H.HasM] : Entailment.HasAxiomM H where
         if (HasM.p H) = b then φ
         else if (HasM.q H) = b then ψ
         else (.atom b))
-      HasM.mem_m;
+      HasM.mem_m
 
 
 class HasC (H : Hilbert.WithRE α) where
   p : α
   q : α
-  ne_pq : p ≠ q := by trivial;
-  mem_c : Axioms.C (.atom p) (.atom q) ∈ H.axioms := by tauto;
+  ne_pq : p ≠ q := by trivial
+  mem_c : Axioms.C (.atom p) (.atom q) ∈ H.axioms := by tauto
 
 instance [H.HasC] : Entailment.HasAxiomC H where
   C φ ψ := by
@@ -174,21 +174,21 @@ instance [H.HasC] : Entailment.HasAxiomC H where
         if (HasC.p H) = b then φ
         else if (HasC.q H) = b then ψ
         else (.atom b))
-      HasC.mem_c;
+      HasC.mem_c
 
 
 class HasN (H : Hilbert.WithRE α) where
-  mem_n : Axioms.N ∈ H.axioms := by tauto;
+  mem_n : Axioms.N ∈ H.axioms := by tauto
 
 instance [H.HasN] : Entailment.HasAxiomN H where
-  N := by apply Deduction.axm'; simp [HasN.mem_n];
+  N := by apply Deduction.axm'; simp [HasN.mem_n]
 
 
 class HasK (H : Hilbert.WithRE α) where
   p : α
   q : α
-  ne_pq : p ≠ q := by trivial;
-  mem_K : Axioms.K (.atom p) (.atom q) ∈ H.axioms := by tauto;
+  ne_pq : p ≠ q := by trivial
+  mem_K : Axioms.K (.atom p) (.atom q) ∈ H.axioms := by tauto
 
 instance [DecidableEq α] [H.HasK] : Entailment.HasAxiomK H where
   K φ ψ := by
@@ -198,48 +198,48 @@ instance [DecidableEq α] [H.HasK] : Entailment.HasAxiomK H where
         if (HasK.p H) = b then φ
         else if (HasK.q H) = b then ψ
         else (.atom b))
-      HasK.mem_K;
+      HasK.mem_K
 
 
 class HasT (H : Hilbert.WithRE α) where
   p : α
-  mem_T : Axioms.T (.atom p) ∈ H.axioms := by tauto;
+  mem_T : Axioms.T (.atom p) ∈ H.axioms := by tauto
 
 instance [H.HasT] : Entailment.HasAxiomT H where
   T φ := by
     simpa using Deduction.axm
       (φ := Axioms.T (.atom (HasT.p H)))
       (s := λ b => if (HasT.p H) = b then φ else (.atom b))
-      HasT.mem_T;
+      HasT.mem_T
 
 class HasD (H : Hilbert.WithRE α) where
   p : α
-  mem_D : Axioms.D (.atom p) ∈ H.axioms := by tauto;
+  mem_D : Axioms.D (.atom p) ∈ H.axioms := by tauto
 
 instance [H.HasD] : Entailment.HasAxiomD H where
   D φ := by
     simpa using Deduction.axm
       (φ := Axioms.D (.atom (HasD.p H)))
       (s := λ b => if (HasD.p H) = b then φ else (.atom b))
-      HasD.mem_D;
+      HasD.mem_D
 
 class HasP (H : Hilbert.WithRE α) where
-  mem_P : Axioms.P ∈ H.axioms := by tauto;
+  mem_P : Axioms.P ∈ H.axioms := by tauto
 
 instance [H.HasP] : Entailment.HasAxiomP H where
-  P := by simpa using Deduction.axm' (h := HasP.mem_P);
+  P := by simpa using Deduction.axm' (h := HasP.mem_P)
 
 
 class HasFour (H : Hilbert.WithRE α) where
   p : α
-  mem_Four : Axioms.Four (.atom p) ∈ H.axioms := by tauto;
+  mem_Four : Axioms.Four (.atom p) ∈ H.axioms := by tauto
 
 instance [H.HasFour] : Entailment.HasAxiomFour H where
   Four φ := by
     simpa using Deduction.axm
       (φ := Axioms.Four (.atom (HasFour.p H)))
       (s := λ b => if (HasFour.p H) = b then φ else (.atom b))
-      HasFour.mem_Four;
+      HasFour.mem_Four
 
 end
 

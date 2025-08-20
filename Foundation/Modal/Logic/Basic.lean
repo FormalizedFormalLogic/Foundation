@@ -36,25 +36,25 @@ variable {L : Logic α} {φ ψ : Formula α}
 
 @[simp low]
 lemma iff_provable : L ⊢! φ ↔ φ ∈ L := by
-  constructor;
-  . intro h;
-    exact PLift.down h.some;
-  . intro h;
-    constructor;
-    constructor;
-    exact h;
+  constructor
+  . intro h
+    exact PLift.down h.some
+  . intro h
+    constructor
+    constructor
+    exact h
 
 @[simp low]
 lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by
-  apply not_congr;
-  simp [iff_provable];
+  apply not_congr
+  simp [iff_provable]
 
 lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
-  constructor;
-  . tauto;
-  . rintro h;
-    ext φ;
-    simpa using Equiv.iff.mp h φ;
+  constructor
+  . tauto
+  . rintro h
+    ext φ
+    simpa using Equiv.iff.mp h φ
 
 lemma subst! [L.Substitution] (s : Substitution _) (hφ : L ⊢! φ) : L ⊢! φ⟦s⟧ := ⟨Substitution.subst s hφ.some⟩
 
@@ -65,17 +65,17 @@ variable [DecidableEq α] [L.IsQuasiNormal] [Consistent L]
 
 @[simp]
 lemma no_bot : L ⊬ ⊥ := by
-  obtain ⟨φ, hφ⟩ := Consistent.exists_unprovable (𝓢 := L) inferInstance;
-  by_contra! hC;
-  apply hφ;
-  apply of_O!;
-  exact hC;
+  obtain ⟨φ, hφ⟩ := Consistent.exists_unprovable (𝓢 := L) inferInstance
+  by_contra! hC
+  apply hφ
+  apply of_O!
+  exact hC
 
 -- TODO: more general place
 lemma not_neg_of! (hφ : L ⊢! φ) : L ⊬ ∼φ := by
-  by_contra! hC;
-  apply L.no_bot;
-  exact hC ⨀ hφ;
+  by_contra! hC
+  apply L.no_bot
+  exact hC ⨀ hφ
 
 end
 
@@ -91,21 +91,21 @@ variable {L : Logic α}
 instance : (∅ : Logic α) ⪯ L := ⟨by simp [Entailment.theory]⟩
 
 instance [HasAxiomVerum L] : (∅ : Logic α) ⪱ L := by
-  apply strictlyWeakerThan_iff.mpr;
-  constructor;
-  . simp;
-  . use ⊤; constructor <;> simp;
+  apply strictlyWeakerThan_iff.mpr
+  constructor
+  . simp
+  . use ⊤; constructor <;> simp
 
 instance : L ⪯ (Set.univ : Logic α) := ⟨by simp [Entailment.theory]⟩
 
 instance [Consistent L] : L ⪱ (Set.univ : Logic α) := by
-  apply strictlyWeakerThan_iff.mpr;
-  constructor;
-  . simp;
-  . obtain ⟨φ, hφ⟩ := consistent_iff_exists_unprovable (𝓢 := L) |>.mp (by assumption);
-    use φ;
-    constructor;
-    . assumption;
+  apply strictlyWeakerThan_iff.mpr
+  constructor
+  . simp
+  . obtain ⟨φ, hφ⟩ := consistent_iff_exists_unprovable (𝓢 := L) |>.mp (by assumption)
+    use φ
+    constructor
+    . assumption
     . simp
 
 end

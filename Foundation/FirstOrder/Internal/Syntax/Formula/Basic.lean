@@ -845,7 +845,7 @@ lemma Graph.case_iff {p y : V} :
     (∃ p₁ y₁, c.Graph L (c.exChanges param) p₁ y₁ ∧ p = ^∃ p₁ ∧ y = c.ex param p₁ y₁) ) :=
   Iff.trans (c.construction L).case (by
     constructor
-    · rintro ⟨param, p', y', e, H⟩;
+    · rintro ⟨param, p', y', e, H⟩
       rcases show _ = param ∧ p = p' ∧ y = y' by simpa using e with ⟨rfl, rfl, rfl⟩
       refine H
     · intro H; exact ⟨_, _, _, rfl, H⟩)

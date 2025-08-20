@@ -27,9 +27,9 @@ variable {ℍ : Type*} [HeytingAlgebra ℍ] (v : α → ℍ)
 
 @[simp] lemma hVal_imp (φ ψ : Formula α) : (φ ➝ ψ).hVal v = φ.hVal v ⇨ ψ.hVal v := rfl
 
-@[simp] lemma hVal_verum : (⊤ : Formula α).hVal v = ⊤ := by simp [Formula.top_def];
+@[simp] lemma hVal_verum : (⊤ : Formula α).hVal v = ⊤ := by simp [Formula.top_def]
 
-@[simp] lemma hVal_neg (φ : Formula α) : (∼φ).hVal v = (φ.hVal v)ᶜ := by simp [Formula.neg_def];
+@[simp] lemma hVal_neg (φ : Formula α) : (∼φ).hVal v = (φ.hVal v)ᶜ := by simp [Formula.neg_def]
 
 end Formula
 
@@ -63,9 +63,9 @@ scoped [LO.Propositional] infix:45 " ⊧ₕ " => LO.Propositional.HeytingSemanti
 
 @[simp] lemma hVal_iff (φ ψ : Formula α) : (ℍ ⊧ₕ φ ⭤ ψ) = bihimp (ℍ ⊧ₕ φ) (ℍ ⊧ₕ ψ) := by simp [LogicalConnective.iff, bihimp, inf_comm]
 
-@[simp] lemma hVal_verum : (ℍ ⊧ₕ ⊤) = ⊤ := by simp [Formula.top_def];
+@[simp] lemma hVal_verum : (ℍ ⊧ₕ ⊤) = ⊤ := by simp [Formula.top_def]
 
-@[simp] lemma hVal_not (φ : Formula α) : (ℍ ⊧ₕ ∼φ) = (ℍ ⊧ₕ φ)ᶜ := by simp [Formula.neg_def];
+@[simp] lemma hVal_not (φ : Formula α) : (ℍ ⊧ₕ ∼φ) = (ℍ ⊧ₕ φ)ᶜ := by simp [Formula.neg_def]
 
 instance : Semantics (Formula α) (HeytingSemantics α) := ⟨fun ℍ φ ↦ (ℍ ⊧ₕ φ) = ⊤⟩
 
@@ -86,8 +86,8 @@ instance : Semantics.And (HeytingSemantics α) := ⟨fun {ℍ φ ψ} ↦ by simp
   simp [LogicalConnective.iff, antisymm_iff]
 
 lemma val_not (φ : Formula α) : ℍ ⊧ ∼φ ↔ (ℍ ⊧ₕ φ) = ⊥ := by
-  simp only [val_def, Formula.hVal_neg];
-  rw [←HeytingAlgebra.himp_bot, himp_eq_top_iff, le_bot_iff];
+  simp only [val_def, Formula.hVal_neg]
+  rw [←HeytingAlgebra.himp_bot, himp_eq_top_iff, le_bot_iff]
   rfl
 
 @[simp] lemma val_or (φ ψ : Formula α) : ℍ ⊧ φ ⋎ ψ ↔ (ℍ ⊧ₕ φ) ⊔ (ℍ ⊧ₕ ψ) = ⊤ := by
@@ -102,13 +102,13 @@ lemma mod_models_iff {φ : Formula α} :
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
 lemma sound {φ : Formula α} (d : H ⊢! φ) : mod H ⊧ φ := by
-  apply mod_models_iff.mpr;
-  intro ℍ hℍ;
+  apply mod_models_iff.mpr
+  intro ℍ hℍ
   induction d with
   | @axm φ s hφ =>
-    apply hℍ.RealizeSet;
-    use φ;
-    simpa;
+    apply hℍ.RealizeSet
+    use φ
+    simpa
   | @mdp φ ψ _ _ ihpq ihp =>
     have : (ℍ ⊧ₕ φ) ≤ (ℍ ⊧ₕ ψ) := by simpa using ihpq
     simpa [val_def'.mp ihp] using this
@@ -129,9 +129,9 @@ def lindenbaum : HeytingSemantics α where
 
 lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
   induction φ with
-  | hand φ ψ ihp ihq => simp only [hVal_and, ihp, ihq]; rw [inf_def];
-  | hor _ _ ihp ihq => simp only [hVal_or, ihp, ihq]; rw [sup_def];
-  | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def];
+  | hand φ ψ ihp ihq => simp only [hVal_and, ihp, ihq]; rw [inf_def]
+  | hor _ _ ihp ihq => simp only [hVal_or, ihp, ihq]; rw [sup_def]
+  | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def]
   | _ => rfl
 
 variable {H}

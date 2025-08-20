@@ -10,8 +10,8 @@ namespace Frame.IsTerminated
 variable {F : Frame} {t : F.World} [F.IsTerminated t]
 
 lemma direct_terminated_of_trans [F.IsTransitive] : ∀ x ≠ t, x ≺ t := by
-  intro x hx;
-  exact HRel.TransGen.unwrap $ IsTerminated.terminal_terminated x hx;
+  intro x hx
+  exact HRel.TransGen.unwrap $ IsTerminated.terminal_terminated x hx
 
 end Frame.IsTerminated
 

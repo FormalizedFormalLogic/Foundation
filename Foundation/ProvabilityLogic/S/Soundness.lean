@@ -15,14 +15,14 @@ variable {T₀ T : FirstOrder.Theory ℒₒᵣ} [T₀ ⪯ T] [Diagonalization T�
 theorem S.arithmetical_soundness (h : Modal.S ⊢! A) (f : Realization 𝔅) : ℕ ⊧ₘ₀ f A := by
   induction h using S.rec' with
   | mem_GL h =>
-    exact models_of_provable₀ inferInstance (GL.arithmetical_soundness h);
+    exact models_of_provable₀ inferInstance (GL.arithmetical_soundness h)
   | axiomT =>
-    simp only [Realization.interpret, models₀_imply_iff];
-    intro h;
+    simp only [Realization.interpret, models₀_imply_iff]
+    intro h
     exact models_of_provable₀ inferInstance (Iff.mp SoundOnModel.sound h)
   | mdp ihAB ihA =>
-    simp only [Realization.interpret, models₀_imply_iff] at ihAB;
-    apply ihAB ihA;
+    simp only [Realization.interpret, models₀_imply_iff] at ihAB
+    apply ihAB ihA
 
 end ProvabilityLogic
 

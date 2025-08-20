@@ -70,7 +70,7 @@ abbrev FrameClass.toFiniteFrameClass (𝔽 : FrameClass) : FiniteFrameClass := {
 postfix:max "ꟳ" => FrameClass.toFiniteFrameClass
 
 
-lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) [Finite F.World] : ⟨F⟩ ∈ 𝔽ꟳ := by simpa;
+lemma FrameClass.iff_mem_restrictFinite {𝔽 : FrameClass} {F : Frame} (h : F ∈ 𝔽) [Finite F.World] : ⟨F⟩ ∈ 𝔽ꟳ := by simpa
 
 section
 
@@ -174,17 +174,17 @@ abbrev ClassicalFrame : Kripke.Frame where
 
 namespace ClassicalFrame
 
-@[simp] lemma transitive : Transitive ClassicalFrame := by simp [Transitive];
+@[simp] lemma transitive : Transitive ClassicalFrame := by simp [Transitive]
 
-@[simp] lemma reflexive : Reflexive ClassicalFrame := by simp [Reflexive];
+@[simp] lemma reflexive : Reflexive ClassicalFrame := by simp [Reflexive]
 
-@[simp] lemma euclidean : Euclidean ClassicalFrame := by simp [Euclidean];
+@[simp] lemma euclidean : Euclidean ClassicalFrame := by simp [Euclidean]
 
-@[simp] lemma symmetric : Symmetric ClassicalFrame := by simp [Symmetric];
+@[simp] lemma symmetric : Symmetric ClassicalFrame := by simp [Symmetric]
 
-@[simp] lemma extensive : Coreflexive ClassicalFrame := by simp [Coreflexive];
+@[simp] lemma extensive : Coreflexive ClassicalFrame := by simp [Coreflexive]
 
-@[simp] lemma universal : Universal ClassicalFrame := by simp [Universal];
+@[simp] lemma universal : Universal ClassicalFrame := by simp [Universal]
 
 end ClassicalFrame
 
@@ -199,18 +199,18 @@ end Classical
 
 /-- Frame with single world and identiy relation -/
 abbrev terminalFrame : FiniteFrame where
-  World := Unit;
+  World := Unit
   Rel := λ _ _ => True
 
 @[simp]
 lemma terminalFrame.iff_rel' {x y : terminalFrame.World} : x ≺ y ↔ x = y := by
-  simp [Frame.Rel'];
+  simp [Frame.Rel']
 
 @[simp]
 lemma terminalFrame.iff_relItr' {x y : terminalFrame.World} : x ≺^[n] y ↔ x = y := by
   induction n with
-  | zero => simp;
-  | succ n ih => simp_all;
+  | zero => simp
+  | succ n ih => simp_all
 
 
 
@@ -219,7 +219,7 @@ abbrev PointFrame : FiniteFrame where
   Rel := (λ _ _ => False)
 
 @[simp]
-lemma PointFrame.iff_rel' {x y : PointFrame.World} : ¬(x ≺ y) := by simp [Frame.Rel'];
+lemma PointFrame.iff_rel' {x y : PointFrame.World} : ¬(x ≺ y) := by simp [Frame.Rel']
 
 
 end LO.Kripke

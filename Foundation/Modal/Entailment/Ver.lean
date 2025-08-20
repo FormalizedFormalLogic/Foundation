@@ -8,11 +8,11 @@ variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailme
 variable {𝓢 : S} [Entailment.Ver 𝓢]
 
 def bot_of_dia : 𝓢 ⊢ ◇φ ➝ ⊥ := by
-  have : 𝓢 ⊢ ∼◇φ ➝ (◇φ ➝ ⊥) := K_left $ negEquiv (𝓢 := 𝓢) (φ := ◇φ);
+  have : 𝓢 ⊢ ∼◇φ ➝ (◇φ ➝ ⊥) := K_left $ negEquiv (𝓢 := 𝓢) (φ := ◇φ)
   exact this ⨀ (contra (K_left diaDuality) ⨀ by
-    apply dni';
-    apply axiomVer;
-  );
+    apply dni'
+    apply axiomVer
+  )
 lemma bot_of_dia! : 𝓢 ⊢! ◇φ ➝ ⊥ := ⟨bot_of_dia⟩
 
 def bot_of_dia' (h : 𝓢 ⊢ ◇φ) : 𝓢 ⊢ ⊥ := bot_of_dia ⨀ h

@@ -30,11 +30,11 @@ lemma s_connected [F.IsStronglyConnected] : ∀ {x y : F.World}, x ≺ y ∨ y �
 protected abbrev IsConnected (F : Frame) := _root_.IsTrichotomous _ F.Rel
 lemma connected [F.IsConnected] : ∀ x y : F.World, x ≺ y ∨ x = y ∨ y ≺ x := by apply IsTrichotomous.trichotomous
 lemma connected' [F.IsConnected] : ∀ x y : F.World, x ≠ y → x ≺ y ∨ y ≺ x := by
-  rintro x y nexy;
-  rcases F.connected x y with (Rxy | rfl | Ryx);
-  . tauto;
-  . contradiction;
-  . tauto;
+  rintro x y nexy
+  rcases F.connected x y with (Rxy | rfl | Ryx)
+  . tauto
+  . contradiction
+  . tauto
 
 
 protected class IsGenerated (F : Kripke.Frame) (R : { s : Set F.World // s.Nonempty }) where
@@ -51,18 +51,18 @@ instance {r : outParam F.World} [F.IsRootedBy r] : F.IsRooted := ⟨by use r⟩
 protected noncomputable def root (F : Frame) [F.IsRooted] : F.World := Classical.choose Frame.IsRooted.exists_root
 
 lemma root_generates [F.IsRooted] : ∀ x ≠ F.root, F.root ≺^+ x := by
-  apply @Frame.IsRooted.exists_root F _ |>.choose_spec |>.root_generates;
+  apply @Frame.IsRooted.exists_root F _ |>.choose_spec |>.root_generates
 
 lemma root_generates' [F.IsRooted] [F.IsTransitive] : ∀ x ≠ F.root, F.root ≺ x := by
-  intro x hx;
-  exact HRel.TransGen.unwrap $ F.root_generates _ hx;
+  intro x hx
+  exact HRel.TransGen.unwrap $ F.root_generates _ hx
 
 /-- `Frame.root` is first. -/
 @[simp] lemma root_first [F.IsRooted] [F.IsTransitive] [F.IsReflexive] : ∀ x, F.root ≺ x := by
-  intro x;
-  by_cases hx : x = F.root;
-  . subst hx; apply F.refl;
-  . exact F.root_generates' x hx;
+  intro x
+  by_cases hx : x = F.root
+  . subst hx; apply F.refl
+  . exact F.root_generates' x hx
 
 
 /-- Explicit version of `root_generates` for rooted by `r`. -/
@@ -70,85 +70,85 @@ lemma root_generates! [F.IsRootedBy r] : ∀ x ≠ r, r ≺^+ x := IsRootedBy.ro
 
 /-- Explicit version of `root_generates'` for rooted by `r`. -/
 lemma root_genaretes'! [F.IsTransitive] [F.IsRootedBy r] : ∀ x ≠ r, r ≺ x := by
-  intro x hx;
-  apply HRel.TransGen.unwrap;
-  exact IsRootedBy.root_generates x hx;
+  intro x hx
+  apply HRel.TransGen.unwrap
+  exact IsRootedBy.root_generates x hx
 
 @[simp] lemma root_first! [F.IsRootedBy r] [F.IsTransitive] [F.IsReflexive] : ∀ x, r ≺ x := by
-  intro x;
-  by_cases hx : x = r;
-  . subst hx; apply F.refl;
-  . exact F.root_genaretes'! x hx;
+  intro x
+  by_cases hx : x = r
+  . subst hx; apply F.refl
+  . exact F.root_genaretes'! x hx
 
 
 instance [F.IsRooted] : F.IsRootedBy F.root where
-  root_generates := by apply @Frame.IsRooted.exists_root F _ |>.choose_spec |>.root_generates;
+  root_generates := by apply @Frame.IsRooted.exists_root F _ |>.choose_spec |>.root_generates
 
 
 instance [rooted : F.IsRootedBy r] : F.IsGenerated (⟨{r}, by tauto⟩) where
   roots_generates := by
-    rintro x hx;
-    use r;
-    constructor;
-    . tauto;
-    . exact rooted.root_generates x hx;
+    rintro x hx
+    use r
+    constructor
+    . tauto
+    . exact rooted.root_generates x hx
 
 
 
 namespace isRooted
 
 instance isConvergent [F.IsRooted] [F.IsPiecewiseConvergent] [F.IsTransitive] [F.IsReflexive] : F.IsConvergent := ⟨by
-  rintro x y nexy;
-  apply F.p_convergent (x := F.root) ?_ ?_ nexy;
-  . by_cases ex : x = F.root;
-    . subst ex; apply F.refl;
-    . apply F.root_generates';
-      tauto;
-  . by_cases ey : y = F.root;
-    . subst ey; apply F.refl;
-    . apply F.root_generates';
-      tauto;
+  rintro x y nexy
+  apply F.p_convergent (x := F.root) ?_ ?_ nexy
+  . by_cases ex : x = F.root
+    . subst ex; apply F.refl
+    . apply F.root_generates'
+      tauto
+  . by_cases ey : y = F.root
+    . subst ey; apply F.refl
+    . apply F.root_generates'
+      tauto
 ⟩
 
 instance isStronglyConvergent [F.IsRooted] [F.IsPiecewiseStronglyConvergent] [F.IsReflexive] [F.IsTransitive] : F.IsStronglyConvergent := ⟨by
-  rintro x y;
-  apply F.ps_convergent (x := F.root) ?_ ?_;
-  . by_cases ex : x = F.root;
-    . subst ex; apply F.refl;
-    . apply F.root_generates';
-      tauto;
-  . by_cases ey : y = F.root;
-    . subst ey; apply F.refl;
-    . apply F.root_generates';
-      tauto;
+  rintro x y
+  apply F.ps_convergent (x := F.root) ?_ ?_
+  . by_cases ex : x = F.root
+    . subst ex; apply F.refl
+    . apply F.root_generates'
+      tauto
+  . by_cases ey : y = F.root
+    . subst ey; apply F.refl
+    . apply F.root_generates'
+      tauto
 ⟩
 
 instance isConnected [F.IsRooted] [F.IsPiecewiseConnected] [F.IsReflexive] [F.IsTransitive] : F.IsConnected := ⟨by
-  rintro x y;
-  suffices x ≠ y → x ≺ y ∨ y ≺ x by tauto;
-  intro nexy;
-  apply F.p_connected' (x := F.root) ?_ ?_ nexy;
-  . by_cases ex : x = F.root;
-    . subst ex; apply F.refl;
-    . apply F.root_generates';
-      tauto;
-  . by_cases ey : y = F.root;
-    . subst ey; apply F.refl;
-    . apply F.root_generates';
-      tauto;
+  rintro x y
+  suffices x ≠ y → x ≺ y ∨ y ≺ x by tauto
+  intro nexy
+  apply F.p_connected' (x := F.root) ?_ ?_ nexy
+  . by_cases ex : x = F.root
+    . subst ex; apply F.refl
+    . apply F.root_generates'
+      tauto
+  . by_cases ey : y = F.root
+    . subst ey; apply F.refl
+    . apply F.root_generates'
+      tauto
 ⟩
 
 instance isStronglyConnected [F.IsRooted] [F.IsPiecewiseStronglyConnected] [F.IsReflexive] [F.IsTransitive] : F.IsStronglyConnected := ⟨by
-  rintro x y;
-  apply F.ps_connected (x := F.root) ?_ ?_;
-  . by_cases ex : x = F.root;
-    . subst ex; apply F.refl;
-    . apply F.root_generates';
-      tauto;
-  . by_cases ey : y = F.root;
-    . subst ey; apply F.refl;
-    . apply F.root_generates';
-      tauto;
+  rintro x y
+  apply F.ps_connected (x := F.root) ?_ ?_
+  . by_cases ex : x = F.root
+    . subst ex; apply F.refl
+    . apply F.root_generates'
+      tauto
+  . by_cases ey : y = F.root
+    . subst ey; apply F.refl
+    . apply F.root_generates'
+      tauto
 ⟩
 
 end isRooted
@@ -156,8 +156,8 @@ end isRooted
 
 instance [rooted : F.IsRootedBy r] : (F^+).IsRootedBy r where
   root_generates := by
-    intro x hx;
-    exact Relation.TransGen.single $ rooted.root_generates x hx;
+    intro x hx
+    exact Relation.TransGen.single $ rooted.root_generates x hx
 
 
 end Frame
@@ -178,45 +178,45 @@ namespace setGenerate
 variable {F : Frame} {R}
 
 protected abbrev roots : { s : Set (F↾R) // s.Nonempty } := ⟨{ r | r.1 ∈ R.1 }, by
-  obtain ⟨r, hr⟩ := R.2;
-  use ⟨r, by tauto⟩;
-  tauto;
+  obtain ⟨r, hr⟩ := R.2
+  use ⟨r, by tauto⟩
+  tauto
 ⟩
 
 lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.Rel.TransGen x y)
   : ((F↾R)^+.Rel ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
-  | base h => exact _root_.Relation.TransGen.single h;
+  | base h => exact _root_.Relation.TransGen.single h
   | @ih a c ha hb hc =>
     let b : (F.setGenerate R).World := ⟨c, by
       rcases hx with hx | ⟨r₁, hR₁, Rr₁a⟩ <;>
-      rcases hy with hy | ⟨r₂, hR₂, Rr₂b⟩;
-      . right; use a; constructor; assumption; exact TransGen.single ha;
-      . right; use a; constructor; assumption; exact TransGen.single ha;
-      . right;
-        use r₁;
-        constructor;
-        . assumption;
-        . exact TransGen.tail Rr₁a ha;
-      . right;
-        use r₁;
-        constructor;
-        . assumption;
-        . exact TransGen.tail Rr₁a ha;
-    ⟩;
-    apply Relation.TransGen.head (b := b);
-    . exact ha;
-    . apply hc;
+      rcases hy with hy | ⟨r₂, hR₂, Rr₂b⟩
+      . right; use a; constructor; assumption; exact TransGen.single ha
+      . right; use a; constructor; assumption; exact TransGen.single ha
+      . right
+        use r₁
+        constructor
+        . assumption
+        . exact TransGen.tail Rr₁a ha
+      . right
+        use r₁
+        constructor
+        . assumption
+        . exact TransGen.tail Rr₁a ha
+    ⟩
+    apply Relation.TransGen.head (b := b)
+    . exact ha
+    . apply hc
 
 instance instGenerated : (F↾R).IsGenerated (setGenerate.roots) where
   roots_generates := by
-    rintro ⟨r, (hr | ⟨t, ht, Rtx⟩)⟩ _;
-    . simp_all;
-    . use ⟨t, by simp_all⟩;
-      constructor;
-      . simpa;
-      . apply trans_rel_of_origin_trans_rel;
-        exact Rtx;
+    rintro ⟨r, (hr | ⟨t, ht, Rtx⟩)⟩ _
+    . simp_all
+    . use ⟨t, by simp_all⟩
+      constructor
+      . simpa
+      . apply trans_rel_of_origin_trans_rel
+        exact Rtx
 
 end setGenerate
 
@@ -234,33 +234,33 @@ variable {F : Frame} {r : outParam (F.World)}
 lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.TransGen x y)
   : ((F↾r)^+.Rel ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
-  | base h => exact Relation.TransGen.single h;
+  | base h => exact Relation.TransGen.single h
   | @ih a c ha hb hc =>
     let b : (F↾r).World := ⟨c, by
       rcases hx with rfl | Rra <;>
-      rcases hy with rfl | Rrb;
-      . right; exact TransGen.single ha;
-      . right; exact TransGen.single ha;
-      . right; exact TransGen.tail Rra ha;
-      . right; exact TransGen.tail Rra ha;
-    ⟩;
-    apply Relation.TransGen.head (b := b);
-    . exact ha;
-    . apply hc;
+      rcases hy with rfl | Rrb
+      . right; exact TransGen.single ha
+      . right; exact TransGen.single ha
+      . right; exact TransGen.tail Rra ha
+      . right; exact TransGen.tail Rra ha
+    ⟩
+    apply Relation.TransGen.head (b := b)
+    . exact ha
+    . apply hc
 
 lemma origin_trans_rel_of_trans_rel {u v : (F↾r).World} (Ruv : (F↾r).TransGen u v) : F.TransGen u.1 v.1 := by
   induction Ruv using TransGen.head_induction_on with
-  | base h => exact Relation.TransGen.single h;
-  | ih a b c => exact TransGen.head a c;
+  | base h => exact Relation.TransGen.single h
+  | ih a b c => exact TransGen.head a c
 
 protected abbrev root : (F↾r).World := ⟨r, by tauto⟩
 
 instance : (F↾r).IsRootedBy pointGenerate.root where
   root_generates := by
-    rintro ⟨w, (rfl | Rrw)⟩ hw;
-    . simp at hw;
-    . apply trans_rel_of_origin_trans_rel;
-      exact Rrw;
+    rintro ⟨w, (rfl | Rrw)⟩ hw
+    . simp at hw
+    . apply trans_rel_of_origin_trans_rel
+      exact Rrw
 
 instance : (F↾r).IsRooted := inferInstance
 
@@ -269,26 +269,26 @@ instance [F.IsFinite] : (F↾r).IsFinite := inferInstance
 instance [DecidableEq F.World] : DecidableEq (F↾r).World := Subtype.instDecidableEq
 
 instance isReflexive [F.IsReflexive] : (F↾r).IsReflexive where
-  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact IsRefl.refl x;
+  refl := by rintro ⟨x, (rfl | hx)⟩ <;> exact IsRefl.refl x
 
 instance isTransitive [F.IsTransitive] : (F↾r).IsTransitive where
   trans := by
-    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ hxy hyz;
-    . assumption;
-    . assumption;
-    . have : z ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
-    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
-    . assumption;
-    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
-    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
-    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this;
+    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ ⟨z, (rfl | hz)⟩ hxy hyz
+    . assumption
+    . assumption
+    . have : z ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this
+    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this
+    . assumption
+    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this
+    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this
+    . have : x ≺ z := IsTrans.trans _ _ _ hxy hyz; exact this
 
 instance isAntisymmetric [F.IsAntisymmetric] : (F↾r).IsAntisymmetric := ⟨by
-  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy Ryx;
-  . tauto;
-  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx;
-  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx;
-  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx;
+  rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ Rxy Ryx
+  . tauto
+  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx
+  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx
+  . simp only [Subtype.mk.injEq]; apply F.antisymm Rxy Ryx
 ⟩
 
 instance isIrreflexive [F.IsIrreflexive] : (F↾r).IsIrreflexive := ⟨by rintro ⟨x, (rfl | hx)⟩ h <;> simp at h⟩
@@ -299,38 +299,38 @@ instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric := ⟨by
 ⟩
 
 instance isPiecewiseConvergent [F.IsPiecewiseConvergent] : (F↾r).IsPiecewiseConvergent := ⟨by
-  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz nexy;
-  any_goals contradiction;
+  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz nexy
+  any_goals contradiction
   case mk.inl.mk.inr.mk.inr | mk.inr.mk.inr.mk.inr =>
-    have ⟨u, Ryu, Rzu⟩ := F.p_convergent Rxy Rxz $ by simp_all;
-    use ⟨u, by right; apply HRel.TransGen.tail Rry Ryu⟩;
+    have ⟨u, Ryu, Rzu⟩ := F.p_convergent Rxy Rxz $ by simp_all
+    use ⟨u, by right; apply HRel.TransGen.tail Rry Ryu⟩
   all_goals
-  . have ⟨u, _⟩ := F.p_convergent Rxy Rxz $ by simp_all;
-    use ⟨u, by tauto⟩;
+  . have ⟨u, _⟩ := F.p_convergent Rxy Rxz $ by simp_all
+    use ⟨u, by tauto⟩
 ⟩
 
 instance isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : (F↾r).IsPiecewiseStronglyConvergent := ⟨by
-  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz;
-  case mk.inl.mk.inl.mk.inl => tauto;
+  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz
+  case mk.inl.mk.inl.mk.inl => tauto
   case mk.inr.mk.inr.mk.inr | mk.inl.mk.inr.mk.inr =>
-    obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz;
-    use ⟨u, ?_⟩;
-    . right; exact HRel.TransGen.tail Rry Ryu;
+    obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz
+    use ⟨u, ?_⟩
+    . right; exact HRel.TransGen.tail Rry Ryu
   all_goals
-  . obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz;
-    use ⟨u, by tauto⟩;
+  . obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz
+    use ⟨u, by tauto⟩
 ⟩
 
 instance isPiecewiseConnected [F.IsPiecewiseConnected] : (F↾r).IsPiecewiseConnected := by
-  apply IsPiecewiseConnected.mk';
-  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz nexy;
-  any_goals tauto;
-  all_goals exact F.p_connected' Rxy Rxz $ by simp_all;;
+  apply IsPiecewiseConnected.mk'
+  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz nexy
+  any_goals tauto
+  all_goals exact F.p_connected' Rxy Rxz $ by simp_all;
 
 instance isPiecewiseStronglyConnected [F.IsPiecewiseStronglyConnected] : (F↾r).IsPiecewiseStronglyConnected := ⟨by
-  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz;
-  any_goals tauto;
-  all_goals exact F.ps_connected Rxy Rxz;
+  rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz
+  any_goals tauto
+  all_goals exact F.ps_connected Rxy Rxz
 ⟩
 
 instance isConvergent [F.IsPiecewiseConvergent] [F.IsTransitive] [F.IsReflexive] : (F↾r).IsConvergent := isRooted.isConvergent
@@ -345,24 +345,24 @@ instance isStronglyConnected [F.IsPiecewiseStronglyConnected] [F.IsReflexive] [F
 def pMorphism (F : Kripke.Frame) (r : F) : (F↾r) →ₚ F where
   toFun := λ ⟨x, _⟩ => x
   forth := by
-    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy;
-    repeat exact hxy;
+    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy
+    repeat exact hxy
   back := by
-    rintro ⟨x, (rfl | hx)⟩ y Rwv;
+    rintro ⟨x, (rfl | hx)⟩ y Rwv
     . simp at Rwv; use ⟨y, by tauto⟩
-    . use ⟨y, by right; exact Relation.TransGen.tail hx Rwv⟩;
+    . use ⟨y, by right; exact Relation.TransGen.tail hx Rwv⟩
 
 /-
 def generatedSub : F↾r ⥹ F where
   toFun := λ ⟨x, _⟩ => x
   forth := by
-    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy;
-    repeat exact hxy;
+    rintro ⟨x, (rfl | hx)⟩ ⟨y, (rfl | hy)⟩ hxy
+    repeat exact hxy
   back := by
-    rintro ⟨x, (rfl | hx)⟩ y Rwv;
+    rintro ⟨x, (rfl | hx)⟩ y Rwv
     . simp at Rwv; use ⟨y, by tauto⟩
-    . use ⟨y, by right; exact Relation.TransGen.tail hx Rwv⟩;
-  monic := by simp;
+    . use ⟨y, by right; exact Relation.TransGen.tail hx Rwv⟩
+  monic := by simp
 -/
 
 end pointGenerate
@@ -377,16 +377,16 @@ namespace Model.pointGenerate
 
 variable {M : Kripke.Model} {r : outParam M.World}
 
-instance [M.IsFinite] : (M↾r).IsFinite := by dsimp [Model.pointGenerate]; infer_instance;
+instance [M.IsFinite] : (M↾r).IsFinite := by dsimp [Model.pointGenerate]; infer_instance
 
 protected abbrev root : (M↾r).World := ⟨r, by tauto⟩
 
-instance : (M↾r).IsRootedBy pointGenerate.root := by dsimp [Model.pointGenerate]; infer_instance;
+instance : (M↾r).IsRootedBy pointGenerate.root := by dsimp [Model.pointGenerate]; infer_instance
 
 protected def pMorphism : (M↾r) →ₚ M := by
-  apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism M.toFrame r);
-  simp only [pointGenerate, Frame.pointGenerate, Subtype.forall];
-  rintro p x (rfl | Rrx) <;> tauto;
+  apply Model.PseudoEpimorphism.ofAtomic (Frame.pointGenerate.pMorphism M.toFrame r)
+  simp only [pointGenerate, Frame.pointGenerate, Subtype.forall]
+  rintro p x (rfl | Rrx) <;> tauto
 
 instance isReflexive [M.IsReflexive] : (M↾r).IsReflexive := Frame.pointGenerate.isReflexive
 instance isTransitive [M.IsTransitive] : (M↾r).IsTransitive := Frame.pointGenerate.isTransitive
@@ -401,15 +401,15 @@ instance isStronglyConnected [M.IsPiecewiseStronglyConnected] [M.IsReflexive] [M
 
 /-
 instance : (M↾r) ⥹ M := by
-  letI g := Frame.pointGenerate.generatedSub (F := M.toFrame) (r := r);
+  letI g := Frame.pointGenerate.generatedSub (F := M.toFrame) (r := r)
   exact {
     toFun := g.toFun,
     forth := g.forth,
     back := g.back,
     monic := g.monic
     atomic := by
-      simp [Model.pointGenerate, Frame.pointGenerate, g];
-      rintro p x (rfl | Rrx) <;> tauto;
+      simp [Model.pointGenerate, Frame.pointGenerate, g]
+      rintro p x (rfl | Rrx) <;> tauto
   }
 -/
 

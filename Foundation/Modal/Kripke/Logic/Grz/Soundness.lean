@@ -27,19 +27,19 @@ instance : whitepoint.IsFiniteGrz where
 
 instance [F.IsFinite] [F.IsPartialOrder] : F.SatisfiesMcKinseyCondition where
   mckinsey := by
-    intro x;
+    intro x
     obtain ⟨y, _, Rxy, hy₃⟩ :=  @Finite.exists_le_maximal _ {
       le := F,
       le_refl := fun a ↦ Frame.refl,
       le_trans := fun x y z ↦ Frame.trans
-    } _ (λ y => x ≺ y) x Frame.refl;
-    use y;
-    constructor;
-    . tauto;
-    . intro z Ryz;
-      apply F.antisymm;
-      . assumption;
-      . exact @hy₃ z (F.trans Rxy Ryz) Ryz;
+    } _ (λ y => x ≺ y) x Frame.refl
+    use y
+    constructor
+    . tauto
+    . intro z Ryz
+      apply F.antisymm
+      . assumption
+      . exact @hy₃ z (F.trans Rxy Ryz) Ryz
 instance [F.IsFiniteGrz] : F.IsS4McK where
 
 end Kripke
@@ -48,15 +48,15 @@ end Kripke
 namespace Logic.Grz.Kripke
 
 instance : Sound Hilbert.Grz FrameClass.finite_Grz := instSound_of_validates_axioms $ by
-  apply FrameClass.validates_with_AxiomK_of_validates;
-  constructor;
-  rintro _ (rfl | rfl) F ⟨_, _⟩;
-  exact validate_AxiomGrz_of_refl_trans_wcwf;
+  apply FrameClass.validates_with_AxiomK_of_validates
+  constructor
+  rintro _ (rfl | rfl) F ⟨_, _⟩
+  exact validate_AxiomGrz_of_refl_trans_wcwf
 
 instance : Entailment.Consistent Hilbert.Grz :=
   consistent_of_sound_frameclass FrameClass.finite_Grz $ by
-    use whitepoint;
-    constructor;
+    use whitepoint
+    constructor
 
 end Logic.Grz.Kripke
 

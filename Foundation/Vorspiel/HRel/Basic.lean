@@ -31,66 +31,66 @@ lemma succ_left (Rxz : R x z) (Rzy : R.Iterate n z y) : R.Iterate (n + 1) x y :=
 @[simp]
 lemma eq : HRel.Iterate (α := α) (· = ·) n = (· = ·) := by
   induction n with
-  | zero => rfl;
+  | zero => rfl
   | succ n ih => simp [Iterate]; aesop
 
 lemma forward : (R.Iterate (n + 1) x y) ↔ ∃ z, R.Iterate n x z ∧ R z y := by
   induction n generalizing x y with
-  | zero => simp_all;
+  | zero => simp_all
   | succ n ih =>
-    constructor;
-    . rintro ⟨z, Rxz, Rzy⟩;
-      obtain ⟨w, Rzw, Rwy⟩ := ih.mp Rzy;
-      use w;
-      constructor;
-      . use z;
-      . assumption;
-    . rintro ⟨z, ⟨w, Rxw, Rwz⟩, Rzy⟩;
-      use w;
-      constructor;
-      . assumption;
-      . apply ih.mpr;
-        use z;
+    constructor
+    . rintro ⟨z, Rxz, Rzy⟩
+      obtain ⟨w, Rzw, Rwy⟩ := ih.mp Rzy
+      use w
+      constructor
+      . use z
+      . assumption
+    . rintro ⟨z, ⟨w, Rxw, Rwz⟩, Rzy⟩
+      use w
+      constructor
+      . assumption
+      . apply ih.mpr
+        use z
 
 lemma true_any (h : x = y) : HRel.Iterate (λ _ _ => True) n x y := by
   induction n with
-  | zero => simpa;
-  | succ n ih => use x;
+  | zero => simpa
+  | succ n ih => use x
 
 lemma congr (h : R.Iterate n x y) (he : n = m) : R.Iterate m x y := by
-  subst he;
-  exact h;
+  subst he
+  exact h
 
 lemma comp : (∃ z, R.Iterate n x z ∧ R.Iterate m z y) ↔ R.Iterate (n + m) x y := by
-  constructor;
-  . rintro ⟨z, hzx, hzy⟩;
+  constructor
+  . rintro ⟨z, hzx, hzy⟩
     induction n generalizing x with
-    | zero => simp_all;
+    | zero => simp_all
     | succ n ih =>
-      suffices R.Iterate (n + m + 1) x y by apply congr this (by omega);
-      obtain ⟨w, hxw, hwz⟩ := hzx;
-      use w;
-      constructor;
-      . exact hxw;
-      . exact @ih w hwz;
-  . rintro h;
+      suffices R.Iterate (n + m + 1) x y by apply congr this (by omega)
+      obtain ⟨w, hxw, hwz⟩ := hzx
+      use w
+      constructor
+      . exact hxw
+      . exact @ih w hwz
+  . rintro h
     induction n generalizing x with
-    | zero => simp_all;
+    | zero => simp_all
     | succ n ih =>
-      have rxy : R.Iterate (n + m + 1) x y := congr h (by omega);
-      obtain ⟨w, rxw, rwy⟩ := rxy;
-      obtain ⟨u, rwu, ruy⟩ := @ih w rwy;
-      use u;
-      constructor;
-      . use w;
-      . assumption;
+      have rxy : R.Iterate (n + m + 1) x y := congr h (by omega)
+      obtain ⟨w, rxw, rwy⟩ := rxy
+      obtain ⟨u, rwu, ruy⟩ := @ih w rwy
+      use u
+      constructor
+      . use w
+      . assumption
 
 lemma unwrap_of_trans {n : ℕ+} [IsTrans _ R] (Rxy : R.Iterate n x y) : R x y := by
   induction n using PNat.recOn generalizing x with
-  | one => simpa using Rxy;
+  | one => simpa using Rxy
   | succ n ih =>
-    obtain ⟨z, Rxz, Rzy⟩ := Rxy;
-    exact IsTrans.trans _ _ _ Rxz (ih Rzy);
+    obtain ⟨z, Rxz, Rzy⟩ := Rxy
+    exact IsTrans.trans _ _ _ Rxz (ih Rzy)
 
 lemma unwrap_of_trans_of_pos {n : ℕ} (h : 0 < n) [IsTrans _ R] (Rxy : R.Iterate n x y) : R x y := by
   have : ∃ m : ℕ+, n = m := ⟨⟨n, h⟩, by simp⟩
@@ -99,10 +99,10 @@ lemma unwrap_of_trans_of_pos {n : ℕ} (h : 0 < n) [IsTrans _ R] (Rxy : R.Iterat
 
 lemma unwrap_of_refl_trans {n : ℕ} [IsRefl _ R] [IsTrans _ R] (Rxy : R.Iterate n x y) : R x y := by
   induction n generalizing x with
-  | zero => subst Rxy; apply IsRefl.refl;
+  | zero => subst Rxy; apply IsRefl.refl
   | succ n ih =>
-    obtain ⟨z, Rxz, Rzy⟩ := Rxy;
-    exact IsTrans.trans _ _ _ Rxz (ih Rzy);
+    obtain ⟨z, Rxz, Rzy⟩ := Rxy
+    exact IsTrans.trans _ _ _ Rxz (ih Rzy)
 
 lemma constant_trans_of_pos {n : ℕ} (pos : 0 < n) [IsTrans _ R] (Rzx : R z x) (Rxy : R.Iterate n x y) : R.Iterate n z y := by
   rcases (pos_succ_iff pos).mp Rxy with ⟨w, Rxw, hwy⟩
@@ -123,25 +123,25 @@ namespace ReflGen
 instance : IsRefl α (R.ReflGen) := ⟨by apply Relation.ReflGen.refl⟩
 
 instance [IsTrans _ R] : IsTrans α (R.ReflGen) := ⟨by
-  rintro a b c (rfl | Rab) (rfl | Rbc);
-  . exact Relation.ReflGen.refl;
-  . exact Relation.ReflGen.single Rbc;
-  . exact Relation.ReflGen.single Rab;
-  . exact Relation.ReflGen.single $ IsTrans.trans a b c Rab Rbc;
+  rintro a b c (rfl | Rab) (rfl | Rbc)
+  . exact Relation.ReflGen.refl
+  . exact Relation.ReflGen.single Rbc
+  . exact Relation.ReflGen.single Rab
+  . exact Relation.ReflGen.single $ IsTrans.trans a b c Rab Rbc
 ⟩
 
 instance [IsSymm _ R] : IsSymm α (ReflGen R) := ⟨by
-  rintro a b (rfl | Rab);
-  . exact Relation.ReflGen.refl;
-  . exact Relation.ReflGen.single $ IsSymm.symm _ _ Rab;
+  rintro a b (rfl | Rab)
+  . exact Relation.ReflGen.refl
+  . exact Relation.ReflGen.single $ IsSymm.symm _ _ Rab
 ⟩
 
 instance [IsIrrefl _ R] [IsTrans _ R] : IsAntisymm α (ReflGen R) := ⟨by
-  rintro a b (rfl | Rab) (rfl | Rba);
-  . trivial;
-  . trivial;
-  . trivial;
-  . exfalso;
+  rintro a b (rfl | Rab) (rfl | Rba)
+  . trivial
+  . trivial
+  . trivial
+  . exfalso
     exact IsIrrefl.irrefl a $ IsTrans.trans a b a Rab Rba
 ⟩
 
@@ -167,33 +167,33 @@ lemma head (Rxy : x ≺ y) (Ryz : y ≺^+ z) : x ≺^+ z := Relation.TransGen.he
 lemma tail (Rxy : x ≺^+ y) (Ryz : y ≺ z) : x ≺^+ z := Relation.TransGen.tail Rxy Ryz
 
 lemma exists_iterate : TransGen R x y ↔ ∃ n : ℕ+, R.Iterate n x y := by
-  constructor;
-  . intro h;
+  constructor
+  . intro h
     induction h with
-    | single h => use 1; simpa;
+    | single h => use 1; simpa
     | tail Rxy Ryz ih =>
-      obtain ⟨⟨n, hn⟩, Rxy⟩ := ih;
-      use ⟨n + 1, by omega⟩;
-      apply HRel.Iterate.forward.mpr;
-      refine ⟨_, Rxy, Ryz⟩;
-  . rintro ⟨n, Rxy⟩;
+      obtain ⟨⟨n, hn⟩, Rxy⟩ := ih
+      use ⟨n + 1, by omega⟩
+      apply HRel.Iterate.forward.mpr
+      refine ⟨_, Rxy, Ryz⟩
+  . rintro ⟨n, Rxy⟩
     induction n using PNat.recOn generalizing x with
     | one =>
-      apply single;
-      simpa using Rxy;
+      apply single
+      simpa using Rxy
     | succ n ih =>
-      obtain ⟨z, Rxz, Rzy⟩ := Rxy;
-      apply head;
-      . exact Rxz;
-      . apply ih;
-        exact Rzy;
+      obtain ⟨z, Rxz, Rzy⟩ := Rxy
+      apply head
+      . exact Rxz
+      . apply ih
+        exact Rzy
 
 lemma remove_iterate {n : ℕ+} (Rxy : R.TransGen.Iterate n x y) : R.TransGen x y := by
-  apply unwrap_of_trans (n := n) Rxy;
+  apply unwrap_of_trans (n := n) Rxy
 
 lemma unwrap [IsTrans _ R] (Rxy : R.TransGen x y) : R x y := by
-  have ⟨n, Rxy⟩ := TransGen.exists_iterate.mp Rxy;
-  exact unwrap_of_trans (n := n) Rxy;
+  have ⟨n, Rxy⟩ := TransGen.exists_iterate.mp Rxy
+  exact unwrap_of_trans (n := n) Rxy
 
 @[simp] lemma unwrap_iff [IsTrans _ R] : R.TransGen x y ↔ R x y :=
   ⟨unwrap, single⟩
@@ -201,18 +201,18 @@ lemma unwrap [IsTrans _ R] (Rxy : R.TransGen x y) : R x y := by
 instance [IsRefl _ R] : IsRefl α R.TransGen := ⟨fun x ↦ Relation.TransGen.single (IsRefl.refl x)⟩
 
 instance [IsSymm _ R] : IsSymm α R.TransGen := ⟨by
-  rintro x y Rxy;
+  rintro x y Rxy
   induction Rxy with
   | single Rxy =>
-    apply single;
-    apply IsSymm.symm _ _ Rxy;
+    apply single
+    apply IsSymm.symm _ _ Rxy
   | tail _ hyz ih =>
     exact trans (Relation.TransGen.single $ (IsSymm.symm _ _) hyz) ih
 ⟩
 
 instance [IsTrans _ R] [IsAntisymm _ R] : IsAntisymm α R.TransGen := ⟨by
-  rintro x y Rxy Ryx;
-  exact IsAntisymm.antisymm _ _ Rxy.unwrap Ryx.unwrap;
+  rintro x y Rxy Ryx
+  exact IsAntisymm.antisymm _ _ Rxy.unwrap Ryx.unwrap
 ⟩
 
 end TransGen
@@ -225,37 +225,37 @@ instance : IsRefl _ (R.ReflTransGen) := ⟨by apply Relation.ReflTransGen.refl�
 instance : IsTrans _ (R.ReflTransGen) := ⟨by apply Relation.ReflTransGen.trans⟩
 
 lemma exists_iterate : R.ReflTransGen x y ↔ ∃ n : ℕ, R.Iterate n x y := by
-  constructor;
-  . intro h;
+  constructor
+  . intro h
     induction h with
-    | refl => use 0;  simp;
+    | refl => use 0;  simp
     | tail Rxy Ryz ih =>
-      obtain ⟨n, Rxy⟩ := ih;
-      use n + 1;
-      apply HRel.Iterate.forward.mpr;
-      exact ⟨_, Rxy, Ryz⟩;
-  . rintro ⟨n, h⟩;
+      obtain ⟨n, Rxy⟩ := ih
+      use n + 1
+      apply HRel.Iterate.forward.mpr
+      exact ⟨_, Rxy, Ryz⟩
+  . rintro ⟨n, h⟩
     induction n generalizing x y with
-    | zero => subst h; apply Relation.ReflTransGen.refl;
+    | zero => subst h; apply Relation.ReflTransGen.refl
     | succ n ih =>
-      obtain ⟨z, Rxz, Rzy⟩ := h;
-      apply Relation.ReflTransGen.head;
-      . exact Rxz;
-      . apply ih;
-        exact Rzy;
+      obtain ⟨z, Rxz, Rzy⟩ := h
+      apply Relation.ReflTransGen.head
+      . exact Rxz
+      . apply ih
+        exact Rzy
 
 lemma remove_iterate (Rxy : (ReflTransGen R).Iterate n x y) : (R.ReflTransGen) x y := by
-  apply unwrap_of_refl_trans (n := n) Rxy;
+  apply unwrap_of_refl_trans (n := n) Rxy
 
 lemma unwrap [IsRefl _ R] [IsTrans _ R] (Rxy : (R.ReflTransGen) x y) : R x y := by
-  obtain ⟨n, Rxy⟩ := ReflTransGen.exists_iterate.mp Rxy;
-  exact unwrap_of_refl_trans Rxy;
+  obtain ⟨n, Rxy⟩ := ReflTransGen.exists_iterate.mp Rxy
+  exact unwrap_of_refl_trans Rxy
 
 instance [IsSymm _ R] : IsSymm _ (R.ReflTransGen) := ⟨by
-  rintro x y Rxy;
+  rintro x y Rxy
   induction Rxy with
-  | refl => apply Relation.ReflTransGen.refl;
-  | @tail y z Rxy Ryz Ryx => exact Relation.ReflTransGen.head (IsSymm.symm _ _ Ryz) Ryx;
+  | refl => apply Relation.ReflTransGen.refl
+  | @tail y z Rxy Ryz Ryx => exact Relation.ReflTransGen.head (IsSymm.symm _ _ Ryz) Ryx
 ⟩
 
 end ReflTransGen
@@ -268,12 +268,12 @@ namespace IrreflGen
 instance : IsIrrefl α (R.IrreflGen) := ⟨by simp [IrreflGen]⟩
 
 instance [IsTrans _ R] [IsAntisymm _ R] : IsTrans _ (R.IrreflGen) := ⟨by
-  rintro a b c ⟨Rab, hne⟩ ⟨Rbc, _⟩;
-  constructor;
-  . exact IsTrans.trans a b c Rab Rbc;
-  . by_contra hC;
-    subst hC;
-    exact hne $ IsAntisymm.antisymm a b Rab Rbc;
+  rintro a b c ⟨Rab, hne⟩ ⟨Rbc, _⟩
+  constructor
+  . exact IsTrans.trans a b c Rab Rbc
+  . by_contra hC
+    subst hC
+    exact hne $ IsAntisymm.antisymm a b Rab Rbc
 ⟩
 
 instance [IsPartialOrder _ R] : IsStrictOrder _ (R.IrreflGen) where

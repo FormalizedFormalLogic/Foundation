@@ -21,16 +21,16 @@ instance : CoeFun (Model.Bisimulation M₁ M₂) (λ _ => M₁.World → M₂.Wo
 def Model.Bisimulation.symm (bi : M₁ ⇄ M₂) : M₂ ⇄ M₁ := {
   toRel := λ a b => bi.toRel b a
   atomic := by
-    intro x₂ x₁ a h;
-    exact (bi.atomic h).symm;
+    intro x₂ x₁ a h
+    exact (bi.atomic h).symm
   forth := by
-    intro x₂ y₂ x₁ hxy h;
-    obtain ⟨y₁, ⟨hy₁, hxy⟩⟩ := bi.back hxy h;
-    use y₁;
+    intro x₂ y₂ x₁ hxy h
+    obtain ⟨y₁, ⟨hy₁, hxy⟩⟩ := bi.back hxy h
+    use y₁
   back := by
-    intro x₁ x₂ y₁ hxy h;
-    obtain ⟨y₂, ⟨hy₂, hxy⟩⟩ := bi.forth hxy h;
-    use y₂;
+    intro x₁ x₂ y₁ hxy h
+    obtain ⟨y₂, ⟨hy₂, hxy⟩⟩ := bi.forth hxy h
+    use y₂
 }
 
 end Bisimulation
@@ -42,24 +42,24 @@ def ModalEquivalent {M₁ M₂ : Model} (w₁ : M₁.World) (w₂ : M₂.World) 
 infix:50 " ↭ " => ModalEquivalent
 
 lemma modal_equivalent_of_bisimilar (Bi : M₁ ⇄ M₂) (bisx : Bi x₁ x₂) : x₁ ↭ x₂ := by
-  intro φ;
+  intro φ
   induction φ generalizing x₁ x₂ with
-  | hatom a => exact Bi.atomic bisx;
+  | hatom a => exact Bi.atomic bisx
   | himp φ ψ ihp ihq =>
-    constructor;
-    . intro hpq hp;
-      exact ihq bisx |>.mp $ hpq $ ihp bisx |>.mpr hp;
-    . intro hpq hp;
-      exact ihq bisx |>.mpr $ hpq $ ihp bisx |>.mp hp;
+    constructor
+    . intro hpq hp
+      exact ihq bisx |>.mp $ hpq $ ihp bisx |>.mpr hp
+    . intro hpq hp
+      exact ihq bisx |>.mpr $ hpq $ ihp bisx |>.mp hp
   | hbox φ ih =>
-    constructor;
-    . intro h y₂ rx₂y₂;
-      obtain ⟨y₁, ⟨bisy, rx₁y₁⟩⟩ := Bi.back bisx rx₂y₂;
-      exact ih bisy |>.mp (h _ rx₁y₁);
-    . intro h y₁ rx₁y₁;
-      obtain ⟨y₂, ⟨bisy, rx₂y₂⟩⟩ := Bi.forth bisx rx₁y₁;
-      exact ih bisy |>.mpr (h _ rx₂y₂);
-  | _ => simp_all;
+    constructor
+    . intro h y₂ rx₂y₂
+      obtain ⟨y₁, ⟨bisy, rx₁y₁⟩⟩ := Bi.back bisx rx₂y₂
+      exact ih bisy |>.mp (h _ rx₁y₁)
+    . intro h y₁ rx₁y₁
+      obtain ⟨y₂, ⟨bisy, rx₂y₂⟩⟩ := Bi.forth bisx rx₁y₁
+      exact ih bisy |>.mpr (h _ rx₂y₂)
+  | _ => simp_all
 
 def ModalEquivalent.symm {M₁ M₂ : Model} {w₁ : M₁.World} {w₂ : M₂.World} (h : w₁ ↭ w₂) : w₂ ↭ w₁ := fun {_} => Iff.symm h
 
@@ -83,39 +83,39 @@ variable {F F₁ F₂ F₃ : Kripke.Frame}
 
 def id : F →ₚ F where
   toFun := _root_.id
-  forth := by simp;
-  back := by simp;
+  forth := by simp
+  back := by simp
 
 def comp (f : F₁ →ₚ F₂) (g : F₂ →ₚ F₃) : F₁ →ₚ F₃ where
   toFun := g ∘ f
   forth := by
-    intro x y hxy;
-    exact g.forth $ f.forth hxy;
+    intro x y hxy
+    exact g.forth $ f.forth hxy
   back := by
-    intro x w hxw;
-    obtain ⟨y, ⟨rfl, hxy⟩⟩ := g.back hxw;
-    obtain ⟨u, ⟨rfl, hfu⟩⟩ := f.back hxy;
-    use u;
-    constructor;
-    . simp_all;
-    . assumption;
+    intro x w hxw
+    obtain ⟨y, ⟨rfl, hxy⟩⟩ := g.back hxw
+    obtain ⟨u, ⟨rfl, hfu⟩⟩ := f.back hxy
+    use u
+    constructor
+    . simp_all
+    . assumption
 
 def TransitiveClosure (f : F₁ →ₚ F₂) [F₂.IsTransitive] : F₁^+ →ₚ F₂ where
   toFun := f.toFun
   forth := by
-    intro x y hxy;
+    intro x y hxy
     induction hxy with
-    | single hxy => exact f.forth hxy;
+    | single hxy => exact f.forth hxy
     | @tail z y _ Rzy Rxz =>
-      replace Rzy := f.forth Rzy;
-      exact IsTrans.trans _ _ _ Rxz Rzy;
+      replace Rzy := f.forth Rzy
+      exact IsTrans.trans _ _ _ Rxz Rzy
   back := by
-    intro x w hxw;
-    obtain ⟨u, ⟨rfl, hxu⟩⟩ := f.back hxw;
-    use u;
-    constructor;
-    . rfl;
-    . exact Relation.TransGen.single hxu;
+    intro x w hxw
+    obtain ⟨u, ⟨rfl, hxu⟩⟩ := f.back hxw
+    use u
+    constructor
+    . rfl
+    . exact Relation.TransGen.single hxu
 
 variable (f : F₁ →ₚ F₂)
 
@@ -179,41 +179,41 @@ def ofAtomic (f : M₁.toFrame →ₚ M₂.toFrame) (atomic : ∀ {w a}, (M₁ w
 
 def id : M →ₚ M where
   toFun := _root_.id
-  forth := by simp;
-  back := by simp;
-  atomic := by simp;
+  forth := by simp
+  back := by simp
+  atomic := by simp
 
 def comp (f : M₁ →ₚ M₂) (g : M₂ →ₚ M₃) : M₁ →ₚ M₃ := ofAtomic (f.toPseudoEpimorphism.comp (g.toPseudoEpimorphism)) $ by
-  intro x φ;
-  constructor;
-  . intro h;
-    apply g.atomic.mp;
-    apply f.atomic.mp;
-    assumption;
-  . intro h;
-    apply f.atomic.mpr;
-    apply g.atomic.mpr;
-    assumption;
+  intro x φ
+  constructor
+  . intro h
+    apply g.atomic.mp
+    apply f.atomic.mp
+    assumption
+  . intro h
+    apply f.atomic.mpr
+    apply g.atomic.mpr
+    assumption
 
 def bisimulation (f : M₁ →ₚ M₂) : M₁ ⇄ M₂ where
   toRel x y := y = f x
   atomic := by
-    rintro x₁ x₂ a rfl;
-    constructor;
-    . apply f.atomic.mp;
-    . apply f.atomic.mpr;
+    rintro x₁ x₂ a rfl
+    constructor
+    . apply f.atomic.mp
+    . apply f.atomic.mpr
   forth := by
-    simp only [exists_eq_left, forall_eq];
-    intro x₁ y₁ rx₁y₁;
-    exact f.forth rx₁y₁;
+    simp only [exists_eq_left, forall_eq]
+    intro x₁ y₁ rx₁y₁
+    exact f.forth rx₁y₁
   back := by
-    rintro x₁ x₂ y₂ rfl rx₂y₂;
-    obtain ⟨y₁, ⟨rfl, _⟩⟩ := f.back rx₂y₂;
-    use y₁;
+    rintro x₁ x₂ y₂ rfl rx₂y₂
+    obtain ⟨y₁, ⟨rfl, _⟩⟩ := f.back rx₂y₂
+    use y₁
 
 lemma modal_equivalence (f : M₁ →ₚ M₂) (w : M₁.World) : w ↭ (f w) := by
-  apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.bisimulation f;
-  simp [Model.PseudoEpimorphism.bisimulation];
+  apply modal_equivalent_of_bisimilar $ Model.PseudoEpimorphism.bisimulation f
+  simp [Model.PseudoEpimorphism.bisimulation]
 
 end Model.PseudoEpimorphism
 
@@ -221,15 +221,15 @@ end Model.PseudoEpimorphism
 variable {F₁ F₂ : Kripke.Frame} {M₁ M₂ : Kripke.Model} {φ : Formula ℕ} {T : FormulaSet ℕ}
 
 lemma validOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧ φ → F₂ ⊧ φ := by
-  intro h V₂ u;
-  obtain ⟨x, rfl⟩ := f_surjective u;
-  refine (Model.PseudoEpimorphism.ofAtomic (M₁ := ⟨F₁, λ w a => V₂ (f w) a⟩) (M₂ := ⟨F₂, V₂⟩) f ?_).modal_equivalence x |>.mp $ h _ x;
-  simp;
+  intro h V₂ u
+  obtain ⟨x, rfl⟩ := f_surjective u
+  refine (Model.PseudoEpimorphism.ofAtomic (M₁ := ⟨F₁, λ w a => V₂ (f w) a⟩) (M₂ := ⟨F₂, V₂⟩) f ?_).modal_equivalence x |>.mp $ h _ x
+  simp
 
 lemma theory_ValidOnFrame_of_surjective_pseudoMorphism (f : F₁ →ₚ F₂) (f_surjective : Function.Surjective f) : F₁ ⊧* T → F₂ ⊧* T := by
-  simp only [Semantics.realizeSet_iff];
-  intro h φ hp;
-  exact validOnFrame_of_surjective_pseudoMorphism f f_surjective (h hp);
+  simp only [Semantics.realizeSet_iff]
+  intro h φ hp
+  exact validOnFrame_of_surjective_pseudoMorphism f f_surjective (h hp)
 
 end PseudoEpimorphism
 

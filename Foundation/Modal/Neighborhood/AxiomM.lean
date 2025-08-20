@@ -12,20 +12,20 @@ class Frame.IsMonotonic (F : Frame) : Prop where
 lemma Frame.mono [Frame.IsMonotonic F] {X Y : Set F} : F.box (X ∩ Y) ⊆ F.box X ∩ F.box Y := by apply IsMonotonic.mono
 
 instance : Frame.simple_blackhole.IsMonotonic := ⟨by
-  intro X Y e he;
+  intro X Y e he
   constructor <;>
-  . simp_all only [Set.mem_setOf_eq, Set.mem_singleton_iff];
-    tauto_set;
+  . simp_all only [Set.mem_setOf_eq, Set.mem_singleton_iff]
+    tauto_set
 ⟩
 
 @[simp]
 lemma valid_axiomM_of_isMonotonic [F.IsMonotonic] : F ⊧ Axioms.M (.atom 0) (.atom 1) := by
-  intro V x;
+  intro V x
   simp only [
     Satisfies, Model.truthset.eq_imp, Model.truthset.eq_box, Model.truthset.eq_and,
     Model.truthset.eq_atom, Set.mem_union, Set.mem_compl_iff, Set.mem_setOf_eq, Set.mem_inter_iff
   ]
-  apply not_or_of_imp;
-  apply Frame.mono;
+  apply not_or_of_imp
+  apply Frame.mono
 
 end LO.Modal.Neighborhood

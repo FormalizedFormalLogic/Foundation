@@ -12,8 +12,8 @@ namespace PLoN
 abbrev AllFrameClass : PLoN.FrameClass := Set.univ
 
 instance : AllFrameClass.IsNonempty := by
-  use ⟨Unit, λ _ _ _ => True⟩;
-  tauto;
+  use ⟨Unit, λ _ _ _ => True⟩
+  tauto
 
 end PLoN
 
@@ -33,14 +33,14 @@ instance : Complete Hilbert.N PLoN.AllFrameClass := inferInstance
 end N
 
 instance : Hilbert.N ⪱ Hilbert.K := by
-  constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.K (.atom 0) (.atom 1);
-    constructor;
-    . simp;
+  constructor
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp
+  . apply Entailment.not_weakerThan_iff.mpr
+    use Axioms.K (.atom 0) (.atom 1)
+    constructor
+    . simp
     . apply Sound.not_provable_of_countermodel (𝓜 := PLoN.AllFrameClass)
-      apply Formula.PLoN.ValidOnFrameClass.not_of_exists_model;
+      apply Formula.PLoN.ValidOnFrameClass.not_of_exists_model
       use {
         World := Fin 2,
         Rel := λ ξ x y =>
@@ -52,28 +52,28 @@ instance : Hilbert.N ⪱ Hilbert.K := by
           | 0 => w = 1
           | 1 => w = 0
           | _ => False,
-      };
-      constructor;
-      . tauto;
-      . simp only [ValidOnModel.iff_models, ValidOnModel, not_forall];
-        use 0;
-        apply Formula.PLoN.Satisfies.imp_def.not.mpr;
-        push_neg;
-        constructor;
-        . intro x R0x;
-          simp_all [Satisfies, Frame.Rel'];
-        . apply Formula.PLoN.Satisfies.imp_def.not.mpr;
-          push_neg;
-          constructor;
-          . intro x R0x;
-            simp_all [Satisfies, Frame.Rel'];
-            omega;
-          . apply Satisfies.box_def.not.mpr;
-            push_neg;
-            use 1;
-            constructor;
+      }
+      constructor
+      . tauto
+      . simp only [ValidOnModel.iff_models, ValidOnModel, not_forall]
+        use 0
+        apply Formula.PLoN.Satisfies.imp_def.not.mpr
+        push_neg
+        constructor
+        . intro x R0x
+          simp_all [Satisfies, Frame.Rel']
+        . apply Formula.PLoN.Satisfies.imp_def.not.mpr
+          push_neg
+          constructor
+          . intro x R0x
+            simp_all [Satisfies, Frame.Rel']
+            omega
+          . apply Satisfies.box_def.not.mpr
+            push_neg
+            use 1
+            constructor
             . simp [Frame.Rel']
-            . simp [Semantics.Realize, Satisfies];
+            . simp [Semantics.Realize, Satisfies]
 
 end Hilbert
 

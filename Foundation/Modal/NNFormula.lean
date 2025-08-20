@@ -65,7 +65,7 @@ lemma verum_eq : (verum : NNFormula α) = ⊤ := rfl
 
 @[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 
-@[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
+@[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg]
 
 lemma neg_eq : neg φ = ∼φ := rfl
 
@@ -76,28 +76,28 @@ lemma neg_eq : neg φ = ∼φ := rfl
 lemma negneg : ∼∼φ = φ := by
   induction φ with
   | and φ ψ ihφ ihψ =>
-    simp only [←neg_eq, neg, and.injEq];
-    exact ⟨ihφ, ihψ⟩;
+    simp only [←neg_eq, neg, and.injEq]
+    exact ⟨ihφ, ihψ⟩
   | or φ ψ ihφ ihψ =>
-    simp only [←neg_eq, neg, or.injEq];
-    exact ⟨ihφ, ihψ⟩;
+    simp only [←neg_eq, neg, or.injEq]
+    exact ⟨ihφ, ihψ⟩
   | box φ ihφ =>
-    simp only [←neg_eq, neg, box.injEq];
-    exact ihφ;
+    simp only [←neg_eq, neg, box.injEq]
+    exact ihφ
   | dia φ ihφ =>
-    simp only [←neg_eq, neg, dia.injEq];
-    exact ihφ;
-  | _ => tauto;
+    simp only [←neg_eq, neg, dia.injEq]
+    exact ihφ
+  | _ => tauto
 
 instance : ModalDeMorgan (NNFormula α) where
-  verum := by tauto;
-  falsum := by tauto;
-  and := by tauto;
-  or := by tauto;
-  box := by tauto;
-  dia := by tauto;
+  verum := by tauto
+  falsum := by tauto
+  and := by tauto
+  or := by tauto
+  box := by tauto
+  dia := by tauto
   neg := λ _ => negneg
-  imply := by tauto;
+  imply := by tauto
 
 section toString
 
@@ -235,12 +235,12 @@ def ofNat : Nat → Option (NNFormula α)
     | 6 =>
       have : c < e + 1 := Nat.lt_succ.mpr $ Nat.unpair_right_le _
       do
-        let φ ← ofNat c;
+        let φ ← ofNat c
         return □φ
     | 7 =>
       have : c < e + 1 := Nat.lt_succ.mpr $ Nat.unpair_right_le _
       do
-        let φ ← ofNat c;
+        let φ ← ofNat c
         return ◇φ
     | _ => none
 
@@ -248,7 +248,7 @@ instance : Encodable (NNFormula α) where
   encode := toNat
   decode := ofNat
   encodek := by
-    intro φ;
+    intro φ
     induction φ using rec' <;> simp [toNat, ofNat, encodek, *]
 
 end Encodable
@@ -284,12 +284,12 @@ namespace isModalCNFPart
 
 variable {a : α} {φ ψ : NNFormula α}
 
-lemma def_atom : isModalCNFPart (.atom a) := by use [⟨(.atom a), by tauto⟩]; tauto;
-lemma def_natom : isModalCNFPart (.natom a) := by use [⟨(.natom a), by tauto⟩]; tauto;
-lemma def_verum : isModalCNFPart (⊤ : NNFormula α) := by use [⟨⊤, by tauto⟩]; tauto;
-lemma def_falsum : isModalCNFPart (⊥ : NNFormula α) := by use [⟨⊥, by tauto⟩]; tauto;
-lemma def_box : isModalCNFPart (□φ) := by use [⟨□φ, by tauto⟩]; tauto;
-lemma def_dia : isModalCNFPart (◇φ) := by use [⟨◇φ, by tauto⟩]; tauto;
+lemma def_atom : isModalCNFPart (.atom a) := by use [⟨(.atom a), by tauto⟩]; tauto
+lemma def_natom : isModalCNFPart (.natom a) := by use [⟨(.natom a), by tauto⟩]; tauto
+lemma def_verum : isModalCNFPart (⊤ : NNFormula α) := by use [⟨⊤, by tauto⟩]; tauto
+lemma def_falsum : isModalCNFPart (⊥ : NNFormula α) := by use [⟨⊥, by tauto⟩]; tauto
+lemma def_box : isModalCNFPart (□φ) := by use [⟨□φ, by tauto⟩]; tauto
+lemma def_dia : isModalCNFPart (◇φ) := by use [⟨◇φ, by tauto⟩]; tauto
 
 end isModalCNFPart
 
@@ -298,12 +298,12 @@ def isModalCNF (φ : NNFormula α) := ∃ Γ : List { ψ // isModalCNFPart ψ },
 
 namespace isModalCNF
 
-@[simp] lemma def_atom {a : α} : isModalCNF (.atom a) := by use [⟨(.atom a), isModalCNFPart.def_atom⟩]; simp;
-@[simp] lemma def_natom {a : α} : isModalCNF (.natom a) := by use [⟨(.natom a), isModalCNFPart.def_natom⟩]; simp;
-@[simp] lemma def_falsum : isModalCNF (⊥ : NNFormula α) := by use [⟨⊥, isModalCNFPart.def_falsum⟩]; simp;
-@[simp] lemma def_verum : isModalCNF (⊤ : NNFormula α) := by use [⟨⊤, isModalCNFPart.def_verum⟩]; simp;
-@[simp] lemma def_box {φ : NNFormula α} : isModalCNF (□φ) := by use [⟨□φ, isModalCNFPart.def_box⟩]; simp;
-@[simp] lemma def_dia {φ : NNFormula α} : isModalCNF (◇φ) := by use [⟨◇φ, isModalCNFPart.def_dia⟩]; simp;
+@[simp] lemma def_atom {a : α} : isModalCNF (.atom a) := by use [⟨(.atom a), isModalCNFPart.def_atom⟩]; simp
+@[simp] lemma def_natom {a : α} : isModalCNF (.natom a) := by use [⟨(.natom a), isModalCNFPart.def_natom⟩]; simp
+@[simp] lemma def_falsum : isModalCNF (⊥ : NNFormula α) := by use [⟨⊥, isModalCNFPart.def_falsum⟩]; simp
+@[simp] lemma def_verum : isModalCNF (⊤ : NNFormula α) := by use [⟨⊤, isModalCNFPart.def_verum⟩]; simp
+@[simp] lemma def_box {φ : NNFormula α} : isModalCNF (□φ) := by use [⟨□φ, isModalCNFPart.def_box⟩]; simp
+@[simp] lemma def_dia {φ : NNFormula α} : isModalCNF (◇φ) := by use [⟨◇φ, isModalCNFPart.def_dia⟩]; simp
 
 end isModalCNF
 
@@ -318,10 +318,10 @@ namespace isModalDNFPart
 lemma of_degree_zero {φ : NNFormula α} (h : φ.degree = 0) : isModalDNFPart φ := by
   induction φ using rec' with
   | hAnd φ ψ ihφ ihψ =>
-    constructor;
-    . apply ihφ; simp_all [degree];
-    . apply ihψ; simp_all [degree];
-  | _ => tauto;
+    constructor
+    . apply ihφ; simp_all [degree]
+    . apply ihψ; simp_all [degree]
+  | _ => tauto
 
 end isModalDNFPart
 

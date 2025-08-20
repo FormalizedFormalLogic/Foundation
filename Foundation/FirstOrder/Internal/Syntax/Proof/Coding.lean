@@ -93,7 +93,7 @@ lemma setShift_quote (Γ : Finset (SyntacticFormula L)) :
 
 @[simp] lemma formulaSet_quote_finset (Γ : Finset (SyntacticFormula L)) : IsFormulaSet L (⌜Γ⌝ : V) := by
   intro x hx
-  rcases Derivation2.Sequent.mem_quote hx with ⟨p, _, rfl⟩;
+  rcases Derivation2.Sequent.mem_quote hx with ⟨p, _, rfl⟩
   simp [Semiformula.quote_def]
 
 noncomputable instance : GoedelQuote (Finset (SyntacticFormula L)) (Metamath.Sequent V L) := ⟨fun Γ ↦ ⟨⌜Γ⌝, by simp⟩⟩
@@ -111,7 +111,7 @@ noncomputable instance : GoedelQuote (Finset (SyntacticFormula L)) (Metamath.Seq
 @[simp] lemma Sequent.typed_quote_singleton (φ : SyntacticFormula L) :
     (⌜({φ} : Finset (SyntacticFormula L))⌝ : Metamath.Sequent V L) = {⌜φ⌝} := by
   rw [show ({φ} : Finset (SyntacticFormula L)) = insert φ ∅ by simp]
-  rw [Sequent.typed_quote_insert];
+  rw [Sequent.typed_quote_insert]
   simp [Sequent.insert_empty_eq_singleton]
 
 @[simp] lemma setShift_typed_quote (Γ : Finset (SyntacticFormula L)) :
@@ -135,7 +135,7 @@ lemma Sequent.coe_eq (Γ : Finset (SyntacticFormula L)) : (↑(⌜Γ⌝ : ℕ) :
 lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (SyntacticFormula L), ⌜S⌝ = s := by
   intro h
   have : ∀ x, ∃ φ : SyntacticFormula L, x ∈ s → ⌜φ⌝ = x := by
-    intro x;
+    intro x
     by_cases hx : x ∈ s
     · simpa [hx] using (h x hx).sound
     · simp [hx]

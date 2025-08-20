@@ -35,67 +35,67 @@ instance : Semantics.Tarski (Valuation α) where
 @[simp] protected lemma realize_atom : v ⊧ (.atom a) ↔ v a := iff_of_eq rfl
 
 lemma eq_fml_of_eq_atom {v u : Valuation α} (h : ∀ {a : α}, v a ↔ u a) : (∀ {φ : Formula α}, v ⊧ φ ↔ u ⊧ φ) := by
-  intro φ;
+  intro φ
   induction φ with
-  | hatom => apply h;
+  | hatom => apply h
   | _ => simp [*]
 
 lemma iff_subst_self (s) :
   ((λ a => val v ((.atom a)⟦s⟧)) : Valuation α) ⊧ φ ↔ v ⊧ (φ⟦s⟧) := by
   induction φ with
-  | hatom a => simp [val, models_iff_val];
-  | hfalsum => simp;
+  | hatom a => simp [val, models_iff_val]
+  | hfalsum => simp
   | himp φ ψ ihφ ihψ =>
-    constructor;
-    . intro hφψ hφ;
-      apply ihψ.mp;
-      apply hφψ;
-      apply ihφ.mpr;
-      exact hφ;
-    . intro hφψs hφ;
-      apply ihψ.mpr;
-      apply hφψs;
-      apply ihφ.mp;
-      exact hφ;
+    constructor
+    . intro hφψ hφ
+      apply ihψ.mp
+      apply hφψ
+      apply ihφ.mpr
+      exact hφ
+    . intro hφψs hφ
+      apply ihψ.mpr
+      apply hφψs
+      apply ihφ.mp
+      exact hφ
   | hand φ ψ ihφ ihψ =>
-    constructor;
-    . rintro ⟨hφ, hψ⟩;
-      constructor;
-      . apply ihφ.mp hφ;
-      . apply ihψ.mp hψ;
-    . rintro ⟨hφ, hψ⟩;
-      constructor;
-      . apply ihφ.mpr hφ;
-      . apply ihψ.mpr hψ;
+    constructor
+    . rintro ⟨hφ, hψ⟩
+      constructor
+      . apply ihφ.mp hφ
+      . apply ihψ.mp hψ
+    . rintro ⟨hφ, hψ⟩
+      constructor
+      . apply ihφ.mpr hφ
+      . apply ihψ.mpr hψ
   | hor φ ψ ihφ ihψ =>
-    constructor;
-    . rintro (hφ | hψ);
-      . left; apply ihφ.mp hφ;
-      . right; apply ihψ.mp hψ;
-    . rintro (hφ | hψ);
-      . left; apply ihφ.mpr hφ;
-      . right; apply ihψ.mpr hψ;
+    constructor
+    . rintro (hφ | hψ)
+      . left; apply ihφ.mp hφ
+      . right; apply ihψ.mp hψ
+    . rintro (hφ | hψ)
+      . left; apply ihφ.mpr hφ
+      . right; apply ihψ.mpr hψ
 
 lemma equiv_of_letterless (hl : φ.letterless) : ∀ v w : Valuation _, v ⊧ φ ↔ w ⊧ φ := by
-  intro v w;
+  intro v w
   induction φ with
-  | hatom a => simp at hl;
-  | hfalsum => simp;
+  | hatom a => simp at hl
+  | hfalsum => simp
   | himp φ ψ ihφ ihψ =>
-    simp only [Formula.letterless] at hl;
-    replace ihφ := ihφ hl.1;
-    replace ihψ := ihψ hl.2;
-    simp_all;
+    simp only [Formula.letterless] at hl
+    replace ihφ := ihφ hl.1
+    replace ihψ := ihψ hl.2
+    simp_all
   | hand φ ψ ihφ ihψ =>
-    simp only [Formula.letterless] at hl;
-    replace ihφ := ihφ hl.1;
-    replace ihψ := ihψ hl.2;
-    simp_all;
+    simp only [Formula.letterless] at hl
+    replace ihφ := ihφ hl.1
+    replace ihψ := ihψ hl.2
+    simp_all
   | hor φ ψ ihφ ihψ =>
-    simp only [Formula.letterless] at hl;
-    replace ihφ := ihφ hl.1;
-    replace ihψ := ihψ hl.2;
-    simp_all;
+    simp only [Formula.letterless] at hl
+    replace ihφ := ihφ hl.1
+    replace ihψ := ihψ hl.2
+    simp_all
 
 end Formula.ClassicalSemantics
 
@@ -113,49 +113,49 @@ variable {v : ClassicalSemantics.Valuation α} {φ ψ : Formula α}
 abbrev Formula.isTautology (φ : Formula α) := Valid (ClassicalSemantics.Valuation α) φ
 
 lemma isTautology_subst_of_isTautology (h : φ.isTautology) : ∀ s, (φ⟦s⟧).isTautology := by
-  intro s v;
-  apply Formula.ClassicalSemantics.iff_subst_self s |>.mp;
-  apply h;
+  intro s v
+  apply Formula.ClassicalSemantics.iff_subst_self s |>.mp
+  apply h
 
 lemma iff_isTautology_and : (φ.isTautology) ∧ (ψ.isTautology) ↔ (φ ⋏ ψ).isTautology := by
-  constructor;
-  . rintro ⟨hφ, hψ⟩ v;
-    have := hφ v;
-    have := hψ v;
-    tauto;
-  . intro h;
-    constructor;
-    . intro v; exact h v |>.1;
-    . intro v; exact h v |>.2;
+  constructor
+  . rintro ⟨hφ, hψ⟩ v
+    have := hφ v
+    have := hψ v
+    tauto
+  . intro h
+    constructor
+    . intro v; exact h v |>.1
+    . intro v; exact h v |>.2
 
 lemma of_isTautology_or : φ.isTautology ∨ ψ.isTautology → (φ ⋎ ψ).isTautology := by
-  rintro (hφ | hψ) v;
-  . left; exact hφ v;
-  . right; exact hψ v;
+  rintro (hφ | hψ) v
+  . left; exact hφ v
+  . right; exact hψ v
 
 lemma of_isTautology_imp₂ : (ψ.isTautology) → (φ ➝ ψ).isTautology := by
-  intro hψ v h;
-  apply hψ;
+  intro hψ v h
+  apply hψ
 
 @[simp]
 lemma isTautology_bot : ¬((⊥ : Formula α).isTautology) := by
-  intro h;
-  have := @h (λ _ => True);
-  simp at this;
+  intro h
+  have := @h (λ _ => True)
+  simp at this
 
 @[simp]
-lemma isTautology_top : (⊤ : Formula α).isTautology := by intro v; simp;
+lemma isTautology_top : (⊤ : Formula α).isTautology := by intro v; simp
 
 lemma isTautology_of_not_neg_isTautology_of_letterless (hl : φ.letterless) : ¬((∼φ).isTautology) → φ.isTautology := by
-  intro h v;
-  obtain ⟨w, hw⟩ : ∃ x : Valuation _, x ⊧ φ := by simpa [Formula.isTautology, Valid] using h;
-  have H := Formula.ClassicalSemantics.equiv_of_letterless hl;
-  apply H w v |>.mp;
-  assumption;
+  intro h v
+  obtain ⟨w, hw⟩ : ∃ x : Valuation _, x ⊧ φ := by simpa [Formula.isTautology, Valid] using h
+  have H := Formula.ClassicalSemantics.equiv_of_letterless hl
+  apply H w v |>.mp
+  assumption
 
 lemma neg_isTautology_of_not_isTautology_of_letterless (hl : φ.letterless) : ¬φ.isTautology → (∼φ).isTautology := by
-  contrapose!;
-  apply isTautology_of_not_neg_isTautology_of_letterless hl;
+  contrapose!
+  apply isTautology_of_not_neg_isTautology_of_letterless hl
 
 end
 

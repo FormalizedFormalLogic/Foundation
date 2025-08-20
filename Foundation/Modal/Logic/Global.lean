@@ -9,12 +9,12 @@ variable {α}
 
 open Modal.Entailment in
 lemma normal_provable_of_K_provable {L : Logic ℕ} [L.IsNormal] (h : Modal.K ⊢! φ) : L ⊢! φ := by
-  simp only [Hilbert.Normal.iff_logic_provable_provable] at h;
+  simp only [Hilbert.Normal.iff_logic_provable_provable] at h
   induction h using Hilbert.Normal.rec! with
-  | axm s h => rcases h with rfl; simp;
-  | mdp hφψ hψ => exact hφψ ⨀ hψ;
-  | nec ihφ => apply nec!; exact ihφ;
-  | _ => simp;
+  | axm s h => rcases h with rfl; simp
+  | mdp hφψ hψ => exact hφψ ⨀ hψ
+  | nec ihφ => apply nec!; exact ihφ
+  | _ => simp
 
 
 namespace Formula
@@ -40,7 +40,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 variable {L : Logic α} {X Y : Set (Formula α)} {φ ψ : Formula α}
 
 instance : Entailment.Lukasiewicz (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
-  mdp ihφψ ihφ := by simpa using GlobalConsequence.mdp ihφψ ihφ;
+  mdp ihφψ ihφ := by simpa using GlobalConsequence.mdp ihφψ ihφ
   imply₁ := GlobalConsequence.imply₁ X
   imply₂ := GlobalConsequence.imply₂ X
   elimContra := GlobalConsequence.ec X
@@ -50,8 +50,8 @@ instance : Entailment.Necessitation (F := Formula α) (S := Logic α × Set (For
 
 instance [L.IsNormal] : Entailment.K (F := Formula α) (S := Logic α × Set (Formula α)) (L, X) where
   K _ _ := by
-    apply GlobalConsequence.thm;
-    simp;
+    apply GlobalConsequence.thm
+    simp
 
 protected lemma thm! (h : L ⊢! φ) : (L, X) ⊢! φ := ⟨GlobalConsequence.thm h⟩
 
@@ -74,15 +74,15 @@ protected lemma rec!
   (imply₂! : ∀ {X φ ψ ξ}, motive X (Axioms.Imply₂ φ ψ ξ) ⟨GlobalConsequence.imply₂ X φ ψ ξ⟩)
   (ec! : ∀ {X φ ψ}, motive X (Axioms.ElimContra φ ψ) ⟨GlobalConsequence.ec X φ ψ⟩)
   : ∀ {X : Set (Formula α)} {φ}, (d : (L, X) ⊢! φ) → motive X φ d := by
-  rintro X φ ⟨d⟩;
+  rintro X φ ⟨d⟩
   induction d with
-  | ctx h => apply ctx! h;
-  | thm h => apply thm! h;
-  | mdp _ _ ihφψ ihφ => apply mdp! ihφψ ihφ;
-  | nec _ ihφ => apply nec! ihφ;
-  | imply₁ => apply imply₁!;
-  | imply₂ => apply imply₂!;
-  | ec => apply ec!;
+  | ctx h => apply ctx! h
+  | thm h => apply thm! h
+  | mdp _ _ ihφψ ihφ => apply mdp! ihφψ ihφ
+  | nec _ ihφ => apply nec! ihφ
+  | imply₁ => apply imply₁!
+  | imply₂ => apply imply₂!
+  | ec => apply ec!
 
 section
 
@@ -92,66 +92,66 @@ variable {L : Logic ℕ} [L.IsNormal] {X Y : Set (Formula ℕ)} {φ ψ : Formula
   Jeřábek, Fact 2.7
 -/
 lemma iff_finite_boxlt_provable : ((L, X) ⊢! φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢! (□^≤[n] Γ.conj) ➝ φ) := by
-  constructor;
-  . intro h;
+  constructor
+  . intro h
     induction h using GlobalConsequence.rec! with
     | thm! h =>
-      use ∅, 0;
-      constructor;
-      . simp;
-      . apply C!_of_conseq!;
-        exact h;
+      use ∅, 0
+      constructor
+      . simp
+      . apply C!_of_conseq!
+        exact h
     | @ctx! X ψ h =>
-      use {ψ}, 0;
-      constructor;
-      . simpa;
-      . simp;
+      use {ψ}, 0
+      constructor
+      . simpa
+      . simp
     | @mdp! _ _ φ ψ _ _ ihφψ ihφ =>
-      obtain ⟨Δ₁, n, ⟨hΔ₁, hφψ⟩⟩ := ihφψ;
-      obtain ⟨Δ₂, m, ⟨hΔ₂, hφ⟩⟩ := ihφ;
-      use Δ₁ ∪ Δ₂, n + m;
-      constructor;
-      . simp only [Finset.coe_union, Set.union_subset_iff];
-        tauto_set;
-      . replace hφψ : L ⊢! (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ ➝ ψ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφψ;
-        replace hφ  : L ⊢! (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφ;
-        cl_prover [hφψ, hφ];
+      obtain ⟨Δ₁, n, ⟨hΔ₁, hφψ⟩⟩ := ihφψ
+      obtain ⟨Δ₂, m, ⟨hΔ₂, hφ⟩⟩ := ihφ
+      use Δ₁ ∪ Δ₂, n + m
+      constructor
+      . simp only [Finset.coe_union, Set.union_subset_iff]
+        tauto_set
+      . replace hφψ : L ⊢! (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ ➝ ψ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφψ
+        replace hφ  : L ⊢! (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφ
+        cl_prover [hφψ, hφ]
     | @nec! _ φ h ih =>
-      obtain ⟨Δ, n, ⟨h₁, h₂⟩⟩ := ih;
-      use Δ, n + 1;
-      constructor;
-      . assumption;
-      . apply C!_trans ?_ $ box_regularity! h₂;
-        apply C!_trans ?_ collect_box_fconj!;
-        apply CFconjFconj!_of_provable;
-        intro ψ hψ;
-        simp only [Finset.mem_image, Finset.mem_range, Function.iterate_one, exists_exists_and_eq_and] at hψ;
-        obtain ⟨i, hi, rfl⟩ := hψ;
-        apply Context.by_axm!;
-        simp only [Finset.coe_image, Finset.coe_range, Set.mem_image, Set.mem_Iio];
-        use i + 1;
-        constructor;
-        . omega;
-        . simp;
+      obtain ⟨Δ, n, ⟨h₁, h₂⟩⟩ := ih
+      use Δ, n + 1
+      constructor
+      . assumption
+      . apply C!_trans ?_ $ box_regularity! h₂
+        apply C!_trans ?_ collect_box_fconj!
+        apply CFconjFconj!_of_provable
+        intro ψ hψ
+        simp only [Finset.mem_image, Finset.mem_range, Function.iterate_one, exists_exists_and_eq_and] at hψ
+        obtain ⟨i, hi, rfl⟩ := hψ
+        apply Context.by_axm!
+        simp only [Finset.coe_image, Finset.coe_range, Set.mem_image, Set.mem_Iio]
+        use i + 1
+        constructor
+        . omega
+        . simp
     | imply₁! | imply₂! | ec! =>
-      use ∅, 0;
-      constructor;
-      . simp;
-      . apply normal_provable_of_K_provable;
-        apply C!_of_conseq!;
-        simp;
-  . rintro ⟨Γ, n, hΓ, hφ⟩;
-    apply (GlobalConsequence.thm! hφ) ⨀ _;
-    apply FConj!_iff_forall_provable.mpr;
-    intro ψ hψ;
-    simp only [Finset.mem_image, Finset.mem_range] at hψ;
-    obtain ⟨i, hi, rfl⟩ := hψ;
-    apply multinec!;
-    apply FConj!_iff_forall_provable.mpr;
-    intro ψ hψ;
-    apply GlobalConsequence.ctx!;
-    apply hΓ;
-    simpa;
+      use ∅, 0
+      constructor
+      . simp
+      . apply normal_provable_of_K_provable
+        apply C!_of_conseq!
+        simp
+  . rintro ⟨Γ, n, hΓ, hφ⟩
+    apply (GlobalConsequence.thm! hφ) ⨀ _
+    apply FConj!_iff_forall_provable.mpr
+    intro ψ hψ
+    simp only [Finset.mem_image, Finset.mem_range] at hψ
+    obtain ⟨i, hi, rfl⟩ := hψ
+    apply multinec!
+    apply FConj!_iff_forall_provable.mpr
+    intro ψ hψ
+    apply GlobalConsequence.ctx!
+    apply hΓ
+    simpa
 
 end
 
