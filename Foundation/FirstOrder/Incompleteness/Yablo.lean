@@ -2,6 +2,20 @@ import Foundation.ProvabilityLogic.Incompleteness
 import Foundation.FirstOrder.Internal.FixedPoint
 import Foundation.FirstOrder.Internal.RosserProvability
 
+
+namespace LO.PeanoMinus
+
+open ORingStruc
+
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
+
+lemma numeral_lt_of_numeral_succ_lt {n : ℕ} {m : M} : (numeral (n + 1) : M) < m → (numeral n < m) := by
+  apply PeanoMinus.lt_trans;
+  simp;
+
+end LO.PeanoMinus
+
+
 namespace LO.FirstOrder
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
@@ -62,13 +76,13 @@ lemma neg_yablo_def {n : ℕ} : U ⊢!. ∼T.yablo/[n] ↔ U ⊢!. “∃ m, ↑
   sorry;
 
 open LO.Entailment
-variable [𝐈𝚺₁ ⪯ T] [T.Δ₁] [Entailment.Consistent T]
+variable [𝐈𝚺₁ ⪯ T] [T.Δ₁]
 
-theorem yablo_unprovable [U_consis : Entailment.Consistent U] {n : ℕ} : T ⊬. T.yablo/[n] := by
+theorem yablo_unprovable [Entailment.Consistent T] {n : ℕ} : T ⊬. T.yablo/[.numeral n] := by
   by_contra! hC;
-  have hC := iff_yablo_provable n |>.mp hC;
+  replace hC := iff_yablo_provable n |>.mp hC;
   have H₁ : T ⊢!. T.provabilityPred (T.yablo/[.numeral (n + 1)]) := by
-    apply Entailment.WeakerThan.pbl $ provable_D1 (T := T) ?_
+    apply Entailment.WeakerThan.pbl $ provable_D1 (T := T) ?_;
     apply iff_yablo_provable _ |>.mpr;
     apply oRing_provable₀_of.{0};
     intro V _ _;
@@ -77,14 +91,11 @@ theorem yablo_unprovable [U_consis : Entailment.Consistent U] {n : ℕ} : T ⊬.
       ∀ (m : V), ORingStruc.numeral (n + 1) < m → ¬Provable T (substNumeral ⌜yablo T⌝ m) by
       simpa [models_iff];
     intro m hm;
-    have : V ⊧ₘ₀ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)”
-      := models_of_provable₀ (T := T) (by assumption) $ hC;
-    replace :
-      ∀ (m : V), ORingStruc.numeral n < m → ¬Provable T (substNumeral ⌜yablo T⌝ m)
-      := by simpa [models_iff] using this;
-    apply this;
-    -- TODO: ORingStruc.numeral (n + 1) < m → ORingStruc.numeral n < m
-    sorry;
+    have : ∀ (m : V), ORingStruc.numeral n < m → ¬Provable T (substNumeral ⌜yablo T⌝ m) := by
+      have : V ⊧ₘ₀ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” :=
+        models_of_provable₀ (T := T) (by assumption) $ hC;
+      simpa [models_iff] using this;
+    exact this _ $ PeanoMinus.numeral_lt_of_numeral_succ_lt hm;
   have H₂ : T ⊢!. ∼T.provabilityPred (T.yablo/[.numeral (n + 1)]) := by
     apply oRing_provable₀_of.{0};
     intro V _ _;
