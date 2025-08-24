@@ -16,6 +16,25 @@ lemma numeral_lt_of_numeral_succ_lt {n : ℕ} {m : M} : (numeral (n + 1) : M) < 
 end LO.PeanoMinus
 
 
+namespace LO.ISigma1.Metamath.InternalArithmetic
+
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
+
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+
+lemma substNumeral_app_quote_nat (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
+  substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[.numeral n] : Sentence ℒₒᵣ)⌝ := by
+  simp [
+    substNumeral, Semiformula.empty_quote_def, Semiformula.quote_def,
+    Rewriting.embedding_substs_eq_substs_coe₁
+  ];
+
+end LO.ISigma1.Metamath.InternalArithmetic
+
+
+
+
+
 namespace LO.FirstOrder
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
@@ -72,11 +91,8 @@ lemma iff_yablo_provable (n : ℕ) : U ⊢!. T.yablo/[n] ↔ U ⊢!. “∀ m, �
 
 end
 
-lemma neg_yablo_def {n : ℕ} : U ⊢!. ∼T.yablo/[n] ↔ U ⊢!. “∃ m, ↑n < m ∧ ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → !T.provable (nσ)” := by
-  sorry;
-
 open LO.Entailment
-variable [𝐈𝚺₁ ⪯ T] [T.Δ₁]
+variable [𝐈𝚺₁ ⪯ T]
 
 theorem yablo_unprovable [Entailment.Consistent T] {n : ℕ} : T ⊬. T.yablo/[.numeral n] := by
   by_contra! hC;
@@ -100,24 +116,23 @@ theorem yablo_unprovable [Entailment.Consistent T] {n : ℕ} : T ⊬. T.yablo/[.
     apply oRing_provable₀_of.{0};
     intro V _ _;
     have : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance;
-    suffices ¬T.Provable ⌜(yablo T)/[↑(n + 1)]⌝ by simpa [provabilityPred, models_iff];
-    have : V ⊧ₘ₀ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)”
-      := models_of_provable₀ (T := T) (by assumption) $ hC;
-    replace :
-      ∀ (m : V), ORingStruc.numeral n < m →
-      ¬T.Provable (substNumeral ⌜T.yablo⌝ m) := by simpa [models_iff] using this;
-    have := this (ORingStruc.numeral (n + 1)) (by simp);
-    sorry;
+    suffices ¬T.Provable (substNumeral ⌜yablo T⌝ (n + 1 : V)) by
+      simpa [provabilityPred, models_iff, ←substNumeral_app_quote_nat];
+    replace : ∀ (m : V), ORingStruc.numeral n < m → ¬T.Provable (substNumeral ⌜T.yablo⌝ m) := by
+      have : V ⊧ₘ₀ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” :=
+        models_of_provable₀ (T := T) (by assumption) $ hC;
+      simpa [models_iff] using this;
+    apply this (n + 1) (by simp [numeral_eq_natCast]);
   apply Entailment.Consistent.not_bot (𝓢 := T.toAxiom);
   . infer_instance;
   . cl_prover [H₁, H₂];
 
-theorem yablo_unrefutable [U.SoundOnHierarchy 𝚺 1] {n : ℕ} : U ⊬. ∼T.yablo/[n] := by
-  have con : Consistent (U : Axiom ℒₒᵣ) := inferInstance;
+theorem yablo_unrefutable [T.SoundOnHierarchy 𝚺 1] {n : ℕ} : T ⊬. ∼T.yablo/[n] := by
+  have T_consis : Consistent (T : Axiom ℒₒᵣ) := inferInstance;
   by_contra! hC;
-  have : U ⊢!. (“∃' (↑n < #0 ∧ !(∀' (↑ssnum/[#0, ⌜yablo T⌝, #1] ➝ ↑(provable T)/[#0])))”) := by
+  have : T ⊢!. (“∃' (↑n < #0 ∧ !(∀' (↑ssnum/[#0, ⌜yablo T⌝, #1] ➝ ↑(provable T)/[#0])))”) := by
     sorry;
-  have := U.soundOnHierarchy 𝚺 1 this (by sorry);
+  have := T.soundOnHierarchy 𝚺 1 this (by sorry);
   sorry;
 
 end Theory
