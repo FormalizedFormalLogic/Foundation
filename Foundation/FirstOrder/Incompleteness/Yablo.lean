@@ -91,10 +91,13 @@ variable {U : ArithmeticTheory} [𝐈𝚺₁ ⪯ U]
 
 lemma yablo_diagonal : U ⊢!. ∀' (T.yablo ⭤ (T.yabloSystem)/[⌜T.yablo⌝, #0]) := parameterized_diagonal₁ _
 
-lemma yablo_diagonal_modeled (n : V) : V ⊧/![n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ n := by
+lemma yablo_diagonal_modeled (n : V) : V ⊧/![n] (T.yablo) ↔ ∀ m, n < m → ¬T.Provable (substNumeral ⌜T.yablo⌝ m) := by
   have : V ⊧ₘ₀ ∀' (T.yablo ⭤ ↑(T.yabloSystem)/[⌜T.yablo⌝, #0]) := models_of_provable₀ (T := 𝐈𝚺₁) (by assumption) $ yablo_diagonal;
   have : ∀ (n : V), V ⊧/![n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ n := by simpa [models₀_iff, Matrix.comp_vecCons'] using this;
   apply this;
+
+lemma yablo_diagonal_neg_modeled (n : V) : ¬V ⊧/![n] (T.yablo) ↔ ∃ m, n < m ∧ T.Provable (substNumeral ⌜T.yablo⌝ m) := by
+  simpa using yablo_diagonal_modeled n |>.not;
 
 lemma iff_yablo_provable (n : ℕ) : U ⊢!. T.yabloPred n ↔ U ⊢!. “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” := by
   suffices U ⊢!. T.yablo/[n] ⭤ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” by
@@ -111,25 +114,17 @@ lemma iff_neg_yablo_provable (n : ℕ) : U ⊢!. ∼(T.yabloPred n) ↔ U ⊢!. 
   apply oRing_provable₀_of.{0};
   intro V _ _;
   haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ U inferInstance;
-  suffices ¬(Semiformula.Eval (standardModel V) (fun i ↦ ORingStruc.numeral n) Empty.elim) (T.yablo) ↔ ∃ m, ORingStruc.numeral n < m ∧ T.Provable (substNumeral ⌜T.yablo⌝ m) by
-    simpa [models₀_iff, Matrix.comp_vecCons'];
-  haveI : ¬V ⊧/![ORingStruc.numeral n] (T.yablo) ↔ ∃ m, ORingStruc.numeral n < m ∧ Provable T (substNumeral ⌜T.yablo⌝ m) := by
-    simpa [YabloSystem, Matrix.cons_val_fin_one] using yablo_diagonal_modeled _ |>.not;
-  convert this;
-  simp;
+  haveI : ¬V ⊧/![ORingStruc.numeral n] (T.yablo) ↔ ∃ m, ORingStruc.numeral n < m ∧ Provable T (substNumeral ⌜T.yablo⌝ m) := yablo_diagonal_neg_modeled _;
+  simpa [models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons'] using this;
 
 lemma provable_greater_yablo {n m : ℕ} (hnm : n < m) : U ⊢!. T.yabloPred n ➝ T.yabloPred m := by
   apply oRing_provable₀_of.{0};
   intro V _ _;
   haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ U inferInstance;
-  suffices V ⊧/![(ORingStruc.numeral n)] (T.yablo) → V ⊧/![(ORingStruc.numeral m)] (T.yablo) by
-    simp only [
-      models₀_iff, LogicalConnective.HomClass.map_imply, Semiformula.eval_substs,
-      Matrix.cons_val_fin_one, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
-      LogicalConnective.Prop.arrow_eq
-    ];
-    convert this <;> simp;
-  simp only [yablo_diagonal_modeled];
+  suffices
+    (∀ m, ORingStruc.numeral n < m → ¬Provable T (substNumeral ⌜yablo T⌝ m)) →
+    (∀ k, ORingStruc.numeral m < k → ¬Provable T (substNumeral ⌜yablo T⌝ k))
+    by simpa [models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons', yablo_diagonal_modeled] using this;
   intro h k hmk;
   apply h;
   apply PeanoMinus.lt_trans _ _ _ (by simpa) hmk;
