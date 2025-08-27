@@ -65,8 +65,7 @@ lemma yabloSystem.defined : 𝚷₁-Relation[V] (T.YabloSystem) via T.yabloSyste
   simp [Theory.YabloSystem, Theory.yabloSystem];
 
 @[simp]
-lemma yabloSystem.eval (v) :
-   Semiformula.Evalbm V v T.yabloSystem.val ↔ T.YabloSystem (v 0) (v 1) := yabloSystem.defined.df.iff v
+lemma yabloSystem.eval (v) : Semiformula.Evalbm V v T.yabloSystem.val ↔ T.YabloSystem (v 0) (v 1) := yabloSystem.defined.df.iff v
 
 instance yabloSystem.definable : 𝚷₁-Relation[V] (T.YabloSystem) := yabloSystem.defined.to_definable
 
@@ -92,12 +91,10 @@ variable {U : ArithmeticTheory} [𝐈𝚺₁ ⪯ U]
 
 lemma yablo_diagonal : U ⊢!. ∀' (T.yablo ⭤ (T.yabloSystem)/[⌜T.yablo⌝, #0]) := parameterized_diagonal₁ _
 
-lemma yablo_diagonal_modeled (n : V) : V ⊧/![n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ n := by sorry;
-  /-
+lemma yablo_diagonal_modeled (n : V) : V ⊧/![n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ n := by
   have : V ⊧ₘ₀ ∀' (T.yablo ⭤ ↑(T.yabloSystem)/[⌜T.yablo⌝, #0]) := models_of_provable₀ (T := 𝐈𝚺₁) (by assumption) $ yablo_diagonal;
-  have : ∀ (n : V), V ⊧/![n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ n := by simpa [models₀_iff] using this;
+  have : ∀ (n : V), V ⊧/![n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ n := by simpa [models₀_iff, Matrix.comp_vecCons'] using this;
   apply this;
-  -/
 
 lemma iff_yablo_provable (n : ℕ) : U ⊢!. T.yabloPred n ↔ U ⊢!. “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” := by
   suffices U ⊢!. T.yablo/[n] ⭤ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” by
@@ -105,9 +102,8 @@ lemma iff_yablo_provable (n : ℕ) : U ⊢!. T.yabloPred n ↔ U ⊢!. “∀ m,
   apply oRing_provable₀_of.{0};
   intro V _ _;
   haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ U inferInstance;
-  haveI : V ⊧/![ORingStruc.numeral n] (yablo T) ↔ T.YabloSystem ⌜T.yablo⌝ (ORingStruc.numeral n) := yablo_diagonal_modeled _;
-  -- simpa [models_iff, Matrix.constant_eq_singleton] using this; TODO: compilation problem
-  sorry;
+  haveI : V ⊧/![ORingStruc.numeral n] (T.yablo) ↔ T.YabloSystem ⌜T.yablo⌝ (ORingStruc.numeral n) := yablo_diagonal_modeled _;
+  simpa [models_iff, Matrix.constant_eq_singleton, Matrix.comp_vecCons'] using this;
 
 lemma iff_neg_yablo_provable (n : ℕ) : U ⊢!. ∼(T.yabloPred n) ↔ U ⊢!. “∃ m, ↑n < m ∧ ∃ nσ, !ssnum nσ ⌜T.yablo⌝ m ∧ !T.provable (nσ)” := by
   suffices U ⊢!. ∼T.yablo/[n] ⭤ “∃ m, ↑n < m ∧ ∃ nσ, !ssnum nσ ⌜T.yablo⌝ m ∧ !T.provable (nσ)” by
@@ -115,14 +111,12 @@ lemma iff_neg_yablo_provable (n : ℕ) : U ⊢!. ∼(T.yabloPred n) ↔ U ⊢!. 
   apply oRing_provable₀_of.{0};
   intro V _ _;
   haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ U inferInstance;
-  haveI : ¬V ⊧/![ORingStruc.numeral n] (yablo T) ↔ ¬T.YabloSystem ⌜T.yablo⌝ (ORingStruc.numeral n) := yablo_diagonal_modeled _ |>.not;
-  sorry;
-  /-
-  simp [YabloSystem] at this;
-  simp [models₀_iff];
+  suffices ¬(Semiformula.Eval (standardModel V) (fun i ↦ ORingStruc.numeral n) Empty.elim) (T.yablo) ↔ ∃ m, ORingStruc.numeral n < m ∧ T.Provable (substNumeral ⌜T.yablo⌝ m) by
+    simpa [models₀_iff, Matrix.comp_vecCons'];
+  haveI : ¬V ⊧/![ORingStruc.numeral n] (T.yablo) ↔ ∃ m, ORingStruc.numeral n < m ∧ Provable T (substNumeral ⌜T.yablo⌝ m) := by
+    simpa [YabloSystem, Matrix.cons_val_fin_one] using yablo_diagonal_modeled _ |>.not;
   convert this;
   simp;
-  -/
 
 lemma provable_greater_yablo {n m : ℕ} (hnm : n < m) : U ⊢!. T.yabloPred n ➝ T.yabloPred m := by
   apply oRing_provable₀_of.{0};
@@ -160,12 +154,9 @@ theorem yablo_unprovable [Entailment.Consistent T] : T ⊬. (T.yabloPred n) := b
     suffices ¬T.Provable (substNumeral ⌜T.yablo⌝ (n + 1 : V)) by
       simpa [provabilityPred, models_iff, ←substNumeral_app_quote_nat_model];
     have : ∀ (x : V), ORingStruc.numeral n < x → ¬T.Provable (substNumeral ⌜T.yablo⌝ x) := by
-      sorry;
-      /-
-      haveI : V ⊧ₘ₀ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” :=
+      have : V ⊧ₘ₀ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” :=
         models_of_provable₀ (T := T) (by assumption) $ (iff_yablo_provable n |>.mp hC);
-      simpa [models_iff] using this; -- TODO: comilation problem
-      -/
+      simpa [models_iff, Matrix.comp_vecCons'] using this;
     apply this (n + 1) (by simp [numeral_eq_natCast]);
   apply Entailment.Consistent.not_bot (𝓢 := T.toAxiom);
   . infer_instance;
@@ -173,11 +164,10 @@ theorem yablo_unprovable [Entailment.Consistent T] : T ⊬. (T.yabloPred n) := b
 
 theorem yablo_unrefutable [T.SoundOnHierarchy 𝚺 1] : T ⊬. ∼T.yabloPred n := by
   by_contra! hC;
-  have := T.soundOnHierarchy 𝚺 1 (iff_neg_yablo_provable n |>.mp hC) $ by simp;
-  obtain ⟨k, hk₁, hk₂⟩ : ∃ x, n < x ∧ Provable T (substNumeral ⌜T.yablo⌝ x) := by sorry
-    -- simpa [models₀_iff] using this;
-  rw [substNumeral_app_quote_nat_Nat, provable_iff_provable₀ (T := T)] at hk₂;
-  exact yablo_unprovable hk₂;
+  haveI := T.soundOnHierarchy 𝚺 1 (iff_neg_yablo_provable n |>.mp hC) $ by simp;
+  obtain ⟨k, _, hk⟩ : ∃ k, n < k ∧ Provable T (substNumeral ⌜T.yablo⌝ k) := by simpa [models₀_iff, Matrix.comp_vecCons'] using this;
+  rw [substNumeral_app_quote_nat_Nat, provable_iff_provable₀ (T := T)] at hk;
+  exact yablo_unprovable hk;
 
 theorem yablo_independent [T.SoundOnHierarchy 𝚺 1] : Entailment.Independent (T : ArithmeticAxiom) (T.yabloPred n) := ⟨yablo_unprovable, yablo_unrefutable⟩
 
