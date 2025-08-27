@@ -8,7 +8,6 @@ namespace LO.Modal
 open Formula
 open LO.Entailment LO.Modal.Entailment
 
-@[match_pattern]
 inductive Modality : Type
   | empty : Modality
   | box : Modality → Modality

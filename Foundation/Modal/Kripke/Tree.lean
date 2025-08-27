@@ -42,13 +42,13 @@ lemma transrel_def : X ≺^+ Y ↔ ∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.Chain'
   constructor;
   . intro h;
     induction h using Relation.TransGen.head_induction_on with
-    | base RZY =>
+    | single RZY =>
       obtain ⟨w, hw⟩ := RZY;
       use [w];
       refine ⟨by tauto, by tauto, ?_⟩;
       rw [←hw];
       exact Y.2.2;
-    | @ih Z U RZU UY ih =>
+    | @head Z U RZU UY ih =>
       obtain ⟨w, hw⟩ := RZU;
       obtain ⟨l, ⟨_, _, hl₃⟩⟩ := ih;
       use w :: l;
