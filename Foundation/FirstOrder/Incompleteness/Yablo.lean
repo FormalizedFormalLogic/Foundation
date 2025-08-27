@@ -1,7 +1,11 @@
-import Foundation.ProvabilityLogic.Incompleteness
-import Foundation.FirstOrder.Internal.FixedPoint
-import Foundation.FirstOrder.Internal.RosserProvability
+/-
+  Formalizing Yablo's Paradox.
 
+  *References*
+  - C. Cieśliński, R. Urbaniak, "Gödelizing the Yablo Sequence"
+-/
+
+import Foundation.FirstOrder.Internal.DerivabilityCondition
 
 namespace LO.PeanoMinus
 
@@ -22,8 +26,15 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
 
-lemma substNumeral_app_quote_nat (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
+lemma substNumeral_app_quote_nat_model (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
   substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[.numeral n] : Sentence ℒₒᵣ)⌝ := by
+  simp [
+    substNumeral, Semiformula.empty_quote_def, Semiformula.quote_def,
+    Rewriting.embedding_substs_eq_substs_coe₁
+  ];
+
+lemma substNumeral_app_quote_nat_Nat (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
+  substNumeral ⌜σ⌝ n = ⌜(σ/[.numeral n] : Sentence ℒₒᵣ)⌝ := by
   simp [
     substNumeral, Semiformula.empty_quote_def, Semiformula.quote_def,
     Rewriting.embedding_substs_eq_substs_coe₁
@@ -59,19 +70,25 @@ lemma yabloSystem.eval (v) :
 
 instance yabloSystem.definable : 𝚷₁-Relation[V] (T.YabloSystem) := yabloSystem.defined.to_definable
 
-
-open Classical
-open LO.Entailment
-
-/-- Yablo Predicate -/
 def yablo (T : ArithmeticTheory) [T.Δ₁] : ArithmeticSemisentence 1 := parameterizedFixedpoint (T.yabloSystem)
 
-abbrev yabloPred (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) : ArithmeticSentence := T.yablo/[n]
+abbrev yabloPred (T : ArithmeticTheory) [T.Δ₁] (n : ℕ) : ArithmeticSentence := T.yablo/[.numeral n]
 
+end Theory
+
+
+
+namespace Arithmetic
+
+variable {T : ArithmeticTheory} [T.Δ₁]
+
+open Theory
+
+-- Lemmata
 section
 
 variable {V : Type} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
-variable [𝐈𝚺₁ ⪯ U]
+variable {U : ArithmeticTheory} [𝐈𝚺₁ ⪯ U]
 
 lemma yablo_diagonal : U ⊢!. ∀' (T.yablo ⭤ (T.yabloSystem)/[⌜T.yablo⌝, #0]) := parameterized_diagonal₁ _
 
@@ -82,8 +99,7 @@ lemma yablo_diagonal_modeled (n : V) : V ⊧/![n] (T.yablo) ↔ T.YabloSystem �
   apply this;
   -/
 
-
-lemma iff_yablo_provable (n : ℕ) : U ⊢!. T.yablo/[n] ↔ U ⊢!. “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” := by
+lemma iff_yablo_provable (n : ℕ) : U ⊢!. T.yabloPred n ↔ U ⊢!. “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” := by
   suffices U ⊢!. T.yablo/[n] ⭤ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” by
     constructor <;> . intro h; cl_prover [h, this];
   apply oRing_provable₀_of.{0};
@@ -93,7 +109,22 @@ lemma iff_yablo_provable (n : ℕ) : U ⊢!. T.yablo/[n] ↔ U ⊢!. “∀ m, �
   -- simpa [models_iff, Matrix.constant_eq_singleton] using this; TODO: compilation problem
   sorry;
 
-lemma provable_yablo_lt (n m : ℕ) (hnm : n < m) : U ⊢!. (T.yabloPred n) ➝ (T.yabloPred m) := by
+lemma iff_neg_yablo_provable (n : ℕ) : U ⊢!. ∼(T.yabloPred n) ↔ U ⊢!. “∃ m, ↑n < m ∧ ∃ nσ, !ssnum nσ ⌜T.yablo⌝ m ∧ !T.provable (nσ)” := by
+  suffices U ⊢!. ∼T.yablo/[n] ⭤ “∃ m, ↑n < m ∧ ∃ nσ, !ssnum nσ ⌜T.yablo⌝ m ∧ !T.provable (nσ)” by
+    constructor <;> . intro h; cl_prover [h, this];
+  apply oRing_provable₀_of.{0};
+  intro V _ _;
+  haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ U inferInstance;
+  haveI : ¬V ⊧/![ORingStruc.numeral n] (yablo T) ↔ ¬T.YabloSystem ⌜T.yablo⌝ (ORingStruc.numeral n) := yablo_diagonal_modeled _ |>.not;
+  sorry;
+  /-
+  simp [YabloSystem] at this;
+  simp [models₀_iff];
+  convert this;
+  simp;
+  -/
+
+lemma provable_greater_yablo {n m : ℕ} (hnm : n < m) : U ⊢!. T.yabloPred n ➝ T.yabloPred m := by
   apply oRing_provable₀_of.{0};
   intro V _ _;
   haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ U inferInstance;
@@ -111,20 +142,24 @@ lemma provable_yablo_lt (n m : ℕ) (hnm : n < m) : U ⊢!. (T.yabloPred n) ➝ 
 
 end
 
-open LO.Entailment
 
-theorem yablo_unprovable [𝐈𝚺₁ ⪯ T] [Entailment.Consistent T] {n : ℕ} : T ⊬. (T.yabloPred n) := by
+-- Main Results
+section
+
+variable [𝐈𝚺₁ ⪯ T] {n : ℕ}
+
+theorem yablo_unprovable [Entailment.Consistent T] : T ⊬. (T.yabloPred n) := by
   by_contra! hC;
-  have H₁ : T ⊢!. T.provabilityPred (T.yablo/[.numeral (n + 1)]) := by
+  have H₁ : T ⊢!. T.provabilityPred (T.yabloPred (n + 1)) := by
     apply Entailment.WeakerThan.pbl $ provable_D1 (T := T) ?_;
-    apply provable_yablo_lt n (n + 1) (by omega) ⨀ hC;
-  have H₂ : T ⊢!. ∼T.provabilityPred (T.yablo/[.numeral (n + 1)]) := by
+    apply provable_greater_yablo (show n < n + 1 by omega) ⨀ hC;
+  have H₂ : T ⊢!. ∼T.provabilityPred (T.yabloPred (n + 1)) := by
     apply oRing_provable₀_of.{0};
     intro V _ _;
     haveI : V ⊧ₘ* 𝐈𝚺₁ := ModelsTheory.of_provably_subtheory V 𝐈𝚺₁ T inferInstance;
-    suffices ¬T.Provable (substNumeral ⌜yablo T⌝ (n + 1 : V)) by
-      simpa [provabilityPred, models_iff, ←substNumeral_app_quote_nat];
-    have : ∀ (x : V), ORingStruc.numeral n < x → ¬Provable T (substNumeral ⌜yablo T⌝ x) := by
+    suffices ¬T.Provable (substNumeral ⌜T.yablo⌝ (n + 1 : V)) by
+      simpa [provabilityPred, models_iff, ←substNumeral_app_quote_nat_model];
+    have : ∀ (x : V), ORingStruc.numeral n < x → ¬T.Provable (substNumeral ⌜T.yablo⌝ x) := by
       sorry;
       /-
       haveI : V ⊧ₘ₀ “∀ m, ↑n < m → ∀ nσ, !ssnum nσ ⌜T.yablo⌝ m → ¬!T.provable (nσ)” :=
@@ -136,17 +171,19 @@ theorem yablo_unprovable [𝐈𝚺₁ ⪯ T] [Entailment.Consistent T] {n : ℕ}
   . infer_instance;
   . cl_prover [H₁, H₂];
 
-/-
-theorem yablo_unrefutable [T.SoundOnHierarchy 𝚺 1] {n : ℕ} : T ⊬. ∼T.yablo/[n] := by
-  have T_consis : Consistent (T : Axiom ℒₒᵣ) := inferInstance;
+theorem yablo_unrefutable [T.SoundOnHierarchy 𝚺 1] : T ⊬. ∼T.yabloPred n := by
   by_contra! hC;
-  have : T ⊢!. (“∃' (↑n < #0 ∧ !(∀' (↑ssnum/[#0, ⌜yablo T⌝, #1] ➝ ↑(provable T)/[#0])))”) := by
-    sorry;
-  have := T.soundOnHierarchy 𝚺 1 this (by sorry);
-  sorry;
--/
+  have := T.soundOnHierarchy 𝚺 1 (iff_neg_yablo_provable n |>.mp hC) $ by simp;
+  obtain ⟨k, hk₁, hk₂⟩ : ∃ x, n < x ∧ Provable T (substNumeral ⌜T.yablo⌝ x) := by sorry
+    -- simpa [models₀_iff] using this;
+  rw [substNumeral_app_quote_nat_Nat, provable_iff_provable₀ (T := T)] at hk₂;
+  exact yablo_unprovable hk₂;
 
-end Theory
+theorem yablo_independent [T.SoundOnHierarchy 𝚺 1] : Entailment.Independent (T : ArithmeticAxiom) (T.yabloPred n) := ⟨yablo_unprovable, yablo_unrefutable⟩
+
+end
+
+end Arithmetic
 
 
 end LO.FirstOrder
