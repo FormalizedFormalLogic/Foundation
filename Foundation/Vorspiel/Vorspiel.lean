@@ -1105,3 +1105,24 @@ protected lemma comp {f : α → β} (hf : Computable f) {p : β → Prop} (hp :
   exact REPred.iff'.mpr ⟨_, pp.comp hf, by intro x; simp⟩
 
 end REPred
+
+namespace ComputablePred
+
+variable {α β : Type*} [Primcodable α] [Primcodable β] {p q : α → Prop}
+
+@[simp] protected lemma const (p : Prop) : ComputablePred fun _ : α ↦ p :=
+  computable_iff_re_compl_re'.mpr ⟨REPred.const _, REPred.const _⟩
+
+lemma and : ComputablePred p → ComputablePred q → ComputablePred fun x ↦ p x ∧ q x := by
+  simp_rw [computable_iff_re_compl_re']
+  rintro ⟨hp, hnp⟩
+  rintro ⟨hq, hnq⟩
+  refine ⟨hp.and hq, (hnp.or hnq).of_eq <| by grind⟩
+
+lemma or : ComputablePred p → ComputablePred q → ComputablePred fun x ↦ p x ∨ q x := by
+  simp_rw [computable_iff_re_compl_re']
+  rintro ⟨hp, hnp⟩
+  rintro ⟨hq, hnq⟩
+  refine ⟨hp.or hq, (hnp.and hnq).of_eq <| by grind⟩
+
+end ComputablePred

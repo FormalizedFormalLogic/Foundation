@@ -232,118 +232,37 @@ lemma Inconsistent.of_ge {𝓢 : S} {𝓣 : T} (h𝓢 : Inconsistent 𝓢) (h : 
 lemma Consistent.of_le {𝓢 : S} {𝓣 : T} (h𝓢 : Consistent 𝓢) (h : 𝓣 ⪯ 𝓢) : Consistent 𝓣 :=
   ⟨fun H ↦ not_consistent_iff_inconsistent.mpr (H.of_ge h) h𝓢⟩
 
-@[ext] structure Translation {S S' F F'} [Entailment F S] [Entailment F' S'] (𝓢 : S) (𝓣 : S') where
-  toFun : F → F'
-  prf {f} : 𝓢 ⊢ f → 𝓣 ⊢ toFun f
-
-infix:40 " ↝ " => Translation
-
-@[ext] structure Bitranslation {S S' F F'} [Entailment F S] [Entailment F' S'] (𝓢 : S) (𝓣 : S') where
-  r : 𝓢 ↝ 𝓣
-  l : 𝓣 ↝ 𝓢
-  r_l : r.toFun ∘ l.toFun = id
-  l_r : l.toFun ∘ r.toFun = id
-
-infix:40 " ↭ " => Bitranslation
-
-@[ext] structure FaithfulTranslation {S S' F F'} [Entailment F S] [Entailment F' S'] (𝓢 : S) (𝓣 : S') extends 𝓢 ↝ 𝓣 where
-  prfInv {f} : 𝓣 ⊢ toFun f → 𝓢 ⊢ f
-
-infix:40 " ↝¹ " => FaithfulTranslation
-
-namespace Translation
-
-variable {S S' S'' : Type*} {F F' F'' : Type*} [Entailment F S] [Entailment F' S'] [Entailment F'' S'']
-
-instance (𝓢 : S) (𝓣 : S') : CoeFun (𝓢 ↝ 𝓣) (fun _ ↦ F → F') := ⟨Translation.toFun⟩
-
-protected def id (𝓢 : S) : 𝓢 ↝ 𝓢 where
-  toFun := id
-  prf := id
-
-@[simp] lemma id_app (𝓢 : S) (f : F) : Translation.id 𝓢 f = f := rfl
-
-def comp {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝ 𝓤) (ψ : 𝓢 ↝ 𝓣) : 𝓢 ↝ 𝓤 where
-  toFun := φ.toFun ∘ ψ.toFun
-  prf := φ.prf ∘ ψ.prf
-
-@[simp] lemma comp_app {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝ 𝓤) (ψ : 𝓢 ↝ 𝓣) (f : F) :
-    φ.comp ψ f = φ (ψ f) := rfl
-
-lemma provable {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↝ 𝓣) {φ} (h : 𝓢 ⊢! φ) : 𝓣 ⊢! f φ := ⟨f.prf h.get⟩
-
-end Translation
-
-namespace Bitranslation
-
-variable {S S' S'' : Type*} {F F' F'' : Type*} [Entailment F S] [Entailment F' S'] [Entailment F'' S'']
-
-@[simp] lemma r_l_app {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↭ 𝓣) (φ : F') : f.r (f.l φ) = φ := congr_fun f.r_l φ
-
-@[simp] lemma l_r_app {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↭ 𝓣) (φ : F) : f.l (f.r φ) = φ := congr_fun f.l_r φ
-
-protected def id (𝓢 : S) : 𝓢 ↭ 𝓢 where
-  r := Translation.id 𝓢
-  l := Translation.id 𝓢
-  r_l := by ext; simp
-  l_r := by ext; simp
-
-protected def symm {𝓢 : S} {𝓣 : S'} (φ : 𝓢 ↭ 𝓣) : 𝓣 ↭ 𝓢 where
-  r := φ.l
-  l := φ.r
-  r_l := φ.l_r
-  l_r := φ.r_l
-
-def comp {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↭ 𝓤) (ψ : 𝓢 ↭ 𝓣) : 𝓢 ↭ 𝓤 where
-  r := φ.r.comp ψ.r
-  l := ψ.l.comp φ.l
-  r_l := by ext; simp
-  l_r := by ext; simp
-
-end Bitranslation
-
-namespace FaithfulTranslation
-
-variable {S S' S'' : Type*} {F F' F'' : Type*} [Entailment F S] [Entailment F' S'] [Entailment F'' S'']
-
-instance (𝓢 : S) (𝓣 : S') : CoeFun (𝓢 ↝¹ 𝓣) (fun _ ↦ F → F') := ⟨fun t ↦ t.toFun⟩
-
-protected def id (𝓢 : S) : 𝓢 ↝¹ 𝓢 where
-  toFun := id
-  prf := id
-  prfInv := id
-
-@[simp] lemma id_app (𝓢 : S) (f : F) : FaithfulTranslation.id 𝓢 f = f := rfl
-
-def comp {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝¹ 𝓤) (ψ : 𝓢 ↝¹ 𝓣) : 𝓢 ↝¹ 𝓤 where
-  toFun := φ.toFun ∘ ψ.toFun
-  prf := φ.prf ∘ ψ.prf
-  prfInv := ψ.prfInv ∘ φ.prfInv
-
-@[simp] lemma comp_app {𝓢 : S} {𝓣 : S'} {𝓤 : S''} (φ : 𝓣 ↝¹ 𝓤) (ψ : 𝓢 ↝¹ 𝓣) (f : F) :
-    φ.comp ψ f = φ (ψ f) := rfl
-
-lemma provable {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↝¹ 𝓣) {φ} (h : 𝓢 ⊢! φ) : 𝓣 ⊢! f φ := ⟨f.prf h.get⟩
-
-lemma provable_iff {𝓢 : S} {𝓣 : S'} (f : 𝓢 ↝¹ 𝓣) {φ} : 𝓣 ⊢! f φ ↔ 𝓢 ⊢! φ :=
-  ⟨fun h ↦ ⟨f.prfInv h.get⟩, fun h ↦ ⟨f.prf h.get⟩⟩
-
-end FaithfulTranslation
-
 section
 
 variable [LogicalConnective F]
 
 variable (𝓢 : S)
 
-def Complete : Prop := ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ∼f
+class Complete : Prop where
+  con : ∀ φ, 𝓢 ⊢! φ ∨ 𝓢 ⊢! ∼φ
 
-def Independent (f : F) : Prop := 𝓢 ⊬ f ∧ 𝓢 ⊬ ∼f
+def Independent (φ : F) : Prop := 𝓢 ⊬ φ ∧ 𝓢 ⊬ ∼φ
+
+class Incomplete : Prop where
+  incon : ∃ φ, Independent 𝓢 φ
 
 end
 
-lemma incomplete_iff_exists_undecidable [LogicalConnective F] {𝓢 : S} :
-    ¬Entailment.Complete 𝓢 ↔ ∃ f, Independent 𝓢 f := by simp [Complete, Independent, not_or]
+lemma complete_def [LogicalConnective F] {𝓢 : S} :
+    Complete 𝓢 ↔ ∀ φ, 𝓢 ⊢! φ ∨ 𝓢 ⊢! ∼φ :=
+  ⟨fun h ↦ h.con, Complete.mk⟩
+
+lemma incomplete_def [LogicalConnective F] {𝓢 : S} :
+    Incomplete 𝓢 ↔ ∃ φ, Independent 𝓢 φ :=
+  ⟨fun h ↦ h.incon, Incomplete.mk⟩
+
+lemma not_complete_iff_incomplete [LogicalConnective F] {𝓢 : S} :
+    ¬Complete 𝓢 ↔ Incomplete 𝓢 := by
+  simp [complete_def, incomplete_def, Independent, not_or]
+
+lemma not_incomplete_iff_complete [LogicalConnective F] {𝓢 : S} :
+    ¬Incomplete 𝓢 ↔ Complete 𝓢 :=
+  Iff.symm <| iff_not_comm.mp not_complete_iff_incomplete.symm
 
 variable (S T)
 
@@ -379,10 +298,6 @@ lemma weakening! (h : 𝓢 ⊆ 𝓣 := by simp) {f} : 𝓢 ⊢! f → 𝓣 ⊢! 
 
 def weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening! h⟩
 
-def translation (h : 𝓢 ⊆ 𝓣) : 𝓢 ↝ 𝓣 where
-  toFun := id
-  prf := weakening h
-
 end Axiomatized
 
 alias by_axm := Axiomatized.provable_axm
@@ -408,10 +323,6 @@ variable [Collection F T] [StrongCut S T]
 
 lemma cut! {𝓢 : S} {𝓣 : T} {φ : F} (H : 𝓢 ⊢!* Collection.set 𝓣) (hp : 𝓣 ⊢! φ) : 𝓢 ⊢! φ := by
   rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.get b⟩
-
-def translation {𝓢 : S} {𝓣 : T} (B : 𝓢 ⊢* Collection.set 𝓣) : 𝓣 ↝ 𝓢 where
-  toFun := id
-  prf := StrongCut.cut B
 
 end StrongCut
 
@@ -507,10 +418,6 @@ alias deduction! := Deduction.of_insert!
 
 lemma Deduction.inv! (h : 𝓢 ⊢! φ ➝ ψ) : cons φ 𝓢 ⊢! ψ := by
   rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
-
-def Deduction.translation (φ : F) (𝓢 : S) : cons φ 𝓢 ↝ 𝓢 where
-  toFun := fun ψ ↦ φ ➝ ψ
-  prf := deduction
 
 lemma deduction_iff : cons φ 𝓢 ⊢! ψ ↔ 𝓢 ⊢! φ ➝ ψ := ⟨deduction!, Deduction.inv!⟩
 
