@@ -110,7 +110,6 @@ instance : L₂ ⪯ sumQuasiNormal L₁ L₂ := by
 
 end sumQuasiNormal
 
-
 inductive sumNormal (L₁ L₂ : Logic α) : Logic α
   | mem₁ {φ}    : L₁ ⊢! φ → sumNormal L₁ L₂ φ
   | mem₂ {φ}    : L₂ ⊢! φ → sumNormal L₁ L₂ φ
