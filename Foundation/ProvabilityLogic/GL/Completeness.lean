@@ -89,7 +89,7 @@ theorem GLPlusBoxBot.arithmetical_completeness (hA : ∀ f : T.PLRealization, T 
   case _ => simpa using GL.arithmetical_completeness h hA
   case _ n =>
     suffices Modal.GLPlusBoxBot n ⊢! A by simpa using this
-    apply iff_provable_GLBB_provable_GL.mpr
+    apply iff_provable_GLPlusBoxBot_provable_GL.mpr
     exact GLPlusBoxBot.arithmetical_completeness_aux (n := n) (by simp [h]) hA
 
 theorem GLPlusBoxBot.arithmetical_completeness_iff :
