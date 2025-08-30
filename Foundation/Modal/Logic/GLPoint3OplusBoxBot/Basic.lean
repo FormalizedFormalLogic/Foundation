@@ -30,6 +30,11 @@ lemma GLPoint3OplusBoxBot.boxbot {n : ℕ} : Modal.GLPoint3OplusBoxBot n ⊢! (�
   apply Logic.sumNormal.mem₂!;
   tauto;
 
+open LO.Entailment LO.Modal.Entailment in
+@[simp]
+lemma GLPoint3OplusBoxBot.axiomNVer {n : ℕ} : Modal.GLPoint3OplusBoxBot n ⊢! (□^[n]φ) :=
+  Modal.Entailment.multibox_axiomK'! (multinec! (by cl_prover)) ⨀ GLPoint3OplusBoxBot.boxbot
+
 @[simp] lemma eq_GLPoint3OplusBoxBot_omega_GLPoint3 : (Modal.GLPoint3OplusBoxBot ⊤) = Modal.GLPoint3 := by simp [Modal.GLPoint3OplusBoxBot];
 
 
@@ -71,8 +76,57 @@ lemma eq_GLPoint3OplusBoxBot_1_Ver : (Modal.GLPoint3OplusBoxBot 1) = Modal.Ver :
     | nec ih => apply nec! ih;
     | _ => cl_prover;
 
+open Formula (atom) in
+open Formula.Kripke in
 lemma GLPoint3OplusBoxBot.provable_weakPoint2_in_2 : Modal.GLPoint3OplusBoxBot 2 ⊢! Axioms.WeakPoint2 (.atom 0) (.atom 1) := by
-  sorry;
+  suffices Modal.GLPoint3OplusBoxBot 2 ⊢! Axioms.CD (.atom 0) by
+    apply C!_trans (Logic.subst! (λ _ => (□(.atom 0) ⋏ (.atom 1))) this);
+    -- TODO: `K_prover`
+    apply normal_provable_of_K_provable;
+    apply Complete.complete (𝓜 := Kripke.FrameClass.K);
+    simp only [Formula.subst.subst_box, Formula.subst.subst_atom];
+    intro F _ V x h y Rxy;
+    apply Satisfies.or_def.mpr;
+    right;
+    exact (Satisfies.and_def.mp $ h y Rxy) |>.2;
+  haveI : Modal.GLPoint3OplusBoxBot 2 ⊢! ◇(.atom 0) ➝ ◇(.atom 0) ⋏ (□^[2](.atom 0)) := by
+    have : Modal.GLPoint3OplusBoxBot 2 ⊢! □^[2](.atom 0) := GLPoint3OplusBoxBot.axiomNVer;
+    cl_prover [this];
+  haveI : Modal.GLPoint3OplusBoxBot 2 ⊢! ◇(.atom 0) ➝ ∼□(⊡(.atom 0) ➝ ∼(.atom 0)) := C!_trans this $ by
+    -- TODO: `K_prover`
+    apply normal_provable_of_K_provable;
+    apply Complete.complete (𝓜 := Kripke.FrameClass.K);
+    intro F _ V x h;
+    replace h := Satisfies.and_def.mp h;
+    obtain ⟨y, Rxy, h₁⟩ := Satisfies.dia_def.mp h.1;
+    apply Satisfies.not_box_def.mpr;
+    use y;
+    constructor;
+    . assumption;
+    . apply Satisfies.not_imp_def.mpr;
+      constructor;
+      . apply Satisfies.and_def.mpr;
+        constructor;
+        . assumption;
+        . intro z Ryz;
+          apply Satisfies.multibox_def.mp h.2;
+          use y;
+          tauto;
+      . apply Satisfies.not_def.mp;
+        apply Satisfies.negneg_def.mpr;
+        assumption;
+  haveI : Modal.GLPoint3OplusBoxBot 2 ⊢! ◇(.atom 0) ➝ □(⊡(∼(.atom 0)) ➝ (.atom 0)) := C!_trans this $ by
+    have : Modal.GLPoint3OplusBoxBot 2 ⊢! □(⊡(.atom 0) ➝ (∼(.atom 0))) ⋎ □(⊡(∼(.atom 0)) ➝ (.atom 0)) := sumNormal.mem₁! (by simp);
+    cl_prover [this];
+  haveI : Modal.GLPoint3OplusBoxBot 2 ⊢! ◇(.atom 0) ➝ □^[2](∼.atom 0) ➝ □(.atom 0) := C!_trans this $ by
+    apply C!_trans ?_ axiomK!;
+    apply axiomK'!;
+    apply nec!
+    cl_prover;
+  haveI : Modal.GLPoint3OplusBoxBot 2 ⊢! ◇(.atom 0) ➝ □(.atom 0) := C!_trans this $ by
+    have : Modal.GLPoint3OplusBoxBot 2 ⊢! (□^[2](∼(.atom 0))) := GLPoint3OplusBoxBot.axiomNVer;
+    cl_prover [this];
+  exact this;
 
 open Formula.Kripke in
 lemma GLPoint2.provable_boxboxbot : Modal.GLPoint2 ⊢! (□^[2]⊥) := by
