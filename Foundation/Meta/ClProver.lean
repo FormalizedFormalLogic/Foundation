@@ -274,72 +274,72 @@ def prover (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
   |     0,      _ => throwError m!"Proof search failed: {← Sequent.toExpr Γ} ⟹ {← Sequent.toExpr Δ}"
   | k + 1,  false =>
     match Δ with
-    |    .atom a :: Δ => do
-      let e ← tryRightClose (.atom a) Γ Δ
+    |     [] => prover k true Γ []
+    | φ :: Δ => do
+      let e ← tryRightClose φ Γ Δ
       match e with
-      | some h =>
-        return h
-      |   none => do
-        let e ← prover k true Γ (Δ ++ [.atom a])
-        rotateRight Γ Δ (.atom a) e
-    |          ⊤ :: Δ => verumRight Γ Δ
-    |          ⊥ :: Δ => do
-      let e ← prover k true Γ Δ
-      falsumRight Γ Δ e
-    |      φ ⋏ ψ :: Δ => do
-      let e₁ ← prover k true Γ (Δ ++ [φ])
-      let e₂ ← prover k true Γ (Δ ++ [ψ])
-      andRight Γ Δ φ ψ e₁ e₂
-    |      φ ⋎ ψ :: Δ => do
-      let e ← prover k true Γ (Δ ++ [φ, ψ])
-      orRight Γ Δ φ ψ e
-    |         ∼φ :: Δ => do
-      let e ← prover k true (Γ ++ [φ]) Δ
-      negRight Γ Δ φ e
-    |    (φ ➝ ψ) :: Δ => do
-      let e ← prover k true (Γ ++ [φ]) (Δ ++ [ψ])
-      implyRight Γ Δ φ ψ e
-    | (.iff φ ψ) :: Δ => do
-      let e₁ ← prover k true (Γ ++ [φ]) (Δ ++ [ψ])
-      let e₂ ← prover k true (Γ ++ [ψ]) (Δ ++ [φ])
-      iffRight Γ Δ φ ψ e₁ e₂
-    |              [] =>
-      prover k true Γ []
+      | some h => return h
+      |   none =>
+        match φ with
+        | .atom a =>
+          let e ← prover k true Γ (Δ ++ [.atom a])
+          rotateRight Γ Δ (.atom a) e
+        | ⊤ => verumRight Γ Δ
+        | ⊥ => do
+          let e ← prover k true Γ Δ
+          falsumRight Γ Δ e
+        | φ ⋏ ψ => do
+          let e₁ ← prover k true Γ (Δ ++ [φ])
+          let e₂ ← prover k true Γ (Δ ++ [ψ])
+          andRight Γ Δ φ ψ e₁ e₂
+        | φ ⋎ ψ => do
+          let e ← prover k true Γ (Δ ++ [φ, ψ])
+          orRight Γ Δ φ ψ e
+        | ∼φ => do
+          let e ← prover k true (Γ ++ [φ]) Δ
+          negRight Γ Δ φ e
+        | φ ➝ ψ => do
+          let e ← prover k true (Γ ++ [φ]) (Δ ++ [ψ])
+          implyRight Γ Δ φ ψ e
+        | .iff φ ψ => do
+          let e₁ ← prover k true (Γ ++ [φ]) (Δ ++ [ψ])
+          let e₂ ← prover k true (Γ ++ [ψ]) (Δ ++ [φ])
+          iffRight Γ Δ φ ψ e₁ e₂
   | k + 1, true =>
     match Γ with
-    |    .atom a :: Γ => do
-      let e ← tryLeftClose (.atom a) Γ Δ
+    |     [] => prover k false [] Δ
+    | φ :: Γ => do
+      let e ← tryLeftClose φ Γ Δ
       match e with
-      | some h =>
-        return h
-      |   none => do
-        let e ← prover k false (Γ ++ [.atom a]) Δ
-        rotateLeft Γ Δ (.atom a) e
-    |          ⊤ :: Γ => do
-      let e ← prover k false Γ Δ
-      verumLeft Γ Δ e
-    |          ⊥ :: Γ => do
-      falsumLeft Γ Δ
-    |      φ ⋏ ψ :: Γ => do
-      let e ← prover k false (Γ ++ [φ, ψ]) Δ
-      andLeft Γ Δ φ ψ e
-    |      φ ⋎ ψ :: Γ => do
-      let e₁ ← prover k false (Γ ++ [φ]) Δ
-      let e₂ ← prover k false (Γ ++ [ψ]) Δ
-      orLeft Γ Δ φ ψ e₁ e₂
-    |         ∼φ :: Γ => do
-      let e ← prover k false Γ (Δ ++ [φ])
-      negLeft Γ Δ φ e
-    |    (φ ➝ ψ) :: Γ => do
-      let e₁ ← prover k false Γ (Δ ++ [φ])
-      let e₂ ← prover k false (Γ ++ [ψ]) Δ
-      implyLeft Γ Δ φ ψ e₁ e₂
-    | (.iff φ ψ) :: Γ => do
-      let e₁ ← prover k false Γ (Δ ++ [φ, ψ])
-      let e₂ ← prover k false (Γ ++ [φ, ψ]) Δ
-      iffLeft Γ Δ φ ψ e₁ e₂
-    |              [] =>
-      prover k false [] Δ
+      | some h => return h
+      |   none =>
+        match φ with
+        | .atom a =>
+          let e ← prover k false (Γ ++ [.atom a]) Δ
+          rotateLeft Γ Δ (.atom a) e
+        | ⊤ => do
+          let e ← prover k false Γ Δ
+          verumLeft Γ Δ e
+        | ⊥ => do
+          falsumLeft Γ Δ
+        | φ ⋏ ψ => do
+          let e ← prover k false (Γ ++ [φ, ψ]) Δ
+          andLeft Γ Δ φ ψ e
+        | φ ⋎ ψ => do
+          let e₁ ← prover k false (Γ ++ [φ]) Δ
+          let e₂ ← prover k false (Γ ++ [ψ]) Δ
+          orLeft Γ Δ φ ψ e₁ e₂
+        | ∼φ => do
+          let e ← prover k false Γ (Δ ++ [φ])
+          negLeft Γ Δ φ e
+        | φ ➝ ψ => do
+          let e₁ ← prover k false Γ (Δ ++ [φ])
+          let e₂ ← prover k false (Γ ++ [ψ]) Δ
+          implyLeft Γ Δ φ ψ e₁ e₂
+        | .iff φ ψ => do
+          let e₁ ← prover k false Γ (Δ ++ [φ, ψ])
+          let e₂ ← prover k false (Γ ++ [φ, ψ]) Δ
+          iffLeft Γ Δ φ ψ e₁ e₂
 
 structure HypInfo where
   levelF : Level
