@@ -89,10 +89,10 @@ instance [DecidableEq F] : Axiomatized (FiniteContext F 𝓢) where
   weakening := fun H b ↦ C_trans (CConj₂Conj₂ H) b
 
 instance : Compact (FiniteContext F 𝓢) where
-  φ := fun {Γ} _ _ ↦ Γ
-  φPrf := id
-  φ_subset := by simp
-  φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
+  Γ := fun {Γ} _ _ ↦ Γ
+  ΓPrf := id
+  Γ_subset := by simp
+  Γ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
 def nthAxm {Γ} (n : ℕ) (h : n < Γ.length := by simp) : Γ ⊢[𝓢] Γ[n] := conj₂Nth Γ n h
 lemma nth_axm! {Γ} (n : ℕ) (h : n < Γ.length := by simp) : Γ ⊢[𝓢]! Γ[n] := ⟨nthAxm n h⟩
@@ -279,10 +279,10 @@ instance [DecidableEq F] : Axiomatized (Context F 𝓢) where
   weakening := fun h b ↦ ⟨b.ctx, fun φ hp ↦ Collection.subset_iff.mp h φ (b.subset φ hp), b.prf⟩
 
 instance : Compact (Context F 𝓢) where
-  φ := fun b ↦ Collection.set b.ctx
-  φPrf := fun b ↦ ⟨b.ctx, by simp [Collection.set], b.prf⟩
-  φ_subset := by rintro ⟨Γ⟩ φ b; exact b.subset
-  φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
+  Γ := fun b ↦ Collection.set b.ctx
+  ΓPrf := fun b ↦ ⟨b.ctx, by simp [Collection.set], b.prf⟩
+  Γ_subset := by rintro ⟨Γ⟩ φ b; exact b.subset
+  Γ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
 
 -- lemma provable_iff' [DecidableEq F] {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (↑Δ ⊆ Γ) ∧ Δ *⊢[𝓢]! φ
 
