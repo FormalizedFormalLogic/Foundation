@@ -33,13 +33,13 @@ variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [C
          (𝓢 : S) [Entailment.Cl 𝓢]
 
 lemma dense_of_finite_extend_incomplete
-    (hE : ∀ φ : F, Entailment.Consistent (cons φ 𝓢) → ¬Entailment.Complete (cons φ 𝓢))
+    (hE : ∀ φ : F, Consistent (cons φ 𝓢) → Incomplete (cons φ 𝓢))
     (h : φ < ψ) : ∃ ξ : LindenbaumAlgebra 𝓢, φ < ξ ∧ ξ < ψ := by
   obtain ⟨φ, rfl⟩ := Quotient.exists_rep φ;
   obtain ⟨ψ, rfl⟩ := Quotient.exists_rep ψ;
   have h₁ : 𝓢 ⊢! φ ➝ ψ := le_def _ |>.mp $ le_of_lt h;
   have h₂ : 𝓢 ⊬  ψ ➝ φ := le_def _ |>.not.mp $ not_le_of_gt h;
-  obtain ⟨ρ, hρ⟩ := Entailment.incomplete_iff_exists_undecidable.mp $ @hE (∼φ ⋏ ψ) $ by
+  obtain ⟨ρ, hρ⟩ := incomplete_def.mp $ @hE (∼φ ⋏ ψ) $ by
     apply consistent_iff_exists_unprovable.mpr;
     use ⊥;
     apply deduction_iff.not.mpr;

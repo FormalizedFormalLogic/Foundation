@@ -35,7 +35,7 @@ lemma soundness_of_validates_axioms (hV : C.Validates H.axioms) : H ⊢! φ → 
 lemma instSound_of_validates_axioms (hV : C.Validates H.axioms) : Sound H C := ⟨fun {_} => soundness_of_validates_axioms hV⟩
 
 lemma consistent_of_sound_frameclass (C : FrameClass) (hC : Set.Nonempty C) [sound : Sound H C] : Entailment.Consistent H := by
-  apply Entailment.Consistent.of_unprovable (f := ⊥);
+  apply Entailment.Consistent.of_unprovable (φ := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
   push_neg;
