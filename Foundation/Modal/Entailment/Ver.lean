@@ -2,6 +2,7 @@ import Foundation.Modal.Entailment.K
 
 namespace LO.Modal.Entailment
 
+open LO.Entailment
 open FiniteContext
 
 variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
