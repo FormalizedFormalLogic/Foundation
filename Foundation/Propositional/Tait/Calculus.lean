@@ -14,7 +14,7 @@ inductive Derivation (T : Theory α) : Sequent α → Type _
 | and {Δ φ ψ} : Derivation T (φ :: Δ) → Derivation T (ψ :: Δ) → Derivation T (φ ⋏ ψ :: Δ)
 | wk {Δ Γ}    : Derivation T Δ → Δ ⊆ Γ → Derivation T Γ
 | cut {Δ φ}   : Derivation T (φ :: Δ) → Derivation T (∼φ :: Δ) → Derivation T Δ
-| root {φ}    : φ ∈ T → Derivation T [φ]
+| axm {φ}    : φ ∈ T → Derivation T [φ]
 
 instance : OneSided (NNFormula α) (Theory α) := ⟨Derivation⟩
 
@@ -22,14 +22,14 @@ namespace Derivation
 
 variable {T U : Theory α} {Δ Δ₁ Δ₂ Γ : Sequent α}
 
-def length : {Δ : Sequent α} → T ⟹ Δ → ℕ
-  | _, axL _ _     => 0
-  | _, verum _     => 0
-  | _, or d        => d.length.succ
-  | _, and dp dq   => (max (length dp) (length dq)).succ
-  | _, wk d _      => d.length.succ
-  | _, cut dp dn   => (max (length dp) (length dn)).succ
-  | _, root _      => 0
+def length {Δ : Sequent α} : T ⟹ Δ → ℕ
+  | axL _ _     => 0
+  | verum _     => 0
+  | or d        => d.length.succ
+  | and dp dq   => (max (length dp) (length dq)).succ
+  | wk d _      => d.length.succ
+  | cut dp dn   => (max (length dp) (length dn)).succ
+  | axm _      => 0
 
 protected def cast (d : T ⟹ Δ) (e : Δ = Γ) : T ⟹ Γ := cast (by simp [e]) d
 
@@ -74,10 +74,10 @@ def trans (F : U ⊢* T) {Γ : Sequent α} : T ⟹ Γ → U ⟹ Γ
   | or d      => or (trans F d)
   | wk d ss   => wk (trans F d) ss
   | cut d₁ d₂ => cut (trans F d₁) (trans F d₂)
-  | root h    => F h
+  | axm h    => F h
 
 instance : Tait.Axiomatized (NNFormula α) (Theory α) where
-  root {_ _ h} := root h
+  axm {_ _ h} := axm h
   trans {_ _ _ F d} := trans (fun h ↦ F _ h) d
 
 variable [DecidableEq α]
@@ -101,8 +101,8 @@ def compact {Γ : Sequent α} : T ⟹ Γ → (s : { s : Finset (NNFormula α) //
     let ⟨s₂, d₂⟩ := compact d₂
     ⟨⟨(s₁ ∪ s₂ : Finset (NNFormula α)), by simp [s₁.prop, s₂.prop]⟩,
       cut (Tait.ofAxiomSubset (by simp) d₁) (Tait.ofAxiomSubset (by simp) d₂)⟩
-  | root (φ := φ) h =>
-    ⟨⟨{φ}, by simp [h]⟩, root (by simp)⟩
+  | axm (φ := φ) h =>
+    ⟨⟨{φ}, by simp [h]⟩, axm (by simp)⟩
 
 instance : Entailment.Compact (Theory α) where
   φ b := (compact b).1
@@ -118,9 +118,9 @@ def deductionAux {Γ : Sequent α} {φ} : T ⟹ Γ → T \ {φ} ⟹ ∼φ :: Γ
   | or d      => Tait.rotate₁ <| Tait.or <| Tait.wk (deductionAux d) (by intro x; simp; tauto)
   | wk d ss   => wk (deductionAux d) <| List.cons_subset_cons (∼φ) ss
   | cut d₁ d₂ => cut (Tait.rotate₁ <| deductionAux d₁) (Tait.rotate₁ <| deductionAux d₂)
-  | root (φ := ψ) h =>
+  | axm (φ := ψ) h =>
     if hq : φ = ψ then em (φ := φ) (by simp [hq]) (by simp) else
-      Tait.wk (show T \ {φ} ⟹ [ψ] from Tait.root (by simp [h, Ne.symm hq])) (by simp)
+      Tait.wk (show T \ {φ} ⟹ [ψ] from Tait.axm (by simp [h, Ne.symm hq])) (by simp)
 
 def deduction {Γ : Sequent α} {φ} (d : insert φ T ⟹ Γ) : T ⟹ ∼φ :: Γ := Tait.ofAxiomSubset (by simp) (deductionAux d)
 

@@ -35,7 +35,7 @@ theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
     · have : v ⊧ φ := by simpa [hv] using ihp
       have : ¬v ⊧ φ := by simpa [hv] using ihn
       contradiction
-  case root φ h =>
+  case axm φ h =>
     have : v ⊧* T := by simpa [Semantics.models] using hv
     simpa using Semantics.realizeSet_iff.mp hv h
 
