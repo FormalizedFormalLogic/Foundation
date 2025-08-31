@@ -40,6 +40,7 @@ lemma GLPoint3OplusBoxBot.axiomNVer {n : ℕ} : Modal.GLPoint3OplusBoxBot n ⊢!
 
 section
 
+open Kripke
 open LO.Entailment LO.Modal.Entailment
 open Formula (atom)
 open Formula.Kripke
@@ -75,6 +76,51 @@ lemma GLPoint3OplusBoxBot.weakerThan_lt {n m : ℕ} (hmn : m > n) : (Modal.GLPoi
 
 instance : (Modal.GLPoint3OplusBoxBot 1) ⪯ (Modal.GLPoint3OplusBoxBot 0) := GLPoint3OplusBoxBot.weakerThan_lt (by simp)
 instance : (Modal.GLPoint3OplusBoxBot 2) ⪯ (Modal.GLPoint3OplusBoxBot 1) := GLPoint3OplusBoxBot.weakerThan_lt (by simp)
+
+/--
+  `<` on `Fin (k + 1)`, `m ≥ n` can be reached by `n` times `<`-step.
+-/
+lemma _root_.HRel.Iterate.fin_lt_stepping_stones {k n : ℕ} {m : Fin (k + 1)}
+  (_ : n = 0 → m = 0)
+  (_ : n ≤ m)
+  : HRel.Iterate (α := Fin (k + 1)) (· < ·) n 0 m := by
+  induction n generalizing m with
+  | zero =>
+    simp_all;
+  | succ n ih =>
+    rw [HRel.Iterate.forward];
+    use ⟨n, by omega⟩;
+    constructor;
+    . apply ih;
+      . simp;
+      . simp;
+    . simpa;
+
+lemma GLPoint3OplusBoxBot.strictlyWeakerThan_GLPoint3 {n : ℕ} : (Modal.GLPoint3) ⪱ (Modal.GLPoint3OplusBoxBot n) := by
+  apply strictlyWeakerThan_iff.mpr;
+  constructor;
+  . intro _ h;
+    apply sumNormal.mem₁!;
+    assumption;
+  . use □^[n]⊥;
+    constructor;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GLPoint3);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨⟨Fin (n + 1), λ x y => (x < y)⟩, (λ _ _ => True)⟩;
+      use M, 0;
+      constructor;
+      . apply Set.mem_setOf_eq.mpr;
+        exact {}
+      . apply Satisfies.multibox_def.not.mpr;
+        push_neg;
+        use ⟨n, by omega⟩;
+        constructor;
+        . apply HRel.Iterate.fin_lt_stepping_stones <;> simp;
+        . tauto;
+    . simp;
+
+instance : (Modal.GLPoint3) ⪱ (Modal.GLPoint3OplusBoxBot 2) := GLPoint3OplusBoxBot.strictlyWeakerThan_GLPoint3
+
 
 lemma eq_GLPoint3OplusBoxBot_0_Univ : (Modal.GLPoint3OplusBoxBot 0) = Set.univ := by
   have : Modal.GLPoint3OplusBoxBot 0 ⊢! ⊥ := GLPoint3OplusBoxBot.boxbot;
