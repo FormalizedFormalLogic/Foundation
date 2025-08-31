@@ -2,6 +2,9 @@
 
 #set page(width: auto, height: auto, margin: 24pt)
 
+#let box = $square$
+#let dia = $diamond$
+
 #let arrows = json("./modal.json").map(((from, to, type)) => {
   if type == "ssub" {
     return strfmt("\"{}\" -> \"{}\"", from, to)
@@ -63,6 +66,9 @@
       "LO.Modal.GL": $Logic("GL")$,
       "LO.Modal.GLPoint2": $Logic("GL.2")$,
       "LO.Modal.GLPoint3": $Logic("GL.3")$,
+      "LO.Modal.GLPoint3OplusBoxBot 0": $Logic("GL.3") plus.circle bot$,
+      "LO.Modal.GLPoint3OplusBoxBot 1": $Logic("GL.3") plus.circle box bot$,
+      "LO.Modal.GLPoint3OplusBoxBot 2": $Logic("GL.3") plus.circle box^2 bot$,
       "LO.Modal.Grz": $Logic("Grz")$,
       "LO.Modal.GrzPoint2": $Logic("Grz.2")$,
       "LO.Modal.GrzPoint2M": $Logic("Grz.2M")$,

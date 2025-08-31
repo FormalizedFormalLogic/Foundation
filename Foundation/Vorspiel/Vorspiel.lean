@@ -144,7 +144,7 @@ lemma vecCons_assoc (a b : α) (s : Fin n → α) :
   funext x; cases' x using Fin.cases with x
   · simp
   · cases x using Fin.lastCases
-    · simp [Fin.succ_castSucc]
+    · simp
     case cast i =>
       simp; simp only [rightConcat_castSucc, Fin.succ_castSucc i, cons_val_succ]
 
@@ -207,13 +207,13 @@ lemma fun_eq_vec_two {v : Fin 2 → α} : v = ![v 0, v 1] := by
 
 lemma fun_eq_vec_three {v : Fin 3 → α} : v = ![v 0, v 1, v 2] := by
   funext x
-  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
+  cases' x using Fin.cases with x <;> simp
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
 
 lemma fun_eq_vec_four {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
   funext x
-  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
-  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
+  cases' x using Fin.cases with x <;> simp
+  cases' x using Fin.cases with x <;> simp
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
 
 lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : ∀ i, a ≠ f i) : Function.Injective (a :> f) := by
@@ -614,7 +614,7 @@ def liftVec : ∀ {n} (f : (Fin n → α) → β),
 
 lemma liftVec_mk {n} (f : (Fin n → α) → β) (h) (v : Fin n → α) :
     liftVec f h (Quotient.mk s ∘ v) = f v := by
-  induction' n with n ih <;> simp [liftVec, empty_eq, Quotient.liftOn_mk]
+  induction' n with n ih <;> simp [liftVec, empty_eq]
   simpa using ih (fun v' => f (vecHead v :> v'))
     (fun v₁ v₂ hv => h (vecHead v :> v₁) (vecHead v :> v₂) (Fin.cases (refl _) hv)) (vecTail v)
 
@@ -704,8 +704,8 @@ lemma ofFn_get_eq_map_cast {n} (g : α → β) (as : List α) {h} :
     ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
   ext i b; simp
   by_cases hi : i < n
-  · simp [hi, List.ofFnNthVal, List.getElem?_eq_getElem (h ▸ hi)]
-  · simp [hi, List.ofFnNthVal, List.getElem?_eq_none (le_of_not_gt $ h ▸ hi)]
+  · simp [hi, List.getElem?_eq_getElem (h ▸ hi)]
+  · simp [hi, List.getElem?_eq_none (le_of_not_gt $ h ▸ hi)]
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 
@@ -727,10 +727,10 @@ lemma remove_nil (a : α) : [].remove a = [] := by simp [List.remove]
 lemma eq_remove_cons {l : List α} : (ψ :: l).remove ψ = l.remove ψ := by induction l <;> simp_all [List.remove];
 
 @[simp]
-lemma remove_singleton_of_ne {φ ψ : α} (h : φ ≠ ψ) : [φ].remove ψ = [φ] := by simp_all [List.remove, Ne.symm];
+lemma remove_singleton_of_ne {φ ψ : α} (h : φ ≠ ψ) : [φ].remove ψ = [φ] := by simp_all [List.remove];
 
 lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
-  simp [List.remove, List.of_mem_filter]
+  simp [List.remove]
 
 lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ l := by
   rw [mem_remove_iff] at h; exact h.1
