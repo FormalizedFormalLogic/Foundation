@@ -23,18 +23,4 @@ lemma decidable_of_incomplete : Inconsistent 𝓢 → Decidable 𝓢 :=
 
 end
 
-class PrimrecLogicalConnective (F : Type*) [Primcodable F] extends LogicalConnective F where
-  and : Primrec₂ fun φ ψ : F ↦ φ ⋏ ψ
-  or : Primrec₂ fun φ ψ : F ↦ φ ⋎ ψ
-  imply : Primrec₂ fun φ ψ : F ↦ φ ➝ ψ
-  neg : Primrec fun φ : F ↦ ∼φ
-
-section Craig's_trick
-
-variable {F : Type*} [Primcodable F] [Entailment F (Set F)]
-
-
-
-end Craig's_trick
-
 end LO.Entailment

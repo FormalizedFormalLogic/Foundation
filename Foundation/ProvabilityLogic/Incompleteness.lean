@@ -204,9 +204,8 @@ theorem goedel_independent [𝔅.GoedelSound] : Independent (T : Axiom L) 𝗚 :
   . apply unprovable_goedel
   . apply unrefutable_goedel
 
-theorem first_incompleteness [𝔅.GoedelSound] :
-    ¬Entailment.Complete (T : Axiom L) :=
-  incomplete_iff_exists_undecidable.mpr ⟨𝗚, 𝔅.goedel_independent⟩
+theorem first_incompleteness [𝔅.GoedelSound] : Incomplete (T : Axiom L) :=
+  incomplete_def.mpr ⟨𝗚, 𝔅.goedel_independent⟩
 
 end First
 
@@ -353,8 +352,8 @@ theorem rosser_independent : Independent (T : Axiom L) 𝗥 := by
   . apply unprovable_goedel
   . apply unrefutable_rosser
 
-theorem rosser_first_incompleteness (𝔅 : Provability T₀ T) [𝔅.Rosser] : ¬Entailment.Complete (T : Axiom L) :=
-  Entailment.incomplete_iff_exists_undecidable.mpr ⟨𝔅.goedel, rosser_independent⟩
+theorem rosser_first_incompleteness (𝔅 : Provability T₀ T) [𝔅.Rosser] : Incomplete (T : Axiom L) :=
+  incomplete_def.mpr ⟨𝔅.goedel, rosser_independent⟩
 
 variable (𝔅)
 
