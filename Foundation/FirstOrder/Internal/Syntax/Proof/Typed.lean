@@ -180,10 +180,10 @@ protected noncomputable def cast {Γ Δ : Metamath.Sequent V L} (e : Γ = Δ) :
     (TDerivation.cast e d).val = d.val := by rcases e; simp [TDerivation.cast]
 
 noncomputable def byAxm (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) : T ⊢ᵈᵉʳ Γ :=
-  ⟨Metamath.root Γ.val φ.val, by simp, Theory.Derivation.root (by simp) (by simpa) h⟩
+  ⟨Metamath.axm Γ.val φ.val, by simp, Theory.Derivation.axm (by simp) (by simpa) h⟩
 
 @[simp] lemma byAxm_val (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) :
-    (byAxm φ h hΓ).val = Metamath.root Γ.val φ.val := rfl
+    (byAxm φ h hΓ).val = Metamath.axm Γ.val φ.val := rfl
 
 noncomputable def em (φ) (h : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : T ⊢ᵈᵉʳ Γ :=
   ⟨axL Γ.val φ.val, by simp, Theory.Derivation.axL (by simp) h hn⟩

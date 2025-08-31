@@ -48,8 +48,16 @@ variable {Γ Δ : Sequent L}
 
 @[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᵀ Γ} :
     IsCutFree (rewrite d f) ↔ IsCutFree d := by
-  induction d generalizing f <;> simp [rewrite, *]
-  case root => contradiction
+  induction d generalizing f
+  case axm => contradiction
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
 
 @[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᵀ Γ} :
     IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree

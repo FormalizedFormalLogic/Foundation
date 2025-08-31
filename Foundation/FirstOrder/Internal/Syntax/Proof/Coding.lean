@@ -156,7 +156,7 @@ variable (V)
 
 noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⊢₂ Γ → T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝
   |   closed Δ φ h hn => TDerivation.em ⌜φ⌝ (by simpa) (by simpa using Sequent.quote_mem_quote.mpr hn)
-  |       root φ hT _ => TDerivation.byAxm ⌜φ⌝ (by simp [tmem, hT]) (by simpa)
+  |       axm φ hT _ => TDerivation.byAxm ⌜φ⌝ (by simp [tmem, hT]) (by simpa)
   |           verum h => TDerivation.verum (by simpa using Sequent.quote_mem_quote.mpr h)
   |       and h bp bq =>
     TDerivation.and' (by simpa using Sequent.quote_mem_quote.mpr h) (bp.typedQuote.cast (by simp)) (bq.typedQuote.cast (by simp))
@@ -181,8 +181,8 @@ lemma coe_typedQuote_val_eq (d : T ⊢₂ Γ) : ↑(d.typedQuote ℕ).val = (d.t
   match d with
   |   closed Δ φ h hn => by
     simp [typedQuote, axL, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
-  |       root φ hT _ => by
-    simp [typedQuote, Metamath.root, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
+  |       axm φ hT _ => by
+    simp [typedQuote, Metamath.axm, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
   |           verum h => by
     simp [typedQuote, Metamath.verumIntro, nat_cast_pair, Sequent.coe_eq]
   |       and h b₁ b₂ => by
@@ -309,7 +309,7 @@ lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstId
     refine ⟨Derivation2.cut b₁ b₂⟩
   · rcases by simpa using hΓ
     rcases Sequent.mem_quote hs with ⟨φ, hφ, rfl⟩
-    refine ⟨Derivation2.root φ (by simpa using hT) hφ⟩
+    refine ⟨Derivation2.axm φ (by simpa using hT) hφ⟩
 
 lemma Provable.sound2 {φ : SyntacticFormula L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢₂.! φ := by
   rcases h with ⟨d, hp, hd⟩
