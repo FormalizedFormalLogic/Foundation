@@ -814,6 +814,30 @@ lemma iff_mem₂_multibox : (□^[n]φ ∈ t.1.2) ↔ (∃ t' : MaximalConsisten
 
 lemma iff_mem₂_box : (□φ ∈ t.1.2) ↔ (∃ t' : MaximalConsistentTableau 𝓢, (t.1.1.prebox ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := iff_mem₂_multibox (n := 1)
 
+lemma iff_mem₁_multidia : (◇^[n]φ ∈ t.1.1) ↔ (∃ t' : MaximalConsistentTableau 𝓢, (t.1.1.premultibox n ⊆ t'.1.1) ∧ (φ ∈ t'.1.1)) := by
+  suffices ◇^[n]φ ∈ t.1.1 ↔ ∃ t' : MaximalConsistentTableau 𝓢, t.1.1.premultibox n ⊆ t'.1.1 ∧ ∼φ ∈ t'.1.2 by simpa [iff_mem₂_neg];
+  apply Iff.trans ?_ iff_mem₂_multibox;
+  rw [←iff_mem₁_neg];
+  constructor;
+  . apply mdp_mem₁_provable; simp;
+  . apply mdp_mem₁_provable; simp;
+
+lemma iff_mem₁_dia : (◇φ ∈ t.1.1) ↔ (∃ t' : MaximalConsistentTableau 𝓢, (t.1.1.prebox ⊆ t'.1.1) ∧ (φ ∈ t'.1.1)) := iff_mem₁_multidia (n := 1)
+
+lemma iff_mem₂_multidia : (◇^[n]φ ∈ t.1.2) ↔ (∀ t' : MaximalConsistentTableau 𝓢, (t.1.1.premultibox n ⊆ t'.1.1) → (φ ∈ t'.1.2)) := by
+  suffices ◇^[n]φ ∈ t.1.2 ↔ (∀ t' : MaximalConsistentTableau 𝓢, (t.1.1.premultibox n ⊆ t'.1.1) → (∼φ ∈ t'.1.1)) by simpa [iff_mem₁_neg]
+  apply Iff.trans ?_ iff_mem₁_multibox;
+  rw [←iff_mem₁_neg];
+  constructor;
+  . apply mdp_mem₁_provable;
+    apply CN!_of_CN!_left;
+    simp;
+  . apply mdp_mem₁_provable;
+    apply CN!_of_CN!_right;
+    simp;
+
+lemma iff_mem₂_dia : (◇φ ∈ t.1.2) ↔ (∀ t' : MaximalConsistentTableau 𝓢, (t.1.1.prebox ⊆ t'.1.1) → (φ ∈ t'.1.2)) := iff_mem₂_multidia (n := 1)
+
 end
 
 end Saturated

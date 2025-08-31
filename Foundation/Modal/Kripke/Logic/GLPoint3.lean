@@ -41,6 +41,8 @@ instance : Entailment.Consistent Hilbert.GLPoint3 :=
 
 section
 
+open MaximalConsistentTableau
+
 private lemma complete_lemma₁ : Hilbert.GLPoint3 ⊢! ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
   sorry;
 
@@ -53,19 +55,24 @@ instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
   replace hu := truthlemma₂.mpr hu;
 
   let v : (canonicalModel Hilbert.GLPoint3).World := if h : □φ ∈ u.1.1 then u else
-    haveI : ∼□φ ∈ u.1.1 := MaximalConsistentTableau.iff_mem₁_neg.mpr (MaximalConsistentTableau.iff_not_mem₁_mem₂.mp h);
-    haveI : ◇(□φ ⋏ ∼φ) ∈ u.1.1 := MaximalConsistentTableau.mdp_mem₁_provable complete_lemma₁ this;
-    u;
+    haveI : ∼□φ ∈ u.1.1 := iff_mem₁_neg.mpr (iff_not_mem₁_mem₂.mp h);
+    haveI : ◇(□φ ⋏ ∼φ) ∈ u.1.1 := mdp_mem₁_provable complete_lemma₁ this;
+    iff_mem₁_dia.mp this |>.choose;
   have hv₁ : □φ ∈ v.1.1 := by
     dsimp [v];
     split;
     . assumption;
-    . sorry;
+    . rename_i h;
+      apply iff_mem₁_and (ψ := ∼φ) |>.mp ?_ |>.1;
+      apply iff_mem₁_dia.mp (mdp_mem₁_provable complete_lemma₁ $ iff_mem₁_neg.mpr (iff_not_mem₁_mem₂.mp h)) |>.choose_spec.2;
   have hv₂ : φ ∈ v.1.2 := by
     dsimp [v];
     split;
     . assumption;
-    . sorry;
+    . apply iff_mem₁_neg.mp;
+      rename_i h;
+      apply iff_mem₁_and (φ := □φ) |>.mp ?_ |>.2;
+      apply iff_mem₁_dia.mp (mdp_mem₁_provable complete_lemma₁ $ iff_mem₁_neg.mpr (iff_not_mem₁_mem₂.mp h)) |>.choose_spec.2;
 
   apply Kripke.not_validOnFrameClass_of_exists_model_world;
 
@@ -90,8 +97,8 @@ instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
         apply Frame.trans;
       irrefl := by
         rintro ⟨x, rfl | ⟨Rrx, ψ, _, hψ₂, hψ₃, hψ₄⟩⟩;
-        . by_contra hC; apply MaximalConsistentTableau.neither ⟨hC hv₁, hv₂⟩;
-        . by_contra hC; apply MaximalConsistentTableau.neither ⟨hC hψ₃, hψ₄⟩;
+        . by_contra hC; apply neither ⟨hC hv₁, hv₂⟩;
+        . by_contra hC; apply neither ⟨hC hψ₃, hψ₄⟩;
       trichotomous := by
         suffices ∀ x y : M.World, x ≠ y → (M.Rel x y ∨ M.Rel y x) by
           intro x y;
@@ -107,15 +114,15 @@ instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
   . have : ∀ x : M.World, ∀ ψ ∈ φ.subformulas, (Satisfies _ x ψ ↔ ψ ∈ x.1.1.1) ∧ (¬Satisfies _ x ψ ↔ ψ ∈ x.1.1.2) := by
       intro x ψ hψ;
       induction ψ generalizing x with
-      | hatom => simp [Satisfies, M, MaximalConsistentTableau.iff_not_mem₁_mem₂];
+      | hatom => simp [Satisfies, M, iff_not_mem₁_mem₂];
       | hfalsum => simp [Satisfies];
       | himp ψ ξ ihψ ihξ =>
         replace ihψ := ihψ x (by grind);
         replace ihξ := ihξ x (by grind);
         simp [
           Satisfies, ihψ, ihξ,
-          MaximalConsistentTableau.iff_mem₂_imp,
-          ←MaximalConsistentTableau.iff_not_mem₂_mem₁
+          iff_mem₂_imp,
+          ←iff_not_mem₂_mem₁
         ];
       | hbox ψ ihψ =>
         constructor;
@@ -124,7 +131,7 @@ instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
             intro h;
             apply Satisfies.not_box_def.mpr;
             have : □ψ ∉ v.1.1 := by sorry;
-            obtain ⟨y, Rxy, hy⟩ := MaximalConsistentTableau.iff_mem₂_box.mp $ MaximalConsistentTableau.iff_not_mem₁_mem₂.mp this;
+            obtain ⟨y, Rxy, hy⟩ := iff_mem₂_box.mp $ iff_not_mem₁_mem₂.mp this;
             use ⟨y, (by sorry)⟩;
             constructor;
             . apply canonicalModel.def_rel_box_mem₁.mpr;
