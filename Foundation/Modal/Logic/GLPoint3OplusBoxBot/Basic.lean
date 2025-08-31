@@ -41,6 +41,8 @@ lemma GLPoint3OplusBoxBot.axiomNVer {n : ℕ} : Modal.GLPoint3OplusBoxBot n ⊢!
 section
 
 open LO.Entailment LO.Modal.Entailment
+open Formula (atom)
+open Formula.Kripke
 
 lemma eq_GLPoint3OplusBoxBot_0_Univ : (Modal.GLPoint3OplusBoxBot 0) = Set.univ := by
   have : Modal.GLPoint3OplusBoxBot 0 ⊢! ⊥ := GLPoint3OplusBoxBot.boxbot;
@@ -76,8 +78,6 @@ lemma eq_GLPoint3OplusBoxBot_1_Ver : (Modal.GLPoint3OplusBoxBot 1) = Modal.Ver :
     | nec ih => apply nec! ih;
     | _ => cl_prover;
 
-open Formula (atom) in
-open Formula.Kripke in
 lemma GLPoint3OplusBoxBot.provable_weakPoint2_in_2 : Modal.GLPoint3OplusBoxBot 2 ⊢! Axioms.WeakPoint2 (.atom 0) (.atom 1) := by
   suffices Modal.GLPoint3OplusBoxBot 2 ⊢! Axioms.CD (.atom 0) by
     apply C!_trans (Logic.subst! (λ _ => (□(.atom 0) ⋏ (.atom 1))) this);
@@ -128,7 +128,6 @@ lemma GLPoint3OplusBoxBot.provable_weakPoint2_in_2 : Modal.GLPoint3OplusBoxBot 2
     cl_prover [this];
   exact this;
 
-open Formula.Kripke in
 lemma GLPoint2.provable_boxboxbot : Modal.GLPoint2 ⊢! (□^[2]⊥) := by
   have h₁ : Modal.GLPoint2 ⊢! □(∼□⊥) ➝ □^[2]⊥  := by
     apply Entailment.WeakerThan.pbl (𝓢 := Modal.GL);
@@ -176,6 +175,93 @@ lemma GLPoint2.provable_boxboxbot : Modal.GLPoint2 ⊢! (□^[2]⊥) := by
   have h₃ : Modal.GLPoint2 ⊢! ◇□⊥ ⭤ ∼□(∼□⊥) := dia_duality!;
   cl_prover [h₁, h₂, h₃];
 
+lemma GLPoint2.provable_axiomWeakPoint3 : Modal.GLPoint2 ⊢! (Axioms.WeakPoint3 (.atom 0) (.atom 1)) := by
+  suffices Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ □(.atom 0) by
+    suffices Modal.GLPoint2 ⊢! ∼□(⊡atom 0 ➝ atom 1) ➝ □(⊡atom 1 ➝ atom 0) by cl_prover [this];
+    apply C!_trans ?_ (Logic.subst! (λ _ => ((⊡atom 1 ➝ atom 0))) this);
+      -- TODO: `K_prover`
+    apply normal_provable_of_K_provable;
+    apply Complete.complete (𝓜 := Kripke.FrameClass.K);
+    simp only [Formula.subst.subst_dia, Formula.subst.subst_and, Formula.subst.subst_atom, Formula.subst.subst_box];
+    intro F _ V x h;
+    obtain ⟨y, Rxy, hy⟩ := Satisfies.not_box_def.mp h;
+    apply Satisfies.dia_def.mpr;
+    use y;
+    constructor;
+    . assumption;
+    . apply Satisfies.and_def.mpr;
+      constructor;
+      . intro h;
+        replace h := Satisfies.and_def.mp h;
+        tauto;
+      . intro z Ryz hz;
+        apply (Satisfies.and_def.mp $ Satisfies.not_imp_def.mp hy |>.1) |>.2;
+        assumption;
+  haveI : Modal.GLPoint2 ⊢! ◇(((.atom 0) ⋏ □(.atom 0))) ➝ ◇(((.atom 0) ⋏ □(.atom 0)) ⋏ □(∼((.atom 0) ⋏ □(.atom 0)))) := by
+    suffices Modal.GLPoint2 ⊢! □((□(∼(atom 0 ⋏ □atom 0)) ➝ ∼(atom 0 ⋏ □atom 0))) ➝ □(∼(atom 0 ⋏ □atom 0)) by
+      apply (?_ ⨀ this);
+      -- TODO: `K_prover`
+      suffices Modal.GLPoint2 ⊢! (□(□(∼(atom 0)) ➝ ∼(atom 0)) ➝ □(∼(atom 0))) ➝ ◇(atom 0) ➝ ◇((atom 0) ⋏ □(∼(atom 0))) by
+        exact Logic.subst! (λ _ => (atom 0 ⋏ □atom 0)) this;
+      apply normal_provable_of_K_provable;
+      apply Complete.complete (𝓜 := Kripke.FrameClass.K);
+      intro F _ V x h₁;
+      contrapose!;
+      intro h₂;
+      apply Satisfies.not_dia_def.mpr;
+      intro y Rxy;
+      apply (Satisfies.box_def.mp $ h₁ ?_) y Rxy;
+      intro z Rxz;
+      replace h₂ := Satisfies.dia_def.not.mp h₂;
+      push_neg at h₂;
+      have := Satisfies.and_def.not.mp $ h₂ z Rxz;
+      set_option push_neg.use_distrib true in push_neg at this;
+      rcases this
+      . tauto;
+      . tauto;
+    simp [axiomL!];
+  haveI : Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ ◇((.atom 0) ⋏ □(.atom 0) ⋏ □^[2](.atom 0) ⋏ □(∼((.atom 0) ⋏ □(.atom 0)))) := C!_trans this $ by
+    have : Modal.GLPoint2 ⊢! □(.atom 0) ➝ □^[2](.atom 0) := by simp [axiomFour!];
+    apply diaK'!;
+    cl_prover [this];
+  haveI : Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ ◇(□⊥ ⋏ (.atom 0)) := C!_trans this $ by
+      -- TODO: `K_prover`
+    apply diaK'!;
+    apply normal_provable_of_K_provable;
+    apply Complete.complete (𝓜 := Kripke.FrameClass.K);
+    intro F _ V x hx;
+    replace ⟨hx₁, hx₂⟩ := Satisfies.and_def.mp hx;
+    replace ⟨hx₂, hx₃⟩ := Satisfies.and_def.mp hx₂;
+    replace ⟨hx₃, hx₄⟩ := Satisfies.and_def.mp hx₃;
+    apply Satisfies.and_def.mpr;
+    constructor;
+    . intro y Rxy;
+      replace hx₂ := hx₂ _ Rxy;
+      replace hx₄ := hx₄ _ Rxy;
+      apply hx₄;
+      apply Satisfies.and_def.mpr;
+      constructor;
+      . assumption;
+      . intro z Ryz;
+        apply Satisfies.multibox_def.mp hx₃;
+        use y;
+        tauto;
+    . assumption;
+  haveI : Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ □(◇⊥ ⋎ (.atom 0)) := C!_trans this $ by simp [axiomWeakPoint2!];
+  haveI : Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ □(.atom 0) := C!_trans this $ by
+    apply axiomK'!;
+    apply nec!;
+    haveI : Modal.GLPoint2 ⊢! ∼◇⊥ := by
+      -- TODO: `K_prover`
+      apply normal_provable_of_K_provable;
+      apply Complete.complete (𝓜 := Kripke.FrameClass.K);
+      intro F _ V x;
+      apply Satisfies.not_dia_def.mpr;
+      tauto;
+    cl_prover [this];
+  exact this;
+
+
 instance : Modal.GLPoint3 ⪯ Modal.GLPoint2 := by
   suffices Hilbert.GLPoint3 ⪯ Hilbert.GLPoint2 by infer_instance;
   apply weakerThan_iff.mpr;
@@ -186,7 +272,7 @@ instance : Modal.GLPoint3 ⪯ Modal.GLPoint2 := by
     . simp;
     . simp;
     . apply Hilbert.Normal.subst! s;
-      sorry;
+      simpa using GLPoint2.provable_axiomWeakPoint3;
   | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ]
   | nec ih => apply nec! ih;
   | _ => cl_prover;
