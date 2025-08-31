@@ -105,10 +105,10 @@ def compact {Γ : Sequent α} : T ⟹ Γ → (s : { s : Finset (NNFormula α) //
     ⟨⟨{φ}, by simp [h]⟩, root (by simp)⟩
 
 instance : Entailment.Compact (Theory α) where
-  φ b := (compact b).1
-  φPrf b := (compact b).2
-  φ_subset b := by simpa using (compact b).1.prop
-  φ_finite b := by simp
+  Γ b := (compact b).1
+  ΓPrf b := (compact b).2
+  Γ_subset b := by simpa using (compact b).1.prop
+  Γ_finite b := by simp
 
 def deductionAux {Γ : Sequent α} {φ} : T ⟹ Γ → T \ {φ} ⟹ ∼φ :: Γ
   | axL Γ φ   => wk (axL Γ φ) (by simp)

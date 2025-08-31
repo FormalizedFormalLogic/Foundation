@@ -47,7 +47,7 @@ instance instSound_of_validates_axioms (hV : C ⊧* H.axioms) : Sound H C := ⟨
 lemma consistent_of_sound_frameclass
   (C : Neighborhood.FrameClass) (C_nonempty: C.Nonempty := by simp) [sound : Sound H C]
   : Entailment.Consistent H := by
-  apply Entailment.Consistent.of_unprovable (f := ⊥);
+  apply Entailment.Consistent.of_unprovable (φ := ⊥);
   apply not_imp_not.mpr sound.sound;
   apply Semantics.set_models_iff.not.mpr;
   push_neg;

@@ -36,7 +36,7 @@ instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T ⪱ T + T.Incon :=
     (Entailment.by_axm _ (by simp [Theory.add_def]))
 
 /-- Gödel-Rosser incompleteness theorem -/
-theorem incomplete' [Consistent T] : ¬Entailment.Complete (T : Axiom ℒₒᵣ) :=
+theorem incomplete' [Consistent T] : Entailment.Incomplete (T : Axiom ℒₒᵣ) :=
   T.rosserProvability.rosser_first_incompleteness
 
 end LO.FirstOrder.Arithmetic
