@@ -13,8 +13,10 @@ open Kripke
 namespace Kripke
 
 protected class Frame.IsFiniteGLPoint3 (F : Frame) extends F.IsFiniteGL, F.IsPiecewiseConnected
+protected class Frame.IsFiniteGLPoint3₂ (F : Frame) extends F.IsFiniteGL, F.IsConnected
 
 abbrev FrameClass.finite_GLPoint3 : FrameClass := { F | F.IsFiniteGLPoint3 }
+abbrev FrameClass.finite_GLPoint3₂ : FrameClass := { F | F.IsFiniteGLPoint3₂ }
 
 instance : blackpoint.IsFiniteGLPoint3 where
   p_connected := by tauto;
@@ -36,7 +38,113 @@ instance : Entailment.Consistent Hilbert.GLPoint3 :=
     use blackpoint;
     constructor;
 
-instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := by sorry;
+
+section
+
+private lemma complete_lemma₁ : Hilbert.GLPoint3 ⊢! ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
+  sorry;
+
+open Classical in
+instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
+  intro φ;
+  contrapose!;
+  intro hφ;
+  obtain ⟨u, hu⟩ := ValidOnModel.exists_world_of_not $ iff_valid_on_canonicalModel_deducible.not.mpr hφ;
+  replace hu := truthlemma₂.mpr hu;
+
+  let v : (canonicalModel Hilbert.GLPoint3).World := if h : □φ ∈ u.1.1 then u else
+    haveI : ∼□φ ∈ u.1.1 := MaximalConsistentTableau.iff_mem₁_neg.mpr (MaximalConsistentTableau.iff_not_mem₁_mem₂.mp h);
+    haveI : ◇(□φ ⋏ ∼φ) ∈ u.1.1 := MaximalConsistentTableau.mdp_mem₁_provable complete_lemma₁ this;
+    u;
+  have hv₁ : □φ ∈ v.1.1 := by
+    dsimp [v];
+    split;
+    . assumption;
+    . sorry;
+  have hv₂ : φ ∈ v.1.2 := by
+    dsimp [v];
+    split;
+    . assumption;
+    . sorry;
+
+  apply Kripke.not_validOnFrameClass_of_exists_model_world;
+
+  let M : Kripke.Model := {
+    World := {
+      x : (canonicalModel Hilbert.GLPoint3).World //
+        x = v ∨
+        (v ≺ x ∧ ∃ ψ ∈ φ.subformulas.prebox, □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2)
+    }
+    world_nonempty := ⟨v, by simp⟩,
+    Rel := λ x y => (canonicalModel Hilbert.GLPoint3).Rel x.1 y.1
+    Val := λ x => (canonicalModel Hilbert.GLPoint3).Val x
+  }
+  use M, ⟨v, by simp⟩;
+  constructor;
+  . exact {
+      world_finite := by
+        sorry;
+      trans := by
+        suffices ∀ (x y z : M.World), (canonicalModel Hilbert.GLPoint3).Rel x y → (canonicalModel Hilbert.GLPoint3).Rel y z → (canonicalModel Hilbert.GLPoint3).Rel x z by tauto;
+        intro _ _ _;
+        apply Frame.trans;
+      irrefl := by
+        rintro ⟨x, rfl | ⟨Rrx, ψ, _, hψ₂, hψ₃, hψ₄⟩⟩;
+        . by_contra hC; apply MaximalConsistentTableau.neither ⟨hC hv₁, hv₂⟩;
+        . by_contra hC; apply MaximalConsistentTableau.neither ⟨hC hψ₃, hψ₄⟩;
+      trichotomous := by
+        suffices ∀ x y : M.World, x ≠ y → (M.Rel x y ∨ M.Rel y x) by
+          intro x y;
+          have := this x y;
+          tauto;
+        rintro ⟨x, rfl | ⟨Rvx, _⟩⟩ ⟨y, rfl | ⟨Rvy, _⟩⟩ hxy;
+        . simp at hxy;
+        . tauto;
+        . tauto;
+        . apply Frame.p_connected' Rvx Rvy ?_;
+          simp_all [M];
+    }
+  . have : ∀ x : M.World, ∀ ψ ∈ φ.subformulas, (Satisfies _ x ψ ↔ ψ ∈ x.1.1.1) ∧ (¬Satisfies _ x ψ ↔ ψ ∈ x.1.1.2) := by
+      intro x ψ hψ;
+      induction ψ generalizing x with
+      | hatom => simp [Satisfies, M, MaximalConsistentTableau.iff_not_mem₁_mem₂];
+      | hfalsum => simp [Satisfies];
+      | himp ψ ξ ihψ ihξ =>
+        replace ihψ := ihψ x (by grind);
+        replace ihξ := ihξ x (by grind);
+        simp [
+          Satisfies, ihψ, ihξ,
+          MaximalConsistentTableau.iff_mem₂_imp,
+          ←MaximalConsistentTableau.iff_not_mem₂_mem₁
+        ];
+      | hbox ψ ihψ =>
+        constructor;
+        . constructor;
+          . contrapose!;
+            intro h;
+            apply Satisfies.not_box_def.mpr;
+            have : □ψ ∉ v.1.1 := by sorry;
+            obtain ⟨y, Rxy, hy⟩ := MaximalConsistentTableau.iff_mem₂_box.mp $ MaximalConsistentTableau.iff_not_mem₁_mem₂.mp this;
+            use ⟨y, (by sorry)⟩;
+            constructor;
+            . apply canonicalModel.def_rel_box_mem₁.mpr;
+              sorry;
+            . apply ihψ _ (by grind) |>.2.mpr hy;
+          . intro h y Rxy;
+            apply ihψ y (by grind) |>.1.mpr;
+            apply canonicalModel.def_rel_box_mem₁.mp Rxy;
+            simpa using h;
+        . constructor;
+          . intro h;
+            obtain ⟨y, Rxy, hy⟩ := Satisfies.not_box_def.mp h;
+            apply canonicalModel.def_rel_box_mem₂.mp Rxy;
+            apply ihψ y (by grind) |>.2.mp hy;
+          . intro h;
+            sorry;
+    apply this _ _ (by simp) |>.2.mpr hv₂;
+⟩
+
+end
 
 
 instance : Hilbert.GL ⪱ Hilbert.GLPoint3 := by
