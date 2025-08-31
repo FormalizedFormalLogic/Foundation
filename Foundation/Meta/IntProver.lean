@@ -373,7 +373,6 @@ def isWeakerSequent (Γ Δ : Sequent) (T : Tableaux) : M Bool := do
     return ((←Lit.dSubsetList Γ Ξ) && (←Lit.dSubsetList Δ Λ)) || (←isWeakerSequent Γ Δ T)
 
 def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
-  trace[int_prover.detail] m!"step: {k}, case: {b}, {← T.toExpr}"
   -- logInfo m!"step: {k}, case: {b}, {← T.toExpr}"
   match k, b with
   |     0,      _ => throwError m!"Proof search failed: {← T.toExpr}"
@@ -545,7 +544,7 @@ elab "int_prover_2s" n:(num)? seq:(termSeq)? : tactic => withMainContext do
         return #[]
     | _        =>
       return #[])
-  closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (r := c) do
+  closeMainGoal `int_prover <| ← AtomM.run .reducible <| ReaderT.run (r := c) do
     let e ← main n hyps L R
     toTwoSided L R e
 
@@ -564,7 +563,7 @@ elab "int_prover" n:(num)? seq:(termSeq)? : tactic => withMainContext do
         return #[]
     | _        =>
       return #[])
-  closeMainGoal `cl_prover <| ← AtomM.run .reducible <| ReaderT.run (r := c) do
+  closeMainGoal `int_prover <| ← AtomM.run .reducible <| ReaderT.run (r := c) do
     let e ← main n hyps [] [φ]
     toProvable φ e
 
