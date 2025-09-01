@@ -158,8 +158,8 @@ end DP
 end Hilbert.Int.Kripke
 
 
-propositional_kripke 𝗜𝐧𝐭 FrameClass.Int
-propositional_kripke 𝗜𝐧𝐭 FrameClass.finite_Int
+propositional_kripke 𝐈𝐧𝐭 FrameClass.Int
+propositional_kripke 𝐈𝐧𝐭 FrameClass.finite_Int
 
 
 end LO.Propositional

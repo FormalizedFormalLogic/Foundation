@@ -35,7 +35,7 @@
     ),
     labels: (
       "𝐂𝐥": $Logic("Cl")$,
-      "𝗜𝐧𝐭": $Logic("Int")$,
+      "𝐈𝐧𝐭": $Logic("Int")$,
       "𝐊𝐂": $Logic("KC")$,
       "𝐊𝐏": $Logic("KP")$,
       "𝐋𝐂": $Logic("LC")$,

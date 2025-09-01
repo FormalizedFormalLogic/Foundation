@@ -109,7 +109,7 @@ end Hilbert
 
 propositional_kripke 𝐊𝐏 FrameClass.KrieselPutnam
 
-instance : 𝗜𝐧𝐭 ⪱ 𝐊𝐏 := inferInstance
+instance : 𝐈𝐧𝐭 ⪱ 𝐊𝐏 := inferInstance
 
 
 end LO.Propositional

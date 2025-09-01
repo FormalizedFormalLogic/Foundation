@@ -14,7 +14,7 @@ namespace Logic
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.letterless) : 𝗜𝐧𝐭 ⊢! φ ↔ 𝐂𝐥 ⊢! φ := by
+theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.letterless) : 𝐈𝐧𝐭 ⊢! φ ↔ 𝐂𝐥 ⊢! φ := by
   constructor;
   . apply WeakerThan.wk;
     infer_instance;

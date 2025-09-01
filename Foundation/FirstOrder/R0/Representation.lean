@@ -114,7 +114,7 @@ section model
 
 open LO.Arithmetic
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* �₀]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗥₀]
 
 private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     Semiformula.Evalfm M (z :> v) (codeAux c) → Semiformula.Evalfm M (z' :> v) (codeAux c) → z = z' := by

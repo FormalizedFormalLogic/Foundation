@@ -20,7 +20,7 @@ lemma Logic.gS4_of_Int : Hilbert.Int ⊢! φ → Hilbert.S4 ⊢! φᵍ := by
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
 
-lemma Modal.S4.is_smallestMC_of_Int : Modal.S4 = (smallestMC 𝗜𝐧𝐭) := by
+lemma Modal.S4.is_smallestMC_of_Int : Modal.S4 = (smallestMC 𝐈𝐧𝐭) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
@@ -47,11 +47,11 @@ lemma Modal.S4.is_smallestMC_of_Int : Modal.S4 = (smallestMC 𝗜𝐧𝐭) := by
       simp only [theory, Propositional.Logic.iff_provable, Set.mem_setOf_eq] at hφ;
       simpa using Logic.gS4_of_Int hφ;
 
-instance : Sound (smallestMC 𝗜𝐧𝐭) FrameClass.S4 := by
+instance : Sound (smallestMC 𝐈𝐧𝐭) FrameClass.S4 := by
   rw [←Modal.S4.is_smallestMC_of_Int];
   infer_instance;
 
-instance modalCompanion_Int_S4 : ModalCompanion 𝗜𝐧𝐭 Modal.S4 := by
+instance modalCompanion_Int_S4 : ModalCompanion 𝐈𝐧𝐭 Modal.S4 := by
   rw [Modal.S4.is_smallestMC_of_Int];
   apply Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     Propositional.Kripke.FrameClass.all
@@ -67,7 +67,7 @@ section Grz
 
 lemma Logic.gGrz_of_Int : Hilbert.Int ⊢! φ → Hilbert.Grz ⊢! φᵍ := λ h ↦ WeakerThan.pbl $ gS4_of_Int h
 
-lemma Logic.Grz.is_largestMC_of_Int : Modal.Grz = (Logic.largestMC 𝗜𝐧𝐭) := by
+lemma Logic.Grz.is_largestMC_of_Int : Modal.Grz = (Logic.largestMC 𝐈𝐧𝐭) := by
   apply Logic.iff_equal_provable_equiv.mpr;
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
@@ -88,11 +88,11 @@ lemma Logic.Grz.is_largestMC_of_Int : Modal.Grz = (Logic.largestMC 𝗜𝐧𝐭)
     | nec ih => apply nec! ih;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-instance : Sound (Logic.largestMC 𝗜𝐧𝐭) FrameClass.finite_Grz := by
+instance : Sound (Logic.largestMC 𝐈𝐧𝐭) FrameClass.finite_Grz := by
   rw [←Logic.Grz.is_largestMC_of_Int];
   infer_instance;
 
-instance modalCompanion_Int_Grz : ModalCompanion 𝗜𝐧𝐭 Modal.Grz := by
+instance modalCompanion_Int_Grz : ModalCompanion 𝐈𝐧𝐭 Modal.Grz := by
   rw [Logic.Grz.is_largestMC_of_Int];
   apply Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     Propositional.Kripke.FrameClass.finite_all
@@ -128,7 +128,7 @@ section boxdot
 /--
   Chagrov & Zakharyaschev 1997, Theorem 3.89
 -/
-theorem embedding_Int_GL {φ : Propositional.Formula ℕ} : 𝗜𝐧𝐭 ⊢! φ ↔ Modal.GL ⊢! φᵍᵇ:= by
+theorem embedding_Int_GL {φ : Propositional.Formula ℕ} : 𝐈𝐧𝐭 ⊢! φ ↔ Modal.GL ⊢! φᵍᵇ:= by
   exact Iff.trans modalCompanion_Int_Grz.companion iff_boxdot_GL_Grz.symm
 
 end boxdot
