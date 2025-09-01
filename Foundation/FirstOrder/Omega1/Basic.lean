@@ -15,29 +15,29 @@ def _root_.LO.Omega1.omega1 : SyntacticFormula ℒₒᵣ := “∀ x, ∃ y, ∃
 inductive _root_.LO.Omega1 : Theory ℒₒᵣ where
   | omega : Omega1 Omega1.omega1
 
-notation "𝛀₁" => Omega1
+notation "𝝮₁" => Omega1
 
-@[simp] lemma _root_.LO.FirstOrder.Theory.OmegaOne.mem_iff {σ} : σ ∈ 𝛀₁ ↔ σ = Omega1.omega1 :=
+@[simp] lemma _root_.LO.FirstOrder.Theory.OmegaOne.mem_iff {σ} : σ ∈ 𝝮₁ ↔ σ = Omega1.omega1 :=
   ⟨by rintro ⟨⟩; rfl, by rintro rfl; exact Omega1.omega⟩
 
 noncomputable section
 
 variable {V : Type*} [ORingStruc V]
 
-lemma models_Omega1_iff [V ⊧ₘ* 𝐈𝚺₀] : V ⊧ₘ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
+lemma models_Omega1_iff [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
   simp [models_def, Omega1.omega1, length_defined.df.iff, Exponential.defined.df.iff, sq, ←le_iff_lt_succ]
 
-lemma omega1_of_ISigma1 [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ ISigma1.Exponential.range_exists (‖x‖^2))
+lemma omega1_of_ISigma1 [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ ISigma1.Exponential.range_exists (‖x‖^2))
 
-instance [V ⊧ₘ* 𝐈𝚺₁] : V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁ :=
+instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁ :=
   ModelsTheory.add_iff.mpr
     ⟨inferInstance, ⟨by intro _; simp only [Theory.OmegaOne.mem_iff]; rintro rfl; exact omega1_of_ISigma1⟩⟩
 
-variable [V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁]
+variable [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]
 
-instance : V ⊧ₘ* 𝐈𝚺₀ := ModelsTheory.of_add_left V 𝐈𝚺₀ 𝛀₁
+instance : V ⊧ₘ* 𝗜𝚺₀ := ModelsTheory.of_add_left V 𝗜𝚺₀ 𝝮₁
 
-instance : V ⊧ₘ* 𝛀₁ := ModelsTheory.of_add_right V 𝐈𝚺₀ 𝛀₁
+instance : V ⊧ₘ* 𝝮₁ := ModelsTheory.of_add_right V 𝗜𝚺₀ 𝝮₁
 
 lemma exists_exponential_sq_length (x : V) : ∃ y, Exponential (‖x‖^2) y :=
   models_Omega1_iff.mp (ModelsTheory.models V Omega1.omega) x
@@ -127,10 +127,10 @@ lemma smash_two_mul_le_sq_smash (a b : V) : a ⨳ (2 * b) ≤ (a ⨳ b) ^ 2 := b
 
 end
 
-instance : 𝐈𝚺₀ ⪯ 𝐈𝚺₀ + 𝛀₁ := inferInstance
+instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₀ + 𝝮₁ := inferInstance
 
-instance : 𝐈𝚺₀ + 𝛀₁ ⪯ 𝐈𝚺₁ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
+instance : 𝗜𝚺₀ + 𝝮₁ ⪯ 𝗜𝚺₁ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
 
-instance : ℕ ⊧ₘ* 𝐈𝚺₀ + 𝛀₁ := inferInstance
+instance : ℕ ⊧ₘ* 𝗜𝚺₀ + 𝝮₁ := inferInstance
 
 end LO.Omega1

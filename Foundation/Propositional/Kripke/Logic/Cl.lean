@@ -154,6 +154,6 @@ propositional_kripke 𝐂𝐥 FrameClass.Cl
 propositional_kripke 𝐂𝐥 FrameClass.finite_Cl
 
 instance : 𝐋𝐂 ⪱ 𝐂𝐥 := inferInstance
-instance : 𝐈𝐧𝐭 ⪱ 𝐂𝐥 := inferInstance
+instance : 𝗜𝐧𝐭 ⪱ 𝐂𝐥 := inferInstance
 
 end LO.Propositional

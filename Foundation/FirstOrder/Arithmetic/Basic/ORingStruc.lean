@@ -217,7 +217,7 @@ section
 
 variable {L : Language.{u}} [L.ORing] (T : Theory L)
 
-lemma consequence_of [𝐄𝐐 ⪯ T] (φ : SyntacticFormula L)
+lemma consequence_of [𝗘𝗤 ⪯ T] (φ : SyntacticFormula L)
   (H : ∀ (M : Type (max u w))
          [ORingStruc M]
          [Structure L M]
@@ -268,13 +268,13 @@ inductive EQ' : Theory L
   | refl : EQ' “x | x = x”
   | replace (φ : SyntacticSemiformula L 1) : EQ' “∀ x y, x = y → !φ x → !φ y”
 
-notation "𝐄𝐐'" => EQ'
+notation "𝗘𝗤'" => EQ'
 
 variable (T : Theory L)
 
-noncomputable instance EQ'.subTheoryOfEQ : (𝐄𝐐' : Theory L) ⪯ 𝐄𝐐 := Entailment.WeakerThan.ofAxm! <| by
+noncomputable instance EQ'.subTheoryOfEQ : (𝗘𝗤' : Theory L) ⪯ 𝗘𝗤 := Entailment.WeakerThan.ofAxm! <| by
   rintro φ h
-  rcases (show 𝐄𝐐' φ from h)
+  rcases (show 𝗘𝗤' φ from h)
   case refl =>
     apply Entailment.by_axm _ (by simpa using eqAxiom.refl)
   case replace φ =>

@@ -152,18 +152,18 @@ structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSub
 
 end
 
-lemma oRing_consequence_of (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+lemma oRing_consequence_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊨ φ := consequence_of T φ fun M _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M
 
-lemma oRing_provable_of (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+lemma oRing_provable_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊢! φ := complete <| oRing_consequence_of _ _ H
 
-lemma oRing_provable₀_of (T : Theory ℒₒᵣ) [𝐄𝐐 ⪯ T] (σ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ₀ σ) :
+lemma oRing_provable₀_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (σ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ₀ σ) :
     T ⊢!. σ := complete₀ <| oRing_consequence_of _ _ H
 
-lemma oRing_weakerThan_of (T S : Theory ℒₒᵣ) [𝐄𝐐 ⪯ S]
+lemma oRing_weakerThan_of (T S : Theory ℒₒᵣ) [𝗘𝗤 ⪯ S]
     (H : ∀ (M : Type*)
            [ORingStruc M]
            [M ⊧ₘ* S],

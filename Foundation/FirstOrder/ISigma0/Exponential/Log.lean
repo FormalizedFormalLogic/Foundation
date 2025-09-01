@@ -13,7 +13,7 @@ variable {V : Type*} [ORingStruc V]
 
 namespace ISigma0
 
-variable [V ⊧ₘ* 𝐈𝚺₀]
+variable [V ⊧ₘ* 𝗜𝚺₀]
 
 lemma log_exists_unique_pos {y : V} (hy : 0 < y) : ∃! x, x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
   have : ∃ x < y, ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y' := by
@@ -448,7 +448,7 @@ end ISigma0
 
 namespace ISigma1
 
-variable [V ⊧ₘ* 𝐈𝚺₁]
+variable [V ⊧ₘ* 𝗜𝚺₁]
 
 @[simp] lemma log_exponential (a : V) : log (Exp.exp a) = a := (exponential_exp a).log_eq_of_exp
 

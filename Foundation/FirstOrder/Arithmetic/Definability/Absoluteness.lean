@@ -9,7 +9,7 @@ lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisenten
     ℕ ⊧/v φ ↔ ℕ ⊧ₘ₀ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
   simp [models_iff]
 
-variable (V : Type*) [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
+variable (V : Type*) [ORingStruc V] [V ⊧ₘ* 𝗣𝗔⁻]
 
 lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence ℒₒᵣ k} :
     V ⊧/(v ·) φ ↔ V ⊧ₘ₀ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
@@ -78,9 +78,9 @@ lemma models_iff_of_Delta1 {σ : 𝚫₁.Semisentence n} (hσ : σ.ProperOn ℕ)
     have : V ⊧/(e ·) (∼σ.pi.val) := by simpa [numeral_eq_natCast] using R0.bold_sigma_one_completeness' (M := V) (by simp) this
     simpa [hσV.iff'] using this
 
-variable {T : ArithmeticTheory} [𝐏𝐀⁻ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-noncomputable instance : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐏𝐀⁻) inferInstance inferInstance
+noncomputable instance : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗣𝗔⁻) inferInstance inferInstance
 
 theorem sigma_one_completeness_iff_param {σ : Semisentence ℒₒᵣ n} (hσ : Hierarchy 𝚺 1 σ) {e : Fin n → ℕ} :
     ℕ ⊧/e σ ↔ T ⊢!. (σ ⇜ fun x ↦ Semiterm.Operator.numeral ℒₒᵣ (e x)) := Iff.trans

@@ -98,7 +98,7 @@ abbrev UniversalFrameClass : FrameClass := { F | Universal F }
 /-- FrameClass for `𝐊.𝟑` -/
 abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
 
-/-- FrameClass for `𝐈𝐧𝐭` and `𝐒𝟒` -/
+/-- FrameClass for `𝗜𝐧𝐭` and `𝐒𝟒` -/
 abbrev ReflexiveTransitiveFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
 alias PreorderFrameClass := ReflexiveTransitiveFrameClass
 

@@ -24,7 +24,7 @@ notation "𝐌𝐢𝐧¹" => Minimal
 
 def Intuitionistic : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ}, by rintro _ ⟨φ, rfl⟩ f; exact ⟨Rew.rewrite f ▹ φ, by simp⟩⟩
 
-notation "𝐈𝐧𝐭¹" => Intuitionistic
+notation "𝗜𝐧𝐭¹" => Intuitionistic
 
 def Classical : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ} ∪ {φ ⋎ ∼φ | φ}, by
   rintro _ (⟨φ, rfl⟩ | ⟨φ, rfl⟩) f

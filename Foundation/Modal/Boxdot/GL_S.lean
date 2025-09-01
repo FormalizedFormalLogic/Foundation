@@ -8,7 +8,7 @@ open Kripke Formula.Kripke
 
 variable {φ : Formula _}
 
-lemma iff_provable_rflSubformula_GL_provable_S : Modal.GL ⊢! (φ.rflSubformula.conj ➝ φ) ↔ Modal.S ⊢! φ := ProvabilityLogic.GL_S_TFAE (T := 𝐈𝚺₁) |>.out 0 1
+lemma iff_provable_rflSubformula_GL_provable_S : Modal.GL ⊢! (φ.rflSubformula.conj ➝ φ) ↔ Modal.S ⊢! φ := ProvabilityLogic.GL_S_TFAE (T := 𝗜𝚺₁) |>.out 0 1
 
 lemma iff_provable_boxdot_GL_provable_boxdot_S : Modal.GL ⊢! φᵇ ↔ Modal.S ⊢! φᵇ := by
   constructor;

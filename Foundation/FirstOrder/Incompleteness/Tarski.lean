@@ -5,7 +5,7 @@ namespace LO.ISigma1
 
 open FirstOrder Entailment
 
-variable {T : Theory ℒₒᵣ} [𝐈𝚺₁ ⪯ T] [Entailment.Consistent T]
+variable {T : Theory ℒₒᵣ} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 
 /--
   There is no predicate `τ`, s.t. for any sentence `σ`, `σ` is provable in `T` iff `τ/[⌜σ⌝]` is so.
@@ -25,7 +25,7 @@ namespace LO.FirstOrderTrueArith
 
 open FirstOrder Arithmetic
 
-lemma provable_iff₀ {σ : Sentence ℒₒᵣ} : 𝐓𝐀 ⊢!. σ ↔ ℕ ⊧ₘ₀ σ := by
+lemma provable_iff₀ {σ : Sentence ℒₒᵣ} : 𝗧𝗔 ⊢!. σ ↔ ℕ ⊧ₘ₀ σ := by
   apply Iff.trans ?_ $ provable_iff (φ := σ);
   exact Axiom.provable_iff;
 
@@ -39,7 +39,7 @@ namespace LO.FirstOrder.Arithmetic
   Tarski's Undefinability of Truth Theorem.
 -/
 theorem undefinability_of_truth : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ₀ σ ↔ ℕ ⊧ₘ₀ τ/[⌜σ⌝] := by
-  have := ISigma1.not_exists_tarski_predicate (T := 𝐓𝐀);
+  have := ISigma1.not_exists_tarski_predicate (T := 𝗧𝗔);
   contrapose! this;
   obtain ⟨τ, hτ⟩ := this;
   use τ;

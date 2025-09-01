@@ -114,7 +114,7 @@ section model
 
 open LO.Arithmetic
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐑₀]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* �₀]
 
 private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     Semiformula.Evalfm M (z :> v) (codeAux c) → Semiformula.Evalfm M (z' :> v) (codeAux c) → z = z' := by
@@ -252,7 +252,7 @@ lemma codeOfREPred_spec {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
   simpa [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
     using (codeOfPartrec'_spec (Nat.Partrec'.of_part this) (v := ![x]) (y := 0)).trans (by simp [f])
 
-variable {T : ArithmeticTheory} [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 lemma re_complete {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
     A x ↔ T ⊢!. (codeOfREPred A)/[‘↑x’] := Iff.trans

@@ -2,7 +2,7 @@
 
 #set page(width: auto, height: auto, margin: 24pt)
 
-#let omitLabels = ("𝐄𝐐", "𝐑₀'")
+#let omitLabels = ("𝗘𝗤", "𝗥₀'")
 
 #let arrows = json("./arith.json").map(((from, to, type)) => {
   if omitLabels.contains(from) == false and omitLabels.contains(from) == false {
@@ -47,22 +47,22 @@
         + "}",
     ),
     labels: (
-      "𝐄𝐐": $Theory("EQ")$,
-      "𝐈Open": $Theory("IOpen")$,
-      "𝐈𝚺₀ + 𝛀₁": $Theory(I Sigma_0 + Omega_1)$,
-      "𝐈𝚺₀": $TheoryISigma0$,
-      "𝐈𝚺₁ + LO.FirstOrder.Theory.Con 𝐈𝚺₁": $TheoryISigma1 + Con(TheoryISigma1)$,
-      "𝐈𝚺₁ + LO.FirstOrder.Theory.Incon 𝐈𝚺₁": $TheoryISigma1 + not Con(TheoryISigma1)$,
-      "𝐈𝚺₁": $TheoryISigma1$,
-      "𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀 + LO.FirstOrder.Theory.Incon (𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀)": $TheoryPA + Con(TheoryPA) + not Con(TheoryPA + Con(TheoryPA))$,
-      "𝐏𝐀 + LO.FirstOrder.Theory.Con 𝐏𝐀": $TheoryPA + Con(TheoryPA)$,
-      "𝐏𝐀 + LO.FirstOrder.Theory.Incon 𝐏𝐀": $TheoryPA + not Con(TheoryPA)$,
-      "𝐏𝐀": $TheoryPA$,
-      "𝐏𝐀⁻": $Theory("PA"^-)$,
-      "𝐐": $Theory("Q")$,
-      "𝐑₀'": $Theory(R'_0)$,
-      "𝐑₀": $Theory(R_0)$,
-      "𝐓𝐀": $Theory("TA")$,
+      "𝗘𝗤": $Theory("EQ")$,
+      "𝗜𝗢𝗽𝗲𝗻": $Theory("IOpen")$,
+      "𝗜𝚺₀ + 𝝮₁": $Theory(I Sigma_0 + Omega_1)$,
+      "𝗜𝚺₀": $TheoryISigma0$,
+      "𝗜𝚺₁ + LO.FirstOrder.Theory.Con 𝗜𝚺₁": $TheoryISigma1 + Con(TheoryISigma1)$,
+      "𝗜𝚺₁ + LO.FirstOrder.Theory.Incon 𝗜𝚺₁": $TheoryISigma1 + not Con(TheoryISigma1)$,
+      "𝗜𝚺₁": $TheoryISigma1$,
+      "𝗣𝗔 + LO.FirstOrder.Theory.Con 𝗣𝗔 + LO.FirstOrder.Theory.Incon (𝗣𝗔 + LO.FirstOrder.Theory.Con 𝗣𝗔)": $TheoryPA + Con(TheoryPA) + not Con(TheoryPA + Con(TheoryPA))$,
+      "𝗣𝗔 + LO.FirstOrder.Theory.Con 𝗣𝗔": $TheoryPA + Con(TheoryPA)$,
+      "𝗣𝗔 + LO.FirstOrder.Theory.Incon 𝗣𝗔": $TheoryPA + not Con(TheoryPA)$,
+      "𝗣𝗔": $TheoryPA$,
+      "𝗣𝗔⁻": $Theory("PA"^-)$,
+      "𝗤": $Theory("Q")$,
+      "𝗥₀'": $Theory(R'_0)$,
+      "𝗥₀": $Theory(R_0)$,
+      "𝗧𝗔": $Theory("TA")$,
     ),
     width: 240pt,
   )

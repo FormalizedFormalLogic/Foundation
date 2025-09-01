@@ -36,7 +36,7 @@ abbrev         ltTri : SyntacticFormula ℒₒᵣ := “x y | x < y ∨ x = y �
 end PeanoMinus.Axiom
 
 inductive PeanoMinus : ArithmeticTheory
-  | equal         : ∀ φ ∈ 𝐄𝐐, PeanoMinus φ
+  | equal         : ∀ φ ∈ 𝗘𝗤, PeanoMinus φ
   | addZero       : PeanoMinus PeanoMinus.Axiom.addZero
   | addAssoc      : PeanoMinus PeanoMinus.Axiom.addAssoc
   | addComm       : PeanoMinus PeanoMinus.Axiom.addComm
@@ -55,15 +55,15 @@ inductive PeanoMinus : ArithmeticTheory
   | ltTrans       : PeanoMinus PeanoMinus.Axiom.ltTrans
   | ltTri         : PeanoMinus PeanoMinus.Axiom.ltTri
 
-notation "𝐏𝐀⁻" => PeanoMinus
+notation "𝗣𝗔⁻" => PeanoMinus
 
 namespace PeanoMinus
 
 open FirstOrder Arithmetic Language
 
-@[simp] lemma finite : Set.Finite 𝐏𝐀⁻ := by
-  have : 𝐏𝐀⁻ =
-    𝐄𝐐 ∪
+@[simp] lemma finite : Set.Finite 𝗣𝗔⁻ := by
+  have : 𝗣𝗔⁻ =
+    𝗘𝗤 ∪
     { Axiom.addZero,
       Axiom.addAssoc,
       Axiom.addComm,
@@ -140,7 +140,7 @@ open FirstOrder Arithmetic Language
   apply Set.finite_singleton
 
 set_option linter.flexible false in
-@[simp] instance : ℕ ⊧ₘ* 𝐏𝐀⁻ := ⟨by
+@[simp] instance : ℕ ⊧ₘ* 𝗣𝗔⁻ := ⟨by
   intro σ h
   rcases h <;> simp [models_def]
   case addAssoc => intro f; exact add_assoc _ _ _
@@ -154,10 +154,10 @@ set_option linter.flexible false in
   case ltTrans => intro f; exact Nat.lt_trans
   case ltTri => intro f; exact Nat.lt_trichotomy _ _
   case equal h =>
-    have : ℕ ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
+    have : ℕ ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h⟩
 
-instance : 𝐄𝐐 ⪯ 𝐏𝐀⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PeanoMinus.equal φ hp
+instance : 𝗘𝗤 ⪯ 𝗣𝗔⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PeanoMinus.equal φ hp
 
 variable {M : Type*} [ORingStruc M]
 
@@ -165,7 +165,7 @@ scoped instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
 lemma le_def {x y : M} : x ≤ y ↔ x = y ∨ x < y := iff_of_eq rfl
 
-variable [M ⊧ₘ* 𝐏𝐀⁻]
+variable [M ⊧ₘ* 𝗣𝗔⁻]
 
 protected lemma add_zero (x : M) : x + 0 = x := by
   simpa [models_iff] using ModelsTheory.models M PeanoMinus.addZero (fun _ ↦ x)
@@ -323,11 +323,11 @@ lemma eq_nat_of_le_nat {n : ℕ} {x : M} : x ≤ n → ∃ m : ℕ, x = m := fun
   have : x < ↑(n + 1) := by simpa [←le_iff_lt_succ] using h
   exact eq_nat_of_lt_nat this
 
-instance : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
+instance : M ⊧ₘ* 𝗥₀ := modelsTheory_iff.mpr <| by
   intro φ h
   rcases h
   case equal h =>
-    have : M ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
+    have : M ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case Ω₁ n m =>
     simp [models_iff, numeral_eq_natCast]
@@ -538,15 +538,15 @@ variable {M}
   · rfl
   · unfold natCast; rw [coe_add_one]; simp [*]
 
-variable {T : ArithmeticTheory} [𝐏𝐀⁻ ⪯ T]
+variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T]
 
-instance : 𝐑₀ ⪯ 𝐏𝐀⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
+instance : 𝗥₀ ⪯ 𝗣𝗔⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
 
-instance : 𝐑₀ ⪱ 𝐏𝐀⁻ :=
+instance : 𝗥₀ ⪱ 𝗣𝗔⁻ :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
     R0.unprovable_addZero (Entailment.by_axm _ PeanoMinus.addZero)
 
-instance (M : Type*) [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻] : M ⊧ₘ* 𝐑₀ := models_of_subtheory (T := 𝐏𝐀⁻) inferInstance
+instance (M : Type*) [ORingStruc M] [M ⊧ₘ* 𝗣𝗔⁻] : M ⊧ₘ* 𝗥₀ := models_of_subtheory (T := 𝗣𝗔⁻) inferInstance
 
 end PeanoMinus
 

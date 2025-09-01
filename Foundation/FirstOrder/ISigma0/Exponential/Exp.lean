@@ -18,7 +18,7 @@ variable {V : Type*} [ORingStruc V]
 
 namespace ISigma0
 
-variable [V ⊧ₘ* 𝐈𝚺₀]
+variable [V ⊧ₘ* 𝗜𝚺₀]
 
 noncomputable def ext (u z : V) : V := z / u % u
 
@@ -716,7 +716,7 @@ namespace ISigma1
 
 open ISigma0
 
-variable [V ⊧ₘ* 𝐈𝚺₁]
+variable [V ⊧ₘ* 𝗜𝚺₁]
 
 namespace Exponential
 

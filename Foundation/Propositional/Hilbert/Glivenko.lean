@@ -38,10 +38,10 @@ theorem iff_provable_neg_efq_provable_neg_efq : Hilbert.Int ⊢! ∼φ ↔ Hilbe
 
 end Hilbert
 
-lemma iff_negneg_Int_Cl : 𝐈𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂𝐥 ⊢! φ := by
+lemma iff_negneg_Int_Cl : 𝗜𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂𝐥 ⊢! φ := by
   simpa [Entailment.theory] using Hilbert.iff_provable_dn_efq_dne_provable;
 
-lemma iff_neg_Int_neg_Cl : 𝐈𝐧𝐭 ⊢! ∼φ ↔ 𝐂𝐥 ⊢! ∼φ := by
+lemma iff_neg_Int_neg_Cl : 𝗜𝐧𝐭 ⊢! ∼φ ↔ 𝐂𝐥 ⊢! ∼φ := by
   simpa [Entailment.theory] using Hilbert.iff_provable_neg_efq_provable_neg_efq;
 
 end LO.Propositional

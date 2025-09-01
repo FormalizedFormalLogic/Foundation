@@ -10,7 +10,7 @@ namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 section WitnessComparisons
 
@@ -75,7 +75,7 @@ variable (T : ArithmeticTheory) [T.Δ₁] (V)
 
 def consistent_eq : T.consistent = T.standardProvability.con := rfl
 
-@[simp] lemma standard_consistent [𝐑₀ ⪯ T] : T.Consistent ℕ ↔ Entailment.Consistent T := by
+@[simp] lemma standard_consistent [𝗥₀ ⪯ T] : T.Consistent ℕ ↔ Entailment.Consistent T := by
   simp [Theory.Consistent, Entailment.consistent_iff_unprovable_bot, Axiom.provable_iff]
 
 end WitnessComparisons
@@ -86,10 +86,10 @@ namespace LO.FirstOrder.Arithmetic
 
 open Entailment ProvabilityLogic
 
-variable (T : ArithmeticTheory) [𝐈𝚺₁ ⪯ T] [T.Δ₁]
+variable (T : ArithmeticTheory) [𝗜𝚺₁ ⪯ T] [T.Δ₁]
 
 instance [ℕ ⊧ₘ* T] : ℕ ⊧ₘ* T + T.Con := by
-  have : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
+  have : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗜𝚺₁)) inferInstance
   have : Entailment.Consistent T := ArithmeticTheory.consistent_of_sound T (Eq ⊥) rfl
   simp [models_iff, *]
 

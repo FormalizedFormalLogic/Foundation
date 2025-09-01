@@ -14,7 +14,7 @@ lemma le_eq (t₁ t₂ : Semiterm L μ n) : LT.le.operator ![t₁, t₂] = “!!
   simp [Operator.operator, Operator.or, LT.le, ←TransitiveRewriting.comp_app, ←Matrix.fun_eq_vec_two]
 
 namespace Order
-variable {T : Theory L} [𝐄𝐐 ⪯ T]
+variable {T : Theory L} [𝗘𝗤 ⪯ T]
 
 noncomputable def leIffEqOrLt : T ⊢! “∀ x y, x ≤ y ↔ x = y ∨ x < y” :=
   complete

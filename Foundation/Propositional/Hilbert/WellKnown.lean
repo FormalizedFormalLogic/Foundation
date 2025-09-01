@@ -105,7 +105,7 @@ end Hilbert
 
 protected abbrev Hilbert.Int : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0)}⟩
 protected abbrev Int := Hilbert.Int.logic
-notation "𝐈𝐧𝐭" => Propositional.Int
+notation "𝗜𝐧𝐭" => Propositional.Int
 instance : Hilbert.Int.HasEFQ where p := 0;
 instance : Entailment.Int (Hilbert.Int) where
 

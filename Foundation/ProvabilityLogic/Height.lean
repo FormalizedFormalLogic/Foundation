@@ -97,8 +97,8 @@ lemma hight_eq_top_of_sigma1_sound (T : Theory ℒₒᵣ) [T.Δ₁] [ArithmeticT
     T.standardProvability.height = ⊤ :=
   hight_eq_top_of_sound_and_consistent _
 
-@[simp] lemma ISigma1_hight_eq_top : 𝐈𝚺₁.standardProvability.height = ⊤ := hight_eq_top_of_sigma1_sound 𝐈𝚺₁
+@[simp] lemma ISigma1_hight_eq_top : 𝗜𝚺₁.standardProvability.height = ⊤ := hight_eq_top_of_sigma1_sound 𝗜𝚺₁
 
-@[simp] lemma Peano_hight_eq_top : 𝐏𝐀.standardProvability.height = ⊤ := hight_eq_top_of_sigma1_sound 𝐏𝐀
+@[simp] lemma Peano_hight_eq_top : 𝗣𝗔.standardProvability.height = ⊤ := hight_eq_top_of_sigma1_sound 𝗣𝗔
 
 end LO.ProvabilityLogic.Provability

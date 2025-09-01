@@ -9,7 +9,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
 
@@ -144,7 +144,7 @@ end
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, bit_defined.df.iff]⟩
 
@@ -188,7 +188,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 lemma mem_iff_mul_exp_add_exp_add {i a : V} : i ∈ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + Exp.exp i + r := by
   simpa [mem_iff_bit, exp_succ] using lenbit_iff_add_mul (exp_pow2 i) (a := a)
@@ -200,7 +200,7 @@ section empty
 
 scoped instance : EmptyCollection V := ⟨0⟩
 
-omit [V ⊧ₘ* 𝐈𝚺₁] in
+omit [V ⊧ₘ* 𝗜𝚺₁] in
 lemma emptyset_def : (∅ : V) = 0 := rfl
 
 @[simp] lemma not_mem_empty (i : V) : i ∉ (∅ : V) := by simp [emptyset_def, mem_iff_bit, Bit]
@@ -501,14 +501,14 @@ lemma insert_remove {i a : V} (h : i ∈ a) : insert i (bitRemove i a) = a := me
 
 section
 
-variable {m : ℕ} [Fact (1 ≤ m)] [V ⊧ₘ* 𝐈𝐍𝐃 𝚺 m]
+variable {m : ℕ} [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝐍𝐃 𝚺 m]
 
-omit [V ⊧ₘ* 𝐈𝚺₁]
+omit [V ⊧ₘ* 𝗜𝚺₁]
 
 private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i := by
-  haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   have : ∃ s < Exp.exp a, ∀ i < a, P i → i ∈ s :=
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
@@ -533,7 +533,7 @@ private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ
   exact ⟨t, lt_of_le_of_lt t_le_s hsn, fun i hi ↦ ⟨this i hi, ht i hi⟩⟩
 
 theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃ s < Exp.exp a, ∀ i < a, i ∈ s ↔ P i :=
   match Γ with
   | 𝚺 => finset_comprehension_aux 𝚺 hP a
@@ -541,9 +541,9 @@ theorem finset_comprehension {Γ} {P : V → Prop} (hP : Γ-[m]-Predicate P) (a 
   | 𝚫 => finset_comprehension_aux 𝚺 hP.of_delta a
 
 theorem finset_comprehension_exists_unique {P : V → Prop} (hP : Γ-[m]-Predicate P) (a : V) :
-    haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+    haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
     ∃! s, s < Exp.exp a ∧ ∀ i < a, i ∈ s ↔ P i := by
-  haveI : V ⊧ₘ* 𝐈𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
+  haveI : V ⊧ₘ* 𝗜𝚺₁ := mod_ISigma_of_le (show 1 ≤ m from Fact.out)
   rcases finset_comprehension hP a with ⟨s, hs, Hs⟩
   exact ExistsUnique.intro s ⟨hs, Hs⟩ (by
     intro t ⟨ht, Ht⟩
