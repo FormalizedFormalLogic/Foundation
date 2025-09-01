@@ -2,8 +2,6 @@
 
 #set page(width: auto, height: auto, margin: 24pt)
 
-#let omitLabels = ("𝗘𝗤", "𝗥₀'")
-
 #let arrows = json("./arith.json").map(((from, to, type)) => {
   if omitLabels.contains(from) == false and omitLabels.contains(from) == false {
     if type == "ssub" {
@@ -17,10 +15,10 @@
 })
 
 #let TheoryPA = $Theory("PA")$
-#let TheoryISigma0 = $Theory(I Sigma_0)$
-#let TheoryISigma1 = $Theory(I Sigma_1)$
+#let TheoryISigma0 = $Theory(I)Sigma_0$
+#let TheoryISigma1 = $Theory(I)Sigma_1$
 
-#let Con(T) = $op("Con")(#T)$
+#let Con(T) = $sans("Con")(#T)$
 
 #figure(caption: [Arithmetic Theory Zoo], numbering: none)[
   #raw-render(
@@ -49,7 +47,7 @@
     labels: (
       "𝗘𝗤": $Theory("EQ")$,
       "𝗜𝗢𝗽𝗲𝗻": $Theory("IOpen")$,
-      "𝗜𝚺₀ + 𝝮₁": $Theory(I Sigma_0 + Omega_1)$,
+      "𝗜𝚺₀ + 𝝮₁": $TheoryISigma0 + Omega_1$,
       "𝗜𝚺₀": $TheoryISigma0$,
       "𝗜𝚺₁ + LO.FirstOrder.Theory.Con 𝗜𝚺₁": $TheoryISigma1 + Con(TheoryISigma1)$,
       "𝗜𝚺₁ + LO.FirstOrder.Theory.Incon 𝗜𝚺₁": $TheoryISigma1 + not Con(TheoryISigma1)$,
@@ -58,10 +56,9 @@
       "𝗣𝗔 + LO.FirstOrder.Theory.Con 𝗣𝗔": $TheoryPA + Con(TheoryPA)$,
       "𝗣𝗔 + LO.FirstOrder.Theory.Incon 𝗣𝗔": $TheoryPA + not Con(TheoryPA)$,
       "𝗣𝗔": $TheoryPA$,
-      "𝗣𝗔⁻": $Theory("PA"^-)$,
+      "𝗣𝗔⁻": $TheoryPA^-$,
       "𝗤": $Theory("Q")$,
-      "𝗥₀'": $Theory(R'_0)$,
-      "𝗥₀": $Theory(R_0)$,
+      "𝗥₀": $Theory("R"_0)$,
       "𝗧𝗔": $Theory("TA")$,
     ),
     width: 240pt,

@@ -260,31 +260,6 @@ end
 
 end Arithmetic
 
-namespace Theory
-
-variable {L : Language} [L.Eq]
-
-inductive EQ' : Theory L
-  | refl : EQ' “x | x = x”
-  | replace (φ : SyntacticSemiformula L 1) : EQ' “∀ x y, x = y → !φ x → !φ y”
-
-notation "𝗘𝗤'" => EQ'
-
-variable (T : Theory L)
-
-noncomputable instance EQ'.subTheoryOfEQ : (𝗘𝗤' : Theory L) ⪯ 𝗘𝗤 := Entailment.WeakerThan.ofAxm! <| by
-  rintro φ h
-  rcases (show 𝗘𝗤' φ from h)
-  case refl =>
-    apply Entailment.by_axm _ (by simpa using eqAxiom.refl)
-  case replace φ =>
-    apply complete ?_
-    apply EQ.provOf.{_, 0} _ ?_
-    intro M _ s _ _
-    simp [models_iff, Semiformula.eval_substs]
-
-end Theory
-
 end FirstOrder
 
 end LO
