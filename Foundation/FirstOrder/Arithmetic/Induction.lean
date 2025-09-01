@@ -34,15 +34,15 @@ notation "𝗜𝗢𝗽𝗲𝗻" => IOpen
 
 abbrev InductionOnHierarchy (Γ : Polarity) (k : ℕ) : ArithmeticTheory := 𝗣𝗔⁻ + InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ k)
 
-prefix:max "𝗜𝐍𝐃 " => InductionOnHierarchy
+prefix:max "𝗜𝗡𝗗 " => InductionOnHierarchy
 
-abbrev ISigma (k : ℕ) : ArithmeticTheory := 𝗜𝐍𝐃 𝚺 k
+abbrev ISigma (k : ℕ) : ArithmeticTheory := 𝗜𝗡𝗗 𝚺 k
 
 prefix:max "𝗜𝚺" => ISigma
 
 notation "𝗜𝚺₀" => ISigma 0
 
-abbrev IPi (k : ℕ) : ArithmeticTheory := 𝗜𝐍𝐃 𝚷 k
+abbrev IPi (k : ℕ) : ArithmeticTheory := 𝗜𝗡𝗗 𝚷 k
 
 prefix:max "𝗜𝚷" => IPi
 
@@ -69,13 +69,13 @@ lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⊆ �
 lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⪯ 𝗜𝚺 s₂ :=
   Entailment.WeakerThan.ofSubset (ISigma_subset_mono h)
 
-instance : 𝗣𝗔⁻ ⪯ 𝗜𝐍𝐃 Γ n := Entailment.WeakerThan.ofSubset (by simp [InductionOnHierarchy, Theory.add_def])
+instance : 𝗣𝗔⁻ ⪯ 𝗜𝗡𝗗 Γ n := Entailment.WeakerThan.ofSubset (by simp [InductionOnHierarchy, Theory.add_def])
 
-instance : 𝗘𝗤 ⪯ 𝗜𝐍𝐃 Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
+instance : 𝗘𝗤 ⪯ 𝗜𝗡𝗗 Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
 
 instance : 𝗘𝗤 ⪯ 𝗜𝗢𝗽𝗲𝗻 := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
 
-instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝐍𝐃 Γ n :=
+instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗 Γ n :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arithmetic.Hierarchy.of_open
 
 instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₁ :=
@@ -131,13 +131,13 @@ namespace InductionOnHierarchy
 
 section
 
-variable (Γ : Polarity) (m : ℕ) [V ⊧ₘ* 𝗜𝐍𝐃 Γ m]
+variable (Γ : Polarity) (m : ℕ) [V ⊧ₘ* 𝗜𝗡𝗗 Γ m]
 
-instance : V ⊧ₘ* InductionScheme ℒₒᵣ (Hierarchy Γ m) := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝐍𝐃 Γ m)
+instance : V ⊧ₘ* InductionScheme ℒₒᵣ (Hierarchy Γ m) := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
 
 lemma succ_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝐍𝐃 Γ m)
+  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
   InductionScheme.succ_induction (P := P) (C := Hierarchy Γ m) (by
     rcases hP with ⟨φ, hp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
@@ -151,7 +151,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
 
 lemma order_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (ind : ∀ x, (∀ y < x, P y) → P x) : ∀ x, P x := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝐍𝐃 Γ m)
+  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
   suffices ∀ x, ∀ y < x, P y by
     intro x; exact this (x + 1) x (by simp only [lt_add_iff_pos_right, lt_one_iff_eq_zero])
   intro x; induction x using succ_induction
@@ -169,7 +169,7 @@ lemma order_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
 
 private lemma neg_succ_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (nzero : ¬P 0) (nsucc : ∀ x, ¬P x → ¬P (x + 1)) : ∀ x, ¬P x := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝐍𝐃 Γ m)
+  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
   by_contra A
   have : ∃ x, P x := by simpa using A
   rcases this with ⟨a, ha⟩
@@ -212,13 +212,13 @@ instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arith
       (.mkPolarity (∼(Rew.rewriteMap v ▹ φ)) (by simpa using hp)
       (by intro x; simp [←Matrix.fun_eq_vec_one, Semiformula.eval_rewriteMap]))
 
-instance models_alt : V ⊧ₘ* 𝗜𝐍𝐃 Γ.alt m := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝐍𝐃 Γ m)
+instance models_alt : V ⊧ₘ* 𝗜𝗡𝗗 Γ.alt m := by
+  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
   simp only [InductionOnHierarchy, ModelsTheory.add_iff]; constructor <;> infer_instance
 
 lemma least_number {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     {x} (h : P x) : ∃ y, P y ∧ ∀ z < y, ¬P z := by
-  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝐍𝐃 Γ m)
+  haveI : V ⊧ₘ* 𝗣𝗔⁻ := models_of_subtheory <| inferInstanceAs (V ⊧ₘ* 𝗜𝗡𝗗 Γ m)
   by_contra A
   have A : ∀ z, P z → ∃ w < z, P w := by simpa using A
   have : ∀ z, ∀ w < z, ¬P w := by
@@ -245,14 +245,14 @@ end
 
 section
 
-variable (Γ : SigmaPiDelta) (m : ℕ) [V ⊧ₘ* 𝗜𝐍𝐃 𝚺 m]
+variable (Γ : SigmaPiDelta) (m : ℕ) [V ⊧ₘ* 𝗜𝗡𝗗 𝚺 m]
 
 lemma succ_induction_sigma {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     (zero : P 0) (succ : ∀ x, P x → P (x + 1)) : ∀ x, P x :=
   match Γ with
   | 𝚺 => succ_induction 𝚺 m hP zero succ
   | 𝚷 =>
-    haveI : V ⊧ₘ* 𝗜𝐍𝐃 𝚷 m := models_alt 𝚺 m
+    haveI : V ⊧ₘ* 𝗜𝗡𝗗 𝚷 m := models_alt 𝚺 m
     succ_induction 𝚷 m hP zero succ
   | 𝚫 => succ_induction 𝚺 m hP.of_delta zero succ
 
@@ -261,7 +261,7 @@ lemma order_induction_sigma {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
   match Γ with
   | 𝚺 => order_induction 𝚺 m hP ind
   | 𝚷 =>
-    haveI : V ⊧ₘ* 𝗜𝐍𝐃 𝚷 m := models_alt 𝚺 m
+    haveI : V ⊧ₘ* 𝗜𝗡𝗗 𝚷 m := models_alt 𝚺 m
     order_induction 𝚷 m hP ind
   | 𝚫 => order_induction 𝚺 m hP.of_delta ind
 
@@ -270,18 +270,18 @@ lemma least_number_sigma {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
   match Γ with
   | 𝚺 => least_number 𝚺 m hP h
   | 𝚷 =>
-    haveI : V ⊧ₘ* 𝗜𝐍𝐃 𝚷 m := models_alt 𝚺 m
+    haveI : V ⊧ₘ* 𝗜𝗡𝗗 𝚷 m := models_alt 𝚺 m
     least_number 𝚷 m hP h
   | 𝚫 => least_number 𝚺 m hP.of_delta h
 
 end
 
-instance [V ⊧ₘ* 𝗜𝐍𝐃 𝚺 m] : V ⊧ₘ* 𝗜𝐍𝐃 Γ m := by
+instance [V ⊧ₘ* 𝗜𝗡𝗗 𝚺 m] : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := by
   rcases Γ
   · infer_instance
   · exact models_alt 𝚺 m
 
-instance [V ⊧ₘ* 𝗜𝐍𝐃 𝚷 m] : V ⊧ₘ* 𝗜𝐍𝐃 Γ m := by
+instance [V ⊧ₘ* 𝗜𝗡𝗗 𝚷 m] : V ⊧ₘ* 𝗜𝗡𝗗 Γ m := by
   rcases Γ
   · exact models_alt 𝚷 m
   · infer_instance
@@ -298,7 +298,7 @@ instance [V ⊧ₘ* 𝗜𝚷n] : V ⊧ₘ* 𝗜𝚺n := inferInstance
 lemma models_ISigma_iff_models_IPi {n} : V ⊧ₘ* 𝗜𝚺 n ↔ V ⊧ₘ* 𝗜𝚷 n :=
   ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
 
-instance [V ⊧ₘ* 𝗜𝚺 n] : V ⊧ₘ* 𝗜𝐍𝐃 Γ n :=
+instance [V ⊧ₘ* 𝗜𝚺 n] : V ⊧ₘ* 𝗜𝗡𝗗 Γ n :=
   match Γ with
   | 𝚺 => inferInstance
   | 𝚷 => inferInstance
@@ -370,7 +370,7 @@ lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ 
   · exact hzero
   · exact hsucc x ih
 
-instance models_ISigma (Γ k) : ℕ ⊧ₘ* 𝗜𝐍𝐃 Γ k := by
+instance models_ISigma (Γ k) : ℕ ⊧ₘ* 𝗜𝗡𝗗 Γ k := by
   simp only [ModelsTheory.add_iff, instModelsTheoryNat, InductionScheme,
     Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp, true_and]
   rintro _ φ _ rfl; simp [models_succInd]
@@ -384,7 +384,7 @@ instance models_Peano : ℕ ⊧ₘ* 𝗣𝗔 := by
     Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp, true_and]
   rintro _ φ _ rfl; simp [models_succInd]
 
-instance : Entailment.Consistent (𝗜𝐍𝐃 Γ k) := (𝗜𝐍𝐃 Γ k).consistent_of_sound (Eq ⊥) rfl
+instance : Entailment.Consistent (𝗜𝗡𝗗 Γ k) := (𝗜𝗡𝗗 Γ k).consistent_of_sound (Eq ⊥) rfl
 
 instance : Entailment.Consistent 𝗣𝗔 := 𝗣𝗔.consistent_of_sound (Eq ⊥) rfl
 

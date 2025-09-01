@@ -201,7 +201,7 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
 
 variable {V : Type*} [ORingStruc V]
 
-variable (m : ℕ) [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝐍𝐃𝚺 m]
+variable (m : ℕ) [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝗡𝗗𝚺 m]
 
 lemma sigma_or_pi_succ_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P) (hQ : 𝚷-[m]-Predicate Q)
     (zero : P 0 ∨ Q 0) (succ : ∀ x, P x ∨ Q x → P (x + 1) ∨ Q (x + 1)) : ∀ x, P x ∨ Q x := by

@@ -501,7 +501,7 @@ lemma insert_remove {i a : V} (h : i ∈ a) : insert i (bitRemove i a) = a := me
 
 section
 
-variable {m : ℕ} [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝐍𝐃 𝚺 m]
+variable {m : ℕ} [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝗡𝗗 𝚺 m]
 
 omit [V ⊧ₘ* 𝗜𝚺₁]
 
