@@ -1,5 +1,6 @@
 import Foundation.Modal.Kripke.Logic.GL.Completeness
 import Foundation.Modal.Kripke.Logic.K4Point3
+import Foundation.Modal.Logic.Global
 
 namespace LO.Modal
 
@@ -43,8 +44,22 @@ section
 
 open MaximalConsistentTableau
 
+instance : Hilbert.K ⪯ Hilbert.GLPoint3 := Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
+
+open LO.Entailment Modal.Entailment in
+open Formula.Kripke in
 private lemma complete_lemma₁ : Hilbert.GLPoint3 ⊢! ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
-  sorry;
+  apply CN!_of_CN!_left;
+  apply C!_trans ?_ axiomL!;
+  apply WeakerThan.pbl (𝓢 := Hilbert.K);
+  -- TODO: `K_prover`
+  apply Complete.complete (𝓜 := Kripke.FrameClass.K);
+  intro F _ V x h₁ y Rxy h₂;
+  have := (Satisfies.not_dia_def.mp h₁) y Rxy;
+  have := Satisfies.and_def.not.mp this;
+  push_neg at this;
+  have := this h₂;
+  simpa using Satisfies.not_def.not.mp this;
 
 private lemma complete_lemma₂ {v : (canonicalModel Hilbert.GLPoint3).World } (h : ∼□φ ∈ v.1.1) :
   ∃! u, v ≺ u ∧ □φ ∈ u.1.1 ∧ ∼φ ∈ u.1.1 := by
@@ -66,32 +81,29 @@ instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
   contrapose!;
   intro hφ;
   obtain ⟨u, hu⟩ := ValidOnModel.exists_world_of_not $ iff_valid_on_canonicalModel_deducible.not.mpr hφ;
-  replace hu := truthlemma₂.mpr hu;
+  replace hu : φ ∈ u.1.2 := truthlemma₂.mpr hu;
 
   let v : (canonicalModel Hilbert.GLPoint3).World := if h : □φ ∈ u.1.1 then u else
-    haveI : ∼□φ ∈ u.1.1 := iff_mem₁_neg.mpr $ iff_not_mem₁_mem₂.mp h;
-    complete_lemma₂ this |>.choose;
+    (complete_lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose;
   have hv₁ : □φ ∈ v.1.1 := by
     dsimp [v];
     split;
     . assumption;
     . rename_i h;
-      exact (complete_lemma₂ $ iff_mem₁_neg.mpr $ iff_not_mem₁_mem₂.mp h) |>.choose_spec.1.2.1;
+      exact (complete_lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose_spec.1.2.1;
   have hv₂ : φ ∈ v.1.2 := by
     dsimp [v];
     split;
     . assumption;
     . apply iff_mem₁_neg.mp;
       rename_i h;
-      exact (complete_lemma₂ $ iff_mem₁_neg.mpr $ iff_not_mem₁_mem₂.mp h) |>.choose_spec.1.2.2;
+      exact (complete_lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose_spec.1.2.2;
 
   apply Kripke.not_validOnFrameClass_of_exists_model_world;
 
   let M : Kripke.Model := {
     World := {
-      x : (canonicalModel Hilbert.GLPoint3).World //
-        x = v ∨
-        (v ≺ x ∧ ∃ ψ ∈ φ.subformulas.prebox, □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2)
+      x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ φ.subformulas.prebox, □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2)
     }
     world_nonempty := ⟨v, by simp⟩,
     Rel := λ x y => (canonicalModel Hilbert.GLPoint3).Rel x.1 y.1
@@ -123,6 +135,7 @@ instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
   constructor;
   . exact {
       world_finite := by
+        dsimp [M];
         sorry;
     }
   . have : ∀ x : M.World, ∀ ψ ∈ φ.subformulas, (Satisfies _ x ψ ↔ ψ ∈ x.1.1.1) := by
@@ -154,7 +167,7 @@ instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
               . exact exv ▸ h;
               . exfalso;
                 apply M.irrefl _ $ M.trans Rxv Rvx;
-          obtain ⟨y, ⟨Rvy, hy₁, hy₂⟩, _⟩ := complete_lemma₂ $ iff_mem₁_neg.mpr $ iff_not_mem₁_mem₂.mp this;
+          obtain ⟨y, ⟨Rvy, hy₁, hy₂⟩, _⟩ := complete_lemma₂ $ iff_mem₁_neg'.mpr this;
           use ⟨y, by
             right;
             constructor;
@@ -177,8 +190,7 @@ instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
               apply mdp_mem₁_provable ?_ $ hy₁;
               simp;
           . apply ihψ _ (by grind) |>.not.mpr;
-            apply iff_not_mem₁_mem₂.mpr;
-            apply iff_mem₁_neg.mp $ hy₂;
+            apply iff_mem₁_neg'.mp hy₂;
         . intro h y Rxy;
           apply ihψ y (by grind) |>.mpr;
           apply canonicalModel.def_rel_box_mem₁.mp Rxy;

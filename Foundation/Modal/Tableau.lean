@@ -753,6 +753,8 @@ lemma iff_mem₁_neg : ∼φ ∈ t.1.1 ↔ φ ∈ t.1.2 := by
     intro h;
     exact iff_not_mem₂_mem₁.mpr $ of_mem₂_neg $ iff_not_mem₁_mem₂.mp h
 
+lemma iff_mem₁_neg' : ∼φ ∈ t.1.1 ↔ φ ∉ t.1.1 := Iff.trans iff_mem₁_neg $ Iff.symm iff_not_mem₁_mem₂
+
 lemma iff_mem₂_neg : ∼φ ∈ t.1.2 ↔ φ ∈ t.1.1 := by
   constructor;
   . apply of_mem₂_neg;
@@ -760,6 +762,7 @@ lemma iff_mem₂_neg : ∼φ ∈ t.1.2 ↔ φ ∈ t.1.1 := by
     intro h;
     exact iff_not_mem₁_mem₂.mpr $ of_mem₁_neg $ iff_not_mem₂_mem₁.mp h
 
+lemma iff_mem₂_neg' : ∼φ ∈ t.1.2 ↔ φ ∉ t.1.2 := Iff.trans iff_mem₂_neg $ Iff.symm iff_not_mem₂_mem₁
 
 section
 
