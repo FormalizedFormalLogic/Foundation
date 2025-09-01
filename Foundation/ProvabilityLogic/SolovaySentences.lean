@@ -269,7 +269,7 @@ variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
 
 section model
 
-variable (T) {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable (T) {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparison (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
@@ -352,12 +352,12 @@ def θChain (ε : List F) : Sentence ℒₒᵣ := θChainAux T (fun i ↦ ⌜T.s
 def θ (i : F) : Sentence ℒₒᵣ := θAux T (fun i ↦ ⌜T.solovay i⌝) i
 
 lemma solovay_diag (i : F) :
-    𝐈𝚺₁ ⊢!. T.solovay i ⭤ θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by
-  have : 𝐈𝚺₁ ⊢!. T.solovay i ⭤
+    𝗜𝚺₁ ⊢!. T.solovay i ⭤ θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by
+  have : 𝗜𝚺₁ ⊢!. T.solovay i ⭤
       (Rew.substs fun j ↦ ⌜T.solovay ((Fintype.equivFin F).symm j)⌝) ▹
         (θAux T (fun i ↦ #(Fintype.equivFin F i)) i ⋏ ⩕ k ∈ { k : F | i ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)]) := by
     simpa [Theory.solovay, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
-      exclusiveMultidiagonal (T := 𝐈𝚺₁) (i := Fintype.equivFin F i)
+      exclusiveMultidiagonal (T := 𝗜𝚺₁) (i := Fintype.equivFin F i)
         (fun j ↦
           let jj := (Fintype.equivFin F).symm j
           θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)])
@@ -382,7 +382,7 @@ section model
 
 variable (T)
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 open Modal ProvabilityLogic Kripke
 
@@ -588,12 +588,12 @@ lemma disjunctive : ∃ i : F, T.Solovay V i := by
   · exact ⟨i, H⟩
 
 /-- Condition 3.-/
-lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
+lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
     T.Solovay V i → T.Provable (⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ : V) := by
   intro hS
   have TP : T.internalize V ⊢! ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ :=
     internal_sentence_provable_of_outer_sentence_provable <| by
-      have : 𝐈𝚺₁ ⊢!. θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
+      have : 𝗜𝚺₁ ⊢!. θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
         oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
           simpa [models_iff] using Θ.disjunction i
       exact Entailment.WeakerThan.pbl this
@@ -606,16 +606,16 @@ lemma Solovay.box_disjunction [𝐈𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
 
 end model
 
-lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.Solovay ℕ r := by
-  haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝐈𝚺₁ ⪯ T))
+lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.Solovay ℕ r := by
+  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝗜𝚺₁ ⪯ T))
   have NS : ∀ i, r ≠ i → ¬T.Solovay ℕ i := by
     intro i hi H
     have Bi : T ⊢!. ∼T.solovay i := (provable_iff_provable₀ (T := T)).mp (Solovay.refute hi H)
     have : ¬T.Solovay ℕ i := by
       set π := θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝]
-      have sπ : 𝐈𝚺₁ ⊢!. T.solovay i ⭤ π := solovay_diag T i
+      have sπ : 𝗜𝚺₁ ⊢!. T.solovay i ⭤ π := solovay_diag T i
       have : T ⊢!. ∼π := by
-        have : T ⊢!. T.solovay i ⭤ π := Entailment.WeakerThan.wk (inferInstanceAs (𝐈𝚺₁.toAxiom ⪯ T.toAxiom)) sπ
+        have : T ⊢!. T.solovay i ⭤ π := Entailment.WeakerThan.wk (inferInstanceAs (𝗜𝚺₁.toAxiom ⪯ T.toAxiom)) sπ
         exact Entailment.K!_left (Entailment.ENN!_of_E! this) ⨀ Bi
       have : ¬ℕ ⊧/![] π := by
         simpa [models_iff] using
@@ -635,8 +635,8 @@ lemma solovay_root_sound [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.
   · have : ¬T.Solovay ℕ i := NS i (by rintro rfl; exact IsIrrefl.irrefl r hri)
     contradiction
 
-lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i : F} (h : r ≠ i) : T ⊬. ∼T.solovay i := by
-  haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝐈𝚺₁ ⪯ T))
+lemma solovay_unprovable [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i : F} (h : r ≠ i) : T ⊬. ∼T.solovay i := by
+  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝗜𝚺₁ ⪯ T))
   have : ∼T.Provable ⌜∼T.solovay i⌝ :=
     Solovay.consistent (V := ℕ) (T := T) (Frame.root_genaretes'! i (Ne.symm h)) solovay_root_sound
   simpa [Theory.ConsistentWith.quote_iff, provable_iff_provable₀, Axiom.unprovable_iff] using this
@@ -644,7 +644,7 @@ lemma solovay_unprovable [𝐈𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i :
 variable (T F)
 
 def _root_.LO.ProvabilityLogic.SolovaySentences.standard
-    [𝐈𝚺₁ ⪯ T] : SolovaySentences T.standardProvability F r where
+    [𝗜𝚺₁ ⪯ T] : SolovaySentences T.standardProvability F r where
   σ := T.solovay
   SC1 i j ne :=
     oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
@@ -659,7 +659,7 @@ def _root_.LO.ProvabilityLogic.SolovaySentences.standard
     oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
       simpa [models₀_iff] using disjunctive
 
-lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝐈𝚺₁ ⪯ T] :
+lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝗜𝚺₁ ⪯ T] :
     (SolovaySentences.standard T F).σ = T.solovay := rfl
 
 end frame

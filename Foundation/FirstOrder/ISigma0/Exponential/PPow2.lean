@@ -10,7 +10,7 @@ namespace LO.ISigma0
 
 open FirstOrder Arithmetic PeanoMinus IOpen
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₀]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₀]
 
 def SPPow2 (m : V) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 

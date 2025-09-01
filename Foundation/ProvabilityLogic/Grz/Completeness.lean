@@ -83,7 +83,7 @@ lemma iff_models_interpret_boxdot_strongInterpret
 end Realization
 
 theorem Grz.arithmetical_completeness_iff
-    {T : ArithmeticTheory} [T.Δ₁] [𝐈𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) :
+    {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) :
     (∀ f : T.PLRealization, T ⊢!. f.strongInterpret A) ↔ Modal.Grz ⊢! A := by
   constructor;
   . intro h;
@@ -98,11 +98,11 @@ theorem Grz.arithmetical_completeness_iff
     exact Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ this f;
 
 theorem Grz.arithmetical_completeness_model_iff
-    {T : ArithmeticTheory} [T.Δ₁] [𝐈𝚺₁ ⪯ T] [ℕ ⊧ₘ* T] :
+    {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [ℕ ⊧ₘ* T] :
     (∀ f : T.PLRealization, ℕ ⊧ₘ₀ f.strongInterpret A) ↔ Modal.Grz ⊢! A := by
   apply Iff.trans ?_ Modal.Logic.iff_provable_Grz_provable_boxdot_S;
   apply Iff.trans ?_ (S.arithmetical_completeness_iff (T := T)).symm;
-  have : 𝐑₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝐑₀ ⪯ 𝐈𝚺₁)) inferInstance
+  have : 𝗥₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗜𝚺₁)) inferInstance
   constructor;
   . intro h f; exact Realization.iff_models_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mpr $ h f;
   . intro h f; exact Realization.iff_models_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ h f;

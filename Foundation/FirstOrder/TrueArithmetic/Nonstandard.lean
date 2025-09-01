@@ -12,7 +12,7 @@ local notation "ℒₒᵣ⋆" => withStar
 def starUnbounded (c : ℕ) : Theory ℒₒᵣ⋆ := Set.range fun n : Fin c ↦ “!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆”
 
 def trueArithWithStarUnbounded (n : ℕ) : Theory ℒₒᵣ⋆ :=
-  𝐄𝐐 ∪ (Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀) ∪ starUnbounded n
+  𝗘𝗤 ∪ (Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝗧𝗔) ∪ starUnbounded n
 
 lemma trueArithWithStarUnbounded.cumulative : Cumulative trueArithWithStarUnbounded := fun c =>
   Set.union_subset_union_right _ <|
@@ -41,7 +41,7 @@ lemma satisfiable_union_trueArithWithStarUnbounded :
   (Compact.compact_cumulative trueArithWithStarUnbounded.cumulative).mpr
     satisfiable_trueArithWithStarUnbounded
 
-instance trueArithWithStarUnbounded.eqTheory : 𝐄𝐐 ⪯ (⋃ c, trueArithWithStarUnbounded c) :=
+instance trueArithWithStarUnbounded.eqTheory : 𝗘𝗤 ⪯ (⋃ c, trueArithWithStarUnbounded c) :=
   Entailment.WeakerThan.ofSubset <|
     Set.subset_iUnion_of_subset 0 (Set.subset_union_of_subset_left (by simp) _)
 
@@ -59,8 +59,8 @@ local notation "⋆" => star
 
 lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧ₘ* ⋃ c, trueArithWithStarUnbounded c := ModelOfSatEq.models _
 
-instance : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
-  have : ℕ⋆ ⊧ₘ* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝐓𝐀 :=
+instance : ℕ⋆ ⊧ₘ* 𝗧𝗔 := ⟨by
+  have : ℕ⋆ ⊧ₘ* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝗧𝗔 :=
     Semantics.RealizeSet.of_subset models_union_trueArithWithStarUnbounded
       (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (by simp) _)
   intro σ hσ
@@ -79,8 +79,8 @@ instance : ℕ⋆ ⊧ₘ* 𝐓𝐀 := ⟨by
   have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this.realize _ (Set.mem_image_of_mem _ hσ))
   exact e ▸ this⟩
 
-instance : ℕ⋆ ⊧ₘ* 𝐏𝐀⁻ :=
-  ModelsTheory.of_ss (U := 𝐓𝐀) inferInstance (Structure.subset_of_models.mpr inferInstance)
+instance : ℕ⋆ ⊧ₘ* 𝗣𝗔⁻ :=
+  ModelsTheory.of_ss (U := 𝗧𝗔) inferInstance (Structure.subset_of_models.mpr inferInstance)
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆ ⊧ₘ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=

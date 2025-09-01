@@ -5,14 +5,14 @@ namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 class _root_.LO.FirstOrder.Theory.Δ₁ (T : Theory L) where
   ch : 𝚫₁.Semisentence 1
   mem_iff : ∀ φ, ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T
-  isDelta1 : ch.ProvablyProperOn 𝐈𝚺₁
+  isDelta1 : ch.ProvablyProperOn 𝗜𝚺₁
 
 abbrev _root_.LO.FirstOrder.Theory.Δ₁ch (T : Theory L) [T.Δ₁] : 𝚫₁.Semisentence 1 := Theory.Δ₁.ch T
 
@@ -24,7 +24,7 @@ instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.�
   constructor
   · intro v
     have : V ⊧/![v 0] (Theory.Δ₁.ch T).sigma.val ↔ V ⊧/![v 0] (Theory.Δ₁.ch T).pi.val := by
-      have := (consequence_iff (T := 𝐈𝚺₁)).mp (sound!₀ <| FirstOrder.Theory.Δ₁.isDelta1 (T := T)) V inferInstance
+      have := (consequence_iff (T := 𝗜𝚺₁)).mp (sound!₀ <| FirstOrder.Theory.Δ₁.isDelta1 (T := T)) V inferInstance
       simp [models_iff] at this ⊢
       simpa [Matrix.constant_eq_singleton] using this ![v 0]
     rwa [show v = ![v 0] from Matrix.fun_eq_vec_one]

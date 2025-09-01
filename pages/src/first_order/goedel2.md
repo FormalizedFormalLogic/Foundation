@@ -1,7 +1,7 @@
 # Gödel's Second Incompleteness Theorem
 
 Recall that inside $\mathsf{I}\Sigma_1$ we can do basic set theory and primitive recursion.
-Many inductive notions and functions on them are defined in $\Delta_1$ or $\Sigma_1$ using 
+Many inductive notions and functions on them are defined in $\Delta_1$ or $\Sigma_1$ using
 the [fixpoint construction](./isigma1.md#fixpoint).
 
 We work inside an arbitrary model $V$ of $\mathsf{I}\Sigma_1$.
@@ -48,7 +48,7 @@ $$
     & && (\exists p \in C, q \in C) [u = \widehat{p \land q}] \lor {} \\
     & && (\exists p \in C, q \in C) [u = \widehat{p \lor q}] \lor {} \\
     & && (\exists p \in C) [u = \widehat{\forall p}] \lor {} \\
-    & && (\exists p \in C) [u = \widehat{\exists p}] 
+    & && (\exists p \in C) [u = \widehat{\exists p}]
 \end{align*}
 $$
 
@@ -112,7 +112,7 @@ $$
       \mathrm{sqt}(d_1) = s \cup \{p\} \land \mathrm{sqt}(d_2) = s \cup \{\lnot p\}] \\
     & && (\exists s, p)[
       d = \widehat{\mathrm{ROOT}(s, p)} \land
-      p \in s \land p \in T ] 
+      p \in s \land p \in T ]
      ]\end{align*}
 $$
 
@@ -147,13 +147,13 @@ Following holds for all formula (not coded one) $\varphi$ and finite set $\Gamma
 - *Sound*: $\N \models \mathrm{Provable}_T(\ulcorner \varphi \urcorner) \implies T \vdash \varphi$
   ```lean
   lemma LO.ISigma1.Metamath.Language.Theory.Provable.sound :
-      (T.codeIn ℕ).Provable ⌜p⌝ → T ⊢! p 
+      (T.codeIn ℕ).Provable ⌜p⌝ → T ⊢! p
   ```
   - [LO.ISigma1.Metamath.Language.Theory.Provable.sound](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D1.html#LO.ISigma1.Metamath.Language.Theory.Provable.sound)
 - _D1_: $T \vdash \varphi \implies V \models \mathrm{Provable}_T(\ulcorner \varphi \urcorner)$
   ```lean
   theorem LO.ISigma1.Metamath.provable_of_provable :
-      T ⊢! p → (T.codeIn V).Provable ⌜p⌝ 
+      T ⊢! p → (T.codeIn V).Provable ⌜p⌝
   ```
   - [LO.ISigma1.Metamath.provable_of_provable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D1.html#LO.ISigma1.Metamath.provable_of_provable)
 - *D2*: $\mathrm{Provable}_T(\ulcorner \varphi \to \psi \urcorner)\ \&\ \mathrm{Provable}_T(\ulcorner \varphi \urcorner)
@@ -189,7 +189,7 @@ $$
   \mathrm{ssnum}(y, {\ulcorner \varphi \urcorner}, x) \iff
   y = \ulcorner \varphi(\overline{x}) \urcorner
 $$
- 
+
 holds. (overline $\overline{\bullet}$ denotes the (formalized) numeral of $x$)
 
 Define a sentence $\mathrm{fixpoint}_\theta$ for formula (with one variable) $\theta$ as follows.
@@ -269,11 +269,11 @@ theorem goedel_iff_consistency
 
 ```lean
 theorem LO.ISigma1.goedel_second_incompleteness
-    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Δ₁] [System.Consistent T] :
-    T ⊬. T.consistent 
+    (T : ArithmeticTheory) [𝗜𝚺₁ ≼ T] [T.Δ₁] [System.Consistent T] :
+    T ⊬. T.consistent
 
 theorem LO.ISigma1.inconsistent_undecidable
-    (T : ArithmeticTheory) [𝐈𝚺₁ ≼ T] [T.Δ₁] [T.Sigma1Sound] :
+    (T : ArithmeticTheory) [𝗜𝚺₁ ≼ T] [T.Δ₁] [T.Sigma1Sound] :
     Independent (T : Axiom ℒₒᵣ) (T.consistent : Sentence ℒₒᵣ)
 ```
 - [LO.ISigma1.goedel_second_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/Second.html#LO.ISigma1.goedel_second_incompleteness)

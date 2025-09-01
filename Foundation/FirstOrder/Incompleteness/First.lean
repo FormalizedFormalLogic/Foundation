@@ -23,7 +23,7 @@ open LO.Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Met
 
 /-- Gödel's first incompleteness theorem-/
 theorem incomplete
-    (T : ArithmeticTheory) [T.Δ₁] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     Incomplete (T : Axiom ℒₒᵣ) := by
   have con : Consistent (T : Axiom ℒₒᵣ) := inferInstance
   let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : SyntacticSemiformula ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
@@ -57,7 +57,7 @@ theorem incomplete
       (inconsistent_of_provable_of_unprovable (this.mp h) h) inferInstance ⟩
 
 theorem exists_true_but_unprovable_sentence
-    (T : ArithmeticTheory) [T.Δ₁] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+    (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ∃ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ₀ σ ∧ T ⊬. σ := by
   obtain ⟨σ, hσ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
   by_cases ℕ ⊧ₘ₀ σ;
@@ -77,7 +77,7 @@ namespace LO.FirstOrderTrueArith
 
 open LO.Entailment FirstOrder Arithmetic
 
-instance {T : ArithmeticTheory} [ℕ ⊧ₘ* T] [T.Δ₁] [𝐑₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝐓𝐀 := by
+instance {T : ArithmeticTheory} [ℕ ⊧ₘ* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;
   . infer_instance
   . obtain ⟨σ, σTrue, σUnprov⟩ := exists_true_but_unprovable_sentence T;

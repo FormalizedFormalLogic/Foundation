@@ -14,7 +14,7 @@ First, the graph of the exponential function must be defined. This is achieved b
 
 1.  Semantic definition.
     ```lean
-    def Exponential {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀] :
+    def Exponential {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝗜𝚺₀] :
         M → M → Prop
     ```
 2.  Syntactic definition that expresses the semantic definition.
@@ -30,11 +30,11 @@ First, the graph of the exponential function must be defined. This is achieved b
     ````
 
 ```lean
-theorem Exponential.total  {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀] (x : M) : ∃ y, Exponential x y
+theorem Exponential.total  {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝗜𝚺₀] (x : M) : ∃ y, Exponential x y
 ```
 
 Since `Exponential` and `Exponential.total` are defined in all the model of $\mathsf{I}\Sigma_1$,
-`𝐈𝚺₁ ⊢! ∀' ∃' exponentialDef` is obtained by the completeness theorem. This was the result we wanted to achieve.
+`𝗜𝚺₁ ⊢! ∀' ∃' exponentialDef` is obtained by the completeness theorem. This was the result we wanted to achieve.
 
 ## Defined Predicates and Functions
 
@@ -81,7 +81,7 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 |           $\mathrm{Semiformula}_x(y)$           | [`Semiformula L x y`]   |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
 |                  $φ [\vec{w}]$                  | [`substs L w φ`]        |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
 |            $\mathrm{Pr}_T(\varphi)$             | [`T.Provable φ`]       |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Sigma_1$ |        -         |
- 
+
 [`x ≤ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/PeanoMinus/Basic.html#LO.PeanoMinus.instLE
 [`x - y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/PeanoMinus/Functions.html#LO.PeanoMinus.sub
 [`x ∣ y`]: https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/Basic/PeanoMinus.html#LO.FirstOrder.Arithmetic.dvd

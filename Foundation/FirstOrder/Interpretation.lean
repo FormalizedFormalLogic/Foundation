@@ -10,7 +10,7 @@ import Foundation.Vorspiel.ExistsUnique
 namespace LO.FirstOrder
 
 @[ext]
-structure Translation {L₁ : Language} [L₁.Eq] (T : Theory L₁) [𝐄𝐐 ⪯ T] (L₂ : Language) [L₂.Eq] where
+structure Translation {L₁ : Language} [L₁.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (L₂ : Language) [L₂.Eq] where
   domain : Semisentence L₁ 1
   rel {k} : L₂.Rel k → Semisentence L₁ k
   func {k} : L₂.Func k → Semisentence L₁ (k + 1)
@@ -23,7 +23,7 @@ structure Translation {L₁ : Language} [L₁.Eq] (T : Theory L₁) [𝐄𝐐 �
 
 namespace Translation
 
-variable {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] {T : Theory L₁} [𝐄𝐐 ⪯ T]
+variable {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] {T : Theory L₁} [𝗘𝗤 ⪯ T]
 
 variable (π : Translation T L₂)
 
@@ -369,17 +369,17 @@ end semantics
 
 end Translation
 
-class Interpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝐄𝐐 ⪯ T] (U : Theory L₂) where
+class Interpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (U : Theory L₂) where
   trln : Translation T L₂
   interpret_theory : ∀ φ ∈ U, T ⊢!. trln.translate (∀∀₀φ)
 
 infix:50 " ⊳ " => Interpretation
 
-abbrev InterpretedBy {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (U : Theory L₂) (T : Theory L₁) [𝐄𝐐 ⪯ T] := T ⊳ U
+abbrev InterpretedBy {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (U : Theory L₂) (T : Theory L₁) [𝗘𝗤 ⪯ T] := T ⊳ U
 
 infix:50 " ⊲ " => InterpretedBy
 
-class Biinterpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝐄𝐐 ⪯ T] (U : Theory L₂) [𝐄𝐐 ⪯ U] where
+class Biinterpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (U : Theory L₂) [𝗘𝗤 ⪯ U] where
   r : T ⊳ U
   l : T ⊲ U
 
@@ -391,7 +391,7 @@ open Translation
 
 section
 
-variable {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] {T : Theory L₁} [𝐄𝐐 ⪯ T] {U : Theory L₂} (π : T ⊳ U)
+variable {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] {T : Theory L₁} [𝗘𝗤 ⪯ T] {U : Theory L₂} (π : T ⊳ U)
 
 abbrev translate (φ : Semiformula L₂ ξ n) : Semiformula L₁ ξ n := π.trln.translate φ
 
@@ -414,7 +414,7 @@ lemma of_provability₀ {σ : Sentence L₂} (h : U ⊢!. σ) : T ⊢!. π.trans
 
 end
 
-def ofWeakerThan {L : Language} [L.Eq] (T U : Theory L) [𝐄𝐐 ⪯ T] [U ⪯ T] : U ⊲ T where
+def ofWeakerThan {L : Language} [L.Eq] (T U : Theory L) [𝗘𝗤 ⪯ T] [U ⪯ T] : U ⊲ T where
   trln := Translation.id T
   interpret_theory φ hφ := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦
     Model.translate_close₀_iff.mpr <| by
@@ -423,11 +423,11 @@ def ofWeakerThan {L : Language} [L.Eq] (T U : Theory L) [𝐄𝐐 ⪯ T] [U ⪯ 
       have : T ⊢! φ := Entailment.weakerThan_iff.mp (inferInstanceAs (U ⪯ T)) (Entailment.by_axm _ (by simp [hφ]))
       exact models_iff.mp (models_of_provable hT this) (fun x ↦ f x)
 
-protected instance refl {L : Language} [L.Eq] (T : Theory L) [𝐄𝐐 ⪯ T] : T ⊳ T := ofWeakerThan T T
+protected instance refl {L : Language} [L.Eq] (T : Theory L) [𝗘𝗤 ⪯ T] : T ⊳ T := ofWeakerThan T T
 
 section composition
 
-variable {L₁ L₂ L₃ : Language} [L₁.Eq] [L₂.Eq] [L₃.Eq] {T₁ : Theory L₁} {T₂ : Theory L₂} {T₃ : Theory L₃} [𝐄𝐐 ⪯ T₁] [𝐄𝐐 ⪯ T₂] [𝐄𝐐 ⪯ T₃]
+variable {L₁ L₂ L₃ : Language} [L₁.Eq] [L₂.Eq] [L₃.Eq] {T₁ : Theory L₁} {T₂ : Theory L₂} {T₃ : Theory L₃} [𝗘𝗤 ⪯ T₁] [𝗘𝗤 ⪯ T₂] [𝗘𝗤 ⪯ T₃]
 
 def compTranslation (τ : Translation T₂ L₃) (π : T₁ ⊳ T₂) : Translation T₁ L₃ where
   domain := π.trln.domain ⋏ π.translate τ.domain
@@ -581,9 +581,9 @@ end Interpretation
 
 namespace Biinterpretation
 
-variable {L₁ L₂ L₃ : Language} [L₁.Eq] [L₂.Eq] [L₃.Eq] {T₁ : Theory L₁} {T₂ : Theory L₂} {T₃ : Theory L₃} [𝐄𝐐 ⪯ T₁] [𝐄𝐐 ⪯ T₂] [𝐄𝐐 ⪯ T₃]
+variable {L₁ L₂ L₃ : Language} [L₁.Eq] [L₂.Eq] [L₃.Eq] {T₁ : Theory L₁} {T₂ : Theory L₂} {T₃ : Theory L₃} [𝗘𝗤 ⪯ T₁] [𝗘𝗤 ⪯ T₂] [𝗘𝗤 ⪯ T₃]
 
-protected instance refl (T : Theory L₁) [𝐄𝐐 ⪯ T] : T ⋈ T := ⟨Interpretation.refl T, Interpretation.refl T⟩
+protected instance refl (T : Theory L₁) [𝗘𝗤 ⪯ T] : T ⋈ T := ⟨Interpretation.refl T, Interpretation.refl T⟩
 
 protected def symm (π : T₁ ⋈ T₂) : T₂ ⋈ T₁ := ⟨π.l, π.r⟩
 

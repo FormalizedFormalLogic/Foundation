@@ -14,7 +14,7 @@ namespace LO.PeanoMinus
 
 open FirstOrder Arithmetic
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗣𝗔⁻]
 
 variable {a b c : V}
 

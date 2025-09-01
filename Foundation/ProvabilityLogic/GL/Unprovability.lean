@@ -60,7 +60,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 section Corollary
 
 /-- Gödel's Second Incompleteness Theorem -/
-example [𝐈𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) : T ⊬. T.standardProvability.con := by
+example [𝗜𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) : T ⊬. T.standardProvability.con := by
   have h := GL.arithmetical_completeness_iff height (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
@@ -80,7 +80,7 @@ lemma iff_modalConsis_bewConsis_inside :
     apply contra!;
     simp [Realization.interpret];
 
-variable [𝐈𝚺₁ ⪯ T]
+variable [𝗜𝚺₁ ⪯ T]
 
 lemma iff_modalIndep_bewIndep_inside :
     T ⊢!. f (Modal.independency A) ⭤ T.standardProvability.indep (f A) := by
@@ -90,7 +90,7 @@ lemma iff_modalIndep_bewIndep_inside :
     . apply K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ);
     . apply C!_trans (K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ) (A := □(∼A))) ?_;
       apply contra!;
-      apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
+      apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁.toAxiom);
       apply T.standardProvability.prov_distribute_imply;
       apply K!_right $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ) ;
   . refine C!_trans ?_ (K!_right $ Realization.iff_interpret_and_inside);
@@ -98,7 +98,7 @@ lemma iff_modalIndep_bewIndep_inside :
     . exact C!_trans (K!_right $ Realization.iff_interpret_neg_inside (A := □A)) C!_id;
     . apply C!_trans ?_ (K!_right $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ) (A := □(∼A)));
       apply contra!;
-      apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
+      apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁.toAxiom);
       apply T.standardProvability.prov_distribute_imply;
       apply K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ);
 

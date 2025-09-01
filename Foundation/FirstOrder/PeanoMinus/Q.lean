@@ -135,11 +135,11 @@ lemma lt_def : a < b ↔ ∃ c, a + c + 1 = b := by
 end OmegaAddOne
 
 set_option linter.flexible false in
-instance : OmegaAddOne ⊧ₘ* 𝐐 := ⟨by
+instance : OmegaAddOne ⊧ₘ* 𝗤 := ⟨by
   intro σ h;
   rcases h;
   case equal h =>
-    have : OmegaAddOne ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
+    have : OmegaAddOne ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case succInj =>
     suffices ∀ (f : ℕ → OmegaAddOne), f 0 + 1 = f 1 + 1 → f 0 = f 1 by simpa [models_iff];
@@ -149,7 +149,7 @@ instance : OmegaAddOne ⊧ₘ* 𝐐 := ⟨by
 
 end Countermodel
 
-lemma unprovable_neSucc : 𝐐 ⊬ “x | x + 1 ≠ x” := unprovable_of_countermodel (M := Countermodel.OmegaAddOne) (fun x ↦ ⊤) _ (by simp)
+lemma unprovable_neSucc : 𝗤 ⊬ “x | x + 1 ≠ x” := unprovable_of_countermodel (M := Countermodel.OmegaAddOne) (fun x ↦ ⊤) _ (by simp)
 
 end LO.RobinsonQ
 
@@ -161,13 +161,13 @@ open FirstOrder FirstOrder.Arithmetic
 
 namespace PeanoMinus
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐏𝐀⁻]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗣𝗔⁻]
 
-instance : M ⊧ₘ* 𝐐 := modelsTheory_iff.mpr <| by
+instance : M ⊧ₘ* 𝗤 := modelsTheory_iff.mpr <| by
   intro φ h
   rcases h
   case equal h =>
-    have : M ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
+    have : M ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case addSucc h =>
     suffices ∀ (f : ℕ → M), f 0 + (f 1 + 1) = f 0 + f 1 + 1 by simpa [models_iff];
@@ -202,9 +202,9 @@ instance : M ⊧ₘ* 𝐐 := modelsTheory_iff.mpr <| by
       . apply ha.symm;
   all_goals simp [models_iff];
 
-instance : 𝐐 ⪯ 𝐏𝐀⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
+instance : 𝗤 ⪯ 𝗣𝗔⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
 
-instance w : 𝐐 ⪱ 𝐏𝐀⁻ := Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc $ by
+instance w : 𝗤 ⪱ 𝗣𝗔⁻ := Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc $ by
   apply oRing_provable_of.{0};
   intro _ _ _;
   simp [models_iff];

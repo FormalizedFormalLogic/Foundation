@@ -4,7 +4,7 @@ import Foundation.FirstOrder.Incompleteness.First
 
 namespace LO.FirstOrder.Arithmetic
 
-variable (T : ArithmeticTheory) [T.Δ₁] [𝐈𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 open LO.Entailment FirstOrder Arithmetic ISigma1 Metamath
 

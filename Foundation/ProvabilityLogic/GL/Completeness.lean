@@ -12,7 +12,7 @@ open FirstOrder Arithmetic
 open Modal
 open Modal.Kripke
 
-variable {T : ArithmeticTheory} [T.Δ₁] [𝐈𝚺₁ ⪯ T] {A : Modal.Formula _}
+variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula _}
 
 theorem unprovable_realization_exists
     (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsFiniteTree r₁]
