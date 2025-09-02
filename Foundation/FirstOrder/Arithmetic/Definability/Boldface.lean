@@ -431,7 +431,7 @@ namespace BoldfaceRel
 @[simp] instance lt : ℌ.BoldfaceRel (LT.lt : V → V → Prop) :=
   Defined.to_definable_oRing₀ (.mkSigma “#0 < #1”) (by intro _; simp)
 
-@[simp] instance le [V ⊧ₘ* 𝐏𝐀⁻] : ℌ.BoldfaceRel (LE.le : V → V → Prop) :=
+@[simp] instance le [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.BoldfaceRel (LE.le : V → V → Prop) :=
   Defined.to_definable_oRing₀ (.mkSigma “#0 ≤ #1”) (by intro _; simp)
 
 end BoldfaceRel
@@ -944,13 +944,13 @@ lemma bex_lt {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
       ⟨ .mkPi (∀' (bf.val ➝ (∃[“#0 < #1”] φ.pi.val ⇜ (#0 :> (#·.succ.succ))))) (by simp),
         by intro v; simp [hbf.df.iff, hp.df.iff, hp.proper.iff'] ⟩
 
-lemma ball_le [V ⊧ₘ* 𝐏𝐀⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma ball_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Boldface (fun v ↦ ∀ x ≤ f v, P v x) := by
   have : Γ-[m + 1].Boldface (fun v ↦ ∀ x < f v + 1, P v x) := ball_lt (BoldfaceFunction₂.comp (by simp) hf (by simp)) h
   exact this.of_iff <| by intro v; simp [lt_succ_iff_le]
 
-lemma bex_le [V ⊧ₘ* 𝐏𝐀⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma bex_le [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Boldface (fun v ↦ ∃ x ≤ f v, P v x) := by
   have : Γ-[m + 1].Boldface (fun v ↦ ∃ x < f v + 1, P v x) := bex_lt (BoldfaceFunction₂.comp (by simp) hf (by simp)) h
@@ -960,7 +960,7 @@ lemma ball_lt' {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Boldface (fun v ↦ ∀ {x}, x < f v → P v x) := ball_lt hf h
 
-lemma ball_le' [V ⊧ₘ* 𝐏𝐀⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+lemma ball_le' [V ⊧ₘ* 𝗣𝗔⁻] {Γ} {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
     Γ-[m + 1].Boldface (fun v ↦ ∀ {x}, x ≤ f v → P v x) := ball_le hf h
 

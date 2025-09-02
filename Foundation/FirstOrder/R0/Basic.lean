@@ -15,28 +15,29 @@ namespace LO
 open FirstOrder FirstOrder.Arithmetic
 
 inductive R0 : ArithmeticTheory
-  | equal : ∀ φ ∈ 𝐄𝐐, R0 φ
+  | equal : ∀ φ ∈ 𝗘𝗤, R0 φ
   | Ω₁ (n m : ℕ) : R0 “↑n + ↑m = ↑(n + m)”
   | Ω₂ (n m : ℕ) : R0 “↑n * ↑m = ↑(n * m)”
   | Ω₃ (n m : ℕ) : n ≠ m → R0 “↑n ≠ ↑m”
   | Ω₄ (n : ℕ) : R0 “∀ x, x < ↑n ↔ ⋁ i < n, x = ↑i”
 
-notation "𝐑₀" => R0
+notation "𝗥₀" => R0
+
 
 namespace R0
 
-instance : 𝐄𝐐 ⪯ 𝐑₀ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ R0.equal φ hp
+instance : 𝗘𝗤 ⪯ 𝗥₀ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ R0.equal φ hp
 
-instance : ℕ ⊧ₘ* 𝐑₀ := ⟨by
+instance : ℕ ⊧ₘ* 𝗥₀ := ⟨by
   intro σ h
   rcases h <;> try { simp [models_def]; done }
   case equal h =>
-    have : ℕ ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
+    have : ℕ ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     simpa [models_def] using modelsTheory_iff.mp this h
   case Ω₃ h =>
     simpa [models_def, ←le_iff_eq_or_lt] using h⟩
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐑₀]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗥₀]
 
 open Language ORingStruc
 
@@ -133,26 +134,26 @@ lemma bold_sigma_one_completeness' {n} {σ : Semisentence ℒₒᵣ n} (hσ : Hi
     Semiformula.Evalbm ℕ e σ → Semiformula.Evalbm M (fun x ↦ numeral (e x)) σ := fun h ↦ by
   simpa [Empty.eq_elim] using bold_sigma_one_completeness (M := M) (φ := σ) hσ (f := Empty.elim) (e := e) h
 
-instance consistent : Entailment.Consistent 𝐑₀ :=
-  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝐑₀)⟩
+instance consistent : Entailment.Consistent 𝗥₀ :=
+  Sound.consistent_of_satisfiable ⟨_, inferInstanceAs (ℕ ⊧ₘ* 𝗥₀)⟩
 
 end R0
 
 namespace FirstOrder.Arithmetic
 
-variable {T : ArithmeticTheory} [𝐑₀ ⪯ T]
+variable {T : ArithmeticTheory} [𝗥₀ ⪯ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ₀ σ → T ⊢!. σ := fun H =>
-  haveI : 𝐄𝐐 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝐑₀) inferInstance inferInstance
+  haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗥₀) inferInstance inferInstance
   complete₀ <| oRing_consequence_of.{0} _ _ <| fun M _ _ ↦ by
-    haveI : M ⊧ₘ* 𝐑₀ := ModelsTheory.of_provably_subtheory M 𝐑₀ T inferInstance
+    haveI : M ⊧ₘ* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ T inferInstance
     exact R0.sigma_one_completeness hσ H
 
 open Classical in
 theorem sigma_one_completeness_iff [T.SoundOnHierarchy 𝚺 1] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ₀ σ ↔ T ⊢!. σ :=
-  haveI : 𝐑₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := T) inferInstance inferInstance
+  haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   ⟨fun h ↦ sigma_one_completeness hσ h, fun h ↦ T.soundOnHierarchy 𝚺 1 h (by simp [hσ])⟩
 
 end FirstOrder.Arithmetic
@@ -163,7 +164,7 @@ end FirstOrder.Arithmetic
 $\omega + 1$ (the structure of order type $\omega + 1$) is a models of $\mathsf{R}_0$.
 -/
 
-/-! ω + 1 models 𝐑₀ -/
+/-! ω + 1 models 𝗥₀ -/
 namespace R0.Countermodel
 
 def OmegaAddOne := Option ℕ
@@ -224,11 +225,11 @@ def cases' {P : OmegaAddOne → Sort*}
   |   .none => top
 
 set_option linter.flexible false in
-instance : OmegaAddOne ⊧ₘ* 𝐑₀ := ⟨by
+instance : OmegaAddOne ⊧ₘ* 𝗥₀ := ⟨by
   intro σ h
   rcases h <;> simp [models_def]
   case equal h =>
-    have : OmegaAddOne ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
+    have : OmegaAddOne ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case Ω₃ h => exact h
   case Ω₄ n =>
@@ -239,7 +240,7 @@ end OmegaAddOne
 
 end Countermodel
 
-lemma unprovable_addZero : 𝐑₀ ⊬ “x | x + 0 = x” :=
+lemma unprovable_addZero : 𝗥₀ ⊬ “x | x + 0 = x” :=
   unprovable_of_countermodel (M := Countermodel.OmegaAddOne) (fun _ ↦ ⊤) _ (by simp)
 
 end R0

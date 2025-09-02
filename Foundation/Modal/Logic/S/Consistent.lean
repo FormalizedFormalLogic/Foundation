@@ -15,7 +15,7 @@ lemma iff_provable_GL_provable_box_S {A : Modal.Formula _} : Modal.GL ⊢! A ↔
     apply Logic.sumQuasiNormal.mem₁!;
     apply nec! h;
   . intro h;
-    apply GL.arithmetical_completeness (T := 𝐈𝚺₁) (by simp);
+    apply GL.arithmetical_completeness (T := 𝗜𝚺₁) (by simp);
     intro f;
     exact Iff.mp Provability.SoundOnModel.sound (S.arithmetical_soundness h f)
 

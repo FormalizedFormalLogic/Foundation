@@ -13,7 +13,7 @@ namespace LO.FirstOrder.Arithmetic
 
 open ISigma1 Metamath ProvabilityLogic
 
-instance : Diagonalization 𝐈𝚺₁ where
+instance : Diagonalization 𝗜𝚺₁ where
   fixedpoint := fixedpoint
   diag θ := diagonal θ
 
@@ -23,17 +23,17 @@ variable {L : Language} [L.Encodable] [L.LORDefinable] {T : Theory L} [T.Δ₁]
 
 local prefix:90 "□" => T.provabilityPred
 
-theorem provable_D1 {σ} : T ⊢!. σ → 𝐈𝚺₁ ⊢!. □σ := fun h ↦
+theorem provable_D1 {σ} : T ⊢!. σ → 𝗜𝚺₁ ⊢!. □σ := fun h ↦
   complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using provable_of_provable_arith₀ (V := V) h
 
-theorem provable_D2 {σ π} : 𝐈𝚺₁ ⊢!. □(σ ➝ π) ➝ □σ ➝ □π :=
+theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢!. □(σ ➝ π) ➝ □σ ➝ □π :=
   complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using modus_ponens_sentence T
 
 variable (T)
 
-abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝐈𝚺₁ T where
+abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
   prov := T.provable
   D1 := provable_D1
 
@@ -54,13 +54,13 @@ variable {T : Theory ℒₒᵣ} [T.Δ₁]
 
 local prefix:90 "□" => T.provabilityPred
 
-lemma provable_sigma_one_complete [𝐏𝐀⁻ ⪯ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    𝐈𝚺₁ ⊢!. σ ➝ □σ :=
+lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
+    𝗜𝚺₁ ⊢!. σ ➝ □σ :=
   complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using InternalArithmetic.sigma_one_complete (T := T) (V := V) hσ
 
-theorem provable_D3 [𝐏𝐀⁻ ⪯ T] {σ : Sentence ℒₒᵣ} :
-    𝐈𝚺₁ ⊢!. □σ ➝ □□σ := provable_sigma_one_complete (by simp)
+theorem provable_D3 [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} :
+    𝗜𝚺₁ ⊢!. □σ ➝ □□σ := provable_sigma_one_complete (by simp)
 
 open LO.Entailment LO.Entailment.FiniteContext
 
@@ -70,12 +70,12 @@ lemma provable_sound {σ} : U ⊢!. □σ → T ⊢!. σ := fun h ↦ by
   have : ℕ ⊧ₘ₀ T.provabilityPred σ := ArithmeticTheory.SoundOn.sound (F := Arithmetic.Hierarchy 𝚺 1) h (by simp)
   simpa [models₀_iff] using this
 
-lemma provable_complete [𝐈𝚺₁ ⪯ U] {σ} : T ⊢!. σ ↔ U ⊢!. □σ :=
+lemma provable_complete [𝗜𝚺₁ ⪯ U] {σ} : T ⊢!. σ ↔ U ⊢!. □σ :=
   ⟨fun h ↦ Entailment.weakening inferInstance (provable_D1 h), provable_sound⟩
 
-instance [𝐏𝐀⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨fun _ ↦ provable_D3⟩
+instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨fun _ ↦ provable_D3⟩
 
-instance [𝐏𝐀⁻ ⪯ T] : T.standardProvability.HBL where
+instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL where
 
 instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.GoedelSound := ⟨fun h ↦ by simpa using provable_sound h⟩
 

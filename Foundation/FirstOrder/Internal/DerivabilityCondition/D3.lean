@@ -11,7 +11,7 @@ open Classical FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 open Entailment Entailment.FiniteContext
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 local prefix:max "#'" => Semiterm.bvar  (V := V) (L := ℒₒᵣ)
 
@@ -25,7 +25,7 @@ local infix:40 " ⤕ " => Semiterm.substs
 
 local infix:40 " ⤔ " => Semiformula.substs
 
-variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝐏𝐀⁻ ⪯ T]
+variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗣𝗔⁻ ⪯ T]
 
 variable {T}
 

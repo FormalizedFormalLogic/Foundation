@@ -30,15 +30,15 @@ variable {ℌ}
 
 namespace Bounded
 
-@[simp] lemma var [V ⊧ₘ* 𝐏𝐀⁻] {k} (i : Fin k) : Bounded fun v : Fin k → V ↦ v i := ⟨#i, by intro _; simp⟩
+@[simp] lemma var [V ⊧ₘ* 𝗣𝗔⁻] {k} (i : Fin k) : Bounded fun v : Fin k → V ↦ v i := ⟨#i, by intro _; simp⟩
 
-@[simp] lemma const [V ⊧ₘ* 𝐏𝐀⁻] {k} (c : V) : Bounded (fun _ : Fin k → V ↦ c) := ⟨&c, by intro _; simp⟩
+@[simp] lemma const [V ⊧ₘ* 𝗣𝗔⁻] {k} (c : V) : Bounded (fun _ : Fin k → V ↦ c) := ⟨&c, by intro _; simp⟩
 
-@[simp] lemma term_retraction [V ⊧ₘ* 𝐏𝐀⁻] (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
+@[simp] lemma term_retraction [V ⊧ₘ* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
     Bounded fun v : Fin k → V ↦ Semiterm.valm V (fun x ↦ v (e x)) id t :=
   ⟨Rew.substs (fun x ↦ #(e x)) t, by intro _; simp [Semiterm.val_substs]⟩
 
-@[simp] lemma term [V ⊧ₘ* 𝐏𝐀⁻] (t : Semiterm ℒₒᵣ V k) : Bounded fun v : Fin k → V => Semiterm.valm V v id t :=
+@[simp] lemma term [V ⊧ₘ* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V k) : Bounded fun v : Fin k → V => Semiterm.valm V v id t :=
   ⟨t, by intro _; simp⟩
 
 lemma retraction {f : (Fin k → V) → V} (hf : Bounded f) (e : Fin k → Fin n) :
@@ -46,7 +46,7 @@ lemma retraction {f : (Fin k → V) → V} (hf : Bounded f) (e : Fin k → Fin n
   rcases hf with ⟨t, ht⟩
   exact ⟨Rew.substs (fun x ↦ #(e x)) t, by intro; simp [Semiterm.val_substs, ht]⟩
 
-lemma comp [V ⊧ₘ* 𝐏𝐀⁻] {k} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V} (hf : Bounded f) (hg : ∀ i, Bounded (g i)) :
+lemma comp [V ⊧ₘ* 𝗣𝗔⁻] {k} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V} (hf : Bounded f) (hg : ∀ i, Bounded (g i)) :
     Bounded (fun v ↦ f (g · v)) where
   bounded := by
     rcases hf.bounded with ⟨tf, htf⟩
@@ -58,14 +58,14 @@ lemma comp [V ⊧ₘ* 𝐏𝐀⁻] {k} {f : (Fin l → V) → V} {g : Fin l → 
 
 end Bounded
 
-lemma Bounded₁.comp [V ⊧ₘ* 𝐏𝐀⁻] {f : V → V} {k} {g : (Fin k → V) → V} (hf : Bounded₁ f) (hg : Bounded g) :
+lemma Bounded₁.comp [V ⊧ₘ* 𝗣𝗔⁻] {f : V → V} {k} {g : (Fin k → V) → V} (hf : Bounded₁ f) (hg : Bounded g) :
     Bounded (fun v ↦ f (g v)) := Bounded.comp hf (l := 1) (fun _ ↦ hg)
 
-lemma Bounded₂.comp [V ⊧ₘ* 𝐏𝐀⁻] {f : V → V → V} {k} {g₁ g₂ : (Fin k → V) → V}
+lemma Bounded₂.comp [V ⊧ₘ* 𝗣𝗔⁻] {f : V → V → V} {k} {g₁ g₂ : (Fin k → V) → V}
     (hf : Bounded₂ f) (hg₁ : Bounded g₁) (hg₂ : Bounded g₂) :
     Bounded (fun v ↦ f (g₁ v) (g₂ v)) := Bounded.comp hf (g := ![g₁, g₂]) (fun i ↦ by cases i using Fin.cases <;> simp [*])
 
-lemma Bounded₃.comp [V ⊧ₘ* 𝐏𝐀⁻] {f : V → V → V → V} {k} {g₁ g₂ g₃ : (Fin k → V) → V}
+lemma Bounded₃.comp [V ⊧ₘ* 𝗣𝗔⁻] {f : V → V → V → V} {k} {g₁ g₂ g₃ : (Fin k → V) → V}
     (hf : Bounded₃ f) (hg₁ : Bounded g₁) (hg₂ : Bounded g₂) (hg₃ : Bounded g₃) :
     Bounded (fun v ↦ f (g₁ v) (g₂ v) (g₃ v)) := Bounded.comp hf (g := ![g₁, g₂, g₃])
       (fun i ↦ by
@@ -74,7 +74,7 @@ lemma Bounded₃.comp [V ⊧ₘ* 𝐏𝐀⁻] {f : V → V → V → V} {k} {g�
 
 namespace Bounded₂
 
-variable [V ⊧ₘ* 𝐏𝐀⁻]
+variable [V ⊧ₘ* 𝗣𝗔⁻]
 
 instance add : Bounded₂ ((· + ·) : V → V → V) where
   bounded := ⟨‘x y. x + y’, by intro _; simp⟩
@@ -135,7 +135,7 @@ end BoldfaceBoundedFunction
 
 namespace HierarchySymbol.Boldface
 
-variable [V ⊧ₘ* 𝐏𝐀⁻]
+variable [V ⊧ₘ* 𝗣𝗔⁻]
 
 variable  {P Q : (Fin k → V) → Prop}
 
@@ -248,7 +248,7 @@ lemma of_iff {f g : (Fin k → V) → V} (H : BoldfaceBoundedFunction f) (h : �
   have : f = g := by funext v; simp [h]
   rcases this; exact H
 
-variable [V ⊧ₘ* 𝐏𝐀⁻]
+variable [V ⊧ₘ* 𝗣𝗔⁻]
 
 @[simp] lemma var {k} (i : Fin k) : BoldfaceBoundedFunction (fun v : Fin k → V ↦ v i) := ⟨by simp, by simp⟩
 
@@ -266,7 +266,7 @@ namespace HierarchySymbol.Boldface
 
 open BoldfaceBoundedFunction
 
-variable [V ⊧ₘ* 𝐏𝐀⁻]
+variable [V ⊧ₘ* 𝗣𝗔⁻]
 
 lemma bcomp₁ {k} {P : V → Prop} {f : (Fin k → V) → V} [hP : ℌ.BoldfacePred P] (hf : BoldfaceBoundedFunction f) :
     ℌ.Boldface fun v ↦ P (f v) :=
@@ -312,7 +312,7 @@ lemma bcomp₄_zero {k} {R : V → V → V → V → Prop} {f₁ f₂ f₃ f₄ 
 
 end HierarchySymbol.Boldface
 
-variable [V ⊧ₘ* 𝐏𝐀⁻]
+variable [V ⊧ₘ* 𝗣𝗔⁻]
 
 lemma HierarchySymbol.BoldfaceFunction.bcomp {k} {F : (Fin l → V) → V} {f : Fin l → (Fin k → V) → V}
     (hF : ℌ.BoldfaceFunction F) (hf : ∀ i, BoldfaceBoundedFunction (f i)) :
