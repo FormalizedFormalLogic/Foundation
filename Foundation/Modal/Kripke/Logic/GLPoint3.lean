@@ -46,9 +46,16 @@ open MaximalConsistentTableau
 
 instance : Hilbert.K ⪯ Hilbert.GLPoint3 := Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
 
+attribute [grind]
+  iff_mem₁_and
+  iff_mem₁_neg
+  iff_mem₂_imp
+  iff_not_mem₁_mem₂
+  iff_not_mem₂_mem₁
+
 open LO.Entailment Modal.Entailment in
 open Formula.Kripke in
-private lemma complete_lemma₁ : Hilbert.GLPoint3 ⊢! ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
+private lemma complete.lemma₁ : Hilbert.GLPoint3 ⊢! ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
   apply CN!_of_CN!_left;
   apply C!_trans ?_ axiomL!;
   apply WeakerThan.pbl (𝓢 := Hilbert.K);
@@ -61,67 +68,41 @@ private lemma complete_lemma₁ : Hilbert.GLPoint3 ⊢! ∼□φ ➝ ◇(□φ �
   have := this h₂;
   simpa using Satisfies.not_def.not.mp this;
 
-private lemma complete_lemma₂ {v : (canonicalModel Hilbert.GLPoint3).World } (h : ∼□φ ∈ v.1.1) :
-  ∃! u, v ≺ u ∧ □φ ∈ u.1.1 ∧ ∼φ ∈ u.1.1 := by
-  obtain ⟨u, Rvu, hu⟩ := iff_mem₁_dia.mp $ mdp_mem₁_provable complete_lemma₁ h;
+private lemma complete.lemma₂ {v : (canonicalModel Hilbert.GLPoint3).World } (h : ∼□φ ∈ v.1.1) :
+  ∃! u, v ≺ u ∧ □φ ∈ u.1.1 ∧ φ ∈ u.1.2 := by
+  obtain ⟨u, Rvu, hu⟩ := iff_mem₁_dia.mp $ mdp_mem₁_provable lemma₁ h;
   use u;
   constructor;
-  . refine ⟨Rvu, iff_mem₁_and.mp hu⟩;
+  . refine ⟨Rvu, by grind⟩;
   . rintro y ⟨Rvy, h₁, h₂⟩;
     rcases Frame.p_connected Rvu Rvy with (Ruy | _ | Ryu);
     . exfalso;
-      apply neither ⟨Ruy $ iff_mem₁_and.mp hu |>.1, iff_mem₁_neg.mp h₂⟩;
+      apply neither ⟨Ruy $ (show □φ ∈ u.1.1 by grind), h₂⟩;
     . tauto;
     . exfalso;
-      apply neither ⟨Ryu h₁, iff_mem₁_neg.mp $ iff_mem₁_and.mp hu |>.2⟩;
+      apply neither ⟨Ryu h₁, by grind⟩;
 
-open Classical in
-instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
-  intro φ;
-  contrapose!;
-  intro hφ;
-  obtain ⟨u, hu⟩ := ValidOnModel.exists_world_of_not $ iff_valid_on_canonicalModel_deducible.not.mpr hφ;
-  replace hu : φ ∈ u.1.2 := truthlemma₂.mpr hu;
+private def complete.filteredModel
+  (v : (canonicalModel Hilbert.GLPoint3).World)
+  (φ : Formula ℕ)
+  (_ : □φ ∈ v.1.1) (_ : φ ∈ v.1.2)
+  : Kripke.Model where
+  World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ φ.subformulas.prebox, □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
+  world_nonempty := ⟨v, by simp⟩
+  Rel := λ x y => x.1 ≺ y.1
+  Val := λ x => (canonicalModel Hilbert.GLPoint3).Val x
 
-  let v : (canonicalModel Hilbert.GLPoint3).World := if h : □φ ∈ u.1.1 then u else
-    (complete_lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose;
-  have hv₁ : □φ ∈ v.1.1 := by
-    dsimp [v];
-    split;
-    . assumption;
-    . rename_i h;
-      exact (complete_lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose_spec.1.2.1;
-  have hv₂ : φ ∈ v.1.2 := by
-    dsimp [v];
-    split;
-    . assumption;
-    . apply iff_mem₁_neg.mp;
-      rename_i h;
-      exact (complete_lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose_spec.1.2.2;
-
-  apply Kripke.not_validOnFrameClass_of_exists_model_world;
-
-  let M : Kripke.Model := {
-    World := {
-      x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ φ.subformulas.prebox, □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2)
-    }
-    world_nonempty := ⟨v, by simp⟩,
-    Rel := λ x y => (canonicalModel Hilbert.GLPoint3).Rel x.1 y.1
-    Val := λ x => (canonicalModel Hilbert.GLPoint3).Val x
-  }
-  use M, ⟨v, by simp⟩;
-  have : M.IsTransitive := ⟨by
-    suffices ∀ (x y z : M.World), (canonicalModel Hilbert.GLPoint3).Rel x y → (canonicalModel Hilbert.GLPoint3).Rel y z → (canonicalModel Hilbert.GLPoint3).Rel x z by tauto;
+private instance : Frame.IsFiniteGLPoint3₂ (complete.filteredModel v φ hv₁ hv₂).toFrame where
+  trans := by
+    suffices ∀ (x y z : (complete.filteredModel v φ _ _)), (canonicalModel Hilbert.GLPoint3).Rel x.1 y.1 → (canonicalModel Hilbert.GLPoint3).Rel y.1 z.1 → (canonicalModel Hilbert.GLPoint3).Rel x.1 z.1 by tauto;
     intro _ _ _;
     apply Frame.trans;
-  ⟩
-  have : M.IsIrreflexive := ⟨by
+  irrefl := by
     rintro ⟨x, rfl | ⟨Rrx, ψ, _, hψ₂, hψ₃, hψ₄⟩⟩;
     . by_contra hC; apply neither ⟨hC hv₁, hv₂⟩;
     . by_contra hC; apply neither ⟨hC hψ₃, hψ₄⟩;
-  ⟩
-  have : M.IsConnected := ⟨by
-    suffices ∀ x y : M.World, x ≠ y → (M.Rel x y ∨ M.Rel y x) by
+  trichotomous := by
+    suffices ∀ x y : (complete.filteredModel v φ _ _), x ≠ y → (x ≺ y ∨ y ≺ x) by
       intro x y;
       have := this x y;
       tauto;
@@ -130,74 +111,91 @@ instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
     . tauto;
     . tauto;
     . apply Frame.p_connected' Rvx Rvy ?_;
-      simp_all [M];
-  ⟩
-  constructor;
-  . exact {
-      world_finite := by
-        dsimp [M];
-        sorry;
-    }
-  . have : ∀ x : M.World, ∀ ψ ∈ φ.subformulas, (Satisfies _ x ψ ↔ ψ ∈ x.1.1.1) := by
-      intro x ψ hψ;
-      induction ψ generalizing x with
-      | hatom => simp [Satisfies, M];
-      | hfalsum => simp [Satisfies];
-      | himp ψ ξ ihψ ihξ =>
-        replace ihψ := ihψ x (by grind);
-        replace ihξ := ihξ x (by grind);
-        simp [
-          Satisfies, ihψ, ihξ,
-          iff_mem₂_imp,
-          ←iff_not_mem₂_mem₁
-        ];
-      | hbox ψ ihψ =>
+      simpa [complete.filteredModel] using hxy;
+  world_finite := by sorry
+
+private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredModel v φ hv₁ hv₂), ∀ ψ ∈ φ.subformulas, (Satisfies _ x ψ ↔ ψ ∈ x.1.1.1) := by
+  intro x ψ hψ;
+  induction ψ generalizing x with
+  | hatom => simp [Satisfies, filteredModel];
+  | hfalsum => simp [Satisfies];
+  | himp ψ ξ ihψ ihξ =>
+    suffices ψ ∈ x.1.1.1 → ξ ∈ x.1.1.1 ↔ ψ ➝ ξ ∈ x.1.1.1 by simpa [Satisfies, (ihψ x (by grind)), (ihξ x (by grind))];
+    grind;
+  | hbox ψ ihψ =>
+    constructor;
+    . contrapose!;
+      intro h;
+      apply Satisfies.not_box_def.mpr;
+      have : □ψ ∉ v.1.1 := by
+        rcases (filteredModel v φ _ _).connected ⟨v, by simp⟩ x with (Rvx | rfl | Rxv);
+        . contrapose! h;
+          apply Rvx;
+          apply mdp_mem₁_provable ?_ $ h;
+          simp;
+        . exact h;
+        . rcases x.2 with (exv | ⟨Rvx, _⟩);
+          . exact exv ▸ h;
+          . exfalso;
+            apply (filteredModel v φ _ _).irrefl _ $ (filteredModel v φ _ _).trans Rxv Rvx;
+      obtain ⟨y, ⟨Rvy, hy₁, hy₂⟩, _⟩ := lemma₂ $ iff_mem₁_neg'.mpr this;
+      use ⟨y, by
+        right;
         constructor;
-        . contrapose!;
-          intro h;
-          apply Satisfies.not_box_def.mpr;
-          have : □ψ ∉ v.1.1 := by
-            rcases M.connected ⟨v, by simp⟩ x with (Rvx | rfl | Rxv);
-            . contrapose! h;
-              apply Rvx;
-              apply mdp_mem₁_provable ?_ $ h;
-              simp;
-            . exact h;
-            . rcases x.2 with (exv | ⟨Rvx, _⟩);
-              . exact exv ▸ h;
-              . exfalso;
-                apply M.irrefl _ $ M.trans Rxv Rvx;
-          obtain ⟨y, ⟨Rvy, hy₁, hy₂⟩, _⟩ := complete_lemma₂ $ iff_mem₁_neg'.mpr this;
-          use ⟨y, by
-            right;
-            constructor;
-            . exact Rvy;
-            . use ψ;
-              refine ⟨?_, ?_, ?_, ?_⟩;
-              . simpa;
-              . apply iff_not_mem₁_mem₂.mp; simpa;
-              . simpa;
-              . exact iff_mem₁_neg.mp $ hy₂;
-          ⟩;
-          constructor;
-          . apply (or_iff_not_imp_right.mp $ M.connected' x _ ?_) ?_;
-            . contrapose! h;
-              subst h;
-              apply hy₁;
-            . by_contra Ryx;
-              apply h;
-              apply Ryx;
-              apply mdp_mem₁_provable ?_ $ hy₁;
-              simp;
-          . apply ihψ _ (by grind) |>.not.mpr;
-            apply iff_mem₁_neg'.mp hy₂;
-        . intro h y Rxy;
-          apply ihψ y (by grind) |>.mpr;
-          apply canonicalModel.def_rel_box_mem₁.mp Rxy;
-          simpa using h;
-    apply this _ _ (by simp) |>.not.mpr;
-    apply iff_not_mem₁_mem₂.mpr;
-    exact hv₂;
+        . exact Rvy;
+        . use ψ;
+          refine ⟨?_, ?_, ?_, ?_⟩;
+          . simpa;
+          . apply iff_not_mem₁_mem₂.mp; simpa;
+          . simpa;
+          . simpa;
+      ⟩;
+      constructor;
+      . apply (or_iff_not_imp_right.mp $ (filteredModel v φ _ _).connected' x _ ?_) ?_;
+        . contrapose! h;
+          subst h;
+          apply hy₁;
+        . by_contra Ryx;
+          apply h;
+          apply Ryx;
+          apply mdp_mem₁_provable ?_ $ hy₁;
+          simp;
+      . apply ihψ _ (by grind) |>.not.mpr;
+        grind;
+    . intro h y Rxy;
+      apply ihψ y (by grind) |>.mpr;
+      apply Rxy;
+      simpa using h;
+
+open Classical in
+open complete in
+instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
+  intro φ;
+  contrapose!;
+  intro hφ;
+  obtain ⟨u, hu⟩ := ValidOnModel.exists_world_of_not $ iff_valid_on_canonicalModel_deducible.not.mpr hφ;
+  replace hu : φ ∈ u.1.2 := truthlemma₂.mpr hu;
+
+  let v : (canonicalModel Hilbert.GLPoint3).World := if h : □φ ∈ u.1.1 then u else (lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose;
+  have hv₁ : □φ ∈ v.1.1 := by
+    unfold v;
+    split;
+    . assumption;
+    . rename_i h;
+      exact (lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose_spec.1.2.1;
+  have hv₂ : φ ∈ v.1.2 := by
+    unfold v;
+    split;
+    . assumption;
+    . rename_i h;
+      exact (lemma₂ $ (iff_mem₁_neg'.mpr h)) |>.choose_spec.1.2.2;
+
+  apply Kripke.not_validOnFrameClass_of_exists_model_world;
+  use (complete.filteredModel v φ hv₁ hv₂), ⟨v, by simp⟩;
+  constructor;
+  . apply Set.mem_setOf_eq.mpr; infer_instance;
+  . apply filteredModel.truthlemma _ _ (by grind) |>.not.mpr;
+    grind;
 ⟩
 
 end
