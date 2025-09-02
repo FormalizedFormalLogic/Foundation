@@ -19,7 +19,7 @@ instance [F.IsTriv] : F.IsS4Point4McK where
   mckinsey := by simp
 
 protected class Frame.IsFiniteTriv (F : Frame) extends F.IsFinite, F.IsTriv
-instance [F.IsFiniteTriv] : F.IsFiniteGrzPoint3 where
+instance [F.IsFiniteTriv] : F.IsFiniteGrzPoint3' where
 
 @[simp] lemma Frame.equality [F.IsTriv] {x y : F} : x ≺ y ↔ x = y := by apply _root_.equality;
 
@@ -100,7 +100,7 @@ instance : Hilbert.KTc ⪱ Hilbert.Triv := by
 
 instance : Hilbert.GrzPoint3 ⪱ Hilbert.Triv := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GrzPoint3 FrameClass.finite_Triv;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass { F : Frame | F.IsFiniteGrzPoint3' } FrameClass.finite_Triv;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
