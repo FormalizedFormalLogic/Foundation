@@ -1,5 +1,6 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Axioms
+import Foundation.ProvabilityLogic.SolovaySentences
 
 namespace LO
 
@@ -134,6 +135,52 @@ lemma TBB_spectrum : (TBB n).spectrum = {n}ᶜ := by
 
 lemma TBB_trace : (TBB n).trace = {n} := by
   simp [Formula.trace, TBB_spectrum, compl_compl];
+
+
+namespace Kripke
+
+open Kripke
+open Formula.Kripke
+
+variable {F : Frame} [Fintype F] {r : F} [F.IsTree r]
+
+lemma Frame.World.finHeight_lt_of_rel {i j : F} (hij : i ≺ j) : Frame.World.finHeight i > Frame.World.finHeight j := fcwHeight_gt_of hij
+
+lemma Frame.World.exists_of_lt_finHeight {i : F} (hn : n < Frame.World.finHeight i) : ∃ j : F, i ≺ j ∧ Frame.World.finHeight j = n := fcwHeight_lt hn
+
+lemma iff_satisfies_mem_finHeight_spectrum
+  (M : Model) [Fintype M] {r : M} [M.IsTree r] {w : M.World}
+  {φ : Formula ℕ} (φ_closed : φ.letterless := by grind)
+  : w ⊧ φ ↔ Frame.World.finHeight w ∈ φ.spectrum := by
+  induction φ generalizing w with
+  | hatom => simp at φ_closed;
+  | hfalsum => simp;
+  | himp φ ψ ihφ ihψ =>
+    rw [Satisfies.imp_def, ihφ (by grind), ihψ (by grind), Formula.spectrum.def_imp]
+    simp;
+    tauto;
+  | hbox φ ihφ =>
+    calc
+      w ⊧ □φ ↔ ∀ v, w ≺ v → v ⊧ φ                                  := by rfl;
+      _      ↔ ∀ v, w ≺ v → (Frame.World.finHeight v ∈ φ.spectrum) := by
+        constructor;
+        . intro h v; rw [←ihφ]; apply h;
+        . intro h v; rw [ihφ]; apply h;
+      _      ↔ ∀ i < (Frame.World.finHeight w), i ∈ φ.spectrum := by
+        constructor;
+        . intro h i hi;
+          obtain ⟨v, Rwv, rfl⟩ := Frame.World.exists_of_lt_finHeight hi;
+          apply h;
+          assumption;
+        . intro h v Rwv;
+          apply h;
+          apply Frame.World.finHeight_lt_of_rel;
+          assumption;
+      _      ↔ Frame.World.finHeight w ∈ (□φ).spectrum := by
+        rw [Formula.spectrum.def_box]; simp;
+
+end Kripke
+
 
 end Modal
 
