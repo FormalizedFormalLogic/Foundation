@@ -164,6 +164,7 @@ import Foundation.ProvabilityLogic.Interpretation
 import Foundation.ProvabilityLogic.Arithmetic
 import Foundation.ProvabilityLogic.SolovaySentences
 import Foundation.ProvabilityLogic.Incompleteness
+import Foundation.ProvabilityLogic.Trace
 
 import Foundation.ProvabilityLogic.N.Soundness
 
