@@ -1,6 +1,13 @@
 import Foundation.Modal.Kripke.Logic.GL.Completeness
 import Foundation.Modal.Kripke.Logic.K4Point3
 import Foundation.Modal.Logic.Global
+import Mathlib.Data.Finite.Sum
+
+
+lemma Finite.of_scoped_subtype {P Q : α → Prop} (h : ∀ x : α, Q x → P x) [Finite { x // P x }] : Finite { x // Q x } := by
+  apply Finite.of_injective (β := { x // P x }) (λ x => ⟨x.1, h _ x.2⟩);
+  simp [Function.Injective];
+
 
 namespace LO.Modal
 
@@ -92,9 +99,9 @@ private def complete.filteredModel
   Rel := λ x y => x.1 ≺ y.1
   Val := λ x => (canonicalModel Hilbert.GLPoint3).Val x
 
-private instance : Frame.IsFiniteGLPoint3₂ (complete.filteredModel v φ hv₁ hv₂).toFrame where
+private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint3₂ (complete.filteredModel v φ hv₁ hv₂).toFrame where
   trans := by
-    suffices ∀ (x y z : (complete.filteredModel v φ _ _)), (canonicalModel Hilbert.GLPoint3).Rel x.1 y.1 → (canonicalModel Hilbert.GLPoint3).Rel y.1 z.1 → (canonicalModel Hilbert.GLPoint3).Rel x.1 z.1 by tauto;
+    suffices ∀ (x y z : (filteredModel v φ _ _)), (canonicalModel Hilbert.GLPoint3).Rel x.1 y.1 → (canonicalModel Hilbert.GLPoint3).Rel y.1 z.1 → (canonicalModel Hilbert.GLPoint3).Rel x.1 z.1 by tauto;
     intro _ _ _;
     apply Frame.trans;
   irrefl := by
@@ -102,7 +109,7 @@ private instance : Frame.IsFiniteGLPoint3₂ (complete.filteredModel v φ hv₁ 
     . by_contra hC; apply neither ⟨hC hv₁, hv₂⟩;
     . by_contra hC; apply neither ⟨hC hψ₃, hψ₄⟩;
   trichotomous := by
-    suffices ∀ x y : (complete.filteredModel v φ _ _), x ≠ y → (x ≺ y ∨ y ≺ x) by
+    suffices ∀ x y : (filteredModel v φ _ _), x ≠ y → (x ≺ y ∨ y ≺ x) by
       intro x y;
       have := this x y;
       tauto;
@@ -111,8 +118,34 @@ private instance : Frame.IsFiniteGLPoint3₂ (complete.filteredModel v φ hv₁ 
     . tauto;
     . tauto;
     . apply Frame.p_connected' Rvx Rvy ?_;
-      simpa [complete.filteredModel] using hxy;
-  world_finite := by sorry
+      simpa [filteredModel] using hxy;
+  world_finite := by
+    dsimp [complete.filteredModel];
+    have : Finite { ψ // ψ ∈ φ.subformulas.prebox ∧ ∼□ψ ∈ v.1.1 } := Finite.of_scoped_subtype (P := λ ψ => ψ ∈ φ.subformulas.prebox) $ by tauto;
+    apply Finite.of_surjective (α := Unit ⊕ { ψ // ψ ∈ φ.subformulas.prebox ∧ ∼□ψ ∈ v.1.1 })
+      (f := λ x => match x with
+        | .inl _ => ⟨v, by simp⟩
+        | .inr ψ =>
+          letI u := lemma₂ (v := v) ψ.2.2;
+          ⟨u.choose, by
+            right;
+            refine ⟨?_, ψ, ?_, ?_, ?_, ?_⟩;
+            . exact u.choose_spec.1.1;
+            . simpa using ψ.2.1;
+            . grind;
+            . exact u.choose_spec.1.2.1;
+            . exact u.choose_spec.1.2.2;
+          ⟩
+      );
+    simp only [
+      Function.Surjective, and_imp, Sum.exists, exists_const, Subtype.exists,
+      Subtype.forall, Finset.mem_preimage, Function.iterate_one, Subtype.mk.injEq, forall_eq_or_imp,
+      true_or, forall_exists_index, true_and
+    ];
+    intro x Rvx ψ hψ hv₁ hv₂ hv₃;
+    right;
+    use ψ, ⟨hψ, by grind⟩;
+    simp [(lemma₂ (iff_mem₁_neg.mpr $ hv₁) |>.choose_spec.2 x $ by simp_all)];
 
 private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredModel v φ hv₁ hv₂), ∀ ψ ∈ φ.subformulas, (Satisfies _ x ψ ↔ ψ ∈ x.1.1.1) := by
   intro x ψ hψ;
@@ -169,7 +202,7 @@ private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredMode
 
 open Classical in
 open complete in
-instance : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
+instance complete : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
   intro φ;
   contrapose!;
   intro hφ;
