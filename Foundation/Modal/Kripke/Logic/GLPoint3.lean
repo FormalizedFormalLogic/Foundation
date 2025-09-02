@@ -20,14 +20,12 @@ open Kripke
 
 namespace Kripke
 
-protected class Frame.IsFiniteGLPoint3 (F : Frame) extends F.IsFiniteGL, F.IsPiecewiseConnected
-protected class Frame.IsFiniteGLPoint3₂ (F : Frame) extends F.IsFiniteGL, F.IsConnected
+protected class Frame.IsFiniteGLPoint3 (F : Frame) extends F.IsFiniteGL, F.IsConnected
 
 abbrev FrameClass.finite_GLPoint3 : FrameClass := { F | F.IsFiniteGLPoint3 }
-abbrev FrameClass.finite_GLPoint3₂ : FrameClass := { F | F.IsFiniteGLPoint3₂ }
 
 instance : blackpoint.IsFiniteGLPoint3 where
-  p_connected := by tauto;
+  trichotomous := by tauto
 
 end Kripke
 
@@ -52,13 +50,6 @@ section
 open MaximalConsistentTableau
 
 instance : Hilbert.K ⪯ Hilbert.GLPoint3 := Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
-
-attribute [grind]
-  iff_mem₁_and
-  iff_mem₁_neg
-  iff_mem₂_imp
-  iff_not_mem₁_mem₂
-  iff_not_mem₂_mem₁
 
 open LO.Entailment Modal.Entailment in
 open Formula.Kripke in
@@ -99,7 +90,7 @@ private def complete.filteredModel
   Rel := λ x y => x.1 ≺ y.1
   Val := λ x => (canonicalModel Hilbert.GLPoint3).Val x
 
-private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint3₂ (complete.filteredModel v φ hv₁ hv₂).toFrame where
+private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint3 (complete.filteredModel v φ hv₁ hv₂).toFrame where
   trans := by
     suffices ∀ (x y z : (filteredModel v φ _ _)), (canonicalModel Hilbert.GLPoint3).Rel x.1 y.1 → (canonicalModel Hilbert.GLPoint3).Rel y.1 z.1 → (canonicalModel Hilbert.GLPoint3).Rel x.1 z.1 by tauto;
     intro _ _ _;
@@ -202,7 +193,7 @@ private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredMode
 
 open Classical in
 open complete in
-instance complete : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3₂ := ⟨by
+instance complete : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := ⟨by
   intro φ;
   contrapose!;
   intro hφ;
