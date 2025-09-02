@@ -1,6 +1,9 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Axioms
 import Foundation.ProvabilityLogic.SolovaySentences
+import Mathlib.Tactic.TFAE
+
+lemma Set.compl_inj_iff {a b : Set α} : aᶜ = bᶜ ↔ a = b := _root_.compl_inj_iff
 
 namespace LO
 
@@ -18,6 +21,13 @@ attribute [grind] letterless.def_imp₁ letterless.def_imp₂ letterless.def_box
 @[simp, grind] lemma def_bot : (⊥ : Formula α).letterless := by simp [letterless]
 @[simp, grind] lemma def_top : (⊤ : Formula α).letterless := by simp [letterless]
 
+end letterless
+
+
+section
+
+variable {φ ψ : Formula α}
+
 @[grind] lemma of_imp_letterless (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ➝ ψ).letterless := by simp_all [letterless]
 @[grind] lemma of_neg_letterless (hφ : φ.letterless) : (∼φ).letterless := by simp_all [letterless]
 @[grind] lemma of_or_letterless (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ⋎ ψ).letterless := by simp_all [letterless]
@@ -27,9 +37,10 @@ attribute [grind] letterless.def_imp₁ letterless.def_imp₂ letterless.def_box
   induction n with
   | zero => simpa [letterless]
   | succ n ih => simp [letterless, ih]
+lemma of_fconj'_letterless {s} {Φ : β → Formula α} (h : ∀ i, (Φ i).letterless) : (⩕ i ∈ s, Φ i).letterless := by
+  sorry;
 
-end letterless
-
+end
 
 /-- spectrum for letterless formula -/
 def spectrum (φ : Formula ℕ) (φ_closed : φ.letterless := by grind) : Set ℕ :=
@@ -57,6 +68,9 @@ variable {φ ψ : Formula ℕ} (hφ : φ.letterless := by grind) (hψ : ψ.lette
     suffices (□^[n](□□φ)).spectrum = (□□^[n](□φ)).spectrum by simpa
     rw [←ih];
     simp;
+
+lemma def_fconj' {s} {Φ : α → Formula ℕ} (hΦ : ∀ i, (Φ i).letterless) : ((⩕ i ∈ s, Φ i).spectrum (of_fconj'_letterless hΦ)) = ⋂ i ∈ s, (Φ i).spectrum (hΦ i) := by
+  sorry;
 
 end spectrum
 
@@ -127,6 +141,8 @@ lemma boxbot_spectrum : (□^[n]⊥ : Formula ℕ).spectrum = { i | i < n } := b
 /-- boxbot instance of axiomT -/
 abbrev TBB (n : ℕ) : Formula ℕ := □^[(n+1)]⊥ ➝ □^[n]⊥
 
+@[simp] lemma TBB_letterless : (TBB n).letterless := by grind
+
 lemma TBB_spectrum : (TBB n).spectrum = {n}ᶜ := by
   rw [Formula.spectrum.def_imp, boxbot_spectrum, boxbot_spectrum];
   ext i;
@@ -149,14 +165,14 @@ lemma Frame.World.finHeight_lt_of_rel {i j : F} (hij : i ≺ j) : Frame.World.fi
 lemma Frame.World.exists_of_lt_finHeight {i : F} (hn : n < Frame.World.finHeight i) : ∃ j : F, i ≺ j ∧ Frame.World.finHeight j = n := fcwHeight_lt hn
 
 lemma iff_satisfies_mem_finHeight_spectrum
-  (M : Model) [Fintype M] {r : M} [M.IsTree r] {w : M.World}
+  {M : Model} [Fintype M] {r : M} [M.IsTree r] {w : M.World}
   {φ : Formula ℕ} (φ_closed : φ.letterless := by grind)
   : w ⊧ φ ↔ Frame.World.finHeight w ∈ φ.spectrum := by
   induction φ generalizing w with
   | hatom => simp at φ_closed;
   | hfalsum => simp;
   | himp φ ψ ihφ ihψ =>
-    rw [Satisfies.imp_def, ihφ (by grind), ihψ (by grind), Formula.spectrum.def_imp]
+    rw [Satisfies.imp_def, ihφ, ihψ, Formula.spectrum.def_imp]
     simp;
     tauto;
   | hbox φ ihφ =>
@@ -179,8 +195,77 @@ lemma iff_satisfies_mem_finHeight_spectrum
       _      ↔ Frame.World.finHeight w ∈ (□φ).spectrum := by
         rw [Formula.spectrum.def_box]; simp;
 
+lemma spectrum_TFAE {φ : Formula ℕ} (_ : φ.letterless := by grind)
+  : [
+  n ∈ φ.spectrum,
+  ∀ M : Model, ∀ r, [Fintype M] → [M.IsTree r] → ∀ w : M.World, Frame.World.finHeight w = n → w ⊧ φ,
+  ∃ M : Model, ∃ r, ∃ _ : Fintype M, ∃ _ : M.IsTree r, ∃ w : M.World, Frame.World.finHeight w = n ∧ w ⊧ φ
+].TFAE := by
+  tfae_have 1 → 2 := by
+    intro h M _ r _ w hw;
+    apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mpr;
+    apply hw ▸ h;
+  tfae_have 2 → 3 := by
+    intro h;
+    sorry;
+  tfae_have 3 → 1 := by
+    rintro ⟨M, _, _, _, w, rfl, h⟩;
+    apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mp h;
+  tfae_finish;
+
 end Kripke
 
+lemma iff_GL_provable_spectrum_Univ {φ : Formula ℕ} (_ : φ.letterless := by grind)
+  : Hilbert.GL ⊢! φ ↔ φ.spectrum = Set.univ := by
+  have := Logic.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree (φ := φ);
+  apply Iff.trans this;
+  simp only [Set.eq_univ_iff_forall]
+  constructor;
+  . intro h n;
+    apply Kripke.spectrum_TFAE (φ := φ) (by grind) |>.out 1 0 |>.mp;
+    sorry;
+  . intro h;
+    sorry;
+
+lemma iff_GL_provable_C_subset_spectrum {φ ψ : Formula ℕ}
+  (_ : φ.letterless := by grind)
+  (_ : ψ.letterless := by grind)
+  : Hilbert.GL ⊢! (φ ➝ ψ) ↔ φ.spectrum ⊆ ψ.spectrum := by
+  apply Iff.trans $ iff_GL_provable_spectrum_Univ;
+  rw [Formula.spectrum.def_imp];
+  suffices (∀ i, i ∉ φ.spectrum ∨ i ∈ ψ.spectrum) ↔ φ.spectrum ⊆ ψ.spectrum by
+    simpa [Set.eq_univ_iff_forall];
+  constructor <;>
+  . intro h i;
+    have := @h i;
+    tauto;
+
+lemma iff_GL_provable_E_eq_spectrum {φ ψ : Formula ℕ}
+  (_ : φ.letterless := by grind)
+  (_ : ψ.letterless := by grind)
+  : Hilbert.GL ⊢! φ ⭤ ψ ↔ φ.spectrum = ψ.spectrum := by
+  have hφ := iff_GL_provable_C_subset_spectrum (φ := φ) (ψ := ψ);
+  have hψ := iff_GL_provable_C_subset_spectrum (φ := ψ) (ψ := φ);
+  constructor;
+  . intro h
+    apply Set.Subset.antisymm;
+    . apply hφ.mp; cl_prover [h]
+    . apply hψ.mp; cl_prover [h]
+  . intro h;
+    replace hφ := hφ.mpr (h.subset);
+    replace hψ := hψ.mpr (h.symm.subset)
+    cl_prover [hφ, hψ];
+
+lemma GL_trace_TBB_normalization {φ : Formula ℕ} (_ : φ.letterless := by grind) (h : φ.trace.Finite) : Hilbert.GL ⊢! φ ⭤ (⩕ n ∈ h.toFinset, (TBB n)) := by
+  apply iff_GL_provable_E_eq_spectrum (by simpa) (Formula.of_fconj'_letterless (by simp)) |>.mpr;
+  calc
+    φ.spectrum = ⋂ i ∈ φ.trace, (TBB i).spectrum          := by
+      have : φ.trace = ⋃ i ∈ φ.trace, (TBB i).trace := by ext i; simp [TBB_trace];
+      simpa [Formula.trace] using Set.compl_inj_iff.mpr this;
+    _          = ((⩕ n ∈ h.toFinset, (TBB n))).spectrum _ := by
+      ext i;
+      rw [Formula.spectrum.def_fconj' (by simp)];
+      simp;
 
 end Modal
 
