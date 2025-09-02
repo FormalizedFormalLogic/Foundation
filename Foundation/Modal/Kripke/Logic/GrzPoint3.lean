@@ -21,11 +21,14 @@ namespace Kripke
 
 variable {F : Frame}
 
-protected class Frame.IsFiniteGrzPoint3 (F : Frame) extends F.IsFinite, F.IsPartialOrder, F.IsPiecewiseStronglyConnected where
+protected class Frame.IsFiniteGrzPoint3 (F : Frame) extends F.IsFinite, F.IsPartialOrder, F.IsStronglyConnected where
+protected class Frame.IsFiniteGrzPoint3' (F : Frame) extends F.IsFinite, F.IsPartialOrder, F.IsPiecewiseStronglyConnected where
 
 abbrev FrameClass.finite_GrzPoint3 : FrameClass := { F | F.IsFiniteGrzPoint3  }
 
 instance [F.IsFiniteGrzPoint3] : F.IsFiniteGrzPoint2 where
+
+instance : whitepoint.IsStronglyConnected := ⟨by tauto⟩
 
 end Kripke
 
@@ -33,6 +36,13 @@ end Kripke
 namespace Logic.GrzPoint3.Kripke
 
 instance : Sound Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
+  . exact validate_AxiomGrz_of_finite_strict_preorder;
+  . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
+
+instance : Sound Hilbert.GrzPoint3 { F : Frame | F.IsFiniteGrzPoint3' } := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;

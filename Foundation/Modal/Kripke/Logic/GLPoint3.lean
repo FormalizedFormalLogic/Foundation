@@ -21,6 +21,7 @@ open Kripke
 namespace Kripke
 
 protected class Frame.IsFiniteGLPoint3 (F : Frame) extends F.IsFiniteGL, F.IsConnected
+protected class Frame.IsFiniteGLPoint3' (F : Frame) extends F.IsFiniteGL, F.IsPiecewiseConnected
 
 abbrev FrameClass.finite_GLPoint3 : FrameClass := { F | F.IsFiniteGLPoint3 }
 
@@ -33,6 +34,13 @@ end Kripke
 namespace Hilbert.GLPoint3.Kripke
 
 instance : Sound Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
+  . exact validate_AxiomL_of_finite_trans_irrefl;
+  . exact validate_WeakPoint3_of_weakConnected;
+
+instance : Sound Hilbert.GLPoint3 { F : Frame | F.IsFiniteGLPoint3' } := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
