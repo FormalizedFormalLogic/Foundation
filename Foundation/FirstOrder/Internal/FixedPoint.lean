@@ -39,7 +39,7 @@ lemma substNumeralParams_app_quote (σ τ : Semisentence ℒₒᵣ (k + 1)) :
 section
 
 def ssnum : 𝚺₁.Semisentence 3 := .mkSigma
-  “y φ x. ∃ n, !numeralGraph n x ∧ ∃ v, !consDef v n 0 ∧ !(substsGraph ℒₒᵣ) y v φ”
+  “y φ x. ∃ n, !numeralGraph n x ∧ ∃ v, !adjoinDef v n 0 ∧ !(substsGraph ℒₒᵣ) y v φ”
 
 lemma substNumeral.defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
   intro v; simp [ssnum, (substs.defined (L := ℒₒᵣ)).df.iff, substNumeral]
