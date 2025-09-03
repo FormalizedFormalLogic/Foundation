@@ -40,7 +40,11 @@ variable {φ ψ : Formula α}
   induction n with
   | zero => simpa [letterless]
   | succ n ih => simp [letterless, ih]
-lemma of_fconj'_letterless {s} {Φ : β → Formula α} (h : ∀ i, (Φ i).letterless) : (⩕ i ∈ s, Φ i).letterless := by
+
+lemma of_fconj_letterless {Φ : Finset (Formula α)} (h : ∀ φ ∈ Φ, φ.letterless) : (Φ.conj).letterless := by
+  sorry;
+
+lemma of_fconj'_letterless {s : Finset β} {Φ : β → Formula α} (h : ∀ i, (Φ i).letterless) : (⩕ i ∈ s, Φ i).letterless := by
   sorry;
 
 end
@@ -87,6 +91,8 @@ variable {φ ψ : Formula ℕ} (hφ : φ.letterless := by grind) (hψ : ψ.lette
       apply h;
       omega;
 
+lemma def_fconj {Φ : Finset (Formula _)} (hΦ : ∀ φ ∈ Φ, φ.letterless) : (Φ.conj.spectrum (of_fconj_letterless hΦ)) = ⋂ φ ∈ Φ, φ.spectrum := by
+  sorry;
 
 lemma def_fconj' {s} {Φ : α → Formula ℕ} (hΦ : ∀ i, (Φ i).letterless) : ((⩕ i ∈ s, Φ i).spectrum (of_fconj'_letterless hΦ)) = ⋂ i ∈ s, (Φ i).spectrum (hΦ i) := by
   sorry;
@@ -256,9 +262,9 @@ section
 open Formula
 open LO.Entailment Modal.Entailment
 
-variable {φ ψ : Formula ℕ}
+variable {φ ψ : Formula ℕ} (_ : φ.letterless := by grind) (_ : ψ.letterless := by grind)
 
-lemma iff_GL_provable_spectrum_Univ (_ : φ.letterless := by grind)
+lemma iff_GL_provable_spectrum_Univ
   : Modal.GL ⊢! φ ↔ φ.spectrum = Set.univ := by
   suffices Hilbert.GL ⊢! φ ↔ φ.spectrum = Set.univ by simpa;
   have := Logic.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree (φ := φ);
@@ -271,10 +277,7 @@ lemma iff_GL_provable_spectrum_Univ (_ : φ.letterless := by grind)
   . intro h;
     sorry;
 
-lemma iff_GL_provable_C_subset_spectrum
-  (_ : φ.letterless := by grind)
-  (_ : ψ.letterless := by grind)
-  : Modal.GL ⊢! (φ ➝ ψ) ↔ φ.spectrum ⊆ ψ.spectrum := by
+lemma iff_GL_provable_C_subset_spectrum : Modal.GL ⊢! (φ ➝ ψ) ↔ φ.spectrum ⊆ ψ.spectrum := by
   apply Iff.trans $ iff_GL_provable_spectrum_Univ;
   rw [Formula.spectrum.def_imp];
   suffices (∀ i, i ∉ φ.spectrum ∨ i ∈ ψ.spectrum) ↔ φ.spectrum ⊆ ψ.spectrum by
@@ -284,10 +287,7 @@ lemma iff_GL_provable_C_subset_spectrum
     have := @h i;
     tauto;
 
-lemma iff_GL_provable_E_eq_spectrum
-  (_ : φ.letterless := by grind)
-  (_ : ψ.letterless := by grind)
-  : Modal.GL ⊢! φ ⭤ ψ ↔ φ.spectrum = ψ.spectrum := by
+lemma iff_GL_provable_E_eq_spectrum : Modal.GL ⊢! φ ⭤ ψ ↔ φ.spectrum = ψ.spectrum := by
   have hφ := iff_GL_provable_C_subset_spectrum (φ := φ) (ψ := ψ);
   have hψ := iff_GL_provable_C_subset_spectrum (φ := ψ) (ψ := φ);
   constructor;
@@ -300,7 +300,7 @@ lemma iff_GL_provable_E_eq_spectrum
     replace hψ := hψ.mpr (h.symm.subset)
     cl_prover [hφ, hψ];
 
-lemma GL_trace_TBB_normalization (_ : φ.letterless := by grind) (h : φ.trace.Finite) : Modal.GL ⊢! φ ⭤ (⩕ n ∈ h.toFinset, (TBB n)) := by
+lemma GL_trace_TBB_normalization (h : φ.trace.Finite) : Modal.GL ⊢! φ ⭤ (⩕ n ∈ h.toFinset, (TBB n)) := by
   apply iff_GL_provable_E_eq_spectrum (by simpa) (Formula.of_fconj'_letterless (by simp)) |>.mpr;
   calc
     φ.spectrum = ⋂ i ∈ φ.trace, (TBB i).spectrum          := by
@@ -311,7 +311,7 @@ lemma GL_trace_TBB_normalization (_ : φ.letterless := by grind) (h : φ.trace.F
       rw [Formula.spectrum.def_fconj' (by simp)];
       simp;
 
-lemma GL_spectrum_TBB_normalization (_ : φ.letterless := by grind) (h : φ.spectrum.Finite) : Modal.GL ⊢! φ ⭤ ∼(⩕ n ∈ h.toFinset, (TBB n)) := by
+lemma GL_spectrum_TBB_normalization (h : φ.spectrum.Finite) : Modal.GL ⊢! φ ⭤ ∼(⩕ n ∈ h.toFinset, (TBB n)) := by
   have h' : (∼φ).trace.Finite := by rwa [Formula.neg_trace_spectrum];
   replace : Modal.GL ⊢! φ ⭤ ∼⩕ n ∈ h'.toFinset, TBB n := by
     have := GL_trace_TBB_normalization (φ := ∼φ) (by grind) h';
@@ -534,13 +534,33 @@ lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum {φ : Modal.Formula 
         use Y;
         tauto;
     _ ↔ ∃ Y : Finset (Formula ℕ), ∃ hY : ∀ ψ ∈ Y, ψ ∈ X, ⋂ ψ ∈ Y, Formula.spectrum ψ (by grind) ⊆ φ.spectrum := by
-      sorry;
+      constructor;
+      . rintro ⟨Y, hY₁, hY₂⟩;
+        use Y, hY₁;
+        convert hY₂;
+        rw [Formula.spectrum.def_fconj];
+        intro ψ hψ;
+        apply Xll ψ;
+        apply hY₁;
+        assumption;
+      . rintro ⟨Y, hY₁, hY₂⟩;
+        use Y;
+        constructor;
+        . exact hY₁;
+        . rw [Formula.spectrum.def_fconj];
+          . exact hY₂;
+          . intro ψ hψ;
+            apply Xll;
+            apply hY₁;
+            assumption;
     _ ↔ (⋂ ψ ∈ X, ψ.spectrum) ⊆ φ.spectrum (by simpa) := by
       constructor;
       . rintro ⟨Y, hY₁, hY₂⟩ i hi;
         apply hY₂;
         simp_all;
-      . sorry;
+      . rcases hSR with hX | hφ;
+        . sorry;
+        . sorry;
 
 lemma Logic.sumQuasiNormal.iff_subset {L : Logic ℕ} {X Y} : L.sumQuasiNormal Y ⊆ L.sumQuasiNormal X ↔ ∀ ψ ∈ Y, L.sumQuasiNormal X ⊢! ψ := by
   suffices (∀ φ, L.sumQuasiNormal Y ⊢! φ → L.sumQuasiNormal X ⊢! φ) ↔ (∀ ψ ∈ Y, L.sumQuasiNormal X ⊢! ψ) by
