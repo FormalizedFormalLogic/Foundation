@@ -53,7 +53,7 @@ open Modal Logic
 open Entailment
 
 variable {T : ArithmeticTheory} [T.Δ₁]
-         {f : T.PLRealization}
+         {f : T.StandardRealization}
          {A B : Modal.Formula _}
 
 
@@ -120,7 +120,7 @@ lemma iff_not_modalIndep_not_bewIndep :
 
 lemma unprovable_independency_of_consistency (height : T.standardProvability.height = ⊤) :
     T ⊬. T.standardProvability.indep (T.standardProvability.con) := by
-  let g : T.PLRealization := ⟨λ _ => ⊥⟩
+  let g : T.StandardRealization := ⟨λ _ => ⊥⟩
   suffices T ⊬. g (Modal.independency (∼□⊥)) by
     have H₁ := iff_modalIndep_bewIndep (f := g) (T := T) (A := ∼□⊥);
     have H₂ := T.standardProvability.indep_iff_distribute (T := T)
@@ -135,7 +135,7 @@ lemma unprovable_independency_of_consistency (height : T.standardProvability.hei
 
 lemma unrefutable_independency_of_consistency (height : T.standardProvability.height = ⊤):
     T ⊬. ∼T.standardProvability.indep (T.standardProvability.con) := by
-  let g : T.PLRealization := ⟨λ _ => ⊥⟩
+  let g : T.StandardRealization := ⟨λ _ => ⊥⟩
   suffices T ⊬. ∼g (Modal.independency (∼□⊥)) by
     have H₁ := iff_not_modalIndep_not_bewIndep (f := g) (T := T) (A := ∼□⊥);
     have H₂ : T ⊢!.

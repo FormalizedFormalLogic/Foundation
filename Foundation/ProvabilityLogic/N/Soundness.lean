@@ -1,4 +1,4 @@
-import Foundation.ProvabilityLogic.Interpretation
+import Foundation.ProvabilityLogic.Realization
 
 namespace LO.ProvabilityLogic
 
