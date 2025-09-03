@@ -1,4 +1,4 @@
-import Foundation.ProvabilityLogic.Incompleteness
+import Foundation.ProvabilityLogic.Provability
 import Foundation.FirstOrder.Internal.DerivabilityCondition
 import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.Logic.HilbertStyle.Cl
@@ -18,7 +18,7 @@ namespace ProvabilityLogic
 structure Realization (𝔅 : Provability T₀ T) where
   val : ℕ → FirstOrder.Sentence L
 
-abbrev _root_.LO.FirstOrder.ArithmeticTheory.PLRealization (T : ArithmeticTheory) [T.Δ₁] := Realization T.standardProvability
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.StandardRealization (T : ArithmeticTheory) [T.Δ₁] := Realization T.standardProvability
 
 namespace Realization
 

@@ -33,7 +33,7 @@ lemma GL_S_TFAE :
     [
       Modal.GL ⊢! (A.rflSubformula.conj ➝ A),
       Modal.S ⊢! A,
-      ∀ f : T.PLRealization, ℕ ⊧ₘ₀ (f A)
+      ∀ f : T.StandardRealization, ℕ ⊧ₘ₀ (f A)
     ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;
@@ -151,7 +151,7 @@ lemma GL_S_TFAE :
       simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;
 
-theorem S.arithmetical_completeness_iff : Modal.S ⊢! A ↔ ∀ f : T.PLRealization, ℕ ⊧ₘ₀ f A := GL_S_TFAE.out 1 2
+theorem S.arithmetical_completeness_iff : Modal.S ⊢! A ↔ ∀ f : T.StandardRealization, ℕ ⊧ₘ₀ f A := GL_S_TFAE.out 1 2
 
 end ProvabilityLogic
 

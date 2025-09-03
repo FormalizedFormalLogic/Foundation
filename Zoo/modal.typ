@@ -120,6 +120,7 @@
       "LO.Modal.Triv": $Logic("Triv")$,
       "LO.Modal.Univ": $bot$,
       "LO.Modal.Ver": $Logic("Ver")$,
+      "𝗣𝗔.ProvabilityLogic": [Provability logic of $Theory("PA")$]
     ),
     width: 980pt,
   )

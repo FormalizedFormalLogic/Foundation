@@ -1,6 +1,6 @@
 import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.FirstOrder.Internal.DerivabilityCondition
-import Foundation.ProvabilityLogic.Incompleteness
+import Foundation.ProvabilityLogic.Provability
 import Mathlib.Data.Nat.PartENat
 
 namespace PartENat
@@ -46,6 +46,9 @@ open Classical
 variable (𝔅)
 
 noncomputable def height : PartENat := PartENat.find (T ⊢!. 𝔅^[·] ⊥)
+
+noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.height (T : ArithmeticTheory) [T.Δ₁] : PartENat :=
+  T.standardProvability.height
 
 variable {𝔅}
 
@@ -93,12 +96,12 @@ lemma hight_eq_zero_of_inconsistent (h : Entailment.Inconsistent T) : 𝔅.heigh
   simpa using
     𝔅.height_le_of_boxBot (T := T) (n := 0) (by simpa using Axiom.provable_iff.mpr (h ⊥))
 
-lemma hight_eq_top_of_sigma1_sound (T : Theory ℒₒᵣ) [T.Δ₁] [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :
-    T.standardProvability.height = ⊤ :=
+lemma hight_eq_top_of_sigma1_sound (T : ArithmeticTheory) [T.Δ₁] [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :
+    T.height = ⊤ :=
   hight_eq_top_of_sound_and_consistent _
 
-@[simp] lemma ISigma1_hight_eq_top : 𝗜𝚺₁.standardProvability.height = ⊤ := hight_eq_top_of_sigma1_sound 𝗜𝚺₁
+@[simp] lemma ISigma1_hight_eq_top : 𝗜𝚺₁.height = ⊤ := hight_eq_top_of_sigma1_sound 𝗜𝚺₁
 
-@[simp] lemma Peano_hight_eq_top : 𝗣𝗔.standardProvability.height = ⊤ := hight_eq_top_of_sigma1_sound 𝗣𝗔
+@[simp] lemma Peano_hight_eq_top : 𝗣𝗔.height = ⊤ := hight_eq_top_of_sigma1_sound 𝗣𝗔
 
 end LO.ProvabilityLogic.Provability
