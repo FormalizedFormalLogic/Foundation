@@ -1,6 +1,9 @@
 import Foundation.Modal.Formula
 import Foundation.Modal.Axioms
 import Foundation.ProvabilityLogic.SolovaySentences
+import Foundation.ProvabilityLogic.S.Completeness
+import Foundation.Modal.Logic.S.Basic
+import Foundation.Modal.Logic.Dz.Basic
 import Mathlib.Tactic.TFAE
 
 lemma Set.compl_inj_iff {a b : Set α} : aᶜ = bᶜ ↔ a = b := _root_.compl_inj_iff
@@ -146,7 +149,7 @@ end trace
 lemma neg_trace_spectrum {φ : Formula ℕ} (hφ : φ.letterless := by grind) : (∼φ).trace = φ.spectrum := by rw [trace.def_neg]; simp [trace];
 lemma neg_spectrum_trace {φ : Formula ℕ} (hφ : φ.letterless := by grind) : (∼φ).spectrum = φ.trace := by rw [spectrum.def_neg]; simp [trace];
 
-lemma trace_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.letterless) : φ.trace.Finite ∨ φ.traceᶜ.Finite := by
+lemma trace_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.letterless := by grind) : φ.trace.Finite ∨ φ.traceᶜ.Finite := by
   simp only [trace, compl_compl];
   apply spectrum_finite_or_cofinite hφ |>.symm;
 
@@ -349,10 +352,80 @@ lemma iff_provable_GLPoint3_letterless_provable_GL : Modal.GLPoint3 ⊢! φ ↔ 
     intro h;
     sorry;
 
+
+end
+
+
+
+section
+
+protected def GLAlpha (α : Set ℕ) : Logic ℕ := Modal.GL.sumQuasiNormal (α.image (λ i => TBB i))
+
+protected def GLBetaMinus (β : Set ℕ) (hβ : βᶜ.Finite) : Logic ℕ := Modal.GL.sumQuasiNormal {∼(⩕ n ∈ hβ.toFinset, (TBB n))}
+
+protected def SBeta (β : Set ℕ) (hβ : βᶜ.Finite) : Logic ℕ := Modal.S ∩ Modal.GLBetaMinus β hβ
+
+protected def DzBeta (β : Set ℕ) (hβ : βᶜ.Finite) : Logic ℕ := Modal.Dz ∩ Modal.GLBetaMinus β hβ
+
 end
 
 end Modal
 
+
+section
+
+open FirstOrder ProvabilityLogic
+
+
+/-- Realization which any propositional variable maps to `⊤` -/
+abbrev FirstOrder.ArithmeticTheory.trivialPLRealization (T : ArithmeticTheory) [T.Δ₁] : T.PLRealization := ⟨λ _ => ⊤⟩
+
+variable {T : ArithmeticTheory} [T.Δ₁]
+
+namespace Modal
+
+def Formula.regular (T : ArithmeticTheory) [T.Δ₁] (φ : Modal.Formula ℕ) := ℕ ⊧ₘ₀ (T.trivialPLRealization φ)
+
+def Formula.singular (T : ArithmeticTheory) [T.Δ₁] (φ : Modal.Formula ℕ) := ¬(φ.regular T)
+
+variable {φ : Modal.Formula _} (_ : φ.letterless)
+
+lemma iff_regular_trace_finite : φ.regular T ↔ φ.trace.Finite := by
+  constructor;
+  . contrapose!;
+    intro h;
+    have := GL_spectrum_TBB_normalization (by grind) $ show φ.spectrum.Finite by
+      simpa [Formula.trace] using or_iff_not_imp_left.mp Formula.trace_finite_or_cofinite h;
+    sorry;
+  . intro h;
+    have := GL_trace_TBB_normalization (by grind) h;
+    sorry;
+
+lemma letterless_arithmetical_completeness [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : [
+  φ.spectrum = Set.univ,
+  Modal.GL ⊢! φ,
+  T ⊢!. T.trivialPLRealization φ
+].TFAE := by
+  tfae_have 3 ↔ 2 := by
+    apply Iff.trans ?_ $ GL.arithmetical_completeness_sound_iff (T := T);
+    constructor;
+    . intro h f;
+      have e : T.trivialPLRealization φ = f φ := by
+        clear h;
+        induction φ with
+        | hfalsum => simp;
+        | hatom => simp_all [Formula.letterless.not_atom];
+        | himp φ ψ ihφ ihψ => simp [Realization.interpret, ihφ (by grind), ihψ (by grind)];
+        | hbox φ ihφ => simp [Realization.interpret, ihφ (by grind)];
+      exact e ▸ h;
+    . intro h;
+      apply h;
+  tfae_have 2 ↔ 1 := iff_GL_provable_spectrum_Univ
+  tfae_finish;
+
+end Modal
+
+end
 
 
 end LO
