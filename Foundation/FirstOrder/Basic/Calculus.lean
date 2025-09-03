@@ -438,7 +438,7 @@ theorem Theory.deduction! [L.DecidableEq] {T : Theory L} {φ ψ} (b : insert φ 
 lemma Theory.close!_iff [L.DecidableEq] {T : Theory L} {φ} : T ⊢! ∀∀φ ↔ T ⊢! φ := by
   constructor
   · intro h
-    apply Theory.deduction! (Entailment.Axiomatized.cons! _ _) ⨀ h
+    apply Theory.deduction! (Entailment.Axiomatized.adjoin! _ _) ⨀ h
   · intro h
     exact Derivation.toClose! h
 
@@ -514,8 +514,8 @@ def deduction [L.DecidableEq] {A : Axiom L} {σ τ} (b : insert σ A ⊢ τ) : A
 instance [L.DecidableEq] : Entailment.Deduction (Axiom L) where
   ofInsert := Axiom.deduction
   inv {σ τ A} b :=
-    have : cons σ A ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
-    this ⨀ (Axiomatized.cons _ _)
+    have : adjoin σ A ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
+    this ⨀ (Axiomatized.adjoin _ _)
 
 variable [L.DecidableEq] {T : Theory L}
 

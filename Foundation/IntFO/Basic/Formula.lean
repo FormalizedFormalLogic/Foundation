@@ -237,9 +237,9 @@ abbrev Theoryᵢ (L : Language) := Set (SyntacticFormulaᵢ L)
 
 abbrev ClosedTheoryᵢ (L : Language) := Set (Sentenceᵢ L)
 
-instance : Collection (SyntacticFormulaᵢ L) (Theoryᵢ L) := inferInstance
+instance : AdjunctiveSet (SyntacticFormulaᵢ L) (Theoryᵢ L) := inferInstance
 
-instance : Collection (Sentenceᵢ L) (ClosedTheoryᵢ L) := inferInstance
+instance : AdjunctiveSet (Sentenceᵢ L) (ClosedTheoryᵢ L) := inferInstance
 
 namespace Theoryᵢ
 

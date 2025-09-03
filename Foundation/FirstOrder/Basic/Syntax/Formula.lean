@@ -674,9 +674,9 @@ abbrev Theory (L : Language) := Set (SyntacticFormula L)
 
 abbrev ClosedTheory (L : Language) := Set (Sentence L)
 
-instance : Collection (SyntacticFormula L) (Theory L) := inferInstance
+instance : AdjunctiveSet (SyntacticFormula L) (Theory L) := inferInstance
 
-instance : Collection (Sentence L) (ClosedTheory L) := inferInstance
+instance : AdjunctiveSet (Sentence L) (ClosedTheory L) := inferInstance
 
 def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
 

@@ -192,24 +192,24 @@ lemma two_iff {v : V} : IsUTermVec L 2 v ↔ ∃ t₁ t₂, IsUTerm L t₁ ∧ I
     exact ⟨t₁, t₂, by simpa using h.nth (show 0 < 2 by simp), by simpa using h.nth (show 1 < 2 by simp), rfl⟩
   · rintro ⟨t₁, t₂, h₁, h₂, rfl⟩; exact ⟨by simp [one_add_one_eq_two], by simp [lt_two_iff_le_one, le_one_iff_eq_zero_or_one, h₁, h₂]⟩
 
-@[simp] lemma cons {n w t : V} (h : IsUTermVec L n w) (ht : IsUTerm L t) : IsUTermVec L (n + 1) (t ∷ w) :=
+@[simp] lemma adjoin {n w t : V} (h : IsUTermVec L n w) (ht : IsUTerm L t) : IsUTermVec L (n + 1) (t ∷ w) :=
   ⟨by simp [h.lh], fun i hi ↦ by
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simpa
     · simpa using h.nth (by simpa using hi)⟩
 
-@[simp] lemma cons₁_iff {t : V} :
+@[simp] lemma adjoin₁_iff {t : V} :
     IsUTermVec L 1 (?[t] : V) ↔ IsUTerm L t := by
   constructor
   · intro h; simpa using h.nth (i := 0) (by simp)
-  · intro h; simpa using empty.cons h
+  · intro h; simpa using empty.adjoin h
 
 @[simp] lemma mkSeq₂_iff {t₁ t₂ : V} :
     IsUTermVec L 2 (?[t₁, t₂] : V) ↔ IsUTerm L t₁ ∧ IsUTerm L t₂ := by
   constructor
   · intro h; exact ⟨by simpa using h.nth (i := 0) (by simp), by simpa using h.nth (i := 1) (by simp)⟩
   · rintro ⟨h₁, h₂⟩
-    simpa [one_add_one_eq_two] using (cons₁_iff.mpr h₂).cons h₁
+    simpa [one_add_one_eq_two] using (adjoin₁_iff.mpr h₂).adjoin h₁
 
 section
 
@@ -621,10 +621,10 @@ lemma nth_resultVec {k w i : V} (hw : IsUTermVec L k w) (hi : i < k) :
 
 lemma resultVec_cons {k w t : V} (hw : IsUTermVec L k w) (ht : IsUTerm L t) :
     c.resultVec L param (k + 1) (t ∷ w) = c.result L param t ∷ c.resultVec L param k w :=
-  nth_ext (by simp [hw, hw.cons ht]) (by
+  nth_ext (by simp [hw, hw.adjoin ht]) (by
     intro i hi
-    have hi : i < k + 1 := by simpa [hw.cons ht, resultVec_lh] using hi
-    rw [c.nth_resultVec L param (hw.cons ht) hi]
+    have hi : i < k + 1 := by simpa [hw.adjoin ht, resultVec_lh] using hi
+    rw [c.nth_resultVec L param (hw.adjoin ht) hi]
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp
     · simp [c.nth_resultVec L param hw (by simpa using hi)])
@@ -826,13 +826,13 @@ lemma IsSemitermVec.iff {k n v : V} : IsSemitermVec L k n v ↔ (len v = k ∧ �
     exact ⟨by simpa using h.nth (i := 0) (by simp),
       IsSemitermVec.iff.mpr ⟨by simpa using h.lh, fun i hi ↦ by simpa using h.nth (show i + 1 < k + 1 by simp [hi])⟩⟩
   · rintro ⟨ht, hw⟩
-    exact ⟨hw.isUTerm.cons ht.isUTerm, by
+    exact ⟨hw.isUTerm.adjoin ht.isUTerm, by
     intro i hi
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp [ht.bv]
     · simpa using hw.nth (by simpa using hi) |>.bv⟩
 
-lemma SemitermVec.cons {n m w t : V} (h : IsSemitermVec L n m w) (ht : IsSemiterm L m t) : IsSemitermVec L (n + 1) m (t ∷ w) :=
+lemma SemitermVec.adjoin {n m w t : V} (h : IsSemitermVec L n m w) (ht : IsSemiterm L m t) : IsSemitermVec L (n + 1) m (t ∷ w) :=
   IsSemitermVec.cons_iff.mpr ⟨ht, h⟩
 
 @[simp] lemma IsSemitermVec.singleton {n t : V} :
@@ -911,8 +911,8 @@ lemma IsSemiterm.induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
 
 @[simp] lemma IsSemitermVec.nil (k : V): IsSemitermVec L 0 k 0 := ⟨by simp, by simp⟩
 
-@[simp] lemma IsSemitermVec.cons {k n w t : V} (h : IsSemitermVec L n k w) (ht : IsSemiterm L k t) : IsSemitermVec L (n + 1) k (t ∷ w) :=
-  ⟨h.isUTerm.cons ht.isUTerm, by
+@[simp] lemma IsSemitermVec.adjoin {k n w t : V} (h : IsSemitermVec L n k w) (ht : IsSemiterm L k t) : IsSemitermVec L (n + 1) k (t ∷ w) :=
+  ⟨h.isUTerm.adjoin ht.isUTerm, by
     intro i hi
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp [ht.bv]
