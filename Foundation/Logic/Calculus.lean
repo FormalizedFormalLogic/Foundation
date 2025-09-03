@@ -34,21 +34,21 @@ infix:45 " ⟹!. " => OneSided.Derivable₁
 noncomputable def OneSided.Derivable.get [OneSided F K] (𝓚 : K) (Δ : List F) (h : 𝓚 ⟹! Δ) : 𝓚 ⟹ Δ :=
   Classical.choice h
 
-class Tait (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] extends OneSided F K where
+class Tait (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] extends OneSided F K where
   verum (𝓚 : K) (Δ : List F)         : 𝓚 ⟹ ⊤ :: Δ
   and {𝓚 : K} {φ ψ : F} {Δ : List F} : 𝓚 ⟹ φ :: Δ → 𝓚 ⟹ ψ :: Δ → 𝓚 ⟹ φ ⋏ ψ :: Δ
   or {𝓚 : K} {φ ψ : F} {Δ : List F}  : 𝓚 ⟹ φ :: ψ :: Δ → 𝓚 ⟹ φ ⋎ ψ :: Δ
   wk {𝓚 : K} {Δ Δ' : List F}         : 𝓚 ⟹ Δ → Δ ⊆ Δ' → 𝓚 ⟹ Δ'
   em {𝓚 : K} {φ} {Δ : List F}        : φ ∈ Δ → ∼φ ∈ Δ → 𝓚 ⟹ Δ
 
-class Tait.Cut (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] [Tait F K] where
+class Tait.Cut (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] [Tait F K] where
   cut {𝓚 : K} {Δ : List F} {φ} : 𝓚 ⟹ φ :: Δ → 𝓚 ⟹ ∼φ :: Δ → 𝓚 ⟹ Δ
 
-class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] [Tait F K] where
+class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] [Tait F K] where
   axm {𝓚 : K} {φ} : φ ∈ 𝓚 → 𝓚 ⟹. φ
   trans {𝓚 𝓛 : K} {Γ} : ((ψ : F) → ψ ∈ 𝓚 → 𝓛 ⟹. ψ) → 𝓚 ⟹ Γ → 𝓛 ⟹ Γ
 
-variable {F S K : Type*} [LogicalConnective F] [Collection F K]
+variable {F S K : Type*} [LogicalConnective F] [AdjunctiveSet F K]
 
 namespace OneSided
 
@@ -122,7 +122,7 @@ def byAxm [Tait.Axiomatized F K] (φ) (h : φ ∈ 𝓚) (hΓ : φ ∈ Γ := by s
 lemma byAxm! [Tait.Axiomatized F K] (φ) (h : φ ∈ 𝓚) (hΓ : φ ∈ Γ := by simp) : 𝓚 ⟹! Γ := ⟨byAxm φ h hΓ⟩
 
 def ofAxiomSubset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → 𝓛 ⟹ Γ :=
-  Tait.Axiomatized.trans fun _ hq ↦ Tait.Axiomatized.axm (Collection.subset_iff.mp h _ hq)
+  Tait.Axiomatized.trans fun _ hq ↦ Tait.Axiomatized.axm (AdjunctiveSet.subset_iff.mp h _ hq)
 
 lemma of_axiom_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹! Γ → 𝓛 ⟹! Γ := fun b ↦ ⟨ofAxiomSubset h b.get⟩
 

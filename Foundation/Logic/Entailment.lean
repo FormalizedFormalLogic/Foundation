@@ -1,6 +1,6 @@
 import Foundation.Logic.LogicSymbol
 import Foundation.Logic.Semantics
-import Foundation.Vorspiel.Collection
+import Foundation.Vorspiel.AdjunctiveSet
 
 /-!
 # Basic definitions and properties of proof system related notions
@@ -126,14 +126,14 @@ lemma strictlyWeakerThan_iff : 𝓢 ⪱ 𝓣 ↔ (∀ {φ}, 𝓢 ⊢! φ → �
   · rintro ⟨h, φ, hs, ht⟩
     exact ⟨weakerThan_iff.mpr h, not_weakerThan_iff.mpr ⟨φ, ht, hs⟩⟩
 
-lemma swk_of_swk_of_wk : 𝓢 ⪱ 𝓣 → 𝓣 ⪯ 𝓤 → 𝓢 ⪱ 𝓤 := by
+lemma swt_of_swt_of_wt : 𝓢 ⪱ 𝓣 → 𝓣 ⪯ 𝓤 → 𝓢 ⪱ 𝓤 := by
   rintro ⟨h₁, nh₁⟩ h₂
   constructor
   . exact WeakerThan.trans h₁ h₂
   · intro h
     exact nh₁ (WeakerThan.trans h₂ h)
 
-lemma swk_of_wk_of_swk : 𝓢 ⪯ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := by
+lemma swt_of_wt_of_swt : 𝓢 ⪯ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := by
   rintro h₁ ⟨h₂, nh₂⟩
   constructor
   . exact WeakerThan.trans h₁ h₂
@@ -142,13 +142,13 @@ lemma swk_of_wk_of_swk : 𝓢 ⪯ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := by
 
 instance [𝓢 ⪱ 𝓣] : 𝓢 ⪯ 𝓣 := StrictlyWeakerThan.weakerThan
 
-lemma StrictlyWeakerThan.trans : 𝓢 ⪱ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := fun h₁ h₂ ↦ swk_of_swk_of_wk h₁ h₂.weakerThan
+lemma StrictlyWeakerThan.trans : 𝓢 ⪱ 𝓣 → 𝓣 ⪱ 𝓤 → 𝓢 ⪱ 𝓤 := fun h₁ h₂ ↦ swt_of_swt_of_wt h₁ h₂.weakerThan
 
 instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ⪯ ·) (· ⪱ ·) where
-  trans := swk_of_swk_of_wk
+  trans := swt_of_swt_of_wt
 
 instance : Trans (α := S) (β := T) (γ := U) (· ⪯ ·) (· ⪱ ·) (· ⪱ ·) where
-  trans := swk_of_wk_of_swk
+  trans := swt_of_wt_of_swt
 
 instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ⪱ ·) (· ⪱ ·) where
   trans := StrictlyWeakerThan.trans
@@ -191,10 +191,10 @@ instance : Trans (α := S) (β := T) (γ := U) (· ⪯ ·) (· ≊ ·) (· ⪯ �
   trans h₁ h₂ := WeakerThan.trans h₁ h₂.le
 
 instance : Trans (α := S) (β := T) (γ := U) (· ≊ ·) (· ⪱ ·) (· ⪱ ·) where
-  trans h₁ h₂ := swk_of_wk_of_swk h₁.le h₂
+  trans h₁ h₂ := swt_of_wt_of_swt h₁.le h₂
 
 instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ≊ ·) (· ⪱ ·) where
-  trans h₁ h₂ := swk_of_swk_of_wk h₁ h₂.le
+  trans h₁ h₂ := swt_of_swt_of_wt h₁ h₂.le
 
 end WeakerThan
 
@@ -245,6 +245,33 @@ lemma Inconsistent.of_ge {𝓢 : S} {𝓣 : T} (h𝓢 : Inconsistent 𝓢) (h : 
 lemma Consistent.of_le {𝓢 : S} {𝓣 : T} (h𝓢 : Consistent 𝓢) (h : 𝓣 ⪯ 𝓢) : Consistent 𝓣 :=
   ⟨fun H ↦ not_consistent_iff_inconsistent.mpr (H.of_ge h) h𝓢⟩
 
+variable (S)
+
+class DeductiveExplosion [LogicalConnective F] where
+  dexp {𝓢 : S} : 𝓢 ⊢ ⊥ → (φ : F) → 𝓢 ⊢ φ
+
+variable {S}
+
+section
+
+variable [LogicalConnective F] [DeductiveExplosion S]
+
+def DeductiveExplosion.dexp! {𝓢 : S} (h : 𝓢 ⊢! ⊥) (φ : F) : 𝓢 ⊢! φ := by
+  rcases h with ⟨b⟩; exact ⟨dexp b φ⟩
+
+lemma inconsistent_iff_provable_bot {𝓢 : S} :
+    Inconsistent 𝓢 ↔ 𝓢 ⊢! ⊥ := ⟨fun h ↦ h ⊥, fun h φ ↦ DeductiveExplosion.dexp! h φ⟩
+
+alias ⟨_, inconsistent_of_provable⟩ := inconsistent_iff_provable_bot
+
+lemma consistent_iff_unprovable_bot {𝓢 : S} :
+    Consistent 𝓢 ↔ 𝓢 ⊬ ⊥ := by
+  simp [inconsistent_iff_provable_bot, ←not_inconsistent_iff_consistent]
+
+alias ⟨Consistent.not_bot, _⟩ := consistent_iff_unprovable_bot
+
+end
+
 /-! ### Completeness and incompleteness -/
 
 section
@@ -282,15 +309,15 @@ end
 
 variable (S T)
 
-class Axiomatized [Collection F S] where
-  prfAxm {𝓢 : S} : 𝓢 ⊢* Collection.set 𝓢
+class Axiomatized [AdjunctiveSet F S] where
+  prfAxm {𝓢 : S} : 𝓢 ⊢* AdjunctiveSet.set 𝓢
   weakening {𝓢 𝓣 : S} : 𝓢 ⊆ 𝓣 → 𝓢 ⊢ φ → 𝓣 ⊢ φ
 
 alias byAxm := Axiomatized.prfAxm
 alias wk := Axiomatized.weakening
 
-class StrongCut [Collection F T] where
-  cut {𝓢 : S} {𝓣 : T} {φ} : 𝓢 ⊢* Collection.set 𝓣 → 𝓣 ⊢ φ → 𝓢 ⊢ φ
+class StrongCut [AdjunctiveSet F T] where
+  cut {𝓢 : S} {𝓣 : T} {φ} : 𝓢 ⊢* AdjunctiveSet.set 𝓣 → 𝓣 ⊢ φ → 𝓢 ⊢ φ
 
 variable {S T}
 
@@ -298,15 +325,15 @@ section Axiomatized
 
 namespace Axiomatized
 
-variable [Collection F S] [Axiomatized S] {𝓢 𝓣 : S}
+variable [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S}
 
-@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢!* Collection.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
+@[simp] lemma provable_axm (𝓢 : S) : 𝓢 ⊢!* AdjunctiveSet.set 𝓢 := fun hf ↦ ⟨prfAxm hf⟩
 
-lemma axm_subset (𝓢 : S) : Collection.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
+lemma axm_subset (𝓢 : S) : AdjunctiveSet.set 𝓢 ⊆ theory 𝓢 := fun _ hp ↦ provable_axm 𝓢 hp
 
-protected def cons (φ : F) (𝓢 : S) : cons φ 𝓢 ⊢ φ := prfAxm (by simp)
+protected def adjoin (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢ φ := prfAxm (by simp)
 
-@[simp] def cons! (φ : F) (𝓢 : S) : cons φ 𝓢 ⊢! φ := provable_axm _ (by simp)
+@[simp] def adjoin! (φ : F) (𝓢 : S) : adjoin φ 𝓢 ⊢! φ := provable_axm _ (by simp)
 
 lemma le_of_subset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨by rintro φ ⟨b⟩; exact ⟨weakening h b⟩⟩
 
@@ -321,9 +348,9 @@ alias wk! := Axiomatized.weakening!
 
 section axiomatized
 
-variable [Collection F S] [Collection F T] [Axiomatized S]
+variable [AdjunctiveSet F S] [AdjunctiveSet F T] [Axiomatized S]
 
-def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, Collection.Finite 𝓕 ∧ 𝓕 ≊ 𝓢
+def FiniteAxiomatizable (𝓢 : S) : Prop := ∃ 𝓕 : S, AdjunctiveSet.Finite 𝓕 ∧ 𝓕 ≊ 𝓢
 
 lemma Consistent.of_subset {𝓢 𝓣 : S} (h𝓢 : Consistent 𝓢) (h : 𝓣 ⊆ 𝓢) : Consistent 𝓣 :=
   h𝓢.of_le (Axiomatized.le_of_subset h)
@@ -335,35 +362,35 @@ end axiomatized
 
 namespace StrongCut
 
-variable [Collection F T] [StrongCut S T]
+variable [AdjunctiveSet F T] [StrongCut S T]
 
-lemma cut! {𝓢 : S} {𝓣 : T} {φ : F} (H : 𝓢 ⊢!* Collection.set 𝓣) (hp : 𝓣 ⊢! φ) : 𝓢 ⊢! φ := by
+lemma cut! {𝓢 : S} {𝓣 : T} {φ : F} (H : 𝓢 ⊢!* AdjunctiveSet.set 𝓣) (hp : 𝓣 ⊢! φ) : 𝓢 ⊢! φ := by
   rcases hp with ⟨b⟩; exact ⟨StrongCut.cut H.get b⟩
 
 end StrongCut
 
-noncomputable def WeakerThan.ofAxm! [Collection F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢!* Collection.set 𝓢₁) :
+noncomputable def WeakerThan.ofAxm! [AdjunctiveSet F S] [StrongCut S S] {𝓢₁ 𝓢₂ : S} (B : 𝓢₂ ⊢!* AdjunctiveSet.set 𝓢₁) :
     𝓢₁ ⪯ 𝓢₂ := ⟨fun _ b ↦ StrongCut.cut! B b⟩
 
-def WeakerThan.ofSubset [Collection F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ wk! h⟩
-
-variable (S)
-
-class Compact [Collection F S] where
-  Γ {𝓢 : S} {φ : F} : 𝓢 ⊢ φ → S
-  ΓPrf {𝓢 : S} {φ : F} (b : 𝓢 ⊢ φ) : Γ b ⊢ φ
-  Γ_subset {𝓢 : S} {φ : F} (b : 𝓢 ⊢ φ) : Γ b ⊆ 𝓢
-  Γ_finite {𝓢 : S} {φ : F} (b : 𝓢 ⊢ φ) : Collection.Finite (Γ b)
-
-variable {S}
+def WeakerThan.ofSubset [AdjunctiveSet F S] [Axiomatized S] {𝓢 𝓣 : S} (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ wk! h⟩
 
 /-! ### Compactness -/
 
+variable (S)
+
+class Compact [AdjunctiveSet F S] where
+  Γ {𝓢 : S} {φ : F} : 𝓢 ⊢ φ → S
+  ΓPrf {𝓢 : S} {φ : F} (b : 𝓢 ⊢ φ) : Γ b ⊢ φ
+  Γ_subset {𝓢 : S} {φ : F} (b : 𝓢 ⊢ φ) : Γ b ⊆ 𝓢
+  Γ_finite {𝓢 : S} {φ : F} (b : 𝓢 ⊢ φ) : AdjunctiveSet.Finite (Γ b)
+
+variable {S}
+
 namespace Compact
 
-variable [Collection F S] [Compact S]
+variable [AdjunctiveSet F S] [Compact S]
 
-lemma finite_provable {𝓢 : S} (h : 𝓢 ⊢! φ) : ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ Collection.Finite 𝓕 ∧ 𝓕 ⊢! φ := by
+lemma finite_provable {𝓢 : S} (h : 𝓢 ⊢! φ) : ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ AdjunctiveSet.Finite 𝓕 ∧ 𝓕 ⊢! φ := by
   rcases h with ⟨b⟩
   exact ⟨Γ b, Γ_subset b, Γ_finite b, ⟨ΓPrf b⟩⟩
 
@@ -377,40 +404,17 @@ namespace Entailment
 
 variable {S : Type*} {F : Type*} [LogicalConnective F] [Entailment F S]
 
-variable (S)
-
-class DeductiveExplosion where
-  dexp {𝓢 : S} : 𝓢 ⊢ ⊥ → (φ : F) → 𝓢 ⊢ φ
-
-variable {S}
-
 section
 
-variable [DeductiveExplosion S]
-
-def DeductiveExplosion.dexp! {𝓢 : S} (h : 𝓢 ⊢! ⊥) (φ : F) : 𝓢 ⊢! φ := by
-  rcases h with ⟨b⟩; exact ⟨dexp b φ⟩
-
-lemma inconsistent_iff_provable_bot {𝓢 : S} :
-    Inconsistent 𝓢 ↔ 𝓢 ⊢! ⊥ := ⟨fun h ↦ h ⊥, fun h φ ↦ DeductiveExplosion.dexp! h φ⟩
-
-alias ⟨_, inconsistent_of_provable⟩ := inconsistent_iff_provable_bot
-
-lemma consistent_iff_unprovable_bot {𝓢 : S} :
-    Consistent 𝓢 ↔ 𝓢 ⊬ ⊥ := by
-  simp [inconsistent_iff_provable_bot, ←not_inconsistent_iff_consistent]
-
-alias ⟨Consistent.not_bot, _⟩ := consistent_iff_unprovable_bot
-
-variable [Collection F S] [Axiomatized S] [Compact S]
+variable [DeductiveExplosion S] [AdjunctiveSet F S] [Axiomatized S] [Compact S]
 
 lemma inconsistent_compact {𝓢 : S} :
-    Inconsistent 𝓢 ↔ ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ Collection.Finite 𝓕 ∧ Inconsistent 𝓕 :=
+    Inconsistent 𝓢 ↔ ∃ 𝓕 : S, 𝓕 ⊆ 𝓢 ∧ AdjunctiveSet.Finite 𝓕 ∧ Inconsistent 𝓕 :=
   ⟨fun H ↦ by rcases Compact.finite_provable (H ⊥) with ⟨𝓕, h𝓕, fin, h⟩; exact ⟨𝓕, h𝓕, fin, inconsistent_of_provable h⟩, by
     rintro ⟨𝓕, h𝓕, _, H⟩; exact H.of_supset h𝓕⟩
 
 lemma consistent_compact {𝓢 : S} :
-    Consistent 𝓢 ↔ ∀ 𝓕 : S, 𝓕 ⊆ 𝓢 → Collection.Finite 𝓕 → Consistent 𝓕 := by
+    Consistent 𝓢 ↔ ∀ 𝓕 : S, 𝓕 ⊆ 𝓢 → AdjunctiveSet.Finite 𝓕 → Consistent 𝓕 := by
   simp [←not_inconsistent_iff_consistent, inconsistent_compact (𝓢 := 𝓢)]
 
 end
@@ -419,27 +423,27 @@ end
 
 variable (S)
 
-class Deduction [Cons F S] where
-  ofInsert {φ ψ : F} {𝓢 : S} : cons φ 𝓢 ⊢ ψ → 𝓢 ⊢ φ ➝ ψ
-  inv {φ ψ : F} {𝓢 : S} : 𝓢 ⊢ φ ➝ ψ → cons φ 𝓢 ⊢ ψ
+class Deduction [Adjoin F S] where
+  ofInsert {φ ψ : F} {𝓢 : S} : adjoin φ 𝓢 ⊢ ψ → 𝓢 ⊢ φ ➝ ψ
+  inv {φ ψ : F} {𝓢 : S} : 𝓢 ⊢ φ ➝ ψ → adjoin φ 𝓢 ⊢ ψ
 
 variable {S}
 
 section deduction
 
-variable [Cons F S] [Deduction S] {𝓢 : S} {φ ψ : F}
+variable [Adjoin F S] [Deduction S] {𝓢 : S} {φ ψ : F}
 
 alias deduction := Deduction.ofInsert
 
-lemma Deduction.of_insert! (h : cons φ 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ➝ ψ := by
+lemma Deduction.of_insert! (h : adjoin φ 𝓢 ⊢! ψ) : 𝓢 ⊢! φ ➝ ψ := by
   rcases h with ⟨b⟩; exact ⟨Deduction.ofInsert b⟩
 
 alias deduction! := Deduction.of_insert!
 
-lemma Deduction.inv! (h : 𝓢 ⊢! φ ➝ ψ) : cons φ 𝓢 ⊢! ψ := by
+lemma Deduction.inv! (h : 𝓢 ⊢! φ ➝ ψ) : adjoin φ 𝓢 ⊢! ψ := by
   rcases h with ⟨b⟩; exact ⟨Deduction.inv b⟩
 
-lemma deduction_iff : cons φ 𝓢 ⊢! ψ ↔ 𝓢 ⊢! φ ➝ ψ := ⟨deduction!, Deduction.inv!⟩
+lemma deduction_iff : adjoin φ 𝓢 ⊢! ψ ↔ 𝓢 ⊢! φ ➝ ψ := ⟨deduction!, Deduction.inv!⟩
 
 end deduction
 

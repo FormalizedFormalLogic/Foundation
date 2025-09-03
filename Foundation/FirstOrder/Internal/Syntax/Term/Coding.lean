@@ -109,7 +109,7 @@ private lemma quote_eq_encode'_aux (v : Fin k → Semiterm L ℕ n)
     suffices
         (⌜v 0⌝ : Metamath.Semiterm V L n).val = encode ↑(v 0) ∧
         SemitermVec.val (fun i ↦ ⌜v i.succ⌝) = ↑(Matrix.vecToNat fun i ↦ encode (v i.succ) : V) by
-      simpa [Matrix.vecToNat, coe_pair_eq_pair_coe, cons_def, Matrix.vecHead, Matrix.vecTail, Function.comp_def]
+      simpa [Matrix.vecToNat, coe_pair_eq_pair_coe, adjoin_def, Matrix.vecHead, Matrix.vecTail, Function.comp_def]
     constructor
     · exact H 0
     · exact ih (fun i ↦ v i.succ) (fun i ↦ by simpa using H i.succ)

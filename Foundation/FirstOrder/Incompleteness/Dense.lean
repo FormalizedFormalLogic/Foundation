@@ -6,10 +6,10 @@ namespace LO
 
 namespace Entailment
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [Collection F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [AdjunctiveSet F S] [Deduction S]
          {𝓢 : S} [Entailment.Cl 𝓢]
 
-lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (cons φ 𝓢) := by
+lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (adjoin φ 𝓢) := by
   apply consistent_iff_exists_unprovable.mpr;
   use ⊥;
   apply deduction_iff.not.mpr;
@@ -17,7 +17,7 @@ lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (cons 
   simp only [not_not];
   cl_prover [h];
 
-lemma consistent_cons_of_unprovable (h : 𝓢 ⊬ φ) : Consistent (cons (∼φ) 𝓢) := by
+lemma consistent_cons_of_unprovable (h : 𝓢 ⊬ φ) : Consistent (adjoin (∼φ) 𝓢) := by
   apply consistent_cons_of_unprovable_neg;
   contrapose! h;
   simp_all only [not_not];
@@ -29,11 +29,11 @@ namespace Entailment.LindenbaumAlgebra
 
 open Entailment LindenbaumAlgebra
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [Collection F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [AdjunctiveSet F S] [Deduction S]
          (𝓢 : S) [Entailment.Cl 𝓢]
 
 lemma dense_of_finite_extend_incomplete
-    (hE : ∀ φ : F, Consistent (cons φ 𝓢) → Incomplete (cons φ 𝓢))
+    (hE : ∀ φ : F, Consistent (adjoin φ 𝓢) → Incomplete (adjoin φ 𝓢))
     (h : φ < ψ) : ∃ ξ : LindenbaumAlgebra 𝓢, φ < ξ ∧ ξ < ψ := by
   obtain ⟨φ, rfl⟩ := Quotient.exists_rep φ;
   obtain ⟨ψ, rfl⟩ := Quotient.exists_rep ψ;

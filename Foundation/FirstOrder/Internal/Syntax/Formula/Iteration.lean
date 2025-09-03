@@ -28,13 +28,13 @@ namespace QQConj
 
 def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. !qqVerumDef y”
-  cons := .mkSigma “y p ps ih. !qqAndDef y p ih”
+  adjoin := .mkSigma “y p ps ih. !qqAndDef y p ih”
 
 noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ^⊤
-  cons _ p _ ih := p ^⋏ ih
+  adjoin _ p _ ih := p ^⋏ ih
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by intro v; simp [blueprint]
+  adjoin_defined := by intro v; simp [blueprint]
 
 end QQConj
 
@@ -68,11 +68,11 @@ end
 @[simp]
 lemma qqConj_semiformula {n ps : V} :
     IsSemiformula L n (^⋀ ps) ↔ (∀ i < len ps, IsSemiformula L n ps.[i]) := by
-  induction ps using cons_ISigma1.sigma1_succ_induction
+  induction ps using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
-  case cons p ps ih =>
-    simp only [qqConj_cons, IsSemiformula.and, ih, len_cons]
+  case adjoin p ps ih =>
+    simp only [qqConj_cons, IsSemiformula.and, ih, len_adjoin]
     constructor
     · rintro ⟨hp, hps⟩ i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -84,11 +84,11 @@ lemma qqConj_semiformula {n ps : V} :
         fun i hi ↦ by simpa using h (i + 1) (by simpa using hi)⟩
 
 @[simp] lemma len_le_conj (ps : V) : len ps ≤ ^⋀ ps := by
-  induction ps using cons_ISigma1.sigma1_succ_induction
+  induction ps using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp [qqVerum]
-  case cons p ps ih =>
-    simp only [len_cons, qqConj_cons, succ_le_iff_lt]
+  case adjoin p ps ih =>
+    simp only [len_adjoin, qqConj_cons, succ_le_iff_lt]
     exact lt_of_le_of_lt ih (by simp)
 
 end qqConj
@@ -97,13 +97,13 @@ namespace QQDisj
 
 def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. !qqFalsumDef y”
-  cons := .mkSigma “y p ps ih. !qqOrDef y p ih”
+  adjoin := .mkSigma “y p ps ih. !qqOrDef y p ih”
 
 noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ^⊥
-  cons _ p _ ih := p ^⋎ ih
+  adjoin _ p _ ih := p ^⋎ ih
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by intro v; simp [blueprint]
+  adjoin_defined := by intro v; simp [blueprint]
 
 end QQDisj
 
@@ -137,11 +137,11 @@ end
 @[simp]
 lemma qqDisj_semiformula {ps : V} :
     IsSemiformula L n (^⋁ ps) ↔ (∀ i < len ps, IsSemiformula L n ps.[i]) := by
-  induction ps using cons_ISigma1.sigma1_succ_induction
+  induction ps using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
-  case cons p ps ih =>
-    simp only [qqDisj_cons, IsSemiformula.or, ih, len_cons]
+  case adjoin p ps ih =>
+    simp only [qqDisj_cons, IsSemiformula.or, ih, len_adjoin]
     constructor
     · rintro ⟨hp, hps⟩ i hi
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -169,7 +169,7 @@ namespace DisjSeqSubst
 
 def blueprint : PR.Blueprint 2 where
   zero := .mkSigma “y w p. !qqFalsumDef y”
-  succ := .mkSigma “y ih k w p. ∃ numeral, !numeralGraph numeral k ∧ ∃ v, !consDef v numeral w ∧
+  succ := .mkSigma “y ih k w p. ∃ numeral, !numeralGraph numeral k ∧ ∃ v, !adjoinDef v numeral w ∧
     ∃ q, !(substsGraph ℒₒᵣ) q v p ∧ !qqOrDef y q ih”
 
 noncomputable def construction : PR.Construction V blueprint where
@@ -211,7 +211,7 @@ lemma _root_.LO.ISigma1.Metamath.IsSemiformula.disjSeqSubst {n m w p : V} (hw : 
   · definability
   case zero => simp
   case succ k ih =>
-    simpa [ih] using hp.substs <| hw.cons (numeral_semiterm m k)
+    simpa [ih] using hp.substs <| hw.adjoin (numeral_semiterm m k)
 
 lemma substs_conj_disjSeqSubst {n m l v w p : V}
     (hp : IsSemiformula ℒₒᵣ (n + 1) p) (hw : IsSemitermVec ℒₒᵣ n m w) (hv : IsSemitermVec ℒₒᵣ m l v) (k : V) :
@@ -220,7 +220,7 @@ lemma substs_conj_disjSeqSubst {n m l v w p : V}
   · definability
   case zero => simp
   case succ k ih =>
-    have hkw : IsSemitermVec ℒₒᵣ (n + 1) m (numeral k ∷ w) := hw.cons (numeral_semiterm m k)
+    have hkw : IsSemitermVec ℒₒᵣ (n + 1) m (numeral k ∷ w) := hw.adjoin (numeral_semiterm m k)
     have ha : IsSemiformula ℒₒᵣ m (disjSeqSubst w p k) := hp.disjSeqSubst hw k
     rw [disjSeqSubst_succ,
       substs_or (hp.substs hkw).isUFormula ha.isUFormula,
@@ -237,8 +237,8 @@ namespace SubstItr
 
 def blueprint : PR.Blueprint 2 where
   zero := .mkSigma “y w p. y = 0”
-  succ := .mkSigma “y ih k w p. ∃ numeral, !numeralGraph numeral k ∧ ∃ v, !consDef v numeral w ∧
-    ∃ sp, !(substsGraph ℒₒᵣ) sp v p ∧ !consDef y sp ih”
+  succ := .mkSigma “y ih k w p. ∃ numeral, !numeralGraph numeral k ∧ ∃ v, !adjoinDef v numeral w ∧
+    ∃ sp, !(substsGraph ℒₒᵣ) sp v p ∧ !adjoinDef y sp ih”
 
 noncomputable def construction : PR.Construction V blueprint where
   zero _ := 0
@@ -339,7 +339,7 @@ lemma shift_conj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
     rw [shift_and (L := ℒₒᵣ), shift_substs hp (m := m), ih, termShiftVec_cons (L := ℒₒᵣ), numeral_shift]
     · simp
     · exact hw.isUTerm
-    · exact hw.cons (numeral_semiterm m k)
+    · exact hw.adjoin (numeral_semiterm m k)
     · exact IsSemiformula.isUFormula <| hp.substs (by simpa [hw])
     · exact IsSemiformula.isUFormula <| hp.substItrConj hw k
 
@@ -353,7 +353,7 @@ lemma shift_disj_substItr {n w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 1) p)
     rw [shift_or (L := ℒₒᵣ), shift_substs hp (m := m), ih, termShiftVec_cons (L := ℒₒᵣ), numeral_shift]
     · simp
     · exact hw.isUTerm
-    · exact hw.cons (numeral_semiterm m k)
+    · exact hw.adjoin (numeral_semiterm m k)
     · exact IsSemiformula.isUFormula <| hp.substs (by simpa [hw])
     · exact IsSemiformula.isUFormula <| hp.substItrDisj hw k
 
@@ -366,7 +366,7 @@ lemma substs_conj_substItr {n m l w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 
     have hkw : IsSemitermVec ℒₒᵣ (n + 1) m (numeral k ∷ w) := by simp [hw]
     have ha : IsSemiformula ℒₒᵣ m (^⋀ substItr w p k) := by
       simp only [qqConj_semiformula, len_substItr]
-      intro i hi; simpa [hi] using hp.substs (hw.cons (by simp))
+      intro i hi; simpa [hi] using hp.substs (hw.adjoin (by simp))
     simp only [substItr_succ, qqConj_cons]
     rw [substs_and (hp.substs hkw).isUFormula ha.isUFormula,
       substs_substs hp hv hkw,
@@ -383,7 +383,7 @@ lemma substs_disj_substItr {n m l w p k : V} (hp : IsSemiformula ℒₒᵣ (n + 
     have hkw : IsSemitermVec ℒₒᵣ (n + 1) m (numeral k ∷ w) := by simp [hw]
     have ha : IsSemiformula ℒₒᵣ m (^⋁ substItr w p k) := by
       simp only [qqDisj_semiformula, len_substItr]
-      intro i hi; simpa [hi] using hp.substs (hw.cons (by simp))
+      intro i hi; simpa [hi] using hp.substs (hw.adjoin (by simp))
     simp only [substItr_succ, qqDisj_cons]
     rw [substs_or (hp.substs hkw).isUFormula ha.isUFormula,
       substs_substs hp hv hkw,
