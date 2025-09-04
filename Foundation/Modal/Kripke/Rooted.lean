@@ -186,8 +186,8 @@ protected abbrev roots : { s : Set (F↾R) // s.Nonempty } := ⟨{ r | r.1 ∈ R
 lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.Rel.TransGen x y)
   : ((F↾R)^+.Rel ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
-  | base h => exact _root_.Relation.TransGen.single h;
-  | @ih a c ha hb hc =>
+  | single h => exact _root_.Relation.TransGen.single h;
+  | @head a c ha hb hc =>
     let b : (F.setGenerate R).World := ⟨c, by
       rcases hx with hx | ⟨r₁, hR₁, Rr₁a⟩ <;>
       rcases hy with hy | ⟨r₂, hR₂, Rr₂b⟩;
@@ -234,8 +234,8 @@ variable {F : Frame} {r : outParam (F.World)}
 lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.TransGen x y)
   : ((F↾r)^+.Rel ⟨x, hx⟩ ⟨y, hy⟩) := by
   induction Rxy using TransGen.head_induction_on with
-  | base h => exact Relation.TransGen.single h;
-  | @ih a c ha hb hc =>
+  | single h => exact Relation.TransGen.single h;
+  | @head a c ha hb hc =>
     let b : (F↾r).World := ⟨c, by
       rcases hx with rfl | Rra <;>
       rcases hy with rfl | Rrb;
@@ -250,8 +250,8 @@ lemma trans_rel_of_origin_trans_rel {hx hy} (Rxy : F.TransGen x y)
 
 lemma origin_trans_rel_of_trans_rel {u v : (F↾r).World} (Ruv : (F↾r).TransGen u v) : F.TransGen u.1 v.1 := by
   induction Ruv using TransGen.head_induction_on with
-  | base h => exact Relation.TransGen.single h;
-  | ih a b c => exact TransGen.head a c;
+  | single h => exact Relation.TransGen.single h;
+  | head a b c => exact TransGen.head a c;
 
 protected abbrev root : (F↾r).World := ⟨r, by tauto⟩
 
