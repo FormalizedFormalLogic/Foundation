@@ -21,96 +21,96 @@ open Entailment TwoSided Tableaux FiniteContext
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment F S] {𝓢 : S} [Entailment.Int 𝓢]
 
-local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
+local notation Γ:45 " ⇒ " Δ:46 => TwoSided 𝓢 Γ Δ
 
-scoped notation:0 Γ:45 " ⟶ " Δ:46 => Tableaux.Sequent.mk Γ Δ
+scoped notation:0 Γ:45 " ⇛ " Δ:46 => Tableaux.Sequent.mk Γ Δ
 
 set_option linter.unusedSectionVars false in
-lemma to_twoSided {Γ Δ} (h : Valid 𝓢 [Γ ⟶ Δ]) : Γ ⟹ Δ := by
+lemma to_twoSided {Γ Δ} (h : Valid 𝓢 [Γ ⇛ Δ]) : Γ ⇒ Δ := by
   rcases h
   · assumption
   · simp_all
 
-lemma to_provable {φ} (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢! φ := by
+lemma to_provable {φ} (h : Valid 𝓢 [[] ⇛ [φ]]) : 𝓢 ⊢! φ := by
   rcases h
   · exact TwoSided.to_provable <| by assumption
   · simp_all
 
-lemma add_hyp {𝒯 : S} (s : 𝒯 ⪯ 𝓢) {Γ Δ φ} (hφ : 𝒯 ⊢! φ)  : Valid 𝓢 [φ :: Γ ⟶ Δ] → Valid 𝓢 [Γ ⟶ Δ] :=
+lemma add_hyp {𝒯 : S} (s : 𝒯 ⪯ 𝓢) {Γ Δ φ} (hφ : 𝒯 ⊢! φ)  : Valid 𝓢 [φ :: Γ ⇛ Δ] → Valid 𝓢 [Γ ⇛ Δ] :=
   Valid.of_single_uppercedent <| TwoSided.add_hyp hφ
 
-lemma right_closed {T Γ Δ φ} (h : φ ∈ Γ) : Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := Valid.right_closed h
+lemma right_closed {T Γ Δ φ} (h : φ ∈ Γ) : Valid 𝓢 ((Γ ⇛ φ :: Δ) :: T) := Valid.right_closed h
 
-lemma left_closed {T Γ Δ φ} (h : φ ∈ Δ) : Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) := Valid.left_closed h
-
-set_option linter.unusedSectionVars false in
-lemma remove {T Γ Δ} : Valid 𝓢 T → Valid 𝓢 ((Γ ⟶ Δ) :: T) := Valid.of_subset
+lemma left_closed {T Γ Δ φ} (h : φ ∈ Δ) : Valid 𝓢 ((φ :: Γ ⇛ Δ) :: T) := Valid.left_closed h
 
 set_option linter.unusedSectionVars false in
-lemma rotate {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ Δ) :: T) := Valid.of_subset
+lemma remove {T Γ Δ} : Valid 𝓢 T → Valid 𝓢 ((Γ ⇛ Δ) :: T) := Valid.of_subset
+
+set_option linter.unusedSectionVars false in
+lemma rotate {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⇛ Δ]) → Valid 𝓢 ((Γ ⇛ Δ) :: T) := Valid.of_subset
 
 
-lemma remove_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
+lemma remove_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⇛ Δ]) → Valid 𝓢 ((Γ ⇛ φ :: Δ) :: T) := fun h ↦
   Valid.remove_right (rotate h)
 
-lemma rotate_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 ((Γ ⟶ φ :: Δ) :: T) := fun h ↦
+lemma rotate_right {T Γ Δ φ} : Valid 𝓢 (T ++ [Γ ⇛ Δ ++ [φ]]) → Valid 𝓢 ((Γ ⇛ φ :: Δ) :: T) := fun h ↦
   Valid.rotate_right (rotate h)
 
-lemma verum_right {T Γ Δ} : Valid 𝓢 ((Γ ⟶ ⊤ :: Δ) :: T) := Valid.verum_right
+lemma verum_right {T Γ Δ} : Valid 𝓢 ((Γ ⇛ ⊤ :: Δ) :: T) := Valid.verum_right
 
-lemma falsum_right {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ ⊥ :: Δ) :: T) := fun h ↦
+lemma falsum_right {T Γ Δ} : Valid 𝓢 (T ++ [Γ ⇛ Δ]) → Valid 𝓢 ((Γ ⇛ ⊥ :: Δ) :: T) := fun h ↦
   Valid.falsum_right (rotate h)
 
 lemma and_right {T Γ Δ φ ψ} :
-    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ]]) → Valid 𝓢 ((Γ ⟶ φ ⋏ ψ :: Δ) :: T) := fun h₁ h₂ ↦
+    Valid 𝓢 (T ++ [Γ ⇛ Δ ++ [φ]]) → Valid 𝓢 (T ++ [Γ ⇛ Δ ++ [ψ]]) → Valid 𝓢 ((Γ ⇛ φ ⋏ ψ :: Δ) :: T) := fun h₁ h₂ ↦
   Valid.and_right (rotate h₁) (rotate h₂)
 
 lemma or_right {T Γ Δ φ ψ} :
-    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ, ψ]]) → Valid 𝓢 ((Γ ⟶ φ ⋎ ψ :: Δ) :: T) := fun h ↦
+    Valid 𝓢 (T ++ [Γ ⇛ Δ ++ [φ, ψ]]) → Valid 𝓢 ((Γ ⇛ φ ⋎ ψ :: Δ) :: T) := fun h ↦
   Valid.or_right (rotate h)
 
 lemma neg_right {T Γ Δ φ} :
-    Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ []] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ ∼φ :: Δ) :: T) := fun h ↦
+    Valid 𝓢 (T ++ [Γ ++ [φ] ⇛ []] ++ [Γ ⇛ Δ]) → Valid 𝓢 ((Γ ⇛ ∼φ :: Δ) :: T) := fun h ↦
   Valid.neg_right' <| rotate <| rotate h
 
 lemma imply_right {T Γ Δ φ ψ} :
-    Valid 𝓢 (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ]) → Valid 𝓢 ((Γ ⟶ (φ ➝ ψ) :: Δ) :: T) := fun h ↦
+    Valid 𝓢 (T ++ [Γ ++ [φ] ⇛ [ψ]] ++ [Γ ⇛ Δ]) → Valid 𝓢 ((Γ ⇛ (φ ➝ ψ) :: Δ) :: T) := fun h ↦
   Valid.imply_right' <| rotate <| rotate h
 
 lemma iff_right {T Γ Δ φ ψ} :
-    Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [φ ➝ ψ]]) → Valid 𝓢 (T ++ [Γ ⟶ Δ ++ [ψ ➝ φ]]) → Valid 𝓢 ((Γ ⟶ (φ ⭤ ψ) :: Δ) :: T) := fun h₁ h₂ ↦
+    Valid 𝓢 (T ++ [Γ ⇛ Δ ++ [φ ➝ ψ]]) → Valid 𝓢 (T ++ [Γ ⇛ Δ ++ [ψ ➝ φ]]) → Valid 𝓢 ((Γ ⇛ (φ ⭤ ψ) :: Δ) :: T) := fun h₁ h₂ ↦
   Valid.and_right (rotate h₁) (rotate h₂)
 
 
-lemma remove_left {T Γ Δ φ} : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
+lemma remove_left {T Γ Δ φ} : Valid 𝓢 ((Γ ⇛ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⇛ Δ) :: T) :=
   Valid.remove_left
 
-lemma rotate_left {T Γ Δ φ} : Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⟶ Δ) :: T) :=
+lemma rotate_left {T Γ Δ φ} : Valid 𝓢 ((Γ ++ [φ] ⇛ Δ) :: T) → Valid 𝓢 ((φ :: Γ ⇛ Δ) :: T) :=
   Valid.rotate_left
 
-lemma verum_left {T Γ Δ} : Valid 𝓢 ((Γ ⟶ Δ) :: T) → Valid 𝓢 ((⊤ :: Γ ⟶ Δ) :: T) := Valid.verum_left
+lemma verum_left {T Γ Δ} : Valid 𝓢 ((Γ ⇛ Δ) :: T) → Valid 𝓢 ((⊤ :: Γ ⇛ Δ) :: T) := Valid.verum_left
 
 set_option linter.unusedSectionVars false in
-lemma falsum_left {T Γ Δ} : Valid 𝓢 ((⊥ :: Γ ⟶ Δ) :: T) := Valid.falsum_left
+lemma falsum_left {T Γ Δ} : Valid 𝓢 ((⊥ :: Γ ⇛ Δ) :: T) := Valid.falsum_left
 
 lemma or_left {T Γ Δ φ ψ} :
-    Valid 𝓢 ((Γ ++ [φ] ⟶ Δ) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋎ ψ :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ] ⇛ Δ) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⇛ Δ) :: T) → Valid 𝓢 ((φ ⋎ ψ :: Γ ⇛ Δ) :: T) :=
   Valid.or_left
 
 lemma and_left {T Γ Δ φ ψ} :
-    Valid 𝓢 ((Γ ++ [φ, ψ] ⟶ Δ) :: T) → Valid 𝓢 ((φ ⋏ ψ :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ, ψ] ⇛ Δ) :: T) → Valid 𝓢 ((φ ⋏ ψ :: Γ ⇛ Δ) :: T) :=
   Valid.and_left
 
 lemma neg_left {T Γ Δ φ} :
-    Valid 𝓢 ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((∼φ :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [∼φ] ⇛ Δ ++ [φ]) :: T) → Valid 𝓢 ((∼φ :: Γ ⇛ Δ) :: T) :=
   Valid.neg_left
 
 lemma imply_left {T Γ Δ φ ψ} :
-    Valid 𝓢 ((Γ ++ [φ ➝ ψ] ⟶ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⟶ Δ) :: T) → Valid 𝓢 (((φ ➝ ψ) :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ ➝ ψ] ⇛ Δ ++ [φ]) :: T) → Valid 𝓢 ((Γ ++ [ψ] ⇛ Δ) :: T) → Valid 𝓢 (((φ ➝ ψ) :: Γ ⇛ Δ) :: T) :=
   Valid.imply_left
 
 lemma iff_left {T Γ Δ φ ψ} :
-    Valid 𝓢 ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⟶ Δ) :: T) → Valid 𝓢 (((φ ⭤ ψ) :: Γ ⟶ Δ) :: T) :=
+    Valid 𝓢 ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⇛ Δ) :: T) → Valid 𝓢 (((φ ⭤ ψ) :: Γ ⇛ Δ) :: T) :=
   Valid.and_left
 
 end Theorems
@@ -170,7 +170,7 @@ abbrev Sequent := List Lit
 
 abbrev Tableaux := Entailment.Tableaux Lit
 
-scoped notation:0 Γ:45 " ⟶ " Δ:46 => Entailment.Tableaux.Sequent.mk Γ Δ
+scoped notation:0 Γ:45 " ⇛ " Δ:46 => Entailment.Tableaux.Sequent.mk Γ Δ
 
 def litToExpr (φ : Lit) : M Expr := do
   let c ← read
@@ -193,7 +193,7 @@ def Sequent.toExpr (Γ : Sequent) : M Expr := do
   return toQList <| Γ.map (Litform.toExpr c.instLC)
 
 def mkTableauSequentQ (F : Q(Type*)) (Γ Δ : Q(List $F)) : Q(Entailment.Tableaux.Sequent $F) :=
-  q($Γ ⟶ $Δ)
+  q($Γ ⇛ $Δ)
 
 def Tableaux.toExpr (T : Tableaux) : M Expr := do
   let c ← read
@@ -369,7 +369,7 @@ def iffLeft (T : Tableaux) (Γ Δ : Sequent) (φ ψ : Lit) (e : Expr) : M Expr :
 def isWeakerSequent (Γ Δ : Sequent) (T : Tableaux) : M Bool := do
   match T with
   |           [] => return false
-  | (Ξ ⟶ Λ) :: T =>
+  | (Ξ ⇛ Λ) :: T =>
     return ((←Lit.dSubsetList Γ Ξ) && (←Lit.dSubsetList Δ Λ)) || (←isWeakerSequent Γ Δ T)
 
 def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
@@ -379,65 +379,65 @@ def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
   | k + 1, false =>
     match T with
     |           [] => throwError m!"Proof search failed: empty tableaux reached."
-    | (Γ ⟶ Δ) :: T =>
+    | (Γ ⇛ Δ) :: T =>
       if ←isWeakerSequent Γ Δ T then
         let e ← prover k false T
         remove T Γ Δ e
       else
       match Γ with
-      |     [] => prover k true (([] ⟶ Δ) :: T)
+      |     [] => prover k true (([] ⇛ Δ) :: T)
       | φ :: Γ => do
         match ← tryLeftClose T Γ Δ φ with
         | some h => return h
         |   none => do
           if ← φ.dMem Γ then
-            let e ← prover k true ((Γ ⟶ Δ) :: T)
+            let e ← prover k true ((Γ ⇛ Δ) :: T)
             removeLeft T Γ Δ φ e
           else
           match φ with
           | .atom a => do
-            let e ← prover k true ((Γ ++ [.atom a] ⟶ Δ) :: T)
+            let e ← prover k true ((Γ ++ [.atom a] ⇛ Δ) :: T)
             rotateLeft T Γ Δ (.atom a) e
           | ⊤ => do
-            let e ← prover k true ((Γ ⟶ Δ) :: T)
+            let e ← prover k true ((Γ ⇛ Δ) :: T)
             verumLeft T Γ Δ e
           | ⊥ => do
             falsumLeft T Γ Δ
           | φ ⋏ ψ => do
-            let e ← prover k true ((Γ ++ [φ, ψ] ⟶ Δ) :: T)
+            let e ← prover k true ((Γ ++ [φ, ψ] ⇛ Δ) :: T)
             andLeft T Γ Δ φ ψ e
           | φ ⋎ ψ => do
-            let e₁ ← prover k true ((Γ ++ [φ] ⟶ Δ) :: T)
-            let e₂ ← prover k true ((Γ ++ [ψ] ⟶ Δ) :: T)
+            let e₁ ← prover k true ((Γ ++ [φ] ⇛ Δ) :: T)
+            let e₂ ← prover k true ((Γ ++ [ψ] ⇛ Δ) :: T)
             orLeft T Γ Δ φ ψ e₁ e₂
           | ∼φ => do
-            let e ← prover k true ((Γ ++ [∼φ] ⟶ Δ ++ [φ]) :: T)
+            let e ← prover k true ((Γ ++ [∼φ] ⇛ Δ ++ [φ]) :: T)
             negLeft T Γ Δ φ e
           | φ ➝ ψ => do
-            let e₁ ← prover k true ((Γ ++ [φ ➝ ψ] ⟶ Δ ++ [φ]) :: T)
-            let e₂ ← prover k true ((Γ ++ [ψ] ⟶ Δ) :: T)
+            let e₁ ← prover k true ((Γ ++ [φ ➝ ψ] ⇛ Δ ++ [φ]) :: T)
+            let e₂ ← prover k true ((Γ ++ [ψ] ⇛ Δ) :: T)
             implyLeft T Γ Δ φ ψ e₁ e₂
           | .iff φ ψ => do
-            let e ← prover k true ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⟶ Δ) :: T)
+            let e ← prover k true ((Γ ++ [φ ➝ ψ, ψ ➝ φ] ⇛ Δ) :: T)
             iffLeft T Γ Δ φ ψ e
   | k + 1,  true =>
     match T with
     |                [] => throwError m!"Proof search failed: empty tableaux reached."
-    |     (Γ ⟶ Δ) :: T => do
+    |     (Γ ⇛ Δ) :: T => do
       if ←isWeakerSequent Γ Δ T then
         let e ← prover k false T
         remove T Γ Δ e
       else
       match Δ with
       | [] =>
-        let e ← prover k false (T ++ [Γ ⟶ []])
+        let e ← prover k false (T ++ [Γ ⇛ []])
         rotate T Γ [] e
       | φ :: Δ => do
         match ← tryRightClose T Γ Δ φ with
         | some h => return h
         |   none => do
           if ← φ.dMem Δ then
-            let e ← prover k false (T ++ [Γ ⟶ Δ])
+            let e ← prover k false (T ++ [Γ ⇛ Δ])
             removeRight T Γ Δ φ e
           else
           match φ with
@@ -446,28 +446,28 @@ def prover (k : ℕ) (b : Bool) (T : Tableaux) : M Expr := do
             match e with
             | some h => return h
             |   none => do
-              let e ← prover k false (T ++ [Γ ⟶ Δ ++ [.atom a]])
+              let e ← prover k false (T ++ [Γ ⇛ Δ ++ [.atom a]])
               rotateRight T Γ Δ (.atom a) e
           | ⊤ => verumRight T Γ Δ
           | ⊥ => do
-            let e ← prover k false (T ++ [Γ ⟶ Δ])
+            let e ← prover k false (T ++ [Γ ⇛ Δ])
             falsumRight T Γ Δ e
           | φ ⋏ ψ => do
-            let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ]])
-            let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ]])
+            let e₁ ← prover k false (T ++ [Γ ⇛ Δ ++ [φ]])
+            let e₂ ← prover k false (T ++ [Γ ⇛ Δ ++ [ψ]])
             andRight T Γ Δ φ ψ e₁ e₂
           | φ ⋎ ψ => do
-            let e ← prover k false (T ++ [Γ ⟶ Δ ++ [φ, ψ]])
+            let e ← prover k false (T ++ [Γ ⇛ Δ ++ [φ, ψ]])
             orRight T Γ Δ φ ψ e
           | ∼φ => do
-            let e ← prover k false (T ++ [Γ ++ [φ] ⟶ []] ++ [Γ ⟶ Δ])
+            let e ← prover k false (T ++ [Γ ++ [φ] ⇛ []] ++ [Γ ⇛ Δ])
             negRight T Γ Δ φ e
           | φ ➝ ψ => do
-            let e ← prover k false (T ++ [Γ ++ [φ] ⟶ [ψ]] ++ [Γ ⟶ Δ])
+            let e ← prover k false (T ++ [Γ ++ [φ] ⇛ [ψ]] ++ [Γ ⇛ Δ])
             implyRight T Γ Δ φ ψ e
           | .iff φ ψ => do
-            let e₁ ← prover k false (T ++ [Γ ⟶ Δ ++ [φ ➝ ψ]])
-            let e₂ ← prover k false (T ++ [Γ ⟶ Δ ++ [ψ ➝ φ]])
+            let e₁ ← prover k false (T ++ [Γ ⇛ Δ ++ [φ ➝ ψ]])
+            let e₂ ← prover k false (T ++ [Γ ⇛ Δ ++ [ψ ➝ φ]])
             iffRight T Γ Δ φ ψ e₁ e₂
 
 structure HypInfo where
@@ -517,7 +517,7 @@ def addHyps (prover : (Γ Δ : Sequent) → M Expr) (Γ Δ : Sequent) : List Hyp
 def main (n : ℕ) (hyps : Array HypInfo) (L R : List Expr) : M Expr := do
   let Γ ← exprListToLitList L
   let Δ ← exprListToLitList R
-  addHyps (fun Γ Δ ↦ prover n false [Γ ⟶ Δ]) Γ Δ hyps.toList
+  addHyps (fun Γ Δ ↦ prover n false [Γ ⇛ Δ]) Γ Δ hyps.toList
 
 def toTwoSided (L R : List Expr) (e : Expr) : M Expr := do
   let Γ ← Sequent.toExpr <| ← exprListToLitList L

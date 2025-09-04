@@ -18,56 +18,56 @@ open Entailment TwoSided FiniteContext
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment F S] (𝓢 : S) [Entailment.Cl 𝓢]
 
-local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
+local notation Γ:45 " ⇒ " Δ:46 => TwoSided 𝓢 Γ Δ
 
-lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢! φ := TwoSided.to_provable h
+lemma to_provable (φ) (h : [] ⇒ [φ]) : 𝓢 ⊢! φ := TwoSided.to_provable h
 
-lemma rotate_right (Γ Δ φ) (hφ : Γ ⟹ Δ ++ [φ]) : Γ ⟹ φ :: Δ := TwoSided.rotate_right hφ
+lemma rotate_right (Γ Δ φ) (hφ : Γ ⇒ Δ ++ [φ]) : Γ ⇒ φ :: Δ := TwoSided.rotate_right hφ
 
-lemma rotate_left (Γ Δ φ) (hφ : (Γ ++ [φ]) ⟹ Δ) : (φ :: Γ) ⟹ Δ := TwoSided.rotate_left hφ
+lemma rotate_left (Γ Δ φ) (hφ : (Γ ++ [φ]) ⇒ Δ) : (φ :: Γ) ⇒ Δ := TwoSided.rotate_left hφ
 
-lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ := TwoSided.add_hyp hφ h
+lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢! φ) (h : (φ :: Γ) ⇒ Δ) : Γ ⇒ Δ := TwoSided.add_hyp hφ h
 
-lemma right_closed (Γ Δ φ) (h : φ ∈ Γ) : Γ ⟹ φ :: Δ := TwoSided.right_closed h
+lemma right_closed (Γ Δ φ) (h : φ ∈ Γ) : Γ ⇒ φ :: Δ := TwoSided.right_closed h
 
-lemma left_closed (Γ Δ φ) (h : φ ∈ Δ) : (φ :: Γ) ⟹ Δ := TwoSided.left_closed h
+lemma left_closed (Γ Δ φ) (h : φ ∈ Δ) : (φ :: Γ) ⇒ Δ := TwoSided.left_closed h
 
-lemma verum_right (Γ Δ) : Γ ⟹ ⊤ :: Δ := TwoSided.verum_right
+lemma verum_right (Γ Δ) : Γ ⇒ ⊤ :: Δ := TwoSided.verum_right
 
-lemma falsum_left (Γ Δ) : (⊥ :: Γ) ⟹ Δ := TwoSided.falsum_left
+lemma falsum_left (Γ Δ) : (⊥ :: Γ) ⇒ Δ := TwoSided.falsum_left
 
-lemma falsum_right (Γ Δ) (h : Γ ⟹ Δ) : Γ ⟹ ⊥ :: Δ := TwoSided.falsum_right h
+lemma falsum_right (Γ Δ) (h : Γ ⇒ Δ) : Γ ⇒ ⊥ :: Δ := TwoSided.falsum_right h
 
-lemma verum_left (Γ Δ) (h : Γ ⟹ Δ) : (⊤ :: Γ) ⟹ Δ := TwoSided.verum_left h
+lemma verum_left (Γ Δ) (h : Γ ⇒ Δ) : (⊤ :: Γ) ⇒ Δ := TwoSided.verum_left h
 
-lemma and_right (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ⟹ Δ ++ [ψ]) : Γ ⟹ φ ⋏ ψ :: Δ :=
+lemma and_right (Γ Δ φ ψ) (hφ : Γ ⇒ Δ ++ [φ]) (hψ : Γ ⇒ Δ ++ [ψ]) : Γ ⇒ φ ⋏ ψ :: Δ :=
   TwoSided.and_right (weakening hφ) (weakening hψ)
 
-lemma or_left (Γ Δ φ ψ) (hφ : (Γ ++ [φ]) ⟹ Δ) (hψ : (Γ ++ [ψ]) ⟹ Δ) : (φ ⋎ ψ :: Γ) ⟹ Δ :=
+lemma or_left (Γ Δ φ ψ) (hφ : (Γ ++ [φ]) ⇒ Δ) (hψ : (Γ ++ [ψ]) ⇒ Δ) : (φ ⋎ ψ :: Γ) ⇒ Δ :=
   TwoSided.or_left (weakening hφ) (weakening hψ)
 
-lemma or_right (Γ Δ φ ψ) (h : Γ ⟹ Δ ++ [φ, ψ]) : Γ ⟹ φ ⋎ ψ :: Δ :=
+lemma or_right (Γ Δ φ ψ) (h : Γ ⇒ Δ ++ [φ, ψ]) : Γ ⇒ φ ⋎ ψ :: Δ :=
   TwoSided.or_right (weakening h)
 
-lemma and_left (Γ Δ φ ψ) (h : (Γ ++ [φ, ψ]) ⟹ Δ) : (φ ⋏ ψ :: Γ) ⟹ Δ :=
+lemma and_left (Γ Δ φ ψ) (h : (Γ ++ [φ, ψ]) ⇒ Δ) : (φ ⋏ ψ :: Γ) ⇒ Δ :=
   TwoSided.and_left (weakening h)
 
-lemma neg_right (Γ Δ φ) (h : (Γ ++ [φ]) ⟹ Δ) : Γ ⟹ ∼φ :: Δ :=
+lemma neg_right (Γ Δ φ) (h : (Γ ++ [φ]) ⇒ Δ) : Γ ⇒ ∼φ :: Δ :=
   TwoSided.neg_right_cl (weakening h)
 
-lemma neg_left (Γ Δ φ) (h : Γ ⟹ Δ ++ [φ]) : (∼φ :: Γ) ⟹ Δ :=
+lemma neg_left (Γ Δ φ) (h : Γ ⇒ Δ ++ [φ]) : (∼φ :: Γ) ⇒ Δ :=
   TwoSided.neg_left (weakening h)
 
-lemma imply_right (Γ Δ φ ψ) (h : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) : Γ ⟹ (φ ➝ ψ) :: Δ :=
+lemma imply_right (Γ Δ φ ψ) (h : (Γ ++ [φ]) ⇒ Δ ++ [ψ]) : Γ ⇒ (φ ➝ ψ) :: Δ :=
   TwoSided.imply_right_cl (weakening h)
 
-lemma imply_left (Γ Δ φ ψ) (hφ : Γ ⟹ Δ ++ [φ]) (hψ : (Γ ++ [ψ]) ⟹ Δ) : ((φ ➝ ψ) :: Γ) ⟹ Δ :=
+lemma imply_left (Γ Δ φ ψ) (hφ : Γ ⇒ Δ ++ [φ]) (hψ : (Γ ++ [ψ]) ⇒ Δ) : ((φ ➝ ψ) :: Γ) ⇒ Δ :=
   TwoSided.imply_left (weakening hφ) (weakening hψ)
 
-lemma iff_right (Γ Δ φ ψ) (hr : (Γ ++ [φ]) ⟹ Δ ++ [ψ]) (hl : (Γ ++ [ψ]) ⟹ Δ ++ [φ]) : Γ ⟹ (φ ⭤ ψ) :: Δ :=
+lemma iff_right (Γ Δ φ ψ) (hr : (Γ ++ [φ]) ⇒ Δ ++ [ψ]) (hl : (Γ ++ [ψ]) ⇒ Δ ++ [φ]) : Γ ⇒ (φ ⭤ ψ) :: Δ :=
   TwoSided.iff_right_cl (weakening hr) (weakening hl)
 
-lemma iff_left (Γ Δ φ ψ) (hr : Γ ⟹ Δ ++ [φ, ψ]) (hl : (Γ ++ [φ, ψ]) ⟹ Δ) : ((φ ⭤ ψ) :: Γ) ⟹ Δ :=
+lemma iff_left (Γ Δ φ ψ) (hr : Γ ⇒ Δ ++ [φ, ψ]) (hl : (Γ ++ [φ, ψ]) ⇒ Δ) : ((φ ⭤ ψ) :: Γ) ⇒ Δ :=
   TwoSided.iff_left (weakening hr) (weakening hl)
 
 end Theorems
@@ -269,9 +269,9 @@ def toProvable (φ : Expr) (e : Expr) : M Expr := do
   iapp ``LO.Meta.ClProver.Theorems.to_provable #[φ, e]
 
 def prover (k : ℕ) (b : Bool) (Γ Δ : Sequent) : M Expr := do
-  --logInfo m!"step: {k}, case: {b}, {← Sequent.toExpr Γ} ⟹ {← Sequent.toExpr Δ}"
+  --logInfo m!"step: {k}, case: {b}, {← Sequent.toExpr Γ} ⇒ {← Sequent.toExpr Δ}"
   match k, b with
-  |     0,      _ => throwError m!"Proof search failed: {← Sequent.toExpr Γ} ⟹ {← Sequent.toExpr Δ}"
+  |     0,      _ => throwError m!"Proof search failed: {← Sequent.toExpr Γ} ⇒ {← Sequent.toExpr Δ}"
   | k + 1,  false =>
     match Δ with
     |     [] => prover k true Γ []

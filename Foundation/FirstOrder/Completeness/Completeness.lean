@@ -15,7 +15,7 @@ section Encodable
 variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]  [L.Encodable]
 
 noncomputable def Derivation.completeness_of_encodable
-  {Γ : Sequent L} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ φ ∈ Γ, M ⊧ₘ φ) : T ⟹ Γ := by
+  {Γ : Sequent L} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ φ ∈ Γ, M ⊧ₘ φ) : T ⇒ Γ := by
   have : WellFounded (SearchTree.Lt T Γ) := by
     by_contra nwf
     have : ∃ φ ∈ Γ, (Model T Γ) ⊧ₘ φ := h _ (Model.models nwf)

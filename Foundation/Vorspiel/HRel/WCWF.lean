@@ -1,5 +1,4 @@
 import Foundation.Vorspiel.HRel.CWF
-import Mathlib.Data.Fintype.Pigeonhole
 
 section
 

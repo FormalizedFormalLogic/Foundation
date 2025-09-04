@@ -1,21 +1,4 @@
-import Mathlib.Data.Vector.Basic
-import Mathlib.Data.Fin.Basic
-import Mathlib.Data.Fin.VecNotation
-import Mathlib.Data.Fintype.Basic
-import Mathlib.Data.Finset.Basic
-import Mathlib.Data.Finset.Preimage
-import Mathlib.Data.Finset.Sort
-import Mathlib.Order.Filter.Ultrafilter.Defs
-import Mathlib.Logic.Encodable.Basic
-import Mathlib.Computability.Primrec
-import Mathlib.Computability.Partrec
-import Mathlib.Data.Finset.Sort
-import Mathlib.Data.List.GetD
-import Mathlib.Data.Set.Finite.Range
-import Mathlib.Tactic.TautoSet
-import Mathlib.Data.Fintype.Sigma
-import Mathlib.Data.Fintype.Vector
-import Mathlib.Computability.Halting
+import Mathlib
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -66,7 +49,7 @@ variable {n : ℕ} {α : Type u}
 infixr:70 " :> " => vecCons
 
 @[simp] lemma vecCons_zero :
-    (a :> s) 0 = a := by simp
+    (a :> s) (0 : Fin (n + 1)) = a := by simp
 
 @[simp] lemma vecCons_succ (i : Fin n) :
     (a :> s) (Fin.succ i) = s i := by simp
@@ -111,7 +94,7 @@ end delab
 infixl:70 " <: " => vecConsLast
 
 @[simp] lemma rightConcat_last :
-    (s <: a) (last n) = a := by simp [vecConsLast]
+    (s <: a) (Fin.last n) = a := by simp [vecConsLast]
 
 @[simp] lemma rightConcat_castSucc (i : Fin n) :
     (s <: a) (Fin.castSucc i) = s i := by simp [vecConsLast]
@@ -119,7 +102,7 @@ infixl:70 " <: " => vecConsLast
 @[simp] lemma rightConcat_zero (a : α) (s : Fin n.succ → α) :
     (s <: a) 0 = s 0 := rightConcat_castSucc 0
 
-@[simp] lemma zero_succ_eq_id {n} : (0 : Fin (n + 1)) :> succ = id :=
+@[simp] lemma zero_succ_eq_id {n} : (0 : Fin (n + 1)) :> Fin.succ = id :=
   funext $ Fin.cases (by simp) (by simp)
 
 @[simp] lemma zero_cons_succ_eq_self (f : Fin (n + 1) → α) : (f 0 :> (f ·.succ) : Fin (n + 1) → α) = f := by
@@ -157,7 +140,7 @@ def decVec {α : Type _} : {n : ℕ} → (v w : Fin n → α) → (∀ i, Decida
 
 lemma comp_vecCons (f : α → β) (a : α) (s : Fin n → α) :
     (fun x ↦ f <| (a :> s) x) = f a :> f ∘ s :=
-  funext (fun i => cases (by simp) (by simp) i)
+  funext (fun i => Fin.cases (by simp) (by simp) i)
 
 lemma comp_vecCons' (f : α → β) (a : α) (s : Fin n → α) :
     (fun x ↦ f <| (a :> s) x) = f a :> fun i ↦ f (s i) :=
@@ -180,7 +163,7 @@ lemma comp_vecCons₂' (g : β → γ) (f : α → β) (a : α) (s : Fin n → �
 @[simp] lemma comp₃ (a₁ a₂ a₃ : α) : f ∘ ![a₁, a₂, a₃] = ![f a₁, f a₂, f a₃] := by simp [comp_vecCons'']
 
 lemma comp_vecConsLast (f : α → β) (a : α) (s : Fin n → α) : (fun x => f $ (s <: a) x) = f ∘ s <: f a :=
-funext (fun i => lastCases (by simp) (by simp) i)
+funext (fun i => Fin.lastCases (by simp) (by simp) i)
 
 @[simp] lemma vecHead_comp (f : α → β) (v : Fin (n + 1) → α) : vecHead (f ∘ v) = f (vecHead v) :=
   by simp [vecHead]
@@ -269,11 +252,11 @@ def appendr {n m} (v : Fin n → α) (w : Fin m → α) : Fin (m + n) → α := 
 
 @[simp] lemma appendr_cons {m n} (x : α) (v : Fin n → α) (w : Fin m → α) : appendr (x :> v) w = x :> appendr v w := by funext i; simp [appendr]
 
-lemma forall_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
+lemma forall_iff' {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
     (∀ v, φ v) ↔ (∀ a, ∀ v, φ (a :> v)) :=
   ⟨fun h a v ↦ h (a :> v), fun h v ↦ by simpa [eq_vecCons v] using h (v 0) (v ∘ Fin.succ)⟩
 
-lemma exists_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
+lemma exists_iff' {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
     (∃ v, φ v) ↔ (∃ a, ∃ v, φ (a :> v)) :=
   ⟨by rintro ⟨v, hv⟩; exact ⟨v 0, v ∘ Fin.succ, by simpa [eq_vecCons] using hv⟩,
    by rintro ⟨a, v, hv⟩; exact ⟨_, hv⟩⟩
@@ -282,30 +265,30 @@ def foldr (f : α → β → β) (init : β) : {k : ℕ} → (Fin k → α) → 
   |     0, _ => init
   | _ + 1, v => f (vecHead v) (Matrix.foldr f init (vecTail v))
 
-def map (f : α → β) : (Fin k → α) → (Fin k → β) := fun v ↦ f ∘ v
+def map' (f : α → β) : (Fin k → α) → (Fin k → β) := fun v ↦ f ∘ v
 
 section map
 
-postfix:max "⨟" => map
+postfix:max "⨟" => map'
 
 variable (f : α → β)
 
-@[simp] lemma map_nil (v : Fin 0 → α) : f⨟ v = ![] := empty_eq (f⨟ v)
+@[simp] lemma map'_nil (v : Fin 0 → α) : f⨟ v = ![] := empty_eq (f⨟ v)
 
-@[simp] lemma map_cons (a : α) (v : Fin k → α) : f⨟ (a :> v) = f a :> f⨟ v := by
+@[simp] lemma map'_cons (a : α) (v : Fin k → α) : f⨟ (a :> v) = f a :> f⨟ v := by
   ext i
-  cases i using Fin.cases <;> simp [map]
+  cases i using Fin.cases <;> simp [map']
 
-@[simp] lemma map_cons' (v : Fin (k + 1) → α) : f⨟ v = f (vecHead v) :> f⨟ (vecTail v) := by
+@[simp] lemma map'_cons' (v : Fin (k + 1) → α) : f⨟ v = f (vecHead v) :> f⨟ (vecTail v) := by
   ext i
-  cases i using Fin.cases <;> { simp [map]; rfl }
+  cases i using Fin.cases <;> { simp [map']; rfl }
 
-@[simp] lemma map_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
+@[simp] lemma map'_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
 
-lemma map_map_comp (g : β → γ) (f : α → β) (v : Fin k → α) :
+lemma map'_map'_comp (g : β → γ) (f : α → β) (v : Fin k → α) :
     g⨟ (f⨟ v) = (g ∘ f)⨟ v := by ext x; simp
 
-lemma map_map_comp' (g : β → γ) (f : α → β) (v : Fin k → α) :
+lemma map'_map'_comp' (g : β → γ) (f : α → β) (v : Fin k → α) :
     g⨟ (f⨟ v) = (fun x ↦ g (f x))⨟ v := by ext x; simp
 
 end map
