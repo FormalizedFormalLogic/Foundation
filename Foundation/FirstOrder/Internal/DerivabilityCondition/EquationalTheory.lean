@@ -29,13 +29,13 @@ open Entailment Entailment.FiniteContext Semiformula
 @[simp] lemma eq_refl (t : Term V ℒₒᵣ) : T.internalize V ⊢! t ≐ t := by
   have : T ⊢! (“∀ x, x = x” : SyntacticFormula ℒₒᵣ) := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
   have : T.internalize V ⊢! ∀' (#'0 ≐ #'0) := by
-    simpa using internal_provable_of_outer_provable this
+    simpa using internal_provable_of_outer_provable (V := V) this
   simpa using TProof.specialize! this t
 
 @[simp] lemma eq_symm (t u : Term V ℒₒᵣ) : T.internalize V ⊢! (t ≐ u) ➝ (u ≐ t) := by
   have : T ⊢! “∀ x y, x = y → y = x” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
   have : T.internalize V ⊢! ∀' ∀' ((#'1 ≐ #'0) ➝ (#'0 ≐ #'1)) := by
-    simpa using internal_provable_of_outer_provable this
+    simpa using internal_provable_of_outer_provable (V := V) this
   simpa using TProof.specialize₂! this u t
 
 @[simp] lemma ne_symm (t u : Term V ℒₒᵣ) : T.internalize V ⊢! (t ≉ u) ➝ (u ≉ t) := by
@@ -48,7 +48,7 @@ open Entailment Entailment.FiniteContext Semiformula
 @[simp] lemma eq_uniform_trans (t₁ t₂ t₃ : Term V ℒₒᵣ) : T.internalize V ⊢! (t₁ ≐ t₂) ➝ (t₂ ≐ t₃) ➝ (t₁ ≐ t₃) := by
   have : T ⊢! “∀ x y z, x = y → y = z → x = z” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
   have : T.internalize V ⊢! ∀' ∀' ∀' ((#'2 ≐ #'1) ➝ (#'1 ≐ #'0) ➝ (#'2 ≐ #'0)) := by
-    simpa using internal_provable_of_outer_provable this
+    simpa using internal_provable_of_outer_provable (V := V) this
   simpa using TProof.specialize₃! this t₃ t₂ t₁
 
 variable {T}

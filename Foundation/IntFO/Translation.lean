@@ -58,11 +58,11 @@ end Semiformula
 
 abbrev Theory.doubleNegation (T : Theory L) : Theoryᵢ L := Semiformula.doubleNegation '' T
 
-scoped[LO.FirstOrder] postfix:max "ᴺ" => Theory.doubleNegation
+scoped[LO.FirstOrder] postfix:max "ᴺ'" => Theory.doubleNegation
 
 abbrev Sequent.doubleNegation (Γ : List (Semiformula L ξ n)) : List (Semiformulaᵢ L ξ n) := Γ.map (·ᴺ)
 
-scoped[LO.FirstOrder] postfix:max "ᴺ" => Sequent.doubleNegation
+scoped[LO.FirstOrder] postfix:max "ᴺ'" => Sequent.doubleNegation
 
 namespace Derivation
 
@@ -105,35 +105,35 @@ def negDoubleNegation : (φ : SyntacticFormula L) → 𝗠𝗶𝗻¹ ⊢ ∼φ�
 open Entailment
 
 noncomputable
-def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝗠𝗶𝗻¹] ⊥
+def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ' ⊢[𝗠𝗶𝗻¹] ⊥
   | axL Γ r v            => nthAxm 1 ⨀ nthAxm 0
   | verum Γ              => nthAxm 0
   | @and _ _ Γ φ ψ dφ dψ =>
-    have ihφ : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[𝗠𝗶𝗻¹] ⊥ := goedelGentzen dφ
-    have ihψ : ((∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[𝗠𝗶𝗻¹] ⊥ := goedelGentzen dψ
-    have : (∼Γ)ᴺ ⊢[𝗠𝗶𝗻¹] ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ := Entailment.K_intro (deduct ihφ) (deduct ihψ)
+    have ihφ : ((∼φ)ᴺ :: (∼Γ)ᴺ') ⊢[𝗠𝗶𝗻¹] ⊥ := goedelGentzen dφ
+    have ihψ : ((∼ψ)ᴺ :: (∼Γ)ᴺ') ⊢[𝗠𝗶𝗻¹] ⊥ := goedelGentzen dψ
+    have : (∼Γ)ᴺ' ⊢[𝗠𝗶𝗻¹] ∼(∼φ)ᴺ ⋏ ∼(∼ψ)ᴺ := Entailment.K_intro (deduct ihφ) (deduct ihψ)
     deductInv (Entailment.dni' this)
   | @or _ _ Γ φ ψ d      =>
-    have : (∼Γ)ᴺ ⊢[𝗠𝗶𝗻¹] (∼ψ)ᴺ ➝ (∼φ)ᴺ ➝ ⊥ := deduct <| deduct  <| goedelGentzen d
-    have : ((∼φ)ᴺ ⋏ (∼ψ)ᴺ :: (∼Γ)ᴺ) ⊢[𝗠𝗶𝗻¹] ⊥ :=
+    have : (∼Γ)ᴺ' ⊢[𝗠𝗶𝗻¹] (∼ψ)ᴺ ➝ (∼φ)ᴺ ➝ ⊥ := deduct <| deduct  <| goedelGentzen d
+    have : ((∼φ)ᴺ ⋏ (∼ψ)ᴺ :: (∼Γ)ᴺ') ⊢[𝗠𝗶𝗻¹] ⊥ :=
       Entailment.FiniteContext.weakening (by simp) this ⨀ (Entailment.K_right (nthAxm 0)) ⨀ (Entailment.K_left (nthAxm 0))
     this
   | @all _ _ Γ φ d       =>
-    have eΓ : (∼Γ⁺)ᴺ = ((∼Γ)ᴺ)⁺ := by
+    have eΓ : (∼Γ⁺)ᴺ' = ((∼Γ)ᴺ')⁺ := by
       simp [Sequent.doubleNegation, Rewriting.shifts, Sequent.neg_def, Semiformula.rew_doubleNegation]
-    have : ((∼Γ)ᴺ)⁺ ⊢[𝗠𝗶𝗻¹] free (∼(∼φ)ᴺ) :=
+    have : ((∼Γ)ᴺ')⁺ ⊢[𝗠𝗶𝗻¹] free (∼(∼φ)ᴺ) :=
       FiniteContext.cast (deduct (goedelGentzen d)) eΓ (by simp [Semiformula.rew_doubleNegation]; rfl)
     deductInv <| dni' <| geNOverFiniteContext this
   | @ex _ _ Γ φ t d      =>
-    have ih : (∼Γ)ᴺ ⊢[𝗠𝗶𝗻¹] ∼((∼φ)ᴺ/[t]) :=
+    have ih : (∼Γ)ᴺ' ⊢[𝗠𝗶𝗻¹] ∼((∼φ)ᴺ/[t]) :=
       Entailment.cast (by simp [Semiformula.rew_doubleNegation]; rfl) <| deduct (goedelGentzen d)
-    have : ((∀' (∼φ)ᴺ) :: (∼Γ)ᴺ) ⊢[𝗠𝗶𝗻¹] (∼φ)ᴺ/[t] := specializeOverContext (nthAxm 0) t
+    have : ((∀' (∼φ)ᴺ) :: (∼Γ)ᴺ') ⊢[𝗠𝗶𝗻¹] (∼φ)ᴺ/[t] := specializeOverContext (nthAxm 0) t
     (FiniteContext.weakening (by simp) ih) ⨀ this
   | @cut _ _ Γ φ dp dn   =>
-    have ihp : ((∼φ)ᴺ :: (∼Γ)ᴺ) ⊢[𝗠𝗶𝗻¹] ⊥ := goedelGentzen dp
-    have ihn : (φᴺ :: (∼Γ)ᴺ) ⊢[𝗠𝗶𝗻¹] ⊥ := cast (by simp) (goedelGentzen dn)
-    have b₁ : (∼Γ)ᴺ ⊢[𝗠𝗶𝗻¹] ∼∼φᴺ := Entailment.C_trans (of <| Entailment.K_left (negDoubleNegation φ)) (deduct ihp)
-    have b₂ : (∼Γ)ᴺ ⊢[𝗠𝗶𝗻¹] ∼φᴺ := deduct ihn
+    have ihp : ((∼φ)ᴺ :: (∼Γ)ᴺ') ⊢[𝗠𝗶𝗻¹] ⊥ := goedelGentzen dp
+    have ihn : (φᴺ :: (∼Γ)ᴺ') ⊢[𝗠𝗶𝗻¹] ⊥ := cast (by simp) (goedelGentzen dn)
+    have b₁ : (∼Γ)ᴺ' ⊢[𝗠𝗶𝗻¹] ∼∼φᴺ := Entailment.C_trans (of <| Entailment.K_left (negDoubleNegation φ)) (deduct ihp)
+    have b₂ : (∼Γ)ᴺ' ⊢[𝗠𝗶𝗻¹] ∼φᴺ := deduct ihn
     b₁ ⨀ b₂
   | @wk _ _ Γ Δ d h      => FiniteContext.weakening (by simpa using List.map_subset _ h) (goedelGentzen d)
 

@@ -149,9 +149,9 @@ lemma weight_lt_weight_of {Γ} (hΓ : Γ ∈ S₂) (h : ∀ Δ ∈ S₁, Δ.weig
 
 end Sequents
 
-abbrev Derivations (T : Theory α) (S : Sequents α) := ∀ Γ ∈ S, T ⟹ Γ
+abbrev Derivations (T : Theory α) (S : Sequents α) := ∀ Γ ∈ S, T ⇒ Γ
 
-abbrev Derivations! (T : Theory α) (S : Sequents α) : Prop := ∀ Γ ∈ S, T ⟹! Γ
+abbrev Derivations! (T : Theory α) (S : Sequents α) : Prop := ∀ Γ ∈ S, T ⇒! Γ
 
 namespace Derivations
 
@@ -200,7 +200,7 @@ def Sequent.IsClosed.choose [DecidableEq α] : (Γ : Sequent α) → Γ.IsClosed
     let ⟨ψ, hψ⟩ := this.choose
     ⟨ψ, by simp [hψ]⟩
 
-def Derivation.ofIsClosed [DecidableEq α] {T : Theory α} {Γ : Sequent α} (h : Γ.IsClosed) : T ⟹ Γ :=
+def Derivation.ofIsClosed [DecidableEq α] {T : Theory α} {Γ : Sequent α} (h : Γ.IsClosed) : T ⇒ Γ :=
   let ⟨φ, h, hn⟩ := h.choose
   em (φ := φ) h hn
 
@@ -296,47 +296,47 @@ lemma Sequent.weight_lt_weight_of_mem_reduction {h : ¬Γ.IsAtomic} : Δ ∈ Γ.
       Nat.sub_lt_left_of_lt_add (Nat.le_add_right_of_le (weight_le_weight_of_mem this)) (by simp; omega)
 
 def Derivation.ofReduction {Γ : Sequent α} {hΓ : ¬Γ.IsAtomic}
-    (d : Derivations T (Γ.reduction hΓ)) : T ⟹ Γ :=
+    (d : Derivations T (Γ.reduction hΓ)) : T ⇒ Γ :=
     match H : Γ.chooseNonAtomic hΓ with
     |  .atom a => by have := Γ.chooseNonAtomic_property hΓ; simp_all
     | .natom a => by have := Γ.chooseNonAtomic_property hΓ; simp_all
     |        ⊤ => verum' (by simpa [H] using Sequent.chooseNonAtomic_mem hΓ)
     |        ⊥ =>
-      have : T ⟹ Γ.remove ⊥ := d (Γ.remove ⊥) (by simp [Sequent.reduction_falsum H])
+      have : T ⇒ Γ.remove ⊥ := d (Γ.remove ⊥) (by simp [Sequent.reduction_falsum H])
       this.wk (by simp)
     |    φ ⋏ ψ =>
-      have : T ⟹ (Γ.remove (φ ⋏ ψ)).concat φ := d _ (by simp [Sequent.reduction_and H])
-      have dφ : T ⟹ φ :: Γ.remove (φ ⋏ ψ) := this.wk (by simp)
-      have : T ⟹ (Γ.remove (φ ⋏ ψ)).concat ψ := d _ (by simp [Sequent.reduction_and H])
-      have dψ : T ⟹ ψ :: Γ.remove (φ ⋏ ψ) := this.wk (by simp)
+      have : T ⇒ (Γ.remove (φ ⋏ ψ)).concat φ := d _ (by simp [Sequent.reduction_and H])
+      have dφ : T ⇒ φ :: Γ.remove (φ ⋏ ψ) := this.wk (by simp)
+      have : T ⇒ (Γ.remove (φ ⋏ ψ)).concat ψ := d _ (by simp [Sequent.reduction_and H])
+      have dψ : T ⇒ ψ :: Γ.remove (φ ⋏ ψ) := this.wk (by simp)
       dφ.and dψ |>.wk (by simpa [H] using Sequent.chooseNonAtomic_mem hΓ)
     |    φ ⋎ ψ =>
-      have : T ⟹ ((Γ.remove (φ ⋎ ψ)).concat φ).concat ψ := d _ (by simp [Sequent.reduction_or H])
-      have : T ⟹ φ :: ψ :: Γ.remove (φ ⋎ ψ) := this.wk <| by simp
+      have : T ⇒ ((Γ.remove (φ ⋎ ψ)).concat φ).concat ψ := d _ (by simp [Sequent.reduction_or H])
+      have : T ⇒ φ :: ψ :: Γ.remove (φ ⋎ ψ) := this.wk <| by simp
       this.or |>.wk (by simpa [H] using Sequent.chooseNonAtomic_mem hΓ)
 
 lemma Derivation.toReduction {Γ : Sequent α} (hΓ : ¬Γ.IsAtomic)
-    (d : T ⟹! Γ) : Derivations! T (Γ.reduction hΓ) := by
+    (d : T ⇒! Γ) : Derivations! T (Γ.reduction hΓ) := by
     match H : Γ.chooseNonAtomic hΓ with
     |  .atom a => have := Γ.chooseNonAtomic_property hΓ; simp_all
     | .natom a => have := Γ.chooseNonAtomic_property hΓ; simp_all
     |        ⊤ => simpa [Sequent.reduction_verum H] using Derivations!.nil
     |        ⊥ =>
-      suffices T ⟹! List.remove ⊥ Γ by
+      suffices T ⇒! List.remove ⊥ Γ by
         simp only [Sequent.reduction_falsum H]
         intro Γ; simp; rintro rfl; assumption
       exact ⟨Tait.cutFalsum <| (d.get).wk <| by simp⟩
     | φ ⋏ ψ =>
-      suffices T ⟹! φ :: List.remove (φ ⋏ ψ) Γ ∧ T ⟹! ψ :: List.remove (φ ⋏ ψ) Γ by
+      suffices T ⇒! φ :: List.remove (φ ⋏ ψ) Γ ∧ T ⇒! ψ :: List.remove (φ ⋏ ψ) Γ by
         simp [Sequent.reduction_and H]
         intro Γ; simp
         rintro (rfl | rfl); { exact Tait.wk! this.1 (by simp) }; { exact Tait.wk! this.2 (by simp) }
-      have : T ⟹! φ ⋏ ψ :: List.remove (φ ⋏ ψ) Γ := Tait.wk! d
+      have : T ⇒! φ ⋏ ψ :: List.remove (φ ⋏ ψ) Γ := Tait.wk! d
       constructor
       · exact Tait.modusPonens! Entailment.and₁! this
       · exact Tait.modusPonens! Entailment.and₂! this
     | φ ⋎ ψ =>
-      suffices T ⟹! φ :: ψ :: List.remove (φ ⋎ ψ) Γ by
+      suffices T ⇒! φ :: ψ :: List.remove (φ ⋎ ψ) Γ by
         simp [Sequent.reduction_or H]
         intro Γ; simp; rintro rfl
         exact Tait.wk! (by assumption)

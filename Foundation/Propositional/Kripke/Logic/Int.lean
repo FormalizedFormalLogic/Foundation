@@ -86,7 +86,7 @@ abbrev counterexampleDPModel (M₁ : Kripke.Model) (M₂ : Kripke.Model) (w₁ :
       | Sum.inr $ Sum.inr w => M₂ w a
       | _ => False,
     by
-      simp only [counterexampleDPFrame, Sum.forall, imp_false, not_false_eq_true, implies_true, imp_self, IsEmpty.forall_iff, and_self, and_true, true_and];
+      simp only [counterexampleDPFrame, Sum.forall, imp_false, not_false_eq_true, implies_true, imp_self, IsEmpty.forall_iff', and_self, and_true, true_and];
       constructor;
       . intro _ _;
         apply M₁.Val.hereditary;

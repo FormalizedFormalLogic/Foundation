@@ -67,8 +67,10 @@ lemma typed_quote_numeral_eq_numeral_one :
   | k + 1 + 1 =>
     calc (⌜(↑(k + 1 + 1) : SyntacticSemiterm ℒₒᵣ n)⌝ : Metamath.Semiterm V ℒₒᵣ n)
       _ = ⌜(↑(k + 1) : SyntacticSemiterm ℒₒᵣ n)⌝ + ⌜((1 : ℕ) : SyntacticSemiterm ℒₒᵣ n)⌝ := rfl
-      _ = typedNumeral ↑(k + 1) + typedNumeral 1 := by simp [typed_quote_numeral_eq_numeral (k + 1), typed_quote_numeral_eq_numeral_one]
-      _ = typedNumeral (↑k + 1 + 1)              := by simp
+      _ = typedNumeral ↑(k + 1) + typedNumeral 1 := by
+        simp [typed_quote_numeral_eq_numeral (k + 1), typed_quote_numeral_eq_numeral_one]
+      _ = typedNumeral (↑k + 1 + 1)              := by
+        simp
 
 lemma typed_quote_inj {t u : SyntacticSemiterm L n} : (⌜t⌝ : Metamath.Semiterm V L n) = ⌜u⌝ → t = u :=
   match t, u with
@@ -190,7 +192,7 @@ end LO.FirstOrder.Semiterm
 
 namespace LO.ISigma1.Metamath
 
-open Encodable FirstOrder
+open Encodable LO.FirstOrder
 
 lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
   induction s using Nat.binaryRec generalizing x
@@ -200,7 +202,7 @@ lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
     · cases' x with x <;> simp [ih]
     · cases' x with x <;> simp [ih]
 
-variable {L : Language} [L.Encodable] [L.LORDefinable]
+variable {L : LO.FirstOrder.Language} [L.Encodable] [L.LORDefinable]
 
 lemma IsSemiterm.sound {n t : ℕ} (ht : IsSemiterm L n t) : ∃ T : FirstOrder.SyntacticSemiterm L n, ⌜T⌝ = t := by
   induction t using Nat.strongRec

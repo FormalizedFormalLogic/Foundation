@@ -12,7 +12,7 @@ variable {L : Language} {T : Theory L}
 
 namespace Derivation
 
-lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ → M) {Γ : Sequent L} : T ⟹ Γ → ∃ φ ∈ Γ, Evalfm M ε φ
+lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ → M) {Γ : Sequent L} : T ⇒ Γ → ∃ φ ∈ Γ, Evalfm M ε φ
   | @axL _ _ Δ _ r v => by
     by_cases h : s.rel r (Semiterm.valm M ![] ε ∘ v)
     · exact ⟨rel r v, by simp, h⟩

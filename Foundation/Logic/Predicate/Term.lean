@@ -19,8 +19,8 @@ inductive Semiterm (L : Language) (ξ : Type*) (n : ℕ)
   | fvar : ξ → Semiterm L ξ n
   | func : ∀ {arity}, L.Func arity → (Fin arity → Semiterm L ξ n) → Semiterm L ξ n
 
-scoped prefix:max "&" => Semiterm.fvar
-scoped prefix:max "#" => Semiterm.bvar
+scoped prefix:max (priority := high) "&" => Semiterm.fvar
+scoped prefix:max (priority := high) "#" => Semiterm.bvar
 
 abbrev Term (L : Language) (ξ : Type*) := Semiterm L ξ 0
 

@@ -461,7 +461,7 @@ lemma lt_fvSup_of_fvar? {φ : SyntacticSemiformula L n} : φ.FVar? m → m < φ.
   have : ∃ s : ℕ, φ.freeVariables.max = s := Finset.max_of_mem hm
   rcases this with ⟨s, hs⟩
   have : m ≤ s := by
-    have : (m : WithBot ℕ) ≤ ↑s := by simpa [hs] using Finset.le_max hm
+    have : (m : WithBot ℕ) ≤ ↑s := by simpa only [hs] using Finset.le_max hm
     exact WithBot.coe_le_coe.mp this
   simpa [hs, WithBot.recBotCoe] using Nat.lt_add_one_of_le this
 
@@ -507,8 +507,8 @@ def lMapAux (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n → Semiformula 
   |     ∃' φ => ∃' lMapAux Φ φ
 
 lemma lMapAux_neg {n} (φ : Semiformula L₁ ξ n) :
-    (∼φ).lMapAux Φ = ∼φ.lMapAux Φ :=
-  by induction φ using Semiformula.rec' <;> simp [*, lMapAux, ←Semiformula.neg_eq]
+    (∼φ).lMapAux Φ = ∼φ.lMapAux Φ := by
+  induction φ using Semiformula.rec' <;> simp [*, lMapAux]
 
 def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformula L₂ ξ n where
   toTr := lMapAux Φ

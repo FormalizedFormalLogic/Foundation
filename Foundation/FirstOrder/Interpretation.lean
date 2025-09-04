@@ -68,7 +68,7 @@ def translateAux {n} : Semiformula L₂ ξ n → Semiformula L₁ ξ n
   |      ∃' φ => ∃_[π] translateAux φ
 
 lemma translateAux_neg {n : ℕ} (φ : Semiformula L₂ ξ n) : π.translateAux (∼φ) = ∼π.translateAux φ := by
-  induction φ using Semiformula.rec' <;> simp [translateAux, *, ←Semiformula.neg_eq]
+  induction φ using Semiformula.rec' <;> simp [translateAux, *]
 
 def translate : Semiformula L₂ ξ n →ˡᶜ Semiformula L₁ ξ n where
   toTr := π.translateAux
@@ -195,8 +195,7 @@ lemma rel_iff {k} (r : L₂.Rel k) (v : Fin k → π.Model M) :
 
 @[simp] lemma eq_iff (v : Fin 2 → π.Model M) :
     Structure.rel (Language.Eq.eq : L₂.Rel 2) v ↔ v 0 = v 1 := by
-  simp [Model.rel_iff, eval_rel, Subtype.val_inj]
-  simp [Matrix.fun_eq_vec_two (v := fun i ↦ (v i : M))]
+  simp [Model.rel_iff, Matrix.fun_eq_vec_two (v := fun i ↦ (v i : M))]
 
 instance : Structure.Eq L₂ (π.Model M) where
   eq a b := by simp [Operator.val, Operator.Eq.sentence_eq, eval_rel]
@@ -217,8 +216,8 @@ lemma func_iff' {k} {f : L₂.Func k} {y : M} {v : Fin k → π.Model M} :
 lemma eval_varEqual_iff {t : Semiterm L₂ ξ n} {ε : ξ → π.Model M} {y : π.Model M} {x : Fin n → π.Model M} :
     Evalm M (y :> fun i ↦ x i) (fun x ↦ ε x) (π.varEqual t) ↔ y = t.valm (π.Model M) x ε := by
   match t with
-  |                     #_ => simp [varEqual, Subtype.coe_inj]
-  |                     &_ => simp [varEqual, Subtype.coe_inj]
+  |                     #_ => simp [varEqual]
+  |                     &_ => simp [varEqual]
   | .func (arity := k) f v =>
     suffices
       (∀ w : Fin k → M,
@@ -315,7 +314,7 @@ protected def id : Translation T L₁ where
   preserve_eq := complete₀ <| EQ.provOf.{_,0} _ fun M _ _ _ _ ↦ by
     simp [models_iff, Matrix.comp_vecCons', Matrix.constant_eq_singleton, Semiformula.eval_rel]
 
-lemma id_func_def : (Translation.id T).func f = “z. z = !!(Semiterm.func f (#·.succ))” := rfl
+lemma id_func_def {f : L₁.Func k} : (Translation.id T).func f = “z. z = !!(Semiterm.func f (#·.succ))” := rfl
 
 lemma id_rel_def : (Translation.id T).rel R = Semiformula.rel R (#·) := rfl
 

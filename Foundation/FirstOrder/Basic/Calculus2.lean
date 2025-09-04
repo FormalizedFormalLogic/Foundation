@@ -41,7 +41,7 @@ variable {T : Theory L}
 lemma shifts_toFinset_eq_image_shift (Δ : Sequent L) :
     (Rewriting.shifts Δ).toFinset = Δ.toFinset.image Rewriting.shift := by ext φ; simp [Rewriting.shifts]
 
-def Derivation.toDerivation2 (T) {Γ : Sequent L} : T ⟹ Γ → T ⊢₂ Γ.toFinset
+def Derivation.toDerivation2 (T) {Γ : Sequent L} : T ⇒ Γ → T ⊢₂ Γ.toFinset
   | Derivation.axL Δ R v            => Derivation2.closed _ (Semiformula.rel R v) (by simp) (by simp)
   | Derivation.axm (φ := φ) h      => Derivation2.axm φ h (by simp)
   | Derivation.verum Δ              => Derivation2.verum (by simp)
@@ -67,7 +67,7 @@ def Derivation.toDerivation2 (T) {Γ : Sequent L} : T ⟹ Γ → T ⊢₂ Γ.toF
       (Derivation2.wk (Derivation.toDerivation2 T d₁) (by simp))
       (Derivation2.wk (Derivation.toDerivation2 T d₂) (by simp))
 
-noncomputable def Derivation2.toDerivation {Γ : Finset (SyntacticFormula L)} : T ⊢₂ Γ → T ⟹ Γ.toList
+noncomputable def Derivation2.toDerivation {Γ : Finset (SyntacticFormula L)} : T ⊢₂ Γ → T ⇒ Γ.toList
   | Derivation2.closed Δ φ hp hn              => Derivation.em (φ := φ) (by simp [hp]) (by simp [hn])
   | Derivation2.axm φ hp h                   => Tait.wk (Derivation.axm hp) (by simp_all)
   | Derivation2.verum h                       => Tait.verum' (by simp [h])
@@ -90,7 +90,7 @@ noncomputable def Derivation2.toDerivation {Γ : Finset (SyntacticFormula L)} : 
       (Tait.wk d.toDerivation <| by intro x; simp)
       (Tait.wk dn.toDerivation <| by intro x; simp)
 
-lemma derivable_iff_derivable2 {Γ : List (SyntacticFormula L)} : T ⟹! Γ ↔ T ⊢₂! Γ.toFinset := by
+lemma derivable_iff_derivable2 {Γ : List (SyntacticFormula L)} : T ⇒! Γ ↔ T ⊢₂! Γ.toFinset := by
   constructor
   · rintro ⟨d⟩; exact ⟨by simpa using Derivation.toDerivation2 T d⟩
   · rintro ⟨d⟩; exact ⟨.wk d.toDerivation (by intro x; simp)⟩

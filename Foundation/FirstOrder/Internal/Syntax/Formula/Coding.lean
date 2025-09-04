@@ -2,7 +2,7 @@ import Foundation.FirstOrder.Internal.Syntax.Formula.Typed
 import Foundation.FirstOrder.Internal.Syntax.Term.Coding
 import Mathlib.Combinatorics.Colex
 
-open Encodable LO FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open Encodable LO LO.FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamath
 
 namespace LO
 

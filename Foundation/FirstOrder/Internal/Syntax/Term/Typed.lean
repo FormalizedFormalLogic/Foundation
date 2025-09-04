@@ -262,7 +262,7 @@ noncomputable def typedNumeral (m : V) : Semiterm V ℒₒᵣ n := ⟨numeral m,
 
 scoped prefix:max "𝕹" => typedNumeral
 
-noncomputable def add (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n := ⟨t.val ^+ u.val, by simp [qqAdd]⟩
+noncomputable def add (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n := ⟨t.val ^+ u.val, by simp [-CharP.cast_eq_zero, qqAdd]⟩
 
 noncomputable def mul (t u : Semiterm V ℒₒᵣ n) : Semiterm V ℒₒᵣ n := ⟨t.val ^* u.val, by simp [qqMul]⟩
 
@@ -285,12 +285,10 @@ noncomputable instance (n : ℕ) : Mul (Semiterm V ℒₒᵣ n) := ⟨mul⟩
   ext; simp [coe_one_eq]
 
 @[simp] lemma add_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
-    Semiterm.func (Language.Add.add : (ℒₒᵣ).Func 2) v = v 0 + v 1 := by
-  ext; rfl
+    Semiterm.func (Language.Add.add : (ℒₒᵣ).Func 2) v = v 0 + v 1 := rfl
 
 @[simp] lemma mul_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
-    Semiterm.func (Language.Mul.mul : (ℒₒᵣ).Func 2) v = v 0 * v 1 := by
-  ext; rfl
+    Semiterm.func (Language.Mul.mul : (ℒₒᵣ).Func 2) v = v 0 * v 1 := rfl
 
 @[simp] lemma add_inj_iff {t₁ t₂ u₁ u₂ : Semiterm V ℒₒᵣ n} :
     t₁ + t₂ = u₁ + u₂ ↔ t₁ = u₁ ∧ t₂ = u₂ := by
@@ -314,7 +312,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
 
 @[simp] lemma subst_add (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ + t₂).substs w = t₁.substs w + t₂.substs w := by
-  ext; simp [qqAdd, Semiterm.substs]
+  ext; simp [-CharP.cast_eq_zero, qqAdd, Semiterm.substs]
 
 @[simp] lemma subst_mul (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ * t₂).substs w = t₁.substs w * t₂.substs w := by
@@ -324,7 +322,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
   ext; simp [Semiterm.shift]
 
 @[simp] lemma shift_add (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ + t₂).shift = t₁.shift + t₂.shift := by
-  ext; simp [qqAdd, Semiterm.shift]
+  ext; simp [-CharP.cast_eq_zero, qqAdd, Semiterm.shift]
 
 @[simp] lemma shift_mul (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ * t₂).shift = t₁.shift * t₂.shift := by
   ext; simp [qqMul, Semiterm.shift]
@@ -333,7 +331,7 @@ lemma numeral_succ_pos' {x : V} (pos : 0 < x) :
   ext; simp [Semiterm.bShift]
 
 @[simp] lemma bShift_add (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ + t₂).bShift = t₁.bShift + t₂.bShift := by
-  ext; simp [qqAdd, Semiterm.bShift]
+  ext; simp [-CharP.cast_eq_zero, qqAdd, Semiterm.bShift]
 
 @[simp] lemma bShift_mul (t₁ t₂ : Semiterm V ℒₒᵣ n) : (t₁ * t₂).bShift = t₁.bShift * t₂.bShift := by
   ext; simp [qqMul, Semiterm.bShift]

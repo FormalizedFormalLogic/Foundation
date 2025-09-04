@@ -85,10 +85,10 @@ noncomputable def SearchTree.recursion {C : SearchTree T Γ → Sort v}
   (τ) (h : ∀ τ₁, (∀ τ₂, SearchTree.Lt T Γ τ₂ τ₁ → C τ₂) → C τ₁) : C τ :=
   WellFounded.fix wf h τ
 
-noncomputable def syntacticMainLemma (φ : SearchTree T Γ) : T ⟹ φ.seq := by
+noncomputable def syntacticMainLemma (φ : SearchTree T Γ) : T ⇒ φ.seq := by
   apply SearchTree.recursion wf φ
   intro ⟨s, Δ₁, a₁⟩ ih
-  have ih' : ∀ {Δ₂}, ReduxNat T s Δ₂ Δ₁ → T ⟹ Δ₂ := fun {Δ₂} r => ih ⟨s + 1, Δ₂, a₁.succ r⟩ (SearchTree.Lt.intro a₁ r)
+  have ih' : ∀ {Δ₂}, ReduxNat T s Δ₂ Δ₁ → T ⇒ Δ₂ := fun {Δ₂} r => ih ⟨s + 1, Δ₂, a₁.succ r⟩ (SearchTree.Lt.intro a₁ r)
   rcases hs : (decode s.unpair.1 : Option (Code L)) with (_ | c)
   · have : ReduxNat T s Δ₁ Δ₁ := ReduxNat.refl hs Δ₁
     exact ih' this
@@ -105,36 +105,36 @@ noncomputable def syntacticMainLemma (φ : SearchTree T Γ) : T ⟹ φ.seq := by
       by_cases h : φ ⋏ ψ ∈ Δ₁
       · have rp : φ :: Δ₁ ≺[Code.and φ ψ] Δ₁ := Redux.and₁ h
         have rq : ψ :: Δ₁ ≺[Code.and φ ψ] Δ₁ := Redux.and₂ h
-        have dp : T ⟹ φ :: Δ₁ := ih' (ReduxNat.redux hs rp)
-        have dq : T ⟹ ψ :: Δ₁ := ih' (ReduxNat.redux hs rq)
+        have dp : T ⇒ φ :: Δ₁ := ih' (ReduxNat.redux hs rp)
+        have dq : T ⇒ ψ :: Δ₁ := ih' (ReduxNat.redux hs rq)
         exact Tait.wk (Tait.and dp dq) (by simpa using h)
       · exact ih' (ReduxNat.redux hs $ Redux.andRefl h)
     case or φ ψ =>
       by_cases h : φ ⋎ ψ ∈ Δ₁
       · have : φ :: ψ :: Δ₁ ≺[Code.or φ ψ] Δ₁ := Redux.or h
-        have : T ⟹ φ :: ψ :: Δ₁ := ih' (ReduxNat.redux hs this)
+        have : T ⇒ φ :: ψ :: Δ₁ := ih' (ReduxNat.redux hs this)
         exact Tait.wk (Tait.or this) (by simpa using h)
       · exact ih' (ReduxNat.redux hs $ Redux.orRefl h)
     case all φ =>
       by_cases h : ∀' φ ∈ Δ₁
       · have : φ/[&(newVar Δ₁)] :: Δ₁ ≺[Code.all φ] Δ₁ := Redux.all h
-        have : T ⟹ φ/[&(newVar Δ₁)] :: Δ₁ := ih' (ReduxNat.redux hs this)
+        have : T ⇒ φ/[&(newVar Δ₁)] :: Δ₁ := ih' (ReduxNat.redux hs this)
         exact Derivation.allNvar h this
       · exact ih' (ReduxNat.redux hs $ Redux.allRefl h)
     case ex φ t =>
       by_cases h : ∃' φ ∈ Δ₁
       · have : φ/[t] :: Δ₁ ≺[Code.ex φ t] Δ₁ := Redux.ex h
-        have : T ⟹ φ/[t] :: Δ₁ := ih' (ReduxNat.redux hs this)
+        have : T ⇒ φ/[t] :: Δ₁ := ih' (ReduxNat.redux hs this)
         exact Tait.wk (Derivation.ex t this) (by simpa using h)
       · exact ih' (ReduxNat.redux hs $ Redux.exRefl h)
     case id φ =>
       by_cases h : φ ∈ T
       · have : (∼∀∀φ) :: Δ₁ ≺[Code.id φ] Δ₁ := Redux.id h
-        have : T ⟹ (∼∀∀φ) :: Δ₁ := ih' (ReduxNat.redux hs this)
+        have : T ⇒ (∼∀∀φ) :: Δ₁ := ih' (ReduxNat.redux hs this)
         exact Derivation.id h this
       · exact ih' (ReduxNat.redux hs $ Redux.idRefl h)
 
-noncomputable def syntacticMainLemmaTop : T ⟹ Γ := syntacticMainLemma wf ⊤
+noncomputable def syntacticMainLemmaTop : T ⇒ Γ := syntacticMainLemma wf ⊤
 
 end WellFounded
 

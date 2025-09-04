@@ -1,9 +1,7 @@
 import Foundation.FirstOrder.Arithmetic.Induction
-import Mathlib.Logic.Nonempty
 
 /-!
 # Basic properties of theory $\mathsf{I_{open}}$
-
 -/
 
 namespace LO
@@ -455,7 +453,7 @@ lemma sqrt_eq_of_le_of_le {x a : V} (le : x * x ≤ a) (h : a ≤ x * x + 2 * x)
 @[simp] lemma sqrt_mul_self (a : V) : √(a * a) = a :=
   Eq.symm <| eq_sqrt a (a * a) <| by simpa using mul_self_lt_mul_self (by simp) (by simp)
 
-@[simp] lemma sqrt_sq (a : V) : √(a^2) = a := by simp [sq]
+@[simp] lemma sqrt_sq (a : V) : (√(a^2) : V) = a := by simp [sq]
 
 @[simp] lemma sqrt_zero : √(0 : V) = 0 := by simpa using sqrt_mul_self (0 : V)
 
@@ -472,7 +470,7 @@ lemma sqrt_three : √(3 : V) = 1 :=
 
 @[simp] lemma two_ne_square (a : V) : 2 ≠ a^2 := by
   intro h
-  rcases show a = √2 from by rw [h]; simp with rfl
+  rcases show a = √(2 : V) from by rw [h]; simp with rfl
   simp [sqrt_two] at h
 
 @[simp] lemma sqrt_le_add (a : V) : a ≤ √a * √a + 2 * √a :=

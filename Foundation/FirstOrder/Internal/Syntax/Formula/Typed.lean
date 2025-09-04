@@ -307,11 +307,11 @@ noncomputable def substItrDisj (w : SemitermVec V ℒₒᵣ m n) (φ : Semiformu
 
 @[simp] lemma substItrConj_free (w : SemitermVec V ℒₒᵣ m 1) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
     (φ.substItrConj w z).free = φ.shift.substItrConj (Semiterm.free⨟ w) z := by
-  unfold free; simp [Matrix.map_map_comp']; rfl
+  unfold free; simp [Matrix.map'_map'_comp']; rfl
 
 @[simp] lemma substItrDisj_free (w : SemitermVec V ℒₒᵣ m 1) (φ : Semiformula V ℒₒᵣ (m + 1)) (z : V) :
     (φ.substItrDisj w z).free = φ.shift.substItrDisj (Semiterm.free⨟ w) z := by
-  unfold free; simp [Matrix.map_map_comp']; rfl
+  unfold free; simp [Matrix.map'_map'_comp']; rfl
 
 end Semiformula
 
@@ -359,9 +359,9 @@ open InternalArithmetic
 
 variable {k n m : ℕ}
 
-noncomputable def Semiterm.equals (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^= u.val, by simp [qqEQ]⟩
+noncomputable def Semiterm.equals (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^= u.val, by simp [-CharP.cast_eq_zero, qqEQ]⟩
 
-noncomputable def Semiterm.notEquals (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^≠ u.val, by simp [qqNEQ]⟩
+noncomputable def Semiterm.notEquals (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^≠ u.val, by simp [-CharP.cast_eq_zero, qqNEQ]⟩
 
 noncomputable def Semiterm.lessThan (t u : Semiterm V ℒₒᵣ n) : Semiformula V ℒₒᵣ n := ⟨t.val ^< u.val, by simp [qqLT]⟩
 
@@ -386,20 +386,16 @@ namespace InternalArithmetic
 variable {n m : ℕ}
 
 @[simp] lemma rel_eq_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
-    Semiformula.rel (Language.Eq.eq : (ℒₒᵣ).Rel 2) v = (v 0 ≐ v 1) := by
-  ext; rfl
+    Semiformula.rel (Language.Eq.eq : (ℒₒᵣ).Rel 2) v = (v 0 ≐ v 1) := rfl
 
 @[simp] lemma nrel_eq_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
-    Semiformula.nrel (Language.Eq.eq : (ℒₒᵣ).Rel 2) v = (v 0 ≉ v 1) := by
-  ext; rfl
+    Semiformula.nrel (Language.Eq.eq : (ℒₒᵣ).Rel 2) v = (v 0 ≉ v 1) := rfl
 
 @[simp] lemma rel_lt_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
-    Semiformula.rel (Language.LT.lt : (ℒₒᵣ).Rel 2) v = (v 0 <' v 1) := by
-  ext; rfl
+    Semiformula.rel (Language.LT.lt : (ℒₒᵣ).Rel 2) v = (v 0 <' v 1) := rfl
 
 @[simp] lemma nrel_lt_eq (v : Fin 2 → Semiterm V ℒₒᵣ n) :
-    Semiformula.nrel (Language.LT.lt : (ℒₒᵣ).Rel 2) v = (v 0 ≮' v 1) := by
-  ext; rfl
+    Semiformula.nrel (Language.LT.lt : (ℒₒᵣ).Rel 2) v = (v 0 ≮' v 1) := rfl
 
 @[simp] lemma val_equals (t u : Semiterm V ℒₒᵣ n) : (t ≐ u).val = t.val ^= u.val := rfl
 @[simp] lemma val_notEquals (t u : Semiterm V ℒₒᵣ n) : (t ≉ u).val = t.val ^≠ u.val := rfl
@@ -424,11 +420,11 @@ variable {n m : ℕ}
 
 @[simp] lemma neg_equals (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     ∼(t₁ ≐ t₂) = (t₁ ≉ t₂) := by
-  ext; simp [Semiterm.equals, Semiterm.notEquals, qqEQ, qqNEQ]
+  ext; simp [-CharP.cast_eq_zero, Semiterm.equals, Semiterm.notEquals, qqEQ, qqNEQ]
 
 @[simp] lemma neg_notEquals (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     ∼(t₁ ≉ t₂) = (t₁ ≐ t₂) := by
-  ext; simp [Semiterm.equals, Semiterm.notEquals, qqEQ, qqNEQ]
+  ext; simp [-CharP.cast_eq_zero, Semiterm.equals, Semiterm.notEquals, qqEQ, qqNEQ]
 
 @[simp] lemma neg_lessThan (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     ∼(t₁ <' t₂) = (t₁ ≮' t₂) := by
@@ -440,11 +436,11 @@ variable {n m : ℕ}
 
 @[simp] lemma shift_equals (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ ≐ t₂).shift = (t₁.shift ≐ t₂.shift) := by
-  ext; simp [Semiterm.equals, Semiterm.shift, Semiformula.shift, qqEQ]
+  ext; simp [-CharP.cast_eq_zero, Semiterm.equals, Semiterm.shift, Semiformula.shift, qqEQ]
 
 @[simp] lemma shift_notEquals (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ ≉ t₂).shift = (t₁.shift ≉ t₂.shift) := by
-  ext; simp [Semiterm.notEquals, Semiterm.shift, Semiformula.shift, qqNEQ]
+  ext; simp [-CharP.cast_eq_zero, Semiterm.notEquals, Semiterm.shift, Semiformula.shift, qqNEQ]
 
 @[simp] lemma shift_lessThan (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ <' t₂).shift = (t₁.shift <' t₂.shift) := by
@@ -456,11 +452,11 @@ variable {n m : ℕ}
 
 @[simp] lemma substs_equals (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ ≐ t₂).substs w = (t₁.substs w ≐ t₂.substs w) := by
-  ext; simp [Semiterm.equals, Semiterm.substs, Semiformula.substs, qqEQ]
+  ext; simp [-CharP.cast_eq_zero, Semiterm.equals, Semiterm.substs, Semiformula.substs, qqEQ]
 
 @[simp] lemma substs_notEquals (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ ≉ t₂).substs w = (t₁.substs w ≉ t₂.substs w) := by
-  ext; simp [Semiterm.notEquals, Semiterm.substs, Semiformula.substs, qqNEQ]
+  ext; simp [-CharP.cast_eq_zero, Semiterm.notEquals, Semiterm.substs, Semiformula.substs, qqNEQ]
 
 @[simp] lemma substs_lessThan (w : SemitermVec V ℒₒᵣ n m) (t₁ t₂ : Semiterm V ℒₒᵣ n) :
     (t₁ <' t₂).substs w = (t₁.substs w <' t₂.substs w) := by

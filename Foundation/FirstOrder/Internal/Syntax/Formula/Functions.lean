@@ -1274,11 +1274,11 @@ instance (Γ m) : Γ-[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne
 
 lemma neg_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^= u) = t ^≠ u := by
   simp only [qqEQ, qqNEQ]
-  rw [neg_rel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
+  rw [neg_rel (L := ℒₒᵣ) LOR_rel_eqIndex (by simp [ht, hu])]
 
 lemma neg_neq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^≠ u) = t ^= u := by
   simp only [qqNEQ, qqEQ]
-  rw [neg_nrel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
+  rw [neg_nrel (L := ℒₒᵣ) LOR_rel_eqIndex (by simp [ht, hu])]
 
 lemma neg_lt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^< u) = t ^≮ u := by
   simp only [qqLT, qqNLT]
@@ -1291,7 +1291,7 @@ lemma neg_nlt {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : 
 lemma substs_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) :
     substs ℒₒᵣ w (t ^= u) = (termSubst ℒₒᵣ w t) ^= (termSubst ℒₒᵣ w u) := by
   simp only [qqEQ]
-  rw [substs_rel (L := ℒₒᵣ) (by simp) (by simp [ht, hu])]
+  rw [substs_rel (L := ℒₒᵣ) LOR_rel_eqIndex (by simp [ht, hu])]
   simp [termSubstVec_cons₂ ht hu]
 
 end InternalArithmetic

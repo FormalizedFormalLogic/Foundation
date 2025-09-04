@@ -10,23 +10,23 @@ variable (𝓢 : S)
 
 def ProvablyEquivalent (φ ψ : F) : Prop := 𝓢 ⊢! φ ⭤ ψ
 
-local infix:45 " ≡ " => ProvablyEquivalent 𝓢
+local infix:45 " ~ " => ProvablyEquivalent 𝓢
 
-protected lemma ProvablyEquivalent.refl [Entailment.Minimal 𝓢] (φ : F) : φ ≡ φ := E!_id
+protected lemma ProvablyEquivalent.refl [Entailment.Minimal 𝓢] (φ : F) : φ ~ φ := E!_id
 
 variable {𝓢}
 
-protected lemma ProvablyEquivalent.symm [Entailment.Minimal 𝓢] {φ ψ : F} : φ ≡ ψ → ψ ≡ φ := E!_symm
+protected lemma ProvablyEquivalent.symm [Entailment.Minimal 𝓢] {φ ψ : F} : φ ~ ψ → ψ ~ φ := E!_symm
 
-protected lemma ProvablyEquivalent.trans [Entailment.Minimal 𝓢] {φ ψ χ : F} : φ ≡ ψ → ψ ≡ χ → φ ≡ χ := E!_trans
+protected lemma ProvablyEquivalent.trans [Entailment.Minimal 𝓢] {φ ψ χ : F} : φ ~ ψ → ψ ~ χ → φ ~ χ := E!_trans
 
-lemma provable_iff_provablyEquivalent_verum [Entailment.Minimal 𝓢] {φ : F} : 𝓢 ⊢! φ ↔ φ ≡ ⊤ :=
+lemma provable_iff_provablyEquivalent_verum [Entailment.Minimal 𝓢] {φ : F} : 𝓢 ⊢! φ ↔ φ ~ ⊤ :=
   ⟨fun h ↦ E!_intro CV! (C!_of_conseq! h), fun h ↦ (K!_right h) ⨀ verum!⟩
 
 variable (𝓢)
 
 def ProvablyEquivalent.setoid [Entailment.Minimal 𝓢] : Setoid F where
-  r := (· ≡ ·)
+  r := (· ~ ·)
   iseqv := { refl := .refl _, symm := .symm, trans := .trans }
 
 abbrev LindenbaumAlgebra [Entailment.Minimal 𝓢] := Quotient (ProvablyEquivalent.setoid 𝓢)
@@ -35,10 +35,10 @@ namespace LindenbaumAlgebra
 
 variable [Entailment.Minimal 𝓢]
 
-lemma of_eq_of {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦ψ⟧ ↔ φ ≡ ψ := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
+lemma of_eq_of {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦ψ⟧ ↔ φ ~ ψ := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
 
 instance [DecidableEq F] : LE (LindenbaumAlgebra 𝓢) :=
-  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢! φ ➝ ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [eq_iff_iff, C!_repalce hp hq]⟩
+  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢! φ ➝ ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [C!_repalce hp hq]⟩
 
 lemma le_def [DecidableEq F] {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦ψ⟧ ↔ 𝓢 ⊢! φ ➝ ψ := iff_of_eq rfl
 
