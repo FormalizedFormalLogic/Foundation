@@ -181,38 +181,38 @@ lemma ww {T : ArithmeticTheory} [T.Δ₁] (φll : φ.letterless := by grind) : A
     simp_all [Realization.interpret];
 -/
 
-@[grind] def regular (T : ArithmeticTheory) [T.Δ₁] (φ : Modal.Formula ℕ) := ℕ ⊧ₘ₀ (T.trivialPLRealization φ)
+@[grind] def Regular (T : ArithmeticTheory) [T.Δ₁] (φ : Modal.Formula ℕ) := ℕ ⊧ₘ₀ (T.trivialPLRealization φ)
 
-@[grind] def singular (T : ArithmeticTheory) [T.Δ₁] (φ : Modal.Formula ℕ) := ¬(φ.regular T)
+@[grind] def Singular (T : ArithmeticTheory) [T.Δ₁] (φ : Modal.Formula ℕ) := ¬(φ.Regular T)
 
-namespace regular
+namespace Regular
 
-@[simp, grind] lemma def_bot : ¬((⊥ : Formula _).regular T) := by simp [Formula.regular, Realization.interpret];
-@[simp, grind] lemma def_top : (⊤ : Formula _).regular T := by simp [Formula.regular, Realization.interpret];
-@[grind] lemma def_neg : (∼φ).regular T ↔ ¬(φ.regular T) := by simp [Formula.regular, Realization.interpret];
-@[grind] lemma def_neg' : (∼φ).regular T ↔ (φ.singular T) := Iff.trans def_neg $ by rfl
-@[grind] lemma def_and : (φ ⋏ ψ).regular T ↔ (φ.regular T) ∧ (ψ.regular T) := by simp [Formula.regular, Realization.interpret];
-@[grind] lemma def_or : (φ ⋎ ψ).regular T ↔ (φ.regular T) ∨ (ψ.regular T) := by simp [Formula.regular, Realization.interpret]; tauto;
-@[grind] lemma def_imp : (φ ➝ ψ).regular T ↔ ((φ.regular T) → (ψ.regular T)) := by simp [Formula.regular, Realization.interpret];
-@[grind] lemma def_iff : (φ ⭤ ψ).regular T ↔ ((φ.regular T) ↔ (ψ.regular T)) := by simp [Formula.regular, Realization.interpret]; tauto;
-lemma def_fconj' {Φ : β → Formula _} : (⩕ i ∈ s, Φ i).regular T ↔ ∀ i ∈ s, ((Φ i).regular T) := by
-  simp [Formula.regular, Realization.interpret];
+@[simp, grind] lemma def_bot : ¬((⊥ : Formula _).Regular T) := by simp [Formula.Regular, Realization.interpret];
+@[simp, grind] lemma def_top : (⊤ : Formula _).Regular T := by simp [Formula.Regular, Realization.interpret];
+@[grind] lemma def_neg : (∼φ).Regular T ↔ ¬(φ.Regular T) := by simp [Formula.Regular, Realization.interpret];
+@[grind] lemma def_neg' : (∼φ).Regular T ↔ (φ.Singular T) := Iff.trans def_neg $ by rfl
+@[grind] lemma def_and : (φ ⋏ ψ).Regular T ↔ (φ.Regular T) ∧ (ψ.Regular T) := by simp [Formula.Regular, Realization.interpret];
+@[grind] lemma def_or : (φ ⋎ ψ).Regular T ↔ (φ.Regular T) ∨ (ψ.Regular T) := by simp [Formula.Regular, Realization.interpret]; tauto;
+@[grind] lemma def_imp : (φ ➝ ψ).Regular T ↔ ((φ.Regular T) → (ψ.Regular T)) := by simp [Formula.Regular, Realization.interpret];
+@[grind] lemma def_iff : (φ ⭤ ψ).Regular T ↔ ((φ.Regular T) ↔ (ψ.Regular T)) := by simp [Formula.Regular, Realization.interpret]; tauto;
+lemma def_fconj' {Φ : β → Formula _} : (⩕ i ∈ s, Φ i).Regular T ↔ ∀ i ∈ s, ((Φ i).Regular T) := by
+  simp [Formula.Regular, Realization.interpret];
   sorry;
 
-end regular
+end Regular
 
 
-namespace singular
+namespace Singular
 
-@[simp, grind] lemma def_bot : (⊥ : Formula _).singular T := by grind
-@[simp, grind] lemma def_top : ¬(⊤ : Formula _).singular T := by grind
-@[grind] lemma def_neg : (∼φ).singular T ↔ ¬(φ.singular T) := by grind;
-@[grind] lemma def_neg' : (∼φ).singular T ↔ (φ.regular T) := by grind;
-@[grind] lemma def_and : (φ ⋏ ψ).singular T ↔ (φ.singular T) ∨ (ψ.singular T) := by grind
-@[grind] lemma def_or : (φ ⋎ ψ).singular T ↔ (φ.singular T) ∧ (ψ.singular T) := by grind
-@[grind] lemma def_imp : (φ ➝ ψ).singular T ↔ (¬(φ.singular T) ∧ (ψ.singular T)) := by grind
+@[simp, grind] lemma def_bot : (⊥ : Formula _).Singular T := by grind
+@[simp, grind] lemma def_top : ¬(⊤ : Formula _).Singular T := by grind
+@[grind] lemma def_neg : (∼φ).Singular T ↔ ¬(φ.Singular T) := by grind;
+@[grind] lemma def_neg' : (∼φ).Singular T ↔ (φ.Regular T) := by grind;
+@[grind] lemma def_and : (φ ⋏ ψ).Singular T ↔ (φ.Singular T) ∨ (ψ.Singular T) := by grind
+@[grind] lemma def_or : (φ ⋎ ψ).Singular T ↔ (φ.Singular T) ∧ (ψ.Singular T) := by grind
+@[grind] lemma def_imp : (φ ➝ ψ).Singular T ↔ (¬(φ.Singular T) ∧ (ψ.Singular T)) := by grind
 
-end singular
+end Singular
 
 end
 
@@ -223,12 +223,12 @@ namespace FormulaSet
 
 abbrev letterless (X : Modal.FormulaSet ℕ) := ∀ φ ∈ X, φ.letterless
 
-protected def regular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet ℕ) := ∀ φ ∈ X, φ.regular T
+protected def Regular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet ℕ) := ∀ φ ∈ X, φ.Regular T
 
-protected def singular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet ℕ) := ¬X.regular T
+protected def Singular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet ℕ) := ¬X.Regular T
 
-lemma exists_singular_of_singular (hX_singular : X.singular T) : ∃ φ ∈ X, φ.singular T := by
-  simpa [FormulaSet.singular, FormulaSet.regular] using hX_singular;
+lemma exists_singular_of_singular (hX_singular : X.Singular T) : ∃ φ ∈ X, φ.Singular T := by
+  simpa [FormulaSet.Singular, FormulaSet.Regular] using hX_singular;
 
 protected def spectrum (X : Modal.FormulaSet ℕ) (_ : X.letterless := by grind) := ⋂ φ ∈ X, φ.spectrum
 
@@ -454,21 +454,21 @@ lemma letterless_arithmetical_completeness [𝗜𝚺₁ ⪯ T] (φll : φ.letter
     exact e ▸ h;
 
 lemma iff_regular_of_provable_E [𝗜𝚺₁ ⪯ T] (φll : φ.letterless := by grind) (ψll : ψ.letterless := by grind) (h : Modal.GL ⊢! φ ⭤ ψ)
-  : φ.regular T ↔ ψ.regular T := by
+  : φ.Regular T ↔ ψ.Regular T := by
   have : T ⊢!. T.trivialPLRealization (φ ⭤ ψ) := letterless_arithmetical_completeness (by grind) |>.mp h;
   have : ℕ ⊧ₘ₀ T.trivialPLRealization (φ ⭤ ψ) := ArithmeticTheory.SoundOn.sound (F := λ _ => True) this (by simp);
-  simp [Realization.interpret, Formula.regular] at this ⊢;
+  simp [Realization.interpret, Formula.Regular] at this ⊢;
   tauto;
 
 lemma iff_singular_of_provable_E [𝗜𝚺₁ ⪯ T] (φll : φ.letterless := by grind) (ψll : ψ.letterless := by grind) (h : Modal.GL ⊢! φ ⭤ ψ)
-  : φ.singular T ↔ ψ.singular T := Iff.not $ iff_regular_of_provable_E φll ψll h
+  : φ.Singular T ↔ ψ.Singular T := Iff.not $ iff_regular_of_provable_E φll ψll h
 
 -- lemma w : ¬ℕ ⊧ₘ₀ T.trivialPLRealization (□^[n]⊥) := by
 
 
 @[simp]
-lemma TBB_regular : (TBB n).regular T := by
-  apply Formula.regular.def_imp.mpr;
+lemma TBB_regular : (TBB n).Regular T := by
+  apply Formula.Regular.def_imp.mpr;
   intro h;
   exfalso;
   have : ¬ℕ ⊧ₘ₀ T.trivialPLRealization (□^[(n + 1)]⊥) := by
@@ -479,8 +479,8 @@ lemma TBB_regular : (TBB n).regular T := by
   exact h;
 
 @[simp, grind]
-lemma TBB_conj'_regular : (⩕ n ∈ s, TBB n).regular T := by
-  apply Formula.regular.def_fconj'.mpr;
+lemma TBB_conj'_regular : (⩕ n ∈ s, TBB n).Regular T := by
+  apply Formula.Regular.def_fconj'.mpr;
   simp;
 
 @[simp, grind]
@@ -498,7 +498,7 @@ lemma TBBSet_trace : FormulaSet.trace (α.image (λ i => TBB i)) = α := by
   simp [TBB_trace];
 
 @[simp]
-lemma TBBSet_regular : FormulaSet.regular T ((fun i ↦ TBB i) '' α) := by simp [FormulaSet.regular];
+lemma TBBSet_regular : FormulaSet.Regular T ((fun i ↦ TBB i) '' α) := by simp [FormulaSet.Regular];
 
 
 variable
@@ -507,23 +507,23 @@ variable
   (Xll : X.letterless := by grind)
   (Yll : Y.letterless := by grind)
 
-lemma Formula.iff_regular_trace_finite : φ.regular T ↔ φ.trace.Finite := by
+lemma Formula.iff_regular_trace_finite : φ.Regular T ↔ φ.trace.Finite := by
   constructor;
   . contrapose!;
     intro h;
     have := GL_spectrum_TBB_normalization (by grind) $ show φ.spectrum.Finite by
       simpa [Formula.trace] using or_iff_not_imp_left.mp Formula.trace_finite_or_cofinite h;
     apply iff_regular_of_provable_E (by grind) (by grind) this |>.not.mpr;
-    apply Formula.regular.def_neg.not.mpr;
+    apply Formula.Regular.def_neg.not.mpr;
     push_neg;
     simp;
   . intro h;
     apply iff_regular_of_provable_E (by grind) (by grind) (GL_trace_TBB_normalization (by grind) h) |>.mpr;
     simp;
 
-lemma Formula.spectrum_finite_of_singular : φ.singular T → φ.spectrum.Finite := by
+lemma Formula.spectrum_finite_of_singular : φ.Singular T → φ.spectrum.Finite := by
   contrapose!;
-  suffices ¬(φ.spectrum).Finite → Formula.regular T φ by simpa [Formula.singular, not_not];
+  suffices ¬(φ.spectrum).Finite → Formula.Regular T φ by simpa [Formula.Singular, not_not];
   intro h;
   apply iff_regular_trace_finite (by grind) |>.mpr;
   apply or_iff_not_imp_right.mp $ Formula.trace_finite_or_cofinite (by grind);
@@ -538,7 +538,7 @@ lemma letterless_arithmetical_completeness' : [
   tfae_have 1 ↔ 3 := iff_GL_provable_spectrum_Univ
   tfae_finish;
 
-lemma FormulaSet.spectrum_finite_of_singular (hX_singular : X.singular T) : X.spectrum.Finite := by
+lemma FormulaSet.spectrum_finite_of_singular (hX_singular : X.Singular T) : X.spectrum.Finite := by
   obtain ⟨φ, hφ₁, hφ₂⟩ := exists_singular_of_singular hX_singular;
   suffices (X.spectrum) ⊆ (φ.spectrum) by
     apply Set.Finite.subset;
@@ -547,7 +547,7 @@ lemma FormulaSet.spectrum_finite_of_singular (hX_singular : X.singular T) : X.sp
   intro i;
   simp_all [FormulaSet.spectrum];
 
-lemma FormulaSet.regular_of_not_trace_cofinite : ¬X.traceᶜ.Finite → X.regular T := by
+lemma FormulaSet.regular_of_not_trace_cofinite : ¬X.traceᶜ.Finite → X.Regular T := by
   contrapose!;
   rw [comp_trace_spectrum];
   apply spectrum_finite_of_singular;
@@ -584,11 +584,11 @@ lemma TBBMinus_spectrum : FormulaSet.spectrum {(∼⩕ n ∈ hβ.toFinset, TBB n
 
 omit [𝗜𝚺₁ ⪯ T] in
 @[simp]
-lemma TBBMinus_singular : FormulaSet.singular T {∼⩕ n ∈ hβ.toFinset, TBB n} := by
-  simp [FormulaSet.singular, FormulaSet.regular, Formula.regular.def_neg];
+lemma TBBMinus_singular : FormulaSet.Singular T {∼⩕ n ∈ hβ.toFinset, TBB n} := by
+  simp [FormulaSet.Singular, FormulaSet.Regular, Formula.Regular.def_neg];
 
 open Classical in
-lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum {φ : Modal.Formula ℕ} (φll : φ.letterless) (hSR : X.singular T ∨ φ.regular T)
+lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum {φ : Modal.Formula ℕ} (φll : φ.letterless) (hSR : X.Singular T ∨ φ.Regular T)
   : Modal.GL.sumQuasiNormal X ⊢! φ ↔ X.spectrum ⊆ φ.spectrum := by
   calc
     _ ↔ ∃ Y, (∀ ψ ∈ Y, ψ ∈ X) ∧ Modal.GL ⊢! Finset.conj Y ➝ φ := by
@@ -662,7 +662,7 @@ lemma Logic.sumQuasiNormal.iff_subset {L : Logic ℕ} {X Y} : L.sumQuasiNormal Y
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
     | subst ihφ => apply Logic.subst!; assumption;
 
-lemma GL.iff_subset_closed_sumQuasiNormal_subset_spectrum (hSR : X.singular T ∨ Y.regular T)
+lemma GL.iff_subset_closed_sumQuasiNormal_subset_spectrum (hSR : X.Singular T ∨ Y.Regular T)
   : Modal.GL.sumQuasiNormal Y ⊆ Modal.GL.sumQuasiNormal X ↔ X.spectrum ⊆ Y.spectrum := by
   calc
     _ ↔ ∀ ψ ∈ Y, Modal.GL.sumQuasiNormal X ⊢! ψ := Logic.sumQuasiNormal.iff_subset
@@ -677,11 +677,11 @@ lemma GL.iff_subset_closed_sumQuasiNormal_subset_spectrum (hSR : X.singular T �
         simpa;
     _ ↔ X.spectrum ⊆ (⋂ ψ ∈ Y, ψ.spectrum) := by simp;
 
-lemma GL.iff_subset_closed_sumQuasiNormal_subset_trace (hSR : X.singular T ∨ Y.regular T)
+lemma GL.iff_subset_closed_sumQuasiNormal_subset_trace (hSR : X.Singular T ∨ Y.Regular T)
   : Modal.GL.sumQuasiNormal Y ⊆ Modal.GL.sumQuasiNormal X ↔ Y.trace ⊆ X.trace :=
   Iff.trans (iff_subset_closed_sumQuasiNormal_subset_spectrum Xll Yll hSR) FormulaSet.iff_subset_spectrum_subset_trace
 
-lemma GL.iff_eq_closed_sumQuasiNormal_eq_spectrum (hXY : (X.regular T ∧ Y.regular T) ∨ (X.singular T ∧ Y.singular T))
+lemma GL.iff_eq_closed_sumQuasiNormal_eq_spectrum (hXY : (X.Regular T ∧ Y.Regular T) ∨ (X.Singular T ∧ Y.Singular T))
   : Modal.GL.sumQuasiNormal X = Modal.GL.sumQuasiNormal Y ↔ X.spectrum = Y.spectrum := by
   simp only [Set.Subset.antisymm_iff];
   rw [
@@ -700,11 +700,11 @@ protected abbrev S_Inter_GL_TBBMinus (β : Set ℕ) (hβ : βᶜ.Finite := by gr
 protected abbrev Dz_Inter_GL_TBBMinus (β : Set ℕ) (hβ : βᶜ.Finite := by grind) : Logic ℕ := Modal.Dz ∩ Modal.GL_TBBMinus β hβ
 
 
-lemma GL.iff_eq_closed_sumQuasiNormal_eq_trace (hXY : (X.regular T ∧ Y.regular T) ∨ (X.singular T ∧ Y.singular T))
+lemma GL.iff_eq_closed_sumQuasiNormal_eq_trace (hXY : (X.Regular T ∧ Y.Regular T) ∨ (X.Singular T ∧ Y.Singular T))
   : Modal.GL.sumQuasiNormal X = Modal.GL.sumQuasiNormal Y ↔ X.trace = Y.trace :=
   Iff.trans (iff_eq_closed_sumQuasiNormal_eq_spectrum Xll Yll hXY) FormulaSet.iff_eq_spectrum_eq_trace
 
-lemma GL.eq_closed_regular_sumQuasiNormal_GL_TBB (X_regular : X.regular T)
+lemma GL.eq_closed_regular_sumQuasiNormal_GL_TBB (X_regular : X.Regular T)
   : Modal.GL.sumQuasiNormal X = Modal.GL_TBB (X.trace) := by
   apply GL.iff_eq_closed_sumQuasiNormal_eq_trace (T := T) ?_ ?_ ?_ |>.mpr;
   . simp;
@@ -715,7 +715,7 @@ lemma GL.eq_closed_regular_sumQuasiNormal_GL_TBB (X_regular : X.regular T)
     . assumption;
     . simp;
 
-lemma GL.eq_closed_singular_sumQuasiNormal_GL_TBBMinus (X_singular : X.singular T)
+lemma GL.eq_closed_singular_sumQuasiNormal_GL_TBBMinus (X_singular : X.Singular T)
   : Modal.GL.sumQuasiNormal X = Modal.GL_TBBMinus (X.trace) (FormulaSet.comp_trace_spectrum Xll ▸ FormulaSet.spectrum_finite_of_singular Xll X_singular) := by
   apply GL.iff_eq_closed_sumQuasiNormal_eq_spectrum (T := T) ?_ ?_ ?_ |>.mpr;
   . simp [TBBMinus_spectrum, FormulaSet.trace];
@@ -734,9 +734,9 @@ lemma GL.eq_closed_singular_sumQuasiNormal_GL_TBBMinus (X_singular : X.singular 
   either `Modal.GL_TBB (X.trace)` (`X` is regular) or `Modal.GL_TBBMinus (X.trace)` (`X` is singular)
 -/
 theorem GL.eq_closed_sumQuasiNormal_GL_TBB_or_GL_TBBMinus :
-  (∃ _ : X.regular T, Modal.GL.sumQuasiNormal X = Modal.GL_TBB (X.trace)) ∨
-  (∃ X_singular : X.singular T, Modal.GL.sumQuasiNormal X = Modal.GL_TBBMinus (X.trace) (FormulaSet.comp_trace_spectrum Xll ▸ FormulaSet.spectrum_finite_of_singular Xll X_singular)) := by
-  by_cases h : X.regular T;
+  (∃ _ : X.Regular T, Modal.GL.sumQuasiNormal X = Modal.GL_TBB (X.trace)) ∨
+  (∃ X_singular : X.Singular T, Modal.GL.sumQuasiNormal X = Modal.GL_TBBMinus (X.trace) (FormulaSet.comp_trace_spectrum Xll ▸ FormulaSet.spectrum_finite_of_singular Xll X_singular)) := by
+  by_cases h : X.Regular T;
   . left;
     constructor;
     . apply GL.eq_closed_regular_sumQuasiNormal_GL_TBB Xll h;
