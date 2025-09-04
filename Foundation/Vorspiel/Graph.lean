@@ -1,4 +1,4 @@
-import Mathlib.Logic.Function.Defs
+import Foundation.Vorspiel.Vorspiel
 
 namespace Function
 

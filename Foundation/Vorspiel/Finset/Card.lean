@@ -1,5 +1,4 @@
-import Mathlib.Algebra.Order.BigOperators.Group.Finset
-import Mathlib.Algebra.Order.Ring.Nat
+import Foundation.Vorspiel.Vorspiel
 
 namespace Finset
 

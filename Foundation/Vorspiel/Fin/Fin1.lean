@@ -1,4 +1,4 @@
-import Mathlib.Order.Fin.Basic
+import Foundation.Vorspiel.Vorspiel
 
 namespace Fin.Fin1
 

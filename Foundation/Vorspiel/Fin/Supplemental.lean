@@ -1,7 +1,4 @@
-
-import Mathlib.Algebra.GroupWithZero.Nat
-import Mathlib.Data.Fintype.Pigeonhole
-
+import Foundation.Vorspiel.Vorspiel
 
 @[simp] lemma Nat.sub_one_lt' [NeZero n] : n - 1 < n := sub_one_lt $ NeZero.ne n
 

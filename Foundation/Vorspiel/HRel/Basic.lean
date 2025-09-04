@@ -1,5 +1,4 @@
-import Mathlib.Data.PNat.Basic
-import Mathlib.Data.Rel
+import Foundation.Vorspiel.Vorspiel
 
 def HRel (α : Type*) := α → α → Prop
 

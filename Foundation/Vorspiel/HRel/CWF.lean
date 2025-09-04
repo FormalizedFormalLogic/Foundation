@@ -1,7 +1,5 @@
-import Mathlib.Data.Fintype.Card
-import Mathlib.Order.WellFounded
+import Foundation.Vorspiel.Vorspiel
 import Foundation.Vorspiel.HRel.Connected
-import Mathlib.Data.Finset.Lattice.Fold
 
 section
 

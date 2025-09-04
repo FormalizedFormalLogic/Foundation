@@ -1,4 +1,3 @@
-
 import Foundation.Vorspiel.Vorspiel
 
 class Adjoin (β : outParam Type*) (α : Type*) where
