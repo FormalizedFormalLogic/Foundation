@@ -1,7 +1,6 @@
 -- This file need to be moved to `Entailment`
 import Foundation.Logic.Entailment
 
-
 namespace LO.Entailment
 
 variable {F : Type u_1} {S : Type u_2} {T : Type u_3}
