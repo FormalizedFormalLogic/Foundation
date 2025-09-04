@@ -168,7 +168,7 @@ section
 
 
 /-- Realization which any propositional variable maps to `⊤` -/
-abbrev _root_.LO.FirstOrder.ArithmeticTheory.trivialPLRealization (T : ArithmeticTheory) [T.Δ₁] : T.PLRealization := ⟨λ _ => ⊤⟩
+abbrev _root_.LO.FirstOrder.ArithmeticTheory.trivialPLRealization (T : ArithmeticTheory) [T.Δ₁] : T.StandardRealization := ⟨λ _ => ⊤⟩
 
 /-
 lemma ww {T : ArithmeticTheory} [T.Δ₁] (φll : φ.letterless := by grind) : Arithmetic.Hierarchy 𝚺 1 (T.trivialPLRealization φ) := by
