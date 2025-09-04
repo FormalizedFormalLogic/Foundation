@@ -1,7 +1,4 @@
 import Foundation.Vorspiel.Vorspiel
-import Mathlib.Data.Nat.ModEq
-import Mathlib.Data.List.FinRange
-import Mathlib.Logic.Godel.GodelBetaFunction
 
 open Mathlib List.Vector Part
 
@@ -57,18 +54,18 @@ lemma or_eq (n m : ℕ) : or n m = if 0 < n ∨ 0 < m then 1 else 0 := by simp [
 
 @[simp] lemma pos_pos_iff (n : ℕ) : 0 < pos n ↔ 0 < n := by simp [pos]
 
-def ball (n : ℕ) (φ : ℕ → ℕ) : ℕ := n.rec 1 (fun n ih => (φ n).pos.and ih)
+def ball (n : ℕ) (f : ℕ → ℕ) : ℕ := n.rec 1 (fun n ih => (f n).pos.and ih)
 
-@[simp] lemma ball_pos_iff {φ : ℕ → ℕ} {n : ℕ} : 0 < ball n φ ↔ ∀ m < n, 0 < φ m := by
+@[simp] lemma ball_pos_iff {f : ℕ → ℕ} {n : ℕ} : 0 < ball n f ↔ ∀ m < n, 0 < f m := by
   induction' n with n ih <;> simp [ball, Nat.lt_succ_iff] at*
   · simp [ih]; exact ⟨
     by rintro ⟨hn, hp⟩ m hm; rcases lt_or_eq_of_le hm with (hm | rfl); { exact hp _ hm }; { exact hn },
     by intro h; exact ⟨h n (Nat.le_refl n), fun m hm => h m (le_of_lt hm)⟩⟩
 
-@[simp] lemma ball_eq_zero_iff {φ : ℕ → ℕ} {n : ℕ} : ball n φ = 0 ↔ ∃ m < n, φ m = 0 := by
-  simpa [-ball_pos_iff] using not_iff_not.mpr (ball_pos_iff (φ := φ) (n := n))
+@[simp] lemma ball_eq_zero_iff {f : ℕ → ℕ} {n : ℕ} : ball n f = 0 ↔ ∃ m < n, f m = 0 := by
+  simpa [-ball_pos_iff] using not_iff_not.mpr (ball_pos_iff (f := f) (n := n))
 
-lemma ball_pos_iff_eq_one {φ : ℕ → ℕ} {n : ℕ} : ball n φ = 1 ↔ 0 < ball n φ := by
+lemma ball_pos_iff_eq_one {f : ℕ → ℕ} {n : ℕ} : ball n f = 1 ↔ 0 < ball n f := by
   induction' n with n _ <;> simp [ball, Nat.lt_succ_iff] at*
   · constructor
     · intro h; simpa using pos_of_eq_one h
@@ -369,7 +366,7 @@ lemma dvd (i j : Fin n) : Arithmetic₁ (fun v => isDvdNat (v.get i) (v.get j)) 
   exact this.of_eq <| by
     intro v
     simp only [head_cons, get_cons_succ, or_pos_iff, isEqNat_pos_iff, isLtNat_pos_iff,
-      Bool.decide_or, isDvdNat, PFun.coe_val, eq_some_iff, mem_map_iff, mem_rfind, mem_some_iff]
+      Bool.decide_or, isDvdNat, PFun.coe_val, eq_some_iff, Part.mem_map_iff, mem_rfind, mem_some_iff]
     by_cases hv : v.get i ∣ v.get j
     · simp only [hv, ↓reduceIte]
       rcases least_number _ hv with ⟨k, hk, hkm⟩
@@ -417,9 +414,9 @@ lemma beta (i j : Fin n) : Arithmetic₁ (fun v => Nat.beta (v.get i) (v.get j))
   (rem 0 1).comp₂ _ ((unpair₁ 0).comp₁ (·.unpair.1) (proj i))
     ((succ 0).comp₁ _ $ (mul 0 1).comp₂ _ (succ j) ((unpair₂ 0).comp₁ (·.unpair.2) (proj i)))
 
-lemma ball {φ : List.Vector ℕ n → ℕ → ℕ} (hp : @Arithmetic₁ (n + 1) (fun v => φ v.tail v.head)) (i) :
-    Arithmetic₁ (fun v => ball (v.get i) (φ v)) := by
-  let F : List.Vector ℕ (n + 1) → ℕ := fun v => (φ v.tail v.head).inv.or (isLeNat (v.get i.succ) v.head)
+lemma ball {f : List.Vector ℕ n → ℕ → ℕ} (hp : @Arithmetic₁ (n + 1) (fun v => f v.tail v.head)) (i) :
+    Arithmetic₁ (fun v => ball (v.get i) (f v)) := by
+  let F : List.Vector ℕ (n + 1) → ℕ := fun v => (f v.tail v.head).inv.or (isLeNat (v.get i.succ) v.head)
   have hF : Arithmetic₁ F := (or 0 1).comp₂ _ ((inv 0).comp₁ _ hp) ((le 0 1).comp₂ _ (proj i.succ) head)
   have : @Arithmetic₁ (n + 1) (fun v => isEqNat v.head (v.get i.succ)) :=
     (equal 0 1).comp₂ _ head (proj i.succ)
@@ -427,16 +424,16 @@ lemma ball {φ : List.Vector ℕ n → ℕ → ℕ} (hp : @Arithmetic₁ (n + 1)
   exact this.of_eq <| by
     intro v
     simp only [tail_cons, head_cons, get_cons_succ, or_pos_iff, inv_pos_iff, not_lt,
-      nonpos_iff_eq_zero, isLeNat_pos_iff, Bool.decide_or, PFun.coe_val, eq_some_iff, mem_map_iff,
+      nonpos_iff_eq_zero, isLeNat_pos_iff, Bool.decide_or, PFun.coe_val, eq_some_iff, Part.mem_map_iff,
       mem_rfind, mem_some_iff, F]
-    by_cases H : ∀ m < v.get i, 0 < φ v m
+    by_cases H : ∀ m < v.get i, 0 < f v m
     · exact ⟨v.get i,
         ⟨by symm; simp, by intro m hm; symm; simp [hm]; exact Nat.ne_zero_of_lt (H m hm)⟩,
         by { simp [isEqNat]; symm; exact ball_pos_iff_eq_one.mpr (by simpa) }⟩
-    · have : ∃ x < List.Vector.get v i, φ v x = 0 ∧ ∀ y < x, φ v y ≠ 0 := by
+    · have : ∃ x < List.Vector.get v i, f v x = 0 ∧ ∀ y < x, f v y ≠ 0 := by
         simp at H; rcases least_number _ H with ⟨x, hx, hxl⟩
         exact ⟨x, hx.1, hx.2, by
-          intro y hy; have : y < v.get i → φ v y ≠ 0 := by simpa using hxl y hy
+          intro y hy; have : y < v.get i → f v y ≠ 0 := by simpa using hxl y hy
           exact this (lt_trans hy hx.1)⟩
       rcases this with ⟨x, hx, hpx, hlx⟩
       exact ⟨x, ⟨by symm; simp [hpx], by intro m hm; symm; simp [hlx m hm, lt_trans hm hx]⟩, by
@@ -490,7 +487,7 @@ lemma prec {n f g} (hf : @Arithmetic₁ n f) (hg : @Arithmetic₁ (n + 2) g) :
   exact (ArithPart₁.map (fun v x => Nat.beta x v.head) this (ArithPart₁.rfindPos hF)).of_eq <| by
     intro v
     simp only [add_succ_sub_one, head_cons, tail_cons, and_pos_iff, isEqNat_pos_iff,
-      ball_pos_iff, Bool.decide_and, PFun.coe_val, eq_some_iff, mem_map_iff, mem_rfind,
+      ball_pos_iff, Bool.decide_and, PFun.coe_val, eq_some_iff, Part.mem_map_iff, mem_rfind,
       mem_some_iff, F]
     suffices ∃ z : ℕ, z.beta 0 = f v.tail ∧ ∀ i < v.head, z.beta (i + 1) = g (i ::ᵥ z.beta i ::ᵥ v.tail) by
       rcases least_number _ this with ⟨z, ⟨hz0, hzs⟩, hzm⟩
