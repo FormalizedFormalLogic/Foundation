@@ -1,4 +1,4 @@
-import Foundation.ProvabilityLogic.Interpretation
+import Foundation.ProvabilityLogic.Realization
 import Foundation.Modal.Kripke.Logic.GL.Tree
 import Foundation.Modal.Kripke.ExtendRoot
 import Foundation.FirstOrder.Internal.WitnessComparison
@@ -8,7 +8,7 @@ import Foundation.ProvabilityLogic.GL.Soundness
 import Foundation.ProvabilityLogic.Height
 
 /-!
-# Basix propaties of Solovay sentences and its existance$
+# Basic propaties of Solovay sentences and its construction
 -/
 
 open Classical

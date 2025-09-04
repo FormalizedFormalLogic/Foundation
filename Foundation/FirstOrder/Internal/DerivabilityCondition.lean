@@ -1,7 +1,7 @@
 import Foundation.FirstOrder.Internal.DerivabilityCondition.D1
 import Foundation.FirstOrder.Internal.DerivabilityCondition.D2
 import Foundation.FirstOrder.Internal.DerivabilityCondition.D3
-import Foundation.ProvabilityLogic.Incompleteness
+import Foundation.ProvabilityLogic.Provability
 import Foundation.FirstOrder.Internal.FixedPoint
 
 /-!

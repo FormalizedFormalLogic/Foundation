@@ -553,7 +553,7 @@ lemma substItrDisj_right {i z : V}
   · intro i hi
     have hi : i < z := by simpa using hi
     rw [substItr_nth _ _ _ hi]
-    exact φ.isSemiformula.substs (w.isSemitermVec.cons (by simp))
+    exact φ.isSemiformula.substs (w.isSemitermVec.adjoin (by simp))
   · simpa using pos_of_gt hi
   · have : z - (i + 1) < z := by simpa using pos_of_gt hi
     rw [substItr_nth _ _ _ this]
@@ -561,7 +561,7 @@ lemma substItrDisj_right {i z : V}
     simp only [this, Nat.succ_eq_add_one, Semiformula.val_substs, SemitermVec.val_succ,
       Matrix.head_cons, val_numeral, Matrix.tail_cons]
     apply Theory.Derivable.em (L := ℒₒᵣ) (p := substs ℒₒᵣ (numeral i ∷ SemitermVec.val w) φ.val)
-    · simpa using φ.isSemiformula_succ.substs (w.isSemitermVec.cons (numeral_semiterm 0 i))
+    · simpa using φ.isSemiformula_succ.substs (w.isSemitermVec.adjoin (numeral_semiterm 0 i))
     · simp
     · simp
 

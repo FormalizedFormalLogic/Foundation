@@ -160,10 +160,9 @@ import Foundation.Modal.Maximal.Makinson
 import Foundation.Modal.VanBentham.StandardTranslation
 
 -- Provability Logic
-import Foundation.ProvabilityLogic.Interpretation
+import Foundation.ProvabilityLogic.Realization
 import Foundation.ProvabilityLogic.Arithmetic
 import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.ProvabilityLogic.Incompleteness
 import Foundation.ProvabilityLogic.Trace
 
 import Foundation.ProvabilityLogic.N.Soundness

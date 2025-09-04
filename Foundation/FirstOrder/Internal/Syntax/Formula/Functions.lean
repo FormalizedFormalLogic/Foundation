@@ -733,7 +733,7 @@ lemma subst_eq_self {n w : V} (hp : IsSemiformula L n p) (hw : IsSemitermVec L n
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
       · simp [qVec]
       · have hi : i < n := by simpa using hi
-        simp only [qVec, nth_cons_succ]
+        simp only [qVec, nth_adjoin_succ]
         rw [nth_termBShiftVec (by simpa [hw.lh] using hw.isUTerm) (by simp [hw.lh, hi])]
         simp [H i hi]
     simp [*, hp.isUFormula, ih hw.qVec H]
@@ -743,7 +743,7 @@ lemma subst_eq_self {n w : V} (hp : IsSemiformula L n p) (hw : IsSemitermVec L n
       rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
       · simp [qVec]
       · have hi : i < n := by simpa using hi
-        simp only [qVec, nth_cons_succ]
+        simp only [qVec, nth_adjoin_succ]
         rw [nth_termBShiftVec (by simpa [hw.lh] using hw.isUTerm) (by simp [hw.lh, hi])]
         simp [H i hi]
     simp [*, hp.isUFormula, ih hw.qVec H]
@@ -757,7 +757,7 @@ variable (L)
 
 noncomputable def substs1 (t u : V) : V := substs L ?[t] u
 
-def substs1Graph : 𝚺₁.Semisentence 3 := .mkSigma “ z t p. ∃ v, !consDef v t 0 ∧ !(substsGraph L) z v p”
+def substs1Graph : 𝚺₁.Semisentence 3 := .mkSigma “ z t p. ∃ v, !adjoinDef v t 0 ∧ !(substsGraph L) z v p”
 
 variable {L}
 
@@ -817,7 +817,7 @@ noncomputable def free1 (p : V) : V := substs L ?[^&0, ^#0] (shift L p)
 variable {L}
 
 @[simp] lemma IsSemiformula.free1 {p : V} (hp : IsSemiformula L 2 p) : IsSemiformula L 1 (free1 L p) :=
-  IsSemiformula.substs (m := 1) hp.shift (SemitermVec.cons (SemitermVec.cons (IsSemitermVec.empty _) (by simp)) (by simp))
+  IsSemiformula.substs (m := 1) hp.shift (SemitermVec.adjoin (SemitermVec.adjoin (IsSemitermVec.empty _) (by simp)) (by simp))
 
 end free1
 
@@ -989,8 +989,8 @@ lemma fomulaComplexity_free1 {p : V} (hp : IsSemiformula L 2 p) :
   have : IsSemiterm (V := V) L 0 ^&0 := by simp
   rw [fomulaComplexity_substs (m := 1) (V := V) hp.shift]
   · rw [formulaComplexity_shift hp.isUFormula]
-  · apply IsSemitermVec.cons ?_ (by simp)
-    apply IsSemitermVec.cons ?_ (by simp)
+  · apply IsSemitermVec.adjoin ?_ (by simp)
+    apply IsSemitermVec.adjoin ?_ (by simp)
     exact IsSemitermVec.nil _
 
 end complexity
