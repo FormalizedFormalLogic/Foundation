@@ -19,7 +19,9 @@ namespace LO.Modal.Kripke
 
 section frame
 
-variable {F : Frame} [Fintype F] {r : F} [F.IsTree r]
+variable {F : Frame} {r : F} [F.IsFiniteTree r]
+
+instance [F.IsFiniteTree r] : Fintype F.World := Fintype.ofFinite (α := F.World)
 
 def Frame.World.finHeight (i : F) : ℕ := fcwHeight (· ≺ ·) i
 
@@ -74,9 +76,8 @@ lemma exists_terminal (i : F) : ∃ j, i ≺^[Frame.World.finHeight i] j := le_f
 namespace Frame.extendRoot
 
 @[simp] lemma finHeight_pos : 0 < (F.extendRoot 1).finHeight := by
-  apply lt_fcwHeight ?_ (by simp)
-  · exact Sum.inr r
-  trivial
+  dsimp [finHeight, World.finHeight]
+  convert lt_fcwHeight (R := (F.extendRoot 1).Rel') (n := 0) (a := extendRoot.root) (b := r) (by simp) (by simp);
 
 @[simp] lemma finHeight₁ : (F.extendRoot 1).finHeight = F.finHeight + 1 := by
   let l := World.finHeight (extendRoot.root : F.extendRoot 1)
@@ -115,7 +116,7 @@ end frame
 
 section model
 
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
+variable {M : Model} {r : M.World} [M.IsFiniteTree r]
 
 lemma finHeight_lt_iff_satisfies_boxbot {i : M} :
     Frame.World.finHeight i < n ↔ i ⊧ □^[n] ⊥ := by
@@ -146,7 +147,7 @@ variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L]
          {T₀ T : Theory L} [T₀ ⪯ T] (𝔅 : Provability T₀ T) [𝔅.HBL]
          {A B : Modal.Formula _}
 
-structure SolovaySentences (F : Kripke.Frame) (r : F) [F.IsFiniteTree r] [Fintype F] where
+structure SolovaySentences (F : Kripke.Frame) (r : F) [F.IsFiniteTree r] where
   σ : F → Sentence L
   protected SC1 : ∀ i j, i ≠ j → T₀ ⊢!. σ i ➝ ∼σ j
   protected SC2 : ∀ i j, i ≺ j → T₀ ⊢!. σ i ➝ 𝔅.dia (σ j)
@@ -159,9 +160,9 @@ variable {𝔅}
 
 namespace SolovaySentences
 
-instance {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F] : CoeFun (SolovaySentences 𝔅 F r) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
+instance {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] : CoeFun (SolovaySentences 𝔅 F r) (λ _ => F → Sentence L) := ⟨λ σ => σ.σ⟩
 
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
+variable {M : Model} {r : M.World} [M.IsFiniteTree r]
 
 variable (S : SolovaySentences 𝔅 M.toFrame r)
 
@@ -265,7 +266,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 
 section frame
 
-variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
+variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r]
 
 section model
 

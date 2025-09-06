@@ -10,7 +10,7 @@ open Entailment FiniteContext
 open FirstOrder ProvabilityLogic
 open Modal Modal.Hilbert
 
-variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
+variable {L : Language} [L.ReferenceableBy L] {T₀ T U : Theory L}
 
 namespace ProvabilityLogic
 
@@ -49,35 +49,44 @@ lemma interpret_boxItr_def (n : ℕ) : f (□^[n] A) = 𝔅^[n] (f A) := by
 
 variable [DecidableEq (Sentence L)]
 
-lemma iff_interpret_neg_inside : T ⊢!. f (∼A) ⭤ ∼(f A) := by
+lemma iff_interpret_neg_inside : U ⊢!. f (∼A) ⭤ ∼(f A) := by
   dsimp [Realization.interpret];
   cl_prover;
 
-lemma iff_interpret_or_inside : T ⊢!. f (A ⋎ B) ⭤ (f A) ⋎ (f B) := by
+lemma iff_interpret_or_inside : U ⊢!. f (A ⋎ B) ⭤ (f A) ⋎ (f B) := by
   dsimp [Realization.interpret];
   cl_prover;
 
-lemma iff_interpret_and_inside : T ⊢!. f (A ⋏ B) ⭤ (f A) ⋏ (f B) := by
+lemma iff_interpret_and_inside : U ⊢!. f (A ⋏ B) ⭤ (f A) ⋏ (f B) := by
   dsimp [Realization.interpret];
   cl_prover;
 
-lemma iff_interpret_neg : T ⊢!. f (∼A) ↔ T ⊢!. ∼(f A) := by
+lemma iff_interpret_neg : U ⊢!. f (∼A) ↔ U ⊢!. ∼(f A) := by
   dsimp [Realization.interpret];
   constructor <;> . intro h; cl_prover [h];
 
-lemma iff_interpret_or : T ⊢!. f (A ⋎ B) ↔ T ⊢!. (f A) ⋎ (f B) := by
+lemma iff_interpret_or : U ⊢!. f (A ⋎ B) ↔ U ⊢!. (f A) ⋎ (f B) := by
   dsimp [Realization.interpret];
   constructor <;> . intro h; cl_prover [h];
 
-lemma iff_interpret_and : T ⊢!. f (A ⋏ B) ↔ T ⊢!. (f A) ⋏ (f B) := by
+lemma iff_interpret_and : U ⊢!. f (A ⋏ B) ↔ U ⊢!. (f A) ⋏ (f B) := by
   dsimp [Realization.interpret];
   constructor <;> . intro h; cl_prover [h];
 
-lemma iff_interpret_and' : T ⊢!. f (A ⋏ B) ↔ T ⊢!. (f A) ∧ T ⊢!. (f B) := by
+@[grind]
+lemma iff_interpret_and' : U ⊢!. f (A ⋏ B) ↔ U ⊢!. (f A) ∧ U ⊢!. (f B) := by
   dsimp [Realization.interpret];
   constructor;
   . intro h; constructor <;> cl_prover [h];
   . rintro ⟨hA, hB⟩; cl_prover [hA, hB];
+
+@[simp, grind]
+lemma iff_interpret_lconj₂ {l : List (Formula _)} : U ⊢!. f (l.conj₂) ↔ ∀ A ∈ l, U ⊢!. f A := by
+  induction l using List.induction_with_singleton with
+  | hcons a l h ih =>
+    rw [List.conj₂_cons_nonempty h (a := a)];
+    grind;
+  | _ => simp [Realization.interpret];
 
 end
 

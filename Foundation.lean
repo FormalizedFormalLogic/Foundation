@@ -163,7 +163,7 @@ import Foundation.Modal.VanBentham.StandardTranslation
 import Foundation.ProvabilityLogic.Realization
 import Foundation.ProvabilityLogic.Arithmetic
 import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.ProvabilityLogic.Provability
+import Foundation.ProvabilityLogic.Trace
 
 import Foundation.ProvabilityLogic.N.Soundness
 
