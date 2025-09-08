@@ -39,25 +39,21 @@ theorem unprovable_realization_exists
 /-- Arithmetical completeness of $\mathsf{GL}$-/
 theorem GL.arithmetical_completeness (height : T.height = ⊤) :
     (∀ f : T.StandardRealization, T ⊢!. f A) → Modal.GL ⊢! A := by
-  suffices ¬Hilbert.GL ⊢! A → ∃ f : T.StandardRealization, T ⊬. f A by
-    contrapose
-    intro hA
-    simpa using this <| Hilbert.Normal.iff_logic_provable_provable |>.not.mp hA
+  suffices ¬Modal.GL ⊢! A → ∃ f : T.StandardRealization, T ⊬. f A by
+    contrapose!;
+    assumption;
   intro hA
-  obtain ⟨M₁, r₁, _, hA₁⟩ :=
-    Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA
+  obtain ⟨M₁, r₁, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA
   have : Fintype M₁ := Fintype.ofFinite _
   exact unprovable_realization_exists M₁ hA₁ <| by simp [height]
 
 theorem GLPlusBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.height) :
     (∀ f : T.StandardRealization, T ⊢!. f A) → Modal.GL ⊢! □^[n] ⊥ ➝ A := by
-  suffices ¬Hilbert.GL ⊢! □^[n]⊥ ➝ A → ∃ f : T.StandardRealization, T ⊬. f A by
-    contrapose
-    intro hA
-    simpa using this <| Hilbert.Normal.iff_logic_provable_provable |>.not.mp hA
+  suffices ¬Modal.GL ⊢! □^[n]⊥ ➝ A → ∃ f : T.StandardRealization, T ⊬. f A by
+    contrapose!;
+    assumption;
   intro hA
-  obtain ⟨M₁, r₁, _, hA₁⟩ :=
-    Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA
+  obtain ⟨M₁, r₁, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA
   have : Fintype M₁ := Fintype.ofFinite _
   have hA₁ : r₁ ⊧ □^[n]⊥ ∧ ¬r₁ ⊧ A := by
     simpa [Formula.Kripke.Satisfies] using hA₁

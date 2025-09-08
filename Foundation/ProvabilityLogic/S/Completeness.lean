@@ -50,8 +50,7 @@ lemma GL_S_TFAE :
     contrapose;
     push_neg;
     intro hA;
-    replace hA := Hilbert.Normal.iff_logic_provable_provable.not.mp hA;
-    obtain ⟨M₁, r₁, _, hA⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
+    obtain ⟨M₁, r₁, _, hA⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
     let M₀ := Model.extendRoot M₁ 1;
     let r₀ : M₀.World := Model.extendRoot.root;
     replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;

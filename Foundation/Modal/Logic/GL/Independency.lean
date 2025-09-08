@@ -59,7 +59,7 @@ lemma unprovable_not_higherIndependency_of_consistency : Modal.GL ⊬ ∼(higher
   by_contra hC;
   induction n with
   | zero =>
-    apply Consistent.not_bot inferInstance (𝓢 := Hilbert.GL);
+    apply Logic.no_bot (L := Modal.GL);
     apply unnec!;
     apply of_NN!;
     simpa [higherIndependency] using hC;
