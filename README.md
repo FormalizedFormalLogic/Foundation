@@ -92,7 +92,7 @@ Companies and organizations that have supported us in the past.
 - [Proxima Technology](https://proxima-ai-tech.com) (2024-2025)
 
 ## Developers:
-- Palalansoukî (@iehality, [palalansouki@gmail.com](mailto:palalansouki@gmail.com)).
+- Palalansoukî (@iehality, [palalansouki@gmail.com](mailto:palalansouki@gmail.com), [@_ni_nn_i_](https://x.com/_ni_nn_i_)).
   Responsible for:
   - Overall design and maintenance.
   - Intuitionistic first-order logic.
