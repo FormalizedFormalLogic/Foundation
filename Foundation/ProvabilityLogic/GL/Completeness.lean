@@ -11,6 +11,7 @@ open Entailment Entailment.FiniteContext
 open FirstOrder Arithmetic
 open Modal
 open Modal.Kripke
+open ArithmeticTheory (ProvabilityLogic)
 
 variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula _}
 
@@ -75,7 +76,7 @@ theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
 
 /-- Provability logic of $\Sigma_1$-sound theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL}$-/
 theorem provabilityLogic_eq_GL_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
-    T.ProvabilityLogic ≊ Modal.GL := by
+    ProvabilityLogic T T ≊ Modal.GL := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A
   simpa [ArithmeticTheory.ProvabilityLogic] using
@@ -101,12 +102,12 @@ theorem GLPlusBoxBot.arithmetical_completeness_iff :
 
 /-- Provability logic of theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL} + \square^{\text{height of } T} \bot$-/
 theorem provabilityLogic_eq_GLPlusBoxBot :
-    T.ProvabilityLogic ≊ Modal.GLPlusBoxBot T.height.toWithTop := by
+    ProvabilityLogic T T ≊ Modal.GLPlusBoxBot T.height.toWithTop := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A
   simpa [ArithmeticTheory.ProvabilityLogic] using
     GLPlusBoxBot.arithmetical_completeness_iff
 
-instance : 𝗣𝗔.ProvabilityLogic ≊ Modal.GL := provabilityLogic_eq_GL_of_sigma1_sound
+instance : ProvabilityLogic 𝗣𝗔 𝗣𝗔 ≊ Modal.GL := provabilityLogic_eq_GL_of_sigma1_sound
 
 end LO.ProvabilityLogic
