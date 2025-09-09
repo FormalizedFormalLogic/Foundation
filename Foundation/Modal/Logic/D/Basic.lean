@@ -1,5 +1,6 @@
 import Foundation.Modal.Logic.Extension
 import Foundation.Modal.Logic.GL.Independency
+import Foundation.Modal.Logic.S.Basic
 
 namespace LO.Modal
 
@@ -88,6 +89,15 @@ protected def D.rec'
       rwa [D'.eq_D] at hφψ;
     . replace hφ := iff_provable.mpr hφ;
       rwa [D'.eq_D] at hφ;
+
+open LO.Entailment LO.Modal.Entailment in
+instance : Modal.D ⪯ Modal.S := by
+  apply weakerThan_iff.mpr;
+  intro φ hφ;
+  induction hφ using D.rec' with
+  | mem_GL h => exact WeakerThan.pbl h;
+  | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+  | _ => exact axiomT!;
 
 end
 
