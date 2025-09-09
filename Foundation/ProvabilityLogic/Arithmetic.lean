@@ -7,17 +7,17 @@ import Foundation.FirstOrder.Internal.FixedPoint
 
 namespace LO.FirstOrder
 
-variable (T : ArithmeticTheory) [T.Δ₁]
+variable (T U : ArithmeticTheory) [T.Δ₁]
 
 /-- Provability logic of arithmetic theory-/
-def ArithmeticTheory.ProvabilityLogic : Modal.Logic ℕ := {A | ∀ f : T.StandardRealization, T ⊢!. f A}
+def ArithmeticTheory.ProvabilityLogic : Modal.Logic ℕ := {A | ∀ f : T.StandardRealization, U ⊢!. f A}
 
-variable {T}
+variable {T U}
 
 namespace ArithmeticTheory.ProvabilityLogic
 
 lemma provable_iff :
-    T.ProvabilityLogic ⊢! A ↔ ∀ f : T.StandardRealization, T ⊢!. f A := by
+    ProvabilityLogic T U ⊢! A ↔ ∀ f : T.StandardRealization, U ⊢!. f A := by
   simp [ArithmeticTheory.ProvabilityLogic]
 
 end ArithmeticTheory.ProvabilityLogic
