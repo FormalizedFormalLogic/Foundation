@@ -394,14 +394,14 @@ namespace Kripke
 open Kripke
 open Formula.Kripke
 
-variable {F : Frame} [Fintype F] {r : F} [F.IsTree r]
+variable {F : Frame} {r : F} [F.IsFiniteTree r]
 
 lemma Frame.World.finHeight_lt_of_rel {i j : F} (hij : i ≺ j) : Frame.World.finHeight i > Frame.World.finHeight j := fcwHeight_gt_of hij
 
 lemma Frame.World.exists_of_lt_finHeight {i : F} (hn : n < Frame.World.finHeight i) : ∃ j : F, i ≺ j ∧ Frame.World.finHeight j = n := fcwHeight_lt hn
 
 lemma iff_satisfies_mem_finHeight_spectrum
-  {M : Model} [Fintype M] {r : M} [M.IsTree r] {w : M.World}
+  {M : Model} {r : M} [M.IsFiniteTree r] {w : M}
   {φ : Formula ℕ} (φ_closed : φ.letterless := by grind)
   : w ⊧ φ ↔ Frame.World.finHeight w ∈ φ.spectrum := by
   induction φ generalizing w with
@@ -431,22 +431,42 @@ lemma iff_satisfies_mem_finHeight_spectrum
       _      ↔ Frame.World.finHeight w ∈ (□φ).spectrum := by
         rw [Formula.spectrum.def_box]; simp;
 
+@[simp]
+lemma _root_.fcwHeight_fin_lt : fcwHeight (α := Fin (n + 1)) (· < ·) 0 = n := by
+  sorry;
+
 lemma spectrum_TFAE (_ : φ.letterless := by grind)
   : [
   n ∈ φ.spectrum,
-  ∀ M : Model, ∀ r, [Fintype M] → [M.IsTree r] → ∀ w : M.World, Frame.World.finHeight w = n → w ⊧ φ,
-  ∃ M : Model, ∃ r, ∃ _ : Fintype M, ∃ _ : M.IsTree r, ∃ w : M.World, Frame.World.finHeight w = n ∧ w ⊧ φ
+  ∀ M : Model, ∀ r, [M.IsFiniteTree r] → ∀ w : M.World, Frame.World.finHeight w = n → w ⊧ φ,
+  ∃ M : Model, ∃ r, ∃ _ : M.IsFiniteTree r, ∃ w : M.World, Frame.World.finHeight w = n ∧ w ⊧ φ
 ].TFAE := by
   tfae_have 1 → 2 := by
-    intro h M _ r _ w hw;
+    intro h M r _ w hw;
     apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mpr;
     apply hw ▸ h;
   tfae_have 2 → 3 := by
     intro h;
-    sorry;
+    let M : Kripke.Model := {
+      World := Fin (n + 1),
+      Rel := (· < ·),
+      Val := λ p i => True,
+    }
+    have : M.IsFiniteTree 0 := {
+      asymm := by apply Fin.lt_asymm;
+      root_generates := by simp [M, Fin.pos_iff_ne_zero]
+    };
+    have : Frame.World.finHeight (F := M.toFrame) 0 = n := by
+      unfold Frame.World.finHeight;
+      convert fcwHeight_fin_lt;
+    refine ⟨M, 0, ?_, ⟨0, ?_, ?_⟩⟩;
+    . assumption;
+    . assumption;
+    . apply h;
+      assumption;
   tfae_have 3 → 1 := by
-    rintro ⟨M, _, _, _, w, rfl, h⟩;
-    apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mp h;
+    rintro ⟨M, r, _, w, rfl, hw⟩;
+    apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mp hw;
   tfae_finish;
 
 end Kripke
@@ -460,18 +480,18 @@ variable {φ ψ : Formula ℕ} (_ : φ.letterless := by grind) (_ : ψ.letterles
 
 lemma iff_GL_provable_spectrum_Univ
   : Modal.GL ⊢! φ ↔ φ.spectrum = Set.univ := by
-  suffices Hilbert.GL ⊢! φ ↔ ∀ (x : ℕ), x ∈ φ.spectrum by simpa [Set.eq_univ_iff_forall];
-  apply Iff.trans (Logic.GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree (φ := φ));
+  rw [Set.eq_univ_iff_forall];
   constructor;
   . intro h n;
     apply Kripke.spectrum_TFAE (φ := φ) (by grind) |>.out 1 0 |>.mp;
-    intro M r _ _ w _;
-    have := @h M r {};
-    sorry;
+    intro M r _ w _;
+    have := GL.Kripke.tree_completeness_TFAE.out 0 2 |>.mp h;
+    apply this M.toFrame r;
   . intro h;
-    intro M r _;
-    -- have := @h (Kripke.Frame.World.finHeight r)
-    sorry;
+    apply GL.Kripke.tree_completeness_TFAE.out 2 0 |>.mp;
+    intro F r _ V w;
+    have := Kripke.spectrum_TFAE (φ := φ) (n := Kripke.Frame.World.finHeight w) (by grind) |>.out 0 1 |>.mp;
+    apply this (by grind) _ r w rfl;
 
 lemma iff_GL_provable_C_subset_spectrum : Modal.GL ⊢! (φ ➝ ψ) ↔ φ.spectrum ⊆ ψ.spectrum := by
   apply Iff.trans $ iff_GL_provable_spectrum_Univ;
@@ -805,11 +825,11 @@ lemma GL.iff_eq_closed_sumQuasiNormal_eq_spectrum (hXY : (X.Regular T ∧ Y.Regu
 
 protected abbrev GLα (α : Set ℕ) : Logic ℕ := Modal.GL.sumQuasiNormal (α.image (λ i => TBB i))
 
-protected abbrev GLβ (β : Set ℕ) (hβ : βᶜ.Finite := by grind) : Logic ℕ := Modal.GL.sumQuasiNormal {∼(⩕ n ∈ hβ.toFinset, (TBB n))}
+protected abbrev GLβMinus (β : Set ℕ) (hβ : βᶜ.Finite := by grind) : Logic ℕ := Modal.GL.sumQuasiNormal {∼(⩕ n ∈ hβ.toFinset, (TBB n))}
 
-protected abbrev S_Inter_GLβ (β : Set ℕ) (hβ : βᶜ.Finite := by grind) : Logic ℕ := Modal.S ∩ Modal.GLβ β hβ
+protected abbrev S_Inter_GLβMinus (β : Set ℕ) (hβ : βᶜ.Finite := by grind) : Logic ℕ := Modal.S ∩ Modal.GLβMinus β hβ
 
-protected abbrev Dz_Inter_GLβ (β : Set ℕ) (hβ : βᶜ.Finite := by grind) : Logic ℕ := Modal.Dz ∩ Modal.GLβ β hβ
+protected abbrev Dz_Inter_GLβMinus (β : Set ℕ) (hβ : βᶜ.Finite := by grind) : Logic ℕ := Modal.Dz ∩ Modal.GLβMinus β hβ
 
 
 lemma GL.iff_eq_closed_sumQuasiNormal_eq_trace (hXY : (X.Regular T ∧ Y.Regular T) ∨ (X.Singular T ∧ Y.Singular T))
@@ -827,8 +847,8 @@ lemma GL.eq_closed_regular_sumQuasiNormal_GLα (X_regular : X.Regular T)
     . assumption;
     . simp;
 
-lemma GL.eq_closed_singular_sumQuasiNormal_GLβ (X_singular : X.Singular T)
-  : Modal.GL.sumQuasiNormal X = Modal.GLβ (X.trace) (FormulaSet.comp_trace_spectrum Xll ▸ FormulaSet.spectrum_finite_of_singular Xll X_singular) := by
+lemma GL.eq_closed_singular_sumQuasiNormal_GLβMinus (X_singular : X.Singular T)
+  : Modal.GL.sumQuasiNormal X = Modal.GLβMinus (X.trace) (FormulaSet.comp_trace_spectrum Xll ▸ FormulaSet.spectrum_finite_of_singular Xll X_singular) := by
   apply GL.iff_eq_closed_sumQuasiNormal_eq_spectrum (T := T) ?_ ?_ ?_ |>.mpr;
   . simp [TBBMinus_spectrum, FormulaSet.trace];
   . assumption;
@@ -843,11 +863,11 @@ lemma GL.eq_closed_singular_sumQuasiNormal_GLβ (X_singular : X.Singular T)
 
 /--
   Quasi-normal extension of `Modal.GL` by closed formula set `X` is
-  either `Modal.GLα (X.trace)` (`X` is regular) or `Modal.GLβ (X.trace)` (`X` is singular)
+  either `Modal.GLα (X.trace)` (`X` is regular) or `Modal.GLβMinus (X.trace)` (`X` is singular)
 -/
-theorem GL.eq_closed_sumQuasiNormal_GLα_or_GLβ :
+theorem GL.eq_closed_sumQuasiNormal_GLα_or_GLβMinus :
   (∃ _ : X.Regular T, Modal.GL.sumQuasiNormal X = Modal.GLα (X.trace)) ∨
-  (∃ X_singular : X.Singular T, Modal.GL.sumQuasiNormal X = Modal.GLβ (X.trace) (FormulaSet.comp_trace_spectrum Xll ▸ FormulaSet.spectrum_finite_of_singular Xll X_singular)) := by
+  (∃ X_singular : X.Singular T, Modal.GL.sumQuasiNormal X = Modal.GLβMinus (X.trace) (FormulaSet.comp_trace_spectrum Xll ▸ FormulaSet.spectrum_finite_of_singular Xll X_singular)) := by
   by_cases h : X.Regular T;
   . left;
     constructor;
@@ -855,7 +875,7 @@ theorem GL.eq_closed_sumQuasiNormal_GLα_or_GLβ :
     . assumption;
   . right;
     constructor;
-    . apply eq_closed_singular_sumQuasiNormal_GLβ (T := T) Xll (by grind) h;
+    . apply eq_closed_singular_sumQuasiNormal_GLβMinus (T := T) Xll (by grind) h;
     . assumption
 
 lemma iff_GLα_subset : Modal.GLα α₁ ⊆ Modal.GLα α₂ ↔ α₁ ⊆ α₂ := by
@@ -865,7 +885,7 @@ lemma iff_GLα_subset : Modal.GLα α₁ ⊆ Modal.GLα α₂ ↔ α₁ ⊆ α�
       simp;
     _ ↔ α₁ ⊆ α₂ := by simp;
 
-lemma iff_GLβ_subset : Modal.GLβ β₁ ⊆ Modal.GLβ β₂ ↔ β₁ ⊆ β₂ := by
+lemma iff_GLβMinus_subset : Modal.GLβMinus β₁ ⊆ Modal.GLβMinus β₂ ↔ β₁ ⊆ β₂ := by
   calc
     _ ↔ FormulaSet.spectrum ({∼(⩕ n ∈ hβ₂.toFinset, (TBB n))}) ⊆ FormulaSet.spectrum ({∼(⩕ n ∈ hβ₁.toFinset, (TBB n))}) := by
       apply GL.iff_subset_closed_sumQuasiNormal_subset_spectrum (T := 𝗣𝗔);
@@ -873,7 +893,7 @@ lemma iff_GLβ_subset : Modal.GLβ β₁ ⊆ Modal.GLβ β₂ ↔ β₁ ⊆ β�
     _ ↔ β₂ᶜ ⊆ β₁ᶜ := by rw [TBBMinus_spectrum, TBBMinus_spectrum];
     _ ↔ β₁ ⊆ β₂ := by simp;
 
-lemma GLα_subset_GLβ : Modal.GLα β ⊆ Modal.GLβ β := by
+lemma GLα_subset_GLβMinus : Modal.GLα β ⊆ Modal.GLβMinus β := by
   apply GL.iff_subset_closed_sumQuasiNormal_subset_spectrum (T := 𝗣𝗔) ?_ ?_ ?_ |>.mpr;
   . rw [TBBMinus_spectrum];
     simp [FormulaSet.spectrum];
