@@ -22,7 +22,7 @@ namespace Derivation
 
 variable {T U : Theory α} {Δ Δ₁ Δ₂ Γ : Sequent α}
 
-def length {Δ : Sequent α} : T ⟹ Δ → ℕ
+def length {Δ : Sequent α} : T ⇒ Δ → ℕ
   | axL _ _     => 0
   | verum _     => 0
   | or d        => d.length.succ
@@ -31,31 +31,31 @@ def length {Δ : Sequent α} : T ⟹ Δ → ℕ
   | cut dp dn   => (max (length dp) (length dn)).succ
   | axm _      => 0
 
-protected def cast (d : T ⟹ Δ) (e : Δ = Γ) : T ⟹ Γ := cast (by simp [e]) d
+protected def cast (d : T ⇒ Δ) (e : Δ = Γ) : T ⇒ Γ := cast (by simp [e]) d
 
-@[simp] lemma length_cast (d : T ⟹ Δ) (e : Δ = Γ) : length (Derivation.cast d e) = length d := by
+@[simp] lemma length_cast (d : T ⇒ Δ) (e : Δ = Γ) : length (Derivation.cast d e) = length d := by
   rcases e with rfl; simp [Derivation.cast]
 
-def verum' (h : ⊤ ∈ Δ) : T ⟹ Δ := (verum Δ).wk (by simp [h])
+def verum' (h : ⊤ ∈ Δ) : T ⇒ Δ := (verum Δ).wk (by simp [h])
 
 def axL' (a : α)
-    (h : NNFormula.atom a ∈ Δ) (hn : NNFormula.natom a ∈ Δ) : T ⟹ Δ := (axL Δ a).wk (by simp [h, hn])
+    (h : NNFormula.atom a ∈ Δ) (hn : NNFormula.natom a ∈ Δ) : T ⇒ Δ := (axL Δ a).wk (by simp [h, hn])
 
-def em {φ : NNFormula α} {Δ : Sequent α} (hpos : φ ∈ Δ) (hneg : ∼φ ∈ Δ) : T ⟹ Δ := by
+def em {φ : NNFormula α} {Δ : Sequent α} (hpos : φ ∈ Δ) (hneg : ∼φ ∈ Δ) : T ⇒ Δ := by
   induction φ using NNFormula.rec' generalizing Δ <;> simp at hneg
   case hverum           => exact verum' hpos
   case hfalsum          => exact verum' hneg
   case hatom a          => exact axL' a hpos hneg
   case hnatom a         => exact axL' a hneg hpos
   case hand φ ψ ihp ihq =>
-    have ihp : T ⟹ φ :: ∼φ :: ∼ψ :: Δ := ihp (by simp) (by simp)
-    have ihq : T ⟹ ψ :: ∼φ :: ∼ψ :: Δ := ihq (by simp) (by simp)
-    have : T ⟹ ∼φ :: ∼ψ :: Δ := (ihp.and ihq).wk (by simp [hpos])
+    have ihp : T ⇒ φ :: ∼φ :: ∼ψ :: Δ := ihp (by simp) (by simp)
+    have ihq : T ⇒ ψ :: ∼φ :: ∼ψ :: Δ := ihq (by simp) (by simp)
+    have : T ⇒ ∼φ :: ∼ψ :: Δ := (ihp.and ihq).wk (by simp [hpos])
     exact this.or.wk (by simp [hneg])
   case hor φ ψ ihp ihq  =>
-    have ihp : T ⟹ ∼φ :: φ :: ψ :: Δ := ihp (by simp) (by simp)
-    have ihq : T ⟹ ∼ψ :: φ :: ψ :: Δ := ihq (by simp) (by simp)
-    have : T ⟹ φ :: ψ :: Δ := (ihp.and ihq).wk (by simp [hneg])
+    have ihp : T ⇒ ∼φ :: φ :: ψ :: Δ := ihp (by simp) (by simp)
+    have ihq : T ⇒ ∼ψ :: φ :: ψ :: Δ := ihq (by simp) (by simp)
+    have : T ⇒ φ :: ψ :: Δ := (ihp.and ihq).wk (by simp [hneg])
     exact this.or.wk (by simp [hpos])
 
 instance : Tait (NNFormula α) (Theory α) where
@@ -67,7 +67,7 @@ instance : Tait (NNFormula α) (Theory α) where
 
 instance : Tait.Cut (NNFormula α) (Theory α) := ⟨Derivation.cut⟩
 
-def trans (F : U ⊢* T) {Γ : Sequent α} : T ⟹ Γ → U ⟹ Γ
+def trans (F : U ⊢* T) {Γ : Sequent α} : T ⇒ Γ → U ⇒ Γ
   | axL Γ φ   => axL Γ φ
   | verum Γ   => verum Γ
   | and d₁ d₂ => and (trans F d₁) (trans F d₂)
@@ -82,7 +82,7 @@ instance : Tait.Axiomatized (NNFormula α) (Theory α) where
 
 variable [DecidableEq α]
 
-def compact {Γ : Sequent α} : T ⟹ Γ → (s : { s : Finset (NNFormula α) // ↑s ⊆ T}) × (s : Theory α) ⟹ Γ
+def compact {Γ : Sequent α} : T ⇒ Γ → (s : { s : Finset (NNFormula α) // ↑s ⊆ T}) × (s : Theory α) ⇒ Γ
   | axL Γ φ   => ⟨⟨∅, by simp⟩, axL Γ φ⟩
   | verum Γ   => ⟨⟨∅, by simp⟩, verum Γ⟩
   | and d₁ d₂ =>
@@ -110,7 +110,7 @@ instance : Entailment.Compact (Theory α) where
   Γ_subset b := by simpa using (compact b).1.prop
   Γ_finite b := by simp
 
-def deductionAux {Γ : Sequent α} {φ} : T ⟹ Γ → T \ {φ} ⟹ ∼φ :: Γ
+def deductionAux {Γ : Sequent α} {φ} : T ⇒ Γ → T \ {φ} ⇒ ∼φ :: Γ
   | axL Γ φ   => wk (axL Γ φ) (by simp)
   | verum Γ   => wk (verum Γ) (by simp)
   | and d₁ d₂ =>
@@ -120,9 +120,9 @@ def deductionAux {Γ : Sequent α} {φ} : T ⟹ Γ → T \ {φ} ⟹ ∼φ :: Γ
   | cut d₁ d₂ => cut (Tait.rotate₁ <| deductionAux d₁) (Tait.rotate₁ <| deductionAux d₂)
   | axm (φ := ψ) h =>
     if hq : φ = ψ then em (φ := φ) (by simp [hq]) (by simp) else
-      Tait.wk (show T \ {φ} ⟹ [ψ] from Tait.axm (by simp [h, Ne.symm hq])) (by simp)
+      Tait.wk (show T \ {φ} ⇒ [ψ] from Tait.axm (by simp [h, Ne.symm hq])) (by simp)
 
-def deduction {Γ : Sequent α} {φ} (d : insert φ T ⟹ Γ) : T ⟹ ∼φ :: Γ := Tait.ofAxiomSubset (by simp) (deductionAux d)
+def deduction {Γ : Sequent α} {φ} (d : insert φ T ⇒ Γ) : T ⇒ ∼φ :: Γ := Tait.ofAxiomSubset (by simp) (deductionAux d)
 
 lemma inconsistent_iff_provable :
     Entailment.Inconsistent (insert φ T) ↔ T ⊢! ∼φ := by
@@ -148,9 +148,9 @@ omit [DecidableEq α]
 
 end Derivation
 
-abbrev Sequent.Tautology (Γ : Sequent α) := (∅ : Theory α) ⟹ Γ
+abbrev Sequent.Tautology (Γ : Sequent α) := (∅ : Theory α) ⇒ Γ
 
-abbrev Sequent.IsTautology (Γ : Sequent α) := (∅ : Theory α) ⟹! Γ
+abbrev Sequent.IsTautology (Γ : Sequent α) := (∅ : Theory α) ⇒! Γ
 
 abbrev NNFormula.Tautology (φ : NNFormula α) := Sequent.Tautology [φ]
 

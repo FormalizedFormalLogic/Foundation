@@ -148,17 +148,17 @@ namespace InternalArithmetic
 
 variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
-def zeroIndex : ℕ := Encodable.encode (Language.Zero.zero : (ℒₒᵣ : FirstOrder.Language).Func 0)
+def zeroIndex : ℕ := Encodable.encode (Language.Zero.zero : (ℒₒᵣ).Func 0)
 
-def oneIndex : ℕ := Encodable.encode (Language.One.one : (ℒₒᵣ : FirstOrder.Language).Func 0)
+def oneIndex : ℕ := Encodable.encode (Language.One.one : (ℒₒᵣ).Func 0)
 
-def addIndex : ℕ := Encodable.encode (Language.Add.add : (ℒₒᵣ : FirstOrder.Language).Func 2)
+def addIndex : ℕ := Encodable.encode (Language.Add.add : (ℒₒᵣ).Func 2)
 
-def mulIndex : ℕ := Encodable.encode (Language.Mul.mul : (ℒₒᵣ : FirstOrder.Language).Func 2)
+def mulIndex : ℕ := Encodable.encode (Language.Mul.mul : (ℒₒᵣ).Func 2)
 
-def eqIndex : ℕ := Encodable.encode (Language.Eq.eq : (ℒₒᵣ : FirstOrder.Language).Rel 2)
+def eqIndex : ℕ := Encodable.encode (Language.Eq.eq : (ℒₒᵣ).Rel 2)
 
-def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ : FirstOrder.Language).Rel 2)
+def ltIndex : ℕ := Encodable.encode (Language.LT.lt : (ℒₒᵣ).Rel 2)
 
 @[simp] lemma LOR_func_zeroIndex : (ℒₒᵣ).IsFunc 0 (zeroIndex : V) := by
   simpa using codeIn_func_quote (V := V) (L := ℒₒᵣ) Language.Zero.zero

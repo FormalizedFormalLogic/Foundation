@@ -368,11 +368,11 @@ def conj₂ : List α → α
 
 prefix:80 "⋀" => List.conj₂
 
-@[simp] lemma conj₂_nil : ⋀[] = (⊤ : α) := rfl
+@[simp] lemma conj₂_nil : ⋀ [] = (⊤ : α) := rfl
 
-@[simp] lemma conj₂_singleton : ⋀[φ] = φ := rfl
+@[simp] lemma conj₂_singleton : ⋀ [φ] = φ := rfl
 
-@[simp] lemma conj₂_doubleton : ⋀[φ, ψ] = φ ⋏ ψ := rfl
+@[simp] lemma conj₂_doubleton : ⋀ [φ, ψ] = φ ⋏ ψ := rfl
 
 @[simp] lemma conj₂_cons_nonempty {a : α} {as : List α} (h : as ≠ [] := by assumption) : ⋀(a :: as) = a ⋏ ⋀as := by
   cases as with

@@ -363,7 +363,7 @@ def conj : {Γ : Sequentᵢ L} → (b : (φ : SyntacticFormulaᵢ L) → φ ∈ 
   | [φ],         b => b φ (by simp)
   | φ :: ψ :: Γ, b => andEquiv.symm ⟨b φ (by simp), conj (fun χ hχ ↦ b χ (List.mem_cons_of_mem φ hχ))⟩
 
-def conj' : {Γ : Sequent L} → (b : (φ : SyntacticFormula L) → φ ∈ Γ → p ⊩ φᴺ) → p ⊩ ⋀Γᴺ
+def conj' : {Γ : Sequent L} → (b : (φ : SyntacticFormula L) → φ ∈ Γ → p ⊩ φᴺ) → p ⊩ ⋀Γᴺ'
   | [],          _ => PUnit.unit
   | [φ],         b => b φ (by simp)
   | φ :: ψ :: Γ, b => andEquiv.symm ⟨b φ (by simp), conj' (fun χ hχ ↦ b χ (List.mem_cons_of_mem φ hχ))⟩
@@ -372,9 +372,9 @@ end Forces
 
 noncomputable
 def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᵀ Γ → {d : ⊢ᵀ Γ // Derivation.IsCutFree d} := fun d ↦
-  let d : 𝗠𝗶𝗻¹ ⊢ ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.goedelGentzen d)
-  let ff : ∼Γ ⊩ ⋀(∼Γ)ᴺ ➝ ⊥ := Forces.ofMinimalProof d (∼Γ)
-  let fc : ∼Γ ⊩ ⋀(∼Γ)ᴺ := Forces.conj' fun φ hφ ↦
+  let d : 𝗠𝗶𝗻¹ ⊢ ⋀(∼Γ)ᴺ' ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.goedelGentzen d)
+  let ff : ∼Γ ⊩ ⋀(∼Γ)ᴺ' ➝ ⊥ := Forces.ofMinimalProof d (∼Γ)
+  let fc : ∼Γ ⊩ ⋀(∼Γ)ᴺ' := Forces.conj' fun φ hφ ↦
     (Forces.refl φ).monotone (StrongerThan.ofSubset <| List.cons_subset.mpr ⟨hφ, by simp⟩)
   let b : ∼Γ ⊩ ⊥ := ff.modusPonens fc
   let ⟨b, hb⟩ := b.falsumEquiv

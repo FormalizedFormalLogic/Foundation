@@ -678,8 +678,8 @@ end
 
 lemma qqFunc_absolute (k f v : ℕ) : ((^func k f v : ℕ) : V) = ^func (k : V) (f : V) (v : V) := by simp [qqFunc, nat_cast_pair]
 
-@[simp] lemma zero_semiterm : IsSemiterm ℒₒᵣ n (𝟎 : V) := by
-  simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+@[simp] lemma zero_semiterm {n : V} : IsSemiterm ℒₒᵣ n (𝟎 : V) := by
+  simp [-CharP.cast_eq_zero, InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma one_semiterm : IsSemiterm ℒₒᵣ n (𝟏 : V) := by
   simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
@@ -733,7 +733,7 @@ end
   induction x using ISigma1.sigma1_succ_induction
   · definability
   case zero => simp
-  case succ x ih => simp [qqAdd, ih]
+  case succ x ih => simp [-CharP.cast_eq_zero, qqAdd, ih]
 
 end Numeral
 
@@ -790,35 +790,36 @@ end
     termSubst ℒₒᵣ w (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  case zero => simp [-CharP.cast_eq_zero, InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
     · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
     · simp only [numeral_add_two, qqAdd]
-      rw [termSubst_func (L := ℒₒᵣ) (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      rw [termSubst_func (L := ℒₒᵣ) (by simp [-CharP.cast_eq_zero])
+        (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
       simp [ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_shift (x : V) :
     termShift ℒₒᵣ (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  case zero => simp [-CharP.cast_eq_zero, InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
     · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
     · simp only [numeral_add_two, qqAdd]
-      rw [termShift_func (L := ℒₒᵣ) (by simp) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
+      rw [termShift_func (L := ℒₒᵣ) (by simp [-CharP.cast_eq_zero]) (by simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc])]
       simp [ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 @[simp] lemma numeral_bShift (x : V) :
     termBShift ℒₒᵣ (numeral x) = numeral x := by
   induction x using ISigma1.sigma1_succ_induction
   · definability
-  case zero => simp [InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
+  case zero => simp [-CharP.cast_eq_zero, InternalArithmetic.zero, qqFunc_absolute, qqFuncN_eq_qqFunc]
   case succ x ih =>
     rcases zero_or_succ x with (rfl | ⟨x, rfl⟩)
     · simp [InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
-    · simp [qqAdd, ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
+    · simp [-CharP.cast_eq_zero, qqAdd, ih, InternalArithmetic.one, qqFunc_absolute, qqFuncN_eq_qqFunc]
 
 end numeral
 

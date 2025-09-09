@@ -358,9 +358,9 @@ lemma subset_iff {a b : V} : a ⊆ b ↔ (∀ x ∈ a, x ∈ b) := by simp [HasS
 
 lemma mem_exp_add_succ_sub_one (i j : V) : i ∈ Exp.exp (i + j + 1) - 1 := by
   have : Exp.exp (i + j + 1) - 1 = (Exp.exp j - 1) * Exp.exp (i + 1) + Exp.exp i + (Exp.exp i - 1) := calc
-    Exp.exp (i + j + 1) - 1 = Exp.exp j * Exp.exp (i + 1) - 1                             := by simp [exp_add, ←mul_assoc, mul_comm]
+    Exp.exp (i + j + 1) - 1 = Exp.exp j * Exp.exp (i + 1) - 1                                 := by simp [exp_add, ←mul_assoc, mul_comm]
     _                   = Exp.exp j * Exp.exp (i + 1) - Exp.exp (i + 1) + Exp.exp (i + 1) - 1 := by rw [sub_add_self_of_le]; exact le_mul_of_pos_left (exp_pos j)
-    _                   = (Exp.exp j - 1) * Exp.exp (i + 1) + Exp.exp (i + 1) - 1         := by simp [sub_mul]
+    _                   = (Exp.exp j - 1) * Exp.exp (i + 1) + Exp.exp (i + 1) - 1             := by simp [PeanoMinus.sub_mul]
     _                   = (Exp.exp j - 1) * Exp.exp (i + 1) + (Exp.exp i + Exp.exp i) - 1     := by simp [←two_mul, ←exp_succ i]
     _                   = (Exp.exp j - 1) * Exp.exp (i + 1) + (Exp.exp i + Exp.exp i - 1)     := by rw [add_tsub_assoc_of_le]; simp [←two_mul, ←pos_iff_one_le]
     _                   = (Exp.exp j - 1) * Exp.exp (i + 1) + Exp.exp i + (Exp.exp i - 1)     := by simp [add_assoc, add_tsub_assoc_of_le]
