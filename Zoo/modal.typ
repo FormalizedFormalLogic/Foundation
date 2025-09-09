@@ -63,7 +63,7 @@
       "LO.Modal.Dum": $Logic("Dum")$,
       "LO.Modal.DumPoint2": $Logic("Dum.2")$,
       "LO.Modal.DumPoint3": $Logic("Dum.3")$,
-      "LO.Modal.Dz": $Logic("Dz")$,
+      "LO.Modal.D": $Logic("D")$,
       "LO.Modal.Empty": $emptyset$,
       "LO.Modal.GL": $Logic("GL")$,
       "LO.Modal.GLPoint2": $Logic("GL.2")$,

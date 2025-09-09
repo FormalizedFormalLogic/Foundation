@@ -149,7 +149,7 @@ import Foundation.Modal.Logic.Extension
 
 import Foundation.Modal.Logic.S.Consistent
 
-import Foundation.Modal.Logic.Dz.Basic
+import Foundation.Modal.Logic.D.Basic
 
 import Foundation.Modal.Logic.GLPlusBoxBot.Basic
 import Foundation.Modal.Logic.GLPoint3OplusBoxBot.Basic
