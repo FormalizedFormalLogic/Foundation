@@ -29,7 +29,8 @@ Main results of this repository. More detailed explanations are provided in the 
   - [Propositional Logic Zoo](#propositional-logic-zoo)
 - `ProvabilityLogic`: [Provability Logic][provability_logic]
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
-- `Logic`: Fundamental tools for various logics
+- `Meta`: Proof automation.
+- `Logic`: Fundamental tools for various logics.
 - `Vospiel`: to mathlib.
 
 
