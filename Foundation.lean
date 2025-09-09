@@ -169,6 +169,7 @@ import Foundation.ProvabilityLogic.N.Soundness
 
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.GL.Unprovability
+import Foundation.ProvabilityLogic.GL.Uniform
 
 import Foundation.ProvabilityLogic.Grz.Completeness
 
