@@ -81,23 +81,39 @@ Automatically generated diagrams, "Zoo", illustrate the *Lean4-verified* interre
 
 ![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/propositional_zoo.png)
 
+## Developers
+
+List of contact information and expertise for current main developers.
+If you have any interest or question, [create a new issue](https://github.com/FormalizedFormalLogic/Foundation/issues) or contact via developers' address.
+
+- Palalansoukî (Shogo Saito, [@iehality][iehality:github], ✉️:[palalansouki@gmail.com][iehality:email])
+  - Overall design and maintenance.
+  - First-order logic (especially arithmetic).
+  - Intuitionistic first-order logic.
+  - Proof automation.
+  - Provability logic.
+- SnO2WMaN (Mashu Noguchi, [@SnO2WMaN][sno2wman:github], ✉️:[me@sno2wman.net][SnO2WMaN:email])
+  - Modal logic.
+  - Propositional logic (including intermediate logic).
+  - Provability logic.
+  - Miscellaneous repository maintenance (e.g. GitHub Actions)
+
+[iehality:github]: https://github.com/iehality
+[iehality:email]: mailto:palalansouki@gmail.com
+[iehality:x]: https://x.com/_ni_nn_i_
+
+[SnO2WMaN:github]: https://github.com/SnO2WMaN
+[SnO2WMaN:email]: mailto:me@sno2wman.net
+[SnO2WMaN:x]: https://x.com/SnO2WMaN
+
+If you with to cite this repository in academic papers, refer to [CITATION.cff](./CITATION.cff).
+
 ## Financial Supports
 
-Any financial supports would greatly helps us. If you considered, please contact us: [palalansouki@gmail.com](mailto:palalansouki@gmail.com)
+Any financial supports would be grateful. If you considered, [please contact us](#Developers).
 
 ### Previous Sponsors
 
 Companies and organizations that have supported us in the past.
 
 - [Proxima Technology](https://proxima-ai-tech.com) (2024-2025)
-
-## Developers:
-- Palalansoukî (@iehality, [palalansouki@gmail.com](mailto:palalansouki@gmail.com), [@_ni_nn_i_](https://x.com/_ni_nn_i_)).
-  Responsible for:
-  - Overall design and maintenance.
-  - Intuitionistic first-order logic.
-  - First-order logic (esprcially arithmetic).
-  - Proof automation.
-  - Provability logic (partially).
-- SnO2WMaN (@SnO2WMaN)
-
