@@ -7,6 +7,9 @@
 
 #let ProvLogic(L1, L2) = $upright("PrL")_(#L1)(#L2)$
 
+#let TheoryPA = $Theory("PA")$
+#let TheoryTA = $Theory("TA")$
+
 #let arrows = json("./modal.json").map(((from, to, type)) => {
   if type == "ssub" {
     return strfmt("\"{}\" -> \"{}\"", from, to)
@@ -122,8 +125,9 @@
       "LO.Modal.Triv": $Logic("Triv")$,
       "LO.Modal.Univ": $bot$,
       "LO.Modal.Ver": $Logic("Ver")$,
-      "𝗣𝗔.ProvabilityLogic 𝗣𝗔": [$ProvLogic(Theory("PA"), Theory("PA"))$],
-      "𝗣𝗔.ProvabilityLogic 𝗧𝗔": [$ProvLogic(Theory("PA"), Theory("TA"))$],
+      "𝗣𝗔.ProvabilityLogic 𝗣𝗔": [$ProvLogic(TheoryPA, TheoryPA)$],
+      "𝗣𝗔.ProvabilityLogic 𝗧𝗔": [$ProvLogic(TheoryPA, TheoryTA)$],
+      "𝗣𝗔.ProvabilityLogic (𝗣𝗔 + ↑(𝗣𝗔.LocalReflection (LO.FirstOrder.Arithmetic.Hierarchy 𝚺 1)))": [$ProvLogic(TheoryPA, TheoryPA + upright("Rfn")_(TheoryPA)(Sigma_1))$],
     ),
     width: 980pt,
   )
