@@ -2,6 +2,7 @@ import Foundation.Modal.Logic.Extension
 import Foundation.Modal.Logic.GL.Independency
 import Foundation.Modal.Logic.S.Basic
 import Foundation.Modal.Entailment.GL
+import Mathlib.Tactic.TFAE
 
 namespace LO.Modal
 
@@ -155,6 +156,176 @@ lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢! □(s.box.disj) 
     apply right_Fdisj!_intro;
     obtain ⟨ψ, hψ₂, rfl⟩ := List.exists_box_of_mem_box hψ;
     simpa using hψ₂;
+
+noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := φ.subformulas.prebox.powerset.image (λ s => □(s.box.disj) ➝ s.box.disj) |>.conj
+
+
+namespace Kripke
+
+variable {M : Kripke.Model} {r} [M.IsRootedBy r]
+
+def tailModel₀ (M : Kripke.Model) {r} [M.IsRootedBy r] (o : ℕ → Prop) : Kripke.Model where
+  World := Unit ⊕ ℕ ⊕ M.World -- `Unit` means `ω`
+  Rel x y :=
+    match x, y with
+    | _            , .inl _        => False -- ¬(x ≺ ω)
+    | .inl        _, _             => True  -- ω ≺ x where x is not ω
+    | .inr $ .inl x, .inr $ .inl y => x > y -- x ≺ y ↔ x > y where x, y ∈ ω
+    | .inr $ .inl _, .inr $ .inr _ => True
+    | .inr $ .inr _, .inr $ .inl _ => False
+    | .inr $ .inr x, .inr $ .inr y => x ≺ y
+  Val x p :=
+    match x with
+    | .inl _        => o p
+    | .inr $ .inl _ => M.Val r p
+    | .inr $ .inr x => M.Val x p
+
+namespace tailModel₀
+
+variable {o}
+
+protected abbrev root {M : Kripke.Model} {r} [M.IsRootedBy r] {o} : tailModel₀ M o := .inl ()
+
+instance : (tailModel₀ M o).IsRootedBy (tailModel₀.root) where
+  root_generates := by
+    intro x h;
+    match x with
+    | .inl _ => simp [tailModel₀.root] at h;
+    | .inr $ _ =>
+      apply Relation.TransGen.single;
+      simp [tailModel₀, tailModel₀.root];
+
+instance [M.IsTransitive] : (tailModel₀ M o).IsTransitive where
+  trans x y z := by
+    match x, y, z with
+    | .inl _, _, _ => dsimp [tailModel₀]; aesop;
+    | _, .inl _, _ => simp [tailModel₀];
+    | _, _, .inl _ => simp [tailModel₀];
+    | .inr $ .inl x, .inr $ .inl y, .inr $ .inl z => dsimp [tailModel₀]; omega;
+    | .inr $ .inr x, .inr $ .inr y, .inr $ .inr z => dsimp [tailModel₀]; apply Frame.trans;
+    | .inr $ .inr _, .inr _, .inr $ .inl _ => dsimp [tailModel₀]; aesop;
+    | .inr $ .inl _, .inr $ .inr _, _ => dsimp [tailModel₀]; aesop;
+    | .inr $ .inl _, .inr $ .inl _, .inr $ .inr _ => simp [tailModel₀];
+    | .inr $ .inr _, .inr $ .inl _, .inr $ .inr _ => simp [tailModel₀];
+
+@[coe] abbrev embed_nat (n : ℕ) : tailModel₀ M o := .inr $ .inl n
+
+@[simp]
+lemma rel_root_embed_nat [M.IsTransitive] {n : ℕ} : tailModel₀.root (M := M) (o := o) ≺ (tailModel₀.embed_nat n) := by
+  apply Frame.root_genaretes'!;
+  simp [tailModel₀];
+
+@[coe] abbrev embed_original (x : M) : tailModel₀ M o := .inr $ .inr x
+
+@[simp]
+lemma rel_root_embed_original [M.IsTransitive] {x : M} : tailModel₀.root (M := M) (o := o) ≺ (tailModel₀.embed_original x) := by
+  apply Frame.root_genaretes'!;
+  simp [tailModel₀];
+
+lemma iff_root_rel_not_root {x : tailModel₀ M o} : tailModel₀.root ≺ x ↔ x ≠ tailModel₀.root := by
+  constructor;
+  . rintro h rfl;
+    simp [Frame.Rel', tailModel₀] at h;
+  . intro h;
+    simp_all [Frame.Rel', tailModel₀];
+
+end tailModel₀
+
+
+def tailModel (M : Kripke.Model) {r} [M.IsRootedBy r] : Kripke.Model := tailModel₀ M (M.Val r)
+
+namespace tailModel
+
+protected abbrev root {M : Kripke.Model} {r} [M.IsRootedBy r] : tailModel M := tailModel₀.root
+
+instance : (tailModel M).IsRootedBy (tailModel.root) := by
+  dsimp [tailModel];
+  infer_instance;
+
+end tailModel
+
+end Kripke
+
+
+section
+
+open Kripke
+open Formula.Kripke
+
+theorem GL_D_TFAE :
+  [
+    Modal.D ⊢! φ,
+    ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → ∀ o, (tailModel₀.root (M := M) (o := o)) ⊧ φ,
+    ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ.dzSubformula ➝ φ,
+    Modal.GL ⊢! φ.dzSubformula ➝ φ,
+  ].TFAE := by
+    tfae_have 1 → 2 := by
+      intro h M r _ o;
+      induction h using D.rec' with
+      | mem_GL h =>
+        sorry
+      | axiomP =>
+        apply Satisfies.not_def.mpr;
+        apply Satisfies.not_box_def.mpr;
+        use tailModel₀.embed_original r;
+        constructor;
+        . exact tailModel₀.rel_root_embed_original;
+        . tauto;
+      | @axiomDz φ ψ =>
+        contrapose!;
+        intro h;
+        replace h := Satisfies.or_def.not.mp h;
+        push_neg at h;
+        obtain ⟨x, Rrx, hx⟩ := Satisfies.not_box_def.mp h.1;
+        obtain ⟨y, Rry, hy⟩ := Satisfies.not_box_def.mp h.2;
+
+        apply Satisfies.not_box_def.mpr;
+        let z : tailModel₀ M o := tailModel₀.embed_nat $
+          match x, y with
+          | .inr $ .inl x, .inr $ .inl y => (max x y) + 1
+          | .inr $ .inr _, .inr $ .inl y => y + 1
+          | .inr $ .inl x, .inr $ .inr _ => x + 1
+          | .inr $ .inr x, .inr $ .inr y => 0
+        have Rzx : z ≺ x := by
+          unfold z;
+          match x, y with
+          | .inr $ .inl _, .inr $ .inl _ => dsimp [tailModel₀]; omega;
+          | .inr $ .inr _, .inr $ .inl _ => simp [tailModel₀, Frame.Rel'];
+          | .inr $ .inl _, .inr $ .inr _ => simp [tailModel₀, Frame.Rel'];
+          | .inr $ .inr _, .inr $ .inr _ => simp [tailModel₀, Frame.Rel'];
+        have Rzy : z ≺ y := by
+          unfold z;
+          match x, y with
+          | .inr $ .inl _, .inr $ .inl _ => dsimp [tailModel₀]; omega;
+          | .inr $ .inr _, .inr $ .inl _ => simp [tailModel₀, Frame.Rel'];
+          | .inr $ .inl _, .inr $ .inr _ => simp [tailModel₀, Frame.Rel'];
+          | .inr $ .inr _, .inr $ .inr _ => simp [tailModel₀, Frame.Rel'];
+        use z;
+        constructor;
+        . exact tailModel₀.rel_root_embed_nat;
+        . apply Satisfies.or_def.not.mpr;
+          push_neg;
+          constructor;
+          . apply Satisfies.not_box_def.mpr;
+            use x;
+          . apply Satisfies.not_box_def.mpr;
+            use y;
+      | mdp ihφψ ihφ => exact ihφψ ihφ
+    tfae_have 2 → 3 := by
+      contrapose!;
+      rintro ⟨M, r, _, h⟩;
+      sorry
+    tfae_have 3 → 4 := by sorry
+    tfae_have 4 → 1 := by
+      intro h;
+      apply (show Modal.D ⊢! φ.dzSubformula ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
+      apply FConj!_iff_forall_provable.mpr;
+      intro ψ hψ;
+      obtain ⟨s, _, rfl⟩ : ∃ s ⊆ φ.subformulas.prebox, □s.box.disj ➝ s.box.disj = ψ := by simpa using hψ;
+      exact D.fdisj_axiomDz;
+    tfae_finish;
+
+end
 
 end
 
