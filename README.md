@@ -3,7 +3,7 @@
 
 # Foundation
 
-Formalizing mathematical logics in Lean 4.
+Formalizing mathematical logic in Lean 4.
 
 ## Structure & Summary
 
@@ -30,7 +30,7 @@ Main results of this repository. More detailed explanations are provided in the 
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
 - `Meta`: Proof automation.
 - `Logic`: Fundamental tools for various logics.
-- `Vospiel`: to mathlib.
+- `Vospiel`: Supplemental definitions and theorems for mathlib.
 
 
 [prop]: ./Foundation/Propositional
@@ -62,7 +62,7 @@ Main results of this repository. More detailed explanations are provided in the 
 
 ## Zoo
 
-Automatically generated diagrams, "Zoo", illustrate the *Lean4-verified* interrelationships among proof systems.
+Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelationships among proof systems.
 
 - A solid arrow $\mathsf{A} \rightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
 - A dashed arrow $\mathsf{A} \dashrightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
@@ -82,12 +82,12 @@ Automatically generated diagrams, "Zoo", illustrate the *Lean4-verified* interre
 
 ## Developers
 
-List of contact information and expertise for current main developers.
-If you have any interest or question, [create a new issue](https://github.com/FormalizedFormalLogic/Foundation/issues) or contact via developers' address.
+List of contact information and areas of expertise of the current main developers.
+If you have any interest or questions, [create a new issue](https://github.com/FormalizedFormalLogic/Foundation/issues) or contact us directly.
 
 - Palalansoukî (Shogo Saito, [@iehality][iehality:github], ✉️:[palalansouki@gmail.com][iehality:email])
   - Overall design and maintenance.
-  - First-order logic (especially arithmetic).
+  - First-order logic.
   - Intuitionistic first-order logic.
   - Proof automation.
   - Provability logic.
@@ -99,11 +99,9 @@ If you have any interest or question, [create a new issue](https://github.com/Fo
 
 [iehality:github]: https://github.com/iehality
 [iehality:email]: mailto:palalansouki@gmail.com
-[iehality:x]: https://x.com/_ni_nn_i_
 
 [SnO2WMaN:github]: https://github.com/SnO2WMaN
 [SnO2WMaN:email]: mailto:me@sno2wman.net
-[SnO2WMaN:x]: https://x.com/SnO2WMaN
 
 If you with to cite this repository in academic papers, refer to [CITATION.cff](./CITATION.cff).
 
