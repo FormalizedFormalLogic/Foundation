@@ -51,7 +51,7 @@ namespace Manipulation
 
 protected def id [Variable Ω ξ n T] : T ⇛ T := ⟨Variable.b, Variable.ω⟩
 
-def trans
+def comp
     [Variable Ω ξ₁ n₁ T₁] [Variable Ω ξ₂ n₂ T₂] [Variable Ω ξ₃ n₃ T₃]
     [Presyntax T₁ T₂] [Presyntax T₂ T₃]
     (f₂ : T₂ ⇛ T₃) (f₁ : T₁ ⇛ T₂) : T₁ ⇛ T₃ :=
@@ -59,8 +59,11 @@ def trans
 
 end Manipulation
 
-variable (T₁ T₂)
+variable (T T₁ T₂)
 
-class Syntax [Variable Ω ξ n T] extends Presyntax T T where
+class ReflexiveSyntax [Variable Ω ξ n T] extends Presyntax T T where
   id_app (t : T) : Manipulation.id.app t = t
-  trans_app :
+
+class TransitiveSyntax [Variable Ω ξ₁ n₁ T₁] [Variable Ω ξ₂ n₂ T₂] [Variable Ω ξ₃ n₃ T₃]
+    [Presyntax T₁ T₂] [Presyntax T₂ T₃] [Presyntax T₁ T₃] where
+  comp_app (f₂ : T₂ ⇛ T₃) (f₁ : T₁ ⇛ T₂) (t : T₁) : (f₂.comp f₁) t = f₂ (f₁ t)
