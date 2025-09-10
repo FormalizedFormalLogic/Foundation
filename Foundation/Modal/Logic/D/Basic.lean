@@ -1,8 +1,11 @@
 import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.Basic
 import Foundation.Modal.Logic.GL.Independency
+import Foundation.Modal.Kripke.Logic.GL.Soundness
 import Foundation.Modal.Logic.S.Basic
 import Foundation.Modal.Entailment.GL
 import Mathlib.Tactic.TFAE
+import Mathlib.Order.WellFoundedSet
 
 namespace LO.Modal
 
@@ -162,6 +165,13 @@ noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := φ.subformulas.p
 
 namespace Kripke
 
+instance {F : Frame} {r : F} [F.IsFiniteTree r] : F.IsConverseWellFounded := ⟨by
+  apply Finite.converseWellFounded_of_trans_irrefl';
+  . infer_instance;
+  . intro x y z; apply F.trans;
+  . intro x; apply F.irrefl;
+⟩
+
 variable {M : Kripke.Model} {r} [M.IsRootedBy r]
 
 def tailModel₀ (M : Kripke.Model) {r} [M.IsRootedBy r] (o : ℕ → Prop) : Kripke.Model where
@@ -195,7 +205,7 @@ instance : (tailModel₀ M o).IsRootedBy (tailModel₀.root) where
       apply Relation.TransGen.single;
       simp [tailModel₀, tailModel₀.root];
 
-instance [M.IsTransitive] : (tailModel₀ M o).IsTransitive where
+instance transitive [M.IsTransitive] : (tailModel₀ M o).IsTransitive where
   trans x y z := by
     match x, y, z with
     | .inl _, _, _ => dsimp [tailModel₀]; aesop;
@@ -221,6 +231,47 @@ lemma rel_root_embed_nat [M.IsTransitive] {n : ℕ} : tailModel₀.root (M := M)
 lemma rel_root_embed_original [M.IsTransitive] {x : M} : tailModel₀.root (M := M) (o := o) ≺ (tailModel₀.embed_original x) := by
   apply Frame.root_genaretes'!;
   simp [tailModel₀];
+
+instance cwf [M.IsFiniteTree r] : (tailModel₀ M o).IsConverseWellFounded := ⟨by
+  apply ConverseWellFounded.iff_has_max.mpr;
+  intro s hs;
+  let s₁ := { x | (Sum.inr $ Sum.inr x) ∈ s };
+  let s₂ := { x | (Sum.inr $ Sum.inl x) ∈ s };
+  by_cases hs₁ : s₁.Nonempty;
+  . obtain ⟨m, hm₁, hm₂⟩ := ConverseWellFounded.iff_has_max.mp M.cwf s₁ (by simpa);
+    use embed_original m;
+    constructor;
+    . exact hm₁;
+    . intro x hx;
+      match x with
+      | .inl _ => simp [tailModel₀];
+      | .inr $ .inl _ => simp [tailModel₀];
+      | .inr $ .inr y => simpa using hm₂ y (by tauto);
+  . by_cases hs₂ : s₂.Nonempty;
+    . let m := Set.IsWF.min (s := s₂) (Set.IsWF.of_wellFoundedLT _) (by assumption);
+      use embed_nat m;
+      constructor;
+      . simpa using Set.IsWF.min_mem (s := s₂) _ _;
+      . intro x hx;
+        match x with
+        | .inl _ => simp [tailModel₀];
+        | .inr $ .inr x =>
+          exfalso;
+          apply hs₁;
+          use x;
+          simpa [s₁];
+        | .inr $ .inl n =>
+          suffices m ≤ n by simpa [tailModel₀];
+          apply Set.IsWF.min_le;
+          simpa [s₂];
+    . use tailModel₀.root;
+      simp [Set.Nonempty] at hs₁ hs₂;
+      constructor;
+      . contrapose! hs;
+        ext x;
+        match x with | .inl _ | .inr $ .inl n | .inr $ .inr x => tauto;
+      . simp_all [tailModel₀, s₁, s₂];
+⟩
 
 lemma iff_root_rel_not_root {x : tailModel₀ M o} : tailModel₀.root ≺ x ↔ x ≠ tailModel₀.root := by
   constructor;
@@ -263,7 +314,12 @@ theorem GL_D_TFAE :
       intro h M r _ o;
       induction h using D.rec' with
       | mem_GL h =>
-        sorry
+        apply Sound.sound (𝓜 := Kripke.FrameClass.infinite_GL) h;
+        apply Set.mem_setOf_eq.mpr;
+        exact {
+          trans := by intro x y z; exact Frame.trans (F := tailModel₀ M o |>.toFrame),
+          cwf := by exact Frame.cwf (F := tailModel₀ M o |>.toFrame);
+        }
       | axiomP =>
         apply Satisfies.not_def.mpr;
         apply Satisfies.not_box_def.mpr;
@@ -315,7 +371,7 @@ theorem GL_D_TFAE :
       contrapose!;
       rintro ⟨M, r, _, h⟩;
       sorry
-    tfae_have 3 → 4 := by sorry
+    tfae_have 4 ↔ 3 := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree
     tfae_have 4 → 1 := by
       intro h;
       apply (show Modal.D ⊢! φ.dzSubformula ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
