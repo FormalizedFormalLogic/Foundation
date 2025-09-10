@@ -25,7 +25,6 @@ Main results of this repository. More detailed explanations are provided in the 
   - [Tait-style calculus][prop:classical_tait] and [completeness][prop:classical_tait_complete]
   - [Completeness for Kripke semantics][prop:kripke]
   - [Disjunctive Property of intuitionistic logic][prop:int_disjunctive]
-  - Rejection Law of Excluded Middle in intuitionistic logic and [sublogic relations][prop:sublogics]
   - [Propositional Logic Zoo](#propositional-logic-zoo)
 - `ProvabilityLogic`: [Provability Logic][provability_logic]
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
