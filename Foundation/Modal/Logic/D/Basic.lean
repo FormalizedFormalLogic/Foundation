@@ -6,13 +6,14 @@ import Foundation.Modal.Logic.S.Basic
 import Foundation.Modal.Entailment.GL
 import Mathlib.Tactic.TFAE
 import Mathlib.Order.WellFoundedSet
+import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal
 
 open Formula (atom)
 open Logic
 
-protected abbrev D := sumQuasiNormal Modal.GL {∼□⊥, □(□(.atom 0) ⋎ □(.atom 1)) ➝ □(.atom 0) ⋎ □(.atom 1)}
+protected abbrev D := sumQuasiNormal Modal.GL {∼□⊥, □(□(atom 0) ⋎ □(.atom 1)) ➝ □(atom 0) ⋎ □(.atom 1)}
 instance : Modal.D.IsQuasiNormal := inferInstance
 
 instance : Entailment.HasAxiomP Modal.D where
@@ -22,7 +23,7 @@ instance : Entailment.HasAxiomP Modal.D where
     simp;
 
 lemma D.mem_axiomDz : Modal.D ⊢! □(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ := by
-  apply Logic.subst! (φ := □(□(.atom 0) ⋎ □(.atom 1)) ➝ □(.atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
+  apply Logic.subst! (φ := □(□(atom 0) ⋎ □(.atom 1)) ➝ □(atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
   apply Logic.sumQuasiNormal.mem₂!;
   simp;
 
@@ -103,14 +104,6 @@ section
 attribute [-simp] Logic.iff_provable
 open LO.Entailment LO.Modal.Entailment
 
-instance : Modal.D ⪯ Modal.S := by
-  apply weakerThan_iff.mpr;
-  intro φ hφ;
-  induction hφ using D.rec' with
-  | mem_GL h => exact WeakerThan.pbl h;
-  | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
-  | _ => exact axiomT!;
-
 instance : Entailment.GL Modal.GL where
   L _ := by
     constructor;
@@ -160,7 +153,10 @@ lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢! □(s.box.disj) 
     obtain ⟨ψ, hψ₂, rfl⟩ := List.exists_box_of_mem_box hψ;
     simpa using hψ₂;
 
-noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := φ.subformulas.prebox.powerset.image (λ s => □(s.box.disj) ➝ s.box.disj) |>.conj
+lemma D.axiomFour : Modal.D ⊢! □□φ ➝ □φ := by
+  simpa using Logic.subst! (λ _ => φ) $ fdisj_axiomDz (s := {(.atom 0)});
+
+noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := φ.subformulas.prebox.powerset.image (λ s => □(s.box.disj) ➝ s.box.disj)
 
 
 namespace Kripke
@@ -307,8 +303,8 @@ theorem GL_D_TFAE :
   [
     Modal.D ⊢! φ,
     ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → ∀ o, (tailModel₀.root (M := M) (o := o)) ⊧ φ,
-    ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ.dzSubformula ➝ φ,
-    Modal.GL ⊢! φ.dzSubformula ➝ φ,
+    ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ.dzSubformula.conj ➝ φ,
+    Modal.GL ⊢! φ.dzSubformula.conj ➝ φ,
   ].TFAE := by
     tfae_have 1 → 2 := by
       intro h M r _ o;
@@ -374,12 +370,51 @@ theorem GL_D_TFAE :
     tfae_have 4 ↔ 3 := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree
     tfae_have 4 → 1 := by
       intro h;
-      apply (show Modal.D ⊢! φ.dzSubformula ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
+      apply (show Modal.D ⊢! φ.dzSubformula.conj ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
       apply FConj!_iff_forall_provable.mpr;
       intro ψ hψ;
       obtain ⟨s, _, rfl⟩ : ∃ s ⊆ φ.subformulas.prebox, □s.box.disj ➝ s.box.disj = ψ := by simpa using hψ;
       exact D.fdisj_axiomDz;
     tfae_finish;
+
+lemma iff_provable_D_provable_GL : Modal.D ⊢! φ ↔ Modal.GL ⊢! φ.dzSubformula.conj ➝ φ := GL_D_TFAE (φ := φ) |>.out 0 3
+
+lemma D.unprovable_T : Modal.D ⊬ (Axioms.T (.atom 0)) := by
+  apply GL_D_TFAE |>.out 0 1 |>.not.mpr;
+  push_neg;
+  let M : Kripke.Model := {
+    World := Fin 1,
+    Rel := (· < ·),
+    Val := λ p i => True,
+  }
+  refine ⟨M, 0, ?_, (λ _ => False), ?_⟩;
+  . exact {
+      world_finite := inferInstance,
+      root_generates := by
+        suffices ∀ w : Fin 1, w = 0 by simpa [M];
+        trivial;
+    }
+  . apply Satisfies.not_imp_def.mpr
+    constructor;
+    . intro x Rrx;
+      match x with
+      | .inr $ .inl x => simp [tailModel₀, Satisfies, M]
+      | .inr $ .inr x => simp [tailModel₀, Satisfies, M]
+    . tauto;
+
+instance : Modal.D ⪱ Modal.S := by
+  constructor;
+  . apply weakerThan_iff.mpr;
+    intro φ hφ;
+    induction hφ using D.rec' with
+    | mem_GL h => exact WeakerThan.pbl h;
+    | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+    | _ => exact axiomT!;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use Axioms.T (.atom 0);
+    constructor;
+    . simp;
+    . exact D.unprovable_T;
 
 end
 
