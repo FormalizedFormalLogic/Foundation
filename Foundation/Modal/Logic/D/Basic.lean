@@ -276,6 +276,108 @@ lemma iff_root_rel_not_root {x : tailModel₀ M o} : tailModel₀.root ≺ x ↔
   . intro h;
     simp_all [Frame.Rel', tailModel₀];
 
+protected def pMorphism_original : M →ₚ (tailModel₀ M o) where
+  toFun := embed_original
+  forth := by simp [tailModel₀];
+  back := by simp [tailModel₀];
+  atomic := by simp [tailModel₀]
+
+lemma modal_equivalent_original {x : M} : ModalEquivalent (M₁ := M) (M₂ := tailModel₀ M o) x (embed_original x) := by
+  apply tailModel₀.pMorphism_original.modal_equivalence;
+
+lemma satisfies_box_of_satisfies_box_at_root [M.IsTransitive] (h : (tailModel₀.root (M := M) (o := o)) ⊧ □φ) {x : tailModel₀ M o} : x ⊧ □φ := by
+  intro y Rxy;
+  apply h;
+  by_cases e : x = tailModel₀.root;
+  . subst e;
+    assumption;
+  . apply Frame.trans ?_ Rxy;
+    apply Frame.root_genaretes'!;
+    assumption;
+
+protected def pMorphism_extendRoot : M.extendRoot n →ₚ (tailModel₀ M o) where
+  toFun := λ x =>
+    match x with
+    | .inl i => embed_nat (n - i - 1) -- TODO: fix
+    | .inr x => embed_original x
+  forth := by
+    rintro (x | x) (y | y) Rxy <;>
+    simp_all only [Model.extendRoot, Frame.extendRoot, tailModel₀];
+    case inl.inl => omega;
+  back := by
+    rintro (x | x) (y | y | y) Rxy;
+    case inl.inr.inl =>
+      simp_all [Frame.Rel', tailModel₀, Model.extendRoot, Frame.extendRoot];
+      use ⟨n - y - 1, by omega⟩;
+      constructor;
+      . simp;
+        omega;
+      . apply Fin.lt_def.mpr;
+        simp;
+        omega;
+    all_goals simp_all [Frame.Rel', tailModel₀, Model.extendRoot, Frame.extendRoot];
+  atomic := by
+    rintro a (w | w) <;> simp [Model.extendRoot, tailModel₀];
+
+lemma modal_equivalent_extendRoot_original {x : M} : ModalEquivalent (M₁ := M.extendRoot n) (M₂ := tailModel₀ M o) x (embed_original x) := by
+  apply tailModel₀.pMorphism_extendRoot.modal_equivalence;
+
+lemma modal_equivalent_extendRoot_nat {n : ℕ+} {i : Fin n} : ModalEquivalent (M₁ := M.extendRoot n) (M₂ := tailModel₀ M o) (Sum.inl i) (embed_nat (n - i - 1)) := by
+  apply tailModel₀.pMorphism_extendRoot.modal_equivalence;
+
+open Formula.Kripke in
+lemma of_provable_rflSubformula_original_root [M.IsTransitive]
+  {φ : Formula _}
+  (hS : r ⊧ (φ.subformulas.prebox.image (λ ψ => □ψ ➝ ψ)).conj) :
+  ∀ ψ ∈ φ.subformulas, ∀ i : ℕ, r ⊧ ψ ↔ (tailModel₀.embed_nat i : tailModel₀ M o) ⊧ ψ := by
+  intro ψ hψ i;
+  induction ψ generalizing i with
+  | hatom p => simp [Semantics.Realize, tailModel₀, Satisfies];
+  | hfalsum => simp;
+  | himp ψ ξ ihψ ihξ => simp [ihψ (by grind) i, ihξ (by grind) i];
+  | hbox ψ ihψ =>
+    replace ihψ := ihψ (by grind);
+    calc
+      _ ↔ (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ := by
+        suffices (∀ y, r ≺ y → y ⊧ ψ) → r ⊧ ψ by simpa [Satisfies];
+        apply Satisfies.fconj_def.mp hS (□ψ ➝ ψ) (by simpa);
+      _ ↔ (∀ x : M, x ⊧ ψ) ∧ r ⊧ ψ := by
+        suffices (∀ x, r ≺ x → x ⊧ ψ) ∧ r ⊧ ψ → (∀ x : M, x ⊧ ψ) by tauto;
+        rintro ⟨h₁, h₂⟩ y;
+        by_cases e : y = r;
+        . subst e; assumption;
+        . apply h₁;
+          apply Frame.root_genaretes'!;
+          assumption;
+      _ ↔ (∀ x : M, x ⊧ ψ) ∧ ∀ j < i, (tailModel₀.embed_nat j : tailModel₀ M o) ⊧ ψ := by
+        constructor;
+        . rintro ⟨h₁, h₂⟩;
+          constructor;
+          . apply h₁;
+          . intro j _;
+            apply ihψ _ |>.mp h₂;
+        . rintro h;
+          constructor;
+          . intro x; apply h.1;
+          . exact h.1 r;
+      _ ↔ (∀ x, (embed_original x : tailModel₀ M o) ⊧ ψ) ∧ ∀ j < i, (tailModel₀.embed_nat j : tailModel₀ M o) ⊧ ψ := by
+        simp [modal_equivalent_original (M := M) (o := o) (φ := ψ)];
+      _ ↔ _ := by
+        constructor;
+        . rintro ⟨h₁, h₂⟩ (_ | j | y) R;
+          . contradiction;
+          . apply h₂;
+            exact R;
+          . apply h₁;
+        . rintro h;
+          constructor;
+          . intro x;
+            apply h;
+            tauto;
+          . intro j hj;
+            apply h;
+            simpa [Frame.Rel', tailModel₀];
+
 end tailModel₀
 
 
@@ -296,6 +398,7 @@ end Kripke
 
 section
 
+open Classical
 open Kripke
 open Formula.Kripke
 
@@ -366,7 +469,72 @@ theorem GL_D_TFAE :
     tfae_have 2 → 3 := by
       contrapose!;
       rintro ⟨M, r, _, h⟩;
-      sorry
+      have h₁ : ∀ X ⊆ φ.subformulas.prebox, Satisfies M r (□X.box.disj ➝ X.box.disj) := by simpa using Satisfies.not_imp_def.mp h |>.1;
+      have h₂ := Satisfies.not_imp_def.mp h |>.2;
+
+      let X := φ.subformulas.prebox.filter (λ ψ => ¬(r ⊧ □ψ));
+      obtain ⟨x, Rrx, hx⟩ : ∃ x, r ≺ x ∧ ∀ ψ ∈ X, ¬x ⊧ □ψ := by
+        have : r ⊧ ∼(X.box.disj) := by
+          apply Satisfies.not_def.mpr;
+          apply Satisfies.fdisj_def.not.mpr;
+          simp [X];
+        have : r ⊧ ∼□(X.box.disj) := by
+          have := h₁ X $ by simp [X];
+          tauto;
+        obtain ⟨x, Rrx, hx⟩ := Satisfies.not_box_def.mp this;
+        use x;
+        constructor;
+        . assumption;
+        . simpa using Satisfies.fdisj_def.not.mp hx;
+
+      let Mt := tailModel₀ (M↾x) (λ p => M.Val r p);
+
+      have : ∀ ψ ∈ φ.subformulas, (tailModel₀.root : Mt) ⊧ ψ ↔ r ⊧ ψ := by
+        intro ψ hψ;
+        induction ψ with
+        | hatom p => simp [tailModel₀, tailModel₀.root, Satisfies, Semantics.Realize]; -- TODO: extract
+        | hfalsum => simp;
+        | himp φ ψ ihφ ihψ => simp [ihφ (by grind), ihψ (by grind)];
+        | hbox ψ ihψ =>
+          replace ihψ := ihψ (by grind);
+          constructor;
+          . intro h;
+            have : (tailModel₀.embed_original ⟨x, by tauto⟩ : Mt) ⊧ □ψ := tailModel₀.satisfies_box_of_satisfies_box_at_root h;
+            have : x ⊧ □ψ :=
+              Model.pointGenerate.modal_equivalent' _ _ |>.mp $
+              tailModel₀.modal_equivalent_original |>.mpr $ this;
+            contrapose! this;
+            apply hx;
+            simp_all [X];
+          . intro h w Rrw;
+            have H₁ : ∀ w : M↾x, w ⊧ ψ := by
+              intro w;
+              apply Model.pointGenerate.modal_equivalent' x w |>.mpr;
+              apply h;
+              rcases w.2 with (_ | Rrw);
+              . convert Rrx;
+              . apply M.trans Rrx $ HRel.TransGen.unwrap Rrw;
+            match w with
+            | .inl _ => contradiction;
+            | .inr $ .inr w => exact tailModel₀.modal_equivalent_original.mp $ H₁ w;
+            | .inr $ .inl n =>
+              apply tailModel₀.of_provable_rflSubformula_original_root (M := M↾x) (φ := φ) ?_ ψ (by grind) n |>.mp;
+              . apply H₁;
+              . apply Model.pointGenerate.modal_equivalent_at_root x |>.mpr;
+                apply Satisfies.conj_def.mpr;
+                suffices ∀ (ψ : Formula ℕ), □ψ ∈ φ.subformulas → x ⊧ (□ψ ➝ ψ) by simpa;
+                intro ψ hψ hψ;
+                have : ψ ∉ X := by
+                  contrapose! hψ;
+                  apply hx;
+                  assumption;
+                have : r ⊧ (□ψ) := by
+                  simp [X] at this;
+                  tauto;
+                apply this;
+                assumption;
+      refine ⟨M↾x, ⟨x, by tauto⟩, ?_, _, this φ (by grind) |>.not.mpr h₂⟩;
+      . exact {}
     tfae_have 4 ↔ 3 := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree
     tfae_have 4 → 1 := by
       intro h;

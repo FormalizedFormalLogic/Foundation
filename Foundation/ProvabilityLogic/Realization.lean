@@ -10,7 +10,7 @@ open Entailment FiniteContext
 open FirstOrder ProvabilityLogic
 open Modal Modal.Hilbert
 
-variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L}
+variable {L : Language} [L.ReferenceableBy L] {T₀ T U : Theory L}
 
 namespace ProvabilityLogic
 
@@ -36,48 +36,6 @@ section
 
 variable {𝔅 : Provability T₀ T} {f : Realization 𝔅} {A B : Modal.Formula _}
 
-lemma interpret_atom_def : f (.atom a) = f.val a := rfl
-
-lemma interpret_imp_def : f (A ➝ B) = (f A) ➝ (f B) := rfl
-
-@[simp] lemma interpret_bot_def : f ⊥ = ⊥ := rfl
-
-lemma interpret_box_def : f (□A) = 𝔅 (f A) := rfl
-
-lemma interpret_boxItr_def (n : ℕ) : f (□^[n] A) = 𝔅^[n] (f A) := by
-  induction n <;> simp [interpret_box_def, -Function.iterate_succ, Function.iterate_succ', *]
-
-variable [DecidableEq (Sentence L)]
-
-lemma iff_interpret_neg_inside : T ⊢!. f (∼A) ⭤ ∼(f A) := by
-  dsimp [Realization.interpret];
-  cl_prover;
-
-lemma iff_interpret_or_inside : T ⊢!. f (A ⋎ B) ⭤ (f A) ⋎ (f B) := by
-  dsimp [Realization.interpret];
-  cl_prover;
-
-lemma iff_interpret_and_inside : T ⊢!. f (A ⋏ B) ⭤ (f A) ⋏ (f B) := by
-  dsimp [Realization.interpret];
-  cl_prover;
-
-lemma iff_interpret_neg : T ⊢!. f (∼A) ↔ T ⊢!. ∼(f A) := by
-  dsimp [Realization.interpret];
-  constructor <;> . intro h; cl_prover [h];
-
-lemma iff_interpret_or : T ⊢!. f (A ⋎ B) ↔ T ⊢!. (f A) ⋎ (f B) := by
-  dsimp [Realization.interpret];
-  constructor <;> . intro h; cl_prover [h];
-
-lemma iff_interpret_and : T ⊢!. f (A ⋏ B) ↔ T ⊢!. (f A) ⋏ (f B) := by
-  dsimp [Realization.interpret];
-  constructor <;> . intro h; cl_prover [h];
-
-lemma iff_interpret_and' : T ⊢!. f (A ⋏ B) ↔ T ⊢!. (f A) ∧ T ⊢!. (f B) := by
-  dsimp [Realization.interpret];
-  constructor;
-  . intro h; constructor <;> cl_prover [h];
-  . rintro ⟨hA, hB⟩; cl_prover [hA, hB];
 
 end
 
@@ -94,6 +52,161 @@ lemma letterless_interpret {𝔅 : Provability T₀ T}
     replace ihA := ihA $ Modal.Formula.letterless.def_box A_letterless;
     simp_all [Realization.interpret];
 
+
+namespace interpret
+
+variable {𝔅 : Provability T₀ T} {f : Realization 𝔅} {A B : Modal.Formula _}
+
+section
+
+@[simp, grind] lemma def_atom : f (.atom a) = f.val a := rfl
+
+@[simp, grind] lemma def_imp : f (A ➝ B) = (f A) ➝ (f B) := rfl
+
+@[simp, grind] lemma def_bot : f ⊥ = ⊥ := rfl
+
+@[simp, grind] lemma def_box : f (□A) = 𝔅 (f A) := rfl
+
+@[simp, grind]
+lemma def_boxItr (n : ℕ) : f (□^[n] A) = 𝔅^[n] (f A) := by
+  induction n <;> simp [-Function.iterate_succ, Function.iterate_succ', *]
+
+end
+
+
+section provability
+
+
+variable [DecidableEq (Sentence L)]
+
+omit [DecidableEq (Sentence L)] in
+@[simp, grind]
+lemma iff_provable_atom : U ⊢!. f (.atom a) ↔ U ⊢!. f.val a := by simp;
+
+
+lemma iff_provable_imp_inside : U ⊢!. f (A ➝ B) ⭤ (f A) ➝ (f B) := by simp only [def_imp]; cl_prover;
+
+@[grind]
+lemma iff_provable_imp : U ⊢!. f (A ➝ B) ↔ U ⊢!. (f A) ➝ (f B) := by
+  have := iff_provable_imp_inside (U := U) (f := f) (A := A) (B := B);
+  constructor <;> . intro h; cl_prover [h, this];
+
+
+omit [DecidableEq (Sentence L)] in
+@[simp, grind]
+lemma iff_provable_bot : U ⊢!. f ⊥ ↔ U ⊢!. ⊥ := by simp [Realization.interpret];
+
+
+omit [DecidableEq (Sentence L)] in
+lemma iff_provable_box_inside : U ⊢!. f (□A) ⭤ 𝔅 (f A) := by simp;
+
+@[grind]
+lemma iff_provable_box : U ⊢!. f (□A) ↔ U ⊢!. 𝔅 (f A) := by
+  have := iff_provable_box_inside (U := U) (f := f) (A := A);
+  constructor <;> . intro h; cl_prover [h, this];
+
+
+omit [DecidableEq (Sentence L)] in
+lemma iff_provable_boxItr_inside {n : ℕ} : U ⊢!. f (□^[n] A) ⭤ 𝔅^[n] (f A) := by simp;
+
+@[simp, grind]
+lemma iff_provable_boxItr {n : ℕ} : U ⊢!. f (□^[n] A) ↔ U ⊢!. 𝔅^[n] (f A) := by
+  have := iff_provable_boxItr_inside (U := U) (f := f) (A := A) (n := n);
+  constructor <;> . intro h; cl_prover [h, this];
+
+
+lemma iff_provable_neg_inside : U ⊢!. f (∼A) ⭤ ∼(f A) := by
+  dsimp [Realization.interpret];
+  cl_prover;
+
+@[grind]
+lemma iff_provable_neg : U ⊢!. f (∼A) ↔ U ⊢!. ∼(f A) := by
+  have := iff_provable_neg_inside (U := U) (f := f) (A := A);
+  constructor <;> . intro h; cl_prover [h, this];
+
+
+lemma iff_provable_or_inside : U ⊢!. f (A ⋎ B) ⭤ (f A) ⋎ (f B) := by
+  dsimp [Realization.interpret];
+  cl_prover;
+
+@[grind]
+lemma iff_provable_or : U ⊢!. f (A ⋎ B) ↔ U ⊢!. (f A) ⋎ (f B) := by
+  have := iff_provable_or_inside (U := U) (f := f) (A := A) (B := B);
+  constructor <;> . intro h; cl_prover [h, this];
+
+
+
+lemma iff_provable_and_inside : U ⊢!. f (A ⋏ B) ⭤ (f A) ⋏ (f B) := by
+  dsimp [Realization.interpret];
+  cl_prover;
+
+@[grind]
+lemma iff_provable_and' : U ⊢!. f (A ⋏ B) ↔ U ⊢!. (f A) ⋏ (f B) := by
+  dsimp [Realization.interpret];
+  constructor <;> . intro h; cl_prover [h];
+
+@[grind]
+lemma iff_provable_and : U ⊢!. f (A ⋏ B) ↔ U ⊢!. (f A) ∧ U ⊢!. (f B) := by
+  constructor;
+  . intro h;
+    have := iff_provable_and'.mp h;
+    constructor <;> cl_prover [this];
+  . rintro ⟨hA, hB⟩;
+    apply iff_provable_and'.mpr;
+    cl_prover [hA, hB];
+
+@[simp, grind]
+lemma iff_provable_lconj₂ {l : List (Formula _)} : U ⊢!. f (l.conj₂) ↔ ∀ A ∈ l, U ⊢!. f A := by
+  induction l using List.induction_with_singleton with
+  | hcons a l h ih =>
+    rw [List.conj₂_cons_nonempty h (a := a)];
+    grind;
+  | _ => simp [Realization.interpret];
+
+@[simp, grind]
+lemma iff_provable_lconj' {l : List (Formula _)} : U ⊢!. f (l.conj' ι) ↔ (∀ A ∈ l, U ⊢!. f (ι A)) := by
+  simp [List.conj']
+
+@[simp, grind]
+lemma iff_provable_fconj {s : Finset (Formula _)} : U ⊢!. f (s.conj) ↔ ∀ A ∈ s, U ⊢!. f A := by
+  simp [Finset.conj]
+
+@[simp, grind]
+lemma iff_provable_fconj' {s : Finset (Formula _)} : U ⊢!. f (s.conj' ι) ↔ (∀ A ∈ s, U ⊢!. f (ι A)) := by
+  simp [Finset.conj']
+
+end provability
+
+
+section model
+
+variable {M} [Nonempty M] [Structure L M]
+
+@[simp, grind] lemma models₀_top : M ⊧ₘ₀ f ⊤ := by simp [Realization.interpret];
+@[simp, grind] lemma models₀_bot : ¬M ⊧ₘ₀ f ⊥ := by simp [Realization.interpret];
+
+@[simp, grind]
+lemma iff_models₀_neg : M ⊧ₘ₀ f (∼A) ↔ ¬(M ⊧ₘ₀ (f A)) := by simp [Realization.interpret];
+
+@[simp, grind]
+lemma iff_models₀_imp : M ⊧ₘ₀ f (A ➝ B) ↔ (M ⊧ₘ₀ (f A) → M ⊧ₘ₀ (f B)) := by simp [Realization.interpret];
+
+@[simp, grind]
+lemma iff_models₀_and : M ⊧ₘ₀ f (A ⋏ B) ↔ M ⊧ₘ₀ (f A) ∧ M ⊧ₘ₀ (f B) := by simp [Realization.interpret];
+
+@[simp, grind]
+lemma iff_models₀_or : M ⊧ₘ₀ f (A ⋎ B) ↔ M ⊧ₘ₀ (f A) ∨ M ⊧ₘ₀ (f B) := by simp [Realization.interpret]; tauto;
+
+@[simp, grind]
+lemma iff_models₀_box : M ⊧ₘ₀ f (□A) ↔ M ⊧ₘ₀ 𝔅 (f A) := by simp [Realization.interpret];
+
+@[simp, grind]
+lemma iff_models₀_boxItr {n : ℕ} : M ⊧ₘ₀ f (□^[n] A) ↔ M ⊧ₘ₀ 𝔅^[n] (f A) := by simp;
+
+end model
+
+
+end interpret
 
 end Realization
 
