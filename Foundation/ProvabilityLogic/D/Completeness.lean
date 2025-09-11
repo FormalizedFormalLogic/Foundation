@@ -44,7 +44,7 @@ theorem provabilityLogic_PA_PAPlusSigma1LocalReflection_eq_D :
     _ ↔ ProvabilityLogic T U ⊢! A                                      := by simp [Logic.iff_provable];
     _ ↔ ∀ f : T.StandardRealization, U ⊢!. f A                         := by simp [ProvabilityLogic.provable_iff];
     _ ↔ ∀ f : T.StandardRealization, T ⊢!. f A.dzSubformula.conj ➝ f A := this
-    _ ↔ ∀ f : T.StandardRealization, T ⊢!. f (A.dzSubformula.conj ➝ A) := by simp [Realization.interpret_imp_def];
+    _ ↔ ∀ f : T.StandardRealization, T ⊢!. f (A.dzSubformula.conj ➝ A) := by simp;
     _ ↔ Modal.GL ⊢! A.dzSubformula.conj ➝ A                            := GL.arithmetical_completeness_sound_iff
     _ ↔ Modal.D ⊢! A                                                   := iff_provable_D_provable_GL.symm
     _ ↔ A ∈ Modal.D                                                    := by simp [Logic.iff_provable];
@@ -97,7 +97,7 @@ theorem provabilityLogic_PA_PAPlusSigma1LocalReflection_eq_D :
     intro D hD;
     simp at hD;
     obtain ⟨s, hs, rfl⟩ := hD;
-    rw [Realization.interpret_imp_def];
+    rw [Realization.interpret.def_imp];
     sorry;
 
 instance : ProvabilityLogic 𝗣𝗔 (𝗣𝗔 + 𝗣𝗔.LocalReflection (Arithmetic.Hierarchy 𝚺 1)) ≊ Modal.D := provabilityLogic_PA_PAPlusSigma1LocalReflection_eq_D
