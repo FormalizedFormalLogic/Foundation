@@ -393,7 +393,6 @@ instance : (tailModel M).IsRootedBy (tailModel.root) := by
 
 end tailModel
 
-
 end Kripke
 
 

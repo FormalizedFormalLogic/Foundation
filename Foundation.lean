@@ -175,6 +175,8 @@ import Foundation.ProvabilityLogic.Grz.Completeness
 
 import Foundation.ProvabilityLogic.S.Completeness
 
+import Foundation.ProvabilityLogic.D.Completeness
+
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit
 import Foundation.Meta.ClProver
