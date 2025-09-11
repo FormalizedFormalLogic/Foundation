@@ -3,6 +3,7 @@ import Foundation.Modal.Logic.S.Basic
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.S.Soundness
 import Foundation.Modal.Boxdot.Basic
+import Foundation.FirstOrder.Incompleteness.Tarski
 import Mathlib.Tactic.TFAE
 
 
@@ -16,6 +17,7 @@ open Entailment
 open Modal
 open FirstOrder
 open Provability
+open ArithmeticTheory (ProvabilityLogic)
 
 variable {T₀ T : ArithmeticTheory} [T₀ ⪯ T] [Diagonalization T₀]
          {𝔅 : Provability T₀ T} [𝔅.HBL] [ℕ ⊧ₘ* T] [𝔅.SoundOnModel ℕ]
@@ -151,6 +153,14 @@ lemma GL_S_TFAE :
   tfae_finish;
 
 theorem S.arithmetical_completeness_iff : Modal.S ⊢! A ↔ ∀ f : T.StandardRealization, ℕ ⊧ₘ₀ f A := GL_S_TFAE.out 1 2
+
+theorem provabilityLogic_PA_TA_eq_S :
+    ProvabilityLogic T 𝗧𝗔 ≊ Modal.S := by
+  apply Logic.iff_equal_provable_equiv.mp
+  ext A;
+  simpa [ArithmeticTheory.ProvabilityLogic, FirstOrderTrueArith.provable_iff₀, ←Logic.iff_provable] using S.arithmetical_completeness_iff.symm;
+
+instance : ProvabilityLogic 𝗣𝗔 𝗧𝗔 ≊ Modal.S := provabilityLogic_PA_TA_eq_S
 
 end ProvabilityLogic
 
