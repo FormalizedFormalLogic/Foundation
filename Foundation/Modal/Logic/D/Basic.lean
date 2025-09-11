@@ -296,6 +296,7 @@ end Kripke
 
 section
 
+open Classical
 open Kripke
 open Formula.Kripke
 
@@ -366,7 +367,65 @@ theorem GL_D_TFAE :
     tfae_have 2 → 3 := by
       contrapose!;
       rintro ⟨M, r, _, h⟩;
-      sorry
+      have h₁ : ∀ X ⊆ φ.subformulas.prebox, Satisfies M r (□X.box.disj ➝ X.box.disj) := by simpa using Satisfies.not_imp_def.mp h |>.1;
+      have h₂ := Satisfies.not_imp_def.mp h |>.2;
+
+      let X := φ.subformulas.prebox.filter (λ ψ => ¬(r ⊧ □ψ));
+      obtain ⟨x, Rrx, hx⟩ : ∃ x, r ≺ x ∧ ∀ ψ ∈ X, ¬x ⊧ □ψ := by
+        have : r ⊧ ∼(X.box.disj) := by
+          apply Satisfies.not_def.mpr;
+          apply Satisfies.fdisj_def.not.mpr;
+          simp [X];
+        have : r ⊧ ∼□(X.box.disj) := by
+          have := h₁ X $ by simp [X];
+          tauto;
+        obtain ⟨x, Rrx, hx⟩ := Satisfies.not_box_def.mp this;
+        use x;
+        constructor;
+        . assumption;
+        . simpa using Satisfies.fdisj_def.not.mp hx;
+      have hR : x ⊧ (φ.subformulas.prebox.image (λ ψ => □ψ ➝ ψ)).conj := by
+        apply Satisfies.conj_def.mpr;
+        suffices ∀ (ψ : Formula ℕ), □ψ ∈ φ.subformulas → x ⊧ (□ψ ➝ ψ) by simpa;
+        intro ψ hψ hψ;
+        have : ψ ∉ X := by
+          contrapose! hψ;
+          apply hx;
+          assumption;
+        have : r ⊧ (□ψ) := by
+          simp [X] at this;
+          tauto;
+        apply this;
+        assumption;
+
+      let Mt := tailModel₀ (M↾x) (λ p => M.Val r p);
+
+      have : ∀ ψ ∈ φ.subformulas, (tailModel₀.root : Mt.World) ⊧ ψ ↔ r ⊧ ψ := by
+        intro ψ hψ;
+        induction ψ with
+        | hatom p => simp [tailModel₀, tailModel₀.root, Satisfies, Semantics.Realize]; -- TODO: extract
+        | hfalsum => simp;
+        | himp φ ψ ihφ ihψ => simp [ihφ (by grind), ihψ (by grind)];
+        | hbox ψ ihψ =>
+          replace ihψ := ihψ (by grind);
+          constructor;
+          . intro h;
+            sorry;
+          . intro h w Rrw;
+            have : ∀ w : M↾x, w.1 ⊧ ψ := by
+              rintro ⟨w, rfl | hw⟩;
+              . apply h;
+                assumption;
+              . apply h;
+                apply M.trans Rrx $ HRel.TransGen.unwrap hw;
+            replace : ∀ w : M↾x, w ⊧ ψ := by sorry;
+            replace : ∀ w : M↾x, (tailModel₀.embed_original w : Mt) ⊧ ψ := by sorry;
+            match w with
+            | .inl _ => contradiction;
+            | .inr $ .inl n => sorry;
+            | .inr $ .inr w => apply this;
+      refine ⟨M↾x, ⟨x, by tauto⟩, ?_, _, this φ (by grind) |>.not.mpr h₂⟩;
+      . exact {}
     tfae_have 4 ↔ 3 := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree
     tfae_have 4 → 1 := by
       intro h;
