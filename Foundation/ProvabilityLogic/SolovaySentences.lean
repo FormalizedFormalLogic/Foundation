@@ -231,7 +231,7 @@ lemma root_of_iterated_inconsistency : T₀ ⊢!. ∼𝔅^[M.finHeight] ⊥ ➝ 
     cl_prover
   · have hri : r ≺ i := Frame.root_genaretes'! i hir
     have : T₀ ⊢!. S.σ i ➝ (↑𝔅)^[M.finHeight] ⊥ := by
-      simpa [Realization.interpret_boxItr_def] using
+      simpa using
         S.mainlemma hri (A := □^[M.finHeight] ⊥)
           <| finHeight_lt_iff_satisfies_boxbot.mp
           <| Frame.World.finHeight_lt_whole_finHeight hri
