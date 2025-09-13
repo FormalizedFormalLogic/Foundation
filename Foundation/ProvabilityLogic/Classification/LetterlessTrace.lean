@@ -733,76 +733,85 @@ private lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum.lemma₁
     . intro i hi;
       apply h;
       simpa using hi;
+
   obtain ⟨ψ, hψX, ψ_singular⟩ : ∃ ψ ∈ X, ψ.Singular T := FormulaSet.exists_singular_of_singular X_singular;
-  have ψ_letterless : ψ.letterless := by grind;
 
-  let SS := { s : Finset (Formula ℕ) // ψ ∈ s ∧ ↑s ⊆ X };
-  let ε' : SS → Formula ℕ := λ s => ⩕ χ ∈ s, χ;
+  obtain ⟨f, f0, f_monotone, fX, f_inv⟩ : ∃ f : ℕ → Finset _, ((f 0) = {ψ}) ∧ (∀ n, f n ⊂ f (n + 1)) ∧ (∀ n, ↑(f n) ⊆ X) ∧ (∀ ξ ∈ X, ∃ i, ξ ∈ f i) := by sorry;
+  have f_conj_letterless : ∀ i, (f i).conj.letterless := λ i => Formula.letterless.of_fconj $ λ ξ hξ => Xll _ $ fX _ hξ;
 
-  obtain ⟨e, he₁, he₂⟩ : ∃ f : ℕ → Finset { χ // χ ∈ X }, ((f 0) = {⟨ψ, hψX⟩}) ∧ (∀ n, f n ⊂ f (n + 1)) :=
-    Set.exists_enumerate_infinite_set' X_infinite hψX;
-
-  let ε := λ n => ⩕ χ ∈ (e n), χ.1;
-
-  have ε_letterless : ∀ {i}, (ε i).letterless := by
+  let sf := λ i => ⋂ ξ, ⋂ (h : ξ ∈ f i), ξ.spectrum (Xll ξ $ fX _ $ by assumption);
+  have sf_eq : ∀ i, sf i = Formula.spectrum ((f i).conj) (f_conj_letterless _) := by
     intro i;
-    apply Formula.letterless.of_fconj';
-    suffices ∀ a ∈ X, a.letterless by simpa;
-    apply Xll;
-
-  have ε_spectrum_eq : ∀ {i}, (ε i).spectrum ε_letterless = ⋂ χ ∈ (e i), χ.1.spectrum := by
+    rw [Formula.spectrum.def_fconj (λ ξ hξ => Xll _ $ fX _ hξ)];
+  have sf_monotone : ∀ i, sf (i + 1) ⊆ sf i := by
     intro i;
-    apply Formula.spectrum.def_fconj' $ by simp [Xll];
-  have ε0_spectrum_eq : (ε 0).spectrum ε_letterless = ψ.spectrum := by simp [ε, ε_spectrum_eq, he₁];
-
-  have ε_spectrum_decl : ∀ {i j}, i < j → (ε j).spectrum ε_letterless ⊆ (ε i).spectrum ε_letterless := by
+    rw [sf_eq (i + 1), sf_eq i];
+    apply iff_GL_provable_C_subset_spectrum (f_conj_letterless _) (f_conj_letterless _) |>.mp;
+    apply Entailment.right_Fconj!_intro;
+    intro χ hχ;
+    apply Entailment.left_Fconj!_intro;
+    apply f_monotone _ |>.1 hχ;
+  replace sf_monotone : ∀ i j, i ≤ j → sf j ⊆ sf i := by
     intro i j hij;
-    have : ∀ k, (ε (i + k)).spectrum ε_letterless ⊆ (ε i).spectrum ε_letterless := by
+    have : ∀ k, (sf (i + k)) ⊆ sf i := by
       intro k;
       induction k with
       | zero => simp;
       | succ k ih =>
         rw [show i + (k + 1) = (i + k) + 1 by omega];
-        apply Set.Subset.trans ?_ ih;
-        apply iff_GL_provable_C_subset_spectrum ε_letterless ε_letterless |>.mp;
-        apply Entailment.right_Fconj'!_intro;
-        intro χ hχ;
-        apply Entailment.left_Fconj'!_intro;
-        apply he₂ _ |>.1 hχ;
+        exact Set.Subset.trans (sf_monotone (i + k)) ih;
     rw [(show j = i + (j - i) by omega)];
     apply this;
+  have sf_X : ∀ i, sf i ⊇ X.spectrum := by
+    intro i n;
+    suffices (∀ (ξ : Formula ℕ) (_ : ξ ∈ X), n ∈ ξ.spectrum _) → ∀ (ξ : Formula ℕ) (_ : ξ ∈ f i), n ∈ ξ.spectrum _ by
+      simpa [sf, FormulaSet.spectrum];
+    intro h ξ hξ;
+    apply h;
+    apply fX i hξ;
 
-  have ε0_spectrum_finite : (ε 0).spectrum ε_letterless |>.Finite := by
-    rw [ε0_spectrum_eq];
-    apply Formula.spectrum_finite_of_singular (by assumption) ψ_singular;
-  have ε_spectrum_finite : ∀ i, (ε i).spectrum ε_letterless |>.Finite := by
-    intro i;
-    rcases (show i = 0 ∨ 0 < i by omega) with ⟨h1, h2⟩;
-    . exact ε0_spectrum_finite;
-    . apply Set.Finite.subset ε0_spectrum_finite;
-      apply ε_spectrum_decl;
-      omega;
+  obtain ⟨k, hk⟩ : ∃ k, sf k = X.spectrum := by
+    by_contra! hC;
+    have : ∀ i, ∃ n, n ∈ sf i ∧ n ∉ X.spectrum := by
+      intro i;
+      exact Set.ssubset_iff_exists.mp (Set.ssubset_of_subset_ne (sf_X i) (hC i).symm) |>.2;
 
-  have : ∀ {i}, X.spectrum ⊆ (ε i).spectrum ε_letterless := by sorry;
-  have : X.spectrum.Finite := Set.Finite.subset ε0_spectrum_finite this
+    have : ∀ i, ∃ j > i, sf j ⊂ sf i := by
+      intro i;
+      obtain ⟨n, hn₁, hn₂⟩ := this i;
+      obtain ⟨ξ, hξ₁, hξ₂⟩ : ∃ ξ, ∃ (_ : ξ ∈ X), n ∉ ξ.spectrum _ := by simpa [FormulaSet.spectrum] using hn₂;
 
-  obtain ⟨k, hk⟩ : ∃ k, (ε k).spectrum ε_letterless = X.spectrum := by
-    simp [FormulaSet.spectrum, ε_spectrum_eq];
+      obtain ⟨j, hj⟩ := f_inv ξ hξ₁;
+      have : i < j := by
+        by_contra hC;
+        have := Set.Subset.trans (sf_monotone j i (by omega)) $ show sf j ⊆ ξ.spectrum by
+          intro _ hn;
+          apply hn;
+          use ξ;
+          simp_all;
+        apply hξ₂;
+        apply this;
+        apply hn₁;
+
+      use j;
+      constructor;
+      . assumption;
+      . exact Set.ssubset_iff_exists.mpr ⟨sf_monotone i j (by omega), by
+          use n;
+          constructor;
+          . assumption;
+          . suffices ∃ χ, ∃ _ : χ ∈ f j, n ∉ χ.spectrum _ by simpa [sf];
+            use ξ;
+            simp_all;
+        ⟩;
+
     sorry;
-  sorry;
-  /-
-  use (f k).image (·.1);
-  constructor;
-  . suffices X.spectrum ⊆ φ.spectrum by calc
-      _ = (γ k).spectrum γ_letterless := by simp [γ_spectrum_eq];
-      _ = X.spectrum := hk
-      _ ⊆ φ.spectrum := this
-    apply Set.Subset.trans ?_ h;
-    intro i;
-    simp [FormulaSet.spectrum];
-  . simp;
-    tauto;
-  -/
+
+  use (f k)
+  refine ⟨?_, ?_⟩;
+  . apply fX;
+  . apply Set.Subset.trans ?_ h;
+    rw [←FormulaSet.spectrum, ←hk];
 
 open Classical in
 lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum {φ : Modal.Formula ℕ} (φll : φ.letterless) (hSR : X.Singular T ∨ φ.Regular T)
