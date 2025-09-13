@@ -1,5 +1,6 @@
 import Foundation.Logic.HilbertStyle.Supplemental
 import Foundation.Modal.Logic.Basic
+import Foundation.Meta.ClProver
 
 namespace LO.Modal
 
@@ -8,6 +9,30 @@ open LO.Entailment LO.Modal.Entailment
 variable {L L₀ L₁ L₂ L₃ : Logic α}
 
 namespace Logic
+
+
+section
+
+variable [DecidableEq α] [L.IsQuasiNormal]
+
+lemma lconj_subst {X : List (Formula α)} {s : Substitution α} : L ⊢! (X.map (·⟦s⟧)).conj₂ ➝ X.conj₂⟦s⟧ := by
+  induction X using List.induction_with_singleton with
+  | hnil => simp;
+  | hsingle => simp;
+  | hcons φ X hφ ih =>
+    suffices L ⊢! φ⟦s⟧ ⋏ ⋀(X.map (·⟦s⟧)) ➝ φ⟦s⟧ ⋏ (⋀X)⟦s⟧ by
+      simpa [List.conj₂_cons_nonempty hφ, List.conj₂_cons_nonempty (show X.map (·⟦s⟧) ≠ [] by simpa), -iff_provable];
+    cl_prover [ih];
+
+lemma fconj_subst {X : Finset (Formula α)} {s : Substitution α} : L ⊢! (X.image (·⟦s⟧)).conj ➝ X.conj⟦s⟧ := by
+  apply C!_trans ?_ $ lconj_subst (L := L) (X := X.toList) (s := s);
+  apply right_Conj₂!_intro;
+  intro φ hφ;
+  apply left_Fconj!_intro;
+  simp_all;
+
+end
+
 
 inductive sumQuasiNormal (L₁ L₂ : Logic α) : Logic α
   | mem₁ {φ}    : L₁ ⊢! φ → sumQuasiNormal L₁ L₂ φ
@@ -107,6 +132,57 @@ instance : L₁ ⪯ sumQuasiNormal L₁ L₂ := by
 instance : L₂ ⪯ sumQuasiNormal L₁ L₂ := by
   rw [sumQuasiNormal.symm];
   infer_instance;
+
+
+section
+
+variable [L₁.IsQuasiNormal]
+
+open LO.Entailment
+
+lemma provable_of_finite_provable : (∃ X : Finset _, (X.toSet ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ) → sumQuasiNormal L₁ L₂ ⊢! φ := by
+  rintro ⟨X, hX₂, hφ⟩;
+  apply (WeakerThan.pbl (𝓣 := sumQuasiNormal L₁ L₂) hφ) ⨀ ?_;
+  apply FConj!_iff_forall_provable.mpr;
+  intro χ hχ;
+  apply mem₂!;
+  apply iff_provable.mpr;
+  apply hX₂ hχ;
+
+lemma finite_provable_of_provable (h : ∀ X : Finset (Formula α), ↑X ⊆ L₂ → ∀ s : Substitution _, ↑(Finset.image (·⟦s⟧) X) ⊆ L₂) :
+  sumQuasiNormal L₁ L₂ ⊢! φ → ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := by
+  intro h;
+  induction h using sumQuasiNormal.rec! with
+  | mem₁ h =>
+    use ∅;
+    constructor;
+    . tauto;
+    . cl_prover [h];
+  | @mem₂ φ h =>
+    use {φ};
+    constructor;
+    . simpa using h;
+    . simp;
+  | @mdp φ ψ _ _ ihφψ ihφ =>
+    obtain ⟨X₁, _, hφψ⟩ := ihφψ;
+    obtain ⟨X₂, _, hφ⟩ := ihφ;
+    use X₁ ∪ X₂;
+    constructor;
+    . simp_all;
+    . suffices L₁ ⊢! (X₁.conj ⋏ X₂.conj) ➝ ψ by exact C!_trans CFconjUnionKFconj! this;
+      cl_prover [hφψ, hφ];
+  | @subst _ s _ ihφ =>
+    obtain ⟨X, hX, hφ⟩ := ihφ;
+    use X.image (·⟦s⟧);
+    constructor;
+    . apply h _ hX;
+    . apply C!_trans ?_ (subst! s hφ);
+      exact Logic.fconj_subst;
+
+lemma iff_provable_finite_provable (h : ∀ X : Finset (Formula α), ↑X ⊆ L₂ → ∀ s : Substitution _, ↑(Finset.image (·⟦s⟧) X) ⊆ L₂) :
+  sumQuasiNormal L₁ L₂ ⊢! φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := ⟨finite_provable_of_provable h, provable_of_finite_provable⟩
+
+end
 
 end sumQuasiNormal
 
