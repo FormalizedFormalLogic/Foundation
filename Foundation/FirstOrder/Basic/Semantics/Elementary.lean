@@ -1,8 +1,6 @@
 import Foundation.FirstOrder.Basic.Semantics.Semantics
 
-namespace LO
-
-namespace FirstOrder
+namespace LO.FirstOrder
 
 section
 
@@ -57,7 +55,10 @@ variable {L M M₁ M₂ M₃}
 
 instance : FunLike (M₁ →ₛ[L] M₂) M₁ M₂ where
   coe := fun φ => φ.toFun
-  coe_injective' := fun φ ψ h => by rcases φ; rcases ψ; simp at h ⊢; ext; exact congr_fun h _
+  coe_injective' := fun φ ψ h => by
+    rcases φ; rcases ψ
+    simp only [Hom.mk.injEq] at h ⊢
+    ext; exact congr_fun h _
 
 instance : HomClass (M₁ →ₛ[L] M₂) L M₁ M₂ where
   map_func := Hom.func'
@@ -86,7 +87,8 @@ end HomClass
 
 instance : FunLike (M₁ ↪ₛ[L] M₂) M₁ M₂ where
   coe := fun φ => φ.toFun
-  coe_injective' := fun φ ψ h => by rcases φ; rcases ψ; simp at h ⊢; ext; exact congr_fun h _
+  coe_injective' := fun φ ψ h => by
+    rcases φ; rcases ψ; simp only [Embedding.mk.injEq] at h ⊢; ext; exact congr_fun h _
 
 instance : EmbeddingClass (M₁ ↪ₛ[L] M₂) L M₁ M₂ where
   map_func := fun φ => φ.func'
@@ -114,7 +116,8 @@ end EmbeddingClass
 
 instance : FunLike (M₁ ≃ₛ[L] M₂) M₁ M₂ where
   coe := fun φ => φ.toFun
-  coe_injective' := fun φ ψ h => by rcases φ; rcases ψ; simp at h ⊢; ext; exact congr_fun h _
+  coe_injective' := fun φ ψ h => by
+    rcases φ; rcases ψ; simp only [Iso.mk.injEq] at h ⊢; ext; exact congr_fun h _
 
 instance : IsoClass (M₁ ≃ₛ[L] M₂) L M₁ M₂ where
   map_func := fun φ => φ.func'
@@ -175,7 +178,8 @@ lemma eval_hom_iff_of_open {n} {e₁ : Fin n → M₁} {ε₁ : ξ → M₁} : {
 
 lemma eval_hom_univClosure {n} {ε₁ : ξ → M₁} {φ : Semiformula L ξ n} (hp : φ.Open) :
     Evalf s₂ (Θ ∘ ε₁) (∀* φ) → Evalf s₁ ε₁ (∀* φ) := by
-  simp; intro h e₁; exact (eval_hom_iff_of_open Θ hp).mpr (h (Θ ∘ e₁))
+  simp only [eval_univClosure]
+  intro h e₁; exact (eval_hom_iff_of_open Θ hp).mpr (h (Θ ∘ e₁))
 
 end Semiformula
 
@@ -191,7 +195,7 @@ namespace Structure
 
 variable (L M₁ M₂)
 
-def ElementaryEquiv : Prop := ∀ φ : SyntacticFormula L, M₁ ⊧ₘ φ ↔ M₂ ⊧ₘ φ
+def ElementaryEquiv : Prop := ∀ σ : Sentence L, M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ
 
 notation:50 M₁ " ≡ₑ[" L "] " M₂ => ElementaryEquiv L M₁ M₂
 
@@ -212,7 +216,7 @@ lemma trans :
   fun h₁ h₂ σ => Iff.trans (h₁ σ) (h₂ σ)
 
 lemma models (h : M₁ ≡ₑ[L] M₂) :
-    ∀ {φ : SyntacticFormula L}, M₁ ⊧ₘ φ ↔ M₂ ⊧ₘ φ := @h
+    ∀ {σ : Sentence L}, M₁ ⊧ₘ σ ↔ M₂ ⊧ₘ σ := @h
 
 lemma modelsTheory (h : M₁ ≡ₑ[L] M₂) {T : Theory L} :
     M₁ ⊧ₘ* T ↔ M₂ ⊧ₘ* T := by simp [modelsTheory_iff, h.models]
@@ -222,9 +226,6 @@ lemma ofEquiv [Nonempty N] (Θ : M ≃ N) :
     M ≡ₑ[L] N := fun φ => by
   letI : Structure L N := Structure.ofEquiv Θ
   simp [models_iff, Empty.eq_elim, Structure.evalf_ofEquiv_iff (Θ := Θ)]
-  constructor
-  · intro h f; exact h _
-  · intro h f; simpa [←Function.comp_assoc] using h (Θ ∘ f)
 
 end ElementaryEquiv
 

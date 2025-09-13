@@ -507,8 +507,8 @@ def lMapAux (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n → Semiformula 
   |     ∃' φ => ∃' lMapAux Φ φ
 
 lemma lMapAux_neg {n} (φ : Semiformula L₁ ξ n) :
-    (∼φ).lMapAux Φ = ∼φ.lMapAux Φ :=
-  by induction φ using Semiformula.rec' <;> simp [*, lMapAux, ←Semiformula.neg_eq]
+    (∼φ).lMapAux Φ = ∼φ.lMapAux Φ := by
+  induction φ using Semiformula.rec' <;> simp [*, lMapAux]
 
 def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformula L₂ ξ n where
   toTr := lMapAux Φ
@@ -669,27 +669,5 @@ lemma mem_fvarList_iff_fvar? [DecidableEq ξ] {φ : Semiformula L ξ n} : x ∈ 
 end enumarateFVar
 
 end Semiformula
-
-abbrev Theory (L : Language) := Set (SyntacticFormula L)
-
-abbrev ClosedTheory (L : Language) := Set (Sentence L)
-
-instance : AdjunctiveSet (SyntacticFormula L) (Theory L) := inferInstance
-
-instance : AdjunctiveSet (Sentence L) (ClosedTheory L) := inferInstance
-
-def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
-
-namespace Theory
-
-variable (T U : Theory L)
-
-instance {L : Language} : Add (Theory L) := ⟨(· ∪ ·)⟩
-
-lemma add_def : T + U = T ∪ U := rfl
-
-end Theory
-
-abbrev ArithmeticTheory := Theory ℒₒᵣ
 
 end LO.FirstOrder
