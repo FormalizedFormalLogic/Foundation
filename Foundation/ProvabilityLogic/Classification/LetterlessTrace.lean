@@ -85,37 +85,6 @@ end FirstOrder
 
 
 
-namespace ProvabilityLogic.Realization
-
-omit [Theory.Δ₁ T]
-variable {M} [Nonempty M] [Structure ℒₒᵣ M]
-         {𝔅 : Provability T₀ T} {f : Realization 𝔅}
-         {A B : Modal.Formula _}
-
-@[simp, grind] lemma interpret_models₀_top : M ⊧ₘ₀ f ⊤ := by simp [Realization.interpret];
-@[simp, grind] lemma interpret_models₀_bot : ¬M ⊧ₘ₀ f ⊥ := by simp [Realization.interpret];
-
-@[simp, grind]
-lemma interpret_models₀_neg : M ⊧ₘ₀ f (∼A) ↔ ¬(M ⊧ₘ₀ (f A)) := by
-  simp [Realization.interpret];
-
-@[simp, grind]
-lemma interpret_models₀_imp : M ⊧ₘ₀ f (A ➝ B) ↔ (M ⊧ₘ₀ (f A) → M ⊧ₘ₀ (f B)) := by
-  simp [Realization.interpret];
-
-@[simp, grind]
-lemma interpret_models₀_and : M ⊧ₘ₀ f (A ⋏ B) ↔ M ⊧ₘ₀ (f A) ∧ M ⊧ₘ₀ (f B) := by
-  simp [Realization.interpret];
-
-@[simp, grind]
-lemma interpret_models₀_or : M ⊧ₘ₀ f (A ⋎ B) ↔ M ⊧ₘ₀ (f A) ∨ M ⊧ₘ₀ (f B) := by
-  simp [Realization.interpret];
-  tauto;
-
-end ProvabilityLogic.Realization
-
-
-
 namespace Modal
 
 namespace Formula
@@ -753,8 +722,6 @@ lemma TBBMinus_singular : FormulaSet.Singular T {∼⩕ n ∈ hβ.toFinset, TBB 
   simp [FormulaSet.Singular, FormulaSet.Regular, Formula.Regular.def_neg];
 
 private lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum.lemma₁
-  (X_letterless : X.letterless)
-  (φ_letterless : φ.letterless)
   (X_singular : X.Singular T)
   (h : ⋂ ψ, ⋂ (h : ψ ∈ X), ψ.spectrum ⊆ φ.spectrum)
   : ∃ Y : Finset _, ∃ (x : ∀ ψ ∈ Y, ψ ∈ X), ⋂ ψ ∈ Y, ψ.spectrum (by grind) ⊆ φ.spectrum := by
@@ -767,49 +734,63 @@ private lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum.lemma₁
       apply h;
       simpa using hi;
   obtain ⟨ψ, hψX, ψ_singular⟩ : ∃ ψ ∈ X, ψ.Singular T := FormulaSet.exists_singular_of_singular X_singular;
-  have ψ_letterless : ψ.letterless := X_letterless ψ hψX;
+  have ψ_letterless : ψ.letterless := by grind;
 
-  obtain ⟨f, hf₁, hf₂⟩ : ∃ f : ℕ → Finset { χ // χ ∈ X }, ((f 0) = {⟨ψ, hψX⟩}) ∧ (∀ n, f n ⊂ f (n + 1)) :=
+  let SS := { s : Finset (Formula ℕ) // ψ ∈ s ∧ ↑s ⊆ X };
+  let ε' : SS → Formula ℕ := λ s => ⩕ χ ∈ s, χ;
+
+  obtain ⟨e, he₁, he₂⟩ : ∃ f : ℕ → Finset { χ // χ ∈ X }, ((f 0) = {⟨ψ, hψX⟩}) ∧ (∀ n, f n ⊂ f (n + 1)) :=
     Set.exists_enumerate_infinite_set' X_infinite hψX;
 
-  let γ := λ n => ⩕ χ ∈ (f n), χ.1;
-  have γ_letterless : ∀ {i}, (γ i).letterless := by
+  let ε := λ n => ⩕ χ ∈ (e n), χ.1;
+
+  have ε_letterless : ∀ {i}, (ε i).letterless := by
     intro i;
     apply Formula.letterless.of_fconj';
     suffices ∀ a ∈ X, a.letterless by simpa;
     apply Xll;
-  have γ_spectrum_eq : ∀ {i}, (γ i).spectrum γ_letterless = ⋂ χ ∈ (f i), χ.1.spectrum := by
+
+  have ε_spectrum_eq : ∀ {i}, (ε i).spectrum ε_letterless = ⋂ χ ∈ (e i), χ.1.spectrum := by
     intro i;
     apply Formula.spectrum.def_fconj' $ by simp [Xll];
-  have γ_spectrum_decl : ∀ {i j}, i < j → (γ j).spectrum γ_letterless ⊆ (γ i).spectrum γ_letterless := by
+  have ε0_spectrum_eq : (ε 0).spectrum ε_letterless = ψ.spectrum := by simp [ε, ε_spectrum_eq, he₁];
+
+  have ε_spectrum_decl : ∀ {i j}, i < j → (ε j).spectrum ε_letterless ⊆ (ε i).spectrum ε_letterless := by
     intro i j hij;
-    have : ∀ k, (γ (i + k)).spectrum γ_letterless ⊆ (γ i).spectrum γ_letterless := by
+    have : ∀ k, (ε (i + k)).spectrum ε_letterless ⊆ (ε i).spectrum ε_letterless := by
       intro k;
       induction k with
       | zero => simp;
       | succ k ih =>
         rw [show i + (k + 1) = (i + k) + 1 by omega];
         apply Set.Subset.trans ?_ ih;
-        apply iff_GL_provable_C_subset_spectrum γ_letterless γ_letterless |>.mp;
+        apply iff_GL_provable_C_subset_spectrum ε_letterless ε_letterless |>.mp;
         apply Entailment.right_Fconj'!_intro;
         intro χ hχ;
         apply Entailment.left_Fconj'!_intro;
-        apply hf₂ _ |>.1 hχ;
+        apply he₂ _ |>.1 hχ;
     rw [(show j = i + (j - i) by omega)];
     apply this;
-  have γ0_spectrum_finite : (γ 0).spectrum γ_letterless |>.Finite := by
-    suffices ψ.spectrum.Finite by simpa [γ, γ_spectrum_eq, hf₁];
+
+  have ε0_spectrum_finite : (ε 0).spectrum ε_letterless |>.Finite := by
+    rw [ε0_spectrum_eq];
     apply Formula.spectrum_finite_of_singular (by assumption) ψ_singular;
-  have γ_spectrum_finite : ∀ i, (γ i).spectrum γ_letterless |>.Finite := by
+  have ε_spectrum_finite : ∀ i, (ε i).spectrum ε_letterless |>.Finite := by
     intro i;
     rcases (show i = 0 ∨ 0 < i by omega) with ⟨h1, h2⟩;
-    . exact γ0_spectrum_finite;
-    . apply Set.Finite.subset γ0_spectrum_finite;
-      apply γ_spectrum_decl;
+    . exact ε0_spectrum_finite;
+    . apply Set.Finite.subset ε0_spectrum_finite;
+      apply ε_spectrum_decl;
       omega;
-  obtain ⟨k, hk⟩ : ∃ k, (γ k).spectrum γ_letterless = X.spectrum := by
-    simp [FormulaSet.spectrum, γ_spectrum_eq];
+
+  have : ∀ {i}, X.spectrum ⊆ (ε i).spectrum ε_letterless := by sorry;
+  have : X.spectrum.Finite := Set.Finite.subset ε0_spectrum_finite this
+
+  obtain ⟨k, hk⟩ : ∃ k, (ε k).spectrum ε_letterless = X.spectrum := by
+    simp [FormulaSet.spectrum, ε_spectrum_eq];
     sorry;
+  sorry;
+  /-
   use (f k).image (·.1);
   constructor;
   . suffices X.spectrum ⊆ φ.spectrum by calc
@@ -821,6 +802,7 @@ private lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum.lemma₁
     simp [FormulaSet.spectrum];
   . simp;
     tauto;
+  -/
 
 open Classical in
 lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum {φ : Modal.Formula ℕ} (φll : φ.letterless) (hSR : X.Singular T ∨ φ.Regular T)
@@ -998,20 +980,20 @@ theorem GL.eq_closed_sumQuasiNormal_GLα_or_GLβMinus :
     . assumption;
   . right;
     constructor;
-    . apply eq_closed_singular_sumQuasiNormal_GLβMinus (T := T) Xll (by grind) h;
+    . apply eq_closed_singular_sumQuasiNormal_GLβMinus (T := T) Xll h;
     . assumption
 
 lemma iff_GLα_subset : Modal.GLα α₁ ⊆ Modal.GLα α₂ ↔ α₁ ⊆ α₂ := by
   calc
     _ ↔ FormulaSet.trace (α₁.image (λ i => TBB i)) ⊆ FormulaSet.trace (α₂.image (λ i => TBB i)) := by
-      apply GL.iff_subset_closed_sumQuasiNormal_subset_trace (T := 𝗣𝗔);
+      apply GL.iff_subset_closed_sumQuasiNormal_subset_trace (T := 𝗣𝗔) (by grind) (by grind);
       simp;
     _ ↔ α₁ ⊆ α₂ := by simp;
 
 lemma iff_GLβMinus_subset : Modal.GLβMinus β₁ ⊆ Modal.GLβMinus β₂ ↔ β₁ ⊆ β₂ := by
   calc
     _ ↔ FormulaSet.spectrum ({∼(⩕ n ∈ hβ₂.toFinset, (TBB n))}) ⊆ FormulaSet.spectrum ({∼(⩕ n ∈ hβ₁.toFinset, (TBB n))}) := by
-      apply GL.iff_subset_closed_sumQuasiNormal_subset_spectrum (T := 𝗣𝗔);
+      apply GL.iff_subset_closed_sumQuasiNormal_subset_spectrum (T := 𝗣𝗔) (by grind) (by grind);
       simp;
     _ ↔ β₂ᶜ ⊆ β₁ᶜ := by rw [TBBMinus_spectrum, TBBMinus_spectrum];
     _ ↔ β₁ ⊆ β₂ := by simp;
