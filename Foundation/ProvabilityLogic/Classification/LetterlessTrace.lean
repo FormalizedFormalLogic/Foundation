@@ -13,6 +13,8 @@ section
 lemma Set.compl_inj_iff {a b : Set α} : aᶜ = bᶜ ↔ a = b := _root_.compl_inj_iff
 
 /-
+  Thanks to @plp127
+
   https://leanprover.zulipchat.com/#narrow/channel/217875-Is-there-code-for-X.3F/topic/ascending.2Fdecending.20lemmata.20related.20.60Set.60.20and.20.60Finset.60/near/539292838
 -/
 lemma Set.infinitely_finset_approximate {α : Type*} {X : Set α} (count : X.Countable) (inf : X.Infinite) {a : α} (ha : a ∈ X) :
@@ -46,25 +48,17 @@ end
 
 section
 
-#check WellFounded.wellFounded_iff_no_descending_seq
+/-
+  Thanks to @plp127
 
-lemma Finset.no_ssubset_descending_chain'  {f : ℕ → Finset α} : ¬(∀ i, f (i + 1) ⊂ f i) := by
-  by_contra hC;
-  apply WellFounded.wellFounded_iff_no_descending_seq.mp Finset.wellFoundedLT.wf |>.false;
-  exact ⟨f, hC⟩;
-
-
+  https://leanprover.zulipchat.com/#narrow/channel/217875-Is-there-code-for-X.3F/topic/ascending.2Fdecending.20lemmata.20related.20.60Set.60.20and.20.60Finset.60/near/539367015
+-/
 lemma Finset.no_ssubset_descending_chain  {f : ℕ → Finset α} : ¬(∀ i, ∃ j > i, f j ⊂ f i) := by
-  have := Finset.no_ssubset_descending_chain' (f := f);
-  contrapose! this;
-  intro i;
-  obtain ⟨j, _, hfjfi⟩ := this i;
-  obtain ⟨k, rfl⟩ : ∃ k, j = (i + 1) + k := by use (j - i - 1); omega;
-  induction k with
-  | zero => simpa;
-  | succ k ih =>
-    sorry;
-
+  intro h
+  have n := 0
+  induction hf : f n using WellFoundedLT.fix generalizing n with subst hf | _ _ ih
+  obtain ⟨m, -, hy⟩ := h n
+  exact ih (f m) hy m rfl
 
 end
 
@@ -740,106 +734,6 @@ omit [𝗜𝚺₁ ⪯ T] in
 @[simp]
 lemma TBBMinus_singular : FormulaSet.Singular T {∼⩕ n ∈ hβ.toFinset, TBB n} := by
   simp [FormulaSet.Singular, FormulaSet.Regular, Formula.Regular.def_neg];
-
-set_option pp.proofs true in
-private lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum.lemma₁
-  (X_singular : X.Singular T)
-  (h : ⋂ ψ, ⋂ (h : ψ ∈ X), ψ.spectrum ⊆ φ.spectrum)
-  : ∃ Y : Finset _, ∃ (x : ∀ ψ ∈ Y, ψ ∈ X), ⋂ ψ ∈ Y, ψ.spectrum (by grind) ⊆ φ.spectrum := by
-  wlog X_infinite : X.Infinite
-  . replace X_infinite := Set.not_infinite.mp X_infinite;
-    use X_infinite.toFinset;
-    refine ⟨?_, ?_⟩
-    . simp;
-    . intro i hi;
-      apply h;
-      simpa using hi;
-
-  obtain ⟨ψ, hψX, ψ_singular⟩ : ∃ ψ ∈ X, ψ.Singular T := FormulaSet.exists_singular_of_singular X_singular;
-
-  obtain ⟨f, f0, f_monotone, fX, f_inv⟩ := Set.infinitely_finset_approximate (Countable.to_set inferInstance) X_infinite hψX;
-  have f_conj_letterless : ∀ i, (f i).conj.letterless := λ i => Formula.letterless.of_fconj $ λ ξ hξ => Xll _ $ fX _ hξ;
-
-  let sf := λ i => ⋂ ξ, ⋂ (h : ξ ∈ f i), ξ.spectrum (Xll ξ $ fX _ $ by assumption);
-  have sf_eq : ∀ i, sf i = Formula.spectrum ((f i).conj) (f_conj_letterless _) := by
-    intro i;
-    rw [Formula.spectrum.def_fconj (λ ξ hξ => Xll _ $ fX _ hξ)];
-  have sf_monotone : ∀ i, sf (i + 1) ⊆ sf i := by
-    intro i;
-    rw [sf_eq (i + 1), sf_eq i];
-    apply iff_GL_provable_C_subset_spectrum (f_conj_letterless _) (f_conj_letterless _) |>.mp;
-    apply Entailment.right_Fconj!_intro;
-    intro χ hχ;
-    apply Entailment.left_Fconj!_intro;
-    apply f_monotone _ |>.1 hχ;
-  replace sf_monotone : ∀ i j, i ≤ j → sf j ⊆ sf i := by
-    intro i j hij;
-    have : ∀ k, (sf (i + k)) ⊆ sf i := by
-      intro k;
-      induction k with
-      | zero => simp;
-      | succ k ih =>
-        rw [show i + (k + 1) = (i + k) + 1 by omega];
-        exact Set.Subset.trans (sf_monotone (i + k)) ih;
-    rw [(show j = i + (j - i) by omega)];
-    apply this;
-
-  have sf0_eq : sf 0 = ψ.spectrum := by simp [sf, f0];
-  have sf0_finite : (sf 0).Finite := by rw [sf0_eq]; exact Formula.spectrum_finite_of_singular (by grind) ψ_singular;
-  have sf_finite : ∀ i, (sf i).Finite := by
-    intro i;
-    apply Set.Finite.subset sf0_finite;
-    apply sf_monotone _ _ (by omega);
-
-  have sf_X : ∀ i, sf i ⊇ X.spectrum := by
-    intro i n;
-    suffices (∀ (ξ : Formula ℕ) (_ : ξ ∈ X), n ∈ ξ.spectrum _) → ∀ (ξ : Formula ℕ) (_ : ξ ∈ f i), n ∈ ξ.spectrum _ by
-      simpa [sf, FormulaSet.spectrum];
-    intro h ξ hξ;
-    apply h;
-    apply fX i hξ;
-
-  obtain ⟨k, hk⟩ : ∃ k, sf k = X.spectrum := by
-    by_contra! hC;
-    have : ∀ i, ∃ n, n ∈ sf i ∧ n ∉ X.spectrum := by
-      intro i;
-      exact Set.ssubset_iff_exists.mp (Set.ssubset_of_subset_ne (sf_X i) (hC i).symm) |>.2;
-
-    apply Finset.no_ssubset_descending_chain (f := λ i => sf_finite i |>.toFinset);
-
-    intro i;
-    obtain ⟨n, hn₁, hn₂⟩ := this i;
-    obtain ⟨ξ, hξ₁, hξ₂⟩ : ∃ ξ, ∃ (_ : ξ ∈ X), n ∉ ξ.spectrum _ := by simpa [FormulaSet.spectrum] using hn₂;
-    obtain ⟨j, hj⟩ := f_inv ξ hξ₁;
-
-    have : i < j := by
-      by_contra hC;
-      have := Set.Subset.trans (sf_monotone j i (by omega)) $ show sf j ⊆ ξ.spectrum by
-        intro _ hn;
-        apply hn;
-        use ξ;
-        simp_all;
-      apply hξ₂;
-      apply this;
-      apply hn₁;
-    use j;
-    constructor;
-    . assumption;
-    . suffices (sf j) ⊂ (sf i) by simpa [sf_finite]
-      exact Set.ssubset_iff_exists.mpr ⟨sf_monotone i j (by omega), by
-        use n;
-        constructor;
-        . assumption;
-        . suffices ∃ χ, ∃ _ : χ ∈ f j, n ∉ χ.spectrum _ by simpa [sf];
-          use ξ;
-          simp_all;
-      ⟩;
-
-  use (f k)
-  refine ⟨?_, ?_⟩;
-  . apply fX;
-  . apply Set.Subset.trans ?_ h;
-    rw [←FormulaSet.spectrum, ←hk];
 
 open Classical LO.Entailment in
 lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum {φ : Modal.Formula ℕ} (φll : φ.letterless) (hSR : X.Singular T ∨ φ.Regular T)
