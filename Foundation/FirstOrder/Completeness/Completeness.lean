@@ -56,9 +56,9 @@ theorem complete {φ : Sentence L} :
       simpa using (satisfiable_lMap L.ofSubLanguage (fun k ↦ Subtype.val_injective) (fun _ ↦ Subtype.val_injective) h)
     contradiction
   have : Entailment.Inconsistent (u' : Theory (languageFinset u)) := Complete.inconsistent_of_unsatisfiable this
-  have : Entailment.Inconsistent (u : Theory L) := by rw [←image_u']; simpa using Derivation.inconsistent_lMap L.ofSubLanguage this
+  have : Entailment.Inconsistent (u : Theory L) := by rw [←image_u']; simpa using Theory.inconsistent_lMap L.ofSubLanguage this
   have : Entailment.Inconsistent (insert (∼φ) T) := this.of_supset ssu
-  exact Derivation.provable_iff_inconsistent.mpr this
+  exact Entailment.provable_iff_inconsistent_adjoin.mpr this
 
 theorem complete_iff : T ⊨ φ ↔ T ⊢! φ :=
   ⟨fun h ↦ complete h, sound!⟩

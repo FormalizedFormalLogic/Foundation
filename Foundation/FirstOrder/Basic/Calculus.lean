@@ -365,7 +365,7 @@ def lMap (Φ : L₁ →ᵥ L₂) {Δ} : 𝓢₁ ⟹ Δ → 𝓢₁.lMap Φ ⟹ �
     Derivation.cast this (by simp)
   | axm h               => axm (Set.mem_image_of_mem _ h)
 
-lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : Entailment.Inconsistent 𝓢₁ → Entailment.Inconsistent (𝓢₁.lMap Φ) := by
+lemma inconsistent'_lMap (Φ : L₁ →ᵥ L₂) : Entailment.Inconsistent 𝓢₁ → Entailment.Inconsistent (𝓢₁.lMap Φ) := by
   simp only [Entailment.inconsistent_iff_provable_bot]; intro ⟨b⟩; exact ⟨by simpa using lMap Φ b⟩
 
 end Hom
@@ -475,6 +475,29 @@ instance [L.DecidableEq] : Entailment.Deduction (Theory L) where
   inv {σ τ T} b :=
     have : adjoin σ T ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
     this ⨀ (Axiomatized.adjoin _ _)
+
+instance (T : Theory L) : Entailment.Cl T := Entailment.Cl.ofEquiv (T : SyntacticFormulas L) T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
+
+instance : DeductiveExplosion (Theory L) where
+  dexp b _ := ofSyntacticProof <| DeductiveExplosion.dexp (toSyntacticProof b) _
+
+lemma inconsistent_iff {T : Theory L} :
+    Inconsistent T ↔ Inconsistent (T : SyntacticFormulas L) := calc
+  Inconsistent T ↔ T ⊢! ⊥                                 := inconsistent_iff_provable_bot
+  _              ↔ (T : SyntacticFormulas L) ⊢! ⊥         := by simp [provable_def]
+  _              ↔ Inconsistent (T : SyntacticFormulas L) := inconsistent_iff_provable_bot.symm
+
+lemma inconsistent_lMap {T : Theory L₁} (Φ : L₁ →ᵥ L₂) :
+    Entailment.Inconsistent T → Entailment.Inconsistent (T.lMap Φ) := by
+  intro h
+  have : SyntacticFormulas.lMap Φ ↑T ⊢! ⊥ := ⟨Derivation.lMap Φ (provable_def.mp <| inconsistent_iff_provable_bot.mp h).get⟩
+  refine inconsistent_iff_provable_bot.mpr <| provable_def.mpr ?_
+  simp
+  apply Axiomatized.weakening! ?_ this
+  simp [SyntacticFormulas.lMap, Theory.toSyntacticFormulas]
+  intro φ hφ
+  simp
+  exact ⟨(Semiformula.lMap Φ) φ, Set.mem_image_of_mem _ hφ, Eq.symm (lMap_emb φ)⟩
 
 end Theory
 
