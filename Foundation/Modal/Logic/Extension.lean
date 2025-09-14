@@ -133,6 +133,24 @@ instance : L₂ ⪯ sumQuasiNormal L₁ L₂ := by
   rw [sumQuasiNormal.symm];
   infer_instance;
 
+omit [DecidableEq α] in
+lemma iff_subset {X Y} : L.sumQuasiNormal Y ⊆ L.sumQuasiNormal X ↔ ∀ ψ ∈ Y, L.sumQuasiNormal X ⊢! ψ := by
+  suffices (∀ φ, L.sumQuasiNormal Y ⊢! φ → L.sumQuasiNormal X ⊢! φ) ↔ (∀ ψ ∈ Y, L.sumQuasiNormal X ⊢! ψ) by
+    apply Iff.trans ?_ this;
+    constructor;
+    . intro h ψ; simpa using @h ψ;
+    . intro h ψ; simpa using @h ψ;
+  constructor;
+  . intro h ψ hψ;
+    apply h;
+    apply Logic.sumQuasiNormal.mem₂!
+    simpa using hψ;
+  . intro h ψ hψ;
+    induction hψ using Logic.sumQuasiNormal.rec! with
+    | mem₁ hψ => apply Logic.sumQuasiNormal.mem₁! hψ;
+    | mem₂ hψ => apply h; simpa using hψ;
+    | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+    | subst ihφ => apply Logic.subst!; assumption;
 
 section
 
