@@ -191,6 +191,8 @@ instance : Tait (SyntacticFormula L) (SyntacticFormulas L) where
 instance : Tait.Cut (SyntacticFormula L) (SyntacticFormulas L) where
   cut {_ _ _ dp dn} := cut dp dn
 
+protected def id {φ} (hφ : φ ∈ 𝓢) : 𝓢 ⟹ ∼φ :: Δ → 𝓢 ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (axm hφ) (by simp)) b
+
 def provableOfDerivable {φ} (b : 𝓢 ⟹. φ) : 𝓢 ⊢ φ := b
 
 def specialize {φ : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
@@ -328,42 +330,42 @@ def unprovable_iff_consistent : 𝓢 ⊬ φ ↔ Entailment.Consistent (insert (�
 
 section Hom
 
-variable {L₁ : Language} {L₂ : Language} {T₁ : SyntacticFormulas L₁} {Δ₁ : Sequent L₁}
+variable {L₁ : Language} {L₂ : Language} {𝓢₁ : SyntacticFormulas L₁} {Δ₁ : Sequent L₁}
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (SyntacticFormula L₁)} :
      (Δ.map <| Semiformula.lMap Φ)⁺ = (Δ⁺.map <| Semiformula.lMap Φ) := by
   simp [Rewriting.shifts, Function.comp_def, Semiformula.lMap_shift]
 
-def lMap (Φ : L₁ →ᵥ L₂) {Δ} : T₁ ⟹ Δ → T₁.lMap Φ ⟹ Δ.map (.lMap Φ)
+def lMap (Φ : L₁ →ᵥ L₂) {Δ} : 𝓢₁ ⟹ Δ → 𝓢₁.lMap Φ ⟹ Δ.map (.lMap Φ)
   | axL Δ r v            =>
     .cast (axL (Δ.map (.lMap Φ)) (Φ.rel r) (fun i ↦ .lMap Φ (v i)))
     (by simp [Semiformula.lMap_rel, Semiformula.lMap_nrel])
   | verum Δ              => by simpa using verum _
   | @or _ _ Δ φ ψ d      => by
-    have : T₁.lMap Φ ⟹ (.lMap Φ φ ⋎ .lMap Φ ψ :: Δ.map (.lMap Φ) : Sequent L₂) :=
+    have : 𝓢₁.lMap Φ ⟹ (.lMap Φ φ ⋎ .lMap Φ ψ :: Δ.map (.lMap Φ) : Sequent L₂) :=
       or (by simpa using lMap Φ d)
     exact Derivation.cast this (by simp)
   | @and _ _ Δ φ ψ dp dq =>
-    have : T₁.lMap Φ ⟹ (.lMap Φ φ ⋏ .lMap Φ ψ :: (Δ.map (.lMap Φ)) : Sequent L₂) :=
+    have : 𝓢₁.lMap Φ ⟹ (.lMap Φ φ ⋏ .lMap Φ ψ :: (Δ.map (.lMap Φ)) : Sequent L₂) :=
       and (Derivation.cast (lMap Φ dp) (by simp)) (Derivation.cast (lMap Φ dq) (by simp))
     Derivation.cast this (by simp)
   | @all _ _ Δ φ d       =>
-    have : T₁.lMap Φ ⟹ ((∀' .lMap Φ φ) :: (Δ.map (.lMap Φ)) : Sequent L₂) :=
+    have : 𝓢₁.lMap Φ ⟹ ((∀' .lMap Φ φ) :: (Δ.map (.lMap Φ)) : Sequent L₂) :=
       all (Derivation.cast (lMap Φ d) (by simp [←Semiformula.lMap_free, shifts_image]))
     Derivation.cast this (by simp)
   | @ex _ _ Δ φ t d      =>
-    have : T₁.lMap Φ ⟹ ((∃' .lMap Φ φ) :: (Δ.map (.lMap Φ)) : Sequent L₂) :=
+    have : 𝓢₁.lMap Φ ⟹ ((∃' .lMap Φ φ) :: (Δ.map (.lMap Φ)) : Sequent L₂) :=
       ex (Semiterm.lMap Φ t)
         (Derivation.cast (lMap Φ d) (by simp [Semiformula.lMap_substs]))
     Derivation.cast this (by simp)
   | @wk _ _ Δ Γ d ss     => (lMap Φ d).wk (List.map_subset _ ss)
   | @cut _ _ Δ φ d dn    =>
-    have : T₁.lMap Φ ⟹ (Δ.map (.lMap Φ) : Sequent L₂) :=
+    have : 𝓢₁.lMap Φ ⟹ (Δ.map (.lMap Φ) : Sequent L₂) :=
       cut (φ := .lMap Φ φ) (Derivation.cast (lMap Φ d) (by simp)) (Derivation.cast (lMap Φ dn) (by simp))
     Derivation.cast this (by simp)
   | axm h               => axm (Set.mem_image_of_mem _ h)
 
-lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : Entailment.Inconsistent T₁ → Entailment.Inconsistent (T₁.lMap Φ) := by
+lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : Entailment.Inconsistent 𝓢₁ → Entailment.Inconsistent (𝓢₁.lMap Φ) := by
   simp only [Entailment.inconsistent_iff_provable_bot]; intro ⟨b⟩; exact ⟨by simpa using lMap Φ b⟩
 
 end Hom
@@ -416,7 +418,7 @@ def allNvar {φ} (h : ∀' φ ∈ Δ) : 𝓢 ⟹ φ/[&(newVar Δ)] :: Δ → �
     genelalizeByNewver (by simpa [FVar?] using not_fvar?_newVar h) (fun _ ↦ not_fvar?_newVar) b
   Tait.wk b (by simp [h])
 
-protected def id {φ} (hp : φ ∈ 𝓢) : 𝓢 ⟹ ∼∀∀ φ :: Δ → 𝓢 ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (toClose (axm hp)) (by simp)) b
+def id_univClosure {φ} (hp : φ ∈ 𝓢) : 𝓢 ⟹ ∼∀∀ φ :: Δ → 𝓢 ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (toClose (axm hp)) (by simp)) b
 
 end Derivation
 

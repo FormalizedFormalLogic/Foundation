@@ -12,22 +12,23 @@ variable {L : Language.{u}} {T : Theory L}
 
 section Encodable
 
-variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]  [L.Encodable]
+variable [L.DecidableEq]  [L.Encodable]
 
 noncomputable def Derivation.completeness_of_encodable
-  {Γ : Sequent L} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ φ ∈ Γ, M ⊧ₘ φ) : T ⟹ Γ := by
+  {Γ : Sequent L} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ φ ∈ Γ, ∀ f, Semiformula.Evalfm M f φ) : (T : SyntacticFormulas L) ⟹ Γ := by
   have : WellFounded (SearchTree.Lt T Γ) := by
     by_contra nwf
-    have : ∃ φ ∈ Γ, (Model T Γ) ⊧ₘ φ := h _ (Model.models nwf)
+    have : ∃ φ ∈ Γ, ∀ f, Semiformula.Evalfm (Model T Γ) f φ := h _ (Model.models nwf)
     rcases this with ⟨φ, hp, h⟩
     have : Evalf (Model.structure T Γ) (&·) φ := h (&·)
     have : ¬Evalf (Model.structure T Γ) (&·) φ := by simpa using semanticMainLemmaTop nwf (φ := φ) hp
     contradiction
   exact syntacticMainLemmaTop this
 
-lemma completeness_of_encodable {φ : SyntacticFormula L} :
+lemma completeness_of_encodable {φ : Sentence L} :
     T ⊨ φ → T ⊢! φ := fun h ↦
-  ⟨Derivation.completeness_of_encodable (T := T) (Γ := [φ]) (fun _ _ _ hM ↦ ⟨φ, List.mem_of_mem_head? rfl, h hM⟩)⟩
+  ⟨Derivation.completeness_of_encodable (T := T) (Γ := [φ])
+    fun _ _ _ hM ↦ ⟨φ, List.mem_of_mem_head? rfl, fun _ ↦ by simpa using h hM⟩⟩
 
 instance : Complete T (Semantics.models (SmallStruc L) T):= ⟨completeness_of_encodable⟩
 
@@ -35,14 +36,14 @@ end Encodable
 
 open Classical
 
-theorem complete {φ : SyntacticFormula L} :
+theorem complete {φ : Sentence L} :
     T ⊨ φ → T ⊢! φ := fun h ↦ by
-  have : ∃ u : Finset (SyntacticFormula L), ↑u ⊆ insert (∼∀∀φ) T ∧ ¬Satisfiable (u : Theory L) := by
+  have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (∼φ) T ∧ ¬Satisfiable (u : Theory L) := by
     simpa using compact.not.mp (consequence_iff_unsatisfiable.mp h)
   rcases this with ⟨u, ssu, hu⟩
   haveI : ∀ k, Encodable ((languageFinset u).Func k) := fun _ ↦ Fintype.toEncodable _
   haveI : ∀ k, Encodable ((languageFinset u).Rel k) := fun _ ↦ Fintype.toEncodable _
-  let u' : Finset (SyntacticFormula (languageFinset u)) := Finset.imageOfFinset u (fun _ hp ↦ toSubLanguageFinsetSelf hp)
+  let u' : Finset (Sentence (languageFinset u)) := Finset.imageOfFinset u (fun _ hp ↦ toSubLanguageFinsetSelf hp)
   have image_u' : u'.image (Semiformula.lMap L.ofSubLanguage) = u := by
     ext τ
     simp only [Finset.mem_image, Finset.mem_imageOfFinset_iff, u']
@@ -56,7 +57,7 @@ theorem complete {φ : SyntacticFormula L} :
     contradiction
   have : Entailment.Inconsistent (u' : Theory (languageFinset u)) := Complete.inconsistent_of_unsatisfiable this
   have : Entailment.Inconsistent (u : Theory L) := by rw [←image_u']; simpa using Derivation.inconsistent_lMap L.ofSubLanguage this
-  have : Entailment.Inconsistent (insert (∼∀∀φ) T) := this.of_supset ssu
+  have : Entailment.Inconsistent (insert (∼φ) T) := this.of_supset ssu
   exact Derivation.provable_iff_inconsistent.mpr this
 
 theorem complete_iff : T ⊨ φ ↔ T ⊢! φ :=
