@@ -574,7 +574,7 @@ lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ {φ}, φ ∈ T → M ⊧ₘ φ) :=
 
 variable (M T)
 
-lemma Theory.models [M ⊧ₘ* T] {φ} (hp : φ ∈ T) : M ⊧ₘ φ := Semantics.realizeSet_iff.mp inferInstance hp
+lemma Theory.models [M ⊧ₘ* T] {σ} (hσ : σ ∈ T) : M ⊧ₘ σ := Semantics.realizeSet_iff.mp inferInstance hσ
 
 variable {M T}
 
