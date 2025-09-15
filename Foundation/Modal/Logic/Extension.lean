@@ -167,7 +167,7 @@ lemma provable_of_finite_provable : (∃ X : Finset _, (X.toSet ⊆ L₂) ∧ L�
   apply iff_provable.mpr;
   apply hX₂ hχ;
 
-lemma finite_provable_of_provable (h : ∀ X : Finset (Formula α), ↑X ⊆ L₂ → ∀ s : Substitution _, ↑(Finset.image (·⟦s⟧) X) ⊆ L₂) :
+lemma finite_provable_of_provable (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, ξ⟦s⟧ ∈ L₂) :
   sumQuasiNormal L₁ L₂ ⊢! φ → ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := by
   intro h;
   induction h using sumQuasiNormal.rec! with
@@ -193,11 +193,15 @@ lemma finite_provable_of_provable (h : ∀ X : Finset (Formula α), ↑X ⊆ L�
     obtain ⟨X, hX, hφ⟩ := ihφ;
     use X.image (·⟦s⟧);
     constructor;
-    . apply h _ hX;
+    . intro ξ hξ;
+      obtain ⟨ξ, _, rfl⟩ : ∃ x ∈ X, x⟦s⟧ = ξ := by simpa using hξ;
+      apply h;
+      apply hX;
+      assumption;
     . apply C!_trans ?_ (subst! s hφ);
       exact Logic.fconj_subst;
 
-lemma iff_provable_finite_provable (h : ∀ X : Finset (Formula α), ↑X ⊆ L₂ → ∀ s : Substitution _, ↑(Finset.image (·⟦s⟧) X) ⊆ L₂) :
+lemma iff_provable_finite_provable (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, ξ⟦s⟧ ∈ L₂)  :
   sumQuasiNormal L₁ L₂ ⊢! φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := ⟨finite_provable_of_provable h, provable_of_finite_provable⟩
 
 end

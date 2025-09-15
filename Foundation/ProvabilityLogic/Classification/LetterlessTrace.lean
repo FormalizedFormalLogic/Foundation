@@ -377,13 +377,8 @@ end FormulaSet
 lemma Logic.sumQuasiNormal.iff_provable_finite_provable_letterless [DecidableEq α] {L₁ L₂ : Logic α} {φ : Formula _} [L₁.IsQuasiNormal] (L₂_letterless : FormulaSet.letterless L₂)
   : sumQuasiNormal L₁ L₂ ⊢! φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := by
   apply iff_provable_finite_provable;
-  rintro Y hY s ψ;
-  suffices ∀ ξ ∈ Y, ξ⟦s⟧ = ψ → ψ ∈ L₂ by simpa;
-  rintro ξ hξ rfl;
-  rw [Formula.subst.subst_letterless (L₂_letterless _ $ hY hξ)];
-  apply hY;
-  simpa;
-
+  rintro ξ hξ s;
+  simpa [Formula.subst.subst_letterless (L₂_letterless _ hξ)];
 
 lemma boxbot_spectrum : (□^[n]⊥ : Formula ℕ).spectrum = { i | i < n } := by
   induction n with
