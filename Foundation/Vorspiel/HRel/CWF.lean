@@ -11,7 +11,6 @@ class IsConverseWellFounded (α) (rel : HRel α) : Prop where cwf : ConverseWell
 
 end
 
-
 section
 
 variable {α} {R : HRel α}
@@ -115,6 +114,14 @@ lemma fcwHeight_eq_succ {a : α} (h : fcwHeight R a ≠ 0) :
     simp_all
   have : ({x : α | R a x} : Finset α).Nonempty := by simpa [Finset.filter_nonempty_iff] using this
   simpa [fcwHeight_eq (R := R) a] using Finset.exists_mem_eq_sup _ this (fun b ↦ fcwHeight R b + 1)
+
+lemma fcwHeight_eq_succ_fcwHeight {a b : α} (h : R a b) (hb : ∀ c, R a c → R b c) :
+    fcwHeight R a = fcwHeight R b + 1 := by
+  apply fcwHeight_eq_of_lt_of_le
+  · intro c Rac
+    suffices fcwHeight R c < fcwHeight R b from Nat.lt_add_right 1 this
+    exact fcwHeight_gt_of (hb c Rac)
+  · use b
 
 lemma fcwHeight_lt [IsTrans α R] {a : α} :
     ∀ {n}, n < fcwHeight R a → ∃ b, R a b ∧ fcwHeight R b = n := by
