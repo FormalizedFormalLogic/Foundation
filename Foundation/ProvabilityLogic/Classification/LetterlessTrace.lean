@@ -484,14 +484,14 @@ namespace Kripke
 open Kripke
 open Formula.Kripke
 
-variable {F : Frame} {r : F} [F.IsFiniteTree r]
+variable {F : Frame} {r : F} [F.IsTree r] [Fintype F]
 
 lemma Frame.World.finHeight_lt_of_rel {i j : F} (hij : i ≺ j) : Frame.World.finHeight i > Frame.World.finHeight j := fcwHeight_gt_of hij
 
 lemma Frame.World.exists_of_lt_finHeight {i : F} (hn : n < Frame.World.finHeight i) : ∃ j : F, i ≺ j ∧ Frame.World.finHeight j = n := fcwHeight_lt hn
 
 lemma iff_satisfies_mem_finHeight_spectrum
-  {M : Model} {r : M} [M.IsFiniteTree r] {w : M}
+  {M : Model} {r : M} [Fintype M] [M.IsTree r] {w : M}
   {φ : Formula ℕ} (φ_closed : φ.letterless := by grind)
   : w ⊧ φ ↔ Frame.World.finHeight w ∈ φ.spectrum := by
   induction φ generalizing w with
@@ -560,20 +560,20 @@ end Frame.finiteLinear
 
 lemma spectrum_TFAE (_ : φ.letterless) : [
   n ∈ φ.spectrum,
-  ∀ M : Model, ∀ r, [M.IsFiniteTree r] → ∀ w : M.World, Frame.World.finHeight w = n → w ⊧ φ,
-  ∃ M : Model, ∃ r, ∃ _ : M.IsFiniteTree r, ∃ w : M.World, Frame.World.finHeight w = n ∧ w ⊧ φ
+  ∀ M : Model, ∀ r, [M.IsTree r] → [Fintype M] → ∀ w : M.World, Frame.World.finHeight w = n → w ⊧ φ,
+  ∃ M : Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, ∃ w : M.World, Frame.World.finHeight w = n ∧ w ⊧ φ
 ].TFAE := by
   tfae_have 1 → 2 := by
-    intro h M r _ w hw;
+    intro h M r _ _ w hw;
     apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mpr;
     apply hw ▸ h;
   tfae_have 2 → 3 := by
     intro h;
-    refine ⟨⟨Frame.finiteLinear n, λ p i => True⟩, 0, inferInstance, ⟨0, ?_, ?_⟩⟩;
+    refine ⟨⟨Frame.finiteLinear n, λ p i => True⟩, 0, inferInstance, inferInstance, ⟨0, ?_, ?_⟩⟩;
     . simp;
     . apply h; simp;
   tfae_have 3 → 1 := by
-    rintro ⟨M, r, _, w, rfl, hw⟩;
+    rintro ⟨M, r, _, _, w, rfl, hw⟩;
     apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mp hw;
   tfae_finish;
 
@@ -592,12 +592,13 @@ lemma iff_GL_provable_spectrum_Univ
   constructor;
   . intro h n;
     apply Kripke.spectrum_TFAE (φ := φ) (by grind) |>.out 1 0 |>.mp;
-    intro M r _ w _;
+    intro M r _ _ w _;
     have := GL.Kripke.tree_completeness_TFAE.out 0 2 |>.mp h;
-    apply this M.toFrame r;
+    apply @this M.toFrame r $ by constructor;
   . intro h;
     apply GL.Kripke.tree_completeness_TFAE.out 2 0 |>.mp;
     intro F r _ V w;
+    have : Fintype (⟨F, V⟩ : Kripke.Model).World := Fintype.ofFinite _
     have := Kripke.spectrum_TFAE (φ := φ) (n := Kripke.Frame.World.finHeight w) (by grind) |>.out 0 1 |>.mp;
     apply this (by grind) _ r w rfl;
 
