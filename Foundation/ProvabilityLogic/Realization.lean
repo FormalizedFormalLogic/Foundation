@@ -32,13 +32,6 @@ namespace Realization
 instance {𝔅 : Provability T₀ T} :
     CoeFun (Realization 𝔅) (fun _ ↦ Formula ℕ → FirstOrder.Sentence L) := ⟨interpret⟩
 
-section
-
-variable {𝔅 : Provability T₀ T} {f : Realization 𝔅} {A B : Modal.Formula _}
-
-
-end
-
 lemma letterless_interpret {𝔅 : Provability T₀ T}
     {f₁ f₂ : Realization 𝔅} (A_letterless : A.letterless) : f₁ A = f₂ A := by
   induction A with
