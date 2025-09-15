@@ -85,21 +85,34 @@ lemma GL.unprovable_of_exists_trace (φ_letterless : φ.letterless) : (∃ n, n 
   simp_all [Formula.trace];
 
 @[simp]
+lemma TBBMinus_trace (hβ : βᶜ.Finite) : (∼⩕ n ∈ hβ.toFinset, TBB n).trace = β := by
+  simp [Formula.trace, TBBMinus_spectrum']
+
+@[simp]
 lemma GL.eq_trace_emptyset : Modal.GL.trace = ∅ := by
   rw [←Logic.sumQuasiNormal.with_empty (L₁ := Modal.GL)]
   simpa using GL.eq_trace_ext (X := ∅) (by simp);
 
+@[simp]
 lemma GLα.eq_trace {α : Set ℕ} : (Modal.GLα α).trace = α := by
   apply Eq.trans $ GL.eq_trace_ext $ by grind;
   simp [FormulaSet.gTrace, Formula.eq_gTrace_trace_of_letterless];
 
 @[simp]
-lemma TBBMinus_trace (hβ : βᶜ.Finite) : (∼⩕ n ∈ hβ.toFinset, TBB n).trace = β := by
-  simp [Formula.trace, TBBMinus_spectrum']
-
-lemma GLβMinus.eq_trace {β : Set ℕ} (hβ : βᶜ.Finite) : (Modal.GLβMinus β).trace = β := by
+lemma GLβMinus.eq_trace {β : Set ℕ} (hβ : βᶜ.Finite := by grind) : (Modal.GLβMinus β).trace = β := by
   apply Eq.trans $ GL.eq_trace_ext $ by grind;
   simp [FormulaSet.gTrace, Formula.eq_gTrace_trace_of_letterless];
+
+@[simp] lemma S.provable_TBB {n : ℕ} : Modal.S ⊢! TBB n := by simp [TBB]
+
+@[simp]
+lemma S.eq_trace : Modal.S.trace = Set.univ := by
+  suffices ∀ (x : ℕ), ∃ i ∈ Modal.S, x ∈ i.gTrace by simpa [Set.eq_univ_iff_forall]
+  intro n;
+  use (TBB n);
+  constructor;
+  . apply Logic.iff_provable.mp; simp;
+  . simp [Formula.eq_gTrace_trace_of_letterless];
 
 end Modal
 
