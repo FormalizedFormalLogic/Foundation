@@ -1,6 +1,51 @@
 import Foundation.FirstOrder.Incompleteness.First
 
 
+section
+
+variable {α : Type*}
+
+/-
+  https://leanprover.zulipchat.com/#narrow/channel/287929-mathlib4/topic/ComputablePred.20from.20Nat.20to.20.CE.B1/near/533574370
+
+  Thanks: Robin Arenz: @Rob23oba
+-/
+section
+
+@[congr]
+lemma Part.assert_congr {p₁ p₂ : Prop} {f₁ : p₁ → Part α} {f₂ : p₂ → Part α}
+    (hp : p₁ = p₂) (hf : ∀ h, f₁ (hp.mpr_prop h) = f₂ h) :
+    Part.assert p₁ f₁ = Part.assert p₂ f₂ := by
+  cases hp
+  cases funext hf
+  rfl
+
+@[simp] lemma Part.assert_false (f : False → Part α) : Part.assert False f = Part.none := by simp [assert_neg]
+
+@[simp] lemma Part.assert_true (f : True → Part α) : Part.assert True f = f trivial := by simp [assert_pos]
+
+lemma REPred.iff_decoded_pred {A : α → Prop} [Primcodable α] :
+    REPred A ↔ REPred fun n : ℕ ↦ ∃ a, Encodable.decode n = some a ∧ A a := by
+  simp only [REPred, Partrec, Encodable.decode_nat, Part.coe_some, Part.bind_some]
+  apply propext_iff.mp;
+  congr 1;
+  ext n;
+  cases (Encodable.decode n : Option α) <;> simp
+
+end
+
+
+section
+
+lemma ComputablePred.iff_decoded_pred {A : α → Prop} [Primcodable α] :
+  ComputablePred A ↔ ComputablePred fun n : ℕ ↦ ∃ a, Encodable.decode n = some a ∧ A a := by
+  sorry;
+
+end
+
+end
+
+
 
 namespace LO.FirstOrder.Arithmetic
 
@@ -54,24 +99,16 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat
   use φ/[⌜a⌝];
   constructor <;> assumption;
 
-/-
-lemma _root_.REPred.iff_decoded_pred {A : α → Prop} [Primcodable α] : REPred A ↔ REPred λ n : ℕ ↦ match Encodable.decode n with | some a => A a | none => False := by
-  sorry;
-
-lemma _root_.ComputablePred.iff_decoded_pred {A : α → Prop} [h : Primcodable α] : ComputablePred A ↔ ComputablePred λ n : ℕ ↦ match Encodable.decode n with | some a => A a | none => False := by
-  sorry;
-
-lemma incomplete_of_REPred_not_ComputablePred₂ {P : α → Prop} [h : Primcodable α] (hRE : REPred P) (hC : ¬ComputablePred P) : ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
-  apply incomplete_of_REPred_not_ComputablePred (P := λ n : ℕ ↦ match h.decode n with | some a => P a | none => False);
-  . exact REPred.iff_decoded_pred.mp hRE;
-  . exact ComputablePred.iff_decoded_pred.not.mp hC;
-
 /--
   Halting problem is r.e. but not recursive, so Gödel's first incompleteness theorem follows.
 -/
-theorem incomplete_of_halting_problem : ¬Entailment.Complete (T : Axiom ℒₒᵣ) := incomplete_of_REPred_not_ComputablePred₂
+lemma incomplete_of_REPred_not_ComputablePred {P : α → Prop} [h : Primcodable α] (hRE : REPred P) (hC : ¬ComputablePred P) : ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
+  apply incomplete_of_REPred_not_ComputablePred_Nat T (P := λ n : ℕ ↦ ∃ a, Encodable.decode n = some a ∧ P a);
+  . apply REPred.iff_decoded_pred.mp hRE;
+  . apply ComputablePred.iff_decoded_pred.not.mp hC;
+
+theorem incomplete_of_halting_problem : ¬Entailment.Complete (T : Axiom ℒₒᵣ) := incomplete_of_REPred_not_ComputablePred T
   (ComputablePred.halting_problem_re 0)
   (ComputablePred.halting_problem _)
--/
 
 end LO.FirstOrder.Arithmetic
