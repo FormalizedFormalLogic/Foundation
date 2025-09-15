@@ -63,9 +63,6 @@ theorem complete {φ : Sentence L} :
 theorem complete_iff : T ⊨ φ ↔ T ⊢! φ :=
   ⟨fun h ↦ complete h, sound!⟩
 
-theorem complete₀ {σ : Sentence L} :
-    T ⊨ σ → (T : Axiom L) ⊢! σ := fun h ↦ Axiom.provable_iff.mpr (complete h)
-
 instance (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨complete⟩
 
 lemma satisfiable_of_consistent' (h : Entailment.Consistent T) : Semantics.Satisfiable (SmallStruc L) T :=
@@ -86,7 +83,7 @@ lemma satidfiable_iff_satisfiable : Semantics.Satisfiable (Struc.{max u w} L) T 
 lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] φ ↔ T ⊨ φ := by
   simp [consequence_iff_unsatisfiable, satidfiable_iff_satisfiable.{u, w}]
 
-theorem complete' {φ : SyntacticFormula L} :
+theorem complete' {φ : Sentence L} :
     T ⊨[Struc.{max u w} L] φ → T ⊢! φ := fun h ↦ complete <| consequence_iff_consequence.{u, w}.mp h
 
 instance (T : Theory L) : Complete T (Semantics.models (Struc.{max u w} L) T) := ⟨complete'.{u, w}⟩
