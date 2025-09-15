@@ -534,7 +534,7 @@ instance : (Frame.finiteLinear n) |>.IsFiniteTree 0 where
   asymm := by apply Fin.lt_asymm;
   root_generates := by simp [Frame.finiteLinear, Fin.pos_iff_ne_zero]
 
-lemma eq_height (i : Fin (n + 1)) : Frame.World.finHeight (of i) = n - i := by
+lemma finHeight_of_eq_sub (i : Fin (n + 1)) : Frame.World.finHeight (of i) = n - i := by
   induction i using Fin.reverseInduction
   case last =>
     suffices World.finHeight (of (Fin.last n)) = 0 by simpa
@@ -554,7 +554,7 @@ lemma eq_height (i : Fin (n + 1)) : Frame.World.finHeight (of i) = n - i := by
       intro j
       exact id
 
-@[simp] lemma eq_height_0 : Frame.World.finHeight (0 : Frame.finiteLinear n) = n := by simpa using eq_height 0
+@[simp] lemma finHeight_zero : Frame.World.finHeight (0 : Frame.finiteLinear n) = n := by simpa using finHeight_of_eq_sub 0
 
 end Frame.finiteLinear
 
