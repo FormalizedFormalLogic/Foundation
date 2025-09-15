@@ -7,6 +7,8 @@ import Foundation.Modal.Logic.D.Basic
 import Mathlib.Tactic.TFAE
 import Foundation.Propositional.Logic.PostComplete
 import Mathlib.Order.WellFounded
+import Foundation.ProvabilityLogic.Arithmetic
+import Foundation.ProvabilityLogic.GL.Uniform
 
 section
 
@@ -1030,5 +1032,56 @@ lemma GLα_subset_GLβMinus (hβ : βᶜ.Finite) : Modal.GLα β ⊆ Modal.GLβM
 end
 
 end Modal
+
+
+namespace ProvabilityLogic
+
+open LO.Entailment
+open FirstOrder.ArithmeticTheory
+
+theorem letterless_provabilityLogic {T : ArithmeticTheory} [𝗜𝚺₁ ⪯ T] [T.Δ₁] [ℕ ⊧ₘ* T] (X : Modal.FormulaSet ℕ) (X_letterless : X.letterless) :
+  ProvabilityLogic T (T + X.image ((letterlessStandardRealization T) ·)) = Modal.GL.sumQuasiNormal X := by
+  generalize eU : T + X.image ((letterlessStandardRealization T) ·) = U;
+  ext A;
+  suffices T.ProvabilityLogic U ⊢! A ↔ Modal.GL.sumQuasiNormal X ⊢! A by
+    simpa [Modal.Logic.iff_provable];
+  constructor;
+  . intro h;
+    apply Modal.Logic.sumQuasiNormal.iff_provable_finite_provable_letterless X_letterless |>.mpr;
+    replace h := ProvabilityLogic.provable_iff.mp h;
+    have : U ⊢!. (GL.uniformStandardRealization T) A := h (GL.uniformStandardRealization T);
+    obtain ⟨Γ, hΓX, H⟩ : ∃ Γ : Finset _,
+      ↑Γ ⊆ X ∧
+      T ⊢!. (Γ.image (letterlessStandardRealization T ·)).conj ➝ (GL.uniformStandardRealization T) A := by
+        sorry;
+    use Γ;
+    constructor;
+    . assumption;
+    . replace H : T ⊢!. (GL.uniformStandardRealization T) (Γ.conj) ➝ (GL.uniformStandardRealization T) A := by
+        apply C!_trans ?_ H;
+        sorry;
+      exact GL.uniformStandardRealization_spec.mp H;
+  . intro h;
+    apply ProvabilityLogic.provable_iff.mpr;
+    intro f;
+    obtain ⟨Y, hYX, hY⟩ := Modal.Logic.sumQuasiNormal.iff_provable_finite_provable_letterless X_letterless |>.mp h;
+    have H : T ⊢!. (f Y.conj) ➝ (f A) := GL.arithmetical_soundness hY;
+    have hf : f Y.conj = (letterlessStandardRealization T) Y.conj := Realization.letterless_interpret $ by
+      apply Modal.Formula.letterless.of_fconj;
+      intro _ _
+      apply X_letterless;
+      apply hYX;
+      assumption;
+    rw [hf] at H;
+    replace H : U ⊢!. letterlessStandardRealization T Y.conj ➝ f A := by
+      subst eU;
+      apply WeakerThan.pbl H;
+    apply Entailment.mdp! H;
+    apply Realization.interpret.iff_provable_fconj (f := letterlessStandardRealization T) |>.mpr;
+    intro B hB;
+    have B_letterless : B.letterless := X_letterless B (hYX hB)
+    sorry;
+
+end ProvabilityLogic
 
 end LO
