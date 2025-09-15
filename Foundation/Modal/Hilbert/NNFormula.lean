@@ -65,7 +65,7 @@ lemma iff_neg {φ : NNFormula _} : Hilbert.K ⊢! ∼(φ.toFormula) ⭤ (∼φ).
       exact K!_right ih;
   | _ => simp;
 
-lemma exists_iff {φ} : ∃ ψ : NNFormula _, Hilbert.K ⊢! φ ⭤ ψ.toFormula := by
+lemma exists_iff' {φ} : ∃ ψ : NNFormula _, Hilbert.K ⊢! φ ⭤ ψ.toFormula := by
   induction φ with
   | hatom a => use (.atom a); simp;
   | hfalsum => use ⊥; simp;
@@ -89,7 +89,7 @@ lemma exists_iff {φ} : ∃ ψ : NNFormula _, Hilbert.K ⊢! φ ⭤ ψ.toFormula
     apply box_iff! ih;
 
 lemma exists_of_provable {φ} (h : Hilbert.K ⊢! φ) : ∃ ψ : NNFormula _, Hilbert.K ⊢! ψ.toFormula := by
-  obtain ⟨ψ, h₂⟩ := exists_iff (φ := φ);
+  obtain ⟨ψ, h₂⟩ := exists_iff' (φ := φ);
   use ψ;
   exact K!_left h₂ ⨀ h;
 

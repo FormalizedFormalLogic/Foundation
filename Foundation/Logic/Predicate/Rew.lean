@@ -1040,7 +1040,7 @@ variable {S : ℕ → Type*} [LCWQ S] [SyntacticRewriting L S S] [LawfulSyntacti
     [Rewriting L ο O ℕ F] [Rewriting L ℕ F ℕ F]
     [TransitiveRewriting L ο O ℕ F ℕ F]
     (Γ : List (O n)) :
-    (Γ.map (Rewriting.embedding (ξ := ℕ)))⁺ = Γ.map (Rewriting.embedding (ξ := ℕ)) := by
+    shifts (Γ.map (Rewriting.embedding (ξ := ℕ))) = Γ.map (Rewriting.embedding (ξ := ℕ)) := by
   suffices ∀ a ∈ Γ, shift (embedding (ξ := ℕ) a) = embedding (ξ := ℕ) a by simp [shifts, Function.comp_def, ← comp_app]
   intro j hj
   unfold embedding shift

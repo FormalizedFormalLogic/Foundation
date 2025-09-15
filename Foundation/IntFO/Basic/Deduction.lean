@@ -124,7 +124,7 @@ def implyAll {φ ψ} (b : Λ ⊢ shift φ ➝ free ψ) : Λ ⊢ φ ➝ ∀' ψ :
   have : Λ ⊢ ∀' (φ/[] ➝ ψ) := gen <| by simpa using b
   all₂ φ ψ ⨀ this
 
-def geNOverFiniteContext {Γ φ} (b : Γ⁺ ⊢[Λ] free φ) : Γ ⊢[Λ] ∀' φ :=
+def geNOverFiniteContext {Γ φ} (b : shifts Γ ⊢[Λ] free φ) : Γ ⊢[Λ] ∀' φ :=
   ofDef <| implyAll <| by simpa [shift_conj₂] using toDef b
 
 def specializeOverContext {Γ φ} (b : Γ ⊢[Λ] ∀' φ) (t) : Γ ⊢[Λ] φ/[t] :=

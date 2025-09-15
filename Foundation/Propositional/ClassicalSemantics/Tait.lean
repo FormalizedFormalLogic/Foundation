@@ -10,7 +10,7 @@ variable {α : Type*} {T : Theory α} {Γ : Sequent α}
 open ClassicalSemantics (Valuation)
 namespace Derivation
 
-theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
+theorem sound : T ⇒ Γ → T ⊨[Valuation α] Γ.disj := by
   intro d v hv
   induction d
   case axL Γ a =>
@@ -39,7 +39,7 @@ theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
     have : v ⊧* T := by simpa [Semantics.models] using hv
     simpa using Semantics.realizeSet_iff.mp hv h
 
-theorem sound! : T ⟹! Γ → T ⊨[Valuation α] Γ.disj := fun h ↦ sound h.get
+theorem sound! : T ⇒! Γ → T ⊨[Valuation α] Γ.disj := fun h ↦ sound h.get
 
 end Derivation
 
@@ -199,10 +199,10 @@ end complete
 
 end ClassicalSemantics
 
-theorem Derivation.complete : T ⊨[Valuation α] Γ.disj → T ⟹! Γ := fun h ↦
+theorem Derivation.complete : T ⊨[Valuation α] Γ.disj → T ⇒! Γ := fun h ↦
   Tait.derivable_iff_provable_disj.mpr (ClassicalSemantics.completeness! h)
 
-theorem Derivation.complete_iff : T ⟹! Γ ↔ T ⊨[Valuation α] Γ.disj := ⟨sound!, complete⟩
+theorem Derivation.complete_iff : T ⇒! Γ ↔ T ⊨[Valuation α] Γ.disj := ⟨sound!, complete⟩
 
 theorem Sequent.isTautology_iff : Γ.IsTautology ↔ ∀ v : Valuation α, ∃ φ ∈ Γ, v ⊧ φ := by
   simp [Sequent.IsTautology, Derivation.complete_iff, Semantics.consequence_iff]

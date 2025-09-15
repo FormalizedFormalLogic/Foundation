@@ -125,7 +125,7 @@ lemma Sequent.typed_quote_inj {Γ Δ : Finset (SyntacticFormula L)} : (⌜Γ⌝ 
 
 lemma Sequent.coe_eq (Γ : Finset (SyntacticFormula L)) : (↑(⌜Γ⌝ : ℕ) : V) = ⌜Γ⌝ := by
   induction Γ using Finset.induction
-  · simp
+  · rfl
   case insert φ s h ih =>
     simp [insert_absolute, ih, Semiformula.coe_quote_eq_quote]
 
@@ -211,17 +211,17 @@ lemma coe_quote_eq (d : T ⊢₂ Γ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := coe
 
 end Derivation2
 
-noncomputable instance (Γ : Sequent L) : GoedelQuote (T ⟹ Γ) V := ⟨fun b ↦ ⌜Derivation.toDerivation2 T b⌝⟩
+noncomputable instance (Γ : Sequent L) : GoedelQuote (T ⇒ Γ) V := ⟨fun b ↦ ⌜Derivation.toDerivation2 T b⌝⟩
 
 noncomputable instance (φ : SyntacticFormula L) : GoedelQuote (T ⊢ φ) V := ⟨fun b ↦
-  let b : T ⟹ [φ] := b
+  let b : T ⇒ [φ] := b
   ⌜b⌝⟩
 
-lemma quote_derivation_def {Γ : Sequent L} (b : T ⟹ Γ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 T b⌝ := rfl
+lemma quote_derivation_def {Γ : Sequent L} (b : T ⇒ Γ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 T b⌝ := rfl
 
 lemma quote_proof_def {φ : SyntacticFormula L} (b : T ⊢ φ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 T b⌝ := rfl
 
-@[simp] lemma derivation_of_quote_derivation {Γ : Sequent L} (b : T ⟹ Γ) : T.DerivationOf (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
+@[simp] lemma derivation_of_quote_derivation {Γ : Sequent L} (b : T ⇒ Γ) : T.DerivationOf (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
   let x := Derivation2.typedQuote V (Derivation.toDerivation2 T b)
   suffices T.DerivationOf x.val ⌜List.toFinset Γ⌝ from this
   simpa using x.derivationOf
