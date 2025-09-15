@@ -10,7 +10,7 @@ namespace LO
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -116,7 +116,7 @@ def _root_.LO.FirstOrder.Theory.internalize (T : Theory L) [T.Δ₁] : InternalT
 
 variable {V}
 
-omit [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁] in
+omit [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁] in
 @[simp] lemma internalize_theory (T : Theory L) [T.Δ₁] : (T.internalize V).theory = T := rfl
 
 structure TDerivation (T : InternalTheory V L) (Γ : Sequent V L) where
@@ -180,10 +180,10 @@ protected noncomputable def cast {Γ Δ : Metamath.Sequent V L} (e : Γ = Δ) :
     (TDerivation.cast e d).val = d.val := by rcases e; simp [TDerivation.cast]
 
 noncomputable def byAxm (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) : T ⊢ᵈᵉʳ Γ :=
-  ⟨Metamath.root Γ.val φ.val, by simp, Theory.Derivation.root (by simp) (by simpa) h⟩
+  ⟨Metamath.axm Γ.val φ.val, by simp, Theory.Derivation.axm (by simp) (by simpa) h⟩
 
 @[simp] lemma byAxm_val (φ) (h : φ ∈' T.theory) (hΓ : φ ∈ Γ) :
-    (byAxm φ h hΓ).val = Metamath.root Γ.val φ.val := rfl
+    (byAxm φ h hΓ).val = Metamath.axm Γ.val φ.val := rfl
 
 noncomputable def em (φ) (h : φ ∈ Γ := by simp) (hn : ∼φ ∈ Γ := by simp) : T ⊢ᵈᵉʳ Γ :=
   ⟨axL Γ.val φ.val, by simp, Theory.Derivation.axL (by simp) h hn⟩
@@ -553,7 +553,7 @@ lemma substItrDisj_right {i z : V}
   · intro i hi
     have hi : i < z := by simpa using hi
     rw [substItr_nth _ _ _ hi]
-    exact φ.isSemiformula.substs (w.isSemitermVec.cons (by simp))
+    exact φ.isSemiformula.substs (w.isSemitermVec.adjoin (by simp))
   · simpa using pos_of_gt hi
   · have : z - (i + 1) < z := by simpa using pos_of_gt hi
     rw [substItr_nth _ _ _ this]
@@ -561,7 +561,7 @@ lemma substItrDisj_right {i z : V}
     simp only [this, Nat.succ_eq_add_one, Semiformula.val_substs, SemitermVec.val_succ,
       Matrix.head_cons, val_numeral, Matrix.tail_cons]
     apply Theory.Derivable.em (L := ℒₒᵣ) (p := substs ℒₒᵣ (numeral i ∷ SemitermVec.val w) φ.val)
-    · simpa using φ.isSemiformula_succ.substs (w.isSemitermVec.cons (numeral_semiterm 0 i))
+    · simpa using φ.isSemiformula_succ.substs (w.isSemitermVec.adjoin (numeral_semiterm 0 i))
     · simp
     · simp
 

@@ -4,7 +4,7 @@ namespace LO
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -150,7 +150,7 @@ noncomputable def shiftRule (s d : V) : V := ⟪s, 7, d⟫ + 1
 
 noncomputable def cutRule (s p d₁ d₂ : V) : V := ⟪s, 8, p, d₁, d₂⟫ + 1
 
-noncomputable def root (s p : V) : V := ⟪s, 9, p⟫ + 1
+noncomputable def axm (s p : V) : V := ⟪s, 9, p⟫ + 1
 
 section
 
@@ -235,14 +235,14 @@ lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V
 @[simp] lemma cutRule.eval (v) :
     Semiformula.Evalbm V v cutRuleGraph.val ↔ v 0 = cutRule (v 1) (v 2) (v 3) (v 4) := cutRule_defined.df.iff v
 
-def rootGraph : 𝚺₀.Semisentence 3 :=
+def axmGraph : 𝚺₀.Semisentence 3 :=
   .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 9 p ∧ y = y' + 1”
 
-lemma root_defined : 𝚺₀-Function₂ (root : V → V → V) via rootGraph := by
-  intro v; simp_all [rootGraph, numeral_eq_natCast, root]
+lemma axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph := by
+  intro v; simp_all [axmGraph, numeral_eq_natCast, axm]
 
-@[simp] lemma root.eval (v) :
-    Semiformula.Evalbm V v rootGraph.val ↔ v 0 = root (v 1) (v 2) := root_defined.df.iff v
+@[simp] lemma axm.eval (v) :
+    Semiformula.Evalbm V v axmGraph.val ↔ v 0 = axm (v 1) (v 2) := axm_defined.df.iff v
 
 @[simp] lemma seq_lt_axL (s p : V) : s < axL s p := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma arity_lt_axL (s p : V) : p < axL s p :=
@@ -296,8 +296,8 @@ lemma root_defined : 𝚺₀-Function₂ (root : V → V → V) via rootGraph :=
 @[simp] lemma d₂_lt_cutRule (s p d₁ d₂ : V) : d₂ < cutRule s p d₁ d₂ :=
   le_iff_lt_succ.mp <| le_trans (le_trans (le_trans (le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _) <| le_pair_right _ _
 
-@[simp] lemma seq_lt_root (s p : V) : s < root s p := le_iff_lt_succ.mp <| le_pair_left _ _
-@[simp] lemma p_lt_root (s p : V) : p < root s p := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
+@[simp] lemma seq_lt_axm (s p : V) : s < axm s p := le_iff_lt_succ.mp <| le_pair_left _ _
+@[simp] lemma p_lt_axm (s p : V) : p < axm s p := le_iff_lt_succ.mp <| le_trans (le_pair_right _ _) <| le_pair_right _ _
 
 @[simp] lemma fstIdx_axL (s p : V) : fstIdx (axL s p) = s := by simp [fstIdx, axL]
 @[simp] lemma fstIdx_verumIntro (s : V) : fstIdx (verumIntro s) = s := by simp [fstIdx, verumIntro]
@@ -308,7 +308,7 @@ lemma root_defined : 𝚺₀-Function₂ (root : V → V → V) via rootGraph :=
 @[simp] lemma fstIdx_wkRule (s d : V) : fstIdx (wkRule s d) = s := by simp [fstIdx, wkRule]
 @[simp] lemma fstIdx_shiftRule (s d : V) : fstIdx (shiftRule s d) = s := by simp [fstIdx, shiftRule]
 @[simp] lemma fstIdx_cutRule (s p d₁ d₂ : V) : fstIdx (cutRule s p d₁ d₂) = s := by simp [fstIdx, cutRule]
-@[simp] lemma fstIdx_root (s p : V) : fstIdx (root s p) = s := by simp [fstIdx, root]
+@[simp] lemma fstIdx_axm (s p : V) : fstIdx (axm s p) = s := by simp [fstIdx, axm]
 
 end
 
@@ -329,7 +329,7 @@ def Phi (C : Set V) (d : V) : Prop :=
     (∃ s d', d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ d' ∈ C) ∨
     (∃ s d', d = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ d' ∈ C) ∨
     (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ C)) ∨
-    (∃ s p, d = root s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) )
+    (∃ s p, d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) )
 
 private lemma phi_iff (C d : V) :
     Phi T {x | x ∈ C} d ↔
@@ -351,7 +351,7 @@ private lemma phi_iff (C d : V) :
       (∃ s < d, ∃ p < d, ∃ d₁ < d, ∃ d₂ < d,
         d = cutRule s p d₁ d₂ ∧ (fstIdx d₁ = insert p s ∧ d₁ ∈ C) ∧ (fstIdx d₂ = insert (neg L p) s ∧ d₂ ∈ C)) ∨
       (∃ s < d, ∃ p < d,
-        d = root s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) := by
+        d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) := by
   constructor
   · rintro ⟨hs, H⟩
     refine ⟨hs, ?_⟩
@@ -411,7 +411,7 @@ def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         (∃ c, !fstIdxDef c d₁ ∧ !insertDef c p s ∧ d₁ ∈ C) ∧
         (∃ c, !fstIdxDef c d₂ ∧ ∃ np, !(negGraph L) np p ∧ !insertDef c np s ∧ d₂ ∈ C)) ∨
       (∃ s < d, ∃ p < d,
-        !rootGraph d s p ∧ p ∈ s ∧ !T.Δ₁ch.sigma p) )”
+        !axmGraph d s p ∧ p ∈ s ∧ !T.Δ₁ch.sigma p) )”
     )
   (.mkPi “d C.
     (∀ fst, !fstIdxDef fst d → !(isFormulaSet L).pi fst) ∧
@@ -441,7 +441,7 @@ def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         (∀ c, !fstIdxDef c d₁ → !insertDef c p s ∧ d₁ ∈ C) ∧
         (∀ c, !fstIdxDef c d₂ → ∀ np, !(negGraph L) np p → !insertDef c np s ∧ d₂ ∈ C)) ∨
       (∃ s < d, ∃ p < d,
-        !rootGraph d s p ∧ p ∈ s ∧ !T.Δ₁ch.pi p) )”
+        !axmGraph d s p ∧ p ∈ s ∧ !T.Δ₁ch.pi p) )”
     )⟩
 
 def construction : Fixpoint.Construction V (blueprint T) where
@@ -474,7 +474,7 @@ def construction : Fixpoint.Construction V (blueprint T) where
       free.defined.df.iff, setShift.defined.df.iff, exIntro.eval, eval_qqExDef,
       IsSemiterm.defined.df.iff, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
       ORingStruc.zero_eq_zero, substs1.defined.df.iff, Fin.succ_one_eq_two, wkRule.eval,
-      bitSubset_defined_iff, shiftRule.eval, cutRule.eval, root.eval, Δ₁Class.defined.df.iff,
+      bitSubset_defined_iff, shiftRule.eval, cutRule.eval, axm.eval, Δ₁Class.defined.df.iff,
       LogicalConnective.Prop.or_eq, HierarchySymbol.Semiformula.pi_mkDelta,
       HierarchySymbol.Semiformula.val_mkPi, Semiformula.eval_all,
       LogicalConnective.HomClass.map_imply, IsFormulaSet.defined.proper.iff',
@@ -508,7 +508,7 @@ def construction : Fixpoint.Construction V (blueprint T) where
       free.defined.df.iff, setShift.defined.df.iff, exIntro.eval, eval_qqExDef,
       IsSemiterm.defined.df.iff, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
       ORingStruc.zero_eq_zero, substs1.defined.df.iff, Fin.succ_one_eq_two, wkRule.eval,
-      bitSubset_defined_iff, shiftRule.eval, cutRule.eval, root.eval, Δ₁Class.defined.df.iff,
+      bitSubset_defined_iff, shiftRule.eval, cutRule.eval, axm.eval, Δ₁Class.defined.df.iff,
       LogicalConnective.Prop.or_eq]
 
       ⟩
@@ -655,7 +655,7 @@ lemma case_iff {d : V} :
       (∃ s d', d = wkRule s d' ∧ fstIdx d' ⊆ s ∧ T.Derivation d') ∨
       (∃ s d', d = shiftRule s d' ∧ s = setShift L (fstIdx d') ∧ T.Derivation d') ∨
       (∃ s p d₁ d₂, d = cutRule s p d₁ d₂ ∧ T.DerivationOf d₁ (insert p s) ∧ T.DerivationOf d₂ (insert (neg L p) s)) ∨
-      (∃ s p, d = root s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) :=
+      (∃ s p, d = axm s p ∧ p ∈ s ∧ p ∈ T.Δ₁Class) ) :=
   (construction T).case
 
 alias ⟨case, _root_.LO.FirstOrder.Theory.Derivation.mk⟩ := case_iff
@@ -678,7 +678,7 @@ lemma induction1 (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
       P d → P (shiftRule s d))
     (hCut : ∀ s, IsFormulaSet L s → ∀ p d₁ d₂, T.DerivationOf d₁ (insert p s) → T.DerivationOf d₂ (insert (neg L p) s) →
       P d₁ → P d₂ → P (cutRule s p d₁ d₂))
-    (hRoot : ∀ s, IsFormulaSet L s → ∀ p, p ∈ s → p ∈ T.Δ₁Class → P (root s p)) : P d :=
+    (hRoot : ∀ s, IsFormulaSet L s → ∀ p, p ∈ s → p ∈ T.Δ₁Class → P (axm s p)) : P d :=
   (construction T).induction (v := ![]) hP (by
     intro C ih d hd
     rcases hd with ⟨hds,
@@ -757,8 +757,8 @@ lemma cutRule {s p d₁ d₂ : V}
     ⟨by simp only [fstIdx_cutRule]; intro q hq; exact hd₁.isFormulaSet q (by simp [hq]),
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inl ⟨s, p, d₁, d₂, rfl, hd₁, hd₂⟩⟩
 
-lemma root {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
-    T.Derivation (root s p) :=
+lemma axm {s p : V} (hs : IsFormulaSet L s) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
+    T.Derivation (axm s p) :=
   Theory.Derivation.mk
     ⟨by simpa using hs,
       Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr <| Or.inr ⟨s, p, rfl, hp, hT⟩⟩
@@ -785,7 +785,7 @@ lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {d : V} : T.Derivation 
   · intro s _ p d₁ d₂ h₁ h₂ ih₁ ih₂
     apply Derivation.cutRule ⟨h₁.1, ih₁⟩ ⟨h₂.1, ih₂⟩
   · intro s hs p hps hpT
-    apply Derivation.root hs hps (h hpT)
+    apply Derivation.axm hs hps (h hpT)
   · definability
 
 end Derivation
@@ -846,7 +846,7 @@ lemma cut {s : V} (p) (hd₁ : T.Derivable (insert p s)) (hd₂ : T.Derivable (i
 
 lemma by_axm {s : V} (hs : IsFormulaSet L s) (p) (hp : p ∈ s) (hT : p ∈ T.Δ₁Class) :
     T.Derivable s := by
-  exact ⟨Metamath.root s p, by simp, Derivation.root hs hp hT⟩
+  exact ⟨Metamath.axm s p, by simp, Derivation.axm hs hp hT⟩
 
 lemma of_ss (h : T.Δ₁Class (V := V) ⊆ U.Δ₁Class) {s : V} : T.Derivable s → U.Derivable s := by
   rintro ⟨d, hd⟩; exact ⟨d, hd.1, hd.2.of_ss h⟩

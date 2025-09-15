@@ -34,21 +34,21 @@ infix:45 " ⟹!. " => OneSided.Derivable₁
 noncomputable def OneSided.Derivable.get [OneSided F K] (𝓚 : K) (Δ : List F) (h : 𝓚 ⟹! Δ) : 𝓚 ⟹ Δ :=
   Classical.choice h
 
-class Tait (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] extends OneSided F K where
+class Tait (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] extends OneSided F K where
   verum (𝓚 : K) (Δ : List F)         : 𝓚 ⟹ ⊤ :: Δ
   and {𝓚 : K} {φ ψ : F} {Δ : List F} : 𝓚 ⟹ φ :: Δ → 𝓚 ⟹ ψ :: Δ → 𝓚 ⟹ φ ⋏ ψ :: Δ
   or {𝓚 : K} {φ ψ : F} {Δ : List F}  : 𝓚 ⟹ φ :: ψ :: Δ → 𝓚 ⟹ φ ⋎ ψ :: Δ
   wk {𝓚 : K} {Δ Δ' : List F}         : 𝓚 ⟹ Δ → Δ ⊆ Δ' → 𝓚 ⟹ Δ'
   em {𝓚 : K} {φ} {Δ : List F}        : φ ∈ Δ → ∼φ ∈ Δ → 𝓚 ⟹ Δ
 
-class Tait.Cut (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] [Tait F K] where
+class Tait.Cut (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] [Tait F K] where
   cut {𝓚 : K} {Δ : List F} {φ} : 𝓚 ⟹ φ :: Δ → 𝓚 ⟹ ∼φ :: Δ → 𝓚 ⟹ Δ
 
-class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [DeMorgan F] [Collection F K] [Tait F K] where
-  root {𝓚 : K} {φ}    : φ ∈ 𝓚 → 𝓚 ⟹. φ
+class Tait.Axiomatized (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] [Tait F K] where
+  axm {𝓚 : K} {φ} : φ ∈ 𝓚 → 𝓚 ⟹. φ
   trans {𝓚 𝓛 : K} {Γ} : ((ψ : F) → ψ ∈ 𝓚 → 𝓛 ⟹. ψ) → 𝓚 ⟹ Γ → 𝓛 ⟹ Γ
 
-variable {F S K : Type*} [LogicalConnective F] [Collection F K]
+variable {F S K : Type*} [LogicalConnective F] [AdjunctiveSet F K]
 
 namespace OneSided
 
@@ -101,34 +101,35 @@ def wkTail (d : 𝓚 ⟹ Γ) : 𝓚 ⟹ φ :: Γ := wk d (by simp)
 def rotate₁ (d : 𝓚 ⟹ φ₂ :: φ₁ :: Γ) : 𝓚 ⟹ φ₁ :: φ₂ :: Γ := wk d (by simp)
 
 def rotate₂ (d : 𝓚 ⟹ φ₃ :: φ₁ :: φ₂ :: Γ) : 𝓚 ⟹ φ₁ :: φ₂ :: φ₃ :: Γ :=
-  wk d (by simp; apply List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| by simp))
+  wk d (by simpa using List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| by simp))
 
 def rotate₃ (d : 𝓚 ⟹ φ₄ :: φ₁ :: φ₂ :: φ₃ :: Γ) : 𝓚 ⟹ φ₁ :: φ₂ :: φ₃ :: φ₄ :: Γ :=
-  wk d (by simp; apply List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| List.subset_cons_of_subset _ <| by simp))
+  wk d (by simpa using
+    List.subset_cons_of_subset _ (List.subset_cons_of_subset _ <| List.subset_cons_of_subset _ <| by simp))
 
 variable {𝓚 𝓛 : K} {Γ : List F}
 
 alias cut := Tait.Cut.cut
 
-alias root := Tait.Axiomatized.root
+alias axm := Tait.Axiomatized.axm
 
 lemma cut! [Cut F K] (hp : 𝓚 ⟹! φ :: Δ) (hn : 𝓚 ⟹! ∼φ :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
 
-lemma root! [Tait.Axiomatized F K] {φ} (h : φ ∈ 𝓚) : 𝓚 ⟹!. φ := ⟨root h⟩
+lemma root! [Tait.Axiomatized F K] {φ} (h : φ ∈ 𝓚) : 𝓚 ⟹!. φ := ⟨axm h⟩
 
-def byAxm [Tait.Axiomatized F K] (φ) (h : φ ∈ 𝓚) (hΓ : φ ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (root h) (by simp_all)
+def byAxm [Tait.Axiomatized F K] (φ) (h : φ ∈ 𝓚) (hΓ : φ ∈ Γ := by simp) : 𝓚 ⟹ Γ := wk (axm h) (by simp_all)
 
 lemma byAxm! [Tait.Axiomatized F K] (φ) (h : φ ∈ 𝓚) (hΓ : φ ∈ Γ := by simp) : 𝓚 ⟹! Γ := ⟨byAxm φ h hΓ⟩
 
 def ofAxiomSubset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → 𝓛 ⟹ Γ :=
-  Tait.Axiomatized.trans fun _ hq ↦ Tait.Axiomatized.root (Collection.subset_iff.mp h _ hq)
+  Tait.Axiomatized.trans fun _ hq ↦ Tait.Axiomatized.axm (AdjunctiveSet.subset_iff.mp h _ hq)
 
 lemma of_axiom_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹! Γ → 𝓛 ⟹! Γ := fun b ↦ ⟨ofAxiomSubset h b.get⟩
 
 instance system : Entailment F K := ⟨(· ⟹. ·)⟩
 
 instance [Tait.Axiomatized F K] : Entailment.Axiomatized K where
-  prfAxm := fun hf ↦ Tait.Axiomatized.root <| hf
+  prfAxm := fun hf ↦ Tait.Axiomatized.axm <| hf
   weakening := Tait.ofAxiomSubset
 
 lemma provable_bot_iff_derivable_nil [Cut F K] : 𝓚 ⟹! [] ↔ 𝓚 ⊢! ⊥ :=

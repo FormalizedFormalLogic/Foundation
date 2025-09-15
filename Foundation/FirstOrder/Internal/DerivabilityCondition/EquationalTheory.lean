@@ -10,7 +10,7 @@ namespace LO.ISigma1.Metamath
 
 open Classical FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 namespace InternalArithmetic
 
@@ -22,7 +22,7 @@ local postfix:max "⇞" => Semiterm.shift
 
 local postfix:max "⤉" => Semiformula.shift
 
-variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝐄𝐐 ⪯ T]
+variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗘𝗤 ⪯ T]
 
 open Entailment Entailment.FiniteContext Semiformula
 

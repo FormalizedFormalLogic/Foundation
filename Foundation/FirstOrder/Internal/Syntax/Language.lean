@@ -61,7 +61,7 @@ instance _root_.LO.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsR
 
 section
 
-variable [V ⊧ₘ* 𝐏𝐀⁻]
+variable [V ⊧ₘ* 𝗣𝗔⁻]
 
 instance  goedelQuoteFunc (k) : GoedelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
 
@@ -146,7 +146,7 @@ instance : (ℒₒᵣ).LORDefinable where
 
 namespace InternalArithmetic
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def zeroIndex : ℕ := Encodable.encode (Language.Zero.zero : (ℒₒᵣ : FirstOrder.Language).Func 0)
 

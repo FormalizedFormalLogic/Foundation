@@ -132,7 +132,7 @@ lemma Logic.GrzPoint3.is_largestMC_of_LC : Modal.GrzPoint3 = (Logic.largestMC �
     | nec ih => apply nec! ih;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-instance : Sound (Logic.largestMC 𝐋𝐂) FrameClass.finite_GrzPoint3 := by
+instance : Sound (Logic.largestMC 𝐋𝐂) { F : Frame | F.IsFiniteGrzPoint3' } := by
   rw [←Logic.GrzPoint3.is_largestMC_of_LC];
   infer_instance;
 
@@ -140,7 +140,7 @@ instance modalCompanion_LC_GrzPoint3 : ModalCompanion 𝐋𝐂 Modal.GrzPoint3 :
   rw [Logic.GrzPoint3.is_largestMC_of_LC];
   exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_LC)
-    (MC := FrameClass.finite_GrzPoint3)
+    (MC := { F : Frame | F.IsFiniteGrzPoint3' })
     (by intro F hF; simp_all only [Set.mem_setOf_eq]; exact {})
 
 end GrzPoint3

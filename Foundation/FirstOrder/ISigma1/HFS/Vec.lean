@@ -10,73 +10,73 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
-section cons
+section adjoin
 
-noncomputable instance : Cons V V := ⟨(⟪·, ·⟫ + 1)⟩
+noncomputable instance : Adjoin V V := ⟨(⟪·, ·⟫ + 1)⟩
 
-scoped infixr:67 " ∷ " => cons
+scoped infixr:67 " ∷ " => adjoin
 
 syntax "?[" term,* "]" : term
 
 macro_rules
-  | `(?[$term:term, $terms:term,*]) => `(cons $term ?[$terms,*])
-  | `(?[$term:term]) => `(cons $term 0)
+  | `(?[$term:term, $terms:term,*]) => `(adjoin $term ?[$terms,*])
+  | `(?[$term:term]) => `(adjoin $term 0)
   | `(?[]) => `(0)
 
-@[app_unexpander Cons.cons]
-def consUnexpander : Lean.PrettyPrinter.Unexpander
+@[app_unexpander Adjoin.adjoin]
+def adjoinUnexpander : Lean.PrettyPrinter.Unexpander
   | `($_ $term ?[$terms,*]) => `(?[$term, $terms,*])
   | `($_ $term 0) => `(?[$term])
   | _ => throw ()
 
-lemma cons_def (x v : V) : x ∷ v = ⟪x, v⟫ + 1 := rfl
+lemma adjoin_def (x v : V) : x ∷ v = ⟪x, v⟫ + 1 := rfl
 
-@[simp] lemma fstIdx_cons (x v : V) : fstIdx (x ∷ v) = x := by simp [cons_def, fstIdx]
+@[simp] lemma fstIdx_adjoin (x v : V) : fstIdx (x ∷ v) = x := by simp [adjoin_def, fstIdx]
 
-@[simp] lemma sndIdx_cons (x v : V) : sndIdx (x ∷ v) = v := by simp [cons_def, sndIdx]
+@[simp] lemma sndIdx_adjoin (x v : V) : sndIdx (x ∷ v) = v := by simp [adjoin_def, sndIdx]
 
-lemma succ_eq_cons (x : V) : x + 1 = π₁ x ∷ π₂ x := by simp [cons_def]
+lemma succ_eq_adjoin (x : V) : x + 1 = π₁ x ∷ π₂ x := by simp [adjoin_def]
 
-@[simp] lemma lt_cons (x v : V) : x < x ∷ v := by simp [cons_def, lt_succ_iff_le]
+@[simp] lemma lt_adjoin (x v : V) : x < x ∷ v := by simp [adjoin_def, lt_succ_iff_le]
 
-@[simp] lemma lt_cons' (x v : V) : v < x ∷ v := by simp [cons_def, lt_succ_iff_le]
+@[simp] lemma lt_adjoin' (x v : V) : v < x ∷ v := by simp [adjoin_def, lt_succ_iff_le]
 
-@[simp] lemma zero_lt_cons (x v : V) : 0 < x ∷ v := by simp [cons_def]
+@[simp] lemma zero_lt_adjoin (x v : V) : 0 < x ∷ v := by simp [adjoin_def]
 
-@[simp] lemma cons_ne_zero (x v : V) : x ∷ v ≠ 0 := by simp [cons_def]
+@[simp] lemma adjoin_ne_zero (x v : V) : x ∷ v ≠ 0 := by simp [adjoin_def]
 
-@[simp] lemma zero_ne_cons (x v : V) : 0 ≠ x ∷ v := by symm; simp [cons_def]
+@[simp] lemma zero_ne_adjoin (x v : V) : 0 ≠ x ∷ v := by symm; simp [adjoin_def]
 
-lemma nil_or_cons (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
+lemma nil_or_adjoin (z : V) : z = 0 ∨ ∃ x v, z = x ∷ v := by
   rcases zero_or_succ z with (rfl | ⟨z, rfl⟩)
   · left; rfl
-  · right; exact ⟨π₁ z, π₂ z, by simp [succ_eq_cons]⟩
+  · right; exact ⟨π₁ z, π₂ z, by simp [succ_eq_adjoin]⟩
 
-@[simp] lemma cons_inj (x₁ x₂ v₁ v₂ : V) :
-    x₁ ∷ v₁ = x₂ ∷ v₂ ↔ x₁ = x₂ ∧ v₁ = v₂ := by simp [cons_def]
+@[simp] lemma adjoin_inj (x₁ x₂ v₁ v₂ : V) :
+    x₁ ∷ v₁ = x₂ ∷ v₂ ↔ x₁ = x₂ ∧ v₁ = v₂ := by simp [adjoin_def]
 
-lemma cons_le_cons {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
-    x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [cons_def] using pair_le_pair hx hv
+lemma adjoin_le_adjoin {x₁ x₂ v₁ v₂ : V} (hx : x₁ ≤ x₂) (hv : v₁ ≤ v₂) :
+    x₁ ∷ v₁ ≤ x₂ ∷ v₂ := by simpa [adjoin_def] using pair_le_pair hx hv
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.consDef : 𝚺₀.Semisentence 3 :=
+def _root_.LO.FirstOrder.Arithmetic.adjoinDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “w x v. ∃ xv < w, !pairDef xv x v ∧ w = xv + 1”
 
-lemma cons_defined : 𝚺₀-Function₂ (cons : V → V → V) via consDef := by
-  intro v; simp_all [consDef, cons_def]
+lemma adjoin_defined : 𝚺₀-Function₂ (adjoin : V → V → V) via adjoinDef := by
+  intro v; simp_all [adjoinDef, adjoin_def]
 
-@[simp] lemma eval_cons (v) :
-    Semiformula.Evalbm V v consDef.val ↔ v 0 = v 1 ∷ v 2 := cons_defined.df.iff v
+@[simp] lemma eval_adjoin (v) :
+    Semiformula.Evalbm V v adjoinDef.val ↔ v 0 = v 1 ∷ v 2 := adjoin_defined.df.iff v
 
-instance cons_definable : 𝚺₀-Function₂ (cons : V → V → V) := cons_defined.to_definable
+instance adjoin_definable : 𝚺₀-Function₂ (adjoin : V → V → V) := adjoin_defined.to_definable
 
-instance cons_definable' (ℌ) : ℌ-Function₂ (cons : V → V → V) := cons_definable.of_zero
+instance adjoin_definable' (ℌ) : ℌ-Function₂ (adjoin : V → V → V) := adjoin_definable.of_zero
 
 def _root_.LO.FirstOrder.Arithmetic.mkVec₁Def : 𝚺₀.Semisentence 2 := .mkSigma
-  “s x. !consDef s x 0”
+  “s x. !adjoinDef s x 0”
 
 lemma mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := by
   intro v; simp [mkVec₁Def]
@@ -89,7 +89,7 @@ instance mkVec₁_definable : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) := mkVec�
 instance mkVec₁_definable' (ℌ) : ℌ-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_definable.of_zero
 
 def _root_.LO.FirstOrder.Arithmetic.mkVec₂Def : 𝚺₁.Semisentence 3 := .mkSigma
-  “s x y. ∃ sy, !mkVec₁Def sy y ∧ !consDef s x sy”
+  “s x y. ∃ sy, !mkVec₁Def sy y ∧ !adjoinDef s x sy”
 
 lemma mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := by
   intro v; simp [mkVec₂Def]
@@ -103,7 +103,7 @@ instance mkVec₂_definable' (Γ m) : Γ-[m + 1]-Function₂ (fun x y : V ↦ ?[
 
 end
 
-end cons
+end adjoin
 
 /-!
 
@@ -139,7 +139,7 @@ def blueprint : Fixpoint.Blueprint 0 where
     (by simp))
     _
 
-def construction : Fixpoint.Construction V blueprint where
+def adjointruction : Fixpoint.Construction V blueprint where
   Φ := fun _ ↦ Phi
   defined := .of_zero <| by intro v; simp [phi_iff]
   monotone := by
@@ -147,19 +147,19 @@ def construction : Fixpoint.Construction V blueprint where
     · left; exact h
     · right; exact ⟨v, i, x, rfl, hC h⟩
 
-instance : construction.Finite V where
+instance : adjointruction.Finite V where
   finite := by
     rintro C v x (h | ⟨v, i, x, rfl, h⟩)
     · exact ⟨0, Or.inl h⟩
     · exact ⟨⟪sndIdx v, i, x⟫ + 1, Or.inr ⟨v, i, x, rfl, h, by simp⟩⟩
 
-def Graph : V → Prop := construction.Fixpoint ![]
+def Graph : V → Prop := adjointruction.Fixpoint ![]
 
 section
 
 def graphDef : 𝚺₁.Semisentence 1 := blueprint.fixpointDef
 
-lemma graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef := construction.fixpoint_defined
+lemma graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef := adjointruction.fixpoint_defined
 
 instance graph_definable : 𝚺₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
 
@@ -173,7 +173,7 @@ end
 lemma graph_case {pr : V} :
     Graph pr ↔
     (∃ v, pr = ⟪v, 0, fstIdx v⟫) ∨ (∃ v i x, pr = ⟪v, i + 1, x⟫ ∧ Graph ⟪sndIdx v, i, x⟫) :=
-  construction.case
+  adjointruction.case
 
 lemma graph_zero {v x : V} :
     Graph ⟪v, 0, x⟫ ↔ x = fstIdx v := by
@@ -239,40 +239,40 @@ lemma nth_zero (v : V) : v.[0] = fstIdx v := nth_eq_of_graph (graph_zero.mpr rfl
 
 lemma nth_succ (v i : V) : v.[i + 1] = (sndIdx v).[i] := nth_eq_of_graph (graph_succ.mpr <| nth_graph _ _)
 
-@[simp] lemma nth_cons_zero (x v : V) : (x ∷ v).[0] = x := by
+@[simp] lemma nth_adjoin_zero (x v : V) : (x ∷ v).[0] = x := by
   simp [nth_zero]
 
-@[simp] lemma nth_cons_succ (x v i : V) : (x ∷ v).[i + 1] = v.[i] := by
+@[simp] lemma nth_adjoin_succ (x v i : V) : (x ∷ v).[i + 1] = v.[i] := by
   simp [nth_succ]
 
-@[simp] lemma nth_cons_one (x v : V) : (x ∷ v).[1] = v.[0] := by
-  simpa using nth_cons_succ x v 0
+@[simp] lemma nth_adjoin_one (x v : V) : (x ∷ v).[1] = v.[0] := by
+  simpa using nth_adjoin_succ x v 0
 
-@[simp] lemma nth_cons_two (x v : V) : (x ∷ v).[2] = v.[1] := by
-  simpa [-nth_cons_succ, one_add_one_eq_two] using nth_cons_succ x v 1
+@[simp] lemma nth_adjoin_two (x v : V) : (x ∷ v).[2] = v.[1] := by
+  simpa [-nth_adjoin_succ, one_add_one_eq_two] using nth_adjoin_succ x v 1
 
-lemma cons_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
+lemma adjoin_cases (x : V) : x = 0 ∨ ∃ y v, x = y ∷ v := by
   rcases zero_or_succ x with (rfl | ⟨z, rfl⟩)
   · simp
-  · right; exact ⟨π₁ z, π₂ z, by simp [cons]⟩
+  · right; exact ⟨π₁ z, π₂ z, by simp [adjoin]⟩
 
-lemma cons_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
-    (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
+lemma adjoin_induction (Γ) {P : V → Prop} (hP : Γ-[1]-Predicate P)
+    (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
   ISigma1.order_induction Γ hP (by
     intro v ih
-    rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩)
+    rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩)
     · exact nil
-    · exact cons _ _ (ih v (by simp)))
+    · exact adjoin _ _ (ih v (by simp)))
 
 @[elab_as_elim]
-lemma cons_ISigma1.sigma1_succ_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
-    (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
-  cons_induction 𝚺 hP nil cons
+lemma adjoin_ISigma1.sigma1_succ_induction {P : V → Prop} (hP : 𝚺₁-Predicate P)
+    (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
+  adjoin_induction 𝚺 hP nil adjoin
 
 @[elab_as_elim]
-lemma cons_ISigma1.pi1_succ_induction {P : V → Prop} (hP : 𝚷₁-Predicate P)
-    (nil : P 0) (cons : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
-  cons_induction 𝚷 hP nil cons
+lemma adjoin_ISigma1.pi1_succ_induction {P : V → Prop} (hP : 𝚷₁-Predicate P)
+    (nil : P 0) (adjoin : ∀ x v, P v → P (x ∷ v)) : ∀ v, P v :=
+  adjoin_induction 𝚷 hP nil adjoin
 
 section
 
@@ -295,8 +295,8 @@ instance nth_definable' (Γ m) : Γ-[m + 1]-Function₂ (nth : V → V → V) :=
 
 end
 
-lemma cons_absolute (a v : ℕ) : ((a ∷ v : ℕ) : V) = (a : V) ∷ (v : V) := by
-  simpa using DefinedFunction.shigmaZero_absolute_func V cons_defined cons_defined ![a, v]
+lemma adjoin_absolute (a v : ℕ) : ((a ∷ v : ℕ) : V) = (a : V) ∷ (v : V) := by
+  simpa using DefinedFunction.shigmaZero_absolute_func V adjoin_defined adjoin_defined ![a, v]
 
 /-- TODO: move-/
 lemma pi₁_zero : π₁ (0 : V) = 0 := nonpos_iff_eq_zero.mp (pi₁_le_self 0)
@@ -315,11 +315,11 @@ lemma nth_lt_of_pos {v} (hv : 0 < v) (i : V) : v.[i] < v := by
   case zero =>
     rcases zero_or_succ v with (rfl | ⟨v, rfl⟩)
     · simp at hv
-    · simp [succ_eq_cons]
+    · simp [succ_eq_adjoin]
   case succ i ih =>
     rcases zero_or_succ v with (rfl | ⟨v, rfl⟩)
     · simp at hv
-    · simp only [succ_eq_cons v, nth_cons_succ]
+    · simp only [succ_eq_adjoin v, nth_adjoin_succ]
       rcases eq_zero_or_pos (π₂ v) with (h | h)
       · simp [h]
       · exact lt_trans (ih h) (by simp)
@@ -342,7 +342,7 @@ namespace VecRec
 
 structure Blueprint (arity : ℕ) where
   nil : 𝚺₁.Semisentence (arity + 1)
-  cons : 𝚺₁.Semisentence (arity + 4)
+  adjoin : 𝚺₁.Semisentence (arity + 4)
 
 namespace Blueprint
 
@@ -353,16 +353,16 @@ def blueprint : Fixpoint.Blueprint arity where
     (.mkSigma “pr C.
         (∃ nil, !β.nil nil ⋯ ∧ !pairDef pr 0 nil) ∨
         (∃ x < pr, ∃ xs < pr, ∃ ih < C,
-          ∃ xxs, !consDef xxs x xs ∧
-          ∃ cons, !β.cons cons x xs ih ⋯ ∧
-          !pairDef pr xxs cons ∧ :⟪xs, ih⟫:∈ C)”
+          ∃ xxs, !adjoinDef xxs x xs ∧
+          ∃ adjoin, !β.adjoin adjoin x xs ih ⋯ ∧
+          !pairDef pr xxs adjoin ∧ :⟪xs, ih⟫:∈ C)”
       (by simp))
     (.mkPi “pr C.
         (∀ nil, !β.nil nil ⋯ → !pairDef pr 0 nil) ∨
         (∃ x < pr, ∃ xs < pr, ∃ ih < C,
-          ∀ xxs, !consDef xxs x xs →
-          ∀ cons, !β.cons cons x xs ih ⋯ →
-          !pairDef pr xxs cons ∧ :⟪xs, ih⟫:∈ C)”
+          ∀ xxs, !adjoinDef xxs x xs →
+          ∀ adjoin, !β.adjoin adjoin x xs ih ⋯ →
+          !pairDef pr xxs adjoin ∧ :⟪xs, ih⟫:∈ C)”
       (by simp))
 
 def graphDef : 𝚺₁.Semisentence (arity + 1) := β.blueprint.fixpointDef
@@ -376,9 +376,9 @@ variable (V)
 
 structure Construction {arity : ℕ} (β : Blueprint arity) where
   nil (param : Fin arity → V) : V
-  cons (param : Fin arity → V) (x xs ih) : V
+  adjoin (param : Fin arity → V) (x xs ih) : V
   nil_defined : 𝚺₁.DefinedFunction nil β.nil
-  cons_defined : 𝚺₁.DefinedFunction (fun v ↦ cons (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.cons
+  adjoin_defined : 𝚺₁.DefinedFunction (fun v ↦ adjoin (v ·.succ.succ.succ) (v 0) (v 1) (v 2)) β.adjoin
 
 variable {V}
 
@@ -387,11 +387,11 @@ namespace Construction
 variable {arity : ℕ} {β : Blueprint arity} (c : Construction V β)
 
 def Phi (param : Fin arity → V) (C : Set V) (pr : V) : Prop :=
-  pr = ⟪0, c.nil param⟫ ∨ (∃ x xs ih, pr = ⟪x ∷ xs, c.cons param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C)
+  pr = ⟪0, c.nil param⟫ ∨ (∃ x xs ih, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C)
 
 private lemma phi_iff (param : Fin arity → V) (C pr : V) :
     c.Phi param {x | x ∈ C} pr ↔
-    pr = ⟪0, c.nil param⟫ ∨ (∃ x < pr, ∃ xs < pr, ∃ ih < C, pr = ⟪x ∷ xs, c.cons param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C) := by
+    pr = ⟪0, c.nil param⟫ ∨ (∃ x < pr, ∃ xs < pr, ∃ ih < C, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ ⟪xs, ih⟫ ∈ C) := by
   constructor
   · rintro (h | ⟨x, xs, ih, rfl, hC⟩)
     · left; exact h
@@ -402,17 +402,17 @@ private lemma phi_iff (param : Fin arity → V) (C pr : V) :
     · left; exact h
     · right; exact ⟨x, xs, ih, rfl, hC⟩
 
-def construction : Fixpoint.Construction V β.blueprint where
+def adjointruction : Fixpoint.Construction V β.blueprint where
   Φ := c.Phi
   defined := ⟨by
-    intro v; simp [Blueprint.blueprint, c.nil_defined.df.iff, c.cons_defined.df.iff], by
-    intro v; simpa [Blueprint.blueprint, c.nil_defined.df.iff, c.cons_defined.df.iff] using c.phi_iff _ _ _⟩
+    intro v; simp [Blueprint.blueprint, c.nil_defined.df.iff, c.adjoin_defined.df.iff], by
+    intro v; simpa [Blueprint.blueprint, c.nil_defined.df.iff, c.adjoin_defined.df.iff] using c.phi_iff _ _ _⟩
   monotone := by
     rintro C C' hC _ x (h | ⟨v, i, hv, rfl, h⟩)
     · left; exact h
     · right; exact ⟨v, i, hv, rfl, hC h⟩
 
-instance : c.construction.Finite V where
+instance : c.adjointruction.Finite V where
   finite := by
     rintro C v x (h | ⟨x, xs, ih, rfl, h⟩)
     · exact ⟨0, Or.inl h⟩
@@ -420,12 +420,12 @@ instance : c.construction.Finite V where
 
 variable (param : Fin arity → V)
 
-def Graph : V → Prop := c.construction.Fixpoint param
+def Graph : V → Prop := c.adjointruction.Fixpoint param
 
 section
 
 lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
-  c.construction.fixpoint_defined
+  c.adjointruction.fixpoint_defined
 
 instance graph_definable : 𝚺₁.Boldface (fun v ↦ c.Graph (v ·.succ) (v 0)) := c.graph_defined.to_definable
 
@@ -439,8 +439,8 @@ end
 variable {param}
 
 lemma graph_case {pr : V} :
-    c.Graph param pr ↔ pr = ⟪0, c.nil param⟫ ∨ (∃ x xs ih, pr = ⟪x ∷ xs, c.cons param x xs ih⟫ ∧ c.Graph param ⟪xs, ih⟫) :=
-  c.construction.case
+    c.Graph param pr ↔ pr = ⟪0, c.nil param⟫ ∨ (∃ x xs ih, pr = ⟪x ∷ xs, c.adjoin param x xs ih⟫ ∧ c.Graph param ⟪xs, ih⟫) :=
+  c.adjointruction.case
 
 lemma graph_nil {l : V} :
     c.Graph param ⟪0, l⟫ ↔ l = c.nil param := by
@@ -451,36 +451,36 @@ lemma graph_nil {l : V} :
     · simp at h
   · rintro rfl; exact c.graph_case.mpr <| Or.inl rfl
 
-lemma graph_cons {x xs y : V} :
-    c.Graph param ⟪x ∷ xs, y⟫ ↔ ∃ y', y = c.cons param x xs y' ∧ c.Graph param ⟪xs, y'⟫ := by
+lemma graph_adjoin {x xs y : V} :
+    c.Graph param ⟪x ∷ xs, y⟫ ↔ ∃ y', y = c.adjoin param x xs y' ∧ c.Graph param ⟪xs, y'⟫ := by
   constructor
   · intro h
     rcases c.graph_case.mp h with (h | ⟨z, zs, v, h, hg⟩)
     · simp at h
-    · rcases show (x = z ∧ xs = zs) ∧ y = c.cons param z zs v by simpa using h with ⟨⟨rfl, rfl⟩, rfl⟩
+    · rcases show (x = z ∧ xs = zs) ∧ y = c.adjoin param z zs v by simpa using h with ⟨⟨rfl, rfl⟩, rfl⟩
       exact ⟨v, rfl, hg⟩
   · rintro ⟨y, rfl, h⟩; exact c.graph_case.mpr <| Or.inr ⟨x, xs, y, rfl, h⟩
 
 variable (param)
 
 lemma graph_exists (xs : V) : ∃ y, c.Graph param ⟪xs, y⟫ := by
-  induction xs using cons_ISigma1.sigma1_succ_induction
+  induction xs using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil =>
     exact ⟨c.nil param, c.graph_nil.mpr rfl⟩
-  case cons x xs ih =>
+  case adjoin x xs ih =>
     · rcases ih with ⟨y, hy⟩
-      exact ⟨c.cons param x xs y, c.graph_cons.mpr ⟨y, rfl, hy⟩⟩
+      exact ⟨c.adjoin param x xs y, c.graph_adjoin.mpr ⟨y, rfl, hy⟩⟩
 
 variable {param}
 
 lemma graph_unique {xs y₁ y₂ : V} : c.Graph param ⟪xs, y₁⟫ → c.Graph param ⟪xs, y₂⟫ → y₁ = y₂ := by
-  induction xs using cons_ISigma1.pi1_succ_induction generalizing y₁ y₂
+  induction xs using adjoin_ISigma1.pi1_succ_induction generalizing y₁ y₂
   · definability
   case nil =>
     simp only [graph_nil]; rintro rfl rfl; rfl
-  case cons x v ih =>
-    simp only [graph_cons, forall_exists_index, and_imp]
+  case adjoin x v ih =>
+    simp only [graph_adjoin, forall_exists_index, and_imp]
     rintro l₁ rfl h₁ l₂ rfl h₂
     rcases ih h₁ h₂; rfl
 
@@ -500,9 +500,9 @@ lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result p
 
 @[simp] lemma result_nil : c.result param (0 : V) = c.nil param := c.result_eq_of_graph param (c.graph_nil.mpr rfl)
 
-@[simp] lemma result_cons (x xs : V) :
-    c.result param (x ∷ xs) = c.cons param x xs (c.result param xs) :=
-  c.result_eq_of_graph param (c.graph_cons.mpr ⟨_, rfl, c.result_graph param xs⟩)
+@[simp] lemma result_adjoin (x xs : V) :
+    c.result param (x ∷ xs) = c.adjoin param x xs (c.result param xs) :=
+  c.result_eq_of_graph param (c.graph_adjoin.mpr ⟨_, rfl, c.result_graph param xs⟩)
 
 section
 
@@ -538,13 +538,13 @@ namespace Len
 
 def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. y = 0”
-  cons := .mkSigma “y x xs ih. y = ih + 1”
+  adjoin := .mkSigma “y x xs ih. y = ih + 1”
 
-def construction : VecRec.Construction V blueprint where
+def adjointruction : VecRec.Construction V blueprint where
   nil _ := 0
-  cons _ _ _ ih := ih + 1
+  adjoin _ _ _ ih := ih + 1
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by intro v; simp [blueprint]
+  adjoin_defined := by intro v; simp [blueprint]
 
 end Len
 
@@ -552,17 +552,17 @@ section len
 
 open Len
 
-noncomputable def len (v : V) : V := construction.result ![] v
+noncomputable def len (v : V) : V := adjointruction.result ![] v
 
-@[simp] lemma len_nil : len (0 : V) = 0 := by simp [len, construction]
+@[simp] lemma len_nil : len (0 : V) = 0 := by simp [len, adjointruction]
 
-@[simp] lemma len_cons (x v : V) : len (x ∷ v) = len v + 1 := by simp [len, construction]
+@[simp] lemma len_adjoin (x v : V) : len (x ∷ v) = len v + 1 := by simp [len, adjointruction]
 
 section
 
 def _root_.LO.FirstOrder.Arithmetic.lenDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
-lemma len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := construction.result_defined
+lemma len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := adjointruction.result_defined
 
 @[simp] lemma eval_lenDef (v) :
     Semiformula.Evalbm V v lenDef.val ↔ v 0 = len (v 1) := len_defined.df.iff v
@@ -574,35 +574,35 @@ instance len_definable' (Γ m) : Γ-[m + 1]-Function₁ (len : V → V) := len_d
 end
 
 @[simp] lemma len_zero_iff_eq_nil {v : V} : len v = 0 ↔ v = 0 := by
-  rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩) <;> simp
+  rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp
 
 lemma nth_lt_len {v i : V} (hl : len v ≤ i) : v.[i] = 0 := by
-  induction v using cons_ISigma1.pi1_succ_induction generalizing i
+  induction v using adjoin_ISigma1.pi1_succ_induction generalizing i
   · definability
   case nil => simp
-  case cons x v ih =>
+  case adjoin x v ih =>
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp at hl
     simpa using ih (by simpa using hl)
 
 @[simp] lemma len_le (v : V) : len v ≤ v := by
-  induction v using cons_ISigma1.pi1_succ_induction
+  induction v using adjoin_ISigma1.pi1_succ_induction
   · definability
   case nil => simp
-  case cons x v ih =>
-    simp only [len_cons]
-    simp only [cons, add_le_add_iff_right]
+  case adjoin x v ih =>
+    simp only [len_adjoin]
+    simp only [adjoin, add_le_add_iff_right]
     exact le_trans ih (le_pair_right x v)
 
 end len
 
 lemma nth_ext {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] = v₂.[i]) : v₁ = v₂ := by
-  induction v₁ using cons_ISigma1.pi1_succ_induction generalizing v₂
+  induction v₁ using adjoin_ISigma1.pi1_succ_induction generalizing v₂
   · definability
   case nil =>
     exact Eq.symm <| len_zero_iff_eq_nil.mp (by simp [←hl])
-  case cons x₁ v₁ ih =>
-    rcases nil_or_cons v₂ with (rfl | ⟨x₂, v₂, rfl⟩)
+  case adjoin x₁ v₁ ih =>
+    rcases nil_or_adjoin v₂ with (rfl | ⟨x₂, v₂, rfl⟩)
     · simp at hl
     have hx : x₁ = x₂ := by simpa using H 0 (by simp)
     have hv : v₁ = v₂ := ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
@@ -612,21 +612,21 @@ lemma nth_ext' (l : V) {v₁ v₂ : V} (hl₁ : len v₁ = l) (hl₂ : len v₂ 
   rcases hl₂; exact nth_ext hl₁ (by simpa [hl₁] using H)
 
 lemma le_of_nth_le_nth {v₁ v₂ : V} (hl : len v₁ = len v₂) (H : ∀ i < len v₁, v₁.[i] ≤ v₂.[i]) : v₁ ≤ v₂ := by
-  induction v₁ using cons_ISigma1.pi1_succ_induction generalizing v₂
+  induction v₁ using adjoin_ISigma1.pi1_succ_induction generalizing v₂
   · definability
   case nil => simp
-  case cons x₁ v₁ ih =>
-    rcases nil_or_cons v₂ with (rfl | ⟨x₂, v₂, rfl⟩)
+  case adjoin x₁ v₁ ih =>
+    rcases nil_or_adjoin v₂ with (rfl | ⟨x₂, v₂, rfl⟩)
     · simp at hl
     have hx : x₁ ≤ x₂ := by simpa using H 0 (by simp)
     have hv : v₁ ≤ v₂ := ih (by simpa using hl) (by intro i hi; simpa using H (i + 1) (by simpa using hi))
-    exact cons_le_cons hx hv
+    exact adjoin_le_adjoin hx hv
 
 lemma nth_lt_self {v i : V} (hi : i < len v) : v.[i] < v := by
-  induction v using cons_ISigma1.pi1_succ_induction generalizing i
+  induction v using adjoin_ISigma1.pi1_succ_induction generalizing i
   · definability
   case nil => simp at hi
-  case cons x v ih =>
+  case adjoin x v ih =>
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp
     · simpa using lt_trans (ih (by simpa using hi)) (by simp)
@@ -670,13 +670,13 @@ namespace ListMax
 
 def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. y = 0”
-  cons := .mkSigma “y x xs ih. !FirstOrder.Arithmetic.max y x ih”
+  adjoin := .mkSigma “y x xs ih. !FirstOrder.Arithmetic.max y x ih”
 
-noncomputable def construction : VecRec.Construction V blueprint where
+noncomputable def adjointruction : VecRec.Construction V blueprint where
   nil _ := 0
-  cons _ x _ ih := max x ih
+  adjoin _ x _ ih := max x ih
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by intro v; simp [blueprint]
+  adjoin_defined := by intro v; simp [blueprint]
 
 end ListMax
 
@@ -684,17 +684,17 @@ section listMax
 
 open ListMax
 
-noncomputable def listMax (v : V) : V := construction.result ![] v
+noncomputable def listMax (v : V) : V := adjointruction.result ![] v
 
-@[simp] lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, construction]
+@[simp] lemma listMax_nil : listMax (0 : V) = 0 := by simp [listMax, adjointruction]
 
-@[simp] lemma listMax_cons (x v : V) : listMax (x ∷ v) = max x (listMax v) := by simp [listMax, construction]
+@[simp] lemma listMax_adjoin (x v : V) : listMax (x ∷ v) = max x (listMax v) := by simp [listMax, adjointruction]
 
 section
 
 def _root_.LO.FirstOrder.Arithmetic.listMaxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
-lemma listMax_defined : 𝚺₁-Function₁ (listMax : V → V) via listMaxDef := construction.result_defined
+lemma listMax_defined : 𝚺₁-Function₁ (listMax : V → V) via listMaxDef := adjointruction.result_defined
 
 @[simp] lemma eval_listMaxDef (v) :
     Semiformula.Evalbm V v listMaxDef.val ↔ v 0 = listMax (v 1) := listMax_defined.df.iff v
@@ -706,20 +706,20 @@ instance listMax_definable' (Γ m) : Γ-[m + 1]-Function₁ (listMax : V → V) 
 end
 
 lemma nth_le_listMax {i v : V} (h : i < len v) : v.[i] ≤ listMax v := by
-  induction v using cons_ISigma1.pi1_succ_induction generalizing i
+  induction v using adjoin_ISigma1.pi1_succ_induction generalizing i
   · definability
   case nil => simp
-  case cons x v ih =>
+  case adjoin x v ih =>
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp
     · simp [ih (by simpa using h)]
 
 lemma listMaxss_le {v z : V} (h : ∀ i < len v, v.[i] ≤ z) : listMax v ≤ z := by
-  induction v using cons_ISigma1.pi1_succ_induction
+  induction v using adjoin_ISigma1.pi1_succ_induction
   · definability
   case nil => simp
-  case cons x v ih =>
-    simp only [listMax_cons, max_le_iff]
+  case adjoin x v ih =>
+    simp only [listMax_adjoin, max_le_iff]
     constructor
     · simpa using h 0 (by simp)
     · exact ih (fun i hi ↦ by simpa using h (i + 1) (by simp [hi]))
@@ -731,10 +731,10 @@ lemma listMaxss_le_iff {v z : V} : listMax v ≤ z ↔ ∀ i < len v, v.[i] ≤ 
 
 /-
 lemma nth_le_listMaxs (v : V) (hv : v ≠ 0) : ∃ i < len v, v.[i] = listMax v := by
-  induction v using cons_ISigma1.sigma1_succ_induction
+  induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp at hv
-  case cons x v ih =>
+  case adjoin x v ih =>
     simp
 -/
 
@@ -750,15 +750,15 @@ namespace TakeLast
 
 def blueprint : VecRec.Blueprint 1 where
   nil := .mkSigma “y k. y = 0”
-  cons := .mkSigma “y x xs ih k.
+  adjoin := .mkSigma “y x xs ih k.
     ∃ l, !lenDef l xs ∧
-    (l < k → !consDef y x xs) ∧ (k ≤ l → y = ih)”
+    (l < k → !adjoinDef y x xs) ∧ (k ≤ l → y = ih)”
 
-noncomputable def construction : VecRec.Construction V blueprint where
+noncomputable def adjointruction : VecRec.Construction V blueprint where
   nil _ := 0
-  cons (param x xs ih) := if len xs < param 0 then x ∷ xs else ih
+  adjoin (param x xs ih) := if len xs < param 0 then x ∷ xs else ih
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by
+  adjoin_defined := by
     intro v
     suffices
       (v 0 = if len (v 2) < v 4 then v 1 ∷ v 2 else v 3) ↔
@@ -774,18 +774,18 @@ section takeLast
 
 open TakeLast
 
-noncomputable def takeLast (v k : V) : V := construction.result ![k] v
+noncomputable def takeLast (v k : V) : V := adjointruction.result ![k] v
 
-@[simp] lemma takeLast_nil : takeLast (0 : V) k = 0 := by simp [takeLast, construction]
+@[simp] lemma takeLast_nil : takeLast (0 : V) k = 0 := by simp [takeLast, adjointruction]
 
-lemma takeLast_cons (x v : V) :
-    takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by simp [takeLast, construction]
+lemma takeLast_adjoin (x v : V) :
+    takeLast (x ∷ v) k = if len v < k then x ∷ v else takeLast v k := by simp [takeLast, adjointruction]
 
 section
 
 def _root_.LO.FirstOrder.Arithmetic.takeLastDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
 
-lemma takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via takeLastDef := construction.result_defined
+lemma takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via takeLastDef := adjointruction.result_defined
 
 @[simp] lemma eval_takeLastDef (v) :
     Semiformula.Evalbm V v takeLastDef.val ↔ v 0 = takeLast (v 1) (v 2) := takeLast_defined.df.iff v
@@ -797,40 +797,40 @@ instance takeLast_definable' (Γ m) : Γ-[m + 1]-Function₂ (takeLast : V → V
 end
 
 lemma len_takeLast {v k : V} (h : k ≤ len v) : len (takeLast v k) = k := by
-  induction v using cons_ISigma1.sigma1_succ_induction
+  induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp_all
-  case cons x v ih =>
+  case adjoin x v ih =>
     have : k = len v + 1 ∨ k ≤ len v := by
       rcases eq_or_lt_of_le h with (h | h)
       · left; simpa using h
       · right; simpa [lt_succ_iff_le] using h
     rcases this with (rfl | hkv)
-    · simp [takeLast_cons]
-    · simp [takeLast_cons, not_lt_of_ge hkv, ih hkv]
+    · simp [takeLast_adjoin]
+    · simp [takeLast_adjoin, not_lt_of_ge hkv, ih hkv]
 
 @[simp] lemma takeLast_len_self (v : V) : takeLast v (len v) = v := by
-  rcases nil_or_cons v with (rfl | ⟨x, v, rfl⟩) <;> simp [takeLast_cons]
+  rcases nil_or_adjoin v with (rfl | ⟨x, v, rfl⟩) <;> simp [takeLast_adjoin]
 
 /-- TODO: move -/
 @[simp] lemma add_sub_add (a b c : V) : (a + c) - (b + c) = a - b := add_tsub_add_eq_tsub_right a c b
 
 @[simp] lemma takeLast_zero (v : V) : takeLast v 0 = 0 := by
-  induction v using cons_ISigma1.sigma1_succ_induction
+  induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
-  case cons x v ih => simp [takeLast_cons, ih]
+  case adjoin x v ih => simp [takeLast_adjoin, ih]
 
 lemma takeLast_succ_of_lt {i v : V} (h : i < len v) : takeLast v (i + 1) = v.[len v - (i + 1)] ∷ takeLast v i := by
-  induction v using cons_ISigma1.sigma1_succ_induction generalizing i
+  induction v using adjoin_ISigma1.sigma1_succ_induction generalizing i
   · definability
   case nil => simp at h
-  case cons x v ih =>
+  case adjoin x v ih =>
     rcases show i = len v ∨ i < len v from eq_or_lt_of_le (by simpa [lt_succ_iff_le] using h) with (rfl | hi)
-    · simp [takeLast_cons]
+    · simp [takeLast_adjoin]
     · have : len v - i = len v - (i + 1) + 1 := by
         rw [←PeanoMinus.sub_sub, sub_add_self_of_le (pos_iff_one_le.mp (tsub_pos_of_lt hi))]
-      simpa [takeLast_cons, lt_succ_iff_le, not_le_of_gt hi, this, not_lt_of_gt hi] using ih hi
+      simpa [takeLast_adjoin, lt_succ_iff_le, not_le_of_gt hi, this, not_lt_of_gt hi] using ih hi
 
 end takeLast
 
@@ -843,14 +843,14 @@ end takeLast
 namespace Concat
 
 def blueprint : VecRec.Blueprint 1 where
-  nil := .mkSigma “y z. !consDef y z 0”
-  cons := .mkSigma “y x xs ih z. !consDef y x ih”
+  nil := .mkSigma “y z. !adjoinDef y z 0”
+  adjoin := .mkSigma “y x xs ih z. !adjoinDef y x ih”
 
-noncomputable def construction : VecRec.Construction V blueprint where
+noncomputable def adjointruction : VecRec.Construction V blueprint where
   nil param := ?[param 0]
-  cons (_ x _ ih) := x ∷ ih
+  adjoin (_ x _ ih) := x ∷ ih
   nil_defined := by intro v; simp [blueprint]
-  cons_defined := by
+  adjoin_defined := by
     intro v; simp [blueprint, Fin.isValue]
 
 end Concat
@@ -859,17 +859,17 @@ section concat
 
 open Concat
 
-noncomputable def concat (v z : V) : V := construction.result ![z] v
+noncomputable def concat (v z : V) : V := adjointruction.result ![z] v
 
-@[simp] lemma concat_nil (z : V) : concat 0 z = ?[z] := by simp [concat, construction]
+@[simp] lemma concat_nil (z : V) : concat 0 z = ?[z] := by simp [concat, adjointruction]
 
-@[simp] lemma concat_cons (x v z : V) : concat (x ∷ v) z = x ∷ concat v z := by simp [concat, construction]
+@[simp] lemma concat_adjoin (x v z : V) : concat (x ∷ v) z = x ∷ concat v z := by simp [concat, adjointruction]
 
 section
 
 def _root_.LO.FirstOrder.Arithmetic.concatDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
 
-lemma concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDef := construction.result_defined
+lemma concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDef := adjointruction.result_defined
 
 @[simp] lemma eval_concatDef (v) :
     Semiformula.Evalbm V v concatDef.val ↔ v 0 = concat (v 1) (v 2) := concat_defined.df.iff v
@@ -881,25 +881,25 @@ instance concat_definable' (Γ m) : Γ-[m + 1]-Function₂ (concat : V → V →
 end
 
 @[simp] lemma len_concat (v z : V) : len (concat v z) = len v + 1 := by
-  induction v using cons_ISigma1.sigma1_succ_induction
+  induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
-  case cons x v ih => simp [ih]
+  case adjoin x v ih => simp [ih]
 
 lemma concat_nth_lt (v z : V) {i} (hi : i < len v) : (concat v z).[i] = v.[i] := by
-  induction v using cons_ISigma1.sigma1_succ_induction generalizing i
+  induction v using adjoin_ISigma1.sigma1_succ_induction generalizing i
   · definability
   case nil => simp at hi
-  case cons x v ih =>
+  case adjoin x v ih =>
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
     · simp
     · simp [ih (by simpa using hi)]
 
 @[simp] lemma concat_nth_len (v z : V) : (concat v z).[len v] = z := by
-  induction v using cons_ISigma1.sigma1_succ_induction
+  induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
-  case cons x v ih => simp [ih]
+  case adjoin x v ih => simp [ih]
 
 lemma concat_nth_len' (v z : V) {i} (hi : len v = i) : (concat v z).[i] = z := by
   rcases hi; simp
@@ -924,7 +924,7 @@ lemma nth_mem_memVec {i v : V} (h : i < len v) : v.[i] ∈ᵥ v := ⟨i, by simp
 
 @[simp] lemma memVec_insert_fst {x v : V} : x ∈ᵥ x ∷ v := ⟨0, by simp⟩
 
-@[simp] lemma memVec_cons_iff {x y v : V} : x ∈ᵥ y ∷ v ↔ x = y ∨ x ∈ᵥ v := by
+@[simp] lemma memVec_adjoin_iff {x y v : V} : x ∈ᵥ y ∷ v ↔ x = y ∨ x ∈ᵥ v := by
   constructor
   · rintro ⟨i, h, rfl⟩
     rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
@@ -1010,27 +1010,27 @@ section repaetVec
 
 def repeatVec.blueprint : PR.Blueprint 1 where
   zero := .mkSigma “y x. y = 0”
-  succ := .mkSigma “y ih n x. !consDef y x ih”
+  succ := .mkSigma “y ih n x. !adjoinDef y x ih”
 
-noncomputable def repeatVec.construction : PR.Construction V repeatVec.blueprint where
+noncomputable def repeatVec.adjointruction : PR.Construction V repeatVec.blueprint where
   zero := fun _ ↦ 0
   succ := fun x _ ih ↦ x 0 ∷ ih
   zero_defined := by intro v; simp [blueprint]
   succ_defined := by intro v; simp [blueprint]
 
 /-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0`-/
-noncomputable def repeatVec (x k : V) : V := repeatVec.construction.result ![x] k
+noncomputable def repeatVec (x k : V) : V := repeatVec.adjointruction.result ![x] k
 
-@[simp] lemma repeatVec_zero (x : V) : repeatVec x 0 = 0 := by simp [repeatVec, repeatVec.construction]
+@[simp] lemma repeatVec_zero (x : V) : repeatVec x 0 = 0 := by simp [repeatVec, repeatVec.adjointruction]
 
-@[simp] lemma repeatVec_succ (x k : V) : repeatVec x (k + 1) = x ∷ repeatVec x k := by simp [repeatVec, repeatVec.construction]
+@[simp] lemma repeatVec_succ (x k : V) : repeatVec x (k + 1) = x ∷ repeatVec x k := by simp [repeatVec, repeatVec.adjointruction]
 
 section
 
 def _root_.LO.FirstOrder.Arithmetic.repeatVecDef : 𝚺₁.Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.substs ![#0, #2, #1])
 
 lemma repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via repeatVecDef :=
-  fun v ↦ by simp [repeatVec.construction.result_defined_iff, repeatVecDef]; rfl
+  fun v ↦ by simp [repeatVec.adjointruction.result_defined_iff, repeatVecDef]; rfl
 
 @[simp] lemma eval_repeatVec (v) :
     Semiformula.Evalbm V v repeatVecDef.val ↔ v 0 = repeatVec (v 1) (v 2) := repeatVec_defined.df.iff v
@@ -1074,13 +1074,13 @@ namespace VecToSet
 
 def blueprint : VecRec.Blueprint 0 where
   nil := .mkSigma “y. y = 0”
-  cons := .mkSigma “y x xs ih. !insertDef y x ih”
+  adjoin := .mkSigma “y x xs ih. !insertDef y x ih”
 
-noncomputable def construction : VecRec.Construction V blueprint where
+noncomputable def adjointruction : VecRec.Construction V blueprint where
   nil _ := ∅
-  cons (_ x _ ih) := insert x ih
+  adjoin (_ x _ ih) := insert x ih
   nil_defined := by intro v; simp [blueprint, emptyset_def]
-  cons_defined := by intro v; simp [blueprint]
+  adjoin_defined := by intro v; simp [blueprint]
 
 end VecToSet
 
@@ -1088,18 +1088,18 @@ section vecToSet
 
 open VecToSet
 
-noncomputable def vecToSet (v : V) : V := construction.result ![] v
+noncomputable def vecToSet (v : V) : V := adjointruction.result ![] v
 
-@[simp] lemma vecToSet_nil : vecToSet (0 : V) = ∅ := by simp [vecToSet, construction]
+@[simp] lemma vecToSet_nil : vecToSet (0 : V) = ∅ := by simp [vecToSet, adjointruction]
 
-@[simp] lemma vecToSet_cons (x v : V) :
-    vecToSet (x ∷ v) = insert x (vecToSet v) := by simp [vecToSet, construction]
+@[simp] lemma vecToSet_adjoin (x v : V) :
+    vecToSet (x ∷ v) = insert x (vecToSet v) := by simp [vecToSet, adjointruction]
 
 section
 
 def _root_.LO.FirstOrder.Arithmetic.vecToSetDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
-lemma vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDef := construction.result_defined
+lemma vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDef := adjointruction.result_defined
 
 @[simp] lemma eval_vecToSetDef (v) :
     Semiformula.Evalbm V v vecToSetDef.val ↔ v 0 = vecToSet (v 1) := vecToSet_defined.df.iff v
@@ -1111,11 +1111,11 @@ instance vecToSet_definable' (Γ) : Γ-[m + 1]-Function₁ (vecToSet : V → V) 
 end
 
 lemma mem_vecToSet_iff {v x : V} : x ∈ vecToSet v ↔ ∃ i < len v, x = v.[i] := by
-  induction v using cons_ISigma1.sigma1_succ_induction
+  induction v using adjoin_ISigma1.sigma1_succ_induction
   · definability
   case nil => simp
-  case cons y v ih =>
-    simp only [vecToSet_cons, mem_bitInsert_iff, ih, len_cons]
+  case adjoin y v ih =>
+    simp only [vecToSet_adjoin, mem_bitInsert_iff, ih, len_adjoin]
     constructor
     · rintro (rfl | ⟨i, hi, rfl⟩)
       · exact ⟨0, by simp⟩

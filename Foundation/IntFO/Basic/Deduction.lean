@@ -20,18 +20,18 @@ namespace Hilbertᵢ
 
 def Minimal : Hilbertᵢ L := ⟨∅, by simp⟩
 
-notation "𝐌𝐢𝐧¹" => Minimal
+notation "𝗠𝗶𝗻¹" => Minimal
 
 def Intuitionistic : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ}, by rintro _ ⟨φ, rfl⟩ f; exact ⟨Rew.rewrite f ▹ φ, by simp⟩⟩
 
-notation "𝐈𝐧𝐭¹" => Intuitionistic
+notation "𝗜𝗻𝘁¹" => Intuitionistic
 
 def Classical : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ} ∪ {φ ⋎ ∼φ | φ}, by
   rintro _ (⟨φ, rfl⟩ | ⟨φ, rfl⟩) f
   · exact Or.inl ⟨Rew.rewrite f ▹ φ, by simp⟩
   · exact Or.inr ⟨Rew.rewrite f ▹ φ, by simp⟩⟩
 
-notation "𝐂𝐥¹" => Classical
+notation "𝗖𝗹¹" => Classical
 
 lemma minimal_le (Λ : Hilbertᵢ L) : (Minimal : Hilbertᵢ L) ≤ Λ := by rintro _ ⟨⟩
 

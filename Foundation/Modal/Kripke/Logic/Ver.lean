@@ -18,7 +18,7 @@ variable {F : Frame}
 protected abbrev Frame.IsVer (F : Frame) := F.IsIsolated
 protected class Frame.IsFiniteVer (F : Frame) extends F.IsFinite, F.IsVer
 
-instance [F.IsFiniteVer] : F.IsFiniteGLPoint3 where
+instance [F.IsFiniteVer] : F.IsFiniteGLPoint3' where
 
 @[simp] lemma Frame.isolated [F.IsVer] {x y : F} : ¬x ≺ y := by apply _root_.isolated;
 
@@ -103,7 +103,7 @@ instance : Hilbert.KTc ⪱ Hilbert.Ver := by
 
 instance : Hilbert.GLPoint3 ⪱ Hilbert.Ver := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GLPoint3 FrameClass.finite_Ver;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass { F : Frame | F.IsFiniteGLPoint3' } FrameClass.finite_Ver;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;

@@ -57,7 +57,7 @@ lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ
       · contradiction
       · exact ⟨ψ, by simp [hn], hq⟩
     · exact ⟨ψ, by simp [h], hq⟩
-  | root (φ := φ) h => ⟨φ, by simp, Theory.models M T h ε⟩
+  | axm (φ := φ) h => ⟨φ, by simp, Theory.models M T h ε⟩
 
 end Derivation
 

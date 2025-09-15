@@ -5,7 +5,7 @@ namespace LO.Omega1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]
 
 namespace Nuon
 
@@ -514,12 +514,12 @@ def isSeriesDef : 𝚺₀.Semisentence 6 := .mkSigma
       ∃ y <⁺ T, !extDef y L T (l + 1) ∧
         !segmentDef U L A (lI * l) lI x y”
 
-omit [V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁] in
+omit [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁] in
 lemma bex_eq_le_iff {p : V → Prop} {b : V} :
     (∃ a ≤ z, a = b ∧ p a) ↔ (b ≤ z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
-omit [V ⊧ₘ* 𝐈𝚺₀ + 𝛀₁] in
+omit [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁] in
 lemma bex_eq_lt_iff {p : V → Prop} {b : V} :
     (∃ a < z, a = b ∧ p a) ↔ (b < z ∧ p b) :=
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩

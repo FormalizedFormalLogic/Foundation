@@ -14,7 +14,7 @@ variable {V : Type*} [ORingStruc V]
 
 section IOpen
 
-variable [V ⊧ₘ* 𝐈Open]
+variable [V ⊧ₘ* 𝗜𝗢𝗽𝗲𝗻]
 
 def Pow2 (a : V) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 
@@ -197,7 +197,7 @@ end IOpen
 
 section ISigma0
 
-variable [V ⊧ₘ* 𝐈𝚺₀]
+variable [V ⊧ₘ* 𝗜𝚺₀]
 
 namespace Pow2
 

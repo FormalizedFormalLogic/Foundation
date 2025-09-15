@@ -1,5 +1,5 @@
 import Foundation.Logic.HilbertStyle.Lukasiewicz
-import Foundation.Vorspiel.Collection
+import Foundation.Vorspiel.AdjunctiveSet
 import Foundation.Modal.LogicSymbol
 import Foundation.Propositional.ClassicalSemantics.ZeroSubst
 import Mathlib.Data.Set.Finite.Lattice

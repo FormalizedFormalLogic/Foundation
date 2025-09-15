@@ -7,7 +7,7 @@ and its inductive properties are proved in $\mathsf{I}\Sigma_0$.
 
 ```lean
 instance LO.ISigma0.exponential_definable
-    [M ⊧ₘ* 𝐈𝚺₀] : 𝚺₀-Relation (Exponential : M → M → Prop)
+    [M ⊧ₘ* 𝗜𝚺₀] : 𝚺₀-Relation (Exponential : M → M → Prop)
 ```
 
 - [LO.ISigma0.exponential_definable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma0/Exponential/Exp.html#LO.ISigma0.exponential_definable)
@@ -15,7 +15,7 @@ instance LO.ISigma0.exponential_definable
 ![Import Graph](./exp.png)
 
 ```lean
-lemma LO.ISigma0.Exponential.exponential_zero_one [M ⊧ₘ* 𝐈𝚺₀] :
+lemma LO.ISigma0.Exponential.exponential_zero_one [M ⊧ₘ* 𝗜𝚺₀] :
     Exponential 0 1
 ```
 
@@ -23,7 +23,7 @@ lemma LO.ISigma0.Exponential.exponential_zero_one [M ⊧ₘ* 𝐈𝚺₀] :
 
 ```lean
 lemma LO.ISigma0.Exponential.exponential_succ_mul_two
-    [M ⊧ₘ* 𝐈𝚺₀] {x y : M} :
+    [M ⊧ₘ* 𝗜𝚺₀] {x y : M} :
     Exponential (x + 1) (2 * y) ↔ Exponential x y
 ```
 

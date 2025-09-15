@@ -13,7 +13,7 @@ namespace LO
 open FirstOrder FirstOrder.Arithmetic
 
 inductive RobinsonQ : ArithmeticTheory
-  | equal          : ∀ φ ∈ 𝐄𝐐, RobinsonQ φ
+  | equal          : ∀ φ ∈ 𝗘𝗤, RobinsonQ φ
   | succNeZero     : RobinsonQ   “a | a + 1 ≠ 0”
   | succInj        : RobinsonQ “a b | a + 1 = b + 1 → a = b”
   | zeroOrSucc     : RobinsonQ   “a | a = 0 ∨ ∃ b, a = b + 1”
@@ -23,13 +23,13 @@ inductive RobinsonQ : ArithmeticTheory
   | mulSucc        : RobinsonQ “a b | a * (b + 1) = a * b + a”
   | ltDef          : RobinsonQ “a b | a < b ↔ ∃ c, a + (c + 1) = b”
 
-notation "𝐐" => RobinsonQ
+notation "𝗤" => RobinsonQ
 
 namespace RobinsonQ
 
 open ORingStruc
 
-@[simp] instance : ℕ ⊧ₘ* 𝐐 := ⟨by
+@[simp] instance : ℕ ⊧ₘ* 𝗤 := ⟨by
   intro σ h
   rcases h <;> simp [models_def, add_assoc, mul_add]
   case ltDef =>
@@ -42,12 +42,12 @@ open ORingStruc
       simp [←hc];
   case zeroOrSucc => omega;
   case equal h =>
-    have : ℕ ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
+    have : ℕ ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h⟩
 
-instance : 𝐄𝐐 ⪯ 𝐐 := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ equal φ hp
+instance : 𝗘𝗤 ⪯ 𝗤 := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ equal φ hp
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐐]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗤]
 
 @[simp] protected lemma succ_ne_zero (a : M) : a + 1 ≠ 0 := by
   simpa [models_iff] using ModelsTheory.models M RobinsonQ.succNeZero (fun _ ↦ a)
@@ -286,11 +286,11 @@ lemma iff_lt_numeral_exists_numeral {n : ℕ} {x : M} : x < numeral n ↔ ∃ m 
       apply numeral_lt_of_lt;
       exact hm;
 
-instance : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
+instance : M ⊧ₘ* 𝗥₀ := modelsTheory_iff.mpr <| by
   intro φ h
   rcases h
   case equal h =>
-    have : M ⊧ₘ* (𝐄𝐐 : ArithmeticTheory) := inferInstance
+    have : M ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case Ω₁ n m => simp [models_iff, numeral_add]
   case Ω₂ n m => simp [models_iff, numeral_mul]
@@ -299,9 +299,9 @@ instance : M ⊧ₘ* 𝐑₀ := modelsTheory_iff.mpr <| by
     suffices ∀ (x : M), x < numeral n ↔ ∃ i < n, x = numeral i by simpa [models_iff];
     apply iff_lt_numeral_exists_numeral;
 
-instance : 𝐑₀ ⪯ 𝐐 := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
+instance : 𝗥₀ ⪯ 𝗤 := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
 
-instance : 𝐑₀ ⪱ 𝐐 :=
+instance : 𝗥₀ ⪱ 𝗤 :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
     R0.unprovable_addZero (Entailment.by_axm _ RobinsonQ.addZero)
 

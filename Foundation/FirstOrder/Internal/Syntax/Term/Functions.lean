@@ -4,7 +4,7 @@ namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 section
 
@@ -474,7 +474,7 @@ variable (L)
 noncomputable def qVec (w : V) : V := ^#0 ∷ termBShiftVec L (len w) w
 
 def qVecGraph : 𝚺₁.Semisentence 2 := .mkSigma
-  “w' w. ∃ k, !lenDef k w ∧ ∃ sw, !(termBShiftVecGraph L) sw k w ∧ ∃ t, !qqBvarDef t 0 ∧ !consDef w' t sw”
+  “w' w. ∃ k, !lenDef k w ∧ ∃ sw, !(termBShiftVecGraph L) sw k w ∧ ∃ t, !qqBvarDef t 0 ∧ !adjoinDef w' t sw”
 
 variable {L}
 
@@ -596,7 +596,7 @@ lemma termShift_qVec {n m w : V} (hw : IsSemitermVec L n m w) :
   rcases zero_or_succ i with (rfl | ⟨i, rfl⟩)
   · simp
   · rcases hw.lh
-    rw [nth_cons_succ, nth_cons_succ,
+    rw [nth_adjoin_succ, nth_adjoin_succ,
       nth_termBShiftVec hw.isUTerm (by simpa using hi),
       nth_termBShiftVec (by simp [hw.isUTerm]) (by simpa [hw.isUTerm] using hi),
       nth_termShiftVec hw.isUTerm (by simpa using hi),

@@ -415,8 +415,14 @@ instance : (M↾r) ⥹ M := by
 
 protected def bisimulation (r : M.World) : (M↾r) ⇄ M := Model.pointGenerate.pMorphism.bisimulation
 
+lemma modal_equivalent_of_rel (r : M.World) (x : M.World) (Rrx : r ≺ x) : ModalEquivalent (M₁ := M↾r) (M₂ := M) ⟨x, by tauto⟩ x
+  := PseudoEpimorphism.modal_equivalence Model.pointGenerate.pMorphism _
+
 lemma modal_equivalent_at_root (r : M.World) : ModalEquivalent (M₁ := M↾r) (M₂ := M) ⟨r, by tauto⟩ r
-  := PseudoEpimorphism.modal_equivalence (Model.pointGenerate.pMorphism) pointGenerate.root
+  := PseudoEpimorphism.modal_equivalence Model.pointGenerate.pMorphism _
+
+lemma modal_equivalent' (r : M.World) (x : M↾r) : ModalEquivalent (M₁ := M↾r) (M₂ := M) x x.1
+  := PseudoEpimorphism.modal_equivalence Model.pointGenerate.pMorphism _
 
 end Model.pointGenerate
 

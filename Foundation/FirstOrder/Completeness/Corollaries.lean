@@ -23,7 +23,7 @@ lemma of_add_left_right [M ⊧ₘ* T + U + V] : M ⊧ₘ* U := @of_add_right _ M
 
 end ModelsTheory
 
-variable {L : Language.{u}} [L.Eq] {T : Theory L} [𝐄𝐐 ⪯ T]
+variable {L : Language.{u}} [L.Eq] {T : Theory L} [𝗘𝗤 ⪯ T]
 
 lemma EQ.provOf (φ : SyntacticFormula L)
   (H : ∀ (M : Type (max u w))

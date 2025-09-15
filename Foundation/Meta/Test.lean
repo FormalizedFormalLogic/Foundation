@@ -14,7 +14,7 @@ example : Entailment.TwoSided 𝓢 [φ, ψ] [χ ⋏ ξ, χ, ψ] := by cl_prover_
 
 example : Entailment.TwoSided 𝓢 [φ ⭤ ψ] [φ ➝ (χ ⋎ ψ)] := by cl_prover_2s
 
-example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, χ ⭤ ξ] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s 32
+example : Entailment.TwoSided 𝓢 [φ ⭤ ψ, χ ⭤ ξ] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s 12
 
 example (h1 : 𝓢 ⊢! φ ⭤ ψ) (h2 : 𝓢 ⊢! χ ⭤ ξ) : Entailment.TwoSided 𝓢 [] [(ψ ➝ ξ) ⭤ (φ ➝ χ)] := by cl_prover_2s [h1, h2]
 

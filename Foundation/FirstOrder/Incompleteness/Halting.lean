@@ -4,7 +4,7 @@ import Foundation.FirstOrder.Incompleteness.First
 
 namespace LO.FirstOrder.Arithmetic
 
-variable (T : ArithmeticTheory) [T.Δ₁] [𝐈𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
+variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 open LO.Entailment FirstOrder Arithmetic ISigma1 Metamath
 
@@ -47,9 +47,10 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
 /--
   If r.e. but not recursive predicate `P` on `ℕ` exists, then implies incompleteness.
 -/
-lemma incomplete_of_REPred_not_ComputablePred_Nat {P : ℕ → Prop} (hRE : REPred P) (hC : ¬ComputablePred P) : ¬Entailment.Complete (T : Axiom ℒₒᵣ) := by
+lemma incomplete_of_REPred_not_ComputablePred_Nat
+    {P : ℕ → Prop} (hRE : REPred P) (hC : ¬ComputablePred P) : Entailment.Incomplete (T : Axiom ℒₒᵣ) := by
   obtain ⟨φ, a, hφ₁, hφ₂⟩ := incomplete_of_REPred_not_ComputablePred_Nat' T hRE hC;
-  apply incomplete_iff_exists_undecidable.mpr;
+  apply incomplete_def.mpr;
   use φ/[⌜a⌝];
   constructor <;> assumption;
 

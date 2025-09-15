@@ -3,31 +3,35 @@
 
 # Foundation
 
-Formalizing mathematical logics in Lean 4.
+Formalizing mathematical logic in Lean 4.
 
-## Summary
+## Structure & Summary
 
-Main Result in this repository. More results and details are in [Book] and [Doc].
+Main results of this repository. More detailed explanations are provided in the [Book] and [Doc].
 
-- [Propositional Logic][prop]
-  - [Tait-style calculus][prop:classical_tait] and [completeness][prop:classical_tait_complete]
-  - [Completeness for Kripke semantics][prop:kripke]
-  - [Disjunctive Property of intuitionistic logic][prop:int_disjunctive]
-  - Rejection Law of Excluded Middle in intuitionistic logic and [sublogic relations][prop:sublogics]
-  - [Propositional Logic Zoo](#propositional-logic-zoo)
-- [First-Order Logic][first_order] and [Arithmetics][arith]
+- `FirstOrder`: [First-Order Logic][first_order] and [Arithmetics][arith]
   - [Completeness Theorem][first_order:completeness]
-  - [Gödel-Gentzen Translation][first_order:goedel_translation]
   - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
   - [Arithmetic][arith]
   - Gödel's [First][arith:goedel_it1] and [Second][arith:goedel_it2] Incompleteness Theorems
   - [Arithmetic Theory Zoo](#arithmetic-theory-zoo)
-- [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
+- `IntFO`: [Intuitionistic First-Order Logic][first_order]
+  - [Gödel-Gentzen Translation][first_order:goedel_translation]
+- `Modal`: [Basic Modal Logic][modal:logic] (with modal operators $\Box, \Diamond$)
   - [Kripke completeness for well-known subsystems][modal:logic_kripke_completeness]
   - [Modal Logic Zoo](#modal-logic-zoo)
   - [Gödel-McKinsey-Tarski Theorem][modal:gmt_theorem] and [Modal Companions](modal:companion)
-- [Provability Logic][provability_logic]
+- `Propositional`: [Propositional Logic][prop]
+  - [Tait-style calculus][prop:classical_tait] and [completeness][prop:classical_tait_complete]
+  - [Completeness for Kripke semantics][prop:kripke]
+  - [Disjunctive Property of intuitionistic logic][prop:int_disjunctive]
+  - [Propositional Logic Zoo](#propositional-logic-zoo)
+- `ProvabilityLogic`: [Provability Logic][provability_logic]
   - [Solovay's Arithmetical Completeness Theorem for GL][provability_logic:GL_arith_complete]
+- `Meta`: Proof automation.
+- `Logic`: Fundamental tools for various logics.
+- `Vospiel`: Supplemental definitions and theorems for mathlib.
+
 
 [prop]: ./Foundation/Propositional
 [prop:classical_tait]: ./Foundation/Propositional/Tait/Calculus.lean
@@ -58,7 +62,11 @@ Main Result in this repository. More results and details are in [Book] and [Doc]
 
 ## Zoo
 
-Lines represent subset relations of theories/logics. Solid lines are represent _proper_ subset.
+Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelationships among proof systems.
+
+- A solid arrow $\mathsf{A} \rightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is strictly stronger than $\mathsf{A}$; that is, $\mathsf{B}$ is stronger than $\mathsf{A}$, while $\mathsf{A}$ is not stronger than $\mathsf{B}$, in terms of provability strength.
+- A dashed arrow $\mathsf{A} \dashrightarrow \mathsf{B}$ indicates that $\mathsf{B}$ is stronger than $\mathsf{A}$ in terms of provability strength.
+- A double line $\mathsf{A} \xlongequal{} \mathsf{B}$ indicates that $\mathsf{A}$ and $\mathsf{B}$ are equivalent in terms of provability strength.
 
 ### Arithmetic Theory Zoo
 
@@ -72,9 +80,34 @@ Lines represent subset relations of theories/logics. Solid lines are represent _
 
 ![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/propositional_zoo.png)
 
+## Developers
+
+List of contact information and areas of expertise of the current main developers.
+If you have any interest or questions, [create a new issue](https://github.com/FormalizedFormalLogic/Foundation/issues) or contact us directly.
+
+- Palalansoukî (Shogo Saito, [@iehality][iehality:github], ✉️:[palalansouki@gmail.com][iehality:email])
+  - Overall design and maintenance.
+  - First-order logic.
+  - Intuitionistic first-order logic.
+  - Proof automation.
+  - Provability logic.
+- SnO2WMaN (Mashu Noguchi, [@SnO2WMaN][sno2wman:github], ✉️:[me@sno2wman.net][SnO2WMaN:email])
+  - Modal logic.
+  - Propositional logic (including intermediate logic).
+  - Provability logic.
+  - Miscellaneous repository maintenance (e.g. GitHub Actions)
+
+[iehality:github]: https://github.com/iehality
+[iehality:email]: mailto:palalansouki@gmail.com
+
+[SnO2WMaN:github]: https://github.com/SnO2WMaN
+[SnO2WMaN:email]: mailto:me@sno2wman.net
+
+If you with to cite this repository in academic papers, refer to [CITATION.cff](./CITATION.cff).
+
 ## Financial Supports
 
-Any financial supports would greatly helps us. If you considered, please contact us: [palalansouki@gmail.com](mailto:palalansouki@gmail.com)
+Any financial supports would be grateful. If you considered, [please contact us](#Developers).
 
 ### Previous Sponsors
 

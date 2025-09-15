@@ -19,7 +19,7 @@ inductive Derivation (T : Theory L) : Sequent L → Type _
 | ex {Γ φ} (t) : Derivation T (φ/[t] :: Γ) → Derivation T ((∃' φ) :: Γ)
 | wk {Γ Δ}     : Derivation T Δ → Δ ⊆ Γ → Derivation T Γ
 | cut {Γ φ}    : Derivation T (φ :: Γ) → Derivation T (∼φ :: Γ) → Derivation T Γ
-| root {φ}     : φ ∈ T → Derivation T [φ]
+| axm {φ}     : φ ∈ T → Derivation T [φ]
 
 instance : OneSided (SyntacticFormula L) (Theory L) := ⟨Derivation⟩
 
@@ -46,7 +46,7 @@ def length {Δ : Sequent L} : T ⟹ Δ → ℕ
   | ex _ d      => d.length.succ
   | wk d _      => d.length.succ
   | cut dp dn   => (max (length dp) (length dn)).succ
-  | root _      => 0
+  | axm _      => 0
 
 section length
 
@@ -109,7 +109,7 @@ protected unsafe def repr {Δ : Sequent L} : T ⟹ Δ → String
       Derivation.repr dn ++
       "\\RightLabel{\\scriptsize(Cut)}\n" ++
       "\\BinaryInfC{$" ++ reprStr Δ ++ "$}\n\n"
-  | root (φ := φ) _   =>
+  | axm (φ := φ) _   =>
       "\\AxiomC{}\n" ++
       "\\RightLabel{\\scriptsize(ROOT)}\n" ++
       "\\UnaryInfC{$" ++ reprStr φ ++ ", " ++ reprStr (∼φ) ++ "$}\n\n"
@@ -126,7 +126,7 @@ protected abbrev cast (d : T ⟹ Δ) (e : Δ = Γ) : T ⟹ Γ := e ▸ d
     length (Derivation.cast d e) = length d := by rcases e with rfl; simp [Derivation.cast]
 
 @[simp] lemma length_cast' (d : T ⟹ Δ) (e : Δ = Γ) :
-    length (e ▸ d) = length d := by rcases e with rfl; simp [Derivation.cast]
+    length (e ▸ d) = length d := by rcases e with rfl; simp
 
 alias weakening := wk
 
@@ -197,7 +197,7 @@ def specialize {φ : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
     T ⟹ (∀' φ) :: Γ → T ⟹ φ/[t] :: Γ := fun d ↦
   have : T ⟹ ∼φ/[t] :: φ/[t] :: Γ := Tait.em (φ := φ/[t]) (by simp) (by simp)
   have dn : T ⟹ ∼(∀' φ) :: φ/[t] :: Γ := by
-    simp only [neg_all, Nat.reduceAdd, Nat.succ_eq_add_one]
+    simp only [neg_all, Nat.reduceAdd]
     exact Derivation.ex t (by simpa using this)
   have dp : T ⟹ (∀' φ) :: φ/[t] :: Γ :=
     Derivation.wk d (List.cons_subset_cons _ <| by simp)
@@ -253,7 +253,7 @@ def rewrite {Δ} : T ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), T ⟹ Δ.map 
     have : T ⟹ ((Rewriting.free φ) :: Δ⁺).map fun φ ↦ Rew.rewrite (&0 :>ₙ fun x => Rew.shift (f x)) ▹ φ :=
       rewrite d (&0 :>ₙ fun x => Rew.shift (f x))
     have : T ⟹ (∀' Rew.rewrite (Rew.bShift ∘ f) ▹ φ) :: Δ.map fun φ ↦ Rew.rewrite f ▹ φ :=
-      all (Derivation.cast this (by simp [free_rewrite_eq, Rewriting.shifts, shift_rewrite_eq, Finset.image_image, Function.comp_def]))
+      all (Derivation.cast this (by simp [free_rewrite_eq, Rewriting.shifts, shift_rewrite_eq, Function.comp_def]))
     Derivation.cast this (by simp [Rew.q_rewrite])
   | @ex _ _ Δ φ t d,      f =>
     have : T ⟹ (φ/[t] :: Δ).map fun φ ↦ Rew.rewrite f ▹ φ := rewrite d f
@@ -265,7 +265,7 @@ def rewrite {Δ} : T ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), T ⟹ Δ.map 
     have dΔ : T ⟹ (Rew.rewrite f ▹ φ) :: Δ.map fun φ ↦ Rew.rewrite f ▹ φ := Derivation.cast (rewrite d f) (by simp)
     have dΓ : T ⟹ ∼(Rew.rewrite f ▹ φ) :: Δ.map fun φ ↦ Rew.rewrite f ▹ φ := Derivation.cast (rewrite dn f) (by simp)
     Derivation.cast (cut dΔ dΓ) (by simp)
-  | root h,               f => rewrite₁ (root h) f
+  | axm h,               f => rewrite₁ (axm h) f
 
 protected def map {Δ : Sequent L} (d : T ⟹ Δ) (f : ℕ → ℕ) :
     T ⟹ Δ.map fun φ ↦ @Rew.rewriteMap L ℕ ℕ 0 f ▹ φ := rewrite d (fun x ↦ &(f x))
@@ -282,10 +282,10 @@ def trans (F : U ⊢* T) {Γ : Sequent L} : T ⟹ Γ → U ⟹ Γ
   | ex t d    => ex t (trans F d)
   | wk d ss   => wk (trans F d) ss
   | cut d₁ d₂ => cut (trans F d₁) (trans F d₂)
-  | root h    => F h
+  | axm h    => F h
 
 instance : Tait.Axiomatized (SyntacticFormula L) (Theory L) where
-  root {_ _ h} := root h
+  axm {_ _ h} := axm h
   trans {_ _ _ F d} := trans (fun h ↦ F _ h) d
 
 variable [(k : ℕ) → DecidableEq (L.Func k)] [(k : ℕ) → DecidableEq (L.Rel k)]
@@ -307,8 +307,8 @@ private def deductionAux {Γ : Sequent L} : T ⟹ Γ → T \ {φ} ⟹ ∼(∀∀
   | ex t d          => Tait.rotate₁ <| ex t <| Tait.rotate₁ (deductionAux d)
   | wk d ss         => wk (deductionAux d) (by simp [List.subset_cons_of_subset _ ss])
   | cut d₁ d₂       => (Tait.rotate₁ <| deductionAux d₁).cut (Tait.rotate₁ <| deductionAux d₂)
-  | root (φ := ψ) h => if hq : φ = ψ then Derivation.cast (not_close' φ) (by simp [hq]) else
-    have : T \ {φ} ⟹. ψ := root (by simp [h, Ne.symm hq])
+  | axm (φ := ψ) h => if hq : φ = ψ then Derivation.cast (not_close' φ) (by simp [hq]) else
+    have : T \ {φ} ⟹. ψ := axm (by simp [h, Ne.symm hq])
     wk this (by simp)
 
 def deduction (d : insert φ T ⟹ Γ) : T ⟹ ∼(∀∀φ) :: Γ := Tait.ofAxiomSubset (by intro x; simp; tauto) (deductionAux d (φ := φ))
@@ -332,7 +332,7 @@ variable {L₁ : Language} {L₂ : Language} {T₁ : Theory L₁} {Δ₁ : Seque
 
 lemma shifts_image (Φ : L₁ →ᵥ L₂) {Δ : List (SyntacticFormula L₁)} :
      (Δ.map <| Semiformula.lMap Φ)⁺ = (Δ⁺.map <| Semiformula.lMap Φ) := by
-  simp [Rewriting.shifts, shiftEmb, Finset.map_eq_image, Finset.image_image, Function.comp_def, Semiformula.lMap_shift]
+  simp [Rewriting.shifts, Function.comp_def, Semiformula.lMap_shift]
 
 def lMap (Φ : L₁ →ᵥ L₂) {Δ} : T₁ ⟹ Δ → T₁.lMap Φ ⟹ Δ.map (.lMap Φ)
   | axL Δ r v            =>
@@ -354,14 +354,14 @@ def lMap (Φ : L₁ →ᵥ L₂) {Δ} : T₁ ⟹ Δ → T₁.lMap Φ ⟹ Δ.map 
   | @ex _ _ Δ φ t d      =>
     have : T₁.lMap Φ ⟹ ((∃' .lMap Φ φ) :: (Δ.map (.lMap Φ)) : Sequent L₂) :=
       ex (Semiterm.lMap Φ t)
-        (Derivation.cast (lMap Φ d) (by simp [Semiformula.lMap_substs, Matrix.constant_eq_singleton]))
+        (Derivation.cast (lMap Φ d) (by simp [Semiformula.lMap_substs]))
     Derivation.cast this (by simp)
   | @wk _ _ Δ Γ d ss     => (lMap Φ d).wk (List.map_subset _ ss)
   | @cut _ _ Δ φ d dn    =>
     have : T₁.lMap Φ ⟹ (Δ.map (.lMap Φ) : Sequent L₂) :=
       cut (φ := .lMap Φ φ) (Derivation.cast (lMap Φ d) (by simp)) (Derivation.cast (lMap Φ dn) (by simp))
-    Derivation.cast this (by simp [Finset.image_union])
-  | root h               => root (Set.mem_image_of_mem _ h)
+    Derivation.cast this (by simp)
+  | axm h               => axm (Set.mem_image_of_mem _ h)
 
 lemma inconsistent_lMap (Φ : L₁ →ᵥ L₂) : Entailment.Inconsistent T₁ → Entailment.Inconsistent (T₁.lMap Φ) := by
   simp only [Entailment.inconsistent_iff_provable_bot]; intro ⟨b⟩; exact ⟨by simpa using lMap Φ b⟩
@@ -416,7 +416,7 @@ def allNvar {φ} (h : ∀' φ ∈ Δ) : T ⟹ φ/[&(newVar Δ)] :: Δ → T ⟹ 
     genelalizeByNewver (by simpa [FVar?] using not_fvar?_newVar h) (fun _ ↦ not_fvar?_newVar) b
   Tait.wk b (by simp [h])
 
-protected def id {φ} (hp : φ ∈ T) : T ⟹ ∼∀∀ φ :: Δ → T ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (toClose (root hp)) (by simp)) b
+protected def id {φ} (hp : φ ∈ T) : T ⟹ ∼∀∀ φ :: Δ → T ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (toClose (axm hp)) (by simp)) b
 
 end Derivation
 
@@ -438,7 +438,7 @@ theorem Theory.deduction! [L.DecidableEq] {T : Theory L} {φ ψ} (b : insert φ 
 lemma Theory.close!_iff [L.DecidableEq] {T : Theory L} {φ} : T ⊢! ∀∀φ ↔ T ⊢! φ := by
   constructor
   · intro h
-    apply Theory.deduction! (Entailment.Axiomatized.cons! _ _) ⨀ h
+    apply Theory.deduction! (Entailment.Axiomatized.adjoin! _ _) ⨀ h
   · intro h
     exact Derivation.toClose! h
 
@@ -514,8 +514,8 @@ def deduction [L.DecidableEq] {A : Axiom L} {σ τ} (b : insert σ A ⊢ τ) : A
 instance [L.DecidableEq] : Entailment.Deduction (Axiom L) where
   ofInsert := Axiom.deduction
   inv {σ τ A} b :=
-    have : cons σ A ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
-    this ⨀ (Axiomatized.cons _ _)
+    have : adjoin σ A ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
+    this ⨀ (Axiomatized.adjoin _ _)
 
 variable [L.DecidableEq] {T : Theory L}
 

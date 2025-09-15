@@ -70,6 +70,7 @@ import Foundation.FirstOrder.Internal.Consistency
 import Foundation.FirstOrder.Internal.WitnessComparison
 import Foundation.FirstOrder.Internal.RosserProvability
 
+
 import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Halting
 
@@ -78,6 +79,7 @@ import Foundation.FirstOrder.Incompleteness.Second
 import Foundation.FirstOrder.Incompleteness.Examples
 
 import Foundation.FirstOrder.Incompleteness.Tarski
+import Foundation.FirstOrder.Incompleteness.Yablo
 
 import Foundation.FirstOrder.Hauptsatz
 
@@ -147,9 +149,10 @@ import Foundation.Modal.Logic.Extension
 
 import Foundation.Modal.Logic.S.Consistent
 
-import Foundation.Modal.Logic.Dz.Basic
+import Foundation.Modal.Logic.D.Basic
 
 import Foundation.Modal.Logic.GLPlusBoxBot.Basic
+import Foundation.Modal.Logic.GLPoint3OplusBoxBot.Basic
 
 import Foundation.Modal.Maximal.Makinson
 
@@ -157,15 +160,16 @@ import Foundation.Modal.Maximal.Makinson
 import Foundation.Modal.VanBentham.StandardTranslation
 
 -- Provability Logic
-import Foundation.ProvabilityLogic.Interpretation
+import Foundation.ProvabilityLogic.Realization
 import Foundation.ProvabilityLogic.Arithmetic
 import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.ProvabilityLogic.Incompleteness
+import Foundation.ProvabilityLogic.Provability
 
 import Foundation.ProvabilityLogic.N.Soundness
 
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.GL.Unprovability
+import Foundation.ProvabilityLogic.GL.Uniform
 
 import Foundation.ProvabilityLogic.Grz.Completeness
 

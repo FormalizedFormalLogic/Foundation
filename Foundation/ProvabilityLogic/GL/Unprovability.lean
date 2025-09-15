@@ -53,18 +53,18 @@ open Modal Logic
 open Entailment
 
 variable {T : ArithmeticTheory} [T.Δ₁]
-         {f : T.PLRealization}
+         {f : T.StandardRealization}
          {A B : Modal.Formula _}
 
 
 section Corollary
 
 /-- Gödel's Second Incompleteness Theorem -/
-example [𝐈𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) : T ⊬. T.standardProvability.con := by
+example [𝗜𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) : T ⊬. T.standardProvability.con := by
   have h := GL.arithmetical_completeness_iff height (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
-  exact Realization.iff_interpret_neg (L := ℒₒᵣ) |>.not.mp h;
+  exact Realization.interpret.iff_provable_neg (f := f) |>.not.mp h;
 
 end Corollary
 
@@ -73,34 +73,34 @@ section Independency
 lemma iff_modalConsis_bewConsis_inside :
     T ⊢!. f (∼□⊥) ⭤ T.standardProvability.con := by
   apply K!_intro;
-  . refine C!_trans (K!_left Realization.iff_interpret_neg_inside) ?_;
+  . refine C!_trans (K!_left Realization.interpret.iff_provable_neg_inside) ?_;
     apply contra!;
     simp [Realization.interpret];
-  . refine C!_trans ?_ (K!_right Realization.iff_interpret_neg_inside)
+  . refine C!_trans ?_ (K!_right Realization.interpret.iff_provable_neg_inside)
     apply contra!;
     simp [Realization.interpret];
 
-variable [𝐈𝚺₁ ⪯ T]
+variable [𝗜𝚺₁ ⪯ T]
 
 lemma iff_modalIndep_bewIndep_inside :
     T ⊢!. f (Modal.independency A) ⭤ T.standardProvability.indep (f A) := by
   apply K!_intro;
-  . refine C!_trans (K!_left $ Realization.iff_interpret_and_inside) ?_;
+  . refine C!_trans (K!_left $ Realization.interpret.iff_provable_and_inside) ?_;
     apply CKK!_of_C!_of_C!;
-    . apply K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ);
-    . apply C!_trans (K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ) (A := □(∼A))) ?_;
+    . apply K!_left $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ);
+    . apply C!_trans (K!_left $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ) (A := □(∼A))) ?_;
       apply contra!;
-      apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
+      apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁.toAxiom);
       apply T.standardProvability.prov_distribute_imply;
-      apply K!_right $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ) ;
-  . refine C!_trans ?_ (K!_right $ Realization.iff_interpret_and_inside);
+      apply K!_right $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ) ;
+  . refine C!_trans ?_ (K!_right $ Realization.interpret.iff_provable_and_inside);
     apply CKK!_of_C!_of_C!;
-    . exact C!_trans (K!_right $ Realization.iff_interpret_neg_inside (A := □A)) C!_id;
-    . apply C!_trans ?_ (K!_right $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ) (A := □(∼A)));
+    . exact C!_trans (K!_right $ Realization.interpret.iff_provable_neg_inside (A := □A)) C!_id;
+    . apply C!_trans ?_ (K!_right $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ) (A := □(∼A)));
       apply contra!;
-      apply WeakerThan.pbl (𝓢 := 𝐈𝚺₁.toAxiom);
+      apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁.toAxiom);
       apply T.standardProvability.prov_distribute_imply;
-      apply K!_left $ Realization.iff_interpret_neg_inside (L := ℒₒᵣ);
+      apply K!_left $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ);
 
 lemma iff_modalIndep_bewIndep :
     T ⊢!. f (Modal.independency A) ↔ T ⊢!. T.standardProvability.indep (f A) := by
@@ -120,7 +120,7 @@ lemma iff_not_modalIndep_not_bewIndep :
 
 lemma unprovable_independency_of_consistency (height : T.standardProvability.height = ⊤) :
     T ⊬. T.standardProvability.indep (T.standardProvability.con) := by
-  let g : T.PLRealization := ⟨λ _ => ⊥⟩
+  let g : T.StandardRealization := ⟨λ _ => ⊥⟩
   suffices T ⊬. g (Modal.independency (∼□⊥)) by
     have H₁ := iff_modalIndep_bewIndep (f := g) (T := T) (A := ∼□⊥);
     have H₂ := T.standardProvability.indep_iff_distribute (T := T)
@@ -135,7 +135,7 @@ lemma unprovable_independency_of_consistency (height : T.standardProvability.hei
 
 lemma unrefutable_independency_of_consistency (height : T.standardProvability.height = ⊤):
     T ⊬. ∼T.standardProvability.indep (T.standardProvability.con) := by
-  let g : T.PLRealization := ⟨λ _ => ⊥⟩
+  let g : T.StandardRealization := ⟨λ _ => ⊥⟩
   suffices T ⊬. ∼g (Modal.independency (∼□⊥)) by
     have H₁ := iff_not_modalIndep_not_bewIndep (f := g) (T := T) (A := ∼□⊥);
     have H₂ : T ⊢!.
@@ -156,7 +156,7 @@ lemma unrefutable_independency_of_consistency (height : T.standardProvability.he
   have h := GL.arithmetical_completeness_iff height |>.not.mpr $ GL.unprovable_not_independency_of_consistency;
   push_neg at h;
   obtain ⟨f, h⟩ := h;
-  replace h := Realization.iff_interpret_neg (L := ℒₒᵣ) |>.not.mp h;
+  replace h := Realization.interpret.iff_provable_neg (L := ℒₒᵣ) |>.not.mp h;
   congr;
 
 theorem undecidable_independency_of_consistency (height : T.standardProvability.height = ⊤) :

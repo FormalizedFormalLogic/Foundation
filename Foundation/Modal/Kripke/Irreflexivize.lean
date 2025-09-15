@@ -1,6 +1,7 @@
 import Foundation.Modal.Kripke.Irreflexive
 import Foundation.Modal.Kripke.AxiomWeakPoint2
 import Foundation.Modal.Kripke.AxiomPoint3
+import Foundation.Modal.Kripke.Rooted
 
 namespace LO.Modal.Kripke
 
@@ -35,6 +36,11 @@ instance [F.IsPiecewiseStronglyConnected] : (F^≠).IsPiecewiseConnected := ⟨b
   suffices y ≠ z → F^≠.Rel y z ∨ F^≠.Rel z y by tauto;
   intro nyz;
   rcases F.ps_connected Rxy Ryz with (Ryz | Rzy) <;> tauto;
+⟩
+
+instance [F.IsStronglyConnected] : (F^≠).IsConnected := ⟨by
+  rintro x y;
+  rcases F.s_connected (x := x) (y := y) with (Rxy | Ryx) <;> tauto;
 ⟩
 
 end IrreflGen
