@@ -53,20 +53,20 @@ lemma truthlemma_lemma1
   {X : ComplementClosedConsistentFinset Hilbert.GL φ.subformulas} (hq : □ψ ∈ φ.subformulas)
   : ((X.1.prebox ∪ X.1.prebox.box) ∪ {□ψ, -ψ}) ⊆ φ.subformulas⁻ := by
   intro χ hr;
-  replace hr : χ = □ψ ∨ □χ ∈ X ∨ (∃ a, □a ∈ X ∧ □a = χ) ∨ χ = -ψ := by simpa using hr;
-  rcases hr with (rfl | hp | ⟨χ, hr, rfl⟩ | rfl);
+  replace hr : χ = □ψ ∨ χ = -ψ ∨ □χ ∈ X ∨ ∃ a, □a ∈ X ∧ □a = χ := by simpa using hr;
+  rcases hr with (rfl | rfl | hp | ⟨χ, hr, rfl⟩);
   . apply Finset.mem_union.mpr;
     tauto;
-  . have := X.closed.subset hp;
-    have := FormulaFinset.complementary_mem_box (by grind) this;
-    apply Finset.mem_union.mpr;
-    grind;
-  . exact X.closed.subset hr;
   . apply Finset.mem_union.mpr;
     right;
     apply Finset.mem_image.mpr;
     use ψ;
     grind;
+  . have := X.closed.subset hp;
+    have := FormulaFinset.complementary_mem_box (by grind) this;
+    apply Finset.mem_union.mpr;
+    grind;
+  . exact X.closed.subset hr;
 
 lemma truthlemma_lemma2
   {X : ComplementClosedConsistentFinset Hilbert.GL φ.subformulas}
