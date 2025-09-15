@@ -91,8 +91,6 @@ lemma models₀_fconj'_iff {s : Finset α} {Γ : α → Sentence L} : M ⊧ₘ�
 
 end FirstOrder
 
-
-
 namespace Modal
 
 namespace Formula
@@ -530,18 +528,35 @@ abbrev Frame.finiteLinear (n : ℕ) : Kripke.Frame where
 
 namespace Frame.finiteLinear
 
+abbrev of (i : Fin (n + 1)) : Frame.finiteLinear n := i
+
 instance : (Frame.finiteLinear n) |>.IsFiniteTree 0 where
   asymm := by apply Fin.lt_asymm;
   root_generates := by simp [Frame.finiteLinear, Fin.pos_iff_ne_zero]
 
-@[simp]
-lemma eq_height_0 : Frame.World.finHeight (0 : Frame.finiteLinear n) = n := by
-  dsimp [Frame.World.finHeight];
-  sorry;
+lemma finHeight_of_eq_sub (i : Fin (n + 1)) : Frame.World.finHeight (of i) = n - i := by
+  induction i using Fin.reverseInduction
+  case last =>
+    suffices World.finHeight (of (Fin.last n)) = 0 by simpa
+    apply fcwHeight_eq_zero_iff.mpr
+    intro j
+    show ¬(Fin.last n) < j
+    simp [Fin.le_last]
+  case cast i ih =>
+    suffices World.finHeight (of i.castSucc) = World.finHeight (of i.succ) + 1 by
+      rw [this, ih]
+      simp; omega
+    apply fcwHeight_eq_succ_fcwHeight
+    · show i.castSucc < i.succ
+      exact Fin.castSucc_lt_succ i
+    · suffices ∀ j : Fin (n + 1), i.castSucc < j → i.succ ≤ j by
+        simpa [le_iff_lt_or_eq] using this
+      intro j
+      exact id
+
+@[simp] lemma finHeight_zero : Frame.World.finHeight (0 : Frame.finiteLinear n) = n := by simpa using finHeight_of_eq_sub 0
 
 end Frame.finiteLinear
-
-
 
 lemma spectrum_TFAE (_ : φ.letterless) : [
   n ∈ φ.spectrum,
