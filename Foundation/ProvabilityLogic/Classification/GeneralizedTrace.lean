@@ -10,6 +10,14 @@ variable {φ ψ : Formula ℕ}
 
 def Formula.gTrace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, ∃ w : M, Frame.World.finHeight w = n ∧ ¬w ⊧ φ }
 
+def Formula.gTrace' (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ ¬r ⊧ φ }
+
+lemma satisfies_of_not_mem_gTrace' : n ∉ φ.gTrace' ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.finHeight = n → r ⊧ φ) := by
+  simp [Formula.gTrace'];
+
+lemma satisfies_of_not_mem_gTrace : n ∉ φ.gTrace ↔ (∀ M : Kripke.Model, ∀ r, [M.IsTree r] → [Fintype M] → ∀ w : M, Frame.World.finHeight w = n → w ⊧ φ) := by
+  simp [Formula.gTrace];
+
 @[grind]
 lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.letterless) : φ.gTrace = φ.trace := by
   ext n;
@@ -113,6 +121,109 @@ lemma S.eq_trace : Modal.S.trace = Set.univ := by
   constructor;
   . apply Logic.iff_provable.mp; simp;
   . simp [Formula.eq_gTrace_trace_of_letterless];
+
+variable {L : Logic ℕ} {φ : Formula ℕ}
+
+attribute [grind] Modal.Logic.iff_provable
+
+lemma subset_of_provable (h : L ⊢! φ) : φ.gTrace ⊆ L.trace := by
+  intro n h;
+  simp_all [Logic.trace, FormulaSet.gTrace];
+  use φ;
+
+abbrev _root_.Set.Cofinite (s : Set α) := sᶜ.Finite
+abbrev _root_.Set.Coinfinite (s : Set α) := sᶜ.Infinite
+
+lemma _root_.Set.Cofinite.subset {s t : Set α} (h : s ⊆ t) : s.Cofinite → t.Cofinite := by
+  intro h;
+  apply Set.Finite.subset (s := sᶜ) h;
+  tauto_set;
+
+lemma _root_.Set.Coinfinite.subset {s t : Set α} (h : t ⊆ s) : s.Coinfinite → t.Coinfinite := by
+  contrapose!;
+  simpa using Set.Cofinite.subset h;
+
+@[grind]
+lemma Formula.gTrace.finite_or_cofinite : φ.gTrace.Finite ∨ φ.gTrace.Cofinite := by
+  sorry;
+
+@[grind]
+lemma Formula.gTrace.finite_of_coinfinite (h_ci : φ.gTrace.Coinfinite) : φ.gTrace.Finite := by
+  rcases Formula.gTrace.finite_or_cofinite (φ := φ) with h | h_cf;
+  . assumption;
+  . exfalso;
+    apply h_ci;
+    exact h_cf;
+
+@[simp]
+lemma TBB_injective : Function.Injective TBB := by sorry;
+
+lemma iff_satisfies_TBB_ne_finHeight {M : Model} {r : M} [M.IsTree r] [Fintype M] {n : ℕ} : r ⊧ (TBB n) ↔ M.finHeight ≠ n := by
+  apply Iff.trans $ iff_satisfies_mem_finHeight_spectrum (φ := TBB n) (w := r)
+  simp;
+  tauto;
+
+lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GLα L.trace := by
+  intro φ hφ;
+  apply Modal.Logic.iff_provable.mp;
+
+  have : φ.gTrace ⊆ L.trace := subset_of_provable (by grind);
+  have : φ.gTrace.Finite := by
+    have : φ.gTrace.Coinfinite := Set.Coinfinite.subset this hL
+    grind
+  let Tφ := this.toFinset;
+
+  apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless ?_ |>.mpr ⟨(Tφ.image TBB), ?_, ?_⟩;
+  . grind;
+  . simpa [Tφ, Set.preimage_image_eq L.trace TBB_injective];
+  . apply GL.Kripke.tree_completeness_TFAE.out 3 0 |>.mp;
+    intro M r _ hr;
+    have : Fintype M.World := Fintype.ofFinite _;
+    apply satisfies_of_not_mem_gTrace (n := M.finHeight) |>.mp;
+    . replace hr : ∀ n ∈ φ.gTrace, M.finHeight ≠ n := by
+        intro n h;
+        apply iff_satisfies_TBB_ne_finHeight.mp;
+        apply Satisfies.fconj_def.mp hr _;
+        simp [Tφ];
+        use n;
+      by_contra hC;
+      apply hr _ hC rfl;
+    . rfl;
+
+
+lemma Formula.Kripke.Satisfies.fconj'_def {M : Kripke.Model} {w : M} {X : Finset α} {ι : α → Formula ℕ} : w ⊧ (⩕ i ∈ X, ι i) ↔ ∀ i ∈ X, w ⊧ ι i := by
+  sorry;
+
+lemma Formula.Kripke.Satisfies.not_fconj'_def {M : Kripke.Model} {w : M} {X : Finset α} {ι : α → Formula ℕ} : ¬(w ⊧ (⩕ i ∈ X, ι i)) ↔ ∃ i ∈ X, ¬(w ⊧ ι i) := by
+  simpa using Formula.Kripke.Satisfies.fconj'_def.not;
+
+
+lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.GLβMinus L.trace := by
+  intro φ hφ;
+  apply Modal.Logic.iff_provable.mp;
+
+  have : φ.gTrace ⊆ L.trace := subset_of_provable (by grind);
+
+  let Tφ := hL.toFinset;
+
+  apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless ?_ |>.mpr ⟨{∼⩕ n ∈ Tφ, TBB n}, ?_, ?_⟩;
+  . grind;
+  . simp_all [Set.compl_iUnion, Tφ];
+  . apply GL.Kripke.tree_completeness_TFAE.out 3 0 |>.mp;
+    intro M r _ hr;
+    have : Fintype M.World := Fintype.ofFinite _;
+    apply satisfies_of_not_mem_gTrace (n := M.finHeight) |>.mp;
+    . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.gTrace → ¬M.finHeight = n := by
+        rintro n ξ hξ₁ hξ₂ rfl;
+        obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ ¬r ⊧ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by simpa using hr;
+        replace hm₁ : ∀ i ∈ L, m ∉ i.gTrace := by simpa [Tφ] using hm₁;
+        replace hm₂ : M.finHeight = m := by simpa using iff_satisfies_TBB_ne_finHeight.not.mp hm₂;
+        apply hm₁ ξ;
+        . assumption;
+        . grind;
+      by_contra hC;
+      apply hr M.finHeight φ hφ hC rfl;
+    . rfl;
 
 end Modal
 
