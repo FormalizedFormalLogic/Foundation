@@ -115,12 +115,14 @@ lemma fcwHeight_eq_succ {a : α} (h : fcwHeight R a ≠ 0) :
   have : ({x : α | R a x} : Finset α).Nonempty := by simpa [Finset.filter_nonempty_iff] using this
   simpa [fcwHeight_eq (R := R) a] using Finset.exists_mem_eq_sup _ this (fun b ↦ fcwHeight R b + 1)
 
-lemma fcwHeight_eq_succ_fcwHeight {a b : α} (h : R a b) (hb : ∀ c, R a c → R b c) :
+lemma fcwHeight_eq_succ_fcwHeight {a b : α} (h : R a b) (hb : ∀ c, R a c → R b c ∨ b = c) :
     fcwHeight R a = fcwHeight R b + 1 := by
   apply fcwHeight_eq_of_lt_of_le
   · intro c Rac
-    suffices fcwHeight R c < fcwHeight R b from Nat.lt_add_right 1 this
-    exact fcwHeight_gt_of (hb c Rac)
+    rcases hb c Rac with (Rbc | rfl)
+    · suffices fcwHeight R c < fcwHeight R b from Nat.lt_add_right 1 this
+      exact fcwHeight_gt_of Rbc
+    · simp
   · use b
 
 lemma fcwHeight_lt [IsTrans α R] {a : α} :
