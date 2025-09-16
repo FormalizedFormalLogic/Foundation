@@ -127,8 +127,9 @@ attribute [grind] Modal.Logic.iff_provable
 
 lemma subset_of_provable (h : L ⊢! φ) : φ.gTrace ⊆ L.trace := by
   intro n h;
-  simp_all [Logic.trace, FormulaSet.gTrace];
+  suffices ∃ i ∈ L, n ∈ i.gTrace by simpa [Logic.trace, FormulaSet.gTrace];
   use φ;
+  grind;
 
 abbrev _root_.Set.Cofinite (s : Set α) := sᶜ.Finite
 abbrev _root_.Set.Coinfinite (s : Set α) := sᶜ.Infinite
@@ -239,6 +240,25 @@ lemma Logic.sumQuasiNormal.rec!_letterless
     sorry;
   | _ => grind;
 
+@[simp]
+lemma Kripke.Frame.extendRoot.eq_finHeight_from_original_root {F : Kripke.Frame} {r : F} [Fintype F.World] [F.IsTree r] : Frame.World.finHeight (r : F.extendRoot 1) = F.finHeight := by
+  apply finHeight_eq_iff_relItr.mpr;
+  constructor;
+  . obtain ⟨t, Rrt⟩ := exists_terminal r;
+    use t;
+    apply extendRoot.embed_rel_iterate_embed_iff_rel.mpr;
+    assumption;
+  . rintro x Rrx y Rxy;
+    suffices F.finHeight + 2 ≤ F.finHeight + 1 by omega;
+    calc
+      _ ≤ (F.extendRoot 1).finHeight := le_finHeight_iff_relItr.mpr $ by
+        use y, r;
+        constructor;
+        . apply Frame.root_genaretes'!; simp;
+        . apply HRel.Iterate.forward.mpr
+          use x;
+      _ = F.finHeight + 1 := by simp;
+
 end Modal
 
 namespace ProvabilityLogic
@@ -275,12 +295,8 @@ lemma provable_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trace) :
       have : 𝗜𝚺₁ ⊢!. S r₀ ➝ ∼(T.standardProvability) (S.realization (□^[M.finHeight]⊥)) := C!_trans (S.SC2 r₀ r Rr₀) $ contra! $
         T.standardProvability.prov_distribute_imply' $
         CN!_of_CN!_right $
-        S.mainlemma_neg Rr₀ $ by
-          apply finHeight_lt_iff_satisfies_boxbot.not.mp;
-          have : Frame.World.finHeight (r : M₀) = M.finHeight := by
-            have := Frame.extendRoot.finHeight₁ (F := M.toFrame);
-            sorry;
-          omega;
+        S.mainlemma_neg Rr₀ $
+        finHeight_lt_iff_satisfies_boxbot.not.mp (by simp);
       apply C!_trans this
       simp [Realization.interpret.def_boxItr]
     . apply S.mainlemma Rr₀;
