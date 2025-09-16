@@ -60,7 +60,7 @@ variable {T : ArithmeticTheory} [T.Δ₁]
 section Corollary
 
 /-- Gödel's Second Incompleteness Theorem -/
-example [𝗜𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) : T ⊬. T.standardProvability.con := by
+example [𝗜𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) : T ⊬ T.standardProvability.con := by
   have h := GL.arithmetical_completeness_iff height (T := T) |>.not.mpr $ GL.unprovable_notbox (φ := ⊥);
   push_neg at h;
   obtain ⟨f, h⟩ := h;
@@ -119,9 +119,9 @@ lemma iff_not_modalIndep_not_bewIndep :
   . intro h; exact (K!_right iff_not_modalIndep_not_bewIndep_inside) ⨀ h;
 
 lemma unprovable_independency_of_consistency (height : T.standardProvability.height = ⊤) :
-    T ⊬. T.standardProvability.indep (T.standardProvability.con) := by
+    T ⊬ T.standardProvability.indep (T.standardProvability.con) := by
   let g : T.StandardRealization := ⟨λ _ => ⊥⟩
-  suffices T ⊬. g (Modal.independency (∼□⊥)) by
+  suffices T ⊬ g (Modal.independency (∼□⊥)) by
     have H₁ := iff_modalIndep_bewIndep (f := g) (T := T) (A := ∼□⊥);
     have H₂ := T.standardProvability.indep_iff_distribute (T := T)
       (σ := g (∼□⊥))
@@ -134,9 +134,9 @@ lemma unprovable_independency_of_consistency (height : T.standardProvability.hei
   congr;
 
 lemma unrefutable_independency_of_consistency (height : T.standardProvability.height = ⊤):
-    T ⊬. ∼T.standardProvability.indep (T.standardProvability.con) := by
+    T ⊬ ∼T.standardProvability.indep (T.standardProvability.con) := by
   let g : T.StandardRealization := ⟨λ _ => ⊥⟩
-  suffices T ⊬. ∼g (Modal.independency (∼□⊥)) by
+  suffices T ⊬ ∼g (Modal.independency (∼□⊥)) by
     have H₁ := iff_not_modalIndep_not_bewIndep (f := g) (T := T) (A := ∼□⊥);
     have H₂ : T ⊢!
       ∼T.standardProvability.indep (g (∼□⊥)) ⭤

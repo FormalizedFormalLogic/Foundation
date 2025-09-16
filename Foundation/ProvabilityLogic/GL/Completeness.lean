@@ -18,7 +18,7 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula
 theorem unprovable_realization_exists
     (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsFiniteTree r₁]
     (hA : ¬r₁ ⊧ A) (h : M₁.finHeight < T.height) :
-    ∃ f : T.StandardRealization, T ⊬. f A := by
+    ∃ f : T.StandardRealization, T ⊬ f A := by
   let M₀ := M₁.extendRoot 1
   let r₀ : M₀ := Frame.extendRoot.root
   have hdnA : r₀ ⊧ ◇(∼A) := by
@@ -40,7 +40,7 @@ theorem unprovable_realization_exists
 /-- Arithmetical completeness of $\mathsf{GL}$-/
 theorem GL.arithmetical_completeness (height : T.height = ⊤) :
     (∀ f : T.StandardRealization, T ⊢! f A) → Modal.GL ⊢! A := by
-  suffices ¬Modal.GL ⊢! A → ∃ f : T.StandardRealization, T ⊬. f A by
+  suffices ¬Modal.GL ⊢! A → ∃ f : T.StandardRealization, T ⊬ f A by
     contrapose!;
     assumption;
   intro hA
@@ -50,7 +50,7 @@ theorem GL.arithmetical_completeness (height : T.height = ⊤) :
 
 theorem GLPlusBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.height) :
     (∀ f : T.StandardRealization, T ⊢! f A) → Modal.GL ⊢! □^[n] ⊥ ➝ A := by
-  suffices ¬Modal.GL ⊢! □^[n]⊥ ➝ A → ∃ f : T.StandardRealization, T ⊬. f A by
+  suffices ¬Modal.GL ⊢! □^[n]⊥ ➝ A → ∃ f : T.StandardRealization, T ⊬ f A by
     contrapose!;
     assumption;
   intro hA

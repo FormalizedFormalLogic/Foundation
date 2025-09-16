@@ -243,11 +243,11 @@ $$
 ```lean
 theorem unprovable_goedel
     (𝔅 : Provability T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] :
-    T ⊬. 𝔅.goedel
+    T ⊬ 𝔅.goedel
 
 theorem unrefutable_goedel
     (𝔅 : Provability T₀ T) [T₀ ⪯ T] [Diagonalization T₀] [Consistent T] [𝔅.GoedelSound] :
-    T ⊬. ∼𝔅.goedel
+    T ⊬ ∼𝔅.goedel
 ```
 - [LO.ProvabilityLogic.Provability.unprovable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.Provability.unprovable_goedel)
 - [LO.ProvabilityLogic.Provability.unrefutable_goedel](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.Provability.unrefutable_goedel)
@@ -270,7 +270,7 @@ theorem goedel_iff_consistency
 ```lean
 theorem LO.ISigma1.goedel_second_incompleteness
     (T : ArithmeticTheory) [𝗜𝚺₁ ≼ T] [T.Δ₁] [System.Consistent T] :
-    T ⊬. T.consistent
+    T ⊬ T.consistent
 
 theorem LO.ISigma1.inconsistent_undecidable
     (T : ArithmeticTheory) [𝗜𝚺₁ ≼ T] [T.Δ₁] [T.Sigma1Sound] :

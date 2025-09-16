@@ -30,28 +30,28 @@ instance : 𝗘𝗤 ⪯ 𝗥₀ := Entailment.WeakerThan.ofSubset <| fun φ hp �
 
 instance : ℕ ⊧ₘ* 𝗥₀ := ⟨by
   intro σ h
-  rcases h <;> try { simp [models_def]; done }
+  rcases h <;> try { simp [models_iff]; done }
   case equal h =>
     have : ℕ ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
-    simpa [models_def] using modelsTheory_iff.mp this h
+    simpa [models_iff] using modelsTheory_iff.mp this h
   case Ω₃ h =>
-    simpa [models_def, ←le_iff_eq_or_lt] using h⟩
+    simpa [models_iff, ←le_iff_eq_or_lt] using h⟩
 
 variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗥₀]
 
 open Language ORingStruc
 
 lemma numeral_add_numeral (n m : ℕ) : (numeral n : M) + numeral m = numeral (n + m) := by
-  simpa [models_iff] using ModelsTheory.models M (Ω₁ n m) (fun _ ↦ 0)
+  simpa [models_iff] using ModelsTheory.models M (Ω₁ n m)
 
 lemma numeral_mul_numeral (n m : ℕ) : (numeral n : M) * numeral m = numeral (n * m) := by
-  simpa [models_iff] using ModelsTheory.models M (Ω₂ n m) (fun _ ↦ 0)
+  simpa [models_iff] using ModelsTheory.models M (Ω₂ n m)
 
 lemma numeral_ne_numeral_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ numeral m := by
-  simpa [models_iff] using ModelsTheory.models M (Ω₃ n m h) (fun _ ↦ 0)
+  simpa [models_iff] using ModelsTheory.models M (Ω₃ n m h)
 
 lemma lt_numeral_iff {x : M} {n : ℕ} : x < numeral n ↔ ∃ i : Fin n, x = numeral i := by
-  have := by simpa [models_iff] using ModelsTheory.models M (Ω₄ n) (fun _ ↦ 0)
+  have := by simpa [models_iff] using ModelsTheory.models M (Ω₄ n)
   constructor
   · intro hx
     rcases (this x).mp hx with ⟨i, hi, rfl⟩
@@ -210,6 +210,9 @@ instance : ORingStruc OmegaAddOne where
 
 @[simp] lemma top_add_zero : (⊤ : OmegaAddOne) + 0 = 0 := by rfl
 
+lemma exists_add_zero_ne_self : ∃ x : OmegaAddOne, x + 0 ≠ x :=
+  ⟨⊤, by simp⟩
+
 @[simp] lemma numeral_eq (n : ℕ) : (ORingStruc.numeral n : OmegaAddOne) = n :=
   match n with
   |     0 => rfl
@@ -227,7 +230,7 @@ def cases' {P : OmegaAddOne → Sort*}
 set_option linter.flexible false in
 instance : OmegaAddOne ⊧ₘ* 𝗥₀ := ⟨by
   intro σ h
-  rcases h <;> simp [models_def]
+  rcases h <;> simp [models_iff]
   case equal h =>
     have : OmegaAddOne ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
@@ -240,8 +243,9 @@ end OmegaAddOne
 
 end Countermodel
 
-lemma unprovable_addZero : 𝗥₀ ⊬ “x | x + 0 = x” :=
-  unprovable_of_countermodel (M := Countermodel.OmegaAddOne) (fun _ ↦ ⊤) _ (by simp)
+lemma unprovable_addZero : 𝗥₀ ⊬ “∀ x, x + 0 = x” :=
+  unprovable_of_countermodel (M := Countermodel.OmegaAddOne) <| by
+    simpa [models_iff] using Countermodel.OmegaAddOne.exists_add_zero_ne_self
 
 end R0
 

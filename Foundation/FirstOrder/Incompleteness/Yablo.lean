@@ -137,7 +137,7 @@ section
 
 variable [𝗜𝚺₁ ⪯ T] {n : ℕ}
 
-theorem yablo_unprovable [Entailment.Consistent T] : T ⊬. (T.yabloPred n) := by
+theorem yablo_unprovable [Entailment.Consistent T] : T ⊬ (T.yabloPred n) := by
   by_contra! hC;
   have H₁ : T ⊢! T.provabilityPred (T.yabloPred (n + 1)) := by
     apply Entailment.WeakerThan.pbl $ provable_D1 (T := T) ?_;
@@ -157,7 +157,7 @@ theorem yablo_unprovable [Entailment.Consistent T] : T ⊬. (T.yabloPred n) := b
   . infer_instance;
   . cl_prover [H₁, H₂];
 
-theorem yablo_unrefutable [T.SoundOnHierarchy 𝚺 1] : T ⊬. ∼T.yabloPred n := by
+theorem yablo_unrefutable [T.SoundOnHierarchy 𝚺 1] : T ⊬ ∼T.yabloPred n := by
   by_contra! hC;
   haveI := T.soundOnHierarchy 𝚺 1 (iff_neg_yablo_provable n |>.mp hC) $ by simp;
   obtain ⟨k, _, hk⟩ : ∃ k, n < k ∧ Provable T (substNumeral ⌜T.yablo⌝ k) := by simpa [models_iff, Matrix.comp_vecCons'] using this;

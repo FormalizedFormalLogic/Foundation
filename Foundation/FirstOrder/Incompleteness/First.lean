@@ -58,7 +58,7 @@ theorem incomplete
 
 theorem exists_true_but_unprovable_sentence
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    ∃ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ σ ∧ T ⊬. σ := by
+    ∃ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ σ ∧ T ⊬ σ := by
   obtain ⟨σ, hσ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
   by_cases ℕ ⊧ₘ σ;
   . use σ;

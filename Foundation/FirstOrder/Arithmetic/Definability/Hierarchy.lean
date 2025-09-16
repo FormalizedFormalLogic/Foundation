@@ -174,7 +174,7 @@ lemma ProvablyProperOn.properOn
     {φ : 𝚫-[m].Semisentence n} (h : φ.ProvablyProperOn T)
     (M : Type w) [ORingStruc M] [M ⊧ₘ* T] : φ.ProperOn M := by
   intro v
-  have := by simpa [models_iff] using consequence_iff.mp (sound!₀ h) M inferInstance
+  have := by simpa [models_iff] using consequence_iff.mp (sound! h) M inferInstance
   exact this v
 
 end ProvablyProperOn

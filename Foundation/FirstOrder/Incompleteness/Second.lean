@@ -14,11 +14,11 @@ variable (T : Theory ℒₒᵣ) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
 /-- Gödel's second incompleteness theorem -/
 theorem consistent_unprovable [Consistent T] :
-    T ⊬. T.consistent :=
+    T ⊬ T.consistent :=
   T.standardProvability.con_unprovable
 
 theorem inconsistent_unprovable [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :
-    T ⊬. ∼T.consistent :=
+    T ⊬ ∼T.consistent :=
   T.standardProvability.con_unrefutable
 
 theorem inconsistent_independent [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :

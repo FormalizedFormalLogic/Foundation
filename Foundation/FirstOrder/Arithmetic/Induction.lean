@@ -26,7 +26,7 @@ end FirstOrder
 variable (L)
 
 def InductionScheme (Γ : Semiformula L ℕ 1 → Prop) : Theory L :=
-  { ψ | ∃ φ : Semiformula L ℕ 1, Γ φ ∧ ψ = succInd φ }
+  { ψ | ∃ φ : Semiformula L ℕ 1, Γ φ ∧ ψ = ∀∀₀(succInd φ) }
 
 abbrev IOpen : ArithmeticTheory := 𝗣𝗔⁻ + InductionScheme ℒₒᵣ Semiformula.Open
 
@@ -69,6 +69,13 @@ lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⊆ �
 lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⪯ 𝗜𝚺 s₂ :=
   Entailment.WeakerThan.ofSubset (ISigma_subset_mono h)
 
+instance : 𝗣𝗔⁻ ⪯ 𝗜𝗢𝗽𝗲𝗻 := Entailment.WeakerThan.ofSubset (by simp [Theory.add_def])
+
+instance : InductionScheme ℒₒᵣ Semiformula.Open ⪯ 𝗜𝗢𝗽𝗲𝗻 := Entailment.WeakerThan.ofSubset (by simp [Theory.add_def])
+
+instance : InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ k) ⪯ 𝗜𝗡𝗗 Γ k :=
+  Entailment.WeakerThan.ofSubset (by simp [InductionOnHierarchy, Theory.add_def])
+
 instance : 𝗣𝗔⁻ ⪯ 𝗜𝗡𝗗 Γ n := Entailment.WeakerThan.ofSubset (by simp [InductionOnHierarchy, Theory.add_def])
 
 instance : 𝗘𝗤 ⪯ 𝗜𝗡𝗗 Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
@@ -85,11 +92,11 @@ instance : 𝗜𝚺i ⪯ 𝗣𝗔 :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset (by intros; trivial)
 
 lemma mem_InductionScheme_of_mem {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) :
-    succInd φ ∈ InductionScheme ℒₒᵣ C := by
+    ∀∀₀ (succInd φ) ∈ InductionScheme ℒₒᵣ C := by
   simpa [InductionScheme] using ⟨φ, hp, rfl⟩
 
 lemma mem_IOpen_of_qfree {φ : Semiformula ℒₒᵣ ℕ 1} (hp : φ.Open) :
-    succInd φ ∈ InductionScheme ℒₒᵣ Semiformula.Open := by
+    ∀∀₀ (succInd φ) ∈ InductionScheme ℒₒᵣ Semiformula.Open := by
   exact ⟨φ, hp, rfl⟩
 
 instance : 𝗣𝗔⁻ ⪯ 𝗜𝗢𝗽𝗲𝗻 := inferInstance
@@ -114,10 +121,11 @@ private lemma induction_eval {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) (v) 
     Semiformula.Evalm V ![0] v φ →
     (∀ x, Semiformula.Evalm V ![x] v φ → Semiformula.Evalm V ![x + 1] v φ) →
     ∀ x, Semiformula.Evalm V ![x] v φ := by
-  have : V ⊧ₘ succInd φ :=
+  have : V ⊧ₘ ∀∀₀ (succInd φ) :=
     ModelsTheory.models (T := InductionScheme _ C) V (by simpa using mem_InductionScheme_of_mem hp)
   revert v
-  simpa [models_iff, succInd, Semiformula.eval_substs, Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] using this
+  simpa [models_iff, Semiformula.eval_close₀, succInd, Semiformula.eval_substs,
+    Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] using this
 
 @[elab_as_elim]
 lemma succ_induction {P : V → Prop}
@@ -203,7 +211,7 @@ instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arith
         ∀ x, Semiformula.Evalm V ![x] f φ by
     simp only [InductionScheme, Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp]
     rintro _ φ hφ rfl
-    simpa [models_iff, succInd, Semiformula.eval_rew_q,
+    simpa [models_iff, Semiformula.eval_close₀, succInd, Semiformula.eval_rew_q,
         Semiformula.eval_substs, Function.comp, Matrix.constant_eq_singleton]
     using this φ hφ
   intro φ hp v
@@ -359,13 +367,13 @@ instance [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ* 𝗜𝚺₀ := inferInstance
 def mod_ISigma_of_le {n₁ n₂} (h : n₁ ≤ n₂) [V ⊧ₘ* 𝗜𝚺 n₂] : V ⊧ₘ* 𝗜𝚺 n₁ :=
   ModelsTheory.of_ss inferInstance (ISigma_subset_mono h)
 
-lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ succInd φ := by
+lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ ∀∀₀ (succInd φ) := by
   suffices
     ∀ f : ℕ → ℕ,
       Semiformula.Evalm ℕ ![0] f φ →
       (∀ x, Semiformula.Evalm ℕ ![x] f φ → Semiformula.Evalm ℕ ![x + 1] f φ) →
         ∀ x, Semiformula.Evalm ℕ ![x] f φ by
-    simpa [succInd, models_iff, Matrix.constant_eq_singleton, Semiformula.eval_substs]
+    simpa [Semiformula.eval_close₀, succInd, models_iff, Matrix.constant_eq_singleton, Semiformula.eval_substs]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih

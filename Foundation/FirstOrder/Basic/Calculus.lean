@@ -499,6 +499,10 @@ lemma inconsistent_lMap {T : Theory L₁} (Φ : L₁ →ᵥ L₂) :
   simp
   exact ⟨(Semiformula.lMap Φ) φ, Set.mem_image_of_mem _ hφ, Eq.symm (lMap_emb φ)⟩
 
+instance {T U : Theory L} : T ⪯ T + U := Entailment.Axiomatized.weakerThanOfSubset (by simp [add_def])
+
+instance {T U : Theory L} : U ⪯ T + U := Entailment.Axiomatized.weakerThanOfSubset (by simp [add_def])
+
 end Theory
 
 namespace SyntacticFormulas

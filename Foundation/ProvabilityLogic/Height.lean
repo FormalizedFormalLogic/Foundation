@@ -52,11 +52,11 @@ noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.height (T : Arithmeti
 
 variable {𝔅}
 
-lemma height_eq_top_iff : 𝔅.height = ⊤ ↔ ∀ n, T ⊬. 𝔅^[n] ⊥ := PartENat.find_eq_top_iff _
+lemma height_eq_top_iff : 𝔅.height = ⊤ ↔ ∀ n, T ⊬ 𝔅^[n] ⊥ := PartENat.find_eq_top_iff _
 
 variable (𝔅)
 
-lemma iIncon_unprovable_of_sigma1_sound [𝔅.Sound] [Entailment.Consistent T] : ∀ n, T ⊬. 𝔅^[n] ⊥
+lemma iIncon_unprovable_of_sigma1_sound [𝔅.Sound] [Entailment.Consistent T] : ∀ n, T ⊬ 𝔅^[n] ⊥
   |     0 => Entailment.consistent_iff_unprovable_bot.mp inferInstance
   | n + 1 => fun h ↦
     have : T ⊢! 𝔅 (𝔅^[n] ⊥) := by simpa [Function.iterate_succ_apply'] using h

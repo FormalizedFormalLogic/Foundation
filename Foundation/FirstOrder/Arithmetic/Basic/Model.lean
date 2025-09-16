@@ -4,6 +4,8 @@ namespace LO
 
 namespace FirstOrder
 
+abbrev ArithmeticTheory := Theory ℒₒᵣ
+
 namespace Arithmetic
 open Language
 
@@ -21,19 +23,19 @@ variable {L : Language} [L.ORing]
 
 @[simp] lemma oringEmb_operator_add_val :
     Semiterm.Operator.Add.add.term.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) = Semiterm.Operator.Add.add.term := by
-  simp [Semiterm.Operator.Add.term_eq, Semiterm.lMap_func, Matrix.empty_eq]
+  simp [Semiterm.Operator.Add.term_eq, Semiterm.lMap_func]
 
 @[simp] lemma oringEmb_operator_mul_val :
     Semiterm.Operator.Mul.mul.term.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) = Semiterm.Operator.Mul.mul.term := by
-  simp [Semiterm.Operator.Mul.term_eq, Semiterm.lMap_func, Matrix.empty_eq]
+  simp [Semiterm.Operator.Mul.term_eq, Semiterm.lMap_func]
 
 @[simp] lemma oringEmb_operator_eq_val :
     .lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) Semiformula.Operator.Eq.eq.sentence = Semiformula.Operator.Eq.eq.sentence := by
-  simp [Semiformula.Operator.Eq.sentence_eq, Semiformula.lMap_rel, Matrix.empty_eq]
+  simp [Semiformula.Operator.Eq.sentence_eq, Semiformula.lMap_rel]
 
 @[simp] lemma oringEmb_operator_lt_val :
     .lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) Semiformula.Operator.LT.lt.sentence = Semiformula.Operator.LT.lt.sentence := by
-  simp [Semiformula.Operator.LT.sentence_eq, Semiformula.lMap_rel, Matrix.empty_eq]
+  simp [Semiformula.Operator.LT.sentence_eq, Semiformula.lMap_rel]
 
 end
 
@@ -125,14 +127,14 @@ variable {M : Type*} [ORingStruc M]
     {L : Language} [L.ORing] [Structure L M]
     [Structure.Zero L M] [Structure.One L M] [Structure.Add L M] [Structure.Mul L M]
     [Structure.Eq L M] [Structure.LT L M]
-    (T : Theory ℒₒᵣ) :
+    (T : ArithmeticTheory) :
     M ⊧ₘ* (T.lMap oringEmb : Theory L) ↔ M ⊧ₘ* T := by
   simp only [modelsTheory_iff]
   constructor
-  · intro H φ hp f
-    exact eval_lMap_oringEmb.mp <| @H (Semiformula.lMap oringEmb φ) (Set.mem_image_of_mem _ hp) f
+  · intro H φ hp
+    exact eval_lMap_oringEmb.mp <| @H (Semiformula.lMap oringEmb φ) (Set.mem_image_of_mem _ hp)
   · simp only [Theory.lMap, Set.mem_image, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂]
-    intro H φ hp f; exact eval_lMap_oringEmb.mpr (H hp f)
+    intro H φ hp; exact eval_lMap_oringEmb.mpr (H hp)
 
 end
 
@@ -152,18 +154,15 @@ structure ClosedCut (M : Type w) [s : Structure L M] extends Structure.ClosedSub
 
 end
 
-lemma oRing_consequence_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+lemma oRing_consequence_of (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊨ φ := consequence_of T φ fun M _ s _ _ ↦ by
   rcases standardModel_unique M s
   exact H M
 
-lemma oRing_provable_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+lemma oRing_provable_of (T : ArithmeticTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊢! φ := complete <| oRing_consequence_of _ _ H
 
-lemma oRing_provable₀_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (σ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ σ) :
-    T ⊢! σ := complete <| oRing_consequence_of _ _ H
-
-lemma oRing_weakerThan_of (T S : Theory ℒₒᵣ) [𝗘𝗤 ⪯ S]
+lemma oRing_weakerThan_of (T S : ArithmeticTheory) [𝗘𝗤 ⪯ S]
     (H : ∀ (M : Type*)
            [ORingStruc M]
            [M ⊧ₘ* S],
@@ -179,11 +178,10 @@ namespace ArithmeticTheory
 
 variable (T : ArithmeticTheory) (F : Sentence ℒₒᵣ → Prop)
 
-instance [ℕ ⊧ₘ* T] : T.SoundOn F := ⟨fun b _ ↦ consequence_iff.mp (sound!₀ b) ℕ inferInstance⟩
+instance [ℕ ⊧ₘ* T] : T.SoundOn F := ⟨fun b _ ↦ consequence_iff.mp (sound! b) ℕ inferInstance⟩
 
 lemma consistent_of_sound [SoundOn T F] (hF : F ⊥) : Entailment.Consistent T :=
-  Entailment.consistent_iff_unprovable_bot.mpr fun b ↦ by
-    simpa [Models₀] using SoundOn.sound (T := T) (F := F) (by simpa [Axiom.provable_iff]) hF
+  Entailment.consistent_iff_unprovable_bot.mpr fun b ↦ SoundOn.sound b hF
 
 end ArithmeticTheory
 

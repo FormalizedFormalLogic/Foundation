@@ -11,7 +11,7 @@ open LO.Entailment FirstOrder Arithmetic ISigma1 Metamath
 open Classical
 
 lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REPred P) (hC : ¬ComputablePred P) :
-  ∃ φ : ArithmeticSemisentence 1, ∃ a : ℕ, T ⊬. φ/[a] ∧ T ⊬. ∼φ/[a] := by
+  ∃ φ : ArithmeticSemisentence 1, ∃ a : ℕ, T ⊬ φ/[a] ∧ T ⊬ ∼φ/[a] := by
   let φ := codeOfREPred P;
   use φ;
   have hP : P = { n : ℕ | T ⊢! φ/[n] } := Set.ext fun x ↦ re_complete hRE;
@@ -21,7 +21,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
     apply ComputablePred.computable_iff_re_compl_re.mpr;
     constructor;
     . assumption;
-    . suffices REPred fun a : ℕ ↦ T ⊬. φ/[a] by simpa [hP] using this;
+    . suffices REPred fun a : ℕ ↦ T ⊬ φ/[a] by simpa [hP] using this;
       have : 𝚺₁-Predicate fun b : ℕ ↦ T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral b] ⌜φ⌝) := by clear hP; definability;
       apply REPred.of_eq (re_iff_sigma1.mpr this);
       intro a;

@@ -14,7 +14,7 @@ variable {L : Language} [L.Encodable] [L.LORDefinable]
 
 variable {T : Theory L} [T.Δ₁]
 
-lemma derivable_quote {Γ : Finset (SyntacticFormula L)} (d : T ⊢₂ Γ) : T.Derivable (⌜Γ⌝ : V) :=
+lemma derivable_quote {Γ : Finset (SyntacticFormula L)} (d : T ⟹₂ Γ) : T.Derivable (⌜Γ⌝ : V) :=
   ⟨⌜d⌝, by simpa [Semiformula.quote_def] using (⌜d⌝ : Theory.internalize V T ⊢ᵈᵉʳ ⌜Γ⌝).derivationOf⟩
 
 /-- Hilbert–Bernays provability condition D1 -/

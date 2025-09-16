@@ -24,7 +24,7 @@ instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.�
   constructor
   · intro v
     have : V ⊧/![v 0] (Theory.Δ₁.ch T).sigma.val ↔ V ⊧/![v 0] (Theory.Δ₁.ch T).pi.val := by
-      have := (consequence_iff (T := 𝗜𝚺₁)).mp (sound!₀ <| FirstOrder.Theory.Δ₁.isDelta1 (T := T)) V inferInstance
+      have := (consequence_iff (T := 𝗜𝚺₁)).mp (sound! <| FirstOrder.Theory.Δ₁.isDelta1 (T := T)) V inferInstance
       simp [models_iff] at this ⊢
       simpa [Matrix.constant_eq_singleton] using this ![v 0]
     rwa [show v = ![v 0] from Matrix.fun_eq_vec_one]
@@ -34,15 +34,15 @@ instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ
 
 @[simp] lemma Δ₁Class.proper : T.Δ₁ch.ProperOn V := (Theory.Δ₁.isDelta1 (T := T)).properOn V
 
-@[simp] lemma Δ₁Class.mem_iff {φ : SyntacticFormula L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
+@[simp] lemma Δ₁Class.mem_iff {φ : Sentence L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
   have : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ℕ ⊧/![⌜φ⌝] T.Δ₁ch.val := by
-    simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
+    simpa [Sentence.coe_quote_eq_quote, Matrix.constant_eq_singleton]
       using FirstOrder.Arithmetic.models_iff_of_Delta1 (V := V) (σ := T.Δ₁ch) (by simp) (by simp) (e := ![⌜φ⌝])
   Iff.trans this (Theory.Δ₁.mem_iff _)
 
-@[simp] lemma Δ₁Class.mem_iff' {φ : SyntacticFormula L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ φ ∈ T := Δ₁Class.mem_iff
+@[simp] lemma Δ₁Class.mem_iff' {φ : Sentence L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ φ ∈ T := Δ₁Class.mem_iff
 
-@[simp] lemma Δ₁Class.mem_iff'' {φ : SyntacticFormula L} : ((⌜φ⌝ : Metamath.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
+@[simp] lemma Δ₁Class.mem_iff'' {φ : Sentence L} : ((⌜φ⌝ : Metamath.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
   Δ₁Class.mem_iff
 
 end LO.ISigma1.Metamath
@@ -89,16 +89,16 @@ instance empty : Theory.Δ₁ (∅ : Theory L) where
   mem_iff {ψ} := by simp
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
-def singleton (φ : SyntacticFormula L) : Theory.Δ₁ {φ} where
+def singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
   ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)”) _
-  mem_iff {ψ} := by simp [Semiformula.quote_eq_encode]
+  mem_iff {ψ} := by simp [Sentence.quote_eq_encode]
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
-@[simp] lemma singleton_toTDef_ch_val (φ : FirstOrder.SyntacticFormula L) :
+@[simp] lemma singleton_toTDef_ch_val (φ : Sentence L) :
     letI := Δ₁.singleton φ
     ({φ} : Theory L).Δ₁ch.val = “x. x = ↑(Encodable.encode φ)” := by rfl
 
-def ofList (l : List (SyntacticFormula L)) : Δ₁ {φ | φ ∈ l} :=
+def ofList (l : List (Sentence L)) : Δ₁ {φ | φ ∈ l} :=
   match l with
   |     [] => empty.ofEq (by ext; simp)
   | φ :: l => ((singleton φ).add (ofList l)).ofEq (by ext; simp [Theory.add_def])
@@ -107,7 +107,7 @@ noncomputable def ofFinite (T : Theory L) (h : Set.Finite T) : T.Δ₁ := (ofLis
 
 instance [T.Δ₁] [U.Δ₁] : (T + U).Δ₁ := add inferInstance inferInstance
 
-instance (φ : SyntacticFormula L) : Theory.Δ₁ {φ} := singleton φ
+instance (φ : Sentence L) : Theory.Δ₁ {φ} := singleton φ
 
 instance insert [d : T.Δ₁] : (insert φ T).Δ₁ := (d.add (singleton φ)).ofEq (by ext; simp [Theory.add_def])
 

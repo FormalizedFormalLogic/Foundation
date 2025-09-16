@@ -14,7 +14,7 @@ namespace Derivation2
 
 variable (V)
 
-def cast [L.DecidableEq] {T : Theory L} (d : T ⊢₂ Γ) (h : Γ = Δ) : T ⊢₂ Δ := h ▸ d
+def cast [L.DecidableEq] {T : Theory L} {Γ Δ : Finset (SyntacticFormula L)} (d : T ⟹₂ Γ) (h : Γ = Δ) : T ⟹₂ Δ := h ▸ d
 
 noncomputable def Sequent.quote (Γ : Finset (SyntacticFormula L)) : V := ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V)
 
@@ -154,9 +154,13 @@ lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (Syntac
 
 variable (V)
 
-noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⊢₂ Γ → T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝
+noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ → T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝
   |   closed Δ φ h hn => TDerivation.em ⌜φ⌝ (by simpa) (by simpa using Sequent.quote_mem_quote.mpr hn)
-  |       axm φ hT _ => TDerivation.byAxm ⌜φ⌝ (by simp [tmem, hT]) (by simpa)
+  |       axm φ hT _ => TDerivation.byAxm ⌜φ⌝ (by
+    have : ∃ σ ∈ T, ↑σ = φ := by simpa [Theory.toSyntacticFormulas] using hT
+    rcases this with ⟨σ, hT', rfl⟩
+    simp only [tmem, internalize_theory]
+    apply (Δ₁Class.mem_iff'' (T := T) (φ := σ)).mpr hT') (by simpa)
   |           verum h => TDerivation.verum (by simpa using Sequent.quote_mem_quote.mpr h)
   |       and h bp bq =>
     TDerivation.and' (by simpa using Sequent.quote_mem_quote.mpr h) (bp.typedQuote.cast (by simp)) (bq.typedQuote.cast (by simp))
@@ -171,13 +175,13 @@ noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⊢₂ Γ �
   | cut (φ := φ) d dn =>
     TDerivation.cut (φ := ⌜φ⌝) (d.typedQuote.cast (by simp)) (dn.typedQuote.cast (by simp))
 
-noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⊢₂ Γ) (T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
+noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⟹₂ Γ) (T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
 
-noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⊢₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝).val⟩
+noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝).val⟩
 
-lemma quote_def (d : T ⊢₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝).val := rfl
+lemma quote_def (d : (T : SyntacticFormulas L) ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝).val := rfl
 
-lemma coe_typedQuote_val_eq (d : T ⊢₂ Γ) : ↑(d.typedQuote ℕ).val = (d.typedQuote V).val :=
+lemma coe_typedQuote_val_eq (d : (T : SyntacticFormulas L) ⟹₂ Γ) : ↑(d.typedQuote ℕ).val = (d.typedQuote V).val :=
   match d with
   |   closed Δ φ h hn => by
     simp [typedQuote, axL, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote']
@@ -207,27 +211,27 @@ lemma coe_typedQuote_val_eq (d : T ⊢₂ Γ) : ↑(d.typedQuote ℕ).val = (d.t
     simp [typedQuote, Metamath.cutRule, nat_cast_pair, Sequent.coe_eq, Semiformula.coe_quote_eq_quote',
       b₁.coe_typedQuote_val_eq, b₂.coe_typedQuote_val_eq]
 
-lemma coe_quote_eq (d : T ⊢₂ Γ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := coe_typedQuote_val_eq V d
+lemma coe_quote_eq (d : (T : SyntacticFormulas L) ⟹₂ Γ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := coe_typedQuote_val_eq V d
 
 end Derivation2
 
-noncomputable instance (Γ : Sequent L) : GoedelQuote (T ⟹ Γ) V := ⟨fun b ↦ ⌜Derivation.toDerivation2 T b⌝⟩
+noncomputable instance (Γ : Sequent L) : GoedelQuote ((T : SyntacticFormulas L) ⟹ Γ) V := ⟨fun b ↦ ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝⟩
 
-noncomputable instance (φ : SyntacticFormula L) : GoedelQuote (T ⊢ φ) V := ⟨fun b ↦
-  let b : T ⟹ [φ] := b
+noncomputable instance (φ : Sentence L) : GoedelQuote (T ⊢ φ) V := ⟨fun b ↦
+  let b : (T : SyntacticFormulas L) ⟹ [↑φ] := b
   ⌜b⌝⟩
 
-lemma quote_derivation_def {Γ : Sequent L} (b : T ⟹ Γ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 T b⌝ := rfl
+lemma quote_derivation_def {Γ : Sequent L} (b : (T : SyntacticFormulas L) ⟹ Γ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝ := rfl
 
-lemma quote_proof_def {φ : SyntacticFormula L} (b : T ⊢ φ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 T b⌝ := rfl
+lemma quote_proof_def {φ : Sentence L} (b : T ⊢ φ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝ := rfl
 
-@[simp] lemma derivation_of_quote_derivation {Γ : Sequent L} (b : T ⟹ Γ) : T.DerivationOf (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
-  let x := Derivation2.typedQuote V (Derivation.toDerivation2 T b)
+@[simp] lemma derivation_of_quote_derivation {Γ : Sequent L} (b : (T : SyntacticFormulas L) ⟹ Γ) : T.DerivationOf (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
+  let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : SyntacticFormulas L) b)
   suffices T.DerivationOf x.val ⌜List.toFinset Γ⌝ from this
   simpa using x.derivationOf
 
-@[simp] lemma proof_of_quote_proof {φ : SyntacticFormula L} (b : T ⊢ φ) : T.Proof (⌜b⌝ : V) ⌜φ⌝ := by
-  let x := Derivation2.typedQuote V (Derivation.toDerivation2 T b)
+@[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢ φ) : T.Proof (⌜b⌝ : V) ⌜φ⌝ := by
+  let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : SyntacticFormulas L) b)
   suffices T.Proof x.val ⌜φ⌝ from this
   simpa using x.derivationOf
 
@@ -238,7 +242,7 @@ namespace Theory
 
 open Derivation2
 
-lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstIdx d ∧ T ⊢₂! Γ := by
+lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstIdx d ∧ (T : SyntacticFormulas L) ⟹₂! Γ := by
   induction d using Nat.strongRec
   case ind d ih =>
   rcases h.case with ⟨hs, H⟩
@@ -309,19 +313,17 @@ lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstId
     refine ⟨Derivation2.cut b₁ b₂⟩
   · rcases by simpa using hΓ
     rcases Sequent.mem_quote hs with ⟨φ, hφ, rfl⟩
+    simp at hT
     refine ⟨Derivation2.axm φ (by simpa using hT) hφ⟩
 
-lemma Provable.sound2 {φ : SyntacticFormula L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢₂.! φ := by
+lemma Provable.sound2 {φ : SyntacticFormula L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢₂! φ := by
   rcases h with ⟨d, hp, hd⟩
   rcases hd.sound with ⟨Γ, e, b⟩
   have : Γ = {φ} := Sequent.quote_inj (V := ℕ) <| by simp [e, hp]
   rcases this
   exact b
 
-lemma Provable.sound {φ : SyntacticFormula L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢! φ :=
-  provable_iff_derivable2.mpr <| Theory.Provable.sound2 (by simpa using h)
-
-lemma Provable.smallSound {σ : Sentence L} (h : T.Provable (⌜σ⌝ : ℕ)) : T ⊢! ↑σ :=
+lemma Provable.sound {φ : Sentence L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢! φ :=
   provable_iff_derivable2.mpr <| Theory.Provable.sound2 (by simpa using h)
 
 end Theory
