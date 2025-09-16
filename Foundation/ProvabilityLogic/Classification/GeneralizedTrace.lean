@@ -17,10 +17,19 @@ lemma satisfies_of_not_mem_gTrace : n ∉ φ.gTrace ↔ (∀ M : Kripke.Model, �
 lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.letterless) : φ.gTrace = φ.trace := by
   ext n;
   apply Iff.trans ?_ (Kripke.spectrum_TFAE φ_letterless (n := n) |>.out 1 0 |>.not);
-  simp [Formula.gTrace];
   constructor;
-  . sorry;
-  . sorry;
+  . rintro ⟨M, r, _, M_fintype, rfl, h⟩;
+    push_neg;
+    refine ⟨M, r, {}, ?_, r, ?_, ?_⟩;
+    . assumption;
+    . rfl;
+    . assumption;
+  . push_neg;
+    rintro ⟨M, r, _, _, w, rfl, h⟩;
+    refine ⟨M.pointGenerate w, Model.pointGenerate.root, {}, ?_, ?_, ?_⟩;
+    . exact Fintype.ofFinite _;
+    . sorry;
+    . exact Model.pointGenerate.modal_equivalent_at_root _ |>.not.mpr h;
 
 open Formula.Kripke
 
@@ -110,7 +119,38 @@ lemma GLβMinus.eq_trace {β : Set ℕ} (hβ : βᶜ.Finite := by grind) : (Moda
   apply Eq.trans $ GL.eq_trace_ext $ by grind;
   simp [FormulaSet.gTrace, Formula.eq_gTrace_trace_of_letterless];
 
-@[simp] lemma S.provable_TBB {n : ℕ} : Modal.S ⊢! TBB n := by simp [TBB]
+attribute [grind] Modal.Logic.iff_provable
+
+@[simp, grind] lemma S.provable_TBB {n : ℕ} : Modal.S ⊢! TBB n := by simp [TBB]
+
+@[simp, grind]
+lemma subset_GLα_S : Modal.GLα α ⊆ Modal.S := by
+  intro φ;
+  suffices Modal.GLα α ⊢! φ → Modal.S ⊢! φ by grind;
+  intro hφ;
+  induction hφ using Modal.Logic.sumQuasiNormal.rec! with
+  | mem₁ hφ => exact Entailment.WeakerThan.pbl hφ;
+  | mem₂ hφ => obtain ⟨_, _, rfl⟩ := hφ; simp;
+  | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+  | subst ihφ => exact Logic.subst! _ ihφ;
+
+@[grind]
+lemma Logic.weakerThan_of_subset {L₁ L₂ : Logic α} (h : L₁ ⊆ L₂) : L₁ ⪯ L₂ := by
+  constructor;
+  simpa [Entailment.theory];
+
+@[grind]
+lemma Logic.strictWeakerThan_of_ssubset {L₁ L₂ : Logic α} (h : L₁ ⊂ L₂) : L₁ ⪱ L₂ := by
+  simp_all [Entailment.strictlyWeakerThan_iff, Set.ssubset_iff_exists];
+  aesop;
+
+instance : Modal.GLα α ⪯ Modal.S := by grind
+
+@[simp, grind]
+lemma Logic.subset_of_weakerThan {L₁ L₂ : Logic α} [L₁ ⪯ L₂] : L₁ ⊆ L₂ := by
+  intro φ;
+  suffices L₁ ⊢! φ → L₂ ⊢! φ by grind;
+  exact Entailment.WeakerThan.pbl;
 
 @[simp]
 lemma S.eq_trace : Modal.S.trace = Set.univ := by
@@ -118,12 +158,11 @@ lemma S.eq_trace : Modal.S.trace = Set.univ := by
   intro n;
   use (TBB n);
   constructor;
-  . apply Logic.iff_provable.mp; simp;
+  . grind;
   . simp [Formula.eq_gTrace_trace_of_letterless];
 
 variable {L : Logic ℕ} {φ : Formula ℕ}
 
-attribute [grind] Modal.Logic.iff_provable
 
 lemma subset_of_provable (h : L ⊢! φ) : φ.gTrace ⊆ L.trace := by
   intro n h;
@@ -270,9 +309,11 @@ open Modal
 open Modal.Kripke
 open Formula.Kripke
 
-variable {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [U.Δ₁] [𝗜𝚺₁ ⪯ U] [T ⪯ U] {A : Formula ℕ}
+variable {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T ⪯ U] {A : Formula ℕ}
 
 lemma provable_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trace) : T.ProvabilityLogic U ⊢! Modal.TBB n := by
+  have : 𝗜𝚺₁ ⪯ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance;
+
   obtain ⟨A, hA₁, ⟨M, r, _, _, rfl, h₂⟩⟩ := by simpa using h;
   replace hA₁ : ∀ f : T.StandardRealization, U ⊢!. f A := ProvabilityLogic.provable_iff.mp (by grind);
 
@@ -289,8 +330,8 @@ lemma provable_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trace) :
   have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢!. S i ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := by
     rintro (a | i);
     . suffices 𝗜𝚺₁ ⊢!. S r₀ ➝ S.realization (TBB M.finHeight) by
-        rw [(show Sum.inl a = r₀ by simp [r₀])];
         dsimp [Realization.interpret];
+        rw [(show Sum.inl a = r₀ by simp [r₀])];
         cl_prover [this]
       have : 𝗜𝚺₁ ⊢!. S r₀ ➝ ∼(T.standardProvability) (S.realization (□^[M.finHeight]⊥)) := C!_trans (S.SC2 r₀ r Rr₀) $ contra! $
         T.standardProvability.prov_distribute_imply' $
@@ -336,7 +377,7 @@ lemma eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic U
   refine ⟨?_, ?_⟩;
   . contrapose! h;
     rw [eq_provablityLogic_GLα_of_coinfinite_trace h];
-    sorry;
+    simp;
   . sorry;
 
 end ProvabilityLogic
