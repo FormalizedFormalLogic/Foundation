@@ -8,14 +8,9 @@ open Kripke
 
 variable {φ ψ : Formula ℕ}
 
-def Formula.gTrace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, ∃ w : M, Frame.World.finHeight w = n ∧ ¬w ⊧ φ }
+def Formula.gTrace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.finHeight = n ∧ ¬r ⊧ φ) }
 
-def Formula.gTrace' (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ ¬r ⊧ φ }
-
-lemma satisfies_of_not_mem_gTrace' : n ∉ φ.gTrace' ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.finHeight = n → r ⊧ φ) := by
-  simp [Formula.gTrace'];
-
-lemma satisfies_of_not_mem_gTrace : n ∉ φ.gTrace ↔ (∀ M : Kripke.Model, ∀ r, [M.IsTree r] → [Fintype M] → ∀ w : M, Frame.World.finHeight w = n → w ⊧ φ) := by
+lemma satisfies_of_not_mem_gTrace : n ∉ φ.gTrace ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.finHeight = n → r ⊧ φ) := by
   simp [Formula.gTrace];
 
 @[grind]
@@ -23,9 +18,13 @@ lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : 
   ext n;
   apply Iff.trans ?_ (Kripke.spectrum_TFAE φ_letterless (n := n) |>.out 1 0 |>.not);
   simp [Formula.gTrace];
+  constructor;
+  . sorry;
+  . sorry;
 
 open Formula.Kripke
 
+/-
 lemma Formula.gTrace_and : (φ ⋏ ψ).gTrace = φ.gTrace ∪ ψ.gTrace := by
   ext n;
   calc
@@ -45,7 +44,7 @@ lemma Formula.gTrace_and : (φ ⋏ ψ).gTrace = φ.gTrace ∪ ψ.gTrace := by
           apply Satisfies.and_def.not.mpr;
           tauto;
     _ ↔ _ := by simp [Formula.gTrace];
-
+-/
 
 abbrev FormulaSet.gTrace (X : FormulaSet ℕ) : Set ℕ := ⋃ φ ∈ X, φ.gTrace
 
@@ -158,7 +157,7 @@ lemma Formula.gTrace.finite_of_coinfinite (h_ci : φ.gTrace.Coinfinite) : φ.gTr
 @[simp]
 lemma TBB_injective : Function.Injective TBB := by sorry;
 
-lemma iff_satisfies_TBB_ne_finHeight {M : Model} {r : M} [M.IsTree r] [Fintype M] {n : ℕ} : r ⊧ (TBB n) ↔ M.finHeight ≠ n := by
+lemma iff_satisfies_TBB_root_ne_finHeight {M : Model} {r : M} [M.IsTree r] [Fintype M] {n : ℕ} : r ⊧ (TBB n) ↔ M.finHeight ≠ n := by
   apply Iff.trans $ iff_satisfies_mem_finHeight_spectrum (φ := TBB n) (w := r)
   simp;
   tauto;
@@ -182,7 +181,7 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
     apply satisfies_of_not_mem_gTrace (n := M.finHeight) |>.mp;
     . replace hr : ∀ n ∈ φ.gTrace, M.finHeight ≠ n := by
         intro n h;
-        apply iff_satisfies_TBB_ne_finHeight.mp;
+        apply iff_satisfies_TBB_root_ne_finHeight.mp;
         apply Satisfies.fconj_def.mp hr _;
         simp [Tφ];
         use n;
@@ -217,7 +216,7 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
         rintro n ξ hξ₁ hξ₂ rfl;
         obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ ¬r ⊧ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by simpa using hr;
         replace hm₁ : ∀ i ∈ L, m ∉ i.gTrace := by simpa [Tφ] using hm₁;
-        replace hm₂ : M.finHeight = m := by simpa using iff_satisfies_TBB_ne_finHeight.not.mp hm₂;
+        replace hm₂ : M.finHeight = m := by simpa using iff_satisfies_TBB_root_ne_finHeight.not.mp hm₂;
         apply hm₁ ξ;
         . assumption;
         . grind;
@@ -225,6 +224,105 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
       apply hr M.finHeight φ hφ hC rfl;
     . rfl;
 
+lemma Logic.sumQuasiNormal.rec!_letterless
+  {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢! φ) → Sort}
+  (mem₁  : ∀ {φ}, (h : L₁ ⊢! φ) → motive φ (mem₁! h))
+  (mem₂  : ∀ {φ}, (h : L₂ ⊢! φ) → motive φ (mem₂! h))
+  (mdp   : ∀ {φ ψ : Formula α},
+           {hφψ : (sumQuasiNormal L₁ L₂) ⊢! φ ➝ ψ} → {hφ : (sumQuasiNormal L₁ L₂) ⊢! φ} →
+          motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
+  )
+  : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢! φ) → motive φ h := by
+  intro φ h;
+  induction h using Logic.sumQuasiNormal.rec! with
+  | @subst ψ s _ ihφ =>
+    sorry;
+  | _ => grind;
+
 end Modal
+
+namespace ProvabilityLogic
+
+open LO.Entailment Entailment.FiniteContext
+open FirstOrder Arithmetic
+open ArithmeticTheory (ProvabilityLogic)
+open Modal
+open Modal.Kripke
+open Formula.Kripke
+
+variable {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [U.Δ₁] [𝗜𝚺₁ ⪯ U] [T ⪯ U] {A : Formula ℕ}
+
+lemma provable_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trace) : T.ProvabilityLogic U ⊢! Modal.TBB n := by
+  obtain ⟨A, hA₁, ⟨M, r, _, _, rfl, h₂⟩⟩ := by simpa using h;
+  replace hA₁ : ∀ f : T.StandardRealization, U ⊢!. f A := ProvabilityLogic.provable_iff.mp (by grind);
+
+  let M₀ := M.extendRoot 1;
+  let r₀ : M₀ := Frame.extendRoot.root
+  have Rr₀ : ∀ {x : M}, r₀ ≺ x := λ {x} => Frame.root_genaretes'! (r := r₀) x (by simp)
+
+  have : M₀.IsFiniteTree r₀ := {};
+  let S : SolovaySentences T.standardProvability M₀.toFrame r₀ := SolovaySentences.standard T M₀.toFrame;
+
+  have : M₀ ⊧ A ➝ (Modal.TBB M.finHeight) := by
+    rintro x hA;
+    sorry;
+  have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢!. S i ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := by
+    rintro (a | i);
+    . suffices 𝗜𝚺₁ ⊢!. S r₀ ➝ S.realization (TBB M.finHeight) by
+        rw [(show Sum.inl a = r₀ by simp [r₀])];
+        dsimp [Realization.interpret];
+        cl_prover [this]
+      have : 𝗜𝚺₁ ⊢!. S r₀ ➝ ∼(T.standardProvability) (S.realization (□^[M.finHeight]⊥)) := C!_trans (S.SC2 r₀ r Rr₀) $ contra! $
+        T.standardProvability.prov_distribute_imply' $
+        CN!_of_CN!_right $
+        S.mainlemma_neg Rr₀ $ by
+          apply finHeight_lt_iff_satisfies_boxbot.not.mp;
+          have : Frame.World.finHeight (r : M₀) = M.finHeight := by
+            have := Frame.extendRoot.finHeight₁ (F := M.toFrame);
+            sorry;
+          omega;
+      apply C!_trans this
+      simp [Realization.interpret.def_boxItr]
+    . apply S.mainlemma Rr₀;
+      apply this;
+  have : 𝗜𝚺₁ ⊢!. (⩖ j, S j) ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := left_Udisj!_intro _ this
+  have : 𝗜𝚺₁ ⊢!. S.realization (A ➝ (Modal.TBB M.finHeight)) := by cl_prover [this, S.SC4];
+
+  have : U ⊢!. S.realization (Modal.TBB M.finHeight) := by
+    have : U ⊢!. S.realization A ➝ S.realization (Modal.TBB M.finHeight) := WeakerThan.pbl this;
+    cl_prover [this, hA₁ S.realization];
+  apply ProvabilityLogic.provable_iff.mpr;
+  intro g;
+  simpa [Realization.letterless_interpret (A := Modal.TBB _) (by grind)] using this;
+
+lemma eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).trace.Coinfinite) : T.ProvabilityLogic U = Modal.GLα (T.ProvabilityLogic U).trace := by
+  apply Set.Subset.antisymm;
+  . apply subset_GLα_of_trace_coinfinite h;
+  . intro A;
+    suffices Modal.GLα (T.ProvabilityLogic U).trace ⊢! A → T.ProvabilityLogic U ⊢! A by grind;
+    intro hA;
+    induction hA using Modal.Logic.sumQuasiNormal.rec! with
+    | mem₁ hA =>
+      apply ProvabilityLogic.provable_iff.mpr;
+      intro f;
+      exact WeakerThan.pbl $ GL.arithmetical_soundness hA;
+    | mem₂ hA =>
+      replace hA := Modal.Logic.iff_provable.mp hA;
+      obtain ⟨n, ⟨N, ⟨A, hA₁, hA₂⟩, hN₂⟩, rfl⟩ := hA;
+      apply provable_of_mem_trace;
+      simp_all only [Set.mem_iUnion, exists_prop];
+      use A;
+    | mdp ihAB ihA => exact ProvabilityLogic.mdp ihAB ihA;
+    | @subst A s ihA =>
+      sorry;
+
+lemma eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : ∃ _ : (T.ProvabilityLogic U).trace.Cofinite, T.ProvabilityLogic U = Modal.GLβMinus (T.ProvabilityLogic U).trace := by
+  refine ⟨?_, ?_⟩;
+  . contrapose! h;
+    rw [eq_provablityLogic_GLα_of_coinfinite_trace h];
+    sorry;
+  . sorry;
+
+end ProvabilityLogic
 
 end LO

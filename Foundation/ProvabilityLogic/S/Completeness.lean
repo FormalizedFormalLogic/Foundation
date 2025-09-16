@@ -115,7 +115,7 @@ lemma GL_S_TFAE :
               apply hA₁;
               simpa [Formula.rflSubformula];
             rintro (i | i) _;
-            . rw [(show (Sum.inl i) = r₀ by simp [r₀]; omega)]
+            . rw [(show (Sum.inl i) = r₀ by simp [r₀];)]
               suffices 𝗜𝚺₁ ⊢!. σ r₀ ➝ σ.realization B by convert this;
               apply ihB (by grind) |>.1;
               exact hrfl h;
