@@ -133,7 +133,7 @@ def ProperWithParamOn (φ : 𝚫-[m].Semiformula M n) : Prop :=
   ∀ (e : Fin n → M), Semiformula.Evalm M e id φ.sigma.val ↔ Semiformula.Evalm M e id φ.pi.val
 
 def ProvablyProperOn (φ : 𝚫-[m].Semisentence n) (T : Theory ℒₒᵣ) : Prop :=
-  T ⊢!. ∀* “!φ.sigma.val ⋯ ↔ !φ.pi.val ⋯”
+  T ⊢! ∀* “!φ.sigma.val ⋯ ↔ !φ.pi.val ⋯”
 
 variable {M}
 
@@ -164,7 +164,7 @@ variable (T : Theory ℒₒᵣ)
 
 lemma ProvablyProperOn.ofProperOn [𝗘𝗤 ⪯ T] {φ : 𝚫-[m].Semisentence n}
     (h : ∀ (M : Type w) [ORingStruc M] [M ⊧ₘ* T], φ.ProperOn M) : φ.ProvablyProperOn T := by
-  apply complete₀ <| FirstOrder.Arithmetic.oRing_consequence_of.{w} T _ ?_
+  apply complete <| FirstOrder.Arithmetic.oRing_consequence_of.{w} T _ ?_
   intro M _ _
   simpa [models_iff] using (h M).iff
 

@@ -69,7 +69,7 @@ def rosser_internalize [Entailment.Consistent T] {φ : SyntacticFormula L} : T �
   have : ¬Entailment.Inconsistent T := Entailment.Consistent.not_inc inferInstance
   contradiction
 
-def rosser_internalize_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢!. σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+def rosser_internalize_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢! σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Semiformula.empty_quote_def] using rosser_internalize (Axiom.provable_iff.mp h)
 
 open Classical in
@@ -88,7 +88,7 @@ def not_rosserProvable [Entailment.Consistent T] {φ : SyntacticFormula L} : T �
   have : ¬Entailment.Inconsistent T := Entailment.Consistent.not_inc inferInstance
   contradiction
 
-def not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢!. ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+def not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢! ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Semiformula.empty_quote_def] using not_rosserProvable (by simpa using Axiom.provable_iff.mp h)
 
 end LO.ISigma1.Metamath
@@ -105,12 +105,12 @@ variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 
 local prefix:90 "𝗥" => T.rosserPred
 
-theorem rosserProvable_D1 {σ} : T ⊢!. σ → 𝗜𝚺₁ ⊢!. 𝗥σ := fun h ↦
-  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+theorem rosserProvable_D1 {σ} : T ⊢! σ → 𝗜𝚺₁ ⊢! 𝗥σ := fun h ↦
+  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using rosser_internalize_sentence h
 
-theorem rosserProvable_rosser {σ} : T ⊢!. ∼σ → 𝗜𝚺₁ ⊢!. ∼𝗥σ := fun h ↦
-  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+theorem rosserProvable_rosser {σ} : T ⊢! ∼σ → 𝗜𝚺₁ ⊢! ∼𝗥σ := fun h ↦
+  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using not_rosserProvable_sentence h
 
 end

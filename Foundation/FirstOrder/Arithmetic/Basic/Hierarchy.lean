@@ -483,7 +483,7 @@ end Arithmetic
 abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) := T.SoundOn (Arithmetic.Hierarchy Γ k)
 
 lemma ArithmeticTheory.soundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) [T.SoundOnHierarchy Γ k] :
-    T ⊢!. σ → Arithmetic.Hierarchy Γ k σ → ℕ ⊧ₘ₀ σ := SoundOn.sound
+    T ⊢! σ → Arithmetic.Hierarchy Γ k σ → ℕ ⊧ₘ σ := SoundOn.sound
 
 instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚺 1] : Entailment.Consistent T :=
   T.consistent_of_sound (Arithmetic.Hierarchy 𝚺 1) (by simp)

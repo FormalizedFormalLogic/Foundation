@@ -160,8 +160,8 @@ lemma oRing_consequence_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (φ : Syntact
 lemma oRing_provable_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (φ : SyntacticFormula ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ φ) :
     T ⊢! φ := complete <| oRing_consequence_of _ _ H
 
-lemma oRing_provable₀_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (σ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ₀ σ) :
-    T ⊢!. σ := complete₀ <| oRing_consequence_of _ _ H
+lemma oRing_provable₀_of (T : Theory ℒₒᵣ) [𝗘𝗤 ⪯ T] (σ : Sentence ℒₒᵣ) (H : ∀ (M : Type*) [ORingStruc M] [M ⊧ₘ* T], M ⊧ₘ σ) :
+    T ⊢! σ := complete <| oRing_consequence_of _ _ H
 
 lemma oRing_weakerThan_of (T S : Theory ℒₒᵣ) [𝗘𝗤 ⪯ S]
     (H : ∀ (M : Type*)
@@ -173,7 +173,7 @@ lemma oRing_weakerThan_of (T S : Theory ℒₒᵣ) [𝗘𝗤 ⪯ S]
 end Arithmetic
 
 class ArithmeticTheory.SoundOn (T : ArithmeticTheory) (F : Sentence ℒₒᵣ → Prop) where
-  sound : ∀ {σ}, T ⊢!. σ → F σ → ℕ ⊧ₘ₀ σ
+  sound : ∀ {σ}, T ⊢! σ → F σ → ℕ ⊧ₘ σ
 
 namespace ArithmeticTheory
 

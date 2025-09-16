@@ -112,19 +112,19 @@ lemma bold_sigma_one_completeness {n} {φ : Semiformula ℒₒᵣ ξ n} (hp : Hi
     exact ⟨numeral x, by simpa [Matrix.comp_vecCons'] using ihp hp⟩
 
 lemma sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ → M ⊧ₘ₀ σ := by
-  suffices Semiformula.Evalbm ℕ ![] σ → Semiformula.Evalbm M ![] σ by simpa [models₀_iff]
+    ℕ ⊧ₘ σ → M ⊧ₘ σ := by
+  suffices Semiformula.Evalbm ℕ ![] σ → Semiformula.Evalbm M ![] σ by simpa [models_iff]
   intro h
   simpa [Matrix.empty_eq, Empty.eq_elim] using bold_sigma_one_completeness hσ h
 
 variable (M)
 
 lemma nat_extention_sigmaOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ → M ⊧ₘ₀ σ := fun h ↦ by
+    ℕ ⊧ₘ σ → M ⊧ₘ σ := fun h ↦ by
   simpa [Matrix.empty_eq] using sigma_one_completeness (M := M) hσ h
 
 lemma nat_extention_piOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚷 1 σ) :
-    M ⊧ₘ₀ σ → ℕ ⊧ₘ₀ σ := by
+    M ⊧ₘ σ → ℕ ⊧ₘ σ := by
   contrapose
   simpa using nat_extention_sigmaOne M (σ := ∼σ) (by simpa using hσ)
 
@@ -144,15 +144,15 @@ namespace FirstOrder.Arithmetic
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ → T ⊢!. σ := fun H =>
+    ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗥₀) inferInstance inferInstance
-  complete₀ <| oRing_consequence_of.{0} _ _ <| fun M _ _ ↦ by
+  complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ ↦ by
     haveI : M ⊧ₘ* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ T inferInstance
     exact R0.sigma_one_completeness hσ H
 
 open Classical in
 theorem sigma_one_completeness_iff [T.SoundOnHierarchy 𝚺 1] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ ↔ T ⊢!. σ :=
+    ℕ ⊧ₘ σ ↔ T ⊢! σ :=
   haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   ⟨fun h ↦ sigma_one_completeness hσ h, fun h ↦ T.soundOnHierarchy 𝚺 1 h (by simp [hσ])⟩
 

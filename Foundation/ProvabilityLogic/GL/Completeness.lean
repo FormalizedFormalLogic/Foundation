@@ -39,7 +39,7 @@ theorem unprovable_realization_exists
 
 /-- Arithmetical completeness of $\mathsf{GL}$-/
 theorem GL.arithmetical_completeness (height : T.height = ⊤) :
-    (∀ f : T.StandardRealization, T ⊢!. f A) → Modal.GL ⊢! A := by
+    (∀ f : T.StandardRealization, T ⊢! f A) → Modal.GL ⊢! A := by
   suffices ¬Modal.GL ⊢! A → ∃ f : T.StandardRealization, T ⊬. f A by
     contrapose!;
     assumption;
@@ -49,7 +49,7 @@ theorem GL.arithmetical_completeness (height : T.height = ⊤) :
   exact unprovable_realization_exists M₁ hA₁ <| by simp [height]
 
 theorem GLPlusBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.height) :
-    (∀ f : T.StandardRealization, T ⊢!. f A) → Modal.GL ⊢! □^[n] ⊥ ➝ A := by
+    (∀ f : T.StandardRealization, T ⊢! f A) → Modal.GL ⊢! □^[n] ⊥ ➝ A := by
   suffices ¬Modal.GL ⊢! □^[n]⊥ ➝ A → ∃ f : T.StandardRealization, T ⊬. f A by
     contrapose!;
     assumption;
@@ -63,11 +63,11 @@ theorem GLPlusBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.h
   exact unprovable_realization_exists M₁ hA₁.2 <| lt_of_lt_of_le (by simp [M₁_height]) height
 
 theorem GL.arithmetical_completeness_iff (height : T.height = ⊤) {A} :
-    (∀ f : T.StandardRealization, T ⊢!. f A) ↔ Modal.GL ⊢! A :=
+    (∀ f : T.StandardRealization, T ⊢! f A) ↔ Modal.GL ⊢! A :=
   ⟨GL.arithmetical_completeness height, GL.arithmetical_soundness⟩
 
 theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
-    (∀ f : T.StandardRealization, T ⊢!. f A) ↔ Modal.GL ⊢! A :=
+    (∀ f : T.StandardRealization, T ⊢! f A) ↔ Modal.GL ⊢! A :=
   GL.arithmetical_completeness_iff (Provability.hight_eq_top_of_sigma1_sound T)
 
 /-- Provability logic of $\Sigma_1$-sound theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL}$-/
@@ -82,7 +82,7 @@ open Classical
 
 /-- Arithmetical completeness of $\mathsf{GL} + \square^n \bot$-/
 theorem GLPlusBoxBot.arithmetical_completeness
-    {n : ℕ∞} (hn : n ≤ T.height) (h : ∀ f : T.StandardRealization, T ⊢!. f A) :
+    {n : ℕ∞} (hn : n ≤ T.height) (h : ∀ f : T.StandardRealization, T ⊢! f A) :
     Modal.GLPlusBoxBot n ⊢! A := by
   match n with
   | .none =>
@@ -93,7 +93,7 @@ theorem GLPlusBoxBot.arithmetical_completeness
     exact GLPlusBoxBot.arithmetical_completeness_aux (n := n) (by simpa using hn) h
 
 theorem GLPlusBoxBot.arithmetical_completeness_iff :
-    (∀ f : T.StandardRealization, T ⊢!. f A) ↔ Modal.GLPlusBoxBot T.height.toWithTop ⊢! A :=
+    (∀ f : T.StandardRealization, T ⊢! f A) ↔ Modal.GLPlusBoxBot T.height.toWithTop ⊢! A :=
   ⟨GLPlusBoxBot.arithmetical_completeness (T := T) (by simp), GLPlusBoxBot.arithmetical_soundness⟩
 
 /-- Provability logic of theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL} + \square^{\text{height of } T} \bot$-/

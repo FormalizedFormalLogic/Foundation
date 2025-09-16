@@ -141,15 +141,15 @@ theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierar
     exact ih hφ
 
 theorem sigma_one_provable_of_models {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-     V ⊧ₘ₀ σ → T.internalize V ⊢! ⌜σ⌝ := by
+     V ⊧ₘ σ → T.internalize V ⊢! ⌜σ⌝ := by
   intro h
   have : T.internalize V ⊢! (toNumVec ![] ⤔ ⌜σ⌝) :=
-    bold_sigma_one_complete T hσ (by simpa [models₀_iff] using h)
+    bold_sigma_one_complete T hσ (by simpa [models_iff] using h)
   simpa using this
 
 /-- Hilbert–Bernays provability condition D3 -/
 theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    V ⊧ₘ₀ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
+    V ⊧ₘ σ → T.Provable (⌜σ⌝ : V) := fun h ↦ by
   simpa [tprovable_iff_provable]
     using InternalArithmetic.sigma_one_provable_of_models T hσ h
 

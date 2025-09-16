@@ -162,7 +162,7 @@ Following holds for all formula (not coded one) $\varphi$ and finite set $\Gamma
     V \models \mathrm{Provable}_{T + \mathsf{R_0}} (\ulcorner \sigma \urcorner)$
   ```lean
   theorem LO.ISigma1.Metamath.sigma1_complete (hσ : Hierarchy 𝚺 1 σ) :
-      V ⊧ₘ₀ σ → T.Provable ⌜σ⌝
+      V ⊧ₘ σ → T.Provable ⌜σ⌝
   ```
   - [LO.ISigma1.Metamath.sigma1_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D3.html#LO.ISigma1.Metamath.sigma1_complete)
 
@@ -227,7 +227,7 @@ $$
 
 ```lean
 theorem LO.ISigma1.diagonal (θ : Semisentence ℒₒᵣ 1) :
-    T ⊢!. fixpoint θ ⭤ θ/[⌜fixpoint θ⌝]
+    T ⊢! fixpoint θ ⭤ θ/[⌜fixpoint θ⌝]
 ```
 - [LO.ISigma1.diagonal](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/FixedPoint.html#LO.ISigma1.diagonal)
 
@@ -261,7 +261,7 @@ $$
 ```lean
 theorem goedel_iff_consistency
     (𝔅 : Provability T₀ T) [𝔅.HBL] [T₀ ⪯ T] [Diagonalization T₀] :
-    T₀ ⊢!. 𝔅.goedel ⭤ 𝔅.con
+    T₀ ⊢! 𝔅.goedel ⭤ 𝔅.con
 ```
 - [LO.ProvabilityLogic.Provability.goedel_iff_consistency](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.Provability.goedel_iff_consistency)
 

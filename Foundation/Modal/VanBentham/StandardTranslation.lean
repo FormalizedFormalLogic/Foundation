@@ -117,8 +117,8 @@ lemma correspondence_satisfies : x ⊧ φ ↔ M ⊧/![x] φ¹ := by
   | _ => simp_all [standardTranslation];
 
 /-- BdRV Prop 2.47 (ii) -/
-lemma correspondence_validOnModel : M ⊧ φ ↔ M ⊧ₘ₀ ∀' φ¹ := by
-  suffices M ⊧ φ ↔ ∀ x : M.World, M ⊧/![x] φ¹ by simpa [FirstOrder.models₀_iff];
+lemma correspondence_validOnModel : M ⊧ φ ↔ M ⊧ₘ ∀' φ¹ := by
+  suffices M ⊧ φ ↔ ∀ x : M.World, M ⊧/![x] φ¹ by simpa [FirstOrder.models_iff];
   constructor;
   . intro h x; apply correspondence_satisfies.mp $ h x;
   . intro h x; exact correspondence_satisfies.mpr $ h x;

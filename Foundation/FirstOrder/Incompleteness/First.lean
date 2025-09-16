@@ -42,9 +42,9 @@ theorem incomplete
           simpa [Semiformula.quote_def] using  internalize_provability (V := ℕ) b⟩
   let σ : Semisentence ℒₒᵣ 1 := codeOfREPred D
   let ρ : Sentence ℒₒᵣ := σ/[⌜σ⌝]
-  have : ∀ n : ℕ, D n ↔ T ⊢!. σ/[↑n] := fun n ↦ by
+  have : ∀ n : ℕ, D n ↔ T ⊢! σ/[↑n] := fun n ↦ by
     simpa [Semiformula.coe_substs_eq_substs_coe₁, Axiom.provable_iff] using re_complete D_re
-  have : T ⊢!. ∼ρ ↔ T ⊢!. ρ := by
+  have : T ⊢! ∼ρ ↔ T ⊢! ρ := by
     have : T ⊢! ∼↑σ/[↑(Encodable.encode σ)] ↔ T ⊢! ↑σ/[↑(Encodable.encode σ)] := by
       simpa [Axiom.provable_iff, Semiformula.quote_eq_encode, Semiformula.empty_quote_eq_encode,
         goedelNumber'_eq_coe_encode, D, Rewriting.embedding_substs_eq_substs_coe₁] using this ⌜σ⌝
@@ -58,9 +58,9 @@ theorem incomplete
 
 theorem exists_true_but_unprovable_sentence
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    ∃ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ₀ σ ∧ T ⊬. σ := by
+    ∃ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ σ ∧ T ⊬. σ := by
   obtain ⟨σ, hσ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
-  by_cases ℕ ⊧ₘ₀ σ;
+  by_cases ℕ ⊧ₘ σ;
   . use σ;
     constructor;
     . assumption;
