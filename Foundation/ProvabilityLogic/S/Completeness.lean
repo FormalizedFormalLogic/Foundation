@@ -6,10 +6,8 @@ import Foundation.Modal.Boxdot.Basic
 import Foundation.FirstOrder.Incompleteness.Tarski
 import Mathlib.Tactic.TFAE
 
-
-noncomputable abbrev LO.Modal.Formula.rflSubformula [DecidableEq α] (φ : Formula α) : FormulaFinset α
-  := (φ.subformulas.prebox.image (λ ψ => □ψ ➝ ψ))
-
+noncomputable abbrev LO.Modal.Formula.rflSubformula [DecidableEq α] (φ : Formula α) : FormulaFinset α :=
+  (φ.subformulas.prebox.image (λ ψ => □ψ ➝ ψ))
 
 namespace LO.ProvabilityLogic
 
@@ -108,8 +106,8 @@ lemma GL_S_TFAE :
         . intro h;
           apply C!_of_conseq!;
           apply T.standardProvability.D1;
-          apply Entailment.WeakerThan.pbl (𝓢 := 𝗜𝚺₁.toAxiom);
-          have : 𝗜𝚺₁ ⊢! ((⩖ j, σ j)) ➝ σ.realization B := by
+          apply Entailment.WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
+          have : 𝗜𝚺₁ ⊢! (⩖ j, σ j) ➝ σ.realization B := by
             apply left_Fdisj'!_intro;
             have hrfl : r₁ ⊧ □B ➝ B := by
               apply hA₁;
@@ -128,7 +126,7 @@ lemma GL_S_TFAE :
                 apply h;
                 apply Frame.root_genaretes'!;
                 assumption
-          have b : 𝗜𝚺₁ ⊢! ⩖ j, σ j := oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
+          have b : 𝗜𝚺₁ ⊢! ⩖ j, σ j := oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
             simpa [models_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.disjunctive
           exact this ⨀ b
         . intro h;
@@ -147,7 +145,7 @@ lemma GL_S_TFAE :
           tauto;
     have : ℕ ⊧ₘ* 𝗜𝚺₁ := models_of_subtheory (U := 𝗜𝚺₁) (T := T) (M := ℕ) inferInstance;
     have : ℕ ⊧ₘ σ.σ r₀ ➝ ∼σ.realization A := models_of_provable inferInstance $ H A (by simp) |>.2 hA₂;
-    simp only [models₀_imply_iff, models₀_not_iff] at this;
+    simp only [Models, LO.Semantics.Not.realize_not, LO.Semantics.Imp.realize_imp] at this;
     exact this <| by
       simpa [models_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;
@@ -158,10 +156,9 @@ theorem provabilityLogic_PA_TA_eq_S :
     ProvabilityLogic T 𝗧𝗔 ≊ Modal.S := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A;
-  simpa [ArithmeticTheory.ProvabilityLogic, FirstOrderTrueArith.provable_iff₀, ←Logic.iff_provable] using S.arithmetical_completeness_iff.symm;
+  simpa [ArithmeticTheory.ProvabilityLogic, FirstOrderTrueArith.provable_iff, ←Logic.iff_provable] using
+    S.arithmetical_completeness_iff.symm;
 
 instance : ProvabilityLogic 𝗣𝗔 𝗧𝗔 ≊ Modal.S := provabilityLogic_PA_TA_eq_S
 
-end ProvabilityLogic
-
-end LO
+end LO.ProvabilityLogic

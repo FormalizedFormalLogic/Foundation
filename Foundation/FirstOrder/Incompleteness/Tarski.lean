@@ -12,26 +12,13 @@ variable {T : Theory ℒₒᵣ} [𝗜𝚺₁ ⪯ T] [Entailment.Consistent T]
 -/
 lemma not_exists_tarski_predicate : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ, T ⊢! σ ⭤ τ/[⌜σ⌝] := by
   rintro ⟨τ, hτ⟩;
-  apply Entailment.Consistent.not_bot (𝓢 := T.toAxiom);
+  apply Entailment.Consistent.not_bot (𝓢 := T);
   . infer_instance;
   . have h₁ : T ⊢! fixedpoint (∼τ) ⭤ τ/[⌜fixedpoint (∼τ)⌝] := by simpa using hτ $ fixedpoint “x. ¬!τ x”;;
     have h₂ : T ⊢! fixedpoint (∼τ) ⭤ ∼τ/[⌜fixedpoint (∼τ)⌝] := by simpa using diagonal (T := T) “x. ¬!τ x”;
     cl_prover [h₁, h₂];
 
 end LO.ISigma1
-
-
-namespace LO.FirstOrderTrueArith
-
-open FirstOrder Arithmetic
-
-lemma provable_iff₀ {σ : Sentence ℒₒᵣ} : 𝗧𝗔 ⊢! σ ↔ ℕ ⊧ₘ σ := by
-  apply Iff.trans ?_ $ provable_iff (φ := σ);
-  exact Axiom.provable_iff;
-
-end LO.FirstOrderTrueArith
-
-
 
 namespace LO.FirstOrder.Arithmetic
 
@@ -44,7 +31,7 @@ theorem undefinability_of_truth : ¬∃ τ : Semisentence ℒₒᵣ 1, ∀ σ : 
   obtain ⟨τ, hτ⟩ := this;
   use τ;
   intro σ;
-  apply FirstOrderTrueArith.provable_iff₀.mpr;
+  apply FirstOrderTrueArith.provable_iff.mpr;
   simpa using hτ σ;
 
 end LO.FirstOrder.Arithmetic

@@ -275,7 +275,7 @@ def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparison (neg ℒₒ�
 
 lemma NegativeSuccessor.quote_iff_provabilityComparison {φ ψ : Sentence ℒₒᵣ} :
     NegativeSuccessor (V := V) T ⌜φ⌝ ⌜ψ⌝ ↔ T.ProvabilityComparison (V := V) ⌜∼φ⌝ ⌜∼ψ⌝ := by
-  simp [NegativeSuccessor, Semiformula.empty_quote_def, Semiformula.quote_def]
+  simp [NegativeSuccessor, Sentence.quote_def, Semiformula.quote_def]
 
 section
 
@@ -592,9 +592,9 @@ lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
     T.Solovay V i → T.Provable (⌜⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ : V) := by
   intro hS
   have TP : T.internalize V ⊢! ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ :=
-    internal_sentence_provable_of_outer_sentence_provable <| by
+    internal_provable_of_outer_provable <| by
       have : 𝗜𝚺₁ ⊢! θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
-        oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
+        oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
           simpa [models_iff] using Θ.disjunction i
       exact Entailment.WeakerThan.pbl this
   have Tθ : T.internalize V ⊢! ⌜θ T i⌝ :=
@@ -610,12 +610,12 @@ lemma solovay_root_sound [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] : T.
   haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝗜𝚺₁ ⪯ T))
   have NS : ∀ i, r ≠ i → ¬T.Solovay ℕ i := by
     intro i hi H
-    have Bi : T ⊢! ∼T.solovay i := (provable_iff_provable₀ (T := T)).mp (Solovay.refute hi H)
+    have Bi : T ⊢! ∼T.solovay i := (provable_iff_provable (T := T)).mp (Solovay.refute hi H)
     have : ¬T.Solovay ℕ i := by
       set π := θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝]
       have sπ : 𝗜𝚺₁ ⊢! T.solovay i ⭤ π := solovay_diag T i
       have : T ⊢! ∼π := by
-        have : T ⊢! T.solovay i ⭤ π := Entailment.WeakerThan.wk (inferInstanceAs (𝗜𝚺₁.toAxiom ⪯ T.toAxiom)) sπ
+        have : T ⊢! T.solovay i ⭤ π := Entailment.WeakerThan.wk (inferInstanceAs (𝗜𝚺₁ ⪯ T)) sπ
         exact Entailment.K!_left (Entailment.ENN!_of_E! this) ⨀ Bi
       have : ¬ℕ ⊧/![] π := by
         simpa [models_iff] using
@@ -639,24 +639,23 @@ lemma solovay_unprovable [𝗜𝚺₁ ⪯ T] [T.SoundOn (Hierarchy 𝚷 2)] {i :
   haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans inferInstance (inferInstanceAs (𝗜𝚺₁ ⪯ T))
   have : ∼T.Provable ⌜∼T.solovay i⌝ :=
     Solovay.consistent (V := ℕ) (T := T) (Frame.root_genaretes'! i (Ne.symm h)) solovay_root_sound
-  simpa [Theory.ConsistentWith.quote_iff, provable_iff_provable₀, Axiom.unprovable_iff] using this
+  simpa [Theory.ConsistentWith.quote_iff, provable_iff_provable] using this
 
 variable (T F)
 
-def _root_.LO.ProvabilityLogic.SolovaySentences.standard
-    [𝗜𝚺₁ ⪯ T] : SolovaySentences T.standardProvability F r where
+def _root_.LO.ProvabilityLogic.SolovaySentences.standard [𝗜𝚺₁ ⪯ T] : SolovaySentences T.standardProvability F r where
   σ := T.solovay
   SC1 i j ne :=
-    oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
+    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using Solovay.exclusive ne
   SC2 i j h :=
-    oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
+    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using Solovay.consistent h
   SC3 i h :=
-    oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
+    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using Solovay.box_disjunction h
   SC4 :=
-    oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
+    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using disjunctive
 
 lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝗜𝚺₁ ⪯ T] :

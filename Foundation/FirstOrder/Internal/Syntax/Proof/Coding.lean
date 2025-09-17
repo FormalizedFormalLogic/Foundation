@@ -313,8 +313,9 @@ lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstId
     refine ⟨Derivation2.cut b₁ b₂⟩
   · rcases by simpa using hΓ
     rcases Sequent.mem_quote hs with ⟨φ, hφ, rfl⟩
-    simp at hT
-    refine ⟨Derivation2.axm φ (by simpa using hT) hφ⟩
+    have : ∃ σ ∈ T, φ = ↑σ := by simpa using hT
+    rcases this with ⟨σ, hσ, rfl⟩
+    refine ⟨Derivation2.axm σ (by simp [hσ]) hφ⟩
 
 lemma Provable.sound2 {φ : SyntacticFormula L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢₂! φ := by
   rcases h with ⟨d, hp, hd⟩

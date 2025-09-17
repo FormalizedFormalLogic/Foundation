@@ -68,15 +68,14 @@ end Entailment.LindenbaumAlgebra
 open Entailment LindenbaumAlgebra FirstOrder
 
 /-- Lindenbuam algebra of `𝗜𝚺₁`-extension theory satisfies G1 is dense. -/
-lemma ISigma1.dense (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.Δ₁] {φ ψ : LindenbaumAlgebra (T : Axiom ℒₒᵣ)} :
+lemma ISigma1.dense (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.Δ₁] {φ ψ : LindenbaumAlgebra T} :
     φ < ψ → ∃ ξ, φ < ξ ∧ ξ < ψ := fun h ↦ by
-  refine LindenbaumAlgebra.dense_of_finite_extend_incomplete (T : Axiom ℒₒᵣ) ?_ h
+  refine LindenbaumAlgebra.dense_of_finite_extend_incomplete T ?_ h
   intro σ con
-  have : 𝗜𝚺₁ ⪯ insert ↑σ T := WeakerThan.trans (inferInstanceAs (𝗜𝚺₁ ⪯ T)) (Axiomatized.le_of_subset (by simp))
-  have : Consistent (insert ↑σ T) := (Axiom.consistent_iff (L := ℒₒᵣ)).mp <| by simpa [-Axiom.consistent_iff] using con
-  simpa using Arithmetic.incomplete' (insert ↑σ T)
+  have : 𝗜𝚺₁ ⪯ insert σ T := WeakerThan.trans (inferInstanceAs (𝗜𝚺₁ ⪯ T)) (Axiomatized.le_of_subset (by simp))
+  simpa using Arithmetic.incomplete' (insert σ T)
 
-instance (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra (T : Axiom ℒₒᵣ)) where
+instance (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T] [T.Δ₁] : DenselyOrdered (LindenbaumAlgebra T) where
   dense _ _ := ISigma1.dense T
 
 end LO

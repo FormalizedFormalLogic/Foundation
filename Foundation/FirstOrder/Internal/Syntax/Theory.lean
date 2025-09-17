@@ -9,9 +9,10 @@ variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
+/-- TODO: define predicate `VariableFree` and make `mem_iff` `∀ φ : Sentence, ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T` -/
 class _root_.LO.FirstOrder.Theory.Δ₁ (T : Theory L) where
   ch : 𝚫₁.Semisentence 1
-  mem_iff : ∀ φ, ℕ ⊧/![⌜φ⌝] ch.val ↔ φ ∈ T
+  mem_iff : ∀ φ : SyntacticFormula L, ℕ ⊧/![⌜φ⌝] ch.val ↔ ∃ σ ∈ T, φ = σ
   isDelta1 : ch.ProvablyProperOn 𝗜𝚺₁
 
 abbrev _root_.LO.FirstOrder.Theory.Δ₁ch (T : Theory L) [T.Δ₁] : 𝚫₁.Semisentence 1 := Theory.Δ₁.ch T
@@ -34,13 +35,18 @@ instance Δ₁Class.definable : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) := Δ
 
 @[simp] lemma Δ₁Class.proper : T.Δ₁ch.ProperOn V := (Theory.Δ₁.isDelta1 (T := T)).properOn V
 
-@[simp] lemma Δ₁Class.mem_iff {φ : Sentence L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
+@[simp] lemma Δ₁Class.mem_iff_s {φ : SyntacticFormula L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ ∃ σ ∈ T, φ = σ :=
   have : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ℕ ⊧/![⌜φ⌝] T.Δ₁ch.val := by
-    simpa [Sentence.coe_quote_eq_quote, Matrix.constant_eq_singleton]
+    simpa [Semiformula.coe_quote_eq_quote, Matrix.constant_eq_singleton]
       using FirstOrder.Arithmetic.models_iff_of_Delta1 (V := V) (σ := T.Δ₁ch) (by simp) (by simp) (e := ![⌜φ⌝])
   Iff.trans this (Theory.Δ₁.mem_iff _)
 
+@[simp] lemma Δ₁Class.mem_iff {φ : Sentence L} : (⌜φ⌝ : V) ∈ T.Δ₁Class ↔ φ ∈ T := by
+  simp [Sentence.quote_def, Δ₁Class.mem_iff_s]
+
 @[simp] lemma Δ₁Class.mem_iff' {φ : Sentence L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ φ ∈ T := Δ₁Class.mem_iff
+
+@[simp] lemma Δ₁Class.mem_iff'_s {φ : SyntacticFormula L} : V ⊧/![⌜φ⌝] T.Δ₁ch.val ↔ ∃ σ ∈ T, φ = σ := Δ₁Class.mem_iff_s
 
 @[simp] lemma Δ₁Class.mem_iff'' {φ : Sentence L} : ((⌜φ⌝ : Metamath.Formula V L).val : V) ∈ T.Δ₁Class ↔ φ ∈ T :=
   Δ₁Class.mem_iff
@@ -59,7 +65,10 @@ open Arithmetic.HierarchySymbol.Semiformula LO.FirstOrder.Theory
 
 instance add (dT : T.Δ₁) (dU : U.Δ₁) : (T + U).Δ₁ where
   ch := T.Δ₁ch ⋎ U.Δ₁ch
-  mem_iff {φ} := by simp [Theory.add_def]
+  mem_iff {φ} := by
+    simp only [Nat.succ_eq_add_one, Nat.reduceAdd, val_or, LogicalConnective.HomClass.map_or,
+      ISigma1.Metamath.Δ₁Class.mem_iff'_s, LogicalConnective.Prop.or_eq, add_def, Set.mem_union]
+    grind
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ ProperOn.or (by simp) (by simp)
 
 def ofEq (dT : T.Δ₁) (h : T = U) : U.Δ₁ where
@@ -91,7 +100,7 @@ instance empty : Theory.Δ₁ (∅ : Theory L) where
 
 def singleton (φ : Sentence L) : Theory.Δ₁ {φ} where
   ch := .ofZero (.mkSigma “x. x = ↑(Encodable.encode φ)”) _
-  mem_iff {ψ} := by simp [Sentence.quote_eq_encode]
+  mem_iff {ψ} := by simp [Semiformula.quote_eq_encode]
   isDelta1 := ProvablyProperOn.ofProperOn.{0} _ fun V _ _ ↦ by simp
 
 @[simp] lemma singleton_toTDef_ch_val (φ : Sentence L) :

@@ -9,7 +9,7 @@ namespace Provability
 
 open LO.Entailment
 
-variable {L : Language} [L.DecidableEq] [L.ReferenceableBy L] [DecidableEq (Sentence L)]
+variable {L : Language} [L.ReferenceableBy L] [DecidableEq (Sentence L)]
          {T₀ T : Theory L} [T₀ ⪯ T]
          {𝔅 : Provability T₀ T}
          {σ π : Sentence L}
@@ -20,11 +20,11 @@ lemma indep_distribute [𝔅.HBL2] (h : T ⊢! σ ⭤ π) :
     T ⊢! 𝔅.indep σ ➝ 𝔅.indep π := by
   apply CKK!_of_C!_of_C!;
   . apply contra!;
-    apply WeakerThan.pbl (𝓢 := T₀.toAxiom);
+    apply WeakerThan.pbl (𝓢 := T₀);
     apply 𝔅.prov_distribute_imply;
     cl_prover [h];
   . apply contra!;
-    apply WeakerThan.pbl (𝓢 := T₀.toAxiom);
+    apply WeakerThan.pbl (𝓢 := T₀);
     apply 𝔅.prov_distribute_imply;
     cl_prover [h];
 
@@ -45,7 +45,6 @@ end Provability
 
 end ProvabilityLogic
 
-
 namespace ProvabilityLogic
 
 open FirstOrder FirstOrder.Arithmetic
@@ -55,7 +54,6 @@ open Entailment
 variable {T : ArithmeticTheory} [T.Δ₁]
          {f : T.StandardRealization}
          {A B : Modal.Formula _}
-
 
 section Corollary
 
@@ -90,7 +88,7 @@ lemma iff_modalIndep_bewIndep_inside :
     . apply K!_left $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ);
     . apply C!_trans (K!_left $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ) (A := □(∼A))) ?_;
       apply contra!;
-      apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁.toAxiom);
+      apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
       apply T.standardProvability.prov_distribute_imply;
       apply K!_right $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ) ;
   . refine C!_trans ?_ (K!_right $ Realization.interpret.iff_provable_and_inside);
@@ -98,7 +96,7 @@ lemma iff_modalIndep_bewIndep_inside :
     . exact C!_trans (K!_right $ Realization.interpret.iff_provable_neg_inside (A := □A)) C!_id;
     . apply C!_trans ?_ (K!_right $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ) (A := □(∼A)));
       apply contra!;
-      apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁.toAxiom);
+      apply WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
       apply T.standardProvability.prov_distribute_imply;
       apply K!_left $ Realization.interpret.iff_provable_neg_inside (L := ℒₒᵣ);
 
@@ -160,12 +158,11 @@ lemma unrefutable_independency_of_consistency (height : T.standardProvability.he
   congr;
 
 theorem undecidable_independency_of_consistency (height : T.standardProvability.height = ⊤) :
-    Independent T.toAxiom (T.standardProvability.indep T.standardProvability.con) := by
+    Independent T (T.standardProvability.indep T.standardProvability.con) := by
   constructor;
   . exact unprovable_independency_of_consistency height;
   . exact unrefutable_independency_of_consistency height;
 
 end Independency
-
 
 end LO.ProvabilityLogic

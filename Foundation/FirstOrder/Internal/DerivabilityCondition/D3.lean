@@ -73,7 +73,7 @@ theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierar
   case hEQ =>
     intro n t₁ t₂ w h
     suffices T.internalize V ⊢! (toNumVec w ⤕ ⌜t₁⌝) ≐ (toNumVec w ⤕ ⌜t₂⌝) by
-      simpa [Semiformula.empty_typed_quote_def]
+      simpa [Sentence.typed_quote_def]
     have : t₁.valbm V w = t₂.valbm V w := by simpa using h
     have h₀ : T.internalize V ⊢!     𝕹(t₁.valbm V w) ≐ 𝕹(t₂.valbm V w) := by simp [this]
     have h₁ : T.internalize V ⊢! (toNumVec w ⤕ ⌜t₁⌝) ≐ 𝕹(t₁.valbm V w) := term_complete T t₁ w
@@ -82,7 +82,7 @@ theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierar
   case hNEQ =>
     intro n t₁ t₂ w h
     suffices T.internalize V ⊢! (toNumVec w ⤕ ⌜t₁⌝) ≉ (toNumVec w ⤕ ⌜t₂⌝) by
-      simpa [Semiformula.empty_typed_quote_def]
+      simpa [Sentence.typed_quote_def]
     have : t₁.valbm V w ≠ t₂.valbm V w := by simpa using h
     have h₀ : T.internalize V ⊢!     𝕹(t₁.valbm V w) ≉ 𝕹(t₂.valbm V w) := by simpa using numeral_ne T this
     have h₁ : T.internalize V ⊢! (toNumVec w ⤕ ⌜t₁⌝) ≐ 𝕹(t₁.valbm V w) := term_complete T t₁ w
@@ -91,7 +91,7 @@ theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierar
   case hLT =>
     intro n t₁ t₂ w h
     suffices T.internalize V ⊢! (toNumVec w ⤕ ⌜t₁⌝) <' (toNumVec w ⤕ ⌜t₂⌝) by
-      simpa [Semiformula.empty_typed_quote_def]
+      simpa [Sentence.typed_quote_def]
     have : t₁.valbm V w < t₂.valbm V w := by simpa using h
     have h₀ : T.internalize V ⊢!     𝕹(t₁.valbm V w) <' 𝕹(t₂.valbm V w) := by simpa using numeral_lt T this
     have h₁ : T.internalize V ⊢! (toNumVec w ⤕ ⌜t₁⌝) ≐ 𝕹(t₁.valbm V w) := term_complete T t₁ w
@@ -100,7 +100,7 @@ theorem bold_sigma_one_complete {n} {φ : Semisentence ℒₒᵣ n} (hp : Hierar
   case hNLT =>
     intro n t₁ t₂ w h
     suffices T.internalize V ⊢! ((toNumVec w ⤕ ⌜t₁⌝) ≮' (toNumVec w ⤕ ⌜t₂⌝)) by
-      simpa [Semiformula.empty_typed_quote_def]
+      simpa [Sentence.typed_quote_def]
     have : t₁.valbm V w ≥ t₂.valbm V w := by simpa using h
     have h₀ : T.internalize V ⊢!     𝕹(t₁.valbm V w) ≮' 𝕹(t₂.valbm V w) := by simpa using numeral_nlt T this
     have h₁ : T.internalize V ⊢! (toNumVec w ⤕ ⌜t₁⌝) ≐ 𝕹(t₁.valbm V w) := term_complete T t₁ w
@@ -155,7 +155,6 @@ theorem sigma_one_complete {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ)
 
 theorem provable_internalize {σ : Sentence ℒₒᵣ} :
     T.Provable (⌜σ⌝ : V) → T.Provable (⌜T.provabilityPred σ⌝ : V) := by
-  simpa [models_iff₀] using
-    sigma_one_complete (V := V) (σ := T.provabilityPred σ) T (by simp)
+  simpa [models_iff] using sigma_one_complete (V := V) (σ := T.provabilityPred σ) T (by simp)
 
 end LO.ISigma1.Metamath.InternalArithmetic

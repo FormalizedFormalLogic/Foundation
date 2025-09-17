@@ -13,26 +13,26 @@ noncomputable def substNumeral (φ x : V) : V := substs ℒₒᵣ ?[numeral x] �
 
 lemma substNumeral_app_quote (σ π : Semisentence ℒₒᵣ 1) :
     substNumeral ⌜σ⌝ (⌜π⌝ : V) = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
-  simp [substNumeral, Semiformula.empty_quote_def, Semiformula.quote_def,
+  simp [substNumeral, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.embedding_substs_eq_substs_coe₁]
 
 noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := substs ℒₒᵣ (matrixToVec (fun i ↦ numeral (v i))) φ
 
 lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ) :
     (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.substs (fun i ↦ ↑(v i))) ▹ σ : Sentence ℒₒᵣ)⌝ := by
-  simp [substNumerals, Semiformula.empty_quote_def, Semiformula.quote_def,
+  simp [substNumerals, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.embedding_substitute_eq_substitute_embedding]
   rfl
 
 lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k → Semisentence ℒₒᵣ k) :
     substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) = ⌜((Rew.substs (fun i ↦ ⌜π i⌝)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
-  simpa [Semiformula.coe_empty_quote_eq_quote] using substNumerals_app_quote (V := V) σ (fun i ↦ ⌜π i⌝)
+  simpa [Sentence.coe_quote_eq_quote] using substNumerals_app_quote (V := V) σ (fun i ↦ ⌜π i⌝)
 
 noncomputable def substNumeralParams (k : ℕ) (φ x : V) : V := substs ℒₒᵣ (matrixToVec (numeral x :> fun i : Fin k ↦ qqBvar i)) φ
 
 lemma substNumeralParams_app_quote (σ τ : Semisentence ℒₒᵣ (k + 1)) :
     (substNumeralParams k ⌜σ⌝ ⌜τ⌝ : V) = ⌜((Rew.substs (⌜τ⌝ :> fun i : Fin k ↦ #i)) ▹ σ : Semisentence ℒₒᵣ k)⌝ := by
-  simp [substNumeralParams, Semiformula.empty_quote_def, Semiformula.quote_def,
+  simp [substNumeralParams, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.embedding_substitute_eq_substitute_embedding, Matrix.vecHead]
   rfl
 

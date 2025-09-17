@@ -6,7 +6,6 @@ import Foundation.FirstOrder.Internal.FixedPoint
 
 /-!
 # Derivability conditions of standard provability predicate
-
 -/
 
 namespace LO.FirstOrder.Arithmetic
@@ -25,7 +24,7 @@ local prefix:90 "□" => T.provabilityPred
 
 theorem provable_D1 {σ} : T ⊢! σ → 𝗜𝚺₁ ⊢! □σ := fun h ↦
   complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff] using provable_of_provable_arith₀ (V := V) h
+    simpa [models_iff] using internalize_provability (V := V) h
 
 theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢! □(σ ➝ π) ➝ □σ ➝ □π :=
   complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by

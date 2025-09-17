@@ -94,7 +94,7 @@ lemma hight_eq_top_of_sound_and_consistent [𝔅.Sound] [Entailment.Consistent T
 lemma hight_eq_zero_of_inconsistent (h : Entailment.Inconsistent T) : 𝔅.height = 0 := by
   suffices 𝔅.height ≤ 0 from PartENat.eq_zero_iff.mpr this
   simpa using
-    𝔅.height_le_of_boxBot (T := T) (n := 0) (by simpa using Axiom.provable_iff.mpr (h ⊥))
+    𝔅.height_le_of_boxBot (T := T) (n := 0) (h ⊥)
 
 lemma hight_eq_top_of_sigma1_sound (T : ArithmeticTheory) [T.Δ₁] [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :
     T.height = ⊤ :=

@@ -27,7 +27,7 @@ lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] :
     T ⊢! f (Aᵇ) ⭤ f.strongInterpret A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
-  | hfalsum => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
+  | hfalsum => simp [strongInterpret, Formula.boxdotTranslate];
   | himp A B ihA ihB => exact ECC!_of_E!_of_E! ihA ihB;
   | hbox A ih =>
     apply K!_intro;
@@ -51,9 +51,9 @@ lemma iff_models_interpret_boxdot_strongInterpret
     M ⊧ₘ f (Aᵇ) ↔ M ⊧ₘ f.strongInterpret A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
-  | hfalsum => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
+  | hfalsum => simp [strongInterpret, Formula.boxdotTranslate];
   | himp A B ihA ihB =>
-    simp only [Formula.boxdotTranslate, interpret, models₀_imply_iff, strongInterpret];
+    simp only [Formula.boxdotTranslate, interpret, Models, Semantics.Imp.realize_imp, strongInterpret];
     constructor;
     . intro hAB hA;
       apply ihB.mp;

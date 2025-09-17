@@ -17,11 +17,11 @@ theorem S.arithmetical_soundness (h : Modal.S ⊢! A) (f : Realization 𝔅) : �
   | mem_GL h =>
     exact models_of_provable inferInstance (GL.arithmetical_soundness h);
   | axiomT =>
-    simp only [Realization.interpret, models₀_imply_iff];
+    simp only [Realization.interpret, Models, LO.Semantics.Imp.realize_imp];
     intro h;
     exact models_of_provable inferInstance (Iff.mp SoundOnModel.sound h)
   | mdp ihAB ihA =>
-    simp only [Realization.interpret, models₀_imply_iff] at ihAB;
+    simp only [Realization.interpret, Models, LO.Semantics.Imp.realize_imp] at ihAB;
     apply ihAB ihA;
 
 end ProvabilityLogic

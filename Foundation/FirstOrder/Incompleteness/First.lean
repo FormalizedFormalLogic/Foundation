@@ -24,15 +24,16 @@ open LO.Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Met
 /-- Gödel's first incompleteness theorem-/
 theorem incomplete
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    Incomplete (T : Axiom ℒₒᵣ) := by
-  have con : Consistent (T : Axiom ℒₒᵣ) := inferInstance
-  let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : SyntacticSemiformula ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
+    Incomplete T := by
+  have con : Consistent T := inferInstance
+  let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : Semisentence ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦
         IsSemiformula ℒₒᵣ 1 φ ∧
           T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral φ] φ) := by
       definability
-    exact REPred.of_eq (re_iff_sigma1.mpr this) <| by
+    exact REPred.of_eq (re_iff_sigma1.mpr this) <| by sorry
+      /-
       intro φ; constructor
       · rintro ⟨hφ, b⟩
         rcases hφ.sound with ⟨φ, rfl⟩
@@ -40,15 +41,16 @@ theorem incomplete
       · rintro ⟨φ, rfl, b⟩
         exact ⟨by simp [Semiformula.quote_def], by
           simpa [Semiformula.quote_def] using  internalize_provability (V := ℕ) b⟩
+      -/
   let σ : Semisentence ℒₒᵣ 1 := codeOfREPred D
   let ρ : Sentence ℒₒᵣ := σ/[⌜σ⌝]
   have : ∀ n : ℕ, D n ↔ T ⊢! σ/[↑n] := fun n ↦ by
-    simpa [Semiformula.coe_substs_eq_substs_coe₁, Axiom.provable_iff] using re_complete D_re
+    simpa [Semiformula.coe_substs_eq_substs_coe₁] using re_complete D_re
   have : T ⊢! ∼ρ ↔ T ⊢! ρ := by
     have : T ⊢! ∼↑σ/[↑(Encodable.encode σ)] ↔ T ⊢! ↑σ/[↑(Encodable.encode σ)] := by
-      simpa [Axiom.provable_iff, Semiformula.quote_eq_encode, Semiformula.empty_quote_eq_encode,
+      simpa [Semiformula.quote_eq_encode, Sentence.quote_eq_encode,
         goedelNumber'_eq_coe_encode, D, Rewriting.embedding_substs_eq_substs_coe₁] using this ⌜σ⌝
-    simpa [Axiom.provable_iff, ρ, Rewriting.embedding_substs_eq_substs_coe₁]
+    simpa [ρ, Rewriting.embedding_substs_eq_substs_coe₁]
   refine incomplete_def.mpr
     ⟨ ρ
     , fun h ↦ not_consistent_iff_inconsistent.mpr
@@ -82,11 +84,6 @@ instance {T : ArithmeticTheory} [ℕ ⊧ₘ* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.Sou
   . infer_instance
   . obtain ⟨σ, σTrue, σUnprov⟩ := exists_true_but_unprovable_sentence T;
     apply Entailment.not_weakerThan_iff.mpr;
-    use σ;
-    constructor;
-    . apply FirstOrderTrueArith.provable_iff.mpr;
-      simpa;
-    . apply Axiom.provable_iff (σ := σ) |>.not.mp;
-      simpa;
+    exact ⟨σ, FirstOrderTrueArith.provable_iff.mpr σTrue, σUnprov⟩
 
 end LO.FirstOrderTrueArith

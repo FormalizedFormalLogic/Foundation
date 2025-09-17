@@ -27,7 +27,7 @@ variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗘𝗤 ⪯ T]
 open Entailment Entailment.FiniteContext Semiformula
 
 @[simp] lemma eq_refl (t : Term V ℒₒᵣ) : T.internalize V ⊢! t ≐ t := by
-  have : T ⊢! (“∀ x, x = x” : SyntacticFormula ℒₒᵣ) := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+  have : T ⊢! “∀ x, x = x” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
   have : T.internalize V ⊢! ∀' (#'0 ≐ #'0) := by
     simpa using internal_provable_of_outer_provable this
   simpa using TProof.specialize! this t

@@ -1,7 +1,5 @@
 import Foundation.FirstOrder.Incompleteness.First
 
-
-
 namespace LO.FirstOrder.Arithmetic
 
 variable (T : ArithmeticTheory) [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
@@ -27,12 +25,13 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
       intro a;
       push_neg at h;
       apply Iff.trans ?_ $ show T ⊢! ∼φ/[a] ↔ ¬T ⊢! φ/[a] by simpa [hP] using h a |>.symm;
-      apply Iff.trans ?_ $ show T ⊢! ∼(φ : SyntacticSemiformula ℒₒᵣ 1)/[↑a] ↔ T ⊢! ∼φ/[a] by
-        convert Axiom.provable_iff.symm;
-        simp [Rewriting.embedding_substs_eq_substs_coe₁];
       constructor;
-      . rintro hP; apply Theory.Provable.sound; simpa [Semiformula.quote_def] using hP;
-      . rintro hφ; simpa [Semiformula.quote_def] using internalize_provability (V := ℕ) hφ;
+      . rintro hP
+        apply Theory.Provable.sound
+        simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.embedding_substs_eq_substs_coe₁] using hP;
+      . rintro hφ
+        simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.embedding_substs_eq_substs_coe₁] using
+          internalize_provability (V := ℕ) hφ;
   push_neg at hd;
   rcases hd with (⟨hd₁, hd₂⟩ | ⟨hd₁, hd₂⟩);
   . use d;
@@ -40,7 +39,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
     . simpa [hP] using hd₁;
     . simpa;
   . exfalso;
-    apply Entailment.Consistent.not_bot (𝓢 := T.toAxiom) inferInstance;
+    apply Entailment.Consistent.not_bot (𝓢 := T) inferInstance;
     replace hd₁ : T ⊢! φ/[d] := by simpa [hP] using hd₁;
     cl_prover [hd₁, hd₂];
 
@@ -48,7 +47,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
   If r.e. but not recursive predicate `P` on `ℕ` exists, then implies incompleteness.
 -/
 lemma incomplete_of_REPred_not_ComputablePred_Nat
-    {P : ℕ → Prop} (hRE : REPred P) (hC : ¬ComputablePred P) : Entailment.Incomplete (T : Axiom ℒₒᵣ) := by
+    {P : ℕ → Prop} (hRE : REPred P) (hC : ¬ComputablePred P) : Entailment.Incomplete T := by
   obtain ⟨φ, a, hφ₁, hφ₂⟩ := incomplete_of_REPred_not_ComputablePred_Nat' T hRE hC;
   apply incomplete_def.mpr;
   use φ/[⌜a⌝];
