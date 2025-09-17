@@ -264,25 +264,63 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
       apply hr M.finHeight φ hφ hC rfl;
     . rfl;
 
-@[simp]
-lemma Kripke.Frame.extendRoot.eq_finHeight_from_original_root {F : Kripke.Frame} {r : F} [Fintype F.World] [F.IsTree r] : Frame.World.finHeight (r : F.extendRoot 1) = F.finHeight := by
+namespace Kripke.Frame
+
+variable {F : Frame} {r : F} [Fintype F.World] [F.IsTree r]
+
+lemma eq_finHeight_root : Frame.World.finHeight x = F.finHeight ↔ x = r := by
+  constructor;
+  . rintro h;
+    contrapose! h;
+    apply Nat.ne_of_lt;
+    apply Frame.World.finHeight_lt_whole_finHeight;
+    apply F.root_genaretes'!;
+    assumption;
+  . tauto;
+
+lemma terminal_rel_finHeight {x y : F} (h : x ≺^[World.finHeight x] y) : ∀ z, ¬y ≺ z := by
+  intro z Ryz;
+  suffices World.finHeight x + 1 ≤ World.finHeight x by omega;
+  exact le_finHeight_iff_relItr.mpr ⟨z, HRel.Iterate.forward.mpr ⟨y, h, Ryz⟩⟩;
+
+lemma extendRoot.eq_original_finHeight {x : F} : Frame.World.finHeight (x : F.extendRoot 1) = Frame.World.finHeight x := by
   apply finHeight_eq_iff_relItr.mpr;
   constructor;
-  . obtain ⟨t, Rrt⟩ := exists_terminal r;
-    use t;
+  . obtain ⟨y, Rxy⟩ := exists_terminal (i := x);
+    use y;
     apply extendRoot.embed_rel_iterate_embed_iff_rel.mpr;
-    assumption;
-  . rintro x Rrx y Rxy;
-    suffices F.finHeight + 2 ≤ F.finHeight + 1 by omega;
-    calc
-      _ ≤ (F.extendRoot 1).finHeight := le_finHeight_iff_relItr.mpr $ by
-        use y, r;
-        constructor;
-        . apply Frame.root_genaretes'!; simp;
-        . apply HRel.Iterate.forward.mpr
-          use x;
-      _ = F.finHeight + 1 := by simp;
+    exact Rxy;
+  . rintro (_ | y) Rxy (_ | z);
+    . simp;
+    . -- TODO: extract no loop lemma (x ≺^[n] i cannot happen where x is original and i is new elements by extension)
+      exfalso;
+      have : extendRoot.root ≺ (x : F.extendRoot 1) := Frame.root_genaretes'! (F := F.extendRoot 1) x (by simp);
+      have : (x : F.extendRoot 1) ≺ x :=
+        HRel.Iterate.unwrap_of_trans_of_pos (by omega) $
+        HRel.Iterate.comp (m := 1) |>.mp ⟨_, Rxy, by simpa⟩;
+      exact Frame.irrefl _ this;
+    . apply Frame.asymm;
+      exact Frame.root_genaretes'! (F := F.extendRoot 1) y (by simp);
+    . have := terminal_rel_finHeight $ extendRoot.embed_rel_iterate_embed_iff_rel.mp Rxy;
+      exact extendRoot.embed_rel_embed_iff_rel.not.mpr $ this z;
 
+lemma extendRoot.eq_original_finHeight_root : Frame.World.finHeight (r : F.extendRoot 1) = F.finHeight := eq_original_finHeight
+
+@[grind]
+lemma extendRoot.iff_eq_finHeight_eq_original_root {x : F.extendRoot 1} : Frame.World.finHeight x = F.finHeight ↔ x = r := by
+  constructor;
+  . rcases x with (a | x);
+    . intro h;
+      have := h ▸ finHeight₁ (F := F);
+      simp [Frame.finHeight] at this;
+    . intro h;
+      suffices x = r by simp [this];
+      apply Frame.eq_finHeight_root.mp;
+      exact h ▸ Frame.extendRoot.eq_original_finHeight.symm;
+  . rintro rfl;
+    exact eq_original_finHeight_root;
+
+end Kripke.Frame
 
 namespace Logic
 
@@ -449,7 +487,7 @@ open Formula.Kripke
 
 variable {T U : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [T ⪯ U] {A : Formula ℕ}
 
-lemma provable_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trace) : T.ProvabilityLogic U ⊢! Modal.TBB n := by
+lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trace) : T.ProvabilityLogic U ⊢! Modal.TBB n := by
   have : 𝗜𝚺₁ ⪯ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance;
 
   obtain ⟨A, hA₁, ⟨M, r, _, _, rfl, h₂⟩⟩ := by simpa using h;
@@ -464,7 +502,18 @@ lemma provable_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trace) :
 
   have : M₀ ⊧ A ➝ (Modal.TBB M.finHeight) := by
     rintro x hA;
-    sorry;
+    rcases Nat.lt_trichotomy (Frame.World.finHeight x) M.finHeight with h | h | h;
+    . intro _;
+      exact finHeight_lt_iff_satisfies_boxbot.mp h;
+    . exfalso;
+      suffices x = r by
+        apply h₂;
+        apply Kripke.Model.extendRoot.modal_equivalence_original_world.mpr;
+        rwa [this] at hA;
+      apply Kripke.Frame.extendRoot.iff_eq_finHeight_eq_original_root.mp h;
+    . apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mpr;
+      simp;
+      omega;
   have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢!. S i ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := by
     rintro (a | i);
     . suffices 𝗜𝚺₁ ⊢!. S r₀ ➝ S.realization (TBB M.finHeight) by
@@ -475,7 +524,7 @@ lemma provable_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trace) :
         T.standardProvability.prov_distribute_imply' $
         CN!_of_CN!_right $
         S.mainlemma_neg Rr₀ $
-        finHeight_lt_iff_satisfies_boxbot.not.mp (by simp);
+        finHeight_lt_iff_satisfies_boxbot.not.mp $ by simp [Frame.extendRoot.eq_original_finHeight_root]
       apply C!_trans this
       simp [Realization.interpret.def_boxItr]
     . apply S.mainlemma Rr₀;
@@ -504,7 +553,7 @@ lemma eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).tr
     | mem₂ hA =>
       replace hA := Modal.Logic.iff_provable.mp hA;
       obtain ⟨n, ⟨N, ⟨A, hA₁, hA₂⟩, hN₂⟩, rfl⟩ := hA;
-      apply provable_of_mem_trace;
+      apply provable_TBB_of_mem_trace;
       simp_all only [Set.mem_iUnion, exists_prop];
       use A;
     | mdp ihAB ihA => exact ProvabilityLogic.mdp ihAB ihA;
