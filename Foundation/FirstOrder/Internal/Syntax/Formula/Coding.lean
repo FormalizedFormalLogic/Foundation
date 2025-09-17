@@ -190,7 +190,13 @@ lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁�
 noncomputable instance : GoedelQuote (SyntacticSemiformula L n) V where
   quote φ := (⌜φ⌝ : Metamath.Semiformula V L n).val
 
-def quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : Metamath.Semiformula V L n).val := rfl
+lemma quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : Metamath.Semiformula V L n).val := rfl
+
+@[simp] lemma quote_isSemiformula (φ : SyntacticSemiformula L n) : IsSemiformula L ↑n (⌜φ⌝ : V) := by simp [quote_def]
+
+@[simp] lemma quote_isSemiformula₀ (φ : SyntacticFormula L) : IsSemiformula L 0 (⌜φ⌝ : V) := by simp [quote_def]
+
+@[simp] lemma quote_isSemiformul₁ (φ : SyntacticSemiformula L 1) : IsSemiformula L 1 (⌜φ⌝ : V) := by simp [quote_def]
 
 @[simp] lemma quote_rel (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) :
     (⌜rel R v⌝ : V) = ^rel ↑k ⌜R⌝ (SemitermVec.val fun i ↦ (⌜v i⌝ : Metamath.Semiterm V L n)) := rfl
@@ -278,6 +284,12 @@ noncomputable instance : GoedelQuote (Semisentence L n) V where
 lemma quote_def (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝ := rfl
 
 def quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Metamath.Semiformula V L n).val := rfl
+
+@[simp] lemma quote_isSemiformula (φ : Semisentence L n) : IsSemiformula L ↑n (⌜φ⌝ : V) := by simp [quote_def]
+
+@[simp] lemma quote_isSemiformula₀ (φ : Sentence L) : IsSemiformula L 0 (⌜φ⌝ : V) := by simp [quote_def]
+
+@[simp] lemma quote_isSemiformul₁ (φ : Semisentence L 1) : IsSemiformula L 1 (⌜φ⌝ : V) := by simp [quote_def]
 
 lemma quote_eq_encode (σ : Semisentence L n) : (⌜σ⌝ : V) = ↑(encode σ) := by simp [quote_def, Semiformula.quote_eq_encode]
 

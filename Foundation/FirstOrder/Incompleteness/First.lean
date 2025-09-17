@@ -19,37 +19,29 @@ lemma re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
         (Primrec.to_comp <| Primrec.vector_cons.comp .id <| .const _)
     exact this.of_eq <| by intro x; symm; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
 
-open LO.Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath
+open LO.Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
 
 /-- Gödel's first incompleteness theorem-/
-theorem incomplete
-    (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
+theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     Incomplete T := by
   have con : Consistent T := inferInstance
-  let D : ℕ → Prop := fun n : ℕ ↦ ∃ φ : Semisentence ℒₒᵣ 1, n = ⌜φ⌝ ∧ T ⊢! ∼φ/[⌜φ⌝]
+  let D : ℕ → Prop := fun φ : ℕ ↦
+        IsSemiformula ℒₒᵣ 1 φ ∧ T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[numeral φ] φ)
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦
-        IsSemiformula ℒₒᵣ 1 φ ∧
-          T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[InternalArithmetic.numeral φ] φ) := by
+        IsSemiformula ℒₒᵣ 1 φ ∧ T.Provable (neg ℒₒᵣ <| substs ℒₒᵣ ?[numeral φ] φ) := by
       definability
-    exact REPred.of_eq (re_iff_sigma1.mpr this) <| by sorry
-      /-
-      intro φ; constructor
-      · rintro ⟨hφ, b⟩
-        rcases hφ.sound with ⟨φ, rfl⟩
-        refine ⟨φ, rfl, Theory.Provable.sound (by simpa [Semiformula.quote_def])⟩
-      · rintro ⟨φ, rfl, b⟩
-        exact ⟨by simp [Semiformula.quote_def], by
-          simpa [Semiformula.quote_def] using  internalize_provability (V := ℕ) b⟩
-      -/
+    exact re_iff_sigma1.mpr this
   let σ : Semisentence ℒₒᵣ 1 := codeOfREPred D
   let ρ : Sentence ℒₒᵣ := σ/[⌜σ⌝]
   have : ∀ n : ℕ, D n ↔ T ⊢! σ/[↑n] := fun n ↦ by
     simpa [Semiformula.coe_substs_eq_substs_coe₁] using re_complete D_re
   have : T ⊢! ∼ρ ↔ T ⊢! ρ := by
-    have : T ⊢! ∼↑σ/[↑(Encodable.encode σ)] ↔ T ⊢! ↑σ/[↑(Encodable.encode σ)] := by
-      simpa [Semiformula.quote_eq_encode, Sentence.quote_eq_encode,
-        goedelNumber'_eq_coe_encode, D, Rewriting.embedding_substs_eq_substs_coe₁] using this ⌜σ⌝
+    have : T.Provable (neg ℒₒᵣ (substs ℒₒᵣ (numeral ⌜σ⌝ ∷ 0) ⌜σ⌝)) ↔ T ⊢! σ/[⌜σ⌝] := by
+      simpa [D] using this ⌜σ⌝
+    have : T ⊢! ∼σ/[⌜σ⌝] ↔ T ⊢! σ/[⌜σ⌝] := by
+      simpa [←provable_iff_provable, Sentence.quote_def,
+        Rewriting.embedding_substs_eq_substs_coe₁, Semiformula.quote_def] using this
     simpa [ρ, Rewriting.embedding_substs_eq_substs_coe₁]
   refine incomplete_def.mpr
     ⟨ ρ
@@ -62,16 +54,9 @@ theorem exists_true_but_unprovable_sentence
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
     ∃ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ σ ∧ T ⊬ σ := by
   obtain ⟨σ, hσ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
-  by_cases ℕ ⊧ₘ σ;
-  . use σ;
-    constructor;
-    . assumption;
-    . exact hσ.1;
-  . use ∼σ;
-    constructor;
-    . simpa;
-    . exact hσ.2;
-
+  by_cases ℕ ⊧ₘ σ
+  . exact ⟨σ, by assumption, hσ.1⟩
+  . exact ⟨∼σ, by simpa, hσ.2⟩
 
 end LO.FirstOrder.Arithmetic
 
@@ -83,7 +68,6 @@ instance {T : ArithmeticTheory} [ℕ ⊧ₘ* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.Sou
   constructor;
   . infer_instance
   . obtain ⟨σ, σTrue, σUnprov⟩ := exists_true_but_unprovable_sentence T;
-    apply Entailment.not_weakerThan_iff.mpr;
-    exact ⟨σ, FirstOrderTrueArith.provable_iff.mpr σTrue, σUnprov⟩
+    exact Entailment.not_weakerThan_iff.mpr ⟨σ, FirstOrderTrueArith.provable_iff.mpr σTrue, σUnprov⟩
 
 end LO.FirstOrderTrueArith
