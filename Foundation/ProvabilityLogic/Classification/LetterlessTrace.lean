@@ -78,16 +78,16 @@ namespace FirstOrder
 variable {M : Type*} [Nonempty M] [s : Structure L M]
 
 @[simp, grind]
-lemma models₀_lconj₂_iff {Γ : List (Sentence L)} : M ⊧ₘ₀ Γ.conj₂ ↔ (∀ σ ∈ Γ, M ⊧ₘ₀ σ) := by
-  simp [models₀_iff, List.map_conj₂_prop];
+lemma models₀_lconj₂_iff {Γ : List (Sentence L)} : M ⊧ₘ Γ.conj₂ ↔ (∀ σ ∈ Γ, M ⊧ₘ σ) := by
+  simp [models_iff];
 
 @[simp, grind]
-lemma models₀_fconj_iff {Γ : Finset (Sentence L)} : M ⊧ₘ₀ Γ.conj ↔ (∀ σ ∈ Γ, M ⊧ₘ₀ σ) := by
-  simp [models₀_iff];
+lemma models₀_fconj_iff {Γ : Finset (Sentence L)} : M ⊧ₘ Γ.conj ↔ (∀ σ ∈ Γ, M ⊧ₘ σ) := by
+  simp [models_iff];
 
 @[simp]
-lemma models₀_fconj'_iff {s : Finset α} {Γ : α → Sentence L} : M ⊧ₘ₀ (⩕ i ∈ s, Γ i) ↔ (∀ i ∈ s, M ⊧ₘ₀ (Γ i)) := by
-  simp [models₀_iff];
+lemma models₀_fconj'_iff {s : Finset α} {Γ : α → Sentence L} : M ⊧ₘ (⩕ i ∈ s, Γ i) ↔ (∀ i ∈ s, M ⊧ₘ (Γ i)) := by
+  simp [models_iff];
 
 end FirstOrder
 
@@ -290,7 +290,7 @@ section
 abbrev _root_.LO.FirstOrder.ArithmeticTheory.letterlessStandardRealization (T : ArithmeticTheory) [T.Δ₁] : T.StandardRealization := ⟨λ _ => ⊤⟩
 
 
-@[grind] def Regular (T : ArithmeticTheory) [T.Δ₁] (φ : Modal.Formula ℕ) := ℕ ⊧ₘ₀ (T.letterlessStandardRealization φ)
+@[grind] def Regular (T : ArithmeticTheory) [T.Δ₁] (φ : Modal.Formula ℕ) := ℕ ⊧ₘ (T.letterlessStandardRealization φ)
 
 @[grind] def Singular (T : ArithmeticTheory) [T.Δ₁] (φ : Modal.Formula ℕ) := ¬(φ.Regular T)
 
@@ -456,7 +456,7 @@ lemma TBB_regular : (TBB n).Regular T := by
   apply Formula.Regular.def_imp.mpr;
   intro h;
   exfalso;
-  have : ¬ℕ ⊧ₘ₀ T.letterlessStandardRealization (□^[(n + 1)]⊥) := by
+  have : ¬ℕ ⊧ₘ T.letterlessStandardRealization (□^[(n + 1)]⊥) := by
     simp only [Box.multibox_succ, Realization.interpret.def_box, Realization.interpret.def_boxItr, Realization.interpret.def_bot];
     apply Provability.SoundOnModel.sound.not.mpr;
     apply Provability.iIncon_unprovable_of_sigma1_sound;
@@ -685,7 +685,7 @@ variable
   (X_letterless : X.letterless) (Y_letterless : Y.letterless)
 
 lemma letterless_arithmetical_completeness [𝗜𝚺₁ ⪯ T] (φ_letterless : φ.letterless)
-  : Modal.GL ⊢! φ ↔ T ⊢!. T.letterlessStandardRealization φ := by
+  : Modal.GL ⊢! φ ↔ T ⊢! T.letterlessStandardRealization φ := by
   apply Iff.trans (GL.arithmetical_completeness_sound_iff (T := T) |>.symm);
   constructor;
   . intro h;
@@ -696,8 +696,8 @@ lemma letterless_arithmetical_completeness [𝗜𝚺₁ ⪯ T] (φ_letterless : 
 
 lemma iff_regular_of_provable_E [𝗜𝚺₁ ⪯ T] (φ_letterless : φ.letterless) (ψ_letterless : ψ.letterless) (h : Modal.GL ⊢! φ ⭤ ψ)
   : φ.Regular T ↔ ψ.Regular T := by
-  have : T ⊢!. T.letterlessStandardRealization (φ ⭤ ψ) := letterless_arithmetical_completeness (by grind) |>.mp h;
-  have : ℕ ⊧ₘ₀ T.letterlessStandardRealization (φ ⭤ ψ) := ArithmeticTheory.SoundOn.sound (F := λ _ => True) this (by simp);
+  have : T ⊢! T.letterlessStandardRealization (φ ⭤ ψ) := letterless_arithmetical_completeness (by grind) |>.mp h;
+  have : ℕ ⊧ₘ T.letterlessStandardRealization (φ ⭤ ψ) := ArithmeticTheory.SoundOn.sound (F := λ _ => True) this (by simp);
   simp [Realization.interpret, Formula.Regular] at this ⊢;
   tauto;
 
@@ -731,7 +731,7 @@ lemma Formula.spectrum_finite_of_singular : φ.Singular T → φ.spectrum.Finite
 
 lemma letterless_arithmetical_completeness' : [
   Modal.GL ⊢! φ,
-  T ⊢!. T.letterlessStandardRealization φ,
+  T ⊢! T.letterlessStandardRealization φ,
   φ.spectrum = Set.univ,
 ].TFAE := by
   tfae_have 1 ↔ 2 := letterless_arithmetical_completeness (by grind)
