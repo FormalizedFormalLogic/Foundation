@@ -252,6 +252,9 @@ protected class Eq (L : Language) where
 protected class LT (L : Language) where
   lt : L.Rel 2
 
+protected class Mem (L : Language) where
+  mem : L.Rel 2
+
 protected class Zero (L : Language) where
   zero : L.Func 0
 
@@ -276,7 +279,7 @@ class Pairing (L : Language) where
 class Star (L : Language) where
   star : L.Func 0
 
-attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Star.star
+attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Mem.mem Star.star
 
 class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
 
