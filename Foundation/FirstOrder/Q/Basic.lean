@@ -14,14 +14,14 @@ open FirstOrder FirstOrder.Arithmetic
 
 inductive RobinsonQ : ArithmeticTheory
   | equal          : ∀ φ ∈ 𝗘𝗤, RobinsonQ φ
-  | succNeZero     : RobinsonQ   “a | a + 1 ≠ 0”
-  | succInj        : RobinsonQ “a b | a + 1 = b + 1 → a = b”
-  | zeroOrSucc     : RobinsonQ   “a | a = 0 ∨ ∃ b, a = b + 1”
-  | addZero        : RobinsonQ   “a | a + 0 = a”
-  | addSucc        : RobinsonQ “a b | a + (b + 1) = (a + b) + 1”
-  | mulZero        : RobinsonQ   “a | a * 0 = 0”
-  | mulSucc        : RobinsonQ “a b | a * (b + 1) = a * b + a”
-  | ltDef          : RobinsonQ “a b | a < b ↔ ∃ c, a + (c + 1) = b”
+  | succNeZero     : RobinsonQ “∀ a, a + 1 ≠ 0”
+  | succInj        : RobinsonQ “∀ a b, a + 1 = b + 1 → a = b”
+  | zeroOrSucc     : RobinsonQ “∀ a, a = 0 ∨ ∃ b, a = b + 1”
+  | addZero        : RobinsonQ “∀ a, a + 0 = a”
+  | addSucc        : RobinsonQ “∀ a b, a + (b + 1) = (a + b) + 1”
+  | mulZero        : RobinsonQ “∀ a, a * 0 = 0”
+  | mulSucc        : RobinsonQ “∀ a b, a * (b + 1) = a * b + a”
+  | ltDef          : RobinsonQ “∀ a b, a < b ↔ ∃ c, a + (c + 1) = b”
 
 notation "𝗤" => RobinsonQ
 
@@ -31,12 +31,12 @@ open ORingStruc
 
 @[simp] instance : ℕ ⊧ₘ* 𝗤 := ⟨by
   intro σ h
-  rcases h <;> simp [models_def, add_assoc, mul_add]
+  rcases h <;> simp [models_iff, add_assoc, mul_add]
   case ltDef =>
-    intro f;
+    intro a b
     constructor;
     . intro h;
-      use (f 1 - f 0 - 1);
+      use (b - a - 1);
       omega;
     . rintro ⟨c, hc⟩;
       simp [←hc];
@@ -49,26 +49,31 @@ instance : 𝗘𝗤 ⪯ 𝗤 := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ 
 
 variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗤]
 
-@[simp] protected lemma succ_ne_zero (a : M) : a + 1 ≠ 0 := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.succNeZero (fun _ ↦ a)
+@[simp] protected lemma succ_ne_zero : ∀ a : M, a + 1 ≠ 0 := by
+  simpa [models_iff] using ModelsTheory.models M RobinsonQ.succNeZero
 
 lemma succ_inj {a b : M} : a + 1 = b + 1 → a = b := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.succInj (a :>ₙ fun _ ↦ b)
+  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.succInj
+  exact this a b
 
 @[simp] protected lemma add_zero {a : M} : a + 0 = a := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.addZero (fun _ ↦ a)
+  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.addZero
+  exact this a
 
 protected lemma add_succ (a b : M) : a + (b + 1) = a + b + 1 := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.addSucc (a :>ₙ fun _ ↦ b)
+  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.addSucc
+  exact this a b
 
 @[simp] protected lemma mul_zero (a : M) : a * 0 = 0 := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.mulZero (fun _ ↦ a)
+  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.mulZero
+  exact this a
 
-protected lemma mul_succ (a b : M) : a * (b + 1) = a * b + a := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.mulSucc (a :>ₙ fun _ ↦ b)
+protected lemma mul_succ : ∀ a b : M, a * (b + 1) = a * b + a := by
+  simpa [models_iff] using ModelsTheory.models M RobinsonQ.mulSucc
 
 lemma zero_or_succ {a : M} : a = 0 ∨ ∃ b : M, a = b + 1 := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.zeroOrSucc (λ _ ↦ a);
+  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.zeroOrSucc
+  exact this a
 
 lemma exists_succ_of_ne_zero {a : M} (ha : a ≠ 0) : ∃ b : M, a = b + 1 := by
   have := zero_or_succ (a := a);
@@ -79,7 +84,8 @@ lemma exists_succ_of_ne_zero' {a : M} (ha : a ≠ 0) : ∃ b : M, b + 1 = a := b
   use b;
 
 protected lemma lt_def {a b : M} : a < b ↔ ∃ c : M, a + (c + 1) = b := by
-  simpa [models_iff] using ModelsTheory.models M RobinsonQ.ltDef (a :>ₙ fun _ ↦ b)
+  have := by simpa [models_iff] using ModelsTheory.models M RobinsonQ.ltDef
+  exact this a b
 
 @[simp]
 lemma one_ne_zero : (1 : M) ≠ 0 := by

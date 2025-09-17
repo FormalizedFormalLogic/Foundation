@@ -217,7 +217,7 @@ section
 
 variable {L : Language.{u}} [L.ORing] (T : Theory L)
 
-lemma consequence_of [𝗘𝗤 ⪯ T] (φ : SyntacticFormula L)
+lemma consequence_of [𝗘𝗤 ⪯ T] (φ : Sentence L)
   (H : ∀ (M : Type (max u w))
          [ORingStruc M]
          [Structure L M]

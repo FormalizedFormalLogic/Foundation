@@ -10,7 +10,7 @@ namespace LO.Omega1
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 /-- ∀ x, ∃ y, 2^{|x|^2} = y-/
-def _root_.LO.Omega1.omega1 : SyntacticFormula ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
+def _root_.LO.Omega1.omega1 : Sentence ℒₒᵣ := “∀ x, ∃ y, ∃ l <⁺ x, !lengthDef l x ∧ !exponentialDef (l * l) y”
 
 inductive _root_.LO.Omega1 : Theory ℒₒᵣ where
   | omega : Omega1 Omega1.omega1
@@ -25,7 +25,7 @@ noncomputable section
 variable {V : Type*} [ORingStruc V]
 
 lemma models_Omega1_iff [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
-  simp [models_def, Omega1.omega1, length_defined.df.iff, Exponential.defined.df.iff, sq, ←le_iff_lt_succ]
+  simp [models_iff, Omega1.omega1, length_defined.df.iff, Exponential.defined.df.iff, sq]
 
 lemma omega1_of_ISigma1 [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ ISigma1.Exponential.range_exists (‖x‖^2))
 

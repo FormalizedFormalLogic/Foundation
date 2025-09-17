@@ -1,5 +1,6 @@
 import Foundation.FirstOrder.Basic.Syntax.Formula
 import Foundation.FirstOrder.Basic.Syntax.Rew
+import Foundation.FirstOrder.Basic.Syntax.Theory
 import Foundation.FirstOrder.Basic.Semantics.Semantics
 import Foundation.FirstOrder.Basic.Semantics.Elementary
 import Foundation.FirstOrder.Basic.Operator
