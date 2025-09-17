@@ -69,15 +69,6 @@ lemma ISigma_subset_mono {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⊆ �
 lemma ISigma_weakerThan_of_le {s₁ s₂} (h : s₁ ≤ s₂) : 𝗜𝚺 s₁ ⪯ 𝗜𝚺 s₂ :=
   Entailment.WeakerThan.ofSubset (ISigma_subset_mono h)
 
-instance : 𝗣𝗔⁻ ⪯ 𝗜𝗢𝗽𝗲𝗻 := Entailment.WeakerThan.ofSubset (by simp [Theory.add_def])
-
-instance : InductionScheme ℒₒᵣ Semiformula.Open ⪯ 𝗜𝗢𝗽𝗲𝗻 := Entailment.WeakerThan.ofSubset (by simp [Theory.add_def])
-
-instance : InductionScheme ℒₒᵣ (Arithmetic.Hierarchy Γ k) ⪯ 𝗜𝗡𝗗 Γ k :=
-  Entailment.WeakerThan.ofSubset (by simp [InductionOnHierarchy, Theory.add_def])
-
-instance : 𝗣𝗔⁻ ⪯ 𝗜𝗡𝗗 Γ n := Entailment.WeakerThan.ofSubset (by simp [InductionOnHierarchy, Theory.add_def])
-
 instance : 𝗘𝗤 ⪯ 𝗜𝗡𝗗 Γ n := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
 
 instance : 𝗘𝗤 ⪯ 𝗜𝗢𝗽𝗲𝗻 := Entailment.WeakerThan.trans (inferInstanceAs (𝗘𝗤 ⪯ 𝗣𝗔⁻)) inferInstance
@@ -85,8 +76,7 @@ instance : 𝗘𝗤 ⪯ 𝗜𝗢𝗽𝗲𝗻 := Entailment.WeakerThan.trans (inf
 instance : 𝗜𝗢𝗽𝗲𝗻 ⪯ 𝗜𝗡𝗗 Γ n :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset Arithmetic.Hierarchy.of_open
 
-instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₁ :=
-  ISigma_weakerThan_of_le (by decide)
+instance : 𝗜𝚺₀ ⪯ 𝗜𝚺₁ := ISigma_weakerThan_of_le (by decide)
 
 instance : 𝗜𝚺i ⪯ 𝗣𝗔 :=
   Entailment.WeakerThan.ofSubset <| Set.union_subset_union_right _  <| InductionScheme_subset (by intros; trivial)
