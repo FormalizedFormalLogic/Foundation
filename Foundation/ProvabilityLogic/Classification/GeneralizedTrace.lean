@@ -474,6 +474,28 @@ lemma sumQuasiNormal.rec!_omitSubst_strong (hL₁ : L₁.Substitution) (hL₂ : 
 end Logic
 
 
+protected abbrev GLαOmega := Modal.GLα Set.univ
+
+@[grind] lemma _root_.Set.univ_cofinite : (Set.univ (α := α))ᶜ.Finite := by simp;
+
+@[simp]
+lemma eq_GLβMinusOmega : Modal.GLβMinus Set.univ = Set.univ := by
+  apply Set.eq_univ_iff_forall.mpr;
+  intro φ;
+  apply Logic.iff_provable.mp;
+  apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless (by simp [FormulaSet.letterless]; grind;) |>.mpr;
+  use {∼⊤};
+  constructor;
+  . simp;
+  . suffices Modal.GL ⊢! ∼⊤ ➝ φ by simpa;
+    cl_prover;
+
+protected abbrev D_inter_GLβMinus (β : Set ℕ) (hβ : βᶜ.Finite := by grind) := Modal.D ∩ Modal.GLβMinus β
+@[simp] lemma eq_D_inter_GLβMinusOmega : Modal.D_inter_GLβMinus Set.univ = Modal.D := by simp
+
+protected abbrev S_inter_GLβMinus (β : Set ℕ) (hβ : βᶜ.Finite := by grind) := Modal.S ∩ Modal.GLβMinus β
+@[simp] lemma eq_S_inter_GLβMinusOmega : Modal.S_inter_GLβMinus Set.univ = Modal.S := by simp
+
 end Modal
 
 namespace ProvabilityLogic
@@ -539,7 +561,7 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trac
   intro g;
   simpa [Realization.letterless_interpret (A := Modal.TBB _) (by grind)] using this;
 
-lemma eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).trace.Coinfinite) : T.ProvabilityLogic U = Modal.GLα (T.ProvabilityLogic U).trace := by
+theorem eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).trace.Coinfinite) : T.ProvabilityLogic U = Modal.GLα (T.ProvabilityLogic U).trace := by
   apply Set.Subset.antisymm;
   . apply subset_GLα_of_trace_coinfinite h;
   . intro A;
@@ -558,12 +580,36 @@ lemma eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).tr
       use A;
     | mdp ihAB ihA => exact ProvabilityLogic.mdp ihAB ihA;
 
-lemma eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : ∃ _ : (T.ProvabilityLogic U).trace.Cofinite, T.ProvabilityLogic U = Modal.GLβMinus (T.ProvabilityLogic U).trace := by
-  refine ⟨?_, ?_⟩;
-  . contrapose! h;
-    rw [eq_provablityLogic_GLα_of_coinfinite_trace h];
-    simp;
-  . sorry;
+@[grind]
+lemma cofinite_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : (T.ProvabilityLogic U).trace.Cofinite := by
+  contrapose! h;
+  rw [eq_provablityLogic_GLα_of_coinfinite_trace h];
+  simp;
+
+@[grind]
+lemma _root_.Set.iff_cofinite_not_coinfinite {s : Set α} : s.Cofinite ↔ ¬s.Coinfinite := by
+  dsimp [Set.Cofinite, Set.Coinfinite];
+  simp;
+
+lemma provable_TBBMinus_of_mem_trace {n : ℕ} (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U ⊢! ∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n := by
+  sorry;
+
+theorem eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U = Modal.GLβMinus (T.ProvabilityLogic U).trace := by
+  apply Set.Subset.antisymm;
+  . apply subset_GLβMinus_of_trace_cofinite;
+    grind;
+  . intro A;
+    suffices Modal.GLβMinus (T.ProvabilityLogic U).trace ⊢! A → T.ProvabilityLogic U ⊢! A by grind;
+    intro hA;
+    induction hA using Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := {∼(⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, (TBB n))}) inferInstance (Logic.substitution_of_letterless (by grind)) with
+    | mem₁ hA =>
+      apply ProvabilityLogic.provable_iff.mpr;
+      intro f;
+      exact WeakerThan.pbl $ GL.arithmetical_soundness hA;
+    | mem₂ hA =>
+      suffices T.ProvabilityLogic U ⊢! ∼(⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, (TBB n)) by simpa;
+      exact provable_TBBMinus_of_mem_trace h;
+    | mdp ihAB ihA => exact ProvabilityLogic.mdp ihAB ihA;
 
 end ProvabilityLogic
 
