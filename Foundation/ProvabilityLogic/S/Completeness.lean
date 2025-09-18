@@ -11,6 +11,8 @@ noncomputable abbrev LO.Modal.Formula.rflSubformula [DecidableEq α] (φ : Formu
   := (φ.subformulas.prebox.image (λ ψ => □ψ ➝ ψ))
 
 
+
+
 namespace LO.ProvabilityLogic
 
 open Entailment
@@ -31,6 +33,128 @@ open Arithmetic
 
 variable [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 
+namespace SolovaySentences
+
+section
+
+omit [ℕ ⊧ₘ* T]
+
+variable {M₁ : Kripke.Model} {r₁ : M₁} [M₁.IsFiniteTree r₁] {A : Formula _}
+
+lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
+  let M₀ := M₁.extendRoot 1
+  let r₀ : M₀ := Model.extendRoot.root
+  have : Fintype M₀.World := Fintype.ofFinite _
+  let S := SolovaySentences.standard T M₀.toFrame
+  ∀ B ∈ A.subformulas,
+  (r₁ ⊧ B → 𝗜𝚺₁ ⊢!. (S r₀) ➝ (S.realization B)) ∧
+  (¬r₁ ⊧ B → 𝗜𝚺₁ ⊢!. (S r₀) ➝ ∼(S.realization B)) := by
+  intro M₀ r₀ _ S B B_sub;
+
+  replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
+  push_neg at hA;
+  obtain ⟨hA₁, hA₂⟩ := hA;
+  replace hA₁ : ∀ φ ∈ A.rflSubformula, r₁ ⊧ φ := by
+    intro φ hφ;
+    apply Model.extendRoot.inr_satisfies_iff.mp
+      $ (Satisfies.fconj_def.mp
+      $ Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr hA₁) φ hφ;
+
+  induction B with
+  | hfalsum => simp [Realization.interpret];
+  | himp B C ihB ihC =>
+    replace ihB := ihB (by grind);
+    replace ihC := ihC (by grind);
+    dsimp [Realization.interpret];
+    constructor;
+    . intro h;
+      rcases Satisfies.imp_def₂.mp h with (hA | hB);
+      . exact C!_trans (ihB.2 hA) CNC!;
+      . exact C!_trans (ihC.1 hB) imply₁!;
+    . intro h;
+      have := Satisfies.imp_def.not.mp h;
+      push_neg at this;
+      obtain ⟨hA, hB⟩ := this;
+      apply deduct'!;
+      apply NC!_of_N!_of_!;
+      . exact deductInv'! $ ihB.1 hA;
+      . exact deductInv'! $ ihC.2 hB;
+  | hatom =>
+    constructor;
+    . intro h;
+      apply right_Fdisj'!_intro;
+      simpa;
+    . intro h;
+      apply CN!_of_CN!_right;
+      apply left_Fdisj'!_intro;
+      intro i hi;
+      apply S.SC1;
+      by_contra hC; subst hC;
+      apply h;
+      simpa using hi;
+  | hbox B ihB =>
+    simp only [Realization.interpret];
+    constructor;
+    . intro h;
+      apply C!_of_conseq!;
+      apply T.standardProvability.D1;
+      apply Entailment.WeakerThan.pbl (𝓢 := 𝗜𝚺₁.toAxiom);
+      have : 𝗜𝚺₁ ⊢!. ((⩖ j, S j)) ➝ S.realization B := by
+        apply left_Fdisj'!_intro;
+        have hrfl : r₁ ⊧ □B ➝ B := by
+          apply hA₁;
+          simpa [Formula.rflSubformula];
+        rintro (i | i) _;
+        . rw [(show (Sum.inl i) = r₀ by simp [r₀];)]
+          suffices 𝗜𝚺₁ ⊢!. S r₀ ➝ S.realization B by convert this;
+          apply ihB (by grind) |>.1;
+          exact hrfl h;
+        . by_cases e : i = r₁;
+          . rw [e];
+            apply S.mainlemma (i := r₁) (by trivial);
+            exact Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr $ hrfl h;
+          . apply S.mainlemma (i := i) (by trivial);
+            apply Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr;
+            apply h;
+            apply Frame.root_genaretes'!;
+            assumption
+      have b : 𝗜𝚺₁ ⊢!. ⩖ j, S j := oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
+        simpa [models₀_iff, S, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.disjunctive
+      exact this ⨀ b
+    . intro h;
+      have := Satisfies.box_def.not.mp h;
+      push_neg at this;
+      obtain ⟨i, Rij, hA⟩ := this;
+      have : 𝗜𝚺₁ ⊢!. S (Sum.inr i) ➝ ∼S.realization B :=
+        S.mainlemma_neg (A := B) (i := i) (by trivial)
+        <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
+      have : 𝗜𝚺₁ ⊢!. ∼T.standardProvability (∼S (Sum.inr i)) ➝ ∼T.standardProvability (S.realization B) :=
+        contra!
+        $ T.standardProvability.prov_distribute_imply'
+        $ CN!_of_CN!_right $ this;
+      refine C!_trans ?_ this;
+      apply S.SC2;
+      tauto;
+
+lemma rfl_mainlemma (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
+  letI M₀ := M₁.extendRoot 1
+  letI r₀ : M₀ := Model.extendRoot.root
+  haveI : Fintype M₀.World := Fintype.ofFinite _
+  letI S := SolovaySentences.standard T M₀.toFrame
+  ∀ B ∈ A.subformulas, r₁ ⊧ B → 𝗜𝚺₁ ⊢!. (S r₀) ➝ (S.realization B) := fun B B_sub => (refl_mainlemma_aux hA B B_sub).1
+
+lemma rfl_mainlemma_neg (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
+  letI M₀ := M₁.extendRoot 1
+  letI r₀ : M₀ := Model.extendRoot.root
+  haveI : Fintype M₀.World := Fintype.ofFinite _
+  letI S := SolovaySentences.standard T M₀.toFrame
+  ∀ B ∈ A.subformulas, ¬r₁ ⊧ B → 𝗜𝚺₁ ⊢!. (S r₀) ➝ ∼(S.realization B) := λ B B_sub => (refl_mainlemma_aux hA B B_sub).2
+
+end
+
+end SolovaySentences
+
+
 lemma GL_S_TFAE :
     [
       Modal.GL ⊢! (A.rflSubformula.conj ➝ A),
@@ -49,107 +173,24 @@ lemma GL_S_TFAE :
     apply S.arithmetical_soundness;
     exact h;
   tfae_have 3 → 1 := by
+    have : ℕ ⊧ₘ* 𝗜𝚺₁ := models_of_subtheory (U := 𝗜𝚺₁) (T := T) (M := ℕ) inferInstance;
+
     contrapose;
     push_neg;
     intro hA;
     obtain ⟨M₁, r₁, _, hA⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA;
+
     let M₀ := Model.extendRoot M₁ 1;
     let r₀ : M₀.World := Model.extendRoot.root;
-    replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
-    push_neg at hA;
-    obtain ⟨hA₁, hA₂⟩ := hA;
-    replace hA₁ : ∀ φ ∈ A.rflSubformula, r₁ ⊧ φ := by
-      intro φ hφ;
-      apply Model.extendRoot.inr_satisfies_iff.mp
-        $ (Satisfies.fconj_def.mp
-        $ Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr hA₁) φ hφ;
     have : Fintype M₀.World := Fintype.ofFinite _
-    let σ : SolovaySentences T.standardProvability (M₀.toFrame) r₀ :=
-      SolovaySentences.standard T M₀.toFrame
-    use σ.realization;
-    have H :
-      ∀ B ∈ A.subformulas,
-      (r₁ ⊧ B → 𝗜𝚺₁ ⊢!. (σ r₀) ➝ (σ.realization B)) ∧
-      (¬r₁ ⊧ B → 𝗜𝚺₁ ⊢!. (σ r₀) ➝ ∼(σ.realization B)) := by
-      intro B B_sub;
-      induction B with
-      | hfalsum => simp [Realization.interpret];
-      | himp B C ihB ihC =>
-        dsimp [Realization.interpret];
-        constructor;
-        . intro h;
-          rcases Satisfies.imp_def₂.mp h with (hA | hB);
-          . exact C!_trans (ihB (by grind) |>.2 hA) CNC!;
-          . exact C!_trans (ihC (by grind) |>.1 hB) imply₁!;
-        . intro h;
-          have := Satisfies.imp_def.not.mp h;
-          push_neg at this;
-          obtain ⟨hA, hB⟩ := this;
-          apply deduct'!;
-          apply NC!_of_N!_of_!;
-          . exact deductInv'! $ ihB (by grind) |>.1 hA;
-          . exact deductInv'! $ ihC (by grind) |>.2 hB;
-      | hatom =>
-        constructor;
-        . intro h;
-          apply right_Fdisj'!_intro;
-          simpa;
-        . intro h;
-          apply CN!_of_CN!_right;
-          apply left_Fdisj'!_intro;
-          intro i hi;
-          apply σ.SC1;
-          by_contra hC; subst hC;
-          apply h;
-          simpa using hi;
-      | hbox B ihB =>
-        simp only [Realization.interpret];
-        constructor;
-        . intro h;
-          apply C!_of_conseq!;
-          apply T.standardProvability.D1;
-          apply Entailment.WeakerThan.pbl (𝓢 := 𝗜𝚺₁.toAxiom);
-          have : 𝗜𝚺₁ ⊢!. ((⩖ j, σ j)) ➝ σ.realization B := by
-            apply left_Fdisj'!_intro;
-            have hrfl : r₁ ⊧ □B ➝ B := by
-              apply hA₁;
-              simpa [Formula.rflSubformula];
-            rintro (i | i) _;
-            . rw [(show (Sum.inl i) = r₀ by simp [r₀];)]
-              suffices 𝗜𝚺₁ ⊢!. σ r₀ ➝ σ.realization B by convert this;
-              apply ihB (by grind) |>.1;
-              exact hrfl h;
-            . by_cases e : i = r₁;
-              . rw [e];
-                apply σ.mainlemma (i := r₁) (by trivial);
-                exact Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr $ hrfl h;
-              . apply σ.mainlemma (i := i) (by trivial);
-                apply Model.extendRoot.inr_satisfies_iff (n := 1) |>.mpr;
-                apply h;
-                apply Frame.root_genaretes'!;
-                assumption
-          have b : 𝗜𝚺₁ ⊢!. ⩖ j, σ j := oRing_provable₀_of _ _ fun (V : Type) _ _ ↦ by
-            simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.disjunctive
-          exact this ⨀ b
-        . intro h;
-          have := Satisfies.box_def.not.mp h;
-          push_neg at this;
-          obtain ⟨i, Rij, hA⟩ := this;
-          have : 𝗜𝚺₁ ⊢!. σ.σ (Sum.inr i) ➝ ∼σ.realization B :=
-            σ.mainlemma_neg (A := B) (i := i) (by trivial)
-            <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
-          have : 𝗜𝚺₁ ⊢!. ∼T.standardProvability (∼σ (Sum.inr i)) ➝ ∼T.standardProvability (σ.realization B) :=
-            contra!
-            $ T.standardProvability.prov_distribute_imply'
-            $ CN!_of_CN!_right $ this;
-          refine C!_trans ?_ this;
-          apply σ.SC2;
-          tauto;
-    have : ℕ ⊧ₘ* 𝗜𝚺₁ := models_of_subtheory (U := 𝗜𝚺₁) (T := T) (M := ℕ) inferInstance;
-    have : ℕ ⊧ₘ₀ σ.σ r₀ ➝ ∼σ.realization A := models_of_provable₀ inferInstance $ H A (by simp) |>.2 hA₂;
+    let S := SolovaySentences.standard T M₀.toFrame
+    use S.realization;
+
+    have : 𝗜𝚺₁ ⊢!. S r₀ ➝ ∼S.realization A:= by convert SolovaySentences.rfl_mainlemma_neg (T := T) hA A (by grind) $ Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
+    have : ℕ ⊧ₘ₀ S r₀ ➝ ∼S.realization A := models_of_provable₀ inferInstance this;
     simp only [models₀_imply_iff, models₀_not_iff] at this;
     exact this <| by
-      simpa [models₀_iff, σ, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
+      simpa [models₀_iff, S, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;
 
 theorem S.arithmetical_completeness_iff : Modal.S ⊢! A ↔ ∀ f : T.StandardRealization, ℕ ⊧ₘ₀ f A := GL_S_TFAE.out 1 2
