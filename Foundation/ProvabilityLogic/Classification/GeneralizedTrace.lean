@@ -3,6 +3,21 @@ import Foundation.Modal.Boxdot.GL_S
 
 namespace LO
 
+namespace Entailment
+
+variable {F : Type*} [LogicalConnective F]
+         {S : Type*} [Entailment F S]
+         {𝓢 : S} [Entailment.Minimal 𝓢]
+
+lemma FConj'_iff_forall_provable [DecidableEq F] {s : Finset α} {ι : α → F} : (𝓢 ⊢! ⩕ i ∈ s, ι i) ↔ (∀ i ∈ s, 𝓢 ⊢! ι i) := by
+  have : 𝓢 ⊢! ⋀(s.toList.map ι) ↔ ∀ i ∈ s, 𝓢 ⊢! ι i := by simpa using Conj₂!_iff_forall_provable (Γ := s.toList.map ι);
+  apply Iff.trans ?_ this;
+  simp [Finset.conj', List.conj'];
+
+end Entailment
+
+
+
 namespace Modal
 
 open Kripke
@@ -602,6 +617,7 @@ lemma _root_.Set.iff_cofinite_not_coinfinite {s : Set α} : s.Cofinite ↔ ¬s.C
   dsimp [Set.Cofinite, Set.Coinfinite];
   simp;
 
+open Classical
 lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U ⊢! ∼⩕ i ∈ (cofinite_of_not_subset_S h).toFinset, TBB i := by
   have : 𝗜𝚺₁ ⪯ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance;
 
@@ -620,7 +636,10 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
 
   let B := A ⋏ ⩕ i ∈ R, TBB i;
   have hB : T.ProvabilityLogic U ⊢! B := by
-    suffices T.ProvabilityLogic U ⊢! A ∧ ∀ i ∈ R, T.ProvabilityLogic U ⊢! TBB i by sorry;
+    suffices T.ProvabilityLogic U ⊢! A ∧ ∀ i ∈ R, T.ProvabilityLogic U ⊢! TBB i by
+      have ⟨h₁, h₂⟩ := this;
+      replace h₂ : T.ProvabilityLogic U ⊢! ⩕ i ∈ R, TBB i := Entailment.FConj'_iff_forall_provable.mpr h₂;
+      cl_prover [h₁, h₂];
     constructor;
     . assumption;
     . rintro i hi;
