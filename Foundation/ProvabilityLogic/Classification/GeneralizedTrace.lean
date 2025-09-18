@@ -1,4 +1,5 @@
 import Foundation.ProvabilityLogic.Classification.LetterlessTrace
+import Foundation.Modal.Boxdot.GL_S
 
 namespace LO
 
@@ -483,7 +484,7 @@ lemma eq_GLβMinusOmega : Modal.GLβMinus Set.univ = Set.univ := by
   apply Set.eq_univ_iff_forall.mpr;
   intro φ;
   apply Logic.iff_provable.mp;
-  apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless (by simp [FormulaSet.letterless]; grind;) |>.mpr;
+  apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless (by grind;) |>.mpr;
   use {∼⊤};
   constructor;
   . simp;
@@ -591,9 +592,45 @@ lemma _root_.Set.iff_cofinite_not_coinfinite {s : Set α} : s.Cofinite ↔ ¬s.C
   dsimp [Set.Cofinite, Set.Coinfinite];
   simp;
 
-lemma provable_TBBMinus_of_mem_trace {n : ℕ} (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U ⊢! ∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n := by
-  sorry;
+lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U ⊢! ∼⩕ i ∈ (cofinite_of_not_subset_S h).toFinset, TBB i := by
+  have : 𝗜𝚺₁ ⪯ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance;
 
+  obtain ⟨B, hB₁, hB₂⟩ := Set.not_subset.mp h;
+  replace hB₁ : T.ProvabilityLogic U ⊢! B := by grind;
+  replace hB₂ : Modal.GL ⊬ B.rflSubformula.conj ➝ B := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ by grind;
+
+  obtain ⟨M, r, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hB₂;
+  have : Fintype M := Fintype.ofFinite _;
+
+  let R := Set.Finite.inter_of_left (s := (Finset.range M.finHeight)) (t := (T.ProvabilityLogic U).trace) (Finset.finite_toSet _) |>.toFinset;
+
+  let C := B ⋏ ⩕ i ∈ R, TBB i;
+  have hC : T.ProvabilityLogic U ⊢! C := by
+    suffices T.ProvabilityLogic U ⊢! B ∧ ∀ i ∈ R, T.ProvabilityLogic U ⊢! TBB i by sorry;
+    constructor;
+    . assumption;
+    . rintro i hi;
+      apply provable_TBB_of_mem_trace;
+      simp_all [R, Logic.trace];
+
+  have : M.IsFiniteTree r := {};
+  let S : SolovaySentences T.standardProvability M.toFrame r := SolovaySentences.standard T M.toFrame;
+
+  have H₁ : 𝗜𝚺₁ ⊢!. S.realization C ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := by
+    dsimp [C];
+    sorry;
+  replace H₁ : U ⊢!. S.realization C ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := WeakerThan.pbl H₁;
+
+  have H₂ : U ⊢!. S.realization C := ProvabilityLogic.provable_iff.mp hC (f := S.realization);
+
+  have H : U ⊢!. S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := by cl_prover [H₁, H₂];
+
+  apply ProvabilityLogic.provable_iff.mpr;
+  intro g;
+
+  rwa [Realization.letterless_interpret (f₁ := S.realization) (f₂ := g) (by grind)] at H;
+
+/-- Artemov & Beklemishev. Lemma 49 -/
 theorem eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U = Modal.GLβMinus (T.ProvabilityLogic U).trace := by
   apply Set.Subset.antisymm;
   . apply subset_GLβMinus_of_trace_cofinite;
@@ -601,13 +638,17 @@ theorem eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic
   . intro A;
     suffices Modal.GLβMinus (T.ProvabilityLogic U).trace ⊢! A → T.ProvabilityLogic U ⊢! A by grind;
     intro hA;
+    dsimp [Modal.GLβMinus] at hA;
     induction hA using Modal.Logic.sumQuasiNormal.rec!_omitSubst_strong (L₁ := Modal.GL) (L₂ := {∼(⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, (TBB n))}) inferInstance (Logic.substitution_of_letterless (by grind)) with
     | mem₁ hA =>
       apply ProvabilityLogic.provable_iff.mpr;
       intro f;
       exact WeakerThan.pbl $ GL.arithmetical_soundness hA;
     | mem₂ hA =>
-      suffices T.ProvabilityLogic U ⊢! ∼(⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, (TBB n)) by simpa;
+      suffices T.ProvabilityLogic U ⊢! ∼(⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, (TBB n)) by
+        replace hA := Logic.iff_provable.mp hA;
+        subst hA;
+        exact this;
       exact provable_TBBMinus_of_mem_trace h;
     | mdp ihAB ihA => exact ProvabilityLogic.mdp ihAB ihA;
 
