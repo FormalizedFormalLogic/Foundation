@@ -525,6 +525,11 @@ lemma iff_satisfies_mem_finHeight_spectrum
       _      ↔ Frame.World.finHeight w ∈ (□φ).spectrum := by
         rw [Formula.spectrum.def_box]; simp;
 
+lemma iff_satisfies_TBB_ne_finHeight
+  {M : Model} {r : M} [Fintype M] [M.IsTree r] {w : M} {n : ℕ}
+  : w ⊧ TBB n ↔ Frame.World.finHeight w ≠ n := by
+  apply Iff.trans iff_satisfies_mem_finHeight_spectrum;
+  simp;
 
 abbrev Frame.finiteLinear (n : ℕ) : Kripke.Frame where
   World := Fin (n + 1)

@@ -56,7 +56,7 @@ theorem tree_completeness_TFAE : [
 
 lemma iff_provable_satisfies_FiniteTransitiveTree : Modal.GL ⊢! φ ↔ (∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ) := tree_completeness_TFAE (φ := φ) |>.out 0 3
 
-lemma iff_unprovable_exists_unsatisfies_FiniteTransitiveTree : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ r, M.IsFiniteTree r ∧ ¬Satisfies M r φ := by
+lemma iff_unprovable_exists_unsatisfies_FiniteTransitiveTree : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ r, M.IsFiniteTree r ∧ ¬r ⊧ φ := by
   apply Iff.not_left;
   push_neg;
   exact iff_provable_satisfies_FiniteTransitiveTree;

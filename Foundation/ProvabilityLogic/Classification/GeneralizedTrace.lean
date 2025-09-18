@@ -198,10 +198,6 @@ lemma Formula.gTrace.finite_of_coinfinite (h_ci : φ.gTrace.Coinfinite) : φ.gTr
 @[simp]
 lemma TBB_injective : Function.Injective TBB := by sorry;
 
-lemma iff_satisfies_TBB_root_ne_finHeight {M : Model} {r : M} [M.IsTree r] [Fintype M] {n : ℕ} : r ⊧ (TBB n) ↔ M.finHeight ≠ n := by
-  apply Iff.trans $ iff_satisfies_mem_finHeight_spectrum (φ := TBB n) (w := r)
-  simp;
-  tauto;
 
 lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GLα L.trace := by
   intro φ hφ;
@@ -222,7 +218,7 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
     apply satisfies_of_not_mem_gTrace (n := M.finHeight) |>.mp;
     . replace hr : ∀ n ∈ φ.gTrace, M.finHeight ≠ n := by
         intro n h;
-        apply iff_satisfies_TBB_root_ne_finHeight.mp;
+        apply iff_satisfies_TBB_ne_finHeight.mp;
         apply Satisfies.fconj_def.mp hr _;
         suffices ∃ m ∈ φ.gTrace, □^[m]⊥ = □^[n]⊥ by simpa [Tφ];
         use n;
@@ -231,11 +227,25 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
     . rfl;
 
 
-lemma Formula.Kripke.Satisfies.fconj'_def {M : Kripke.Model} {w : M} {X : Finset α} {ι : α → Formula ℕ} : w ⊧ (⩕ i ∈ X, ι i) ↔ ∀ i ∈ X, w ⊧ ι i := by
+namespace Formula.Kripke.Satisfies
+
+variable {M : Kripke.Model} {w : M} {X : Finset α} {ι : α → Formula ℕ}
+
+lemma fconj'_def : w ⊧ (⩕ i ∈ X, ι i) ↔ ∀ i ∈ X, w ⊧ ι i := by
   sorry;
 
-lemma Formula.Kripke.Satisfies.not_fconj'_def {M : Kripke.Model} {w : M} {X : Finset α} {ι : α → Formula ℕ} : ¬(w ⊧ (⩕ i ∈ X, ι i)) ↔ ∃ i ∈ X, ¬(w ⊧ ι i) := by
+lemma not_fconj'_def : ¬(w ⊧ (⩕ i ∈ X, ι i)) ↔ ∃ i ∈ X, ¬(w ⊧ ι i) := by
   simpa using Formula.Kripke.Satisfies.fconj'_def.not;
+
+lemma fdisj'_def : w ⊧ (⩖ i ∈ X, ι i) ↔ ∃ i ∈ X, w ⊧ ι i := by
+  sorry;
+
+lemma not_fdisj'_def : ¬(w ⊧ (⩖ i ∈ X, ι i)) ↔ ∀ i ∈ X, ¬(w ⊧ ι i) := by
+  simpa using Formula.Kripke.Satisfies.fdisj'_def.not;
+
+lemma not_and_def {φ ψ : Formula ℕ} : ¬(w ⊧ φ ⋏ ψ) ↔ ¬(w ⊧ φ) ∨ ¬(w ⊧ ψ) := by simp [-not_and, not_and_or];
+
+end Formula.Kripke.Satisfies
 
 
 lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.GLβMinus L.trace := by
@@ -257,7 +267,7 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
         rintro n ξ hξ₁ hξ₂ rfl;
         obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ ¬r ⊧ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by simpa using hr;
         replace hm₁ : ∀ i ∈ L, m ∉ i.gTrace := by simpa [Tφ] using hm₁;
-        replace hm₂ : M.finHeight = m := by simpa using iff_satisfies_TBB_root_ne_finHeight.not.mp hm₂;
+        replace hm₂ : M.finHeight = m := by simpa using iff_satisfies_TBB_ne_finHeight.not.mp hm₂;
         apply hm₁ ξ;
         . assumption;
         . grind;
@@ -595,34 +605,73 @@ lemma _root_.Set.iff_cofinite_not_coinfinite {s : Set α} : s.Cofinite ↔ ¬s.C
 lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U ⊢! ∼⩕ i ∈ (cofinite_of_not_subset_S h).toFinset, TBB i := by
   have : 𝗜𝚺₁ ⪯ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance;
 
-  obtain ⟨B, hB₁, hB₂⟩ := Set.not_subset.mp h;
-  replace hB₁ : T.ProvabilityLogic U ⊢! B := by grind;
-  replace hB₂ : Modal.GL ⊬ B.rflSubformula.conj ➝ B := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ by grind;
+  obtain ⟨A, hA₁, hA₂⟩ := Set.not_subset.mp h;
+  replace hA₁ : T.ProvabilityLogic U ⊢! A := by grind;
+  replace hA₂ : Modal.GL ⊬ A.rflSubformula.conj ➝ A := Modal.Logic.iff_provable_rflSubformula_GL_provable_S.not.mpr $ by grind;
 
-  obtain ⟨M, r, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hB₂;
-  have : Fintype M := Fintype.ofFinite _;
+  obtain ⟨M₁, r₁, _, hM⟩ := Modal.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA₂;
+  have : Fintype M₁ := Fintype.ofFinite _;
 
-  let R := Set.Finite.inter_of_left (s := (Finset.range M.finHeight)) (t := (T.ProvabilityLogic U).trace) (Finset.finite_toSet _) |>.toFinset;
+  let M₀ := Model.extendRoot M₁ 1;
+  let r₀ : M₀.World := Model.extendRoot.root;
+  have : Fintype M₀.World := Fintype.ofFinite _
 
-  let C := B ⋏ ⩕ i ∈ R, TBB i;
-  have hC : T.ProvabilityLogic U ⊢! C := by
-    suffices T.ProvabilityLogic U ⊢! B ∧ ∀ i ∈ R, T.ProvabilityLogic U ⊢! TBB i by sorry;
+  let R := Set.Finite.inter_of_left (s := (Finset.range M₁.finHeight)) (t := (T.ProvabilityLogic U).trace) (Finset.finite_toSet _) |>.toFinset;
+
+  let B := A ⋏ ⩕ i ∈ R, TBB i;
+  have hB : T.ProvabilityLogic U ⊢! B := by
+    suffices T.ProvabilityLogic U ⊢! A ∧ ∀ i ∈ R, T.ProvabilityLogic U ⊢! TBB i by sorry;
     constructor;
     . assumption;
     . rintro i hi;
       apply provable_TBB_of_mem_trace;
       simp_all [R, Logic.trace];
 
-  have : M.IsFiniteTree r := {};
-  let S : SolovaySentences T.standardProvability M.toFrame r := SolovaySentences.standard T M.toFrame;
+  have : M₁.IsFiniteTree r₁ := {};
+  let S := SolovaySentences.standard T M₀.toFrame;
 
-  have H₁ : 𝗜𝚺₁ ⊢!. S.realization C ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := by
-    dsimp [C];
-    sorry;
-  replace H₁ : U ⊢!. S.realization C ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := WeakerThan.pbl H₁;
+  have H₁ : 𝗜𝚺₁ ⊢!. (S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n)) := by
+    apply ?_ ⨀ S.SC4;
+    apply left_Udisj!_intro _;
+    rintro (a | i);
+    . suffices 𝗜𝚺₁ ⊢!. S r₀ ➝ S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) by
+        rwa [(show Sum.inl a = r₀ by simp [r₀])];
+      have H₁ : 𝗜𝚺₁ ⊢!. S r₀ ➝ ∼S.realization A := by
+        convert SolovaySentences.rfl_mainlemma_neg (T := T) hM A (by grind) ?_;
+        exact Satisfies.not_imp_def.mp hM |>.2;
+      have H₂ : 𝗜𝚺₁ ⊢!. S.realization B ⭤ S.realization A ⋏ S.realization (⩕ n ∈ R, TBB n) := Realization.interpret.iff_provable_and_inside;
+      cl_prover [H₁, H₂];
+    . suffices 𝗜𝚺₁ ⊢!. S i ➝ S.realization (B ➝ (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n)) by simpa;
+      apply SolovaySentences.mainlemma (S := S) (T := T) (i := i) ?_ ?_;
+      . apply Frame.root_genaretes'!;
+        simp;
+      . intro h;
+        apply Satisfies.not_def.mpr;
+        apply Satisfies.not_fconj'_def.mpr;
+        use Frame.World.finHeight (i : M₀);
+        constructor;
+        . by_contra hC;
+          apply iff_satisfies_TBB_ne_finHeight (w := (i : M₀)) (n := Frame.World.finHeight (i : M₀)) |>.mp;
+          . apply Satisfies.fconj'_def.mp $ Satisfies.and_def.mp h |>.2;
+            suffices Frame.World.finHeight (i : M₀) < M₁.finHeight ∧ Frame.World.finHeight (i : M₀) ∈ (T.ProvabilityLogic U).trace by
+              simpa [R];
+            constructor;
+            . suffices Frame.World.finHeight i < M₁.finHeight by calc
+                _ = Frame.World.finHeight (i : M₁) := by convert Frame.extendRoot.eq_original_finHeight
+                _ < _                              := this;
+              apply Frame.World.finHeight_lt_whole_finHeight;
+              apply M₁.root_genaretes'!;
+              rintro rfl;
+              apply Satisfies.not_imp_def.mp hM |>.2;
+              apply Model.extendRoot.modal_equivalence_original_world.mpr;
+              exact Satisfies.and_def.mp h |>.1;
+            . simpa using hC;
+          . rfl;
+        . apply iff_satisfies_TBB_ne_finHeight.not.mpr;
+          simp;
 
-  have H₂ : U ⊢!. S.realization C := ProvabilityLogic.provable_iff.mp hC (f := S.realization);
-
+  replace H₁ : U ⊢!. S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := WeakerThan.pbl H₁;
+  have H₂ : U ⊢!. S.realization B := ProvabilityLogic.provable_iff.mp hB (f := S.realization);
   have H : U ⊢!. S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := by cl_prover [H₁, H₂];
 
   apply ProvabilityLogic.provable_iff.mpr;
