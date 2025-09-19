@@ -233,9 +233,7 @@ namespace List
 
 variable {l s t : List F} {φ : F}
 
-protected abbrev multibox (n : ℕ) : List F → List F
-  | [] => []
-  | φ :: l => □^[n]φ :: List.multibox n l
+protected abbrev multibox (n : ℕ) : List F → List F := List.map (□^[n] ·)
 -- notation "□'^[" n:90 "]" l:80 => List.multibox n l
 
 protected abbrev box : List F → List F := List.multibox (n := 1)
@@ -271,17 +269,9 @@ lemma box_mem_of (h : φ ∈ l) : □φ ∈ l.box := multibox_mem_of h
 lemma multibox_nonempty (h : l ≠ []) : l.multibox n ≠ [] := by induction l <;> simp_all;
 lemma box_nonempty (h : l ≠ []) : l.box ≠ [] := multibox_nonempty h
 
-lemma exists_multibox_of_mem_multibox (h : φ ∈ l.multibox n) : ∃ ψ ∈ l, φ = □^[n]ψ := by
-  induction l with
-  | nil => simp at h;
-  | cons ψ l ih =>
-    simp only [mem_cons] at h;
-    rcases h with (h | h);
-    . use ψ; tauto;
-    . obtain ⟨ξ, hξ₁, hξ₂⟩ := ih h;
-      use ξ;
-      constructor <;> tauto;
-lemma exists_box_of_mem_box (h : φ ∈ l.box) : ∃ ψ ∈ l, φ = □ψ := exists_multibox_of_mem_multibox h
+lemma exists_multibox_of_mem_multibox (h : φ ∈ l.multibox n) : ∃ ψ ∈ l, □^[n]ψ = φ := by simpa using h;
+
+lemma exists_box_of_mem_box (h : φ ∈ l.box) : ∃ ψ ∈ l, □ψ = φ := exists_multibox_of_mem_multibox h
 
 protected noncomputable abbrev multiboxFilter [DecidableEq F] (l : List F) (n : ℕ) := l.premultibox n |>.multibox n
 protected noncomputable abbrev boxFilter [DecidableEq F] (l : List F) := l.multiboxFilter 1
@@ -304,24 +294,7 @@ lemma mem_multiboxFilter_of_mem [DecidableEq F] (h : □^[n]φ ∈ l) : □^[n]�
 lemma mem_boxFilter_of_mem [DecidableEq F] (h : □φ ∈ l) : □φ ∈ l.boxFilter := mem_multiboxFilter_of_mem h
 
 @[simp]
-lemma iff_mem_multibox_add : φ ∈ (l.multibox m |>.multibox n) ↔ φ ∈ l.multibox (n + m) := by
-  induction l with
-  | nil => simp_all;
-  | cons ψ l ih =>
-    simp only [mem_cons, LO.Box.add];
-    constructor;
-    . intro h;
-      rcases h with (rfl | h);
-      . tauto;
-      . right;
-        apply ih.mp;
-        exact h;
-    . intro h;
-      rcases h with (rfl | h);
-      . tauto;
-      . right;
-        apply ih.mpr;
-        exact h;
+lemma iff_mem_multibox_add : φ ∈ (l.multibox m |>.multibox n) ↔ φ ∈ l.multibox (n + m) := by simp [Box.add];
 
 end List
 
@@ -414,9 +387,7 @@ namespace List
 
 variable {l s t : List F} {φ : F}
 
-protected abbrev multidia (n : ℕ) : List F → List F
-  | [] => []
-  | φ :: l => ◇^[n]φ :: List.multidia n l
+protected abbrev multidia (n : ℕ) : List F → List F := List.map (◇^[n] ·)
 -- notation "◇'^[" n:90 "]" l:80 => List.multidia n l
 
 protected abbrev dia : List F → List F := List.multidia (n := 1)
@@ -452,17 +423,8 @@ lemma dia_mem_of (h : φ ∈ l) : ◇φ ∈ l.dia := multidia_mem_of h
 lemma multidia_nonempty (h : l ≠ []) : l.multidia n ≠ [] := by induction l <;> simp_all;
 lemma dia_nonempty (h : l ≠ []) : l.dia ≠ [] := multidia_nonempty h
 
-lemma exists_multidia_of_mem_multidia (h : φ ∈ l.multidia n) : ∃ ψ ∈ l, φ = ◇^[n]ψ := by
-  induction l with
-  | nil => simp at h;
-  | cons ψ l ih =>
-    simp only [mem_cons] at h;
-    rcases h with (h | h);
-    . use ψ; tauto;
-    . obtain ⟨ξ, hξ₁, hξ₂⟩ := ih h;
-      use ξ;
-      constructor <;> tauto;
-lemma exists_dia_of_mem_dia (h : φ ∈ l.dia) : ∃ ψ ∈ l, φ = ◇ψ := exists_multidia_of_mem_multidia h
+lemma exists_multidia_of_mem_multidia (h : φ ∈ l.multidia n) : ∃ ψ ∈ l, ◇^[n]ψ = φ := by simpa using h;
+lemma exists_dia_of_mem_dia (h : φ ∈ l.dia) : ∃ ψ ∈ l, ◇ψ = φ := exists_multidia_of_mem_multidia h
 
 protected noncomputable abbrev multidiaFilter [DecidableEq F] (l : List F) (n : ℕ) := l.premultidia n |>.multidia n
 protected noncomputable abbrev diaFilter [DecidableEq F] (l : List F) := l.multidiaFilter 1
@@ -485,24 +447,7 @@ lemma mem_multidiaFilter_of_mem [DecidableEq F] (h : ◇^[n]φ ∈ l) : ◇^[n]�
 lemma mem_diaFilter_of_mem [DecidableEq F] (h : ◇φ ∈ l) : ◇φ ∈ l.diaFilter := mem_multidiaFilter_of_mem h
 
 @[simp]
-lemma iff_mem_multidia_add : φ ∈ (l.multidia m |>.multidia n) ↔ φ ∈ l.multidia (n + m) := by
-  induction l with
-  | nil => simp_all;
-  | cons ψ l ih =>
-    simp only [mem_cons, LO.Dia.add];
-    constructor;
-    . intro h;
-      rcases h with (rfl | h);
-      . tauto;
-      . right;
-        apply ih.mp;
-        exact h;
-    . intro h;
-      rcases h with (rfl | h);
-      . tauto;
-      . right;
-        apply ih.mpr;
-        exact h;
+lemma iff_mem_multidia_add : φ ∈ (l.multidia m |>.multidia n) ↔ φ ∈ l.multidia (n + m) := by simp [Dia.add];
 
 end List
 
