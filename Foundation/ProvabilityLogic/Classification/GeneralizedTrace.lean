@@ -25,6 +25,22 @@ end Set
 
 namespace LO
 
+
+namespace Semantics
+
+variable {M : Type*} {F : Type*} [LogicalConnective F] [Semantics F M] [Tarski M] {𝓜 : M} {α}
+
+@[simp] lemma realize_list_conj' {l : List α} {ι : α → F} : 𝓜 ⊧ l.conj' ι ↔ ∀ i ∈ l, 𝓜 ⊧ ι i := by simp [List.conj']
+
+@[simp] lemma realize_list_disj' {l : List α} {ι : α → F} : 𝓜 ⊧ l.disj' ι ↔ ∃ i ∈ l, 𝓜 ⊧ ι i := by simp [List.disj']
+
+@[simp] lemma realize_finset_conj' {s : Finset α} {ι : α → F} : 𝓜 ⊧ s.conj' ι ↔ ∀ i ∈ s, 𝓜 ⊧ ι i := by simp [Finset.conj']
+
+@[simp] lemma realize_finset_disj' {s : Finset α} {ι : α → F} : 𝓜 ⊧ s.disj' ι ↔ ∃ i ∈ s, 𝓜 ⊧ ι i := by simp [Finset.disj']
+
+end Semantics
+
+
 namespace Entailment
 
 variable {F : Type*} [LogicalConnective F]
@@ -339,21 +355,17 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
 
 namespace Formula.Kripke.Satisfies
 
-variable {M : Kripke.Model} {w : M} {X : Finset α} {ι : α → Formula ℕ}
+variable {M : Kripke.Model} {w : M} {X : Finset α} {ι : α → Formula ℕ} {φ ψ : Formula ℕ}
 
-lemma fconj'_def : w ⊧ (⩕ i ∈ X, ι i) ↔ ∀ i ∈ X, w ⊧ ι i := by
-  sorry;
+lemma fconj'_def : w ⊧ (⩕ i ∈ X, ι i) ↔ ∀ i ∈ X, w ⊧ ι i := by simp;
 
-lemma not_fconj'_def : ¬(w ⊧ (⩕ i ∈ X, ι i)) ↔ ∃ i ∈ X, ¬(w ⊧ ι i) := by
-  simpa using Formula.Kripke.Satisfies.fconj'_def.not;
+lemma not_fconj'_def : ¬(w ⊧ (⩕ i ∈ X, ι i)) ↔ ∃ i ∈ X, ¬(w ⊧ ι i) := by simp;
 
-lemma fdisj'_def : w ⊧ (⩖ i ∈ X, ι i) ↔ ∃ i ∈ X, w ⊧ ι i := by
-  sorry;
+lemma fdisj'_def : w ⊧ (⩖ i ∈ X, ι i) ↔ ∃ i ∈ X, w ⊧ ι i := by simp;
 
-lemma not_fdisj'_def : ¬(w ⊧ (⩖ i ∈ X, ι i)) ↔ ∀ i ∈ X, ¬(w ⊧ ι i) := by
-  simpa using Formula.Kripke.Satisfies.fdisj'_def.not;
+lemma not_fdisj'_def : ¬(w ⊧ (⩖ i ∈ X, ι i)) ↔ ∀ i ∈ X, ¬(w ⊧ ι i) := by simp;
 
-lemma not_and_def {φ ψ : Formula ℕ} : ¬(w ⊧ φ ⋏ ψ) ↔ ¬(w ⊧ φ) ∨ ¬(w ⊧ ψ) := by simp [-not_and, not_and_or];
+lemma not_and_def : ¬(w ⊧ φ ⋏ ψ) ↔ ¬(w ⊧ φ) ∨ ¬(w ⊧ ψ) := by simp [-not_and, not_and_or];
 
 end Formula.Kripke.Satisfies
 
@@ -375,7 +387,8 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
     apply satisfies_of_not_mem_gTrace (n := M.finHeight) |>.mp;
     . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.gTrace → ¬M.finHeight = n := by
         rintro n ξ hξ₁ hξ₂ rfl;
-        obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ ¬r ⊧ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by simpa using hr;
+        obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ ¬r ⊧ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by
+          simpa only [Finset.conj_singleton] using hr;
         replace hm₁ : ∀ i ∈ L, m ∉ i.gTrace := by simpa [Tφ] using hm₁;
         replace hm₂ : M.finHeight = m := by simpa using iff_satisfies_TBB_ne_finHeight.not.mp hm₂;
         apply hm₁ ξ;
