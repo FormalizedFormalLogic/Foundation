@@ -341,6 +341,10 @@ lemma weakening! (h : 𝓢 ⊆ 𝓣 := by simp) {φ} : 𝓢 ⊢! φ → 𝓣 ⊢
 
 def weakerThanOfSubset (h : 𝓢 ⊆ 𝓣) : 𝓢 ⪯ 𝓣 := ⟨fun _ ↦ weakening! h⟩
 
+def toAdjoin {𝓢 : S} : 𝓢 ⊢ ψ → adjoin φ 𝓢 ⊢ ψ := fun b ↦ wk (by simp) b
+
+def to_adjoin {𝓢 : S} : 𝓢 ⊢! ψ → adjoin φ 𝓢 ⊢! ψ := fun b ↦ weakening! (by simp) b
+
 end Axiomatized
 
 alias by_axm := Axiomatized.provable_axm

@@ -1,5 +1,4 @@
 import Foundation.FirstOrder.Arithmetic.Definability.Boldface
-import Foundation.FirstOrder.Arithmetic.Definability.Init
 
 namespace LO.FirstOrder.Arithmetic
 
@@ -423,15 +422,6 @@ attribute [aesop 11 (rule_sets := [Definability]) safe]
   Boldface.or
   Boldface.all
   Boldface.ex
-
-macro "definability" : attr =>
-  `(attr|aesop 10 (rule_sets := [$(Lean.mkIdent `Definability):ident]) safe)
-
-macro "definability" (config)? : tactic =>
-  `(tactic| aesop (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `Definability):ident]))
-
-macro "definability?" (config)? : tactic =>
-  `(tactic| aesop? (config := { terminal := true }) (rule_sets := [$(Lean.mkIdent `Definability):ident]))
 
 example (c : V) : BoldfaceBoundedFunction₂ (fun x _ : V ↦ c + 2 * x^2) := by definability
 

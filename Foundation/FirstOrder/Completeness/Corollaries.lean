@@ -25,7 +25,7 @@ end ModelsTheory
 
 variable {L : Language.{u}} [L.Eq] {T : Theory L} [𝗘𝗤 ⪯ T]
 
-lemma EQ.provOf (φ : SyntacticFormula L)
+lemma EQ.provOf (φ : Sentence L)
   (H : ∀ (M : Type (max u w))
          [Nonempty M]
          [Structure L M] [Structure.Eq L M]

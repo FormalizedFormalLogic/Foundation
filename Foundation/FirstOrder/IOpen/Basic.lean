@@ -2,7 +2,7 @@ import Foundation.FirstOrder.Arithmetic.Induction
 import Mathlib.Logic.Nonempty
 
 /-!
-# Basic properties of theory $\mathsf{I_{open}}$
+# Basic properties of theory $\mathsf{IOpen}$
 
 -/
 

@@ -12,7 +12,8 @@ variable {L : Language} {T : Theory L}
 
 namespace Derivation
 
-lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ → M) {Γ : Sequent L} : T ⟹ Γ → ∃ φ ∈ Γ, Evalfm M ε φ
+lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ → M) {Γ : Sequent L} :
+    (T : SyntacticFormulas L) ⟹ Γ → ∃ φ ∈ Γ, Evalfm M ε φ
   | @axL _ _ Δ _ r v => by
     by_cases h : s.rel r (Semiterm.valm M ![] ε ∘ v)
     · exact ⟨rel r v, by simp, h⟩
@@ -57,31 +58,24 @@ lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ
       · contradiction
       · exact ⟨ψ, by simp [hn], hq⟩
     · exact ⟨ψ, by simp [h], hq⟩
-  | axm (φ := φ) h => ⟨φ, by simp, Theory.models M T h ε⟩
+  | axm (φ := φ) h => ⟨φ, by simp, by
+      have : ∃ σ ∈ T, ↑σ = φ := by
+        simpa [Theory.toSyntacticFormulas] using h
+      rcases this with ⟨σ, hσ, rfl⟩
+      simpa using Theory.models M T hσ⟩
 
 end Derivation
 
-variable {φ : SyntacticFormula L}
+theorem sound : T ⊢ σ → T ⊨[Struc.{v, u} L] σ := fun b s hT ↦ by
+  have : s.Dom ⊧ₘ* T := hT
+  have : Inhabited s.Dom := Classical.inhabited_of_nonempty s.nonempty
+  simpa using Derivation.sound s.Dom default b
 
-theorem sound : T ⊢ φ → T ⊨[Struc.{v, u} L] φ := fun b s hT f ↦ by
-  haveI : s.Dom ⊧ₘ* T := hT
-  rcases Derivation.sound s.Dom f b with ⟨ψ, hp, h⟩
-  have : ψ = φ := by simpa using hp
-  rcases this
-  exact h
+theorem sound! : T ⊢! σ → T ⊨[Struc.{v, u} L] σ := fun ⟨b⟩ ↦ sound b
 
-theorem sound! : T ⊢! φ → T ⊨[Struc.{v, u} L] φ := fun ⟨b⟩ ↦ sound b
+theorem smallSound : T ⊢ σ → T ⊨ σ := sound
 
-theorem sound!₀ [L.DecidableEq] {σ : Sentence L} :
-    (T : Axiom L) ⊢! σ → T ⊨[Struc.{v, u} L] σ :=
-  fun b ↦ sound! <| Axiom.provable_iff.mp b
-
-theorem smallSound : T ⊢ φ → T ⊨ φ := sound
-
-theorem smallSound! : T ⊢! φ → T ⊨ φ := sound!
-
-theorem smallSound!₀ [L.DecidableEq] {σ : Sentence L} :
-    (T : Axiom L) ⊢! σ → T ⊨ σ := sound!₀
+theorem smallSound! : T ⊢! σ → T ⊨ σ := sound!
 
 instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨sound!⟩
 
@@ -94,19 +88,13 @@ lemma consistent_of_satidfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) :
   Sound.consistent_of_satisfiable h
 
 lemma unprovable_of_countermodel {M : Type*} [s : Structure L M] [Nonempty M] [hM : M ⊧ₘ* T]
-    (f : ℕ → M) (φ : SyntacticFormula L) (c : ¬Semiformula.Evalfm M f φ) : T ⊬ φ := by
+    {σ} (c : ¬M ⊧ₘ σ) : T ⊬ σ := by
   apply Sound.not_provable_of_countermodel (𝓜 := Semantics.models (Struc L) T) (𝓢 := T)
   intro h
-  exact c (h hM f)
+  exact c (h hM)
 
-lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : T ⊢! φ) :
-    M ⊧ₘ φ := consequence_iff.mp (sound! h) M inferInstance
-
-open Classical in
-lemma models_of_provable₀ {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : (T : Axiom L) ⊢! σ) :
-    M ⊧ₘ₀ σ :=
-  haveI : L.DecidableEq := inferInstance
-  consequence_iff.mp (sound! (T := T) <| Axiom.provable_iff.mp h) M inferInstance
+lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : T ⊢! σ) :
+    M ⊧ₘ σ := consequence_iff.mp (sound! h) M inferInstance
 
 end sound
 

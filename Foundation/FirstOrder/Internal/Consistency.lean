@@ -28,7 +28,7 @@ def _root_.LO.FirstOrder.Theory.ConsistentWith (φ : V) : Prop := ¬T.Provable (
 
 lemma _root_.LO.FirstOrder.Theory.ConsistentWith.quote_iff {σ : Sentence L} :
     T.ConsistentWith (⌜σ⌝ : V) ↔ ¬T.Provable (⌜∼σ⌝ : V) := by
-  simp [Theory.ConsistentWith, Semiformula.empty_quote_def, Semiformula.quote_def]
+  simp [Theory.ConsistentWith, Sentence.quote_def, Semiformula.quote_def]
 
 section
 
@@ -76,7 +76,7 @@ variable (T : ArithmeticTheory) [T.Δ₁] (V)
 def consistent_eq : T.consistent = T.standardProvability.con := rfl
 
 @[simp] lemma standard_consistent [𝗥₀ ⪯ T] : T.Consistent ℕ ↔ Entailment.Consistent T := by
-  simp [Theory.Consistent, Entailment.consistent_iff_unprovable_bot, Axiom.provable_iff]
+  simp [Theory.Consistent, Entailment.consistent_iff_unprovable_bot]
 
 end WitnessComparisons
 
