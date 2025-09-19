@@ -118,7 +118,8 @@ lemma extendRoot.iff_eq_finHeight_eq_original_root {x : F.extendRoot 1} : Frame.
   . rintro rfl;
     exact eq_original_finHeight_root;
 
-instance [Fintype F] : Fintype (F↾x) := by sorry;
+open Classical in
+noncomputable instance [h : Fintype F] : Fintype (F↾x) := by apply Subtype.fintype;
 
 instance [F.IsTree r] : (F↾x).IsTree ⟨x, by tauto⟩ := by constructor;
 
@@ -302,9 +303,192 @@ lemma subset_of_provable (h : L ⊢! φ) : φ.gTrace ⊆ L.trace := by
   grind;
 
 
+namespace Kripke
+
+/--
+  ... ≺ x ≺ a ≺ y ≺ ...
+  ↓
+  ... ≺ x ≺ (n - 1) ≺ ... ≺ 0 ≺ a ≺ y ≺ ...
+-/
+def Model.boneLengthening (M : Kripke.Model) (a : M) (n : ℕ) : Kripke.Model where
+  World := M.World ⊕ Fin n
+  Rel w v :=
+    match w, v with
+    | .inl x, .inl y => x ≺ y
+    | .inl x, .inr _ => x ≺ a
+    | .inr _, .inl y => y = a ∨ a ≺ y
+    | .inr i, .inr j => i > j
+  Val x p :=
+    match x with
+    | .inl w => M.Val w p
+    | .inr _ => M.Val a p
+
+namespace Model.boneLengthening
+
+variable {M : Kripke.Model} {a : M} [M.IsIrreflexive] {k : ℕ} {φ : Formula ℕ}
+
+@[coe] abbrev callus (i : Fin k) : M.boneLengthening a k := Sum.inr i
+instance : Coe (Fin k) (M.boneLengthening a k) := ⟨callus⟩
+
+@[coe] abbrev embed (x : M) : M.boneLengthening a k := Sum.inl x
+instance : Coe (M.World) ((M.boneLengthening a k).World) := ⟨embed⟩
+
+instance [Fintype M] : Fintype (M.boneLengthening a k) := by apply instFintypeSum
+
+instance [M.IsTransitive] : (M.boneLengthening a k).IsTransitive where
+  trans := by
+    rintro (x | i) (y | j) (z | l) Rxy Ryz <;> simp_all only [Model.boneLengthening];
+    . apply Frame.trans Rxy Ryz;
+    . apply Frame.trans Rxy Ryz;
+    . rcases Ryz with rfl | Ray;
+      . assumption;
+      . exact Frame.trans Rxy Ray;
+    . rcases Rxy with rfl | Ray;
+      . tauto;
+      . right;
+        exact Frame.trans Ray Ryz;
+    . exfalso;
+      rcases Rxy with rfl | Ray;
+      . apply M.irrefl _ Ryz;
+      . apply M.irrefl _ $ Frame.trans Ryz Ray;
+    . omega;
+
+instance isTree [M.IsTree r] (hra : r ≠ a) : (M.boneLengthening a k).IsTree r where
+  asymm := by
+    rintro (x | i) (y | j) Rxy;
+    . apply M.asymm Rxy;
+    . apply not_or.mpr;
+      constructor;
+      . contrapose! Rxy;
+        simp_all [Model.boneLengthening];
+      . exact M.asymm Rxy;
+    . rcases Rxy with rfl | Ray;
+      . apply Frame.irrefl;
+      . apply M.asymm Ray;
+    . simp_all [Model.boneLengthening];
+      omega;
+  root_generates := by
+    rintro (x | i) <;>
+    . intro;
+      apply HRel.TransGen.unwrap_iff.mpr;
+      dsimp [Model.boneLengthening];
+      apply Frame.root_genaretes'!;
+      tauto;
+
+@[simp]
+lemma height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
+  have : (M.boneLengthening a k).IsTree r := isTree hra;
+  (M.boneLengthening a k).finHeight = M.finHeight + k := by
+  intro _;
+  apply finHeight_eq_iff_relItr.mpr;
+  constructor;
+  . obtain ⟨t, Rrt⟩ := Kripke.exists_terminal (F := M.boneLengthening a k |>.toFrame) r;
+    use t;
+    induction k with
+    | zero =>
+      sorry;
+    | succ k ih =>
+      suffices (r : M.boneLengthening a (k + 1)) ≺^[(M.finHeight + k) + 1] t by
+        rwa [(show M.finHeight + (k + 1) = (M.finHeight + k) + 1 by omega)];
+      dsimp [Frame.RelItr', HRel.Iterate]
+      sorry;
+  . intro t Rrt x;
+    sorry;
+
+lemma equivalence {x : M} (hx : x = a ∨ a ≺ x) : ∀ φ, x ⊧ φ ↔ ((x : M.boneLengthening a k) ⊧ φ) := by sorry
+
+lemma mainlemma_aux
+  (hrfl : a ⊧ φ.rflSubformula.conj)
+  {ψ} (hψ : ψ ∈ φ.subformulas) :
+  (∀ i : Fin k, ((i : M.boneLengthening a k) ⊧ ψ ↔ (a : M.boneLengthening a k) ⊧ ψ)) ∧
+  (∀ x : M, (x ⊧ ψ ↔ (x : M.boneLengthening a k) ⊧ ψ)) := by
+  induction ψ with
+  | hatom => simp [Semantics.Realize, Satisfies, Model.boneLengthening];
+  | hfalsum => simp;
+  | himp ψ ξ ihψ ihξ => simp [ihψ (by grind), ihξ (by grind)];
+  | hbox ψ ihφ =>
+    have ⟨ihφ₁, ihφ₂⟩ := ihφ (by grind);
+    constructor;
+    . intro i;
+      constructor;
+      . rintro h j Raj;
+        apply h;
+        rcases j with (j | j);
+        . right; exact Raj;
+        . simp [Frame.Rel', Model.boneLengthening] at Raj;
+      . intro h;
+        have : (a : M.boneLengthening a k) ⊧ ψ := Satisfies.fconj_def.mp (equivalence (by tauto) _ |>.mp hrfl) (□ψ ➝ ψ) (by simpa) h;
+        rintro (y | j) Ri;
+        . rcases Ri with rfl | Ray;
+          . assumption;
+          . apply h;
+            exact Ray;
+        . apply ihφ₁ j |>.mpr this;
+    . intro y;
+      constructor;
+      . rintro h (z | j) Ryz;
+        . apply ihφ₂ _ |>.mp;
+          apply h;
+          exact Ryz;
+        . apply ihφ₁ j |>.mpr;
+          apply ihφ₂ _ |>.mp;
+          apply h;
+          apply Ryz;
+      . intro h z Ryz;
+        apply ihφ₂ z |>.mpr;
+        apply h;
+        exact Ryz;
+
+lemma mainlemma₁
+  (hrfl : a ⊧ φ.rflSubformula.conj) {ψ} (hψ : ψ ∈ φ.subformulas) (i : Fin k)
+  : ((i : M.boneLengthening a k) ⊧ ψ) ↔ (a : M.boneLengthening a k) ⊧ ψ := (mainlemma_aux hrfl (by grind)).1 i
+
+lemma mainlemma₂
+  (hrfl : a ⊧ φ.rflSubformula.conj) {ψ} (hψ : ψ ∈ φ.subformulas) (x : M)
+  : (x ⊧ ψ) ↔ (x : M.boneLengthening a k) ⊧ ψ := (mainlemma_aux hrfl (by grind)).2 x
+
+end Model.boneLengthening
+
+end Kripke
+
+
 @[grind]
 lemma Formula.gTrace.finite_or_cofinite : φ.gTrace.Finite ∨ φ.gTrace.Cofinite := by
-  sorry;
+  suffices φ.gTrace.Infinite → φ.gTrace.Cofinite by tauto;
+  intro tr_infinite;
+
+  obtain ⟨m, hm₁, hm₂⟩ : ∃ m, φ.rflSubformula.card < m ∧ m ∈ φ.gTrace := by
+    use (φ.rflSubformula.card + 1);
+    constructor;
+    . omega;
+    . sorry;
+
+  obtain ⟨M, r,_, _, rfl, hr⟩ := iff_mem_gTrace.mp hm₂;
+  have : M.IsFiniteTree r := {}
+
+  have H₁ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ := finHeight_lt_iff_satisfies_boxbot (i := r) (n := φ.rflSubformula.card + 1) |>.not.mp $ by
+    rw [←Frame.finHeight];
+    omega;
+  have : Modal.GL ⊢! ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := by
+    sorry;
+  have H₂ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp this M r;
+  obtain ⟨a, Rrx, hx⟩ := Satisfies.dia_def.mp $ H₂ H₁;
+  replace Rrx : r ≠ a := by rintro rfl; apply M.irrefl _ Rrx;
+
+  have : {k | k ≥ M.finHeight} ⊆ φ.gTrace := by
+    intro k hmk;
+    obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hmk;
+    apply iff_mem_gTrace.mpr;
+    refine ⟨M.boneLengthening a k, r, ?_, ?_, ?_, ?_⟩;
+    . apply Model.boneLengthening.isTree Rrx;
+    . infer_instance;
+    . apply Model.boneLengthening.height Rrx;
+    . exact Model.boneLengthening.mainlemma₂ hx (by grind) r |>.not.mp hr;
+  apply Set.Cofinite.subset this;
+  apply Set.Finite.subset (s := Finset.range M.finHeight);
+  . apply Finset.finite_toSet;
+  . intro i;
+    simp;
 
 @[grind]
 lemma Formula.gTrace.finite_of_coinfinite (h_ci : φ.gTrace.Coinfinite) : φ.gTrace.Finite := by
