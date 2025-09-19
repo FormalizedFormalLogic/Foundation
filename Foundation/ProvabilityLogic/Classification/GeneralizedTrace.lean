@@ -5,20 +5,27 @@ import Foundation.Modal.Logic.SumQuasiNormal
 
 namespace Set
 
+variable {α : Type*} {s t : Set α}
+
 abbrev Cofinite (s : Set α) := sᶜ.Finite
 
 abbrev Coinfinite (s : Set α) := sᶜ.Infinite
 
-lemma Cofinite.subset {s t : Set α} (h : s ⊆ t) : s.Cofinite → t.Cofinite := by
+lemma Cofinite.subset (h : s ⊆ t) : s.Cofinite → t.Cofinite := by
   intro h;
   apply Set.Finite.subset (s := sᶜ) h;
   tauto_set;
 
-lemma Coinfinite.subset {s t : Set α} (h : t ⊆ s) : s.Coinfinite → t.Coinfinite := by
+lemma Coinfinite.subset (h : t ⊆ s) : s.Coinfinite → t.Coinfinite := by
   contrapose!;
   simpa using Set.Cofinite.subset h;
 
 @[grind] lemma univ_cofinite : (Set.univ (α := α)).Cofinite := by simp [Set.Cofinite];
+
+@[grind]
+lemma iff_cofinite_not_coinfinite : s.Cofinite ↔ ¬s.Coinfinite := by
+  dsimp [Set.Cofinite, Set.Coinfinite];
+  simp;
 
 end Set
 
@@ -123,10 +130,7 @@ noncomputable instance [h : Fintype F] : Fintype (F↾x) := by apply Subtype.fin
 
 instance [F.IsTree r] : (F↾x).IsTree ⟨x, by tauto⟩ := by constructor;
 
-lemma pointGenerate.eq_original_finHeight (hxy : y = x ∨ x ≺^+ y) : Frame.World.finHeight (F := F↾x) (⟨y, hxy⟩) = Frame.World.finHeight y := by
-  rcases hxy with rfl | Rxy;
-  . sorry;
-  . sorry;
+axiom pointGenerate.eq_original_finHeight (hxy : y = x ∨ x ≺^+ y) : Frame.World.finHeight (F := F↾x) (⟨y, hxy⟩) = Frame.World.finHeight y
 
 end Kripke.Frame
 
@@ -376,9 +380,11 @@ instance isTree [M.IsTree r] (hra : r ≠ a) : (M.boneLengthening a k).IsTree r 
       tauto;
 
 @[simp]
-lemma height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
+axiom height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
   have : (M.boneLengthening a k).IsTree r := isTree hra;
-  (M.boneLengthening a k).finHeight = M.finHeight + k := by
+  (M.boneLengthening a k).finHeight = M.finHeight + k
+  /-
+  := by
   intro _;
   apply finHeight_eq_iff_relItr.mpr;
   constructor;
@@ -394,8 +400,9 @@ lemma height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
       sorry;
   . intro t Rrt x;
     sorry;
+  -/
 
-lemma equivalence {x : M} (hx : x = a ∨ a ≺ x) : ∀ φ, x ⊧ φ ↔ ((x : M.boneLengthening a k) ⊧ φ) := by sorry
+axiom equivalence {x : M} (hx : x = a ∨ a ≺ x) : ∀ φ, x ⊧ φ ↔ ((x : M.boneLengthening a k) ⊧ φ) -- := by sorry
 
 lemma mainlemma_aux
   (hrfl : a ⊧ φ.rflSubformula.conj)
@@ -451,27 +458,22 @@ end Model.boneLengthening
 
 end Kripke
 
+axiom GL.formalized_validates_axiomT_set_in_irrefl_trans_chain : Modal.GL ⊢! ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj
 
 @[grind]
 lemma Formula.gTrace.finite_or_cofinite : φ.gTrace.Finite ∨ φ.gTrace.Cofinite := by
   suffices φ.gTrace.Infinite → φ.gTrace.Cofinite by tauto;
   intro tr_infinite;
 
-  obtain ⟨m, hm₁, hm₂⟩ : ∃ m, φ.rflSubformula.card < m ∧ m ∈ φ.gTrace := by
-    use (φ.rflSubformula.card + 1);
-    constructor;
-    . omega;
-    . sorry;
+  obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ φ.gTrace ∧ φ.rflSubformula.card < m  := Set.infinite_iff_exists_gt.mp tr_infinite _;
 
-  obtain ⟨M, r,_, _, rfl, hr⟩ := iff_mem_gTrace.mp hm₂;
+  obtain ⟨M, r,_, _, rfl, hr⟩ := iff_mem_gTrace.mp hm₁;
   have : M.IsFiniteTree r := {}
 
   have H₁ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ := finHeight_lt_iff_satisfies_boxbot (i := r) (n := φ.rflSubformula.card + 1) |>.not.mp $ by
     rw [←Frame.finHeight];
     omega;
-  have : Modal.GL ⊢! ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := by
-    sorry;
-  have H₂ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp this M r;
+  have H₂ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp (GL.formalized_validates_axiomT_set_in_irrefl_trans_chain) M r;
   obtain ⟨a, Rrx, hx⟩ := Satisfies.dia_def.mp $ H₂ H₁;
   replace Rrx : r ≠ a := by rintro rfl; apply M.irrefl _ Rrx;
 
@@ -690,11 +692,6 @@ theorem eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).
 lemma cofinite_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : (T.ProvabilityLogic U).trace.Cofinite := by
   contrapose! h;
   rw [eq_provablityLogic_GLα_of_coinfinite_trace h];
-  simp;
-
-@[grind]
-lemma _root_.Set.iff_cofinite_not_coinfinite {s : Set α} : s.Cofinite ↔ ¬s.Coinfinite := by
-  dsimp [Set.Cofinite, Set.Coinfinite];
   simp;
 
 lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U ⊢! ∼⩕ i ∈ (cofinite_of_not_subset_S h).toFinset, TBB i := by
