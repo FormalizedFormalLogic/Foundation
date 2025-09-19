@@ -8,9 +8,9 @@ import Foundation.Vorspiel.Graph
 # Relations and functions defined by a first-order formula (with parameter)
 -/
 
-namespace LO.FirstOrder.Language
+namespace LO.FirstOrder
 
-variable (L : Language) {M : Type*} [Structure L M]
+variable {L : Language} {M : Type*} [Structure L M]
 
 def Defined (R : (Fin k → M) → Prop) (φ : Semisentence L k) : Prop :=
   ∀ v, R v ↔ Semiformula.Evalbm M v φ
@@ -18,47 +18,89 @@ def Defined (R : (Fin k → M) → Prop) (φ : Semisentence L k) : Prop :=
 def DefinedWithParam (R : (Fin k → M) → Prop) (φ : Semiformula L M k) : Prop :=
   ∀ v, R v ↔ Semiformula.Evalm M v id φ
 
-lemma Defined.iff {R : (Fin k → M) → Prop} {φ : Semisentence L k} (h : L.Defined R φ) (v) :
+lemma Defined.iff {R : (Fin k → M) → Prop} {φ : Semisentence L k} (h : Defined R φ) (v) :
     Semiformula.Evalbm M v φ ↔ R v := (h v).symm
 
-lemma DefinedWithParam.iff {R : (Fin k → M) → Prop} {φ : Semiformula L M k} (h : L.DefinedWithParam R φ) (v) :
+lemma DefinedWithParam.iff {R : (Fin k → M) → Prop} {φ : Semiformula L M k} (h : DefinedWithParam R φ) (v) :
     Semiformula.Evalm M v id φ ↔ R v := (h v).symm
 
 abbrev DefinedFunction (f : (Fin k → M) → M) (φ : Semisentence L (k + 1)) : Prop :=
-  L.Defined (fun v ↦ v 0 = f (v ·.succ)) φ
+  Defined (fun v ↦ v 0 = f (v ·.succ)) φ
 
 abbrev DefinedPred (P : M → Prop) (φ : Semisentence L 1) : Prop :=
-  L.Defined (fun v ↦ P (v 0)) φ
+  Defined (fun v ↦ P (v 0)) φ
 
 abbrev DefinedRel (R : M → M → Prop) (φ : Semisentence L 2) : Prop :=
-  L.Defined (fun v ↦ R (v 0) (v 1)) φ
+  Defined (fun v ↦ R (v 0) (v 1)) φ
 
 abbrev DefinedRel₃ (R : M → M → M → Prop) (φ : Semisentence L 3) : Prop :=
-  L.Defined (fun v ↦ R (v 0) (v 1) (v 2)) φ
+  Defined (fun v ↦ R (v 0) (v 1) (v 2)) φ
 
 abbrev DefinedRel₄ (R : M → M → M → M → Prop) (φ : Semisentence L 4) : Prop :=
-  L.Defined (fun v ↦ R (v 0) (v 1) (v 2) (v 3)) φ
+  Defined (fun v ↦ R (v 0) (v 1) (v 2) (v 3)) φ
 
 abbrev DefinedFunction₀ (c : M) (φ : Semisentence L 1) : Prop :=
-  L.DefinedFunction (fun _ => c) φ
+  DefinedFunction (fun _ => c) φ
 
 abbrev DefinedFunction₁ (f : M → M) (φ : Semisentence L 2) : Prop :=
-  L.DefinedFunction (fun v ↦ f (v 0)) φ
+  DefinedFunction (fun v ↦ f (v 0)) φ
 
 abbrev DefinedFunction₂ (f : M → M → M) (φ : Semisentence L 3) : Prop :=
-  L.DefinedFunction (fun v ↦ f (v 0) (v 1)) φ
+  DefinedFunction (fun v ↦ f (v 0) (v 1)) φ
 
 abbrev DefinedFunction₃ (f : M → M → M → M) (φ : Semisentence L 4) : Prop :=
-  L.DefinedFunction (fun v ↦ f (v 0) (v 1) (v 2)) φ
+  DefinedFunction (fun v ↦ f (v 0) (v 1) (v 2)) φ
 
 abbrev DefinedFunction₄ (f : M → M → M → M → M) (φ : Semisentence L 5) : Prop :=
-  L.DefinedFunction (fun v ↦ f (v 0) (v 1) (v 2) (v 3)) φ
+  DefinedFunction (fun v ↦ f (v 0) (v 1) (v 2) (v 3)) φ
 
 abbrev DefinedFunction₅ (f : M → M → M → M → M → M) (φ : Semisentence L 6) : Prop :=
-  L.DefinedFunction (fun v ↦ f (v 0) (v 1) (v 2) (v 3) (v 4)) φ
+  DefinedFunction (fun v ↦ f (v 0) (v 1) (v 2) (v 3) (v 4)) φ
+
+notation L "-relation " P " via " φ => DefinedRel (L := L) P φ
+
+notation L "-relation₃ " P " via " φ => DefinedRel₃ (L := L) P φ
+
+notation L "-relation₄ " P " via " φ => DefinedRel₄ (L := L) P φ
+
+notation L "-function₀ " c " via " φ => DefinedFunction₀ (L := L) c φ
+
+notation L "-function₁ " f " via " φ => DefinedFunction₁ (L := L) f φ
+
+notation L "-function₂ " f " via " φ => DefinedFunction₂ (L := L) f φ
+
+notation L "-function₃ " f " via " φ => DefinedFunction₃ (L := L) f φ
+
+notation L "-function₄ " f " via " φ => DefinedFunction₄ (L := L) f φ
+
+notation L "-function₅ " f " via " φ => DefinedFunction₅ (L := L) f φ
+
+notation L "-predicate[" M "] " P " via " φ => DefinedPred (L := L) (M := M) P φ
+
+notation L "-relation[" M "] " P " via " φ => DefinedRel (L := L) (M := M) P φ
+
+notation L "-relation₃[" M "] " P " via " φ => DefinedRel₃ (L := L) (M := M) P φ
+
+notation L "-relation₄[" M "] " P " via " φ => DefinedRel₄ (L := L) (M := M) P φ
+
+notation L "-function₀[" M "] " c " via " φ => DefinedFunction₀ (L := L) (M := M) c φ
+
+notation L "-function₁[" M "] " f " via " φ => DefinedFunction₁ (L := L) (M := M) f φ
+
+notation L "-function₂[" M "] " f " via " φ => DefinedFunction₂ (L := L) (M := M) f φ
+
+notation L "-function₃[" M "] " f " via " φ => DefinedFunction₃ (L := L) (M := M) f φ
+
+notation L "-function₄[" M "] " f " via " φ => DefinedFunction₄ (L := L) (M := M) f φ
+
+notation L "-function₅[" M "] " f " via " φ => DefinedFunction₅ (L := L) (M := M) f φ
+
+namespace Language
+
+variable (L)
 
 class Definable {k} (P : (Fin k → M) → Prop) : Prop where
-  definable : ∃ φ : Semiformula L M k, L.DefinedWithParam P φ
+  definable : ∃ φ : Semiformula L M k, DefinedWithParam P φ
 
 abbrev DefinablePred (P : M → Prop) : Prop := L.Definable (k := 1) fun v ↦ P (v 0)
 
@@ -72,8 +114,7 @@ abbrev DefinableRel₅ (P : M → M → M → M → M → Prop) : Prop := L.Defi
 
 abbrev DefinableRel₆ (P : M → M → M → M → M → M → Prop) : Prop := L.Definable (k := 6) (fun v ↦ P (v 0) (v 1) (v 2) (v 3) (v 4) (v 5))
 
-abbrev DefinableFunction (f : (Fin k → M) → M) : Prop :=
-  Definable (k := k + 1) L fun v ↦ v 0 = f (v ·.succ)
+abbrev DefinableFunction (f : (Fin k → M) → M) : Prop := Definable (k := k + 1) L fun v ↦ v 0 = f (v ·.succ)
 
 abbrev DefinableFunction₀ (c : M) : Prop := L.DefinableFunction (k := 0) (fun _ ↦ c)
 
@@ -88,25 +129,6 @@ abbrev DefinableFunction₄ (f : M → M → M → M → M) : Prop := L.Definabl
 abbrev DefinableFunction₅ (f : M → M → M → M → M → M) : Prop := L.DefinableFunction (k := 5) (fun v ↦ f (v 0) (v 1) (v 2) (v 3) (v 4))
 
 variable {L}
-
-notation L "-relation " P " via " φ => DefinedRel L P φ
-
-notation L "-relation₃ " P " via " φ => DefinedRel₃ L P φ
-
-notation L "-relation₄ " P " via " φ => DefinedRel₄ L P φ
-
-notation L "-function₀ " c " via " φ => DefinedFunction₀ L c φ
-
-notation L "-function₁ " f " via " φ => DefinedFunction₁ L f φ
-
-notation L "-function₂ " f " via " φ => DefinedFunction₂ L f φ
-
-notation L "-function₃ " f " via " φ => DefinedFunction₃ L f φ
-
-notation L "-function₄ " f " via " φ => DefinedFunction₄ L f φ
-
-notation L "-function₅ " f " via " φ => DefinedFunction₅ L f φ
-
 
 notation L "-predicate " P => DefinablePred L P
 
@@ -126,56 +148,34 @@ notation L "-function₃ " f => DefinableFunction₃ L f
 
 notation L "-function₄ " f => DefinableFunction₄ L f
 
+notation L "-predicate[" M "] " P => DefinablePred (L := L) (M := M) P
 
-notation L "-predicate[" M "] " P " via " φ => DefinedPred (M := M) L P φ
+notation L "-relation[" M "] " P => DefinableRel (L := L) (M := M) P
 
-notation L "-relation[" M "] " P " via " φ => DefinedRel (M := M) L P φ
+notation L "-relation₃[" M "] " P => DefinableRel₃ (L := L) (M := M) P
 
-notation L "-relation₃[" M "] " P " via " φ => DefinedRel₃ (M := M) L P φ
+notation L "-relation₄[" M "] " P => DefinableRel₄ (L := L) (M := M) P
 
-notation L "-relation₄[" M "] " P " via " φ => DefinedRel₄ (M := M) L P φ
+notation L "-relation₅[" M "] " P => DefinableRel₅ (L := L) (M := M) P
 
-notation L "-function₀[" M "] " c " via " φ => DefinedFunction₀ (M := M) L c φ
+notation L "-function₁[" M "] " f => DefinableFunction₁ (L := L) (M := M) f
 
-notation L "-function₁[" M "] " f " via " φ => DefinedFunction₁ (M := M) L f φ
+notation L "-function₂[" M "] " f => DefinableFunction₂ (L := L) (M := M) f
 
-notation L "-function₂[" M "] " f " via " φ => DefinedFunction₂ (M := M) L f φ
+notation L "-function₃[" M "] " f => DefinableFunction₃ (L := L) (M := M) f
 
-notation L "-function₃[" M "] " f " via " φ => DefinedFunction₃ (M := M) L f φ
-
-notation L "-function₄[" M "] " f " via " φ => DefinedFunction₄ (M := M) L f φ
-
-notation L "-function₅[" M "] " f " via " φ => DefinedFunction₅ (M := M) L f φ
-
-
-notation L "-predicate[" M "] " P => DefinablePred (M := M) L P
-
-notation L "-relation[" M "] " P => DefinableRel (M := M) L P
-
-notation L "-relation₃[" M "] " P => DefinableRel₃ (M := M) L P
-
-notation L "-relation₄[" M "] " P => DefinableRel₄ (M := M) L P
-
-notation L "-relation₅[" M "] " P => DefinableRel₅ (M := M) L P
-
-notation L "-function₁[" M "] " f => DefinableFunction₁ (M := M) L f
-
-notation L "-function₂[" M "] " f => DefinableFunction₂ (M := M) L f
-
-notation L "-function₃[" M "] " f => DefinableFunction₃ (M := M) L f
-
-notation L "-function₄[" M "] " f => DefinableFunction₄ (M := M) L f
+notation L "-function₄[" M "] " f => DefinableFunction₄ (L := L) (M := M) f
 
 namespace Defined
 
-lemma to_definable {R : (Fin k → M) → Prop} {φ : Semisentence L k} (hR : L.Defined R φ) : L.Definable R :=
+lemma to_definable {R : (Fin k → M) → Prop} {φ : Semisentence L k} (hR : Defined R φ) : L.Definable R :=
   ⟨Rewriting.embedding φ, fun v ↦ by simp [Semiformula.eval_emb, hR.iff]⟩
 
 end Defined
 
 namespace DefinedFunction
 
-lemma to_definable {f : (Fin k → M) → M} {φ : Semisentence L (k + 1)} (hf : L.DefinedFunction f φ) : L.DefinableFunction f :=
+lemma to_definable {f : (Fin k → M) → M} {φ : Semisentence L (k + 1)} (hf : DefinedFunction f φ) : L.DefinableFunction f :=
   Defined.to_definable hf
 
 end DefinedFunction
@@ -239,13 +239,13 @@ instance mem [L.Mem] [Membership M M] [Structure.Mem L M] : L-relation[M] Member
 
 lemma fconj {P : ι → (Fin k → M) → Prop} (s : Finset ι)
     (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∀ i ∈ s, P i v := by
-  have : ∀ i, ∃ φ, L.DefinedWithParam (P i) φ := fun i ↦ (h i).definable
+  have : ∀ i, ∃ φ, DefinedWithParam (P i) φ := fun i ↦ (h i).definable
   rcases Classical.axiomOfChoice this with ⟨φ, H⟩
   exact ⟨⩕ i ∈ s, φ i, fun v ↦ by simp [fun i ↦ (H i).iff]⟩
 
 lemma fdisj {P : ι → (Fin k → M) → Prop} (s : Finset ι)
     (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∃ i ∈ s, P i v := by
-  have : ∀ i, ∃ φ, L.DefinedWithParam (P i) φ := fun i ↦ (h i).definable
+  have : ∀ i, ∃ φ, DefinedWithParam (P i) φ := fun i ↦ (h i).definable
   rcases Classical.axiomOfChoice this with ⟨φ, H⟩
   exact ⟨⩖ i ∈ s, φ i, fun v ↦ by simp [fun i ↦ (H i).iff]⟩
 
