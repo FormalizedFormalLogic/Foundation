@@ -57,43 +57,43 @@ abbrev DefinedFunction₄ (f : M → M → M → M → M) (φ : Semisentence L 5
 abbrev DefinedFunction₅ (f : M → M → M → M → M → M) (φ : Semisentence L 6) : Prop :=
   DefinedFunction (fun v ↦ f (v 0) (v 1) (v 2) (v 3) (v 4)) φ
 
-notation L "-relation " P " via " φ => DefinedRel (L := L) P φ
+notation K "-relation " P " via " φ => DefinedRel (L := K) P φ
 
-notation L "-relation₃ " P " via " φ => DefinedRel₃ (L := L) P φ
+notation K "-relation₃ " P " via " φ => DefinedRel₃ (L := K) P φ
 
-notation L "-relation₄ " P " via " φ => DefinedRel₄ (L := L) P φ
+notation K "-relation₄ " P " via " φ => DefinedRel₄ (L := K) P φ
 
-notation L "-function₀ " c " via " φ => DefinedFunction₀ (L := L) c φ
+notation K "-function₀ " c " via " φ => DefinedFunction₀ (L := K) c φ
 
-notation L "-function₁ " f " via " φ => DefinedFunction₁ (L := L) f φ
+notation K "-function₁ " f " via " φ => DefinedFunction₁ (L := K) f φ
 
-notation L "-function₂ " f " via " φ => DefinedFunction₂ (L := L) f φ
+notation K "-function₂ " f " via " φ => DefinedFunction₂ (L := K) f φ
 
-notation L "-function₃ " f " via " φ => DefinedFunction₃ (L := L) f φ
+notation K "-function₃ " f " via " φ => DefinedFunction₃ (L := K) f φ
 
-notation L "-function₄ " f " via " φ => DefinedFunction₄ (L := L) f φ
+notation K "-function₄ " f " via " φ => DefinedFunction₄ (L := K) f φ
 
-notation L "-function₅ " f " via " φ => DefinedFunction₅ (L := L) f φ
+notation K "-function₅ " f " via " φ => DefinedFunction₅ (L := K) f φ
 
-notation L "-predicate[" M "] " P " via " φ => DefinedPred (L := L) (M := M) P φ
+notation K "-predicate[" N "] " P " via " φ => DefinedPred (L := K) (M := N) P φ
 
-notation L "-relation[" M "] " P " via " φ => DefinedRel (L := L) (M := M) P φ
+notation K "-relation[" N "] " P " via " φ => DefinedRel (L := K) (M := N) P φ
 
-notation L "-relation₃[" M "] " P " via " φ => DefinedRel₃ (L := L) (M := M) P φ
+notation K "-relation₃[" N "] " P " via " φ => DefinedRel₃ (L := K) (M := N) P φ
 
-notation L "-relation₄[" M "] " P " via " φ => DefinedRel₄ (L := L) (M := M) P φ
+notation K "-relation₄[" N "] " P " via " φ => DefinedRel₄ (L := K) (M := N) P φ
 
-notation L "-function₀[" M "] " c " via " φ => DefinedFunction₀ (L := L) (M := M) c φ
+notation K "-function₀[" N "] " c " via " φ => DefinedFunction₀ (L := K) (M := N) c φ
 
-notation L "-function₁[" M "] " f " via " φ => DefinedFunction₁ (L := L) (M := M) f φ
+notation K "-function₁[" N "] " f " via " φ => DefinedFunction₁ (L := K) (M := N) f φ
 
-notation L "-function₂[" M "] " f " via " φ => DefinedFunction₂ (L := L) (M := M) f φ
+notation K "-function₂[" N "] " f " via " φ => DefinedFunction₂ (L := K) (M := N) f φ
 
-notation L "-function₃[" M "] " f " via " φ => DefinedFunction₃ (L := L) (M := M) f φ
+notation K "-function₃[" N "] " f " via " φ => DefinedFunction₃ (L := K) (M := N) f φ
 
-notation L "-function₄[" M "] " f " via " φ => DefinedFunction₄ (L := L) (M := M) f φ
+notation K "-function₄[" N "] " f " via " φ => DefinedFunction₄ (L := K) (M := N) f φ
 
-notation L "-function₅[" M "] " f " via " φ => DefinedFunction₅ (L := L) (M := M) f φ
+notation K "-function₅[" N "] " f " via " φ => DefinedFunction₅ (L := K) (M := N) f φ
 
 namespace Language
 
@@ -148,23 +148,25 @@ notation L "-function₃ " f => DefinableFunction₃ L f
 
 notation L "-function₄ " f => DefinableFunction₄ L f
 
-notation L "-predicate[" M "] " P => DefinablePred (L := L) (M := M) P
+notation L "-predicate[" N "] " P => DefinablePred (M := N) L P
 
-notation L "-relation[" M "] " P => DefinableRel (L := L) (M := M) P
+notation L "-relation[" N "] " P => DefinableRel (M := N) L P
 
-notation L "-relation₃[" M "] " P => DefinableRel₃ (L := L) (M := M) P
+notation L "-relation₃[" N "] " P => DefinableRel₃ (M := N) L P
 
-notation L "-relation₄[" M "] " P => DefinableRel₄ (L := L) (M := M) P
+notation L "-relation₄[" N "] " P => DefinableRel₄ (M := N) L P
 
-notation L "-relation₅[" M "] " P => DefinableRel₅ (L := L) (M := M) P
+notation L "-relation₅[" N "] " P => DefinableRel₅ (M := N) L P
 
-notation L "-function₁[" M "] " f => DefinableFunction₁ (L := L) (M := M) f
+notation L "-function₁[" N "] " f => DefinableFunction₁ (M := N) L f
 
-notation L "-function₂[" M "] " f => DefinableFunction₂ (L := L) (M := M) f
+notation L "-function₂[" N "] " f => DefinableFunction₂ (M := N) L f
 
-notation L "-function₃[" M "] " f => DefinableFunction₃ (L := L) (M := M) f
+notation L "-function₃[" N "] " f => DefinableFunction₃ (M := N) L f
 
-notation L "-function₄[" M "] " f => DefinableFunction₄ (L := L) (M := M) f
+notation L "-function₄[" N "] " f => DefinableFunction₄ (M := N) L f
+
+end Language
 
 namespace Defined
 
@@ -179,6 +181,8 @@ lemma to_definable {f : (Fin k → M) → M} {φ : Semisentence L (k + 1)} (hf :
   Defined.to_definable hf
 
 end DefinedFunction
+
+namespace Language
 
 namespace Definable
 
