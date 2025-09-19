@@ -26,8 +26,8 @@ instance : Entailment.Lukasiewicz (ProvabilityLogic T U) where
     constructor;
     simp only [←Modal.Logic.iff_provable, ProvabilityLogic.provable_iff] at hA hB ⊢;
     intro f;
-    replace hA : U ⊢!. f A ➝ f B := hA f;
-    replace hB : U ⊢!. f A := hB f;
+    replace hA : U ⊢! f A ➝ f B := hA f;
+    replace hB : U ⊢! f A := hB f;
     cl_prover [hA, hB];
   imply₁ A B := by
     constructor;

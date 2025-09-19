@@ -619,7 +619,7 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trac
   have : 𝗜𝚺₁ ⪯ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance;
 
   obtain ⟨A, hA₁, ⟨M, r, _, _, rfl, h₂⟩⟩ := by simpa using h;
-  replace hA₁ : ∀ f : T.StandardRealization, U ⊢!. f A := ProvabilityLogic.provable_iff.mp (by grind);
+  replace hA₁ : ∀ f : T.StandardRealization, U ⊢! f A := ProvabilityLogic.provable_iff.mp (by grind);
 
   let M₀ := M.extendRoot 1;
   let r₀ : M₀ := Frame.extendRoot.root
@@ -642,13 +642,13 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trac
     . apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mpr;
       simp;
       omega;
-  have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢!. S i ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := by
+  have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢! S i ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := by
     rintro (a | i);
-    . suffices 𝗜𝚺₁ ⊢!. S r₀ ➝ S.realization (TBB M.finHeight) by
+    . suffices 𝗜𝚺₁ ⊢! S r₀ ➝ S.realization (TBB M.finHeight) by
         dsimp [Realization.interpret];
         rw [(show Sum.inl a = r₀ by simp [r₀])];
         cl_prover [this]
-      have : 𝗜𝚺₁ ⊢!. S r₀ ➝ ∼(T.standardProvability) (S.realization (□^[M.finHeight]⊥)) := C!_trans (S.SC2 r₀ r Rr₀) $ contra! $
+      have : 𝗜𝚺₁ ⊢! S r₀ ➝ ∼(T.standardProvability) (S.realization (□^[M.finHeight]⊥)) := C!_trans (S.SC2 r₀ r Rr₀) $ contra! $
         T.standardProvability.prov_distribute_imply' $
         CN!_of_CN!_right $
         S.mainlemma_neg Rr₀ $
@@ -657,11 +657,11 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trac
       simp [Realization.interpret.def_boxItr]
     . apply S.mainlemma Rr₀;
       apply this;
-  have : 𝗜𝚺₁ ⊢!. (⩖ j, S j) ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := left_Udisj!_intro _ this
-  have : 𝗜𝚺₁ ⊢!. S.realization (A ➝ (Modal.TBB M.finHeight)) := by cl_prover [this, S.SC4];
+  have : 𝗜𝚺₁ ⊢! (⩖ j, S j) ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := left_Udisj!_intro _ this
+  have : 𝗜𝚺₁ ⊢! S.realization (A ➝ (Modal.TBB M.finHeight)) := by cl_prover [this, S.SC4];
 
-  have : U ⊢!. S.realization (Modal.TBB M.finHeight) := by
-    have : U ⊢!. S.realization A ➝ S.realization (Modal.TBB M.finHeight) := WeakerThan.pbl this;
+  have : U ⊢! S.realization (Modal.TBB M.finHeight) := by
+    have : U ⊢! S.realization A ➝ S.realization (Modal.TBB M.finHeight) := WeakerThan.pbl this;
     cl_prover [this, hA₁ S.realization];
   apply ProvabilityLogic.provable_iff.mpr;
   intro g;
@@ -728,18 +728,18 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
   have : M₁.IsFiniteTree r₁ := {};
   let S := SolovaySentences.standard T M₀.toFrame;
 
-  have H₁ : 𝗜𝚺₁ ⊢!. (S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n)) := by
+  have H₁ : 𝗜𝚺₁ ⊢! (S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n)) := by
     apply ?_ ⨀ S.SC4;
     apply left_Udisj!_intro _;
     rintro (a | i);
-    . suffices 𝗜𝚺₁ ⊢!. S r₀ ➝ S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) by
+    . suffices 𝗜𝚺₁ ⊢! S r₀ ➝ S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) by
         rwa [(show Sum.inl a = r₀ by simp [r₀])];
-      have H₁ : 𝗜𝚺₁ ⊢!. S r₀ ➝ ∼S.realization A := by
+      have H₁ : 𝗜𝚺₁ ⊢! S r₀ ➝ ∼S.realization A := by
         convert SolovaySentences.rfl_mainlemma_neg (T := T) hM A (by grind) ?_;
         exact Satisfies.not_imp_def.mp hM |>.2;
-      have H₂ : 𝗜𝚺₁ ⊢!. S.realization B ⭤ S.realization A ⋏ S.realization (⩕ n ∈ R, TBB n) := Realization.interpret.iff_provable_and_inside;
+      have H₂ : 𝗜𝚺₁ ⊢! S.realization B ⭤ S.realization A ⋏ S.realization (⩕ n ∈ R, TBB n) := Realization.interpret.iff_provable_and_inside;
       cl_prover [H₁, H₂];
-    . suffices 𝗜𝚺₁ ⊢!. S i ➝ S.realization (B ➝ (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n)) by simpa;
+    . suffices 𝗜𝚺₁ ⊢! S i ➝ S.realization (B ➝ (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n)) by simpa;
       apply SolovaySentences.mainlemma (S := S) (T := T) (i := i) ?_ ?_;
       . apply Frame.root_genaretes'!;
         simp;
@@ -768,9 +768,9 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
         . apply iff_satisfies_TBB_ne_finHeight.not.mpr;
           simp;
 
-  replace H₁ : U ⊢!. S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := WeakerThan.pbl H₁;
-  have H₂ : U ⊢!. S.realization B := ProvabilityLogic.provable_iff.mp hB (f := S.realization);
-  have H : U ⊢!. S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := by cl_prover [H₁, H₂];
+  replace H₁ : U ⊢! S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := WeakerThan.pbl H₁;
+  have H₂ : U ⊢! S.realization B := ProvabilityLogic.provable_iff.mp hB (f := S.realization);
+  have H : U ⊢! S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := by cl_prover [H₁, H₂];
 
   apply ProvabilityLogic.provable_iff.mpr;
   intro g;
