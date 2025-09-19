@@ -16,6 +16,7 @@ import Mathlib.Tactic.TautoSet
 import Mathlib.Data.Fintype.Sigma
 import Mathlib.Data.Fintype.Vector
 import Mathlib.Computability.Halting
+import Mathlib.Tactic.Cases
 
 namespace Nat
 variable {α : ℕ → Sort u}

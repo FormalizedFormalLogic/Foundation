@@ -77,7 +77,7 @@ instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
   constructor;
   . exact Canonical.canonical;
   . suffices ∃ X, ¬(PLoN.Satisfies (canonicalModel 𝓢) X φ) by
-      simpa [PLoN.ValidOnModel];
+      simpa only [Semantics.Realize, PLoN.ValidOnModel, not_forall];
     obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (T := {∼φ}) $ by
       apply unprovable_iff_singleton_neg_consistent.mpr;
       exact h;

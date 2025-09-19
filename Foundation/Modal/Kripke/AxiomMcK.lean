@@ -203,11 +203,9 @@ instance [Hilbert.K4McK ⪯ H] : (canonicalFrame H).SatisfiesMcKinseyCondition :
       apply WeakerThan.pbl (𝓢 := Hilbert.K4McK);
       convert Logic.K4McK.DiaFconjCDiabox (Γ := Γ'.preimage (λ φ => ◇φ ➝ □φ) (by simp [Set.InjOn])) ?_
       . simp [Γ'₂, Finset.image_preimage];
-      . simp [
-          Γ',
-          (show insert (◇⊤ ➝ □⊤) Γ = {◇⊤ ➝ □⊤} ∪ Γ by ext; simp),
-          (show Finset.preimage {◇⊤ ➝ □⊤} (fun φ ↦ ◇φ ➝ □φ) (by simp [Set.InjOn]) = {(⊤ : Formula ℕ)} by ext; simp),
-        ];
+      . suffices ∃ φ, ¬φ = ⊤ → ◇φ ➝ □φ ∈ Γ by simpa [Finset.eq_empty_iff_forall_notMem, Γ'];
+        use ⊤;
+        simp;
     . replace hC : (Γ'₁ ∪ Γ'₂).toSet *⊢[H]! ⊥ := by
         convert hC;
         ext φ;

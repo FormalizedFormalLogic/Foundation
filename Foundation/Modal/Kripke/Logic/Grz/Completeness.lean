@@ -90,20 +90,20 @@ lemma truthlemma_lemma1
   : ((X.1.prebox.box) ∪ {□(ψ ➝ □ψ), -ψ}) ⊆ (φ.subformulasGrz)⁻ := by
   simp only [FormulaFinset.complementary];
   intro χ hr;
-  replace hr : χ = □(ψ ➝ □ψ) ∨ (∃ a, □a ∈ X ∧ □a = χ) ∨ χ = -ψ := by
-    simpa [Finset.mem_union] using hr;
   apply Finset.mem_union.mpr;
-  rcases hr with (rfl | ⟨χ, hr, rfl⟩ | rfl);
+  replace hr : χ = □(ψ ➝ □ψ) ∨ χ = -ψ ∨ (∃ a, □a ∈ X ∧ □a = χ)  := by
+    simpa [Finset.mem_union] using hr;
+  rcases hr with (rfl | rfl | ⟨χ, hr, rfl⟩);
   . left;
     simp;
     tauto;
-  . have := X.closed.subset hr;
-    left;
-    exact FormulaFinset.complementary_mem_box (by grind) this;
   . right;
     simp only [Finset.mem_image, Finset.mem_union, Finset.mem_preimage, Function.iterate_one];
     use ψ;
     grind;
+  . have := X.closed.subset hr;
+    left;
+    exact FormulaFinset.complementary_mem_box (by grind) this;
 
 omit [Consistent 𝓢] in
 lemma truthlemma_lemma2
