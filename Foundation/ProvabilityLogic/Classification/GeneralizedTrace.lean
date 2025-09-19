@@ -1,5 +1,27 @@
 import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 import Foundation.Modal.Boxdot.GL_S
+import Foundation.Modal.Logic.SumQuasiNormal
+
+
+namespace Set
+
+abbrev Cofinite (s : Set α) := sᶜ.Finite
+
+abbrev Coinfinite (s : Set α) := sᶜ.Infinite
+
+lemma Cofinite.subset {s t : Set α} (h : s ⊆ t) : s.Cofinite → t.Cofinite := by
+  intro h;
+  apply Set.Finite.subset (s := sᶜ) h;
+  tauto_set;
+
+lemma Coinfinite.subset {s t : Set α} (h : t ⊆ s) : s.Coinfinite → t.Coinfinite := by
+  contrapose!;
+  simpa using Set.Cofinite.subset h;
+
+@[grind] lemma univ_cofinite : (Set.univ (α := α)).Cofinite := by simp [Set.Cofinite];
+
+end Set
+
 
 namespace LO
 
@@ -20,11 +42,82 @@ end Entailment
 
 namespace Modal
 
-open Kripke
-
 variable {φ ψ : Formula ℕ}
 
+open Kripke
+
+namespace Kripke.Frame
+
+variable {F : Frame} {r x y : F} [Fintype F] [F.IsTree r]
+
+lemma eq_finHeight_root : Frame.World.finHeight x = F.finHeight ↔ x = r := by
+  constructor;
+  . rintro h;
+    contrapose! h;
+    apply Nat.ne_of_lt;
+    apply Frame.World.finHeight_lt_whole_finHeight;
+    apply F.root_genaretes'!;
+    assumption;
+  . tauto;
+
+lemma terminal_rel_finHeight (h : x ≺^[World.finHeight x] y) : ∀ z, ¬y ≺ z := by
+  intro z Ryz;
+  suffices World.finHeight x + 1 ≤ World.finHeight x by omega;
+  exact le_finHeight_iff_relItr.mpr ⟨z, HRel.Iterate.forward.mpr ⟨y, h, Ryz⟩⟩;
+
+lemma extendRoot.eq_original_finHeight : Frame.World.finHeight (x : F.extendRoot 1) = Frame.World.finHeight x := by
+  apply finHeight_eq_iff_relItr.mpr;
+  constructor;
+  . obtain ⟨y, Rxy⟩ := exists_terminal (i := x);
+    use y;
+    apply extendRoot.embed_rel_iterate_embed_iff_rel.mpr;
+    exact Rxy;
+  . rintro (_ | y) Rxy (_ | z);
+    . simp;
+    . -- TODO: extract no loop lemma (x ≺^[n] i cannot happen where x is original and i is new elements by extension)
+      exfalso;
+      have : extendRoot.root ≺ (x : F.extendRoot 1) := Frame.root_genaretes'! (F := F.extendRoot 1) x (by simp);
+      have : (x : F.extendRoot 1) ≺ x :=
+        HRel.Iterate.unwrap_of_trans_of_pos (by omega) $
+        HRel.Iterate.comp (m := 1) |>.mp ⟨_, Rxy, by simpa⟩;
+      exact Frame.irrefl _ this;
+    . apply Frame.asymm;
+      exact Frame.root_genaretes'! (F := F.extendRoot 1) y (by simp);
+    . have := terminal_rel_finHeight $ extendRoot.embed_rel_iterate_embed_iff_rel.mp Rxy;
+      exact extendRoot.embed_rel_embed_iff_rel.not.mpr $ this z;
+
+lemma extendRoot.eq_original_finHeight_root : Frame.World.finHeight (r : F.extendRoot 1) = F.finHeight := eq_original_finHeight
+
+@[grind]
+lemma extendRoot.iff_eq_finHeight_eq_original_root {x : F.extendRoot 1} : Frame.World.finHeight x = F.finHeight ↔ x = r := by
+  constructor;
+  . rcases x with (a | x);
+    . intro h;
+      have := h ▸ finHeight₁ (F := F);
+      simp [Frame.finHeight] at this;
+    . intro h;
+      suffices x = r by simp [this];
+      apply Frame.eq_finHeight_root.mp;
+      exact h ▸ Frame.extendRoot.eq_original_finHeight.symm;
+  . rintro rfl;
+    exact eq_original_finHeight_root;
+
+instance [Fintype F] : Fintype (F↾x) := by sorry;
+
+instance [F.IsTree r] : (F↾x).IsTree ⟨x, by tauto⟩ := by constructor;
+
+lemma pointGenerate.eq_original_finHeight (hxy : y = x ∨ x ≺^+ y) : Frame.World.finHeight (F := F↾x) (⟨y, hxy⟩) = Frame.World.finHeight y := by
+  rcases hxy with rfl | Rxy;
+  . sorry;
+  . sorry;
+
+end Kripke.Frame
+
+
 def Formula.gTrace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.finHeight = n ∧ ¬r ⊧ φ) }
+
+lemma iff_mem_gTrace {n : ℕ} : n ∈ φ.gTrace ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ ¬r ⊧ φ := by
+  simp [Formula.gTrace];
 
 lemma satisfies_of_not_mem_gTrace : n ∉ φ.gTrace ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.finHeight = n → r ⊧ φ) := by
   simp [Formula.gTrace];
@@ -40,75 +133,83 @@ lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : 
     . assumption;
     . rfl;
     . assumption;
-  . push_neg;
-    rintro ⟨M, r, _, _, w, rfl, h⟩;
-    refine ⟨M.pointGenerate w, Model.pointGenerate.root, {}, ?_, ?_, ?_⟩;
-    . exact Fintype.ofFinite _;
-    . sorry;
-    . exact Model.pointGenerate.modal_equivalent_at_root _ |>.not.mpr h;
+  . dsimp [Formula.gTrace];
+    contrapose!;
+    rintro h M r _ _ x rfl;
+    apply Model.pointGenerate.modal_equivalent' x ⟨x, by tauto⟩ |>.mp;
+    apply h;
+    apply Frame.pointGenerate.eq_original_finHeight;
 
 open Formula.Kripke
 
-/-
+@[simp, grind] lemma Formula.gTrace_bot : (⊥ : Formula ℕ).gTrace = Set.univ := by simp [Formula.eq_gTrace_trace_of_letterless];
+@[simp, grind] lemma Formula.gTrace_top : (⊤ : Formula ℕ).gTrace = ∅ := by simp [Formula.eq_gTrace_trace_of_letterless];
+
 lemma Formula.gTrace_and : (φ ⋏ ψ).gTrace = φ.gTrace ∪ ψ.gTrace := by
   ext n;
   calc
-    _ ↔ ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, ∃ w : M, Frame.World.finHeight w = n ∧ ¬w ⊧ (φ ⋏ ψ) := by simp [Formula.gTrace]
+    _ ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ (¬r ⊧ φ ∨ ¬r ⊧ ψ) := by simp [gTrace, -not_and, not_and_or]
     _ ↔
-      (∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, ∃ w : M, Frame.World.finHeight w = n ∧ ¬w ⊧ φ) ∨
-      (∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, ∃ w : M, Frame.World.finHeight w = n ∧ ¬w ⊧ ψ) := by
+      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ ¬r ⊧ φ) ∨
+      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ ¬r ⊧ ψ) := by
       constructor;
-      . rintro ⟨M, r, _, _, w, _, h⟩;
-        replace h := Satisfies.and_def.not.mp h;
-        set_option push_neg.use_distrib true in push_neg at h;
-        rcases h with (h | h);
+      . rintro ⟨M, r, _, _, _, (h | h)⟩;
         . left; tauto;
         . right; tauto;
-      . rintro (⟨M, r, _, _, w, _, h⟩ | ⟨M, r, _, _, w, _, h⟩) <;>
-        . refine ⟨M, r, by assumption, by assumption, w, by assumption, ?_⟩;
-          apply Satisfies.and_def.not.mpr;
-          tauto;
+      . rintro (⟨M, r, _, _, _, _⟩ | ⟨M, r, _, _, _, _⟩) <;>
+        . refine ⟨M, r, by assumption, by assumption, by tauto⟩;
     _ ↔ _ := by simp [Formula.gTrace];
--/
+
+lemma Formula.gTrace_lconj₂ {s : List (Formula ℕ)} : (s.conj₂).gTrace = ⋃ φ ∈ s, φ.gTrace := by
+  induction s using List.induction_with_singleton with
+  | hcons φ s hs ih => simp [List.conj₂_cons_nonempty hs, Formula.gTrace_and, ih];
+  | _ => simp [List.conj₂];
+
+lemma Formula.gTrace_fconj {s : Finset (Formula ℕ)} : s.conj.gTrace = ⋃ φ ∈ s, φ.gTrace := by simp [Finset.conj, Formula.gTrace_lconj₂];
+
+lemma subset_gTrace_of_provable_imp_GL (h : Modal.GL ⊢! φ ➝ ψ) : ψ.gTrace ⊆ φ.gTrace := by
+  intro n hn;
+  obtain ⟨M, r, _, _, rfl, h₁⟩ := iff_mem_gTrace.mp hn;
+  apply iff_mem_gTrace.mpr;
+  refine ⟨M, r, by assumption, by assumption, by rfl, ?_⟩;
+  contrapose! h₁;
+  have : M.IsFiniteTree r := {}
+  apply GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
+  assumption;
 
 abbrev FormulaSet.gTrace (X : FormulaSet ℕ) : Set ℕ := ⋃ φ ∈ X, φ.gTrace
 
-@[simp]
-lemma FormulaSet.gTrace_empty : (∅ : FormulaSet ℕ).gTrace = ∅ := by simp [FormulaSet.gTrace];
+@[simp] lemma FormulaSet.gTrace_empty : (∅ : FormulaSet ℕ).gTrace = ∅ := by simp [FormulaSet.gTrace];
+
+lemma eq_FormulaSet_gTrace_finset_conj {X : Finset (Formula ℕ)} : X.conj.gTrace = FormulaSet.gTrace X.toSet := by simp [FormulaSet.gTrace, Formula.gTrace_fconj];
+
+lemma FormulaSet.subset_gTrace_of_subset {X Y : FormulaSet ℕ} (h : X ⊆ Y) : X.gTrace ⊆ Y.gTrace := by
+  simp only [gTrace, Set.iUnion_subset_iff];
+  intro φ hφ i hi;
+  simp only [Set.mem_iUnion, exists_prop];
+  use φ;
+  constructor;
+  . apply h; assumption;
+  . assumption;
 
 abbrev Logic.trace (L : Logic ℕ) : Set ℕ := FormulaSet.gTrace L
 
-lemma GL.eq_trace_ext
-  {X : FormulaSet ℕ}
-  (hX : ∀ ξ ∈ X, ∀ s : Substitution _, ξ⟦s⟧ ∈ X)
-  : (Modal.GL.sumQuasiNormal X).trace = X.gTrace := by
+lemma GL.eq_trace_ext {X : FormulaSet ℕ} (hX : ∀ ξ ∈ X, ∀ s : Substitution _, ξ⟦s⟧ ∈ X) : (Modal.GL.sumQuasiNormal X).trace = X.gTrace := by
   ext n;
-  suffices (∃ φ ∈ Modal.GL.sumQuasiNormal X, n ∈ φ.gTrace) ↔ (∃ φ ∈ X, n ∈ φ.gTrace) by
-    simpa [Logic.trace];
   constructor;
-  . rintro ⟨φ, hφ₁, hφ₂⟩;
-    obtain ⟨Y, hY₁, hY₂⟩ := Logic.sumQuasiNormal.iff_provable_finite_provable hX |>.mp $ Logic.iff_provable.mpr hφ₁;
-    sorry;
-  . rintro ⟨φ, hφ₁, hφ₂⟩;
+  . suffices (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.gTrace) → (n ∈ X.gTrace) by simpa [Logic.trace];
+    rintro ⟨φ, hφ₁, hφ₂⟩;
+    obtain ⟨Y, hY₁, hY₂⟩ := Logic.sumQuasiNormal.iff_provable_finite_provable hX |>.mp hφ₁;
+    apply FormulaSet.subset_gTrace_of_subset hY₁;
+    apply eq_FormulaSet_gTrace_finset_conj ▸ subset_gTrace_of_provable_imp_GL hY₂;
+    assumption;
+  . suffices (∃ φ ∈ X, n ∈ φ.gTrace) → (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.gTrace) by simpa [Logic.trace];
+    rintro ⟨φ, hφ₁, hφ₂⟩;
     use φ;
     constructor;
-    . apply Logic.iff_provable.mp;
-      apply Logic.sumQuasiNormal.mem₂!;
+    . apply Logic.sumQuasiNormal.mem₂!;
       simpa [Logic.iff_provable];
     . assumption;
-
-lemma Logic.sumQuasiNormal.with_empty [DecidableEq α] {L₁ : Logic α} [L₁.IsQuasiNormal] : L₁.sumQuasiNormal ∅ = L₁ := by
-  ext φ;
-  suffices L₁.sumQuasiNormal ∅ ⊢! φ ↔ L₁ ⊢! φ by simpa [Logic.iff_provable];
-  constructor;
-  . intro h;
-    induction h using Logic.sumQuasiNormal.rec! with
-    | mem₁ => assumption;
-    | mem₂ => simp_all;
-    | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
-    | subst ihφ => exact Logic.subst! _ ihφ;
-  . intro h;
-    exact Entailment.WeakerThan.pbl h;
 
 lemma GL.unprovable_of_exists_trace (φ_letterless : φ.letterless) : (∃ n, n ∈ φ.trace) → Modal.GL ⊬ φ := by
   contrapose!;
@@ -134,8 +235,6 @@ lemma GLα.eq_trace {α : Set ℕ} : (Modal.GLα α).trace = α := by
 lemma GLβMinus.eq_trace {β : Set ℕ} (hβ : βᶜ.Finite := by grind) : (Modal.GLβMinus β).trace = β := by
   apply Eq.trans $ GL.eq_trace_ext $ by grind;
   simp [FormulaSet.gTrace, Formula.eq_gTrace_trace_of_letterless];
-
-attribute [grind] Modal.Logic.iff_provable
 
 @[simp, grind] lemma S.provable_TBB {n : ℕ} : Modal.S ⊢! TBB n := by simp [TBB]
 
@@ -186,17 +285,6 @@ lemma subset_of_provable (h : L ⊢! φ) : φ.gTrace ⊆ L.trace := by
   use φ;
   grind;
 
-abbrev _root_.Set.Cofinite (s : Set α) := sᶜ.Finite
-abbrev _root_.Set.Coinfinite (s : Set α) := sᶜ.Infinite
-
-lemma _root_.Set.Cofinite.subset {s t : Set α} (h : s ⊆ t) : s.Cofinite → t.Cofinite := by
-  intro h;
-  apply Set.Finite.subset (s := sᶜ) h;
-  tauto_set;
-
-lemma _root_.Set.Coinfinite.subset {s t : Set α} (h : t ⊆ s) : s.Coinfinite → t.Coinfinite := by
-  contrapose!;
-  simpa using Set.Cofinite.subset h;
 
 @[grind]
 lemma Formula.gTrace.finite_or_cofinite : φ.gTrace.Finite ∨ φ.gTrace.Cofinite := by
@@ -290,219 +378,7 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
       apply hr M.finHeight φ hφ hC rfl;
     . rfl;
 
-namespace Kripke.Frame
-
-variable {F : Frame} {r : F} [Fintype F.World] [F.IsTree r]
-
-lemma eq_finHeight_root : Frame.World.finHeight x = F.finHeight ↔ x = r := by
-  constructor;
-  . rintro h;
-    contrapose! h;
-    apply Nat.ne_of_lt;
-    apply Frame.World.finHeight_lt_whole_finHeight;
-    apply F.root_genaretes'!;
-    assumption;
-  . tauto;
-
-lemma terminal_rel_finHeight {x y : F} (h : x ≺^[World.finHeight x] y) : ∀ z, ¬y ≺ z := by
-  intro z Ryz;
-  suffices World.finHeight x + 1 ≤ World.finHeight x by omega;
-  exact le_finHeight_iff_relItr.mpr ⟨z, HRel.Iterate.forward.mpr ⟨y, h, Ryz⟩⟩;
-
-lemma extendRoot.eq_original_finHeight {x : F} : Frame.World.finHeight (x : F.extendRoot 1) = Frame.World.finHeight x := by
-  apply finHeight_eq_iff_relItr.mpr;
-  constructor;
-  . obtain ⟨y, Rxy⟩ := exists_terminal (i := x);
-    use y;
-    apply extendRoot.embed_rel_iterate_embed_iff_rel.mpr;
-    exact Rxy;
-  . rintro (_ | y) Rxy (_ | z);
-    . simp;
-    . -- TODO: extract no loop lemma (x ≺^[n] i cannot happen where x is original and i is new elements by extension)
-      exfalso;
-      have : extendRoot.root ≺ (x : F.extendRoot 1) := Frame.root_genaretes'! (F := F.extendRoot 1) x (by simp);
-      have : (x : F.extendRoot 1) ≺ x :=
-        HRel.Iterate.unwrap_of_trans_of_pos (by omega) $
-        HRel.Iterate.comp (m := 1) |>.mp ⟨_, Rxy, by simpa⟩;
-      exact Frame.irrefl _ this;
-    . apply Frame.asymm;
-      exact Frame.root_genaretes'! (F := F.extendRoot 1) y (by simp);
-    . have := terminal_rel_finHeight $ extendRoot.embed_rel_iterate_embed_iff_rel.mp Rxy;
-      exact extendRoot.embed_rel_embed_iff_rel.not.mpr $ this z;
-
-lemma extendRoot.eq_original_finHeight_root : Frame.World.finHeight (r : F.extendRoot 1) = F.finHeight := eq_original_finHeight
-
-@[grind]
-lemma extendRoot.iff_eq_finHeight_eq_original_root {x : F.extendRoot 1} : Frame.World.finHeight x = F.finHeight ↔ x = r := by
-  constructor;
-  . rcases x with (a | x);
-    . intro h;
-      have := h ▸ finHeight₁ (F := F);
-      simp [Frame.finHeight] at this;
-    . intro h;
-      suffices x = r by simp [this];
-      apply Frame.eq_finHeight_root.mp;
-      exact h ▸ Frame.extendRoot.eq_original_finHeight.symm;
-  . rintro rfl;
-    exact eq_original_finHeight_root;
-
-end Kripke.Frame
-
-namespace Logic
-
-variable {L L₁ L₂ : Logic α} {φ ψ : Formula α} {s : Substitution α}
-
-inductive sumQuasiNormal' (L₁ L₂ : Logic α) : Logic α
-| mem₁ {φ} (s : Substitution _) : L₁ ⊢! φ → sumQuasiNormal' L₁ L₂ (φ⟦s⟧)
-| mem₂ {φ} (s : Substitution _) : L₂ ⊢! φ → sumQuasiNormal' L₁ L₂ (φ⟦s⟧)
-| mdp {φ ψ : Formula α} : sumQuasiNormal' L₁ L₂ (φ ➝ ψ) → sumQuasiNormal' L₁ L₂ φ → sumQuasiNormal' L₁ L₂ ψ
-
-namespace sumQuasiNormal'
-
-@[grind]
-lemma mem₁! (h : L₁ ⊢! φ) : sumQuasiNormal' L₁ L₂ ⊢! (φ⟦s⟧) := by
-  apply iff_provable.mpr;
-  apply sumQuasiNormal'.mem₁ _ h;
-
-@[grind]
-lemma mem₁!_nosub (h : L₁ ⊢! φ) : sumQuasiNormal' L₁ L₂ ⊢! φ := by
-  simpa using mem₁! (s := Substitution.id) h;
-
-@[grind]
-lemma mem₂! (h : L₂ ⊢! φ) : sumQuasiNormal' L₁ L₂ ⊢! (φ⟦s⟧) := by
-  apply iff_provable.mpr;
-  apply sumQuasiNormal'.mem₂ _ h;
-
-@[grind]
-lemma mem₂!_nosub (h : L₂ ⊢! φ) : sumQuasiNormal' L₁ L₂ ⊢! φ := by
-  simpa using mem₂! (s := Substitution.id) h;
-
-instance : Entailment.ModusPonens (sumQuasiNormal' L₁ L₂) where
-  mdp := by rintro φ ψ ⟨hφψ⟩ ⟨hφ⟩; exact ⟨sumQuasiNormal'.mdp hφψ hφ⟩;
-
-lemma rec!
-  {motive : (φ : Formula α) → ((sumQuasiNormal' L₁ L₂) ⊢! φ) → Sort}
-  (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢! φ) → motive (φ⟦s⟧) (mem₁! h))
-  (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢! φ) → motive (φ⟦s⟧) (mem₂! h))
-  (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal' L₁ L₂) ⊢! (φ ➝ ψ)} → {hφ : (sumQuasiNormal' L₁ L₂) ⊢! φ} →
-          motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
-  )
-  : ∀ {φ}, (h : sumQuasiNormal' L₁ L₂ ⊢! φ) → motive φ h := by
-  intro φ hφ;
-  induction (iff_provable.mp $ hφ) with
-  | mdp hφψ hφ ihφψ ihφ =>
-    apply mdp;
-    . apply ihφψ;
-    . apply ihφ;
-    . apply iff_provable.mpr; assumption;
-    . apply iff_provable.mpr; assumption;
-  | _ => grind;
-
-instance : (sumQuasiNormal' L₁ L₂).Substitution where
-  subst s := by
-    rintro ⟨hφ⟩;
-    constructor;
-    induction hφ with
-    | mem₁ s' h => simpa using mem₁ (s := s' ∘ s) h
-    | mem₂ s' h => simpa using mem₂ (s := s' ∘ s) h
-    | mdp _ _ ihφψ ihφ => exact mdp ihφψ ihφ
-
-end sumQuasiNormal'
-
-
-attribute [grind] Logic.sumQuasiNormal.mem₁! Logic.sumQuasiNormal.mem₂!
-
-lemma eq_sumQuasiNormal_sumQuasiNormal' : Logic.sumQuasiNormal L₁ L₂ = Logic.sumQuasiNormal' L₁ L₂ := by
-  ext φ;
-  suffices (Logic.sumQuasiNormal L₁ L₂ ⊢! φ) ↔ (Logic.sumQuasiNormal' L₁ L₂ ⊢! φ) by grind;
-  constructor;
-  . intro h;
-    induction h using Logic.sumQuasiNormal.rec! with
-    | @subst ψ s _ ihφ => exact subst! _ ihφ;
-    | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
-    | _ => grind;
-  . intro h;
-    induction h using Logic.sumQuasiNormal'.rec! with
-    | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
-    | _ => apply subst!; grind;
-
-@[grind]
-lemma iff_provable_sumQuasiNormal'_provable_sumQuasiNormal : (sumQuasiNormal' L₁ L₂ ⊢! φ) ↔ (sumQuasiNormal L₁ L₂ ⊢! φ) := by
-  rw [eq_sumQuasiNormal_sumQuasiNormal'];
-
-lemma sumQuasiNormal.rec!_omitSubst
-  {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢! φ) → Sort}
-  (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢! φ) → motive (φ⟦s⟧) (subst! s $ mem₁! h))
-  (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢! φ) → motive (φ⟦s⟧) (subst! s $ mem₂! h))
-  (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal L₁ L₂) ⊢! (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢! φ} →
-           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
-  )
-  : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢! φ) → motive φ h := by
-  intro φ hφ;
-  induction (iff_provable_sumQuasiNormal'_provable_sumQuasiNormal.mpr hφ) using Logic.sumQuasiNormal'.rec! with
-  | mem₁ s h => grind;
-  | mem₂ s h => grind;
-  | @mdp _ _ hφψ hφ ihφψ ihφ => exact mdp (ihφψ $ by grind) (ihφ $ by grind);
-
-attribute [grind] Logic.subst!
-
-@[grind]
-def substitution_of_letterless (L_letterless : FormulaSet.letterless L) : L.Substitution where
-  subst s := by
-    rintro ⟨hφ⟩;
-    constructor;
-    simpa [Formula.subst.subst_letterless (s := s) $ L_letterless _ hφ];
-
-lemma sumQuasiNormal.rec!_omitSubst₁ (hL₁ : L₁.Substitution)
-  {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢! φ) → Sort}
-  (mem₁  : ∀ {φ}, (h : L₁ ⊢! φ) → motive φ (mem₁! h))
-  (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢! φ) → motive (φ⟦s⟧) (subst! s $ mem₂! h))
-  (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal L₁ L₂) ⊢! (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢! φ} →
-           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
-  )
-  : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢! φ) → motive φ h := by
-  apply sumQuasiNormal.rec!_omitSubst;
-  . intro φ s h;
-    apply mem₁;
-    grind;
-  . assumption;
-  . assumption;
-
-lemma sumQuasiNormal.rec!_omitSubst₂ (hL₂ : L₂.Substitution)
-  {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢! φ) → Sort}
-  (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢! φ) → motive (φ⟦s⟧) (subst! s $ mem₁! h))
-  (mem₂  : ∀ {φ}, (h : L₂ ⊢! φ) → motive φ (mem₂! h))
-  (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal L₁ L₂) ⊢! (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢! φ} →
-           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
-  )
-  : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢! φ) → motive φ h := by
-  simp_all only [Logic.sumQuasiNormal.symm (L₁ := L₁) (L₂ := L₂)]
-  apply sumQuasiNormal.rec!_omitSubst₁ <;> assumption;
-
-lemma sumQuasiNormal.rec!_omitSubst_strong (hL₁ : L₁.Substitution) (hL₂ : L₂.Substitution)
-  {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢! φ) → Sort}
-  (mem₁  : ∀ {φ}, (h : L₁ ⊢! φ) → motive φ (mem₁! h))
-  (mem₂  : ∀ {φ}, (h : L₂ ⊢! φ) → motive φ (mem₂! h))
-  (mdp   : ∀ {φ ψ : Formula α},
-           {hφψ : (sumQuasiNormal L₁ L₂) ⊢! (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢! φ} →
-           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
-  )
-  : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢! φ) → motive φ h := by
-  apply sumQuasiNormal.rec!_omitSubst;
-  . intro φ h _; apply mem₁; grind;
-  . intro φ h _; apply mem₂; grind;
-  . assumption;
-
-end Logic
-
-
 protected abbrev GLαOmega := Modal.GLα Set.univ
-
-@[grind] lemma _root_.Set.univ_cofinite : (Set.univ (α := α))ᶜ.Finite := by simp;
 
 @[simp]
 lemma eq_GLβMinusOmega : Modal.GLβMinus Set.univ = Set.univ := by
@@ -617,7 +493,6 @@ lemma _root_.Set.iff_cofinite_not_coinfinite {s : Set α} : s.Cofinite ↔ ¬s.C
   dsimp [Set.Cofinite, Set.Coinfinite];
   simp;
 
-open Classical
 lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U ⊢! ∼⩕ i ∈ (cofinite_of_not_subset_S h).toFinset, TBB i := by
   have : 𝗜𝚺₁ ⪯ U := WeakerThan.trans (𝓣 := T) inferInstance inferInstance;
 
