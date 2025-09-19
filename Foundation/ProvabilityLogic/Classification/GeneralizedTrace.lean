@@ -684,7 +684,7 @@ theorem eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).
       apply provable_TBB_of_mem_trace;
       simp_all only [Set.mem_iUnion, exists_prop];
       use A;
-    | mdp ihAB ihA => exact ProvabilityLogic.mdp ihAB ihA;
+    | mdp ihAB ihA => exact ihAB ⨀ ihA;
 
 @[grind]
 lemma cofinite_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : (T.ProvabilityLogic U).trace.Cofinite := by
@@ -797,7 +797,7 @@ theorem eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic
         subst hA;
         exact this;
       exact provable_TBBMinus_of_mem_trace h;
-    | mdp ihAB ihA => exact ProvabilityLogic.mdp ihAB ihA;
+    | mdp ihAB ihA => exact ihAB ⨀ ihA;
 
 end ProvabilityLogic
 
