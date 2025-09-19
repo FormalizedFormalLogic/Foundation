@@ -18,6 +18,8 @@ macro_rules
 
 def isEmpty : Semisentence ℒₛₑₜ 1 := “x. ∀ y, y ∉ x”
 
+def isNonempty : Semisentence ℒₛₑₜ 1 := “x. ∃ y, y ∈ x”
+
 def isSucc : Semisentence ℒₛₑₜ 2 := “y x. ∀ z, z ∈ y ↔ z ∈ x ∨ z = x”
 
 namespace Axiom
@@ -34,7 +36,7 @@ def power : Sentence ℒₛₑₜ := “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x
 
 def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x x', !isSucc x' x ∧ x ∈ I → x' ∈ I)”
 
-def foundation : Sentence ℒₛₑₜ := “∀ x, ¬!isEmpty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
+def foundation : Sentence ℒₛₑₜ := “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
 
 def separationSchema (φ : SyntacticSemiformula ℒₛₑₜ 1) : Sentence ℒₛₑₜ :=
   ∀∀₀ “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ∈ x ∧ !φ z”
@@ -43,7 +45,7 @@ def replacementSchema (φ : SyntacticSemiformula ℒₛₑₜ 2) : Sentence ℒ�
   ∀∀₀ “(∀ x, ∃! y, !φ x y) → ∀ X, ∃ Y, ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
 
 def choice : Sentence ℒₛₑₜ :=
-  “∀ x, (∀ y ∈ x, ¬!isEmpty y) ∧ (∀ y ∈ x, ∀ z ∈ x, y ≠ z → ¬∃ w, w ∈ y ∧ w ∈ z) → ∃ c, ∀ y ∈ x, ∃ u ∈ c, u ∈ y”
+  “∀ x, (∀ y ∈ x, !isNonempty y) ∧ (∀ y ∈ x, ∀ z ∈ x, y ≠ z → ¬∃ w, w ∈ y ∧ w ∈ z) → ∃ c, ∀ y ∈ x, ∃ u ∈ c, u ∈ y”
 
 end Axiom
 
