@@ -299,8 +299,15 @@ lemma Formula.gTrace.finite_of_coinfinite (h_ci : φ.gTrace.Coinfinite) : φ.gTr
     exact h_cf;
 
 @[simp]
-lemma TBB_injective : Function.Injective TBB := by sorry;
-
+lemma TBB_injective : Function.Injective TBB := by
+  rintro i j;
+  suffices □^[i]⊥ = □^[j]⊥ → i = j by simpa;
+  wlog hij : i < j;
+  . rcases (show i = j ∨ i > j by omega) with h | h
+    . tauto;
+    . have := @this j i; grind;
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_lt hij;
+  simp [show ((i + k) + 1) = i + (k + 1) by omega, ←(Box.add (n := i) (m := (k + 1)))];
 
 lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GLα L.trace := by
   intro φ hφ;
@@ -314,7 +321,7 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
 
   apply Logic.sumQuasiNormal.iff_provable_finite_provable_letterless ?_ |>.mpr ⟨(Tφ.image TBB), ?_, ?_⟩;
   . grind;
-  . simpa [Tφ, Set.preimage_image_eq L.trace TBB_injective];
+  . simpa [Tφ]
   . apply GL.Kripke.tree_completeness_TFAE.out 3 0 |>.mp;
     intro M r _ hr;
     have : Fintype M.World := Fintype.ofFinite _;
