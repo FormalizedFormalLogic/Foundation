@@ -183,6 +183,7 @@ import Foundation.ProvabilityLogic.Grz.Completeness
 import Foundation.ProvabilityLogic.S.Completeness
 
 import Foundation.ProvabilityLogic.Classification.LetterlessTrace
+import Foundation.ProvabilityLogic.Classification.GeneralizedTrace
 
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit

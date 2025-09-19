@@ -24,9 +24,7 @@ lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization 𝔅} : U
     . exact FLT_shift;
   | nec ihp => exact D1_shift ihp;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
-  | imply₁ => exact imply₁!;
-  | imply₂ => exact imply₂!;
-  | ec => exact CCCOCOC!;
+  | _ => dsimp [Realization.interpret]; cl_prover;
 
 open Classical
 

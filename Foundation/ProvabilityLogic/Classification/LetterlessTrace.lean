@@ -347,7 +347,7 @@ end Formula
 
 namespace FormulaSet
 
-abbrev letterless (X : Modal.FormulaSet ℕ) := ∀ φ ∈ X, φ.letterless
+abbrev letterless (X : Modal.FormulaSet α) := ∀ φ ∈ X, φ.letterless
 
 protected def Regular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet ℕ) := ∀ φ ∈ X, φ.Regular T
 
@@ -372,7 +372,11 @@ lemma iff_eq_spectrum_eq_trace : X.spectrum = Y.spectrum ↔ X.trace = Y.trace :
 
 end FormulaSet
 
-
+lemma Logic.sumQuasiNormal.iff_provable_finite_provable_letterless [DecidableEq α] {L₁ L₂ : Logic α} {φ : Formula _} [L₁.IsQuasiNormal] (L₂_letterless : FormulaSet.letterless L₂)
+  : sumQuasiNormal L₁ L₂ ⊢! φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := by
+  apply iff_provable_finite_provable;
+  rintro ξ hξ s;
+  simpa [Formula.subst.subst_letterless (L₂_letterless _ hξ)];
 
 lemma boxbot_spectrum : (□^[n]⊥ : Formula ℕ).spectrum = { i | i < n } := by
   induction n with
@@ -521,6 +525,11 @@ lemma iff_satisfies_mem_finHeight_spectrum
       _      ↔ Frame.World.finHeight w ∈ (□φ).spectrum := by
         rw [Formula.spectrum.def_box]; simp;
 
+lemma iff_satisfies_TBB_ne_finHeight
+  {M : Model} {r : M} [Fintype M] [M.IsTree r] {w : M} {n : ℕ}
+  : w ⊧ TBB n ↔ Frame.World.finHeight w ≠ n := by
+  apply Iff.trans iff_satisfies_mem_finHeight_spectrum;
+  simp;
 
 abbrev Frame.finiteLinear (n : ℕ) : Kripke.Frame where
   World := Fin (n + 1)
@@ -760,13 +769,7 @@ open Classical LO.Entailment in
 lemma GL.iff_provable_closed_sumQuasiNormal_subset_spectrum (hSR : X.Singular T ∨ φ.Regular T)
   : Modal.GL.sumQuasiNormal X ⊢! φ ↔ X.spectrum ⊆ φ.spectrum := by
   calc
-    _ ↔ ∃ Y, (∀ ψ ∈ Y, ψ ∈ X) ∧ Modal.GL ⊢! Finset.conj Y ➝ φ := Logic.sumQuasiNormal.iff_provable_finite_provable $ by
-      rintro Y hY s ψ;
-      suffices ∀ ξ ∈ Y, ξ⟦s⟧ = ψ → ψ ∈ X by simpa;
-      rintro ξ hξ rfl;
-      rw [Formula.subst.subst_letterless (X_letterless _ $ hY hξ)];
-      apply hY;
-      simpa;
+    _ ↔ ∃ Y, (∀ ψ ∈ Y, ψ ∈ X) ∧ Modal.GL ⊢! Finset.conj Y ➝ φ := Logic.sumQuasiNormal.iff_provable_finite_provable_letterless X_letterless
     _ ↔ ∃ Y : Finset (Formula ℕ), ∃ _ : ∀ ψ ∈ Y, ψ ∈ X, (Finset.conj Y).spectrum (Formula.letterless.of_fconj (by grind)) ⊆ φ.spectrum := by
       constructor;
       . rintro ⟨Y, _, hY₂⟩;
