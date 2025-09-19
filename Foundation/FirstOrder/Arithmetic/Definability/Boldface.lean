@@ -2,23 +2,7 @@ import Foundation.FirstOrder.Arithmetic.Definability.Hierarchy
 import Foundation.FirstOrder.Arithmetic.BoundedQuantifier
 import Foundation.Vorspiel.Graph
 
-namespace LO.FirstOrder.Arithmetic
-
-end Arithmetic
-
-def Defined {k} (R : (Fin k → V) → Prop) [Structure L V] (φ : Semisentence L k) : Prop :=
-  ∀ v, R v ↔ Semiformula.Evalbm V v φ
-
-def DefinedWithParam {k} (R : (Fin k → V) → Prop) [Structure L V] (φ : Semiformula L V k) : Prop :=
-  ∀ v, R v ↔ Semiformula.Evalm V v id φ
-
-lemma Defined.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {φ : Semisentence L k} (h : Defined R φ) (v) :
-    Semiformula.Evalbm V v φ ↔ R v := (h v).symm
-
-lemma DefinedWithParam.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {φ : Semiformula L V k} (h : DefinedWithParam R φ) (v) :
-    Semiformula.Evalm V v id φ ↔ R v := (h v).symm
-
-namespace Arithmetic.HierarchySymbol
+namespace LO.FirstOrder.Arithmetic.HierarchySymbol
 
 variable (ξ : Type*) (n : ℕ)
 
@@ -968,6 +952,4 @@ end Boldface
 
 end
 
-end Arithmetic.HierarchySymbol
-
-end LO.FirstOrder
+end LO.FirstOrder.Arithmetic.HierarchySymbol

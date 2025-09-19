@@ -81,6 +81,9 @@ import Foundation.FirstOrder.Incompleteness.Tarski
 import Foundation.FirstOrder.Incompleteness.Yablo
 
 import Foundation.FirstOrder.SetTheory.Basic
+import Foundation.FirstOrder.SetTheory.Axioms
+
+import Foundation.FirstOrder.Z.Basic
 
 import Foundation.FirstOrder.ZF.Basic
 
