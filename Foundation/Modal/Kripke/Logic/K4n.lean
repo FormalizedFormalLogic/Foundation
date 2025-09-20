@@ -1,5 +1,6 @@
 import Foundation.Modal.Kripke.AxiomFourN
 import Foundation.Modal.Kripke.Hilbert
+import Foundation.Modal.Kripke.Logic.KTc
 
 namespace LO.Modal
 
@@ -171,6 +172,7 @@ end K4n
 
 end Hilbert
 
+@[grind]
 lemma K4n.strictlyWeakerThan_of_le (hnm : n < m) : Modal.K4n m ⪱ Modal.K4n n := by
   have := Hilbert.K4n.strictlyWeakerThan_of_lt hnm;
   grind;
@@ -188,7 +190,10 @@ instance : Infinite { L : Logic ℕ // Entailment.Consistent L } := Infinite.of_
   apply K4n.not_equiv;
   assumption;
 
-lemma eq_K4_K4n_one : Modal.K4n 1 = Modal.K4 := rfl
-instance : Modal.K4n 1 ≊ Modal.K4 := by simp [eq_K4_K4n_one]
+instance : Modal.K4n 0 ≊ Modal.KTc := by simp [show Modal.K4n 0 = Modal.KTc by rfl];
+instance : Modal.K4n 1 ≊ Modal.K4 := by simp [show Modal.K4n 1 = Modal.K4 by rfl];
+
+instance : Modal.K4n 1 ⪱ Modal.K4n 0 := by grind;
+instance : Modal.K4n 2 ⪱ Modal.K4n 1 := by grind;
 
 end LO.Modal
