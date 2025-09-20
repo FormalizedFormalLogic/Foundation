@@ -800,6 +800,7 @@ protected class Ver extends Entailment.K 𝓢, HasAxiomVer 𝓢
 protected class KMcK extends Entailment.K 𝓢, HasAxiomMcK 𝓢
 
 protected class K4 extends Entailment.K 𝓢, HasAxiomFour 𝓢
+protected class K4n (n) (𝓢 : S) extends Entailment.K 𝓢, HasAxiomFourN n 𝓢
 protected class K4McK extends Entailment.K4 𝓢, HasAxiomMcK 𝓢
 protected class K4Point2 extends Entailment.K4 𝓢, HasAxiomWeakPoint2 𝓢
 protected class K4Point3 extends Entailment.K4 𝓢, HasAxiomWeakPoint3 𝓢

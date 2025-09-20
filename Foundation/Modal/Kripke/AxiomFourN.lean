@@ -38,7 +38,7 @@ end Frame
 
 variable {F : Kripke.Frame} {n : ℕ+}
 
-lemma validate_AxiomFourN_of_weakTransitive [F.IsWeakTransitive n] : F ⊧ (Axioms.FourN n (.atom 0)) := validate_axiomGeach_of_isGeachConvergent (g := ⟨0, n + 1, n, 0⟩)
+lemma validate_AxiomFourN_of_weakTransitive [weakTrans : F.IsWeakTransitive n] : F ⊧ (Axioms.FourN n (.atom 0)) := validate_axiomGeach_of_isGeachConvergent (g := ⟨0, n + 1, n, 0⟩)
 
 namespace Canonical
 
