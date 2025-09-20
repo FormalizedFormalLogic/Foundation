@@ -1,5 +1,5 @@
 import Foundation.FirstOrder.PeanoMinus.Basic
-import Foundation.FirstOrder.Arith.Definability
+import Foundation.FirstOrder.Arithmetic.Definability
 import Mathlib.Algebra.GroupWithZero.Divisibility
 import Mathlib.Algebra.Prime.Lemmas
 
@@ -12,9 +12,9 @@ This file provides functions and relations defined in $\mathsf{PA^-}
 
 namespace LO.PeanoMinus
 
-open FirstOrder Arith
+open FirstOrder Arithmetic
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐏𝐀⁻]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗣𝗔⁻]
 
 variable {a b c : V}
 
@@ -42,17 +42,17 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
 
 @[simp] lemma sub_le_self (a b : V) : a - b ≤ a := by
   have : b ≤ a ∨ a < b := le_or_gt b a
-  rcases this with (hxy | hxy) <;> simp [hxy]
+  rcases this with (hxy | hxy) <;> simp
   · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
   · simp [sub_spec_of_lt hxy]
 
-open FirstOrder.Arith.HierarchySymbol.Boldface
+open FirstOrder.Arithmetic.HierarchySymbol.Boldface
 
-def _root_.LO.FirstOrder.Arith.subDef : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
+def _root_.LO.FirstOrder.Arithmetic.subDef : 𝚺₀.Semisentence 3 :=
+  .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)”
 
 lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef := by
-  intro v; simp [FirstOrder.Arith.subDef, sub_eq_iff]
+  intro v; simp [FirstOrder.Arithmetic.subDef, sub_eq_iff]
 
 @[simp] lemma sub_defined_iff (v) :
     Semiformula.Evalbm V v subDef.val ↔ v 0 = v 1 - v 2 := sub_defined.df.iff v
@@ -176,12 +176,12 @@ lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
     · rintro ⟨c, rfl⟩; exact ⟨c, le_mul_self_of_pos_left (pos_iff_ne_zero.mpr hx), rfl⟩
     · rintro ⟨c, hz, rfl⟩; exact dvd_mul_right a c
 
-def _root_.LO.FirstOrder.Arith.dvd : 𝚺₀.Semisentence 2 :=
-  .mkSigma “x y. ∃ z <⁺ y, y = x * z” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.dvd : 𝚺₀.Semisentence 2 :=
+  .mkSigma “x y. ∃ z <⁺ y, y = x * z”
 
 lemma dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd :=
   fun v ↦ by
-    simp [dvd_iff_bounded, Matrix.vecHead, Matrix.vecTail, dvd]
+    simp [dvd_iff_bounded, dvd]
 
 @[simp] lemma dvd_defined_iff (v) :
     Semiformula.Evalbm V v dvd.val ↔ v 0 ∣ v 1 := dvd_defined.df.iff v
@@ -239,12 +239,12 @@ lemma eq_one_or_eq_of_dvd_of_prime {p a : V} (pp : Prime p) (hxp : a ∣ p) : a 
 def IsPrime (a : V) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 -- TODO: prove IsPrime a ↔ Prime a
 
-def _root_.LO.FirstOrder.Arith.isPrime : 𝚺₀.Semisentence 1 :=
-  .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x” (by simp [Hierarchy.pi_zero_iff_sigma_zero])
+def _root_.LO.FirstOrder.Arithmetic.isPrime : 𝚺₀.Semisentence 1 :=
+  .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x”
 
 lemma isPrime_defined : 𝚺₀-Predicate (λ a : V ↦ IsPrime a) via isPrime := by
   intro v
-  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.vecHead, Matrix.constant_eq_singleton,
+  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton,
     IsPrime, isPrime]
 
 end Prime
@@ -253,12 +253,12 @@ end Prime
 
 section min
 
-def _root_.LO.FirstOrder.Arith.min : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y. (x ≤ y → z = x) ∧ (x ≥ y → z = y)” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.min : 𝚺₀.Semisentence 3 :=
+  .mkSigma “z x y. (x ≤ y → z = x) ∧ (x ≥ y → z = y)”
 
 set_option linter.flexible false in
 lemma min_defined : 𝚺₀-Function₂ (min : V → V → V) via min := by
-  intro v; simp [FirstOrder.Arith.min]
+  intro v; simp [FirstOrder.Arithmetic.min]
   rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
   · intro h₀₁ h₂₁
     exact le_antisymm (by simpa [h₀₁] using h) (by simpa [h₀₁] using h₂₁)
@@ -278,12 +278,12 @@ end min
 
 section max
 
-def _root_.LO.FirstOrder.Arith.max : 𝚺₀.Semisentence 3 :=
-  .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.max : 𝚺₀.Semisentence 3 :=
+  .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)”
 
 set_option linter.flexible false in
 lemma max_defined : 𝚺₀-Function₂ (max : V → V → V) via max := by
-  intro v; simp [Arith.max]
+  intro v; simp [Arithmetic.max]
   rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
   · intro h₀₂ h₂₁
     exact le_antisymm (by simpa [h₀₂] using h₂₁) (by simpa [h₀₂] using h)

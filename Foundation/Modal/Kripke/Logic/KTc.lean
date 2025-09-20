@@ -23,42 +23,40 @@ end Kripke
 
 
 
-namespace Logic.KTc.Kripke
+namespace Hilbert.KTc.Kripke
 
-instance sound : Sound (Logic.KTc) Kripke.FrameClass.KTc := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F F_corefl _ rfl;
+instance : Sound (Hilbert.KTc) Kripke.FrameClass.KTc := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_corefl;
   exact Kripke.validate_AxiomTc_of_coreflexive (corefl := F_corefl);
 
-instance consistent : Entailment.Consistent (Logic.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.KTc $ by
+instance : Entailment.Consistent (Hilbert.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.KTc $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance canonical : Canonical (Logic.KTc) Kripke.FrameClass.KTc := ⟨by
+instance : Canonical (Hilbert.KTc) Kripke.FrameClass.KTc := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Logic.KTc) Kripke.FrameClass.KTc := inferInstance
+instance : Complete (Hilbert.KTc) Kripke.FrameClass.KTc := inferInstance
 
-lemma corefl : Logic.KTc = Kripke.FrameClass.KTc.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.KB4 ⪱ Logic.KTc := by
+instance : Hilbert.KB4 ⪱ Hilbert.KTc := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.IsKB4 ⊧ φ → FrameClass.KTc ⊧ φ by
-      simpa [KB4.Kripke.refl_trans, KTc.Kripke.corefl];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.KB4 FrameClass.KTc;
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.KTc ⊢! φ ∧ ¬FrameClass.IsKB4 ⊧ φ by simpa [KB4.Kripke.refl_trans];
     use (Axioms.Tc (.atom 0));
     constructor;
-    . exact axiomTc!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KB4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -72,6 +70,8 @@ instance : Logic.KB4 ⪱ Logic.KTc := by
         use 1;
         aesop;
 
-end Logic.KTc.Kripke
+end Hilbert.KTc.Kripke
+
+instance : Modal.KB4 ⪱ Modal.KTc := inferInstance
 
 end LO.Modal

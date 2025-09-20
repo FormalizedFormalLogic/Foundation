@@ -1,5 +1,5 @@
 import Foundation.Logic.LogicSymbol
-import Foundation.Vorspiel.Collection
+import Foundation.Vorspiel.AdjunctiveSet
 
 namespace LO.Propositional
 
@@ -192,7 +192,7 @@ end NNFormula
 
 abbrev Theory (α : Type*) := Set (NNFormula α)
 
-instance : Collection (NNFormula α) (Theory α) := inferInstance
+instance : AdjunctiveSet (NNFormula α) (Theory α) := inferInstance
 
 
 end LO.Propositional

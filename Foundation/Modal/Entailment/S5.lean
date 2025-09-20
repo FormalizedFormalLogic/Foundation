@@ -32,4 +32,9 @@ def rm_diabox : 𝓢 ⊢ ◇□φ ➝ φ := C_trans diabox_box axiomT
 def rm_diabox' (h : 𝓢 ⊢ ◇□φ) : 𝓢 ⊢ φ := rm_diabox ⨀ h
 lemma rm_diabox'! (h : 𝓢 ⊢! ◇□φ) : 𝓢 ⊢! φ := ⟨rm_diabox' h.some⟩
 
+
+def lem₁_diaT_of_S5Grz : 𝓢 ⊢ (∼□(∼φ) ➝ ∼□(∼□φ)) ➝ (◇φ ➝ ◇□φ) := C_trans (CCC_of_C_left diaDuality_mp) (CCC_of_C_right diaDuality_mpr)
+
+def lem₂_diaT_of_S5Grz : 𝓢 ⊢ (◇φ ➝ ◇□φ) ➝ (◇φ ➝ φ) := CCC_of_C_right rm_diabox
+
 end LO.Modal.Entailment

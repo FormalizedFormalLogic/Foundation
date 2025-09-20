@@ -44,7 +44,7 @@ lemma iff_subst_self (s) :
   ((λ a => val v ((.atom a)⟦s⟧)) : Valuation α) ⊧ φ ↔ v ⊧ (φ⟦s⟧) := by
   induction φ with
   | hatom a => simp [val, models_iff_val];
-  | hfalsum => simp [val];
+  | hfalsum => simp;
   | himp φ ψ ihφ ihψ =>
     constructor;
     . intro hφψ hφ;

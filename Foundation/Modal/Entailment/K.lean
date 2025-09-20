@@ -90,6 +90,7 @@ def multiboxverum : 𝓢 ⊢ (□^[n]⊤ : F) := multinec verum
 
 def boxverum : 𝓢 ⊢ (□⊤ : F) := multiboxverum (n := 1)
 @[simp] lemma boxverum! : 𝓢 ⊢! (□⊤ : F) := ⟨boxverum⟩
+instance : Entailment.HasAxiomN 𝓢 := ⟨boxverum⟩
 
 def boxdotverum : 𝓢 ⊢ (⊡⊤ : F) := K_intro verum boxverum
 @[simp] lemma boxdotverum! : 𝓢 ⊢! (⊡⊤ : F) := ⟨boxdotverum⟩
@@ -108,6 +109,8 @@ def collect_multibox_and : 𝓢 ⊢ □^[n]φ ⋏ □^[n]ψ ➝ □^[n](φ ⋏ �
 
 def collect_box_and : 𝓢 ⊢ □φ ⋏ □ψ ➝ □(φ ⋏ ψ) := collect_multibox_and (n := 1)
 @[simp] lemma collect_box_and! : 𝓢 ⊢! □φ ⋏ □ψ ➝ □(φ ⋏ ψ) := ⟨collect_box_and⟩
+
+instance : Entailment.HasAxiomC 𝓢 := ⟨λ _ _ => collect_box_and⟩
 
 def collect_multibox_and' (h : 𝓢 ⊢ □^[n]φ ⋏ □^[n]ψ) : 𝓢 ⊢ □^[n](φ ⋏ ψ) := collect_multibox_and ⨀ h
 lemma collect_multibox_and'! (h : 𝓢 ⊢! □^[n]φ ⋏ □^[n]ψ) : 𝓢 ⊢! □^[n](φ ⋏ ψ) := ⟨collect_multibox_and' h.some⟩
@@ -272,6 +275,8 @@ lemma distribute_multibox_and'! (d : 𝓢 ⊢! □^[n](φ ⋏ ψ)) : 𝓢 ⊢! �
 def distribute_box_and' (h : 𝓢 ⊢ □(φ ⋏ ψ)) : 𝓢 ⊢ □φ ⋏ □ψ := distribute_multibox_and' (n := 1) h
 lemma distribute_box_and'! (d : 𝓢 ⊢! □(φ ⋏ ψ)) : 𝓢 ⊢! □φ ⋏ □ψ := ⟨distribute_box_and' d.some⟩
 
+instance : Entailment.HasAxiomM 𝓢 := ⟨λ _ _ => distribute_box_and⟩
+
 
 def boxdotAxiomK : 𝓢 ⊢ ⊡(φ ➝ ψ) ➝ (⊡φ ➝ ⊡ψ) := by
   apply deduct';
@@ -304,7 +309,7 @@ lemma distribute_multibox_conj! : 𝓢 ⊢! □^[n]⋀Γ ➝ ⋀(Γ.multibox n) 
   | hnil => simp;
   | hsingle => simp;
   | hcons φ Γ h ih =>
-    simp only [ne_eq, not_false_eq_true, List.conj₂_cons_nonempty h];
+    simp only [List.conj₂_cons_nonempty h];
     have h₁ : 𝓢 ⊢! □^[n](φ ⋏ ⋀Γ) ➝ □^[n]φ := imply_multibox_distribute'! $ and₁!;
     have h₂ : 𝓢 ⊢! □^[n](φ ⋏ ⋀Γ) ➝ ⋀(Γ.multibox n) := C!_trans (imply_multibox_distribute'! $ and₂!) ih;
     have := right_K!_intro h₁ h₂;
@@ -517,6 +522,10 @@ lemma box_congruence! (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □φ ⭤ □ψ := b
   . apply box_regularity!; exact C_of_E_mp! h;
   . apply box_regularity!; exact C_of_E_mpr! h;
 
+-- TODO
+noncomputable instance : Entailment.RE 𝓢 where
+  re a := box_congruence! ⟨a⟩ |>.some
+
 -- TODO: move
 omit [DecidableEq F] in
 lemma E!_replace (h₁ : 𝓢 ⊢! φ₁ ⭤ ψ₁) (h₂ : 𝓢 ⊢! φ₂ ⭤ ψ₂) (h₃ : 𝓢 ⊢! φ₁ ⭤ φ₂) : 𝓢 ⊢! ψ₁ ⭤ ψ₂ := by
@@ -615,6 +624,89 @@ lemma lemma_Grz₁! : 𝓢 ⊢! (□φ ➝ □(□((φ ⋏ (□φ ➝ □□φ))
 end
 
 
+section Boxlt
+
+variable {n m : ℕ}
+
+lemma boxlt_lt_succ! : 𝓢 ⊢! (□^≤[n + 1] φ) ➝ (□^≤[n] φ) := by
+  apply CFconjFconj!_of_provable;
+  intro ψ hψ;
+  simp only [Finset.mem_image, Finset.mem_range] at hψ;
+  obtain ⟨i, hi, rfl⟩ := hψ;
+  apply Context.by_axm!
+  simp only [Finset.coe_image, Finset.coe_range, Set.mem_image, Set.mem_Iio];
+  use i;
+  constructor;
+  . omega;
+  . simp;
+
+lemma boxlt_lt_add! : 𝓢 ⊢! (□^≤[n + m] φ) ➝ (□^≤[n] φ) := by
+  induction m with
+  | zero => simp;
+  | succ m ih =>
+    rw [(show n + (m + 1) = n + m + 1 by rfl)];
+    apply C!_trans boxlt_lt_succ! ih;
+
+lemma boxlt_lt! (h : n ≥ m) : 𝓢 ⊢! (□^≤[n] φ) ➝ (□^≤[m] φ) := by
+  convert boxlt_lt_add! (𝓢 := 𝓢) (n := m) (m := n - m) (φ := φ);
+  omega;
+
+lemma E_boxlt_succ! : 𝓢 ⊢! (□^≤[n + 1] φ) ⭤ (□^≤[n] φ) ⋏ (□^[(n + 1)] φ) := by
+  apply E!_intro;
+  . apply FConj_DT.mpr;
+    apply K!_intro;
+    . apply FConj_DT.mp;
+      apply boxlt_lt!;
+      omega;
+    . apply Context.by_axm!;
+      simp only [Finset.coe_image, Finset.coe_range, Box.multibox_succ, Set.mem_image, Set.mem_Iio];
+      use n + 1;
+      constructor;
+      . omega;
+      . simp;
+  . suffices 𝓢 ⊢! (□^≤[n]φ) ⋏ (Finset.conj {(□^[(n + 1)]φ)}) ➝ (□^≤[n + 1]φ) by simpa using this;
+    convert CKFconjFconjUnion! (𝓢 := 𝓢) (Γ := Finset.range (n + 1) |>.image (λ i => □^[i] φ)) (Δ := {(□^[(n + 1)]φ)});
+    ext ψ;
+    simp only [Finset.mem_image, Finset.mem_range, Box.multibox_succ, Finset.mem_union, Finset.mem_singleton];
+    constructor;
+    . rintro ⟨k, hk, rfl⟩;
+      by_cases ha : k = n + 1;
+      . right;
+        subst ha;
+        simp;
+      . left;
+        use k;
+        constructor;
+        . omega;
+        . simp;
+    . rintro (⟨k, hk, rfl⟩ | rfl);
+      . use k;
+        constructor;
+        . omega;
+        . simp;
+      . use (n + 1);
+        constructor;
+        . omega;
+        . simp;
+
+lemma boxlt_regularity! (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! (□^≤[n] φ) ➝ (□^≤[n] ψ) := by
+  induction n with
+  | zero => simpa;
+  | succ n ih =>
+    suffices 𝓢 ⊢! ((□^≤[n]φ) ⋏ (□^[(n + 1)]φ)) ➝ ((□^≤[n]ψ) ⋏ (□^[(n + 1)]ψ)) by
+      apply C!_replace ?_ ?_ this;
+      . apply C_of_E_mp! E_boxlt_succ!;
+      . apply C_of_E_mpr! E_boxlt_succ!;
+    apply CKK!_of_C!_of_C! ih $ imply_multibox_distribute'! h;
+
+-- TODO: better name
+lemma boxlt_fconj_regularity_of_subset {Γ Δ : Finset _} (hs : Γ ⊆ Δ) : 𝓢 ⊢! (□^≤[n]Δ.conj) ➝ □^≤[n]Γ.conj := by
+  apply boxlt_regularity!;
+  apply CFConj_FConj!_of_subset hs;
+
+end Boxlt
+
+
 
 namespace Context
 
@@ -651,6 +743,16 @@ lemma nec! {Γ : Set F} (h : Γ *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! □φ := by
     obtain ⟨ψ, hψ, rfl⟩ := List.exists_box_of_mem_box hψ;
     simp_all;
   . assumption;
+
+lemma box_regularity! (h : Γ *⊢[𝓢]! φ ➝ ψ) : Γ.box *⊢[𝓢]! □φ ➝ □ψ := by
+  have H₁ := Context.nec! h;
+  have H₂ : Γ.box *⊢[𝓢]! □(φ ➝ ψ) ➝ (□φ ➝ □ψ) := by simp;
+  exact H₂ ⨀ H₁;
+
+lemma box_congruence! (h : Γ *⊢[𝓢]! φ ⭤ ψ) : Γ.box *⊢[𝓢]! □φ ⭤ □ψ := by
+  apply E!_intro;
+  . apply box_regularity!; exact C_of_E_mp! h;
+  . apply box_regularity!; exact C_of_E_mpr! h;
 
 end Context
 

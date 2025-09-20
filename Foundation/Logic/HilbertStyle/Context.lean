@@ -28,7 +28,7 @@ instance : Membership F (FiniteContext F 𝓢) := ⟨λ Γ x => (x ∈ Γ.ctx)�
 
 instance : HasSubset (FiniteContext F 𝓢) := ⟨(·.ctx ⊆ ·.ctx)⟩
 
-instance : Cons F (FiniteContext F 𝓢) := ⟨(· :: ·.ctx)⟩
+instance : Adjoin F (FiniteContext F 𝓢) := ⟨(· :: ·.ctx)⟩
 
 lemma mem_def {φ : F} {Γ : FiniteContext F 𝓢} : φ ∈ Γ ↔ φ ∈ Γ.ctx := iff_of_eq rfl
 
@@ -38,10 +38,10 @@ lemma mem_def {φ : F} {Γ : FiniteContext F 𝓢} : φ ∈ Γ ↔ φ ∈ Γ.ctx
 
 @[simp] lemma not_mem_empty (φ : F) : ¬φ ∈ (∅ : FiniteContext F 𝓢) := by simp [EmptyCollection.emptyCollection]
 
-instance : Collection F (FiniteContext F 𝓢) where
+instance : AdjunctiveSet F (FiniteContext F 𝓢) where
   subset_iff := List.subset_def
   not_mem_empty := by simp
-  mem_cons_iff := by simp [Cons.cons, mem_def]
+  mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
 variable [Entailment F S] [LogicalConnective F]
 
@@ -89,10 +89,10 @@ instance [DecidableEq F] : Axiomatized (FiniteContext F 𝓢) where
   weakening := fun H b ↦ C_trans (CConj₂Conj₂ H) b
 
 instance : Compact (FiniteContext F 𝓢) where
-  φ := fun {Γ} _ _ ↦ Γ
-  φPrf := id
-  φ_subset := by simp
-  φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
+  Γ := fun {Γ} _ _ ↦ Γ
+  ΓPrf := id
+  Γ_subset := by simp
+  Γ_finite := by rintro ⟨Γ⟩; simp [AdjunctiveSet.Finite, AdjunctiveSet.set]
 
 def nthAxm {Γ} (n : ℕ) (h : n < Γ.length := by simp) : Γ ⊢[𝓢] Γ[n] := conj₂Nth Γ n h
 lemma nth_axm! {Γ} (n : ℕ) (h : n < Γ.length := by simp) : Γ ⊢[𝓢]! Γ[n] := ⟨nthAxm n h⟩
@@ -148,7 +148,8 @@ instance (Γ : FiniteContext F 𝓢) : Entailment.NegationEquiv Γ := ⟨fun _ �
 instance [Entailment.Minimal 𝓢] (Γ : FiniteContext F 𝓢) : Entailment.Minimal Γ where
 
 
-def mdp' [DecidableEq F] (bΓ : Γ ⊢[𝓢] φ ➝ ψ) (bΔ : Δ ⊢[𝓢] φ) : (Γ ++ Δ) ⊢[𝓢] ψ := wk (by simp) bΓ ⨀ wk (by simp) bΔ
+def mdp' [DecidableEq F] (bΓ : Γ ⊢[𝓢] φ ➝ ψ) (bΔ : Δ ⊢[𝓢] φ) : (Γ ++ Δ) ⊢[𝓢] ψ :=
+  wk (by simp) bΓ ⨀ wk (by simp) bΔ
 
 def deduct {φ ψ : F} : {Γ : List F} → (φ :: Γ) ⊢[𝓢] ψ → Γ ⊢[𝓢] φ ➝ ψ
   | .nil => fun b ↦ ofDef <| C_of_conseq (toDef b)
@@ -217,7 +218,7 @@ instance : Membership F (Context F 𝓢) := ⟨λ Γ x => (x ∈ Γ.ctx)⟩
 
 instance : HasSubset (Context F 𝓢) := ⟨(·.ctx ⊆ ·.ctx)⟩
 
-instance : Cons F (Context F 𝓢) := ⟨(⟨insert · ·.ctx⟩)⟩
+instance : Adjoin F (Context F 𝓢) := ⟨(⟨insert · ·.ctx⟩)⟩
 
 lemma mem_def {φ : F} {Γ : Context F 𝓢} : φ ∈ Γ ↔ φ ∈ Γ.ctx := iff_of_eq rfl
 
@@ -225,12 +226,12 @@ lemma mem_def {φ : F} {Γ : Context F 𝓢} : φ ∈ Γ ↔ φ ∈ Γ.ctx := if
 
 @[simp] lemma mem_coe_iff {φ : F} {Γ : Set F} : φ ∈ (Γ : Context F 𝓢) ↔ φ ∈ Γ := iff_of_eq rfl
 
-@[simp] lemma not_mem_empty (φ : F) : ¬φ ∈ (∅ : Context F 𝓢) := by simp [EmptyCollection.emptyCollection, Set.mem_def]
+@[simp] lemma not_mem_empty (φ : F) : ¬φ ∈ (∅ : Context F 𝓢) := by exact fun a ↦ a
 
-instance : Collection F (Context F 𝓢) where
+instance : AdjunctiveSet F (Context F 𝓢) where
   subset_iff := by rintro ⟨s⟩ ⟨u⟩; simp [Set.subset_def]
   not_mem_empty := by simp
-  mem_cons_iff := by simp [Cons.cons, mem_def]
+  mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
 variable [LogicalConnective F] [Entailment F S]
 
@@ -275,14 +276,14 @@ section minimal
 variable [Entailment.Minimal 𝓢]
 
 instance [DecidableEq F] : Axiomatized (Context F 𝓢) where
-  prfAxm := fun {Γ φ} hp ↦ ⟨[φ], by simpa using hp, byAxm (by simp [Collection.set])⟩
-  weakening := fun h b ↦ ⟨b.ctx, fun φ hp ↦ Collection.subset_iff.mp h φ (b.subset φ hp), b.prf⟩
+  prfAxm := fun {Γ φ} hp ↦ ⟨[φ], by simpa using hp, byAxm (by simp [AdjunctiveSet.set])⟩
+  weakening := fun h b ↦ ⟨b.ctx, fun φ hp ↦ AdjunctiveSet.subset_iff.mp h φ (b.subset φ hp), b.prf⟩
 
 instance : Compact (Context F 𝓢) where
-  φ := fun b ↦ Collection.set b.ctx
-  φPrf := fun b ↦ ⟨b.ctx, by simp [Collection.set], b.prf⟩
-  φ_subset := by rintro ⟨Γ⟩ φ b; exact b.subset
-  φ_finite := by rintro ⟨Γ⟩; simp [Collection.Finite, Collection.set]
+  Γ := fun b ↦ AdjunctiveSet.set b.ctx
+  ΓPrf := fun b ↦ ⟨b.ctx, by simp [AdjunctiveSet.set], b.prf⟩
+  Γ_subset := by rintro ⟨Γ⟩ φ b; exact b.subset
+  Γ_finite := by rintro ⟨Γ⟩; simp [AdjunctiveSet.Finite, AdjunctiveSet.set]
 
 -- lemma provable_iff' [DecidableEq F] {φ : F} : Γ *⊢[𝓢]! φ ↔ ∃ Δ : Finset F, (↑Δ ⊆ Γ) ∧ Δ *⊢[𝓢]! φ
 

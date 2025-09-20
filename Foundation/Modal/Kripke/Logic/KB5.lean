@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 
 namespace LO.Modal
 
@@ -19,23 +19,24 @@ end Kripke
 
 namespace Logic.KB5.Kripke
 
-instance sound : Sound (Logic.KB5) Kripke.FrameClass.KB5 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
+instance : Sound (Hilbert.KB5) Kripke.FrameClass.KB5 := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
   rintro F ⟨_, _⟩ _ (rfl | rfl);
   . exact validate_AxiomB_of_symmetric;
   . exact validate_AxiomFive_of_euclidean;
 
-instance consistent : Entailment.Consistent (Logic.KB5) := consistent_of_sound_frameclass Kripke.FrameClass.KB5 $ by
+instance : Entailment.Consistent (Hilbert.KB5) := consistent_of_sound_frameclass Kripke.FrameClass.KB5 $ by
   use whitepoint;
   constructor;
 
 
-instance canonical : Canonical (Logic.KB5) Kripke.FrameClass.KB5 := ⟨by constructor⟩
+instance : Canonical (Hilbert.KB5) Kripke.FrameClass.KB5 := ⟨by constructor⟩
 
-instance complete : Complete (Logic.KB5) Kripke.FrameClass.KB5 := inferInstance
+instance : Complete (Hilbert.KB5) Kripke.FrameClass.KB5 := inferInstance
 
 end Logic.KB5.Kripke
 
-lemma Logic.KB5.Kripke.symm : Logic.KB5 = Kripke.FrameClass.KB5.logic := eq_hilbert_logic_frameClass_logic
 
 end LO.Modal

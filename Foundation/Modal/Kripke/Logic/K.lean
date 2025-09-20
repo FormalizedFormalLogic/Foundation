@@ -1,4 +1,3 @@
-import Foundation.Modal.Hilbert.K
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Completeness
 import Foundation.Modal.Kripke.Filtration
@@ -8,21 +7,40 @@ namespace LO.Modal
 open Kripke
 open Hilbert.Kripke
 
-namespace Logic.K.Kripke
 
-instance sound : Sound (Logic.K) FrameClass.all := instSound_of_validates_axioms FrameClass.all.validates_axiomK
+namespace Kripke
 
-instance sound_finite : Sound (Logic.K) FrameClass.finite_all := instSound_of_validates_axioms FrameClass.finite_all.validates_axiomK
+protected abbrev FrameClass.K : FrameClass := Set.univ
+protected abbrev FrameClass.finite_K : FrameClass := { F | F.IsFinite }
 
-instance : Entailment.Consistent (Logic.K) := consistent_of_sound_frameclass FrameClass.all (by simp)
+end Kripke
 
-instance : Kripke.Canonical (Logic.K) FrameClass.all := ⟨by trivial⟩
 
-instance complete : Complete (Logic.K) FrameClass.all := inferInstance
+namespace Hilbert.K.Kripke
 
-instance complete_finite : Complete (Logic.K) (FrameClass.finite_all) := ⟨by
+instance : Sound (Hilbert.K) FrameClass.K := instSound_of_validates_axioms $ by
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  intro F _;
+  exact Formula.Kripke.ValidOnFrame.axiomK;
+
+instance : Sound (Hilbert.K) FrameClass.finite_K := instSound_of_validates_axioms $ by
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  intro F hF;
+  exact Formula.Kripke.ValidOnFrame.axiomK;
+
+instance : Entailment.Consistent (Hilbert.K) := consistent_of_sound_frameclass FrameClass.K $ by
+  use whitepoint
+  simp;
+
+instance : Kripke.Canonical (Hilbert.K) FrameClass.K := ⟨by trivial⟩
+
+instance : Complete (Hilbert.K) FrameClass.K := inferInstance
+
+instance : Complete (Hilbert.K) (FrameClass.finite_K) := ⟨by
   intro φ hp;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.K);
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFiltrationModel M ↑φ.subformulas;
@@ -33,10 +51,8 @@ instance complete_finite : Complete (Logic.K) (FrameClass.finite_all) := ⟨by
   simp;
 ⟩
 
-lemma all : Logic.K = FrameClass.all.logic := eq_hilbert_logic_frameClass_logic
-lemma finite_all : Logic.K = FrameClass.finite_all.logic := eq_hilbert_logic_frameClass_logic
+end Hilbert.K.Kripke
 
-end Logic.K.Kripke
 
 
 end LO.Modal

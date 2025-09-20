@@ -8,21 +8,27 @@ namespace Formula
 variable {α : Type u} [DecidableEq α]
 variable {φ ψ χ : Formula ℕ}
 
-noncomputable abbrev subformulasGrz (φ : Formula α) := φ.subformulas ∪ (φ.subformulas.prebox.image (λ ψ => □(ψ ➝ □ψ)))
+@[grind] noncomputable abbrev subformulasGrz (φ : Formula α) := φ.subformulas ∪ (φ.subformulas.prebox.image (λ ψ => □(ψ ➝ □ψ)))
 
 namespace subformulasGrz
 
-@[simp] lemma mem_self : φ ∈ φ.subformulasGrz := by simp [subformulasGrz, subformulas.mem_self]
+@[simp, grind] lemma mem_self : φ ∈ φ.subformulasGrz := by simp [subformulasGrz, subformulas.mem_self]
 
-lemma mem_boximpbox (h : ψ ∈ φ.subformulas.prebox) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
+@[grind] protected lemma mem_of_mem_subformula (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
 
-protected lemma mem_of_mem_subformula (h : ψ ∈ φ.subformulas) : ψ ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
-add_subformula_rules safe 10 tactic [
-  (by exact subformulasGrz.mem_of_mem_subformula (by subformula)),
-]
+@[grind ⇒] lemma mem_boximpbox (h : ψ ∈ φ.subformulas.prebox) : □(ψ ➝ □ψ) ∈ φ.subformulasGrz := by simp_all [subformulasGrz];
 
-@[subformula]
-protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by subformula;
+@[grind ⇒]
+protected lemma mem_imp (h : (ψ ➝ χ) ∈ φ.subformulasGrz) : ψ ∈ φ.subformulasGrz ∧ χ ∈ φ.subformulasGrz := by
+  simp_all only [
+    Finset.mem_union, Finset.mem_image, Finset.mem_preimage, Function.iterate_one,
+    reduceCtorEq, and_false, exists_const, or_false
+  ];
+  grind;
+
+example {_ : φ ∈ φ.subformulasGrz} : φ ∈ φ.subformulasGrz := by grind;
+example {_ : ψ ➝ χ ∈ φ.subformulasGrz} : ψ ∈ φ.subformulasGrz := by grind
+example {_ : ψ ➝ χ ∈ φ.subformulasGrz} : χ ∈ φ.subformulasGrz := by grind
 
 end subformulasGrz
 
@@ -34,7 +40,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open ComplementClosedConsistentFinset
 open Kripke
 
-namespace Logic.Grz.Kripke
+namespace Hilbert.Grz.Kripke
 
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Grz 𝓢]
@@ -93,14 +99,11 @@ lemma truthlemma_lemma1
     tauto;
   . have := X.closed.subset hr;
     left;
-    exact FormulaFinset.complementary_mem_box (by subformula) this;
+    exact FormulaFinset.complementary_mem_box (by grind) this;
   . right;
-    simp;
+    simp only [Finset.mem_image, Finset.mem_union, Finset.mem_preimage, Function.iterate_one];
     use ψ;
-    constructor;
-    . left;
-      exact subformulas.mem_box hq;
-    . rfl;
+    grind;
 
 omit [Consistent 𝓢] in
 lemma truthlemma_lemma2
@@ -125,11 +128,9 @@ lemma truthlemma_lemma2
         replace : X *⊢[𝓢]! □ψ := Context.weakening! ?_ this;
         . exact membership_iff (subformulasGrz.mem_of_mem_subformula hψ₁) |>.mpr this;
         . intro ξ hξ;
-          simp at hξ;
           obtain ⟨ξ, hξ, rfl⟩ := hξ;
           tauto;
       . intro ξ hξ;
-        simp at hξ;
         obtain ⟨ξ, hξ, rfl⟩ := hξ;
         have := hΓ₁ hξ;
         simp at this ⊢;
@@ -155,32 +156,29 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
   | hatom => simp [Satisfies];
   | hfalsum => simp [Satisfies];
   | himp ψ χ ihq ihr =>
-    have : ψ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.1;
-    have : χ ∈ φ.subformulas := subformulas.mem_imp q_sub |>.2;
     constructor;
     . contrapose;
       intro h;
       apply Satisfies.not_imp.mpr;
       apply Satisfies.and_def.mpr;
       constructor;
-      . apply ihq (by subformula) |>.mpr;
+      . apply ihq (by grind) |>.mpr;
         exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.1;
-      . apply ihr (by subformula) |>.not.mpr;
-        exact iff_mem_compl (by subformula) |>.not.mpr $ by
+      . apply ihr (by grind) |>.not.mpr;
+        exact iff_not_mem_compl (by grind) |>.not.mpr $ by
           push_neg;
           exact iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mp h |>.2;
     . contrapose;
       intro h;
       replace h := Satisfies.and_def.mp $ Satisfies.not_imp.mp h;
       obtain ⟨hq, hr⟩ := h;
-      replace hq := ihq (by subformula) |>.mp hq;
-      replace hr := ihr (by subformula) |>.not.mp hr;
+      replace hq := ihq (by grind) |>.mp hq;
+      replace hr := ihr (by grind) |>.not.mp hr;
       apply iff_not_mem_imp (ψ := ψ) (χ := χ) |>.mpr;
       constructor;
       . assumption;
-      . simpa using iff_mem_compl (by subformula) |>.not.mp hr;
+      . simpa using iff_not_mem_compl (by grind) |>.not.mp hr;
   | hbox ψ ih =>
-    have := subformulas.mem_box q_sub;
     constructor;
     . contrapose;
       by_cases w : ψ ∈ X;
@@ -202,14 +200,14 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
             . apply hY.2;
               simp;
             . by_contra hC;
-              have : ↑X *⊢[𝓢]! ψ := membership_iff (by subformula) |>.mp w;
+              have : ↑X *⊢[𝓢]! ψ := membership_iff (by grind) |>.mp w;
               have : ↑X *⊢[𝓢]! □(ψ ➝ □ψ) := membership_iff (by simp; right; assumption) |>.mp hC;
               have : ↑X *⊢[𝓢]! (ψ ⋏ □(ψ ➝ □ψ)) ➝ □ψ := Context.of! $ truthlemma_lemma3;
               have : ↑X *⊢[𝓢]! □ψ := this ⨀ K!_intro (by assumption) (by assumption);
-              have : □ψ ∈ X := membership_iff (by subformula) |>.mpr this;
+              have : □ψ ∈ X := membership_iff (by grind) |>.mpr this;
               contradiction;
-        . apply ih (by subformula) |>.not.mpr;
-          apply iff_mem_compl (by subformula) |>.not.mpr;
+        . apply ih (by grind) |>.not.mpr;
+          apply iff_not_mem_compl (by grind) |>.not.mpr;
           push_neg;
           apply hY.2;
           simp;
@@ -218,12 +216,12 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         use X;
         constructor;
         . apply Frame.refl;
-        . exact ih (by subformula) |>.not.mpr w;
+        . exact ih (by grind) |>.not.mpr w;
     . intro h Y RXY;
-      apply ih (subformulas.mem_box q_sub) |>.mpr;
+      apply ih (by grind) |>.mpr;
       have : ↑Y *⊢[𝓢]! □ψ ➝ ψ := Context.of! $ axiomT!;
-      have : ↑Y *⊢[𝓢]! ψ := this ⨀ (membership_iff (by subformula) |>.mp (RXY.1 ψ (by subformula) h));
-      exact membership_iff (by subformula) |>.mpr this;
+      have : ↑Y *⊢[𝓢]! ψ := this ⨀ (membership_iff (by grind) |>.mp (RXY.1 ψ (by simp; grind) h));
+      exact membership_iff (by grind) |>.mpr this;
 
 lemma complete_of_mem_miniCanonicalFrame
   (C : Kripke.FrameClass)
@@ -242,38 +240,34 @@ lemma complete_of_mem_miniCanonicalFrame
       (by
         simp only [Finset.singleton_subset_iff];
         apply FormulaFinset.complementary_comp;
-        subformula;
+        grind;
       )
       (FormulaFinset.unprovable_iff_singleton_compl_consistent.mpr h);
     use (miniCanonicalModel _ φ).Val, X;
-    apply truthlemma (by subformula) |>.not.mpr;
-    exact iff_mem_compl (by subformula) |>.not.mpr $ by
+    apply truthlemma (by grind) |>.not.mpr;
+    exact iff_not_mem_compl (by grind) |>.not.mpr $ by
       push_neg;
       apply hX₁;
       tauto;
 ⟩
 
-instance complete : Complete Logic.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
+instance : Complete Hilbert.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
   simp only [Set.mem_setOf_eq];
   intro φ;
   infer_instance;
 
-lemma finite_partial_order : Logic.Grz = FrameClass.finite_Grz.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.S4M ⪱ Logic.Grz := by
+instance : Hilbert.S4McK ⪱ Hilbert.Grz := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.S4M ⊧ φ → FrameClass.finite_Grz ⊧ φ by
-      simpa [S4M.Kripke.preorder_mckinsey, Grz.Kripke.finite_partial_order];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.S4McK FrameClass.finite_Grz
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0)
     constructor;
     . simp;
-    . suffices ¬FrameClass.S4M ⊧ (Axioms.Grz (.atom 0)) by simpa [S4M.Kripke.preorder_mckinsey];
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4McK)
       apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ x y => y = 2 ∨ x = 0 ∨ x = 1⟩, λ w _ => w = 1 ∨ w = 2⟩, 0;
       constructor;
@@ -290,10 +284,12 @@ instance : Logic.S4M ⪱ Logic.Grz := by
         . contradiction;
         . contradiction;
 
-instance : Logic.S4 ⪱ Logic.Grz := calc
-  Logic.S4 ⪱ Logic.S4M := by infer_instance
-  _        ⪱ Logic.Grz := by infer_instance
+instance : Hilbert.S4 ⪱ Hilbert.Grz := calc
+  Hilbert.S4 ⪱ Hilbert.S4McK := by infer_instance
+  _          ⪱ Hilbert.Grz   := by infer_instance
 
-end Logic.Grz.Kripke
+end Hilbert.Grz.Kripke
+
+instance : Modal.S4McK ⪱ Modal.Grz := inferInstance
 
 end LO.Modal

@@ -11,15 +11,15 @@ In $\mathsf{I}\Sigma_1$, we can further prove their entireness.
 Weak theory of sets in $V_\omega$ (Hereditary Finite Sets) can be developed inside $\mathsf{I}\Sigma_1$ using Ackermann coding and bit predicate. Hereafter, we will use the notation $i \in a$ in the sense of bit predicate:
 
 ```lean
-lemma LO.Arith.mem_iff_bit [M ⊧ₘ* 𝐈𝚺₁] {i a : M} : i ∈ a ↔ Bit i a
+lemma LO.Arithmetic.mem_iff_bit [M ⊧ₘ* 𝗜𝚺₁] {i a : M} : i ∈ a ↔ Bit i a
 ```
 
-- [LO.Arith.mem_iff_bit](https://formalizedformallogic.github.io/Foundation/doc/Foundation/Arithmetization/ISigmaOne/Bit.html#LO.Arith.mem_iff_bit)
+- [LO.Arithmetic.mem_iff_bit](https://formalizedformallogic.github.io/Foundation/doc/Foundation/Arithmetization/ISigmaOne/Bit.html#LO.Arithmetic.mem_iff_bit)
 
 The following comprehension holds.
 
 ```lean
-theorem LO.ISigma1.finset_comprehension₁ [M ⊧ₘ* 𝐈𝚺₁]
+theorem LO.ISigma1.finset_comprehension₁ [M ⊧ₘ* 𝗜𝚺₁]
     {P : M → Prop} (hP : (Γ, 1)-Predicate P) (a : M) :
     ∃ s < exp a, ∀ i < a, i ∈ s ↔ P i
 ```
@@ -35,7 +35,7 @@ and [mapping](https://formalizedformallogic.github.io/Foundation/doc/Foundation/
 $\mathrm{Seq}(s)$ iff $s$ is a mapping and its domain is $[0, l)$ for some $l$.
 
 ```lean
-def LO.ISigma1.Seq [M ⊧ₘ* 𝐈𝚺₁] (s : M) : Prop := IsMapping s ∧ ∃ l, domain s = under l
+def LO.ISigma1.Seq [M ⊧ₘ* 𝗜𝚺₁] (s : M) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 ```
 
 - [LO.ISigma1.Seq](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.Seq)
@@ -98,7 +98,7 @@ structure Blueprint (k : ℕ) where
 
 structure Construction (φ : Blueprint k) where
   Φ : (Fin k → M) → Set M → M → Prop
-  defined : Arith.Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
+  defined : Arithmetic.Defined (fun v ↦ Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0)) φ.core
   monotone {C C' : Set M} (h : C ⊆ C') {v x} : Φ v C x → Φ v C' x
 
 class Construction.Finite (c : Construction M φ) where
@@ -132,4 +132,4 @@ theorem Construction.induction [c.StrongFinite]
     ∀ x, c.Fixpoint v x → P x
 ```
 
-- [LO.Arith.Fixpoint.Construction.induction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.induction)
+- [LO.Arithmetic.Fixpoint.Construction.induction](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Fixpoint.html#LO.ISigma1.Fixpoint.Construction.induction)

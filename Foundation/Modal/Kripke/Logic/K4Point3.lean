@@ -1,7 +1,7 @@
 import Foundation.Modal.Kripke.AxiomWeakPoint3
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.K4
 
 namespace LO.Modal
@@ -15,39 +15,39 @@ namespace Kripke
 
 protected class Frame.IsK4Point3 (F : Kripke.Frame) extends F.IsTransitive, F.IsPiecewiseConnected
 
-abbrev FrameClass.IsK4Point3 : FrameClass := { F | F.IsK4Point3 }
+abbrev FrameClass.K4Point3 : FrameClass := { F | F.IsK4Point3 }
 
 end Kripke
 
 
 namespace Logic.K4Point3.Kripke
 
-instance sound : Sound Logic.K4Point3 FrameClass.IsK4Point3 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+instance : Sound Hilbert.K4Point3 FrameClass.K4Point3 := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_WeakPoint3_of_weakConnected;
 
-instance consistent : Entailment.Consistent Logic.K4Point3 :=
-  consistent_of_sound_frameclass FrameClass.IsK4Point3 $ by
+instance : Entailment.Consistent Hilbert.K4Point3 :=
+  consistent_of_sound_frameclass FrameClass.K4Point3 $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical Logic.K4Point3 FrameClass.IsK4Point3 :=  ⟨by constructor⟩
+instance : Canonical Hilbert.K4Point3 FrameClass.K4Point3 :=  ⟨by constructor⟩
 
-instance complete : Complete Logic.K4Point3 FrameClass.IsK4Point3 := inferInstance
+instance : Complete Hilbert.K4Point3 FrameClass.K4Point3 := inferInstance
 
-lemma trans_weakConnected : Logic.K4Point3 = FrameClass.IsK4Point3.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.K4 ⪱ Logic.K4Point3 := by
+instance : Hilbert.K4 ⪱ Hilbert.K4Point3 := by
   constructor;
-  . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.K4Point3 ⊢! φ ∧ ¬FrameClass.K4 ⊧ φ by simpa [K4.Kripke.trans];
     use (Axioms.WeakPoint3 (.atom 0) (.atom 1));
     constructor;
     . exact axiomWeakPoint3!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 3, λ x y => x = 0 ∧ y ≠ 0⟩,
         λ w a => if a = 0 then w = 1 else w = 2
@@ -69,5 +69,7 @@ instance : Logic.K4 ⪱ Logic.K4Point3 := by
         . trivial;
 
 end Logic.K4Point3.Kripke
+
+instance : Modal.K4 ⪱ Modal.K4Point3 := inferInstance
 
 end LO.Modal

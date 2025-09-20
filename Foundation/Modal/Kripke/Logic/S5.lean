@@ -58,36 +58,37 @@ lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : Frame
 end Kripke
 
 
-namespace Logic.S5.Kripke
+namespace Hilbert.S5.Kripke
 
-instance sound_refl_eucl : Sound Logic.S5 FrameClass.S5 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+instance : Sound Hilbert.S5 FrameClass.S5 := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance sound_universal : Sound Logic.S5 FrameClass.universal := ⟨by
+instance : Sound Hilbert.S5 FrameClass.universal := ⟨by
   intro φ hF;
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mpr;
-  exact sound_refl_eucl.sound hF;
+  exact Sound.sound (𝓜 := FrameClass.S5) hF;
 ⟩
 
-instance consistent : Entailment.Consistent Logic.S5 := consistent_of_sound_frameclass FrameClass.S5 $ by
+instance : Entailment.Consistent Hilbert.S5 := consistent_of_sound_frameclass FrameClass.S5 $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical Logic.S5 FrameClass.S5 := ⟨by constructor⟩
+instance : Canonical Hilbert.S5 FrameClass.S5 := ⟨by constructor⟩
 
-instance complete_refl_eucl : Complete Logic.S5 FrameClass.S5 := inferInstance
+instance : Complete Hilbert.S5 FrameClass.S5 := inferInstance
 
-instance complete_universal : Complete Logic.S5 FrameClass.universal := ⟨by
+instance : Complete Hilbert.S5 FrameClass.universal := ⟨by
   intro φ hF;
-  apply Kripke.complete_refl_eucl.complete;
+  apply Complete.complete (𝓜 := FrameClass.S5);
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mp;
   exact hF;
 ⟩
 
-end Logic.S5.Kripke
+end Hilbert.S5.Kripke
 
 
 namespace Logic
@@ -96,24 +97,19 @@ open Formula
 open Entailment
 open Kripke
 
-lemma S5.Kripke.refl_eucl : Logic.S5 = FrameClass.S5.logic := eq_hilbert_logic_frameClass_logic
-lemma S5.Kripke.universal : Logic.S5 = FrameClass.universal.logic := eq_hilbert_logic_frameClass_logic
 
-instance : Logic.KTB ⪱ Logic.S5 := by
+instance : Hilbert.KTB ⪱ Hilbert.S5 := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.KTB ⊧ φ → FrameClass.S5 ⊧ φ by
-      simpa [KTB.Kripke.refl_symm, S5.Kripke.refl_eucl];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.KTB) (FrameClass.S5);
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S5 ⊢! φ ∧ ¬FrameClass.KTB ⊧ φ by simpa [KTB.Kripke.refl_symm];
     use Axioms.Five (.atom 0);
     constructor;
     . exact axiomFive!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KTB)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = 1 ∧ y ≠ 2) ∨ (x = 2 ∧ y ≠ 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
@@ -125,21 +121,18 @@ instance : Logic.KTB ⪱ Logic.S5 := by
         . use 2;
           constructor <;> omega;
 
-instance : Logic.KD45 ⪱ Logic.S5 := by
+instance : Hilbert.KD45 ⪱ Hilbert.S5 := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.serial_trans_eucl ⊧ φ → FrameClass.S5 ⊧ φ by
-      simpa [KD45.Kripke.serial_trans_eucl, S5.Kripke.refl_eucl];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.KD45) (FrameClass.S5);
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S5 ⊢! φ ∧ ¬FrameClass.serial_trans_eucl ⊧ φ by simpa [KD45.Kripke.serial_trans_eucl];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD45)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => (x = 0 ∧ y = 1) ∨ (x = 1 ∧ y = 1)⟩, λ x _ => x = 1⟩;
       use M, 0;
       constructor;
@@ -151,41 +144,35 @@ instance : Logic.KD45 ⪱ Logic.S5 := by
       . simp [Semantics.Realize, Satisfies, M];
         tauto;
 
-instance : Logic.KB4 ⪱ Logic.S5 := by
+instance : Hilbert.KB4 ⪱ Hilbert.S5 := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.IsKB4 ⊧ φ → FrameClass.S5 ⊧ φ by
-      simpa [KB4.Kripke.refl_trans, S5.Kripke.refl_eucl];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.KB4) (FrameClass.S5);
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S5 ⊢! φ ∧ ¬FrameClass.IsKB4 ⊧ φ by simpa [KB4.Kripke.refl_trans];
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KB4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ x _ => False⟩, 0;
       constructor;
       . refine { symm := by tauto, trans := by tauto };
       . simp [Semantics.Realize, Satisfies];
 
-instance : Logic.S4Point4 ⪱ Logic.S5 := by
+instance : Hilbert.S4Point4 ⪱ Hilbert.S5 := by
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    suffices ∀ φ, FrameClass.S4Point4 ⊧ φ → FrameClass.S5 ⊧ φ by
-      simpa [S4Point4.Kripke.preorder_sobocinski, S5.Kripke.refl_eucl];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.S4Point4) (FrameClass.S5);
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
-    suffices ∃ φ, Logic.S5 ⊢! φ ∧ ¬Kripke.FrameClass.S4Point4 ⊧ φ by simpa [S4Point4.Kripke.preorder_sobocinski];
     use Axioms.Five (.atom 0);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4Point4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w a => w = 0⟩;
       use M, 0;
       constructor;
@@ -205,12 +192,26 @@ instance : Logic.S4Point4 ⪱ Logic.S5 := by
         . use 1;
           constructor <;> omega;
 
-instance : Logic.S4 ⪱ Logic.S5 := calc
-  Logic.S4 ⪱ Logic.S4Point2 := by infer_instance
-  _        ⪱ Logic.S4Point3 := by infer_instance
-  _        ⪱ Logic.S4Point4 := by infer_instance
-  _        ⪱ Logic.S5       := by infer_instance
+instance : Hilbert.S4 ⪱ Hilbert.S5 := calc
+  Hilbert.S4 ⪱ Hilbert.S4Point2 := by infer_instance
+  _          ⪱ Hilbert.S4Point3 := by infer_instance
+  _          ⪱ Hilbert.S4Point4 := by infer_instance
+  _          ⪱ Hilbert.S5       := by infer_instance
 
 end Logic
+
+instance : Modal.KTB ⪱ Modal.S5 := inferInstance
+
+instance : Modal.KD45 ⪱ Modal.S5 := inferInstance
+
+instance : Modal.KB4 ⪱ Modal.S5 := inferInstance
+
+instance : Modal.S4Point4 ⪱ Modal.S5 := inferInstance
+
+instance : Modal.S4 ⪱ Modal.S5 := inferInstance
+
+instance : Modal.KT ⪱ Modal.S5 := calc
+  Modal.KT ⪱ Modal.S4 := by infer_instance
+  _        ⪱ Modal.S5 := by infer_instance
 
 end LO.Modal

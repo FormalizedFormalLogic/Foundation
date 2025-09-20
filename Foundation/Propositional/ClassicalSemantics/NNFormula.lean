@@ -24,7 +24,7 @@ def valAux : NNFormula α → F
 
 lemma valAux_neg (φ : NNFormula α) :
     valAux v (∼φ) = ∼(valAux v φ) :=
-  by induction φ using rec' <;> simp [*, valAux, ←neg_eq, or_iff_not_imp_left]
+  by induction φ using rec' <;> simp [*, valAux]
 
 def val : NNFormula α →ˡᶜ F where
   toTr := valAux v

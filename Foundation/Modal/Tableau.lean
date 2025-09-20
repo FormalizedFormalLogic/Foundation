@@ -41,7 +41,7 @@ instance : HasSubset (Tableau α) := ⟨λ t₁ t₂ => t₁.1 ⊆ t₂.1 ∧ t�
 
 section
 
-variable [Entailment.K 𝓢]
+variable [Entailment.Cl 𝓢]
 
 lemma equality_def {t₁ t₂ : Tableau α} : t₁ = t₂ ↔ t₁.1 = t₂.1 ∧ t₁.2 = t₂.2 := by
   constructor;
@@ -119,7 +119,7 @@ lemma iff_consistent_insert₁
       exact hΓ;
   . intro h Γ Δ hΓ hΔ;
     by_contra hC;
-    simp_all only [Set.mem_insert_iff];
+    simp_all only [];
     apply h (Γ := Γ.erase φ) (Δ := Δ) (by simpa) hΔ;
     refine C!_trans ?_ hC;
     . exact C!_trans CKFConjinsertFConj! $ CFConj_FConj!_of_subset $ Finset.insert_erase_subset φ Γ
@@ -228,7 +228,7 @@ variable {𝓢}
 
 @[simp] lemma eq_lindenbaum_indexed_zero [Encodable α] {t : Tableau α} : t[0] = t := by simp [lindenbaum_indexed]
 
-lemma consistent_lindenbaum_next [Entailment.K 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
+lemma consistent_lindenbaum_next [Entailment.Cl 𝓢] (consistent : t.Consistent 𝓢) (φ : Formula α) : (t.lindenbaum_next 𝓢 φ).Consistent 𝓢 := by
   unfold lindenbaum_next;
   split;
   . assumption;
@@ -238,7 +238,7 @@ lemma consistent_lindenbaum_next [Entailment.K 𝓢] (consistent : t.Consistent 
 
 variable [Encodable α]
 
-lemma consistent_lindenbaum_indexed_succ [Entailment.K 𝓢] {i : ℕ} : t[i].Consistent 𝓢 → t[i + 1].Consistent 𝓢 := by
+lemma consistent_lindenbaum_indexed_succ [Entailment.Cl 𝓢] {i : ℕ} : t[i].Consistent 𝓢 → t[i + 1].Consistent 𝓢 := by
   simp only [lindenbaum_indexed];
   split;
   . intro h; apply consistent_lindenbaum_next h;
@@ -248,7 +248,7 @@ lemma either_mem_lindenbaum_indexed (t) (φ : Formula α) : φ ∈ t[(encode φ)
   simp only [lindenbaum_indexed, encodek, lindenbaum_next];
   split <;> tauto;
 
-lemma consistent_lindenbaum_indexed [Entailment.K 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
+lemma consistent_lindenbaum_indexed [Entailment.Cl 𝓢] (consistent : t.Consistent 𝓢) (i : ℕ) : t[i].Consistent 𝓢 := by
   induction i with
   | zero => simpa;
   | succ i ih => apply consistent_lindenbaum_indexed_succ; assumption;
@@ -319,7 +319,7 @@ lemma exists_finset_lindenbaum_index₂ {Δ : Finset _} (hΓ : ↑Δ ⊆ ⋃ i, 
   apply hΔ;
   simpa;
 
-lemma exists_consistent_saturated_tableau [Entailment.K 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (u.Consistent 𝓢) ∧ (u.Maximal) := by
+lemma exists_consistent_saturated_tableau [Entailment.Cl 𝓢] (hCon : t.Consistent 𝓢) : ∃ u, t ⊆ u ∧ (u.Consistent 𝓢) ∧ (u.Maximal) := by
   use t∞;
   refine ⟨?subset, ?consistent, ?maximal⟩;
   case subset => constructor <;> apply Set.subset_iUnion_of_subset 0 (by simp);
@@ -330,7 +330,7 @@ lemma exists_consistent_saturated_tableau [Entailment.K 𝓢] (hCon : t.Consiste
     . right; simp only [lindenbaum_max, Set.mem_iUnion];  use (encode φ + 1);
   case consistent =>
     intro Γ Δ hΓ hΔ;
-    simp_all only [lindenbaum_max, Set.mem_iUnion];
+    simp_all only [lindenbaum_max];
     obtain ⟨m, hΓ⟩ := exists_finset_lindenbaum_index₁ hΓ;
     obtain ⟨n, hΔ⟩ := exists_finset_lindenbaum_index₂ hΔ;
     rcases (lt_trichotomy m n) with hm | hmn | hn;
@@ -358,21 +358,21 @@ variable {t t₁ t₂  : MaximalConsistentTableau 𝓢} {φ ψ : Formula α}
 
 @[simp] lemma consistent (t : MaximalConsistentTableau 𝓢) : t.1.Consistent 𝓢 := t.2.2
 
-lemma lindenbaum {t₀ : Tableau α} [Entailment.K 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : MaximalConsistentTableau 𝓢), t₀ ⊆ t.1 := by
+lemma lindenbaum {t₀ : Tableau α} [Entailment.Cl 𝓢] [Encodable α] (hCon : t₀.Consistent 𝓢) : ∃ (t : MaximalConsistentTableau 𝓢), t₀ ⊆ t.1 := by
   obtain ⟨t, ht, hCon, hMax⟩ := Tableau.lindenbaum hCon;
   exact ⟨⟨t, hMax, hCon⟩, ht⟩;
 
-instance [Entailment.Consistent 𝓢] [Entailment.K 𝓢] [DecidableEq α] [Encodable α] : Nonempty (MaximalConsistentTableau 𝓢) := ⟨lindenbaum consistent_empty |>.choose⟩
+instance [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢] [DecidableEq α] [Encodable α] : Nonempty (MaximalConsistentTableau 𝓢) := ⟨lindenbaum consistent_empty |>.choose⟩
 
 variable {t t₁ t₂ : MaximalConsistentTableau 𝓢}
 
-variable [Entailment.K 𝓢]
+variable [Entailment.Cl 𝓢]
 
 lemma disjoint : t.1.Disjoint := t.1.disjoint_of_consistent $ t.consistent
 
-lemma iff_not_mem₁_mem₂ : φ ∉ t.1.1 ↔ φ ∈ t.1.2 := Tableau.iff_not_mem₁_mem₂ t.consistent t.maximal
+@[grind] lemma iff_not_mem₁_mem₂ : φ ∉ t.1.1 ↔ φ ∈ t.1.2 := Tableau.iff_not_mem₁_mem₂ t.consistent t.maximal
 
-lemma iff_not_mem₂_mem₁ : φ ∉ t.1.2 ↔ φ ∈ t.1.1 := Tableau.iff_not_mem₂_mem₁ t.consistent t.maximal
+@[grind] lemma iff_not_mem₂_mem₁ : φ ∉ t.1.2 ↔ φ ∈ t.1.1 := Tableau.iff_not_mem₂_mem₁ t.consistent t.maximal
 
 lemma neither : ¬(φ ∈ t.1.1 ∧ φ ∈ t.1.2) := by
   push_neg;
@@ -511,6 +511,7 @@ private lemma of_mem₂_and : φ ⋏ ψ ∈ t.1.2 → (φ ∈ t.1.2 ∨ ψ ∈ t
   have hψ := iff_not_mem₂_mem₁.mp hφψ.2;
   exact mdp_mem₁ (mdp_mem₁_provable and₃! hφ) hψ;
 
+@[grind]
 lemma iff_mem₁_and : φ ⋏ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.1) := by
   constructor;
   . apply of_mem₁_and;
@@ -521,6 +522,7 @@ lemma iff_mem₁_and : φ ⋏ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.1) :
     . have := iff_not_mem₁_mem₂.mpr hφ; contradiction;
     . exact iff_not_mem₁_mem₂.mpr hψ;
 
+@[grind]
 lemma iff_mem₂_and : φ ⋏ ψ ∈ t.1.2 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.2) := by
   constructor;
   . apply of_mem₂_and;
@@ -614,6 +616,7 @@ private lemma of_mem₂_or : φ ⋎ ψ ∈ t.1.2 → (φ ∈ t.1.2 ∧ ψ ∈ t.
   . apply iff_not_mem₂_mem₁.mpr;
     exact mdp_mem₁_provable or₂! $ iff_not_mem₂_mem₁.mp hψ;
 
+@[grind]
 lemma iff_mem₁_or : φ ⋎ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) := by
   constructor;
   . apply of_mem₁_or;
@@ -623,6 +626,7 @@ lemma iff_mem₁_or : φ ⋎ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 ∨ ψ ∈ t.1.1) :=
     rcases of_mem₂_or $ iff_not_mem₁_mem₂.mp hφψ with ⟨hφ, hψ⟩;
     constructor <;> { apply iff_not_mem₁_mem₂.mpr; assumption; };
 
+@[grind]
 lemma iff_mem₂_or : φ ⋎ ψ ∈ t.1.2 ↔ (φ ∈ t.1.2 ∧ ψ ∈ t.1.2) := by
   constructor;
   . apply of_mem₂_or;
@@ -708,6 +712,7 @@ private lemma of_mem₂_imp : φ ➝ ψ ∈ t.1.2 → (φ ∈ t.1.1 ∧ ψ ∈ t
     have : φ ➝ ψ ∉ t.1.2 := iff_not_mem₂_mem₁.mpr $ mdp_mem₁ this (iff_not_mem₂_mem₁.mp hψ);
     contradiction;
 
+@[grind]
 lemma iff_mem₁_imp : φ ➝ ψ ∈ t.1.1 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) := by
   constructor;
   . apply of_mem₁_imp;
@@ -719,9 +724,11 @@ lemma iff_mem₁_imp : φ ➝ ψ ∈ t.1.1 ↔ (φ ∈ t.1.2 ∨ ψ ∈ t.1.1) :
     . exact iff_not_mem₂_mem₁.mpr hφ;
     . exact iff_not_mem₁_mem₂.mpr hψ;
 
+@[grind]
 lemma iff_mem₁_imp' : φ ➝ ψ ∈ t.1.1 ↔ (φ ∈ t.1.1 → ψ ∈ t.1.1) := by
   simp [iff_mem₁_imp, or_iff_not_imp_left, iff_not_mem₂_mem₁];
 
+@[grind]
 lemma iff_mem₂_imp : φ ➝ ψ ∈ t.1.2 ↔ (φ ∈ t.1.1 ∧ ψ ∈ t.1.2) := by
   constructor;
   . apply of_mem₂_imp;
@@ -746,6 +753,7 @@ private lemma of_mem₂_neg : ∼φ ∈ t.1.2 → (φ ∈ t.1.1) := by
   rcases of_mem₂_imp h with ⟨hφ, hb⟩;
   exact hφ;
 
+@[grind]
 lemma iff_mem₁_neg : ∼φ ∈ t.1.1 ↔ φ ∈ t.1.2 := by
   constructor;
   . apply of_mem₁_neg;
@@ -753,6 +761,10 @@ lemma iff_mem₁_neg : ∼φ ∈ t.1.1 ↔ φ ∈ t.1.2 := by
     intro h;
     exact iff_not_mem₂_mem₁.mpr $ of_mem₂_neg $ iff_not_mem₁_mem₂.mp h
 
+@[grind]
+lemma iff_mem₁_neg' : ∼φ ∈ t.1.1 ↔ φ ∉ t.1.1 := Iff.trans iff_mem₁_neg $ Iff.symm iff_not_mem₁_mem₂
+
+@[grind]
 lemma iff_mem₂_neg : ∼φ ∈ t.1.2 ↔ φ ∈ t.1.1 := by
   constructor;
   . apply of_mem₂_neg;
@@ -760,8 +772,14 @@ lemma iff_mem₂_neg : ∼φ ∈ t.1.2 ↔ φ ∈ t.1.1 := by
     intro h;
     exact iff_not_mem₁_mem₂.mpr $ of_mem₁_neg $ iff_not_mem₂_mem₁.mp h
 
+@[grind]
+lemma iff_mem₂_neg' : ∼φ ∈ t.1.2 ↔ φ ∉ t.1.2 := Iff.trans iff_mem₂_neg $ Iff.symm iff_not_mem₂_mem₁
 
-omit [Entailment.K 𝓢] [DecidableEq α] [Encodable α] in
+section
+
+variable [Entailment.K 𝓢]
+
+omit [Entailment.Cl 𝓢] [Entailment.K 𝓢] [DecidableEq α] [Encodable α] in
 private lemma of_mem₁_multibox : (□^[n]φ ∈ t.1.1) → (∀ {t' : MaximalConsistentTableau 𝓢}, (t.1.1.premultibox n ⊆ t'.1.1) → (φ ∈ t'.1.1)) := by
   intro h t' ht';
   apply ht';
@@ -809,6 +827,32 @@ lemma iff_mem₂_multibox : (□^[n]φ ∈ t.1.2) ↔ (∃ t' : MaximalConsisten
     exact iff_not_mem₂_mem₁.mpr $ of_mem₁_multibox (iff_not_mem₂_mem₁.mp hφ) ht';
 
 lemma iff_mem₂_box : (□φ ∈ t.1.2) ↔ (∃ t' : MaximalConsistentTableau 𝓢, (t.1.1.prebox ⊆ t'.1.1) ∧ (φ ∈ t'.1.2)) := iff_mem₂_multibox (n := 1)
+
+lemma iff_mem₁_multidia : (◇^[n]φ ∈ t.1.1) ↔ (∃ t' : MaximalConsistentTableau 𝓢, (t.1.1.premultibox n ⊆ t'.1.1) ∧ (φ ∈ t'.1.1)) := by
+  suffices ◇^[n]φ ∈ t.1.1 ↔ ∃ t' : MaximalConsistentTableau 𝓢, t.1.1.premultibox n ⊆ t'.1.1 ∧ ∼φ ∈ t'.1.2 by simpa [iff_mem₂_neg];
+  apply Iff.trans ?_ iff_mem₂_multibox;
+  rw [←iff_mem₁_neg];
+  constructor;
+  . apply mdp_mem₁_provable; simp;
+  . apply mdp_mem₁_provable; simp;
+
+lemma iff_mem₁_dia : (◇φ ∈ t.1.1) ↔ (∃ t' : MaximalConsistentTableau 𝓢, (t.1.1.prebox ⊆ t'.1.1) ∧ (φ ∈ t'.1.1)) := iff_mem₁_multidia (n := 1)
+
+lemma iff_mem₂_multidia : (◇^[n]φ ∈ t.1.2) ↔ (∀ t' : MaximalConsistentTableau 𝓢, (t.1.1.premultibox n ⊆ t'.1.1) → (φ ∈ t'.1.2)) := by
+  suffices ◇^[n]φ ∈ t.1.2 ↔ (∀ t' : MaximalConsistentTableau 𝓢, (t.1.1.premultibox n ⊆ t'.1.1) → (∼φ ∈ t'.1.1)) by simpa [iff_mem₁_neg]
+  apply Iff.trans ?_ iff_mem₁_multibox;
+  rw [←iff_mem₁_neg];
+  constructor;
+  . apply mdp_mem₁_provable;
+    apply CN!_of_CN!_left;
+    simp;
+  . apply mdp_mem₁_provable;
+    apply CN!_of_CN!_right;
+    simp;
+
+lemma iff_mem₂_dia : (◇φ ∈ t.1.2) ↔ (∀ t' : MaximalConsistentTableau 𝓢, (t.1.1.prebox ⊆ t'.1.1) → (φ ∈ t'.1.2)) := iff_mem₂_multidia (n := 1)
+
+end
 
 end Saturated
 

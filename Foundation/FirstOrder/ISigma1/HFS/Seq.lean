@@ -8,9 +8,9 @@ import Foundation.FirstOrder.ISigma1.HFS.Basic
 
 namespace LO.ISigma1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def Seq (s : V) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 
@@ -24,8 +24,8 @@ private lemma seq_iff (s : V) : Seq s ↔ IsMapping s ∧ ∃ l ≤ 2 * s, ∃ d
         _ ≤ 2 * s    := by simp), ⟨domain s , by simp,  rfl, h⟩⟩,
    by rintro ⟨hs, l, _, _, _, rfl, h⟩; exact ⟨hs, l, h⟩⟩
 
-def _root_.LO.FirstOrder.Arith.seqDef : 𝚺₀.Semisentence 1 := .mkSigma
-  “s. !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.seqDef : 𝚺₀.Semisentence 1 := .mkSigma
+  “s. !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l”
 
 lemma seq_defined : 𝚺₀-Predicate (Seq : V → Prop) via seqDef := by
   intro v; simp [seqDef, seq_iff]
@@ -81,8 +81,8 @@ private lemma lh_graph (l s : V) : l = lh s ↔ (Seq s → ∃ d ≤ 2 * s, d = 
     · rcases h Hs with ⟨_, _, rfl, h⟩; simpa [h] using Hs.domain_eq
     · simp [lh_prop_of_not_seq Hs, hn Hs]⟩
 
-def _root_.LO.FirstOrder.Arith.lhDef : 𝚺₀.Semisentence 2 := .mkSigma
-  “l s. (!seqDef s → ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l) ∧ (¬!seqDef s → l = 0)” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.lhDef : 𝚺₀.Semisentence 2 := .mkSigma
+  “l s. (!seqDef s → ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l) ∧ (¬!seqDef s → l = 0)”
 
 lemma lh_defined : 𝚺₀-Function₁ (lh : V → V) via lhDef := by
   intro v; simp [lhDef, -exists_eq_right_right, lh_graph]
@@ -137,8 +137,8 @@ lemma Seq.znth_eq_of_mem {s i : V} (h : Seq s) (hi : ⟪i, x⟫ ∈ s) : znth s 
 lemma znth_prop_not {s i : V} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
   Classical.choose!_spec (znth_existsUnique s i) |>.2 (by simpa [-not_and, not_and_or] using h)
 
-def _root_.LO.FirstOrder.Arith.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “x s i. ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ∼[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
+  “x s i. ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ∼[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)”
 
 private lemma znth_graph {x s i : V} : x = znth s i ↔ ∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0) := by
   simp [znth, Classical.choose!_eq_iff]
@@ -205,12 +205,12 @@ section
 lemma seqCons_graph (t x s : V) :
     t = s ⁀' x ↔ ∃ l ≤ 2 * s, l = lh s ∧ ∃ p ≤ (2 * s + x + 1)^2, p = ⟪l, x⟫ ∧ t = insert p s :=
   ⟨by rintro rfl
-      exact ⟨lh s, by simp [lt_succ_iff_le], rfl, ⟪lh s, x⟫,
+      exact ⟨lh s, by simp, rfl, ⟪lh s, x⟫,
         le_trans (pair_le_pair_left (by simp) x) (pair_polybound (2 * s) x), rfl, by rfl⟩,
    by rintro ⟨l, _, rfl, p, _, rfl, rfl⟩; rfl⟩
 
-def _root_.LO.FirstOrder.Arith.seqConsDef : 𝚺₀.Semisentence 3 := .mkSigma
-  “t s x. ∃ l <⁺ 2 * s, !lhDef l s ∧ ∃ p <⁺ (2 * s + x + 1)², !pairDef p l x ∧ !insertDef t p s” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.seqConsDef : 𝚺₀.Semisentence 3 := .mkSigma
+  “t s x. ∃ l <⁺ 2 * s, !lhDef l s ∧ ∃ p <⁺ (2 * s + x + 1)², !pairDef p l x ∧ !insertDef t p s”
 
 lemma seqCons_defined : 𝚺₀-Function₂ (seqCons : V → V → V) via seqConsDef := by
   intro v; simp [seqConsDef, seqCons_graph]
@@ -353,8 +353,8 @@ def vecConsUnexpander : Lean.PrettyPrinter.Unexpander
 
 section
 
-def _root_.LO.FirstOrder.Arith.mkSeq₁Def : 𝚺₀.Semisentence 2 := .mkSigma
-  “s x. !seqConsDef s 0 x” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.mkSeq₁Def : 𝚺₀.Semisentence 2 := .mkSigma
+  “s x. !seqConsDef s 0 x”
 
 lemma mkSeq₁_defined : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁Def := by
   intro v; simp [mkSeq₁Def]; rfl
@@ -366,8 +366,8 @@ instance mkSeq₁_definable : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) := mk
 
 instance mkSeq₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_definable.of_zero
 
-def _root_.LO.FirstOrder.Arith.mkSeq₂Def : 𝚺₁.Semisentence 3 := .mkSigma
-  “s x y. ∃ sx, !mkSeq₁Def sx x ∧ !seqConsDef s sx y” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.mkSeq₂Def : 𝚺₁.Semisentence 3 := .mkSigma
+  “s x y. ∃ sx, !mkSeq₁Def sx x ∧ !seqConsDef s sx y”
 
 lemma mkSeq₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂Def := by
   intro v; simp [mkSeq₂Def]
@@ -422,163 +422,5 @@ lemma mem_vectoSeq {n : ℕ} (v : Fin n → V) (i : Fin n) : ⟪(i : V), v i⟫ 
     · simpa [vecToSeq, mem_seqCons_iff] using Or.inr <| ih (v ·.castSucc) i
 
 end seqToVec
-
-open HierarchySymbol
-
-lemma order_ball_ISigma1.sigma1_succ_induction {f : V → V → V} (hf : 𝚺₁-Function₂ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
-    (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f x y, P x' y') → P x y) : ∀ x y, P x y := by
-  have maxf : ∀ x y, ∃ m, ∀ x' ≤ x, ∀ y' ≤ y, f x' y' ≤ m := by
-    intro x y;
-    rcases sigma₁_replacement₂ hf (under (x + 1)) (under (y + 1)) |>.exists with ⟨m, hm⟩
-    exact ⟨m, fun x' hx' y' hy' ↦
-      le_of_lt <| lt_of_mem <| hm (f x' y') |>.mpr
-        ⟨x', by simpa [lt_succ_iff_le] using hx', y', by simpa [lt_succ_iff_le] using hy', rfl⟩⟩
-  intro x y
-  have : ∀ k ≤ x, ∃ W, Seq W ∧ k + 1 = lh W ∧
-      ⟪0, y⟫ ∈ W ∧
-      ∀ l < k, ∀ m < W, ∀ m' < W, ⟪l, m⟫ ∈ W → ⟪l + 1, m'⟫ ∈ W → ∀ x' ≤ x - l, ∀ y' ≤ m, f x' y' ≤ m' := by
-    intro k hk
-    induction k using ISigma1.sigma1_succ_induction
-    · apply Boldface.imp (Boldface.comp₂ (by definability) (by definability))
-      apply Boldface.ex
-      apply Boldface.and (Boldface.comp₁ (by definability))
-      apply Boldface.and
-        (Boldface.comp₂
-          (BoldfaceFunction.comp₂ (.var _) (.const _))
-          (BoldfaceFunction.comp₁ (.var _)))
-      apply Boldface.and
-        (Boldface.comp₂ (.var 0) (by definability))
-      apply Boldface.ball_lt (.var _)
-      apply Boldface.ball_lt (.var _)
-      apply Boldface.ball_lt (.var _)
-      apply Boldface.imp
-        (Boldface.comp₂ (.var _) (BoldfaceFunction.comp₂ (.var _) (.var _)))
-      apply Boldface.imp
-        (Boldface.comp₂ (.var _) (BoldfaceFunction.comp₂ (BoldfaceFunction.comp₂ (.var _) (.const _)) (.var _)))
-      apply Boldface.ball_le
-        (Boldface.comp₂
-          (.var _)
-          (BoldfaceFunction.comp₂ (.const _) (.var _)))
-      apply Boldface.ball_le (.var _)
-      apply Boldface.comp₂
-        (BoldfaceFunction.comp₂
-          (.var _) (.var _)) (.var _)
-    case zero => exact ⟨!⟦y⟧, by simp⟩
-    case succ k ih =>
-      rcases ih (le_trans le_self_add hk) with ⟨W, SW, hkW, hW₀, hWₛ⟩
-      let m₀ := SW.nth (show k < lh W by simp [←hkW])
-      have : ∃ m₁, ∀ x' ≤ x - k, ∀ y' ≤ m₀, f x' y' ≤ m₁ := maxf (x - k) m₀
-      rcases this with ⟨m₁, hm₁⟩
-      exact ⟨W ⁀' m₁, SW.seqCons m₁, by simp [SW, hkW], Seq.subset_seqCons _ _ hW₀, by
-        intro l hl m _ m' _ hm hm' x' hx' y' hy'
-        rcases show l ≤ k from lt_succ_iff_le.mp hl with (rfl | hl)
-        · have hmm₀ : m = m₀ :=
-            SW.isMapping.uniq (by simpa [mem_seqCons_iff, ←hkW] using hm) (by simp [m₀])
-          have hm'm₁ : m' = m₁ := by
-            simpa [SW, hkW, mem_seqCons_iff] using hm'
-          simpa [hm'm₁] using hm₁ x' hx' y' (by simp [←hmm₀, hy'])
-        · have Hm : ⟪l, m⟫ ∈ W := Seq.mem_seqCons_iff_of_lt (by simpa [←hkW]) |>.mp hm
-          have Hm' : ⟪l + 1, m'⟫ ∈ W := Seq.mem_seqCons_iff_of_lt (by simpa [←hkW]) |>.mp hm'
-          exact hWₛ l hl m (lt_of_mem_rng Hm) m' (lt_of_mem_rng Hm') Hm Hm' x' hx' y' hy'⟩
-  rcases this x (by rfl) with ⟨W, SW, hxW, hW₀, hWₛ⟩
-  have : ∀ i ≤ x, ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := by
-    intro i
-    induction i using ISigma1.sigma1_succ_induction
-    · apply Boldface.imp
-        (Boldface.comp₂ (.var _) (.const _))
-      apply Boldface.ball_lt (.const _)
-      apply Boldface.imp
-        (Boldface.comp₂
-          (.const _)
-          (BoldfaceFunction.comp₂
-            (BoldfaceFunction.comp₂
-              (.const _) (.var _)) (.var _)))
-      apply Boldface.ball_le (.var _)
-      apply Boldface.ball_le (.var _)
-      apply Boldface.comp₂ (.var _) (.var _)
-    case zero =>
-      intro _ _ _ _ _ h y' _
-      rcases nonpos_iff_eq_zero.mp h
-      exact ind 0 y' (by simp)
-    case succ i ih' =>
-      intro hi m _ hm x' hx' y' hy'
-      have ih : ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := ih' (le_trans le_self_add hi)
-      refine ind x' y' ?_
-      intro x'' hx'' y'' hy''
-      let m₁ := SW.nth (show x - i < lh W by simp [←hxW, lt_succ_iff_le])
-      have : f x' y' ≤ m₁ :=
-        hWₛ (x - (i + 1)) (tsub_lt_iff_left hi |>.mpr (by simp)) m (lt_of_mem_rng hm) m₁ (by simp [m₁]) hm
-          (by rw [←PeanoMinus.sub_sub, sub_add_self_of_le (show 1 ≤ x - i from le_tsub_of_add_le_left hi)]; simp [m₁])
-          x' (by simp [tsub_tsub_cancel_of_le hi, hx']) y' hy'
-      exact ih m₁ (by simp [m₁]) (by simp [m₁]) x'' (lt_succ_iff_le.mp (lt_of_lt_of_le hx'' hx')) y'' (le_trans hy'' this)
-  exact this x (by rfl) y (lt_of_mem_rng hW₀) (by simpa using hW₀) x (by rfl) y (by rfl)
-
-lemma order_ball_ISigma1.sigma1_succ_induction' {f : V → V} (hf : 𝚺₁-Function₁ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
-    (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f y, P x' y') → P x y) : ∀ x y, P x y :=
-  have : 𝚺₁-Function₂ (fun _ ↦ f) := BoldfaceFunction.comp₁ (by simp)
-  order_ball_ISigma1.sigma1_succ_induction this hP ind
-
-lemma order_ball_induction₂_sigma1 {fy fz : V → V → V → V}
-    (hfy : 𝚺₁-Function₃ fy) (hfz : 𝚺₁-Function₃ fz) {P : V → V → V → Prop} (hP : 𝚺₁-Relation₃ P)
-    (ind : ∀ x y z, (∀ x' < x, ∀ y' ≤ fy x y z, ∀ z' ≤ fz x y z, P x' y' z') → P x y z) :
-    ∀ x y z, P x y z := by
-  let Q : V → V → Prop := fun x w ↦ P x (π₁ w) (π₂ w)
-  have hQ : 𝚺₁-Relation Q := by
-    apply Boldface.comp₃ (.var _)
-      (BoldfaceFunction.comp₁ (.var _))
-      (BoldfaceFunction.comp₁ (.var _))
-  let f : V → V → V := fun x w ↦ ⟪fy x (π₁ w) (π₂ w), fz x (π₁ w) (π₂ w)⟫
-  have hf : 𝚺₁-Function₂ f := by
-    simp only [f, Q]
-    apply BoldfaceFunction.comp₂
-    · apply BoldfaceFunction.comp₃ (.var _)
-      · apply BoldfaceFunction.comp₁ (.var _)
-      · apply BoldfaceFunction.comp₁ (.var _)
-    · apply BoldfaceFunction.comp₃ (.var _)
-      · apply BoldfaceFunction.comp₁ (.var _)
-      · apply BoldfaceFunction.comp₁ (.var _)
-  intro x y z
-  simpa [Q] using order_ball_ISigma1.sigma1_succ_induction hf hQ (fun x w ih ↦
-    ind x (π₁ w) (π₂ w) (fun x' hx' y' hy' z' hz' ↦ by simpa [Q] using ih x' hx' ⟪y', z'⟫ (pair_le_pair hy' hz')))
-    x ⟪y, z⟫
-
-lemma order_ball_induction₃_sigma1 {fy fz fw : V → V → V → V → V}
-    (hfy : 𝚺₁-Function₄ fy) (hfz : 𝚺₁-Function₄ fz) (hfw : 𝚺₁-Function₄ fw) {P : V → V → V → V → Prop} (hP : 𝚺₁-Relation₄ P)
-    (ind : ∀ x y z w, (∀ x' < x, ∀ y' ≤ fy x y z w, ∀ z' ≤ fz x y z w, ∀ w' ≤ fw x y z w, P x' y' z' w') → P x y z w) :
-    ∀ x y z w, P x y z w := by
-  let Q : V → V → Prop := fun x v ↦ P x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))
-  have hQ : 𝚺₁-Relation Q := by
-    apply Boldface.comp₄
-      (.var _)
-      (BoldfaceFunction.comp₁ <| .var _)
-      (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-      (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-  let f : V → V → V := fun x v ↦
-    ⟪fy x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fz x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fw x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))⟫
-  have hf : 𝚺₁-Function₂ f := by
-    simp only [f]
-    apply BoldfaceFunction.comp₂
-    · apply BoldfaceFunction.comp₄
-        (.var _)
-        (BoldfaceFunction.comp₁ <| .var _)
-        (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-        (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-    · apply BoldfaceFunction.comp₂
-      · apply BoldfaceFunction.comp₄
-          (.var _)
-          (BoldfaceFunction.comp₁ <| .var _)
-          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-      · apply BoldfaceFunction.comp₄
-          (.var _)
-          (BoldfaceFunction.comp₁ <| .var _)
-          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-  intro x y z w
-  have := order_ball_ISigma1.sigma1_succ_induction hf hQ (fun x v ih ↦
-    ind x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)) (fun x' hx' y' hy' z' hz' w' hw' ↦ by
-      simpa [Q] using ih x' hx' ⟪y', z', w'⟫ (pair_le_pair hy' <| pair_le_pair hz' hw')))
-    x ⟪y, z, w⟫
-  simpa [Q] using this
 
 end LO.ISigma1

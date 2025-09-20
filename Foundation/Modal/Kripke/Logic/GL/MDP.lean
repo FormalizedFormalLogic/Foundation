@@ -6,7 +6,12 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Kripke
 open Formula.Kripke
 
-namespace Logic.GL
+instance : Entailment.GL Modal.GL where
+  L φ := by
+    constructor;
+    simp [Modal.GL, Entailment.theory];
+
+namespace GL
 
 namespace Kripke
 
@@ -49,8 +54,8 @@ instance {F₁ F₂ : Frame} {r₁ : outParam F₁.World} {r₂ : outParam F₂.
     match x, y, z with
     | .inr (.inl x), .inr (.inl y), .inr (.inl z) => apply tree₁.trans _ _ _ hxy hyz;
     | .inr (.inr x), .inr (.inr y), .inr (.inr z) => apply tree₂.trans _ _ _ hxy hyz;
-    | .inl _, .inr (.inr _), .inr (.inr _) => simp [Frame.Rel'];
-    | .inl _, .inr (.inl _), .inr (.inl _) => simp [Frame.Rel'];
+    | .inl _, .inr (.inr _), .inr (.inr _) => simp;
+    | .inl _, .inr (.inl _), .inr (.inl _) => simp;
 
 -- TODO: remove?
 instance : (mdpCounterexmpleFrame F₁ F₂ r₁ r₂).IsIrreflexive := ⟨by simp⟩
@@ -125,19 +130,19 @@ end mdpCounterexmpleModel
 end Kripke
 
 
-lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Logic.GL]! □φ₁ ⋎ □φ₂) : (X.box) *⊢[Logic.GL]! □φ₁ ∨ (X.box) *⊢[Logic.GL]! □φ₂ := by
+lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL]! □φ₁ ⋎ □φ₂) : (X.box) *⊢[Modal.GL]! □φ₁ ∨ (X.box) *⊢[Modal.GL]! □φ₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
-  have : Logic.GL ⊢! ⋀Δ.box ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
-  have : Logic.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
+  have : Modal.GL ⊢! ⋀Δ.box ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
+  have : Modal.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
-  have : (Logic.GL ⊢! ⊡c ➝ φ₁) ∨ (Logic.GL ⊢! ⊡c ➝ φ₂) := by
+  have : (Modal.GL ⊢! ⊡c ➝ φ₁) ∨ (Modal.GL ⊢! ⊡c ➝ φ₂) := by
     by_contra! hC;
-    have ⟨h₁, h₂⟩ : (Logic.GL ⊬ ⊡c ➝ φ₁) ∧ (Logic.GL ⊬ ⊡c ➝ φ₂) := hC;
+    have ⟨h₁, h₂⟩ : (Modal.GL ⊬ ⊡c ➝ φ₁) ∧ (Modal.GL ⊬ ⊡c ➝ φ₂) := hC;
 
-    obtain ⟨M₁, r₁, _, hM₁⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₁;
-    obtain ⟨M₂, r₂, _, hM₂⟩ := Logic.GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₂;
+    obtain ⟨M₁, r₁, _, hM₁⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₁;
+    obtain ⟨M₂, r₂, _, hM₂⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp h₂;
 
     let M₀ := Kripke.mdpCounterexmpleModel M₁ M₂ r₁ r₂;
     let r₀ := Kripke.mdpCounterexmpleModel.root (M₁ := M₁) (M₂ := M₂) (r₁ := r₁) (r₂ := r₂)
@@ -172,7 +177,7 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Logic.GL]! □φ₁ ⋎ □φ₂) : 
       push_neg;
       exact ⟨hp₁, hp₂⟩;
     have : ¬(Satisfies M₀ r₀ (□c ➝ (□φ₁ ⋎ □φ₂))) := _root_.not_imp.mpr ⟨hc, this⟩;
-    have : Logic.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr $ by
+    have : Modal.GL ⊬ □c ➝ □φ₁ ⋎ □φ₂ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mpr $ by
       use M₀, r₀;
       constructor;
       . infer_instance;
@@ -188,13 +193,14 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Logic.GL]! □φ₁ ⋎ □φ₂) : 
     tauto;
   };
 
-theorem modal_disjunctive (h : Logic.GL ⊢! □φ₁ ⋎ □φ₂) : Logic.GL ⊢! φ₁ ∨ Logic.GL ⊢! φ₂ := by
-  have : ∅ *⊢[Logic.GL]! □φ₁ ∨ ∅ *⊢[Logic.GL]! □φ₂ := by simpa using MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
+theorem modal_disjunctive (h : Modal.GL ⊢! □φ₁ ⋎ □φ₂) : Modal.GL ⊢! φ₁ ∨ Modal.GL ⊢! φ₂ := by
+  have : ∅ *⊢[Modal.GL]! □φ₁ ∨ ∅ *⊢[Modal.GL]! □φ₂ := by simpa using MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
   rcases this with (h | h) <;> {
     have := unnec! $ Context.emptyPrf! h;
     tauto;
   }
+instance : ModalDisjunctive Modal.GL := ⟨modal_disjunctive⟩
 
-end Logic.GL
+end GL
 
 end LO.Modal
