@@ -10,9 +10,9 @@ namespace Kripke
 
 namespace Frame
 
-variable {F : Frame} {n : ℕ+}
+variable {F : Frame} {n : ℕ}
 
-class IsWeakTransitive (F : Kripke.Frame) (n : ℕ+) where
+class IsWeakTransitive (F : Kripke.Frame) (n : ℕ) where
   weak_trans : ∀ ⦃x y : F⦄, x ≺^[n + 1] y → x ≺^[n] y
 
 instance [F.IsPiecewiseStronglyConnected] : F.IsPiecewiseConnected := inferInstance
@@ -36,7 +36,7 @@ instance [F.IsWeakTransitive n] : F.IsGeachConvergent ⟨0, n + 1, n, 0⟩ := �
 end Frame
 
 
-variable {F : Kripke.Frame} {n : ℕ+}
+variable {F : Kripke.Frame} {n : ℕ}
 
 lemma validate_AxiomFourN_of_weakTransitive [weakTrans : F.IsWeakTransitive n] : F ⊧ (Axioms.FourN n (.atom 0)) := validate_axiomGeach_of_isGeachConvergent (g := ⟨0, n + 1, n, 0⟩)
 

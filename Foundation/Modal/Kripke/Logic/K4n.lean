@@ -1,8 +1,5 @@
-import Foundation.Modal.Kripke.Logic.K4
 import Foundation.Modal.Kripke.AxiomFourN
-import Foundation.Modal.Kripke.Filtration
-import Foundation.Vorspiel.Fin.Supplemental
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Kripke.Hilbert
 
 namespace LO.Modal
 
@@ -13,13 +10,13 @@ namespace Kripke
 
 abbrev Frame.IsK4n (F : Frame) (n) := F.IsWeakTransitive n
 
-protected abbrev FrameClass.K4n (n : ℕ+) : FrameClass := { F | F.IsK4n n }
+protected abbrev FrameClass.K4n (n : ℕ) : FrameClass := { F | F.IsK4n n }
 
 end Kripke
 
 namespace Hilbert
 
-variable {n : ℕ+}
+variable {n : ℕ}
 
 namespace K4n.Kripke
 
@@ -46,14 +43,15 @@ instance : Complete (Modal.K4n n) (FrameClass.K4n n) := inferInstance
 
 end K4n.Kripke
 
-namespace K4nInfiniteChain
+
+namespace K4n
 
 open LO.Entailment LO.Modal.Entailment
 open Formula.Kripke
 
-variable {n m : ℕ+}
+variable {n m : ℕ}
 
-abbrev counterframe (n : ℕ+) : Kripke.Frame := ⟨Fin (n + 2), λ ⟨x, _⟩ ⟨y, _⟩ => y = min (x + 1) (n + 1)⟩
+abbrev counterframe (n : ℕ) : Kripke.Frame := ⟨Fin (n + 2), λ ⟨x, _⟩ ⟨y, _⟩ => y = min (x + 1) (n + 1)⟩
 
 abbrev counterframe.last : counterframe n |>.World := ⟨n + 1, by omega⟩
 
@@ -109,10 +107,10 @@ lemma counterframe.iff_rel_from {i j : counterframe n} {m : ℕ} : i ≺^[m] j �
 instance : Frame.IsWeakTransitive (counterframe n) (n + 1) := by
   constructor;
   intro x y;
-  simp only [counterframe.iff_rel_from, PNat.add_coe, PNat.val_ofNat, le_add_iff_nonneg_left, zero_le, inf_of_le_right];
+  simp only [counterframe.iff_rel_from, le_add_iff_nonneg_left, zero_le, inf_of_le_right];
   omega;
 
-instance succ_strictlyWeakerThan : Hilbert.K4n (n + 1) ⪱ Hilbert.K4n n := by
+lemma succ_strictlyWeakerThan : Hilbert.K4n (n + 1) ⪱ Hilbert.K4n n := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl);
@@ -147,42 +145,41 @@ instance succ_strictlyWeakerThan : Hilbert.K4n (n + 1) ⪱ Hilbert.K4n n := by
             simp;
           . simp [Semantics.Realize, Satisfies, M];
 
-instance add_strictlyWeakerThan : Hilbert.K4n (n + m) ⪱ Hilbert.K4n n := by
+lemma add_strictlyWeakerThan {m : ℕ+} : Hilbert.K4n (n + m) ⪱ Hilbert.K4n n := by
   induction m with
-  | one => infer_instance;
+  | one => apply succ_strictlyWeakerThan;
   | succ m ih =>
     trans Hilbert.K4n (n + m);
-    . rw [(show n + (m + 1) = n + m + 1 by rfl)];
-      infer_instance;
+    . apply succ_strictlyWeakerThan;
     . apply ih;
 
-instance strictlyWeakerThan_of_lt (hnm : n < m) : Hilbert.K4n m ⪱ Hilbert.K4n n := by
-  convert add_strictlyWeakerThan (n := n) (m := m - n);
-  exact PNat.add_sub_of_lt hnm |>.symm;
+lemma strictlyWeakerThan_of_lt (hnm : n < m) : Hilbert.K4n m ⪱ Hilbert.K4n n := by
+  convert add_strictlyWeakerThan (n := n) (m := ⟨m - n, by omega⟩);
+  simp;
+  omega;
 
-instance not_equiv_of_ne (hnm : n ≠ m) : ¬(Hilbert.K4n n ≊ Hilbert.K4n m) := by
-  rcases lt_trichotomy n m with h | rfl | h;
-  . by_contra!;
-    apply strictlyWeakerThan_of_lt h |>.notWT;
-    exact this.le;
-  . contradiction;
-  . by_contra!;
-    apply strictlyWeakerThan_of_lt h |>.notWT;
-    exact this.symm.le;
+lemma not_equiv_of_ne (hnm : n ≠ m) : ¬(Hilbert.K4n n ≊ Hilbert.K4n m) := by
+  wlog hnm : n < m;
+  . have := @this m n (by omega) (by omega);
+    contrapose! this;
+    exact this.symm;
+  by_contra!;
+  apply strictlyWeakerThan_of_lt hnm |>.notWT;
+  exact this.le;
 
-end K4nInfiniteChain
+end K4n
 
 end Hilbert
 
-instance K4n.strictlyWeakerThan (hnm : n < m) : Modal.K4n m ⪱ Modal.K4n n := by
-  have := Hilbert.K4nInfiniteChain.strictlyWeakerThan_of_lt hnm;
+lemma K4n.strictlyWeakerThan_of_le (hnm : n < m) : Modal.K4n m ⪱ Modal.K4n n := by
+  have := Hilbert.K4n.strictlyWeakerThan_of_lt hnm;
   grind;
 
-instance K4n.not_equiv (hnm : n ≠ m) : ¬(Modal.K4n n ≊ Modal.K4n m) := by
-  have := Hilbert.K4nInfiniteChain.not_equiv_of_ne hnm;
+lemma K4n.not_equiv (hnm : n ≠ m) : ¬(Modal.K4n n ≊ Modal.K4n m) := by
+  have := Hilbert.K4n.not_equiv_of_ne hnm;
   grind;
 
-instance infinite_consistent_logics : Infinite { L : Logic ℕ // Entailment.Consistent L } := Infinite.of_injective (β := ℕ+) (λ n => ⟨Modal.K4n n, inferInstance⟩) $ by
+instance : Infinite { L : Logic ℕ // Entailment.Consistent L } := Infinite.of_injective (λ n => ⟨Modal.K4n n, inferInstance⟩) $ by
   intro i j;
   simp only [Subtype.mk.injEq];
   contrapose!;
@@ -190,5 +187,8 @@ instance infinite_consistent_logics : Infinite { L : Logic ℕ // Entailment.Con
   apply Logic.iff_equal_provable_equiv.not.mpr;
   apply K4n.not_equiv;
   assumption;
+
+lemma eq_K4_K4n_one : Modal.K4n 1 = Modal.K4 := rfl
+instance : Modal.K4n 1 ≊ Modal.K4 := by simp [eq_K4_K4n_one]
 
 end LO.Modal

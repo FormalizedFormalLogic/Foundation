@@ -251,7 +251,7 @@ instance [H.HasFour] : Entailment.HasAxiomFour H where
       HasFour.mem_Four;
 
 
-class HasFourN (H : Hilbert.Normal α) (n : ℕ+) where
+class HasFourN (H : Hilbert.Normal α) (n : ℕ) where
   p : α
   mem_FourN : Axioms.FourN n (.atom p) ∈ H.axioms := by tauto;
 
@@ -586,8 +586,8 @@ instance : (Hilbert.K4).HasFour where p := 0
 instance : Entailment.K4 (Hilbert.K4) where
 
 
-protected abbrev Hilbert.K4n (n : ℕ+) : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.FourN n (.atom 0)}⟩
-protected abbrev K4n (n : ℕ+) := Hilbert.K4n n |>.logic
+protected abbrev Hilbert.K4n (n : ℕ) : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.FourN n (.atom 0)}⟩
+protected abbrev K4n (n : ℕ) := Hilbert.K4n n |>.logic
 instance : (Hilbert.K4n n).HasK where p := 0; q := 1;
 instance : (Hilbert.K4n n).HasFourN n where p := 0;
 instance : Entailment.K4n n (Hilbert.K4n n) where
