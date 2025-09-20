@@ -49,6 +49,8 @@ namespace K4n
 
 open LO.Entailment LO.Modal.Entailment
 open Formula.Kripke
+open Formula (atom)
+
 
 variable {n m : ℕ}
 
@@ -110,6 +112,31 @@ instance : Frame.IsWeakTransitive (counterframe n) (n + 1) := by
   intro x y;
   simp only [counterframe.iff_rel_from, le_add_iff_nonneg_left, zero_le, inf_of_le_right];
   omega;
+
+instance : Hilbert.K ⪱ Hilbert.K4n n := by
+  constructor;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.FourN n (.atom 0));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
+      let M : Model := ⟨counterframe n, λ w a => w = n⟩;
+      use M, 0;
+      constructor;
+      . simp;
+      . apply Satisfies.not_imp_def.mpr;
+        constructor;
+        . apply Satisfies.multibox_def.mpr;
+          intro y R0y;
+          simp [Semantics.Realize, Satisfies, M, counterframe.iff_rel_from.mp R0y];
+        . apply Satisfies.multibox_def.not.mpr;
+          push_neg;
+          use ⟨(n + 1), by omega⟩;
+          constructor;
+          . apply counterframe.iff_rel_from.mpr; simp;
+          . simp [Semantics.Realize, Satisfies, M];
 
 lemma succ_strictlyWeakerThan : Hilbert.K4n (n + 1) ⪱ Hilbert.K4n n := by
   constructor;
@@ -181,7 +208,7 @@ lemma K4n.not_equiv (hnm : n ≠ m) : ¬(Modal.K4n n ≊ Modal.K4n m) := by
   have := Hilbert.K4n.not_equiv_of_ne hnm;
   grind;
 
-instance : Infinite { L : Logic ℕ // Entailment.Consistent L } := Infinite.of_injective (λ n => ⟨Modal.K4n n, inferInstance⟩) $ by
+instance : Infinite { L : Logic ℕ // Nonempty (L.IsNormal) ∧ Entailment.Consistent L } := Infinite.of_injective (λ n => ⟨Modal.K4n n, ⟨inferInstance⟩, inferInstance⟩) $ by
   intro i j;
   simp only [Subtype.mk.injEq];
   contrapose!;
@@ -195,5 +222,7 @@ instance : Modal.K4n 1 ≊ Modal.K4 := by simp [show Modal.K4n 1 = Modal.K4 by r
 
 instance : Modal.K4n 1 ⪱ Modal.K4n 0 := by grind;
 instance : Modal.K4n 2 ⪱ Modal.K4n 1 := by grind;
+
+instance : Modal.K ⪱ Modal.K4n 2 := by infer_instance;
 
 end LO.Modal
