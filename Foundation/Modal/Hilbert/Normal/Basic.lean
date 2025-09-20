@@ -243,6 +243,21 @@ instance [H.HasFour] : Entailment.HasAxiomFour H where
       HasFour.mem_Four;
 
 
+class HasFourN (H : Hilbert α) (n : ℕ+) where
+  p : α
+  mem_FourN : Axioms.FourN n (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasFourN n] : Entailment.HasAxiomFourN n H.logic where
+  FourN φ := by
+    constructor;
+    apply maxm;
+    use Axioms.FourN n (.atom (HasFourN.p H n));
+    constructor;
+    . exact HasFourN.mem_FourN;
+    . use (λ b => if (HasFourN.p H n) = b then φ else (.atom b));
+      simp;
+
+
 class HasFive (H : Hilbert.Normal α) where
   p : α
   mem_Five : Axioms.Five (.atom p) ∈ H.axioms := by tauto;
@@ -564,6 +579,12 @@ protected abbrev K4 := Hilbert.K4.logic
 instance : (Hilbert.K4).HasK where p := 0; q := 1;
 instance : (Hilbert.K4).HasFour where p := 0
 instance : Entailment.K4 (Hilbert.K4) where
+
+
+protected abbrev Hilbert.K4n (n : ℕ+) : Hilbert ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.FourN n (.atom 0)}⟩
+protected abbrev Logic.K4n (n : ℕ+) := Hilbert.K4n n |>.logic
+instance : (Hilbert.K4n n).HasK where p := 0; q := 1;
+instance : (Hilbert.K4n n).HasFourN n where p := 0;
 
 
 protected abbrev Hilbert.K4McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.McK (.atom 0)}⟩
