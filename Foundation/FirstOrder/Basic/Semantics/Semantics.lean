@@ -494,6 +494,12 @@ lemma eval_close₀ [Nonempty M] (φ : SyntacticFormula L) :
   haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
   simp [Semiformula.close₀, ←eval_toEmpty (f := default), eval_close]
 
+open Classical in
+@[simp] lemma eval_enumarateFVar_idxOfFVar_eq_id [Inhabited M] (φ : Semiformula L M n) (v) :
+    Semiformula.Evalm M v (fun x ↦ φ.enumarateFVar (φ.idxOfFVar x)) φ ↔ Semiformula.Evalm M v id φ :=
+  Semiformula.eval_iff_of_funEqOn _ <| by
+    intro x hx; simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)]
+
 end rew
 
 end Semiformula

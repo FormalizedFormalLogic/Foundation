@@ -9,22 +9,6 @@ reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth"
 
 namespace LO
 
-namespace FirstOrder
-
-
-namespace Semiformula
-
-variable {L : Language} {V : Type*} [DecidableEq V] [Inhabited V] [Structure L V]
-
--- TODO: move to somewhere in Basic
-@[simp] lemma eval_enumarateFVar_idxOfFVar_eq_id (φ : Semiformula L V n) (v) :
-    Semiformula.Evalm V v (fun x ↦ φ.enumarateFVar (φ.idxOfFVar x)) φ ↔ Semiformula.Evalm V v id φ :=
-  Semiformula.eval_iff_of_funEqOn _ <| by intro x hx; simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)]
-
-end Semiformula
-
-end FirstOrder
-
 open FirstOrder SetTheory
 
 inductive Zermelo : Theory ℒₛₑₜ
@@ -50,7 +34,10 @@ scoped instance : HasSubset V := ⟨fun x y ↦ ∀ z ∈ x, z ∈ y⟩
 
 lemma subset_def {a b : V} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b := by rfl
 
-lemma Subset.defined_isSubsetOf : ℒₛₑₜ-relation[V] Subset via isSubsetOf := fun v ↦ by simp [isSubsetOf, subset_def]
+@[simp] lemma subset_self (x : V) : x ⊆ x := by simp [subset_def]
+
+instance Subset.defined_isSubsetOf : ℒₛₑₜ-relation[V] Subset via isSubsetOf :=
+  ⟨fun v ↦ by simp [isSubsetOf, subset_def]⟩
 
 instance Subset.definable : ℒₛₑₜ-relation[V] Subset := defined_isSubsetOf.to_definable
 
@@ -58,13 +45,15 @@ def IsEmpty (a : V) : Prop := ∀ x, x ∉ a
 
 lemma IsEmpty.not_mem {a x : V} (h : IsEmpty a) : x ∉ a := h x
 
-lemma IsEmpty.defined_isEmpty : ℒₛₑₜ-predicate[V] IsEmpty via isEmpty := fun v ↦ by simp [isEmpty, IsEmpty]
+instance IsEmpty.defined_isEmpty : ℒₛₑₜ-predicate[V] IsEmpty via isEmpty :=
+  ⟨fun v ↦ by simp [isEmpty, IsEmpty]⟩
 
 instance IsEmpty.definable : ℒₛₑₜ-predicate[V] IsEmpty := defined_isEmpty.to_definable
 
 def IsNonempty (a : V) : Prop := ∃ x, x ∈ a
 
-lemma IsNonempty.defined_isNonempty : ℒₛₑₜ-predicate[V] IsNonempty via isNonempty := fun v ↦ by simp [isNonempty, IsNonempty]
+instance IsNonempty.defined_isNonempty : ℒₛₑₜ-predicate[V] IsNonempty via isNonempty :=
+  ⟨fun v ↦ by simp [isNonempty, IsNonempty]⟩
 
 instance IsNonempty.definable : ℒₛₑₜ-predicate[V] IsNonempty := defined_isNonempty.to_definable
 
@@ -93,10 +82,10 @@ lemma subset_antisymm {x y : V} (hxy : x ⊆ y) (hyx : y ⊆ x) : x = y := by
 
 /-! ## Axiom of empty set -/
 
-lemma emptyset_exists : ∃ e : V, IsEmpty e := by simpa [models_iff] using ModelsTheory.models V Zermelo.axiom_of_empty_set
+lemma empty_exists : ∃ e : V, IsEmpty e := by simpa [models_iff] using ModelsTheory.models V Zermelo.axiom_of_empty_set
 
-lemma emptyset_existsUnique : ∃! e : V, IsEmpty e := by
-  rcases emptyset_exists (V := V) with ⟨e, he⟩
+lemma empty_existsUnique : ∃! e : V, IsEmpty e := by
+  rcases empty_exists (V := V) with ⟨e, he⟩
   apply ExistsUnique.intro e he
   intro x hx
   ext y
@@ -104,17 +93,26 @@ lemma emptyset_existsUnique : ∃! e : V, IsEmpty e := by
 
 open Classical
 
-noncomputable scoped instance : EmptyCollection V := ⟨Classical.choose! emptyset_existsUnique⟩
+noncomputable scoped instance : EmptyCollection V := ⟨Classical.choose! empty_existsUnique⟩
 
-@[simp] lemma IsEmpty.emptyset : IsEmpty (∅ : V) := Classical.choose!_spec emptyset_existsUnique
+@[simp] lemma IsEmpty.empty : IsEmpty (∅ : V) := Classical.choose!_spec empty_existsUnique
 
-@[simp] lemma not_mem_emptyset {x} : x ∉ (∅ : V) := IsEmpty.emptyset.not_mem
+@[simp] lemma not_mem_empty {x} : x ∉ (∅ : V) := IsEmpty.empty.not_mem
 
 lemma eq_empty_iff_isEmpty {x : V} :
     x = ∅ ↔ IsEmpty x := ⟨by rintro rfl; simp, by intro h; ext; simp[h.not_mem]⟩
 
 lemma ne_empty_iff_isNonempty {x : V} :
     x ≠ ∅ ↔ IsNonempty x := by simp [eq_empty_iff_isEmpty]
+
+lemma eq_empty_or_isNonempty (x : V) : x = ∅ ∨ IsNonempty x := by
+  by_cases hx : x = ∅
+  · simp_all
+  · right; exact ne_empty_iff_isNonempty.mp hx
+
+@[simp] lemma empty_subset (x : V) : ∅ ⊆ x := by simp [subset_def]
+
+@[simp] lemma subset_empty_iff_eq_empty {x : V} : x ⊆ ∅ ↔ x = ∅ := by simp [mem_ext_iff, subset_def]
 
 /-! ## Axiom of pairing -/
 
@@ -133,10 +131,12 @@ noncomputable def doubleton (x y : V) : V := Classical.choose! (pairing_existsUn
 
 def doubleton.dfn : Semisentence ℒₛₑₜ 3 := “p x y. ∀ z, z ∈ p ↔ z = x ∨ z = y”
 
-lemma doubleton.defined : ℒₛₑₜ-function₂[V] doubleton via doubleton.dfn := by
-  intro v; simp [doubleton.dfn, mem_ext_iff]
+instance doubleton.defined : ℒₛₑₜ-function₂[V] doubleton via doubleton.dfn :=
+  ⟨by intro v; simp [doubleton.dfn, mem_ext_iff]⟩
 
 instance doubleton.definable : ℒₛₑₜ-function₂[V] doubleton := doubleton.defined.to_definable
+
+@[simp] lemma doubleton_isNonempty (x y : V) : IsNonempty (doubleton x y) := ⟨x, by simp⟩
 
 noncomputable def singleton (x : V) : V := doubleton x x
 
@@ -148,10 +148,12 @@ lemma singleton_def (x : V) : ({x} : V) = doubleton x x := rfl
 
 def singleton.dfn : Semisentence ℒₛₑₜ 2 := “p x. !doubleton.dfn p x x”
 
-lemma singleton.defined : ℒₛₑₜ-function₁[V] Singleton.singleton via singleton.dfn := by
-  intro v; simp [singleton.dfn, doubleton.defined.iff]; rfl
+instance singleton.defined : ℒₛₑₜ-function₁[V] Singleton.singleton via singleton.dfn :=
+  ⟨by intro v; simp [singleton.dfn]; rfl⟩
 
 instance singleton.definable : ℒₛₑₜ-function₁[V] Singleton.singleton := singleton.defined.to_definable
+
+@[simp] lemma singleton_isNonempty (x : V) : IsNonempty ({x} : V) := ⟨x, by simp⟩
 
 /-! ## Axiom of union -/
 
@@ -168,18 +170,22 @@ noncomputable def sUnion (x : V) : V := Classical.choose! (union_existsUnique x)
 
 prefix:110 "⋃ˢ " => sUnion
 
-@[simp] lemma mem_sUnion_iff {x z : V} : z ∈ ⋃ˢ x ↔ ∃ y ∈ x, z ∈ y := Classical.choose!_spec (union_existsUnique x) z
+lemma mem_sUnion_iff {x z : V} : z ∈ ⋃ˢ x ↔ ∃ y ∈ x, z ∈ y := Classical.choose!_spec (union_existsUnique x) z
 
 def sUnion.dfn : Semisentence ℒₛₑₜ 2 := “u x. ∀ z, z ∈ u ↔ ∃ w ∈ x, z ∈ w”
 
-lemma sUnion.defined : ℒₛₑₜ-function₁[V] sUnion via sUnion.dfn := by
-  intro v; simp [sUnion.dfn, mem_sUnion_iff, mem_ext_iff]
+instance sUnion.defined : ℒₛₑₜ-function₁[V] sUnion via sUnion.dfn :=
+  ⟨by intro v; simp [sUnion.dfn, mem_sUnion_iff, mem_ext_iff]⟩
 
 instance sUnion.definable : ℒₛₑₜ-function₁[V] sUnion := sUnion.defined.to_definable
 
-@[simp] lemma sUnion_emptyset_eq_emptyset : ⋃ˢ (∅ : V) = ∅ := by ext; simp
+@[simp] lemma sUnion_empty_eq_empty : ⋃ˢ (∅ : V) = ∅ := by ext; simp [mem_sUnion_iff]
 
-@[simp] lemma sUnion_singleton_eq (x : V) : ⋃ˢ ({x} : V) = x := by ext; simp
+@[simp] lemma sUnion_singleton_eq (x : V) : ⋃ˢ ({x} : V) = x := by ext; simp [mem_sUnion_iff]
+
+@[simp] lemma IsNonempty_sUnion_iff {x : V} : IsNonempty (⋃ˢ x) ↔ ∃ y ∈ x, IsNonempty y := by
+  simp only [IsNonempty, mem_sUnion_iff]
+  grind
 
 /-! ### Union of two sets -/
 
@@ -191,12 +197,12 @@ lemma union_def (x y : V) : x ∪ y = ⋃ˢ (doubleton x y) := rfl
 
 def union.dfn : Semisentence ℒₛₑₜ 3 := “u x y. ∀ d, !doubleton.dfn d x y → !sUnion.dfn u d”
 
-lemma union.defined : ℒₛₑₜ-function₂[V] Union.union via union.dfn := by
-  intro v; simp [union.dfn, doubleton.defined.iff, sUnion.defined.iff, union_def]
+instance union.defined : ℒₛₑₜ-function₂[V] Union.union via union.dfn :=
+  ⟨by intro v; simp [union.dfn, union_def]⟩
 
 instance union.definable : ℒₛₑₜ-function₂[V] Union.union := union.defined.to_definable
 
-@[simp] lemma mem_union_iff {x y z : V} : z ∈ x ∪ y ↔ z ∈ x ∨ z ∈ y := by simp [union_def]
+@[simp] lemma mem_union_iff {x y z : V} : z ∈ x ∪ y ↔ z ∈ x ∨ z ∈ y := by simp [union_def, mem_sUnion_iff]
 
 @[simp] lemma union_self_eq (x : V) : x ∪ x = x := by ext; simp
 
@@ -208,6 +214,9 @@ lemma union_assoc (x y z : V) : (x ∪ y) ∪ z = x ∪ (y ∪ z) := by ext; sim
 
 @[simp] lemma empty_union (x : V) : ∅ ∪ x = x := by ext; simp
 
+@[simp] lemma IsNonempty_union_iff {x y : V} : IsNonempty (x ∪ y) ↔ IsNonempty x ∨ IsNonempty y := by
+  simp only [IsNonempty, mem_union_iff]; grind
+
 /-! ### Insert -/
 
 noncomputable def insert (x y : V) : V := {x} ∪ y
@@ -218,8 +227,8 @@ lemma insert_def (x y : V) : Insert.insert x y = {x} ∪ y := rfl
 
 def insert.dfn : Semisentence ℒₛₑₜ 3 := “u x y. ∀ s, !singleton.dfn s x → !union.dfn u s y”
 
-lemma insert.defined : ℒₛₑₜ-function₂[V] Insert.insert via insert.dfn := by
-  intro v; simp [insert.dfn, singleton.defined.iff, union.defined.iff, insert_def]
+instance insert.defined : ℒₛₑₜ-function₂[V] Insert.insert via insert.dfn :=
+  ⟨by intro v; simp [insert.dfn, insert_def]⟩
 
 instance insert.definable : ℒₛₑₜ-function₂[V] Insert.insert := insert.defined.to_definable
 
@@ -229,9 +238,54 @@ instance insert.definable : ℒₛₑₜ-function₂[V] Insert.insert := insert.
 
 lemma union_insert (x y : V) : x ∪ Insert.insert y z = Insert.insert y (x ∪ z) := by ext; simp; tauto
 
-lemma unordered_pair_eq_doubleton (x y : V) : {x, y} = doubleton x y := by ext; simp
+lemma pair_eq_doubleton (x y : V) : {x, y} = doubleton x y := by ext; simp
 
-@[simp] lemma sUnion_insert (x y : V) : ⋃ˢ Insert.insert x y = x ∪ ⋃ˢ y := by ext; simp
+@[simp] lemma sUnion_insert (x y : V) : ⋃ˢ Insert.insert x y = x ∪ ⋃ˢ y := by ext; simp [mem_sUnion_iff]
+
+@[simp] lemma insert_isNonempty (x y : V) : IsNonempty (Insert.insert x y) := ⟨x, by simp⟩
+
+@[simp] lemma intsert_union (x y z : V) :
+    Insert.insert x y ∪ z = Insert.insert x (y ∪ z) := by
+  ext; simp only [mem_union_iff, mem_insert]; grind
+
+@[simp] lemma singleton_inter (x y : V) :
+    {x} ∪ y = Insert.insert x y := by
+  ext; simp
+
+@[simp, grind] lemma insert_eq_self_of_mem {x y : V} (hx : x ∈ y) : Insert.insert x y = y := by
+  ext; simp only [mem_insert, or_iff_right_iff_imp]; grind
+
+/-! ## Axiom of power set -/
+
+lemma power_exists : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
+  simpa [models_iff, Axiom.power] using ModelsTheory.models V Zermelo.axiom_of_power_set
+
+lemma power_existsUnique (x : V) : ∃! y : V, ∀ z, z ∈ y ↔ z ⊆ x := by
+  rcases power_exists x with ⟨p, hp⟩
+  apply ExistsUnique.intro p hp
+  intro q hq
+  ext; simp_all
+
+noncomputable def power (x : V) : V := Classical.choose! (power_existsUnique x)
+
+prefix:110 "℘ " => power
+
+lemma mem_power_iff {x z : V} : z ∈ ℘ x ↔ z ⊆ x := Classical.choose!_spec (power_existsUnique x) z
+
+def power.dfn : Semisentence ℒₛₑₜ 2 := “p x. ∀ z, z ∈ p ↔ z ⊆ x”
+
+instance power.defined : ℒₛₑₜ-function₁[V] power via power.dfn :=
+  ⟨by intro v; simp [mem_power_iff, power.dfn, mem_ext_iff]⟩
+
+instance power.definable : ℒₛₑₜ-function₁[V] power := power.defined.to_definable
+
+@[simp] lemma empty_mem_power (x : V) : ∅ ∈ ℘ x := by simp [mem_power_iff]
+
+@[simp] lemma self_mem_power (x : V) : x ∈ ℘ x := by simp [mem_power_iff]
+
+@[simp] lemma power_empty : ℘ (∅ : V) = {∅} := by ext; simp [mem_power_iff]
+
+@[simp] lemma power_nonempty (x : V) : IsNonempty (℘ x) := ⟨x, by simp⟩
 
 /-! ## Aussonderungsaxiom -/
 
@@ -288,14 +342,198 @@ noncomputable def sInter (x : V) : V := {z ∈ ⋃ˢ x ; ∀ y ∈ x, z ∈ y}
 
 prefix:110 "⋂ˢ " => sInter
 
-lemma mem_sInter_iff {x : V} : z ∈ ⋂ˢ x ↔ z ∈ ⋃ˢ x ∧ ∀ y ∈ x, z ∈ y := by simp [sInter]
+lemma mem_sInter_iff {x : V} : z ∈ ⋂ˢ x ↔ IsNonempty x ∧ ∀ y ∈ x, z ∈ y := by
+  simp only [sInter, mem_sep_iff, mem_sUnion_iff, and_congr_left_iff, IsNonempty]
+  grind
 
-lemma IsNenempty.mem_sInter_iff {x : V} (hx : IsNonempty x) : z ∈ ⋂ˢ x ↔ ∀ y ∈ x, z ∈ y := by
-  simp only [Zermelo.mem_sInter_iff, mem_sUnion_iff, and_iff_right_iff_imp]
-  rcases hx with ⟨v, hv⟩
-  grind only
+def sInter.dfn : Semisentence ℒₛₑₜ 2 := “u x. ∀ z, z ∈ u ↔ !isNonempty x ∧ ∀ y ∈ x, z ∈ y”
+
+instance sInter.defined : ℒₛₑₜ-function₁[V] sInter via sInter.dfn :=
+  ⟨by intro v; simp [sInter.dfn, mem_ext_iff, mem_sInter_iff]⟩
+
+instance sInter.definable : ℒₛₑₜ-function₁[V] sInter := sInter.defined.to_definable
+
+lemma IsNonempty.mem_sInter_iff {x : V} (hx : IsNonempty x) :
+    z ∈ ⋂ˢ x ↔ ∀ y ∈ x, z ∈ y := by
+  simp [Zermelo.mem_sInter_iff, hx]
 
 @[simp] lemma sInter_empty_eq : ⋂ˢ (∅ : V) = ∅ := by ext; simp [mem_sInter_iff]
+
+@[simp] lemma sInter_singleton (x : V) : ⋂ˢ {x} = x := by ext; simp [IsNonempty.mem_sInter_iff]
+
+/-! #### Intersection of two sets -/
+
+noncomputable def inter (x y : V) : V := ⋂ˢ {x, y}
+
+noncomputable instance : Inter V := ⟨inter⟩
+
+lemma inter_def (x y : V) : x ∩ y = ⋂ˢ {x, y} := rfl
+
+@[simp] lemma mem_inter_iff {x y z : V} : z ∈ x ∩ y ↔ z ∈ x ∧ z ∈ y := by
+  simp [inter_def, IsNonempty.mem_sInter_iff]
+
+def inter.dfn : Semisentence ℒₛₑₜ 3 := “u x y. ∀ z, z ∈ u ↔ z ∈ x ∧ z ∈ y”
+
+instance inter.defined : ℒₛₑₜ-function₂[V] Inter.inter via inter.dfn := ⟨by intro v; simp [inter.dfn, mem_ext_iff]⟩
+
+instance inter.definable : ℒₛₑₜ-function₂[V] Inter.inter := inter.defined.to_definable
+
+@[simp] lemma inter_self (x : V) : x ∩ x = x := by ext; simp
+
+@[simp] lemma inter_comm (x y : V) : x ∩ y = y ∩ x := by ext; simp; tauto
+
+@[simp] lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; simp; tauto
+
+@[simp] lemma inter_empty (x : V) : x ∩ ∅ = ∅ := by ext; simp
+
+@[simp] lemma empty_inter (x : V) : ∅ ∩ x = ∅ := by ext; simp
+
+@[simp] lemma sInter_insert (x y : V) (hy : IsNonempty y) : ⋂ˢ Insert.insert x y = x ∩ ⋂ˢ y := by
+  ext; simp [*, IsNonempty.mem_sInter_iff]
+
+@[simp, grind] lemma intsert_inter_of_mem (x y z : V) (hx : x ∈ z) :
+    Insert.insert x y ∩ z = Insert.insert x (y ∩ z) := by
+  ext; simp only [inter_comm, mem_inter_iff, mem_insert]; grind
+
+@[simp, grind] lemma intsert_inter_of_not_mem (x y z : V) (hx : x ∉ z) :
+    Insert.insert x y ∩ z = y ∩ z := by
+  ext; simp only [inter_comm, mem_inter_iff, mem_insert]; grind
+
+@[simp, grind] lemma singleton_inter_of_mem {x y : V} (hx : x ∈ y) :
+    {x} ∩ y = {x} := by
+  ext
+  simp only [inter_comm, mem_inter_iff, mem_singleton_iff,
+    and_iff_right_iff_imp]; grind
+
+@[simp, grind] lemma singleton_inter_of_not_mem {x y : V} (hx : x ∉ y) :
+    {x} ∩ y = ∅ := by
+  ext; simp only [inter_comm, mem_inter_iff, mem_singleton_iff, not_mem_empty, iff_false, not_and]
+  grind
+
+/-! ### Set difference -/
+
+noncomputable def sdiff (x y : V) : V := {z ∈ x ; z ∉ y}
+
+noncomputable instance : SDiff V := ⟨sdiff⟩
+
+lemma sdiff_def (x y : V) : x \ y = {z ∈ x ; z ∉ y} := rfl
+
+@[simp] lemma mem_sdiff_iff {x y z : V} : z ∈ x \ y ↔ z ∈ x ∧ z ∉ y := by simp [sdiff_def]
+
+def sdiff.dfn : Semisentence ℒₛₑₜ 3 := “d x y. ∀ z, z ∈ d ↔ z ∈ x ∧ z ∉ y”
+
+instance sdiff.defined : ℒₛₑₜ-function₂[V] SDiff.sdiff via sdiff.dfn := ⟨by intro v; simp [sdiff.dfn, mem_ext_iff]⟩
+
+instance sdiff.definable : ℒₛₑₜ-function₂[V] SDiff.sdiff := sdiff.defined.to_definable
+
+@[simp] lemma sdiff_empty (x : V) : x \ ∅ = x := by ext; simp
+
+@[simp] lemma empty_sdiff (x : V) : ∅ \ x = ∅ := by ext; simp
+
+@[simp, grind] lemma singleton_sdiff_of_mem {x z : V} (hx : x ∈ z) :
+    {x} \ z = ∅ := by
+  ext
+  simp only [mem_sdiff_iff, mem_singleton_iff, not_mem_empty,
+    iff_false, not_and, Decidable.not_not]; grind
+
+@[simp, grind] lemma singleton_sdiff_of_not_mem {x z : V} (hx : x ∉ z) :
+    {x} \ z = {x} := by
+  ext; simp only [mem_sdiff_iff, mem_singleton_iff, and_iff_left_iff_imp]; grind
+
+@[simp, grind] lemma insert_sdiff_of_mem {x y z : V} (hx : x ∈ z) :
+    Insert.insert x y \ z = y \ z := by
+  ext; simp only [mem_sdiff_iff, mem_insert, and_congr_left_iff, or_iff_right_iff_imp]; grind
+
+@[simp, grind] lemma insert_sdiff_of_not_mem {x y z : V} (hx : x ∉ z) :
+    Insert.insert x y \ z = Insert.insert x (y \ z) := by
+  ext; simp only [mem_sdiff_iff, mem_insert]; grind
+
+/-! ### Kuratowski's ordered pair -/
+
+noncomputable def kpair (x y : V) : V := {{x}, {x, y}}
+
+noncomputable def kpair.π₁ (z : V) : V := ⋃ˢ ⋂ˢ z
+
+noncomputable def kpair.π₂ (z : V) : V := ⋃ˢ {x ∈ ⋃ˢ z; x ∈ ⋂ˢ z → ⋃ˢ z = ⋂ˢ z}
+
+def kpair.dfn : Semisentence ℒₛₑₜ 3 :=
+  “k x y. ∀ x', !singleton.dfn x' x → ∀ z, !doubleton.dfn z x y → !doubleton.dfn k x' z”
+
+instance kpair.defined : ℒₛₑₜ-function₂[V] kpair via kpair.dfn :=
+  ⟨by intro v; simp [kpair.dfn, kpair, ←pair_eq_doubleton]⟩
+
+instance kpair.definable : ℒₛₑₜ-function₂[V] kpair := kpair.defined.to_definable
+
+def kpair.π₁.dfn : Semisentence ℒₛₑₜ 2 := “p₁ x. ∀ i, !sInter.dfn i x → !sUnion.dfn p₁ i”
+
+instance kpair.π₁.defined : ℒₛₑₜ-function₁[V] kpair.π₁ via kpair.π₁.dfn :=
+  ⟨by intro v; simp [kpair.π₁.dfn, π₁]⟩
+
+instance kpair.π₁.definable : ℒₛₑₜ-function₁[V] kpair.π₁ := kpair.π₁.defined.to_definable
+
+def kpair.π₂.dfn : Semisentence ℒₛₑₜ 2 :=
+  “p₂ x. ∀ u, !sUnion.dfn u x → ∀ i, !sInter.dfn i x → ∀ s, (∀ z, z ∈ s ↔ (z ∈ u ∧ (z ∈ i → u = i))) → !sUnion.dfn p₂ s”
+
+instance kpair.π₂.defined : ℒₛₑₜ-function₁[V] kpair.π₂ via kpair.π₂.dfn :=
+  ⟨by intro v
+      let u := ⋃ˢ v 1
+      let i := ⋂ˢ v 1
+      suffices v 0 = ⋃ˢ {x ∈ u ; x ∈ i → u = i} ↔ ∀ s, (∀ z, z ∈ s ↔ z ∈ u ∧ (z ∈ i → u = i)) → v 0 = ⋃ˢ s by
+        simpa [kpair.π₂.dfn, π₂] using this
+      constructor
+      · intro e s hs; rw [e]
+        congr; ext
+        simp only [mem_sep_iff]; grind
+      · intro h
+        apply h
+        intro z; simp⟩
+
+instance kpair.π₂.definable : ℒₛₑₜ-function₁[V] kpair.π₂ := kpair.π₂.defined.to_definable
+
+@[grind, simp] lemma kpair.π₁_kpair (x y : V) :
+    π₁ (kpair x y) = x := by simp [π₁, kpair]
+
+@[grind, simp] lemma kpair.π₂_kpair (x y : V) :
+    π₂ (kpair x y) = y := calc
+  π₂ (kpair x y) = ⋃ˢ {z ∈ {x, y} ; z = x → ({x, y} : V) = {x}} := by simp [π₂, kpair]
+  _              = ⋃ˢ {y} := by
+    congr; ext z
+    suffices (z = x ∨ z = y) ∧ (z = x → y = x) ↔ z = y by simpa [mem_ext_iff (x := {x, y})]
+    grind
+  _              = y := by simp
+
+lemma kpair_inj {x₁ x₂ y₁ y₂ : V} :
+    kpair x₁ y₁ = kpair x₂ y₂ → x₁ = x₂ ∧ y₁ = y₂ := by
+  intro h
+  constructor
+  · calc x₁ = kpair.π₁ (kpair x₁ y₁) := by simp
+    _       = kpair.π₁ (kpair x₂ y₂) := by rw [h]
+    _       = x₂ := by simp
+  · calc y₁ = kpair.π₂ (kpair x₁ y₁) := by simp
+    _       = kpair.π₂ (kpair x₂ y₂) := by rw [h]
+    _       = y₂ := by simp
+
+@[simp, grind =] lemma kpair_iff {x₁ x₂ y₁ y₂ : V} :
+    kpair x₁ y₁ = kpair x₂ y₂ ↔ x₁ = x₂ ∧ y₁ = y₂ :=
+  ⟨kpair_inj, by rintro ⟨rfl, rfl⟩; rfl⟩
+
+/-! ### Product -/
+
+noncomputable def prod (X Y : V) : V := {z ∈ ℘ ℘ (X ∪ Y) ; ∃ x ∈ X, ∃ y ∈ Y, z = kpair x y}
+
+infix:60 " ×ˢ " => prod
+
+@[simp] lemma mem_prod_iff {X Y z : V} : z ∈ X ×ˢ Y ↔ ∃ x ∈ X, ∃ y ∈ Y, z = kpair x y := by
+  suffices ∀ x ∈ X, ∀ y ∈ Y, z = kpair x y → z ∈ ℘ ℘ (X ∪ Y) by simpa [prod]
+  rintro x hx y hy rfl
+  simp_all [mem_power_iff, subset_def, kpair]
+
+def prod.dfn : Semisentence ℒₛₑₜ 3 := “p X Y. ∀ z, z ∈ p ↔ ∃ x ∈ X, ∃ y ∈ Y, !kpair.dfn z x y”
+
+instance prod.defined : ℒₛₑₜ-function₂[V] prod via prod.dfn :=
+  ⟨by intro v; simp [prod.dfn, mem_ext_iff]⟩
+
+instance prod.definable : ℒₛₑₜ-function₂[V] prod := prod.defined.to_definable
 
 end Zermelo
 
