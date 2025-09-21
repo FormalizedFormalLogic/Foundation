@@ -11,20 +11,23 @@ namespace Modal
 variable {φ ψ : Formula ℕ}
 
 open Kripke
+open Formula.Kripke
 
 
-def Formula.gTrace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.height = n ∧ ¬r ⊧ φ) }
+namespace Formula
 
-lemma iff_mem_gTrace {n : ℕ} : n ∈ φ.gTrace ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ φ := by
-  simp [Formula.gTrace];
+def trace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.height = n ∧ ¬r ⊧ φ) }
 
-lemma satisfies_of_not_mem_gTrace : n ∉ φ.gTrace ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.height = n → r ⊧ φ) := by
-  simp [Formula.gTrace];
+lemma iff_mem_trace {n : ℕ} : n ∈ φ.trace ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ φ := by
+  simp [Formula.trace];
+
+lemma satisfies_of_not_mem_trace : n ∉ φ.trace ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.height = n → r ⊧ φ) := by
+  simp [Formula.trace];
 
 @[grind]
-lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.Letterless) : φ.gTrace = φ.trace := by
+lemma eq_trace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.Letterless) : φ.trace = φ.letterlessTrace := by
   ext n;
-  apply Iff.trans ?_ (Kripke.spectrum_TFAE φ_letterless (n := n) |>.out 1 0 |>.not);
+  apply Iff.trans ?_ (Kripke.letterlessSpectrum_TFAE φ_letterless (n := n) |>.out 1 0 |>.not);
   constructor;
   . rintro ⟨M, r, _, M_fintype, rfl, h⟩;
     push_neg;
@@ -32,7 +35,7 @@ lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : 
     . assumption;
     . rfl;
     . assumption;
-  . dsimp [Formula.gTrace];
+  . dsimp [Formula.trace];
     contrapose!;
     rintro h M r _ _ x rfl;
     apply Model.pointGenerate.modal_equivalent' x ⟨x, by tauto⟩ |>.mp;
@@ -41,13 +44,13 @@ lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : 
 
 open Formula.Kripke
 
-@[simp, grind] lemma Formula.gTrace_bot : (⊥ : Formula ℕ).gTrace = Set.univ := by simp [Formula.eq_gTrace_trace_of_letterless];
-@[simp, grind] lemma Formula.gTrace_top : (⊤ : Formula ℕ).gTrace = ∅ := by simp [Formula.eq_gTrace_trace_of_letterless];
+@[simp, grind] lemma trace_bot : (⊥ : Formula ℕ).trace = Set.univ := by simp [Formula.eq_trace_trace_of_letterless];
+@[simp, grind] lemma trace_top : (⊤ : Formula ℕ).trace = ∅ := by simp [Formula.eq_trace_trace_of_letterless];
 
-lemma Formula.gTrace_and : (φ ⋏ ψ).gTrace = φ.gTrace ∪ ψ.gTrace := by
+lemma trace_and : (φ ⋏ ψ).trace = φ.trace ∪ ψ.trace := by
   ext n;
   calc
-    _ ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ (¬r ⊧ φ ∨ ¬r ⊧ ψ) := by simp [gTrace, -not_and, not_and_or]
+    _ ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ (¬r ⊧ φ ∨ ¬r ⊧ ψ) := by simp [trace, -not_and, not_and_or]
     _ ↔
       (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ φ) ∨
       (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ ψ) := by
@@ -57,33 +60,38 @@ lemma Formula.gTrace_and : (φ ⋏ ψ).gTrace = φ.gTrace ∪ ψ.gTrace := by
         . right; tauto;
       . rintro (⟨M, r, _, _, _, _⟩ | ⟨M, r, _, _, _, _⟩) <;>
         . refine ⟨M, r, by assumption, by assumption, by tauto⟩;
-    _ ↔ _ := by simp [Formula.gTrace];
+    _ ↔ _ := by simp [Formula.trace];
 
-lemma Formula.gTrace_lconj₂ {s : List (Formula ℕ)} : (s.conj₂).gTrace = ⋃ φ ∈ s, φ.gTrace := by
+lemma trace_lconj₂ {s : List (Formula ℕ)} : (s.conj₂).trace = ⋃ φ ∈ s, φ.trace := by
   induction s using List.induction_with_singleton with
-  | hcons φ s hs ih => simp [List.conj₂_cons_nonempty hs, Formula.gTrace_and, ih];
+  | hcons φ s hs ih => simp [List.conj₂_cons_nonempty hs, Formula.trace_and, ih];
   | _ => simp [List.conj₂];
 
-lemma Formula.gTrace_fconj {s : Finset (Formula ℕ)} : s.conj.gTrace = ⋃ φ ∈ s, φ.gTrace := by simp [Finset.conj, Formula.gTrace_lconj₂];
+lemma trace_fconj {s : Finset (Formula ℕ)} : s.conj.trace = ⋃ φ ∈ s, φ.trace := by simp [Finset.conj, Formula.trace_lconj₂];
 
-lemma subset_gTrace_of_provable_imp_GL (h : Modal.GL ⊢! φ ➝ ψ) : ψ.gTrace ⊆ φ.gTrace := by
+lemma subset_trace_of_provable_imp_GL (h : Modal.GL ⊢! φ ➝ ψ) : ψ.trace ⊆ φ.trace := by
   intro n hn;
-  obtain ⟨M, r, _, _, rfl, h₁⟩ := iff_mem_gTrace.mp hn;
-  apply iff_mem_gTrace.mpr;
+  obtain ⟨M, r, _, _, rfl, h₁⟩ := iff_mem_trace.mp hn;
+  apply iff_mem_trace.mpr;
   refine ⟨M, r, by assumption, by assumption, by rfl, ?_⟩;
   contrapose! h₁;
   have : M.IsFiniteTree r := {}
   apply GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp h;
   assumption;
 
-abbrev FormulaSet.gTrace (X : FormulaSet ℕ) : Set ℕ := ⋃ φ ∈ X, φ.gTrace
+end Formula
 
-@[simp] lemma FormulaSet.gTrace_empty : (∅ : FormulaSet ℕ).gTrace = ∅ := by simp [FormulaSet.gTrace];
 
-lemma eq_FormulaSet_gTrace_finset_conj {X : Finset (Formula ℕ)} : X.conj.gTrace = FormulaSet.gTrace X.toSet := by simp [FormulaSet.gTrace, Formula.gTrace_fconj];
+namespace FormulaSet
 
-lemma FormulaSet.subset_gTrace_of_subset {X Y : FormulaSet ℕ} (h : X ⊆ Y) : X.gTrace ⊆ Y.gTrace := by
-  simp only [gTrace, Set.iUnion_subset_iff];
+abbrev trace (X : FormulaSet ℕ) : Set ℕ := ⋃ φ ∈ X, φ.trace
+
+@[simp] lemma trace_empty : (∅ : FormulaSet ℕ).trace = ∅ := by simp [FormulaSet.trace];
+
+lemma eq_FormulaSet_trace_finset_conj {X : Finset (Formula ℕ)} : X.conj.trace = FormulaSet.trace X.toSet := by simp [FormulaSet.trace, Formula.trace_fconj];
+
+lemma subset_trace_of_subset {X Y : FormulaSet ℕ} (h : X ⊆ Y) : X.trace ⊆ Y.trace := by
+  simp only [trace, Set.iUnion_subset_iff];
   intro φ hφ i hi;
   simp only [Set.mem_iUnion, exists_prop];
   use φ;
@@ -91,18 +99,21 @@ lemma FormulaSet.subset_gTrace_of_subset {X Y : FormulaSet ℕ} (h : X ⊆ Y) : 
   . apply h; assumption;
   . assumption;
 
-abbrev Logic.trace (L : Logic ℕ) : Set ℕ := FormulaSet.gTrace L
+end FormulaSet
 
-lemma GL.eq_trace_ext {X : FormulaSet ℕ} (hX : ∀ ξ ∈ X, ∀ s : Substitution _, ξ⟦s⟧ ∈ X) : (Modal.GL.sumQuasiNormal X).trace = X.gTrace := by
+
+abbrev Logic.trace (L : Logic ℕ) : Set ℕ := FormulaSet.trace L
+
+lemma GL.eq_trace_ext {X : FormulaSet ℕ} (hX : ∀ ξ ∈ X, ∀ s : Substitution _, ξ⟦s⟧ ∈ X) : (Modal.GL.sumQuasiNormal X).trace = X.trace := by
   ext n;
   constructor;
-  . suffices (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.gTrace) → (n ∈ X.gTrace) by simpa [Logic.trace, Logic.iff_provable];
+  . suffices (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.trace) → (n ∈ X.trace) by simpa [Logic.trace, Logic.iff_provable];
     rintro ⟨φ, hφ₁, hφ₂⟩;
     obtain ⟨Y, hY₁, hY₂⟩ := Logic.sumQuasiNormal.iff_provable_finite_provable hX |>.mp hφ₁;
-    apply FormulaSet.subset_gTrace_of_subset hY₁;
-    apply eq_FormulaSet_gTrace_finset_conj ▸ subset_gTrace_of_provable_imp_GL hY₂;
+    apply FormulaSet.subset_trace_of_subset hY₁;
+    apply FormulaSet.eq_FormulaSet_trace_finset_conj ▸ Formula.subset_trace_of_provable_imp_GL hY₂;
     assumption;
-  . suffices (∃ φ ∈ X, n ∈ φ.gTrace) → (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.gTrace) by simpa [Logic.trace, Logic.iff_provable];
+  . suffices (∃ φ ∈ X, n ∈ φ.trace) → (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.trace) by simpa [Logic.trace, Logic.iff_provable];
     rintro ⟨φ, hφ₁, hφ₂⟩;
     use φ;
     constructor;
@@ -110,15 +121,15 @@ lemma GL.eq_trace_ext {X : FormulaSet ℕ} (hX : ∀ ξ ∈ X, ∀ s : Substitut
       simpa [Logic.iff_provable];
     . assumption;
 
-lemma GL.unprovable_of_exists_trace (φ_letterless : φ.Letterless) : (∃ n, n ∈ φ.trace) → Modal.GL ⊬ φ := by
+lemma GL.unprovable_of_exists_trace (φ_letterless : φ.Letterless) : (∃ n, n ∈ φ.letterlessTrace) → Modal.GL ⊬ φ := by
   contrapose!;
   intro h;
-  have := Modal.iff_GL_provable_spectrum_Univ φ_letterless |>.mp (by simpa using h);
-  simp_all [Formula.trace];
+  have := Modal.iff_GL_provable_letterlessSpectrum_Univ φ_letterless |>.mp (by simpa using h);
+  simp_all [Formula.letterlessTrace];
 
 @[simp]
-lemma TBBMinus_trace (hβ : β.Cofinite) : (∼⩕ n ∈ hβ.toFinset, TBB n).trace = β := by
-  simp [Formula.trace, TBBMinus_spectrum']
+lemma TBBMinus_trace (hβ : β.Cofinite) : (∼⩕ n ∈ hβ.toFinset, TBB n).letterlessTrace = β := by
+  simp [Formula.letterlessTrace, TBBMinus_letterlessSpectrum']
 
 @[simp]
 lemma GL.eq_trace_emptyset : Modal.GL.trace = ∅ := by
@@ -128,12 +139,12 @@ lemma GL.eq_trace_emptyset : Modal.GL.trace = ∅ := by
 @[simp]
 lemma GLα.eq_trace {α : Set ℕ} : (Modal.GLα α).trace = α := by
   apply Eq.trans $ GL.eq_trace_ext $ by grind;
-  simp [FormulaSet.gTrace, Formula.eq_gTrace_trace_of_letterless];
+  simp [FormulaSet.trace, Formula.eq_trace_trace_of_letterless];
 
 @[simp]
 lemma GLβMinus.eq_trace {β : Set ℕ} (hβ : β.Cofinite := by grind) : (Modal.GLβMinus β).trace = β := by
   apply Eq.trans $ GL.eq_trace_ext $ by grind;
-  simp [FormulaSet.gTrace, Formula.eq_gTrace_trace_of_letterless];
+  simp [FormulaSet.trace, Formula.eq_trace_trace_of_letterless];
 
 @[simp, grind] lemma S.provable_TBB {n : ℕ} : Modal.S ⊢! TBB n := by simp [TBB]
 
@@ -152,19 +163,19 @@ instance : Modal.GLα α ⪯ Modal.S := by grind
 
 @[simp]
 lemma S.eq_trace : Modal.S.trace = Set.univ := by
-  suffices ∀ (x : ℕ), ∃ i ∈ Modal.S, x ∈ i.gTrace by simpa [Set.eq_univ_iff_forall]
+  suffices ∀ (x : ℕ), ∃ i ∈ Modal.S, x ∈ i.trace by simpa [Set.eq_univ_iff_forall]
   intro n;
   use (TBB n);
   constructor;
   . grind;
-  . simp [Formula.eq_gTrace_trace_of_letterless];
+  . simp [Formula.eq_trace_trace_of_letterless];
 
 variable {L : Logic ℕ} {φ : Formula ℕ}
 
 
-lemma subset_of_provable (h : L ⊢! φ) : φ.gTrace ⊆ L.trace := by
+lemma subset_of_provable (h : L ⊢! φ) : φ.trace ⊆ L.trace := by
   intro n h;
-  suffices ∃ i ∈ L, n ∈ i.gTrace by simpa [Logic.trace, FormulaSet.gTrace];
+  suffices ∃ i ∈ L, n ∈ i.trace by simpa [Logic.trace, FormulaSet.trace];
   use φ;
   grind;
 
@@ -323,13 +334,13 @@ end Kripke
 axiom GL.formalized_validates_axiomT_set_in_irrefl_trans_chain : Modal.GL ⊢! ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj
 
 @[grind]
-lemma Formula.gTrace.finite_or_cofinite : φ.gTrace.Finite ∨ φ.gTrace.Cofinite := by
-  suffices φ.gTrace.Infinite → φ.gTrace.Cofinite by tauto;
+lemma Formula.trace.finite_or_cofinite : φ.trace.Finite ∨ φ.trace.Cofinite := by
+  suffices φ.trace.Infinite → φ.trace.Cofinite by tauto;
   intro tr_infinite;
 
-  obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ φ.gTrace ∧ φ.rflSubformula.card < m  := Set.infinite_iff_exists_gt.mp tr_infinite _;
+  obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ φ.trace ∧ φ.rflSubformula.card < m  := Set.infinite_iff_exists_gt.mp tr_infinite _;
 
-  obtain ⟨M, r,_, _, rfl, hr⟩ := iff_mem_gTrace.mp hm₁;
+  obtain ⟨M, r,_, _, rfl, hr⟩ := iff_mem_trace.mp hm₁;
   have : M.IsFiniteTree r := {}
 
   have H₁ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ := height_lt_iff_satisfies_boxbot (i := r) (n := φ.rflSubformula.card + 1) |>.not.mp $ by
@@ -339,10 +350,10 @@ lemma Formula.gTrace.finite_or_cofinite : φ.gTrace.Finite ∨ φ.gTrace.Cofinit
   obtain ⟨a, Rrx, hx⟩ := Satisfies.dia_def.mp $ H₂ H₁;
   replace Rrx : r ≠ a := by rintro rfl; apply M.irrefl _ Rrx;
 
-  have : {k | k ≥ M.height} ⊆ φ.gTrace := by
+  have : {k | k ≥ M.height} ⊆ φ.trace := by
     intro k hmk;
     obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hmk;
-    apply iff_mem_gTrace.mpr;
+    apply iff_mem_trace.mpr;
     refine ⟨M.boneLengthening a k, r, ?_, ?_, ?_, ?_⟩;
     . apply Model.boneLengthening.isTree Rrx;
     . infer_instance;
@@ -355,8 +366,8 @@ lemma Formula.gTrace.finite_or_cofinite : φ.gTrace.Finite ∨ φ.gTrace.Cofinit
     simp;
 
 @[grind]
-lemma Formula.gTrace.finite_of_coinfinite (h_ci : φ.gTrace.Coinfinite) : φ.gTrace.Finite := by
-  rcases Formula.gTrace.finite_or_cofinite (φ := φ) with h | h_cf;
+lemma Formula.trace.finite_of_coinfinite (h_ci : φ.trace.Coinfinite) : φ.trace.Finite := by
+  rcases Formula.trace.finite_or_cofinite (φ := φ) with h | h_cf;
   . assumption;
   . exfalso;
     apply h_ci;
@@ -366,9 +377,9 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
   intro φ hφ;
   apply Modal.Logic.iff_provable.mp;
 
-  have : φ.gTrace ⊆ L.trace := subset_of_provable (by grind);
-  have : φ.gTrace.Finite := by
-    have : φ.gTrace.Coinfinite := Set.Coinfinite.subset this hL
+  have : φ.trace ⊆ L.trace := subset_of_provable (by grind);
+  have : φ.trace.Finite := by
+    have : φ.trace.Coinfinite := Set.Coinfinite.subset this hL
     grind
   let Tφ := this.toFinset;
 
@@ -378,12 +389,12 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
   . apply GL.Kripke.tree_completeness_TFAE.out 3 0 |>.mp;
     intro M r _ hr;
     have : Fintype M.World := Fintype.ofFinite _;
-    apply satisfies_of_not_mem_gTrace (n := M.height) |>.mp;
-    . replace hr : ∀ n ∈ φ.gTrace, M.height ≠ n := by
+    apply Formula.satisfies_of_not_mem_trace (n := M.height) |>.mp;
+    . replace hr : ∀ n ∈ φ.trace, M.height ≠ n := by
         intro n h;
         apply iff_satisfies_TBB_ne_rank.mp;
         apply Satisfies.fconj_def.mp hr _;
-        suffices ∃ m ∈ φ.gTrace, □^[m]⊥ = □^[n]⊥ by simpa [Tφ];
+        suffices ∃ m ∈ φ.trace, □^[m]⊥ = □^[n]⊥ by simpa [Tφ];
         use n;
       by_contra hC;
       apply hr _ hC rfl;
@@ -393,7 +404,7 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
   intro φ hφ;
   apply Modal.Logic.iff_provable.mp;
 
-  have : φ.gTrace ⊆ L.trace := subset_of_provable (by grind);
+  have : φ.trace ⊆ L.trace := subset_of_provable (by grind);
 
   let Tφ := hL.toFinset;
 
@@ -403,12 +414,12 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
   . apply GL.Kripke.tree_completeness_TFAE.out 3 0 |>.mp;
     intro M r _ hr;
     have : Fintype M.World := Fintype.ofFinite _;
-    apply satisfies_of_not_mem_gTrace (n := M.height) |>.mp;
-    . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.gTrace → ¬M.height = n := by
+    apply Formula.satisfies_of_not_mem_trace (n := M.height) |>.mp;
+    . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.trace → ¬M.height = n := by
         rintro n ξ hξ₁ hξ₂ rfl;
         obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ ¬r ⊧ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by
           simpa only [Finset.conj_singleton] using hr;
-        replace hm₁ : ∀ i ∈ L, m ∉ i.gTrace := by simpa [Tφ] using hm₁;
+        replace hm₁ : ∀ i ∈ L, m ∉ i.trace := by simpa [Tφ] using hm₁;
         replace hm₂ : M.height = m := by simpa using iff_satisfies_TBB_ne_rank.not.mp hm₂;
         apply hm₁ ξ;
         . assumption;
@@ -474,7 +485,7 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trac
         apply Kripke.Model.extendRoot.modal_equivalence_original_world.mpr;
         rwa [this] at hA;
       apply Kripke.Frame.extendRoot.iff_eq_height_eq_original_root.mp h;
-    . apply iff_satisfies_mem_rank_spectrum (by grind) |>.mpr;
+    . apply iff_satisfies_mem_rank_letterlessSpectrum (by grind) |>.mpr;
       simp;
       omega;
   have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢! S i ➝ S.realization (A ➝ (Modal.TBB M.height)) := by
@@ -581,8 +592,7 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
         . by_contra hC;
           apply iff_satisfies_TBB_ne_rank (w := (i : M₀)) (n := Frame.rank (i : M₀)) |>.mp;
           . apply Satisfies.fconj'_def.mp $ Satisfies.and_def.mp h |>.2;
-            suffices Frame.rank (i : M₀) < M₁.height ∧ Frame.rank (i : M₀) ∈ (T.ProvabilityLogic U).trace by
-              simpa [R];
+            suffices Frame.rank (i : M₀) < M₁.height ∧ Frame.rank (i : M₀) ∈ (T.ProvabilityLogic U).trace by simpa [R];
             constructor;
             . suffices Frame.rank i < M₁.height by calc
                 _ = Frame.rank (i : M₁) := by convert Frame.extendRoot.eq_original_height
