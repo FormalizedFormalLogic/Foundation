@@ -119,7 +119,7 @@ lemma eq_empty_or_isNonempty (x : V) : x = ∅ ∨ IsNonempty x := by
 lemma pairing_exists : ∀ x y : V, ∃ z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
   simpa [models_iff, Axiom.pairing] using ModelsTheory.models V Zermelo.axiom_of_pairing
 
-lemma pairing_existsUnique (x y : V) : ∃! z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y  := by
+lemma pairing_existsUnique (x y : V) : ∃! z : V, ∀ w, w ∈ z ↔ w = x ∨ w = y := by
   rcases pairing_exists x y with ⟨p, hp⟩
   apply ExistsUnique.intro p hp
   intro q hq
@@ -132,7 +132,7 @@ noncomputable def doubleton (x y : V) : V := Classical.choose! (pairing_existsUn
 def doubleton.dfn : Semisentence ℒₛₑₜ 3 := “p x y. ∀ z, z ∈ p ↔ z = x ∨ z = y”
 
 instance doubleton.defined : ℒₛₑₜ-function₂[V] doubleton via doubleton.dfn :=
-  ⟨by intro v; simp [doubleton.dfn, mem_ext_iff]⟩
+  ⟨by intro v; simp [doubleton.dfn, doubleton]⟩
 
 instance doubleton.definable : ℒₛₑₜ-function₂[V] doubleton := doubleton.defined.to_definable
 
@@ -275,7 +275,7 @@ lemma mem_power_iff {x z : V} : z ∈ ℘ x ↔ z ⊆ x := Classical.choose!_spe
 def power.dfn : Semisentence ℒₛₑₜ 2 := “p x. ∀ z, z ∈ p ↔ z ⊆ x”
 
 instance power.defined : ℒₛₑₜ-function₁[V] power via power.dfn :=
-  ⟨by intro v; simp [mem_power_iff, power.dfn, mem_ext_iff]⟩
+  ⟨by intro v; simp [power.dfn, power]⟩
 
 instance power.definable : ℒₛₑₜ-function₁[V] power := power.defined.to_definable
 
@@ -508,10 +508,10 @@ lemma kpair_inj {x₁ x₂ y₁ y₂ : V} :
   constructor
   · calc x₁ = kpair.π₁ (kpair x₁ y₁) := by simp
     _       = kpair.π₁ (kpair x₂ y₂) := by rw [h]
-    _       = x₂ := by simp
+    _       = x₂                     := by simp
   · calc y₁ = kpair.π₂ (kpair x₁ y₁) := by simp
     _       = kpair.π₂ (kpair x₂ y₂) := by rw [h]
-    _       = y₂ := by simp
+    _       = y₂                     := by simp
 
 @[simp, grind =] lemma kpair_iff {x₁ x₂ y₁ y₂ : V} :
     kpair x₁ y₁ = kpair x₂ y₂ ↔ x₁ = x₂ ∧ y₁ = y₂ :=
@@ -534,6 +534,123 @@ instance prod.defined : ℒₛₑₜ-function₂[V] prod via prod.dfn :=
   ⟨by intro v; simp [prod.dfn, mem_ext_iff]⟩
 
 instance prod.definable : ℒₛₑₜ-function₂[V] prod := prod.defined.to_definable
+
+@[simp] lemma prod_empty (x : V) : x ×ˢ ∅ = ∅ := by ext; simp
+
+@[simp] lemma empty_prod (x : V) : ∅ ×ˢ x = ∅ := by ext; simp
+
+@[simp] lemma kpair_mem_iff {x y X Y : V} : kpair x y ∈ X ×ˢ Y ↔ x ∈ X ∧ y ∈ Y := by
+  simp
+
+/-! ## Axiom of infinity -/
+
+noncomputable def succ (x : V) : V := Insert.insert x x
+
+@[simp] lemma mem_succ_iff {x y : V} : y ∈ succ x ↔ y = x ∨ y ∈ x := by simp [succ]
+
+abbrev succ.dfn := isSucc
+
+instance succ.defined : ℒₛₑₜ-function₁[V] succ via succ.dfn :=
+  ⟨fun v ↦ by simp [succ.dfn, isSucc, mem_ext_iff (x := v 0)]⟩
+
+instance succ.definable : ℒₛₑₜ-function₁[V] succ := succ.defined.to_definable
+
+def IsInductive (x : V) : Prop := ∅ ∈ x ∧ ∀ y ∈ x, succ y ∈ x
+
+def IsInductive.dfn : Semisentence ℒₛₑₜ 1 :=
+  “x. (∀ e, !isEmpty e → e ∈ x) ∧ (∀ y ∈ x, ∀ y', !succ.dfn y' y → y' ∈ x)”
+
+instance IsInductive.defined : ℒₛₑₜ-predicate[V] IsInductive via IsInductive.dfn :=
+  ⟨fun v ↦ by simp [IsInductive, IsInductive.dfn, ←eq_empty_iff_isEmpty]⟩
+
+instance IsInductive.definable : ℒₛₑₜ-predicate[V] IsInductive := IsInductive.defined.to_definable
+
+lemma IsInductive.zero {I : V} (hI : IsInductive I) : ∅ ∈ I := hI.1
+
+lemma IsInductive.succ {I : V} (hI : IsInductive I) {x : V} (hx : x ∈ I) : succ x ∈ I := hI.2 x hx
+
+lemma isInductive_exists : ∃ I : V, IsInductive I := by
+  simpa [models_iff, Axiom.infinity, ←eq_empty_iff_isEmpty] using ModelsTheory.models V Zermelo.axiom_of_infinity
+
+lemma omega_existsUnique : ∃! ω : V, ∀ x, x ∈ ω ↔ ∀ I : V, IsInductive I → x ∈ I := by
+  rcases isInductive_exists (V := V) with ⟨I, hI⟩
+  let ω : V := {x ∈ I ; ∀ J : V, IsInductive J → x ∈ J}
+  have : ∀ x, x ∈ ω ↔ ∀ I : V, IsInductive I → x ∈ I := by
+    intro x; constructor
+    · intro hx J hJ
+      have hx : x ∈ I ∧ ∀ J : V, IsInductive J → x ∈ J := by simpa [ω] using hx
+      exact hx.2 J hJ
+    · intro h
+      suffices x ∈ I ∧ ∀ J : V, IsInductive J → x ∈ J by simpa [ω]
+      exact ⟨h I hI, h⟩
+  apply ExistsUnique.intro ω this
+  intros; ext; simp_all
+
+noncomputable def ω : V := Classical.choose! (omega_existsUnique)
+
+lemma mem_ω_iff_mem_all_inductive {x : V} :
+  x ∈ (ω : V) ↔ ∀ I : V, IsInductive I → x ∈ I := Classical.choose!_spec (omega_existsUnique) x
+
+def isω : Semisentence ℒₛₑₜ 1 := “ω. ∀ x, x ∈ ω ↔ ∀ I, !IsInductive.dfn I → x ∈ I”
+
+instance ω.defined : ℒₛₑₜ-function₀[V] ω via isω := ⟨fun v ↦ by simp [isω, ω]⟩
+
+@[simp] lemma empty_mem_ω : ∅ ∈ (ω : V) := mem_ω_iff_mem_all_inductive.mpr <| fun _ hI ↦ hI.zero
+
+@[simp] lemma ω_succ_closed {x : V} : x ∈ (ω : V) → succ x ∈ (ω : V) := by
+  intro hx
+  apply mem_ω_iff_mem_all_inductive.mpr
+  intro I hI
+  exact hI.succ (mem_ω_iff_mem_all_inductive.mp hx I hI)
+
+@[simp] lemma ω_isInductive : IsInductive (ω : V) := ⟨empty_mem_ω, fun _ ↦ ω_succ_closed⟩
+
+lemma IsInductive.ω_subset {I : V} (hI : IsInductive I) : (ω : V) ⊆ I :=
+  fun _ hx ↦ mem_ω_iff_mem_all_inductive.mp hx I hI
+
+noncomputable def ofNat : ℕ → V
+  |     0 => ∅
+  | n + 1 => succ (ofNat n)
+
+noncomputable scoped instance (n) : OfNat V n := ⟨ofNat n⟩
+
+noncomputable scoped instance : NatCast V := ⟨ofNat⟩
+
+lemma zero_def : (0 : V) = ∅ := rfl
+
+lemma num_succ_def (n : ℕ) : ((n + 1 : ℕ) : V) = succ ↑n := rfl
+
+@[simp] lemma cast_zero_def : ((0 : ℕ) : V) = 0 := rfl
+
+lemma one_def : (1 : V) = {∅} := calc
+  (1 : V) = succ ∅ := rfl
+  _       = {∅} := by simp [succ]
+
+@[simp] lemma ofNat_mem_ω (n : ℕ) : ↑n ∈ (ω : V) :=
+  match n with
+  |     0 => by simp [zero_def]
+  | n + 1 => by simp [num_succ_def, ω_succ_closed (ofNat_mem_ω n)]
+
+@[simp] lemma zero_mem_ω : 0 ∈ (ω : V) := ofNat_mem_ω 0
+
+@[simp] lemma one_mem_ω : 1 ∈ (ω : V) := ofNat_mem_ω 1
+
+@[simp] lemma two_mem_ω : 2 ∈ (ω : V) := ofNat_mem_ω 2
+
+lemma naturalNumber_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
+    (zero : P 0) (succ : ∀ x ∈ (ω : V), P x → P (succ x)) : ∀ x ∈ (ω : V), P x := by
+  let p : V := {x ∈ ω ; P x}
+  have : IsInductive p := by
+    constructor
+    · simpa [p]
+    · intro x hx
+      have hx : x ∈ (ω : V) ∧ P x := by simpa [p] using hx
+      suffices Zermelo.succ x ∈ ω ∧ P (Zermelo.succ x) by simpa [p]
+      refine ⟨ω_succ_closed hx.1, succ x hx.1 hx.2⟩
+  have : ω ⊆ p := this.ω_subset
+  intro x hx
+  have : x ∈ (ω : V) ∧ P x := by simpa [p] using this x hx
+  exact this.2
 
 end Zermelo
 
