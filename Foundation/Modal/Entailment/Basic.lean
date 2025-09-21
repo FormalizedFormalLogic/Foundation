@@ -334,6 +334,24 @@ def axiomFour'! (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! □□φ := ⟨axiomFour' h.so
 end HasAxiomFour
 
 
+class HasAxiomFourN (n) (𝓢 : S) where
+  FourN (φ : F) : 𝓢 ⊢ Axioms.FourN n φ
+
+section
+
+variable [HasAxiomFourN n 𝓢]
+
+def axiomFourN : 𝓢 ⊢ □^[n]φ ➝ □^[(n + 1)]φ := by apply HasAxiomFourN.FourN
+@[simp] lemma axiomFourN! : 𝓢 ⊢!  □^[n]φ ➝ □^[(n + 1)]φ := ⟨axiomFourN⟩
+
+variable [Entailment.Minimal 𝓢]
+
+instance (Γ : FiniteContext F 𝓢) : HasAxiomFourN n Γ := ⟨fun _ ↦ FiniteContext.of axiomFourN⟩
+instance (Γ : Context F 𝓢) : HasAxiomFourN n Γ := ⟨fun _ ↦ Context.of axiomFourN⟩
+
+end
+
+
 class HasAxiomFive [Dia F] (𝓢 : S) where
   Five (φ : F) : 𝓢 ⊢ Axioms.Five φ
 
@@ -651,6 +669,7 @@ instance [Entailment.HasAxiomT 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1,
 instance [Entailment.HasAxiomB 𝓢]      : Entailment.HasAxiomGeach ⟨0, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomB⟩
 instance [Entailment.HasAxiomD 𝓢]      : Entailment.HasAxiomGeach ⟨0, 0, 1, 1⟩ 𝓢 := ⟨fun _ => axiomD⟩
 instance [Entailment.HasAxiomFour 𝓢]   : Entailment.HasAxiomGeach ⟨0, 2, 1, 0⟩ 𝓢 := ⟨fun _ => axiomFour⟩
+instance [Entailment.HasAxiomFourN n 𝓢] : HasAxiomGeach ⟨0, n + 1, n, 0⟩ 𝓢 := ⟨fun _ ↦ axiomFourN⟩
 instance [Entailment.HasAxiomFive 𝓢]   : Entailment.HasAxiomGeach ⟨1, 1, 0, 1⟩ 𝓢 := ⟨fun _ => axiomFive⟩
 instance [Entailment.HasAxiomTc 𝓢]     : Entailment.HasAxiomGeach ⟨0, 1, 0, 0⟩ 𝓢 := ⟨fun _ => axiomTc⟩
 instance [Entailment.HasAxiomPoint2 𝓢] : Entailment.HasAxiomGeach ⟨1, 1, 1, 1⟩ 𝓢 := ⟨fun _ => axiomPoint2⟩
@@ -781,6 +800,7 @@ protected class Ver extends Entailment.K 𝓢, HasAxiomVer 𝓢
 protected class KMcK extends Entailment.K 𝓢, HasAxiomMcK 𝓢
 
 protected class K4 extends Entailment.K 𝓢, HasAxiomFour 𝓢
+protected class K4n (n) (𝓢 : S) extends Entailment.K 𝓢, HasAxiomFourN n 𝓢
 protected class K4McK extends Entailment.K4 𝓢, HasAxiomMcK 𝓢
 protected class K4Point2 extends Entailment.K4 𝓢, HasAxiomWeakPoint2 𝓢
 protected class K4Point3 extends Entailment.K4 𝓢, HasAxiomWeakPoint3 𝓢

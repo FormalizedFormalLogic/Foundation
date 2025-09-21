@@ -163,10 +163,11 @@ lemma Equiv.iff : 𝓢 ≊ 𝓣 ↔ (∀ φ, 𝓢 ⊢! φ ↔ 𝓣 ⊢! φ) :=
 
 @[instance, simp, refl] protected lemma Equiv.refl (𝓢 : S) : 𝓢 ≊ 𝓢 := ⟨rfl⟩
 
-@[symm] lemma Equiv.symm : 𝓢 ≊ 𝓣 → 𝓣 ≊ 𝓢 := fun e ↦ ⟨Eq.symm e.eq⟩
+@[symm, grind] lemma Equiv.symm : 𝓢 ≊ 𝓣 → 𝓣 ≊ 𝓢 := fun e ↦ ⟨Eq.symm e.eq⟩
 
 @[trans] lemma Equiv.trans : 𝓢 ≊ 𝓣 → 𝓣 ≊ 𝓤 → 𝓢 ≊ 𝓤 := fun e₁ e₂ ↦ ⟨Eq.trans e₁.eq e₂.eq⟩
 
+@[grind]
 lemma Equiv.antisymm_iff : 𝓢 ≊ 𝓣 ↔ 𝓢 ⪯ 𝓣 ∧ 𝓣 ⪯ 𝓢 := by
   constructor
   · intro e
@@ -176,7 +177,7 @@ lemma Equiv.antisymm_iff : 𝓢 ≊ 𝓣 ↔ 𝓢 ⪯ 𝓣 ∧ 𝓣 ⪯ 𝓢 := 
 
 alias ⟨_, Equiv.antisymm⟩ := Equiv.antisymm_iff
 
-lemma Equiv.le : 𝓢 ≊ 𝓣 → 𝓢 ⪯ 𝓣 := fun e ↦ ⟨by rw [e.eq]⟩
+@[grind] lemma Equiv.le : 𝓢 ≊ 𝓣 → 𝓢 ⪯ 𝓣 := fun e ↦ ⟨by rw [e.eq]⟩
 
 instance : Trans (α := S) (β := T) (γ := U) (· ≊ ·) (· ≊ ·) (· ≊ ·) where
   trans := Equiv.trans
@@ -195,6 +196,12 @@ instance : Trans (α := S) (β := T) (γ := U) (· ≊ ·) (· ⪱ ·) (· ⪱ �
 
 instance : Trans (α := S) (β := T) (γ := U) (· ⪱ ·) (· ≊ ·) (· ⪱ ·) where
   trans h₁ h₂ := swt_of_swt_of_wt h₁ h₂.le
+
+@[grind]
+lemma iff_strictlyWeakerThan_weakerThan_not_equiv : 𝓢 ⪱ 𝓣 ↔ 𝓢 ⪯ 𝓣 ∧ ¬(𝓢 ≊ 𝓣) := by
+  constructor
+  · rintro ⟨_, _⟩; grind;
+  · rintro ⟨_, _⟩; constructor <;> grind;
 
 end WeakerThan
 
