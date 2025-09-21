@@ -100,8 +100,8 @@ theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
     ¬i ⊧ A → T₀ ⊢! S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
 
-lemma root_of_iterated_inconsistency : T₀ ⊢! ∼𝔅^[M.finHeight] ⊥ ➝ S r := by
-  suffices T₀ ⊢! (⩖ j, S j) ➝ ∼S r ➝ 𝔅^[M.finHeight] ⊥ by
+lemma root_of_iterated_inconsistency : T₀ ⊢! ∼𝔅^[M.height] ⊥ ➝ S r := by
+  suffices T₀ ⊢! (⩖ j, S j) ➝ ∼S r ➝ 𝔅^[M.height] ⊥ by
     cl_prover [this, S.SC4]
   apply Entailment.left_Udisj!_intro
   intro i
@@ -109,20 +109,20 @@ lemma root_of_iterated_inconsistency : T₀ ⊢! ∼𝔅^[M.finHeight] ⊥ ➝ S
   · rcases hir
     cl_prover
   · have hri : r ≺ i := Frame.root_genaretes'! i hir
-    have : T₀ ⊢! S.σ i ➝ (↑𝔅)^[M.finHeight] ⊥ := by
+    have : T₀ ⊢! S.σ i ➝ (↑𝔅)^[M.height] ⊥ := by
       simpa using
-        S.mainlemma hri (A := □^[M.finHeight] ⊥)
-          <| finHeight_lt_iff_satisfies_boxbot.mp
-          <| Frame.World.finHeight_lt_whole_finHeight hri
+        S.mainlemma hri (A := □^[M.height] ⊥)
+          <| height_lt_iff_satisfies_boxbot.mp
+          <| Frame.rank_lt_whole_height hri
     cl_prover [this]
 
 lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢! S.realization A) :
-    𝔅.height < M.finHeight := by
-  apply 𝔅.height_lt_pos_of_boxBot (finHeight_pos_of_dia h)
+    𝔅.height < M.height := by
+  apply 𝔅.height_lt_pos_of_boxBot (height_pos_of_dia h)
   have : ∃ i, r ≺ i ∧ ¬i ⊧ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
   have b₀ : T₀ ⊢! 𝔅 (S.realization A) := 𝔅.D1 b
-  have b₁ : T₀ ⊢! ∼(↑𝔅)^[M.finHeight] ⊥ ➝ S r := S.root_of_iterated_inconsistency
+  have b₁ : T₀ ⊢! ∼(↑𝔅)^[M.height] ⊥ ➝ S r := S.root_of_iterated_inconsistency
   have b₂ : T₀ ⊢! S r ➝ 𝔅.dia (S i) := S.SC2 r i hi
   have b₃ : T₀ ⊢! 𝔅.dia (S i) ➝ ∼𝔅 (S.realization A) := by
     simpa [Provability.dia] using

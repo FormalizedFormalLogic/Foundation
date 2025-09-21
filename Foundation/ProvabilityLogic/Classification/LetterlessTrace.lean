@@ -364,10 +364,10 @@ open Formula.Kripke
 
 variable {F : Frame} {r : F} [F.IsTree r] [Fintype F]
 
-lemma iff_satisfies_mem_finHeight_spectrum
+lemma iff_satisfies_mem_rank_spectrum
   {M : Model} {r : M} [Fintype M] [M.IsTree r] {w : M}
   {φ : Formula ℕ} (φ_closed : φ.letterless := by grind)
-  : w ⊧ φ ↔ Frame.World.finHeight w ∈ φ.spectrum := by
+  : w ⊧ φ ↔ Frame.rank w ∈ φ.spectrum := by
   induction φ generalizing w with
   | hatom => simp at φ_closed;
   | hfalsum => simp;
@@ -378,27 +378,27 @@ lemma iff_satisfies_mem_finHeight_spectrum
   | hbox φ ihφ =>
     calc
       w ⊧ □φ ↔ ∀ v, w ≺ v → v ⊧ φ                                  := by rfl;
-      _      ↔ ∀ v, w ≺ v → (Frame.World.finHeight v ∈ φ.spectrum) := by
+      _      ↔ ∀ v, w ≺ v → (Frame.rank v ∈ φ.spectrum) := by
         constructor;
         . intro h v; rw [←ihφ]; apply h;
         . intro h v; rw [ihφ]; apply h;
-      _      ↔ ∀ i < (Frame.World.finHeight w), i ∈ φ.spectrum := by
+      _      ↔ ∀ i < (Frame.rank w), i ∈ φ.spectrum := by
         constructor;
         . intro h i hi;
-          obtain ⟨v, Rwv, rfl⟩ := Frame.World.exists_of_lt_finHeight hi;
+          obtain ⟨v, Rwv, rfl⟩ := Frame.exists_of_lt_height hi;
           apply h;
           assumption;
         . intro h v Rwv;
           apply h;
-          apply Frame.World.finHeight_lt_of_rel;
+          apply Frame.rank_lt_of_rel;
           assumption;
-      _      ↔ Frame.World.finHeight w ∈ (□φ).spectrum := by
+      _      ↔ Frame.rank w ∈ (□φ).spectrum := by
         rw [Formula.spectrum.def_box]; simp;
 
-lemma iff_satisfies_TBB_ne_finHeight
+lemma iff_satisfies_TBB_ne_rank
   {M : Model} {r : M} [Fintype M] [M.IsTree r] {w : M} {n : ℕ}
-  : w ⊧ TBB n ↔ Frame.World.finHeight w ≠ n := by
-  apply Iff.trans iff_satisfies_mem_finHeight_spectrum;
+  : w ⊧ TBB n ↔ Frame.rank w ≠ n := by
+  apply Iff.trans iff_satisfies_mem_rank_spectrum;
   simp;
 
 abbrev Frame.finiteLinear (n : ℕ) : Kripke.Frame where
@@ -413,16 +413,16 @@ instance : (Frame.finiteLinear n) |>.IsFiniteTree 0 where
   asymm := by apply Fin.lt_asymm;
   root_generates := by simp [Frame.finiteLinear, Fin.pos_iff_ne_zero]
 
-lemma finHeight_of_eq_sub (i : Fin (n + 1)) : Frame.World.finHeight (of i) = n - i := by
+lemma rank_of_eq_sub (i : Fin (n + 1)) : Frame.rank (of i) = n - i := by
   induction i using Fin.reverseInduction
   case last =>
-    suffices World.finHeight (of (Fin.last n)) = 0 by simpa
+    suffices rank (of (Fin.last n)) = 0 by simpa
     apply fcwHeight_eq_zero_iff.mpr
     intro j
     show ¬(Fin.last n) < j
     simp [Fin.le_last]
   case cast i ih =>
-    suffices World.finHeight (of i.castSucc) = World.finHeight (of i.succ) + 1 by
+    suffices rank (of i.castSucc) = rank (of i.succ) + 1 by
       rw [this, ih]
       simp; omega
     apply fcwHeight_eq_succ_fcwHeight
@@ -433,18 +433,18 @@ lemma finHeight_of_eq_sub (i : Fin (n + 1)) : Frame.World.finHeight (of i) = n -
       intro j
       exact id
 
-@[simp] lemma finHeight_zero : Frame.World.finHeight (0 : Frame.finiteLinear n) = n := by simpa using finHeight_of_eq_sub 0
+@[simp] lemma rank_zero : Frame.rank (0 : Frame.finiteLinear n) = n := by simpa using rank_of_eq_sub 0
 
 end Frame.finiteLinear
 
 lemma spectrum_TFAE (_ : φ.letterless) : [
   n ∈ φ.spectrum,
-  ∀ M : Model, ∀ r, [M.IsTree r] → [Fintype M] → ∀ w : M.World, Frame.World.finHeight w = n → w ⊧ φ,
-  ∃ M : Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, ∃ w : M.World, Frame.World.finHeight w = n ∧ w ⊧ φ
+  ∀ M : Model, ∀ r, [M.IsTree r] → [Fintype M] → ∀ w : M.World, Frame.rank w = n → w ⊧ φ,
+  ∃ M : Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, ∃ w : M.World, Frame.rank w = n ∧ w ⊧ φ
 ].TFAE := by
   tfae_have 1 → 2 := by
     intro h M r _ _ w hw;
-    apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mpr;
+    apply iff_satisfies_mem_rank_spectrum (by grind) |>.mpr;
     apply hw ▸ h;
   tfae_have 2 → 3 := by
     intro h;
@@ -453,7 +453,7 @@ lemma spectrum_TFAE (_ : φ.letterless) : [
     . apply h; simp;
   tfae_have 3 → 1 := by
     rintro ⟨M, r, _, _, w, rfl, hw⟩;
-    apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mp hw;
+    apply iff_satisfies_mem_rank_spectrum (by grind) |>.mp hw;
   tfae_finish;
 
 end Kripke
@@ -478,7 +478,7 @@ lemma iff_GL_provable_spectrum_Univ
     apply GL.Kripke.tree_completeness_TFAE.out 2 0 |>.mp;
     intro F r _ V w;
     have : Fintype (⟨F, V⟩ : Kripke.Model).World := Fintype.ofFinite _
-    have := Kripke.spectrum_TFAE (φ := φ) (n := Kripke.Frame.World.finHeight w) (by grind) |>.out 0 1 |>.mp;
+    have := Kripke.spectrum_TFAE (φ := φ) (n := Kripke.Frame.rank w) (by grind) |>.out 0 1 |>.mp;
     apply this (by grind) _ r w rfl;
 
 lemma iff_GL_provable_C_subset_spectrum : Modal.GL ⊢! (φ ➝ ψ) ↔ φ.spectrum ⊆ ψ.spectrum := by

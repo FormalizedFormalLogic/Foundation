@@ -13,12 +13,12 @@ variable {φ ψ : Formula ℕ}
 open Kripke
 
 
-def Formula.gTrace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.finHeight = n ∧ ¬r ⊧ φ) }
+def Formula.gTrace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.height = n ∧ ¬r ⊧ φ) }
 
-lemma iff_mem_gTrace {n : ℕ} : n ∈ φ.gTrace ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ ¬r ⊧ φ := by
+lemma iff_mem_gTrace {n : ℕ} : n ∈ φ.gTrace ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ φ := by
   simp [Formula.gTrace];
 
-lemma satisfies_of_not_mem_gTrace : n ∉ φ.gTrace ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.finHeight = n → r ⊧ φ) := by
+lemma satisfies_of_not_mem_gTrace : n ∉ φ.gTrace ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.height = n → r ⊧ φ) := by
   simp [Formula.gTrace];
 
 @[grind]
@@ -37,7 +37,7 @@ lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : 
     rintro h M r _ _ x rfl;
     apply Model.pointGenerate.modal_equivalent' x ⟨x, by tauto⟩ |>.mp;
     apply h;
-    apply Frame.pointGenerate.eq_original_finHeight;
+    apply Frame.pointGenerate.eq_original_height;
 
 open Formula.Kripke
 
@@ -47,10 +47,10 @@ open Formula.Kripke
 lemma Formula.gTrace_and : (φ ⋏ ψ).gTrace = φ.gTrace ∪ ψ.gTrace := by
   ext n;
   calc
-    _ ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ (¬r ⊧ φ ∨ ¬r ⊧ ψ) := by simp [gTrace, -not_and, not_and_or]
+    _ ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ (¬r ⊧ φ ∨ ¬r ⊧ ψ) := by simp [gTrace, -not_and, not_and_or]
     _ ↔
-      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ ¬r ⊧ φ) ∨
-      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.finHeight = n ∧ ¬r ⊧ ψ) := by
+      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ φ) ∨
+      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ ψ) := by
       constructor;
       . rintro ⟨M, r, _, _, _, (h | h)⟩;
         . left; tauto;
@@ -242,13 +242,13 @@ instance isTree [M.IsTree r] (hra : r ≠ a) : (M.boneLengthening a k).IsTree r 
       tauto;
 
 @[simp]
-axiom height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
+axiom eq_height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
   have : (M.boneLengthening a k).IsTree r := isTree hra;
-  (M.boneLengthening a k).finHeight = M.finHeight + k
+  (M.boneLengthening a k).height = M.height + k
   /-
   := by
   intro _;
-  apply finHeight_eq_iff_relItr.mpr;
+  apply height_eq_iff_relItr.mpr;
   constructor;
   . obtain ⟨t, Rrt⟩ := Kripke.exists_rank_terminal (F := M.boneLengthening a k |>.toFrame) r;
     use t;
@@ -256,8 +256,8 @@ axiom height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
     | zero =>
       sorry;
     | succ k ih =>
-      suffices (r : M.boneLengthening a (k + 1)) ≺^[(M.finHeight + k) + 1] t by
-        rwa [(show M.finHeight + (k + 1) = (M.finHeight + k) + 1 by omega)];
+      suffices (r : M.boneLengthening a (k + 1)) ≺^[(M.rank + k) + 1] t by
+        rwa [(show M.rank + (k + 1) = (M.rank + k) + 1 by omega)];
       dsimp [Frame.RelItr', HRel.Iterate]
       sorry;
   . intro t Rrt x;
@@ -332,24 +332,24 @@ lemma Formula.gTrace.finite_or_cofinite : φ.gTrace.Finite ∨ φ.gTrace.Cofinit
   obtain ⟨M, r,_, _, rfl, hr⟩ := iff_mem_gTrace.mp hm₁;
   have : M.IsFiniteTree r := {}
 
-  have H₁ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ := finHeight_lt_iff_satisfies_boxbot (i := r) (n := φ.rflSubformula.card + 1) |>.not.mp $ by
-    rw [←Frame.finHeight];
+  have H₁ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ := height_lt_iff_satisfies_boxbot (i := r) (n := φ.rflSubformula.card + 1) |>.not.mp $ by
+    rw [←Frame.height];
     omega;
   have H₂ : r ⊧ ∼□^[(φ.rflSubformula.card + 1)]⊥ ➝ ◇φ.rflSubformula.conj := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree.mp (GL.formalized_validates_axiomT_set_in_irrefl_trans_chain) M r;
   obtain ⟨a, Rrx, hx⟩ := Satisfies.dia_def.mp $ H₂ H₁;
   replace Rrx : r ≠ a := by rintro rfl; apply M.irrefl _ Rrx;
 
-  have : {k | k ≥ M.finHeight} ⊆ φ.gTrace := by
+  have : {k | k ≥ M.height} ⊆ φ.gTrace := by
     intro k hmk;
     obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hmk;
     apply iff_mem_gTrace.mpr;
     refine ⟨M.boneLengthening a k, r, ?_, ?_, ?_, ?_⟩;
     . apply Model.boneLengthening.isTree Rrx;
     . infer_instance;
-    . apply Model.boneLengthening.height Rrx;
+    . apply Model.boneLengthening.eq_height Rrx;
     . exact Model.boneLengthening.mainlemma₂ hx (by grind) r |>.not.mp hr;
   apply Set.Cofinite.subset this;
-  apply Set.Finite.subset (s := Finset.range M.finHeight);
+  apply Set.Finite.subset (s := Finset.range M.height);
   . apply Finset.finite_toSet;
   . intro i;
     simp;
@@ -378,10 +378,10 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
   . apply GL.Kripke.tree_completeness_TFAE.out 3 0 |>.mp;
     intro M r _ hr;
     have : Fintype M.World := Fintype.ofFinite _;
-    apply satisfies_of_not_mem_gTrace (n := M.finHeight) |>.mp;
-    . replace hr : ∀ n ∈ φ.gTrace, M.finHeight ≠ n := by
+    apply satisfies_of_not_mem_gTrace (n := M.height) |>.mp;
+    . replace hr : ∀ n ∈ φ.gTrace, M.height ≠ n := by
         intro n h;
-        apply iff_satisfies_TBB_ne_finHeight.mp;
+        apply iff_satisfies_TBB_ne_rank.mp;
         apply Satisfies.fconj_def.mp hr _;
         suffices ∃ m ∈ φ.gTrace, □^[m]⊥ = □^[n]⊥ by simpa [Tφ];
         use n;
@@ -403,18 +403,18 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
   . apply GL.Kripke.tree_completeness_TFAE.out 3 0 |>.mp;
     intro M r _ hr;
     have : Fintype M.World := Fintype.ofFinite _;
-    apply satisfies_of_not_mem_gTrace (n := M.finHeight) |>.mp;
-    . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.gTrace → ¬M.finHeight = n := by
+    apply satisfies_of_not_mem_gTrace (n := M.height) |>.mp;
+    . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.gTrace → ¬M.height = n := by
         rintro n ξ hξ₁ hξ₂ rfl;
         obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ ¬r ⊧ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by
           simpa only [Finset.conj_singleton] using hr;
         replace hm₁ : ∀ i ∈ L, m ∉ i.gTrace := by simpa [Tφ] using hm₁;
-        replace hm₂ : M.finHeight = m := by simpa using iff_satisfies_TBB_ne_finHeight.not.mp hm₂;
+        replace hm₂ : M.height = m := by simpa using iff_satisfies_TBB_ne_rank.not.mp hm₂;
         apply hm₁ ξ;
         . assumption;
         . grind;
       by_contra hC;
-      apply hr M.finHeight φ hφ hC rfl;
+      apply hr M.height φ hφ hC rfl;
     . rfl;
 
 protected abbrev GLαOmega := Modal.GLα Set.univ
@@ -463,40 +463,40 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trac
   have : M₀.IsFiniteTree r₀ := {};
   let S : SolovaySentences T.standardProvability M₀.toFrame r₀ := SolovaySentences.standard T M₀.toFrame;
 
-  have : M₀ ⊧ A ➝ (Modal.TBB M.finHeight) := by
+  have : M₀ ⊧ A ➝ (Modal.TBB M.height) := by
     rintro x hA;
-    rcases Nat.lt_trichotomy (Frame.World.finHeight x) M.finHeight with h | h | h;
+    rcases Nat.lt_trichotomy (Frame.rank x) M.height with h | h | h;
     . intro _;
-      exact finHeight_lt_iff_satisfies_boxbot.mp h;
+      exact height_lt_iff_satisfies_boxbot.mp h;
     . exfalso;
       suffices x = r by
         apply h₂;
         apply Kripke.Model.extendRoot.modal_equivalence_original_world.mpr;
         rwa [this] at hA;
-      apply Kripke.Frame.extendRoot.iff_eq_finHeight_eq_original_root.mp h;
-    . apply iff_satisfies_mem_finHeight_spectrum (by grind) |>.mpr;
+      apply Kripke.Frame.extendRoot.iff_eq_height_eq_original_root.mp h;
+    . apply iff_satisfies_mem_rank_spectrum (by grind) |>.mpr;
       simp;
       omega;
-  have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢! S i ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := by
+  have : ∀ i : M₀.World, 𝗜𝚺₁ ⊢! S i ➝ S.realization (A ➝ (Modal.TBB M.height)) := by
     rintro (a | i);
-    . suffices 𝗜𝚺₁ ⊢! S r₀ ➝ S.realization (TBB M.finHeight) by
+    . suffices 𝗜𝚺₁ ⊢! S r₀ ➝ S.realization (TBB M.height) by
         dsimp [Realization.interpret];
         rw [(show Sum.inl a = r₀ by simp [r₀])];
         cl_prover [this]
-      have : 𝗜𝚺₁ ⊢! S r₀ ➝ ∼(T.standardProvability) (S.realization (□^[M.finHeight]⊥)) := C!_trans (S.SC2 r₀ r Rr₀) $ contra! $
+      have : 𝗜𝚺₁ ⊢! S r₀ ➝ ∼(T.standardProvability) (S.realization (□^[M.height]⊥)) := C!_trans (S.SC2 r₀ r Rr₀) $ contra! $
         T.standardProvability.prov_distribute_imply' $
         CN!_of_CN!_right $
         S.mainlemma_neg Rr₀ $
-        finHeight_lt_iff_satisfies_boxbot.not.mp $ by simp [Frame.extendRoot.eq_original_finHeight_root]
+        height_lt_iff_satisfies_boxbot.not.mp $ by simp [Frame.extendRoot.eq_original_height_root]
       apply C!_trans this
       simp [Realization.interpret.def_boxItr]
     . apply S.mainlemma Rr₀;
       apply this;
-  have : 𝗜𝚺₁ ⊢! (⩖ j, S j) ➝ S.realization (A ➝ (Modal.TBB M.finHeight)) := left_Udisj!_intro _ this
-  have : 𝗜𝚺₁ ⊢! S.realization (A ➝ (Modal.TBB M.finHeight)) := by cl_prover [this, S.SC4];
+  have : 𝗜𝚺₁ ⊢! (⩖ j, S j) ➝ S.realization (A ➝ (Modal.TBB M.height)) := left_Udisj!_intro _ this
+  have : 𝗜𝚺₁ ⊢! S.realization (A ➝ (Modal.TBB M.height)) := by cl_prover [this, S.SC4];
 
-  have : U ⊢! S.realization (Modal.TBB M.finHeight) := by
-    have : U ⊢! S.realization A ➝ S.realization (Modal.TBB M.finHeight) := WeakerThan.pbl this;
+  have : U ⊢! S.realization (Modal.TBB M.height) := by
+    have : U ⊢! S.realization A ➝ S.realization (Modal.TBB M.height) := WeakerThan.pbl this;
     cl_prover [this, hA₁ S.realization];
   apply ProvabilityLogic.provable_iff.mpr;
   intro g;
@@ -541,7 +541,7 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
   let r₀ : M₀.World := Model.extendRoot.root;
   have : Fintype M₀.World := Fintype.ofFinite _
 
-  let R := Set.Finite.inter_of_left (s := (Finset.range M₁.finHeight)) (t := (T.ProvabilityLogic U).trace) (Finset.finite_toSet _) |>.toFinset;
+  let R := Set.Finite.inter_of_left (s := (Finset.range M₁.height)) (t := (T.ProvabilityLogic U).trace) (Finset.finite_toSet _) |>.toFinset;
 
   let B := A ⋏ ⩕ i ∈ R, TBB i;
   have hB : T.ProvabilityLogic U ⊢! B := by
@@ -576,18 +576,18 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
       . intro h;
         apply Satisfies.not_def.mpr;
         apply Satisfies.not_fconj'_def.mpr;
-        use Frame.World.finHeight (i : M₀);
+        use Frame.rank (i : M₀);
         constructor;
         . by_contra hC;
-          apply iff_satisfies_TBB_ne_finHeight (w := (i : M₀)) (n := Frame.World.finHeight (i : M₀)) |>.mp;
+          apply iff_satisfies_TBB_ne_rank (w := (i : M₀)) (n := Frame.rank (i : M₀)) |>.mp;
           . apply Satisfies.fconj'_def.mp $ Satisfies.and_def.mp h |>.2;
-            suffices Frame.World.finHeight (i : M₀) < M₁.finHeight ∧ Frame.World.finHeight (i : M₀) ∈ (T.ProvabilityLogic U).trace by
+            suffices Frame.rank (i : M₀) < M₁.height ∧ Frame.rank (i : M₀) ∈ (T.ProvabilityLogic U).trace by
               simpa [R];
             constructor;
-            . suffices Frame.World.finHeight i < M₁.finHeight by calc
-                _ = Frame.World.finHeight (i : M₁) := by convert Frame.extendRoot.eq_original_finHeight
+            . suffices Frame.rank i < M₁.height by calc
+                _ = Frame.rank (i : M₁) := by convert Frame.extendRoot.eq_original_height
                 _ < _                              := this;
-              apply Frame.World.finHeight_lt_whole_finHeight;
+              apply Frame.rank_lt_whole_height;
               apply M₁.root_genaretes'!;
               rintro rfl;
               apply Satisfies.not_imp_def.mp hM |>.2;
@@ -595,7 +595,7 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
               exact Satisfies.and_def.mp h |>.1;
             . simpa using hC;
           . rfl;
-        . apply iff_satisfies_TBB_ne_finHeight.not.mpr;
+        . apply iff_satisfies_TBB_ne_rank.not.mpr;
           simp;
 
   replace H₁ : U ⊢! S.realization B ➝ S.realization (∼⩕ n ∈ (cofinite_of_not_subset_S h).toFinset, TBB n) := WeakerThan.pbl H₁;
