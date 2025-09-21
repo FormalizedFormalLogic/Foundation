@@ -1,6 +1,6 @@
 import Foundation.Modal.Hilbert.NNFormula
 import Foundation.Modal.Maximal.Basic
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.SumNormal
 import Foundation.Modal.ZeroSubstitution
 import Foundation.Modal.Kripke.Logic.Ver
 import Foundation.Propositional.ClassicalSemantics.Hilbert
@@ -171,7 +171,6 @@ theorem subset_Triv_of_KD_subset [Modal.KD ⪯ L] : L ⪯ Modal.Triv := by
   contradiction;
 
 end
-
 
 theorem makinson : (L.VerFamily ∨ L.TrivFamily) ∧ ¬(L.VerFamily ∧ L.TrivFamily) := by
   constructor;

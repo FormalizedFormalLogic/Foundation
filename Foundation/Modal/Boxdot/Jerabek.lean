@@ -270,7 +270,7 @@ theorem jerabek_SBDP
     have h₁ : (L, XB.toSet) ⊢! φ ➝ φᵇ := C_of_E_mp! $ Claim2 φ (by grind);
     have h₂ : (L, XB.toSet) ⊢! φ := by
       apply GlobalConsequence.thm!;
-      simpa using hφL;
+      grind;
     exact h₁ ⨀ h₂;
   obtain ⟨Γ, n, hΓ, hφ⟩ := GlobalConsequence.iff_finite_boxlt_provable.mp this;
   replace hφ : L ⊢! (□^≤[n]XB.conj) ➝ φᵇ := C!_trans (boxlt_fconj_regularity_of_subset hΓ) hφ;
@@ -279,15 +279,15 @@ theorem jerabek_SBDP
   use χ;
   constructor;
   . constructor;
-    . suffices L ⊢! χ by simpa;
+    . suffices L ⊢! χ by grind;
       apply dhyp!;
-      simpa using hφL;
+      grind;
     . assumption;
-  . suffices L₀ ⊬ (□^[n]X.conj) ➝ φ by simpa;
+  . suffices L₀ ⊬ (□^[n]X.conj) ➝ φ by grind;
     apply sound.not_provable_of_countermodel;
     apply not_validOnFrameClass_of_exists_model_world;
 
-    have : ¬C ⊧ φ := complete.exists_countermodel_of_not_provable (by simpa using hφL₀);
+    have : ¬C ⊧ φ := complete.exists_countermodel_of_not_provable (by grind);
     obtain ⟨M, x, hMC, hF⟩ := Kripke.exists_model_world_of_not_validOnFrameClass this;
     let M₂ : Kripke.Model := {
       toFrame := M.toFrame.twice

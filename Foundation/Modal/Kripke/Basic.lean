@@ -130,6 +130,8 @@ lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp [Satisfie
 
 @[simp] lemma negneg_def : x ⊧ ∼∼φ ↔ x ⊧ φ := by simp;
 
+protected lemma not_and_def : ¬(x ⊧ φ ⋏ ψ) ↔ ¬(x ⊧ φ) ∨ ¬(x ⊧ ψ) := by simp [-not_and, not_and_or];
+
 lemma multibox_dn : x ⊧ □^[n](∼∼φ) ↔ x ⊧ □^[n]φ := by
   induction n generalizing x with
   | zero => simp;
@@ -202,41 +204,27 @@ lemma multidia_def : x ⊧ ◇^[n]φ ↔ ∃ y, x ≺^[n] y ∧ y ⊧ φ := by
       . apply ih.mpr;
         use y;
 
-lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ hΓ ih =>
-    suffices x ⊧ φ ∨ x ⊧ ⋁Γ ↔ x ⊧ φ ∨ ∃ a ∈ Γ, x ⊧ a by simp [List.disj₂_cons_nonempty hΓ];
-    constructor;
-    . rintro (_ | h)
-      . tauto;
-      . right; exact ih.mp h;
-    . rintro (_ | h);
-      . tauto;
-      . right; exact ih.mpr h;
-  | _ => simp;
+lemma disj_def : x ⊧ ⋁Γ ↔ ∃ φ ∈ Γ, x ⊧ φ := by simp
 
 lemma conj₁_def {Γ : List _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by induction Γ <;> simp;
 
-lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by
-  induction Γ using List.induction_with_singleton with
-  | hcons φ Γ hΓ ih =>
-    suffices (x ⊧ φ ∧ x ⊧ ⋀Γ) ↔ (x ⊧ φ ∧ ∀ φ ∈ Γ, x ⊧ φ) by simp [List.conj₂_cons_nonempty hΓ];
-    constructor;
-    . intro ⟨_, hΓ⟩;
-      constructor;
-      . assumption;
-      . exact ih.mp hΓ;
-    . intro ⟨_, hΓ⟩;
-      constructor;
-      . assumption;
-      . apply ih.mpr hΓ;
-  | _ => simp;
+lemma conj_def : x ⊧ ⋀Γ ↔ ∀ φ ∈ Γ, x ⊧ φ := by simp
+
+lemma fconj'_def {ι : α → Formula ℕ} : x ⊧ (⩕ i ∈ X, ι i) ↔ ∀ i ∈ X, x ⊧ ι i := by simp;
+
+lemma not_fconj'_def {ι : α → Formula ℕ}  : ¬(x ⊧ (⩕ i ∈ X, ι i)) ↔ ∃ i ∈ X, ¬(x ⊧ ι i) := by simp;
+
 
 lemma fconj_def {Γ : Finset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
   simp only [Semantics.realize_finset_conj];
 
 lemma fdisj_def {Γ : Finset _} : x ⊧ Γ.disj ↔ ∃ φ ∈ Γ, x ⊧ φ := by
   simp only [Semantics.realize_finset_disj];
+
+lemma fdisj'_def {ι : α → Formula ℕ} : x ⊧ (⩖ i ∈ X, ι i) ↔ ∃ i ∈ X, x ⊧ ι i := by simp;
+
+lemma not_fdisj'_def {ι : α → Formula ℕ} : ¬(x ⊧ (⩖ i ∈ X, ι i)) ↔ ∀ i ∈ X, ¬(x ⊧ ι i) := by simp;
+
 
 lemma trans (hpq : x ⊧ φ ➝ ψ) (hqr : x ⊧ ψ ➝ χ) : x ⊧ φ ➝ χ := by simp_all;
 

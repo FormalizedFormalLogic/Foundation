@@ -1,5 +1,5 @@
 import Foundation.Modal.Boxdot.GL_Grz
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.SumNormal
 import Foundation.Modal.ModalCompanion.Basic
 import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Kripke.Logic.Int

@@ -50,7 +50,7 @@ lemma Hilbert.equiv_logic_Normal_WithLoeb
   : HN.logic ≊ HL.logic := by
   apply Entailment.Equiv.iff.mpr;
   intro φ;
-  suffices HN ⊢! φ ↔ HL ⊢! φ by simpa [Entailment.theory, Set.mem_setOf_eq];
+  suffices HN ⊢! φ ↔ HL ⊢! φ by simpa [Modal.Logic.iff_provable, Entailment.theory, Set.mem_setOf_eq];
   exact Entailment.Equiv.iff.mp (Hilbert.equiv_Normal_WithLoeb provable_HN provable_HL) φ;
 
 
@@ -96,7 +96,7 @@ lemma Hilbert.equiv_logic_Normal_WithHenkin
   : HN.logic ≊ HH.logic := by
   apply Entailment.Equiv.iff.mpr;
   intro φ;
-  suffices HN ⊢! φ ↔ HH ⊢! φ by simpa [Entailment.theory, Set.mem_setOf_eq];
+  suffices HN ⊢! φ ↔ HH ⊢! φ by simpa [Modal.Logic.iff_provable, Entailment.theory, Set.mem_setOf_eq];
   exact Entailment.Equiv.iff.mp (Hilbert.equiv_Normal_WithHenkin provable_HN provable_HH) φ;
 
 

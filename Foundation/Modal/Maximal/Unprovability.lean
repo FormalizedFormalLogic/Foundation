@@ -82,6 +82,11 @@ lemma unprovable_AxiomT : (Hilbert.GL) ⊬ Axioms.T (.atom a) := by
   use (λ _ => False);
   tauto;
 
+@[simp, grind]
+lemma unprovable_axiomT' : Modal.GL ⊬ Axioms.T (.atom a) := by
+  apply Hilbert.Normal.iff_logic_provable_provable.not.mpr;
+  exact unprovable_AxiomT;
+
 instance : Entailment.Consistent (Hilbert.GL) := by
   apply consistent_iff_exists_unprovable.mpr;
   use (Axioms.T (atom 0));

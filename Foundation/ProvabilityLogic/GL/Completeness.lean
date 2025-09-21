@@ -74,8 +74,8 @@ theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
 theorem provabilityLogic_eq_GL_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
     ProvabilityLogic T T ≊ Modal.GL := by
   apply Logic.iff_equal_provable_equiv.mp
-  ext A
-  simpa [ArithmeticTheory.ProvabilityLogic] using
+  ext A;
+  simpa [ArithmeticTheory.ProvabilityLogic, Logic.iff_provable] using
     GL.arithmetical_completeness_sound_iff
 
 open Classical
@@ -101,7 +101,7 @@ theorem provabilityLogic_eq_GLPlusBoxBot :
     ProvabilityLogic T T ≊ Modal.GLPlusBoxBot T.height.toWithTop := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A
-  simpa [ArithmeticTheory.ProvabilityLogic] using
+  simpa [ArithmeticTheory.ProvabilityLogic, Logic.iff_provable] using
     GLPlusBoxBot.arithmetical_completeness_iff
 
 instance : ProvabilityLogic 𝗣𝗔 𝗣𝗔 ≊ Modal.GL := provabilityLogic_eq_GL_of_sigma1_sound

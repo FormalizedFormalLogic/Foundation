@@ -154,8 +154,6 @@ import Foundation.Modal.Boxdot.GL_Grz
 
 import Foundation.Modal.Modality.S5
 
-import Foundation.Modal.Logic.Extension
-
 import Foundation.Modal.Logic.S.Consistent
 
 import Foundation.Modal.Logic.D.Basic

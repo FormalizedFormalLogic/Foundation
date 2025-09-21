@@ -48,7 +48,7 @@ lemma Hilbert.equiv_logic_WithRE_Normal
   : HE.logic ≊ HN.logic := by
   apply Entailment.Equiv.iff.mpr;
   intro φ;
-  suffices HE ⊢! φ ↔ HN ⊢! φ by simpa [Entailment.theory, Set.mem_setOf_eq];
+  suffices HE ⊢! φ ↔ HN ⊢! φ by simpa [Modal.Logic.iff_provable, Entailment.theory, Set.mem_setOf_eq];
   exact Entailment.Equiv.iff.mp (Hilbert.equiv_WithRE_Normal provable_HE provable_HN) φ;
 
 instance : 𝐄𝐌𝐂𝐍 ≊ Modal.K := by

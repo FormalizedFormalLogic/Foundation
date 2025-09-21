@@ -1,4 +1,4 @@
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.SumNormal
 import Foundation.Modal.Logic.S.Basic
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.S.Soundness

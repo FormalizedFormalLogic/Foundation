@@ -105,7 +105,7 @@ section
 
 abbrev logic (H : Hilbert.WithRE α) : Logic α := Entailment.theory H
 
-@[simp high]
+ @[grind]
 lemma iff_logic_provable_provable : H.logic ⊢! φ ↔ H ⊢! φ := by simp [Entailment.theory, Logic.iff_provable];
 
 instance [H₁ ⪯ H₂] : H₁.logic ⪯ H₂.logic := by
@@ -129,12 +129,8 @@ instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := by
 instance [h : Incomparable H₁ H₂]
   : Incomparable H₁.logic H₂.logic := by
   apply Incomparable.of_unprovable;
-  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₁;
-    use φ;
-    simpa;
-  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₂;
-    use φ;
-    simpa;
+  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₁; use φ; grind;
+  . obtain ⟨φ, hφ⟩ := Entailment.not_weakerThan_iff.mp h.notWT₂; use φ; grind;
 
 end
 

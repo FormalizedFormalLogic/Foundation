@@ -1,4 +1,4 @@
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.SumNormal
 import Foundation.Modal.Maximal.Unprovability
 import Mathlib.Data.ENat.Basic
 import Foundation.Modal.Kripke.Logic.GL.Completeness
@@ -53,7 +53,7 @@ lemma GLPoint3OplusBoxBot.weakerThan_succ {n : ℕ} : (Modal.GLPoint3OplusBoxBot
   | mem₁ h => apply Entailment.WeakerThan.pbl h;
   | @mem₂ φ h =>
     suffices Modal.GLPoint3OplusBoxBot n ⊢! (□^[n]⊥) ➝ (□^[(n + 1)](⊥)) by
-      rw [(show φ = □^[(n + 1)]⊥ by simpa using h)];
+      rw [(show φ = □^[(n + 1)]⊥ by replace h := Logic.iff_provable.mp h; simp_all;)];
       exact this ⨀ (by simp);
     apply multibox_axiomK'!;
     apply multinec!;
@@ -121,7 +121,6 @@ lemma GLPoint3OplusBoxBot.strictlyWeakerThan_GLPoint3 {n : ℕ} : (Modal.GLPoint
 
 instance : (Modal.GLPoint3) ⪱ (Modal.GLPoint3OplusBoxBot 2) := GLPoint3OplusBoxBot.strictlyWeakerThan_GLPoint3
 
-
 lemma eq_GLPoint3OplusBoxBot_0_Univ : (Modal.GLPoint3OplusBoxBot 0) = Set.univ := by
   have : Modal.GLPoint3OplusBoxBot 0 ⊢! ⊥ := GLPoint3OplusBoxBot.boxbot;
   ext φ;
@@ -129,6 +128,7 @@ lemma eq_GLPoint3OplusBoxBot_0_Univ : (Modal.GLPoint3OplusBoxBot 0) = Set.univ :
     simp only [←iff_provable, Set.mem_univ, iff_true];
     cl_prover [this];
   apply sumNormal.mem₂!;
+  apply Logic.iff_provable.mpr;
   simp;
 
 
@@ -139,11 +139,11 @@ lemma eq_GLPoint3OplusBoxBot_1_Ver : (Modal.GLPoint3OplusBoxBot 1) = Modal.Ver :
     intro h;
     induction h using sumNormal.rec! with
     | mem₁ h => apply Entailment.WeakerThan.pbl h;
-    | mem₂ h => simp_all;
+    | mem₂ h => simp_all [Logic.iff_provable];
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
     | subst ih => apply Logic.subst! _ ih;
     | nec ih => apply nec! ih;
-  . suffices Hilbert.Ver ⊢! φ → Modal.GLPoint3OplusBoxBot 1 ⊢! φ by simpa [←iff_provable];
+  . suffices Hilbert.Ver ⊢! φ → Modal.GLPoint3OplusBoxBot 1 ⊢! φ by simpa [Logic.iff_provable];
     intro h;
     induction h using Hilbert.Normal.rec! with
     | axm s h =>
@@ -151,7 +151,8 @@ lemma eq_GLPoint3OplusBoxBot_1_Ver : (Modal.GLPoint3OplusBoxBot 1) = Modal.Ver :
       . simp;
       . apply axiomK''! (φ := ⊥);
         . apply nec!; cl_prover;
-        . apply sumNormal.mem₂!
+        . apply sumNormal.mem₂!;
+          apply Logic.iff_provable.mpr;
           simp;
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ]
     | nec ih => apply nec! ih;
@@ -251,7 +252,7 @@ lemma GLPoint2.provable_boxboxbot : Modal.GLPoint2 ⊢! (□^[2]⊥) := by
         . assumption;
       . tauto;
     haveI : Modal.GLPoint2 ⊢! ◇□⊥ ➝ □(□□⊥ ➝ □⊥) := C!_trans this $ axiomK'! $ nec! (by cl_prover);
-    haveI : Modal.GLPoint2 ⊢! ◇□⊥ ➝ □□⊥ := C!_trans this (by simp [axiomL!])
+    haveI : Modal.GLPoint2 ⊢! ◇□⊥ ➝ □□⊥ := C!_trans this (by simp)
     exact this;
   have h₃ : Modal.GLPoint2 ⊢! ◇□⊥ ⭤ ∼□(∼□⊥) := dia_duality!;
   cl_prover [h₁, h₂, h₃];
@@ -300,9 +301,9 @@ lemma GLPoint2.provable_axiomWeakPoint3 : Modal.GLPoint2 ⊢! (Axioms.WeakPoint3
       rcases this
       . tauto;
       . tauto;
-    simp [axiomL!];
+    simp;
   haveI : Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ ◇((.atom 0) ⋏ □(.atom 0) ⋏ □^[2](.atom 0) ⋏ □(∼((.atom 0) ⋏ □(.atom 0)))) := C!_trans this $ by
-    have : Modal.GLPoint2 ⊢! □(.atom 0) ➝ □^[2](.atom 0) := by simp [axiomFour!];
+    have : Modal.GLPoint2 ⊢! □(.atom 0) ➝ □^[2](.atom 0) := by simp;
     apply diaK'!;
     cl_prover [this];
   haveI : Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ ◇(□⊥ ⋏ (.atom 0)) := C!_trans this $ by
@@ -328,7 +329,7 @@ lemma GLPoint2.provable_axiomWeakPoint3 : Modal.GLPoint2 ⊢! (Axioms.WeakPoint3
         use y;
         tauto;
     . assumption;
-  haveI : Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ □(◇⊥ ⋎ (.atom 0)) := C!_trans this $ by simp [axiomWeakPoint2!];
+  haveI : Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ □(◇⊥ ⋎ (.atom 0)) := C!_trans this $ by simp;
   haveI : Modal.GLPoint2 ⊢! ◇((.atom 0) ⋏ □(.atom 0)) ➝ □(.atom 0) := C!_trans this $ by
     apply axiomK'!;
     apply nec!;
@@ -342,6 +343,11 @@ lemma GLPoint2.provable_axiomWeakPoint3 : Modal.GLPoint2 ⊢! (Axioms.WeakPoint3
     cl_prover [this];
   exact this;
 
+instance : Entailment.GLPoint3 Modal.GLPoint2 where
+  WeakPoint3 φ ψ := by
+    constructor;
+    apply Logic.iff_provable.mp;
+    simpa using Logic.subst! (s := λ a => match a with | 0 => φ | 1 => ψ | _ => a) GLPoint2.provable_axiomWeakPoint3;
 
 instance : Modal.GLPoint3 ⪯ Modal.GLPoint2 := by
   suffices Hilbert.GLPoint3 ⪯ Hilbert.GLPoint2 by infer_instance;
@@ -352,8 +358,7 @@ instance : Modal.GLPoint3 ⪯ Modal.GLPoint2 := by
     rcases h with (rfl | rfl | rfl);
     . simp;
     . simp;
-    . apply Hilbert.Normal.subst! s;
-      simpa using GLPoint2.provable_axiomWeakPoint3;
+    . apply Hilbert.Normal.iff_logic_provable_provable.mp; simp;
   | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ]
   | nec ih => apply nec! ih;
   | _ => cl_prover;
@@ -366,12 +371,12 @@ lemma eq_GLPoint3OplusBoxBot_2_GLPoint2 : (Modal.GLPoint3OplusBoxBot 2) = Modal.
     induction h using sumNormal.rec! with
     | mem₁ h => apply Entailment.WeakerThan.pbl h;
     | @mem₂ φ h =>
-      rw [(show φ = □^[2]⊥ by simpa using h)];
+      rw [(show φ = □^[2]⊥ by replace h := Logic.iff_provable.mp h; simp_all;)];
       exact GLPoint2.provable_boxboxbot;
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
     | subst ih => apply Logic.subst! _ ih;
     | nec ih => apply nec! ih;
-  . suffices Hilbert.GLPoint2  ⊢! φ → Modal.GLPoint3OplusBoxBot 2 ⊢! φ by simpa [←iff_provable];
+  . suffices Hilbert.GLPoint2 ⊢! φ → Modal.GLPoint3OplusBoxBot 2 ⊢! φ by simpa [iff_provable];
     intro h;
     induction h using Hilbert.Normal.rec! with
     | axm s h =>

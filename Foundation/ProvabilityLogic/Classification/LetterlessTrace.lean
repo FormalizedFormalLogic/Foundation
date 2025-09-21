@@ -1,4 +1,3 @@
-
 import Foundation.Modal.Logic.S.Basic
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.Vorspiel.Set.Cofinite
@@ -242,12 +241,6 @@ lemma iff_eq_spectrum_eq_trace : X.spectrum = Y.spectrum ↔ X.trace = Y.trace :
 
 end FormulaSet
 
-lemma Logic.sumQuasiNormal.iff_provable_finite_provable_letterless [DecidableEq α] {L₁ L₂ : Logic α} {φ : Formula _} [L₁.IsQuasiNormal] (L₂_letterless : FormulaSet.letterless L₂)
-  : sumQuasiNormal L₁ L₂ ⊢! φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := by
-  apply iff_provable_finite_provable;
-  rintro ξ hξ s;
-  simpa [Formula.subst.subst_letterless (L₂_letterless _ hξ)];
-
 lemma boxbot_spectrum : (□^[n]⊥ : Formula ℕ).spectrum = { i | i < n } := by
   induction n with
   | zero => simp
@@ -273,6 +266,17 @@ section
 variable {α α₁ α₂ β β₁ β₂ : Set ℕ} (hβ : β.Cofinite := by grind) (hβ₁ : β₁.Cofinite := by grind) (hβ₂ : β₂.Cofinite := by grind)
 
 @[simp, grind] lemma TBB_letterless : (TBB n).letterless := by grind
+
+@[simp]
+lemma TBB_injective : Function.Injective TBB := by
+  rintro i j;
+  suffices □^[i]⊥ = □^[j]⊥ → i = j by simpa;
+  wlog hij : i < j;
+  . rcases (show i = j ∨ i > j by omega) with h | h
+    . tauto;
+    . have := @this j i; grind;
+  obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_lt hij;
+  simp [show ((i + k) + 1) = i + (k + 1) by omega, ←(Box.add (n := i) (m := (k + 1)))];
 
 @[simp]
 lemma TBB_spectrum : (TBB n).spectrum = {n}ᶜ := by

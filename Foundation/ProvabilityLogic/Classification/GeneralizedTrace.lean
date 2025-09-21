@@ -148,23 +148,7 @@ lemma subset_GLα_S : Modal.GLα α ⊆ Modal.S := by
   | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
   | subst ihφ => exact Logic.subst! _ ihφ;
 
-@[grind]
-lemma Logic.weakerThan_of_subset {L₁ L₂ : Logic α} (h : L₁ ⊆ L₂) : L₁ ⪯ L₂ := by
-  constructor;
-  simpa [Entailment.theory];
-
-@[grind]
-lemma Logic.strictWeakerThan_of_ssubset {L₁ L₂ : Logic α} (h : L₁ ⊂ L₂) : L₁ ⪱ L₂ := by
-  simp_all [Entailment.strictlyWeakerThan_iff, Set.ssubset_iff_exists];
-  aesop;
-
 instance : Modal.GLα α ⪯ Modal.S := by grind
-
-@[simp, grind]
-lemma Logic.subset_of_weakerThan {L₁ L₂ : Logic α} [L₁ ⪯ L₂] : L₁ ⊆ L₂ := by
-  intro φ;
-  suffices L₁ ⊢! φ → L₂ ⊢! φ by grind;
-  exact Entailment.WeakerThan.pbl;
 
 @[simp]
 lemma S.eq_trace : Modal.S.trace = Set.univ := by
@@ -378,17 +362,6 @@ lemma Formula.gTrace.finite_of_coinfinite (h_ci : φ.gTrace.Coinfinite) : φ.gTr
     apply h_ci;
     exact h_cf;
 
-@[simp]
-lemma TBB_injective : Function.Injective TBB := by
-  rintro i j;
-  suffices □^[i]⊥ = □^[j]⊥ → i = j by simpa;
-  wlog hij : i < j;
-  . rcases (show i = j ∨ i > j by omega) with h | h
-    . tauto;
-    . have := @this j i; grind;
-  obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_lt hij;
-  simp [show ((i + k) + 1) = i + (k + 1) by omega, ←(Box.add (n := i) (m := (k + 1)))];
-
 lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GLα L.trace := by
   intro φ hφ;
   apply Modal.Logic.iff_provable.mp;
@@ -415,24 +388,6 @@ lemma subset_GLα_of_trace_coinfinite (hL : L.trace.Coinfinite) : L ⊆ Modal.GL
       by_contra hC;
       apply hr _ hC rfl;
     . rfl;
-
-
-namespace Formula.Kripke.Satisfies
-
-variable {M : Kripke.Model} {w : M} {X : Finset α} {ι : α → Formula ℕ} {φ ψ : Formula ℕ}
-
-lemma fconj'_def : w ⊧ (⩕ i ∈ X, ι i) ↔ ∀ i ∈ X, w ⊧ ι i := by simp;
-
-lemma not_fconj'_def : ¬(w ⊧ (⩕ i ∈ X, ι i)) ↔ ∃ i ∈ X, ¬(w ⊧ ι i) := by simp;
-
-lemma fdisj'_def : w ⊧ (⩖ i ∈ X, ι i) ↔ ∃ i ∈ X, w ⊧ ι i := by simp;
-
-lemma not_fdisj'_def : ¬(w ⊧ (⩖ i ∈ X, ι i)) ↔ ∀ i ∈ X, ¬(w ⊧ ι i) := by simp;
-
-lemma not_and_def : ¬(w ⊧ φ ⋏ ψ) ↔ ¬(w ⊧ φ) ∨ ¬(w ⊧ ψ) := by simp [-not_and, not_and_or];
-
-end Formula.Kripke.Satisfies
-
 
 lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.GLβMinus L.trace := by
   intro φ hφ;
