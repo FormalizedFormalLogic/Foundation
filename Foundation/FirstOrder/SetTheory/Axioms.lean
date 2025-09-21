@@ -20,7 +20,7 @@ def isEmpty : Semisentence ℒₛₑₜ 1 := “x. ∀ y, y ∉ x”
 
 def isNonempty : Semisentence ℒₛₑₜ 1 := “x. ∃ y, y ∈ x”
 
-def isSucc : Semisentence ℒₛₑₜ 2 := “y x. ∀ z, z ∈ y ↔ z ∈ x ∨ z = x”
+def isSucc : Semisentence ℒₛₑₜ 2 := “y x. ∀ z, z ∈ y ↔ z = x ∨ z ∈ x”
 
 namespace Axiom
 
@@ -34,7 +34,7 @@ def union : Sentence ℒₛₑₜ := “∀ x, ∃ y, ∀ z, z ∈ y ↔ ∃ w �
 
 def power : Sentence ℒₛₑₜ := “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ⊆ x”
 
-def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x x', !isSucc x' x ∧ x ∈ I → x' ∈ I)”
+def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I) ∧ (∀ x ∈ I, ∀ x', !isSucc x' x → x' ∈ I)”
 
 def foundation : Sentence ℒₛₑₜ := “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
 

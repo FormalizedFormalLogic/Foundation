@@ -201,7 +201,7 @@ instance : Structure.Eq L₂ (π.Model M) where
   eq a b := by simp [Operator.val, Operator.Eq.sentence_eq, eval_rel]
 
 lemma func_iff {k} {f : L₂.Func k} {y : π.Model M} {v : Fin k → π.Model M} :
-    y = Structure.func f v ↔ Evalbm M (y :> fun i ↦ v i) (π.func f) := Classical.choose!_eq_iff _
+    y = Structure.func f v ↔ Evalbm M (y :> fun i ↦ v i) (π.func f) := Classical.choose!_eq_iff_right _
 
 lemma func_iff' {k} {f : L₂.Func k} {y : M} {v : Fin k → π.Model M} :
     y = Structure.func f v ↔ π.Dom y ∧ Evalbm M (y :> fun i ↦ v i) (π.func f) := by

@@ -12,14 +12,14 @@ namespace LO.FirstOrder
 
 variable {L : Language} {M : Type*} [Structure L M]
 
-def Defined (R : (Fin k → M) → Prop) (φ : Semisentence L k) : Prop :=
-  ∀ v, R v ↔ Semiformula.Evalbm M v φ
+class Defined (R : outParam ((Fin k → M) → Prop)) (φ : Semisentence L k) : Prop where
+  iff : ∀ v, R v ↔ Semiformula.Evalbm M v φ
 
 def DefinedWithParam (R : (Fin k → M) → Prop) (φ : Semiformula L M k) : Prop :=
   ∀ v, R v ↔ Semiformula.Evalm M v id φ
 
-lemma Defined.iff {R : (Fin k → M) → Prop} {φ : Semisentence L k} (h : Defined R φ) (v) :
-    Semiformula.Evalbm M v φ ↔ R v := (h v).symm
+@[simp] lemma Defined.eval_iff {R : (Fin k → M) → Prop} {φ : Semisentence L k} [h : Defined R φ] (v) :
+    Semiformula.Evalbm M v φ ↔ R v := (h.iff v).symm
 
 lemma DefinedWithParam.iff {R : (Fin k → M) → Prop} {φ : Semiformula L M k} (h : DefinedWithParam R φ) (v) :
     Semiformula.Evalm M v id φ ↔ R v := (h v).symm
@@ -171,7 +171,7 @@ end Language
 namespace Defined
 
 lemma to_definable {R : (Fin k → M) → Prop} {φ : Semisentence L k} (hR : Defined R φ) : L.Definable R :=
-  ⟨Rewriting.embedding φ, fun v ↦ by simp [Semiformula.eval_emb, hR.iff]⟩
+  ⟨Rewriting.embedding φ, fun v ↦ by simp [Semiformula.eval_emb]⟩
 
 end Defined
 
