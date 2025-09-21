@@ -6,62 +6,62 @@ variable {α : Type*}
 
 namespace Formula
 
-def letterless : Formula α → Prop
+def Letterless : Formula α → Prop
   | atom _ => False
   | ⊥ => True
-  | □φ => φ.letterless
-  | φ ➝ ψ => (φ.letterless) ∧ (ψ.letterless)
+  | □φ => φ.Letterless
+  | φ ➝ ψ => (φ.Letterless) ∧ (ψ.Letterless)
 
-namespace letterless
+namespace Letterless
 
 variable {φ ψ : Formula α}
 
-@[simp, grind] lemma not_atom : ¬(letterless (atom p)) := by simp [letterless]
+@[simp, grind] lemma not_atom : ¬(Letterless (atom p)) := by simp [Letterless]
 
-@[simp, grind] lemma def_bot : (⊥ : Formula α).letterless := by simp [letterless]
-@[simp, grind] lemma def_top : (⊤ : Formula α).letterless := by simp [letterless]
+@[simp, grind] lemma def_bot : (⊥ : Formula α).Letterless := by simp [Letterless]
+@[simp, grind] lemma def_top : (⊤ : Formula α).Letterless := by simp [Letterless]
 
-lemma def_imp : (φ ➝ ψ).letterless → φ.letterless ∧ ψ.letterless := by simp [letterless]
-@[grind] lemma def_imp₁ : (φ ➝ ψ).letterless → φ.letterless := λ h => def_imp h |>.1
-@[grind] lemma def_imp₂ : (φ ➝ ψ).letterless → ψ.letterless := λ h => def_imp h |>.2
+lemma def_imp : (φ ➝ ψ).Letterless → φ.Letterless ∧ ψ.Letterless := by simp [Letterless]
+@[grind] lemma def_imp₁ : (φ ➝ ψ).Letterless → φ.Letterless := λ h => def_imp h |>.1
+@[grind] lemma def_imp₂ : (φ ➝ ψ).Letterless → ψ.Letterless := λ h => def_imp h |>.2
 
-@[grind] lemma def_box : (□φ).letterless → φ.letterless := by simp [letterless]
+@[grind] lemma def_box : (□φ).Letterless → φ.Letterless := by simp [Letterless]
 
-@[grind] lemma of_imp (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ➝ ψ).letterless := by simp_all [letterless]
-@[grind] lemma of_neg (hφ : φ.letterless) : (∼φ).letterless := by simp_all [letterless]
-@[grind] lemma of_or (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ⋎ ψ).letterless := by simp_all [letterless]
-@[grind] lemma of_and (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ⋏ ψ).letterless := by simp_all [letterless]
-@[grind] lemma of_box (hφ : φ.letterless) : (□φ).letterless := by simp_all [letterless]
-@[grind] lemma of_multibox (hφ : φ.letterless) : (□^[n]φ).letterless := by
+@[grind] lemma of_imp (hφ : φ.Letterless) (hψ : ψ.Letterless) : (φ ➝ ψ).Letterless := by simp_all [Letterless]
+@[grind] lemma of_neg (hφ : φ.Letterless) : (∼φ).Letterless := by simp_all [Letterless]
+@[grind] lemma of_or (hφ : φ.Letterless) (hψ : ψ.Letterless) : (φ ⋎ ψ).Letterless := by simp_all [Letterless]
+@[grind] lemma of_and (hφ : φ.Letterless) (hψ : ψ.Letterless) : (φ ⋏ ψ).Letterless := by simp_all [Letterless]
+@[grind] lemma of_box (hφ : φ.Letterless) : (□φ).Letterless := by simp_all [Letterless]
+@[grind] lemma of_multibox (hφ : φ.Letterless) : (□^[n]φ).Letterless := by
   induction n with
-  | zero => simpa [letterless]
-  | succ n ih => simp [letterless, ih]
-@[grind] lemma of_iff (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ⭤ ψ).letterless := by simp_all [letterless]
+  | zero => simpa [Letterless]
+  | succ n ih => simp [Letterless, ih]
+@[grind] lemma of_iff (hφ : φ.Letterless) (hψ : ψ.Letterless) : (φ ⭤ ψ).Letterless := by simp_all [Letterless]
 
 @[grind]
-lemma of_lconj₂ {l : List (Formula α)} (h : ∀ φ ∈ l, φ.letterless) : (l.conj₂).letterless := by
-  induction l using List.induction_with_singleton <;> simp_all [letterless];
+lemma of_lconj₂ {l : List (Formula α)} (h : ∀ φ ∈ l, φ.Letterless) : (l.conj₂).Letterless := by
+  induction l using List.induction_with_singleton <;> simp_all [Letterless];
 
 @[grind]
-lemma of_lconj' {l : List β} {Φ : β → Formula α} (h : ∀ i ∈ l, (Φ i).letterless) : (l.conj' Φ).letterless := by
+lemma of_lconj' {l : List β} {Φ : β → Formula α} (h : ∀ i ∈ l, (Φ i).Letterless) : (l.conj' Φ).Letterless := by
   induction l using List.induction_with_singleton with
   | hcons _ _ _ ih => apply of_lconj₂; grind;
   | _  => simp_all [List.conj']
 
 @[grind]
-lemma of_fconj {s : Finset (Formula α)} (h : ∀ φ ∈ s, φ.letterless) : (s.conj).letterless := by
+lemma of_fconj {s : Finset (Formula α)} (h : ∀ φ ∈ s, φ.Letterless) : (s.conj).Letterless := by
   apply of_lconj₂;
   simpa;
 
-lemma of_fconj' {s : Finset β} {Φ : β → Formula α} (h : ∀ i, (Φ i).letterless) : (⩕ i ∈ s, Φ i).letterless := by
+lemma of_fconj' {s : Finset β} {Φ : β → Formula α} (h : ∀ i, (Φ i).Letterless) : (⩕ i ∈ s, Φ i).Letterless := by
   apply of_lconj';
   grind;
 
-end letterless
+end Letterless
 
 @[simp, grind]
-lemma subst.subst_letterless {φ : Formula α} (hφ : φ.letterless) {s : Substitution α} : φ⟦s⟧ = φ := by
-  induction φ <;> simp_all [letterless];
+lemma subst.subst_letterless {φ : Formula α} (hφ : φ.Letterless) {s : Substitution α} : φ⟦s⟧ = φ := by
+  induction φ <;> simp_all [Letterless];
 
 end Formula
 
@@ -71,13 +71,13 @@ namespace FormulaSet
 
 variable {α : Type*} {Γ : FormulaSet α} {φ : Formula α}
 
-def letterless (Γ : FormulaSet α) : Prop := ∀ φ ∈ Γ, φ.letterless
+def Letterless (Γ : FormulaSet α) : Prop := ∀ φ ∈ Γ, φ.Letterless
 
 @[simp, grind]
-lemma letterless_singleton {φ : Formula α} : ({φ} : FormulaSet α).letterless ↔ φ.letterless := by
-  simp [FormulaSet.letterless];
+lemma letterless_singleton {φ : Formula α} : ({φ} : FormulaSet α).Letterless ↔ φ.Letterless := by
+  simp [Letterless];
 
-@[grind] lemma letterless_of_mem (hΓ : Γ.letterless) (hφ : φ ∈ Γ) : φ.letterless := hΓ φ hφ
+@[grind] lemma letterless_of_mem (hΓ : Γ.Letterless) (hφ : φ ∈ Γ) : φ.Letterless := hΓ φ hφ
 
 end FormulaSet
 

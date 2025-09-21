@@ -22,7 +22,7 @@ lemma satisfies_of_not_mem_gTrace : n ∉ φ.gTrace ↔ (∀ M : Kripke.Model, �
   simp [Formula.gTrace];
 
 @[grind]
-lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.letterless) : φ.gTrace = φ.trace := by
+lemma Formula.eq_gTrace_trace_of_letterless {φ : Formula ℕ} (φ_letterless : φ.Letterless) : φ.gTrace = φ.trace := by
   ext n;
   apply Iff.trans ?_ (Kripke.spectrum_TFAE φ_letterless (n := n) |>.out 1 0 |>.not);
   constructor;
@@ -110,7 +110,7 @@ lemma GL.eq_trace_ext {X : FormulaSet ℕ} (hX : ∀ ξ ∈ X, ∀ s : Substitut
       simpa [Logic.iff_provable];
     . assumption;
 
-lemma GL.unprovable_of_exists_trace (φ_letterless : φ.letterless) : (∃ n, n ∈ φ.trace) → Modal.GL ⊬ φ := by
+lemma GL.unprovable_of_exists_trace (φ_letterless : φ.Letterless) : (∃ n, n ∈ φ.trace) → Modal.GL ⊬ φ := by
   contrapose!;
   intro h;
   have := Modal.iff_GL_provable_spectrum_Univ φ_letterless |>.mp (by simpa using h);
@@ -500,7 +500,7 @@ lemma provable_TBB_of_mem_trace {n : ℕ} (h : n ∈ (T.ProvabilityLogic U).trac
     cl_prover [this, hA₁ S.realization];
   apply ProvabilityLogic.provable_iff.mpr;
   intro g;
-  simpa [Realization.letterless_interpret (A := Modal.TBB _) (by grind)] using this;
+  grind;
 
 theorem eq_provablityLogic_GLα_of_coinfinite_trace (h : (T.ProvabilityLogic U).trace.Coinfinite) : T.ProvabilityLogic U = Modal.GLα (T.ProvabilityLogic U).trace := by
   apply Set.Subset.antisymm;
@@ -586,7 +586,7 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
             constructor;
             . suffices Frame.rank i < M₁.height by calc
                 _ = Frame.rank (i : M₁) := by convert Frame.extendRoot.eq_original_height
-                _ < _                              := this;
+                _ < _                   := this;
               apply Frame.rank_lt_whole_height;
               apply M₁.root_genaretes'!;
               rintro rfl;
@@ -604,8 +604,7 @@ lemma provable_TBBMinus_of_mem_trace (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) 
 
   apply ProvabilityLogic.provable_iff.mpr;
   intro g;
-
-  rwa [Realization.letterless_interpret (f₁ := S.realization) (f₂ := g) (by grind)] at H;
+  grind;
 
 /-- Artemov & Beklemishev. Lemma 49 -/
 theorem eq_provabilityLogic_GLβMinus_of_not_subset_S (h : ¬(T.ProvabilityLogic U) ⊆ Modal.S) : T.ProvabilityLogic U = Modal.GLβMinus (T.ProvabilityLogic U).trace := by

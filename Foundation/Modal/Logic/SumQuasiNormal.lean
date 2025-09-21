@@ -173,7 +173,7 @@ lemma iff_provable_finite_provable (h : ∀ ξ ∈ L₂, ∀ s : Substitution _,
   sumQuasiNormal L₁ L₂ ⊢! φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := ⟨finite_provable_of_provable h, provable_of_finite_provable⟩
 
 omit [DecidableEq α] in
-lemma iff_provable_finite_provable_letterless [DecidableEq α] {L₁ L₂ : Logic α} {φ : Formula _} [L₁.IsQuasiNormal] (L₂_letterless : FormulaSet.letterless L₂)
+lemma iff_provable_finite_provable_letterless [DecidableEq α] {L₁ L₂ : Logic α} {φ : Formula _} [L₁.IsQuasiNormal] (L₂_letterless : FormulaSet.Letterless L₂)
   : sumQuasiNormal L₁ L₂ ⊢! φ ↔ ∃ X : Finset _, (↑X ⊆ L₂) ∧ L₁ ⊢! X.conj ➝ φ := by
   apply iff_provable_finite_provable;
   rintro ξ hξ s;
@@ -295,7 +295,7 @@ lemma sumQuasiNormal.rec!_omitSubst
 attribute [grind] Logic.subst!
 
 @[grind]
-def substitution_of_letterless (L_letterless : FormulaSet.letterless L) : L.Substitution where
+def substitution_of_letterless (L_letterless : FormulaSet.Letterless L) : L.Substitution where
   subst s := by
     rintro ⟨hφ⟩;
     constructor;

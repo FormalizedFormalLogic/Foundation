@@ -23,7 +23,7 @@ theorem Cl.post_complete : ¬∃ L : Logic _, Entailment.Consistent L ∧ Nonemp
   have h₁ : L ⊢! ∼(φ⟦(vfSubst v).1⟧) := hL $ by
     apply iff_isTautology.mpr;
     apply neg_isTautology_of_not_isTautology_of_letterless;
-    . apply Formula.letterless_zeroSubst;
+    . apply Formula.Letterless_zeroSubst;
     . apply isTautology_vfSubst.not.mp hv;
   have h₂ : L ⊢! φ⟦(vfSubst v).1⟧ := L.subst! _ hφ₂;
   exact h₁ ⨀ h₂;
