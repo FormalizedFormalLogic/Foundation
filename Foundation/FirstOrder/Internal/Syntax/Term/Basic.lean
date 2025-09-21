@@ -642,7 +642,7 @@ section
 lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result L (v ·.succ) (v 0)) (β.result L) := by
   intro v
   simp [Blueprint.result, HierarchySymbol.Semiformula.val_sigma, IsUTerm.defined.proper.iff',
-    c.eval_graphDef, result, Classical.choose!_eq_iff]
+    c.eval_graphDef, result, Classical.choose!_eq_iff_right]
 
 @[simp] lemma result_graphDef (v) :
     Semiformula.Evalbm V v (β.result L).val ↔ v 0 = c.result L (v ·.succ.succ) (v 1) := (result_defined c).df.iff v
@@ -651,7 +651,7 @@ private lemma resultVec_graph {w' k w} :
     w' = c.resultVec L param k w ↔
     ( (IsUTermVec L k w → k = len w' ∧ ∀ i < k, c.Graph L param w.[i] w'.[i]) ∧
       (¬IsUTermVec L k w → w' = 0) ) :=
-  Classical.choose!_eq_iff (c.graph_existsUnique_vec_total L param k w)
+  Classical.choose!_eq_iff_right (c.graph_existsUnique_vec_total L param k w)
 
 lemma resultVec_defined : 𝚺₁.DefinedFunction (fun v ↦ c.resultVec L (v ·.succ.succ) (v 0) (v 1)) (β.resultVec L) := by
   intro v

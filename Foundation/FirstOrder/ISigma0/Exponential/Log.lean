@@ -66,7 +66,7 @@ lemma log_lt_self_of_pos {y : V} (pos : 0 < y) : log y < y :=
   · simp
   · exact le_of_lt <| log_lt_self_of_pos pos
 
-lemma log_graph {x y : V} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') := Classical.choose!_eq_iff _
+lemma log_graph {x y : V} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' ≤ y, Exponential x y' ∧ y < 2 * y') := Classical.choose!_eq_iff_right _
 
 def _root_.LO.FirstOrder.Arithmetic.logDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' <⁺ y, !exponentialDef x y' ∧ y < 2 * y')”

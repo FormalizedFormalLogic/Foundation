@@ -140,11 +140,7 @@ lemma succ_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)
     rcases hP with ⟨φ, hp⟩
     haveI : Inhabited V := Classical.inhabited_of_nonempty'
     exact ⟨φ.val.enumarateFVar, (Rew.rewriteMap φ.val.idxOfFVar) ▹ φ.val, by simp,
-      by  intro x; simp [Semiformula.eval_rewriteMap]
-          have : (Semiformula.Evalm V ![x] fun x ↦ φ.val.enumarateFVar (φ.val.idxOfFVar x)) φ.val ↔ (Semiformula.Evalm V ![x] id) φ.val :=
-            Semiformula.eval_iff_of_funEqOn _ (by
-              intro x hx; simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)])
-          simp [this, hp.df.iff]⟩)
+      by intro x; simp [Semiformula.eval_rewriteMap, hp.df.iff]⟩)
     zero succ
 
 lemma order_induction {P : V → Prop} (hP : Γ-[m].BoldfacePred P)

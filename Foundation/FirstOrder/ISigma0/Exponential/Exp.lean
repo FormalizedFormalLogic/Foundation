@@ -740,7 +740,7 @@ section exponential
 
 lemma exponential_exp (a : V) : Exponential a (Exp.exp a) := Classical.choose!_spec (Exponential.range_exists_unique a)
 
-lemma exponential_graph {a b : V} : a = Exp.exp b ↔ Exponential b a := Classical.choose!_eq_iff _
+lemma exponential_graph {a b : V} : a = Exp.exp b ↔ Exponential b a := Classical.choose!_eq_iff_right _
 
 def _root_.LO.FirstOrder.Arithmetic.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y. !exponentialDef.val y x”
 
