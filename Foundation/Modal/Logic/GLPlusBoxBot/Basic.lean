@@ -1,4 +1,4 @@
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.SumQuasiNormal
 import Foundation.Modal.Maximal.Unprovability
 import Mathlib.Data.ENat.Basic
 import Foundation.Modal.Kripke.Logic.GL.Completeness
@@ -33,7 +33,7 @@ lemma iff_provable_GLPlusBoxBot_provable_GL {n : ℕ} {φ} : Modal.GLPlusBoxBot 
   . intro h;
     induction h using sumQuasiNormal.rec! with
     | mem₁ h => cl_prover [h]
-    | mem₂ h => simp_all;
+    | mem₂ h => simp_all [Logic.iff_provable];
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
     | subst ihφ => simpa using Logic.subst! _ ihφ;
   . intro h;

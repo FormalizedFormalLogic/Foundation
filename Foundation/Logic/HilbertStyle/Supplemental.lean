@@ -1093,6 +1093,11 @@ lemma iff_FiniteContext_Context [DecidableEq F] {Γ : List F} : Γ ⊢[𝓢]! φ
     apply FiniteContext.provable_iff.mpr;
     exact C!_trans (by simp) h;
 
+lemma FConj'_iff_forall_provable [DecidableEq F] {s : Finset α} {ι : α → F} : (𝓢 ⊢! ⩕ i ∈ s, ι i) ↔ (∀ i ∈ s, 𝓢 ⊢! ι i) := by
+  have : 𝓢 ⊢! ⋀(s.toList.map ι) ↔ ∀ i ∈ s, 𝓢 ⊢! ι i := by simpa using Conj₂!_iff_forall_provable (Γ := s.toList.map ι);
+  apply Iff.trans ?_ this;
+  simp [Finset.conj', List.conj'];
+
 end
 
 

@@ -154,8 +154,6 @@ import Foundation.Modal.Boxdot.GL_Grz
 
 import Foundation.Modal.Modality.S5
 
-import Foundation.Modal.Logic.Extension
-
 import Foundation.Modal.Logic.S.Consistent
 
 import Foundation.Modal.Logic.D.Basic
@@ -184,7 +182,7 @@ import Foundation.ProvabilityLogic.Grz.Completeness
 import Foundation.ProvabilityLogic.S.Completeness
 
 import Foundation.ProvabilityLogic.Classification.LetterlessTrace
-import Foundation.ProvabilityLogic.Classification.GeneralizedTrace
+import Foundation.ProvabilityLogic.Classification.Trace
 
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit

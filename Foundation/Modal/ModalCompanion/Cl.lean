@@ -161,9 +161,8 @@ end S5Grz
 
 section boxdot
 
-theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ ↔ Hilbert.Ver ⊢! φᵍᵇ := by
-  apply Iff.trans modalCompanion_Cl_Triv.companion;
-  simpa using Logic.iff_boxdotTranslated_Ver_Triv.symm;
+theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ ↔ Modal.Ver ⊢! φᵍᵇ :=
+  Iff.trans ModalCompanion.companion Logic.iff_boxdotTranslated_Ver_Triv.symm
 
 end boxdot
 

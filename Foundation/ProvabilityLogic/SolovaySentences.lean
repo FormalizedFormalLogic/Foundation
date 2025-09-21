@@ -1,6 +1,5 @@
 import Foundation.ProvabilityLogic.Realization
-import Foundation.Modal.Kripke.Logic.GL.Tree
-import Foundation.Modal.Kripke.ExtendRoot
+import Foundation.Modal.Kripke.Rank
 import Foundation.FirstOrder.Internal.WitnessComparison
 import Foundation.FirstOrder.Internal.FixedPoint
 import Foundation.FirstOrder.Internal.Consistency
@@ -14,125 +13,6 @@ import Foundation.ProvabilityLogic.Height
 open Classical
 
 noncomputable section
-
-namespace LO.Modal.Kripke
-
-section frame
-
-variable {F : Frame} [Fintype F] {r : F} [F.IsTree r]
-
-def Frame.World.finHeight (i : F) : ℕ := fcwHeight (· ≺ ·) i
-
-variable (F)
-
-def Frame.finHeight : ℕ := Frame.World.finHeight r
-
-variable {F}
-
-lemma Frame.World.finHeight_lt_whole_finHeight {i : F} (hi : r ≺ i) :
-    Frame.World.finHeight i < F.finHeight := fcwHeight_gt_of hi
-
-lemma Frame.World.finHeight_le_whole_finHeight (i : F) :
-    Frame.World.finHeight i ≤ F.finHeight := by
-  by_cases hi : i = r
-  · rcases hi; rfl
-  · have : r ≺ i := root_genaretes'! i hi
-    exact le_of_lt (fcwHeight_gt_of this)
-
-lemma finHeight_lt_iff_relItr {i : F} :
-    Frame.World.finHeight i < n ↔ ∀ j, ¬i ≺^[n] j  := by
-  match n with
-  |     0 => simp_all
-  | n + 1 =>
-    suffices Frame.World.finHeight i ≤ n ↔ ∀ j : F, i ≺ j → Frame.World.finHeight j < n by
-      calc
-        Frame.World.finHeight i < n + 1
-          ↔ Frame.World.finHeight i ≤ n := Nat.lt_add_one_iff
-        _ ↔ ∀ j, i ≺ j → Frame.World.finHeight j < n := this
-        _ ↔ ∀ j, i ≺ j → ∀ k, ¬j ≺^[n] k := by simp [finHeight_lt_iff_relItr (n := n)]
-        _ ↔ ∀ k j, i ≺ j → ¬j ≺^[n] k    := by grind
-        _ ↔ ∀ j, ¬i ≺^[n + 1] j  := by simp
-    constructor
-    · exact fun h j hij ↦ lt_of_lt_of_le (fcwHeight_gt_of hij) h
-    · exact fcwHeight_le
-
-lemma le_finHeight_iff_relItr {i : F} :
-    n ≤ Frame.World.finHeight i ↔ ∃ j, i ≺^[n] j := calc
-  n ≤ Frame.World.finHeight i ↔ ¬Frame.World.finHeight i < n := Iff.symm Nat.not_lt
-  _                           ↔ ∃ j, i ≺^[n] j := by simp [finHeight_lt_iff_relItr]
-
-lemma finHeight_eq_iff_relItr {i : F} :
-    Frame.World.finHeight i = n ↔ (∃ j, i ≺^[n] j) ∧ (∀ j, i ≺^[n] j → ∀ k, ¬j ≺ k) := calc
-  Frame.World.finHeight i = n
-    ↔ Frame.World.finHeight i < n + 1 ∧ n ≤ Frame.World.finHeight i := by simpa [Nat.lt_succ_iff] using Nat.eq_iff_le_and_ge
-  _ ↔ (∀ j, ¬i ≺^[n + 1] j) ∧ (∃ j, i ≺^[n] j) := by simp [finHeight_lt_iff_relItr, le_finHeight_iff_relItr]
-  _ ↔ (∀ k j, i ≺^[n] j → ¬j ≺ k) ∧ (∃ j, i ≺^[n] j) := by simp only [HRel.Iterate.forward, not_exists, not_and]
-  _ ↔ (∃ j, i ≺^[n] j) ∧ (∀ j, i ≺^[n] j → ∀ k, ¬j ≺ k) := by grind
-
-lemma exists_terminal (i : F) : ∃ j, i ≺^[Frame.World.finHeight i] j := le_finHeight_iff_relItr.mp (by simp)
-
-namespace Frame.extendRoot
-
-@[simp] lemma finHeight_pos : 0 < (F.extendRoot 1).finHeight := by
-  apply lt_fcwHeight ?_ (by simp)
-  · exact Sum.inr r
-  trivial
-
-@[simp] lemma finHeight₁ : (F.extendRoot 1).finHeight = F.finHeight + 1 := by
-  let l := World.finHeight (extendRoot.root : F.extendRoot 1)
-  suffices
-      l ≤ Frame.World.finHeight r + 1 ∧
-      Frame.World.finHeight r < l by
-    simpa using Nat.eq_iff_le_and_ge.mpr this
-  constructor
-  · suffices l - 1 ≤ World.finHeight r from Nat.le_add_of_sub_le this
-    apply le_finHeight_iff_relItr.mpr
-    by_cases hl : l - 1 = 0
-    · exact ⟨r, by simp [hl]⟩
-    have lpos : 0 < l - 1 := Nat.zero_lt_of_ne_zero hl
-    have e : l = (l - 1) + 1 := by
-      symm; exact Nat.sub_add_cancel Frame.extendRoot.finHeight_pos
-    have : ∃ j, extendRoot.root ≺^[l] j := exists_terminal (extendRoot.root : F.extendRoot 1)
-    rcases this with ⟨j, hj⟩
-    have : ∃ z, extendRoot.root ≺ z ∧ z ≺^[l - 1] j := by
-      rw [e] at hj
-      simpa using hj
-    rcases this with ⟨z, hz, hzj⟩
-    have : ∃ x, j = embed x := eq_inr_of_root_rel <| HRel.Iterate.unwrap_of_trans_of_pos finHeight_pos hj
-    rcases this with ⟨j, rfl⟩
-    rcases not_root_of_from_root'₁ hz with (rfl | ⟨z, rfl, Rrz⟩)
-    · exact ⟨j, embed_rel_iterate_embed_iff_rel.mp hzj⟩
-    use j
-    exact HRel.Iterate.constant_trans_of_pos lpos Rrz (embed_rel_iterate_embed_iff_rel.mp hzj)
-  · suffices World.finHeight r + 1 ≤ World.finHeight extendRoot.root from this
-    apply le_finHeight_iff_relItr.mpr
-    rcases exists_terminal r with ⟨j, hj⟩
-    exact ⟨j, r, by trivial, embed_rel_iterate_embed_iff_rel.mpr hj⟩
-
-end Frame.extendRoot
-
-end frame
-
-section model
-
-variable {M : Model} {r : M.World} [M.IsFiniteTree r] [Fintype M]
-
-lemma finHeight_lt_iff_satisfies_boxbot {i : M} :
-    Frame.World.finHeight i < n ↔ i ⊧ □^[n] ⊥ := by
-  simp only [finHeight_lt_iff_relItr, Formula.Kripke.Satisfies.multibox_def]
-  simp
-
-lemma finHeight_pos_of_dia {i : M} (hA : i ⊧ ◇ A) : 0 < Frame.World.finHeight i := by
-  have : ∃ j, i ≺ j ∧ j ⊧ A := Formula.Kripke.Satisfies.dia_def.mp hA
-  rcases this with ⟨j, hj, _⟩
-  apply lt_fcwHeight hj (by simp)
-
-@[simp] lemma Model.extendRoot.finHeight₁ :
-    (M.extendRoot 1).finHeight = M.finHeight + 1 := Frame.extendRoot.finHeight₁
-
-end model
-
-end LO.Modal.Kripke
 
 namespace LO.ProvabilityLogic
 
@@ -220,8 +100,8 @@ theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
     ¬i ⊧ A → T₀ ⊢! S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
 
-lemma root_of_iterated_inconsistency : T₀ ⊢! ∼𝔅^[M.finHeight] ⊥ ➝ S r := by
-  suffices T₀ ⊢! (⩖ j, S j) ➝ ∼S r ➝ 𝔅^[M.finHeight] ⊥ by
+lemma root_of_iterated_inconsistency : T₀ ⊢! ∼𝔅^[M.height] ⊥ ➝ S r := by
+  suffices T₀ ⊢! (⩖ j, S j) ➝ ∼S r ➝ 𝔅^[M.height] ⊥ by
     cl_prover [this, S.SC4]
   apply Entailment.left_Udisj!_intro
   intro i
@@ -229,20 +109,20 @@ lemma root_of_iterated_inconsistency : T₀ ⊢! ∼𝔅^[M.finHeight] ⊥ ➝ S
   · rcases hir
     cl_prover
   · have hri : r ≺ i := Frame.root_genaretes'! i hir
-    have : T₀ ⊢! S.σ i ➝ (↑𝔅)^[M.finHeight] ⊥ := by
+    have : T₀ ⊢! S.σ i ➝ (↑𝔅)^[M.height] ⊥ := by
       simpa using
-        S.mainlemma hri (A := □^[M.finHeight] ⊥)
-          <| finHeight_lt_iff_satisfies_boxbot.mp
-          <| Frame.World.finHeight_lt_whole_finHeight hri
+        S.mainlemma hri (A := □^[M.height] ⊥)
+          <| height_lt_iff_satisfies_boxbot.mp
+          <| Frame.rank_lt_whole_height hri
     cl_prover [this]
 
 lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢! S.realization A) :
-    𝔅.height < M.finHeight := by
-  apply 𝔅.height_lt_pos_of_boxBot (finHeight_pos_of_dia h)
+    𝔅.height < M.height := by
+  apply 𝔅.height_lt_pos_of_boxBot (height_pos_of_dia h)
   have : ∃ i, r ≺ i ∧ ¬i ⊧ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
   have b₀ : T₀ ⊢! 𝔅 (S.realization A) := 𝔅.D1 b
-  have b₁ : T₀ ⊢! ∼(↑𝔅)^[M.finHeight] ⊥ ➝ S r := S.root_of_iterated_inconsistency
+  have b₁ : T₀ ⊢! ∼(↑𝔅)^[M.height] ⊥ ➝ S r := S.root_of_iterated_inconsistency
   have b₂ : T₀ ⊢! S r ➝ 𝔅.dia (S i) := S.SC2 r i hi
   have b₃ : T₀ ⊢! 𝔅.dia (S i) ➝ ∼𝔅 (S.realization A) := by
     simpa [Provability.dia] using

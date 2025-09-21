@@ -1,5 +1,5 @@
 import Foundation.Modal.Kripke.Logic.S4
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.SumNormal
 import Foundation.Propositional.Kripke.Basic
 
 namespace LO
@@ -53,6 +53,7 @@ instance : Modal.Entailment.Grz IL.largestMC where
     apply Modal.Logic.iff_provable.mp;
     apply Modal.Logic.subst! (φ := Modal.Axioms.Grz (.atom 0)) (s := λ _ => φ);
     apply Modal.Logic.sumNormal.mem₂!;
+    apply Modal.Logic.iff_provable.mpr;
     simp;
 
 instance : IL.smallestMC ⪯ IL.smallestMC := inferInstance

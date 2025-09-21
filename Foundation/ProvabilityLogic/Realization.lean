@@ -3,6 +3,7 @@ import Foundation.FirstOrder.Internal.DerivabilityCondition
 import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.Logic.HilbertStyle.Cl
 import Foundation.Modal.Hilbert.Normal.Basic
+import Foundation.Modal.Letterless
 
 namespace LO
 
@@ -32,17 +33,18 @@ namespace Realization
 instance {𝔅 : Provability T₀ T} :
     CoeFun (Realization 𝔅) (fun _ ↦ Formula ℕ → FirstOrder.Sentence L) := ⟨interpret⟩
 
+@[grind]
 lemma letterless_interpret {𝔅 : Provability T₀ T}
-    {f₁ f₂ : Realization 𝔅} (A_letterless : A.letterless) : f₁ A = f₂ A := by
+    {f₁ f₂ : Realization 𝔅} (A_letterless : A.Letterless) : f₁ A = f₂ A := by
   induction A with
   | hatom a => simp at A_letterless;
   | hfalsum => simp_all [Realization.interpret];
   | himp A B ihA ihB =>
-    replace ihA := ihA $ Modal.Formula.letterless.def_imp₁ A_letterless;
-    replace ihB := ihB $ Modal.Formula.letterless.def_imp₂ A_letterless;
+    replace ihA := ihA $ Modal.Formula.Letterless.def_imp₁ A_letterless;
+    replace ihB := ihB $ Modal.Formula.Letterless.def_imp₂ A_letterless;
     simp_all [Realization.interpret];
   | hbox A ihA =>
-    replace ihA := ihA $ Modal.Formula.letterless.def_box A_letterless;
+    replace ihA := ihA $ Modal.Formula.Letterless.def_box A_letterless;
     simp_all [Realization.interpret];
 
 

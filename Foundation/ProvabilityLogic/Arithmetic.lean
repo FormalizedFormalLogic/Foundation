@@ -16,9 +16,9 @@ variable {T U} {A B C : Modal.Formula ℕ}
 
 namespace ArithmeticTheory.ProvabilityLogic
 
-lemma provable_iff :
-    ProvabilityLogic T U ⊢! A ↔ ∀ f : T.StandardRealization, U ⊢! f A := by
-  simp [ArithmeticTheory.ProvabilityLogic]
+@[grind]
+lemma provable_iff : ProvabilityLogic T U ⊢! A ↔ ∀ f : T.StandardRealization, U ⊢! f A := by
+  simp [Modal.Logic.iff_provable, ArithmeticTheory.ProvabilityLogic]
 
 instance : Entailment.Lukasiewicz (ProvabilityLogic T U) where
   mdp := by

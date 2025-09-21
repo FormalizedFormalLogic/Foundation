@@ -95,6 +95,6 @@ theorem iff_boxdotTranslatedGLPoint3_GrzPoint3 : Hilbert.GLPoint3 ⊢! φᵇ ↔
 ⟩
 
 theorem iff_boxdot_GLPoint3_GrzPoint3 : Modal.GLPoint3 ⊢! φᵇ ↔ Modal.GrzPoint3 ⊢! φ := by
-  simpa using iff_boxdotTranslatedGLPoint3_GrzPoint3;
+  grind [iff_boxdotTranslatedGLPoint3_GrzPoint3];
 
 end LO.Modal

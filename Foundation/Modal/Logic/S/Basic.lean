@@ -1,4 +1,4 @@
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.SumQuasiNormal
 import Foundation.Modal.Maximal.Unprovability
 
 namespace LO.Modal
@@ -14,7 +14,10 @@ instance : Entailment.HasAxiomT Modal.S where
     constructor;
     apply Logic.sumQuasiNormal.subst (φ := Axioms.T (.atom 0)) (s := λ _ => φ);
     apply Logic.sumQuasiNormal.mem₂;
+    apply Logic.iff_provable.mpr;
     simp;
+
+attribute [grind] Hilbert.Normal.iff_logic_provable_provable Logic.GL.unprovable_AxiomT
 
 instance : Modal.GL ⪱ Modal.S := by
   constructor;
@@ -23,7 +26,7 @@ instance : Modal.GL ⪱ Modal.S := by
     use (Axioms.T (.atom 0));
     constructor;
     . simp;
-    . simpa using Logic.GL.unprovable_AxiomT;
+    . grind;
 
 section
 

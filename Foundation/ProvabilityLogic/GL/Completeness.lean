@@ -17,7 +17,7 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula
 
 theorem unprovable_realization_exists
     (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsFiniteTree r₁]
-    (hA : ¬r₁ ⊧ A) (h : M₁.finHeight < T.height) :
+    (hA : ¬r₁ ⊧ A) (h : M₁.height < T.height) :
     ∃ f : T.StandardRealization, T ⊬ f A := by
   let M₀ := M₁.extendRoot 1
   let r₀ : M₀ := Frame.extendRoot.root
@@ -30,11 +30,11 @@ theorem unprovable_realization_exists
     SolovaySentences.standard T M₀.toFrame
   use S.realization
   intro hC
-  have : T.height ≤ M₁.finHeight := by
+  have : T.height ≤ M₁.height := by
     apply PartENat.le_of_lt_add_one
     calc
-      (Theory.standardProvability T).height < M₀.finHeight := S.theory_height hdnA hC
-      _                                     = M₁.finHeight + 1 := by simp [M₀]
+      (Theory.standardProvability T).height < M₀.height := S.theory_height hdnA hC
+      _                                     = M₁.height + 1 := by simp [M₀]
   exact not_lt_of_ge this h
 
 /-- Arithmetical completeness of $\mathsf{GL}$-/
@@ -58,8 +58,7 @@ theorem GLPlusBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.h
   have : Fintype M₁ := Fintype.ofFinite _
   have hA₁ : r₁ ⊧ □^[n]⊥ ∧ ¬r₁ ⊧ A := by
     simpa [Formula.Kripke.Satisfies] using hA₁
-  have M₁_height : M₁.finHeight < n :=
-    finHeight_lt_iff_satisfies_boxbot.mpr hA₁.1
+  have M₁_height : M₁.height < n := height_lt_iff_satisfies_boxbot.mpr hA₁.1
   exact unprovable_realization_exists M₁ hA₁.2 <| lt_of_lt_of_le (by simp [M₁_height]) height
 
 theorem GL.arithmetical_completeness_iff (height : T.height = ⊤) {A} :
@@ -74,8 +73,8 @@ theorem GL.arithmetical_completeness_sound_iff [T.SoundOnHierarchy 𝚺 1] {A} :
 theorem provabilityLogic_eq_GL_of_sigma1_sound [T.SoundOnHierarchy 𝚺 1] :
     ProvabilityLogic T T ≊ Modal.GL := by
   apply Logic.iff_equal_provable_equiv.mp
-  ext A
-  simpa [ArithmeticTheory.ProvabilityLogic] using
+  ext A;
+  simpa [ArithmeticTheory.ProvabilityLogic, Logic.iff_provable] using
     GL.arithmetical_completeness_sound_iff
 
 open Classical
@@ -101,7 +100,7 @@ theorem provabilityLogic_eq_GLPlusBoxBot :
     ProvabilityLogic T T ≊ Modal.GLPlusBoxBot T.height.toWithTop := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A
-  simpa [ArithmeticTheory.ProvabilityLogic] using
+  simpa [ArithmeticTheory.ProvabilityLogic, Logic.iff_provable] using
     GLPlusBoxBot.arithmetical_completeness_iff
 
 instance : ProvabilityLogic 𝗣𝗔 𝗣𝗔 ≊ Modal.GL := provabilityLogic_eq_GL_of_sigma1_sound

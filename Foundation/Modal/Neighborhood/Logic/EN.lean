@@ -66,7 +66,7 @@ instance : Modal.N ⪱ 𝐄𝐍 := by
   constructor;
   . suffices ∀ φ, Hilbert.N ⊢! φ → Hilbert.EN ⊢! φ by
       apply Entailment.weakerThan_iff.mpr;
-      simpa;
+      grind;
     intro φ hφ;
     induction hφ using Hilbert.Normal.rec! with
     | axm s h => simp at h;
@@ -75,7 +75,9 @@ instance : Modal.N ⪱ 𝐄𝐍 := by
     | _ => simp;
   . suffices ∃ φ, Hilbert.EN ⊢! φ ∧ Hilbert.N ⊬ φ by
       apply Entailment.not_weakerThan_iff.mpr;
-      simpa using this;
+      obtain ⟨φ, _⟩ := this;
+      use φ;
+      grind;
     use □(.atom 0) ⭤ □(∼∼.atom 0);
     constructor;
     . apply re!;
