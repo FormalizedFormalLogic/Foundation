@@ -1,68 +1,7 @@
-import Foundation.Modal.Formula
-import Foundation.Modal.Axioms
-import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.ProvabilityLogic.S.Completeness
+
 import Foundation.Modal.Logic.S.Basic
-import Foundation.Modal.Logic.D.Basic
-import Mathlib.Tactic.TFAE
-import Foundation.Propositional.Logic.PostComplete
-import Mathlib.Order.WellFounded
-
-section
-
-lemma Set.compl_inj_iff {a b : Set α} : aᶜ = bᶜ ↔ a = b := _root_.compl_inj_iff
-
-/-
-  Thanks to @plp127
-
-  https://leanprover.zulipchat.com/#narrow/channel/217875-Is-there-code-for-X.3F/topic/ascending.2Fdecending.20lemmata.20related.20.60Set.60.20and.20.60Finset.60/near/539292838
--/
-lemma Set.infinitely_finset_approximate {α : Type*} {X : Set α} (count : X.Countable) (inf : X.Infinite) {a : α} (ha : a ∈ X) :
-  ∃ f : ℕ → Finset α, ((f 0) = {a}) ∧ (∀ i, f i ⊂ f (i + 1)) ∧ (∀ i, ↑(f i) ⊆ X) ∧ (∀ b ∈ X, ∃ i, b ∈ f i) := by
-  let X' := X \ {a}
-  have count' : Countable X' := (count.mono Set.diff_subset).to_subtype
-  have inf' : Infinite X' := (inf.diff (Set.finite_singleton a)).to_subtype
-  obtain ⟨eq⟩ : Nonempty (Nat ≃ X') := nonempty_equiv_of_countable
-  refine ⟨
-    fun n => Finset.cons a ((Finset.range n).map
-    (eq.toEmbedding.trans (Function.Embedding.subtype _))) ?_, ?_, ?_, ?_, ?_
-  ⟩
-  · suffices ∀ x < n, ¬↑(eq x) = a by simpa;
-    intro x _
-    exact (eq x).prop.right
-  · rfl
-  · simp [Finset.ssubset_def]
-  · suffices ∀ (i : ℕ), Set.Iio i ⊆ (fun a ↦ ↑(eq a)) ⁻¹' X by simpa [Set.insert_subset_iff, ha]
-    intro i x _;
-    exact (eq x).prop.left
-  · intro b hb
-    by_cases hba : b = a
-    · exact ⟨0, by simp [hba]⟩
-    · refine ⟨eq.symm ⟨b, hb, hba⟩ + 1, ?_⟩
-      apply Finset.mem_cons_of_mem;
-      suffices ∃ a_1 < eq.symm ⟨b, _⟩ + 1, ↑(eq _) = b by simpa;
-      exact ⟨eq.symm ⟨b, hb, hba⟩, by simp⟩
-
-end
-
-
-section
-
-/-
-  Thanks to @plp127
-
-  https://leanprover.zulipchat.com/#narrow/channel/217875-Is-there-code-for-X.3F/topic/ascending.2Fdecending.20lemmata.20related.20.60Set.60.20and.20.60Finset.60/near/539367015
--/
-lemma Finset.no_ssubset_descending_chain  {f : ℕ → Finset α} : ¬(∀ i, ∃ j > i, f j ⊂ f i) := by
-  intro h
-  have n := 0
-  induction hf : f n using WellFoundedLT.fix generalizing n with subst hf | _ _ ih
-  obtain ⟨m, -, hy⟩ := h n
-  exact ih (f m) hy m rfl
-
-end
-
-
+import Foundation.ProvabilityLogic.GL.Completeness
+import Foundation.Vorspiel.Set.Cofinite
 
 namespace LO
 
@@ -72,76 +11,9 @@ variable {φ ψ : Modal.Formula ℕ}
          {X Y : Modal.FormulaSet ℕ}
          {T : ArithmeticTheory} [T.Δ₁]
 
-
-namespace FirstOrder
-
-variable {M : Type*} [Nonempty M] [s : Structure L M]
-
-@[simp, grind]
-lemma models₀_lconj₂_iff {Γ : List (Sentence L)} : M ⊧ₘ Γ.conj₂ ↔ (∀ σ ∈ Γ, M ⊧ₘ σ) := by
-  simp [models_iff];
-
-@[simp, grind]
-lemma models₀_fconj_iff {Γ : Finset (Sentence L)} : M ⊧ₘ Γ.conj ↔ (∀ σ ∈ Γ, M ⊧ₘ σ) := by
-  simp [models_iff];
-
-@[simp]
-lemma models₀_fconj'_iff {s : Finset α} {Γ : α → Sentence L} : M ⊧ₘ (⩕ i ∈ s, Γ i) ↔ (∀ i ∈ s, M ⊧ₘ (Γ i)) := by
-  simp [models_iff];
-
-end FirstOrder
-
 namespace Modal
 
 namespace Formula
-
-
-@[simp, grind]
-lemma subst.subst_letterless {φ : Formula α} {s : Substitution α} (hφ : φ.letterless) : φ⟦s⟧ = φ := by
-  induction φ <;> simp_all [letterless];
-
-
-namespace letterless
-
-variable {φ ψ : Formula α}
-
-attribute [grind] letterless.def_imp₁ letterless.def_imp₂ letterless.def_box
-
-@[simp, grind] lemma def_bot : (⊥ : Formula α).letterless := by simp [letterless]
-@[simp, grind] lemma def_top : (⊤ : Formula α).letterless := by simp [letterless]
-
-@[grind] lemma of_imp (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ➝ ψ).letterless := by simp_all [letterless]
-@[grind] lemma of_neg (hφ : φ.letterless) : (∼φ).letterless := by simp_all [letterless]
-@[grind] lemma of_or (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ⋎ ψ).letterless := by simp_all [letterless]
-@[grind] lemma of_and (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ⋏ ψ).letterless := by simp_all [letterless]
-@[grind] lemma of_box (hφ : φ.letterless) : (□φ).letterless := by simp_all [letterless]
-@[grind] lemma of_multibox (hφ : φ.letterless) : (□^[n]φ).letterless := by
-  induction n with
-  | zero => simpa [letterless]
-  | succ n ih => simp [letterless, ih]
-@[grind] lemma of_iff (hφ : φ.letterless) (hψ : ψ.letterless) : (φ ⭤ ψ).letterless := by simp_all [letterless]
-
-@[grind]
-lemma of_lconj₂ {l : List (Formula α)} (h : ∀ φ ∈ l, φ.letterless) : (l.conj₂).letterless := by
-  induction l using List.induction_with_singleton <;> simp_all [letterless];
-
-@[grind]
-lemma of_lconj' {l : List β} {Φ : β → Formula α} (h : ∀ i ∈ l, (Φ i).letterless) : (l.conj' Φ).letterless := by
-  induction l using List.induction_with_singleton with
-  | hcons _ _ _ ih => apply of_lconj₂; grind;
-  | _  => simp_all [List.conj']
-
-@[grind]
-lemma of_fconj {s : Finset (Formula α)} (h : ∀ φ ∈ s, φ.letterless) : (s.conj).letterless := by
-  apply of_lconj₂;
-  simpa;
-
-lemma of_fconj' {s : Finset β} {Φ : β → Formula α} (h : ∀ i, (Φ i).letterless) : (⩕ i ∈ s, Φ i).letterless := by
-  apply of_lconj';
-  grind;
-
-end letterless
-
 
 /-- spectrum for letterless formula -/
 def spectrum (φ : Formula ℕ) (φ_closed : φ.letterless := by grind) : Set ℕ :=
@@ -220,7 +92,7 @@ lemma def_fconj' {s} {Φ : α → Formula ℕ} (hΦ : ∀ i, (Φ i).letterless) 
 end spectrum
 
 
-lemma spectrum_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.letterless) : φ.spectrum.Finite ∨ φ.spectrumᶜ.Finite := by
+lemma spectrum_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.letterless) : φ.spectrum.Finite ∨ φ.spectrum.Cofinite := by
   induction φ with
   | hfalsum => simp;
   | hatom => simp at hφ;
@@ -231,10 +103,9 @@ lemma spectrum_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.letterless) : φ.
     case himp.inr.inl => left; simp_all;
     all_goals
     . right;
-      simp only [Set.compl_union, compl_compl];
       first
-      | apply Set.Finite.inter_of_left (by simpa);
-      | apply Set.Finite.inter_of_right (by simpa);
+      | . apply Set.cofinite_union_left; simp_all;
+      | . apply Set.cofinite_union_right; simp_all;
   | hbox φ ihφ =>
     by_cases h : φ.spectrum = Set.univ;
     . right;
@@ -277,10 +148,11 @@ end trace
 lemma neg_trace_spectrum {φ : Formula ℕ} (hφ : φ.letterless := by grind) : (∼φ).trace = φ.spectrum := by rw [trace.def_neg]; simp [trace];
 lemma neg_spectrum_trace {φ : Formula ℕ} (hφ : φ.letterless := by grind) : (∼φ).spectrum = φ.trace := by rw [spectrum.def_neg]; simp [trace];
 
-lemma trace_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.letterless := by grind) : φ.trace.Finite ∨ φ.traceᶜ.Finite := by
-  simp only [trace, compl_compl];
-  apply spectrum_finite_or_cofinite hφ |>.symm;
-
+lemma trace_finite_or_cofinite {φ : Formula ℕ} (hφ : φ.letterless := by grind) : φ.trace.Finite ∨ φ.trace.Cofinite := by
+  suffices φ.spectrum.Finite ∨ φ.spectrum.Cofinite by
+    simp_all [Formula.trace];
+    tauto;
+  apply spectrum_finite_or_cofinite hφ;
 
 section
 
@@ -347,8 +219,6 @@ end Formula
 
 namespace FormulaSet
 
-abbrev letterless (X : Modal.FormulaSet α) := ∀ φ ∈ X, φ.letterless
-
 protected def Regular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet ℕ) := ∀ φ ∈ X, φ.Regular T
 
 protected def Singular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet ℕ) := ¬X.Regular T
@@ -356,7 +226,7 @@ protected def Singular (T : ArithmeticTheory) [T.Δ₁] (X : Modal.FormulaSet �
 lemma exists_singular_of_singular (hX_singular : X.Singular T) : ∃ φ ∈ X, φ.Singular T := by
   simpa [FormulaSet.Singular, FormulaSet.Regular] using hX_singular;
 
-protected def spectrum (X : Modal.FormulaSet ℕ) (_ : X.letterless := by grind) := ⋂ φ ∈ X, φ.spectrum
+protected def spectrum (X : Modal.FormulaSet ℕ) (X_c : X.letterless := by grind) := ⋂ φ ∈ X, φ.spectrum
 
 protected def trace (X : Modal.FormulaSet ℕ) (_ : X.letterless := by grind) := X.spectrumᶜ
 
@@ -400,7 +270,7 @@ abbrev TBB (n : ℕ) : Formula ℕ := □^[(n+1)]⊥ ➝ □^[n]⊥
 
 section
 
-variable {α α₁ α₂ β β₁ β₂ : Set ℕ} (hβ : βᶜ.Finite := by grind) (hβ₁ : β₁ᶜ.Finite := by grind) (hβ₂ : β₂ᶜ.Finite := by grind)
+variable {α α₁ α₂ β β₁ β₂ : Set ℕ} (hβ : β.Cofinite := by grind) (hβ₁ : β₁.Cofinite := by grind) (hβ₂ : β₂.Cofinite := by grind)
 
 @[simp, grind] lemma TBB_letterless : (TBB n).letterless := by grind
 
@@ -413,7 +283,7 @@ lemma TBB_spectrum : (TBB n).spectrum = {n}ᶜ := by
 
 @[simp]
 lemma TBB_trace : (TBB n).trace = {n} := by simp [Formula.trace, TBB_spectrum, compl_compl];
-variable {α α₁ α₂ β β₁ β₂ : Set ℕ} (hβ : βᶜ.Finite := by grind) (hβ₁ : β₁ᶜ.Finite := by grind) (hβ₂ : β₂ᶜ.Finite := by grind)
+variable {α α₁ α₂ β β₁ β₂ : Set ℕ} (hβ : β.Cofinite := by grind) (hβ₁ : β₁.Cofinite := by grind) (hβ₂ : β₂.Cofinite := by grind)
 
 @[simp, grind]
 lemma TBB_conj'_letterless : (⩕ n ∈ s, TBB n).letterless := by
@@ -489,10 +359,6 @@ open Kripke
 open Formula.Kripke
 
 variable {F : Frame} {r : F} [F.IsTree r] [Fintype F]
-
-lemma Frame.World.finHeight_lt_of_rel {i j : F} (hij : i ≺ j) : Frame.World.finHeight i > Frame.World.finHeight j := fcwHeight_gt_of hij
-
-lemma Frame.World.exists_of_lt_finHeight {i : F} (hn : n < Frame.World.finHeight i) : ∃ j : F, i ≺ j ∧ Frame.World.finHeight j = n := fcwHeight_lt hn
 
 lemma iff_satisfies_mem_finHeight_spectrum
   {M : Model} {r : M} [Fintype M] [M.IsTree r] {w : M}
@@ -756,12 +622,11 @@ lemma FormulaSet.spectrum_finite_of_singular (X_singular : X.Singular T) : X.spe
   intro i;
   simp_all [FormulaSet.spectrum];
 
-lemma FormulaSet.regular_of_not_trace_cofinite : ¬X.traceᶜ.Finite → X.Regular T := by
+lemma FormulaSet.regular_of_not_trace_cofinite : ¬X.trace.Cofinite → X.Regular T := by
   contrapose!;
-  rw [comp_trace_spectrum];
+  suffices ¬X.Regular T → (X.spectrum).Finite by simpa [FormulaSet.trace, comp_trace_spectrum];
   apply spectrum_finite_of_singular;
   assumption;
-
 
 section
 
@@ -966,7 +831,7 @@ lemma GL.iff_eq_closed_sumQuasiNormal_eq_spectrum (hXY : (X.Regular T ∧ Y.Regu
 
 protected abbrev GLα (α : Set ℕ) : Logic ℕ := Modal.GL.sumQuasiNormal (α.image (λ i => TBB i))
 
-protected abbrev GLβMinus (β : Set ℕ) (hβ : βᶜ.Finite := by grind) : Logic ℕ := Modal.GL.sumQuasiNormal {∼(⩕ n ∈ hβ.toFinset, (TBB n))}
+protected abbrev GLβMinus (β : Set ℕ) (hβ : β.Cofinite := by grind) : Logic ℕ := Modal.GL.sumQuasiNormal {∼(⩕ n ∈ hβ.toFinset, (TBB n))}
 
 
 lemma GL.iff_eq_closed_sumQuasiNormal_eq_trace (hXY : (X.Regular T ∧ Y.Regular T) ∨ (X.Singular T ∧ Y.Singular T))
@@ -986,9 +851,10 @@ lemma GL.eq_closed_regular_sumQuasiNormal_GLα (X_regular : X.Regular T)
 
 
 @[grind]
-lemma FormulaSet.comp_trace_finite_of_singular (X_singular : X.Singular T) : (X.trace)ᶜ.Finite :=
-  FormulaSet.comp_trace_spectrum X_letterless ▸ FormulaSet.spectrum_finite_of_singular X_letterless X_singular
-
+lemma FormulaSet.comp_trace_finite_of_singular (X_singular : X.Singular T) : (X.trace).Cofinite := by
+  have := FormulaSet.spectrum_finite_of_singular X_letterless X_singular;
+  have := FormulaSet.comp_trace_spectrum X_letterless;
+  grind;
 
 lemma GL.eq_closed_singular_sumQuasiNormal_GLβMinus (X_singular : X.Singular T) : Modal.GL.sumQuasiNormal X = Modal.GLβMinus (X.trace) := by
   apply GL.iff_eq_closed_sumQuasiNormal_eq_spectrum (T := T) ?_ ?_ ?_ |>.mpr;
@@ -1027,7 +893,7 @@ lemma iff_GLα_subset : Modal.GLα α₁ ⊆ Modal.GLα α₂ ↔ α₁ ⊆ α�
       simp;
     _ ↔ α₁ ⊆ α₂ := by simp;
 
-lemma iff_GLβMinus_subset (hβ₁ : β₁ᶜ.Finite) (hβ₂ : β₂ᶜ.Finite) : Modal.GLβMinus β₁ ⊆ Modal.GLβMinus β₂ ↔ β₁ ⊆ β₂ := by
+lemma iff_GLβMinus_subset (hβ₁ : β₁.Cofinite) (hβ₂ : β₂.Cofinite) : Modal.GLβMinus β₁ ⊆ Modal.GLβMinus β₂ ↔ β₁ ⊆ β₂ := by
   calc
     _ ↔ FormulaSet.spectrum ({∼(⩕ n ∈ hβ₂.toFinset, (TBB n))}) ⊆ FormulaSet.spectrum ({∼(⩕ n ∈ hβ₁.toFinset, (TBB n))}) := by
       apply GL.iff_subset_closed_sumQuasiNormal_subset_spectrum (T := 𝗣𝗔) (by grind) (by grind);
@@ -1035,7 +901,7 @@ lemma iff_GLβMinus_subset (hβ₁ : β₁ᶜ.Finite) (hβ₂ : β₂ᶜ.Finite)
     _ ↔ β₂ᶜ ⊆ β₁ᶜ := by rw [TBBMinus_spectrum, TBBMinus_spectrum];
     _ ↔ β₁ ⊆ β₂ := by simp;
 
-lemma GLα_subset_GLβMinus (hβ : βᶜ.Finite) : Modal.GLα β ⊆ Modal.GLβMinus β := by
+lemma GLα_subset_GLβMinus (hβ : β.Cofinite) : Modal.GLα β ⊆ Modal.GLβMinus β := by
   apply GL.iff_subset_closed_sumQuasiNormal_subset_spectrum (T := 𝗣𝗔) ?_ ?_ ?_ |>.mpr;
   . rw [TBBMinus_spectrum];
     simp [FormulaSet.spectrum];

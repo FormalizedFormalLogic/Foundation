@@ -1,138 +1,16 @@
 import Foundation.ProvabilityLogic.Classification.LetterlessTrace
 import Foundation.Modal.Boxdot.GL_S
 import Foundation.Modal.Logic.SumQuasiNormal
-
-
-namespace Set
-
-variable {α : Type*} {s t : Set α}
-
-abbrev Cofinite (s : Set α) := sᶜ.Finite
-
-abbrev Coinfinite (s : Set α) := sᶜ.Infinite
-
-lemma Cofinite.subset (h : s ⊆ t) : s.Cofinite → t.Cofinite := by
-  intro h;
-  apply Set.Finite.subset (s := sᶜ) h;
-  tauto_set;
-
-lemma Coinfinite.subset (h : t ⊆ s) : s.Coinfinite → t.Coinfinite := by
-  contrapose!;
-  simpa using Set.Cofinite.subset h;
-
-@[grind] lemma univ_cofinite : (Set.univ (α := α)).Cofinite := by simp [Set.Cofinite];
-
-@[grind]
-lemma iff_cofinite_not_coinfinite : s.Cofinite ↔ ¬s.Coinfinite := by
-  dsimp [Set.Cofinite, Set.Coinfinite];
-  simp;
-
-end Set
+import Foundation.Modal.Logic.D.Basic
 
 
 namespace LO
-
-
-namespace Semantics
-
-variable {M : Type*} {F : Type*} [LogicalConnective F] [Semantics F M] [Tarski M] {𝓜 : M} {α}
-
-@[simp] lemma realize_list_conj' {l : List α} {ι : α → F} : 𝓜 ⊧ l.conj' ι ↔ ∀ i ∈ l, 𝓜 ⊧ ι i := by simp [List.conj']
-
-@[simp] lemma realize_list_disj' {l : List α} {ι : α → F} : 𝓜 ⊧ l.disj' ι ↔ ∃ i ∈ l, 𝓜 ⊧ ι i := by simp [List.disj']
-
-@[simp] lemma realize_finset_conj' {s : Finset α} {ι : α → F} : 𝓜 ⊧ s.conj' ι ↔ ∀ i ∈ s, 𝓜 ⊧ ι i := by simp [Finset.conj']
-
-@[simp] lemma realize_finset_disj' {s : Finset α} {ι : α → F} : 𝓜 ⊧ s.disj' ι ↔ ∃ i ∈ s, 𝓜 ⊧ ι i := by simp [Finset.disj']
-
-end Semantics
-
-
-namespace Entailment
-
-variable {F : Type*} [LogicalConnective F]
-         {S : Type*} [Entailment F S]
-         {𝓢 : S} [Entailment.Minimal 𝓢]
-
-lemma FConj'_iff_forall_provable [DecidableEq F] {s : Finset α} {ι : α → F} : (𝓢 ⊢! ⩕ i ∈ s, ι i) ↔ (∀ i ∈ s, 𝓢 ⊢! ι i) := by
-  have : 𝓢 ⊢! ⋀(s.toList.map ι) ↔ ∀ i ∈ s, 𝓢 ⊢! ι i := by simpa using Conj₂!_iff_forall_provable (Γ := s.toList.map ι);
-  apply Iff.trans ?_ this;
-  simp [Finset.conj', List.conj'];
-
-end Entailment
-
-
 
 namespace Modal
 
 variable {φ ψ : Formula ℕ}
 
 open Kripke
-
-namespace Kripke.Frame
-
-variable {F : Frame} {r x y : F} [Fintype F] [F.IsTree r]
-
-lemma eq_finHeight_root : Frame.World.finHeight x = F.finHeight ↔ x = r := by
-  constructor;
-  . rintro h;
-    contrapose! h;
-    apply Nat.ne_of_lt;
-    apply Frame.World.finHeight_lt_whole_finHeight;
-    apply F.root_genaretes'!;
-    assumption;
-  . tauto;
-
-lemma terminal_rel_finHeight (h : x ≺^[World.finHeight x] y) : ∀ z, ¬y ≺ z := by
-  intro z Ryz;
-  suffices World.finHeight x + 1 ≤ World.finHeight x by omega;
-  exact le_finHeight_iff_relItr.mpr ⟨z, HRel.Iterate.forward.mpr ⟨y, h, Ryz⟩⟩;
-
-lemma extendRoot.eq_original_finHeight : Frame.World.finHeight (x : F.extendRoot 1) = Frame.World.finHeight x := by
-  apply finHeight_eq_iff_relItr.mpr;
-  constructor;
-  . obtain ⟨y, Rxy⟩ := exists_terminal (i := x);
-    use y;
-    apply extendRoot.embed_rel_iterate_embed_iff_rel.mpr;
-    exact Rxy;
-  . rintro (_ | y) Rxy (_ | z);
-    . simp;
-    . -- TODO: extract no loop lemma (x ≺^[n] i cannot happen where x is original and i is new elements by extension)
-      exfalso;
-      have : extendRoot.root ≺ (x : F.extendRoot 1) := Frame.root_genaretes'! (F := F.extendRoot 1) x (by simp);
-      have : (x : F.extendRoot 1) ≺ x :=
-        HRel.Iterate.unwrap_of_trans_of_pos (by omega) $
-        HRel.Iterate.comp (m := 1) |>.mp ⟨_, Rxy, by simpa⟩;
-      exact Frame.irrefl _ this;
-    . apply Frame.asymm;
-      exact Frame.root_genaretes'! (F := F.extendRoot 1) y (by simp);
-    . have := terminal_rel_finHeight $ extendRoot.embed_rel_iterate_embed_iff_rel.mp Rxy;
-      exact extendRoot.embed_rel_embed_iff_rel.not.mpr $ this z;
-
-lemma extendRoot.eq_original_finHeight_root : Frame.World.finHeight (r : F.extendRoot 1) = F.finHeight := eq_original_finHeight
-
-@[grind]
-lemma extendRoot.iff_eq_finHeight_eq_original_root {x : F.extendRoot 1} : Frame.World.finHeight x = F.finHeight ↔ x = r := by
-  constructor;
-  . rcases x with (a | x);
-    . intro h;
-      have := h ▸ finHeight₁ (F := F);
-      simp [Frame.finHeight] at this;
-    . intro h;
-      suffices x = r by simp [this];
-      apply Frame.eq_finHeight_root.mp;
-      exact h ▸ Frame.extendRoot.eq_original_finHeight.symm;
-  . rintro rfl;
-    exact eq_original_finHeight_root;
-
-open Classical in
-noncomputable instance [h : Fintype F] : Fintype (F↾x) := by apply Subtype.fintype;
-
-instance [F.IsTree r] : (F↾x).IsTree ⟨x, by tauto⟩ := by constructor;
-
-axiom pointGenerate.eq_original_finHeight (hxy : y = x ∨ x ≺^+ y) : Frame.World.finHeight (F := F↾x) (⟨y, hxy⟩) = Frame.World.finHeight y
-
-end Kripke.Frame
 
 
 def Formula.gTrace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.finHeight = n ∧ ¬r ⊧ φ) }
@@ -239,7 +117,7 @@ lemma GL.unprovable_of_exists_trace (φ_letterless : φ.letterless) : (∃ n, n 
   simp_all [Formula.trace];
 
 @[simp]
-lemma TBBMinus_trace (hβ : βᶜ.Finite) : (∼⩕ n ∈ hβ.toFinset, TBB n).trace = β := by
+lemma TBBMinus_trace (hβ : β.Cofinite) : (∼⩕ n ∈ hβ.toFinset, TBB n).trace = β := by
   simp [Formula.trace, TBBMinus_spectrum']
 
 @[simp]
@@ -253,7 +131,7 @@ lemma GLα.eq_trace {α : Set ℕ} : (Modal.GLα α).trace = α := by
   simp [FormulaSet.gTrace, Formula.eq_gTrace_trace_of_letterless];
 
 @[simp]
-lemma GLβMinus.eq_trace {β : Set ℕ} (hβ : βᶜ.Finite := by grind) : (Modal.GLβMinus β).trace = β := by
+lemma GLβMinus.eq_trace {β : Set ℕ} (hβ : β.Cofinite := by grind) : (Modal.GLβMinus β).trace = β := by
   apply Eq.trans $ GL.eq_trace_ext $ by grind;
   simp [FormulaSet.gTrace, Formula.eq_gTrace_trace_of_letterless];
 
@@ -598,10 +476,10 @@ lemma eq_GLβMinusOmega : Modal.GLβMinus Set.univ = Set.univ := by
   . suffices Modal.GL ⊢! ∼⊤ ➝ φ by simpa;
     cl_prover;
 
-protected abbrev D_inter_GLβMinus (β : Set ℕ) (hβ : βᶜ.Finite := by grind) := Modal.D ∩ Modal.GLβMinus β
+protected abbrev D_inter_GLβMinus (β : Set ℕ) (hβ : β.Cofinite := by grind) := Modal.D ∩ Modal.GLβMinus β
 @[simp] lemma eq_D_inter_GLβMinusOmega : Modal.D_inter_GLβMinus Set.univ = Modal.D := by simp
 
-protected abbrev S_inter_GLβMinus (β : Set ℕ) (hβ : βᶜ.Finite := by grind) := Modal.S ∩ Modal.GLβMinus β
+protected abbrev S_inter_GLβMinus (β : Set ℕ) (hβ : β.Cofinite := by grind) := Modal.S ∩ Modal.GLβMinus β
 @[simp] lemma eq_S_inter_GLβMinusOmega : Modal.S_inter_GLβMinus Set.univ = Modal.S := by simp
 
 end Modal

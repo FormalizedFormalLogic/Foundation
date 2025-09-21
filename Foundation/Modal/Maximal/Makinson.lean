@@ -1,6 +1,7 @@
 import Foundation.Modal.Hilbert.NNFormula
 import Foundation.Modal.Maximal.Basic
 import Foundation.Modal.Logic.Extension
+import Foundation.Modal.ZeroSubstitution
 import Foundation.Modal.Kripke.Logic.Ver
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 
