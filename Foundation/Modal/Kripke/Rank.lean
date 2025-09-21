@@ -60,7 +60,7 @@ lemma finHeight_eq_iff_relItr {i : F} :
   _ ↔ (∀ k j, i ≺^[n] j → ¬j ≺ k) ∧ (∃ j, i ≺^[n] j) := by simp only [HRel.Iterate.forward, not_exists, not_and]
   _ ↔ (∃ j, i ≺^[n] j) ∧ (∀ j, i ≺^[n] j → ∀ k, ¬j ≺ k) := by grind
 
-lemma exists_terminal (i : F) : ∃ j, i ≺^[Frame.World.finHeight i] j := le_finHeight_iff_relItr.mp (by simp)
+lemma exists_rank_terminal (i : F) : ∃ j, i ≺^[Frame.World.finHeight i] j := le_finHeight_iff_relItr.mp (by simp)
 
 lemma eq_finHeight_root : Frame.World.finHeight x = F.finHeight ↔ x = r := by
   constructor;
@@ -98,7 +98,7 @@ namespace extendRoot
     have lpos : 0 < l - 1 := Nat.zero_lt_of_ne_zero hl
     have e : l = (l - 1) + 1 := by
       symm; exact Nat.sub_add_cancel Frame.extendRoot.finHeight_pos
-    have : ∃ j, extendRoot.root ≺^[l] j := exists_terminal (extendRoot.root : F.extendRoot 1)
+    have : ∃ j, extendRoot.root ≺^[l] j := exists_rank_terminal (extendRoot.root : F.extendRoot 1)
     rcases this with ⟨j, hj⟩
     have : ∃ z, extendRoot.root ≺ z ∧ z ≺^[l - 1] j := by
       rw [e] at hj
@@ -112,13 +112,13 @@ namespace extendRoot
     exact HRel.Iterate.constant_trans_of_pos lpos Rrz (embed_rel_iterate_embed_iff_rel.mp hzj)
   · suffices World.finHeight r + 1 ≤ World.finHeight extendRoot.root from this
     apply le_finHeight_iff_relItr.mpr
-    rcases exists_terminal r with ⟨j, hj⟩
+    rcases exists_rank_terminal r with ⟨j, hj⟩
     exact ⟨j, r, by trivial, embed_rel_iterate_embed_iff_rel.mpr hj⟩
 
 lemma eq_original_finHeight : Frame.World.finHeight (x : F.extendRoot 1) = Frame.World.finHeight x := by
   apply finHeight_eq_iff_relItr.mpr;
   constructor;
-  . obtain ⟨y, Rxy⟩ := exists_terminal (i := x);
+  . obtain ⟨y, Rxy⟩ := exists_rank_terminal (i := x);
     use y;
     apply extendRoot.embed_rel_iterate_embed_iff_rel.mpr;
     exact Rxy;

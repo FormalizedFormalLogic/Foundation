@@ -96,13 +96,13 @@ abbrev Logic.trace (L : Logic ℕ) : Set ℕ := FormulaSet.gTrace L
 lemma GL.eq_trace_ext {X : FormulaSet ℕ} (hX : ∀ ξ ∈ X, ∀ s : Substitution _, ξ⟦s⟧ ∈ X) : (Modal.GL.sumQuasiNormal X).trace = X.gTrace := by
   ext n;
   constructor;
-  . suffices (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.gTrace) → (n ∈ X.gTrace) by simpa [Logic.trace];
+  . suffices (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.gTrace) → (n ∈ X.gTrace) by simpa [Logic.trace, Logic.iff_provable];
     rintro ⟨φ, hφ₁, hφ₂⟩;
     obtain ⟨Y, hY₁, hY₂⟩ := Logic.sumQuasiNormal.iff_provable_finite_provable hX |>.mp hφ₁;
     apply FormulaSet.subset_gTrace_of_subset hY₁;
     apply eq_FormulaSet_gTrace_finset_conj ▸ subset_gTrace_of_provable_imp_GL hY₂;
     assumption;
-  . suffices (∃ φ ∈ X, n ∈ φ.gTrace) → (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.gTrace) by simpa [Logic.trace];
+  . suffices (∃ φ ∈ X, n ∈ φ.gTrace) → (∃ φ, Modal.GL.sumQuasiNormal X ⊢! φ ∧ n ∈ φ.gTrace) by simpa [Logic.trace, Logic.iff_provable];
     rintro ⟨φ, hφ₁, hφ₂⟩;
     use φ;
     constructor;
@@ -250,7 +250,7 @@ axiom height [M.IsTree r] [Fintype M] (hra : r ≠ a) :
   intro _;
   apply finHeight_eq_iff_relItr.mpr;
   constructor;
-  . obtain ⟨t, Rrt⟩ := Kripke.exists_terminal (F := M.boneLengthening a k |>.toFrame) r;
+  . obtain ⟨t, Rrt⟩ := Kripke.exists_rank_terminal (F := M.boneLengthening a k |>.toFrame) r;
     use t;
     induction k with
     | zero =>

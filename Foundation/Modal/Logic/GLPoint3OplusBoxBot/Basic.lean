@@ -210,13 +210,14 @@ lemma GLPoint3OplusBoxBot.provable_weakPoint2_in_2 : Modal.GLPoint3OplusBoxBot 2
     cl_prover [this];
   exact this;
 
+
 lemma GLPoint2.provable_boxboxbot : Modal.GLPoint2 ⊢! (□^[2]⊥) := by
   have h₁ : Modal.GLPoint2 ⊢! □(∼□⊥) ➝ □^[2]⊥  := by
     apply Entailment.WeakerThan.pbl (𝓢 := Modal.GL);
     haveI : Modal.GL ⊢! □(∼□⊥) ➝ □⊥ := by
       suffices Modal.GL ⊢! □(□⊥ ➝ ⊥) ➝ □⊥ by exact this;
       simp [axiomL!];
-    haveI : Modal.GL ⊢! □(∼□⊥) ➝ □□⊥ := C!_trans this (by simp [axiomFour!]);
+    haveI : Modal.GL ⊢! □(∼□⊥) ➝ □□⊥ := C!_trans this (by simp);
     exact this;
   have h₂ : Modal.GLPoint2 ⊢! ◇□⊥ ➝ □^[2]⊥ := by
     haveI : Modal.GLPoint2 ⊢! ◇□⊥ ➝ ◇(□(∼□⊥) ⋏ □⊥) := by

@@ -44,8 +44,9 @@ lemma Modal.S4.is_smallestMC_of_Int : Modal.S4 = (smallestMC 𝐈𝐧𝐭) := by
     | nec ih => apply Entailment.nec! ih;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      simp only [theory, Propositional.Logic.iff_provable, Set.mem_setOf_eq] at hφ;
-      simpa using Logic.gS4_of_Int hφ;
+      apply Hilbert.Normal.iff_logic_provable_provable.mpr;
+      apply Logic.gS4_of_Int;
+      simpa [theory, Propositional.Logic.iff_provable, Set.mem_setOf_eq] using hφ;
 
 instance : Sound (smallestMC 𝐈𝐧𝐭) FrameClass.S4 := by
   rw [←Modal.S4.is_smallestMC_of_Int];

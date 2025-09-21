@@ -44,10 +44,13 @@ lemma provable_Triv_of_boxdotTranslated_Ver : Hilbert.Ver ⊢! φᵇ → Hilbert
     apply iff_reflexivize_irreflexivize'.not.mp;
     exact h;
 
-theorem iff_boxdotTranslated_Ver_Triv : Hilbert.Ver ⊢! φᵇ ↔ Hilbert.Triv ⊢! φ := ⟨
+theorem iff_boxdotTranslated_Ver_Triv' : Hilbert.Ver ⊢! φᵇ ↔ Hilbert.Triv ⊢! φ := ⟨
   provable_Triv_of_boxdotTranslated_Ver,
   provable_boxdotTranslated_Ver_of_Triv
 ⟩
+
+theorem iff_boxdotTranslated_Ver_Triv : Modal.Ver ⊢! φᵇ ↔ Modal.Triv ⊢! φ := by
+  grind [iff_boxdotTranslated_Ver_Triv'];
 
 end Logic
 

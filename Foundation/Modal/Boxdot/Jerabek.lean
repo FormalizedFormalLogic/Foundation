@@ -163,7 +163,7 @@ section
 
 variable {L : Logic ℕ} [L.IsNormal] {n : ℕ} {Γ Δ : Finset (Formula ℕ)} {φ : Formula ℕ} {p} {b}
 
-private lemma jerabek_SBDP.lemma₁ : Hilbert.K ⊢! (flag (.atom p) b) ⋏ □φᵇ ➝ ⊡((flag (.atom p) !b) ➝ φᵇ) := by
+private lemma jerabek_SBDP.lemma₁ : Modal.K ⊢! (flag (.atom p) b) ⋏ □φᵇ ➝ ⊡((flag (.atom p) !b) ➝ φᵇ) := by
   apply Complete.complete (𝓜 := Kripke.FrameClass.K);
   intro F hF V x hx;
   replace hF := Set.mem_setOf_eq.mp hF;
@@ -182,7 +182,7 @@ private lemma jerabek_SBDP.lemma₁ : Hilbert.K ⊢! (flag (.atom p) b) ⋏ □�
 
 private lemma jerabek_SBDP.lemma₂ : L ⊢! (flag (.atom p) b) ⋏ □φᵇ ➝ ⊡((flag (.atom p) !b) ➝ φᵇ) := by
   apply normal_provable_of_K_provable;
-  simpa using lemma₁;
+  exact lemma₁;
 
 private lemma jerabek_SBDP.lemma₃ : L ⊢! (□^[n]Γ.conj)ᵇ ➝ □^≤[n](Γ.image (·ᵇ)).conj := by
   apply normal_provable_of_K_provable;
