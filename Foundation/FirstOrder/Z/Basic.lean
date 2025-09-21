@@ -555,6 +555,8 @@ instance succ.defined : ℒₛₑₜ-function₁[V] succ via succ.dfn :=
 
 instance succ.definable : ℒₛₑₜ-function₁[V] succ := succ.defined.to_definable
 
+@[simp] lemma mem_succ_self (x : V) : x ∈ succ x := by simp
+
 def IsInductive (x : V) : Prop := ∅ ∈ x ∧ ∀ y ∈ x, succ y ∈ x
 
 def IsInductive.dfn : Semisentence ℒₛₑₜ 1 :=
@@ -637,6 +639,7 @@ lemma one_def : (1 : V) = {∅} := calc
 
 @[simp] lemma two_mem_ω : 2 ∈ (ω : V) := ofNat_mem_ω 2
 
+@[elab_as_elim]
 lemma naturalNumber_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
     (zero : P 0) (succ : ∀ x ∈ (ω : V), P x → P (succ x)) : ∀ x ∈ (ω : V), P x := by
   let p : V := {x ∈ ω ; P x}
@@ -652,6 +655,56 @@ lemma naturalNumber_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
   have : x ∈ (ω : V) ∧ P x := by simpa [p] using this x hx
   exact this.2
 
-end Zermelo
+/-! ### Transitive set -/
 
-end LO
+def IsTransitive (x : V) : Prop := ∀ y ∈ x, y ⊆ x
+
+def IsTransitive.dfn : Semisentence ℒₛₑₜ 1 := “x. ∀ y ∈ x, y ⊆ x”
+
+instance IsTransitive.defined : ℒₛₑₜ-predicate[V] IsTransitive via IsTransitive.dfn :=
+  ⟨fun v ↦ by simp [IsTransitive.dfn, IsTransitive]⟩
+
+instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive := IsTransitive.defined.to_definable
+
+@[simp] lemma IsTransitive.empty : IsTransitive (∅ : V) := fun x ↦ by simp
+
+/-
+@[simp] lemma IsTransitive.ω : IsTransitive (ω : V) := by
+  intro x hx
+  induction x using naturalNumber_induction
+  · definability
+  case zero =>
+    simp [zero_def]
+  case succ x hx' ih =>
+    intro z hz
+    rcases show z = x ∨ z ∈ x by simpa using hz with (rfl | hz)
+    · exact hx'
+    · exact ih hx' z hz
+-/
+@[simp] lemma IsTransitive.ω : IsTransitive (ω : V) := by
+  apply naturalNumber_induction
+  · definability
+  case zero =>
+    simp [zero_def]
+  case succ =>
+    intro x hx ih z hz
+    rcases show z = x ∨ z ∈ x by simpa using hz with (rfl | hz)
+    · exact hx
+    · exact ih z hz
+
+/-! ## Axiom of foundation -/
+
+lemma foundation : ∀ x : V, IsNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
+  simpa [models_iff, Axiom.foundation] using ModelsTheory.models V Zermelo.axiom_of_foundation
+
+@[simp] lemma mem_irrefl (x : V) : x ∉ x := by
+  simpa using foundation ({x} : V) (by simp)
+
+@[simp] lemma ne_succ (x : V) : x ≠ succ x := by
+  intro h
+  have : x ∈ succ x := mem_succ_self x
+  simp [←h] at this
+
+@[simp] lemma zero_ne_one : (0 : V) ≠ (1 : V) := ne_succ 0
+
+end LO.Zermelo
