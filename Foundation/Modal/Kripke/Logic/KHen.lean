@@ -5,10 +5,12 @@ import Foundation.Modal.Entailment.GL
 
 namespace LO.Modal
 
-open System
-open Kripke
+open Entailment
 open Formula
 open Formula.Kripke
+open Kripke
+open System
+
 
 namespace Kripke
 
@@ -343,6 +345,9 @@ lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ ⭤ φ) ➝ �
 
 end Kripke
 
+
+namespace KHen
+
 lemma Kripke.valid_cresswellModel_of_provable : Modal.KHen ⊢! φ → cresswellModel ⊧ φ := by
   intro h;
   induction h using Hilbert.Normal.rec! with
@@ -367,11 +372,8 @@ theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Modal.KHen ⊢!
   have : Modal.KHen ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
   exact @unprovable_atomic_axiomFour _ this;
 
-namespace Logic
+end KHen
 
-open Formula
-open Entailment
-open Kripke
 
 instance : Modal.K ⪱ Modal.KHen := by
   constructor;
@@ -394,12 +396,6 @@ instance : Modal.KHen ⪱ Modal.GL := by
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
-    . apply unprovable_atomic_axiomFour;
-
-end Logic
-
-end LO.Modal
-
-
+    . apply KHen.unprovable_atomic_axiomFour;
 
 end LO.Modal

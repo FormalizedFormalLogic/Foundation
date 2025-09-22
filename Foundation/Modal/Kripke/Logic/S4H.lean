@@ -27,6 +27,8 @@ instance [F.IsFiniteS4H] : F.IsFiniteGrz where
 end Kripke
 
 
+namespace S4H
+
 instance : Sound (Modal.S4H) FrameClass.S4H := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
@@ -44,6 +46,9 @@ instance : Canonical (Modal.S4H) FrameClass.S4H := ⟨by constructor⟩
 instance : Complete (Modal.S4H) FrameClass.S4H := inferInstance
 
 instance : Complete Modal.S4H FrameClass.finite_S4H := by sorry
+
+end S4H
+
 
 instance : Modal.Grz ⪱ Modal.S4H := by
   constructor;
@@ -70,8 +75,6 @@ instance : Modal.Grz ⪱ Modal.S4H := by
         . use 2;
           simp [M];
           omega;
-
-end Hilbert
 
 
 end LO.Modal

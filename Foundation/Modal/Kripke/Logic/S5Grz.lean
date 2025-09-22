@@ -49,13 +49,13 @@ instance : Modal.Grz ⪱ Modal.S5Grz := by
         . use 1;
           constructor <;> omega;
 
-instance : Modal.S4 ⪱ Hilbert.Triv := calc
+instance : Modal.S4 ⪱ Modal.Triv := calc
   Modal.S4 ⪱ Modal.S5    := by infer_instance
   _          ⪱ Modal.S5Grz := by infer_instance
-  _          ≊ Hilbert.Triv  := by infer_instance
+  _          ≊ Modal.Triv  := by infer_instance
 
 instance : Sound Modal.S5Grz FrameClass.finite_Triv := by
-  suffices Modal.S5Grz ≊ Hilbert.Triv by
+  suffices Modal.S5Grz ≊ Modal.Triv by
     constructor;
     intro φ h;
     apply Sound.sound $ Entailment.Equiv.iff.mp this φ |>.mp h;

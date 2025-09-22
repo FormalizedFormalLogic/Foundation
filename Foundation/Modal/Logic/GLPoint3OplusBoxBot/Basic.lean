@@ -143,7 +143,7 @@ lemma eq_GLPoint3OplusBoxBot_1_Ver : (Modal.GLPoint3OplusBoxBot 1) = Modal.Ver :
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
     | subst ih => apply Logic.subst! _ ih;
     | nec ih => apply nec! ih;
-  . suffices Hilbert.Ver ⊢! φ → Modal.GLPoint3OplusBoxBot 1 ⊢! φ by simpa [Logic.iff_provable];
+  . suffices Modal.Ver ⊢! φ → Modal.GLPoint3OplusBoxBot 1 ⊢! φ by simpa [Logic.iff_provable];
     intro h;
     induction h using Hilbert.Normal.rec! with
     | axm s h =>

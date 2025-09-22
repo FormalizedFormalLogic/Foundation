@@ -18,7 +18,7 @@ namespace Logic
 
 namespace Triv
 
-lemma unprovable_AxiomL : Hilbert.Triv ⊬ (Axioms.L (.atom a)) := by
+lemma unprovable_AxiomL : Modal.Triv ⊬ (Axioms.L (.atom a)) := by
   apply Logic.Triv.iff_provable_Cl.not.mpr;
   apply Hilbert.Cl.not_provable_of_exists_valuation;
   use (λ _ => False);
@@ -29,7 +29,7 @@ end Triv
 
 namespace Ver
 
-lemma unprovable_AxiomP : Hilbert.Ver ⊬ Axioms.P := by
+lemma unprovable_AxiomP : Modal.Ver ⊬ Axioms.P := by
   apply Logic.Ver.iff_provable_Cl.not.mpr;
   apply Hilbert.Cl.not_provable_of_exists_valuation;
   use (λ _ => False);

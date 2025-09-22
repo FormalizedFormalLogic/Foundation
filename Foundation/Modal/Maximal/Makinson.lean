@@ -37,7 +37,7 @@ lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : L ⊢! φ) (hV : Modal.Ver ⊬ 
   have hΔ₁ : ∀ ψ ∈ Δ, ¬ψ.1.isPrebox := by
     rintro ⟨ψ, _⟩ hψ₁ hψ₂;
     obtain ⟨ξ, rfl⟩ := NNFormula.exists_isPrebox hψ₂;
-    have : Hilbert.Ver ⊢! □ξ.toFormula := by simp;
+    have : Modal.Ver ⊢! □ξ.toFormula := by simp;
     sorry;
 
   have : ∃ Γ: List (Formula ℕ), L ⊢! φ ⭤ ⋀Γ := by sorry;
@@ -186,7 +186,7 @@ theorem makinson : (L.VerFamily ∨ L.TrivFamily) ∧ ¬(L.VerFamily ∧ L.TrivF
     have h₁ : Modal.Ver ⊢! ∼□⊥ := by apply Entailment.WeakerThan.pbl (show Modal.KD ⊢! ∼□⊥ by simp);
     have h₂ : Modal.Ver ⊢! □⊥ := by simp;
     have : Modal.Ver ⊢! ⊥ := h₁ ⨀ h₂;
-    apply Entailment.Consistent.not_bot inferInstance (𝓢 := Hilbert.Ver);
+    apply Entailment.Consistent.not_bot inferInstance (𝓢 := Modal.Ver);
     simpa;
 
 lemma VerFamily.notTrivFamily [L.VerFamily] : ¬L.TrivFamily := by

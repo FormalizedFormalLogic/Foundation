@@ -7,6 +7,12 @@ import Foundation.Modal.Kripke.Hilbert
 
 namespace LO.Modal
 
+open Entailment
+open Formula
+open Kripke
+open Modal.Kripke
+
+
 namespace Kripke
 
 variable {F : Kripke.Frame}
@@ -19,8 +25,6 @@ end Kripke
 
 
 
-open Kripke
-open Modal.Kripke
 
 instance : Sound (Modal.KTMk) Kripke.FrameClass.KTMk := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -38,7 +42,7 @@ instance : Canonical (Modal.KTMk) Kripke.FrameClass.KTMk := ⟨by constructor⟩
 instance : Complete (Modal.KTMk) Kripke.FrameClass.KTMk := inferInstance
 
 
-section
+namespace KTMk
 
 open Formula.Kripke
 open Entailment
@@ -84,12 +88,12 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
         apply Satisfies.not_def.mp $ Satisfies.and_def.mp (hl' ⟨i, hi⟩) |>.2;
         apply Satisfies.mdp ?_ $ eij ▸ Satisfies.and_def.mp (hl' ⟨j, hj⟩) |>.1;
         apply hM.realize;
-        simp only [Entailment.theory, Set.mem_setOf_eq];
         obtain ⟨c, hc, rfl⟩ := lt_iff_exists_add.mp hij;
         match c with
         | 0 => contradiction;
         | n + 1 =>
           suffices Modal.KTMk ⊢! □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
+            apply Logic.iff_provable.mp;
             rwa [show (i + (n + 1) + 1) = (i + 2 + n) by omega];
           apply reduce_box_in_CAnt!;
       . apply List.chain'_concat_of_not_nil (List.length_pos_iff_ne_nil.mp (by simp [hl_len])) |>.mpr;
@@ -102,7 +106,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
       . intro h;
         have : l[m] ⊧ □^[(m + 1)]φ ⋏ ∼□^[(m + 2)]φ ➝ ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := by
           apply hM.realize;
-          simp only [Entailment.theory, Set.mem_setOf_eq];
+          apply Logic.iff_provable.mp;
           simp;
         replace : l[m] ⊧ ◇(□^[(m + 2)]φ ⋏ ◇(∼□^[(m + 2)]φ)) := this h;
         obtain ⟨y, hy₁, hy₂⟩ := Satisfies.dia_def.mp this;
@@ -123,7 +127,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
   rw [H i |>.choose_spec.2.1, H j |>.choose_spec.2.1];
   simp;
 
-lemma model_infinitity_of_not_validate_axiomFour {M : Kripke.Model} (hM : M ⊧* Modal.KTMk.logic)
+lemma model_infinitity_of_not_validate_axiomFour {M : Kripke.Model} (hM : M ⊧* Modal.KTMk)
   : (∃ φ : Formula ℕ, ¬M ⊧ Axioms.Four φ) → Infinite M := by
   contrapose!;
   intro h;
@@ -133,7 +137,6 @@ lemma model_infinitity_of_not_validate_axiomFour {M : Kripke.Model} (hM : M ⊧*
 abbrev recessionFrame : Kripke.Frame where
   World := ℕ
   Rel i j := i ≤ j + 1
-
 
 namespace recessionFrame
 
@@ -166,7 +169,7 @@ lemma exists_not_provable_axiomFour : ∃ φ : Formula ℕ, Modal.KTMk ⊬ Axiom
     infer_instance;
   . assumption;
 
-lemma no_finite_model_property : ¬(∀ φ, Modal.KTMk ⊬ φ → ∃ M : Kripke.Model, Finite M ∧ M ⊧* Modal.KTMk.logic ∧ ¬M ⊧ φ)  := by
+lemma no_finite_model_property : ¬(∀ φ, Modal.KTMk ⊬ φ → ∃ M : Kripke.Model, Finite M ∧ M ⊧* Modal.KTMk ∧ ¬M ⊧ φ)  := by
   by_contra! hC;
   obtain ⟨φ, hφ⟩ := exists_not_provable_axiomFour;
   obtain ⟨M, hM₁, hM₂, hM₃⟩ := @hC (Axioms.Four φ) hφ;
@@ -174,16 +177,11 @@ lemma no_finite_model_property : ¬(∀ φ, Modal.KTMk ⊬ φ → ∃ M : Kripke
   . assumption;
   . assumption;
 
-example : ∃ φ, Modal.KTMk ⊬ φ ∧ (∀ M : Kripke.Model, Finite M → M ⊧* Modal.KTMk.logic → M ⊧ φ) := by
+example : ∃ φ, Modal.KTMk ⊬ φ ∧ (∀ M : Kripke.Model, Finite M → M ⊧* Modal.KTMk → M ⊧ φ) := by
   simpa using no_finite_model_property;
 
-end
+end KTMk
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
 
 instance : Modal.KT ⪱ Modal.KTMk := by
   constructor;
@@ -232,14 +230,10 @@ instance : Modal.KTMk ⪱ Modal.S4 := by
           . apply F.refl;
           . assumption;
   . apply Entailment.not_weakerThan_iff.mpr;
-    obtain ⟨φ, hφ⟩ := Logic.KTMk.Kripke.exists_not_provable_axiomFour;
+    obtain ⟨φ, hφ⟩ := KTMk.exists_not_provable_axiomFour;
     use Axioms.Four φ;
     constructor;
     . simp;
     . assumption;
-
-end Logic
-
-
 
 end LO.Modal

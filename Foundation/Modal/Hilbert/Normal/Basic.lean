@@ -1013,20 +1013,20 @@ protected abbrev Hilbert.N : Hilbert.Normal ℕ := ⟨{}⟩
 protected abbrev N := Hilbert.N.logic
 
 
-protected abbrev Hilbert.Ver : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Ver (.atom 0)}⟩
-protected abbrev Ver := Hilbert.Ver.logic
-instance : (Hilbert.Ver).HasK where p := 0; q := 1;
-instance : (Hilbert.Ver).HasVer where p := 0
-instance : Entailment.Ver (Hilbert.Ver) where
+protected abbrev Modal.Ver : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Ver (.atom 0)}⟩
+protected abbrev Ver := Modal.Ver.logic
+instance : (Modal.Ver).HasK where p := 0; q := 1;
+instance : (Modal.Ver).HasVer where p := 0
+instance : Entailment.Ver (Modal.Ver) where
 
 
-protected abbrev Hilbert.Triv : Hilbert.Normal ℕ := ⟨{ Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Tc (.atom 0)}⟩
-protected abbrev Triv := Hilbert.Triv.logic
-instance : (Hilbert.Triv).HasK where p := 0; q := 1;
-instance : (Hilbert.Triv).HasT where p := 0
-instance : (Hilbert.Triv).HasTc where p := 0
-instance : Entailment.Triv (Hilbert.Triv) where
-instance : Hilbert.K4 ⪯ Hilbert.Triv := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl) <;> simp;
+protected abbrev Modal.Triv : Hilbert.Normal ℕ := ⟨{ Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Tc (.atom 0)}⟩
+protected abbrev Triv := Modal.Triv.logic
+instance : (Modal.Triv).HasK where p := 0; q := 1;
+instance : (Modal.Triv).HasT where p := 0
+instance : (Modal.Triv).HasTc where p := 0
+instance : Entailment.Triv (Modal.Triv) where
+instance : Hilbert.K4 ⪯ Modal.Triv := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl) <;> simp;
 
 
 protected abbrev Modal.S5Grz : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0), Axioms.Grz (.atom 0)}⟩
@@ -1037,7 +1037,7 @@ instance : (Modal.S5Grz).HasFive where p := 0
 instance : (Modal.S5Grz).HasGrz where p := 0
 instance : Entailment.S5Grz (Modal.S5Grz) where
 
-instance : Modal.S5Grz ≊ Hilbert.Triv := by
+instance : Modal.S5Grz ≊ Modal.Triv := by
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl | rfl) <;> simp;

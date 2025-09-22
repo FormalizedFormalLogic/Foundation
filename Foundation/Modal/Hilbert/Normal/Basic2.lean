@@ -106,6 +106,7 @@ instance [Ax.HasK] : Entailment.HasAxiomK (Hilbert.Normal Ax) where
       (φ := Axioms.K (.atom (HasK.p Ax)) (.atom (HasK.q Ax)))
       (s := λ b => if (HasK.p Ax) = b then φ else if (HasK.q Ax) = b then ψ else (.atom b))
       (HasK.mem_K);
+instance [Ax.HasK] : Logic.IsNormal (Hilbert.Normal Ax) where
 
 instance [Ax.HasT] : Entailment.HasAxiomT (Hilbert.Normal Ax) where
   T φ := by
