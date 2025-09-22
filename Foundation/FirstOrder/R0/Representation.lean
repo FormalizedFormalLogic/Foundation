@@ -29,25 +29,25 @@ lemma sigma1_re (ε : ξ → ℕ) {k} {φ : Semiformula ℒₒᵣ ξ k} (hp : Hi
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
       <| ⟨fun v : List.Vector ℕ n ↦ decide (t₁.valm ℕ v.get ε = t₂.valm ℕ v.get ε), ?_, ?_⟩
-    · apply Primrec.to_comp <| Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)
+    · apply Primrec.to_comp (Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)).decide
     · simp
   case hNEQ =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
       <| ⟨fun v : List.Vector ℕ n ↦ !decide (t₁.valm ℕ v.get ε = t₂.valm ℕ v.get ε), ?_, ?_⟩
-    · apply Primrec.to_comp <| Primrec.not.comp <| Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)
+    · apply Primrec.to_comp <| Primrec.not.comp (Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)).decide
     · simp
   case hLT =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
       <| ⟨fun v : List.Vector ℕ n ↦ decide (t₁.valm ℕ v.get ε < t₂.valm ℕ v.get ε), ?_, ?_⟩
-    · apply Primrec.to_comp <| Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)
+    · apply Primrec.to_comp (Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)).decide
     · simp
   case hNLT =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
       <| ⟨fun v : List.Vector ℕ n ↦ !decide (t₁.valm ℕ v.get ε < t₂.valm ℕ v.get ε), ?_, ?_⟩
-    · apply Primrec.to_comp <| Primrec.not.comp <| Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)
+    · apply Primrec.to_comp <| Primrec.not.comp (Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)).decide
     · simp
   case hAnd =>
     intro n φ ψ _ _ ihp ihq

@@ -288,6 +288,7 @@ scoped instance : CanonicallyOrderedAdd M where
     · exact ⟨0, by simp⟩
     · simpa [eq_comm] using add_eq_of_lt x y h
   le_self_add := by intro x y; simp
+  le_add_self := by intro x y; simp
 
 scoped instance : IsOrderedAddMonoid M where
   add_le_add_left _ _ h z := (add_le_add_iff_left z).mpr h

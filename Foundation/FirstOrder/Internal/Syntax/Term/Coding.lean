@@ -194,8 +194,8 @@ open Encodable FirstOrder
 
 lemma mem_iff_mem_bitIndices {x s : ℕ} : x ∈ s ↔ x ∈ s.bitIndices := by
   induction s using Nat.binaryRec generalizing x
-  case z => simp
-  case f b s ih =>
+  case zero => simp
+  case bit b s ih =>
     cases b <;> simp
     · cases' x with x <;> simp [ih]
     · cases' x with x <;> simp [ih]
