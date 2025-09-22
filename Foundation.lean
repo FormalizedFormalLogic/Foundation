@@ -101,7 +101,9 @@ import Foundation.IntFO.Translation
 
 -- Modal
 -- import Foundation.Modal.Hilbert.Minimal_Normal
-import Foundation.Modal.Hilbert.GL_K4Loeb_K4Henkin_K4Hen
+-- import Foundation.Modal.Hilbert.GL_K4Loeb_K4Henkin_K4Hen
+import Foundation.Modal.Hilbert.WithLoeb.Basic
+import Foundation.Modal.Hilbert.WithHenkin.Basic
 
 import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
 import Foundation.Modal.Kripke.Logic.GL.MDP
