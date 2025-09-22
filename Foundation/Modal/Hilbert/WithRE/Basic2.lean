@@ -167,66 +167,145 @@ open Hilbert.WithRE
 protected abbrev E : Logic ℕ := Hilbert.WithRE ∅
 
 protected abbrev EM.axioms : Axiom ℕ := {Axioms.M (.atom 0) (.atom 1)}
-protected abbrev EM : Logic ℕ := Hilbert.WithRE EM.axioms
 instance : EM.axioms.HasM where p := 0; q := 1;
-instance : Entailment.HasAxiomM Modal.EM := instHasAxiomM
+protected abbrev EM : Logic ℕ := Hilbert.WithRE EM.axioms
 instance : Entailment.EM Modal.EM where
 
-protected abbrev EC : Logic ℕ := Hilbert.WithRE {Axioms.C (.atom 0) (.atom 1)}
+protected abbrev EC.axioms : Axiom ℕ := {Axioms.C (.atom 0) (.atom 1)}
+instance : EC.axioms.HasC where p := 0; q := 1;
+protected abbrev EC : Logic ℕ := Hilbert.WithRE EC.axioms
+instance : Entailment.EC Modal.EC where
 
 protected abbrev EN.axioms : Axiom ℕ := {Axioms.N}
-protected abbrev EN : Logic ℕ := Hilbert.WithRE EN.axioms
 instance : EN.axioms.HasN where mem_n := by simp;
-instance : Entailment.HasAxiomN Modal.EN := instHasAxiomN
+protected abbrev EN : Logic ℕ := Hilbert.WithRE EN.axioms
+instance : Entailment.EN Modal.EN where
 
-protected abbrev EMC : Logic ℕ := Hilbert.WithRE {Axioms.M (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1)}
+protected abbrev EMC.axioms : Axiom ℕ := {Axioms.M (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1)}
+instance : EMC.axioms.HasM where p := 0; q := 1;
+instance : EMC.axioms.HasC where p := 0; q := 1;
+protected abbrev EMC : Logic ℕ := Hilbert.WithRE EMC.axioms
+instance : Entailment.EMC Modal.EMC where
 
-protected abbrev EMN : Logic ℕ := Hilbert.WithRE {Axioms.M (.atom 0) (.atom 1), Axioms.N}
+protected abbrev EMN.axioms : Axiom ℕ := {Axioms.M (.atom 0) (.atom 1), Axioms.N}
+instance : EMN.axioms.HasM where p := 0; q := 1;
+instance : EMN.axioms.HasN where
+protected abbrev EMN : Logic ℕ := Hilbert.WithRE EMN.axioms
+instance : Entailment.EMN Modal.EMN where
 
-protected abbrev ECN : Logic ℕ := Hilbert.WithRE {Axioms.C (.atom 0) (.atom 1), Axioms.N}
+protected abbrev ECN.axioms : Axiom ℕ := {Axioms.C (.atom 0) (.atom 1), Axioms.N}
+instance : ECN.axioms.HasC where p := 0; q := 1
+instance : ECN.axioms.HasN where
+protected abbrev ECN : Logic ℕ := Hilbert.WithRE ECN.axioms
+instance : Entailment.ECN Modal.ECN where
 
-protected abbrev EMCN : Logic ℕ := Hilbert.WithRE {Axioms.M (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1), Axioms.N}
+protected abbrev EMCN.axioms : Axiom ℕ := {Axioms.M (.atom 0) (.atom 1), Axioms.C (.atom 0) (.atom 1), Axioms.N}
+instance : EMCN.axioms.HasM where p := 0; q := 1
+instance : EMCN.axioms.HasC where p := 0; q := 1
+instance : EMCN.axioms.HasN where
+protected abbrev EMCN : Logic ℕ := Hilbert.WithRE EMCN.axioms
+instance : Entailment.EMCN Modal.EMCN where
 
 protected abbrev EK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1)}
-protected abbrev EK : Logic ℕ := Hilbert.WithRE EK.axioms
 instance : EK.axioms.HasK where p := 0; q := 1;
-instance : Entailment.HasAxiomK Modal.EK := instHasAxiomK
+protected abbrev EK : Logic ℕ := Hilbert.WithRE EK.axioms
+instance : Entailment.EK Modal.EK where
 
-protected abbrev E4 : Logic ℕ := Hilbert.WithRE {Axioms.Four (.atom 0)}
+protected abbrev E4.axioms : Axiom ℕ := {Axioms.Four (.atom 0)}
+instance : E4.axioms.HasFour where p := 0; mem_Four := by simp;
+protected abbrev E4 : Logic ℕ := Hilbert.WithRE E4.axioms
+instance : Entailment.E4 Modal.E4 where
 
-protected abbrev ED : Logic ℕ := Hilbert.WithRE {Axioms.D (.atom 0)}
+protected abbrev ED.axioms : Axiom ℕ := {Axioms.D (.atom 0)}
+instance : ED.axioms.HasD where p := 0; mem_D := by simp;
+protected abbrev ED : Logic ℕ := Hilbert.WithRE ED.axioms
+instance : Entailment.HasAxiomD Modal.ED := instHasAxiomD
 
+protected abbrev END.axioms : Axiom ℕ := {Axioms.N, Axioms.D (.atom 0)}
+instance : END.axioms.HasN where
+instance : END.axioms.HasD where p := 0; mem_D := by simp
 protected abbrev END : Logic ℕ := Hilbert.WithRE {Axioms.N, Axioms.D (.atom 0)}
+instance : Entailment.END Modal.END where
 
-protected abbrev EP : Logic ℕ := Hilbert.WithRE {Axioms.P}
+protected abbrev EP.axioms : Axiom ℕ := {Axioms.P}
+instance : EP.axioms.HasP where mem_P := by simp;
+protected abbrev EP : Logic ℕ := Hilbert.WithRE EP.axioms
+instance : Entailment.HasAxiomP Modal.EP := instHasAxiomP
 
-protected abbrev ET : Logic ℕ := Hilbert.WithRE {Axioms.T (.atom 0)}
+protected abbrev ET.axioms : Axiom ℕ := {Axioms.T (.atom 0)}
+instance : ET.axioms.HasT where p := 0;
+protected abbrev ET : Logic ℕ := Hilbert.WithRE ET.axioms
+instance : Entailment.HasAxiomT Modal.ET := instHasAxiomT
 
-protected abbrev EMT : Logic ℕ := Hilbert.WithRE {Axioms.M (.atom 0) (.atom 1), Axioms.T (.atom 0)}
+protected abbrev EMT.axioms : Axiom ℕ := {Axioms.M (.atom 0) (.atom 1), Axioms.T (.atom 0)}
+instance : EMT.axioms.HasM where p := 0; q := 1;
+instance : EMT.axioms.HasT where p := 0;
+protected abbrev EMT : Logic ℕ := Hilbert.WithRE EMT.axioms
+instance : Entailment.EMT Modal.EMT where
 
-protected abbrev EMT4 : Logic ℕ := Hilbert.WithRE {Axioms.M (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0)}
+protected abbrev EMT4.axioms : Axiom ℕ := {
+  Axioms.M (.atom 0) (.atom 1),
+  Axioms.T (.atom 0),
+  Axioms.Four (.atom 0)
+}
+instance : EMT4.axioms.HasM where p := 0; q := 1;
+instance : EMT4.axioms.HasT where p := 0;
+instance : EMT4.axioms.HasFour where p := 0;
+protected abbrev EMT4 : Logic ℕ := Hilbert.WithRE EMT4.axioms
+instance : Entailment.EMT4 Modal.EMT4 where
 
-protected abbrev EMCN4 : Logic ℕ := Hilbert.WithRE {
+protected abbrev EMC4.axioms : Axiom ℕ := {
+  Axioms.M (.atom 0) (.atom 1),
+  Axioms.C (.atom 0) (.atom 1),
+  Axioms.Four (.atom 0)
+}
+instance : EMC4.axioms.HasM where p := 0; q := 1
+instance : EMC4.axioms.HasC where p := 0; q := 1;
+instance : EMC4.axioms.HasFour where p := 0;
+protected abbrev EMC4 : Logic ℕ := Hilbert.WithRE EMC4.axioms
+instance : Entailment.EMC4 Modal.EMC4 where
+
+protected abbrev EMCN4.axioms : Axiom ℕ := {
   Axioms.M (.atom 0) (.atom 1),
   Axioms.C (.atom 0) (.atom 1),
   Axioms.N,
   Axioms.Four (.atom 0)
 }
+instance : EMCN4.axioms.HasM where p := 0; q := 1;
+instance : EMCN4.axioms.HasC where p := 0; q := 1;
+instance : EMCN4.axioms.HasN where
+instance : EMCN4.axioms.HasFour where p := 0;
+protected abbrev EMCN4 : Logic ℕ := Hilbert.WithRE EMCN4.axioms
+instance : Entailment.EMC Modal.EMCN4 where
 
-protected abbrev EMCNT : Logic ℕ := Hilbert.WithRE {
+protected abbrev EMCNT.axioms : Axiom ℕ := {
   Axioms.M (.atom 0) (.atom 1),
   Axioms.C (.atom 0) (.atom 1),
   Axioms.N,
   Axioms.T (.atom 0)
 }
+instance : EMCNT.axioms.HasM where p := 0; q := 1;
+instance : EMCNT.axioms.HasC where p := 0; q := 1
+instance : EMCNT.axioms.HasN where
+instance : EMCNT.axioms.HasT where p := 0;
+protected abbrev EMCNT : Logic ℕ := Hilbert.WithRE EMCNT.axioms
+instance : Entailment.EMC Modal.EMCNT where
 
-protected abbrev EMCNT4 : Logic ℕ := Hilbert.WithRE {
+
+protected abbrev EMCNT4.axioms : Axiom ℕ := {
   Axioms.M (.atom 0) (.atom 1),
   Axioms.C (.atom 0) (.atom 1),
   Axioms.N,
   Axioms.T (.atom 0),
   Axioms.Four (.atom 0)
 }
+instance : EMCNT4.axioms.HasM where p := 0; q := 1;
+instance : EMCNT4.axioms.HasC where p := 0; q := 1
+instance : EMCNT4.axioms.HasN where
+instance : EMCNT4.axioms.HasT where p := 0;
+instance : EMCNT4.axioms.HasFour where p := 0;
+protected abbrev EMCNT4 : Logic ℕ := Hilbert.WithRE EMCNT4.axioms
+instance : Entailment.EMC Modal.EMCNT4 where
 
 end
 

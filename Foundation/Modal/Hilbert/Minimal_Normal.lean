@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.Minimal.Basic
+import Foundation.Modal.Hilbert.WithRE.Basic
 import Foundation.Modal.Hilbert.Normal.Basic
 
 

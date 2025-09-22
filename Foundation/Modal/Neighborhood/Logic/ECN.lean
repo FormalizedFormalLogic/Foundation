@@ -15,27 +15,20 @@ protected abbrev FrameClass.ECN : FrameClass := { F | F.IsECN }
 
 end Neighborhood
 
-
-namespace Hilbert
-
-namespace ECN.Neighborhood
-
-instance : Sound Hilbert.ECN FrameClass.ECN := instSound_of_validates_axioms $ by
+instance : Sound Modal.ECN FrameClass.ECN := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Hilbert.ECN := consistent_of_sound_frameclass FrameClass.ECN $ by
+instance : Entailment.Consistent Modal.ECN := consistent_of_sound_frameclass FrameClass.ECN $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Hilbert.ECN FrameClass.ECN := complete_of_canonical_frame FrameClass.ECN (minimalCanonicalFrame (Hilbert.ECN)) $ by
+instance : Complete Modal.ECN FrameClass.ECN := complete_of_canonical_frame FrameClass.ECN (minimalCanonicalFrame (Modal.ECN)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-end ECN.Neighborhood
-
-instance : Hilbert.EC ⪱ Hilbert.ECN := by
+instance : Modal.EC ⪱ Modal.ECN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -77,7 +70,7 @@ instance : Hilbert.EC ⪱ Hilbert.ECN := by
       . simp! [M, Semantics.Realize, Satisfies];
         tauto_set;
 
-instance : Hilbert.EN ⪱ Hilbert.ECN := by
+instance : Modal.EN ⪱ Modal.ECN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -109,9 +102,6 @@ instance : Hilbert.EN ⪱ Hilbert.ECN := by
       . simp! [M, Semantics.Realize, Satisfies];
         tauto_set;
 
-end Hilbert
 
-instance : 𝐄𝐂 ⪱ 𝐄𝐂𝐍 := inferInstance
-instance : 𝐄𝐍 ⪱ 𝐄𝐂𝐍 := inferInstance
 
 end LO.Modal

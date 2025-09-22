@@ -25,24 +25,19 @@ protected abbrev FrameClass.EP : FrameClass := { F | F.IsEP }
 end Neighborhood
 
 
-namespace Hilbert
 
-namespace EP.Neighborhood
-
-instance : Sound Hilbert.EP FrameClass.EP := instSound_of_validates_axioms $ by
+instance : Sound Modal.EP FrameClass.EP := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   simp;
 
-instance : Entailment.Consistent Hilbert.EP := consistent_of_sound_frameclass FrameClass.EP $ by
+instance : Entailment.Consistent Modal.EP := consistent_of_sound_frameclass FrameClass.EP $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-end EP.Neighborhood
-
-instance : Hilbert.E ⪱ Hilbert.EP := by
+instance : Modal.E ⪱ Modal.EP := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -59,8 +54,5 @@ instance : Hilbert.E ⪱ Hilbert.EP := by
         by_contra! hC;
         simpa using hC.not_contains_empty;
 
-end Hilbert
-
-instance : 𝐄 ⪱ 𝐄𝐏 := inferInstance
 
 end LO.Modal

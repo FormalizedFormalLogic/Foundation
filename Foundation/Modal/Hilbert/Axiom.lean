@@ -39,7 +39,6 @@ class HasD (Ax : Axiom α) where
   mem_D : Axioms.D (.atom p) ∈ Ax := by tauto
 
 class HasP (Ax : Axiom α) where
-  p : α
   mem_P : Axioms.P ∈ Ax := by tauto;
 
 class HasFour (Ax : Axiom α) where

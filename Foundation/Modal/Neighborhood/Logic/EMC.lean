@@ -66,26 +66,20 @@ lemma EK_counterframe_for_M_and_C.validate_axiomM : ¬EK_counterframe_for_M_and_
 end Neighborhood
 
 
-namespace Hilbert
-
-namespace EMC.Neighborhood
-
-instance : Sound Hilbert.EMC FrameClass.EMC := instSound_of_validates_axioms $ by
+instance : Sound Modal.EMC FrameClass.EMC := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Hilbert.EMC := consistent_of_sound_frameclass FrameClass.EMC $ by
+instance : Entailment.Consistent Modal.EMC := consistent_of_sound_frameclass FrameClass.EMC $ by
   use Frame.simple_blackhole;
   simp;
   constructor;
 
-instance : Complete Hilbert.EMC FrameClass.EMC := complete_of_canonical_frame FrameClass.EMC (maximalCanonicalFrame (Hilbert.EMC)) $ by
+instance : Complete Modal.EMC FrameClass.EMC := complete_of_canonical_frame FrameClass.EMC (maximalCanonicalFrame (Modal.EMC)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-end EMC.Neighborhood
-
-instance : Hilbert.EC ⪱ Hilbert.EMC := by
+instance : Modal.EC ⪱ Modal.EMC := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -129,7 +123,7 @@ instance : Hilbert.EC ⪱ Hilbert.EMC := by
         simp!;
         omega;
 
-instance : Hilbert.EM ⪱ Hilbert.EMC := by
+instance : Modal.EM ⪱ Modal.EMC := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -176,10 +170,7 @@ instance : Hilbert.EM ⪱ Hilbert.EMC := by
       . simp! [M, Semantics.Realize, Satisfies];
         tauto_set;
 
-
-section
-
-instance : Hilbert.EK ⪱ Hilbert.EMC := by
+instance : Modal.EK ⪱ Modal.EMC := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
     rintro φ rfl; simp;
@@ -191,13 +182,5 @@ instance : Hilbert.EK ⪱ Hilbert.EMC := by
       . apply EK_counterframe_for_M_and_C.validate_axiomC;
       . simp only [Semantics.RealizeSet.singleton_iff];
         apply EK_counterframe_for_M_and_C.validate_axiomK;
-
-end
-
-end Hilbert
-
-instance : 𝐄𝐂 ⪱ 𝐄𝐌𝐂 := inferInstance
-instance : 𝐄𝐌 ⪱ 𝐄𝐌𝐂 := inferInstance
-instance : 𝐄𝐊 ⪱ 𝐄𝐌𝐂 := inferInstance
 
 end LO.Modal

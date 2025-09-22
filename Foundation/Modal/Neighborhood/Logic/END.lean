@@ -15,22 +15,18 @@ protected abbrev FrameClass.END : FrameClass := { F | F.IsEND }
 end Neighborhood
 
 
-namespace Hilbert
 
-namespace END.Neighborhood
 
-instance : Sound Hilbert.END FrameClass.END := instSound_of_validates_axioms $ by
+instance : Sound Modal.END FrameClass.END := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Hilbert.END := consistent_of_sound_frameclass FrameClass.END $ by
+instance : Entailment.Consistent Modal.END := consistent_of_sound_frameclass FrameClass.END $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   constructor;
 
-end END.Neighborhood
-
-instance : Hilbert.ED ⪱ Hilbert.END := by
+instance : Modal.ED ⪱ Modal.END := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -53,7 +49,7 @@ instance : Hilbert.ED ⪱ Hilbert.END := by
         by_contra! hC;
         simpa [F] using F.univ_mem 0;
 
-instance : Hilbert.EP ⪱ Hilbert.END := by
+instance : Modal.EP ⪱ Modal.END := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
     rintro _ rfl;
@@ -64,9 +60,5 @@ instance : Hilbert.EP ⪱ Hilbert.END := by
     . simp;
     . exact EP.unprovable_AxiomD;
 
-end Hilbert
-
-instance : 𝐄𝐃 ⪱ 𝐄𝐍𝐃 := inferInstance
-instance : 𝐄𝐏 ⪱ 𝐄𝐍𝐃 := inferInstance
 
 end LO.Modal

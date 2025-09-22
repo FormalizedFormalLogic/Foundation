@@ -14,9 +14,6 @@ abbrev FrameClass.E : FrameClass := Set.univ
 
 end Neighborhood
 
-
-namespace E.Neighborhood
-
 instance : Sound Modal.E FrameClass.E := instSound_of_validates_axioms $ by simp;
 
 instance : Entailment.Consistent Modal.E := consistent_of_sound_frameclass FrameClass.E $ by
@@ -24,9 +21,6 @@ instance : Entailment.Consistent Modal.E := consistent_of_sound_frameclass Frame
   simp;
 
 instance : Complete Modal.E FrameClass.E := complete_of_canonical_frame FrameClass.E (minimalCanonicalFrame (Modal.E)) (by tauto)
-
-end E.Neighborhood
-
 
 instance : Modal.E ⪱ Modal.EK := by
   constructor;

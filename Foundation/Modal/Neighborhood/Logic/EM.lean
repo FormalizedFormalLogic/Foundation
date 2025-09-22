@@ -15,9 +15,6 @@ protected abbrev FrameClass.EM : FrameClass := { F | F.IsEM }
 end Neighborhood
 
 
-
-namespace EM.Neighborhood
-
 instance : Sound Modal.EM FrameClass.EM := instSound_of_validates_axioms $ by
   constructor;
   rintro _ rfl F hF;
@@ -31,9 +28,6 @@ instance : Entailment.Consistent Modal.EM := consistent_of_sound_frameclass Fram
 instance : Complete Modal.EM FrameClass.EM := complete_of_canonical_frame FrameClass.EM (maximalCanonicalFrame (Modal.EM)) $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
-
-end EM.Neighborhood
-
 
 instance : Modal.E ⪱ Modal.EM := by
   constructor;
