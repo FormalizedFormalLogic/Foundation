@@ -22,9 +22,9 @@ open Modal.Kripke
 open Entailment
 
 
-lemma provable_boxdot_GL_of_provable_Grz : Modal.Grz ⊢! φ → Modal.GL ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
+lemma provable_boxdot_GL_of_provable_Grz : Modal.Grz ⊢! φ → Modal.GL ⊢! φᵇ := Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances $ by
   intro φ hp;
-  rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
+  rcases (by simpa [Axiom.instances] using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
   . exact boxdot_Grz_of_L!
 

@@ -193,6 +193,13 @@ instance : Modal.S4 ⪱ Modal.S5 := calc
   _          ⪱ Modal.S4Point4 := by infer_instance
   _          ⪱ Modal.S5       := by infer_instance
 
+instance : Entailment.S4 Modal.S5 where
+  Four φ := by
+    constructor;
+    apply Modal.Logic.iff_provable.mp;
+    apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
+    simp;
+
 instance : Modal.KT ⪱ Modal.S5 := calc
   Modal.KT ⪱ Modal.S4 := by infer_instance
   _        ⪱ Modal.S5 := by infer_instance

@@ -19,7 +19,7 @@ protected abbrev FrameClass.KD4 : FrameClass := { F | F.IsKD4 }
 end Kripke
 
 
-namespace Modal.KD4.Kripke
+namespace KD4
 
 instance : Sound Modal.KD4 FrameClass.KD4 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -40,6 +40,7 @@ instance : Canonical Modal.KD4 FrameClass.KD4 := ⟨by
 
 instance : Complete Modal.KD4 FrameClass.KD4 := inferInstance
 
+end KD4
 
 instance : Modal.KD ⪱ Modal.KD4 := by
   constructor;
@@ -69,9 +70,5 @@ instance : Modal.K4 ⪱ Modal.KD4 := by
       constructor;
       . exact { trans := by simp; }
       . simp [Semantics.Realize, Satisfies];
-
-end Modal.KD4.Kripke
-
-
 
 end LO.Modal

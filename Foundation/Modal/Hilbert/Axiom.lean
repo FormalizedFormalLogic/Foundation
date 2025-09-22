@@ -7,6 +7,8 @@ variable {α : Type _}
 
 abbrev Axiom (α) := Set (Formula α)
 
+abbrev Axiom.instances (Ax : Axiom α) : FormulaSet α := { φ | ∃ ψ ∈ Ax, ∃ s, φ = ψ⟦s⟧ }
+
 namespace Axiom
 
 class HasM (Ax : Axiom α) where

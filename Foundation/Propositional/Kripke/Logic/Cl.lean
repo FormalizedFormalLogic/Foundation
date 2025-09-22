@@ -5,7 +5,7 @@ import Foundation.Propositional.Kripke.Logic.LC
 namespace LO.Propositional
 
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Formula.Kripke
 
 
@@ -144,7 +144,7 @@ instance : Hilbert.LC ⪱ Hilbert.Cl := by
         omega;
 
 instance : Hilbert.Int ⪱ Hilbert.Cl := calc
-  Hilbert.Int ⪱ Hilbert.KC := inferInstance
+  Hilbert.Int ⪱ Modal.KC := inferInstance
   _           ⪱ Hilbert.LC := inferInstance
   _           ⪱ Hilbert.Cl := inferInstance
 

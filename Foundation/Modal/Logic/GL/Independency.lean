@@ -22,11 +22,10 @@ namespace GL
 variable {n : ℕ} {φ : Formula ℕ}
 
 lemma unprovable_notbox : Modal.GL ⊬ ∼□φ := by
-  apply Hilbert.Normal.iff_logic_provable_provable.not.mpr;
   by_contra hC;
   have : Modal.GL ⊢! ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
   have : Modal.GL ⊢! ∼□⊥ := this ⨀ hC;
-  have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using Logic.GL.provable_verTranslated_Cl this;
+  have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := GL.provable_verTranslated_Cl this;
   have := Hilbert.Cl.soundness this (λ _ => False);
   tauto;
 
@@ -38,9 +37,8 @@ lemma unprovable_not_independency_of_consistency : Modal.GL ⊬ ∼(independency
   by_contra hC;
   rcases modal_disjunctive (A!_of_ANNNN! $ ANN!_of_NK! hC) with (h | h);
   . apply unprovable_notbox h;
-  . apply Consistent.not_bot inferInstance (𝓢 := Modal.GL);
-    simpa using unnec! $ of_NN! h;
-
+  . apply Logic.no_bot (L := Modal.GL);
+    exact unnec! $ of_NN! h;
 
 /-
 theorem undecidable_independency_of_consistency : Independent Modal.GL (independency (∼□⊥)) := by

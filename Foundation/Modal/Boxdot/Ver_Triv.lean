@@ -14,9 +14,9 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {φ : Formula ℕ}
 
-lemma provable_boxdotTranslated_Ver_of_Triv : Modal.Triv ⊢! φ → Modal.Ver ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
+lemma provable_boxdotTranslated_Ver_of_Triv : Modal.Triv ⊢! φ → Modal.Ver ⊢! φᵇ := Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances $ by
   rintro φ hp;
-  rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
+  rcases (by simpa [Axiom.instances] using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
   . simp only [boxdotTranslate, and₁!];
   . apply deduct'!;

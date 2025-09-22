@@ -19,9 +19,7 @@ lemma iff_provable_GL_provable_box_S {A : Modal.Formula _} : Modal.GL ⊢! A ↔
     intro f;
     exact Iff.mp Provability.SoundOnModel.sound (S.arithmetical_soundness h f)
 
-theorem S.no_boxbot : Modal.S ⊬ □⊥ := iff_provable_GL_provable_box_S.not.mp $ by
-  simp only [Hilbert.Normal.iff_logic_provable_provable];
-  apply Entailment.Consistent.not_bot inferInstance;
+theorem S.no_boxbot : Modal.S ⊬ □⊥ := iff_provable_GL_provable_box_S.not.mp $ by simp;
 
 instance : Entailment.Consistent Modal.S := Entailment.Consistent.of_unprovable S.no_boxbot
 

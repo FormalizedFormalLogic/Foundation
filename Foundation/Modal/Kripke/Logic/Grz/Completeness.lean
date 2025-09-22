@@ -40,7 +40,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open ComplementClosedConsistentFinset
 open Kripke
 
-namespace Modal.Grz.Kripke
+namespace Grz.Kripke
 
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Grz 𝓢]
@@ -288,7 +288,7 @@ instance : Modal.S4 ⪱ Modal.Grz := calc
   Modal.S4 ⪱ Modal.S4McK := by infer_instance
   _          ⪱ Modal.Grz   := by infer_instance
 
-end Modal.Grz.Kripke
+end Grz.Kripke
 
 
 end LO.Modal

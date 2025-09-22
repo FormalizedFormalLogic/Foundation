@@ -21,7 +21,7 @@ protected abbrev FrameClass.finite_S4 : FrameClass := { F | F.IsFiniteS4 }
 end Kripke
 
 
-namespace Modal.S4.Kripke
+namespace S4
 
 instance : Sound Modal.S4 FrameClass.S4 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
@@ -107,7 +107,7 @@ instance : Modal.KD ⪱ Modal.S4 := calc
   Modal.KD ⪱ Modal.KD4 := by infer_instance
   _          ⪱ Modal.S4  := by infer_instance
 
-end Modal.S4.Kripke
+end S4
 
 
 

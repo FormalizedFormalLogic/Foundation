@@ -47,8 +47,7 @@ open Formula.Kripke
 
 lemma GLPoint3OplusBoxBot.weakerThan_succ {n : ℕ} : (Modal.GLPoint3OplusBoxBot (n + 1)) ⪯ (Modal.GLPoint3OplusBoxBot n) := by
   apply weakerThan_iff.mpr;
-  intro φ;
-  intro h;
+  intro φ h;
   induction h using sumNormal.rec! with
   | mem₁ h => apply Entailment.WeakerThan.pbl h;
   | @mem₂ φ h =>
@@ -355,11 +354,7 @@ instance : Modal.GLPoint3 ⪯ Modal.GLPoint2 := by
   apply weakerThan_iff.mpr;
   intro φ hφ;
   induction hφ using Hilbert.Normal.rec! with
-  | axm s h =>
-    rcases h with (rfl | rfl | rfl);
-    . simp;
-    . simp;
-    . apply Hilbert.Normal.iff_logic_provable_provable.mp; simp;
+  | axm s h => rcases h with (rfl | rfl | rfl) <;> simp;
   | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ]
   | nec ih => apply nec! ih;
   | _ => cl_prover;

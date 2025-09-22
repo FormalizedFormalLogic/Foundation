@@ -103,9 +103,9 @@ lemma Hilbert.equiv_logic_Normal_WithHenkin
 
 theorem provable_GL_TFAE : [
   Modal.GL ⊢! φ,
-  Hilbert.K4Loeb ⊢! φ,
-  Hilbert.K4Henkin ⊢! φ,
-  Hilbert.K4Hen ⊢! φ
+  Modal.K4Loeb ⊢! φ,
+  Modal.K4Henkin ⊢! φ,
+  Modal.K4Hen ⊢! φ
 ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;

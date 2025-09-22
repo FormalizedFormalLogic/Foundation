@@ -119,12 +119,12 @@ instance : Entailment.Cl (Hilbert.Cl) where
 lemma Hilbert.Int_weakerThan_Cl : (Hilbert.Int) ⪯ (Hilbert.Cl) := by apply weakerThan_of_subset_axioms; tauto;
 
 
-protected abbrev Hilbert.KC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}⟩
-protected abbrev KC := Hilbert.KC.logic
+protected abbrev Modal.KC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}⟩
+protected abbrev KC := Modal.KC.logic
 notation "𝐊𝐂" => Propositional.KC
-instance : Hilbert.KC.HasEFQ where p := 0;
-instance : Hilbert.KC.HasWeakLEM where p := 0;
-instance : Entailment.KC (Hilbert.KC) where
+instance : Modal.KC.HasEFQ where p := 0;
+instance : Modal.KC.HasWeakLEM where p := 0;
+instance : Entailment.KC (Modal.KC) where
 
 
 protected abbrev Hilbert.LC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.Dummett (.atom 0) (.atom 1)}⟩
@@ -135,11 +135,11 @@ instance : Hilbert.LC.HasDummett where p := 0; q := 1;
 instance : Entailment.LC (Hilbert.LC) where
 
 
-protected abbrev Hilbert.KrieselPutnam : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}⟩
-protected abbrev KrieselPutnam := Hilbert.KrieselPutnam.logic
+protected abbrev Modal.KrieselPutnam : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}⟩
+protected abbrev KrieselPutnam := Modal.KrieselPutnam.logic
 notation "𝐊𝐏" => Propositional.KrieselPutnam
-instance : Hilbert.KrieselPutnam.HasEFQ where p := 0;
-instance : Hilbert.KrieselPutnam.HasKrieselPutnam where p := 0; q := 1; r := 2;
-instance : Entailment.KrieselPutnam (Hilbert.KrieselPutnam) where
+instance : Modal.KrieselPutnam.HasEFQ where p := 0;
+instance : Modal.KrieselPutnam.HasKrieselPutnam where p := 0; q := 1; r := 2;
+instance : Entailment.KrieselPutnam (Modal.KrieselPutnam) where
 
 end LO.Propositional

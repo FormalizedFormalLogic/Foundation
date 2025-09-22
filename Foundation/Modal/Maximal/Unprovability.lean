@@ -13,13 +13,10 @@ open Hilbert
 open Hilbert.Deduction
 open Formula
 
-namespace Logic
-
-
 namespace Triv
 
 lemma unprovable_AxiomL : Modal.Triv ⊬ (Axioms.L (.atom a)) := by
-  apply Logic.Triv.iff_provable_Cl.not.mpr;
+  apply Triv.iff_provable_Cl.not.mpr;
   apply Hilbert.Cl.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
@@ -30,7 +27,7 @@ end Triv
 namespace Ver
 
 lemma unprovable_AxiomP : Modal.Ver ⊬ Axioms.P := by
-  apply Logic.Ver.iff_provable_Cl.not.mpr;
+  apply Ver.iff_provable_Cl.not.mpr;
   apply Hilbert.Cl.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
@@ -40,12 +37,12 @@ end Ver
 
 namespace K4
 
-lemma provable_trivTranslated_Cl : Hilbert.K4 ⊢! φ → Hilbert.Cl ⊢! φᵀ.toPropFormula := by
+lemma provable_trivTranslated_Cl : Modal.K4 ⊢! φ → Hilbert.Cl ⊢! φᵀ.toPropFormula := by
   intro h;
-  apply Logic.Triv.iff_provable_Cl.mp;
+  apply Triv.iff_provable_Cl.mp;
   apply WeakerThan.pbl h;
 
-lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
+lemma unprovable_AxiomL : Modal.K4 ⊬ (Axioms.L (.atom a)) := by
   apply not_imp_not.mpr provable_trivTranslated_Cl;
   apply Hilbert.Cl.not_provable_of_exists_valuation;
   use (λ _ => False);
@@ -53,7 +50,7 @@ lemma unprovable_AxiomL : Hilbert.K4 ⊬ (Axioms.L (.atom a)) := by
 
 end K4
 
-instance : Hilbert.K4 ⪱ Modal.GL := by
+instance : Modal.K4 ⪱ Modal.GL := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl) <;> simp;
@@ -76,16 +73,12 @@ lemma provable_verTranslated_Cl : Modal.GL ⊢! φ → Hilbert.Cl ⊢! φⱽ.toP
       exact ih₁ ⨀ ih₂;
     | _ => simp [verTranslate, Formula.toPropFormula];
 
+@[simp, grind]
 lemma unprovable_AxiomT : (Modal.GL) ⊬ Axioms.T (.atom a) := by
   apply not_imp_not.mpr provable_verTranslated_Cl;
   apply Hilbert.Cl.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
-
-@[simp, grind]
-lemma unprovable_axiomT' : Modal.GL ⊬ Axioms.T (.atom a) := by
-  apply Hilbert.Normal.iff_logic_provable_provable.not.mpr;
-  exact unprovable_AxiomT;
 
 instance : Entailment.Consistent (Modal.GL) := by
   apply consistent_iff_exists_unprovable.mpr;
@@ -94,14 +87,13 @@ instance : Entailment.Consistent (Modal.GL) := by
 
 end GL
 
+
 theorem not_S4_weakerThan_GL : ¬(Modal.S4) ⪯ (Modal.GL) := by
   apply Entailment.not_weakerThan_iff.mpr;
   use (Axioms.T (atom 0));
   constructor;
   . exact axiomT!;
   . exact GL.unprovable_AxiomT;
-
-end Logic
 
 
 end LO.Modal

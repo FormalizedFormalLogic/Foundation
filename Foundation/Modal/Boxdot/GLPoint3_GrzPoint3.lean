@@ -20,9 +20,9 @@ open Formula (boxdotTranslate)
 open Modal.Kripke
 open Entailment
 
-lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : Modal.GrzPoint3 ⊢! φ → Modal.GLPoint3 ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
+lemma provable_boxdotTranslated_GLPoint3_of_GrzPoint3 : Modal.GrzPoint3 ⊢! φ → Modal.GLPoint3 ⊢! φᵇ := Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances $ by
   intro φ hp;
-  rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨s, _, rfl⟩);
+  rcases (by simpa [Axiom.instances] using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨s, _, rfl⟩);
   . exact boxdot_axiomK!;
   . exact boxdot_Grz_of_L!
   . apply Complete.complete (𝓢 := Modal.GLPoint3) (𝓜 := FrameClass.finite_GLPoint3);

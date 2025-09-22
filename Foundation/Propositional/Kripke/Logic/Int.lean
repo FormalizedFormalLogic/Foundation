@@ -8,7 +8,7 @@ namespace LO.Propositional
 
 open Kripke
 open Formula.Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 @[reducible] protected alias Kripke.FrameClass.Int := FrameClass.all
 @[reducible] protected alias Kripke.FrameClass.finite_Int := FrameClass.finite_all

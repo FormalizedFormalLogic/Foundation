@@ -1,7 +1,10 @@
-import Foundation.Modal.Neighborhood.Hilbert
-import Foundation.Modal.Neighborhood.AxiomN
+-- import Foundation.Modal.Neighborhood.Hilbert
+-- import Foundation.Modal.Neighborhood.AxiomN
 import Foundation.Modal.Neighborhood.Logic.E
 import Foundation.Modal.PLoN.Logic.N
+
+
+#eval LO.Modal.instHasTNatAxioms
 
 namespace LO.Modal
 

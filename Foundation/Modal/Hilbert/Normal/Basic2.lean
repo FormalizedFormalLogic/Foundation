@@ -303,6 +303,15 @@ instance : K.axioms.HasK where p := 0; q := 1;
 protected abbrev K := Hilbert.Normal K.axioms
 instance : Entailment.K Modal.K where
 
+instance {L : Logic ℕ} [L.IsNormal] : Modal.K ⪯ L := by
+  apply Logic.weakerThan_of_provable;
+  intro φ hφ;
+  induction hφ using Hilbert.Normal.rec! with
+  | axm s h => rcases h with rfl; simp;
+  | nec hφ => apply nec! hφ;
+  | mdp hφψ hφ => exact mdp! hφψ hφ
+  | imply₁ | imply₂ | ec => simp;
+
 protected abbrev KT.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}
 instance : KT.axioms.HasK where p := 0; q := 1;
 instance : KT.axioms.HasT where p := 0;
@@ -320,6 +329,13 @@ instance : KP.axioms.HasK where p := 0; q := 1;
 instance : KP.axioms.HasP where
 protected abbrev KP := Hilbert.Normal KP.axioms
 instance : Entailment.KP Modal.KP where
+
+instance : Modal.KP ≊ Modal.KD := by
+  apply Entailment.Equiv.antisymm_iff.mpr;
+  constructor;
+  . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl) <;> simp;
+  . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl) <;> simp;
+
 
 protected abbrev KB.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.B (.atom 0)}
 instance : KB.axioms.HasK where p := 0; q := 1;
@@ -743,7 +759,7 @@ instance : S4H.axioms.HasH1 where p := 0
 instance : Entailment.S4H (Modal.S4H) where
 
 
-protected abbrev N.axioms : Axiom ℕ := {}
+protected abbrev N.axioms : Axiom ℕ := ∅
 protected abbrev N := Hilbert.Normal N.axioms
 
 

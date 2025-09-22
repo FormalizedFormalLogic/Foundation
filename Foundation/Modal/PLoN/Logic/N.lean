@@ -1,6 +1,5 @@
 import Foundation.Modal.PLoN.Hilbert
 import Foundation.Modal.PLoN.Completeness
-import Foundation.Modal.Hilbert.Normal.Basic2
 
 namespace LO.Modal
 
@@ -17,22 +16,23 @@ instance : AllFrameClass.IsNonempty := by
 
 end PLoN
 
-namespace Hilbert
-
 
 namespace N
 
-instance : AllFrameClass.DefinedBy Hilbert.N.axiomInstances := ⟨by simp_all⟩
+instance : AllFrameClass.DefinedBy Modal.N.axioms.instances := ⟨by simp⟩
 
-instance : Entailment.Consistent Hilbert.N := PLoN.Hilbert.consistent_of_FrameClass PLoN.AllFrameClass
+instance : Sound Modal.N PLoN.AllFrameClass := inferInstance
 
-instance : Canonical Hilbert.N PLoN.AllFrameClass := ⟨by tauto⟩
+instance : Entailment.Consistent Modal.N := PLoN.Hilbert.consistent_of_FrameClass PLoN.AllFrameClass
 
-instance : Complete Hilbert.N PLoN.AllFrameClass := inferInstance
+instance : Canonical Modal.N PLoN.AllFrameClass := ⟨by tauto⟩
+
+instance : Complete Modal.N PLoN.AllFrameClass := inferInstance
 
 end N
 
-instance : Hilbert.N ⪱ Hilbert.K := by
+
+instance : Modal.N ⪱ Modal.K := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -74,9 +74,5 @@ instance : Hilbert.N ⪱ Hilbert.K := by
             constructor;
             . simp [Frame.Rel']
             . simp [Semantics.Realize, Satisfies];
-
-end Hilbert
-
-instance : Modal.N ⪯ Modal.K := inferInstance
 
 end LO.Modal
