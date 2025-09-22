@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.WithRE.Basic2
+import Foundation.Modal.Hilbert.WithRE.Basic
 import Foundation.Modal.Neighborhood.Basic
 
 namespace LO.Modal
