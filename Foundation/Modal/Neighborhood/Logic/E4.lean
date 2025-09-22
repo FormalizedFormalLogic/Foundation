@@ -66,29 +66,22 @@ end
 
 end Neighborhood
 
-
-namespace Hilbert
-
-namespace E4.Neighborhood
-
-instance : Sound Hilbert.E4 FrameClass.E4 := instSound_of_validates_axioms $ by
+instance : Sound Modal.E4 FrameClass.E4 := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply valid_axiomFour_of_isTransitive;
 
-instance : Entailment.Consistent Hilbert.E4 := consistent_of_sound_frameclass FrameClass.E4 $ by
+instance : Entailment.Consistent Modal.E4 := consistent_of_sound_frameclass FrameClass.E4 $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Hilbert.E4 FrameClass.E4 := complete_of_canonical_frame FrameClass.E4 (minimalCanonicalFrame (Hilbert.E4)) $ by
+instance : Complete Modal.E4 FrameClass.E4 := complete_of_canonical_frame FrameClass.E4 (minimalCanonicalFrame (Modal.E4)) $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-end E4.Neighborhood
-
-instance : Hilbert.E ⪱ Hilbert.E4 := by
+instance : Modal.E ⪱ Modal.E4 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -100,9 +93,5 @@ instance : Hilbert.E ⪱ Hilbert.E4 := by
       apply not_validOnFrameClass_of_exists_frame;
       use Frame.trivial_nontransitive;
       simp;
-
-end Hilbert
-
-instance : 𝐄 ⪱ 𝐄𝟒 := inferInstance
 
 end LO.Modal

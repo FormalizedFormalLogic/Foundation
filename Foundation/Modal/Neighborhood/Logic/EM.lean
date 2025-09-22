@@ -15,27 +15,21 @@ protected abbrev FrameClass.EM : FrameClass := { F | F.IsEM }
 end Neighborhood
 
 
-namespace Hilbert
-
-namespace EM.Neighborhood
-
-instance : Sound Hilbert.EM FrameClass.EM := instSound_of_validates_axioms $ by
+instance : Sound Modal.EM FrameClass.EM := instSound_of_validates_axioms $ by
   constructor;
   rintro _ rfl F hF;
   simp_all;
 
-instance : Entailment.Consistent Hilbert.EM := consistent_of_sound_frameclass FrameClass.EM $ by
+instance : Entailment.Consistent Modal.EM := consistent_of_sound_frameclass FrameClass.EM $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Hilbert.EM FrameClass.EM := complete_of_canonical_frame FrameClass.EM (maximalCanonicalFrame (Hilbert.EM)) $ by
+instance : Complete Modal.EM FrameClass.EM := complete_of_canonical_frame FrameClass.EM (maximalCanonicalFrame (Modal.EM)) $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-end EM.Neighborhood
-
-instance : Hilbert.E ⪱ Hilbert.EM := by
+instance : Modal.E ⪱ Modal.EM := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -65,9 +59,5 @@ instance : Hilbert.E ⪱ Hilbert.EM := by
         ext x;
         simp;
         omega;
-
-end Hilbert
-
-instance : 𝐄 ⪱ 𝐄𝐌 := inferInstance
 
 end LO.Modal

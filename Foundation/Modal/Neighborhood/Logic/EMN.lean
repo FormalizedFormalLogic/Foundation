@@ -18,26 +18,20 @@ protected abbrev FrameClass.EMN : FrameClass := { F | F.IsEMN }
 end Neighborhood
 
 
-namespace Hilbert
-
-namespace EMN.Neighborhood
-
-instance : Sound Hilbert.EMN FrameClass.EMN := instSound_of_validates_axioms $ by
+instance : Sound Modal.EMN FrameClass.EMN := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Hilbert.EMN := consistent_of_sound_frameclass FrameClass.EMN $ by
+instance : Entailment.Consistent Modal.EMN := consistent_of_sound_frameclass FrameClass.EMN $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Hilbert.EMN FrameClass.EMN := complete_of_canonical_frame FrameClass.EMN (maximalCanonicalFrame (Hilbert.EMN)) $ by
+instance : Complete Modal.EMN FrameClass.EMN := complete_of_canonical_frame FrameClass.EMN (maximalCanonicalFrame (Modal.EMN)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-end EMN.Neighborhood
-
-instance : Hilbert.EM ⪱ Hilbert.EMN := by
+instance : Modal.EM ⪱ Modal.EMN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -57,7 +51,7 @@ instance : Hilbert.EM ⪱ Hilbert.EMN := by
       . exact { mono := by rintro X Y w hw; simp_all [M] }
       . simp! [M, Semantics.Realize, Satisfies];
 
-instance : Hilbert.EN ⪱ Hilbert.EMN := by
+instance : Modal.EN ⪱ Modal.EMN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -87,10 +81,5 @@ instance : Hilbert.EN ⪱ Hilbert.EMN := by
             match x with | 0 | 1 => simp_all [M]
         }
       . simp! [M, Semantics.Realize, Satisfies];
-
-end Hilbert
-
-instance : 𝐄𝐌 ⪱ 𝐄𝐌𝐍 := inferInstance
-instance : 𝐄𝐍 ⪱ 𝐄𝐌𝐍 := inferInstance
 
 end LO.Modal
