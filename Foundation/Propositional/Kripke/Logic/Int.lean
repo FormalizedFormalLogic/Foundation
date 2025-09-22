@@ -128,7 +128,7 @@ lemma satisfies_right_on_counterexampleDPModel :
       exact ihq.mpr $ h (by simpa) $ ihp.mp hp;
   | _ => simp_all [counterexampleDPModel, Satisfies.iff_models, Satisfies];
 
-theorem disjunctive : Hilbert.Int ⊢! φ ⋎ ψ → Hilbert.Int ⊢! φ ∨ Hilbert.Int ⊢! ψ := by
+theorem disjunctive : Hilbert.Int ⊢ φ ⋎ ψ → Hilbert.Int ⊢ φ ∨ Hilbert.Int ⊢ ψ := by
   contrapose!;
   rintro ⟨hnφ, hnψ⟩;
 

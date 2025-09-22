@@ -15,7 +15,7 @@ section FrameClass
 
 variable {C C₁ C₂ : Kripke.FrameClass}
 
-lemma soundness_of_validates_axioms (hV : C.Validates H.axioms) : H ⊢! φ → C ⊧ φ := by
+lemma soundness_of_validates_axioms (hV : C.Validates H.axioms) : H ⊢ φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ with
   | verum => apply ValidOnFrame.top;

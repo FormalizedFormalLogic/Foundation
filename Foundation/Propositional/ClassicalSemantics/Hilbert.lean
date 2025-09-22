@@ -10,7 +10,7 @@ open Formula.ClassicalSemantics
 
 namespace Hilbert.Cl
 
-theorem soundness (h : Hilbert.Cl ⊢! φ) : φ.isTautology := by
+theorem soundness (h : Hilbert.Cl ⊢ φ) : φ.isTautology := by
   intro v;
   induction h with
   | axm _ h => rcases h with (rfl | rfl) <;> tauto;
@@ -77,7 +77,7 @@ lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) 
       . left; apply ihφ.mpr hφ;
       . right; apply ihψ.mpr hψ;
 
-theorem completeness : (φ.isTautology) → (Hilbert.Cl ⊢! φ) := by
+theorem completeness : (φ.isTautology) → (Hilbert.Cl ⊢ φ) := by
   contrapose;
   intro h;
   obtain ⟨T, hT⟩ := lindenbaum (𝓢 := Hilbert.Cl) (t₀ := (∅, {φ})) $ by
@@ -101,12 +101,12 @@ theorem completeness : (φ.isTautology) → (Hilbert.Cl ⊢! φ) := by
   apply hT.2;
   tauto;
 
-theorem iff_isTautology_provable : φ.isTautology ↔ Hilbert.Cl ⊢! φ := ⟨
+theorem iff_isTautology_provable : φ.isTautology ↔ Hilbert.Cl ⊢ φ := ⟨
   completeness,
   soundness,
 ⟩
 
-lemma exists_valuation_of_not_provable : ¬(Hilbert.Cl ⊢! φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
+lemma exists_valuation_of_not_provable : ¬(Hilbert.Cl ⊢ φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
   contrapose!;
   simpa using completeness;
 
@@ -127,7 +127,7 @@ lemma exists_valuation_of_not (h : 𝐂𝐥 ⊬ φ) : ∃ v : Valuation _, ¬(v 
   apply Hilbert.Cl.exists_valuation_of_not_provable;
   tauto;
 
-lemma iff_isTautology : 𝐂𝐥 ⊢! φ ↔ φ.isTautology := by simp [tautologies];
+lemma iff_isTautology : 𝐂𝐥 ⊢ φ ↔ φ.isTautology := by simp [tautologies];
 
 end Logic.Cl
 

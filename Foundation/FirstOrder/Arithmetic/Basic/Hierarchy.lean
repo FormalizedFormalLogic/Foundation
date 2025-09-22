@@ -64,7 +64,7 @@ lemma zero_eq_alt {φ : Semiformula L ξ n} : Hierarchy Γ 0 φ → Hierarchy Γ
   generalize hz : 0 = z
   rw [eq_comm] at hz
   intro h
-  induction h <;> try simp at hz ⊢
+  induction h <;> try simp at hz ⊢!
   case and _ _ ihp ihq =>
     exact ⟨ihp hz, ihq hz⟩
   case or _ _ ihp ihq => exact ⟨ihp hz, ihq hz⟩
@@ -483,7 +483,7 @@ end Arithmetic
 abbrev ArithmeticTheory.SoundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) := T.SoundOn (Arithmetic.Hierarchy Γ k)
 
 lemma ArithmeticTheory.soundOnHierarchy (T : ArithmeticTheory) (Γ : Polarity) (k : ℕ) [T.SoundOnHierarchy Γ k] :
-    T ⊢! σ → Arithmetic.Hierarchy Γ k σ → ℕ ⊧ₘ σ := SoundOn.sound
+    T ⊢ σ → Arithmetic.Hierarchy Γ k σ → ℕ ⊧ₘ σ := SoundOn.sound
 
 instance (T : ArithmeticTheory) [T.SoundOnHierarchy 𝚺 1] : Entailment.Consistent T :=
   T.consistent_of_sound (Arithmetic.Hierarchy 𝚺 1) (by simp)

@@ -57,14 +57,14 @@ instance : Entailment.DeductiveExplosion (Hilbert.Normal α) where
   dexp := fun h _ ↦ of_O h
 
 protected lemma rec!
-  {motive   : (φ : Formula α) → (H ⊢! φ) → Sort}
+  {motive   : (φ : Formula α) → (H ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ H.axioms) → motive (φ⟦s⟧) ⟨.axm s h⟩)
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : H ⊢! φ ➝ ψ} → {hφ : H ⊢! φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
-  (nec      : ∀ {φ}, {hφψ : H ⊢! φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : H ⊢ φ ➝ ψ} → {hφ : H ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
+  (nec      : ∀ {φ}, {hφψ : H ⊢ φ} → motive (φ) hφψ → motive (□φ) (nec! hφψ))
   (imply₁   : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ by simp)
   (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
-  : ∀ {φ}, (d : H ⊢! φ) → motive φ d := by
+  : ∀ {φ}, (d : H ⊢ φ) → motive φ d := by
   rintro φ ⟨d⟩;
   induction d with
   | axm s h => apply axm s h;
@@ -74,18 +74,18 @@ protected lemma rec!
   | imply₂ φ ψ χ => apply imply₂
   | ec φ ψ => apply ec;
 
-lemma axm! {φ} (s) (h : φ ∈ H.axioms) : H ⊢! (φ⟦s⟧) := ⟨.axm s h⟩
+lemma axm! {φ} (s) (h : φ ∈ H.axioms) : H ⊢ (φ⟦s⟧) := ⟨.axm s h⟩
 
-lemma axm'! {φ} (h : φ ∈ H.axioms) : H ⊢! φ := by simpa using axm! Substitution.id h
+lemma axm'! {φ} (h : φ ∈ H.axioms) : H ⊢ φ := by simpa using axm! Substitution.id h
 
-lemma subst! {φ} (s) (h : H ⊢! φ) : H ⊢! (φ⟦s⟧) := by
+lemma subst! {φ} (s) (h : H ⊢ φ) : H ⊢ (φ⟦s⟧) := by
   induction h using Normal.rec! with
   | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ;
   | @axm φ s' h => rw [(show φ⟦s'⟧⟦s⟧ = φ⟦s' ∘ s⟧ by simp)]; apply axm!; exact h;
   | @nec φ h => apply nec!; simpa;
   | _ => simp;
 
-lemma weakerThan_of_provable_axioms (hs : H₂ ⊢!* H₁.axioms) : H₁ ⪯ H₂ := by
+lemma weakerThan_of_provable_axioms (hs : H₂ ⊢* H₁.axioms) : H₁ ⪯ H₂ := by
   apply weakerThan_iff.mpr;
   intro φ h;
   induction h using Normal.rec! with
@@ -108,7 +108,7 @@ section
 abbrev logic (H : Hilbert.Normal α) : Logic α := Entailment.theory H
 
 @[grind]
-lemma iff_logic_provable_provable : H.logic ⊢! φ ↔ H ⊢! φ := by simp [Entailment.theory, Logic.iff_provable];
+lemma iff_logic_provable_provable : H.logic ⊢ φ ↔ H ⊢ φ := by simp [Entailment.theory, Logic.iff_provable];
 
 instance : Entailment.Lukasiewicz H.logic where
   mdp hφψ hφ := by
@@ -537,7 +537,7 @@ instance : Entailment.K (Hilbert.K) where
 instance [L.IsNormal] : Modal.K ⪯ L := by
   constructor;
   intro φ;
-  suffices Hilbert.K ⊢! φ → L ⊢! φ by simpa [Logic.iff_provable, theory];
+  suffices Hilbert.K ⊢ φ → L ⊢ φ by simpa [Logic.iff_provable, theory];
   intro hφ;
   induction hφ using Hilbert.Normal.rec! with
   | axm s h => rcases h with rfl; simp;

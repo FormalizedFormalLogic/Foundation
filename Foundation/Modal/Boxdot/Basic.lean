@@ -18,7 +18,7 @@ postfix:90 "ᵇ" => Formula.boxdotTranslate
 
 
 theorem Hilbert.of_provable_boxdotTranslated_axiomInstances {H₁ H₂ : Hilbert.Normal α} [Entailment.K H₂]
-  (h : ∀ φ ∈ H₁.axiomInstances, H₂ ⊢! φᵇ) : H₁ ⊢! φ → H₂ ⊢! φᵇ := by
+  (h : ∀ φ ∈ H₁.axiomInstances, H₂ ⊢ φᵇ) : H₁ ⊢ φ → H₂ ⊢ φᵇ := by
   intro d;
   induction d using Hilbert.Normal.rec! with
   | @axm φ s hs =>

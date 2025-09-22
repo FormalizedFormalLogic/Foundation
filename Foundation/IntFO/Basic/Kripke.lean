@@ -155,7 +155,7 @@ variable {Λ : Hilbertᵢ L}
 open HilbertProofᵢ Semantics
 
 /-
-theorem sound (H : 𝓚 ⊧* Λ) : Λ ⊢ φ → 𝓚 ⊧ φ
+theorem sound (H : 𝓚 ⊧* Λ) : Λ ⊢! φ → 𝓚 ⊧ φ
   | eaxm h => RealizeSet.realize 𝓚 h
   | @mdp _ _ φ ψ bφψ bφ => fun w bv fv ↦ by simpa using sound H bφψ w bv fv w (by simp) (sound H bφ w _ _)
   | @gen _ _ φ b        => fun w bv fv v hwv x ↦ by { have := sound H b v ![] }

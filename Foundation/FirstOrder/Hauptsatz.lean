@@ -12,41 +12,41 @@ variable {L : Language.{u}}
 
 namespace Derivation
 
-inductive IsCutFree : {Γ : Sequent L} → ⊢ᵀ Γ → Prop
+inductive IsCutFree : {Γ : Sequent L} → ⊢!ᵀ Γ → Prop
 | axL (Γ) {k} (r : L.Rel k) (v)                 : IsCutFree (axL Γ r v)
 | verum (Γ)                                     : IsCutFree (verum Γ)
-| or {Γ φ ψ} {d : ⊢ᵀ φ :: ψ :: Γ}               : IsCutFree d → IsCutFree d.or
-| and {Γ φ ψ} {dφ : ⊢ᵀ φ :: Γ} {dψ : ⊢ᵀ ψ :: Γ} : IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
-| all {Γ φ} {d : ⊢ᵀ Rewriting.free φ :: Γ⁺}     : IsCutFree d → IsCutFree d.all
-| ex {Γ φ} (t) {d : ⊢ᵀ φ/[t] :: Γ}              : IsCutFree d → IsCutFree d.ex
-| wk {Δ Γ} {d : ⊢ᵀ Δ} (ss : Δ ⊆ Γ)              : IsCutFree d → IsCutFree (d.wk ss)
+| or {Γ φ ψ} {d : ⊢!ᵀ φ :: ψ :: Γ}               : IsCutFree d → IsCutFree d.or
+| and {Γ φ ψ} {dφ : ⊢!ᵀ φ :: Γ} {dψ : ⊢!ᵀ ψ :: Γ} : IsCutFree dφ → IsCutFree dψ → IsCutFree (dφ.and dψ)
+| all {Γ φ} {d : ⊢!ᵀ Rewriting.free φ :: Γ⁺}     : IsCutFree d → IsCutFree d.all
+| ex {Γ φ} (t) {d : ⊢!ᵀ φ/[t] :: Γ}              : IsCutFree d → IsCutFree d.ex
+| wk {Δ Γ} {d : ⊢!ᵀ Δ} (ss : Δ ⊆ Γ)              : IsCutFree d → IsCutFree (d.wk ss)
 
 attribute [simp] IsCutFree.axL IsCutFree.verum
 
 variable {Γ Δ : Sequent L}
 
-@[simp] lemma isCutFree_or_iff {d : ⊢ᵀ φ :: ψ :: Γ} :
+@[simp] lemma isCutFree_or_iff {d : ⊢!ᵀ φ :: ψ :: Γ} :
     IsCutFree d.or ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .or⟩
 
-@[simp] lemma isCutFree_and_iff {dφ : ⊢ᵀ φ :: Γ} {dψ : ⊢ᵀ ψ :: Γ} :
+@[simp] lemma isCutFree_and_iff {dφ : ⊢!ᵀ φ :: Γ} {dψ : ⊢!ᵀ ψ :: Γ} :
     IsCutFree (dφ.and dψ) ↔ IsCutFree dφ ∧ IsCutFree dψ :=
   ⟨by rintro ⟨⟩; constructor <;> assumption, by intro ⟨hφ, hψ⟩; exact hφ.and hψ⟩
 
-@[simp] lemma isCutFree_all_iff {d : ⊢ᵀ Rewriting.free φ :: Γ⁺} :
+@[simp] lemma isCutFree_all_iff {d : ⊢!ᵀ Rewriting.free φ :: Γ⁺} :
     IsCutFree d.all ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .all⟩
 
-@[simp] lemma isCutFree_ex_iff {d : ⊢ᵀ φ/[t] :: Γ} :
+@[simp] lemma isCutFree_ex_iff {d : ⊢!ᵀ φ/[t] :: Γ} :
     IsCutFree d.ex ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .ex t⟩
 
-@[simp] lemma isCutFree_wk_iff {d : ⊢ᵀ Δ} {ss : Δ ⊆ Γ} :
+@[simp] lemma isCutFree_wk_iff {d : ⊢!ᵀ Δ} {ss : Δ ⊆ Γ} :
     IsCutFree (d.wk ss) ↔ IsCutFree d := ⟨by rintro ⟨⟩; assumption, .wk _⟩
 
-@[simp] lemma IsCutFree.cast {d : ⊢ᵀ Γ} {e : Γ = Δ} :
+@[simp] lemma IsCutFree.cast {d : ⊢!ᵀ Γ} {e : Γ = Δ} :
     IsCutFree (.cast d e) ↔ IsCutFree d := by rcases e; rfl
 
-@[simp] lemma IsCutFree.not_cut (dp : ⊢ᵀ φ :: Γ) (dn : ⊢ᵀ ∼φ :: Γ) : ¬IsCutFree (dp.cut dn) := by rintro ⟨⟩
+@[simp] lemma IsCutFree.not_cut (dp : ⊢!ᵀ φ :: Γ) (dn : ⊢!ᵀ ∼φ :: Γ) : ¬IsCutFree (dp.cut dn) := by rintro ⟨⟩
 
-@[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᵀ Γ} :
+@[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢!ᵀ Γ} :
     IsCutFree (rewrite d f) ↔ IsCutFree d := by
   induction d generalizing f
   case axm => contradiction
@@ -59,11 +59,11 @@ variable {Γ Δ : Sequent L}
   case _ => simp [rewrite, *]
   case _ => simp [rewrite, *]
 
-@[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᵀ Γ} :
+@[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢!ᵀ Γ} :
     IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
 
 @[simp] lemma IsCutFree.genelalizeByNewver_isCutFree {φ : SyntacticSemiformula L 1} (hp : ¬φ.FVar? m) (hΔ : ∀ ψ ∈ Δ, ¬ψ.FVar? m)
-    (d : ⊢ᵀ φ/[&m] :: Δ) : IsCutFree (genelalizeByNewver hp hΔ d) ↔ IsCutFree d := by simp [genelalizeByNewver]
+    (d : ⊢!ᵀ φ/[&m] :: Δ) : IsCutFree (genelalizeByNewver hp hΔ d) ↔ IsCutFree d := by simp [genelalizeByNewver]
 
 end Derivation
 
@@ -111,14 +111,14 @@ def add {Γ Δ Ξ Θ : Sequent L} : Γ ⟶⁺ Δ → Ξ ⟶⁺ Θ → Γ ++ Ξ �
   | wk d h,  b => wk (d.add b) (by simp [h])
   | .id,     b => b.append Γ
 
-def graft {Ξ Γ : Sequent L} (b : ⊢ᵀ Ξ) : Ξ ⟶⁺ Γ → ⊢ᵀ Γ
+def graft {Ξ Γ : Sequent L} (b : ⊢!ᵀ Ξ) : Ξ ⟶⁺ Γ → ⊢!ᵀ Γ
   | verum Γ => .verum Γ
   | or d    => .or (d.graft b)
   | ex t d  => .ex t (d.graft b)
   | wk d h  => .wk (d.graft b) h
   | .id     => b
 
-lemma graft_isCutFree_of_isCutFree {b : ⊢ᵀ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
+lemma graft_isCutFree_of_isCutFree {b : ⊢!ᵀ Ξ} {d : Ξ ⟶⁺ Γ} (hb : Derivation.IsCutFree b) : Derivation.IsCutFree (d.graft b) := by
   induction d <;> simp [graft, *]
 
 end PositiveDerivationFrom
@@ -170,8 +170,8 @@ end StrongerThan
 
 abbrev Forces (p : ℙ) : SyntacticFormulaᵢ L → Type u
   | ⊤        => PUnit.{u+1}
-  | ⊥        => { b : ⊢ᵀ ∼p // Derivation.IsCutFree b }
-  | .rel R v => { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b }
+  | ⊥        => { b : ⊢!ᵀ ∼p // Derivation.IsCutFree b }
+  | .rel R v => { b : ⊢!ᵀ .rel R v :: ∼p // Derivation.IsCutFree b }
   | φ ⋏ ψ    => Forces p φ × Forces p ψ
   | φ ⋎ ψ    => Forces p φ ⊕ Forces p ψ
   | φ ➝ ψ    => (q : ℙ) → q ≼ p → Forces q φ → Forces q ψ
@@ -189,9 +189,9 @@ namespace Forces
 
 def verumEquiv : p ⊩ ⊤ ≃ PUnit := .refl _
 
-def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢ᵀ ∼p // Derivation.IsCutFree b} := .refl _
+def falsumEquiv : p ⊩ ⊥ ≃ { b : ⊢!ᵀ ∼p // Derivation.IsCutFree b} := .refl _
 
-def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢ᵀ .rel R v :: ∼p // Derivation.IsCutFree b } := .refl _
+def relEquiv {k} {R : L.Rel k} {v} : p ⊩ .rel R v ≃ { b : ⊢!ᵀ .rel R v :: ∼p // Derivation.IsCutFree b } := .refl _
 
 def andEquiv {φ ψ : SyntacticFormulaᵢ L} : p ⊩ φ ⋏ ψ ≃ (p ⊩ φ) × (p ⊩ ψ) := .refl _
 
@@ -248,13 +248,13 @@ def modusPonens {φ ψ : SyntacticFormulaᵢ L} (f : p ⊩ φ ➝ ψ) (g : p ⊩
   f.implyEquiv p (StrongerThan.refl p) g
 
 noncomputable
-def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝗠𝗶𝗻¹ ⊢ φ → ⊩ φ
+def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩ φ
   | .mdp (φ := ψ) b d => fun p ↦
     let b : p ⊩ ψ ➝ φ := ofMinimalProof b p
     let d : p ⊩ ψ := ofMinimalProof d p
     b.implyEquiv p (StrongerThan.refl p) d
   | .gen (φ := φ) b => fun p ↦ allEquiv.symm fun t ↦
-    let d : 𝗠𝗶𝗻¹ ⊢ φ/[t] :=
+    let d : 𝗠𝗶𝗻¹ ⊢! φ/[t] :=
       HilbertProofᵢ.cast (HilbertProofᵢ.rewrite (t :>ₙ fun x ↦ &x) b) (by simp [rewrite_free_eq_subst])
     ofMinimalProof d p
   | .verum => fun p ↦ PUnit.unit
@@ -319,7 +319,7 @@ private def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ ψ
     let bψ : [ψ] ⊓ q ⊩ ⊥ := dψ.implyEquiv ([ψ] ⊓ q) (.minLeRight _ _) (ihψ.monotone (.minLeLeft _ _))
     let ⟨bbφ, hbbφ⟩ := bφ.falsumEquiv
     let ⟨bbψ, hbbψ⟩ := bψ.falsumEquiv
-    let band : ⊢ᵀ ∼φ ⋏ ∼ψ :: ∼q := Derivation.and
+    let band : ⊢!ᵀ ∼φ ⋏ ∼ψ :: ∼q := Derivation.and
       (Derivation.cast bbφ (by simp [inf_def])) (Derivation.cast bbψ (by simp [inf_def]))
     falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]), by simp [band, hbbφ, hbbψ]⟩
 
@@ -330,7 +330,7 @@ private def refl.ex (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃' φ] ⊩ (∃
     let b : [φ/[&x]] ⊓ q ⊩ ⊥ :=
       (f.allEquiv &x).implyEquiv ([φ/[&x]] ⊓ q) (StrongerThan.minLeRight _ _) (ih.monotone (StrongerThan.minLeLeft _ _))
     let ⟨b, hb⟩ := b.falsumEquiv
-    let ba : ⊢ᵀ (∀' ∼φ) :: ∼q :=
+    let ba : ⊢!ᵀ (∀' ∼φ) :: ∼q :=
       Derivation.genelalizeByNewver (m := x)
         (by have : ¬Semiformula.FVar? (∀' ∼φ) x := not_fvar?_newVar (by simp)
             simpa using this)
@@ -371,8 +371,8 @@ def conj' : {Γ : Sequent L} → (b : (φ : SyntacticFormula L) → φ ∈ Γ �
 end Forces
 
 noncomputable
-def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᵀ Γ → {d : ⊢ᵀ Γ // Derivation.IsCutFree d} := fun d ↦
-  let d : 𝗠𝗶𝗻¹ ⊢ ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.goedelGentzen d)
+def main [L.DecidableEq] {Γ : Sequent L} : ⊢!ᵀ Γ → {d : ⊢!ᵀ Γ // Derivation.IsCutFree d} := fun d ↦
+  let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.goedelGentzen d)
   let ff : ∼Γ ⊩ ⋀(∼Γ)ᴺ ➝ ⊥ := Forces.ofMinimalProof d (∼Γ)
   let fc : ∼Γ ⊩ ⋀(∼Γ)ᴺ := Forces.conj' fun φ hφ ↦
     (Forces.refl φ).monotone (StrongerThan.ofSubset <| List.cons_subset.mpr ⟨hφ, by simp⟩)

@@ -64,7 +64,7 @@ end Hilbert
 instance : 𝐄 ⪱ 𝐄𝐍 := inferInstance
 instance : Modal.N ⪱ 𝐄𝐍 := by
   constructor;
-  . suffices ∀ φ, Hilbert.N ⊢! φ → Hilbert.EN ⊢! φ by
+  . suffices ∀ φ, Hilbert.N ⊢ φ → Hilbert.EN ⊢ φ by
       apply Entailment.weakerThan_iff.mpr;
       grind;
     intro φ hφ;
@@ -73,7 +73,7 @@ instance : Modal.N ⪱ 𝐄𝐍 := by
     | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ;
     | nec ihφ => apply Entailment.nec! ihφ;
     | _ => simp;
-  . suffices ∃ φ, Hilbert.EN ⊢! φ ∧ Hilbert.N ⊬ φ by
+  . suffices ∃ φ, Hilbert.EN ⊢ φ ∧ Hilbert.N ⊬ φ by
       apply Entailment.not_weakerThan_iff.mpr;
       obtain ⟨φ, _⟩ := this;
       use φ;

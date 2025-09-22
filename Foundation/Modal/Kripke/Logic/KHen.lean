@@ -347,7 +347,7 @@ end Kripke
 
 namespace Logic.KHen
 
-lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢! φ → cresswellModel ⊧ φ := by
+lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢ φ → cresswellModel ⊧ φ := by
   intro h;
   induction h using Hilbert.Normal.rec! with
   | axm s h =>
@@ -364,11 +364,11 @@ lemma unprovable_atomic_axiomFour : Hilbert.KHen ⊬ Axioms.Four (atom a) := by
   by_contra hC;
   exact cresswellModel.not_valid_axiomFour $ Kripke.valid_cresswellModel_of_provable hC 2♯;
 
-theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Hilbert.KHen ⊢! φ ↔ C ⊧ φ := by
+theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Hilbert.KHen ⊢ φ ↔ C ⊧ φ := by
   rintro ⟨C, h⟩;
   have : C ⊧ Axioms.Hen (atom 0) := @h (Axioms.Hen (atom 0)) |>.mp $ by simp;
   have : C ⊧ Axioms.Four (atom 0) := fun {F} hF => valid_atomic_axiomFour_of_valid_atomic_axiomH (this hF);
-  have : Hilbert.KHen ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
+  have : Hilbert.KHen ⊢ Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
   exact @unprovable_atomic_axiomFour _ this;
 
 end Logic.KHen

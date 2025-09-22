@@ -154,7 +154,7 @@ lemma isFormulaSet_sound {s : ℕ} : IsFormulaSet L s → ∃ S : Finset (Syntac
 
 variable (V)
 
-noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ → T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝
+noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ → T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝
   |   closed Δ φ h hn => TDerivation.em ⌜φ⌝ (by simpa) (by simpa using Sequent.quote_mem_quote.mpr hn)
   |       axm φ hT _ => TDerivation.byAxm ⌜φ⌝ (by
     have : ∃ σ ∈ T, ↑σ = φ := by simpa [Theory.toSyntacticFormulas] using hT
@@ -175,11 +175,11 @@ noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ �
   | cut (φ := φ) d dn =>
     TDerivation.cut (φ := ⌜φ⌝) (d.typedQuote.cast (by simp)) (dn.typedQuote.cast (by simp))
 
-noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⟹₂ Γ) (T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
+noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⟹₂ Γ) (T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
 
-noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝).val⟩
+noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val⟩
 
-lemma quote_def (d : (T : SyntacticFormulas L) ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢ᵈᵉʳ ⌜Γ⌝).val := rfl
+lemma quote_def (d : (T : SyntacticFormulas L) ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val := rfl
 
 lemma coe_typedQuote_val_eq (d : (T : SyntacticFormulas L) ⟹₂ Γ) : ↑(d.typedQuote ℕ).val = (d.typedQuote V).val :=
   match d with
@@ -217,25 +217,25 @@ end Derivation2
 
 noncomputable instance (Γ : Sequent L) : GoedelQuote ((T : SyntacticFormulas L) ⟹ Γ) V := ⟨fun b ↦ ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝⟩
 
-noncomputable instance (φ : Sentence L) : GoedelQuote (T ⊢ φ) V := ⟨fun b ↦
+noncomputable instance (φ : Sentence L) : GoedelQuote (T ⊢! φ) V := ⟨fun b ↦
   let b : (T : SyntacticFormulas L) ⟹ [↑φ] := b
   ⌜b⌝⟩
 
 lemma quote_derivation_def {Γ : Sequent L} (b : (T : SyntacticFormulas L) ⟹ Γ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝ := rfl
 
-lemma quote_proof_def {φ : Sentence L} (b : T ⊢ φ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝ := rfl
+lemma quote_proof_def {φ : Sentence L} (b : T ⊢! φ) : (⌜b⌝ : V) = ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝ := rfl
 
 @[simp] lemma derivation_of_quote_derivation {Γ : Sequent L} (b : (T : SyntacticFormulas L) ⟹ Γ) : T.DerivationOf (⌜b⌝ : V) ⌜Γ.toFinset⌝ := by
   let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : SyntacticFormulas L) b)
   suffices T.DerivationOf x.val ⌜List.toFinset Γ⌝ from this
   simpa using x.derivationOf
 
-@[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢ φ) : T.Proof (⌜b⌝ : V) ⌜φ⌝ := by
+@[simp] lemma proof_of_quote_proof {φ : Sentence L} (b : T ⊢! φ) : T.Proof (⌜b⌝ : V) ⌜φ⌝ := by
   let x := Derivation2.typedQuote V (Derivation.toDerivation2 (T : SyntacticFormulas L) b)
   suffices T.Proof x.val ⌜φ⌝ from this
   simpa using x.derivationOf
 
-lemma coe_quote_proof_eq (d : T ⊢ φ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := by
+lemma coe_quote_proof_eq (d : T ⊢! φ) : (↑(⌜d⌝ : ℕ) : V) = ⌜d⌝ := by
   simp [quote_proof_def, Derivation2.coe_quote_eq]
 
 namespace Theory
@@ -317,14 +317,14 @@ lemma Derivation.sound {d : ℕ} (h : T.Derivation d) : ∃ Γ, ⌜Γ⌝ = fstId
     rcases this with ⟨σ, hσ, rfl⟩
     refine ⟨Derivation2.axm σ (by simp [hσ]) hφ⟩
 
-lemma Provable.sound2 {φ : SyntacticFormula L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢₂! φ := by
+lemma Provable.sound2 {φ : SyntacticFormula L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢!₂! φ := by
   rcases h with ⟨d, hp, hd⟩
   rcases hd.sound with ⟨Γ, e, b⟩
   have : Γ = {φ} := Sequent.quote_inj (V := ℕ) <| by simp [e, hp]
   rcases this
   exact b
 
-lemma Provable.sound {φ : Sentence L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢! φ :=
+lemma Provable.sound {φ : Sentence L} (h : T.Provable (⌜φ⌝ : ℕ)) : T ⊢ φ :=
   provable_iff_derivable2.mpr <| Theory.Provable.sound2 (by simpa using h)
 
 end Theory

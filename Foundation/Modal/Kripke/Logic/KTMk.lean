@@ -93,7 +93,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
         match c with
         | 0 => contradiction;
         | n + 1 =>
-          suffices Hilbert.KTMk ⊢! □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
+          suffices Hilbert.KTMk ⊢ □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
             rwa [show (i + (n + 1) + 1) = (i + 2 + n) by omega];
           apply reduce_box_in_CAnt!;
       . apply List.chain'_concat_of_not_nil (List.length_pos_iff_ne_nil.mp (by simp [hl_len])) |>.mpr;

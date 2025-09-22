@@ -45,8 +45,8 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
   have : Fintype M₀.World := Fintype.ofFinite _
   let S := SolovaySentences.standard T M₀.toFrame
   ∀ B ∈ A.subformulas,
-  (r₁ ⊧ B → 𝗜𝚺₁ ⊢! (S r₀) ➝ (S.realization B)) ∧
-  (¬r₁ ⊧ B → 𝗜𝚺₁ ⊢! (S r₀) ➝ ∼(S.realization B)) := by
+  (r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ (S.realization B)) ∧
+  (¬r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B)) := by
   intro M₀ r₀ _ S B B_sub;
 
   replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
@@ -97,14 +97,14 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
       apply C!_of_conseq!;
       apply T.standardProvability.D1;
       apply Entailment.WeakerThan.pbl (𝓢 := 𝗜𝚺₁);
-      have : 𝗜𝚺₁ ⊢! ((⩖ j, S j)) ➝ S.realization B := by
+      have : 𝗜𝚺₁ ⊢ ((⩖ j, S j)) ➝ S.realization B := by
         apply left_Fdisj'!_intro;
         have hrfl : r₁ ⊧ □B ➝ B := by
           apply hA₁;
           simpa [Formula.rflSubformula];
         rintro (i | i) _;
         . rw [(show (Sum.inl i) = r₀ by simp [r₀];)]
-          suffices 𝗜𝚺₁ ⊢! S r₀ ➝ S.realization B by convert this;
+          suffices 𝗜𝚺₁ ⊢ S r₀ ➝ S.realization B by convert this;
           apply ihB (by grind) |>.1;
           exact hrfl h;
         . by_cases e : i = r₁;
@@ -116,17 +116,17 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
             apply h;
             apply Frame.root_genaretes'!;
             assumption
-      have b : 𝗜𝚺₁ ⊢! ⩖ j, S j := oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+      have b : 𝗜𝚺₁ ⊢ ⩖ j, S j := oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
         simpa [models_iff, S, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.disjunctive
       exact this ⨀ b
     . intro h;
       have := Satisfies.box_def.not.mp h;
       push_neg at this;
       obtain ⟨i, Rij, hA⟩ := this;
-      have : 𝗜𝚺₁ ⊢! S (Sum.inr i) ➝ ∼S.realization B :=
+      have : 𝗜𝚺₁ ⊢ S (Sum.inr i) ➝ ∼S.realization B :=
         S.mainlemma_neg (A := B) (i := i) (by trivial)
         <| Model.extendRoot.inr_satisfies_iff (n := 1) |>.not.mpr hA;
-      have : 𝗜𝚺₁ ⊢! ∼T.standardProvability (∼S (Sum.inr i)) ➝ ∼T.standardProvability (S.realization B) :=
+      have : 𝗜𝚺₁ ⊢ ∼T.standardProvability (∼S (Sum.inr i)) ➝ ∼T.standardProvability (S.realization B) :=
         contra!
         $ T.standardProvability.prov_distribute_imply'
         $ CN!_of_CN!_right $ this;
@@ -139,14 +139,14 @@ lemma rfl_mainlemma (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
   letI r₀ : M₀ := Model.extendRoot.root
   haveI : Fintype M₀.World := Fintype.ofFinite _
   letI S := SolovaySentences.standard T M₀.toFrame
-  ∀ B ∈ A.subformulas, r₁ ⊧ B → 𝗜𝚺₁ ⊢! (S r₀) ➝ (S.realization B) := fun B B_sub => (refl_mainlemma_aux hA B B_sub).1
+  ∀ B ∈ A.subformulas, r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ (S.realization B) := fun B B_sub => (refl_mainlemma_aux hA B B_sub).1
 
 lemma rfl_mainlemma_neg (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
   letI M₀ := M₁.extendRoot 1
   letI r₀ : M₀ := Model.extendRoot.root
   haveI : Fintype M₀.World := Fintype.ofFinite _
   letI S := SolovaySentences.standard T M₀.toFrame
-  ∀ B ∈ A.subformulas, ¬r₁ ⊧ B → 𝗜𝚺₁ ⊢! (S r₀) ➝ ∼(S.realization B) := λ B B_sub => (refl_mainlemma_aux hA B B_sub).2
+  ∀ B ∈ A.subformulas, ¬r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B) := λ B B_sub => (refl_mainlemma_aux hA B B_sub).2
 
 end
 
@@ -155,13 +155,13 @@ end SolovaySentences
 
 lemma GL_S_TFAE :
     [
-      Modal.GL ⊢! (A.rflSubformula.conj ➝ A),
-      Modal.S ⊢! A,
+      Modal.GL ⊢ (A.rflSubformula.conj ➝ A),
+      Modal.S ⊢ A,
       ∀ f : T.StandardRealization, ℕ ⊧ₘ (f A)
     ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;
-    have h : Modal.S ⊢! Finset.conj A.rflSubformula ➝ A := WeakerThan.pbl h;
+    have h : Modal.S ⊢ Finset.conj A.rflSubformula ➝ A := WeakerThan.pbl h;
     apply h ⨀ ?_;
     apply FConj!_iff_forall_provable.mpr;
     simp [-Logic.iff_provable];
@@ -192,7 +192,7 @@ lemma GL_S_TFAE :
       simpa [models_iff, S, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;
 
-theorem S.arithmetical_completeness_iff : Modal.S ⊢! A ↔ ∀ f : T.StandardRealization, ℕ ⊧ₘ f A := GL_S_TFAE.out 1 2
+theorem S.arithmetical_completeness_iff : Modal.S ⊢ A ↔ ∀ f : T.StandardRealization, ℕ ⊧ₘ f A := GL_S_TFAE.out 1 2
 
 theorem provabilityLogic_PA_TA_eq_S :
     ProvabilityLogic T 𝗧𝗔 ≊ Modal.S := by

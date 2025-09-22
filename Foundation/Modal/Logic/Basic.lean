@@ -21,7 +21,7 @@ variable {L L₀ L₁ L₂ L₃ : Logic α}
 section
 
 protected class Substitution (L : Logic α) where
-  subst {φ} (s) : L ⊢ φ → L ⊢ φ⟦s⟧
+  subst {φ} (s) : L ⊢! φ → L ⊢! φ⟦s⟧
 
 protected class IsQuasiNormal (L : Logic α) extends Entailment.Cl L, Entailment.HasAxiomK L, Entailment.HasDiaDuality L, L.Substitution where
 
@@ -36,7 +36,7 @@ section
 variable {L : Logic α} {φ ψ : Formula α}
 
 @[grind]
-lemma iff_provable : L ⊢! φ ↔ φ ∈ L := by
+lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by
   constructor;
   . intro h;
     exact PLift.down h.some;
@@ -58,7 +58,7 @@ lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
     have := Equiv.iff.mp h φ;
     grind;
 
-lemma subst! [L.Substitution] (s : Substitution _) (hφ : L ⊢! φ) : L ⊢! φ⟦s⟧ := ⟨Substitution.subst s hφ.some⟩
+lemma subst! [L.Substitution] (s : Substitution _) (hφ : L ⊢ φ) : L ⊢ φ⟦s⟧ := ⟨Substitution.subst s hφ.some⟩
 
 @[simp]
 lemma mem_verum [HasAxiomVerum L] : ⊤ ∈ L := by
@@ -87,7 +87,7 @@ lemma not_mem_bot : ⊥ ∉ L := by
   exact no_bot;
 
 -- TODO: more general place
-lemma not_neg_of! (hφ : L ⊢! φ) : L ⊬ ∼φ := by
+lemma not_neg_of! (hφ : L ⊢ φ) : L ⊬ ∼φ := by
   by_contra! hC;
   apply L.no_bot;
   exact hC ⨀ hφ;
@@ -101,7 +101,7 @@ section
 @[grind]
 lemma weakerThan_of_subset (h : L₁ ⊆ L₂) : L₁ ⪯ L₂ := by
   constructor;
-  suffices ∀ (φ : Formula α), L₁ ⊢! φ → L₂ ⊢! φ by simpa [Entailment.theory];
+  suffices ∀ (φ : Formula α), L₁ ⊢ φ → L₂ ⊢ φ by simpa [Entailment.theory];
   intro φ;
   have := @h φ;
   grind;
@@ -118,7 +118,7 @@ lemma strictWeakerThan_of_ssubset (h : L₁ ⊂ L₂) : L₁ ⪱ L₂ := by
 @[simp, grind]
 lemma subset_of_weakerThan [L₁ ⪯ L₂] : L₁ ⊆ L₂ := by
   intro φ;
-  suffices L₁ ⊢! φ → L₂ ⊢! φ by grind;
+  suffices L₁ ⊢ φ → L₂ ⊢ φ by grind;
   exact Entailment.WeakerThan.pbl;
 
 end
@@ -127,16 +127,16 @@ section
 
 variable [DecidableEq α] [L.IsQuasiNormal]
 
-lemma lconj_subst {X : List (Formula α)} {s : Substitution α} : L ⊢! (X.map (·⟦s⟧)).conj₂ ➝ X.conj₂⟦s⟧ := by
+lemma lconj_subst {X : List (Formula α)} {s : Substitution α} : L ⊢ (X.map (·⟦s⟧)).conj₂ ➝ X.conj₂⟦s⟧ := by
   induction X using List.induction_with_singleton with
   | hnil => simp;
   | hsingle => simp;
   | hcons φ X hφ ih =>
-    suffices L ⊢! φ⟦s⟧ ⋏ ⋀(X.map (·⟦s⟧)) ➝ φ⟦s⟧ ⋏ (⋀X)⟦s⟧ by
+    suffices L ⊢ φ⟦s⟧ ⋏ ⋀(X.map (·⟦s⟧)) ➝ φ⟦s⟧ ⋏ (⋀X)⟦s⟧ by
       simpa [List.conj₂_cons_nonempty hφ, List.conj₂_cons_nonempty (show X.map (·⟦s⟧) ≠ [] by simpa)];
     cl_prover [ih];
 
-lemma fconj_subst {X : Finset (Formula α)} {s : Substitution α} : L ⊢! (X.image (·⟦s⟧)).conj ➝ X.conj⟦s⟧ := by
+lemma fconj_subst {X : Finset (Formula α)} {s : Substitution α} : L ⊢ (X.image (·⟦s⟧)).conj ➝ X.conj⟦s⟧ := by
   apply C!_trans ?_ $ lconj_subst (L := L) (X := X.toList) (s := s);
   apply right_Conj₂!_intro;
   intro φ hφ;

@@ -101,7 +101,7 @@ lemma mod_models_iff {φ : Formula α} :
     mod.{_,w} H ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* H.axiomInstances → ℍ ⊧ φ := by
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
-lemma sound {φ : Formula α} (d : H ⊢! φ) : mod H ⊧ φ := by
+lemma sound {φ : Formula α} (d : H ⊢ φ) : mod H ⊧ φ := by
   apply mod_models_iff.mpr;
   intro ℍ hℍ;
   induction d with
@@ -137,7 +137,7 @@ lemma lindenbaum_val_eq : (lindenbaum H ⊧ₕ φ) = ⟦φ⟧ := by
 variable {H}
 
 omit [Entailment.Consistent H] in
-lemma lindenbaum_complete_iff [Entailment.Consistent H] {φ : Formula α} : lindenbaum H ⊧ φ ↔ H ⊢! φ := by
+lemma lindenbaum_complete_iff [Entailment.Consistent H] {φ : Formula α} : lindenbaum H ⊧ φ ↔ H ⊢ φ := by
   simp [val_def', lindenbaum_val_eq, provable_iff_eq_top]
 
 instance : Sound H (lindenbaum H) := ⟨lindenbaum_complete_iff.mpr⟩
@@ -148,7 +148,7 @@ end
 
 open Hilbert.Deduction
 
-lemma complete [DecidableEq α] {φ : Formula α} [H.HasEFQ] (h : mod.{_,u} H ⊧ φ) : H ⊢! φ := by
+lemma complete [DecidableEq α] {φ : Formula α} [H.HasEFQ] (h : mod.{_,u} H ⊧ φ) : H ⊢ φ := by
   wlog Con : Entailment.Consistent H
   . exact Entailment.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <|

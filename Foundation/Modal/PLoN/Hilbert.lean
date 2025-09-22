@@ -13,7 +13,7 @@ open Formula
 variable {C : PLoN.FrameClass}
 variable {H : Hilbert.Normal ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 
-lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy H.axiomInstances] : H ⊢! φ → C ⊧ φ := by
+lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy H.axiomInstances] : H ⊢ φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.Normal.rec! with
   | axm s h =>

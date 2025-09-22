@@ -66,22 +66,22 @@ lemma sound (M : Type*) [s : Structure L M] [Nonempty M] [M ⊧ₘ* T] (ε : ℕ
 
 end Derivation
 
-theorem sound : T ⊢ σ → T ⊨[Struc.{v, u} L] σ := fun b s hT ↦ by
+theorem sound : T ⊢! σ → T ⊨[Struc.{v, u} L] σ := fun b s hT ↦ by
   have : s.Dom ⊧ₘ* T := hT
   have : Inhabited s.Dom := Classical.inhabited_of_nonempty s.nonempty
   simpa using Derivation.sound s.Dom default b
 
-theorem sound! : T ⊢! σ → T ⊨[Struc.{v, u} L] σ := fun ⟨b⟩ ↦ sound b
+theorem sound! : T ⊢ σ → T ⊨[Struc.{v, u} L] σ := fun ⟨b⟩ ↦ sound b
 
-theorem smallSound : T ⊢ σ → T ⊨ σ := sound
+theorem smallSound : T ⊢! σ → T ⊨ σ := sound
 
-theorem smallSound! : T ⊢! σ → T ⊨ σ := sound!
+theorem smallSound! : T ⊢ σ → T ⊨ σ := sound!
 
 instance (T : Theory L) : Sound T (Semantics.models (Struc.{v, u} L) T) := ⟨sound!⟩
 
 lemma models_of_subtheory {T U : Theory L} [U ⪯ T] {M : Type*} [Structure L M] [Nonempty M] (hM : M ⊧ₘ* T) : M ⊧ₘ* U :=
   ⟨ fun {φ} hp ↦ by
-    have : T ⊢! φ := (inferInstanceAs (U ⪯ T)).pbl (Entailment.by_axm _ hp)
+    have : T ⊢ φ := (inferInstanceAs (U ⪯ T)).pbl (Entailment.by_axm _ hp)
     exact sound! this hM ⟩
 
 lemma consistent_of_satidfiable (h : Semantics.Satisfiable (Struc.{v, u} L) T) : Entailment.Consistent T :=
@@ -93,7 +93,7 @@ lemma unprovable_of_countermodel {M : Type*} [s : Structure L M] [Nonempty M] [h
   intro h
   exact c (h hM)
 
-lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : T ⊢! σ) :
+lemma models_of_provable {M : Type*} [Nonempty M] [Structure L M] (hT : M ⊧ₘ* T) (h : T ⊢ σ) :
     M ⊧ₘ σ := consequence_iff.mp (sound! h) M inferInstance
 
 end sound

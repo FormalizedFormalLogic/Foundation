@@ -123,9 +123,9 @@ lemma truthlemma_lemma2
       replace := axiomGrz! ⨀ this;
       replace := Context.nec! this;
       replace := Context.boxbox_in_context_to_box this;
-      replace : X.1.toSet.prebox.box.box *⊢[𝓢]! □ψ := Context.weakening! ?_ this;
+      replace : X.1.toSet.prebox.box.box *⊢[𝓢] □ψ := Context.weakening! ?_ this;
       . replace := Context.boxbox_in_context_to_box this;
-        replace : X *⊢[𝓢]! □ψ := Context.weakening! ?_ this;
+        replace : X *⊢[𝓢] □ψ := Context.weakening! ?_ this;
         . exact membership_iff (subformulasGrz.mem_of_mem_subformula hψ₁) |>.mpr this;
         . intro ξ hξ;
           obtain ⟨ξ, hξ, rfl⟩ := hξ;
@@ -145,7 +145,7 @@ lemma truthlemma_lemma2
         tauto;
 
 omit [Consistent 𝓢] in
-lemma truthlemma_lemma3 : 𝓢 ⊢! (φ ⋏ □(φ ➝ □φ)) ➝ □φ := by
+lemma truthlemma_lemma3 : 𝓢 ⊢ (φ ⋏ □(φ ➝ □φ)) ➝ □φ := by
   refine C!_trans ?_ $ inner_mdp! (𝓢 := 𝓢) (φ := φ) (ψ := □φ);
   apply CKK!_of_C!';
   exact axiomT!;
@@ -200,10 +200,10 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
             . apply hY.2;
               simp;
             . by_contra hC;
-              have : ↑X *⊢[𝓢]! ψ := membership_iff (by grind) |>.mp w;
-              have : ↑X *⊢[𝓢]! □(ψ ➝ □ψ) := membership_iff (by simp; right; assumption) |>.mp hC;
-              have : ↑X *⊢[𝓢]! (ψ ⋏ □(ψ ➝ □ψ)) ➝ □ψ := Context.of! $ truthlemma_lemma3;
-              have : ↑X *⊢[𝓢]! □ψ := this ⨀ K!_intro (by assumption) (by assumption);
+              have : ↑X *⊢[𝓢] ψ := membership_iff (by grind) |>.mp w;
+              have : ↑X *⊢[𝓢] □(ψ ➝ □ψ) := membership_iff (by simp; right; assumption) |>.mp hC;
+              have : ↑X *⊢[𝓢] (ψ ⋏ □(ψ ➝ □ψ)) ➝ □ψ := Context.of! $ truthlemma_lemma3;
+              have : ↑X *⊢[𝓢] □ψ := this ⨀ K!_intro (by assumption) (by assumption);
               have : □ψ ∈ X := membership_iff (by grind) |>.mpr this;
               contradiction;
         . apply ih (by grind) |>.not.mpr;
@@ -219,8 +219,8 @@ lemma truthlemma {X : (miniCanonicalModel 𝓢 φ).World} (q_sub : ψ ∈ φ.sub
         . exact ih (by grind) |>.not.mpr w;
     . intro h Y RXY;
       apply ih (by grind) |>.mpr;
-      have : ↑Y *⊢[𝓢]! □ψ ➝ ψ := Context.of! $ axiomT!;
-      have : ↑Y *⊢[𝓢]! ψ := this ⨀ (membership_iff (by grind) |>.mp (RXY.1 ψ (by simp; grind) h));
+      have : ↑Y *⊢[𝓢] □ψ ➝ ψ := Context.of! $ axiomT!;
+      have : ↑Y *⊢[𝓢] ψ := this ⨀ (membership_iff (by grind) |>.mp (RXY.1 ψ (by simp; grind) h));
       exact membership_iff (by grind) |>.mpr this;
 
 lemma complete_of_mem_miniCanonicalFrame

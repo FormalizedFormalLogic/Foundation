@@ -322,29 +322,29 @@ namespace Logic
 
 variable {m : Modality} {L : Logic _} [L.IsNormal] {φ ψ : Formula ℕ} {s : Substitution ℕ}
 
-lemma modality_congruence (h : L ⊢! φ ⭤ ψ) : L ⊢! (m φ) ⭤ (m ψ) := by
+lemma modality_congruence (h : L ⊢ φ ⭤ ψ) : L ⊢ (m φ) ⭤ (m ψ) := by
   induction m with
   | empty => simpa [-iff_provable];
   | box m' ih => apply box_congruence! ih;
   | dia m' ih => apply dia_congruence! ih;
   | neg m' ih => apply neg_congruence! ih;
 
-lemma E_subst_attachmodality : L ⊢! ((m φ)⟦s⟧) ⭤ (m (φ⟦s⟧)) := by
+lemma E_subst_attachmodality : L ⊢ ((m φ)⟦s⟧) ⭤ (m (φ⟦s⟧)) := by
   induction m with
   | empty => simp;
   | box m' ih => apply box_congruence! ih;
   | dia m' ih => apply dia_congruence! ih;
   | neg m' ih => apply neg_congruence! ih;
 
-lemma C_subst_attachmodality_mp : L ⊢! ((m φ)⟦s⟧) ➝ (m (φ⟦s⟧)) := by
+lemma C_subst_attachmodality_mp : L ⊢ ((m φ)⟦s⟧) ➝ (m (φ⟦s⟧)) := by
   apply C_of_E_mp! E_subst_attachmodality;
 
-lemma C_subst_attachmodality_mpr : L ⊢! (m (φ⟦s⟧)) ➝ ((m φ)⟦s⟧) := by
+lemma C_subst_attachmodality_mpr : L ⊢ (m (φ⟦s⟧)) ➝ ((m φ)⟦s⟧) := by
   apply C_of_E_mpr! E_subst_attachmodality;
 
-lemma attachmodality_subst_of_subst_attachmodality : L ⊢! (m φ)⟦s⟧ → L ⊢! m (φ⟦s⟧) := mdp! $ C_subst_attachmodality_mp
+lemma attachmodality_subst_of_subst_attachmodality : L ⊢ (m φ)⟦s⟧ → L ⊢ m (φ⟦s⟧) := mdp! $ C_subst_attachmodality_mp
 
-lemma subst_attachmodality_of_attachmodality_subst : L ⊢! m (φ⟦s⟧) → L ⊢! (m φ)⟦s⟧ := mdp! $ C_subst_attachmodality_mpr
+lemma subst_attachmodality_of_attachmodality_subst : L ⊢ m (φ⟦s⟧) → L ⊢ (m φ)⟦s⟧ := mdp! $ C_subst_attachmodality_mpr
 
 end Logic
 
@@ -356,7 +356,7 @@ open Formula
 variable {L : Logic ℕ} [L.IsNormal] {m₁ m₂ : Modality}
 
 class Translation (L : Logic _) (m₁ m₂ : Modality) where
-  translate : ∀ a,  L ⊢! (m₁ (.atom a)) ➝ (m₂ (.atom a))
+  translate : ∀ a,  L ⊢ (m₁ (.atom a)) ➝ (m₂ (.atom a))
 
 notation:90 M₁ " ⤳[" L "] " M₂ => Translation L M₁ M₂
 
@@ -374,7 +374,7 @@ instance : IsTrans _ (· ⤳[L] ·) where
     exact C!_trans (T₁₂.translate a) (T₂₃.translate a);
 
 class Equivalence (L : Logic ℕ) (M₁ M₂ : Modality) where
-  equivalent : ∀ a, L ⊢! (M₁ (.atom a)) ⭤ (M₂ (.atom a))
+  equivalent : ∀ a, L ⊢ (M₁ (.atom a)) ⭤ (M₂ (.atom a))
 
 notation M₁ " ≅[" L "] " M₂ => Equivalence L M₁ M₂
 
@@ -422,13 +422,13 @@ instance : IsTrans _ (· ≅[L] ·) := ⟨by
 instance : IsEquiv _ (· ≅[L] ·) where
 
 
-lemma Translation.translate_fml [m₁ ⤳[L] m₂] (φ : Formula _) : L ⊢! m₁ φ ➝ m₂ φ := by
+lemma Translation.translate_fml [m₁ ⤳[L] m₂] (φ : Formula _) : L ⊢ m₁ φ ➝ m₂ φ := by
   let s : Substitution ℕ := λ a => if a = 0 then φ else (.atom a);
   apply C!_replace ?_ ?_ $ L.subst! (Translation.translate (L := L) (m₁ := m₁) (m₂ := m₂) 0) (s := s);
   . simpa [s] using L.C_subst_attachmodality_mpr (s := s) (φ := (.atom 0));
   . simpa [s] using L.C_subst_attachmodality_mp (s := s) (φ := (.atom 0));
 
-def translation_of_axiomInstance {a : ℕ} (h : L ⊢! (m₁ a) ➝ (m₂ a)) : m₁ ⤳[L] m₂ := ⟨by
+def translation_of_axiomInstance {a : ℕ} (h : L ⊢ (m₁ a) ➝ (m₂ a)) : m₁ ⤳[L] m₂ := ⟨by
   intro b;
   let s : Substitution ℕ := λ c => if c = a then b else c;
   apply C!_replace ?_ ?_ $ L.subst! (s := s) h;
@@ -444,14 +444,14 @@ lemma translation_expand_right {L : Logic _} [L.IsNormal] (m₁ m₂ m) [m₁ �
 lemma translation_expand_left {L : Logic _} [L.IsNormal] (m₁ m₂ m) [m₁ ⤳[L] m₂] [m ⤳[L] (-)] : (m + m₁) ⤳[L] (m₂) := by
   constructor;
   intro a;
-  have H₁ : L ⊢! (m + m₁) (atom a) ➝ m₁ (atom a) := by simpa using Translation.translate_fml (m₁ := m) (m₂ := (-)) (m₁ (.atom a));
-  have H₂ : L ⊢! m₁ (atom a) ➝ m₂ (atom a) := Translation.translate_fml (.atom a);
+  have H₁ : L ⊢ (m + m₁) (atom a) ➝ m₁ (atom a) := by simpa using Translation.translate_fml (m₁ := m) (m₂ := (-)) (m₁ (.atom a));
+  have H₂ : L ⊢ m₁ (atom a) ➝ m₂ (atom a) := Translation.translate_fml (.atom a);
   exact C!_trans H₁ H₂;
 
-lemma Equivalence.equivalent_fml [m₁ ≅[L] m₂] (φ : Formula _) : L ⊢! m₁ φ ⭤ m₂ φ := by
+lemma Equivalence.equivalent_fml [m₁ ≅[L] m₂] (φ : Formula _) : L ⊢ m₁ φ ⭤ m₂ φ := by
   apply E!_intro <;> apply Translation.translate_fml;
 
-def equivalence_of_axiomInstance {a : ℕ} (h : L ⊢! (m₁ a) ⭤ (m₂ a)) : m₁ ≅[L] m₂ := by
+def equivalence_of_axiomInstance {a : ℕ} (h : L ⊢ (m₁ a) ⭤ (m₂ a)) : m₁ ≅[L] m₂ := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
   . apply translation_of_axiomInstance (a := a);

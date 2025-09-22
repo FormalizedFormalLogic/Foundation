@@ -40,7 +40,7 @@ end Ver
 
 namespace K4
 
-lemma provable_trivTranslated_Cl : Hilbert.K4 ⊢! φ → Hilbert.Cl ⊢! φᵀ.toPropFormula := by
+lemma provable_trivTranslated_Cl : Hilbert.K4 ⊢ φ → Hilbert.Cl ⊢ φᵀ.toPropFormula := by
   intro h;
   apply Logic.Triv.iff_provable_Cl.mp;
   apply WeakerThan.pbl h;
@@ -66,7 +66,7 @@ instance : Hilbert.K4 ⪱ Hilbert.GL := by
 
 namespace GL
 
-lemma provable_verTranslated_Cl : Hilbert.GL ⊢! φ → Hilbert.Cl ⊢! φⱽ.toPropFormula := by
+lemma provable_verTranslated_Cl : Hilbert.GL ⊢ φ → Hilbert.Cl ⊢ φⱽ.toPropFormula := by
   intro h;
   induction h using Hilbert.Normal.rec! with
     | axm _ a =>

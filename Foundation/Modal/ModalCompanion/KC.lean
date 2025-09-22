@@ -23,8 +23,8 @@ open Modal.Formula.Kripke
 section S4Point2
 
 open Formula.Kripke in
-lemma Logic.S4Point2.goedelTranslated_axiomWLEM : Hilbert.S4Point2 ⊢! □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
-  suffices Hilbert.S4Point2 ⊢! □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
+lemma Logic.S4Point2.goedelTranslated_axiomWLEM : Hilbert.S4Point2 ⊢ □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
+  suffices Hilbert.S4Point2 ⊢ □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
     apply A!_replace this;
     . apply axiomK'!;
       apply nec!;
@@ -67,7 +67,7 @@ instance : Entailment.HasAxiomPoint2 (smallestMC 𝐊𝐂) where
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply Modal.Logic.subst! (L := (smallestMC 𝐊𝐂)) (φ := Modal.Axioms.Point2 (.atom 0)) (s := λ a => φ);
-    have : (smallestMC 𝐊𝐂) ⊢! □(∼□(.atom 0)) ⋎ □(∼□(∼□(.atom 0))) := by
+    have : (smallestMC 𝐊𝐂) ⊢ □(∼□(.atom 0)) ⋎ □(∼□(∼□(.atom 0))) := by
       apply Logic.sumNormal.mem₂!;
       use Axioms.WeakLEM (.atom 0);
       constructor;
@@ -144,7 +144,7 @@ end S4Point2
 
 section GrzPoint2
 
-lemma Logic.gGrzPoint2_of_KC : 𝐊𝐂 ⊢! φ → Modal.GrzPoint2 ⊢! φᵍ := by
+lemma Logic.gGrzPoint2_of_KC : 𝐊𝐂 ⊢ φ → Modal.GrzPoint2 ⊢ φᵍ := by
   intro h;
   apply WeakerThan.pbl $ modalCompanion_KC_S4Point2.companion.mp h;
 

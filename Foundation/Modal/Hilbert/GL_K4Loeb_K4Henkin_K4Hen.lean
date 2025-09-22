@@ -12,12 +12,12 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 lemma Hilbert.equiv_Normal_WithLoeb
   {HN : Hilbert.Normal α} {HL : Hilbert.WithLoeb α}
   [LoebRule HN]
-  (provable_HN : ∀ φ ∈ HN.axiomInstances, HL ⊢! φ)
-  (provable_HL : ∀ φ ∈ HL.axiomInstances, HN ⊢! φ)
+  (provable_HN : ∀ φ ∈ HN.axiomInstances, HL ⊢ φ)
+  (provable_HL : ∀ φ ∈ HL.axiomInstances, HN ⊢ φ)
   : HN ≊ HL := by
   apply Entailment.Equiv.iff.mpr;
   intro φ;
-  suffices HN ⊢! φ ↔ HL ⊢! φ by simpa [Entailment.theory, Set.mem_setOf_eq];
+  suffices HN ⊢ φ ↔ HL ⊢ φ by simpa [Entailment.theory, Set.mem_setOf_eq];
   constructor;
   . intro h;
     induction h using Hilbert.Normal.rec! with
@@ -45,24 +45,24 @@ lemma Hilbert.equiv_Normal_WithLoeb
 
 lemma Hilbert.equiv_logic_Normal_WithLoeb
   {HN : Hilbert.Normal α} {HL : Hilbert.WithLoeb α} [LoebRule HN]
-  (provable_HN : ∀ φ ∈ HN.axiomInstances, HL ⊢! φ)
-  (provable_HL : ∀ φ ∈ HL.axiomInstances, HN ⊢! φ)
+  (provable_HN : ∀ φ ∈ HN.axiomInstances, HL ⊢ φ)
+  (provable_HL : ∀ φ ∈ HL.axiomInstances, HN ⊢ φ)
   : HN.logic ≊ HL.logic := by
   apply Entailment.Equiv.iff.mpr;
   intro φ;
-  suffices HN ⊢! φ ↔ HL ⊢! φ by simpa [Modal.Logic.iff_provable, Entailment.theory, Set.mem_setOf_eq];
+  suffices HN ⊢ φ ↔ HL ⊢ φ by simpa [Modal.Logic.iff_provable, Entailment.theory, Set.mem_setOf_eq];
   exact Entailment.Equiv.iff.mp (Hilbert.equiv_Normal_WithLoeb provable_HN provable_HL) φ;
 
 
 lemma Hilbert.equiv_Normal_WithHenkin
   {HN : Hilbert.Normal α} {HH : Hilbert.WithHenkin α}
   [HenkinRule HN]
-  (provable_HN : ∀ φ ∈ HN.axiomInstances, HH ⊢! φ)
-  (provable_HH : ∀ φ ∈ HH.axiomInstances, HN ⊢! φ)
+  (provable_HN : ∀ φ ∈ HN.axiomInstances, HH ⊢ φ)
+  (provable_HH : ∀ φ ∈ HH.axiomInstances, HN ⊢ φ)
   : HN ≊ HH := by
   apply Entailment.Equiv.iff.mpr;
   intro φ;
-  suffices HN ⊢! φ ↔ HH ⊢! φ by simpa [Entailment.theory, Set.mem_setOf_eq];
+  suffices HN ⊢ φ ↔ HH ⊢ φ by simpa [Entailment.theory, Set.mem_setOf_eq];
   constructor;
   . intro h;
     induction h using Hilbert.Normal.rec! with
@@ -91,21 +91,21 @@ lemma Hilbert.equiv_Normal_WithHenkin
 lemma Hilbert.equiv_logic_Normal_WithHenkin
   {HN : Hilbert.Normal α} {HH : Hilbert.WithHenkin α}
   [HenkinRule HN]
-  (provable_HN : ∀ φ ∈ HN.axiomInstances, HH ⊢! φ)
-  (provable_HH : ∀ φ ∈ HH.axiomInstances, HN ⊢! φ)
+  (provable_HN : ∀ φ ∈ HN.axiomInstances, HH ⊢ φ)
+  (provable_HH : ∀ φ ∈ HH.axiomInstances, HN ⊢ φ)
   : HN.logic ≊ HH.logic := by
   apply Entailment.Equiv.iff.mpr;
   intro φ;
-  suffices HN ⊢! φ ↔ HH ⊢! φ by simpa [Modal.Logic.iff_provable, Entailment.theory, Set.mem_setOf_eq];
+  suffices HN ⊢ φ ↔ HH ⊢ φ by simpa [Modal.Logic.iff_provable, Entailment.theory, Set.mem_setOf_eq];
   exact Entailment.Equiv.iff.mp (Hilbert.equiv_Normal_WithHenkin provable_HN provable_HH) φ;
 
 
 
 theorem provable_GL_TFAE : [
-  Hilbert.GL ⊢! φ,
-  Hilbert.K4Loeb ⊢! φ,
-  Hilbert.K4Henkin ⊢! φ,
-  Hilbert.K4Hen ⊢! φ
+  Hilbert.GL ⊢ φ,
+  Hilbert.K4Loeb ⊢ φ,
+  Hilbert.K4Henkin ⊢ φ,
+  Hilbert.K4Hen ⊢ φ
 ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;

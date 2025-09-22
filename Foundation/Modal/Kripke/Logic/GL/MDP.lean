@@ -130,14 +130,14 @@ end mdpCounterexmpleModel
 end Kripke
 
 
-lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL]! □φ₁ ⋎ □φ₂) : (X.box) *⊢[Modal.GL]! □φ₁ ∨ (X.box) *⊢[Modal.GL]! □φ₂ := by
+lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL] □φ₁ ⋎ □φ₂) : (X.box) *⊢[Modal.GL] □φ₁ ∨ (X.box) *⊢[Modal.GL] □φ₂ := by
   obtain ⟨Δ, sΓ, hΓ⟩ := Context.provable_iff_boxed.mp h;
 
-  have : Modal.GL ⊢! ⋀Δ.box ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
-  have : Modal.GL ⊢! □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
+  have : Modal.GL ⊢ ⋀Δ.box ➝ (□φ₁ ⋎ □φ₂) := FiniteContext.provable_iff.mp hΓ;
+  have : Modal.GL ⊢ □⋀Δ ➝ (□φ₁ ⋎ □φ₂) := C!_trans (by simp) this;
   generalize e : ⋀Δ = c at this;
 
-  have : (Modal.GL ⊢! ⊡c ➝ φ₁) ∨ (Modal.GL ⊢! ⊡c ➝ φ₂) := by
+  have : (Modal.GL ⊢ ⊡c ➝ φ₁) ∨ (Modal.GL ⊢ ⊡c ➝ φ₂) := by
     by_contra! hC;
     have ⟨h₁, h₂⟩ : (Modal.GL ⊬ ⊡c ➝ φ₁) ∧ (Modal.GL ⊬ ⊡c ➝ φ₂) := hC;
 
@@ -193,8 +193,8 @@ lemma MDP_Aux {X : Set _} (h : (X.box) *⊢[Modal.GL]! □φ₁ ⋎ □φ₂) : 
     tauto;
   };
 
-theorem modal_disjunctive (h : Modal.GL ⊢! □φ₁ ⋎ □φ₂) : Modal.GL ⊢! φ₁ ∨ Modal.GL ⊢! φ₂ := by
-  have : ∅ *⊢[Modal.GL]! □φ₁ ∨ ∅ *⊢[Modal.GL]! □φ₂ := by simpa using MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
+theorem modal_disjunctive (h : Modal.GL ⊢ □φ₁ ⋎ □φ₂) : Modal.GL ⊢ φ₁ ∨ Modal.GL ⊢ φ₂ := by
+  have : ∅ *⊢[Modal.GL] □φ₁ ∨ ∅ *⊢[Modal.GL] □φ₂ := by simpa using MDP_Aux (X := ∅) (φ₁ := φ₁) (φ₂ := φ₂) $ Context.of! h;
   rcases this with (h | h) <;> {
     have := unnec! $ Context.emptyPrf! h;
     tauto;

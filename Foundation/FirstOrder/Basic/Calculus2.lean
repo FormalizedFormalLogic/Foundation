@@ -34,7 +34,7 @@ scoped infix:45 " ⟹₂! " => Derivable2
 
 abbrev Derivable2SingleConseq (𝓢 : SyntacticFormulas L) (φ : SyntacticFormula L) : Prop := 𝓢 ⟹₂! {φ}
 
-scoped infix: 45 " ⊢₂! " => Derivable2SingleConseq
+scoped infix: 45 " ⊢!₂! " => Derivable2SingleConseq
 
 variable {𝓢 : SyntacticFormulas L}
 
@@ -95,7 +95,7 @@ lemma derivable_iff_derivable2 {Γ : List (SyntacticFormula L)} : 𝓢 ⟹! Γ �
   · rintro ⟨d⟩; exact ⟨by simpa using Derivation.toDerivation2 𝓢 d⟩
   · rintro ⟨d⟩; exact ⟨.wk d.toDerivation (by intro x; simp)⟩
 
-def provable_iff_derivable2 {φ} : 𝓢 ⊢! φ ↔ 𝓢 ⊢₂! φ := derivable_iff_derivable2
+def provable_iff_derivable2 {φ} : 𝓢 ⊢ φ ↔ 𝓢 ⊢!₂! φ := derivable_iff_derivable2
 
 end derivation2
 

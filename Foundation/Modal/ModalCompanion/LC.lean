@@ -15,19 +15,19 @@ open Modal.Formula.Kripke
 
 section S4Point3
 
-lemma S4Point3.goedelTranslated_axiomDummett : Hilbert.S4Point3 ⊢! □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
+lemma S4Point3.goedelTranslated_axiomDummett : Hilbert.S4Point3 ⊢ □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
   apply axiomK'!;
   apply nec!;
   apply C!_swap;
   apply deduct'!;
   apply deduct!;
-  have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3]! ψᵍ ➝ □ψᵍ := of'! $ goedelTranslated_axiomTc;
-  have h₂ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3]! ψᵍ := by_axm!;
-  have h₃ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3]! □ψᵍ ➝ χᵍ := by_axm!;
+  have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3] ψᵍ ➝ □ψᵍ := of'! $ goedelTranslated_axiomTc;
+  have h₂ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3] ψᵍ := by_axm!;
+  have h₃ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3] □ψᵍ ➝ χᵍ := by_axm!;
   exact h₃ ⨀ (h₁ ⨀ h₂);
 
 @[simp]
-lemma S4.CCLL_CCL : Modal.S4 ⊢! □(□φ ➝ □ψ) ➝ □(□φ ➝ ψ) := by
+lemma S4.CCLL_CCL : Modal.S4 ⊢ □(□φ ➝ □ψ) ➝ □(□φ ➝ ψ) := by
   apply Complete.complete (𝓜 := FrameClass.S4);
   rintro F ⟨_, _⟩ V x h₁ y Rxy h₂;
   apply @h₁ y Rxy h₂;
@@ -42,7 +42,7 @@ instance : Entailment.HasAxiomPoint3 (smallestMC 𝐋𝐂) where
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply Modal.Logic.subst! (L := (smallestMC 𝐋𝐂)) (φ := Modal.Axioms.Point3 (.atom 0) (.atom 1)) (s := λ a => match a with | 0 => φ | 1 => ψ | _ => .atom a);
-    have : (smallestMC 𝐋𝐂) ⊢! □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) := by
+    have : (smallestMC 𝐋𝐂) ⊢ □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) := by
       apply Logic.sumNormal.mem₂!;
       use Axioms.Dummett (.atom 0) (.atom 1);
       constructor;
@@ -103,7 +103,7 @@ end S4Point3
 
 section GrzPoint3
 
-lemma Logic.gGrzPoint3_of_LC : 𝐋𝐂 ⊢! φ → Modal.GrzPoint3 ⊢! φᵍ := by
+lemma Logic.gGrzPoint3_of_LC : 𝐋𝐂 ⊢ φ → Modal.GrzPoint3 ⊢ φᵍ := by
   intro h;
   apply WeakerThan.pbl $ modalCompanion_LC_S4Point3.companion.mp h;
 
@@ -149,7 +149,7 @@ end GrzPoint3
 
 section boxdot
 
-theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : 𝐋𝐂 ⊢! φ ↔ Modal.GLPoint3 ⊢! φᵍᵇ :=
+theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : 𝐋𝐂 ⊢ φ ↔ Modal.GLPoint3 ⊢ φᵍᵇ :=
   Iff.trans modalCompanion_LC_GrzPoint3.companion iff_boxdot_GLPoint3_GrzPoint3.symm
 
 end boxdot

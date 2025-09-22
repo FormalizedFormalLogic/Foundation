@@ -9,7 +9,7 @@ open ProvabilityLogic
 open Entailment
 open Kripke Formula.Kripke
 
-lemma iff_provable_GL_provable_box_S {A : Modal.Formula _} : Modal.GL ⊢! A ↔ Modal.S ⊢! □A := by
+lemma iff_provable_GL_provable_box_S {A : Modal.Formula _} : Modal.GL ⊢ A ↔ Modal.S ⊢ □A := by
   constructor;
   . intro h;
     apply Logic.sumQuasiNormal.mem₁!;

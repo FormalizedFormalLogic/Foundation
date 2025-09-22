@@ -15,7 +15,7 @@ open Modal.Kripke
 
 section S4
 
-lemma Logic.gS4_of_Int : Hilbert.Int ⊢! φ → Hilbert.S4 ⊢! φᵍ := by
+lemma Logic.gS4_of_Int : Hilbert.Int ⊢ φ → Hilbert.S4 ⊢ φᵍ := by
   apply provable_goedelTranslated_of_provable Hilbert.Int Hilbert.S4;
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
@@ -66,7 +66,7 @@ end S4
 
 section Grz
 
-lemma Logic.gGrz_of_Int : Hilbert.Int ⊢! φ → Hilbert.Grz ⊢! φᵍ := λ h ↦ WeakerThan.pbl $ gS4_of_Int h
+lemma Logic.gGrz_of_Int : Hilbert.Int ⊢ φ → Hilbert.Grz ⊢ φᵍ := λ h ↦ WeakerThan.pbl $ gS4_of_Int h
 
 lemma Logic.Grz.is_largestMC_of_Int : Modal.Grz = (Logic.largestMC 𝐈𝐧𝐭) := by
   apply Logic.iff_equal_provable_equiv.mpr;
@@ -107,15 +107,15 @@ end Grz
 
 section glivenko
 
-lemma Logic.iff_provable_Cl_provable_dia_gS4 : 𝐂𝐥 ⊢! φ ↔ Hilbert.S4 ⊢! ◇φᵍ := by
+lemma Logic.iff_provable_Cl_provable_dia_gS4 : 𝐂𝐥 ⊢ φ ↔ Hilbert.S4 ⊢ ◇φᵍ := by
   constructor;
   . intro h;
-    suffices Hilbert.S4 ⊢! □◇φᵍ by exact axiomT'! this;
+    suffices Hilbert.S4 ⊢ □◇φᵍ by exact axiomT'! this;
     have := modalCompanion_Int_S4.companion.mp $ iff_negneg_Int_Cl.mpr h;
     simp only [goedelTranslate, Hilbert.Normal.iff_logic_provable_provable] at this;
     cl_prover [this];
   . intro h;
-    replace h : Hilbert.S4 ⊢! □◇φᵍ := nec! h;
+    replace h : Hilbert.S4 ⊢ □◇φᵍ := nec! h;
     apply iff_negneg_Int_Cl.mp;
     apply modalCompanion_Int_S4.companion.mpr;
     simp only [Hilbert.Normal.iff_logic_provable_provable];
@@ -129,7 +129,7 @@ section boxdot
 /--
   Chagrov & Zakharyaschev 1997, Theorem 3.89
 -/
-theorem embedding_Int_GL {φ : Propositional.Formula ℕ} : 𝐈𝐧𝐭 ⊢! φ ↔ Modal.GL ⊢! φᵍᵇ:= by
+theorem embedding_Int_GL {φ : Propositional.Formula ℕ} : 𝐈𝐧𝐭 ⊢ φ ↔ Modal.GL ⊢ φᵍᵇ:= by
   exact Iff.trans modalCompanion_Int_Grz.companion iff_boxdot_GL_Grz.symm
 
 end boxdot

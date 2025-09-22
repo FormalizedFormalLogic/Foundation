@@ -146,7 +146,7 @@ lemma consequence_of' (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑ�
   exact H M
 
 lemma provable_of (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
-    T ⊢! φ := complete <| consequence_of' _ _ H
+    T ⊢ φ := complete <| consequence_of' _ _ H
 
 end SetTheory
 

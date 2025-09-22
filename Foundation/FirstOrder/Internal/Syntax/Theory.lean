@@ -26,7 +26,7 @@ instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.�
   · intro v
     have : V ⊧/![v 0] (Theory.Δ₁.ch T).sigma.val ↔ V ⊧/![v 0] (Theory.Δ₁.ch T).pi.val := by
       have := (consequence_iff (T := 𝗜𝚺₁)).mp (sound! <| FirstOrder.Theory.Δ₁.isDelta1 (T := T)) V inferInstance
-      simp [models_iff] at this ⊢
+      simp [models_iff] at this ⊢!
       simpa [Matrix.constant_eq_singleton] using this ![v 0]
     rwa [show v = ![v 0] from Matrix.fun_eq_vec_one]
   · intro v; simp [←Matrix.fun_eq_vec_one, Theory.Δ₁Class]

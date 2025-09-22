@@ -24,7 +24,7 @@ lemma eq_hilbert_logic_frameClass_logic {H : Hilbert.Normal ℕ} {C : FrameClass
 namespace Hilbert.Kripke
 
 
-lemma soundness_of_validates_axioms (hV : C ⊧* H.axioms) : H ⊢! φ → C ⊧ φ := by
+lemma soundness_of_validates_axioms (hV : C ⊧* H.axioms) : H ⊢ φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.Normal.rec! with
   | @axm φ s h =>
@@ -63,10 +63,10 @@ instance [Sound H C] : Sound H.logic C := by
 instance [Complete H C] : Complete H.logic C := by
   constructor;
   intro φ hφ;
-  suffices H ⊢! φ by grind;
+  suffices H ⊢ φ by grind;
   apply Complete.complete hφ;
 
-lemma soundness_of_frame_validates_axioms (hV : F ⊧* H.axioms) : H ⊢! φ → F ⊧ φ := by
+lemma soundness_of_frame_validates_axioms (hV : F ⊧* H.axioms) : H ⊢ φ → F ⊧ φ := by
   intro hφ;
   induction hφ using Hilbert.Normal.rec! with
   | axm s h =>
@@ -105,7 +105,7 @@ instance [Sound H F] : Sound H.logic F := by
 instance [Complete H F] : Complete H.logic F := by
   constructor;
   intro φ hφ;
-  suffices H ⊢! φ by grind;
+  suffices H ⊢ φ by grind;
   apply Complete.complete hφ;
 
 end Hilbert.Kripke

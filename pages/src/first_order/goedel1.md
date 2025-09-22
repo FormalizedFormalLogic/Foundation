@@ -5,7 +5,7 @@ Otherwise, $\mathcal{S}$ is _incomplete_.
 
 ```lean
 def System.Complete {F S} [System F S] [LogicalConnective F] (𝓢 : S) : Prop :=
-    ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ~f
+    ∀ f, 𝓢 ⊢ f ∨ 𝓢 ⊢ ~f
 ```
 - [System.Complete](https://formalizedformallogic.github.io/Incompleteness/docs/Logic/Logic/System.html#LO.System.Complete)
 
@@ -21,7 +21,7 @@ Let $T$ be a $\Delta_1$-definable arithmetic theory, stronger than $\mathsf{R}_0
 lemma re_complete
     [𝗥₀ ≼ T] [Sigma1Sound T]
     {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
-    p x ↔ T ⊢! (codeOfRePred p)/[‘↑x’]
+    p x ↔ T ⊢ (codeOfRePred p)/[‘↑x’]
 ```
 - [re_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/R0/Representation.html#LO.FirstOrder.Arithmetic.re_complete)
 

@@ -8,7 +8,7 @@ variable {α}
 
 
 open Modal.Entailment in
-lemma normal_provable_of_K_provable {L : Logic ℕ} [L.IsNormal] (h : Modal.K ⊢! φ) : L ⊢! φ := by
+lemma normal_provable_of_K_provable {L : Logic ℕ} [L.IsNormal] (h : Modal.K ⊢ φ) : L ⊢ φ := by
   simp only [Hilbert.Normal.iff_logic_provable_provable] at h;
   induction h using Hilbert.Normal.rec! with
   | axm s h => rcases h with rfl; simp;
@@ -23,7 +23,7 @@ end Formula
 
 
 inductive GlobalConsequence (L : Logic α) : Set (Formula α) → Formula α → Type*
-  | protected thm {X φ}      : L ⊢! φ → GlobalConsequence L X φ
+  | protected thm {X φ}      : L ⊢ φ → GlobalConsequence L X φ
   | protected ctx {X φ}      : φ ∈ X → GlobalConsequence L X φ
   | protected mdp {X Y φ ψ}  : GlobalConsequence L X (φ ➝ ψ) → GlobalConsequence L Y φ → GlobalConsequence L (X ∪ Y) ψ
   | protected nec {X φ}      : GlobalConsequence L X φ → GlobalConsequence L X (□φ)
@@ -53,27 +53,27 @@ instance [L.IsNormal] : Entailment.K (F := Formula α) (S := Logic α × Set (Fo
     apply GlobalConsequence.thm;
     simp;
 
-protected lemma thm! (h : L ⊢! φ) : (L, X) ⊢! φ := ⟨GlobalConsequence.thm h⟩
+protected lemma thm! (h : L ⊢ φ) : (L, X) ⊢ φ := ⟨GlobalConsequence.thm h⟩
 
-protected lemma ctx! (h : φ ∈ X) : (L, X) ⊢! φ := ⟨GlobalConsequence.ctx h⟩
+protected lemma ctx! (h : φ ∈ X) : (L, X) ⊢ φ := ⟨GlobalConsequence.ctx h⟩
 
 protected lemma rec!
-  {motive : (X : Set (Formula α)) → (φ : Formula α) → ((L, X) ⊢! φ) → Sort}
+  {motive : (X : Set (Formula α)) → (φ : Formula α) → ((L, X) ⊢ φ) → Sort}
   (ctx! : ∀ {X φ} (h : φ ∈ X), motive X φ ⟨GlobalConsequence.ctx h⟩)
-  (thm! : ∀ {X φ} (h : L ⊢! φ), motive X φ ⟨GlobalConsequence.thm h⟩)
+  (thm! : ∀ {X φ} (h : L ⊢ φ), motive X φ ⟨GlobalConsequence.thm h⟩)
   (mdp! : ∀ {X Y φ ψ}
-    {hφψ : (L, X) ⊢! φ ➝ ψ} {hφ : (L, Y) ⊢! φ},
+    {hφψ : (L, X) ⊢ φ ➝ ψ} {hφ : (L, Y) ⊢ φ},
     motive X (φ ➝ ψ) hφψ → motive Y φ hφ →
     motive (X ∪ Y) ψ ⟨GlobalConsequence.mdp hφψ.some hφ.some⟩
   )
   (nec! : ∀ {X φ}
-    {hφ : (L, X) ⊢! φ},
+    {hφ : (L, X) ⊢ φ},
     motive X φ hφ → motive X (□φ) ⟨GlobalConsequence.nec hφ.some⟩
   )
   (imply₁! : ∀ {X φ ψ}, motive X (Axioms.Imply₁ φ ψ) ⟨GlobalConsequence.imply₁ X φ ψ⟩)
   (imply₂! : ∀ {X φ ψ ξ}, motive X (Axioms.Imply₂ φ ψ ξ) ⟨GlobalConsequence.imply₂ X φ ψ ξ⟩)
   (ec! : ∀ {X φ ψ}, motive X (Axioms.ElimContra φ ψ) ⟨GlobalConsequence.ec X φ ψ⟩)
-  : ∀ {X : Set (Formula α)} {φ}, (d : (L, X) ⊢! φ) → motive X φ d := by
+  : ∀ {X : Set (Formula α)} {φ}, (d : (L, X) ⊢ φ) → motive X φ d := by
   rintro X φ ⟨d⟩;
   induction d with
   | ctx h => apply ctx! h;
@@ -91,7 +91,7 @@ variable {L : Logic ℕ} [L.IsNormal] {X Y : Set (Formula ℕ)} {φ ψ : Formula
 /--
   Jeřábek, Fact 2.7
 -/
-lemma iff_finite_boxlt_provable : ((L, X) ⊢! φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢! (□^≤[n] Γ.conj) ➝ φ) := by
+lemma iff_finite_boxlt_provable : ((L, X) ⊢ φ) ↔ (∃ Γ : Finset (Formula _), ∃ n, ↑Γ ⊆ X ∧ L ⊢ (□^≤[n] Γ.conj) ➝ φ) := by
   constructor;
   . intro h;
     induction h using GlobalConsequence.rec! with
@@ -113,8 +113,8 @@ lemma iff_finite_boxlt_provable : ((L, X) ⊢! φ) ↔ (∃ Γ : Finset (Formula
       constructor;
       . simp only [Finset.coe_union, Set.union_subset_iff];
         tauto_set;
-      . replace hφψ : L ⊢! (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ ➝ ψ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφψ;
-        replace hφ  : L ⊢! (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφ;
+      . replace hφψ : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ ➝ ψ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφψ;
+        replace hφ  : L ⊢ (□^≤[n + m](Δ₁ ∪ Δ₂).conj) ➝ φ := C!_trans (C!_trans (boxlt_lt! (by omega)) (boxlt_regularity! (CFConj_FConj!_of_subset (by simp)))) hφ;
         cl_prover [hφψ, hφ];
     | @nec! _ φ h ih =>
       obtain ⟨Δ, n, ⟨h₁, h₂⟩⟩ := ih;

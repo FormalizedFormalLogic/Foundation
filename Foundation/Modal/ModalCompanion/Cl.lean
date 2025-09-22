@@ -15,8 +15,8 @@ open Modal.Formula.Kripke
 
 namespace Propositional
 
-lemma Logic.Cl.smallestMC.mem_diabox_box : (smallestMC 𝐂𝐥) ⊢! (◇□(.atom 0) ➝ □(.atom 0)) := by
-  have : (smallestMC 𝐂𝐥) ⊢! □(.atom 0) ⋎ □(∼□(.atom 0)) := by
+lemma Logic.Cl.smallestMC.mem_diabox_box : (smallestMC 𝐂𝐥) ⊢ (◇□(.atom 0) ➝ □(.atom 0)) := by
+  have : (smallestMC 𝐂𝐥) ⊢ □(.atom 0) ⋎ □(∼□(.atom 0)) := by
     apply Logic.sumNormal.mem₂!;
     use Axioms.LEM (.atom 0);
     constructor;
@@ -108,7 +108,7 @@ end S5
 
 section S5Grz
 
-lemma Logic.gS5Grz_of_Cl : 𝐂𝐥 ⊢! φ → Modal.S5Grz ⊢! φᵍ := by
+lemma Logic.gS5Grz_of_Cl : 𝐂𝐥 ⊢ φ → Modal.S5Grz ⊢ φᵍ := by
   intro h;
   apply WeakerThan.pbl $ modalCompanion_Cl_S5.companion.mp h;
 
@@ -161,7 +161,7 @@ end S5Grz
 
 section boxdot
 
-theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ ↔ Modal.Ver ⊢! φᵍᵇ :=
+theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢ φ ↔ Modal.Ver ⊢ φᵍᵇ :=
   Iff.trans ModalCompanion.companion Logic.iff_boxdotTranslated_Ver_Triv.symm
 
 end boxdot

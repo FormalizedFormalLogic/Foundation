@@ -24,11 +24,11 @@ instance : Modal.GL ⪯ Modal.GLPlusBoxBot n := by
   split <;> infer_instance;
 
 @[simp]
-lemma Logic.GLPlusBoxBot.boxbot {n : ℕ} : Modal.GLPlusBoxBot n ⊢! (□^[n]⊥) := by
+lemma Logic.GLPlusBoxBot.boxbot {n : ℕ} : Modal.GLPlusBoxBot n ⊢ (□^[n]⊥) := by
   apply Logic.sumQuasiNormal.mem₂!;
   tauto;
 
-lemma iff_provable_GLPlusBoxBot_provable_GL {n : ℕ} {φ} : Modal.GLPlusBoxBot n ⊢! φ ↔ Modal.GL ⊢! (□^[n]⊥) ➝ φ := by
+lemma iff_provable_GLPlusBoxBot_provable_GL {n : ℕ} {φ} : Modal.GLPlusBoxBot n ⊢ φ ↔ Modal.GL ⊢ (□^[n]⊥) ➝ φ := by
   constructor;
   . intro h;
     induction h using sumQuasiNormal.rec! with
@@ -37,7 +37,7 @@ lemma iff_provable_GLPlusBoxBot_provable_GL {n : ℕ} {φ} : Modal.GLPlusBoxBot 
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
     | subst ihφ => simpa using Logic.subst! _ ihφ;
   . intro h;
-    replace h : Modal.GLPlusBoxBot n ⊢! (□^[n]⊥) ➝ φ := sumQuasiNormal.mem₁! h;
+    replace h : Modal.GLPlusBoxBot n ⊢ (□^[n]⊥) ➝ φ := sumQuasiNormal.mem₁! h;
     exact h ⨀ (by simp);
 
 @[simp] lemma eq_GLPlusBoxBot_omega_GL : (Modal.GLPlusBoxBot ⊤) = Modal.GL := by simp [Modal.GLPlusBoxBot];
@@ -50,14 +50,14 @@ open LO.Entailment LO.Modal.Entailment
 lemma Logic.GLPlusBoxBot.weakerThan_succ {n : ℕ} : (Modal.GLPlusBoxBot (n + 1)) ⪯ (Modal.GLPlusBoxBot n) := by
   apply weakerThan_iff.mpr;
   intro φ;
-  suffices Modal.GL ⊢! □^[(n + 1)]⊥ ➝ φ → Modal.GL ⊢! □^[n]⊥ ➝ φ by
+  suffices Modal.GL ⊢ □^[(n + 1)]⊥ ➝ φ → Modal.GL ⊢ □^[n]⊥ ➝ φ by
     simpa [
       (show Modal.GLPlusBoxBot (↑n + 1) = Modal.GLPlusBoxBot ↑(n + 1) by simp),
       iff_provable_GLPlusBoxBot_provable_GL
     ];
   intro h;
   apply C!_trans ?_ h;
-  suffices Modal.GL ⊢! □^[n]⊥ ➝ □^[n](□⊥) by simpa [Function.iterate_succ_apply]
+  suffices Modal.GL ⊢ □^[n]⊥ ➝ □^[n](□⊥) by simpa [Function.iterate_succ_apply]
   apply imply_multibox_distribute'!;
   cl_prover;
 

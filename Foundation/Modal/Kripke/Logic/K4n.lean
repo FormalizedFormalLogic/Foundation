@@ -143,7 +143,7 @@ lemma succ_strictlyWeakerThan : Hilbert.K4n (n + 1) ⪱ Hilbert.K4n n := by
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl);
     . simp;
-    . suffices Hilbert.K4n n ⊢! □□^[n](.atom 0) ➝ □□^[(n + 1)](.atom 0) by simpa [Axioms.FourN];
+    . suffices Hilbert.K4n n ⊢ □□^[n](.atom 0) ➝ □□^[(n + 1)](.atom 0) by simpa [Axioms.FourN];
       apply imply_box_distribute'!;
       exact axiomFourN!;
   . apply Entailment.not_weakerThan_iff.mpr;

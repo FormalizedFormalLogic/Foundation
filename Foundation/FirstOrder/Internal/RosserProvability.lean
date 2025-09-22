@@ -52,7 +52,7 @@ lemma rosser_quote_def₀ {φ : Sentence L} :
 
 def RosserProvable.to_provable {φ : V} : T.RosserProvable φ → T.Provable φ := ProvabilityComparison.to_provable
 
-lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} : T.Proof (n : V) ⌜φ⌝ → T ⊢! φ := fun h ↦ by
+lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} : T.Proof (n : V) ⌜φ⌝ → T ⊢ φ := fun h ↦ by
   have : T.Proof n ⌜φ⌝ ↔ T.Proof (↑n : V) ⌜φ⌝ := by
     simpa [Sentence.coe_quote_eq_quote] using
       Defined.shigmaOne_absolute V (φ := T.proof)
@@ -63,23 +63,23 @@ lemma provable_of_standard_proof {n : ℕ} {φ : Sentence L} : T.Proof (n : V) �
 
 open Classical
 
-def rosser_internalize [Entailment.Consistent T] {φ : Sentence L} : T ⊢! φ → T.RosserProvable (⌜φ⌝ : V) := by
+def rosser_internalize [Entailment.Consistent T] {φ : Sentence L} : T ⊢ φ → T.RosserProvable (⌜φ⌝ : V) := by
   intro h
   let n : ℕ := ⌜h.get⌝
   have hn : T.Proof (↑n : V) ⌜φ⌝ := by simp [n, coe_quote_proof_eq]
   refine rosser_quote_def₀.mpr ⟨n, hn, ?_⟩
   intro b hb Hb
   rcases eq_nat_of_lt_nat hb with ⟨b, rfl⟩
-  have : T ⊢! ∼φ := provable_of_standard_proof (V := V) Hb
+  have : T ⊢ ∼φ := provable_of_standard_proof (V := V) Hb
   have : Entailment.Inconsistent T := Entailment.inconsistent_of_provable_of_unprovable h this
   have : ¬Entailment.Inconsistent T := Entailment.Consistent.not_inc inferInstance
   contradiction
 
-def rosser_internalize_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢! σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+def rosser_internalize_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ σ → T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using rosser_internalize h
 
 open Classical in
-def not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢! ∼φ → ¬T.RosserProvable (⌜φ⌝ : V) := by
+def not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢ ∼φ → ¬T.RosserProvable (⌜φ⌝ : V) := by
   rintro h r
   let n : ℕ := ⌜h.get⌝
   have hn : T.Proof (↑n : V) ⌜∼φ⌝ := by simp [n, coe_quote_proof_eq]
@@ -89,12 +89,12 @@ def not_rosserProvable [Entailment.Consistent T] {φ : Sentence L} : T ⊢! ∼�
     have : ¬T.Proof (↑n : V) ⌜∼φ⌝ := Hb n (lt_of_not_ge A)
     contradiction
   rcases eq_nat_of_le_nat this with ⟨b, rfl⟩
-  have : T ⊢! φ := provable_of_standard_proof hb
+  have : T ⊢ φ := provable_of_standard_proof hb
   have : Entailment.Inconsistent T := Entailment.inconsistent_of_provable_of_unprovable this h
   have : ¬Entailment.Inconsistent T := Entailment.Consistent.not_inc inferInstance
   contradiction
 
-def not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢! ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
+def not_rosserProvable_sentence [Entailment.Consistent T] {σ : Sentence L} : T ⊢ ∼σ → ¬T.RosserProvable (⌜σ⌝ : V) := fun h ↦ by
   simpa [Sentence.quote_def] using not_rosserProvable h
 
 end LO.ISigma1.Metamath
@@ -111,11 +111,11 @@ variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 
 local prefix:90 "𝗥" => T.rosserPred
 
-theorem rosserProvable_D1 {σ} : T ⊢! σ → 𝗜𝚺₁ ⊢! 𝗥σ := fun h ↦
+theorem rosserProvable_D1 {σ} : T ⊢ σ → 𝗜𝚺₁ ⊢ 𝗥σ := fun h ↦
   complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using rosser_internalize_sentence h
 
-theorem rosserProvable_rosser {σ} : T ⊢! ∼σ → 𝗜𝚺₁ ⊢! ∼𝗥σ := fun h ↦
+theorem rosserProvable_rosser {σ} : T ⊢ ∼σ → 𝗜𝚺₁ ⊢ ∼𝗥σ := fun h ↦
   complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using not_rosserProvable_sentence h
 

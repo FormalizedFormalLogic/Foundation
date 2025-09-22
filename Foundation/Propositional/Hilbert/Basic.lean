@@ -60,9 +60,9 @@ instance : Entailment.Minimal H where
 
 @[induction_eliminator]
 protected lemma rec!
-  {motive   : (φ : Formula α) → (H ⊢! φ) → Sort}
+  {motive   : (φ : Formula α) → (H ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ H.axioms) → motive (φ⟦s⟧) ⟨.axm s h⟩)
-  (mdp      : ∀ {φ ψ : Formula α}, {hpq : H ⊢! φ ➝ ψ} → {hp : H ⊢! φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (mdp! hpq hp))
+  (mdp      : ∀ {φ ψ : Formula α}, {hpq : H ⊢ φ ➝ ψ} → {hp : H ⊢ φ} → motive (φ ➝ ψ) hpq → motive φ hp → motive ψ (mdp! hpq hp))
   (verum    : motive ⊤ verum!)
   (implyS   : ∀ {φ ψ},   motive (Axioms.Imply₁ φ ψ) $ by simp)
   (implyK   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
@@ -72,7 +72,7 @@ protected lemma rec!
   (orIntroL : ∀ {φ ψ},   motive (φ ➝ φ ⋎ ψ) $ by simp)
   (orIntroR : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) $ by simp)
   (orElim   : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) $ by simp)
-  : ∀ {φ}, (d : H ⊢! φ) → motive φ d := by
+  : ∀ {φ}, (d : H ⊢ φ) → motive φ d := by
   rintro φ ⟨d⟩;
   induction d with
   | axm s h => apply axm s h;
@@ -90,21 +90,21 @@ protected lemma rec!
   | orIntroR => apply orIntroR;
   | orElim => apply orElim;
 
-lemma axm! {φ} (s) (h : φ ∈ H.axioms) : H ⊢! (φ⟦s⟧) := ⟨.axm s h⟩
+lemma axm! {φ} (s) (h : φ ∈ H.axioms) : H ⊢ (φ⟦s⟧) := ⟨.axm s h⟩
 
-lemma axm'! {φ} (h : φ ∈ H.axioms) : H ⊢! φ := by simpa using axm! Substitution.id h
+lemma axm'! {φ} (h : φ ∈ H.axioms) : H ⊢ φ := by simpa using axm! Substitution.id h
 
-lemma axm_instances! {φ} (h : φ ∈ H.axiomInstances) : H ⊢! φ := by
+lemma axm_instances! {φ} (h : φ ∈ H.axiomInstances) : H ⊢ φ := by
   obtain ⟨ψ, hψ, s, rfl⟩ := h;
   apply axm! s hψ;
 
-lemma subst! {φ} (s) (h : H ⊢! φ) : H ⊢! (φ⟦s⟧) := by
+lemma subst! {φ} (s) (h : H ⊢ φ) : H ⊢ (φ⟦s⟧) := by
   induction h with
   | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ;
   | @axm φ s' h => rw [(show φ⟦s'⟧⟦s⟧ = φ⟦s' ∘ s⟧ by simp)]; apply axm!; exact h;
   | _ => simp;
 
-lemma weakerThan_of_provable_axioms (hs : H₂ ⊢!* H₁.axioms) : H₁ ⪯ H₂ := by
+lemma weakerThan_of_provable_axioms (hs : H₂ ⊢* H₁.axioms) : H₁ ⪯ H₂ := by
   apply weakerThan_iff.mpr;
   intro φ h;
   induction h with
@@ -139,7 +139,7 @@ instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := by
   apply Equiv.iff.mp;
   infer_instance;
 
-lemma iff_provable : H ⊢! φ ↔ H.logic ⊢! φ := by simp [theory];
+lemma iff_provable : H ⊢ φ ↔ H.logic ⊢ φ := by simp [theory];
 lemma iff_not_provable : H ⊬ φ ↔ H.logic ⊬ φ := by simp [theory];
 
 instance : Entailment.Minimal H.logic where

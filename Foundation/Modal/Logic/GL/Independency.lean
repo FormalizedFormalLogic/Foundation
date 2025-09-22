@@ -24,9 +24,9 @@ variable {n : ℕ} {φ : Formula ℕ}
 lemma unprovable_notbox : Modal.GL ⊬ ∼□φ := by
   apply Hilbert.Normal.iff_logic_provable_provable.not.mpr;
   by_contra hC;
-  have : Hilbert.GL ⊢! ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
-  have : Hilbert.GL ⊢! ∼□⊥ := this ⨀ hC;
-  have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := by simpa using Logic.GL.provable_verTranslated_Cl this;
+  have : Hilbert.GL ⊢ ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
+  have : Hilbert.GL ⊢ ∼□⊥ := this ⨀ hC;
+  have : Hilbert.Cl ⊢ (⊥ ➝ ⊥) ➝ ⊥ := by simpa using Logic.GL.provable_verTranslated_Cl this;
   have := Hilbert.Cl.soundness this (λ _ => False);
   tauto;
 
