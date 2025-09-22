@@ -351,7 +351,7 @@ instance : Entailment.GLPoint3 Modal.GLPoint2 where
     simpa using Logic.subst! (s := λ a => match a with | 0 => φ | 1 => ψ | _ => a) GLPoint2.provable_axiomWeakPoint3;
 
 instance : Modal.GLPoint3 ⪯ Modal.GLPoint2 := by
-  suffices Hilbert.GLPoint3 ⪯ Hilbert.GLPoint2 by infer_instance;
+  suffices Modal.GLPoint3 ⪯ Modal.GLPoint2 by infer_instance;
   apply weakerThan_iff.mpr;
   intro φ hφ;
   induction hφ using Hilbert.Normal.rec! with
@@ -377,7 +377,7 @@ lemma eq_GLPoint3OplusBoxBot_2_GLPoint2 : (Modal.GLPoint3OplusBoxBot 2) = Modal.
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
     | subst ih => apply Logic.subst! _ ih;
     | nec ih => apply nec! ih;
-  . suffices Hilbert.GLPoint2 ⊢! φ → Modal.GLPoint3OplusBoxBot 2 ⊢! φ by simpa [iff_provable];
+  . suffices Modal.GLPoint2 ⊢! φ → Modal.GLPoint3OplusBoxBot 2 ⊢! φ by simpa [iff_provable];
     intro h;
     induction h using Hilbert.Normal.rec! with
     | axm s h =>

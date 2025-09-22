@@ -7,7 +7,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -24,25 +24,20 @@ protected abbrev FrameClass.finite_KTB: FrameClass := { F | F.IsFiniteKTB }
 end Kripke
 
 
-namespace Hilbert.KTB.Kripke
-
-instance : Sound Hilbert.KTB FrameClass.KTB := instSound_of_validates_axioms $ by
+instance : Sound Modal.KTB FrameClass.KTB := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomB_of_symmetric;
 
-instance : Entailment.Consistent Hilbert.KTB := consistent_of_sound_frameclass FrameClass.KTB $ by
+instance : Entailment.Consistent Modal.KTB := consistent_of_sound_frameclass FrameClass.KTB $ by
   use whitepoint;
   constructor;
 
+instance : Canonical Modal.KTB FrameClass.KTB := ⟨by constructor⟩
 
-instance : Canonical Hilbert.KTB FrameClass.KTB := ⟨by constructor⟩
-
-instance : Complete Hilbert.KTB FrameClass.KTB := inferInstance
-
-instance : Complete Hilbert.KTB FrameClass.finite_KTB := ⟨by
+instance : Complete Modal.KTB FrameClass.finite_KTB := ⟨by
   intro φ hp;
   apply Complete.complete (𝓜 := FrameClass.KTB);
   intro F hF V x;
@@ -59,8 +54,7 @@ instance : Complete Hilbert.KTB FrameClass.finite_KTB := ⟨by
   }
 ⟩
 
-
-instance : Hilbert.KT ⪱ Hilbert.KTB := by
+instance : Modal.KT ⪱ Modal.KTB := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -78,9 +72,9 @@ instance : Hilbert.KT ⪱ Hilbert.KTB := by
         use 1;
         omega;
 
-instance : Hilbert.KDB ⪱ Hilbert.KTB := by
+instance : Modal.KDB ⪱ Modal.KTB := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.KDB FrameClass.KTB;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.KDB FrameClass.KTB;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -103,10 +97,5 @@ instance : Hilbert.KDB ⪱ Hilbert.KTB := by
       . simp [Semantics.Realize, Satisfies];
         omega;
 
-end Hilbert.KTB.Kripke
-
-instance : Modal.KT ⪱ Modal.KTB := inferInstance
-
-instance : Modal.KDB ⪱ Modal.KTB := inferInstance
 
 end LO.Modal

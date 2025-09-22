@@ -710,83 +710,83 @@ instance : (Hilbert.KB5).HasFive where p := 0
 instance : Entailment.KB5 (Hilbert.KB5) where
 
 
-protected abbrev Hilbert.S4 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0)}⟩
-protected abbrev S4 := Hilbert.S4.logic
-instance : (Hilbert.S4).HasK where p := 0; q := 1;
-instance : (Hilbert.S4).HasT where p := 0
-instance : (Hilbert.S4).HasFour where p := 0
-instance : Entailment.S4 (Hilbert.S4) where
-instance : Hilbert.K4 ⪯ Hilbert.S4 := weakerThan_of_subset_axioms $ by simp;
+protected abbrev Modal.S4 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0)}⟩
+protected abbrev S4 := Modal.S4.logic
+instance : (Modal.S4).HasK where p := 0; q := 1;
+instance : (Modal.S4).HasT where p := 0
+instance : (Modal.S4).HasFour where p := 0
+instance : Entailment.S4 (Modal.S4) where
+instance : Hilbert.K4 ⪯ Modal.S4 := weakerThan_of_subset_axioms $ by simp;
 
 
-protected abbrev Hilbert.S4McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0)}⟩
-protected abbrev S4McK := Hilbert.S4McK.logic
-instance : (Hilbert.S4McK).HasK where p := 0; q := 1;
-instance : (Hilbert.S4McK).HasT where p := 0
-instance : (Hilbert.S4McK).HasFour where p := 0
-instance : (Hilbert.S4McK).HasMcK where p := 0
-instance : Entailment.S4McK (Hilbert.S4McK) where
-instance : Hilbert.K4McK ⪯ Hilbert.S4McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+protected abbrev Modal.S4McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0)}⟩
+protected abbrev S4McK := Modal.S4McK.logic
+instance : (Modal.S4McK).HasK where p := 0; q := 1;
+instance : (Modal.S4McK).HasT where p := 0
+instance : (Modal.S4McK).HasFour where p := 0
+instance : (Modal.S4McK).HasMcK where p := 0
+instance : Entailment.S4McK (Modal.S4McK) where
+instance : Hilbert.K4McK ⪯ Modal.S4McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
-protected abbrev Hilbert.S4Point2McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point2 (.atom 0)}⟩
-protected abbrev S4Point2McK := Hilbert.S4Point2McK.logic
-instance : (Hilbert.S4Point2McK).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Point2McK).HasT where p := 0
-instance : (Hilbert.S4Point2McK).HasFour where p := 0
-instance : (Hilbert.S4Point2McK).HasMcK where p := 0
-instance : (Hilbert.S4Point2McK).HasPoint2 where p := 0
-instance : Entailment.S4Point2McK (Hilbert.S4Point2McK) where
-instance : Hilbert.K4McK ⪯ Hilbert.S4Point2McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+protected abbrev Modal.S4Point2McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point2 (.atom 0)}⟩
+protected abbrev S4Point2McK := Modal.S4Point2McK.logic
+instance : (Modal.S4Point2McK).HasK where p := 0; q := 1;
+instance : (Modal.S4Point2McK).HasT where p := 0
+instance : (Modal.S4Point2McK).HasFour where p := 0
+instance : (Modal.S4Point2McK).HasMcK where p := 0
+instance : (Modal.S4Point2McK).HasPoint2 where p := 0
+instance : Entailment.S4Point2McK (Modal.S4Point2McK) where
+instance : Hilbert.K4McK ⪯ Modal.S4Point2McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
-protected abbrev Hilbert.S4Point3McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
-protected abbrev S4Point3McK := Hilbert.S4Point3McK.logic
-instance : (Hilbert.S4Point3McK).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Point3McK).HasT where p := 0
-instance : (Hilbert.S4Point3McK).HasFour where p := 0
-instance : (Hilbert.S4Point3McK).HasMcK where p := 0
-instance : (Hilbert.S4Point3McK).HasPoint3 where p := 0; q := 1;
-instance : Entailment.S4Point3McK (Hilbert.S4Point3McK) where
-instance : Hilbert.K4McK ⪯ Hilbert.S4Point3McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+protected abbrev Modal.S4Point3McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
+protected abbrev S4Point3McK := Modal.S4Point3McK.logic
+instance : (Modal.S4Point3McK).HasK where p := 0; q := 1;
+instance : (Modal.S4Point3McK).HasT where p := 0
+instance : (Modal.S4Point3McK).HasFour where p := 0
+instance : (Modal.S4Point3McK).HasMcK where p := 0
+instance : (Modal.S4Point3McK).HasPoint3 where p := 0; q := 1;
+instance : Entailment.S4Point3McK (Modal.S4Point3McK) where
+instance : Hilbert.K4McK ⪯ Modal.S4Point3McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
-protected abbrev Hilbert.S4Point4McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point4 (.atom 0)}⟩
-protected abbrev S4Point4McK := Hilbert.S4Point4McK.logic
-instance : (Hilbert.S4Point4McK).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Point4McK).HasT where p := 0
-instance : (Hilbert.S4Point4McK).HasFour where p := 0
-instance : (Hilbert.S4Point4McK).HasMcK where p := 0
-instance : (Hilbert.S4Point4McK).HasPoint4 where p := 0
-instance : Entailment.S4Point4McK (Hilbert.S4Point4McK) where
-instance : Hilbert.K4McK ⪯ Hilbert.S4Point4McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+protected abbrev Modal.S4Point4McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point4 (.atom 0)}⟩
+protected abbrev S4Point4McK := Modal.S4Point4McK.logic
+instance : (Modal.S4Point4McK).HasK where p := 0; q := 1;
+instance : (Modal.S4Point4McK).HasT where p := 0
+instance : (Modal.S4Point4McK).HasFour where p := 0
+instance : (Modal.S4Point4McK).HasMcK where p := 0
+instance : (Modal.S4Point4McK).HasPoint4 where p := 0
+instance : Entailment.S4Point4McK (Modal.S4Point4McK) where
+instance : Hilbert.K4McK ⪯ Modal.S4Point4McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
-protected abbrev Hilbert.S4Point2 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point2 (.atom 0)}⟩
-protected abbrev S4Point2 := Hilbert.S4Point2.logic
-instance : (Hilbert.S4Point2).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Point2).HasT where p := 0
-instance : (Hilbert.S4Point2).HasFour where p := 0
-instance : (Hilbert.S4Point2).HasPoint2 where p := 0
-instance : Entailment.S4Point2 (Hilbert.S4Point2) where
+protected abbrev Modal.S4Point2 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point2 (.atom 0)}⟩
+protected abbrev S4Point2 := Modal.S4Point2.logic
+instance : (Modal.S4Point2).HasK where p := 0; q := 1;
+instance : (Modal.S4Point2).HasT where p := 0
+instance : (Modal.S4Point2).HasFour where p := 0
+instance : (Modal.S4Point2).HasPoint2 where p := 0
+instance : Entailment.S4Point2 (Modal.S4Point2) where
 
 
-protected abbrev Hilbert.S4Point3 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
-protected abbrev S4Point3 := Hilbert.S4Point3.logic
-instance : (Hilbert.S4Point3).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Point3).HasT where p := 0
-instance : (Hilbert.S4Point3).HasFour where p := 0
-instance : (Hilbert.S4Point3).HasPoint3 where p := 0; q := 1;
-instance : Entailment.S4Point3 (Hilbert.S4Point3) where
+protected abbrev Modal.S4Point3 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
+protected abbrev S4Point3 := Modal.S4Point3.logic
+instance : (Modal.S4Point3).HasK where p := 0; q := 1;
+instance : (Modal.S4Point3).HasT where p := 0
+instance : (Modal.S4Point3).HasFour where p := 0
+instance : (Modal.S4Point3).HasPoint3 where p := 0; q := 1;
+instance : Entailment.S4Point3 (Modal.S4Point3) where
 
 
-protected abbrev Hilbert.S4Point4 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point4 (.atom 0)}⟩
-protected abbrev S4Point4 := Hilbert.S4Point4.logic
-instance : (Hilbert.S4Point4).HasK where p := 0; q := 1;
-instance : (Hilbert.S4Point4).HasT where p := 0
-instance : (Hilbert.S4Point4).HasFour where p := 0
-instance : (Hilbert.S4Point4).HasPoint4 where p := 0
-instance : Entailment.S4Point4 (Hilbert.S4Point4) where
+protected abbrev Modal.S4Point4 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point4 (.atom 0)}⟩
+protected abbrev S4Point4 := Modal.S4Point4.logic
+instance : (Modal.S4Point4).HasK where p := 0; q := 1;
+instance : (Modal.S4Point4).HasT where p := 0
+instance : (Modal.S4Point4).HasFour where p := 0
+instance : (Modal.S4Point4).HasPoint4 where p := 0
+instance : Entailment.S4Point4 (Modal.S4Point4) where
 
 
 protected abbrev Hilbert.K5 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Five (.atom 0)}⟩
@@ -796,37 +796,37 @@ instance : (Hilbert.K5).HasFive where p := 0
 instance : Entailment.K5 (Hilbert.K5) where
 
 
-protected abbrev Hilbert.S5 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0)}⟩
-protected abbrev S5 := Hilbert.S5.logic
-instance : (Hilbert.S5).HasK where p := 0; q := 1;
-instance : (Hilbert.S5).HasT where p := 0
-instance : (Hilbert.S5).HasFive where p := 0
-instance : Entailment.S5 (Hilbert.S5) where
+protected abbrev Modal.S5 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0)}⟩
+protected abbrev S5 := Modal.S5.logic
+instance : (Modal.S5).HasK where p := 0; q := 1;
+instance : (Modal.S5).HasT where p := 0
+instance : (Modal.S5).HasFive where p := 0
+instance : Entailment.S5 (Modal.S5) where
 
 
-protected abbrev Hilbert.GL : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0)}⟩
-protected abbrev GL := Hilbert.GL.logic
-instance : (Hilbert.GL).HasK where p := 0; q := 1;
-instance : (Hilbert.GL).HasL where p := 0;
-instance : Entailment.GL (Hilbert.GL) where
+protected abbrev Modal.GL : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0)}⟩
+protected abbrev GL := Modal.GL.logic
+instance : (Modal.GL).HasK where p := 0; q := 1;
+instance : (Modal.GL).HasL where p := 0;
+instance : Entailment.GL (Modal.GL) where
 instance : Entailment.GL Modal.GL where
 
-protected abbrev Hilbert.GLPoint2 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}⟩
-protected abbrev GLPoint2 := Hilbert.GLPoint2.logic
-instance : (Hilbert.GLPoint2).HasK where p := 0; q := 1;
-instance : (Hilbert.GLPoint2).HasL where p := 0
-instance : (Hilbert.GLPoint2).HasWeakPoint2 where p := 0; q := 1;
-instance : Entailment.GLPoint2 (Hilbert.GLPoint2) where
+protected abbrev Modal.GLPoint2 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}⟩
+protected abbrev GLPoint2 := Modal.GLPoint2.logic
+instance : (Modal.GLPoint2).HasK where p := 0; q := 1;
+instance : (Modal.GLPoint2).HasL where p := 0
+instance : (Modal.GLPoint2).HasWeakPoint2 where p := 0; q := 1;
+instance : Entailment.GLPoint2 (Modal.GLPoint2) where
 instance : Entailment.GLPoint2 Modal.GLPoint2 where
-instance : Hilbert.GL ⪯ Hilbert.GLPoint2 := weakerThan_of_subset_axioms $ by simp
+instance : Modal.GL ⪯ Modal.GLPoint2 := weakerThan_of_subset_axioms $ by simp
 
 
-protected abbrev Hilbert.GLPoint3 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}⟩
-protected abbrev GLPoint3 := Hilbert.GLPoint3.logic
-instance : (Hilbert.GLPoint3).HasK where p := 0; q := 1;
-instance : (Hilbert.GLPoint3).HasL where p := 0
-instance : (Hilbert.GLPoint3).HasWeakPoint3 where p := 0; q := 1;
-instance : Entailment.GLPoint3 (Hilbert.GLPoint3) where
+protected abbrev Modal.GLPoint3 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}⟩
+protected abbrev GLPoint3 := Modal.GLPoint3.logic
+instance : (Modal.GLPoint3).HasK where p := 0; q := 1;
+instance : (Modal.GLPoint3).HasL where p := 0
+instance : (Modal.GLPoint3).HasWeakPoint3 where p := 0; q := 1;
+instance : Entailment.GLPoint3 (Modal.GLPoint3) where
 
 
 protected abbrev Hilbert.K4Z : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Z (.atom 0)}⟩
@@ -839,7 +839,7 @@ instance : Entailment.K4Z (Hilbert.K4Z) where
 instance : Hilbert.K4 ⪯ Hilbert.K4Z := weakerThan_of_subset_axioms $ by simp
 instance : Modal.K4 ⪯ Modal.K4Z := inferInstance
 
-instance : Hilbert.K4Z ⪯ Hilbert.GL := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+instance : Hilbert.K4Z ⪯ Modal.GL := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 instance : Modal.K4Z ⪯ Modal.GL := inferInstance
 
 
@@ -857,7 +857,7 @@ instance : Modal.K4Point2 ⪯ Modal.K4Point2Z := inferInstance
 instance : Hilbert.K4Z ⪯ Hilbert.K4Point2Z := weakerThan_of_subset_axioms (by simp)
 instance : Modal.K4Z ⪯ Modal.K4Point2Z := inferInstance
 
-instance : Hilbert.K4Point2Z ⪯ Hilbert.GLPoint2 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
+instance : Hilbert.K4Point2Z ⪯ Modal.GLPoint2 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
 instance : Modal.K4Point2Z ⪯ Modal.GLPoint2 := inferInstance
 
 
@@ -875,7 +875,7 @@ instance : Modal.K4Point3 ⪯ Modal.K4Point3Z := inferInstance
 instance : Hilbert.K4Z ⪯ Hilbert.K4Point3Z := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 instance : Modal.K4Z ⪯ Modal.K4Point3Z := inferInstance
 
-instance : Hilbert.K4Point3Z ⪯ Hilbert.GLPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
+instance : Hilbert.K4Point3Z ⪯ Modal.GLPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
 instance : Modal.K4Point3Z ⪯ Modal.GLPoint3 := inferInstance
 
 
@@ -893,28 +893,28 @@ instance : (Hilbert.K4Hen).HasHen where p := 0
 instance : Entailment.K4Hen (Hilbert.K4Hen) where
 
 
-protected abbrev Hilbert.Grz : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0)}⟩
-protected abbrev Grz := Hilbert.Grz.logic
-instance : (Hilbert.Grz).HasK where p := 0; q := 1;
-instance : (Hilbert.Grz).HasGrz where p := 0
-instance : Entailment.Grz (Hilbert.Grz) where
-instance : Hilbert.KT ⪯ Hilbert.Grz := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl) <;> simp;
+protected abbrev Modal.Grz : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0)}⟩
+protected abbrev Grz := Modal.Grz.logic
+instance : (Modal.Grz).HasK where p := 0; q := 1;
+instance : (Modal.Grz).HasGrz where p := 0
+instance : Entailment.Grz (Modal.Grz) where
+instance : Hilbert.KT ⪯ Modal.Grz := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl) <;> simp;
 
 
-protected abbrev Hilbert.GrzPoint2 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Point2 (.atom 0)}⟩
-protected abbrev GrzPoint2 := Hilbert.GrzPoint2.logic
-instance : (Hilbert.GrzPoint2).HasK where p := 0; q := 1;
-instance : (Hilbert.GrzPoint2).HasGrz where p := 0
-instance : (Hilbert.GrzPoint2).HasPoint2 where p := 0
-instance : Entailment.GrzPoint2 (Hilbert.GrzPoint2) where
+protected abbrev Modal.GrzPoint2 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Point2 (.atom 0)}⟩
+protected abbrev GrzPoint2 := Modal.GrzPoint2.logic
+instance : (Modal.GrzPoint2).HasK where p := 0; q := 1;
+instance : (Modal.GrzPoint2).HasGrz where p := 0
+instance : (Modal.GrzPoint2).HasPoint2 where p := 0
+instance : Entailment.GrzPoint2 (Modal.GrzPoint2) where
 
 
-protected abbrev Hilbert.GrzPoint3 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
-protected abbrev GrzPoint3 := Hilbert.GrzPoint3.logic
-instance : (Hilbert.GrzPoint3).HasK where p := 0; q := 1;
-instance : (Hilbert.GrzPoint3).HasGrz where p := 0
-instance : (Hilbert.GrzPoint3).HasPoint3 where p := 0; q := 1;
-instance : Entailment.GrzPoint3 (Hilbert.GrzPoint3) where
+protected abbrev Modal.GrzPoint3 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}⟩
+protected abbrev GrzPoint3 := Modal.GrzPoint3.logic
+instance : (Modal.GrzPoint3).HasK where p := 0; q := 1;
+instance : (Modal.GrzPoint3).HasGrz where p := 0
+instance : (Modal.GrzPoint3).HasPoint3 where p := 0; q := 1;
+instance : Entailment.GrzPoint3 (Modal.GrzPoint3) where
 
 
 protected abbrev Hilbert.Dum : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dum (.atom 0)}⟩
@@ -925,10 +925,10 @@ instance : (Hilbert.Dum).HasFour where p := 0
 instance : (Hilbert.Dum).HasDum where p := 0
 instance : Entailment.Dum (Hilbert.Dum) where
 
-instance : Hilbert.S4 ⪯ Hilbert.Dum := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
+instance : Modal.S4 ⪯ Hilbert.Dum := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 instance : Modal.S4 ⪯ Modal.Dum := inferInstance
 
-instance : Hilbert.Dum ⪯ Hilbert.Grz := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
+instance : Hilbert.Dum ⪯ Modal.Grz := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl) <;> simp;
 instance : Modal.Dum ⪯ Modal.Grz := inferInstance
 
 
@@ -944,10 +944,10 @@ instance : Entailment.DumPoint2 (Hilbert.DumPoint2) where
 instance : Hilbert.Dum ⪯ Hilbert.DumPoint2 := weakerThan_of_subset_axioms (by simp)
 instance : Modal.Dum ⪯ Modal.DumPoint2 := inferInstance
 
-instance : Hilbert.S4Point2 ⪯ Hilbert.DumPoint2 := weakerThan_of_subset_axioms (by simp)
+instance : Modal.S4Point2 ⪯ Hilbert.DumPoint2 := weakerThan_of_subset_axioms (by simp)
 instance : Modal.S4Point2 ⪯ Modal.DumPoint2 := inferInstance
 
-instance : Hilbert.DumPoint2 ⪯ Hilbert.GrzPoint2 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
+instance : Hilbert.DumPoint2 ⪯ Modal.GrzPoint2 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
 instance : Modal.DumPoint2 ⪯ Modal.GrzPoint2 := inferInstance
 
 
@@ -963,10 +963,10 @@ instance : Entailment.DumPoint3 (Hilbert.DumPoint3) where
 instance : Hilbert.Dum ⪯ Hilbert.DumPoint3 := weakerThan_of_subset_axioms (by simp)
 instance : Modal.Dum ⪯ Modal.DumPoint3 := inferInstance
 
-instance : Hilbert.S4Point3 ⪯ Hilbert.DumPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
+instance : Modal.S4Point3 ⪯ Hilbert.DumPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
 instance : Modal.S4Point3 ⪯ Modal.DumPoint3 := inferInstance
 
-instance : Hilbert.DumPoint3 ⪯ Hilbert.GrzPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
+instance : Hilbert.DumPoint3 ⪯ Modal.GrzPoint3 := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl | rfl | rfl) <;> simp;
 instance : Modal.DumPoint3 ⪯ Modal.GrzPoint3 := inferInstance
 
 
@@ -995,18 +995,18 @@ instance : (Hilbert.KTMk).HasMk where p := 0; q := 1
 instance : Entailment.KTMk (Hilbert.KTMk) where
 
 
-protected abbrev Hilbert.S4H : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.H (.atom 0)}⟩
+protected abbrev Modal.S4H : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.H (.atom 0)}⟩
 /--
   - `S4H` in Segerberg 1971.
   - `K1.2` in Sobocinski 1964, "Family $K$ of the non-Lewis modal systems"
 -/
-protected abbrev S4H := Hilbert.S4H.logic
+protected abbrev S4H := Modal.S4H.logic
 
-instance : (Hilbert.S4H).HasK where p := 0; q := 1;
-instance : (Hilbert.S4H).HasT where p := 0
-instance : (Hilbert.S4H).HasFour where p := 0
-instance : (Hilbert.S4H).HasH1 where p := 0
-instance : Entailment.S4H (Hilbert.S4H) where
+instance : (Modal.S4H).HasK where p := 0; q := 1;
+instance : (Modal.S4H).HasT where p := 0
+instance : (Modal.S4H).HasFour where p := 0
+instance : (Modal.S4H).HasH1 where p := 0
+instance : Entailment.S4H (Modal.S4H) where
 
 
 protected abbrev Hilbert.N : Hilbert.Normal ℕ := ⟨{}⟩
@@ -1029,15 +1029,15 @@ instance : Entailment.Triv (Hilbert.Triv) where
 instance : Hilbert.K4 ⪯ Hilbert.Triv := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl) <;> simp;
 
 
-protected abbrev Hilbert.S5Grz : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0), Axioms.Grz (.atom 0)}⟩
-protected abbrev S5Grz : Logic ℕ := Hilbert.S5Grz.logic
-instance : (Hilbert.S5Grz).HasK where p := 0; q := 1;
-instance : (Hilbert.S5Grz).HasT where p := 0
-instance : (Hilbert.S5Grz).HasFive where p := 0
-instance : (Hilbert.S5Grz).HasGrz where p := 0
-instance : Entailment.S5Grz (Hilbert.S5Grz) where
+protected abbrev Modal.S5Grz : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0), Axioms.Grz (.atom 0)}⟩
+protected abbrev S5Grz : Logic ℕ := Modal.S5Grz.logic
+instance : (Modal.S5Grz).HasK where p := 0; q := 1;
+instance : (Modal.S5Grz).HasT where p := 0
+instance : (Modal.S5Grz).HasFive where p := 0
+instance : (Modal.S5Grz).HasGrz where p := 0
+instance : Entailment.S5Grz (Modal.S5Grz) where
 
-instance : Hilbert.S5Grz ≊ Hilbert.Triv := by
+instance : Modal.S5Grz ≊ Hilbert.Triv := by
   apply Entailment.Equiv.antisymm_iff.mpr;
   constructor;
   . apply weakerThan_of_provable_axioms; rintro φ (rfl | rfl | rfl | rfl) <;> simp;

@@ -6,7 +6,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -21,9 +21,9 @@ instance [F.IsS4Point4] : F.IsS4Point3 where
 end Kripke
 
 
-namespace Hilbert.S4Point4.Kripke
+namespace Modal.S4Point4.Kripke
 
-instance : Sound Hilbert.S4Point4 FrameClass.S4Point4 := instSound_of_validates_axioms $ by
+instance : Sound Modal.S4Point4 FrameClass.S4Point4 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
@@ -31,19 +31,19 @@ instance : Sound Hilbert.S4Point4 FrameClass.S4Point4 := instSound_of_validates_
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomPoint4_of_satisfiesSobocinskiCondition;
 
-instance : Entailment.Consistent Hilbert.S4Point4 :=
+instance : Entailment.Consistent Modal.S4Point4 :=
   consistent_of_sound_frameclass FrameClass.S4Point4 $ by
     use whitepoint;
     constructor;
 
-instance : Canonical Hilbert.S4Point4 FrameClass.S4Point4 := ⟨by constructor⟩
+instance : Canonical Modal.S4Point4 FrameClass.S4Point4 := ⟨by constructor⟩
 
-instance : Complete Hilbert.S4Point4 FrameClass.S4Point4 := inferInstance
+instance : Complete Modal.S4Point4 FrameClass.S4Point4 := inferInstance
 
 
-instance : Hilbert.S4Point3 ⪱ Hilbert.S4Point4 := by
+instance : Modal.S4Point3 ⪱ Modal.S4Point4 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.S4Point3) (FrameClass.S4Point4);
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass (FrameClass.S4Point3) (FrameClass.S4Point4);
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -65,8 +65,7 @@ instance : Hilbert.S4Point3 ⪱ Hilbert.S4Point4 := by
         use 2;
         omega;
 
-end Hilbert.S4Point4.Kripke
+end Modal.S4Point4.Kripke
 
-instance : Modal.S4Point3 ⪱ Modal.S4Point4 := inferInstance
 
 end LO.Modal

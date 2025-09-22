@@ -1,7 +1,6 @@
 import Foundation.Modal.Kripke.AxiomWeakPoint3
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.K4
 
 namespace LO.Modal
@@ -9,7 +8,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -19,27 +18,24 @@ abbrev FrameClass.K4Point3 : FrameClass := { F | F.IsK4Point3 }
 
 end Kripke
 
-
-namespace Logic.K4Point3.Kripke
-
-instance : Sound Hilbert.K4Point3 FrameClass.K4Point3 := instSound_of_validates_axioms $ by
+instance : Sound Modal.K4Point3 FrameClass.K4Point3 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_WeakPoint3_of_weakConnected;
 
-instance : Entailment.Consistent Hilbert.K4Point3 :=
+instance : Entailment.Consistent Modal.K4Point3 :=
   consistent_of_sound_frameclass FrameClass.K4Point3 $ by
     use whitepoint;
     constructor;
 
-instance : Canonical Hilbert.K4Point3 FrameClass.K4Point3 :=  ⟨by constructor⟩
+instance : Canonical Modal.K4Point3 FrameClass.K4Point3 :=  ⟨by constructor⟩
 
-instance : Complete Hilbert.K4Point3 FrameClass.K4Point3 := inferInstance
+instance : Complete Modal.K4Point3 FrameClass.K4Point3 := inferInstance
 
 
-instance : Hilbert.K4 ⪱ Hilbert.K4Point3 := by
+instance : Modal.K4 ⪱ Modal.K4Point3 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -67,9 +63,5 @@ instance : Hilbert.K4 ⪱ Hilbert.K4Point3 := by
         . omega;
         . trivial;
         . trivial;
-
-end Logic.K4Point3.Kripke
-
-instance : Modal.K4 ⪱ Modal.K4Point3 := inferInstance
 
 end LO.Modal

@@ -23,8 +23,8 @@ open Modal.Formula.Kripke
 section S4Point2
 
 open Formula.Kripke in
-lemma Logic.S4Point2.goedelTranslated_axiomWLEM : Hilbert.S4Point2 ⊢! □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
-  suffices Hilbert.S4Point2 ⊢! □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
+lemma Logic.S4Point2.goedelTranslated_axiomWLEM : Modal.S4Point2 ⊢! □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
+  suffices Modal.S4Point2 ⊢! □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
     apply A!_replace this;
     . apply axiomK'!;
       apply nec!;
@@ -117,7 +117,7 @@ lemma S4Point2.is_smallestMC_of_KC : Modal.S4Point2 = (smallestMC 𝐊𝐂) := b
     | mem₂ h =>
       apply Hilbert.Normal.iff_logic_provable_provable.mpr;
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable Hilbert.KC Hilbert.S4Point2;
+      apply provable_goedelTranslated_of_provable Hilbert.KC Modal.S4Point2;
       . rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
         . simp;
         . simpa using Logic.S4Point2.goedelTranslated_axiomWLEM;

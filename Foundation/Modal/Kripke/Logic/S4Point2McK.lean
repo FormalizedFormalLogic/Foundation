@@ -6,7 +6,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -19,9 +19,9 @@ protected abbrev FrameClass.S4Point2McK : FrameClass := { F | F.IsS4Point2McK }
 end Kripke
 
 
-namespace Hilbert.S4Point2McK.Kripke
+namespace Modal.S4Point2McK.Kripke
 
-instance : Sound (Hilbert.S4Point2McK) FrameClass.S4Point2McK := instSound_of_validates_axioms $ by
+instance : Sound (Modal.S4Point2McK) FrameClass.S4Point2McK := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl | rfl) F ⟨_, _⟩;
@@ -30,17 +30,17 @@ instance : Sound (Hilbert.S4Point2McK) FrameClass.S4Point2McK := instSound_of_va
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance : Entailment.Consistent Hilbert.S4Point2McK :=
+instance : Entailment.Consistent Modal.S4Point2McK :=
   consistent_of_sound_frameclass FrameClass.S4Point2McK $ by
     use whitepoint;
     constructor;
 
-instance : Canonical (Hilbert.S4Point2McK) FrameClass.S4Point2McK := ⟨by constructor⟩
+instance : Canonical (Modal.S4Point2McK) FrameClass.S4Point2McK := ⟨by constructor⟩
 
-instance : Complete (Hilbert.S4Point2McK) FrameClass.S4Point2McK := inferInstance
+instance : Complete (Modal.S4Point2McK) FrameClass.S4Point2McK := inferInstance
 
 
-instance : Hilbert.S4McK ⪱ Hilbert.S4Point2McK := by
+instance : Modal.S4McK ⪱ Modal.S4Point2McK := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -73,7 +73,7 @@ instance : Hilbert.S4McK ⪱ Hilbert.S4Point2McK := by
         . use 2;
           omega;
 
-instance : Hilbert.S4Point2 ⪱ Hilbert.S4Point2McK := by
+instance : Modal.S4Point2 ⪱ Modal.S4Point2McK := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -94,10 +94,8 @@ instance : Hilbert.S4Point2 ⪱ Hilbert.S4Point2McK := by
         use 1;
         trivial;
 
-end Hilbert.S4Point2McK.Kripke
+end Modal.S4Point2McK.Kripke
 
-instance : Modal.S4McK ⪱ Modal.S4Point2McK := inferInstance
 
-instance : Modal.S4Point2 ⪱ Modal.S4Point2McK := inferInstance
 
 end LO.Modal

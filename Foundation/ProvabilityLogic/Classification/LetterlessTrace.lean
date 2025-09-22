@@ -536,7 +536,7 @@ lemma GL_proves_letterless_axiomWeakPoint3 (φ_letterless : φ.Letterless) (ψ_l
 /-- Theorem 2 in [Valentini & Solitro 1983] -/
 lemma iff_provable_GLPoint3_letterless_provable_GL : Modal.GLPoint3 ⊢! φ ↔ (∀ s : ZeroSubstitution _, Modal.GL ⊢! φ⟦s.1⟧) := by
   constructor;
-  . suffices Hilbert.GLPoint3 ⊢! φ → (∀ s : ZeroSubstitution _, Modal.GL ⊢! φ⟦s.1⟧) by simpa;
+  . suffices Modal.GLPoint3 ⊢! φ → (∀ s : ZeroSubstitution _, Modal.GL ⊢! φ⟦s.1⟧) by simpa;
     intro h s;
     induction h using Hilbert.Normal.rec! with
     | axm t ht =>
@@ -549,7 +549,7 @@ lemma iff_provable_GLPoint3_letterless_provable_GL : Modal.GLPoint3 ⊢! φ ↔ 
     | nec h => apply nec! h;
     | _ => simp;
   . contrapose!;
-    suffices Hilbert.GLPoint3 ⊬ φ → (∃ s : ZeroSubstitution _, Hilbert.GL ⊬ φ⟦s.1⟧) by simpa;
+    suffices Modal.GLPoint3 ⊬ φ → (∃ s : ZeroSubstitution _, Modal.GL ⊬ φ⟦s.1⟧) by simpa;
     -- Kripke semantical arguments (?)
     intro h;
     sorry;

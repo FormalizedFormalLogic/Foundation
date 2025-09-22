@@ -13,7 +13,7 @@ open Entailment
 open Entailment.Context
 open Formula
 open Formula.Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Kripke
 
 section
@@ -68,28 +68,24 @@ end
 
 section
 
-namespace Logic
-
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-instance : Hilbert.Grz ⪯ Hilbert.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+instance : Modal.Grz ⪯ Modal.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
 
-lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Hilbert.Grz]! φ) : Hilbert.GrzPoint2 ⊢! φ := by
+lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Modal.Grz]! φ) : Modal.GrzPoint2 ⊢! φ := by
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
   simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe] at hΓ₁;
-  replace hΓ₂ : Hilbert.GrzPoint2 ⊢! ⋀Γ ➝ φ := WeakerThan.pbl $ FiniteContext.provable_iff.mp hΓ₂;
+  replace hΓ₂ : Modal.GrzPoint2 ⊢! ⋀Γ ➝ φ := WeakerThan.pbl $ FiniteContext.provable_iff.mp hΓ₂;
   exact hΓ₂ ⨀ by
     apply Conj₂!_intro;
     intro γ hγ;
     obtain ⟨a, ha, rfl⟩ := hΓ₁ _ hγ;
     exact axiomPoint2!;
 
-lemma not_Grz_of_not_GrzPoint2 (h : Hilbert.GrzPoint2 ⊬ φ) : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList ⊬[Hilbert.Grz] φ := by
+lemma not_Grz_of_not_GrzPoint2 (h : Modal.GrzPoint2 ⊬ φ) : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList ⊬[Modal.Grz] φ := by
   have := Context.provable_iff.not.mp $ not_imp_not.mpr GrzPoint2_of_Grz h;
   push_neg at this;
   convert this ((φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toList) $ by simp;
-
-end Logic
 
 end
 
@@ -106,17 +102,14 @@ instance [F.IsFiniteGrzPoint2] : F.IsS4Point2McK where
 
 end Kripke
 
-
-namespace Logic.GrzPoint2.Kripke
-
-instance : Sound Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := instSound_of_validates_axioms $ by
+instance : Sound Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance : Entailment.Consistent Hilbert.GrzPoint2 :=
+instance : Entailment.Consistent Modal.GrzPoint2 :=
   consistent_of_sound_frameclass FrameClass.finite_GrzPoint2 $ by
     use whitepoint;
     constructor;
@@ -126,14 +119,14 @@ section
 
 open Relation
 
-instance : Complete Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
+instance : Complete Modal.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
   intro φ;
   contrapose;
   intro hφ;
 
-  replace hφ : Hilbert.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
+  replace hφ : Modal.Grz ⊬ ⋀((φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList) ➝ φ := not_Grz_of_not_GrzPoint2 hφ;
   generalize eΓ : (φ.atoms.image (λ a => Axioms.Point2 (atom a))).toList = Γ at hφ;
-  obtain ⟨M, r, hM, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (Complete.complete (𝓢 := Hilbert.Grz) (𝓜 := FrameClass.finite_Grz)) hφ;
+  obtain ⟨M, r, hM, hΓφ⟩ := exists_model_world_of_not_validOnFrameClass $ not_imp_not.mpr (Complete.complete (𝓢 := Modal.Grz) (𝓜 := FrameClass.finite_Grz)) hφ;
   replace hM := Set.mem_setOf_eq.mp hM;
   -- have : IsPartialOrder _ M.toFrame := IsPartialOrder.mk
 
@@ -277,7 +270,7 @@ instance : Complete Hilbert.GrzPoint2 FrameClass.finite_GrzPoint2 := ⟨by
 end
 
 
-instance : Hilbert.Grz ⪱ Hilbert.GrzPoint2 := by
+instance : Modal.Grz ⪱ Modal.GrzPoint2 := by
   constructor;
   . infer_instance;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -315,9 +308,9 @@ instance : Hilbert.Grz ⪱ Hilbert.GrzPoint2 := by
             push_neg;
             simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
 
-instance : Hilbert.S4Point2McK ⪱ Hilbert.GrzPoint2 := by
+instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.S4Point2McK FrameClass.finite_GrzPoint2;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.S4Point2McK FrameClass.finite_GrzPoint2;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -347,16 +340,8 @@ instance : Hilbert.S4Point2McK ⪱ Hilbert.GrzPoint2 := by
         . contradiction;
         . contradiction;
 
-instance : Hilbert.S4Point2 ⪱ Hilbert.GrzPoint2 := calc
-  Hilbert.S4Point2 ⪱ Hilbert.S4Point2McK := by infer_instance
-  _                ⪱ Hilbert.GrzPoint2 := by infer_instance
-
-end Logic.GrzPoint2.Kripke
-
-instance : Modal.Grz ⪱ Modal.GrzPoint2 := inferInstance
-
-instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := inferInstance
-
-instance : Modal.S4Point2 ⪱ Modal.GrzPoint2 := inferInstance
+instance : Modal.S4Point2 ⪱ Modal.GrzPoint2 := calc
+  Modal.S4Point2 ⪱ Modal.S4Point2McK := by infer_instance
+  _                ⪱ Modal.GrzPoint2 := by infer_instance
 
 end LO.Modal

@@ -85,7 +85,7 @@ lemma S5.is_smallestMC_of_Cl : Modal.S5 = (smallestMC 𝐂𝐥) := by
       apply Hilbert.Normal.iff_logic_provable_provable.mpr;
       rcases h with ⟨φ, hφ, rfl⟩;
       apply rm_diabox'!;
-      apply WeakerThan.pbl (𝓢 := Hilbert.S4);
+      apply WeakerThan.pbl (𝓢 := Modal.S4);
       exact (diaK'! $ goedelTranslated_axiomTc) ⨀ (iff_provable_Cl_provable_dia_gS4.mp hφ);
 
 instance : Sound (smallestMC 𝐂𝐥) FrameClass.S5 := by

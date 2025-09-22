@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.K5
 import Foundation.Modal.Kripke.Logic.KD
 
@@ -9,7 +8,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -18,27 +17,22 @@ protected abbrev FrameClass.KD5 : FrameClass := { F | F.IsKD5 }
 
 end Kripke
 
-
-namespace Hilbert.KD5.Kripke
-
-instance : Sound (Hilbert.KD5) Kripke.FrameClass.KD5 := instSound_of_validates_axioms $ by
+instance : Sound (Modal.KD5) Kripke.FrameClass.KD5 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFive_of_euclidean;
 
-instance : Entailment.Consistent (Hilbert.KD5) := consistent_of_sound_frameclass Kripke.FrameClass.KD5 $ by
+instance : Entailment.Consistent (Modal.KD5) := consistent_of_sound_frameclass Kripke.FrameClass.KD5 $ by
   use whitepoint;
   constructor;
 
-instance : Canonical (Hilbert.KD5) Kripke.FrameClass.KD5 := ⟨by constructor⟩
+instance : Canonical (Modal.KD5) Kripke.FrameClass.KD5 := ⟨by constructor⟩
 
-instance : Complete (Hilbert.KD5) Kripke.FrameClass.KD5 := inferInstance
+instance : Complete (Modal.KD5) Kripke.FrameClass.KD5 := inferInstance
 
-end KD5.Kripke
-
-instance : Hilbert.KD ⪱ Hilbert.KD5 := by
+instance : Modal.KD ⪱ Modal.KD5 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -58,7 +52,7 @@ instance : Hilbert.KD ⪱ Hilbert.KD5 := by
         . use 1;
           constructor <;> tauto;
 
-instance : Hilbert.K5 ⪱ Hilbert.KD5 := by
+instance : Modal.K5 ⪱ Modal.KD5 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -71,12 +65,5 @@ instance : Hilbert.K5 ⪱ Hilbert.KD5 := by
       constructor;
       . refine { reucl := by simp [RightEuclidean]; };
       . simp [Semantics.Realize, Satisfies];
-
-end Hilbert
-
-instance : Modal.KD ⪱ Modal.KD5 := inferInstance
-
-instance : Modal.K5 ⪱ Modal.KD5 := inferInstance
-
 
 end LO.Modal

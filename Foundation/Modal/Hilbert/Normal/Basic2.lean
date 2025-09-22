@@ -338,6 +338,7 @@ instance : KTB.axioms.HasK where p := 0; q := 1
 instance : KTB.axioms.HasT where p := 0
 instance : KTB.axioms.HasB where p := 0
 protected abbrev KTB := Hilbert.Normal KTB.axioms
+instance : Entailment.KTB Modal.KTB where
 
 protected abbrev KMcK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.McK (.atom 0)}
 instance : KMcK.axioms.HasK where p := 0; q := 1

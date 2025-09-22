@@ -21,7 +21,7 @@ theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.Letterless) : 𝐈�
   . apply WeakerThan.wk;
     infer_instance;
   . intro h;
-    have : Modal.Hilbert.S4 ⊢! ◇φᵍ := Modal.Logic.iff_provable_Cl_provable_dia_gS4.mp h;
+    have : Modal.Modal.S4 ⊢! ◇φᵍ := Modal.Logic.iff_provable_Cl_provable_dia_gS4.mp h;
     have : Modal.Hilbert.Triv ⊢! ◇φᵍ := WeakerThan.pbl this;
     have : Modal.Hilbert.Triv ⊢! φᵍ := diaT'! this;
     have : (φᵍᵀ.toPropFormula _).isTautology := Modal.Logic.Triv.iff_isTautology.mp this;

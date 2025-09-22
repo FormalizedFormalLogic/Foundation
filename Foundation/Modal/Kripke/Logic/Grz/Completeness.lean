@@ -40,7 +40,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open ComplementClosedConsistentFinset
 open Kripke
 
-namespace Hilbert.Grz.Kripke
+namespace Modal.Grz.Kripke
 
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Grz 𝓢]
@@ -251,15 +251,15 @@ lemma complete_of_mem_miniCanonicalFrame
       tauto;
 ⟩
 
-instance : Complete Hilbert.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
+instance : Complete Modal.Grz FrameClass.finite_Grz := complete_of_mem_miniCanonicalFrame FrameClass.finite_Grz $ by
   simp only [Set.mem_setOf_eq];
   intro φ;
   infer_instance;
 
 
-instance : Hilbert.S4McK ⪱ Hilbert.Grz := by
+instance : Modal.S4McK ⪱ Modal.Grz := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.S4McK FrameClass.finite_Grz
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.S4McK FrameClass.finite_Grz
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -284,12 +284,11 @@ instance : Hilbert.S4McK ⪱ Hilbert.Grz := by
         . contradiction;
         . contradiction;
 
-instance : Hilbert.S4 ⪱ Hilbert.Grz := calc
-  Hilbert.S4 ⪱ Hilbert.S4McK := by infer_instance
-  _          ⪱ Hilbert.Grz   := by infer_instance
+instance : Modal.S4 ⪱ Modal.Grz := calc
+  Modal.S4 ⪱ Modal.S4McK := by infer_instance
+  _          ⪱ Modal.Grz   := by infer_instance
 
-end Hilbert.Grz.Kripke
+end Modal.Grz.Kripke
 
-instance : Modal.S4McK ⪱ Modal.Grz := inferInstance
 
 end LO.Modal

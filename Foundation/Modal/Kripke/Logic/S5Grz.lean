@@ -7,9 +7,9 @@ namespace LO.Modal.Logic
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
-instance : Hilbert.S5 ⪱ Hilbert.S5Grz := by
+instance : Modal.S5 ⪱ Modal.S5Grz := by
   constructor;
   . exact Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -24,7 +24,7 @@ instance : Hilbert.S5 ⪱ Hilbert.S5Grz := by
       . simp [Semantics.Realize, Satisfies];
         tauto;
 
-instance : Hilbert.Grz ⪱ Hilbert.S5Grz := by
+instance : Modal.Grz ⪱ Modal.S5Grz := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
@@ -49,22 +49,16 @@ instance : Hilbert.Grz ⪱ Hilbert.S5Grz := by
         . use 1;
           constructor <;> omega;
 
-instance : Hilbert.S4 ⪱ Hilbert.Triv := calc
-  Hilbert.S4 ⪱ Hilbert.S5    := by infer_instance
-  _          ⪱ Hilbert.S5Grz := by infer_instance
+instance : Modal.S4 ⪱ Hilbert.Triv := calc
+  Modal.S4 ⪱ Modal.S5    := by infer_instance
+  _          ⪱ Modal.S5Grz := by infer_instance
   _          ≊ Hilbert.Triv  := by infer_instance
 
-instance : Sound Hilbert.S5Grz FrameClass.finite_Triv := by
-  suffices Hilbert.S5Grz ≊ Hilbert.Triv by
+instance : Sound Modal.S5Grz FrameClass.finite_Triv := by
+  suffices Modal.S5Grz ≊ Hilbert.Triv by
     constructor;
     intro φ h;
     apply Sound.sound $ Entailment.Equiv.iff.mp this φ |>.mp h;
   infer_instance;
-
-instance : Modal.S5 ⪱ Modal.S5Grz := inferInstance
-
-instance : Modal.Grz ⪱ Modal.S5Grz := inferInstance
-
-instance : Modal.S4 ⪱ Modal.Triv := inferInstance
 
 end LO.Modal.Logic

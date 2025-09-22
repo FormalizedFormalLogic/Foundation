@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.KD4
 import Foundation.Modal.Kripke.Logic.KD5
 import Foundation.Modal.Kripke.Logic.K45
@@ -10,7 +9,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -22,9 +21,9 @@ end Kripke
 
 
 
-namespace Hilbert.KD45.Kripke
+namespace Modal.KD45.Kripke
 
-instance : Sound Hilbert.KD45 FrameClass.KD45 := instSound_of_validates_axioms $ by
+instance : Sound Modal.KD45 FrameClass.KD45 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
@@ -32,16 +31,16 @@ instance : Sound Hilbert.KD45 FrameClass.KD45 := instSound_of_validates_axioms $
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance : Entailment.Consistent Hilbert.KD45 := consistent_of_sound_frameclass FrameClass.KD45 $ by
+instance : Entailment.Consistent Modal.KD45 := consistent_of_sound_frameclass FrameClass.KD45 $ by
   use whitepoint;
   constructor;
 
-instance : Canonical Hilbert.KD45 FrameClass.KD45 := ⟨by constructor⟩
+instance : Canonical Modal.KD45 FrameClass.KD45 := ⟨by constructor⟩
 
-instance : Complete Hilbert.KD45 FrameClass.KD45 := inferInstance
+instance : Complete Modal.KD45 FrameClass.KD45 := inferInstance
 
 
-instance : Hilbert.KD4 ⪱ Hilbert.KD45 := by
+instance : Modal.KD4 ⪱ Modal.KD45 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -65,7 +64,7 @@ instance : Hilbert.KD4 ⪱ Hilbert.KD45 := by
         . use 1;
           constructor <;> omega;
 
-instance : Hilbert.KD5 ⪱ Hilbert.KD45 := by
+instance : Modal.KD5 ⪱ Modal.KD45 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -102,7 +101,7 @@ instance : Hilbert.KD5 ⪱ Hilbert.KD45 := by
             . omega;
             . trivial;
 
-instance : Hilbert.K45 ⪱ Hilbert.KD45 := by
+instance : Modal.K45 ⪱ Modal.KD45 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -117,12 +116,9 @@ instance : Hilbert.K45 ⪱ Hilbert.KD45 := by
         refine { trans := by simp, reucl := by simp [RightEuclidean] }
       . simp [Semantics.Realize, Satisfies];
 
-end Hilbert.KD45.Kripke
+end Modal.KD45.Kripke
 
-instance : Modal.KD4 ⪱ Modal.KD45 := inferInstance
 
-instance : Modal.KD5 ⪱ Modal.KD45 := inferInstance
 
-instance : Modal.K45 ⪱ Modal.KD45 := inferInstance
 
 end LO.Modal

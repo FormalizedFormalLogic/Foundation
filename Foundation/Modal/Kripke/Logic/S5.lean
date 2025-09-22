@@ -8,8 +8,11 @@ import Foundation.Vorspiel.HRel.Universal
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
+
 
 
 namespace Kripke
@@ -58,49 +61,41 @@ lemma iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass : Frame
 end Kripke
 
 
-namespace Hilbert.S5.Kripke
 
-instance : Sound Hilbert.S5 FrameClass.S5 := instSound_of_validates_axioms $ by
+instance : Sound Modal.S5 FrameClass.S5 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFive_of_euclidean;
 
-instance : Sound Hilbert.S5 FrameClass.universal := ⟨by
+instance : Sound Modal.S5 FrameClass.universal := ⟨by
   intro φ hF;
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mpr;
   exact Sound.sound (𝓜 := FrameClass.S5) hF;
 ⟩
 
-instance : Entailment.Consistent Hilbert.S5 := consistent_of_sound_frameclass FrameClass.S5 $ by
+instance : Entailment.Consistent Modal.S5 := consistent_of_sound_frameclass FrameClass.S5 $ by
   use whitepoint;
   constructor;
 
-instance : Canonical Hilbert.S5 FrameClass.S5 := ⟨by constructor⟩
+instance : Canonical Modal.S5 FrameClass.S5 := ⟨by constructor⟩
 
-instance : Complete Hilbert.S5 FrameClass.S5 := inferInstance
+instance : Complete Modal.S5 FrameClass.S5 := inferInstance
 
-instance : Complete Hilbert.S5 FrameClass.universal := ⟨by
+instance : Complete Modal.S5 FrameClass.universal := ⟨by
   intro φ hF;
   apply Complete.complete (𝓜 := FrameClass.S5);
   apply iff_validOnUniversalFrameClass_validOnReflexiveEuclideanFrameClass.mp;
   exact hF;
 ⟩
 
-end Hilbert.S5.Kripke
 
 
-namespace Logic
 
-open Formula
-open Entailment
-open Kripke
-
-
-instance : Hilbert.KTB ⪱ Hilbert.S5 := by
+instance : Modal.KTB ⪱ Modal.S5 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.KTB) (FrameClass.S5);
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass (FrameClass.KTB) (FrameClass.S5);
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -121,9 +116,9 @@ instance : Hilbert.KTB ⪱ Hilbert.S5 := by
         . use 2;
           constructor <;> omega;
 
-instance : Hilbert.KD45 ⪱ Hilbert.S5 := by
+instance : Modal.KD45 ⪱ Modal.S5 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.KD45) (FrameClass.S5);
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass (FrameClass.KD45) (FrameClass.S5);
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -144,9 +139,9 @@ instance : Hilbert.KD45 ⪱ Hilbert.S5 := by
       . simp [Semantics.Realize, Satisfies, M];
         tauto;
 
-instance : Hilbert.KB4 ⪱ Hilbert.S5 := by
+instance : Modal.KB4 ⪱ Modal.S5 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.KB4) (FrameClass.S5);
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass (FrameClass.KB4) (FrameClass.S5);
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -161,9 +156,9 @@ instance : Hilbert.KB4 ⪱ Hilbert.S5 := by
       . refine { symm := by tauto, trans := by tauto };
       . simp [Semantics.Realize, Satisfies];
 
-instance : Hilbert.S4Point4 ⪱ Hilbert.S5 := by
+instance : Modal.S4Point4 ⪱ Modal.S5 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass (FrameClass.S4Point4) (FrameClass.S5);
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass (FrameClass.S4Point4) (FrameClass.S5);
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -192,23 +187,11 @@ instance : Hilbert.S4Point4 ⪱ Hilbert.S5 := by
         . use 1;
           constructor <;> omega;
 
-instance : Hilbert.S4 ⪱ Hilbert.S5 := calc
-  Hilbert.S4 ⪱ Hilbert.S4Point2 := by infer_instance
-  _          ⪱ Hilbert.S4Point3 := by infer_instance
-  _          ⪱ Hilbert.S4Point4 := by infer_instance
-  _          ⪱ Hilbert.S5       := by infer_instance
-
-end Logic
-
-instance : Modal.KTB ⪱ Modal.S5 := inferInstance
-
-instance : Modal.KD45 ⪱ Modal.S5 := inferInstance
-
-instance : Modal.KB4 ⪱ Modal.S5 := inferInstance
-
-instance : Modal.S4Point4 ⪱ Modal.S5 := inferInstance
-
-instance : Modal.S4 ⪱ Modal.S5 := inferInstance
+instance : Modal.S4 ⪱ Modal.S5 := calc
+  Modal.S4 ⪱ Modal.S4Point2 := by infer_instance
+  _          ⪱ Modal.S4Point3 := by infer_instance
+  _          ⪱ Modal.S4Point4 := by infer_instance
+  _          ⪱ Modal.S5       := by infer_instance
 
 instance : Modal.KT ⪱ Modal.S5 := calc
   Modal.KT ⪱ Modal.S4 := by infer_instance

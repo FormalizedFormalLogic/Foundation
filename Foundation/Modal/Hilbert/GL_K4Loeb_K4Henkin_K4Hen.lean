@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.Normal.Basic
+import Foundation.Modal.Hilbert.Normal.Basic2
 import Foundation.Modal.Hilbert.WithLoeb.Basic
 import Foundation.Modal.Hilbert.WithHenkin.Basic
 import Mathlib.Tactic.TFAE
@@ -102,7 +102,7 @@ lemma Hilbert.equiv_logic_Normal_WithHenkin
 
 
 theorem provable_GL_TFAE : [
-  Hilbert.GL ⊢! φ,
+  Modal.GL ⊢! φ,
   Hilbert.K4Loeb ⊢! φ,
   Hilbert.K4Henkin ⊢! φ,
   Hilbert.K4Hen ⊢! φ

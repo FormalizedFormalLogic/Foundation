@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.Normal.Basic
+import Foundation.Modal.Hilbert.Normal.Basic2
 import Foundation.Modal.Logic.SumNormal
 import Foundation.Meta.ClProver
 
@@ -608,8 +608,8 @@ instance : DecidablePred (· ∈ allOfSize n) := by
   simp only [allOfSize.iff_mem_eq_size];
   infer_instance;
 
-#eval allOfSize 2
-#eval □ ∈ allOfSize 1
+-- #eval allOfSize 2
+-- #eval □ ∈ allOfSize 1
 
 lemma allOfSize.eq_succ_left₁ : m ∈ allOfSize (n + 1) → ∃ m₁ m₂, m₁ ∈ allOfSize 1 ∧ m₂ ∈ allOfSize n ∧ m = m₁ + m₂ := by
   simp only [allOfSize.iff_mem_eq_size];
@@ -624,7 +624,7 @@ def allOfSizeLe : Nat → Modalities
   | 0 => allOfSize 0
   | n + 1 => allOfSizeLe n ∪ allOfSize (n + 1)
 
-#eval allOfSizeLe 3
+-- #eval allOfSizeLe 3
 
 lemma allOfSizeLe.iff_mem_le_size : m ∈ allOfSizeLe n ↔ m.size ≤ n := by
   induction n with
