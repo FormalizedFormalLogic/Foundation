@@ -27,9 +27,7 @@ abbrev Derivation₀ (Γ : Sequent L) : Type _ := (∅ : SyntacticFormulas L) �
 
 abbrev Derivable₀ (Γ : Sequent L) : Prop := (∅ : SyntacticFormulas L) ⟹! Γ
 
-prefix:45 "⊢!ᵀ " => Derivation₀
-
-prefix:45 "⊢!ᵀ! " => Derivable₀
+prefix:45 "⊢ᵀ " => Derivation₀
 
 namespace Derivation
 

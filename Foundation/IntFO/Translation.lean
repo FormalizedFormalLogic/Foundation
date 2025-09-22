@@ -105,7 +105,7 @@ def negDoubleNegation : (φ : SyntacticFormula L) → 𝗠𝗶𝗻¹ ⊢! ∼φ�
 open Entailment
 
 noncomputable
-def goedelGentzen {Γ : Sequent L} : ⊢!ᵀ Γ → (∼Γ)ᴺ ⊢[𝗠𝗶𝗻¹]! ⊥
+def goedelGentzen {Γ : Sequent L} : ⊢ᵀ Γ → (∼Γ)ᴺ ⊢[𝗠𝗶𝗻¹]! ⊥
   | axL Γ r v            => nthAxm 1 ⨀ nthAxm 0
   | verum Γ              => nthAxm 0
   | @and _ _ Γ φ ψ dφ dψ =>
