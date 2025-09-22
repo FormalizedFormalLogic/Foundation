@@ -6,7 +6,7 @@ namespace LO.FirstOrder
 
 namespace BinderNotation
 
-abbrev finSuccItr {n} (i : Fin n) : (m : ℕ) → Fin (n + m)
+@[simp] abbrev finSuccItr {n} (i : Fin n) : (m : ℕ) → Fin (n + m)
   | 0     => i
   | m + 1 => (finSuccItr i m).succ
 

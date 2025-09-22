@@ -475,15 +475,15 @@ end FreeVariables
 
 section
 
-variable {α : Type*} [LinearOrder  α]
+variable {α : Type*} [LinearOrder α]
 
 lemma List.maximam?_some_of_not_nil {l : List α} (h : l ≠ []) : l.max?.isSome := by
   cases l
   case nil => simp at h
   case cons l => simp [List.max?_cons]
 
-lemma List.maximam?_eq_some {l : List α} {a} (h : l.max? = some a) : ∀ x ∈ l, x ≤ a :=
-  List.max?_le_iff (by simp) h (x := a) |>.mp (by rfl)
+lemma List.maximam?_eq_some [Std.LawfulOrderSup α] {l : List α} {a} (h : l.max? = some a) : ∀ x ∈ l, x ≤ a :=
+  List.max?_le_iff h (x := a) |>.mp (by rfl)
 
 end
 
