@@ -13,26 +13,26 @@ noncomputable def substNumeral (φ x : V) : V := substs ℒₒᵣ ?[numeral x] �
 
 lemma substNumeral_app_quote (σ π : Semisentence ℒₒᵣ 1) :
     substNumeral ⌜σ⌝ (⌜π⌝ : V) = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
-  simp [substNumeral, Semiformula.empty_quote_def, Semiformula.quote_def,
+  simp [substNumeral, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.embedding_substs_eq_substs_coe₁]
 
 noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := substs ℒₒᵣ (matrixToVec (fun i ↦ numeral (v i))) φ
 
 lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ) :
     (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.substs (fun i ↦ ↑(v i))) ▹ σ : Sentence ℒₒᵣ)⌝ := by
-  simp [substNumerals, Semiformula.empty_quote_def, Semiformula.quote_def,
+  simp [substNumerals, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.embedding_substitute_eq_substitute_embedding]
   rfl
 
 lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k → Semisentence ℒₒᵣ k) :
     substNumerals (⌜σ⌝ : V) (fun i ↦ ⌜π i⌝) = ⌜((Rew.substs (fun i ↦ ⌜π i⌝)) ▹ σ : Sentence ℒₒᵣ)⌝ := by
-  simpa [Semiformula.coe_empty_quote_eq_quote] using substNumerals_app_quote (V := V) σ (fun i ↦ ⌜π i⌝)
+  simpa [Sentence.coe_quote_eq_quote] using substNumerals_app_quote (V := V) σ (fun i ↦ ⌜π i⌝)
 
 noncomputable def substNumeralParams (k : ℕ) (φ x : V) : V := substs ℒₒᵣ (matrixToVec (numeral x :> fun i : Fin k ↦ qqBvar i)) φ
 
 lemma substNumeralParams_app_quote (σ τ : Semisentence ℒₒᵣ (k + 1)) :
     (substNumeralParams k ⌜σ⌝ ⌜τ⌝ : V) = ⌜((Rew.substs (⌜τ⌝ :> fun i : Fin k ↦ #i)) ▹ σ : Semisentence ℒₒᵣ k)⌝ := by
-  simp [substNumeralParams, Semiformula.empty_quote_def, Semiformula.quote_def,
+  simp [substNumeralParams, Sentence.quote_def, Semiformula.quote_def,
     Rewriting.embedding_substitute_eq_substitute_embedding, Matrix.vecHead]
   rfl
 
@@ -128,9 +128,9 @@ def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 := “x. ∀
 def fixedpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
-    T ⊢!. fixedpoint θ ⭤ θ/[⌜fixedpoint θ⌝] :=
+    T ⊢! fixedpoint θ ⭤ θ/[⌜fixedpoint θ⌝] :=
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (fixedpoint θ) ↔ V ⊧/![⌜fixedpoint θ⌝] θ by
       simpa [models_iff, Matrix.constant_eq_singleton]
@@ -156,9 +156,9 @@ def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒₒᵣ k :=
 def multifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.substs fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
 
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
-    T ⊢!. multifixedpoint θ i ⭤ (Rew.substs fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
+    T ⊢! multifixedpoint θ i ⭤ (Rew.substs fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (multifixedpoint θ i) ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) by simpa [models_iff]
     let t : Fin k → V := fun i ↦ ⌜multidiag (θ i)⌝
@@ -183,8 +183,8 @@ def exclusiveMultifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin 
   · rintro rfl; rfl
 
 theorem exclusiveMultidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
-    T ⊢!. exclusiveMultifixedpoint θ i ⭤ (Rew.substs fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i := by
-  have : T ⊢!. exclusiveMultifixedpoint θ i ⭤ ((Rew.substs fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i).padding ↑i := by
+    T ⊢! exclusiveMultifixedpoint θ i ⭤ (Rew.substs fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i := by
+  have : T ⊢! exclusiveMultifixedpoint θ i ⭤ ((Rew.substs fun j ↦ ⌜exclusiveMultifixedpoint θ j⌝) ▹ θ i).padding ↑i := by
     simpa using multidiagonal (T := T) (fun j ↦ (θ j).padding j) (i := i)
   exact Entailment.E!_trans this (Entailment.padding_iff _ _)
 
@@ -206,9 +206,9 @@ def parameterizedFixedpoint (θ : Semisentence ℒₒᵣ (k + 1)) : Semisentence
     (Rew.substs (⌜parameterizedDiag θ⌝ :> fun j ↦ #j)) ▹ parameterizedDiag θ
 
 theorem parameterized_diagonal (θ : Semisentence ℒₒᵣ (k + 1)) :
-    T ⊢!. ∀* (parameterizedFixedpoint θ ⭤ “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
+    T ⊢! ∀* (parameterizedFixedpoint θ ⭤ “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  complete₀ <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices
         ∀ params : Fin k → V,
@@ -225,7 +225,7 @@ theorem parameterized_diagonal (θ : Semisentence ℒₒᵣ (k + 1)) :
       _ ↔ V ⊧/(⌜parameterizedFixedpoint θ⌝ :> params) θ := by simp [ht]
 
 theorem parameterized_diagonal₁ (θ : Semisentence ℒₒᵣ 2) :
-    T ⊢!. ∀' (parameterizedFixedpoint θ ⭤ θ/[⌜parameterizedFixedpoint θ⌝, #0]) := by
+    T ⊢! ∀' (parameterizedFixedpoint θ ⭤ θ/[⌜parameterizedFixedpoint θ⌝, #0]) := by
   simpa [univClosure, BinderNotation.finSuccItr, Matrix.fun_eq_vec_one] using
     parameterized_diagonal (T := T) θ
 

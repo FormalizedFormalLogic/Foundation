@@ -70,7 +70,6 @@ import Foundation.FirstOrder.Internal.Consistency
 import Foundation.FirstOrder.Internal.WitnessComparison
 import Foundation.FirstOrder.Internal.RosserProvability
 
-
 import Foundation.FirstOrder.Incompleteness.First
 import Foundation.FirstOrder.Incompleteness.Halting
 
@@ -80,6 +79,15 @@ import Foundation.FirstOrder.Incompleteness.Examples
 
 import Foundation.FirstOrder.Incompleteness.Tarski
 import Foundation.FirstOrder.Incompleteness.Yablo
+
+import Foundation.FirstOrder.SetTheory.Basic
+import Foundation.FirstOrder.SetTheory.Axioms
+
+import Foundation.FirstOrder.Z.Basic
+
+import Foundation.FirstOrder.ZF.Basic
+
+import Foundation.FirstOrder.ZFC.Basic
 
 import Foundation.FirstOrder.Hauptsatz
 
@@ -107,6 +115,7 @@ import Foundation.Modal.Kripke.Logic.GrzPoint3
 import Foundation.Modal.Kripke.Logic.K4McK
 import Foundation.Modal.Kripke.Logic.K4Point2
 import Foundation.Modal.Kripke.Logic.K4Point3
+import Foundation.Modal.Kripke.Logic.K4n
 import Foundation.Modal.Kripke.Logic.KHen
 import Foundation.Modal.Kripke.Logic.KT4B
 import Foundation.Modal.Kripke.Logic.KTc
@@ -145,8 +154,6 @@ import Foundation.Modal.Boxdot.GL_Grz
 
 import Foundation.Modal.Modality.S5
 
-import Foundation.Modal.Logic.Extension
-
 import Foundation.Modal.Logic.S.Consistent
 
 import Foundation.Modal.Logic.D.Basic
@@ -163,7 +170,6 @@ import Foundation.Modal.VanBentham.StandardTranslation
 import Foundation.ProvabilityLogic.Realization
 import Foundation.ProvabilityLogic.Arithmetic
 import Foundation.ProvabilityLogic.SolovaySentences
-import Foundation.ProvabilityLogic.Provability
 
 import Foundation.ProvabilityLogic.N.Soundness
 
@@ -174,6 +180,9 @@ import Foundation.ProvabilityLogic.GL.Uniform
 import Foundation.ProvabilityLogic.Grz.Completeness
 
 import Foundation.ProvabilityLogic.S.Completeness
+
+import Foundation.ProvabilityLogic.Classification.LetterlessTrace
+import Foundation.ProvabilityLogic.Classification.Trace
 
 import Foundation.Meta.Qq
 import Foundation.Meta.Lit

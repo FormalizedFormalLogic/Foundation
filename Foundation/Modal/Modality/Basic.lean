@@ -1,5 +1,5 @@
 import Foundation.Modal.Hilbert.Normal.Basic
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.SumNormal
 import Foundation.Meta.ClProver
 
 
@@ -530,22 +530,22 @@ open Hilbert.Normal
 variable {H : Hilbert.Normal ℕ} [H.HasK] {m : outParam (Modality)}
 
 instance [H.HasT] : (□) ⤳[H.logic] (-) :=
-  translation_of_axiomInstance (a := HasT.p H) $ by simp [Entailment.theory];
+  translation_of_axiomInstance (a := HasT.p H) $ by simp [Logic.iff_provable, Entailment.theory];
 
 instance [H.HasFour] : (□) ⤳[H.logic] (□□) :=
-  translation_of_axiomInstance (a := HasFour.p (H := H)) $ by simp [Entailment.theory];
+  translation_of_axiomInstance (a := HasFour.p (H := H)) $ by simp [Logic.iff_provable, Entailment.theory];
 
 instance [H.HasTc] : (m) ⤳[H.logic] (□m) :=
-  translation_of_axiomInstance (a := HasTc.p H) $ by simp [Entailment.theory];
+  translation_of_axiomInstance (a := HasTc.p H) $ by simp [Logic.iff_provable, Entailment.theory];
 
 instance [H.HasB] : (m) ⤳[H.logic] (□◇m) :=
-  translation_of_axiomInstance (a := HasB.p (H := H)) $ by simp [Entailment.theory];
+  translation_of_axiomInstance (a := HasB.p (H := H)) $ by simp [Logic.iff_provable, Entailment.theory];
 
 instance [H.HasD] : (□m) ⤳[H.logic] (◇m) :=
-  translation_of_axiomInstance (a := HasD.p (H := H)) $ by simp [Entailment.theory];
+  translation_of_axiomInstance (a := HasD.p (H := H)) $ by simp [Logic.iff_provable, Entailment.theory];
 
 instance [H.HasFive] : (◇m) ⤳[H.logic] (□◇m) :=
-  translation_of_axiomInstance (a := HasFive.p (H := H)) $ by simp [Entailment.theory];
+  translation_of_axiomInstance (a := HasFive.p (H := H)) $ by simp [Logic.iff_provable, Entailment.theory];
 
 end
 

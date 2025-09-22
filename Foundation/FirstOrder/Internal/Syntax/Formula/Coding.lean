@@ -190,7 +190,13 @@ lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁�
 noncomputable instance : GoedelQuote (SyntacticSemiformula L n) V where
   quote φ := (⌜φ⌝ : Metamath.Semiformula V L n).val
 
-def quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : Metamath.Semiformula V L n).val := rfl
+lemma quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : Metamath.Semiformula V L n).val := rfl
+
+@[simp] lemma quote_isSemiformula (φ : SyntacticSemiformula L n) : IsSemiformula L ↑n (⌜φ⌝ : V) := by simp [quote_def]
+
+@[simp] lemma quote_isSemiformula₀ (φ : SyntacticFormula L) : IsSemiformula L 0 (⌜φ⌝ : V) := by simp [quote_def]
+
+@[simp] lemma quote_isSemiformul₁ (φ : SyntacticSemiformula L 1) : IsSemiformula L 1 (⌜φ⌝ : V) := by simp [quote_def]
 
 @[simp] lemma quote_rel (R : L.Rel k) (v : Fin k → SyntacticSemiterm L n) :
     (⌜rel R v⌝ : V) = ^rel ↑k ⌜R⌝ (SemitermVec.val fun i ↦ (⌜v i⌝ : Metamath.Semiterm V L n)) := rfl
@@ -246,55 +252,65 @@ noncomputable instance : LCWQIsoGoedelQuote (Semisentence L) (Metamath.Semiformu
   all _ := by simp
   ex _ := by simp
 
-def empty_typed_quote_def (σ : Semisentence L n) :
-    (⌜σ⌝ : Metamath.Semiformula V L n) = ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝ := rfl
-
-@[simp] lemma empty_typed_quote_eq (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t = !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
-
-@[simp] lemma empty_typed_quote_ne (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≠ !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
-
-@[simp] lemma empty_typed_quote_lt (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t < !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
-
-@[simp] lemma empty_typed_quote_nlt (t u : ClosedSemiterm ℒₒᵣ n) :
-    (⌜(“!!t ≮ !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
-
-noncomputable instance : GoedelQuote (Semisentence L n) V where
-  quote σ := ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝
-
-lemma empty_quote_def (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝ := rfl
-
-def empty_quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Metamath.Semiformula V L n).val := rfl
-
-lemma empty_quote_eq_encode (σ : Semisentence L n) : (⌜σ⌝ : V) = ↑(encode σ) := by simp [empty_quote_def, quote_eq_encode]
-
-lemma coe_empty_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = ⌜σ⌝ := by
-  simp [empty_quote_eq_encode]
-
-@[simp] lemma val_empty_quote {ξ n e ε} (σ : Semisentence L n) :
-    Semiterm.valm V e ε (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) = ⌜σ⌝ := by
-  simp [goedelNumber'_def, empty_quote_eq_encode, numeral_eq_natCast]
-
 @[simp] lemma coe_quote {ξ n} (φ : SyntacticSemiformula L n) : ↑(⌜φ⌝ : ℕ) = (⌜φ⌝ : Semiterm ℒₒᵣ ξ m) := by
-  simp [goedelNumber'_def, quote_eq_encode]
-
-@[simp] lemma coe_empty_quote {ξ n} (σ : Semisentence L n) : ↑(⌜σ⌝ : ℕ) = (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) := by
-  simp [goedelNumber'_def, empty_quote_eq_encode]
+  simp [goedelNumber'_def, Semiformula.quote_eq_encode]
 
 @[simp] lemma quote_quote_eq_numeral (φ : SyntacticSemiformula L n) :
     (⌜(⌜φ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Metamath.Semiterm V ℒₒᵣ m) = InternalArithmetic.typedNumeral ⌜φ⌝ := by
   simp [←coe_quote, coe_quote_eq_quote]
 
-@[simp] lemma empty_quote_quote_eq_numeral (σ : Semisentence L n) :
-    (⌜(⌜σ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Metamath.Semiterm V ℒₒᵣ m) = InternalArithmetic.typedNumeral ⌜σ⌝ := by
-  simp [←coe_empty_quote, coe_empty_quote_eq_quote]
-
-@[simp] lemma empty_quote_inj_iff {σ₁ σ₂ : Semisentence L n} :
-    (⌜σ₁⌝ : V) = ⌜σ₂⌝ ↔ σ₁ = σ₂ := by simp [empty_quote_eq_encode]
-
 end Semiformula
+
+namespace Sentence
+
+def typed_quote_def (σ : Semisentence L n) :
+    (⌜σ⌝ : Metamath.Semiformula V L n) = ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝ := rfl
+
+@[simp] lemma typed_quote_eq (t u : ClosedSemiterm ℒₒᵣ n) :
+    (⌜(“!!t = !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
+
+@[simp] lemma typed_quote_ne (t u : ClosedSemiterm ℒₒᵣ n) :
+    (⌜(“!!t ≠ !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≉ ⌜u⌝) := rfl
+
+@[simp] lemma typed_quote_lt (t u : ClosedSemiterm ℒₒᵣ n) :
+    (⌜(“!!t < !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ <' ⌜u⌝) := rfl
+
+@[simp] lemma typed_quote_nlt (t u : ClosedSemiterm ℒₒᵣ n) :
+    (⌜(“!!t ≮ !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
+
+noncomputable instance : GoedelQuote (Semisentence L n) V where
+  quote σ := ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝
+
+lemma quote_def (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝ := rfl
+
+def quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Metamath.Semiformula V L n).val := rfl
+
+@[simp] lemma quote_isSemiformula (φ : Semisentence L n) : IsSemiformula L ↑n (⌜φ⌝ : V) := by simp [quote_def]
+
+@[simp] lemma quote_isSemiformula₀ (φ : Sentence L) : IsSemiformula L 0 (⌜φ⌝ : V) := by simp [quote_def]
+
+@[simp] lemma quote_isSemiformul₁ (φ : Semisentence L 1) : IsSemiformula L 1 (⌜φ⌝ : V) := by simp [quote_def]
+
+lemma quote_eq_encode (σ : Semisentence L n) : (⌜σ⌝ : V) = ↑(encode σ) := by simp [quote_def, Semiformula.quote_eq_encode]
+
+lemma coe_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = ⌜σ⌝ := by
+  simp [quote_eq_encode]
+
+@[simp] lemma val_quote {ξ n e ε} (σ : Semisentence L n) :
+    Semiterm.valm V e ε (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) = ⌜σ⌝ := by
+  simp [goedelNumber'_def, quote_eq_encode, numeral_eq_natCast]
+
+@[simp] lemma coe_quote {ξ n} (σ : Semisentence L n) : ↑(⌜σ⌝ : ℕ) = (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) := by
+  simp [goedelNumber'_def, quote_eq_encode]
+
+@[simp] lemma quote_quote_eq_numeral (σ : Semisentence L n) :
+    (⌜(⌜σ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Metamath.Semiterm V ℒₒᵣ m) = InternalArithmetic.typedNumeral ⌜σ⌝ := by
+  simp [←coe_quote, coe_quote_eq_quote]
+
+@[simp] lemma quote_inj_iff {σ₁ σ₂ : Semisentence L n} :
+    (⌜σ₁⌝ : V) = ⌜σ₂⌝ ↔ σ₁ = σ₂ := by simp [quote_eq_encode]
+
+end Sentence
 
 end FirstOrder
 

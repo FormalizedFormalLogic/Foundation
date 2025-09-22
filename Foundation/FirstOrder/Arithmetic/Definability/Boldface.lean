@@ -6,16 +6,16 @@ namespace LO.FirstOrder.Arithmetic
 
 end Arithmetic
 
-def Defined {k} (R : (Fin k → V) → Prop) [Structure L V] (φ : Semisentence L k) : Prop :=
+def Defined' {k} (R : (Fin k → V) → Prop) [Structure L V] (φ : Semisentence L k) : Prop :=
   ∀ v, R v ↔ Semiformula.Evalbm V v φ
 
-def DefinedWithParam {k} (R : (Fin k → V) → Prop) [Structure L V] (φ : Semiformula L V k) : Prop :=
+def DefinedWithParam' {k} (R : (Fin k → V) → Prop) [Structure L V] (φ : Semiformula L V k) : Prop :=
   ∀ v, R v ↔ Semiformula.Evalm V v id φ
 
-lemma Defined.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {φ : Semisentence L k} (h : Defined R φ) (v) :
+lemma Defined'.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {φ : Semisentence L k} (h : Defined' R φ) (v) :
     Semiformula.Evalbm V v φ ↔ R v := (h v).symm
 
-lemma DefinedWithParam.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {φ : Semiformula L V k} (h : DefinedWithParam R φ) (v) :
+lemma DefinedWithParam'.iff [Structure L V] {k} {R : (Fin k → V) → Prop} {φ : Semiformula L V k} (h : DefinedWithParam' R φ) (v) :
     Semiformula.Evalm V v id φ ↔ R v := (h v).symm
 
 namespace Arithmetic.HierarchySymbol
@@ -27,14 +27,14 @@ open PeanoMinus
 variable {V : Type*} [ORingStruc V]
 
 def Defined (R : (Fin k → V) → Prop) : {ℌ : HierarchySymbol} → ℌ.Semisentence k → Prop
-  | 𝚺-[_], φ => FirstOrder.Defined R φ.val
-  | 𝚷-[_], φ => FirstOrder.Defined R φ.val
-  | 𝚫-[_], φ => φ.ProperOn V ∧ FirstOrder.Defined R φ.val
+  | 𝚺-[_], φ => FirstOrder.Defined' R φ.val
+  | 𝚷-[_], φ => FirstOrder.Defined' R φ.val
+  | 𝚫-[_], φ => φ.ProperOn V ∧ FirstOrder.Defined' R φ.val
 
 def DefinedWithParam (R : (Fin k → V) → Prop) : {ℌ : HierarchySymbol} → ℌ.Semiformula V k → Prop
-  | 𝚺-[_], φ => FirstOrder.DefinedWithParam R φ.val
-  | 𝚷-[_], φ => FirstOrder.DefinedWithParam R φ.val
-  | 𝚫-[_], φ => φ.ProperWithParamOn V ∧ FirstOrder.DefinedWithParam R φ.val
+  | 𝚺-[_], φ => FirstOrder.DefinedWithParam' R φ.val
+  | 𝚷-[_], φ => FirstOrder.DefinedWithParam' R φ.val
+  | 𝚫-[_], φ => φ.ProperWithParamOn V ∧ FirstOrder.DefinedWithParam' R φ.val
 
 variable {ℌ : HierarchySymbol} {Γ : SigmaPiDelta}
 
@@ -199,7 +199,7 @@ variable {k} {P Q : (Fin k → V) → Prop}
 
 namespace Defined
 
-lemma df {R : (Fin k → V) → Prop} {φ : ℌ.Semisentence k} (h : Defined R φ) : FirstOrder.Defined R φ.val :=
+lemma df {R : (Fin k → V) → Prop} {φ : ℌ.Semisentence k} (h : Defined R φ) : FirstOrder.Defined' R φ.val :=
   match ℌ with
   | 𝚺-[_] => h
   | 𝚷-[_] => h
@@ -968,6 +968,4 @@ end Boldface
 
 end
 
-end Arithmetic.HierarchySymbol
-
-end LO.FirstOrder
+end LO.FirstOrder.Arithmetic.HierarchySymbol

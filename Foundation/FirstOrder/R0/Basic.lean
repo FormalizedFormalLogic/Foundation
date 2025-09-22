@@ -30,28 +30,28 @@ instance : 𝗘𝗤 ⪯ 𝗥₀ := Entailment.WeakerThan.ofSubset <| fun φ hp �
 
 instance : ℕ ⊧ₘ* 𝗥₀ := ⟨by
   intro σ h
-  rcases h <;> try { simp [models_def]; done }
+  rcases h <;> try { simp [models_iff]; done }
   case equal h =>
     have : ℕ ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
-    simpa [models_def] using modelsTheory_iff.mp this h
+    simpa [models_iff] using modelsTheory_iff.mp this h
   case Ω₃ h =>
-    simpa [models_def, ←le_iff_eq_or_lt] using h⟩
+    simpa [models_iff, ←le_iff_eq_or_lt] using h⟩
 
 variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗥₀]
 
 open Language ORingStruc
 
 lemma numeral_add_numeral (n m : ℕ) : (numeral n : M) + numeral m = numeral (n + m) := by
-  simpa [models_iff] using ModelsTheory.models M (Ω₁ n m) (fun _ ↦ 0)
+  simpa [models_iff] using ModelsTheory.models M (Ω₁ n m)
 
 lemma numeral_mul_numeral (n m : ℕ) : (numeral n : M) * numeral m = numeral (n * m) := by
-  simpa [models_iff] using ModelsTheory.models M (Ω₂ n m) (fun _ ↦ 0)
+  simpa [models_iff] using ModelsTheory.models M (Ω₂ n m)
 
 lemma numeral_ne_numeral_of_ne {n m : ℕ} (h : n ≠ m) : (numeral n : M) ≠ numeral m := by
-  simpa [models_iff] using ModelsTheory.models M (Ω₃ n m h) (fun _ ↦ 0)
+  simpa [models_iff] using ModelsTheory.models M (Ω₃ n m h)
 
 lemma lt_numeral_iff {x : M} {n : ℕ} : x < numeral n ↔ ∃ i : Fin n, x = numeral i := by
-  have := by simpa [models_iff] using ModelsTheory.models M (Ω₄ n) (fun _ ↦ 0)
+  have := by simpa [models_iff] using ModelsTheory.models M (Ω₄ n)
   constructor
   · intro hx
     rcases (this x).mp hx with ⟨i, hi, rfl⟩
@@ -112,19 +112,19 @@ lemma bold_sigma_one_completeness {n} {φ : Semiformula ℒₒᵣ ξ n} (hp : Hi
     exact ⟨numeral x, by simpa [Matrix.comp_vecCons'] using ihp hp⟩
 
 lemma sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ → M ⊧ₘ₀ σ := by
-  suffices Semiformula.Evalbm ℕ ![] σ → Semiformula.Evalbm M ![] σ by simpa [models₀_iff]
+    ℕ ⊧ₘ σ → M ⊧ₘ σ := by
+  suffices Semiformula.Evalbm ℕ ![] σ → Semiformula.Evalbm M ![] σ by simpa [models_iff]
   intro h
   simpa [Matrix.empty_eq, Empty.eq_elim] using bold_sigma_one_completeness hσ h
 
 variable (M)
 
 lemma nat_extention_sigmaOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ → M ⊧ₘ₀ σ := fun h ↦ by
+    ℕ ⊧ₘ σ → M ⊧ₘ σ := fun h ↦ by
   simpa [Matrix.empty_eq] using sigma_one_completeness (M := M) hσ h
 
 lemma nat_extention_piOne {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚷 1 σ) :
-    M ⊧ₘ₀ σ → ℕ ⊧ₘ₀ σ := by
+    M ⊧ₘ σ → ℕ ⊧ₘ σ := by
   contrapose
   simpa using nat_extention_sigmaOne M (σ := ∼σ) (by simpa using hσ)
 
@@ -144,15 +144,15 @@ namespace FirstOrder.Arithmetic
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T]
 
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ → T ⊢!. σ := fun H =>
+    ℕ ⊧ₘ σ → T ⊢! σ := fun H =>
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗥₀) inferInstance inferInstance
-  complete₀ <| oRing_consequence_of.{0} _ _ <| fun M _ _ ↦ by
+  complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ ↦ by
     haveI : M ⊧ₘ* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ T inferInstance
     exact R0.sigma_one_completeness hσ H
 
 open Classical in
 theorem sigma_one_completeness_iff [T.SoundOnHierarchy 𝚺 1] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
-    ℕ ⊧ₘ₀ σ ↔ T ⊢!. σ :=
+    ℕ ⊧ₘ σ ↔ T ⊢! σ :=
   haveI : 𝗥₀ ⪯ T := Entailment.WeakerThan.trans (𝓣 := T) inferInstance inferInstance
   ⟨fun h ↦ sigma_one_completeness hσ h, fun h ↦ T.soundOnHierarchy 𝚺 1 h (by simp [hσ])⟩
 
@@ -210,6 +210,9 @@ instance : ORingStruc OmegaAddOne where
 
 @[simp] lemma top_add_zero : (⊤ : OmegaAddOne) + 0 = 0 := by rfl
 
+lemma exists_add_zero_ne_self : ∃ x : OmegaAddOne, x + 0 ≠ x :=
+  ⟨⊤, by simp⟩
+
 @[simp] lemma numeral_eq (n : ℕ) : (ORingStruc.numeral n : OmegaAddOne) = n :=
   match n with
   |     0 => rfl
@@ -227,7 +230,7 @@ def cases' {P : OmegaAddOne → Sort*}
 set_option linter.flexible false in
 instance : OmegaAddOne ⊧ₘ* 𝗥₀ := ⟨by
   intro σ h
-  rcases h <;> simp [models_def]
+  rcases h <;> simp [models_iff]
   case equal h =>
     have : OmegaAddOne ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
@@ -240,8 +243,9 @@ end OmegaAddOne
 
 end Countermodel
 
-lemma unprovable_addZero : 𝗥₀ ⊬ “x | x + 0 = x” :=
-  unprovable_of_countermodel (M := Countermodel.OmegaAddOne) (fun _ ↦ ⊤) _ (by simp)
+lemma unprovable_addZero : 𝗥₀ ⊬ “∀ x, x + 0 = x” :=
+  unprovable_of_countermodel (M := Countermodel.OmegaAddOne) <| by
+    simpa [models_iff] using Countermodel.OmegaAddOne.exists_add_zero_ne_self
 
 end R0
 

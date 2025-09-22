@@ -255,8 +255,8 @@ lemma codeOfREPred_spec {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
 lemma re_complete {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
-    A x ↔ T ⊢!. (codeOfREPred A)/[‘↑x’] := Iff.trans
-  (by simpa [models₀_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
+    A x ↔ T ⊢! (codeOfREPred A)/[‘↑x’] := Iff.trans
+  (by simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
   (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
 
 end Arithmetic

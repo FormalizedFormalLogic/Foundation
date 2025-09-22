@@ -83,8 +83,12 @@ variable {𝓜 : M}
 @[simp] lemma realize_list_conj₂ {l : List F} :
     𝓜 ⊧ ⋀l ↔ ∀ φ ∈ l, 𝓜 ⊧ φ := by induction l using List.induction_with_singleton <;> simp [*]
 
+@[simp] lemma realize_list_conj' {l : List α} {ι : α → F} : 𝓜 ⊧ l.conj' ι ↔ ∀ i ∈ l, 𝓜 ⊧ ι i := by simp [List.conj']
+
 @[simp] lemma realize_finset_conj {s : Finset F} :
     𝓜 ⊧ s.conj ↔ ∀ φ ∈ s, 𝓜 ⊧ φ := by simp [Finset.conj]
+
+@[simp] lemma realize_finset_conj' {s : Finset α} {ι : α → F} : 𝓜 ⊧ s.conj' ι ↔ ∀ i ∈ s, 𝓜 ⊧ ι i := by simp [Finset.conj']
 
 @[simp] lemma realize_list_disj {l : List F} :
     𝓜 ⊧ l.disj ↔ ∃ φ ∈ l, 𝓜 ⊧ φ := by induction l <;> simp [*]
@@ -92,8 +96,12 @@ variable {𝓜 : M}
 @[simp] lemma realize_list_disj₂ {l : List F} :
     𝓜 ⊧ ⋁l ↔ ∃ φ ∈ l, 𝓜 ⊧ φ := by induction l using List.induction_with_singleton <;> simp [*]
 
+@[simp] lemma realize_list_disj' {l : List α} {ι : α → F} : 𝓜 ⊧ l.disj' ι ↔ ∃ i ∈ l, 𝓜 ⊧ ι i := by simp [List.disj']
+
 @[simp] lemma realize_finset_disj {s : Finset F} :
     𝓜 ⊧ s.disj ↔ ∃ φ ∈ s, 𝓜 ⊧ φ := by simp [Finset.disj]
+
+@[simp] lemma realize_finset_disj' {s : Finset α} {ι : α → F} : 𝓜 ⊧ s.disj' ι ↔ ∃ i ∈ s, 𝓜 ⊧ ι i := by simp [Finset.disj']
 
 end
 

@@ -1,4 +1,4 @@
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Logic.SumNormal
 import Foundation.Modal.Logic.Basic
 import Foundation.Modal.Logic.GL.Independency
 import Foundation.Modal.Kripke.Logic.GL.Soundness
@@ -20,11 +20,13 @@ instance : Entailment.HasAxiomP Modal.D where
   P := by
     constructor;
     apply Logic.sumQuasiNormal.mem₂;
+    apply Logic.iff_provable.mpr;
     simp;
 
 lemma D.mem_axiomDz : Modal.D ⊢! □(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ := by
   apply Logic.subst! (φ := □(□(atom 0) ⋎ □(.atom 1)) ➝ □(atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
   apply Logic.sumQuasiNormal.mem₂!;
+  apply Logic.iff_provable.mpr;
   simp;
 
 instance : Modal.GL ⪱ Modal.D := by
@@ -101,7 +103,6 @@ end
 
 section
 
-attribute [-simp] Logic.iff_provable
 open LO.Entailment LO.Modal.Entailment
 
 instance : Entailment.GL Modal.GL where
@@ -560,7 +561,7 @@ lemma D.unprovable_T : Modal.D ⊬ (Axioms.T (.atom 0)) := by
   . exact {
       world_finite := inferInstance,
       root_generates := by
-        suffices ∀ w : Fin 1, w = 0 by simpa [M];
+        suffices ∀ w : Fin 1, w = 0 by simp [M];
         trivial;
     }
   . apply Satisfies.not_imp_def.mpr

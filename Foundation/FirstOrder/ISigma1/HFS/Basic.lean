@@ -433,7 +433,7 @@ def _root_.LO.FirstOrder.Arithmetic.isMappingDef : 𝚺₀.Semisentence 1 := .mk
   “m. ∃ d <⁺ 2 * m, !domainDef d m ∧ ∀ x ∈' d, ∃ y < m, x ∼[m] y ∧ ∀ y' < m, x ∼[m] y' → y' = y”
 
 lemma isMapping_defined : 𝚺₀-Predicate (IsMapping : V → Prop) via isMappingDef := by
-  intro v; simp [isMappingDef, isMapping_iff, lt_succ_iff_le]
+  intro v; simp [isMappingDef, isMapping_iff]
 
 @[simp] lemma isMapping_defined_iff (v) :
     Semiformula.Evalbm V v isMappingDef.val ↔ IsMapping (v 0) := isMapping_defined.df.iff v

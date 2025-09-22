@@ -57,13 +57,14 @@ lemma consistent_of_sound_frameclass (C : Kripke.FrameClass) (C_nonempty: C.None
 instance [Sound H C] : Sound H.logic C := by
   constructor;
   intro φ hφ;
-  apply Sound.sound $ by simpa using hφ;
+  apply Sound.sound (𝓢 := H);
+  grind;
 
 instance [Complete H C] : Complete H.logic C := by
   constructor;
   intro φ hφ;
-  simpa using Complete.complete hφ;
-
+  suffices H ⊢! φ by grind;
+  apply Complete.complete hφ;
 
 lemma soundness_of_frame_validates_axioms (hV : F ⊧* H.axioms) : H ⊢! φ → F ⊧ φ := by
   intro hφ;
@@ -98,12 +99,14 @@ lemma weakerThan_of_subset_frameClass (C₁ C₂ : FrameClass) (hC : C₂ ⊆ C�
 instance [Sound H F] : Sound H.logic F := by
   constructor;
   intro φ hφ;
-  apply Sound.sound $ by simpa using hφ;
+  apply Sound.sound (𝓢 := H);
+  grind;
 
 instance [Complete H F] : Complete H.logic F := by
   constructor;
   intro φ hφ;
-  simpa using Complete.complete hφ;
+  suffices H ⊢! φ by grind;
+  apply Complete.complete hφ;
 
 end Hilbert.Kripke
 

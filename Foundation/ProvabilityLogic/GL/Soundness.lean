@@ -15,7 +15,7 @@ variable {L : FirstOrder.Language} [L.ReferenceableBy L]
          {T U : FirstOrder.Theory L} [Diagonalization T]  [T ⪯ U]
          {𝔅 : Provability T U} [𝔅.HBL]
 
-lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization 𝔅} : U ⊢!. f A := by
+lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization 𝔅} : U ⊢! f A := by
   replace h := Normal.iff_logic_provable_provable.mp h;
   induction h using Hilbert.Normal.rec! with
   | axm _ hp =>
@@ -24,23 +24,21 @@ lemma GL.arithmetical_soundness (h : Modal.GL ⊢! A) {f : Realization 𝔅} : U
     . exact FLT_shift;
   | nec ihp => exact D1_shift ihp;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
-  | imply₁ => exact imply₁!;
-  | imply₂ => exact imply₂!;
-  | ec => exact CCCOCOC!;
+  | _ => dsimp [Realization.interpret]; cl_prover;
 
 open Classical
 
 theorem GLPlusBoxBot.arithmetical_soundness
     (hA : Modal.GLPlusBoxBot 𝔅.height.toWithTop ⊢! A)
-    (f : Realization 𝔅) : U ⊢!. f A := by
+    (f : Realization 𝔅) : U ⊢! f A := by
   cases h : 𝔅.height using PartENat.casesOn
   case _ =>
     exact GL.arithmetical_soundness (by simpa [h] using hA)
   case _ n =>
     have : Modal.GLPlusBoxBot n ⊢! A := by simpa [h] using hA
     have : Modal.GL ⊢! □^[n]⊥ ➝ A := iff_provable_GLPlusBoxBot_provable_GL.mp this
-    have : U ⊢!. f (□^[n]⊥ ➝ A) := GL.arithmetical_soundness this;
-    have : U ⊢!. 𝔅^[n] ⊥ ➝ f A := by grind;
+    have : U ⊢! f (□^[n]⊥ ➝ A) := GL.arithmetical_soundness this;
+    have : U ⊢! 𝔅^[n] ⊥ ➝ f A := by grind;
     exact this ⨀ (Provability.height_le_iff_boxBot.mp (by simp [h]))
 
 end LO.ProvabilityLogic

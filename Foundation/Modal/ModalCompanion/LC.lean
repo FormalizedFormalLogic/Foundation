@@ -15,7 +15,7 @@ open Modal.Formula.Kripke
 
 section S4Point3
 
-lemma Logic.S4Point3.goedelTranslated_axiomDummett : Hilbert.S4Point3 ⊢! □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
+lemma S4Point3.goedelTranslated_axiomDummett : Hilbert.S4Point3 ⊢! □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
   apply axiomK'!;
   apply nec!;
   apply C!_swap;
@@ -27,7 +27,7 @@ lemma Logic.S4Point3.goedelTranslated_axiomDummett : Hilbert.S4Point3 ⊢! □(�
   exact h₃ ⨀ (h₁ ⨀ h₂);
 
 @[simp]
-private lemma Logic.S4Point.lemma₁ : Hilbert.S4 ⊢! □(□φ ➝ □ψ) ➝ □(□φ ➝ ψ) := by
+lemma S4.CCLL_CCL : Modal.S4 ⊢! □(□φ ➝ □ψ) ➝ □(□φ ➝ ψ) := by
   apply Complete.complete (𝓜 := FrameClass.S4);
   rintro F ⟨_, _⟩ V x h₁ y Rxy h₂;
   apply @h₁ y Rxy h₂;
@@ -35,6 +35,7 @@ private lemma Logic.S4Point.lemma₁ : Hilbert.S4 ⊢! □(□φ ➝ □ψ) ➝ 
 
 namespace Logic
 
+instance : Entailment.S4 Modal.S4 where
 
 instance : Entailment.HasAxiomPoint3 (smallestMC 𝐋𝐂) where
   Point3 φ ψ := by
@@ -79,7 +80,7 @@ lemma S4Point3.is_smallestMC_of_LC : Modal.S4Point3 = (smallestMC 𝐋𝐂) := b
       . rintro _ ⟨_, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩;
         . simp;
         . apply A!_replace axiomPoint3! <;>
-          apply Logic.S4Point3.goedelTranslated_axiomDummett;
+          apply S4Point3.goedelTranslated_axiomDummett;
       . simpa [theory] using hφ;
 
 instance : Sound (smallestMC 𝐋𝐂) FrameClass.S4Point3 := by
@@ -148,8 +149,8 @@ end GrzPoint3
 
 section boxdot
 
-theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : 𝐋𝐂 ⊢! φ ↔ Modal.GLPoint3 ⊢! φᵍᵇ := by
-  exact Iff.trans modalCompanion_LC_GrzPoint3.companion iff_boxdot_GLPoint3_GrzPoint3.symm
+theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : 𝐋𝐂 ⊢! φ ↔ Modal.GLPoint3 ⊢! φᵍᵇ :=
+  Iff.trans modalCompanion_LC_GrzPoint3.companion iff_boxdot_GLPoint3_GrzPoint3.symm
 
 end boxdot
 

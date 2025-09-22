@@ -10,7 +10,6 @@ lemma Nat.iff_lt_exists_add_succ : n < m ↔ ∃ k, m = n + (k + 1) := by
     apply Nat.lt_add_of_pos_right;
     omega;
 
-
 namespace LO.RobinsonQ
 
 open FirstOrder FirstOrder.Arithmetic
@@ -132,6 +131,9 @@ lemma lt_def : a < b ↔ ∃ c, a + c + 1 = b := by
       | .none => simp at hc;
       | .some c => use c; exact Option.mem_some_iff.mp hc |>.symm;
 
+lemma exists_add_one_eq_self : ∃ x : OmegaAddOne, x + 1 = x :=
+  ⟨⊤, rfl⟩
+
 end OmegaAddOne
 
 set_option linter.flexible false in
@@ -142,18 +144,18 @@ instance : OmegaAddOne ⊧ₘ* 𝗤 := ⟨by
     have : OmegaAddOne ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case succInj =>
-    suffices ∀ (f : ℕ → OmegaAddOne), f 0 + 1 = f 1 + 1 → f 0 = f 1 by simpa [models_iff];
+    suffices ∀ a b : OmegaAddOne, a + 1 = b + 1 → a = b by simpa [models_iff];
     intro _; apply OmegaAddOne.succ_inj;
   all_goals simp [models_iff];
 ⟩
 
 end Countermodel
 
-lemma unprovable_neSucc : 𝗤 ⊬ “x | x + 1 ≠ x” := unprovable_of_countermodel (M := Countermodel.OmegaAddOne) (fun x ↦ ⊤) _ (by simp)
+lemma unprovable_neSucc : 𝗤 ⊬ “∀ x, x + 1 ≠ x” :=
+  unprovable_of_countermodel (M := Countermodel.OmegaAddOne) <| by
+    simpa [models_iff] using Countermodel.OmegaAddOne.exists_add_one_eq_self
 
 end LO.RobinsonQ
-
-
 
 namespace LO
 
@@ -170,25 +172,23 @@ instance : M ⊧ₘ* 𝗤 := modelsTheory_iff.mpr <| by
     have : M ⊧ₘ* (𝗘𝗤 : ArithmeticTheory) := inferInstance
     exact modelsTheory_iff.mp this h
   case addSucc h =>
-    suffices ∀ (f : ℕ → M), f 0 + (f 1 + 1) = f 0 + f 1 + 1 by simpa [models_iff];
-    intro f;
-    rw [add_assoc]
+    suffices ∀ a b : M, a + (b + 1) = a + b + 1 by simpa [models_iff];
+    simp [add_assoc]
   case mulSucc h =>
-    suffices ∀ (f : ℕ → M), f 0 * (f 1 + 1) = f 0 * f 1 + f 0 by simpa [models_iff];
-    intro f;
+    suffices ∀ a b : M, a * (b + 1) = a * b + a by simpa [models_iff];
+    intro a b;
     calc
-      f 0 * (f 1 + 1) = (f 0 * f 1) + (f 0 * 1) := by rw [mul_add_distr]
-      _               = (f 0 * f 1) + f 0       := by rw [mul_one]
-    ;
+      a * (b + 1) = (a * b) + (a * 1) := by rw [mul_add_distr]
+      _           = (a * b) + a       := by rw [mul_one]
   case zeroOrSucc h =>
-    suffices ∀ (f : ℕ → M), f 0 = 0 ∨ ∃ x, f 0 = x + 1 by simpa [models_iff];
-    intro f;
-    by_cases h : 0 < f 0;
+    suffices ∀ a b : M, a = 0 ∨ ∃ x, a = x + 1 by simpa [models_iff];
+    intro a b;
+    by_cases h : 0 < a;
     . right; apply eq_succ_of_pos h;
     . left; simpa using h;
   case ltDef h =>
-    suffices ∀ (f : ℕ → M), f 0 < f 1 ↔ ∃ x, f 0 + (x + 1) = f 1 by simpa [models_iff];
-    intro f;
+    suffices ∀ a b : M, a < b ↔ ∃ x, a + (x + 1) = b by simpa [models_iff];
+    intro a b;
     apply Iff.trans lt_iff_exists_add;
     constructor;
     . rintro ⟨a, ha₁, ha₂⟩;

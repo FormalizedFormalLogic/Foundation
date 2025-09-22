@@ -107,7 +107,7 @@ section
 
 abbrev logic (H : Hilbert.Normal α) : Logic α := Entailment.theory H
 
-@[simp high]
+@[grind]
 lemma iff_logic_provable_provable : H.logic ⊢! φ ↔ H ⊢! φ := by simp [Entailment.theory, Logic.iff_provable];
 
 instance : Entailment.Lukasiewicz H.logic where
@@ -128,23 +128,31 @@ instance : Entailment.Necessitation H.logic where
     constructor;
     exact nec! hφ;
 
-instance [H₁ ⪯ H₂] : H₁.logic ⪯ H₂.logic := by
-  apply weakerThan_iff.mpr;
-  simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];
-  apply WeakerThan.wk;
-  infer_instance;
+@[grind]
+lemma iff_weakerThan_hilbert_weakerThan_logic : H₁ ⪯ H₂ ↔ H₁.logic ⪯ H₂.logic := by
+  constructor;
+  . intro h;
+    apply weakerThan_iff.mpr;
+    simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];
+    apply WeakerThan.wk;
+    assumption;
+  . intro h;
+    apply weakerThan_iff.mpr;
+    intro φ;
+    simpa [iff_logic_provable_provable] using h.pbl;
 
-instance [H₁ ⪱ H₂] : H₁.logic ⪱ H₂.logic := by
-  apply strictlyWeakerThan_iff.mpr;
-  simp only [theory, Logic.iff_provable, Set.mem_setOf_eq, Logic.iff_unprovable];
-  apply strictlyWeakerThan_iff.mp;
-  infer_instance;
+@[grind]
+lemma iff_equiv_hilbert_equiv_logic : H₁ ≊ H₂ ↔ H₁.logic ≊ H₂.logic := by grind;
 
-instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := by
-  apply Equiv.iff.mpr;
-  simp only [theory, Logic.iff_provable, Set.mem_setOf_eq];
-  apply Equiv.iff.mp;
-  infer_instance;
+@[grind]
+lemma iff_strictlyWeakerThan_hilbert_strictlyWeakerThan_logic : H₁ ⪱ H₂ ↔ H₁.logic ⪱ H₂.logic := by grind;
+
+instance [H₁ ⪯ H₂] : H₁.logic ⪯ H₂.logic := iff_weakerThan_hilbert_weakerThan_logic.mp inferInstance
+instance [H₁ ⪱ H₂] : H₁.logic ⪱ H₂.logic := iff_strictlyWeakerThan_hilbert_strictlyWeakerThan_logic.mp inferInstance
+instance [H₁ ≊ H₂] : H₁.logic ≊ H₂.logic := iff_equiv_hilbert_equiv_logic.mp inferInstance
+instance [H₁.logic ⪯ H₂.logic] : H₁ ⪯ H₂ := iff_weakerThan_hilbert_weakerThan_logic.mpr inferInstance
+instance [H₁.logic ⪱ H₂.logic] : H₁ ⪱ H₂ := iff_strictlyWeakerThan_hilbert_strictlyWeakerThan_logic.mpr inferInstance
+instance [H₁.logic ≊ H₂.logic] : H₁ ≊ H₂ := iff_equiv_hilbert_equiv_logic.mpr inferInstance
 
 instance [Entailment.Consistent H] : Entailment.Consistent H.logic where
   not_inconsistent := by
@@ -196,6 +204,10 @@ instance [H.HasT] : Entailment.HasAxiomT H where
       (s := λ b => if (HasT.p H) = b then φ else (.atom b))
       HasT.mem_T;
 
+instance [H.HasT] : Entailment.HasAxiomT H.logic where
+  T := by intros; constructor; simp [Entailment.theory];
+
+
 class HasB (H : Hilbert.Normal α) where
   p : α
   mem_B : Axioms.B (.atom p) ∈ H.axioms := by tauto;
@@ -219,6 +231,9 @@ instance [H.HasD] : Entailment.HasAxiomD H where
       (s := λ b => if (HasD.p H) = b then φ else (.atom b))
       HasD.mem_D;
 
+instance [H.HasD] : Entailment.HasAxiomD H.logic where
+  D := by intros; constructor; simp [Entailment.theory];
+
 
 class HasP (H : Hilbert.Normal α) where
   mem_P : Axioms.P ∈ H.axioms := by tauto;
@@ -241,6 +256,19 @@ instance [H.HasFour] : Entailment.HasAxiomFour H where
       (φ := Axioms.Four (.atom (HasFour.p H)))
       (s := λ b => if (HasFour.p H) = b then φ else (.atom b))
       HasFour.mem_Four;
+instance [H.HasFour] : Entailment.HasAxiomFour H.logic where
+  Four := by intros; constructor; simp [Entailment.theory];
+
+class HasFourN (H : Hilbert.Normal α) (n : ℕ) where
+  p : α
+  mem_FourN : Axioms.FourN n (.atom p) ∈ H.axioms := by tauto;
+
+instance [H.HasFourN n] : Entailment.HasAxiomFourN n H where
+  FourN φ := by
+    simpa [Axioms.FourN] using Deduction.axm
+      (φ := Axioms.FourN n (.atom (HasFourN.p H n)))
+      (s := λ b => if (HasFourN.p H n) = b then φ else (.atom b))
+      HasFourN.mem_FourN;
 
 
 class HasFive (H : Hilbert.Normal α) where
@@ -254,6 +282,9 @@ instance [H.HasFive] : Entailment.HasAxiomFive H where
       (s := λ b => if (HasFive.p H) = b then φ else (.atom b))
       HasFive.mem_Five;
 
+instance [H.HasFive] : Entailment.HasAxiomFive H.logic where
+  Five := by intros; constructor; simp [Entailment.theory];
+
 
 class HasPoint2 (H : Hilbert.Normal α) where
   p : α
@@ -265,6 +296,9 @@ instance [H.HasPoint2] : Entailment.HasAxiomPoint2 H where
       (φ := Axioms.Point2 (.atom (HasPoint2.p H)))
       (s := λ b => if (HasPoint2.p H) = b then φ else (.atom b))
       HasPoint2.mem_Point2;
+
+instance [H.HasPoint2] : Entailment.HasAxiomPoint2 H.logic where
+  Point2 := by intros; constructor; simp [Entailment.theory];
 
 
 class HasWeakPoint2 (H : Hilbert.Normal α) where
@@ -282,6 +316,8 @@ instance [H.HasWeakPoint2] : Entailment.HasAxiomWeakPoint2 H where
         else if (HasWeakPoint2.q H) = b then ψ
         else (.atom b))
       HasWeakPoint2.mem_WeakPoint2;
+instance [H.HasWeakPoint2] : Entailment.HasAxiomWeakPoint2 H.logic where
+  WeakPoint2 := by intros; constructor; simp [Entailment.theory];
 
 
 class HasPoint3 (H : Hilbert.Normal α) where
@@ -299,6 +335,8 @@ instance [H.HasPoint3] : Entailment.HasAxiomPoint3 H where
         else if (HasPoint3.q H) = b then ψ
         else (.atom b))
       HasPoint3.mem_Point3;
+instance [H.HasPoint3] : Entailment.HasAxiomPoint3 H.logic where
+  Point3 := by intros; constructor; simp [Entailment.theory];
 
 
 class HasWeakPoint3 (H : Hilbert.Normal α) where
@@ -316,6 +354,9 @@ instance [H.HasWeakPoint3] : Entailment.HasAxiomWeakPoint3 H where
         else if (HasWeakPoint3.q H) = b then ψ
         else (.atom b))
       HasWeakPoint3.mem_WeakPoint3;
+
+instance [H.HasWeakPoint3] : Entailment.HasAxiomWeakPoint3 H.logic where
+  WeakPoint3 := by intros; constructor; simp [Entailment.theory];
 
 
 class HasPoint4 (H : Hilbert.Normal α) where
@@ -341,6 +382,9 @@ instance [H.HasL] : Entailment.HasAxiomL H where
       (s := λ b => if (HasL.p H) = b then φ else (.atom b))
       HasL.mem_L;
 
+instance [H.HasL] : Entailment.HasAxiomL H.logic where
+  L := by intros; constructor; simp [Entailment.theory];
+
 
 class HasZ (H : Hilbert.Normal α) where
   p : α
@@ -364,6 +408,8 @@ instance [H.HasGrz] : Entailment.HasAxiomGrz H where
       (φ := Axioms.Grz (.atom (HasGrz.p H)))
       (s := λ b => if (HasGrz.p H) = b then φ else (.atom b))
       HasGrz.mem_Grz;
+instance [H.HasGrz] : Entailment.HasAxiomGrz H.logic where
+  Grz := by intros; constructor; simp [Entailment.theory];
 
 
 class HasDum (H : Hilbert.Normal α) where
@@ -400,6 +446,8 @@ instance [H.HasVer] : Entailment.HasAxiomVer H where
       (φ := Axioms.Ver (.atom (HasVer.p H)))
       (s := λ b => if (HasVer.p H) = b then φ else (.atom b))
       HasVer.mem_Ver;
+instance [H.HasVer] : Entailment.HasAxiomVer H.logic where
+  Ver := by intros; constructor; simp [Entailment.theory];
 
 
 class HasHen (H : Hilbert.Normal α) where
@@ -489,7 +537,7 @@ instance : Entailment.K (Hilbert.K) where
 instance [L.IsNormal] : Modal.K ⪯ L := by
   constructor;
   intro φ;
-  suffices Hilbert.K ⊢! φ → L ⊢! φ by simpa [theory, Set.mem_setOf_eq, Set.setOf_mem_eq];
+  suffices Hilbert.K ⊢! φ → L ⊢! φ by simpa [Logic.iff_provable, theory];
   intro hφ;
   induction hφ using Hilbert.Normal.rec! with
   | axm s h => rcases h with rfl; simp;
@@ -503,6 +551,7 @@ protected abbrev KT := Hilbert.KT.logic
 instance : (Hilbert.KT).HasK where p := 0; q := 1;
 instance : (Hilbert.KT).HasT where p := 0
 instance : Entailment.KT (Hilbert.KT) where
+instance : Entailment.KT Modal.KT where
 
 
 protected abbrev Hilbert.KD : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0)}⟩
@@ -510,7 +559,7 @@ protected abbrev KD := Hilbert.KD.logic
 instance : (Hilbert.KD).HasK where p := 0; q := 1;
 instance : (Hilbert.KD).HasD where p := 0
 instance : Entailment.KD (Hilbert.KD) where
-
+instance : Entailment.KD Modal.KD where
 
 protected abbrev Hilbert.KP : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.P}⟩
 protected abbrev KP : Logic ℕ := Hilbert.KP.logic
@@ -564,6 +613,13 @@ protected abbrev K4 := Hilbert.K4.logic
 instance : (Hilbert.K4).HasK where p := 0; q := 1;
 instance : (Hilbert.K4).HasFour where p := 0
 instance : Entailment.K4 (Hilbert.K4) where
+
+
+protected abbrev Hilbert.K4n (n : ℕ) : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.FourN n (.atom 0)}⟩
+protected abbrev K4n (n : ℕ) := Hilbert.K4n n |>.logic
+instance : (Hilbert.K4n n).HasK where p := 0; q := 1;
+instance : (Hilbert.K4n n).HasFourN n where p := 0;
+instance : Entailment.K4n n (Hilbert.K4n n) where
 
 
 protected abbrev Hilbert.K4McK : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.McK (.atom 0)}⟩
@@ -753,7 +809,7 @@ protected abbrev GL := Hilbert.GL.logic
 instance : (Hilbert.GL).HasK where p := 0; q := 1;
 instance : (Hilbert.GL).HasL where p := 0;
 instance : Entailment.GL (Hilbert.GL) where
-
+instance : Entailment.GL Modal.GL where
 
 protected abbrev Hilbert.GLPoint2 : Hilbert.Normal ℕ := ⟨{Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}⟩
 protected abbrev GLPoint2 := Hilbert.GLPoint2.logic
@@ -761,6 +817,7 @@ instance : (Hilbert.GLPoint2).HasK where p := 0; q := 1;
 instance : (Hilbert.GLPoint2).HasL where p := 0
 instance : (Hilbert.GLPoint2).HasWeakPoint2 where p := 0; q := 1;
 instance : Entailment.GLPoint2 (Hilbert.GLPoint2) where
+instance : Entailment.GLPoint2 Modal.GLPoint2 where
 instance : Hilbert.GL ⪯ Hilbert.GLPoint2 := weakerThan_of_subset_axioms $ by simp
 
 

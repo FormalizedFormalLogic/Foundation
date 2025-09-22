@@ -87,7 +87,7 @@ lemma star_unbounded (n : ℕ) : n < ⋆ := by
     models_union_trueArithWithStarUnbounded.realize _
       <| Set.mem_iUnion_of_mem (n + 1)
       <| Set.mem_union_right _
-      <| by simp only [Rew.hom_finitary2, Rew.finitary0]; exact Set.mem_range_self (Fin.last n)
+      <| Set.mem_range_self (Fin.last n)
   simpa [models_iff, numeral_eq_natCast] using this
 
 end Nonstandard

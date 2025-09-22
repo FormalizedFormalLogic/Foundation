@@ -2,6 +2,7 @@ import Foundation.FirstOrder.PeanoMinus.Basic
 import Foundation.FirstOrder.Arithmetic.Definability
 import Mathlib.Algebra.GroupWithZero.Divisibility
 import Mathlib.Algebra.Prime.Lemmas
+import Foundation.Vorspiel.ExistsUnique
 
 /-!
 # Functions and relations defined in $\mathsf{PA^-}$
@@ -38,7 +39,7 @@ lemma sub_spec_of_ge (h : a ≥ b) : a = b + (a - b) := (Classical.choose!_spec 
 
 lemma sub_spec_of_lt (h : a < b) : a - b = 0 := (Classical.choose!_spec (sub_existsUnique a b)).2 h
 
-lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0)) := Classical.choose!_eq_iff (sub_existsUnique a b)
+lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0)) := Classical.choose!_eq_iff_right (sub_existsUnique a b)
 
 @[simp] lemma sub_le_self (a b : V) : a - b ≤ a := by
   have : b ≤ a ∨ a < b := le_or_gt b a

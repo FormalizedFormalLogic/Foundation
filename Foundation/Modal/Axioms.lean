@@ -34,6 +34,8 @@ protected abbrev P : F := ∼(□⊥)
 /-- Axiom for transivity -/
 protected abbrev Four := □φ ➝ □□φ
 
+protected abbrev FourN (n : ℕ) (φ : F) := □^[n]φ ➝ □^[(n + 1)]φ
+
 /-- Axiom for euclidean -/
 protected abbrev Five := ◇φ ➝ □◇φ
 

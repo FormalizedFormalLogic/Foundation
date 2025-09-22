@@ -1144,8 +1144,9 @@ section
 lemma result_defined : 𝚺₁-Function₂ c.result L via β.result L := by
   intro v
   simpa [Blueprint.result, HierarchySymbol.Semiformula.val_sigma,
-    IsUFormula.defined.df.iff, IsUFormula.defined.proper.iff', c.eval_graphDef]
-  using Classical.choose!_eq_iff (c.exists_unique_all L (v 1) (v 2))
+    IsUFormula.defined.df.iff, IsUFormula.defined.proper.iff', c.eval_graphDef,
+    -Classical.choose!_eq_iff_right]
+  using Classical.choose!_eq_iff_right (c.exists_unique_all L (v 1) (v 2))
 
 instance result_definable : 𝚺-[0 + 1]-Function₂ c.result L := c.result_defined.to_definable
 

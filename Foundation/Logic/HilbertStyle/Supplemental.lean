@@ -1093,6 +1093,11 @@ lemma iff_FiniteContext_Context [DecidableEq F] {Γ : List F} : Γ ⊢[𝓢]! φ
     apply FiniteContext.provable_iff.mpr;
     exact C!_trans (by simp) h;
 
+lemma FConj'_iff_forall_provable [DecidableEq F] {s : Finset α} {ι : α → F} : (𝓢 ⊢! ⩕ i ∈ s, ι i) ↔ (∀ i ∈ s, 𝓢 ⊢! ι i) := by
+  have : 𝓢 ⊢! ⋀(s.toList.map ι) ↔ ∀ i ∈ s, 𝓢 ⊢! ι i := by simpa using Conj₂!_iff_forall_provable (Γ := s.toList.map ι);
+  apply Iff.trans ?_ this;
+  simp [Finset.conj', List.conj'];
+
 end
 
 
@@ -1197,11 +1202,11 @@ lemma bot_of_mem_neg [DecidableEq F] {Γ : Set F}  (h₁ : φ ∈ Γ) (h₂ : �
 
 end Context
 
-
-
 section classical
 
 variable [Entailment.Cl 𝓢]
+
+instance Cl.toInt [DecidableEq F] (𝓢 : S) [Entailment.Cl 𝓢] : Entailment.Int 𝓢 where
 
 lemma not_imply_prem''! [DecidableEq F] (hpq : 𝓢 ⊢! φ ➝ ψ) (hpnr : 𝓢 ⊢! φ ➝ ∼ξ) : 𝓢 ⊢! φ ➝ ∼(ψ ➝ ξ) :=
   deduct'! $ (contra! $ CCAN!) ⨀ (NA!_of_KNN! $ K!_intro (dni'! $ of'! hpq ⨀ (by_axm!)) (of'! hpnr ⨀ (by_axm!)))
@@ -1214,22 +1219,24 @@ end classical
 
 section consistency
 
-variable [HasAxiomEFQ 𝓢]
-
-
-lemma inconsistent_of_provable_of_unprovable {φ : F}
+lemma inconsistent_of_provable_of_unprovable [HasAxiomEFQ 𝓢] {φ : F}
     (hp : 𝓢 ⊢! φ) (hn : 𝓢 ⊢! ∼φ) : Inconsistent 𝓢 := by
   have : 𝓢 ⊢! φ ➝ ⊥ := N!_iff_CO!.mp hn
   intro ψ; exact efq! ⨀ (this ⨀ hp)
 
+variable [DecidableEq F] [AdjunctiveSet F S] [Axiomatized S] [Deduction S] [∀ 𝓢 : S, Entailment.Cl 𝓢]
+
+lemma provable_iff_inconsistent_adjoin {φ : F} :
+    𝓢 ⊢! φ ↔ Inconsistent (adjoin (∼φ) 𝓢) := by
+  constructor
+  · intro h
+    apply inconsistent_of_provable_of_unprovable (φ := φ)
+    · exact Axiomatized.to_adjoin h
+    · exact Axiomatized.adjoin! _ _
+  · intro h
+    have : 𝓢 ⊢! ∼φ ➝ ⊥ := Deduction.of_insert! (h _)
+    refine of_NN! <| N!_iff_CO!.mpr this
+
 end consistency
-
-end LO.Entailment
-
-namespace LO.Entailment
-
-variable {F : Type*} [LogicalConnective F] {S : Type*} [Entailment F S]
-
-instance Cl.toInt [DecidableEq F] (𝓢 : S) [Entailment.Cl 𝓢] : Entailment.Int 𝓢 where
 
 end LO.Entailment

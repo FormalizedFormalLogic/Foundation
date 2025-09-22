@@ -2,7 +2,7 @@ import Foundation.FirstOrder.Arithmetic.Induction
 import Mathlib.Logic.Nonempty
 
 /-!
-# Basic properties of theory $\mathsf{I_{open}}$
+# Basic properties of theory $\mathsf{IOpen}$
 
 -/
 
@@ -100,7 +100,7 @@ lemma eq_mul_div_add_of_pos (a : V) {b} (hb : 0 < b) : ∃ r < b, a = b * (a / b
 @[simp] lemma div_spec_zero (a : V) : a / 0 = 0 := (Classical.choose!_spec (div_exists_unique a 0)).2 (by simp)
 
 lemma div_graph {a b c : V} : c = a / b ↔ ((0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)) :=
-  Classical.choose!_eq_iff _
+  Classical.choose!_eq_iff_right _
 
 def _root_.LO.FirstOrder.Arithmetic.divDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “c a b. (0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)”
@@ -427,7 +427,7 @@ prefix:75 "√" => sqrt
 
 @[simp] lemma sqrt_spec_lt (a : V) : a < (√a + 1) * (√a + 1) := (Classical.choose!_spec (sqrt_exists_unique a)).2
 
-lemma sqrt_graph {a b : V} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) := Classical.choose!_eq_iff _
+lemma sqrt_graph {a b : V} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) := Classical.choose!_eq_iff_right _
 
 def _root_.LO.FirstOrder.Arithmetic.sqrtDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “b a. b * b ≤ a ∧ a < (b + 1) * (b + 1)”

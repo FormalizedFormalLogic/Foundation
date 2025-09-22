@@ -58,14 +58,14 @@ lemma isTautology_vfSubst : v ⊧ φ ↔ (φ⟦(vfSubst v).1⟧.isTautology) := 
       apply ihφ.mpr;
       intro u;
       apply equiv_of_letterless ?_ u w |>.mpr hφ;
-      exact φ.letterless_zeroSubst;
+      exact φ.Letterless_zeroSubst;
     . intro h hφ;
       apply ihψ.mpr;
       intro w;
       apply equiv_of_letterless ?_ v w |>.mp;
       . apply h;
         apply ihφ.mp hφ;
-      exact ψ.letterless_zeroSubst;
+      exact ψ.Letterless_zeroSubst;
   | hor φ ψ ihφ ihψ =>
     constructor;
     . rintro (h | h) w;
@@ -77,12 +77,12 @@ lemma isTautology_vfSubst : v ⊧ φ ↔ (φ⟦(vfSubst v).1⟧.isTautology) := 
         apply ihφ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp hφ;
-        exact φ.letterless_zeroSubst;
+        exact φ.Letterless_zeroSubst;
       . right;
         apply ihψ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp hψ;
-        exact ψ.letterless_zeroSubst;
+        exact ψ.Letterless_zeroSubst;
   | hand φ ψ ihφ ihψ =>
     constructor;
     . rintro ⟨hφ, hψ⟩ w;
@@ -95,10 +95,10 @@ lemma isTautology_vfSubst : v ⊧ φ ↔ (φ⟦(vfSubst v).1⟧.isTautology) := 
       . apply ihφ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp $ h v |>.1;
-        exact φ.letterless_zeroSubst;
+        exact φ.Letterless_zeroSubst;
       . apply ihψ.mpr;
         intro w;
         apply equiv_of_letterless ?_ v w |>.mp $ h v |>.2;
-        exact ψ.letterless_zeroSubst;
+        exact ψ.Letterless_zeroSubst;
 
 end LO.Propositional.ClassicalSemantics

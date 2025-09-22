@@ -654,7 +654,7 @@ noncomputable def nuon (a : V) : V := Classical.choose! (Nuon.exists_unique a)
 
 lemma Nuon.nuon_eq {a b : V} (h : Nuon a b) : nuon a = b := (nuon_nuon a).uniq h
 
-lemma Nuon.nuon_eq_iff {a b : V} : b = nuon a ↔ Nuon a b := Classical.choose!_eq_iff (Nuon.exists_unique a)
+lemma Nuon.nuon_eq_iff {a b : V} : b = nuon a ↔ Nuon a b := Classical.choose!_eq_iff_right (Nuon.exists_unique a)
 
 lemma nuon_bit0 (a : V) : nuon (2 * a) = nuon a := by
   rcases zero_le a with (rfl | pos)
