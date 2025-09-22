@@ -109,7 +109,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.Letterless) :
       tauto;
     . intro h;
       have : Modal.KD ⊢ □(∼φ) := nec! $ ihφ (by grind) |>.2 $ by tauto;
-      simp only [Hilbert.Normal.iff_logic_provable_provable] at ⊢! this;
+      simp only [Hilbert.Normal.iff_logic_provable_provable] at ⊢ this;
       exact negbox_dne'! $ dia_duality'!.mp $ axiomD'! this;
 
 lemma provable_KD_of_classical_satisfiability (hl : φ.Letterless) : (v ⊧ φᵀ.toPropFormula) → Modal.KD ⊢ φ :=

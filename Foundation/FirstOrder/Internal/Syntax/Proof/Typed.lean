@@ -476,7 +476,7 @@ lemma specialize₂_shift! {φ : Semiformula V L 2} (b : T ⊢ ∀' ∀' φ) (t 
     T ⊢ φ.shift.shift.substs ![t, u] := ⟨specialize₂_shift b.get _ _⟩
 
 noncomputable def generalizeAux {C : Formula V L} {φ : Semiformula V L 1} (dp : T ⊢! C.shift ➝ φ.free) : T ⊢! C ➝ ∀' φ := by
-  rw [Semiformula.imp_def] at dp ⊢!
+  rw [Semiformula.imp_def] at dp ⊢
   apply TDerivation.or
   apply TDerivation.rotate₁
   apply TDerivation.all
@@ -497,7 +497,7 @@ noncomputable def generalize {Γ} {φ : Semiformula V L 1} (d : Γ.map .shift �
 lemma generalize! {Γ} {φ : Semiformula V L 1} (d : Γ.map .shift ⊢[T] φ.free) : Γ ⊢[T] ∀' φ := ⟨generalize d.get⟩
 
 noncomputable def specializeWithCtxAux {C : Formula V L} {φ : Semiformula V L 1} (d : T ⊢! C ➝ ∀' φ) (t : Term V L) : T ⊢! C ➝ φ.substs ![t] := by
-  rw [Semiformula.imp_def] at d ⊢!
+  rw [Semiformula.imp_def] at d ⊢
   apply TDerivation.or
   apply TDerivation.rotate₁
   apply TDerivation.specialize

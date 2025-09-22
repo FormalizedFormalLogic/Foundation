@@ -216,7 +216,7 @@ protected lemma mdp (hφψ : M ⊧ φ ➝ ψ) (hψ : M ⊧ φ) : M ⊧ ψ := by
   . exact hψ x;
 
 protected lemma re (hφ : M ⊧ φ ⭤ ψ) : M ⊧ □φ ⭤ □ψ := by
-  rw [valid_iff] at ⊢! hφ;
+  rw [valid_iff] at ⊢ hφ;
   ext x;
   simp_all;
 

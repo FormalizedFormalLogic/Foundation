@@ -64,7 +64,7 @@ lemma zero_eq_alt {φ : Semiformula L ξ n} : Hierarchy Γ 0 φ → Hierarchy Γ
   generalize hz : 0 = z
   rw [eq_comm] at hz
   intro h
-  induction h <;> try simp at hz ⊢!
+  induction h <;> try simp at hz ⊢
   case and _ _ ihp ihq =>
     exact ⟨ihp hz, ihq hz⟩
   case or _ _ ihp ihq => exact ⟨ihp hz, ihq hz⟩
