@@ -70,7 +70,7 @@ lemma div_exists_unique_pos (a : V) {b} (pos : 0 < b) : ∃! u, b * u ≤ a ∧ 
     · exact this a pos u' hu' u hu (Ne.symm ne) (Ne.lt_of_le ne $ by simpa using lt)
     have : a < a := by calc
       a < b * (u + 1) := hu.2
-      _ ≤ b * u'      := (_root_.mul_le_mul_left pos).mpr (lt_iff_succ_le.mp lt)
+      _ ≤ b * u'      := (mul_le_mul_iff_right₀ pos).mpr (lt_iff_succ_le.mp lt)
       _ ≤ a           := hu'.1
     exact LT.lt.false this)
 
