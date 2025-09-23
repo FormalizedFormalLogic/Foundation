@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.Normal.Basic2
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Hilbert.WithLoeb.Basic
 import Foundation.Modal.Hilbert.WithHenkin.Basic
 import Mathlib.Tactic.TFAE

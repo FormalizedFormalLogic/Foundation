@@ -1,6 +1,6 @@
 import Foundation.Propositional.Hilbert.WellKnown
 import Foundation.Propositional.ClassicalSemantics.Hilbert
-import Foundation.Modal.Hilbert.Normal.Basic2
+import Foundation.Modal.Hilbert.Normal.Basic
 
 namespace LO.Modal
 

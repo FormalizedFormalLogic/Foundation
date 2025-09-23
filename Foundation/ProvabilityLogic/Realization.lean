@@ -2,7 +2,7 @@ import Foundation.ProvabilityLogic.Provability
 import Foundation.FirstOrder.Internal.DerivabilityCondition
 import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.Logic.HilbertStyle.Cl
-import Foundation.Modal.Hilbert.Normal.Basic2
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Letterless
 
 namespace LO
