@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.K4
 import Foundation.Modal.Kripke.Logic.KD
 
@@ -9,7 +8,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -20,29 +19,30 @@ protected abbrev FrameClass.KD4 : FrameClass := { F | F.IsKD4 }
 end Kripke
 
 
-namespace Hilbert.KD4.Kripke
+namespace KD4
 
-instance : Sound Hilbert.KD4 FrameClass.KD4 := instSound_of_validates_axioms $ by
+instance : Sound Modal.KD4 FrameClass.KD4 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomFour_of_transitive;
 
-instance : Entailment.Consistent Hilbert.KD4 := consistent_of_sound_frameclass
+instance : Entailment.Consistent Modal.KD4 := consistent_of_sound_frameclass
   FrameClass.KD4 $ by
     use whitepoint;
     constructor
 
-instance : Canonical Hilbert.KD4 FrameClass.KD4 := ⟨by
+instance : Canonical Modal.KD4 FrameClass.KD4 := ⟨by
   apply Set.mem_setOf_eq.mpr;
   constructor
 ⟩
 
-instance : Complete Hilbert.KD4 FrameClass.KD4 := inferInstance
+instance : Complete Modal.KD4 FrameClass.KD4 := inferInstance
 
+end KD4
 
-instance : Hilbert.KD ⪱ Hilbert.KD4 := by
+instance : Modal.KD ⪱ Modal.KD4 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -57,7 +57,7 @@ instance : Hilbert.KD ⪱ Hilbert.KD4 := by
       . simp [Semantics.Realize, Satisfies];
         tauto;
 
-instance : Hilbert.K4 ⪱ Hilbert.KD4 := by
+instance : Modal.K4 ⪱ Modal.KD4 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -70,11 +70,5 @@ instance : Hilbert.K4 ⪱ Hilbert.KD4 := by
       constructor;
       . exact { trans := by simp; }
       . simp [Semantics.Realize, Satisfies];
-
-end Hilbert.KD4.Kripke
-
-instance : Modal.KD ⪱ Modal.KD4 := inferInstance
-
-instance : Modal.K4 ⪱ Modal.KD4 := inferInstance
 
 end LO.Modal

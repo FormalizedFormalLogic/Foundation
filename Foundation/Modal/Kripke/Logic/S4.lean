@@ -8,7 +8,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -21,25 +21,25 @@ protected abbrev FrameClass.finite_S4 : FrameClass := { F | F.IsFiniteS4 }
 end Kripke
 
 
-namespace Hilbert.S4.Kripke
+namespace S4
 
-instance : Sound Hilbert.S4 FrameClass.S4 := instSound_of_validates_axioms $ by
+instance : Sound Modal.S4 FrameClass.S4 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
 
-instance : Entailment.Consistent Hilbert.S4 := consistent_of_sound_frameclass FrameClass.S4 $ by
+instance : Entailment.Consistent Modal.S4 := consistent_of_sound_frameclass FrameClass.S4 $ by
   use whitepoint;
   constructor;
 
-instance : Canonical Hilbert.S4 FrameClass.S4 := ⟨by constructor⟩
+instance : Canonical Modal.S4 FrameClass.S4 := ⟨by constructor⟩
 
-instance : Complete Hilbert.S4 FrameClass.S4 := inferInstance
+instance : Complete Modal.S4 FrameClass.S4 := inferInstance
 
 open finestFiltrationTransitiveClosureModel in
-instance : Complete Hilbert.S4 FrameClass.finite_S4 := ⟨by
+instance : Complete Modal.S4 FrameClass.finite_S4 := ⟨by
   intro φ hp;
   apply Complete.complete (𝓜 := FrameClass.S4);
   rintro F hF V x;
@@ -55,7 +55,7 @@ instance : Complete Hilbert.S4 FrameClass.finite_S4 := ⟨by
 ⟩
 
 
-instance : Hilbert.KT ⪱ Hilbert.S4 := by
+instance : Modal.KT ⪱ Modal.S4 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -85,7 +85,7 @@ instance : Hilbert.KT ⪱ Hilbert.S4 := by
           . use 2;
             refine ⟨by omega;, by trivial, by trivial⟩;
 
-instance : Hilbert.KD4 ⪱ Hilbert.S4 := by
+instance : Modal.KD4 ⪱ Modal.S4 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp
@@ -103,16 +103,13 @@ instance : Hilbert.KD4 ⪱ Hilbert.S4 := by
         };
       . simp [Semantics.Realize, Satisfies];
 
-instance : Hilbert.KD ⪱ Hilbert.S4 := calc
-  Hilbert.KD ⪱ Hilbert.KD4 := by infer_instance
-  _          ⪱ Hilbert.S4  := by infer_instance
+instance : Modal.KD ⪱ Modal.S4 := calc
+  Modal.KD ⪱ Modal.KD4 := by infer_instance
+  _          ⪱ Modal.S4  := by infer_instance
 
-end Hilbert.S4.Kripke
+end S4
 
 
-instance : Modal.KT ⪱ Modal.S4 := inferInstance
-instance : Modal.KD4 ⪱ Modal.S4 := inferInstance
-instance : Modal.KD ⪱ Modal.S4 := inferInstance
 
 instance : Sound Modal.S4 FrameClass.S4 := inferInstance
 instance : Complete Modal.S4 FrameClass.S4 := inferInstance

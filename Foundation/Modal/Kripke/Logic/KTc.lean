@@ -6,7 +6,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -23,31 +23,31 @@ end Kripke
 
 
 
-namespace Hilbert.KTc.Kripke
+namespace Modal.KTc.Kripke
 
-instance : Sound (Hilbert.KTc) Kripke.FrameClass.KTc := instSound_of_validates_axioms $ by
+instance : Sound (Modal.KTc) Kripke.FrameClass.KTc := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   simp only [Set.mem_singleton_iff, forall_eq];
   rintro F F_corefl;
   exact Kripke.validate_AxiomTc_of_coreflexive (corefl := F_corefl);
 
-instance : Entailment.Consistent (Hilbert.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.KTc $ by
+instance : Entailment.Consistent (Modal.KTc) := consistent_of_sound_frameclass Kripke.FrameClass.KTc $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Canonical (Hilbert.KTc) Kripke.FrameClass.KTc := ⟨by
+instance : Canonical (Modal.KTc) Kripke.FrameClass.KTc := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete (Hilbert.KTc) Kripke.FrameClass.KTc := inferInstance
+instance : Complete (Modal.KTc) Kripke.FrameClass.KTc := inferInstance
 
 
-instance : Hilbert.KB4 ⪱ Hilbert.KTc := by
+instance : Modal.KB4 ⪱ Modal.KTc := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.KB4 FrameClass.KTc;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.KB4 FrameClass.KTc;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -70,8 +70,7 @@ instance : Hilbert.KB4 ⪱ Hilbert.KTc := by
         use 1;
         aesop;
 
-end Hilbert.KTc.Kripke
+end Modal.KTc.Kripke
 
-instance : Modal.KB4 ⪱ Modal.KTc := inferInstance
 
 end LO.Modal

@@ -7,7 +7,7 @@ open Kripke
 open Formula
 open Formula.Kripke
 
-namespace Hilbert.Kripke
+namespace Modal.Kripke
 
 variable {H H₁ H₂ : Hilbert ℕ} {Γ : Set (Formula ℕ)} {φ : Formula ℕ}
 
@@ -99,6 +99,6 @@ end
 
 end FrameClass
 
-end Hilbert.Kripke
+end Modal.Kripke
 
 end LO.Propositional

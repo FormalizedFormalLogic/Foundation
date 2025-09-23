@@ -233,13 +233,17 @@ protected abbrev EP : Logic ℕ := Hilbert.WithRE EP.axioms
 instance : Entailment.HasAxiomP Modal.EP := instHasAxiomP
 
 protected abbrev ET.axioms : Axiom ℕ := {Axioms.T (.atom 0)}
+namespace ET.axioms
 instance : ET.axioms.HasT where p := 0;
+end ET.axioms
 protected abbrev ET : Logic ℕ := Hilbert.WithRE ET.axioms
 instance : Entailment.HasAxiomT Modal.ET := instHasAxiomT
 
 protected abbrev EMT.axioms : Axiom ℕ := {Axioms.M (.atom 0) (.atom 1), Axioms.T (.atom 0)}
+namespace EMT.axioms
 instance : EMT.axioms.HasM where p := 0; q := 1;
 instance : EMT.axioms.HasT where p := 0;
+end EMT.axioms
 protected abbrev EMT : Logic ℕ := Hilbert.WithRE EMT.axioms
 instance : Entailment.EMT Modal.EMT where
 
@@ -248,9 +252,11 @@ protected abbrev EMT4.axioms : Axiom ℕ := {
   Axioms.T (.atom 0),
   Axioms.Four (.atom 0)
 }
+namespace EMT4.axioms
 instance : EMT4.axioms.HasM where p := 0; q := 1;
 instance : EMT4.axioms.HasT where p := 0;
 instance : EMT4.axioms.HasFour where p := 0;
+end EMT4.axioms
 protected abbrev EMT4 : Logic ℕ := Hilbert.WithRE EMT4.axioms
 instance : Entailment.EMT4 Modal.EMT4 where
 
@@ -284,12 +290,15 @@ protected abbrev EMCNT.axioms : Axiom ℕ := {
   Axioms.N,
   Axioms.T (.atom 0)
 }
+namespace EMCNT.axioms
 instance : EMCNT.axioms.HasM where p := 0; q := 1;
 instance : EMCNT.axioms.HasC where p := 0; q := 1
 instance : EMCNT.axioms.HasN where
 instance : EMCNT.axioms.HasT where p := 0;
+end EMCNT.axioms
 protected abbrev EMCNT : Logic ℕ := Hilbert.WithRE EMCNT.axioms
 instance : Entailment.EMC Modal.EMCNT where
+instance : Entailment.EN Modal.EMCNT where
 
 
 protected abbrev EMCNT4.axioms : Axiom ℕ := {
@@ -299,14 +308,18 @@ protected abbrev EMCNT4.axioms : Axiom ℕ := {
   Axioms.T (.atom 0),
   Axioms.Four (.atom 0)
 }
+namespace EMCNT4.axioms
 instance : EMCNT4.axioms.HasM where p := 0; q := 1;
 instance : EMCNT4.axioms.HasC where p := 0; q := 1
 instance : EMCNT4.axioms.HasN where
 instance : EMCNT4.axioms.HasT where p := 0;
 instance : EMCNT4.axioms.HasFour where p := 0;
+end EMCNT4.axioms
 protected abbrev EMCNT4 : Logic ℕ := Hilbert.WithRE EMCNT4.axioms
 instance : Entailment.EMC Modal.EMCNT4 where
+instance : Entailment.EN Modal.EMCNT4 where
 
 end
+
 
 end LO.Modal

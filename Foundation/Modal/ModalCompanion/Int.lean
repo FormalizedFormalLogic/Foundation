@@ -13,48 +13,45 @@ open Propositional.Logic (smallestMC largestMC)
 open Modal
 open Modal.Kripke
 
-section S4
+lemma Kripke.sound_frameClass_of_equiv (L₁ L₂ : Logic ℕ) [L₁ ≊ L₂] {C : Kripke.FrameClass} [Sound L₁ C] : Sound L₂ C := by grind;
+lemma Kripke.complete_frameClass_of_equiv (L₁ L₂ : Logic ℕ) [L₁ ≊ L₂] {C : Kripke.FrameClass} [Complete L₁ C] : Complete L₂ C := by grind;
 
-lemma Logic.gS4_of_Int : Hilbert.Int ⊢! φ → Hilbert.S4 ⊢! φᵍ := by
-  apply provable_goedelTranslated_of_provable Hilbert.Int Hilbert.S4;
+
+lemma gS4_of_Int : Hilbert.Int ⊢! φ → Modal.S4 ⊢! φᵍ := by
+  apply provable_goedelTranslated_of_provable Hilbert.Int Modal.S4;
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
 
-lemma Modal.S4.is_smallestMC_of_Int : Modal.S4 = (smallestMC 𝐈𝐧𝐭) := by
-  apply Logic.iff_equal_provable_equiv.mpr;
-  apply Entailment.Equiv.antisymm_iff.mpr;
+namespace S4
+
+instance : Modal.S4 ≊ 𝐈𝐧𝐭.smallestMC := by
+  apply Logic.equiv_of_provable;
+  intro φ;
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    intro φ hφ;
-    simp only [Hilbert.Normal.iff_logic_provable_provable] at hφ;
+  . intro hφ;
     induction hφ using Modal.Hilbert.Normal.rec! with
-    | axm _ h =>
-      rcases h with (rfl | rfl | rfl) <;>
-      . apply Logic.sumNormal.mem₁!;
-        simp;
+    | axm _ h => rcases h with (rfl | rfl | rfl) <;> simp;
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
     | nec ihφ => exact nec! ihφ;
     | _ => apply Logic.sumNormal.mem₁!; simp;
-  . apply Entailment.weakerThan_iff.mpr;
-    intro φ hφ;
+  . intro hφ;
     induction hφ using Logic.sumNormal.rec! with
-    | mem₁ h => tauto;
+    | subst ih => apply Logic.subst! _ ih;
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
-    | subst ih => apply Modal.Logic.subst! _ ih;
-    | nec ih => apply Entailment.nec! ih;
+    | nec ih => apply nec! ih;
+    | mem₁ h => tauto;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply Hilbert.Normal.iff_logic_provable_provable.mpr;
-      apply Logic.gS4_of_Int;
+      apply gS4_of_Int;
       simpa [theory, Propositional.Logic.iff_provable, Set.mem_setOf_eq] using hφ;
 
-instance : Sound (smallestMC 𝐈𝐧𝐭) FrameClass.S4 := by
-  rw [←Modal.S4.is_smallestMC_of_Int];
-  infer_instance;
+lemma eq_smallestMC_of_Int : Modal.S4 = 𝐈𝐧𝐭.smallestMC := Logic.eq_of_equiv
 
-instance modalCompanion_Int_S4 : ModalCompanion 𝐈𝐧𝐭 Modal.S4 := by
-  rw [Modal.S4.is_smallestMC_of_Int];
-  apply Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
+instance : Sound 𝐈𝐧𝐭.smallestMC FrameClass.S4 := Kripke.sound_frameClass_of_equiv Modal.S4 𝐈𝐧𝐭.smallestMC
+
+instance : ModalCompanion 𝐈𝐧𝐭 Modal.S4 := by
+  apply eq_smallestMC_of_Int ▸
+    Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     Propositional.Kripke.FrameClass.all
     FrameClass.S4;
   intro F _;
@@ -64,38 +61,38 @@ end S4
 
 
 
-section Grz
 
-lemma Logic.gGrz_of_Int : Hilbert.Int ⊢! φ → Hilbert.Grz ⊢! φᵍ := λ h ↦ WeakerThan.pbl $ gS4_of_Int h
+instance : 𝐈𝐧𝐭.smallestMC ⪯ Modal.Grz := calc
+  _ ≊ Modal.S4  := by symm; infer_instance;
+  _ ⪯ Modal.Grz := inferInstance
 
-lemma Logic.Grz.is_largestMC_of_Int : Modal.Grz = (Logic.largestMC 𝐈𝐧𝐭) := by
-  apply Logic.iff_equal_provable_equiv.mpr;
-  apply Entailment.Equiv.antisymm_iff.mpr;
+
+namespace Grz
+
+instance : Modal.Grz ≊ 𝐈𝐧𝐭.largestMC := by
+  apply Logic.equiv_of_provable;
+  intro φ;
   constructor;
-  . apply Entailment.weakerThan_iff.mpr;
-    intro _ hφ;
-    simp only [Hilbert.Normal.iff_logic_provable_provable] at hφ;
+  . intro hφ;
     induction hφ using Modal.Hilbert.Normal.rec! with
-    | axm _ h => rcases h with (rfl | rfl | rfl) <;> simp;
-    | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
-    | nec ihφ => exact nec! ihφ;
-    | _ => simp;
-  . apply Entailment.weakerThan_iff.mpr;
-    intro _ hφ;
-    induction hφ using Logic.sumNormal.rec! with
-    | mem₁ h => apply WeakerThan.pbl $ Modal.S4.is_smallestMC_of_Int ▸ h;
+    | axm _ h => rcases h with (rfl | rfl) <;> simp;
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
-    | subst ih => apply subst! _ ih;
+    | nec ihφ => exact nec! ihφ;
+    | _ => apply Logic.sumNormal.mem₁!; simp;
+  . intro hφ;
+    induction hφ using Logic.sumNormal.rec! with
+    | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
+    | subst ih => apply Logic.subst! _ ih;
     | nec ih => apply nec! ih;
+    | mem₁ h => apply WeakerThan.pbl h;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-instance : Sound (Logic.largestMC 𝐈𝐧𝐭) FrameClass.finite_Grz := by
-  rw [←Logic.Grz.is_largestMC_of_Int];
-  infer_instance;
+lemma is_largestMC_of_Int : Modal.Grz = 𝐈𝐧𝐭.largestMC := Logic.eq_of_equiv
 
-instance modalCompanion_Int_Grz : ModalCompanion 𝐈𝐧𝐭 Modal.Grz := by
-  rw [Logic.Grz.is_largestMC_of_Int];
-  apply Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
+instance : Sound 𝐈𝐧𝐭.largestMC FrameClass.finite_Grz := Kripke.sound_frameClass_of_equiv Modal.Grz 𝐈𝐧𝐭.largestMC
+
+instance : ModalCompanion 𝐈𝐧𝐭 Modal.Grz := by
+  apply is_largestMC_of_Int ▸ Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     Propositional.Kripke.FrameClass.finite_all
     FrameClass.finite_Grz
   rintro F hF;
@@ -105,34 +102,22 @@ instance modalCompanion_Int_Grz : ModalCompanion 𝐈𝐧𝐭 Modal.Grz := by
 end Grz
 
 
-section glivenko
-
-lemma Logic.iff_provable_Cl_provable_dia_gS4 : 𝐂𝐥 ⊢! φ ↔ Hilbert.S4 ⊢! ◇φᵍ := by
+lemma iff_provable_Cl_provable_dia_gS4 : 𝐂𝐥 ⊢! φ ↔ Modal.S4 ⊢! ◇φᵍ := by
   constructor;
   . intro h;
-    suffices Hilbert.S4 ⊢! □◇φᵍ by exact axiomT'! this;
-    have := modalCompanion_Int_S4.companion.mp $ iff_negneg_Int_Cl.mpr h;
-    simp only [goedelTranslate, Hilbert.Normal.iff_logic_provable_provable] at this;
+    suffices Modal.S4 ⊢! □◇φᵍ by exact axiomT'! this;
+    have : Modal.S4 ⊢! (∼∼φ)ᵍ := ModalCompanion.companion.mp $ iff_negneg_Int_Cl.mpr h;
     cl_prover [this];
   . intro h;
-    replace h : Hilbert.S4 ⊢! □◇φᵍ := nec! h;
     apply iff_negneg_Int_Cl.mp;
-    apply modalCompanion_Int_S4.companion.mpr;
-    simp only [Hilbert.Normal.iff_logic_provable_provable];
+    suffices Modal.S4 ⊢! (∼∼φ)ᵍ by exact ModalCompanion.companion.mpr this;
+    replace h : Modal.S4 ⊢! □◇φᵍ := nec! h;
     cl_prover [h];
-
-end glivenko
-
-
-section boxdot
 
 /--
   Chagrov & Zakharyaschev 1997, Theorem 3.89
 -/
-theorem embedding_Int_GL {φ : Propositional.Formula ℕ} : 𝐈𝐧𝐭 ⊢! φ ↔ Modal.GL ⊢! φᵍᵇ:= by
-  exact Iff.trans modalCompanion_Int_Grz.companion iff_boxdot_GL_Grz.symm
-
-end boxdot
+theorem embedding_Int_GL : 𝐈𝐧𝐭 ⊢! φ ↔ Modal.GL ⊢! φᵍᵇ:= Iff.trans ModalCompanion.companion iff_boxdot_GL_Grz.symm
 
 
 end LO.Modal

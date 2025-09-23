@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.KD
 import Foundation.Modal.Entailment.KT
 
@@ -9,7 +8,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -22,33 +21,27 @@ instance {F : Kripke.Frame} [F.IsKT] : F.IsKD := by simp
 end Kripke
 
 
-namespace Hilbert
-
-namespace KT.Kripke
-
-instance : Sound Hilbert.KT FrameClass.KT := instSound_of_validates_axioms $ by
+instance : Sound Modal.KT FrameClass.KT := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   simp only [Set.mem_singleton_iff, forall_eq];
   rintro F F_refl;
   exact Kripke.validate_AxiomT_of_reflexive (refl := F_refl);
 
-instance : Entailment.Consistent Hilbert.KT := consistent_of_sound_frameclass FrameClass.KT $ by
+instance : Entailment.Consistent Modal.KT := consistent_of_sound_frameclass FrameClass.KT $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   simp;
 
-instance : Canonical Hilbert.KT FrameClass.KT := ⟨by
+instance : Canonical Modal.KT FrameClass.KT := ⟨by
   apply Set.mem_setOf_eq.mpr;
   dsimp [Frame.IsKT];
   infer_instance;
 ⟩
 
-instance : Complete Hilbert.KT FrameClass.KT := inferInstance
+instance : Complete Modal.KT FrameClass.KT := inferInstance
 
-end KT.Kripke
-
-instance : Hilbert.KD ⪱ Hilbert.KT := by
+instance : Modal.KD ⪱ Modal.KT := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -61,10 +54,5 @@ instance : Hilbert.KD ⪱ Hilbert.KT := by
       constructor;
       . exact { serial := by tauto };
       . simp [Semantics.Realize, Satisfies];
-
-end Hilbert
-
-instance : Modal.KD ⪱ Modal.KT := inferInstance
-
 
 end LO.Modal

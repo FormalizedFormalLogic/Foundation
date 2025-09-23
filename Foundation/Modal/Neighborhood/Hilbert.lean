@@ -7,7 +7,7 @@ open Formula
 open Modal.Neighborhood
 open Formula.Neighborhood
 
-variable {Ax : Set (Formula ℕ)} {φ : Formula ℕ}
+variable {Ax : Axiom ℕ} {φ : Formula ℕ}
 variable {F : Neighborhood.Frame} {C : Neighborhood.FrameClass}
 
 namespace Hilbert.Neighborhood

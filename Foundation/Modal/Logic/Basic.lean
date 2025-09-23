@@ -73,7 +73,7 @@ lemma exists_unprovable : ∃ φ, L ⊬ φ := Consistent.exists_unprovable (𝓢
 
 variable [DecidableEq α] [L.IsQuasiNormal]
 
-@[simp]
+@[simp, grind]
 lemma no_bot : L ⊬ ⊥ := by
   obtain ⟨φ, hφ⟩ := exists_unprovable (L := L);
   contrapose! hφ;
@@ -81,12 +81,13 @@ lemma no_bot : L ⊬ ⊥ := by
   apply of_O!;
   assumption;
 
-@[simp]
+@[simp, grind]
 lemma not_mem_bot : ⊥ ∉ L := by
   apply iff_unprovable.mp;
   exact no_bot;
 
 -- TODO: more general place
+@[grind]
 lemma not_neg_of! (hφ : L ⊢! φ) : L ⊬ ∼φ := by
   by_contra! hC;
   apply L.no_bot;
@@ -94,17 +95,24 @@ lemma not_neg_of! (hφ : L ⊢! φ) : L ⊬ ∼φ := by
 
 end
 
-end
 
-section
+@[grind]
+lemma weakerThan_of_provable (h : ∀ φ, L₁ ⊢! φ → L₂ ⊢! φ) : L₁ ⪯ L₂ := by
+  constructor;
+  simpa [Entailment.theory, forall_exists_index];
 
 @[grind]
 lemma weakerThan_of_subset (h : L₁ ⊆ L₂) : L₁ ⪯ L₂ := by
-  constructor;
-  suffices ∀ (φ : Formula α), L₁ ⊢! φ → L₂ ⊢! φ by simpa [Entailment.theory];
+  suffices ∀ (φ : Formula α), L₁ ⊢! φ → L₂ ⊢! φ by grind;
   intro φ;
-  have := @h φ;
   grind;
+
+@[grind]
+lemma equiv_of_provable (h : ∀ φ, L₁ ⊢! φ ↔ L₂ ⊢! φ) : L₁ ≊ L₂ := by
+  apply Entailment.Equiv.antisymm;
+  constructor <;>
+  . apply weakerThan_of_provable;
+    grind;
 
 @[grind]
 lemma strictWeakerThan_of_ssubset (h : L₁ ⊂ L₂) : L₁ ⪱ L₂ := by
@@ -120,6 +128,12 @@ lemma subset_of_weakerThan [L₁ ⪯ L₂] : L₁ ⊆ L₂ := by
   intro φ;
   suffices L₁ ⊢! φ → L₂ ⊢! φ by grind;
   exact Entailment.WeakerThan.pbl;
+
+instance [L₁ ≊ L₂] : L₁ ⪯ L₂ := Equiv.le inferInstance
+instance [L₁ ≊ L₂] : L₂ ⪯ L₁ := Equiv.le $ .symm inferInstance
+
+@[grind]
+lemma eq_of_equiv [L₁ ≊ L₂] : L₁ = L₂ := Set.Subset.antisymm subset_of_weakerThan subset_of_weakerThan
 
 end
 

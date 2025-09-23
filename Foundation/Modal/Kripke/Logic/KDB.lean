@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Logic.KB
 import Foundation.Modal.Kripke.Logic.KD
 
@@ -9,7 +8,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -20,26 +19,22 @@ abbrev FrameClass.KDB : FrameClass := { F | F.IsKDB }
 end Kripke
 
 
-namespace Hilbert.KDB.Kripke
-
-instance : Sound (Hilbert.KDB) Kripke.FrameClass.KDB := instSound_of_validates_axioms $ by
+instance : Sound (Modal.KDB) Kripke.FrameClass.KDB := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomD_of_serial;
   . exact validate_AxiomB_of_symmetric;
 
-instance : Entailment.Consistent (Hilbert.KDB) := consistent_of_sound_frameclass Kripke.FrameClass.KDB $ by
+instance : Entailment.Consistent (Modal.KDB) := consistent_of_sound_frameclass Kripke.FrameClass.KDB $ by
   use whitepoint;
   constructor;
 
+instance : Canonical (Modal.KDB) Kripke.FrameClass.KDB := ⟨by constructor⟩
 
-instance : Canonical (Hilbert.KDB) Kripke.FrameClass.KDB := ⟨by constructor⟩
+instance : Complete (Modal.KDB) Kripke.FrameClass.KDB := inferInstance
 
-instance : Complete (Hilbert.KDB) Kripke.FrameClass.KDB := inferInstance
-
-
-instance : Hilbert.KD ⪱ Hilbert.KDB := by
+instance : Modal.KD ⪱ Modal.KDB := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -56,7 +51,7 @@ instance : Hilbert.KD ⪱ Hilbert.KDB := by
         use 1;
         constructor <;> omega;
 
-instance : Hilbert.KB ⪱ Hilbert.KDB := by
+instance : Modal.KB ⪱ Modal.KDB := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -69,11 +64,5 @@ instance : Hilbert.KB ⪱ Hilbert.KDB := by
       constructor;
       . refine { symm := by simp; };
       . simp [Semantics.Realize, Satisfies];
-
-end Hilbert.KDB.Kripke
-
-instance : Modal.KD ⪱ Modal.KDB := inferInstance
-
-instance : Modal.KB ⪱ Modal.KDB := inferInstance
 
 end LO.Modal

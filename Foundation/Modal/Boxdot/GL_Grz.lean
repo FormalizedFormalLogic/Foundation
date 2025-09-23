@@ -22,13 +22,13 @@ open Modal.Kripke
 open Entailment
 
 
-lemma provable_boxdot_GL_of_provable_Grz : Hilbert.Grz ⊢! φ → Hilbert.GL ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
+lemma provable_boxdot_GL_of_provable_Grz : Modal.Grz ⊢! φ → Modal.GL ⊢! φᵇ := Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances $ by
   intro φ hp;
-  rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
+  rcases (by simpa [Axiom.instances] using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
   . exact boxdot_Grz_of_L!
 
-lemma provable_Grz_of_provable_boxdot_GL : Hilbert.GL ⊢! φᵇ → Hilbert.Grz ⊢! φ := by
+lemma provable_Grz_of_provable_boxdot_GL : Modal.GL ⊢! φᵇ → Modal.Grz ⊢! φ := by
   contrapose;
   intro h;
   obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ (not_imp_not.mpr $ Complete.complete (𝓜 := FrameClass.finite_Grz)) h;
@@ -42,7 +42,7 @@ lemma provable_Grz_of_provable_boxdot_GL : Hilbert.GL ⊢! φᵇ → Hilbert.Grz
     apply iff_reflexivize_irreflexivize'.not.mp;
     assumption;
 
-theorem iff_provable_boxdot_GL_provable_Grz : Hilbert.GL ⊢! φᵇ ↔ Hilbert.Grz ⊢! φ := ⟨
+theorem iff_provable_boxdot_GL_provable_Grz : Modal.GL ⊢! φᵇ ↔ Modal.Grz ⊢! φ := ⟨
   provable_Grz_of_provable_boxdot_GL,
   provable_boxdot_GL_of_provable_Grz
 ⟩

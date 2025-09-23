@@ -6,7 +6,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -21,9 +21,9 @@ protected abbrev FrameClass.S4Point3McK : FrameClass := { F | F.IsS4Point3McK }
 end Kripke
 
 
-namespace Hilbert.S4Point3McK.Kripke
+namespace Modal.S4Point3McK.Kripke
 
-instance : Sound (Hilbert.S4Point3McK) FrameClass.S4Point3McK := instSound_of_validates_axioms $ by
+instance : Sound (Modal.S4Point3McK) FrameClass.S4Point3McK := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl | rfl) F ⟨_, _⟩;
@@ -32,19 +32,19 @@ instance : Sound (Hilbert.S4Point3McK) FrameClass.S4Point3McK := instSound_of_va
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance : Entailment.Consistent Hilbert.S4Point3McK :=
+instance : Entailment.Consistent Modal.S4Point3McK :=
   consistent_of_sound_frameclass FrameClass.S4Point3McK $ by
     use whitepoint;
     constructor;
 
-instance : Canonical (Hilbert.S4Point3McK) FrameClass.S4Point3McK := ⟨by constructor⟩
+instance : Canonical (Modal.S4Point3McK) FrameClass.S4Point3McK := ⟨by constructor⟩
 
-instance : Complete (Hilbert.S4Point3McK) FrameClass.S4Point3McK := inferInstance
+instance : Complete (Modal.S4Point3McK) FrameClass.S4Point3McK := inferInstance
 
 
-instance : Hilbert.S4Point2McK ⪱ Hilbert.S4Point3McK := by
+instance : Modal.S4Point2McK ⪱ Modal.S4Point3McK := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.S4Point2McK FrameClass.S4Point3McK;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.S4Point2McK FrameClass.S4Point3McK;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -81,7 +81,7 @@ instance : Hilbert.S4Point2McK ⪱ Hilbert.S4Point3McK := by
         . use 1; simp only [M]; refine ⟨?_, ?_, ?_, ?_⟩ <;> omega;
         . use 2; simp only [M]; refine ⟨?_, ?_, ?_, ?_⟩ <;> omega;
 
-instance : Hilbert.S4Point3 ⪱ Hilbert.S4Point3McK := by
+instance : Modal.S4Point3 ⪱ Modal.S4Point3McK := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -102,10 +102,8 @@ instance : Hilbert.S4Point3 ⪱ Hilbert.S4Point3McK := by
         use 1;
         trivial;
 
-end Hilbert.S4Point3McK.Kripke
+end Modal.S4Point3McK.Kripke
 
-instance : Modal.S4Point2McK ⪱ Modal.S4Point3McK := inferInstance
 
-instance : Modal.S4Point3 ⪱ Modal.S4Point3McK := inferInstance
 
 end LO.Modal

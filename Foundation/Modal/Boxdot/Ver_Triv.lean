@@ -14,18 +14,18 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {φ : Formula ℕ}
 
-lemma provable_boxdotTranslated_Ver_of_Triv : Hilbert.Triv ⊢! φ → Hilbert.Ver ⊢! φᵇ := Hilbert.of_provable_boxdotTranslated_axiomInstances $ by
+lemma provable_boxdotTranslated_Ver_of_Triv : Modal.Triv ⊢! φ → Modal.Ver ⊢! φᵇ := Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances $ by
   rintro φ hp;
-  rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
+  rcases (by simpa [Axiom.instances] using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
   . simp only [boxdotTranslate, and₁!];
   . apply deduct'!;
     apply K!_intro <;> simp;
 
-lemma provable_Triv_of_boxdotTranslated_Ver : Hilbert.Ver ⊢! φᵇ → Hilbert.Triv ⊢! φ := by
+lemma provable_Triv_of_boxdotTranslated_Ver : Modal.Ver ⊢! φᵇ → Modal.Triv ⊢! φ := by
   intro h;
-  replace h := Sound.sound (𝓢 := Hilbert.Ver) (𝓜 := FrameClass.Ver) h;
-  apply Complete.complete (𝓢 := Hilbert.Triv) (𝓜 := FrameClass.Triv);
+  replace h := Sound.sound (𝓢 := Modal.Ver) (𝓜 := FrameClass.Ver) h;
+  apply Complete.complete (𝓢 := Modal.Triv) (𝓜 := FrameClass.Triv);
   contrapose! h;
   obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ h;
   replace hF := Set.mem_setOf_eq.mp hF;
@@ -44,7 +44,7 @@ lemma provable_Triv_of_boxdotTranslated_Ver : Hilbert.Ver ⊢! φᵇ → Hilbert
     apply iff_reflexivize_irreflexivize'.not.mp;
     exact h;
 
-theorem iff_boxdotTranslated_Ver_Triv' : Hilbert.Ver ⊢! φᵇ ↔ Hilbert.Triv ⊢! φ := ⟨
+theorem iff_boxdotTranslated_Ver_Triv' : Modal.Ver ⊢! φᵇ ↔ Modal.Triv ⊢! φ := ⟨
   provable_Triv_of_boxdotTranslated_Ver,
   provable_boxdotTranslated_Ver_of_Triv
 ⟩

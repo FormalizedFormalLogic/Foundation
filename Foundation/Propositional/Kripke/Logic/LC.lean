@@ -4,7 +4,7 @@ import Foundation.Propositional.Kripke.Logic.KC
 namespace LO.Propositional
 
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Formula.Kripke
 
 namespace Kripke
@@ -101,7 +101,7 @@ instance : Complete Hilbert.LC FrameClass.finite_LC := ⟨by
 
 end LC.Kripke
 
-instance : Hilbert.KC ⪱ Hilbert.LC := by
+instance : Modal.KC ⪱ Hilbert.LC := by
   constructor;
   . apply weakerThan_of_subset_frameClass FrameClass.KC FrameClass.LC;
     intro F hF;
