@@ -17,8 +17,9 @@
     raw(
       "
   digraph PropositionalLogicZoo {
-    rankdir = BT;
+    rankdir = LR;
     node [
+      shape=none
       margin=0.1
       width=0
       height=0
@@ -34,12 +35,12 @@
         + "}",
     ),
     labels: (
-      "𝐂𝐥": $Logic("Cl")$,
-      "𝐈𝐧𝐭": $Logic("Int")$,
-      "𝐊𝐂": $Logic("KC")$,
-      "𝐊𝐏": $Logic("KP")$,
-      "𝐋𝐂": $Logic("LC")$,
+      "LO.Propositional.Cl": $Logic("Cl")$,
+      "LO.Propositional.Int": $Logic("Int")$,
+      "LO.Propositional.KC": $Logic("KC")$,
+      "LO.Propositional.KrieselPutnam": $Logic("KP")$,
+      "LO.Propositional.LC": $Logic("LC")$,
     ),
-    width: 70pt,
+    width: 240pt,
   )
 ]
