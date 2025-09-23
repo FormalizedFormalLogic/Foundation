@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Basic2
+import Foundation.Propositional.Hilbert.Basic
 
 namespace LO.Propositional
 
