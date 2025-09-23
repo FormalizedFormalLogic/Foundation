@@ -11,29 +11,30 @@ open Formula.Kripke
 protected abbrev Kripke.FrameClass.KrieselPutnam : FrameClass := { F | F.SatisfiesKriselPutnamCondition }
 
 
-namespace Hilbert.KrieselPutnam.Kripke
+namespace KrieselPutnam
 
-instance : Sound Modal.KrieselPutnam FrameClass.KrieselPutnam := instSound_of_validates_axioms $ by
+instance : Sound Propositional.KrieselPutnam FrameClass.KrieselPutnam := instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomKrieselPutnam_of_satisfiesKrieselPutnamCondition
 
-instance : Entailment.Consistent Modal.KrieselPutnam := consistent_of_sound_frameclass FrameClass.KrieselPutnam $ by
+instance : Entailment.Consistent Propositional.KrieselPutnam := consistent_of_sound_frameclass FrameClass.KrieselPutnam $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance : Canonical Modal.KrieselPutnam FrameClass.KrieselPutnam := ⟨by
+instance : Canonical Propositional.KrieselPutnam FrameClass.KrieselPutnam := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete Modal.KrieselPutnam FrameClass.KrieselPutnam := inferInstance
+instance : Complete Propositional.KrieselPutnam FrameClass.KrieselPutnam := inferInstance
 
-end Hilbert.KrieselPutnam.Kripke
+end KrieselPutnam
 
-instance : Hilbert.Int ⪱ Modal.KrieselPutnam := by
+
+instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -103,11 +104,5 @@ instance : Hilbert.Int ⪱ Modal.KrieselPutnam := by
               constructor;
               . tauto;
               . simp [Semantics.Realize, Satisfies, M, Frame.Rel'];
-
-
-propositional_kripke 𝐊𝐏 FrameClass.KrieselPutnam
-
-instance : 𝐈𝐧𝐭 ⪱ 𝐊𝐏 := inferInstance
-
 
 end LO.Propositional

@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.WellKnown
+import Foundation.Propositional.Hilbert.Basic
 import Foundation.Propositional.ClassicalSemantics.Basic
 import Foundation.Propositional.ConsistentTableau
 
@@ -8,9 +8,9 @@ open Semantics
 open ClassicalSemantics
 open Formula.ClassicalSemantics
 
-namespace Hilbert.Cl
+namespace Cl
 
-theorem soundness (h : Hilbert.Cl ⊢! φ) : φ.isTautology := by
+theorem soundness (h : Propositional.Cl ⊢! φ) : φ.isTautology := by
   intro v;
   induction h with
   | axm _ h => rcases h with (rfl | rfl) <;> tauto;
@@ -20,7 +20,7 @@ theorem soundness (h : Hilbert.Cl ⊢! φ) : φ.isTautology := by
   | orElim => simp [Semantics.Realize, val]; tauto;
   | _ => tauto;
 
-lemma not_provable_of_exists_valuation : (∃ v : Valuation _, ¬(v ⊧ φ)) → Hilbert.Cl ⊬ φ := by
+lemma not_provable_of_exists_valuation : (∃ v : Valuation _, ¬(v ⊧ φ)) → Propositional.Cl ⊬ φ := by
   contrapose!;
   simpa using soundness;
 
@@ -30,9 +30,9 @@ open
   Entailment
   SaturatedConsistentTableau
 
-def canonicalVal (T : SaturatedConsistentTableau Hilbert.Cl) : Valuation ℕ := λ a => (.atom a) ∈ T.1.1
+def canonicalVal (T : SaturatedConsistentTableau Propositional.Cl) : Valuation ℕ := λ a => (.atom a) ∈ T.1.1
 
-lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) ⊧ φ ↔ φ ∈ T.1.1 := by
+lemma truthlemma {T : SaturatedConsistentTableau Propositional.Cl} : (canonicalVal T) ⊧ φ ↔ φ ∈ T.1.1 := by
   induction φ with
   | hatom => simp [canonicalVal];
   | hfalsum => simp [canonicalVal];
@@ -77,10 +77,10 @@ lemma truthlemma {T : SaturatedConsistentTableau Hilbert.Cl} : (canonicalVal T) 
       . left; apply ihφ.mpr hφ;
       . right; apply ihψ.mpr hψ;
 
-theorem completeness : (φ.isTautology) → (Hilbert.Cl ⊢! φ) := by
+theorem completeness : (φ.isTautology) → (Propositional.Cl ⊢! φ) := by
   contrapose;
   intro h;
-  obtain ⟨T, hT⟩ := lindenbaum (𝓢 := Hilbert.Cl) (t₀ := (∅, {φ})) $ by
+  obtain ⟨T, hT⟩ := lindenbaum (𝓢 := Propositional.Cl) (t₀ := (∅, {φ})) $ by
     intro Γ Δ hΓ hΔ;
     by_contra hC;
     apply h;
@@ -101,34 +101,23 @@ theorem completeness : (φ.isTautology) → (Hilbert.Cl ⊢! φ) := by
   apply hT.2;
   tauto;
 
-theorem iff_isTautology_provable : φ.isTautology ↔ Hilbert.Cl ⊢! φ := ⟨
+@[grind]
+theorem iff_isTautology_provable : φ.isTautology ↔ Propositional.Cl ⊢! φ := ⟨
   completeness,
   soundness,
 ⟩
 
-lemma exists_valuation_of_not_provable : ¬(Hilbert.Cl ⊢! φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
+lemma exists_valuation_of_not_provable : ¬(Propositional.Cl ⊢! φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
   contrapose!;
   simpa using completeness;
 
 end Completeness
 
-end Hilbert.Cl
-
-
-namespace Logic.Cl
-
-variable {φ : Formula ℕ}
-
-theorem tautologies : 𝐂𝐥 = { φ | φ.isTautology } := by
+theorem tautologies : Propositional.Cl = { φ | φ.isTautology } := by
   ext φ;
-  simp [Hilbert.Cl.iff_isTautology_provable, Entailment.theory];
+  simp [Cl.iff_isTautology_provable, Logic.iff_provable];
 
-lemma exists_valuation_of_not (h : 𝐂𝐥 ⊬ φ) : ∃ v : Valuation _, ¬(v ⊧ φ) := by
-  apply Hilbert.Cl.exists_valuation_of_not_provable;
-  tauto;
+end Cl
 
-lemma iff_isTautology : 𝐂𝐥 ⊢! φ ↔ φ.isTautology := by simp [tautologies];
-
-end Logic.Cl
 
 end LO.Propositional

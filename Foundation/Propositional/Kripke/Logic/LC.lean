@@ -20,36 +20,34 @@ protected abbrev FrameClass.finite_LC : FrameClass := { F | F.IsFiniteLC }
 end Kripke
 
 
-namespace Hilbert
+namespace LC
 
-namespace LC.Kripke
-
-instance : Sound Hilbert.LC FrameClass.LC := instSound_of_validates_axioms $ by
+instance : Sound Propositional.LC FrameClass.LC := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomEFQ;
   rintro F hF _ rfl;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply validate_axiomDummett_of_isPiecewiseStronglyConnected;
 
-instance : Sound Hilbert.LC FrameClass.finite_LC := instSound_of_validates_axioms $ by
+instance : Sound Propositional.LC FrameClass.finite_LC := instSound_of_validates_axioms $ by
   apply FrameClass.Validates.withAxiomEFQ;
   rintro F hF _ rfl;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply validate_axiomDummett_of_isPiecewiseStronglyConnected;
 
-instance : Entailment.Consistent Hilbert.LC := consistent_of_sound_frameclass FrameClass.LC $ by
+instance : Entailment.Consistent Propositional.LC := consistent_of_sound_frameclass FrameClass.LC $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance : Canonical Hilbert.LC FrameClass.LC := ⟨by
+instance : Canonical Propositional.LC FrameClass.LC := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete Hilbert.LC FrameClass.LC := inferInstance
+instance : Complete Propositional.LC FrameClass.LC := inferInstance
 
 open finestFiltrationTransitiveClosureModel Relation in
-instance : Complete Hilbert.LC FrameClass.finite_LC := ⟨by
+instance : Complete Propositional.LC FrameClass.finite_LC := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.LC);
   rintro F F_conn V r;
@@ -99,9 +97,10 @@ instance : Complete Hilbert.LC FrameClass.finite_LC := ⟨by
   }
 ⟩
 
-end LC.Kripke
+end LC
 
-instance : Modal.KC ⪱ Hilbert.LC := by
+
+instance : Propositional.KC ⪱ Propositional.LC := by
   constructor;
   . apply weakerThan_of_subset_frameClass FrameClass.KC FrameClass.LC;
     intro F hF;
@@ -133,13 +132,7 @@ instance : Modal.KC ⪱ Hilbert.LC := by
         by_contra hC;
         simpa using @hC.ps_connected 0 1 2;
 
-end Hilbert
-
-
-propositional_kripke 𝐋𝐂 FrameClass.LC
-propositional_kripke 𝐋𝐂 FrameClass.finite_LC
-
-instance : 𝐊𝐂 ⪱ 𝐋𝐂 := inferInstance
+instance : Propositional.KC ⪱ Propositional.LC := inferInstance
 
 
 end LO.Propositional

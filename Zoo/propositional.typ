@@ -34,11 +34,11 @@
         + "}",
     ),
     labels: (
-      "𝐂𝐥": $Logic("Cl")$,
-      "𝐈𝐧𝐭": $Logic("Int")$,
-      "𝐊𝐂": $Logic("KC")$,
-      "𝐊𝐏": $Logic("KP")$,
-      "𝐋𝐂": $Logic("LC")$,
+      "Propositional.Cl": $Logic("Cl")$,
+      "Propositional.Int": $Logic("Int")$,
+      "Propositional.KC": $Logic("KC")$,
+      "Propositional.KrieselPutnam": $Logic("KP")$,
+      "Propositional.LC": $Logic("LC")$,
     ),
     width: 70pt,
   )
