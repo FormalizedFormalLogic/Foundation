@@ -298,6 +298,7 @@ instance : EMCNT.axioms.HasT where p := 0;
 end EMCNT.axioms
 protected abbrev EMCNT : Logic ℕ := Hilbert.WithRE EMCNT.axioms
 instance : Entailment.EMC Modal.EMCNT where
+instance : Entailment.EN Modal.EMCNT where
 
 
 protected abbrev EMCNT4.axioms : Axiom ℕ := {
@@ -316,6 +317,7 @@ instance : EMCNT4.axioms.HasFour where p := 0;
 end EMCNT4.axioms
 protected abbrev EMCNT4 : Logic ℕ := Hilbert.WithRE EMCNT4.axioms
 instance : Entailment.EMC Modal.EMCNT4 where
+instance : Entailment.EN Modal.EMCNT4 where
 
 end
 

@@ -121,12 +121,12 @@ instance : Modal.GrzPoint3 ≊ 𝐋𝐂.largestMC := by
     | mem₁ h => apply WeakerThan.pbl h;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-lemma is_largestMC_of_KC : Modal.GrzPoint3 = 𝐋𝐂.largestMC := Logic.eq_of_equiv
+lemma is_largestMC_of_LC : Modal.GrzPoint3 = 𝐋𝐂.largestMC := Logic.eq_of_equiv
 
 instance : Sound 𝐋𝐂.largestMC FrameClass.finite_GrzPoint3 := Kripke.sound_frameClass_of_equiv Modal.GrzPoint3 𝐋𝐂.largestMC
 
 instance : ModalCompanion 𝐋𝐂 Modal.GrzPoint3 := by
-  apply is_largestMC_of_KC ▸ Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
+  apply is_largestMC_of_LC ▸ Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     Propositional.Kripke.FrameClass.finite_LC
     ({ F : Frame | F.IsFiniteGrzPoint3' })
   rintro F hF;

@@ -111,7 +111,7 @@ instance : Modal.S5Grz ≊ 𝐂𝐥.largestMC := by
     | mem₁ h => apply WeakerThan.pbl h;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-lemma is_largestMC_of_KC : Modal.S5Grz = 𝐂𝐥.largestMC := Logic.eq_of_equiv
+lemma is_largestMC_of_Cl : Modal.S5Grz = 𝐂𝐥.largestMC := Logic.eq_of_equiv
 
 instance : Sound 𝐂𝐥.largestMC FrameClass.finite_Triv := Kripke.sound_frameClass_of_equiv Modal.S5Grz 𝐂𝐥.largestMC
 
@@ -119,7 +119,7 @@ end S5Grz
 
 
 instance S5Grz.modalCompanion : ModalCompanion 𝐂𝐥 Modal.S5Grz := by
-  apply is_largestMC_of_KC ▸ Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
+  apply is_largestMC_of_Cl ▸ Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_Cl)
     (MC := Modal.Kripke.FrameClass.finite_Triv);
   . intro F hF; simp_all only [Set.mem_setOf_eq]; exact {};
