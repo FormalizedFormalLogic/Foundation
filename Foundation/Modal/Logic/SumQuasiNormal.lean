@@ -32,9 +32,9 @@ instance : Entailment.ModusPonens (sumQuasiNormal L₁ L₂) where
 
 instance : (sumQuasiNormal L₁ L₂).Substitution where
   subst s hφ := by
-    constructor;
+    rw [iff_provable] at ⊢ hφ;
     apply sumQuasiNormal.subst;
-    exact PLift.down hφ;
+    assumption;
 
 lemma rec!
   {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢ φ) → Sort}
@@ -44,7 +44,7 @@ lemma rec!
            {hφψ : (sumQuasiNormal L₁ L₂) ⊢ φ ➝ ψ} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
-  (subst : ∀ {φ s}, {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} → (motive φ hφ) → motive (φ⟦s⟧) (Logic.subst! _ hφ))
+  (subst : ∀ {φ s}, {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} → (motive φ hφ) → motive (φ⟦s⟧) (Logic.subst _ hφ))
   : ∀ {φ}, (h : sumQuasiNormal L₁ L₂ ⊢ φ) → motive φ h := by
   intro _ hφ;
   induction (iff_provable.mp $ hφ) with
@@ -87,9 +87,9 @@ instance [Entailment.Cl L₁] : Entailment.Lukasiewicz (sumQuasiNormal L₁ L₂
 instance [L₁.IsQuasiNormal] : (sumQuasiNormal L₁ L₂).IsQuasiNormal where
   K _ _ := by constructor; apply sumQuasiNormal.mem₁; simp;
   subst s hφ := by
-    constructor;
+    rw [iff_provable] at ⊢ hφ;
     apply sumQuasiNormal.subst;
-    exact PLift.down hφ;
+    assumption;
 
 instance [L₂.IsQuasiNormal] : (sumQuasiNormal L₁ L₂).IsQuasiNormal := by
   rw [sumQuasiNormal.symm];
@@ -118,7 +118,7 @@ lemma iff_subset {X Y} : L.sumQuasiNormal Y ⊆ L.sumQuasiNormal X ↔ ∀ ψ �
     | mem₁ hψ => apply Logic.sumQuasiNormal.mem₁! hψ;
     | mem₂ hψ => apply h; grind;
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
-    | subst ihφ => apply Logic.subst!; assumption;
+    | subst ihφ => apply Logic.subst; assumption;
 
 section
 
@@ -166,7 +166,7 @@ lemma finite_provable_of_provable (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, 
       apply h;
       apply hX;
       assumption;
-    . apply C!_trans ?_ (subst! s hφ);
+    . apply C!_trans ?_ (Logic.subst s hφ);
       exact fconj_subst;
 
 lemma iff_provable_finite_provable (h : ∀ ξ ∈ L₂, ∀ s : Substitution _, ξ⟦s⟧ ∈ L₂)  :
@@ -192,7 +192,7 @@ lemma with_empty [DecidableEq α] {L₁ : Logic α} [L₁.IsQuasiNormal] : L₁.
     | mem₁ => assumption;
     | mem₂ => simp_all [Logic.iff_provable];
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
-    | subst ihφ => exact Logic.subst! _ ihφ;
+    | subst ihφ => exact Logic.subst _ ihφ;
   . intro h;
     exact Entailment.WeakerThan.pbl h;
 
@@ -246,9 +246,8 @@ lemma rec!
   | _ => grind;
 
 instance : (sumQuasiNormal' L₁ L₂).Substitution where
-  subst s := by
-    rintro ⟨hφ⟩;
-    constructor;
+  subst s hφ := by
+    rw [iff_provable] at ⊢ hφ;
     induction hφ with
     | mem₁ s' h => simpa using mem₁ (s := s' ∘ s) h
     | mem₂ s' h => simpa using mem₂ (s := s' ∘ s) h
@@ -265,13 +264,13 @@ lemma eq_sumQuasiNormal_sumQuasiNormal' : Logic.sumQuasiNormal L₁ L₂ = Logic
   constructor;
   . intro h;
     induction h using Logic.sumQuasiNormal.rec! with
-    | @subst ψ s _ ihφ => exact subst! _ ihφ;
+    | @subst ψ s _ ihφ => exact Logic.subst _ ihφ;
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
     | _ => grind;
   . intro h;
     induction h using Logic.sumQuasiNormal'.rec! with
     | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
-    | _ => apply subst!; grind;
+    | _ => apply Logic.subst; grind;
 
 @[grind]
 lemma iff_provable_sumQuasiNormal'_provable_sumQuasiNormal : (sumQuasiNormal' L₁ L₂ ⊢ φ) ↔ (sumQuasiNormal L₁ L₂ ⊢ φ) := by
@@ -279,8 +278,8 @@ lemma iff_provable_sumQuasiNormal'_provable_sumQuasiNormal : (sumQuasiNormal' L�
 
 lemma sumQuasiNormal.rec!_omitSubst
   {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢ φ) → Sort}
-  (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢ φ) → motive (φ⟦s⟧) (subst! s $ mem₁! h))
-  (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢ φ) → motive (φ⟦s⟧) (subst! s $ mem₂! h))
+  (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢ φ) → motive (φ⟦s⟧) (Logic.subst s $ mem₁! h))
+  (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢ φ) → motive (φ⟦s⟧) (Logic.subst s $ mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
            {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
            motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
@@ -292,19 +291,18 @@ lemma sumQuasiNormal.rec!_omitSubst
   | mem₂ s h => grind;
   | @mdp _ _ hφψ hφ ihφψ ihφ => exact mdp (ihφψ $ by grind) (ihφ $ by grind);
 
-attribute [grind] Logic.subst!
+attribute [grind] Logic.subst
 
-@[grind]
+
 def substitution_of_letterless (L_letterless : FormulaSet.Letterless L) : L.Substitution where
-  subst s := by
-    rintro ⟨hφ⟩;
-    constructor;
+  subst s hφ := by
+    rw [Logic.iff_provable] at ⊢ hφ;
     simpa [Formula.subst.subst_letterless (s := s) $ L_letterless _ hφ];
 
 lemma sumQuasiNormal.rec!_omitSubst₁ (hL₁ : L₁.Substitution)
   {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢ φ) → Sort}
   (mem₁  : ∀ {φ}, (h : L₁ ⊢ φ) → motive φ (mem₁! h))
-  (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢ φ) → motive (φ⟦s⟧) (subst! s $ mem₂! h))
+  (mem₂  : ∀ {φ}, ∀ s, (h : L₂ ⊢ φ) → motive (φ⟦s⟧) (Logic.subst s $ mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
            {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →
            motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
@@ -319,7 +317,7 @@ lemma sumQuasiNormal.rec!_omitSubst₁ (hL₁ : L₁.Substitution)
 
 lemma sumQuasiNormal.rec!_omitSubst₂ (hL₂ : L₂.Substitution)
   {motive : (φ : Formula α) → ((sumQuasiNormal L₁ L₂) ⊢ φ) → Sort}
-  (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢ φ) → motive (φ⟦s⟧) (subst! s $ mem₁! h))
+  (mem₁  : ∀ {φ}, ∀ s, (h : L₁ ⊢ φ) → motive (φ⟦s⟧) (Logic.subst s $ mem₁! h))
   (mem₂  : ∀ {φ}, (h : L₂ ⊢ φ) → motive φ (mem₂! h))
   (mdp   : ∀ {φ ψ : Formula α},
            {hφψ : (sumQuasiNormal L₁ L₂) ⊢ (φ ➝ ψ)} → {hφ : (sumQuasiNormal L₁ L₂) ⊢ φ} →

@@ -24,7 +24,7 @@ instance : Entailment.HasAxiomP Modal.D where
     simp;
 
 lemma D.mem_axiomDz : Modal.D ⊢ □(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ := by
-  apply Logic.subst! (φ := □(□(atom 0) ⋎ □(.atom 1)) ➝ □(atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
+  apply Logic.subst (φ := □(□(atom 0) ⋎ □(.atom 1)) ➝ □(atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
   apply Logic.sumQuasiNormal.mem₂!;
   apply Logic.iff_provable.mpr;
   simp;
@@ -69,7 +69,7 @@ private lemma D'.eq_D : Modal.D' = Modal.D := by
       induction ihφ with
       | mem_GL h =>
         apply Modal.D'.mem_GL;
-        apply subst!;
+        apply Logic.subst;
         exact h;
       | axiomP => apply Modal.D'.axiomP;
       | axiomD _ _ => apply Modal.D'.axiomD;
@@ -148,7 +148,7 @@ lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢ □(s.box.disj) �
     simpa using hψ₂;
 
 lemma D.axiomFour : Modal.D ⊢ □□φ ➝ □φ := by
-  simpa using Logic.subst! (λ _ => φ) $ fdisj_axiomDz (s := {(.atom 0)});
+  simpa using Logic.subst (λ _ => φ) $ fdisj_axiomDz (s := {(.atom 0)});
 
 noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := φ.subformulas.prebox.powerset.image (λ s => □(s.box.disj) ➝ s.box.disj)
 

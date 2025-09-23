@@ -14,25 +14,25 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 
 
-lemma smallestMC_of_Cl.mem_diabox_box : (Propositional.Cl.smallestMC) ⊢! (◇□(.atom 0) ➝ □(.atom 0)) := by
-  have H₁ : (Propositional.Cl.smallestMC) ⊢! □(.atom 0) ⋎ □(∼□(.atom 0)) := by
+lemma smallestMC_of_Cl.mem_diabox_box : (Propositional.Cl.smallestMC) ⊢ (◇□(.atom 0) ➝ □(.atom 0)) := by
+  have H₁ : (Propositional.Cl.smallestMC) ⊢ □(.atom 0) ⋎ □(∼□(.atom 0)) := by
     apply Logic.sumNormal.mem₂!;
     use Axioms.LEM (.atom 0);
     constructor;
     . apply Propositional.Logic.iff_provable.mp;
       simp;
     . tauto;
-  have H₂ : Propositional.Cl.smallestMC ⊢! ◇□(.atom 0) ➝ ∼□(∼□(.atom 0)) := diaDuality_mp!;
+  have H₂ : Propositional.Cl.smallestMC ⊢ ◇□(.atom 0) ➝ ∼□(∼□(.atom 0)) := diaDuality_mp!;
   cl_prover [H₁, H₂];
 
 instance : Entailment.HasAxiomFive (Propositional.Cl.smallestMC) where
   Five φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (L := (Propositional.Cl.smallestMC)) (φ := Modal.Axioms.Five (.atom 0)) (s := λ a => φ);
-    have H₁ : Propositional.Cl.smallestMC ⊢! ◇□(∼.atom 0) ➝ □(∼.atom 0) := Modal.Logic.subst! (s := λ _ => ∼(.atom 0)) $ smallestMC_of_Cl.mem_diabox_box;
-    have H₂ : Propositional.Cl.smallestMC ⊢! ∼□◇(.atom 0) ➝ ◇□(∼.atom 0) := diaDuality_mp!;
-    have H₃ : Propositional.Cl.smallestMC ⊢! ◇(.atom 0) ➝ ∼□(∼.atom 0) := diaDuality_mp!;
+    apply Modal.Logic.subst (L := (Propositional.Cl.smallestMC)) (φ := Modal.Axioms.Five (.atom 0)) (s := λ a => φ);
+    have H₁ : Propositional.Cl.smallestMC ⊢ ◇□(∼.atom 0) ➝ □(∼.atom 0) := Modal.Logic.subst (s := λ _ => ∼(.atom 0)) $ smallestMC_of_Cl.mem_diabox_box;
+    have H₂ : Propositional.Cl.smallestMC ⊢ ∼□◇(.atom 0) ➝ ◇□(∼.atom 0) := diaDuality_mp!;
+    have H₃ : Propositional.Cl.smallestMC ⊢ ◇(.atom 0) ➝ ∼□(∼.atom 0) := diaDuality_mp!;
     cl_prover [H₁, H₂, H₃];
 
 namespace S5
@@ -53,7 +53,7 @@ instance : Modal.S5 ≊ Propositional.Cl.smallestMC := by
     | mem₁ h => apply WeakerThan.pbl h;
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
     | nec ihφ => exact nec! ihφ;
-    | subst ihφ => apply Logic.subst! _ ihφ;
+    | subst ihφ => apply Logic.subst _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
       apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
@@ -106,7 +106,7 @@ instance : Modal.S5Grz ≊ Propositional.Cl.largestMC := by
   . intro hφ;
     induction hφ using Logic.sumNormal.rec! with
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
-    | subst ih => apply Logic.subst! _ ih;
+    | subst ih => apply Logic.subst _ ih;
     | nec ih => apply nec! ih;
     | mem₁ h => apply WeakerThan.pbl h;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
@@ -132,7 +132,7 @@ instance Triv.modalCompanion : ModalCompanion Propositional.Cl Modal.Triv := by
 
 section boxdot
 
-theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : Propositional.Cl ⊢! φ ↔ Modal.Ver ⊢! φᵍᵇ :=
+theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : Propositional.Cl ⊢ φ ↔ Modal.Ver ⊢ φᵍᵇ :=
   Iff.trans ModalCompanion.companion Logic.iff_boxdotTranslated_Ver_Triv.symm
 
 end boxdot

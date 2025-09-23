@@ -23,11 +23,11 @@ namespace Hilbert.WithRE
 
 variable {Ax Ax₁ Ax₂ : Axiom α}
 
-@[grind] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : WithRE Ax ⊢! φ⟦s⟧ := by
+@[grind] lemma axm! {φ} (s : Substitution _) (h : φ ∈ Ax) : WithRE Ax ⊢ φ⟦s⟧ := by
   apply Logic.iff_provable.mpr;
   apply axm s h;
 
-@[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithRE Ax ⊢! φ := by simpa using axm! .id h;
+@[grind] lemma axm'! {φ} (h : φ ∈ Ax) : WithRE Ax ⊢ φ := by simpa using axm! .id h;
 
 instance : Entailment.Lukasiewicz (Hilbert.WithRE Ax) where
   imply₁ _ _ := by constructor; apply Hilbert.WithRE.imply₁;
@@ -44,8 +44,7 @@ instance : Entailment.E (Hilbert.WithRE Ax) where
 
 instance : Logic.Substitution (Hilbert.WithRE Ax) where
   subst {φ} s h := by
-    constructor;
-    replace h := h.1;
+    rw [Logic.iff_provable] at h ⊢;
     induction h with
     | @axm _ s' ih => simpa using axm (s := s' ∘ s) ih;
     | mdp hφψ hφ ihφψ ihφ => apply mdp ihφψ ihφ;
@@ -55,14 +54,14 @@ instance : Logic.Substitution (Hilbert.WithRE Ax) where
     | ec φ ψ => apply ec;
 
 protected lemma rec!
-  {motive   : (φ : Formula α) → (WithRE Ax ⊢! φ) → Sort}
+  {motive   : (φ : Formula α) → (WithRE Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithRE Ax) ⊢! φ ➝ ψ} → {hφ : (WithRE Ax) ⊢! φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
-  (re       : ∀ {φ ψ}, {hφψ : (WithRE Ax) ⊢! φ ⭤ ψ} → motive (φ ⭤ ψ) hφψ → motive (□φ ⭤ □ψ) (re! hφψ))
+  (mdp      : ∀ {φ ψ : Formula α}, {hφψ : (WithRE Ax) ⊢ φ ➝ ψ} → {hφ : (WithRE Ax) ⊢ φ} → motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ))
+  (re       : ∀ {φ ψ}, {hφψ : (WithRE Ax) ⊢ φ ⭤ ψ} → motive (φ ⭤ ψ) hφψ → motive (□φ ⭤ □ψ) (re! hφψ))
   (imply₁   : ∀ {φ ψ}, motive (Axioms.Imply₁ φ ψ) $ by simp)
   (imply₂   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
   (ec       : ∀ {φ ψ}, motive (Axioms.ElimContra φ ψ) $ by simp)
-  : ∀ {φ}, (d : WithRE Ax ⊢! φ) → motive φ d := by
+  : ∀ {φ}, (d : WithRE Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;
   induction d with
@@ -78,11 +77,11 @@ protected lemma rec!
   | imply₂ φ ψ χ => apply imply₂;
   | ec φ ψ => apply ec;
 
-lemma weakerThan_of_provable_axioms (hs : WithRE Ax₂ ⊢!* Ax₁) : (WithRE Ax₁) ⪯ (WithRE Ax₂) := by
+lemma weakerThan_of_provable_axioms (hs : WithRE Ax₂ ⊢* Ax₁) : (WithRE Ax₁) ⪯ (WithRE Ax₂) := by
   apply Entailment.weakerThan_iff.mpr;
   intro φ h;
   induction h using WithRE.rec! with
-  | axm h => apply Logic.subst!; apply hs; assumption;
+  | axm h => apply Logic.subst; apply hs; assumption;
   | @re φ ψ h => apply re!; simpa;
   | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
   | _ => simp;

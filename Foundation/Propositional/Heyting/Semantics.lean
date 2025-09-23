@@ -101,7 +101,7 @@ lemma mod_models_iff {φ : Formula α} :
     mod.{_,w} Ax ⊧ φ ↔ ∀ ℍ : HeytingSemantics.{_,w} α, ℍ ⊧* Ax.instances → ℍ ⊧ φ := by
   simp [mod, Semantics.models, Semantics.set_models_iff]
 
-lemma sound {φ : Formula α} (d : (Hilbert Ax) ⊢! φ) : mod (Hilbert Ax) ⊧ φ := by
+lemma sound {φ : Formula α} (d : (Hilbert Ax) ⊢ φ) : mod (Hilbert Ax) ⊧ φ := by
   apply mod_models_iff.mpr;
   intro ℍ hℍ;
   induction d with
@@ -133,7 +133,7 @@ lemma lindenbaum_val_eq : (lindenbaum Ax ⊧ₕ φ) = ⟦φ⟧ := by
   | himp _ _ ihp ihq => simp only [hVal_imply, ihp, ihq]; rw [himp_def];
   | _ => rfl
 
-lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum Ax ⊧ φ ↔ (Hilbert Ax) ⊢! φ := by
+lemma lindenbaum_complete_iff {φ : Formula α} : lindenbaum Ax ⊧ φ ↔ (Hilbert Ax) ⊢ φ := by
   simp [val_def', lindenbaum_val_eq, provable_iff_eq_top]
 
 instance : Sound (Hilbert Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.mpr⟩
@@ -142,7 +142,7 @@ instance : Complete (Hilbert Ax) (lindenbaum Ax) := ⟨lindenbaum_complete_iff.m
 
 end
 
-lemma complete [DecidableEq α] [Ax.HasEFQ] {φ : Formula α} (h : mod.{_,u} Ax ⊧ φ) : (Hilbert Ax) ⊢! φ := by
+lemma complete [DecidableEq α] [Ax.HasEFQ] {φ : Formula α} (h : mod.{_,u} Ax ⊧ φ) : (Hilbert Ax) ⊢ φ := by
   wlog Con : Entailment.Consistent (Hilbert Ax)
   . exact Entailment.not_consistent_iff_inconsistent.mp Con φ
   exact lindenbaum_complete_iff.mp <|

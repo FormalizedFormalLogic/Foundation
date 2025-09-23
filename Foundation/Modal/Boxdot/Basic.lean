@@ -18,7 +18,7 @@ postfix:90 "ᵇ" => Formula.boxdotTranslate
 
 
 theorem Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances [Entailment.K (Hilbert.Normal Ax₂)]
-  (h : ∀ φ ∈ Ax₁.instances, Hilbert.Normal Ax₂ ⊢! φᵇ) : Hilbert.Normal Ax₁ ⊢! φ → Hilbert.Normal Ax₂ ⊢! φᵇ := by
+  (h : ∀ φ ∈ Ax₁.instances, Hilbert.Normal Ax₂ ⊢ φᵇ) : Hilbert.Normal Ax₁ ⊢ φ → Hilbert.Normal Ax₂ ⊢ φᵇ := by
   intro d;
   induction d using Hilbert.Normal.rec! with
   | @axm φ s hs => apply h; use φ; tauto;

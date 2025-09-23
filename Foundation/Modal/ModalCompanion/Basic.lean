@@ -51,7 +51,7 @@ instance : Modal.Entailment.Grz IL.largestMC where
   Grz φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (φ := Modal.Axioms.Grz (.atom 0)) (s := λ _ => φ);
+    apply Modal.Logic.subst (φ := Modal.Axioms.Grz (.atom 0)) (s := λ _ => φ);
     apply Modal.Logic.sumNormal.mem₂!;
     apply Modal.Logic.iff_provable.mpr;
     simp;
@@ -216,8 +216,8 @@ lemma goedelTranslated_OrElim : 𝓜𝓢 ⊢ (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (
 lemma provable_goedelTranslated_of_provable
   {IAx : Propositional.Axiom ℕ}
   {𝓜𝓢 : MS} [Entailment.S4 𝓜𝓢]
-  (hAx : ∀ φ ∈ IAx.instances, 𝓜𝓢 ⊢! φᵍ)
-  : (Propositional.Hilbert IAx) ⊢! φ → 𝓜𝓢 ⊢! φᵍ := by
+  (hAx : ∀ φ ∈ IAx.instances, 𝓜𝓢 ⊢ φᵍ)
+  : (Propositional.Hilbert IAx) ⊢ φ → 𝓜𝓢 ⊢ φᵍ := by
   intro h;
   induction h using Propositional.Hilbert.rec! with
   | @axm φ _ ih =>

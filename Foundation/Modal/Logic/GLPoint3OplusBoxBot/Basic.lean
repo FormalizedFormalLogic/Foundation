@@ -58,7 +58,7 @@ lemma GLPoint3OplusBoxBot.weakerThan_succ {n : ℕ} : (Modal.GLPoint3OplusBoxBot
     apply multinec!;
     cl_prover;
   | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
-  | subst ih => apply Logic.subst! _ ih;
+  | subst ih => apply Logic.subst _ ih;
   | nec ih => apply nec! ih;
 
 lemma GLPoint3OplusBoxBot.weakerThan_add {n k : ℕ} : (Modal.GLPoint3OplusBoxBot (n + k)) ⪯ (Modal.GLPoint3OplusBoxBot n) := by
@@ -140,9 +140,9 @@ lemma eq_GLPoint3OplusBoxBot_1_Ver : (Modal.GLPoint3OplusBoxBot 1) = Modal.Ver :
     | mem₁ h => apply Entailment.WeakerThan.pbl h;
     | mem₂ h => simp_all [Logic.iff_provable];
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
-    | subst ih => apply Logic.subst! _ ih;
+    | subst ih => apply Logic.subst _ ih;
     | nec ih => apply nec! ih;
-  . suffices Modal.Ver ⊢! φ → Modal.GLPoint3OplusBoxBot 1 ⊢! φ by simpa [Logic.iff_provable];
+  . suffices Modal.Ver ⊢ φ → Modal.GLPoint3OplusBoxBot 1 ⊢ φ by simpa [Logic.iff_provable];
     intro h;
     induction h using Hilbert.Normal.rec! with
     | axm s h =>
@@ -161,7 +161,7 @@ instance : (Modal.GLPoint3OplusBoxBot 1) ≊ Modal.Ver := by rw [eq_GLPoint3Oplu
 
 lemma GLPoint3OplusBoxBot.provable_weakPoint2_in_2 : Modal.GLPoint3OplusBoxBot 2 ⊢ Axioms.WeakPoint2 (.atom 0) (.atom 1) := by
   suffices Modal.GLPoint3OplusBoxBot 2 ⊢ Axioms.CD (.atom 0) by
-    apply C!_trans (Logic.subst! (λ _ => (□(.atom 0) ⋏ (.atom 1))) this);
+    apply C!_trans (Logic.subst (λ _ => (□(.atom 0) ⋏ (.atom 1))) this);
     -- TODO: `K_prover`
     apply normal_provable_of_K_provable;
     apply Complete.complete (𝓜 := Kripke.FrameClass.K);
@@ -260,7 +260,7 @@ lemma GLPoint2.provable_boxboxbot : Modal.GLPoint2 ⊢ (□^[2]⊥) := by
 lemma GLPoint2.provable_axiomWeakPoint3 : Modal.GLPoint2 ⊢ (Axioms.WeakPoint3 (.atom 0) (.atom 1)) := by
   suffices Modal.GLPoint2 ⊢ ◇((.atom 0) ⋏ □(.atom 0)) ➝ □(.atom 0) by
     suffices Modal.GLPoint2 ⊢ ∼□(⊡atom 0 ➝ atom 1) ➝ □(⊡atom 1 ➝ atom 0) by cl_prover [this];
-    apply C!_trans ?_ (Logic.subst! (λ _ => ((⊡atom 1 ➝ atom 0))) this);
+    apply C!_trans ?_ (Logic.subst (λ _ => ((⊡atom 1 ➝ atom 0))) this);
       -- TODO: `K_prover`
     apply normal_provable_of_K_provable;
     apply Complete.complete (𝓜 := Kripke.FrameClass.K);
@@ -284,7 +284,7 @@ lemma GLPoint2.provable_axiomWeakPoint3 : Modal.GLPoint2 ⊢ (Axioms.WeakPoint3 
       apply (?_ ⨀ this);
       -- TODO: `K_prover`
       suffices Modal.GLPoint2 ⊢ (□(□(∼(atom 0)) ➝ ∼(atom 0)) ➝ □(∼(atom 0))) ➝ ◇(atom 0) ➝ ◇((atom 0) ⋏ □(∼(atom 0))) by
-        exact Logic.subst! (λ _ => (atom 0 ⋏ □atom 0)) this;
+        exact Logic.subst (λ _ => (atom 0 ⋏ □atom 0)) this;
       apply normal_provable_of_K_provable;
       apply Complete.complete (𝓜 := Kripke.FrameClass.K);
       intro F _ V x h₁;
@@ -347,7 +347,7 @@ instance : Entailment.GLPoint3 Modal.GLPoint2 where
   WeakPoint3 φ ψ := by
     constructor;
     apply Logic.iff_provable.mp;
-    simpa using Logic.subst! (s := λ a => match a with | 0 => φ | 1 => ψ | _ => a) GLPoint2.provable_axiomWeakPoint3;
+    simpa using Logic.subst (s := λ a => match a with | 0 => φ | 1 => ψ | _ => a) GLPoint2.provable_axiomWeakPoint3;
 
 instance : Modal.GLPoint3 ⪯ Modal.GLPoint2 := by
   suffices Modal.GLPoint3 ⪯ Modal.GLPoint2 by infer_instance;
@@ -370,16 +370,16 @@ lemma eq_GLPoint3OplusBoxBot_2_GLPoint2 : (Modal.GLPoint3OplusBoxBot 2) = Modal.
       rw [(show φ = □^[2]⊥ by replace h := Logic.iff_provable.mp h; simp_all;)];
       exact GLPoint2.provable_boxboxbot;
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
-    | subst ih => apply Logic.subst! _ ih;
+    | subst ih => apply Logic.subst _ ih;
     | nec ih => apply nec! ih;
-  . suffices Modal.GLPoint2 ⊢! φ → Modal.GLPoint3OplusBoxBot 2 ⊢! φ by simpa [iff_provable];
+  . suffices Modal.GLPoint2 ⊢ φ → Modal.GLPoint3OplusBoxBot 2 ⊢ φ by simpa [iff_provable];
     intro h;
     induction h using Hilbert.Normal.rec! with
     | axm s h =>
       rcases h with (rfl | rfl | rfl);
       . simp;
       . apply sumNormal.mem₁!; simp;
-      . apply subst! s GLPoint3OplusBoxBot.provable_weakPoint2_in_2;
+      . apply Logic.subst s GLPoint3OplusBoxBot.provable_weakPoint2_in_2;
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ]
     | nec ih => apply nec! ih;
     | _ => cl_prover;

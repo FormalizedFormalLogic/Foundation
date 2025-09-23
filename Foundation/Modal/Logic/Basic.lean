@@ -21,7 +21,7 @@ variable {L L₀ L₁ L₂ L₃ : Logic α}
 section
 
 protected class Substitution (L : Logic α) where
-  subst {φ} (s) : L ⊢! φ → L ⊢! φ⟦s⟧
+  subst {φ} (s) : L ⊢ φ → L ⊢ φ⟦s⟧
 
 protected class IsQuasiNormal (L : Logic α) extends Entailment.Cl L, Entailment.HasAxiomK L, Entailment.HasDiaDuality L, L.Substitution where
 
@@ -34,6 +34,8 @@ end
 section
 
 variable {L : Logic α} {φ ψ : Formula α}
+
+export Substitution (subst)
 
 @[grind]
 lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by
@@ -57,8 +59,6 @@ lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
     ext φ;
     have := Equiv.iff.mp h φ;
     grind;
-
-lemma subst! [L.Substitution] (s : Substitution _) (hφ : L ⊢ φ) : L ⊢ φ⟦s⟧ := ⟨Substitution.subst s hφ.some⟩
 
 @[simp]
 lemma mem_verum [HasAxiomVerum L] : ⊤ ∈ L := by
@@ -88,7 +88,7 @@ lemma not_mem_bot : ⊥ ∉ L := by
 
 -- TODO: more general place
 @[grind]
-lemma not_neg_of! (hφ : L ⊢! φ) : L ⊬ ∼φ := by
+lemma not_neg_of! (hφ : L ⊢ φ) : L ⊬ ∼φ := by
   by_contra! hC;
   apply L.no_bot;
   exact hC ⨀ hφ;
@@ -97,18 +97,18 @@ end
 
 
 @[grind]
-lemma weakerThan_of_provable (h : ∀ φ, L₁ ⊢! φ → L₂ ⊢! φ) : L₁ ⪯ L₂ := by
+lemma weakerThan_of_provable (h : ∀ φ, L₁ ⊢ φ → L₂ ⊢ φ) : L₁ ⪯ L₂ := by
   constructor;
   simpa [Entailment.theory, forall_exists_index];
 
 @[grind]
 lemma weakerThan_of_subset (h : L₁ ⊆ L₂) : L₁ ⪯ L₂ := by
-  suffices ∀ (φ : Formula α), L₁ ⊢! φ → L₂ ⊢! φ by grind;
+  suffices ∀ (φ : Formula α), L₁ ⊢ φ → L₂ ⊢ φ by grind;
   intro φ;
   grind;
 
 @[grind]
-lemma equiv_of_provable (h : ∀ φ, L₁ ⊢! φ ↔ L₂ ⊢! φ) : L₁ ≊ L₂ := by
+lemma equiv_of_provable (h : ∀ φ, L₁ ⊢ φ ↔ L₂ ⊢ φ) : L₁ ≊ L₂ := by
   apply Entailment.Equiv.antisymm;
   constructor <;>
   . apply weakerThan_of_provable;

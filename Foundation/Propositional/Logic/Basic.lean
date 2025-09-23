@@ -15,16 +15,16 @@ namespace Logic
 variable {L L₀ L₁ L₂ L₃ : Logic α} {φ ψ : Formula α}
 
 protected class Substitution (L : Logic α) where
-  subst! {φ : Formula _} (s) : L ⊢ φ → L ⊢ φ⟦s⟧
+  subst {φ : Formula _} (s) : L ⊢ φ → L ⊢ φ⟦s⟧
 
 protected class IsSuperintuitionistic (L : Logic α) extends Entailment.Int L, L.Substitution where
 
 section
 
-export Substitution (subst!)
+export Substitution (subst)
 
  @[grind]
-lemma iff_provable : L ⊢! φ ↔ φ ∈ L := by
+lemma iff_provable : L ⊢ φ ↔ φ ∈ L := by
   constructor;
   . intro h;
     exact PLift.down h.some;

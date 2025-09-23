@@ -36,7 +36,7 @@ lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : L ⊢ φ) (hV : Modal.Ver ⊬ �
   have hΔ₁ : ∀ ψ ∈ Δ, ¬ψ.1.isPrebox := by
     rintro ⟨ψ, _⟩ hψ₁ hψ₂;
     obtain ⟨ξ, rfl⟩ := NNFormula.exists_isPrebox hψ₂;
-    have : Modal.Ver ⊢! □ξ.toFormula := by simp;
+    have : Modal.Ver ⊢ □ξ.toFormula := by simp;
     sorry;
 
   have : ∃ Γ: List (Formula ℕ), L ⊢ φ ⭤ ⋀Γ := by sorry;
@@ -45,7 +45,7 @@ lemma KD_subset_of_not_subset_Ver.lemma₁ (hL : L ⊢ φ) (hV : Modal.Ver ⊬ �
 lemma KD_subset_of_not_subset_Ver (hV : ¬L ⪯ Modal.Ver) : Modal.KD ⪯ L := by
   apply weakerThan_iff.mpr;
   intro φ hφ;
-  replace hφ : Modal.KP ⊢! φ := Entailment.Equiv.iff.mp inferInstance _ |>.mpr hφ;
+  replace hφ : Modal.KP ⊢ φ := Entailment.Equiv.iff.mp inferInstance _ |>.mpr hφ;
   induction hφ using Hilbert.Normal.rec! with
   | axm _ h =>
     rcases h with (rfl | rfl);
@@ -106,7 +106,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.Letterless) :
       apply ihφ (by grind) |>.1;
       tauto;
     . intro h;
-      have : Modal.KD ⊢! □(∼φ) := nec! $ ihφ (by grind) |>.2 $ by tauto;
+      have : Modal.KD ⊢ □(∼φ) := nec! $ ihφ (by grind) |>.2 $ by tauto;
       exact negbox_dne'! $ dia_duality'!.mp $ axiomD'! this;
 
 lemma provable_KD_of_classical_satisfiability (hl : φ.Letterless) : (v ⊧ φᵀ.toPropFormula) → Modal.KD ⊢ φ :=
@@ -162,7 +162,7 @@ theorem subset_Triv_of_KD_subset [Modal.KD ⪯ L] : L ⪯ Modal.Triv := by
     $ Semantics.Not.realize_not.mp
     $ this (λ _ => True);
   have : L ⊢ ∼ψ := WeakerThan.pbl this;
-  have : L ⊬ ∼ψ := L.not_neg_of! $ Logic.subst! _ hφ₁;
+  have : L ⊬ ∼ψ := L.not_neg_of! $ Logic.subst _ hφ₁;
   contradiction;
 
 end
@@ -179,9 +179,9 @@ theorem makinson : (L.VerFamily ∨ L.TrivFamily) ∧ ¬(L.VerFamily ∧ L.TrivF
     apply Logic.no_bot (L := Modal.Ver);
     have ⟨⟨hVer⟩, ⟨hKD, hTriv⟩⟩ := hC;
     have : Modal.KD ⪯ Modal.Ver := by apply Entailment.WeakerThan.trans (𝓣 := L) <;> infer_instance;
-    have h₁ : Modal.Ver ⊢! ∼□⊥ := by apply Entailment.WeakerThan.pbl (show Modal.KD ⊢! ∼□⊥ by simp);
-    have h₂ : Modal.Ver ⊢! □⊥ := by simp;
-    have : Modal.Ver ⊢! ⊥ := h₁ ⨀ h₂;
+    have h₁ : Modal.Ver ⊢ ∼□⊥ := by apply Entailment.WeakerThan.pbl (show Modal.KD ⊢ ∼□⊥ by simp);
+    have h₂ : Modal.Ver ⊢ □⊥ := by simp;
+    have : Modal.Ver ⊢ ⊥ := h₁ ⨀ h₂;
     assumption;
 
 lemma VerFamily.notTrivFamily [L.VerFamily] : ¬L.TrivFamily := by

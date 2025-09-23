@@ -23,8 +23,8 @@ open Modal.Formula.Kripke
 namespace S4Point2
 
 open Formula.Kripke in
-lemma goedelTranslated_axiomWLEM : Modal.S4Point2 ⊢! □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
-  suffices Modal.S4Point2 ⊢! □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
+lemma goedelTranslated_axiomWLEM : Modal.S4Point2 ⊢ □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
+  suffices Modal.S4Point2 ⊢ □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
     apply A!_replace this;
     . apply axiomK'!;
       apply nec!;
@@ -64,8 +64,8 @@ instance : Entailment.HasAxiomPoint2 Propositional.KC.smallestMC where
   Point2 φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (L := Propositional.KC.smallestMC) (φ := Modal.Axioms.Point2 (.atom 0)) (s := λ a => φ);
-    have : Propositional.KC.smallestMC ⊢! □(∼□(.atom 0)) ⋎ □(∼□(∼□(.atom 0))) := by
+    apply Modal.Logic.subst (L := Propositional.KC.smallestMC) (φ := Modal.Axioms.Point2 (.atom 0)) (s := λ a => φ);
+    have : Propositional.KC.smallestMC ⊢ □(∼□(.atom 0)) ⋎ □(∼□(∼□(.atom 0))) := by
       apply Logic.sumNormal.mem₂!;
       use Axioms.WeakLEM (.atom 0);
       constructor;
@@ -109,7 +109,7 @@ instance : Modal.S4Point2 ≊ Propositional.KC.smallestMC := by
     | mem₁ h => apply WeakerThan.pbl h;
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
     | nec ihφ => exact nec! ihφ;
-    | subst ihφ => apply Logic.subst! _ ihφ;
+    | subst ihφ => apply Logic.subst _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
       apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
@@ -157,7 +157,7 @@ instance : Modal.GrzPoint2 ≊ Propositional.KC.largestMC := by
   . intro hφ;
     induction hφ using Logic.sumNormal.rec! with
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
-    | subst ih => apply Logic.subst! _ ih;
+    | subst ih => apply Logic.subst _ ih;
     | nec ih => apply nec! ih;
     | mem₁ h => apply WeakerThan.pbl h;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;

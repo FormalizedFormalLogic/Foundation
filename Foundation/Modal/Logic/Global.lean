@@ -8,7 +8,7 @@ variable {α}
 
 
 open Modal.Entailment in
-lemma normal_provable_of_K_provable {L : Logic ℕ} [L.IsNormal] (h : Modal.K ⊢! φ) : L ⊢! φ := by
+lemma normal_provable_of_K_provable {L : Logic ℕ} [L.IsNormal] (h : Modal.K ⊢ φ) : L ⊢ φ := by
   induction h using Hilbert.Normal.rec! with
   | axm s h => rcases h with rfl; simp;
   | mdp hφψ hψ => exact hφψ ⨀ hψ;

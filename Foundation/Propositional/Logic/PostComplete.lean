@@ -20,12 +20,12 @@ theorem Cl.post_complete : ¬∃ L : Logic _, Entailment.Consistent L ∧ Nonemp
   apply Logic.no_bot (L := L);
   obtain ⟨hL, φ, hφ₁, hφ₂⟩ := Entailment.strictlyWeakerThan_iff.mp L_Cl;
   have ⟨v, hv⟩ := exists_valuation_of_not_provable hφ₁;
-  have h₁ : L ⊢! ∼(φ⟦(vfSubst v).1⟧) := hL $ by
+  have h₁ : L ⊢ ∼(φ⟦(vfSubst v).1⟧) := hL $ by
     apply iff_isTautology_provable.mp;
     apply neg_isTautology_of_not_isTautology_of_letterless;
     . apply Formula.Letterless_zeroSubst;
     . apply isTautology_vfSubst.not.mp hv;
-  have h₂ : L ⊢ φ⟦(vfSubst v).1⟧ := L.subst! _ hφ₂;
+  have h₂ : L ⊢ φ⟦(vfSubst v).1⟧ := L.subst _ hφ₂;
   exact h₁ ⨀ h₂;
 
 end Logic

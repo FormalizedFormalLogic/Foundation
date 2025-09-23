@@ -59,7 +59,7 @@ private lemma S'.eq_S : Modal.S' = Modal.S := by
       induction ihφ with
       | mem_GL h =>
         apply Modal.S'.mem_GL;
-        apply subst!;
+        apply Logic.subst;
         exact h;
       | axiomT _ => apply Modal.S'.axiomT;
       | mdp _ _ ihφψ ihφ => apply Modal.S'.mdp ihφψ ihφ;

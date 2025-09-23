@@ -45,9 +45,8 @@ instance : Entailment.Necessitation (sumNormal L₁ L₂) where
 
 instance : (sumNormal L₁ L₂).Substitution where
   subst s hφ := by
-    constructor;
-    apply sumNormal.subst;
-    exact PLift.down hφ;
+    rw [Logic.iff_provable] at hφ ⊢;
+    exact sumNormal.subst hφ;
 
 
 lemma rec!
@@ -59,7 +58,7 @@ lemma rec!
           motive (φ ➝ ψ) hφψ → motive φ hφ → motive ψ (hφψ ⨀ hφ)
   )
   (nec   : ∀ {φ}, {hφ : (sumNormal L₁ L₂) ⊢ φ} → (motive φ hφ) → motive (□φ) (Entailment.nec! hφ))
-  (subst : ∀ {φ s}, {hφ : (sumNormal L₁ L₂) ⊢ φ} → (motive φ hφ) → motive (φ⟦s⟧) (Logic.subst! _ hφ))
+  (subst : ∀ {φ s}, {hφ : (sumNormal L₁ L₂) ⊢ φ} → (motive φ hφ) → motive (φ⟦s⟧) (Logic.subst _ hφ))
   : ∀ {φ}, (h : sumNormal L₁ L₂ ⊢ φ) → motive φ h := by
   intro _ hφ;
   induction (iff_provable.mp $ hφ) with
@@ -113,9 +112,8 @@ instance [Entailment.Cl L₁] : Entailment.Lukasiewicz (sumNormal L₁ L₂) whe
 instance [L₁.IsNormal] : (sumNormal L₁ L₂).IsNormal where
   K _ _ := by constructor; apply sumNormal.mem₁; simp;
   subst s hφ := by
-    constructor;
-    apply sumNormal.subst;
-    exact PLift.down hφ;
+    apply Logic.subst;
+    assumption;
   nec hφ := by
     constructor;
     apply sumNormal.nec;

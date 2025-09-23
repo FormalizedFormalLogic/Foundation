@@ -424,14 +424,14 @@ instance : IsEquiv _ (· ≅[L] ·) where
 
 lemma Translation.translate_fml [m₁ ⤳[L] m₂] (φ : Formula _) : L ⊢ m₁ φ ➝ m₂ φ := by
   let s : Substitution ℕ := λ a => if a = 0 then φ else (.atom a);
-  apply C!_replace ?_ ?_ $ L.subst! (Translation.translate (L := L) (m₁ := m₁) (m₂ := m₂) 0) (s := s);
+  apply C!_replace ?_ ?_ $ L.subst (Translation.translate (L := L) (m₁ := m₁) (m₂ := m₂) 0) (s := s);
   . simpa [s] using L.C_subst_attachmodality_mpr (s := s) (φ := (.atom 0));
   . simpa [s] using L.C_subst_attachmodality_mp (s := s) (φ := (.atom 0));
 
 def translation_of_axiomInstance {a : ℕ} (h : L ⊢ (m₁ a) ➝ (m₂ a)) : m₁ ⤳[L] m₂ := ⟨by
   intro b;
   let s : Substitution ℕ := λ c => if c = a then b else c;
-  apply C!_replace ?_ ?_ $ L.subst! (s := s) h;
+  apply C!_replace ?_ ?_ $ L.subst (s := s) h;
   . simpa [s] using L.C_subst_attachmodality_mpr (s := s) (φ := (.atom a));
   . simpa [s] using L.C_subst_attachmodality_mp (s := s) (φ := (.atom a));
 ⟩

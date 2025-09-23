@@ -536,7 +536,7 @@ lemma GL_proves_letterless_axiomWeakPoint3 (φ_letterless : φ.Letterless) (ψ_l
 /-- Theorem 2 in [Valentini & Solitro 1983] -/
 lemma iff_provable_GLPoint3_letterless_provable_GL : Modal.GLPoint3 ⊢ φ ↔ (∀ s : ZeroSubstitution _, Modal.GL ⊢ φ⟦s.1⟧) := by
   constructor;
-  . suffices Modal.GLPoint3 ⊢! φ → (∀ s : ZeroSubstitution _, Modal.GL ⊢! φ⟦s.1⟧) by simpa;
+  . suffices Modal.GLPoint3 ⊢ φ → (∀ s : ZeroSubstitution _, Modal.GL ⊢ φ⟦s.1⟧) by simpa;
     intro h s;
     induction h using Hilbert.Normal.rec! with
     | axm t ht =>
@@ -693,7 +693,7 @@ lemma GL.iff_provable_closed_sumQuasiNormal_subset_letterlessSpectrum (hSR : X.S
             intro i;
             rw [sf_eq (i + 1), sf_eq i];
             apply iff_GL_provable_C_subset_letterlessSpectrum (f_conj_letterless _) (f_conj_letterless _) |>.mp;
-            -- TODO: `Γ ⊇ Δ` → `⊢! Γ.conj → Δ.conj`
+            -- TODO: `Γ ⊇ Δ` → `⊢ Γ.conj → Δ.conj`
             apply right_Fconj!_intro;
             intro χ hχ;
             apply left_Fconj!_intro;

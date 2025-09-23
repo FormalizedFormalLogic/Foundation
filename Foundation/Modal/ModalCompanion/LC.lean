@@ -24,8 +24,8 @@ instance : Entailment.HasAxiomPoint3 (smallestMC Propositional.LC) where
   Point3 φ ψ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (L := (smallestMC Propositional.LC)) (φ := Modal.Axioms.Point3 (.atom 0) (.atom 1)) (s := λ a => match a with | 0 => φ | 1 => ψ | _ => .atom a);
-    have : (smallestMC Propositional.LC) ⊢! □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) := by
+    apply Modal.Logic.subst (L := (smallestMC Propositional.LC)) (φ := Modal.Axioms.Point3 (.atom 0) (.atom 1)) (s := λ a => match a with | 0 => φ | 1 => ψ | _ => .atom a);
+    have : (smallestMC Propositional.LC) ⊢ □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) := by
       apply Logic.sumNormal.mem₂!;
       use Axioms.Dummett (.atom 0) (.atom 1);
       constructor;
@@ -39,15 +39,15 @@ instance : Entailment.HasAxiomPoint3 (smallestMC Propositional.LC) where
 
 namespace S4Point3
 
-lemma goedelTranslated_axiomDummett : Modal.S4Point3 ⊢! □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
+lemma goedelTranslated_axiomDummett : Modal.S4Point3 ⊢ □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
   apply axiomK'!;
   apply nec!;
   apply C!_swap;
   apply deduct'!;
   apply deduct!;
-  have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3]! ψᵍ ➝ □ψᵍ := of'! $ goedelTranslated_axiomTc;
-  have h₂ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3]! ψᵍ := by_axm!;
-  have h₃ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3]! □ψᵍ ➝ χᵍ := by_axm!;
+  have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ ➝ □ψᵍ := of'! $ goedelTranslated_axiomTc;
+  have h₂ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ := by_axm!;
+  have h₃ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] □ψᵍ ➝ χᵍ := by_axm!;
   exact h₃ ⨀ (h₁ ⨀ h₂);
 
 instance : Modal.S4Point3 ≊ Propositional.LC.smallestMC := by
@@ -66,7 +66,7 @@ instance : Modal.S4Point3 ≊ Propositional.LC.smallestMC := by
     | mem₁ h => apply WeakerThan.pbl h;
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
     | nec ihφ => exact nec! ihφ;
-    | subst ihφ => apply Logic.subst! _ ihφ;
+    | subst ihφ => apply Logic.subst _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
       apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
@@ -116,7 +116,7 @@ instance : Modal.GrzPoint3 ≊ Propositional.LC.largestMC := by
   . intro hφ;
     induction hφ using Logic.sumNormal.rec! with
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
-    | subst ih => apply Logic.subst! _ ih;
+    | subst ih => apply Logic.subst _ ih;
     | nec ih => apply nec! ih;
     | mem₁ h => apply WeakerThan.pbl h;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
@@ -138,7 +138,7 @@ end GrzPoint3
 
 section boxdot
 
-theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : Propositional.LC ⊢! φ ↔ Modal.GLPoint3 ⊢! φᵍᵇ :=
+theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : Propositional.LC ⊢ φ ↔ Modal.GLPoint3 ⊢ φᵍᵇ :=
   Iff.trans ModalCompanion.companion iff_boxdot_GLPoint3_GrzPoint3.symm
 
 end boxdot

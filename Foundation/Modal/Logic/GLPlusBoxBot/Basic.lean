@@ -35,7 +35,7 @@ lemma iff_provable_GLPlusBoxBot_provable_GL {n : ℕ} {φ} : Modal.GLPlusBoxBot 
     | mem₁ h => cl_prover [h]
     | mem₂ h => simp_all [Logic.iff_provable];
     | mdp ihφψ ihφ => cl_prover [ihφψ, ihφ];
-    | subst ihφ => simpa using Logic.subst! _ ihφ;
+    | subst ihφ => simpa using Logic.subst _ ihφ;
   . intro h;
     replace h : Modal.GLPlusBoxBot n ⊢ (□^[n]⊥) ➝ φ := sumQuasiNormal.mem₁! h;
     exact h ⨀ (by simp);

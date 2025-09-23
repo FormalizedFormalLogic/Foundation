@@ -9,8 +9,8 @@ open LO.Modal.Entailment
 lemma equiv_WithRE_Normal_of_provable_axiomInstances
   {AxE AxN : Axiom ℕ}
   [Necessitation (Hilbert.WithRE AxE)] [RE (Hilbert.Normal AxN)]
-  (hN : (Hilbert.Normal AxN) ⊢!* AxE.instances)
-  (hE : (Hilbert.WithRE AxE) ⊢!* AxN.instances)
+  (hN : (Hilbert.Normal AxN) ⊢* AxE.instances)
+  (hE : (Hilbert.WithRE AxE) ⊢* AxN.instances)
   : (Hilbert.WithRE AxE) ≊ (Hilbert.Normal AxN) := by
   apply Logic.equiv_of_provable;
   intro φ;

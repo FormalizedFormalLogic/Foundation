@@ -157,7 +157,7 @@ lemma subset_GLα_S : Modal.GLα α ⊆ Modal.S := by
   | mem₁ hφ => exact Entailment.WeakerThan.pbl hφ;
   | mem₂ hφ => obtain ⟨_, _, rfl⟩ := hφ; simp;
   | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
-  | subst ihφ => exact Logic.subst! _ ihφ;
+  | subst ihφ => exact Logic.subst _ ihφ;
 
 instance : Modal.GLα α ⪯ Modal.S := by grind
 
