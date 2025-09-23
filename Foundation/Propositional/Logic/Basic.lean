@@ -23,7 +23,7 @@ section
 
 export Substitution (subst!)
 
-@[simp low]
+ @[grind]
 lemma iff_provable : L ⊢! φ ↔ φ ∈ L := by
   constructor;
   . intro h;
@@ -33,7 +33,7 @@ lemma iff_provable : L ⊢! φ ↔ φ ∈ L := by
     constructor;
     exact h;
 
-@[simp low]
+ @[grind]
 lemma iff_unprovable : L ⊬ φ ↔ φ ∉ L := by
   apply not_congr;
   simp [iff_provable];
@@ -43,7 +43,8 @@ lemma iff_equal_provable_equiv : L₁ = L₂ ↔ L₁ ≊ L₂ := by
   . tauto;
   . rintro h;
     ext φ;
-    simpa using Equiv.iff.mp h φ;
+    have := Equiv.iff.mp h φ;
+    grind;
 
 section
 
@@ -73,25 +74,25 @@ section
 
 variable {L : Logic α}
 
-instance : (∅ : Logic α) ⪯ L := ⟨by simp [Entailment.theory]⟩
+instance : (∅ : Logic α) ⪯ L := ⟨by simp [Entailment.theory, Logic.iff_provable]⟩
 
 instance [HasAxiomVerum L] : (∅ : Logic α) ⪱ L := by
   apply strictlyWeakerThan_iff.mpr;
   constructor;
-  . simp;
-  . use ⊤; constructor <;> simp;
+  . simp [Logic.iff_provable];
+  . use ⊤; constructor <;> simp [Logic.iff_unprovable];
 
-instance : L ⪯ (Set.univ : Logic α) := ⟨by simp [Entailment.theory]⟩
+instance : L ⪯ (Set.univ : Logic α) := ⟨by simp [Entailment.theory, Logic.iff_provable]⟩
 
 instance [Consistent L] : L ⪱ (Set.univ : Logic α) := by
   apply strictlyWeakerThan_iff.mpr;
   constructor;
-  . simp;
+  . simp [Logic.iff_provable];
   . obtain ⟨φ, hφ⟩ := consistent_iff_exists_unprovable (𝓢 := L) |>.mp (by assumption);
     use φ;
     constructor;
     . assumption;
-    . simp
+    . simp [Logic.iff_provable]
 
 end
 
