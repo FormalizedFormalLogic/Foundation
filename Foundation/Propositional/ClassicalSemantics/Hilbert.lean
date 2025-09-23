@@ -8,7 +8,7 @@ open Semantics
 open ClassicalSemantics
 open Formula.ClassicalSemantics
 
-namespace 𝐂𝐥
+namespace Cl
 
 theorem soundness (h : 𝐂𝐥 ⊢! φ) : φ.isTautology := by
   intro v;
@@ -101,6 +101,7 @@ theorem completeness : (φ.isTautology) → (𝐂𝐥 ⊢! φ) := by
   apply hT.2;
   tauto;
 
+@[grind]
 theorem iff_isTautology_provable : φ.isTautology ↔ 𝐂𝐥 ⊢! φ := ⟨
   completeness,
   soundness,
@@ -112,23 +113,11 @@ lemma exists_valuation_of_not_provable : ¬(𝐂𝐥 ⊢! φ) → ∃ v : Valuat
 
 end Completeness
 
-end 𝐂𝐥
-
-
-namespace Logic.Cl
-
-variable {φ : Formula ℕ}
-
 theorem tautologies : 𝐂𝐥 = { φ | φ.isTautology } := by
   ext φ;
-  simp [𝐂𝐥.iff_isTautology_provable, Entailment.theory];
+  simp [Cl.iff_isTautology_provable, Logic.iff_provable];
 
-lemma exists_valuation_of_not (h : 𝐂𝐥 ⊬ φ) : ∃ v : Valuation _, ¬(v ⊧ φ) := by
-  apply 𝐂𝐥.exists_valuation_of_not_provable;
-  tauto;
+end Cl
 
-lemma iff_isTautology : 𝐂𝐥 ⊢! φ ↔ φ.isTautology := by simp [tautologies];
-
-end Logic.Cl
 
 end LO.Propositional

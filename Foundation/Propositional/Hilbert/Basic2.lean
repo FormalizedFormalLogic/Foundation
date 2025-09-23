@@ -25,6 +25,10 @@ namespace Hilbert
 
 variable {Ax Ax₁ Ax₂ : Axiom α}
 
+@[grind] lemma axm' (h : φ ∈ Ax) : φ ∈ Hilbert Ax := by
+  rw [(show φ = φ⟦.id⟧ by simp)]
+  apply axm _ h;
+
 @[grind] lemma axm! (s : Substitution α) (h : φ ∈ Ax) : Hilbert Ax ⊢! (φ⟦s⟧)  := by
   apply Logic.iff_provable.mpr;
   apply axm s h;
@@ -32,6 +36,11 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
 @[grind] lemma axm'! (h : φ ∈ Ax) : Hilbert Ax ⊢! φ := by
   rw [(show φ = φ⟦.id⟧ by simp)]
   apply axm! _ h;
+
+@[grind]
+lemma axm_instances! (h : φ ∈ Ax.instances) : Hilbert Ax ⊢! φ := by
+  rcases h with ⟨ψ, _, s, rfl⟩;
+  grind;
 
 instance : Entailment.ModusPonens (Hilbert Ax) where
   mdp h₁ h₂ := by
@@ -111,6 +120,7 @@ instance [Ax.HasEFQ] : Entailment.HasAxiomEFQ (Hilbert Ax) where
       (s := λ b => if (HasEFQ.p Ax) = b then φ else (.atom b))
       (φ := Axioms.EFQ (.atom (HasEFQ.p Ax)))
       $ HasEFQ.mem_efq;
+instance  [Ax.HasEFQ] : Entailment.Int (Hilbert Ax) where
 
 instance [Ax.HasLEM] : Entailment.HasAxiomLEM (Hilbert Ax) where
   lem φ := by

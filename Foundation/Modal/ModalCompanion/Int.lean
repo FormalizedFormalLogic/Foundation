@@ -18,7 +18,7 @@ lemma Kripke.complete_frameClass_of_equiv (L₁ L₂ : Logic ℕ) [L₁ ≊ L₂
 
 
 lemma gS4_of_Int : 𝐈𝐧𝐭 ⊢! φ → Modal.S4 ⊢! φᵍ := by
-  apply provable_goedelTranslated_of_provable 𝐈𝐧𝐭 Modal.S4;
+  apply provable_goedelTranslated_of_provable;
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
 
@@ -106,10 +106,10 @@ lemma iff_provable_Cl_provable_dia_gS4 : 𝐂𝐥 ⊢! φ ↔ Modal.S4 ⊢! ◇�
   constructor;
   . intro h;
     suffices Modal.S4 ⊢! □◇φᵍ by exact axiomT'! this;
-    have : Modal.S4 ⊢! (∼∼φ)ᵍ := ModalCompanion.companion.mp $ iff_negneg_Int_Cl.mpr h;
+    have : Modal.S4 ⊢! (∼∼φ)ᵍ := ModalCompanion.companion.mp $ glivenko.mpr h;
     cl_prover [this];
   . intro h;
-    apply iff_negneg_Int_Cl.mp;
+    apply glivenko.mp;
     suffices Modal.S4 ⊢! (∼∼φ)ᵍ by exact ModalCompanion.companion.mpr this;
     replace h : Modal.S4 ⊢! □◇φᵍ := nec! h;
     cl_prover [h];

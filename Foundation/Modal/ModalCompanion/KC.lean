@@ -69,7 +69,8 @@ instance : Entailment.HasAxiomPoint2 𝐊𝐂.smallestMC where
       apply Logic.sumNormal.mem₂!;
       use Axioms.WeakLEM (.atom 0);
       constructor;
-      . simp [theory];
+      . apply Propositional.Logic.iff_provable.mp;
+        simp;
       . tauto;
     apply ?_ ⨀ this;
     apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
@@ -111,11 +112,10 @@ instance : Modal.S4Point2 ≊ 𝐊𝐂.smallestMC := by
     | subst ihφ => apply Logic.subst! _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable 𝐊𝐂 Modal.S4Point2;
-      . rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
-        . simp;
-        . exact S4Point2.goedelTranslated_axiomWLEM;
-      . simpa [theory] using hφ;
+      apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
+      rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
+      . simp;
+      . exact S4Point2.goedelTranslated_axiomWLEM;
 
 lemma eq_smallestMC_of_KC : Modal.S4Point2 = 𝐊𝐂.smallestMC := Logic.eq_of_equiv
 

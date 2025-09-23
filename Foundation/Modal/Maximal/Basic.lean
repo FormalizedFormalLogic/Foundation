@@ -63,7 +63,7 @@ open Formula (trivTranslate verTranslate)
 
 variable {φ : Modal.Formula ℕ}
 
-lemma Hilbert.Normal.provable_of_classical_provable {Ax : Axiom ℕ} {φ : Propositional.Formula ℕ} : Propositional.𝐂𝐥 ⊢! φ → (Hilbert.Normal Ax ⊢! φ.toModalFormula) := by
+lemma Hilbert.Normal.provable_of_classical_provable {Ax : Axiom ℕ} {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ → (Hilbert.Normal Ax ⊢! φ.toModalFormula) := by
   intro h;
   induction h using Propositional.Hilbert.rec! with
   | axm _ h => rcases h with (rfl | rfl) <;> simp;
@@ -82,7 +82,7 @@ lemma iff_trivTranslated : Modal.Triv ⊢! φ ⭤ φᵀ := by
   | himp _ _ ih₁ ih₂ => exact ECC!_of_E!_of_E! ih₁ ih₂;
   | _ => apply E!_id
 
-lemma iff_provable_Cl : Modal.Triv ⊢! φ ↔ Propositional.𝐂𝐥 ⊢! φᵀ.toPropFormula := by
+lemma iff_provable_Cl : Modal.Triv ⊢! φ ↔ 𝐂𝐥 ⊢! φᵀ.toPropFormula := by
   constructor;
   . intro h;
     induction h using Hilbert.Normal.rec! with
@@ -100,7 +100,7 @@ lemma iff_provable_Cl : Modal.Triv ⊢! φ ↔ Propositional.𝐂𝐥 ⊢! φᵀ
 
 lemma iff_isTautology : Modal.Triv ⊢! φ ↔ φᵀ.toPropFormula.isTautology := by
   apply Iff.trans Triv.iff_provable_Cl;
-  apply Propositional.𝐂𝐥.iff_isTautology_provable.symm;
+  apply Propositional.Cl.iff_isTautology_provable.symm;
 
 end Triv
 
@@ -116,7 +116,7 @@ lemma iff_verTranslated : Modal.Ver ⊢! φ ⭤ φⱽ := by
   | himp _ _ ih₁ ih₂ => exact ECC!_of_E!_of_E! ih₁ ih₂;
   | _ => apply E!_id
 
-protected lemma iff_provable_Cl : Modal.Ver ⊢! φ ↔ Propositional.𝐂𝐥 ⊢! φⱽ.toPropFormula := by
+protected lemma iff_provable_Cl : Modal.Ver ⊢! φ ↔ 𝐂𝐥 ⊢! φⱽ.toPropFormula := by
   constructor;
   . intro h;
     induction h using Hilbert.Normal.rec! with
@@ -133,7 +133,7 @@ protected lemma iff_provable_Cl : Modal.Ver ⊢! φ ↔ Propositional.𝐂𝐥 �
 
 lemma iff_isTautology : Modal.Ver ⊢! φ ↔ φⱽ.toPropFormula.isTautology := by
   apply Iff.trans Ver.iff_provable_Cl;
-  apply Propositional.𝐂𝐥.iff_isTautology_provable.symm;
+  apply Propositional.Cl.iff_isTautology_provable.symm;
 
 end Ver
 

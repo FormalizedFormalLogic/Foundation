@@ -2,16 +2,17 @@ import Foundation.Propositional.Hilbert.Basic2
 
 namespace LO.Propositional
 
-namespace Hilbert
-
 open Entailment
 open Formula (atom)
 
 variable [DecidableEq α]
 
-theorem iff_provable_dn_efq_dne_provable : 𝐈𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂𝐥 ⊢! φ := by
+instance : 𝐈𝐧𝐭 ⪯ 𝐂𝐥 := Hilbert.weakerThan_of_subset_axioms $ by simp
+
+theorem iff_provable_dn_Int_Cl : 𝐈𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂𝐥 ⊢! φ := by
   constructor;
-  . intro d; exact of_NN! $ Int_weakerThan_Cl.subset d;
+  . intro d;
+    exact of_NN! $ WeakerThan.pbl d;
   . intro d;
     induction d with
     | axm s hp =>
@@ -27,21 +28,13 @@ theorem iff_provable_dn_efq_dne_provable : 𝐈𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂�
     | mdp ihφψ ihφ => exact CNNNN!_of_NNC! ihφψ ⨀ ihφ;
     | _ => apply dni'!; simp;
 
-alias glivenko := iff_provable_dn_efq_dne_provable
+alias glivenko := iff_provable_dn_Int_Cl
 
-theorem iff_provable_neg_efq_provable_neg_efq : 𝐈𝐧𝐭 ⊢! ∼φ ↔ 𝐂𝐥 ⊢! ∼φ := by
+theorem iff_provable_not_Int_not_Cl : 𝐈𝐧𝐭 ⊢! ∼φ ↔ 𝐂𝐥 ⊢! ∼φ := by
   constructor;
   . intro d;
     exact glivenko.mp $ dni'! d;
   . intro d;
     exact tne'! $ glivenko.mpr d;
-
-end Hilbert
-
-lemma iff_negneg_Int_Cl : 𝐈𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂𝐥 ⊢! φ := by
-  simpa [Entailment.theory] using Hilbert.iff_provable_dn_efq_dne_provable;
-
-lemma iff_neg_Int_neg_Cl : 𝐈𝐧𝐭 ⊢! ∼φ ↔ 𝐂𝐥 ⊢! ∼φ := by
-  simpa [Entailment.theory] using Hilbert.iff_provable_neg_efq_provable_neg_efq;
 
 end LO.Propositional

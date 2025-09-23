@@ -19,7 +19,8 @@ lemma smallestMC_of_Cl.mem_diabox_box : (𝐂𝐥.smallestMC) ⊢! (◇□(.atom
     apply Logic.sumNormal.mem₂!;
     use Axioms.LEM (.atom 0);
     constructor;
-    . simp [theory];
+    . apply Propositional.Logic.iff_provable.mp;
+      simp;
     . tauto;
   have H₂ : 𝐂𝐥.smallestMC ⊢! ◇□(.atom 0) ➝ ∼□(∼□(.atom 0)) := diaDuality_mp!;
   cl_prover [H₁, H₂];
@@ -55,14 +56,13 @@ instance : Modal.S5 ≊ 𝐂𝐥.smallestMC := by
     | subst ihφ => apply Logic.subst! _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable 𝐂𝐥 Modal.S5;
-      . rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
-        . simp;
-        . apply rm_diabox'!;
-          apply WeakerThan.pbl (𝓢 := Modal.S4);
-          apply (diaK'! $ goedelTranslated_axiomTc) ⨀ (iff_provable_Cl_provable_dia_gS4.mp _);
-          simp [theory];
-      . simpa [theory] using hφ;
+      apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
+      rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
+      . simp;
+      . apply rm_diabox'!;
+        apply WeakerThan.pbl (𝓢 := Modal.S4);
+        apply (diaK'! $ goedelTranslated_axiomTc) ⨀ (iff_provable_Cl_provable_dia_gS4.mp _);
+        simp;
 
 lemma is_smallestMC_of_Cl : Modal.S5 = 𝐂𝐥.smallestMC := Logic.eq_of_equiv
 

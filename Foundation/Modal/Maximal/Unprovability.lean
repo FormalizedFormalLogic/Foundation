@@ -10,14 +10,13 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 open Formula
 open Hilbert
-open Hilbert.Deduction
 open Formula
 
 namespace Triv
 
 lemma unprovable_AxiomL : Modal.Triv ⊬ (Axioms.L (.atom a)) := by
   apply Triv.iff_provable_Cl.not.mpr;
-  apply 𝐂𝐥.not_provable_of_exists_valuation;
+  apply Cl.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
 
@@ -28,7 +27,7 @@ namespace Ver
 
 lemma unprovable_AxiomP : Modal.Ver ⊬ Axioms.P := by
   apply Ver.iff_provable_Cl.not.mpr;
-  apply 𝐂𝐥.not_provable_of_exists_valuation;
+  apply Cl.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
 
@@ -44,7 +43,7 @@ lemma provable_trivTranslated_Cl : Modal.K4 ⊢! φ → 𝐂𝐥 ⊢! φᵀ.toPr
 
 lemma unprovable_AxiomL : Modal.K4 ⊬ (Axioms.L (.atom a)) := by
   apply not_imp_not.mpr provable_trivTranslated_Cl;
-  apply 𝐂𝐥.not_provable_of_exists_valuation;
+  apply Cl.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
 
@@ -76,7 +75,7 @@ lemma provable_verTranslated_Cl : Modal.GL ⊢! φ → 𝐂𝐥 ⊢! φⱽ.toPro
 @[simp, grind]
 lemma unprovable_AxiomT : (Modal.GL) ⊬ Axioms.T (.atom a) := by
   apply not_imp_not.mpr provable_verTranslated_Cl;
-  apply 𝐂𝐥.not_provable_of_exists_valuation;
+  apply Cl.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
 

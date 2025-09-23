@@ -29,7 +29,8 @@ instance : Entailment.HasAxiomPoint3 (smallestMC 𝐋𝐂) where
       apply Logic.sumNormal.mem₂!;
       use Axioms.Dummett (.atom 0) (.atom 1);
       constructor;
-      . simp [theory];
+      . apply Propositional.Logic.iff_provable.mp;
+        simp;
       . tauto;
     apply ?_ ⨀ this;
     apply CAA!_of_C!_of_C! <;>
@@ -68,12 +69,11 @@ instance : Modal.S4Point3 ≊ 𝐋𝐂.smallestMC := by
     | subst ihφ => apply Logic.subst! _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable 𝐋𝐂 Modal.S4Point3;
-      . rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
-        . simp;
-        . apply A!_replace axiomPoint3! <;>
-          apply S4Point3.goedelTranslated_axiomDummett;
-      . simpa [theory] using hφ;
+      apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
+      rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
+      . simp;
+      . apply A!_replace axiomPoint3! <;>
+        apply S4Point3.goedelTranslated_axiomDummett;
 
 lemma eq_smallestMC_of_KC : Modal.S4Point3 = 𝐋𝐂.smallestMC := Logic.eq_of_equiv
 

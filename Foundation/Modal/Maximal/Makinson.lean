@@ -154,7 +154,7 @@ lemma subset_Triv_of_KD_subset.lemma₂ {φ : Modal.Formula α} {s : Proposition
 theorem subset_Triv_of_KD_subset [Modal.KD ⪯ L] : L ⪯ Modal.Triv := by
   by_contra! hC;
   obtain ⟨φ, hφ₁, hφ₂⟩ := not_weakerThan_iff.mp hC;
-  replace hφ₂ := (not_imp_not.mpr Propositional.𝐂𝐥.completeness) $ Modal.Triv.iff_provable_Cl.not.mp $ hφ₂;
+  replace hφ₂ := (not_imp_not.mpr Propositional.Cl.completeness) $ Modal.Triv.iff_provable_Cl.not.mp $ hφ₂;
   obtain ⟨s, h⟩ := ClassicalSemantics.exists_neg_zeroSubst_of_not_isTautology hφ₂;
   let ψ := φ⟦(s : Modal.ZeroSubstitution _).1⟧;
   have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (∼(ψᵀ.toPropFormula)) := subset_Triv_of_KD_subset.lemma₂.mp h;
