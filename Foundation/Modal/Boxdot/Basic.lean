@@ -7,7 +7,7 @@ namespace LO.Modal
 open LO.Entailment LO.Modal.Entailment
 open Formula
 
-variable {φ : Formula α}
+variable {φ : Formula α} {Ax Ax₁ Ax₂ : Axiom α}
 
 def Formula.boxdotTranslate : Formula α → Formula α
   | atom a => .atom a
@@ -17,19 +17,17 @@ def Formula.boxdotTranslate : Formula α → Formula α
 postfix:90 "ᵇ" => Formula.boxdotTranslate
 
 
-theorem Hilbert.of_provable_boxdotTranslated_axiomInstances {H₁ H₂ : Hilbert.Normal α} [Entailment.K H₂]
-  (h : ∀ φ ∈ H₁.axiomInstances, H₂ ⊢ φᵇ) : H₁ ⊢ φ → H₂ ⊢ φᵇ := by
+theorem Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances [Entailment.K (Hilbert.Normal Ax₂)]
+  (h : ∀ φ ∈ Ax₁.instances, Hilbert.Normal Ax₂ ⊢! φᵇ) : Hilbert.Normal Ax₁ ⊢! φ → Hilbert.Normal Ax₂ ⊢! φᵇ := by
   intro d;
   induction d using Hilbert.Normal.rec! with
-  | @axm φ s hs =>
-    apply h;
-    use φ;
-    tauto;
+  | @axm φ s hs => apply h; use φ; tauto;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | nec ihp => exact boxdot_nec! $ ihp;
   | imply₂ => exact imply₂!;
   | imply₁ => exact imply₁!;
   | ec => exact elim_contra!;
+
 
 namespace Formula.Kripke.Satisfies
 

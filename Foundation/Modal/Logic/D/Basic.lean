@@ -105,13 +105,6 @@ section
 
 open LO.Entailment LO.Modal.Entailment
 
-instance : Entailment.GL Modal.GL where
-  L _ := by
-    constructor;
-    apply Logic.iff_provable.mp;
-    apply Hilbert.Normal.iff_logic_provable_provable.mpr;
-    simp;
-
 @[simp]
 lemma GL.box_disj_Tc {l : List (Formula ℕ)} : Modal.GL ⊢ l.box.disj ➝ □l.box.disj := by
   apply left_Disj!_intro;

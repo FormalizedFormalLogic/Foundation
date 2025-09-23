@@ -1,15 +1,16 @@
 import Foundation.Modal.Kripke.AxiomL
-import Foundation.Modal.Hilbert.Normal.Basic
 import Mathlib.Order.Interval.Finset.Nat
 import Foundation.Modal.Kripke.Logic.K
 import Foundation.Modal.Entailment.GL
 
 namespace LO.Modal
 
-open System
-open Kripke
+open Entailment
 open Formula
 open Formula.Kripke
+open Kripke
+open System
+
 
 namespace Kripke
 
@@ -345,9 +346,9 @@ lemma cresswellModel.valid_axiomHen : cresswellModel ⊧ □(□φ ⭤ φ) ➝ �
 end Kripke
 
 
-namespace Logic.KHen
+namespace KHen
 
-lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢ φ → cresswellModel ⊧ φ := by
+lemma Kripke.valid_cresswellModel_of_provable : Modal.KHen ⊢! φ → cresswellModel ⊧ φ := by
   intro h;
   induction h using Hilbert.Normal.rec! with
   | axm s h =>
@@ -360,29 +361,23 @@ lemma Kripke.valid_cresswellModel_of_provable : Hilbert.KHen ⊢ φ → cresswel
   | imply₂ => exact Kripke.ValidOnModel.imply₂;
   | ec => exact Kripke.ValidOnModel.elimContra;
 
-lemma unprovable_atomic_axiomFour : Hilbert.KHen ⊬ Axioms.Four (atom a) := by
+lemma unprovable_atomic_axiomFour : Modal.KHen ⊬ Axioms.Four (atom a) := by
   by_contra hC;
   exact cresswellModel.not_valid_axiomFour $ Kripke.valid_cresswellModel_of_provable hC 2♯;
 
-theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Hilbert.KHen ⊢ φ ↔ C ⊧ φ := by
+theorem Kripke.incomplete : ¬∃ C : Kripke.FrameClass, ∀ φ, Modal.KHen ⊢! φ ↔ C ⊧ φ := by
   rintro ⟨C, h⟩;
   have : C ⊧ Axioms.Hen (atom 0) := @h (Axioms.Hen (atom 0)) |>.mp $ by simp;
   have : C ⊧ Axioms.Four (atom 0) := fun {F} hF => valid_atomic_axiomFour_of_valid_atomic_axiomH (this hF);
-  have : Hilbert.KHen ⊢ Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
+  have : Modal.KHen ⊢! Axioms.Four (atom 0) := @h (Axioms.Four (atom 0)) |>.mpr this;
   exact @unprovable_atomic_axiomFour _ this;
 
-end Logic.KHen
+end KHen
 
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-instance : Hilbert.K ⪱ Hilbert.KHen := by
+instance : Modal.K ⪱ Modal.KHen := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Hen (.atom 0));
     constructor;
@@ -393,7 +388,7 @@ instance : Hilbert.K ⪱ Hilbert.KHen := by
       simp [Satisfies, Semantics.Realize];
       constructor <;> tauto;
 
-instance : Hilbert.KHen ⪱ Hilbert.GL := by
+instance : Modal.KHen ⪱ Modal.GL := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
@@ -401,12 +396,6 @@ instance : Hilbert.KHen ⪱ Hilbert.GL := by
     use (Axioms.Four (.atom 0));
     constructor;
     . exact axiomFour!;
-    . apply Logic.KHen.unprovable_atomic_axiomFour;
-
-end Logic
-
-instance : Modal.K ⪱ Modal.KHen := inferInstance
-
-instance : Modal.KHen ⪱ Modal.GL := inferInstance
+    . apply KHen.unprovable_atomic_axiomFour;
 
 end LO.Modal

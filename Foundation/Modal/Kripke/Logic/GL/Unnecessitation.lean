@@ -8,8 +8,6 @@ open Kripke
 open Formula.Kripke
 open Relation
 
-namespace Logic.GL
-
 open Model in
 lemma imply_boxdot_plain_of_imply_box_box : Modal.GL ⊢ □φ ➝ □ψ → Modal.GL ⊢ ⊡φ ➝ ψ := by
   contrapose;
@@ -51,7 +49,5 @@ theorem unnecessitation! : Modal.GL ⊢ □φ → Modal.GL ⊢ φ := by
   exact this ⨀ boxdotverum!;
 
 noncomputable instance : Entailment.Unnecessitation Modal.GL := ⟨λ h => unnecessitation! ⟨h⟩ |>.some⟩
-
-end Logic.GL
 
 end LO.Modal

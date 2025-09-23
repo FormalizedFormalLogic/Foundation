@@ -19,27 +19,23 @@ protected abbrev FrameClass.EN : FrameClass := { F | F.IsEN }
 end Neighborhood
 
 
-namespace Hilbert
 
-namespace EN.Neighborhood
 
-instance : Sound Hilbert.EN FrameClass.EN := instSound_of_validates_axioms $ by
+instance : Sound Modal.EN FrameClass.EN := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F hF;
   simp_all;
 
-instance : Entailment.Consistent Hilbert.EN := consistent_of_sound_frameclass FrameClass.EN $ by
+instance : Entailment.Consistent Modal.EN := consistent_of_sound_frameclass FrameClass.EN $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Hilbert.EN FrameClass.EN := complete_of_canonical_frame FrameClass.EN (minimalCanonicalFrame (Hilbert.EN)) $ by
+instance : Complete Modal.EN FrameClass.EN := complete_of_canonical_frame FrameClass.EN (minimalCanonicalFrame (Modal.EN)) $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-end EN.Neighborhood
-
-instance : Hilbert.E ⪱ Hilbert.EN := by
+instance : Modal.E ⪱ Modal.EN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -59,25 +55,19 @@ instance : Hilbert.E ⪱ Hilbert.EN := by
       . tauto;
       . simp! [M, Semantics.Realize, Satisfies];
 
-end Hilbert
 
-instance : 𝐄 ⪱ 𝐄𝐍 := inferInstance
-instance : Modal.N ⪱ 𝐄𝐍 := by
+
+instance : Modal.N ⪱ Modal.EN := by
+
   constructor;
-  . suffices ∀ φ, Hilbert.N ⊢ φ → Hilbert.EN ⊢ φ by
-      apply Entailment.weakerThan_iff.mpr;
-      grind;
+  . suffices ∀ φ, Modal.N ⊢! φ → Modal.EN ⊢! φ by apply Logic.weakerThan_of_provable this;
     intro φ hφ;
     induction hφ using Hilbert.Normal.rec! with
     | axm s h => simp at h;
     | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ;
     | nec ihφ => apply Entailment.nec! ihφ;
     | _ => simp;
-  . suffices ∃ φ, Hilbert.EN ⊢ φ ∧ Hilbert.N ⊬ φ by
-      apply Entailment.not_weakerThan_iff.mpr;
-      obtain ⟨φ, _⟩ := this;
-      use φ;
-      grind;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use □(.atom 0) ⭤ □(∼∼.atom 0);
     constructor;
     . apply re!;

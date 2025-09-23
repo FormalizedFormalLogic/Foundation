@@ -18,32 +18,24 @@ instance : Frame.simple_blackhole.IsSerial := by
   simp only [Frame.box, Set.mem_singleton_iff, Set.mem_setOf_eq, Frame.dia, Set.compl_univ_iff, Set.mem_compl_iff];
   tauto_set;
 
-
 @[reducible] protected alias Frame.IsED := Frame.IsSerial
 protected abbrev FrameClass.ED : FrameClass := { F | F.IsED }
-
 
 end Neighborhood
 
 
-namespace Hilbert
-
-namespace ED.Neighborhood
-
-instance : Sound Hilbert.ED FrameClass.ED := instSound_of_validates_axioms $ by
+instance : Sound Modal.ED FrameClass.ED := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   simp;
 
-instance : Entailment.Consistent Hilbert.ED := consistent_of_sound_frameclass FrameClass.ED $ by
+instance : Entailment.Consistent Modal.ED := consistent_of_sound_frameclass FrameClass.ED $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-end ED.Neighborhood
-
-instance : Hilbert.E ⪱ Hilbert.ED := by
+instance : Modal.E ⪱ Modal.ED := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -62,8 +54,5 @@ instance : Hilbert.E ⪱ Hilbert.ED := by
         simp [Frame.box, Frame.dia] at this;
 
 
-end Hilbert
-
-instance : 𝐄 ⪱ 𝐄𝐃 := inferInstance
 
 end LO.Modal

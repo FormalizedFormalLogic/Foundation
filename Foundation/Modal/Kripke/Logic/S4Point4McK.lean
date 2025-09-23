@@ -6,7 +6,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -22,9 +22,9 @@ protected abbrev FrameClass.S4Point4McK : FrameClass := { F | F.IsS4Point4McK }
 end Kripke
 
 
-namespace Hilbert.S4Point4McK.Kripke
+namespace Modal.S4Point4McK.Kripke
 
-instance : Sound Hilbert.S4Point4McK FrameClass.S4Point4McK := instSound_of_validates_axioms $ by
+instance : Sound Modal.S4Point4McK FrameClass.S4Point4McK := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl | rfl) F ⟨_, _⟩;
@@ -33,19 +33,19 @@ instance : Sound Hilbert.S4Point4McK FrameClass.S4Point4McK := instSound_of_vali
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
   . exact validate_axiomPoint4_of_satisfiesSobocinskiCondition;
 
-instance : Entailment.Consistent Hilbert.S4Point4McK :=
+instance : Entailment.Consistent Modal.S4Point4McK :=
   consistent_of_sound_frameclass FrameClass.S4Point4McK $ by
     use whitepoint;
     constructor;
 
-instance : Canonical Hilbert.S4Point4McK FrameClass.S4Point4McK := ⟨by constructor⟩
+instance : Canonical Modal.S4Point4McK FrameClass.S4Point4McK := ⟨by constructor⟩
 
-instance : Complete Hilbert.S4Point4McK FrameClass.S4Point4McK := inferInstance
+instance : Complete Modal.S4Point4McK FrameClass.S4Point4McK := inferInstance
 
 
-instance : Hilbert.S4Point3McK ⪱ Hilbert.S4Point4McK := by
+instance : Modal.S4Point3McK ⪱ Modal.S4Point4McK := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.S4Point3McK FrameClass.S4Point4McK;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.S4Point3McK FrameClass.S4Point4McK;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -72,7 +72,7 @@ instance : Hilbert.S4Point3McK ⪱ Hilbert.S4Point4McK := by
         use 2;
         omega;
 
-instance : Hilbert.S4Point4 ⪱ Hilbert.S4Point4McK := by
+instance : Modal.S4Point4 ⪱ Modal.S4Point4McK := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -93,10 +93,8 @@ instance : Hilbert.S4Point4 ⪱ Hilbert.S4Point4McK := by
         use 1;
         trivial;
 
-end Hilbert.S4Point4McK.Kripke
+end Modal.S4Point4McK.Kripke
 
-instance : Modal.S4Point3McK ⪱ Modal.S4Point4McK := inferInstance
 
-instance : Modal.S4Point4 ⪱ Modal.S4Point4McK := inferInstance
 
 end LO.Modal

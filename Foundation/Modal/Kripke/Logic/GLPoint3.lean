@@ -15,7 +15,7 @@ open Entailment
 open Entailment.Context
 open Formula
 open Formula.Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Kripke
 
 namespace Kripke
@@ -31,23 +31,23 @@ instance : blackpoint.IsFiniteGLPoint3 where
 end Kripke
 
 
-namespace Hilbert.GLPoint3.Kripke
+namespace Modal.GLPoint3.Kripke
 
-instance : Sound Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
+instance : Sound Modal.GLPoint3 FrameClass.finite_GLPoint3 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomL_of_finite_trans_irrefl;
   . exact validate_WeakPoint3_of_weakConnected;
 
-instance : Sound Hilbert.GLPoint3 { F : Frame | F.IsFiniteGLPoint3' } := instSound_of_validates_axioms $ by
+instance : Sound Modal.GLPoint3 { F : Frame | F.IsFiniteGLPoint3' } := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomL_of_finite_trans_irrefl;
   . exact validate_WeakPoint3_of_weakConnected;
 
-instance : Entailment.Consistent Hilbert.GLPoint3 :=
+instance : Entailment.Consistent Modal.GLPoint3 :=
   consistent_of_sound_frameclass FrameClass.finite_GLPoint3 $ by
     use blackpoint;
     constructor;
@@ -57,14 +57,14 @@ section
 
 open MaximalConsistentTableau
 
-instance : Hilbert.K ⪯ Hilbert.GLPoint3 := Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
+instance : Modal.K ⪯ Modal.GLPoint3 := Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
 
 open LO.Entailment Modal.Entailment in
 open Formula.Kripke in
-private lemma complete.lemma₁ : Hilbert.GLPoint3 ⊢ ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
+private lemma complete.lemma₁ : Modal.GLPoint3 ⊢! ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
   apply CN!_of_CN!_left;
   apply C!_trans ?_ axiomL!;
-  apply WeakerThan.pbl (𝓢 := Hilbert.K);
+  apply WeakerThan.pbl (𝓢 := Modal.K);
   -- TODO: `K_prover`
   apply Complete.complete (𝓜 := Kripke.FrameClass.K);
   intro F _ V x h₁ y Rxy h₂;
@@ -74,7 +74,7 @@ private lemma complete.lemma₁ : Hilbert.GLPoint3 ⊢ ∼□φ ➝ ◇(□φ �
   have := this h₂;
   simpa using Satisfies.not_def.not.mp this;
 
-private lemma complete.lemma₂ {v : (canonicalModel Hilbert.GLPoint3).World } (h : ∼□φ ∈ v.1.1) :
+private lemma complete.lemma₂ {v : (canonicalModel Modal.GLPoint3).World } (h : ∼□φ ∈ v.1.1) :
   ∃! u, v ≺ u ∧ □φ ∈ u.1.1 ∧ φ ∈ u.1.2 := by
   obtain ⟨u, Rvu, hu⟩ := iff_mem₁_dia.mp $ mdp_mem₁_provable lemma₁ h;
   use u;
@@ -89,18 +89,18 @@ private lemma complete.lemma₂ {v : (canonicalModel Hilbert.GLPoint3).World } (
       apply neither ⟨Ryu h₁, by grind⟩;
 
 private def complete.filteredModel
-  (v : (canonicalModel Hilbert.GLPoint3).World)
+  (v : (canonicalModel Modal.GLPoint3).World)
   (φ : Formula ℕ)
   (_ : □φ ∈ v.1.1) (_ : φ ∈ v.1.2)
   : Kripke.Model where
   World := { x // x = v ∨ (v ≺ x ∧ ∃ ψ ∈ φ.subformulas.prebox, □ψ ∈ v.1.2 ∧ □ψ ∈ x.1.1 ∧ ψ ∈ x.1.2) }
   world_nonempty := ⟨v, by simp⟩
   Rel := λ x y => x.1 ≺ y.1
-  Val := λ x => (canonicalModel Hilbert.GLPoint3).Val x
+  Val := λ x => (canonicalModel Modal.GLPoint3).Val x
 
 private instance complete.filteredModel.isFiniteGLPoint3 : Frame.IsFiniteGLPoint3 (complete.filteredModel v φ hv₁ hv₂).toFrame where
   trans := by
-    suffices ∀ (x y z : (filteredModel v φ _ _)), (canonicalModel Hilbert.GLPoint3).Rel x.1 y.1 → (canonicalModel Hilbert.GLPoint3).Rel y.1 z.1 → (canonicalModel Hilbert.GLPoint3).Rel x.1 z.1 by tauto;
+    suffices ∀ (x y z : (filteredModel v φ _ _)), (canonicalModel Modal.GLPoint3).Rel x.1 y.1 → (canonicalModel Modal.GLPoint3).Rel y.1 z.1 → (canonicalModel Modal.GLPoint3).Rel x.1 z.1 by tauto;
     intro _ _ _;
     apply Frame.trans;
   irrefl := by
@@ -201,14 +201,14 @@ private lemma complete.filteredModel.truthlemma : ∀ x : (complete.filteredMode
 
 open Classical in
 open complete in
-instance complete : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := ⟨by
+instance complete : Complete Modal.GLPoint3 FrameClass.finite_GLPoint3 := ⟨by
   intro φ;
   contrapose!;
   intro hφ;
   obtain ⟨u, hu⟩ := ValidOnModel.exists_world_of_not $ iff_valid_on_canonicalModel_deducible.not.mpr hφ;
   replace hu : φ ∈ u.1.2 := truthlemma₂.mpr hu;
 
-  let v : (canonicalModel Hilbert.GLPoint3).World := if h : □φ ∈ u.1.1 then u else (lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose;
+  let v : (canonicalModel Modal.GLPoint3).World := if h : □φ ∈ u.1.1 then u else (lemma₂ $ iff_mem₁_neg'.mpr h) |>.choose;
   have hv₁ : □φ ∈ v.1.1 := by
     unfold v;
     split;
@@ -233,7 +233,7 @@ instance complete : Complete Hilbert.GLPoint3 FrameClass.finite_GLPoint3 := ⟨b
 end
 
 
-instance : Hilbert.GL ⪱ Hilbert.GLPoint3 := by
+instance : Modal.GL ⪱ Modal.GLPoint3 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
@@ -256,7 +256,7 @@ instance : Hilbert.GL ⪱ Hilbert.GLPoint3 := by
         refine ⟨?_, ?_, ?_, ?_⟩;
         all_goals omega;
 
-instance : Hilbert.K4Point3 ⪱ Hilbert.GLPoint3 := by
+instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
@@ -277,10 +277,8 @@ instance : Hilbert.K4Point3 ⪱ Hilbert.GLPoint3 := by
         . use 1;
           omega;
 
-end Hilbert.GLPoint3.Kripke
+end Modal.GLPoint3.Kripke
 
-instance : Modal.GL ⪱ Modal.GLPoint3 := inferInstance
 
-instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := inferInstance
 
 end LO.Modal

@@ -17,27 +17,20 @@ protected abbrev FrameClass.EMCN : FrameClass := { F | F.IsEMCN }
 
 end Neighborhood
 
-
-namespace Hilbert
-
-namespace EMCN.Neighborhood
-
-instance : Sound Hilbert.EMCN FrameClass.EMCN := instSound_of_validates_axioms $ by
+instance : Sound Modal.EMCN FrameClass.EMCN := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl | rfl) F (rfl | rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Hilbert.EMCN := consistent_of_sound_frameclass FrameClass.EMCN $ by
+instance : Entailment.Consistent Modal.EMCN := consistent_of_sound_frameclass FrameClass.EMCN $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Hilbert.EMCN FrameClass.EMCN := complete_of_canonical_frame FrameClass.EMCN (maximalCanonicalFrame (Hilbert.EMCN)) $ by
+instance : Complete Modal.EMCN FrameClass.EMCN := complete_of_canonical_frame FrameClass.EMCN (maximalCanonicalFrame (Modal.EMCN)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-end EMCN.Neighborhood
-
-instance : Hilbert.EMC ⪱ Hilbert.EMCN := by
+instance : Modal.EMC ⪱ Modal.EMCN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -64,7 +57,7 @@ instance : Hilbert.EMC ⪱ Hilbert.EMCN := by
         }
       . simp! [M, Semantics.Realize, Satisfies];
 
-instance : Hilbert.ECN ⪱ Hilbert.EMCN := by
+instance : Modal.ECN ⪱ Modal.EMCN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -99,7 +92,7 @@ instance : Hilbert.ECN ⪱ Hilbert.EMCN := by
       . simp! [M, Semantics.Realize, Satisfies];
         tauto_set;
 
-instance : Hilbert.EMN ⪱ Hilbert.EMCN := by
+instance : Modal.EMN ⪱ Modal.EMCN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -150,10 +143,6 @@ instance : Hilbert.EMN ⪱ Hilbert.EMCN := by
       . simp! [M, Semantics.Realize, Satisfies];
         tauto_set;
 
-end Hilbert
 
-instance : 𝐄𝐌𝐂 ⪱ 𝐄𝐌𝐂𝐍 := inferInstance
-instance : 𝐄𝐂𝐍 ⪱ 𝐄𝐌𝐂𝐍 := inferInstance
-instance : 𝐄𝐌𝐍 ⪱ 𝐄𝐌𝐂𝐍 := inferInstance
 
 end LO.Modal

@@ -17,8 +17,6 @@ instance : Entailment.HasAxiomT Modal.S where
     apply Logic.iff_provable.mpr;
     simp;
 
-attribute [grind] Hilbert.Normal.iff_logic_provable_provable Logic.GL.unprovable_AxiomT
-
 instance : Modal.GL ⪱ Modal.S := by
   constructor;
   . infer_instance;

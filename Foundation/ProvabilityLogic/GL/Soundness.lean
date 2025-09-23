@@ -16,7 +16,6 @@ variable {L : FirstOrder.Language} [L.ReferenceableBy L]
          {𝔅 : Provability T U} [𝔅.HBL]
 
 lemma GL.arithmetical_soundness (h : Modal.GL ⊢ A) {f : Realization 𝔅} : U ⊢ f A := by
-  replace h := Normal.iff_logic_provable_provable.mp h;
   induction h using Hilbert.Normal.rec! with
   | axm _ hp =>
     rcases hp with (⟨_, rfl⟩ | ⟨_, rfl⟩)

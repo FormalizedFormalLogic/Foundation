@@ -14,7 +14,7 @@ open Entailment
 open Entailment.Context
 open Formula
 open Formula.Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Kripke
 
 namespace Kripke
@@ -32,30 +32,27 @@ instance : whitepoint.IsStronglyConnected := ⟨by tauto⟩
 
 end Kripke
 
-
-namespace Logic.GrzPoint3.Kripke
-
-instance : Sound Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 := instSound_of_validates_axioms $ by
+instance : Sound Modal.GrzPoint3 FrameClass.finite_GrzPoint3 := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance : Sound Hilbert.GrzPoint3 { F : Frame | F.IsFiniteGrzPoint3' } := instSound_of_validates_axioms $ by
+instance : Sound Modal.GrzPoint3 { F : Frame | F.IsFiniteGrzPoint3' } := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance : Entailment.Consistent Hilbert.GrzPoint3 :=
+instance : Entailment.Consistent Modal.GrzPoint3 :=
   consistent_of_sound_frameclass FrameClass.finite_GrzPoint3 $ by
     use whitepoint;
     constructor;
 
-instance : Complete Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 :=
-  Hilbert.Grz.Kripke.complete_of_mem_miniCanonicalFrame FrameClass.finite_GrzPoint3 $ by
+instance : Complete Modal.GrzPoint3 FrameClass.finite_GrzPoint3 :=
+  Modal.Grz.Kripke.complete_of_mem_miniCanonicalFrame FrameClass.finite_GrzPoint3 $ by
     sorry;
     /-
     intro φ;
@@ -87,8 +84,6 @@ instance : Complete Hilbert.GrzPoint3 FrameClass.finite_GrzPoint3 :=
       . sorry;
     -/
 
-end Logic.GrzPoint3.Kripke
-
 namespace Logic
 
 open Formula
@@ -96,9 +91,9 @@ open Entailment
 open Kripke
 
 
-instance : Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
+instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := by
   constructor;
-  . apply Hilbert.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GrzPoint2 FrameClass.finite_GrzPoint3;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GrzPoint2 FrameClass.finite_GrzPoint3;
     intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
@@ -148,7 +143,7 @@ instance : Hilbert.GrzPoint2 ⪱ Hilbert.GrzPoint3 := by
             . tauto;
             . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
 
-instance : Hilbert.S4Point3 ⪱ Hilbert.GrzPoint3 := by
+instance : Modal.S4Point3 ⪱ Modal.GrzPoint3 := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl | rfl) <;> simp;
@@ -171,8 +166,6 @@ instance : Hilbert.S4Point3 ⪱ Hilbert.GrzPoint3 := by
 
 end Logic
 
-instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := inferInstance
 
-instance : Modal.S4Point3 ⪱ Modal.GrzPoint3 := inferInstance
 
 end LO.Modal

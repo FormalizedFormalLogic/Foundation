@@ -6,11 +6,6 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Kripke
 open Formula.Kripke
 
-instance : Entailment.GL Modal.GL where
-  L φ := by
-    constructor;
-    simp [Modal.GL, Entailment.theory];
-
 namespace GL
 
 namespace Kripke

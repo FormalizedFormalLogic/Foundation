@@ -8,7 +8,7 @@ namespace LO.Modal
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -22,9 +22,9 @@ end Kripke
 
 
 
-namespace Hilbert.S4McK.Kripke
+namespace Modal.S4McK.Kripke
 
-instance : Sound Hilbert.S4McK FrameClass.S4McK := instSound_of_validates_axioms $ by
+instance : Sound Modal.S4McK FrameClass.S4McK := instSound_of_validates_axioms $ by
   apply FrameClass.validates_with_AxiomK_of_validates;
   constructor;
   rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
@@ -32,17 +32,17 @@ instance : Sound Hilbert.S4McK FrameClass.S4McK := instSound_of_validates_axioms
   . exact validate_AxiomFour_of_transitive;
   . exact validate_axiomMcK_of_satisfiesMcKinseyCondition;
 
-instance : Entailment.Consistent Hilbert.S4McK := consistent_of_sound_frameclass FrameClass.S4McK $ by
+instance : Entailment.Consistent Modal.S4McK := consistent_of_sound_frameclass FrameClass.S4McK $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   constructor
 
-instance : Canonical Hilbert.S4McK FrameClass.S4McK := ⟨by constructor⟩
+instance : Canonical Modal.S4McK FrameClass.S4McK := ⟨by constructor⟩
 
-instance : Complete Hilbert.S4McK FrameClass.S4McK := inferInstance
+instance : Complete Modal.S4McK FrameClass.S4McK := inferInstance
 
 
-instance : Hilbert.S4 ⪱ Hilbert.S4McK := by
+instance : Modal.S4 ⪱ Modal.S4McK := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -62,7 +62,7 @@ instance : Hilbert.S4 ⪱ Hilbert.S4McK := by
         use 1;
         trivial;
 
-instance : Hilbert.K4McK ⪱ Hilbert.S4McK := by
+instance : Modal.K4McK ⪱ Modal.S4McK := by
   constructor;
   . apply Hilbert.Normal.weakerThan_of_subset_axioms; intro φ; aesop;
   . apply Entailment.not_weakerThan_iff.mpr;
@@ -83,10 +83,8 @@ instance : Hilbert.K4McK ⪱ Hilbert.S4McK := by
         }
       . simp [Semantics.Realize, Satisfies, M];
 
-end Hilbert.S4McK.Kripke
+end Modal.S4McK.Kripke
 
-instance : Modal.S4 ⪱ Modal.S4McK := inferInstance
 
-instance : Modal.K4McK ⪱ Modal.S4McK := inferInstance
 
 end LO.Modal

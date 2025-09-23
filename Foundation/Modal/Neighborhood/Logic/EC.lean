@@ -16,33 +16,26 @@ protected abbrev FrameClass.EC : FrameClass := { F | F.IsEC }
 
 end Neighborhood
 
-
-namespace Hilbert
-
-namespace EC.Neighborhood
-
-instance : Sound Hilbert.EC FrameClass.EC := instSound_of_validates_axioms $ by
+instance : Sound Modal.EC FrameClass.EC := instSound_of_validates_axioms $ by
   constructor;
   rintro _ rfl F hF;
   simp_all;
 
-instance : Entailment.Consistent Hilbert.EC := consistent_of_sound_frameclass FrameClass.EC $ by
+instance : Entailment.Consistent Modal.EC := consistent_of_sound_frameclass FrameClass.EC $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Hilbert.EC FrameClass.EC := complete_of_canonical_frame FrameClass.EC (minimalCanonicalFrame (Hilbert.EC)) $ by
+instance : Complete Modal.EC FrameClass.EC := complete_of_canonical_frame FrameClass.EC (minimalCanonicalFrame (Modal.EC)) $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-end EC.Neighborhood
-
-instance : Hilbert.E ⪱ Hilbert.EC := by
+instance : Modal.E ⪱ Modal.EC := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.C (.atom 0) (.atom 1));
+    use Axioms.C (.atom 0) (.atom 1);
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
@@ -64,8 +57,6 @@ instance : Hilbert.E ⪱ Hilbert.EC := by
       . tauto;
       . simp [M, Semantics.Realize, Satisfies]
 
-end Hilbert
 
-instance : 𝐄 ⪱ 𝐄𝐂 := inferInstance
 
 end LO.Modal

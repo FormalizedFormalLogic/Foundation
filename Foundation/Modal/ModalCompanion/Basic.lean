@@ -1,6 +1,6 @@
 import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Logic.SumNormal
-import Foundation.Propositional.Kripke.Basic
+import Foundation.Propositional.Kripke.Hilbert
 
 namespace LO
 
@@ -28,7 +28,7 @@ variable {IL : Propositional.Logic ℕ}
 
 variable (IL : Propositional.Logic ℕ)
 
-abbrev smallestMC (IL : Propositional.Logic ℕ) : Modal.Logic ℕ := Modal.Logic.sumNormal Modal.S4 ((Entailment.theory IL).image (·ᵍ))
+abbrev smallestMC (IL : Propositional.Logic ℕ) : Modal.Logic ℕ := Modal.Logic.sumNormal Modal.S4 (IL.image (·ᵍ))
 
 instance : Modal.Entailment.S4 IL.smallestMC where
   T φ := by
@@ -74,7 +74,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
     intro φ hφ;
     apply Modal.Logic.sumNormal.mem₂!;
     use φ;
-    simpa;
+    grind;
   )
   (by
     intro φ;
@@ -127,7 +127,7 @@ lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     apply Modal.Logic.sumNormal.mem₁!;
     apply Modal.Logic.sumNormal.mem₂!;
     use φ;
-    simpa;
+    grind;
   )
   (by
     intro φ;
@@ -214,9 +214,10 @@ lemma goedelTranslated_OrElim : 𝓜𝓢 ⊢ (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (
   exact nec! $ C!_trans axiomFour! $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! $ or₃!) axiomK!;
 
 lemma provable_goedelTranslated_of_provable
-  (IH : Propositional.Hilbert ℕ) (𝓜𝓢 : MS) [Entailment.S4 𝓜𝓢]
-  (hAx : ∀ φ ∈ IH.axiomInstances, 𝓜𝓢 ⊢ φᵍ)
-  : IH ⊢ φ → 𝓜𝓢 ⊢ φᵍ := by
+  {IAx : Propositional.Axiom ℕ}
+  {𝓜𝓢 : MS} [Entailment.S4 𝓜𝓢]
+  (hAx : ∀ φ ∈ IAx.instances, 𝓜𝓢 ⊢! φᵍ)
+  : (Propositional.Hilbert IAx) ⊢! φ → 𝓜𝓢 ⊢! φᵍ := by
   intro h;
   induction h using Propositional.Hilbert.rec! with
   | @axm φ _ ih =>
@@ -230,7 +231,7 @@ lemma provable_goedelTranslated_of_provable
   | andElimR => exact nec! and₂!;
   | orIntroL => exact nec! or₁!;
   | orIntroR => exact nec! or₂!;
-  | K_intro => exact goedelTranslated_AndIntro;
+  | andIntro => exact goedelTranslated_AndIntro;
   | orElim => exact goedelTranslated_OrElim;
   | implyS => exact goedelTranslated_implyS;
   | implyK => exact goedelTranslated_implyK;

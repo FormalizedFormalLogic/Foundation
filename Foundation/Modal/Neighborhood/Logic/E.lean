@@ -7,24 +7,22 @@ open Neighborhood
 open Hilbert.Neighborhood
 open Formula.Neighborhood
 
+
 namespace Neighborhood
 
 abbrev FrameClass.E : FrameClass := Set.univ
 
 end Neighborhood
 
+instance : Sound Modal.E FrameClass.E := instSound_of_validates_axioms $ by simp;
 
-namespace Hilbert.E.Neighborhood
-
-instance : Sound Hilbert.E FrameClass.E := instSound_of_validates_axioms $ by simp;
-
-instance : Entailment.Consistent Hilbert.E := consistent_of_sound_frameclass FrameClass.E $ by
+instance : Entailment.Consistent Modal.E := consistent_of_sound_frameclass FrameClass.E $ by
   use ⟨Unit, λ _ => {}⟩;
   simp;
 
-instance : Complete Hilbert.E FrameClass.E := complete_of_canonical_frame FrameClass.E (minimalCanonicalFrame (Hilbert.E)) (by tauto)
+instance : Complete Modal.E FrameClass.E := complete_of_canonical_frame FrameClass.E (minimalCanonicalFrame (Modal.E)) (by tauto)
 
-instance : Hilbert.E ⪱ Hilbert.EK := by
+instance : Modal.E ⪱ Modal.EK := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -58,7 +56,7 @@ instance : Hilbert.E ⪱ Hilbert.EK := by
           omega;
         . tauto_set;
 
-instance : Hilbert.E ⪱ Hilbert.EN := by
+instance : Modal.E ⪱ Modal.EN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -77,10 +75,5 @@ instance : Hilbert.E ⪱ Hilbert.EN := by
       constructor;
       . tauto;
       . simp! [M, Semantics.Realize, Satisfies];
-
-end Hilbert.E.Neighborhood
-
-instance : 𝐄 ⪱ 𝐄𝐍 := inferInstance
-instance : 𝐄 ⪱ 𝐄𝐊 := inferInstance
 
 end LO.Modal

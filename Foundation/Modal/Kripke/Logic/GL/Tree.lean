@@ -9,7 +9,7 @@ open Formula.Kripke
 open Entailment
 open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 

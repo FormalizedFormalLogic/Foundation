@@ -16,27 +16,20 @@ protected abbrev FrameClass.EMC4 : FrameClass := { F | F.IsEMC4 }
 
 end Neighborhood
 
-
-namespace Hilbert
-
-namespace E4.Neighborhood
-
-instance : Sound Hilbert.EMC4 FrameClass.EMC4 := instSound_of_validates_axioms $ by
+instance : Sound Modal.EMC4 FrameClass.EMC4 := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Hilbert.EMC4 := consistent_of_sound_frameclass FrameClass.EMC4 $ by
+instance : Entailment.Consistent Modal.EMC4 := consistent_of_sound_frameclass FrameClass.EMC4 $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Hilbert.EMC4 FrameClass.EMC4 := complete_of_canonical_frame FrameClass.EMC4 (maximalCanonicalFrame (Hilbert.EMC4)) $ by
+instance : Complete Modal.EMC4 FrameClass.EMC4 := complete_of_canonical_frame FrameClass.EMC4 (maximalCanonicalFrame (Modal.EMC4)) $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-end E4.Neighborhood
-
-instance : Hilbert.EMC ⪱ Hilbert.EMC4 := by
+instance : Modal.EMC ⪱ Modal.EMC4 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
@@ -50,9 +43,5 @@ instance : Hilbert.EMC ⪱ Hilbert.EMC4 := by
       constructor;
       . constructor;
       . simp;
-
-end Hilbert
-
-instance : 𝐄 ⪱ 𝐄𝟒 := inferInstance
 
 end LO.Modal
