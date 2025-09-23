@@ -1,10 +1,7 @@
--- import Foundation.Modal.Neighborhood.Hilbert
--- import Foundation.Modal.Neighborhood.AxiomN
+import Foundation.Modal.Neighborhood.Hilbert
+import Foundation.Modal.Neighborhood.AxiomN
 import Foundation.Modal.Neighborhood.Logic.E
 import Foundation.Modal.PLoN.Logic.N
-
-
-#eval LO.Modal.instHasTNatAxioms
 
 namespace LO.Modal
 
@@ -61,21 +58,16 @@ instance : Modal.E ⪱ Modal.EN := by
 
 
 instance : Modal.N ⪱ Modal.EN := by
+
   constructor;
-  . suffices ∀ φ, Hilbert.N ⊢! φ → Modal.EN ⊢! φ by
-      apply Entailment.weakerThan_iff.mpr;
-      grind;
+  . suffices ∀ φ, Modal.N ⊢! φ → Modal.EN ⊢! φ by apply Logic.weakerThan_of_provable this;
     intro φ hφ;
     induction hφ using Hilbert.Normal.rec! with
     | axm s h => simp at h;
     | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ;
     | nec ihφ => apply Entailment.nec! ihφ;
     | _ => simp;
-  . suffices ∃ φ, Modal.EN ⊢! φ ∧ Hilbert.N ⊬ φ by
-      apply Entailment.not_weakerThan_iff.mpr;
-      obtain ⟨φ, _⟩ := this;
-      use φ;
-      grind;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use □(.atom 0) ⭤ □(∼∼.atom 0);
     constructor;
     . apply re!;

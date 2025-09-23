@@ -527,25 +527,15 @@ section
 
 open Hilbert.Normal
 
-variable {H : Hilbert.Normal ℕ} [H.HasK] {m : outParam (Modality)}
+variable {H : Axiom ℕ} [H.HasK] {m : outParam (Modality)}
+variable {L : Logic _} [L.IsNormal]
 
-instance [H.HasT] : (□) ⤳[H.logic] (-) :=
-  translation_of_axiomInstance (a := HasT.p H) $ by simp [Logic.iff_provable, Entailment.theory];
-
-instance [H.HasFour] : (□) ⤳[H.logic] (□□) :=
-  translation_of_axiomInstance (a := HasFour.p (H := H)) $ by simp [Logic.iff_provable, Entailment.theory];
-
-instance [H.HasTc] : (m) ⤳[H.logic] (□m) :=
-  translation_of_axiomInstance (a := HasTc.p H) $ by simp [Logic.iff_provable, Entailment.theory];
-
-instance [H.HasB] : (m) ⤳[H.logic] (□◇m) :=
-  translation_of_axiomInstance (a := HasB.p (H := H)) $ by simp [Logic.iff_provable, Entailment.theory];
-
-instance [H.HasD] : (□m) ⤳[H.logic] (◇m) :=
-  translation_of_axiomInstance (a := HasD.p (H := H)) $ by simp [Logic.iff_provable, Entailment.theory];
-
-instance [H.HasFive] : (◇m) ⤳[H.logic] (□◇m) :=
-  translation_of_axiomInstance (a := HasFive.p (H := H)) $ by simp [Logic.iff_provable, Entailment.theory];
+instance [Entailment.HasAxiomT L] : (□m) ⤳[L] (m) := translation_of_axiomInstance (a := 0) $ by simp;
+instance [Entailment.HasAxiomFour L] : (□m) ⤳[L] (□□m) := translation_of_axiomInstance (a := 0) $ by simp;
+instance [Entailment.HasAxiomTc L] : (m) ⤳[L] (□m) := translation_of_axiomInstance (a := 0) $ by simp;
+instance [Entailment.HasAxiomB L] : (m) ⤳[L] (□◇m) := translation_of_axiomInstance (a := 0) $ by simp;
+instance [Entailment.HasAxiomD L] : (□m) ⤳[L] (◇m) := translation_of_axiomInstance (a := 0) $ by simp;
+instance [Entailment.HasAxiomFive L] : (◇m) ⤳[L] (□◇m) := translation_of_axiomInstance (a := 0) $ by simp;
 
 end
 
@@ -567,7 +557,7 @@ variable {n : ℕ} {m : Modality} {M : Modalities}
 
 def max_size (M : Modalities) (M_nonempty : M.Nonempty := by decide) := M.image (λ m => m.size) |>.max' $ Finset.image_nonempty.mpr M_nonempty
 
-#eval max_size ({-, ∼, □, □, □, □□□□□□□, □, ◇})
+-- #eval max_size ({-, ∼, □, □, □, □□□□□□□, □, ◇})
 
 lemma lt_max_size_of_mem {M_nonempty : M.Nonempty} (hM : m ∈ M) : m.size ≤ (M.max_size M_nonempty) := by
   apply Finset.le_max';

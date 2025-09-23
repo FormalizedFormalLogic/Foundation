@@ -299,7 +299,9 @@ section
 open Hilbert.Normal
 
 protected abbrev K.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1)}
+namespace K.axioms
 instance : K.axioms.HasK where p := 0; q := 1;
+end K.axioms
 protected abbrev K := Hilbert.Normal K.axioms
 instance : Entailment.K Modal.K where
 
@@ -313,20 +315,26 @@ instance {L : Logic ℕ} [L.IsNormal] : Modal.K ⪯ L := by
   | imply₁ | imply₂ | ec => simp;
 
 protected abbrev KT.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0)}
+namespace KT.axioms
 instance : KT.axioms.HasK where p := 0; q := 1;
 instance : KT.axioms.HasT where p := 0;
+end KT.axioms
 protected abbrev KT := Hilbert.Normal KT.axioms
 instance : Entailment.KT Modal.KT where
 
 protected abbrev KD.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0)}
+namespace KD.axioms
 instance : KD.axioms.HasK where p := 0; q := 1;
 instance : KD.axioms.HasD where p := 0;
+end KD.axioms
 protected abbrev KD := Hilbert.Normal KD.axioms
 instance : Entailment.KD Modal.KD where
 
 protected abbrev KP.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.P}
+namespace KP.axioms
 instance : KP.axioms.HasK where p := 0; q := 1;
 instance : KP.axioms.HasP where
+end KP.axioms
 protected abbrev KP := Hilbert.Normal KP.axioms
 instance : Entailment.KP Modal.KP where
 
@@ -338,47 +346,61 @@ instance : Modal.KP ≊ Modal.KD := by
 
 
 protected abbrev KB.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.B (.atom 0)}
+namespace KB.axioms
 instance : KB.axioms.HasK where p := 0; q := 1;
 instance : KB.axioms.HasB where p := 0;
+end KB.axioms
 protected abbrev KB := Hilbert.Normal KB.axioms
 instance : Entailment.KB Modal.KB where
 
 protected abbrev KDB.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.B (.atom 0)}
+namespace KDB.axioms
 instance : KDB.axioms.HasK where p := 0; q := 1
 instance : KDB.axioms.HasD where p := 0
 instance : KDB.axioms.HasB where p := 0
+end KDB.axioms
 protected abbrev KDB := Hilbert.Normal KDB.axioms
 instance : Entailment.KDB Modal.KDB where
 
 protected abbrev KTB.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.B (.atom 0)}
+namespace KTB.axioms
 instance : KTB.axioms.HasK where p := 0; q := 1
 instance : KTB.axioms.HasT where p := 0
 instance : KTB.axioms.HasB where p := 0
+end KTB.axioms
 protected abbrev KTB := Hilbert.Normal KTB.axioms
 instance : Entailment.KTB Modal.KTB where
 
 protected abbrev KMcK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.McK (.atom 0)}
+namespace KMcK.axioms
 instance : KMcK.axioms.HasK where p := 0; q := 1
 instance : KMcK.axioms.HasMcK where p := 0
+end KMcK.axioms
 protected abbrev KMcK := Hilbert.Normal KMcK.axioms
 instance : Entailment.KMcK Modal.KMcK where
 
 protected abbrev K4.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0)}
+namespace K4.axioms
 instance : K4.axioms.HasK where p := 0; q := 1
 instance : K4.axioms.HasFour where p := 0;
+end K4.axioms
 protected abbrev K4 := Hilbert.Normal K4.axioms
 instance : Entailment.K4 Modal.K4 where
 
 protected abbrev K4n.axioms (n : ℕ) : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.FourN n (.atom 0)}
+namespace K4n.axioms
 instance {n : ℕ} : K4n.axioms n |>.HasK where p := 0; q := 1
 instance {n : ℕ} : K4n.axioms n |>.HasFourN n where p := 0;
+end K4n.axioms
 protected abbrev K4n (n : ℕ) := Hilbert.Normal (K4n.axioms n)
 instance {n : ℕ} : Entailment.K4n n (Modal.K4n n) where
 
 protected abbrev K4McK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.McK (.atom 0)}
+namespace K4McK.axioms
 instance : K4McK.axioms.HasK where p := 0; q := 1
 instance : K4McK.axioms.HasFour where p := 0;
 instance : K4McK.axioms.HasMcK where p := 0;
+end K4McK.axioms
 protected abbrev K4McK := Hilbert.Normal K4McK.axioms
 instance : Entailment.K4McK Modal.K4McK where
 
@@ -388,183 +410,225 @@ noncomputable instance [Entailment.K (Hilbert.Normal Ax)] [Modal.K4McK ⪯ Hilbe
 
 
 protected abbrev K4Point2.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}
+namespace K4Point2.axioms
 instance : K4Point2.axioms.HasK where p := 0; q := 1
 instance : K4Point2.axioms.HasFour where p := 0;
 instance : K4Point2.axioms.HasWeakPoint2 where p := 0; q := 1;
+end K4Point2.axioms
 protected abbrev K4Point2 := Hilbert.Normal K4Point2.axioms
 instance : Entailment.K4Point2 Modal.K4Point2 where
 
 protected abbrev K4Point3.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}
+namespace K4Point3.axioms
 instance : K4Point3.axioms.HasK where p := 0; q := 1
 instance : K4Point3.axioms.HasFour where p := 0;
 instance : K4Point3.axioms.HasWeakPoint3 where p := 0; q := 1;
+end K4Point3.axioms
 protected abbrev K4Point3 := Hilbert.Normal K4Point3.axioms
 instance : Entailment.K4Point3 Modal.K4Point3 where
 
 
 protected abbrev KT4B.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.B (.atom 0)}
+namespace KT4B.axioms
 instance : KT4B.axioms.HasK where p := 0; q := 1;
 instance : KT4B.axioms.HasT where p := 0
 instance : KT4B.axioms.HasFour where p := 0
 instance : KT4B.axioms.HasB where p := 0
+end KT4B.axioms
 protected abbrev KT4B := Hilbert.Normal KT4B.axioms
 instance : Entailment.KT4B (Modal.KT4B) where
 
 
 protected abbrev K45.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Five (.atom 0)}
+namespace K45.axioms
 instance : K45.axioms.HasK where p := 0; q := 1;
 instance : K45.axioms.HasFour where p := 0
 instance : K45.axioms.HasFive where p := 0
+end K45.axioms
 protected abbrev K45 := Hilbert.Normal K45.axioms
 instance : Entailment.K45 (Modal.K45) where
 
 
 protected abbrev KD4.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Four (.atom 0)}
+namespace KD4.axioms
 instance : KD4.axioms.HasK where p := 0; q := 1;
 instance : KD4.axioms.HasD where p := 0
 instance : KD4.axioms.HasFour where p := 0
+end KD4.axioms
 protected abbrev KD4 := Hilbert.Normal KD4.axioms
 instance : Entailment.KD4 (Modal.KD4) where
 
 
 protected abbrev KD5.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Five (.atom 0)}
+namespace KD5.axioms
 instance : KD5.axioms.HasK where p := 0; q := 1;
 instance : KD5.axioms.HasD where p := 0
 instance : KD5.axioms.HasFive where p := 0
+end KD5.axioms
 protected abbrev KD5 := Hilbert.Normal KD5.axioms
 instance : Entailment.KD5 (Modal.KD5) where
 
 
 protected abbrev KD45.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Four (.atom 0), Axioms.Five (.atom 0)}
+namespace KD45.axioms
 instance : KD45.axioms.HasK where p := 0; q := 1;
 instance : KD45.axioms.HasD where p := 0
 instance : KD45.axioms.HasFour where p := 0
 instance : KD45.axioms.HasFive where p := 0
+end KD45.axioms
 protected abbrev KD45 := Hilbert.Normal KD45.axioms
 instance : Entailment.KD45 (Modal.KD45) where
 
 
 protected abbrev KB4.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.B (.atom 0), Axioms.Four (.atom 0)}
+namespace KB4.axioms
 instance : KB4.axioms.HasK where p := 0; q := 1;
 instance : KB4.axioms.HasB where p := 0
 instance : KB4.axioms.HasFour where p := 0
+end KB4.axioms
 protected abbrev KB4 := Hilbert.Normal KB4.axioms
 instance : Entailment.KB4 (Modal.KB4) where
 
 
 protected abbrev KB5.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.B (.atom 0), Axioms.Five (.atom 0)}
+namespace KB5.axioms
 instance : KB5.axioms.HasK where p := 0; q := 1;
 instance : KB5.axioms.HasB where p := 0
 instance : KB5.axioms.HasFive where p := 0
+end KB5.axioms
 protected abbrev KB5 := Hilbert.Normal KB5.axioms
 instance : Entailment.KB5 (Modal.KB5) where
 
 
 protected abbrev S4.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0)}
+namespace S4.axioms
 instance : S4.axioms.HasK where p := 0; q := 1;
 instance : S4.axioms.HasT where p := 0
 instance : S4.axioms.HasFour where p := 0
+end S4.axioms
 protected abbrev S4 := Hilbert.Normal S4.axioms
 instance : Entailment.S4 (Modal.S4) where
 instance : Modal.K4 ⪯ Modal.S4 := weakerThan_of_subset_axioms $ by simp;
 
 
 protected abbrev S4McK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0)}
+namespace S4McK.axioms
 instance : S4McK.axioms.HasK where p := 0; q := 1;
 instance : S4McK.axioms.HasT where p := 0
 instance : S4McK.axioms.HasFour where p := 0
 instance : S4McK.axioms.HasMcK where p := 0
+end S4McK.axioms
 protected abbrev S4McK := Hilbert.Normal S4McK.axioms
 instance : Entailment.S4McK (Modal.S4McK) where
 instance : Modal.K4McK ⪯ Modal.S4McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
 protected abbrev S4Point2McK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point2 (.atom 0)}
+namespace S4Point2McK.axioms
 instance : S4Point2McK.axioms.HasK where p := 0; q := 1;
 instance : S4Point2McK.axioms.HasT where p := 0
 instance : S4Point2McK.axioms.HasFour where p := 0
 instance : S4Point2McK.axioms.HasMcK where p := 0
 instance : S4Point2McK.axioms.HasPoint2 where p := 0
+end S4Point2McK.axioms
 protected abbrev S4Point2McK := Hilbert.Normal S4Point2McK.axioms
 instance : Entailment.S4Point2McK (Modal.S4Point2McK) where
 instance : Modal.K4McK ⪯ Modal.S4Point2McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
 protected abbrev S4Point3McK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}
+namespace S4Point3McK.axioms
 instance : S4Point3McK.axioms.HasK where p := 0; q := 1;
 instance : S4Point3McK.axioms.HasT where p := 0
 instance : S4Point3McK.axioms.HasFour where p := 0
 instance : S4Point3McK.axioms.HasMcK where p := 0
 instance : S4Point3McK.axioms.HasPoint3 where p := 0; q := 1;
+end S4Point3McK.axioms
 protected abbrev S4Point3McK := Hilbert.Normal S4Point3McK.axioms
 instance : Entailment.S4Point3McK (Modal.S4Point3McK) where
 instance : Modal.K4McK ⪯ Modal.S4Point3McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
 protected abbrev S4Point4McK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.McK (.atom 0), Axioms.Point4 (.atom 0)}
+namespace S4Point4McK.axioms
 instance : S4Point4McK.axioms.HasK where p := 0; q := 1;
 instance : S4Point4McK.axioms.HasT where p := 0
 instance : S4Point4McK.axioms.HasFour where p := 0
 instance : S4Point4McK.axioms.HasMcK where p := 0
 instance : S4Point4McK.axioms.HasPoint4 where p := 0
+end S4Point4McK.axioms
 protected abbrev S4Point4McK := Hilbert.Normal S4Point4McK.axioms
 instance : Entailment.S4Point4McK (Modal.S4Point4McK) where
 instance : Modal.K4McK ⪯ Modal.S4Point4McK := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl | rfl) <;> simp;
 
 
 protected abbrev S4Point2.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point2 (.atom 0)}
+namespace S4Point2.axioms
 instance : S4Point2.axioms.HasK where p := 0; q := 1;
 instance : S4Point2.axioms.HasT where p := 0
 instance : S4Point2.axioms.HasFour where p := 0
 instance : S4Point2.axioms.HasPoint2 where p := 0
+end S4Point2.axioms
 protected abbrev S4Point2 := Hilbert.Normal S4Point2.axioms
 instance : Entailment.S4Point2 (Modal.S4Point2) where
 
 
 protected abbrev S4Point3.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}
+namespace S4Point3.axioms
 instance : S4Point3.axioms.HasK where p := 0; q := 1;
 instance : S4Point3.axioms.HasT where p := 0
 instance : S4Point3.axioms.HasFour where p := 0
 instance : S4Point3.axioms.HasPoint3 where p := 0; q := 1;
+end S4Point3.axioms
 protected abbrev S4Point3 := Hilbert.Normal S4Point3.axioms
 instance : Entailment.S4Point3 (Modal.S4Point3) where
 
 
 protected abbrev S4Point4.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Point4 (.atom 0)}
+namespace S4Point4.axioms
 instance : S4Point4.axioms.HasK where p := 0; q := 1;
 instance : S4Point4.axioms.HasT where p := 0
 instance : S4Point4.axioms.HasFour where p := 0
 instance : S4Point4.axioms.HasPoint4 where p := 0
+end S4Point4.axioms
 protected abbrev S4Point4 := Hilbert.Normal S4Point4.axioms
 instance : Entailment.S4Point4 (Modal.S4Point4) where
 
 
 protected abbrev K5.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Five (.atom 0)}
+namespace K5.axioms
 instance : K5.axioms.HasK where p := 0; q := 1;
 instance : K5.axioms.HasFive where p := 0
+end K5.axioms
 protected abbrev K5 := Hilbert.Normal K5.axioms
 instance : Entailment.K5 (Modal.K5) where
 
 
 protected abbrev S5.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0)}
+namespace S5.axioms
 instance : S5.axioms.HasK where p := 0; q := 1;
 instance : S5.axioms.HasT where p := 0
 instance : S5.axioms.HasFive where p := 0
+end S5.axioms
 protected abbrev S5 := Hilbert.Normal S5.axioms
 instance : Entailment.S5 (Modal.S5) where
 
 
 protected abbrev GL.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0)}
+namespace GL.axioms
 instance : GL.axioms.HasK where p := 0; q := 1;
 instance : GL.axioms.HasL where p := 0;
+end GL.axioms
 protected abbrev GL := Hilbert.Normal GL.axioms
 instance : Entailment.GL (Modal.GL) where
 instance : Entailment.GL (Modal.GL) where
 
 protected abbrev GLPoint2.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}
+namespace GLPoint2.axioms
 instance : GLPoint2.axioms.HasK where p := 0; q := 1;
 instance : GLPoint2.axioms.HasL where p := 0
 instance : GLPoint2.axioms.HasWeakPoint2 where p := 0; q := 1;
+end GLPoint2.axioms
 protected abbrev GLPoint2 := Hilbert.Normal GLPoint2.axioms
 instance : Entailment.GLPoint2 (Modal.GLPoint2) where
 instance : Entailment.GLPoint2 (Modal.GLPoint2) where
@@ -572,17 +636,21 @@ instance : Modal.GL ⪯ Modal.GLPoint2 := weakerThan_of_subset_axioms $ by simp
 
 
 protected abbrev GLPoint3.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.L (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}
+namespace GLPoint3.axioms
 instance : GLPoint3.axioms.HasK where p := 0; q := 1;
 instance : GLPoint3.axioms.HasL where p := 0
 instance : GLPoint3.axioms.HasWeakPoint3 where p := 0; q := 1;
+end GLPoint3.axioms
 protected abbrev GLPoint3 := Hilbert.Normal GLPoint3.axioms
 instance : Entailment.GLPoint3 (Modal.GLPoint3) where
 
 
 protected abbrev K4Z.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Z (.atom 0)}
+namespace K4Z.axioms
 instance : K4Z.axioms.HasK where p := 0; q := 1;
 instance : K4Z.axioms.HasFour where p := 0
 instance : K4Z.axioms.HasZ where p := 0
+end K4Z.axioms
 protected abbrev K4Z := Hilbert.Normal K4Z.axioms
 instance : Entailment.K4Z (Modal.K4Z) where
 
@@ -594,10 +662,12 @@ instance : Modal.K4Z ⪯ Modal.GL := inferInstance
 
 
 protected abbrev K4Point2Z.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Z (.atom 0), Axioms.WeakPoint2 (.atom 0) (.atom 1)}
+namespace K4Point2Z.axioms
 instance : K4Point2Z.axioms.HasK where p := 0; q := 1;
 instance : K4Point2Z.axioms.HasFour where p := 0
 instance : K4Point2Z.axioms.HasZ where p := 0
 instance : K4Point2Z.axioms.HasWeakPoint2 where p := 0; q := 1;
+end K4Point2Z.axioms
 protected abbrev K4Point2Z := Hilbert.Normal K4Point2Z.axioms
 instance : Entailment.K4Point2Z (Modal.K4Point2Z) where
 
@@ -612,10 +682,12 @@ instance : Modal.K4Point2Z ⪯ Modal.GLPoint2 := inferInstance
 
 
 protected abbrev K4Point3Z.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Z (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1)}
+namespace K4Point3Z.axioms
 instance : K4Point3Z.axioms.HasK where p := 0; q := 1;
 instance : K4Point3Z.axioms.HasFour where p := 0
 instance : K4Point3Z.axioms.HasZ where p := 0
 instance : K4Point3Z.axioms.HasWeakPoint3 where p := 0; q := 1;
+end K4Point3Z.axioms
 protected abbrev K4Point3Z := Hilbert.Normal K4Point3Z.axioms
 instance : Entailment.K4Point3Z (Modal.K4Point3Z) where
 
@@ -630,48 +702,60 @@ instance : Modal.K4Point3Z ⪯ Modal.GLPoint3 := inferInstance
 
 
 protected abbrev KHen.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Hen (.atom 0)}
+namespace KHen.axioms
 instance : KHen.axioms.HasK where p := 0; q := 1;
 instance : KHen.axioms.HasHen where p := 0;
+end KHen.axioms
 protected abbrev KHen := Hilbert.Normal KHen.axioms
 
 
 protected abbrev K4Hen.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Four (.atom 0), Axioms.Hen (.atom 0)}
+namespace K4Hen.axioms
 instance : K4Hen.axioms.HasK where p := 0; q := 1;
 instance : K4Hen.axioms.HasFour where p := 0
 instance : K4Hen.axioms.HasHen where p := 0
+end K4Hen.axioms
 protected abbrev K4Hen := Hilbert.Normal K4Hen.axioms
 instance : Entailment.K4Hen (Modal.K4Hen) where
 
 
 protected abbrev Grz.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0)}
+namespace Grz.axioms
 instance : Grz.axioms.HasK where p := 0; q := 1;
 instance : Grz.axioms.HasGrz where p := 0
+end Grz.axioms
 protected abbrev Grz := Hilbert.Normal Grz.axioms
 instance : Entailment.Grz (Modal.Grz) where
 instance : Modal.KT ⪯ Modal.Grz := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl) <;> simp;
 
 
 protected abbrev GrzPoint2.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Point2 (.atom 0)}
+namespace GrzPoint2.axioms
 instance : GrzPoint2.axioms.HasK where p := 0; q := 1;
 instance : GrzPoint2.axioms.HasGrz where p := 0
 instance : GrzPoint2.axioms.HasPoint2 where p := 0
+end GrzPoint2.axioms
 protected abbrev GrzPoint2 := Hilbert.Normal GrzPoint2.axioms
 instance : Entailment.GrzPoint2 (Modal.GrzPoint2) where
 
 
 protected abbrev GrzPoint3.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Grz (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}
+namespace GrzPoint3.axioms
 instance : GrzPoint3.axioms.HasK where p := 0; q := 1;
 instance : GrzPoint3.axioms.HasGrz where p := 0
 instance : GrzPoint3.axioms.HasPoint3 where p := 0; q := 1;
+end GrzPoint3.axioms
 protected abbrev GrzPoint3 := Hilbert.Normal GrzPoint3.axioms
 instance : Entailment.GrzPoint3 (Modal.GrzPoint3) where
 
 
 protected abbrev Dum.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dum (.atom 0)}
+namespace Dum.axioms
 instance : Dum.axioms.HasK where p := 0; q := 1;
 instance : Dum.axioms.HasT where p := 0
 instance : Dum.axioms.HasFour where p := 0
 instance : Dum.axioms.HasDum where p := 0
+end Dum.axioms
 protected abbrev Dum := Hilbert.Normal Dum.axioms
 instance : Entailment.Dum (Modal.Dum) where
 
@@ -683,11 +767,13 @@ instance : Modal.Dum ⪯ Modal.Grz := inferInstance
 
 
 protected abbrev DumPoint2.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dum (.atom 0), Axioms.Point2 (.atom 0)}
+namespace DumPoint2.axioms
 instance : DumPoint2.axioms.HasK where p := 0; q := 1;
 instance : DumPoint2.axioms.HasT where p := 0
 instance : DumPoint2.axioms.HasFour where p := 0
 instance : DumPoint2.axioms.HasDum where p := 0
 instance : DumPoint2.axioms.HasPoint2 where p := 0
+end DumPoint2.axioms
 protected abbrev DumPoint2 := Hilbert.Normal DumPoint2.axioms
 instance : Entailment.DumPoint2 (Modal.DumPoint2) where
 
@@ -702,11 +788,13 @@ instance : Modal.DumPoint2 ⪯ Modal.GrzPoint2 := inferInstance
 
 
 protected abbrev DumPoint3.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.Dum (.atom 0), Axioms.Point3 (.atom 0) (.atom 1)}
+namespace DumPoint3.axioms
 instance : DumPoint3.axioms.HasK where p := 0; q := 1;
 instance : DumPoint3.axioms.HasT where p := 0
 instance : DumPoint3.axioms.HasFour where p := 0
 instance : DumPoint3.axioms.HasDum where p := 0
 instance : DumPoint3.axioms.HasPoint3 where p := 0; q := 1;
+end DumPoint3.axioms
 protected abbrev DumPoint3 := Hilbert.Normal DumPoint3.axioms
 instance : Entailment.DumPoint3 (Modal.DumPoint3) where
 
@@ -721,41 +809,48 @@ instance : Modal.DumPoint3 ⪯ Modal.GrzPoint3 := inferInstance
 
 
 protected abbrev KTc.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Tc (.atom 0)}
+namespace KTc.axioms
 instance : KTc.axioms.HasK where p := 0; q := 1;
 instance : KTc.axioms.HasTc where p := 0
+end KTc.axioms
 protected abbrev KTc := Hilbert.Normal KTc.axioms
 instance : Entailment.KTc (Modal.KTc) where
 
 
 protected abbrev KD4Point3Z.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.D (.atom 0), Axioms.Four (.atom 0), Axioms.WeakPoint3 (.atom 0) (.atom 1), Axioms.Z (.atom 0)}
+namespace KD4Point3Z.axioms
 instance : KD4Point3Z.axioms.HasK where p := 0; q := 1;
 instance : KD4Point3Z.axioms.HasD where p := 0
 instance : KD4Point3Z.axioms.HasFour where p := 0
 instance : KD4Point3Z.axioms.HasWeakPoint3 where p := 0; q := 1;
 instance : KD4Point3Z.axioms.HasZ where p := 0
+end KD4Point3Z.axioms
 protected abbrev KD4Point3Z := Hilbert.Normal KD4Point3Z.axioms
 instance : Entailment.KD4Point3Z (Modal.KD4Point3Z) where
 
 
 protected abbrev KTMk.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Mk (.atom 0) (.atom 1)}
+namespace KTMk.axioms
 instance : KTMk.axioms.HasK where p := 0; q := 1;
 instance : KTMk.axioms.HasT where p := 0
 instance : KTMk.axioms.HasMk where p := 0; q := 1
+end KTMk.axioms
 protected abbrev KTMk := Hilbert.Normal KTMk.axioms
 instance : Entailment.KTMk (Modal.KTMk) where
 
 
 protected abbrev S4H.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Four (.atom 0), Axioms.H (.atom 0)}
+namespace S4H.axioms
+instance : S4H.axioms.HasK where p := 0; q := 1;
+instance : S4H.axioms.HasT where p := 0
+instance : S4H.axioms.HasFour where p := 0
+instance : S4H.axioms.HasH1 where p := 0
+end S4H.axioms
 /--
   - `S4H` in Segerberg 1971.
   - `K1.2` in Sobocinski 1964, "Family $K$ of the non-Lewis modal systems"
 -/
 protected abbrev S4H := Hilbert.Normal S4H.axioms
-
-instance : S4H.axioms.HasK where p := 0; q := 1;
-instance : S4H.axioms.HasT where p := 0
-instance : S4H.axioms.HasFour where p := 0
-instance : S4H.axioms.HasH1 where p := 0
 instance : Entailment.S4H (Modal.S4H) where
 
 
@@ -764,16 +859,20 @@ protected abbrev N := Hilbert.Normal N.axioms
 
 
 protected abbrev Ver.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.Ver (.atom 0)}
+namespace Ver.axioms
 instance : Ver.axioms.HasK where p := 0; q := 1;
 instance : Ver.axioms.HasVer where p := 0
+end Ver.axioms
 protected abbrev Ver := Hilbert.Normal Ver.axioms
 instance : Entailment.Ver (Modal.Ver) where
 
 
 protected abbrev Triv.axioms : Axiom ℕ := { Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Tc (.atom 0)}
+namespace Triv.axioms
 instance : Triv.axioms.HasK where p := 0; q := 1;
 instance : Triv.axioms.HasT where p := 0
 instance : Triv.axioms.HasTc where p := 0
+end Triv.axioms
 protected abbrev Triv := Hilbert.Normal Triv.axioms
 instance : Entailment.Triv (Modal.Triv) where
 instance : Modal.K4 ⪯ Modal.Triv := weakerThan_of_provable_axioms $ by rintro φ (rfl | rfl) <;> simp;
@@ -781,10 +880,12 @@ instance : Modal.K4 ⪯ Modal.Triv := weakerThan_of_provable_axioms $ by rintro 
 
 protected abbrev S5Grz.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1), Axioms.T (.atom 0), Axioms.Five (.atom 0), Axioms.Grz (.atom 0)}
 protected abbrev S5Grz := Hilbert.Normal S5Grz.axioms
+namespace S5Grz.axioms
 instance : S5Grz.axioms.HasK where p := 0; q := 1;
 instance : S5Grz.axioms.HasT where p := 0
 instance : S5Grz.axioms.HasFive where p := 0
 instance : S5Grz.axioms.HasGrz where p := 0
+end S5Grz.axioms
 instance : Entailment.S5Grz (Modal.S5Grz) where
 
 instance : Modal.S5Grz ≊ Modal.Triv := by
