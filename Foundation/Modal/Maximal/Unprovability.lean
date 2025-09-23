@@ -36,7 +36,7 @@ end Ver
 
 namespace K4
 
-lemma provable_trivTranslated_Cl : Modal.K4 ⊢! φ → 𝐂𝐥 ⊢! φᵀ.toPropFormula := by
+lemma provable_trivTranslated_Cl : Modal.K4 ⊢! φ → Propositional.Cl ⊢! φᵀ.toPropFormula := by
   intro h;
   apply Triv.iff_provable_Cl.mp;
   apply WeakerThan.pbl h;
@@ -62,7 +62,7 @@ instance : Modal.K4 ⪱ Modal.GL := by
 
 namespace GL
 
-lemma provable_verTranslated_Cl : Modal.GL ⊢! φ → 𝐂𝐥 ⊢! φⱽ.toPropFormula := by
+lemma provable_verTranslated_Cl : Modal.GL ⊢! φ → Propositional.Cl ⊢! φⱽ.toPropFormula := by
   intro h;
   induction h using Hilbert.Normal.rec! with
     | axm _ a =>

@@ -15,19 +15,19 @@ open Modal.Kripke
 
 namespace Int
 
-instance : Sound 𝐈𝐧𝐭 FrameClass.Int := instSound_of_validates_axioms FrameClass.all.validates_AxiomEFQ
+instance : Sound Propositional.Int FrameClass.Int := instSound_of_validates_axioms FrameClass.all.validates_AxiomEFQ
 
-instance : Entailment.Consistent 𝐈𝐧𝐭 := consistent_of_sound_frameclass FrameClass.Int $ by simp
+instance : Entailment.Consistent Propositional.Int := consistent_of_sound_frameclass FrameClass.Int $ by simp
 
-instance : Sound 𝐈𝐧𝐭 FrameClass.finite_Int := instSound_of_validates_axioms FrameClass.finite_all.validates_AxiomEFQ
+instance : Sound Propositional.Int FrameClass.finite_Int := instSound_of_validates_axioms FrameClass.finite_all.validates_AxiomEFQ
 
-instance : Canonical 𝐈𝐧𝐭 FrameClass.Int := by tauto;
+instance : Canonical Propositional.Int FrameClass.Int := by tauto;
 
-instance : Complete 𝐈𝐧𝐭 FrameClass.Int := inferInstance
+instance : Complete Propositional.Int FrameClass.Int := inferInstance
 
 section FFP
 
-instance : Complete 𝐈𝐧𝐭 FrameClass.finite_Int := ⟨by
+instance : Complete Propositional.Int FrameClass.finite_Int := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.Int);
   intro F _ V x;
@@ -127,7 +127,7 @@ lemma satisfies_right_on_counterexampleDPModel :
       exact ihq.mpr $ h (by simpa) $ ihp.mp hp;
   | _ => simp_all [counterexampleDPModel, Satisfies.iff_models, Satisfies];
 
-theorem disjunctive : 𝐈𝐧𝐭 ⊢! φ ⋎ ψ → 𝐈𝐧𝐭 ⊢! φ ∨ 𝐈𝐧𝐭 ⊢! ψ := by
+theorem disjunctive : Propositional.Int ⊢! φ ⋎ ψ → Propositional.Int ⊢! φ ∨ Propositional.Int ⊢! ψ := by
   contrapose!;
   rintro ⟨hnφ, hnψ⟩;
 
@@ -150,7 +150,7 @@ theorem disjunctive : 𝐈𝐧𝐭 ⊢! φ ⋎ ψ → 𝐈𝐧𝐭 ⊢! φ ∨ �
       . exact satisfies_right_on_counterexampleDPModel.not.mp hψ;
       . apply M₂.refl;
 
-instance : Entailment.Disjunctive 𝐈𝐧𝐭 := ⟨disjunctive⟩
+instance : Entailment.Disjunctive Propositional.Int := ⟨disjunctive⟩
 
 end DP
 

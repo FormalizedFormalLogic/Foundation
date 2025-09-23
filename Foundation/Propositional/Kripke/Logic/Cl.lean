@@ -34,30 +34,30 @@ end Kripke
 
 namespace Cl
 
-instance : Sound 𝐂𝐥 FrameClass.Cl :=
+instance : Sound Propositional.Cl FrameClass.Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomLEM_of_isEuclidean;
 
-instance : Sound 𝐂𝐥 FrameClass.finite_Cl :=
+instance : Sound Propositional.Cl FrameClass.finite_Cl :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F ⟨_, hF⟩ _ rfl;
     apply validate_axiomLEM_of_isEuclidean;
 
-instance : Entailment.Consistent 𝐂𝐥 := consistent_of_sound_frameclass FrameClass.Cl $ by
+instance : Entailment.Consistent Propositional.Cl := consistent_of_sound_frameclass FrameClass.Cl $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance : Canonical 𝐂𝐥 FrameClass.Cl :=  ⟨by
+instance : Canonical Propositional.Cl FrameClass.Cl :=  ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete 𝐂𝐥 FrameClass.Cl := inferInstance
+instance : Complete Propositional.Cl FrameClass.Cl := inferInstance
 
 section FFP
 
@@ -65,8 +65,8 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance : Complete 𝐂𝐥 FrameClass.finite_Cl := by
-  suffices Complete 𝐂𝐥 { F : Frame | F.IsFinite ∧ F.IsSymmetric } by
+instance : Complete Propositional.Cl FrameClass.finite_Cl := by
+  suffices Complete Propositional.Cl { F : Frame | F.IsFinite ∧ F.IsSymmetric } by
     convert this;
     constructor;
     . rintro ⟨_, hF⟩; exact ⟨by tauto, inferInstance⟩;
@@ -115,7 +115,7 @@ end FFP
 end Cl
 
 
-instance : 𝐋𝐂 ⪱ 𝐂𝐥 := by
+instance : Propositional.LC ⪱ Propositional.Cl := by
   constructor;
   . apply Hilbert.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl) <;> simp;
@@ -142,9 +142,9 @@ instance : 𝐋𝐂 ⪱ 𝐂𝐥 := by
         have := @F.eucl _ 0 1 0;
         omega;
 
-instance : 𝐈𝐧𝐭 ⪱ 𝐂𝐥 := calc
-  𝐈𝐧𝐭 ⪱ 𝐊𝐂 := inferInstance
-  _   ⪱ 𝐋𝐂 := inferInstance
-  _   ⪱ 𝐂𝐥 := inferInstance
+instance : Propositional.Int ⪱ Propositional.Cl := calc
+  Propositional.Int ⪱ Propositional.KC := inferInstance
+  _   ⪱ Propositional.LC := inferInstance
+  _   ⪱ Propositional.Cl := inferInstance
 
 end LO.Propositional

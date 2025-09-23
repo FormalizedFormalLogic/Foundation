@@ -182,8 +182,7 @@ namespace Int.axioms
 instance : Int.axioms.HasEFQ where p := 0;
 end Int.axioms
 protected abbrev Int := Hilbert Int.axioms
-notation "𝐈𝐧𝐭" => Propositional.Int
-instance : Entailment.Int 𝐈𝐧𝐭 where
+instance : Entailment.Int Propositional.Int where
 
 
 protected abbrev Cl.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.LEM (.atom 0)}
@@ -192,8 +191,7 @@ instance : Cl.axioms.HasEFQ where p := 0;
 instance : Cl.axioms.HasLEM where p := 0;
 end Cl.axioms
 protected abbrev Cl := Hilbert Cl.axioms
-notation "𝐂𝐥" => Propositional.Cl
-instance : Entailment.Cl 𝐂𝐥 where
+instance : Entailment.Cl Propositional.Cl where
 
 
 protected abbrev KC.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}
@@ -202,8 +200,7 @@ instance : KC.axioms.HasEFQ where p := 0;
 instance : KC.axioms.HasWLEM where p := 0;
 end KC.axioms
 protected abbrev KC := Hilbert KC.axioms
-notation "𝐊𝐂" => Propositional.KC
-instance : Entailment.KC 𝐊𝐂 where
+instance : Entailment.KC Propositional.KC where
 
 
 protected abbrev LC.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.Dummett (.atom 0) (.atom 1)}
@@ -212,8 +209,7 @@ instance : LC.axioms.HasEFQ where p := 0;
 instance : LC.axioms.HasDummett where p := 0; q := 1;
 end LC.axioms
 protected abbrev LC := Hilbert LC.axioms
-notation "𝐋𝐂" => Propositional.LC
-instance : Entailment.LC 𝐋𝐂 where
+instance : Entailment.LC Propositional.LC where
 
 
 protected abbrev KrieselPutnam.axioms : Axiom ℕ := {Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}
@@ -222,8 +218,7 @@ instance : KrieselPutnam.axioms.HasEFQ where p := 0;
 instance : KrieselPutnam.axioms.HasKrieselPutnam where p := 0; q := 1; r := 2;
 end KrieselPutnam.axioms
 protected abbrev KrieselPutnam := Hilbert KrieselPutnam.axioms
-notation "𝐊𝐏" => Propositional.KrieselPutnam
-instance : Entailment.KrieselPutnam 𝐊𝐏 where
+instance : Entailment.KrieselPutnam Propositional.KrieselPutnam where
 
 
 end LO.Propositional

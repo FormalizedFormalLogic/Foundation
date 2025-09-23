@@ -7,9 +7,9 @@ open Formula (atom)
 
 variable [DecidableEq α]
 
-instance : 𝐈𝐧𝐭 ⪯ 𝐂𝐥 := Hilbert.weakerThan_of_subset_axioms $ by simp
+instance : Propositional.Int ⪯ Propositional.Cl := Hilbert.weakerThan_of_subset_axioms $ by simp
 
-theorem iff_provable_dn_Int_Cl : 𝐈𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂𝐥 ⊢! φ := by
+theorem iff_provable_dn_Int_Cl : Propositional.Int ⊢! ∼∼φ ↔ Propositional.Cl ⊢! φ := by
   constructor;
   . intro d;
     exact of_NN! $ WeakerThan.pbl d;
@@ -23,14 +23,14 @@ theorem iff_provable_dn_Int_Cl : 𝐈𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂𝐥 ⊢! φ
         generalize (s 0) = ψ;
         apply N!_iff_CO!.mpr;
         apply FiniteContext.deduct'!;
-        have : [∼(ψ ⋎ ∼ψ)] ⊢[𝐈𝐧𝐭]! ∼ψ ⋏ ∼(ψ ➝ ⊥) := KNN!_of_NA! $ FiniteContext.id!;
+        have : [∼(ψ ⋎ ∼ψ)] ⊢[Propositional.Int]! ∼ψ ⋏ ∼(ψ ➝ ⊥) := KNN!_of_NA! $ FiniteContext.id!;
         exact (N!_iff_CO!.mp $ K!_right this) ⨀ (N!_iff_CO!.mp $ K!_left this);
     | mdp ihφψ ihφ => exact CNNNN!_of_NNC! ihφψ ⨀ ihφ;
     | _ => apply dni'!; simp;
 
 alias glivenko := iff_provable_dn_Int_Cl
 
-theorem iff_provable_not_Int_not_Cl : 𝐈𝐧𝐭 ⊢! ∼φ ↔ 𝐂𝐥 ⊢! ∼φ := by
+theorem iff_provable_not_Int_not_Cl : Propositional.Int ⊢! ∼φ ↔ Propositional.Cl ⊢! ∼φ := by
   constructor;
   . intro d;
     exact glivenko.mp $ dni'! d;

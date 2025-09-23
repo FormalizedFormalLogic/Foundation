@@ -13,28 +13,28 @@ protected abbrev Kripke.FrameClass.KrieselPutnam : FrameClass := { F | F.Satisfi
 
 namespace KrieselPutnam
 
-instance : Sound 𝐊𝐏 FrameClass.KrieselPutnam := instSound_of_validates_axioms $ by
+instance : Sound Propositional.KrieselPutnam FrameClass.KrieselPutnam := instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomKrieselPutnam_of_satisfiesKrieselPutnamCondition
 
-instance : Entailment.Consistent 𝐊𝐏 := consistent_of_sound_frameclass FrameClass.KrieselPutnam $ by
+instance : Entailment.Consistent Propositional.KrieselPutnam := consistent_of_sound_frameclass FrameClass.KrieselPutnam $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance : Canonical 𝐊𝐏 FrameClass.KrieselPutnam := ⟨by
+instance : Canonical Propositional.KrieselPutnam FrameClass.KrieselPutnam := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete 𝐊𝐏 FrameClass.KrieselPutnam := inferInstance
+instance : Complete Propositional.KrieselPutnam FrameClass.KrieselPutnam := inferInstance
 
 end KrieselPutnam
 
 
-instance : 𝐈𝐧𝐭 ⪱ 𝐊𝐏 := by
+instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
   constructor;
   . apply Hilbert.weakerThan_of_subset_axioms $ by simp;
   . apply Entailment.not_weakerThan_iff.mpr;

@@ -14,30 +14,30 @@ open Modal.Kripke
 open Modal.Formula.Kripke
 
 
-lemma smallestMC_of_Cl.mem_diabox_box : (𝐂𝐥.smallestMC) ⊢! (◇□(.atom 0) ➝ □(.atom 0)) := by
-  have H₁ : (𝐂𝐥.smallestMC) ⊢! □(.atom 0) ⋎ □(∼□(.atom 0)) := by
+lemma smallestMC_of_Cl.mem_diabox_box : (Propositional.Cl.smallestMC) ⊢! (◇□(.atom 0) ➝ □(.atom 0)) := by
+  have H₁ : (Propositional.Cl.smallestMC) ⊢! □(.atom 0) ⋎ □(∼□(.atom 0)) := by
     apply Logic.sumNormal.mem₂!;
     use Axioms.LEM (.atom 0);
     constructor;
     . apply Propositional.Logic.iff_provable.mp;
       simp;
     . tauto;
-  have H₂ : 𝐂𝐥.smallestMC ⊢! ◇□(.atom 0) ➝ ∼□(∼□(.atom 0)) := diaDuality_mp!;
+  have H₂ : Propositional.Cl.smallestMC ⊢! ◇□(.atom 0) ➝ ∼□(∼□(.atom 0)) := diaDuality_mp!;
   cl_prover [H₁, H₂];
 
-instance : Entailment.HasAxiomFive (𝐂𝐥.smallestMC) where
+instance : Entailment.HasAxiomFive (Propositional.Cl.smallestMC) where
   Five φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
-    apply Modal.Logic.subst! (L := (𝐂𝐥.smallestMC)) (φ := Modal.Axioms.Five (.atom 0)) (s := λ a => φ);
-    have H₁ : 𝐂𝐥.smallestMC ⊢! ◇□(∼.atom 0) ➝ □(∼.atom 0) := Modal.Logic.subst! (s := λ _ => ∼(.atom 0)) $ smallestMC_of_Cl.mem_diabox_box;
-    have H₂ : 𝐂𝐥.smallestMC ⊢! ∼□◇(.atom 0) ➝ ◇□(∼.atom 0) := diaDuality_mp!;
-    have H₃ : 𝐂𝐥.smallestMC ⊢! ◇(.atom 0) ➝ ∼□(∼.atom 0) := diaDuality_mp!;
+    apply Modal.Logic.subst! (L := (Propositional.Cl.smallestMC)) (φ := Modal.Axioms.Five (.atom 0)) (s := λ a => φ);
+    have H₁ : Propositional.Cl.smallestMC ⊢! ◇□(∼.atom 0) ➝ □(∼.atom 0) := Modal.Logic.subst! (s := λ _ => ∼(.atom 0)) $ smallestMC_of_Cl.mem_diabox_box;
+    have H₂ : Propositional.Cl.smallestMC ⊢! ∼□◇(.atom 0) ➝ ◇□(∼.atom 0) := diaDuality_mp!;
+    have H₃ : Propositional.Cl.smallestMC ⊢! ◇(.atom 0) ➝ ∼□(∼.atom 0) := diaDuality_mp!;
     cl_prover [H₁, H₂, H₃];
 
 namespace S5
 
-instance : Modal.S5 ≊ 𝐂𝐥.smallestMC := by
+instance : Modal.S5 ≊ Propositional.Cl.smallestMC := by
   apply Logic.equiv_of_provable;
   intro φ;
   constructor;
@@ -64,13 +64,13 @@ instance : Modal.S5 ≊ 𝐂𝐥.smallestMC := by
         apply (diaK'! $ goedelTranslated_axiomTc) ⨀ (iff_provable_Cl_provable_dia_gS4.mp _);
         simp;
 
-lemma is_smallestMC_of_Cl : Modal.S5 = 𝐂𝐥.smallestMC := Logic.eq_of_equiv
+lemma is_smallestMC_of_Cl : Modal.S5 = Propositional.Cl.smallestMC := Logic.eq_of_equiv
 
-instance : Sound (𝐂𝐥.smallestMC) FrameClass.S5 := Kripke.sound_frameClass_of_equiv Modal.S5 𝐂𝐥.smallestMC
+instance : Sound (Propositional.Cl.smallestMC) FrameClass.S5 := Kripke.sound_frameClass_of_equiv Modal.S5 Propositional.Cl.smallestMC
 
-instance : ModalCompanion 𝐂𝐥 Modal.S5 := by
+instance : ModalCompanion Propositional.Cl Modal.S5 := by
   apply is_smallestMC_of_Cl ▸ Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
-    (IL := 𝐂𝐥)
+    (IL := Propositional.Cl)
     (IC := Propositional.Kripke.FrameClass.Cl)
     (MC := Modal.Kripke.FrameClass.S5)
   rintro F hF;
@@ -80,7 +80,7 @@ instance : ModalCompanion 𝐂𝐥 Modal.S5 := by
 end S5
 
 
-instance : 𝐂𝐥.smallestMC ⪯ Modal.S5Grz := calc
+instance : Propositional.Cl.smallestMC ⪯ Modal.S5Grz := calc
   _ ≊ Modal.S5    := by symm; infer_instance;
   _ ⪯ Modal.S5Grz := inferInstance
 
@@ -88,7 +88,7 @@ instance : 𝐂𝐥.smallestMC ⪯ Modal.S5Grz := calc
 section S5Grz
 
 
-instance : Modal.S5Grz ≊ 𝐂𝐥.largestMC := by
+instance : Modal.S5Grz ≊ Propositional.Cl.largestMC := by
   apply Logic.equiv_of_provable;
   intro φ;
   constructor;
@@ -98,7 +98,7 @@ instance : Modal.S5Grz ≊ 𝐂𝐥.largestMC := by
       rcases h with (rfl | rfl | rfl | rfl);
       . simp;
       . simp;
-      . apply WeakerThan.pbl (𝓢 := 𝐂𝐥.smallestMC); simp;
+      . apply WeakerThan.pbl (𝓢 := Propositional.Cl.smallestMC); simp;
       . simp;
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
     | nec ihφ => exact nec! ihφ;
@@ -111,20 +111,20 @@ instance : Modal.S5Grz ≊ 𝐂𝐥.largestMC := by
     | mem₁ h => apply WeakerThan.pbl h;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-lemma is_largestMC_of_Cl : Modal.S5Grz = 𝐂𝐥.largestMC := Logic.eq_of_equiv
+lemma is_largestMC_of_Cl : Modal.S5Grz = Propositional.Cl.largestMC := Logic.eq_of_equiv
 
-instance : Sound 𝐂𝐥.largestMC FrameClass.finite_Triv := Kripke.sound_frameClass_of_equiv Modal.S5Grz 𝐂𝐥.largestMC
+instance : Sound Propositional.Cl.largestMC FrameClass.finite_Triv := Kripke.sound_frameClass_of_equiv Modal.S5Grz Propositional.Cl.largestMC
 
 end S5Grz
 
 
-instance S5Grz.modalCompanion : ModalCompanion 𝐂𝐥 Modal.S5Grz := by
+instance S5Grz.modalCompanion : ModalCompanion Propositional.Cl Modal.S5Grz := by
   apply is_largestMC_of_Cl ▸ Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
     (IC := Propositional.Kripke.FrameClass.finite_Cl)
     (MC := Modal.Kripke.FrameClass.finite_Triv);
   . intro F hF; simp_all only [Set.mem_setOf_eq]; exact {};
 
-instance Triv.modalCompanion : ModalCompanion 𝐂𝐥 Modal.Triv := by
+instance Triv.modalCompanion : ModalCompanion Propositional.Cl Modal.Triv := by
   convert S5Grz.modalCompanion;
   have : Modal.Triv ≊ Modal.S5Grz := by symm; infer_instance;
   apply Logic.eq_of_equiv;
@@ -132,7 +132,7 @@ instance Triv.modalCompanion : ModalCompanion 𝐂𝐥 Modal.Triv := by
 
 section boxdot
 
-theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ ↔ Modal.Ver ⊢! φᵍᵇ :=
+theorem embedding_Cl_Ver {φ : Propositional.Formula ℕ} : Propositional.Cl ⊢! φ ↔ Modal.Ver ⊢! φᵍᵇ :=
   Iff.trans ModalCompanion.companion Logic.iff_boxdotTranslated_Ver_Triv.symm
 
 end boxdot

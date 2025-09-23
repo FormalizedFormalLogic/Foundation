@@ -63,7 +63,7 @@ open Formula (trivTranslate verTranslate)
 
 variable {φ : Modal.Formula ℕ}
 
-lemma Hilbert.Normal.provable_of_classical_provable {Ax : Axiom ℕ} {φ : Propositional.Formula ℕ} : 𝐂𝐥 ⊢! φ → (Hilbert.Normal Ax ⊢! φ.toModalFormula) := by
+lemma Hilbert.Normal.provable_of_classical_provable {Ax : Axiom ℕ} {φ : Propositional.Formula ℕ} : Propositional.Cl ⊢! φ → (Hilbert.Normal Ax ⊢! φ.toModalFormula) := by
   intro h;
   induction h using Propositional.Hilbert.rec! with
   | axm _ h => rcases h with (rfl | rfl) <;> simp;
@@ -82,7 +82,7 @@ lemma iff_trivTranslated : Modal.Triv ⊢! φ ⭤ φᵀ := by
   | himp _ _ ih₁ ih₂ => exact ECC!_of_E!_of_E! ih₁ ih₂;
   | _ => apply E!_id
 
-lemma iff_provable_Cl : Modal.Triv ⊢! φ ↔ 𝐂𝐥 ⊢! φᵀ.toPropFormula := by
+lemma iff_provable_Cl : Modal.Triv ⊢! φ ↔ Propositional.Cl ⊢! φᵀ.toPropFormula := by
   constructor;
   . intro h;
     induction h using Hilbert.Normal.rec! with
@@ -116,7 +116,7 @@ lemma iff_verTranslated : Modal.Ver ⊢! φ ⭤ φⱽ := by
   | himp _ _ ih₁ ih₂ => exact ECC!_of_E!_of_E! ih₁ ih₂;
   | _ => apply E!_id
 
-protected lemma iff_provable_Cl : Modal.Ver ⊢! φ ↔ 𝐂𝐥 ⊢! φⱽ.toPropFormula := by
+protected lemma iff_provable_Cl : Modal.Ver ⊢! φ ↔ Propositional.Cl ⊢! φⱽ.toPropFormula := by
   constructor;
   . intro h;
     induction h using Hilbert.Normal.rec! with
