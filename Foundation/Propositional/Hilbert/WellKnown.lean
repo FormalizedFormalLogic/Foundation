@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Basic
+import Foundation.Propositional.Hilbert.Basic2
 import Foundation.Propositional.Entailment.Basic
 
 namespace LO.Propositional
@@ -103,43 +103,43 @@ end
 end Hilbert
 
 
-protected abbrev Hilbert.Int : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0)}⟩
-protected abbrev Int := Hilbert.Int.logic
+protected abbrev 𝐈𝐧𝐭 : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0)}⟩
+protected abbrev Int := 𝐈𝐧𝐭.logic
 notation "𝐈𝐧𝐭" => Propositional.Int
-instance : Hilbert.Int.HasEFQ where p := 0;
-instance : Entailment.Int (Hilbert.Int) where
+instance : 𝐈𝐧𝐭.HasEFQ where p := 0;
+instance : Entailment.Int (𝐈𝐧𝐭) where
 
-protected abbrev Hilbert.Cl : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.LEM (.atom 0)}⟩
-protected abbrev Cl := Hilbert.Cl.logic
+protected abbrev 𝐂𝐥 : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.LEM (.atom 0)}⟩
+protected abbrev Cl := 𝐂𝐥.logic
 notation "𝐂𝐥" => Propositional.Cl
-instance : Hilbert.Cl.HasEFQ where p := 0;
-instance : Hilbert.Cl.HasLEM where p := 0;
-instance : Entailment.Cl (Hilbert.Cl) where
+instance : 𝐂𝐥.HasEFQ where p := 0;
+instance : 𝐂𝐥.HasLEM where p := 0;
+instance : Entailment.Cl (𝐂𝐥) where
 
-lemma Hilbert.Int_weakerThan_Cl : (Hilbert.Int) ⪯ (Hilbert.Cl) := by apply weakerThan_of_subset_axioms; tauto;
+lemma 𝐈𝐧𝐭_weakerThan_Cl : (𝐈𝐧𝐭) ⪯ (𝐂𝐥) := by apply weakerThan_of_subset_axioms; tauto;
 
 
-protected abbrev Modal.KC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}⟩
-protected abbrev KC := Modal.KC.logic
+protected abbrev 𝐊𝐂 : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.WeakLEM (.atom 0)}⟩
+protected abbrev KC := 𝐊𝐂.logic
 notation "𝐊𝐂" => Propositional.KC
-instance : Modal.KC.HasEFQ where p := 0;
-instance : Modal.KC.HasWeakLEM where p := 0;
-instance : Entailment.KC (Modal.KC) where
+instance : 𝐊𝐂.HasEFQ where p := 0;
+instance : 𝐊𝐂.HasWeakLEM where p := 0;
+instance : Entailment.KC (𝐊𝐂) where
 
 
-protected abbrev Hilbert.LC : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.Dummett (.atom 0) (.atom 1)}⟩
-protected abbrev LC := Hilbert.LC.logic
+protected abbrev 𝐋𝐂 : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.Dummett (.atom 0) (.atom 1)}⟩
+protected abbrev LC := 𝐋𝐂.logic
 notation "𝐋𝐂" => Propositional.LC
-instance : Hilbert.LC.HasEFQ where p := 0;
-instance : Hilbert.LC.HasDummett where p := 0; q := 1;
-instance : Entailment.LC (Hilbert.LC) where
+instance : 𝐋𝐂.HasEFQ where p := 0;
+instance : 𝐋𝐂.HasDummett where p := 0; q := 1;
+instance : Entailment.LC (𝐋𝐂) where
 
 
-protected abbrev Modal.KrieselPutnam : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}⟩
-protected abbrev KrieselPutnam := Modal.KrieselPutnam.logic
+protected abbrev 𝐊𝐏 : Hilbert ℕ := ⟨{Axioms.EFQ (.atom 0), Axioms.KrieselPutnam (.atom 0) (.atom 1) (.atom 2)}⟩
+protected abbrev KrieselPutnam := 𝐊𝐏.logic
 notation "𝐊𝐏" => Propositional.KrieselPutnam
-instance : Modal.KrieselPutnam.HasEFQ where p := 0;
-instance : Modal.KrieselPutnam.HasKrieselPutnam where p := 0; q := 1; r := 2;
-instance : Entailment.KrieselPutnam (Modal.KrieselPutnam) where
+instance : 𝐊𝐏.HasEFQ where p := 0;
+instance : 𝐊𝐏.HasKrieselPutnam where p := 0; q := 1; r := 2;
+instance : Entailment.KrieselPutnam (𝐊𝐏) where
 
 end LO.Propositional

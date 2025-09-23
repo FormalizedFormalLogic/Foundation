@@ -111,7 +111,7 @@ instance : Modal.S4Point2 ≊ 𝐊𝐂.smallestMC := by
     | subst ihφ => apply Logic.subst! _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable Modal.KC Modal.S4Point2;
+      apply provable_goedelTranslated_of_provable 𝐊𝐂 Modal.S4Point2;
       . rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
         . simp;
         . exact S4Point2.goedelTranslated_axiomWLEM;

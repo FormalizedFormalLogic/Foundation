@@ -17,7 +17,7 @@ namespace Triv
 
 lemma unprovable_AxiomL : Modal.Triv ⊬ (Axioms.L (.atom a)) := by
   apply Triv.iff_provable_Cl.not.mpr;
-  apply Hilbert.Cl.not_provable_of_exists_valuation;
+  apply 𝐂𝐥.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
 
@@ -28,7 +28,7 @@ namespace Ver
 
 lemma unprovable_AxiomP : Modal.Ver ⊬ Axioms.P := by
   apply Ver.iff_provable_Cl.not.mpr;
-  apply Hilbert.Cl.not_provable_of_exists_valuation;
+  apply 𝐂𝐥.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
 
@@ -37,14 +37,14 @@ end Ver
 
 namespace K4
 
-lemma provable_trivTranslated_Cl : Modal.K4 ⊢! φ → Hilbert.Cl ⊢! φᵀ.toPropFormula := by
+lemma provable_trivTranslated_Cl : Modal.K4 ⊢! φ → 𝐂𝐥 ⊢! φᵀ.toPropFormula := by
   intro h;
   apply Triv.iff_provable_Cl.mp;
   apply WeakerThan.pbl h;
 
 lemma unprovable_AxiomL : Modal.K4 ⊬ (Axioms.L (.atom a)) := by
   apply not_imp_not.mpr provable_trivTranslated_Cl;
-  apply Hilbert.Cl.not_provable_of_exists_valuation;
+  apply 𝐂𝐥.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
 
@@ -63,7 +63,7 @@ instance : Modal.K4 ⪱ Modal.GL := by
 
 namespace GL
 
-lemma provable_verTranslated_Cl : Modal.GL ⊢! φ → Hilbert.Cl ⊢! φⱽ.toPropFormula := by
+lemma provable_verTranslated_Cl : Modal.GL ⊢! φ → 𝐂𝐥 ⊢! φⱽ.toPropFormula := by
   intro h;
   induction h using Hilbert.Normal.rec! with
     | axm _ a =>
@@ -76,7 +76,7 @@ lemma provable_verTranslated_Cl : Modal.GL ⊢! φ → Hilbert.Cl ⊢! φⱽ.toP
 @[simp, grind]
 lemma unprovable_AxiomT : (Modal.GL) ⊬ Axioms.T (.atom a) := by
   apply not_imp_not.mpr provable_verTranslated_Cl;
-  apply Hilbert.Cl.not_provable_of_exists_valuation;
+  apply 𝐂𝐥.not_provable_of_exists_valuation;
   use (λ _ => False);
   tauto;
 

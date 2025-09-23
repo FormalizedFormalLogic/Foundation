@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.WellKnown
+import Foundation.Propositional.Hilbert.Basic2
 
 namespace LO.Propositional
 
@@ -9,7 +9,7 @@ open Formula (atom)
 
 variable [DecidableEq α]
 
-theorem iff_provable_dn_efq_dne_provable : Hilbert.Int ⊢! ∼∼φ ↔ Hilbert.Cl ⊢! φ := by
+theorem iff_provable_dn_efq_dne_provable : 𝐈𝐧𝐭 ⊢! ∼∼φ ↔ 𝐂𝐥 ⊢! φ := by
   constructor;
   . intro d; exact of_NN! $ Int_weakerThan_Cl.subset d;
   . intro d;
@@ -22,14 +22,14 @@ theorem iff_provable_dn_efq_dne_provable : Hilbert.Int ⊢! ∼∼φ ↔ Hilbert
         generalize (s 0) = ψ;
         apply N!_iff_CO!.mpr;
         apply FiniteContext.deduct'!;
-        have : [∼(ψ ⋎ ∼ψ)] ⊢[Hilbert.Int]! ∼ψ ⋏ ∼(ψ ➝ ⊥) := KNN!_of_NA! $ FiniteContext.id!;
+        have : [∼(ψ ⋎ ∼ψ)] ⊢[𝐈𝐧𝐭]! ∼ψ ⋏ ∼(ψ ➝ ⊥) := KNN!_of_NA! $ FiniteContext.id!;
         exact (N!_iff_CO!.mp $ K!_right this) ⨀ (N!_iff_CO!.mp $ K!_left this);
     | mdp ihφψ ihφ => exact CNNNN!_of_NNC! ihφψ ⨀ ihφ;
     | _ => apply dni'!; simp;
 
 alias glivenko := iff_provable_dn_efq_dne_provable
 
-theorem iff_provable_neg_efq_provable_neg_efq : Hilbert.Int ⊢! ∼φ ↔ Hilbert.Cl ⊢! ∼φ := by
+theorem iff_provable_neg_efq_provable_neg_efq : 𝐈𝐧𝐭 ⊢! ∼φ ↔ 𝐂𝐥 ⊢! ∼φ := by
   constructor;
   . intro d;
     exact glivenko.mp $ dni'! d;

@@ -25,8 +25,8 @@ lemma unprovable_notbox : Modal.GL ⊬ ∼□φ := by
   by_contra hC;
   have : Modal.GL ⊢! ∼□φ ➝ ∼□⊥ := contra! (imply_box_distribute'! efq!)
   have : Modal.GL ⊢! ∼□⊥ := this ⨀ hC;
-  have : Hilbert.Cl ⊢! (⊥ ➝ ⊥) ➝ ⊥ := GL.provable_verTranslated_Cl this;
-  have := Hilbert.Cl.soundness this (λ _ => False);
+  have : 𝐂𝐥 ⊢! (⊥ ➝ ⊥) ➝ ⊥ := GL.provable_verTranslated_Cl this;
+  have := 𝐂𝐥.soundness this (λ _ => False);
   tauto;
 
 lemma unprovable_independency : Modal.GL ⊬ independency φ := by

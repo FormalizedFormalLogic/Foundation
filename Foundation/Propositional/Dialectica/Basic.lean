@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.Basic
+import Foundation.Propositional.Hilbert.Basic2
 
 /-!
   # A Toy Model of Dialectica Interpretation for Intuitionistic Propositional Logic

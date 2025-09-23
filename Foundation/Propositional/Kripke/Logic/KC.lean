@@ -34,35 +34,33 @@ instance [F.IsKC] : F.IsKrieselPutnam := ⟨by
 end Kripke
 
 
-namespace Hilbert
+namespace KC
 
-namespace KC.Kripke
-
-instance : Sound Modal.KC FrameClass.KC :=
+instance : Sound 𝐊𝐂 FrameClass.KC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
 
-instance : Sound Modal.KC FrameClass.finite_KC :=
+instance : Sound 𝐊𝐂 FrameClass.finite_KC :=
   instSound_of_validates_axioms $ by
     apply FrameClass.Validates.withAxiomEFQ;
     rintro F hF _ rfl;
     replace hF := Set.mem_setOf_eq.mp hF;
     apply validate_axiomWeakLEM_of_isPiecewiseStronglyConvergent
 
-instance : Entailment.Consistent Modal.KC := consistent_of_sound_frameclass FrameClass.KC $ by
+instance : Entailment.Consistent 𝐊𝐂 := consistent_of_sound_frameclass FrameClass.KC $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Canonical Modal.KC FrameClass.KC := ⟨by
+instance : Canonical 𝐊𝐂 FrameClass.KC := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance : Complete Modal.KC FrameClass.KC := inferInstance
+instance : Complete 𝐊𝐂 FrameClass.KC := inferInstance
 
 section FFP
 
@@ -70,7 +68,7 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance : Complete (Modal.KC) FrameClass.finite_KC := ⟨by
+instance : Complete (𝐊𝐂) FrameClass.finite_KC := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.KC);
   rintro F F_con V r;
@@ -132,9 +130,10 @@ instance : Complete (Modal.KC) FrameClass.finite_KC := ⟨by
 
 end FFP
 
-end KC.Kripke
+end KC
 
-instance : Modal.KrieselPutnam ⪱ Modal.KC := by
+
+instance : 𝐊𝐏 ⪱ 𝐊𝐂 := by
   constructor;
   . apply weakerThan_of_subset_frameClass FrameClass.KrieselPutnam FrameClass.KC;
     intro F hF;
@@ -184,15 +183,8 @@ instance : Modal.KrieselPutnam ⪱ Modal.KC := by
         have := @F.ps_convergent _ 0 1 2;
         omega;
 
-instance : Hilbert.Int ⪱ Modal.KC := calc
-  Hilbert.Int ⪱ Modal.KrieselPutnam := inferInstance
-  _           ⪱ Modal.KC := inferInstance
-
-end Hilbert
-
-propositional_kripke 𝐊𝐂 FrameClass.KC
-propositional_kripke 𝐊𝐂 FrameClass.finite_KC
-
-instance : 𝐊𝐏 ⪱ 𝐊𝐂 := inferInstance
+instance : 𝐈𝐧𝐭 ⪱ 𝐊𝐂 := calc
+  𝐈𝐧𝐭 ⪱ 𝐊𝐏 := inferInstance
+  _   ⪱ 𝐊𝐂 := inferInstance
 
 end LO.Propositional

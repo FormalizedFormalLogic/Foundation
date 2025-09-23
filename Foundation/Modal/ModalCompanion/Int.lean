@@ -17,8 +17,8 @@ lemma Kripke.sound_frameClass_of_equiv (L₁ L₂ : Logic ℕ) [L₁ ≊ L₂] {
 lemma Kripke.complete_frameClass_of_equiv (L₁ L₂ : Logic ℕ) [L₁ ≊ L₂] {C : Kripke.FrameClass} [Complete L₁ C] : Complete L₂ C := by grind;
 
 
-lemma gS4_of_Int : Hilbert.Int ⊢! φ → Modal.S4 ⊢! φᵍ := by
-  apply provable_goedelTranslated_of_provable Hilbert.Int Modal.S4;
+lemma gS4_of_Int : 𝐈𝐧𝐭 ⊢! φ → Modal.S4 ⊢! φᵍ := by
+  apply provable_goedelTranslated_of_provable 𝐈𝐧𝐭 Modal.S4;
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
 

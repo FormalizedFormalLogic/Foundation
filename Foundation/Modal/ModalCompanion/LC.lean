@@ -68,7 +68,7 @@ instance : Modal.S4Point3 ≊ 𝐋𝐂.smallestMC := by
     | subst ihφ => apply Logic.subst! _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable Hilbert.LC Modal.S4Point3;
+      apply provable_goedelTranslated_of_provable 𝐋𝐂 Modal.S4Point3;
       . rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
         . simp;
         . apply A!_replace axiomPoint3! <;>

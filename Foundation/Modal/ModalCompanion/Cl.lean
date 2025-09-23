@@ -55,7 +55,7 @@ instance : Modal.S5 ≊ 𝐂𝐥.smallestMC := by
     | subst ihφ => apply Logic.subst! _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable Hilbert.Cl Modal.S5;
+      apply provable_goedelTranslated_of_provable 𝐂𝐥 Modal.S5;
       . rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
         . simp;
         . apply rm_diabox'!;

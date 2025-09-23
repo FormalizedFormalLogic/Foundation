@@ -1,4 +1,4 @@
-import Foundation.Propositional.Hilbert.WellKnown
+import Foundation.Propositional.Hilbert.Basic2
 import Foundation.Propositional.Kripke.Logic.Cl
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Propositional.ClassicalSemantics.ZeroSubst
@@ -11,7 +11,7 @@ namespace Logic
 
 open Formula (atom)
 open Formula.ClassicalSemantics
-open Propositional.Hilbert.Cl
+open Propositional.𝐂𝐥
 open ClassicalSemantics
 
 theorem Cl.post_complete : ¬∃ L : Logic _, Entailment.Consistent L ∧ Nonempty (L.IsSuperintuitionistic) ∧ 𝐂𝐥 ⪱ L := by
