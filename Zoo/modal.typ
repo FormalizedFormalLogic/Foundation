@@ -6,6 +6,8 @@
 #let dia = $diamond$
 
 #let ProvLogic(L1, L2) = $upright("PrL")_(#L1)(#L2)$
+#let smallestMC(L) = $tau(#L)$
+#let largestMC(L) = $sigma(#L)$
 
 #let arrows = json("./modal.json").map(((from, to, type)) => {
   if type == "ssub" {
@@ -30,7 +32,8 @@
     rankdir = BT;
 
     node [
-      margin=0.1
+      shape=none
+      margin=0.125
       width=0
       height=0
     ]
@@ -51,20 +54,29 @@
         + "}",
     ),
     labels: (
-      "𝐄": $Logic("E")$,
-      "𝐄𝐂": $Logic("EC")$,
-      "𝐄𝐂𝐍": $Logic("ECN")$,
-      "𝐄𝐊": $Logic("EK")$,
-      "𝐄𝐌": $Logic("EM")$,
-      "𝐄𝐌𝐂": $Logic("EMC")$,
-      "𝐄𝐌𝐂𝐍": $Logic("EMCN")$,
-      "𝐄𝐌𝐍": $Logic("EMN")$,
-      "𝐄𝐍": $Logic("EN")$,
+      "LO.Modal.D": $Logic("D")$,
       "LO.Modal.Dum": $Logic("Dum")$,
       "LO.Modal.DumPoint2": $Logic("Dum.2")$,
       "LO.Modal.DumPoint3": $Logic("Dum.3")$,
-      "LO.Modal.D": $Logic("D")$,
+      "LO.Modal.E": $Logic("E")$,
+      "LO.Modal.E4": $Logic("E4")$,
+      "LO.Modal.EC": $Logic("EC")$,
+      "LO.Modal.ECN": $Logic("ECN")$,
+      "LO.Modal.ED": $Logic("ED")$,
+      "LO.Modal.EK": $Logic("EK")$,
+      "LO.Modal.EM": $Logic("EM")$,
+      "LO.Modal.EMC": $Logic("EMC")$,
+      "LO.Modal.EMC4": $Logic("EMC4")$,
+      "LO.Modal.EMCN": $Logic("EMCN")$,
+      "LO.Modal.EMCNT": $Logic("EMCNT")$,
+      "LO.Modal.EMCNT4": $Logic("EMCNT4")$,
+      "LO.Modal.EMN": $Logic("EMN")$,
       "LO.Modal.Empty": $emptyset$,
+      "LO.Modal.EMT": $Logic("EMT")$,
+      "LO.Modal.EMT4": $Logic("EMT4")$,
+      "LO.Modal.EN": $Logic("EN")$,
+      "LO.Modal.END": $Logic("END")$,
+      "LO.Modal.EP": $Logic("EP")$,
       "LO.Modal.GL": $Logic("GL")$,
       "LO.Modal.GLPoint2": $Logic("GL.2")$,
       "LO.Modal.GLPoint3": $Logic("GL.3")$,
@@ -82,6 +94,9 @@
       "LO.Modal.K4Henkin": $Logic("K4") + Rule("Henkin")$,
       "LO.Modal.K4Loeb": $Logic("K4") + Rule("Löb")$,
       "LO.Modal.K4McK": $Logic("K4McK")$,
+      "LO.Modal.K4n 0": $Logic("K4")_0$,
+      "LO.Modal.K4n 1": $Logic("K4")_1$,
+      "LO.Modal.K4n 2": $Logic("K4")_2$,
       "LO.Modal.K4Point2": $Logic("K4.2")$,
       "LO.Modal.K4Point2Z": $Logic("K4.2Z")$,
       "LO.Modal.K4Point3": $Logic("K4.3")$,
@@ -122,15 +137,21 @@
       "LO.Modal.Triv": $Logic("Triv")$,
       "LO.Modal.Univ": $bot$,
       "LO.Modal.Ver": $Logic("Ver")$,
-      "LO.Modal.K4n 0": $Logic("K4")_0$,
-      "LO.Modal.K4n 1": $Logic("K4")_1$,
-      "LO.Modal.K4n 2": $Logic("K4")_2$,
+      "LO.Propositional.Cl.largestMC": $largestMC(Logic("Cl"))$,
+      "LO.Propositional.Cl.smallestMC": $smallestMC(Logic("Cl"))$,
+      "LO.Propositional.Int.largestMC": $largestMC(Logic("Int"))$,
+      "LO.Propositional.Int.smallestMC": $smallestMC(Logic("Int"))$,
+      "LO.Propositional.KC.largestMC": $largestMC(Logic("KC"))$,
+      "LO.Propositional.KC.smallestMC": $smallestMC(Logic("KC"))$,
+      "LO.Propositional.LC.largestMC": $largestMC(Logic("LC"))$,
+      "LO.Propositional.LC.smallestMC": $smallestMC(Logic("LC"))$,
       "𝗣𝗔.ProvabilityLogic 𝗣𝗔": [$ProvLogic(Theory("PA"), Theory("PA"))$],
       "𝗣𝗔.ProvabilityLogic 𝗧𝗔": [$ProvLogic(Theory("PA"), Theory("TA"))$],
     ),
-    width: 980pt,
+    width: 1280pt,
   )
 ]
 
 Notes:
 - $ProvLogic(T, U)$ is provability logic of $T$ relative to $U$ where $T$ and $U$ are first-order arithmetical theories.
+- $smallestMC(L)$ is smallest modal companion of a propositional logic $L$, and $largestMC(L)$ is largest modal companion of $L$.

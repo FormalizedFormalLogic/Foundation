@@ -202,6 +202,7 @@ instance : Modal.K4n 1 ≊ Modal.K4 := by simp [show Modal.K4n 1 = Modal.K4 by r
 
 instance : Modal.K4n 1 ⪱ Modal.K4n 0 := strictlyWeakerThan_of_lt (by omega)
 instance : Modal.K4n 2 ⪱ Modal.K4n 1 := strictlyWeakerThan_of_lt (by omega)
+instance : Modal.K ⪱ Modal.K4n 2 := inferInstance
 
 end
 
