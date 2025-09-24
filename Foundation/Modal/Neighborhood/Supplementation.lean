@@ -10,19 +10,17 @@ variable {F : Frame}
 
 def Frame.Supplementation (F : Frame) : Frame := Frame.mk_ℬ F.World (λ X => (Set.sUnion { F.box Y | Y ⊆ X }))
 
-local postfix:80 "♯" => Frame.Supplementation
-
 namespace Frame.Supplementation
 
-lemma iff_exists_subset {X : Set (F.World)} {w : F.World} : w ∈ F♯.box X ↔ ∃ Y ⊆ X, w ∈ F.box Y := by
+lemma iff_exists_subset {X : Set (F.World)} {w : F.World} : w ∈ F.Supplementation.box X ↔ ∃ Y ⊆ X, w ∈ F.box Y := by
   simp [Frame.Supplementation, Frame.box, Frame.mk_ℬ, Set.mem_sUnion, Set.mem_setOf_eq, exists_exists_and_eq_and]
 
-lemma subset (X : Set (F.World)) : F.box X ⊆ F♯.box X := by
+lemma subset (X : Set (F.World)) : F.box X ⊆ F.Supplementation.box X := by
   intro x;
   simp [Frame.Supplementation, Frame.box, Frame.mk_ℬ];
   tauto;
 
-lemma monotonic {X Y : Set (F.World)} (h : X ⊆ Y) : F♯.box X ⊆ F♯.box Y := by
+lemma monotonic {X Y : Set (F.World)} (h : X ⊆ Y) : F.Supplementation.box X ⊆ F.Supplementation.box Y := by
   intro x hX;
   obtain ⟨X', hX', hX⟩ := iff_exists_subset.mp hX;
   apply iff_exists_subset.mpr;
@@ -31,7 +29,7 @@ lemma monotonic {X Y : Set (F.World)} (h : X ⊆ Y) : F♯.box X ⊆ F♯.box Y 
   . apply Set.Subset.trans hX' h;
   . assumption;
 
-lemma monotonic_iterated {X Y : Set (F.World)} (h : X ⊆ Y) (n) : F♯.box^[n] X ⊆ F♯.box^[n] Y := by
+lemma monotonic_iterated {X Y : Set (F.World)} (h : X ⊆ Y) (n) : F.Supplementation.box^[n] X ⊆ F.Supplementation.box^[n] Y := by
   induction n with
   | zero => simpa;
   | succ n ih =>
@@ -39,7 +37,7 @@ lemma monotonic_iterated {X Y : Set (F.World)} (h : X ⊆ Y) (n) : F♯.box^[n] 
     apply monotonic;
     apply ih;
 
-lemma itl_reduce : F♯♯.box X = F♯.box X := by
+lemma itl_reduce : F.Supplementation.Supplementation.box X = F.Supplementation.box X := by
   ext x;
   simp only [Supplementation, mk_ℬ, Set.mem_setOf_eq, Set.mem_sUnion, exists_exists_and_eq_and]
   constructor;
@@ -50,7 +48,7 @@ lemma itl_reduce : F♯♯.box X = F♯.box X := by
     . assumption;
   . tauto;
 
-instance : F♯.IsMonotonic := by
+instance : F.Supplementation.IsMonotonic := by
   constructor;
   rintro X Y x hx;
   obtain ⟨W, hW₁, hW₂⟩ := iff_exists_subset.mp hx;
@@ -61,7 +59,7 @@ instance : F♯.IsMonotonic := by
     . tauto_set;
     . assumption;
 
-instance [F.IsReflexive] : F♯.IsReflexive := by
+instance [F.IsReflexive] : F.Supplementation.IsReflexive := by
   constructor;
   intro X w hw;
   replace ⟨Y, hY₁, hY₂⟩ := iff_exists_subset.mp hw;
@@ -69,14 +67,14 @@ instance [F.IsReflexive] : F♯.IsReflexive := by
   apply F.refl;
   exact hY₂;
 
-instance [F.ContainsUnit] : F♯.ContainsUnit := by
+instance [F.ContainsUnit] : F.Supplementation.ContainsUnit := by
   constructor;
   ext x;
   suffices ∃ a, a ∈ F.𝒩 x by simpa [Supplementation, mk_ℬ];
   use Set.univ;
   simp;
 
-instance [F.IsTransitive] : F♯.IsTransitive := by
+instance [F.IsTransitive] : F.Supplementation.IsTransitive := by
   constructor;
   intro X w hw;
   obtain ⟨Y, hYX, hY⟩ := iff_exists_subset.mp hw;
@@ -84,7 +82,7 @@ instance [F.IsTransitive] : F♯.IsTransitive := by
   apply monotonic $ subset Y;
   apply subset (F.box Y) $ F.trans hY;
 
-instance [F.IsRegular] : F♯.IsRegular := by
+instance [F.IsRegular] : F.Supplementation.IsRegular := by
   constructor;
   rintro X Y w ⟨hX, hY⟩;
   apply iff_exists_subset.mpr;
@@ -102,47 +100,68 @@ end Frame.Supplementation
 section
 
 open MaximalConsistentSet (proofset)
+open Formula (atom)
+open Formula.Neighborhood
+open MaximalConsistentSet
 open MaximalConsistentSet.proofset
 
 variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢]
+variable {𝓢 : S} [Entailment.EM 𝓢] [Entailment.Consistent 𝓢]
 
-abbrev maximalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Frame := (minimalCanonicalFrame 𝓢)♯
+abbrev maximalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Frame := (minimalCanonicalFrame 𝓢).Supplementation
 
-variable [Entailment.EM 𝓢]
+namespace maximalCanonicalFrame
 
-instance : (maximalCanonicalFrame 𝓢).IsCanonical 𝓢 where
-  box_proofset := by
-    intro φ;
-    apply Set.eq_of_subset_of_subset;
-    . intro Γ;
-      simp only [
-        Frame.Supplementation, Frame.mk_ℬ, Set.mem_setOf_eq, Set.mem_sUnion,
-        exists_exists_and_eq_and, forall_exists_index, and_imp
-      ];
-      intro X hX h;
-      split at h;
-      . rename_i hψ;
-        rw [hψ.choose_spec] at hX;
-        apply box_subset_of_subset hX;
-        apply h;
-      . contradiction;
-    . intro Γ;
-      simp only [
-        Frame.Supplementation, Frame.mk_ℬ, Set.mem_setOf_eq, Set.mem_sUnion,
-        exists_exists_and_eq_and
-      ];
-      intro hΓ;
-      use proofset 𝓢 φ;
-      constructor
-      . rfl;
-      . split;
-        . rename_i hψ;
-          rw [←eq_boxed_of_eq hψ.choose_spec];
-          apply hΓ;
-        . simp_all;
+open Classical in
+lemma box_proofset : Frame.box (maximalCanonicalFrame 𝓢) (proofset 𝓢 φ) = proofset 𝓢 (□φ) := by
+  ext Γ;
+  suffices (∃ a ⊆ proofset 𝓢 φ, Γ ∈ if h : ∃ φ, a = proofset 𝓢 φ then proofset 𝓢 (□h.choose) else ∅) ↔ Γ ∈ proofset 𝓢 (□φ) by
+    simpa [maximalCanonicalFrame, minimalCanonicalFrame, Frame.mk_ℬ, Frame.Supplementation];
+  constructor;
+  . rintro ⟨X, hX₁, hX₂⟩;
+    split_ifs at hX₂ with hX;
+    . apply box_subset_of_subset (hX.choose_spec ▸ hX₁);
+      exact hX₂;
+    . contradiction;
+  . intro hΓ;
+    use proofset 𝓢 φ;
+    constructor;
+    . tauto;
+    . split_ifs with h;
+      . exact eq_boxed_of_eq h.choose_spec ▸ hΓ;
+      . push_neg at h;
+        tauto;
+
+end maximalCanonicalFrame
+
+
+abbrev maximalCanonicalModel (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Model where
+  toFrame := maximalCanonicalFrame 𝓢
+  Val a := proofset 𝓢 (.atom a)
+
+@[grind]
+protected lemma maximalCanonicalModel.truthlemma : (proofset 𝓢 φ) = ((maximalCanonicalModel 𝓢) φ) := by
+  induction φ with
+  | hatom => simp [maximalCanonicalModel]
+  | hfalsum => simp [maximalCanonicalModel];
+  | himp φ ψ ihφ ihψ => simp_all [MaximalConsistentSet.proofset.eq_imp];
+  | hbox φ ihφ => simp [Model.truthset.eq_box, ←ihφ, maximalCanonicalFrame.box_proofset];
+
+protected lemma maximalCanonicalFrame.completeness {C : FrameClass} (hC : (maximalCanonicalFrame 𝓢) ∈ C) : LO.Complete 𝓢 C := by
+  constructor;
+  intro φ hφ;
+  contrapose! hφ;
+  obtain ⟨Γ, hΓ⟩ := lindenbaum $ FormulaSet.unprovable_iff_singleton_neg_consistent.mpr hφ;
+  apply not_validOnFrameClass_of_exists_model_world;
+  use (maximalCanonicalModel 𝓢), Γ;
+  constructor;
+  . assumption;
+  . suffices Γ ∉ proofset 𝓢 φ by simpa [Semantics.Realize, Satisfies, maximalCanonicalModel.truthlemma];
+    apply MaximalConsistentSet.proofset.iff_mem.not.mp;
+    apply MaximalConsistentSet.iff_mem_neg.mp;
+    tauto;
+
 
 end
-
 
 end LO.Modal.Neighborhood

@@ -1,7 +1,6 @@
-import Foundation.Modal.Neighborhood.AxiomC
 import Foundation.Modal.Neighborhood.AxiomGeach
 import Foundation.Modal.Neighborhood.AxiomM
-import Foundation.Modal.Neighborhood.AxiomN
+import Foundation.Modal.Neighborhood.AxiomC
 import Foundation.Modal.Neighborhood.Logic.E
 
 @[simp]
@@ -77,7 +76,7 @@ instance : Entailment.Consistent Modal.E4 := consistent_of_sound_frameclass Fram
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Modal.E4 FrameClass.E4 := complete_of_canonical_frame FrameClass.E4 (minimalCanonicalFrame (Modal.E4)) $ by
+instance : Complete Modal.E4 FrameClass.E4 := minimalCanonicalFrame.completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
