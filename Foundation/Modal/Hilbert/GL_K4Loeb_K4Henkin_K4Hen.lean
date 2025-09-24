@@ -10,10 +10,10 @@ variable {α : Type*}
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 theorem provable_GL_TFAE : [
-  Modal.GL ⊢! φ,
-  Modal.K4Loeb ⊢! φ,
-  Modal.K4Henkin ⊢! φ,
-  Modal.K4Hen ⊢! φ
+  Modal.GL ⊢ φ,
+  Modal.K4Loeb ⊢ φ,
+  Modal.K4Henkin ⊢ φ,
+  Modal.K4Hen ⊢ φ
 ].TFAE := by
   tfae_have 1 → 2 := by
     intro h;

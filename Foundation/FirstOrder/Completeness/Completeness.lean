@@ -26,7 +26,7 @@ noncomputable def Derivation.completeness_of_encodable
   exact syntacticMainLemmaTop this
 
 lemma completeness_of_encodable {φ : Sentence L} :
-    T ⊨ φ → T ⊢! φ := fun h ↦
+    T ⊨ φ → T ⊢ φ := fun h ↦
   ⟨Derivation.completeness_of_encodable (T := T) (Γ := [φ])
     fun _ _ _ hM ↦ ⟨φ, List.mem_of_mem_head? rfl, fun _ ↦ by simpa using h hM⟩⟩
 
@@ -37,7 +37,7 @@ end Encodable
 open Classical
 
 theorem complete {φ : Sentence L} :
-    T ⊨ φ → T ⊢! φ := fun h ↦ by
+    T ⊨ φ → T ⊢ φ := fun h ↦ by
   have : ∃ u : Finset (Sentence L), ↑u ⊆ insert (∼φ) T ∧ ¬Satisfiable (u : Theory L) := by
     simpa using compact.not.mp (consequence_iff_unsatisfiable.mp h)
   rcases this with ⟨u, ssu, hu⟩
@@ -60,7 +60,7 @@ theorem complete {φ : Sentence L} :
   have : Entailment.Inconsistent (insert (∼φ) T) := this.of_supset ssu
   exact Entailment.provable_iff_inconsistent_adjoin.mpr this
 
-theorem complete_iff : T ⊨ φ ↔ T ⊢! φ :=
+theorem complete_iff : T ⊨ φ ↔ T ⊢ φ :=
   ⟨fun h ↦ complete h, sound!⟩
 
 instance (T : Theory L) : Complete T (Semantics.models (SmallStruc L) T) := ⟨complete⟩
@@ -84,7 +84,7 @@ lemma consequence_iff_consequence : T ⊨[Struc.{max u w} L] φ ↔ T ⊨ φ := 
   simp [consequence_iff_unsatisfiable, satidfiable_iff_satisfiable.{u, w}]
 
 theorem complete' {φ : Sentence L} :
-    T ⊨[Struc.{max u w} L] φ → T ⊢! φ := fun h ↦ complete <| consequence_iff_consequence.{u, w}.mp h
+    T ⊨[Struc.{max u w} L] φ → T ⊢ φ := fun h ↦ complete <| consequence_iff_consequence.{u, w}.mp h
 
 instance (T : Theory L) : Complete T (Semantics.models (Struc.{max u w} L) T) := ⟨complete'.{u, w}⟩
 

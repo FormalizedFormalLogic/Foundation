@@ -29,8 +29,6 @@ abbrev Derivable₀ (Γ : Sequent L) : Prop := (∅ : SyntacticFormulas L) ⟹! 
 
 prefix:45 "⊢ᵀ " => Derivation₀
 
-prefix:45 "⊢ᵀ! " => Derivable₀
-
 namespace Derivation
 
 variable {𝓢 U : SyntacticFormulas L} {Δ Δ₁ Δ₂ Γ : Sequent L} {φ ψ r : SyntacticFormula L}
@@ -193,7 +191,7 @@ instance : Tait.Cut (SyntacticFormula L) (SyntacticFormulas L) where
 
 protected def id {φ} (hφ : φ ∈ 𝓢) : 𝓢 ⟹ ∼φ :: Δ → 𝓢 ⟹ Δ := fun b ↦ Tait.cut (Tait.wk (axm hφ) (by simp)) b
 
-def provableOfDerivable {φ} (b : 𝓢 ⟹. φ) : 𝓢 ⊢ φ := b
+def provableOfDerivable {φ} (b : 𝓢 ⟹. φ) : 𝓢 ⊢! φ := b
 
 def specialize {φ : SyntacticSemiformula L 1} (t : SyntacticTerm L) :
     𝓢 ⟹ (∀' φ) :: Γ → 𝓢 ⟹ φ/[t] :: Γ := fun d ↦
@@ -226,17 +224,17 @@ def instances : {k : ℕ} → {φ : SyntacticSemiformula L k} → {Γ : Sequent 
         cases x using Fin.cases <;> simp
     instances (k := k) (v := (v ·.succ)) (Derivation.cast this (by simp))
 
-def allClosureFixitr {φ : SyntacticFormula L} (dp : 𝓢 ⊢ φ) : (m : ℕ) → 𝓢 ⊢ ∀* Rew.fixitr 0 m ▹ φ
+def allClosureFixitr {φ : SyntacticFormula L} (dp : 𝓢 ⊢! φ) : (m : ℕ) → 𝓢 ⊢! ∀* Rew.fixitr 0 m ▹ φ
   | 0     => by simpa
   | m + 1 => by
     simp only [allClosure_fixitr, Nat.reduceAdd]
     apply all; simpa using allClosureFixitr dp m
 
-def toClose (b : 𝓢 ⊢ φ) : 𝓢 ⊢ ∀∀φ := allClosureFixitr b φ.fvSup
+def toClose (b : 𝓢 ⊢! φ) : 𝓢 ⊢! ∀∀φ := allClosureFixitr b φ.fvSup
 
-def toClose! (b : 𝓢 ⊢! φ) : 𝓢 ⊢! ∀∀φ := ⟨toClose b.get⟩
+def toClose! (b : 𝓢 ⊢ φ) : 𝓢 ⊢ ∀∀φ := ⟨toClose b.get⟩
 
-def rewrite₁ (b : 𝓢 ⊢ φ) (f : ℕ → SyntacticTerm L) : 𝓢 ⊢ (Rew.rewrite f) ▹ φ :=
+def rewrite₁ (b : 𝓢 ⊢! φ) (f : ℕ → SyntacticTerm L) : 𝓢 ⊢! (Rew.rewrite f) ▹ φ :=
   Derivation.cast (specializes (fun x ↦ f x) (allClosureFixitr b φ.fvSup)) (by simp)
 
 def rewrite {Δ} : 𝓢 ⟹ Δ → ∀ (f : ℕ → SyntacticTerm L), 𝓢 ⟹ Δ.map fun φ ↦ Rew.rewrite f ▹ φ
@@ -275,7 +273,7 @@ protected def map {Δ : Sequent L} (d : 𝓢 ⟹ Δ) (f : ℕ → ℕ) :
 protected def shift {Δ : Sequent L} (d : 𝓢 ⟹ Δ) : 𝓢 ⟹ Δ⁺ :=
   Derivation.cast (Derivation.map d Nat.succ) (by simp only [Rewriting.shifts, List.map_inj_left]; intro _ _; rfl)
 
-def trans (F : U ⊢* 𝓢) {Γ : Sequent L} : 𝓢 ⟹ Γ → U ⟹ Γ
+def trans (F : U ⊢!* 𝓢) {Γ : Sequent L} : 𝓢 ⟹ Γ → U ⟹ Γ
   | axL Γ R v => axL Γ R v
   | verum Γ   => verum Γ
   | and d₁ d₂ => and (trans F d₁) (trans F d₂)
@@ -296,9 +294,9 @@ private def not_close' (φ) : 𝓢 ⟹ [∼(∀∀φ), φ] :=
   have : 𝓢 ⟹ [∃* ∼(@Rew.fixitr L 0 (fvSup φ) ▹ φ), φ] := instances (v := fun x ↦ &x) (em (φ := φ) (by simp) (by simp))
   Derivation.cast this (by simp [close])
 
-def invClose (b : 𝓢 ⊢ ∀∀φ) : 𝓢 ⊢ φ := cut (wk b (by simp)) (not_close' φ)
+def invClose (b : 𝓢 ⊢! ∀∀φ) : 𝓢 ⊢! φ := cut (wk b (by simp)) (not_close' φ)
 
-def invClose! (b : 𝓢 ⊢! ∀∀φ) : 𝓢 ⊢! φ := ⟨invClose b.get⟩
+def invClose! (b : 𝓢 ⊢ ∀∀φ) : 𝓢 ⊢ φ := ⟨invClose b.get⟩
 
 private def deductionAux {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 \ {φ} ⟹ ∼(∀∀φ) :: Γ
   | axL Γ R v       => Tait.wkTail <| axL Γ R v
@@ -315,14 +313,14 @@ private def deductionAux {Γ : Sequent L} : 𝓢 ⟹ Γ → 𝓢 \ {φ} ⟹ ∼(
 
 def deduction (d : insert φ 𝓢 ⟹ Γ) : 𝓢 ⟹ ∼(∀∀φ) :: Γ := Tait.ofAxiomSubset (by intro x; simp; tauto) (deductionAux d (φ := φ))
 
-def provable_iff_inconsistent : 𝓢 ⊢! φ ↔ Entailment.Inconsistent (insert (∼∀∀φ) 𝓢) := by
+def provable_iff_inconsistent : 𝓢 ⊢ φ ↔ Entailment.Inconsistent (insert (∼∀∀φ) 𝓢) := by
   constructor
   · rintro b
     exact Entailment.inconsistent_of_provable_of_unprovable
       (Entailment.wk! (by simp) (toClose! b)) (Entailment.by_axm _ (by simp))
   · intro h
     rcases Tait.inconsistent_iff_provable.mp h with ⟨d⟩
-    have : 𝓢 ⊢ ∀∀φ :=  Derivation.cast (deduction d) (by rw [close_eq_self_of (∼∀∀φ) (by simp)]; simp)
+    have : 𝓢 ⊢! ∀∀φ :=  Derivation.cast (deduction d) (by rw [close_eq_self_of (∼∀∀φ) (by simp)]; simp)
     exact ⟨invClose this⟩
 
 def unprovable_iff_consistent : 𝓢 ⊬ φ ↔ Entailment.Consistent (insert (∼∀∀φ) 𝓢) := by
@@ -428,14 +426,14 @@ instance {𝓢 U : SyntacticFormulas L} : 𝓢 ⪯ 𝓢 ∪ U := Entailment.Axio
 
 instance {𝓢 U : SyntacticFormulas L} : U ⪯ 𝓢 ∪ U := Entailment.Axiomatized.weakerThanOfSubset (by simp)
 
-def deduction [L.DecidableEq] {𝓢 : SyntacticFormulas L} {φ ψ} (b : insert φ 𝓢 ⊢ ψ) : 𝓢 ⊢ ∀∀φ ➝ ψ :=
+def deduction [L.DecidableEq] {𝓢 : SyntacticFormulas L} {φ ψ} (b : insert φ 𝓢 ⊢! ψ) : 𝓢 ⊢! ∀∀φ ➝ ψ :=
   have : 𝓢 ⟹ [∼∀∀φ, ψ] := Derivation.deduction b
   (Tait.or this).cast (by simp; rfl)
 
-theorem deduction! [L.DecidableEq] {𝓢 : SyntacticFormulas L} {φ ψ} (b : insert φ 𝓢 ⊢! ψ) : 𝓢 ⊢! ∀∀φ ➝ ψ :=
+theorem deduction! [L.DecidableEq] {𝓢 : SyntacticFormulas L} {φ ψ} (b : insert φ 𝓢 ⊢ ψ) : 𝓢 ⊢ ∀∀φ ➝ ψ :=
   ⟨deduction b.get⟩
 
-lemma close!_iff [L.DecidableEq] {𝓢 : SyntacticFormulas L} {φ} : 𝓢 ⊢! ∀∀φ ↔ 𝓢 ⊢! φ := by
+lemma close!_iff [L.DecidableEq] {𝓢 : SyntacticFormulas L} {φ} : 𝓢 ⊢ ∀∀φ ↔ 𝓢 ⊢ φ := by
   constructor
   · intro h
     apply deduction! (Entailment.Axiomatized.adjoin! _ _) ⨀ h
@@ -448,15 +446,15 @@ end SyntacticFormulas
   ### Theory (T set of sentences)
 -/
 
-instance : Entailment (Sentence L) (Theory L) := ⟨fun T σ ↦ (T : SyntacticFormulas L) ⊢ ↑σ⟩
+instance : Entailment (Sentence L) (Theory L) := ⟨fun T σ ↦ (T : SyntacticFormulas L) ⊢! ↑σ⟩
 
 instance (T : Theory L) : Entailment.Cl T := Entailment.Cl.ofEquiv (T : SyntacticFormulas L) T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
 
-def toSyntacticProof {T : Theory L} {σ} : T ⊢ σ → (T : SyntacticFormulas L) ⊢ ↑σ := fun b ↦ b
+def toSyntacticProof {T : Theory L} {σ} : T ⊢! σ → (T : SyntacticFormulas L) ⊢! ↑σ := fun b ↦ b
 
-def  ofSyntacticProof {T : Theory L} {σ} : (T : SyntacticFormulas L) ⊢ ↑σ → T ⊢ σ := fun b ↦ b
+def  ofSyntacticProof {T : Theory L} {σ} : (T : SyntacticFormulas L) ⊢! ↑σ → T ⊢! σ := fun b ↦ b
 
-lemma provable_def {T : Theory L} {σ} : T ⊢! σ ↔ (T : SyntacticFormulas L) ⊢! ↑σ := by rfl
+lemma provable_def {T : Theory L} {σ} : T ⊢ σ ↔ (T : SyntacticFormulas L) ⊢ ↑σ := by rfl
 
 namespace Theory
 
@@ -466,14 +464,14 @@ instance : Axiomatized (Theory L) where
   prfAxm {T} σ h := ofSyntacticProof <| Axiomatized.prfAxm (by simpa using h)
   weakening {σ T B} h b := ofSyntacticProof <| Axiomatized.weakening (by simpa using h) b
 
-def deduction [L.DecidableEq] {T : Theory L} {σ τ} (b : insert σ T ⊢ τ) : T ⊢ σ ➝ τ :=
-  have : insert ↑σ T.toSyntacticFormulas ⊢ ↑τ := by simpa using toSyntacticProof b
+def deduction [L.DecidableEq] {T : Theory L} {σ τ} (b : insert σ T ⊢! τ) : T ⊢! σ ➝ τ :=
+  have : insert ↑σ T.toSyntacticFormulas ⊢! ↑τ := by simpa using toSyntacticProof b
   (SyntacticFormulas.deduction this).cast (by simp)
 
 instance [L.DecidableEq] : Entailment.Deduction (Theory L) where
   ofInsert := Theory.deduction
   inv {σ τ T} b :=
-    have : adjoin σ T ⊢ σ ➝ τ := Axiomatized.weakening (by simp) b
+    have : adjoin σ T ⊢! σ ➝ τ := Axiomatized.weakening (by simp) b
     this ⨀ (Axiomatized.adjoin _ _)
 
 instance (T : Theory L) : Entailment.Cl T := Entailment.Cl.ofEquiv (T : SyntacticFormulas L) T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
@@ -483,14 +481,14 @@ instance : DeductiveExplosion (Theory L) where
 
 lemma inconsistent_iff {T : Theory L} :
     Inconsistent T ↔ Inconsistent (T : SyntacticFormulas L) := calc
-  Inconsistent T ↔ T ⊢! ⊥                                 := inconsistent_iff_provable_bot
-  _              ↔ (T : SyntacticFormulas L) ⊢! ⊥         := by simp [provable_def]
+  Inconsistent T ↔ T ⊢ ⊥                                 := inconsistent_iff_provable_bot
+  _              ↔ (T : SyntacticFormulas L) ⊢ ⊥         := by simp [provable_def]
   _              ↔ Inconsistent (T : SyntacticFormulas L) := inconsistent_iff_provable_bot.symm
 
 lemma inconsistent_lMap {T : Theory L₁} (Φ : L₁ →ᵥ L₂) :
     Entailment.Inconsistent T → Entailment.Inconsistent (T.lMap Φ) := by
   intro h
-  have : SyntacticFormulas.lMap Φ ↑T ⊢! ⊥ := ⟨Derivation.lMap Φ (provable_def.mp <| inconsistent_iff_provable_bot.mp h).get⟩
+  have : SyntacticFormulas.lMap Φ ↑T ⊢ ⊥ := ⟨Derivation.lMap Φ (provable_def.mp <| inconsistent_iff_provable_bot.mp h).get⟩
   refine inconsistent_iff_provable_bot.mpr <| provable_def.mpr ?_
   simp
   apply Axiomatized.weakening! ?_ this
@@ -512,10 +510,10 @@ open Entailment
 variable [L.DecidableEq] {𝓢 : SyntacticFormulas L}
 
 def coe_provable_iff_provable_coe {σ : Sentence L} :
-    (𝓢 : Theory L) ⊢! σ ↔ 𝓢 ⊢! ↑σ := by
+    (𝓢 : Theory L) ⊢ σ ↔ 𝓢 ⊢ ↑σ := by
   constructor
   · intro b
-    have : 𝓢.toTheory.toSyntacticFormulas ⊢! ↑σ := b
+    have : 𝓢.toTheory.toSyntacticFormulas ⊢ ↑σ := b
     apply Entailment.StrongCut.cut! ?_ this
     intro τ hτ
     have : ∃ τ' ∈ 𝓢, ∀∀ τ' = τ := by simpa [SyntacticFormulas.toTheory, Theory.toSyntacticFormulas] using hτ
@@ -525,7 +523,7 @@ def coe_provable_iff_provable_coe {σ : Sentence L} :
     apply provable_def.mpr
     apply Entailment.StrongCut.cut! ?_ b
     intro φ hφ
-    have : 𝓢.toTheory.toSyntacticFormulas ⊢! ∀∀φ :=
+    have : 𝓢.toTheory.toSyntacticFormulas ⊢ ∀∀φ :=
       by_axm _ <| by simpa [SyntacticFormulas.toTheory, Theory.toSyntacticFormulas] using ⟨φ, by simpa, rfl⟩
     exact SyntacticFormulas.close!_iff.mp this
 
@@ -533,7 +531,7 @@ def coe_unprovable_iff_unprovable_coe {σ} :
     (𝓢 : Theory L) ⊬ σ ↔ 𝓢 ⊬ ↑σ := coe_provable_iff_provable_coe.not
 
 def provable_close₀_iff {φ : SyntacticFormula L} :
-    (𝓢 : Theory L) ⊢! ∀∀₀ φ ↔ 𝓢 ⊢! φ := Iff.trans coe_provable_iff_provable_coe (by simp [SyntacticFormulas.close!_iff])
+    (𝓢 : Theory L) ⊢ ∀∀₀ φ ↔ 𝓢 ⊢ φ := Iff.trans coe_provable_iff_provable_coe (by simp [SyntacticFormulas.close!_iff])
 
 def unprovable_close₀_iff {φ : SyntacticFormula L} :
     (𝓢 : Theory L) ⊬ ∀∀₀ φ ↔ 𝓢 ⊬ φ := provable_close₀_iff.not

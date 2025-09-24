@@ -100,13 +100,13 @@ instance [Entailment.HasAxiomKrieselPutnam 𝓢] : (canonicalFrame 𝓢).Satisfi
     let Γ₂ := Γ₁.preimage (∼·) $ by simp [Set.InjOn];
     let Δy := { φ ∈ Δ | φ ∈ y.1.2};
     let Δz := { φ ∈ Δ | φ ∈ z.1.2};
-    replace hC : 𝓢 ⊢! (Γx ∪ Γ₁).conj ➝ (Δy ∪ Δz).disj := C!_replace ?_ ?_ hC;
-    . replace hC : 𝓢 ⊢! Γx.conj ⋏ Γ₁.conj ➝ Δy.disj ⋎ Δz.disj := C!_replace CKFconjFconjUnion! CFdisjUnionAFdisj hC;
+    replace hC : 𝓢 ⊢ (Γx ∪ Γ₁).conj ➝ (Δy ∪ Δz).disj := C!_replace ?_ ?_ hC;
+    . replace hC : 𝓢 ⊢ Γx.conj ⋏ Γ₁.conj ➝ Δy.disj ⋎ Δz.disj := C!_replace CKFconjFconjUnion! CFdisjUnionAFdisj hC;
       generalize eδy : Δy.disj = δy at hC;
       generalize eδz : Δz.disj = δz at hC;
-      replace hC : ↑Γx *⊢[𝓢]! ∼(Γ₂.disj) ➝ δy ⋎ δz := C!_trans ?_ $ FConj_DT.mp $ CK!_iff_CC!.mp hC;
+      replace hC : ↑Γx *⊢[𝓢] ∼(Γ₂.disj) ➝ δy ⋎ δz := C!_trans ?_ $ FConj_DT.mp $ CK!_iff_CC!.mp hC;
       . generalize eγ : Γ₂.disj = γ at hC;
-        replace hC : ↑Γx *⊢[𝓢]! (∼γ ➝ δy) ⋎ (∼γ ➝ δz) := krieselputnam'! hC;
+        replace hC : ↑Γx *⊢[𝓢] (∼γ ➝ δy) ⋎ (∼γ ➝ δz) := krieselputnam'! hC;
         replace hC : ∼γ ➝ δy ∈ x.1.1 ∨ ∼γ ➝ δz ∈ x.1.1 := iff_mem₁_or.mp $ iff_provable_include₁.mp hC x ?_;
         . rcases hC with h | h;
           . apply iff_not_mem₂_mem₁.mpr $ of_mem₁_imp' (Rxy h) ?_

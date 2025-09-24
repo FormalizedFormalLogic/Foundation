@@ -34,7 +34,7 @@ theorem Exponential.total  {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [
 ```
 
 Since `Exponential` and `Exponential.total` are defined in all the model of $\mathsf{I}\Sigma_1$,
-`𝗜𝚺₁ ⊢! ∀' ∃' exponentialDef` is obtained by the completeness theorem. This was the result we wanted to achieve.
+`𝗜𝚺₁ ⊢ ∀' ∃' exponentialDef` is obtained by the completeness theorem. This was the result we wanted to achieve.
 
 ## Defined Predicates and Functions
 

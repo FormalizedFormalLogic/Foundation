@@ -147,13 +147,13 @@ Following holds for all formula (not coded one) $\varphi$ and finite set $\Gamma
 - *Sound*: $\N \models \mathrm{Provable}_T(\ulcorner \varphi \urcorner) \implies T \vdash \varphi$
   ```lean
   lemma LO.ISigma1.Metamath.Language.Theory.Provable.sound :
-      (T.codeIn ℕ).Provable ⌜p⌝ → T ⊢! p
+      (T.codeIn ℕ).Provable ⌜p⌝ → T ⊢ p
   ```
   - [LO.ISigma1.Metamath.Language.Theory.Provable.sound](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D1.html#LO.ISigma1.Metamath.Language.Theory.Provable.sound)
 - _D1_: $T \vdash \varphi \implies V \models \mathrm{Provable}_T(\ulcorner \varphi \urcorner)$
   ```lean
   theorem LO.ISigma1.Metamath.provable_of_provable :
-      T ⊢! p → (T.codeIn V).Provable ⌜p⌝
+      T ⊢ p → (T.codeIn V).Provable ⌜p⌝
   ```
   - [LO.ISigma1.Metamath.provable_of_provable](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/D1.html#LO.ISigma1.Metamath.provable_of_provable)
 - *D2*: $\mathrm{Provable}_T(\ulcorner \varphi \to \psi \urcorner)\ \&\ \mathrm{Provable}_T(\ulcorner \varphi \urcorner)
@@ -227,7 +227,7 @@ $$
 
 ```lean
 theorem LO.ISigma1.diagonal (θ : Semisentence ℒₒᵣ 1) :
-    T ⊢! fixpoint θ ⭤ θ/[⌜fixpoint θ⌝]
+    T ⊢ fixpoint θ ⭤ θ/[⌜fixpoint θ⌝]
 ```
 - [LO.ISigma1.diagonal](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/FixedPoint.html#LO.ISigma1.diagonal)
 
@@ -261,7 +261,7 @@ $$
 ```lean
 theorem goedel_iff_consistency
     (𝔅 : Provability T₀ T) [𝔅.HBL] [T₀ ⪯ T] [Diagonalization T₀] :
-    T₀ ⊢! 𝔅.goedel ⭤ 𝔅.con
+    T₀ ⊢ 𝔅.goedel ⭤ 𝔅.con
 ```
 - [LO.ProvabilityLogic.Provability.goedel_iff_consistency](https://formalizedformallogic.github.io/Foundation/doc/Foundation/ProvabilityLogic/Incompleteness.html#LO.ProvabilityLogic.Provability.goedel_iff_consistency)
 

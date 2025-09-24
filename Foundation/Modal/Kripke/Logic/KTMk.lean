@@ -92,7 +92,7 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
         match c with
         | 0 => contradiction;
         | n + 1 =>
-          suffices Modal.KTMk ⊢! □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
+          suffices Modal.KTMk ⊢ □^[((i + 2) + n)]φ ➝ □^[(i + 2)]φ by
             apply Logic.iff_provable.mp;
             rwa [show (i + (n + 1) + 1) = (i + 2 + n) by omega];
           apply reduce_box_in_CAnt!;

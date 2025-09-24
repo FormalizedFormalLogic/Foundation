@@ -72,10 +72,10 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 instance : Modal.Grz ⪯ Modal.GrzPoint2 := Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
 
-lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Modal.Grz]! φ) : Modal.GrzPoint2 ⊢! φ := by
+lemma GrzPoint2_of_Grz (h : (φ.atoms.image (λ a => Axioms.Point2 (.atom a))).toSet *⊢[Modal.Grz] φ) : Modal.GrzPoint2 ⊢ φ := by
   obtain ⟨Γ, hΓ₁, hΓ₂⟩ := Context.provable_iff.mp h;
   simp only [Finset.coe_image, Set.mem_image, Finset.mem_coe] at hΓ₁;
-  replace hΓ₂ : Modal.GrzPoint2 ⊢! ⋀Γ ➝ φ := WeakerThan.pbl $ FiniteContext.provable_iff.mp hΓ₂;
+  replace hΓ₂ : Modal.GrzPoint2 ⊢ ⋀Γ ➝ φ := WeakerThan.pbl $ FiniteContext.provable_iff.mp hΓ₂;
   exact hΓ₂ ⨀ by
     apply Conj₂!_intro;
     intro γ hγ;

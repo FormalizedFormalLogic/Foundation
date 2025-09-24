@@ -20,13 +20,13 @@ variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailme
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
-lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢! φ := TwoSided.to_provable h
+lemma to_provable (φ) (h : [] ⟹ [φ]) : 𝓢 ⊢ φ := TwoSided.to_provable h
 
 lemma rotate_right (Γ Δ φ) (hφ : Γ ⟹ Δ ++ [φ]) : Γ ⟹ φ :: Δ := TwoSided.rotate_right hφ
 
 lemma rotate_left (Γ Δ φ) (hφ : (Γ ++ [φ]) ⟹ Δ) : (φ :: Γ) ⟹ Δ := TwoSided.rotate_left hφ
 
-lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ := TwoSided.add_hyp hφ h
+lemma add_hyp (𝒯 : S) (s : 𝒯 ⪯ 𝓢) (Γ Δ φ) (hφ : 𝒯 ⊢ φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ := TwoSided.add_hyp hφ h
 
 lemma right_closed (Γ Δ φ) (h : φ ∈ Γ) : Γ ⟹ φ :: Δ := TwoSided.right_closed h
 
@@ -105,7 +105,7 @@ def iapp (n : Name) (xs : Array Expr) : M Expr := do
   return c.app n xs
 
 def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List Q($c.F)) := do
-  let ~q(@Entailment.TwoSided $F $LC $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  let ~q(@Entailment.TwoSided $F $LC $S $E $𝓢 $p $q) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some DC ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some CL ← trySynthInstanceQ q(Entailment.Cl $𝓢)
@@ -115,7 +115,7 @@ def getGoalTwoSided (e : Q(Prop)) : MetaM ((c : Context) × List Q($c.F) × List
   return ⟨⟨_, _, _, F, LC, DC, S, E, 𝓢, CL⟩, Γ, Δ⟩
 
 def getGoalProvable (e : Q(Prop)) : MetaM ((c : Context) × Q($c.F)) := do
-  let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  let ~q(@Entailment.Provable $F $S $E $𝓢 $p) := e | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   let .some DC ← trySynthInstanceQ q(DecidableEq $F)
     | throwError m! "error: failed to find instance DecidableEq {F}"
   let .some LC ← trySynthInstanceQ q(LogicalConnective $F)
@@ -350,11 +350,11 @@ structure HypInfo where
   E : Q(Entailment.{_, _, levelE} $F $S)
   𝓢 : Q($S)
   φ : Q($F)
-  proof : Q($𝓢 ⊢! $φ)
+  proof : Q($𝓢 ⊢ $φ)
 
 def synthProvable (e : Expr) : MetaM HypInfo := do
   let (ty : Q(Prop)) ← inferType e
-  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢! _"
+  let ~q(@Entailment.Provable $F $S $E $𝓢 $φ) := ty | throwError m!"(getGoal) error: {e} not a form of _ ⊢ _"
   return ⟨_, _, _, F, S, E, 𝓢, φ, e⟩
 
 structure CompatibleHypInfo where

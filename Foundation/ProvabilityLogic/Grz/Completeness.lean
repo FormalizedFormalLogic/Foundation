@@ -24,7 +24,7 @@ def strongInterpret (f : Realization 𝔅) : Formula ℕ → Sentence L
   | □φ => (f.strongInterpret φ) ⋏ 𝔅 (f.strongInterpret φ)
 
 lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] :
-    T ⊢! f (Aᵇ) ⭤ f.strongInterpret A := by
+    T ⊢ f (Aᵇ) ⭤ f.strongInterpret A := by
   induction A with
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | hfalsum => simp [strongInterpret, Formula.boxdotTranslate];
@@ -41,7 +41,7 @@ lemma iff_interpret_boxdot_strongInterpret_inside [𝔅.HBL2] :
       . exact 𝔅.prov_distribute_imply'' $ K!_right ih;
 
 lemma iff_interpret_boxdot_strongInterpret [𝔅.HBL2] :
-    T ⊢! f (Aᵇ) ↔ T ⊢! f.strongInterpret A := by
+    T ⊢ f (Aᵇ) ↔ T ⊢ f.strongInterpret A := by
   constructor;
   . intro h; exact (K!_left iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
   . intro h; exact (K!_right iff_interpret_boxdot_strongInterpret_inside) ⨀ h;
@@ -84,22 +84,22 @@ end Realization
 
 theorem Grz.arithmetical_completeness_iff
     {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] (height : T.standardProvability.height = ⊤) :
-    (∀ f : T.StandardRealization, T ⊢! f.strongInterpret A) ↔ Modal.Grz ⊢! A := by
+    (∀ f : T.StandardRealization, T ⊢ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
   constructor;
   . intro h;
-    suffices Modal.GL ⊢! Aᵇ by apply iff_boxdot_GL_Grz.mp this;
+    suffices Modal.GL ⊢ Aᵇ by apply iff_boxdot_GL_Grz.mp this;
     apply GL.arithmetical_completeness_iff height |>.mp;
     intro f;
     apply Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ).mpr;
     apply h;
   . intro h f;
     replace h := iff_boxdot_GL_Grz.mpr h;
-    have : (∀ f : T.StandardRealization, T ⊢! f (Aᵇ)) := GL.arithmetical_completeness_iff height |>.mpr h;
+    have : (∀ f : T.StandardRealization, T ⊢ f (Aᵇ)) := GL.arithmetical_completeness_iff height |>.mpr h;
     exact Realization.iff_interpret_boxdot_strongInterpret (L := ℒₒᵣ) |>.mp $ this f;
 
 theorem Grz.arithmetical_completeness_model_iff
     {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] [ℕ ⊧ₘ* T] :
-    (∀ f : T.StandardRealization, ℕ ⊧ₘ f.strongInterpret A) ↔ Modal.Grz ⊢! A := by
+    (∀ f : T.StandardRealization, ℕ ⊧ₘ f.strongInterpret A) ↔ Modal.Grz ⊢ A := by
   apply Iff.trans ?_ Modal.Logic.iff_provable_Grz_provable_boxdot_S;
   apply Iff.trans ?_ (S.arithmetical_completeness_iff (T := T)).symm;
   have : 𝗥₀ ⪯ T := WeakerThan.trans (inferInstanceAs (𝗥₀ ⪯ 𝗜𝚺₁)) inferInstance

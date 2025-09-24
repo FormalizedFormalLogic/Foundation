@@ -18,15 +18,15 @@ variable (T : Theory L) [T.Δ₁]
 theorem modus_ponens {φ ψ : SyntacticFormula L} (hφψ : T.Provable (⌜φ ➝ ψ⌝ : V)) (hφ : T.Provable (⌜φ⌝ : V)) :
     T.Provable (⌜ψ⌝ : V) := by
   apply (tprovable_tquote_iff_provable_quote (L := L)).mp
-  have hφψ : Theory.internalize V T ⊢! ⌜φ⌝ ➝ ⌜ψ⌝ := by simpa using (tprovable_tquote_iff_provable_quote (L := L)).mpr hφψ
-  have hφ : Theory.internalize V T ⊢! ⌜φ⌝ := (tprovable_tquote_iff_provable_quote (L := L)).mpr hφ
+  have hφψ : Theory.internalize V T ⊢ ⌜φ⌝ ➝ ⌜ψ⌝ := by simpa using (tprovable_tquote_iff_provable_quote (L := L)).mpr hφψ
+  have hφ : Theory.internalize V T ⊢ ⌜φ⌝ := (tprovable_tquote_iff_provable_quote (L := L)).mpr hφ
   exact hφψ ⨀ hφ
 
 theorem modus_ponens_sentence {σ τ : Sentence L} (hστ : T.Provable (⌜σ ➝ τ⌝ : V)) (hσ : T.Provable (⌜σ⌝ : V)) :
     T.Provable (⌜τ⌝ : V) := by
   apply (tprovable_tquote_iff_provable_quote (L := L)).mp
-  have hστ : Theory.internalize V T ⊢! ⌜σ⌝ ➝ ⌜τ⌝ := by simpa using (tprovable_tquote_iff_provable_quote (L := L)).mpr hστ
-  have hσ : Theory.internalize V T ⊢! ⌜σ⌝ := (tprovable_tquote_iff_provable_quote (L := L)).mpr hσ
+  have hστ : Theory.internalize V T ⊢ ⌜σ⌝ ➝ ⌜τ⌝ := by simpa using (tprovable_tquote_iff_provable_quote (L := L)).mpr hστ
+  have hσ : Theory.internalize V T ⊢ ⌜σ⌝ := (tprovable_tquote_iff_provable_quote (L := L)).mpr hσ
   exact hστ ⨀ hσ
 
 end LO.ISigma1.Metamath

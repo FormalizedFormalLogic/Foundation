@@ -8,7 +8,7 @@ variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailme
 
 variable (𝓢 : S)
 
-abbrev TwoSided (Γ Δ : List F) : Prop := Γ ⊢[𝓢]! Δ.disj
+abbrev TwoSided (Γ Δ : List F) : Prop := Γ ⊢[𝓢] Δ.disj
 
 variable {𝓢} [Entailment.Int 𝓢]
 
@@ -33,10 +33,10 @@ lemma rotate_right_inv (hφ : Γ ⟹ φ :: Δ) : Γ ⟹ Δ ++ [φ] := weakening 
 
 lemma rotate_left_inv (hφ : (φ :: Γ) ⟹ Δ) : (Γ ++ [φ]) ⟹ Δ := weakening hφ
 
-lemma to_provable {φ} (h : [] ⟹ [φ]) : 𝓢 ⊢! φ :=
+lemma to_provable {φ} (h : [] ⟹ [φ]) : 𝓢 ⊢ φ :=
   FiniteContext.provable_iff_provable.mpr <| left_Disj!_intro [φ] (by simp) ⨀! h
 
-lemma add_hyp {𝒯 : S} [𝒯 ⪯ 𝓢] (hφ : 𝒯 ⊢! φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ :=
+lemma add_hyp {𝒯 : S} [𝒯 ⪯ 𝓢] (hφ : 𝒯 ⊢ φ) (h : (φ :: Γ) ⟹ Δ) : Γ ⟹ Δ :=
   deduct! h ⨀! of'! (WeakerThan.pbl hφ)
 
 lemma right_closed (h : φ ∈ Γ) : Γ ⟹ φ :: Δ := right_Disj!_intro _ (φ := φ) (by simp) ⨀! (by_axm! h)
@@ -53,7 +53,7 @@ lemma falsum_right (h : Γ ⟹ Δ) : Γ ⟹ ⊥ :: Δ := weakening h
 lemma verum_left (h : Γ ⟹ Δ) : (⊤ :: Γ) ⟹ Δ := weakening h
 
 lemma and_right (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ⟹ Δ ++ [ψ]) : Γ ⟹ φ ⋏ ψ :: Δ := by
-  have : Γ ⊢[𝓢]! (φ :: Δ).disj ➝ (ψ :: Δ).disj ➝ (φ ⋏ ψ :: Δ).disj := by
+  have : Γ ⊢[𝓢] (φ :: Δ).disj ➝ (ψ :: Δ).disj ➝ (φ ⋏ ψ :: Δ).disj := by
     apply left_Disj!_intro
     rintro χ hχ
     rcases show χ = φ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
@@ -76,7 +76,7 @@ lemma or_left (hφ : Γ ++ [φ] ⟹ Δ) (hψ : Γ ++ [ψ] ⟹ Δ) : φ ⋎ ψ ::
   · apply deduct! <| weakening hψ
 
 lemma or_right (h : Γ ⟹ Δ ++ [φ, ψ]) : Γ ⟹ φ ⋎ ψ :: Δ := by
-  have : Γ ⊢[𝓢]! (φ :: ψ :: Δ).disj ➝ (φ ⋎ ψ :: Δ).disj := by
+  have : Γ ⊢[𝓢] (φ :: ψ :: Δ).disj ➝ (φ ⋎ ψ :: Δ).disj := by
     apply left_Disj!_intro
     intro χ hχ
     rcases show χ = φ ∨ χ = ψ ∨ χ ∈ Δ by simpa using hχ with (rfl | rfl | hχ)
@@ -87,29 +87,29 @@ lemma or_right (h : Γ ⟹ Δ ++ [φ, ψ]) : Γ ⟹ φ ⋎ ψ :: Δ := by
 
 lemma and_left (h : Γ ++ [φ, ψ] ⟹ Δ) : (φ ⋏ ψ :: Γ) ⟹ Δ := by
   have : φ :: ψ :: Γ ⟹ Δ := weakening h
-  have : (φ ⋏ ψ :: Γ) ⊢[𝓢]! ψ ➝ φ ➝ Δ.disj := wk! (by simp) (deduct! <| deduct! this)
+  have : (φ ⋏ ψ :: Γ) ⊢[𝓢] ψ ➝ φ ➝ Δ.disj := wk! (by simp) (deduct! <| deduct! this)
   exact this ⨀! (deductInv! and₂!) ⨀! (deductInv! and₁!)
 
 lemma neg_right_int (h : Γ ++ [φ] ⟹ []) : Γ ⟹ ∼φ :: Δ := by
   have : φ :: Γ ⟹ [] := weakening h
-  have : Γ ⊢[𝓢]! ∼φ := N!_iff_CO!.mpr <| deduct! this
+  have : Γ ⊢[𝓢] ∼φ := N!_iff_CO!.mpr <| deduct! this
   have : Γ ⟹ [∼φ] := (right_Disj!_intro _ (by simp)) ⨀! this
   exact weakening this
 
 omit [Entailment.Int 𝓢] in
 lemma neg_right_cl [Entailment.Cl 𝓢] (h : Γ ++ [φ] ⟹ Δ) : Γ ⟹ ∼φ :: Δ := by
-  have hφ : Γ ⊢[𝓢]! φ ➝ (∼φ :: Δ).disj := by
+  have hφ : Γ ⊢[𝓢] φ ➝ (∼φ :: Δ).disj := by
     apply deduct!
-    suffices (φ :: Γ) ⊢[𝓢]! Δ.disj ➝ (∼φ :: Δ).disj from this ⨀ weakening h
+    suffices (φ :: Γ) ⊢[𝓢] Δ.disj ➝ (∼φ :: Δ).disj from this ⨀ weakening h
     apply left_Disj!_intro
     intro ψ hψ
     apply right_Disj!_intro _ (by simp [hψ])
-  have hnφ : Γ ⊢[𝓢]! ∼φ ➝ (∼φ :: Δ).disj := right_Disj!_intro _ (by simp)
+  have hnφ : Γ ⊢[𝓢] ∼φ ➝ (∼φ :: Δ).disj := right_Disj!_intro _ (by simp)
   exact left_A!_intro hφ hnφ ⨀ lem!
 
 lemma neg_left_int (h : Γ ++ [∼φ] ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ := by
   have h : ∼φ :: Γ ⟹ φ :: Δ := weakening h
-  suffices (∼φ :: Γ) ⊢[𝓢]! (φ :: Δ).disj ➝ Δ.disj from this ⨀ (wk! (by simp) h)
+  suffices (∼φ :: Γ) ⊢[𝓢] (φ :: Δ).disj ➝ Δ.disj from this ⨀ (wk! (by simp) h)
   apply left_Disj!_intro
   intro ψ hψ
   rcases show ψ = φ ∨ ψ ∈ Δ by simpa using hψ with (rfl | hψ)
@@ -123,12 +123,12 @@ lemma neg_left (h : Γ ⟹ Δ ++ [φ]) : ∼φ :: Γ ⟹ Δ :=
 lemma imply_left_int (hφ : Γ ++ [φ ➝ ψ] ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ ➝ ψ) :: Γ ⟹ Δ := by
   have hφ : (φ ➝ ψ) :: Γ ⟹ φ :: Δ := weakening hφ
   have hψ : ψ :: Γ ⟹ Δ := weakening hψ
-  suffices ((φ ➝ ψ) :: Γ) ⊢[𝓢]! (φ :: Δ).disj ➝ Δ.disj from this ⨀! wk! (by simp) hφ
+  suffices ((φ ➝ ψ) :: Γ) ⊢[𝓢] (φ :: Δ).disj ➝ Δ.disj from this ⨀! wk! (by simp) hφ
   apply left_Disj!_intro
   intro χ hχ
   rcases show χ = φ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
   · apply deduct!
-    have : Γ ⊢[𝓢]! ψ ➝ Δ.disj := deduct! hψ
+    have : Γ ⊢[𝓢] ψ ➝ Δ.disj := deduct! hψ
     apply (wk! (by simp) this) ⨀! (by_axm₁! ⨀! by_axm₀!)
   · apply right_Disj!_intro _ (by simp [hχ])
 
@@ -137,18 +137,18 @@ lemma imply_left (hφ : Γ ⟹ Δ ++ [φ]) (hψ : Γ ++ [ψ] ⟹ Δ) : (φ ➝ �
 
 lemma imply_right_int (h : Γ ++ [φ] ⟹ [ψ]) : Γ ⟹ (φ ➝ ψ) :: Δ := by
   have h : φ :: Γ ⟹ [ψ] := weakening h
-  have : (φ :: Γ) ⊢[𝓢]! ψ := (left_Disj!_intro _ <| by simp) ⨀ h
+  have : (φ :: Γ) ⊢[𝓢] ψ := (left_Disj!_intro _ <| by simp) ⨀ h
   exact (right_Disj!_intro _ <| by simp) ⨀! deduct! this
 
 omit [Entailment.Int 𝓢] in
 lemma imply_right_cl [Entailment.Cl 𝓢] (h : Γ ++ [φ] ⟹ Δ ++ [ψ]) : Γ ⟹ (φ ➝ ψ) :: Δ := by
   have h : φ :: Γ ⟹ ψ :: Δ := weakening h
-  have hnφ : Γ ⊢[𝓢]! ∼φ ➝ ((φ ➝ ψ) :: Δ).disj := by
+  have hnφ : Γ ⊢[𝓢] ∼φ ➝ ((φ ➝ ψ) :: Δ).disj := by
     apply right_Disj!_intro' ((φ ➝ ψ) :: Δ) (φ := φ ➝ ψ) (by simp)
     exact CNC!
-  have hφ : Γ ⊢[𝓢]! φ ➝ ((φ ➝ ψ) :: Δ).disj := by
+  have hφ : Γ ⊢[𝓢] φ ➝ ((φ ➝ ψ) :: Δ).disj := by
     apply deduct!
-    suffices (φ :: Γ) ⊢[𝓢]! (ψ :: Δ).disj ➝ ((φ ➝ ψ) :: Δ).disj from this ⨀ h
+    suffices (φ :: Γ) ⊢[𝓢] (ψ :: Δ).disj ➝ ((φ ➝ ψ) :: Δ).disj from this ⨀ h
     apply left_Disj!_intro
     intro χ hχ
     rcases show χ = ψ ∨ χ ∈ Δ by simpa using hχ with (rfl | hχ)
@@ -252,7 +252,7 @@ lemma remove : Valid 𝓢 T → Valid 𝓢 ((Γ ⟶ Δ) :: T) :=
 
 variable [DecidableEq F] [Entailment.Int 𝓢]
 
-lemma to_provable (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢! φ := by
+lemma to_provable (h : Valid 𝓢 [[] ⟶ [φ]]) : 𝓢 ⊢ φ := by
   rcases h
   · exact TwoSided.to_provable <| by assumption
   · simp_all

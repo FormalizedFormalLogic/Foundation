@@ -10,7 +10,7 @@ open Formula.ClassicalSemantics
 
 namespace Cl
 
-theorem soundness (h : Propositional.Cl ⊢! φ) : φ.isTautology := by
+theorem soundness (h : Propositional.Cl ⊢ φ) : φ.isTautology := by
   intro v;
   induction h with
   | axm _ h => rcases h with (rfl | rfl) <;> tauto;
@@ -77,7 +77,7 @@ lemma truthlemma {T : SaturatedConsistentTableau Propositional.Cl} : (canonicalV
       . left; apply ihφ.mpr hφ;
       . right; apply ihψ.mpr hψ;
 
-theorem completeness : (φ.isTautology) → (Propositional.Cl ⊢! φ) := by
+theorem completeness : (φ.isTautology) → (Propositional.Cl ⊢ φ) := by
   contrapose;
   intro h;
   obtain ⟨T, hT⟩ := lindenbaum (𝓢 := Propositional.Cl) (t₀ := (∅, {φ})) $ by
@@ -102,12 +102,12 @@ theorem completeness : (φ.isTautology) → (Propositional.Cl ⊢! φ) := by
   tauto;
 
 @[grind]
-theorem iff_isTautology_provable : φ.isTautology ↔ Propositional.Cl ⊢! φ := ⟨
+theorem iff_isTautology_provable : φ.isTautology ↔ Propositional.Cl ⊢ φ := ⟨
   completeness,
   soundness,
 ⟩
 
-lemma exists_valuation_of_not_provable : ¬(Propositional.Cl ⊢! φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
+lemma exists_valuation_of_not_provable : ¬(Propositional.Cl ⊢ φ) → ∃ v : Valuation _, ¬(v ⊧ φ) := by
   contrapose!;
   simpa using completeness;
 

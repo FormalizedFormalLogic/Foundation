@@ -29,16 +29,16 @@ variable {Ax Ax₁ Ax₂ : Axiom α}
   rw [(show φ = φ⟦.id⟧ by simp)]
   apply axm _ h;
 
-@[grind] lemma axm! (s : Substitution α) (h : φ ∈ Ax) : Hilbert Ax ⊢! (φ⟦s⟧)  := by
+@[grind] lemma axm! (s : Substitution α) (h : φ ∈ Ax) : Hilbert Ax ⊢ (φ⟦s⟧)  := by
   apply Logic.iff_provable.mpr;
   apply axm s h;
 
-@[grind] lemma axm'! (h : φ ∈ Ax) : Hilbert Ax ⊢! φ := by
+@[grind] lemma axm'! (h : φ ∈ Ax) : Hilbert Ax ⊢ φ := by
   rw [(show φ = φ⟦.id⟧ by simp)]
   apply axm! _ h;
 
 @[grind]
-lemma axm_instances! (h : φ ∈ Ax.instances) : Hilbert Ax ⊢! φ := by
+lemma axm_instances! (h : φ ∈ Ax.instances) : Hilbert Ax ⊢ φ := by
   rcases h with ⟨ψ, _, s, rfl⟩;
   grind;
 
@@ -62,9 +62,9 @@ instance : Entailment.Minimal (Hilbert Ax) where
 
 @[induction_eliminator]
 protected lemma rec!
-  {motive   : (φ : Formula α) → (Hilbert Ax ⊢! φ) → Sort}
+  {motive   : (φ : Formula α) → (Hilbert Ax ⊢ φ) → Sort}
   (axm      : ∀ {φ : Formula α} (s), (h : φ ∈ Ax) → motive (φ⟦s⟧) (by grind))
-  (mdp      : ∀ {φ ψ : Formula α}, {hpq : (Hilbert Ax) ⊢! φ ➝ ψ} → {hp : (Hilbert Ax) ⊢! φ} → (motive (φ ➝ ψ) hpq) → (motive φ hp) → (motive ψ (hpq ⨀ hp)))
+  (mdp      : ∀ {φ ψ : Formula α}, {hpq : (Hilbert Ax) ⊢ φ ➝ ψ} → {hp : (Hilbert Ax) ⊢ φ} → (motive (φ ➝ ψ) hpq) → (motive φ hp) → (motive ψ (hpq ⨀ hp)))
   (verum    : motive ⊤ $ by simp)
   (implyS   : ∀ {φ ψ},   motive (Axioms.Imply₁ φ ψ) $ by simp)
   (implyK   : ∀ {φ ψ χ}, motive (Axioms.Imply₂ φ ψ χ) $ by simp)
@@ -74,7 +74,7 @@ protected lemma rec!
   (orIntroL : ∀ {φ ψ},   motive (φ ➝ φ ⋎ ψ) $ by simp)
   (orIntroR : ∀ {φ ψ},   motive (ψ ➝ φ ⋎ ψ) $ by simp)
   (orElim   : ∀ {φ ψ χ}, motive ((φ ➝ χ) ➝ (ψ ➝ χ) ➝ φ ⋎ ψ ➝ χ) $ by simp)
-  : ∀ {φ}, (d : Hilbert Ax ⊢! φ) → motive φ d := by
+  : ∀ {φ}, (d : Hilbert Ax ⊢ φ) → motive φ d := by
   rintro φ d;
   replace d := Logic.iff_provable.mp d;
   induction d with
@@ -86,17 +86,17 @@ protected lemma rec!
   | _ => grind;
 
 instance : Logic.Substitution (Hilbert Ax) where
-  subst! s h := by
+  subst s h := by
     induction h using Hilbert.rec! with
     | axm s' h => simpa [Formula.subst_comp] using axm! (s' ∘ s) h;
     | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
     | _ => simp;
 
-lemma weakerThan_of_provable_axioms (hs : Hilbert Ax₂ ⊢!* Ax₁) : (Hilbert Ax₁) ⪯ (Hilbert Ax₂) := by
+lemma weakerThan_of_provable_axioms (hs : Hilbert Ax₂ ⊢* Ax₁) : (Hilbert Ax₁) ⪯ (Hilbert Ax₂) := by
   apply Entailment.weakerThan_iff.mpr;
   intro φ h;
   induction h using Hilbert.rec! with
-  | axm h => apply Logic.subst!; apply hs; assumption;
+  | axm h => apply Logic.subst; apply hs; assumption;
   | mdp ih₁ ih₂ => exact ih₁ ⨀ ih₂;
   | _ => simp;
 

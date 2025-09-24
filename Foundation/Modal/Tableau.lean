@@ -124,7 +124,7 @@ lemma iff_consistent_insert₁
     refine C!_trans ?_ hC;
     . exact C!_trans CKFConjinsertFConj! $ CFConj_FConj!_of_subset $ Finset.insert_erase_subset φ Γ
 
-lemma iff_inconsistent_insert₁ : Tableau.Inconsistent 𝓢 ((insert φ T), U) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢! φ ⋏ Γ.conj ➝ Δ.disj := by
+lemma iff_inconsistent_insert₁ : Tableau.Inconsistent 𝓢 ((insert φ T), U) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ φ ⋏ Γ.conj ➝ Δ.disj := by
   unfold Tableau.Inconsistent;
   constructor;
   . contrapose; push_neg; apply iff_consistent_insert₁.mpr;
@@ -148,7 +148,7 @@ lemma iff_consistent_insert₂ : Tableau.Consistent 𝓢 (T, (insert φ U)) ↔ 
       simp only [Finset.mem_toList, Finset.mem_insert, Finset.mem_erase, ne_eq];
       tauto;
 
-lemma iff_not_consistent_insert₂ : Tableau.Inconsistent 𝓢 (T, (insert φ U)) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢! Γ.conj ➝ φ ⋎ Δ.disj := by
+lemma iff_not_consistent_insert₂ : Tableau.Inconsistent 𝓢 (T, (insert φ U)) ↔ ∃ Γ Δ : Finset (Formula α), (↑Γ ⊆ T) ∧ (↑Δ ⊆ U) ∧ 𝓢 ⊢ Γ.conj ➝ φ ⋎ Δ.disj := by
   unfold Tableau.Inconsistent;
   constructor;
   . contrapose; push_neg; apply iff_consistent_insert₂.mpr;
@@ -171,7 +171,7 @@ lemma iff_consistent_empty_singleton₂ : Tableau.Consistent 𝓢 (∅, {φ}) �
       apply C!_of_conseq!;
       apply A!_intro_left (by simpa using h);
 
-lemma iff_inconsistent_singleton₂ : Tableau.Inconsistent 𝓢 (∅, {φ}) ↔ 𝓢 ⊢! φ := by
+lemma iff_inconsistent_singleton₂ : Tableau.Inconsistent 𝓢 (∅, {φ}) ↔ 𝓢 ⊢ φ := by
   convert iff_consistent_empty_singleton₂ (𝓢 := 𝓢) (φ := φ) |>.not;
   tauto;
 
@@ -416,7 +416,7 @@ section
 
 variable [DecidableEq α] [Encodable α]
 
-lemma iff_provable_include₁ : T *⊢[𝓢]! φ ↔ ∀ t : MaximalConsistentTableau 𝓢, (T ⊆ t.1.1) → φ ∈ t.1.1 := by
+lemma iff_provable_include₁ : T *⊢[𝓢] φ ↔ ∀ t : MaximalConsistentTableau 𝓢, (T ⊆ t.1.1) → φ ∈ t.1.1 := by
   constructor;
   . intro h t hT;
     by_contra hφ;
@@ -438,7 +438,7 @@ lemma iff_provable_include₁ : T *⊢[𝓢]! φ ↔ ∀ t : MaximalConsistentTa
       contrapose;
       simp only [not_not];
       intro h;
-      replace h : T *⊢[𝓢]! Δ.disj := Context.weakening! (by simpa using hΓ) $ FConj_DT.mp h;
+      replace h : T *⊢[𝓢] Δ.disj := Context.weakening! (by simpa using hΓ) $ FConj_DT.mp h;
       rcases Set.subset_singleton_iff_eq.mp hΔ with (hΔ | hΔ);
       . simp only [Finset.coe_eq_empty] at hΔ;
         subst hΔ;
@@ -450,7 +450,7 @@ lemma iff_provable_include₁ : T *⊢[𝓢]! φ ↔ ∀ t : MaximalConsistentTa
     apply ht.2;
     simp;
 
-lemma iff_provable_mem₁ : 𝓢 ⊢! φ ↔ ∀ t : MaximalConsistentTableau 𝓢, φ ∈ t.1.1 := by
+lemma iff_provable_mem₁ : 𝓢 ⊢ φ ↔ ∀ t : MaximalConsistentTableau 𝓢, φ ∈ t.1.1 := by
   constructor;
   . intro h t;
     apply iff_provable_include₁ (T := ∅) |>.mp;
@@ -477,9 +477,9 @@ lemma mdp_mem₁ (hφψ : φ ➝ ψ ∈ t.1.1) (hφ : φ ∈ t.1.1) : ψ ∈ t.1
     tauto;
   . simpa;
 
-lemma mdp_mem₁_provable (hφψ : 𝓢 ⊢! φ ➝ ψ) (hφ : φ ∈ t.1.1) : ψ ∈ t.1.1 := mdp_mem₁ (iff_provable_mem₁.mp hφψ t) hφ
+lemma mdp_mem₁_provable (hφψ : 𝓢 ⊢ φ ➝ ψ) (hφ : φ ∈ t.1.1) : ψ ∈ t.1.1 := mdp_mem₁ (iff_provable_mem₁.mp hφψ t) hφ
 
-lemma mdp_mem₂_provable (hφψ : 𝓢 ⊢! φ ➝ ψ) : ψ ∈ t.1.2 → φ ∈ t.1.2 := by
+lemma mdp_mem₂_provable (hφψ : 𝓢 ⊢ φ ➝ ψ) : ψ ∈ t.1.2 → φ ∈ t.1.2 := by
   contrapose;
   intro hφ;
   apply iff_not_mem₂_mem₁.mpr;

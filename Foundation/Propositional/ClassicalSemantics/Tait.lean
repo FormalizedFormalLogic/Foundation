@@ -43,7 +43,7 @@ theorem sound! : T ⟹! Γ → T ⊨[Valuation α] Γ.disj := fun h ↦ sound h.
 
 end Derivation
 
-lemma soundness {T : Theory α} {φ} : T ⊢! φ → T ⊨[Valuation α] φ := by
+lemma soundness {T : Theory α} {φ} : T ⊢ φ → T ⊨[Valuation α] φ := by
   rintro ⟨b⟩ v hv; simpa using Derivation.sound b hv
 
 namespace ClassicalSemantics
@@ -110,7 +110,7 @@ lemma mem_or_neg_mem_maximalConsistentTheory {consisT : Entailment.Consistent T}
   contradiction
 
 lemma mem_maximalConsistentTheory_iff :
-    φ ∈ maximalConsistentTheory consisT ↔ maximalConsistentTheory consisT ⊢! φ :=
+    φ ∈ maximalConsistentTheory consisT ↔ maximalConsistentTheory consisT ⊢ φ :=
   ⟨fun h ↦ ⟨Entailment.byAxm h⟩, fun h ↦ by have : φ ∈ theory (maximalConsistentTheory consisT) := h; simpa using this⟩
 
 lemma maximalConsistentTheory_consistent' {φ} :
@@ -123,7 +123,7 @@ lemma maximalConsistentTheory_consistent' {φ} :
   simp_all
 
 lemma not_mem_maximalConsistentTheory_iff :
-    φ ∉ maximalConsistentTheory consisT ↔ maximalConsistentTheory consisT ⊢! ∼φ := by
+    φ ∉ maximalConsistentTheory consisT ↔ maximalConsistentTheory consisT ⊢ ∼φ := by
   by_cases hp : φ ∈ maximalConsistentTheory consisT <;> simp [hp]
   · intro bnp
     have : Inconsistent (maximalConsistentTheory consisT) :=
@@ -135,14 +135,14 @@ lemma not_mem_maximalConsistentTheory_iff :
 
 lemma mem_maximalConsistentTheory_and {φ ψ} (h : φ ⋏ ψ ∈ maximalConsistentTheory consisT) :
     φ ∈ maximalConsistentTheory consisT ∧ ψ ∈ maximalConsistentTheory consisT := by
-  have : maximalConsistentTheory consisT ⊢! φ ⋏ ψ := mem_maximalConsistentTheory_iff.mp h
+  have : maximalConsistentTheory consisT ⊢ φ ⋏ ψ := mem_maximalConsistentTheory_iff.mp h
   exact ⟨mem_maximalConsistentTheory_iff.mpr (K!_left this),
          mem_maximalConsistentTheory_iff.mpr (K!_right this)⟩
 
 lemma mem_maximalConsistentTheory_or {φ ψ} (h : φ ⋎ ψ ∈ maximalConsistentTheory consisT) :
     φ ∈ maximalConsistentTheory consisT ∨ ψ ∈ maximalConsistentTheory consisT := by
   by_contra A
-  have b : maximalConsistentTheory consisT ⊢! ∼φ ∧ maximalConsistentTheory consisT ⊢! ∼ψ := by
+  have b : maximalConsistentTheory consisT ⊢ ∼φ ∧ maximalConsistentTheory consisT ⊢ ∼ψ := by
     simpa [not_or, not_mem_maximalConsistentTheory_iff] using A
   have : Inconsistent (maximalConsistentTheory consisT) :=
     Entailment.inconsistent_of_provable
@@ -172,7 +172,7 @@ lemma satisfiable_of_consistent (consisT : Consistent T) : Semantics.Satisfiable
   ⟨(NNFormula.atom · ∈ maximalConsistentTheory consisT),
     Semantics.RealizeSet.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
 
-theorem completeness! : T ⊨[Valuation α] φ → T ⊢! φ := by
+theorem completeness! : T ⊨[Valuation α] φ → T ⊢ φ := by
   haveI : DecidableEq α := Classical.typeDecidableEq α
   suffices Consistent (insert (∼φ) T) → Semantics.Satisfiable (Valuation α) (insert (∼φ) T) by
     contrapose
@@ -188,7 +188,7 @@ theorem completeness! : T ⊨[Valuation α] φ → T ⊢! φ := by
   intro consis
   exact satisfiable_of_consistent consis
 
-noncomputable def completeness : T ⊨[Valuation α] φ → T ⊢ φ :=
+noncomputable def completeness : T ⊨[Valuation α] φ → T ⊢! φ :=
   fun h ↦ (completeness! h).get
 
 instance (T : Theory α) : Complete T (Semantics.models (Valuation α) T)  where
