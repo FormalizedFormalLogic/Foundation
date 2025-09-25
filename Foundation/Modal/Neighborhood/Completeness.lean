@@ -93,7 +93,7 @@ lemma eq_boxed_of_eq [Entailment.E 𝓢] : ‖φ‖ = ‖ψ‖ → ‖□φ‖ =
 
 @[grind]
 lemma box_subset_of_subset [Entailment.EM 𝓢] : ‖φ‖ ⊆ ‖ψ‖ → ‖□φ‖ ⊆ ‖□ψ‖ := by
-  suffices 𝓢 ⊢! φ ➝ ψ → 𝓢 ⊢! □φ ➝ □ψ by simpa [imp_subset];
+  suffices 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ □φ ➝ □ψ by simpa [imp_subset];
   apply Entailment.rm!;
 
 end MaximalConsistentSet.proofset
