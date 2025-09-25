@@ -24,9 +24,9 @@ variable {L : Language} [L.ReferenceableBy L] {T₀ T : Theory L} {𝔅 : Provab
 
 open Classical
 
-lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢! 𝔅^[n] ⊥ ➝ 𝔅^[m] ⊥ := by
+lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢ 𝔅^[n] ⊥ ➝ 𝔅^[m] ⊥ := by
   revert m
-  suffices ∀ k, T ⊢! 𝔅^[n] ⊥ ➝ 𝔅^[n + k] ⊥ by
+  suffices ∀ k, T ⊢ 𝔅^[n] ⊥ ➝ 𝔅^[n + k] ⊥ by
     intro m hnm
     simpa [Nat.add_sub_of_le hnm] using this (m - n)
   intro k
@@ -34,18 +34,18 @@ lemma boxBot_monotone [T₀ ⪯ T] [𝔅.HBL] : n ≤ m → T ⊢! 𝔅^[n] ⊥ 
   case zero => simp
   case succ k ih =>
     simp only [← add_assoc, Function.iterate_succ_apply']
-    have b₀ : T ⊢! 𝔅^[n] ⊥ ➝ 𝔅 (𝔅^[n] ⊥) := by
+    have b₀ : T ⊢ 𝔅^[n] ⊥ ➝ 𝔅 (𝔅^[n] ⊥) := by
       cases n
       · simp
       · simpa only [Function.iterate_succ_apply'] using 𝔅.D3_shift
-    have b₁ : T ⊢! 𝔅 (𝔅^[n] ⊥) ➝ 𝔅 (𝔅^[n + k] ⊥) := 𝔅.prov_distribute_imply'' ih
+    have b₁ : T ⊢ 𝔅 (𝔅^[n] ⊥) ➝ 𝔅 (𝔅^[n + k] ⊥) := 𝔅.prov_distribute_imply'' ih
     cl_prover [b₀, b₁]
 
 open Classical
 
 variable (𝔅)
 
-noncomputable def height : PartENat := PartENat.find (T ⊢! 𝔅^[·] ⊥)
+noncomputable def height : PartENat := PartENat.find (T ⊢ 𝔅^[·] ⊥)
 
 noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.height (T : ArithmeticTheory) [T.Δ₁] : PartENat :=
   T.standardProvability.height
@@ -59,15 +59,15 @@ variable (𝔅)
 lemma iIncon_unprovable_of_sigma1_sound [𝔅.Sound] [Entailment.Consistent T] : ∀ n, T ⊬ 𝔅^[n] ⊥
   |     0 => Entailment.consistent_iff_unprovable_bot.mp inferInstance
   | n + 1 => fun h ↦
-    have : T ⊢! 𝔅 (𝔅^[n] ⊥) := by simpa [Function.iterate_succ_apply'] using h
+    have : T ⊢ 𝔅 (𝔅^[n] ⊥) := by simpa [Function.iterate_succ_apply'] using h
     iIncon_unprovable_of_sigma1_sound n <| Sound.sound this
 
-lemma height_le_of_boxBot {n : ℕ} (h : T ⊢! 𝔅^[n] ⊥) : 𝔅.height ≤ n :=
-  PartENat.find_le (T ⊢! 𝔅^[·] ⊥) n h
+lemma height_le_of_boxBot {n : ℕ} (h : T ⊢ 𝔅^[n] ⊥) : 𝔅.height ≤ n :=
+  PartENat.find_le (T ⊢ 𝔅^[·] ⊥) n h
 
-lemma height_lt_pos_of_boxBot [𝔅.Sound₀] {n : ℕ} (pos : 0 < n) (h : T₀ ⊢! 𝔅^[n] ⊥) : 𝔅.height < n := by
+lemma height_lt_pos_of_boxBot [𝔅.Sound₀] {n : ℕ} (pos : 0 < n) (h : T₀ ⊢ 𝔅^[n] ⊥) : 𝔅.height < n := by
   have e : n.pred.succ = n := Eq.symm <| (Nat.sub_eq_iff_eq_add pos).mp rfl
-  have : T₀ ⊢! 𝔅 (𝔅^[n.pred] ⊥) := by
+  have : T₀ ⊢ 𝔅 (𝔅^[n.pred] ⊥) := by
     rwa [←Function.iterate_succ_apply' (f := 𝔅), e]
   have := 𝔅.height_le_of_boxBot (Sound₀.sound₀ this)
   have : 𝔅.height < n := by
@@ -78,10 +78,10 @@ lemma height_lt_pos_of_boxBot [𝔅.Sound₀] {n : ℕ} (pos : 0 < n) (h : T₀ 
 variable {𝔅}
 
 lemma height_le_iff_boxBot [T₀ ⪯ T] [𝔅.HBL] {n : ℕ} :
-    𝔅.height ≤ n ↔ T ⊢! 𝔅^[n] ⊥ := by
+    𝔅.height ≤ n ↔ T ⊢ 𝔅^[n] ⊥ := by
   constructor
   · intro h
-    have : ∃ m ≤ n, T ⊢! (↑𝔅)^[m] ⊥ := PartENat.exists_of_find_le _ n h
+    have : ∃ m ≤ n, T ⊢ (↑𝔅)^[m] ⊥ := PartENat.exists_of_find_le _ n h
     rcases this with ⟨m, hmn, hm⟩
     exact 𝔅.boxBot_monotone hmn ⨀ hm
   · exact 𝔅.height_le_of_boxBot

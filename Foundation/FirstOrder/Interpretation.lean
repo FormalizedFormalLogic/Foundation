@@ -14,11 +14,11 @@ structure Translation {L₁ : Language} [L₁.Eq] (T : Theory L₁) [𝗘𝗤 �
   rel {k} : L₂.Rel k → Semisentence L₁ k
   func {k} : L₂.Func k → Semisentence L₁ (k + 1)
   domain_nonempty :
-    T ⊢! ∃' domain
+    T ⊢ ∃' domain
   func_defined {k} (f : L₂.Func k) :
-    T ⊢! ∀* ((Matrix.conj fun i ↦ domain/[#i]) ➝ ∃'! (domain/[#0] ⋏ func f))
+    T ⊢ ∀* ((Matrix.conj fun i ↦ domain/[#i]) ➝ ∃'! (domain/[#0] ⋏ func f))
   preserve_eq :
-    T ⊢! “∀ x y, !domain x → !domain y → (!(rel Language.Eq.eq) x y ↔ x = y)”
+    T ⊢ “∀ x y, !domain x → !domain y → (!(rel Language.Eq.eq) x y ↔ x = y)”
 
 namespace Translation
 
@@ -365,7 +365,7 @@ end Translation
 
 class Interpretation {L₁ L₂ : Language} [L₁.Eq] [L₂.Eq] (T : Theory L₁) [𝗘𝗤 ⪯ T] (U : Theory L₂) where
   trln : Translation T L₂
-  interpret_theory : ∀ φ ∈ U, T ⊢! trln.translate φ
+  interpret_theory : ∀ φ ∈ U, T ⊢ trln.translate φ
 
 infix:50 " ⊳ " => Interpretation
 
@@ -398,7 +398,7 @@ instance model_models_theory {M : Type v} [Nonempty M] [Structure L₁ M] [Struc
     Model.translate_iff.mp <| consequence_iff'.mp (sound! (π.interpret_theory σ hσ)) M
 
 open Classical in
-lemma of_provability {σ : Sentence L₂} (h : U ⊢! σ) : T ⊢! π.translate σ :=
+lemma of_provability {σ : Sentence L₂} (h : U ⊢ σ) : T ⊢ π.translate σ :=
   complete <| EQ.provOf.{_,0} _ fun _ _ _ _ hT ↦
     Model.translate_iff.mpr <| models_of_provable (π.model_models_theory hT) h
 
@@ -409,7 +409,7 @@ def ofWeakerThan {L : Language} [L.Eq] (T U : Theory L) [𝗘𝗤 ⪯ T] [U ⪯ 
   interpret_theory φ hφ := complete <| EQ.provOf.{_,0} _ fun M _ _ _ hT ↦
     Model.translate_iff.mpr <| by
       suffices M ⊧/ ![] φ by simpa [models_iff, Empty.eq_elim, Matrix.empty_eq]
-      have : T ⊢! φ := Entailment.weakerThan_iff.mp (inferInstanceAs (U ⪯ T)) (Entailment.by_axm _ (by simp [hφ]))
+      have : T ⊢ φ := Entailment.weakerThan_iff.mp (inferInstanceAs (U ⪯ T)) (Entailment.by_axm _ (by simp [hφ]))
       exact models_of_provable hT this
 
 protected instance refl {L : Language} [L.Eq] (T : Theory L) [𝗘𝗤 ⪯ T] : T ⊳ T := ofWeakerThan T T

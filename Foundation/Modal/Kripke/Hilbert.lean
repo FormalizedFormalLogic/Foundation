@@ -12,7 +12,7 @@ namespace Kripke
 variable {Ax : Axiom ℕ} {φ : Formula ℕ}
 variable {F : Frame} {C : FrameClass}
 
-lemma soundness_of_validates_axioms (hV : C ⊧* Ax) : Hilbert.Normal Ax ⊢! φ → C ⊧ φ := by
+lemma soundness_of_validates_axioms (hV : C ⊧* Ax) : Hilbert.Normal Ax ⊢ φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.Normal.rec! with
   | @axm φ s h =>
@@ -44,7 +44,7 @@ lemma consistent_of_sound_frameclass
   . assumption;
   . simp;
 
-lemma soundness_of_frame_validates_axioms (hV : F ⊧* Ax) : (Hilbert.Normal Ax) ⊢! φ → F ⊧ φ := by
+lemma soundness_of_frame_validates_axioms (hV : F ⊧* Ax) : (Hilbert.Normal Ax) ⊢ φ → F ⊧ φ := by
   intro hφ;
   induction hφ using Hilbert.Normal.rec! with
   | axm s h =>

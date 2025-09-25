@@ -132,7 +132,7 @@ instance [Tait.Axiomatized F K] : Entailment.Axiomatized K where
   prfAxm := fun hf ↦ Tait.Axiomatized.axm <| hf
   weakening := Tait.ofAxiomSubset
 
-lemma provable_bot_iff_derivable_nil [Cut F K] : 𝓚 ⟹! [] ↔ 𝓚 ⊢! ⊥ :=
+lemma provable_bot_iff_derivable_nil [Cut F K] : 𝓚 ⟹! [] ↔ 𝓚 ⊢ ⊥ :=
   ⟨fun b ↦ wk! b (by simp), fun b ↦ cut! b (by simpa using verum! _ _)⟩
 
 lemma waekerThan_of_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⪯ 𝓛 := ⟨fun _ ↦ Entailment.Axiomatized.weakening! h⟩
@@ -150,7 +150,7 @@ instance : Entailment.Deduction K where
     let h : cons φ 𝓚 ⟹ [∼φ ⋎ ψ, ψ] :=
       wk (show cons φ 𝓚 ⟹ [∼φ ⋎ ψ] from ofEq (ofAxiomSubset (by simp) b) (by simp [DeMorgan.imply])) (by simp)
     let n : cons φ 𝓚 ⟹ [∼(∼φ ⋎ ψ), ψ] :=
-      let hp : cons φ 𝓚 ⟹ [φ, ψ] := wk (show cons φ 𝓚 ⊢ φ from byAxm (by simp)) (by simp)
+      let hp : cons φ 𝓚 ⟹ [φ, ψ] := wk (show cons φ 𝓚 ⊢! φ from byAxm (by simp)) (by simp)
       let hq : cons φ 𝓚 ⟹ [∼ψ, ψ] := em (φ := ψ) (by simp) (by simp)
       ofEq (and hp hq) (by simp)
     cut h n
@@ -167,7 +167,7 @@ lemma consistent_iff_unprovable [Tait.Axiomatized F K] [Cut F K] :
 
 /-
 lemma provable_iff_inconsistent {φ} :
-    𝓚 ⊢! φ ↔ Inconsistent (cons (∼φ) 𝓚) := by
+    𝓚 ⊢ φ ↔ Inconsistent (cons (∼φ) 𝓚) := by
   simp [inconsistent_iff_provable, deduction_iff, DeMorgan.imply]
   constructor
   · intro h; exact cut! (of_axiom_subset (by simp) h) (root! <| by simp)
@@ -175,13 +175,13 @@ lemma provable_iff_inconsistent {φ} :
     exact ⟨by simpa using Tait.Axiomatized.proofOfContra b⟩
 
 lemma refutable_iff_inconsistent {φ} :
-    𝓚 ⊢! ∼φ ↔ Inconsistent (cons φ 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (φ := ∼φ)
+    𝓚 ⊢ ∼φ ↔ Inconsistent (cons φ 𝓚) := by simpa using provable_iff_inconsistent (𝓚 := 𝓚) (φ := ∼φ)
 
 lemma consistent_insert_iff_not_refutable {φ}  :
     Entailment.Consistent (cons φ 𝓚) ↔ 𝓚 ⊬ ∼φ := by
   simp [Entailment.Unprovable, refutable_iff_inconsistent, Entailment.not_inconsistent_iff_consistent]
 
-lemma inconsistent_of_provable_and_refutable {φ} (bp : 𝓚 ⊢! φ) (br : 𝓚 ⊢! ∼φ) : Inconsistent 𝓚 :=
+lemma inconsistent_of_provable_and_refutable {φ} (bp : 𝓚 ⊢ φ) (br : 𝓚 ⊢ ∼φ) : Inconsistent 𝓚 :=
   inconsistent_iff_provable.mpr <| cut! bp br
 -/
 
@@ -193,47 +193,47 @@ instance [Cut F K] : Entailment.Cl 𝓚 where
       ofEq d (by simp)
     cut dpq dnq
   negEquiv φ := ofEq
-    (show 𝓚 ⊢ (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
+    (show 𝓚 ⊢! (φ ⋎ ∼φ ⋎ ⊥) ⋏ (φ ⋏ ⊤ ⋎ ∼φ) from
       and (or <| rotate₁ <| or <| close φ) (or <| and (close φ) verum'))
     (by simp [Axioms.NegEquiv, DeMorgan.imply, LogicalConnective.iff])
   verum := verum _ _
   imply₁ φ ψ :=
-    have : 𝓚 ⊢ ∼φ ⋎ ∼ψ ⋎ φ := or <| rotate₁ <| or <| close φ
+    have : 𝓚 ⊢! ∼φ ⋎ ∼ψ ⋎ φ := or <| rotate₁ <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
   imply₂ φ ψ χ :=
-    have : 𝓚 ⊢ φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
+    have : 𝓚 ⊢! φ ⋏ ψ ⋏ ∼χ ⋎ φ ⋏ ∼ψ ⋎ ∼φ ⋎ χ :=
       or <| rotate₁ <| or <| rotate₁ <| or <| rotate₃ <| and
         (close φ)
         (and (rotate₃ <| and (close φ) (close ψ)) (close χ))
     ofEq this (by simp [DeMorgan.imply])
   and₁ φ ψ :=
-    have : 𝓚 ⊢ (∼φ ⋎ ∼ψ) ⋎ φ := or <| or <| close φ
+    have : 𝓚 ⊢! (∼φ ⋎ ∼ψ) ⋎ φ := or <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
   and₂ φ ψ :=
-    have : 𝓚 ⊢ (∼φ ⋎ ∼ψ) ⋎ ψ := or <| or <| close ψ
+    have : 𝓚 ⊢! (∼φ ⋎ ∼ψ) ⋎ ψ := or <| or <| close ψ
     ofEq this (by simp [DeMorgan.imply])
   and₃ φ ψ :=
-    have : 𝓚 ⊢ ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := or <| rotate₁ <| or <| rotate₁ <| and (close φ) (close ψ)
+    have : 𝓚 ⊢! ∼φ ⋎ ∼ψ ⋎ φ ⋏ ψ := or <| rotate₁ <| or <| rotate₁ <| and (close φ) (close ψ)
     ofEq this (by simp [DeMorgan.imply])
   or₁ φ ψ :=
-    have : 𝓚 ⊢ ∼φ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close φ
+    have : 𝓚 ⊢! ∼φ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close φ
     ofEq this (by simp [DeMorgan.imply])
   or₂ φ ψ :=
-    have : 𝓚 ⊢ ∼ψ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close ψ
+    have : 𝓚 ⊢! ∼ψ ⋎ φ ⋎ ψ := or <| rotate₁ <| or <| close ψ
     ofEq this (by simp [DeMorgan.imply])
   or₃ φ ψ χ :=
-    have : 𝓚 ⊢ φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
+    have : 𝓚 ⊢! φ ⋏ ∼χ ⋎ ψ ⋏ ∼ χ ⋎ ∼φ ⋏ ∼ψ ⋎ χ :=
       or <| rotate₁ <| or <| rotate₁ <| or <| and
         (rotate₃ <| and (close φ) (close χ))
         (rotate₂ <| and (close ψ) (close χ))
     ofEq this (by simp [DeMorgan.imply])
   dne φ :=
-    have : 𝓚 ⊢ ∼φ ⋎ φ := or <| close φ
+    have : 𝓚 ⊢! ∼φ ⋎ φ := or <| close φ
     ofEq this (by simp [DeMorgan.imply])
 
 lemma wkCut [Cut F K] (hp : 𝓚 ⟹! φ :: Δ) (hn : 𝓚 ⟹! ∼φ :: Δ) : 𝓚 ⟹! Δ := ⟨cut hp.get hn.get⟩
 
-def modusPonens [Cut F K] (b : 𝓚 ⊢ φ ➝ ψ) : 𝓚 ⟹ φ :: Γ → 𝓚 ⟹ ψ :: Γ := fun d ↦
+def modusPonens [Cut F K] (b : 𝓚 ⊢! φ ➝ ψ) : 𝓚 ⟹ φ :: Γ → 𝓚 ⟹ ψ :: Γ := fun d ↦
   cut (φ := φ)
     (wk d <| by simp) <|
     cut (φ := φ ➝ ψ)
@@ -241,7 +241,7 @@ def modusPonens [Cut F K] (b : 𝓚 ⊢ φ ➝ ψ) : 𝓚 ⟹ φ :: Γ → 𝓚 
       have : 𝓚 ⟹ φ ⋏ ∼ψ :: ∼φ :: ψ :: Γ := and (em' φ) (em' ψ)
       ofEq this <| by simp [DeMorgan.imply]
 
-def modusPonens! [Cut F K] (b : 𝓚 ⊢! φ ➝ ψ) : 𝓚 ⟹! φ :: Γ → 𝓚 ⟹! ψ :: Γ := fun d ↦ ⟨modusPonens b.get d.get⟩
+def modusPonens! [Cut F K] (b : 𝓚 ⊢ φ ➝ ψ) : 𝓚 ⟹! φ :: Γ → 𝓚 ⟹! ψ :: Γ := fun d ↦ ⟨modusPonens b.get d.get⟩
 
 def cutFalsum [Cut F K] (d : 𝓚 ⟹ ⊥ :: Γ) : 𝓚 ⟹ Γ := Tait.cut (φ := ⊥) (Tait.wk d <| by simp) (ofEq (verum _ Γ) <| by simp)
 
@@ -258,7 +258,7 @@ def disjConsOfAppend {Γ Δ} (d : 𝓚 ⟹ Γ ++ Δ) : 𝓚 ⟹ Γ.disj :: Δ :=
     have : 𝓚 ⟹ Γ ++ φ :: Δ := wk d <| by simp
     wk (disjConsOfAppend this) (by simp)
 
-def proofOfDerivation (d : 𝓚 ⟹ Γ) : 𝓚 ⊢ Γ.disj := disjConsOfAppend (Γ := Γ) (Δ := []) (ofEq d (by simp))
+def proofOfDerivation (d : 𝓚 ⟹ Γ) : 𝓚 ⊢! Γ.disj := disjConsOfAppend (Γ := Γ) (Δ := []) (ofEq d (by simp))
 
 def AppendOfDisjCons [Cut F K] {Γ Δ} (d : 𝓚 ⟹ Γ.disj :: Δ) : 𝓚 ⟹ Γ ++ Δ :=
   match Γ with
@@ -267,9 +267,9 @@ def AppendOfDisjCons [Cut F K] {Γ Δ} (d : 𝓚 ⟹ Γ.disj :: Δ) : 𝓚 ⟹ �
     have : 𝓚 ⟹ Γ.disj :: φ :: Δ := wk (orReversion d) (by simp)
     wk (AppendOfDisjCons this) (by simp)
 
-def derivationOfProof [Cut F K] (d : 𝓚 ⊢ Γ.disj) : 𝓚 ⟹ Γ := ofEq (AppendOfDisjCons d) (by simp)
+def derivationOfProof [Cut F K] (d : 𝓚 ⊢! Γ.disj) : 𝓚 ⟹ Γ := ofEq (AppendOfDisjCons d) (by simp)
 
-lemma derivable_iff_provable_disj [Cut F K] : 𝓚 ⟹! Γ ↔ 𝓚 ⊢! Γ.disj :=
+lemma derivable_iff_provable_disj [Cut F K] : 𝓚 ⟹! Γ ↔ 𝓚 ⊢ Γ.disj :=
   ⟨fun h ↦ ⟨proofOfDerivation h.get⟩, fun h ↦ ⟨derivationOfProof h.get⟩⟩
 
 end Tait

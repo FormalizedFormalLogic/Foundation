@@ -17,7 +17,7 @@ lemma Kripke.sound_frameClass_of_equiv (L₁ L₂ : Logic ℕ) [L₁ ≊ L₂] {
 lemma Kripke.complete_frameClass_of_equiv (L₁ L₂ : Logic ℕ) [L₁ ≊ L₂] {C : Kripke.FrameClass} [Complete L₁ C] : Complete L₂ C := by grind;
 
 
-lemma gS4_of_Int : Propositional.Int ⊢! φ → Modal.S4 ⊢! φᵍ := by
+lemma gS4_of_Int : Propositional.Int ⊢ φ → Modal.S4 ⊢ φᵍ := by
   apply provable_goedelTranslated_of_provable;
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
@@ -36,7 +36,7 @@ instance : Modal.S4 ≊ Propositional.Int.smallestMC := by
     | _ => apply Logic.sumNormal.mem₁!; simp;
   . intro hφ;
     induction hφ using Logic.sumNormal.rec! with
-    | subst ih => apply Logic.subst! _ ih;
+    | subst ih => apply Logic.subst _ ih;
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
     | nec ih => apply nec! ih;
     | mem₁ h => tauto;
@@ -82,7 +82,7 @@ instance : Modal.Grz ≊ Propositional.Int.largestMC := by
   . intro hφ;
     induction hφ using Logic.sumNormal.rec! with
     | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
-    | subst ih => apply Logic.subst! _ ih;
+    | subst ih => apply Logic.subst _ ih;
     | nec ih => apply nec! ih;
     | mem₁ h => apply WeakerThan.pbl h;
     | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
@@ -102,22 +102,22 @@ instance : ModalCompanion Propositional.Int Modal.Grz := by
 end Grz
 
 
-lemma iff_provable_Cl_provable_dia_gS4 : Propositional.Cl ⊢! φ ↔ Modal.S4 ⊢! ◇φᵍ := by
+lemma iff_provable_Cl_provable_dia_gS4 : Propositional.Cl ⊢ φ ↔ Modal.S4 ⊢ ◇φᵍ := by
   constructor;
   . intro h;
-    suffices Modal.S4 ⊢! □◇φᵍ by exact axiomT'! this;
-    have : Modal.S4 ⊢! (∼∼φ)ᵍ := ModalCompanion.companion.mp $ glivenko.mpr h;
+    suffices Modal.S4 ⊢ □◇φᵍ by exact axiomT'! this;
+    have : Modal.S4 ⊢ (∼∼φ)ᵍ := ModalCompanion.companion.mp $ glivenko.mpr h;
     cl_prover [this];
   . intro h;
     apply glivenko.mp;
-    suffices Modal.S4 ⊢! (∼∼φ)ᵍ by exact ModalCompanion.companion.mpr this;
-    replace h : Modal.S4 ⊢! □◇φᵍ := nec! h;
+    suffices Modal.S4 ⊢ (∼∼φ)ᵍ by exact ModalCompanion.companion.mpr this;
+    replace h : Modal.S4 ⊢ □◇φᵍ := nec! h;
     cl_prover [h];
 
 /--
   Chagrov & Zakharyaschev 1997, Theorem 3.89
 -/
-theorem embedding_Int_GL : Propositional.Int ⊢! φ ↔ Modal.GL ⊢! φᵍᵇ:= Iff.trans ModalCompanion.companion iff_boxdot_GL_Grz.symm
+theorem embedding_Int_GL : Propositional.Int ⊢ φ ↔ Modal.GL ⊢ φᵍᵇ:= Iff.trans ModalCompanion.companion iff_boxdot_GL_Grz.symm
 
 
 end LO.Modal

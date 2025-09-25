@@ -24,7 +24,7 @@ open Classical
 open Kripke Kripke.Model
 
 theorem tree_completeness_TFAE : [
-  Modal.GL ⊢! φ,
+  Modal.GL ⊢ φ,
   FrameClass.finite_GL ⊧ φ,
   ∀ F : Kripke.Frame, ∀ r, [F.IsFiniteTree r] → F ⊧ φ,
   ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ
@@ -54,7 +54,7 @@ theorem tree_completeness_TFAE : [
     exact pointGenerate.pMorphism.modal_equivalence _ |>.mp this;
   tfae_finish;
 
-lemma iff_provable_satisfies_FiniteTransitiveTree : Modal.GL ⊢! φ ↔ (∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ) := tree_completeness_TFAE (φ := φ) |>.out 0 3
+lemma iff_provable_satisfies_FiniteTransitiveTree : Modal.GL ⊢ φ ↔ (∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ) := tree_completeness_TFAE (φ := φ) |>.out 0 3
 
 lemma iff_unprovable_exists_unsatisfies_FiniteTransitiveTree : Modal.GL ⊬ φ ↔ ∃ M : Model, ∃ r, M.IsFiniteTree r ∧ ¬r ⊧ φ := by
   apply Iff.not_left;

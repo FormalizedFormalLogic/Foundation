@@ -23,8 +23,8 @@ instance : Entailment.HasAxiomP Modal.D where
     apply Logic.iff_provable.mpr;
     simp;
 
-lemma D.mem_axiomDz : Modal.D ⊢! □(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ := by
-  apply Logic.subst! (φ := □(□(atom 0) ⋎ □(.atom 1)) ➝ □(atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
+lemma D.mem_axiomDz : Modal.D ⊢ □(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ := by
+  apply Logic.subst (φ := □(□(atom 0) ⋎ □(.atom 1)) ➝ □(atom 0) ⋎ □(.atom 1)) (s := λ a => if a = 0 then φ else ψ);
   apply Logic.sumQuasiNormal.mem₂!;
   apply Logic.iff_provable.mpr;
   simp;
@@ -41,7 +41,7 @@ instance : Modal.GL ⪱ Modal.D := by
 section
 
 private inductive D' : Logic ℕ
-  | mem_GL {φ} : Modal.GL ⊢! φ → Modal.D' φ
+  | mem_GL {φ} : Modal.GL ⊢ φ → Modal.D' φ
   | axiomP : Modal.D' (∼□⊥)
   | axiomD (φ ψ) : Modal.D' (□(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ)
   | mdp  {φ ψ} : Modal.D' (φ ➝ ψ) → Modal.D' φ → Modal.D' ψ
@@ -69,7 +69,7 @@ private lemma D'.eq_D : Modal.D' = Modal.D := by
       induction ihφ with
       | mem_GL h =>
         apply Modal.D'.mem_GL;
-        apply subst!;
+        apply Logic.subst;
         exact h;
       | axiomP => apply Modal.D'.axiomP;
       | axiomD _ _ => apply Modal.D'.axiomD;
@@ -77,12 +77,12 @@ private lemma D'.eq_D : Modal.D' = Modal.D := by
 
 -- TODO: Remove `eq_D_D'`?
 protected def D.rec'
-  {motive  : (φ : Formula ℕ) → (Modal.D ⊢! φ) → Prop}
-  (mem_GL  : ∀ {φ}, (h : Modal.GL ⊢! φ) → motive φ (sumQuasiNormal.mem₁! h))
+  {motive  : (φ : Formula ℕ) → (Modal.D ⊢ φ) → Prop}
+  (mem_GL  : ∀ {φ}, (h : Modal.GL ⊢ φ) → motive φ (sumQuasiNormal.mem₁! h))
   (axiomP  : motive (∼□⊥) (by simp))
   (axiomDz : ∀ {φ ψ}, motive (□(□φ ⋎ □ψ) ➝ □φ ⋎ □ψ) (Modal.D.mem_axiomDz))
-  (mdp : ∀ {φ ψ}, {hφψ : Modal.D ⊢! φ ➝ ψ} → {hφ : Modal.D ⊢! φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (hφψ ⨀ hφ))
-  : ∀ {φ}, (h : Modal.D ⊢! φ) → motive φ h := by
+  (mdp : ∀ {φ ψ}, {hφψ : Modal.D ⊢ φ ➝ ψ} → {hφ : Modal.D ⊢ φ} → (motive (φ ➝ ψ) hφψ) → (motive φ hφ) → motive ψ (hφψ ⨀ hφ))
+  : ∀ {φ}, (h : Modal.D ⊢ φ) → motive φ h := by
   intro φ h;
   replace h := iff_provable.mp $ Modal.D'.eq_D ▸ h;
   induction h with
@@ -106,7 +106,7 @@ section
 open LO.Entailment LO.Modal.Entailment
 
 @[simp]
-lemma GL.box_disj_Tc {l : List (Formula ℕ)} : Modal.GL ⊢! l.box.disj ➝ □l.box.disj := by
+lemma GL.box_disj_Tc {l : List (Formula ℕ)} : Modal.GL ⊢ l.box.disj ➝ □l.box.disj := by
   apply left_Disj!_intro;
   intro ψ hψ;
   obtain ⟨ψ, hψ, rfl⟩ := List.exists_box_of_mem_box hψ;
@@ -116,7 +116,7 @@ lemma GL.box_disj_Tc {l : List (Formula ℕ)} : Modal.GL ⊢! l.box.disj ➝ □
   apply right_Disj!_intro;
   assumption;
 
-lemma D.ldisj_axiomDz {l : List (Formula ℕ)} : Modal.D ⊢! □(l.box.disj) ➝ l.box.disj := by
+lemma D.ldisj_axiomDz {l : List (Formula ℕ)} : Modal.D ⊢ □(l.box.disj) ➝ l.box.disj := by
   induction l with
   | nil => exact axiomP!;
   | cons φ l ih =>
@@ -124,13 +124,13 @@ lemma D.ldisj_axiomDz {l : List (Formula ℕ)} : Modal.D ⊢! □(l.box.disj) �
     . apply sumQuasiNormal.mem₁!;
       apply axiomK'!;
       apply nec!;
-      suffices Modal.GL ⊢! □φ ⋎ l.box.disj ➝ □φ ⋎ □l.box.disj by simpa;
-      have : Modal.GL ⊢! l.box.disj ➝ □l.box.disj := GL.box_disj_Tc;
+      suffices Modal.GL ⊢ □φ ⋎ l.box.disj ➝ □φ ⋎ □l.box.disj by simpa;
+      have : Modal.GL ⊢ l.box.disj ➝ □l.box.disj := GL.box_disj_Tc;
       cl_prover [this];
-    . suffices Modal.D ⊢! □φ ⋎ □l.box.disj ➝ □φ ⋎ l.box.disj by simpa;
+    . suffices Modal.D ⊢ □φ ⋎ □l.box.disj ➝ □φ ⋎ l.box.disj by simpa;
       cl_prover [ih];
 
-lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢! □(s.box.disj) ➝ s.box.disj := by
+lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢ □(s.box.disj) ➝ s.box.disj := by
   apply C!_replace ?_ ?_ $ D.ldisj_axiomDz (l := s.toList);
   . apply sumQuasiNormal.mem₁!;
     apply axiomK'!;
@@ -147,8 +147,8 @@ lemma D.fdisj_axiomDz {s : Finset (Formula ℕ)} : Modal.D ⊢! □(s.box.disj) 
     obtain ⟨ψ, hψ₂, rfl⟩ := List.exists_box_of_mem_box hψ;
     simpa using hψ₂;
 
-lemma D.axiomFour : Modal.D ⊢! □□φ ➝ □φ := by
-  simpa using Logic.subst! (λ _ => φ) $ fdisj_axiomDz (s := {(.atom 0)});
+lemma D.axiomFour : Modal.D ⊢ □□φ ➝ □φ := by
+  simpa using Logic.subst (λ _ => φ) $ fdisj_axiomDz (s := {(.atom 0)});
 
 noncomputable abbrev Formula.dzSubformula (φ : Formula ℕ) := φ.subformulas.prebox.powerset.image (λ s => □(s.box.disj) ➝ s.box.disj)
 
@@ -399,10 +399,10 @@ open Formula.Kripke
 
 theorem GL_D_TFAE :
   [
-    Modal.D ⊢! φ,
+    Modal.D ⊢ φ,
     ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → ∀ o, (tailModel₀.root (M := M) (o := o)) ⊧ φ,
     ∀ M : Kripke.Model, ∀ r, [M.IsFiniteTree r] → r ⊧ φ.dzSubformula.conj ➝ φ,
-    Modal.GL ⊢! φ.dzSubformula.conj ➝ φ,
+    Modal.GL ⊢ φ.dzSubformula.conj ➝ φ,
   ].TFAE := by
     tfae_have 1 → 2 := by
       intro h M r _ o;
@@ -533,14 +533,14 @@ theorem GL_D_TFAE :
     tfae_have 4 ↔ 3 := GL.Kripke.iff_provable_satisfies_FiniteTransitiveTree
     tfae_have 4 → 1 := by
       intro h;
-      apply (show Modal.D ⊢! φ.dzSubformula.conj ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
+      apply (show Modal.D ⊢ φ.dzSubformula.conj ➝ φ by exact sumQuasiNormal.mem₁! h) ⨀ ?_;
       apply FConj!_iff_forall_provable.mpr;
       intro ψ hψ;
       obtain ⟨s, _, rfl⟩ : ∃ s ⊆ φ.subformulas.prebox, □s.box.disj ➝ s.box.disj = ψ := by simpa using hψ;
       exact D.fdisj_axiomDz;
     tfae_finish;
 
-lemma iff_provable_D_provable_GL : Modal.D ⊢! φ ↔ Modal.GL ⊢! φ.dzSubformula.conj ➝ φ := GL_D_TFAE (φ := φ) |>.out 0 3
+lemma iff_provable_D_provable_GL : Modal.D ⊢ φ ↔ Modal.GL ⊢ φ.dzSubformula.conj ➝ φ := GL_D_TFAE (φ := φ) |>.out 0 3
 
 lemma D.unprovable_T : Modal.D ⊬ (Axioms.T (.atom 0)) := by
   apply GL_D_TFAE |>.out 0 1 |>.not.mpr;

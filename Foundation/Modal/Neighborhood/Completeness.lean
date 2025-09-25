@@ -47,7 +47,7 @@ attribute [simp, grind]
   eq_and
   eq_or
 
-lemma iff_provable_eq_univ : 𝓢 ⊢! φ ↔ ‖φ‖ = Set.univ := by
+lemma iff_provable_eq_univ : 𝓢 ⊢ φ ↔ ‖φ‖ = Set.univ := by
   constructor;
   . intro h;
     apply Set.eq_univ_of_forall;
@@ -62,7 +62,7 @@ lemma iff_provable_eq_univ : 𝓢 ⊢! φ ↔ ‖φ‖ = Set.univ := by
     tauto;
 
 @[grind]
-lemma imp_subset : 𝓢 ⊢! φ ➝ ψ ↔ ‖φ‖ ⊆ ‖ψ‖ := by
+lemma imp_subset : 𝓢 ⊢ φ ➝ ψ ↔ ‖φ‖ ⊆ ‖ψ‖ := by
   constructor;
   . intro h Γ;
     apply iff_mem_imp.mp $ iff_forall_mem_provable.mpr h Γ;
@@ -72,7 +72,7 @@ lemma imp_subset : 𝓢 ⊢! φ ➝ ψ ↔ ‖φ‖ ⊆ ‖ψ‖ := by
     apply iff_mem_imp.mpr $ @h Γ;
 
 @[grind]
-lemma iff_subset : 𝓢 ⊢! φ ⭤ ψ ↔ ‖φ‖ = ‖ψ‖ := by
+lemma iff_subset : 𝓢 ⊢ φ ⭤ ψ ↔ ‖φ‖ = ‖ψ‖ := by
   constructor;
   . intro h;
     apply Set.eq_of_subset_of_subset <;>

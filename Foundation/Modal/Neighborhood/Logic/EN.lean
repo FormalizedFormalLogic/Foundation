@@ -60,7 +60,7 @@ instance : Modal.E ⪱ Modal.EN := by
 instance : Modal.N ⪱ Modal.EN := by
 
   constructor;
-  . suffices ∀ φ, Modal.N ⊢! φ → Modal.EN ⊢! φ by apply Logic.weakerThan_of_provable this;
+  . suffices ∀ φ, Modal.N ⊢ φ → Modal.EN ⊢ φ by apply Logic.weakerThan_of_provable this;
     intro φ hφ;
     induction hφ using Hilbert.Normal.rec! with
     | axm s h => simp at h;

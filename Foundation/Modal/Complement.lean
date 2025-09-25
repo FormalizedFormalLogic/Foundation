@@ -90,7 +90,7 @@ variable {α : Type*}
 variable {S} [Entailment (Formula α) S]
 variable {𝓢 : S} [Entailment.Cl 𝓢] {φ : Formula _}
 
-lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! φ) (hcp : 𝓢 ⊢! -φ) : 𝓢 ⊢! ⊥ := by
+lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢ φ) (hcp : 𝓢 ⊢ -φ) : 𝓢 ⊢ ⊥ := by
   induction φ using Formula.cases_neg with
   | hfalsum => assumption;
   | hatom a => unfold Formula.complement at hcp; exact hcp ⨀ hp;
@@ -100,7 +100,7 @@ lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! φ) (hcp : 𝓢 ⊢
     simp only [Formula.complement.imp_def₁ h] at hcp;
     exact hcp ⨀ hp;
 
-lemma neg_complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! ∼φ) (hcp : 𝓢 ⊢! ∼(-φ)) : 𝓢 ⊢! ⊥ := by
+lemma neg_complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢ ∼φ) (hcp : 𝓢 ⊢ ∼(-φ)) : 𝓢 ⊢ ⊥ := by
   induction φ using Formula.cases_neg with
   | hfalsum =>
     unfold Formula.complement at hcp;
@@ -120,7 +120,7 @@ lemma neg_complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢! ∼φ) (hcp : �
 
 open Entailment
 
-lemma of_imply_complement_bot [DecidableEq α] (h : 𝓢 ⊢! (-φ) ➝ ⊥) : 𝓢 ⊢! φ := by
+lemma of_imply_complement_bot [DecidableEq α] (h : 𝓢 ⊢ (-φ) ➝ ⊥) : 𝓢 ⊢ φ := by
   rcases Formula.complement.or (φ := φ) with (hφ | ⟨ψ, rfl⟩);
   . rw [hφ] at h;
     apply of_NN!;

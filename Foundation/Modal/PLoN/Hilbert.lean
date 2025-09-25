@@ -14,7 +14,7 @@ open Formula
 variable {Ax : Axiom ℕ} {φ : Formula ℕ}
 variable {F : Frame} {C : FrameClass}
 
-lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy Ax.instances] : Hilbert.Normal Ax ⊢! φ → C ⊧ φ := by
+lemma soundness_of_defined_by_AxiomInstances [defined : C.DefinedBy Ax.instances] : Hilbert.Normal Ax ⊢ φ → C ⊧ φ := by
   intro hφ F hF;
   induction hφ using Hilbert.Normal.rec! with
   | @axm φ s h =>

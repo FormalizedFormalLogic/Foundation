@@ -12,8 +12,8 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
   ∃ φ : ArithmeticSemisentence 1, ∃ a : ℕ, T ⊬ φ/[a] ∧ T ⊬ ∼φ/[a] := by
   let φ := codeOfREPred P;
   use φ;
-  have hP : P = { n : ℕ | T ⊢! φ/[n] } := Set.ext fun x ↦ re_complete hRE;
-  have ⟨d, hd⟩ : ∃ d : ℕ, ¬(¬P d ↔ T ⊢! ∼φ/[d]) := by
+  have hP : P = { n : ℕ | T ⊢ φ/[n] } := Set.ext fun x ↦ re_complete hRE;
+  have ⟨d, hd⟩ : ∃ d : ℕ, ¬(¬P d ↔ T ⊢ ∼φ/[d]) := by
     by_contra h;
     apply hC;
     apply ComputablePred.computable_iff_re_compl_re.mpr;
@@ -24,7 +24,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
       apply REPred.of_eq (re_iff_sigma1.mpr this);
       intro a;
       push_neg at h;
-      apply Iff.trans ?_ $ show T ⊢! ∼φ/[a] ↔ ¬T ⊢! φ/[a] by simpa [hP] using h a |>.symm;
+      apply Iff.trans ?_ $ show T ⊢ ∼φ/[a] ↔ ¬T ⊢ φ/[a] by simpa [hP] using h a |>.symm;
       constructor;
       . rintro hP
         apply Theory.Provable.sound
@@ -40,7 +40,7 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
     . simpa;
   . exfalso;
     apply Entailment.Consistent.not_bot (𝓢 := T) inferInstance;
-    replace hd₁ : T ⊢! φ/[d] := by simpa [hP] using hd₁;
+    replace hd₁ : T ⊢ φ/[d] := by simpa [hP] using hd₁;
     cl_prover [hd₁, hd₂];
 
 /--

@@ -10,14 +10,14 @@ namespace LO.FirstOrder
 variable (T U : ArithmeticTheory) [T.Δ₁]
 
 /-- Provability logic of arithmetic theory-/
-def ArithmeticTheory.ProvabilityLogic : Modal.Logic ℕ := {A | ∀ f : T.StandardRealization, U ⊢! f A}
+def ArithmeticTheory.ProvabilityLogic : Modal.Logic ℕ := {A | ∀ f : T.StandardRealization, U ⊢ f A}
 
 variable {T U} {A B C : Modal.Formula ℕ}
 
 namespace ArithmeticTheory.ProvabilityLogic
 
 @[grind]
-lemma provable_iff : ProvabilityLogic T U ⊢! A ↔ ∀ f : T.StandardRealization, U ⊢! f A := by
+lemma provable_iff : ProvabilityLogic T U ⊢ A ↔ ∀ f : T.StandardRealization, U ⊢ f A := by
   simp [Modal.Logic.iff_provable, ArithmeticTheory.ProvabilityLogic]
 
 instance : Entailment.Lukasiewicz (ProvabilityLogic T U) where
@@ -26,8 +26,8 @@ instance : Entailment.Lukasiewicz (ProvabilityLogic T U) where
     constructor;
     simp only [←Modal.Logic.iff_provable, ProvabilityLogic.provable_iff] at hA hB ⊢;
     intro f;
-    replace hA : U ⊢! f A ➝ f B := hA f;
-    replace hB : U ⊢! f A := hB f;
+    replace hA : U ⊢ f A ➝ f B := hA f;
+    replace hB : U ⊢ f A := hB f;
     cl_prover [hA, hB];
   imply₁ A B := by
     constructor;

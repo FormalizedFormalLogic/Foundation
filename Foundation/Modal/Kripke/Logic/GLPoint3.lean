@@ -61,7 +61,7 @@ instance : Modal.K ⪯ Modal.GLPoint3 := Hilbert.Normal.weakerThan_of_subset_axi
 
 open LO.Entailment Modal.Entailment in
 open Formula.Kripke in
-private lemma complete.lemma₁ : Modal.GLPoint3 ⊢! ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
+private lemma complete.lemma₁ : Modal.GLPoint3 ⊢ ∼□φ ➝ ◇(□φ ⋏ ∼φ) := by
   apply CN!_of_CN!_left;
   apply C!_trans ?_ axiomL!;
   apply WeakerThan.pbl (𝓢 := Modal.K);

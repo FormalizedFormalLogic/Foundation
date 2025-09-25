@@ -13,8 +13,8 @@ class Incomparable (𝓢 : S) (𝓣 : T) where
   notWT₂ : ¬𝓣 ⪯ 𝓢
 
 lemma Incomparable.of_unprovable
-  (h₁ : ∃ φ, 𝓢 ⊢! φ ∧ 𝓣 ⊬ φ)
-  (h₂ : ∃ ψ, 𝓣 ⊢! ψ ∧ 𝓢 ⊬ ψ)
+  (h₁ : ∃ φ, 𝓢 ⊢ φ ∧ 𝓣 ⊬ φ)
+  (h₂ : ∃ ψ, 𝓣 ⊢ ψ ∧ 𝓢 ⊬ ψ)
   : Incomparable (𝓢 : S) (𝓣 : T) := by
   constructor <;>
   . apply Entailment.not_weakerThan_iff.mpr;
