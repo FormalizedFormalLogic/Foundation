@@ -117,7 +117,7 @@ attribute [grind]
   FormulaSet.IsSubformulaClosed.of_mem_imp₂
   FormulaSet.IsSubformulaClosed.of_mem_box
 
-theorem filtration (Fi : Filtration M T) (φ : Formula ℕ) (hφ : φ ∈ T) : (Fi.toModel φ) = 【M φ】 := by
+theorem Filtration.filtration (Fi : Filtration M T) (φ) (hφ : φ ∈ T) : (Fi.toModel φ) = 【M φ】 := by
   induction φ with
   | hatom a => apply Fi.V_def;
   | hfalsum => simp;
@@ -128,6 +128,14 @@ theorem filtration (Fi : Filtration M T) (φ : Formula ℕ) (hφ : φ ∈ T) : (
   | hbox φ ihφ =>
     replace ihφ := ihφ (by grind);
     apply ihφ ▸ Fi.B_def φ (by grind);
+
+lemma Filtration.filtration_satisfies (Fi : Filtration M T) (φ) (hφ : φ ∈ T) {x : M} : Satisfies Fi.toModel ⟦x⟧ φ ↔ x ⊧ φ := by
+  simp only [Satisfies, (filtration Fi _ hφ)];
+  constructor;
+  . rintro ⟨y, hy, Ryx⟩;
+    simp only [FilterEqvSetoid, Quotient.eq, filterEquiv] at Ryx;
+    apply Ryx φ hφ |>.mp hy;
+  . tauto;
 
 lemma Filtration.truthlemma (Fi : Filtration M T) {φ ψ} (hφ : φ ∈ T) (hψ : ψ ∈ T) :
   (Fi.toModel φ) = (Fi.toModel ψ) ↔ (【M φ】 : Set (FilterEqvQuotient M T)) = (【M ψ】) := by
@@ -212,7 +220,7 @@ def transitiveFiltration (M : Model) [M.IsTransitive] (T : FormulaSet ℕ) [T.Is
   V := λ a => 【M (.atom a)】
   V_def := by intro a; rfl
 
-instance [M.IsTransitive] : (transitiveFiltration M T).toModel.IsTransitive := by
+instance transitiveFiltration.isTransitive [M.IsTransitive] : (transitiveFiltration M T).toModel.IsTransitive := by
   constructor;
   intro X;
   by_cases h : (minimalFiltration M T).toModel.box X = ∅;

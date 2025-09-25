@@ -37,6 +37,8 @@ def mk_ℬ (World : Type) [Nonempty World] (B : Set World → Set World) : Frame
   World := World
   𝒩 x := { X | x ∈ B X }
 
+class IsFinite (F : Frame) : Prop where
+  world_finite : Finite F.World
 
 section
 
