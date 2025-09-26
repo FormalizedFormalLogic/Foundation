@@ -98,20 +98,14 @@ instance [Entailment.ET 𝓢] : (minimalCanonicalFrame 𝓢).IsReflexive := by
   constructor;
   intro X Γ hΓ;
   obtain ⟨φ, rfl, hφ⟩ := minimalCanonicalFrame.exists_box X Γ hΓ;
-  have : proofset 𝓢 (□φ) ⊆ proofset 𝓢 φ := proofset.imp_subset.mp (by simp);
-  exact Frame.IsCanonical.iff_mem (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) |>.mp $ this (hφ ▸ hΓ);
+  apply proofset.imp_subset.mp (by simp) $ hφ ▸ hΓ;
 
 instance [Entailment.E4 𝓢] : (minimalCanonicalFrame 𝓢).IsTransitive := by
   constructor;
   intro X Γ hΓ;
   obtain ⟨φ, rfl, hφ⟩ := minimalCanonicalFrame.exists_box X Γ hΓ;
   have : proofset 𝓢 (□φ) ⊆ proofset 𝓢 (□□φ) := proofset.imp_subset.mp (by simp);
-  have := Frame.IsCanonical.iff_mem (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) |>.mp $ this (hφ ▸ hΓ);
-  rw [
-    ←(Frame.IsCanonical.box_proofset (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) (□φ)),
-    ←(Frame.IsCanonical.box_proofset (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) φ)
-  ] at this;
-  exact Frame.IsCanonical.iff_mem (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) |>.mpr this;
+  exact minimalCanonicalFrame.multibox_proofset (𝓢 := 𝓢) ▸ this (hφ ▸ hΓ);
 
 end
 

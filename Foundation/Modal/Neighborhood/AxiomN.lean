@@ -43,15 +43,13 @@ open MaximalConsistentSet.proofset
 instance : (minimalCanonicalFrame 𝓢).ContainsUnit := by
   constructor;
   dsimp [minimalCanonicalFrame, Frame.mk_ℬ, Frame.box];
-  split;
-  . rename_i h;
-    apply iff_provable_eq_univ.mp;
+  split_ifs with h;
+  . apply iff_provable_eq_univ.mp;
     apply nec!;
     apply iff_provable_eq_univ.mpr;
     apply h.choose_spec.symm;
-  . rename_i h;
-    push_neg at h;
-    simpa using @h ⊤;
+  . push_neg at h;
+    simpa using h ⊤;
 
 end
 

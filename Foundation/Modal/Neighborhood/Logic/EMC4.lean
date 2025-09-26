@@ -25,7 +25,7 @@ instance : Entailment.Consistent Modal.EMC4 := consistent_of_sound_frameclass Fr
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Modal.EMC4 FrameClass.EMC4 := complete_of_canonical_frame FrameClass.EMC4 (maximalCanonicalFrame (Modal.EMC4)) $ by
+instance : Complete Modal.EMC4 FrameClass.EMC4 := maximalCanonicalFrame.completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 

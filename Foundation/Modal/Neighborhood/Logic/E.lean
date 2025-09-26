@@ -20,7 +20,7 @@ instance : Entailment.Consistent Modal.E := consistent_of_sound_frameclass Frame
   use ⟨Unit, λ _ => {}⟩;
   simp;
 
-instance : Complete Modal.E FrameClass.E := complete_of_canonical_frame FrameClass.E (minimalCanonicalFrame (Modal.E)) (by tauto)
+instance : Complete Modal.E FrameClass.E := minimalCanonicalFrame.completeness $ by tauto
 
 instance : Modal.E ⪱ Modal.EK := by
   constructor;

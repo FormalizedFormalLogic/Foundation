@@ -45,15 +45,14 @@ instance : (minimalCanonicalFrame 𝓢).IsRegular := by
   rintro X Y Γ ⟨hX, hY⟩;
   obtain ⟨φ, rfl, hφ⟩ := minimalCanonicalFrame.exists_box X Γ hX;
   obtain ⟨ψ, rfl, hψ⟩ := minimalCanonicalFrame.exists_box Y Γ hY;
-  rw [(show proofset 𝓢 φ ∩ proofset 𝓢 ψ = proofset 𝓢 (φ ⋏ ψ) by simp)];
+  suffices Γ ∈ proofset 𝓢 (□(φ ⋏ ψ)) by
+    rwa [(show proofset 𝓢 φ ∩ proofset 𝓢 ψ = proofset 𝓢 (φ ⋏ ψ) by grind), minimalCanonicalFrame.box_proofset];
   have : proofset 𝓢 (□φ ⋏ □ψ) ⊆ proofset 𝓢 (□(φ ⋏ ψ)) := proofset.imp_subset |>.mp (by simp);
-  have : Γ ∈ proofset 𝓢 (□(φ ⋏ ψ)) := this $ by
+  exact this $ by
     simp only [proofset.eq_and, Set.mem_inter_iff];
     constructor;
     . apply hφ ▸ hX;
     . apply hψ ▸ hY;
-  convert this;
-  convert Frame.IsCanonical.box_proofset (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) (φ ⋏ ψ);
 
 end
 
