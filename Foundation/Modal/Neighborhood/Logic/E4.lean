@@ -24,7 +24,7 @@ instance : Frame.simple_blackhole.IsTransitive := by
 protected class Frame.IsFiniteE4 (F : Frame) extends F.IsE4, F.IsFinite
 
 protected abbrev FrameClass.E4 : FrameClass := { F | F.IsE4 }
-protected abbrev FrameClass.finite_K4 : FrameClass := { F | F.IsFiniteE4 }
+protected abbrev FrameClass.finite_E4 : FrameClass := { F | F.IsFiniteE4 }
 
 
 section
@@ -86,7 +86,7 @@ instance : Complete Modal.E4 FrameClass.E4 := minimalCanonicalFrame.completeness
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Complete Modal.E4 FrameClass.finite_K4 := ⟨by
+instance : Complete Modal.E4 FrameClass.finite_E4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.E4);
   intro F F_trans V x;
