@@ -1,5 +1,6 @@
 import Mathlib.Data.Set.Finite.Powerset
 import Foundation.Modal.Neighborhood.AxiomGeach
+import Foundation.Modal.Neighborhood.Supplementation
 
 namespace LO.Modal
 
@@ -139,6 +140,16 @@ lemma refl_truthset [M.IsReflexive] : (【M (□φ)】 : Set (FilterEqvQuotient 
   use x;
   constructor;
   . apply M.refl; simpa;
+  . rfl;
+
+lemma mono_truthset [M.IsMonotonic] (hψ : ψ ∈ T) (h : (【M φ】 : Set (FilterEqvQuotient M T)) ⊆ 【M ψ】) : (【M (□φ)】 : Set (FilterEqvQuotient M T)) ⊆ 【M (□ψ)】 := by
+  intro X;
+  suffices ∀ (x : M.World), x ∈ M.truthset (□φ) → ⟦x⟧ = X → ∃ x, x ∈ M.truthset (□ψ) ∧ ⟦x⟧ = X by
+    simpa [toFilterEquivSet, Set.mem_setOf_eq];
+  rintro x hx rfl;
+  use x;
+  constructor;
+  . exact M.mono' (subset_original_truthset_of_subset hψ h) hx;
   . rfl;
 
 end toFilterEquivSet
@@ -331,7 +342,6 @@ instance transitiveFiltration.isTransitive [M.IsTransitive] : (transitiveFiltrat
           . grind;
         . grind;
 
-
 instance transitiveFiltration.isReflexive [M.IsTransitive] [M.IsReflexive] : (transitiveFiltration M T).toModel.IsReflexive := by
   constructor;
   rintro X W hW;
@@ -339,6 +349,47 @@ instance transitiveFiltration.isReflexive [M.IsTransitive] [M.IsReflexive] : (tr
   . apply toFilterEquivSet.refl_truthset;
     assumption;
   . assumption;
+
+
+open Classical in
+def supplementedTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransitive] (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Filtration M T where
+  B := (transitiveFiltration M T).toModel.Supplementation.box
+  B_def := by
+    intro φ hφ;
+    suffices ⋃₀ {x | ∃ Y ⊆ 【M.truthset φ】, (transitiveFiltration M T).B Y = x} = 【M (□φ)】 by
+      dsimp [Filtration.toModel, Frame.mk_ℬ, Frame.Supplementation, Frame.box];
+      exact this;
+    ext W;
+    constructor;
+    . rintro ⟨Y, ⟨Z, hZ₁, rfl⟩, hZ₂⟩;
+      rcases transitiveFiltration.of_mem_B hZ₂ with ⟨ψ, ψ_sub, rfl, hψ⟩ | ⟨ψ, ψ_sub, rfl, hψ⟩;
+      . exact toFilterEquivSet.mono_truthset (by grind) (by assumption) hψ;
+      . apply toFilterEquivSet.mono_truthset (by grind) (by assumption) $ toFilterEquivSet.trans_truthset hψ;
+    . intro hW;
+      use (transitiveFiltration M T).B 【M.truthset φ】;
+      constructor;
+      . use 【M.truthset φ】;
+      . exact (transitiveFiltration M T).mem_box_in_out hφ |>.mpr hW;
+  V := (transitiveFiltration M T).V
+  V_def := by simp;
+
+namespace supplementedTransitiveFiltration
+
+variable [M.IsMonotonic] [M.IsTransitive]
+
+protected instance isMonotonic: (supplementedTransitiveFiltration M T).toModel.IsMonotonic := ⟨
+  Frame.Supplementation.isMonotonic (F := (transitiveFiltration M T).toModel.toFrame).mono
+⟩
+
+protected instance isTransitive : (supplementedTransitiveFiltration M T).toModel.IsTransitive := ⟨
+  Frame.Supplementation.isTransitive (F := (transitiveFiltration M T).toModel.toFrame).trans
+⟩
+
+protected instance isReflexive [M.IsReflexive] : (supplementedTransitiveFiltration M T).toModel.IsReflexive := ⟨
+  Frame.Supplementation.isReflexive (F := (transitiveFiltration M T).toModel.toFrame).refl
+⟩
+
+end supplementedTransitiveFiltration
 
 end Neighborhood
 

@@ -48,7 +48,7 @@ lemma itl_reduce : F.Supplementation.Supplementation.box X = F.Supplementation.b
     . assumption;
   . tauto;
 
-instance : F.Supplementation.IsMonotonic := by
+instance isMonotonic : F.Supplementation.IsMonotonic := by
   constructor;
   rintro X Y x hx;
   obtain ⟨W, hW₁, hW₂⟩ := iff_exists_subset.mp hx;
@@ -59,7 +59,7 @@ instance : F.Supplementation.IsMonotonic := by
     . tauto_set;
     . assumption;
 
-instance [F.IsReflexive] : F.Supplementation.IsReflexive := by
+instance isReflexive [F.IsReflexive] : F.Supplementation.IsReflexive := by
   constructor;
   intro X w hw;
   replace ⟨Y, hY₁, hY₂⟩ := iff_exists_subset.mp hw;
@@ -74,7 +74,7 @@ instance [F.ContainsUnit] : F.Supplementation.ContainsUnit := by
   use Set.univ;
   simp;
 
-instance [F.IsTransitive] : F.Supplementation.IsTransitive := by
+instance isTransitive [F.IsTransitive] : F.Supplementation.IsTransitive := by
   constructor;
   intro X w hw;
   obtain ⟨Y, hYX, hY⟩ := iff_exists_subset.mp hw;
@@ -82,7 +82,7 @@ instance [F.IsTransitive] : F.Supplementation.IsTransitive := by
   apply monotonic $ subset Y;
   apply subset (F.box Y) $ F.trans hY;
 
-instance [F.IsRegular] : F.Supplementation.IsRegular := by
+instance isRegular [F.IsRegular] : F.Supplementation.IsRegular := by
   constructor;
   rintro X Y w ⟨hX, hY⟩;
   apply iff_exists_subset.mpr;
