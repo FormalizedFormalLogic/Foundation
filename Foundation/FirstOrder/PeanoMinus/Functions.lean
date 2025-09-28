@@ -194,7 +194,7 @@ section
 syntax:45 first_order_term:45 " ∣ " first_order_term:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ∣ $u:first_order_term]) => `(⤫formula[ $binders* | $fbinders* | !dvd.val $t $u])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ∣ $u:first_order_term]) => `(⤫formula(lit)[ $binders* | $fbinders* | !dvd.val $t $u])
 
 end
 

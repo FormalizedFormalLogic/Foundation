@@ -14,14 +14,14 @@ noncomputable def substNumeral (φ x : V) : V := subst ℒₒᵣ ?[numeral x] φ
 lemma substNumeral_app_quote (σ π : Semisentence ℒₒᵣ 1) :
     substNumeral ⌜σ⌝ (⌜π⌝ : V) = ⌜(σ/[⌜π⌝] : Sentence ℒₒᵣ)⌝ := by
   simp [substNumeral, Sentence.quote_def, Semiformula.quote_def,
-    Rewriting.emb_substs_eq_substs_coe₁]
+    Rewriting.emb_subst_eq_subst_coe₁]
 
 noncomputable def substNumerals (φ : V) (v : Fin k → V) : V := subst ℒₒᵣ (matrixToVec (fun i ↦ numeral (v i))) φ
 
 lemma substNumerals_app_quote (σ : Semisentence ℒₒᵣ k) (v : Fin k → ℕ) :
     (substNumerals ⌜σ⌝ (v ·) : V) = ⌜((Rew.subst (fun i ↦ ↑(v i))) ▹ σ : Sentence ℒₒᵣ)⌝ := by
   simp [substNumerals, Sentence.quote_def, Semiformula.quote_def,
-    Rewriting.emb_subst_eq_subst_embedding]
+    Rewriting.emb_subst_eq_subst_emb]
   rfl
 
 lemma substNumerals_app_quote_quote (σ : Semisentence ℒₒᵣ k) (π : Fin k → Semisentence ℒₒᵣ k) :
@@ -33,7 +33,7 @@ noncomputable def substNumeralParams (k : ℕ) (φ x : V) : V := subst ℒₒᵣ
 lemma substNumeralParams_app_quote (σ τ : Semisentence ℒₒᵣ (k + 1)) :
     (substNumeralParams k ⌜σ⌝ ⌜τ⌝ : V) = ⌜((Rew.subst (⌜τ⌝ :> fun i : Fin k ↦ #i)) ▹ σ : Semisentence ℒₒᵣ k)⌝ := by
   simp [substNumeralParams, Sentence.quote_def, Semiformula.quote_def,
-    Rewriting.emb_subst_eq_subst_embedding, Matrix.vecHead]
+    Rewriting.emb_subst_eq_subst_emb, Matrix.vecHead]
   rfl
 
 section

@@ -44,8 +44,8 @@ open Lean PrettyPrinter Delaborator
 syntax ":Seq " first_order_term : first_order_formula
 
 scoped macro_rules
-  | `(⤫formula[$binders* | $fbinders* | :Seq $t:first_order_term]) =>
-    `(⤫formula[$binders* | $fbinders* | !seqDef.val $t])
+  | `(⤫formula($type)[$binders* | $fbinders* | :Seq $t:first_order_term]) =>
+    `(⤫formula($type)[$binders* | $fbinders* | !seqDef.val $t])
 
 end
 

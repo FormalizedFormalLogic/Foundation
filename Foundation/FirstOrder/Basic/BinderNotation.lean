@@ -149,7 +149,7 @@ declare_syntax_cat first_order_term
 declare_syntax_cat first_order.quote_type
 
 syntax:max "lit" : first_order.quote_type -- literal notation
-syntax:max "nested" : first_order.quote_type -- formula as term
+syntax:max "faf" : first_order.quote_type -- formula-as-function notation
 
 syntax "⤫term(" first_order.quote_type ")[" ident* " | " ident* " | " first_order_term:0 "]" : term
 
@@ -675,18 +675,18 @@ end delab
 /-! ### Notation for formula as term -/
 
 macro_rules
-  | `(⤫formula(nested)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term*   ]) => do
+  | `(⤫formula(faf)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term*   ]) => do
     let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) fun a s ↦ do
-      `(⤫term(nested)[ $binders* | $fbinders* | $a ] :> $s)
+      `(⤫term(faf)[ $binders* | $fbinders* | $a ] :> $s)
     `(($φ).nestFormulae $Ψ)
-  | `(⤫formula(nested)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term* ⋯ ]) => do
+  | `(⤫formula(faf)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term* ⋯ ]) => do
     let length := Syntax.mkNumLit (toString binders.size)
     let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) fun a s ↦ do
-      `(⤫term(nested)[ $binders* | $fbinders* | $a] :> $s)
+      `(⤫term(faf)[ $binders* | $fbinders* | $a] :> $s)
     `(($φ).nestFormulae $Ψ)
 
 macro_rules
-  | `(⤫term(nested)[ $binders* | $fbinders* | $x:ident                         ]) => do
+  | `(⤫term(faf)[ $binders* | $fbinders* | $x:ident                         ]) => do
     match binders.idxOf? x with
     | none =>
       match fbinders.idxOf? x with
@@ -697,91 +697,91 @@ macro_rules
     | some x =>
       let i := Syntax.mkNumLit (toString x)
       `(“#0 = #$i”)
-  | `(⤫term(nested)[ $binders* | $fbinders* | !$f:term $vs:first_order_term*   ]) => do
+  | `(⤫term(faf)[ $binders* | $fbinders* | !$f:term $vs:first_order_term*   ]) => do
     let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) fun a s ↦ do
-      `(⤫term(nested)[ $binders* | $fbinders* | $a ] :> $s)
+      `(⤫term(faf)[ $binders* | $fbinders* | $a ] :> $s)
     `(($f).nestFormulaeFunc $Ψ)
-  | `(⤫term(nested)[ $binders* | $fbinders* | !$f:term $vs:first_order_term* ⋯ ]) => do
+  | `(⤫term(faf)[ $binders* | $fbinders* | !$f:term $vs:first_order_term* ⋯ ]) => do
     let length := Syntax.mkNumLit (toString binders.size)
     let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) fun a s ↦ do
-      `(⤫term(nested)[ $binders* | $fbinders* | $a] :> $s)
+      `(⤫term(faf)[ $binders* | $fbinders* | $a] :> $s)
     `(($f).nestFormulaeFunc $Ψ)
 
 macro_rules
-  | `(⤫formula(nested)[ $binders* | $fbinders* | $t:first_order_term = $u:first_order_term ]) => do
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term = $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀' (⤫term(nested)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(nested)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 = #0”)))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => do
+    `(∀' (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 = #0”)))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≠ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀' (⤫term(nested)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(nested)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ≠ #0”)))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) => do
+    `(∀' (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ≠ #0”)))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term < $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀' (⤫term(nested)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(nested)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 < #0”)))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => do
+    `(∀' (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 < #0”)))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≮ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀' (⤫term(nested)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(nested)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ≮ #0”)))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | $t:first_order_term ≤ $u:first_order_term ]) => do
+    `(∀' (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ≮ #0”)))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≤ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀' (⤫term(nested)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(nested)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ≤ #0”)))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => do
+    `(∀' (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ≤ #0”)))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ≰ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀' (⤫term(nested)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(nested)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ≰ #0”)))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | $t:first_order_term ∈ $u:first_order_term ]) => do
+    `(∀' (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ≰ #0”)))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ∈ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀' (⤫term(nested)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(nested)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ∈ #0”)))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => do
+    `(∀' (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ∈ #0”)))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | $t:first_order_term ∉ $u:first_order_term ]) => do
     let x₁ : TSyntax `ident ← TSyntax.freshIdent
     let x₂ : TSyntax `ident ← TSyntax.freshIdent
-    `(∀' (⤫term(nested)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(nested)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ∉ #0”)))
+    `(∀' (⤫term(faf)[ $x₁ $binders* | $fbinders* | $t ] ➝ ∀' (⤫term(faf)[ $x₁ $x₂ $binders* | $fbinders* | $u ] ➝ “#1 ∉ #0”)))
 
 macro_rules
-  | `(⤫formula(nested)[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do
+  | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(nested)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.ballLT #0 ⤫formula(nested)[ $x $binders* | $fbinders* | $φ ]))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | ∀ $x ≤ $t, $φ ]) => do
+    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.ballLT #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(nested)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.ballLE #0 ⤫formula(nested)[ $x $binders* | $fbinders* | $φ ]))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | ∀ $x ∈ $t, $φ ]) => do
+    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.ballLE #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(nested)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.ballMem #0 ⤫formula(nested)[ $x $binders* | $fbinders* | $φ ]))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | ∃ $x < $t, $φ ]) => do
+    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.ballMem #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(nested)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.bexLT #0 ⤫formula(nested)[ $x $binders* | $fbinders* | $φ ]))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | ∃ $x ≤ $t, $φ ]) => do
+    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.bexLT #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(nested)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.bexLE #0 ⤫formula(nested)[ $x $binders* | $fbinders* | $φ ]))
-  | `(⤫formula(nested)[ $binders* | $fbinders* | ∃ $x ∈ $t, $φ ]) => do
+    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.bexLE #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+  | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(nested)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.bexMem #0 ⤫formula(nested)[ $x $binders* | $fbinders* | $φ ]))
+    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.bexMem #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
 
-syntax "n‘" first_order_term:0 "’" : term
-syntax "n‘" ident* "| " first_order_term:0 "’" : term
-syntax "n‘" ident* ". " first_order_term:0 "’" : term
-
-macro_rules
-  | `(n‘ $e:first_order_term ’)              => `(⤫term(nested)[           |            | $e ])
-  | `(n‘ $fbinders* | $e:first_order_term ’) => `(⤫term(nested)[           | $fbinders* | $e ])
-  | `(n‘ $binders*. $e:first_order_term ’)   => `(⤫term(nested)[ $binders* |            | $e ])
-
-#check n‘a x. x’
-
-syntax "n“" ident* "| "  first_order_formula:0 "”" : term
-syntax "n“" ident* ". "  first_order_formula:0 "”" : term
-syntax "n“" first_order_formula:0 "”" : term
+syntax "f‘" first_order_term:0 "’" : term
+syntax "f‘" ident* "| " first_order_term:0 "’" : term
+syntax "f‘" ident* ". " first_order_term:0 "’" : term
 
 macro_rules
-  | `(n“ $e:first_order_formula ”)              => `(⤫formula(nested)[           |            | $e ])
-  | `(n“ $fbinders* | $e:first_order_formula ”) => `(⤫formula(nested)[           | $fbinders* | $e ])
-  | `(n“ $binders*. $e:first_order_formula ”)   => `(⤫formula(nested)[ $binders* |            | $e ])
+  | `(f‘ $e:first_order_term ’)              => `(⤫term(faf)[           |            | $e ])
+  | `(f‘ $fbinders* | $e:first_order_term ’) => `(⤫term(faf)[           | $fbinders* | $e ])
+  | `(f‘ $binders*. $e:first_order_term ’)   => `(⤫term(faf)[ $binders* |            | $e ])
 
-#check n“x y. x = y”
+#check f‘a x. x’
+
+syntax "f“" ident* "| "  first_order_formula:0 "”" : term
+syntax "f“" ident* ". "  first_order_formula:0 "”" : term
+syntax "f“" first_order_formula:0 "”" : term
+
+macro_rules
+  | `(f“ $e:first_order_formula ”)              => `(⤫formula(faf)[           |            | $e ])
+  | `(f“ $fbinders* | $e:first_order_formula ”) => `(⤫formula(faf)[           | $fbinders* | $e ])
+  | `(f“ $binders*. $e:first_order_formula ”)   => `(⤫formula(faf)[ $binders* |            | $e ])
+
+#check f“x y. x = y”
 
 end BinderNotation
 

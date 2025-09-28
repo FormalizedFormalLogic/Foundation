@@ -268,7 +268,7 @@ variable (𝔅)
 
 lemma kreisel_spec (σ : Sentence L) : T₀ ⊢ 𝗞 σ ⭤ (𝔅 (𝗞 σ) ➝ σ) := by
   convert (diag (T := T₀) “x. !𝔅.prov x → !σ”);
-  simp [kreisel, ← TransitiveRewriting.comp_app, Rew.substs_comp_substs];
+  simp [kreisel, ← TransitiveRewriting.comp_app, Rew.subst_comp_subst];
   rfl;
 
 variable {𝔅}

@@ -206,7 +206,7 @@ def θAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) : Semisenten
 lemma rew_twoPointAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) :
     Rew.subst w ▹ twoPointAux T t i j = twoPointAux T (fun i ↦ Rew.subst w (t i)) i j := by
   simp [twoPointAux, Finset.map_conj', Function.comp_def, ←TransitiveRewriting.comp_app,
-    Rew.substs_comp_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
+    Rew.subst_comp_subst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
 lemma rew_θChainAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (ε : List F) :
     Rew.subst w ▹ θChainAux T t ε = θChainAux T (fun i ↦ Rew.subst w (t i)) ε := by
@@ -242,7 +242,7 @@ lemma solovay_diag (i : F) :
           let jj := (Fintype.equivFin F).symm j
           θAux T (fun i ↦ #(Fintype.equivFin F i)) jj ⋏ ⩕ k ∈ { k : F | jj ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)])
   simpa [θ, Finset.map_conj', Function.comp_def, rew_θAux, ←TransitiveRewriting.comp_app,
-    Rew.substs_comp_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using this
+    Rew.subst_comp_subst, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using this
 
 @[simp] lemma solovay_exclusive {i j : F} : T.solovay i = T.solovay j ↔ i = j := by simp [Theory.solovay]
 

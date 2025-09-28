@@ -35,14 +35,14 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
   let σ : Semisentence ℒₒᵣ 1 := codeOfREPred D
   let ρ : Sentence ℒₒᵣ := σ/[⌜σ⌝]
   have : ∀ n : ℕ, D n ↔ T ⊢ σ/[↑n] := fun n ↦ by
-    simpa [Semiformula.coe_substs_eq_substs_coe₁] using re_complete D_re
+    simpa [Semiformula.coe_subst_eq_subst_coe₁] using re_complete D_re
   have : T ⊢ ∼ρ ↔ T ⊢ ρ := by
     have : T.Provable (neg ℒₒᵣ (subst ℒₒᵣ (numeral ⌜σ⌝ ∷ 0) ⌜σ⌝)) ↔ T ⊢ σ/[⌜σ⌝] := by
       simpa [D] using this ⌜σ⌝
     have : T ⊢ ∼σ/[⌜σ⌝] ↔ T ⊢ σ/[⌜σ⌝] := by
       simpa [←provable_iff_provable, Sentence.quote_def,
-        Rewriting.emb_substs_eq_substs_coe₁, Semiformula.quote_def] using this
-    simpa [ρ, Rewriting.emb_substs_eq_substs_coe₁]
+        Rewriting.emb_subst_eq_subst_coe₁, Semiformula.quote_def] using this
+    simpa [ρ, Rewriting.emb_subst_eq_subst_coe₁]
   refine incomplete_def.mpr
     ⟨ ρ
     , fun h ↦ not_consistent_iff_inconsistent.mpr

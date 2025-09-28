@@ -28,9 +28,9 @@ lemma incomplete_of_REPred_not_ComputablePred_Nat' {P : ℕ → Prop} (hRE : REP
       constructor;
       . rintro hP
         apply Theory.Provable.sound
-        simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.emb_substs_eq_substs_coe₁] using hP;
+        simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.emb_subst_eq_subst_coe₁] using hP;
       . rintro hφ
-        simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.emb_substs_eq_substs_coe₁] using
+        simpa [Sentence.quote_def, Semiformula.quote_def, Rewriting.emb_subst_eq_subst_coe₁] using
           internalize_provability (V := ℕ) hφ;
   push_neg at hd;
   rcases hd with (⟨hd₁, hd₂⟩ | ⟨hd₁, hd₂⟩);

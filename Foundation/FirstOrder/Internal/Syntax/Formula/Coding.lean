@@ -109,13 +109,13 @@ noncomputable instance : LCWQIsoGoedelQuote (SyntacticSemiformula L) (Metamath.S
   case hand => simp [*]
   case hor => simp [*]
   case hall φ ih =>
-    simp [*, Rew.q_substs, Matrix.comp_vecCons']; rfl
+    simp [*, Rew.q_subst, Matrix.comp_vecCons']; rfl
   case hex φ ih =>
-    simp [*, Rew.q_substs, Matrix.comp_vecCons']; rfl
+    simp [*, Rew.q_subst, Matrix.comp_vecCons']; rfl
 
 @[simp] lemma free_quote (φ : SyntacticSemiformula L 1) :
     (⌜Rewriting.free φ⌝ : Metamath.Formula V L) = Metamath.Semiformula.free ⌜φ⌝ := by
-  rw [← LawfulSyntacticRewriting.app_substs_fbar_zero_comp_shift_eq_free, typed_quote_substs, typed_quote_shift]
+  rw [← LawfulSyntacticRewriting.app_subst_fbar_zero_comp_shift_eq_free, typed_quote_substs, typed_quote_shift]
   simp [Metamath.Semiformula.free, Matrix.constant_eq_singleton]
 
 open InternalArithmetic
