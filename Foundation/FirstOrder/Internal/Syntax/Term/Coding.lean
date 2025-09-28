@@ -39,7 +39,7 @@ variable {V}
   induction t <;> simp [Rew.func, *]; rfl
 
 @[simp] lemma typed_quote_substs {n m} (t : SyntacticSemiterm L n) (w : Fin n → SyntacticSemiterm L m) :
-    (⌜Rew.substs w t⌝ : Metamath.Semiterm V L m) = Metamath.Semiterm.substs (fun i ↦ ⌜w i⌝) ⌜t⌝ := by
+    (⌜Rew.subst w t⌝ : Metamath.Semiterm V L m) = Metamath.Semiterm.subst (fun i ↦ ⌜w i⌝) ⌜t⌝ := by
   induction t <;> simp [Rew.func, *]; rfl
 
 open InternalArithmetic

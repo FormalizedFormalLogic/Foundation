@@ -21,9 +21,9 @@ local postfix:max "⇞" => Semiterm.shift
 
 local postfix:max "⤉" => Semiformula.shift
 
-local infix:40 " ⤕ " => Semiterm.substs
+local infix:40 " ⤕ " => Semiterm.subst
 
-local infix:40 " ⤔ " => Semiformula.substs
+local infix:40 " ⤔ " => Semiformula.subst
 
 variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗣𝗔⁻ ⪯ T]
 

@@ -35,7 +35,7 @@ namespace Bounded
 
 @[simp] lemma term_retraction [V ⊧ₘ* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
     Bounded fun v : Fin k → V ↦ Semiterm.valm V (fun x ↦ v (e x)) id t :=
-  ⟨Rew.substs (fun x ↦ #(e x)) t, by intro _; simp [Semiterm.val_substs]⟩
+  ⟨Rew.subst (fun x ↦ #(e x)) t, by intro _; simp [Semiterm.val_substs]⟩
 
 @[simp] lemma term [V ⊧ₘ* 𝗣𝗔⁻] (t : Semiterm ℒₒᵣ V k) : Bounded fun v : Fin k → V => Semiterm.valm V v id t :=
   ⟨t, by intro _; simp⟩
@@ -43,14 +43,14 @@ namespace Bounded
 lemma retraction {f : (Fin k → V) → V} (hf : Bounded f) (e : Fin k → Fin n) :
     Bounded fun v ↦ f (fun i ↦ v (e i)) := by
   rcases hf with ⟨t, ht⟩
-  exact ⟨Rew.substs (fun x ↦ #(e x)) t, by intro; simp [Semiterm.val_substs, ht]⟩
+  exact ⟨Rew.subst (fun x ↦ #(e x)) t, by intro; simp [Semiterm.val_substs, ht]⟩
 
 lemma comp [V ⊧ₘ* 𝗣𝗔⁻] {k} {f : (Fin l → V) → V} {g : Fin l → (Fin k → V) → V} (hf : Bounded f) (hg : ∀ i, Bounded (g i)) :
     Bounded (fun v ↦ f (g · v)) where
   bounded := by
     rcases hf.bounded with ⟨tf, htf⟩
     choose tg htg using fun i ↦ (hg i).bounded
-    exact ⟨Rew.substs tg tf, by
+    exact ⟨Rew.subst tg tf, by
       intro v
       simpa [Semiterm.val_substs]
         using le_trans (htf (g · v)) (Structure.Monotone.term_monotone tf (fun i ↦ htg i v) (by simp))⟩
@@ -146,7 +146,7 @@ lemma ball_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
   rcases h with ⟨φ, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y < x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.ball (#0) (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i ↦ #i.succ.succ)) φ))) := by
+      (f_graph ⋏ HierarchySymbol.Semiformula.ball (#0) (HierarchySymbol.Semiformula.rew (Rew.subst (#0 :> fun i ↦ #i.succ.succ)) φ))) := by
     simpa [←le_iff_lt_succ, Matrix.comp_vecCons'] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball #0)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
@@ -159,7 +159,7 @@ lemma bex_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
   rcases h with ⟨φ, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y < x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.bex (#0) (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) φ))) := by
+      (f_graph ⋏ HierarchySymbol.Semiformula.bex (#0) (HierarchySymbol.Semiformula.rew (Rew.subst (#0 :> fun i => #i.succ.succ)) φ))) := by
     simpa [←le_iff_lt_succ, Matrix.comp_vecCons'] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex #0)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
@@ -171,7 +171,7 @@ lemma ball_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
   rcases h with ⟨φ, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y ≤ x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.ball ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) φ))) := by
+      (f_graph ⋏ HierarchySymbol.Semiformula.ball ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.subst (#0 :> fun i => #i.succ.succ)) φ))) := by
     simpa [←le_iff_lt_succ, Matrix.comp_vecCons'] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball ‘x. x + 1’)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 
@@ -183,7 +183,7 @@ lemma bex_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
   rcases h with ⟨φ, hp⟩
   have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y ≤ x, P v y)
     (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.bex ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.substs (#0 :> fun i => #i.succ.succ)) φ))) := by
+      (f_graph ⋏ HierarchySymbol.Semiformula.bex ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.subst (#0 :> fun i => #i.succ.succ)) φ))) := by
     simpa [←le_iff_lt_succ, Matrix.comp_vecCons'] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex ‘x. x + 1’)).bex ‘!!bf + 1’
   exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
 

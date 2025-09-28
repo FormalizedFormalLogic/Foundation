@@ -200,14 +200,14 @@ syntax:max "∀ " ident " <⁺ " first_order_term ", " first_order_formula:0 : f
 syntax:max "∃ " ident " <⁺ " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | ∀ $x <⁺ $t, $φ]) => do
+  | `(⤫formula(lit)[ $binders* | $fbinders* | ∀ $x <⁺ $t, $φ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(Semiformula.ballLTSucc ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
-  | `(⤫formula[ $binders* | $fbinders* | ∃ $x <⁺ $t, $φ]) => do
+    `(Semiformula.ballLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | ∃ $x <⁺ $t, $φ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(Semiformula.bexLTSucc ⤫term[ $binders* | $fbinders* | $t ] ⤫formula[ $binders'* | $fbinders* | $φ ])
+    `(Semiformula.bexLTSucc ⤫term(lit)[ $binders* | $fbinders* | $t ] ⤫formula(lit)[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
 

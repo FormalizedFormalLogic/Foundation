@@ -1308,7 +1308,7 @@ variable (L)
 
 noncomputable def bv (p : V) : V := (BV.construction L).result L 0 p
 
-def bvGraph : 𝚺₁.Semisentence 2 := ((BV.blueprint L).result L).rew (Rew.substs ![#0, ‘0’, #1])
+def bvGraph : 𝚺₁.Semisentence 2 := ((BV.blueprint L).result L).rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
 

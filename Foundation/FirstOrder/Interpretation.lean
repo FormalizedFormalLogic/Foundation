@@ -44,7 +44,7 @@ def varEqual : Semiterm L₂ ξ n → Semiformula L₁ ξ (n + 1)
     ∀^[k] (
       (Matrix.conj fun i ↦
         Rew.emb ▹ π.domain/[#(i.addCast (n + 1))] ⋏
-        Rew.substs (#(i.addCast (n + 1)) :> fun j ↦ #((j.addNat 1).addNat k)) ▹ varEqual (v i))
+        Rew.subst (#(i.addCast (n + 1)) :> fun j ↦ #((j.addNat 1).addNat k)) ▹ varEqual (v i))
       ➝ (Rew.embSubsts (#((0 : Fin (n + 1)).addNat k) :> fun i ↦ #(i.addCast (n + 1))) ▹ π.func f)
     )
 
@@ -52,7 +52,7 @@ def translateRel {k} (r : L₂.Rel k) (v : Fin k → Semiterm L₂ ξ n) : Semif
   ∀^[k] (
     (Matrix.conj fun i ↦
       Rew.emb ▹ π.domain/[#(i.addCast n)] ⋏
-      Rew.substs (#(i.addCast n) :> fun j ↦ #(j.addNat k)) ▹ π.varEqual (v i))
+      Rew.subst (#(i.addCast n) :> fun j ↦ #(j.addNat k)) ▹ π.varEqual (v i))
     ➝ (Rew.embSubsts (fun i ↦ #(i.addCast n)) ▹ π.rel r)
   )
 

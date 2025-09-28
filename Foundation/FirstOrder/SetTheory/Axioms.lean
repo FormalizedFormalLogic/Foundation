@@ -12,9 +12,10 @@ def isSubsetOf : Semisentence ℒₛₑₜ 2 := “x y. ∀ z ∈ x, z ∈ y”
 
 syntax:45 first_order_term:45 " ⊆ " first_order_term:0 : first_order_formula
 
+open Lean Elab PrettyPrinter Delaborator SubExpr in
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | $t:first_order_term ⊆ $u:first_order_term ]) =>
-    `(isSubsetOf/[⤫term[ $binders* | $fbinders* | $t ], ⤫term[ $binders* | $fbinders* | $u ]])
+  | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term ⊆ $u:first_order_term ]) =>
+    `(⤫formula($type)[ $binders* | $fbinders* | !isSubsetOf $t:first_order_term $u:first_order_term ])
 
 def isEmpty : Semisentence ℒₛₑₜ 1 := “x. ∀ y, y ∉ x”
 
@@ -39,10 +40,10 @@ def infinity : Sentence ℒₛₑₜ := “∃ I, (∀ e, !isEmpty e → e ∈ I
 def foundation : Sentence ℒₛₑₜ := “∀ x, !isNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y”
 
 def separationSchema (φ : SyntacticSemiformula ℒₛₑₜ 1) : Sentence ℒₛₑₜ :=
-  ∀∀₀ “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ∈ x ∧ !φ z”
+  .univCl “∀ x, ∃ y, ∀ z, z ∈ y ↔ z ∈ x ∧ !φ z”
 
 def replacementSchema (φ : SyntacticSemiformula ℒₛₑₜ 2) : Sentence ℒₛₑₜ :=
-  ∀∀₀ “(∀ x, ∃! y, !φ x y) → ∀ X, ∃ Y, ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
+  .univCl “(∀ x, ∃! y, !φ x y) → ∀ X, ∃ Y, ∀ y, y ∈ Y ↔ ∃ x ∈ X, !φ x y”
 
 def choice : Sentence ℒₛₑₜ :=
   “∀ x, (∀ y ∈ x, !isNonempty y) ∧ (∀ y ∈ x, ∀ z ∈ x, y ≠ z → ¬∃ w, w ∈ y ∧ w ∈ z) → ∃ c, ∀ y ∈ x, ∃ u ∈ c, u ∈ y”

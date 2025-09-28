@@ -183,20 +183,20 @@ lemma encode_all (φ : Semiformula L ξ (n + 1)) : encode (∀' φ) = (Nat.pair 
 lemma encode_ex (φ : Semiformula L ξ (n + 1)) : encode (∃' φ) = (Nat.pair 7 <| φ.toNat) + 1 := rfl
 
 @[simp] lemma encode_emb (σ : Semisentence L n) :
-    encode (Rewriting.embedding σ : Semiformula L ξ n) = encode σ := by
+    encode (Rewriting.emb σ : Semiformula L ξ n) = encode σ := by
   induction σ using rec' <;>
     simp [coe_rel, coe_nrel,
       encode_rel, encode_nrel, encode_verum, encode_falsum, encode_and, encode_or, encode_all, encode_ex,
       ← encode_eq_toNat, *]
 
 @[simp] lemma encode_inj_sentence {σ : Semisentence L n} {φ : Semiformula L ξ n} :
-    encode φ = encode σ ↔ φ = Rewriting.embedding σ := by
+    encode φ = encode σ ↔ φ = Rewriting.emb σ := by
   constructor
   · intro h; apply encode_inj.mp; simpa
   · rintro rfl; simp
 
 @[simp] lemma encode_inj_sentence' {σ : Semisentence L n} {φ : Semiformula L ξ n} :
-    encode σ = encode φ ↔ φ = Rewriting.embedding σ := by rw [←encode_inj_sentence, eq_comm]
+    encode σ = encode φ ↔ φ = Rewriting.emb σ := by rw [←encode_inj_sentence, eq_comm]
 
 end Semiformula
 

@@ -217,13 +217,13 @@ def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f
     (by simp [Rew.q_rewrite, rewrite_subst_eq])
   | all₂ φ ψ       => HilbertProofᵢ.cast
     (all₂ (Rew.rewrite f ▹ φ) (Rew.rewrite (⇑Rew.bShift ∘ f) ▹ ψ))
-    (by simp [Rew.q_rewrite, rewrite_substs_nil])
+    (by simp [Rew.q_rewrite, rewrite_subst_nil])
   | ex₁ t φ        => HilbertProofᵢ.cast
     (ex₁ (Rew.rewrite f t) (Rew.rewrite (⇑Rew.bShift ∘ f) ▹ φ))
     (by simp [Rew.q_rewrite, rewrite_subst_eq])
   | ex₂ φ ψ        => HilbertProofᵢ.cast
     (ex₂ (Rew.rewrite (⇑Rew.bShift ∘ f) ▹ φ) (Rew.rewrite f ▹ ψ))
-    (by simp [Rew.q_rewrite, rewrite_substs_nil])
+    (by simp [Rew.q_rewrite, rewrite_subst_nil])
 
 @[simp] lemma depth_rewrite (f : ℕ → SyntacticTerm L) (b : Λ ⊢! φ) : ‖rewrite f b‖ = ‖b‖ := by
   induction b generalizing f <;> simp [rewrite, *]
