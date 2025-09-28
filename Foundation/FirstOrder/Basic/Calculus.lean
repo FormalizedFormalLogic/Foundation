@@ -207,7 +207,7 @@ def specializes : {k : ℕ} → {φ : SyntacticSemiformula L k} → {Γ : Sequen
     𝓢 ⟹ (∀* φ) :: Γ → 𝓢 ⟹ (φ ⇜ v) :: Γ
   | 0,     φ, Γ, _, b => Derivation.cast b (by simp)
   | k + 1, φ, Γ, v, b =>
-    have : 𝓢 ⟹ (∀' (Rew.substs (v ·.succ)).q ▹ φ) :: Γ := by simpa using specializes (φ := ∀' φ) (v ·.succ) b
+    have : 𝓢 ⟹ (∀' (Rew.subst (v ·.succ)).q ▹ φ) :: Γ := by simpa using specializes (φ := ∀' φ) (v ·.succ) b
     Derivation.cast (specialize (v 0) this) (by
       simp only [Nat.reduceAdd, ← TransitiveRewriting.comp_app, List.cons.injEq, and_true]; congr 2
       ext x <;> simp [Rew.comp_app]
@@ -217,9 +217,9 @@ def instances : {k : ℕ} → {φ : SyntacticSemiformula L k} → {Γ : Sequent 
     𝓢 ⟹ (φ ⇜ v) :: Γ → 𝓢 ⟹ (∃* φ) :: Γ
   | 0,     φ, Γ, _, b => Derivation.cast b (by simp)
   | k + 1, φ, Γ, v, b =>
-    have : 𝓢 ⟹ (∃' (Rew.substs (v ·.succ)).q ▹ φ) :: Γ :=
+    have : 𝓢 ⟹ (∃' (Rew.subst (v ·.succ)).q ▹ φ) :: Γ :=
       ex (v 0) <| Derivation.cast b <| by
-        unfold Rewriting.substitute; rw [←TransitiveRewriting.comp_app]; congr 3
+        unfold Rewriting.subst; rw [←TransitiveRewriting.comp_app]; congr 3
         ext x <;> simp [Rew.comp_app]
         cases x using Fin.cases <;> simp
     instances (k := k) (v := (v ·.succ)) (Derivation.cast this (by simp))
@@ -530,11 +530,11 @@ def coe_provable_iff_provable_coe {σ : Sentence L} :
 def coe_unprovable_iff_unprovable_coe {σ} :
     (𝓢 : Theory L) ⊬ σ ↔ 𝓢 ⊬ ↑σ := coe_provable_iff_provable_coe.not
 
-def provable_close₀_iff {φ : SyntacticFormula L} :
+def provable_univCl_iff {φ : SyntacticFormula L} :
     (𝓢 : Theory L) ⊢ ∀∀₀ φ ↔ 𝓢 ⊢ φ := Iff.trans coe_provable_iff_provable_coe (by simp [SyntacticFormulas.close!_iff])
 
-def unprovable_close₀_iff {φ : SyntacticFormula L} :
-    (𝓢 : Theory L) ⊬ ∀∀₀ φ ↔ 𝓢 ⊬ φ := provable_close₀_iff.not
+def unprovable_univCl_iff {φ : SyntacticFormula L} :
+    (𝓢 : Theory L) ⊬ ∀∀₀ φ ↔ 𝓢 ⊬ φ := provable_univCl_iff.not
 
 instance (𝓢 𝓣 : SyntacticFormulas L) [𝓢 ⪯ 𝓣] : 𝓢.toTheory ⪯ 𝓣.toTheory :=
   ⟨fun _ b ↦ coe_provable_iff_provable_coe.mpr <| (inferInstanceAs (𝓢 ⪯ 𝓣)).pbl (coe_provable_iff_provable_coe.mp b)⟩

@@ -37,9 +37,9 @@ noncomputable def termSubst (w t : V) : V := construction.result L ![w] t
 
 noncomputable def termSubstVec (k w v : V) : V := construction.resultVec L ![w] k v
 
-def termSubstGraph : 𝚺₁.Semisentence 3 := (blueprint.result L).rew <| Rew.substs ![#0, #2, #1]
+def termSubstGraph : 𝚺₁.Semisentence 3 := (blueprint.result L).rew <| Rew.subst ![#0, #2, #1]
 
-def termSubstVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec L).rew <| Rew.substs ![#0, #1, #3, #2]
+def termSubstVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
 
 variable {L}
 
@@ -442,9 +442,9 @@ noncomputable def termFreeAt (m t : V) : V := construction.result L ![m] t
 
 noncomputable def termFreeAtVec (m k v : V) : V := construction.resultVec L ![m] k v
 
-def termFreeAtGraph : 𝚺₁.Semisentence 3 := (blueprint.result L).rew <| Rew.substs ![#0, #2, #1]
+def termFreeAtGraph : 𝚺₁.Semisentence 3 := (blueprint.result L).rew <| Rew.subst ![#0, #2, #1]
 
-def termFreeAtVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec L).rew <| Rew.substs ![#0, #1, #3, #2]
+def termFreeAtVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
 
 variable {L}
 

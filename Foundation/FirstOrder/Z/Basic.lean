@@ -293,7 +293,7 @@ lemma separation_exists_eval (x : V) (φ : Semiformula ℒₛₑₜ V 1) : ∃ y
   have : Inhabited V := inhabited_of_nonempty inferInstance
   let f := φ.enumarateFVar
   let ψ := (Rew.rewriteMap φ.idxOfFVar) ▹ φ
-  have := by simpa [models_iff, Semiformula.eval_close₀, Axiom.separationSchema] using ModelsTheory.models V (Zermelo.axiom_of_separation ψ)
+  have := by simpa [models_iff, Semiformula.eval_univCl, Axiom.separationSchema] using ModelsTheory.models V (Zermelo.axiom_of_separation ψ)
   simpa [ψ, f, Semiformula.eval_rewriteMap, Matrix.constant_eq_singleton] using this f x
 
 lemma separation_exists (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) : ∃ y : V, ∀ z : V, z ∈ y ↔ z ∈ x ∧ P z := by

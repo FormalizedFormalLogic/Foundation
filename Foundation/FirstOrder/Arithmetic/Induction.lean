@@ -114,7 +114,7 @@ private lemma induction_eval {φ : Semiformula ℒₒᵣ ℕ 1} (hp : C φ) (v) 
   have : V ⊧ₘ ∀∀₀ (succInd φ) :=
     ModelsTheory.models (T := InductionScheme _ C) V (by simpa using mem_InductionScheme_of_mem hp)
   revert v
-  simpa [models_iff, Semiformula.eval_close₀, succInd, Semiformula.eval_substs,
+  simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_substs,
     Semiformula.eval_rew_q Rew.toS, Function.comp, Matrix.constant_eq_singleton] using this
 
 @[elab_as_elim]
@@ -197,7 +197,7 @@ instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arith
         ∀ x, Semiformula.Evalm V ![x] f φ by
     simp only [InductionScheme, Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp]
     rintro _ φ hφ rfl
-    simpa [models_iff, Semiformula.eval_close₀, succInd, Semiformula.eval_rew_q,
+    simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_rew_q,
         Semiformula.eval_substs, Function.comp, Matrix.constant_eq_singleton]
     using this φ hφ
   intro φ hp v
@@ -359,7 +359,7 @@ lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ ∀∀₀ (
       Semiformula.Evalm ℕ ![0] f φ →
       (∀ x, Semiformula.Evalm ℕ ![x] f φ → Semiformula.Evalm ℕ ![x + 1] f φ) →
         ∀ x, Semiformula.Evalm ℕ ![x] f φ by
-    simpa [Semiformula.eval_close₀, succInd, models_iff, Matrix.constant_eq_singleton, Semiformula.eval_substs]
+    simpa [Semiformula.eval_univCl, succInd, models_iff, Matrix.constant_eq_singleton, Semiformula.eval_substs]
   intro e hzero hsucc x; induction' x with x ih
   · exact hzero
   · exact hsucc x ih

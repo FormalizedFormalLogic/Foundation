@@ -204,19 +204,19 @@ def θAux (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) : Semisenten
   ⩖ ε : WChain r i, θChainAux T t ε
 
 lemma rew_twoPointAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) :
-    Rew.substs w ▹ twoPointAux T t i j = twoPointAux T (fun i ↦ Rew.substs w (t i)) i j := by
+    Rew.subst w ▹ twoPointAux T t i j = twoPointAux T (fun i ↦ Rew.subst w (t i)) i j := by
   simp [twoPointAux, Finset.map_conj', Function.comp_def, ←TransitiveRewriting.comp_app,
     Rew.substs_comp_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
 lemma rew_θChainAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (ε : List F) :
-    Rew.substs w ▹ θChainAux T t ε = θChainAux T (fun i ↦ Rew.substs w (t i)) ε := by
+    Rew.subst w ▹ θChainAux T t ε = θChainAux T (fun i ↦ Rew.subst w (t i)) ε := by
   match ε with
   |          [] => simp [θChainAux]
   |         [_] => simp [θChainAux]
   | j :: i :: ε => simp [θChainAux, rew_θChainAux w _ (i :: ε), rew_twoPointAux]
 
 lemma rew_θAux (w : Fin N → FirstOrder.Semiterm ℒₒᵣ Empty N') (t : F → FirstOrder.Semiterm ℒₒᵣ Empty N) (i : F) :
-    Rew.substs w ▹ θAux T t i = θAux T (fun i ↦ Rew.substs w (t i)) i := by
+    Rew.subst w ▹ θAux T t i = θAux T (fun i ↦ Rew.subst w (t i)) i := by
   simp [Finset.map_udisj, θAux, rew_θChainAux]
 
 def _root_.LO.FirstOrder.Theory.solovay (i : F) : Sentence ℒₒᵣ := exclusiveMultifixedpoint
@@ -234,7 +234,7 @@ def θ (i : F) : Sentence ℒₒᵣ := θAux T (fun i ↦ ⌜T.solovay i⌝) i
 lemma solovay_diag (i : F) :
     𝗜𝚺₁ ⊢ T.solovay i ⭤ θ T i ⋏ ⩕ j ∈ { j : F | i ≺ j }, T.consistentWith/[⌜T.solovay j⌝] := by
   have : 𝗜𝚺₁ ⊢ T.solovay i ⭤
-      (Rew.substs fun j ↦ ⌜T.solovay ((Fintype.equivFin F).symm j)⌝) ▹
+      (Rew.subst fun j ↦ ⌜T.solovay ((Fintype.equivFin F).symm j)⌝) ▹
         (θAux T (fun i ↦ #(Fintype.equivFin F i)) i ⋏ ⩕ k ∈ { k : F | i ≺ k }, T.consistentWith/[#(Fintype.equivFin F k)]) := by
     simpa [Theory.solovay, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using
       exclusiveMultidiagonal (T := 𝗜𝚺₁) (i := Fintype.equivFin F i)

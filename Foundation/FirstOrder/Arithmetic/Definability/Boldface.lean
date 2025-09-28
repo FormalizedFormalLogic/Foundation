@@ -307,7 +307,7 @@ lemma to_definable_deltaOne {φ : 𝚫₁.Semiformula V k} {Γ m}
     (h : DefinedWithParam P φ) : Γ-[m + 1].Boldface P := ⟨φ.ofDeltaOne Γ m, h.of_deltaOne⟩
 
 lemma retraction {φ : ℌ.Semiformula V k} (hp : DefinedWithParam P φ) (f : Fin k → Fin l) :
-    DefinedWithParam (fun v ↦ P fun i ↦ v (f i)) (φ.rew <| Rew.substs fun x ↦ #(f x)) :=
+    DefinedWithParam (fun v ↦ P fun i ↦ v (f i)) (φ.rew <| Rew.subst fun x ↦ #(f x)) :=
   match ℌ with
   | 𝚺-[_] => by intro; simp [hp.df.iff]
   | 𝚷-[_] => by intro; simp [hp.df.iff]
@@ -494,7 +494,7 @@ instance [𝚺₀.Boldface P] (ℌ : HierarchySymbol) : ℌ.Boldface P := Boldfa
 lemma retraction (h : ℌ.Boldface P) {n} (f : Fin k → Fin n) :
     ℌ.Boldface fun v ↦ P (fun i ↦ v (f i)) := by
   rcases h with ⟨φ, h⟩
-  exact ⟨φ.rew (Rew.substs (fun i ↦ #(f i))),
+  exact ⟨φ.rew (Rew.subst (fun i ↦ #(f i))),
   match ℌ with
   | 𝚺-[_] => by intro; simp [h.df.iff]
   | 𝚷-[_] => by intro; simp [h.df.iff]
@@ -503,7 +503,7 @@ lemma retraction (h : ℌ.Boldface P) {n} (f : Fin k → Fin n) :
 lemma retractiont (h : ℌ.Boldface P) (f : Fin k → Semiterm ℒₒᵣ V n) :
     ℌ.Boldface fun v ↦ P (fun i ↦ Semiterm.valm V v id (f i)) := by
   rcases h with ⟨φ, h⟩
-  exact ⟨φ.rew (Rew.substs f),
+  exact ⟨φ.rew (Rew.subst f),
   match ℌ with
   | 𝚺-[_] => by intro; simp [h.df.iff]
   | 𝚷-[_] => by intro; simp [h.df.iff]
@@ -799,7 +799,7 @@ lemma of_sigmaOne {k} {f : (Fin k → V) → V}
 @[simp] lemma term_retraction (t : Semiterm ℒₒᵣ V n) (e : Fin n → Fin k) :
     ℌ.BoldfaceFunction fun v : Fin k → V ↦ Semiterm.valm V (fun x ↦ v (e x)) id t :=
   .of_zero (Γ' := 𝚺)
-    ⟨.mkSigma “x. x = !!(Rew.substs (fun x ↦ #(e x).succ) t)”, by intro v; simp [Semiterm.val_substs]⟩
+    ⟨.mkSigma “x. x = !!(Rew.subst (fun x ↦ #(e x).succ) t)”, by intro v; simp [Semiterm.val_substs]⟩
 
 @[simp] lemma term (t : Semiterm ℒₒᵣ V k) :
     ℌ.BoldfaceFunction fun v : Fin k → V ↦ Semiterm.valm V v id t :=

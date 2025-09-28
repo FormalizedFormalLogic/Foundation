@@ -171,7 +171,7 @@ end Language
 namespace Defined
 
 lemma to_definable {R : (Fin k → M) → Prop} {φ : Semisentence L k} (hR : Defined R φ) : L.Definable R :=
-  ⟨Rewriting.embedding φ, fun v ↦ by simp [Semiformula.eval_emb]⟩
+  ⟨Rewriting.emb φ, fun v ↦ by simp [Semiformula.eval_emb]⟩
 
 end Defined
 
@@ -264,7 +264,7 @@ lemma fintype_ex [Fintype ι] {P : ι → (Fin k → M) → Prop}
 lemma retraction (h : L.Definable P) {n} (f : Fin k → Fin n) :
     L.Definable fun v ↦ P (fun i ↦ v (f i)) := by
   rcases h with ⟨φ, hφ⟩
-  exact ⟨(Rew.substs fun i ↦ #(f i)) ▹ φ, fun v ↦ by simp [←hφ.iff]⟩
+  exact ⟨(Rew.subst fun i ↦ #(f i)) ▹ φ, fun v ↦ by simp [←hφ.iff]⟩
 
 lemma exVec {k l} {P : (Fin k → M) → (Fin l → M) → Prop}
     (h : L.Definable fun w : Fin (k + l) → M ↦ P (fun i ↦ w (i.castAdd l)) (fun j ↦ w (j.natAdd k))) :

@@ -196,7 +196,7 @@ def rew (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → 
   simpa using h.iff _
 
 @[simp] lemma ProperWithParamOn.rew {φ : 𝚫-[m].Semiformula M n₁}
-    (h : φ.ProperWithParamOn M) (f : Fin n₁ → Semiterm ℒₒᵣ M n₂) : (φ.rew (Rew.substs f)).ProperWithParamOn M := by
+    (h : φ.ProperWithParamOn M) (f : Fin n₁ → Semiterm ℒₒᵣ M n₂) : (φ.rew (Rew.subst f)).ProperWithParamOn M := by
   rcases φ; intro e;
   simp only [Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, pi_mkDelta]
   exact h.iff _
@@ -331,7 +331,7 @@ instance : ExQuantifier (𝚺-[m + 1].Semiformula ξ) := ⟨ex⟩
 instance : UnivQuantifier (𝚷-[m + 1].Semiformula ξ) := ⟨all⟩
 
 def substSigma (φ : 𝚺-[m + 1].Semiformula ξ 1) (F : 𝚺-[m + 1].Semiformula ξ (n + 1)) :
-    𝚺-[m + 1].Semiformula ξ n := (F ⋏ φ.rew (Rew.substs ![#0])).ex
+    𝚺-[m + 1].Semiformula ξ n := (F ⋏ φ.rew (Rew.subst ![#0])).ex
 
 @[simp] lemma val_verum : (⊤ : Γ.Semiformula ξ n).val = ⊤ := by
   rcases Γ with ⟨Γ, m⟩; rcases Γ <;> simp <;> rfl

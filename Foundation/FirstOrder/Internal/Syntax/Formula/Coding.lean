@@ -100,7 +100,7 @@ noncomputable instance : LCWQIsoGoedelQuote (SyntacticSemiformula L) (Metamath.S
   case hex φ ih => simp [*]
 
 @[simp] lemma typed_quote_substs {n m} (w : Fin n → SyntacticSemiterm L m) (φ : SyntacticSemiformula L n) :
-    (⌜φ ⇜ w⌝ : Metamath.Semiformula V L m) = Metamath.Semiformula.substs (fun i ↦ ⌜w i⌝) ⌜φ⌝ := by
+    (⌜φ ⇜ w⌝ : Metamath.Semiformula V L m) = Metamath.Semiformula.subst (fun i ↦ ⌜w i⌝) ⌜φ⌝ := by
   induction φ using Semiformula.rec' generalizing m
   case hrel => simp [rew_rel, *]; rfl
   case hnrel => simp [rew_nrel, *]; rfl
@@ -242,7 +242,7 @@ lemma coe_quote_eq_quote' (φ : SyntacticSemiformula L n) :
     (⌜φ₁⌝ : V) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := by simp [quote_eq_encode]
 
 noncomputable instance : LCWQIsoGoedelQuote (Semisentence L) (Metamath.Semiformula V L) where
-  gq n := ⟨fun σ ↦ (⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝)⟩
+  gq n := ⟨fun σ ↦ (⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝)⟩
   top := by simp
   bot := by simp
   and _ _ := by simp
@@ -264,7 +264,7 @@ end Semiformula
 namespace Sentence
 
 def typed_quote_def (σ : Semisentence L n) :
-    (⌜σ⌝ : Metamath.Semiformula V L n) = ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝ := rfl
+    (⌜σ⌝ : Metamath.Semiformula V L n) = ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝ := rfl
 
 @[simp] lemma typed_quote_eq (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t = !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≐ ⌜u⌝) := rfl
@@ -279,9 +279,9 @@ def typed_quote_def (σ : Semisentence L n) :
     (⌜(“!!t ≮ !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
 noncomputable instance : GoedelQuote (Semisentence L n) V where
-  quote σ := ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝
+  quote σ := ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝
 
-lemma quote_def (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜(Rewriting.embedding σ : SyntacticSemiformula L n)⌝ := rfl
+lemma quote_def (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝ := rfl
 
 def quote_eq (σ : Semisentence L n) : (⌜σ⌝ : V) = (⌜σ⌝ : Metamath.Semiformula V L n).val := rfl
 

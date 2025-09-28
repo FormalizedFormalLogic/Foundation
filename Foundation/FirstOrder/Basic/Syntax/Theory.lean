@@ -28,7 +28,7 @@ instance {L : Language} : Add (Theory L) := ⟨(· ∪ ·)⟩
 
 lemma add_def : T + U = T ∪ U := rfl
 
-@[coe] def toSyntacticFormulas (T : Theory L) : SyntacticFormulas L := Rewriting.embedding '' T
+@[coe] def toSyntacticFormulas (T : Theory L) : SyntacticFormulas L := Rewriting.emb '' T
 
 instance : Coe (Theory L) (SyntacticFormulas L) := ⟨toSyntacticFormulas⟩
 
@@ -52,7 +52,7 @@ namespace SyntacticFormulas
 
 def lMap (Φ : L₁ →ᵥ L₂) (𝓢 : SyntacticFormulas L₁) : SyntacticFormulas L₂ := Semiformula.lMap Φ '' 𝓢
 
-@[coe] def toTheory (𝓢 : SyntacticFormulas L) : Theory L := Semiformula.close₀ '' 𝓢
+@[coe] def toTheory (𝓢 : SyntacticFormulas L) : Theory L := Semiformula.univCl '' 𝓢
 
 instance : CoeOut (SyntacticFormulas L) (Theory L) := ⟨toTheory⟩
 
@@ -62,7 +62,7 @@ end SyntacticFormulas
     ((insert ↑σ 𝓢 : SyntacticFormulas L) : Theory L) = insert σ ↑𝓢 := by
   ext τ
   simp [SyntacticFormulas.toTheory]
-  simp [Semiformula.close₀]
+  simp [Semiformula.univCl]
   tauto
 
 abbrev ArithmeticAxiom := Theory ℒₒᵣ

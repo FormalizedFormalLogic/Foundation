@@ -116,7 +116,7 @@ lemma val_rewriteMap (f : μ₁ → μ₂) (t : Semiterm L μ₁ n) :
   by simp [val_rew]; congr
 
 lemma val_substs (w : Fin n₁ → Semiterm L ξ n₂) (t : Semiterm L ξ n₁) :
-    (Rew.substs w t).val s e₂ ε = t.val s (fun x => (w x).val s e₂ ε) ε :=
+    (Rew.subst w t).val s e₂ ε = t.val s (fun x => (w x).val s e₂ ε) ε :=
   by simp [val_rew]; congr
 
 @[simp] lemma val_bShift (a : M) (t : Semiterm L ξ n) :
@@ -388,7 +388,7 @@ lemma eval_bShift' (φ : Semiformula L ξ n) :
   simp [eval_rew, Function.comp_def]
 
 @[simp] lemma eval_emb {ε : ξ → M} (φ : Semiformula L Empty n) :
-    Eval s e ε (Rewriting.embedding (ξ := ξ) φ : Semiformula L ξ n) ↔ Eval s e Empty.elim φ := by
+    Eval s e ε (Rewriting.emb (ξ := ξ) φ : Semiformula L ξ n) ↔ Eval s e Empty.elim φ := by
   simp [eval_rew, Function.comp_def, Empty.eq_elim]
 
 @[simp] lemma eval_empty [h : IsEmpty o] (φ : Formula L o) :
@@ -478,9 +478,9 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
       fun x ↦ eval_toEmpty (φ := φ) (e := (x :> e)) (by simpa using hp)
     simp [this]
 
-lemma eval_close {ε} (φ : SyntacticFormula L) :
-    Evalf s ε (∀∀φ) ↔ ∀ f, Evalf s f φ := by
-  simp only [close, eval_univClosure, eval_rew, Matrix.empty_eq, Function.comp_def]
+@[simp] lemma eval_univCl' {ε} (φ : SyntacticFormula L) :
+    Evalf s ε φ.univCl' ↔ ∀ f, Evalf s f φ := by
+  simp only [univCl', eval_univClosure, eval_rew, Matrix.empty_eq, Function.comp_def]
   constructor
   · intro h f
     refine (eval_iff_of_funEqOn φ ?_).mp (h (fun x ↦ f x))
@@ -489,10 +489,10 @@ lemma eval_close {ε} (φ : SyntacticFormula L) :
     refine (eval_iff_of_funEqOn φ ?_).mp (h (fun x ↦ if hx : x < φ.fvSup then f ⟨x, by simp [hx]⟩ else ε 0))
     intro x hx; simp [Rew.fixitr_fvar, lt_fvSup_of_fvar? hx]
 
-lemma eval_close₀ [Nonempty M] (φ : SyntacticFormula L) :
-    Evalb s ![] (∀∀₀φ) ↔ ∀ f, Evalf s f φ := by
+@[simp] lemma eval_univCl [Nonempty M] (φ : SyntacticFormula L) :
+    Evalb s ![] φ.univCl ↔ ∀ f, Evalf s f φ := by
   haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
-  simp [Semiformula.close₀, ←eval_toEmpty (f := default), eval_close]
+  simp [Semiformula.univCl, ←eval_toEmpty (f := default)]
 
 @[simp] lemma eval_enumarateFVar_idxOfFVar_eq_id [DecidableEq M] [Inhabited M] (φ : Semiformula L M n) (v) :
     Semiformula.Evalm M v (fun x ↦ φ.enumarateFVar (φ.idxOfFVar x)) φ ↔ Semiformula.Evalm M v id φ :=

@@ -1027,7 +1027,7 @@ noncomputable def repeatVec (x k : V) : V := repeatVec.adjointruction.result ![x
 
 section
 
-def _root_.LO.FirstOrder.Arithmetic.repeatVecDef : 𝚺₁.Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.substs ![#0, #2, #1])
+def _root_.LO.FirstOrder.Arithmetic.repeatVecDef : 𝚺₁.Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
 lemma repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via repeatVecDef :=
   fun v ↦ by simp [repeatVec.adjointruction.result_defined_iff, repeatVecDef]; rfl

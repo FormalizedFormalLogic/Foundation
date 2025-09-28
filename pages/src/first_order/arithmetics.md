@@ -79,7 +79,7 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 |            $\mathrm{Semiterm}_x (y)$            | [`Semiterm L x y`]      |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
 |                  $t [\vec{w}]$                  | [`L.termSubst w t`]     |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
 |           $\mathrm{Semiformula}_x(y)$           | [`Semiformula L x y`]   |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
-|                  $φ [\vec{w}]$                  | [`substs L w φ`]        |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
+|                  $φ [\vec{w}]$                  | [`subst L w φ`]        |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
 |            $\mathrm{Pr}_T(\varphi)$             | [`T.Provable φ`]       |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Sigma_1$ |        -         |
 
 [`x ≤ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/PeanoMinus/Basic.html#LO.PeanoMinus.instLE
@@ -112,6 +112,6 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 [`Semiterm L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Basic.html#LO.ISigma1.Metamath.IsSemiterm
 [`L.termSubst w t`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Functions.html#LO.ISigma1.Metamath.Language.termSubst
 [`Semiformula L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Basic.html#LO.ISigma1.Metamath.IsSemiformula
-[`substs L w φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Functions.html#LO.ISigma1.Metamath.substs
+[`subst L w φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Functions.html#LO.ISigma1.Metamath.subst
 [`T.Provable φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/FormalizedR0.html#LO.FirstOrder.Theory.Provable%E2%82%90
 

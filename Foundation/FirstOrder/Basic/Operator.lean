@@ -25,7 +25,7 @@ def equiv : Operator L n ≃ ClosedSemiterm L n where
   right_inv := by intro _; simp
 
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L ξ n) : Semiterm L ξ n :=
-  Rew.substs v (Rew.emb o.term)
+  Rew.subst v (Rew.emb o.term)
 
 @[coe] abbrev const (c : Const L) : Semiterm L ξ n := c.operator ![]
 
@@ -298,7 +298,7 @@ abbrev Const (L : Language.{u}) := Operator L 0
 namespace Operator
 
 def operator {arity : ℕ} (o : Operator L arity) (v : Fin arity → Semiterm L ξ n) : Semiformula L ξ n :=
-  Rewriting.embedding o.sentence ⇜ v
+  Rewriting.emb o.sentence ⇜ v
 
 @[coe] def const (c : Const L) : Semiformula L ξ n := c.operator ![]
 
@@ -309,7 +309,7 @@ def comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) : Operator L l
 
 lemma operator_comp (o : Operator L k) (w : Fin k → Semiterm.Operator L l) (v : Fin l → Semiterm L ξ n) :
   (o.comp w).operator v = o.operator (fun x => (w x).operator v) := by
-    unfold operator Rewriting.embedding Rewriting.substitute comp
+    unfold operator Rewriting.emb Rewriting.subst comp
     simp only [operator, ← TransitiveRewriting.comp_app, Rew.emb_eq_id, Rew.comp_id];
     congr 2
     ext
@@ -501,7 +501,7 @@ protected lemma operator' (o : Semiterm.Operator L k) (v : Fin k → Semiterm L 
 
 lemma hom_operator (o : Semiformula.Operator L k) (v : Fin k → Semiterm L ξ₁ n₁) :
     ω ▹ o.operator v = o.operator fun i ↦ ω (v i) := by
-  unfold Semiformula.Operator.operator Rewriting.substitute Rewriting.embedding
+  unfold Semiformula.Operator.operator Rewriting.subst Rewriting.emb
   simp only [← TransitiveRewriting.comp_app]; congr 2
   ext
   · simp [Rew.comp_app]
