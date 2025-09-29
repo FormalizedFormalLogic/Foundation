@@ -65,57 +65,5 @@ instance : Modal.ECN ⪱ Modal.EMCN := by
       . simp! [M, Semantics.Realize, Satisfies];
         tauto_set;
 
-instance : Modal.EMN ⪱ Modal.EMCN := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.C (.atom 0) (.atom 1));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMN);
-      apply not_validOnFrameClass_of_exists_model_world;
-      let M : Model := {
-        World := Fin 2,
-        𝒩 := λ w =>
-          match w with
-          | 0 => {{0}, {1}, {0, 1}}
-          | 1 => {{0}, {0, 1}},
-        Val := λ w =>
-          match w with
-          | 0 => {0}
-          | 1 => {1}
-          | _ => Set.univ
-      };
-      use M, 0;
-      constructor;
-      . exact {
-          mono := by
-            rintro X Y e he;
-            constructor;
-            . match e with
-              | 0 => rcases Set.Fin2.all_cases X with rfl | rfl | rfl | rfl <;> simp_all [M];
-              | 1 =>
-                rcases Set.Fin2.all_cases X with rfl | rfl | rfl | rfl;
-                case inr.inr.inl =>
-                  rcases Set.Fin2.all_cases Y with rfl | rfl | rfl | rfl <;>
-                  . simp [M] at he; tauto_set;
-                all_goals simp_all [M];
-            . match e with
-              | 0 => rcases Set.Fin2.all_cases Y with rfl | rfl | rfl | rfl <;> simp_all [M];
-              | 1 =>
-                rcases Set.Fin2.all_cases Y with rfl | rfl | rfl | rfl;
-                case inr.inr.inl =>
-                  rcases Set.Fin2.all_cases X with rfl | rfl | rfl | rfl <;>
-                  . simp [M] at he; tauto_set;
-                all_goals simp_all [M];
-          contains_unit := by
-            ext e;
-            match e with | 0 | 1 => simp_all [M, Set.Fin2.eq_univ];
-        }
-      . simp! [M, Semantics.Realize, Satisfies];
-        tauto_set;
-
-
 
 end LO.Modal

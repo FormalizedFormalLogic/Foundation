@@ -1,5 +1,6 @@
 import Foundation.Modal.Neighborhood.Logic.E
 import Foundation.Modal.Neighborhood.Supplementation
+import Foundation.Vorspiel.Set.Fin
 
 namespace LO.Modal
 
@@ -15,7 +16,49 @@ protected abbrev FrameClass.EM : FrameClass := { F | F.IsEM }
 instance : Frame.simple_whitehole.IsEM where
   mono := by simp_all;
 
+abbrev counterframe_axiomC₁ : Frame := {
+  World := Fin 2,
+  𝒩 := λ w =>
+    match w with
+    | 0 => {{0}, {1}, {0, 1}}
+    | 1 => {{1}, {0, 1}}
+}
+
+instance : counterframe_axiomC₁.IsEM where
+  mono := by
+    rintro X Y w hw;
+    constructor;
+    . match w with
+      | 0 | 1 =>
+        rcases Set.Fin2.all_cases X with rfl | rfl | rfl | rfl;
+        case inr.inl =>
+          rcases Set.Fin2.all_cases Y with rfl | rfl | rfl | rfl <;>
+          . simp [counterframe_axiomC₁] at hw;
+            tauto_set;
+        all_goals simp_all [counterframe_axiomC₁];
+    . match w with
+      | 0 | 1 =>
+        rcases Set.Fin2.all_cases Y with rfl | rfl | rfl | rfl;
+        case inr.inl =>
+          rcases Set.Fin2.all_cases X with rfl | rfl | rfl | rfl <;>
+          . simp [counterframe_axiomC₁] at hw;
+            tauto_set;
+        all_goals simp_all [counterframe_axiomC₁];
+
+@[simp]
+lemma counterframe_axiomC₁.not_validate_axiomC : ¬counterframe_axiomC₁ ⊧ Axioms.C (.atom 0) (.atom 1) := by
+  apply ValidOnFrame.not_of_exists_valuation_world;
+  use (λ a =>
+    match a with
+    | 0 => {0}
+    | 1 => {1}
+    | _ => ∅
+  ), 0;
+  simp [Satisfies];
+  tauto_set;
+
 end Neighborhood
+
 
 namespace EM
 
@@ -48,6 +91,22 @@ instance : Modal.EM ⪱ Modal.EMN := by
       use Frame.simple_whitehole;
       constructor;
       . apply Set.mem_setOf_eq.mpr; infer_instance;
+      . simp;
+
+instance : Modal.EM ⪱ Modal.EMC := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.C (.atom 0) (.atom 1));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EM);
+      apply not_validOnFrameClass_of_exists_frame;
+      use counterframe_axiomC₁;
+      constructor;
+      . apply Set.mem_setOf_eq.mpr;
+        infer_instance;
       . simp;
 
 instance : Modal.E ⪱ Modal.EM := by

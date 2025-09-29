@@ -145,53 +145,6 @@ instance : Modal.EC ⪱ Modal.EMC := by
         simp!;
         omega;
 
-instance : Modal.EM ⪱ Modal.EMC := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.C (.atom 0) (.atom 1));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EM);
-      apply not_validOnFrameClass_of_exists_model_world;
-      let M : Model := {
-        World := Fin 2,
-        𝒩 := λ w =>
-          match w with
-          | 0 => {{0}, {1}, {0, 1}}
-          | 1 => {{1}, {0, 1}},
-        Val := λ w =>
-          match w with
-          | 0 => {0}
-          | 1 => {1}
-          | _ => Set.univ
-      };
-      use M, 0;
-      constructor;
-      . exact {
-          -- TODO: need golf!
-          mono := by
-            rintro X Y w hw;
-            constructor;
-            . match w with
-              | 0 | 1 =>
-                rcases Set.Fin2.all_cases X with rfl | rfl | rfl | rfl;
-                case inr.inl =>
-                  rcases Set.Fin2.all_cases Y with rfl | rfl | rfl | rfl <;>
-                  . simp [M] at hw; tauto_set;
-                all_goals simp_all [M];
-            . match w with
-              | 0 | 1 =>
-                rcases Set.Fin2.all_cases Y with rfl | rfl | rfl | rfl;
-                case inr.inl =>
-                  rcases Set.Fin2.all_cases X with rfl | rfl | rfl | rfl <;>
-                  . simp [M] at hw; tauto_set;
-                all_goals simp_all [M];
-        }
-      . simp! [M, Semantics.Realize, Satisfies];
-        tauto_set;
-
 instance : Modal.EK ⪱ Modal.EMC := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
