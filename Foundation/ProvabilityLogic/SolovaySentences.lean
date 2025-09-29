@@ -149,7 +149,7 @@ variable {F : Kripke.Frame} {r : F} [F.IsFiniteTree r] [Fintype F]
 
 section model
 
-variable (T) {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable (T) {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def NegativeSuccessor (φ ψ : V) : Prop := T.ProvabilityComparison (neg ℒₒᵣ φ) (neg ℒₒᵣ ψ)
 
@@ -262,7 +262,7 @@ section model
 
 variable (T)
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 open Modal ProvabilityLogic Kripke
 
@@ -474,7 +474,7 @@ lemma Solovay.box_disjunction [𝗜𝚺₁ ⪯ T] {i : F} (ne : r ≠ i) :
   have TP : T.internalize V ⊢ ⌜θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j⌝ :=
     internal_provable_of_outer_provable <| by
       have : 𝗜𝚺₁ ⊢ θ T i ➝ T.solovay i ⋎ ⩖ j ∈ {j : F | i ≺ j}, T.solovay j :=
-        oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+        provable_of_models _ _ fun (V : Type) _ _ ↦ by
           simpa [models_iff] using Θ.disjunction i
       exact Entailment.WeakerThan.pbl this
   have Tθ : T.internalize V ⊢ ⌜θ T i⌝ :=
@@ -526,16 +526,16 @@ variable (T F)
 def _root_.LO.ProvabilityLogic.SolovaySentences.standard [𝗜𝚺₁ ⪯ T] : SolovaySentences T.standardProvability F r where
   σ := T.solovay
   SC1 i j ne :=
-    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+    provable_of_models _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using Solovay.exclusive ne
   SC2 i j h :=
-    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+    provable_of_models _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using Solovay.consistent h
   SC3 i h :=
-    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+    provable_of_models _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff, standardProvability_def] using Solovay.box_disjunction h
   SC4 :=
-    oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+    provable_of_models _ _ fun (V : Type) _ _ ↦ by
       simpa [models_iff] using disjunctive
 
 lemma _root_.LO.ProvabilityLogic.SolovaySentences.standard_σ_def [𝗜𝚺₁ ⪯ T] :

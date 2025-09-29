@@ -10,7 +10,7 @@ namespace LO
 
 open FirstOrder Arithmetic PeanoMinus
 
-variable {V : Type*} [ORingStruc V]
+variable {V : Type*} [ORingStructure V]
 
 namespace IOpen
 

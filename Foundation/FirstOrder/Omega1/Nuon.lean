@@ -5,7 +5,7 @@ namespace LO.Omega1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₀ + 𝝮₁]
 
 namespace Nuon
 

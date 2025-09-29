@@ -4,7 +4,7 @@ namespace LO
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -473,7 +473,7 @@ def construction : Fixpoint.Construction V (blueprint T) where
       Matrix.cons_app_six, orIntro.eval, eval_qqOrDef, allIntro.eval, eval_qqAllDef,
       free.defined.df.iff, setShift.defined.df.iff, exIntro.eval, eval_qqExDef,
       IsSemiterm.defined.df.iff, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
-      ORingStruc.zero_eq_zero, substs1.defined.df.iff, Fin.succ_one_eq_two, wkRule.eval,
+      ORingStructure.zero_eq_zero, substs1.defined.df.iff, Fin.succ_one_eq_two, wkRule.eval,
       bitSubset_defined_iff, shiftRule.eval, cutRule.eval, axm.eval, Δ₁Class.defined.df.iff,
       LogicalConnective.Prop.or_eq, HierarchySymbol.Semiformula.pi_mkDelta,
       HierarchySymbol.Semiformula.val_mkPi, Semiformula.eval_all,
@@ -507,7 +507,7 @@ def construction : Fixpoint.Construction V (blueprint T) where
       Matrix.cons_app_six, orIntro.eval, eval_qqOrDef, allIntro.eval, eval_qqAllDef,
       free.defined.df.iff, setShift.defined.df.iff, exIntro.eval, eval_qqExDef,
       IsSemiterm.defined.df.iff, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
-      ORingStruc.zero_eq_zero, substs1.defined.df.iff, Fin.succ_one_eq_two, wkRule.eval,
+      ORingStructure.zero_eq_zero, substs1.defined.df.iff, Fin.succ_one_eq_two, wkRule.eval,
       bitSubset_defined_iff, shiftRule.eval, cutRule.eval, axm.eval, Δ₁Class.defined.df.iff,
       LogicalConnective.Prop.or_eq]
 

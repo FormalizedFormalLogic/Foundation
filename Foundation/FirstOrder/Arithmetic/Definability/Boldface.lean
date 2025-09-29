@@ -24,7 +24,7 @@ variable (ξ : Type*) (n : ℕ)
 
 open PeanoMinus
 
-variable {V : Type*} [ORingStruc V]
+variable {V : Type*} [ORingStructure V]
 
 def Defined (R : (Fin k → V) → Prop) : {ℌ : HierarchySymbol} → ℌ.Semisentence k → Prop
   | 𝚺-[_], φ => FirstOrder.Defined' R φ.val

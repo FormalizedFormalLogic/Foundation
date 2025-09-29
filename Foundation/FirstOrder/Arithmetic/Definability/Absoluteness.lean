@@ -9,7 +9,7 @@ lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisenten
     ℕ ⊧/v φ ↔ ℕ ⊧ₘ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
   simp [models_iff]
 
-variable (V : Type*) [ORingStruc V] [V ⊧ₘ* 𝗣𝗔⁻]
+variable (V : Type*) [ORingStructure V] [V ⊧ₘ* 𝗣𝗔⁻]
 
 lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence ℒₒᵣ k} :
     V ⊧/(v ·) φ ↔ V ⊧ₘ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by

@@ -6,7 +6,7 @@ open PeanoMinus
 
 variable {ξ : Type*} {n : ℕ}
 
-variable {V : Type*} [ORingStruc V]
+variable {V : Type*} [ORingStructure V]
 
 variable {ℌ : HierarchySymbol} {Γ Γ' : SigmaPiDelta}
 
@@ -23,7 +23,7 @@ abbrev Bounded₃ (f : V → V → V → V) : Prop := Bounded (k := 3) (fun v �
 
 instance (f : (Fin k → V) → V) [h : Bounded f] : Bounded f := by
   rcases h with ⟨t, ht⟩
-  exact ⟨Semiterm.lMap Language.oringEmb t, by simpa⟩
+  exact ⟨t, by simpa⟩
 
 variable {ℌ}
 

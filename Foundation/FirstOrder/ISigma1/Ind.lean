@@ -8,7 +8,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 @[elab_as_elim] lemma sigma1_pos_succ_induction
     {P : V → Prop} (hP : 𝚺₁-Predicate P)
@@ -199,7 +199,7 @@ namespace LO.Induction
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
 
-variable {V : Type*} [ORingStruc V]
+variable {V : Type*} [ORingStructure V]
 
 variable (m : ℕ) [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝗡𝗗𝚺 m]
 

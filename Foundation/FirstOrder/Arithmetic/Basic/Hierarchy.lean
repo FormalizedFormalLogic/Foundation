@@ -334,14 +334,6 @@ lemma of_open {φ : Semiformula L ξ n} : φ.Open → Hierarchy Γ s φ := by
 
 variable {L : Language} [L.ORing]
 
-set_option linter.flexible false in
-lemma oringEmb {φ : Semiformula ℒₒᵣ ξ n} : Hierarchy Γ s φ → Hierarchy Γ s (Semiformula.lMap (Language.oringEmb : ℒₒᵣ →ᵥ L) φ) := by
-  intro h; induction h <;> try simp [*, Semiformula.lMap_rel, Semiformula.lMap_nrel]
-  case sigma ih => exact ih.accum _
-  case pi ih => exact ih.accum _
-  case dummy_pi ih => exact ih.dummy_pi
-  case dummy_sigma ih => exact ih.dummy_sigma
-
 lemma iff_iff {φ ψ : Semiformula L ξ n} :
     Hierarchy b s (φ ⭤ ψ) ↔ (Hierarchy b s φ ∧ Hierarchy b.alt s φ ∧ Hierarchy b s ψ ∧ Hierarchy b.alt s ψ) := by
   simp [Semiformula.iff_eq]; tauto

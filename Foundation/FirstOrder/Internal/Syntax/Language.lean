@@ -27,7 +27,7 @@ alias _root_.LO.FirstOrder.Language.isRel := Language.LORDefinable.rel
 alias _root_.LO.FirstOrder.Language.iff_isFunc := Language.LORDefinable.func_iff
 alias _root_.LO.FirstOrder.Language.iff_isRel := Language.LORDefinable.rel_iff
 
-variable {V : Type*} [ORingStruc V] [L.LORDefinable]
+variable {V : Type*} [ORingStructure V] [L.LORDefinable]
 
 def _root_.LO.FirstOrder.Language.IsFunc (arity f : V) : Prop := V ⊧/![arity, f] L.isFunc.val
 
@@ -146,7 +146,7 @@ instance : (ℒₒᵣ).LORDefinable where
 
 namespace InternalArithmetic
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def zeroIndex : ℕ := Encodable.encode (Language.Zero.zero : (ℒₒᵣ : FirstOrder.Language).Func 0)
 

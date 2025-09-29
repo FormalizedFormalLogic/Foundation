@@ -27,7 +27,7 @@ notation "𝗤" => RobinsonQ
 
 namespace RobinsonQ
 
-open ORingStruc
+open ORingStructure
 
 @[simp] instance : ℕ ⊧ₘ* 𝗤 := ⟨by
   intro σ h
@@ -47,7 +47,7 @@ open ORingStruc
 
 instance : 𝗘𝗤 ⪯ 𝗤 := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ equal φ hp
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗤]
+variable {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗤]
 
 @[simp] protected lemma succ_ne_zero : ∀ a : M, a + 1 ≠ 0 := by
   simpa [models_iff] using ModelsTheory.models M RobinsonQ.succNeZero
@@ -173,7 +173,7 @@ lemma iff_le_one_eq_zero {a : M} : a < 1 ↔ a = 0 := by
   match n with
   |     0 => simp
   |     1 => simp
-  | n + 2 => simp [ORingStruc.numeral, RobinsonQ.add_succ, numeral_zero_add (n + 1)]
+  | n + 2 => simp [ORingStructure.numeral, RobinsonQ.add_succ, numeral_zero_add (n + 1)]
 
 lemma numeral_add_one (n : ℕ) : (numeral n : M) + 1 = numeral (n + 1) := by
   match n with
@@ -305,7 +305,7 @@ instance : M ⊧ₘ* 𝗥₀ := modelsTheory_iff.mpr <| by
     suffices ∀ (x : M), x < numeral n ↔ ∃ i < n, x = numeral i by simpa [models_iff];
     apply iff_lt_numeral_exists_numeral;
 
-instance : 𝗥₀ ⪯ 𝗤 := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
+instance : 𝗥₀ ⪯ 𝗤 := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 
 instance : 𝗥₀ ⪱ 𝗤 :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
