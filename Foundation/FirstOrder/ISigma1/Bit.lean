@@ -111,14 +111,14 @@ syntax:max "∀ " ident " ∈' " first_order_term ", " first_order_formula:0 : f
 syntax:max "∃ " ident " ∈' " first_order_term ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | ∀ $x ∈' $t, $p]) => do
+  | `(⤫formula(lit)[ $binders* | $fbinders* | ∀ $x ∈' $t, $p]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(ballIn ⤫term[ $binders* | $fbinders* | $t] ⤫formula[$binders'* | $fbinders* | $p])
-  | `(⤫formula[ $binders* | $fbinders* | ∃ $x ∈' $t, $p]) => do
+    `(ballIn ⤫term(lit)[ $binders* | $fbinders* | $t] ⤫formula(lit)[$binders'* | $fbinders* | $p])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | ∃ $x ∈' $t, $p]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(bexIn ⤫term[$binders* | $fbinders* | $t] ⤫formula[$binders'* | $fbinders* | $p])
+    `(bexIn ⤫term(lit)[$binders* | $fbinders* | $t] ⤫formula(lit)[$binders'* | $fbinders* | $p])
 
 syntax:45 first_order_term:45 " ∼[" first_order_term "]" first_order_term:0 : first_order_formula
 syntax:45 first_order_term:45 " ≁[" first_order_term "]" first_order_term:0 : first_order_formula
@@ -126,14 +126,14 @@ syntax:45 ":⟪" first_order_term ", " first_order_term "⟫:∈ " first_order_t
 syntax:45 ":⟪" first_order_term ", " first_order_term ", " first_order_term "⟫:∈ " first_order_term:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ] $t₂:first_order_term]) =>
-    `(memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
-  | `(⤫formula[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term]) =>
-    `(∼memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
-  | `(⤫formula[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term⟫:∈ $u:first_order_term]) =>
-    `(memRelOpr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂]])
-  | `(⤫formula[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term, $t₃:first_order_term⟫:∈ $u:first_order_term]) =>
-    `(memRel₃Opr.operator ![⤫term[$binders* | $fbinders* | $u], ⤫term[$binders* | $fbinders* | $t₁], ⤫term[$binders* | $fbinders* | $t₂], ⤫term[$binders* | $fbinders* | $t₃]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ∼[ $u:first_order_term ] $t₂:first_order_term]) =>
+    `(memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t₁:first_order_term ≁[ $u:first_order_term ] $t₂:first_order_term]) =>
+    `(∼memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term⟫:∈ $u:first_order_term]) =>
+    `(memRelOpr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | :⟪$t₁:first_order_term, $t₂:first_order_term, $t₃:first_order_term⟫:∈ $u:first_order_term]) =>
+    `(memRel₃Opr.operator ![⤫term(lit)[$binders* | $fbinders* | $u], ⤫term(lit)[$binders* | $fbinders* | $t₁], ⤫term(lit)[$binders* | $fbinders* | $t₂], ⤫term(lit)[$binders* | $fbinders* | $t₃]])
 end
 
 @[simp] lemma Hierarchy.memRel {t₁ t₂ u : Semiterm ℒₒᵣ μ n} : Hierarchy Γ s “!!t₁ ∼[ !!u ] !!t₂” := by

@@ -338,14 +338,14 @@ syntax:max "∃! " first_order_formula:0 : first_order_formula
 syntax:max "∃! " ident ", " first_order_formula:0 : first_order_formula
 
 macro_rules
-  | `(⤫formula[ $binders* | $fbinders* | ∃! $φ:first_order_formula ]) => do
+  | `(⤫formula($type)[ $binders* | $fbinders* | ∃! $φ:first_order_formula ]) => do
     let v := mkIdent (Name.mkSimple ("var" ++ toString binders.size))
     let binders' := binders.insertIdx 0 v
-    `(∃'! ⤫formula[ $binders'* | $fbinders* | $φ])
-  | `(⤫formula[ $binders* | $fbinders* | ∃! $x, $φ ])                 => do
+    `(∃'! ⤫formula($type)[ $binders'* | $fbinders* | $φ])
+  | `(⤫formula($type)[ $binders* | $fbinders* | ∃! $x, $φ ])                 => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
     let binders' := binders.insertIdx 0 x
-    `(∃'! ⤫formula[ $binders'* | $fbinders* | $φ ])
+    `(∃'! ⤫formula($type)[ $binders'* | $fbinders* | $φ ])
 
 end BinderNotation
 

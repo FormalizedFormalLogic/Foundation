@@ -326,7 +326,7 @@ lemma semanticMainLemma_val (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
 
 lemma Model.models (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
     Model T Γ ⊧ₘ* T :=
-  ⟨fun φ hφ ↦ by simpa [Semiformula.eval_close] using semanticMainLemma_val nwf _ (chainSet_id nwf hφ)⟩
+  ⟨fun φ hφ ↦ by simpa [Semiformula.eval_univCl] using semanticMainLemma_val nwf _ (chainSet_id nwf hφ)⟩
 
 lemma semanticMainLemmaTop (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : SyntacticFormula L} (h : φ ∈ Γ) :
     ¬Evalf (Model.structure T Γ) Semiterm.fvar φ :=

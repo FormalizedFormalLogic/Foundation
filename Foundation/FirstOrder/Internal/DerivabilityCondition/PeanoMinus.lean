@@ -217,38 +217,38 @@ lemma lt_iff_substItrDisj (t : Term V ℒₒᵣ) (m : V) :
     cl_prover [ih, this]
 
 lemma ball_intro (φ : Semiformula V ℒₒᵣ 1) (n : V)
-    (bs : ∀ i < n, T.internalize V ⊢ φ.substs ![𝕹 i]) :
+    (bs : ∀ i < n, T.internalize V ⊢ φ.subst ![𝕹 i]) :
     T.internalize V ⊢ φ.ball (𝕹 n) := by
   apply TProof.all!
-  suffices T.internalize V ⊢ (&'0 <' 𝕹 n) ➝ φ⤉.substs ![&'0] by
+  suffices T.internalize V ⊢ (&'0 <' 𝕹 n) ➝ φ⤉.subst ![&'0] by
     simpa [imp_def, Semiformula.free, SemitermVec.q, Semiterm.shift_substs, Semiterm.substs_substs]
-  suffices T.internalize V ⊢ substItrDisj ![&'0] (#'1 ≐ #'0) n ➝ φ⤉.substs ![&'0] from
+  suffices T.internalize V ⊢ substItrDisj ![&'0] (#'1 ≐ #'0) n ➝ φ⤉.subst ![&'0] from
     C!_trans (K!_left (lt_iff_substItrDisj T &'0 n)) this
   apply TProof.substItrDisj_left_intro
   · intro i hi
-    suffices T.internalize V ⊢ (&'0 ≐ 𝕹 i) ➝ φ⤉.substs ![&'0] by simpa
-    have hi : T.internalize V ⊢ φ⤉.substs ![𝕹 i] := by
+    suffices T.internalize V ⊢ (&'0 ≐ 𝕹 i) ➝ φ⤉.subst ![&'0] by simpa
+    have hi : T.internalize V ⊢ φ⤉.subst ![𝕹 i] := by
       simpa [Semiformula.shift_substs] using TProof.shift! (bs i hi)
-    have rl : T.internalize V ⊢ (𝕹 i ≐ &'0) ➝ φ⤉.substs ![𝕹 i] ➝ φ⤉.substs ![&'0] :=
+    have rl : T.internalize V ⊢ (𝕹 i ≐ &'0) ➝ φ⤉.subst ![𝕹 i] ➝ φ⤉.subst ![&'0] :=
       replace T φ.shift (𝕹 i) (&'0)
     have ec : T.internalize V ⊢ (&'0 ≐ 𝕹 i) ➝ (𝕹 i ≐ &'0) := eq_symm T (Semiterm.fvar 0) (𝕹 i)
     cl_prover [hi, rl, ec]
 
 lemma bex_intro (φ : Semiformula V ℒₒᵣ 1) (n : V) {i}
-    (hi : i < n) (b : T.internalize V ⊢ φ.substs ![𝕹 i]) :
+    (hi : i < n) (b : T.internalize V ⊢ φ.subst ![𝕹 i]) :
     T.internalize V ⊢ φ.bex (𝕹 n) := by
   apply TProof.ex! (𝕹 i)
-  suffices T.internalize V ⊢ (𝕹 i <' 𝕹 n) ⋏ φ.substs ![𝕹 i] by simpa
+  suffices T.internalize V ⊢ (𝕹 i <' 𝕹 n) ⋏ φ.subst ![𝕹 i] by simpa
   apply K!_intro
   · exact numeral_lt T hi
   · exact b
 
 lemma ball_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
     T.internalize V ⊢ (t ≐ u) ➝ φ.ball t ➝ φ.ball u := by
-  simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.substs ![#'0]).ball #'0) t u
+  simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.subst ![#'0]).ball #'0) t u
 
 lemma bex_replace (φ : Semiformula V ℒₒᵣ 1) (t u : Term V ℒₒᵣ) :
     T.internalize V ⊢ (t ≐ u) ➝ φ.bex t ➝ φ.bex u := by
-  simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.substs ![#'0]).bex #'0) t u
+  simpa [SemitermVec.q, Semiformula.substs_substs] using replace T ((φ.subst ![#'0]).bex #'0) t u
 
 end LO.ISigma1.Metamath.InternalArithmetic

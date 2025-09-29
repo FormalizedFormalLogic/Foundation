@@ -30,14 +30,14 @@ lemma substNumeral_app_quote_nat_model (σ : Semisentence ℒₒᵣ 1) (n : ℕ)
   substNumeral ⌜σ⌝ (n : V) = ⌜(σ/[.numeral n] : Sentence ℒₒᵣ)⌝ := by
   simp [
     substNumeral, Sentence.quote_def, Semiformula.quote_def,
-    Rewriting.embedding_substs_eq_substs_coe₁
+    Rewriting.emb_subst_eq_subst_coe₁
   ];
 
 lemma substNumeral_app_quote_nat_Nat (σ : Semisentence ℒₒᵣ 1) (n : ℕ) :
   substNumeral ⌜σ⌝ n = ⌜(σ/[.numeral n] : Sentence ℒₒᵣ)⌝ := by
   simp [
     substNumeral, Sentence.quote_def, Semiformula.quote_def,
-    Rewriting.embedding_substs_eq_substs_coe₁
+    Rewriting.emb_subst_eq_subst_coe₁
   ];
 
 end LO.ISigma1.Metamath.InternalArithmetic
