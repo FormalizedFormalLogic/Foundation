@@ -386,11 +386,11 @@ end transitiveFiltration
 
 open Classical in
 def supplementedTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransitive] (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Filtration M T where
-  B := (transitiveFiltration M T).toModel.Supplementation.box
+  B := (transitiveFiltration M T).toModel.supplementation.box
   B_def := by
     intro φ hφ;
     suffices ⋃₀ {x | ∃ Y ⊆ 【M.truthset φ】, (transitiveFiltration M T).B Y = x} = 【M (□φ)】 by
-      dsimp [Filtration.toModel, Frame.mk_ℬ, Frame.Supplementation, Frame.box];
+      dsimp [Filtration.toModel, Frame.mk_ℬ, Frame.supplementation, Frame.box];
       exact this;
     ext W;
     constructor;
@@ -411,15 +411,15 @@ namespace supplementedTransitiveFiltration
 variable [M.IsMonotonic] [M.IsTransitive]
 
 protected instance isMonotonic: (supplementedTransitiveFiltration M T).toModel.IsMonotonic := ⟨
-  Frame.Supplementation.isMonotonic (F := (transitiveFiltration M T).toModel.toFrame).mono
+  Frame.supplementation.isMonotonic (F := (transitiveFiltration M T).toModel.toFrame).mono
 ⟩
 
 protected instance isTransitive : (supplementedTransitiveFiltration M T).toModel.IsTransitive := ⟨
-  Frame.Supplementation.isTransitive (F := (transitiveFiltration M T).toModel.toFrame).trans
+  Frame.supplementation.isTransitive (F := (transitiveFiltration M T).toModel.toFrame).trans
 ⟩
 
 protected instance isReflexive [M.IsReflexive] : (supplementedTransitiveFiltration M T).toModel.IsReflexive := ⟨
-  Frame.Supplementation.isReflexive (F := (transitiveFiltration M T).toModel.toFrame).refl
+  Frame.supplementation.isReflexive (F := (transitiveFiltration M T).toModel.toFrame).refl
 ⟩
 
 end supplementedTransitiveFiltration

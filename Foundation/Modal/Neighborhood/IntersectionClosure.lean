@@ -37,14 +37,14 @@ lemma Frame.intersectionClosure.mem_box_of_mem_original_box {F : Frame} {x : F} 
   use {s};
   refine ⟨?_, ?_, ?_⟩ <;> simp_all;
 
-def Frame.quasiFiltering (F : Frame) : Frame := F.intersectionClosure.Supplementation
+def Frame.quasiFiltering (F : Frame) : Frame := F.intersectionClosure.supplementation
 
 namespace Frame.quasiFiltering
 
-@[grind] lemma symm_𝒩 : F.quasiFiltering.𝒩 = F.Supplementation.intersectionClosure.𝒩 := by
+@[grind] lemma symm_𝒩 : F.quasiFiltering.𝒩 = F.supplementation.intersectionClosure.𝒩 := by
   dsimp [quasiFiltering];
   ext a X;
-  simp [Frame.intersectionClosure, Frame.Supplementation, Frame.mk_ℬ];
+  simp [Frame.intersectionClosure, Frame.supplementation, Frame.mk_ℬ];
   constructor;
   . rintro ⟨_, hb₁, Y, hb₃, rfl, hb₅⟩;
     use Y;
@@ -65,23 +65,23 @@ namespace Frame.quasiFiltering
         have := @hZ₁ a;
         sorry;
 
-lemma symm_box : F.quasiFiltering.box = F.Supplementation.intersectionClosure.box := by
+lemma symm_box : F.quasiFiltering.box = F.supplementation.intersectionClosure.box := by
   ext x;
   simp [symm_𝒩];
   tauto;
 
-instance isMonotonic : F.quasiFiltering.IsMonotonic := Frame.Supplementation.isMonotonic
+instance isMonotonic : F.quasiFiltering.IsMonotonic := Frame.supplementation.isMonotonic
 
-instance isRegular : F.quasiFiltering.IsRegular := Frame.Supplementation.isRegular
+instance isRegular : F.quasiFiltering.IsRegular := Frame.supplementation.isRegular
 
 instance isTransitive [F.IsTransitive] : F.quasiFiltering.IsTransitive := by
   constructor;
   intro X w hw;
-  obtain ⟨Y, hY₁, Ys, hYs₁, rfl, hYs₂⟩ := Frame.Supplementation.iff_exists_subset.mp hw;
+  obtain ⟨Y, hY₁, Ys, hYs₁, rfl, hYs₂⟩ := Frame.supplementation.iff_exists_subset.mp hw;
   apply Frame.mono' (F := F.quasiFiltering) (X := (⋂ Yi ∈ Ys, F.box Yi)) $ by
     intro a ha;
     simp only [
-      quasiFiltering, intersectionClosure, ne_eq, Supplementation, box, mk_ℬ,
+      quasiFiltering, intersectionClosure, ne_eq, supplementation, box, mk_ℬ,
       Set.mem_sUnion, Set.mem_setOf_eq, exists_exists_and_eq_and
     ];
     use (⋂ Yi ∈ Ys, Yi);
@@ -106,7 +106,7 @@ instance isTransitive [F.IsTransitive] : F.quasiFiltering.IsTransitive := by
 
 lemma mem_box_of_mem_original_box {F : Frame} {x : F} {s : Set F} : x ∈ F.box s → x ∈ F.quasiFiltering.box s := by
   intro hx;
-  suffices x ∈ F.Supplementation.intersectionClosure.box s by exact symm_box ▸ this;
+  suffices x ∈ F.supplementation.intersectionClosure.box s by exact symm_box ▸ this;
   apply Frame.intersectionClosure.mem_box_of_mem_original_box;
   use F.box s;
   constructor;
