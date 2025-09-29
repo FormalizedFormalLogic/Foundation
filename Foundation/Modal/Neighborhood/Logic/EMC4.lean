@@ -14,7 +14,12 @@ namespace Neighborhood
 protected class Frame.IsEMC4 (F : Frame) extends F.IsMonotonic, F.IsRegular, F.IsTransitive where
 protected abbrev FrameClass.EMC4 : FrameClass := { F | F.IsEMC4 }
 
+protected class Frame.IsFiniteEMC4 (F : Frame) extends F.IsEMC4, F.IsFinite where
+protected abbrev FrameClass.finite_EMC4 : FrameClass := { F | F.IsFiniteEMC4 }
+
 end Neighborhood
+
+namespace EMC4
 
 instance : Sound Modal.EMC4 FrameClass.EMC4 := instSound_of_validates_axioms $ by
   constructor;
@@ -25,9 +30,29 @@ instance : Entailment.Consistent Modal.EMC4 := consistent_of_sound_frameclass Fr
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Modal.EMC4 FrameClass.EMC4 := complete_of_canonical_frame FrameClass.EMC4 (maximalCanonicalFrame (Modal.EMC4)) $ by
+instance : Complete Modal.EMC4 FrameClass.EMC4 := maximalCanonicalFrame.completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
+
+instance : Complete Modal.EMC4 FrameClass.finite_EMC4 := ⟨by
+  intro φ hφ;
+  apply Complete.complete (𝓜 := FrameClass.EMC4);
+  intro F F_trans V x;
+  replace F_trans := Set.mem_setOf_eq.mp F_trans;
+
+  let M : Model := ⟨F, V⟩;
+  apply quasiFilteringTransitiveFiltration M φ.subformulas (by simp) |>.filtration_satisfies _ (by grind) |>.mp;
+  apply hφ;
+  apply Set.mem_setOf_eq.mpr;
+  exact {
+    world_finite := by apply FilterEqvQuotient.finite $ by simp;
+    trans := by apply quasiFilteringTransitiveFiltration.isTransitive.trans;
+    mono := by apply quasiFilteringTransitiveFiltration.isMonotonic.mono;
+    regular := by apply quasiFilteringTransitiveFiltration.isRegular.regular;
+  };
+⟩
+
+end EMC4
 
 instance : Modal.EMC ⪱ Modal.EMC4 := by
   constructor;

@@ -93,16 +93,13 @@ lemma eq_boxed_of_eq [Entailment.E 𝓢] : ‖φ‖ = ‖ψ‖ → ‖□φ‖ =
 
 @[grind]
 lemma box_subset_of_subset [Entailment.EM 𝓢] : ‖φ‖ ⊆ ‖ψ‖ → ‖□φ‖ ⊆ ‖□ψ‖ := by
-  intro h;
-  apply imp_subset.mp;
-  exact Entailment.rm! $ imp_subset.mpr h;
+  suffices 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ □φ ➝ □ψ by simpa [imp_subset];
+  apply Entailment.rm!;
 
 end MaximalConsistentSet.proofset
 
 end
 
-
-section
 
 namespace Neighborhood
 
@@ -111,85 +108,8 @@ open Formula.Neighborhood
 open MaximalConsistentSet
 
 variable {S} [Entailment (Formula ℕ) S]
-variable {𝓢 : S} -- [Entailment.Cl 𝓢] [Entailment.Consistent 𝓢]
+variable {𝓢 : S} [Entailment.E 𝓢] [Entailment.Consistent 𝓢]
 variable {φ ψ ξ : Formula ℕ}
-
-class Frame.IsCanonical (F : Frame) (𝓢 : S) : Prop where
-  eq_world : F.World = MaximalConsistentSet 𝓢 := by rfl
-  box_proofset : ∀ φ, F.box (eq_world ▸ (proofset 𝓢 φ)) = eq_world ▸ (proofset 𝓢 (□φ))
-
-namespace Frame.IsCanonical
-
-variable {F : Frame} [canonical : F.IsCanonical 𝓢]
-
-@[simp]
-lemma eq_empty : (canonical.eq_world ▸ (∅ : Set (MaximalConsistentSet 𝓢))) = ∅ := by
-  have := canonical.eq_world;
-  grind;
-
-@[simp]
-lemma eq_union {X Y : Set (MaximalConsistentSet 𝓢)} : (canonical.eq_world ▸ (X ∪ Y)) = ((canonical.eq_world ▸ X) ∪ (canonical.eq_world ▸ Y)) := by
-  have := canonical.eq_world;
-  grind;
-
-@[simp]
-lemma eq_comp {X : Set (MaximalConsistentSet 𝓢)} : (canonical.eq_world ▸ Xᶜ) = (canonical.eq_world ▸ X)ᶜ := by
-  haveI := canonical.eq_world;
-  grind;
-
-@[simp]
-lemma iff_mem {Γ : MaximalConsistentSet 𝓢} {X : Set _} : Γ ∈ X ↔ (canonical.eq_world ▸ Γ) ∈ (canonical.eq_world ▸ X) := by
-  have := canonical.eq_world;
-  grind;
-
-end Frame.IsCanonical
-
-
-def canonicalModel (F : Frame) (𝓢 : S) [canonical : F.IsCanonical 𝓢] : Model where
-  toFrame := F
-  Val a := canonical.eq_world ▸ proofset 𝓢 (.atom a)
-
-namespace canonicalModel
-
-variable {F : Frame} [canonical : F.IsCanonical 𝓢]
-
-@[simp] lemma eq_model_box : (canonicalModel F 𝓢).box = F.box := by tauto;
-
-end canonicalModel
-
-variable [Entailment.Cl 𝓢]
-         {F : Frame} [canonical : F.IsCanonical 𝓢]
-
-lemma truthlemma : canonical.eq_world ▸ (proofset 𝓢 φ) = ((canonicalModel F 𝓢).truthset φ) := by
-  induction φ with
-  | hatom => simp [canonicalModel]
-  | hfalsum => simp [canonicalModel];
-  | himp φ ψ ihφ ihψ => simp_all [MaximalConsistentSet.proofset.eq_imp, ←ihφ, ←ihψ];
-  | hbox φ ihφ =>
-    rw [Model.truthset.eq_box, ←ihφ, ←(canonical.box_proofset φ)];
-    rfl;
-
-lemma complete_of_canonical_frame (C : FrameClass) (F : Frame) [canonical : F.IsCanonical 𝓢] (hC : F ∈ C)
-  : LO.Complete 𝓢 C := by
-  constructor;
-  intro φ;
-  contrapose!;
-  intro hφ;
-  have := FormulaSet.unprovable_iff_singleton_neg_consistent.mpr hφ;
-  obtain ⟨Γ, hΓ⟩ := lindenbaum this;
-  apply not_validOnFrameClass_of_exists_model_world;
-  use (canonicalModel F 𝓢), (canonical.eq_world ▸ Γ);
-  constructor;
-  . assumption;
-  . simp only [Semantics.Realize, Satisfies, ←truthlemma];
-    suffices Γ ∈ (proofset 𝓢 (∼φ)) by
-      apply canonical.iff_mem.not.mp;
-      simpa using this;
-    apply hΓ;
-    tauto;
-
-
-
 
 open Classical in
 abbrev minimalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Frame := Frame.mk_ℬ
@@ -198,75 +118,59 @@ abbrev minimalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consiste
 
 namespace minimalCanonicalFrame
 
-variable {𝓢 : S} [Entailment.E 𝓢] [Entailment.Consistent 𝓢]
+@[grind]
+lemma box_proofset : (minimalCanonicalFrame 𝓢).box (proofset 𝓢 φ) = (proofset 𝓢 (□φ)) := by
+  dsimp [minimalCanonicalFrame, Frame.mk_ℬ, Frame.box];
+  split_ifs with h;
+  . apply proofset.eq_boxed_of_eq;
+    apply h.choose_spec.symm;
+  . tauto;
 
-
-instance : (minimalCanonicalFrame 𝓢).IsCanonical 𝓢 where
-  box_proofset := by
-    intro φ;
-    dsimp [minimalCanonicalFrame, Frame.mk_ℬ, Frame.box];
-    split;
-    . rename_i h;
-      apply proofset.eq_boxed_of_eq;
-      apply h.choose_spec.symm;
-    . tauto;
+@[grind]
+lemma multibox_proofset : (minimalCanonicalFrame 𝓢).box^[n] (proofset 𝓢 φ) = (proofset 𝓢 (□^[n]φ)) := by
+  induction n generalizing φ with
+  | zero => simp;
+  | succ n ih => simp only [Function.iterate_succ, Function.comp_apply, box_proofset, ih];
 
 lemma exists_box (X) (Γ : (minimalCanonicalFrame 𝓢).World) (hΓ : Γ ∈ Frame.box _ X)
   : ∃ φ, X = proofset 𝓢 φ ∧ Frame.box _ X = proofset 𝓢 (□φ)
   := by
-    simp [Frame.mk_ℬ, Frame.box] at hΓ;
-    split at hΓ;
-    . rename_i h;
-      obtain ⟨φ, hφ⟩ := h;
+    dsimp [minimalCanonicalFrame, Frame.mk_ℬ, Frame.box] at hΓ;
+    split_ifs at hΓ with hφ;
+    . obtain ⟨φ, rfl⟩ := hφ;
       use φ;
-      constructor;
-      . assumption;
-      . convert Frame.IsCanonical.box_proofset (F := minimalCanonicalFrame 𝓢) (𝓢 := 𝓢) φ;
+      grind;
     . contradiction;
-
-/-
-lemma exists_dia (X) (Γ : (CanonicalBox.minimal 𝓢).model.World) (hΓ : Γ ∈ Frame.box _ X)
-  : ∃ φ, X = proofset 𝓢 φ ∧ Frame.dia _ X = proofset 𝓢 (◇φ)
-  := by
-    obtain ⟨φ, hφ, hΓ⟩ := exists_box X Γ hΓ;
-    use φ;
-    constructor;
-    . assumption;
-    . ext Γ;
-      rw [(show ◇φ = ∼□(∼φ) by rfl)];
-      simp only [
-        CanonicalBox.minimal, CanonicalBox.model, CanonicalBox.frame, Frame.mk_ℬ,
-        Frame.dia, Frame.box, Set.mem_setOf_eq, Set.setOf_mem_eq, Set.mem_compl_iff,
-        proofset.eq_neg
-      ];
-      constructor;
-      . intro h;
-        split at h;
-        . rename_i h₂;
-          suffices proofset 𝓢 (□h₂.choose) = proofset 𝓢 (□(∼φ)) by rw [this] at h; simpa;
-          apply proofset.eq_boxed_of_eq;
-          rw [←h₂.choose_spec, hφ];
-          simp;
-        . exfalso;
-          rename_i h₂;
-          push_neg at h₂;
-          apply @h₂ (∼φ);
-          simpa;
-      . intro h;
-        split;
-        . rename_i h₂;
-          suffices proofset 𝓢 (□h₂.choose) = proofset 𝓢 (□(∼φ)) by rw [←this] at h; simpa;
-          apply proofset.eq_boxed_of_eq;
-          rw [←h₂.choose_spec, hφ];
-          simp;
-        . tauto;
--/
 
 end minimalCanonicalFrame
 
+abbrev minimalCanonicalModel (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Model where
+  toFrame := minimalCanonicalFrame 𝓢
+  Val a := proofset 𝓢 (.atom a)
+
+@[grind]
+lemma minimalCanonicalModel.truthlemma : (proofset 𝓢 φ) = ((minimalCanonicalModel 𝓢) φ) := by
+  induction φ with
+  | hatom => simp [minimalCanonicalModel]
+  | hfalsum => simp [minimalCanonicalModel];
+  | himp φ ψ ihφ ihψ => simp_all [MaximalConsistentSet.proofset.eq_imp];
+  | hbox φ ihφ => simp [Model.truthset.eq_box, ←ihφ, minimalCanonicalFrame.box_proofset];
+
+lemma minimalCanonicalFrame.completeness {C : FrameClass} (hC : (minimalCanonicalFrame 𝓢) ∈ C) : LO.Complete 𝓢 C := by
+  constructor;
+  intro φ hφ;
+  contrapose! hφ;
+  obtain ⟨Γ, hΓ⟩ := lindenbaum $ FormulaSet.unprovable_iff_singleton_neg_consistent.mpr hφ;
+  apply not_validOnFrameClass_of_exists_model_world;
+  use (minimalCanonicalModel 𝓢), Γ;
+  constructor;
+  . assumption;
+  . suffices Γ ∉ proofset 𝓢 φ by simpa [Semantics.Realize, Satisfies, minimalCanonicalModel.truthlemma];
+    apply MaximalConsistentSet.proofset.iff_mem.not.mp;
+    apply MaximalConsistentSet.iff_mem_neg.mp;
+    tauto;
 
 end Neighborhood
 
-end
 
 end LO.Modal

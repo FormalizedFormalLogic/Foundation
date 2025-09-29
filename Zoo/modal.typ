@@ -77,6 +77,7 @@
       "LO.Modal.EN": $Logic("EN")$,
       "LO.Modal.END": $Logic("END")$,
       "LO.Modal.EP": $Logic("EP")$,
+      "LO.Modal.ET4": $Logic("ET4")$,
       "LO.Modal.GL": $Logic("GL")$,
       "LO.Modal.GLPoint2": $Logic("GL.2")$,
       "LO.Modal.GLPoint3": $Logic("GL.3")$,

@@ -29,7 +29,7 @@ instance : Entailment.Consistent Modal.EMT := consistent_of_sound_frameclass Fra
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Modal.EMT FrameClass.EMT := complete_of_canonical_frame FrameClass.EMT (maximalCanonicalFrame (Modal.EMT)) $ by
+instance : Complete Modal.EMT FrameClass.EMT := maximalCanonicalFrame.completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
