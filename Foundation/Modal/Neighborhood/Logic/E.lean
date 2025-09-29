@@ -12,7 +12,15 @@ namespace Neighborhood
 
 abbrev FrameClass.E : FrameClass := Set.univ
 
+protected abbrev Frame.simple_whitehole : Frame := ⟨Unit, λ _ => ∅⟩
+
+@[simp]
+lemma Frame.simple_whitehole.not_valid_axiomN : ¬Frame.simple_whitehole ⊧ Axioms.N := by
+  simp [Semantics.Realize, ValidOnFrame, ValidOnModel, Satisfies];
+
 end Neighborhood
+
+
 
 instance : Sound Modal.E FrameClass.E := instSound_of_validates_axioms $ by simp;
 
@@ -65,15 +73,10 @@ instance : Modal.E ⪱ Modal.EN := by
     constructor;
     . simp;
     . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
-      apply not_validOnFrameClass_of_exists_model_world;
-      let M : Model := {
-        World := Fin 1,
-        𝒩 := λ w => ∅,
-        Val := λ w => Set.univ
-      };
-      use M, 0;
+      apply not_validOnFrameClass_of_exists_frame;
+      use Frame.simple_whitehole;
       constructor;
       . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp;
 
 end LO.Modal

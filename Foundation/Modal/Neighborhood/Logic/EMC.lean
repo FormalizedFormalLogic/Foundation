@@ -16,6 +16,9 @@ namespace Neighborhood
 protected class Frame.IsEMC (F) extends Frame.IsMonotonic F, Frame.IsRegular F where
 protected abbrev FrameClass.EMC : FrameClass := { F | F.IsEMC }
 
+instance : Frame.simple_whitehole.IsEMC where
+  regular := by simp_all [Frame.simple_whitehole, Frame.box];
+
 abbrev EK_counterframe_for_M_and_C : Frame := {
   World := Fin 4,
   𝒩 := λ _ => {{0, 1}, {0, 2}}
@@ -66,6 +69,8 @@ lemma EK_counterframe_for_M_and_C.validate_axiomM : ¬EK_counterframe_for_M_and_
 end Neighborhood
 
 
+namespace EMC
+
 instance : Sound Modal.EMC FrameClass.EMC := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
@@ -78,6 +83,23 @@ instance : Entailment.Consistent Modal.EMC := consistent_of_sound_frameclass Fra
 instance : Complete Modal.EMC FrameClass.EMC := maximalCanonicalFrame.completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
+
+end EMC
+
+instance : Modal.EMC ⪱ Modal.EMCN := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use Axioms.N;
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMC);
+      apply not_validOnFrameClass_of_exists_frame;
+      use Frame.simple_whitehole;
+      constructor;
+      . tauto;
+      . simp;
 
 instance : Modal.EC ⪱ Modal.EMC := by
   constructor;

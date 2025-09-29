@@ -12,8 +12,12 @@ namespace Neighborhood
 @[reducible] protected alias Frame.IsEM := Frame.IsMonotonic
 protected abbrev FrameClass.EM : FrameClass := { F | F.IsEM }
 
+instance : Frame.simple_whitehole.IsEM where
+  mono := by simp_all;
+
 end Neighborhood
 
+namespace EM
 
 instance : Sound Modal.EM FrameClass.EM := instSound_of_validates_axioms $ by
   constructor;
@@ -28,6 +32,23 @@ instance : Entailment.Consistent Modal.EM := consistent_of_sound_frameclass Fram
 instance : Complete Modal.EM FrameClass.EM := maximalCanonicalFrame.completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
+
+end EM
+
+instance : Modal.EM ⪱ Modal.EMN := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use Axioms.N;
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EM);
+      apply not_validOnFrameClass_of_exists_frame;
+      use Frame.simple_whitehole;
+      constructor;
+      . apply Set.mem_setOf_eq.mpr; infer_instance;
+      . simp;
 
 instance : Modal.E ⪱ Modal.EM := by
   constructor;

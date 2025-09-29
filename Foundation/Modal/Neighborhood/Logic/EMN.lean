@@ -31,26 +31,6 @@ instance : Complete Modal.EMN FrameClass.EMN := maximalCanonicalFrame.completene
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Modal.EM ⪱ Modal.EMN := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.N;
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EM);
-      apply not_validOnFrameClass_of_exists_model_world;
-      let M : Model := {
-        World := Fin 1,
-        𝒩 := λ w => ∅,
-        Val := λ w => Set.univ
-      };
-      use M, 0;
-      constructor;
-      . exact { mono := by rintro X Y w hw; simp_all [M] }
-      . simp! [M, Semantics.Realize, Satisfies];
-
 instance : Modal.EN ⪱ Modal.EMN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;

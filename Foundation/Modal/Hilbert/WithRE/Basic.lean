@@ -205,6 +205,23 @@ instance : EMCN.axioms.HasN where
 protected abbrev EMCN : Logic ℕ := Hilbert.WithRE EMCN.axioms
 instance : Entailment.EMCN Modal.EMCN where
 
+protected abbrev EMCT4.axioms : Axiom ℕ := {
+  Axioms.M (.atom 0) (.atom 1),
+  Axioms.C (.atom 0) (.atom 1),
+  Axioms.T (.atom 0),
+  Axioms.Four (.atom 0)
+}
+namespace EMCT4
+instance : EMCT4.axioms.HasM where p := 0; q := 1
+instance : EMCT4.axioms.HasC where p := 0; q := 1
+instance : EMCT4.axioms.HasT where p := 0;
+instance : EMCT4.axioms.HasFour where p := 0;
+end EMCT4
+protected abbrev EMCT4 : Logic ℕ := Hilbert.WithRE EMCT4.axioms
+instance : Entailment.EMC Modal.EMCT4 where
+instance : Entailment.E4 Modal.EMCT4 where
+instance : Entailment.ET Modal.EMCT4 where
+
 protected abbrev EK.axioms : Axiom ℕ := {Axioms.K (.atom 0) (.atom 1)}
 instance : EK.axioms.HasK where p := 0; q := 1;
 protected abbrev EK : Logic ℕ := Hilbert.WithRE EK.axioms

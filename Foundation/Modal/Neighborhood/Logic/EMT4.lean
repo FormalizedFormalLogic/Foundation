@@ -68,4 +68,42 @@ instance : Modal.EMT ⪱ Modal.EMT4 := by
       . constructor;
       . simp;
 
+instance : Modal.EMT4 ⪱ Modal.EMCT4 := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use Axioms.C (.atom 0) (.atom 1);
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMT4);
+      apply not_validOnFrameClass_of_exists_model_world;
+      use {
+        World := Fin 2,
+        𝒩 := λ w =>
+          match w with
+          | 0 => {{0}, {1}, {0, 1}}
+          | 1 => {{1}, {0, 1}},
+        Val := λ w =>
+          match w with
+          | 0 => {0}
+          | 1 => {1}
+          | _ => Set.univ
+      }, 0;
+      constructor;
+      . exact {
+          mono := by sorry;
+          refl := by
+            simp [Frame.box];
+            rintro X w;
+            match w with
+            | 0 => simp; sorry;
+            | 1 => simp; sorry;
+          trans := by
+
+            sorry;
+        }
+      . simp! [Semantics.Realize, Satisfies];
+        tauto_set;
+
 end LO.Modal

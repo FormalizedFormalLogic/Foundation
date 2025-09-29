@@ -21,8 +21,13 @@ instance : Frame.simple_blackhole.IsSerial := by
 @[reducible] protected alias Frame.IsED := Frame.IsSerial
 protected abbrev FrameClass.ED : FrameClass := { F | F.IsED }
 
+instance : Frame.simple_whitehole.IsED where
+  serial := by simp_all [Frame.simple_whitehole, Frame.box];
+
 end Neighborhood
 
+
+namespace ED
 
 instance : Sound Modal.ED FrameClass.ED := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.singleton_iff];
@@ -34,6 +39,9 @@ instance : Entailment.Consistent Modal.ED := consistent_of_sound_frameclass Fram
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
+
+end ED
+
 
 instance : Modal.E ⪱ Modal.ED := by
   constructor;
@@ -53,6 +61,19 @@ instance : Modal.E ⪱ Modal.ED := by
         have := @hC.serial {1} 1;
         simp [Frame.box, Frame.dia] at this;
 
-
+instance : Modal.ED ⪱ Modal.END := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use Axioms.N;
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.ED);
+      apply not_validOnFrameClass_of_exists_frame;
+      use Frame.simple_whitehole;
+      constructor;
+      . apply Set.mem_setOf_eq.mpr; infer_instance;
+      . simp;
 
 end LO.Modal
