@@ -1,6 +1,7 @@
 import Mathlib.Data.Set.Finite.Powerset
 import Foundation.Modal.Neighborhood.AxiomGeach
 import Foundation.Modal.Neighborhood.Supplementation
+import Foundation.Modal.Neighborhood.IntersectionClosure
 
 namespace LO.Modal
 
@@ -76,6 +77,17 @@ namespace toFilterEquivSet
 
 variable {X Y : Set M.World}
 
+@[grind]
+lemma mem_of_mem {x : M.World} (hx : x ∈ X) : ⟦x⟧ ∈ (【X】 : Set (FilterEqvQuotient M T)) := by use x;
+
+@[grind]
+lemma iff_mem_truthset (hφ : φ ∈ T) : x ∈ M.truthset φ ↔ ⟦x⟧ ∈ (【M.truthset φ】 : Set (FilterEqvQuotient M T)) := by
+  constructor;
+  . grind;
+  . rintro ⟨y, hy₁, hy₂⟩;
+    exact FilterEqvQuotient.iff_eq.mp hy₂ φ hφ |>.mp hy₁;
+
+
 @[simp, grind] lemma empty : (【∅】 : Set (FilterEqvQuotient M T)) = ∅ := by simp [toFilterEquivSet];
 
 @[grind]
@@ -89,6 +101,10 @@ lemma union : (【X ∪ Y】 : Set (FilterEqvQuotient M T)) = (【X】 ∪ 【Y�
     . obtain ⟨x, hx, rfl⟩ := h;
       use x;
       grind;
+
+lemma of_inter : (【X ∩ Y】 : Set (FilterEqvQuotient M T)) ⊆ (【X】 ∩ 【Y】 : Set (FilterEqvQuotient M T)) := by
+  rintro _ ⟨x, ⟨hx₁, hx₂⟩, rfl⟩;
+  constructor <;> use x;
 
 @[grind]
 lemma compl_truthset (hφ : φ ∈ T) : (【(M φ)ᶜ】 : Set (FilterEqvQuotient M T)) = 【M φ】ᶜ := by
@@ -142,7 +158,7 @@ lemma refl_truthset [M.IsReflexive] : (【M (□φ)】 : Set (FilterEqvQuotient 
   . apply M.refl; simpa;
   . rfl;
 
-lemma mono_truthset [M.IsMonotonic] (hψ : ψ ∈ T) (h : (【M φ】 : Set (FilterEqvQuotient M T)) ⊆ 【M ψ】) : (【M (□φ)】 : Set (FilterEqvQuotient M T)) ⊆ 【M (□ψ)】 := by
+lemma mono'_truthset [M.IsMonotonic] (hψ : ψ ∈ T) (h : (【M φ】 : Set (FilterEqvQuotient M T)) ⊆ 【M ψ】) : (【M (□φ)】 : Set (FilterEqvQuotient M T)) ⊆ 【M (□ψ)】 := by
   intro X;
   suffices ∀ (x : M.World), x ∈ M.truthset (□φ) → ⟦x⟧ = X → ∃ x, x ∈ M.truthset (□ψ) ∧ ⟦x⟧ = X by
     simpa [toFilterEquivSet, Set.mem_setOf_eq];
@@ -235,6 +251,27 @@ def minimalFiltration (M : Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] : 
   V := λ a => 【M (.atom a)】
   V_def := by intro a; rfl
 
+lemma minimalFiltration.iff_mem_B : W ∈ (minimalFiltration M T).B X ↔ ∃ φ, □φ ∈ T ∧ X = 【M.truthset φ】 ∧ W ∈ 【M.truthset (□φ)】 := by
+  constructor;
+  . intro h;
+    dsimp [minimalFiltration, Filtration.toModel, Frame.mk_ℬ, Frame.box] at h;
+    split_ifs at h with hY;
+    . use hY.choose;
+      refine ⟨?_, ?_, ?_⟩
+      . exact hY.choose_spec.1;
+      . exact hY.choose_spec.2;
+      . simpa;
+    . contradiction;
+  . rintro ⟨φ, hφ, rfl, hW⟩;
+    dsimp [minimalFiltration, Filtration.toModel, Frame.mk_ℬ, Frame.box];
+    split_ifs with h;
+    . suffices W ∈ 【M.truthset (□h.choose)】 by exact this;
+      exact (minimalFiltration M T).mem_box_in_out h.choose_spec.1 |>.mp $ h.choose_spec.2 ▸ (minimalFiltration M T).mem_box_in_out hφ |>.mpr hW;
+    . push_neg at h;
+      have := h φ hφ;
+      contradiction;
+
+
 open Classical in
 def transitiveFiltration (M : Model) [M.IsTransitive] (T : FormulaSet ℕ) [T.IsSubformulaClosed] : Filtration M T where
   B X := ((minimalFiltration M T).B X) ∪ (if ∃ Y, X = (minimalFiltration M T).B Y then X else ∅)
@@ -266,45 +303,39 @@ def transitiveFiltration (M : Model) [M.IsTransitive] (T : FormulaSet ℕ) [T.Is
   V := λ a => 【M (.atom a)】
   V_def := by intro a; rfl
 
-lemma minimalFiltration.iff_mem_B : W ∈ (minimalFiltration M T).B X ↔ ∃ φ, □φ ∈ T ∧ X = 【M.truthset φ】 ∧ W ∈ 【M.truthset (□φ)】 := by
+
+namespace transitiveFiltration
+
+variable [M.IsTransitive]
+
+lemma iff_mem_B :
+  (W ∈ (transitiveFiltration M T).B X) ↔
+  (((∃ φ, □φ ∈ T ∧ X = 【M.truthset φ】 ∧ W ∈ 【M.truthset (□φ)】) ∨
+  (∃ φ, □φ ∈ T ∧ X = 【M.truthset (□φ)】 ∧ W ∈ 【M.truthset (□φ)】))) := by
   constructor;
-  . intro h;
-    dsimp [minimalFiltration, Filtration.toModel, Frame.mk_ℬ, Frame.box] at h;
-    split_ifs at h with hY;
-    . use hY.choose;
-      refine ⟨?_, ?_, ?_⟩
-      . exact hY.choose_spec.1;
-      . exact hY.choose_spec.2;
-      . simpa;
-    . contradiction;
-  . rintro ⟨φ, hφ, rfl, hW⟩;
-    dsimp [minimalFiltration, Filtration.toModel, Frame.mk_ℬ, Frame.box];
-    split_ifs with h;
-    . suffices W ∈ 【M.truthset (□h.choose)】 by exact this;
-      exact (minimalFiltration M T).mem_box_in_out h.choose_spec.1 |>.mp $ h.choose_spec.2 ▸ (minimalFiltration M T).mem_box_in_out hφ |>.mpr hW;
-    . push_neg at h;
-      have := h φ hφ;
-      contradiction;
-
-lemma transitiveFiltration.of_mem_B [M.IsTransitive] :
-  (W ∈ (transitiveFiltration M T).B X) →
-  ((∃ φ, □φ ∈ T ∧ X = 【M.truthset φ】 ∧ W ∈ 【M.truthset (□φ)】) ∨
-  (∃ φ, □φ ∈ T ∧ X = 【M.truthset (□φ)】 ∧ W ∈ 【M.truthset (□φ)】)) := by
-  dsimp [transitiveFiltration, Filtration.toModel, Frame.mk_ℬ, Frame.box];
-  rintro (h | h);
-  . left; exact minimalFiltration.iff_mem_B.mp h;
-  . split_ifs at h with hY;
-    . right;
-      obtain ⟨Y, rfl⟩ := hY;
-      obtain ⟨φ, hφ₁, rfl, hφ₃⟩ := minimalFiltration.iff_mem_B.mp h;
+  . rintro (h | h);
+    . left; exact minimalFiltration.iff_mem_B.mp h;
+    . split_ifs at h with hY;
+      . right;
+        obtain ⟨Y, rfl⟩ := hY;
+        obtain ⟨φ, hφ₁, rfl, hφ₃⟩ := minimalFiltration.iff_mem_B.mp h;
+        use φ;
+        refine ⟨hφ₁, ?_, ?_⟩;
+        . grind;
+        . assumption;
+      . contradiction;
+  . rintro (⟨φ, hφ₁, rfl, hφ₃⟩ | ⟨φ, hφ, rfl, _⟩);
+    . left;
+      apply minimalFiltration.iff_mem_B.mpr;
       use φ;
-      refine ⟨hφ₁, ?_, ?_⟩;
-      . grind;
-      . assumption;
-    . contradiction;
+    . right;
+      suffices (∃ Y, 【M (□φ)】 = (minimalFiltration M T).B Y) ∧ W ∈ 【M (□φ)】 by simpa;
+      constructor;
+      . use (【M.truthset φ】);
+        rw [Filtration.box_in_out hφ]
+      . tauto;
 
-
-instance transitiveFiltration.isTransitive [M.IsTransitive] : (transitiveFiltration M T).toModel.IsTransitive := by
+instance isTransitive : (transitiveFiltration M T).toModel.IsTransitive := by
   constructor;
   intro X;
   by_cases h : (minimalFiltration M T).B X = ∅;
@@ -342,13 +373,15 @@ instance transitiveFiltration.isTransitive [M.IsTransitive] : (transitiveFiltrat
           . grind;
         . grind;
 
-instance transitiveFiltration.isReflexive [M.IsTransitive] [M.IsReflexive] : (transitiveFiltration M T).toModel.IsReflexive := by
+instance isReflexive [M.IsReflexive] : (transitiveFiltration M T).toModel.IsReflexive := by
   constructor;
   rintro X W hW;
-  rcases transitiveFiltration.of_mem_B hW with (⟨φ, hφ, rfl, _⟩ | ⟨φ, hφ, rfl, _⟩);
+  rcases transitiveFiltration.iff_mem_B.mp hW with (⟨φ, hφ, rfl, _⟩ | ⟨φ, hφ, rfl, _⟩);
   . apply toFilterEquivSet.refl_truthset;
     assumption;
   . assumption;
+
+end transitiveFiltration
 
 
 open Classical in
@@ -362,9 +395,9 @@ def supplementedTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransitive
     ext W;
     constructor;
     . rintro ⟨Y, ⟨Z, hZ₁, rfl⟩, hZ₂⟩;
-      rcases transitiveFiltration.of_mem_B hZ₂ with ⟨ψ, ψ_sub, rfl, hψ⟩ | ⟨ψ, ψ_sub, rfl, hψ⟩;
-      . exact toFilterEquivSet.mono_truthset (by grind) (by assumption) hψ;
-      . apply toFilterEquivSet.mono_truthset (by grind) (by assumption) $ toFilterEquivSet.trans_truthset hψ;
+      rcases transitiveFiltration.iff_mem_B.mp hZ₂ with ⟨ψ, ψ_sub, rfl, hψ⟩ | ⟨ψ, ψ_sub, rfl, hψ⟩;
+      . exact toFilterEquivSet.mono'_truthset (by grind) (by assumption) hψ;
+      . apply toFilterEquivSet.mono'_truthset (by grind) (by assumption) $ toFilterEquivSet.trans_truthset hψ;
     . intro hW;
       use (transitiveFiltration M T).B 【M.truthset φ】;
       constructor;
@@ -390,6 +423,193 @@ protected instance isReflexive [M.IsReflexive] : (supplementedTransitiveFiltrati
 ⟩
 
 end supplementedTransitiveFiltration
+
+
+open Classical in
+def quasiFilteringTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransitive] [M.IsRegular] (T : FormulaSet ℕ) [T.IsSubformulaClosed] (hT : T.Finite) : Filtration M T where
+  V := (transitiveFiltration M T).V
+  V_def := by simp;
+  B := (transitiveFiltration M T).toModel.quasiFiltering.box
+  B_def := by
+    intro φ hφ;
+    ext W;
+    constructor;
+    . rintro ⟨_, ⟨Y, hY, rfl⟩, ⟨Ys, hYs₁, hYs₂, hYs₃⟩⟩;
+      let Vs := { Vi ∈ Ys | ∃ ψ, □ψ ∈ T ∧ Vi = 【M ψ】 ∧ W ∈ 【M (□ψ)】 };
+      let Us := { Ui ∈ Ys | ∃ ψ, □ψ ∈ T ∧ Ui = 【M (□ψ)】 ∧ W ∈ 【M (□ψ)】 };
+      have eYVU : Ys = Vs ∪ Us := by
+        ext Yi;
+        simp only [Finset.mem_union, Finset.mem_filter, Vs, Us];
+        constructor;
+        . intro hYi;
+          rcases transitiveFiltration.iff_mem_B.mp $ hYs₃ Yi hYi with (hV | hU);
+          . left; tauto;
+          . right; tauto;
+        . tauto_set;
+
+      let Ψ := {ψ // □ψ ∈ T ∧ (∃ Vi ∈ Ys, Vi = 【M ψ】) ∧ W ∈ 【M (□ψ)】};
+      have : Fintype Ψ := by
+        apply Fintype.subtype (s := { ψ ∈ hT.toFinset.prebox | (∃ Vi ∈ Ys, Vi = 【M ψ】) ∧ W ∈ 【M (□ψ)】 });
+        simp;
+      let Ξ := {ξ // □ξ ∈ T ∧ (∃ Ui ∈ Ys, Ui = 【M (□ξ)】) ∧ W ∈ 【M (□ξ)】};
+      have : Fintype Ξ := by
+        apply Fintype.subtype (s := { ξ ∈ hT.toFinset.prebox | (∃ Ui ∈ Ys, Ui = 【M (□ξ)】) ∧ W ∈ 【M (□ξ)】 });
+        simp;
+
+      have H : (⋂ ψ : Ψ, 【M ψ】) ∩ (⋂ ξ : Ξ, 【M (□ξ)】) ⊆ (【M φ】 : Set (FilterEqvQuotient M T)) := by calc
+        _ = (⋂ ψ : Ψ, 【M ψ】) ∩ (⋂ Ui ∈ Us, Ui) := by
+          suffices (⋂ ψ : Ξ, 【M (□ψ)】) = (⋂ Ui ∈ Us, Ui) by congr;
+          ext A;
+          suffices
+            (∀ ξ, □ξ ∈ T → 【M (□ξ)】 ∈ Ys → W ∈ 【M (□ξ)】 → A ∈ 【M (□ξ)】) ↔
+            (∀ ξ, □ξ ∈ T → ∀ Yi ∈ Ys, Yi = 【M (□ξ)】 → W ∈ 【M (□ξ)】 → A ∈ Yi) by
+            simp [Ξ, Us];
+            tauto;
+          constructor;
+          . rintro h _ _ _ _ rfl;
+            apply h <;> assumption;
+          . rintro h _ _ _ _;
+            apply h <;> tauto;
+        _ = (⋂ Vi ∈ Vs, Vi) ∩ (⋂ Ui ∈ Us, Ui) := by
+          suffices (⋂ ψ : Ψ, 【M ψ】) = (⋂ Vi ∈ Vs, Vi) by congr;
+          ext A;
+          suffices
+            (∀ ψ, □ψ ∈ T → 【M ψ】 ∈ Ys → W ∈ 【M (□ψ)】 → A ∈ 【M ψ】) ↔
+            (∀ ψ, □ψ ∈ T → ∀ Yi ∈ Ys, Yi = 【M ψ】 → W ∈ 【M (□ψ)】 → A ∈ Yi) by
+            simp [Ψ, Vs];
+            tauto;
+          constructor;
+          . rintro h _ _ _ _ rfl;
+            apply h <;> assumption;
+          . rintro h _ _ _ _;
+            apply h <;> tauto;
+        _ = ⋂ Xi ∈ Ys, Xi := by
+          ext A;
+          simp only [Set.mem_inter_iff, Set.mem_iInter, eYVU, Finset.mem_union];
+          constructor;
+          . rintro ⟨hV, hU⟩ i (hi | hi);
+            . exact hV i hi;
+            . exact hU i hi;
+          . rintro h;
+            constructor;
+            . intro i hi;
+              apply h;
+              left;
+              assumption;
+            . intro i hi;
+              apply h;
+              right;
+              assumption;
+        _ = Y             := by grind;
+        _ ⊆ 【M φ】         := by assumption;
+      obtain ⟨w, rfl⟩ := Quotient.exists_rep W;
+      by_cases hΨ : Nonempty Ψ <;> by_cases hΞ : Nonempty Ξ;
+      . suffices w ∈ M.box ((⋂ ψ : Ψ, M ψ) ∩ (⋂ ξ : Ξ, M (□ξ))) by
+          apply toFilterEquivSet.mem_of_mem;
+          replace H : M.box ((⋂ ψ : Ψ, M ψ) ∩ (⋂ ξ : Ξ, M (□ξ))) ⊆ M.box (M φ) := M.mono' $ by
+            rintro a ⟨haψ, haξ⟩;
+            apply toFilterEquivSet.iff_mem_truthset (T := T) (by grind) |>.mpr;
+            apply H;
+            constructor;
+            . apply Set.mem_iInter.mpr;
+              intro ψ;
+              apply toFilterEquivSet.iff_mem_truthset (by grind) |>.mp;
+              apply haψ;
+              simp;
+            . apply Set.mem_iInter.mpr;
+              intro ξ;
+              apply toFilterEquivSet.iff_mem_truthset (by grind) |>.mp;
+              apply haξ;
+              simp;
+          apply H this;
+        apply M.regular;
+        constructor;
+        . suffices ∀ ψ : Ψ, w ∈ M (□ψ) by apply M.regular_finite_iUnion; simpa;
+          rintro ⟨ψ, _, ⟨Vi, hVi, rfl⟩, ⟨v, hv₁, hv₂⟩⟩;
+          grind;
+        . suffices ∀ ξ : Ξ, w ∈ M (□^[2]ξ) by apply M.regular_finite_iUnion (ι := Ξ); simpa;
+          rintro ⟨ξ, _, ⟨Ui, hUi, rfl⟩, ⟨v, hv₁, hv₂⟩⟩;
+          replace hv₁ : v ∈ M.box^[2] (M ξ) := M.trans hv₁;
+          grind;
+      . suffices ∀ ψ : Ψ, w ∈ M (□ψ) by
+          apply toFilterEquivSet.mem_of_mem;
+          replace H : M.box (⋂ ψ : Ψ, M ψ) ⊆ M.box (M φ) := M.mono' $ by
+            rintro a haψ;
+            apply toFilterEquivSet.iff_mem_truthset (T := T) (by grind) |>.mpr;
+            apply H;
+            constructor;
+            . apply Set.mem_iInter.mpr;
+              intro ψ;
+              apply toFilterEquivSet.iff_mem_truthset (by grind) |>.mp;
+              apply haψ;
+              simp;
+            . have : ⋂ ξ : Ξ, (【M.truthset (□ξ)】 : Set (FilterEqvQuotient M T)) = Set.univ := by
+                ext A;
+                simp [@IsEmpty.forall_iff (α := Ξ) (by simpa using hΞ)];
+              rw [this];
+              simp;
+          apply H;
+          apply M.regular_finite_iUnion;
+          simpa;
+        rintro ⟨ψ, _, ⟨Vi, hVi, rfl⟩, ⟨v, hv₁, hv₂⟩⟩;
+        grind;
+      . suffices ∀ ξ : Ξ, w ∈ M (□^[2]ξ) by
+          apply toFilterEquivSet.mem_of_mem;
+          replace H : M.box (⋂ ξ : Ξ, M (□ξ)) ⊆ M.box (M φ) := M.mono' $ by
+            rintro a haξ;
+            apply toFilterEquivSet.iff_mem_truthset (T := T) (by grind) |>.mpr;
+            apply H;
+            constructor;
+            . have : ⋂ ψ : Ψ, (【M.truthset ψ】 : Set (FilterEqvQuotient M T)) = Set.univ := by
+                ext A;
+                simp [@IsEmpty.forall_iff (α := Ψ) (by simpa using hΨ)];
+              rw [this];
+              simp;
+            . apply Set.mem_iInter.mpr;
+              intro ξ;
+              apply toFilterEquivSet.iff_mem_truthset (by grind) |>.mp;
+              apply haξ;
+              simp;
+          apply H;
+          apply M.regular_finite_iUnion;
+          simpa;
+        rintro ⟨ξ, _, ⟨Ui, hUi, rfl⟩, ⟨v, hv₁, hv₂⟩⟩;
+        replace hv₁ : v ∈ M.box^[2] (M ξ) := M.trans hv₁;
+        grind;
+      . exfalso;
+        apply hYs₁;
+        suffices (Vs = ∅ ∧ Us = ∅) by simp [eYVU, this.1, this.2];
+        constructor;
+        . suffices ∀ Yi ∈ Ys, ∀ ψ, □ψ ∈ T → Yi = 【M ψ】 → ⟦w⟧ ∉ 【M (□ψ)】 by simpa [Vs];
+          rintro _ _ ψ hψ rfl;
+          apply (show ∀ ψ, □ψ ∈ T → 【M ψ】 ∈ Ys → ⟦w⟧ ∉ 【M (□ψ)】 by simpa [Ψ] using hΨ) <;> assumption;
+        . suffices ∀ Yi ∈ Ys, ∀ ξ, □ξ ∈ T → Yi = 【M (□ξ)】 → ⟦w⟧ ∉ 【M (□ξ)】 by simpa [Us];
+          rintro _ _ ξ hξ rfl;
+          apply (show ∀ ξ, □ξ ∈ T → 【M (□ξ)】 ∈ Ys → ⟦w⟧ ∉ 【M (□ξ)】 by simpa [Ξ] using hΞ) <;> assumption;
+    . intro h;
+      apply Frame.quasiFiltering.mem_box_of_mem_original_box;
+      apply transitiveFiltration.iff_mem_B.mpr;
+      left;
+      use φ;
+      tauto;
+
+namespace quasiFilteringTransitiveFiltration
+
+variable {T_finite : Set.Finite T} [M.IsMonotonic] [M.IsTransitive] [M.IsRegular]
+
+protected instance isRegular : (quasiFilteringTransitiveFiltration M T T_finite).toModel.IsRegular := ⟨
+  Frame.quasiFiltering.isRegular (F := (transitiveFiltration M T).toModel.toFrame).regular
+⟩
+
+protected instance isMonotonic: (quasiFilteringTransitiveFiltration M T T_finite).toModel.IsMonotonic := ⟨
+  Frame.quasiFiltering.isMonotonic (F := (transitiveFiltration M T).toModel.toFrame).mono
+⟩
+
+protected instance isTransitive : (quasiFilteringTransitiveFiltration M T T_finite).toModel.IsTransitive := ⟨
+  Frame.quasiFiltering.isTransitive (F := (transitiveFiltration M T).toModel.toFrame).trans
+⟩
+
+end quasiFilteringTransitiveFiltration
 
 end Neighborhood
 

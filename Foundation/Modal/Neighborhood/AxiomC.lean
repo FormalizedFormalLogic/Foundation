@@ -12,6 +12,22 @@ class Frame.IsRegular (F : Frame) : Prop where
 
 lemma Frame.regular [Frame.IsRegular F] {X Y : Set F} : (F.box X) ∩ (F.box Y) ⊆ F.box (X ∩ Y) := by apply IsRegular.regular
 
+open Classical in
+lemma Frame.regular_finset_iUnion [F.IsRegular] (s : Finset (Set F)) (hs : s.Nonempty) : (⋂ i ∈ s, F.box i) ⊆ F.box (⋂ i ∈ s, i) := by
+  induction s using Finset.induction_on with
+  | empty => simp_all;
+  | insert i s hi ih =>
+    wlog hs : s.Nonempty;
+    . simp_all;
+    replace ih := ih hs;
+    apply Set.Subset.trans ?_ (show i ∩ ⋂ j ∈ s, j = ⋂ j ∈ insert i s, j by simp ▸ F.regular (X := i) (Y := ⋂ j ∈ s, j));
+    suffices (F.box i) ∩ (⋂ j ∈ s, F.box j) ⊆ F.box (⋂ j ∈ s, j) by simpa;
+    grind;
+
+open Classical in
+lemma Frame.regular_finite_iUnion [F.IsRegular] {ι} [h : Fintype ι] [Nonempty ι] {X : ι → Set F} : (⋂ i : ι, F.box (X i)) ⊆ F.box (⋂ i : ι, X i) := by
+  simpa using Frame.regular_finset_iUnion (Finset.univ.image X) (by simp);
+
 instance : Frame.simple_blackhole.IsRegular := ⟨by
   intro X Y e;
   simp_all;
