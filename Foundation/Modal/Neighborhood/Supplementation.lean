@@ -8,17 +8,30 @@ namespace LO.Modal.Neighborhood
 
 variable {F : Frame}
 
-def Frame.supplementation (F : Frame) : Frame := Frame.mk_ℬ F.World (λ X => (Set.sUnion { F.box Y | Y ⊆ X }))
+def Frame.supplementation (F : Frame) : Frame where
+  World := F.World
+  𝒩 a X := ∃ Y ⊆ X, a ∈ F.box Y
 
 namespace Frame.supplementation
 
 lemma iff_exists_subset {X : Set (F.World)} {w : F.World} : w ∈ F.supplementation.box X ↔ ∃ Y ⊆ X, w ∈ F.box Y := by
-  simp [Frame.supplementation, Frame.box, Frame.mk_ℬ, Set.mem_sUnion, Set.mem_setOf_eq, exists_exists_and_eq_and]
+  simp [Frame.supplementation];
+  tauto;
+
+lemma mem_box_of_mem_original_box : x ∈ F.box X → x ∈ F.supplementation.box X := by
+  intro hx;
+  use X;
+
+lemma box_aux {X : Set (F.World)} : F.supplementation.box X = ⋃₀ {x | ∃ Y ⊆ X, F.box Y = x} := by
+  ext w;
+  simp only [supplementation, Set.mem_setOf_eq, Set.mem_sUnion, exists_exists_and_eq_and]
+  constructor;
+  . rintro ⟨Y, hY₁, hY₂⟩; use Y;
+  . rintro ⟨Y, hY₁, hY₂⟩; use Y;
 
 lemma subset (X : Set (F.World)) : F.box X ⊆ F.supplementation.box X := by
-  intro x;
-  simp [Frame.supplementation, Frame.box, Frame.mk_ℬ];
-  tauto;
+  intro x _;
+  use X;
 
 lemma monotonic {X Y : Set (F.World)} (h : X ⊆ Y) : F.supplementation.box X ⊆ F.supplementation.box Y := by
   intro x hX;
@@ -39,14 +52,13 @@ lemma monotonic_iterated {X Y : Set (F.World)} (h : X ⊆ Y) (n) : F.supplementa
 
 lemma itl_reduce : F.supplementation.supplementation.box X = F.supplementation.box X := by
   ext x;
-  simp only [supplementation, mk_ℬ, Set.mem_setOf_eq, Set.mem_sUnion, exists_exists_and_eq_and]
   constructor;
   . rintro ⟨Y, RYX, Z, RZY, hZ⟩;
     use Z;
     constructor;
     . tauto_set;
     . assumption;
-  . tauto;
+  . apply subset;
 
 instance isMonotonic : F.supplementation.IsMonotonic := by
   constructor;
@@ -70,9 +82,13 @@ instance isReflexive [F.IsReflexive] : F.supplementation.IsReflexive := by
 instance [F.ContainsUnit] : F.supplementation.ContainsUnit := by
   constructor;
   ext x;
-  suffices ∃ a, a ∈ F.𝒩 x by simpa [supplementation, mk_ℬ];
+  suffices ∃ Y ⊆ Set.univ, Y ∈ F.𝒩 x by
+    simp only [supplementation, Set.mem_setOf_eq, Set.mem_univ, iff_true];
+    exact this;
   use Set.univ;
-  simp;
+  constructor;
+  . rfl;
+  . simp;
 
 instance isTransitive [F.IsTransitive] : F.supplementation.IsTransitive := by
   constructor;

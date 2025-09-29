@@ -34,7 +34,7 @@ instance : Complete Modal.EMC4 FrameClass.EMC4 := maximalCanonicalFrame.complete
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Modal.EMC4 FrameClass.finite_EMC4 := ⟨by
+instance FFP_EMC4 : Complete Modal.EMC4 FrameClass.finite_EMC4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.EMC4);
   intro F F_trans V x;

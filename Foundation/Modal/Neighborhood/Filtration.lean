@@ -390,8 +390,7 @@ def supplementedTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransitive
   B_def := by
     intro φ hφ;
     suffices ⋃₀ {x | ∃ Y ⊆ 【M.truthset φ】, (transitiveFiltration M T).B Y = x} = 【M (□φ)】 by
-      dsimp [Filtration.toModel, Frame.mk_ℬ, Frame.supplementation, Frame.box];
-      exact this;
+      simpa [Frame.supplementation.box_aux]
     ext W;
     constructor;
     . rintro ⟨Y, ⟨Z, hZ₁, rfl⟩, hZ₂⟩;
@@ -434,7 +433,7 @@ def quasiFilteringTransitiveFiltration (M : Model) [M.IsMonotonic] [M.IsTransiti
     intro φ hφ;
     ext W;
     constructor;
-    . rintro ⟨_, ⟨Y, hY, rfl⟩, ⟨Ys, hYs₁, hYs₂, hYs₃⟩⟩;
+    . rintro ⟨Y, hY, ⟨Ys, hYs₁, hYs₂, hYs₃⟩⟩;
       let Vs := { Vi ∈ Ys | ∃ ψ, □ψ ∈ T ∧ Vi = 【M ψ】 ∧ W ∈ 【M (□ψ)】 };
       let Us := { Ui ∈ Ys | ∃ ψ, □ψ ∈ T ∧ Ui = 【M (□ψ)】 ∧ W ∈ 【M (□ψ)】 };
       have eYVU : Ys = Vs ∪ Us := by
