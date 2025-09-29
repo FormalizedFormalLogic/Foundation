@@ -54,10 +54,10 @@ instance _root_.LO.FirstOrder.Language.IsFunc.definable : 𝚺₀-Relation (L.Is
 instance _root_.LO.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsRel (V := V)) := Language.IsRel.defined.to_definable
 
 @[simp, definability] instance _root_.LO.FirstOrder.Language.IsFunc.definable' (ℌ) : ℌ-Relation (L.IsFunc (V := V)) :=
-  HierarchySymbol.Boldface.of_zero Language.IsFunc.definable
+  HierarchySymbol.Definable.of_zero Language.IsFunc.definable
 
 @[simp, definability] instance _root_.LO.FirstOrder.Language.IsRel.definable' (ℌ) : ℌ-Relation (L.IsRel (V := V)) :=
-  HierarchySymbol.Boldface.of_zero Language.IsRel.definable
+  HierarchySymbol.Definable.of_zero Language.IsRel.definable
 
 section
 

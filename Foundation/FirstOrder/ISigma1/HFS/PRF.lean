@@ -136,8 +136,8 @@ variable (c v)
 open Classical in
 lemma CSeq.exists (l : V) : ∃ s, c.CSeq v s ∧ l + 1 = lh s := by
   induction l using ISigma1.sigma1_succ_induction
-  · apply HierarchySymbol.Boldface.ex
-    apply HierarchySymbol.Boldface.and
+  · apply HierarchySymbol.Definable.ex
+    apply HierarchySymbol.Definable.and
     · exact ⟨p.cseqDef.rew (Rew.embSubsts <| #0 :> fun i ↦ &(v i)), by
         intro w; simpa [Matrix.comp_vecCons'] using c.cseq_defined_iff (w 0 :> v) |>.symm⟩
     · definability
@@ -196,10 +196,10 @@ lemma result_defined_delta : 𝚫₁.DefinedFunction (fun v ↦ c.result (v ·.s
 @[simp] lemma result_defined_iff (v) :
     Semiformula.Evalbm V v p.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.df.iff v
 
-instance result_definable : 𝚺₁.BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+instance result_definable : 𝚺₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined.to_definable
 
-instance result_definable_delta₁ : 𝚫₁.BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
+instance result_definable_delta₁ : 𝚫₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0) : (Fin (k + 1) → V) → V) :=
   c.result_defined_delta.to_definable
 
 attribute [irreducible] Blueprint.resultDef

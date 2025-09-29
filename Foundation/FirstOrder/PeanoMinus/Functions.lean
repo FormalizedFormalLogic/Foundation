@@ -47,7 +47,7 @@ lemma sub_eq_iff : c = a - b ↔ ((a ≥ b → a = b + c) ∧ (a < b → c = 0))
   · simpa [← sub_spec_of_ge hxy] using show a - b ≤ b + (a - b) from le_add_self
   · simp [sub_spec_of_lt hxy]
 
-open FirstOrder.Arithmetic.HierarchySymbol.Boldface
+open FirstOrder.Arithmetic.HierarchySymbol.Definable
 
 def _root_.LO.FirstOrder.Arithmetic.subDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)”
@@ -58,7 +58,7 @@ lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef :
 @[simp] lemma sub_defined_iff (v) :
     Semiformula.Evalbm V v subDef.val ↔ v 0 = v 1 - v 2 := sub_defined.df.iff v
 
-instance sub_definable (ℌ : HierarchySymbol) : ℌ.BoldfaceFunction₂ ((· - ·) : V → V → V) := sub_defined.to_definable₀
+instance sub_definable (ℌ : HierarchySymbol) : ℌ.DefinableFunction₂ ((· - ·) : V → V → V) := sub_defined.to_definable₀
 
 instance sub_polybounded : Bounded₂ ((· - ·) : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -187,7 +187,7 @@ lemma dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd :=
 @[simp] lemma dvd_defined_iff (v) :
     Semiformula.Evalbm V v dvd.val ↔ v 0 ∣ v 1 := dvd_defined.df.iff v
 
-instance dvd_definable (ℌ : HierarchySymbol) : ℌ.BoldfaceRel ((· ∣ ·) : V → V → Prop) := dvd_defined.to_definable₀
+instance dvd_definable (ℌ : HierarchySymbol) : ℌ.DefinableRel ((· ∣ ·) : V → V → Prop) := dvd_defined.to_definable₀
 
 section
 

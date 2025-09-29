@@ -201,24 +201,6 @@ def rew (ω : Rew ℒₒᵣ ξ₁ n₁ ξ₂ n₂) : {Γ : HierarchySymbol} → 
   simp only [Semiformula.rew, sigma_mkDelta, val_rew, Semiformula.eval_rew, pi_mkDelta]
   exact h.iff _
 
-def emb : {Γ : HierarchySymbol} → Γ.Semiformula ξ n → Γ.Semiformula ξ n
-  | 𝚺-[_], mkSigma φ hp => mkSigma φ hp
-  | 𝚷-[_], mkPi φ hp    => mkPi φ hp
-  | 𝚫-[_], mkDelta φ ψ  => mkDelta φ.emb ψ.emb
-
-@[simp] lemma val_emb {Γ : HierarchySymbol} (φ : Γ.Semiformula ξ n) : φ.emb.val = φ.val := by
-  rcases Γ with ⟨Γ, m⟩; rcases φ with (_ | _ | ⟨⟨p, _⟩, ⟨q, _⟩⟩) <;> simp [val, emb]
-
-@[simp] lemma pi_emb (φ : 𝚫-[m].Semiformula ξ n) : φ.emb.pi = φ.pi.emb := by cases φ; rfl
-
-@[simp] lemma sigma_emb (φ : 𝚫-[m].Semiformula ξ n) : φ.emb.sigma = φ.sigma.emb := by cases φ; rfl
-
-@[simp] lemma emb_proper (φ : 𝚫-[m].Semisentence n) : φ.emb.ProperOn M ↔ φ.ProperOn M := by
-  rcases φ; simp [ProperOn, emb]
-
-@[simp] lemma emb_properWithParam (φ : 𝚫-[m].Semiformula M n) : φ.emb.ProperWithParamOn M ↔ φ.ProperWithParamOn M := by
-  rcases φ; simp [ProperWithParamOn, emb]
-
 lemma sigmaZero {Γ} (φ : Γ-[0].Semiformula ξ k) : Hierarchy 𝚺 0 φ.val :=
   match Γ with
   | 𝚺 => φ.sigma_prop

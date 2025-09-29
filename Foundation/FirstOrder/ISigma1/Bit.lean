@@ -48,18 +48,18 @@ lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by 
 
 section
 
-@[definability] lemma HierarchySymbol.Boldface.ball_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
-    Γ-[m + 1].Boldface (fun v ↦ ∀ x ∈ f v, P v x) := by
-  have : Γ-[m + 1].Boldface (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
-    .ball_lt hf (.imp (HierarchySymbol.Boldface.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction Fin.succ)) h)
+@[definability] lemma HierarchySymbol.Definable.ball_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γ-[m + 1].Definable (fun v ↦ ∀ x ∈ f v, P v x) := by
+  have : Γ-[m + 1].Definable (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
+    .ball_lt hf (.imp (HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction Fin.succ)) h)
   exact this.of_iff <| by intro v; exact ⟨fun h x _ hxv ↦ h x hxv, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
 
-@[definability] lemma HierarchySymbol.Boldface.bex_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
-    Γ-[m + 1].Boldface (fun v ↦ ∃ x ∈ f v, P v x) := by
-  have : Γ-[m + 1].Boldface (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
-    .bex_lt hf (.and (HierarchySymbol.Boldface.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction _)) h)
+@[definability] lemma HierarchySymbol.Definable.bex_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γ-[m + 1].Definable (fun v ↦ ∃ x ∈ f v, P v x) := by
+  have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
+    .bex_lt hf (.and (HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction _)) h)
   exact this.of_iff <| by
     intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩, by rintro ⟨x, _, hx, hvx⟩; exact ⟨x, hx, hvx⟩⟩
 
@@ -513,9 +513,9 @@ private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
   have : Γ.alt-[m]-Predicate (fun s : V ↦ ∀ i < a, P i → i ∈ s) := by
-    apply HierarchySymbol.Boldface.ball_blt; simp; apply HierarchySymbol.Boldface.imp
-    · simpa using HierarchySymbol.Boldface.bcomp₁ (by definability)
-    · simpa using HierarchySymbol.Boldface.bcomp₂ (by definability) (by definability)
+    apply HierarchySymbol.Definable.ball_blt; simp; apply HierarchySymbol.Definable.imp
+    · simpa using HierarchySymbol.Definable.bcomp₁ (by definability)
+    · simpa using HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : V) := by
     simpa using InductionOnHierarchy.least_number Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩
