@@ -10,7 +10,7 @@ namespace LO.ISigma1.Metamath
 
 open Classical FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 namespace InternalArithmetic
 
@@ -27,26 +27,26 @@ variable (T : ArithmeticTheory) [Theory.Δ₁ T] [𝗘𝗤 ⪯ T]
 open Entailment Entailment.FiniteContext Semiformula
 
 @[simp] lemma eq_refl (t : Term V ℒₒᵣ) : T.internalize V ⊢ t ≐ t := by
-  have : T ⊢ “∀ x, x = x” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+  have : T ⊢ “∀ x, x = x” := provable_of_models.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
   have : T.internalize V ⊢ ∀' (#'0 ≐ #'0) := by
     simpa using internal_provable_of_outer_provable this
   simpa using TProof.specialize! this t
 
 @[simp] lemma eq_symm (t u : Term V ℒₒᵣ) : T.internalize V ⊢ (t ≐ u) ➝ (u ≐ t) := by
-  have : T ⊢ “∀ x y, x = y → y = x” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+  have : T ⊢ “∀ x y, x = y → y = x” := provable_of_models.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
   have : T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ (#'0 ≐ #'1)) := by
     simpa using internal_provable_of_outer_provable this
   simpa using TProof.specialize₂! this u t
 
 @[simp] lemma ne_symm (t u : Term V ℒₒᵣ) : T.internalize V ⊢ (t ≉ u) ➝ (u ≉ t) := by
-  have : T ⊢ “∀ x y, x ≠ y → y ≠ x” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+  have : T ⊢ “∀ x y, x ≠ y → y ≠ x” := provable_of_models.{0} _ _ fun _ _ _ ↦ by
     simp [models_iff, ne_comm]
   have : T.internalize V ⊢ ∀' ∀' ((#'1 ≉ #'0) ➝ (#'0 ≉ #'1)) := by
     simpa using internal_provable_of_outer_provable (V := V) this
   simpa using TProof.specialize₂! this u t
 
 @[simp] lemma eq_uniform_trans (t₁ t₂ t₃ : Term V ℒₒᵣ) : T.internalize V ⊢ (t₁ ≐ t₂) ➝ (t₂ ≐ t₃) ➝ (t₁ ≐ t₃) := by
-  have : T ⊢ “∀ x y z, x = y → y = z → x = z” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+  have : T ⊢ “∀ x y z, x = y → y = z → x = z” := provable_of_models.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
   have : T.internalize V ⊢ ∀' ∀' ∀' ((#'2 ≐ #'1) ➝ (#'1 ≐ #'0) ➝ (#'2 ≐ #'0)) := by
     simpa using internal_provable_of_outer_provable this
   simpa using TProof.specialize₃! this t₃ t₂ t₁
@@ -66,36 +66,36 @@ variable (T)
 section replace
 
 lemma subst_eq (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢ (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ ≐ u₁) ➝ (t₂ ≐ u₂) := by
-  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ = y₁ → x₂ = y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ = y₁ → x₂ = y₂” := provable_of_models.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
   have := by simpa using internal_provable_of_outer_provable this (V := V)
   simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
 
 lemma subst_lt (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢ (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ <' u₁) ➝ (t₂ <' u₂) := by
-  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ < y₁ → x₂ < y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ < y₁ → x₂ < y₂” := provable_of_models.{0} _ _ fun _ _ _ ↦ by
     simpa [models_iff] using fun a b c e h ↦ e ▸ h
   have := by simpa using internal_provable_of_outer_provable this (V := V)
   simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
 
 lemma subst_ne (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢ (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ ≉ u₁) ➝ (t₂ ≉ u₂) := by
-  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ ≠ y₁ → x₂ ≠ y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ ≠ y₁ → x₂ ≠ y₂” := provable_of_models.{0} _ _ fun _ _ _ ↦ by
     simpa [models_iff] using fun a b c e h ↦ e ▸ h
   have := by simpa using internal_provable_of_outer_provable this (V := V)
   simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
 
 lemma subst_nlt (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢ (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ ≮' u₁) ➝ (t₂ ≮' u₂) := by
-  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ ≮ y₁ → x₂ ≮ y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ ≮ y₁ → x₂ ≮ y₂” := provable_of_models.{0} _ _ fun _ _ _ ↦ by
     simpa [models_iff] using fun a b c e h ↦ e ▸ h
   have := by simpa using internal_provable_of_outer_provable this (V := V)
   simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
 
 lemma subst_add_eq_add (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢ (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ + u₁ ≐ t₂ + u₂) := by
-  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ + y₁ = x₂ + y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ + y₁ = x₂ + y₂” := provable_of_models.{0} _ _ fun _ _ _ ↦ by
     simpa [models_iff] using fun a b c e ↦ by simp [e]
   have := by simpa using internal_provable_of_outer_provable this (V := V)
   simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
 
 lemma subst_mul_eq_mul (t₁ t₂ u₁ u₂ : Term V ℒₒᵣ) : T.internalize V ⊢ (t₁ ≐ t₂) ➝ (u₁ ≐ u₂) ➝ (t₁ * u₁ ≐ t₂ * u₂) := by
-  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ * y₁ = x₂ * y₂” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by
+  have : T ⊢ “∀ x₁ x₂ y₁ y₂, x₁ = x₂ → y₁ = y₂ → x₁ * y₁ = x₂ * y₂” := provable_of_models.{0} _ _ fun _ _ _ ↦ by
     simpa [models_iff] using fun a b c e ↦ by simp [e]
   have := by simpa using internal_provable_of_outer_provable this (V := V)
   simpa using TProof.specialize₄! this u₂ u₁ t₂ t₁
@@ -197,7 +197,7 @@ lemma term_replace_aux (t : V) :
     suffices T.internalize V ⊢ ∀' ∀' ((#'1 ≐ #'0) ➝ (#'1 ≐ #'0)) by
       have := (tprovable_iff_provable (T := T)).mp this
       simpa [-substs_equals, val_all] using this
-    have : T ⊢ “∀ x y, (x = y → x = y)” := oRing_provable_of.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
+    have : T ⊢ “∀ x y, (x = y → x = y)” := provable_of_models.{0} _ _ fun _ _ _ ↦ by simp [models_iff]
     simpa using internal_provable_of_outer_provable this (V := V)
   case hfvar =>
     intro x

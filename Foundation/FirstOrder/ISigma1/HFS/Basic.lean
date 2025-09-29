@@ -11,7 +11,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 @[simp] lemma susbset_insert (x a : V) : a ⊆ insert x a := by intro z hz; simp [hz]
 
@@ -256,7 +256,7 @@ section domain
 lemma domain_exists_unique (s : V) :
     ∃! d : V, ∀ x, x ∈ d ↔ ∃ y, ⟪x, y⟫ ∈ s := by
   have : 𝚺₁-Predicate fun x ↦ ∃ y, ⟪x, y⟫ ∈ s :=
-    HierarchySymbol.BoldfacePred.of_iff (Q := fun x ↦ ∃ y < s, ⟪x, y⟫ ∈ s)
+    HierarchySymbol.DefinablePred.of_iff (Q := fun x ↦ ∃ y < s, ⟪x, y⟫ ∈ s)
       (by definability)
       (fun x ↦ ⟨by rintro ⟨y, hy⟩; exact ⟨y, lt_of_le_of_lt (le_pair_right x y) (lt_of_mem hy), hy⟩,
                 by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)
@@ -349,7 +349,7 @@ section range
 lemma range_exists_unique (s : V) :
     ∃! r : V, ∀ y, y ∈ r ↔ ∃ x, ⟪x, y⟫ ∈ s := by
   have : 𝚺₁-Predicate fun y ↦ ∃ x, ⟪x, y⟫ ∈ s :=
-    HierarchySymbol.BoldfacePred.of_iff (Q := fun y ↦ ∃ x < s, ⟪x, y⟫ ∈ s)
+    HierarchySymbol.DefinablePred.of_iff (Q := fun y ↦ ∃ x < s, ⟪x, y⟫ ∈ s)
       (by definability)
       (fun y ↦ ⟨by rintro ⟨x, hy⟩; exact ⟨x, lt_of_le_of_lt (le_pair_left x y) (lt_of_mem hy), hy⟩,
                 by rintro ⟨y, _, hy⟩; exact ⟨y, hy⟩⟩)

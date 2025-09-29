@@ -8,7 +8,7 @@ namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -112,11 +112,11 @@ variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 local prefix:90 "𝗥" => T.rosserPred
 
 theorem rosserProvable_D1 {σ} : T ⊢ σ → 𝗜𝚺₁ ⊢ 𝗥σ := fun h ↦
-  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  complete <| consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using rosser_internalize_sentence h
 
 theorem rosserProvable_rosser {σ} : T ⊢ ∼σ → 𝗜𝚺₁ ⊢ ∼𝗥σ := fun h ↦
-  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  complete <| consequence_of _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using not_rosserProvable_sentence h
 
 end

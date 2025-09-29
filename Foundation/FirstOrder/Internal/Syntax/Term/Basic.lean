@@ -5,7 +5,7 @@ namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -467,11 +467,11 @@ lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph L (v ·.succ.succ) (v 0
 @[simp] lemma eval_graphDef (v) :
     Semiformula.Evalbm V v (β.graph L).val ↔ c.Graph L (v ·.succ.succ) (v 0) (v 1) := (graph_defined c).df.iff v
 
-instance graph_definable : 𝚺₁.Boldface (fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1)) :=
+instance graph_definable : 𝚺₁.Definable (fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1)) :=
   (graph_defined c).to_definable
 
 instance graph_definable₂ (param) : 𝚺-[0 + 1]-Relation (c.Graph L param) := by
-  simpa using HierarchySymbol.Boldface.retractiont (n := 2) (graph_definable c) (#0 :> #1 :> fun i ↦ &(param i))
+  simpa using HierarchySymbol.Definable.retractiont (n := 2) (graph_definable c) (#0 :> #1 :> fun i ↦ &(param i))
 
 lemma graph_dom_isUTerm {t y} :
     c.Graph L param t y → IsUTerm L t := fun h ↦ Graph.case_iff.mp h |>.1

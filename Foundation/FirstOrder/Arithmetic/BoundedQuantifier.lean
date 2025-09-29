@@ -4,7 +4,7 @@ namespace LO.FirstOrder.Semiformula
 
 open PeanoMinus
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗣𝗔⁻] {L : Language} [L.LT] [L.Zero] [L.One] [L.Add]
+variable {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗣𝗔⁻] {L : Language} [L.LT] [L.Zero] [L.One] [L.Add]
 
 variable [Structure L M] [Structure.LT L M] [Structure.One L M] [Structure.Add L M]
 

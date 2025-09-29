@@ -93,11 +93,7 @@ attribute [instance] Structure.Set.mk
 
 namespace SetTheory
 
-section
-
-variable (T : SetTheory)
-
-lemma consequence_of [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ)
+private lemma consequence_of_aux (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ)
     (H : ∀ (M : Type w)
            [SetStructure M]
            [Structure ℒₛₑₜ M]
@@ -109,9 +105,6 @@ lemma consequence_of [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ)
   letI : Structure.Model ℒₛₑₜ M ⊧ₘ* T :=
     ((Structure.ElementaryEquiv.modelsTheory (Structure.Model.elementaryEquiv ℒₛₑₜ M)).mp hT)
   (Structure.ElementaryEquiv.models (Structure.Model.elementaryEquiv ℒₛₑₜ M)).mpr (H (Structure.Model ℒₛₑₜ M))
-
-end
-
 section semantics
 
 variable (M : Type*) [SetStructure M]
@@ -140,13 +133,13 @@ lemma standardStructure_unique (s : Structure ℒₛₑₜ M) [hEq : Structure.E
 
 end semantics
 
-lemma consequence_of' (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
-    T ⊨ φ := consequence_of T φ fun M _ s _ _ ↦ by
+lemma consequence_of_models (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+    T ⊨ φ := consequence_of_aux T φ fun M _ s _ _ ↦ by
   rcases standardStructure_unique M s
   exact H M
 
-lemma provable_of (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
-    T ⊢ φ := complete <| consequence_of' _ _ H
+lemma provable_of_models (T : SetTheory) [𝗘𝗤 ⪯ T] (φ : Sentence ℒₛₑₜ) (H : ∀ (M : Type*) [SetStructure M] [Nonempty M] [M ⊧ₘ* T], M ⊧ₘ φ) :
+    T ⊢ φ := complete <| consequence_of_models _ _ H
 
 end SetTheory
 

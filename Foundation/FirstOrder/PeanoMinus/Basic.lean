@@ -159,7 +159,7 @@ set_option linter.flexible false in
 
 instance : 𝗘𝗤 ⪯ 𝗣𝗔⁻ := Entailment.WeakerThan.ofSubset <| fun φ hp ↦ PeanoMinus.equal φ hp
 
-variable {M : Type*} [ORingStruc M]
+variable {M : Type*} [ORingStructure M]
 
 scoped instance : LE M := ⟨fun x y => x = y ∨ x < y⟩
 
@@ -293,10 +293,10 @@ scoped instance : CanonicallyOrderedAdd M where
 scoped instance : IsOrderedAddMonoid M where
   add_le_add_left _ _ h z := (add_le_add_iff_left z).mpr h
 
-lemma numeral_eq_natCast : (n : ℕ) → (ORingStruc.numeral n : M) = n
+lemma numeral_eq_natCast : (n : ℕ) → (ORingStructure.numeral n : M) = n
   |     0 => rfl
   |     1 => by simp
-  | n + 2 => by simp [ORingStruc.numeral, numeral_eq_natCast (n + 1), add_assoc, one_add_one_eq_two]
+  | n + 2 => by simp [ORingStructure.numeral, numeral_eq_natCast (n + 1), add_assoc, one_add_one_eq_two]
 
 lemma not_neg (x : M) : ¬x < 0 := by simp
 
@@ -347,11 +347,11 @@ variable {a b c : M}
 
 instance : Nonempty M := ⟨0⟩
 
-@[simp] lemma numeral_two_eq_two : (ORingStruc.numeral 2 : M) = 2 := by simp [numeral_eq_natCast]
+@[simp] lemma numeral_two_eq_two : (ORingStructure.numeral 2 : M) = 2 := by simp [numeral_eq_natCast]
 
-@[simp] lemma numeral_three_eq_three : (ORingStruc.numeral 3 : M) = 3 := by simp [numeral_eq_natCast]
+@[simp] lemma numeral_three_eq_three : (ORingStructure.numeral 3 : M) = 3 := by simp [numeral_eq_natCast]
 
-@[simp] lemma numeral_four_eq_four : (ORingStruc.numeral 4 : M) = 4 := by simp [numeral_eq_natCast]
+@[simp] lemma numeral_four_eq_four : (ORingStructure.numeral 4 : M) = 4 := by simp [numeral_eq_natCast]
 
 lemma lt_succ_iff_le {x y : M} : x < y + 1 ↔ x ≤ y := Iff.symm le_iff_lt_succ
 
@@ -541,13 +541,13 @@ variable {M}
 
 variable {T : ArithmeticTheory} [𝗣𝗔⁻ ⪯ T]
 
-instance : 𝗥₀ ⪯ 𝗣𝗔⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
+instance : 𝗥₀ ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 
 instance : 𝗥₀ ⪱ 𝗣𝗔⁻ :=
   Entailment.StrictlyWeakerThan.of_unprovable_provable
     R0.unprovable_addZero (Entailment.by_axm _ PeanoMinus.addZero)
 
-instance (M : Type*) [ORingStruc M] [M ⊧ₘ* 𝗣𝗔⁻] : M ⊧ₘ* 𝗥₀ := models_of_subtheory (T := 𝗣𝗔⁻) inferInstance
+instance (M : Type*) [ORingStructure M] [M ⊧ₘ* 𝗣𝗔⁻] : M ⊧ₘ* 𝗥₀ := models_of_subtheory (T := 𝗣𝗔⁻) inferInstance
 
 end PeanoMinus
 
