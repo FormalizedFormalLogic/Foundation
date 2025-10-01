@@ -34,12 +34,16 @@ scoped instance : HasSubset V := ⟨fun x y ↦ ∀ z ∈ x, z ∈ y⟩
 
 lemma subset_def {a b : V} : a ⊆ b ↔ ∀ x ∈ a, x ∈ b := by rfl
 
-@[simp] lemma subset_self (x : V) : x ⊆ x := by simp [subset_def]
-
 instance Subset.defined_isSubsetOf : ℒₛₑₜ-relation[V] Subset via isSubsetOf :=
   ⟨fun v ↦ by simp [isSubsetOf, subset_def]⟩
 
 instance Subset.definable : ℒₛₑₜ-relation[V] Subset := defined_isSubsetOf.to_definable
+
+@[simp] lemma subset_self (x : V) : x ⊆ x := by simp [subset_def]
+
+@[simp] lemma subset_trans {x y z : V} : x ⊆ y → y ⊆ z → x ⊆ z := fun hxy hyz v hv ↦ hyz v (hxy v hv)
+
+instance : IsTrans V Subset := ⟨fun _ _ _ ↦ subset_trans⟩
 
 def IsEmpty (a : V) : Prop := ∀ x, x ∉ a
 
@@ -217,6 +221,10 @@ lemma union_assoc (x y z : V) : (x ∪ y) ∪ z = x ∪ (y ∪ z) := by ext; sim
 @[simp] lemma IsNonempty_union_iff {x y : V} : IsNonempty (x ∪ y) ↔ IsNonempty x ∨ IsNonempty y := by
   simp only [IsNonempty, mem_union_iff]; grind
 
+@[simp] lemma subset_union_left (x y : V) : x ⊆ x ∪ y := fun z hz ↦ by simp [hz]
+
+@[simp] lemma subset_union_right (x y : V) : y ⊆ x ∪ y := fun z hz ↦ by simp [hz]
+
 /-! ### Insert -/
 
 noncomputable def insert (x y : V) : V := {x} ∪ y
@@ -241,6 +249,8 @@ lemma union_insert (x y : V) : x ∪ Insert.insert y z = Insert.insert y (x ∪ 
 lemma pair_eq_doubleton (x y : V) : {x, y} = doubleton x y := by ext; simp
 
 @[simp] lemma sUnion_insert (x y : V) : ⋃ˢ Insert.insert x y = x ∪ ⋃ˢ y := by ext; simp [mem_sUnion_iff]
+
+@[simp] lemma subset_insert (x y : V) : y ⊆ Insert.insert x y := by simp [insert_def]
 
 @[simp] lemma insert_isNonempty (x y : V) : IsNonempty (Insert.insert x y) := ⟨x, by simp⟩
 
@@ -557,6 +567,8 @@ instance succ.definable : ℒₛₑₜ-function₁[V] succ := succ.defined.to_de
 
 @[simp] lemma mem_succ_self (x : V) : x ∈ succ x := by simp
 
+@[simp] lemma mem_subset_self (x : V) : x ⊆ succ x := by simp [succ]
+
 def IsInductive (x : V) : Prop := ∅ ∈ x ∧ ∀ y ∈ x, succ y ∈ x
 
 def IsInductive.dfn : Semisentence ℒₛₑₜ 1 :=
@@ -624,6 +636,8 @@ lemma num_succ_def (n : ℕ) : ((n + 1 : ℕ) : V) = succ ↑n := rfl
 
 @[simp] lemma cast_zero_def : ((0 : ℕ) : V) = 0 := rfl
 
+@[simp] lemma cast_one_def : ((1 : ℕ) : V) = 1 := rfl
+
 lemma one_def : (1 : V) = {∅} := calc
   (1 : V) = succ ∅ := rfl
   _       = {∅} := by simp [succ]
@@ -666,7 +680,28 @@ instance IsTransitive.defined : ℒₛₑₜ-predicate[V] IsTransitive via IsTra
 
 instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive := IsTransitive.defined.to_definable
 
-@[simp] lemma IsTransitive.empty : IsTransitive (∅ : V) := fun x ↦ by simp
+namespace IsTransitive
+
+omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+lemma mem_trans {x y z : V} (H : IsTransitive z) (hxy : x ∈ y) (hyz : y ∈ z) : x ∈ z := H y hyz x hxy
+
+@[simp] lemma empty : IsTransitive (∅ : V) := fun x ↦ by simp
+
+lemma succ {x : V} (h : IsTransitive x) : IsTransitive (succ x) := by
+  intro y hy
+  rcases show y = x ∨ y ∈ x by simpa using hy with (rfl | hy)
+  · simp
+  · exact subset_trans (h y hy) (by simp)
+
+@[simp] lemma nat (h : x ∈ (ω : V)) : IsTransitive x := by
+  apply naturalNumber_induction
+  · definability
+  case zero =>
+    simp [zero_def]
+  case succ =>
+    intro x hx ih
+    exact ih.succ
+  · assumption
 
 /-
 @[simp] lemma IsTransitive.ω : IsTransitive (ω : V) := by
@@ -681,7 +716,8 @@ instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive := IsTr
     · exact hx'
     · exact ih hx' z hz
 -/
-@[simp] lemma IsTransitive.ω : IsTransitive (ω : V) := by
+
+@[simp] lemma ω : IsTransitive (ω : V) := by
   apply naturalNumber_induction
   · definability
   case zero =>
@@ -692,6 +728,8 @@ instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive := IsTr
     · exact hx
     · exact ih z hz
 
+end IsTransitive
+
 /-! ## Axiom of foundation -/
 
 lemma foundation : ∀ x : V, IsNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
@@ -699,6 +737,19 @@ lemma foundation : ∀ x : V, IsNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y
 
 @[simp] lemma mem_irrefl (x : V) : x ∉ x := by
   simpa using foundation ({x} : V) (by simp)
+
+lemma ne_of_mem {x y : V} : x ∈ y → x ≠ y := by
+  rintro h rfl; simp_all
+
+lemma mem_asymm {x y : V} : x ∈ y → y ∉ x := by
+  intro hxy hyx
+  have : y ∉ x ∨ x ∉ y := by simpa using foundation ({x, y} : V) (by simp)
+  rcases this with (_ | _) <;> simp_all
+
+lemma mem_asymm₃ {x y z : V} : x ∈ y → y ∈ z → z ∉ x := by
+  intro hxy hyz
+  have : y ∉ x ∧ z ∉ x := by simpa [hxy, hyz] using foundation ({x, y, z} : V) (by simp)
+  exact this.2
 
 @[simp] lemma ne_succ (x : V) : x ≠ succ x := by
   intro h
