@@ -271,6 +271,23 @@ lemma of_deltaOne {R : (Fin k → V) → Prop} {Γ m} (h : 𝚫₁.Definable R) 
   | 𝚫 => exact ⟨by intro _; simp [HierarchySymbol.Semiformula.ofDeltaOne, h.iff, HierarchySymbol.Semiformula.val_sigma, h.proper.iff'],
     by intro _; simp [HierarchySymbol.Semiformula.ofDeltaOne, h.df.iff, HierarchySymbol.Semiformula.val_sigma]⟩
 
+lemma of_delta (h : 𝚫-[m].Definable P) : Γ-[m].Definable P := by
+  rcases h with ⟨φ, h⟩
+  match Γ with
+  | 𝚺 => exact ⟨φ.sigma, by intro v; simp [HierarchySymbol.Semiformula.val_sigma, h.df.iff]⟩
+  | 𝚷 => exact ⟨φ.pi, by intro v; simp [←h.proper v, HierarchySymbol.Semiformula.val_sigma, h.df.iff]⟩
+  | 𝚫 => exact ⟨φ, h⟩
+
+instance [𝚫-[m].Definable P] (Γ) : Γ-[m].Definable P := of_delta inferInstance
+
+lemma of_sigma_of_pi (hσ : 𝚺-[m].Definable P) (hπ : 𝚷-[m].Definable P) : Γ-[m].Definable P :=
+  match Γ with
+  | 𝚺 => hσ
+  | 𝚷 => hπ
+  | 𝚫 => by
+    rcases hσ with ⟨φ, hp⟩; rcases hπ with ⟨ψ, hq⟩
+    exact ⟨.mkDelta φ ψ, by intro v; simp [hp.df.iff, hq.df.iff], by intro v; simp [hp.df.iff]⟩
+
 lemma of_iff {P Q : (Fin k → V) → Prop} (h : ∀ x, P x ↔ Q x) (H : ℌ.Definable Q) : ℌ.Definable P := by
   rwa [show P = Q from by funext v; simp [h]]
 
@@ -309,25 +326,41 @@ lemma or (hP : ℌ.Definable P) (hQ : ℌ.Definable Q) : ℌ.Definable fun x ↦
   | 𝚺-[m] | 𝚷-[m] => intro v; simp [hP.iff, hQ.iff]
   | 𝚫-[m] => exact ⟨hP.proper.or hQ.proper, by intro v; simp [hP.iff, hQ.iff]⟩
 
-lemma negSigma (h : 𝚺-[m].Definable P) : 𝚷-[m].Definable fun x ↦ ¬P x := by
-  rcases h with ⟨φ, h⟩
-  apply Definable.mk' φ.negSigma
-  intro v; simp [h.iff]
+lemma notSigma (h : 𝚺-[m].Definable P) : 𝚷-[m].Definable fun x ↦ ¬P x := by
+  rcases h with ⟨φ, h⟩; exact Definable.mk' φ.negSigma fun v ↦ by simp [h.iff]
 
-lemma negPi (h : 𝚷-[m].Definable P) : 𝚺-[m].Definable fun x ↦ ¬P x := by
+lemma notPi (h : 𝚷-[m].Definable P) : 𝚺-[m].Definable fun x ↦ ¬P x := by
   rcases h with ⟨φ, h⟩
-  apply Definable.mk' φ.negPi
-  intro v; simp [h.iff]
+  exact Definable.mk' φ.negPi fun v ↦ by simp [h.iff]
 
-lemma not (h : 𝚫-[m].Definable P) : 𝚫-[m].Definable fun x ↦ ¬P x := by
+lemma notDelta (h : 𝚫-[m].Definable P) : 𝚫-[m].Definable fun x ↦ ¬P x := by
   rcases h with ⟨φ, h⟩
   exact Definable.mk' (∼φ) ⟨h.proper.neg, by intro v; simp [h.proper.eval_neg, h.iff]⟩
 
-lemma imp (hp : 𝚫-[m].Definable P) (hq : 𝚫-[m].Definable Q) :
-    𝚫-[m].Definable fun x ↦ P x → Q x := (hp.not.or hq).of_iff (by intro x; simp [imp_iff_not_or])
+lemma not (h : Γ.alt-[m].Definable P) :
+    Γ-[m].Definable (fun v ↦ ¬P v) :=
+  match Γ with
+  | 𝚺 => h.notPi
+  | 𝚷 => h.notSigma
+  | 𝚫 => h.notDelta
 
-lemma biconditional {φ ψ : 𝚫-[m].Semiformula V k} (hp : DefinedWithParam P φ) (hq : DefinedWithParam Q ψ) :
-    DefinedWithParam (fun x ↦ P x ↔ Q x) (φ ⭤ ψ) := ((hp.imp hq).and (hq.imp hp)).of_iff <| by intro v; simp [iff_iff_implies_and_implies]
+lemma impDelta (hp : 𝚫-[m].Definable P) (hq : 𝚫-[m].Definable Q) :
+    𝚫-[m].Definable fun x ↦ P x → Q x := (hp.notDelta.or hq).of_iff (by intro x; simp [imp_iff_not_or])
+
+lemma imp (h₁ : Γ.alt-[m].Definable P) (h₂ : Γ-[m].Definable Q) :
+    Γ-[m].Definable (fun v ↦ P v → Q v) := by
+  match Γ with
+  | 𝚺 =>
+    rcases h₁ with ⟨φ₁, h₁⟩; rcases h₂ with ⟨φ₂, h₂⟩
+    exact ⟨φ₁.negPi ⋎ φ₂, fun _ ↦ by simp [Semiformula.negPi, h₁.iff, h₂.iff, imp_iff_not_or]⟩
+  | 𝚷 =>
+    rcases h₁ with ⟨p₁, h₁⟩; rcases h₂ with ⟨p₂, h₂⟩
+    exact ⟨p₁.negSigma ⋎ p₂, fun _ ↦ by simp [h₁.iff, h₂.iff, imp_iff_not_or]⟩
+  | 𝚫 => exact impDelta h₁ h₂
+
+lemma biconditional (h₁ : 𝚫-[m].Definable P) (h₂ : 𝚫-[m].Definable Q) {Γ} :
+    Γ-[m].Definable (fun v ↦ P v ↔ Q v) :=
+  .of_delta <| ((h₁.impDelta h₂).and (h₂.impDelta h₁)).of_iff <| by intro v; simp [iff_iff_implies_and_implies]
 
 lemma ball {P : (Fin (k + 1) → V) → Prop} {φ : ℌ.Semiformula V (k + 1)}
     (hp : DefinedWithParam P φ) (t : Semiterm ℒₒᵣ V k) :
