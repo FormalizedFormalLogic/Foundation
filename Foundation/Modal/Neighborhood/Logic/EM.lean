@@ -1,5 +1,6 @@
 import Foundation.Modal.Neighborhood.Logic.E
 import Foundation.Modal.Neighborhood.Supplementation
+import Foundation.Modal.Neighborhood.AxiomC
 import Foundation.Vorspiel.Set.Fin
 
 namespace LO.Modal
@@ -47,14 +48,9 @@ instance : counterframe_axiomC₁.IsEM where
 
 @[simp]
 lemma counterframe_axiomC₁.not_validate_axiomC : ¬counterframe_axiomC₁ ⊧ Axioms.C (.atom 0) (.atom 1) := by
-  apply ValidOnFrame.not_of_exists_valuation_world;
-  use (λ a =>
-    match a with
-    | 0 => {0}
-    | 1 => {1}
-    | _ => ∅
-  ), 0;
-  simp [Satisfies];
+  apply not_imp_not.mpr $ @isRegular_of_valid_axiomC (F := counterframe_axiomC₁);
+  by_contra hC;
+  have : ({0} : Set counterframe_axiomC₁) ∩ {1} = {0, 1} := by simpa using @hC.regular {0} {1} 0;
   tauto_set;
 
 end Neighborhood
