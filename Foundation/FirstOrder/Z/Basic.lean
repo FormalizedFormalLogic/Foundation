@@ -54,18 +54,21 @@ instance IsEmpty.defined : ℒₛₑₜ-predicate[V] IsEmpty via isEmpty :=
 
 instance IsEmpty.definable : ℒₛₑₜ-predicate[V] IsEmpty := defined.to_definable
 
-def IsNonempty (a : V) : Prop := ∃ x, x ∈ a
+class IsNonempty (a : V) : Prop where
+  nonempty : ∃ x, x ∈ a
+
+lemma isNonempty_def {x : V} : IsNonempty x ↔ ∃ y, y ∈ x := ⟨fun h ↦ h.nonempty, fun h ↦ ⟨h⟩⟩
 
 instance IsNonempty.defined_isNonempty : ℒₛₑₜ-predicate[V] IsNonempty via isNonempty :=
-  ⟨fun v ↦ by simp [isNonempty, IsNonempty]⟩
+  ⟨fun v ↦ by simp [isNonempty, isNonempty_def]⟩
 
 instance IsNonempty.definable : ℒₛₑₜ-predicate[V] IsNonempty := defined_isNonempty.to_definable
 
 @[simp] lemma not_isEmpty_iff_isNonempty {x : V} :
-    ¬IsEmpty x ↔ IsNonempty x := by simp [IsEmpty, IsNonempty]
+    ¬IsEmpty x ↔ IsNonempty x := by simp [IsEmpty, isNonempty_def]
 
 @[simp] lemma not_isNonempty_iff_isEmpty {x : V} :
-    ¬IsNonempty x ↔ IsEmpty x := by simp [IsEmpty, IsNonempty]
+    ¬IsNonempty x ↔ IsEmpty x := by simp [IsEmpty, isNonempty_def]
 
 scoped instance : CoeSort V (Type _) := ⟨fun x ↦ {z : V // z ∈ x}⟩
 
@@ -175,7 +178,7 @@ instance doubleton.defined : ℒₛₑₜ-function₂[V] doubleton via doubleton
 
 instance doubleton.definable : ℒₛₑₜ-function₂[V] doubleton := doubleton.defined.to_definable
 
-@[simp] lemma doubleton_isNonempty (x y : V) : IsNonempty (doubleton x y) := ⟨x, by simp⟩
+@[simp] instance doubleton_isNonempty (x y : V) : IsNonempty (doubleton x y) := ⟨x, by simp⟩
 
 noncomputable def singleton (x : V) : V := doubleton x x
 
@@ -192,7 +195,7 @@ instance singleton.defined : ℒₛₑₜ-function₁[V] Singleton.singleton via
 
 instance singleton.definable : ℒₛₑₜ-function₁[V] Singleton.singleton := singleton.defined.to_definable
 
-@[simp] lemma singleton_isNonempty (x : V) : IsNonempty ({x} : V) := ⟨x, by simp⟩
+@[simp] instance singleton_isNonempty (x : V) : IsNonempty ({x} : V) := ⟨x, by simp⟩
 
 /-! ## Axiom of union -/
 
@@ -223,8 +226,11 @@ instance sUnion.definable : ℒₛₑₜ-function₁[V] sUnion := sUnion.defined
 @[simp] lemma sUnion_singleton_eq (x : V) : ⋃ˢ ({x} : V) = x := by ext; simp [mem_sUnion_iff]
 
 @[simp] lemma IsNonempty_sUnion_iff {x : V} : IsNonempty (⋃ˢ x) ↔ ∃ y ∈ x, IsNonempty y := by
-  simp only [IsNonempty, mem_sUnion_iff]
+  simp only [isNonempty_def, mem_sUnion_iff]
   grind
+
+lemma subset_sUnion_of_mem {x y : V} (h : x ∈ y) : x ⊆ ⋃ˢ y := fun z hz ↦ by
+  simp only [mem_sUnion_iff]; grind
 
 /-! ### Union of two sets -/
 
@@ -254,7 +260,7 @@ lemma union_assoc (x y z : V) : (x ∪ y) ∪ z = x ∪ (y ∪ z) := by ext; sim
 @[simp] lemma empty_union (x : V) : ∅ ∪ x = x := by ext; simp
 
 @[simp] lemma IsNonempty_union_iff {x y : V} : IsNonempty (x ∪ y) ↔ IsNonempty x ∨ IsNonempty y := by
-  simp only [IsNonempty, mem_union_iff]; grind
+  simp only [isNonempty_def, mem_union_iff]; grind
 
 @[simp] lemma subset_union_left (x y : V) : x ⊆ x ∪ y := fun z hz ↦ by simp [hz]
 
@@ -291,7 +297,7 @@ lemma pair_eq_doubleton (x y : V) : {x, y} = doubleton x y := by ext; simp
 
 @[simp] lemma subset_insert (x y : V) : y ⊆ Insert.insert x y := by simp [insert_def]
 
-@[simp] lemma insert_isNonempty (x y : V) : IsNonempty (Insert.insert x y) := ⟨x, by simp⟩
+@[simp] instance insert_isNonempty (x y : V) : IsNonempty (Insert.insert x y) := ⟨x, by simp⟩
 
 @[simp] lemma intsert_union (x y z : V) :
     Insert.insert x y ∪ z = Insert.insert x (y ∪ z) := by
@@ -334,7 +340,7 @@ instance power.definable : ℒₛₑₜ-function₁[V] power := power.defined.to
 
 @[simp] lemma power_empty : ℘ (∅ : V) = {∅} := by ext; simp [mem_power_iff]
 
-@[simp] lemma power_nonempty (x : V) : IsNonempty (℘ x) := ⟨x, by simp⟩
+@[simp] instance power_nonempty (x : V) : IsNonempty (℘ x) := ⟨x, by simp⟩
 
 /-! ## Aussonderungsaxiom -/
 
@@ -392,7 +398,7 @@ noncomputable def sInter (x : V) : V := {z ∈ ⋃ˢ x ; ∀ y ∈ x, z ∈ y}
 prefix:110 "⋂ˢ " => sInter
 
 lemma mem_sInter_iff {x : V} : z ∈ ⋂ˢ x ↔ IsNonempty x ∧ ∀ y ∈ x, z ∈ y := by
-  simp only [sInter, mem_sep_iff, mem_sUnion_iff, and_congr_left_iff, IsNonempty]
+  simp only [sInter, mem_sep_iff, mem_sUnion_iff, and_congr_left_iff, isNonempty_def]
   grind
 
 def sInter.dfn : Semisentence ℒₛₑₜ 2 := “u x. ∀ z, z ∈ u ↔ !isNonempty x ∧ ∀ y ∈ x, z ∈ y”
@@ -402,13 +408,27 @@ instance sInter.defined : ℒₛₑₜ-function₁[V] sInter via sInter.dfn :=
 
 instance sInter.definable : ℒₛₑₜ-function₁[V] sInter := sInter.defined.to_definable
 
-lemma IsNonempty.mem_sInter_iff {x : V} (hx : IsNonempty x) :
+@[simp] lemma mem_sInter_iff_of_nonempty {x : V} [hx : IsNonempty x] :
     z ∈ ⋂ˢ x ↔ ∀ y ∈ x, z ∈ y := by
   simp [Zermelo.mem_sInter_iff, hx]
 
 @[simp] lemma sInter_empty_eq : ⋂ˢ (∅ : V) = ∅ := by ext; simp [mem_sInter_iff]
 
-@[simp] lemma sInter_singleton (x : V) : ⋂ˢ {x} = x := by ext; simp [IsNonempty.mem_sInter_iff]
+@[simp] lemma sInter_singleton (x : V) : ⋂ˢ {x} = x := by ext; simp [mem_sInter_iff_of_nonempty]
+
+lemma sInter_subset_of_mem_of_nonempty {x y : V} [IsNonempty y] (h : x ∈ y) : ⋂ˢ y ⊆ x := by
+  intro z hz
+  simp only [mem_sInter_iff_of_nonempty] at hz
+  grind
+
+@[simp] lemma subset_sInter_iff_of_nonempty {x y : V} [IsNonempty y] : x ⊆ ⋂ˢ y ↔ ∀ z ∈ y, x ⊆ z := by
+  constructor
+  · intro h z hzy
+    exact subset_trans h (sInter_subset_of_mem_of_nonempty hzy)
+  · intro h z hz
+    simp only [mem_sInter_iff_of_nonempty]
+    intro v hvy
+    exact h v hvy z hz
 
 /-! #### Intersection of two sets -/
 
@@ -419,7 +439,7 @@ noncomputable instance : Inter V := ⟨inter⟩
 lemma inter_def (x y : V) : x ∩ y = ⋂ˢ {x, y} := rfl
 
 @[simp] lemma mem_inter_iff {x y z : V} : z ∈ x ∩ y ↔ z ∈ x ∧ z ∈ y := by
-  simp [inter_def, IsNonempty.mem_sInter_iff]
+  simp [inter_def, mem_sInter_iff_of_nonempty]
 
 def inter.dfn : Semisentence ℒₛₑₜ 3 := “u x y. ∀ z, z ∈ u ↔ z ∈ x ∧ z ∈ y”
 
@@ -437,8 +457,8 @@ lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; sim
 
 @[simp] lemma empty_inter (x : V) : ∅ ∩ x = ∅ := by ext; simp
 
-@[simp] lemma sInter_insert (x y : V) (hy : IsNonempty y) : ⋂ˢ Insert.insert x y = x ∩ ⋂ˢ y := by
-  ext; simp [*, IsNonempty.mem_sInter_iff]
+@[simp] lemma sInter_insert (x y : V) [hy : IsNonempty y] : ⋂ˢ Insert.insert x y = x ∩ ⋂ˢ y := by
+  ext; simp [*, mem_sInter_iff_of_nonempty]
 
 @[simp, grind] lemma intsert_inter_of_mem (x y z : V) (hx : x ∈ z) :
     Insert.insert x y ∩ z = Insert.insert x (y ∩ z) := by
@@ -655,6 +675,8 @@ instance ω.defined : ℒₛₑₜ-function₀[V] ω via isω := ⟨fun v ↦ by
 
 @[simp] lemma empty_mem_ω : ∅ ∈ (ω : V) := mem_ω_iff_mem_all_inductive.mpr <| fun _ hI ↦ hI.zero
 
+@[simp] instance ω_nonempty : IsNonempty (ω : V) := ⟨⟨∅, by simp⟩⟩
+
 @[simp] lemma ω_succ_closed {x : V} : x ∈ (ω : V) → succ x ∈ (ω : V) := by
   intro hx
   apply mem_ω_iff_mem_all_inductive.mpr
@@ -686,6 +708,8 @@ lemma one_def : (1 : V) = {∅} := calc
   (1 : V) = succ ∅ := rfl
   _       = {∅} := by simp [succ]
 
+@[simp] lemma zero_mem_one : 0 ∈ (1 : V) := by simp [zero_def, one_def]
+
 @[simp] lemma ofNat_mem_ω (n : ℕ) : ↑n ∈ (ω : V) :=
   match n with
   |     0 => by simp [zero_def]
@@ -715,27 +739,27 @@ lemma naturalNumber_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
 
 /-! ## Axiom of foundation -/
 
-lemma foundation : ∀ x : V, IsNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
+lemma foundation : ∀ x : V, [IsNonempty x] → ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
   simpa [models_iff, Axiom.foundation] using ModelsTheory.models V Zermelo.axiom_of_foundation
 
-lemma foundation' (x : V) (hx : IsNonempty x) : ∃ y ∈ x, x ∩ y = ∅ := by
-  rcases foundation x hx with ⟨y, hyx, H⟩
+lemma foundation' (x : V) [IsNonempty x] : ∃ y ∈ x, x ∩ y = ∅ := by
+  rcases foundation x with ⟨y, hyx, H⟩
   exact ⟨y, hyx, by ext z; simpa using H z⟩
 
 @[simp] lemma mem_irrefl (x : V) : x ∉ x := by
-  simpa using foundation ({x} : V) (by simp)
+  simpa using foundation ({x} : V)
 
 lemma ne_of_mem {x y : V} : x ∈ y → x ≠ y := by
   rintro h rfl; simp_all
 
 lemma mem_asymm {x y : V} : x ∈ y → y ∉ x := by
   intro hxy hyx
-  have : y ∉ x ∨ x ∉ y := by simpa using foundation ({x, y} : V) (by simp)
+  have : y ∉ x ∨ x ∉ y := by simpa using foundation ({x, y} : V)
   rcases this with (_ | _) <;> simp_all
 
 lemma mem_asymm₃ {x y z : V} : x ∈ y → y ∈ z → z ∉ x := by
   intro hxy hyz
-  have : y ∉ x ∧ z ∉ x := by simpa [hxy, hyz] using foundation ({x, y, z} : V) (by simp)
+  have : y ∉ x ∧ z ∉ x := by simpa [hxy, hyz] using foundation ({x, y, z} : V)
   exact this.2
 
 @[simp] lemma ne_succ (x : V) : x ≠ succ x := by

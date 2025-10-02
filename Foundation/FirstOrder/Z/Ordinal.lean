@@ -2,6 +2,8 @@ import Foundation.FirstOrder.Z.Basic
 
 /-!
 # Ordinals and transitive sets in Zermelo set theory
+
+reference: Ralf Schindler, "Set Theory, Exploring Independence and Truth"
 -/
 
 namespace LO.Zermelo
@@ -71,6 +73,22 @@ lemma union {x y : V} [hx : IsTransitive x] [hy : IsTransitive y] : IsTransitive
   rintro z (hzx | hzy)
   · exact subset_trans (hx.transitive z hzx) (by simp)
   · exact subset_trans (hy.transitive z hzy) (by simp)⟩
+
+lemma sUnion {X : V} (h : ∀ x ∈ X, IsTransitive x) : IsTransitive (⋃ˢ X) := ⟨by
+  intro x hx
+  have : ∃ y ∈ X, x ∈ y := by simpa [mem_sUnion_iff] using hx
+  rcases this with ⟨y, hyX, hxy⟩
+  exact subset_trans ((h y hyX).transitive x hxy) (subset_sUnion_of_mem hyX)⟩
+
+lemma sInter {X : V} (h : ∀ x ∈ X, IsTransitive x) : IsTransitive (⋂ˢ X) := by
+  rcases eq_empty_or_isNonempty X with (rfl | hX)
+  · simp
+  refine ⟨?_⟩
+  intro y hy
+  apply subset_sInter_iff_of_nonempty.mpr
+  intro z hzX
+  have : y ∈ z := mem_sInter_iff_of_nonempty.mp hy z hzX
+  exact (h z hzX).transitive y this
 
 /-
 @[simp] lemma IsTransitive.ω : IsTransitive (ω : V) := by
@@ -158,7 +176,8 @@ protected instance nat : α ∈ (ω : V) → IsOrdinal (α : V) := by
 lemma mem_of_ssubset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊊ β → α ∈ β := by
   intro ss
   have : ∃ γ, (γ ∈ β ∧ γ ∉ α) ∧ ∀ δ ∈ β, δ ∉ α → δ ∉ γ := by
-    simpa using foundation (β \ α) (isNonempty_sdiff_of_ssubset ss)
+    have : IsNonempty (β \ α) := (isNonempty_sdiff_of_ssubset ss)
+    simpa using foundation (β \ α)
   rcases this with ⟨γ, ⟨hγβ, hγα⟩, Hγ⟩
   have Hγα : γ ⊆ α := by
     intro ξ hξγ
@@ -204,7 +223,8 @@ lemma subset_or_supset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊆ β ∨
     simp only [mem_sep_iff, mem_succ_iff, mem_irrefl, or_false, true_and, C]
     exact ⟨β, hβ, Aαβ⟩
   have : ∃ α₀, (α₀ ∈ succ α ∧ ∃ β, IsOrdinal β ∧ ¬α₀ ⊆ β ∧ ¬β ⊆ α₀) ∧ ∀ γ ∈ C, γ ∉ α₀ := by
-    simpa [C] using foundation C ⟨α, hαC⟩
+    have : IsNonempty C := ⟨α, hαC⟩
+    simpa [C] using foundation C
   rcases this with ⟨α₀, ⟨hα₀sα, β₀, ordβ₀, Hα₀β₀⟩, Hα₀⟩
   have ordα₀ : IsOrdinal α₀ := by
     rcases mem_succ_iff.mp hα₀sα with (rfl | hα₀α)
@@ -258,8 +278,27 @@ lemma of_transitive_of_isOrdinal (tr : IsTransitive α) (H : ∀ β ∈ α, IsOr
     have : IsOrdinal ζ := H ζ hζα
     mem_trichotomy ξ ζ
 
-@[simp] instance ω : IsOrdinal (ω : V) :=
+@[simp] protected instance ω : IsOrdinal (ω : V) :=
   of_transitive_of_isOrdinal inferInstance fun _ hn ↦ IsOrdinal.nat hn
+
+lemma sUnion {X : V} (h : ∀ α ∈ X, IsOrdinal α) : IsOrdinal (⋃ˢ X) :=
+  of_transitive_of_isOrdinal (IsTransitive.sUnion fun α hαX ↦ (h α hαX).toIsTransitive)
+    fun β hβ ↦ by
+      have : ∃ γ ∈ X, β ∈ γ := by simpa [mem_sUnion_iff] using hβ
+      rcases this with ⟨γ, hγX, hβγ⟩
+      have : IsOrdinal γ := h γ hγX
+      exact of_mem hβγ
+
+lemma sInter {X : V} (h : ∀ α ∈ X, IsOrdinal α) : IsOrdinal (⋂ˢ X) := by
+  rcases eq_empty_or_isNonempty X with (rfl | hX)
+  · simp
+  · apply of_transitive_of_isOrdinal (IsTransitive.sInter fun α hαX ↦ (h α hαX).toIsTransitive)
+    rcases hX.nonempty with ⟨α₀, hα₀X⟩
+    have : IsOrdinal α₀ := h α₀ hα₀X
+    intro α hα
+    have : ∀ y ∈ X, α ∈ y := by simpa using hα
+    have : α ∈ α₀ := this α₀ hα₀X
+    exact of_mem this
 
 end IsOrdinal
 
