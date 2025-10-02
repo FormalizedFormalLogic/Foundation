@@ -35,26 +35,6 @@ instance : Complete Modal.EN FrameClass.EN := minimalCanonicalFrame.completeness
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Modal.E ⪱ Modal.EN := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.N;
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
-      apply not_validOnFrameClass_of_exists_model_world;
-      let M : Model := {
-        World := Fin 1,
-        𝒩 := λ w => ∅,
-        Val := λ w => Set.univ
-      };
-      use M, 0;
-      constructor;
-      . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
-
 
 
 instance : Modal.N ⪱ Modal.EN := by

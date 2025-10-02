@@ -69,4 +69,25 @@ instance : Modal.EMC ⪱ Modal.EMC4 := by
       . constructor;
       . simp;
 
+instance : Modal.EMC4 ⪱ Modal.EMCT4 := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use Axioms.T (.atom 0);
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMC4);
+      apply not_validOnFrameClass_of_exists_frame;
+      use ⟨Fin 1, λ _ => Set.univ⟩;
+      constructor;
+      . exact {
+          mono := by simp,
+          regular := by simp [Frame.box],
+          trans := by simp [Frame.box]
+        }
+      . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
+        by_contra! hC;
+        simpa [Frame.box] using @hC.refl ∅;
+
 end LO.Modal
