@@ -74,6 +74,7 @@ instance : Complete Modal.EM FrameClass.EM := maximalCanonicalFrame.completeness
 
 end EM
 
+
 instance : Modal.EM ⪱ Modal.EMN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
@@ -105,35 +106,22 @@ instance : Modal.EM ⪱ Modal.EMC := by
         infer_instance;
       . simp;
 
-instance : Modal.E ⪱ Modal.EM := by
+instance : Modal.EM ⪱ Modal.EMT := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.M (.atom 0) (.atom 1));
+    use (Axioms.T (.atom 0));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
-      apply not_validOnFrameClass_of_exists_model_world;
-      let M : Model := {
-        World := Fin 3,
-        𝒩 := λ w =>
-          match w with
-          | 0 => {{1}}
-          | 1 => {{0}, {0, 1}}
-          | 2 => {{0}, {1, 2}},
-        Val := λ w =>
-          match w with
-          | 0 => {0, 1}
-          | 1 => {1, 2}
-          | _ => Set.univ
-      };
-      use M, 0;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EM);
+      apply not_validOnFrameClass_of_exists_frame;
+      use ⟨Fin 1, λ _ => Set.univ⟩;
       constructor;
-      . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
-        ext x;
-        simp;
-        omega;
+      . exact ⟨by tauto⟩;
+      . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
+        by_contra! hC;
+        simpa [Frame.box] using @hC.refl ∅;
+
 
 end LO.Modal

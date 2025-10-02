@@ -42,25 +42,6 @@ instance : Entailment.Consistent Modal.ED := consistent_of_sound_frameclass Fram
 
 end ED
 
-
-instance : Modal.E ⪱ Modal.ED := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.D (.atom 0));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
-      apply not_validOnFrameClass_of_exists_frame;
-      use ⟨Fin 2, λ w => match w with | 0 => {{0}} | 1 => Set.univ⟩
-      constructor;
-      . tauto;
-      . apply not_imp_not.mpr isSerial_of_valid_axiomD;
-        by_contra! hC;
-        have := @hC.serial {1} 1;
-        simp [Frame.box, Frame.dia] at this;
-
 instance : Modal.ED ⪱ Modal.END := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;

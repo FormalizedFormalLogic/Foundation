@@ -16,56 +16,6 @@ protected abbrev FrameClass.EMT4 : FrameClass := { F | F.IsEMT4 }
 protected class Frame.IsFiniteEMT4 (F : Frame) extends F.IsEMT4, F.IsFinite
 protected abbrev FrameClass.finite_EMT4 : FrameClass := { F | F.IsFiniteEMT4 }
 
-abbrev counterframe_axiomC₂ : Frame := {
-  World := Fin 2,
-  𝒩 := λ w =>
-    match w with
-    | 0 => {{0}, {1}, {0, 1}}
-    | 1 => {{1}, {0, 1}}
-}
-
-instance : counterframe_axiomC₂.IsEMT4 where
-  mono := by sorry;
-  refl := by sorry;
-  trans := by sorry;
-
-@[simp]
-lemma counterframe_axiomC₂.not_validate_axiomC : ¬counterframe_axiomC₂ ⊧ Axioms.C (.atom 0) (.atom 1) := by
-  apply ValidOnFrame.not_of_exists_valuation_world;
-  use (λ a =>
-    match a with
-    | 0 => {0}
-    | 1 => {1}
-    | _ => ∅
-  ), 0;
-  simp [Satisfies];
-  tauto_set;
-
-/- actual EM4, not EMT4
-instance : counterframe_axiomC₁.IsEMT4 where
-  refl := by sorry;
-  trans := by
-    intro X w;
-    match w with
-    | 0 =>
-      rintro (rfl | rfl | rfl);
-      . left;
-        ext a;
-        match a with | 0 => simp | 1 => simp; tauto_set;
-      . right; right;
-        ext a;
-        match a with | 0 => simp | 1 => simp;
-      . simp [Frame.box]
-        right; right;
-        ext a;
-        match a with | 0 => simp | 1 => simp;
-    | 1 =>
-      rintro (rfl | rfl) <;>
-      . right;
-        ext a;
-        match a with | 0 => simp | 1 => simp;
--/
-
 end Neighborhood
 
 
@@ -103,36 +53,5 @@ instance : Complete Modal.EMT4 FrameClass.finite_EMT4 := ⟨by
 ⟩
 
 end EMT4
-
-instance : Modal.EMT ⪱ Modal.EMT4 := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.Four (.atom 0));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMT);
-      apply not_validOnFrameClass_of_exists_frame;
-      use Frame.trivial_nontransitive;
-      constructor;
-      . constructor;
-      . simp;
-
-instance : Modal.EMT4 ⪱ Modal.EMCT4 := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.C (.atom 0) (.atom 1);
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMT4);
-      apply not_validOnFrameClass_of_exists_frame;
-      use counterframe_axiomC₂;
-      constructor;
-      . apply Set.mem_setOf_eq.mpr;
-        infer_instance;
-      . simp;
 
 end LO.Modal

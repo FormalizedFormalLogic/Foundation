@@ -40,37 +40,6 @@ instance : Complete Modal.EMN FrameClass.EMN := maximalCanonicalFrame.completene
 
 end EMN
 
-instance : Modal.EN ⪱ Modal.EMN := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.M (.atom 0) (.atom 1));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EN);
-      apply not_validOnFrameClass_of_exists_model_world;
-      let M : Model := {
-        World := Fin 2,
-        𝒩 := λ w =>
-          match w with
-          | 0 => {∅, Set.univ}
-          | 1 => {Set.univ},
-        Val := λ w =>
-          match w with
-          | 0 => {0}
-          | 1 => {1}
-          | _ => Set.univ
-      };
-      use M, 0;
-      constructor;
-      . exact {
-          contains_unit := by
-            ext x;
-            match x with | 0 | 1 => simp_all [M]
-        }
-      . simp! [M, Semantics.Realize, Satisfies];
-
 instance : Modal.EMN ⪱ Modal.EMCN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
