@@ -67,6 +67,8 @@ instance IsNonempty.definable : ℒₛₑₜ-predicate[V] IsNonempty := defined_
 @[simp] lemma not_isNonempty_iff_isEmpty {x : V} :
     ¬IsNonempty x ↔ IsEmpty x := by simp [IsEmpty, IsNonempty]
 
+scoped instance : CoeSort V (Type _) := ⟨fun x ↦ {z : V // z ∈ x}⟩
+
 variable [Nonempty V] [V ⊧ₘ* 𝗭]
 
 /-! ## Axiom of extentionality -/
@@ -668,67 +670,6 @@ lemma naturalNumber_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
   intro x hx
   have : x ∈ (ω : V) ∧ P x := by simpa [p] using this x hx
   exact this.2
-
-/-! ### Transitive set -/
-
-def IsTransitive (x : V) : Prop := ∀ y ∈ x, y ⊆ x
-
-def IsTransitive.dfn : Semisentence ℒₛₑₜ 1 := “x. ∀ y ∈ x, y ⊆ x”
-
-instance IsTransitive.defined : ℒₛₑₜ-predicate[V] IsTransitive via IsTransitive.dfn :=
-  ⟨fun v ↦ by simp [IsTransitive.dfn, IsTransitive]⟩
-
-instance IsTransitive.definable : ℒₛₑₜ-predicate[V] IsTransitive := IsTransitive.defined.to_definable
-
-namespace IsTransitive
-
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
-lemma mem_trans {x y z : V} (H : IsTransitive z) (hxy : x ∈ y) (hyz : y ∈ z) : x ∈ z := H y hyz x hxy
-
-@[simp] lemma empty : IsTransitive (∅ : V) := fun x ↦ by simp
-
-lemma succ {x : V} (h : IsTransitive x) : IsTransitive (succ x) := by
-  intro y hy
-  rcases show y = x ∨ y ∈ x by simpa using hy with (rfl | hy)
-  · simp
-  · exact subset_trans (h y hy) (by simp)
-
-@[simp] lemma nat (h : x ∈ (ω : V)) : IsTransitive x := by
-  apply naturalNumber_induction
-  · definability
-  case zero =>
-    simp [zero_def]
-  case succ =>
-    intro x hx ih
-    exact ih.succ
-  · assumption
-
-/-
-@[simp] lemma IsTransitive.ω : IsTransitive (ω : V) := by
-  intro x hx
-  induction x using naturalNumber_induction
-  · definability
-  case zero =>
-    simp [zero_def]
-  case succ x hx' ih =>
-    intro z hz
-    rcases show z = x ∨ z ∈ x by simpa using hz with (rfl | hz)
-    · exact hx'
-    · exact ih hx' z hz
--/
-
-@[simp] lemma ω : IsTransitive (ω : V) := by
-  apply naturalNumber_induction
-  · definability
-  case zero =>
-    simp [zero_def]
-  case succ =>
-    intro x hx ih z hz
-    rcases show z = x ∨ z ∈ x by simpa using hz with (rfl | hz)
-    · exact hx
-    · exact ih z hz
-
-end IsTransitive
 
 /-! ## Axiom of foundation -/
 
