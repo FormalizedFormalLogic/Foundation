@@ -49,10 +49,10 @@ def IsEmpty (a : V) : Prop := ∀ x, x ∉ a
 
 lemma IsEmpty.not_mem {a x : V} (h : IsEmpty a) : x ∉ a := h x
 
-instance IsEmpty.defined_isEmpty : ℒₛₑₜ-predicate[V] IsEmpty via isEmpty :=
+instance IsEmpty.defined : ℒₛₑₜ-predicate[V] IsEmpty via isEmpty :=
   ⟨fun v ↦ by simp [isEmpty, IsEmpty]⟩
 
-instance IsEmpty.definable : ℒₛₑₜ-predicate[V] IsEmpty := defined_isEmpty.to_definable
+instance IsEmpty.definable : ℒₛₑₜ-predicate[V] IsEmpty := defined.to_definable
 
 def IsNonempty (a : V) : Prop := ∃ x, x ∈ a
 
@@ -68,6 +68,22 @@ instance IsNonempty.definable : ℒₛₑₜ-predicate[V] IsNonempty := defined_
     ¬IsNonempty x ↔ IsEmpty x := by simp [IsEmpty, IsNonempty]
 
 scoped instance : CoeSort V (Type _) := ⟨fun x ↦ {z : V // z ∈ x}⟩
+
+def SSubset (x y : V) : Prop := x ⊆ y ∧ x ≠ y
+
+infix:50 " ⊊ " => SSubset
+
+lemma ssubset_def {x y : V} : x ⊊ y ↔ x ⊆ y ∧ x ≠ y := by rfl
+
+def SSubset.dfn : Semisentence ℒₛₑₜ 2 := “x y. x ⊆ y ∧ x ≠ y”
+
+instance SSubset.defined : ℒₛₑₜ-relation[V] SSubset via SSubset.dfn := ⟨fun v ↦ by simp [ssubset_def, SSubset.dfn]⟩
+
+instance SSubset.definable : ℒₛₑₜ-relation[V] SSubset := SSubset.defined.to_definable
+
+@[simp] lemma SSubset.irrefl (x : V) : ¬x ⊊ x := by simp [ssubset_def]
+
+lemma SSubset.subset {x y : V} : x ⊊ y → x ⊆ y := fun h ↦ h.1
 
 variable [Nonempty V] [V ⊧ₘ* 𝗭]
 
@@ -85,6 +101,23 @@ lemma subset_antisymm {x y : V} (hxy : x ⊆ y) (hyx : y ⊆ x) : x = y := by
   ext z; constructor
   · exact hxy z
   · exact hyx z
+
+lemma SSubset.iff {x y : V} : x ⊊ y ↔ x ⊆ y ∧ ∃ z ∈ y, z ∉ x := by
+  constructor
+  · rintro ⟨ss, eq⟩
+    refine ⟨ss, ?_⟩
+    contrapose eq
+    push_neg at *
+    apply subset_antisymm ss eq
+  · rintro ⟨ss, ⟨z, hzy, hzx⟩⟩
+    refine ⟨ss, ?_⟩
+    rintro rfl
+    contradiction
+
+lemma SSubset.exists_not_mem {x y : V} (hxy : x ⊊ y) : ∃ z ∈ y, z ∉ x := (SSubset.iff.mp hxy).2
+
+lemma SSubset.of_subset_of_not_mem_of_mem {x y z : V} (ss : x ⊆ y) (hzx : z ∉ x) (hzy : z ∈ y) : x ⊊ y :=
+  SSubset.iff.mpr ⟨ss, z, hzy, hzx⟩
 
 /-! ## Axiom of empty set -/
 
@@ -105,11 +138,11 @@ noncomputable scoped instance : EmptyCollection V := ⟨Classical.choose! empty_
 
 @[simp] lemma not_mem_empty {x} : x ∉ (∅ : V) := IsEmpty.empty.not_mem
 
-lemma eq_empty_iff_isEmpty {x : V} :
-    x = ∅ ↔ IsEmpty x := ⟨by rintro rfl; simp, by intro h; ext; simp[h.not_mem]⟩
+@[simp] lemma isEmpty_iff_eq_empty {x : V} :
+    IsEmpty x ↔ x = ∅ := ⟨by intro h; ext; simp[h.not_mem], by rintro rfl; simp⟩
 
-lemma ne_empty_iff_isNonempty {x : V} :
-    x ≠ ∅ ↔ IsNonempty x := by simp [eq_empty_iff_isEmpty]
+@[simp] lemma ne_empty_iff_isNonempty {x : V} :
+    x ≠ ∅ ↔ IsNonempty x := by simp [←isEmpty_iff_eq_empty]
 
 lemma eq_empty_or_isNonempty (x : V) : x = ∅ ∨ IsNonempty x := by
   by_cases hx : x = ∅
@@ -226,6 +259,10 @@ lemma union_assoc (x y z : V) : (x ∪ y) ∪ z = x ∪ (y ∪ z) := by ext; sim
 @[simp] lemma subset_union_left (x y : V) : x ⊆ x ∪ y := fun z hz ↦ by simp [hz]
 
 @[simp] lemma subset_union_right (x y : V) : y ⊆ x ∪ y := fun z hz ↦ by simp [hz]
+
+@[simp] lemma union_eq_iff_right {x y : V} : x ∪ y = x ↔ y ⊆ x := by simp [mem_ext_iff, subset_def]
+
+@[simp] lemma union_eq_iff_left {x y : V} : x ∪ y = y ↔ x ⊆ y := by simp [mem_ext_iff, subset_def]
 
 /-! ### Insert -/
 
@@ -392,9 +429,9 @@ instance inter.definable : ℒₛₑₜ-function₂[V] Inter.inter := inter.defi
 
 @[simp] lemma inter_self (x : V) : x ∩ x = x := by ext; simp
 
-@[simp] lemma inter_comm (x y : V) : x ∩ y = y ∩ x := by ext; simp; tauto
+lemma inter_comm (x y : V) : x ∩ y = y ∩ x := by ext; simp; tauto
 
-@[simp] lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; simp; tauto
+lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; simp; tauto
 
 @[simp] lemma inter_empty (x : V) : x ∩ ∅ = ∅ := by ext; simp
 
@@ -459,6 +496,11 @@ instance sdiff.definable : ℒₛₑₜ-function₂[V] SDiff.sdiff := sdiff.defi
 @[simp, grind] lemma insert_sdiff_of_not_mem {x y z : V} (hx : x ∉ z) :
     Insert.insert x y \ z = Insert.insert x (y \ z) := by
   ext; simp only [mem_sdiff_iff, mem_insert]; grind
+
+lemma isNonempty_sdiff_of_ssubset {x y : V} : x ⊊ y → IsNonempty (y \ x) := by
+  intro h
+  rcases h.exists_not_mem with ⟨z, hzy, hzx⟩
+  exact ⟨z, by simp_all⟩
 
 /-! ### Kuratowski's ordered pair -/
 
@@ -558,16 +600,16 @@ instance prod.definable : ℒₛₑₜ-function₂[V] prod := prod.defined.to_de
 
 noncomputable def succ (x : V) : V := Insert.insert x x
 
-@[simp] lemma mem_succ_iff {x y : V} : y ∈ succ x ↔ y = x ∨ y ∈ x := by simp [succ]
+lemma mem_succ_iff {x y : V} : y ∈ succ x ↔ y = x ∨ y ∈ x := by simp [succ]
 
 abbrev succ.dfn := isSucc
 
 instance succ.defined : ℒₛₑₜ-function₁[V] succ via succ.dfn :=
-  ⟨fun v ↦ by simp [succ.dfn, isSucc, mem_ext_iff (x := v 0)]⟩
+  ⟨fun v ↦ by simp [mem_succ_iff, succ.dfn, isSucc, mem_ext_iff (x := v 0)]⟩
 
 instance succ.definable : ℒₛₑₜ-function₁[V] succ := succ.defined.to_definable
 
-@[simp] lemma mem_succ_self (x : V) : x ∈ succ x := by simp
+@[simp] lemma mem_succ_self (x : V) : x ∈ succ x := by simp [mem_succ_iff]
 
 @[simp] lemma mem_subset_self (x : V) : x ⊆ succ x := by simp [succ]
 
@@ -577,7 +619,7 @@ def IsInductive.dfn : Semisentence ℒₛₑₜ 1 :=
   “x. (∀ e, !isEmpty e → e ∈ x) ∧ (∀ y ∈ x, ∀ y', !succ.dfn y' y → y' ∈ x)”
 
 instance IsInductive.defined : ℒₛₑₜ-predicate[V] IsInductive via IsInductive.dfn :=
-  ⟨fun v ↦ by simp [IsInductive, IsInductive.dfn, ←eq_empty_iff_isEmpty]⟩
+  ⟨fun v ↦ by simp [IsInductive, IsInductive.dfn]⟩
 
 instance IsInductive.definable : ℒₛₑₜ-predicate[V] IsInductive := IsInductive.defined.to_definable
 
@@ -586,7 +628,7 @@ lemma IsInductive.zero {I : V} (hI : IsInductive I) : ∅ ∈ I := hI.1
 lemma IsInductive.succ {I : V} (hI : IsInductive I) {x : V} (hx : x ∈ I) : succ x ∈ I := hI.2 x hx
 
 lemma isInductive_exists : ∃ I : V, IsInductive I := by
-  simpa [models_iff, Axiom.infinity, ←eq_empty_iff_isEmpty] using ModelsTheory.models V Zermelo.axiom_of_infinity
+  simpa [models_iff, Axiom.infinity] using ModelsTheory.models V Zermelo.axiom_of_infinity
 
 lemma omega_existsUnique : ∃! ω : V, ∀ x, x ∈ ω ↔ ∀ I : V, IsInductive I → x ∈ I := by
   rcases isInductive_exists (V := V) with ⟨I, hI⟩
@@ -675,6 +717,10 @@ lemma naturalNumber_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
 
 lemma foundation : ∀ x : V, IsNonempty x → ∃ y ∈ x, ∀ z ∈ x, z ∉ y := by
   simpa [models_iff, Axiom.foundation] using ModelsTheory.models V Zermelo.axiom_of_foundation
+
+lemma foundation' (x : V) (hx : IsNonempty x) : ∃ y ∈ x, x ∩ y = ∅ := by
+  rcases foundation x hx with ⟨y, hyx, H⟩
+  exact ⟨y, hyx, by ext z; simpa using H z⟩
 
 @[simp] lemma mem_irrefl (x : V) : x ∉ x := by
   simpa using foundation ({x} : V) (by simp)
