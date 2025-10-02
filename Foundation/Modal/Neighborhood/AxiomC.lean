@@ -47,6 +47,12 @@ lemma valid_axiomC_of_isRegular [F.IsRegular] : F ⊧ Axioms.C (.atom 0) (.atom 
   . apply h₁;
   . apply h₂;
 
+lemma isRegular_of_valid_axiomC (h : F ⊧ Axioms.C (.atom 0) (.atom 1)) : F.IsRegular := by
+  constructor;
+  rintro X Y w ⟨hwX, hwY⟩;
+  have := @h (λ a => match a with | 0 => X | 1 => Y | _ => ∅) w;
+  simp [Satisfies] at this;
+  grind;
 
 section
 

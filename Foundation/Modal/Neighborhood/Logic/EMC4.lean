@@ -54,19 +54,4 @@ instance : Complete Modal.EMC4 FrameClass.finite_EMC4 := ⟨by
 
 end EMC4
 
-instance : Modal.EMC ⪱ Modal.EMC4 := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.Four (.atom 0));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMC);
-      apply not_validOnFrameClass_of_exists_frame;
-      use Frame.trivial_nontransitive;
-      constructor;
-      . constructor;
-      . simp;
-
 end LO.Modal
