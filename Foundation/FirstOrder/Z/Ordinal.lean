@@ -12,24 +12,6 @@ open FirstOrder SetTheory
 
 variable {V : Type*} [SetStructure V] [Nonempty V] [V ⊧ₘ* 𝗭]
 
-scoped instance : LT V := ⟨fun x y ↦ x ∈ y⟩
-
-scoped instance : LE V := ⟨fun x y ↦ x ⊆ y⟩
-
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
-lemma lt_def {x y : V} : x < y ↔ x ∈ y := by rfl
-
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
-lemma le_def {x y : V} : x ≤ y ↔ x ⊆ y := by rfl
-
-@[simp] lemma lt_irrefl (x : V) : ¬x < x := mem_irrefl x
-
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
-@[simp, refl] lemma le_refl (x : V) : x ≤ x := by simp [le_def]
-
-omit [Nonempty V] [V ⊧ₘ* 𝗭] in
-lemma le_trans {x y z : V} : x ≤ y → y ≤ z → x ≤ z := subset_trans
-
 /-! ### Transitive set -/
 
 class IsTransitive (x : V) : Prop where
@@ -182,7 +164,7 @@ lemma mem_of_ssubset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊊ β → �
   have Hγα : γ ⊆ α := by
     intro ξ hξγ
     have hξβ : ξ ∈ β := hβ.transitive γ hγβ _ hξγ
-    by_contra hξα
+    by_contra! hξα
     have : ξ ∉ γ := Hγ ξ hξβ hξα
     contradiction
   have Hαγ : α ⊆ γ := by
@@ -213,11 +195,17 @@ lemma mem_of_ssubset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊊ β → �
     · simp
     · exact hβ.transitive α h
 
+open Classical in
+@[grind] lemma mem_iff_subset_and_not_subset [hα : IsOrdinal α] [hβ : IsOrdinal β] :
+    α ∈ β ↔ α ⊆ β ∧ ¬β ⊆ α := calc
+  α ∈ β ↔ α ⊊ β          := ssubset_iff.symm
+  _     ↔ α ⊆ β ∧ α ≠ β  := by rfl
+  _     ↔ α ⊆ β ∧ ¬β ⊆ α := by grind
+
 variable (α β)
 
 lemma subset_or_supset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊆ β ∨ β ⊆ α := by
-  by_contra Aαβ
-  push_neg at Aαβ
+  by_contra! Aαβ
   let C : V := {α' ∈ succ α ; ∃ β, IsOrdinal β ∧ ¬α' ⊆ β ∧ ¬β ⊆ α'}
   have hαC : α ∈ C := by
     simp only [mem_sep_iff, mem_succ_iff, mem_irrefl, or_false, true_and, C]
@@ -239,7 +227,7 @@ lemma subset_or_supset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊆ β ∨
       · exact ordα₀.trichotomy ξ hξα₀ ζ hζα₀
       · have : IsOrdinal ζ := of_mem hζβ₀
         have : ξ ⊆ ζ ∨ ζ ⊆ ξ := by
-          by_contra A; push_neg at A
+          by_contra! A
           have : ξ ∈ C := mem_sep_iff.mpr ⟨hα.succ.transitive α₀ hα₀sα ξ hξα₀, ζ, of_mem hζβ₀, A⟩
           exact Hα₀ ξ this hξα₀
         grind
@@ -247,14 +235,14 @@ lemma subset_or_supset [hα : IsOrdinal α] [hβ : IsOrdinal β] : α ⊆ β ∨
       rcases show ζ ∈ α₀ ∨ ζ ∈ β₀ by simpa [γ₀] using hζγ₀ with (hζα₀ | hζβ₀)
       · have : IsOrdinal ζ := of_mem hζα₀
         have : ξ ⊆ ζ ∨ ζ ⊆ ξ := by
-          by_contra A; push_neg at A
+          by_contra! A
           have : ζ ∈ C := mem_sep_iff.mpr ⟨hα.succ.transitive α₀ hα₀sα ζ hζα₀, ξ, inferInstance, by grind⟩
           exact Hα₀ _ this hζα₀
         grind
       · have : ζ ∈ ξ ∨ ζ = ξ ∨ ξ ∈ ζ := ordβ₀.trichotomy ζ hζβ₀ ξ hξβ₀
         grind⟩
   have : γ₀ = α₀ ∨ γ₀ = β₀ := by
-    by_contra A; push_neg at A
+    by_contra! A
     have : α₀ ∈ γ₀ := ssubset_iff.mp ⟨by simp [γ₀], by grind⟩
     have hα₀β₀ : α₀ ∈ β₀ := by simpa [γ₀] using this
     have : β₀ ∈ γ₀ := ssubset_iff.mp ⟨by simp [γ₀], by grind⟩
@@ -281,7 +269,7 @@ lemma of_transitive_of_isOrdinal (tr : IsTransitive α) (H : ∀ β ∈ α, IsOr
 @[simp] protected instance ω : IsOrdinal (ω : V) :=
   of_transitive_of_isOrdinal inferInstance fun _ hn ↦ IsOrdinal.nat hn
 
-lemma sUnion {X : V} (h : ∀ α ∈ X, IsOrdinal α) : IsOrdinal (⋃ˢ X) :=
+protected lemma sUnion {X : V} (h : ∀ α ∈ X, IsOrdinal α) : IsOrdinal (⋃ˢ X) :=
   of_transitive_of_isOrdinal (IsTransitive.sUnion fun α hαX ↦ (h α hαX).toIsTransitive)
     fun β hβ ↦ by
       have : ∃ γ ∈ X, β ∈ γ := by simpa [mem_sUnion_iff] using hβ
@@ -289,7 +277,7 @@ lemma sUnion {X : V} (h : ∀ α ∈ X, IsOrdinal α) : IsOrdinal (⋃ˢ X) :=
       have : IsOrdinal γ := h γ hγX
       exact of_mem hβγ
 
-lemma sInter {X : V} (h : ∀ α ∈ X, IsOrdinal α) : IsOrdinal (⋂ˢ X) := by
+protected lemma sInter {X : V} (h : ∀ α ∈ X, IsOrdinal α) : IsOrdinal (⋂ˢ X) := by
   rcases eq_empty_or_isNonempty X with (rfl | hX)
   · simp
   · apply of_transitive_of_isOrdinal (IsTransitive.sInter fun α hαX ↦ (h α hαX).toIsTransitive)
@@ -300,6 +288,159 @@ lemma sInter {X : V} (h : ∀ α ∈ X, IsOrdinal α) : IsOrdinal (⋂ˢ X) := b
     have : α ∈ α₀ := this α₀ hα₀X
     exact of_mem this
 
+lemma sInter_mem {X : V} [IsNonempty X] (h : ∀ α ∈ X, IsOrdinal α) : ⋂ˢ X ∈ X := by
+  by_contra! hXX
+  have : IsOrdinal (⋂ˢ X) := IsOrdinal.sInter h
+  have : ⋂ˢ X ∈ ⋂ˢ X := mem_sInter_iff_of_nonempty.mpr fun α hαX ↦ by
+    have : IsOrdinal α := h α hαX
+    have : ⋂ˢ X ⊆ α := sInter_subset_of_mem_of_nonempty hαX
+    rcases subset_iff.mp this with (rfl | hXα)
+    · contradiction
+    · assumption
+  simp_all
+
+lemma empty_mem_iff_nonempty [IsOrdinal α] : ∅ ∈ α ↔ IsNonempty α := by
+  have : ∅ = α ∨ ∅ ∈ α := subset_iff.mp (show ∅ ⊆ α by simp)
+  rcases this with (rfl | h)
+  · simp
+  · simp only [h, true_iff]
+    exact ⟨∅, h⟩
+
 end IsOrdinal
+
+variable (V)
+
+@[ext]
+structure Ordinal where
+  val : V
+  ordinal : IsOrdinal val
+
+variable {V}
+
+attribute [coe] Ordinal.val
+
+attribute [instance] Ordinal.ordinal
+
+instance : Coe (Ordinal V) V := ⟨Ordinal.val⟩
+
+@[coe] def IsOrdinal.toOrdinal (α : V) [IsOrdinal α] : Ordinal V := ⟨α, inferInstance⟩
+
+omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+@[simp] lemma IsOrdinal.toOrdinal_val (α : V) [IsOrdinal α] : (IsOrdinal.toOrdinal α).val = α := rfl
+
+omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+@[simp] lemma Ordinal.val_toOrdinal (α : Ordinal V) : IsOrdinal.toOrdinal α.val = α := rfl
+
+namespace Ordinal
+
+variable {α β γ : Ordinal V}
+
+instance : LT (Ordinal V) := ⟨fun α β ↦ α.val ∈ β.val⟩
+
+instance : LE (Ordinal V) := ⟨fun α β ↦ α.val ⊆ β.val⟩
+
+omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+lemma lt_def : α < β ↔ α.val ∈ β.val := by rfl
+
+omit [Nonempty V] [V ⊧ₘ* 𝗭] in
+lemma le_def : α ≤ β ↔ α.val ⊆ β.val := by rfl
+
+instance : IsOrdinal α.val := α.ordinal
+
+noncomputable instance : LinearOrder (Ordinal V) where
+  le_refl α := subset_refl α.val
+  le_trans α β γ := subset_trans
+  lt_iff_le_not_ge α β := IsOrdinal.mem_iff_subset_and_not_subset
+  le_antisymm α β := by simpa [le_def, Ordinal.ext_iff] using subset_antisymm (x := α.val) (y := β.val)
+  le_total α β := IsOrdinal.subset_or_supset α.val β.val
+  toDecidableLE := Classical.decRel LE.le
+
+noncomputable instance : OrderBot (Ordinal V) where
+  bot := IsOrdinal.toOrdinal ∅
+  bot_le _ := empty_subset _
+
+@[simp] lemma bot_val_eq : (⊥ : Ordinal V).val = ∅ := rfl
+
+lemma pos_iff_nonempty : ⊥ < α ↔ IsNonempty α.val := IsOrdinal.empty_mem_iff_nonempty
+
+lemma eq_bot_or_pos : α = ⊥ ∨ α > ⊥ := by exact eq_bot_or_bot_lt α
+
+protected noncomputable def succ (α : Ordinal V) : Ordinal V where
+  val := succ α
+  ordinal := inferInstance
+
+@[simp] lemma succ_val (α : Ordinal V) : α.succ.val = succ α.val := rfl
+
+@[simp] lemma lt_succ (α : Ordinal V) : α < α.succ := lt_def.mpr <| by simp
+
+protected noncomputable def ω : Ordinal V := IsOrdinal.toOrdinal ω
+
+noncomputable def minimal (α : Ordinal V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P := by definability) : Ordinal V where
+  val := ⋂ˢ {x ∈ ↑α ; P x}
+  ordinal := IsOrdinal.sInter fun ξ hξ ↦
+    have : ξ ∈ (α : V) ∧ P ξ := by simpa using hξ
+    IsOrdinal.of_mem this.1
+
+section minimal
+
+variable (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
+
+@[simp] lemma minimal_val (α : Ordinal V) : (minimal α P).val = ⋂ˢ {x ∈ ↑α ; P x} := rfl
+
+@[simp] lemma minimal_bot_eq : minimal ⊥ P hP = ⊥ := by ext; simp [minimal_val]
+
+variable {P hP}
+
+private lemma minimal_prop_of_exists_aux (H : ∃ β < α, P β) :
+    α.minimal P < α ∧ P (α.minimal P) ∧ ∀ ξ < α, P ξ → α.minimal P ≤ ξ := by
+  let X := {x ∈ ↑α ; P x}
+  have : IsNonempty X := by
+    rcases H with ⟨β, hαβ, Pβ⟩
+    exact ⟨β, by simp [X, lt_def.mp hαβ, Pβ]⟩
+  have : ⋂ˢ X ∈ X := IsOrdinal.sInter_mem (X := X) fun β hβ ↦ by
+    have : β ∈ α.val ∧ P β := by simpa [X] using hβ
+    exact IsOrdinal.of_mem this.1
+  have : ⋂ˢ X ∈ α.val ∧ P (⋂ˢ X) := by simpa [X] using this
+  refine ⟨this.1, by simpa using this.2, ?_⟩
+  intro ξ hξα Pξ
+  suffices ⋂ˢ X ⊆ ξ from le_def.mpr (by simpa using this)
+  apply sInter_subset_of_mem_of_nonempty
+  simp [X, Pξ, lt_def.mp hξα]
+
+lemma minimal_lt_of_exists (H : ∃ β < α, P β) : α.minimal P < α := (minimal_prop_of_exists_aux H).1
+
+lemma minimal_prop_of_exists (H : ∃ β < α, P β) : P (α.minimal P) := (minimal_prop_of_exists_aux H).2.1
+
+lemma minimal_le_of_exists_aux (H : ∃ β < α, P β) : ∀ ξ < α, P ξ → α.minimal P ≤ ξ := (minimal_prop_of_exists_aux H).2.2
+
+lemma minimal_le_of_exists (H : ∃ β < α, P β) : ∀ ξ : Ordinal V, P ξ → α.minimal P ≤ ξ := by
+  intro ξ Pξ
+  rcases show ξ < α ∨ α ≤ ξ from lt_or_ge ξ α with (lt | le)
+  · exact minimal_le_of_exists_aux H ξ lt Pξ
+  · calc
+      α.minimal P hP ≤ α := le_of_lt <| minimal_lt_of_exists H
+      _              ≤ ξ := le
+
+end minimal
+
+end Ordinal
+
+lemma exists_minimal (P : V → Prop) (hP : ℒₛₑₜ-predicate P) (h : ∃ α : Ordinal V, P α) :
+    ∃ β : Ordinal V, P β ∧ ∀ ξ : Ordinal V, P ξ → β ≤ ξ := by
+  rcases h with ⟨α, hα⟩
+  have exs : ∃ β < α.succ, P β := ⟨α, by simp, hα⟩
+  refine ⟨α.succ.minimal P, Ordinal.minimal_prop_of_exists exs, Ordinal.minimal_le_of_exists exs⟩
+
+lemma transfinite_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
+    (ih : ∀ α : Ordinal V, (∀ β < α, P β) → P α) : ∀ α : Ordinal V, P α := by
+  by_contra! exs
+  have : ∃ β : Ordinal V, ¬P ↑β ∧ ∀ (ξ : Ordinal V), ¬P ↑ξ → β ≤ ξ :=
+    exists_minimal (fun x ↦ ¬P x) (by definability) exs
+  rcases this with ⟨β, Pβ, H⟩
+  have : P β := ih β fun ξ hξβ ↦ by
+    by_contra! Pξ
+    have : β ≤ ξ := H ξ Pξ
+    exact not_lt_of_ge this hξβ
+  contradiction
 
 end LO.Zermelo

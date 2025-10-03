@@ -39,9 +39,11 @@ instance Subset.defined_isSubsetOf : ℒₛₑₜ-relation[V] Subset via isSubse
 
 instance Subset.definable : ℒₛₑₜ-relation[V] Subset := defined_isSubsetOf.to_definable
 
-@[simp] lemma subset_self (x : V) : x ⊆ x := by simp [subset_def]
+@[simp, refl] lemma subset_refl (x : V) : x ⊆ x := by simp [subset_def]
 
-@[simp] lemma subset_trans {x y z : V} : x ⊆ y → y ⊆ z → x ⊆ z := fun hxy hyz v hv ↦ hyz v (hxy v hv)
+@[simp, trans] lemma subset_trans {x y z : V} : x ⊆ y → y ⊆ z → x ⊆ z := fun hxy hyz v hv ↦ hyz v (hxy v hv)
+
+instance : IsRefl V Subset := ⟨subset_refl⟩
 
 instance : IsTrans V Subset := ⟨fun _ _ _ ↦ subset_trans⟩
 
@@ -100,7 +102,7 @@ alias ⟨_, mem_ext⟩ := mem_ext_iff
 
 attribute [ext] mem_ext
 
-lemma subset_antisymm {x y : V} (hxy : x ⊆ y) (hyx : y ⊆ x) : x = y := by
+@[grind] lemma subset_antisymm {x y : V} (hxy : x ⊆ y) (hyx : y ⊆ x) : x = y := by
   ext z; constructor
   · exact hxy z
   · exact hyx z
@@ -365,6 +367,9 @@ noncomputable def sep (x : V) (P : V → Prop) (hP : ℒₛₑₜ-predicate P) :
 
 @[simp] lemma mem_sep_iff {P : V → Prop} {hP : ℒₛₑₜ-predicate P} {z x : V} :
     z ∈ sep x P hP ↔ z ∈ x ∧ P z := Classical.choose!_spec (separation_existsUnique x P hP) z
+
+@[simp] lemma sep_empty_eq (P : V → Prop) (hP : ℒₛₑₜ-predicate P) :
+    sep ∅ P hP = ∅ := by ext; simp
 
 @[simp] lemma sep_subset {P : V → Prop} {hP : ℒₛₑₜ-predicate P} {x : V} :
     sep x P hP ⊆ x := by intro z; simp; tauto
@@ -631,7 +636,7 @@ instance succ.definable : ℒₛₑₜ-function₁[V] succ := succ.defined.to_de
 
 @[simp] lemma mem_succ_self (x : V) : x ∈ succ x := by simp [mem_succ_iff]
 
-@[simp] lemma mem_subset_self (x : V) : x ⊆ succ x := by simp [succ]
+@[simp] lemma mem_subset_refl (x : V) : x ⊆ succ x := by simp [succ]
 
 def IsInductive (x : V) : Prop := ∅ ∈ x ∧ ∀ y ∈ x, succ y ∈ x
 
