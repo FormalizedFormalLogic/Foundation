@@ -19,7 +19,7 @@ protected abbrev FrameClass.EN : FrameClass := { F | F.IsEN }
 end Neighborhood
 
 
-
+namespace EN
 
 instance : Sound Modal.EN FrameClass.EN := instSound_of_validates_axioms $ by
   constructor;
@@ -35,59 +35,71 @@ instance : Complete Modal.EN FrameClass.EN := minimalCanonicalFrame.completeness
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Modal.E ⪱ Modal.EN := by
+end EN
+
+
+instance : Modal.EN ⪱ Modal.ECN := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.N;
+    use (Axioms.C (.atom 0) (.atom 1));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EN);
       apply not_validOnFrameClass_of_exists_model_world;
       let M : Model := {
-        World := Fin 1,
-        𝒩 := λ w => ∅,
-        Val := λ w => Set.univ
+        World := Fin 2,
+        𝒩 := λ w =>
+          match w with
+          | 0 => {{0}, {1}, {0, 1}, Set.univ}
+          | 1 => {{1}, {0, 1}, Set.univ},
+        Val := λ w =>
+          match w with
+          | 0 => {0}
+          | 1 => {1}
+          | _ => Set.univ
       };
       use M, 0;
       constructor;
-      . tauto;
+      . exact {
+          contains_unit := by
+            ext x;
+            match x with | 0 | 1 => simp_all [M]
+        }
+      . simp! [M, Semantics.Realize, Satisfies];
+        tauto_set;
+
+instance : Modal.EN ⪱ Modal.EMN := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.M (.atom 0) (.atom 1));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EN);
+      apply not_validOnFrameClass_of_exists_model_world;
+      let M : Model := {
+        World := Fin 2,
+        𝒩 := λ w =>
+          match w with
+          | 0 => {∅, Set.univ}
+          | 1 => {Set.univ},
+        Val := λ w =>
+          match w with
+          | 0 => {0}
+          | 1 => {1}
+          | _ => Set.univ
+      };
+      use M, 0;
+      constructor;
+      . exact {
+          contains_unit := by
+            ext x;
+            match x with | 0 | 1 => simp_all [M]
+        }
       . simp! [M, Semantics.Realize, Satisfies];
 
-
-
-instance : Modal.N ⪱ Modal.EN := by
-
-  constructor;
-  . suffices ∀ φ, Modal.N ⊢ φ → Modal.EN ⊢ φ by apply Logic.weakerThan_of_provable this;
-    intro φ hφ;
-    induction hφ using Hilbert.Normal.rec! with
-    | axm s h => simp at h;
-    | mdp ihφψ ihφ => apply ihφψ ⨀ ihφ;
-    | nec ihφ => apply Entailment.nec! ihφ;
-    | _ => simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use □(.atom 0) ⭤ □(∼∼.atom 0);
-    constructor;
-    . apply re!;
-      cl_prover;
-    . apply Sound.not_provable_of_countermodel (𝓜 := PLoN.AllFrameClass);
-      apply Formula.PLoN.ValidOnFrameClass.not_of_exists_model;
-      let M : PLoN.Model := {
-        World := Fin 2,
-        Rel ξ x y := if ξ = ∼∼(.atom 0) then True else False,
-        Valuation x a := x = 0
-      };
-      use M;
-      constructor;
-      . tauto;
-      . suffices (∃ x : M.World, ∀ y : M.World, (PLoN.Frame.Rel' (.atom 0) x y) → y = 0) ∧ ∃ x : M.World, x ≠ 0 by
-          simpa [M, Semantics.Realize, Formula.PLoN.ValidOnModel, Formula.PLoN.Satisfies] using this;
-        constructor;
-        . use 0;
-          simp [M, PLoN.Frame.Rel'];
-        . use 1;
-          simp [M];
 
 end LO.Modal
