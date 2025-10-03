@@ -748,6 +748,10 @@ protected class EMT extends Entailment.E 𝓢, HasAxiomM 𝓢, HasAxiomT 𝓢
 instance [Entailment.EMT 𝓢] : Entailment.EM 𝓢 where
 instance [Entailment.EMT 𝓢] : Entailment.ET 𝓢 where
 
+protected class ED extends Entailment.E 𝓢, HasAxiomD 𝓢
+
+protected class EB extends Entailment.E 𝓢, HasAxiomB 𝓢
+
 protected class E4 extends Entailment.E 𝓢, HasAxiomFour 𝓢
 
 protected class EMC4 extends Entailment.EMC 𝓢, HasAxiomFour 𝓢

@@ -154,6 +154,14 @@ instance instHasAxiomFour [Ax.HasFour] : Entailment.HasAxiomFour (Hilbert.WithRE
       (s := λ b => if (HasFour.p Ax) = b then φ else (.atom b))
       (by exact HasFour.mem_Four);
 
+instance [Ax.HasB] : Entailment.HasAxiomB (Hilbert.WithRE Ax) where
+  B φ := by
+    constructor;
+    simpa using Hilbert.WithRE.axm
+      (φ := Axioms.B (.atom (HasB.p Ax)))
+      (s := λ b => if (HasB.p Ax) = b then φ else (.atom b))
+      (by exact HasB.mem_B);
+
 end
 
 end Hilbert.WithRE
@@ -328,7 +336,15 @@ protected abbrev EMCNT4 : Logic ℕ := Hilbert.WithRE EMCNT4.axioms
 instance : Entailment.EMC Modal.EMCNT4 where
 instance : Entailment.EN Modal.EMCNT4 where
 
+protected abbrev EB.axioms : Axiom ℕ := {Axioms.B (.atom 0)}
+namespace EB.axioms
+instance : EB.axioms.HasB where p := 0; mem_B := by simp;
+end EB.axioms
+protected abbrev EB : Logic ℕ := Hilbert.WithRE EB.axioms
+instance : Entailment.EB Modal.EB where
+
 end
+
 
 
 end LO.Modal
