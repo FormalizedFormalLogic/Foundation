@@ -34,22 +34,18 @@ lemma containsUnit_of_valid_axiomN (h : F ⊧ Axioms.N) : F.ContainsUnit := by
 section
 
 variable [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.EN 𝓢]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E 𝓢]
 
 open Entailment
 open MaximalConsistentSet
 open MaximalConsistentSet.proofset
 
-instance : (minimalCanonicalFrame 𝓢).ContainsUnit := by
+instance [Entailment.HasAxiomN 𝓢] : (minimalCanonicity 𝓢).toModel.ContainsUnit := by
   constructor;
-  dsimp [minimalCanonicalFrame, Frame.mk_ℬ, Frame.box];
-  split_ifs with h;
-  . apply iff_provable_eq_univ.mp;
-    apply nec!;
-    apply iff_provable_eq_univ.mpr;
-    apply h.choose_spec.symm;
-  . push_neg at h;
-    simpa using h ⊤;
+  ext x;
+  simp only [minimalCanonicity, Canonicity.toModel, Frame.box, Set.mem_setOf_eq, Set.mem_univ, iff_true];
+  use ⊤;
+  simp [iff_provable_eq_univ.mp (show 𝓢 ⊢ □⊤ by simp)]
 
 end
 
