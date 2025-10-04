@@ -84,6 +84,8 @@ import Foundation.FirstOrder.SetTheory.Basic
 import Foundation.FirstOrder.SetTheory.Axioms
 
 import Foundation.FirstOrder.Z.Basic
+import Foundation.FirstOrder.Z.Ordinal
+import Foundation.FirstOrder.Z.Function
 
 import Foundation.FirstOrder.ZF.Basic
 
