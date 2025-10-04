@@ -84,9 +84,6 @@ instance : Entailment.Consistent Modal.E := consistent_of_sound_frameclass Frame
 
 instance : Complete Modal.E FrameClass.E := (minimalCanonicity Modal.E).completeness $ by tauto
 
-
-
-
 end E
 
 
@@ -162,12 +159,6 @@ instance : Modal.E ⪱ Modal.EN := by
       constructor;
       . tauto;
       . simp;
-
-
-
-
-end E
-
 
 instance : Modal.E ⪱ Modal.EM := by
   constructor;

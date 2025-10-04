@@ -1,4 +1,4 @@
-import Foundation.Modal.Entailment.Basic
+import Foundation.Modal.Entailment.E
 
 namespace LO.Modal.Entailment
 
@@ -7,39 +7,52 @@ open LO.Entailment LO.Entailment.FiniteContext
 variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
 variable {𝓢 : S} [Entailment.K 𝓢] {n : ℕ} {φ ψ ξ χ: F}
 
--- TODO: move to supplemental
-section
 
-lemma conj_cons! [DecidableEq F] : 𝓢 ⊢ (φ ⋏ ⋀Γ) ⭤ ⋀(φ :: Γ) := by
-  induction Γ using List.induction_with_singleton with
-  | hnil =>
-    simp only [List.conj₂_nil, List.conj₂_singleton];
-    apply E!_intro;
-    . simp;
-    . exact right_K!_intro (by simp) (by simp);
-  | _ => simp;
+section E
 
-lemma iff_top_left'! (h : 𝓢 ⊢ φ) : 𝓢 ⊢ φ ⭤ ⊤ := by
+variable [DecidableEq F]
+
+-- TODO: move
+lemma neg_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ∼φ ⭤ ∼ψ := by
   apply E!_intro;
-  . simp;
-  . exact C!_of_conseq! h;
+  . apply contra! $ C_of_E_mpr! h;
+  . apply contra! $ C_of_E_mp! h;
 
-lemma iff_symm'! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ⭤ φ := by
+
+omit [DecidableEq F] in
+lemma box_regularity! (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ □φ ➝ □ψ := by
+  apply ?_ ⨀ nec! h;
+  simp;
+
+
+-- TODO: move
+omit [DecidableEq F] in
+lemma box_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ □φ ⭤ □ψ := by
+  apply E!_intro
+  . apply box_regularity!; exact C_of_E_mp! h;
+  . apply box_regularity!; exact C_of_E_mpr! h;
+
+-- TODO
+noncomputable instance : Entailment.RE 𝓢 where
+  re a := box_congruence! ⟨a⟩ |>.some
+
+noncomputable instance : Entailment.E 𝓢 where
+
+-- TODO: move
+omit [DecidableEq F] in
+lemma E!_replace (h₁ : 𝓢 ⊢ φ₁ ⭤ ψ₁) (h₂ : 𝓢 ⊢ φ₂ ⭤ ψ₂) (h₃ : 𝓢 ⊢ φ₁ ⭤ φ₂) : 𝓢 ⊢ ψ₁ ⭤ ψ₂ := by
   apply E!_intro;
-  . exact K!_right h;
-  . exact K!_left h;
+  . apply C!_replace (C_of_E_mpr! h₁) (C_of_E_mp! h₂) (C_of_E_mp! h₃);
+  . apply C!_replace (C_of_E_mpr! h₂) (C_of_E_mp! h₁) (C_of_E_mpr! h₃);
 
-lemma iff_top_right! (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ⊤ ⭤ φ := iff_symm'! $ iff_top_left'! h
+lemma dia_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ◇φ ⭤ ◇ψ := by
+  apply E!_replace (E!_symm $ dia_duality!) (E!_symm $ dia_duality!);
+  apply neg_congruence!;
+  apply box_congruence!;
+  apply neg_congruence!;
+  exact h;
 
-@[simp]
-lemma iff_not_bot_top! [DecidableEq F] : 𝓢 ⊢ ∼⊤ ⭤ ⊥ := by
-  apply E!_intro;
-  . apply CN!_of_CN!_left;
-    apply C!_of_conseq!;
-    simp;
-  . exact efq!;
-
-end
+end E
 
 
 def multibox_axiomK : 𝓢 ⊢! □^[n](φ ➝ ψ) ➝ □^[n]φ ➝ □^[n]ψ := by
@@ -78,12 +91,6 @@ def diaDuality'.mp (h : 𝓢 ⊢! ◇φ) : 𝓢 ⊢! ∼(□(∼φ)) := (K_left 
 def diaDuality'.mpr (h : 𝓢 ⊢! ∼(□(∼φ))) : 𝓢 ⊢! ◇φ := (K_right diaDuality) ⨀ h
 
 lemma dia_duality'! : 𝓢 ⊢ ◇φ ↔ 𝓢 ⊢ ∼(□(∼φ)) := ⟨λ h => ⟨diaDuality'.mp h.some⟩, λ h => ⟨diaDuality'.mpr h.some⟩⟩
-
-def box_dne : 𝓢 ⊢! □(∼∼φ) ➝ □φ := axiomK' $ nec dne
-@[simp] lemma box_dne! : 𝓢 ⊢ □(∼∼φ) ➝ □φ := ⟨box_dne⟩
-
-def box_dne' (h : 𝓢 ⊢! □(∼∼φ)): 𝓢 ⊢! □φ := box_dne ⨀ h
-lemma box_dne'! (h : 𝓢 ⊢ □(∼∼φ)): 𝓢 ⊢ □φ := ⟨box_dne' h.some⟩
 
 def multiboxverum : 𝓢 ⊢! (□^[n]⊤ : F) := multinec verum
 @[simp] lemma multiboxverum! : 𝓢 ⊢ (□^[n]⊤ : F) := ⟨multiboxverum⟩
@@ -246,10 +253,7 @@ lemma multibox_duality'! : 𝓢 ⊢ □^[n]φ ↔ 𝓢 ⊢ ∼(◇^[n](∼φ)) :
 lemma box_duality'! : 𝓢 ⊢ □φ ↔ 𝓢 ⊢ ∼(◇(∼φ)) := multibox_duality'! (n := 1)
 
 
-def box_dni : 𝓢 ⊢! □φ ➝ □(∼∼φ) := axiomK' $ nec dni
-@[simp] lemma box_dni! : 𝓢 ⊢ □φ ➝ □(∼∼φ) := ⟨box_dni⟩
-
-def box_dni' (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! □(∼∼φ) := box_dni ⨀ h
+noncomputable def box_dni' (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! □(∼∼φ) := box_dni ⨀ h
 lemma box_dni'! (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ □(∼∼φ) := ⟨box_dni' h.some⟩
 
 @[simp] lemma negbox_dni! : 𝓢 ⊢ ∼□φ ➝ ∼□(∼∼φ) := by
@@ -501,44 +505,6 @@ lemma not_dia_bot : 𝓢 ⊢ ∼◇^[n]⊥ := by
 
 -- def distributeDiaAnd' (h : 𝓢 ⊢! ◇(φ ⋏ ψ)) : 𝓢 ⊢! ◇φ ⋏ ◇ψ := distributeDiaAnd ⨀ h
 lemma distribute_dia_and'! (h : 𝓢 ⊢ ◇(φ ⋏ ψ)) : 𝓢 ⊢ ◇φ ⋏ ◇ψ := distribute_dia_and! ⨀ h
-
--- TODO: move
-lemma neg_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ∼φ ⭤ ∼ψ := by
-  apply E!_intro;
-  . apply contra! $ C_of_E_mpr! h;
-  . apply contra! $ C_of_E_mp! h;
-
-
-omit [DecidableEq F] in
-lemma box_regularity! (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ □φ ➝ □ψ := by
-  apply ?_ ⨀ nec! h;
-  simp;
-
-
--- TODO: move
-omit [DecidableEq F] in
-lemma box_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ □φ ⭤ □ψ := by
-  apply E!_intro
-  . apply box_regularity!; exact C_of_E_mp! h;
-  . apply box_regularity!; exact C_of_E_mpr! h;
-
--- TODO
-noncomputable instance : Entailment.RE 𝓢 where
-  re a := box_congruence! ⟨a⟩ |>.some
-
--- TODO: move
-omit [DecidableEq F] in
-lemma E!_replace (h₁ : 𝓢 ⊢ φ₁ ⭤ ψ₁) (h₂ : 𝓢 ⊢ φ₂ ⭤ ψ₂) (h₃ : 𝓢 ⊢ φ₁ ⭤ φ₂) : 𝓢 ⊢ ψ₁ ⭤ ψ₂ := by
-  apply E!_intro;
-  . apply C!_replace (C_of_E_mpr! h₁) (C_of_E_mp! h₂) (C_of_E_mp! h₃);
-  . apply C!_replace (C_of_E_mpr! h₂) (C_of_E_mp! h₁) (C_of_E_mpr! h₃);
-
-lemma dia_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ◇φ ⭤ ◇ψ := by
-  apply E!_replace (E!_symm $ dia_duality!) (E!_symm $ dia_duality!);
-  apply neg_congruence!;
-  apply box_congruence!;
-  apply neg_congruence!;
-  exact h;
 
 section List
 

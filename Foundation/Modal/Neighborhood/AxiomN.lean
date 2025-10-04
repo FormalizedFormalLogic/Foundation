@@ -38,14 +38,14 @@ variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E 𝓢]
 
 open Entailment
 open MaximalConsistentSet
-open MaximalConsistentSet.proofset
+open proofset
 
 instance [Entailment.HasAxiomN 𝓢] : (minimalCanonicity 𝓢).toModel.ContainsUnit := by
   constructor;
   ext x;
   simp only [minimalCanonicity, Canonicity.toModel, Frame.box, Set.mem_setOf_eq, Set.mem_univ, iff_true];
   use ⊤;
-  simp [iff_provable_eq_univ.mp (show 𝓢 ⊢ □⊤ by simp)]
+  simp [MaximalConsistentSet.mem_of_prove]
 
 end
 

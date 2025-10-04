@@ -115,16 +115,16 @@ end Frame.supplementation
 
 section
 
-open MaximalConsistentSet (proofset)
+open MaximalConsistentSet
 open Formula (atom)
 open Formula.Neighborhood
 open MaximalConsistentSet
-open MaximalConsistentSet.proofset
+open proofset
 
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.EM 𝓢] [Entailment.Consistent 𝓢]
 
-abbrev maximalCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 𝓢] : Canonicity 𝓢 where
+abbrev supplementedMinimalCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 𝓢] : Canonicity 𝓢 where
   𝒩 := (minimalCanonicity 𝓢).toModel.supplementation.𝒩
   def_𝒩 := by
     intro X φ;
@@ -134,23 +134,20 @@ abbrev maximalCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 
       constructor;
       . simp;
       . use φ;
-        constructor;
-        . rfl;
-        . grind;
-    . rintro ⟨Y, hψ₁, ⟨ψ, rfl, hψ₂⟩⟩;
+    . rintro ⟨Y, hψ₁, ⟨ψ, hψ₂, rfl⟩⟩;
       apply proofset.box_subset_of_subset hψ₁ hψ₂;
   V a := proofset 𝓢 (.atom a);
   def_V := by simp;
 
-instance : (maximalCanonicity 𝓢).toModel.IsMonotonic := Frame.supplementation.isMonotonic (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance : (supplementedMinimalCanonicity 𝓢).toModel.IsMonotonic := Frame.supplementation.isMonotonic (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
-instance [Entailment.HasAxiomC 𝓢] : (maximalCanonicity 𝓢).toModel.IsRegular := Frame.supplementation.isRegular (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance [Entailment.HasAxiomC 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.IsRegular := Frame.supplementation.isRegular (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
-instance [Entailment.HasAxiomN 𝓢] : (maximalCanonicity 𝓢).toModel.ContainsUnit := Frame.supplementation.containsUnit (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance [Entailment.HasAxiomN 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.ContainsUnit := Frame.supplementation.containsUnit (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
-instance [Entailment.HasAxiomT 𝓢] : (maximalCanonicity 𝓢).toModel.IsReflexive := Frame.supplementation.isReflexive (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance [Entailment.HasAxiomT 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.IsReflexive := Frame.supplementation.isReflexive (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
-instance [Entailment.HasAxiomFour 𝓢] : (maximalCanonicity 𝓢).toModel.IsTransitive := Frame.supplementation.isTransitive (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance [Entailment.HasAxiomFour 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.IsTransitive := Frame.supplementation.isTransitive (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
 end
 

@@ -162,6 +162,14 @@ instance [Ax.HasB] : Entailment.HasAxiomB (Hilbert.WithRE Ax) where
       (s := λ b => if (HasB.p Ax) = b then φ else (.atom b))
       (by exact HasB.mem_B);
 
+instance [Ax.HasFive] : Entailment.HasAxiomFive (Hilbert.WithRE Ax) where
+  Five φ := by
+    constructor;
+    simpa using Hilbert.WithRE.axm
+      (φ := Axioms.Five (.atom (HasFive.p Ax)))
+      (s := λ b => if (HasFive.p Ax) = b then φ else (.atom b))
+      (by exact HasFive.mem_Five);
+
 end
 
 end Hilbert.WithRE
@@ -243,6 +251,16 @@ instance : END.axioms.HasN where
 instance : END.axioms.HasD where p := 0; mem_D := by simp
 protected abbrev END : Logic ℕ := Hilbert.WithRE {Axioms.N, Axioms.D (.atom 0)}
 instance : Entailment.END Modal.END where
+
+protected abbrev END4.axioms : Axiom ℕ := {Axioms.N, Axioms.D (.atom 0), Axioms.Four (.atom 0)}
+namespace END4.axioms
+instance : END4.axioms.HasN where
+instance : END4.axioms.HasD where p := 0;
+instance : END4.axioms.HasFour where p := 0; mem_Four := by simp;
+end END4.axioms
+protected abbrev END4 : Logic ℕ := Hilbert.WithRE END4.axioms
+instance : Entailment.END Modal.END where
+instance : Entailment.E4 Modal.END4 where
 
 protected abbrev EP.axioms : Axiom ℕ := {Axioms.P}
 instance : EP.axioms.HasP where mem_P := by simp;
@@ -338,10 +356,27 @@ instance : Entailment.EN Modal.EMCNT4 where
 
 protected abbrev EB.axioms : Axiom ℕ := {Axioms.B (.atom 0)}
 namespace EB.axioms
-instance : EB.axioms.HasB where p := 0; mem_B := by simp;
+instance : EB.axioms.HasB where p := 0;
 end EB.axioms
 protected abbrev EB : Logic ℕ := Hilbert.WithRE EB.axioms
 instance : Entailment.EB Modal.EB where
+
+
+protected abbrev E5.axioms : Axiom ℕ := {Axioms.Five (.atom 0)}
+namespace E5.axioms
+instance : E5.axioms.HasFive where p := 0;
+end E5.axioms
+protected abbrev E5 : Logic ℕ := Hilbert.WithRE E5.axioms
+instance : Entailment.E5 Modal.E5 where
+
+
+protected abbrev ET5.axioms : Axiom ℕ := {Axioms.T (.atom 0), Axioms.Five (.atom 0)}
+namespace ET5.axioms
+instance : ET5.axioms.HasFive where p := 0;
+instance : ET5.axioms.HasT where p := 0;
+end ET5.axioms
+protected abbrev ET5 : Logic ℕ := Hilbert.WithRE ET5.axioms
+instance : Entailment.ET5 Modal.ET5 where
 
 end
 

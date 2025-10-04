@@ -8,15 +8,17 @@ open LO.Entailment LO.Modal.Entailment
 
 section
 
+open MaximalConsistentSet
+
 variable {α : Type*} [DecidableEq α]
 variable {S} [Entailment (Formula α) S]
 variable {𝓢 : S} [Entailment.Cl 𝓢]
 
-def MaximalConsistentSet.proofset (𝓢 : S) (φ : Formula α) : Set (MaximalConsistentSet 𝓢) := { Γ : MaximalConsistentSet 𝓢 | φ ∈ Γ }
+def proofset (𝓢 : S) (φ : Formula α) : Set (MaximalConsistentSet 𝓢) := { Γ : MaximalConsistentSet 𝓢 | φ ∈ Γ }
 
-namespace MaximalConsistentSet.proofset
+namespace proofset
 
-local notation "‖" φ "‖" => MaximalConsistentSet.proofset 𝓢 φ
+local notation "‖" φ "‖" => proofset 𝓢 φ
 
 variable {φ ψ : Formula α} {Γ : MaximalConsistentSet 𝓢}
 
@@ -104,8 +106,7 @@ lemma box_subset_of_subset [Entailment.EM 𝓢] : ‖φ‖ ⊆ ‖ψ‖ → ‖�
   suffices 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ □φ ➝ □ψ by simpa [imp_subset];
   apply Entailment.rm!;
 
-
-end MaximalConsistentSet.proofset
+end proofset
 
 end
 
@@ -161,6 +162,7 @@ lemma multidia_proofset : 𝓒.toModel.dia^[n] (proofset 𝓢 φ) = (proofset �
   | zero => simp;
   | succ n ih => simp only [Function.iterate_succ, Function.comp_apply, dia_proofset, ih];
 
+@[grind]
 lemma iff_box {Γ : 𝓒.toModel} : □φ ∈ Γ.1 ↔ Γ ∈ 𝓒.toModel.box (proofset 𝓢 φ) := by apply 𝓒.def_𝒩
 
 @[grind]
@@ -175,7 +177,7 @@ lemma truthlemma : (proofset 𝓢 φ) = (𝓒.toModel φ) := by
   induction φ with
   | hatom => apply 𝓒.def_V _ |>.symm;
   | hfalsum => simp;
-  | himp φ ψ ihφ ihψ => simp_all [MaximalConsistentSet.proofset.eq_imp];
+  | himp φ ψ ihφ ihψ => simp_all [proofset.eq_imp];
   | hbox φ ihφ =>
     suffices proofset 𝓢 (□φ) = 𝓒.toModel.box (𝓒.toModel.truthset φ) by simpa;
     rw [←ihφ, box_proofset];
@@ -190,7 +192,7 @@ lemma completeness {C : FrameClass} (hC : 𝓒.toModel.toFrame ∈ C) : LO.Compl
   constructor;
   . assumption;
   . suffices Γ ∉ proofset 𝓢 φ by simpa [Semantics.Realize, Satisfies, 𝓒.truthlemma];
-    apply MaximalConsistentSet.proofset.iff_mem.not.mp;
+    apply proofset.iff_mem.not.mp;
     apply MaximalConsistentSet.iff_mem_neg.mp;
     tauto;
 
@@ -198,15 +200,14 @@ end Canonicity
 
 
 def minimalCanonicity (𝓢 : S) [Entailment.E 𝓢] : Canonicity 𝓢 where
-  𝒩 w X := ∃ φ, X = proofset 𝓢 φ ∧ w ∈ proofset 𝓢 (□φ)
+  𝒩 Γ X := ∃ φ, □φ ∈ Γ ∧ X = proofset 𝓢 φ
   def_𝒩 := by
     intro X φ;
     constructor;
     . intro h;
       use φ;
-      grind;
     . rintro ⟨ψ, hψ₁, hψ₂⟩;
-      have := proofset.eq_boxed_of_eq hψ₁;
+      have := proofset.eq_boxed_of_eq hψ₂;
       grind;
   V a := proofset 𝓢 (.atom a);
   def_V := by simp;
@@ -216,10 +217,17 @@ lemma minimalCanonicity.iff_mem_box_exists_fml {X} {Γ : (minimalCanonicity 𝓢
   : Γ ∈ Frame.box _ X ↔ ∃ φ, X = proofset 𝓢 φ ∧ Frame.box _ X = proofset 𝓢 (□φ) ∧ Γ ∈ proofset 𝓢 (□φ)
   := by
     constructor;
-    . rintro ⟨φ, rfl, _⟩;
+    . rintro ⟨φ, _, rfl⟩;
       use φ;
       simpa;
     . tauto;
+
+lemma minimalCanonicity.iff_mem_dia_forall_fml {X} {Γ : (minimalCanonicity 𝓢).toModel}
+  : Γ ∈ Frame.dia _ X ↔ ∀ φ, Xᶜ ≠ proofset 𝓢 φ ∨ Frame.box _ Xᶜ ≠ proofset 𝓢 (□φ) ∨ Γ ∉ proofset 𝓢 (□φ)
+  := by
+    apply Iff.trans (iff_mem_box_exists_fml.not);
+    set_option push_neg.use_distrib true in push_neg;
+    rfl;
 
 end Neighborhood
 

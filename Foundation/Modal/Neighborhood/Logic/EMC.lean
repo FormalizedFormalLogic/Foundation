@@ -35,7 +35,7 @@ instance : Entailment.Consistent Modal.EMC := consistent_of_sound_frameclass Fra
   simp;
   constructor;
 
-instance : Complete Modal.EMC FrameClass.EMC := (maximalCanonicity Modal.EMC).completeness $ by
+instance : Complete Modal.EMC FrameClass.EMC := (supplementedMinimalCanonicity Modal.EMC).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
