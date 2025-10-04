@@ -443,4 +443,32 @@ lemma transfinite_induction (P : V → Prop) (hP : ℒₛₑₜ-predicate P)
     exact not_lt_of_ge this hξβ
   contradiction
 
+/-! ### Well-foundedness -/
+
+class IsWellFoundedRel (D : outParam (V → Prop)) (R : V → V → Prop) : Prop where
+  wf : ∀ S : V, (∀ x ∈ S, D x) → IsNonempty S → ∃ z ∈ S, ∀ x ∈ S, ¬R x z
+
+instance IsWellFoundedRel.mem : IsWellFoundedRel (fun _ : V ↦ True) (· ∈ ·) where
+  wf S _ _ := foundation S
+
+class SetLike (R : V → V → Prop) where
+  leftSet (x : V) : ∃ y : V, ∀ z, z ∈ y ↔ R z x
+
+namespace SetLike
+
+variable (R : V → V → Prop) [SetLike R]
+
+lemma left_existsUnique (x : V) : ∃! s : V, ∀ z, z ∈ s ↔ R z x := by
+  have : ∃ y, ∀ z, z ∈ y ↔ R z x := leftSet x
+  rcases this with ⟨y, hy⟩
+  apply ExistsUnique.intro y hy
+  intro y' hy'
+  ext; simp_all
+
+noncomputable def left (x : V) : V := Classical.choose! <| left_existsUnique R x
+
+@[simp] lemma mem_left (x y : V) : y ∈ left R x ↔ R y x := Classical.choose!_spec (left_existsUnique R x) y
+
+end SetLike
+
 end LO.Zermelo

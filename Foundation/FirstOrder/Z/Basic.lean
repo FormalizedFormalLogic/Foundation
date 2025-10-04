@@ -327,7 +327,7 @@ noncomputable def power (x : V) : V := Classical.choose! (power_existsUnique x)
 
 prefix:110 "℘ " => power
 
-lemma mem_power_iff {x z : V} : z ∈ ℘ x ↔ z ⊆ x := Classical.choose!_spec (power_existsUnique x) z
+@[simp] lemma mem_power_iff {x z : V} : z ∈ ℘ x ↔ z ⊆ x := Classical.choose!_spec (power_existsUnique x) z
 
 def power.dfn : Semisentence ℒₛₑₜ 2 := “p x. ∀ z, z ∈ p ↔ z ⊆ x”
 
@@ -602,7 +602,7 @@ noncomputable def prod (X Y : V) : V := {z ∈ ℘ ℘ (X ∪ Y) ; ∃ x ∈ X, 
 
 infix:60 " ×ˢ " => prod
 
-@[simp] lemma mem_prod_iff {X Y z : V} : z ∈ X ×ˢ Y ↔ ∃ x ∈ X, ∃ y ∈ Y, z = kpair x y := by
+lemma mem_prod_iff {X Y z : V} : z ∈ X ×ˢ Y ↔ ∃ x ∈ X, ∃ y ∈ Y, z = kpair x y := by
   suffices ∀ x ∈ X, ∀ y ∈ Y, z = kpair x y → z ∈ ℘ ℘ (X ∪ Y) by simpa [prod]
   rintro x hx y hy rfl
   simp_all [mem_power_iff, subset_def, kpair]
@@ -610,16 +610,36 @@ infix:60 " ×ˢ " => prod
 def prod.dfn : Semisentence ℒₛₑₜ 3 := “p X Y. ∀ z, z ∈ p ↔ ∃ x ∈ X, ∃ y ∈ Y, !kpair.dfn z x y”
 
 instance prod.defined : ℒₛₑₜ-function₂[V] prod via prod.dfn :=
-  ⟨by intro v; simp [prod.dfn, mem_ext_iff]⟩
+  ⟨by intro v; simp [prod.dfn, mem_ext_iff, mem_prod_iff]⟩
 
 instance prod.definable : ℒₛₑₜ-function₂[V] prod := prod.defined.to_definable
 
-@[simp] lemma prod_empty (x : V) : x ×ˢ ∅ = ∅ := by ext; simp
+@[simp] lemma prod_empty (x : V) : x ×ˢ ∅ = ∅ := by ext; simp [mem_prod_iff]
 
-@[simp] lemma empty_prod (x : V) : ∅ ×ˢ x = ∅ := by ext; simp
+@[simp] lemma empty_prod (x : V) : ∅ ×ˢ x = ∅ := by ext; simp [mem_prod_iff]
 
 @[simp] lemma kpair_mem_iff {x y X Y : V} : kpair x y ∈ X ×ˢ Y ↔ x ∈ X ∧ y ∈ Y := by
-  simp
+  simp [mem_prod_iff]
+
+lemma prod_subset_prod_of_subset {X₁ X₂ Y₁ Y₂ : V} (hX : X₁ ⊆ X₂) (hY : Y₁ ⊆ Y₂) : X₁ ×ˢ Y₁ ⊆ X₂ ×ˢ Y₂ := by
+  intro p hp
+  have : ∃ x ∈ X₁, ∃ y ∈ Y₁, p = kpair x y := by simpa [mem_prod_iff] using hp
+  rcases this with ⟨x, hx, y, hy, rfl⟩
+  simp [hX _ hx, hY _ hy]
+
+lemma union_prod (x y z : V) : (x ∪ y) ×ˢ z = (x ×ˢ z) ∪ (y ×ˢ z) := by
+  ext v; simp only [mem_prod_iff, mem_union_iff]; grind
+
+@[simp] lemma singleton_prod_singleton (x y : V) : ({x} ×ˢ {y} : V) = {kpair x y} := by
+  ext z; simp [mem_prod_iff]
+
+lemma insert_kpair_subset_insert_prod_insert_of_subset_prod {R X Y : V} (h : R ⊆ X ×ˢ Y) (x y : V) :
+    Insert.insert (kpair x y) R ⊆ Insert.insert x X ×ˢ Insert.insert y Y := by
+  intro z hz
+  rcases show z = kpair x y ∨ z ∈ R by simpa using hz with (rfl | hz)
+  · simp
+  · exact prod_subset_prod_of_subset
+      (show X ⊆ Insert.insert x X by simp) (show Y ⊆ Insert.insert y Y by simp) z (h z hz)
 
 /-! ## Axiom of infinity -/
 
