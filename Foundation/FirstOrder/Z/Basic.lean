@@ -274,42 +274,42 @@ lemma union_assoc (x y z : V) : (x ∪ y) ∪ z = x ∪ (y ∪ z) := by ext; sim
 
 /-! ### Insert -/
 
-noncomputable def insert (x y : V) : V := {x} ∪ y
+protected noncomputable def insert (x y : V) : V := {x} ∪ y
 
-noncomputable scoped instance : Insert V V := ⟨insert⟩
+noncomputable scoped instance : Insert V V := ⟨Zermelo.insert⟩
 
-lemma insert_def (x y : V) : Insert.insert x y = {x} ∪ y := rfl
+lemma insert_def (x y : V) : insert x y = {x} ∪ y := rfl
 
 def insert.dfn : Semisentence ℒₛₑₜ 3 := “u x y. ∀ s, !singleton.dfn s x → !union.dfn u s y”
 
-instance insert.defined : ℒₛₑₜ-function₂[V] Insert.insert via insert.dfn :=
+instance insert.defined : ℒₛₑₜ-function₂[V] insert via insert.dfn :=
   ⟨by intro v; simp [insert.dfn, insert_def]⟩
 
-instance insert.definable : ℒₛₑₜ-function₂[V] Insert.insert := insert.defined.to_definable
+instance insert.definable : ℒₛₑₜ-function₂[V] insert := insert.defined.to_definable
 
-@[simp] lemma mem_insert {x y z : V} : z ∈ Insert.insert x y ↔ z = x ∨ z ∈ y := by simp [insert_def]
+@[simp] lemma mem_insert {x y z : V} : z ∈ insert x y ↔ z = x ∨ z ∈ y := by simp [insert_def]
 
-@[simp] lemma insert_empty_eq (x : V) : (Insert.insert x ∅ : V) = {x} := by ext; simp
+@[simp] lemma insert_empty_eq (x : V) : (insert x ∅ : V) = {x} := by ext; simp
 
-lemma union_insert (x y : V) : x ∪ Insert.insert y z = Insert.insert y (x ∪ z) := by ext; simp; tauto
+lemma union_insert (x y : V) : x ∪ insert y z = insert y (x ∪ z) := by ext; simp; tauto
 
 lemma pair_eq_doubleton (x y : V) : {x, y} = doubleton x y := by ext; simp
 
-@[simp] lemma sUnion_insert (x y : V) : ⋃ˢ Insert.insert x y = x ∪ ⋃ˢ y := by ext; simp [mem_sUnion_iff]
+@[simp] lemma sUnion_insert (x y : V) : ⋃ˢ insert x y = x ∪ ⋃ˢ y := by ext; simp [mem_sUnion_iff]
 
-@[simp] lemma subset_insert (x y : V) : y ⊆ Insert.insert x y := by simp [insert_def]
+@[simp] lemma subset_insert (x y : V) : y ⊆ insert x y := by simp [insert_def]
 
-@[simp] instance insert_isNonempty (x y : V) : IsNonempty (Insert.insert x y) := ⟨x, by simp⟩
+@[simp] instance insert_isNonempty (x y : V) : IsNonempty (insert x y) := ⟨x, by simp⟩
 
 @[simp] lemma intsert_union (x y z : V) :
-    Insert.insert x y ∪ z = Insert.insert x (y ∪ z) := by
+    insert x y ∪ z = insert x (y ∪ z) := by
   ext; simp only [mem_union_iff, mem_insert]; grind
 
 @[simp] lemma singleton_inter (x y : V) :
-    {x} ∪ y = Insert.insert x y := by
+    {x} ∪ y = insert x y := by
   ext; simp
 
-@[simp, grind] lemma insert_eq_self_of_mem {x y : V} (hx : x ∈ y) : Insert.insert x y = y := by
+@[simp, grind] lemma insert_eq_self_of_mem {x y : V} (hx : x ∈ y) : insert x y = y := by
   ext; simp only [mem_insert, or_iff_right_iff_imp]; grind
 
 /-! ## Axiom of power set -/
@@ -462,15 +462,15 @@ lemma inter_assoc (x y z : V) : (x ∩ y) ∩ z = x ∩ (y ∩ z) := by ext; sim
 
 @[simp] lemma empty_inter (x : V) : ∅ ∩ x = ∅ := by ext; simp
 
-@[simp] lemma sInter_insert (x y : V) [hy : IsNonempty y] : ⋂ˢ Insert.insert x y = x ∩ ⋂ˢ y := by
+@[simp] lemma sInter_insert (x y : V) [hy : IsNonempty y] : ⋂ˢ insert x y = x ∩ ⋂ˢ y := by
   ext; simp [*, mem_sInter_iff_of_nonempty]
 
 @[simp, grind] lemma intsert_inter_of_mem (x y z : V) (hx : x ∈ z) :
-    Insert.insert x y ∩ z = Insert.insert x (y ∩ z) := by
+    insert x y ∩ z = insert x (y ∩ z) := by
   ext; simp only [inter_comm, mem_inter_iff, mem_insert]; grind
 
 @[simp, grind] lemma intsert_inter_of_not_mem (x y z : V) (hx : x ∉ z) :
-    Insert.insert x y ∩ z = y ∩ z := by
+    insert x y ∩ z = y ∩ z := by
   ext; simp only [inter_comm, mem_inter_iff, mem_insert]; grind
 
 @[simp, grind] lemma singleton_inter_of_mem {x y : V} (hx : x ∈ y) :
@@ -515,11 +515,11 @@ instance sdiff.definable : ℒₛₑₜ-function₂[V] SDiff.sdiff := sdiff.defi
   ext; simp only [mem_sdiff_iff, mem_singleton_iff, and_iff_left_iff_imp]; grind
 
 @[simp, grind] lemma insert_sdiff_of_mem {x y z : V} (hx : x ∈ z) :
-    Insert.insert x y \ z = y \ z := by
+    insert x y \ z = y \ z := by
   ext; simp only [mem_sdiff_iff, mem_insert, and_congr_left_iff, or_iff_right_iff_imp]; grind
 
 @[simp, grind] lemma insert_sdiff_of_not_mem {x y z : V} (hx : x ∉ z) :
-    Insert.insert x y \ z = Insert.insert x (y \ z) := by
+    insert x y \ z = insert x (y \ z) := by
   ext; simp only [mem_sdiff_iff, mem_insert]; grind
 
 lemma isNonempty_sdiff_of_ssubset {x y : V} : x ⊊ y → IsNonempty (y \ x) := by
@@ -647,16 +647,16 @@ lemma union_prod (x y z : V) : (x ∪ y) ×ˢ z = (x ×ˢ z) ∪ (y ×ˢ z) := b
   ext z; simp [mem_prod_iff]
 
 lemma insert_kpair_subset_insert_prod_insert_of_subset_prod {R X Y : V} (h : R ⊆ X ×ˢ Y) (x y : V) :
-    Insert.insert ⟨x, y⟩ₖ R ⊆ Insert.insert x X ×ˢ Insert.insert y Y := by
+    insert ⟨x, y⟩ₖ R ⊆ insert x X ×ˢ insert y Y := by
   intro z hz
   rcases show z = ⟨x, y⟩ₖ ∨ z ∈ R by simpa using hz with (rfl | hz)
   · simp
   · exact prod_subset_prod_of_subset
-      (show X ⊆ Insert.insert x X by simp) (show Y ⊆ Insert.insert y Y by simp) z (h z hz)
+      (show X ⊆ insert x X by simp) (show Y ⊆ insert y Y by simp) z (h z hz)
 
 /-! ## Axiom of infinity -/
 
-noncomputable def succ (x : V) : V := Insert.insert x x
+noncomputable def succ (x : V) : V := insert x x
 
 lemma mem_succ_iff {x y : V} : y ∈ succ x ↔ y = x ∨ y ∈ x := by simp [succ]
 
@@ -742,9 +742,27 @@ lemma num_succ_def (n : ℕ) : ((n + 1 : ℕ) : V) = succ ↑n := rfl
 
 @[simp] lemma cast_one_def : ((1 : ℕ) : V) = 1 := rfl
 
-lemma one_def : (1 : V) = {∅} := calc
+lemma one_def : (1 : V) = {0} := calc
   (1 : V) = succ ∅ := rfl
   _       = {∅} := by simp [succ]
+
+lemma one_def' : (1 : V) = {∅} := one_def
+
+lemma two_def : (2 : V) = {0, 1} := calc
+  (2 : V) = succ 1     := rfl
+  _       = insert 1 1 := by rfl
+  _       = {1, 0}     := by rw [←one_def]
+  _       = {0, 1}     := by ext; simp; tauto
+
+@[simp] lemma zero_ne_one : (0 : V) ≠ (1 : V) := by
+  suffices ∅ ≠ {∅} by simpa [zero_def, one_def]
+  intro e
+  have := mem_ext_iff.mp e ∅
+  simp at this
+
+@[simp] lemma one_ne_zero : (1 : V) ≠ (0 : V) := Ne.symm zero_ne_one
+
+@[simp] lemma mem_two_iff (x : V) : x ∈ (2 : V) ↔ x = 0 ∨ x = 1 := by simp [two_def]
 
 @[simp] lemma zero_mem_one : 0 ∈ (1 : V) := by simp [zero_def, one_def]
 
@@ -804,7 +822,5 @@ lemma mem_asymm₃ {x y z : V} : x ∈ y → y ∈ z → z ∉ x := by
   intro h
   have : x ∈ succ x := mem_succ_self x
   simp [←h] at this
-
-@[simp] lemma zero_ne_one : (0 : V) ≠ (1 : V) := ne_succ 0
 
 end LO.Zermelo
