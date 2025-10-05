@@ -407,9 +407,16 @@ instance CardEQ.defined : ℒₛₑₜ-relation[V] (· ≋ ·) via dfn := ⟨fun
 
 instance CardEQ.definable : ℒₛₑₜ-relation[V] (· ≋ ·) := defined.to_definable
 
+lemma CardEQ.le {X Y : V} (h : X ≋ Y) : X ≤ Y := h.1
+
+lemma CardEQ.ge {X Y : V} (h : X ≋ Y) : X ≥ Y := h.2
+
 @[simp, refl] lemma CardEQ.refl (X : V) : X ≋ X := ⟨by rfl, by rfl⟩
 
 @[symm] lemma CardEQ.symm {X Y : V} : X ≋ Y → Y ≋ X := fun e ↦ ⟨e.2, e.1⟩
+
+@[trans] lemma CardEQ.trans {X Y Z : V} : X ≋ Y → Y ≋ Z → X ≋ Z := fun eXY eYZ ↦
+  ⟨eXY.le.trans eYZ.le, eYZ.ge.trans eXY.ge⟩
 
 lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
   constructor
