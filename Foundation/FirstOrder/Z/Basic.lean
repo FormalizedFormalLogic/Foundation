@@ -199,6 +199,11 @@ instance singleton.definable : ℒₛₑₜ-function₁[V] Singleton.singleton :
 
 @[simp] instance singleton_isNonempty (x : V) : IsNonempty ({x} : V) := ⟨x, by simp⟩
 
+@[simp] lemma singleton_subset_iff_mem {x y : V} : {x} ⊆ y ↔ x ∈ y := by simp [subset_def]
+
+@[simp] lemma singleton_ext_iff {x y : V} : ({x} : V) = {y} ↔ x = y := by
+  simp [mem_ext_iff (x := {x})]
+
 /-! ## Axiom of union -/
 
 lemma union_exists : ∀ x : V, ∃ y : V, ∀ z, z ∈ y ↔ ∃ w ∈ x, z ∈ w := by

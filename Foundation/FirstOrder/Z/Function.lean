@@ -363,53 +363,49 @@ lemma compose_injective {R S : V} (hR : Injective R) (hS : Injective S) : Inject
 
 def CardLE (X Y : V) : Prop := ∃ f ∈ Y ^ X, Injective f
 
-scoped instance : LE V := ⟨CardLE⟩
+infix:50 " ≤# " => CardLE
 
-lemma cardLE_of_subset {X Y : V} (h : X ⊆ Y) : X ≤ Y :=
+lemma cardLE_of_subset {X Y : V} (h : X ⊆ Y) : X ≤# Y :=
   ⟨identity X, mem_function_of_mem_function_of_subset (identity_mem_function X) h, by simp⟩
 
-@[simp] lemma cardLE_empty (X : V) : ∅ ≤ X := cardLE_of_subset (by simp)
+@[simp] lemma cardLE_empty (X : V) : ∅ ≤# X := cardLE_of_subset (by simp)
 
-@[simp, refl] lemma CardLE.refl (X : V) : X ≤ X := cardLE_of_subset (by simp)
+@[simp, refl] lemma CardLE.refl (X : V) : X ≤# X := cardLE_of_subset (by simp)
 
-@[trans] lemma CardLE.trans {X Y Z : V} : X ≤ Y → Y ≤ Z → X ≤ Z := by
+@[trans] lemma CardLE.trans {X Y Z : V} : X ≤# Y → Y ≤# Z → X ≤# Z := by
   rintro ⟨f, hf, f_inj⟩
   rintro ⟨g, hg, g_inj⟩
   refine ⟨compose f g, compose_function hf hg, compose_injective f_inj g_inj⟩
 
-instance : Preorder V where
-  le_refl := CardLE.refl
-  le_trans _ _ _ := CardLE.trans
+def CardLT (X Y : V) : Prop := X ≤# Y ∧ ¬Y ≤# X
 
-lemma cardLE_def {X Y : V} : X ≤ Y ↔ ∃ f ∈ Y ^ X, Injective f := by rfl
-
-lemma cardLT_def {X Y : V} : X < Y ↔ X ≤ Y ∧ ¬Y ≤ X := by rfl
+infix:50 " <# " => CardLT
 
 def CardLE.dfn : Semisentence ℒₛₑₜ 2 := f“X Y. ∃ f ∈ !function.dfn Y X, !Injective.dfn f”
 
-instance CardLE.defined : ℒₛₑₜ-relation[V] (· ≤ ·) via dfn := ⟨fun v ↦ by simp [cardLE_def, dfn]⟩
+instance CardLE.defined : ℒₛₑₜ-relation[V] CardLE via dfn := ⟨fun v ↦ by simp [CardLE, dfn]⟩
 
-instance CardLE.definable : ℒₛₑₜ-relation[V] (· ≤ ·) := defined.to_definable
+instance CardLE.definable : ℒₛₑₜ-relation[V] CardLE := defined.to_definable
 
 def CardLT.dfn : Semisentence ℒₛₑₜ 2 := “X Y. !CardLE.dfn X Y ∧ ¬!CardLE.dfn Y X”
 
-instance CardLT.defined : ℒₛₑₜ-relation[V] (· < ·) via dfn := ⟨fun v ↦ by simp [cardLT_def, dfn]⟩
+instance CardLT.defined : ℒₛₑₜ-relation[V] CardLT via dfn := ⟨fun v ↦ by simp [CardLT, dfn]⟩
 
-instance CardLT.definable : ℒₛₑₜ-relation[V] (· < ·) := defined.to_definable
+instance CardLT.definable : ℒₛₑₜ-relation[V] CardLT := defined.to_definable
 
-def CardEQ (X Y : V) : Prop := X ≤ Y ∧ Y ≤ X
+def CardEQ (X Y : V) : Prop := X ≤# Y ∧ Y ≤# X
 
 infix:60 " ≋ " => CardEQ
 
 def CardEQ.dfn : Semisentence ℒₛₑₜ 2 := “X Y. !CardLE.dfn X Y ∧ !CardLE.dfn Y X”
 
-instance CardEQ.defined : ℒₛₑₜ-relation[V] (· ≋ ·) via dfn := ⟨fun v ↦ by simp [CardEQ, dfn]⟩
+instance CardEQ.defined : ℒₛₑₜ-relation[V] CardEQ via dfn := ⟨fun v ↦ by simp [CardEQ, dfn]⟩
 
-instance CardEQ.definable : ℒₛₑₜ-relation[V] (· ≋ ·) := defined.to_definable
+instance CardEQ.definable : ℒₛₑₜ-relation[V] CardEQ := defined.to_definable
 
-lemma CardEQ.le {X Y : V} (h : X ≋ Y) : X ≤ Y := h.1
+lemma CardEQ.le {X Y : V} (h : X ≋ Y) : X ≤# Y := h.1
 
-lemma CardEQ.ge {X Y : V} (h : X ≋ Y) : X ≥ Y := h.2
+lemma CardEQ.ge {X Y : V} (h : X ≋ Y) : Y ≤# X := h.2
 
 @[simp, refl] lemma CardEQ.refl (X : V) : X ≋ X := ⟨by rfl, by rfl⟩
 
@@ -417,6 +413,41 @@ lemma CardEQ.ge {X Y : V} (h : X ≋ Y) : X ≥ Y := h.2
 
 @[trans] lemma CardEQ.trans {X Y Z : V} : X ≋ Y → Y ≋ Z → X ≋ Z := fun eXY eYZ ↦
   ⟨eXY.le.trans eYZ.le, eYZ.ge.trans eXY.ge⟩
+
+lemma cardLT_power (X : V) : X <# ℘ X := by
+  have : X ≤# ℘ X := by
+    let F : V := {p ∈ X ×ˢ ℘ X ; ∃ x ∈ X, p = ⟨x, {x}⟩ₖ}
+    have : F ∈ ℘ X ^ X := by
+      apply mem_function.intro
+      · simp [F]
+      · intro x hx
+        apply ExistsUnique.intro {x} (by simp [F, hx])
+        intro y hy
+        have : y ⊆ X ∧ y = {x} := by simpa [hx, F] using hy
+        simp [this]
+    have : Injective F := by
+      intro x₁ x₂ s h₁ h₂
+      rcases show (x₁ ∈ X ∧ s ⊆ X) ∧ x₁ ∈ X ∧ s = {x₁} by simpa [F] using h₁ with ⟨_, _, rfl⟩
+      have : (x₂ ∈ X ∧ x₁ ∈ X) ∧ x₁ ∈ X ∧ x₂ = x₁ := by simpa [F] using h₂
+      simp [this.2.2]
+    refine ⟨F, by assumption, by assumption⟩
+  have : ¬℘ X ≤# X := by
+    rintro ⟨F, hF, injF⟩
+    have : IsFunction F := IsFunction.of_mem hF
+    let D : V := {x ∈ X ; ∃ s ∈ ℘ X, ⟨s, x⟩ₖ ∈ F ∧ x ∉ s}
+    have : ∃ d ∈ X, ⟨D, d⟩ₖ ∈ F := exists_of_mem_function hF D (by simp [D])
+    rcases this with ⟨d, hd, Hd⟩
+    have : d ∈ D ↔ d ∉ D := calc
+      d ∈ D ↔ ∃ s ⊆ X, ⟨s, d⟩ₖ ∈ F ∧ d ∉ s := by simp [hd, D]
+      _     ↔ d ∉ D := ?_
+    · grind
+    constructor
+    · rintro ⟨S, hS, hSF, hdS⟩
+      rcases show D = S from injF _ _ _ Hd hSF
+      assumption
+    · intro h
+      refine ⟨D, by simpa [hd] using mem_of_mem_functions hF Hd, Hd, h⟩
+  refine ⟨by assumption, by assumption⟩
 
 lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
   constructor
@@ -480,7 +511,7 @@ lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
         apply ExistsUnique.intro f ?_ ?_
         · simp [F, hs, kp1_mem_f, f_func]
         · intro g hg
-          have : (s ⊆ X ∧ g ∈ (2 ^ X : V)) ∧ ∀ (x : V), ⟨x, 1⟩ₖ ∈ g ↔ x ∈ s := by simpa [F] using hg
+          have : (s ⊆ X ∧ g ∈ (2 ^ X : V)) ∧ ∀ x, ⟨x, 1⟩ₖ ∈ g ↔ x ∈ s := by simpa [F] using hg
           rcases this with ⟨⟨_, g_func⟩, Hg⟩
           apply function_ext g_func f_func
           intro x hx i hi
@@ -489,8 +520,8 @@ lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
             grind
           · grind
     · intro s₁ s₂ f h₁ h₂
-      have : (s₁ ⊆ X ∧ f ∈ (2 ^ X : V)) ∧ ∀ (x : V), ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s₁ := by simpa [F] using h₁
-      have : (s₂ ⊆ X ∧ f ∈ (2 ^ X : V)) ∧ ∀ (x : V), ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s₂ := by simpa [F] using h₂
+      have : (s₁ ⊆ X ∧ f ∈ (2 ^ X : V)) ∧ ∀ x, ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s₁ := by simpa [F] using h₁
+      have : (s₂ ⊆ X ∧ f ∈ (2 ^ X : V)) ∧ ∀ x, ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s₂ := by simpa [F] using h₂
       ext z; grind
 
 end LO.Zermelo
