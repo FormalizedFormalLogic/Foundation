@@ -531,6 +531,19 @@ lemma isNonempty_sdiff_of_ssubset {x y : V} : x ⊊ y → IsNonempty (y \ x) := 
 
 noncomputable def kpair (x y : V) : V := {{x}, {x, y}}
 
+/-- `⟨x, y, z, ...⟩ₖ` notation for `kpair` -/
+syntax "⟨" term,* "⟩ₖ" : term
+
+macro_rules
+  | `(⟨$term:term, $terms:term,*⟩ₖ) => `(kpair $term ⟨$terms,*⟩ₖ)
+  | `(⟨$term:term⟩ₖ) => `($term)
+
+@[app_unexpander kpair]
+def pairUnexpander : Lean.PrettyPrinter.Unexpander
+  | `($_ $term $term2) => `(⟨$term, $term2⟩ₖ)
+  | _ => throw ()
+
+
 noncomputable def kpair.π₁ (z : V) : V := ⋃ˢ ⋂ˢ z
 
 noncomputable def kpair.π₂ (z : V) : V := ⋃ˢ {x ∈ ⋃ˢ z; x ∈ ⋂ˢ z → ⋃ˢ z = ⋂ˢ z}
@@ -570,11 +583,11 @@ instance kpair.π₂.defined : ℒₛₑₜ-function₁[V] kpair.π₂ via kpair
 instance kpair.π₂.definable : ℒₛₑₜ-function₁[V] kpair.π₂ := kpair.π₂.defined.to_definable
 
 @[grind, simp] lemma kpair.π₁_kpair (x y : V) :
-    π₁ (kpair x y) = x := by simp [π₁, kpair]
+    π₁ ⟨x, y⟩ₖ = x := by simp [π₁, kpair]
 
 @[grind, simp] lemma kpair.π₂_kpair (x y : V) :
-    π₂ (kpair x y) = y := calc
-  π₂ (kpair x y) = ⋃ˢ {z ∈ {x, y} ; z = x → ({x, y} : V) = {x}} := by simp [π₂, kpair]
+    π₂ ⟨x, y⟩ₖ = y := calc
+  π₂ ⟨x, y⟩ₖ = ⋃ˢ {z ∈ {x, y} ; z = x → ({x, y} : V) = {x}} := by simp [π₂, kpair]
   _              = ⋃ˢ {y} := by
     congr; ext z
     suffices (z = x ∨ z = y) ∧ (z = x → y = x) ↔ z = y by simpa [mem_ext_iff (x := {x, y})]
@@ -582,28 +595,28 @@ instance kpair.π₂.definable : ℒₛₑₜ-function₁[V] kpair.π₂ := kpai
   _              = y := by simp
 
 lemma kpair_inj {x₁ x₂ y₁ y₂ : V} :
-    kpair x₁ y₁ = kpair x₂ y₂ → x₁ = x₂ ∧ y₁ = y₂ := by
+    ⟨x₁, y₁⟩ₖ = ⟨x₂, y₂⟩ₖ → x₁ = x₂ ∧ y₁ = y₂ := by
   intro h
   constructor
-  · calc x₁ = kpair.π₁ (kpair x₁ y₁) := by simp
-    _       = kpair.π₁ (kpair x₂ y₂) := by rw [h]
-    _       = x₂                     := by simp
-  · calc y₁ = kpair.π₂ (kpair x₁ y₁) := by simp
-    _       = kpair.π₂ (kpair x₂ y₂) := by rw [h]
-    _       = y₂                     := by simp
+  · calc x₁ = kpair.π₁ ⟨x₁, y₁⟩ₖ := by simp
+    _       = kpair.π₁ ⟨x₂, y₂⟩ₖ := by rw [h]
+    _       = x₂                 := by simp
+  · calc y₁ = kpair.π₂ ⟨x₁, y₁⟩ₖ := by simp
+    _       = kpair.π₂ ⟨x₂, y₂⟩ₖ := by rw [h]
+    _       = y₂                 := by simp
 
 @[simp, grind =] lemma kpair_iff {x₁ x₂ y₁ y₂ : V} :
-    kpair x₁ y₁ = kpair x₂ y₂ ↔ x₁ = x₂ ∧ y₁ = y₂ :=
+    ⟨x₁, y₁⟩ₖ = ⟨x₂, y₂⟩ₖ ↔ x₁ = x₂ ∧ y₁ = y₂ :=
   ⟨kpair_inj, by rintro ⟨rfl, rfl⟩; rfl⟩
 
 /-! ### Product -/
 
-noncomputable def prod (X Y : V) : V := {z ∈ ℘ ℘ (X ∪ Y) ; ∃ x ∈ X, ∃ y ∈ Y, z = kpair x y}
+noncomputable def prod (X Y : V) : V := {z ∈ ℘ ℘ (X ∪ Y) ; ∃ x ∈ X, ∃ y ∈ Y, z = ⟨x, y⟩ₖ}
 
 infix:60 " ×ˢ " => prod
 
-lemma mem_prod_iff {X Y z : V} : z ∈ X ×ˢ Y ↔ ∃ x ∈ X, ∃ y ∈ Y, z = kpair x y := by
-  suffices ∀ x ∈ X, ∀ y ∈ Y, z = kpair x y → z ∈ ℘ ℘ (X ∪ Y) by simpa [prod]
+lemma mem_prod_iff {X Y z : V} : z ∈ X ×ˢ Y ↔ ∃ x ∈ X, ∃ y ∈ Y, z = ⟨x, y⟩ₖ := by
+  suffices ∀ x ∈ X, ∀ y ∈ Y, z = ⟨x, y⟩ₖ → z ∈ ℘ ℘ (X ∪ Y) by simpa [prod]
   rintro x hx y hy rfl
   simp_all [mem_power_iff, subset_def, kpair]
 
@@ -618,25 +631,25 @@ instance prod.definable : ℒₛₑₜ-function₂[V] prod := prod.defined.to_de
 
 @[simp] lemma empty_prod (x : V) : ∅ ×ˢ x = ∅ := by ext; simp [mem_prod_iff]
 
-@[simp] lemma kpair_mem_iff {x y X Y : V} : kpair x y ∈ X ×ˢ Y ↔ x ∈ X ∧ y ∈ Y := by
+@[simp] lemma kpair_mem_iff {x y X Y : V} : ⟨x, y⟩ₖ ∈ X ×ˢ Y ↔ x ∈ X ∧ y ∈ Y := by
   simp [mem_prod_iff]
 
 lemma prod_subset_prod_of_subset {X₁ X₂ Y₁ Y₂ : V} (hX : X₁ ⊆ X₂) (hY : Y₁ ⊆ Y₂) : X₁ ×ˢ Y₁ ⊆ X₂ ×ˢ Y₂ := by
   intro p hp
-  have : ∃ x ∈ X₁, ∃ y ∈ Y₁, p = kpair x y := by simpa [mem_prod_iff] using hp
+  have : ∃ x ∈ X₁, ∃ y ∈ Y₁, p = ⟨x, y⟩ₖ := by simpa [mem_prod_iff] using hp
   rcases this with ⟨x, hx, y, hy, rfl⟩
   simp [hX _ hx, hY _ hy]
 
 lemma union_prod (x y z : V) : (x ∪ y) ×ˢ z = (x ×ˢ z) ∪ (y ×ˢ z) := by
   ext v; simp only [mem_prod_iff, mem_union_iff]; grind
 
-@[simp] lemma singleton_prod_singleton (x y : V) : ({x} ×ˢ {y} : V) = {kpair x y} := by
+@[simp] lemma singleton_prod_singleton (x y : V) : ({x} ×ˢ {y} : V) = {⟨x, y⟩ₖ} := by
   ext z; simp [mem_prod_iff]
 
 lemma insert_kpair_subset_insert_prod_insert_of_subset_prod {R X Y : V} (h : R ⊆ X ×ˢ Y) (x y : V) :
-    Insert.insert (kpair x y) R ⊆ Insert.insert x X ×ˢ Insert.insert y Y := by
+    Insert.insert ⟨x, y⟩ₖ R ⊆ Insert.insert x X ×ˢ Insert.insert y Y := by
   intro z hz
-  rcases show z = kpair x y ∨ z ∈ R by simpa using hz with (rfl | hz)
+  rcases show z = ⟨x, y⟩ₖ ∨ z ∈ R by simpa using hz with (rfl | hz)
   · simp
   · exact prod_subset_prod_of_subset
       (show X ⊆ Insert.insert x X by simp) (show Y ⊆ Insert.insert y Y by simp) z (h z hz)
