@@ -1,4 +1,5 @@
 import Foundation.Modal.Entailment.E
+import Foundation.Modal.Entailment.DiaDuality
 
 namespace LO.Modal.Entailment
 
@@ -13,5 +14,11 @@ def diabot! : 𝓢 ⊢! ◇⊤ := by
   apply M!_of_NLN!;
   exact (CCNCN ⨀ axiomT) ⨀ verum;
 lemma diabot : 𝓢 ⊢ ◇⊤ := ⟨diabot!⟩
+
+namespace ET
+
+instance : Entailment.HasAxiomD 𝓢 := ⟨fun _ ↦ C_trans axiomT diaTc⟩
+
+end ET
 
 end LO.Modal.Entailment

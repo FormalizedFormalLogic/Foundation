@@ -24,6 +24,10 @@ instance : Entailment.ETB 𝓢 where
 
 instance : Entailment.EN 𝓢 where
 
+instance : Entailment.HasAxiomFour 𝓢 := HasAxiomFour.of_dual $ by
+  intro φ;
+  sorry;
+
 end ET5
 
 
