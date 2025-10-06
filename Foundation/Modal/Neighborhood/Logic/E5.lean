@@ -25,6 +25,22 @@ instance : Frame.simple_blackhole.IsEuclidean := by
   intro X x hx;
   simp_all [(show X ≠ ∅ by grind), Frame.box];
 
+abbrev counterframe_axiomFive : Frame := ⟨Fin 2, λ x => {{x}}⟩
+
+instance : counterframe_axiomFive.IsRegular := by
+  constructor;
+  rintro X Y x ⟨hx, hy⟩;
+  match x with | 0 | 1 => simp_all;
+
+@[simp]
+lemma counterframe_axiomFive.not_valid_axiomFive : ¬counterframe_axiomFive ⊧ Axioms.Five (Formula.atom 0) := by
+  apply not_imp_not.mpr isEuclidean_of_valid_axiomFive;
+  by_contra! hC;
+  have := hC.eucl Set.univ;
+  have := Set.Subset.antisymm_iff.mp (@this 1 (by simp; tauto_set)) |>.1;
+  have := @this 0 (by simp; tauto_set);
+  contradiction;
+
 end Neighborhood
 
 namespace E5
@@ -52,6 +68,13 @@ instance : Modal.E ⪱ Modal.E5 := by
     simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Five (.atom 0));
-    sorry;
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
+      apply not_validOnFrameClass_of_exists_frame;
+      use counterframe_axiomFive;
+      constructor;
+      . simp;
+      . simp;
 
 end LO.Modal

@@ -5,13 +5,18 @@ import Foundation.Modal.Neighborhood.Logic.END4
 import Foundation.Modal.Neighborhood.Logic.ET4
 import Foundation.Modal.Neighborhood.Logic.ET
 import Foundation.Modal.Neighborhood.Logic.E5
+import Foundation.Vorspiel.Set.Fin
 
+@[simp]
+lemma Set.ne_univ_empty [Nonempty α] : Set.univ (α := α) ≠ ∅ := by simp only [ne_eq,
+  univ_eq_empty_iff, not_isEmpty_of_nonempty, not_false_eq_true];
 
 namespace LO.Modal
 
 open Neighborhood
 open Hilbert.Neighborhood
 open Formula.Neighborhood
+
 
 namespace Neighborhood
 
@@ -25,18 +30,10 @@ instance : Frame.simple_blackhole.IsET5 where
     intro X x hx;
     simp_all [Frame.simple_blackhole, Frame.box];
 
-instance [F.IsET5] : F.IsSymmetric where
-  symm := by
-    intro X x hx;
-    apply F.eucl;
-    apply F.refl_dual;
-    assumption;
-
-instance [F.IsET5] : F.IsTransitive where
-  trans := by
-    intro X x hx;
-    have := @F.symm
-    sorry;
+instance : counterframe_axiomFive.IsReflexive := by
+  constructor;
+  intro X x hx;
+  simp_all [Frame.box];
 
 section
 
@@ -59,6 +56,15 @@ instance : (minimalCanonicity 𝓢).toModel.IsET5 where
 
 end
 
+abbrev counterframe_EN4_ENT4 : Neighborhood.Frame := ⟨Fin 2, λ x => {{x}, {x}ᶜ, Set.univ}⟩
+
+@[simp]
+lemma counterframe_2_3_5.not_valid_axiomT : ¬counterframe_2_3_5 ⊧ Axioms.T (Formula.atom a) := by
+  apply not_imp_not.mpr isReflexive_of_valid_axiomT;
+  by_contra! hC;
+  have := hC.refl {0};
+  have := @this 1
+  simp at this;
 
 end Neighborhood
 
@@ -78,54 +84,65 @@ instance : Complete Modal.ET5 FrameClass.ET5 := (minimalCanonicity Modal.ET5).co
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-lemma provable_axiomD : Modal.ET5 ⊢ Axioms.D φ := by
-  suffices Modal.ET5 ⊢ Axioms.D (.atom 0) by apply Logic.subst (s := λ n => φ) this;
-  apply Complete.complete (𝓜 := FrameClass.ET5);
-  intro F hF;
-  replace hF := Set.mem_setOf_eq.mp hF;
-  apply valid_axiomD_of_isSerial;
-
-noncomputable instance : Entailment.HasAxiomD Modal.ET5 := ⟨λ _ => provable_axiomD.some⟩
-
-
-lemma provable_axiomFour : Modal.ET5 ⊢ Axioms.Four φ := by
-  suffices Modal.ET5 ⊢ Axioms.Four (.atom 0) by apply Logic.subst (s := λ n => φ) this;
-  apply Complete.complete (𝓜 := FrameClass.ET5);
-  intro F hF;
-  replace hF := Set.mem_setOf_eq.mp hF;
-  apply valid_axiomFour_of_isTransitive;
-
-noncomputable instance : Entailment.HasAxiomFour Modal.ET5 := ⟨λ _ => provable_axiomFour.some⟩
-
-
-lemma provable_axiomB : Modal.ET5 ⊢ Axioms.B φ := by
-  suffices Modal.ET5 ⊢ Axioms.B (.atom 0) by apply Logic.subst (s := λ n => φ) this;
-  apply Complete.complete (𝓜 := FrameClass.ET5);
-  intro F hF;
-  replace hF := Set.mem_setOf_eq.mp hF;
-  apply valid_axiomB_of_isSymmetric;
-
-noncomputable instance : Entailment.HasAxiomB Modal.ET5 := ⟨λ _ => provable_axiomB.some⟩
-
 end ET5
 
 
-instance : Modal.END4 ⪱ Modal.ET5 := by
+instance : Modal.END ⪱ Modal.ET5 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl | rfl) <;> simp;
-  . sorry;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.T (.atom 0));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.END);
+      apply not_validOnFrameClass_of_exists_frame;
+      use counterframe_2_3_5;
+      constructor;
+      . apply Set.mem_setOf_eq.mpr;
+        infer_instance;
+      . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
+        by_contra! hC;
+        have := hC.refl {0};
+        have := @this 1
+        simp at this;
 
 instance : Modal.ET ⪱ Modal.ET5 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
-  . sorry;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.Five (.atom 0));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.ET);
+      apply not_validOnFrameClass_of_exists_frame;
+      use ⟨Fin 2, λ x => {{x}}⟩;
+      constructor;
+      . apply Set.mem_setOf_eq.mpr;
+        infer_instance
+      . simp;
 
 instance : Modal.E5 ⪱ Modal.ET5 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
-  . sorry;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.T (.atom 0));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E5);
+      apply not_validOnFrameClass_of_exists_frame;
+      use ⟨Fin 2, λ _ => Set.univ⟩;
+      constructor;
+      . apply Set.mem_setOf_eq.mpr;
+        constructor;
+        . intro X x hx;
+          simp_all [Frame.box, Frame.dia];
+      . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
+        by_contra! hC;
+        have : ∀ (y : Fin 2), y = 1 := by simpa using hC.refl {1};
+        have := this 0;
+        contradiction;
 
 end LO.Modal

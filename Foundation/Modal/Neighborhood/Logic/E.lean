@@ -267,19 +267,6 @@ instance : Modal.E ⪱ Modal.EK := by
           omega;
         . tauto_set;
 
-instance : Modal.E ⪱ Modal.E4 := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.Four (.atom 0));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
-      apply not_validOnFrameClass_of_exists_frame;
-      use Frame.trivial_nontransitive;
-      simp;
-
 instance : Modal.E ⪱ Modal.ED := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
