@@ -62,4 +62,19 @@ def INLNM! : 𝓢 ⊢! ∼(□(∼φ)) ➝ ◇φ := K_right diaDuality
 def M!_of_NLN! (h : 𝓢 ⊢! ∼(□(∼φ))) : 𝓢 ⊢! ◇φ := INLNM! ⨀ h
 @[grind] lemma M_of_NLN (h : 𝓢 ⊢ ∼(□(∼φ))) : 𝓢 ⊢ ◇φ := INLNM ⨀ h
 
+
+section
+
+variable [DecidableEq F] [Entailment.HasAxiomT 𝓢]
+
+instance : HasAxiomDiaTc 𝓢 := ⟨by
+  intro φ;
+  apply C_trans ?_ (K_right diaDuality);
+  exact C_trans dni $ contra axiomT;
+⟩
+
+instance : HasAxiomP 𝓢 := ⟨N_of_CO axiomT⟩
+
+end
+
 end LO.Modal.Entailment

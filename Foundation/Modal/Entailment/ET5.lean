@@ -1,4 +1,4 @@
-import Foundation.Modal.Entailment.ET
+import Foundation.Modal.Entailment.ETB
 import Foundation.Modal.Entailment.EN
 
 namespace LO.Modal.Entailment
@@ -18,11 +18,9 @@ variable [DecidableEq F]
 
 namespace ET5
 
-instance : Entailment.HasAxiomN 𝓢 := ⟨by
-  have H₁ : 𝓢 ⊢! ◇⊤ ➝ □◇⊤ := axiomFive;
-  have H₂ : 𝓢 ⊢! □◇⊤ ➝ □⊤ := K_left $ re $ iff_top_left' $ diabot!;
-  exact (C_trans H₁ H₂) ⨀ diabot!;
-⟩
+instance : Entailment.HasAxiomB 𝓢 := ⟨fun _ ↦ C_trans diaTc axiomFive⟩
+
+instance : Entailment.ETB 𝓢 where
 
 instance : Entailment.EN 𝓢 where
 
