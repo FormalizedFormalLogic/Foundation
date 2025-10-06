@@ -64,6 +64,13 @@ lemma IsSymmetric.of_dual {F : Frame} (h : ∀ X : Set F, F.dia (F.box X) ⊆ X)
   have := @h Xᶜ w;
   simp_all;
 
+lemma IsSymmetric.of_alt {F : Frame} (h : ∀ a X, a ∈ X → { b | Xᶜ ∉ F.𝒩 b } ∈ F.𝒩 a) : F.IsSymmetric := by
+  constructor;
+  intro X a ha;
+  have := h a;
+  simp_all [Frame.dia, Frame.box];
+  grind;
+
 
 class IsEuclidean (F : Frame) : Prop where
   eucl : ∀ X : Set F, F.dia X ⊆ F.box (F.dia X)

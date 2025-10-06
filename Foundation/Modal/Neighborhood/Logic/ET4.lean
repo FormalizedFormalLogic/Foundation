@@ -1,4 +1,5 @@
 import Foundation.Modal.Neighborhood.Logic.E4
+import Foundation.Modal.Neighborhood.Logic.ET
 
 namespace LO.Modal
 
@@ -7,11 +8,6 @@ open Hilbert.Neighborhood
 open Formula.Neighborhood
 
 namespace Neighborhood
-
-instance : Frame.simple_blackhole.IsReflexive := by
-  constructor;
-  intro X x;
-  simp_all;
 
 protected class Frame.IsET4 (F : Frame) extends F.IsReflexive, F.IsTransitive
 protected class Frame.IsFiniteET4 (F : Frame) extends F.IsET4, F.IsFinite

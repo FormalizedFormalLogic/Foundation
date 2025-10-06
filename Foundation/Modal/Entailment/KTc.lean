@@ -30,8 +30,8 @@ namespace KTc'
 
 variable [Entailment.KTc' 𝓢]
 
-protected def axiomTc : 𝓢 ⊢! φ ➝ □φ := C_trans (C_of_CNN (C_trans (K_right diaDuality) diaT)) box_dne
-instance : HasAxiomTc 𝓢 := ⟨fun _ ↦ KTc'.axiomTc⟩
+protected noncomputable def axiomTc : 𝓢 ⊢! φ ➝ □φ := C_trans (C_of_CNN (C_trans (K_right diaDuality) diaT)) box_dne
+noncomputable instance : HasAxiomTc 𝓢 := ⟨fun _ ↦ KTc'.axiomTc⟩
 
 end KTc'
 

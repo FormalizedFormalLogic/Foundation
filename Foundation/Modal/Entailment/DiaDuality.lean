@@ -21,10 +21,12 @@ lemma conj_cons! [DecidableEq F] : 𝓢 ⊢ (φ ⋏ ⋀Γ) ⭤ ⋀(φ :: Γ) := 
     . exact right_K!_intro (by simp) (by simp);
   | _ => simp;
 
-lemma iff_top_left'! (h : 𝓢 ⊢ φ) : 𝓢 ⊢ φ ⭤ ⊤ := by
-  apply E!_intro;
-  . simp;
-  . exact C!_of_conseq! h;
+def iff_top_left' (h : 𝓢 ⊢! φ) : 𝓢 ⊢! φ ⭤ ⊤ := by
+  apply E_intro;
+  . exact CV;
+  . exact C_of_conseq h;
+
+lemma iff_top_left'! : 𝓢 ⊢ φ → 𝓢 ⊢ φ ⭤ ⊤ := λ ⟨h⟩ => ⟨iff_top_left' h⟩
 
 lemma iff_symm'! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ⭤ φ := by
   apply E!_intro;
@@ -57,6 +59,7 @@ def IMNLN! : 𝓢 ⊢! ◇φ ➝ ∼(□(∼φ)) := K_left diaDuality
 def INLNM! : 𝓢 ⊢! ∼(□(∼φ)) ➝ ◇φ := K_right diaDuality
 @[simp] lemma INLNM : 𝓢 ⊢ ∼(□(∼φ)) ➝ ◇φ := ⟨INLNM!⟩
 
+def M!_of_NLN! (h : 𝓢 ⊢! ∼(□(∼φ))) : 𝓢 ⊢! ◇φ := INLNM! ⨀ h
 @[grind] lemma M_of_NLN (h : 𝓢 ⊢ ∼(□(∼φ))) : 𝓢 ⊢ ◇φ := INLNM ⨀ h
 
 end LO.Modal.Entailment

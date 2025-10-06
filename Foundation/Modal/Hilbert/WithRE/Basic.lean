@@ -2,6 +2,7 @@ import Foundation.Modal.Formula
 import Foundation.Modal.Entailment.K
 import Foundation.Modal.Entailment.EMCN
 import Foundation.Modal.Entailment.END
+import Foundation.Modal.Entailment.ET5
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Logic.Incomparable
 import Foundation.Modal.Logic.Basic

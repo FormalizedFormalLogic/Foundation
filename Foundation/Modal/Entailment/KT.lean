@@ -30,10 +30,10 @@ namespace KT'
 
 variable [Entailment.KT' 𝓢]
 
-protected def axiomT : 𝓢 ⊢! □φ ➝ φ := C_trans box_dni (C_of_CNN (C_trans diaTc diaDuality_mp))
+protected noncomputable def axiomT : 𝓢 ⊢! □φ ➝ φ := C_trans box_dni (C_of_CNN (C_trans diaTc diaDuality_mp))
 
-instance : HasAxiomT 𝓢 := ⟨fun _ ↦ KT'.axiomT⟩
-instance : Entailment.KT 𝓢 where
+noncomputable instance : HasAxiomT 𝓢 := ⟨fun _ ↦ KT'.axiomT⟩
+noncomputable instance : Entailment.KT 𝓢 where
 noncomputable instance : Entailment.KD 𝓢 where
 
 end KT'

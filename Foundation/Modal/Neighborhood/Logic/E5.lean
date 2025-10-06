@@ -46,4 +46,12 @@ instance : Complete Modal.E5 FrameClass.E5 := (maximalCanonicity _).completeness
 
 end E5
 
+instance : Modal.E ⪱ Modal.E5 := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.Five (.atom 0));
+    sorry;
+
 end LO.Modal
