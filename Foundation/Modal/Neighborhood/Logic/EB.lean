@@ -40,10 +40,6 @@ instance : Entailment.Consistent Modal.EB := consistent_of_sound_frameclass Fram
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance : Complete Modal.EB FrameClass.EB := minimalCanonicalFrame.completeness $ by
-  apply Set.mem_setOf_eq.mpr;
-  infer_instance;
-
 end EB
 
 end LO.Modal

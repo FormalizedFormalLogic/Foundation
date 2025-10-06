@@ -92,21 +92,4 @@ instance : Modal.E ⪱ Modal.E4 := by
       use counterframe_2_3_5;
       simp;
 
-instance : Modal.E4 ⪱ Modal.ET4 := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.T (.atom 0));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E4);
-      apply not_validOnFrameClass_of_exists_frame;
-      use ⟨Fin 1, λ _ => Set.univ⟩;
-      constructor;
-      . tauto;
-      . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
-        by_contra! hC;
-        simpa [Frame.box] using @hC.refl ∅;
-
 end LO.Modal

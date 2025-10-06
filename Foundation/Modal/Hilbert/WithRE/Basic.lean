@@ -383,6 +383,34 @@ protected abbrev EB : Logic ℕ := Hilbert.WithRE EB.axioms
 instance : Entailment.EB Modal.EB where
 
 
+protected abbrev ETB.axioms : Axiom ℕ := {Axioms.B (.atom 0), Axioms.T (.atom 0)}
+namespace ETB.axioms
+instance : ETB.axioms.HasB where p := 0;
+instance : ETB.axioms.HasT where p := 0;
+end ETB.axioms
+protected abbrev ETB : Logic ℕ := Hilbert.WithRE ETB.axioms
+instance : Entailment.ETB Modal.ETB where
+instance : Entailment.EN Modal.ETB where
+
+protected abbrev ENTB.axioms : Axiom ℕ := {Axioms.N, Axioms.B (.atom 0), Axioms.T (.atom 0)}
+namespace ENTB.axioms
+instance : ENTB.axioms.HasN where
+instance : ENTB.axioms.HasT where p := 0;
+instance : ENTB.axioms.HasB where p := 0;
+end ENTB.axioms
+protected abbrev ENTB : Logic ℕ := Hilbert.WithRE ENTB.axioms
+instance : Entailment.ETB Modal.ENTB where
+instance : Entailment.EN Modal.ENTB where
+
+instance : Modal.ETB ≊ Modal.ENTB := by
+  apply Entailment.Equiv.antisymm_iff.mpr;
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
+
+
 protected abbrev E5.axioms : Axiom ℕ := {Axioms.Five (.atom 0)}
 namespace E5.axioms
 instance : E5.axioms.HasFive where p := 0;
