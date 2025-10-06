@@ -1,6 +1,7 @@
 import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.Logic.END
 import Foundation.Modal.Neighborhood.Logic.E4
+import Foundation.Modal.Neighborhood.Logic.EN4
 import Foundation.Vorspiel.Set.Fin
 
 namespace LO.Modal
@@ -15,7 +16,6 @@ protected class Frame.IsEND4 (F : Frame) extends F.IsEND, F.IsTransitive where
 protected abbrev FrameClass.END4 : FrameClass := { F | F.IsEND4 }
 
 instance : counterframe_2_3_5.IsEND where
-  contains_unit := by simp [Frame.box];
   serial := by
     rintro X x;
     suffices X = {x}ᶜ ∨ X = Set.univ → ¬X = {x} ∧ ¬X = ∅ by simpa [Frame.box, Frame.dia];

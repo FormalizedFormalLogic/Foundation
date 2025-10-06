@@ -56,8 +56,6 @@ instance : (minimalCanonicity 𝓢).toModel.IsET5 where
 
 end
 
-abbrev counterframe_EN4_ENT4 : Neighborhood.Frame := ⟨Fin 2, λ x => {{x}, {x}ᶜ, Set.univ}⟩
-
 @[simp]
 lemma counterframe_2_3_5.not_valid_axiomT : ¬counterframe_2_3_5 ⊧ Axioms.T (Formula.atom a) := by
   apply not_imp_not.mpr isReflexive_of_valid_axiomT;

@@ -232,6 +232,15 @@ instance : E4.axioms.HasFour where p := 0; mem_Four := by simp;
 protected abbrev E4 : Logic ℕ := Hilbert.WithRE E4.axioms
 instance : Entailment.E4 Modal.E4 where
 
+protected abbrev EN4.axioms : Axiom ℕ := {Axioms.N, Axioms.Four (.atom 0)}
+namespace EN4.axioms
+instance : EN4.axioms.HasN where
+instance : EN4.axioms.HasFour where p := 0;
+end EN4.axioms
+protected abbrev EN4 : Logic ℕ := Hilbert.WithRE EN4.axioms
+instance : Entailment.EN Modal.EN4 where
+instance : Entailment.E4 Modal.EN4 where
+
 protected abbrev ET4.axioms : Axiom ℕ := {Axioms.Four (.atom 0), Axioms.T (.atom 0)}
 namespace ET4.axioms
 instance : ET4.axioms.HasFour where p := 0;
@@ -241,6 +250,17 @@ protected abbrev ET4 : Logic ℕ := Hilbert.WithRE ET4.axioms
 instance : Entailment.E Modal.ET4 where
 instance : Entailment.ET Modal.ET4 where
 instance : Entailment.E4 Modal.ET4 where
+
+protected abbrev ENT4.axioms : Axiom ℕ := {Axioms.N, Axioms.T (.atom 0), Axioms.Four (.atom 0)}
+namespace ENT4.axioms
+instance : ENT4.axioms.HasN where
+instance : ENT4.axioms.HasT where p := 0;
+instance : ENT4.axioms.HasFour where p := 0;
+end ENT4.axioms
+protected abbrev ENT4 : Logic ℕ := Hilbert.WithRE ENT4.axioms
+instance : Entailment.EN Modal.ENT4 where
+instance : Entailment.ET Modal.ENT4 where
+instance : Entailment.E4 Modal.ENT4 where
 
 protected abbrev ED.axioms : Axiom ℕ := {Axioms.D (.atom 0)}
 instance : ED.axioms.HasD where p := 0; mem_D := by simp;
@@ -378,6 +398,8 @@ instance : ET5.axioms.HasT where p := 0;
 end ET5.axioms
 protected abbrev ET5 : Logic ℕ := Hilbert.WithRE ET5.axioms
 instance : Entailment.ET5 Modal.ET5 where
+
+
 
 end
 
