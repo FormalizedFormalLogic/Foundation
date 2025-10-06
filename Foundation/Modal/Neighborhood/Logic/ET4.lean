@@ -71,4 +71,27 @@ instance : Modal.E4 ⪱ Modal.ET4 := by
         by_contra! hC;
         simpa [Frame.box] using @hC.refl ∅;
 
+instance : Modal.ET ⪱ Modal.ET4 := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.Four (.atom 0));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.ET);
+      apply not_validOnFrameClass_of_exists_frame;
+      use ⟨Fin 2, λ x => match x with | 0 => {Set.univ} | 1 => {{1}}⟩;
+      constructor;
+      . constructor;
+        intro X x;
+        match x with
+        | 0 => rintro rfl; simp;
+        | 1 => rintro rfl; simp;
+      . by_contra! hC;
+        have : ∀ (x : Fin 2), Set.univ ∈ match x with | 0 => ({Set.univ} : Set (Set (Fin 2))) | 1 => ({{1}} : Set (Set (Fin 2))) := by
+          simpa [Frame.box, Set.eq_univ_iff_forall] using (Set.subset_def.mp $ isTransitive_of_valid_axiomFour hC |>.trans Set.univ) 0;
+        replace : Set.univ = ({1} : Set (Fin 2)) := this 1;
+        tauto_set;
+
 end LO.Modal
