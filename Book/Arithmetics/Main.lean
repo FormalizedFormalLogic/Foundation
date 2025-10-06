@@ -7,7 +7,7 @@ open Verso.Genre
 open Verso.Genre.Manual
 
 set_option verso.docstring.allowMissing true
-
+set_option linter.tacticAnalysis false
 #doc (Manual) "Arithmetics" =>
 %%%
 tag := "arithmetics"

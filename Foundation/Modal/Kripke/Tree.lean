@@ -11,7 +11,7 @@ section
 
 variable {F : Kripke.Frame} {r : outParam F.World}
 
-@[mk_iff] class Frame.IsTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsRooted r, F.IsAsymmetric, F.IsTransitive where
+@[mk_iff] class Frame.IsTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsRootedBy r, F.IsAsymmetric, F.IsTransitive where
 
 @[mk_iff] class Frame.IsFiniteTree (F : Kripke.Frame) (r : outParam F.World) extends F.IsFinite, F.IsTree r where
 
@@ -42,13 +42,13 @@ lemma transrel_def : X ≺^+ Y ↔ ∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.Chain'
   constructor;
   . intro h;
     induction h using Relation.TransGen.head_induction_on with
-    | base RZY =>
+    | single RZY =>
       obtain ⟨w, hw⟩ := RZY;
       use [w];
       refine ⟨by tauto, by tauto, ?_⟩;
       rw [←hw];
       exact Y.2.2;
-    | @ih Z U RZU UY ih =>
+    | @head Z U RZU UY ih =>
       obtain ⟨w, hw⟩ := RZU;
       obtain ⟨l, ⟨_, _, hl₃⟩⟩ := ih;
       use w :: l;
@@ -116,11 +116,11 @@ protected def pMorphism (F : Frame) (r : F) : F.mkTreeUnravelling r →ₚ F whe
 
 protected abbrev root : (F.mkTreeUnravelling r).World := ⟨[r], by tauto⟩
 
-instance : (F.mkTreeUnravelling r).IsRooted treeUnravelling.root where
+instance : (F.mkTreeUnravelling r).IsRootedBy treeUnravelling.root where
   root_generates := by
     rintro ⟨_, ⟨l, rfl⟩, l_chain⟩ hn;
     apply transrel_def.mpr;
-    simp only [ne_eq, List.cons_append, List.nil_append, List.cons.injEq, true_and, List.head_cons, existsAndEq];
+    simp only [ne_eq, List.cons_append, List.nil_append, List.cons.injEq, true_and, existsAndEq];
     constructor;
     . by_contra hC;
       subst hC;
@@ -165,7 +165,7 @@ abbrev pMorphism (F : Frame) [F.IsTransitive] (r : F) : (F.mkTransTreeUnravellin
 
 protected abbrev root : (F.mkTransTreeUnravelling r).World := treeUnravelling.root
 
-instance instIsRooted : (F.mkTransTreeUnravelling r).IsRooted (mkTransTreeUnravelling.root) := inferInstance
+instance instIsRooted : (F.mkTransTreeUnravelling r).IsRootedBy (mkTransTreeUnravelling.root) := inferInstance
 
 instance instFinite [DecidableEq F.World] [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : Finite (F.mkTransTreeUnravelling r).World := by
   suffices h : Finite { x // List.Chain' F.Rel x } by

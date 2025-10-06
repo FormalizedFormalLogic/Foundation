@@ -1,10 +1,10 @@
 import Foundation.FirstOrder.Basic.Syntax.Rew
+import Foundation.FirstOrder.Basic.Syntax.Theory
 
 /-!
 # Semantics of first-order logic
 
 This file defines the structure and the evaluation of terms and formulas by Tarski's truth definition.
-
 -/
 
 namespace LO
@@ -75,11 +75,11 @@ def val (s : Structure L M) (e : Fin n → M) (ε : ξ → M) : Semiterm L ξ n 
   | &x       => ε x
   | func f v => s.func f (fun i => (v i).val s e ε)
 
-abbrev valb (s : Structure L M) (e : Fin n → M) (t : Semiterm L Empty n) : M := t.val s e Empty.elim
+abbrev valb (s : Structure L M) (e : Fin n → M) (t : ClosedSemiterm L n) : M := t.val s e Empty.elim
 
 abbrev valm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : ξ → M) : Semiterm L ξ n → M := val s e ε
 
-abbrev valbm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : Semiterm L Empty n → M := valb s e
+abbrev valbm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) : ClosedSemiterm L n → M := valb s e
 
 abbrev realize (s : Structure L M) (t : Term L M) : M := t.val s ![] id
 
@@ -116,7 +116,7 @@ lemma val_rewriteMap (f : μ₁ → μ₂) (t : Semiterm L μ₁ n) :
   by simp [val_rew]; congr
 
 lemma val_substs (w : Fin n₁ → Semiterm L ξ n₂) (t : Semiterm L ξ n₁) :
-    (Rew.substs w t).val s e₂ ε = t.val s (fun x => (w x).val s e₂ ε) ε :=
+    (Rew.subst w t).val s e₂ ε = t.val s (fun x => (w x).val s e₂ ε) ε :=
   by simp [val_rew]; congr
 
 @[simp] lemma val_bShift (a : M) (t : Semiterm L ξ n) :
@@ -141,7 +141,7 @@ lemma val_embSubsts (w : Fin k → Semiterm L ξ n) (t : Semiterm L Empty k) :
     valb s e (Rew.toS t) = val s ![] e t := by
   simp [val_rew, Matrix.empty_eq]; congr
 
-@[simp] lemma val_toF {e : Fin n → M} (t : Semiterm L Empty n) :
+@[simp] lemma val_toF {e : Fin n → M} (t : ClosedSemiterm L n) :
     val s ![] e (Rew.toF t) = valb s e t := by
   simp only [val_rew]; congr; funext i; contradiction
 
@@ -151,7 +151,7 @@ variable (φ : L₁ →ᵥ L₂) (e : Fin n → M) (ε : ξ → M)
 
 lemma val_lMap (φ : L₁ →ᵥ L₂) (s₂ : Structure L₂ M) (e : Fin n → M) (ε : ξ → M) {t : Semiterm L₁ ξ n} :
     (t.lMap φ).val s₂ e ε = t.val (s₂.lMap φ) e ε :=
-  by induction t <;> simp [*, valm, Function.comp_def, val_func, Semiterm.lMap_func]
+  by induction t <;> simp [*, val_func, Semiterm.lMap_func]
 
 end Language
 
@@ -231,7 +231,7 @@ def EvalAux (s : Structure L M) (ε : ξ → M) : ∀ {n}, (Fin n → M) → Sem
 
 @[simp] lemma EvalAux_neg (φ : Semiformula L ξ n) :
     EvalAux s ε e (∼φ) = ¬EvalAux s ε e φ :=
-  by induction φ using rec' <;> simp [*, EvalAux, ←neg_eq, or_iff_not_imp_left]
+  by induction φ using rec' <;> simp [*, EvalAux, or_iff_not_imp_left]
 
 def Eval (s : Structure L M) (e : Fin n → M) (ε : ξ → M) : Semiformula L ξ n →ˡᶜ Prop where
   toTr := EvalAux s ε e
@@ -240,7 +240,7 @@ def Eval (s : Structure L M) (e : Fin n → M) (ε : ξ → M) : Semiformula L �
   map_and' := by simp [EvalAux]
   map_or' := by simp [EvalAux]
   map_neg' := by simp [EvalAux_neg]
-  map_imply' := by simp [imp_eq, EvalAux_neg, ←neg_eq, EvalAux, imp_iff_not_or]
+  map_imply' := by simp [EvalAux_neg, ←neg_eq, EvalAux, imp_iff_not_or]
 
 abbrev Evalm (M : Type w) [s : Structure L M] {n} (e : Fin n → M) (ε : ξ → M) :
     Semiformula L ξ n →ˡᶜ Prop := Eval s e ε
@@ -388,7 +388,7 @@ lemma eval_bShift' (φ : Semiformula L ξ n) :
   simp [eval_rew, Function.comp_def]
 
 @[simp] lemma eval_emb {ε : ξ → M} (φ : Semiformula L Empty n) :
-    Eval s e ε (Rewriting.embedding (ξ := ξ) φ : Semiformula L ξ n) ↔ Eval s e Empty.elim φ := by
+    Eval s e ε (Rewriting.emb (ξ := ξ) φ : Semiformula L ξ n) ↔ Eval s e Empty.elim φ := by
   simp [eval_rew, Function.comp_def, Empty.eq_elim]
 
 @[simp] lemma eval_empty [h : IsEmpty o] (φ : Formula L o) :
@@ -478,9 +478,9 @@ lemma eval_toEmpty [DecidableEq ξ] {n} {φ : Semiformula L ξ n} (hp : φ.freeV
       fun x ↦ eval_toEmpty (φ := φ) (e := (x :> e)) (by simpa using hp)
     simp [this]
 
-lemma eval_close {ε} (φ : SyntacticFormula L) :
-    Evalf s ε (∀∀φ) ↔ ∀ f, Evalf s f φ := by
-  simp only [close, eval_univClosure, eval_rew, Matrix.empty_eq, Function.comp_def]
+@[simp] lemma eval_univCl' {ε} (φ : SyntacticFormula L) :
+    Evalf s ε φ.univCl' ↔ ∀ f, Evalf s f φ := by
+  simp only [univCl', eval_univClosure, eval_rew, Matrix.empty_eq, Function.comp_def]
   constructor
   · intro h f
     refine (eval_iff_of_funEqOn φ ?_).mp (h (fun x ↦ f x))
@@ -489,10 +489,15 @@ lemma eval_close {ε} (φ : SyntacticFormula L) :
     refine (eval_iff_of_funEqOn φ ?_).mp (h (fun x ↦ if hx : x < φ.fvSup then f ⟨x, by simp [hx]⟩ else ε 0))
     intro x hx; simp [Rew.fixitr_fvar, lt_fvSup_of_fvar? hx]
 
-lemma eval_close₀ [Nonempty M] (φ : SyntacticFormula L) :
-    Evalb s ![] (∀∀₀φ) ↔ ∀ f, Evalf s f φ := by
+@[simp] lemma eval_univCl [Nonempty M] (φ : SyntacticFormula L) :
+    Evalb s ![] φ.univCl ↔ ∀ f, Evalf s f φ := by
   haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
-  simp [Semiformula.close₀, ←eval_toEmpty (f := default), eval_close]
+  simp [Semiformula.univCl, ←eval_toEmpty (f := default)]
+
+@[simp] lemma eval_enumarateFVar_idxOfFVar_eq_id [DecidableEq M] [Inhabited M] (φ : Semiformula L M n) (v) :
+    Semiformula.Evalm M v (fun x ↦ φ.enumarateFVar (φ.idxOfFVar x)) φ ↔ Semiformula.Evalm M v id φ :=
+  Semiformula.eval_iff_of_funEqOn _ <| by
+    intro x hx; simp [Semiformula.enumarateFVar_idxOfFVar (Semiformula.mem_fvarList_iff_fvar?.mpr hx)]
 
 end rew
 
@@ -531,33 +536,26 @@ end
 
 end Structure
 
-instance : Semantics (SyntacticFormula L) (Struc L) where
-  Realize := fun str φ ↦ ∀ f, Semiformula.Evalf str.struc f φ
+instance : Semantics (Sentence L) (Struc L) where
+  Realize := fun str ↦ Semiformula.Evalb str.struc ![]
 
-instance : Semantics.Top (Struc L) := ⟨by simp [Semantics.Realize]⟩
-
-instance : Semantics.Bot (Struc L) := ⟨by simp [Semantics.Realize]⟩
-
-instance : Semantics.And (Struc L) := ⟨by
-  intro 𝓜 φ ψ
-  constructor
-  · intro h; exact ⟨fun f ↦ (h f).left, fun f ↦ (h f).right⟩
-  · rintro ⟨hp, hq⟩ f; exact ⟨hp f, hq f⟩ ⟩
+instance : Semantics.Tarski (Struc L) where
+  realize_top := by simp [Semantics.Realize]
+  realize_bot := by simp [Semantics.Realize]
+  realize_and := by simp [Semantics.Realize]
+  realize_or := by simp [Semantics.Realize]
+  realize_imp := by simp [Semantics.Realize]
+  realize_not := by simp [Semantics.Realize]
 
 section
 
 variable (M : Type*) [Nonempty M] [s : Structure L M] {T U : Theory L}
 
-abbrev Models : SyntacticFormula L → Prop := Semantics.Realize s.toStruc
+abbrev Models : Sentence L → Prop := Semantics.Realize s.toStruc
 
 infix:45 " ⊧ₘ " => Models
 
-abbrev Models₀ (σ : Sentence L) : Prop := M ⊧ₘ (↑σ : SyntacticFormula L)
-
-infix:45 " ⊧ₘ₀ " => Models₀
-
-abbrev ModelsTheory (T : Theory L) : Prop :=
-  Semantics.RealizeSet s.toStruc T
+abbrev ModelsTheory (T : Theory L) : Prop := Semantics.RealizeSet s.toStruc T
 
 infix:45 " ⊧ₘ* " => ModelsTheory
 
@@ -565,7 +563,7 @@ abbrev Realize (M : Type*) [s : Structure L M] : Formula L M → Prop := Semifor
 
 infix:45 " ⊧ₘᵣ " => Realize
 
-abbrev Consequence (T : Theory L) (φ : SyntacticFormula L) : Prop := T ⊨[SmallStruc L] φ
+abbrev Consequence (T : Theory L) (σ : Sentence L) : Prop := T ⊨[SmallStruc L] σ
 
 infix:45 " ⊨ " => Consequence
 
@@ -575,40 +573,13 @@ variable {M}
 
 def modelsTheory_iff_modelsTheory_s : M ⊧ₘ* T ↔ s.toStruc ⊧* T := by rfl
 
-lemma models_def {φ} : (M ⊧ₘ φ) = ∀ f, Semiformula.Evalf s f φ := rfl
-
-lemma models_iff {φ} : M ⊧ₘ φ ↔ ∀ f, Semiformula.Evalf s f φ := by simp [models_def]
-
-lemma models₀_iff {σ : Sentence L} : M ⊧ₘ₀ σ ↔ Semiformula.Evalb s ![] σ := by
-  simp [models_iff]
-
-lemma models_iff₀ {φ} : M ⊧ₘ φ ↔ Semiformula.Evalb s ![] ∀∀₀φ := by
-  haveI : Inhabited M := Classical.inhabited_of_nonempty inferInstance
-  simp [models_def, Semiformula.eval_close₀]
+lemma models_iff : M ⊧ₘ σ ↔ Semiformula.Evalbm (s := s) M ![] σ := by rfl
 
 lemma modelsTheory_iff : M ⊧ₘ* T ↔ (∀ {φ}, φ ∈ T → M ⊧ₘ φ) := Semantics.realizeSet_iff
 
-section Models₀
-
-@[simp] lemma models₀_verum : M ⊧ₘ₀ (⊤ : Sentence L) := by simp [models₀_iff]
-
-@[simp] lemma not_models₀_falsum : ¬M ⊧ₘ₀ (⊥ : Sentence L) := by simp [models₀_iff]
-
-@[simp] lemma models₀_not_iff (σ : Sentence L) : M ⊧ₘ₀ (∼σ) ↔ ¬M ⊧ₘ₀ σ := by simp [models₀_iff]
-
-@[simp] lemma models₀_or_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⋎ π) ↔ M ⊧ₘ₀ σ ∨ M ⊧ₘ₀ π := by simp [models₀_iff]
-
-@[simp] lemma models₀_and_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⋏ π) ↔ M ⊧ₘ₀ σ ∧ M ⊧ₘ₀ π := by simp [models₀_iff]
-
-@[simp] lemma models₀_imply_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ➝ π) ↔ M ⊧ₘ₀ σ → M ⊧ₘ₀ π := by simp [models₀_iff]
-
-@[simp] lemma models₀_equiv_iff (σ π : Sentence L) : M ⊧ₘ₀ (σ ⭤ π) ↔ (M ⊧ₘ₀ σ ↔ M ⊧ₘ₀ π) := by simp [models₀_iff]
-
-end Models₀
-
 variable (M T)
 
-lemma Theory.models [M ⊧ₘ* T] {φ} (hp : φ ∈ T) : M ⊧ₘ φ := Semantics.realizeSet_iff.mp inferInstance hp
+lemma Theory.models [M ⊧ₘ* T] {σ} (hσ : σ ∈ T) : M ⊧ₘ σ := Semantics.realizeSet_iff.mp inferInstance hσ
 
 variable {M T}
 
@@ -647,7 +618,7 @@ noncomputable instance nonemptyModelOfSat (h : Semantics.Satisfiable (Struc.{v, 
   choose i _ _ using Classical.choose_spec (satisfiable_iff.mp h); exact i
 
 noncomputable def StructureModelOfSatAux (h : Semantics.Satisfiable (Struc.{v, u} L) T) :
-    { s : Structure L (ModelOfSat h) // ModelOfSat h ⊧ₘ* T } := by
+    { _s : Structure L (ModelOfSat h) // ModelOfSat h ⊧ₘ* T } := by
   choose _ s h using Classical.choose_spec (satisfiable_iff.mp h)
   exact ⟨s, h⟩
 
@@ -656,22 +627,19 @@ noncomputable instance StructureModelOfSat (h : Semantics.Satisfiable (Struc.{v,
 
 lemma ModelOfSat.models (h : Semantics.Satisfiable (Struc.{v, u} L) T) : ModelOfSat h ⊧ₘ* T := (StructureModelOfSatAux h).prop
 
-lemma consequence_iff_unsatisfiable {φ : SyntacticFormula L} :
-    T ⊨[Struc.{v, u} L] φ ↔ ¬Semantics.Satisfiable (Struc.{v, u} L) (insert (∼∀∀φ) T) := by
-  let σ := ∼∀∀₀φ
-  have : ∼∀∀φ = Rewriting.embedding σ := by simp [Semiformula.close₀, σ]
-  rw [this]
+lemma consequence_iff_unsatisfiable {σ : Sentence L} :
+    T ⊨[Struc.{v, u} L] σ ↔ ¬Semantics.Satisfiable (Struc.{v, u} L) (insert (∼σ) T) := by
   constructor
   · intro h
     apply unsatisfiable_iff.mpr
-    intro M _ s; simp only [Semantics.RealizeSet.insert_iff, models₀_iff, not_and']
-    intro hT; simpa [σ] using models_iff₀.mp (h hT)
+    intro M _ s; simp only [Semantics.RealizeSet.insert_iff, models_iff, not_and']
+    intro hT; simpa using models_iff.mp (h hT)
   · intro h; apply consequence_iff.mpr
     intro M _ s hT
-    have : ¬(Semiformula.Evalb s ![]) σ := by
-      have := by simpa only [Semantics.RealizeSet.insert_iff, not_and', models₀_iff] using unsatisfiable_iff.mp h M inferInstance s
-      exact this hT
-    apply models_iff₀.mpr (by simpa [σ] using this)
+    have : (Semiformula.Evalb s ![]) σ := by
+      have := by simpa only [Semantics.RealizeSet.insert_iff, not_and', models_iff] using unsatisfiable_iff.mp h M inferInstance s
+      simpa using this hT
+    apply models_iff.mpr (by simpa using this)
 
 end
 
@@ -683,22 +651,22 @@ section lMap
 variable {M : Type u} {s₂ : Structure L₂ M} {n} {e : Fin n → M} {ε : ξ → M}
 
 lemma eval_lMap [Nonempty M] {φ : Semiformula L₁ ξ n} :
-    Eval s₂ e ε (lMap Φ φ) ↔ Eval (s₂.lMap Φ) e ε φ :=
-  by induction φ using rec' <;>
+    Eval s₂ e ε (lMap Φ φ) ↔ Eval (s₂.lMap Φ) e ε φ := by
+  induction φ using rec' <;>
     simp [*, Semiterm.val_lMap, lMap_rel, lMap_nrel, eval_rel, eval_nrel]
 
-lemma models_lMap [Nonempty M] {φ : SyntacticFormula L₁} :
-    s₂.toStruc ⊧ lMap Φ φ ↔ (s₂.lMap Φ).toStruc ⊧ φ :=
-  by simp [Semantics.Realize, Evalf, eval_lMap]
+lemma models_lMap [Nonempty M] {σ : Sentence L₁} :
+    s₂.toStruc ⊧ lMap Φ σ ↔ (s₂.lMap Φ).toStruc ⊧ σ := by
+  simp [Semantics.Realize, eval_lMap]
 
 end lMap
 
 end Semiformula
 
-lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : Theory L₁} {φ : SyntacticFormula L₁} (h : T ⊨[Struc.{v, u} L₁] φ) :
-    T.lMap Φ ⊨[Struc.{v, u} L₂] Semiformula.lMap Φ φ := by
+lemma lMap_models_lMap {L₁ L₂ : Language.{u}} {Φ : L₁ →ᵥ L₂}  {T : Theory L₁} {σ : Sentence L₁} (h : T ⊨[Struc.{v, u} L₁] σ) :
+    T.lMap Φ ⊨[Struc.{v, u} L₂] Semiformula.lMap Φ σ := by
   intro s hM
-  have : (s.struc.lMap Φ).toStruc ⊧ φ :=
+  have : (s.struc.lMap Φ).toStruc ⊧ σ :=
     h ⟨fun _ hq => Semiformula.models_lMap.mp <| hM.realize _ (Set.mem_image_of_mem _ hq)⟩
   exact Semiformula.models_lMap.mpr this
 
@@ -729,7 +697,7 @@ variable {M : Type u} [Nonempty M] [s₂ : Structure L₂ M]
 
 lemma modelsTheory_onTheory₁ {T₁ : Theory L₁} :
     ModelsTheory (s := s₂) M (T₁.lMap Φ) ↔ ModelsTheory (s := s₂.lMap Φ) M T₁ :=
-  by simp [Semiformula.models_lMap, Theory.lMap, modelsTheory_iff, @modelsTheory_iff (T := T₁)]
+  by simp [Semiformula.models_lMap, Theory.lMap, @modelsTheory_iff (T := T₁)]
 
 end Theory
 

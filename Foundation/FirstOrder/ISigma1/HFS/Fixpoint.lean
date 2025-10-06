@@ -8,9 +8,9 @@ import Foundation.FirstOrder.ISigma1.HFS.PRF
 
 namespace LO.ISigma1
 
-open FirstOrder Arith PeanoMinus IOpen ISigma0
+open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₁]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
 
 namespace Fixpoint
 
@@ -24,20 +24,20 @@ variable {k} (φ : Blueprint k)
 instance : Coe (Blueprint k) (𝚫₁.Semisentence (k + 2)) := ⟨Blueprint.core⟩
 
 def succDef : 𝚺₁.Semisentence (k + 3) := .mkSigma
-  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ s ∧ !φ.core.pi x ih ⋯ → x ∈ u)” (by simp)
+  “u ih s. ∀ x < u + (s + 1), (x ∈ u → x ≤ s ∧ !φ.core.sigma x ih ⋯) ∧ (x ≤ s ∧ !φ.core.pi x ih ⋯ → x ∈ u)”
 
 def prBlueprint : PR.Blueprint k where
-  zero := .mkSigma “x. x = 0” (by simp)
+  zero := .mkSigma “x. x = 0”
   succ := φ.succDef
 
 def limSeqDef : 𝚺₁.Semisentence (k + 2) := (φ.prBlueprint).resultDef
 
 def fixpointDef : 𝚺₁.Semisentence (k + 1) :=
-  .mkSigma “x. ∃ s L, !φ.limSeqDef L s ⋯  ∧ x ∈ L” (by simp)
+  .mkSigma “x. ∃ s L, !φ.limSeqDef L s ⋯  ∧ x ∈ L”
 
 def fixpointDefΔ₁ : 𝚫₁.Semisentence (k + 1) := .mkDelta
-  (.mkSigma “x. ∃ L, !φ.limSeqDef L (x + 1) ⋯  ∧ x ∈ L” (by simp))
-  (.mkPi “x. ∀ L, !φ.limSeqDef L (x + 1) ⋯  → x ∈ L” (by simp))
+  (.mkSigma “x. ∃ L, !φ.limSeqDef L (x + 1) ⋯  ∧ x ∈ L”)
+  (.mkPi “x. ∀ L, !φ.limSeqDef L (x + 1) ⋯  → x ∈ L”)
 
 end Blueprint
 
@@ -95,7 +95,8 @@ private lemma succ_graph {u v s ih} :
 lemma succ_defined : 𝚺₁.DefinedFunction (fun v : Fin (k + 2) → V ↦ c.succ (v ·.succ.succ) (v 1) (v 0)) φ.succDef := by
   intro v
   simp [Blueprint.succDef, succ_graph, HierarchySymbol.Semiformula.val_sigma, c.eval_formula,
-    c.defined.proper.iff', -and_imp, ←iff_iff_implies_and_implies]
+    c.defined.proper.iff', -and_imp,  BinderNotation.finSuccItr]
+  grind
 
 lemma eval_succDef (v) :
     Semiformula.Evalbm V v φ.succDef.val ↔ v 0 = c.succ (v ·.succ.succ.succ) (v 2) (v 1) := c.succ_defined.df.iff v

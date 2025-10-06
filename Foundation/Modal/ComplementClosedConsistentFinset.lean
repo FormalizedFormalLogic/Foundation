@@ -36,11 +36,11 @@ lemma empty_conisistent [Entailment.Consistent 𝓢] : FormulaFinset.Consistent 
   simp only [Finset.coe_empty];
   apply FormulaSet.emptyset_consistent;
 
-lemma provable_iff_insert_neg_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (∼φ) Φ) ↔ ↑Φ *⊢[𝓢]! φ := by
+lemma provable_iff_insert_neg_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (∼φ) Φ) ↔ ↑Φ *⊢[𝓢] φ := by
   apply Iff.trans iff_inconsistent_inconsistent.symm;
   simpa using FormulaSet.provable_iff_insert_neg_not_consistent;
 
-lemma neg_provable_iff_insert_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (φ) Φ) ↔ ↑Φ *⊢[𝓢]! ∼φ := by
+lemma neg_provable_iff_insert_not_consistent : FormulaFinset.Inconsistent 𝓢 (insert (φ) Φ) ↔ ↑Φ *⊢[𝓢] ∼φ := by
   apply Iff.trans iff_inconsistent_inconsistent.symm;
   simpa using FormulaSet.neg_provable_iff_insert_not_consistent;
 
@@ -56,7 +56,7 @@ lemma unprovable_iff_singleton_compl_consistent : FormulaFinset.Consistent 𝓢 
     apply Iff.trans iff_theory_consistent_formulae_consistent.symm;
     simpa using FormulaSet.unprovable_iff_singleton_consistent;
 
-lemma provable_iff_singleton_compl_inconsistent : (FormulaFinset.Inconsistent 𝓢 ({-φ})) ↔ 𝓢 ⊢! φ := by
+lemma provable_iff_singleton_compl_inconsistent : (FormulaFinset.Inconsistent 𝓢 ({-φ})) ↔ 𝓢 ⊢ φ := by
   constructor;
   . contrapose;
     unfold Inconsistent;
@@ -115,11 +115,11 @@ lemma next_consistent [Entailment.Cl 𝓢]
   . simpa;
   . rename_i h;
     by_contra hC;
-    have h₁ : ↑Φ *⊢[𝓢]! ∼φ := FormulaFinset.neg_provable_iff_insert_not_consistent (𝓢 := 𝓢) (Φ := Φ) (φ := φ) |>.mp h;
-    have h₂ : ↑Φ *⊢[𝓢]! ∼-φ := @FormulaFinset.neg_provable_iff_insert_not_consistent α _ (𝓢 := 𝓢) _ _ (Φ := Φ) (-φ) |>.mp $ by
+    have h₁ : ↑Φ *⊢[𝓢] ∼φ := FormulaFinset.neg_provable_iff_insert_not_consistent (𝓢 := 𝓢) (Φ := Φ) (φ := φ) |>.mp h;
+    have h₂ : ↑Φ *⊢[𝓢] ∼-φ := @FormulaFinset.neg_provable_iff_insert_not_consistent α _ (𝓢 := 𝓢) _ _ (Φ := Φ) (-φ) |>.mp $ by
       unfold FormulaFinset.Inconsistent;
       simpa using hC;
-    have : ↑Φ *⊢[𝓢]! ⊥ := neg_complement_derive_bot h₁ h₂;
+    have : ↑Φ *⊢[𝓢] ⊥ := neg_complement_derive_bot h₁ h₂;
     contradiction;
 
 lemma enum_consistent [Entailment.Cl 𝓢]
@@ -254,7 +254,7 @@ lemma lindenbaum
 
 noncomputable instance [Entailment.Consistent 𝓢] : Inhabited (ComplementClosedConsistentFinset 𝓢 Ψ) := ⟨lindenbaum (Φ := ∅) (Ψ := Ψ) (by simp) (FormulaFinset.empty_conisistent) |>.choose⟩
 
-lemma membership_iff (hq_sub : ψ ∈ Ψ := by subformula) : (ψ ∈ X) ↔ (X *⊢[𝓢]! ψ) := by
+lemma membership_iff (hq_sub : ψ ∈ Ψ) : (ψ ∈ X) ↔ (X *⊢[𝓢] ψ) := by
   constructor;
   . intro h; exact Context.by_axm! h;
   . intro hp;
@@ -263,18 +263,18 @@ lemma membership_iff (hq_sub : ψ ∈ Ψ := by subformula) : (ψ ∈ X) ↔ (X *
       assumption;
       exact X.closed.either ψ hq_sub;
     by_contra hC;
-    have hnp : X *⊢[𝓢]! -ψ := Context.by_axm! hC;
+    have hnp : X *⊢[𝓢] -ψ := Context.by_axm! hC;
     have := complement_derive_bot hp hnp;
     simpa;
 
-lemma mem_verum (h : ⊤ ∈ Ψ := by subformula) : ⊤ ∈ X := by
+lemma mem_verum (h : ⊤ ∈ Ψ) : ⊤ ∈ X := by
   apply membership_iff h |>.mpr;
   exact verum!;
 
 @[simp] lemma mem_falsum : ⊥ ∉ X := FormulaSet.not_mem_falsum_of_consistent X.consistent
 
 
-lemma iff_mem_compl (hq_sub : ψ ∈ Ψ := by subformula) : (ψ ∈ X) ↔ (-ψ ∉ X) := by
+lemma iff_not_mem_compl (hq_sub : ψ ∈ Ψ := by grind) : (ψ ∈ X) ↔ (-ψ ∉ X) := by
   constructor;
   . intro hq; replace hq := membership_iff hq_sub |>.mp hq;
     by_contra hnq;
@@ -282,32 +282,36 @@ lemma iff_mem_compl (hq_sub : ψ ∈ Ψ := by subformula) : (ψ ∈ X) ↔ (-ψ 
     | hfalsum => exact unprovable_falsum hq;
     | hatom a =>
       simp only [Formula.complement] at hnq;
-      have : ↑X *⊢[𝓢]! ∼(atom a) := Context.by_axm! hnq;
-      have : ↑X *⊢[𝓢]! ⊥ := complement_derive_bot hq this;
+      have : ↑X *⊢[𝓢] ∼(atom a) := Context.by_axm! hnq;
+      have : ↑X *⊢[𝓢] ⊥ := complement_derive_bot hq this;
       simpa;
     | hbox ψ =>
       simp only [Formula.complement] at hnq;
-      have : ↑X *⊢[𝓢]! ∼(□ψ) := Context.by_axm! hnq;
-      have : ↑X *⊢[𝓢]! ⊥ := complement_derive_bot hq this;
+      have : ↑X *⊢[𝓢] ∼(□ψ) := Context.by_axm! hnq;
+      have : ↑X *⊢[𝓢] ⊥ := complement_derive_bot hq this;
       simpa;
     | hneg ψ =>
       simp only [Formula.complement] at hnq;
-      have : ↑X *⊢[𝓢]! ψ := Context.by_axm! hnq;
-      have : ↑X *⊢[𝓢]! ⊥ := complement_derive_bot hq this;
+      have : ↑X *⊢[𝓢] ψ := Context.by_axm! hnq;
+      have : ↑X *⊢[𝓢] ⊥ := complement_derive_bot hq this;
       simpa;
     | himp ψ χ h =>
       simp only [Formula.complement.imp_def₁ h] at hnq;
-      have : ↑X *⊢[𝓢]! ∼(ψ ➝ χ) := Context.by_axm! hnq;
-      have : ↑X *⊢[𝓢]! ⊥ := this ⨀ hq;
+      have : ↑X *⊢[𝓢] ∼(ψ ➝ χ) := Context.by_axm! hnq;
+      have : ↑X *⊢[𝓢] ⊥ := this ⨀ hq;
       simpa;
   . intro h; exact mem_of_not_mem_compl (by assumption) h;
 
+lemma iff_mem_compl (hq_sub : ψ ∈ Ψ := by grind) : (ψ ∉ X) ↔ (-ψ ∈ X) := by simpa using iff_not_mem_compl hq_sub |>.not;
+
 lemma iff_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by subformula) (hsub_q : ψ ∈ Ψ := by subformula)  (hsub_r : χ ∈ Ψ := by subformula)
+  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by grind)
+  (hsub_q : ψ ∈ Ψ := by grind)
+  (hsub_r : χ ∈ Ψ := by grind)
   : ((ψ ➝ χ) ∈ X) ↔ (ψ ∈ X) → (-χ ∉ X) := by
   constructor;
   . intro hqr hq;
-    apply iff_mem_compl hsub_r |>.mp;
+    apply iff_not_mem_compl hsub_r |>.mp;
     replace hqr := membership_iff hsub_qr |>.mp hqr;
     replace hq := membership_iff hsub_q |>.mp hq;
     exact membership_iff hsub_r |>.mpr $ hqr ⨀ hq;
@@ -326,12 +330,14 @@ lemma iff_mem_imp
         simp only [Formula.complement.imp_def₁ h] at hq;
         exact C_of_N $ Context.by_axm! (by simpa using hq);
     . apply membership_iff (by assumption) |>.mpr;
-      exact C!_of_conseq! $ membership_iff (by assumption) |>.mp $ iff_mem_compl (by assumption) |>.mpr hr;
+      exact C!_of_conseq! $ membership_iff (by assumption) |>.mp $ iff_not_mem_compl (by assumption) |>.mpr hr;
 
 lemma iff_not_mem_imp
-  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by subformula) (hsub_q : ψ ∈ Ψ := by subformula)  (hsub_r : χ ∈ Ψ := by subformula)
+  (hsub_qr : (ψ ➝ χ) ∈ Ψ := by grind)
+  (hsub_q : ψ ∈ Ψ := by grind)
+  (hsub_r : χ ∈ Ψ := by grind)
   : ((ψ ➝ χ) ∉ X) ↔ (ψ ∈ X) ∧ (-χ ∈ X) := by
-  simpa using iff_mem_imp (Ψ := Ψ) |>.not;
+  simpa using iff_mem_imp hsub_qr hsub_q hsub_r |>.not;
 
 instance : Finite (ComplementClosedConsistentFinset 𝓢 Ψ) := by
   let f : ComplementClosedConsistentFinset 𝓢 Ψ → (Finset.powerset (Ψ⁻)) := λ X => ⟨X, by simpa using X.closed.subset⟩

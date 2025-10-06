@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.AxiomGrz
-import Foundation.Modal.Hilbert.WellKnown
-import Foundation.Modal.Kripke.Logic.S4M
+import Foundation.Modal.Kripke.Logic.S4McK
 import Mathlib.Order.Preorder.Finite
 
 namespace LO.Modal
@@ -9,8 +8,10 @@ open Formula
 open Formula.Kripke
 open Entailment
 open Entailment.Context
+open Entailment
+open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -38,23 +39,19 @@ instance [F.IsFinite] [F.IsPartialOrder] : F.SatisfiesMcKinseyCondition where
       apply F.antisymm;
       . assumption;
       . exact @hy₃ z (F.trans Rxy Ryz) Ryz;
-instance [F.IsFiniteGrz] : F.IsS4M where
+instance [F.IsFiniteGrz] : F.IsS4McK where
 
 end Kripke
 
-
-namespace Hilbert.Grz.Kripke
-
-instance finite_sound : Sound (Hilbert.Grz) FrameClass.finite_Grz := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ rfl;
+instance : Sound Modal.Grz FrameClass.finite_Grz := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   exact validate_AxiomGrz_of_refl_trans_wcwf;
 
-instance consistent : Entailment.Consistent (Hilbert.Grz) :=
+instance : Entailment.Consistent Modal.Grz :=
   consistent_of_sound_frameclass FrameClass.finite_Grz $ by
     use whitepoint;
     constructor;
-
-end Hilbert.Grz.Kripke
 
 end LO.Modal

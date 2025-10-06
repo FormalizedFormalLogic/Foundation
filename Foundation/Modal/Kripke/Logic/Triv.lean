@@ -1,24 +1,25 @@
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.GrzPoint3
-import Foundation.Modal.Kripke.Logic.S4Point4M
+import Foundation.Modal.Kripke.Logic.S4Point4McK
 import Foundation.Vorspiel.HRel.Equality
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
-open Hilbert.Kripke
-
+open Modal.Kripke
 
 namespace Kripke
 
 variable {F : Frame}
 
 protected abbrev Frame.IsTriv (F : Frame) := _root_.IsEquality F.Rel
-instance [F.IsTriv] : F.IsS4Point4M where
+instance [F.IsTriv] : F.IsS4Point4McK where
   mckinsey := by simp
 
 protected class Frame.IsFiniteTriv (F : Frame) extends F.IsFinite, F.IsTriv
-instance [F.IsFiniteTriv] : F.IsFiniteGrzPoint3 where
+instance [F.IsFiniteTriv] : F.IsFiniteGrzPoint3' where
 
 @[simp] lemma Frame.equality [F.IsTriv] {x y : F} : x ≺ y ↔ x = y := by apply _root_.equality;
 
@@ -29,36 +30,34 @@ protected abbrev FrameClass.finite_Triv : FrameClass := { F | F.IsFiniteTriv }
 end Kripke
 
 
-namespace Hilbert.Triv.Kripke
+instance : Sound Modal.Triv Kripke.FrameClass.Triv := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomTc_of_coreflexive;
 
-instance sound_Triv : Sound (Hilbert.Triv) Kripke.FrameClass.Triv :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomK;
-    rintro F ⟨_⟩ _ (rfl | rfl);
-    . exact validate_AxiomT_of_reflexive;
-    . exact validate_AxiomTc_of_coreflexive;
+instance : Sound Modal.Triv Kripke.FrameClass.finite_Triv := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
+  . exact validate_AxiomT_of_reflexive;
+  . exact validate_AxiomTc_of_coreflexive;
 
-instance sound_finite_Triv : Sound (Hilbert.Triv) Kripke.FrameClass.finite_Triv :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomK;
-    rintro F ⟨_, _⟩ _ (rfl | rfl);
-    . exact validate_AxiomT_of_reflexive;
-    . exact validate_AxiomTc_of_coreflexive;
-
-instance consistent : Entailment.Consistent (Hilbert.Triv) := consistent_of_sound_frameclass Kripke.FrameClass.Triv $ by
+instance : Entailment.Consistent Modal.Triv := consistent_of_sound_frameclass Kripke.FrameClass.Triv $ by
   use whitepoint;
   constructor;
 
-instance cannonical_Triv : Canonical (Hilbert.Triv) Kripke.FrameClass.Triv := ⟨by constructor⟩
+instance : Canonical Modal.Triv Kripke.FrameClass.Triv := ⟨by constructor⟩
 
-instance complete_Triv : Complete (Hilbert.Triv) Kripke.FrameClass.Triv := inferInstance
+instance : Complete Modal.Triv Kripke.FrameClass.Triv := inferInstance
 
 section FFP
 
 open Relation in
-instance complete_finite_Triv : Complete (Hilbert.Triv) Kripke.FrameClass.finite_Triv := ⟨by
+instance : Complete Modal.Triv Kripke.FrameClass.finite_Triv := ⟨by
   intro φ hφ;
-  apply Kripke.complete_Triv.complete;
+  apply Complete.complete (𝓜 := Kripke.FrameClass.Triv);
   intro F F_eq V r;
   replace F_eq := Set.mem_setOf_eq.mp F_eq;
   apply Model.pointGenerate.modal_equivalent_at_root (r := r) |>.mp;
@@ -82,50 +81,33 @@ instance complete_finite_Triv : Complete (Hilbert.Triv) Kripke.FrameClass.finite
 
 end FFP
 
-end Hilbert.Triv.Kripke
 
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-
-lemma Triv.Kripke.equality : Logic.Triv = FrameClass.Triv.logic := eq_hilbert_logic_frameClass_logic
-lemma Triv.Kripke.finite_equality : Logic.Triv = FrameClass.finite_Triv.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
-theorem Triv.proper_extension_of_KTc : Logic.KTc ⊂ Logic.Triv := by
+instance : Modal.KTc ⪱ Modal.Triv := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬Kripke.FrameClass.KTc ⊧ φ by
-      rw [KTc.Kripke.corefl];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms; simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.T (.atom 0));
     constructor;
-    . exact axiomT!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.KTc);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => False⟩, λ w _ => False⟩, 0;
       constructor;
       . refine ⟨by tauto⟩;
       . simp [Satisfies, Semantics.Realize];
 
-@[simp]
-theorem Triv.proper_extension_of_GrzPoint3 : Logic.GrzPoint3 ⊂ Logic.Triv := by
+instance : Modal.GrzPoint3 ⪱ Modal.Triv := by
   constructor;
-  . rw [GrzPoint3.Kripke.finite_connected_partial_order, Triv.Kripke.finite_equality];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass { F : Frame | F.IsFiniteGrzPoint3' } FrameClass.finite_Triv;
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.finite_connected_partial_order ⊧ φ by
-      rw [GrzPoint3.Kripke.finite_connected_partial_order];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Tc (.atom 0);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GrzPoint3);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
       use M, 0;
       constructor;
@@ -139,21 +121,18 @@ theorem Triv.proper_extension_of_GrzPoint3 : Logic.GrzPoint3 ⊂ Logic.Triv := b
           . omega;
           . trivial;
 
-@[simp]
-theorem Triv.proper_extension_of_S4Point4M : Logic.S4Point4M ⊂ Logic.Triv := by
+instance : Modal.S4Point4McK ⪱ Modal.Triv := by
   constructor;
-  . rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey, Triv.Kripke.finite_equality];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.S4Point4McK FrameClass.Triv;
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.Triv ⊢! φ ∧ ¬FrameClass.S4Point4M ⊧ φ by
-      rw [S4Point4M.Kripke.preorder_sobocinski_mckinsey];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Tc (.atom 0);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point4McK);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
       use M, 0;
       constructor;
@@ -180,10 +159,5 @@ theorem Triv.proper_extension_of_S4Point4M : Logic.S4Point4M ⊂ Logic.Triv := b
           constructor;
           . omega;
           . trivial;
-
-@[simp]
-theorem Univ.proper_extension_of_Triv : Logic.Triv ⊂ Logic.Univ := by constructor <;> simp;
-
-end Logic
 
 end LO.Modal

@@ -13,18 +13,18 @@ set_option verso.docstring.allowMissing true
 tag := "goedel-2"
 %%%
 
-Recall that inside $``\mathsf{I}\Sigma_1`` we can do basic set theory and primitive recursion.
-Many inductive notions and functions on them are defined in $``\Delta_1`` or $``\Sigma_1`` using
+Recall that inside $`\mathsf{I}\Sigma_1` we can do basic set theory and primitive recursion.
+Many inductive notions and functions on them are defined in $`\Delta_1` or $`\Sigma_1` using
 the fixpoint construction.
 
 -- TODO: ref: fixpoint construction
 
-We work inside an arbitrary model $``V`` of $``\mathsf{I}\Sigma_1``.
+We work inside an arbitrary model $`V` of $`\mathsf{I}\Sigma_1`.
 
 # Coding of Terms and Formulae
 
 ## Term
-Define $``T_C`` as follows.
+Define $`T_C` as follows.
 
 -- TODO: display TeX
 ```
@@ -37,7 +37,7 @@ Define $``T_C`` as follows.
 \end{align*}
 ```
 
-$``\widehat{\bullet}`` is a quasi-quotation..
+$`\widehat{\bullet}` is a quasi-quotation..
 
 -- TODO: display TeX
 ```
@@ -48,15 +48,15 @@ $``\widehat{\bullet}`` is a quasi-quotation..
 \end{align*}
 ```
 
-$``T_C`` is $``\Delta_1`` (if $``C`` is a finite set) and monotone. Let $``\mathrm{UTerm}(t)`` be a fixpoint of $``T_C``.
-It is $``\Delta_1`` since $``T_C`` satisfies strong finiteness.
-Define the function $``\mathrm{termBV}(t)`` inductively on $``\mathrm{UTerm}`` meaning
-the largest bounded variable $``+1`` that appears in the term.
-Define $``\mathrm{Semiterm}(n, t) := \mathrm{UTerm}(t) \land \mathrm{termBV}(t) \le n``.
+$`T_C` is $`\Delta_1` (if $`C` is a finite set) and monotone. Let $`\mathrm{UTerm}(t)` be a fixpoint of $`T_C`.
+It is $`\Delta_1` since $`T_C` satisfies strong finiteness.
+Define the function $`\mathrm{termBV}(t)` inductively on $`\mathrm{UTerm}` meaning
+the largest bounded variable $`+1` that appears in the term.
+Define $`\mathrm{Semiterm}(n, t) := \mathrm{UTerm}(t) \land \mathrm{termBV}(t) \le n`.
 
 ## Formula
 
-Similarly, Define $``F_C``:
+Similarly, Define $`F_C`:
 
 -- TODO: display TeX
 ```
@@ -87,20 +87,20 @@ Similarly, Define $``F_C``:
 \end{align*}
 ```
 
-$``F_C`` is $``\Delta_1`` and monotone. Let $``\mathrm{UFormula}(p)`` be a fixpoint of $``F_C`` and define
+$`F_C` is $`\Delta_1` and monotone. Let $`\mathrm{UFormula}(p)` be a fixpoint of $`F_C` and define
 
 ```
 \mathrm{Semiformula}(n, p) \iff \mathrm{UFormula}(p) \land \mathrm{bv}(p) \le n
 ```
 
-The function $``\mathrm{bv}(p)`` is defined inductively on $``\mathrm{UFormula}`` meaning the largest bounded variable $``+1`` that appears in the formula.
+The function $`\mathrm{bv}(p)` is defined inductively on $`\mathrm{UFormula}` meaning the largest bounded variable $`+1` that appears in the formula.
 
-$``\mathrm{UFormula}(p)`` and $``\mathrm{Semiormula}(n, p)`` are again $``\Delta_1`` since $``F_C`` satisfies strong finiteness.
+$`\mathrm{UFormula}(p)` and $`\mathrm{Semiormula}(n, p)` are again $`\Delta_1` since $`F_C` satisfies strong finiteness.
 
 # Formalized Provability
 
-Let $``T`` be $``\Delta_1``-definable theory.
-Define $``D_C``:
+Let $`T` be $`\Delta_1`-definable theory.
+Define $`D_C`:
 
 ```
 \begin{align*}
@@ -153,8 +153,8 @@ Define $``D_C``:
 \end{align*}
 ```
 
-$``p^+`` is a *shift* of a formula $``p``. $``s^+`` is a image of *shift* of $``s``.
-Take fixpoint $``\mathrm{Derivation}_T(d)``.
+$`p^+` is a *shift* of a formula $`p`. $`s^+` is a image of *shift* of $`s`.
+Take fixpoint $`\mathrm{Derivation}_T(d)`.
 
 ```
 \begin{align*}
@@ -163,29 +163,29 @@ Take fixpoint $``\mathrm{Derivation}_T(d)``.
 \end{align*}
 ```
 
-Following holds for all formula (not coded one) $``\varphi`` and finite set $``\Gamma``.
+Following holds for all formula (not coded one) $`\varphi` and finite set $`\Gamma`.
 
-$``\N \models \mathrm{Provable}_T(\ulcorner \varphi \urcorner) \implies T \vdash \varphi``
+$`\N \models \mathrm{Provable}_T(\ulcorner \varphi \urcorner) \implies T \vdash \varphi`
 
-{docstring LO.ISigma1.Metamath.Language.Theory.Provable.sound}
+{docstring LO.FirstOrder.Theory.Provable.sound}
 
-Now assume that $``U`` is a theory of arithmetic stronger than $``\mathsf{R_0}`` and
-$``T`` be a theory of arithmetic stronger than $``\mathsf{I}\Sigma_1``.
+Now assume that $`U` is a theory of arithmetic stronger than $`\mathsf{R_0}` and
+$`T` be a theory of arithmetic stronger than $`\mathsf{I}\Sigma_1`.
 The following holds, thanks to the completeness theorem.
 
 
 # Second Incompleteness Theorem
 
-Assume that $``T`` is $``\Delta_1``-definable and stronger than $``\mathsf{I}\Sigma_1``.
+Assume that $`T` is $`\Delta_1`-definable and stronger than $`\mathsf{I}\Sigma_1`.
 
 ## Fixpoint Lemma
 
-Since the substitution is $``\Sigma_1``, There is a formula $``\mathrm{ssnum}(y, p, x)``
- such that, for all formula $``\varphi`` with only one variable and $``x, y \in V``,
+Since the substitution is $`\Sigma_1`, There is a formula $`\mathrm{ssnum}(y, p, x)`
+ such that, for all formula $`\varphi` with only one variable and $`x, y \in V`,
 
-holds. (overline $``\overline{\bullet}`` denotes the (formalized) numeral of $``x``)
+holds. (overline $`\overline{\bullet}` denotes the (formalized) numeral of $`x`)
 
-Define a sentence $``\mathrm{fixpoint}_\theta`` for formula (with one variable) $``\theta`` as follows.
+Define a sentence $`\mathrm{fixpoint}_\theta` for formula (with one variable) $`\theta` as follows.
 
 ```
   \begin{align*}
@@ -196,38 +196,38 @@ Define a sentence $``\mathrm{fixpoint}_\theta`` for formula (with one variable) 
   \end{align*}
 ```
 
-$``T \vdash \mathrm{fixpoint}_\theta \leftrightarrow \theta({\ulcorner \mathrm{fixpoint}_\theta \urcorner})``
+$`T \vdash \mathrm{fixpoint}_\theta \leftrightarrow \theta({\ulcorner \mathrm{fixpoint}_\theta \urcorner})`
 
 {docstring LO.ISigma1.diagonal}
 
 ## Main Theorem
 
-Define Gödel sentence $``\mathrm{G}_T``:
+Define Gödel sentence $`\mathrm{G}_T`:
 
 ```
   \mathrm{G}_T \coloneqq \mathrm{fixpoint}_{\lnot\mathrm{Provable}_T(x)}
 ```
 
-Gödel sentence is undecidable, i.e., $``T \nvdash \mathrm{G}`` if $``T`` is consistent, and $``T \nvdash \lnot\mathrm{G}`` if $``\mathbb{N} \models T``.
+Gödel sentence is undecidable, i.e., $`T \nvdash \mathrm{G}` if $`T` is consistent, and $`T \nvdash \lnot\mathrm{G}` if $`\mathbb{N} \models T`.
 
-{docstring LO.ISigma1.goedel_unprovable}
+{docstring LO.ProvabilityLogic.Provability.unprovable_goedel}
 
-{docstring LO.ISigma1.not_goedel_unprovable}
+{docstring LO.ProvabilityLogic.Provability.unrefutable_goedel}
 
-Define formalized incompleteness sentence $``\mathrm{Con}_T``:
+Define formalized incompleteness sentence $`\mathrm{Con}_T`:
 
 ```
   \mathrm{Con}_T \coloneqq \lnot\mathrm{Provable}_T(\ulcorner \bot \urcorner)
 ```
 
-$``T \vdash \mathrm{Con}_T \leftrightarrow G_T``
+$`T \vdash \mathrm{Con}_T \leftrightarrow G_T`
 
-{docstring LO.ISigma1.consistent_iff_goedel}
+{docstring LO.ProvabilityLogic.Provability.goedel_iff_con}
 
 
-$``T`` cannot prove its own consistency, i.e., $``T \nvdash \mathrm{Con}_T`` if $``T`` is consistent.
-Moreover, $``\mathrm{Con}_T`` is undecidable from $``T`` if $``\mathbb{N} \models T``.
+$`T` cannot prove its own consistency, i.e., $`T \nvdash \mathrm{Con}_T` if $`T` is consistent.
+Moreover, $`\mathrm{Con}_T` is undecidable from $`T` if $`\mathbb{N} \models T`.
 
-{docstring LO.ISigma1.goedel_second_incompleteness}
+{docstring LO.FirstOrder.Arithmetic.consistent_unprovable}
 
-{docstring LO.ISigma1.inconsistent_undecidable}
+{docstring LO.FirstOrder.Arithmetic.inconsistent_independent}

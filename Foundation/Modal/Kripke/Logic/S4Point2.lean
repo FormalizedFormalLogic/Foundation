@@ -1,6 +1,5 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Filtration
 import Foundation.Modal.Kripke.Logic.S4
 import Foundation.Modal.Kripke.Logic.K4Point2
@@ -8,9 +7,10 @@ import Foundation.Modal.Kripke.Rooted
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
-open Hilbert.Kripke
-
+open Modal.Kripke
 
 namespace Kripke
 
@@ -28,24 +28,22 @@ abbrev FrameClass.finite_S4Point2 : FrameClass := { F | F.IsFiniteS4Point2 }
 end Kripke
 
 
-
-namespace Hilbert.S4Point2.Kripke
-
-instance sound : Sound (Hilbert.S4Point2) FrameClass.S4Point2 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl | rfl);
+instance : Sound Modal.S4Point2 FrameClass.S4Point2 := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance consistent : Entailment.Consistent (Hilbert.S4Point2) :=
+instance : Entailment.Consistent Modal.S4Point2 :=
   consistent_of_sound_frameclass FrameClass.S4Point2 $ by
     use whitepoint;
     constructor;
 
-instance canonical : Canonical (Hilbert.S4Point2) FrameClass.S4Point2 := ⟨by constructor⟩
+instance : Canonical Modal.S4Point2 FrameClass.S4Point2 := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.S4Point2) FrameClass.S4Point2 := inferInstance
+instance : Complete Modal.S4Point2 FrameClass.S4Point2 := inferInstance
 
 
 section FFP
@@ -54,16 +52,17 @@ open
   finestFiltrationTransitiveClosureModel
   Relation
 
-instance finite_sound : Sound (Hilbert.S4Point2) FrameClass.finite_S4Point2 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _, _⟩ _ (rfl | rfl | rfl);
+instance : Sound Modal.S4Point2 FrameClass.finite_S4Point2 := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
   . exact validate_AxiomPoint2_of_confluent;
 
-instance finite_complete : Complete (Hilbert.S4Point2) FrameClass.finite_S4Point2 := ⟨by
+instance : Complete Modal.S4Point2 FrameClass.finite_S4Point2 := ⟨by
   intro φ hφ;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.S4Point2);
   rintro F hF V r;
   replace hF := Set.mem_setOf_eq.mp hF;
   let M : Kripke.Model := ⟨F, V⟩;
@@ -72,7 +71,7 @@ instance finite_complete : Complete (Hilbert.S4Point2) FrameClass.finite_S4Point
   apply Model.pointGenerate.modal_equivalent_at_root (M := M) (r := r) |>.mp;
 
   let FRM := finestFiltrationTransitiveClosureModel (M↾r) (φ.subformulas);
-  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTransitive)) (by subformula) |>.mpr;
+  apply filtration FRM (finestFiltrationTransitiveClosureModel.filterOf (trans := Frame.pointGenerate.isTransitive)) (by simp) |>.mpr;
   apply hφ;
   apply Set.mem_setOf_eq.mpr;
   exact {
@@ -89,28 +88,16 @@ instance finite_complete : Complete (Hilbert.S4Point2) FrameClass.finite_S4Point
 
 end FFP
 
-end Hilbert.S4Point2.Kripke
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma S4Point2.Kripke.confluent_preorder : Logic.S4Point2 = FrameClass.S4Point2.logic := eq_hilbert_logic_frameClass_logic
-lemma S4Point2.Kripke.finite_confluent_preorder : Logic.S4Point2 = FrameClass.finite_S4Point2.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
-theorem S4Point2.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4Point2 := by
+instance : Modal.S4 ⪱ Modal.S4Point2 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬FrameClass.S4 ⊧ φ by
-      rw [S4.Kripke.preorder];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Point2 (.atom 0)
     constructor;
     . exact axiomPoint2!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.S4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 3, λ x y => (x = 0) ∨ (x = y) ⟩, λ w _ => w = 1⟩;
       use M, 0;
       constructor;
@@ -129,21 +116,18 @@ theorem S4Point2.proper_extension_of_S4 : Logic.S4 ⊂ Logic.S4Point2 := by
           . omega;
           . omega;
 
-@[simp]
-theorem S4Point2.proper_extension_of_K4Point2 : Logic.K4Point2 ⊂ Logic.S4Point2 := by
+instance : Modal.K4Point2 ⪱ Modal.S4Point2 := by
   constructor;
-  . rw [K4Point2.Kripke.trans_weakConfluent, S4Point2.Kripke.confluent_preorder];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass (FrameClass.K4Point2) (FrameClass.S4Point2);
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.S4Point2 ⊢! φ ∧ ¬Kripke.FrameClass.K4Point2 ⊧ φ by
-      rw [K4Point2.Kripke.trans_weakConfluent];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Point2 (.atom 0));
     constructor;
     . exact axiomPoint2!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K4Point2)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
         ⟨Fin 2, λ x y => x < y⟩,
         λ w a => False
@@ -160,6 +144,8 @@ theorem S4Point2.proper_extension_of_K4Point2 : Logic.K4Point2 ⊂ Logic.S4Point
         . omega;
         . use 1; omega;
 
-end Logic
+instance : Modal.KT ⪱ Modal.S4Point2 := calc
+  Modal.KT ⪱ Modal.S4       := by infer_instance
+  _        ⪱ Modal.S4Point2 := by infer_instance
 
 end LO.Modal

@@ -14,37 +14,45 @@ open Entailment
 open Entailment.Context
 open Formula
 open Formula.Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Kripke
 
 namespace Kripke
 
 variable {F : Frame}
 
-protected class Frame.IsFiniteGrzPoint3 (F : Frame) extends F.IsFinite, F.IsPartialOrder, F.IsPiecewiseStronglyConnected where
+protected class Frame.IsFiniteGrzPoint3 (F : Frame) extends F.IsFinite, F.IsPartialOrder, F.IsStronglyConnected where
+protected class Frame.IsFiniteGrzPoint3' (F : Frame) extends F.IsFinite, F.IsPartialOrder, F.IsPiecewiseStronglyConnected where
 
-abbrev FrameClass.finite_connected_partial_order : FrameClass := { F | F.IsFiniteGrzPoint3  }
+abbrev FrameClass.finite_GrzPoint3 : FrameClass := { F | F.IsFiniteGrzPoint3  }
 
 instance [F.IsFiniteGrzPoint3] : F.IsFiniteGrzPoint2 where
 
+instance : whitepoint.IsStronglyConnected := ⟨by tauto⟩
+
 end Kripke
 
-
-namespace Hilbert.GrzPoint3.Kripke
-
-instance finite_sound : Sound (Hilbert.GrzPoint3) FrameClass.finite_connected_partial_order := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _, _⟩ _ (rfl | rfl);
+instance : Sound Modal.GrzPoint3 FrameClass.finite_GrzPoint3 := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomGrz_of_finite_strict_preorder;
   . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
 
-instance consistent : Entailment.Consistent (Hilbert.GrzPoint3) :=
-  consistent_of_sound_frameclass FrameClass.finite_connected_partial_order $ by
+instance : Sound Modal.GrzPoint3 { F : Frame | F.IsFiniteGrzPoint3' } := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
+  . exact validate_AxiomGrz_of_finite_strict_preorder;
+  . exact validate_axiomPoint3_of_isPiecewiseStronglyConnected;
+
+instance : Entailment.Consistent Modal.GrzPoint3 :=
+  consistent_of_sound_frameclass FrameClass.finite_GrzPoint3 $ by
     use whitepoint;
     constructor;
 
-instance finite_complete : Complete (Hilbert.GrzPoint3) (FrameClass.finite_connected_partial_order) :=
-  Kripke.Grz.complete_of_mem_miniCanonicalFrame FrameClass.finite_connected_partial_order $ by
+instance : Complete Modal.GrzPoint3 FrameClass.finite_GrzPoint3 :=
+  Modal.Grz.Kripke.complete_of_mem_miniCanonicalFrame FrameClass.finite_GrzPoint3 $ by
     sorry;
     /-
     intro φ;
@@ -76,30 +84,25 @@ instance finite_complete : Complete (Hilbert.GrzPoint3) (FrameClass.finite_conne
       . sorry;
     -/
 
-end Hilbert.GrzPoint3.Kripke
-
 namespace Logic
 
 open Formula
 open Entailment
 open Kripke
 
-lemma GrzPoint3.Kripke.finite_connected_partial_order : Logic.GrzPoint3 = FrameClass.finite_connected_partial_order.logic := eq_hilbert_logic_frameClass_logic
 
-theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⊂ Logic.GrzPoint3 := by
+instance : Modal.GrzPoint2 ⪱ Modal.GrzPoint3 := by
   constructor;
-  . rw [GrzPoint2.Kripke.finite_confluent_partial_order, GrzPoint3.Kripke.finite_connected_partial_order];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.finite_GrzPoint2 FrameClass.finite_GrzPoint3;
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_GrzPoint2 ⊧ φ by
-      rw [GrzPoint2.Kripke.finite_confluent_partial_order];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Point3 (.atom 0) (.atom 1);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_GrzPoint2);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let F : Frame := ⟨Fin 4, λ x y => x = 0 ∨ x = y ∨ y = 3⟩;
       let M : Model := ⟨
         F,
@@ -140,16 +143,16 @@ theorem GrzPoint3.proper_extension_of_GrzPoint2: Logic.GrzPoint2 ⊂ Logic.GrzPo
             . tauto;
             . simp [M, Semantics.Realize, Satisfies, Frame.Rel', F];
 
-theorem GrzPoint3.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.GrzPoint3 := by
+instance : Modal.S4Point3 ⪱ Modal.GrzPoint3 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.GrzPoint3 ⊢! φ ∧ ¬FrameClass.finite_S4Point3 ⊧ φ by
-      rw [S4Point3.Kripke.finite_connected_preorder];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0);
     constructor;
     . simp;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.S4Point3);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
       constructor;
       . exact {
@@ -159,9 +162,10 @@ theorem GrzPoint3.proper_extension_of_S4Point3 : Logic.S4Point3 ⊂ Logic.GrzPoi
             rintro x y z Rxy Rxz;
             simp;
         };
-      . simp [Reflexive, Transitive, Semantics.Realize, Satisfies];
+      . simp [Semantics.Realize, Satisfies];
 
 end Logic
+
 
 
 end LO.Modal

@@ -7,141 +7,139 @@ namespace LO.Modal
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
-open Propositional.Formula (goedelTranslate)
-open Propositional.Formula (atom)
+open Propositional.Formula (atom goedelTranslate)
+open Propositional.Logic (smallestMC largestMC)
 open Modal
 open Modal.Kripke
+open Modal.Formula.Kripke
 
+@[simp]
+lemma S4.CCLL_CCL : Modal.S4 ⊢ □(□φ ➝ □ψ) ➝ □(□φ ➝ ψ) := by
+  apply Complete.complete (𝓜 := FrameClass.S4);
+  rintro F ⟨_, _⟩ V x h₁ y Rxy h₂;
+  apply @h₁ y Rxy h₂;
+  apply IsRefl.refl;
 
-section S4Point3
+instance : Entailment.HasAxiomPoint3 (smallestMC Propositional.LC) where
+  Point3 φ ψ := by
+    constructor;
+    apply Modal.Logic.iff_provable.mp;
+    apply Modal.Logic.subst (L := (smallestMC Propositional.LC)) (φ := Modal.Axioms.Point3 (.atom 0) (.atom 1)) (s := λ a => match a with | 0 => φ | 1 => ψ | _ => .atom a);
+    have : (smallestMC Propositional.LC) ⊢ □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) := by
+      apply Logic.sumNormal.mem₂!;
+      use Axioms.Dummett (.atom 0) (.atom 1);
+      constructor;
+      . apply Propositional.Logic.iff_provable.mp;
+        simp;
+      . tauto;
+    apply ?_ ⨀ this;
+    apply CAA!_of_C!_of_C! <;>
+    . apply Entailment.WeakerThan.pbl (𝓢 := Modal.S4);
+      simp;
 
-lemma Hilbert.S4Point3.goedelTranslated_axiomDummett : Hilbert.S4Point3 ⊢! □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
+namespace S4Point3
+
+lemma goedelTranslated_axiomDummett : Modal.S4Point3 ⊢ □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
   apply axiomK'!;
   apply nec!;
   apply C!_swap;
   apply deduct'!;
   apply deduct!;
-  have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3]! ψᵍ ➝ □ψᵍ := of'! $ Hilbert.goedelTranslated_axiomTc;
-  have h₂ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3]! ψᵍ := by_axm!;
-  have h₃ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Hilbert.S4Point3]! □ψᵍ ➝ χᵍ := by_axm!;
+  have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ ➝ □ψᵍ := of'! $ goedelTranslated_axiomTc;
+  have h₂ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ := by_axm!;
+  have h₃ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] □ψᵍ ➝ χᵍ := by_axm!;
   exact h₃ ⨀ (h₁ ⨀ h₂);
 
-private lemma Hilbert.S4Point.lemma₁ : Hilbert.S4 ⊢! □(□φ ➝ □ψ) ➝ □(□φ ➝ ψ) := by
-  apply Hilbert.S4.Kripke.complete.complete;
-  rintro F ⟨_, _⟩ V x h₁ y Rxy h₂;
-  apply @h₁ y Rxy h₂;
-  apply IsRefl.refl;
-
-namespace Logic
-
-lemma mem_gAxiomPoint3_smallestMC_of_LC : □(□(.atom 0) ➝ (.atom 1)) ⋎ □(□(.atom 1) ➝ (.atom 0)) ∈ Logic.LC.smallestMC := by
-  have : □(□.atom 0 ➝ □.atom 1) ⋎ □(□.atom 1 ➝ □.atom 0) ∈ Logic.LC.smallestMC := by
-    apply Logic.sumNormal.mem₂;
-    use Axioms.Dummett (.atom 0) (.atom 1);
-    simp [Axioms.Dummett, goedelTranslate];
-  apply Propositional.Logic.smallestMC.mdp_S4 ?_ this;
-  apply CAA!_of_C!_of_C!;
-  repeat exact Hilbert.S4Point.lemma₁;
-
-lemma S4Point3.is_smallestMC_of_LC : Logic.S4Point3 = Logic.LC.smallestMC := by
-  ext φ;
+instance : Modal.S4Point3 ≊ Propositional.LC.smallestMC := by
+  apply Logic.equiv_of_provable;
+  intro φ;
   constructor;
   . intro hφ;
-    induction hφ using Hilbert.Deduction.rec! with
-    | maxm h =>
-      rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
-      . apply Logic.sumNormal.mem₁; simp;
-      . apply Logic.sumNormal.mem₁; simp;
-      . apply Logic.sumNormal.mem₁; simp;
-      . exact Logic.sumNormal.subst $ mem_gAxiomPoint3_smallestMC_of_LC;
-    | mdp => apply Logic.sumNormal.mdp <;> assumption;
-    | nec => apply Logic.sumNormal.nec; assumption;
-    | _ => apply Logic.sumNormal.mem₁; simp;
+    induction hφ using Modal.Hilbert.Normal.rec! with
+    | axm s h =>
+      rcases h with (rfl | rfl | rfl | rfl) <;> simp;
+    | mdp ihφψ ihφ => exact ihφψ ⨀ ihφ;
+    | nec ihφ => exact nec! ihφ;
+    | _ => simp;
   . intro hφ;
-    induction hφ with
-    | mem₁ h => apply Logic.S4Point3.proper_extension_of_S4.subset h;
-    | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
-    | subst h ih => apply Modal.Logic.subst ih;
-    | nec h ih => apply Modal.Logic.nec ih;
+    induction hφ using Logic.sumNormal.rec! with
+    | mem₁ h => apply WeakerThan.pbl h;
+    | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
+    | nec ihφ => exact nec! ihφ;
+    | subst ihφ => apply Logic.subst _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply Hilbert.provable_goedelTranslated_of_provable Hilbert.LC Hilbert.S4Point3 ?_ (by trivial);
-      rintro _ ⟨_, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩;
-      . apply Logic.S4Point3.proper_extension_of_S4.subset;
-        apply modalCompanion_Int_S4.companion.mp;
-        simp;
-      . suffices Hilbert.S4Point3 ⊢! □(s 0ᵍ ➝ s 1ᵍ) ⋎ □(s 1ᵍ ➝ s 0ᵍ) by simpa [goedelTranslate];
-        apply A!_replace axiomPoint3!;
-        repeat exact Hilbert.S4Point3.goedelTranslated_axiomDummett;
+      apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
+      rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
+      . simp;
+      . apply A!_replace axiomPoint3! <;>
+        apply S4Point3.goedelTranslated_axiomDummett;
 
-instance modalCompanion_LC_S4Point3 : ModalCompanion Logic.LC Logic.S4Point3 := by
-  rw [Logic.S4Point3.is_smallestMC_of_LC];
-  exact Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
+lemma eq_smallestMC_of_KC : Modal.S4Point3 = Propositional.LC.smallestMC := Logic.eq_of_equiv
+
+instance : Sound Propositional.LC.smallestMC FrameClass.S4Point3 := Kripke.sound_frameClass_of_equiv Modal.S4Point3 Propositional.LC.smallestMC
+
+instance : ModalCompanion Propositional.LC Modal.S4Point3 := by
+  apply eq_smallestMC_of_KC ▸ Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
+    (IL := Propositional.LC)
     (IC := Propositional.Kripke.FrameClass.LC)
     (MC := Modal.Kripke.FrameClass.S4Point3)
-    (by rw [Logic.LC.Kripke.LC])
-    (by rw [←Modal.Logic.S4Point3.is_smallestMC_of_LC, ←Modal.Logic.S4Point3.Kripke.connected_preorder])
-    (by intro F hF; simp_all only [Set.mem_setOf_eq]; exact {})
-
-end Logic
+  rintro F hF;
+  simp_all only [Set.mem_setOf_eq];
+  constructor;
 
 end S4Point3
 
 
+instance : Propositional.LC.smallestMC ⪯ Modal.GrzPoint3 := calc
+  _ ≊ Modal.S4Point3  := by symm; infer_instance;
+  _ ⪯ Modal.GrzPoint3 := inferInstance
+
+
+
 section GrzPoint3
 
-lemma Logic.gGrzPoint3_of_LC : φ ∈ Logic.LC → φᵍ ∈ Logic.GrzPoint3 := by
-  intro h;
-  apply GrzPoint3.proper_extension_of_S4Point3.subset;
-  exact modalCompanion_LC_S4Point3.companion.mp h;
-
-lemma Logic.GrzPoint3.is_largestMC_of_LC : Logic.GrzPoint3 = Logic.LC.largestMC := by
-  ext φ;
+instance : Modal.GrzPoint3 ≊ Propositional.LC.largestMC := by
+  apply Logic.equiv_of_provable;
+  intro φ;
   constructor;
   . intro hφ;
-    induction hφ using Hilbert.Deduction.rec! with
-    | maxm h =>
-      rcases (by simpa using h) with (⟨s, rfl⟩ | ⟨s, rfl⟩ | ⟨s, rfl⟩);
-      . apply Logic.sumNormal.mem₁;
-        apply Logic.sumNormal.mem₁;
-        simp;
-      . apply Logic.sumNormal.subst (φ := □(□((.atom 0) ➝ □(.atom 0)) ➝ (.atom 0)) ➝ (.atom 0)) (s := s);
-        apply Logic.sumNormal.mem₂;
-        simp;
-      . apply Logic.sumNormal.subst (φ := □(□(.atom 0) ➝ (.atom 1)) ⋎ □(□(.atom 1) ➝ (.atom 0))) (s := s);
-        apply Logic.sumNormal.mem₁;
-        rw [←Logic.S4Point3.is_smallestMC_of_LC]
-        simp;
-    | mdp => apply Logic.sumNormal.mdp <;> assumption;
-    | nec => apply Logic.sumNormal.nec; assumption;
-    | _ => apply Logic.sumNormal.mem₁; apply Logic.sumNormal.mem₁; simp;
+    induction hφ using Modal.Hilbert.Normal.rec! with
+    | axm _ h =>
+      rcases h with (rfl | rfl | rfl);
+      . simp;
+      . simp;
+      . apply WeakerThan.pbl (𝓢 := Propositional.LC.smallestMC); simp;
+    | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
+    | nec ihφ => exact nec! ihφ;
+    | _ => apply Logic.sumNormal.mem₁!; simp;
   . intro hφ;
-    induction hφ with
-    | mem₁ h =>
-      apply GrzPoint3.proper_extension_of_S4Point3.subset;
-      rwa [Logic.S4Point3.is_smallestMC_of_LC]
-    | mdp hφ hψ ihφψ ihψ => apply Modal.Logic.mdp ihφψ ihψ;
-    | subst h ih => apply Modal.Logic.subst ih;
-    | nec h ih => apply Modal.Logic.nec ih;
-    | mem₂ h =>
-      rcases h with ⟨φ, hφ, rfl⟩; simp;
+    induction hφ using Logic.sumNormal.rec! with
+    | mdp ihφψ ihψ => exact ihφψ ⨀ ihψ;
+    | subst ih => apply Logic.subst _ ih;
+    | nec ih => apply nec! ih;
+    | mem₁ h => apply WeakerThan.pbl h;
+    | mem₂ h => rcases h with ⟨φ, hφ, rfl⟩; simp;
 
-instance modalCompanion_LC_GrzPoint3 : ModalCompanion Logic.LC Logic.GrzPoint3 := by
-  rw [Logic.GrzPoint3.is_largestMC_of_LC];
-  exact Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
-    (IC := Propositional.Kripke.FrameClass.finite_LC)
-    (MC := Modal.Kripke.FrameClass.finite_connected_partial_order)
-    (by rw [Logic.LC.Kripke.finite_LC])
-    (by rw [←Logic.GrzPoint3.is_largestMC_of_LC, Modal.Logic.GrzPoint3.Kripke.finite_connected_partial_order])
-    (by intro F hF; simp_all only [Set.mem_setOf_eq]; exact {})
+lemma is_largestMC_of_LC : Modal.GrzPoint3 = Propositional.LC.largestMC := Logic.eq_of_equiv
+
+instance : Sound Propositional.LC.largestMC FrameClass.finite_GrzPoint3 := Kripke.sound_frameClass_of_equiv Modal.GrzPoint3 Propositional.LC.largestMC
+
+instance : ModalCompanion Propositional.LC Modal.GrzPoint3 := by
+  apply is_largestMC_of_LC ▸ Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
+    Propositional.Kripke.FrameClass.finite_LC
+    ({ F : Frame | F.IsFiniteGrzPoint3' })
+  rintro F hF;
+  simp_all only [Set.mem_setOf_eq];
+  exact {}
 
 end GrzPoint3
 
 
 section boxdot
 
-theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : φ ∈ Logic.LC ↔ φᵍᵇ ∈ Logic.GLPoint3 := by
-  exact Iff.trans modalCompanion_LC_GrzPoint3.companion Logic.iff_boxdotTranslatedGLPoint3_GrzPoint3.symm
+theorem embedding_LC_GLPoint3 {φ : Propositional.Formula ℕ} : Propositional.LC ⊢ φ ↔ Modal.GLPoint3 ⊢ φᵍᵇ :=
+  Iff.trans ModalCompanion.companion iff_boxdot_GLPoint3_GrzPoint3.symm
 
 end boxdot
 

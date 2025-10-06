@@ -1,10 +1,10 @@
 import Foundation.FirstOrder.R0.Basic
-import Foundation.Vorspiel.Arith
+import Foundation.Vorspiel.Arithmetic
 import Mathlib.Computability.Primrec
 
 open Encodable Denumerable
 
-namespace LO.FirstOrder.Arith
+namespace LO.FirstOrder.Arithmetic
 
 open Mathlib Encodable Semiterm.Operator.GoedelNumber
 
@@ -29,25 +29,25 @@ lemma sigma1_re (ε : ξ → ℕ) {k} {φ : Semiformula ℒₒᵣ ξ k} (hp : Hi
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
       <| ⟨fun v : List.Vector ℕ n ↦ decide (t₁.valm ℕ v.get ε = t₂.valm ℕ v.get ε), ?_, ?_⟩
-    · apply Primrec.to_comp <| Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)
+    · apply Primrec.to_comp (Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)).decide
     · simp
   case hNEQ =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
       <| ⟨fun v : List.Vector ℕ n ↦ !decide (t₁.valm ℕ v.get ε = t₂.valm ℕ v.get ε), ?_, ?_⟩
-    · apply Primrec.to_comp <| Primrec.not.comp <| Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)
+    · apply Primrec.to_comp <| Primrec.not.comp (Primrec.eq.comp (term_primrec t₁) (term_primrec t₂)).decide
     · simp
   case hLT =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
       <| ⟨fun v : List.Vector ℕ n ↦ decide (t₁.valm ℕ v.get ε < t₂.valm ℕ v.get ε), ?_, ?_⟩
-    · apply Primrec.to_comp <| Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)
+    · apply Primrec.to_comp (Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)).decide
     · simp
   case hNLT =>
     intro n t₁ t₂
     refine ComputablePred.to_re <| ComputablePred.computable_iff.mpr
       <| ⟨fun v : List.Vector ℕ n ↦ !decide (t₁.valm ℕ v.get ε < t₂.valm ℕ v.get ε), ?_, ?_⟩
-    · apply Primrec.to_comp <| Primrec.not.comp <| Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)
+    · apply Primrec.to_comp <| Primrec.not.comp (Primrec.nat_lt.comp (term_primrec t₁) (term_primrec t₂)).decide
     · simp
   case hAnd =>
     intro n φ ψ _ _ ihp ihq
@@ -112,9 +112,9 @@ def code (c : Code k) : Semisentence ℒₒᵣ (k + 1) := (Rew.bind (L := ℒₒ
 /-
 section model
 
-open LO.Arith
+open LO.Arithmetic
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝐑₀]
+variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗥₀]
 
 private lemma codeAux_uniq {k} {c : Code k} {v : Fin k → M} {z z' : M} :
     Semiformula.Evalfm M (z :> v) (codeAux c) → Semiformula.Evalfm M (z' :> v) (codeAux c) → z = z' := by
@@ -181,24 +181,24 @@ private lemma models_codeAux {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc :
   induction hc generalizing y
   case zero =>
     have : (0 : Part ℕ) = Part.some 0 := rfl
-    simp [code, codeAux, models_iff, this, eq_comm]
+    simp [codeAux, this, eq_comm]
   case one =>
     have : (1 : Part ℕ) = Part.some 1 := rfl
-    simp [code, codeAux, models_iff, this, eq_comm]
+    simp [codeAux, this, eq_comm]
   case equal i j =>
-    by_cases hv : v i = v j <;> simp [code, codeAux, models_iff, hv, Nat.isEqNat, eq_comm]
+    by_cases hv : v i = v j <;> simp [codeAux, hv, Nat.isEqNat, eq_comm]
   case lt i j =>
-    simp [code, codeAux, models_iff]
+    simp [codeAux]
     by_cases hv : v i < v j <;> simp [hv, Nat.isLtNat, eq_comm, Nat.not_lt.mp]
-  case add => simp [code, codeAux, models_iff, eq_comm]
-  case mul => simp [code, codeAux, models_iff, eq_comm]
-  case proj => simp [code, codeAux, models_iff, eq_comm]
+  case add => simp [codeAux, eq_comm]
+  case mul => simp [codeAux, eq_comm]
+  case proj => simp [codeAux, eq_comm]
   case comp m n c d f g _ _ ihf ihg =>
     suffices
       (∃ e' : Fin n → ℕ, (Semiformula.Evalfm ℕ (y :> e')) (codeAux c) ∧
         ∀ i, (Semiformula.Evalfm ℕ (e' i :> v)) (codeAux (d i)))
       ↔ (List.Vector.mOfFn (g · (List.Vector.ofFn v))).bind f = Part.some y by
-        simp [code, codeAux, models_iff]
+        simp [codeAux]
         simpa [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons']
     constructor
     · rintro ⟨e, hf, hg⟩
@@ -215,7 +215,7 @@ private lemma models_codeAux {c : Code k} {f : List.Vector ℕ k →. ℕ} (hc :
     suffices
       (f (y ::ᵥ List.Vector.ofFn v) = 0 ∧ ∀ x < y, 0 < f (x ::ᵥ List.Vector.ofFn v))
       ↔ (Nat.rfind fun n ↦ Part.some (decide (f (n ::ᵥ List.Vector.ofFn v) = 0))) = Part.some y by
-      simp [code, codeAux, models_iff]
+      simp [codeAux]
       simpa [Semiformula.eval_rew, Function.comp_def, Matrix.empty_eq, Matrix.comp_vecCons', ihf, List.Vector.ofFn_vecCons]
     constructor
     · rintro ⟨hy, h⟩
@@ -239,27 +239,27 @@ lemma codeOfPartrec'_spec {k} {f : List.Vector ℕ k →. ℕ} (hf : Nat.Partrec
 
 open Classical
 
-noncomputable def codeOfREPred (p : ℕ → Prop) : Semisentence ℒₒᵣ 1 :=
-  let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
+noncomputable def codeOfREPred (A : ℕ → Prop) : Semisentence ℒₒᵣ 1 :=
+  let f : ℕ →. Unit := fun a ↦ Part.assert (A a) fun _ ↦ Part.some ()
   (codeOfPartrec' (fun v ↦ (f (v.get 0)).map fun _ ↦ 0))/[‘0’, #0]
 
-lemma codeOfREPred_spec {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
-    ℕ ⊧/![x] (codeOfREPred p) ↔ p x := by
-  let f : ℕ →. Unit := fun a ↦ Part.assert (p a) fun _ ↦ Part.some ()
-  suffices ℕ ⊧/![x] ((codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0]) ↔ p x from this
+lemma codeOfREPred_spec {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
+    ℕ ⊧/![x] (codeOfREPred A) ↔ A x := by
+  let f : ℕ →. Unit := fun a ↦ Part.assert (A a) fun _ ↦ Part.some ()
+  suffices ℕ ⊧/![x] ((codeOfPartrec' fun v ↦ Part.map (fun _ ↦ 0) (f (v.get 0)))/[‘0’, #0]) ↔ A x from this
   have : Partrec fun v : List.Vector ℕ 1 ↦ (f (v.get 0)).map fun _ ↦ 0 := by
     refine Partrec.map (Partrec.comp hp (Primrec.to_comp <| Primrec.vector_get.comp .id (.const 0))) (Computable.const 0).to₂
   simpa [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
     using (codeOfPartrec'_spec (Nat.Partrec'.of_part this) (v := ![x]) (y := 0)).trans (by simp [f])
 
-variable {T : Theory ℒₒᵣ} [𝐑₀ ⪯ T] [Sigma1Sound T]
+variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-lemma re_complete {p : ℕ → Prop} (hp : REPred p) {x : ℕ} :
-    p x ↔ T ⊢! ↑((codeOfREPred p)/[‘↑x’] : Sentence ℒₒᵣ) := Iff.trans
-  (by simpa [models₀_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
-  (sigma_one_completeness_iff (by simp [codeOfREPred, codeOfPartrec']))
+lemma re_complete {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
+    A x ↔ T ⊢ (codeOfREPred A)/[‘↑x’] := Iff.trans
+  (by simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
+  (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])
 
-end Arith
+end Arithmetic
 
 end FirstOrder
 

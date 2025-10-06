@@ -9,8 +9,8 @@ variable {𝓢 : S} [Entailment.Cl 𝓢]
 
 noncomputable instance : HasAxiomDummett 𝓢 where
   dummett φ ψ := by
-    have d₁ : 𝓢 ⊢ φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := C_trans imply₁ or₂;
-    have d₂ : 𝓢 ⊢ ∼φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := C_trans CNC or₁;
+    have d₁ : 𝓢 ⊢! φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := C_trans imply₁ or₂;
+    have d₂ : 𝓢 ⊢! ∼φ ➝ ((φ ➝ ψ) ⋎ (ψ ➝ φ)) := C_trans CNC or₁;
     exact of_C_of_C_of_A d₁ d₂ lem;
 
 noncomputable instance : Entailment.LC 𝓢 where

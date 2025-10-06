@@ -57,7 +57,7 @@ instance [Finite F] : Finite (Cluster F) := Finite.of_surjective (λ x => ⟦x�
 lemma iff_eq_cluster : (⟦x⟧ : Cluster F) = ⟦y⟧ ↔ (x = y ∨ (x ≺ y ∧ y ≺ x)) := by
   simp only [Quotient.eq, clusterEquiv];
 
-protected abbrev rel : Rel (Cluster F) (Cluster F) := Quotient.lift₂ (λ x y => x ≺ y) $ by
+protected abbrev rel : HRel (Cluster F) := Quotient.lift₂ (λ x y => x ≺ y) $ by
     rintro x₁ y₁ x₂ y₂ (rfl | ⟨Rx₁x₂, Rx₂x₁⟩) (rfl | ⟨Ry₁y₂, Ry₂y₁⟩);
     . rfl;
     . apply eq_iff_iff.mpr;
@@ -114,7 +114,7 @@ instance [IsTotal _ F] : IsTotal (Cluster F) (· ≼ ·) := ⟨by
 ⟩
 
 
-protected abbrev strict_rel : Rel (Cluster F) (Cluster F) := λ X Y => X ≼ Y ∧ X ≠ Y
+protected abbrev strict_rel : HRel (Cluster F) := λ X Y => X ≼ Y ∧ X ≠ Y
 local infix:50 " ≺ " => Cluster.strict_rel
 
 instance : IsTrans (Cluster F) (· ≺ ·) := ⟨by

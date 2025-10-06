@@ -4,8 +4,10 @@ import Foundation.Modal.Kripke.Filtration
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -22,31 +24,27 @@ protected abbrev FrameClass.finite_KTB: FrameClass := { F | F.IsFiniteKTB }
 end Kripke
 
 
-namespace Hilbert.KTB.Kripke
-
-instance sound : Sound (Hilbert.KTB) FrameClass.KTB := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+instance : Sound Modal.KTB FrameClass.KTB := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomB_of_symmetric;
 
-instance consistent : Entailment.Consistent (Hilbert.KTB) := consistent_of_sound_frameclass FrameClass.KTB $ by
+instance : Entailment.Consistent Modal.KTB := consistent_of_sound_frameclass FrameClass.KTB $ by
   use whitepoint;
   constructor;
 
+instance : Canonical Modal.KTB FrameClass.KTB := ⟨by constructor⟩
 
-instance canonical : Canonical (Hilbert.KTB) FrameClass.KTB := ⟨by constructor⟩
-
-instance complete : Complete (Hilbert.KTB) FrameClass.KTB := inferInstance
-
-instance finite_complete : Complete (Hilbert.KTB) FrameClass.finite_KTB := ⟨by
+instance : Complete Modal.KTB FrameClass.finite_KTB := ⟨by
   intro φ hp;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.KTB);
   intro F hF V x;
   replace hF := Set.mem_setOf_eq.mp hF;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := finestFiltrationModel M φ.subformulas;
-  apply filtration FM (finestFiltrationModel.filterOf) (by subformula) |>.mpr;
+  apply filtration FM (finestFiltrationModel.filterOf) (by simp) |>.mpr;
   apply hp;
   apply Set.mem_setOf_eq.mpr;
   refine {
@@ -56,27 +54,15 @@ instance finite_complete : Complete (Hilbert.KTB) FrameClass.finite_KTB := ⟨by
   }
 ⟩
 
-end Hilbert.KTB.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KTB.Kripke.refl_symm : Logic.KTB = FrameClass.KTB.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
-theorem KTB.proper_extension_of_KT : Logic.KT ⊂ Logic.KTB := by
+instance : Modal.KT ⪱ Modal.KTB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬Kripke.FrameClass.KT ⊧ φ by
-      rw [KT.Kripke.refl];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.B (.atom 0));
     constructor;
     . exact axiomB!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KT);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -86,21 +72,18 @@ theorem KTB.proper_extension_of_KT : Logic.KT ⊂ Logic.KTB := by
         use 1;
         omega;
 
-@[simp]
-theorem KTB.proper_extension_of_KDB : Logic.KDB ⊂ Logic.KTB := by
+instance : Modal.KDB ⪱ Modal.KTB := by
   constructor;
-  . rw [KDB.Kripke.serial_symm, KTB.Kripke.refl_symm];
-    rintro φ hφ F hF;
-    apply hφ;
+  . apply Modal.Kripke.weakerThan_of_subset_frameClass FrameClass.KDB FrameClass.KTB;
+    intro F hF;
     simp_all only [Set.mem_setOf_eq];
     infer_instance;
-  . suffices ∃ φ, Hilbert.KTB ⊢! φ ∧ ¬Kripke.FrameClass.KDB ⊧ φ by
-      rw [KDB.Kripke.serial_symm];
-      tauto;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KDB);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => x ≠ y⟩, λ x _ => x = 1⟩, 0;
       constructor;
       . refine {
@@ -114,6 +97,5 @@ theorem KTB.proper_extension_of_KDB : Logic.KDB ⊂ Logic.KTB := by
       . simp [Semantics.Realize, Satisfies];
         omega;
 
-end Logic
 
 end LO.Modal

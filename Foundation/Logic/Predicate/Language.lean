@@ -120,11 +120,13 @@ instance (k) : ToString (oRing.Rel k) :=
   | Rel.eq => "\\mathrm{Eq}"
   | Rel.lt    => "\\mathrm{LT}"⟩
 
-instance (k) : DecidableEq (oRing.Func k) := fun a b =>
-  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+instance (k) : DecidableEq (oRing.Func k) := fun a b => by
+  rcases a <;> rcases b <;>
+  simp only [reduceCtorEq] <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : DecidableEq (oRing.Rel k) := fun a b =>
-  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+instance (k) : DecidableEq (oRing.Rel k) := fun a b => by
+  rcases a <;> rcases b <;>
+  simp only [reduceCtorEq] <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
 instance (k) : Encodable (oRing.Func k) where
   encode := fun x =>
@@ -250,6 +252,9 @@ protected class Eq (L : Language) where
 protected class LT (L : Language) where
   lt : L.Rel 2
 
+protected class Mem (L : Language) where
+  mem : L.Rel 2
+
 protected class Zero (L : Language) where
   zero : L.Func 0
 
@@ -274,7 +279,7 @@ class Pairing (L : Language) where
 class Star (L : Language) where
   star : L.Func 0
 
-attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Star.star
+attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Mem.mem Star.star
 
 class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
 
@@ -401,6 +406,18 @@ instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Func k) := La
 instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
 
 instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
+
+protected class Language.Encodable (L : Language) where
+  func : (k : ℕ) → Encodable (L.Func k)
+  rel : (k : ℕ) → Encodable (L.Rel k)
+
+instance (L : Language) [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] : L.Encodable := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+
+instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Func k) := Language.Encodable.func k
+
+instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Rel k) := Language.Encodable.rel k
+
+instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Rel k) := Language.Encodable.rel k
 
 class Language.Finite (L : Language) where
   func : Fintype ((k : ℕ) × L.Func k)

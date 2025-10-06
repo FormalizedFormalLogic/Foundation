@@ -1,47 +1,39 @@
-import Foundation.Modal.Hilbert.S5Grz
 import Foundation.Modal.Kripke.Logic.Grz.Completeness
 import Foundation.Modal.Kripke.Logic.Triv
 import Foundation.Modal.Kripke.Logic.S5
 
 namespace LO.Modal.Logic
 
-open Formula
 open Entailment
+open Formula
 open Kripke
+open Modal.Kripke
 
-lemma S5Grz.Kripke.finite_equality : Logic.S5Grz = Kripke.FrameClass.finite_Triv.logic := by
-  rw [eq_S5Grz_Triv, Triv.Kripke.finite_equality];
-
-@[simp]
-theorem S5Grz.proper_extension_of_S5 : Logic.S5 ⊂ Logic.S5Grz := by
+instance : Modal.S5 ⪱ Modal.S5Grz := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.universal ⊧ φ by
-      rw [S5.Kripke.universal];
-      tauto;
+  . exact Hilbert.Normal.weakerThan_of_subset_axioms (by simp)
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Grz (.atom 0);
     constructor;
-    . exact axiomGrz!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.universal);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
       constructor;
-      . exact {
-          universal := by tauto;
-        };
+      . exact { universal := by tauto }
       . simp [Semantics.Realize, Satisfies];
         tauto;
 
-@[simp]
-theorem S5Grz.proper_extension_of_Grz : Logic.Grz ⊂ Logic.S5Grz := by
+instance : Modal.Grz ⪱ Modal.S5Grz := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S5Grz ⊢! φ ∧ ¬FrameClass.finite_Grz ⊧ φ by
-      rw [Grz.Kripke.finite_partial_order];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Five (.atom 0)
     constructor;
-    . exact axiomFive!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := Kripke.FrameClass.finite_Grz);
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x ≤ y⟩, (λ w _ => w = 0)⟩;
       use M, 0;
       constructor;
@@ -57,11 +49,16 @@ theorem S5Grz.proper_extension_of_Grz : Logic.Grz ⊂ Logic.S5Grz := by
         . use 1;
           constructor <;> omega;
 
-@[simp]
-theorem Triv.proper_extension_of_S5 : Logic.S5 ⊂ Logic.Triv := by simp [←eq_S5Grz_Triv];
+instance : Modal.S4 ⪱ Modal.Triv := calc
+  Modal.S4 ⪱ Modal.S5    := by infer_instance
+  _          ⪱ Modal.S5Grz := by infer_instance
+  _          ≊ Modal.Triv  := by infer_instance
 
-@[simp]
-lemma Triv.proper_extension_of_S4 : Logic.S4 ⊂ Logic.Triv := by
-  trans Logic.S5 <;> simp;
+instance : Sound Modal.S5Grz FrameClass.finite_Triv := by
+  suffices Modal.S5Grz ≊ Modal.Triv by
+    constructor;
+    intro φ h;
+    apply Sound.sound $ Entailment.Equiv.iff.mp this φ |>.mp h;
+  infer_instance;
 
 end LO.Modal.Logic

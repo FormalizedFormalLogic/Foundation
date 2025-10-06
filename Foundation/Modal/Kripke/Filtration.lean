@@ -14,7 +14,7 @@ open FormulaSet.IsSubformulaClosed
 open Formula (atom)
 open Formula.Kripke
 
-def filterEquiv (M : Kripke.Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] (x y : M.World) := ∀ φ, (_ : φ ∈ T := by subformula) → x ⊧ φ ↔ y ⊧ φ
+def filterEquiv (M : Kripke.Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed] (x y : M.World) := ∀ φ, (_ : φ ∈ T) → x ⊧ φ ↔ y ⊧ φ
 
 variable (M : Kripke.Model) (T : FormulaSet ℕ) [T.IsSubformulaClosed]
 
@@ -62,7 +62,7 @@ lemma finite (T_finite : T.Finite) : Finite (FilterEqvQuotient M T) := by
       exact this φ hp hpx |>.2;
     . intro hpy;
       have := h.symm.subset;
-      simp only [Set.setOf_subset_setOf, and_imp, f] at this;
+      simp only [Set.setOf_subset_setOf, and_imp] at this;
       exact this φ hp hpy |>.2;
   exact Finite.of_injective f hf
 
@@ -237,7 +237,7 @@ instance filterOf [trans : M.IsTransitive] : FilterOf (finestFiltrationTransitiv
     replace ⟨n, RXY⟩ := HRel.TransGen.exists_iterate.mp RXY;
     induction n using PNat.recOn generalizing x with
     | one =>
-      simp only [PNat.val_ofNat, HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right] at RXY;
+      simp only [PNat.val_ofNat, HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right] at RXY;
       obtain ⟨u, v, exu, eyv, Ruv⟩ := RXY;
       have : u ⊧ □φ := FilterEqvQuotient.iff_of_eq exu hφ |>.mp hx;
       have : v ⊧ φ := this _ Ruv;

@@ -20,10 +20,10 @@ tag := "modal-logic-hilbert-systems"
 
 # Soundness
 
-{docstring Hilbert.Kripke.instSound_of_validates_axioms}
+{docstring LO.Modal.Kripke.instSound_of_validates_axioms}
 
-# For {lean}`Logic.K`
+# For {lean}`LO.Modal.K`
 
-Recall {lean}`Logic.K` is defined by Hilbert system {lean}`Hilbert.K`.
+Recall {lean}`LO.Modal.K` is defined by Hilbert system {lean}`LO.Modal.Hilbert.Normal`.
 
-{docstring Hilbert.K.Kripke.complete}
+{docstring LO.Modal.instCompleteLogicNatFormulaFrameClassKK}

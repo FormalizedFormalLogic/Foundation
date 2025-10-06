@@ -112,7 +112,7 @@ private lemma truthlemma.himp
     . simp only [Finset.coe_insert, Finset.coe_singleton];
       apply Set.doubleton_subset.mpr;
       tauto;
-    . suffices 𝓢 ⊢! Finset.conj {φ, φ ➝ ψ} ➝ Finset.disj {ψ} by simpa;
+    . suffices 𝓢 ⊢ Finset.conj {φ, φ ➝ ψ} ➝ Finset.disj {ψ} by simpa;
       apply CFConj_CDisj!_of_innerMDP (φ := φ) (ψ := ψ) <;> simp;
 
 lemma truthlemma : t ⊧ φ ↔ φ ∈ t.1.1 := by
@@ -123,12 +123,12 @@ lemma truthlemma : t ⊧ φ ↔ φ ∈ t.1.1 := by
   | hand φ ψ ihp ihq => simp [SaturatedConsistentTableau.iff_mem₁_and, *];
   | hor φ ψ ihp ihq => simp [SaturatedConsistentTableau.iff_mem₁_or, *];
 
-lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ φ ↔ 𝓢 ⊢! φ := by
+lemma iff_valid_on_canonicalModel_deducible : (Kripke.canonicalModel 𝓢) ⊧ φ ↔ 𝓢 ⊢ φ := by
   constructor;
   . contrapose;
     intro h;
     have : Tableau.Consistent 𝓢 (∅, {φ}) := by
-      simp only [Tableau.Consistent, Collection.not_mem_empty, imp_false, Set.mem_singleton_iff];
+      simp only [Tableau.Consistent];
       rintro Γ Δ hΓ hΔ;
       by_contra hC;
       apply h;

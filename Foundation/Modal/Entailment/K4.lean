@@ -8,48 +8,48 @@ variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailme
 variable {𝓢 : S} [Entailment.K4 𝓢]
 
 @[simp]
-lemma diaFour! : 𝓢 ⊢! ◇◇φ ➝ ◇φ := by
+lemma diaFour! : 𝓢 ⊢ ◇◇φ ➝ ◇φ := by
   apply C!_replace diaDuality_mp! diaDuality_mpr!;
   apply contra!;
-  suffices 𝓢 ⊢! □□(∼φ) ➝ □(∼◇φ) by apply C!_trans axiomFour! this;
+  suffices 𝓢 ⊢ □□(∼φ) ➝ □(∼◇φ) by apply C!_trans axiomFour! this;
   apply axiomK'!;
   apply nec!;
   simp;
-lemma diaFour'! (h : 𝓢 ⊢! ◇◇φ) : 𝓢 ⊢! ◇φ := diaFour! ⨀ h
+lemma diaFour'! (h : 𝓢 ⊢ ◇◇φ) : 𝓢 ⊢ ◇φ := diaFour! ⨀ h
 
-def imply_BoxBoxdot_Box: 𝓢 ⊢  □⊡φ ➝ □φ := by
+def imply_BoxBoxdot_Box: 𝓢 ⊢!  □⊡φ ➝ □φ := by
   exact C_trans distribute_box_and and₁
-@[simp] lemma imply_boxboxdot_box : 𝓢 ⊢! □⊡φ ➝ □φ := ⟨imply_BoxBoxdot_Box⟩
+@[simp] lemma imply_boxboxdot_box : 𝓢 ⊢ □⊡φ ➝ □φ := ⟨imply_BoxBoxdot_Box⟩
 
-def imply_Box_BoxBoxdot : 𝓢 ⊢ □φ ➝ □⊡φ := by
+def imply_Box_BoxBoxdot : 𝓢 ⊢! □φ ➝ □⊡φ := by
   exact C_trans (right_K_intro (C_id _) axiomFour) collect_box_and
-@[simp] lemma imply_box_boxboxdot! : 𝓢 ⊢! □φ ➝ □⊡φ := ⟨imply_Box_BoxBoxdot⟩
+@[simp] lemma imply_box_boxboxdot! : 𝓢 ⊢ □φ ➝ □⊡φ := ⟨imply_Box_BoxBoxdot⟩
 
-def imply_Box_BoxBoxdot' (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ □⊡φ := imply_Box_BoxBoxdot ⨀ h
-def imply_Box_BoxBoxdot'! (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! □⊡φ := ⟨imply_Box_BoxBoxdot' h.some⟩
+def imply_Box_BoxBoxdot' (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! □⊡φ := imply_Box_BoxBoxdot ⨀ h
+def imply_Box_BoxBoxdot'! (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ □⊡φ := ⟨imply_Box_BoxBoxdot' h.some⟩
 
-def iff_Box_BoxBoxdot : 𝓢 ⊢ □φ ⭤ □⊡φ := by
+def iff_Box_BoxBoxdot : 𝓢 ⊢! □φ ⭤ □⊡φ := by
   apply E_intro;
   . exact imply_Box_BoxBoxdot
   . exact imply_BoxBoxdot_Box;
-@[simp] lemma iff_box_boxboxdot! : 𝓢 ⊢! □φ ⭤ □⊡φ := ⟨iff_Box_BoxBoxdot⟩
+@[simp] lemma iff_box_boxboxdot! : 𝓢 ⊢ □φ ⭤ □⊡φ := ⟨iff_Box_BoxBoxdot⟩
 
-def iff_Box_BoxdotBox : 𝓢 ⊢ □φ ⭤ ⊡□φ := by
+def iff_Box_BoxdotBox : 𝓢 ⊢! □φ ⭤ ⊡□φ := by
   apply E_intro;
   . exact C_trans (right_K_intro (C_id _) axiomFour) (C_id _)
   . exact and₁
-@[simp] lemma iff_box_boxdotbox! : 𝓢 ⊢! □φ ⭤ ⊡□φ := ⟨iff_Box_BoxdotBox⟩
+@[simp] lemma iff_box_boxdotbox! : 𝓢 ⊢ □φ ⭤ ⊡□φ := ⟨iff_Box_BoxdotBox⟩
 
-def iff_Boxdot_BoxdotBoxdot : 𝓢 ⊢ ⊡φ ⭤ ⊡⊡φ := by
+def iff_Boxdot_BoxdotBoxdot : 𝓢 ⊢! ⊡φ ⭤ ⊡⊡φ := by
   apply E_intro;
   . exact right_K_intro (C_id _) (C_trans boxdotBox (K_left iff_Box_BoxBoxdot));
   . exact and₁;
-@[simp] lemma iff_boxdot_boxdotboxdot : 𝓢 ⊢! ⊡φ ⭤ ⊡⊡φ := ⟨iff_Boxdot_BoxdotBoxdot⟩
+@[simp] lemma iff_boxdot_boxdotboxdot : 𝓢 ⊢ ⊡φ ⭤ ⊡⊡φ := ⟨iff_Boxdot_BoxdotBoxdot⟩
 
-def boxdotAxiomFour : 𝓢 ⊢ ⊡φ ➝ ⊡⊡φ := K_left iff_Boxdot_BoxdotBoxdot
-@[simp] lemma boxdot_axiomFour! : 𝓢 ⊢! ⊡φ ➝ ⊡⊡φ := ⟨boxdotAxiomFour⟩
+def boxdotAxiomFour : 𝓢 ⊢! ⊡φ ➝ ⊡⊡φ := K_left iff_Boxdot_BoxdotBoxdot
+@[simp] lemma boxdot_axiomFour! : 𝓢 ⊢ ⊡φ ➝ ⊡⊡φ := ⟨boxdotAxiomFour⟩
 
-lemma Context.multibox_2_in_context_to_box_finset {Γ : Finset F} (h : Γ.multibox 2 *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! φ := by
+lemma Context.multibox_2_in_context_to_box_finset {Γ : Finset F} (h : Γ.multibox 2 *⊢[𝓢] φ) : Γ.box *⊢[𝓢] φ := by
   apply FConj_DT.mp;
   refine C!_trans ?_ $ FConj_DT.mpr h;
   apply CFconjFconj!_of_provable;
@@ -59,7 +59,7 @@ lemma Context.multibox_2_in_context_to_box_finset {Γ : Finset F} (h : Γ.multib
   apply Context.by_axm!
   simpa using h;
 
-lemma Context.multibox_2_in_context_to_box {Γ : Set F} (h : Γ.multibox 2 *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! φ := by
+lemma Context.multibox_2_in_context_to_box {Γ : Set F} (h : Γ.multibox 2 *⊢[𝓢] φ) : Γ.box *⊢[𝓢] φ := by
   apply Context.provable_iff_finset.mpr;
   obtain ⟨Δ, hΔ₁, hΔ₂⟩ := Context.provable_iff_finset.mp h;
   use Δ.premultibox 2 |>.box;
@@ -77,7 +77,7 @@ lemma Context.multibox_2_in_context_to_box {Γ : Set F} (h : Γ.multibox 2 *⊢[
     obtain ⟨ψ, hψ, rfl⟩ := this;
     simpa;
 
-lemma Context.boxbox_in_context_to_box {Γ : Set F} (h : Γ.box.box *⊢[𝓢]! φ) : Γ.box *⊢[𝓢]! φ := by
+lemma Context.boxbox_in_context_to_box {Γ : Set F} (h : Γ.box.box *⊢[𝓢] φ) : Γ.box *⊢[𝓢] φ := by
   rw [(show Γ.box.box = Γ.multibox 2 by ext; simp)] at h;
   apply Context.multibox_2_in_context_to_box h;
 

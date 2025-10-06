@@ -16,6 +16,7 @@ import Mathlib.Tactic.TautoSet
 import Mathlib.Data.Fintype.Sigma
 import Mathlib.Data.Fintype.Vector
 import Mathlib.Computability.Halting
+import Mathlib.Tactic.Cases
 
 namespace Nat
 variable {α : ℕ → Sort u}
@@ -144,7 +145,7 @@ lemma vecCons_assoc (a b : α) (s : Fin n → α) :
   funext x; cases' x using Fin.cases with x
   · simp
   · cases x using Fin.lastCases
-    · simp [Fin.succ_castSucc]
+    · simp
     case cast i =>
       simp; simp only [rightConcat_castSucc, Fin.succ_castSucc i, cons_val_succ]
 
@@ -207,13 +208,13 @@ lemma fun_eq_vec_two {v : Fin 2 → α} : v = ![v 0, v 1] := by
 
 lemma fun_eq_vec_three {v : Fin 3 → α} : v = ![v 0, v 1, v 2] := by
   funext x
-  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
+  cases' x using Fin.cases with x <;> simp
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
 
 lemma fun_eq_vec_four {v : Fin 4 → α} : v = ![v 0, v 1, v 2, v 3] := by
   funext x
-  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
-  cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
+  cases' x using Fin.cases with x <;> simp
+  cases' x using Fin.cases with x <;> simp
   cases' x using Fin.cases with x <;> simp [Fin.eq_zero]
 
 lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : ∀ i, a ≠ f i) : Function.Injective (a :> f) := by
@@ -269,21 +270,6 @@ def appendr {n m} (v : Fin n → α) (w : Fin m → α) : Fin (m + n) → α := 
 
 @[simp] lemma appendr_cons {m n} (x : α) (v : Fin n → α) (w : Fin m → α) : appendr (x :> v) w = x :> appendr v w := by funext i; simp [appendr]
 
-section vecToNat
-
-def vecToNat : {n : ℕ} → (Fin n → ℕ) → ℕ
-  | 0,     _ => 0
-  | _ + 1, v => Nat.pair (v 0) (vecToNat $ v ∘ Fin.succ) + 1
-
-open Encodable
-
-@[simp] lemma vecToNat_empty (v : Fin 0 → ℕ) : vecToNat v = 0 := by rfl
-
-@[simp] lemma encode_succ {n} (x : ℕ) (v : Fin n → ℕ) : vecToNat (x :> v) = Nat.pair x (vecToNat v) + 1 := by
-  simp [vecToNat, Function.comp_def]
-
-end vecToNat
-
 lemma forall_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
     (∀ v, φ v) ↔ (∀ a, ∀ v, φ (a :> v)) :=
   ⟨fun h a v ↦ h (a :> v), fun h v ↦ by simpa [eq_vecCons v] using h (v 0) (v ∘ Fin.succ)⟩
@@ -292,6 +278,83 @@ lemma exists_iff {n : ℕ} (φ : (Fin (n + 1) → α) → Prop) :
     (∃ v, φ v) ↔ (∃ a, ∃ v, φ (a :> v)) :=
   ⟨by rintro ⟨v, hv⟩; exact ⟨v 0, v ∘ Fin.succ, by simpa [eq_vecCons] using hv⟩,
    by rintro ⟨a, v, hv⟩; exact ⟨_, hv⟩⟩
+
+def foldr (f : α → β → β) (init : β) : {k : ℕ} → (Fin k → α) → β
+  |     0, _ => init
+  | _ + 1, v => f (vecHead v) (Matrix.foldr f init (vecTail v))
+
+def map (f : α → β) : (Fin k → α) → (Fin k → β) := fun v ↦ f ∘ v
+
+section map
+
+postfix:max "⨟" => map
+
+variable (f : α → β)
+
+@[simp] lemma map_nil (v : Fin 0 → α) : f⨟ v = ![] := empty_eq (f⨟ v)
+
+@[simp] lemma map_cons (a : α) (v : Fin k → α) : f⨟ (a :> v) = f a :> f⨟ v := by
+  ext i
+  cases i using Fin.cases <;> simp [map]
+
+@[simp] lemma map_cons' (v : Fin (k + 1) → α) : f⨟ v = f (vecHead v) :> f⨟ (vecTail v) := by
+  ext i
+  cases i using Fin.cases <;> { simp [map]; rfl }
+
+@[simp] lemma map_app (v : Fin k → α) (i : Fin k) : (f⨟ v) i = f (v i) := rfl
+
+lemma map_map_comp (g : β → γ) (f : α → β) (v : Fin k → α) :
+    g⨟ (f⨟ v) = (g ∘ f)⨟ v := by ext x; simp
+
+lemma map_map_comp' (g : β → γ) (f : α → β) (v : Fin k → α) :
+    g⨟ (f⨟ v) = (fun x ↦ g (f x))⨟ v := by ext x; simp
+
+end map
+section foldr
+
+variable (f : α → β → β) (init : β)
+
+@[simp] lemma foldr_zero (v : Fin 0 → α) : foldr f init v = init := rfl
+
+@[simp] lemma foldr_succ (v : Fin (k + 1) → α) : foldr f init v = f (vecHead v) (foldr f init (vecTail v)) := rfl
+
+end foldr
+
+def foldl (f : α → β → α) : (init : α) → {k : ℕ} → (Fin k → β) → α
+  | a,     0, _ => a
+  | a, _ + 1, v => Matrix.foldl f (f a (vecHead v)) (vecTail v)
+
+section foldl
+
+variable (f : α → β → α) (init : α)
+
+@[simp] lemma foldl_zero (v : Fin 0 → β) : foldl f init v = init := rfl
+
+@[simp] lemma foldl_succ (v : Fin (k + 1) → β) : foldl f init v = foldl f (f init (vecHead v)) (vecTail v) := rfl
+
+end foldl
+
+lemma eq_iff_eq_vecHead_of_eq_vecTail {v₁ v₂ : Fin (n + 1) → α} :
+    Matrix.vecHead v₁ = Matrix.vecHead v₂ ∧ Matrix.vecTail v₁ = Matrix.vecTail v₂ ↔ v₁ = v₂ := by
+  constructor
+  · rintro ⟨h, t⟩
+    ext i; cases i using Fin.cases
+    · exact h
+    · exact congr_fun t _
+  · rintro rfl; simp
+
+section vecToNat
+
+def vecToNat (v : Fin n → ℕ) : ℕ := foldr (fun x ih ↦ Nat.pair x ih + 1) 0 v
+
+open Encodable
+
+@[simp] lemma vecToNat_empty (v : Fin 0 → ℕ) : vecToNat v = 0 := by rfl
+
+@[simp] lemma encode_succ {n} (x : ℕ) (v : Fin n → ℕ) : vecToNat (x :> v) = Nat.pair x (vecToNat v) + 1 := by
+  simp [vecToNat]
+
+end vecToNat
 
 end Matrix
 
@@ -353,8 +416,12 @@ variable {n : ℕ}
 @[simp] lemma natToVec_vecToNat (v : Fin n → ℕ) : (vecToNat v).natToVec n = some v := by
   induction n
   · simp [*, Nat.natToVec, vecToNat, Matrix.empty_eq]
-  · suffices v 0 :> v ∘ Fin.succ = v by simp [*, Nat.natToVec, vecToNat]
-    exact funext (fun i ↦ i.cases (by simp [Matrix.empty_eq]) (by simp [Matrix.empty_eq]))
+  case succ _ ih =>
+    suffices v 0 :> v ∘ Fin.succ = v by
+      simp only [vecToNat, foldr_succ, natToVec, unpair_pair, Option.map_eq_some_iff]
+      use vecTail v
+      simpa using ih (vecTail v)
+    exact funext (fun i ↦ i.cases (by simp) (by simp))
 
 lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v) (i : Fin n) : v i < e := by
   induction' n with n ih generalizing e
@@ -369,7 +436,7 @@ lemma lt_of_eq_natToVec {e : ℕ} {v : Fin n → ℕ} (h : e.natToVec n = some v
         exact lt_trans (ih hnv i) (lt_succ.mpr <| unpair_right_le e)
 
 lemma one_le_of_bodd {n : ℕ} (h : n.bodd = true) : 1 ≤ n :=
-by induction n <;> simp [←Nat.add_one] at h ⊢
+by induction n <;> simp at h ⊢
 
 lemma pair_le_pair_of_le {a₁ a₂ b₁ b₂ : ℕ} (ha : a₁ ≤ a₂) (hb : b₁ ≤ b₂) : a₁.pair b₁ ≤ a₂.pair b₂ := by
   rcases lt_or_eq_of_le ha with (ha | rfl) <;> rcases lt_or_eq_of_le hb with (hb | rfl)
@@ -548,7 +615,7 @@ def liftVec : ∀ {n} (f : (Fin n → α) → β),
 
 lemma liftVec_mk {n} (f : (Fin n → α) → β) (h) (v : Fin n → α) :
     liftVec f h (Quotient.mk s ∘ v) = f v := by
-  induction' n with n ih <;> simp [liftVec, empty_eq, Quotient.liftOn_mk]
+  induction' n with n ih <;> simp [liftVec, empty_eq]
   simpa using ih (fun v' => f (vecHead v :> v'))
     (fun v₁ v₂ hv => h (vecHead v :> v₁) (vecHead v :> v₂) (Fin.cases (refl _) hv)) (vecTail v)
 
@@ -638,8 +705,8 @@ lemma ofFn_get_eq_map_cast {n} (g : α → β) (as : List α) {h} :
     ofFn (fun i => g (as.get (i.cast h)) : Fin n → β) = as.map g := by
   ext i b; simp
   by_cases hi : i < n
-  · simp [hi, List.ofFnNthVal, List.getElem?_eq_getElem (h ▸ hi)]
-  · simp [hi, List.ofFnNthVal, List.getElem?_eq_none (le_of_not_lt $ h ▸ hi)]
+  · simp [hi, List.getElem?_eq_getElem (h ▸ hi)]
+  · simp [hi, List.getElem?_eq_none (le_of_not_gt $ h ▸ hi)]
 
 variable {m : Type _ → Type _} {α : Type _} {β : Type _} [Monad m]
 
@@ -661,10 +728,10 @@ lemma remove_nil (a : α) : [].remove a = [] := by simp [List.remove]
 lemma eq_remove_cons {l : List α} : (ψ :: l).remove ψ = l.remove ψ := by induction l <;> simp_all [List.remove];
 
 @[simp]
-lemma remove_singleton_of_ne {φ ψ : α} (h : φ ≠ ψ) : [φ].remove ψ = [φ] := by simp_all [List.remove, Ne.symm];
+lemma remove_singleton_of_ne {φ ψ : α} (h : φ ≠ ψ) : [φ].remove ψ = [φ] := by simp_all [List.remove];
 
 lemma mem_remove_iff {l : List α} : b ∈ l.remove a ↔ b ∈ l ∧ b ≠ a := by
-  simp [List.remove, List.of_mem_filter]
+  simp [List.remove]
 
 lemma mem_of_mem_remove {a b : α} {l : List α} (h : b ∈ l.remove a) : b ∈ l := by
   rw [mem_remove_iff] at h; exact h.1
@@ -1039,3 +1106,24 @@ protected lemma comp {f : α → β} (hf : Computable f) {p : β → Prop} (hp :
   exact REPred.iff'.mpr ⟨_, pp.comp hf, by intro x; simp⟩
 
 end REPred
+
+namespace ComputablePred
+
+variable {α β : Type*} [Primcodable α] [Primcodable β] {p q : α → Prop}
+
+@[simp] protected lemma const (p : Prop) : ComputablePred fun _ : α ↦ p :=
+  computable_iff_re_compl_re'.mpr ⟨REPred.const _, REPred.const _⟩
+
+lemma and : ComputablePred p → ComputablePred q → ComputablePred fun x ↦ p x ∧ q x := by
+  simp_rw [computable_iff_re_compl_re']
+  rintro ⟨hp, hnp⟩
+  rintro ⟨hq, hnq⟩
+  refine ⟨hp.and hq, (hnp.or hnq).of_eq <| by grind⟩
+
+lemma or : ComputablePred p → ComputablePred q → ComputablePred fun x ↦ p x ∨ q x := by
+  simp_rw [computable_iff_re_compl_re']
+  rintro ⟨hp, hnp⟩
+  rintro ⟨hq, hnq⟩
+  refine ⟨hp.or hq, (hnp.and hnq).of_eq <| by grind⟩
+
+end ComputablePred

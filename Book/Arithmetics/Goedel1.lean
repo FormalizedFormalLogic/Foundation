@@ -13,7 +13,7 @@ set_option verso.docstring.allowMissing true
 tag := "goedel-1"
 %%%
 
-A deduction system $``\mathcal{S}`` is _complete_ iff it can prove or refute every sentence $``\sigma``.
-Otherwise, $``\mathcal{S}`` is _incomplete_.
+A deduction system $`\mathcal{S}` is _complete_ iff it can prove or refute every sentence $`\sigma`.
+Otherwise, $`\mathcal{S}` is _incomplete_.
 
-{docstring LO.R0.goedel_first_incompleteness}
+{docstring LO.FirstOrder.Arithmetic.incomplete}

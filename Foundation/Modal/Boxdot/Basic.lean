@@ -1,4 +1,4 @@
-import Foundation.Modal.Hilbert.Basic
+import Foundation.Modal.Hilbert.Normal.Basic
 import Foundation.Modal.Kripke.Closure
 import Foundation.Modal.Kripke.Irreflexivize
 
@@ -6,10 +6,8 @@ namespace LO.Modal
 
 open LO.Entailment LO.Modal.Entailment
 open Formula
-open Hilbert.Deduction
 
-variable [DecidableEq α]
-variable {φ : Formula α}
+variable {φ : Formula α} {Ax Ax₁ Ax₂ : Axiom α}
 
 def Formula.boxdotTranslate : Formula α → Formula α
   | atom a => .atom a
@@ -18,20 +16,132 @@ def Formula.boxdotTranslate : Formula α → Formula α
   | □φ => ⊡(boxdotTranslate φ)
 postfix:90 "ᵇ" => Formula.boxdotTranslate
 
-class BoxdotProperty (L₁ L₂ : Logic) where
-  bdp {φ : _} : φᵇ ∈ L₁ ↔ φ ∈ L₂
 
-
-theorem Hilbert.boxdotTranslated_of_dominate {H₁ H₂ : Hilbert α} [Entailment.K H₂]
-  (h : ∀ φ ∈ H₁.axiomInstances, H₂ ⊢! φᵇ) : H₁ ⊢! φ → H₂ ⊢! φᵇ := by
+theorem Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances [Entailment.K (Hilbert.Normal Ax₂)]
+  (h : ∀ φ ∈ Ax₁.instances, Hilbert.Normal Ax₂ ⊢ φᵇ) : Hilbert.Normal Ax₁ ⊢ φ → Hilbert.Normal Ax₂ ⊢ φᵇ := by
   intro d;
-  induction d using Hilbert.Deduction.rec! with
-  | maxm hs => exact h _ hs;
+  induction d using Hilbert.Normal.rec! with
+  | @axm φ s hs => apply h; use φ; tauto;
   | mdp ihpq ihp => exact ihpq ⨀ ihp;
   | nec ihp => exact boxdot_nec! $ ihp;
   | imply₂ => exact imply₂!;
   | imply₁ => exact imply₁!;
   | ec => exact elim_contra!;
+
+
+namespace Formula.Kripke.Satisfies
+
+open Kripke
+
+variable {M : Kripke.Model} {x : M} {φ ψ : Formula _}
+
+lemma iff_boxdotboxdot : x ⊧ φᵇᵇ ↔ x ⊧ φᵇ := by
+  induction φ generalizing x with
+  | hbox φ ih =>
+    suffices x ⊧ (φᵇ) → (x ⊧ (□φᵇᵇ) ↔ x ⊧ (□φᵇ)) by simpa [Formula.boxdotTranslate, Box.boxdot, ih];
+    intro h₁;
+    constructor;
+    . intro h₂ y Rxy; exact ih.mp $ @h₂ y Rxy;
+    . intro h₂ y Rxy; exact ih.mpr $ @h₂ y Rxy;
+  | _ => simp_all [Formula.boxdotTranslate];
+
+lemma boxdot_and : x ⊧ (φ ⋏ ψ)ᵇ ↔ x ⊧ φᵇ ⋏ ψᵇ := by simp [boxdotTranslate];
+
+lemma boxdotTranslate_lconj {l : List _} : x ⊧ l.conjᵇ ↔ x ⊧ (l.map (·ᵇ)).conj := by
+  induction l with
+  | nil => simp [Formula.boxdotTranslate];
+  | cons φ l ih =>
+    apply Iff.trans boxdot_and;
+    apply Iff.trans Satisfies.and_def;
+    suffices x ⊧ φᵇ → (x ⊧ (l.conjᵇ) ↔ ∀ ψ ∈ l, x ⊧ (ψᵇ)) by simpa;
+    intro hφ;
+    constructor;
+    . intro hl ψ hψ;
+      have := ih.mp hl;
+      apply Satisfies.conj₁_def.mp this;
+      simp;
+      tauto;
+    . intro h;
+      apply ih.mpr;
+      apply Satisfies.conj₁_def.mpr;
+      simpa;
+
+lemma boxdotTranslate_lconj₂ {l : List _} : x ⊧ (⋀l)ᵇ ↔ x ⊧ ⋀(l.map (·ᵇ)) := by
+  induction l using List.induction_with_singleton with
+  | hnil => simp [Formula.boxdotTranslate];
+  | hsingle φ => simp;
+  | hcons φ l hl ih =>
+    suffices x ⊧ ((φ ⋏ ⋀l)ᵇ) ↔ x ⊧ (φᵇ) ∧ ∀ a ∈ l, x ⊧ (aᵇ) by simpa [hl, boxdot_and];
+    apply Iff.trans boxdot_and;
+    apply Iff.trans Satisfies.and_def;
+    suffices x ⊧ φᵇ → (x ⊧ (⋀l)ᵇ ↔ ∀ ψ ∈ l, x ⊧ (ψᵇ)) by simpa;
+    intro hφ;
+    constructor;
+    . intro hl ψ hψ;
+      have := ih.mp hl;
+      apply Satisfies.conj_def.mp this;
+      simp;
+      tauto;
+    . intro h;
+      apply ih.mpr;
+      apply Satisfies.conj_def.mpr;
+      simpa;
+
+lemma boxdotTranslate_fconj₂ {Γ : Finset _} : x ⊧ Γ.conjᵇ ↔ x ⊧ (Γ.image (·ᵇ)).conj := by
+  obtain ⟨l, rfl⟩ : ∃ l : List _, l.toFinset = Γ := ⟨Γ.toList, by simp⟩
+  induction l with
+  | nil => simp [Formula.boxdotTranslate];
+  | cons φ l ih =>
+    apply Iff.trans boxdotTranslate_lconj₂;
+    suffices (∀ ψ, (φᵇ = ψ ∨ ∃ ξ ∈ l, ξᵇ = ψ) → x ⊧ ψ) ↔ x ⊧ (φᵇ) ∧ ∀ ξ ∈ l, x ⊧ (ξᵇ) by simpa;
+    constructor;
+    . intro h;
+      constructor;
+      . apply h;
+        tauto;
+      . intro ψ hψ;
+        apply h;
+        right;
+        use ψ;
+    . rintro ⟨h₁, h₂⟩ _ (rfl | ⟨ψ, hψ, rfl⟩);
+      . assumption;
+      . apply h₂;
+        assumption;
+
+lemma iff_boxdotTranslateMultibox_boxdotTranslateBoxlt : x ⊧ (□^[n]φ)ᵇ ↔ x ⊧ □^≤[n] φᵇ := by
+  induction n generalizing x with
+  | zero => simp;
+  | succ n ih =>
+    suffices (∀ k < n + 1, x ⊧ (□^[k]φᵇ)) ∧ x ⊧ (□(□^[n]φ)ᵇ) ↔ (∀ k < n + 2, x ⊧ (□^[k]φᵇ)) by
+      simpa [Box.boxdot, boxdotTranslate, ih];
+    constructor;
+    . rintro ⟨h₁, h₂⟩ k hk;
+      apply Satisfies.multibox_def.mpr;
+      intro y Rxy;
+      by_cases ek : k = n + 1;
+      . subst ek;
+        obtain ⟨u, Ryu, Ruy⟩ := Rxy;
+        apply Satisfies.multibox_def.mp (Satisfies.fconj_def.mp (ih.mp $ h₂ u Ryu) _ ?_) Ruy;
+        . simp;
+          tauto;
+      . exact Satisfies.multibox_def.mp (h₁ k (by omega)) Rxy;
+    . intro h;
+      constructor;
+      . intro k hk;
+        apply Satisfies.multibox_def.mpr;
+        intro y Rxy;
+        apply Satisfies.multibox_def.mp (@h k (by omega)) Rxy;
+      . intro y Rxy;
+        apply ih.mpr;
+        apply Satisfies.fconj_def.mpr;
+        simp only [Finset.mem_image, Finset.mem_range, Satisfies.iff_models, forall_exists_index, and_imp, forall_apply_eq_imp_iff₂];
+        intro k hk;
+        apply Satisfies.multibox_def.mpr;
+        intro u Ryu;
+        apply Satisfies.multibox_def.mp $ @h (k + 1) (by omega);
+        use y;
+
+end Formula.Kripke.Satisfies
 
 
 namespace Kripke

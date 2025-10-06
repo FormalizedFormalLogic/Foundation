@@ -14,7 +14,7 @@ First, the graph of the exponential function must be defined. This is achieved b
 
 1.  Semantic definition.
     ```lean
-    def Exponential {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀] :
+    def Exponential {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝗜𝚺₀] :
         M → M → Prop
     ```
 2.  Syntactic definition that expresses the semantic definition.
@@ -30,11 +30,11 @@ First, the graph of the exponential function must be defined. This is achieved b
     ````
 
 ```lean
-theorem Exponential.total  {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝐈𝚺₀] (x : M) : ∃ y, Exponential x y
+theorem Exponential.total  {M : Type*} [Zero M] [One M] [Add M] [Mul M] [LT M] [M ⊧ₘ* 𝗜𝚺₀] (x : M) : ∃ y, Exponential x y
 ```
 
 Since `Exponential` and `Exponential.total` are defined in all the model of $\mathsf{I}\Sigma_1$,
-`𝐈𝚺₁ ⊢! ∀' ∃' exponentialDef` is obtained by the completeness theorem. This was the result we wanted to achieve.
+`𝗜𝚺₁ ⊢ ∀' ∃' exponentialDef` is obtained by the completeness theorem. This was the result we wanted to achieve.
 
 ## Defined Predicates and Functions
 
@@ -76,15 +76,15 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 |      $\mathrm{lh}(x)$ (length of sequence)      | [`lh x`]                |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Sigma_0$ |       $x$        |
 | $x^\frown \braket{y}$ (concatation of sequence) | [`x ⁀' y`]              |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Sigma_0$ |       none       |
 |      $(x)_y$ ($y$-th element of sequence)       | [`znth x`]              |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Sigma_0$ |       $x$        |
-|            $\mathrm{Semiterm}_x (y)$            | [`L.Semiterm x y`]      |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
+|            $\mathrm{Semiterm}_x (y)$            | [`Semiterm L x y`]      |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
 |                  $t [\vec{w}]$                  | [`L.termSubst w t`]     |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
-|           $\mathrm{Semiformula}_x(y)$           | [`L.Semiformula x y`]   |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
-|                  $φ [\vec{w}]$                  | [`L.substs w φ`]        |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
-|            $\mathrm{Pr}_T(\varphi)$             | [`T.Provableₐ φ`]       |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Sigma_1$ |        -         |
- 
+|           $\mathrm{Semiformula}_x(y)$           | [`Semiformula L x y`]   |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Delta_1$ |        -         |
+|                  $φ [\vec{w}]$                  | [`subst L w φ`]        |           $\mathsf{I}\Sigma_1$           |           $\mathsf{I}\Sigma_1$           | $\Delta_1$ |       none       |
+|            $\mathrm{Pr}_T(\varphi)$             | [`T.Provable φ`]       |           $\mathsf{I}\Sigma_1$           |                    -                     | $\Sigma_1$ |        -         |
+
 [`x ≤ y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/PeanoMinus/Basic.html#LO.PeanoMinus.instLE
 [`x - y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/PeanoMinus/Functions.html#LO.PeanoMinus.sub
-[`x ∣ y`]: https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/Basic/PeanoMinus.html#LO.FirstOrder.Arith.dvd
+[`x ∣ y`]: https://formalizedformallogic.github.io/Arithmetization/docs/Arithmetization/Basic/PeanoMinus.html#LO.FirstOrder.Arithmetic.dvd
 [`x % y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/IOpen/Basic.html#LO.IOpen.rem
 [`√x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/IOpen/Basic.html#LO.IOpen.sqrt
 [`⟪x, y⟫`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/IOpen/Basic.html#LO.IOpen.pair
@@ -109,9 +109,9 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $\ma
 [`lh x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.lh
 [`x ⁀' y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.seqCons
 [`znth x`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/HFS/Seq.html#LO.ISigma1.znth
-[`L.Semiterm x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Basic.html#LO.ISigma1.Metamath.Language.IsSemiterm
+[`Semiterm L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Basic.html#LO.ISigma1.Metamath.IsSemiterm
 [`L.termSubst w t`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Term/Functions.html#LO.ISigma1.Metamath.Language.termSubst
-[`L.Semiformula x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Basic.html#LO.ISigma1.Metamath.Language.IsSemiformula
-[`L.substs w φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Functions.html#LO.ISigma1.Metamath.Language.substs
-[`T.Provableₐ φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/FormalizedR0.html#LO.FirstOrder.Theory.Provable%E2%82%90
+[`Semiformula L x y`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Basic.html#LO.ISigma1.Metamath.IsSemiformula
+[`subst L w φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/ISigma1/Metamath/Formula/Functions.html#LO.ISigma1.Metamath.subst
+[`T.Provable φ`]: https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/StandardProvability/FormalizedR0.html#LO.FirstOrder.Theory.Provable%E2%82%90
 

@@ -10,6 +10,12 @@ protected abbrev DiaDuality := ◇φ ⭤ ∼(□(∼φ))
 
 protected abbrev K := □(φ ➝ ψ) ➝ □φ ➝ □ψ
 
+protected abbrev M := □(φ ⋏ ψ) ➝ (□φ ⋏ □ψ)
+
+protected abbrev C := (□φ ⋏ □ψ) ➝ □(φ ⋏ ψ)
+
+protected abbrev N := □(⊤ : F)
+
 /-- Axiom for reflexive -/
 protected abbrev T := □φ ➝ φ
 
@@ -27,6 +33,8 @@ protected abbrev P : F := ∼(□⊥)
 
 /-- Axiom for transivity -/
 protected abbrev Four := □φ ➝ □□φ
+
+protected abbrev FourN (n : ℕ) (φ : F) := □^[n]φ ➝ □^[(n + 1)]φ
 
 /-- Axiom for euclidean -/
 protected abbrev Five := ◇φ ➝ □◇φ
@@ -75,7 +83,7 @@ protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
 /--
   Axiom for McKinsey condition
 -/
-protected abbrev M := □◇φ ➝ ◇□φ
+protected abbrev McK := □◇φ ➝ ◇□φ
 
 /--
   Axiom for
@@ -86,10 +94,14 @@ protected abbrev L := □(□φ ➝ φ) ➝ □φ
 
 protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
 
-protected abbrev H := □(□φ ⭤ φ) ➝ □φ
+protected abbrev Hen := □(□φ ⭤ φ) ➝ □φ
 
 protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
 
+/--
+  For Sobocinski's `K1.2`.
+-/
+protected abbrev H := φ ➝ □(◇φ ➝ φ)
 
 protected structure Geach.Taple where
   i : ℕ
@@ -101,3 +113,5 @@ protected structure Geach.Taple where
   Axiom for Geach confluency.
 -/
 protected abbrev Geach (g : Geach.Taple) (φ : F) := ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ)
+
+end LO.Modal.Axioms

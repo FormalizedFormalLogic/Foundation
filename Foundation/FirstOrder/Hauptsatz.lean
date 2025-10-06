@@ -48,8 +48,16 @@ variable {Γ Δ : Sequent L}
 
 @[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᵀ Γ} :
     IsCutFree (rewrite d f) ↔ IsCutFree d := by
-  induction d generalizing f <;> simp [rewrite, *]
-  case root => contradiction
+  induction d generalizing f
+  case axm => contradiction
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
 
 @[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᵀ Γ} :
     IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
@@ -240,13 +248,13 @@ def modusPonens {φ ψ : SyntacticFormulaᵢ L} (f : p ⊩ φ ➝ ψ) (g : p ⊩
   f.implyEquiv p (StrongerThan.refl p) g
 
 noncomputable
-def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝐌𝐢𝐧¹ ⊢ φ → ⊩ φ
+def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩ φ
   | .mdp (φ := ψ) b d => fun p ↦
     let b : p ⊩ ψ ➝ φ := ofMinimalProof b p
     let d : p ⊩ ψ := ofMinimalProof d p
     b.implyEquiv p (StrongerThan.refl p) d
   | .gen (φ := φ) b => fun p ↦ allEquiv.symm fun t ↦
-    let d : 𝐌𝐢𝐧¹ ⊢ φ/[t] :=
+    let d : 𝗠𝗶𝗻¹ ⊢! φ/[t] :=
       HilbertProofᵢ.cast (HilbertProofᵢ.rewrite (t :>ₙ fun x ↦ &x) b) (by simp [rewrite_free_eq_subst])
     ofMinimalProof d p
   | .verum => fun p ↦ PUnit.unit
@@ -318,7 +326,7 @@ private def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ ψ
 private def refl.ex (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃' φ] ⊩ (∃' φ)ᴺ :=
   implyOf fun q f ↦
     let x := newVar ((∀' ∼φ) :: ∼q)
-    let ih : [φ/[&x]] ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.substitute_doubleNegation])
+    let ih : [φ/[&x]] ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.subst_doubleNegation])
     let b : [φ/[&x]] ⊓ q ⊩ ⊥ :=
       (f.allEquiv &x).implyEquiv ([φ/[&x]] ⊓ q) (StrongerThan.minLeRight _ _) (ih.monotone (StrongerThan.minLeLeft _ _))
     let ⟨b, hb⟩ := b.falsumEquiv
@@ -364,7 +372,7 @@ end Forces
 
 noncomputable
 def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᵀ Γ → {d : ⊢ᵀ Γ // Derivation.IsCutFree d} := fun d ↦
-  let d : 𝐌𝐢𝐧¹ ⊢ ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.goedelGentzen d)
+  let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.goedelGentzen d)
   let ff : ∼Γ ⊩ ⋀(∼Γ)ᴺ ➝ ⊥ := Forces.ofMinimalProof d (∼Γ)
   let fc : ∼Γ ⊩ ⋀(∼Γ)ᴺ := Forces.conj' fun φ hφ ↦
     (Forces.refl φ).monotone (StrongerThan.ofSubset <| List.cons_subset.mpr ⟨hφ, by simp⟩)

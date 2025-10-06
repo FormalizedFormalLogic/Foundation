@@ -5,9 +5,10 @@ import Foundation.Modal.Kripke.Logic.KT
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
-open Hilbert.Kripke
-
+open Modal.Kripke
 
 namespace Kripke
 
@@ -20,26 +21,27 @@ protected abbrev FrameClass.finite_S4 : FrameClass := { F | F.IsFiniteS4 }
 end Kripke
 
 
-namespace Hilbert.S4.Kripke
+namespace S4
 
-instance sound : Sound (Hilbert.S4) FrameClass.S4 := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F ⟨_, _⟩ _ (rfl | rfl);
+instance : Sound Modal.S4 FrameClass.S4 := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  rintro _ (rfl | rfl) F ⟨_, _⟩;
   . exact validate_AxiomT_of_reflexive;
   . exact validate_AxiomFour_of_transitive;
 
-instance consistent : Entailment.Consistent (Hilbert.S4) := consistent_of_sound_frameclass FrameClass.S4 $ by
+instance : Entailment.Consistent Modal.S4 := consistent_of_sound_frameclass FrameClass.S4 $ by
   use whitepoint;
   constructor;
 
-instance canonical : Canonical (Hilbert.S4) FrameClass.S4 := ⟨by constructor⟩
+instance : Canonical Modal.S4 FrameClass.S4 := ⟨by constructor⟩
 
-instance complete : Complete (Hilbert.S4) FrameClass.S4 := inferInstance
+instance : Complete Modal.S4 FrameClass.S4 := inferInstance
 
 open finestFiltrationTransitiveClosureModel in
-instance finiteComplete : Complete (Hilbert.S4) FrameClass.finite_S4 := ⟨by
+instance : Complete Modal.S4 FrameClass.finite_S4 := ⟨by
   intro φ hp;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.S4);
   rintro F hF V x;
   replace hF := Set.mem_setOf_eq.mp hF;
   let M : Kripke.Model := ⟨F, V⟩;
@@ -52,27 +54,16 @@ instance finiteComplete : Complete (Hilbert.S4) FrameClass.finite_S4 := ⟨by
   }
 ⟩
 
-end Hilbert.S4.Kripke
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma S4.Kripke.preorder : Logic.S4 = FrameClass.S4.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
-theorem S4.proper_extension_of_KT : Logic.KT ⊂ Logic.S4 := by
+instance : Modal.KT ⪱ Modal.S4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp [axiomK!, axiomT!]) |>.subset;
-  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬FrameClass.KT ⊧ φ by
-      rw [KT.Kripke.refl];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Four (.atom 0);
     constructor;
     . exact axiomFour!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KT)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨
           ⟨Fin 3, λ x y => (x = 0 ∧ y ≠ 2) ∨ (x = 1 ∧ y ≠ 0) ∨ (x = 2 ∧ y = 2)⟩,
           λ w _ => w = 0 ∨ w = 1
@@ -94,17 +85,16 @@ theorem S4.proper_extension_of_KT : Logic.KT ⊂ Logic.S4 := by
           . use 2;
             refine ⟨by omega;, by trivial, by trivial⟩;
 
-@[simp]
-theorem S4.proper_extension_of_KD4 : Logic.KD4 ⊂ Logic.S4 := by
+instance : Modal.KD4 ⪱ Modal.S4 := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.S4 ⊢! φ ∧ ¬FrameClass.KD4 ⊧ φ by
-      rw [KD4.Kripke.serial_trans];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.T (.atom 0);
     constructor;
     . exact axiomT!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD4)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 3, λ _ y => y = 1⟩, (λ w _ => w = 1)⟩, 0;
       constructor;
       . refine {
@@ -113,9 +103,15 @@ theorem S4.proper_extension_of_KD4 : Logic.KD4 ⊂ Logic.S4 := by
         };
       . simp [Semantics.Realize, Satisfies];
 
-@[simp]
-lemma S4.proper_extension_of_KD : Logic.KD ⊂ Logic.S4 := by trans Logic.KT <;> simp;
+instance : Modal.KD ⪱ Modal.S4 := calc
+  Modal.KD ⪱ Modal.KD4 := by infer_instance
+  _          ⪱ Modal.S4  := by infer_instance
 
-end Logic
+end S4
+
+
+
+instance : Sound Modal.S4 FrameClass.S4 := inferInstance
+instance : Complete Modal.S4 FrameClass.S4 := inferInstance
 
 end LO.Modal
