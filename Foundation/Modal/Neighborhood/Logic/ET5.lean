@@ -2,7 +2,7 @@ import Foundation.Modal.Neighborhood.AxiomGeach
 import Foundation.Modal.Neighborhood.AxiomN
 import Foundation.Modal.Neighborhood.AxiomB
 import Foundation.Modal.Neighborhood.Logic.END4
-import Foundation.Modal.Neighborhood.Logic.ET4
+import Foundation.Modal.Neighborhood.Logic.ENT4
 import Foundation.Modal.Neighborhood.Logic.ET
 import Foundation.Modal.Neighborhood.Logic.E5
 import Foundation.Vorspiel.Set.Fin
@@ -30,10 +30,6 @@ instance : Frame.simple_blackhole.IsET5 where
     intro X x hx;
     simp_all [Frame.simple_blackhole, Frame.box];
 
-instance : counterframe_axiomFive.IsReflexive := by
-  constructor;
-  intro X x hx;
-  simp_all [Frame.box];
 
 section
 
@@ -64,6 +60,11 @@ lemma counterframe_2_3_5.not_valid_axiomT : ¬counterframe_2_3_5 ⊧ Axioms.T (F
   have := @this 1
   simp at this;
 
+instance : counterframe_axiomFive.IsENT4 where
+  contains_unit := by simp [Frame.box];
+  refl := by rintro X x (rfl | rfl | rfl) <;> tauto_set;
+  trans := by rintro X x (rfl | rfl) <;> simp [Frame.box];
+
 end Neighborhood
 
 
@@ -85,37 +86,17 @@ instance : Complete Modal.ET5 FrameClass.ET5 := (minimalCanonicity Modal.ET5).co
 end ET5
 
 
-instance : Modal.END ⪱ Modal.ET5 := by
+instance : Modal.ENT4 ⪱ Modal.ET5 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
     rintro φ (rfl | rfl | rfl) <;> simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.T (.atom 0));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.END);
-      apply not_validOnFrameClass_of_exists_frame;
-      use counterframe_2_3_5;
-      constructor;
-      . apply Set.mem_setOf_eq.mpr;
-        infer_instance;
-      . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
-        by_contra! hC;
-        have := hC.refl {0};
-        have := @this 1
-        simp at this;
-
-instance : Modal.ET ⪱ Modal.ET5 := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.Five (.atom 0));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.ET);
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.ENT4);
       apply not_validOnFrameClass_of_exists_frame;
-      use ⟨Fin 2, λ x => {{x}}⟩;
+      use counterframe_axiomFive;
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         infer_instance

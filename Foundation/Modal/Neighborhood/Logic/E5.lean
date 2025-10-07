@@ -25,21 +25,27 @@ instance : Frame.simple_blackhole.IsEuclidean := by
   intro X x hx;
   simp_all [(show X ≠ ∅ by grind), Frame.box];
 
-abbrev counterframe_axiomFive : Frame := ⟨Fin 2, λ x => {{x}}⟩
+abbrev counterframe_axiomFive : Frame := ⟨Fin 3, λ x => {{x}, Set.univ}⟩
 
 instance : counterframe_axiomFive.IsRegular := by
   constructor;
-  rintro X Y x ⟨hx, hy⟩;
-  match x with | 0 | 1 => simp_all;
+  rintro X Y x ⟨(rfl | rfl), (rfl | rfl)⟩ <;>
+  match x with | 0 | 1 | 2 => simp_all;
 
 @[simp]
 lemma counterframe_axiomFive.not_valid_axiomFive : ¬counterframe_axiomFive ⊧ Axioms.Five (Formula.atom 0) := by
   apply not_imp_not.mpr isEuclidean_of_valid_axiomFive;
   by_contra! hC;
-  have := hC.eucl Set.univ;
-  have := Set.Subset.antisymm_iff.mp (@this 1 (by simp; tauto_set)) |>.1;
-  have := @this 0 (by simp; tauto_set);
-  contradiction;
+  have := hC.eucl {0, 1};
+  have := @this 1 $ by
+    simp only [Set.mem_compl_iff, Set.mem_setOf_eq, Set.mem_insert_iff, Set.mem_singleton_iff, Set.compl_univ_iff, not_or];
+    tauto_set;
+  simp only [Frame.box, Frame.dia, Set.mem_insert_iff, Set.mem_singleton_iff, Set.compl_univ_iff, Set.mem_setOf_eq] at this;
+  rcases this with (h | h);
+  . have := Set.ext_iff.mp h 1 |>.2 (by simp);
+    simp at this;
+    tauto_set;
+  . tauto_set;
 
 end Neighborhood
 

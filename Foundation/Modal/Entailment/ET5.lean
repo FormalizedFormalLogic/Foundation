@@ -24,10 +24,9 @@ instance : Entailment.ETB 𝓢 where
 
 instance : Entailment.EN 𝓢 where
 
-instance : Entailment.HasAxiomFour 𝓢 := HasAxiomFour.of_dual $ by
-  intro φ;
-  sorry;
+instance : Entailment.HasAxiomPoint2 𝓢 := ⟨fun _ ↦ C_trans (C_trans axiomFiveDual! axiomT) axiomB⟩
 
+instance : Entailment.HasAxiomFour 𝓢 := ⟨fun _ ↦ C_trans (C_trans axiomTDual! axiomFive) (K_left $ re $ K_intro axiomFiveDual! axiomTDual!)⟩
 end ET5
 
 

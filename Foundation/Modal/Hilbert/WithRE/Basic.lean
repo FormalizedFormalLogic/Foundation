@@ -283,6 +283,19 @@ protected abbrev END4 : Logic ℕ := Hilbert.WithRE END4.axioms
 instance : Entailment.END Modal.END where
 instance : Entailment.E4 Modal.END4 where
 
+protected abbrev EMND4.axioms : Axiom ℕ := {Axioms.M (.atom 0) (.atom 1), Axioms.N, Axioms.D (.atom 0), Axioms.Four (.atom 0)}
+namespace EMND4.axioms
+instance : EMND4.axioms.HasM where p := 0; q := 1;
+instance : EMND4.axioms.HasN where
+instance : EMND4.axioms.HasD where p := 0;
+instance : EMND4.axioms.HasFour where p := 0; mem_Four := by simp;
+end EMND4.axioms
+protected abbrev EMND4 : Logic ℕ := Hilbert.WithRE EMND4.axioms
+instance : Entailment.END Modal.END where
+instance : Entailment.EM Modal.EMND4 where
+instance : Entailment.E4 Modal.EMND4 where
+
+
 protected abbrev EP.axioms : Axiom ℕ := {Axioms.P}
 instance : EP.axioms.HasP where mem_P := by simp;
 protected abbrev EP : Logic ℕ := Hilbert.WithRE EP.axioms
@@ -426,8 +439,6 @@ instance : ET5.axioms.HasT where p := 0;
 end ET5.axioms
 protected abbrev ET5 : Logic ℕ := Hilbert.WithRE ET5.axioms
 instance : Entailment.ET5 Modal.ET5 where
-
-
 
 end
 

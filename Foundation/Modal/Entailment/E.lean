@@ -147,4 +147,10 @@ def axiomFiveDual! [DecidableEq F] [HasAxiomFive 𝓢] : 𝓢 ⊢! ◇□φ ➝ 
   . exact boxDuality_mpr;
 @[simp] lemma axiomFiveDual [HasAxiomFive 𝓢] : 𝓢 ⊢ ◇□φ ➝ □φ := ⟨axiomFiveDual!⟩
 
+def axiomTDual! [DecidableEq F] [HasAxiomT 𝓢] : 𝓢 ⊢! φ ➝ ◇φ := by
+  apply C_replace ?_ ?_ $ contra $ axiomT (φ := ∼φ);
+  . exact dni;
+  . exact diaDuality_mpr;
+@[simp] lemma axiomTDual [HasAxiomT 𝓢] : 𝓢 ⊢ φ ➝ ◇φ := ⟨axiomTDual!⟩
+
 end LO.Modal.Entailment
