@@ -306,7 +306,7 @@ namespace ET.axioms
 instance : ET.axioms.HasT where p := 0;
 end ET.axioms
 protected abbrev ET : Logic ℕ := Hilbert.WithRE ET.axioms
-instance : Entailment.HasAxiomT Modal.ET := instHasAxiomT
+instance : Entailment.ET Modal.ET where
 
 protected abbrev EMT.axioms : Axiom ℕ := {Axioms.M (.atom 0) (.atom 1), Axioms.T (.atom 0)}
 namespace EMT.axioms

@@ -4,6 +4,7 @@ import Foundation.Modal.Neighborhood.AxiomC
 import Foundation.Modal.Neighborhood.Logic.E
 import Foundation.Modal.Neighborhood.Logic.ED
 import Foundation.Modal.Neighborhood.Filtration
+import Foundation.Modal.Entailment.ET
 
 namespace LO.Modal
 
@@ -51,23 +52,13 @@ instance : Complete Modal.ET FrameClass.ET := (minimalCanonicity Modal.ET).compl
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-lemma provable_axiomD : Modal.ET ⊢ Axioms.D φ := by
-  suffices Modal.ET ⊢ Axioms.D (.atom 0) by apply Logic.subst (s := λ n => φ) this;
-  apply Complete.complete (𝓜 := FrameClass.ET);
-  intro F hF;
-  replace hF := Set.mem_setOf_eq.mp hF;
-  apply valid_axiomD_of_isSerial;
-
-noncomputable instance : Entailment.HasAxiomD Modal.ET := ⟨λ _ => provable_axiomD.some⟩
-
 end ET
 
 
 instance : Modal.ED ⪱ Modal.ET := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
-    rintro φ (rfl);
-    . simp;
+    rintro φ rfl; simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.T (.atom 0));
     constructor;

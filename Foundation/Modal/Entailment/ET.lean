@@ -19,6 +19,8 @@ namespace ET
 
 instance : Entailment.HasAxiomD 𝓢 := ⟨fun _ ↦ C_trans axiomT diaTc⟩
 
+instance : Entailment.ED 𝓢 where
+
 end ET
 
 end LO.Modal.Entailment
