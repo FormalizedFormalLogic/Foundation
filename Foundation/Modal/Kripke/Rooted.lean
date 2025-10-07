@@ -300,8 +300,7 @@ instance isAsymmetric [F.IsAsymmetric] : (F↾r).IsAsymmetric := ⟨by
 
 instance isPiecewiseConvergent [F.IsPiecewiseConvergent] : (F↾r).IsPiecewiseConvergent := ⟨by
   rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz nexy;
-  any_goals contradiction;
-  case mk.inl.mk.inr.mk.inr | mk.inr.mk.inr.mk.inr =>
+  case inl.inr.inr | inr.inr.inr =>
     have ⟨u, Ryu, Rzu⟩ := F.p_convergent Rxy Rxz $ by simp_all;
     use ⟨u, by right; apply HRel.TransGen.tail Rry Ryu⟩;
   all_goals
@@ -311,8 +310,8 @@ instance isPiecewiseConvergent [F.IsPiecewiseConvergent] : (F↾r).IsPiecewiseCo
 
 instance isPiecewiseStronglyConvergent [F.IsPiecewiseStronglyConvergent] : (F↾r).IsPiecewiseStronglyConvergent := ⟨by
   rintro ⟨x, (rfl | Rrx)⟩ ⟨y, (rfl | Rry)⟩ ⟨z, (rfl | Rrz)⟩ Rxy Rxz;
-  case mk.inl.mk.inl.mk.inl => tauto;
-  case mk.inr.mk.inr.mk.inr | mk.inl.mk.inr.mk.inr =>
+  case inl.inl.inl => tauto;
+  case inr.inr.inr | inl.inr.inr =>
     obtain ⟨u, Ryu, Rzu⟩ := F.ps_convergent Rxy Rxz;
     use ⟨u, ?_⟩;
     . right; exact HRel.TransGen.tail Rry Ryu;
