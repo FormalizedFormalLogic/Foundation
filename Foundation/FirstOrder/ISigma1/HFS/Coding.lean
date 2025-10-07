@@ -4,7 +4,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 noncomputable def finsetArithmetizeAux : List V → V
   |      [] => ∅

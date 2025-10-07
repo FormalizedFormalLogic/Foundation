@@ -14,7 +14,7 @@ namespace LO
 
 open FirstOrder Arithmetic PeanoMinus IOpen
 
-variable {V : Type*} [ORingStruc V]
+variable {V : Type*} [ORingStructure V]
 
 namespace ISigma0
 

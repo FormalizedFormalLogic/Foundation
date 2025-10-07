@@ -10,7 +10,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 section adjoin
 
@@ -427,10 +427,10 @@ section
 lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
   c.adjointruction.fixpoint_defined
 
-instance graph_definable : 𝚺₁.Boldface (fun v ↦ c.Graph (v ·.succ) (v 0)) := c.graph_defined.to_definable
+instance graph_definable : 𝚺₁.Definable (fun v ↦ c.Graph (v ·.succ) (v 0)) := c.graph_defined.to_definable
 
 instance graph_definable' (param) : 𝚺₁-Predicate (c.Graph param) := by
-  simpa using HierarchySymbol.Boldface.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
+  simpa using HierarchySymbol.Definable.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
 
 instance graph_definable'' (param) : 𝚺-[0 + 1]-Predicate (c.Graph param) := c.graph_definable' param
 
@@ -516,11 +516,11 @@ lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (
 @[simp] lemma eval_resultDef (v) :
     Semiformula.Evalbm V v β.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.df.iff v
 
-instance result_definable : 𝚺₁.BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
+instance result_definable : 𝚺₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
   c.result_defined.to_definable
 
 instance result_definable' (Γ m) :
-    Γ-[m + 1].BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0)) := c.result_definable.of_sigmaOne
+    Γ-[m + 1].DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) := c.result_definable.of_sigmaOne
 
 end
 

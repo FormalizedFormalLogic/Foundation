@@ -37,9 +37,9 @@ instance : ℕ ⊧ₘ* 𝗥₀ := ⟨by
   case Ω₃ h =>
     simpa [models_iff, ←le_iff_eq_or_lt] using h⟩
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗥₀]
+variable {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗥₀]
 
-open Language ORingStruc
+open Language ORingStructure
 
 lemma numeral_add_numeral (n m : ℕ) : (numeral n : M) + numeral m = numeral (n + m) := by
   simpa [models_iff] using ModelsTheory.models M (Ω₁ n m)
@@ -146,7 +146,7 @@ variable {T : ArithmeticTheory} [𝗥₀ ⪯ T]
 theorem sigma_one_completeness {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     ℕ ⊧ₘ σ → T ⊢ σ := fun H =>
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗥₀) inferInstance inferInstance
-  complete <| oRing_consequence_of.{0} _ _ <| fun M _ _ ↦ by
+  provable_of_models.{0} _ _ <| fun M _ _ ↦ by
     haveI : M ⊧ₘ* 𝗥₀ := ModelsTheory.of_provably_subtheory M 𝗥₀ T inferInstance
     exact R0.sigma_one_completeness hσ H
 
@@ -177,7 +177,7 @@ instance (n : ℕ) : OfNat OmegaAddOne n := ⟨.some n⟩
 
 instance : Top OmegaAddOne := ⟨.none⟩
 
-instance : ORingStruc OmegaAddOne where
+instance : ORingStructure OmegaAddOne where
   add a b :=
     match a, b with
     | .some i, .some j => i + j
@@ -213,11 +213,11 @@ instance : ORingStruc OmegaAddOne where
 lemma exists_add_zero_ne_self : ∃ x : OmegaAddOne, x + 0 ≠ x :=
   ⟨⊤, by simp⟩
 
-@[simp] lemma numeral_eq (n : ℕ) : (ORingStruc.numeral n : OmegaAddOne) = n :=
+@[simp] lemma numeral_eq (n : ℕ) : (ORingStructure.numeral n : OmegaAddOne) = n :=
   match n with
   |     0 => rfl
   |     1 => rfl
-  | n + 2 => by simp [ORingStruc.numeral, numeral_eq (n + 1)]; rfl
+  | n + 2 => by simp [ORingStructure.numeral, numeral_eq (n + 1)]; rfl
 
 @[simp] lemma coe_inj_iff (n m : ℕ) : (↑n : OmegaAddOne) = (↑m : OmegaAddOne) ↔ n = m := Option.some_inj
 

@@ -10,7 +10,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 namespace Fixpoint
 
@@ -69,7 +69,7 @@ lemma eval_formula (v : Fin k.succ.succ → V) :
 lemma succ_existsUnique (s ih : V) :
     ∃! u : V, ∀ x, (x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x) := by
   have : 𝚺₁-Predicate fun x ↦ x ≤ s ∧ c.Φ v {z | z ∈ ih} x := by
-    apply HierarchySymbol.Boldface.and (by definability)
+    apply HierarchySymbol.Definable.and (by definability)
       ⟨φ.core.sigma.rew <| Rew.embSubsts (#0 :> &ih :> fun i ↦ &(v i)),
         by intro x; simp [HierarchySymbol.Semiformula.val_sigma, c.eval_formula]⟩
   exact finite_comprehension₁! this
@@ -124,17 +124,17 @@ lemma termSet_defined : 𝚺₁.DefinedFunction (fun v ↦ c.limSeq (v ·.succ) 
     Semiformula.Evalbm V v φ.limSeqDef.val ↔ v 0 = c.limSeq (v ·.succ.succ) (v 1) := c.termSet_defined.df.iff v
 
 instance limSeq_definable :
-  𝚺₁.BoldfaceFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.termSet_defined.to_definable
+  𝚺₁.DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.termSet_defined.to_definable
 
-@[simp, definability] instance limSeq_definable' (Γ) : Γ-[m + 1].BoldfaceFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.limSeq_definable.of_sigmaOne
+@[simp, definability] instance limSeq_definable' (Γ) : Γ-[m + 1].DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.limSeq_definable.of_sigmaOne
 
 lemma mem_limSeq_succ_iff {x s : V} :
     x ∈ c.limSeq v (s + 1) ↔ x ≤ s ∧ c.Φ v {z | z ∈ c.limSeq v s} x := by simp [limSeq_succ, mem_succ_iff]
 
 lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s' := by
   induction s' using ISigma1.sigma1_succ_induction generalizing s
-  · apply HierarchySymbol.Boldface.ball_le (by definability)
-    apply HierarchySymbol.Boldface.comp₂
+  · apply HierarchySymbol.Definable.ball_le (by definability)
+    apply HierarchySymbol.Definable.comp₂
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
     · exact ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
   case zero =>
@@ -150,12 +150,12 @@ lemma limSeq_cumulative {s s' : V} : s ≤ s' → c.limSeq v s ⊆ c.limSeq v s'
 lemma mem_limSeq_self [c.StrongFinite] {u s : V} :
     u ∈ c.limSeq v s → u ∈ c.limSeq v (u + 1) := by
   induction u using ISigma1.pi1_order_induction generalizing s
-  · apply HierarchySymbol.Boldface.all
-    apply HierarchySymbol.Boldface.imp
-    · apply HierarchySymbol.Boldface.comp₂
+  · apply HierarchySymbol.Definable.all
+    apply HierarchySymbol.Definable.imp
+    · apply HierarchySymbol.Definable.comp₂
         ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
         (by definability)
-    · apply HierarchySymbol.Boldface.comp₂
+    · apply HierarchySymbol.Definable.comp₂
         ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> ‘#2 + 1’ :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
         (by definability)
   case ind u ih =>
@@ -191,9 +191,9 @@ lemma fixpoint_iff_succ {x : V} : c.Fixpoint v x ↔ ∃ u, x ∈ c.limSeq v (u 
 lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.limSeq v s := by
   have : ∃ F : V, ∀ x, x ∈ F ↔ x < m ∧ c.Fixpoint v x := by
     have : 𝚺₁-Predicate fun x ↦ x < m ∧ c.Fixpoint v x :=
-      HierarchySymbol.Boldface.and (by definability)
-        (HierarchySymbol.Boldface.ex
-          (HierarchySymbol.Boldface.comp₂
+      HierarchySymbol.Definable.and (by definability)
+        (HierarchySymbol.Definable.ex
+          (HierarchySymbol.Definable.comp₂
             ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #1 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
             (by definability)))
     exact finite_comprehension₁! this ⟨m, fun i hi ↦ hi.1⟩ |>.exists
@@ -201,7 +201,7 @@ lemma finite_upperbound (m : V) : ∃ s, ∀ z < m, c.Fixpoint v z → z ∈ c.l
   have : ∀ x ∈ F, ∃ u, x ∈ c.limSeq v u := by
     intro x hx; exact hF x |>.mp hx |>.2
   have : ∃ f, IsMapping f ∧ domain f = F ∧ ∀ (x y : V), ⟪x, y⟫ ∈ f → x ∈ c.limSeq v y := sigmaOne_skolem
-    (by apply HierarchySymbol.Boldface.comp₂
+    (by apply HierarchySymbol.Definable.comp₂
           ⟨φ.limSeqDef.rew <| Rew.embSubsts (#0 :> #2 :> fun i ↦ &(v i)), by intro v; simp [c.eval_limSeqDef]⟩
           (by definability)) this
   rcases this with ⟨f, mf, rfl, hf⟩
@@ -250,10 +250,10 @@ theorem induction [c.StrongFinite] {P : V → Prop} (hP : Γ-[1]-Predicate P)
     (H : ∀ C : Set V, (∀ x ∈ C, c.Fixpoint v x ∧ P x) → ∀ x, c.Φ v C x → P x) :
     ∀ x, c.Fixpoint v x → P x := by
   apply InductionOnHierarchy.order_induction_sigma (Γ := Γ) (m := 1) (P := fun x ↦ c.Fixpoint v x → P x)
-  · apply HierarchySymbol.Boldface.imp
-      (HierarchySymbol.BoldfacePred.comp
+  · apply HierarchySymbol.Definable.imp
+      (HierarchySymbol.DefinablePred.comp
         (by
-          apply HierarchySymbol.Boldface.of_deltaOne
+          apply HierarchySymbol.Definable.of_deltaOne
           exact ⟨φ.fixpointDefΔ₁.rew <| Rew.embSubsts <| #0 :> fun x ↦ &(v x), c.fixpoint_definedΔ₁.proper.rew' _,
             by intro v; simp [c.eval_fixpointDefΔ₁]⟩)
         (by definability))

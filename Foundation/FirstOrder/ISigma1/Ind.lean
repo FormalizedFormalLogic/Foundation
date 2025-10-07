@@ -8,7 +8,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 @[elab_as_elim] lemma sigma1_pos_succ_induction
     {P : V → Prop} (hP : 𝚺₁-Predicate P)
@@ -41,29 +41,29 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
       ∀ l < k, ∀ m < W, ∀ m' < W, ⟪l, m⟫ ∈ W → ⟪l + 1, m'⟫ ∈ W → ∀ x' ≤ x - l, ∀ y' ≤ m, f x' y' ≤ m' := by
     intro k hk
     induction k using ISigma1.sigma1_succ_induction
-    · apply Boldface.imp (Boldface.comp₂ (by definability) (by definability))
-      apply Boldface.ex
-      apply Boldface.and (Boldface.comp₁ (by definability))
-      apply Boldface.and
-        (Boldface.comp₂
-          (BoldfaceFunction.comp₂ (.var _) (.const _))
-          (BoldfaceFunction.comp₁ (.var _)))
-      apply Boldface.and
-        (Boldface.comp₂ (.var 0) (by definability))
-      apply Boldface.ball_lt (.var _)
-      apply Boldface.ball_lt (.var _)
-      apply Boldface.ball_lt (.var _)
-      apply Boldface.imp
-        (Boldface.comp₂ (.var _) (BoldfaceFunction.comp₂ (.var _) (.var _)))
-      apply Boldface.imp
-        (Boldface.comp₂ (.var _) (BoldfaceFunction.comp₂ (BoldfaceFunction.comp₂ (.var _) (.const _)) (.var _)))
-      apply Boldface.ball_le
-        (Boldface.comp₂
+    · apply Definable.imp (Definable.comp₂ (by definability) (by definability))
+      apply Definable.ex
+      apply Definable.and (Definable.comp₁ (by definability))
+      apply Definable.and
+        (Definable.comp₂
+          (DefinableFunction.comp₂ (.var _) (.const _))
+          (DefinableFunction.comp₁ (.var _)))
+      apply Definable.and
+        (Definable.comp₂ (.var 0) (by definability))
+      apply Definable.ball_lt (.var _)
+      apply Definable.ball_lt (.var _)
+      apply Definable.ball_lt (.var _)
+      apply Definable.imp
+        (Definable.comp₂ (.var _) (DefinableFunction.comp₂ (.var _) (.var _)))
+      apply Definable.imp
+        (Definable.comp₂ (.var _) (DefinableFunction.comp₂ (DefinableFunction.comp₂ (.var _) (.const _)) (.var _)))
+      apply Definable.ball_le
+        (Definable.comp₂
           (.var _)
-          (BoldfaceFunction.comp₂ (.const _) (.var _)))
-      apply Boldface.ball_le (.var _)
-      apply Boldface.comp₂
-        (BoldfaceFunction.comp₂
+          (DefinableFunction.comp₂ (.const _) (.var _)))
+      apply Definable.ball_le (.var _)
+      apply Definable.comp₂
+        (DefinableFunction.comp₂
           (.var _) (.var _)) (.var _)
     case zero => exact ⟨!⟦y⟧, by simp⟩
     case succ k ih =>
@@ -86,18 +86,18 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
   have : ∀ i ≤ x, ∀ m < W, ⟪x - i, m⟫ ∈ W → ∀ x' ≤ i, ∀ y' ≤ m, P x' y' := by
     intro i
     induction i using ISigma1.sigma1_succ_induction
-    · apply Boldface.imp
-        (Boldface.comp₂ (.var _) (.const _))
-      apply Boldface.ball_lt (.const _)
-      apply Boldface.imp
-        (Boldface.comp₂
+    · apply Definable.imp
+        (Definable.comp₂ (.var _) (.const _))
+      apply Definable.ball_lt (.const _)
+      apply Definable.imp
+        (Definable.comp₂
           (.const _)
-          (BoldfaceFunction.comp₂
-            (BoldfaceFunction.comp₂
+          (DefinableFunction.comp₂
+            (DefinableFunction.comp₂
               (.const _) (.var _)) (.var _)))
-      apply Boldface.ball_le (.var _)
-      apply Boldface.ball_le (.var _)
-      apply Boldface.comp₂ (.var _) (.var _)
+      apply Definable.ball_le (.var _)
+      apply Definable.ball_le (.var _)
+      apply Definable.comp₂ (.var _) (.var _)
     case zero =>
       intro _ _ _ _ _ h y' _
       rcases nonpos_iff_eq_zero.mp h
@@ -117,7 +117,7 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
 
 lemma bounded_all_sigma1_order_induction' {f : V → V} (hf : 𝚺₁-Function₁ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f y, P x' y') → P x y) : ∀ x y, P x y :=
-  have : 𝚺₁-Function₂ (fun _ ↦ f) := BoldfaceFunction.comp₁ (by simp)
+  have : 𝚺₁-Function₂ (fun _ ↦ f) := DefinableFunction.comp₁ (by simp)
   bounded_all_sigma1_order_induction this hP ind
 
 lemma bounded_all_sigma1_order_induction₂ {fy fz : V → V → V → V}
@@ -126,19 +126,19 @@ lemma bounded_all_sigma1_order_induction₂ {fy fz : V → V → V → V}
     ∀ x y z, P x y z := by
   let Q : V → V → Prop := fun x w ↦ P x (π₁ w) (π₂ w)
   have hQ : 𝚺₁-Relation Q := by
-    apply Boldface.comp₃ (.var _)
-      (BoldfaceFunction.comp₁ (.var _))
-      (BoldfaceFunction.comp₁ (.var _))
+    apply Definable.comp₃ (.var _)
+      (DefinableFunction.comp₁ (.var _))
+      (DefinableFunction.comp₁ (.var _))
   let f : V → V → V := fun x w ↦ ⟪fy x (π₁ w) (π₂ w), fz x (π₁ w) (π₂ w)⟫
   have hf : 𝚺₁-Function₂ f := by
     simp only [f]
-    apply BoldfaceFunction.comp₂
-    · apply BoldfaceFunction.comp₃ (.var _)
-      · apply BoldfaceFunction.comp₁ (.var _)
-      · apply BoldfaceFunction.comp₁ (.var _)
-    · apply BoldfaceFunction.comp₃ (.var _)
-      · apply BoldfaceFunction.comp₁ (.var _)
-      · apply BoldfaceFunction.comp₁ (.var _)
+    apply DefinableFunction.comp₂
+    · apply DefinableFunction.comp₃ (.var _)
+      · apply DefinableFunction.comp₁ (.var _)
+      · apply DefinableFunction.comp₁ (.var _)
+    · apply DefinableFunction.comp₃ (.var _)
+      · apply DefinableFunction.comp₁ (.var _)
+      · apply DefinableFunction.comp₁ (.var _)
   intro x y z
   simpa [Q] using bounded_all_sigma1_order_induction hf hQ (fun x w ih ↦
     ind x (π₁ w) (π₂ w) (fun x' hx' y' hy' z' hz' ↦ by simpa [Q] using ih x' hx' ⟪y', z'⟫ (pair_le_pair hy' hz')))
@@ -150,32 +150,32 @@ lemma bounded_all_sigma1_order_induction₃ {fy fz fw : V → V → V → V → 
     ∀ x y z w, P x y z w := by
   let Q : V → V → Prop := fun x v ↦ P x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))
   have hQ : 𝚺₁-Relation Q := by
-    apply Boldface.comp₄
+    apply Definable.comp₄
       (.var _)
-      (BoldfaceFunction.comp₁ <| .var _)
-      (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-      (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
+      (DefinableFunction.comp₁ <| .var _)
+      (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
+      (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
   let f : V → V → V := fun x v ↦
     ⟪fy x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fz x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fw x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))⟫
   have hf : 𝚺₁-Function₂ f := by
     simp only [f]
-    apply BoldfaceFunction.comp₂
-    · apply BoldfaceFunction.comp₄
+    apply DefinableFunction.comp₂
+    · apply DefinableFunction.comp₄
         (.var _)
-        (BoldfaceFunction.comp₁ <| .var _)
-        (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-        (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-    · apply BoldfaceFunction.comp₂
-      · apply BoldfaceFunction.comp₄
+        (DefinableFunction.comp₁ <| .var _)
+        (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
+        (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
+    · apply DefinableFunction.comp₂
+      · apply DefinableFunction.comp₄
           (.var _)
-          (BoldfaceFunction.comp₁ <| .var _)
-          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-      · apply BoldfaceFunction.comp₄
+          (DefinableFunction.comp₁ <| .var _)
+          (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
+          (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
+      · apply DefinableFunction.comp₄
           (.var _)
-          (BoldfaceFunction.comp₁ <| .var _)
-          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
-          (BoldfaceFunction.comp₁ <| BoldfaceFunction.comp₁ <| .var _)
+          (DefinableFunction.comp₁ <| .var _)
+          (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
+          (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
   intro x y z w
   have := bounded_all_sigma1_order_induction hf hQ (fun x v ih ↦
     ind x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)) (fun x' hx' y' hy' z' hz' w' hw' ↦ by
@@ -199,7 +199,7 @@ namespace LO.Induction
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
 
-variable {V : Type*} [ORingStruc V]
+variable {V : Type*} [ORingStructure V]
 
 variable (m : ℕ) [Fact (1 ≤ m)] [V ⊧ₘ* 𝗜𝗡𝗗𝚺 m]
 
@@ -240,16 +240,16 @@ lemma sigma_or_pi_order_induction {P Q : V → Prop} (hP : 𝚺-[m]-Predicate P)
     intro x hx
     induction x using ISigma1.sigma1_order_induction
     · clear hp hq ind
-      apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.imp
+      apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.imp
       · simp_all only [SigmaPiDelta.alt_sigma, Fin.isValue]
-        apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₂
-        · simp [Fin.isValue, HierarchySymbol.BoldfaceFunction.var]
-        · simp [HierarchySymbol.BoldfaceFunction.const]
-      · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.or
-        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₂
+        apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
+        · simp [Fin.isValue, HierarchySymbol.DefinableFunction.var]
+        · simp [HierarchySymbol.DefinableFunction.const]
+      · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.or
+        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
           · simp
           · simp
-        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Boldface.comp₂
+        · apply LO.FirstOrder.Arithmetic.HierarchySymbol.Definable.comp₂
           · simp
           · simp
     case ind z ih =>

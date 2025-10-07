@@ -116,7 +116,7 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
             apply h;
             apply Frame.root_genaretes'!;
             assumption
-      have b : 𝗜𝚺₁ ⊢ ⩖ j, S j := oRing_provable_of _ _ fun (V : Type) _ _ ↦ by
+      have b : 𝗜𝚺₁ ⊢ ⩖ j, S j := provable_of_models _ _ fun (V : Type) _ _ ↦ by
         simpa [models_iff, S, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.disjunctive
       exact this ⨀ b
     . intro h;
