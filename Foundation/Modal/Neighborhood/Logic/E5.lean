@@ -1,7 +1,6 @@
 import Foundation.Modal.Neighborhood.AxiomGeach
 import Foundation.Modal.Neighborhood.AxiomM
 import Foundation.Modal.Neighborhood.AxiomC
-import Foundation.Modal.Neighborhood.AxiomB
 import Foundation.Modal.Neighborhood.Logic.E
 import Foundation.Modal.Neighborhood.Filtration
 

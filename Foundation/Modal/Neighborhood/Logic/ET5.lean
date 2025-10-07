@@ -1,6 +1,5 @@
 import Foundation.Modal.Neighborhood.AxiomGeach
 import Foundation.Modal.Neighborhood.AxiomN
-import Foundation.Modal.Neighborhood.AxiomB
 import Foundation.Modal.Neighborhood.Logic.END4
 import Foundation.Modal.Neighborhood.Logic.ENT4
 import Foundation.Modal.Neighborhood.Logic.ET

@@ -14,7 +14,11 @@ variable {α : Type*} [DecidableEq α]
 variable {S} [Entailment (Formula α) S]
 variable {𝓢 : S} [Entailment.Cl 𝓢]
 
-def proofset (𝓢 : S) (φ : Formula α) : Set (MaximalConsistentSet 𝓢) := { Γ : MaximalConsistentSet 𝓢 | φ ∈ Γ }
+abbrev Proofset (𝓢 : S) := Set (MaximalConsistentSet 𝓢)
+
+def proofset (𝓢 : S) (φ : Formula α) : Proofset 𝓢 := { Γ : MaximalConsistentSet 𝓢 | φ ∈ Γ }
+
+def Nonproofset (𝓢 : S) := { P : Proofset 𝓢 // ∀ φ, P ≠ proofset 𝓢 φ }
 
 namespace proofset
 
