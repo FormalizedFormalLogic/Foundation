@@ -26,8 +26,8 @@ inductive Redux (T : Theory L) : Code L → Sequent L → Sequent L → Prop
     ∃' φ ∈ Γ → Redux T (Code.ex φ t) (φ/[t] :: Γ) Γ
   | exRefl    {Γ : Sequent L} {φ : SyntacticSemiformula L 1} {t : SyntacticTerm L} :
     ∃' φ ∉ Γ → Redux T (Code.ex φ t) Γ Γ
-  | id        {Γ : Sequent L} {φ : SyntacticFormula L} (hp : φ ∈ T) : Redux T (Code.id φ) ((∼∀∀φ) :: Γ) Γ
-  | idRefl    {Γ : Sequent L} {φ : SyntacticFormula L} (hp : φ ∉ T) : Redux T (Code.id φ) Γ Γ
+  | id        {Γ : Sequent L} {σ : Sentence L} (hσ : σ ∈ T) : Redux T (Code.id σ) ((∼σ) :: Γ) Γ
+  | idRefl    {Γ : Sequent L} {σ : Sentence L} (hσ : σ ∉ T) : Redux T (Code.id σ) Γ Γ
 
 local notation:25 Δ₁" ≺[" c:25 "] " Δ₂:80 => Redux T c Δ₁ Δ₂
 
@@ -67,7 +67,7 @@ lemma rank_of_lt {τ₁ τ₂ : SearchTree T Γ} (h : Lt T Γ τ₂ τ₁) : τ�
   cases h; simp
 
 lemma seq_of_lt {τ₁ τ₂ : SearchTree T Γ} (h : Lt T Γ τ₂ τ₁) : τ₂.seq ≺⟨τ₁.rank⟩ τ₁.seq := by
-  cases h; simp [rank, seq]; assumption
+  cases h; simpa [rank, seq]
 
 instance : Top (SearchTree T Γ) := ⟨⟨0, Γ, SearchTreeAux.zero⟩⟩
 
@@ -85,10 +85,11 @@ noncomputable def SearchTree.recursion {C : SearchTree T Γ → Sort v}
   (τ) (h : ∀ τ₁, (∀ τ₂, SearchTree.Lt T Γ τ₂ τ₁ → C τ₂) → C τ₁) : C τ :=
   WellFounded.fix wf h τ
 
-noncomputable def syntacticMainLemma (φ : SearchTree T Γ) : T ⟹ φ.seq := by
+noncomputable def syntacticMainLemma (φ : SearchTree T Γ) : (T : SyntacticFormulas L) ⟹ φ.seq := by
   apply SearchTree.recursion wf φ
   intro ⟨s, Δ₁, a₁⟩ ih
-  have ih' : ∀ {Δ₂}, ReduxNat T s Δ₂ Δ₁ → T ⟹ Δ₂ := fun {Δ₂} r => ih ⟨s + 1, Δ₂, a₁.succ r⟩ (SearchTree.Lt.intro a₁ r)
+  have ih' : ∀ {Δ₂}, ReduxNat T s Δ₂ Δ₁ → (T : SyntacticFormulas L) ⟹ Δ₂ :=
+    fun {Δ₂} r => ih ⟨s + 1, Δ₂, a₁.succ r⟩ (SearchTree.Lt.intro a₁ r)
   rcases hs : (decode s.unpair.1 : Option (Code L)) with (_ | c)
   · have : ReduxNat T s Δ₁ Δ₁ := ReduxNat.refl hs Δ₁
     exact ih' this
@@ -105,36 +106,36 @@ noncomputable def syntacticMainLemma (φ : SearchTree T Γ) : T ⟹ φ.seq := by
       by_cases h : φ ⋏ ψ ∈ Δ₁
       · have rp : φ :: Δ₁ ≺[Code.and φ ψ] Δ₁ := Redux.and₁ h
         have rq : ψ :: Δ₁ ≺[Code.and φ ψ] Δ₁ := Redux.and₂ h
-        have dp : T ⟹ φ :: Δ₁ := ih' (ReduxNat.redux hs rp)
-        have dq : T ⟹ ψ :: Δ₁ := ih' (ReduxNat.redux hs rq)
+        have dp : (T : SyntacticFormulas L) ⟹ φ :: Δ₁ := ih' (ReduxNat.redux hs rp)
+        have dq : (T : SyntacticFormulas L) ⟹ ψ :: Δ₁ := ih' (ReduxNat.redux hs rq)
         exact Tait.wk (Tait.and dp dq) (by simpa using h)
       · exact ih' (ReduxNat.redux hs $ Redux.andRefl h)
     case or φ ψ =>
       by_cases h : φ ⋎ ψ ∈ Δ₁
       · have : φ :: ψ :: Δ₁ ≺[Code.or φ ψ] Δ₁ := Redux.or h
-        have : T ⟹ φ :: ψ :: Δ₁ := ih' (ReduxNat.redux hs this)
+        have : (T : SyntacticFormulas L) ⟹ φ :: ψ :: Δ₁ := ih' (ReduxNat.redux hs this)
         exact Tait.wk (Tait.or this) (by simpa using h)
       · exact ih' (ReduxNat.redux hs $ Redux.orRefl h)
     case all φ =>
       by_cases h : ∀' φ ∈ Δ₁
       · have : φ/[&(newVar Δ₁)] :: Δ₁ ≺[Code.all φ] Δ₁ := Redux.all h
-        have : T ⟹ φ/[&(newVar Δ₁)] :: Δ₁ := ih' (ReduxNat.redux hs this)
+        have : (T : SyntacticFormulas L) ⟹ φ/[&(newVar Δ₁)] :: Δ₁ := ih' (ReduxNat.redux hs this)
         exact Derivation.allNvar h this
       · exact ih' (ReduxNat.redux hs $ Redux.allRefl h)
     case ex φ t =>
       by_cases h : ∃' φ ∈ Δ₁
       · have : φ/[t] :: Δ₁ ≺[Code.ex φ t] Δ₁ := Redux.ex h
-        have : T ⟹ φ/[t] :: Δ₁ := ih' (ReduxNat.redux hs this)
+        have : (T : SyntacticFormulas L) ⟹ φ/[t] :: Δ₁ := ih' (ReduxNat.redux hs this)
         exact Tait.wk (Derivation.ex t this) (by simpa using h)
       · exact ih' (ReduxNat.redux hs $ Redux.exRefl h)
     case id φ =>
       by_cases h : φ ∈ T
-      · have : (∼∀∀φ) :: Δ₁ ≺[Code.id φ] Δ₁ := Redux.id h
-        have : T ⟹ (∼∀∀φ) :: Δ₁ := ih' (ReduxNat.redux hs this)
-        exact Derivation.id h this
+      · have : (∼φ) :: Δ₁ ≺[Code.id φ] Δ₁ := Redux.id h
+        have : (T : SyntacticFormulas L) ⟹ (∼↑φ) :: Δ₁ := ih' (ReduxNat.redux hs this)
+        exact Derivation.id (by simp [h]) this
       · exact ih' (ReduxNat.redux hs $ Redux.idRefl h)
 
-noncomputable def syntacticMainLemmaTop : T ⟹ Γ := syntacticMainLemma wf ⊤
+noncomputable def syntacticMainLemmaTop : (T : SyntacticFormulas L) ⟹ Γ := syntacticMainLemma wf ⊤
 
 end WellFounded
 
@@ -163,9 +164,13 @@ lemma chainU_spec (nwf : ¬WellFounded (SearchTree.Lt T Γ)) : IsInfiniteDescend
   isInfiniteDescendingChain_of_non_acc _ _ (top_inaccessible nwf)
 
 lemma chainU_val_fst_eq (nwf : ¬WellFounded (SearchTree.Lt T Γ)) (s : ℕ) : (chainU T Γ s).rank = s := by
-  induction' s with s ih <;> simp [SearchTree.rank]
-  · exact rfl
-  · simpa [ih] using SearchTree.rank_of_lt (chainU_spec nwf s)
+  induction s
+  case zero =>
+    dsimp [SearchTree.rank]
+    exact rfl
+  case succ s ih =>
+    dsimp [SearchTree.rank]
+    simpa [ih] using SearchTree.rank_of_lt (chainU_spec nwf s)
 
 lemma chain_spec (nwf : ¬WellFounded (SearchTree.Lt T Γ)) (s) : ⛓️[s + 1] ≺⟨s⟩ ⛓️[s] :=
   by simpa [chainU_val_fst_eq nwf s] using SearchTree.seq_of_lt (chainU_spec nwf s)
@@ -181,7 +186,8 @@ lemma chain_spec' (nwf : ¬WellFounded (SearchTree.Lt T Γ)) (c : Code L) (i : �
     ⛓️[(encode c).pair i + 1] ≺[c] ⛓️[(encode c).pair i] := (chain_spec nwf _).toRedux
 
 lemma chainSet_verum (nwf : ¬WellFounded (SearchTree.Lt T Γ)) : ⊤ ∉ ⛓️ := by
-  simp [chainSet]; intro s h
+  suffices ∀ s, ⊤ ∉ ⛓️[s] by simpa [chainSet]
+  intro s h
   have : ⊤ ∈ ⛓️[(encode (Code.verum : Code L)).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) h
   have : ¬⊤ ∈ ⛓️[(encode (Code.verum : Code L)).pair s] := by
     have : ⛓️[(encode Code.verum).pair s + 1] ≺[Code.verum] ⛓️[(encode Code.verum).pair s] := chain_spec' nwf _ _
@@ -256,8 +262,8 @@ lemma chainSet_ex (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : SyntacticSemi
   { have : ∃' φ ∈ ⛓️[(encode $ Code.ex φ t).pair s] := chain_monotone nwf (Nat.right_le_pair _ _) hs
     contradiction }
 
-lemma chainSet_id (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : SyntacticFormula L} (h : φ ∈ T) :
-    ∼∀∀φ ∈ ⛓️ := by
+lemma chainSet_id (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : Sentence L} (h : φ ∈ T) :
+    ∼↑φ ∈ ⛓️ := by
   have : ⛓️[(encode $ Code.id φ).pair 0 + 1] ≺[Code.id φ] ⛓️[(encode $ Code.id φ).pair 0] := chain_spec' nwf _ _
   generalize hΔ : ⛓️[(encode $ Code.id φ).pair 0 + 1] = Δ
   rw [hΔ] at this; rcases this
@@ -289,7 +295,8 @@ lemma semanticMainLemma_val (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
   | rel r v,  h => by rcases chainSet_axL nwf r v with (hr | hr); { contradiction }; { simpa [eval_rel] using hr }
   | nrel r v, h => by simpa [eval_nrel] using h
   | φ ⋏ ψ,    h => by
-      simp; intro _ _
+      suffices Evalf (Model.structure T Γ) Semiterm.fvar φ → ¬Evalf (Model.structure T Γ) Semiterm.fvar ψ by simpa
+      intro _ _
       have : φ ∈ ⛓️ ∨ ψ ∈ ⛓️ := chainSet_and nwf h
       rcases this with (h | h)
       · have : ¬Evalf (Model.structure T Γ) Semiterm.fvar φ := semanticMainLemma_val nwf φ h
@@ -307,9 +314,10 @@ lemma semanticMainLemma_val (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
       rcases this with ⟨u, hu⟩
       have : ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar φ := by
         simpa [eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val nwf (φ/[u]) hu
-      simp; exact ⟨u, this⟩
+      simpa using ⟨u, this⟩
   | ∃' φ,     h => by
-      simp; intro u
+      suffices ∀ u : Model T Γ, ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar φ by simpa
+      intro u
       have : φ/[u] ∈ ⛓️ := chainSet_ex nwf h u
       have : ¬Eval (Model.structure T Γ) ![u] Semiterm.fvar φ := by
         simpa [eval_substs, Matrix.constant_eq_singleton] using semanticMainLemma_val nwf (φ/[u]) this
@@ -318,10 +326,7 @@ lemma semanticMainLemma_val (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
 
 lemma Model.models (nwf : ¬WellFounded (SearchTree.Lt T Γ)) :
     Model T Γ ⊧ₘ* T :=
-  ⟨by intro φ hp f
-      have : ∀ f, (Evalf (Model.structure T Γ) f) φ := by
-        simpa [Semiformula.eval_close] using semanticMainLemma_val nwf _ (chainSet_id nwf hp)
-      exact this f⟩
+  ⟨fun φ hφ ↦ by simpa [Semiformula.eval_univCl] using semanticMainLemma_val nwf _ (chainSet_id nwf hφ)⟩
 
 lemma semanticMainLemmaTop (nwf : ¬WellFounded (SearchTree.Lt T Γ)) {φ : SyntacticFormula L} (h : φ ∈ Γ) :
     ¬Evalf (Model.structure T Γ) Semiterm.fvar φ :=

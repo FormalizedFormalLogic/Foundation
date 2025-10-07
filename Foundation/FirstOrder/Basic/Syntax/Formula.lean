@@ -11,9 +11,7 @@ The quantification is represented by de Bruijn index.
 
 -/
 
-namespace LO
-
-namespace FirstOrder
+namespace LO.FirstOrder
 
 inductive Semiformula (L : Language) (ξ : Type*) : ℕ → Type _ where
   |  verum {n} : Semiformula L ξ n
@@ -34,6 +32,18 @@ abbrev Semisentence (L : Language) (n : ℕ) := Semiformula L Empty n
 abbrev SyntacticSemiformula (L : Language) (n : ℕ) := Semiformula L ℕ n
 
 abbrev SyntacticFormula (L : Language) := SyntacticSemiformula L 0
+
+abbrev ArithmeticSemiformula (ξ : Type*) (n : ℕ) := Semiformula ℒₒᵣ ξ n
+
+abbrev ArithmeticFormula (ξ : Type*) := Formula ℒₒᵣ ξ
+
+abbrev ArithmeticSemisentence (n : ℕ) := Semisentence ℒₒᵣ n
+
+abbrev ArithmeticSentence := Sentence ℒₒᵣ
+
+abbrev ArithmeticSyntacticSemiformula (n : ℕ) := SyntacticSemiformula ℒₒᵣ n
+
+abbrev ArithmeticSyntacticFormula := SyntacticFormula ℒₒᵣ
 
 namespace Semiformula
 
@@ -465,15 +475,15 @@ end FreeVariables
 
 section
 
-variable {α : Type*} [LinearOrder  α]
+variable {α : Type*} [LinearOrder α]
 
 lemma List.maximam?_some_of_not_nil {l : List α} (h : l ≠ []) : l.max?.isSome := by
   cases l
   case nil => simp at h
   case cons l => simp [List.max?_cons]
 
-lemma List.maximam?_eq_some {l : List α} {a} (h : l.max? = some a) : ∀ x ∈ l, x ≤ a :=
-  List.max?_le_iff (by simp) h (x := a) |>.mp (by rfl)
+lemma List.maximam?_eq_some [Std.LawfulOrderSup α] {l : List α} {a} (h : l.max? = some a) : ∀ x ∈ l, x ≤ a :=
+  List.max?_le_iff h (x := a) |>.mp (by rfl)
 
 end
 
@@ -497,8 +507,8 @@ def lMapAux (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n → Semiformula 
   |     ∃' φ => ∃' lMapAux Φ φ
 
 lemma lMapAux_neg {n} (φ : Semiformula L₁ ξ n) :
-    (∼φ).lMapAux Φ = ∼φ.lMapAux Φ :=
-  by induction φ using Semiformula.rec' <;> simp [*, lMapAux, ←Semiformula.neg_eq]
+    (∼φ).lMapAux Φ = ∼φ.lMapAux Φ := by
+  induction φ using Semiformula.rec' <;> simp [*, lMapAux]
 
 def lMap (Φ : L₁ →ᵥ L₂) {n} : Semiformula L₁ ξ n →ˡᶜ Semiformula L₂ ξ n where
   toTr := lMapAux Φ
@@ -660,26 +670,4 @@ end enumarateFVar
 
 end Semiformula
 
-abbrev Theory (L : Language) := Set (SyntacticFormula L)
-
-abbrev ClosedTheory (L : Language) := Set (Sentence L)
-
-instance : Collection (SyntacticFormula L) (Theory L) := inferInstance
-
-instance : Collection (Sentence L) (ClosedTheory L) := inferInstance
-
-def Theory.lMap (Φ : L₁ →ᵥ L₂) (T : Theory L₁) : Theory L₂ := Semiformula.lMap Φ '' T
-
-namespace Theory
-
-variable (T U : Theory L)
-
-instance {L : Language} : Add (Theory L) := ⟨(· ∪ ·)⟩
-
-lemma add_def : T + U = T ∪ U := rfl
-
-end Theory
-
-end FirstOrder
-
-end LO
+end LO.FirstOrder

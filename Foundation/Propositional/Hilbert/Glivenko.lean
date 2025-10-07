@@ -1,39 +1,38 @@
-import Foundation.Propositional.Hilbert.WellKnown
+import Foundation.Propositional.Hilbert.Basic
+import Foundation.Meta.IntProver
+import Foundation.Meta.ClProver
 
 namespace LO.Propositional
 
-namespace Hilbert
-
 open Entailment
+open Formula (atom)
 
 variable [DecidableEq α]
 
-theorem iff_provable_dn_efq_dne_provable : (Hilbert.Int) ⊢! ∼∼φ ↔ (Hilbert.Cl) ⊢! φ := by
+instance : Propositional.Int ⪯ Propositional.Cl := Hilbert.weakerThan_of_subset_axioms $ by simp
+
+theorem iff_provable_dn_Int_Cl : Propositional.Int ⊢ ∼∼φ ↔ Propositional.Cl ⊢ φ := by
   constructor;
-  . intro d; exact of_NN! $ Int_weakerThan_Cl.subset d;
   . intro d;
-    induction d using Deduction.rec! with
-    | maxm hp =>
-      rcases (by simpa using hp) with (⟨_, rfl⟩ | ⟨s, rfl⟩);
-      . apply dni'!;
-        exact efq!;
-      . generalize (s 0) = ψ;
-        apply N!_iff_CO!.mpr;
-        apply FiniteContext.deduct'!;
-        have : [∼(ψ ⋎ (ψ ➝ ⊥))] ⊢[Hilbert.Int]! ∼ψ ⋏ ∼(ψ ➝ ⊥) := KNN!_of_NA! $ FiniteContext.id!;
-        exact (N!_iff_CO!.mp $ K!_right this) ⨀ (N!_iff_CO!.mp $ K!_left this);
+    exact of_NN! $ WeakerThan.pbl d;
+  . intro d;
+    induction d with
+    | axm s hp =>
+      rcases hp with (rfl | rfl);
+      . suffices Propositional.Int ⊢ ∼∼(⊥ ➝ s 0) by simpa;
+        int_prover;
+      . suffices Propositional.Int ⊢ ∼∼(s 0 ⋎ ∼s 0) by simpa;
+        int_prover;
     | mdp ihφψ ihφ => exact CNNNN!_of_NNC! ihφψ ⨀ ihφ;
     | _ => apply dni'!; simp;
 
-alias glivenko := iff_provable_dn_efq_dne_provable
+alias glivenko := iff_provable_dn_Int_Cl
 
-theorem iff_provable_neg_efq_provable_neg_efq : (Hilbert.Int) ⊢! ∼φ ↔ (Hilbert.Cl) ⊢! ∼φ := by
+theorem iff_provable_not_Int_not_Cl : Propositional.Int ⊢ ∼φ ↔ Propositional.Cl ⊢ ∼φ := by
   constructor;
   . intro d;
     exact glivenko.mp $ dni'! d;
   . intro d;
     exact tne'! $ glivenko.mpr d;
-
-end Hilbert
 
 end LO.Propositional

@@ -1,14 +1,14 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Logic.KD
 import Foundation.Modal.Entailment.KT
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
-open Hilbert.Kripke
-
+open Modal.Kripke
 
 namespace Kripke
 
@@ -21,52 +21,38 @@ instance {F : Kripke.Frame} [F.IsKT] : F.IsKD := by simp
 end Kripke
 
 
-namespace Hilbert.KT
-
-instance Kripke.sound : Sound (Hilbert.KT) FrameClass.KT := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F F_refl _ rfl;
+instance : Sound Modal.KT FrameClass.KT := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_refl;
   exact Kripke.validate_AxiomT_of_reflexive (refl := F_refl);
 
-instance Kripke.consistent : Entailment.Consistent (Hilbert.KT) := consistent_of_sound_frameclass FrameClass.KT $ by
+instance : Entailment.Consistent Modal.KT := consistent_of_sound_frameclass FrameClass.KT $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   simp;
 
-instance Kripke.canonical : Canonical (Hilbert.KT) FrameClass.KT := ⟨by
+instance : Canonical Modal.KT FrameClass.KT := ⟨by
   apply Set.mem_setOf_eq.mpr;
   dsimp [Frame.IsKT];
   infer_instance;
 ⟩
 
-instance Kripke.complete : Complete (Hilbert.KT) FrameClass.KT := inferInstance
+instance : Complete Modal.KT FrameClass.KT := inferInstance
 
-end Hilbert.KT
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KT.Kripke.refl : Logic.KT = FrameClass.KT.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
-theorem KT.proper_extension_of_KD : Logic.KD ⊂ Logic.KT := by
+instance : Modal.KD ⪱ Modal.KT := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KT ⊢! φ ∧ ¬FrameClass.IsKD ⊧ φ by
-      rw [KD.Kripke.serial];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.T (.atom 0));
     constructor;
     . exact axiomT!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KD)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩, 0;
       constructor;
       . exact { serial := by tauto };
       . simp [Semantics.Realize, Satisfies];
-
-end Logic
 
 end LO.Modal

@@ -14,20 +14,21 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 variable {φ : Formula ℕ}
 
-lemma provable_boxdotTranslated_Ver_of_Triv : φ ∈ Logic.Triv → φᵇ ∈ Logic.Ver := Hilbert.boxdotTranslated_of_dominate $ by
+lemma provable_boxdotTranslated_Ver_of_Triv : Modal.Triv ⊢ φ → Modal.Ver ⊢ φᵇ := Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances $ by
   rintro φ hp;
-  rcases (by simpa using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
+  rcases (by simpa [Axiom.instances] using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
   . exact boxdot_axiomK!;
-  . simp only [boxdotTranslate, axiomVer!, and₁!];
+  . simp only [boxdotTranslate, and₁!];
   . apply deduct'!;
     apply K!_intro <;> simp;
 
-lemma provable_Triv_of_boxdotTranslated_Ver : φᵇ ∈ Logic.Ver → φ ∈ Logic.Triv := by
-  contrapose;
-  rw [Logic.Triv.Kripke.equality, Logic.Ver.Kripke.isolated];
+lemma provable_Triv_of_boxdotTranslated_Ver : Modal.Ver ⊢ φᵇ → Modal.Triv ⊢ φ := by
   intro h;
-  obtain ⟨F, F_eq, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ h;
-  replace F_eq := Set.mem_setOf_eq.mp F_eq;
+  replace h := Sound.sound (𝓢 := Modal.Ver) (𝓜 := FrameClass.Ver) h;
+  apply Complete.complete (𝓢 := Modal.Triv) (𝓜 := FrameClass.Triv);
+  contrapose! h;
+  obtain ⟨F, hF, h⟩ := iff_not_validOnFrameClass_exists_frame.mp $ h;
+  replace hF := Set.mem_setOf_eq.mp hF;
   apply iff_not_validOnFrameClass_exists_frame.mpr;
   use F^≠;
   constructor;
@@ -43,12 +44,13 @@ lemma provable_Triv_of_boxdotTranslated_Ver : φᵇ ∈ Logic.Ver → φ ∈ Log
     apply iff_reflexivize_irreflexivize'.not.mp;
     exact h;
 
-theorem iff_boxdotTranslated_Ver_Triv : (Hilbert.Ver) ⊢! φᵇ ↔ (Hilbert.Triv) ⊢! φ := ⟨
+theorem iff_boxdotTranslated_Ver_Triv' : Modal.Ver ⊢ φᵇ ↔ Modal.Triv ⊢ φ := ⟨
   provable_Triv_of_boxdotTranslated_Ver,
   provable_boxdotTranslated_Ver_of_Triv
 ⟩
 
-instance : BoxdotProperty (Logic.Ver) (Logic.Triv) := ⟨iff_boxdotTranslated_Ver_Triv⟩
+theorem iff_boxdotTranslated_Ver_Triv : Modal.Ver ⊢ φᵇ ↔ Modal.Triv ⊢ φ := by
+  grind [iff_boxdotTranslated_Ver_Triv'];
 
 end Logic
 

@@ -1,12 +1,13 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
@@ -17,45 +18,32 @@ end Kripke
 
 
 
-namespace Hilbert.KB.Kripke
-
-instance sound : Sound (Hilbert.KB) FrameClass.KB := instSound_of_validates_axioms $ by
-  apply FrameClass.Validates.withAxiomK;
-  rintro F F_symm _ rfl;
+instance : Sound Modal.KB FrameClass.KB := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_symm;
   exact validate_AxiomB_of_symmetric (sym := F_symm);
 
-instance consistent : Entailment.Consistent (Hilbert.KB) := consistent_of_sound_frameclass FrameClass.KB $ by
+instance : Entailment.Consistent Modal.KB := consistent_of_sound_frameclass FrameClass.KB $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance canonical : Canonical (Hilbert.KB) FrameClass.KB := ⟨by
+instance : Canonical Modal.KB FrameClass.KB := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KB) FrameClass.KB := inferInstance
-
-end Hilbert.KB.Kripke
-
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KB.Kripke.symm : Logic.KB = FrameClass.KB.logic := eq_hilbert_logic_frameClass_logic
-
-theorem KB.proper_extension_of_K : Logic.K ⊂ Logic.KB := by
+instance : Modal.K ⪱ Modal.KB := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KB ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
-      rw [K.Kripke.all];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.B (.atom 0));
     constructor;
-    . exact axiomB!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       let M : Model := ⟨⟨Fin 2, λ x y => x = 0 ∧ y = 1⟩, λ w _ => w = 0⟩;
       use M, 0;
       constructor;
@@ -63,7 +51,5 @@ theorem KB.proper_extension_of_K : Logic.K ⊂ Logic.KB := by
       . suffices ∃ (x : M.World), (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [Semantics.Realize, Satisfies, M];
         use 1;
         trivial;
-
-end Logic
 
 end LO.Modal

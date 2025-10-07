@@ -24,6 +24,10 @@ scoped prefix:max "#" => Semiterm.bvar
 
 abbrev Term (L : Language) (ξ : Type*) := Semiterm L ξ 0
 
+abbrev ClosedSemiterm (L : Language) (n : ℕ) := Semiterm L Empty n
+
+abbrev ClosedTerm (L : Language) := Semiterm L Empty 0
+
 abbrev SyntacticSemiterm (L : Language) (n : ℕ) := Semiterm L ℕ n
 
 abbrev SyntacticTerm (L : Language) := SyntacticSemiterm L 0

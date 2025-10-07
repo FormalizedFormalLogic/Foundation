@@ -5,27 +5,29 @@ import Foundation.Propositional.Kripke.Logic.Cl
 
 namespace LO.Propositional
 
-@[simp]
-def Formula.goedelTranslate.letterless {φ : Formula ℕ} (hφ : φ.letterless) : φᵍ.letterless := by
-  induction φ <;> simp_all [Formula.letterless, goedelTranslate, Modal.Formula.letterless]
+@[simp, grind]
+lemma Formula.goedelTranslate.Letterless {φ : Formula ℕ} (hφ : φ.Letterless) : φᵍ.Letterless := by
+  induction φ with
+  | himp | hand | hor => simp_all only [Formula.goedelTranslate]; grind;
+  | _ => simp_all [Formula.goedelTranslate];
 
 
 namespace Logic
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.letterless) : φ ∈ Logic.Int ↔ φ ∈ Logic.Cl := by
+theorem iff_letterless_Int_Cl {φ : Formula ℕ} (hφ : φ.Letterless) : Propositional.Int ⊢ φ ↔ Propositional.Cl ⊢ φ := by
   constructor;
-  . apply Propositional.Logic.Cl.proper_extension_of_Int.1;
+  . apply WeakerThan.wk;
+    infer_instance;
   . intro h;
-    have : ◇φᵍ ∈ Modal.Logic.S4 := Modal.Logic.iff_provable_Cl_provable_dia_gS4.mp h;
-    have : ◇φᵍ ∈ Modal.Logic.Triv := Modal.Logic.Triv.proper_extension_of_S4.subset this;
-    have : φᵍ ∈ Modal.Logic.Triv := diaT'! this;
-    have : Hilbert.Cl ⊢! φᵍᵀ.toPropFormula _ := Modal.Hilbert.Triv.iff_provable_Cl.mp this;
-    have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (φᵍᵀ.toPropFormula _) := Hilbert.Cl.soundness this;
-    have : φᵍ ∈ Modal.Logic.KD := Modal.Logic.provable_KD_of_classical_tautology (Formula.goedelTranslate.letterless hφ) this;
-    have : φᵍ ∈ Modal.Logic.S4 := Modal.Logic.S4.proper_extension_of_KD.subset this;
-    exact Modal.modalCompanion_Int_S4.companion.mpr this;
+    have : Modal.S4 ⊢ ◇φᵍ := Modal.iff_provable_Cl_provable_dia_gS4.mp h;
+    have : Modal.Triv ⊢ ◇φᵍ := WeakerThan.pbl this;
+    have : Modal.Triv ⊢ φᵍ := diaT'! this;
+    have : (φᵍᵀ.toPropFormula _).isTautology := Modal.Triv.iff_isTautology.mp this;
+    have : Modal.KD ⊢ φᵍ := Modal.Logic.provable_KD_of_classical_tautology (by grind) this;
+    have : Modal.S4 ⊢ φᵍ := WeakerThan.pbl this;
+    exact Modal.ModalCompanion.companion.mpr this;
 
 end Logic
 

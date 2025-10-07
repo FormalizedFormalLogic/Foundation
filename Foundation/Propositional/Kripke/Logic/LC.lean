@@ -4,12 +4,14 @@ import Foundation.Propositional.Kripke.Logic.KC
 namespace LO.Propositional
 
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 open Formula.Kripke
 
 namespace Kripke
 
-protected abbrev Frame.IsLC := Frame.IsPiecewiseStronglyConnected
+variable {F : Frame}
+
+@[reducible] protected alias Frame.IsLC := Frame.IsPiecewiseStronglyConnected
 protected class Frame.IsFiniteLC (F : Frame) extends F.IsFinite, F.IsLC
 
 protected abbrev FrameClass.LC : FrameClass := { F | F.IsLC }
@@ -18,42 +20,36 @@ protected abbrev FrameClass.finite_LC : FrameClass := { F | F.IsFiniteLC }
 end Kripke
 
 
-namespace Hilbert.LC.Kripke
+namespace LC
 
-instance sound : Sound Hilbert.LC FrameClass.LC := instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomEFQ;
-    rintro F hF _ rfl;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_axiomDummett_of_isPiecewiseStronglyConnected;
+instance : Sound Propositional.LC FrameClass.LC := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomEFQ;
+  rintro F hF _ rfl;
+  replace hF := Set.mem_setOf_eq.mp hF;
+  apply validate_axiomDummett_of_isPiecewiseStronglyConnected;
 
-instance sound_finite : Sound Hilbert.LC FrameClass.finite_LC :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomEFQ;
-    rintro F hF _ rfl;
-    replace hF := Set.mem_setOf_eq.mp hF;
-    apply validate_axiomDummett_of_isPiecewiseStronglyConnected;
+instance : Sound Propositional.LC FrameClass.finite_LC := instSound_of_validates_axioms $ by
+  apply FrameClass.Validates.withAxiomEFQ;
+  rintro F hF _ rfl;
+  replace hF := Set.mem_setOf_eq.mp hF;
+  apply validate_axiomDummett_of_isPiecewiseStronglyConnected;
 
-instance consistent : Entailment.Consistent Hilbert.LC := consistent_of_sound_frameclass FrameClass.LC $ by
+instance : Entailment.Consistent Propositional.LC := consistent_of_sound_frameclass FrameClass.LC $ by
   use whitepoint;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance canonical : Canonical Hilbert.LC FrameClass.LC := ⟨by
+instance : Canonical Propositional.LC FrameClass.LC := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete Hilbert.LC FrameClass.LC := inferInstance
+instance : Complete Propositional.LC FrameClass.LC := inferInstance
 
-section FFP
-
-open
-  finestFiltrationTransitiveClosureModel
-  Relation
-
-instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_LC := ⟨by
+open finestFiltrationTransitiveClosureModel Relation in
+instance : Complete Propositional.LC FrameClass.finite_LC := ⟨by
   intro φ hφ;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.LC);
   rintro F F_conn V r;
   replace F_conn := Set.mem_setOf_eq.mp F_conn;
   let M : Kripke.Model := ⟨F, V⟩;
@@ -99,29 +95,23 @@ instance finite_complete : Complete (Hilbert.LC) FrameClass.finite_LC := ⟨by
           use Z, Y;
           tauto;
   }
-
 ⟩
 
-end FFP
-
-end Hilbert.LC.Kripke
-
-namespace Logic.LC
+end LC
 
 
-lemma Kripke.LC : Logic.LC = Kripke.FrameClass.LC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-lemma Kripke.finite_LC : Logic.LC = Kripke.FrameClass.finite_LC.logic := eq_Hilbert_Logic_KripkeFrameClass_Logic
-
-@[simp]
-theorem proper_extension_of_KC : Logic.KC ⊂ Logic.LC := by
+instance : Propositional.KC ⪱ Propositional.LC := by
   constructor;
-  . exact (Hilbert.weakerThan_of_dominate_axiomInstances
-      (by rintro _ ⟨ψ, ⟨(rfl | rfl), ⟨s, rfl⟩⟩⟩ <;> simp)).subset
-  . suffices ∃ φ, Hilbert.LC ⊢! φ ∧ ¬FrameClass.KC ⊧ φ by rw [KC.Kripke.KC]; tauto;
+  . apply weakerThan_of_subset_frameClass FrameClass.KC FrameClass.LC;
+    intro F hF;
+    simp_all only [Set.mem_setOf_eq];
+    infer_instance
+  . apply Entailment.not_weakerThan_iff.mpr;
     use Axioms.Dummett (.atom 0) (.atom 1);
     constructor;
     . simp;
-    . apply not_validOnFrameClass_of_exists_frame;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.KC)
+      apply not_validOnFrameClass_of_exists_frame;
       use {
         World := Fin 4
         Rel := λ x y => ¬(x = 1 ∧ y = 2) ∧ ¬(x = 2 ∧ y = 1) ∧ (x ≤ y)
@@ -142,6 +132,7 @@ theorem proper_extension_of_KC : Logic.KC ⊂ Logic.LC := by
         by_contra hC;
         simpa using @hC.ps_connected 0 1 2;
 
-end Logic.LC
+instance : Propositional.KC ⪱ Propositional.LC := inferInstance
+
 
 end LO.Propositional

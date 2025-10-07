@@ -16,10 +16,10 @@ import Foundation.Propositional.ClassicalSemantics.Tait
 import Foundation.Propositional.ClassicalSemantics.Hilbert
 import Foundation.Propositional.Hilbert.Glivenko
 import Foundation.Propositional.Heyting.Semantics
-import Foundation.Propositional.Kripke.Logic.KP
 import Foundation.Propositional.Kripke.Logic.Cl
 import Foundation.Propositional.Logic.Letterless_Int_Cl
 import Foundation.Propositional.Logic.PostComplete
+import Foundation.Propositional.Decidable
 
 -- FirstOrder
 
@@ -35,16 +35,19 @@ import Foundation.FirstOrder.Completeness.Completeness
 import Foundation.FirstOrder.Order.Le
 import Foundation.FirstOrder.Interpretation
 
-import Foundation.FirstOrder.Arith.Basic
-import Foundation.FirstOrder.Arith.BoundedQuantifier
-import Foundation.FirstOrder.Arith.Definability
-import Foundation.FirstOrder.Arith.Induction
+import Foundation.FirstOrder.Arithmetic.Basic
+import Foundation.FirstOrder.Arithmetic.BoundedQuantifier
+import Foundation.FirstOrder.Arithmetic.Definability
+import Foundation.FirstOrder.Arithmetic.Induction
 
 import Foundation.FirstOrder.R0.Basic
 import Foundation.FirstOrder.R0.Representation
 
+import Foundation.FirstOrder.Q.Basic
+
 import Foundation.FirstOrder.PeanoMinus.Basic
 import Foundation.FirstOrder.PeanoMinus.Functions
+import Foundation.FirstOrder.PeanoMinus.Q
 
 import Foundation.FirstOrder.TrueArithmetic.Basic
 import Foundation.FirstOrder.TrueArithmetic.Nonstandard
@@ -56,20 +59,37 @@ import Foundation.FirstOrder.ISigma0.Exponential
 import Foundation.FirstOrder.ISigma1.Bit
 import Foundation.FirstOrder.ISigma1.HFS
 import Foundation.FirstOrder.ISigma1.Ind
-import Foundation.FirstOrder.ISigma1.Metamath
 
 import Foundation.FirstOrder.Omega1.Basic
 import Foundation.FirstOrder.Omega1.Nuon
 
-import Foundation.FirstOrder.Incompleteness.FixedPoint
-import Foundation.FirstOrder.Incompleteness.StandardProvability
-import Foundation.FirstOrder.Incompleteness.DerivabilityCondition.Basic
-import Foundation.FirstOrder.Incompleteness.First
-import Foundation.FirstOrder.Incompleteness.Second
-import Foundation.FirstOrder.Incompleteness.ConsistencyPredicate
-import Foundation.FirstOrder.Incompleteness.WitnessComparison
-import Foundation.FirstOrder.Incompleteness.Delta1
+import Foundation.FirstOrder.Internal.Syntax
+import Foundation.FirstOrder.Internal.FixedPoint
+import Foundation.FirstOrder.Internal.DerivabilityCondition
+import Foundation.FirstOrder.Internal.Consistency
+import Foundation.FirstOrder.Internal.WitnessComparison
+import Foundation.FirstOrder.Internal.RosserProvability
 
+import Foundation.FirstOrder.Incompleteness.First
+import Foundation.FirstOrder.Incompleteness.Halting
+
+import Foundation.FirstOrder.Incompleteness.Dense
+import Foundation.FirstOrder.Incompleteness.Second
+import Foundation.FirstOrder.Incompleteness.Examples
+
+import Foundation.FirstOrder.Incompleteness.Tarski
+import Foundation.FirstOrder.Incompleteness.Yablo
+
+import Foundation.FirstOrder.SetTheory.Basic
+import Foundation.FirstOrder.SetTheory.Axioms
+
+import Foundation.FirstOrder.Z.Basic
+import Foundation.FirstOrder.Z.Ordinal
+import Foundation.FirstOrder.Z.Function
+
+import Foundation.FirstOrder.ZF.Basic
+
+import Foundation.FirstOrder.ZFC.Basic
 
 import Foundation.FirstOrder.Hauptsatz
 
@@ -82,9 +102,8 @@ import Foundation.IntFO.Translation
 -- import Foundation.Propositional.Dialectica.Basic
 
 -- Modal
-import Foundation.Modal.Hilbert.KP
-import Foundation.Modal.Hilbert.S5Grz
-import Foundation.Modal.Hilbert.GL.Alternatives
+import Foundation.Modal.Hilbert.WithRE_Normal
+import Foundation.Modal.Hilbert.GL_K4Loeb_K4Henkin_K4Hen
 
 import Foundation.Modal.Kripke.Logic.GL.Unnecessitation
 import Foundation.Modal.Kripke.Logic.GL.MDP
@@ -95,18 +114,22 @@ import Foundation.Modal.Kripke.Logic.Grz.Completeness
 import Foundation.Modal.Kripke.Logic.GLPoint3
 import Foundation.Modal.Kripke.Logic.GrzPoint2
 import Foundation.Modal.Kripke.Logic.GrzPoint3
-import Foundation.Modal.Kripke.Logic.K4M
+import Foundation.Modal.Kripke.Logic.K4McK
 import Foundation.Modal.Kripke.Logic.K4Point2
 import Foundation.Modal.Kripke.Logic.K4Point3
-import Foundation.Modal.Kripke.Logic.KH
+import Foundation.Modal.Kripke.Logic.K4n
+import Foundation.Modal.Kripke.Logic.KHen
 import Foundation.Modal.Kripke.Logic.KT4B
 import Foundation.Modal.Kripke.Logic.KTc
 import Foundation.Modal.Kripke.Logic.KTMk
-import Foundation.Modal.Kripke.Logic.S4Point4M
+import Foundation.Modal.Kripke.Logic.S4H
 import Foundation.Modal.Kripke.Logic.S4Point3
 import Foundation.Modal.Kripke.Logic.S4Point4
+import Foundation.Modal.Kripke.Logic.S4Point4McK
 import Foundation.Modal.Kripke.Logic.S5
 import Foundation.Modal.Kripke.Logic.S5Grz
+
+import Foundation.Modal.Boxdot.Jerabek
 
 import Foundation.Modal.Kripke.NNFormula
 import Foundation.Modal.Kripke.ComplexityLimited
@@ -114,7 +137,15 @@ import Foundation.Modal.Kripke.Undefinability
 import Foundation.Modal.Kripke.Balloon
 import Foundation.Modal.Kripke.LinearFrame
 
-import Foundation.Modal.PLoN.Hilbert.N
+import Foundation.Modal.PLoN.Logic.N
+
+import Foundation.Modal.Neighborhood.Logic.E4
+import Foundation.Modal.Neighborhood.Logic.EMC4
+import Foundation.Modal.Neighborhood.Logic.EMCN
+import Foundation.Modal.Neighborhood.Logic.EMT4
+import Foundation.Modal.Neighborhood.Logic.END
+import Foundation.Modal.Neighborhood.Logic.ET4
+import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
 
 import Foundation.Modal.ModalCompanion.Int
 import Foundation.Modal.ModalCompanion.KC
@@ -124,23 +155,39 @@ import Foundation.Modal.ModalCompanion.Cl
 import Foundation.Modal.Boxdot.K4_S4
 import Foundation.Modal.Boxdot.GL_Grz
 
-
-import Foundation.Modal.Logic.Extension
+import Foundation.Modal.Modality.S5
 
 import Foundation.Modal.Logic.S.Consistent
 
-import Foundation.Modal.Logic.Dz.Basic
+import Foundation.Modal.Logic.D.Basic
+
+import Foundation.Modal.Logic.GLPlusBoxBot.Basic
+import Foundation.Modal.Logic.GLPoint3OplusBoxBot.Basic
 
 import Foundation.Modal.Maximal.Makinson
 
+
+import Foundation.Modal.VanBentham.StandardTranslation
+
 -- Provability Logic
+import Foundation.ProvabilityLogic.Realization
+import Foundation.ProvabilityLogic.Arithmetic
+import Foundation.ProvabilityLogic.SolovaySentences
+
 import Foundation.ProvabilityLogic.N.Soundness
 
 import Foundation.ProvabilityLogic.GL.Completeness
 import Foundation.ProvabilityLogic.GL.Unprovability
+import Foundation.ProvabilityLogic.GL.Uniform
 
 import Foundation.ProvabilityLogic.Grz.Completeness
 
 import Foundation.ProvabilityLogic.S.Completeness
 
-import Foundation.AutoProver.Classical
+import Foundation.ProvabilityLogic.Classification.LetterlessTrace
+import Foundation.ProvabilityLogic.Classification.Trace
+
+import Foundation.Meta.Qq
+import Foundation.Meta.Lit
+import Foundation.Meta.ClProver
+import Foundation.Meta.IntProver

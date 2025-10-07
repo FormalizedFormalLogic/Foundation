@@ -5,7 +5,7 @@ Otherwise, $\mathcal{S}$ is _incomplete_.
 
 ```lean
 def System.Complete {F S} [System F S] [LogicalConnective F] (𝓢 : S) : Prop :=
-    ∀ f, 𝓢 ⊢! f ∨ 𝓢 ⊢! ~f
+    ∀ f, 𝓢 ⊢ f ∨ 𝓢 ⊢ ~f
 ```
 - [System.Complete](https://formalizedformallogic.github.io/Incompleteness/docs/Logic/Logic/System.html#LO.System.Complete)
 
@@ -19,11 +19,11 @@ Let $T$ be a $\Delta_1$-definable arithmetic theory, stronger than $\mathsf{R}_0
 
 ```lean
 lemma re_complete
-    [𝐑₀ ≼ T] [Sigma1Sound T]
+    [𝗥₀ ≼ T] [Sigma1Sound T]
     {p : ℕ → Prop} (hp : RePred p) {x : ℕ} :
-    p x ↔ T ⊢! (codeOfRePred p)/[‘↑x’] 
+    p x ↔ T ⊢ (codeOfRePred p)/[‘↑x’]
 ```
-- [re_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/R0/Representation.html#LO.FirstOrder.Arith.re_complete)
+- [re_complete](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/R0/Representation.html#LO.FirstOrder.Arithmetic.re_complete)
 
 ### Main Theorem
 
@@ -34,20 +34,20 @@ lemma re_complete
   Define a set of formulae with one variable.
   $$ D \coloneqq \{\varphi \mid T \vdash \lnot \varphi({\ulcorner \varphi \urcorner}) \} $$
     $D$ is r.e. since $T$ is $\Delta_1$-definable. (one could use Craig's trick to weaken this condition to $\Sigma_1$, but I will not do that here.)
-  
+
   By the representation theorem, there exists a $\Sigma_1$ formula $\rho(x)$ that represents $D$. i.e.,
-  
+
   $$ T \vdash \rho({\ulcorner \varphi \urcorner}) \iff T \vdash \lnot \varphi({\ulcorner \varphi \urcorner})$$
-  
+
   Let $\gamma := \rho({\ulcorner \rho \urcorner})$. The next follows immediately.
-  
+
   $$ T \vdash \gamma \iff T \vdash \lnot \gamma $$
-  
+
   Thus, as $T$ is consistent, $\gamma$ is undecidable from $T$. ∎
 
 ```lean
 theorem goedel_first_incompleteness
-  (T : Theory ℒₒᵣ) [𝐑₀ ≼ T] [Sigma1Sound T] [T.Delta1Definable] :
+  (T : ArithmeticTheory) [𝗥₀ ≼ T] [Sigma1Sound T] [T.Δ₁] :
   ¬System.Complete T
 ```
 - [goedel_first_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/First.html#LO.R0.goedel_first_incompleteness)

@@ -34,7 +34,7 @@ instance [F.IsGeachConvergent ⟨0, 0, 1, 1⟩] : F.IsSerial where
   serial := by simpa using IsGeachConvergent.gconv (F := F) (g := ⟨0, 0, 1, 1⟩);
 instance [F.IsSerial] : F.IsGeachConvergent ⟨0, 0, 1, 1⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, and_self];
+    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, and_self];
     subst Rxz;
     apply _root_.IsSerial.serial
 
@@ -52,7 +52,7 @@ instance [F.IsGeachConvergent ⟨0, 2, 1, 0⟩] : F.IsTransitive where
     apply this x x z rfl y;
 instance [F.IsTransitive] : F.IsGeachConvergent ⟨0, 2, 1, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_right'];
+    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, exists_eq_right'];
     subst Rxy;
     obtain ⟨y, Rxy, Ryz⟩ := Rxz;
     exact IsTrans.trans _ _ _ Rxy Ryz
@@ -70,7 +70,7 @@ instance [F.IsGeachConvergent ⟨0, 1, 0, 1⟩] : F.IsSymmetric where
     apply @this x x y rfl;
 instance [F.IsSymmetric] : F.IsGeachConvergent ⟨0, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_left'];
+    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, exists_eq_left'];
     subst Rxy;
     exact _root_.IsSymm.symm _ _ Rxz;
 
@@ -87,7 +87,7 @@ instance [F.IsGeachConvergent ⟨1, 1, 0, 1⟩] : F.IsEuclidean where
     apply this x z y Rxz Rxy;
 instance [F.IsEuclidean] : F.IsGeachConvergent ⟨1, 1, 0, 1⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right, exists_eq_left'];
+    simp_all only [HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right, exists_eq_left'];
     exact IsRightEuclidean.reucl Rxz Rxy
 
 
@@ -101,7 +101,7 @@ instance [F.IsGeachConvergent ⟨1, 1, 1, 1⟩] : F.IsPiecewiseStronglyConvergen
   ps_convergent := by simpa using IsGeachConvergent.gconv (g := ⟨1, 1, 1, 1⟩) (F := F);
 instance [F.IsPiecewiseStronglyConvergent] : F.IsGeachConvergent ⟨1, 1, 1, 1⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right];
+    simp_all only [HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right];
     obtain ⟨u, Ryu, Rzu⟩ := IsPiecewiseStronglyConvergent.ps_convergent Rxy Rxz;
     use u;
 
@@ -118,7 +118,7 @@ instance [F.IsGeachConvergent ⟨0, 1, 0, 0⟩] : F.IsCoreflexive where
     apply this x x y rfl Rxy |>.symm;
 instance [F.IsCoreflexive] : F.IsGeachConvergent ⟨0, 1, 0, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_left'];
+    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, exists_eq_left'];
     subst Rxy;
     exact F.corefl Rxz |>.symm;
 
@@ -135,7 +135,7 @@ instance [F.IsGeachConvergent ⟨1, 1, 0, 0⟩] : F.IsFunctional where
     exact this x y z Rxy Rxz |>.symm;
 instance [F.IsFunctional] : F.IsGeachConvergent ⟨1, 1, 0, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.iterate.iff_succ, HRel.iterate.iff_zero, exists_eq_right, exists_eq_left'];
+    simp_all only [HRel.Iterate.iff_succ, HRel.Iterate.iff_zero, exists_eq_right, exists_eq_left'];
     apply IsFunctional.functional Rxy Rxz |>.symm;
 
 
@@ -151,7 +151,7 @@ instance [F.IsGeachConvergent ⟨0, 1, 2, 0⟩] : F.IsDense where
     apply this x x y rfl Rxy;
 instance [F.IsDense] : F.IsGeachConvergent ⟨0, 1, 2, 0⟩ where
   gconv x y z Rxy Rxz := by
-    simp_all only [HRel.iterate.iff_zero, HRel.iterate.iff_succ, exists_eq_right, exists_eq_right'];
+    simp_all only [HRel.Iterate.iff_zero, HRel.Iterate.iff_succ, exists_eq_right, exists_eq_right'];
     subst Rxy;
     obtain ⟨u, Ryu, Rzu⟩ := IsDense.dense Rxz;
     use u;
@@ -168,7 +168,7 @@ end Frame
 instance : whitepoint.IsGeachConvergent g := ⟨by
   rintro x y z Rxy Rxz;
   use ();
-  constructor <;> . apply HRel.iterate.true_any; tauto;
+  constructor <;> . apply HRel.Iterate.true_any; tauto;
 ⟩
 instance : whitepoint.IsPreorder where
 
@@ -271,7 +271,7 @@ instance [Entailment.HasAxiomGeach g 𝓢] : (canonicalFrame 𝓢).IsGeachConver
     have hδ : ◇^[g.n](Δ.disj) ∈ z.1.2 := mdp_mem₂_provable distribute_multidia_fdisj! $ iff_mem₂_fdisj.mpr (by simpa using hΔ);
     generalize Γ.conj = γ at hγ hC;
     generalize Δ.disj = δ at hδ hC;
-    have : 𝓢 ⊢! □^[g.m]γ ➝ □^[g.m]δ := imply_multibox_distribute'! hC;
+    have : 𝓢 ⊢ □^[g.m]γ ➝ □^[g.m]δ := imply_multibox_distribute'! hC;
     have : □^[g.m]δ ∈ y.1.1 := mdp_mem₁_provable this hγ;
     have : ◇^[g.i](□^[g.m]δ) ∈ x.1.1 := def_multirel_multidia_mem₁.mp Rxy this;
     have : □^[g.j](◇^[g.n]δ) ∈ x.1.1 := mdp_mem₁_provable axiomGeach! this;

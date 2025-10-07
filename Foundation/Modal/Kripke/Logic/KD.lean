@@ -1,69 +1,64 @@
 import Foundation.Modal.Kripke.AxiomGeach
 import Foundation.Modal.Kripke.Hilbert
-import Foundation.Modal.Hilbert.WellKnown
 import Foundation.Modal.Kripke.Logic.K
 
 namespace LO.Modal
 
+open Entailment
+open Formula
 open Kripke
-open Hilbert.Kripke
+open Modal.Kripke
 
 namespace Kripke
 
 protected abbrev Frame.IsKD := Frame.IsSerial
 
-protected abbrev FrameClass.IsKD : FrameClass := { F | F.IsKD }
+protected abbrev FrameClass.KD : FrameClass := { F | F.IsKD }
 
 end Kripke
 
 
-namespace Hilbert.KD.Kripke
+namespace Hilbert
 
-instance sound : Sound (Hilbert.KD) FrameClass.IsKD :=
-  instSound_of_validates_axioms $ by
-    apply FrameClass.Validates.withAxiomK;
-    rintro F F_serial φ rfl;
-    apply validate_AxiomD_of_serial (ser := F_serial);
+namespace KD.Kripke
 
-instance consistent : Entailment.Consistent (Hilbert.KD) :=
-  consistent_of_sound_frameclass FrameClass.IsKD $ by
+instance : Sound Modal.KD FrameClass.KD := instSound_of_validates_axioms $ by
+  apply FrameClass.validates_with_AxiomK_of_validates;
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  rintro F F_serial φ;
+  apply validate_AxiomD_of_serial (ser := F_serial);
+
+instance : Entailment.Consistent Modal.KD :=
+  consistent_of_sound_frameclass FrameClass.KD $ by
     use whitepoint;
     apply Set.mem_setOf_eq.mpr;
     infer_instance;
 
-instance canonical : Canonical (Hilbert.KD) FrameClass.IsKD := ⟨by
+instance : Canonical Modal.KD FrameClass.KD := ⟨by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 ⟩
 
-instance complete : Complete (Hilbert.KD) FrameClass.IsKD := inferInstance
+instance : Complete Modal.KD FrameClass.KD := inferInstance
 
-end Hilbert.KD.Kripke
+end KD.Kripke
 
-namespace Logic
-
-open Formula
-open Entailment
-open Kripke
-
-lemma KD.Kripke.serial : Logic.KD = FrameClass.IsKD.logic := eq_hilbert_logic_frameClass_logic
-
-@[simp]
-theorem KD.proper_extension_of_K : Logic.K ⊂ Logic.KD := by
+instance : Modal.K ⪱ Modal.KD := by
   constructor;
-  . exact Hilbert.weakerThan_of_dominate_axioms (by simp) |>.subset;
-  . suffices ∃ φ, Hilbert.KD ⊢! φ ∧ ¬FrameClass.all ⊧ φ by
-      rw [K.Kripke.all];
-      tauto;
+  . apply Hilbert.Normal.weakerThan_of_subset_axioms $ by simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.D (.atom 0));
     constructor;
     . exact axiomD!;
-    . apply Kripke.not_validOnFrameClass_of_exists_model_world;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.K)
+      apply Kripke.not_validOnFrameClass_of_exists_model_world;
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
       constructor;
       . trivial;
       . simp [Semantics.Realize, Satisfies];
 
-end Logic
+end Hilbert
+
 
 end LO.Modal

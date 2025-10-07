@@ -38,7 +38,7 @@ variable {t : (canonicalModel 𝓢).World}
 lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧ φ) := by
   induction φ generalizing t with
   | hatom =>
-    simp_all only [Semantics.Realize, Satisfies, implies_true, true_and];
+    simp_all only [Semantics.Realize, Satisfies, true_and];
     exact iff_not_mem₁_mem₂.symm;
   | hfalsum => simp [Semantics.Realize, Satisfies];
   | himp φ ψ ihφ ihψ =>
@@ -106,7 +106,7 @@ lemma truthlemma₁ : (φ ∈ t.1.1) ↔ t ⊧ φ := truthlemma.1
 
 lemma truthlemma₂ : (φ ∈ t.1.2) ↔ ¬t ⊧ φ := truthlemma.2
 
-lemma iff_valid_on_canonicalModel_deducible : (canonicalModel 𝓢) ⊧ φ ↔ 𝓢 ⊢! φ := by
+lemma iff_valid_on_canonicalModel_deducible : (canonicalModel 𝓢) ⊧ φ ↔ 𝓢 ⊢ φ := by
   constructor;
   . contrapose;
     intro h;
@@ -172,7 +172,7 @@ lemma def_multirel_multibox_satisfies : x ≺^[n] y ↔ (∀ {φ}, x ⊧ □^[n]
       obtain ⟨t, ht⟩ := lindenbaum (𝓢 := 𝓢) (t₀ := ⟨{ φ | x ⊧ □φ }, Set.multibox n { φ | ¬y ⊧ φ }⟩) $ by
         intro Γ Δ hΓ hΔ;
         by_contra! hC;
-        have : 𝓢 ⊢! □Γ.conj ➝ □Δ.disj := imply_box_distribute'! hC;
+        have : 𝓢 ⊢ □Γ.conj ➝ □Δ.disj := imply_box_distribute'! hC;
         have : □Δ.disj ∈ x.1.1 := mdp_mem₁_provable this $ by
           apply truthlemma₁.mpr;
           intro y Rxy;

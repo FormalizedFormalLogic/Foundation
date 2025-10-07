@@ -8,30 +8,30 @@ $\mathrm{PPow2}(n)$ is a property that holds iff $n = 2^{2^i}$ for some $i$.
 
 namespace LO.ISigma0
 
-open FirstOrder Arith PeanoMinus IOpen
+open FirstOrder Arithmetic PeanoMinus IOpen
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝐈𝚺₀]
+variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₀]
 
 def SPPow2 (m : V) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
-def _root_.LO.FirstOrder.Arith.sppow2Def : 𝚺₀.Semisentence 1 :=
+def _root_.LO.FirstOrder.Arithmetic.sppow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma
   “ m. ¬!lenbitDef 1 m ∧ !lenbitDef 2 m ∧
     ∀ i <⁺ m, !pow2Def i → 2 < i → (!lenbitDef i m ↔ ∃ s <⁺ i, !sqrtDef s i ∧ s * s = i ∧ !lenbitDef s m)
-  ” (by simp)
+  ”
 
 lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : V → Prop) via sppow2Def := by
   intro v
-  simp [SPPow2, sppow2Def, Matrix.vecHead, Matrix.vecTail, lenbit_defined.df.iff,
-    pow2_defined.df.iff, sqrt_defined.df.iff, ←le_iff_lt_succ, sq, numeral_eq_natCast]
+  simp [SPPow2, sppow2Def, lenbit_defined.df.iff,
+    pow2_defined.df.iff, sqrt_defined.df.iff, sq, numeral_eq_natCast]
 
 def PPow2 (i : V) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
-def _root_.LO.FirstOrder.Arith.ppow2Def : 𝚺₀.Semisentence 1 :=
-  .mkSigma “i. !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m” (by simp)
+def _root_.LO.FirstOrder.Arithmetic.ppow2Def : 𝚺₀.Semisentence 1 :=
+  .mkSigma “i. !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m”
 
 lemma ppow2_defined : 𝚺₀-Predicate (PPow2 : V → Prop) via ppow2Def := by
-  intro v; simp [PPow2, ppow2Def, Matrix.vecHead, Matrix.vecTail,
+  intro v; simp [PPow2, ppow2Def,
     lenbit_defined.df.iff, pow2_defined.df.iff, sppow2_defined.df.iff, numeral_eq_natCast]
 
 instance ppow2_definable : 𝚺₀-Predicate (PPow2 : V → Prop) := ppow2_defined.to_definable
@@ -81,7 +81,7 @@ lemma of_sqrt (hm : SPPow2 m) {i : V} (pi : Pow2 i) (him : i ≤ m) (hsqi : (√
   rintro ⟨_, h, _⟩; simp at h
 
 @[simp] lemma not_one : ¬SPPow2 (1 : V) := by
-  rintro ⟨_, h, _⟩; simp [LenBit.iff_rem, one_lt_two] at h
+  rintro ⟨_, h, _⟩; simp [LenBit.iff_rem] at h
 
 lemma sq_le_of_lt (hm : SPPow2 m) {i j : V} (pi : Pow2 i) (pj : Pow2 j) (hi : LenBit i m) (hj : LenBit j m) : i < j → i^2 ≤ j := by
   intro hij
@@ -202,10 +202,10 @@ protected lemma sq {i : V} (ppi : PPow2 i) : PPow2 (i^2) := by
     lt_of_lt_of_le hm
       (two_mul_le_sq $ one_lt_iff_two_le.mp $ lt_of_le_of_ne (pos_iff_one_le.mp $ ppi.pos) (Ne.symm ne1))
   exact ⟨ppi.pow2.sq, m + i^2,
-    by simp [two_mul, hm, this],
+    by simp [two_mul, this],
     sppm', LenBit.add_self this⟩
 
-@[simp] lemma two : PPow2 (2 : V) := ⟨by simp, 2, by simp [one_lt_two]⟩
+@[simp] lemma two : PPow2 (2 : V) := ⟨by simp, 2, by simp⟩
 
 @[simp] lemma not_zero : ¬PPow2 (0 : V) := by intro h; simpa using h.pow2
 
@@ -308,7 +308,7 @@ lemma two_mul_sq_uniq {y i j : V} (py : Pow2 y) (ppi : PPow2 i) (ppj : PPow2 j)
     i^2 ≤ j                 := sq_le_of_lt ppi ppj hij
     _   ≤ 2 * y^2           := hj.2
     _   = 2 * (y * y)       := by simp [sq]
-    _   < 2 * (2 * (y * y)) := lt_mul_of_pos_of_one_lt_left (by simpa using pos_iff_ne_zero.mp py.pos) (by simp [one_lt_two])
+    _   < 2 * (2 * (y * y)) := lt_mul_of_pos_of_one_lt_left (by simpa using pos_iff_ne_zero.mp py.pos) (by simp)
     _   = (2 * y)^2         := by simp [sq, mul_assoc, mul_left_comm]
   have : i < 2 * y := sq_lt_sq.mp this
   have : y < y := lt_of_lt_of_le hi.1 ((ppi.pow2.le_iff_lt_two py).mpr this)

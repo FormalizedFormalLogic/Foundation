@@ -1,4 +1,3 @@
-import Foundation.Modal.Hilbert.K
 import Foundation.Modal.Kripke.Hilbert
 import Foundation.Modal.Kripke.Completeness
 import Foundation.Modal.Kripke.Filtration
@@ -6,24 +5,40 @@ import Foundation.Modal.Kripke.Filtration
 namespace LO.Modal
 
 open Kripke
-open Hilbert.Kripke
 
-namespace Hilbert.K.Kripke
 
-instance sound : Sound (Hilbert.K) FrameClass.all := instSound_of_validates_axioms FrameClass.all.validates_axiomK
+namespace Kripke
 
-instance sound_finite : Sound (Hilbert.K) FrameClass.finite_all := instSound_of_validates_axioms FrameClass.finite_all.validates_axiomK
+protected abbrev FrameClass.K : FrameClass := Set.univ
+protected abbrev FrameClass.finite_K : FrameClass := { F | F.IsFinite }
 
-instance : Entailment.Consistent (Hilbert.K) := consistent_of_sound_frameclass FrameClass.all (by simp)
+end Kripke
 
-instance : Kripke.Canonical (Hilbert.K) FrameClass.all := ⟨by trivial⟩
 
-/-- Hilbert system for `K` is complete for class of all Kripke frame -/
-instance complete : Complete (Hilbert.K) FrameClass.all := inferInstance
 
-instance complete_finite : Complete (Hilbert.K) (FrameClass.finite_all) := ⟨by
+instance : Sound Modal.K FrameClass.K := instSound_of_validates_axioms $ by
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  intro F _;
+  exact Formula.Kripke.ValidOnFrame.axiomK;
+
+instance : Sound Modal.K FrameClass.finite_K := instSound_of_validates_axioms $ by
+  constructor;
+  simp only [Set.mem_singleton_iff, forall_eq];
+  intro F hF;
+  exact Formula.Kripke.ValidOnFrame.axiomK;
+
+instance : Entailment.Consistent Modal.K := consistent_of_sound_frameclass FrameClass.K $ by
+  use whitepoint
+  simp;
+
+instance : Kripke.Canonical Modal.K FrameClass.K := ⟨by trivial⟩
+
+instance : Complete Modal.K FrameClass.K := inferInstance
+
+instance : Complete Modal.K (FrameClass.finite_K) := ⟨by
   intro φ hp;
-  apply Kripke.complete.complete;
+  apply Complete.complete (𝓜 := FrameClass.K);
   intro F _ V x;
   let M : Kripke.Model := ⟨F, V⟩;
   let FM := coarsestFiltrationModel M ↑φ.subformulas;
@@ -34,21 +49,5 @@ instance complete_finite : Complete (Hilbert.K) (FrameClass.finite_all) := ⟨by
   simp;
 ⟩
 
-end Hilbert.K.Kripke
-
-
-namespace Logic
-
-lemma K.Kripke.all : Logic.K = FrameClass.all.logic := eq_hilbert_logic_frameClass_logic
-lemma K.Kripke.finite_all : Logic.K = FrameClass.finite_all.logic := eq_hilbert_logic_frameClass_logic
-
-theorem K.proper_extension_of_Empty : Logic.Empty ⊂ Logic.K := by
-  constructor;
-  . simp;
-  . suffices ∃ φ, Hilbert.K ⊢! φ by tauto_set;
-    use ⊤;
-    simp;
-
-end Logic
 
 end LO.Modal

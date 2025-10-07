@@ -25,6 +25,18 @@ prefix:76 "⊡" => boxdot
 abbrev multibox (n : ℕ) : F → F := (□ ·)^[n]
 notation:76 "□^[" n:90 "]" φ:80 => multibox n φ
 
+section
+
+variable [DecidableEq F] [Top F] [Wedge F]
+
+noncomputable abbrev boxlt (n : ℕ) (φ : F) := Finset.range (n + 1) |>.image (λ i => □^[i] φ) |>.conj
+notation:90 "□^≤[" n "]" φ => Box.boxlt n φ
+
+@[simp high]
+lemma boxlt_zero {φ : F} : (□^≤[0]φ) = φ := by simp [Box.boxlt];
+
+end
+
 /-
 class Subclosed (C : F → Prop) where
   box_closed : C (□φ) → C φ
