@@ -84,6 +84,8 @@ import Foundation.FirstOrder.SetTheory.Basic
 import Foundation.FirstOrder.SetTheory.Axioms
 
 import Foundation.FirstOrder.Z.Basic
+import Foundation.FirstOrder.Z.Ordinal
+import Foundation.FirstOrder.Z.Function
 
 import Foundation.FirstOrder.ZF.Basic
 
@@ -138,12 +140,16 @@ import Foundation.Modal.Kripke.LinearFrame
 import Foundation.Modal.PLoN.Logic.N
 
 import Foundation.Modal.Neighborhood.Logic.E4
+import Foundation.Modal.Neighborhood.Logic.E5
 import Foundation.Modal.Neighborhood.Logic.EMC4
 import Foundation.Modal.Neighborhood.Logic.EMCN
 import Foundation.Modal.Neighborhood.Logic.EMT4
 import Foundation.Modal.Neighborhood.Logic.EMCT4
 import Foundation.Modal.Neighborhood.Logic.END
+import Foundation.Modal.Neighborhood.Logic.ENT4
 import Foundation.Modal.Neighborhood.Logic.ET4
+import Foundation.Modal.Neighborhood.Logic.ET5
+import Foundation.Modal.Neighborhood.Logic.ETB
 import Foundation.Modal.Neighborhood.Logic.Incomparability.ED_EP
 
 import Foundation.Modal.ModalCompanion.Int

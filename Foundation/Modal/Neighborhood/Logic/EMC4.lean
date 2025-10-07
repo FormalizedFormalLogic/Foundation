@@ -30,7 +30,7 @@ instance : Entailment.Consistent Modal.EMC4 := consistent_of_sound_frameclass Fr
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Modal.EMC4 FrameClass.EMC4 := maximalCanonicalFrame.completeness $ by
+instance : Complete Modal.EMC4 FrameClass.EMC4 := (supplementedMinimalCanonicity Modal.EMC4).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
@@ -53,21 +53,6 @@ instance : Complete Modal.EMC4 FrameClass.finite_EMC4 := ⟨by
 ⟩
 
 end EMC4
-
-instance : Modal.EMC ⪱ Modal.EMC4 := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.Four (.atom 0));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMC);
-      apply not_validOnFrameClass_of_exists_frame;
-      use Frame.trivial_nontransitive;
-      constructor;
-      . constructor;
-      . simp;
 
 instance : Modal.EMC4 ⪱ Modal.EMCT4 := by
   constructor;

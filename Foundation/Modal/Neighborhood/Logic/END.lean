@@ -15,7 +15,7 @@ protected abbrev FrameClass.END : FrameClass := { F | F.IsEND }
 end Neighborhood
 
 
-
+namespace END
 
 instance : Sound Modal.END FrameClass.END := instSound_of_validates_axioms $ by
   constructor;
@@ -26,16 +26,6 @@ instance : Entailment.Consistent Modal.END := consistent_of_sound_frameclass Fra
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Modal.EP ⪱ Modal.END := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
-    rintro _ rfl;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use Axioms.D (.atom 0);
-    constructor;
-    . simp;
-    . exact EP.unprovable_AxiomD;
-
+end END
 
 end LO.Modal

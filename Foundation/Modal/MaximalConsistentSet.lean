@@ -387,6 +387,8 @@ lemma iff_mem_imp : ((φ ➝ ψ) ∈ Ω) ↔ (φ ∈ Ω) → (ψ ∈ Ω) := by
 
 lemma mdp (hφψ : φ ➝ ψ ∈ Ω) (hψ : φ ∈ Ω) : ψ ∈ Ω := iff_mem_imp.mp hφψ hψ
 
+lemma mdp_provable (hφψ : 𝓢 ⊢ φ ➝ ψ) (hψ : φ ∈ Ω) : ψ ∈ Ω := mdp (mem_of_prove hφψ) hψ
+
 @[simp]
 lemma iff_mem_and : ((φ ⋏ ψ) ∈ Ω) ↔ (φ ∈ Ω) ∧ (ψ ∈ Ω) := by
   constructor;

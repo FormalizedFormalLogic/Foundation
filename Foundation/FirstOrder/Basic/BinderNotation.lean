@@ -677,12 +677,14 @@ end delab
 macro_rules
   | `(⤫formula(faf)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term*   ]) => do
     let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(![])) fun a s ↦ do
-      `(⤫term(faf)[ $binders* | $fbinders* | $a ] :> $s)
+      let x : TSyntax `ident ← TSyntax.freshIdent
+      `(⤫term(faf)[ $x $binders* | $fbinders* | $a ] :> $s)
     `(($φ).nestFormulae $Ψ)
   | `(⤫formula(faf)[ $binders* | $fbinders* | !$φ:term $vs:first_order_term* ⋯ ]) => do
     let length := Syntax.mkNumLit (toString binders.size)
     let Ψ ← vs.foldrM (β := Lean.TSyntax _) (init := ← `(fun x ↦ #(finSuccItr x $length))) fun a s ↦ do
-      `(⤫term(faf)[ $binders* | $fbinders* | $a] :> $s)
+      let x : TSyntax `ident ← TSyntax.freshIdent
+      `(⤫term(faf)[ $x $binders* | $fbinders* | $a] :> $s)
     `(($φ).nestFormulae $Ψ)
 
 macro_rules
@@ -744,22 +746,28 @@ macro_rules
 macro_rules
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.ballLT #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+      let vt : TSyntax `ident ← TSyntax.freshIdent
+      `(∀' (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] ➝ Semiformula.ballLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.ballLE #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+      let vt : TSyntax `ident ← TSyntax.freshIdent
+      `(∀' (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] ➝ Semiformula.ballLE #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∀ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.ballMem #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+      let vt : TSyntax `ident ← TSyntax.freshIdent
+      `(∀' (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] ➝ Semiformula.ballMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x < $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.bexLT #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+      let vt : TSyntax `ident ← TSyntax.freshIdent
+      `(∀' (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] ➝ Semiformula.bexLT #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x ≤ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.bexLE #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+      let vt : TSyntax `ident ← TSyntax.freshIdent
+      `(∀' (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] ➝ Semiformula.bexLE #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
   | `(⤫formula(faf)[ $binders* | $fbinders* | ∃ $x ∈ $t, $φ ]) => do
     if binders.elem x then Macro.throwErrorAt x "error: variable is duplicated." else
-    `(∀' (⤫term(faf)[ $x $binders* | $fbinders* | $t ] ➝ Semiformula.bexMem #0 ⤫formula(faf)[ $x $binders* | $fbinders* | $φ ]))
+      let vt : TSyntax `ident ← TSyntax.freshIdent
+      `(∀' (⤫term(faf)[ $vt $binders* | $fbinders* | $t ] ➝ Semiformula.bexMem #0 ⤫formula(faf)[ $x $vt $binders* | $fbinders* | $φ ]))
 
 syntax "f‘" first_order_term:0 "’" : term
 syntax "f‘" ident* "| " first_order_term:0 "’" : term
@@ -782,6 +790,34 @@ macro_rules
   | `(f“ $binders*. $e:first_order_formula ”)   => `(⤫formula(faf)[ $binders* |            | $e ])
 
 #check f“x y. x = y”
+
+/-
+variable {L : Language} [L.Eq] [L.Mem]
+
+def func : Semisentence L 3 := sorry
+
+def rel : Semisentence L 2 := sorry
+
+def sent : Semisentence L 3 := f“F X Y. ∀ f, f ∈ F ↔ f ∈ !func X Y”
+
+def sent₂ : Semisentence L 3 := f“F X Y. ∀ f, f ∈ F”
+
+variable {M : Type*} [Membership M M] [s : Structure L M] [Structure.Eq L M] [Structure.Mem L M]
+
+def Func : M → M → M := sorry
+
+def Rel : M → M → Prop := sorry
+
+@[simp] lemma eval_func : M ⊧/![x, y, z] (func : Semisentence L 3) ↔ x = Func y z := sorry
+
+@[simp] lemma eval_rel : M ⊧/![x, y] (rel : Semisentence L 2) ↔ Rel x y := sorry
+
+lemma egegege : M ⊧/![x, y, z] (f“x y z. ∀ w ∈ x, w ∈ z” : Semisentence L 3) := by {
+
+  simp
+
+ }
+-/
 
 end BinderNotation
 
