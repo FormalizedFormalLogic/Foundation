@@ -1,7 +1,4 @@
-import VersoBlog
-import VersoManual
-
-import Foundation.FirstOrder.Incompleteness.Second
+import Book.Init
 
 open Verso.Genre
 open Verso.Genre.Manual

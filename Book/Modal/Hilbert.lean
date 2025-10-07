@@ -1,9 +1,4 @@
-import VersoBlog
-import VersoManual
-
-import Foundation.Modal.Kripke.Logic.K
-
-import Book.Bibliography
+import Book.Init
 
 open LO.Modal
 

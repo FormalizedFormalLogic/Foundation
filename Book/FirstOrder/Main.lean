@@ -21,14 +21,14 @@ variables `x y z` is just an example and can take any number of `ident`s.
 ## Binder Notation
 
 Binder notation of term takes either form:
-- Term: `‘x y z. e’`, Formula: `“x y z. e”`
-  - `x y z` is the symbol for the bound variables,
+  Term: `‘x y z. e’`, Formula: `“x y z. e”`
+    `x y z` is the symbol for the bound variables,
     `k:num`-variables denotes the terms in `Semiterm L ξ (n + $k)`/`Semiformula L ξ (n + $k)`. (`n` can be variable)
-- Term: `‘x y z | e’`, Formula: `“x y z | e”`
-  - `x y z` is the symbol for the free variables,
+  Term: `‘x y z | e’`, Formula: `“x y z | e”`
+    `x y z` is the symbol for the free variables,
     `k:num`-variables denotes the terms in `Semiterm L ξ n`/`Semiformula L ξ n`. (`n` can be variable)
-- Term: `‘e’`, Formula: `“e”`
-  - An abbreviation of `‘ . e’`/`“ . e”`
+  Term: `‘e’`, Formula: `“e”`
+    An abbreviation of `‘ . e’`/`“ . e”`
 
 ## Expression of term/formula
 

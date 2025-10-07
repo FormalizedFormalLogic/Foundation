@@ -37,9 +37,9 @@ noncomputable def termSubst (w t : V) : V := construction.result L ![w] t
 
 noncomputable def termSubstVec (k w v : V) : V := construction.resultVec L ![w] k v
 
-def termSubstGraph : 𝚺₁.Semisentence 3 := (blueprint.result L).rew <| Rew.subst ![#0, #2, #1]
+noncomputable def termSubstGraph : 𝚺₁.Semisentence 3 := (blueprint.result L).rew <| Rew.subst ![#0, #2, #1]
 
-def termSubstVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
+noncomputable def termSubstVecGraph : 𝚺₁.Semisentence 4 := (blueprint.resultVec L).rew <| Rew.subst ![#0, #1, #3, #2]
 
 variable {L}
 
@@ -184,9 +184,9 @@ noncomputable def termShift (t : V) : V := construction.result L ![] t
 
 noncomputable def termShiftVec (k v : V) : V := construction.resultVec L ![] k v
 
-def termShiftGraph : 𝚺₁.Semisentence 2 := blueprint.result L
+noncomputable def termShiftGraph : 𝚺₁.Semisentence 2 := blueprint.result L
 
-def termShiftVecGraph : 𝚺₁.Semisentence 3 := blueprint.resultVec L
+noncomputable def termShiftVecGraph : 𝚺₁.Semisentence 3 := blueprint.resultVec L
 
 variable {L}
 
@@ -319,9 +319,9 @@ noncomputable def termBShift (t : V) : V := construction.result L ![] t
 
 noncomputable def termBShiftVec (k v : V) : V := construction.resultVec L ![] k v
 
-def termBShiftGraph : 𝚺₁.Semisentence 2 := blueprint.result L
+noncomputable def termBShiftGraph : 𝚺₁.Semisentence 2 := blueprint.result L
 
-def termBShiftVecGraph : 𝚺₁.Semisentence 3 := blueprint.resultVec L
+noncomputable def termBShiftVecGraph : 𝚺₁.Semisentence 3 := blueprint.resultVec L
 
 variable {L}
 
@@ -473,7 +473,7 @@ variable (L)
 
 noncomputable def qVec (w : V) : V := ^#0 ∷ termBShiftVec L (len w) w
 
-def qVecGraph : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def qVecGraph : 𝚺₁.Semisentence 2 := .mkSigma
   “w' w. ∃ k, !lenDef k w ∧ ∃ sw, !(termBShiftVecGraph L) sw k w ∧ ∃ t, !qqBvarDef t 0 ∧ !adjoinDef w' t sw”
 
 variable {L}

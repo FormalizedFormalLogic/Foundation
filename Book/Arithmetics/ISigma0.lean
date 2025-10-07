@@ -1,17 +1,10 @@
-import VersoBlog
-import VersoManual
-
-import Foundation.FirstOrder.ISigma0.Exponential
-
-import Book.Bibliography
+import Book.Init
 
 open Verso.Genre
 open Verso.Genre.Manual
 open Verso.Genre.Manual.InlineLean
 
-set_option linter.tacticAnalysis false
 set_option verso.docstring.allowMissing true
-set_option pp.rawOnError true
 
 #doc (Manual) "ISigma0" =>
 %%%

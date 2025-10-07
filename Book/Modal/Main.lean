@@ -1,3 +1,4 @@
+import Book.Init
 import Book.Modal.Hilbert
 
 open Verso.Genre

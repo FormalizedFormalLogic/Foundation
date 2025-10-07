@@ -1,17 +1,5 @@
 import Book.Init
 
-import VersoBlog
-import VersoManual
-
-import Book.Bibliography
-
-
-set_option linter.tacticAnalysis false
-
-set_option linter.tacticAnalysis false
-
-
-
 open Verso.Genre Manual
 open Verso.Genre.Manual.InlineLean
 
@@ -85,10 +73,10 @@ Then there is a $`\Sigma_1`-predicate $`\mathsf{Fix}_{\Phi}(\vec{v}, x)` such th
 
 if $`\Phi` satisfies following conditions:
 
-- $`\Phi` is $`\Delta_1`-definable if $`C` is a set. i.e.,
+1 $`\Phi` is $`\Delta_1`-definable if $`C` is a set. i.e.,
    a predicate $`(c, \vec{v}, x) \mapsto \Phi_{\{z \mid \mathrm{Bit}(z, c)\}}(\vec{v}, x)` is $`\Delta_1`-definable.
-- _Monotone_: $`C \subseteq C'` and $`\Phi_C(\vec{v}, x)` implies $`\Phi_{C'}(\vec{v}, x)`.
-- _Finite_: $`\Phi_C (\vec{v}, x)` implies the existence of a $`m` s.t. $`\Phi_{\{z \in C \mid z < m\}} (\vec{v}, x)`.
+2 _Monotone_: $`C \subseteq C'` and $`\Phi_C(\vec{v}, x)` implies $`\Phi_{C'}(\vec{v}, x)`.
+3 _Finite_: $`\Phi_C (\vec{v}, x)` implies the existence of a $`m` s.t. $`\Phi_{\{z \in C \mid z < m\}} (\vec{v}, x)`.
 
 {docstring LO.ISigma1.Fixpoint.Blueprint}
 
