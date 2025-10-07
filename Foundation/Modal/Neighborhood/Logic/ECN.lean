@@ -28,7 +28,7 @@ instance : Entailment.Consistent Modal.ECN := consistent_of_sound_frameclass Fra
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Modal.ECN FrameClass.ECN := minimalCanonicalFrame.completeness $ by
+instance : Complete Modal.ECN FrameClass.ECN := (minimalCanonicity Modal.ECN).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
@@ -67,7 +67,9 @@ instance : Modal.ECN ⪱ Modal.EMCN := by
             rcases hwY with (rfl | rfl) <;>
             simp;
         }
-      . simp! [M, Semantics.Realize, Satisfies];
-        tauto_set;
+      . simp! [M, Semantics.Realize, Satisfies, Set.eq_univ_iff_forall];
+        constructor;
+        . omega;
+        . tauto_set;
 
 end LO.Modal

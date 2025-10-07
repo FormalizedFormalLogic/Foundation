@@ -28,7 +28,7 @@ instance : Entailment.Consistent Modal.EC := consistent_of_sound_frameclass Fram
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Modal.EC FrameClass.EC := minimalCanonicalFrame.completeness $ by
+instance : Complete Modal.EC FrameClass.EC := (minimalCanonicity Modal.EC).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 

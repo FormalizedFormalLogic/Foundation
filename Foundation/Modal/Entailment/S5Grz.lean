@@ -9,7 +9,7 @@ open LO.Entailment LO.Entailment.FiniteContext
 variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
 variable {𝓢 : S} [DecidableEq F] [Entailment.S5Grz 𝓢]
 
-protected def S5Grz.diaT : 𝓢 ⊢! ◇φ ➝ φ := by
+protected noncomputable def S5Grz.diaT : 𝓢 ⊢! ◇φ ➝ φ := by
   have : 𝓢 ⊢! (φ ➝ □φ) ➝ (∼□φ ➝ ∼φ) := CCCNN;
   have : 𝓢 ⊢! □(φ ➝ □φ) ➝ □(∼□φ ➝ ∼φ) := implyBoxDistribute' this;
   have : 𝓢 ⊢! □(φ ➝ □φ) ➝ (□(∼□φ) ➝ □(∼φ)) := C_trans this axiomK;
@@ -22,7 +22,7 @@ protected def S5Grz.diaT : 𝓢 ⊢! ◇φ ➝ φ := by
   have : 𝓢 ⊢! □◇φ ➝ φ := C_trans this axiomGrz;
   exact C_trans axiomFive this;
 
-instance : HasAxiomDiaT 𝓢 := ⟨fun _ ↦ S5Grz.diaT⟩
-instance : Entailment.KTc' 𝓢 where
+noncomputable instance : HasAxiomDiaT 𝓢 := ⟨fun _ ↦ S5Grz.diaT⟩
+noncomputable instance : Entailment.KTc' 𝓢 where
 
 end LO.Modal.Entailment

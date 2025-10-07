@@ -47,7 +47,7 @@ instance : (◇◇) ≅[Modal.S5] (◇) := by
   apply iff_equivalence_bi_translate.mpr;
   constructor;
   . apply translation_of_axiomInstance (a := 0);
-    simp;
+    exact axiomFourDual;
   . apply translation_of_axiomInstance (a := 0);
     simp;
 instance : (◇□) ≅[Modal.S5] (□) := by

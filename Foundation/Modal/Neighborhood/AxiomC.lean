@@ -57,24 +57,20 @@ lemma isRegular_of_valid_axiomC (h : F ⊧ Axioms.C (.atom 0) (.atom 1)) : F.IsR
 section
 
 variable [Entailment (Formula ℕ) S]
-variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.EC 𝓢]
+variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E 𝓢]
 
 open Entailment
 open MaximalConsistentSet
 
-instance : (minimalCanonicalFrame 𝓢).IsRegular := by
+instance [Entailment.HasAxiomC 𝓢] : (minimalCanonicity 𝓢).toModel.IsRegular := by
   constructor;
   rintro X Y Γ ⟨hX, hY⟩;
-  obtain ⟨φ, rfl, hφ⟩ := minimalCanonicalFrame.exists_box X Γ hX;
-  obtain ⟨ψ, rfl, hψ⟩ := minimalCanonicalFrame.exists_box Y Γ hY;
+  obtain ⟨φ, rfl, _, hφ⟩ := minimalCanonicity.iff_mem_box_exists_fml.mp hX;
+  obtain ⟨ψ, rfl, _, hψ⟩ := minimalCanonicity.iff_mem_box_exists_fml.mp hY;
   suffices Γ ∈ proofset 𝓢 (□(φ ⋏ ψ)) by
-    rwa [(show proofset 𝓢 φ ∩ proofset 𝓢 ψ = proofset 𝓢 (φ ⋏ ψ) by grind), minimalCanonicalFrame.box_proofset];
-  have : proofset 𝓢 (□φ ⋏ □ψ) ⊆ proofset 𝓢 (□(φ ⋏ ψ)) := proofset.imp_subset |>.mp (by simp);
-  exact this $ by
-    simp only [proofset.eq_and, Set.mem_inter_iff];
-    constructor;
-    . apply hφ ▸ hX;
-    . apply hψ ▸ hY;
+    rwa [(show proofset 𝓢 φ ∩ proofset 𝓢 ψ = proofset 𝓢 (φ ⋏ ψ) by grind), Canonicity.box_proofset];
+  apply proofset.imp_subset |>.mp (show 𝓢 ⊢ □φ ⋏ □ψ ➝ □(φ ⋏ ψ) by simp);
+  grind;
 
 end
 
