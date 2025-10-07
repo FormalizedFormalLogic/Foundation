@@ -32,7 +32,7 @@ instance : Entailment.Consistent Modal.EMCT4 := consistent_of_sound_frameclass F
   use Frame.simple_blackhole;
   constructor;
 
-instance : Complete Modal.EMCT4 FrameClass.EMCT4 := maximalCanonicalFrame.completeness $ by
+instance : Complete Modal.EMCT4 FrameClass.EMCT4 := (supplementedMinimalCanonicity _).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
