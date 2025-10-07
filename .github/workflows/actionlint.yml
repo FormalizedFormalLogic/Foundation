@@ -2,11 +2,6 @@ name: Actionlint
 
 on:
   push:
-    branches:
-      - "master"
-    paths:
-      - ".github/**"
-  pull_request:
     paths:
       - ".github/**"
 
