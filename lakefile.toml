@@ -16,6 +16,10 @@ name = "mathlib"
 scope = "leanprover"
 name = "doc-gen4"
 
+[[require]]
+scope = "leanprover"
+name = "verso"
+
 [[lean_lib]]
 name = "Foundation"
 
@@ -36,3 +40,10 @@ supportInterpreter = true
 
 [[lean_lib]]
 name = "Zoo"
+
+[[lean_lib]]
+name = "Book"
+
+[[lean_exe]]
+name = "book"
+root = "Book.Book"

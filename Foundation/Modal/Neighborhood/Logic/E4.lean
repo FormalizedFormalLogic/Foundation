@@ -3,6 +3,7 @@ import Foundation.Modal.Neighborhood.AxiomM
 import Foundation.Modal.Neighborhood.AxiomC
 import Foundation.Modal.Neighborhood.Logic.E
 import Foundation.Modal.Neighborhood.Filtration
+import Foundation.Vorspiel.Set.Fin
 
 namespace LO.Modal
 
@@ -22,6 +23,24 @@ protected class Frame.IsFiniteE4 (F : Frame) extends F.IsE4, F.IsFinite
 protected abbrev FrameClass.E4 : FrameClass := { F | F.IsE4 }
 protected abbrev FrameClass.finite_E4 : FrameClass := { F | F.IsFiniteE4 }
 
+/--
+  | `x` | `∅` | `{0}` | `{1}` | `{0, 1}` |
+  |:---:|:---:|:-----:|:-----:|:--------:|
+  | `0` |     |       |✓      |✓         |
+  | `1` |     |✓      |       |✓         |
+-/
+abbrev counterframe_2_3_5 : Frame := ⟨Fin 2, λ x => {{x}ᶜ, Set.univ}⟩
+
+@[simp]
+lemma counterframe_2_3_5.not_valid_axiomFour : ¬counterframe_2_3_5 ⊧ Axioms.Four (Formula.atom 0) := by
+  apply not_imp_not.mpr isTransitive_of_valid_axiomFour;
+  by_contra! hC;
+  have := hC.trans {0}
+  rcases @this 1 (by simp) with (h | h);
+  . simp [Frame.box] at h;
+    tauto_set;
+  . simp [Frame.box, Set.eq_univ_iff_forall] at h;
+    tauto_set;
 
 end Neighborhood
 
@@ -38,7 +57,7 @@ instance : Entailment.Consistent Modal.E4 := consistent_of_sound_frameclass Fram
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Modal.E4 FrameClass.E4 := minimalCanonicalFrame.completeness $ by
+instance : Complete Modal.E4 FrameClass.E4 := (minimalCanonicity Modal.E4).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
@@ -60,21 +79,17 @@ instance : Complete Modal.E4 FrameClass.finite_E4 := ⟨by
 
 end E4
 
-instance : Modal.E4 ⪱ Modal.ET4 := by
+instance : Modal.E ⪱ Modal.E4 := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
     simp;
   . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.T (.atom 0));
+    use (Axioms.Four (.atom 0));
     constructor;
     . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E4);
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
       apply not_validOnFrameClass_of_exists_frame;
-      use ⟨Fin 1, λ _ => Set.univ⟩;
-      constructor;
-      . tauto;
-      . apply not_imp_not.mpr isReflexive_of_valid_axiomT;
-        by_contra! hC;
-        simpa [Frame.box] using @hC.refl ∅;
+      use counterframe_2_3_5;
+      simp;
 
 end LO.Modal

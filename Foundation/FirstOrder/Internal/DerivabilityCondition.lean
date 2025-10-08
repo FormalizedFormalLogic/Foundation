@@ -12,7 +12,7 @@ namespace LO.FirstOrder.Arithmetic
 
 open ISigma1 Metamath ProvabilityLogic
 
-instance : Diagonalization 𝗜𝚺₁ where
+noncomputable instance : Diagonalization 𝗜𝚺₁ where
   fixedpoint := fixedpoint
   diag θ := diagonal θ
 
@@ -32,7 +32,7 @@ theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ ➝ π) ➝ □σ ➝ □π
 
 variable (T)
 
-abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
+noncomputable abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
   prov := T.provable
   D1 := provable_D1
 
