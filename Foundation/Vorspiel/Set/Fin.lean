@@ -24,6 +24,13 @@ namespace Fin2
 
 protected lemma eq_univ : Set.univ (α := Fin 2) = {0, 1} := by ext x; match x with | 0 | 1 => simp
 
+@[simp]
+protected lemma ne_singleton_univ {x : Fin 2} : ({x} : Set (Fin 2)) ≠ Set.univ := by
+  apply Set.Subset.antisymm_iff.not.mpr;
+  suffices ∃ y, y ≠ x by simpa;
+  use x + 1;
+  omega;
+
 protected lemma eq_powerset : Set.powerset (Set.univ : Set (Fin 2)) = {{0, 1}, {0}, {1}, ∅} := by
   ext x;
   simp only [Set.powerset_univ, Set.mem_univ, Fin.isValue, Set.mem_insert_iff, Set.mem_singleton_iff, true_iff];
@@ -45,7 +52,26 @@ protected lemma eq_powerset : Set.powerset (Set.univ : Set (Fin 2)) = {{0, 1}, {
 protected lemma all_cases (s : Set (Fin 2)) : s = {0, 1} ∨ s = {0} ∨ s = {1} ∨ s = ∅ := by
   simpa using Set.Fin2.eq_powerset.subset (by simp);
 
+@[simp]
+lemma eq_compl_singleton_one_singleton_zero : ({1}ᶜ : Set (Fin 2)) = {0} := by
+  apply Set.Subset.antisymm_iff.mpr;
+  constructor;
+  . intro;
+    simp;
+    omega;
+  . simp;
+
+@[simp]
+lemma eq_compl_singleton_zero_singleton_one : ({0}ᶜ : Set (Fin 2)) = {1} := by
+  apply Set.Subset.antisymm_iff.mpr;
+  constructor;
+  . intro;
+    simp;
+    omega;
+  . simp;
+
 end Fin2
+
 
 namespace Fin3
 

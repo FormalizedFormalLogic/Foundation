@@ -79,7 +79,7 @@ instance isReflexive [F.IsReflexive] : F.supplementation.IsReflexive := by
   apply F.refl;
   exact hY₂;
 
-instance [F.ContainsUnit] : F.supplementation.ContainsUnit := by
+instance containsUnit [F.ContainsUnit] : F.supplementation.ContainsUnit := by
   constructor;
   ext x;
   suffices ∃ Y ⊆ Set.univ, Y ∈ F.𝒩 x by
@@ -115,69 +115,42 @@ end Frame.supplementation
 
 section
 
-open MaximalConsistentSet (proofset)
+open MaximalConsistentSet
 open Formula (atom)
 open Formula.Neighborhood
 open MaximalConsistentSet
-open MaximalConsistentSet.proofset
+open proofset
 
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.EM 𝓢] [Entailment.Consistent 𝓢]
 
-abbrev maximalCanonicalFrame (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Frame := (minimalCanonicalFrame 𝓢).supplementation
-
-namespace maximalCanonicalFrame
-
-open Classical in
-lemma box_proofset : Frame.box (maximalCanonicalFrame 𝓢) (proofset 𝓢 φ) = proofset 𝓢 (□φ) := by
-  ext Γ;
-  suffices (∃ a ⊆ proofset 𝓢 φ, Γ ∈ if h : ∃ φ, a = proofset 𝓢 φ then proofset 𝓢 (□h.choose) else ∅) ↔ Γ ∈ proofset 𝓢 (□φ) by
-    simpa [maximalCanonicalFrame, minimalCanonicalFrame, Frame.mk_ℬ, Frame.supplementation];
-  constructor;
-  . rintro ⟨X, hX₁, hX₂⟩;
-    split_ifs at hX₂ with hX;
-    . apply box_subset_of_subset (hX.choose_spec ▸ hX₁);
-      exact hX₂;
-    . contradiction;
-  . intro hΓ;
-    use proofset 𝓢 φ;
+abbrev supplementedMinimalCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 𝓢] : Canonicity 𝓢 where
+  𝒩 := (minimalCanonicity 𝓢).toModel.supplementation.𝒩
+  def_𝒩 := by
+    intro X φ;
     constructor;
-    . tauto;
-    . split_ifs with h;
-      . exact eq_boxed_of_eq h.choose_spec ▸ hΓ;
-      . push_neg at h;
-        tauto;
+    . rintro h;
+      use proofset 𝓢 φ;
+      constructor;
+      . simp;
+      . use φ;
+    . rintro ⟨Y, hψ₁, ⟨ψ, hψ₂, rfl⟩⟩;
+      apply proofset.box_subset_of_subset hψ₁ hψ₂;
+  V a := proofset 𝓢 (.atom a);
+  def_V := by simp;
 
-end maximalCanonicalFrame
+instance : (supplementedMinimalCanonicity 𝓢).toModel.IsMonotonic := Frame.supplementation.isMonotonic (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
+instance [Entailment.HasAxiomC 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.IsRegular := Frame.supplementation.isRegular (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
-abbrev maximalCanonicalModel (𝓢 : S) [Entailment.E 𝓢] [Entailment.Consistent 𝓢] : Model where
-  toFrame := maximalCanonicalFrame 𝓢
-  Val a := proofset 𝓢 (.atom a)
+instance [Entailment.HasAxiomN 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.ContainsUnit := Frame.supplementation.containsUnit (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
-@[grind]
-protected lemma maximalCanonicalModel.truthlemma : (proofset 𝓢 φ) = ((maximalCanonicalModel 𝓢) φ) := by
-  induction φ with
-  | hatom => simp [maximalCanonicalModel]
-  | hfalsum => simp [maximalCanonicalModel];
-  | himp φ ψ ihφ ihψ => simp_all [MaximalConsistentSet.proofset.eq_imp];
-  | hbox φ ihφ => simp [Model.truthset.eq_box, ←ihφ, maximalCanonicalFrame.box_proofset];
+instance [Entailment.HasAxiomT 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.IsReflexive := Frame.supplementation.isReflexive (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
-protected lemma maximalCanonicalFrame.completeness {C : FrameClass} (hC : (maximalCanonicalFrame 𝓢) ∈ C) : LO.Complete 𝓢 C := by
-  constructor;
-  intro φ hφ;
-  contrapose! hφ;
-  obtain ⟨Γ, hΓ⟩ := lindenbaum $ FormulaSet.unprovable_iff_singleton_neg_consistent.mpr hφ;
-  apply not_validOnFrameClass_of_exists_model_world;
-  use (maximalCanonicalModel 𝓢), Γ;
-  constructor;
-  . assumption;
-  . suffices Γ ∉ proofset 𝓢 φ by simpa [Semantics.Realize, Satisfies, maximalCanonicalModel.truthlemma];
-    apply MaximalConsistentSet.proofset.iff_mem.not.mp;
-    apply MaximalConsistentSet.iff_mem_neg.mp;
-    tauto;
-
+instance [Entailment.HasAxiomFour 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.IsTransitive := Frame.supplementation.isTransitive (F := (minimalCanonicity 𝓢).toModel.toFrame)
 
 end
+
+
 
 end LO.Modal.Neighborhood
