@@ -87,7 +87,8 @@ Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelat
 Build and host locally by some tools e.g. [miniserve](https://github.com/svenstaro/miniserve) or `python3 -m http.server`
 
 ```shell
-lake exe book --depth 2
+lake exe book
+
 miniserve _out/html-multi --index index.html
 ```
 
