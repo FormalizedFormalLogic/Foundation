@@ -17,6 +17,6 @@
   - [Theories of Arithmetics](./first_order/arithmetic_theories.md)
   - [Theory IΣ₀](./first_order/isigma0.md)
   - [Theory IΣ₁](./first_order/isigma1.md)
-  - [Gödel's First Incompleteness Theorem](./first_order/goedel1.md)
-  - [Gödel's Second Incompleteness Theorem](./first_order/goedel2.md)
+  - [Gödel's First Incompleteness Theorem](./first_order/gödel1.md)
+  - [Gödel's Second Incompleteness Theorem](./first_order/gödel2.md)
 - [Interpretation](./first_order/interpretation.md)

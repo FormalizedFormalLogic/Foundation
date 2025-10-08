@@ -6,7 +6,7 @@ open Encodable Denumerable
 
 namespace LO.FirstOrder.Arithmetic
 
-open Mathlib Encodable Semiterm.Operator.GoedelNumber
+open Mathlib Encodable Semiterm.Operator.GödelNumber
 
 section
 
