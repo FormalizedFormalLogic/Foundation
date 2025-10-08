@@ -34,16 +34,6 @@ jobs:
         uses: ts-graphviz/setup-graphviz@v2
       - name: Setup typst
         uses: typst-community/setup-typst@v4
-      - name: Setup mdbook
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: mdbook
-          version: "0.4.51"
-      - name: Setup mdbook-katex
-        uses: baptiste0928/cargo-install@v3
-        with:
-          crate: mdbook-katex
-          version: "0.9.4"
       - name: Print tools version
         run: |
           lake --version
@@ -71,33 +61,34 @@ jobs:
       # Build import-graph
       - name: Generate import graph
         run: |
-          lake exe graph ./import_graph.png
-          lake exe graph ./import_graph.pdf
-          lake exe graph ./import_graph.html
-      - name: Copy import graph to pages
-        run: |
-          cp ./import_graph.png ./pages/src/assets
-          cp ./import_graph.pdf ./pages/src/assets
-          cp ./import_graph.html ./pages/src/assets
+          lake exe graph ./pages/_output/import_graph.png
+          lake exe graph ./pages/_output/import_graph.pdf
+          lake exe graph ./pages/_output/import_graph.html
 
       - name: Generate Propositional Zoo
         run: |
           lake exe generate_propositional_zoo
-          typst compile ./Zoo/propositional.typ ./pages/src/assets/propositional_zoo.png
+          typst compile ./Zoo/propositional.typ ./pages/_output/propositional_zoo.png
       - name: Generate Modal Zoo
         run: |
           lake exe generate_modal_zoo
-          typst compile ./Zoo/modal.typ ./pages/src/assets/modal_zoo.png
+          typst compile ./Zoo/modal.typ ./pages/_output/modal_zoo.png
       - name: Generate Arith Zoo
         run: |
           lake exe generate_arith_zoo
-          typst compile ./Zoo/arith.typ ./pages/src/assets/arith_zoo.png
+          typst compile ./Zoo/arith.typ ./pages/_output/arith_zoo.png
 
-      # Build doc
-      - name: Build docs
+      # Build Doc
+      - name: Build doc
         run: lake build Foundation:docs
-      - name: Copy docs to pages
+      - name: Copy doc to pages
         run: cp -r .lake/build/doc ./pages/_output/doc
+
+      # Build Book
+      - name: Build book
+        run: lake exe book --depth 2
+      - name: Copy book to pages
+        run: cp -r  _out/html-multi ./pages/_output/book
 
       # Save project cache
       - name: Save project cache
@@ -106,11 +97,6 @@ jobs:
         with:
           path: .lake
           key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-
-      # Build book
-      - name: Build book
-        run: mdbook build
-        working-directory: pages
 
       # Upload pages artifact
       - uses: actions/upload-pages-artifact@v3

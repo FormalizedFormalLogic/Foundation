@@ -69,15 +69,15 @@ Automatically generated diagrams "Zoo", illustrate the Lean4-verified interrelat
 
 ### Arithmetic Theory Zoo
 
-![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/arith_zoo.png)
+![Arithmetic Theory Zoo](https://formalizedformallogic.github.io/Foundation/arith_zoo.png)
 
 ### Modal Logic Zoo
 
-![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/modal_zoo.png)
+![Modal Logic Zoo](https://formalizedformallogic.github.io/Foundation/modal_zoo.png)
 
 ### Propositional Logic Zoo
 
-![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/book/assets/propositional_zoo.png)
+![Propositional Logic Zoo](https://formalizedformallogic.github.io/Foundation/propositional_zoo.png)
 
 ## Build
 
