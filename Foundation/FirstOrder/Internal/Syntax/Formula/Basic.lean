@@ -238,7 +238,7 @@ def formulaAux : 𝚺₀.Semisentence 2 := .mkSigma
     (∃ p₁ < p, p₁ ∈ C ∧ !qqAllDef p p₁) ∨
     (∃ p₁ < p, p₁ ∈ C ∧ !qqExDef p p₁)”
 
-def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
+noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma
     “p C.
       (∃ k < p, ∃ r < p, ∃ v < p, !L.isRel k r ∧ !(isUTermVec L).sigma k v ∧ !qqRelDef p k r v) ∨
@@ -321,7 +321,7 @@ variable (L)
 
 def IsUFormula : V → Prop := (FormalizedFormula.construction L).Fixpoint ![]
 
-def isUFormula : 𝚫₁.Semisentence 1 := (FormalizedFormula.blueprint L).fixpointDefΔ₁
+noncomputable def isUFormula : 𝚫₁.Semisentence 1 := (FormalizedFormula.blueprint L).fixpointDefΔ₁
 
 variable {L}
 
@@ -574,7 +574,7 @@ namespace Blueprint
 
 variable (L) (β : Blueprint)
 
-def blueprint (β : Blueprint) : Fixpoint.Blueprint 0 := ⟨.mkDelta
+noncomputable def blueprint (β : Blueprint) : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “pr C.
     ∃ param <⁺ pr, ∃ p <⁺ pr, ∃ y <⁺ pr, !pair₃Def pr param p y ∧ !(isUFormula L).sigma p ∧
     ((∃ k < p, ∃ R < p, ∃ v < p, !qqRelDef p k R v ∧ !β.rel y param k R v) ∨
@@ -606,10 +606,12 @@ def blueprint (β : Blueprint) : Fixpoint.Blueprint 0 := ⟨.mkDelta
       (∀ param', !β.exChanges param' param → :⟪param', p₁, y₁⟫:∈ C) ∧ !qqExDef p p₁ ∧ !β.ex.graphDelta.pi.val y param p₁ y₁))
   ”)⟩
 
-def graph : 𝚺₁.Semisentence 3 := .mkSigma
+/-- Note: `noncomputable` attribute to prohibit compilation of a large term. This is necessary for Zoo and integration with Verso. -/
+noncomputable def graph : 𝚺₁.Semisentence 3 := .mkSigma
   “param p y. ∃ pr, !pair₃Def pr param p y ∧ !(β.blueprint L).fixpointDef pr”
 
-def result : 𝚺₁.Semisentence 3 := .mkSigma
+/-- Note: `noncomputable` attribute to prohibit compilation of a large term. This is necessary for Zoo and integration with Verso. -/
+noncomputable def result : 𝚺₁.Semisentence 3 := .mkSigma
   “y param p. (!(isUFormula L).pi p → !(β.graph L) param p y) ∧ (¬!(isUFormula L).sigma p → y = 0)”
 
 end Blueprint
@@ -1266,7 +1268,7 @@ namespace BV
 
 variable (L)
 
-def blueprint : UformulaRec1.Blueprint where
+noncomputable def blueprint : UformulaRec1.Blueprint where
   rel := .mkSigma “y param k R v. ∃ M, !(termBVVecGraph L) M k v ∧ !listMaxDef y M”
   nrel := .mkSigma “y param k R v. ∃ M, !(termBVVecGraph L) M k v ∧ !listMaxDef y M”
   verum := .mkSigma “y param. y = 0”
@@ -1308,7 +1310,7 @@ variable (L)
 
 noncomputable def bv (p : V) : V := (BV.construction L).result L 0 p
 
-def bvGraph : 𝚺₁.Semisentence 2 := ((BV.blueprint L).result L).rew (Rew.subst ![#0, ‘0’, #1])
+noncomputable def bvGraph : 𝚺₁.Semisentence 2 := ((BV.blueprint L).result L).rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
 
@@ -1357,7 +1359,7 @@ structure IsSemiformula (n p : V) : Prop where
 
 abbrev IsFormula (p : V) : Prop := IsSemiformula L 0 p
 
-def isSemiformula : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def isSemiformula : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p. !(isUFormula L).sigma p ∧ ∃ b, !(bvGraph L) b p ∧ b ≤ n”)
   (.mkPi “n p. !(isUFormula L).pi p ∧ ∀ b, !(bvGraph L) b p → b ≤ n”)
 

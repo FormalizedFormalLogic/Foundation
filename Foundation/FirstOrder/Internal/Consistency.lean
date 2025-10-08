@@ -32,13 +32,13 @@ lemma _root_.LO.FirstOrder.Theory.ConsistentWith.quote_iff {σ : Sentence L} :
 
 section
 
-def _root_.LO.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
+noncomputable def _root_.LO.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
   .mkPi (∼T.provabilityPred ⊥)
 
 @[simp] lemma consistent.defined : Semiformula.Evalbm V ![] (T.consistent : Sentence ℒₒᵣ) ↔ T.Consistent V := by
   simp [Theory.consistent, Theory.Consistent]
 
-def _root_.LO.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi
+noncomputable def _root_.LO.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi
   “φ. ∀ nφ, !(negGraph L) nφ φ → ¬!T.provable nφ”
 
 lemma consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith := by
@@ -50,9 +50,9 @@ lemma consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop)
 
 instance consistentWith.definable : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) := (consistentWith.defined T).to_definable
 
-abbrev _root_.LO.FirstOrder.Theory.consistentWithPred (σ : Sentence L) : Sentence ℒₒᵣ := T.consistentWith.val/[⌜σ⌝]
+noncomputable abbrev _root_.LO.FirstOrder.Theory.consistentWithPred (σ : Sentence L) : Sentence ℒₒᵣ := T.consistentWith.val/[⌜σ⌝]
 
-def _root_.LO.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) : 𝚷₁.Sentence := .mkPi
+noncomputable def _root_.LO.FirstOrder.Theory.consistentWithPred' (σ : Sentence L) : 𝚷₁.Sentence := .mkPi
   “!T.consistentWith !!(⌜σ⌝)”
 
 @[simp] lemma consistentWithPred'_val (σ : Sentence L) : (T.consistentWithPred' σ).val = T.consistentWithPred' σ := by rfl
@@ -65,9 +65,9 @@ abbrev _root_.LO.FirstOrder.Theory.Con : ArithmeticTheory := {↑T.consistent}
 
 abbrev _root_.LO.FirstOrder.Theory.Incon : ArithmeticTheory := {∼↑T.consistent}
 
-instance : T.Con.Δ₁ := Theory.Δ₁.singleton _
+noncomputable instance : T.Con.Δ₁ := Theory.Δ₁.singleton _
 
-instance : T.Incon.Δ₁ := Theory.Δ₁.singleton _
+noncomputable instance : T.Incon.Δ₁ := Theory.Δ₁.singleton _
 
 end
 

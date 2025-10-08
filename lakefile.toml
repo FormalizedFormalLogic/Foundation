@@ -18,6 +18,11 @@ scope = "leanprover"
 name = "doc-gen4"
 rev = "v4.23.0"
 
+[[require]]
+scope = "leanprover"
+name = "verso"
+rev = "v4.23.0"
+
 [[lean_lib]]
 name = "Foundation"
 
@@ -38,3 +43,10 @@ supportInterpreter = true
 
 [[lean_lib]]
 name = "Zoo"
+
+[[lean_lib]]
+name = "Book"
+
+[[lean_exe]]
+name = "book"
+root = "Book.Book"
