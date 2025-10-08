@@ -43,8 +43,7 @@ $`\mathrm{Seq}(s)` iff $`s` is a mapping and its domain is $`[0, l)` for some $`
 Let $`f(\vec v)`, $`g(\vec{v}, x, z)` be a $`\Sigma_1`-function.
 There is a $`\Sigma_1`-function $`\mathsf{PR}_{f,g}(\vec{v}, u)` such that:
 
--- TODO: display TeX
-```
+```math
 \begin{align*}
   \mathsf{PR}_{f,g}(\vec{v}, 0) &= f(\vec{v}) \\
   \mathsf{PR}_{f,g}(\vec{v}, u + 1) &= g(\vec{v}, u, \mathsf{PR}_{f,g}(\vec{v}, u))
@@ -66,8 +65,7 @@ There is a $`\Sigma_1`-function $`\mathsf{PR}_{f,g}(\vec{v}, u)` such that:
 Let $`\Phi_C(\vec{v}, x)` be a predicate, which takes a _class_ $`C` as a parameter.
 Then there is a $`\Sigma_1`-predicate $`\mathsf{Fix}_{\Phi}(\vec{v}, x)` such that
 
--- TODO: display TeX
-```
+```math
   \mathsf{Fix}_\Phi(\vec{v}, x) \iff \Phi_{\{z \mid \mathsf{Fix}_\Phi(\vec{v}, z)\}} (\vec{v}, x)
 ```
 

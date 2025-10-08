@@ -23,8 +23,7 @@ We work inside an arbitrary model $`V` of $`\mathsf{I}\Sigma_1`.
 ## Term
 Define $`T_C` as follows.
 
--- TODO: display TeX
-```
+```math
 \begin{align*}
   u \in T_C &\iff
       && (\exists z)[u = \widehat{\#z}] \lor {}  \\
@@ -36,8 +35,7 @@ Define $`T_C` as follows.
 
 $`\widehat{\bullet}` is a quasi-quotation..
 
--- TODO: display TeX
-```
+```math
 \begin{align*}
   \text{bounded variable: }&& \widehat{\#z} &\coloneqq \braket{0, z} + 1 \\
   \text{free variable: }&&\widehat{\&x} &\coloneqq \braket{1, x} + 1 \\
@@ -55,8 +53,7 @@ Define $`\mathrm{Semiterm}(n, t) := \mathrm{UTerm}(t) \land \mathrm{termBV}(t) \
 
 Similarly, Define $`F_C`:
 
--- TODO: display TeX
-```
+```math
 \begin{align*}
   u \in F_C &\iff
       && (\exists k, R, v)[\mathrm{Rel}_k(R) \land \text{$v$ is a list of $\mathrm{UTerm}$ of length $k$} \land u = \widehat{R^k (v)}] \lor {}  \\
@@ -70,8 +67,7 @@ Similarly, Define $`F_C`:
 \end{align*}
 ```
 
--- TODO: display TeX
-```
+```math
 \begin{align*}
   \widehat{R^k(v)}       &\coloneqq \braket{0, R, k, v} + 1\\
   \widehat{\lnot R^k(v)} &\coloneqq \braket{1, R, k, v} + 1 \\
@@ -99,7 +95,7 @@ $`\mathrm{UFormula}(p)` and $`\mathrm{Semiormula}(n, p)` are again $`\Delta_1` s
 Let $`T` be $`\Delta_1`-definable theory.
 Define $`D_C`:
 
-```
+```math
 \begin{align*}
   d \in D_C &\iff
     &&(\forall p \in \mathrm{sqt}(d))[\mathrm{Semiformula}(0, p)] \land {} \\
@@ -134,7 +130,7 @@ Define $`D_C`:
      ]\end{align*}
 ```
 
-```
+```math
 \begin{align*}
   \widehat{\text{AXL}(s, p)}       &\coloneqq \braket{s, 0, p} + 1\\
   \widehat{\top\text{-INTRO}(s)} &\coloneqq \braket{s, 1, 0} + 1 \\
@@ -153,7 +149,7 @@ Define $`D_C`:
 $`p^+` is a *shift* of a formula $`p`. $`s^+` is a image of *shift* of $`s`.
 Take fixpoint $`\mathrm{Derivation}_T(d)`.
 
-```
+```math
 \begin{align*}
   \mathrm{Derivable}_T(\Gamma) &\coloneqq (\exists d)[\mathrm{Derivation}_T(d) \land \mathrm{sqt}(d) = \Gamma] \\
   \mathrm{Provable}_T(p) &\coloneqq \mathrm{Derivable}_T(\{p\})
@@ -184,7 +180,7 @@ holds. (overline $`\overline{\bullet}` denotes the (formalized) numeral of $`x`)
 
 Define a sentence $`\mathrm{fixpoint}_\theta` for formula (with one variable) $`\theta` as follows.
 
-```
+```math
   \begin{align*}
     \mathrm{fixpoint}_\theta
       &\coloneqq \mathrm{diag}_\theta(\overline{\ulcorner \mathrm{diag}_\theta \urcorner}) \\
@@ -201,7 +197,7 @@ $`T \vdash \mathrm{fixpoint}_\theta \leftrightarrow \theta({\ulcorner \mathrm{fi
 
 Define Gödel sentence $`\mathrm{G}_T`:
 
-```
+```math
   \mathrm{G}_T \coloneqq \mathrm{fixpoint}_{\lnot\mathrm{Provable}_T(x)}
 ```
 
@@ -213,7 +209,7 @@ Gödel sentence is undecidable, i.e., $`T \nvdash \mathrm{G}` if $`T` is consist
 
 Define formalized incompleteness sentence $`\mathrm{Con}_T`:
 
-```
+```math
   \mathrm{Con}_T \coloneqq \lnot\mathrm{Provable}_T(\ulcorner \bot \urcorner)
 ```
 
