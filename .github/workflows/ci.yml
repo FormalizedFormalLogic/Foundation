@@ -35,8 +35,6 @@ jobs:
           lake --version
           dot -V
           typst --version
-          mdbook --version
-          mdbook-katex --version
 
       # Restore project cache
       - name: Restore cache
