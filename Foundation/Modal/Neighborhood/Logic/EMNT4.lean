@@ -23,22 +23,22 @@ end Neighborhood
 
 namespace EMNT4
 
-instance : Sound Modal.EMNT4 FrameClass.EMNT4 := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EMNT4 FrameClass.EMNT4 := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl | rfl | rfl) F hF <;>
   . replace hF := Set.mem_setOf_eq.mp hF;
     simp;
 
-instance : Entailment.Consistent Modal.EMNT4 := consistent_of_sound_frameclass FrameClass.EMNT4 $ by
+instance consistent : Entailment.Consistent Modal.EMNT4 := consistent_of_sound_frameclass FrameClass.EMNT4 $ by
   use Frame.simple_blackhole;
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Modal.EMNT4 FrameClass.EMNT4 := (supplementedMinimalCanonicity Modal.EMNT4).completeness $ by
+instance Neighborhood.complete : Complete Modal.EMNT4 FrameClass.EMNT4 := (supplementedMinimalCanonicity Modal.EMNT4).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Modal.EMNT4 FrameClass.finite_EMNT4 := ⟨by
+instance Neighborhood.finite_complete : Complete Modal.EMNT4 FrameClass.finite_EMNT4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.EMNT4);
   intro F F_trans V x;

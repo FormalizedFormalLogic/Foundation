@@ -32,3 +32,11 @@ def Seg71 : Thesis where
   year := 1971
   degree := inlines!"Ph.D"
   university := inlines!"Stanford University"
+
+def Kop23 : ArXiv where
+  title := inlines!"The Finite Model Property of Some Non-normal Modal Logics with the Transitivity Axiom"
+  authors := #[
+    inlines!"K. Kopnev",
+  ]
+  year := 2023
+  id := "2305.08605"

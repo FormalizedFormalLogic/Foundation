@@ -46,22 +46,22 @@ end Neighborhood
 
 namespace E4
 
-instance : Sound Modal.E4 FrameClass.E4 := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.E4 FrameClass.E4 := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply valid_axiomFour_of_isTransitive;
 
-instance : Entailment.Consistent Modal.E4 := consistent_of_sound_frameclass FrameClass.E4 $ by
+instance consistent : Entailment.Consistent Modal.E4 := consistent_of_sound_frameclass FrameClass.E4 $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Modal.E4 FrameClass.E4 := (minimalCanonicity Modal.E4).completeness $ by
+instance Neighborhood.complete : Complete Modal.E4 FrameClass.E4 := (minimalCanonicity Modal.E4).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
-instance : Complete Modal.E4 FrameClass.finite_E4 := ⟨by
+instance Neighborhood.finite_complete : Complete Modal.E4 FrameClass.finite_E4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.E4);
   intro F F_trans V x;

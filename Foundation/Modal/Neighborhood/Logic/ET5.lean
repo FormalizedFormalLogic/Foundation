@@ -69,16 +69,16 @@ end Neighborhood
 
 namespace ET5
 
-instance : Sound Modal.ET5 FrameClass.ET5 := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.ET5 FrameClass.ET5 := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Modal.ET5 := consistent_of_sound_frameclass FrameClass.ET5 $ by
+instance consistent : Entailment.Consistent Modal.ET5 := consistent_of_sound_frameclass FrameClass.ET5 $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Modal.ET5 FrameClass.ET5 := (minimalCanonicity Modal.ET5).completeness $ by
+instance Neighborhood.complete : Complete Modal.ET5 FrameClass.ET5 := (minimalCanonicity Modal.ET5).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 

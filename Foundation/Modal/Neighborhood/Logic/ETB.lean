@@ -21,12 +21,12 @@ end Neighborhood
 
 namespace ETB
 
-instance : Sound Modal.ETB FrameClass.ETB := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.ETB FrameClass.ETB := instSound_of_validates_axioms $ by
   constructor;
   rintro φ (rfl | rfl) F hF <;>
   . replace hF := Set.mem_setOf_eq.mp hF; simp;
 
-instance : Entailment.Consistent Modal.ETB := consistent_of_sound_frameclass FrameClass.ETB $ by
+instance consistent : Entailment.Consistent Modal.ETB := consistent_of_sound_frameclass FrameClass.ETB $ by
   use Frame.simple_blackhole;
   constructor;
 

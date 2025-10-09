@@ -18,17 +18,17 @@ end Neighborhood
 
 namespace EC
 
-instance : Sound Modal.EC FrameClass.EC := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EC FrameClass.EC := instSound_of_validates_axioms $ by
   constructor;
   rintro _ rfl F hF;
   simp_all;
 
-instance : Entailment.Consistent Modal.EC := consistent_of_sound_frameclass FrameClass.EC $ by
+instance consistent : Entailment.Consistent Modal.EC := consistent_of_sound_frameclass FrameClass.EC $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Modal.EC FrameClass.EC := (minimalCanonicity Modal.EC).completeness $ by
+instance Neighborhood.complete : Complete Modal.EC FrameClass.EC := (minimalCanonicity Modal.EC).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 

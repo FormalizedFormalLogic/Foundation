@@ -353,7 +353,7 @@ lemma iff_mem_B :
         rw [Filtration.box_in_out hφ]
       . tauto;
 
-instance isTransitive : (transitiveFiltration M T).toModel.IsTransitive := by
+protected instance isTransitive : (transitiveFiltration M T).toModel.IsTransitive := by
   constructor;
   intro X;
   by_cases h : (minimalFiltration M T).B X = ∅;
@@ -391,7 +391,7 @@ instance isTransitive : (transitiveFiltration M T).toModel.IsTransitive := by
           . grind;
         . grind;
 
-instance isReflexive [M.IsReflexive] : (transitiveFiltration M T).toModel.IsReflexive := by
+protected instance isReflexive [M.IsReflexive] : (transitiveFiltration M T).toModel.IsReflexive := by
   constructor;
   rintro X W hW;
   rcases transitiveFiltration.iff_mem_B.mp hW with (⟨φ, hφ, rfl, _⟩ | ⟨φ, hφ, rfl, _⟩);
@@ -399,7 +399,7 @@ instance isReflexive [M.IsReflexive] : (transitiveFiltration M T).toModel.IsRefl
     assumption;
   . assumption;
 
-instance containsUnit [M.ContainsUnit] (hT : □⊤ ∈ T) : (transitiveFiltration M T).toModel.ContainsUnit := by
+protected instance containsUnit [M.ContainsUnit] (hT : □⊤ ∈ T) : (transitiveFiltration M T).toModel.ContainsUnit := by
   constructor;
   ext X;
   suffices X ∈ (transitiveFiltration M T).B Set.univ by simpa;

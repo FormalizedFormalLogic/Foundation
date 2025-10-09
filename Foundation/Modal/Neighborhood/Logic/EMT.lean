@@ -22,16 +22,16 @@ end Neighborhood
 
 namespace EMT
 
-instance : Sound Modal.EMT FrameClass.EMT := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EMT FrameClass.EMT := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Modal.EMT := consistent_of_sound_frameclass FrameClass.EMT $ by
+instance consistent : Entailment.Consistent Modal.EMT := consistent_of_sound_frameclass FrameClass.EMT $ by
   use Frame.simple_blackhole;
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Modal.EMT FrameClass.EMT := (supplementedMinimalCanonicity Modal.EMT).completeness $ by
+instance Neighborhood.complete : Complete Modal.EMT FrameClass.EMT := (supplementedMinimalCanonicity Modal.EMT).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 

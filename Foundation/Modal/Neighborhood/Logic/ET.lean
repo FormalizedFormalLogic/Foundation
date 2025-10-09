@@ -37,18 +37,18 @@ end Neighborhood
 
 namespace ET
 
-instance : Sound Modal.ET FrameClass.ET := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.ET FrameClass.ET := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply valid_axiomT_of_isReflexive;
 
-instance : Entailment.Consistent Modal.ET := consistent_of_sound_frameclass FrameClass.ET $ by
+instance consistent : Entailment.Consistent Modal.ET := consistent_of_sound_frameclass FrameClass.ET $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Modal.ET FrameClass.ET := (minimalCanonicity Modal.ET).completeness $ by
+instance Neighborhood.complete : Complete Modal.ET FrameClass.ET := (minimalCanonicity Modal.ET).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 

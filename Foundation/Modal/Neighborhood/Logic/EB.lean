@@ -29,13 +29,13 @@ end Neighborhood
 
 namespace EB
 
-instance : Sound Modal.EB FrameClass.EB := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EB FrameClass.EB := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply valid_axiomB_of_isSymmetric;
 
-instance : Entailment.Consistent Modal.EB := consistent_of_sound_frameclass FrameClass.EB $ by
+instance consistent : Entailment.Consistent Modal.EB := consistent_of_sound_frameclass FrameClass.EB $ by
   use Frame.simple_blackhole;
   apply Set.mem_setOf_eq.mpr;
   infer_instance

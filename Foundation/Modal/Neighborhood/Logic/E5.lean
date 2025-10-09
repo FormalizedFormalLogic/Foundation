@@ -50,18 +50,18 @@ end Neighborhood
 
 namespace E5
 
-instance : Sound Modal.E5 FrameClass.E5 := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.E5 FrameClass.E5 := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply valid_axiomFive_of_isEuclidean;
 
-instance : Entailment.Consistent Modal.E5 := consistent_of_sound_frameclass FrameClass.E5 $ by
+instance consistent : Entailment.Consistent Modal.E5 := consistent_of_sound_frameclass FrameClass.E5 $ by
   use Frame.simple_blackhole;
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance : Complete Modal.E5 FrameClass.E5 := (maximalCanonicity _).completeness $ by
+instance Neighborhood.complete : Complete Modal.E5 FrameClass.E5 := (maximalCanonicity _).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
