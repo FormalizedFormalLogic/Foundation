@@ -12,6 +12,7 @@ where
     htmlDepth := 2,
     sourceLink := some "https://github.com/FormalizedFormalLogic/Foundation",
     issueLink := some "https://github.com/FormalizedFormalLogic/Foundation/issues",
+    extraFiles := [("./Book/assets", "./assets")],
     logo := some "/assets/logo.svg",
     extraCssFiles := #[additionalCssFile],
     extraDataFiles := juliamonoFonts,
