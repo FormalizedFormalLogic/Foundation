@@ -9,7 +9,7 @@ Formalizing mathematical logic in Lean 4.
 
 Main results of this repository. More detailed explanations are provided in the [Book] and [Doc].
 
-- `FirstOrder`: [First-Order Logic][first_order] and [Arithmetics][arith]
+- `FirstOrder`: [First-Order Logic][first_order] and [Arithmetic][arith]
   - [Completeness Theorem][first_order:completeness]
   - [Cut-elimination of first-order sequent calculus _(Gentzen's Hauptsatz)_][first_order:haupstaz]
   - [Arithmetic][arith]
