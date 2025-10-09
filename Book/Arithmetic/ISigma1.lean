@@ -20,11 +20,11 @@ In $`\mathsf{I}\Sigma_1`, we can further prove their entireness.
 
 # Theory of Hereditary Finite Sets
 
-Weak theory of sets in $`V_\omega` (Hereditary Finite Sets) can be developed
-inside $`\mathsf{I}\Sigma_1` using Ackermann coding and bit predicate.
-Hereafter, we will use the notation $`i \in a` in the sense of bit predicate:
+Weak theory of sets in $`\mathbf V_\omega` (Hereditary Finite Sets) can be developed
+inside $`\mathsf{I}\Sigma_1` using Ackermann coding and BIT predicate.
+Hereafter, we will use the notation $`i \in a` in the sense of BIT predicate:
 
--- TODO: LO.Arith.mem_iff_bit
+{docstring LO.ISigma1.mem_iff_bit}
 
 The following comprehension holds.
 
@@ -36,7 +36,7 @@ The basic concepts of set theory, such as union, inter, cartesian product, and m
 
 $`\mathrm{Seq}(s)` iff $`s` is a mapping and its domain is $`[0, l)` for some $`l`.
 
--- TODO: LO.ISigma1.Seq
+{docstring LO.ISigma1.Seq}
 
 # Primitive Recursion
 
