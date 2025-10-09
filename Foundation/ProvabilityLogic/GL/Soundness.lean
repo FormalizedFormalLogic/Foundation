@@ -28,9 +28,9 @@ lemma GL.arithmetical_soundness (h : Modal.GL ⊢ A) {f : Realization 𝔅} : U 
 open Classical
 
 theorem GLPlusBoxBot.arithmetical_soundness
-    (hA : Modal.GLPlusBoxBot 𝔅.height.toWithTop ⊢ A)
+    (hA : Modal.GLPlusBoxBot 𝔅.height ⊢ A)
     (f : Realization 𝔅) : U ⊢ f A := by
-  cases h : 𝔅.height using PartENat.casesOn
+  cases h : 𝔅.height
   case _ =>
     exact GL.arithmetical_soundness (by simpa [h] using hA)
   case _ n =>

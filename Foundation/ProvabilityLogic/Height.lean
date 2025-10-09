@@ -1,17 +1,7 @@
 import Foundation.FirstOrder.Incompleteness.Examples
 import Foundation.FirstOrder.Internal.DerivabilityCondition
 import Foundation.ProvabilityLogic.Provability
-import Mathlib.Data.Nat.PartENat
-
-namespace PartENat
-
-variable (P : ℕ → Prop) [DecidablePred P]
-
-theorem exists_of_find_le (n : ℕ) (h : find P ≤ (n : PartENat)) : ∃ m ≤ n, P m := by
-  by_contra A
-  exact IsIrrefl.irrefl _ <| lt_of_le_of_lt h <| lt_find P n (by simpa using A)
-
-end PartENat
+import Foundation.Vorspiel.ENat
 
 namespace LO.ProvabilityLogic.Provability
 
@@ -45,14 +35,14 @@ open Classical
 
 variable (𝔅)
 
-noncomputable def height : PartENat := PartENat.find (T ⊢ 𝔅^[·] ⊥)
+noncomputable def height : ENat := ENat.find (T ⊢ 𝔅^[·] ⊥)
 
-noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.height (T : ArithmeticTheory) [T.Δ₁] : PartENat :=
+noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.height (T : ArithmeticTheory) [T.Δ₁] : ℕ∞ :=
   T.standardProvability.height
 
 variable {𝔅}
 
-lemma height_eq_top_iff : 𝔅.height = ⊤ ↔ ∀ n, T ⊬ 𝔅^[n] ⊥ := PartENat.find_eq_top_iff _
+lemma height_eq_top_iff : 𝔅.height = ⊤ ↔ ∀ n, T ⊬ 𝔅^[n] ⊥ := ENat.find_eq_top_iff _
 
 variable (𝔅)
 
@@ -63,7 +53,7 @@ lemma iIncon_unprovable_of_sigma1_sound [𝔅.Sound] [Entailment.Consistent T] :
     iIncon_unprovable_of_sigma1_sound n <| Sound.sound this
 
 lemma height_le_of_boxBot {n : ℕ} (h : T ⊢ 𝔅^[n] ⊥) : 𝔅.height ≤ n :=
-  PartENat.find_le (T ⊢ 𝔅^[·] ⊥) n h
+  ENat.find_le (T ⊢ 𝔅^[·] ⊥) n h
 
 lemma height_lt_pos_of_boxBot [𝔅.Sound₀] {n : ℕ} (pos : 0 < n) (h : T₀ ⊢ 𝔅^[n] ⊥) : 𝔅.height < n := by
   have e : n.pred.succ = n := Eq.symm <| (Nat.sub_eq_iff_eq_add pos).mp rfl
@@ -72,7 +62,7 @@ lemma height_lt_pos_of_boxBot [𝔅.Sound₀] {n : ℕ} (pos : 0 < n) (h : T₀ 
   have := 𝔅.height_le_of_boxBot (Sound₀.sound₀ this)
   have : 𝔅.height < n := by
     rw [←e]
-    exact lt_of_le_of_lt this <| PartENat.coe_lt_coe.mpr <| by simp
+    exact lt_of_le_of_lt this <| ENat.coe_lt_coe.mpr <| by simp
   exact this
 
 variable {𝔅}
@@ -81,7 +71,7 @@ lemma height_le_iff_boxBot [T₀ ⪯ T] [𝔅.HBL] {n : ℕ} :
     𝔅.height ≤ n ↔ T ⊢ 𝔅^[n] ⊥ := by
   constructor
   · intro h
-    have : ∃ m ≤ n, T ⊢ (↑𝔅)^[m] ⊥ := PartENat.exists_of_find_le _ n h
+    have : ∃ m ≤ n, T ⊢ (↑𝔅)^[m] ⊥ := ENat.exists_of_find_le _ n h
     rcases this with ⟨m, hmn, hm⟩
     exact 𝔅.boxBot_monotone hmn ⨀ hm
   · exact 𝔅.height_le_of_boxBot
@@ -92,9 +82,8 @@ lemma hight_eq_top_of_sound_and_consistent [𝔅.Sound] [Entailment.Consistent T
   height_eq_top_iff.mpr 𝔅.iIncon_unprovable_of_sigma1_sound
 
 lemma hight_eq_zero_of_inconsistent (h : Entailment.Inconsistent T) : 𝔅.height = 0 := by
-  suffices 𝔅.height ≤ 0 from PartENat.eq_zero_iff.mpr this
-  simpa using
-    𝔅.height_le_of_boxBot (T := T) (n := 0) (h ⊥)
+  suffices 𝔅.height ≤ 0 from nonpos_iff_eq_zero.mp this
+  simpa using 𝔅.height_le_of_boxBot (n := 0) (h ⊥)
 
 lemma hight_eq_top_of_sigma1_sound (T : ArithmeticTheory) [T.Δ₁] [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :
     T.height = ⊤ :=

@@ -1,5 +1,6 @@
 import Foundation.Logic.Predicate.Term
 import Foundation.Logic.Predicate.Quantifier
+import Mathlib.Data.Nat.Cast.Order.Basic
 
 /-!
 # Formulas of first-order logic
@@ -461,7 +462,7 @@ lemma lt_fvSup_of_fvar? {φ : SyntacticSemiformula L n} : φ.FVar? m → m < φ.
   have : ∃ s : ℕ, φ.freeVariables.max = s := Finset.max_of_mem hm
   rcases this with ⟨s, hs⟩
   have : m ≤ s := by
-    have : (m : WithBot ℕ) ≤ ↑s := by simpa [hs] using Finset.le_max hm
+    have : (m : WithBot ℕ) ≤ ↑s := by simpa [hs, -Nat.cast_le] using Finset.le_max hm
     exact WithBot.coe_le_coe.mp this
   simpa [hs, WithBot.recBotCoe] using Nat.lt_add_one_of_le this
 

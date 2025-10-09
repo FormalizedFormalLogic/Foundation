@@ -19,7 +19,7 @@ end
 
 
 def Frame.mkTreeUnravelling (F : Frame) (r : F.World) : Kripke.Frame where
-  World := { c : List F.World // [r] <+: c ∧ c.Chain' F.Rel }
+  World := { c : List F.World // [r] <+: c ∧ c.IsChain F.Rel }
   Rel X Y := ∃ z, Y.1 = X.1 ++ [z]
   world_nonempty := ⟨[r], (by simp)⟩
 
@@ -38,7 +38,7 @@ lemma rel_length (h : X ≺ Y) : X.1.length < Y.1.length := by
   obtain ⟨z, hz⟩ := h;
   simp_all;
 
-lemma transrel_def : X ≺^+ Y ↔ ∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.Chain' F.Rel (X.1 ++ l)) := by
+lemma transrel_def : X ≺^+ Y ↔ ∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.IsChain F.Rel (X.1 ++ l)) := by
   constructor;
   . intro h;
     induction h using Relation.TransGen.head_induction_on with
@@ -69,7 +69,7 @@ lemma transrel_def : X ≺^+ Y ↔ ∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.Chain'
           use (l ++ [z]);
           rw [←hl];
           simp;
-        . apply List.Chain'.prefix hl₃;
+        . apply List.IsChain.prefix hl₃;
           use zs;
           simp_all;
       ⟩);
@@ -107,7 +107,7 @@ protected def pMorphism (F : Frame) (r : F) : F.mkTreeUnravelling r →ₚ F whe
       . obtain ⟨i, hi⟩ := cx.2.1;
         use (i ++ [y]);
         simp_rw [←List.append_assoc, hi];
-      . apply List.Chain'.append;
+      . apply List.IsChain.append;
         . exact cx.2.2;
         . simp;
         . intro z hz; simp;
@@ -159,7 +159,7 @@ instance : (F.mkTransTreeUnravelling r).IsAsymmetric := ⟨by
   exact hxy.not_lt hyx;
 ⟩
 
-lemma rel_def : X ≺ Y ↔ (∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.Chain' F.Rel (X.1 ++ l))) := treeUnravelling.transrel_def
+lemma rel_def : X ≺ Y ↔ (∃ l ≠ [], Y.1 = X.1 ++ l ∧ (List.IsChain F.Rel (X.1 ++ l))) := treeUnravelling.transrel_def
 
 abbrev pMorphism (F : Frame) [F.IsTransitive] (r : F) : (F.mkTransTreeUnravelling r) →ₚ F := (treeUnravelling.pMorphism F r).TransitiveClosure
 
@@ -168,10 +168,10 @@ protected abbrev root : (F.mkTransTreeUnravelling r).World := treeUnravelling.ro
 instance instIsRooted : (F.mkTransTreeUnravelling r).IsRootedBy (mkTransTreeUnravelling.root) := inferInstance
 
 instance instFinite [DecidableEq F.World] [F.IsFinite] [F.IsTransitive] [F.IsIrreflexive] : Finite (F.mkTransTreeUnravelling r).World := by
-  suffices h : Finite { x // List.Chain' F.Rel x } by
+  suffices h : Finite { x // List.IsChain F.Rel x } by
     exact
      Finite.of_injective
-     (β := { x // List.Chain' F.Rel x })
+     (β := { x // List.IsChain F.Rel x })
      (fun x => ⟨x.1, x.2.2⟩)
      (by rintro ⟨x, hx⟩ ⟨y, hy⟩; simp_all);
   apply List.chains_finite;
