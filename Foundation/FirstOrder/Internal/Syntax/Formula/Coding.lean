@@ -6,8 +6,8 @@ open Encodable LO FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1 Metamat
 
 namespace LO
 
-class LCWQIsoGoedelQuote (α β : ℕ → Type*) [LCWQ α] [LCWQ β] where
-  gq : ∀ n, GoedelQuote (α n) (β n)
+class LCWQIsoGödelQuote (α β : ℕ → Type*) [LCWQ α] [LCWQ β] where
+  gq : ∀ n, GödelQuote (α n) (β n)
   top : ⌜(⊤ : α n)⌝ = (⊤ : β n)
   bot : ⌜(⊥ : α n)⌝ = (⊥ : β n)
   and (φ ψ : α n) : (⌜φ ⋏ ψ⌝ : β n) = ⌜φ⌝ ⋏ ⌜ψ⌝
@@ -17,13 +17,13 @@ class LCWQIsoGoedelQuote (α β : ℕ → Type*) [LCWQ α] [LCWQ β] where
   all (φ : α (n + 1)) : (⌜∀' φ⌝ : β n) = ∀' ⌜φ⌝
   ex (φ : α (n + 1)) : (⌜∃' φ⌝ : β n) = ∃' ⌜φ⌝
 
-namespace LCWQIsoGoedelQuote
+namespace LCWQIsoGödelQuote
 
 attribute [simp] top bot and or imply neg all ex
 
-variable {α β : ℕ → Type*} [LCWQ α] [LCWQ β] [LCWQIsoGoedelQuote α β]
+variable {α β : ℕ → Type*} [LCWQ α] [LCWQ β] [LCWQIsoGödelQuote α β]
 
-instance (n : ℕ) : GoedelQuote (α n) (β n) := gq n
+instance (n : ℕ) : GödelQuote (α n) (β n) := gq n
 
 @[simp] lemma iff (φ ψ : α n) : (⌜φ ⭤ ψ⌝ : β n) = ⌜φ⌝ ⭤ ⌜ψ⌝ := by simp [LogicalConnective.iff]
 
@@ -33,7 +33,7 @@ instance (n : ℕ) : GoedelQuote (α n) (β n) := gq n
 @[simp] lemma bex (φ : α (n + 1)) (ψ : α (n + 1)) :
     (⌜∃[φ] ψ⌝ : β n)  = ∃[⌜φ⌝] ⌜ψ⌝ := by simp [LO.bex]
 
-end LCWQIsoGoedelQuote
+end LCWQIsoGödelQuote
 
 end LO
 
@@ -70,7 +70,7 @@ lemma typedQuote_neg {n} (φ : SyntacticSemiformula L n) : (∼φ).typedQuote V 
   |     ∀' φ => simp [typedQuote, typedQuote_neg φ]
   |     ∃' φ => simp [typedQuote, typedQuote_neg φ]
 
-noncomputable instance : LCWQIsoGoedelQuote (SyntacticSemiformula L) (Metamath.Semiformula V L) where
+noncomputable instance : LCWQIsoGödelQuote (SyntacticSemiformula L) (Metamath.Semiformula V L) where
   gq _ := ⟨typedQuote V⟩
   top := rfl
   bot := rfl
@@ -161,18 +161,18 @@ lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁�
   |         ⊤,         ⊤ => by simp
   |         ⊥,         ⊥ => by simp
   |   φ₁ ⋏ ψ₁,   φ₂ ⋏ ψ₂ => by
-    simp only [LCWQIsoGoedelQuote.and, Metamath.Semiformula.and_inj, and_inj, and_imp]
+    simp only [LCWQIsoGödelQuote.and, Metamath.Semiformula.and_inj, and_inj, and_imp]
     intro hφ hψ
     refine ⟨typed_quote_inj hφ, typed_quote_inj hψ⟩
   |   φ₁ ⋎ ψ₁,   φ₂ ⋎ ψ₂ => by
-    simp only [LCWQIsoGoedelQuote.or, Metamath.Semiformula.or_inj, or_inj, and_imp]
+    simp only [LCWQIsoGödelQuote.or, Metamath.Semiformula.or_inj, or_inj, and_imp]
     intro hφ hψ
     refine ⟨typed_quote_inj hφ, typed_quote_inj hψ⟩
   |     ∀' φ₁,     ∀' φ₂ => by
-    simp only [LCWQIsoGoedelQuote.all, Metamath.Semiformula.all_inj, all_inj]
+    simp only [LCWQIsoGödelQuote.all, Metamath.Semiformula.all_inj, all_inj]
     exact typed_quote_inj
   |     ∃' φ₁,     ∃' φ₂ => by
-    simp only [LCWQIsoGoedelQuote.ex, Metamath.Semiformula.ex_inj, ex_inj]
+    simp only [LCWQIsoGödelQuote.ex, Metamath.Semiformula.ex_inj, ex_inj]
     exact typed_quote_inj
   | rel _ _, nrel _ _ | rel _ _, ⊤ | rel _ _, ⊥ | rel _ _, _ ⋏ _ | rel _ _, _ ⋎ _ | rel _ _, ∀' _ | rel _ _, ∃' _
   | nrel _ _, rel _ _ | nrel _ _, ⊤ | nrel _ _, ⊥ | nrel _ _, _ ⋏ _ | nrel _ _, _ ⋎ _ | nrel _ _, ∀' _ | nrel _ _, ∃' _
@@ -187,7 +187,7 @@ lemma typed_quote_inj {n} {φ₁ φ₂ : SyntacticSemiformula L n} : (⌜φ₁�
 @[simp] lemma typed_quote_inj_iff {φ₁ φ₂ : SyntacticSemiformula L n} :
     (⌜φ₁⌝ : Metamath.Semiformula V L n) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := ⟨typed_quote_inj, by rintro rfl; rfl⟩
 
-noncomputable instance : GoedelQuote (SyntacticSemiformula L n) V where
+noncomputable instance : GödelQuote (SyntacticSemiformula L n) V where
   quote φ := (⌜φ⌝ : Metamath.Semiformula V L n).val
 
 lemma quote_def (φ : SyntacticSemiformula L n) : (⌜φ⌝ : V) = (⌜φ⌝ : Metamath.Semiformula V L n).val := rfl
@@ -241,7 +241,7 @@ lemma coe_quote_eq_quote' (φ : SyntacticSemiformula L n) :
 @[simp] lemma quote_inj_iff {φ₁ φ₂ : SyntacticSemiformula L n} :
     (⌜φ₁⌝ : V) = ⌜φ₂⌝ ↔ φ₁ = φ₂ := by simp [quote_eq_encode]
 
-noncomputable instance : LCWQIsoGoedelQuote (Semisentence L) (Metamath.Semiformula V L) where
+noncomputable instance : LCWQIsoGödelQuote (Semisentence L) (Metamath.Semiformula V L) where
   gq n := ⟨fun σ ↦ (⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝)⟩
   top := by simp
   bot := by simp
@@ -253,7 +253,7 @@ noncomputable instance : LCWQIsoGoedelQuote (Semisentence L) (Metamath.Semiformu
   ex _ := by simp
 
 @[simp] lemma coe_quote {ξ n} (φ : SyntacticSemiformula L n) : ↑(⌜φ⌝ : ℕ) = (⌜φ⌝ : Semiterm ℒₒᵣ ξ m) := by
-  simp [goedelNumber'_def, Semiformula.quote_eq_encode]
+  simp [gödelNumber'_def, Semiformula.quote_eq_encode]
 
 @[simp] lemma quote_quote_eq_numeral (φ : SyntacticSemiformula L n) :
     (⌜(⌜φ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Metamath.Semiterm V ℒₒᵣ m) = InternalArithmetic.typedNumeral ⌜φ⌝ := by
@@ -278,7 +278,7 @@ def typed_quote_def (σ : Semisentence L n) :
 @[simp] lemma typed_quote_nlt (t u : ClosedSemiterm ℒₒᵣ n) :
     (⌜(“!!t ≮ !!u” : Semisentence ℒₒᵣ n)⌝ : Metamath.Semiformula V ℒₒᵣ n) = (⌜t⌝ ≮' ⌜u⌝) := rfl
 
-noncomputable instance : GoedelQuote (Semisentence L n) V where
+noncomputable instance : GödelQuote (Semisentence L n) V where
   quote σ := ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝
 
 lemma quote_def (σ : Semisentence L n) : (⌜σ⌝ : V) = ⌜(Rewriting.emb σ : SyntacticSemiformula L n)⌝ := rfl
@@ -298,10 +298,10 @@ lemma coe_quote_eq_quote (σ : Semisentence L n) : (↑(⌜σ⌝ : ℕ) : V) = �
 
 @[simp] lemma val_quote {ξ n e ε} (σ : Semisentence L n) :
     Semiterm.valm V e ε (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) = ⌜σ⌝ := by
-  simp [goedelNumber'_def, quote_eq_encode, numeral_eq_natCast]
+  simp [gödelNumber'_def, quote_eq_encode, numeral_eq_natCast]
 
 @[simp] lemma coe_quote {ξ n} (σ : Semisentence L n) : ↑(⌜σ⌝ : ℕ) = (⌜σ⌝ : Semiterm ℒₒᵣ ξ m) := by
-  simp [goedelNumber'_def, quote_eq_encode]
+  simp [gödelNumber'_def, quote_eq_encode]
 
 @[simp] lemma quote_quote_eq_numeral (σ : Semisentence L n) :
     (⌜(⌜σ⌝ : Semiterm ℒₒᵣ ℕ m)⌝ : Metamath.Semiterm V ℒₒᵣ m) = InternalArithmetic.typedNumeral ⌜σ⌝ := by

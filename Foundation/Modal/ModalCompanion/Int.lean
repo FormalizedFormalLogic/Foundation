@@ -8,7 +8,7 @@ namespace LO.Modal
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
-open Propositional.Formula (goedelTranslate)
+open Propositional.Formula (gödelTranslate)
 open Propositional.Logic (smallestMC largestMC)
 open Modal
 open Modal.Kripke
@@ -18,7 +18,7 @@ lemma Kripke.complete_frameClass_of_equiv (L₁ L₂ : Logic ℕ) [L₁ ≊ L₂
 
 
 lemma gS4_of_Int : Propositional.Int ⊢ φ → Modal.S4 ⊢ φᵍ := by
-  apply provable_goedelTranslated_of_provable;
+  apply provable_gödelTranslated_of_provable;
   rintro _ ⟨φ, ⟨_⟩, ⟨s, rfl⟩⟩;
   apply nec! $ efq!;
 

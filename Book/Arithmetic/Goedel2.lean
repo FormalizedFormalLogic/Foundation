@@ -203,9 +203,9 @@ Define Gödel sentence $`\mathrm{G}_T`:
 
 Gödel sentence is undecidable, i.e., $`T \nvdash \mathrm{G}` if $`T` is consistent, and $`T \nvdash \lnot\mathrm{G}` if $`\mathbb{N} \models T`.
 
-{docstring LO.ProvabilityLogic.Provability.unprovable_goedel}
+{docstring LO.ProvabilityLogic.Provability.unprovable_gödel}
 
-{docstring LO.ProvabilityLogic.Provability.unrefutable_goedel}
+{docstring LO.ProvabilityLogic.Provability.unrefutable_gödel}
 
 Define formalized incompleteness sentence $`\mathrm{Con}_T`:
 
@@ -215,7 +215,7 @@ Define formalized incompleteness sentence $`\mathrm{Con}_T`:
 
 $`T \vdash \mathrm{Con}_T \leftrightarrow G_T`
 
-{docstring LO.ProvabilityLogic.Provability.goedel_iff_con}
+{docstring LO.ProvabilityLogic.Provability.gödel_iff_con}
 
 
 $`T` cannot prove its own consistency, i.e., $`T \nvdash \mathrm{Con}_T` if $`T` is consistent.

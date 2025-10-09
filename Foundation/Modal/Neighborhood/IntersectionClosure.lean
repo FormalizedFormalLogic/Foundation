@@ -126,6 +126,16 @@ instance isTransitive [F.IsTransitive] : F.quasiFiltering.IsTransitive := by
     . simp [Frame.box] at hYs₂ ⊢;
       simpa;
 
+instance containsUnit [F.ContainsUnit] : F.quasiFiltering.ContainsUnit := by
+  constructor;
+  ext x;
+  simp only [quasiFiltering, intersectionClosure, ne_eq, supplementation, Set.mem_setOf_eq, Set.mem_univ, iff_true];
+  use Set.univ;
+  constructor;
+  . tauto;
+  . use {Set.univ};
+    simp;
+
 lemma mem_box_of_mem_original_box {x : F} {s : Set F} : x ∈ F.box s → x ∈ F.quasiFiltering.box s := by
   intro hx;
   suffices x ∈ F.supplementation.intersectionClosure.box s by exact symm_box ▸ this;

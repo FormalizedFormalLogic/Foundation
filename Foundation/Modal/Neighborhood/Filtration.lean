@@ -143,6 +143,17 @@ lemma eq_original_truthset_of_eq (hφ : φ ∈ T) (hψ : ψ ∈ T) (h : (【M φ
   . apply toFilterEquivSet.subset_original_truthset_of_subset hψ; tauto_set;
   . apply toFilterEquivSet.subset_original_truthset_of_subset hφ; tauto_set;
 
+@[simp, grind]
+lemma eq_univ : (【Set.univ】  : Set (FilterEqvQuotient M T)) = Set.univ := by
+  ext X;
+  obtain ⟨x, rfl⟩ := Quotient.exists_rep X;
+  suffices ∃ y, (FilterEqvSetoid M T) y x by simpa [toFilterEquivSet];
+  use x;
+
+@[simp, grind]
+lemma contains_unit [M.ContainsUnit] : (【M (□⊤)】  : Set (FilterEqvQuotient M T)) = Set.univ := by
+  suffices M (□⊤) = Set.univ by rw [this, eq_univ];
+  simp [M.contains_unit];
 
 lemma trans_truthset [M.IsTransitive] : (【M (□φ)】 : Set (FilterEqvQuotient M T)) ⊆ 【M (□□φ)】 := by
   intro X;
@@ -388,6 +399,17 @@ instance isReflexive [M.IsReflexive] : (transitiveFiltration M T).toModel.IsRefl
     assumption;
   . assumption;
 
+instance containsUnit [M.ContainsUnit] (hT : □⊤ ∈ T) : (transitiveFiltration M T).toModel.ContainsUnit := by
+  constructor;
+  ext X;
+  suffices X ∈ (transitiveFiltration M T).B Set.univ by simpa;
+  apply iff_mem_B.mpr;
+  left;
+  use ⊤;
+  refine ⟨hT, ?_, ?_⟩;
+  . simp;
+  . grind;
+
 end transitiveFiltration
 
 
@@ -427,6 +449,13 @@ protected instance isTransitive : (supplementedTransitiveFiltration M T).toModel
 protected instance isReflexive [M.IsReflexive] : (supplementedTransitiveFiltration M T).toModel.IsReflexive := ⟨
   Frame.supplementation.isReflexive (F := (transitiveFiltration M T).toModel.toFrame).refl
 ⟩
+
+protected instance containsUnit [M.ContainsUnit] (hT : □⊤ ∈ T) : (supplementedTransitiveFiltration M T).toModel.ContainsUnit := by
+  constructor;
+  ext X;
+  suffices X ∈ (supplementedTransitiveFiltration M T).B Set.univ by simpa;
+  have : (transitiveFiltration M T).toModel.ContainsUnit := transitiveFiltration.containsUnit hT;
+  simp [supplementedTransitiveFiltration, (transitiveFiltration M T).toModel.supplementation.contains_unit]
 
 end supplementedTransitiveFiltration
 
@@ -614,6 +643,13 @@ protected instance isMonotonic: (quasiFilteringTransitiveFiltration M T T_finite
 protected instance isTransitive : (quasiFilteringTransitiveFiltration M T T_finite).toModel.IsTransitive := ⟨
   Frame.quasiFiltering.isTransitive (F := (transitiveFiltration M T).toModel.toFrame).trans
 ⟩
+
+protected instance containsUnit [M.ContainsUnit] (hT : □⊤ ∈ T) : (quasiFilteringTransitiveFiltration M T T_finite).toModel.ContainsUnit := by
+  constructor;
+  ext X;
+  suffices X ∈ (quasiFilteringTransitiveFiltration M T T_finite).B Set.univ by simpa;
+  have : (transitiveFiltration M T).toModel.ContainsUnit := transitiveFiltration.containsUnit hT;
+  simp [quasiFilteringTransitiveFiltration, (transitiveFiltration M T).toModel.quasiFiltering.contains_unit];
 
 end quasiFilteringTransitiveFiltration
 
