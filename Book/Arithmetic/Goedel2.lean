@@ -164,6 +164,12 @@ Take fixedpoint $`\mathrm{Derivation}_T(d)`.
 \end{align*}
 ```
 
+{docstring LO.FirstOrder.Theory.Derivable}
+
+{docstring LO.FirstOrder.Theory.Provable}
+
+{docstring LO.FirstOrder.Theory.Proof}
+
 Following holds for all formula (not coded one) $`\varphi` and finite set $`\Gamma`.
 
 $`\N \models \mathrm{Provable}_T(\ulcorner \varphi \urcorner) \implies T \vdash \varphi`
@@ -273,10 +279,10 @@ variable (T : Theory ℒₒᵣ) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 ```
 
 We will use $`\square \varphi` to denote $`\mathrm{Provable}(\ulcorner\varphi\urcorner)`.
-Define Gödel sentence $`\mathsf{G}`, as $`\mathrm{fixedpoint}_{\lnot\mathrm{Provable}_T(x)}`, satisfies
+Define Gödel sentence $`\mathsf{G}`, as $`\mathrm{fixedpoint}_{\lnot\mathrm{Provable}_T(x)}` using fixed-point theorem, satisfies
 
 ```math
-  T \vdash \mathsf{G} \leftrightarrow \lnot \mathfrak{B}(\ulcorner\mathsf{G}\urcorner)
+  T \vdash \mathsf{G} \leftrightarrow \lnot \mathrm{Provable}(\ulcorner\mathsf{G}\urcorner)
 ```
 
 ```lean

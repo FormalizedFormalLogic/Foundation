@@ -71,13 +71,13 @@ lemma δ_spec (n : ℕ) : D T n ↔ T ⊢ (δ T)/[↑n] := by
   using re_complete (D_re T)
 ```
 
-Define sentence $`\psi_T`, defined as $`\delta_T(\ulcorner\delta_T\urcorner)`
+Define sentence $`\pi_T`, defined as $`\delta_T(\ulcorner\delta_T\urcorner)`
 
 ```lean
 noncomputable def π : Sentence ℒₒᵣ := (δ T)/[⌜δ T⌝]
 ```
 
-By a simple inference, it can be shown that the provability of $`\psi_T` and the provability of its negation are equivalent.
+By a simple inference, it can be shown that the provability of $`\pi_T` and the provability of its negation are equivalent.
 
 ```lean
 lemma paradoxical : T ⊢ π T ↔ T ⊢ ∼π T := calc
