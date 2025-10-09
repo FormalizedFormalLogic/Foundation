@@ -12,6 +12,9 @@ namespace Neighborhood
 protected class Frame.IsENT4 (F : Frame) extends F.ContainsUnit, F.IsReflexive, F.IsTransitive where
 protected abbrev FrameClass.ENT4 : FrameClass := { F | F.IsENT4 }
 
+protected class Frame.IsFiniteENT4 (F : Frame) extends F.IsENT4, F.IsFinite where
+protected abbrev FrameClass.finite_ENT4 : FrameClass := { F | F.IsFiniteENT4 }
+
 abbrev counterframe_EN4_ENT4 : Neighborhood.Frame := ⟨Fin 2, λ x => {{x}, {x}ᶜ, Set.univ}⟩
 
 instance : counterframe_EN4_ENT4.IsEN4 where
@@ -55,6 +58,28 @@ instance : Entailment.Consistent Modal.ENT4 := consistent_of_sound_frameclass Fr
   use Frame.simple_blackhole;
   apply Set.mem_setOf_eq.mpr;
   constructor;
+
+instance : Complete Modal.ENT4 FrameClass.ENT4 := (minimalCanonicity _).completeness $ by
+  apply Set.mem_setOf_eq.mpr;
+  exact {}
+
+instance : Complete Modal.ENT4 FrameClass.finite_ENT4 := ⟨by
+  intro φ hφ;
+  apply Complete.complete (𝓜 := FrameClass.ENT4);
+  intro F hF V x;
+  replace F_trans := Set.mem_setOf_eq.mp hF;
+
+  let M : Model := ⟨F, V⟩;
+  apply transitiveFiltration M (Finset.toSet $ φ.subformulas ∪ (□⊤ : Formula ℕ).subformulas) |>.filtration_satisfies _ (by grind) |>.mp;
+  apply hφ;
+  apply Set.mem_setOf_eq.mpr;
+  exact {
+    world_finite := by apply FilterEqvQuotient.finite $ by simp;
+    trans := by apply transitiveFiltration.isTransitive.trans;
+    refl := by apply transitiveFiltration.isReflexive.refl;
+    contains_unit := by apply transitiveFiltration.containsUnit (by simp) |>.contains_unit;
+  };
+⟩
 
 end ENT4
 
