@@ -9,69 +9,6 @@ set_option linter.unusedSectionVars false
 
 open LO Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
 
-namespace AAA
-
-variable (T : Theory ℒₒᵣ) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
-
-local prefix:max "□" => T.provabilityPred
-
-noncomputable def gödel : Sentence ℒₒᵣ := fixedpoint (∼T.provable)
-
-local notation "𝗚" => gödel T
-
-variable {T}
-
-lemma gödel_spec : T ⊢ 𝗚 ⭤ ∼□𝗚 := by simpa using diagonal (∼T.provable)
-
-lemma gödel_unprovable [Entailment.Consistent T] : T ⊬ 𝗚 := by
-  intro h
-  have hp : T ⊢ □𝗚 := weakening inferInstance (provable_D1 h)
-  have hn : T ⊢ ∼□𝗚 := K!_left gödel_spec ⨀ h
-  exact not_consistent_iff_inconsistent.mpr
-    (inconsistent_of_provable_of_unprovable hp hn) inferInstance
-
-lemma not_gödel_unprovable [ℕ ⊧ₘ* T] : T ⊬ ∼𝗚 := fun h ↦ by
-  have : T ⊢ □𝗚 := Entailment.CN!_of_CN!_left (K!_right gödel_spec) ⨀ h
-  have : T ⊢ 𝗚 := provable_sound this
-  exact not_consistent_iff_inconsistent.mpr (inconsistent_of_provable_of_unprovable this h)
-    (Sound.consistent_of_satisfiable ⟨_, (inferInstance : ℕ ⊧ₘ* T)⟩)
-
-variable (T)
-
-noncomputable def consistent : Sentence ℒₒᵣ := ∼□⊥
-
-local notation "𝗖𝗼𝗻" => consistent T
-
-variable {T}
-
-open Entailment FiniteContext
-
-lemma consistent_iff_goedel : T ⊢ 𝗖𝗼𝗻 ⭤ 𝗚 := by
-  apply E!_intro
-  · have bew_G : [∼𝗚] ⊢[T] □𝗚 := deductInv'! <| CN!_of_CN!_left <| K!_right gödel_spec
-    have bew_not_bew_G : [∼𝗚] ⊢[T] □(∼□𝗚) := by
-      have : T ⊢ □(𝗚 ➝ ∼□𝗚) := weakening inferInstance <| provable_D1 <| K!_left gödel_spec
-      exact provable_D2_context (of'! this) bew_G
-    have bew_bew_G : [∼𝗚] ⊢[T] □□𝗚 := provable_D3_context bew_G
-    have : [∼𝗚] ⊢[T] □⊥ :=
-      provable_D2_context (provable_D2_context (of'! <| weakening inferInstance <| provable_D1 CNC!) bew_not_bew_G) bew_bew_G
-    exact CN!_of_CN!_left (deduct'! this)
-  · have : [□⊥] ⊢[T] □𝗚 := by
-      have : T ⊢ □(⊥ ➝ 𝗚) := weakening inferInstance <| provable_D1 efq!
-      exact provable_D2_context (of'! this) (by simp)
-    have : [□⊥] ⊢[T] ∼𝗚 :=
-      of'! (CN!_of_CN!_right <| K!_left <| gödel_spec) ⨀ this
-    exact CN!_of_CN!_right (deduct'! this)
-
-/-- Gödel's Second Incompleteness Theorem-/
-theorem goedel_second_incompleteness [Entailment.Consistent T] : T ⊬ 𝗖𝗼𝗻 := fun h ↦
-  gödel_unprovable <| K!_left consistent_iff_goedel ⨀ h
-
-theorem inconsistent_unprovable [ℕ ⊧ₘ* T] : T ⊬ ∼𝗖𝗼𝗻 := fun h ↦
-  not_gödel_unprovable <| contra! (K!_right consistent_iff_goedel) ⨀ h
-
-end AAA
-
 #doc (Manual) "Gödel's Second Incompleteness Theorem" =>
 %%%
 tag := "goedel-2"
