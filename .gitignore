@@ -1,5 +1,8 @@
 .lake
 
+# Verso
+_out
+
 # VSCode
 .vscode/settings.json
 

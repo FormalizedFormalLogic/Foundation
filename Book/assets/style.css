@@ -1,0 +1,103 @@
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-LightItalic.woff2') format('woff2');
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-RegularItalic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src:
+    url('./juliamono/JuliaMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-MediumItalic.woff2') format('woff2');
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-SemiBoldItalic.woff2') format('woff2');
+  font-weight: 600;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src:
+    url('./juliamono/JuliaMono-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-BoldItalic.woff2') format('woff2');
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-ExtraBoldItalic.woff2') format('woff2');
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-Black.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'JuliaMono';
+  src: url('./juliamono/JuliaMono-BlackItalic.woff2') format('woff2');
+  font-weight: 900;
+  font-style: italic;
+}
+
+:root {
+  --verso-code-font-family: 'JuliaMono', monospace;
+}

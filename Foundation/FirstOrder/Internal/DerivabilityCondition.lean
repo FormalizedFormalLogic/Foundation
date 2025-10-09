@@ -12,7 +12,7 @@ namespace LO.FirstOrder.Arithmetic
 
 open ISigma1 Metamath ProvabilityLogic
 
-instance : Diagonalization 𝗜𝚺₁ where
+noncomputable instance : Diagonalization 𝗜𝚺₁ where
   fixedpoint := fixedpoint
   diag θ := diagonal θ
 
@@ -32,7 +32,7 @@ theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ ➝ π) ➝ □σ ➝ □π
 
 variable (T)
 
-abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
+noncomputable abbrev _root_.LO.FirstOrder.Theory.standardProvability : Provability 𝗜𝚺₁ T where
   prov := T.provable
   D1 := provable_D1
 
@@ -76,7 +76,7 @@ instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL3 := ⟨fun _ ↦ provab
 
 instance [𝗣𝗔⁻ ⪯ T] : T.standardProvability.HBL where
 
-instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.GoedelSound := ⟨fun h ↦ by simpa using provable_sound h⟩
+instance [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] : T.standardProvability.GödelSound := ⟨fun h ↦ by simpa using provable_sound h⟩
 
 instance : T.standardProvability.Sound₀ := ⟨provable_sound⟩
 

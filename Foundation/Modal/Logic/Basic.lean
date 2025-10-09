@@ -77,7 +77,6 @@ variable [DecidableEq α] [L.IsQuasiNormal]
 lemma no_bot : L ⊬ ⊥ := by
   obtain ⟨φ, hφ⟩ := exists_unprovable (L := L);
   contrapose! hφ;
-  simp_all only [not_not];
   apply of_O!;
   assumption;
 

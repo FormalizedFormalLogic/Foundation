@@ -105,8 +105,8 @@ protected class Div (L : Language) where
 protected class Star (L : Language) where
   star : Semiterm.Const L
 
-class GoedelNumber (L : Language) (α : Type*) where
-  goedelNumber : α → Semiterm.Const L
+class GödelNumber (L : Language) (α : Type*) where
+  gödelNumber : α → Semiterm.Const L
 
 notation "op(0)" => Zero.zero
 
@@ -215,17 +215,17 @@ end npow
       bv_func, Fin.forall_fin_iff_zero_and_forall_succ, bvar]
     tauto
 
-namespace GoedelNumber
+namespace GödelNumber
 
-variable {α} [GoedelNumber L α]
+variable {α} [GödelNumber L α]
 
-abbrev goedelNumber' (a : α) : Semiterm L ξ n := const (goedelNumber a)
+abbrev gödelNumber' (a : α) : Semiterm L ξ n := const (gödelNumber a)
 
-instance : GoedelQuote α (Semiterm L ξ n) := ⟨goedelNumber'⟩
+instance : GödelQuote α (Semiterm L ξ n) := ⟨gödelNumber'⟩
 
-def ofEncodable [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Encodable α] : GoedelNumber L α := ⟨Operator.encode L⟩
+def ofEncodable [Operator.Zero L] [Operator.One L] [Operator.Add L] {α : Type*} [Encodable α] : GödelNumber L α := ⟨Operator.encode L⟩
 
-end GoedelNumber
+end GödelNumber
 
 end Operator
 
