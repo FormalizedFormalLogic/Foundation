@@ -31,7 +31,7 @@ theorem unprovable_realization_exists
   use S.realization
   intro hC
   have : T.height ≤ M₁.height := by
-    apply PartENat.le_of_lt_add_one
+    apply Order.le_of_lt_add_one
     calc
       (Theory.standardProvability T).height < M₀.height := S.theory_height hdnA hC
       _                                     = M₁.height + 1 := by simp [M₀]
@@ -92,12 +92,12 @@ theorem GLPlusBoxBot.arithmetical_completeness
     exact GLPlusBoxBot.arithmetical_completeness_aux (n := n) (by simpa using hn) h
 
 theorem GLPlusBoxBot.arithmetical_completeness_iff :
-    (∀ f : T.StandardRealization, T ⊢ f A) ↔ Modal.GLPlusBoxBot T.height.toWithTop ⊢ A :=
+    (∀ f : T.StandardRealization, T ⊢ f A) ↔ Modal.GLPlusBoxBot T.height ⊢ A :=
   ⟨GLPlusBoxBot.arithmetical_completeness (T := T) (by simp), GLPlusBoxBot.arithmetical_soundness⟩
 
 /-- Provability logic of theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL} + \square^{\text{height of } T} \bot$-/
 theorem provabilityLogic_eq_GLPlusBoxBot :
-    ProvabilityLogic T T ≊ Modal.GLPlusBoxBot T.height.toWithTop := by
+    ProvabilityLogic T T ≊ Modal.GLPlusBoxBot T.height := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A
   simpa [ArithmeticTheory.ProvabilityLogic, Logic.iff_provable] using
