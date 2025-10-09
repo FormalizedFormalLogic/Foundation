@@ -75,7 +75,7 @@ Remark the second incompleteness theorem is proved on hereditarily finite sets.
 
 - paper: [Lawrence C. Paulson, _"A Machine-Assisted Proof of Gödel's Incompleteness Theorems for the Theory of Hereditarily Finite Sets"_](https://arxiv.org/abs/2104.14260)
 
-### [Christoph Benzmüller, Woltzenlogel Paleo, _"Gödel's God in Isabelle/HOL"_](https://www.isa-afp.org/entries/GoedelGod.html)
+### [Christoph Benzmüller, Woltzenlogel Paleo, _"Gödel's God in Isabelle/HOL"_](https://www.isa-afp.org/entries/GödelGod.html)
 
 Gödel's ontological argument of God's existence.
 

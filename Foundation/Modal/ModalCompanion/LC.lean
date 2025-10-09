@@ -7,7 +7,7 @@ namespace LO.Modal
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
-open Propositional.Formula (atom goedelTranslate)
+open Propositional.Formula (atom gödelTranslate)
 open Propositional.Logic (smallestMC largestMC)
 open Modal
 open Modal.Kripke
@@ -39,13 +39,13 @@ instance : Entailment.HasAxiomPoint3 (smallestMC Propositional.LC) where
 
 namespace S4Point3
 
-lemma goedelTranslated_axiomDummett : Modal.S4Point3 ⊢ □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
+lemma gödelTranslated_axiomDummett : Modal.S4Point3 ⊢ □(□ψᵍ ➝ χᵍ) ➝ □(ψᵍ ➝ χᵍ) := by
   apply axiomK'!;
   apply nec!;
   apply C!_swap;
   apply deduct'!;
   apply deduct!;
-  have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ ➝ □ψᵍ := of'! $ goedelTranslated_axiomTc;
+  have h₁ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ ➝ □ψᵍ := of'! $ gödelTranslated_axiomTc;
   have h₂ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] ψᵍ := by_axm!;
   have h₃ : [□ψᵍ ➝ χᵍ, ψᵍ] ⊢[Modal.S4Point3] □ψᵍ ➝ χᵍ := by_axm!;
   exact h₃ ⨀ (h₁ ⨀ h₂);
@@ -69,11 +69,11 @@ instance : Modal.S4Point3 ≊ Propositional.LC.smallestMC := by
     | subst ihφ => apply Logic.subst _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
+      apply provable_gödelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
       rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
       . simp;
       . apply A!_replace axiomPoint3! <;>
-        apply S4Point3.goedelTranslated_axiomDummett;
+        apply S4Point3.gödelTranslated_axiomDummett;
 
 lemma eq_smallestMC_of_KC : Modal.S4Point3 = Propositional.LC.smallestMC := Logic.eq_of_equiv
 

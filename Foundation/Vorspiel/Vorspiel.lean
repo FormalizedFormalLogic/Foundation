@@ -896,6 +896,7 @@ lemma sup_univ_cast {α : Type _} [SemilatticeSup α] [OrderBot α] {n} (f : Fin
 
 end Finset
 
+
 namespace Denumerable
 
 lemma lt_of_mem_list : ∀ n i, i ∈ Denumerable.ofNat (List ℕ) n → i < n

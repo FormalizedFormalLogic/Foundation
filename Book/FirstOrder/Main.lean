@@ -1,4 +1,4 @@
-import Book.Arithmetics.Main
+import Book.Arithmetic.Main
 
 open Verso.Genre
 open Verso.Genre.Manual

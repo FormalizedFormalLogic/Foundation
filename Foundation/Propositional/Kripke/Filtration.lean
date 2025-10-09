@@ -132,7 +132,7 @@ theorem filtration {x : M.World} {φ : Formula ℕ} (hs : φ ∈ T := by grind) 
     constructor;
     . rintro hφψ Y RXY hφ;
       obtain ⟨y, ey⟩ := Quotient.exists_rep (cast (filterOf.def_world) Y);
-      have : y ⊧ ψ → Y ⊧ ψ := by simpa [ey] using ihψ (x := y) |>.mp;
+      have : y ⊧ ψ → Y ⊧ ψ := by simpa [ey] using ihψ (x := y) (by grind) |>.mp;
       apply this;
       apply filterOf.def_rel_back ?_ (φ := φ ➝ ψ) hs hφψ;
       . apply _root_.refl;

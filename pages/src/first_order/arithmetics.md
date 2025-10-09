@@ -1,4 +1,4 @@
-# Arithmetics
+# Arithmetic
 
 In this formalization, we prefer developing arithmetic _model theoretic_, i.e.
 show $T \models \sigma$ instead of $T \vdash \sigma$ (They are equivalent thanks to the completeness theorem.). This approach has several advantages:

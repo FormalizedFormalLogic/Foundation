@@ -7,7 +7,7 @@ namespace LO.Modal
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
-open Propositional.Formula (atom goedelTranslate)
+open Propositional.Formula (atom gödelTranslate)
 open Propositional.Logic (smallestMC largestMC)
 open Modal
 open Modal.Kripke
@@ -56,12 +56,12 @@ instance : Modal.S5 ≊ Propositional.Cl.smallestMC := by
     | subst ihφ => apply Logic.subst _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
+      apply provable_gödelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
       rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
       . simp;
       . apply rm_diabox'!;
         apply WeakerThan.pbl (𝓢 := Modal.S4);
-        apply (diaK'! $ goedelTranslated_axiomTc) ⨀ (iff_provable_Cl_provable_dia_gS4.mp _);
+        apply (diaK'! $ gödelTranslated_axiomTc) ⨀ (iff_provable_Cl_provable_dia_gS4.mp _);
         simp;
 
 lemma is_smallestMC_of_Cl : Modal.S5 = Propositional.Cl.smallestMC := Logic.eq_of_equiv

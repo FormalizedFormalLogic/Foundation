@@ -6,7 +6,7 @@ open Encodable Denumerable
 
 namespace LO.FirstOrder.Arithmetic
 
-open Mathlib Encodable Semiterm.Operator.GoedelNumber
+open Mathlib Encodable Semiterm.Operator.GödelNumber
 
 section
 
@@ -254,7 +254,8 @@ lemma codeOfREPred_spec {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
 
 variable {T : ArithmeticTheory} [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1]
 
-lemma re_complete {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
+/-- Weak representation of a r.e. predicate -/
+theorem re_complete {A : ℕ → Prop} (hp : REPred A) {x : ℕ} :
     A x ↔ T ⊢ (codeOfREPred A)/[‘↑x’] := Iff.trans
   (by simpa [models_iff, Semiformula.eval_substs, Matrix.constant_eq_singleton] using (codeOfREPred_spec hp (x := x)).symm)
   (sigma_one_completeness_iff <| by simp [codeOfREPred, codeOfPartrec'])

@@ -46,8 +46,8 @@ lemma re_complete
   Thus, as $T$ is consistent, $\gamma$ is undecidable from $T$. ∎
 
 ```lean
-theorem goedel_first_incompleteness
+theorem gödel_first_incompleteness
   (T : ArithmeticTheory) [𝗥₀ ≼ T] [Sigma1Sound T] [T.Δ₁] :
   ¬System.Complete T
 ```
-- [goedel_first_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/First.html#LO.R0.goedel_first_incompleteness)
+- [gödel_first_incompleteness](https://formalizedformallogic.github.io/Foundation/doc/Foundation/FirstOrder/Incompleteness/First.html#LO.R0.gödel_first_incompleteness)
