@@ -34,7 +34,6 @@ lemma nodup_iff_get_ne_get : l.Nodup ↔ ∀ i j : Fin l.length, i < j → l[i] 
 
 lemma Nodup.infinite_of_infinite : Infinite {l : List α // l.Nodup} → Infinite α := by
   contrapose!;
-  simp only [not_infinite_iff_finite];
   intro _;
   exact List.Nodup.finite;
 

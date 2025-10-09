@@ -51,9 +51,8 @@ lemma validate_axiomFour_of_model_finitely {M : Kripke.Model} (hM : M ⊧* Modal
   : Finite M → ∀ φ : Formula ℕ, M ⊧ Axioms.Four φ := by
   contrapose!;
   rintro ⟨φ, hφ⟩;
-  apply not_finite_iff_infinite.mpr;
   apply List.Nodup.infinite_of_infinite;
-  have H : ∀ n : ℕ+, ∃ l : List M.World, l.Nodup ∧ l.length = n ∧ List.Chain' (· ≺ ·) l ∧ (∀ i : Fin l.length, l[i] ⊧ □^[(i + 1)]φ ⋏ ∼□^[(i + 2)]φ) := by
+  have H : ∀ n : ℕ+, ∃ l : List M.World, l.Nodup ∧ l.length = n ∧ List.IsChain (· ≺ ·) l ∧ (∀ i : Fin l.length, l[i] ⊧ □^[(i + 1)]φ ⋏ ∼□^[(i + 2)]φ) := by
     intro n;
     induction n with
     | one =>
