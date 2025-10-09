@@ -14,7 +14,7 @@ namespace LO.Modal
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
-open Propositional.Formula (atom goedelTranslate)
+open Propositional.Formula (atom gödelTranslate)
 open Propositional.Logic (smallestMC largestMC)
 open Modal
 open Modal.Kripke
@@ -23,13 +23,13 @@ open Modal.Formula.Kripke
 namespace S4Point2
 
 open Formula.Kripke in
-lemma goedelTranslated_axiomWLEM : Modal.S4Point2 ⊢ □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
+lemma gödelTranslated_axiomWLEM : Modal.S4Point2 ⊢ □(∼φᵍ) ⋎ □(∼□(∼φᵍ)) := by
   suffices Modal.S4Point2 ⊢ □(∼(□φᵍ)) ⋎ □(∼□(∼□(φᵍ))) by
     apply A!_replace this;
     . apply axiomK'!;
       apply nec!;
       apply contra!;
-      exact goedelTranslated_axiomTc;
+      exact gödelTranslated_axiomTc;
     . apply axiomK'!;
       apply nec!;
       apply contra!;
@@ -112,10 +112,10 @@ instance : Modal.S4Point2 ≊ Propositional.KC.smallestMC := by
     | subst ihφ => apply Logic.subst _ ihφ;
     | mem₂ h =>
       rcases h with ⟨φ, hφ, rfl⟩;
-      apply provable_goedelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
+      apply provable_gödelTranslated_of_provable ?_ (Propositional.Logic.iff_provable.mpr hφ);
       rintro _ ⟨_, (rfl | rfl), ⟨s, rfl⟩⟩;
       . simp;
-      . exact S4Point2.goedelTranslated_axiomWLEM;
+      . exact S4Point2.gödelTranslated_axiomWLEM;
 
 lemma eq_smallestMC_of_KC : Modal.S4Point2 = Propositional.KC.smallestMC := Logic.eq_of_equiv
 

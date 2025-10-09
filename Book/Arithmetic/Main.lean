@@ -1,15 +1,15 @@
 import Book.Init
-import Book.Arithmetics.ISigma0
-import Book.Arithmetics.ISigma1
-import Book.Arithmetics.Goedel1
-import Book.Arithmetics.Goedel2
+import Book.Arithmetic.ISigma0
+import Book.Arithmetic.ISigma1
+import Book.Arithmetic.Goedel1
+import Book.Arithmetic.Goedel2
 
 open Verso.Genre
 open Verso.Genre.Manual
 
 set_option verso.docstring.allowMissing true
 set_option linter.tacticAnalysis false
-#doc (Manual) "Arithmetics" =>
+#doc (Manual) "Arithmetic" =>
 %%%
 tag := "arithmetics"
 %%%
@@ -47,10 +47,10 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $`\m
 `𝐈𝚺₁ ⊢! ∀' ∃' exponentialDef` is obtained by the completeness theorem.
 This was the result we wanted to achieve.
 
-{include 0 Book.Arithmetics.ISigma0}
+{include 0 Book.Arithmetic.ISigma0}
 
-{include 0 Book.Arithmetics.ISigma1}
+{include 0 Book.Arithmetic.ISigma1}
 
-{include 0 Book.Arithmetics.Goedel1}
+{include 0 Book.Arithmetic.Goedel1}
 
-{include 0 Book.Arithmetics.Goedel2}
+{include 0 Book.Arithmetic.Goedel2}
