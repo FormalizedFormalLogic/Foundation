@@ -2,8 +2,12 @@ import Book.Init
 
 open Verso.Genre
 open Verso.Genre.Manual
+open Verso.Genre.Manual.InlineLean
 
 set_option verso.docstring.allowMissing true
+set_option linter.unusedSectionVars false
+
+open LO Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
 
 #doc (Manual) "Gödel's Second Incompleteness Theorem" =>
 %%%
@@ -12,9 +16,7 @@ tag := "goedel-2"
 
 Recall that inside $`\mathsf{I}\Sigma_1` we can do basic set theory and primitive recursion.
 Many inductive notions and functions on them are defined in $`\Delta_1` or $`\Sigma_1` using
-the fixpoint construction.
-
--- TODO: ref: fixpoint construction
+the fixedpoint construction.
 
 We work inside an arbitrary model $`V` of $`\mathsf{I}\Sigma_1`.
 
@@ -43,11 +45,13 @@ $`\widehat{\bullet}` is a quasi-quotation..
 \end{align*}
 ```
 
-$`T_C` is $`\Delta_1` (if $`C` is a finite set) and monotone. Let $`\mathrm{UTerm}(t)` be a fixpoint of $`T_C`.
+$`T_C` is $`\Delta_1` (if $`C` is a finite set) and monotone. Let $`\mathrm{UTerm}(t)` be a fixedpoint of $`T_C`.
 It is $`\Delta_1` since $`T_C` satisfies strong finiteness.
 Define the function $`\mathrm{termBV}(t)` inductively on $`\mathrm{UTerm}` meaning
 the largest bounded variable $`+1` that appears in the term.
 Define $`\mathrm{Semiterm}(n, t) := \mathrm{UTerm}(t) \land \mathrm{termBV}(t) \le n`.
+
+{docstring LO.ISigma1.Metamath.IsSemiterm}
 
 ## Formula
 
@@ -80,15 +84,19 @@ Similarly, Define $`F_C`:
 \end{align*}
 ```
 
-$`F_C` is $`\Delta_1` and monotone. Let $`\mathrm{UFormula}(p)` be a fixpoint of $`F_C` and define
+$`F_C` is $`\Delta_1` and monotone. Let $`\mathrm{UFormula}(p)` be a fixedpoint of $`F_C` and define
 
 ```
 \mathrm{Semiformula}(n, p) \iff \mathrm{UFormula}(p) \land \mathrm{bv}(p) \le n
 ```
 
+{docstring LO.ISigma1.Metamath.IsSemiformula}
+
 The function $`\mathrm{bv}(p)` is defined inductively on $`\mathrm{UFormula}` meaning the largest bounded variable $`+1` that appears in the formula.
 
 $`\mathrm{UFormula}(p)` and $`\mathrm{Semiormula}(n, p)` are again $`\Delta_1` since $`F_C` satisfies strong finiteness.
+
+{docstring LO.ISigma1.Metamath.IsUFormula}
 
 # Formalized Provability
 
@@ -147,7 +155,7 @@ Define $`D_C`:
 ```
 
 $`p^+` is a *shift* of a formula $`p`. $`s^+` is a image of *shift* of $`s`.
-Take fixpoint $`\mathrm{Derivation}_T(d)`.
+Take fixedpoint $`\mathrm{Derivation}_T(d)`.
 
 ```math
 \begin{align*}
@@ -155,6 +163,12 @@ Take fixpoint $`\mathrm{Derivation}_T(d)`.
   \mathrm{Provable}_T(p) &\coloneqq \mathrm{Derivable}_T(\{p\})
 \end{align*}
 ```
+
+{docstring LO.FirstOrder.Theory.Derivable}
+
+{docstring LO.FirstOrder.Theory.Provable}
+
+{docstring LO.FirstOrder.Theory.Proof}
 
 Following holds for all formula (not coded one) $`\varphi` and finite set $`\Gamma`.
 
@@ -166,60 +180,212 @@ Now assume that $`U` is a theory of arithmetic stronger than $`\mathsf{R_0}` and
 $`T` be a theory of arithmetic stronger than $`\mathsf{I}\Sigma_1`.
 The following holds, thanks to the completeness theorem.
 
+1 $`U \vdash \sigma \iff T \vdash \mathrm{Provable}_U(\ulcorner \sigma \urcorner)`
+
+{docstring LO.FirstOrder.Arithmetic.provable_complete}
+
+2 $`T \vdash \mathrm{Provable}_U(\ulcorner \sigma \to \pi \urcorner) \to \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \to \mathrm{Provable}_U(\ulcorner \pi \urcorner)`
+
+{docstring LO.FirstOrder.Arithmetic.provable_D2}
+
+3 $`T \vdash \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \to \mathrm{Provable}_U(\ulcorner \mathrm{Provable}_U(\ulcorner \sigma \urcorner) \urcorner)`
+
+{docstring LO.FirstOrder.Arithmetic.provable_D3}
 
 # Second Incompleteness Theorem
 
 Assume that $`T` is $`\Delta_1`-definable and stronger than $`\mathsf{I}\Sigma_1`.
 
-## Fixpoint Lemma
+```lean
+section
+
+variable (T : Theory ℒₒᵣ) [𝗜𝚺₁ ⪯ T]
+```
+
+## Fixed-point Lemma
 
 Since the substitution is $`\Sigma_1`, There is a formula $`\mathrm{ssnum}(y, p, x)`
- such that, for all formula $`\varphi` with only one variable and $`x, y \in V`,
+such that, for all formula $`\varphi` with only one variable and $`x, y \in V`,
+
+```math
+  \mathrm{ssnum}(y, {\ulcorner \varphi \urcorner}, x) \iff y = \ulcorner \varphi(\overline{x}) \urcorner
+```
 
 holds. (overline $`\overline{\bullet}` denotes the (formalized) numeral of $`x`)
 
-Define a sentence $`\mathrm{fixpoint}_\theta` for formula (with one variable) $`\theta` as follows.
+Define a sentence $`\mathrm{fixedpoint}_\theta` for formula (with one variable) $`\theta` as follows.
 
 ```math
   \begin{align*}
-    \mathrm{fixpoint}_\theta
+    \mathrm{fixedpoint}_\theta
       &\coloneqq \mathrm{diag}_\theta(\overline{\ulcorner \mathrm{diag}_\theta \urcorner}) \\
     \mathrm{diag}_\theta(x)
       &\coloneqq (\forall y)[\mathrm{ssnum}(y, x, x) \to \theta (y)]
   \end{align*}
 ```
 
-$`T \vdash \mathrm{fixpoint}_\theta \leftrightarrow \theta({\ulcorner \mathrm{fixpoint}_\theta \urcorner})`
+```lean
+namespace Book
 
-{docstring LO.ISigma1.diagonal}
+noncomputable def diag (θ : Semisentence ℒₒᵣ 1) :
+  Semisentence ℒₒᵣ 1 := “x. ∀ y, !ssnum y x x → !θ y”
+
+noncomputable def fixedpoint (θ : Semisentence ℒₒᵣ 1) :
+  Sentence ℒₒᵣ := (Book.diag θ)/[⌜Book.diag θ⌝]
+```
+
+By simple reasoning, it can be checked that f satisfies the following:
+
+```math
+  T \vdash \mathrm{fixedpoint}_\theta \leftrightarrow \theta({\ulcorner \mathrm{fixedpoint}_\theta \urcorner})
+```
+
+```lean
+theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
+    T ⊢ fixedpoint θ ⭤ θ/[⌜fixedpoint θ⌝] :=
+  haveI : 𝗘𝗤 ⪯ T :=
+    Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁)
+    inferInstance inferInstance
+  complete <| oRing_consequence_of.{0} _ _
+  fun (V : Type) _ _ ↦ by
+    haveI : V ⊧ₘ* 𝗜𝚺₁ :=
+      ModelsTheory.of_provably_subtheory
+      V 𝗜𝚺₁ T inferInstance
+    suffices
+      V ⊧/![] (fixedpoint θ) ↔ V ⊧/![⌜fixedpoint θ⌝] θ by
+      simpa [models_iff, Matrix.constant_eq_singleton]
+    let t : V := ⌜diag θ⌝
+    have ht : substNumeral t t = ⌜fixedpoint θ⌝ := by
+      simp [t, fixedpoint, substNumeral_app_quote]
+    calc
+      V ⊧/![] (fixedpoint θ)
+    _ ↔ V ⊧/![t] (diag θ)         := by
+      simp [fixedpoint, Matrix.constant_eq_singleton, t]
+    _ ↔ V ⊧/![substNumeral t t] θ := by
+      simp [diag, Matrix.constant_eq_singleton]
+    _ ↔ V ⊧/![⌜fixedpoint θ⌝] θ   := by simp [ht]
+
+end Book
+```
 
 ## Main Theorem
 
-Define Gödel sentence $`\mathrm{G}_T`:
+Let $`T` be a $`\Delta_1`-theory, which is stronger than $`\mathsf{I}\Sigma_1`.
 
-```math
-  \mathrm{G}_T \coloneqq \mathrm{fixpoint}_{\lnot\mathrm{Provable}_T(x)}
+```lean
+namespace Book
+
+variable (T : Theory ℒₒᵣ) [T.Δ₁] [𝗜𝚺₁ ⪯ T]
 ```
 
-Gödel sentence is undecidable, i.e., $`T \nvdash \mathrm{G}` if $`T` is consistent, and $`T \nvdash \lnot\mathrm{G}` if $`\mathbb{N} \models T`.
-
-{docstring LO.ProvabilityLogic.Provability.unprovable_gödel}
-
-{docstring LO.ProvabilityLogic.Provability.unrefutable_gödel}
-
-Define formalized incompleteness sentence $`\mathrm{Con}_T`:
+We will use $`\square \varphi` to denote $`\mathrm{Provable}(\ulcorner\varphi\urcorner)`.
+Define Gödel sentence $`\mathsf{G}`, as $`\mathrm{fixedpoint}_{\lnot\mathrm{Provable}_T(x)}` using fixed-point theorem, satisfies
 
 ```math
-  \mathrm{Con}_T \coloneqq \lnot\mathrm{Provable}_T(\ulcorner \bot \urcorner)
+  T \vdash \mathsf{G} \leftrightarrow \lnot \mathrm{Provable}(\ulcorner\mathsf{G}\urcorner)
 ```
 
-$`T \vdash \mathrm{Con}_T \leftrightarrow G_T`
+```lean
+local prefix:max "□" => T.provabilityPred
 
-{docstring LO.ProvabilityLogic.Provability.gödel_iff_con}
+noncomputable def gödel : Sentence ℒₒᵣ :=
+  Book.fixedpoint (∼T.provable)
 
+local notation "𝗚" => gödel T
 
-$`T` cannot prove its own consistency, i.e., $`T \nvdash \mathrm{Con}_T` if $`T` is consistent.
-Moreover, $`\mathrm{Con}_T` is undecidable from $`T` if $`\mathbb{N} \models T`.
+variable {T}
+
+lemma gödel_spec : T ⊢ 𝗚 ⭤ ∼□𝗚 := by
+  simpa using Book.diagonal T (∼T.provable)
+```
+
+Gödel sentence is undecidable, i.e., $`T \nvdash \mathsf{G}` if $`T` is consistent,
+
+```lean
+lemma gödel_unprovable [Entailment.Consistent T] :
+    T ⊬ 𝗚 := by
+  intro h
+  have hp : T ⊢ □𝗚 :=
+    weakening inferInstance (provable_D1 h)
+  have hn : T ⊢ ∼□𝗚 :=
+    K!_left gödel_spec ⨀ h
+  exact not_consistent_iff_inconsistent.mpr
+    (inconsistent_of_provable_of_unprovable hp hn)
+    inferInstance
+```
+
+And $`T \nvdash \lnot\mathsf{G}` if $`\mathbb{N} \models T`.
+
+```lean
+lemma gödel_irrefutable [ℕ ⊧ₘ* T] : T ⊬ ∼𝗚 := fun h ↦ by
+  have : T ⊢ □𝗚 :=
+    CN!_of_CN!_left (K!_right gödel_spec) ⨀ h
+  have : T ⊢ 𝗚 := provable_sound this
+  exact not_consistent_iff_inconsistent.mpr
+    (inconsistent_of_provable_of_unprovable this h)
+    (Sound.consistent_of_satisfiable
+      ⟨_, (inferInstance : ℕ ⊧ₘ* T)⟩)
+```
+
+Define formalized consistent statement $`\mathrm{Con}_T` as $`\lnot\mathrm{Provable}_T(\ulcorner \bot \urcorner)`:
+
+```lean
+variable (T)
+
+noncomputable def consistent : Sentence ℒₒᵣ := ∼□⊥
+
+local notation "𝗖𝗼𝗻" => consistent T
+```
+
+And, surprisingly enough, it can be proved that Gödel sentence $`\mathsf{G}` is equivalent to the consistency statement.
+
+```lean
+variable {T}
+
+open Entailment FiniteContext
+
+lemma consistent_iff_goedel : T ⊢ 𝗖𝗼𝗻 ⭤ 𝗚 := by
+  apply E!_intro
+  · have bew_G : [∼𝗚] ⊢[T] □𝗚 :=
+      deductInv'! <| CN!_of_CN!_left <| K!_right gödel_spec
+    have bew_not_bew_G : [∼𝗚] ⊢[T] □(∼□𝗚) := by
+      have : T ⊢ □(𝗚 ➝ ∼□𝗚) :=
+        weakening inferInstance
+        <| provable_D1 <| K!_left gödel_spec
+      exact provable_D2_context (of'! this) bew_G
+    have bew_bew_G : [∼𝗚] ⊢[T] □□𝗚 :=
+      provable_D3_context bew_G
+    have : [∼𝗚] ⊢[T] □⊥ :=
+      provable_D2_context
+        (provable_D2_context
+          (of'! <| weakening inferInstance
+          <| provable_D1 CNC!) bew_not_bew_G)
+        bew_bew_G
+    exact CN!_of_CN!_left (deduct'! this)
+  · have : [□⊥] ⊢[T] □𝗚 := by
+      have : T ⊢ □(⊥ ➝ 𝗚) :=
+        weakening inferInstance <| provable_D1 efq!
+      exact provable_D2_context (of'! this) (by simp)
+    have : [□⊥] ⊢[T] ∼𝗚 :=
+      of'!
+        (CN!_of_CN!_right <| K!_left <| gödel_spec)
+      ⨀ this
+    exact CN!_of_CN!_right (deduct'! this)
+```
+
+Finally, combined with the fact that $`\mathsf{G}` is independent,
+we can prove that the consistency statement is also independent.
+
+```lean
+theorem consistent_unprovable [Consistent T] :
+    T ⊬ 𝗖𝗼𝗻 := fun h ↦
+  gödel_unprovable <| K!_left consistent_iff_goedel ⨀ h
+
+theorem inconsistent_unprovable [ℕ ⊧ₘ* T] :
+    T ⊬ ∼𝗖𝗼𝗻 := fun h ↦
+  gödel_irrefutable
+  <| contra! (K!_right consistent_iff_goedel) ⨀ h
+```
 
 {docstring LO.FirstOrder.Arithmetic.consistent_unprovable}
 
