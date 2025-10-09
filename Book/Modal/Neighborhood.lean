@@ -83,6 +83,68 @@ We summarize the soundness and completeness in neighborhood semantics for the se
 
 {docstring E.Neighborhood.complete}
 
+Next we consider combinations of basic axioms in neighborhood semantics.
+
+## For {lean}`Modal.EM`
+
+{docstring FrameClass.EM}
+
+{docstring EM.Neighborhood.sound}
+
+{docstring EM.Neighborhood.complete}
+
+## For {lean}`Modal.EC`
+
+{docstring FrameClass.EC}
+
+{docstring EC.Neighborhood.sound}
+
+{docstring EC.Neighborhood.complete}
+
+## For {lean}`Modal.EN`
+
+{docstring FrameClass.EN}
+
+{docstring EN.Neighborhood.sound}
+
+{docstring EN.Neighborhood.complete}
+
+## For {lean}`Modal.EMC`
+
+{docstring FrameClass.EMC}
+
+{docstring EMC.Neighborhood.sound}
+
+{docstring EMC.Neighborhood.complete}
+
+## For {lean}`Modal.ECN`
+
+{docstring FrameClass.ECN}
+
+{docstring ECN.Neighborhood.sound}
+
+{docstring ECN.Neighborhood.complete}
+
+## For {lean}`Modal.EMN`
+
+{docstring FrameClass.EMN}
+
+{docstring EMN.Neighborhood.sound}
+
+{docstring EMN.Neighborhood.complete}
+
+## For {lean}`Modal.EMCN`
+
+{docstring FrameClass.EMCN}
+
+{docstring EMCN.Neighborhood.sound}
+
+{docstring EMCN.Neighborhood.complete}
+
+Since {lean}`Modal.K` is equivalent to {lean}`Modal.EMCN`, so `{Modal.K}` is also sound and complete with respect to neighborhood semantics.
+
+Next consider additional axioms.
+
 ## For {lean}`Modal.E4`
 
 {docstring FrameClass.E4}
@@ -181,14 +243,6 @@ Similar to `Modal.EMC4`.
 
 {docstring E5.Neighborhood.complete}
 
-## For {lean}`Modal.EM`
-
-{docstring FrameClass.EM}
-
-{docstring EM.Neighborhood.sound}
-
-{docstring EM.Neighborhood.complete}
-
 ## For {lean}`Modal.ET`
 
 {docstring FrameClass.ET}
@@ -197,38 +251,6 @@ Similar to `Modal.EMC4`.
 
 {docstring ET.Neighborhood.complete}
 
-## For {lean}`Modal.EN`
-
-{docstring FrameClass.EN}
-
-{docstring EN.Neighborhood.sound}
-
-{docstring EN.Neighborhood.complete}
-
-## For {lean}`Modal.EC`
-
-{docstring FrameClass.EC}
-
-{docstring EC.Neighborhood.sound}
-
-{docstring EC.Neighborhood.complete}
-
-## For {lean}`Modal.ECN`
-
-{docstring FrameClass.ECN}
-
-{docstring ECN.Neighborhood.sound}
-
-{docstring ECN.Neighborhood.complete}
-
-## For {lean}`Modal.EMN`
-
-{docstring FrameClass.EMN}
-
-{docstring EMN.Neighborhood.sound}
-
-{docstring EMN.Neighborhood.complete}
-
 ## For {lean}`Modal.EMT`
 
 {docstring FrameClass.EMT}
@@ -236,22 +258,6 @@ Similar to `Modal.EMC4`.
 {docstring EMT.Neighborhood.sound}
 
 {docstring EMT.Neighborhood.complete}
-
-## For {lean}`Modal.EMC`
-
-{docstring FrameClass.EMC}
-
-{docstring EMC.Neighborhood.sound}
-
-{docstring EMC.Neighborhood.complete}
-
-## For {lean}`Modal.EMCN`
-
-{docstring FrameClass.EMCN}
-
-{docstring EMCN.Neighborhood.sound}
-
-{docstring EMCN.Neighborhood.complete}
 
 ## For {lean}`Modal.EP`
 
