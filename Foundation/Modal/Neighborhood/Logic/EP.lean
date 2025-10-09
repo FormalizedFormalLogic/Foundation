@@ -27,13 +27,13 @@ end Neighborhood
 
 namespace EP
 
-instance : Sound Modal.EP FrameClass.EP := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EP FrameClass.EP := instSound_of_validates_axioms $ by
   simp only [Semantics.RealizeSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   simp;
 
-instance : Entailment.Consistent Modal.EP := consistent_of_sound_frameclass FrameClass.EP $ by
+instance consistent : Entailment.Consistent Modal.EP := consistent_of_sound_frameclass FrameClass.EP $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;

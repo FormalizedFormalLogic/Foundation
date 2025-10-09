@@ -48,22 +48,22 @@ end Neighborhood
 
 namespace ENT4
 
-instance : Sound Modal.ENT4 FrameClass.ENT4 := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.ENT4 FrameClass.ENT4 := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl | rfl) F hF <;>
   . have := Set.mem_setOf_eq.mp hF;
     simp;
 
-instance : Entailment.Consistent Modal.ENT4 := consistent_of_sound_frameclass FrameClass.ENT4 $ by
+instance consistent : Entailment.Consistent Modal.ENT4 := consistent_of_sound_frameclass FrameClass.ENT4 $ by
   use Frame.simple_blackhole;
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Modal.ENT4 FrameClass.ENT4 := (minimalCanonicity _).completeness $ by
+instance Neighborhood.complete : Complete Modal.ENT4 FrameClass.ENT4 := (minimalCanonicity _).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   exact {}
 
-instance : Complete Modal.ENT4 FrameClass.finite_ENT4 := ⟨by
+instance Neighborhood.finite_complete : Complete Modal.ENT4 FrameClass.finite_ENT4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.ENT4);
   intro F hF V x;

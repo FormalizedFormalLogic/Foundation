@@ -101,3 +101,11 @@
 :root {
   --verso-code-font-family: 'JuliaMono', monospace;
 }
+
+html {
+  overflow-y: scroll;
+}
+
+.with-toc #toc {
+  overflow-y: scroll;
+}

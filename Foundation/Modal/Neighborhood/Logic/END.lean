@@ -17,11 +17,11 @@ end Neighborhood
 
 namespace END
 
-instance : Sound Modal.END FrameClass.END := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.END FrameClass.END := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Modal.END := consistent_of_sound_frameclass FrameClass.END $ by
+instance consistent : Entailment.Consistent Modal.END := consistent_of_sound_frameclass FrameClass.END $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   constructor;
