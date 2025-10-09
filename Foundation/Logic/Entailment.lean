@@ -290,6 +290,7 @@ class Complete : Prop where
 
 def Independent (φ : F) : Prop := 𝓢 ⊬ φ ∧ 𝓢 ⊬ ∼φ
 
+/-- A proof system is incomplete if and only if there exists a formula that is both unprovable and irrefutable. -/
 class Incomplete : Prop where
   indep : ∃ φ, Independent 𝓢 φ
 

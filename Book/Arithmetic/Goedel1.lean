@@ -91,7 +91,7 @@ lemma paradoxical : T ⊢ π T ↔ T ⊢ ∼π T := calc
 Hence, $`\pi_T` and its negation are both unprovable from $`T`, since $`T` is consistent.
 
 ```lean
-lemma unprovable : T ⊬ π T := by
+theorem unprovable : T ⊬ π T := by
   intro h
   have : T ⊢ ∼π T := (paradoxical T).mp h
   have : Inconsistent T :=
@@ -99,7 +99,7 @@ lemma unprovable : T ⊬ π T := by
   exact not_consistent_iff_inconsistent.mpr
     this inferInstance
 
-lemma unrefutable : T ⊬ ∼π T := by
+theorem irrefutable : T ⊬ ∼π T := by
   intro h
   have : T ⊢ π T := (paradoxical T).mpr h
   have : Inconsistent T :=

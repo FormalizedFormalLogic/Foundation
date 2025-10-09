@@ -311,7 +311,7 @@ lemma gödel_unprovable [Entailment.Consistent T] :
 And $`T \nvdash \lnot\mathsf{G}` if $`\mathbb{N} \models T`.
 
 ```lean
-lemma gödel_unrefutable [ℕ ⊧ₘ* T] : T ⊬ ∼𝗚 := fun h ↦ by
+lemma gödel_irrefutable [ℕ ⊧ₘ* T] : T ⊬ ∼𝗚 := fun h ↦ by
   have : T ⊢ □𝗚 :=
     CN!_of_CN!_left (K!_right gödel_spec) ⨀ h
   have : T ⊢ 𝗚 := provable_sound this
@@ -377,7 +377,7 @@ theorem consistent_unprovable [Consistent T] :
 
 theorem inconsistent_unprovable [ℕ ⊧ₘ* T] :
     T ⊬ ∼𝗖𝗼𝗻 := fun h ↦
-  gödel_unrefutable
+  gödel_irrefutable
   <| contra! (K!_right consistent_iff_goedel) ⨀ h
 ```
 
