@@ -21,21 +21,21 @@ end Neighborhood
 
 namespace ET4
 
-instance : Sound Modal.ET4 FrameClass.ET4 := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.ET4 FrameClass.ET4 := instSound_of_validates_axioms $ by
   constructor;
   rintro φ (rfl | rfl) F ⟨_, _⟩;
   . apply valid_axiomFour_of_isTransitive;
   . apply valid_axiomT_of_isReflexive;
 
-instance : Entailment.Consistent Modal.ET4 := consistent_of_sound_frameclass FrameClass.ET4 $ by
+instance consistent : Entailment.Consistent Modal.ET4 := consistent_of_sound_frameclass FrameClass.ET4 $ by
   use Frame.simple_blackhole;
   constructor;
 
-instance : Complete Modal.ET4 FrameClass.ET4 := (minimalCanonicity _).completeness $ by
+instance Neighborhood.complete : Complete Modal.ET4 FrameClass.ET4 := (minimalCanonicity _).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Modal.ET4 FrameClass.finite_ET4 := ⟨by
+instance Neighborhood.finite_complete : Complete Modal.ET4 FrameClass.finite_ET4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.ET4);
   intro F F_trans V x;
