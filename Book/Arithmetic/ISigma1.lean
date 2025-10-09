@@ -60,7 +60,7 @@ There is a $`\Sigma_1`-function $`\mathsf{PR}_{f,g}(\vec{v}, u)` such that:
 
 {docstring LO.ISigma1.PR.Construction.result_succ}
 
-# Fixpoint
+# Fixed-point
 
 Let $`\Phi_C(\vec{v}, x)` be a predicate, which takes a _class_ $`C` as a parameter.
 Then there is a $`\Sigma_1`-predicate $`\mathsf{Fix}_{\Phi}(\vec{v}, x)` such that
