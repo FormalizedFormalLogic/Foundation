@@ -149,7 +149,7 @@ set_option linter.flexible false in
   case mulComm  => intros; exact mul_comm _ _
   case addEqOfLt => intro a b h; exact ⟨b - a, Nat.add_sub_of_le (le_of_lt h)⟩
   case oneLeOfZeroLt => intro n hn; exact hn
-  case mulLtMul => intro a b c h hl; exact (mul_lt_mul_right hl).mpr h
+  case mulLtMul => intro a b c h hl; exact (mul_lt_mul_iff_left₀ hl).mpr h
   case distr => intros; exact Nat.mul_add _ _ _
   case ltTrans => intro a b c; exact Nat.lt_trans
   case ltTri => intros; exact Nat.lt_trichotomy _ _
@@ -475,7 +475,7 @@ lemma two_mul_le_sq_add_one (i : M) : 2 * i ≤ i ^ 2 + 1 := by
     · exact le_trans (two_mul_le_sq (one_lt_iff_two_le.mp lt)) (by simp)
 
 lemma two_mul_lt_sq {i : M} (h : 2 < i) : 2 * i < i ^ 2 := by
-  simpa [sq] using (mul_lt_mul_right (show 0 < i from pos_of_gt h)).mpr h
+  simpa [sq] using (mul_lt_mul_iff_left₀ (show 0 < i from pos_of_gt h)).mpr h
 
 lemma succ_le_double_of_pos {a : M} (h : 0 < a) : a + 1 ≤ 2 * a := by
   simpa [two_mul] using pos_iff_one_le.mp h
