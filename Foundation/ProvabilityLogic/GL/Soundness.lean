@@ -27,10 +27,19 @@ lemma GL.arithmetical_soundness (h : Modal.GL ⊢ A) {f : Realization 𝔅} : U 
 
 open Classical
 
+example (i : PartENat) : ⊥ := by
+  cases i using PartENat.casesOn
+
+example (i : Fin 7) : ⊥ := by
+  cases i using Fin.casesOn
+
+
 theorem GLPlusBoxBot.arithmetical_soundness
     (hA : Modal.GLPlusBoxBot 𝔅.height.toWithTop ⊢ A)
     (f : Realization 𝔅) : U ⊢ f A := by
-  cases h : 𝔅.height using PartENat.casesOn
+  generalize 𝔅.height = h
+
+  cases h using PartENat.casesOn
   case _ =>
     exact GL.arithmetical_soundness (by simpa [h] using hA)
   case _ n =>

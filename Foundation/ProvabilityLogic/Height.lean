@@ -3,14 +3,25 @@ import Foundation.FirstOrder.Internal.DerivabilityCondition
 import Foundation.ProvabilityLogic.Provability
 import Mathlib.Data.Nat.PartENat
 
-namespace PartENat
+namespace ENat
 
-variable (P : ℕ → Prop) [DecidablePred P]
+open Classical
 
-theorem exists_of_find_le (n : ℕ) (h : find P ≤ (n : PartENat)) : ∃ m ≤ n, P m := by
+noncomputable def find (P : ℕ → Prop) : ℕ∞ := if h : ∃ x : ℕ, P x then Nat.find h else ⊤
+
+variable (P : ℕ → Prop)
+
+theorem lt_find (n : ℕ) (h : ∀ m ≤ n, ¬P m) : (n : ℕ∞) < find P := by
+  by_cases h : ∃ x : ℕ, P x
+  · simpa [find, h]
+  · simp [find, h]
+
+theorem exists_of_find_le (n : ℕ) (h : find P ≤ (n : ENat)) : ∃ m ≤ n, P m := by
   by_contra A
   exact IsIrrefl.irrefl _ <| lt_of_le_of_lt h <| lt_find P n (by simpa using A)
 
+
+/--/
 end PartENat
 
 namespace LO.ProvabilityLogic.Provability
@@ -45,7 +56,7 @@ open Classical
 
 variable (𝔅)
 
-noncomputable def height : PartENat := PartENat.find (T ⊢ 𝔅^[·] ⊥)
+noncomputable def height : ENat := ENat.find (T ⊢ 𝔅^[·] ⊥)
 
 noncomputable abbrev _root_.LO.FirstOrder.ArithmeticTheory.height (T : ArithmeticTheory) [T.Δ₁] : PartENat :=
   T.standardProvability.height
