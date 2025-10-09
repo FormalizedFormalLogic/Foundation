@@ -30,7 +30,6 @@ lemma containsUnit_of_valid_axiomN (h : F ⊧ Axioms.N) : F.ContainsUnit := by
   ext x;
   simpa [Satisfies] using @h (λ _ => Set.univ) x;
 
-
 section
 
 variable [Entailment (Formula ℕ) S]
