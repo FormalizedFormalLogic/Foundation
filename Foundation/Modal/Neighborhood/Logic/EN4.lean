@@ -4,6 +4,20 @@ import Foundation.Modal.Neighborhood.Logic.EN
 
 namespace LO.Modal
 
+instance {φ : Formula ℕ} : FormulaSet.IsSubformulaClosed (Finset.toSet (φ.subformulas ∪ (□⊤ : Formula ℕ).subformulas)) := by
+  constructor;
+  simp_all only [Finset.coe_union];
+  rintro ψ (hψ | hψ);
+  . intro ξ hξ;
+    left;
+    apply Formula.subformulas.subset_of_mem hψ;
+    simpa;
+  . intro ξ hξ;
+    right;
+    apply Formula.subformulas.subset_of_mem hψ;
+    simpa;
+
+open LO.Entailment
 open Neighborhood
 open Hilbert.Neighborhood
 open Formula.Neighborhood
@@ -13,8 +27,12 @@ namespace Neighborhood
 protected class Frame.IsEN4 (F : Frame) extends F.ContainsUnit, F.IsTransitive where
 protected abbrev FrameClass.EN4 : FrameClass := { F | F.IsEN4 }
 
+protected class Frame.IsFiniteEN4 (F : Frame) extends F.IsEN4, F.IsFinite where
+protected abbrev FrameClass.finite_EN4 : FrameClass := { F | F.IsFiniteEN4 }
+
 instance : counterframe_2_3_5.IsEN where
   contains_unit := by simp [Frame.box];
+
 
 end Neighborhood
 
@@ -31,6 +49,28 @@ instance : Entailment.Consistent Modal.EN4 := consistent_of_sound_frameclass Fra
   use Frame.simple_blackhole;
   apply Set.mem_setOf_eq.mpr;
   constructor;
+
+instance : Complete Modal.EN4 FrameClass.EN4 := (minimalCanonicity Modal.EN4).completeness $ by
+  apply Set.mem_setOf_eq.mpr;
+  exact {}
+
+instance : Complete Modal.EN4 FrameClass.finite_EN4 := ⟨by
+  intro φ hφ;
+  apply Complete.complete (𝓜 := FrameClass.EN4);
+  intro F hF V x;
+  replace hF := Set.mem_setOf_eq.mp hF;
+
+  let M : Model := ⟨F, V⟩;
+  apply transitiveFiltration M (Finset.toSet $ φ.subformulas ∪ (□⊤ : Formula ℕ).subformulas) |>.filtration_satisfies _ (by grind) |>.mp;
+  apply hφ;
+  apply Set.mem_setOf_eq.mpr;
+  exact {
+    world_finite := by apply FilterEqvQuotient.finite $ by simp;
+    trans := by apply transitiveFiltration.isTransitive.trans;
+    contains_unit := by
+      apply transitiveFiltration.containsUnit (by simp) |>.contains_unit;
+  };
+⟩
 
 end EN4
 

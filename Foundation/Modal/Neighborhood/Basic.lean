@@ -1,6 +1,7 @@
 import Foundation.Vorspiel.HRel.Basic
 import Foundation.Modal.Axioms
 import Foundation.Modal.Formula
+import Foundation.Modal.Letterless
 import Foundation.Modal.Logic.Basic
 
 namespace LO.Modal

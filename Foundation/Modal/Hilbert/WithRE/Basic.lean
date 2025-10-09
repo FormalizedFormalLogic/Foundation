@@ -240,6 +240,7 @@ end EN4.axioms
 protected abbrev EN4 : Logic ℕ := Hilbert.WithRE EN4.axioms
 instance : Entailment.EN Modal.EN4 where
 instance : Entailment.E4 Modal.EN4 where
+instance : Modal.E4 ⪯ Modal.EN4 := weakerThan_of_subset_axioms (by simp)
 
 protected abbrev ET4.axioms : Axiom ℕ := {Axioms.Four (.atom 0), Axioms.T (.atom 0)}
 namespace ET4.axioms
@@ -329,6 +330,26 @@ end EMT4.axioms
 protected abbrev EMT4 : Logic ℕ := Hilbert.WithRE EMT4.axioms
 instance : Entailment.EMT4 Modal.EMT4 where
 
+
+protected abbrev EMNT4.axioms : Axiom ℕ := {
+  Axioms.M (.atom 0) (.atom 1),
+  Axioms.N,
+  Axioms.T (.atom 0),
+  Axioms.Four (.atom 0)
+}
+namespace EMNT4.axioms
+instance : EMNT4.axioms.HasM where p := 0; q := 1;
+instance : EMNT4.axioms.HasN where
+instance : EMNT4.axioms.HasT where p := 0;
+instance : EMNT4.axioms.HasFour where p := 0;
+end EMNT4.axioms
+protected abbrev EMNT4 : Logic ℕ := Hilbert.WithRE EMNT4.axioms
+instance : Entailment.EM Modal.EMNT4 where
+instance : Entailment.EN Modal.EMNT4 where
+instance : Entailment.ET Modal.EMNT4 where
+instance : Entailment.E4 Modal.EMNT4 where
+
+
 protected abbrev EMC4.axioms : Axiom ℕ := {
   Axioms.M (.atom 0) (.atom 1),
   Axioms.C (.atom 0) (.atom 1),
@@ -339,6 +360,7 @@ instance : EMC4.axioms.HasC where p := 0; q := 1;
 instance : EMC4.axioms.HasFour where p := 0;
 protected abbrev EMC4 : Logic ℕ := Hilbert.WithRE EMC4.axioms
 instance : Entailment.EMC4 Modal.EMC4 where
+
 
 protected abbrev EMCN4.axioms : Axiom ℕ := {
   Axioms.M (.atom 0) (.atom 1),
@@ -352,6 +374,7 @@ instance : EMCN4.axioms.HasN where
 instance : EMCN4.axioms.HasFour where p := 0;
 protected abbrev EMCN4 : Logic ℕ := Hilbert.WithRE EMCN4.axioms
 instance : Entailment.EMC Modal.EMCN4 where
+
 
 protected abbrev EMCNT.axioms : Axiom ℕ := {
   Axioms.M (.atom 0) (.atom 1),
