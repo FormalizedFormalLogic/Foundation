@@ -56,4 +56,20 @@ instance : Modal.EMN ⪱ Modal.EMCN := by
         infer_instance;
       . simp;
 
+instance : Modal.EMN ⪱ Modal.EMCN := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.C (.atom 0) (.atom 1));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.EMN);
+      apply not_validOnFrameClass_of_exists_frame;
+      use counterframe_axiomC₁;
+      constructor;
+      . apply Set.mem_setOf_eq.mpr;
+        infer_instance;
+      . simp;
+
 end LO.Modal
