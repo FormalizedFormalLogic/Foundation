@@ -21,7 +21,7 @@ open Formula.Neighborhood
 namespace Neighborhood
 
 
-abbrev FrameClass.E : FrameClass := Set.univ
+protected abbrev FrameClass.E : FrameClass := Set.univ
 
 protected abbrev Frame.simple_whitehole : Frame := ⟨Unit, λ _ => ∅⟩
 
@@ -76,13 +76,13 @@ end Neighborhood
 
 namespace E
 
-instance : Sound Modal.E FrameClass.E := instSound_of_validates_axioms $ by simp;
+instance Neighborhood.sound : Sound Modal.E FrameClass.E := instSound_of_validates_axioms $ by simp;
 
-instance : Entailment.Consistent Modal.E := consistent_of_sound_frameclass FrameClass.E $ by
+instance consistent : Entailment.Consistent Modal.E := consistent_of_sound_frameclass FrameClass.E $ by
   use ⟨Unit, λ _ => {}⟩;
   simp;
 
-instance : Complete Modal.E FrameClass.E := (minimalCanonicity Modal.E).completeness $ by tauto
+instance Neighborhood.complete : Complete Modal.E FrameClass.E := (minimalCanonicity Modal.E).completeness $ by tauto
 
 end E
 

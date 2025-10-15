@@ -21,17 +21,17 @@ end Neighborhood
 
 namespace EN
 
-instance : Sound Modal.EN FrameClass.EN := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EN FrameClass.EN := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F hF;
   simp_all;
 
-instance : Entailment.Consistent Modal.EN := consistent_of_sound_frameclass FrameClass.EN $ by
+instance consistent : Entailment.Consistent Modal.EN := consistent_of_sound_frameclass FrameClass.EN $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Modal.EN FrameClass.EN := (minimalCanonicity Modal.EN).completeness $ by
+instance Neighborhood.complete : Complete Modal.EN FrameClass.EN := (minimalCanonicity Modal.EN).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 

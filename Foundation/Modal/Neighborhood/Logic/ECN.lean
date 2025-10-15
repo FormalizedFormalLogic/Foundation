@@ -19,16 +19,16 @@ end Neighborhood
 
 namespace ECN
 
-instance : Sound Modal.ECN FrameClass.ECN := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.ECN FrameClass.ECN := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Modal.ECN := consistent_of_sound_frameclass FrameClass.ECN $ by
+instance consistent : Entailment.Consistent Modal.ECN := consistent_of_sound_frameclass FrameClass.ECN $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance : Complete Modal.ECN FrameClass.ECN := (minimalCanonicity Modal.ECN).completeness $ by
+instance Neighborhood.complete : Complete Modal.ECN FrameClass.ECN := (minimalCanonicity Modal.ECN).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
