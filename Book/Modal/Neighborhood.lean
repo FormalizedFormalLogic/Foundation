@@ -17,9 +17,17 @@ open Modal Neighborhood
 
 # Minimal Modal Logic
 
+Minimal modal logic needs only modal equivalence rule ({lean}`Hilbert.WithRE.re`), not necessitation rule.
+
+{docstring Hilbert.WithRE}
+
 # Neighborhood Semantics
 
+*TODO*
+
 # Canonical Model
+
+*TODO*
 
 # Filtration
 
@@ -35,7 +43,7 @@ Reflexivity is preserved when original model is reflexive.
 
 {docstring transitiveFiltration.isReflexive}
 
-To show that Contains-unit property is preserved is not trivial, it needs that `□⊤` is in the filter.
+To show that contains-unit property is preserved is not trivial, it needs that `□⊤` is in the filter.
 
 {docstring transitiveFiltration.containsUnit}
 
@@ -47,7 +55,7 @@ By supplementation, monotonicity is recovered.
 
 {docstring supplementedTransitiveFiltration.isMonotonic}
 
-Similarly, transitivity, reflexivity and contains-unit property is preserved.
+Similarly, transitivity, reflexivity and contains-unit property is preserved (of course contains-unit needs `□⊤` is in filter).
 
 {docstring supplementedTransitiveFiltration.isTransitive}
 
@@ -141,7 +149,7 @@ Next we consider combinations of basic axioms in neighborhood semantics.
 
 {docstring EMCN.Neighborhood.complete}
 
-Since {lean}`Modal.K` is equivalent to {lean}`Modal.EMCN`, so `{Modal.K}` is also sound and complete with respect to neighborhood semantics.
+Since {lean}`Modal.K` is equivalent to {lean}`Modal.EMCN`, so {lean}`Modal.K` is also sound and complete with respect to neighborhood semantics.
 
 Next consider additional axioms.
 
