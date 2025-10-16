@@ -154,8 +154,8 @@ def toModel (𝓒 : Canonicity 𝓢) : Model where
   𝒩 := 𝓒.𝒩
   Val := 𝓒.V
 
-abbrev box := 𝓒.toModel.box
-abbrev dia := 𝓒.toModel.dia
+abbrev box (𝓒 : Canonicity 𝓢) := 𝓒.toModel.box
+abbrev dia (𝓒 : Canonicity 𝓢) := 𝓒.toModel.dia
 
 @[simp]
 lemma box_proofset : 𝓒.box (proofset 𝓢 φ) = (proofset 𝓢 (□φ)) := by
@@ -231,8 +231,8 @@ def minimalCanonicity (𝓢 : S) [Entailment.E 𝓢] : Canonicity 𝓢 where
   def_V := by simp;
 
 
-lemma minimalCanonicity.iff_mem_box_exists_fml {X} {Γ : (minimalCanonicity 𝓢).toModel}
-  : Γ ∈ Frame.box _ X ↔ ∃ φ, X = proofset 𝓢 φ ∧ Frame.box _ X = proofset 𝓢 (□φ) ∧ Γ ∈ proofset 𝓢 (□φ)
+lemma minimalCanonicity.iff_mem_box_exists_fml {X A}
+  : A ∈ (minimalCanonicity 𝓢).box X ↔ ∃ φ, X = proofset 𝓢 φ ∧ A ∈ proofset 𝓢 (□φ)
   := by
     constructor;
     . rintro ⟨φ, _, rfl⟩;
@@ -240,8 +240,13 @@ lemma minimalCanonicity.iff_mem_box_exists_fml {X} {Γ : (minimalCanonicity 𝓢
       simpa;
     . tauto;
 
+@[grind]
+lemma minimalCanonicity.not_isNonproofset_of_mem_box {X : Proofset 𝓢} (h : A ∈ (minimalCanonicity 𝓢).box X) : ¬X.IsNonproofset := by
+  obtain ⟨φ, rfl, _⟩ := minimalCanonicity.iff_mem_box_exists_fml.mp h;
+  simp;
+
 lemma minimalCanonicity.iff_mem_dia_forall_fml {X} {Γ : (minimalCanonicity 𝓢).toModel}
-  : Γ ∈ Frame.dia _ X ↔ ∀ φ, Xᶜ ≠ proofset 𝓢 φ ∨ Frame.box _ Xᶜ ≠ proofset 𝓢 (□φ) ∨ Γ ∉ proofset 𝓢 (□φ)
+  : Γ ∈ (minimalCanonicity 𝓢).dia X ↔ ∀ φ, Xᶜ ≠ proofset 𝓢 φ ∨ Γ ∉ proofset 𝓢 (□φ)
   := by
     apply Iff.trans (iff_mem_box_exists_fml.not);
     set_option push_neg.use_distrib true in push_neg;
