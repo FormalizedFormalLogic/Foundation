@@ -61,7 +61,7 @@ instance consistent : Entailment.Consistent Modal.E5 := consistent_of_sound_fram
   apply Set.mem_setOf_eq.mpr;
   infer_instance
 
-instance Neighborhood.complete : Complete Modal.E5 FrameClass.E5 := (maximalCanonicity _).completeness $ by
+instance Neighborhood.complete : Complete Modal.E5 FrameClass.E5 := (maximalRelativeMaximalCanonicity _).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 

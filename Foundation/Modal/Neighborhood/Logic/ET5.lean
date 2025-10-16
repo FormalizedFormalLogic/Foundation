@@ -34,20 +34,22 @@ section
 
 variable [Entailment (Formula ℕ) S] {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.ET5 𝓢]
 
-instance: (minimalCanonicity 𝓢).toModel.IsEuclidean := by
-  apply Canonicity.isEuclidean;
+instance: (minimalRelativeMaximalCanonicity 𝓢).toModel.IsEuclidean := by
+  apply relativeMinimalCanonicity.isEuclidean;
   intro A X X_np;
-  replace : {B | X ∉ (minimalCanonicity 𝓢).𝒩 B} = proofset 𝓢 ⊤ := by
-    suffices ∀ B, X ∉ (minimalCanonicity 𝓢).𝒩 B by simpa [Set.eq_univ_iff_forall];
-    rintro _ ⟨φ, _, hφ₂⟩;
-    apply X_np;
-    apply hφ₂;
+
+  replace : { B | A ∉ (minimalRelativeMaximalCanonicity 𝓢).𝒩 B } = proofset 𝓢 ⊤ := by
+    suffices ∀ B, A ∉ (minimalRelativeMaximalCanonicity 𝓢).𝒩 B by simpa [Set.eq_univ_iff_forall];
+    rintro _ (h | ⟨_, h⟩);
+    . apply X_np;
+      sorry;
+    . exact h;
   rw [this];
   apply minimalCanonicity 𝓢 |>.def_𝒩 A ⊤ |>.mp;
   apply MaximalConsistentSet.mem_of_prove;
   simp;
 
-instance : (minimalCanonicity 𝓢).toModel.IsET5 where
+instance : (minimalRelativeMaximalCanonicity 𝓢).toModel.IsET5 where
 
 end
 

@@ -18,7 +18,18 @@ abbrev Proofset (𝓢 : S) := Set (MaximalConsistentSet 𝓢)
 
 def proofset (𝓢 : S) (φ : Formula α) : Proofset 𝓢 := { Γ : MaximalConsistentSet 𝓢 | φ ∈ Γ }
 
-def Nonproofset (𝓢 : S) := { P : Proofset 𝓢 // ∀ φ, P ≠ proofset 𝓢 φ }
+def Proofset.IsNonproofset {𝓢 : S} (P : Proofset 𝓢) := ∀ φ, P ≠ proofset 𝓢 φ
+
+omit [DecidableEq α] [Entailment.Cl 𝓢] in
+lemma iff_not_isNonProofset_exists : ¬P.IsNonproofset ↔ ∃ φ, P = proofset 𝓢 φ := by
+  dsimp [Proofset.IsNonproofset];
+  push_neg;
+  tauto;
+
+omit [DecidableEq α] [Entailment.Cl 𝓢] in
+@[simp]
+lemma not_isNonproofset_proofset : ¬(proofset 𝓢 φ).IsNonproofset := by simp [Proofset.IsNonproofset];
+
 
 namespace proofset
 
@@ -143,38 +154,41 @@ def toModel (𝓒 : Canonicity 𝓢) : Model where
   𝒩 := 𝓒.𝒩
   Val := 𝓒.V
 
-@[simp]
-lemma box_proofset : 𝓒.toModel.box (proofset 𝓢 φ) = (proofset 𝓢 (□φ)) := by
-  ext w;
-  apply Iff.trans ?_ (𝓒.def_𝒩 w φ).symm;
-  simp [toModel];
+abbrev box := 𝓒.toModel.box
+abbrev dia := 𝓒.toModel.dia
 
 @[simp]
-lemma multibox_proofset : 𝓒.toModel.box^[n] (proofset 𝓢 φ) = (proofset 𝓢 (□^[n]φ)) := by
+lemma box_proofset : 𝓒.box (proofset 𝓢 φ) = (proofset 𝓢 (□φ)) := by
+  ext w;
+  apply Iff.trans ?_ (𝓒.def_𝒩 w φ).symm;
+  simp [toModel, Canonicity.box];
+
+@[simp]
+lemma multibox_proofset : 𝓒.box^[n] (proofset 𝓢 φ) = (proofset 𝓢 (□^[n]φ)) := by
   induction n generalizing φ with
   | zero => simp;
   | succ n ih => simp only [Function.iterate_succ, Function.comp_apply, box_proofset, ih];
 
 @[simp]
-lemma dia_proofset : 𝓒.toModel.dia (proofset 𝓢 φ) = (proofset 𝓢 (◇φ)) := by
-  suffices 𝓒.toModel.dia (proofset 𝓢 φ) = (proofset 𝓢 (∼(□(∼φ)))) by tauto;
+lemma dia_proofset : 𝓒.dia (proofset 𝓢 φ) = (proofset 𝓢 (◇φ)) := by
+  suffices 𝓒.dia (proofset 𝓢 φ) = (proofset 𝓢 (∼(□(∼φ)))) by tauto;
   simpa using 𝓒.box_proofset (φ := ∼φ);
 
 @[simp]
-lemma multidia_proofset : 𝓒.toModel.dia^[n] (proofset 𝓢 φ) = (proofset 𝓢 (◇^[n]φ)) := by
+lemma multidia_proofset : 𝓒.dia^[n] (proofset 𝓢 φ) = (proofset 𝓢 (◇^[n]φ)) := by
   induction n generalizing φ with
   | zero => simp;
   | succ n ih => simp only [Function.iterate_succ, Function.comp_apply, dia_proofset, ih];
 
 @[grind]
-lemma iff_box {Γ : 𝓒.toModel} : □φ ∈ Γ.1 ↔ Γ ∈ 𝓒.toModel.box (proofset 𝓢 φ) := by apply 𝓒.def_𝒩
+lemma iff_box {Γ : 𝓒.toModel} : □φ ∈ Γ.1 ↔ Γ ∈ 𝓒.box (proofset 𝓢 φ) := by apply 𝓒.def_𝒩
 
 @[grind]
-lemma iff_dia {Γ : 𝓒.toModel} : ◇φ ∈ Γ.1 ↔ Γ ∈ 𝓒.toModel.dia (proofset 𝓢 φ) := calc
+lemma iff_dia {Γ : 𝓒.toModel} : ◇φ ∈ Γ.1 ↔ Γ ∈ 𝓒.dia (proofset 𝓢 φ) := calc
   _ ↔ ∼□(∼φ) ∈ Γ.1 := by rfl;
   _ ↔ □(∼φ) ∉ Γ.1 := by apply MaximalConsistentSet.iff_mem_neg;
   _ ↔ (proofset 𝓢 (∼φ)) ∉ (𝓒.𝒩 Γ) := by simpa using iff_box (Γ := Γ) (φ := ∼φ) |>.not;
-  _ ↔ _ := by simp [toModel];
+  _ ↔ _ := by simp [toModel, Canonicity.dia];
 
 @[grind]
 lemma truthlemma : (proofset 𝓢 φ) = (𝓒.toModel φ) := by
@@ -183,7 +197,7 @@ lemma truthlemma : (proofset 𝓢 φ) = (𝓒.toModel φ) := by
   | hfalsum => simp;
   | himp φ ψ ihφ ihψ => simp_all [proofset.eq_imp];
   | hbox φ ihφ =>
-    suffices proofset 𝓢 (□φ) = 𝓒.toModel.box (𝓒.toModel.truthset φ) by simpa;
+    suffices proofset 𝓢 (□φ) = 𝓒.box (𝓒.toModel.truthset φ) by simpa;
     rw [←ihφ, box_proofset];
 
 lemma completeness {C : FrameClass} (hC : 𝓒.toModel.toFrame ∈ C) : LO.Complete 𝓢 C := by
