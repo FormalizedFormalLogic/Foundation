@@ -1,13 +1,15 @@
-/build
-/lake-packages/*
-*.olean
-/.lake
+.lake
 
+# Verso
+_out
+
+# VSCode
 .vscode/settings.json
+.vscode/mcp.json
 
-# Import-graph
-import_graph.*
-*.pdf
+# import graph
+import_graph.pdf
 
-# mdbook
-md/book
+# Claude
+.claude/settings.local.json
+

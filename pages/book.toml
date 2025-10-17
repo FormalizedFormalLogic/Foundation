@@ -1,0 +1,17 @@
+[book]
+title = "Formalized Formal Logic"
+authors = ["iehality", "SnO2WMaN"]
+language = "en"
+multilingual = false
+src = "src"
+
+[build]
+build-dir = "_output/book"
+create-missing = false
+
+[output.html]
+git-repository-url = "https://github.com/FormalizedFormalLogic/book"
+site-url = "/Foundation/book/"
+
+[preprocessor.katex]
+after = ["links"]

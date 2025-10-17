@@ -7,7 +7,7 @@ namespace FirstOrder
 
 namespace Structure
 
-structure Model (L : Language) (M : Type*) :=
+structure Model (L : Language) (M : Type*) where
   intro : M
 
 namespace Model
@@ -190,9 +190,6 @@ variable (L M)
 
 lemma uLift_elementaryEquiv [Nonempty M] : ULift.{v'} M ≡ₑ[L] M := by
   intro σ; simp [models_iff, Semiformula.evalm_uLift, Matrix.empty_eq, Empty.eq_elim]
-  constructor
-  · intro h f; exact h _
-  · intro h f; exact h (fun x ↦ (f x).down)
 
 end ULift
 

@@ -2,61 +2,61 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 namespace LO
 
-variable {F S : Type*} [LogicalConnective F] [System F S]
+variable {F S : Type*} [LogicalConnective F] [Entailment F S]
 
-namespace System
+namespace Entailment
 
 variable (𝓢 : S)
 
-def ProvablyEquivalent (φ ψ : F) : Prop := 𝓢 ⊢! φ ⭤ ψ
+def ProvablyEquivalent (φ ψ : F) : Prop := 𝓢 ⊢ φ ⭤ ψ
 
 local infix:45 " ≡ " => ProvablyEquivalent 𝓢
 
-protected lemma ProvablyEquivalent.refl [System.Minimal 𝓢] (φ : F) : φ ≡ φ := iff_id!
+protected lemma ProvablyEquivalent.refl [Entailment.Minimal 𝓢] (φ : F) : φ ≡ φ := E!_id
 
 variable {𝓢}
 
-protected lemma ProvablyEquivalent.symm [System.Minimal 𝓢] {φ ψ : F} : φ ≡ ψ → ψ ≡ φ := iff_comm'!
+protected lemma ProvablyEquivalent.symm [Entailment.Minimal 𝓢] {φ ψ : F} : φ ≡ ψ → ψ ≡ φ := E!_symm
 
-protected lemma ProvablyEquivalent.trans [System.Minimal 𝓢] {φ ψ χ : F} : φ ≡ ψ → ψ ≡ χ → φ ≡ χ := iff_trans''!
+protected lemma ProvablyEquivalent.trans [Entailment.Minimal 𝓢] {φ ψ χ : F} : φ ≡ ψ → ψ ≡ χ → φ ≡ χ := E!_trans
 
-lemma provable_iff_provablyEquivalent_verum [System.Minimal 𝓢] {φ : F} : 𝓢 ⊢! φ ↔ φ ≡ ⊤ :=
-  ⟨fun h ↦ iff_intro! imply_left_verum! (imply₁'! h), fun h ↦ (and_right! h) ⨀ verum!⟩
+lemma provable_iff_provablyEquivalent_verum [Entailment.Minimal 𝓢] {φ : F} : 𝓢 ⊢ φ ↔ φ ≡ ⊤ :=
+  ⟨fun h ↦ E!_intro CV! (C!_of_conseq! h), fun h ↦ (K!_right h) ⨀ verum!⟩
 
 variable (𝓢)
 
-def ProvablyEquivalent.setoid [System.Minimal 𝓢] : Setoid F where
+def ProvablyEquivalent.setoid [Entailment.Minimal 𝓢] : Setoid F where
   r := (· ≡ ·)
   iseqv := { refl := .refl _, symm := .symm, trans := .trans }
 
-abbrev LindenbaumAlgebra [System.Minimal 𝓢] := Quotient (ProvablyEquivalent.setoid 𝓢)
+abbrev LindenbaumAlgebra [Entailment.Minimal 𝓢] := Quotient (ProvablyEquivalent.setoid 𝓢)
 
 namespace LindenbaumAlgebra
 
-variable [System.Minimal 𝓢]
+variable [Entailment.Minimal 𝓢]
 
 lemma of_eq_of {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⟦ψ⟧ ↔ φ ≡ ψ := Quotient.eq (r := ProvablyEquivalent.setoid 𝓢)
 
 instance [DecidableEq F] : LE (LindenbaumAlgebra 𝓢) :=
-  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢! φ ➝ ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [eq_iff_iff, imp_replace_iff!' hp hq]⟩
+  ⟨Quotient.lift₂ (fun φ ψ ↦ 𝓢 ⊢ φ ➝ ψ) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by simp only [eq_iff_iff, C!_repalce hp hq]⟩
 
-lemma le_def [DecidableEq F] {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦ψ⟧ ↔ 𝓢 ⊢! φ ➝ ψ := iff_of_eq rfl
+lemma le_def [DecidableEq F] {φ ψ : F} : (⟦φ⟧ : LindenbaumAlgebra 𝓢) ≤ ⟦ψ⟧ ↔ 𝓢 ⊢ φ ➝ ψ := iff_of_eq rfl
 
 instance : Top (LindenbaumAlgebra 𝓢) := ⟨⟦⊤⟧⟩
 
 instance : Bot (LindenbaumAlgebra 𝓢) := ⟨⟦⊥⟧⟩
 
 instance [DecidableEq F] : Min (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ⋏ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
-  simpa only [Quotient.eq] using and_replace_iff! hp hq⟩
+  simpa only [Quotient.eq] using EKK!_of_E!_of_E! hp hq⟩
 
 instance [DecidableEq F] : Max (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ⋎ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
-  simpa only [Quotient.eq] using or_replace_iff! hp hq⟩
+  simpa only [Quotient.eq] using EAA!_of_E!_of_E! hp hq⟩
 
 instance [DecidableEq F] : HImp (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift₂ (fun φ ψ ↦ ⟦φ ➝ ψ⟧) fun φ₁ ψ₁ φ₂ ψ₂ hp hq ↦ by
-  simpa only [Quotient.eq] using imp_replace_iff! hp hq⟩
+  simpa only [Quotient.eq] using ECC!_of_E!_of_E! hp hq⟩
 
 instance [DecidableEq F] : HasCompl (LindenbaumAlgebra 𝓢) := ⟨Quotient.lift (fun φ ↦ ⟦∼φ⟧) fun φ₁ φ₂ hp ↦ by
-  simpa only [Quotient.eq] using neg_replace_iff'! hp⟩
+  simpa only [Quotient.eq] using ENN!_of_E! hp⟩
 
 lemma top_def : (⊤ : LindenbaumAlgebra 𝓢) = ⟦⊤⟧ := rfl
 
@@ -81,12 +81,12 @@ instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) wh
     induction' ψ using Quotient.ind with ψ
     induction' χ using Quotient.ind with χ
     simp only [le_def]
-    exact imp_trans''!
+    exact C!_trans
   le_antisymm φ ψ := by
     induction' φ using Quotient.ind with φ
     induction' ψ using Quotient.ind with ψ
     simp only [le_def, of_eq_of]
-    intro hp hq; exact iff_intro! hp hq
+    intro hp hq; exact E!_intro hp hq
   inf_le_left φ ψ := by
     induction' φ using Quotient.ind with φ
     induction' ψ using Quotient.ind with ψ
@@ -102,7 +102,7 @@ instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) wh
     induction' ψ using Quotient.ind with ψ
     induction' χ using Quotient.ind with χ
     simp only [inf_def, le_def]
-    exact imply_right_and!
+    exact right_K!_intro
   le_sup_left φ ψ := by
     induction' φ using Quotient.ind with φ
     induction' ψ using Quotient.ind with ψ
@@ -118,21 +118,21 @@ instance [DecidableEq F] : GeneralizedHeytingAlgebra (LindenbaumAlgebra 𝓢) wh
     induction' ψ using Quotient.ind with ψ
     induction' χ using Quotient.ind with χ
     simp only [sup_def, le_def]
-    exact or₃''!
+    exact left_A!_intro
   le_top φ := by
     induction' φ using Quotient.ind with φ
     simp only [top_def, le_def]
-    exact imply_left_verum!
+    exact CV!
   le_himp_iff φ ψ χ := by
     induction' φ using Quotient.ind with φ
     induction' ψ using Quotient.ind with ψ
     induction' χ using Quotient.ind with χ
     simp only [himp_def, le_def, inf_def]
-    exact Iff.symm and_imply_iff_imply_imply'!
+    exact Iff.symm CK!_iff_CC!
 
 variable {𝓢}
 
-lemma provable_iff_eq_top {φ : F} : 𝓢 ⊢! φ ↔ (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⊤ := by
+lemma provable_iff_eq_top {φ : F} : 𝓢 ⊢ φ ↔ (⟦φ⟧ : LindenbaumAlgebra 𝓢) = ⊤ := by
   simp [top_def, provable_iff_provablyEquivalent_verum]; rfl
 
 lemma inconsistent_iff_trivial : Inconsistent 𝓢 ↔ (∀ φ : LindenbaumAlgebra 𝓢, φ = ⊤) := by
@@ -158,7 +158,7 @@ section intuitionistic
 
 open LindenbaumAlgebra
 
-variable [System.Intuitionistic 𝓢]
+variable [Entailment.Int 𝓢]
 
 instance LindenbaumAlgebra.heyting [DecidableEq F] : HeytingAlgebra (LindenbaumAlgebra 𝓢) where
   bot_le φ := by
@@ -168,7 +168,7 @@ instance LindenbaumAlgebra.heyting [DecidableEq F] : HeytingAlgebra (LindenbaumA
   himp_bot φ := by
     induction' φ using Quotient.ind with φ
     simp only [bot_def, himp_def, compl_def, Quotient.eq]
-    exact iff_comm! ⨀ neg_equiv!
+    exact CEE! ⨀ neg_equiv!
 
 end intuitionistic
 
@@ -176,20 +176,20 @@ section classical
 
 open LindenbaumAlgebra
 
-variable [System.Classical 𝓢]
+variable [Entailment.Cl 𝓢]
 
 instance LindenbaumAlgebra.boolean [DecidableEq F] : BooleanAlgebra (LindenbaumAlgebra 𝓢) where
   inf_compl_le_bot φ := by
     induction' φ using Quotient.ind with φ
-    simp only [compl_def, inf_def, bot_def, le_def, intro_bot_of_and!]
+    simp only [compl_def, inf_def, bot_def, le_def, CKNO!]
   top_le_sup_compl φ := by
     induction' φ using Quotient.ind with φ
     simp only [top_def, compl_def, sup_def, le_def]
-    apply imply₁'! lem!
+    apply C!_of_conseq! lem!
   le_top φ := by
     induction' φ using Quotient.ind with φ
     simp only [top_def, le_def]
-    exact imply_left_verum!
+    exact CV!
   bot_le φ := by
     induction' φ using Quotient.ind with φ
     simp only [bot_def, le_def]
@@ -199,10 +199,10 @@ instance LindenbaumAlgebra.boolean [DecidableEq F] : BooleanAlgebra (LindenbaumA
     induction' ψ using Quotient.ind with ψ
     rw [sup_comm]
     simp only [himp_def, compl_def, sup_def, Quotient.eq]
-    exact imply_iff_not_or!
+    exact ECAN!
 
 end classical
 
-end System
+end Entailment
 
 end LO

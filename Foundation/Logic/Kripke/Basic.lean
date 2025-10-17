@@ -1,7 +1,5 @@
 import Foundation.Logic.Semantics
-import Foundation.Logic.System
-import Foundation.Vorspiel.BinaryRelations
-import Foundation.Vorspiel.RelItr
+import Foundation.Logic.Entailment
 
 /-
   DEPRECATED!!
@@ -100,17 +98,17 @@ abbrev UniversalFrameClass : FrameClass := { F | Universal F }
 /-- FrameClass for `𝐊.𝟑` -/
 abbrev ConnectedFrameClass : FrameClass := { F | Connected F }
 
-/-- FrameClass for `𝐈𝐧𝐭` and `𝐒𝟒` -/
+/-- FrameClass for `Propositional.Int` and `𝐒𝟒` -/
 abbrev ReflexiveTransitiveFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F }
 alias PreorderFrameClass := ReflexiveTransitiveFrameClass
 
-/-- FrameClass for `𝐊𝐂` and `𝐒𝟒.𝟐` -/
+/-- FrameClass for `Propositional.KC` and `𝐒𝟒.𝟐` -/
 abbrev ReflexiveTransitiveConfluentFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Confluent F }
 
-/-- FrameClass for `𝐋𝐂` and `𝐒𝟒.𝟑` -/
+/-- FrameClass for `Propositional.LC` and `𝐒𝟒.𝟑` -/
 abbrev ReflexiveTransitiveConnectedFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Connected F }
 
-/-- FrameClass for `𝐂𝐥` and `𝐊𝐓𝟒𝐁` (`𝐒𝟓`) -/
+/-- FrameClass for `Propositional.Cl` and `𝐊𝐓𝟒𝐁` (`𝐒𝟓`) -/
 abbrev ReflexiveTransitiveSymmetricFrameClass : FrameClass := { F | Reflexive F ∧ Transitive F ∧ Symmetric F }
 alias EquivalenceFrameClass := ReflexiveTransitiveSymmetricFrameClass
 

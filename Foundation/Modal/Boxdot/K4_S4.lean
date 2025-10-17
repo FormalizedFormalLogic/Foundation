@@ -1,37 +1,33 @@
 import Foundation.Modal.Boxdot.Basic
-import Foundation.Modal.Hilbert.WeakerThan.K4_S4
-import Foundation.Modal.System.S4
+import Foundation.Modal.Entailment.S4
+import Foundation.Modal.Kripke.Logic.K4
+import Foundation.Modal.Kripke.Logic.S4
 
 namespace LO.Modal
 
-open System
+open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Formula
-open Hilbert.Deduction
 
-variable [DecidableEq α]
-variable {φ : Formula α}
+lemma provable_boxdotTranslated_K4_of_provable_S4 : Modal.S4 ⊢ φ → Modal.K4 ⊢ φᵇ :=
+  Hilbert.Normal.of_provable_boxdotTranslated_axiomInstances $ by
+    intro φ hp;
+    rcases (by simpa [Axiom.instances] using hp) with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
+    . exact boxdot_axiomK!;
+    . exact boxdot_axiomT!;
+    . exact boxdot_axiomFour!
 
-lemma boxdotTranslatedK4_of_S4 : (Hilbert.S4 α) ⊢! φ → (Hilbert.K4 α) ⊢! φᵇ := boxdotTranslated $ by
-  intro φ hp;
-  simp at hp;
-  rcases hp with (⟨_, _, rfl⟩ | ⟨_, rfl⟩ | ⟨_, rfl⟩);
-  . dsimp [BoxdotTranslation]; exact boxdot_axiomK!;
-  . dsimp [BoxdotTranslation]; exact boxdot_axiomT!;
-  . dsimp [BoxdotTranslation]; exact boxdot_axiomFour!
+lemma provable_S4_iff_boxdotTranslated : Modal.S4 ⊢ φ ⭤ φᵇ := by
+  induction φ with
+  | hbox φ ihp => exact E!_trans (box_iff! ihp) iff_box_boxdot!;
+  | himp φ ψ ihp ihq => exact ECC!_of_E!_of_E! ihp ihq;
+  | _ => exact E!_id;
 
-lemma iff_boxdotTranslation_S4 : (Hilbert.S4 α) ⊢! φ ⭤ φᵇ := by
-  induction φ using Formula.rec' with
-  | hbox φ ihp => exact iff_trans''! (box_iff! ihp) iff_box_boxdot!;
-  | himp φ ψ ihp ihq => exact imp_replace_iff! ihp ihq;
-  | _ => exact iff_id!;
+lemma provable_S4_of_provable_boxdotTranslated_K4 (h : Modal.K4 ⊢ φᵇ) : Modal.S4 ⊢ φ := by
+  exact (K!_right provable_S4_iff_boxdotTranslated) ⨀ (WeakerThan.pbl h);
 
-lemma S4_of_boxdotTranslatedK4 (h : (Hilbert.K4 α) ⊢! φᵇ) : (Hilbert.S4 α) ⊢! φ := by
-  exact (and₂'! iff_boxdotTranslation_S4) ⨀ (weakerThan_iff.mp $ Hilbert.K4_weakerThan_S4) h
-
-theorem iff_S4_boxdotTranslatedK4 : (Hilbert.K4 α) ⊢! φᵇ ↔ (Hilbert.S4 α) ⊢! φ:= by
-  constructor;
-  . apply S4_of_boxdotTranslatedK4;
-  . apply boxdotTranslatedK4_of_S4;
-instance : BoxdotProperty (Hilbert.K4 α) (Hilbert.S4 α) := ⟨iff_S4_boxdotTranslatedK4⟩
+theorem iff_boxdotTranslatedK4_S4 : Modal.K4 ⊢ φᵇ ↔ Modal.S4 ⊢ φ := ⟨
+  provable_S4_of_provable_boxdotTranslated_K4,
+  provable_boxdotTranslated_K4_of_provable_S4
+⟩
 
 end LO.Modal

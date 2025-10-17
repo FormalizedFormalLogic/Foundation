@@ -1,7 +1,7 @@
 import Foundation.IntFO.Translation
 
 /-!
-#Algebraic Proofs of Cut Elimination
+# Algebraic proofs of cut elimination
 
 Main reference: Jeremy Avigad, Algebraic proofs of cut elimination, The Journal of Logic and Algebraic Programming, Volume 49, Issues 1–2, 2001, Pages 15-30
  -/
@@ -48,8 +48,16 @@ variable {Γ Δ : Sequent L}
 
 @[simp] lemma isCutFree_rewrite_iff_isCutFree {f : ℕ → SyntacticTerm L} {d : ⊢ᵀ Γ} :
     IsCutFree (rewrite d f) ↔ IsCutFree d := by
-  induction d generalizing f <;> simp [rewrite, *]
-  case root => contradiction
+  induction d generalizing f
+  case axm => contradiction
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
+  case _ => simp [rewrite, *]
 
 @[simp] lemma isCutFree_map_iff_isCutFree {f : ℕ → ℕ} {d : ⊢ᵀ Γ} :
     IsCutFree (Derivation.map d f) ↔ IsCutFree d := isCutFree_rewrite_iff_isCutFree
@@ -130,7 +138,7 @@ scoped instance : Min ℙ := ⟨fun p q ↦ p ++ q⟩
 
 lemma inf_def (p q : ℙ) : p ⊓ q = p ++ q := rfl
 
-@[simp] lemma neg_inf_p_eq (p q : ℙ) : ∼(p ⊓ q) = ∼p ⊓ ∼q := List.map_append _ _ _
+@[simp] lemma neg_inf_p_eq (p q : ℙ) : ∼(p ⊓ q) = ∼p ⊓ ∼q := List.map_append
 
 namespace StrongerThan
 
@@ -142,9 +150,9 @@ def ofSubset {q p : ℙ} (h : q ⊇ p) : q ≼ p := ⟨.ofSubset <| List.map_sub
 
 def and {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ φ :: ψ :: p := ⟨.or .id⟩
 
-def andLeft {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ φ :: p := trans (and φ ψ) (ofSubset <| by simp)
+def K_left {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ φ :: p := trans (and φ ψ) (ofSubset <| by simp)
 
-def andRight {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ ψ :: p := trans (and φ ψ) (ofSubset <| by simp)
+def K_right {p : ℙ} (φ ψ : SyntacticFormula L) : φ ⋏ ψ :: p ≼ ψ :: p := trans (and φ ψ) (ofSubset <| by simp)
 
 def all {p : ℙ} (φ : SyntacticSemiformula L 1) (t) : (∀' φ) :: p ≼ φ/[t] :: p := ⟨.ex t (by simpa [← Semiformula.neg_eq] using .id)⟩
 
@@ -195,6 +203,8 @@ def allEquiv {φ} : p ⊩ ∀' φ ≃ ((t : SyntacticTerm L) → Forces p (φ/[t
 
 def exEquiv {φ} : p ⊩ ∃' φ ≃ ((t : SyntacticTerm L) × Forces p (φ/[t])) := .refl _
 
+def cast {p : ℙ} (f : p ⊩ φ) (s : φ = ψ) : p ⊩ ψ := s ▸ f
+
 def monotone {q p : ℙ} (s : q ≼ p) : {φ : SyntacticFormulaᵢ L} → p ⊩ φ → q ⊩ φ
   | ⊤,        _ => PUnit.unit
   | ⊥,        b =>
@@ -238,13 +248,13 @@ def modusPonens {φ ψ : SyntacticFormulaᵢ L} (f : p ⊩ φ ➝ ψ) (g : p ⊩
   f.implyEquiv p (StrongerThan.refl p) g
 
 noncomputable
-def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝐌𝐢𝐧¹ ⊢ φ → ⊩ φ
+def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝗠𝗶𝗻¹ ⊢! φ → ⊩ φ
   | .mdp (φ := ψ) b d => fun p ↦
     let b : p ⊩ ψ ➝ φ := ofMinimalProof b p
     let d : p ⊩ ψ := ofMinimalProof d p
     b.implyEquiv p (StrongerThan.refl p) d
   | .gen (φ := φ) b => fun p ↦ allEquiv.symm fun t ↦
-    let d : 𝐌𝐢𝐧¹ ⊢ φ/[t] :=
+    let d : 𝗠𝗶𝗻¹ ⊢! φ/[t] :=
       HilbertProofᵢ.cast (HilbertProofᵢ.rewrite (t :>ₙ fun x ↦ &x) b) (by simp [rewrite_free_eq_subst])
     ofMinimalProof d p
   | .verum => fun p ↦ PUnit.unit
@@ -300,23 +310,11 @@ def ofMinimalProof {φ : SyntacticFormulaᵢ L} : 𝐌𝐢𝐧¹ ⊢ φ → ⊩ 
 def relRefl {k} (R : L.Rel k) (v : Fin k → SyntacticTerm L) : [.rel R v] ⊩ rel R v :=
   relEquiv.symm ⟨Derivation.axL _ _ _, by simp⟩
 
-protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
-  | ⊤    => implyEquiv.symm fun q sqp dφ ↦ dφ
-  | ⊥    => falsumEquiv.symm ⟨Derivation.verum _, by simp⟩
-  | .rel R v => implyOf fun q dq ↦
-    let b : [.rel R v] ⊓ q ⊩ rel R v := (relRefl R v).monotone (StrongerThan.minLeLeft _ _)
-    dq.implyEquiv ([.rel R v] ⊓ q) (StrongerThan.minLeRight _ _) b
-  | .nrel R v => implyOf fun q dq ↦
-    let ⟨d, hd⟩ := dq.relEquiv
-    falsumEquiv.symm ⟨Derivation.cast d (by simp [inf_def]), by simp [hd]⟩
-  | φ ⋏ ψ =>
-    let ihφ : [φ] ⊩ φᴺ := Forces.refl φ
-    let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
-    andEquiv.symm ⟨ihφ.monotone (.andLeft φ ψ), ihψ.monotone (.andRight φ ψ)⟩
-  | φ ⋎ ψ => implyOf fun q dq ↦
+private def refl.or (ihφ : [φ] ⊩ φᴺ) (ihψ : [ψ] ⊩ ψᴺ) : [φ ⋎ ψ] ⊩ (φ ⋎ ψ)ᴺ :=
+  implyOf fun q dq ↦
     let ⟨dφ, dψ⟩ : q ⊩ ∼φᴺ × q ⊩ ∼ψᴺ := dq.andEquiv
-    let ihφ : [φ] ⊩ φᴺ := Forces.refl φ
-    let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
+    let ihφ : [φ] ⊩ φᴺ := ihφ
+    let ihψ : [ψ] ⊩ ψᴺ := ihψ
     let bφ : [φ] ⊓ q ⊩ ⊥ := dφ.implyEquiv ([φ] ⊓ q) (.minLeRight _ _) (ihφ.monotone (.minLeLeft _ _))
     let bψ : [ψ] ⊓ q ⊩ ⊥ := dψ.implyEquiv ([ψ] ⊓ q) (.minLeRight _ _) (ihψ.monotone (.minLeLeft _ _))
     let ⟨bbφ, hbbφ⟩ := bφ.falsumEquiv
@@ -324,12 +322,11 @@ protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
     let band : ⊢ᵀ ∼φ ⋏ ∼ψ :: ∼q := Derivation.and
       (Derivation.cast bbφ (by simp [inf_def])) (Derivation.cast bbψ (by simp [inf_def]))
     falsumEquiv.symm ⟨Derivation.cast band (by simp [inf_def]), by simp [band, hbbφ, hbbψ]⟩
-  | ∀' φ => allEquiv.symm fun t ↦
-    let b : [φ/[t]] ⊩ φᴺ/[t] := by simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
-    b.monotone (StrongerThan.all φ t)
-  | ∃' φ => implyOf fun q f ↦
+
+private def refl.ex (d : ∀ x, [φ/[&x]] ⊩ (φ/[&x])ᴺ) : [∃' φ] ⊩ (∃' φ)ᴺ :=
+  implyOf fun q f ↦
     let x := newVar ((∀' ∼φ) :: ∼q)
-    let ih : [φ/[&x]] ⊩ φᴺ/[&x] := by simpa [Semiformula.substitute_doubleNegation] using Forces.refl (φ/[&x])
+    let ih : [φ/[&x]] ⊩ φᴺ/[&x] := cast (d x) (by simp [Semiformula.subst_doubleNegation])
     let b : [φ/[&x]] ⊓ q ⊩ ⊥ :=
       (f.allEquiv &x).implyEquiv ([φ/[&x]] ⊓ q) (StrongerThan.minLeRight _ _) (ih.monotone (StrongerThan.minLeLeft _ _))
     let ⟨b, hb⟩ := b.falsumEquiv
@@ -340,6 +337,25 @@ protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
         (fun ψ hψ ↦ not_fvar?_newVar (List.mem_cons_of_mem (∀' ∼φ) hψ))
         (Derivation.cast b (by simp [inf_def]))
     falsumEquiv.symm ⟨ba, by simp [ba, hb]⟩
+
+protected def refl : (φ : SyntacticFormula L) → [φ] ⊩ φᴺ
+  |         ⊤ => implyEquiv.symm fun q sqp dφ ↦ dφ
+  |         ⊥ => falsumEquiv.symm ⟨Derivation.verum _, by simp⟩
+  |  .rel R v => implyOf fun q dq ↦
+    let b : [.rel R v] ⊓ q ⊩ rel R v := (relRefl R v).monotone (StrongerThan.minLeLeft _ _)
+    dq.implyEquiv ([.rel R v] ⊓ q) (StrongerThan.minLeRight _ _) b
+  | .nrel R v => implyOf fun q dq ↦
+    let ⟨d, hd⟩ := dq.relEquiv
+    falsumEquiv.symm ⟨Derivation.cast d (by simp [inf_def]), by simp [hd]⟩
+  |     φ ⋏ ψ =>
+    let ihφ : [φ] ⊩ φᴺ := Forces.refl φ
+    let ihψ : [ψ] ⊩ ψᴺ := Forces.refl ψ
+    andEquiv.symm ⟨ihφ.monotone (.K_left φ ψ), ihψ.monotone (.K_right φ ψ)⟩
+  |     φ ⋎ ψ => refl.or (Forces.refl φ) (Forces.refl ψ)
+  |      ∀' φ => allEquiv.symm fun t ↦
+    let b : [φ/[t]] ⊩ φᴺ/[t] := by simpa [Semiformula.rew_doubleNegation] using Forces.refl (φ/[t])
+    b.monotone (StrongerThan.all φ t)
+  |      ∃' φ => refl.ex fun x ↦ Forces.refl (φ/[&x])
   termination_by φ => φ.complexity
 
 def conj : {Γ : Sequentᵢ L} → (b : (φ : SyntacticFormulaᵢ L) → φ ∈ Γ → p ⊩ φ) → p ⊩ ⋀Γ
@@ -356,7 +372,7 @@ end Forces
 
 noncomputable
 def main [L.DecidableEq] {Γ : Sequent L} : ⊢ᵀ Γ → {d : ⊢ᵀ Γ // Derivation.IsCutFree d} := fun d ↦
-  let d : 𝐌𝐢𝐧¹ ⊢ ⋀(∼Γ)ᴺ ➝ ⊥ := System.FiniteContext.toDef (Derivation.goedelGentzen d)
+  let d : 𝗠𝗶𝗻¹ ⊢! ⋀(∼Γ)ᴺ ➝ ⊥ := Entailment.FiniteContext.toDef (Derivation.gödelGentzen d)
   let ff : ∼Γ ⊩ ⋀(∼Γ)ᴺ ➝ ⊥ := Forces.ofMinimalProof d (∼Γ)
   let fc : ∼Γ ⊩ ⋀(∼Γ)ᴺ := Forces.conj' fun φ hφ ↦
     (Forces.refl φ).monotone (StrongerThan.ofSubset <| List.cons_subset.mpr ⟨hφ, by simp⟩)

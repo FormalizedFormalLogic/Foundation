@@ -2,19 +2,115 @@ name: CI
 
 on:
   push:
-    branches:
-      - "master"
-  pull_request:
-  workflow_dispatch:
+  merge_group:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
     name: Build project
     runs-on: ubuntu-latest
     steps:
+      # We don't use https://github.com/leanprover/lean-action.
+      # Because caching strategy is not suitable for our project.
+
       - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
+      - name: Setup elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Setup graphviz
+        uses: ts-graphviz/setup-graphviz@v2
+      - name: Setup typst
+        uses: typst-community/setup-typst@v4
+      - name: Print tools version
+        run: |
+          lake --version
+          dot -V
+          typst --version
+
+      # Restore project cache
+      - name: Restore cache
+        id: cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: .lake
+          key: lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            lake-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean-toolchain') }}-${{ hashFiles('lake-manifest.json') }}
+
+      # Build project
+      - name: Get Mathlib cache
+        run: lake exe cache get
+      - name: Build project
+        run: lake build --keep-toolchain
+
+      # Build import-graph
+      - name: Generate import graph
+        run: |
+          lake exe graph ./pages/_output/import_graph.png
+          lake exe graph ./pages/_output/import_graph.pdf
+          lake exe graph ./pages/_output/import_graph.html
+
+      - name: Generate Propositional Zoo
+        run: |
+          lake exe generate_propositional_zoo
+          typst compile ./Zoo/propositional.typ ./pages/_output/propositional_zoo.png
+      - name: Generate Modal Zoo
+        run: |
+          lake exe generate_modal_zoo
+          typst compile ./Zoo/modal.typ ./pages/_output/modal_zoo.png
+      - name: Generate Arith Zoo
+        run: |
+          lake exe generate_arith_zoo
+          typst compile ./Zoo/arith.typ ./pages/_output/arith_zoo.png
+
+      # Build Doc
+      - name: Build doc
+        run: lake build Foundation:docs
+      - name: Copy doc to pages
+        run: cp -r .lake/build/doc ./pages/_output/doc
+
+      # Build Book
+      - name: Download JuliaMono
+        run: |
+          wget https://github.com/cormullion/juliamono/releases/download/v0.061/JuliaMono-webfonts.tar.gz
+          mkdir juliamono
+          tar -xvf JuliaMono-webfonts.tar.gz -C juliamono --strip-components 1
+          rm JuliaMono-webfonts.tar.gz
+        working-directory: ./Book/assets
+      - name: Build book
+        run: lake exe book
+      - name: Copy book to pages
+        run: cp -r  _out/html-multi ./pages/_output/book
+
+      # Save project cache
+      - name: Save project cache
+        id: cache-save
+        uses: actions/cache/save@v4
+        with:
+          path: .lake
+          key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+
+      # Upload pages artifact
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages/_output
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

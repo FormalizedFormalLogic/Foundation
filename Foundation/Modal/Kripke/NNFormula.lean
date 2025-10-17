@@ -3,7 +3,7 @@ import Foundation.Modal.Kripke.Basic
 
 namespace LO.Modal
 
-open System
+open Entailment
 
 variable {φ ψ : NNFormula ℕ}
 
@@ -16,7 +16,7 @@ def Satisfies (M : Kripke.Model) (x : M.World) : NNFormula ℕ → Prop
   | ⊥       => False
   | φ ⋎ ψ   => Satisfies M x φ ∨ Satisfies M x ψ
   | φ ⋏ ψ   => Satisfies M x φ ∧ Satisfies M x ψ
-  | □φ      => ∀ y, x ≺ y → Satisfies M y φ
+  | □φ      => ∀ y, x ≺ y → (Satisfies M y φ)
   | ◇φ      => ∃ y, x ≺ y ∧ (Satisfies M y φ)
 
 namespace Satisfies
@@ -92,7 +92,7 @@ protected lemma neg_def : x ⊧ ∼φ ↔ ¬x ⊧ φ := by
   | _ => simp [Satisfies.iff_models, Satisfies];
 
 protected lemma imp_def : x ⊧ φ ➝ ψ ↔ x ⊧ φ → x ⊧ ψ := by
-  simp [←NNFormula.imp_eq, NNFormula.imp, Satisfies.or_def, Satisfies.neg_def];
+  simp [Satisfies.or_def, Satisfies.neg_def];
   tauto;
 
 protected instance : Semantics.Tarski (M.World) where
@@ -102,6 +102,8 @@ protected instance : Semantics.Tarski (M.World) where
   realize_and := Satisfies.and_def
   realize_imp := Satisfies.imp_def
   realize_not := Satisfies.neg_def
+
+
 
 end Satisfies
 
@@ -207,11 +209,6 @@ lemma ValidOnFrame.toFormula : NNFormula.Kripke.ValidOnFrame F φ ↔ Formula.Kr
   λ h V => ValidOnModel.toFormula.mpr (h V)
 ⟩
 
-lemma ValidOnFrameClass.toFormula : NNFormula.Kripke.ValidOnFrameClass C φ ↔ Formula.Kripke.ValidOnFrameClass C φ.toFormula := ⟨
-  λ h _ hF => ValidOnFrame.toFormula.mp (h hF),
-  λ h _ hF => ValidOnFrame.toFormula.mpr (h hF)
-⟩
-
 end NNFormula.Kripke
 
 
@@ -220,7 +217,7 @@ namespace Formula.Kripke
 variable {φ : Formula ℕ}
 
 lemma Satisfies.toNNFormula : Formula.Kripke.Satisfies M x φ ↔ NNFormula.Kripke.Satisfies M x φ.toNNFormula := by
-  induction φ using Formula.rec' generalizing x with
+  induction φ generalizing x with
   | hbox φ ihφ =>
     constructor;
     . intro h y Rxy;
@@ -253,11 +250,6 @@ lemma ValidOnModel.toNNFormula : Formula.Kripke.ValidOnModel M φ ↔ NNFormula.
 lemma ValidOnFrame.toNNFormula : Formula.Kripke.ValidOnFrame F φ ↔ NNFormula.Kripke.ValidOnFrame F φ.toNNFormula := ⟨
   fun h V => ValidOnModel.toNNFormula.mp (h V),
   fun h V => ValidOnModel.toNNFormula.mpr (h V)
-⟩
-
-lemma ValidOnFrameClass.toNNFormula : Formula.Kripke.ValidOnFrameClass C φ ↔ NNFormula.Kripke.ValidOnFrameClass C φ.toNNFormula := ⟨
-  fun h _ hF => ValidOnFrame.toNNFormula.mp (h hF),
-  fun h _ hF => ValidOnFrame.toNNFormula.mpr (h hF)
 ⟩
 
 end Formula.Kripke

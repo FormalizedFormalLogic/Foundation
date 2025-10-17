@@ -1,159 +1,117 @@
 import Foundation.Modal.LogicSymbol
-import Foundation.Vorspiel.Geach
 
-namespace LO.Axioms
+namespace LO.Modal.Axioms
 
 variable {F : Type*} [BasicModalLogicalConnective F]
 variable (φ ψ χ : F)
 
-
-section Basic
-
 /-- `◇` is duality of `□`. -/
-protected abbrev DiaDuality [Dia F] := ◇φ ⭤ ∼(□(∼φ))
-abbrev DiaDuality.set [Dia F] : Set F := { Axioms.DiaDuality φ | (φ) }
+protected abbrev DiaDuality := ◇φ ⭤ ∼(□(∼φ))
 
 protected abbrev K := □(φ ➝ ψ) ➝ □φ ➝ □ψ
-abbrev K.set : Set F := { Axioms.K φ ψ | (φ) (ψ) }
-notation:max "𝗞" => K.set
 
+protected abbrev M := □(φ ⋏ ψ) ➝ (□φ ⋏ □ψ)
+
+protected abbrev C := (□φ ⋏ □ψ) ➝ □(φ ⋏ ψ)
+
+protected abbrev N := □(⊤ : F)
+
+/-- Axiom for reflexive -/
 protected abbrev T := □φ ➝ φ
-abbrev T.set : Set F := { Axioms.T φ | (φ) }
-notation:max "𝗧" => T.set
 
-protected abbrev B [Dia F] := φ ➝ □◇φ
-abbrev B.set [Dia F] : Set F := { Axioms.B φ | (φ) }
-notation:max "𝗕" => B.set
+/-- Alternative axiom `T` -/
+protected abbrev DiaTc := φ ➝ ◇φ
 
-/-- `□`-only version of axiom `𝗕`. -/
-protected abbrev B₂ := □φ ➝ □(∼□(∼φ))
-abbrev B₂.set : Set F := { Axioms.B₂ φ | (φ) }
-notation:max "𝗕(□)" => B₂.set
+/-- Axiom for symmetric -/
+protected abbrev B := φ ➝ □◇φ
 
-protected abbrev D [Dia F] := □φ ➝ ◇φ
-abbrev D.set [Dia F] : Set F := { Axioms.D φ | (φ) }
-notation:max "𝗗" => D.set
+/-- Axiom for serial -/
+protected abbrev D := □φ ➝ ◇φ
 
-
+/-- Alternative axiom `D` -/
 protected abbrev P : F := ∼(□⊥)
-abbrev P.set : Set F := { Axioms.P | }
-notation:max "𝗣" => P.set
-@[simp] lemma P.set.def : 𝗣 = {(∼(□⊥) : F)} := by ext; simp;
 
-
+/-- Axiom for transivity -/
 protected abbrev Four := □φ ➝ □□φ
-abbrev Four.set : Set F := { Axioms.Four φ | (φ) }
-notation:max "𝟰" => Four.set
 
-protected abbrev Five [Dia F] := ◇φ ➝ □◇φ
-abbrev Five.set [Dia F] : Set F := { Axioms.Five φ | (φ) }
-notation:max "𝟱" => Five.set
+protected abbrev FourN (n : ℕ) (φ : F) := □^[n]φ ➝ □^[(n + 1)]φ
 
-/-- `□`-only version of axiom `𝟱`. -/
-protected abbrev Five₂ := ∼□φ ➝ □(∼□(∼φ))
-abbrev Five₂.set : Set F := { Axioms.Five₂ φ | (φ) }
-notation:max "𝟱(□)" => Five₂.set
+/-- Axiom for euclidean -/
+protected abbrev Five := ◇φ ➝ □◇φ
 
-protected abbrev Dot2 [Dia F] := ◇□φ ➝ □◇φ
-abbrev Dot2.set [Dia F] : Set F := { Axioms.Dot2 φ | (φ) }
-notation:max ".𝟮" => Dot2.set
+/-- Axiom for confluency -/
+protected abbrev Point2 := ◇□φ ➝ □◇φ
 
+/-- Axiom for weak confluency -/
+protected abbrev WeakPoint2 := ◇(□φ ⋏ ψ) ➝ □(◇φ ⋎ ψ)
+
+/-- Axiom for density -/
 protected abbrev C4 := □□φ ➝ □φ
-abbrev C4.set : Set F := { Axioms.C4 φ | (φ) }
-notation:max "𝗖𝟰" => C4.set
 
-protected abbrev CD [Dia F] := ◇φ ➝ □φ
-abbrev CD.set [Dia F] : Set F := { Axioms.CD φ | (φ) }
-notation:max "𝗖𝗗" => CD.set
+/-- Axiom for functionality -/
+protected abbrev CD := ◇φ ➝ □φ
 
+/-- Axiom for coreflexivity -/
 protected abbrev Tc := φ ➝ □φ
-abbrev Tc.set : Set F := { Axioms.Tc φ | (φ) }
-notation:max "𝗧𝗰" => Tc.set
 
+/-- Alternative axiom `Tc` -/
+protected abbrev DiaT := ◇φ ➝ φ
+
+/-- Axiom for isolated -/
 protected abbrev Ver := □φ
-abbrev Ver.set : Set F := { Axioms.Ver φ | (φ) }
-notation:max "𝗩𝗲𝗿" => Ver.set
 
-protected abbrev Dot3 := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ)
-abbrev Dot3.set : Set F := { Axioms.Dot3 φ ψ | (φ) (ψ) }
-notation:max ".𝟯" => Dot3.set
+/-- Axiom for connectivity -/
+protected abbrev Point3 := □(□φ ➝ ψ) ⋎ □(□ψ ➝ φ)
 
+/-- Axiom for weak connectivity -/
+protected abbrev WeakPoint3 := □(⊡φ ➝ ψ) ⋎ □(⊡ψ ➝ φ)
+
+/--
+  - `R1`: Hudges & Cresswell
+-/
+protected abbrev Point4 := ◇□φ ➝ φ ➝ □φ
+
+/--
+  Axiom for
+  - weakly converse wellfounded partial order (for non-resritcted Kripke frame)
+  - partial order (for finite Kripke frame)
+-/
 protected abbrev Grz := □(□(φ ➝ □φ) ➝ φ) ➝ φ
-abbrev Grz.set : Set F := { Axioms.Grz φ | (φ) }
-notation:max "𝗚𝗿𝘇" => Grz.set
 
-protected abbrev M [Dia F] := (□◇φ ➝ ◇□φ)
-abbrev M.set [Dia F] : Set F := { Axioms.M φ | (φ) }
-notation:max "𝗠" => M.set
+protected abbrev Dum := □(□(φ ➝ □φ) ➝ φ) ➝ (◇□φ ➝ φ)
 
+/--
+  Axiom for McKinsey condition
+-/
+protected abbrev McK := □◇φ ➝ ◇□φ
+
+/--
+  Axiom for
+  - transitive converse wellfounded order (for non-resritcted Kripke frame)
+  - strict partial order (for finite Kripke frame)
+-/
 protected abbrev L := □(□φ ➝ φ) ➝ □φ
-abbrev L.set : Set F := { Axioms.L φ | (φ) }
-notation:max "𝗟" => L.set
 
-protected abbrev H := □(□φ ⭤ φ) ➝ □φ
-abbrev H.set : Set F := { Axioms.H φ | (φ) }
-notation:max "𝗛" => H.set
+protected abbrev Z := □(□φ ➝ φ) ➝ (◇□φ ➝ □φ)
 
-end Basic
+protected abbrev Hen := □(□φ ⭤ φ) ➝ □φ
 
+protected abbrev Mk := □φ ⋏ ψ ➝ ◇(□□φ ⋏ ◇ψ)
 
-section Geach
+/--
+  For Sobocinski's `K1.2`.
+-/
+protected abbrev H := φ ➝ □(◇φ ➝ φ)
 
-protected abbrev Geach (t : GeachConfluent.Taple) (φ : F) := ◇^[t.i](□^[t.m]φ) ➝ □^[t.j](◇^[t.n]φ)
-abbrev Geach.set (t : GeachConfluent.Taple) : Set F := { Axioms.Geach t φ | (φ) }
-notation:max "𝗴𝗲(" t ")" => Geach.set t
+protected structure Geach.Taple where
+  i : ℕ
+  j : ℕ
+  m : ℕ
+  n : ℕ
 
+/--
+  Axiom for Geach confluency.
+-/
+protected abbrev Geach (g : Geach.Taple) (φ : F) := ◇^[g.i](□^[g.m]φ) ➝ □^[g.j](◇^[g.n]φ)
 
-section
-
-@[simp] lemma T.is_geach : (𝗧 : Set F) = 𝗴𝗲(⟨0, 0, 1, 0⟩) := rfl
-
-@[simp] lemma B.is_geach : (𝗕 : Set F) = 𝗴𝗲(⟨0, 1, 0, 1⟩) := rfl
-
-@[simp] lemma D.is_geach : (𝗗 : Set F) = 𝗴𝗲(⟨0, 0, 1, 1⟩) := rfl
-
-@[simp] lemma Four.is_geach : (𝟰 : Set F) = 𝗴𝗲(⟨0, 2, 1, 0⟩) := rfl
-
-@[simp] lemma Five.is_geach : (𝟱 : Set F) = 𝗴𝗲(⟨1, 1, 0, 1⟩) := rfl
-
-@[simp] lemma Dot2.is_geach : (.𝟮 : Set F) = 𝗴𝗲(⟨1, 1, 1, 1⟩) := rfl
-
-@[simp] lemma C4.is_geach : (𝗖𝟰 : Set F) = 𝗴𝗲(⟨0, 1, 2, 0⟩) := rfl
-
-@[simp] lemma CD.is_geach : (𝗖𝗗 : Set F) = 𝗴𝗲(⟨1, 1, 0, 0⟩) := rfl
-
-@[simp] lemma Tc.is_geach : (𝗧𝗰 : Set F) = 𝗴𝗲(⟨0, 1, 0, 0⟩) := rfl
-
-end
-
-
-def MultiGeach.set : List (GeachConfluent.Taple) → Set F
-  | [] => ∅
-  | t :: ts => 𝗴𝗲(t) ∪ (MultiGeach.set ts)
-notation:max "𝗚𝗲(" ts ")" => MultiGeach.set ts
-
-namespace MultiGeach
-
-@[simp] lemma def_nil : 𝗚𝗲([]) = (∅ : Set F) := by simp [MultiGeach.set]
-
-lemma def_one {t : GeachConfluent.Taple} : (𝗚𝗲([t]) : Set F) = 𝗴𝗲(t) := by simp [MultiGeach.set]
-
-lemma def_two {t₁ t₂ : GeachConfluent.Taple} : (𝗚𝗲([t₁, t₂]) : Set F) = 𝗴𝗲(t₁) ∪ 𝗴𝗲(t₂) := by simp [MultiGeach.set]
-
-lemma def_three {t₁ t₂ t₃ : GeachConfluent.Taple} : (𝗚𝗲([t₁, t₂, t₃]) : Set F) = 𝗴𝗲(t₁) ∪ 𝗴𝗲(t₂) ∪ 𝗴𝗲(t₃) := by simp [MultiGeach.set, Set.union_assoc];
-
-@[simp] lemma iff_cons : 𝗚𝗲(x :: l) = (𝗴𝗲(x) : Set F) ∪ 𝗚𝗲(l) := by simp only [MultiGeach.set];
-
-lemma mem (h : x ∈ l) : (𝗴𝗲(x) : Set F) ⊆ 𝗚𝗲(l) := by
-  induction l with
-  | nil => contradiction;
-  | cons a as ih =>
-    cases h;
-    . tauto;
-    . apply Set.subset_union_of_subset_right $ ih (by assumption);
-
-end MultiGeach
-
-end Geach
-
-end LO.Axioms
+end LO.Modal.Axioms

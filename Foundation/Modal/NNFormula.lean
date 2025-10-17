@@ -59,11 +59,11 @@ lemma falsum_eq : (falsum : NNFormula α) = ⊥ := rfl
 
 lemma verum_eq : (verum : NNFormula α) = ⊤ := rfl
 
-@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Wedge.wedge]
+@[simp] lemma and_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋏ φ₂ = ψ₁ ⋏ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Wedge.wedge]
 
-@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Vee.vee]
+@[simp] lemma or_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ⋎ φ₂ = ψ₁ ⋎ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Vee.vee]
 
-@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp[Arrow.arrow]
+@[simp] lemma imp_inj (φ₁ ψ₁ φ₂ ψ₂ : Formula α) : φ₁ ➝ φ₂ = ψ₁ ➝ ψ₂ ↔ φ₁ = ψ₁ ∧ φ₂ = ψ₂ := by simp [Arrow.arrow]
 
 @[simp] lemma neg_inj (φ ψ : Formula α) : ∼φ = ∼ψ ↔ φ = ψ := by simp [NegAbbrev.neg];
 
@@ -253,6 +253,94 @@ instance : Encodable (NNFormula α) where
 
 end Encodable
 
+def isPrebox : NNFormula α → Prop
+  | □_ => true
+  | _   => false
+
+lemma exists_isPrebox (hφ : φ.isPrebox) : ∃ ψ, φ = □ψ := by match φ with | □ψ => exact ⟨ψ, rfl⟩
+
+def isPredia : NNFormula α → Prop
+  | ◇_ => true
+  | _   => false
+
+lemma exists_isPredia (hφ : φ.isPredia) : ∃ ψ, φ = ◇ψ := by match φ with | ◇ψ => exact ⟨ψ, rfl⟩
+
+def degree : NNFormula α → Nat
+  | ⊤       => 0
+  | ⊥       => 0
+  | atom _  => 0
+  | natom _ => 0
+  | φ ⋏ ψ   => max φ.degree ψ.degree
+  | φ ⋎ ψ   => max φ.degree ψ.degree
+  | □φ      => φ.degree + 1
+  | ◇φ      => φ.degree + 1
+
+
+
+abbrev isModalCNFPart (φ : NNFormula α) :=
+  ∃ Γ : List { ψ : NNFormula α // ψ.isPrebox ∨ ψ.isPredia ∨ ψ.degree = 0 }, φ = ⋁Γ.unattach
+
+namespace isModalCNFPart
+
+variable {a : α} {φ ψ : NNFormula α}
+
+lemma def_atom : isModalCNFPart (.atom a) := by use [⟨(.atom a), by tauto⟩]; tauto;
+lemma def_natom : isModalCNFPart (.natom a) := by use [⟨(.natom a), by tauto⟩]; tauto;
+lemma def_verum : isModalCNFPart (⊤ : NNFormula α) := by use [⟨⊤, by tauto⟩]; tauto;
+lemma def_falsum : isModalCNFPart (⊥ : NNFormula α) := by use [⟨⊥, by tauto⟩]; tauto;
+lemma def_box : isModalCNFPart (□φ) := by use [⟨□φ, by tauto⟩]; tauto;
+lemma def_dia : isModalCNFPart (◇φ) := by use [⟨◇φ, by tauto⟩]; tauto;
+
+end isModalCNFPart
+
+
+def isModalCNF (φ : NNFormula α) := ∃ Γ : List { ψ // isModalCNFPart ψ }, φ = ⋀Γ.unattach
+
+namespace isModalCNF
+
+@[simp] lemma def_atom {a : α} : isModalCNF (.atom a) := by use [⟨(.atom a), isModalCNFPart.def_atom⟩]; simp;
+@[simp] lemma def_natom {a : α} : isModalCNF (.natom a) := by use [⟨(.natom a), isModalCNFPart.def_natom⟩]; simp;
+@[simp] lemma def_falsum : isModalCNF (⊥ : NNFormula α) := by use [⟨⊥, isModalCNFPart.def_falsum⟩]; simp;
+@[simp] lemma def_verum : isModalCNF (⊤ : NNFormula α) := by use [⟨⊤, isModalCNFPart.def_verum⟩]; simp;
+@[simp] lemma def_box {φ : NNFormula α} : isModalCNF (□φ) := by use [⟨□φ, isModalCNFPart.def_box⟩]; simp;
+@[simp] lemma def_dia {φ : NNFormula α} : isModalCNF (◇φ) := by use [⟨◇φ, isModalCNFPart.def_dia⟩]; simp;
+
+end isModalCNF
+
+
+def isModalDNFPart : NNFormula α → Prop
+  | φ ⋏ ψ  => (φ.isModalDNFPart) ∧ (ψ.isModalDNFPart)
+  | φ      => φ.isPrebox ∨ φ.isPredia ∨ φ.degree = 0
+
+
+namespace isModalDNFPart
+
+lemma of_degree_zero {φ : NNFormula α} (h : φ.degree = 0) : isModalDNFPart φ := by
+  induction φ using rec' with
+  | hAnd φ ψ ihφ ihψ =>
+    constructor;
+    . apply ihφ; simp_all [degree];
+    . apply ihψ; simp_all [degree];
+  | _ => tauto;
+
+end isModalDNFPart
+
+
+def isModalDNF : NNFormula α → Prop
+  | φ ⋎ ψ => φ.isModalDNF ∧ ψ.isModalDNF
+  | φ => φ.isModalDNFPart
+
+namespace isModalDNF
+
+@[simp] lemma def_atom {a : α} : isModalDNF (.atom a) := by simp [isModalDNF, isModalDNFPart, degree]
+@[simp] lemma def_natom {a : α} : isModalDNF (.natom a) := by simp [isModalDNF, isModalDNFPart, degree]
+@[simp] lemma def_falsum : isModalDNF (⊥ : NNFormula α) := by simp [isModalDNF, isModalDNFPart, degree]
+@[simp] lemma def_verum : isModalDNF (⊤ : NNFormula α) := by simp [isModalDNF, isModalDNFPart, degree]
+@[simp] lemma def_box {φ : NNFormula α} : isModalDNF (□φ) := by simp [isModalDNF, isPrebox, isModalDNFPart]
+@[simp] lemma def_dia {φ : NNFormula α} : isModalDNF (◇φ) := by simp [isModalDNF, isPredia, isModalDNFPart]
+
+
+end isModalDNF
 
 end NNFormula
 

@@ -1,13 +1,49 @@
-name = "foundation"
+name = "Foundation"
 defaultTargets = ["Foundation"]
 
 [leanOptions]
-linter.flexible = true
+pp.unicode.fun = true
+weak.linter.flexible = true
+weak.linter.refine = true
+weak.linter.oldObtain = true
+weak.linter.style.multiGoal = true
 
 [[require]]
-name = "mathlib"
 scope = "leanprover-community"
-version = "git#master"
+name = "mathlib"
+
+[[require]]
+scope = "leanprover"
+name = "doc-gen4"
+
+[[require]]
+scope = "leanprover"
+name = "verso"
 
 [[lean_lib]]
 name = "Foundation"
+
+[[lean_exe]]
+name = "generate_arith_zoo"
+root = "Zoo.Arith"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "generate_modal_zoo"
+root = "Zoo.Modal"
+supportInterpreter = true
+
+[[lean_exe]]
+name = "generate_propositional_zoo"
+root = "Zoo.Propositional"
+supportInterpreter = true
+
+[[lean_lib]]
+name = "Zoo"
+
+[[lean_lib]]
+name = "Book"
+
+[[lean_exe]]
+name = "book"
+root = "Book.Book"

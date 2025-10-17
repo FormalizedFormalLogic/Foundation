@@ -1,4 +1,4 @@
-import Foundation.Logic.System
+import Foundation.Logic.Entailment
 
 /-!
 # Language of first-order logic
@@ -120,11 +120,13 @@ instance (k) : ToString (oRing.Rel k) :=
   | Rel.eq => "\\mathrm{Eq}"
   | Rel.lt    => "\\mathrm{LT}"⟩
 
-instance (k) : DecidableEq (oRing.Func k) := fun a b =>
-  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+instance (k) : DecidableEq (oRing.Func k) := fun a b => by
+  rcases a <;> rcases b <;>
+  simp only [reduceCtorEq] <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
-instance (k) : DecidableEq (oRing.Rel k) := fun a b =>
-  by rcases a <;> rcases b <;> simp <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
+instance (k) : DecidableEq (oRing.Rel k) := fun a b => by
+  rcases a <;> rcases b <;>
+  simp only [reduceCtorEq] <;> try {exact instDecidableTrue} <;> try {exact instDecidableFalse}
 
 instance (k) : Encodable (oRing.Func k) where
   encode := fun x =>
@@ -161,6 +163,50 @@ instance (k) : Encodable (oRing.Rel k) where
     | 2, 1 => some Rel.lt
     | _, _ => none
   encodek := fun x => by rcases x <;> simp
+
+def funcEquivFinFour : (k : ℕ) × oRing.Func k ≃ Fin 4 where
+  toFun f :=
+    match f with
+    | ⟨0, Func.zero⟩ => 0
+    | ⟨0,  Func.one⟩ => 1
+    | ⟨2,  Func.add⟩ => 2
+    | ⟨2,  Func.mul⟩ => 3
+  invFun x :=
+    match x with
+    | 0 => ⟨0, Func.zero⟩
+    | 1 => ⟨0,  Func.one⟩
+    | 2 => ⟨2,  Func.add⟩
+    | 3 => ⟨2,  Func.mul⟩
+  left_inv f :=
+    match f with
+    | ⟨0, Func.zero⟩ => rfl
+    | ⟨0,  Func.one⟩ => rfl
+    | ⟨2,  Func.add⟩ => rfl
+    | ⟨2,  Func.mul⟩ => rfl
+  right_inv x :=
+    match x with
+    | 0 => rfl
+    | 1 => rfl
+    | 2 => rfl
+    | 3 => rfl
+
+def relEquivFinTwo : (k : ℕ) × oRing.Rel k ≃ Fin 2 where
+  toFun f :=
+    match f with
+    | ⟨2, Rel.eq⟩ => 0
+    | ⟨2, Rel.lt⟩ => 1
+  invFun x :=
+    match x with
+    | 0 => ⟨2, Rel.eq⟩
+    | 1 => ⟨2, Rel.lt⟩
+  left_inv f :=
+    match f with
+    | ⟨2, Rel.eq⟩ => rfl
+    | ⟨2, Rel.lt⟩ => rfl
+  right_inv x :=
+    match x with
+    | 0 => rfl
+    | 1 => rfl
 
 end ORing
 
@@ -206,6 +252,9 @@ protected class Eq (L : Language) where
 protected class LT (L : Language) where
   lt : L.Rel 2
 
+protected class Mem (L : Language) where
+  mem : L.Rel 2
+
 protected class Zero (L : Language) where
   zero : L.Func 0
 
@@ -230,7 +279,7 @@ class Pairing (L : Language) where
 class Star (L : Language) where
   star : L.Func 0
 
-attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Star.star
+attribute [match_pattern] Zero.zero One.one Add.add Mul.mul Exp.exp Eq.eq LT.lt Mem.mem Star.star
 
 class ORing (L : Language) extends L.Eq, L.LT, L.Zero, L.One, L.Add, L.Mul
 
@@ -357,6 +406,26 @@ instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Func k) := La
 instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
 
 instance (L : Language) [L.DecidableEq] (k : ℕ) : DecidableEq (L.Rel k) := Language.DecidableEq.rel k
+
+protected class Language.Encodable (L : Language) where
+  func : (k : ℕ) → Encodable (L.Func k)
+  rel : (k : ℕ) → Encodable (L.Rel k)
+
+instance (L : Language) [(k : ℕ) → Encodable (L.Func k)] [(k : ℕ) → Encodable (L.Rel k)] : L.Encodable := ⟨fun _ ↦ inferInstance, fun _ ↦ inferInstance⟩
+
+instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Func k) := Language.Encodable.func k
+
+instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Rel k) := Language.Encodable.rel k
+
+instance (L : Language) [L.Encodable] (k : ℕ) : Encodable (L.Rel k) := Language.Encodable.rel k
+
+class Language.Finite (L : Language) where
+  func : Fintype ((k : ℕ) × L.Func k)
+  rel : Fintype ((k : ℕ) × L.Rel k)
+
+instance : Language.Finite ℒₒᵣ where
+  func := Fintype.ofEquiv (Fin 4) Language.ORing.funcEquivFinFour.symm
+  rel := Fintype.ofEquiv (Fin 2) Language.ORing.relEquivFinTwo.symm
 
 end FirstOrder
 
