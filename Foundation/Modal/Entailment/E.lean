@@ -21,8 +21,19 @@ variable {𝓢 : S} [Entailment.E 𝓢] {n : ℕ} {φ ψ ξ χ: F}
 
 variable [DecidableEq F]
 
-def ELLNN! : 𝓢 ⊢! □φ ⭤ □(∼∼φ) := by apply re; exact dn;
-@[simp] lemma ELLNN : 𝓢 ⊢ □φ ⭤ □(∼∼φ) := ⟨ELLNN!⟩
+def multire {n} (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □^[n]φ ⭤ □^[n]ψ := by
+  induction n with
+  | zero => simp only [Function.iterate_zero, id_eq]; exact h;
+  | succ n ih =>
+    simp only [Box.multibox_succ];
+    apply re ih;
+omit [DecidableEq F] in lemma multire! {n} (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ □^[n]φ ⭤ □^[n]ψ := ⟨multire h.some⟩
+
+def multi_ELLNN! : 𝓢 ⊢! □^[n]φ ⭤ □^[n](∼∼φ) := multire dn
+@[simp] lemma multi_ELLNN : 𝓢 ⊢ □^[n]φ ⭤ □^[n](∼∼φ) := ⟨multi_ELLNN!⟩
+
+def ELLNN! : 𝓢 ⊢! □φ ⭤ □(∼∼φ) := multi_ELLNN! (n := 1)
+@[simp] lemma ELLNN : 𝓢 ⊢ □φ ⭤ □(∼∼φ) := multi_ELLNN (n := 1)
 
 def ILLNN! : 𝓢 ⊢! □φ ➝ □(∼∼φ) := K_left ELLNN!
 @[simp] lemma ILLNN : 𝓢 ⊢ □φ ➝ □(∼∼φ) := ⟨ILLNN!⟩
@@ -120,37 +131,5 @@ lemma boxDuality_mp'! (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ ∼(◇(∼φ)) := ⟨boxD
 
 def boxDuality_mpr' (h : 𝓢 ⊢! ∼(◇(∼φ))) : 𝓢 ⊢! □φ := boxDuality_mpr ⨀ h
 lemma boxDuality_mpr'! (h : 𝓢 ⊢ ∼(◇(∼φ))) : 𝓢 ⊢ □φ := ⟨boxDuality_mpr' h.some⟩
-
-
-instance HasAxiomFour.of_dual (h : ∀ φ, 𝓢 ⊢! ◇◇φ ➝ ◇φ) : HasAxiomFour 𝓢 := ⟨by
-  intro φ;
-  apply C_replace ?_ ?_ $ contra $ h (∼φ);
-  . exact boxDuality_mp;
-  . exact multiboxDuality_mpr (n := 2);
-⟩
-
-def axiomFourDual! [DecidableEq F] [HasAxiomFour 𝓢] : 𝓢 ⊢! ◇◇φ ➝ ◇φ := by
-  apply C_replace ?_ ?_ $ contra $ axiomFour (𝓢 := 𝓢) (φ := ∼φ);
-  . exact multidiaDuality_mp (n := 2);
-  . exact diaDuality_mpr;
-@[simp] lemma axiomFourDual [HasAxiomFour 𝓢] : 𝓢 ⊢ ◇◇φ ➝ ◇φ := ⟨axiomFourDual!⟩
-
-def axiomFiveDual! [DecidableEq F] [HasAxiomFive 𝓢] : 𝓢 ⊢! ◇□φ ➝ □φ := by
-  apply C_replace ?_ ?_ $ contra $ axiomFive (𝓢 := 𝓢) (φ := ∼φ);
-  . apply C_trans (IMNLN! (φ := □φ)) ?_
-    apply contra;
-    apply K_right;
-    apply re;
-    apply K_intro;
-    . exact INLMN!;
-    . apply C_trans IMNLN! $ contra $ ILLNN!;
-  . exact boxDuality_mpr;
-@[simp] lemma axiomFiveDual [HasAxiomFive 𝓢] : 𝓢 ⊢ ◇□φ ➝ □φ := ⟨axiomFiveDual!⟩
-
-def axiomTDual! [DecidableEq F] [HasAxiomT 𝓢] : 𝓢 ⊢! φ ➝ ◇φ := by
-  apply C_replace ?_ ?_ $ contra $ axiomT (φ := ∼φ);
-  . exact dni;
-  . exact diaDuality_mpr;
-@[simp] lemma axiomTDual [HasAxiomT 𝓢] : 𝓢 ⊢ φ ➝ ◇φ := ⟨axiomTDual!⟩
 
 end LO.Modal.Entailment

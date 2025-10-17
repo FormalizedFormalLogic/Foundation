@@ -1,4 +1,5 @@
 import Foundation.Modal.Entailment.K
+import Foundation.Modal.Entailment.AxiomGeach
 
 namespace LO.Modal.Entailment
 

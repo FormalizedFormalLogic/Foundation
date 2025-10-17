@@ -82,7 +82,7 @@ instance consistent : Entailment.Consistent Modal.E := consistent_of_sound_frame
   use ⟨Unit, λ _ => {}⟩;
   simp;
 
-instance Neighborhood.complete : Complete Modal.E FrameClass.E := (minimalCanonicity Modal.E).completeness $ by tauto
+instance Neighborhood.complete : Complete Modal.E FrameClass.E := (basicCanonicity Modal.E).completeness $ by tauto
 
 end E
 
