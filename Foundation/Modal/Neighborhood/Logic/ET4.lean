@@ -31,7 +31,7 @@ instance consistent : Entailment.Consistent Modal.ET4 := consistent_of_sound_fra
   use Frame.simple_blackhole;
   constructor;
 
-instance Neighborhood.complete : Complete Modal.ET4 FrameClass.ET4 := (minimalCanonicity _).completeness $ by
+instance Neighborhood.complete : Complete Modal.ET4 FrameClass.ET4 := (basicCanonicity _).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 

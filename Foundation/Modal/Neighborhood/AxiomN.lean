@@ -39,10 +39,18 @@ open Entailment
 open MaximalConsistentSet
 open proofset
 
-instance [Entailment.HasAxiomN 𝓢] : (minimalCanonicity 𝓢).toModel.ContainsUnit := by
+instance [Entailment.HasAxiomN 𝓢] : (basicCanonicity 𝓢).toModel.ContainsUnit := by
   constructor;
   ext x;
-  simp only [minimalCanonicity, Canonicity.toModel, Frame.box, Set.mem_setOf_eq, Set.mem_univ, iff_true];
+  simp only [basicCanonicity, Canonicity.toModel, Frame.box, Set.mem_setOf_eq, Set.mem_univ, iff_true];
+  use ⊤;
+  simp [MaximalConsistentSet.mem_of_prove]
+
+instance [Entailment.HasAxiomN 𝓢] : (relativeBasicCanonicity 𝓢 P).toModel.ContainsUnit := by
+  constructor;
+  ext x;
+  suffices Set.univ ∈ (relativeBasicCanonicity 𝓢 P).toModel.𝒩 x by simpa;
+  left;
   use ⊤;
   simp [MaximalConsistentSet.mem_of_prove]
 

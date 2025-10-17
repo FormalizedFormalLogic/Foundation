@@ -34,20 +34,22 @@ section
 
 variable [Entailment (Formula ℕ) S] {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.ET5 𝓢]
 
-instance: (minimalCanonicity 𝓢).toModel.IsEuclidean := by
-  apply Canonicity.isEuclidean;
-  intro A X X_np;
-  replace : {B | X ∉ (minimalCanonicity 𝓢).𝒩 B} = proofset 𝓢 ⊤ := by
-    suffices ∀ B, X ∉ (minimalCanonicity 𝓢).𝒩 B by simpa [Set.eq_univ_iff_forall];
+instance : (basicCanonicity 𝓢).toModel.IsEuclidean := by
+  apply Canonicity.isEuclidean';
+  intro X X_np A;
+  suffices X ∉ (basicCanonicity 𝓢).𝒩 A → {w | X ∉ (basicCanonicity 𝓢).𝒩 w} ∈ (basicCanonicity 𝓢).𝒩 A by
+    contrapose!;
+    simpa [Frame.dia, Frame.box, Canonicity.toModel];
+  intro h;
+  have : {B | X ∉ (basicCanonicity 𝓢).𝒩 B} = proofset 𝓢 ⊤ := by
+    suffices ∀ B, X ∉ (basicCanonicity 𝓢).𝒩 B by simpa [Set.eq_univ_iff_forall];
     rintro _ ⟨φ, _, hφ₂⟩;
-    apply X_np;
+    apply X_np φ;
     apply hφ₂;
-  rw [this];
-  apply minimalCanonicity 𝓢 |>.def_𝒩 A ⊤ |>.mp;
-  apply MaximalConsistentSet.mem_of_prove;
-  simp;
+  exact this ▸ (basicCanonicity 𝓢 |>.def_𝒩 A ⊤ |>.mp $ MaximalConsistentSet.mem_of_prove (by simp));
 
-instance : (minimalCanonicity 𝓢).toModel.IsET5 where
+
+instance : (basicCanonicity 𝓢).toModel.IsET5 where
 
 end
 
@@ -78,7 +80,7 @@ instance consistent : Entailment.Consistent Modal.ET5 := consistent_of_sound_fra
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance Neighborhood.complete : Complete Modal.ET5 FrameClass.ET5 := (minimalCanonicity Modal.ET5).completeness $ by
+instance Neighborhood.complete : Complete Modal.ET5 FrameClass.ET5 := (basicCanonicity Modal.ET5).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
