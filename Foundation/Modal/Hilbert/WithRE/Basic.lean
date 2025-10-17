@@ -3,6 +3,7 @@ import Foundation.Modal.Entailment.K
 import Foundation.Modal.Entailment.EMCN
 import Foundation.Modal.Entailment.END
 import Foundation.Modal.Entailment.ET5
+import Foundation.Modal.Entailment.EMK
 import Foundation.Logic.HilbertStyle.Lukasiewicz
 import Foundation.Logic.Incomparable
 import Foundation.Modal.Logic.Basic
@@ -316,6 +317,34 @@ instance : EMT.axioms.HasT where p := 0;
 end EMT.axioms
 protected abbrev EMT : Logic ℕ := Hilbert.WithRE EMT.axioms
 instance : Entailment.EMT Modal.EMT where
+
+protected abbrev EMK.axioms : Axiom ℕ := {Axioms.M (.atom 0) (.atom 1), Axioms.K (.atom 0) (.atom 1)}
+namespace EMK.axioms
+instance : EMK.axioms.HasM where p := 0; q := 1;
+instance : EMK.axioms.HasK where p := 0; q := 1;
+end EMK.axioms
+protected abbrev EMK : Logic ℕ := Hilbert.WithRE EMK.axioms
+instance : Entailment.EMK Modal.EMK where
+
+protected abbrev EMCK.axioms : Axiom ℕ := {
+  Axioms.M (.atom 0) (.atom 1),
+  Axioms.C (.atom 0) (.atom 1),
+  Axioms.K (.atom 0) (.atom 1)
+}
+namespace EMCK.axioms
+instance : EMCK.axioms.HasM where p := 0; q := 1;
+instance : EMCK.axioms.HasC where p := 0; q := 1;
+instance : EMCK.axioms.HasK where p := 0; q := 1;
+end EMCK.axioms
+protected abbrev EMCK : Logic ℕ := Hilbert.WithRE EMCK.axioms
+
+instance : Modal.EMK ≊ Modal.EMCK := by
+  apply Entailment.Equiv.antisymm_iff.mpr;
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
 
 protected abbrev EMT4.axioms : Axiom ℕ := {
   Axioms.M (.atom 0) (.atom 1),
