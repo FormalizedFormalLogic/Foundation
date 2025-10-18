@@ -57,7 +57,7 @@ instance consistent : Entailment.Consistent Modal.E4 := consistent_of_sound_fram
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance Neighborhood.complete : Complete Modal.E4 FrameClass.E4 := (minimalCanonicity Modal.E4).completeness $ by
+instance Neighborhood.complete : Complete Modal.E4 FrameClass.E4 := (basicCanonicity Modal.E4).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 

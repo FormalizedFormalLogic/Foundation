@@ -62,15 +62,16 @@ variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E 𝓢]
 open Entailment
 open MaximalConsistentSet
 
-instance [Entailment.HasAxiomC 𝓢] : (minimalCanonicity 𝓢).toModel.IsRegular := by
+instance [Entailment.HasAxiomC 𝓢] : (basicCanonicity 𝓢).toModel.IsRegular := by
   constructor;
-  rintro X Y Γ ⟨hX, hY⟩;
-  obtain ⟨φ, rfl, _, hφ⟩ := minimalCanonicity.iff_mem_box_exists_fml.mp hX;
-  obtain ⟨ψ, rfl, _, hψ⟩ := minimalCanonicity.iff_mem_box_exists_fml.mp hY;
-  suffices Γ ∈ proofset 𝓢 (□(φ ⋏ ψ)) by
+  rintro X Y A ⟨hX, hY⟩;
+  obtain ⟨φ, rfl, hφ⟩ := basicCanonicity.iff_mem_box_exists_fml.mp hX;
+  obtain ⟨ψ, rfl, hψ⟩ := basicCanonicity.iff_mem_box_exists_fml.mp hY;
+  suffices A ∈ proofset 𝓢 (□(φ ⋏ ψ)) by
     rwa [(show proofset 𝓢 φ ∩ proofset 𝓢 ψ = proofset 𝓢 (φ ⋏ ψ) by grind), Canonicity.box_proofset];
   apply proofset.imp_subset |>.mp (show 𝓢 ⊢ □φ ⋏ □ψ ➝ □(φ ⋏ ψ) by simp);
-  grind;
+  rw [proofset.eq_and]
+  tauto;
 
 end
 

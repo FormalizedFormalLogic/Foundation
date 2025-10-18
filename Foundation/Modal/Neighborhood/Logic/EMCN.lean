@@ -29,7 +29,7 @@ instance consistent : Entailment.Consistent Modal.EMCN := consistent_of_sound_fr
   simp only [Set.mem_setOf_eq];
   constructor;
 
-instance Neighborhood.complete : Complete Modal.EMCN FrameClass.EMCN := (supplementedMinimalCanonicity Modal.EMCN).completeness $ by
+instance Neighborhood.complete : Complete Modal.EMCN FrameClass.EMCN := (supplementedBasicCanonicity Modal.EMCN).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 

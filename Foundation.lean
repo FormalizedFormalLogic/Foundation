@@ -178,6 +178,8 @@ import Foundation.Modal.Maximal.Makinson
 
 import Foundation.Modal.VanBentham.StandardTranslation
 
+import Foundation.Modal.Algebra.Magari
+
 -- Provability Logic
 import Foundation.ProvabilityLogic.Realization
 import Foundation.ProvabilityLogic.Arithmetic
