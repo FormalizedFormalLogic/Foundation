@@ -96,6 +96,7 @@ import Foundation.FirstOrder.Hauptsatz
 -- IntFO
 
 import Foundation.IntFO.Basic
+import Foundation.IntFO.Kripke.Basic
 import Foundation.IntFO.Translation
 
 -- TODO:

@@ -178,7 +178,7 @@ variable {Λ : Hilbertᵢ L}
 
 open HilbertProofᵢ Semantics
 
-lemma sound!_aux (H : 𝓚 ⊧* Λ) (w : 𝓚) (fv : ℕ → 𝓚.Carrier) (hfv : ∀ i, fv i ∈ 𝓚.Domain w) {φ} : Λ ⊢! φ → w ⊩[![]|fv] φ
+private lemma sound!_aux (H : 𝓚 ⊧* Λ) (w : 𝓚) (fv : ℕ → 𝓚.Carrier) (hfv : ∀ i, fv i ∈ 𝓚.Domain w) {φ} : Λ ⊢! φ → w ⊩[![]|fv] φ
   |     eaxm h => by
     simpa [Matrix.empty_eq] using H.RealizeSet h w ![] fun i ↦ ⟨fv i, hfv i⟩
   | mdp bφψ bφ => by simpa using sound!_aux H w fv hfv bφψ w (by simp) (sound!_aux H w fv hfv bφ)

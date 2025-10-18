@@ -230,4 +230,38 @@ def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f
 
 end HilbertProofᵢ
 
+@[ext]
+structure Theoryᵢ (𝓗 : Hilbertᵢ L) where
+  theory : Set (Sentenceᵢ L)
+namespace Theoryᵢ
+
+open Entailment
+
+variable {𝓗 : Hilbertᵢ L} {T : Theoryᵢ 𝓗}
+
+instance : SetLike (Theoryᵢ 𝓗) (Sentenceᵢ L) where
+  coe := theory
+  coe_injective' _ _ := Theoryᵢ.ext
+
+lemma mem_def : φ ∈ T ↔ φ ∈ T.theory := by rfl
+
+@[simp] lemma mem_mk_iff (s : Set (Sentenceᵢ L)) : φ ∈ (⟨s⟩ : Theoryᵢ 𝓗) ↔ φ ∈ s := by rfl
+
+instance : AdjunctiveSet (Sentenceᵢ L) (Theoryᵢ 𝓗) where
+  Subset T U := ∀ φ ∈ T, φ ∈ U
+  emptyCollection := ⟨∅⟩
+  adjoin φ T := ⟨adjoin φ T.theory⟩
+  subset_iff := by simp
+  not_mem_empty := by simp
+  mem_cons_iff := by simp [mem_def]
+
+def Proof (T : Theoryᵢ 𝓗) (φ : Sentenceᵢ L) :=
+  (Rewriting.emb '' T.theory) *⊢[𝓗]! (Rewriting.emb φ : SyntacticFormulaᵢ L)
+
+instance : Entailment (Sentenceᵢ L) (Theoryᵢ 𝓗) := ⟨Theoryᵢ.Proof⟩
+
+lemma provable_def {φ : Sentenceᵢ L} : T ⊢ φ ↔ (Rewriting.emb '' T.theory) *⊢[𝓗] (φ : SyntacticFormulaᵢ L) := by rfl
+
+end Theoryᵢ
+
 end LO.FirstOrder
