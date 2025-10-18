@@ -225,6 +225,17 @@ lemma injective_vecCons {f : Fin n → α} (h : Function.Injective f) {a} (ha : 
   · simp [*]
   · simpa using @h _ _
 
+@[simp] lemma vecCons_empty_eq_singleton (v : Fin 0 → α) (x : α) : x :> v = ![x] := by
+  ext i
+  rcases fin_one_eq_zero i
+  simp
+
+@[simp] lemma vecConsLast_empty_eq_singleton (v : Fin 0 → α) (x : α) : v <: x = ![x] := by
+  ext i
+  rcases fin_one_eq_zero i
+  simp [vecConsLast]
+  rfl
+
 end
 
 variable {α : Type _}

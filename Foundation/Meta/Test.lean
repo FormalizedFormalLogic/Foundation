@@ -8,7 +8,7 @@ section
 
 variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [Entailment F S]
 
-variable {𝓢 𝓣 : S} [Entailment.Cl 𝓢] {φ ψ χ ξ : F}
+variable {𝓢 𝓣 : S} [Entailment.Cl 𝓢] {φ ψ χ ξ p q r s : F}
 
 example : Entailment.TwoSided 𝓢 [φ, ψ] [χ ⋏ ξ, χ, ψ] := by cl_prover_2s
 
@@ -21,6 +21,16 @@ example (h1 : 𝓢 ⊢ φ ⭤ ψ) (h2 : 𝓢 ⊢ χ ⭤ ξ) : Entailment.TwoSide
 example : 𝓢 ⊢ (φ ⋏ ψ) ➝ ((φ ➝ ψ ➝ ⊥) ➝ ⊥) := by cl_prover
 
 example(h1 : 𝓢 ⊢ φ ⭤ ψ) (h2 : 𝓢 ⊢ χ ⭤ ξ) : 𝓢 ⊢ (ψ ➝ ∼ξ) ⭤ (φ ➝ ∼χ) := by cl_prover [h1, h2]
+
+example : 𝓢 ⊢ (φ ➝ ψ) ⋎ (ψ ➝ φ) := by cl_prover
+
+example : 𝓢 ⊢ ((p ⋎ ∼q) ⋎ ((q ⋎ ∼s) ⋏ (r ⋎ ∼p)))  := by cl_prover
+
+example : 𝓢 ⊢ (((p ➝ q) ➝ q) ➝ p ➝ q) ➝ p ➝ q := by cl_prover
+
+example : 𝓢 ⊢ (p ➝ ∼q) ⋏ (q ⋎ r) ⋏ p ➝ r := by cl_prover
+
+example : 𝓢 ⊢ p ⋏ ∼q ➝ q ➝ p := by cl_prover
 
 end
 
