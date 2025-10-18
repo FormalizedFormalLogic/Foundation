@@ -181,20 +181,20 @@ variable [L.DecidableEq] [DecidableEq ξ]
 
 def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ = ψ)
   | _, ⊤,        ψ => by cases ψ using cases' <;>
-      { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
+      { simp only [reduceCtorEq]; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | _, ⊥,        ψ => by cases ψ using cases' <;>
-      { simp; try { exact isFalse not_false }; try { exact isTrue trivial } }
+      { simp only [reduceCtorEq]; try { exact isFalse not_false }; try { exact isTrue trivial } }
   | _, rel r v,  ψ => by
-      cases ψ using cases' <;> try { simp; exact isFalse not_false }
+      cases ψ using cases' <;> try { simpa using isFalse not_false }
       case hRel k₁ k₂ r₂ v₂ =>
         by_cases e : k₁ = k₂
         · rcases e with rfl
           exact match decEq r r₂ with
-          | isTrue h  => by simp [h]; exact Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
+          | isTrue h  => by simpa [h] using Matrix.decVec _ _ (fun i => decEq (v i) (v₂ i))
           | isFalse h => isFalse (by simp [h])
         · exact isFalse (by simp [e])
   | _, φ ⋏ ψ,    χ => by
-      cases χ using cases' <;> try { simp; exact isFalse not_false }
+      cases χ using cases' <;> try { simpa using isFalse not_false }
       case hAnd φ' ψ' =>
         exact match hasDecEq φ φ' with
         | isTrue hp =>
@@ -203,7 +203,7 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ =
           | isFalse hq => isFalse (by simp [hp, hq])
         | isFalse hp => isFalse (by simp [hp])
   | _, φ ⋎ ψ,    χ => by
-      cases χ using cases' <;> try { simp; exact isFalse not_false }
+      cases χ using cases' <;> try { simpa using isFalse not_false }
       case hOr φ' ψ' =>
         exact match hasDecEq φ φ' with
         | isTrue hp =>
@@ -212,7 +212,7 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ =
           | isFalse hq => isFalse (by simp [hp, hq])
         | isFalse hp => isFalse (by simp [hp])
   | _, φ ➝ ψ,    χ => by
-      cases χ using cases' <;> try { simp; exact isFalse not_false }
+      cases χ using cases' <;> try { simpa using isFalse not_false }
       case hImp φ' ψ' =>
         exact match hasDecEq φ φ' with
         | isTrue hp =>
@@ -221,35 +221,17 @@ def hasDecEq : {n : ℕ} → (φ ψ : Semiformulaᵢ L ξ n) → Decidable (φ =
           | isFalse hq => isFalse (by simp [hp, hq])
         | isFalse hp => isFalse (by simp [hp])
   | _, ∀' φ,     ψ => by
-      cases ψ using cases' <;> try { simp; exact isFalse not_false }
-      case hAll φ' => simp; exact hasDecEq φ φ'
+      cases ψ using cases' <;> try { simpa using isFalse not_false }
+      case hAll φ' => simpa using hasDecEq φ φ'
   | _, ∃' φ,     ψ => by
-      cases ψ using cases' <;> try { simp; exact isFalse not_false }
-      case hEx φ' => simp; exact hasDecEq φ φ'
+      cases ψ using cases' <;> try { simpa using isFalse not_false }
+      case hEx φ' => simpa using hasDecEq φ φ'
 
 instance : DecidableEq (Semiformulaᵢ L ξ n) := hasDecEq
 
 end Decidable
 
 end Semiformulaᵢ
-
-abbrev Theoryᵢ (L : Language) := Set (SyntacticFormulaᵢ L)
-
-abbrev ClosedTheoryᵢ (L : Language) := Set (Sentenceᵢ L)
-
-instance : AdjunctiveSet (SyntacticFormulaᵢ L) (Theoryᵢ L) := inferInstance
-
-instance : AdjunctiveSet (Sentenceᵢ L) (ClosedTheoryᵢ L) := inferInstance
-
-namespace Theoryᵢ
-
-variable (T U : Theoryᵢ L)
-
-instance {L : Language} : Add (Theoryᵢ L) := ⟨(· ∪ ·)⟩
-
-lemma add_def : T + U = T ∪ U := rfl
-
-end Theoryᵢ
 
 /-! (Weak) Negative Formula -/
 namespace Semiformulaᵢ

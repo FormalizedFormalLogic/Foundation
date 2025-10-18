@@ -279,6 +279,10 @@ instance [DecidableEq F] : Axiomatized (Context F 𝓢) where
   prfAxm := fun {Γ φ} hp ↦ ⟨[φ], by simpa using hp, byAxm (by simp [AdjunctiveSet.set])⟩
   weakening := fun h b ↦ ⟨b.ctx, fun φ hp ↦ AdjunctiveSet.subset_iff.mp h φ (b.subset φ hp), b.prf⟩
 
+def byAxm [DecidableEq F] {Γ : Set F} {φ : F} (h : φ ∈ Γ) : Γ *⊢[𝓢]! φ := Axiomatized.prfAxm (by simpa)
+
+lemma by_axm [DecidableEq F] {Γ : Set F} {φ : F} (h : φ ∈ Γ) : Γ *⊢[𝓢] φ := Axiomatized.provable_axm _ (by simpa)
+
 instance : Compact (Context F 𝓢) where
   Γ := fun b ↦ AdjunctiveSet.set b.ctx
   ΓPrf := fun b ↦ ⟨b.ctx, by simp [AdjunctiveSet.set], b.prf⟩

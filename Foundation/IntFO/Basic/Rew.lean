@@ -28,6 +28,8 @@ instance : Rewriting L ξ (Semiformulaᵢ L ξ) ζ (Semiformulaᵢ L ζ) where
   app_all (_ _) := rfl
   app_ex (_ _) := rfl
 
+instance : Coe (Semisentenceᵢ L n) (SyntacticSemiformulaᵢ L n) := ⟨Rewriting.emb (ξ := ℕ)⟩
+
 lemma rew_rel (ω : Rew L ξ₁ n₁ ξ₂ n₂) {k} (r : L.Rel k) (v : Fin k → Semiterm L ξ₁ n₁) :
     ω ▹ rel r v = rel r fun i ↦ ω (v i) := rfl
 
