@@ -44,9 +44,10 @@ open Frame
 
 structure RelationalKripkeModel (L : Language) [L.Relational] where
   World : Type*
-  preorder : Preorder World
+  [preorder : Preorder World]
   Carrier : Type*
   Domain : World → Set Carrier
+  domain_nonempty : ∀ w, ∃ x, x ∈ Domain w
   domain_antimonotone : w ≥ v → Domain w ⊆ Domain v
   Rel (w : World) {k : ℕ} (R : L.Rel k) : (Fin k → Carrier) → Prop
   rel_monotone : w ≥ v → Rel w R t → Rel v R t
@@ -104,6 +105,20 @@ variable {w bv fv}
 @[simp] lemma val_neg {φ : Semiformulaᵢ L ξ n} :
     w ⊩[bv|fv] ∼φ ↔ ∀ v ≤ w, ¬v ⊩[bv|fv] φ := by rfl
 
+@[simp] lemma val_conj {Γ : List (Semiformulaᵢ L ξ n)} :
+    w ⊩[bv|fv] ⋀Γ ↔ ∀ φ ∈ Γ, w ⊩[bv|fv] φ :=
+  match Γ with
+  |          [] => by simp
+  |         [φ] => by simp
+  | φ :: ψ :: Γ => by simp [val_conj (Γ := ψ :: Γ)]
+
+@[simp] lemma val_disj {Γ : List (Semiformulaᵢ L ξ n)} :
+    w ⊩[bv|fv] ⋁Γ ↔ ∃ φ ∈ Γ, w ⊩[bv|fv] φ :=
+  match Γ with
+  |          [] => by simp
+  |         [φ] => by simp
+  | φ :: ψ :: Γ => by simp [val_disj (Γ := ψ :: Γ)]
+
 lemma val_rew {bv : Fin n₂ → Carrier 𝓚} {fv : ξ₂ → Carrier 𝓚} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
     w ⊩[bv|fv] (ω ▹ φ) ↔
     w ⊩[fun x ↦ (ω #x).relationalVal bv fv|fun x ↦ (ω &x).relationalVal bv fv] φ := by
@@ -145,6 +160,10 @@ lemma val_subst (w : Fin k → Semiterm L ξ n) (φ : Semiformulaᵢ L ξ k) :
     v ⊩[bv|fv] φ/[t] ↔ v ⊩[![t.relationalVal bv fv]|fv] φ := by
   simp [val_subst, Matrix.constant_eq_singleton]
 
+@[simp] lemma val_emb {φ : Semisentenceᵢ L n} :
+    v ⊩[bv|fv] (Rewriting.emb φ) ↔ v ⊩[bv|Empty.elim] φ := by
+  simp [Rewriting.emb, val_rew, Empty.eq_elim]
+
 lemma Val.monotone
     {n} {bv : Fin n → Carrier 𝓚} {fv : ξ → Carrier 𝓚}
     (h : v ≤ w) {φ} : w ⊩[bv|fv] φ → v ⊩[bv|fv] φ :=
@@ -168,9 +187,9 @@ lemma Val.monotone
 
 variable (𝓚)
 
-def Force (φ : Semiformulaᵢ L ξ n) : Prop := ∀ (w : 𝓚) (bv : Fin n → w) (fv : ξ → w), w ⊩[fun i ↦ bv i|fun i ↦ fv i] φ
+def Force (φ : Sentenceᵢ L) : Prop := ∀ w : 𝓚, w ⊩[![]|Empty.elim] φ
 
-instance : Semantics (SyntacticFormulaᵢ L) (RelationalKripkeModel L) := ⟨fun 𝓚 φ ↦ 𝓚.Force φ⟩
+instance : Semantics (Sentenceᵢ L) (RelationalKripkeModel L) := ⟨fun 𝓚 φ ↦ 𝓚.Force φ⟩
 
 variable {𝓚}
 
@@ -178,12 +197,14 @@ variable {Λ : Hilbertᵢ L}
 
 open HilbertProofᵢ Semantics
 
-private lemma sound!_aux (H : 𝓚 ⊧* Λ) (w : 𝓚) (fv : ℕ → 𝓚.Carrier) (hfv : ∀ i, fv i ∈ 𝓚.Domain w) {φ} : Λ ⊢! φ → w ⊩[![]|fv] φ
+lemma sound!_forces (w : 𝓚) (fv : ℕ → 𝓚.Carrier) (hfv : ∀ i, fv i ∈ 𝓚.Domain w) {φ} : 𝗜𝗻𝘁¹ ⊢! φ → w ⊩[![]|fv] φ
   |     eaxm h => by
-    simpa [Matrix.empty_eq] using H.RealizeSet h w ![] fun i ↦ ⟨fv i, hfv i⟩
-  | mdp bφψ bφ => by simpa using sound!_aux H w fv hfv bφψ w (by simp) (sound!_aux H w fv hfv bφ)
+    have : ∃ ψ, Axioms.EFQ ψ = φ := by simpa [Hilbertᵢ.Intuitionistic] using h
+    rcases this with ⟨ψ, rfl⟩
+    rintro v hvw ⟨⟩
+  | mdp bφψ bφ => by simpa using sound!_forces w fv hfv bφψ w (by simp) (sound!_forces w fv hfv bφ)
   |      gen b => fun v hwv x ↦ by
-    simpa using sound!_aux H v (x :>ₙ fv) (by rintro (i | i) <;> simp [fun i ↦ 𝓚.domain_antimonotone hwv (hfv i)]) b
+    simpa using sound!_forces v (x :>ₙ fv) (by rintro (i | i) <;> simp [fun i ↦ 𝓚.domain_antimonotone hwv (hfv i)]) b
   | verum => by simp
   | imply₁ φ ψ => by
     intro w₁ hw₁w₀ hw₁φ w₂ hw₁w₂ hw₂φ
@@ -228,10 +249,20 @@ private lemma sound!_aux (H : 𝓚 ⊧* Λ) (w : 𝓚) (fv : ℕ → 𝓚.Carrie
     rintro w₁ hw₁ H w₂ hw₂₁ ⟨x, hφ⟩
     simpa using H w₂ hw₂₁ x w₂ (by rfl) hφ
 
-lemma sound (H : 𝓚 ⊧* Λ) : Λ ⊢ φ → 𝓚 ⊧ φ := fun b w bv fv ↦ by
-  simpa [Matrix.empty_eq] using sound!_aux H w (fun i ↦ fv i) (by simp) b.get
+lemma sound {T : Theoryᵢ (𝗜𝗻𝘁¹ : Hilbertᵢ L)} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H w ↦ by
+  rcases 𝓚.domain_nonempty w with ⟨x, hx⟩
+  have : (Rewriting.emb '' T.theory) *⊢[𝗜𝗻𝘁¹] ↑φ := b
+  rcases Entailment.Context.provable_iff.mp this with ⟨Γ, HΓ, b⟩
+  have : w ⊩[![]|fun _ ↦ x] ⋀Γ ➝ ↑φ := sound!_forces (L := L) w (fun _ ↦ x) (by simp [hx]) b.get
+  have : w ⊩[![]|fun _ : ℕ ↦ x] ↑φ := by
+    apply this w (by rfl)
+    suffices ∀ φ ∈ Γ, w ⊩[![]|fun _ ↦ x] φ by simpa
+    intro φ hφ
+    rcases show ∃ x ∈ T.theory, ↑x = φ by simpa using HΓ φ hφ with ⟨φ, hφ', rfl⟩
+    simpa using H.RealizeSet hφ' w
+  simpa using this
 
-instance (Λ : Hilbertᵢ L) : Sound Λ (Semantics.models (RelationalKripkeModel L) Λ) := ⟨fun b _ H ↦ sound H b⟩
+instance (T : Theoryᵢ (𝗜𝗻𝘁¹ : Hilbertᵢ L)) : Sound T (Semantics.models (RelationalKripkeModel L) T) := ⟨fun b _ H ↦ sound b H⟩
 
 end RelationalKripkeModel
 
