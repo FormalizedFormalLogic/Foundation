@@ -56,8 +56,6 @@ lemma subst_doubleNegation (φ : Semiformula L ξ n₁) (v : Fin n₁ → Semite
 
 end Semiformula
 
-abbrev Theory.doubleNegation (T : Theory L) : Theoryᵢ L := Semiformula.doubleNegation '' T
-
 scoped[LO.FirstOrder] postfix:max "ᴺ" => Theory.doubleNegation
 
 abbrev Sequent.doubleNegation (Γ : List (Semiformula L ξ n)) : List (Semiformulaᵢ L ξ n) := Γ.map (·ᴺ)
