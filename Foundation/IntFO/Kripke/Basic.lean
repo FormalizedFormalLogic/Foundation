@@ -1,4 +1,5 @@
-import Foundation.IntFO.Basic.Deduction
+import Foundation.IntFO.Basic
+import Foundation.Logic.ForcingRelation
 
 namespace LO.FirstOrder
 
@@ -19,24 +20,24 @@ lemma fvar_of_relational (t : Term L ξ) : ∃ x, t = &x := by
 
 variable {M : Type*} (bv : Fin n → M) (fv : ξ → M)
 
-def relationalVal : Semiterm L ξ n → M
+def relationalForces : Semiterm L ξ n → M
   |        #x => bv x
   |        &x => fv x
   | .func f _ => Language.Relational.func_empty _ |>.elim' f
 
 variable {bv fv}
 
-@[simp] lemma relationalVal_bvar : (#x : Semiterm L ξ n).relationalVal bv fv = bv x := rfl
+@[simp] lemma relationalForces_bvar : (#x : Semiterm L ξ n).relationalForces bv fv = bv x := rfl
 
-@[simp] lemma relationalVal_fvar : (&x : Semiterm L ξ n).relationalVal bv fv = fv x := rfl
+@[simp] lemma relationalForces_fvar : (&x : Semiterm L ξ n).relationalForces bv fv = fv x := rfl
 
-lemma relationalVal_rew {bv : Fin n₂ → M} {fv : ξ₂ → M} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (t : Semiterm L ξ₁ n₁) :
-    relationalVal bv fv (ω t) = relationalVal (relationalVal bv fv ∘ ω ∘ bvar) (relationalVal bv fv ∘ ω ∘ fvar) t := by
+lemma relationalForces_rew {bv : Fin n₂ → M} {fv : ξ₂ → M} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (t : Semiterm L ξ₁ n₁) :
+    relationalForces bv fv (ω t) = relationalForces (relationalForces bv fv ∘ ω ∘ bvar) (relationalForces bv fv ∘ ω ∘ fvar) t := by
   rcases bvar_or_fvar_of_relational t with (⟨x, rfl⟩ | ⟨x, rfl⟩) <;> simp
 
-@[simp] lemma relationalVal_bShift (x : M) (t : Semiterm L ξ n) :
-    relationalVal (x :> bv) fv (Rew.bShift t) = relationalVal bv fv t := by
-  simp [relationalVal_rew, Function.comp_def]
+@[simp] lemma relationalForces_bShift (x : M) (t : Semiterm L ξ n) :
+    relationalForces (x :> bv) fv (Rew.bShift t) = relationalForces bv fv t := by
+  simp [relationalForces_rew, Function.comp_def]
 
 end Semiterm
 
@@ -62,109 +63,109 @@ namespace RelationalKripkeModel
 
 variable {L : Language} [L.Relational] {𝓚 : RelationalKripkeModel L}
 
-def Val {n} (w : 𝓚) (bv : Fin n → Carrier 𝓚) (fv : ξ → Carrier 𝓚) : Semiformulaᵢ L ξ n → Prop
-  | .rel R t => 𝓚.Rel w R fun i ↦ (t i).relationalVal bv fv
+def Forces {n} (w : 𝓚) (bv : Fin n → Carrier 𝓚) (fv : ξ → Carrier 𝓚) : Semiformulaᵢ L ξ n → Prop
+  | .rel R t => 𝓚.Rel w R fun i ↦ (t i).relationalForces bv fv
   |        ⊤ => True
   |        ⊥ => False
-  |    φ ⋏ ψ => Val w bv fv φ ∧ Val w bv fv ψ
-  |    φ ⋎ ψ => Val w bv fv φ ∨ Val w bv fv ψ
-  |    φ ➝ ψ => ∀ v ≤ w, Val v bv fv φ → Val v bv fv ψ
-  |     ∀' φ => ∀ v ≤ w, ∀ x : v, Val v (x.val :> bv) fv φ
-  |     ∃' φ => ∃ x : w, Val w (x.val :> bv) fv φ
+  |    φ ⋏ ψ => Forces w bv fv φ ∧ Forces w bv fv ψ
+  |    φ ⋎ ψ => Forces w bv fv φ ∨ Forces w bv fv ψ
+  |    φ ➝ ψ => ∀ v ≤ w, Forces v bv fv φ → Forces v bv fv ψ
+  |     ∀' φ => ∀ v ≤ w, ∀ x : v, Forces v (x.val :> bv) fv φ
+  |     ∃' φ => ∃ x : w, Forces w (x.val :> bv) fv φ
 
-local notation:45 w " ⊩[" bv "|" fv "] " φ:46 => Val w bv fv φ
+local notation:45 w " ⊩[" bv "|" fv "] " φ:46 => Forces w bv fv φ
 
-abbrev Valb {n} (w : 𝓚) (bv : Fin n → Carrier 𝓚) : Semisentenceᵢ L n → Prop := 𝓚.Val w bv Empty.elim
+abbrev Forcesb {n} (w : 𝓚) (bv : Fin n → Carrier 𝓚) : Semisentenceᵢ L n → Prop := 𝓚.Forces w bv Empty.elim
 
-scoped notation:45 w " ⊩/" bv φ:46 => Valb w bv φ
+scoped notation:45 w " ⊩/" bv φ:46 => Forcesb w bv φ
 
 variable (w : 𝓚) (bv : Fin n → Carrier 𝓚) (fv : ξ → Carrier 𝓚)
 
-@[simp] lemma val_verum : w ⊩[bv|fv] ⊤ := by trivial
+@[simp] lemma forces_verum : w ⊩[bv|fv] ⊤ := by trivial
 
-@[simp] lemma val_falsum : ¬w ⊩[bv|fv] ⊥ := by rintro ⟨⟩
+@[simp] lemma forces_falsum : ¬w ⊩[bv|fv] ⊥ := by rintro ⟨⟩
 
 variable {w bv fv}
 
-@[simp] lemma val_rel {k} {R : L.Rel k} {t} :
-    w ⊩[bv|fv] .rel R t ↔ 𝓚.Rel w R fun i ↦ (t i).relationalVal bv fv := by rfl
+@[simp] lemma forces_rel {k} {R : L.Rel k} {t} :
+    w ⊩[bv|fv] .rel R t ↔ 𝓚.Rel w R fun i ↦ (t i).relationalForces bv fv := by rfl
 
-@[simp] lemma val_and {φ ψ : Semiformulaᵢ L ξ n} : w ⊩[bv|fv] φ ⋏ ψ ↔ w ⊩[bv|fv] φ ∧ w ⊩[bv|fv] ψ := by rfl
+@[simp] lemma forces_and {φ ψ : Semiformulaᵢ L ξ n} : w ⊩[bv|fv] φ ⋏ ψ ↔ w ⊩[bv|fv] φ ∧ w ⊩[bv|fv] ψ := by rfl
 
-@[simp] lemma val_or {φ ψ : Semiformulaᵢ L ξ n} : w ⊩[bv|fv] φ ⋎ ψ ↔ w ⊩[bv|fv] φ ∨ w ⊩[bv|fv] ψ := by rfl
+@[simp] lemma forces_or {φ ψ : Semiformulaᵢ L ξ n} : w ⊩[bv|fv] φ ⋎ ψ ↔ w ⊩[bv|fv] φ ∨ w ⊩[bv|fv] ψ := by rfl
 
-@[simp] lemma val_imply {φ ψ : Semiformulaᵢ L ξ n} :
-    w ⊩[bv|fv] φ ➝ ψ ↔ ∀ v ≤ w, Val v bv fv φ → Val v bv fv ψ := by rfl
+lemma forces_imply {φ ψ : Semiformulaᵢ L ξ n} :
+    w ⊩[bv|fv] φ ➝ ψ ↔ ∀ v ≤ w, Forces v bv fv φ → Forces v bv fv ψ := by rfl
 
-@[simp] lemma val_all {φ : Semiformulaᵢ L ξ (n + 1)} :
-    w ⊩[bv|fv] ∀' φ ↔ ∀ v ≤ w, ∀ x : v, Val v (x.val :> bv) fv φ := by rfl
+lemma forces_not {φ : Semiformulaᵢ L ξ n} :
+    w ⊩[bv|fv] ∼φ ↔ ∀ v ≤ w, ¬Forces v bv fv φ := by rfl
 
-@[simp] lemma val_ex {φ : Semiformulaᵢ L ξ (n + 1)} :
+@[simp] lemma forces_all {φ : Semiformulaᵢ L ξ (n + 1)} :
+    w ⊩[bv|fv] ∀' φ ↔ ∀ v ≤ w, ∀ x : v, Forces v (x.val :> bv) fv φ := by rfl
+
+@[simp] lemma forces_ex {φ : Semiformulaᵢ L ξ (n + 1)} :
     w ⊩[bv|fv] ∃' φ ↔ ∃ x : w, w ⊩[x :> bv|fv] φ := by rfl
 
-@[simp] lemma val_neg {φ : Semiformulaᵢ L ξ n} :
-    w ⊩[bv|fv] ∼φ ↔ ∀ v ≤ w, ¬v ⊩[bv|fv] φ := by rfl
-
-@[simp] lemma val_conj {Γ : List (Semiformulaᵢ L ξ n)} :
+@[simp] lemma forces_conj {Γ : List (Semiformulaᵢ L ξ n)} :
     w ⊩[bv|fv] ⋀Γ ↔ ∀ φ ∈ Γ, w ⊩[bv|fv] φ :=
   match Γ with
   |          [] => by simp
   |         [φ] => by simp
-  | φ :: ψ :: Γ => by simp [val_conj (Γ := ψ :: Γ)]
+  | φ :: ψ :: Γ => by simp [forces_conj (Γ := ψ :: Γ)]
 
-@[simp] lemma val_disj {Γ : List (Semiformulaᵢ L ξ n)} :
+@[simp] lemma forces_disj {Γ : List (Semiformulaᵢ L ξ n)} :
     w ⊩[bv|fv] ⋁Γ ↔ ∃ φ ∈ Γ, w ⊩[bv|fv] φ :=
   match Γ with
   |          [] => by simp
   |         [φ] => by simp
-  | φ :: ψ :: Γ => by simp [val_disj (Γ := ψ :: Γ)]
+  | φ :: ψ :: Γ => by simp [forces_disj (Γ := ψ :: Γ)]
 
-lemma val_rew {bv : Fin n₂ → Carrier 𝓚} {fv : ξ₂ → Carrier 𝓚} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
+lemma forces_rew {bv : Fin n₂ → Carrier 𝓚} {fv : ξ₂ → Carrier 𝓚} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
     w ⊩[bv|fv] (ω ▹ φ) ↔
-    w ⊩[fun x ↦ (ω #x).relationalVal bv fv|fun x ↦ (ω &x).relationalVal bv fv] φ := by
+    w ⊩[fun x ↦ (ω #x).relationalForces bv fv|fun x ↦ (ω &x).relationalForces bv fv] φ := by
   induction φ using Semiformulaᵢ.rec' generalizing n₂ w
   case hRel k R t =>
-    simp only [Semiformulaᵢ.rew_rel, val_rel]
+    simp only [Semiformulaᵢ.rew_rel, forces_rel]
     apply iff_of_eq; congr; funext x
-    simp [Semiterm.relationalVal_rew ω (t x), Function.comp_def]
+    simp [Semiterm.relationalForces_rew ω (t x), Function.comp_def]
   case hImp φ ψ ihφ ihψ =>
-    simp [*]
+    simp [forces_imply, *]
   case hAnd φ ψ ihφ ihψ => simp [ihφ, ihψ]
   case hOr φ ψ ihφ ihψ => simp [ihφ, ihψ]
   case hVerum => simp
   case hFalsum => simp
   case hAll φ ih =>
-    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
+    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalForces (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalForces bv fv) := by
       funext i; cases i using Fin.cases <;> simp
     simp [ih, this]
   case hEx φ ih =>
-    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
+    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalForces (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalForces bv fv) := by
       funext i; cases i using Fin.cases <;> simp
     simp [ih, this]
 
-@[simp] lemma val_free {fv : ℕ → 𝓚.Carrier} {φ : SyntacticSemiformulaᵢ L (n + 1)} :
+@[simp] lemma forces_free {fv : ℕ → 𝓚.Carrier} {φ : SyntacticSemiformulaᵢ L (n + 1)} :
     v ⊩[bv|↑x :>ₙ fv] Rewriting.free φ ↔ v ⊩[bv <: x|fv] φ := by
-  have : (fun i ↦ Semiterm.relationalVal (L := L) bv (x :>ₙ fv) (Rew.free #i)) = (bv <: x) := by
+  have : (fun i ↦ Semiterm.relationalForces (L := L) bv (x :>ₙ fv) (Rew.free #i)) = (bv <: x) := by
     ext i; cases i using Fin.lastCases <;> simp
-  simp [Rewriting.free, val_rew, this]
+  simp [Rewriting.free, forces_rew, this]
 
-lemma val_subst (w : Fin k → Semiterm L ξ n) (φ : Semiformulaᵢ L ξ k) :
-    v ⊩[bv|fv] (φ ⇜ w) ↔ v ⊩[fun i ↦ (w i).relationalVal bv fv|fv] φ := by
-  simp [Rewriting.subst, val_rew]
+lemma forces_subst (w : Fin k → Semiterm L ξ n) (φ : Semiformulaᵢ L ξ k) :
+    v ⊩[bv|fv] (φ ⇜ w) ↔ v ⊩[fun i ↦ (w i).relationalForces bv fv|fv] φ := by
+  simp [Rewriting.subst, forces_rew]
 
-@[simp] lemma val_subst₀ (φ : Formulaᵢ L ξ) :
+@[simp] lemma forces_subst₀ (φ : Formulaᵢ L ξ) :
     v ⊩[bv|fv] φ/[] ↔ v ⊩[![]|fv] φ := by
-  simp [val_subst, Matrix.empty_eq]
+  simp [forces_subst, Matrix.empty_eq]
 
-@[simp] lemma val_subst₁ (t : Semiterm L ξ n) (φ : Semiformulaᵢ L ξ 1) :
-    v ⊩[bv|fv] φ/[t] ↔ v ⊩[![t.relationalVal bv fv]|fv] φ := by
-  simp [val_subst, Matrix.constant_eq_singleton]
+@[simp] lemma forces_subst₁ (t : Semiterm L ξ n) (φ : Semiformulaᵢ L ξ 1) :
+    v ⊩[bv|fv] φ/[t] ↔ v ⊩[![t.relationalForces bv fv]|fv] φ := by
+  simp [forces_subst, Matrix.constant_eq_singleton]
 
-@[simp] lemma val_emb {φ : Semisentenceᵢ L n} :
+@[simp] lemma forces_emb {φ : Semisentenceᵢ L n} :
     v ⊩[bv|fv] (Rewriting.emb φ) ↔ v ⊩[bv|Empty.elim] φ := by
-  simp [Rewriting.emb, val_rew, Empty.eq_elim]
+  simp [Rewriting.emb, forces_rew, Empty.eq_elim]
 
-lemma Val.monotone
+lemma Forces.monotone
     {n} {bv : Fin n → Carrier 𝓚} {fv : ξ → Carrier 𝓚}
     (h : v ≤ w) {φ} : w ⊩[bv|fv] φ → v ⊩[bv|fv] φ :=
   match φ with
@@ -185,11 +186,25 @@ lemma Val.monotone
     rintro ⟨x, Hw⟩
     exact ⟨⟨x, 𝓚.domain_antimonotone h x.prop⟩, Hw.monotone h⟩
 
+instance : ForcingRelation 𝓚 (Sentenceᵢ L) := ⟨fun w φ ↦ w ⊩[![]|Empty.elim] φ⟩
+
+lemma forces_def {w : 𝓚} {φ : Sentenceᵢ L} : w ⊩ φ ↔ w ⊩[![]|Empty.elim] φ := by rfl
+
+lemma nforces_def {w : 𝓚} {φ : Sentenceᵢ L} : w ⊮ φ ↔ ¬w ⊩[![]|Empty.elim] φ := by rfl
+
+instance : ForcingRelation.Kripke 𝓚 (· ≥ ·) where
+  verum w := trivial
+  falsum w := by rintro ⟨⟩
+  and w := by simp [forces_def]
+  or w := by simp [forces_def]
+  implies w := by simp [forces_def, forces_imply]
+  not w := by simp [forces_def, nforces_def, forces_not]
+
 variable (𝓚)
 
-def Force (φ : Sentenceᵢ L) : Prop := ∀ w : 𝓚, w ⊩[![]|Empty.elim] φ
+abbrev Models (φ : Sentenceᵢ L) : Prop := ∀ w : 𝓚, w ⊩ φ
 
-instance : Semantics (Sentenceᵢ L) (RelationalKripkeModel L) := ⟨fun 𝓚 φ ↦ 𝓚.Force φ⟩
+instance : Semantics (Sentenceᵢ L) (RelationalKripkeModel L) := ⟨fun 𝓚 φ ↦ 𝓚.Models φ⟩
 
 variable {𝓚}
 
@@ -235,7 +250,7 @@ lemma sound!_forces (w : 𝓚) (fv : ℕ → 𝓚.Carrier) (hfv : ∀ i, fv i �
   | all₁ φ t => by
     rcases t.fvar_of_relational with ⟨x, rfl⟩
     intro v hvw hφ
-    suffices v ⊩[![fv x]|fv] φ by simpa [val_subst, Matrix.constant_eq_singleton]
+    suffices v ⊩[![fv x]|fv] φ by simpa [forces_subst, Matrix.constant_eq_singleton]
     simpa using hφ v (by rfl) ⟨fv x, 𝓚.domain_antimonotone hvw (hfv x)⟩
   | all₂ φ ψ => by
     intro w₁ hw₁ H w₂ hw₂₁ hφ w₃ hw₃₂ x
