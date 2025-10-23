@@ -91,7 +91,32 @@ lemma iInf_def (X : ι → 𝓚.DownwardClosed) : ⨅ i, X i = iInf X := calc
 @[simp] lemma mem_iInf_iff {X : ι → 𝓚.DownwardClosed} :
   w ∈ ⨅ i, X i ↔ ∀ i, w ∈ X i := by simp [iInf_def, iInf]
 
-instance : Lattice 𝓚.DownwardClosed where
+def univ : 𝓚.DownwardClosed where
+  val := Set.univ
+  downward_closed' w v := by simp
+
+def empty : 𝓚.DownwardClosed where
+  val := ∅
+  downward_closed' _ _ := by simp_all
+
+instance : CompleteLattice 𝓚.DownwardClosed where
+  top := univ
+  le_top X w := by simp [univ]
+  bot := empty
+  bot_le X w := by simp [empty]
+  le_sSup 𝓧 X hX w hw := by
+    suffices ∃ X ∈ 𝓧, w ∈ X by simpa
+    exact ⟨X, hX, hw⟩
+  sSup_le 𝓧 X h w hw := by
+    rcases show ∃ Y ∈ 𝓧, w ∈ Y by simpa using hw with ⟨Y, hY, hw⟩
+    exact h Y hY hw
+  sInf_le 𝓧 X hX w hw := by
+    have : ∀ X ∈ 𝓧, w ∈ X := by simpa using hw
+    exact this X hX
+  le_sInf 𝓧 X h w hw := by
+    suffices ∀ Y ∈ 𝓧, w ∈ Y by simpa
+    intro Y hY
+    exact h Y hY hw
   sup X Y := sSup {X, Y}
   inf X Y := sInf {X, Y}
   le_sup_left X Y w hw := by simp [hw]
@@ -112,20 +137,12 @@ instance : Lattice 𝓚.DownwardClosed where
 @[simp] lemma mem_sup {w : 𝓚} {X Y : 𝓚.DownwardClosed} :
     w ∈ X ⊔ Y ↔ w ∈ X ∨ w ∈ Y := calc
   _ ↔ w ∈ sSup {X, Y} := by rfl
-  _ ↔ _ := by simp
+  _ ↔ _ := by rw [mem_sSup_iff]; simp
 
 @[simp] lemma mem_inf {w : 𝓚} {X Y : 𝓚.DownwardClosed} :
     w ∈ X ⊓ Y ↔ w ∈ X ∧ w ∈ Y := calc
   _ ↔ w ∈ sInf {X, Y} := by rfl
-  _ ↔ _ := by simp
-
-def univ : 𝓚.DownwardClosed where
-  val := Set.univ
-  downward_closed' w v := by simp
-
-def empty : 𝓚.DownwardClosed where
-  val := ∅
-  downward_closed' _ _ := by simp_all
+  _ ↔ _ := by rw [mem_sInf_iff]; simp
 
 def himp (X Y : 𝓚.DownwardClosed) : 𝓚.DownwardClosed where
   val := {w | ∀ v ≤ w, v ∈ X → v ∈ Y}
@@ -136,10 +153,6 @@ def himp (X Y : 𝓚.DownwardClosed) : 𝓚.DownwardClosed where
     exact this x (le_trans hxw h) hxX
 
 instance : HeytingAlgebra 𝓚.DownwardClosed where
-  top := univ
-  le_top X w := by simp [univ]
-  bot := empty
-  bot_le X w := by simp [empty]
   himp := himp
   le_himp_iff X Y Z := by
     constructor
