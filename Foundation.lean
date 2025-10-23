@@ -97,6 +97,7 @@ import Foundation.FirstOrder.Hauptsatz
 
 import Foundation.IntFO.Basic
 import Foundation.IntFO.Kripke.Basic
+import Foundation.IntFO.Kripke.HeytingValuedModel
 import Foundation.IntFO.Translation
 
 -- TODO:
