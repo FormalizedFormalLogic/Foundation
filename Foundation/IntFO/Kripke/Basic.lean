@@ -200,6 +200,9 @@ instance : ForcingRelation.Kripke 𝓚 (· ≥ ·) where
   implies w := by simp [forces_def, forces_imply]
   not w := by simp [forces_def, nforces_def, forces_not]
 
+lemma Forces.monotone' {v w : 𝓚} {φ} : v ≤ w → w ⊩ φ → v ⊩ φ :=
+  fun h hw ↦ Forces.monotone h hw
+
 variable (𝓚)
 
 abbrev Models (φ : Sentenceᵢ L) : Prop := ∀ w : 𝓚, w ⊩ φ
