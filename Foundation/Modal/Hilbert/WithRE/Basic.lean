@@ -346,6 +346,14 @@ instance : Modal.EMK ≊ Modal.EMCK := by
   . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
     rintro _ (rfl | rfl | rfl) <;> simp;
 
+instance : Modal.EMC ≊ Modal.EMCK := by
+  apply Entailment.Equiv.antisymm_iff.mpr;
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl) <;> simp;
+
 protected abbrev EMT4.axioms : Axiom ℕ := {
   Axioms.M (.atom 0) (.atom 1),
   Axioms.T (.atom 0),
