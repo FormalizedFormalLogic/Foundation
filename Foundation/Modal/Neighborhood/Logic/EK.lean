@@ -17,6 +17,12 @@ open Formula.Neighborhood
 
 namespace Neighborhood
 
+@[reducible] protected alias Frame.IsEK := Frame.HasPropertyK
+protected abbrev FrameClass.EK : FrameClass := { F | F.IsEK }
+
+instance : Frame.simple_blackhole.IsEK where
+  K := by rintro X Y w ⟨hxy, rfl⟩; simp_all;
+
 variable {a b}
 
 abbrev EK_counterframe_for_M_and_C : Frame := {
@@ -63,6 +69,21 @@ lemma EK_counterframe_for_M_and_C.validate_axiomM : ¬EK_counterframe_for_M_and_
     simpa using @this 1 (by simp)
 
 end Neighborhood
+
+
+namespace EK
+
+instance Neighborhood.sound : Sound Modal.EK FrameClass.EK := instSound_of_validates_axioms $ by
+  constructor;
+  rintro _ rfl F hF;
+  simp_all;
+
+instance consistent : Entailment.Consistent Modal.EK := consistent_of_sound_frameclass FrameClass.EK $ by
+  use Frame.simple_blackhole;
+  simp only [Set.mem_setOf_eq];
+  infer_instance;
+
+end EK
 
 
 instance : Modal.EK ⪱ Modal.EMC := by
