@@ -39,7 +39,8 @@ instance : EK_counterframe_for_M_and_C.HasPropertyK where
       have := @this 3 (by simp [h₂]);
       simp at this;
 
-lemma EK_counterframe_for_M_and_C.validate_axiomC : ¬EK_counterframe_for_M_and_C ⊧ Axioms.C (atom 0) (atom 1) := by
+@[simp]
+lemma EK_counterframe_for_M_and_C.not_validate_axiomC : ¬EK_counterframe_for_M_and_C ⊧ Axioms.C (atom 0) (atom 1) := by
   apply ValidOnFrame.not_of_exists_valuation_world;
   use (λ a =>
     match a with
@@ -49,7 +50,8 @@ lemma EK_counterframe_for_M_and_C.validate_axiomC : ¬EK_counterframe_for_M_and_
   ), 0;
   simp [Satisfies];
 
-lemma EK_counterframe_for_M_and_C.validate_axiomM : ¬EK_counterframe_for_M_and_C ⊧ Axioms.M ((atom 0) ⋎ (atom 1)) (atom 1) := by
+@[simp]
+lemma EK_counterframe_for_M_and_C.not_validate_axiomM : ¬EK_counterframe_for_M_and_C ⊧ Axioms.M ((atom 0) ⋎ (atom 1)) (atom 1) := by
   apply ValidOnFrame.not_of_exists_valuation_world;
   use (λ a =>
     match a with
@@ -85,7 +87,6 @@ instance consistent : Entailment.Consistent Modal.EK := consistent_of_sound_fram
 
 end EK
 
-
 instance : Modal.EK ⪱ Modal.EMC := by
   constructor;
   . apply Hilbert.WithRE.weakerThan_of_provable_axioms;
@@ -94,8 +95,6 @@ instance : Modal.EK ⪱ Modal.EMC := by
     use (Axioms.C (.atom 0) (.atom 1));
     constructor;
     . simp;
-    . apply not_imp_not.mpr $ soundness_of_axioms_validOnFrame (F := EK_counterframe_for_M_and_C) ?_;
-      . apply EK_counterframe_for_M_and_C.validate_axiomC;
-      . simp;
+    . apply not_imp_not.mpr $ soundness_of_axioms_validOnFrame (F := EK_counterframe_for_M_and_C) ?_ <;> simp;
 
 end LO.Modal

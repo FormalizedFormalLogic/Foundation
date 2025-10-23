@@ -144,6 +144,7 @@ import Foundation.Modal.PLoN.Logic.N
 import Foundation.Modal.Neighborhood.Logic.E4
 import Foundation.Modal.Neighborhood.Logic.E5
 import Foundation.Modal.Neighborhood.Logic.EK
+import Foundation.Modal.Neighborhood.Logic.EMK
 import Foundation.Modal.Neighborhood.Logic.EMC4
 import Foundation.Modal.Neighborhood.Logic.EMCN
 import Foundation.Modal.Neighborhood.Logic.EMCN4
