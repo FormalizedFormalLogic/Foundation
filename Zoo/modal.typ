@@ -69,6 +69,8 @@
       "LO.Modal.EM": $Logic("EM")$,
       "LO.Modal.EMC": $Logic("EMC")$,
       "LO.Modal.EMC4": $Logic("EMC4")$,
+      "LO.Modal.EMK": $Logic("EMK")$,
+      "LO.Modal.EMCK": $Logic("EMCK")$,
       "LO.Modal.EMCN": $Logic("EMCN")$,
       "LO.Modal.EMCNT": $Logic("EMCNT")$,
       "LO.Modal.EMCNT4": $Logic("EMCNT4")$,
