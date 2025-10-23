@@ -1,4 +1,5 @@
 import Foundation.Modal.Neighborhood.AxiomGeach
+import Foundation.Modal.Neighborhood.AxiomK
 import Foundation.Modal.Neighborhood.Hilbert
 import Foundation.Modal.Neighborhood.Logic.E4
 import Foundation.Modal.Neighborhood.Logic.EC
@@ -16,23 +17,21 @@ open Formula.Neighborhood
 
 namespace Neighborhood
 
+variable {a b}
+
 abbrev EK_counterframe_for_M_and_C : Frame := {
   World := Fin 4,
   𝒩 := λ _ => {{0, 1}, {0, 2}}
 }
 
-lemma EK_counterframe_for_M_and_C.validate_axiomK : EK_counterframe_for_M_and_C ⊧ Axioms.K (atom 0) (atom 1) := by
-  intro V x;
-  apply Satisfies.def_imp.mpr;
-  intro h₁; replace h₁ := Satisfies.def_box.mp h₁;
-  apply Satisfies.def_imp.mpr;
-  intro h₂; replace h₂ := Satisfies.def_box.mp h₂;
-  apply Satisfies.def_box.mpr;
-  simp_all only [Fin.isValue, Model.truthset.eq_imp, Model.truthset.eq_atom, Set.mem_insert_iff, Set.mem_singleton_iff];
-  rcases h₂ with h₂ | h₂ <;> rcases h₁ with h₁ | h₁ <;>
-  . have := h₁.subset;
-    have := @this 3 $ by simp [h₂];
-    simp at this;
+instance : EK_counterframe_for_M_and_C.HasPropertyK where
+  K := by
+    intro X Y w;
+    suffices Xᶜ ∪ Y = {0, 1} ∨ Xᶜ ∪ Y = {0, 2} → X = {0, 1} ∨ X = {0, 2} → Y = {0, 1} ∨ Y = {0, 2} by simpa;
+    rintro (h₁ | h₁) (h₂ | h₂) <;>
+    . have := h₁.subset;
+      have := @this 3 (by simp [h₂]);
+      simp at this;
 
 lemma EK_counterframe_for_M_and_C.validate_axiomC : ¬EK_counterframe_for_M_and_C ⊧ Axioms.C (atom 0) (atom 1) := by
   apply ValidOnFrame.not_of_exists_valuation_world;
@@ -54,7 +53,7 @@ lemma EK_counterframe_for_M_and_C.validate_axiomM : ¬EK_counterframe_for_M_and_
   ), 0;
   suffices (({0, 2} : Set (Fin 4)) ⊆ {2, 0, 1}) ∧ ({2, 0, 1} : Set (Fin 4)) ≠ {0, 2} by
     simp [Satisfies];
-    grind;
+    tauto_set;
   constructor;
   . intro x;
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff];
@@ -76,7 +75,6 @@ instance : Modal.EK ⪱ Modal.EMC := by
     . simp;
     . apply not_imp_not.mpr $ soundness_of_axioms_validOnFrame (F := EK_counterframe_for_M_and_C) ?_;
       . apply EK_counterframe_for_M_and_C.validate_axiomC;
-      . simp only [Semantics.RealizeSet.singleton_iff];
-        apply EK_counterframe_for_M_and_C.validate_axiomK;
+      . simp;
 
 end LO.Modal
