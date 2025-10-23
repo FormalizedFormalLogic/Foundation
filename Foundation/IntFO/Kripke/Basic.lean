@@ -20,28 +20,26 @@ lemma fvar_of_relational (t : Term L ξ) : ∃ x, t = &x := by
 
 variable {M : Type*} (bv : Fin n → M) (fv : ξ → M)
 
-def relationalForces : Semiterm L ξ n → M
+def relationalVal : Semiterm L ξ n → M
   |        #x => bv x
   |        &x => fv x
   | .func f _ => Language.Relational.func_empty _ |>.elim' f
 
 variable {bv fv}
 
-@[simp] lemma relationalForces_bvar : (#x : Semiterm L ξ n).relationalForces bv fv = bv x := rfl
+@[simp] lemma relationalVal_bvar : (#x : Semiterm L ξ n).relationalVal bv fv = bv x := rfl
 
-@[simp] lemma relationalForces_fvar : (&x : Semiterm L ξ n).relationalForces bv fv = fv x := rfl
+@[simp] lemma relationalVal_fvar : (&x : Semiterm L ξ n).relationalVal bv fv = fv x := rfl
 
-lemma relationalForces_rew {bv : Fin n₂ → M} {fv : ξ₂ → M} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (t : Semiterm L ξ₁ n₁) :
-    relationalForces bv fv (ω t) = relationalForces (relationalForces bv fv ∘ ω ∘ bvar) (relationalForces bv fv ∘ ω ∘ fvar) t := by
+lemma relationalVal_rew {bv : Fin n₂ → M} {fv : ξ₂ → M} (ω : Rew L ξ₁ n₁ ξ₂ n₂) (t : Semiterm L ξ₁ n₁) :
+    relationalVal bv fv (ω t) = relationalVal (relationalVal bv fv ∘ ω ∘ bvar) (relationalVal bv fv ∘ ω ∘ fvar) t := by
   rcases bvar_or_fvar_of_relational t with (⟨x, rfl⟩ | ⟨x, rfl⟩) <;> simp
 
-@[simp] lemma relationalForces_bShift (x : M) (t : Semiterm L ξ n) :
-    relationalForces (x :> bv) fv (Rew.bShift t) = relationalForces bv fv t := by
-  simp [relationalForces_rew, Function.comp_def]
+@[simp] lemma relationalVal_bShift (x : M) (t : Semiterm L ξ n) :
+    relationalVal (x :> bv) fv (Rew.bShift t) = relationalVal bv fv t := by
+  simp [relationalVal_rew, Function.comp_def]
 
 end Semiterm
-
-open Frame
 
 structure RelationalKripkeModel (L : Language) [L.Relational] where
   World : Type*
@@ -64,7 +62,7 @@ namespace RelationalKripkeModel
 variable {L : Language} [L.Relational] {𝓚 : RelationalKripkeModel L}
 
 def Forces {n} (w : 𝓚) (bv : Fin n → Carrier 𝓚) (fv : ξ → Carrier 𝓚) : Semiformulaᵢ L ξ n → Prop
-  | .rel R t => 𝓚.Rel w R fun i ↦ (t i).relationalForces bv fv
+  | .rel R t => 𝓚.Rel w R fun i ↦ (t i).relationalVal bv fv
   |        ⊤ => True
   |        ⊥ => False
   |    φ ⋏ ψ => Forces w bv fv φ ∧ Forces w bv fv ψ
@@ -88,7 +86,7 @@ variable (w : 𝓚) (bv : Fin n → Carrier 𝓚) (fv : ξ → Carrier 𝓚)
 variable {w bv fv}
 
 @[simp] lemma forces_rel {k} {R : L.Rel k} {t} :
-    w ⊩[bv|fv] .rel R t ↔ 𝓚.Rel w R fun i ↦ (t i).relationalForces bv fv := by rfl
+    w ⊩[bv|fv] .rel R t ↔ 𝓚.Rel w R fun i ↦ (t i).relationalVal bv fv := by rfl
 
 @[simp] lemma forces_and {φ ψ : Semiformulaᵢ L ξ n} : w ⊩[bv|fv] φ ⋏ ψ ↔ w ⊩[bv|fv] φ ∧ w ⊩[bv|fv] ψ := by rfl
 
@@ -122,12 +120,12 @@ lemma forces_not {φ : Semiformulaᵢ L ξ n} :
 
 lemma forces_rew {bv : Fin n₂ → Carrier 𝓚} {fv : ξ₂ → Carrier 𝓚} {ω : Rew L ξ₁ n₁ ξ₂ n₂} {φ : Semiformulaᵢ L ξ₁ n₁} :
     w ⊩[bv|fv] (ω ▹ φ) ↔
-    w ⊩[fun x ↦ (ω #x).relationalForces bv fv|fun x ↦ (ω &x).relationalForces bv fv] φ := by
+    w ⊩[fun x ↦ (ω #x).relationalVal bv fv|fun x ↦ (ω &x).relationalVal bv fv] φ := by
   induction φ using Semiformulaᵢ.rec' generalizing n₂ w
   case hRel k R t =>
     simp only [Semiformulaᵢ.rew_rel, forces_rel]
     apply iff_of_eq; congr; funext x
-    simp [Semiterm.relationalForces_rew ω (t x), Function.comp_def]
+    simp [Semiterm.relationalVal_rew ω (t x), Function.comp_def]
   case hImp φ ψ ihφ ihψ =>
     simp [forces_imply, *]
   case hAnd φ ψ ihφ ihψ => simp [ihφ, ihψ]
@@ -135,22 +133,22 @@ lemma forces_rew {bv : Fin n₂ → Carrier 𝓚} {fv : ξ₂ → Carrier 𝓚} 
   case hVerum => simp
   case hFalsum => simp
   case hAll φ ih =>
-    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalForces (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalForces bv fv) := by
+    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
       funext i; cases i using Fin.cases <;> simp
     simp [ih, this]
   case hEx φ ih =>
-    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalForces (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalForces bv fv) := by
+    have (x : Carrier 𝓚) : (fun i ↦ (ω.q #i).relationalVal (x :> bv) fv) = (x :> fun i ↦ (ω #i).relationalVal bv fv) := by
       funext i; cases i using Fin.cases <;> simp
     simp [ih, this]
 
 @[simp] lemma forces_free {fv : ℕ → 𝓚.Carrier} {φ : SyntacticSemiformulaᵢ L (n + 1)} :
     v ⊩[bv|↑x :>ₙ fv] Rewriting.free φ ↔ v ⊩[bv <: x|fv] φ := by
-  have : (fun i ↦ Semiterm.relationalForces (L := L) bv (x :>ₙ fv) (Rew.free #i)) = (bv <: x) := by
+  have : (fun i ↦ Semiterm.relationalVal (L := L) bv (x :>ₙ fv) (Rew.free #i)) = (bv <: x) := by
     ext i; cases i using Fin.lastCases <;> simp
   simp [Rewriting.free, forces_rew, this]
 
 lemma forces_subst (w : Fin k → Semiterm L ξ n) (φ : Semiformulaᵢ L ξ k) :
-    v ⊩[bv|fv] (φ ⇜ w) ↔ v ⊩[fun i ↦ (w i).relationalForces bv fv|fv] φ := by
+    v ⊩[bv|fv] (φ ⇜ w) ↔ v ⊩[fun i ↦ (w i).relationalVal bv fv|fv] φ := by
   simp [Rewriting.subst, forces_rew]
 
 @[simp] lemma forces_subst₀ (φ : Formulaᵢ L ξ) :
@@ -158,7 +156,7 @@ lemma forces_subst (w : Fin k → Semiterm L ξ n) (φ : Semiformulaᵢ L ξ k) 
   simp [forces_subst, Matrix.empty_eq]
 
 @[simp] lemma forces_subst₁ (t : Semiterm L ξ n) (φ : Semiformulaᵢ L ξ 1) :
-    v ⊩[bv|fv] φ/[t] ↔ v ⊩[![t.relationalForces bv fv]|fv] φ := by
+    v ⊩[bv|fv] φ/[t] ↔ v ⊩[![t.relationalVal bv fv]|fv] φ := by
   simp [forces_subst, Matrix.constant_eq_singleton]
 
 @[simp] lemma forces_emb {φ : Semisentenceᵢ L n} :
@@ -190,7 +188,7 @@ instance : ForcingRelation 𝓚 (Sentenceᵢ L) := ⟨fun w φ ↦ w ⊩[![]|Emp
 
 lemma forces_def {w : 𝓚} {φ : Sentenceᵢ L} : w ⊩ φ ↔ w ⊩[![]|Empty.elim] φ := by rfl
 
-lemma nforces_def {w : 𝓚} {φ : Sentenceᵢ L} : w ⊮ φ ↔ ¬w ⊩[![]|Empty.elim] φ := by rfl
+lemma nforces_def {w : 𝓚} {φ : Sentenceᵢ L} : w ⊮ φ ↔ ¬w ⊩ φ := by rfl
 
 instance : ForcingRelation.Kripke 𝓚 (· ≥ ·) where
   verum w := trivial
@@ -267,7 +265,7 @@ lemma sound!_forces (w : 𝓚) (fv : ℕ → 𝓚.Carrier) (hfv : ∀ i, fv i �
     rintro w₁ hw₁ H w₂ hw₂₁ ⟨x, hφ⟩
     simpa using H w₂ hw₂₁ x w₂ (by rfl) hφ
 
-lemma sound {T : Theoryᵢ (𝗜𝗻𝘁¹ : Hilbertᵢ L)} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H w ↦ by
+lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : 𝓚 ⊧* T → 𝓚 ⊧ φ := fun H w ↦ by
   rcases 𝓚.domain_nonempty w with ⟨x, hx⟩
   have : (Rewriting.emb '' T.theory) *⊢[𝗜𝗻𝘁¹] ↑φ := b
   rcases Entailment.Context.provable_iff.mp this with ⟨Γ, HΓ, b⟩
@@ -280,7 +278,7 @@ lemma sound {T : Theoryᵢ (𝗜𝗻𝘁¹ : Hilbertᵢ L)} (b : T ⊢ φ) : �
     simpa using H.RealizeSet hφ' w
   simpa using this
 
-instance (T : Theoryᵢ (𝗜𝗻𝘁¹ : Hilbertᵢ L)) : Sound T (Semantics.models (RelationalKripkeModel L) T) := ⟨fun b _ H ↦ sound b H⟩
+instance (T : Theoryᵢ L 𝗜𝗻𝘁¹) : Sound T (Semantics.models (RelationalKripkeModel L) T) := ⟨fun b _ H ↦ sound b H⟩
 
 end RelationalKripkeModel
 

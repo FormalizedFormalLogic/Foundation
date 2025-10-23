@@ -235,24 +235,28 @@ def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f
 
 end HilbertProofᵢ
 
-@[ext]
-structure Theoryᵢ (𝓗 : Hilbertᵢ L) where
+variable (L)
+
+@[ext] structure Theoryᵢ (𝓗 : Hilbertᵢ L) where
   theory : Set (Sentenceᵢ L)
+
+variable {L}
+
 namespace Theoryᵢ
 
 open LO.Entailment
 
-variable {𝓗 : Hilbertᵢ L} {T : Theoryᵢ 𝓗}
+variable {𝓗 : Hilbertᵢ L} {T : Theoryᵢ L 𝓗}
 
-instance : SetLike (Theoryᵢ 𝓗) (Sentenceᵢ L) where
+instance : SetLike (Theoryᵢ L 𝓗) (Sentenceᵢ L) where
   coe := theory
   coe_injective' _ _ := Theoryᵢ.ext
 
 lemma mem_def : φ ∈ T ↔ φ ∈ T.theory := by rfl
 
-@[simp] lemma mem_mk_iff (s : Set (Sentenceᵢ L)) : φ ∈ (⟨s⟩ : Theoryᵢ 𝓗) ↔ φ ∈ s := by rfl
+@[simp] lemma mem_mk_iff (s : Set (Sentenceᵢ L)) : φ ∈ (⟨s⟩ : Theoryᵢ L 𝓗) ↔ φ ∈ s := by rfl
 
-instance : AdjunctiveSet (Sentenceᵢ L) (Theoryᵢ 𝓗) where
+instance : AdjunctiveSet (Sentenceᵢ L) (Theoryᵢ L 𝓗) where
   Subset T U := ∀ φ ∈ T, φ ∈ U
   emptyCollection := ⟨∅⟩
   adjoin φ T := ⟨adjoin φ T.theory⟩
@@ -262,10 +266,10 @@ instance : AdjunctiveSet (Sentenceᵢ L) (Theoryᵢ 𝓗) where
 
 @[simp] lemma adjoin_theory_def : (adjoin φ T).theory = insert φ T.theory := rfl
 
-def Proof (T : Theoryᵢ 𝓗) (φ : Sentenceᵢ L) :=
+def Proof (T : Theoryᵢ L 𝓗) (φ : Sentenceᵢ L) :=
   (Rewriting.emb '' T.theory) *⊢[𝓗]! (Rewriting.emb φ : SyntacticFormulaᵢ L)
 
-instance : Entailment (Sentenceᵢ L) (Theoryᵢ 𝓗) := ⟨Theoryᵢ.Proof⟩
+instance : Entailment (Sentenceᵢ L) (Theoryᵢ L 𝓗) := ⟨Theoryᵢ.Proof⟩
 
 lemma provable_def {φ : Sentenceᵢ L} : T ⊢ φ ↔ (Rewriting.emb '' T.theory) *⊢[𝓗] ↑φ := by rfl
 
@@ -278,7 +282,7 @@ open Context
 
 variable [L.DecidableEq]
 
-instance : Axiomatized (Theoryᵢ 𝓗) where
+instance : Axiomatized (Theoryᵢ L 𝓗) where
   prfAxm {T} φ h := by
     show (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑φ
     exact Context.byAxm (Set.mem_image_of_mem _ (by simpa [mem_def] using h))
@@ -298,7 +302,7 @@ def deductInv! {φ ψ} (b : T ⊢! φ ➝ ψ) : adjoin φ T ⊢! ψ :=
   have : insert ↑φ (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑ψ := Context.deductInv b
   Context.weakening (by simp [Set.image_insert_eq]) this
 
-instance : Deduction (Theoryᵢ 𝓗) where
+instance : Deduction (Theoryᵢ L 𝓗) where
   ofInsert := deduct!
   inv := deductInv!
 
