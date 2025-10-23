@@ -30,7 +30,7 @@ instance consistent : Entailment.Consistent Modal.EMT4 := consistent_of_sound_fr
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance Neighborhood.complete : Complete Modal.EMT4 FrameClass.EMT4 := (supplementedMinimalCanonicity Modal.EMT4).completeness $ by
+instance Neighborhood.complete : Complete Modal.EMT4 FrameClass.EMT4 := (supplementedBasicCanonicity Modal.EMT4).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 

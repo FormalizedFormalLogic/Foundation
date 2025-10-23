@@ -124,8 +124,8 @@ open proofset
 variable {S} [Entailment (Formula ℕ) S]
 variable {𝓢 : S} [Entailment.EM 𝓢] [Entailment.Consistent 𝓢]
 
-abbrev supplementedMinimalCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 𝓢] : Canonicity 𝓢 where
-  𝒩 := (minimalCanonicity 𝓢).toModel.supplementation.𝒩
+abbrev supplementedBasicCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 𝓢] : Canonicity 𝓢 where
+  𝒩 := (basicCanonicity 𝓢).toModel.supplementation.𝒩
   def_𝒩 := by
     intro X φ;
     constructor;
@@ -139,15 +139,36 @@ abbrev supplementedMinimalCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment
   V a := proofset 𝓢 (.atom a);
   def_V := by simp;
 
-instance : (supplementedMinimalCanonicity 𝓢).toModel.IsMonotonic := Frame.supplementation.isMonotonic (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance : (supplementedBasicCanonicity 𝓢).toModel.IsMonotonic := Frame.supplementation.isMonotonic (F := (basicCanonicity 𝓢).toModel.toFrame)
 
-instance [Entailment.HasAxiomC 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.IsRegular := Frame.supplementation.isRegular (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance [Entailment.HasAxiomC 𝓢] : (supplementedBasicCanonicity 𝓢).toModel.IsRegular := Frame.supplementation.isRegular (F := (basicCanonicity 𝓢).toModel.toFrame)
 
-instance [Entailment.HasAxiomN 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.ContainsUnit := Frame.supplementation.containsUnit (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance [Entailment.HasAxiomN 𝓢] : (supplementedBasicCanonicity 𝓢).toModel.ContainsUnit := Frame.supplementation.containsUnit (F := (basicCanonicity 𝓢).toModel.toFrame)
 
-instance [Entailment.HasAxiomT 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.IsReflexive := Frame.supplementation.isReflexive (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance [Entailment.HasAxiomT 𝓢] : (supplementedBasicCanonicity 𝓢).toModel.IsReflexive := Frame.supplementation.isReflexive (F := (basicCanonicity 𝓢).toModel.toFrame)
 
-instance [Entailment.HasAxiomFour 𝓢] : (supplementedMinimalCanonicity 𝓢).toModel.IsTransitive := Frame.supplementation.isTransitive (F := (minimalCanonicity 𝓢).toModel.toFrame)
+instance [Entailment.HasAxiomFour 𝓢] : (supplementedBasicCanonicity 𝓢).toModel.IsTransitive := Frame.supplementation.isTransitive (F := (basicCanonicity 𝓢).toModel.toFrame)
+
+
+def supplementedRelativeCanonicity (𝓢 : S) [Entailment.EM 𝓢] [Entailment.Consistent 𝓢]
+  (P : MaximalConsistentSet 𝓢 → Set (Proofset 𝓢))
+  (hP : ∀ Y : Proofset 𝓢, Y.IsNonproofset → ∀ X, Y ∈ P X → ∀ φ, Y ⊆ proofset 𝓢 φ → □φ ∈ X) -- might be too strong assumption
+  : Canonicity 𝓢 where
+  𝒩 := (relativeBasicCanonicity 𝓢 P).toModel.supplementation.𝒩
+  def_𝒩 := by
+    intro X φ;
+    constructor;
+    . rintro h;
+      use proofset 𝓢 φ;
+      constructor;
+      . simp;
+      . left;
+        use φ;
+    . rintro ⟨Y, _, (⟨ψ, _, rfl⟩ | ⟨_, _⟩)⟩;
+      . apply proofset.box_subset_of_subset (φ := ψ) <;> assumption;
+      . apply hP Y <;> assumption;
+  V a := proofset 𝓢 (.atom a);
+  def_V := by simp;
 
 end
 

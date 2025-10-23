@@ -1,4 +1,5 @@
 import Foundation.Modal.Neighborhood.Completeness
+import Foundation.Modal.Entailment.AxiomGeach
 
 namespace LO.Modal.Neighborhood
 
@@ -6,7 +7,7 @@ open Formula (atom)
 open Formula.Neighborhood
 
 
-variable {F : Frame} {X Y : Set F.World} {g : Axioms.Geach.Taple}
+variable {F : Frame} {X Y : Set F.World}
 
 namespace Frame
 
@@ -64,13 +65,19 @@ lemma IsSymmetric.of_dual {F : Frame} (h : ∀ X : Set F, F.dia (F.box X) ⊆ X)
   have := @h Xᶜ w;
   simp_all;
 
-lemma IsSymmetric.of_alt {F : Frame} (h : ∀ a X, a ∈ X → { b | Xᶜ ∉ F.𝒩 b } ∈ F.𝒩 a) : F.IsSymmetric := by
+lemma IsSymmetric.of_alt {F : Frame} (h : ∀ X a, { b | Xᶜ ∉ F.𝒩 b } ∉ F.𝒩 a → a ∉ X) : F.IsSymmetric := by
   constructor;
   intro X a ha;
-  have := h a;
-  simp_all [Frame.dia, Frame.box];
+  have := h X a;
   grind;
 
+lemma iff_IsSymmetric_dual : F.IsSymmetric ↔ ∀ X : Set F, F.dia (F.box X) ⊆ X := by
+  constructor;
+  . intro h X w;
+    have := @F.symm Xᶜ _ w;
+    simp_all [Frame.dia, Frame.box];
+    tauto;
+  . intro h; apply IsSymmetric.of_dual h;
 
 class IsEuclidean (F : Frame) : Prop where
   eucl : ∀ X : Set F, F.dia X ⊆ F.box (F.dia X)
@@ -91,10 +98,10 @@ lemma IsEuclidean.of_dual {F : Frame} (h : ∀ X, F.dia (F.box X) ⊆ F.box X) :
   have := @h Xᶜ w;
   simp_all;
 
-lemma IsEuclidean.of_alt {F : Frame} (h : ∀ a X, X ∉ F.𝒩 a → { b | X ∉ F.𝒩 b } ∈ F.𝒩 a) : F.IsEuclidean := by
+lemma IsEuclidean.of_alt {F : Frame} (h : ∀ X a, X ∉ F.𝒩 a → { b | X ∉ F.𝒩 b } ∈ F.𝒩 a) : F.IsEuclidean := by
   constructor;
   intro X a ha;
-  have := h a;
+  have := h X a;
   simp_all [Frame.dia, Frame.box];
   grind;
 
@@ -161,128 +168,169 @@ variable {𝓢 : S} [Entailment.E 𝓢] [Entailment.Consistent 𝓢]
 open LO.Entailment Modal.Entailment
 open MaximalConsistentSet
 
-instance [Entailment.HasAxiomT 𝓢] : (minimalCanonicity 𝓢).toModel.IsReflexive := by
+namespace Canonicity
+
+variable {𝓒 : Canonicity 𝓢}
+
+protected instance isGeachean (g) [Entailment.HasAxiomGeach g 𝓢]
+  (h : ∀ X : Proofset 𝓢, X.IsNonproofset → 𝓒.toModel.dia^[g.i] (𝓒.toModel.box^[g.m] X) ⊆ 𝓒.toModel.box^[g.j] (𝓒.toModel.dia^[g.n] X))
+  : 𝓒.toModel.IsGeachConvergent g := by
   constructor;
-  intro X Γ hΓ;
-  obtain ⟨φ, rfl, _, hφ⟩ := minimalCanonicity.iff_mem_box_exists_fml.mp hΓ;
+  rintro X A hX;
+  by_cases X_np : Proofset.IsNonproofset X;
+  . apply h <;> assumption;
+  . obtain ⟨φ, rfl⟩ := iff_not_isNonProofset_exists.mp X_np; clear X_np;
+    replace hX : A ∈ proofset 𝓢 (◇^[g.i](□^[g.m]φ)) := by simpa using hX;
+    suffices A ∈ proofset 𝓢 (□^[g.j](◇^[g.n]φ)) by simpa;
+    apply MaximalConsistentSet.mdp_provable ?_ hX;
+    simp;
+
+instance isReflexive [Entailment.HasAxiomT 𝓢]
+  (h : ∀ X : Proofset 𝓢, X.IsNonproofset → 𝓒.toModel.box X ⊆ X) : 𝓒.toModel.IsReflexive := by
+  have := Canonicity.isGeachean ⟨0, 0, 1, 0⟩ h;
+  infer_instance
+
+instance isTransitive [Entailment.HasAxiomFour 𝓢]
+  (h : ∀ X : Proofset 𝓢, X.IsNonproofset → 𝓒.toModel.box X ⊆ 𝓒.toModel.box^[2] X) : 𝓒.toModel.IsTransitive := by
+  have := Canonicity.isGeachean ⟨0, 2, 1, 0⟩ h;
+  infer_instance
+
+instance isSerial [Entailment.HasAxiomD 𝓢]
+  (h : ∀ X : Proofset 𝓢, X.IsNonproofset → 𝓒.toModel.box X ⊆ 𝓒.toModel.dia X) : 𝓒.toModel.IsSerial := by
+  have := Canonicity.isGeachean ⟨0, 0, 1, 1⟩ h;
+  infer_instance
+
+instance isEuclidean [Entailment.HasAxiomFive 𝓢]
+  (h : ∀ X : Proofset 𝓢, X.IsNonproofset → 𝓒.toModel.dia X ⊆ 𝓒.toModel.box (𝓒.toModel.dia X)) : 𝓒.toModel.IsEuclidean := by
+  have := Canonicity.isGeachean ⟨1, 1, 0, 1⟩ h;
+  infer_instance
+
+instance isEuclidean' [Entailment.HasAxiomFive 𝓢]
+  (h : ∀ X : Proofset 𝓢, X.IsNonproofset → 𝓒.toModel.dia (𝓒.toModel.box X) ⊆ (𝓒.toModel.box X)) : 𝓒.toModel.IsEuclidean := by
+  apply Frame.IsEuclidean.of_dual;
+  apply Canonicity.isGeachean ⟨1, 1, 1, 0⟩ h |>.gconv;
+
+instance isSymmetric [Entailment.HasAxiomB 𝓢]
+  (h : ∀ X : Proofset 𝓢, X.IsNonproofset → X ⊆ 𝓒.toModel.box (𝓒.toModel.dia X)) : 𝓒.toModel.IsSymmetric := by
+  have := Canonicity.isGeachean ⟨0, 1, 0, 1⟩ h;
+  infer_instance
+
+instance isSymmetric' [Entailment.HasAxiomB 𝓢]
+  (h : ∀ X : Proofset 𝓢, X.IsNonproofset → 𝓒.toModel.dia (𝓒.toModel.box X) ⊆ X) : 𝓒.toModel.IsSymmetric := by
+  apply Frame.IsSymmetric.of_dual;
+  apply Canonicity.isGeachean ⟨1, 0, 1, 0⟩ h |>.gconv;
+
+end Canonicity
+
+
+
+instance [Entailment.HasAxiomT 𝓢] : (basicCanonicity 𝓢).toModel.IsReflexive := by
+  apply Canonicity.isReflexive;
+  intro X hX A hA;
+  obtain ⟨φ, rfl, hφ⟩ := basicCanonicity.iff_mem_box_exists_fml.mp hA;
   apply proofset.imp_subset.mp (by simp) hφ;
 
-instance [Entailment.HasAxiomFour 𝓢] : (minimalCanonicity 𝓢).toModel.IsTransitive := by
-  constructor;
-  intro X Γ hΓ;
-  obtain ⟨φ, rfl, _, hφ⟩ := minimalCanonicity.iff_mem_box_exists_fml.mp hΓ;
+instance [Entailment.HasAxiomFour 𝓢] : (basicCanonicity 𝓢).toModel.IsTransitive := by
+  apply Canonicity.isTransitive;
+  intro X hX A hA;
+  obtain ⟨φ, rfl, hφ⟩ := basicCanonicity.iff_mem_box_exists_fml.mp hA;
   simp only [Canonicity.multibox_proofset];
   apply proofset.imp_subset.mp (by simp) hφ;
 
-instance [Entailment.HasAxiomD 𝓢] : (minimalCanonicity 𝓢).toModel.IsSerial := by
-  constructor;
-  intro X Γ hΓ;
-  obtain ⟨φ, rfl, _, hφ⟩ := minimalCanonicity.iff_mem_box_exists_fml.mp hΓ;
+instance [Entailment.HasAxiomD 𝓢] : (basicCanonicity 𝓢).toModel.IsSerial := by
+  apply Canonicity.isSerial;
+  intro X hX A hA;
+  obtain ⟨φ, rfl, hφ⟩ := basicCanonicity.iff_mem_box_exists_fml.mp hA;
   simp only [Canonicity.dia_proofset];
   apply proofset.imp_subset.mp (by simp) hφ;
 
 
-instance Canonicity.isEuclidean {𝓒 : Canonicity 𝓢} [Entailment.HasAxiomFive 𝓢]
-  (h : ∀ A X, (∀ φ, X ≠ proofset 𝓢 φ) → { B | X ∉ 𝓒.𝒩 B } ∈ 𝓒.𝒩 A)
-  : 𝓒.toModel.IsEuclidean := by
-  apply Frame.IsEuclidean.of_alt;
-  rintro A X hX;
-  by_cases hA : ∀ φ, X ≠ proofset 𝓢 φ;
-  . apply h;
-    assumption;
-  . push_neg at hA;
-    obtain ⟨φ, rfl⟩ := hA;
-    suffices proofset 𝓢 (◇(∼φ)) = {b | proofset 𝓢 φ ∉ 𝓒.toModel.𝒩 b} by
-      have H : proofset 𝓢 (◇(∼φ)) ∈ 𝓒.𝒩 A := 𝓒.def_𝒩 _ _ |>.mp
-        $ MaximalConsistentSet.mdp_provable (show 𝓢 ⊢ ∼□φ ➝ □◇(∼φ) by exact C!_trans (by simp) Entailment.axiomFive!)
-        $ MaximalConsistentSet.iff_mem_neg.mpr
-        $ by apply Canonicity.iff_box.not.mpr; simpa [Canonicity.toModel];
-      rwa [this] at H;
-    ext _;
-    simp [←𝓒.dia_proofset, Canonicity.toModel];
+namespace relativeBasicCanonicity
 
+variable {P} {X : Proofset 𝓢} {A : (relativeBasicCanonicity 𝓢 P).toModel.World}
 
-def relativeMinimalCanonicity (𝓢 : S) [Entailment.E 𝓢] (P : MaximalConsistentSet 𝓢 → Set (Proofset 𝓢)) : Canonicity 𝓢 where
-  𝒩 A := (minimalCanonicity 𝓢 |>.𝒩 A) ∪ ({ X | (∀ φ, X ≠ proofset 𝓢 φ) ∧ (X ∈ P A) });
-  def_𝒩 := by
-    intro X φ;
-    constructor;
-    . intro h;
-      left;
-      use φ;
-    . rintro (⟨ψ, hψ₁, hψ₂⟩ | h);
-      . have := proofset.eq_boxed_of_eq hψ₂;
-        grind;
-      . simpa using h.1 φ;
-  V a := proofset 𝓢 (.atom a);
-  def_V := by simp;
-
-omit [Entailment.Consistent 𝓢] in
-lemma relativeMinimalCanonicity.mem_nonproofset {P A X} (hX : ∀ φ, X ≠ proofset 𝓢 φ) (hP : X ∈ P A) : X ∈ (relativeMinimalCanonicity 𝓢 P).𝒩 A := by
-  right;
-  constructor;
+protected instance isSerial [Entailment.HasAxiomD 𝓢]
+  (hP : ∀ X : Proofset 𝓢, X.IsNonproofset → ∀ A, X ∈ P A → A ∈ (relativeBasicCanonicity 𝓢 P).toModel.dia X)
+  : (relativeBasicCanonicity 𝓢 P).toModel.IsSerial := by
+  apply Canonicity.isSerial;
+  intro X hX A hA;
+  apply hP;
   . assumption;
+  . rcases hA with (h | ⟨_, h⟩);
+    . exfalso; exact basicCanonicity.not_isNonproofset_of_mem_box h $ hX;
+    . assumption;
+
+protected instance isReflexive [Entailment.HasAxiomT 𝓢]
+  (hP : ∀ X : Proofset 𝓢, X.IsNonproofset → ∀ A, X ∈ P A → A ∈ X)
+  : (relativeBasicCanonicity 𝓢 P).toModel.IsReflexive := by
+  apply Canonicity.isReflexive;
+  intro X hX A hA;
+  apply hP;
   . assumption;
+  . rcases hA with (h | ⟨_, h⟩);
+    . exfalso; exact basicCanonicity.not_isNonproofset_of_mem_box h $ hX;
+    . assumption;
 
-instance relativeMinimalCanonicity.isEuclidean [Entailment.HasAxiomFive 𝓢] {P}
-  (hP : ∀ X A, { B | X ∉ (relativeMinimalCanonicity 𝓢 P).𝒩 B} ∈ (relativeMinimalCanonicity 𝓢 P).𝒩 A)
-  : (relativeMinimalCanonicity 𝓢 P).toModel.IsEuclidean := by
-  apply Frame.IsEuclidean.of_alt;
-  rintro A X hX;
-  by_cases hX_np : ∀ φ, X ≠ proofset 𝓢 φ;
-  . apply hP;
-  . push_neg at hX_np;
-    obtain ⟨φ, rfl⟩ := hX_np;
-    suffices proofset 𝓢 (◇(∼φ)) = {b | proofset 𝓢 φ ∉ (relativeMinimalCanonicity 𝓢 P).toModel.𝒩 b} by
-      have H : proofset 𝓢 (◇(∼φ)) ∈ (relativeMinimalCanonicity 𝓢 P).𝒩 A := (relativeMinimalCanonicity 𝓢 P).def_𝒩 _ _ |>.mp
-        $ MaximalConsistentSet.mdp_provable (show 𝓢 ⊢ ∼□φ ➝ □◇(∼φ) by exact C!_trans (by simp) Entailment.axiomFive!)
-        $ MaximalConsistentSet.iff_mem_neg.mpr
-        $ by apply Canonicity.iff_box.not.mpr; simpa [Canonicity.toModel];
-      rwa [this] at H;
-    ext _;
-    simp [←(relativeMinimalCanonicity 𝓢 P).dia_proofset, Canonicity.toModel];
+protected instance isTransitive [Entailment.HasAxiomFour 𝓢]
+  (hP : ∀ X : Proofset 𝓢, X.IsNonproofset → ∀ A, X ∈ P A → A ∈ (relativeBasicCanonicity 𝓢 P).toModel.box^[2] X)
+  : (relativeBasicCanonicity 𝓢 P).toModel.IsTransitive := by
+  apply Canonicity.isTransitive;
+  intro X hX A hA;
+  apply hP;
+  . assumption;
+  . rcases hA with (h | ⟨_, h⟩);
+    . exfalso; exact basicCanonicity.not_isNonproofset_of_mem_box h $ hX;
+    . assumption;
 
+protected instance isEuclidean [Entailment.HasAxiomFive 𝓢]
+  (hP : ∀ X : Proofset 𝓢, X.IsNonproofset → ∀ A, Xᶜ ∉ P A → A ∈ (relativeBasicCanonicity 𝓢 P).toModel.box ((relativeBasicCanonicity 𝓢 P).toModel.dia X))
+  : (relativeBasicCanonicity 𝓢 P).toModel.IsEuclidean := by
+  apply Canonicity.isEuclidean;
+  intro X hX A hA;
+  apply hP;
+  . assumption;
+  . rcases relativeBasicCanonicity.iff_mem_dia.mp hA with ⟨hA₁, (h | hA₂)⟩
+    . exfalso;
+      obtain ⟨φ, hφ⟩ := iff_not_isNonProofset_exists.mp h;
+      apply hX (∼φ);
+      grind;
+    . assumption;
 
+/-
+protected instance isSymmetric [Entailment.HasAxiomGeach ⟨1, 0, 1, 0⟩ 𝓢]
+  (hP₁ : ∀ X : Proofset 𝓢, X.IsNonproofset → ∀ A, ((relativeBasicCanonicity 𝓢 P).box X)ᶜ ∉ P A → A ∈ X)
+  : (relativeBasicCanonicity 𝓢 P).toModel.IsSymmetric := by
+  apply Canonicity.isSymmetric';
+  intro X hX A hA;
+  apply hP₁;
+  . assumption;
+  . rcases relativeBasicCanonicity.iff_mem_dia.mp hA with ⟨hA, (⟨φ, hφ⟩ | hA)⟩
+    . rw [hφ] at hA;
+      sorry;
+    . assumption;
+-/
 
-def maximalCanonicity (𝓢 : S) [Entailment.E 𝓢] : Canonicity 𝓢 where
-  𝒩 A := (minimalCanonicity 𝓢 |>.𝒩 A) ∪ ({ X | ∀ φ, X ≠ proofset 𝓢 φ})
-  def_𝒩 := by
-    intro X φ;
-    constructor;
-    . intro h;
-      left;
-      use φ;
-    . rintro (⟨ψ, hψ₁, hψ₂⟩ | h);
-      . have := proofset.eq_boxed_of_eq hψ₂;
-        grind;
-      . grind;
-  V a := proofset 𝓢 (.atom a);
-  def_V := by simp;
-
-instance maximalCanonicity.isEuclidean [Entailment.HasAxiomFive 𝓢]
-  : (maximalCanonicity 𝓢).toModel.IsEuclidean := by
-  apply Frame.IsEuclidean.of_alt;
-  rintro A X hX;
-  by_cases hA : ∀ φ, X ≠ proofset 𝓢 φ;
-  . replace ⟨_, ⟨ψ, hψ⟩⟩ : X ∉ (minimalCanonicity 𝓢).𝒩 A ∧ ∃ x, X = proofset 𝓢 x := by
-      simpa [maximalCanonicity, Canonicity.toModel] using hX;
-    grind;
-  . push_neg at hA;
-    obtain ⟨φ, rfl⟩ := hA;
-    suffices proofset 𝓢 (◇(∼φ)) = {b | proofset 𝓢 φ ∉ (maximalCanonicity 𝓢).toModel.𝒩 b} by
-      have H : proofset 𝓢 (◇(∼φ)) ∈ (maximalCanonicity 𝓢).𝒩 A := (maximalCanonicity 𝓢).def_𝒩 _ _ |>.mp
-        $ MaximalConsistentSet.mdp_provable (show 𝓢 ⊢ ∼□φ ➝ □◇(∼φ) by exact C!_trans (by simp) Entailment.axiomFive!)
-        $ MaximalConsistentSet.iff_mem_neg.mpr
-        $ by apply Canonicity.iff_box.not.mpr; simpa [Canonicity.toModel];
-      rwa [this] at H;
-    ext _;
-    simp [←(maximalCanonicity 𝓢).dia_proofset, Canonicity.toModel];
-
-end
+end relativeBasicCanonicity
 
 
+namespace minimalRelativeMaximalCanonicity
 
-section
+protected instance isSerial [Entailment.HasAxiomD 𝓢] : (minimalRelativeMaximalCanonicity 𝓢).toModel.IsSerial := relativeBasicCanonicity.isSerial $ by tauto;
+
+protected instance isReflexive [Entailment.HasAxiomT 𝓢] : (minimalRelativeMaximalCanonicity 𝓢).toModel.IsReflexive := relativeBasicCanonicity.isReflexive $ by tauto;
+
+protected instance isTransitive [Entailment.HasAxiomFour 𝓢] : (minimalRelativeMaximalCanonicity 𝓢).toModel.IsTransitive := relativeBasicCanonicity.isTransitive $ by tauto;
+
+end minimalRelativeMaximalCanonicity
+
+
+
+namespace maximalRelativeMaximalCanonicity
+
+protected instance IsEuclidean [Entailment.HasAxiomFive 𝓢] : (maximalRelativeMaximalCanonicity 𝓢).toModel.IsEuclidean := relativeBasicCanonicity.isEuclidean $ by tauto;
+
+end maximalRelativeMaximalCanonicity
+
 
 end
 
