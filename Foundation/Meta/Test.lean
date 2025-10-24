@@ -6,7 +6,7 @@ namespace LO
 
 section
 
-variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [Entailment F S]
+variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [Entailment S F]
 
 variable {𝓢 𝓣 : S} [Entailment.Cl 𝓢] {φ ψ χ ξ p q r s : F}
 
@@ -38,7 +38,7 @@ section
 
 open LO.Modal.Entailment
 
-variable {S F : Type*} [DecidableEq F] [BasicModalLogicalConnective F] [Entailment F S]
+variable {S F : Type*} [DecidableEq F] [BasicModalLogicalConnective F] [Entailment S F]
 
 variable {𝓢 𝓣 𝓤 : S} [𝓣 ⪯ 𝓢] [𝓤 ⪯ 𝓢] [Modal.Entailment.K 𝓢] {φ ψ ξ χ : F}
 
@@ -50,7 +50,7 @@ end
 
 section
 
-variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [Entailment F S]
+variable {F : Type*} [DecidableEq F] {S : Type*} [LogicalConnective F] [Entailment S F]
 
 variable {𝓢 𝓣 : S} [Entailment.Int 𝓢] [𝓣 ⪯ 𝓢] {φ ψ χ ξ : F}
 

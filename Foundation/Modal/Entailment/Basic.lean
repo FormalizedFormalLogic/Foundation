@@ -7,7 +7,7 @@ namespace LO.Modal.Entailment
 
 open LO.Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F]
 variable {𝓢 : S}
 
 section Rules

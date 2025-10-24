@@ -74,7 +74,7 @@ instance : Modal.EC ⪱ Modal.ECN := by
               rcases hwY with (rfl | rfl | rfl) <;>
               simp [M]
         }
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
         tauto_set;
 
 instance : Modal.EC ⪱ Modal.EMC := by
@@ -116,7 +116,7 @@ instance : Modal.EC ⪱ Modal.EMC := by
               rcases hwY with (rfl | rfl | rfl) <;>
               simp [M]
         }
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
         ext x;
         simp!;
         omega;

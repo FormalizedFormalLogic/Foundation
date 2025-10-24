@@ -7,7 +7,7 @@ namespace LO.Modal
 open LO.Entailment
 
 variable {α : Type*} [DecidableEq α]
-variable {S} [Entailment (Formula α) S]
+variable {S} [Entailment S (Formula α)]
 variable {𝓢 : S}
 
 namespace FormulaFinset

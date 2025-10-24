@@ -123,12 +123,12 @@ instance : Modal.S4Point2 ⪱ Modal.S4Point3 := by
         . apply Kripke.Satisfies.box_def.not.mpr;
           push_neg;
           use 1;
-          simp [Satisfies, Semantics.Realize, M];
+          simp [Satisfies, Semantics.Models, M];
           constructor <;> omega;
         . apply Kripke.Satisfies.box_def.not.mpr;
           push_neg;
           use 2;
-          simp [Satisfies, Semantics.Realize, M];
+          simp [Satisfies, Semantics.Models, M];
           constructor <;> omega;
 
 instance : Modal.S4 ⪱ Modal.S4Point3 := calc
@@ -158,7 +158,7 @@ instance : Modal.K4Point3 ⪱ Modal.S4Point3 := by
           p_connected := by simp [M, PiecewiseConnected]; omega
         };
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∀ y, ¬x ≺ y by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         use 1;
         refine ⟨?_, ?_, ⟨1, ?_, ?_⟩⟩;
         repeat omega;

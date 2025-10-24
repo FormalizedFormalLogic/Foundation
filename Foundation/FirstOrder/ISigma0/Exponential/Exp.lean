@@ -493,7 +493,7 @@ lemma ext_le_ext_of_seq₀_of_seqₛ {y X Y : V} (h₀ : Exponential.Seq₀ X Y)
           ext i X = 2 * ext (√i) X + 1 := by simpa [ppi.sq_sqrt_eq ne2] using hodd.1
           _       < 2 * ext (√i) Y + 1 := by simpa using IH
           _       ≤ 2 * ext (√i) Y^2   :=
-            lt_iff_succ_le.mp <| (mul_lt_mul_left <| by simp).mpr
+            lt_iff_succ_le.mp <| (mul_lt_mul_iff_right₀ <| by simp).mpr
               <| lt_self_pow₀ (one_lt_iff_two_le.mpr twole) (by simp)
           _       = ext i Y            := by simpa [ppi.sq_sqrt_eq ne2] using Eq.symm hodd.2
 

@@ -87,7 +87,7 @@ end FormulaFinset
 section
 
 variable {α : Type*}
-variable {S} [Entailment (Formula α) S]
+variable {S} [Entailment S (Formula α)]
 variable {𝓢 : S} [Entailment.Cl 𝓢] {φ : Formula _}
 
 lemma complement_derive_bot [DecidableEq α] (hp : 𝓢 ⊢ φ) (hcp : 𝓢 ⊢ -φ) : 𝓢 ⊢ ⊥ := by

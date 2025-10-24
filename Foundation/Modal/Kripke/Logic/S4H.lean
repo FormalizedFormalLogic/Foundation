@@ -68,7 +68,7 @@ instance : Modal.Grz ⪱ Modal.S4H := by
       . simp only [Set.mem_setOf_eq];
         exact {}
       . suffices ∃ x : M, (0 : M) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 ∧ x = 1 by
-          simpa [Semantics.Realize, Satisfies, M];
+          simpa [Semantics.Models, Satisfies, M];
         use 1;
         constructor;
         . tauto;

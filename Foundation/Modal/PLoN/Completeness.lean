@@ -3,7 +3,7 @@ import Foundation.Modal.PLoN.Basic
 
 namespace LO.Modal
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢] [Entailment.Necessitation 𝓢]
 
 namespace PLoN
@@ -20,17 +20,17 @@ abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl �
   toFrame := canonicalFrame 𝓢
   Valuation Ω a := (atom a) ∈ Ω
 
-@[reducible] instance : Semantics (Formula ℕ) (canonicalModel 𝓢).World := Formula.PLoN.Satisfies.semantics (M := canonicalModel 𝓢)
+@[reducible] instance : Semantics (canonicalModel 𝓢).World (Formula ℕ) := Formula.PLoN.Satisfies.semantics (M := canonicalModel 𝓢)
 
 variable {φ : Formula ℕ}
 
 lemma truthlemma : ∀ {X : (canonicalModel 𝓢).World}, X ⊧ φ ↔ (φ ∈ X) := by
   induction φ with
   | hfalsum =>
-    simp only [Semantics.Realize, PLoN.Satisfies, false_iff];
+    simp only [Semantics.Models, PLoN.Satisfies, false_iff];
     exact not_mem_falsum;
   | hatom =>
-    simp_all [Semantics.Realize, PLoN.Satisfies];
+    simp_all [Semantics.Models, PLoN.Satisfies];
   | himp φ ψ ihp ihq =>
     intro Ω;
     constructor;
@@ -77,7 +77,7 @@ instance [Canonical 𝓢 C] : Complete 𝓢 C := ⟨by
   constructor;
   . exact Canonical.canonical;
   . suffices ∃ X, ¬(PLoN.Satisfies (canonicalModel 𝓢) X φ) by
-      simpa only [Semantics.Realize, PLoN.ValidOnModel, not_forall];
+      simpa only [Semantics.Models, PLoN.ValidOnModel, not_forall];
     obtain ⟨Y, hY⟩ := lindenbaum (𝓢 := 𝓢) (T := {∼φ}) $ by
       apply unprovable_iff_singleton_neg_consistent.mpr;
       exact h;

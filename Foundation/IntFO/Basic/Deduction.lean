@@ -59,7 +59,7 @@ inductive HilbertProofᵢ (Λ : Hilbertᵢ L) : SyntacticFormulaᵢ L → Type _
   | ex₁ t φ      : HilbertProofᵢ Λ <| φ/[t] ➝ ∃' φ
   | ex₂ φ ψ      : HilbertProofᵢ Λ <| ∀' (φ ➝ ψ/[]) ➝ ∃' φ ➝ ψ
 
-instance : Entailment (SyntacticFormulaᵢ L) (Hilbertᵢ L) := ⟨HilbertProofᵢ⟩
+instance : Entailment (Hilbertᵢ L) (SyntacticFormulaᵢ L) := ⟨HilbertProofᵢ⟩
 
 namespace HilbertProofᵢ
 
@@ -269,7 +269,7 @@ instance : AdjunctiveSet (Sentenceᵢ L) (Theoryᵢ L 𝓗) where
 def Proof (T : Theoryᵢ L 𝓗) (φ : Sentenceᵢ L) :=
   (Rewriting.emb '' T.theory) *⊢[𝓗]! (Rewriting.emb φ : SyntacticFormulaᵢ L)
 
-instance : Entailment (Sentenceᵢ L) (Theoryᵢ L 𝓗) := ⟨Theoryᵢ.Proof⟩
+instance : Entailment (Theoryᵢ L 𝓗) (Sentenceᵢ L) := ⟨Theoryᵢ.Proof⟩
 
 lemma provable_def {φ : Sentenceᵢ L} : T ⊢ φ ↔ (Rewriting.emb '' T.theory) *⊢[𝓗] ↑φ := by rfl
 

@@ -32,7 +32,7 @@ instance : Frame.simple_blackhole.IsET5 where
 
 section
 
-variable [Entailment (Formula ℕ) S] {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.ET5 𝓢]
+variable [Entailment S (Formula ℕ)] {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.ET5 𝓢]
 
 instance : (basicCanonicity 𝓢).toModel.IsEuclidean := by
   apply Canonicity.isEuclidean';

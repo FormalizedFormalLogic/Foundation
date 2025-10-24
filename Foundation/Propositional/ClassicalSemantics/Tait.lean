@@ -37,7 +37,7 @@ theorem sound : T ⟹ Γ → T ⊨[Valuation α] Γ.disj := by
       contradiction
   case axm φ h =>
     have : v ⊧* T := by simpa [Semantics.models] using hv
-    simpa using Semantics.realizeSet_iff.mp hv h
+    simpa using Semantics.modelsSet_iff.mp hv h
 
 theorem sound! : T ⟹! Γ → T ⊨[Valuation α] Γ.disj := fun h ↦ sound h.get
 
@@ -170,7 +170,7 @@ lemma maximalConsistentTheory_satisfiable :
 
 lemma satisfiable_of_consistent (consisT : Consistent T) : Semantics.Satisfiable (Valuation α) T :=
   ⟨(NNFormula.atom · ∈ maximalConsistentTheory consisT),
-    Semantics.RealizeSet.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
+    Semantics.ModelsSet.of_subset maximalConsistentTheory_satisfiable (by simp)⟩
 
 theorem completeness! : T ⊨[Valuation α] φ → T ⊢ φ := by
   haveI : DecidableEq α := Classical.typeDecidableEq α
@@ -180,10 +180,10 @@ theorem completeness! : T ⊨[Valuation α] φ → T ⊢ φ := by
     have : Semantics.Satisfiable (Valuation α) (insert (∼φ) T) :=
       this (Derivation.consistent_iff_unprovable.mpr $ by simpa)
     rcases this with ⟨v, hv⟩
-    have : v ⊧* T := Semantics.RealizeSet.of_subset hv (by simp)
+    have : v ⊧* T := Semantics.ModelsSet.of_subset hv (by simp)
     have : v ⊧ φ := hs this
     have : ¬v ⊧ φ := by
-      simpa using hv.realize v (Set.mem_insert (∼φ) T)
+      simpa using hv.models v (Set.mem_insert (∼φ) T)
     contradiction
   intro consis
   exact satisfiable_of_consistent consis

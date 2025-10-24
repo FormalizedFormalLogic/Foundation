@@ -68,7 +68,7 @@ instance : Modal.S4Point3McK ⪱ Modal.S4Point4McK := by
             constructor <;> omega;
         }
       . suffices ∃ x, (0 : M) ≺ x ∧ ¬x ≺ 1 ∧ (0 : M) ≺ 1 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         use 2;
         omega;
 
@@ -89,7 +89,7 @@ instance : Modal.S4Point4 ⪱ Modal.S4Point4McK := by
           trans := by tauto,
           sobocinski := by tauto
         }
-      . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Realize, Satisfies];
+      . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Models, Satisfies];
         use 1;
         trivial;
 

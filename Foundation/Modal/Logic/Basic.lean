@@ -11,7 +11,7 @@ variable {α : Type*}
 
 abbrev Logic (α) := Set (Modal.Formula α)
 
-instance : Entailment (Formula α) (Logic α) := ⟨fun L φ ↦ PLift (φ ∈ L)⟩
+instance : Entailment (Logic α) (Formula α) := ⟨fun L φ ↦ PLift (φ ∈ L)⟩
 
 
 namespace Logic

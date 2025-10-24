@@ -21,7 +21,7 @@ inductive Derivation (𝓢 : SyntacticFormulas L) : Sequent L → Type _
 | cut {Γ φ}    : Derivation 𝓢 (φ :: Γ) → Derivation 𝓢 (∼φ :: Γ) → Derivation 𝓢 Γ
 | axm {φ}     : φ ∈ 𝓢 → Derivation 𝓢 [φ]
 
-instance : OneSided (SyntacticFormula L) (SyntacticFormulas L) := ⟨Derivation⟩
+instance : OneSided (SyntacticFormulas L) (SyntacticFormula L) := ⟨Derivation⟩
 
 abbrev Derivation₀ (Γ : Sequent L) : Type _ := (∅ : SyntacticFormulas L) ⟹ Γ
 
@@ -446,7 +446,7 @@ end SyntacticFormulas
   ### Theory (T set of sentences)
 -/
 
-instance : Entailment (Sentence L) (Theory L) := ⟨fun T σ ↦ (T : SyntacticFormulas L) ⊢! ↑σ⟩
+instance : Entailment (Theory L) (Sentence L) := ⟨fun T σ ↦ (T : SyntacticFormulas L) ⊢! ↑σ⟩
 
 instance (T : Theory L) : Entailment.Cl T := Entailment.Cl.ofEquiv (T : SyntacticFormulas L) T (Rewriting.app Rew.emb) (fun _ ↦ .refl _)
 

@@ -85,7 +85,7 @@ instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
               use 2;
               constructor;
               . tauto;
-              . simp [Semantics.Realize, Satisfies, M];
+              . simp [Semantics.Models, Satisfies, M];
             | 2 => tauto;
             | 3 => tauto;
             | 4 => tauto;
@@ -97,12 +97,12 @@ instance : Propositional.Int ⪱ Propositional.KrieselPutnam := by
               use 4;
               constructor;
               . tauto;
-              . simp [Semantics.Realize, Satisfies, M, Frame.Rel'];
+              . simp [Semantics.Models, Satisfies, M, Frame.Rel'];
             . apply Satisfies.imp_def.not.mpr;
               push_neg;
               use 3;
               constructor;
               . tauto;
-              . simp [Semantics.Realize, Satisfies, M, Frame.Rel'];
+              . simp [Semantics.Models, Satisfies, M, Frame.Rel'];
 
 end LO.Propositional

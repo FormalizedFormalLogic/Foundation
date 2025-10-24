@@ -43,9 +43,9 @@ instance : AdjunctiveSet F (FiniteContext F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [Entailment F S] [LogicalConnective F]
+variable [Entailment S F] [LogicalConnective F]
 
-instance (𝓢 : S) : Entailment F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢! ·.conj ➝ ·)⟩
+instance (𝓢 : S) : Entailment (FiniteContext F 𝓢) F := ⟨(𝓢 ⊢! ·.conj ➝ ·)⟩
 
 abbrev Prf (𝓢 : S) (Γ : List F) (φ : F) : Type _ := (Γ : FiniteContext F 𝓢) ⊢! φ
 
@@ -233,14 +233,14 @@ instance : AdjunctiveSet F (Context F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [LogicalConnective F] [Entailment F S]
+variable [LogicalConnective F] [Entailment S F]
 
 structure Proof (Γ : Context F 𝓢) (φ : F) where
   ctx : List F
   subset : ∀ ψ ∈ ctx, ψ ∈ Γ
   prf : ctx ⊢[𝓢]! φ
 
-instance (𝓢 : S) : Entailment F (Context F 𝓢) := ⟨Proof⟩
+instance (𝓢 : S) : Entailment (Context F 𝓢) F := ⟨Proof⟩
 
 variable (𝓢)
 

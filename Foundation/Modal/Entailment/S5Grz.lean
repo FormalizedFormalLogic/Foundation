@@ -6,7 +6,7 @@ namespace LO.Modal.Entailment
 
 open LO.Entailment LO.Entailment.FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F]
 variable {𝓢 : S} [DecidableEq F] [Entailment.S5Grz 𝓢]
 
 protected noncomputable def S5Grz.diaT : 𝓢 ⊢! ◇φ ➝ φ := by

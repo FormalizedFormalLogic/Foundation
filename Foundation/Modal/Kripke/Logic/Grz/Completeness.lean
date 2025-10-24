@@ -42,7 +42,7 @@ open Kripke
 
 namespace Grz.Kripke
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Grz 𝓢]
 
 variable {φ ψ : Formula ℕ}
@@ -277,7 +277,7 @@ instance : Modal.S4McK ⪱ Modal.Grz := by
           mckinsey := by simp;
         }
       . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
-          simpa [Semantics.Realize, Satisfies];
+          simpa [Semantics.Models, Satisfies];
         intro x hx hxn1;
         by_contra hxn2;
         rcases @hx 1 (by omega) (by tauto) x (by omega);

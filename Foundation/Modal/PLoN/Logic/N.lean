@@ -59,7 +59,7 @@ instance : Modal.N ⪱ Modal.EN := by
       constructor;
       . tauto;
       . suffices (∃ x : M.World, ∀ y : M.World, (PLoN.Frame.Rel' (.atom 0) x y) → y = 0) ∧ ∃ x : M.World, x ≠ 0 by
-          simpa [M, Semantics.Realize, Formula.PLoN.ValidOnModel, Formula.PLoN.Satisfies] using this;
+          simpa [M, Semantics.Models, Formula.PLoN.ValidOnModel, Formula.PLoN.Satisfies] using this;
         constructor;
         . use 0;
           simp [M, PLoN.Frame.Rel'];
@@ -108,6 +108,6 @@ instance : Modal.N ⪱ Modal.K := by
             use 1;
             constructor;
             . simp [Frame.Rel']
-            . simp [Semantics.Realize, Satisfies];
+            . simp [Semantics.Models, Satisfies];
 
 end LO.Modal

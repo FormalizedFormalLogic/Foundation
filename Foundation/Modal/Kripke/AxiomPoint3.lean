@@ -36,7 +36,7 @@ lemma validate_axiomPoint3_of_isPiecewiseStronglyConnected [F.IsPiecewiseStrongl
   suffices
     (∀ y, x ≺ y → (∀ z, y ≺ z → V z 0) → V y 1) ∨
     (∀ y, x ≺ y → (∀ z, y ≺ z → V z 1) → V y 0)
-    by simpa [Semantics.Realize, Satisfies];
+    by simpa [Semantics.Models, Satisfies];
   by_contra hC;
   push_neg at hC;
   obtain ⟨⟨y, Rxy, hp, hnq⟩, ⟨z, Rxz, hq, hnp⟩⟩ := hC;
@@ -53,7 +53,7 @@ lemma isPiecewiseStronglyConnected_of_validate_axiomPoint3 (h : F ⊧ (Axioms.Po
     apply ValidOnFrame.not_of_exists_valuation_world;
     use (λ w a => match a with | 0 => y ≺ w | 1 => z ≺ w | _ => False), x;
     suffices ∃ y', x ≺ y' ∧ (∀ z', y' ≺ z' → y ≺ z') ∧ ¬z ≺ y' ∧ (∃ z', x ≺ z' ∧ (∀ y, z' ≺ y → z ≺ y) ∧ ¬y ≺ z') by
-      simpa [Semantics.Realize, Satisfies];
+      simpa [Semantics.Models, Satisfies];
     refine ⟨y, Rxy, by tauto, nRzy, z, Rxz, by tauto, nRyz⟩;
 
 end definability
@@ -61,7 +61,7 @@ end definability
 
 section canonicality
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke
