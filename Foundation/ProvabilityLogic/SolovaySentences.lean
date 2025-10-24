@@ -50,7 +50,7 @@ noncomputable def realization :
 
 private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
     (i ⊧ A → T₀ ⊢ S i ➝ S.realization A) ∧
-    (¬i ⊧ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
+    (i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
   induction A generalizing i with
   | hfalsum => simp [Realization.interpret, Semantics.Models, Satisfies];
   | hatom a =>
@@ -67,7 +67,7 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
       apply h;
       simpa using hi;
   | himp A B ihA ihB =>
-    simp only [Realization.interpret, Semantics.Imp.models_imply, Classical.not_imp, and_imp];
+    simp only [Realization.interpret, Semantics.Imp.models_imply, Semantics.NotModels, Classical.not_imp, and_imp];
     constructor;
     . intro h;
       rcases Satisfies.imp_def₂.mp h with (hA | hB);
@@ -98,7 +98,7 @@ theorem mainlemma (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i
     i ⊧ A → T₀ ⊢ S i ➝ S.realization A := (mainlemma_aux S hri).1
 
 theorem mainlemma_neg (S : SolovaySentences 𝔅 M.toFrame r) {i : M} (hri : r ≺ i) :
-    ¬i ⊧ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
+    i ⊭ A → T₀ ⊢ S i ➝ ∼S.realization A := (mainlemma_aux S hri).2
 
 lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S r := by
   suffices T₀ ⊢ (⩖ j, S j) ➝ ∼S r ➝ 𝔅^[M.height] ⊥ by
@@ -119,7 +119,7 @@ lemma root_of_iterated_inconsistency : T₀ ⊢ ∼𝔅^[M.height] ⊥ ➝ S r :
 lemma theory_height [𝔅.Sound₀] (h : r ⊧ ◇(∼A)) (b : T ⊢ S.realization A) :
     𝔅.height < M.height := by
   apply 𝔅.height_lt_pos_of_boxBot (height_pos_of_dia h)
-  have : ∃ i, r ≺ i ∧ ¬i ⊧ A := Formula.Kripke.Satisfies.dia_def.mp h
+  have : ∃ i, r ≺ i ∧ i ⊭ A := Formula.Kripke.Satisfies.dia_def.mp h
   rcases this with ⟨i, hi, hiA⟩
   have b₀ : T₀ ⊢ 𝔅 (S.realization A) := 𝔅.D1 b
   have b₁ : T₀ ⊢ ∼(↑𝔅)^[M.height] ⊥ ➝ S r := S.root_of_iterated_inconsistency

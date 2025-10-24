@@ -16,9 +16,9 @@ open Formula.Kripke
 
 namespace Formula
 
-def trace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.height = n ∧ ¬r ⊧ φ) }
+def trace (φ : Formula ℕ) : Set ℕ := { n | ∃ M : Kripke.Model, ∃ r, ∃ _ : M.IsTree r, ∃ _ : Fintype M, (M.height = n ∧ r ⊭ φ) }
 
-lemma iff_mem_trace {n : ℕ} : n ∈ φ.trace ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ φ := by
+lemma iff_mem_trace {n : ℕ} : n ∈ φ.trace ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ r ⊭ φ := by
   simp [Formula.trace];
 
 lemma satisfies_of_not_mem_trace : n ∉ φ.trace ↔ (∀ M : Kripke.Model, ∀ r : M, [M.IsTree r] → [Fintype M] → M.height = n → r ⊧ φ) := by
@@ -50,10 +50,11 @@ open Formula.Kripke
 lemma trace_and : (φ ⋏ ψ).trace = φ.trace ∪ ψ.trace := by
   ext n;
   calc
-    _ ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ (¬r ⊧ φ ∨ ¬r ⊧ ψ) := by simp [trace, -not_and, not_and_or]
+    _ ↔ ∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ (r ⊭ φ ∨ r ⊭ ψ) := by
+      simp [Semantics.NotModels, trace, -not_and, not_and_or]
     _ ↔
-      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ φ) ∨
-      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ ¬r ⊧ ψ) := by
+      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ r ⊭ φ) ∨
+      (∃ M : Kripke.Model, ∃ r : M, ∃ _ : M.IsTree r, ∃ _ : Fintype M, M.height = n ∧ r ⊭ ψ) := by
       constructor;
       . rintro ⟨M, r, _, _, _, (h | h)⟩;
         . left; tauto;
@@ -417,7 +418,7 @@ lemma subset_GLβMinus_of_trace_cofinite (hL : L.trace.Cofinite) : L ⊆ Modal.G
     apply Formula.satisfies_of_not_mem_trace (n := M.height) |>.mp;
     . replace hr : ∀ (n : ℕ), ∀ x ∈ L, n ∈ x.trace → ¬M.height = n := by
         rintro n ξ hξ₁ hξ₂ rfl;
-        obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ ¬r ⊧ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by
+        obtain ⟨m, hm₁, hm₂⟩ : ∃ m, m ∈ Tφ ∧ r ⊭ TBB m := Satisfies.not_fconj'_def.mp $ Satisfies.not_def.mp $ by
           simpa only [Finset.conj_singleton] using hr;
         replace hm₁ : ∀ i ∈ L, m ∉ i.trace := by simpa [Tφ] using hm₁;
         replace hm₂ : M.height = m := by simpa using iff_satisfies_TBB_ne_rank.not.mp hm₂;
