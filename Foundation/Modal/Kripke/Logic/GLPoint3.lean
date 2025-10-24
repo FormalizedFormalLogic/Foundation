@@ -252,7 +252,7 @@ instance : Modal.GL ⪱ Modal.GLPoint3 := by
           irrefl := by omega
         };
       . suffices (0 : M.World) ≺ 1 ∧ (∀ x, (1 : M.World) ≺ x → x = 1) ∧ (0 : M.World) ≺ 2 ∧ ∀ x, (2 : M.World) ≺ x → x = 2 by
-          simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
+          simpa [Semantics.Models, Satisfies, ValidOnFrame, M];
         refine ⟨?_, ?_, ?_, ?_⟩;
         all_goals omega;
 
@@ -270,7 +270,7 @@ instance : Modal.K4Point3 ⪱ Modal.GLPoint3 := by
       constructor;
       . apply Set.mem_setOf_eq.mpr;
         constructor;
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
         constructor;
         . intro y Rxy;
           use y;

@@ -145,7 +145,7 @@ lemma ultrafilter_exists [(t : FinSubtheory T) → Nonempty (A t)]
     rcases this with ⟨t, htT, rfl⟩
     exact ⟨⟨t, htT⟩, by
       suffices ∀ i ∈ t, A ⟨t, htT⟩ ⊧ₘ i by simpa [Sentence.domain] using this
-      intro i hi; exact (H ⟨t, htT⟩).RealizeSet hi⟩)
+      intro i hi; exact (H ⟨t, htT⟩).ModelsSet hi⟩)
 
 lemma compactness_aux :
     Satisfiable T ↔ ∀ i : FinSubtheory T, Satisfiable (i.val : Theory L) := by

@@ -14,7 +14,7 @@ open Kripke
 open Modal.Kripke
 
 instance : Sound Modal.KD4Point3Z natLT := instSound_of_frame_validates_axioms $ by
-  simp only [Semantics.RealizeSet.insert_iff, ValidOnFrame.models_iff, Semantics.RealizeSet.singleton_iff];
+  simp only [Semantics.ModelsSet.insert_iff, ValidOnFrame.models_iff, Semantics.ModelsSet.singleton_iff];
   refine ⟨?_, ?_, ?_, ?_, ?_⟩;
   . apply FrameClass.K.validates_axiomK <;> tauto;
   . apply validate_AxiomD_of_serial;

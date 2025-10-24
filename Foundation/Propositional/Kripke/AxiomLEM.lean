@@ -51,7 +51,7 @@ lemma isEuclidean_of_validate_axiomLEM (h : F ⊧ (Axioms.LEM (.atom 0))) : F.Is
   ⟩;
   suffices Satisfies ⟨F, V⟩ z (.atom 0) by simpa [Satisfies] using this;
   apply V.hereditary Rxz;
-  have : ∀ (w : F.World), x ≺ w → y ≺ w → y ≺ x := by simpa [Semantics.Realize, Satisfies, V, or_iff_not_imp_right] using h V x;
+  have : ∀ (w : F.World), x ≺ w → y ≺ w → y ≺ x := by simpa [Semantics.Models, Satisfies, V, or_iff_not_imp_right] using h V x;
   apply this y;
   . exact Rxy;
   . apply F.refl;

@@ -206,7 +206,7 @@ lemma completeness {C : FrameClass} (hC : 𝓒.toModel.toFrame ∈ C) : LO.Compl
   use 𝓒.toModel, Γ;
   constructor;
   . assumption;
-  . suffices Γ ∉ proofset 𝓢 φ by simpa [Semantics.Realize, Satisfies, 𝓒.truthlemma];
+  . suffices Γ ∉ proofset 𝓢 φ by simpa [Semantics.Models, Satisfies, 𝓒.truthlemma];
     apply proofset.iff_mem.not.mp;
     apply MaximalConsistentSet.iff_mem_neg.mp;
     tauto;

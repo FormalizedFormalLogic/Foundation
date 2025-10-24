@@ -89,7 +89,7 @@ lemma KD_provability_of_classical_satisfiability (hl : φ.Letterless) :
       . exact C_of_N $ ihφ (by grind) |>.2 hφ;
       . exact C!_of_conseq! $ ihψ (by grind) |>.1 hψ;
     . intro h;
-      simp only [trivTranslate, toPropFormula, Semantics.Realize, Formula.ClassicalSemantics.val] at h;
+      simp only [trivTranslate, toPropFormula, Semantics.Models, Formula.ClassicalSemantics.val] at h;
       push_neg at h;
       rcases h with ⟨hφ, hψ⟩;
       replace hφ := ihφ (by grind) |>.1 hφ;
@@ -159,7 +159,7 @@ theorem subset_Triv_of_KD_subset [Modal.KD ⪯ L] : L ⪯ Modal.Triv := by
   let ψ := φ⟦(s : Modal.ZeroSubstitution _).1⟧;
   have : Semantics.Valid (ClassicalSemantics.Valuation ℕ) (∼(ψᵀ.toPropFormula)) := subset_Triv_of_KD_subset.lemma₂.mp h;
   have : Modal.KD ⊢ ∼ψ := provable_not_KD_of_classical_unsatisfiable Formula.Letterless_zeroSubst
-    $ Semantics.Not.realize_not.mp
+    $ Semantics.Not.models_not.mp
     $ this (λ _ => True);
   have : L ⊢ ∼ψ := WeakerThan.pbl this;
   have : L ⊬ ∼ψ := L.not_neg_of! $ Logic.subst _ hφ₁;

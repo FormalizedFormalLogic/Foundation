@@ -196,10 +196,10 @@ scoped notation "‖" φ "‖" => value φ
 @[simp] lemma value_or (φ ψ : Sentenceᵢ L) : (‖φ ⋎ ψ‖ : 𝓚.DownwardClosed) = ‖φ‖ ⊔ ‖ψ‖ := by ext; simp
 
 @[simp] lemma value_imply (φ ψ : Sentenceᵢ L) : (‖φ ➝ ψ‖ : 𝓚.DownwardClosed) = ‖φ‖ ⇨ ‖ψ‖ := by
-  ext; simp [ForcingRelation.Kripke.implies, mem_himp_iff]
+  ext; simp [ForcingRelation.IntuitionisticKripke.imply, mem_himp_iff]
 
 @[simp] lemma value_not (φ : Sentenceᵢ L) : (‖∼φ‖ : 𝓚.DownwardClosed) = ‖φ‖ᶜ := by
-  ext; simp [ForcingRelation.Kripke.not, mem_compl_iff]
+  ext; simp [ForcingRelation.IntuitionisticKripke.not, mem_compl_iff]
 
 end DownwardClosed
 

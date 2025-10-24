@@ -21,7 +21,7 @@ instance : Modal.S5 ⪱ Modal.S5Grz := by
       use ⟨⟨Fin 2, λ x y => True⟩, λ w _ => w = 1⟩, 0;
       constructor;
       . exact { universal := by tauto }
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
         tauto;
 
 instance : Modal.Grz ⪱ Modal.S5Grz := by
@@ -43,7 +43,7 @@ instance : Modal.Grz ⪱ Modal.S5Grz := by
           antisymm := by simp [M]; omega;
         };
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [Semantics.Realize, Satisfies, ValidOnFrame, M];
+          simpa [Semantics.Models, Satisfies, ValidOnFrame, M];
         constructor;
         . omega;
         . use 1;

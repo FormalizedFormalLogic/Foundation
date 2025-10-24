@@ -96,12 +96,12 @@ protected lemma imp_def : x ⊧ φ ➝ ψ ↔ x ⊧ φ → x ⊧ ψ := by
   tauto;
 
 protected instance : Semantics.Tarski (M.World) where
-  realize_top := λ _ => Satisfies.top_def
-  realize_bot := λ _ => Satisfies.bot_def
-  realize_or  := Satisfies.or_def
-  realize_and := Satisfies.and_def
-  realize_imp := Satisfies.imp_def
-  realize_not := Satisfies.neg_def
+  models_verum := λ _ => Satisfies.top_def
+  models_falsum := λ _ => Satisfies.bot_def
+  models_or  := Satisfies.or_def
+  models_and := Satisfies.and_def
+  models_imply := Satisfies.imp_def
+  models_not := Satisfies.neg_def
 
 
 

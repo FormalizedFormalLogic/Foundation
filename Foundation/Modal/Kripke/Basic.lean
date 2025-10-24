@@ -119,12 +119,12 @@ protected lemma dia_def : x ⊧ ◇φ ↔ ∃ y, x ≺ y ∧ y ⊧ φ := by simp
 protected lemma not_dia_def : ¬x ⊧ ◇φ ↔ ∀ y, x ≺ y → ¬(y ⊧ φ) := by simp [Satisfies];
 
 protected instance : Semantics.Tarski (M.World) where
-  realize_top := λ _ => Satisfies.top_def;
-  realize_bot := λ _ => Satisfies.bot_def;
-  realize_imp := Satisfies.imp_def;
-  realize_not := Satisfies.not_def;
-  realize_or := Satisfies.or_def;
-  realize_and := Satisfies.and_def;
+  models_verum := λ _ => Satisfies.top_def;
+  models_falsum := λ _ => Satisfies.bot_def;
+  models_imply := Satisfies.imp_def;
+  models_not := Satisfies.not_def;
+  models_or := Satisfies.or_def;
+  models_and := Satisfies.and_def;
 
 lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp [Satisfies];
 
@@ -216,10 +216,10 @@ lemma not_fconj'_def {ι : α → Formula ℕ}  : ¬(x ⊧ (⩕ i ∈ X, ι i)) 
 
 
 lemma fconj_def {Γ : Finset _} : x ⊧ Γ.conj ↔ ∀ φ ∈ Γ, x ⊧ φ := by
-  simp only [Semantics.realize_finset_conj];
+  simp only [Semantics.models_finset_conj];
 
 lemma fdisj_def {Γ : Finset _} : x ⊧ Γ.disj ↔ ∃ φ ∈ Γ, x ⊧ φ := by
-  simp only [Semantics.realize_finset_disj];
+  simp only [Semantics.models_finset_disj];
 
 lemma fdisj'_def {ι : α → Formula ℕ} : x ⊧ (⩖ i ∈ X, ι i) ↔ ∃ i ∈ X, x ⊧ ι i := by simp;
 
@@ -395,10 +395,10 @@ protected lemma bot_def : ¬M ⊧ ⊥ := by simp [Kripke.ValidOnModel];
 protected lemma top_def : M ⊧ ⊤ := by simp [Kripke.ValidOnModel];
 
 instance : Semantics.Bot (Kripke.Model) where
-  realize_bot := λ _ => ValidOnModel.bot_def;
+  models_falsum := λ _ => ValidOnModel.bot_def;
 
 instance : Semantics.Top (Kripke.Model) where
-  realize_top := λ _ => ValidOnModel.top_def;
+  models_verum := λ _ => ValidOnModel.top_def;
 
 
 lemma iff_not_exists_world {M : Kripke.Model} : (¬M ⊧ φ) ↔ (∃ x : M.World, ¬x ⊧ φ) := by
@@ -451,17 +451,17 @@ variable {F : Kripke.Frame}
 
 @[simp] protected lemma models_iff : F ⊧ φ ↔ Kripke.ValidOnFrame F φ := iff_of_eq rfl
 
-lemma models_set_iff : F ⊧* Φ ↔ ∀ φ ∈ Φ, F ⊧ φ := by simp [Semantics.realizeSet_iff];
+lemma models_set_iff : F ⊧* Φ ↔ ∀ φ ∈ Φ, F ⊧ φ := by simp [Semantics.modelsSet_iff];
 
 protected lemma top_def : F ⊧ ⊤ := by simp [ValidOnFrame];
 
 protected lemma bot_def : ¬F ⊧ ⊥ := by simp [ValidOnFrame];
 
 instance : Semantics.Top (Kripke.Frame) where
-  realize_top _ := ValidOnFrame.top_def;
+  models_verum _ := ValidOnFrame.top_def;
 
 instance : Semantics.Bot (Kripke.Frame) where
-  realize_bot _ := ValidOnFrame.bot_def
+  models_falsum _ := ValidOnFrame.bot_def
 
 lemma iff_not_exists_valuation : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ¬(⟨F, V⟩ : Kripke.Model) ⊧ φ) := by
   simp [ValidOnFrame];
@@ -469,7 +469,7 @@ lemma iff_not_exists_valuation : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, �
 alias ⟨exists_valuation_of_not, not_of_exists_valuation⟩ := iff_not_exists_valuation
 
 lemma iff_not_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ∃ x : (⟨F, V⟩ : Kripke.Model).World, ¬Satisfies _ x φ) := by
-  simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Realize];
+  simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Models];
 
 alias ⟨exists_valuation_world_of_not, not_of_exists_valuation_world⟩ := iff_not_exists_valuation_world
 
@@ -568,7 +568,7 @@ lemma validates_with_AxiomK_of_validates (hV : C ⊧* Γ) : C ⊧* (insert (Axio
   rintro φ (rfl | hφ);
   . intro F _;
     apply Formula.Kripke.ValidOnFrame.axiomK;
-  . apply hV.realize;
+  . apply hV.models;
     assumption;
 
 end FrameClass

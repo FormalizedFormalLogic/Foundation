@@ -64,7 +64,7 @@ instance : Modal.S4McK ⪱ Modal.S4Point2McK := by
             | 2 => use 2; tauto;
         }
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, x ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         use 1;
         refine ⟨?_, ?_, ?_⟩;
         . omega;
@@ -90,7 +90,7 @@ instance : Modal.S4Point2 ⪱ Modal.S4Point2McK := by
           trans := by tauto;
           ps_convergent := by tauto;
         }
-      . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Realize, Satisfies];
+      . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Models, Satisfies];
         use 1;
         trivial;
 

@@ -283,7 +283,7 @@ lemma mainlemma_aux
   (∀ i : Fin k, ((i : M.boneLengthening a k) ⊧ ψ ↔ (a : M.boneLengthening a k) ⊧ ψ)) ∧
   (∀ x : M, (x ⊧ ψ ↔ (x : M.boneLengthening a k) ⊧ ψ)) := by
   induction ψ with
-  | hatom => simp [Semantics.Realize, Satisfies, Model.boneLengthening];
+  | hatom => simp [Semantics.Models, Satisfies, Model.boneLengthening];
   | hfalsum => simp;
   | himp ψ ξ ihψ ihξ => simp [ihψ (by grind), ihξ (by grind)];
   | hbox ψ ihφ =>

@@ -28,7 +28,7 @@ end Neighborhood
 namespace EP
 
 instance Neighborhood.sound : Sound Modal.EP FrameClass.EP := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.singleton_iff];
+  simp only [Semantics.ModelsSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   simp;

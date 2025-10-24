@@ -123,13 +123,13 @@ instance : Modal.K ⪱ Modal.K4n n := by
         constructor;
         . apply Satisfies.multibox_def.mpr;
           intro y R0y;
-          simp [Semantics.Realize, Satisfies, M, counterframe.iff_rel_from.mp R0y];
+          simp [Semantics.Models, Satisfies, M, counterframe.iff_rel_from.mp R0y];
         . apply Satisfies.multibox_def.not.mpr;
           push_neg;
           use ⟨(n + 1), by omega⟩;
           constructor;
           . apply counterframe.iff_rel_from.mpr; simp;
-          . simp [Semantics.Realize, Satisfies, M];
+          . simp [Semantics.Models, Satisfies, M];
 
 lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
   constructor;
@@ -155,7 +155,7 @@ lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
         . apply Satisfies.multibox_def.mpr;
           intro y R0y;
           replace R0y := counterframe.iff_rel_from_zero.mp R0y;
-          simp only [Semantics.Realize, Satisfies, counterframe.last, ne_eq, M];
+          simp only [Semantics.Models, Satisfies, counterframe.last, ne_eq, M];
           rintro rfl;
           simp at R0y;
         . apply Satisfies.multibox_def.not.mpr;
@@ -164,7 +164,7 @@ lemma succ_strictlyWeakerThan : Modal.K4n (n + 1) ⪱ Modal.K4n n := by
           constructor;
           . apply counterframe.iff_rel_from_zero.mpr;
             simp;
-          . simp [Semantics.Realize, Satisfies, M];
+          . simp [Semantics.Models, Satisfies, M];
 
 lemma add_strictlyWeakerThan {m : ℕ+} : Modal.K4n (n + m) ⪱ Modal.K4n n := by
   induction m with

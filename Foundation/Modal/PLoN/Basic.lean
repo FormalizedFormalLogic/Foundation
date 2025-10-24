@@ -81,12 +81,12 @@ protected lemma bot_def : ¬(x ⊧ ⊥) := by simp [Satisfies];
 protected lemma top_def : x ⊧ ⊤ := by simp [Satisfies];
 
 instance : Semantics.Tarski M.World where
-  realize_top := λ _ => Satisfies.top_def
-  realize_bot := λ _ => Satisfies.bot_def
-  realize_imp := Satisfies.imp_def
-  realize_not := Satisfies.not_def
-  realize_and := Satisfies.and_def
-  realize_or  := Satisfies.or_def
+  models_verum := λ _ => Satisfies.top_def
+  models_falsum := λ _ => Satisfies.bot_def
+  models_imply := Satisfies.imp_def
+  models_not := Satisfies.not_def
+  models_and := Satisfies.and_def
+  models_or  := Satisfies.or_def
 
 protected lemma def_iff : x ⊧ φ ⭤ ψ ↔ ((x ⊧ φ) ↔ (x ⊧ ψ)) := by
   simp [LogicalConnective.iff]
@@ -108,7 +108,7 @@ protected lemma iff_models {M : PLoN.Model} {φ : Formula ℕ}
 : M ⊧ φ ↔ Formula.PLoN.ValidOnModel M φ := by rfl
 
 instance : Semantics.Bot (PLoN.Model) where
-  realize_bot _ := by
+  models_falsum _ := by
     simp [Formula.PLoN.ValidOnModel];
     use ﹫;
 
@@ -136,7 +136,7 @@ protected lemma re : ¬∀ M : Model, ∀ φ ψ, M ⊧ φ ⭤ ψ → M ⊧ □φ
   . simp [ValidOnModel];
     tauto;
   . suffices (∃ x : M.World, ∀ y : M.World, x ≺[atom 0] y → y = 0) ∧ ∃ x : M.World, x ≠ 0 by
-      simpa [M, ValidOnModel, Semantics.Realize, Satisfies] using this;
+      simpa [M, ValidOnModel, Semantics.Models, Satisfies] using this;
     constructor;
     . use 0;
       intro x;
@@ -163,7 +163,7 @@ protected lemma iff_models {F : PLoN.Frame} {φ : Formula ℕ}
 variable {F : Frame}
 
 instance : Semantics.Bot (PLoN.Frame) where
-  realize_bot _ := by simp [Formula.PLoN.ValidOnFrame];
+  models_falsum _ := by simp [Formula.PLoN.ValidOnFrame];
 
 protected lemma nec (h : F ⊧ φ) : F ⊧ □φ := by
   intro V x y _;

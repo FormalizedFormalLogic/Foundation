@@ -187,7 +187,7 @@ lemma GL_S_TFAE :
     have := Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
     have : ℕ ⊧ₘ S r₀ ➝ ∼S.realization A := models_of_provable inferInstance $ by
       convert SolovaySentences.rfl_mainlemma_neg (T := T) hA A (by grind) $ Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
-    simp only [Models, LO.Semantics.Not.realize_not, LO.Semantics.Imp.realize_imp] at this;
+    simp only [Models, LO.Semantics.Not.models_not, LO.Semantics.Imp.models_imply] at this;
     exact this <| by
       simpa [models_iff, S, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;

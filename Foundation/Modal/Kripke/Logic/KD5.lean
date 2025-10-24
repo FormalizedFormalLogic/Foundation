@@ -46,7 +46,7 @@ instance : Modal.KD ⪱ Modal.KD5 := by
       constructor;
       . tauto;
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         constructor;
         . tauto;
         . use 1;
@@ -64,6 +64,6 @@ instance : Modal.K5 ⪱ Modal.KD5 := by
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
       . refine { reucl := by simp [RightEuclidean]; };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end LO.Modal

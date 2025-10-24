@@ -52,7 +52,7 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
     (i ⊧ A → T₀ ⊢ S i ➝ S.realization A) ∧
     (¬i ⊧ A → T₀ ⊢ S i ➝ ∼S.realization A) := by
   induction A generalizing i with
-  | hfalsum => simp [Realization.interpret, Semantics.Realize, Satisfies];
+  | hfalsum => simp [Realization.interpret, Semantics.Models, Satisfies];
   | hatom a =>
     constructor;
     . intro h;
@@ -67,7 +67,7 @@ private lemma mainlemma_aux {i : M} (hri : r ≺ i) :
       apply h;
       simpa using hi;
   | himp A B ihA ihB =>
-    simp only [Realization.interpret, Semantics.Imp.realize_imp, Classical.not_imp, and_imp];
+    simp only [Realization.interpret, Semantics.Imp.models_imply, Classical.not_imp, and_imp];
     constructor;
     . intro h;
       rcases Satisfies.imp_def₂.mp h with (hA | hB);

@@ -103,7 +103,7 @@ instance : Modal.S4 ⪱ Modal.S4Point2 := by
       constructor;
       . simp only [Set.mem_setOf_eq]; refine { refl := by omega, trans := by omega; };
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, x ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 1 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         use 1;
         refine ⟨by omega, ?_, ?_⟩;
         . intro y;
@@ -137,7 +137,7 @@ instance : Modal.K4Point2 ⪱ Modal.S4Point2 := by
       . simp only [Set.mem_setOf_eq];
         refine { p_convergent := by simp [M, PiecewiseConvergent ]; omega; };
       . suffices ∃ x, (0 : M.World) ≺ x ∧ (∀ y, ¬x ≺ y) ∧ ∃ x, (0 : M.World) ≺ x by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         use 1;
         refine ⟨?_, ?_, ?_⟩;
         . omega;

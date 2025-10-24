@@ -488,7 +488,7 @@ lemma consistent_of_meaningful : Semantics.Meaningful 𝓜 → Entailment.Consis
 lemma consistent_of_model [LogicalConnective F] [Semantics.Bot M] (𝓜 : M) [Sound 𝓢 𝓜] : Entailment.Consistent 𝓢 :=
   consistent_of_meaningful (𝓜 := 𝓜) inferInstance
 
-lemma realizeSet_of_prfSet {T : Set F} (b : 𝓢 ⊢* T) : 𝓜 ⊧* T :=
+lemma modelsSet_of_prfSet {T : Set F} (b : 𝓢 ⊢* T) : 𝓜 ⊧* T :=
   ⟨fun _ hf ↦ sound (b hf)⟩
 
 end

@@ -61,7 +61,7 @@ lemma models_union_trueArithWithStarUnbounded : ℕ⋆ ⊧ₘ* ⋃ c, trueArithW
 
 instance : ℕ⋆ ⊧ₘ* 𝗧𝗔 := ⟨by
   have : ℕ⋆ ⊧ₘ* Semiformula.lMap (Language.Hom.add₁ _ _) '' 𝗧𝗔 :=
-    Semantics.RealizeSet.of_subset models_union_trueArithWithStarUnbounded
+    Semantics.ModelsSet.of_subset models_union_trueArithWithStarUnbounded
       (Set.subset_iUnion_of_subset 0 $ Set.subset_union_of_subset_left (by simp) _)
   intro σ hσ
   let s : Structure ℒₒᵣ ℕ⋆ := (ModelOfSatEq.struc satisfiable_union_trueArithWithStarUnbounded).lMap
@@ -76,7 +76,7 @@ instance : ℕ⋆ ⊧ₘ* 𝗧𝗔 := ⟨by
         Matrix.fun_eq_vec_two]⟩
     haveI : Structure.LT ℒₒᵣ ℕ⋆ := ⟨fun _ _ => iff_of_eq rfl⟩
     exact standardModel_unique _ _
-  have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this.realize _ (Set.mem_image_of_mem _ hσ))
+  have : s.toStruc ⊧ σ := Semiformula.models_lMap.mp (this.models _ (Set.mem_image_of_mem _ hσ))
   exact e ▸ this⟩
 
 instance : ℕ⋆ ⊧ₘ* 𝗣𝗔⁻ :=
@@ -84,7 +84,7 @@ instance : ℕ⋆ ⊧ₘ* 𝗣𝗔⁻ :=
 
 lemma star_unbounded (n : ℕ) : n < ⋆ := by
   have : ℕ⋆ ⊧ₘ (“!!(Semiterm.Operator.numeral ℒₒᵣ⋆ n) < ⋆” : Sentence ℒₒᵣ⋆) :=
-    models_union_trueArithWithStarUnbounded.realize _
+    models_union_trueArithWithStarUnbounded.models _
       <| Set.mem_iUnion_of_mem (n + 1)
       <| Set.mem_union_right _
       <| Set.mem_range_self (Fin.last n)

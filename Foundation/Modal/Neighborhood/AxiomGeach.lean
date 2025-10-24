@@ -119,7 +119,7 @@ lemma valid_axiomGeach_of_isGeachConvergent [F.IsGeachConvergent g] : F ⊧ Axio
   intro V x;
   apply Satisfies.def_imp.mpr;
   suffices x ∈ F.dia^[g.i] (F.box^[g.m] (V a)) → x ∈ F.box^[g.j] (F.dia^[g.n] (V a)) by
-    simpa [Semantics.Realize, Satisfies];
+    simpa [Semantics.Models, Satisfies];
   apply F.gconv;
 
 @[simp] lemma valid_axiomT_of_isReflexive [F.IsReflexive] : F ⊧ Axioms.T (.atom a) := valid_axiomGeach_of_isGeachConvergent (g := ⟨0, 0, 1, 0⟩)
@@ -132,7 +132,7 @@ lemma isGeachConvergent_of_valid_axiomGeach (h : F ⊧ Axioms.Geach g (.atom a))
   constructor;
   intro X x hx;
   have : x ∈ F.dia^[g.i] (F.box^[g.m] X) → x ∈ F.box^[g.j] (F.dia^[g.n] X) := by
-    simpa [Semantics.Realize, Satisfies] using Satisfies.def_imp.mp $ @h (λ _ => X) x;
+    simpa [Semantics.Models, Satisfies] using Satisfies.def_imp.mp $ @h (λ _ => X) x;
   apply this;
   apply hx;
 

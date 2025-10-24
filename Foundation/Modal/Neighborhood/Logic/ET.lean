@@ -38,7 +38,7 @@ end Neighborhood
 namespace ET
 
 instance Neighborhood.sound : Sound Modal.ET FrameClass.ET := instSound_of_validates_axioms $ by
-  simp only [Semantics.RealizeSet.singleton_iff];
+  simp only [Semantics.ModelsSet.singleton_iff];
   intro F hF;
   replace hF := Set.mem_setOf_eq.mp hF;
   apply valid_axiomT_of_isReflexive;

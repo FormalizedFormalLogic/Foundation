@@ -67,7 +67,7 @@ lemma isTransitive_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsTra
       use v;
       constructor;
       . assumption;
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 lemma isConverseWellFounded_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) : F.IsConverseWellFounded where
   cwf := by
@@ -95,7 +95,7 @@ lemma isConverseWellFounded_of_validate_axiomL (h : F ⊧ (Axioms.L (.atom 0))) 
       use y;
       constructor;
       . assumption;
-      . simpa [Semantics.Realize, Satisfies];
+      . simpa [Semantics.Models, Satisfies];
 
 /-
 protected instance FrameClass.transitive_cwf.definability : FrameClass.trans_cwf.DefinedByFormula (Axioms.L (.atom 0)) := ⟨by

@@ -40,7 +40,7 @@ lemma validate_WeakPoint3_of_weakConnected [F.IsPiecewiseConnected] : F ⊧ (Axi
   suffices
     (∀ (y : F.World), x ≺ y → V y 0 → (∀ (x : F.World), y ≺ x → V x 0) → V y 1) ∨
     (∀ (y : F.World), x ≺ y → V y 1 → (∀ (x : F.World), y ≺ x → V x 1) → V y 0)
-    by simpa [Semantics.Realize, Satisfies];
+    by simpa [Semantics.Models, Satisfies];
   by_contra hC;
   push_neg at hC;
   obtain ⟨⟨y, Rxy, hy0, hz, nhy1⟩, ⟨z, Rxz, hz1, hy, nhz0⟩⟩ := hC;
@@ -63,7 +63,7 @@ lemma isPiecewiseConnected_of_validate_axiomWeakPoint3 (h : F ⊧ (Axioms.WeakPo
     suffices
       ∃ w, x ≺ w ∧ (w = y ∨ y ≺ w) ∧ (∀ (v : F.World), w ≺ v → ¬v = y → y ≺ v) ∧ ¬w = z ∧ ¬z ≺ w ∧
       ∃ w, x ≺ w ∧ (w = z ∨ z ≺ w) ∧ (∀ (v : F.World), w ≺ v → ¬v = z → z ≺ v) ∧ ¬w = y ∧ ¬y ≺ w by
-      simpa [Semantics.Realize, Satisfies];
+      simpa [Semantics.Models, Satisfies];
     refine ⟨y, Rxy, ?_, ?_, ?_, ?_, z, Rxz, ?_, ?_, ?_, ?_⟩;
     all_goals tauto;
 

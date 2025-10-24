@@ -38,9 +38,9 @@ variable {t : (canonicalModel 𝓢).World}
 lemma truthlemma : ((φ ∈ t.1.1) ↔ t ⊧ φ) ∧ ((φ ∈ t.1.2) ↔ ¬t ⊧ φ) := by
   induction φ generalizing t with
   | hatom =>
-    simp_all only [Semantics.Realize, Satisfies, true_and];
+    simp_all only [Semantics.Models, Satisfies, true_and];
     exact iff_not_mem₁_mem₂.symm;
-  | hfalsum => simp [Semantics.Realize, Satisfies];
+  | hfalsum => simp [Semantics.Models, Satisfies];
   | himp φ ψ ihφ ihψ =>
     constructor;
     . constructor;

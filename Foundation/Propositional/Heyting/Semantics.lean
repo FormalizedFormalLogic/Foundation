@@ -106,7 +106,7 @@ lemma sound {φ : Formula α} (d : (Hilbert Ax) ⊢ φ) : mod (Hilbert Ax) ⊧ �
   intro ℍ hℍ;
   induction d with
   | @axm φ s hφ =>
-    apply hℍ.RealizeSet;
+    apply hℍ.ModelsSet;
     use φ;
     grind;
   | @mdp φ ψ _ _ ihpq ihp =>

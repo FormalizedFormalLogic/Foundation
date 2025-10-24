@@ -56,6 +56,6 @@ instance : Modal.KD ⪱ Modal.KT := by
       use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩, 0;
       constructor;
       . exact { serial := by tauto };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end LO.Modal

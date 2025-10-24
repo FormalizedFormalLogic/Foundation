@@ -67,7 +67,7 @@ instance : Modal.EN ⪱ Modal.ECN := by
             ext x;
             match x with | 0 | 1 => simp_all [M]
         }
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
         tauto_set;
 
 instance : Modal.EN ⪱ Modal.EMN := by
@@ -99,7 +99,7 @@ instance : Modal.EN ⪱ Modal.EMN := by
             ext x;
             match x with | 0 | 1 => simp_all [M]
         }
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
 
 
 end LO.Modal

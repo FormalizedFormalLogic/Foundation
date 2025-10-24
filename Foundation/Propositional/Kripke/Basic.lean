@@ -103,16 +103,16 @@ variable {M : Kripke.Model} {w w' : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 lemma not_of_neg : w ⊧ ∼φ → ¬w ⊧ φ := fun h hC ↦ h (refl w) hC
 
 instance : Semantics.Top M.World where
-  realize_top := by simp [Satisfies];
+  models_verum := by simp [Satisfies];
 
 instance : Semantics.Bot M.World where
-  realize_bot := by simp [Satisfies];
+  models_falsum := by simp [Satisfies];
 
 instance : Semantics.And M.World where
-  realize_and := by simp [Satisfies];
+  models_and := by simp [Satisfies];
 
 instance : Semantics.Or M.World where
-  realize_or := by simp [Satisfies];
+  models_or := by simp [Satisfies];
 
 lemma formula_hereditary
   (hw : w ≺ w') : w ⊧ φ → w' ⊧ φ := by
@@ -268,7 +268,7 @@ alias ⟨exists_valuation_of_not, not_of_exists_valuation⟩ := iff_not_exists_v
 
 
 lemma iff_not_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ∃ x : (⟨F, V⟩ : Kripke.Model).World, ¬Satisfies _ x φ) := by
-  simp [ValidOnFrame, ValidOnModel, Semantics.Realize];
+  simp [ValidOnFrame, ValidOnModel, Semantics.Models];
 
 alias ⟨exists_valuation_world_of_not, not_of_exists_valuation_world⟩ := iff_not_exists_valuation_world
 

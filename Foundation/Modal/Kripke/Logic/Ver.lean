@@ -97,7 +97,7 @@ instance : Modal.KTc ⪱ Modal.Ver := by
       constructor;
       . refine ⟨by unfold Coreflexive; trivial⟩
       . suffices ∃ x, (0 : M.World) ≺ x by
-          simpa [Satisfies, Semantics.Realize];
+          simpa [Satisfies, Semantics.Models];
         use 0;
 
 instance : Modal.GLPoint3 ⪱ Modal.Ver := by
@@ -115,7 +115,7 @@ instance : Modal.GLPoint3 ⪱ Modal.Ver := by
       use ⟨⟨Fin 2, λ x y => x < y⟩, (λ w a => False)⟩, 0;
       constructor;
       . exact {}
-      . simp only [Semantics.Realize, Satisfies, imp_false, not_forall, not_not];
+      . simp only [Semantics.Models, Satisfies, imp_false, not_forall, not_not];
         use 1;
         tauto;
 
