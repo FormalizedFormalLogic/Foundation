@@ -35,12 +35,12 @@ instance : Modal.Entailment.S4 IL.smallestMC where
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply Modal.Logic.sumNormal.mem₁!;
-    simp [Modal.Logic.iff_provable, Entailment.theory];
+    simp;
   Four φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply Modal.Logic.sumNormal.mem₁!;
-    simp [Modal.Logic.iff_provable, Entailment.theory];
+    simp;
 
 lemma smallestMC.mdp_S4 (hφψ : Modal.S4 ⊢ φ ➝ ψ) (hφ : IL.smallestMC ⊢ φ) : IL.smallestMC ⊢ ψ := by
   exact (Modal.Logic.sumNormal.mem₁! hφψ) ⨀ hφ;
@@ -178,7 +178,7 @@ namespace Modal
 open Propositional.Formula (gödelTranslate)
 
 variable {IL : Propositional.Logic ℕ}
-variable {MS} [Entailment (Modal.Formula ℕ) MS]
+variable {MS} [Entailment MS (Modal.Formula ℕ)]
 variable {𝓜𝓢 : MS}  [Entailment.S4 𝓜𝓢]
 variable {φ ψ χ : Propositional.Formula ℕ}
 

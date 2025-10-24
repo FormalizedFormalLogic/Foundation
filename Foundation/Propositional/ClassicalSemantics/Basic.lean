@@ -20,16 +20,16 @@ def val (v : Valuation α) : Formula α → Prop
 
 variable {v : Valuation α} {φ ψ : Formula α}
 
-instance semantics : Semantics (Formula α) (Valuation α) := ⟨fun v ↦ val v⟩
+instance semantics : Semantics (Valuation α) (Formula α) := ⟨fun v ↦ val v⟩
 
 lemma models_iff_val : v ⊧ φ ↔ val v φ := iff_of_eq rfl
 
 instance : Semantics.Tarski (Valuation α) where
   models_verum := by simp [models_iff_val, val]
-  models_falsum := by simp [models_iff_val, val]
+  models_falsum := by simp [Semantics.NotModels, models_iff_val, val]
   models_and := by simp [models_iff_val, val]
   models_or  := by simp [models_iff_val, val]
-  models_not := by simp [models_iff_val, val]
+  models_not := by simp [Semantics.NotModels, models_iff_val, val]
   models_imply := by simp [models_iff_val, val]
 
 @[simp] protected lemma models_atom : v ⊧ (.atom a) ↔ v a := iff_of_eq rfl

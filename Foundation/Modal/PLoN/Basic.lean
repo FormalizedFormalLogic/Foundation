@@ -58,7 +58,7 @@ def Satisfies (M : PLoN.Model) (w : M.World) : Formula ℕ → Prop
 
 namespace Satisfies
 
-protected instance semantics (M : PLoN.Model) : Semantics (Formula ℕ) (M.World) := ⟨fun w ↦ Formula.PLoN.Satisfies M w⟩
+protected instance semantics (M : PLoN.Model) : Semantics M.World (Formula ℕ) := ⟨fun w ↦ Formula.PLoN.Satisfies M w⟩
 
 variable {M : PLoN.Model} {x : M.World} {φ ψ : Formula ℕ}
 
@@ -101,7 +101,7 @@ namespace ValidOnModel
 
 variable {M : PLoN.Model} {φ ψ χ : Formula ℕ}
 
-instance : Semantics (Formula ℕ) (PLoN.Model) := ⟨fun M ↦ Formula.PLoN.ValidOnModel M⟩
+instance : Semantics PLoN.Model (Formula ℕ) := ⟨fun M ↦ Formula.PLoN.ValidOnModel M⟩
 
 @[simp]
 protected lemma iff_models {M : PLoN.Model} {φ : Formula ℕ}
@@ -109,7 +109,7 @@ protected lemma iff_models {M : PLoN.Model} {φ : Formula ℕ}
 
 instance : Semantics.Bot (PLoN.Model) where
   models_falsum _ := by
-    simp [Formula.PLoN.ValidOnModel];
+    simp [Semantics.NotModels, Formula.PLoN.ValidOnModel];
     use ﹫;
 
 variable {M : PLoN.Model}
@@ -154,7 +154,7 @@ def ValidOnFrame (F : PLoN.Frame) (φ : Formula ℕ) := ∀ V, (Model.mk F V) �
 
 namespace ValidOnFrame
 
-instance : Semantics (Formula ℕ) (PLoN.Frame) := ⟨fun F ↦ Formula.PLoN.ValidOnFrame F⟩
+instance : Semantics PLoN.Frame (Formula ℕ) := ⟨fun F ↦ Formula.PLoN.ValidOnFrame F⟩
 
 @[simp]
 protected lemma iff_models {F : PLoN.Frame} {φ : Formula ℕ}
@@ -163,7 +163,7 @@ protected lemma iff_models {F : PLoN.Frame} {φ : Formula ℕ}
 variable {F : Frame}
 
 instance : Semantics.Bot (PLoN.Frame) where
-  models_falsum _ := by simp [Formula.PLoN.ValidOnFrame];
+  models_falsum _ := by simp [Semantics.NotModels, Formula.PLoN.ValidOnFrame];
 
 protected lemma nec (h : F ⊧ φ) : F ⊧ □φ := by
   intro V x y _;
@@ -186,7 +186,7 @@ def ValidOnFrameClass (C : PLoN.FrameClass) (φ : Formula ℕ) := ∀ {F}, F ∈
 
 namespace ValidOnFrameClass
 
-instance : Semantics (Formula ℕ) (PLoN.FrameClass) := ⟨fun C ↦ Formula.PLoN.ValidOnFrameClass C⟩
+instance : Semantics PLoN.FrameClass (Formula ℕ) := ⟨fun C ↦ Formula.PLoN.ValidOnFrameClass C⟩
 
 variable {C : FrameClass}
 

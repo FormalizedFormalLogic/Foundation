@@ -42,7 +42,7 @@ open Kripke
 
 namespace Grz.Kripke
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Grz 𝓢]
 
 variable {φ ψ : Formula ℕ}

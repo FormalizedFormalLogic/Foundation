@@ -536,16 +536,16 @@ end
 
 end Structure
 
-instance : Semantics (Sentence L) (Struc L) where
+instance : Semantics (Struc L) (Sentence L) where
   Models := fun str ↦ Semiformula.Evalb str.struc ![]
 
 instance : Semantics.Tarski (Struc L) where
   models_verum := by simp [Semantics.Models]
-  models_falsum := by simp [Semantics.Models]
+  models_falsum := by simp [Semantics.NotModels, Semantics.Models]
   models_and := by simp [Semantics.Models]
   models_or := by simp [Semantics.Models]
   models_imply := by simp [Semantics.Models]
-  models_not := by simp [Semantics.Models]
+  models_not := by simp [Semantics.NotModels, Semantics.Models]
 
 section
 
@@ -558,10 +558,6 @@ infix:45 " ⊧ₘ " => Models
 abbrev ModelsTheory (T : Theory L) : Prop := Semantics.ModelsSet s.toStruc T
 
 infix:45 " ⊧ₘ* " => ModelsTheory
-
-abbrev Models (M : Type*) [s : Structure L M] : Formula L M → Prop := Semiformula.Evalf s id
-
-infix:45 " ⊧ₘᵣ " => Models
 
 abbrev Consequence (T : Theory L) (σ : Sentence L) : Prop := T ⊨[SmallStruc L] σ
 
@@ -711,7 +707,7 @@ variable {L} {M : Type u} [Nonempty M] [Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ₘ σ := by rfl
 
-lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.ModelsSet hσ⟩
+lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.models_set hσ⟩
 
 end Structure
 

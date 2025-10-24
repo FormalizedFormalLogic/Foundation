@@ -126,7 +126,7 @@ structure Context where
   instLC : Q(LogicalConnective $F)
   instDE : Q(DecidableEq $F)
   S : Q(Type levelS)
-  E : Q(Entailment.{_, _, levelE} $F $S)
+  E : Q(Entailment.{_, _, levelE} $S $F)
   𝓢 : Q($S)
   instInt : Q(Entailment.Int $𝓢)
 
@@ -476,7 +476,7 @@ structure HypInfo where
   levelE : Level
   F : Q(Type levelF)
   S : Q(Type levelS)
-  E : Q(Entailment.{_, _, levelE} $F $S)
+  E : Q(Entailment.{_, _, levelE} $S $F)
   𝓢 : Q($S)
   φ : Q($F)
   proof : Q($𝓢 ⊢ $φ)

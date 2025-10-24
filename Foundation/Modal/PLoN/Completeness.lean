@@ -3,7 +3,7 @@ import Foundation.Modal.PLoN.Basic
 
 namespace LO.Modal
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Cl 𝓢] [Entailment.Necessitation 𝓢]
 
 namespace PLoN
@@ -20,7 +20,7 @@ abbrev canonicalModel (𝓢 : S) [Entailment.Consistent 𝓢] [Entailment.Cl �
   toFrame := canonicalFrame 𝓢
   Valuation Ω a := (atom a) ∈ Ω
 
-@[reducible] instance : Semantics (Formula ℕ) (canonicalModel 𝓢).World := Formula.PLoN.Satisfies.semantics (M := canonicalModel 𝓢)
+@[reducible] instance : Semantics (canonicalModel 𝓢).World (Formula ℕ) := Formula.PLoN.Satisfies.semantics (M := canonicalModel 𝓢)
 
 variable {φ : Formula ℕ}
 

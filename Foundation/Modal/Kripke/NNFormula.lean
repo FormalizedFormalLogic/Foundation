@@ -23,7 +23,7 @@ namespace Satisfies
 
 variable {M : Kripke.Model} {x : M.World}
 
-protected instance semantics : Semantics (NNFormula ℕ) (M.World) := ⟨λ x ↦ Satisfies M x⟩
+protected instance semantics : Semantics M (NNFormula ℕ) := ⟨λ x ↦ Satisfies M x⟩
 
 protected lemma iff_models : x ⊧ φ ↔ Satisfies M x φ := iff_of_eq rfl
 
@@ -112,7 +112,7 @@ def ValidOnModel (M : Kripke.Model) := λ φ => ∀ x, Satisfies M x φ
 
 namespace ValidOnModel
 
-instance semantics : Semantics (NNFormula ℕ) (Kripke.Model) := ⟨λ M ↦ ValidOnModel M⟩
+instance semantics : Semantics Kripke.Model (NNFormula ℕ) := ⟨λ M ↦ ValidOnModel M⟩
 
 @[simp] protected lemma iff_models : M ⊧ φ ↔ ValidOnModel M φ := iff_of_eq rfl
 
@@ -123,7 +123,7 @@ def ValidOnFrame (F : Kripke.Frame) := λ φ => ∀ V, (⟨F, V⟩ : Kripke.Mode
 
 namespace ValidOnFrame
 
-instance semantics : Semantics (NNFormula ℕ) (Kripke.Frame) := ⟨λ F ↦ ValidOnFrame F⟩
+instance semantics : Semantics Kripke.Frame (NNFormula ℕ) := ⟨λ F ↦ ValidOnFrame F⟩
 
 @[simp] protected lemma iff_models : F ⊧ φ ↔ ValidOnFrame F φ := iff_of_eq rfl
 
@@ -134,7 +134,7 @@ def ValidOnFrameClass (C : Kripke.FrameClass) := λ φ => ∀ {F}, F ∈ C → V
 
 namespace ValidOnFrameClass
 
-instance semantics : Semantics (NNFormula ℕ) (Kripke.FrameClass) := ⟨λ C ↦ ValidOnFrameClass C⟩
+instance semantics : Semantics Kripke.FrameClass (NNFormula ℕ) := ⟨λ C ↦ ValidOnFrameClass C⟩
 
 @[simp] protected lemma iff_models : C ⊧ φ ↔ ValidOnFrameClass C φ := iff_of_eq rfl
 

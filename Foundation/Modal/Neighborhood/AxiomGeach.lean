@@ -162,7 +162,7 @@ end
 
 section
 
-variable [Entailment (Formula ℕ) S]
+variable [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.E 𝓢] [Entailment.Consistent 𝓢]
 
 open LO.Entailment Modal.Entailment

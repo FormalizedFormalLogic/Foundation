@@ -254,7 +254,7 @@ end definability
 
 section canonicality
 
-variable [Entailment (Formula ℕ) S]
+variable [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open Formula.Kripke

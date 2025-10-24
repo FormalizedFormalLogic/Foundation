@@ -32,7 +32,7 @@ lemma containsUnit_of_valid_axiomN (h : F ⊧ Axioms.N) : F.ContainsUnit := by
 
 section
 
-variable [Entailment (Formula ℕ) S]
+variable [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E 𝓢]
 
 open Entailment

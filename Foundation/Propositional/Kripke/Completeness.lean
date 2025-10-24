@@ -3,7 +3,7 @@ import Foundation.Propositional.ConsistentTableau
 
 namespace LO.Propositional
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.Int 𝓢]
 variable {t t₁ t₂ : SaturatedConsistentTableau 𝓢} {φ ψ : Formula ℕ}
 

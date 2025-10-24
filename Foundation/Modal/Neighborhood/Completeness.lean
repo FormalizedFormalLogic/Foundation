@@ -11,7 +11,7 @@ section
 open MaximalConsistentSet
 
 variable {α : Type*} [DecidableEq α]
-variable {S} [Entailment (Formula α) S]
+variable {S} [Entailment S (Formula α)]
 variable {𝓢 : S} [Entailment.Cl 𝓢]
 
 abbrev Proofset (𝓢 : S) := Set (MaximalConsistentSet 𝓢)
@@ -132,7 +132,7 @@ open Formula (atom)
 open Formula.Neighborhood
 open MaximalConsistentSet
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.E 𝓢] [Entailment.Consistent 𝓢]
 variable {φ ψ ξ : Formula ℕ}
 

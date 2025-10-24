@@ -129,7 +129,7 @@ scoped infix:45 " ⊢!ᵈᵉʳ " => TDerivation
 
 def TProof (T : InternalTheory V L) (φ : Formula V L) := T ⊢!ᵈᵉʳ insert φ ∅
 
-instance : Entailment (Formula V L) (InternalTheory V L) := ⟨TProof⟩
+instance : Entailment (InternalTheory V L) (Formula V L) := ⟨TProof⟩
 
 instance : HasSubset (InternalTheory V L) := ⟨fun T U ↦ T.theory.Δ₁Class (V := V) ⊆ U.theory.Δ₁Class⟩
 

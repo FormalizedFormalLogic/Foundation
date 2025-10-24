@@ -80,7 +80,7 @@ def Satisfies (M : Kripke.Model) (w : M.World) : Formula ℕ → Prop
 
 namespace Satisfies
 
-instance semantics (M : Kripke.Model) : Semantics (Formula ℕ) (M.World) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
+instance semantics (M : Kripke.Model) : Semantics M (Formula ℕ) := ⟨fun w ↦ Formula.Kripke.Satisfies M w⟩
 
 variable {M : Kripke.Model} {w w' : M.World} {a : ℕ} {φ ψ χ : Formula ℕ}
 
@@ -106,7 +106,7 @@ instance : Semantics.Top M.World where
   models_verum := by simp [Satisfies];
 
 instance : Semantics.Bot M.World where
-  models_falsum := by simp [Satisfies];
+  models_falsum := by simp [Semantics.NotModels, Satisfies];
 
 instance : Semantics.And M.World where
   models_and := by simp [Satisfies];
@@ -179,7 +179,7 @@ def ValidOnModel (M : Kripke.Model) (φ : Formula ℕ) := ∀ w : M.World, w ⊧
 
 namespace ValidOnModel
 
-instance semantics : Semantics (Formula ℕ) (Model) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
+instance semantics : Semantics Model (Formula ℕ) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
 variable {M : Model} {φ ψ χ : Formula ℕ}
 
@@ -246,7 +246,7 @@ def ValidOnFrame (F : Frame) (φ : Formula ℕ) := ∀ V, (⟨F, V⟩ : Kripke.M
 
 namespace ValidOnFrame
 
-instance semantics : Semantics (Formula ℕ) (Frame) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
+instance semantics : Semantics Frame (Formula ℕ) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
 
 variable {F : Frame} {φ ψ χ : Formula ℕ}
 

@@ -56,7 +56,7 @@ lemma isRegular_of_valid_axiomC (h : F ⊧ Axioms.C (.atom 0) (.atom 1)) : F.IsR
 
 section
 
-variable [Entailment (Formula ℕ) S]
+variable [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.E 𝓢]
 
 open Entailment

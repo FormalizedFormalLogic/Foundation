@@ -45,9 +45,7 @@ protected class Top where
 
 /-- Tarski's truth definition for `⊥`. -/
 protected class Bot where
-  models_falsum (𝓜 : M) : 𝓜 ⊭ (⊥ : F)
-
-@[simp] lemma Bot.models_falsum' [Semantics.Bot M] (𝓜 : M) : ¬𝓜 ⊧ (⊥ : F) := models_falsum _
+  models_falsum (𝓜 : M) : ¬𝓜 ⊧ (⊥ : F)
 
 /-- Tarski's truth definition for `⋏`. -/
 protected class And where
@@ -63,7 +61,7 @@ protected class Imp where
 
 /-- Tarski's truth definition for `∼`. -/
 protected class Not where
-  models_not {𝓜 : M} {φ : F} : 𝓜 ⊧ ∼φ ↔ 𝓜 ⊭ φ
+  models_not {𝓜 : M} {φ : F} : 𝓜 ⊧ ∼φ ↔ ¬𝓜 ⊧ φ
 
 /-- Tarski's truth definitions. -/
 class Tarski extends

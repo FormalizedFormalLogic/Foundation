@@ -205,7 +205,7 @@ variable (𝓚)
 
 abbrev Models (φ : Sentenceᵢ L) : Prop := ∀ w : 𝓚, w ⊩ φ
 
-instance : Semantics (Sentenceᵢ L) (RelationalKripkeModel L) := ⟨fun 𝓚 φ ↦ 𝓚.Models φ⟩
+instance : Semantics (RelationalKripkeModel L) (Sentenceᵢ L) := ⟨fun 𝓚 φ ↦ 𝓚.Models φ⟩
 
 variable {𝓚}
 
@@ -275,7 +275,7 @@ lemma sound {T : Theoryᵢ L 𝗜𝗻𝘁¹} (b : T ⊢ φ) : 𝓚 ⊧* T → �
     suffices ∀ φ ∈ Γ, w ⊩[![]|fun _ ↦ x] φ by simpa
     intro φ hφ
     rcases show ∃ x ∈ T.theory, ↑x = φ by simpa using HΓ φ hφ with ⟨φ, hφ', rfl⟩
-    simpa using H.ModelsSet hφ' w
+    simpa using H.models_set hφ' w
   simpa using this
 
 instance (T : Theoryᵢ L 𝗜𝗻𝘁¹) : Sound T (Semantics.models (RelationalKripkeModel L) T) := ⟨fun b _ H ↦ sound b H⟩

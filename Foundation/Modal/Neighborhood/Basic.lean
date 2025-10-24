@@ -126,7 +126,7 @@ def Satisfies (M : Model) (x : M.World) (φ : Formula ℕ) : Prop := x ∈ M φ
 
 namespace Satisfies
 
-protected instance semantics {M : Model} : Semantics (Formula ℕ) M.World := ⟨λ x => Formula.Neighborhood.Satisfies M x⟩
+protected instance semantics {M : Model} : Semantics M (Formula ℕ) := ⟨λ x => Formula.Neighborhood.Satisfies M x⟩
 
 variable {M : Model} {x : M.World} {φ ψ ξ : Formula ℕ}
 
@@ -175,7 +175,7 @@ namespace ValidOnModel
 
 variable {M : Model} {φ ψ ξ : Formula ℕ}
 
-protected instance semantics : Semantics (Formula ℕ) Model := ⟨fun M ↦ ValidOnModel M⟩
+protected instance semantics : Semantics Model (Formula ℕ) := ⟨fun M ↦ ValidOnModel M⟩
 
 @[simp]
 lemma iff_eq_truthset_univ : M ⊧ φ ↔ (M φ = Set.univ) := by
@@ -189,7 +189,7 @@ lemma iff_eq_truthset_univ : M ⊧ φ ↔ (M φ = Set.univ) := by
 
 instance : Semantics.Bot Model where
   models_falsum M := by
-    simp only [iff_eq_truthset_univ, Neighborhood.Model.truthset.eq_bot];
+    simp only [Semantics.NotModels, iff_eq_truthset_univ, Neighborhood.Model.truthset.eq_bot];
     apply Set.nonempty_iff_ne_empty.mp ?_ |>.symm;
     simp;
 
@@ -233,7 +233,7 @@ namespace ValidOnFrame
 
 variable {F : Frame} {φ ψ ξ : Formula ℕ}
 
-protected instance semantics : Semantics (Formula ℕ) Frame := ⟨fun F ↦ ValidOnFrame F⟩
+protected instance semantics : Semantics Frame (Formula ℕ) := ⟨fun F ↦ ValidOnFrame F⟩
 
 instance : Semantics.Bot Frame where
   models_falsum F := by

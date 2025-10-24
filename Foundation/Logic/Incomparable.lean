@@ -5,7 +5,7 @@ import Foundation.Logic.Entailment
 namespace LO.Entailment
 
 variable {F : Type u_1} {S : Type u_2} {T : Type u_3}
-         [Entailment S F] [Entailment F T]
+         [Entailment S F] [Entailment T F]
          {𝓢 : S} {𝓣 : T}
 
 class Incomparable (𝓢 : S) (𝓣 : T) where

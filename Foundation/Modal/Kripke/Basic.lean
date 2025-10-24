@@ -89,7 +89,7 @@ def Satisfies (M : Kripke.Model) (x : M.World) : Formula ℕ → Prop
 
 namespace Satisfies
 
-protected instance semantics {M : Kripke.Model} : Semantics (Formula ℕ) (M.World) := ⟨fun x ↦ Formula.Kripke.Satisfies M x⟩
+protected instance semantics {M : Kripke.Model} : Semantics M (Formula ℕ) := ⟨fun x ↦ Formula.Kripke.Satisfies M x⟩
 
 variable {M : Kripke.Model} {x : M.World} {φ ψ : Formula ℕ}
 
@@ -126,15 +126,15 @@ protected instance : Semantics.Tarski (M.World) where
   models_or := Satisfies.or_def;
   models_and := Satisfies.and_def;
 
-lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp [Satisfies];
+lemma iff_def : x ⊧ φ ⭤ ψ ↔ (x ⊧ φ ↔ x ⊧ ψ) := by simp;
 
-@[simp] lemma negneg_def : x ⊧ ∼∼φ ↔ x ⊧ φ := by simp;
+@[simp] lemma negneg_def : x ⊧ ∼∼φ ↔ x ⊧ φ := by simp [Semantics.NotModels];
 
 protected lemma not_and_def : ¬(x ⊧ φ ⋏ ψ) ↔ ¬(x ⊧ φ) ∨ ¬(x ⊧ ψ) := by simp [-not_and, not_and_or];
 
 lemma multibox_dn : x ⊧ □^[n](∼∼φ) ↔ x ⊧ □^[n]φ := by
   induction n generalizing x with
-  | zero => simp;
+  | zero => simp [Semantics.NotModels];
   | succ n ih =>
     suffices x ⊧ (□□^[n](∼∼φ)) ↔ x ⊧ (□□^[n]φ) by simpa;
     constructor;
@@ -147,7 +147,7 @@ lemma box_dn : x ⊧ □(∼∼φ) ↔ x ⊧ □φ := multibox_dn (n := 1)
 
 lemma multidia_dn : x ⊧ ◇^[n](∼∼φ) ↔ x ⊧ ◇^[n]φ := by
   induction n generalizing x with
-  | zero => simp;
+  | zero => simp [Semantics.NotModels];
   | succ n ih =>
     suffices x ⊧ (◇◇^[n](∼∼φ)) ↔ x ⊧ (◇◇^[n]φ) by simpa;
     constructor;
@@ -233,7 +233,7 @@ lemma mdp (hpq : x ⊧ φ ➝ ψ) (hp : x ⊧ φ) : x ⊧ ψ := by simp_all;
 
 lemma intro_neg_semiequiv (h : x ⊧ φ → x ⊧ ψ) : x ⊧ ∼ψ → x ⊧ ∼φ := by
   contrapose;
-  simp_all [Satisfies];
+  simp_all;
 
 lemma intro_multibox_semiequiv (h : ∀ y, x ≺^[n] y → y ⊧ φ → y ⊧ ψ) : x ⊧ □^[n]φ → x ⊧ □^[n]ψ := by
   induction n generalizing x with
@@ -295,11 +295,11 @@ lemma intro_dia_equiv (h : ∀ y, x ≺ y → (y ⊧ φ ↔ y ⊧ ψ)) : x ⊧ �
   simpa;
 
 
-lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Satisfies];
+lemma dia_dual : x ⊧ ◇φ ↔ x ⊧ ∼□(∼φ) := by simp [Semantics.NotModels, Satisfies];
 
 lemma multidia_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
   induction n generalizing x with
-  | zero => simp;
+  | zero => simp [Semantics.NotModels];
   | succ n ih =>
     constructor;
     . intro h;
@@ -327,7 +327,7 @@ lemma multidia_dual : x ⊧ ◇^[n]φ ↔ x ⊧ ∼□^[n](∼φ) := by
       . apply ih.mpr;
         exact Satisfies.not_def.mpr hy;
 
-lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Satisfies];
+lemma box_dual : x ⊧ □φ ↔ x ⊧ ∼◇(∼φ) := by simp [Semantics.NotModels, Satisfies];
 
 lemma multibox_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by
   constructor;
@@ -348,7 +348,7 @@ lemma multibox_dual : x ⊧ □^[n]φ ↔ x ⊧ ∼◇^[n](∼φ) := by
     apply multibox_dn.not.mpr;
     exact h;
 
-lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Satisfies];
+lemma not_imp : ¬(x ⊧ φ ➝ ψ) ↔ x ⊧ φ ⋏ ∼ψ := by simp [Semantics.NotModels];
 
 lemma iff_subst_self {x : F.World} (s : Substitution ℕ) :
   letI U : Kripke.Valuation F := λ w a => Satisfies ⟨F, V⟩ w ((atom a)⟦s⟧);
@@ -384,7 +384,7 @@ def ValidOnModel (M : Kripke.Model) (φ : Formula ℕ) := ∀ x : M.World, x ⊧
 
 namespace ValidOnModel
 
-instance semantics : Semantics (Formula ℕ) (Kripke.Model) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
+instance semantics : Semantics Kripke.Model (Formula ℕ) := ⟨fun M ↦ Formula.Kripke.ValidOnModel M⟩
 
 @[simp] protected lemma iff_models {M : Kripke.Model} : M ⊧ f ↔ Kripke.ValidOnModel M f := iff_of_eq rfl
 
@@ -426,7 +426,7 @@ protected lemma imply₁ : M ⊧ (Axioms.Imply₁ φ ψ) := by simp [ValidOnMode
 
 protected lemma imply₂ : M ⊧ (Axioms.Imply₂ φ ψ χ) := by simp [ValidOnModel]; tauto;
 
-protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel, Satisfies]; tauto;
+protected lemma elimContra : M ⊧ (Axioms.ElimContra φ ψ) := by simp [ValidOnModel]; tauto;
 
 protected lemma axiomK : M ⊧ (Axioms.K φ ψ)  := by
   intro V;
@@ -445,7 +445,7 @@ def ValidOnFrame (F : Kripke.Frame) (φ : Formula ℕ) := ∀ V, (⟨F, V⟩ : K
 
 namespace ValidOnFrame
 
-instance semantics : Semantics (Formula ℕ) (Kripke.Frame) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
+instance semantics : Semantics Kripke.Frame (Formula ℕ) := ⟨fun F ↦ Formula.Kripke.ValidOnFrame F⟩
 
 variable {F : Kripke.Frame}
 
@@ -469,7 +469,7 @@ lemma iff_not_exists_valuation : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, �
 alias ⟨exists_valuation_of_not, not_of_exists_valuation⟩ := iff_not_exists_valuation
 
 lemma iff_not_exists_valuation_world : (¬F ⊧ φ) ↔ (∃ V : Kripke.Valuation F, ∃ x : (⟨F, V⟩ : Kripke.Model).World, ¬Satisfies _ x φ) := by
-  simp [ValidOnFrame, Satisfies, ValidOnModel, Semantics.Models];
+  simp [ValidOnFrame, ValidOnModel, Semantics.Models];
 
 alias ⟨exists_valuation_world_of_not, not_of_exists_valuation_world⟩ := iff_not_exists_valuation_world
 
