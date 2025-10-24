@@ -18,6 +18,7 @@ Also provides 𝓜 characterization of compactness.
 
 namespace LO
 
+/-- `Semantics M F` denotes semantics of formulae `F for models `M` -/
 class Semantics (M : Type*) (F : outParam Type*) where
   Models : M → F → Prop
 
@@ -27,34 +28,44 @@ namespace Semantics
 
 infix:45 " ⊧ " => Models
 
+/-- The negation of `𝓜 ⊧ φ` -/
 abbrev NotModels (𝓜 : M) (φ : F) : Prop := ¬𝓜 ⊧ φ
 
 infix:45 " ⊭ " => NotModels
+
+/-! ### Tarski's truth definitions -/
 
 section
 
 variable [LogicalConnective F] (M)
 
+/-- Tarski's truth definition for `⊤`. -/
 protected class Top where
   models_verum (𝓜 : M) : 𝓜 ⊧ (⊤ : F)
 
+/-- Tarski's truth definition for `⊥`. -/
 protected class Bot where
   models_falsum (𝓜 : M) : 𝓜 ⊭ (⊥ : F)
 
 @[simp] lemma Bot.models_falsum' [Semantics.Bot M] (𝓜 : M) : ¬𝓜 ⊧ (⊥ : F) := models_falsum _
 
+/-- Tarski's truth definition for `⋏`. -/
 protected class And where
   models_and {𝓜 : M} {φ ψ : F} : 𝓜 ⊧ φ ⋏ ψ ↔ 𝓜 ⊧ φ ∧ 𝓜 ⊧ ψ
 
+/-- Tarski's truth definition for `⋎`. -/
 protected class Or where
   models_or {𝓜 : M} {φ ψ : F} : 𝓜 ⊧ φ ⋎ ψ ↔ 𝓜 ⊧ φ ∨ 𝓜 ⊧ ψ
 
+/-- Tarski's truth definition for `➝`. -/
 protected class Imp where
   models_imply {𝓜 : M} {φ ψ : F} : 𝓜 ⊧ φ ➝ ψ ↔ (𝓜 ⊧ φ → 𝓜 ⊧ ψ)
 
+/-- Tarski's truth definition for `∼`. -/
 protected class Not where
   models_not {𝓜 : M} {φ : F} : 𝓜 ⊧ ∼φ ↔ 𝓜 ⊭ φ
 
+/-- Tarski's truth definitions. -/
 class Tarski extends
   Semantics.Top M,
   Semantics.Bot M,
@@ -110,6 +121,9 @@ variable {𝓜 : M}
 
 end
 
+/-! ### A semantics and satisfiability over a set of formulas -/
+
+/-- `𝓜 ⊧* T` denotes `𝓜 ⊧ φ` for all `φ` in `T`. -/
 class ModelsSet (𝓜 : M) (T : Set F) : Prop where
   models_set : ∀ ⦃φ⦄, φ ∈ T → Models 𝓜 φ
 
@@ -121,10 +135,12 @@ def Valid (φ : F) : Prop := ∀ 𝓜 : M, 𝓜 ⊧ φ
 
 def Satisfiable (T : Set F) : Prop := ∃ 𝓜 : M, 𝓜 ⊧* T
 
+/-- A set of models satisfies set of formulae `T`. -/
 def models (T : Set F) : Set M := {𝓜 | 𝓜 ⊧* T}
 
 variable {M}
 
+/-- A set of formulae satisfied by model `𝓜`. -/
 def theory (𝓜 : M) : Set F := {φ | 𝓜 ⊧ φ}
 
 class Meaningful (𝓜 : M) : Prop where
@@ -203,6 +219,9 @@ instance [Semantics M F] : Semantics (Set M) F := ⟨fun s φ ↦ ∀ ⦃𝓜⦄
 
 @[simp] lemma empty_models (φ : F) : (∅ : Set M) ⊧ φ := by rintro h; simp
 
+/-! Logical consequence -/
+
+/-- The logical conseqence. -/
 def Consequence (T : Set F) (φ : F) : Prop := models M T ⊧ φ
 
 -- note that ⊨ (\vDash) is *NOT* ⊧ (\models)
@@ -243,6 +262,9 @@ lemma of_mem {T : Set F} {φ} (h : φ ∈ T) : T ⊨[M] φ := fun _ hs => hs.mod
 
 end Semantics
 
+/-! Compactness -/
+
+/-- A cumulative sequence of sets. -/
 def Cumulative (T : ℕ → Set F) : Prop := ∀ s, T s ⊆ T (s + 1)
 
 namespace Cumulative
@@ -276,6 +298,7 @@ end Cumulative
 
 variable (M)
 
+/-- A `Semantics M F` is compact if, for any set of formulas, the satisfiability of the set is equivalent to the satisfiability of every finite subset of it.  -/
 class Compact : Prop where
   compact {T : Set F} :
     Semantics.Satisfiable M T ↔ (∀ u : Finset F, ↑u ⊆ T → Semantics.Satisfiable M (u : Set F))
