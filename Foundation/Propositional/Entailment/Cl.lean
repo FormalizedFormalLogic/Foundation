@@ -4,7 +4,7 @@ namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [LogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [LogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S} [Entailment.Cl 𝓢]
 
 noncomputable instance : HasAxiomDummett 𝓢 where

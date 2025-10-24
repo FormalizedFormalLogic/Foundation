@@ -5,7 +5,7 @@ namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S] {𝓢 : S} [Entailment.Minimal 𝓢]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F] {𝓢 : S} [Entailment.Minimal 𝓢]
 
 def C_replace [HasAxiomImply₁ 𝓢] [HasAxiomImply₂ 𝓢] (h₁ : 𝓢 ⊢! ψ₁ ➝ φ₁) (h₂ : 𝓢 ⊢! φ₂ ➝ ψ₂) : 𝓢 ⊢! φ₁ ➝ φ₂ → 𝓢 ⊢! ψ₁ ➝ ψ₂ := λ h => C_trans h₁ $ C_trans h h₂
 
@@ -16,7 +16,7 @@ namespace LO.Modal.Entailment
 
 open LO.Entailment LO.Entailment.FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F]
 variable {𝓢 : S} [Entailment.E 𝓢] {n : ℕ} {φ ψ ξ χ: F}
 
 variable [DecidableEq F]

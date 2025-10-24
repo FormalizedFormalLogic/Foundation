@@ -5,7 +5,7 @@ namespace LO.Modal.Entailment
 
 open LO.Entailment Entailment.FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S} [Entailment.K4 𝓢]
 
 lemma diaFour'! (h : 𝓢 ⊢ ◇◇φ) : 𝓢 ⊢ ◇φ := axiomFourDual ⨀ h

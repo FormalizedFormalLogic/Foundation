@@ -43,7 +43,7 @@ instance : AdjunctiveSet F (FiniteContext F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [Entailment F S] [LogicalConnective F]
+variable [Entailment S F] [LogicalConnective F]
 
 instance (𝓢 : S) : Entailment F (FiniteContext F 𝓢) := ⟨(𝓢 ⊢! ·.conj ➝ ·)⟩
 
@@ -233,7 +233,7 @@ instance : AdjunctiveSet F (Context F 𝓢) where
   not_mem_empty := by simp
   mem_cons_iff := by simp [Adjoin.adjoin, mem_def]
 
-variable [LogicalConnective F] [Entailment F S]
+variable [LogicalConnective F] [Entailment S F]
 
 structure Proof (Γ : Context F 𝓢) (φ : F) where
   ctx : List F

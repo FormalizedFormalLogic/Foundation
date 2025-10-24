@@ -6,7 +6,7 @@ open Entailment
 open FiniteContext
 
 variable {F : Type*} [LogicalConnective F] [DecidableEq F]
-         {S : Type*} [Entailment F S]
+         {S : Type*} [Entailment S F]
          {𝓢 : S} [Entailment.Cl 𝓢]
          {φ ψ χ ξ : F}
 

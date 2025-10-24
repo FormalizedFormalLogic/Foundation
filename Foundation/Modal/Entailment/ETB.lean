@@ -5,7 +5,7 @@ namespace LO.Entailment
 
 open FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S] {𝓢 : S} [Entailment.Minimal 𝓢]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F] {𝓢 : S} [Entailment.Minimal 𝓢]
 
 def C_of (h : 𝓢 ⊢! φ) : 𝓢 ⊢! ψ ➝ φ := deduct' $ of h
 @[grind] lemma C_of! : 𝓢 ⊢ φ → 𝓢 ⊢ ψ ➝ φ := λ ⟨h⟩ => ⟨C_of h⟩
@@ -17,7 +17,7 @@ namespace LO.Modal.Entailment
 
 open LO.Entailment LO.Entailment.FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {n : ℕ} {φ ψ ξ χ: F}
 
 

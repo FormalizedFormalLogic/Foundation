@@ -2,7 +2,7 @@ import Foundation.Logic.HilbertStyle.Supplemental
 
 namespace LO
 
-variable {F S : Type*} [LogicalConnective F] [Entailment F S]
+variable {F S : Type*} [LogicalConnective F] [Entailment S F]
 
 namespace Entailment
 

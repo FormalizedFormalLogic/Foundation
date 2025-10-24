@@ -16,7 +16,7 @@ namespace Theorems
 
 open Entailment TwoSided FiniteContext
 
-variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment F S] (𝓢 : S) [Entailment.Cl 𝓢]
+variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment S F] (𝓢 : S) [Entailment.Cl 𝓢]
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
@@ -94,7 +94,7 @@ abbrev M := ReaderT Context AtomM
 #check Mathlib.Tactic.AtomM
 
 /-- Apply the function
-  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment F S] {𝓢} [Entailment.Cl 𝓢], _` to the
+  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Cl 𝓢], _` to the
 implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
   mkAppN <| @Expr.const n [c.levelF, c.levelS, c.levelE]

@@ -90,7 +90,7 @@ variable [Tarski M]
 variable {𝓜 : M}
 
 @[simp] lemma models_iff {φ ψ : F} :
-    𝓜 ⊧ φ ⭤ ψ ↔ ((𝓜 ⊧ φ) ↔ (𝓜 ⊧ ψ)) := by
+    𝓜 ⊧ φ ⭤ ψ ↔ (𝓜 ⊧ φ ↔ 𝓜 ⊧ ψ) := by
   simp [LogicalConnective.iff, iff_iff_implies_and_implies]
 
 @[simp] lemma models_list_conj {l : List F} :
