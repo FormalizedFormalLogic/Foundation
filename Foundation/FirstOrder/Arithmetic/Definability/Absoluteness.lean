@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
+import Foundation.FirstOrder.Arithmetic.Definability.BoundedBoldface
 import Foundation.FirstOrder.R0.Basic
 
 namespace LO.FirstOrder.Arithmetic
