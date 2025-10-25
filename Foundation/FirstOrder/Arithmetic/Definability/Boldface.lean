@@ -189,6 +189,12 @@ lemma df {R : (Fin k → V) → Prop} {φ : ℌ.Semisentence k} (h : Defined R �
 @[simp] lemma iff {R : (Fin k → V) → Prop} {φ : ℌ.Semisentence k} [h : Defined R φ] :
     Semiformula.Evalbm V v φ.val ↔ R v := h.df _
 
+@[simp] lemma iff_delta_pi {R : (Fin k → V) → Prop} {φ : (𝚫-[m]).Semisentence k} [h : Defined R φ] :
+    Semiformula.Evalbm V v φ.pi.val ↔ R v := by simp [h.proper.iff']
+
+@[simp] lemma iff_delta_sigma {R : (Fin k → V) → Prop} {φ : (𝚫-[m]).Semisentence k} [h : Defined R φ] :
+    Semiformula.Evalbm V v φ.sigma.val ↔ R v := by simp [h.proper.iff]
+
 lemma of_zero {R : (Fin k → V) → Prop} {φ : 𝚺₀.Semisentence k} (h : Defined R φ) : Defined R (φ.ofZero ℌ) := Defined.mk <|
   match ℌ with
   | 𝚺-[m] => by intro _; simp

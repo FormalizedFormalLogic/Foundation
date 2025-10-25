@@ -21,9 +21,9 @@ noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (param z)        := (param 1).[z]
   fvar (_     x)        := ^&x
   func (_     k f _ v') := ^func k f v'
-  bvar_defined := by intro v; simp [blueprint]
-  fvar_defined := by intro v; simp [blueprint]
-  func_defined := by intro v; simp [blueprint]
+  bvar_defined := .mk fun v ↦ by simp [blueprint]
+  fvar_defined := .mk fun v ↦ by simp [blueprint]
+  func_defined := .mk fun v ↦ by simp [blueprint]
 
 end TermSubst
 
@@ -57,18 +57,17 @@ variable {n m w : V}
 
 section
 
-lemma termSubst.defined : 𝚺₁-Function₂ termSubst (V := V) L via termSubstGraph L := by
-  intro v
+instance termSubst.defined : 𝚺₁-Function₂ termSubst (V := V) L via termSubstGraph L := .mk fun v ↦ by
   simpa [termSubstGraph, termSubst, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
-    using construction.result_defined ![v 0, v 2, v 1]
+    using construction.result_defined.defined ![v 0, v 2, v 1]
 
 instance termSubst.definable : 𝚺₁-Function₂ termSubst (V := V) L := termSubst.defined.to_definable
 
 instance termSubst.definable' : Γ-[k + 1]-Function₂ termSubst (V := V) L := termSubst.definable.of_sigmaOne
 
-lemma termSubstVec.defined : 𝚺₁-Function₃ termSubstVec (V := V) L via termSubstVecGraph L := by
-  intro v; simpa [termSubstVecGraph, termSubstVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
-    using construction.resultVec_defined ![v 0, v 1, v 3, v 2]
+instance termSubstVec.defined : 𝚺₁-Function₃ termSubstVec (V := V) L via termSubstVecGraph L := .mk fun v ↦ by
+  simpa [termSubstVecGraph, termSubstVec, Matrix.constant_eq_singleton, Matrix.comp_vecCons']
+    using construction.resultVec_defined.defined ![v 0, v 1, v 3, v 2]
 
 instance termSubstVec.definable : 𝚺₁-Function₃ termSubstVec (V := V) L := termSubstVec.defined.to_definable
 
@@ -168,9 +167,9 @@ noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (_ z)        := ^#z
   fvar (_ x)        := ^&(x + 1)
   func (_ k f _ v') := ^func k f v'
-  bvar_defined := by intro v; simp [blueprint]
-  fvar_defined := by intro v; simp [blueprint]
-  func_defined := by intro v; simp [blueprint]
+  bvar_defined := .mk fun v ↦ by simp [blueprint]
+  fvar_defined := .mk fun v ↦ by simp [blueprint]
+  func_defined := .mk fun v ↦ by simp [blueprint]
 
 end TermShift
 
@@ -204,15 +203,15 @@ variable {n : V}
 
 section
 
-lemma termShift.defined : 𝚺₁-Function₁ termShift (V := V) L via termShiftGraph L := by
-  intro v; simpa [termShiftGraph, termShift] using construction.result_defined v
+instance termShift.defined : 𝚺₁-Function₁ termShift (V := V) L via termShiftGraph L := .mk fun v ↦ by
+  simpa [termShiftGraph, termShift] using construction.result_defined.defined v
 
 instance termShift.definable : 𝚺₁-Function₁ termShift (V := V) L := termShift.defined.to_definable
 
 instance termShift.definable' : Γ-[i + 1]-Function₁ termShift (V := V) L := termShift.definable.of_sigmaOne
 
-lemma termShiftVec.defined : 𝚺₁-Function₂ termShiftVec (V := V) L via termShiftVecGraph L := by
-  intro v; simpa [termShiftVecGraph, termShiftVec] using construction.resultVec_defined v
+instance termShiftVec.defined : 𝚺₁-Function₂ termShiftVec (V := V) L via termShiftVecGraph L := .mk fun v ↦ by
+  simpa [termShiftVecGraph, termShiftVec] using construction.resultVec_defined.defined v
 
 instance termShiftVec.definable : 𝚺₁-Function₂ termShiftVec (V := V) L := termShiftVec.defined.to_definable
 
@@ -303,9 +302,9 @@ noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (_ z)        := ^#(z + 1)
   fvar (_ x)        := ^&x
   func (_ k f _ v') := ^func k f v'
-  bvar_defined := by intro v; simp [blueprint]
-  fvar_defined := by intro v; simp [blueprint]
-  func_defined := by intro v; simp [blueprint]
+  bvar_defined := .mk fun v ↦ by simp [blueprint]
+  fvar_defined := .mk fun v ↦ by simp [blueprint]
+  func_defined := .mk fun v ↦ by simp [blueprint]
 
 end TermBShift
 
@@ -337,15 +336,15 @@ variable {L}
 
 section
 
-lemma termBShift.defined : 𝚺₁-Function₁ termBShift (V := V) L via termBShiftGraph L := by
-  intro v; simpa using construction.result_defined v
+instance termBShift.defined : 𝚺₁-Function₁ termBShift (V := V) L via termBShiftGraph L := .mk fun v ↦ by
+  simpa using construction.result_defined.defined v
 
 instance termBShift.definable : 𝚺₁-Function₁ termBShift (V := V) L := termBShift.defined.to_definable
 
 instance termBShift.definable' : Γ-[i + 1]-Function₁ termBShift (V := V) L := termBShift.definable.of_sigmaOne
 
-lemma termBShiftVec.defined : 𝚺₁-Function₂ termBShiftVec (V := V) L via termBShiftVecGraph L := by
-  intro v; simpa using construction.resultVec_defined v
+instance termBShiftVec.defined : 𝚺₁-Function₂ termBShiftVec (V := V) L via termBShiftVecGraph L := .mk fun v ↦ by
+  simpa using construction.resultVec_defined.defined v
 
 instance termBShiftVec.definable : 𝚺₁-Function₂ termBShiftVec (V := V) L := termBShiftVec.defined.to_definable
 
@@ -480,8 +479,7 @@ variable {L}
 
 section
 
-lemma qVec.defined : 𝚺₁-Function₁[V] qVec L via qVecGraph L := by
-  intro v; simp [qVecGraph, termBShiftVec.defined.df.iff]; rfl
+instance qVec.defined : 𝚺₁-Function₁[V] qVec L via qVecGraph L := .mk fun v ↦ by simp [qVecGraph]; rfl
 
 instance qVec.definable : 𝚺₁-Function₁[V] qVec L := qVec.defined.to_definable
 
@@ -646,21 +644,15 @@ def qqAddGraph : 𝚺₁.Semisentence 3 :=
 def qqMulGraph : 𝚺₁.Semisentence 3 :=
   .mkSigma “t x y. ∃ v, !mkVec₂Def v x y ∧ !qqFuncDef t 2 ↑mulIndex v”
 
-lemma qqAdd_defined : 𝚺₁-Function₂ (qqAdd : V → V → V) via qqAddGraph := by
-  intro v; simp [qqAddGraph, numeral_eq_natCast, qqAdd]
+instance qqAdd_defined : 𝚺₁-Function₂ (qqAdd : V → V → V) via qqAddGraph := .mk fun v ↦ by
+  simp [qqAddGraph, numeral_eq_natCast, qqAdd]
 
-lemma qqMul_defined : 𝚺₁-Function₂ (qqMul : V → V → V) via qqMulGraph := by
-  intro v; simp [qqMulGraph, numeral_eq_natCast, qqMul]
+instance qqMul_defined : 𝚺₁-Function₂ (qqMul : V → V → V) via qqMulGraph := .mk fun v ↦ by
+  simp [qqMulGraph, numeral_eq_natCast, qqMul]
 
 instance : Γ-[m + 1]-Function₂ (qqAdd : V → V → V) := .of_sigmaOne qqAdd_defined.to_definable
 
 instance : Γ-[m + 1]-Function₂ (qqMul : V → V → V) := .of_sigmaOne qqMul_defined.to_definable
-
-@[simp] lemma eval_qqAddGraph (v) :
-    Semiformula.Evalbm V v qqAddGraph.val ↔ v 0 = (v 1) ^+ (v 2) := qqAdd_defined.df.iff v
-
-@[simp] lemma eval_qqMulGraph (v) :
-    Semiformula.Evalbm V v qqMulGraph.val ↔ v 0 = (v 1) ^* (v 2) := qqMul_defined.df.iff v
 
 end
 
@@ -699,8 +691,8 @@ def blueprint : PR.Blueprint 0 where
 noncomputable def construction : PR.Construction V blueprint where
   zero := fun _ ↦ 𝟏
   succ := fun _ _ t ↦ t ^+ 𝟏
-  zero_defined := by intro v; simp [blueprint, numeral_eq_natCast]
-  succ_defined := by intro v; simp [qqAdd, blueprint, numeral_eq_natCast]
+  zero_defined := .mk fun v ↦ by simp [blueprint, numeral_eq_natCast]
+  succ_defined := .mk fun v ↦ by simp [qqAdd, blueprint, numeral_eq_natCast]
 
 noncomputable def numeralAux (x : V) : V := construction.result ![] x
 
@@ -712,11 +704,8 @@ section
 
 def numeralAuxGraph : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
-lemma numeralAux.defined : 𝚺₁-Function₁ (numeralAux : V → V) via numeralAuxGraph :=
+instance numeralAux.defined : 𝚺₁-Function₁ (numeralAux : V → V) via numeralAuxGraph := .mk
   fun v ↦ by simp [construction.result_defined_iff, numeralAuxGraph]; rfl
-
-@[simp] lemma numeralAuxGraph.eval (v) :
-    Semiformula.Evalbm V v numeralAuxGraph.val ↔ v 0 = numeralAux (v 1) := numeralAux.defined.df.iff v
 
 instance numeralAux.definable : 𝚺-[0 + 1]-Function₁ (numeralAux : V → V) := numeralAux.defined.to_definable
 
@@ -771,14 +760,9 @@ lemma numeral_succ_pos (pos : 0 < n) : numeral (n + 1 : V) = numeral n ^+ 𝟏 :
 
 section
 
-
-
-lemma numeral_defined : 𝚺₁-Function₁ (numeral : V → V) via numeralGraph := fun v ↦ by
+instance numeral_defined : 𝚺₁-Function₁ (numeral : V → V) via numeralGraph := .mk fun v ↦ by
   simp [numeralGraph, numeral_eq_natCast]
   by_cases hv1 : v 1 = 0 <;> simp [hv1, numeral]
-
-@[simp] lemma eval_numeralGraph (v) :
-    Semiformula.Evalbm V v numeralGraph.val ↔ v 0 = numeral (v 1) := numeral_defined.df.iff v
 
 instance numeral_definable : 𝚺₁-Function₁ (numeral : V → V) := numeral_defined.to_definable
 

@@ -25,7 +25,7 @@ noncomputable section
 variable {V : Type*} [ORingStructure V]
 
 lemma models_Omega1_iff [V ⊧ₘ* 𝗜𝚺₀] : V ⊧ₘ Omega1.omega1 ↔ ∀ x : V, ∃ y, Exponential (‖x‖^2) y := by
-  simp [models_iff, Omega1.omega1, length_defined.df.iff, Exponential.defined.df.iff, sq]
+  simp [models_iff, Omega1.omega1, sq]
 
 lemma omega1_of_ISigma1 [V ⊧ₘ* 𝗜𝚺₁] : V ⊧ₘ Omega1.omega1 := models_Omega1_iff.mpr (fun x ↦ ISigma1.Exponential.range_exists (‖x‖^2))
 
@@ -64,13 +64,12 @@ lemma exponential_smash_one (a : V) : Exponential ‖a‖ (a ⨳ 1) := by simpa 
 def smashDef : 𝚺₀.Semisentence 3 := .mkSigma
   “z x y. ∃ lx <⁺ x, ∃ ly <⁺ y, !lengthDef lx x ∧ !lengthDef ly y ∧ !exponentialDef (lx * ly) z”
 
-lemma smash_defined : 𝚺₀-Function₂ (Smash.smash : V → V → V) via smashDef := by
-  intro v
-  suffices v 0 = v 1 ⨳ v 2 ↔ Exponential (‖v 1‖ * ‖v 2‖) (v 0) by
-    simpa [smashDef, length_defined.df.iff, Exponential.defined.df.iff, ←le_iff_lt_succ]
+instance smash_defined : 𝚺₀-Function₂ (Smash.smash : V → V → V) via smashDef := .mk <| fun v ↦ by
+  suffices Exponential (‖v 1‖ * ‖v 2‖) (v 0) ↔ v 0 = v 1 ⨳ v 2 by
+    simpa [smashDef, ←le_iff_lt_succ]
   constructor
-  · intro h; simp [h, exponential_smash]
   · rintro h; exact h.uniq (exponential_smash (v 1) (v 2))
+  · intro h; simp [h, exponential_smash]
 
 instance smash_definable : 𝚺₀-Function₂ (Smash.smash : V → V → V) := smash_defined.to_definable
 

@@ -51,19 +51,11 @@ lemma nth_lt_qqFunc_of_lt {i k f v : V} (hi : i < len v) : v.[i] < ^func k f v :
 
 def _root_.LO.FirstOrder.Arithmetic.qqBvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t z. ∃ t' < t, !pairDef t' 0 z ∧ t = t' + 1”
 
-lemma qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := by
-  intro v; simp_all [qqBvarDef, qqBvar]
-
-@[simp] lemma eval_qqBvarDef (v) :
-    Semiformula.Evalbm V v qqBvarDef.val ↔ v 0 = ^#(v 1) := qqBvar_defined.df.iff v
+instance qqBvar_defined : 𝚺₀-Function₁ (qqBvar : V → V) via qqBvarDef := .mk fun _ ↦ by simp_all [qqBvarDef, qqBvar]
 
 def _root_.LO.FirstOrder.Arithmetic.qqFvarDef : 𝚺₀.Semisentence 2 := .mkSigma “t x. ∃ t' < t, !pairDef t' 1 x ∧ t = t' + 1”
 
-lemma qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef := by
-  intro v; simp_all [qqFvarDef, qqFvar]
-
-@[simp] lemma eval_qqFvarDef (v) :
-    Semiformula.Evalbm V v qqFvarDef.val ↔ v 0 = ^&(v 1) := qqFvar_defined.df.iff v
+instance qqFvar_defined : 𝚺₀-Function₁ (qqFvar : V → V) via qqFvarDef := .mk fun v ↦ by simp_all [qqFvarDef, qqFvar]
 
 private lemma qqFunc_graph {x k f v : V} :
     x = ^func k f v ↔ ∃ fv < x, fv = ⟪f, v⟫ ∧ ∃ kfv < x, kfv = ⟪k, fv⟫ ∧ ∃ x' < x, x' = ⟪2, kfv⟫ ∧ x = x' + 1 :=
@@ -76,11 +68,7 @@ private lemma qqFunc_graph {x k f v : V} :
 def _root_.LO.FirstOrder.Arithmetic.qqFuncDef : 𝚺₀.Semisentence 4 := .mkSigma
   “x k f v. ∃ fv < x, !pairDef fv f v ∧ ∃ kfv < x, !pairDef kfv k fv ∧ ∃ x' < x, !pairDef x' 2 kfv ∧ x = x' + 1”
 
-lemma qqFunc_defined : 𝚺₀-Function₃ (qqFunc : V → V → V → V) via qqFuncDef := by
-  intro v; simp [qqFuncDef, qqFunc_graph]
-
-@[simp] lemma eval_qqFuncDef (v) :
-    Semiformula.Evalbm V v qqFuncDef.val ↔ v 0 = ^func (v 1) (v 2) (v 3) := qqFunc_defined.df.iff v
+instance qqFunc_defined : 𝚺₀-Function₃ (qqFunc : V → V → V → V) via qqFuncDef := .mk fun v ↦ by simp [qqFuncDef, qqFunc_graph]
 
 namespace FormalizedTerm
 
@@ -153,9 +141,7 @@ variable {L}
 
 namespace IsUTerm
 
-lemma defined : 𝚫₁-Predicate (IsUTerm L (V := V)) via (isUTerm L) := (construction L).fixpoint_definedΔ₁
-
-@[simp] lemma eval (v) : Semiformula.Evalbm V v (isUTerm L).val ↔ IsUTerm L (v 0) := defined.df.iff v
+instance defined : 𝚫₁-Predicate (IsUTerm L (V := V)) via (isUTerm L) := (construction L).fixpoint_definedΔ₁
 
 instance definable : 𝚫₁-Predicate (IsUTerm L (V := V)) := defined.to_definable
 
@@ -214,12 +200,9 @@ lemma two_iff {v : V} : IsUTermVec L 2 v ↔ ∃ t₁ t₂, IsUTerm L t₁ ∧ I
 
 section
 
-lemma defined : 𝚫₁-Relation (IsUTermVec (V := V) L) via (isUTermVec L) :=
+instance defined : 𝚫₁-Relation (IsUTermVec (V := V) L) via (isUTermVec L) :=
   ⟨by intro v; simp [isUTermVec, HierarchySymbol.Semiformula.val_sigma, IsUTerm.defined.proper.iff'],
    by intro v; simp [isUTermVec, HierarchySymbol.Semiformula.val_sigma, IsUTermVec]⟩
-
-@[simp] lemma eval (v) :
-    Semiformula.Evalbm V v (isUTermVec L).val ↔ IsUTermVec L (v 0) (v 1) := defined.df.iff v
 
 instance definable : 𝚫₁-Relation (IsUTermVec (V := V) L) := defined.to_definable
 
@@ -376,57 +359,17 @@ private lemma phi_iff (param : Fin arity → V) (C pr : V) :
 
 def construction : Fixpoint.Construction V (β.blueprint L) where
   Φ := c.Phi L
-  defined :=
-  ⟨by intro v
-      /-
-      simp? [HierarchySymbol.Semiformula.val_sigma, Blueprint.blueprint,
-        eval_isUTermDef L, IsUTerm.defined.proper.iff',
-        c.bvar_defined.iff, c.bvar_defined.graph_delta.proper.iff',
-        c.fvar_defined.iff, c.fvar_defined.graph_delta.proper.iff',
-        c.func_defined.iff, c.func_defined.graph_delta.proper.iff']
-      -/
-      simp only [Nat.succ_eq_add_one, Blueprint.blueprint, Nat.reduceAdd, HierarchySymbol.Semiformula.val_sigma,
-        HierarchySymbol.Semiformula.sigma_mkDelta,
-        HierarchySymbol.Semiformula.val_mkSigma, Semiformula.eval_bexLTSucc', Semiterm.val_bvar,
-        Matrix.cons_val_one, Matrix.vecHead, LogicalConnective.HomClass.map_and,
-        Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.cons_val_two, Matrix.vecTail,
-        Function.comp_apply, Matrix.cons_val_succ, Matrix.cons_val_zero, Matrix.cons_val_fin_one,
-        Matrix.constant_eq_singleton, pair_defined_iff, Fin.isValue, Fin.succ_zero_eq_one,
-        Matrix.cons_val_four, IsUTerm.eval, LogicalConnective.HomClass.map_or,
-        Semiformula.eval_bexLT, eval_qqBvarDef, Matrix.cons_app_five, c.bvar_defined.iff,
-        LogicalConnective.Prop.and_eq, eval_qqFvarDef, c.fvar_defined.iff, Matrix.cons_val_three,
-        Semiformula.eval_ex, Matrix.cons_app_seven, Matrix.cons_app_six, eval_repeatVec,
-        eval_lenDef, Semiformula.eval_ballLT, eval_nthDef, Semiformula.eval_operator_three, cons_app_11,
-        cons_app_10, cons_app_9, Matrix.cons_app_eight, eval_memRel, exists_eq_left, eval_qqFuncDef,
-        Fin.succ_one_eq_two, c.func_defined.iff, LogicalConnective.Prop.or_eq,
-        HierarchySymbol.Semiformula.pi_mkDelta, HierarchySymbol.Semiformula.val_mkPi, IsUTerm.defined.proper.iff',
-        c.bvar_defined.graph_delta.proper.iff', HierarchySymbol.Semiformula.graphDelta_val,
-        c.fvar_defined.graph_delta.proper.iff', Semiformula.eval_all,
-        LogicalConnective.HomClass.map_imply, Semiformula.eval_operator_two, Structure.Eq.eq,
-        LogicalConnective.Prop.arrow_eq, forall_eq, c.func_defined.graph_delta.proper.iff']
-      ,
-    by  intro v
-        /-
-        simpa? [HierarchySymbol.Semiformula.val_sigma, Blueprint.blueprint, eval_isUTermDef L,
-          c.bvar_defined.iff, c.fvar_defined.iff, c.func_defined.iff]
-        using c.phi_iff _ _ _
-        -/
-        simpa only [Nat.succ_eq_add_one, Blueprint.blueprint,
-          Nat.reduceAdd, HierarchySymbol.Semiformula.val_sigma,
-          HierarchySymbol.Semiformula.val_mkDelta, HierarchySymbol.Semiformula.val_mkSigma,
-          Semiformula.eval_bexLTSucc', Semiterm.val_bvar, Matrix.cons_val_one, Matrix.vecHead,
-          LogicalConnective.HomClass.map_and, Semiformula.eval_substs, Matrix.comp_vecCons',
-          Matrix.cons_val_two, Matrix.vecTail, Function.comp_apply, Matrix.cons_val_succ,
-          Matrix.cons_val_zero, Matrix.cons_val_fin_one, Matrix.constant_eq_singleton,
-          pair_defined_iff, Fin.isValue, Fin.succ_zero_eq_one, IsUTerm.eval,
-          LogicalConnective.HomClass.map_or, Semiformula.eval_bexLT, eval_qqBvarDef,
-          c.bvar_defined.iff, LogicalConnective.Prop.and_eq, eval_qqFvarDef, c.fvar_defined.iff,
-          Matrix.cons_val_three, Semiformula.eval_ex, Matrix.cons_app_seven, Matrix.cons_app_six,
-          Matrix.cons_app_five, Matrix.cons_val_four, eval_repeatVec, eval_lenDef,
-          Semiformula.eval_ballLT, eval_nthDef, Semiformula.eval_operator_three, cons_app_11,
-          cons_app_10, cons_app_9, Matrix.cons_app_eight, eval_memRel, exists_eq_left,
-          eval_qqFuncDef, Fin.succ_one_eq_two, c.func_defined.iff,
-          LogicalConnective.Prop.or_eq] using c.phi_iff L _ _ _⟩
+  defined := .mk <| by
+    constructor
+    · intro v
+      simp [Blueprint.blueprint,
+        c.bvar_defined.iff, c.bvar_defined.graph_delta.iff_delta_pi,
+        c.fvar_defined.iff, c.fvar_defined.graph_delta.iff_delta_pi,
+        c.func_defined.iff, c.func_defined.graph_delta.iff_delta_pi]
+    · intro v
+      symm
+      simpa [Blueprint.blueprint, c.bvar_defined.iff, c.fvar_defined.iff, c.func_defined.iff]
+        using c.phi_iff L _ _ _
   monotone := by
     unfold Phi
     rintro C C' hC v pr ⟨ht, H⟩
@@ -462,13 +405,13 @@ lemma Graph.case_iff {t y : V} :
 
 variable (c)
 
-lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1)) (β.graph L) := by
-  intro v; simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Graph]
+lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1)) (β.graph L) := .mk fun v ↦ by
+  simp [Blueprint.graph, (c.construction L).fixpoint_defined.iff, Graph]
 
 @[simp] lemma eval_graphDef (v) :
-    Semiformula.Evalbm V v (β.graph L).val ↔ c.Graph L (v ·.succ.succ) (v 0) (v 1) := (graph_defined c).df.iff v
+    Semiformula.Evalbm V v (β.graph L).val ↔ c.Graph L (v ·.succ.succ) (v 0) (v 1) := (graph_defined c).iff
 
-instance graph_definable : 𝚺₁.Definable (fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1)) :=
+instance graph_definable : 𝚺₁.Definable fun v ↦ c.Graph L (v ·.succ.succ) (v 0) (v 1) :=
   (graph_defined c).to_definable
 
 instance graph_definable₂ (param) : 𝚺-[0 + 1]-Relation (c.Graph L param) := by
@@ -640,13 +583,12 @@ variable (c)
 
 section
 
-lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result L (v ·.succ) (v 0)) (β.result L) := by
-  intro v
+lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result L (v ·.succ) (v 0)) (β.result L) := .mk fun v ↦ by
   simp [Blueprint.result, HierarchySymbol.Semiformula.val_sigma, IsUTerm.defined.proper.iff',
     c.eval_graphDef, result, Classical.choose!_eq_iff_right]
 
 @[simp] lemma result_graphDef (v) :
-    Semiformula.Evalbm V v (β.result L).val ↔ v 0 = c.result L (v ·.succ.succ) (v 1) := (result_defined c).df.iff v
+    Semiformula.Evalbm V v (β.result L).val ↔ v 0 = c.result L (v ·.succ.succ) (v 1) := (result_defined c).iff
 
 private lemma resultVec_graph {w' k w} :
     w' = c.resultVec L param k w ↔
@@ -654,14 +596,14 @@ private lemma resultVec_graph {w' k w} :
       (¬IsUTermVec L k w → w' = 0) ) :=
   Classical.choose!_eq_iff_right (c.graph_existsUnique_vec_total L param k w)
 
-lemma resultVec_defined : 𝚺₁.DefinedFunction (fun v ↦ c.resultVec L (v ·.succ.succ) (v 0) (v 1)) (β.resultVec L) := by
-  intro v
+lemma resultVec_defined : 𝚺₁.DefinedFunction (fun v ↦ c.resultVec L (v ·.succ.succ) (v 0) (v 1)) (β.resultVec L) := .mk fun v ↦ by
+  symm
   simpa [Blueprint.resultVec, HierarchySymbol.Semiformula.val_sigma, IsUTermVec.defined.proper.iff',
     c.eval_graphDef] using c.resultVec_graph
 
 lemma eval_resultVec (v : Fin (arity + 3) → V) :
     Semiformula.Evalbm V v (β.resultVec L).val ↔
-    v 0 = c.resultVec L (v ·.succ.succ.succ) (v 1) (v 2) := c.resultVec_defined.df.iff v
+    v 0 = c.resultVec L (v ·.succ.succ.succ) (v 1) (v 2) := c.resultVec_defined.iff
 
 end
 
@@ -682,9 +624,9 @@ noncomputable def construction : Language.TermRec.Construction V blueprint where
   bvar (_ z)        := z + 1
   fvar (_ _)        := 0
   func (_ _ _ _ v') := listMax v'
-  bvar_defined := by intro v; simp [blueprint]
-  fvar_defined := by intro v; simp [blueprint]
-  func_defined := by intro v; simp [blueprint]
+  bvar_defined := .mk fun v ↦ by simp [blueprint]
+  fvar_defined := .mk fun v ↦ by simp [blueprint]
+  func_defined := .mk fun v ↦ by simp [blueprint]
 
 end IsUTerm.BV
 
@@ -728,13 +670,13 @@ lemma termBVVec_cons {k t ts : V} (ht : IsUTerm L t) (hts : IsUTermVec L k ts) :
 
 section
 
-lemma termBV.defined : 𝚺₁-Function₁ (termBV (V := V) L) via (termBVGraph L) := construction.result_defined
+instance termBV.defined : 𝚺₁-Function₁ (termBV (V := V) L) via (termBVGraph L) := construction.result_defined
 
 instance termBV.definable : 𝚺₁-Function₁ (termBV (V := V) L) := termBV.defined.to_definable
 
 instance termBV.definable' : Γ-[k + 1]-Function₁ (termBV (V := V) L) := termBV.definable.of_sigmaOne
 
-lemma termBVVec.defined : 𝚺₁-Function₂ (termBVVec (V := V) L) via (termBVVecGraph L) :=
+instance termBVVec.defined : 𝚺₁-Function₂ (termBVVec (V := V) L) via (termBVVecGraph L) :=
   construction.resultVec_defined
 
 instance termBVVec.definable : 𝚺₁-Function₂ (termBVVec (V := V) L) := termBVVec.defined.to_definable
@@ -846,31 +788,23 @@ lemma SemitermVec.adjoin {n m w t : V} (h : IsSemitermVec L n m w) (ht : IsSemit
 
 section
 
-lemma IsSemiterm.defined : 𝚫₁-Relation (IsSemiterm (V := V) L) via (isSemiterm L) where
-  left := by
-    intro v
-    simp [isSemiterm, HierarchySymbol.Semiformula.val_sigma,
-      IsUTerm.defined.df.iff, IsUTerm.defined.proper.iff',
-      termBV.defined.df.iff]
-  right := by
-    intro v
-    simp [isSemiterm, HierarchySymbol.Semiformula.val_sigma,
-      IsUTerm.defined.df.iff, termBV.defined.df.iff]; rfl
+instance IsSemiterm.defined : 𝚫₁-Relation (IsSemiterm (V := V) L) via (isSemiterm L) := .mk <| by
+  refine ⟨?_, ?_⟩
+  · intro v
+    simp [isSemiterm, HierarchySymbol.Semiformula.val_sigma]
+  · intro v
+    simp [isSemiterm, IsSemiterm, HierarchySymbol.Semiformula.val_sigma]
 
 instance IsSemiterm.definable : 𝚫₁-Relation (IsSemiterm (V := V) L) := IsSemiterm.defined.to_definable
 
 instance IsSemiterm.definable' (Γ m) : Γ-[m + 1]-Relation (IsSemiterm (V := V) L) := IsSemiterm.definable.of_deltaOne
 
-lemma IsSemitermVec.defined : 𝚫₁-Relation₃ (IsSemitermVec (V := V) L) via (isSemitermVec L) where
-  left := by
-    intro v
-    simp [isSemitermVec, HierarchySymbol.Semiformula.val_sigma,
-      IsUTermVec.defined.df.iff, IsUTermVec.defined.proper.iff',
-      termBV.defined.df.iff]
-  right := by
-    intro v
-    simp [isSemitermVec, HierarchySymbol.Semiformula.val_sigma,
-      IsUTermVec.defined.df.iff, termBV.defined.df.iff]; rfl
+instance IsSemitermVec.defined : 𝚫₁-Relation₃ (IsSemitermVec (V := V) L) via (isSemitermVec L) := .mk <| by
+  refine ⟨?_, ?_⟩
+  · intro v
+    simp [isSemitermVec, HierarchySymbol.Semiformula.val_sigma]
+  · intro v
+    simp [isSemitermVec, IsSemitermVec, HierarchySymbol.Semiformula.val_sigma]
 
 instance IsSemitermVec.definable : 𝚫₁-Relation₃ (IsSemitermVec (V := V) L) := IsSemitermVec.defined.to_definable
 
