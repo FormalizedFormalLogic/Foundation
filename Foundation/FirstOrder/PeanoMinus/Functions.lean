@@ -52,11 +52,7 @@ open FirstOrder.Arithmetic.HierarchySymbol.Definable
 def _root_.LO.FirstOrder.Arithmetic.subDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → x = y + z) ∧ (x < y → z = 0)”
 
-lemma sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef := by
-  intro v; simp [FirstOrder.Arithmetic.subDef, sub_eq_iff]
-
-@[simp] lemma sub_defined_iff (v) :
-    Semiformula.Evalbm V v subDef.val ↔ v 0 = v 1 - v 2 := sub_defined.df.iff v
+instance sub_defined : 𝚺₀-Function₂ ((· - ·) : V → V → V) via subDef := .mk <| by intro v; simp [FirstOrder.Arithmetic.subDef, sub_eq_iff]
 
 instance sub_definable (ℌ : HierarchySymbol) : ℌ.DefinableFunction₂ ((· - ·) : V → V → V) := sub_defined.to_definable₀
 
@@ -180,12 +176,7 @@ lemma dvd_iff_bounded {a b : V} : a ∣ b ↔ ∃ c ≤ b, b = a * c := by
 def _root_.LO.FirstOrder.Arithmetic.dvd : 𝚺₀.Semisentence 2 :=
   .mkSigma “x y. ∃ z <⁺ y, y = x * z”
 
-lemma dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd :=
-  fun v ↦ by
-    simp [dvd_iff_bounded, dvd]
-
-@[simp] lemma dvd_defined_iff (v) :
-    Semiformula.Evalbm V v dvd.val ↔ v 0 ∣ v 1 := dvd_defined.df.iff v
+instance dvd_defined : 𝚺₀-Relation (fun a b : V ↦ a ∣ b) via dvd := .mk fun v ↦ by simp [dvd_iff_bounded, dvd]
 
 instance dvd_definable (ℌ : HierarchySymbol) : ℌ.DefinableRel ((· ∣ ·) : V → V → Prop) := dvd_defined.to_definable₀
 
@@ -243,10 +234,8 @@ def IsPrime (a : V) : Prop := 1 < a ∧ ∀ b ≤ a, b ∣ a → b = 1 ∨ b = a
 def _root_.LO.FirstOrder.Arithmetic.isPrime : 𝚺₀.Semisentence 1 :=
   .mkSigma “x. 1 < x ∧ ∀ y <⁺ x, !dvd.val y x → y = 1 ∨ y = x”
 
-lemma isPrime_defined : 𝚺₀-Predicate (λ a : V ↦ IsPrime a) via isPrime := by
-  intro v
-  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton,
-    IsPrime, isPrime]
+instance isPrime_defined : 𝚺₀-Predicate (λ a : V ↦ IsPrime a) via isPrime := .mk fun v ↦ by
+  simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton, IsPrime, isPrime]
 
 end Prime
 
@@ -258,18 +247,10 @@ def _root_.LO.FirstOrder.Arithmetic.min : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≤ y → z = x) ∧ (x ≥ y → z = y)”
 
 set_option linter.flexible false in
-lemma min_defined : 𝚺₀-Function₂ (min : V → V → V) via min := by
-  intro v; simp [FirstOrder.Arithmetic.min]
-  rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
-  · intro h₀₁ h₂₁
-    exact le_antisymm (by simpa [h₀₁] using h) (by simpa [h₀₁] using h₂₁)
-  · intro h₀₂ h₁₂
-    exact le_antisymm (by simpa [h₀₂] using h) (by simpa [h₀₂] using h₁₂)
+instance min_defined : 𝚺₀-Function₂[V] min via min := .mk fun v ↦ by
+  simp [FirstOrder.Arithmetic.min]; grind
 
-@[simp] lemma eval_minDef (v) :
-    Semiformula.Evalbm V v min.val ↔ v 0 = min (v 1) (v 2) := min_defined.df.iff v
-
-instance min_definable (ℌ) : ℌ-Function₂ (min : V → V → V) := HierarchySymbol.Defined.to_definable₀ min_defined
+instance min_definable (ℌ) : ℌ-Function₂[V] min := min_defined.to_definable₀
 
 instance min_polybounded : Bounded₂ (min : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -283,18 +264,9 @@ def _root_.LO.FirstOrder.Arithmetic.max : 𝚺₀.Semisentence 3 :=
   .mkSigma “z x y. (x ≥ y → z = x) ∧ (x ≤ y → z = y)”
 
 set_option linter.flexible false in
-lemma max_defined : 𝚺₀-Function₂ (max : V → V → V) via max := by
-  intro v; simp [Arithmetic.max]
-  rcases le_total (v 1) (v 2) with (h | h) <;> simp [h]
-  · intro h₀₂ h₂₁
-    exact le_antisymm (by simpa [h₀₂] using h₂₁) (by simpa [h₀₂] using h)
-  · intro h₀₁ h₁₂
-    exact le_antisymm (by simpa [h₀₁] using h₁₂) (by simpa [h₀₁] using h)
+instance max_defined : 𝚺₀-Function₂[V] max via max := .mk fun v ↦ by simp [Arithmetic.max]; grind
 
-@[simp] lemma eval_maxDef (v) :
-    Semiformula.Evalbm V v max.val ↔ v 0 = max (v 1) (v 2) := max_defined.df.iff v
-
-instance max_definable (Γ) : Γ-Function₂ (max : V → V → V) := HierarchySymbol.Defined.to_definable₀ max_defined
+instance max_definable (Γ) : Γ-Function₂[V] max := max_defined.to_definable₀
 
 instance max_polybounded : Bounded₂ (max : V → V → V) := ⟨‘#0 + #1’, λ v ↦ by simp⟩
 

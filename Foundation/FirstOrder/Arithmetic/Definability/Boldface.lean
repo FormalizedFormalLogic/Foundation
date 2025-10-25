@@ -206,7 +206,7 @@ lemma to_definable (φ : ℌ.Semisentence k) (hP : Defined P φ) : ℌ.Definable
     fun v ↦ by rcases φ; simpa [HierarchySymbol.Semiformula.rew] using hP.proper.rew Rew.emb v,
     by intro; simp⟩⟩
 
-lemma to_definable₀ (φ : 𝚺₀.Semisentence k) (hP : Defined P φ) :
+lemma to_definable₀ {φ : 𝚺₀.Semisentence k} (hP : Defined P φ) :
     ℌ.Definable P := Defined.to_definable (φ.ofZero ℌ) hP.of_zero
 
 end Defined
@@ -248,38 +248,38 @@ end IsDefinedByWithParam
 namespace DefinableRel
 
 @[simp] instance eq : ℌ.DefinableRel (Eq : V → V → Prop) :=
-  Defined.to_definable₀ (.mkSigma “#0 = #1”) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1”) ⟨by intro _; simp⟩
 
 @[simp] instance lt : ℌ.DefinableRel (LT.lt : V → V → Prop) :=
-  Defined.to_definable₀ (.mkSigma “#0 < #1”) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 < #1”) ⟨by intro _; simp⟩
 
 @[simp] instance le [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableRel (LE.le : V → V → Prop) :=
-  Defined.to_definable₀ (.mkSigma “#0 ≤ #1”) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 ≤ #1”) ⟨by intro _; simp⟩
 
 end DefinableRel
 
 namespace DefinableFunction₂
 
 @[simp] instance add : ℌ.DefinableFunction₂ ((· + ·) : V → V → V) :=
-  Defined.to_definable₀ (.mkSigma “#0 = #1 + #2”) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1 + #2”) ⟨by intro _; simp⟩
 
 @[simp] instance mul : ℌ.DefinableFunction₂ ((· * ·) : V → V → V) :=
-  Defined.to_definable₀ (.mkSigma “#0 = #1 * #2”) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #2”) ⟨by intro _; simp⟩
 
 @[simp] instance hAdd : ℌ.DefinableFunction₂ (HAdd.hAdd : V → V → V) :=
-  Defined.to_definable₀ (.mkSigma “#0 = #1 + #2”) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1 + #2”) ⟨by intro _; simp⟩
 
 @[simp] instance hMul : ℌ.DefinableFunction₂ (HMul.hMul : V → V → V) :=
-  Defined.to_definable₀ (.mkSigma “#0 = #1 * #2”) ⟨by intro _; simp⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #2”) ⟨by intro _; simp⟩
 
 @[simp] protected instance sq [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^2 :=
-  Defined.to_definable₀ (.mkSigma “#0 = #1 * #1”) ⟨by intro _; simp [sq]⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1”) ⟨by intro _; simp [sq]⟩
 
 @[simp] instance pow3 [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^3 :=
-  Defined.to_definable₀ (.mkSigma “#0 = #1 * #1 * #1”) ⟨by intro _; simp [PeanoMinus.pow_three]⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1”) ⟨by intro _; simp [PeanoMinus.pow_three]⟩
 
 @[simp] instance pow4 [V ⊧ₘ* 𝗣𝗔⁻] : ℌ.DefinableFunction₁ fun x : V ↦ x^4 :=
-  Defined.to_definable₀ (.mkSigma “#0 = #1 * #1 * #1 * #1”) ⟨by intro _; simp [pow_four]⟩
+  Defined.to_definable₀ (φ := .mkSigma “#0 = #1 * #1 * #1 * #1”) ⟨by intro _; simp [pow_four]⟩
 
 end DefinableFunction₂
 

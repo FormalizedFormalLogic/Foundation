@@ -28,10 +28,9 @@ lemma ext_graph (a b c : V) : a = ext b c ↔ ∃ x ≤ c, x = c / b ∧ a = x %
 def _root_.LO.FirstOrder.Arithmetic.extDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “a b c. ∃ x <⁺ c, !divDef x c b ∧ !remDef a x b”
 
-lemma ext_defined : 𝚺₀-Function₂ (λ a b : V ↦ ext a b) via extDef := by
-  intro v; simp [extDef, ext_graph, Semiformula.eval_substs, div_defined.df.iff, rem_defined.df.iff, le_iff_lt_succ]
+instance ext_defined : 𝚺₀-Function₂[V] ext via extDef := .mk fun v ↦ by simp [extDef, ext_graph, Semiformula.eval_substs, le_iff_lt_succ]
 
-instance ext_definable : 𝚺₀-Function₂ (ext : V → V → V) := ext_defined.to_definable
+instance ext_definable : 𝚺₀-Function₂[V] ext := ext_defined.to_definable
 
 @[simp] lemma ext_le_add (u z : V) : ext u z ≤ z :=
   le_trans (mod_le (z / u) u) (by simp)
@@ -90,9 +89,8 @@ def Exponential.Seqₛ.def : 𝚺₀.Semisentence 3 := .mkSigma
       ( (∃ ext_u_X <⁺ X, !extDef ext_u_X u X ∧ !extDef (2 * ext_u_X + 1) u² X) ∧
         (∃ ext_u_Y <⁺ Y, !extDef ext_u_Y u Y ∧ !extDef (2 * ext_u_Y²) u² Y) ) ”
 
-lemma Exponential.Seqₛ.defined : 𝚺₀-Relation₃ (Exponential.Seqₛ : V → V → V → Prop) via Exponential.Seqₛ.def := by
-  intro v; simp [Exponential.Seqₛ.iff, Exponential.Seqₛ.def, ppow2_defined.df.iff,
-    ext_defined.df.iff, sq, numeral_eq_natCast]
+instance Exponential.Seqₛ.defined : 𝚺₀-Relation₃[V] Exponential.Seqₛ via Exponential.Seqₛ.def := .mk fun v ↦ by
+  simp [Exponential.Seqₛ.iff, Exponential.Seqₛ.def, sq, numeral_eq_natCast]
 
 lemma Exponential.graph_iff (x y : V) :
     Exponential x y ↔
@@ -115,15 +113,11 @@ def _root_.LO.FirstOrder.Arithmetic.exponentialDef : 𝚺₀.Semisentence 2 := .
       ∃ u <⁺ y², u ≠ 2 ∧ !ppow2Def u ∧ !extDef x u X ∧ !extDef y u Y”
 
 /-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
-lemma Exponential.defined : 𝚺₀-Relation (Exponential : V → V → Prop) via exponentialDef := by
-  intro v; simp [Exponential.graph_iff, exponentialDef, ppow2_defined.df.iff, ext_defined.df.iff,
-    Exponential.Seqₛ.defined.df.iff, pow_four, sq, numeral_eq_natCast]
+instance Exponential.defined : 𝚺₀-Relation[V] Exponential via exponentialDef := .mk fun v ↦ by
+  simp [Exponential.graph_iff, exponentialDef, pow_four, sq, numeral_eq_natCast]
 
 /-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
 instance exponential_definable : 𝚺₀-Relation (Exponential : V → V → Prop) := Exponential.defined.to_definable
-
-@[simp] lemma exponential_defined_iff (v) :
-    Semiformula.Evalbm V v exponentialDef.val ↔ Exponential (v 0) (v 1) := Exponential.defined.df.iff v
 
 @[simp] instance exponential_definable' (Γ) : Γ-Relation (Exponential : V → V → Prop) := exponential_definable.of_zero
 
@@ -748,11 +742,7 @@ lemma exponential_graph {a b : V} : a = Exp.exp b ↔ Exponential b a := Classic
 
 def _root_.LO.FirstOrder.Arithmetic.expDef : 𝚺₀.Semisentence 2 := .mkSigma “x y. !exponentialDef.val y x”
 
-lemma exp_defined_deltaZero : 𝚺₀-Function₁ (Exp.exp : V → V) via expDef := by
-  intro v; simp [expDef, exponential_graph]
-
-@[simp] lemma exp_defined_iff (v) :
-    Semiformula.Evalbm V v expDef.val ↔ v 0 = Exp.exp (v 1) := exp_defined_deltaZero.df.iff v
+instance exp_defined_deltaZero : 𝚺₀-Function₁[V] Exp.exp via expDef := .mk fun v ↦ by simp [expDef, exponential_graph]
 
 instance exp_definable_deltaZero : 𝚺₀-Function₁ (Exp.exp : V → V) := exp_defined_deltaZero.to_definable
 

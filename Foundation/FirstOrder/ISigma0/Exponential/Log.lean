@@ -71,11 +71,7 @@ lemma log_graph {x y : V} : x = log y ↔ (y = 0 → x = 0) ∧ (0 < y → x < y
 def _root_.LO.FirstOrder.Arithmetic.logDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. (y = 0 → x = 0) ∧ (0 < y → x < y ∧ ∃ y' <⁺ y, !exponentialDef x y' ∧ y < 2 * y')”
 
-lemma log_defined : 𝚺₀-Function₁ (log : V → V) via logDef := by
-  intro v; simp [logDef, log_graph, numeral_eq_natCast]
-
-@[simp] lemma log_defined_iff (v) :
-    Semiformula.Evalbm V v logDef.val ↔ v 0 = log (v 1) := log_defined.df.iff v
+instance log_defined : 𝚺₀-Function₁[V] log via logDef := .mk fun v ↦ by simp [logDef, log_graph, numeral_eq_natCast]
 
 instance log_definable : 𝚺₀-Function₁ (log : V → V) := log_defined.to_definable
 
@@ -163,11 +159,7 @@ lemma length_graph {i a : V} : i = ‖a‖ ↔ (0 < a → ∃ k ≤ a, k = log a
 def _root_.LO.FirstOrder.Arithmetic.lengthDef : 𝚺₀.Semisentence 2 := .mkSigma
   “i a. (0 < a → ∃ k <⁺ a, !logDef k a ∧ i = k + 1) ∧ (a = 0 → i = 0)”
 
-lemma length_defined : 𝚺₀-Function₁ (‖·‖ : V → V) via lengthDef := by
-  intro v; simp [lengthDef, length_graph]
-
-@[simp] lemma length_defined_iff (v) :
-    Semiformula.Evalbm V v lengthDef.val ↔ v 0 = ‖v 1‖ := length_defined.df.iff v
+instance length_defined : 𝚺₀-Function₁[V] Length.length via lengthDef := .mk fun v ↦ by simp [lengthDef, length_graph]
 
 instance length_definable : 𝚺₀-Function₁ (‖·‖ : V → V) := length_defined.to_definable
 
@@ -338,13 +330,9 @@ lemma bexp_graph {y a x : V} : y = bexp a x ↔ ∃ l ≤ a, l = ‖a‖ ∧ (x 
 def _root_.LO.FirstOrder.Arithmetic.bexpDef : 𝚺₀.Semisentence 3 := .mkSigma
   “y a x. ∃ l <⁺ a, !lengthDef l a ∧ (x < l → !exponentialDef x y) ∧ (l ≤ x → y = 0)”
 
-lemma bexp_defined : 𝚺₀-Function₂ (bexp : V → V → V) via bexpDef := by
-  intro v; simp [bexpDef, bexp_graph]
+instance bexp_defined : 𝚺₀-Function₂[V] bexp via bexpDef := .mk fun v ↦ by simp [bexpDef, bexp_graph]
 
-@[simp] lemma bexp_defined_iff (v) :
-    Semiformula.Evalbm V v bexpDef.val ↔ v 0 = bexp (v 1) (v 2) := bexp_defined.df.iff v
-
-instance bexp_definable : 𝚺₀-Function₂ (bexp : V → V → V) := bexp_defined.to_definable
+instance bexp_definable : 𝚺₀-Function₂[V] bexp := bexp_defined.to_definable
 
 instance : Bounded₂ (bexp : V → V → V) := ⟨#0, λ _ ↦ by simp⟩
 
@@ -418,13 +406,9 @@ lemma fbit_eq_zero_of_le {a i : V} (hi : ‖a‖ ≤ i) : fbit a i = 0 := by sim
 def _root_.LO.FirstOrder.Arithmetic.fbitDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b a i. ∃ x <⁺ a, !bexpDef x a i ∧ ∃ y <⁺ a, !divDef y a x ∧ !remDef b y 2”
 
-lemma fbit_defined : 𝚺₀-Function₂ (fbit : V → V → V) via fbitDef := by
-  intro v; simp [fbitDef, fbit, numeral_eq_natCast]
+instance fbit_defined : 𝚺₀-Function₂[V] fbit via fbitDef := .mk fun v ↦ by simp [fbitDef, fbit, numeral_eq_natCast]
 
-@[simp] lemma fbit_defined_iff (v) :
-    Semiformula.Evalbm V v fbitDef.val ↔ v 0 = fbit (v 1) (v 2) := fbit_defined.df.iff v
-
-instance fbit_definable : 𝚺₀-Function₂ (fbit : V → V → V) := fbit_defined.to_definable
+instance fbit_definable : 𝚺₀-Function₂[V] fbit := fbit_defined.to_definable
 
 instance : Bounded₂ (fbit : V → V → V) := ⟨‘1’, λ _ ↦ by simp⟩
 
