@@ -486,12 +486,14 @@ macro "definability?" (config)? : tactic =>
 
 example {f : M → M} {g : M → M → M} [L.DefinableFunction₁ f] [L.DefinableFunction₂ g] (c : M) :
     L.DefinableRel fun x y : M ↦ ∀ z, f x = g y (g (f z) c) := by
-  definability?
+  definability
 
 example [L.Mem] [Membership M M] [Structure.Mem L M] {f : M → M} [L.DefinableFunction₁ f] :
     L.DefinableRel fun x y : M ↦ f x = y ↔ ∀ z, z ∈ f x ↔ z ∈ y := by
-  definability?
+  definability
 
 end aesop
 
-end LO.FirstOrder.Language
+end Language
+
+end LO.FirstOrder

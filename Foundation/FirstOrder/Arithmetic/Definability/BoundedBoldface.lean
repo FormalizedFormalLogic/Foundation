@@ -142,50 +142,49 @@ lemma ball_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∀ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨φ, hp⟩
-  have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y < x, P v y)
-    (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.ball (#0) (HierarchySymbol.Semiformula.rew (Rew.subst (#0 :> fun i ↦ #i.succ.succ)) φ))) := by
-    simpa [←le_iff_lt_succ, Matrix.comp_vecCons'] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball #0)).bex ‘!!bf + 1’
-  exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
-
+  have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y < x, P v y := by
+    apply bex'; apply and
+    · exact hf.definable
+    · suffices ℌ.Definable fun x ↦ ∀ y < Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
+      apply ball ?_ #0
+      simpa using h.retraction (0 :> (·.succ.succ))
+  exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
 lemma bex_blt {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∃ x < f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨φ, hp⟩
-  have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y < x, P v y)
-    (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.bex (#0) (HierarchySymbol.Semiformula.rew (Rew.subst (#0 :> fun i => #i.succ.succ)) φ))) := by
-    simpa [←le_iff_lt_succ, Matrix.comp_vecCons'] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex #0)).bex ‘!!bf + 1’
-  exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
+  have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y < x, P v y := by
+    apply bex'; apply and
+    · exact hf.definable
+    · suffices ℌ.Definable fun x ↦ ∃ y < Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
+      apply bex ?_ #0
+      simpa using h.retraction (0 :> (·.succ.succ))
+  exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
 lemma ball_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∀ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨φ, hp⟩
-  have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y ≤ x, P v y)
-    (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.ball ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.subst (#0 :> fun i => #i.succ.succ)) φ))) := by
-    simpa [←le_iff_lt_succ, Matrix.comp_vecCons'] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).ball ‘x. x + 1’)).bex ‘!!bf + 1’
-  exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
+  have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∀ y ≤ x, P v y := by
+    apply bex'; apply and
+    · exact hf.definable
+    · suffices ℌ.Definable fun x ↦ ∀ y ≤ Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
+      apply ball' ?_ #0
+      simpa using h.retraction (0 :> (·.succ.succ))
+  exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
 lemma bex_ble {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : ℌ.Definable fun w ↦ P (w ·.succ) (w 0)) :
     ℌ.Definable fun v ↦ ∃ x ≤ f v, P v x := by
   rcases hf.bounded with ⟨bf, hbf⟩
-  rcases hf.definable with ⟨f_graph, hf_graph⟩
-  rcases h with ⟨φ, hp⟩
-  have : ℌ.DefinedWithParam (fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y ≤ x, P v y)
-    (HierarchySymbol.Semiformula.bex ‘!!bf + 1’
-      (f_graph ⋏ HierarchySymbol.Semiformula.bex ‘x. x + 1’ (HierarchySymbol.Semiformula.rew (Rew.subst (#0 :> fun i => #i.succ.succ)) φ))) := by
-    simpa [←le_iff_lt_succ, Matrix.comp_vecCons'] using (hf_graph.and ((hp.retraction (0 :> (·.succ.succ))).bex ‘x. x + 1’)).bex ‘!!bf + 1’
-  exact .of_iff ⟨_, this⟩ (fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩)
+  have : ℌ.Definable fun v ↦ ∃ x ≤ Semiterm.valm V v id bf, x = f v ∧ ∃ y ≤ x, P v y := by
+    apply bex'; apply and
+    · exact hf.definable
+    · suffices ℌ.Definable fun x ↦ ∃ y ≤ Semiterm.valm (L := ℒₒᵣ) V x id (#0), P (fun x_1 ↦ x x_1.succ) y by simpa
+      apply bex' ?_ #0
+      simpa using h.retraction (0 :> (·.succ.succ))
+  exact this.of_iff <| fun v ↦ ⟨fun h ↦ ⟨f v, hbf v, rfl, h⟩, by rintro ⟨y, hy, rfl, h⟩; exact h⟩
 
 lemma ball_blt_zero {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
     (hf : DefinableBoundedFunction f) (h : Γ-[0].Definable fun w ↦ P (w ·.succ) (w 0)) :
@@ -220,8 +219,8 @@ lemma bex_vec_le_boldfaceBoundedFunction {k} {φ : Fin l → (Fin k → V) → V
         · ext i; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
         · ext i
           cases' i using Fin.cases with i
-          · simp only [Matrix.cons_val_zero, g]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
-          · simp only [Matrix.cons_val_succ, g]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+          · simp only [Matrix.cons_val_zero]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
+          · simp only [Matrix.cons_val_succ]; congr 1; ext; simp [Matrix.vecAppend_eq_ite]
 
 lemma substitution_boldfaceBoundedFunction {f : Fin k → (Fin l → V) → V}
     (hP : ℌ.Definable P) (hf : ∀ i, DefinableBoundedFunction (f i)) :
@@ -384,59 +383,31 @@ attribute [aesop (rule_sets := [Definability]) norm]
   pow_four
 
 attribute [aesop 5 (rule_sets := [Definability]) safe]
-  DefinableFunction.comp₁
-  DefinableFunction.comp₂
-  DefinableFunction.comp₃
   DefinableBoundedFunction.comp₁
   DefinableBoundedFunction.comp₂
   DefinableBoundedFunction.comp₃
 
 attribute [aesop 6 (rule_sets := [Definability]) safe]
-  Definable.comp₁
-  Definable.comp₂
-  Definable.comp₃
-  Definable.comp₄
-  Definable.const
   Definable.bcomp₁_zero
   Definable.bcomp₂_zero
   Definable.bcomp₃_zero
   Definable.bcomp₄_zero
 
 attribute [aesop 8 (rule_sets := [Definability]) safe]
-  Definable.ball_lt
-  Definable.ball_le
-  Definable.bex_lt
-  Definable.bex_le
   Definable.ball_blt_zero
   Definable.ball_ble_zero
   Definable.bex_blt_zero
   Definable.bex_ble_zero
 
-attribute [aesop 10 (rule_sets := [Definability]) safe]
-  Definable.not
-  Definable.imp
-  Definable.biconditional
-
-attribute [aesop 11 (rule_sets := [Definability]) safe]
-  Definable.and
-  Definable.or
-  Definable.all
-  Definable.ex
-
 example (c : V) : DefinableBoundedFunction₂ (fun x _ : V ↦ c + 2 * x^2) := by definability
 
-example {ex : V → V} [𝚺₀.DefinableFunction₁ ex] (c : V) :
-    𝚷₀.DefinableRel (fun x y : V ↦ ∃ z < x + c * y, (ex x = x ∧ x < y) ↔ ex x = z ∧ ex (x + 1) = 2 * z) := by
-  simp [Function.Graph.iff_left ex]
-  definability?
-
 example {ex : V → V} [h : 𝚫₁.DefinableFunction₁ ex] :
-    𝚺₁.DefinableRel (fun x y : V ↦ ∃ z, x < y ↔ ex (ex x) = z) := by
-  definability?
+    𝚺₁.DefinableRel (fun x y : V ↦ ∃ z, x < y ↔ ex (ex (ex (ex x))) = z) := by
+  definability
 
 example {ex : V → V} [h : 𝚺₁.DefinableFunction₁ ex] :
     𝚺₁.DefinableRel (fun x y : V ↦ ∀ z < ex y, x < y ↔ ex (ex x) = z) := by
-  definability?
+  definability
 
 end
 
