@@ -38,7 +38,7 @@ lemma substNumeralParams_app_quote (σ τ : Semisentence ℒₒᵣ (k + 1)) :
 
 section
 
-def ssnum : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def ssnum : 𝚺₁.Semisentence 3 := .mkSigma
   “y φ x. ∃ n, !numeralGraph n x ∧ ∃ v, !adjoinDef v n 0 ∧ !(substsGraph ℒₒᵣ) y v φ”
 
 lemma substNumeral.defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
@@ -49,7 +49,7 @@ attribute [irreducible] ssnum
 @[simp] lemma substNumeral.eval (v) :
     Semiformula.Evalbm V v ssnum.val ↔ v 0 = substNumeral (v 1) (v 2) := substNumeral.defined.df.iff v
 
-def ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
+noncomputable def ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “y φ. ∃ n, !lenDef ↑k n ∧
     (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k).val ∧ !numeralGraph z #i.succ.succ.succ.succ) ∧
     !(substsGraph ℒₒᵣ) y n φ”
@@ -80,7 +80,7 @@ attribute [irreducible] ssnums
 @[simp] lemma substNumerals.eval (v : Fin (k + 2) → V) :
     Semiformula.Evalbm V v ssnums.val ↔ v 0 = substNumerals (v 1) (fun i ↦ v i.succ.succ) := substNumerals.defined.df.iff v
 
-def ssnumParams (k : ℕ) : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def ssnumParams (k : ℕ) : 𝚺₁.Semisentence 3 := .mkSigma
   “y φ x. ∃ v, !lenDef ↑(k + 1) v ∧
     (∃ z, !nthDef z v 0 ∧ !numeralGraph z x) ∧
     (⋀ i, ∃ z, !nthDef z v ↑(i : Fin k).val.succ ∧ !qqBvarDef z ↑i) ∧
@@ -123,9 +123,9 @@ variable {T : Theory ℒₒᵣ} [𝗜𝚺₁ ⪯ T]
 
 section Diagonalization
 
-def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 := “x. ∀ y, !ssnum y x x → !θ y”
+noncomputable def diag (θ : Semisentence ℒₒᵣ 1) : Semisentence ℒₒᵣ 1 := “x. ∀ y, !ssnum y x x → !θ y”
 
-def fixedpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
+noncomputable def fixedpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒᵣ := (diag θ)/[⌜diag θ⌝]
 
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     T ⊢ fixedpoint θ ⭤ θ/[⌜fixedpoint θ⌝] :=
@@ -148,12 +148,12 @@ end Diagonalization
 section Multidiagonalization
 
 /-- $\mathrm{diag}_i(\vec{x}) := (\forall \vec{y})\left[ \left(\bigwedge_j \mathrm{ssnums}(y_j, x_j, \vec{x})\right) \to \theta_i(\vec{y}) \right]$ -/
-def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒₒᵣ k :=
+noncomputable def multidiag (θ : Semisentence ℒₒᵣ k) : Semisentence ℒₒᵣ k :=
   ∀^[k] (
     (Matrix.conj fun j : Fin k ↦ (Rew.subst <| #(j.addCast k) :> #(j.addNat k) :> fun l ↦ #(l.addNat k)) ▹ ssnums.val) ➝
     (Rew.subst fun j ↦ #(j.addCast k)) ▹ θ)
 
-def multifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.subst fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
+noncomputable def multifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ := (Rew.subst fun j ↦ ⌜multidiag (θ j)⌝) ▹ (multidiag (θ i))
 
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢ multifixedpoint θ i ⭤ (Rew.subst fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
@@ -170,7 +170,7 @@ theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
       _ ↔ V ⊧/(fun i ↦ substNumerals (t i) t) (θ i) := by simp [multidiag, ← funext_iff]
       _ ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) := by simp [ht]
 
-def exclusiveMultifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
+noncomputable def exclusiveMultifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i : Fin k) : Sentence ℒₒᵣ :=
   multifixedpoint (fun j ↦ (θ j).padding j) i
 
 @[simp] lemma exclusiveMultifixedpoint_inj_iff (θ : Fin k → Semisentence ℒₒᵣ k) :
@@ -200,9 +200,9 @@ end Multidiagonalization
 
 section ParameterizedDiagonalization
 
-def parameterizedDiag (θ : Semisentence ℒₒᵣ (k + 1)) : Semisentence ℒₒᵣ (k + 1) := “x. ∀ y, !(ssnumParams k) y x x → !θ y ⋯”
+noncomputable def parameterizedDiag (θ : Semisentence ℒₒᵣ (k + 1)) : Semisentence ℒₒᵣ (k + 1) := “x. ∀ y, !(ssnumParams k) y x x → !θ y ⋯”
 
-def parameterizedFixedpoint (θ : Semisentence ℒₒᵣ (k + 1)) : Semisentence ℒₒᵣ k :=
+noncomputable def parameterizedFixedpoint (θ : Semisentence ℒₒᵣ (k + 1)) : Semisentence ℒₒᵣ k :=
     (Rew.subst (⌜parameterizedDiag θ⌝ :> fun j ↦ #j)) ▹ parameterizedDiag θ
 
 theorem parameterized_diagonal (θ : Semisentence ℒₒᵣ (k + 1)) :

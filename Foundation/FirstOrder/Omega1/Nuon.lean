@@ -27,7 +27,7 @@ local notation S "{" L "}[" i "]" => ext L S i
 
 lemma ext_eq_zero_of_lt {L S i : V} (h : ‖S‖ ≤ i * ‖L‖) : S{L}[i] = 0 := by simp [ext, bexp_eq_zero_of_le h]
 
-@[simp] lemma ext_le_self (L S i : V) : S{L}[i] ≤ S := le_trans (mod_le _ _) (by simp [ext])
+@[simp] lemma ext_le_self (L S i : V) : S{L}[i] ≤ S := le_trans (mod_le _ _) (by simp)
 
 lemma ext_graph_aux (z S L i : V) : z = S{L}[i] ↔ (‖S‖ ≤ i * ‖L‖ → z = 0) ∧ (i * ‖L‖ < ‖S‖ → ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % (L ⨳ 1)) := by
   rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_gt _ _ with (le | lt)
@@ -47,7 +47,7 @@ lemma ext_graph (z S L i : V) : z = S{L}[i] ↔
         ∃ b ≤ S, Exponential (i * lL) b ∧ ∃ hL ≤ 2 * L + 1, Exponential lL hL ∧ ∃ divS ≤ S, divS = S / b ∧ z = divS % hL) := by
   rw [ext_graph_aux]
   rcases show ‖S‖ ≤ i * ‖L‖ ∨ i * ‖L‖ < ‖S‖ from le_or_gt _ _ with (le | lt)
-  · simp [ext_eq_zero_of_lt le, le, not_lt.mpr le]
+  · simp [le, not_lt.mpr le]
   · suffices (∃ b ≤ S, Exponential (i * ‖L‖) b ∧ z = S / b % L ⨳ 1)
       ↔ ∃ b ≤ S, Exponential (i * ‖L‖) b ∧ ∃ hL ≤ 2 * L + 1, Exponential ‖L‖ hL ∧ z = S / b % hL
     by simpa [lt, not_le.mpr lt]
@@ -75,7 +75,7 @@ def extDef : 𝚺₀.Semisentence 4 := .mkSigma
 
 lemma ext_defined : 𝚺₀-Function₃ (ext : V → V → V → V) via extDef := by
   intro v; simp [extDef, length_defined.df.iff, Exponential.defined.df.iff,
-    div_defined.df.iff, rem_defined.df.iff, lt_succ_iff_le, ext_graph, numeral_eq_natCast]
+    div_defined.df.iff, rem_defined.df.iff, ext_graph, numeral_eq_natCast]
 
 instance ext_Definable : 𝚺₀-Function₃ (ext : V → V → V → V) := ext_defined.to_definable
 
@@ -456,16 +456,16 @@ lemma polyI_smash_self_polybounded {A : V} (pos : 0 < A) : (polyI A) ⨳ (polyI 
   (polyI A) ⨳ (polyI A) = bexp ((polyI A) ⨳ (polyI A)) ((√‖A‖ + 1) ^ 2) := Eq.symm <| by simpa [sq, len_polyI pos] using bexp_eq_smash (polyI A) (polyI A)
   _                     ≤ bexp ((2 * A) ⨳ (2 * A)) ((2 * √‖A‖) ^ 2)     :=
     (bexp_monotone_le
-      (by simp [length_smash, lt_succ_iff_le, ←sq, len_polyI pos])
-      (by simp [length_smash, lt_succ_iff_le, ←sq, len_polyI pos, length_two_mul_of_pos pos])).mpr
+      (by simp [length_smash, ←sq, len_polyI pos])
+      (by simp [length_smash, lt_succ_iff_le, ←sq, length_two_mul_of_pos pos])).mpr
     (by simp [two_mul, ←pos_iff_one_le, pos])
   _                     ≤ bexp ((2 * A) ⨳ (2 * A)) (4 * (√‖A‖) ^ 2)     := by simp [mul_pow, two_pow_two_eq_four]
   _                     = (bexp (A ⨳ 1) ((√‖A‖) ^ 2)) ^ 4               :=
     bexp_four_mul
-      (by simp [length_smash, lt_succ_iff_le, ←sq, len_polyI pos, length_two_mul_of_pos pos, ←two_pow_two_eq_four, ←mul_pow])
+      (by simp [length_smash, lt_succ_iff_le, ←sq, length_two_mul_of_pos pos, ←two_pow_two_eq_four, ←mul_pow])
       (by simp [length_smash, lt_succ_iff_le])
   _                     ≤ (bexp (A ⨳ 1) ‖A‖) ^ 4                        := by
-    simpa using (bexp_monotone_le (by simp [length_smash, lt_succ_iff_le]) (by simp [length_smash, lt_succ_iff_le])).mpr (by simp)
+    simpa using (bexp_monotone_le (by simp [length_smash, lt_succ_iff_le]) (by simp [length_smash])).mpr (by simp)
   _                     = (A ⨳ 1) ^ 4                                   := by congr 1; simpa using bexp_eq_smash A 1
   _                     ≤ (2 * A + 1) ^ 4                               := by simp
 
@@ -494,7 +494,7 @@ def isSegmentDef : 𝚺₀.Semisentence 5 := .mkSigma
 set_option linter.flexible false in
 lemma isSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSegment (v 0) (v 1) (v 2) (v 3) (v 4)) isSegmentDef := by
   intro v
-  simp [IsSegment, isSegmentDef, ext_defined.df.iff, fbit_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
+  simp [IsSegment, isSegmentDef, ext_defined.df.iff, fbit_defined.df.iff, numeral_eq_natCast]
   apply forall₂_congr; intro x _
   constructor
   · intro h; exact ⟨by simp [←h], h.symm⟩
@@ -525,7 +525,7 @@ lemma bex_eq_lt_iff {p : V → Prop} {b : V} :
   ⟨by rintro ⟨a, hp, rfl, hr⟩; exact ⟨hp, hr⟩, by rintro ⟨hp, hr⟩; exact ⟨b, hp, rfl, hr⟩⟩
 
 lemma isSerieDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ IsSeries (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) isSeriesDef := by
-  intro v; simp [IsSeries, isSeriesDef, length_defined.df.iff, ext_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
+  intro v; simp [IsSeries, isSeriesDef, length_defined.df.iff, ext_defined.df.iff, segmentDef_defined.df.iff]
 
 def seriesDef : 𝚺₀.Semisentence 6 := .mkSigma
   “U I L A iter n. ∃ T < U, !isSeriesDef U I L A iter T ∧ !extDef 0 L T 0 ∧ !extDef n L T iter”
@@ -549,7 +549,7 @@ def seriesSegmentDef : 𝚺₀.Semisentence 6 := .mkSigma
 
 lemma seriesSegmentDef_defined : 𝚺₀.Defined (V := V) (λ v ↦ SeriesSegment (v 0) (v 1) (v 2) (v 3) (v 4) (v 5)) seriesSegmentDef := by
   intro v; simp [SeriesSegment, seriesSegmentDef,
-    length_defined.df.iff, div_defined.df.iff, rem_defined.df.iff, seriesDef_defined.df.iff, segmentDef_defined.df.iff, lt_succ_iff_le]
+    length_defined.df.iff, div_defined.df.iff, rem_defined.df.iff, seriesDef_defined.df.iff, segmentDef_defined.df.iff]
 
 def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
   “A k n.
@@ -561,7 +561,7 @@ def nuonAuxDef : 𝚺₀.Semisentence 3 := .mkSigma
 
 lemma nuonAux_defined : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) via nuonAuxDef := by
   intro v; simp [NuonAux, polyU, polyI, polyL, nuonAuxDef,
-    length_defined.df.iff, sqrt_defined.df.iff, bexp_defined.df.iff, seriesSegmentDef_defined.df.iff, lt_succ_iff_le, numeral_eq_natCast]
+    length_defined.df.iff, sqrt_defined.df.iff, bexp_defined.df.iff, seriesSegmentDef_defined.df.iff, numeral_eq_natCast]
 
 instance nuonAux_definable : 𝚺₀-Relation₃ (NuonAux : V → V → V → Prop) := nuonAux_defined.to_definable
 
@@ -673,7 +673,7 @@ def _root_.LO.FirstOrder.Arithmetic.nuonDef : 𝚺₀.Semisentence 2 := .mkSigma
 
 lemma nuon_defined : 𝚺₀-Function₁ (nuon : V → V) via nuonDef := by
   intro v; simp [Nuon.nuon_eq_iff, Nuon, nuonDef,
-    length_defined.df.iff, Nuon.nuonAux_defined.df.iff, lt_succ_iff_le]
+    length_defined.df.iff, Nuon.nuonAux_defined.df.iff]
 
 @[simp] lemma eval_nuon_iff (v) :
     Semiformula.Evalbm V v nuonDef.val ↔ v 0 = nuon (v 1) :=nuon_defined.df.iff v

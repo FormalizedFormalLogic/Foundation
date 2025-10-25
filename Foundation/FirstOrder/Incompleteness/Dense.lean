@@ -6,7 +6,7 @@ namespace LO
 
 namespace Entailment
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [AdjunctiveSet F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
          {𝓢 : S} [Entailment.Cl 𝓢]
 
 lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (adjoin φ 𝓢) := by
@@ -14,13 +14,11 @@ lemma consistent_cons_of_unprovable_neg (h : 𝓢 ⊬ ∼φ) : Consistent (adjoi
   use ⊥;
   apply deduction_iff.not.mpr;
   contrapose! h;
-  simp only [not_not];
   cl_prover [h];
 
 lemma consistent_cons_of_unprovable (h : 𝓢 ⊬ φ) : Consistent (adjoin (∼φ) 𝓢) := by
   apply consistent_cons_of_unprovable_neg;
   contrapose! h;
-  simp_all only [not_not];
   cl_prover [h];
 
 end Entailment
@@ -29,7 +27,7 @@ namespace Entailment.LindenbaumAlgebra
 
 open Entailment LindenbaumAlgebra
 
-variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment F S] [AdjunctiveSet F S] [Deduction S]
+variable {F S : Type*} [DecidableEq F] [LogicalConnective F] [Entailment S F] [AdjunctiveSet F S] [Deduction S]
          (𝓢 : S) [Entailment.Cl 𝓢]
 
 lemma dense_of_finite_extend_incomplete
@@ -44,7 +42,6 @@ lemma dense_of_finite_extend_incomplete
     use ⊥;
     apply deduction_iff.not.mpr;
     contrapose! h₂;
-    simp only [not_not];
     cl_prover [h₂];
   use ⟦φ ⋎ (ψ ⋏ ∼ρ)⟧;
   refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩⟩;

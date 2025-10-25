@@ -26,37 +26,39 @@ theorem incomplete (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHi
     Incomplete T := by
   have con : Consistent T := inferInstance
   let D : ℕ → Prop := fun φ : ℕ ↦
-        IsSemiformula ℒₒᵣ 1 φ ∧ T.Provable (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ)
+    IsSemiformula ℒₒᵣ 1 φ ∧ T.Provable (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ)
   have D_re : REPred D := by
     have : 𝚺₁-Predicate fun φ : ℕ ↦
         IsSemiformula ℒₒᵣ 1 φ ∧ T.Provable (neg ℒₒᵣ <| subst ℒₒᵣ ?[numeral φ] φ) := by
       definability
     exact re_iff_sigma1.mpr this
-  let σ : Semisentence ℒₒᵣ 1 := codeOfREPred D
-  let ρ : Sentence ℒₒᵣ := σ/[⌜σ⌝]
-  have : ∀ n : ℕ, D n ↔ T ⊢ σ/[↑n] := fun n ↦ by
+  have D_spec (φ : Semisentence ℒₒᵣ 1) : D ⌜φ⌝ ↔ T ⊢ ∼φ/[⌜φ⌝] := by
+    simp [D, ←provable_iff_provable, Sentence.quote_def,
+      Rewriting.emb_subst_eq_subst_coe₁, Semiformula.quote_def]
+  let δ : Semisentence ℒₒᵣ 1 := codeOfREPred D
+  have (n : ℕ) : D n ↔ T ⊢ δ/[↑n] := by
     simpa [Semiformula.coe_subst_eq_subst_coe₁] using re_complete D_re
-  have : T ⊢ ∼ρ ↔ T ⊢ ρ := by
-    have : T.Provable (neg ℒₒᵣ (subst ℒₒᵣ (numeral ⌜σ⌝ ∷ 0) ⌜σ⌝)) ↔ T ⊢ σ/[⌜σ⌝] := by
-      simpa [D] using this ⌜σ⌝
-    have : T ⊢ ∼σ/[⌜σ⌝] ↔ T ⊢ σ/[⌜σ⌝] := by
-      simpa [←provable_iff_provable, Sentence.quote_def,
-        Rewriting.emb_subst_eq_subst_coe₁, Semiformula.quote_def] using this
-    simpa [ρ, Rewriting.emb_subst_eq_subst_coe₁]
-  refine incomplete_def.mpr
-    ⟨ ρ
-    , fun h ↦ not_consistent_iff_inconsistent.mpr
-        (inconsistent_of_provable_of_unprovable h (this.mpr h)) inferInstance
-    , fun h ↦ not_consistent_iff_inconsistent.mpr
-      (inconsistent_of_provable_of_unprovable (this.mp h) h) inferInstance ⟩
+  let π : Sentence ℒₒᵣ := δ/[⌜δ⌝]
+  have : T ⊢ π ↔ T ⊢ ∼π := calc
+    T ⊢ π ↔ T ⊢ δ/[⌜δ⌝]  := by rfl
+    _     ↔ D ⌜δ⌝        := by simpa using (this ⌜δ⌝).symm
+    _     ↔ T ⊢ ∼δ/[⌜δ⌝] := D_spec δ
+    _     ↔ T ⊢ ∼π       := by rfl
+  refine incomplete_def.mpr ⟨π, ?_, ?_⟩
+  · intro h
+    exact not_consistent_iff_inconsistent.mpr
+      (inconsistent_of_provable_of_unprovable h (this.mp h)) inferInstance
+  · intro h
+    exact not_consistent_iff_inconsistent.mpr
+      (inconsistent_of_provable_of_unprovable (this.mpr h) h) inferInstance
 
 theorem exists_true_but_unprovable_sentence
     (T : ArithmeticTheory) [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] :
-    ∃ σ : Sentence ℒₒᵣ, ℕ ⊧ₘ σ ∧ T ⊬ σ := by
-  obtain ⟨σ, hσ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
-  by_cases ℕ ⊧ₘ σ
-  . exact ⟨σ, by assumption, hσ.1⟩
-  . exact ⟨∼σ, by simpa, hσ.2⟩
+    ∃ δ : Sentence ℒₒᵣ, ℕ ⊧ₘ δ ∧ T ⊬ δ := by
+  obtain ⟨δ, hδ⟩ := incomplete_def.mp $ Arithmetic.incomplete T;
+  by_cases ℕ ⊧ₘ δ
+  . exact ⟨δ, by assumption, hδ.1⟩
+  . exact ⟨∼δ, by simpa, hδ.2⟩
 
 end LO.FirstOrder.Arithmetic
 
@@ -67,7 +69,7 @@ open LO.Entailment FirstOrder Arithmetic
 instance {T : ArithmeticTheory} [ℕ ⊧ₘ* T] [T.Δ₁] [𝗥₀ ⪯ T] [T.SoundOnHierarchy 𝚺 1] : T ⪱ 𝗧𝗔 := by
   constructor;
   . infer_instance
-  . obtain ⟨σ, σTrue, σUnprov⟩ := exists_true_but_unprovable_sentence T;
-    exact Entailment.not_weakerThan_iff.mpr ⟨σ, FirstOrderTrueArith.provable_iff.mpr σTrue, σUnprov⟩
+  . obtain ⟨δ, δTrue, δUnprov⟩ := exists_true_but_unprovable_sentence T;
+    exact Entailment.not_weakerThan_iff.mpr ⟨δ, FirstOrderTrueArith.provable_iff.mpr δTrue, δUnprov⟩
 
 end LO.FirstOrderTrueArith

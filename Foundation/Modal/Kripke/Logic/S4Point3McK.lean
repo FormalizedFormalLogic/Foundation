@@ -75,7 +75,7 @@ instance : Modal.S4Point2McK ⪱ Modal.S4Point3McK := by
       . suffices
           (∃ x, (0 : M) ≺ x ∧ (∀ (w : M), x ≺ w → w = 1 ∨ w = 3) ∧ x ≠ 2 ∧ x ≠ 3) ∧
           (∃ x, (0 : M) ≺ x ∧ (∀ (w : M), x ≺ w → w = 2 ∨ w = 3) ∧ x ≠ 1 ∧ x ≠ 3) by
-          simp [M, Semantics.Realize, Satisfies];
+          simp [M, Semantics.Models, Satisfies];
           tauto;
         constructor;
         . use 1; simp only [M]; refine ⟨?_, ?_, ?_, ?_⟩ <;> omega;
@@ -98,7 +98,7 @@ instance : Modal.S4Point3 ⪱ Modal.S4Point3McK := by
           trans := by tauto,
           ps_connected := by tauto;
         }
-      . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Realize, Satisfies];
+      . suffices ∃ x : M, x ≠ 0 by simpa [M, Semantics.Models, Satisfies];
         use 1;
         trivial;
 

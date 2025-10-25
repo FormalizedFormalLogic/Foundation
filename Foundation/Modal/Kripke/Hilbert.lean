@@ -17,7 +17,7 @@ lemma soundness_of_validates_axioms (hV : C ⊧* Ax) : Hilbert.Normal Ax ⊢ φ 
   induction hφ using Hilbert.Normal.rec! with
   | @axm φ s h =>
     apply ValidOnFrame.subst;
-    apply hV.realize;
+    apply hV.models;
     . assumption;
     . assumption;
   | mdp ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
@@ -49,7 +49,7 @@ lemma soundness_of_frame_validates_axioms (hV : F ⊧* Ax) : (Hilbert.Normal Ax)
   induction hφ using Hilbert.Normal.rec! with
   | axm s h =>
     apply ValidOnFrame.subst;
-    apply hV.realize;
+    apply hV.models;
     assumption;
   | mdp ihpq ihp => exact ValidOnFrame.mdp ihpq ihp;
   | nec ih => exact ValidOnFrame.nec ih;

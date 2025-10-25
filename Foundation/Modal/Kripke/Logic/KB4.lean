@@ -57,7 +57,7 @@ instance : Modal.K45 ⪱ Modal.KB4 := by
       constructor;
       . simp only [Fin.isValue, Set.mem_setOf_eq];
         refine { trans := by omega, reucl := by tauto };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 instance : Modal.KB ⪱ Modal.KB4 := by
   constructor;
@@ -72,7 +72,7 @@ instance : Modal.KB ⪱ Modal.KB4 := by
       constructor;
       . simp only [bne_iff_ne, ne_eq, Set.mem_setOf_eq];
         refine { symm := by tauto };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
         tauto;
 
 end LO.Modal

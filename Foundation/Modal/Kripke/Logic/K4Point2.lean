@@ -52,7 +52,7 @@ instance : Modal.K4 ⪱ Modal.K4Point2 := by
       . simp only [Set.mem_setOf_eq];
         exact { trans := by omega };
       . suffices ∃ (x : M.World), (∀ y, ¬x ≺ y) ∧ x ≠ 0 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         use 1;
         constructor;
         . omega;

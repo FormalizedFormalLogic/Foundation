@@ -68,7 +68,7 @@ instance : Modal.KT ⪱ Modal.KTB := by
       constructor;
       . tauto;
       . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         use 1;
         omega;
 
@@ -94,7 +94,7 @@ instance : Modal.KDB ⪱ Modal.KTB := by
             | 1 => use 0; omega;
           symm := by simp; omega
         };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
         omega;
 
 

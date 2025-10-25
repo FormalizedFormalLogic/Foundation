@@ -8,13 +8,13 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 open Propositional
 
 @[match_pattern]
-def Propositional.Formula.goedelTranslate : Propositional.Formula α → Modal.Formula α
+def Propositional.Formula.gödelTranslate : Propositional.Formula α → Modal.Formula α
   | .atom a  => □(.atom a)
   | ⊥ => ⊥
-  | φ ⋏ ψ => (goedelTranslate φ) ⋏ (goedelTranslate ψ)
-  | φ ⋎ ψ => (goedelTranslate φ) ⋎ (goedelTranslate ψ)
-  | φ ➝ ψ => □((goedelTranslate φ) ➝ (goedelTranslate ψ))
-postfix:90 "ᵍ" => Propositional.Formula.goedelTranslate
+  | φ ⋏ ψ => (gödelTranslate φ) ⋏ (gödelTranslate ψ)
+  | φ ⋎ ψ => (gödelTranslate φ) ⋎ (gödelTranslate ψ)
+  | φ ➝ ψ => □((gödelTranslate φ) ➝ (gödelTranslate ψ))
+postfix:90 "ᵍ" => Propositional.Formula.gödelTranslate
 
 class Modal.ModalCompanion (IL : Propositional.Logic ℕ) (ML : Modal.Logic ℕ) where
   companion : ∀ {φ}, IL ⊢ φ ↔ ML ⊢ φᵍ
@@ -35,12 +35,12 @@ instance : Modal.Entailment.S4 IL.smallestMC where
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply Modal.Logic.sumNormal.mem₁!;
-    simp [Modal.Logic.iff_provable, Entailment.theory];
+    simp;
   Four φ := by
     constructor;
     apply Modal.Logic.iff_provable.mp;
     apply Modal.Logic.sumNormal.mem₁!;
-    simp [Modal.Logic.iff_provable, Entailment.theory];
+    simp;
 
 lemma smallestMC.mdp_S4 (hφψ : Modal.S4 ⊢ φ ➝ ψ) (hφ : IL.smallestMC ⊢ φ) : IL.smallestMC ⊢ ψ := by
   exact (Modal.Logic.sumNormal.mem₁! hφψ) ⨀ hφ;
@@ -63,7 +63,7 @@ end Propositional.Logic
 
 section
 
-open Propositional.Formula (goedelTranslate)
+open Propositional.Formula (gödelTranslate)
 
 lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
   {IL : Propositional.Logic ℕ} (IC : Propositional.Kripke.FrameClass) (MC : Modal.Kripke.FrameClass)
@@ -86,7 +86,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
       intro ψ x;
       induction ψ using Propositional.Formula.rec' generalizing x with
       | hatom a =>
-        unfold goedelTranslate;
+        unfold gödelTranslate;
         constructor;
         . intro _ _ h;
           exact V.hereditary h $ by assumption;
@@ -94,7 +94,7 @@ lemma Modal.instModalCompanion_of_smallestMC_via_KripkeSemantics
           exact h x F.refl;
       | hfalsum =>  rfl;
       | hor φ ψ ihp ihq =>
-        unfold goedelTranslate;
+        unfold gödelTranslate;
         constructor;
         . rintro (hp | hq);
           . apply Modal.Formula.Kripke.Satisfies.or_def.mpr; left;
@@ -139,7 +139,7 @@ lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
       intro ψ x;
       induction ψ using Propositional.Formula.rec' generalizing x with
       | hatom a =>
-        unfold goedelTranslate;
+        unfold gödelTranslate;
         constructor;
         . intro _ _ h;
           exact V.hereditary h $ by assumption;
@@ -147,7 +147,7 @@ lemma Modal.instModalCompanion_of_largestMC_via_KripkeSemantics
           exact h x F.refl;
       | hfalsum =>  rfl;
       | hor φ ψ ihp ihq =>
-        unfold goedelTranslate;
+        unfold gödelTranslate;
         constructor;
         . rintro (hp | hq);
           . apply Modal.Formula.Kripke.Satisfies.or_def.mpr; left;
@@ -175,29 +175,29 @@ end
 
 namespace Modal
 
-open Propositional.Formula (goedelTranslate)
+open Propositional.Formula (gödelTranslate)
 
 variable {IL : Propositional.Logic ℕ}
-variable {MS} [Entailment (Modal.Formula ℕ) MS]
+variable {MS} [Entailment MS (Modal.Formula ℕ)]
 variable {𝓜𝓢 : MS}  [Entailment.S4 𝓜𝓢]
 variable {φ ψ χ : Propositional.Formula ℕ}
 
 @[simp]
-lemma goedelTranslated_efq : 𝓜𝓢 ⊢ (⊥ ➝ φ)ᵍ := by
+lemma gödelTranslated_efq : 𝓜𝓢 ⊢ (⊥ ➝ φ)ᵍ := by
   apply nec!;
-  simp [goedelTranslate];
+  simp [gödelTranslate];
 
-lemma goedelTranslated_axiomTc : 𝓜𝓢 ⊢ φᵍ ➝ □φᵍ := by
+lemma gödelTranslated_axiomTc : 𝓜𝓢 ⊢ φᵍ ➝ □φᵍ := by
   induction φ using Propositional.Formula.rec' with
-  | hfalsum => simp only [goedelTranslate, efq!];
+  | hfalsum => simp only [gödelTranslate, efq!];
   | hand φ ψ ihp ihq => exact C!_trans (CKK!_of_C!_of_C! ihp ihq) collect_box_and!
   | hor φ ψ ihp ihq => exact C!_trans (left_A!_intro (right_A!_intro_left ihp) (right_A!_intro_right ihq)) collect_box_or!
-  | _ => simp only [goedelTranslate, axiomFour!];
+  | _ => simp only [gödelTranslate, axiomFour!];
 
-lemma goedelTranslated_implyS : 𝓜𝓢 ⊢ (φ ➝ ψ ➝ φ)ᵍ := by
-  exact nec! $ C!_trans goedelTranslated_axiomTc $ axiomK'! $ nec! $ imply₁!;
+lemma gödelTranslated_implyS : 𝓜𝓢 ⊢ (φ ➝ ψ ➝ φ)ᵍ := by
+  exact nec! $ C!_trans gödelTranslated_axiomTc $ axiomK'! $ nec! $ imply₁!;
 
-lemma goedelTranslated_implyK : 𝓜𝓢 ⊢ ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
+lemma gödelTranslated_implyK : 𝓜𝓢 ⊢ ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ) ➝ φ ➝ χ)ᵍ := by
   apply nec! $ C!_trans (C!_trans (axiomK'! $ nec! ?b) axiomFour!) $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! imply₂!) axiomK!;
   apply provable_iff_provable.mpr;
   apply deduct_iff.mpr;
@@ -207,13 +207,13 @@ lemma goedelTranslated_implyK : 𝓜𝓢 ⊢ ((φ ➝ ψ ➝ χ) ➝ (φ ➝ ψ)
   have : [φᵍ, φᵍ ➝ □(ψᵍ ➝ χᵍ)] ⊢[𝓜𝓢] □(ψᵍ ➝ χᵍ) := (by assumption) ⨀ (by assumption);
   exact axiomT'! this;
 
-lemma goedelTranslated_AndIntro : 𝓜𝓢 ⊢ (φ ➝ ψ ➝ φ ⋏ ψ)ᵍ := by
-  exact nec! $ C!_trans goedelTranslated_axiomTc $ axiomK'! $ nec! $ and₃!
+lemma gödelTranslated_AndIntro : 𝓜𝓢 ⊢ (φ ➝ ψ ➝ φ ⋏ ψ)ᵍ := by
+  exact nec! $ C!_trans gödelTranslated_axiomTc $ axiomK'! $ nec! $ and₃!
 
-lemma goedelTranslated_OrElim : 𝓜𝓢 ⊢ (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)))ᵍ := by
+lemma gödelTranslated_OrElim : 𝓜𝓢 ⊢ (((φ ➝ χ) ➝ (ψ ➝ χ) ➝ (φ ⋎ ψ ➝ χ)))ᵍ := by
   exact nec! $ C!_trans axiomFour! $ axiomK'! $ nec! $ C!_trans (axiomK'! $ nec! $ or₃!) axiomK!;
 
-lemma provable_goedelTranslated_of_provable
+lemma provable_gödelTranslated_of_provable
   {IAx : Propositional.Axiom ℕ}
   {𝓜𝓢 : MS} [Entailment.S4 𝓜𝓢]
   (hAx : ∀ φ ∈ IAx.instances, 𝓜𝓢 ⊢ φᵍ)
@@ -231,10 +231,10 @@ lemma provable_goedelTranslated_of_provable
   | andElimR => exact nec! and₂!;
   | orIntroL => exact nec! or₁!;
   | orIntroR => exact nec! or₂!;
-  | andIntro => exact goedelTranslated_AndIntro;
-  | orElim => exact goedelTranslated_OrElim;
-  | implyS => exact goedelTranslated_implyS;
-  | implyK => exact goedelTranslated_implyK;
+  | andIntro => exact gödelTranslated_AndIntro;
+  | orElim => exact gödelTranslated_OrElim;
+  | implyS => exact gödelTranslated_implyS;
+  | implyK => exact gödelTranslated_implyK;
 
 end Modal
 

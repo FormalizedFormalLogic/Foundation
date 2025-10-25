@@ -4,10 +4,10 @@ namespace LO.Modal.Entailment
 
 open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S} [Entailment.GL 𝓢]
 
-def goedel2 : 𝓢 ⊢! (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := by
+def gödel2 : 𝓢 ⊢! (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := by
   apply ENN_of_E;
   apply E_intro;
   . apply implyBoxDistribute';
@@ -16,11 +16,11 @@ def goedel2 : 𝓢 ⊢! (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := by
       apply implyBoxDistribute';
       exact K_left negEquiv;
     ) axiomL;
-lemma goedel2! : 𝓢 ⊢ (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := ⟨goedel2⟩
+lemma gödel2! : 𝓢 ⊢ (∼(□⊥) ⭤ ∼(□(∼(□⊥))) : F) := ⟨gödel2⟩
 
-def goedel2'.mp : 𝓢 ⊢! (∼(□⊥) : F) → 𝓢 ⊢! ∼(□(∼(□⊥)) : F) := by intro h; exact (K_left goedel2) ⨀ h;
-def goedel2'.mpr : 𝓢 ⊢! ∼(□(∼(□⊥)) : F) → 𝓢 ⊢! (∼(□⊥) : F) := by intro h; exact (K_right goedel2) ⨀ h;
-lemma goedel2'! : 𝓢 ⊢ (∼(□⊥) : F) ↔ 𝓢 ⊢ ∼(□(∼(□⊥)) : F) := ⟨λ ⟨h⟩ ↦ ⟨goedel2'.mp h⟩, λ ⟨h⟩ ↦ ⟨goedel2'.mpr h⟩⟩
+def gödel2'.mp : 𝓢 ⊢! (∼(□⊥) : F) → 𝓢 ⊢! ∼(□(∼(□⊥)) : F) := by intro h; exact (K_left gödel2) ⨀ h;
+def gödel2'.mpr : 𝓢 ⊢! ∼(□(∼(□⊥)) : F) → 𝓢 ⊢! (∼(□⊥) : F) := by intro h; exact (K_right gödel2) ⨀ h;
+lemma gödel2'! : 𝓢 ⊢ (∼(□⊥) : F) ↔ 𝓢 ⊢ ∼(□(∼(□⊥)) : F) := ⟨λ ⟨h⟩ ↦ ⟨gödel2'.mp h⟩, λ ⟨h⟩ ↦ ⟨gödel2'.mpr h⟩⟩
 
 
 namespace GL

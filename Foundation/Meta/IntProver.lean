@@ -19,7 +19,7 @@ namespace Theorems
 
 open Entailment TwoSided Tableaux FiniteContext
 
-variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment F S] {𝓢 : S} [Entailment.Int 𝓢]
+variable {F : Type*} [LogicalConnective F] [DecidableEq F] {S : Type*} [Entailment S F] {𝓢 : S} [Entailment.Int 𝓢]
 
 local notation Γ:45 " ⟹ " Δ:46 => TwoSided 𝓢 Γ Δ
 
@@ -126,7 +126,7 @@ structure Context where
   instLC : Q(LogicalConnective $F)
   instDE : Q(DecidableEq $F)
   S : Q(Type levelS)
-  E : Q(Entailment.{_, _, levelE} $F $S)
+  E : Q(Entailment.{_, _, levelE} $S $F)
   𝓢 : Q($S)
   instInt : Q(Entailment.Int $𝓢)
 
@@ -136,7 +136,7 @@ open Mathlib Qq Lean Elab Meta Tactic
 abbrev M := ReaderT Context AtomM
 
 /-- Apply the function
-  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment F S] {𝓢} [Entailment.Int 𝓢], _` to the
+  `n : ∀ {F} [LogicalConnective F] [DecidableEq F] {S} [Entailment S F] {𝓢} [Entailment.Int 𝓢], _` to the
 implicit parameters in the context, and the given list of arguments. -/
 def Context.app (c : Context) (n : Name) : Array Expr → Expr :=
   mkAppN <| @Expr.const n [c.levelF, c.levelS, c.levelE]
@@ -476,7 +476,7 @@ structure HypInfo where
   levelE : Level
   F : Q(Type levelF)
   S : Q(Type levelS)
-  E : Q(Entailment.{_, _, levelE} $F $S)
+  E : Q(Entailment.{_, _, levelE} $S $F)
   𝓢 : Q($S)
   φ : Q($F)
   proof : Q($𝓢 ⊢ $φ)

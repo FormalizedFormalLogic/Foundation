@@ -8,9 +8,9 @@ open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
 variable {L : Language} [L.Encodable]
 
-instance (k) : Semiterm.Operator.GoedelNumber ℒₒᵣ (L.Func k) := ⟨fun f ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode f)⟩
+instance (k) : Semiterm.Operator.GödelNumber ℒₒᵣ (L.Func k) := ⟨fun f ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode f)⟩
 
-instance (k) : Semiterm.Operator.GoedelNumber ℒₒᵣ (L.Rel k) := ⟨fun r ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode r)⟩
+instance (k) : Semiterm.Operator.GödelNumber ℒₒᵣ (L.Rel k) := ⟨fun r ↦ Semiterm.Operator.numeral ℒₒᵣ (Encodable.encode r)⟩
 
 variable (L)
 
@@ -63,9 +63,9 @@ section
 
 variable [V ⊧ₘ* 𝗣𝗔⁻]
 
-instance  goedelQuoteFunc (k) : GoedelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
+instance  gödelQuoteFunc (k) : GödelQuote (L.Func k) V := ⟨fun f ↦ ↑(Encodable.encode f)⟩
 
-instance goedelQuoteRel (k) : GoedelQuote (L.Rel k) V := ⟨fun R ↦ ↑(Encodable.encode R)⟩
+instance gödelQuoteRel (k) : GödelQuote (L.Rel k) V := ⟨fun R ↦ ↑(Encodable.encode R)⟩
 
 omit [L.LORDefinable] in
 lemma quote_func_def (f : L.Func k) : (⌜f⌝ : V) = ↑(Encodable.encode f) := rfl
@@ -190,9 +190,9 @@ lemma coe_addIndex_eq : (addIndex : V) = 0 := rfl
 
 lemma coe_mulIndex_eq : (mulIndex : V) = 1 := by simp [mulIndex]; rfl
 
-@[instance] abbrev goedelQuoteFuncLOR (k) : GoedelQuote ((ℒₒᵣ).Func k) V := goedelQuoteFunc k
+@[instance] abbrev gödelQuoteFuncLOR (k) : GödelQuote ((ℒₒᵣ).Func k) V := gödelQuoteFunc k
 
-@[instance] abbrev goedelQuoteRelLOR (k) : GoedelQuote ((ℒₒᵣ).Rel k) V := goedelQuoteRel k
+@[instance] abbrev gödelQuoteRelLOR (k) : GödelQuote ((ℒₒᵣ).Rel k) V := gödelQuoteRel k
 
 lemma isFunc_iff_LOR {k f : V} :
     (ℒₒᵣ).IsFunc k f ↔

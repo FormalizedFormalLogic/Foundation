@@ -16,7 +16,7 @@ variable (L)
 
 def IsFormulaSet (s : V) : Prop := ∀ p ∈ s, IsFormula L p
 
-def isFormulaSet : 𝚫₁.Semisentence 1 := .mkDelta
+noncomputable def isFormulaSet : 𝚫₁.Semisentence 1 := .mkDelta
   (.mkSigma “s. ∀ p ∈' s, !(isSemiformula L).sigma 0 p”)
   (.mkPi “s. ∀ p ∈' s, !(isSemiformula L).pi 0 p”)
 
@@ -72,7 +72,7 @@ lemma setShift_existsUnique (s : V) :
 
 noncomputable def setShift (s : V) : V := Classical.choose! (setShift_existsUnique L s)
 
-def setShiftGraph : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def setShiftGraph : 𝚺₁.Semisentence 2 := .mkSigma
   “t s. (∀ y ∈' t, ∃ x ∈' s, !(shiftGraph L) y x) ∧ (∀ x ∈' s, ∃ y, !(shiftGraph L) y x ∧ y ∈ t)”
 
 variable {L}
@@ -383,7 +383,7 @@ private lemma phi_iff (C d : V) :
     · right; right; right; right; right; right; right; right; left; exact ⟨s, p, d₁, d₂, rfl, h⟩
     · right; right; right; right; right; right; right; right; right; exact ⟨s, p, h⟩
 
-def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
+noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
   (.mkSigma “d C.
     (∃ fst, !fstIdxDef fst d ∧ !(isFormulaSet L).sigma fst) ∧
     ( (∃ s < d, ∃ p < d, !axLGraph d s p ∧ p ∈ s ∧ ∃ np, !(negGraph L) np p ∧ np ∈ s) ∨
@@ -567,25 +567,25 @@ def Proof (d φ : V) : Prop := T.DerivationOf d {φ}
 
 def Provable (φ : V) : Prop := ∃ d, T.Proof d φ
 
-def derivation : 𝚫₁.Semisentence 1 := (blueprint T).fixpointDefΔ₁
+noncomputable def derivation : 𝚫₁.Semisentence 1 := (blueprint T).fixpointDefΔ₁
 
-def derivationOf : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def derivationOf : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “d s. !fstIdxDef s d ∧ !T.derivation.sigma d”)
   (.mkPi “d s. !fstIdxDef s d ∧ !T.derivation.pi d”)
 
-def derivable : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def derivable : 𝚺₁.Semisentence 1 := .mkSigma
   “Γ. ∃ d, !T.derivationOf.sigma d Γ”
 
-def proof : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def proof : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “d φ. ∃ s, !insertDef s φ 0 ∧ !T.derivationOf.sigma d s”)
   (.mkPi “d φ. ∀ s, !insertDef s φ 0 → !T.derivationOf.pi d s”)
 
-def provable : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def provable : 𝚺₁.Semisentence 1 := .mkSigma
   “φ. ∃ d, !T.proof.sigma d φ”
 
-abbrev provabilityPred (σ : Sentence L) : Sentence ℒₒᵣ := T.provable.val/[⌜σ⌝]
+noncomputable abbrev provabilityPred (σ : Sentence L) : Sentence ℒₒᵣ := T.provable.val/[⌜σ⌝]
 
-def provabilityPred' (σ : Sentence L) : 𝚺₁.Sentence := .mkSigma
+noncomputable def provabilityPred' (σ : Sentence L) : 𝚺₁.Sentence := .mkSigma
   “!T.provable !!(⌜σ⌝)”
 
 @[simp] lemma provabilityPred'_val (σ : Sentence L) : (T.provabilityPred' σ).val = T.provabilityPred σ := by rfl

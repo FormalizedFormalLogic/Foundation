@@ -8,7 +8,7 @@ namespace LO.Modal
 open LO.Entailment LO.Modal.Entailment
 
 variable {α : Type*}
-variable {S} [Entailment (Formula α) S]
+variable {S} [Entailment S (Formula α)]
 variable {𝓢 : S}
 
 namespace FormulaSet
@@ -84,7 +84,7 @@ lemma iff_insert_consistent : Consistent 𝓢 (insert φ T) ↔ ∀ {Γ : Formul
     have := def_consistent.mp h (insert φ Γ) ?_;
     . revert this;
       contrapose!;
-      simp only [not_not, Finset.coe_insert];
+      simp only [Finset.coe_insert];
       intro h;
       exact Context.deductInv! h;
     . simpa using Set.insert_subset_insert hΓ;
@@ -94,7 +94,7 @@ lemma iff_insert_consistent : Consistent 𝓢 (insert φ T) ↔ ∀ {Γ : Formul
     have := @h (Γ.erase φ) ?_;
     . revert this;
       contrapose!;
-      simp only [not_not, Finset.coe_erase];
+      simp only [Finset.coe_erase];
       intro h;
       apply Context.deduct!;
       apply Context.weakening! (Γ := Γ) ?_ h;
@@ -386,6 +386,8 @@ lemma iff_mem_imp : ((φ ➝ ψ) ∈ Ω) ↔ (φ ∈ Ω) → (ψ ∈ Ω) := by
       exact imply₁! ⨀ (membership_iff.mp h)
 
 lemma mdp (hφψ : φ ➝ ψ ∈ Ω) (hψ : φ ∈ Ω) : ψ ∈ Ω := iff_mem_imp.mp hφψ hψ
+
+lemma mdp_provable (hφψ : 𝓢 ⊢ φ ➝ ψ) (hψ : φ ∈ Ω) : ψ ∈ Ω := mdp (mem_of_prove hφψ) hψ
 
 @[simp]
 lemma iff_mem_and : ((φ ⋏ ψ) ∈ Ω) ↔ (φ ∈ Ω) ∧ (ψ ∈ Ω) := by

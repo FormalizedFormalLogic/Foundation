@@ -195,7 +195,7 @@ instance models_InductionScheme_alt : V ⊧ₘ* InductionScheme ℒₒᵣ (Arith
         Semiformula.Evalm V ![0] f φ →
         (∀ x, Semiformula.Evalm V ![x] f φ → Semiformula.Evalm V ![x + 1] f φ) →
         ∀ x, Semiformula.Evalm V ![x] f φ by
-    simp only [InductionScheme, Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp]
+    simp only [InductionScheme, Semantics.ModelsSet.setOf_iff, forall_exists_index, and_imp]
     rintro _ φ hφ rfl
     simpa [models_iff, Semiformula.eval_univCl, succInd, Semiformula.eval_rew_q,
         Semiformula.eval_substs, Function.comp, Matrix.constant_eq_singleton]
@@ -366,7 +366,7 @@ lemma models_succInd (φ : Semiformula ℒₒᵣ ℕ 1) : ℕ ⊧ₘ (succInd φ
 
 instance models_ISigma (Γ k) : ℕ ⊧ₘ* 𝗜𝗡𝗗 Γ k := by
   simp only [ModelsTheory.add_iff, instModelsTheoryNat, InductionScheme,
-    Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp, true_and]
+    Semantics.ModelsSet.setOf_iff, forall_exists_index, and_imp, true_and]
   rintro _ φ _ rfl; simp [models_succInd]
 
 instance models_ISigmaZero : ℕ ⊧ₘ* 𝗜𝚺₀ := inferInstance
@@ -375,7 +375,7 @@ instance models_ISigmaOne : ℕ ⊧ₘ* 𝗜𝚺₁ := inferInstance
 
 instance models_Peano : ℕ ⊧ₘ* 𝗣𝗔 := by
   simp only [Peano, InductionScheme, ModelsTheory.add_iff, instModelsTheoryNat,
-    Semantics.RealizeSet.setOf_iff, forall_exists_index, and_imp, true_and]
+    Semantics.ModelsSet.setOf_iff, forall_exists_index, and_imp, true_and]
   rintro _ φ _ rfl; simp [models_succInd]
 
 instance : Entailment.Consistent (𝗜𝗡𝗗 Γ k) := (𝗜𝗡𝗗 Γ k).consistent_of_sound (Eq ⊥) rfl

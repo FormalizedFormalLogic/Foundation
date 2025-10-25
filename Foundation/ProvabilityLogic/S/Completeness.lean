@@ -46,7 +46,7 @@ lemma refl_mainlemma_aux (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
   let S := SolovaySentences.standard T M₀.toFrame
   ∀ B ∈ A.subformulas,
   (r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ (S.realization B)) ∧
-  (¬r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B)) := by
+  (r₁ ⊭ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B)) := by
   intro M₀ r₀ _ S B B_sub;
 
   replace hA := Formula.Kripke.Satisfies.imp_def.not.mp hA;
@@ -146,7 +146,7 @@ lemma rfl_mainlemma_neg (hA : ¬r₁ ⊧ (A.rflSubformula.conj ➝ A)) :
   letI r₀ : M₀ := Model.extendRoot.root
   haveI : Fintype M₀.World := Fintype.ofFinite _
   letI S := SolovaySentences.standard T M₀.toFrame
-  ∀ B ∈ A.subformulas, ¬r₁ ⊧ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B) := λ B B_sub => (refl_mainlemma_aux hA B B_sub).2
+  ∀ B ∈ A.subformulas, r₁ ⊭ B → 𝗜𝚺₁ ⊢ (S r₀) ➝ ∼(S.realization B) := λ B B_sub => (refl_mainlemma_aux hA B B_sub).2
 
 end
 
@@ -187,7 +187,7 @@ lemma GL_S_TFAE :
     have := Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
     have : ℕ ⊧ₘ S r₀ ➝ ∼S.realization A := models_of_provable inferInstance $ by
       convert SolovaySentences.rfl_mainlemma_neg (T := T) hA A (by grind) $ Formula.Kripke.Satisfies.not_imp_def.mp hA |>.2;
-    simp only [Models, LO.Semantics.Not.realize_not, LO.Semantics.Imp.realize_imp] at this;
+    simp only [Models, LO.Semantics.Not.models_not, LO.Semantics.Imp.models_imply] at this;
     exact this <| by
       simpa [models_iff, S, SolovaySentences.standard_σ_def] using ISigma1.Metamath.SolovaySentences.solovay_root_sound
   tfae_finish;

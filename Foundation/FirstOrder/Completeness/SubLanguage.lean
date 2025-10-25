@@ -220,7 +220,7 @@ lemma models_lMap
     (injr : ∀ k, Function.Injective (Φ.rel : L₁.Rel k → L₂.Rel k))
     (φ : Sentence L₁) :
     (s₁.extendStructure Φ).toStruc ⊧ Semiformula.lMap Φ φ ↔ s₁.toStruc ⊧ φ := by
-  simp [Semantics.Realize, eval_lMap s₁ Φ injf injr]
+  simp [Semantics.Models, eval_lMap s₁ Φ injf injr]
 
 end extendStructure
 
@@ -238,9 +238,9 @@ lemma lMap_models_lMap_iff
   · intro h s₁ hs₁
     refine (Structure.extendStructure.models_lMap s₁.struc Φ injf injr φ).mp <| h ?_
     suffices ∀ σ ∈ T, (Structure.extendStructure Φ s₁.struc).toStruc ⊧ Semiformula.lMap Φ σ by
-      simpa [Semantics.realizeSet_iff, Theory.lMap, Semantics.models]
+      simpa [Semantics.modelsSet_iff, Theory.lMap, Semantics.models]
     intro σ hσ
-    exact (Structure.extendStructure.models_lMap s₁.struc Φ injf injr σ).mpr (hs₁.realize _ hσ)
+    exact (Structure.extendStructure.models_lMap s₁.struc Φ injf injr σ).mpr (hs₁.models _ hσ)
   · exact lMap_models_lMap
 
 lemma satisfiable_lMap
@@ -251,10 +251,10 @@ lemma satisfiable_lMap
     Satisfiable (Semiformula.lMap Φ '' T) := by
   rcases s with ⟨⟨M, i, s⟩, hM⟩
   exact ⟨⟨M, i, s.extendStructure Φ⟩, by
-    simp only [Semantics.realizeSet_iff, Set.mem_image, forall_exists_index, and_imp,
+    simp only [Semantics.modelsSet_iff, Set.mem_image, forall_exists_index, and_imp,
       forall_apply_eq_imp_iff₂]
     intro φ hp
-    exact (Structure.extendStructure.models_lMap s Φ injf injr φ).mpr (hM.realize _ hp)⟩
+    exact (Structure.extendStructure.models_lMap s Φ injf injr φ).mpr (hM.models _ hp)⟩
 
 end lMap
 

@@ -65,6 +65,7 @@ def Exponential.Seqₛ (y X Y : V) : Prop := ∀ u ≤ y, u ≠ 2 → PPow2 u �
 
 def Exponential.Seqₘ (x y X Y : V) : Prop := ∃ u ≤ y^2, u ≠ 2 ∧ PPow2 u ∧ ext u X = x ∧ ext u Y = y
 
+/-- The graph of the exponential function -/
 def Exponential (x y : V) : Prop := (x = 0 ∧ y = 1) ∨ ∃ X ≤ y^4, ∃ Y ≤ y^4, Exponential.Seq₀ X Y ∧ Exponential.Seqₛ y X Y ∧ Exponential.Seqₘ x y X Y
 
 lemma Exponential.Seqₛ.iff (y X Y : V) :
@@ -113,14 +114,16 @@ def _root_.LO.FirstOrder.Arithmetic.exponentialDef : 𝚺₀.Semisentence 2 := .
       !Exponential.Seqₛ.def y X Y ∧
       ∃ u <⁺ y², u ≠ 2 ∧ !ppow2Def u ∧ !extDef x u X ∧ !extDef y u Y”
 
+/-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
 lemma Exponential.defined : 𝚺₀-Relation (Exponential : V → V → Prop) via exponentialDef := by
   intro v; simp [Exponential.graph_iff, exponentialDef, ppow2_defined.df.iff, ext_defined.df.iff,
     Exponential.Seqₛ.defined.df.iff, pow_four, sq, numeral_eq_natCast]
 
+/-- The graph of the exponential function can be defined by the $\Delta_0$-formula. -/
+instance exponential_definable : 𝚺₀-Relation (Exponential : V → V → Prop) := Exponential.defined.to_definable
+
 @[simp] lemma exponential_defined_iff (v) :
     Semiformula.Evalbm V v exponentialDef.val ↔ Exponential (v 0) (v 1) := Exponential.defined.df.iff v
-
-instance exponential_definable : 𝚺₀-Relation (Exponential : V → V → Prop) := Exponential.defined.to_definable
 
 @[simp] instance exponential_definable' (Γ) : Γ-Relation (Exponential : V → V → Prop) := exponential_definable.of_zero
 
@@ -490,7 +493,7 @@ lemma ext_le_ext_of_seq₀_of_seqₛ {y X Y : V} (h₀ : Exponential.Seq₀ X Y)
           ext i X = 2 * ext (√i) X + 1 := by simpa [ppi.sq_sqrt_eq ne2] using hodd.1
           _       < 2 * ext (√i) Y + 1 := by simpa using IH
           _       ≤ 2 * ext (√i) Y^2   :=
-            lt_iff_succ_le.mp <| (mul_lt_mul_left <| by simp).mpr
+            lt_iff_succ_le.mp <| (mul_lt_mul_iff_right₀ <| by simp).mpr
               <| lt_self_pow₀ (one_lt_iff_two_le.mpr twole) (by simp)
           _       = ext i Y            := by simpa [ppi.sq_sqrt_eq ne2] using Eq.symm hodd.2
 
@@ -720,6 +723,7 @@ variable [V ⊧ₘ* 𝗜𝚺₁]
 
 namespace Exponential
 
+/-- The exponential function is proved to be total in $\mathsf I Σ_1$. -/
 lemma range_exists (x : V) : ∃ y, Exponential x y := by
   induction x using ISigma1.sigma1_succ_induction
   · definability

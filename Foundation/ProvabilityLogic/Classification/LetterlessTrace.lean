@@ -37,8 +37,7 @@ variable (hφ : φ.Letterless := by grind) (hψ : ψ.Letterless := by grind)
   | zero => simp [letterlessSpectrum]
   | succ n ih =>
     suffices (□^[n](□□φ)).letterlessSpectrum = (□□^[n](□φ)).letterlessSpectrum by simpa
-    rw [←ih];
-    simp;
+    simpa using ih (φ := □φ) (by grind);
 @[grind] lemma def_boxdot : (⊡φ).letterlessSpectrum = { n | ∀ i ≤ n, i ∈ φ.letterlessSpectrum } := by
   ext i;
   suffices (i ∈ φ.letterlessSpectrum ∧ ∀ j < i, j ∈ φ.letterlessSpectrum) ↔ ∀ j ≤ i, j ∈ φ.letterlessSpectrum by simpa [letterlessSpectrum];
@@ -371,16 +370,15 @@ lemma iff_satisfies_mem_rank_letterlessSpectrum
   | hatom => simp at φ_closed;
   | hfalsum => simp;
   | himp φ ψ ihφ ihψ =>
-    rw [Satisfies.imp_def, ihφ, ihψ, Formula.letterlessSpectrum.def_imp]
-    simp;
-    tauto;
+    rw [Satisfies.imp_def, ihφ (by grind), ihψ (by grind), Formula.letterlessSpectrum.def_imp];
+    tauto_set;
   | hbox φ ihφ =>
     calc
       w ⊧ □φ ↔ ∀ v, w ≺ v → v ⊧ φ                                  := by rfl;
       _      ↔ ∀ v, w ≺ v → (Frame.rank v ∈ φ.letterlessSpectrum) := by
         constructor;
-        . intro h v; rw [←ihφ]; apply h;
-        . intro h v; rw [ihφ]; apply h;
+        . intro h v; rw [←ihφ (by grind)]; apply h;
+        . intro h v; rw [ihφ (by grind)]; apply h;
       _      ↔ ∀ i < (Frame.rank w), i ∈ φ.letterlessSpectrum := by
         constructor;
         . intro h i hi;
@@ -766,6 +764,7 @@ lemma GL.iff_provable_closed_sumQuasiNormal_subset_letterlessSpectrum (hSR : X.S
           . apply fX;
           . apply Set.Subset.trans ?_ h;
             rw [←FormulaSet.letterlessSpectrum, ←hk];
+            assumption;
         . have H : ∀ i ∈ φ.letterlessTrace, ∃ ψ, ∃ _ : ψ ∈ X, i ∈ ψ.letterlessTrace := by
             have : φ.letterlessTrace ⊆ ⋃ ψ ∈ X, ψ.letterlessTrace := by
               apply Set.compl_subset_compl.mp;

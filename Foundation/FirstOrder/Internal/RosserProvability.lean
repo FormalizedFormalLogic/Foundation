@@ -18,7 +18,7 @@ def _root_.LO.FirstOrder.Theory.RosserProvable (φ : V) : Prop := T.ProvabilityC
 
 section
 
-def _root_.LO.FirstOrder.Theory.rosserProvable : 𝚺₁.Semisentence 1 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Theory.rosserProvable : 𝚺₁.Semisentence 1 := .mkSigma
   “φ. ∃ nφ, !(negGraph L) nφ φ ∧ !T.provabilityComparison φ nφ”
 
 lemma _root_.LO.FirstOrder.Theory.RosserProvable_defined :
@@ -32,7 +32,7 @@ lemma _root_.LO.FirstOrder.Theory.RosserProvable_defined :
 instance _root_.LO.FirstOrder.Theory.rosserProvable_definable :
     𝚺₁-Predicate (T.RosserProvable : V → Prop) := T.RosserProvable_defined.to_definable
 
-abbrev _root_.LO.FirstOrder.Theory.rosserPred (σ : Sentence L) : Sentence ℒₒᵣ := T.rosserProvable.val/[⌜σ⌝]
+noncomputable abbrev _root_.LO.FirstOrder.Theory.rosserPred (σ : Sentence L) : Sentence ℒₒᵣ := T.rosserProvable.val/[⌜σ⌝]
 
 end
 
@@ -129,7 +129,7 @@ variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 
 variable (T)
 
-abbrev _root_.LO.FirstOrder.Theory.rosserProvability : Provability 𝗜𝚺₁ T where
+noncomputable abbrev _root_.LO.FirstOrder.Theory.rosserProvability : Provability 𝗜𝚺₁ T where
   prov := T.rosserProvable
   D1 := rosserProvable_D1
 

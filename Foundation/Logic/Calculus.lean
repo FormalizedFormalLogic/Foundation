@@ -14,27 +14,27 @@ This file defines a characterization of Tait style calculus and Gentzen style ca
 
 namespace LO
 
-class OneSided (F : outParam Type*) (K : Type*) where
+class OneSided (K : Type*) (F : outParam Type*) where
   Derivation : K → List F → Type*
 
 infix:45 " ⟹ " => OneSided.Derivation
 
-abbrev OneSided.Derivation₁ [OneSided F K] (𝓚 : K) (φ : F) : Type _ := 𝓚 ⟹ [φ]
+abbrev OneSided.Derivation₁ [OneSided K F] (𝓚 : K) (φ : F) : Type _ := 𝓚 ⟹ [φ]
 
 infix:45 " ⟹. " => OneSided.Derivation₁
 
-abbrev OneSided.Derivable [OneSided F K] (𝓚 : K) (Δ : List F) : Prop := Nonempty (𝓚 ⟹ Δ)
+abbrev OneSided.Derivable [OneSided K F] (𝓚 : K) (Δ : List F) : Prop := Nonempty (𝓚 ⟹ Δ)
 
 infix:45 " ⟹! " => OneSided.Derivable
 
-abbrev OneSided.Derivable₁ [OneSided F K] (𝓚 : K) (φ : F) : Prop := Nonempty (𝓚 ⟹. φ)
+abbrev OneSided.Derivable₁ [OneSided K F] (𝓚 : K) (φ : F) : Prop := Nonempty (𝓚 ⟹. φ)
 
 infix:45 " ⟹!. " => OneSided.Derivable₁
 
-noncomputable def OneSided.Derivable.get [OneSided F K] (𝓚 : K) (Δ : List F) (h : 𝓚 ⟹! Δ) : 𝓚 ⟹ Δ :=
+noncomputable def OneSided.Derivable.get [OneSided K F] (𝓚 : K) (Δ : List F) (h : 𝓚 ⟹! Δ) : 𝓚 ⟹ Δ :=
   Classical.choice h
 
-class Tait (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] extends OneSided F K where
+class Tait (F K : Type*) [LogicalConnective F] [DeMorgan F] [AdjunctiveSet F K] extends OneSided K F where
   verum (𝓚 : K) (Δ : List F)         : 𝓚 ⟹ ⊤ :: Δ
   and {𝓚 : K} {φ ψ : F} {Δ : List F} : 𝓚 ⟹ φ :: Δ → 𝓚 ⟹ ψ :: Δ → 𝓚 ⟹ φ ⋏ ψ :: Δ
   or {𝓚 : K} {φ ψ : F} {Δ : List F}  : 𝓚 ⟹ φ :: ψ :: Δ → 𝓚 ⟹ φ ⋎ ψ :: Δ
@@ -52,7 +52,7 @@ variable {F S K : Type*} [LogicalConnective F] [AdjunctiveSet F K]
 
 namespace OneSided
 
-variable [OneSided F K] {𝓚 : K} {Γ Δ : List F}
+variable [OneSided K F] {𝓚 : K} {Γ Δ : List F}
 
 protected abbrev cast (d : 𝓚 ⟹ Δ) (e : Δ = Γ) : 𝓚 ⟹ Γ := cast (congrArg _ e) d
 
@@ -126,7 +126,7 @@ def ofAxiomSubset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹ Γ → �
 
 lemma of_axiom_subset [Tait.Axiomatized F K] (h : 𝓚 ⊆ 𝓛) : 𝓚 ⟹! Γ → 𝓛 ⟹! Γ := fun b ↦ ⟨ofAxiomSubset h b.get⟩
 
-instance system : Entailment F K := ⟨(· ⟹. ·)⟩
+instance system : Entailment K F := ⟨(· ⟹. ·)⟩
 
 instance [Tait.Axiomatized F K] : Entailment.Axiomatized K where
   prfAxm := fun hf ↦ Tait.Axiomatized.axm <| hf

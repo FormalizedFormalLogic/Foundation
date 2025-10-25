@@ -56,7 +56,7 @@ instance : Modal.K ⪱ Modal.KD := by
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => False⟩, 0;
       constructor;
       . trivial;
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end Hilbert
 

@@ -6,7 +6,7 @@ abbrev Sequentᵢ (L : Language) := List (SyntacticFormulaᵢ L)
 
 open Semiformulaᵢ
 
-variable {L : Language} {T : Theory L}
+variable {L : Language.{u}} {T : Theory L}
 
 structure Hilbertᵢ (L : Language) where
   axiomSet : Set (SyntacticFormulaᵢ L)
@@ -22,7 +22,7 @@ def Minimal : Hilbertᵢ L := ⟨∅, by simp⟩
 
 notation "𝗠𝗶𝗻¹" => Minimal
 
-def Intuitionistic : Hilbertᵢ L := ⟨{⊥ ➝ φ | φ}, by rintro _ ⟨φ, rfl⟩ f; exact ⟨Rew.rewrite f ▹ φ, by simp⟩⟩
+def Intuitionistic : Hilbertᵢ L := ⟨{Axioms.EFQ φ | φ}, by rintro _ ⟨φ, rfl⟩ f; exact ⟨Rew.rewrite f ▹ φ, by simp⟩⟩
 
 notation "𝗜𝗻𝘁¹" => Intuitionistic
 
@@ -36,6 +36,8 @@ notation "𝗖𝗹¹" => Classical
 lemma minimal_le (Λ : Hilbertᵢ L) : (Minimal : Hilbertᵢ L) ≤ Λ := by rintro _ ⟨⟩
 
 lemma intuitionistic_le_classical : (Intuitionistic : Hilbertᵢ L) ≤ Classical := by rintro _ ⟨φ, rfl⟩; exact .inl ⟨φ, rfl⟩
+
+@[simp] lemma mem_mk (s : Set (SyntacticFormulaᵢ L)) (h) : φ ∈ Hilbertᵢ.mk s h ↔ φ ∈ s := by rfl
 
 end Hilbertᵢ
 
@@ -57,7 +59,7 @@ inductive HilbertProofᵢ (Λ : Hilbertᵢ L) : SyntacticFormulaᵢ L → Type _
   | ex₁ t φ      : HilbertProofᵢ Λ <| φ/[t] ➝ ∃' φ
   | ex₂ φ ψ      : HilbertProofᵢ Λ <| ∀' (φ ➝ ψ/[]) ➝ ∃' φ ➝ ψ
 
-instance : Entailment (SyntacticFormulaᵢ L) (Hilbertᵢ L) := ⟨HilbertProofᵢ⟩
+instance : Entailment (Hilbertᵢ L) (SyntacticFormulaᵢ L) := ⟨HilbertProofᵢ⟩
 
 namespace HilbertProofᵢ
 
@@ -87,6 +89,9 @@ instance : Entailment.Minimal Λ where
   negEquiv _ := Entailment.E_Id _
 
 variable {Λ}
+
+instance : Entailment.Int (𝗜𝗻𝘁¹ : Hilbertᵢ L) where
+  efq _ := eaxm <| by simp [Hilbertᵢ.Intuitionistic]
 
 protected def cast {φ ψ} (b : Λ ⊢! φ) (e : φ = ψ) : Λ ⊢! ψ := e ▸ b
 
@@ -229,5 +234,90 @@ def rewrite (f : ℕ → SyntacticTerm L) : Λ ⊢! φ → Λ ⊢! Rew.rewrite f
   induction b generalizing f <;> simp [rewrite, *]
 
 end HilbertProofᵢ
+
+variable (L)
+
+@[ext] structure Theoryᵢ (𝓗 : Hilbertᵢ L) where
+  theory : Set (Sentenceᵢ L)
+
+variable {L}
+
+namespace Theoryᵢ
+
+open LO.Entailment
+
+variable {𝓗 : Hilbertᵢ L} {T : Theoryᵢ L 𝓗}
+
+instance : SetLike (Theoryᵢ L 𝓗) (Sentenceᵢ L) where
+  coe := theory
+  coe_injective' _ _ := Theoryᵢ.ext
+
+lemma mem_def : φ ∈ T ↔ φ ∈ T.theory := by rfl
+
+@[simp] lemma mem_mk_iff (s : Set (Sentenceᵢ L)) : φ ∈ (⟨s⟩ : Theoryᵢ L 𝓗) ↔ φ ∈ s := by rfl
+
+instance : AdjunctiveSet (Sentenceᵢ L) (Theoryᵢ L 𝓗) where
+  Subset T U := ∀ φ ∈ T, φ ∈ U
+  emptyCollection := ⟨∅⟩
+  adjoin φ T := ⟨adjoin φ T.theory⟩
+  subset_iff := by simp
+  not_mem_empty := by simp
+  mem_cons_iff := by simp [mem_def]
+
+@[simp] lemma adjoin_theory_def : (adjoin φ T).theory = insert φ T.theory := rfl
+
+def Proof (T : Theoryᵢ L 𝓗) (φ : Sentenceᵢ L) :=
+  (Rewriting.emb '' T.theory) *⊢[𝓗]! (Rewriting.emb φ : SyntacticFormulaᵢ L)
+
+instance : Entailment (Theoryᵢ L 𝓗) (Sentenceᵢ L) := ⟨Theoryᵢ.Proof⟩
+
+lemma provable_def {φ : Sentenceᵢ L} : T ⊢ φ ↔ (Rewriting.emb '' T.theory) *⊢[𝓗] ↑φ := by rfl
+
+def Proof.cast! (e : φ = ψ) : T ⊢! φ → T ⊢! ψ := fun b ↦ e ▸ b
+
+def Proof.weakening! [L.DecidableEq] (ss : T ⊆ U) : T ⊢! φ → U ⊢! φ :=
+  Context.weakening (Set.image_mono ss)
+
+open Context
+
+variable [L.DecidableEq]
+
+instance : Axiomatized (Theoryᵢ L 𝓗) where
+  prfAxm {T} φ h := by
+    show (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑φ
+    exact Context.byAxm (Set.mem_image_of_mem _ (by simpa [mem_def] using h))
+  weakening {φ T U} ss b := by
+    show (Rewriting.emb '' U.theory) *⊢[𝓗]! ↑φ
+    apply Context.weakening ?_ b
+    exact Set.image_mono ss
+
+def ofHilbert {φ : Sentenceᵢ L} : 𝓗 ⊢! ↑φ → T ⊢! φ := Context.of
+
+def deduct! {φ ψ} (b : adjoin φ T ⊢! ψ) : T ⊢! φ ➝ ψ :=
+  have : (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑φ ➝ ↑ψ :=
+    Context.deduct <| Context.weakening (by simp [-Set.image_subset_iff, Set.image_insert_eq]) b
+  this
+
+def deductInv! {φ ψ} (b : T ⊢! φ ➝ ψ) : adjoin φ T ⊢! ψ :=
+  have : insert ↑φ (Rewriting.emb '' T.theory) *⊢[𝓗]! ↑ψ := Context.deductInv b
+  Context.weakening (by simp [Set.image_insert_eq]) this
+
+instance : Deduction (Theoryᵢ L 𝓗) where
+  ofInsert := deduct!
+  inv := deductInv!
+
+variable (𝓗)
+
+instance : Entailment.Minimal T :=
+  Minimal.ofEquiv (Context.mk (Rewriting.emb '' T.theory)) T (Rewriting.app Rew.emb)
+    fun φ ↦ (Equiv.refl ((Rewriting.emb '' T.theory) *⊢[𝓗]! ↑φ))
+
+instance minimal [Entailment.Int 𝓗] : Entailment.Int T where
+  efq _ := ofHilbert <| efq
+
+instance cl [Entailment.Cl 𝓗] : Entailment.Cl T where
+  dne _ := ofHilbert <| dne
+
+end Theoryᵢ
 
 end LO.FirstOrder

@@ -20,10 +20,13 @@ structure Language where
 
 namespace Language
 
-class IsRelational (L : Language) where
-  func_empty : ∀ k, IsEmpty (L.Func (k + 1))
+class Relational (L : Language) where
+  func_empty : ∀ k, IsEmpty (L.Func k)
 
-class IsConstant (L : Language) extends IsRelational L where
+instance {L : Language} [L.Relational] : IsEmpty (L.Func k) := Relational.func_empty k
+
+class IsConstant (L : Language) where
+  func_empty : ∀ k, IsEmpty (L.Func (k + 1))
   rel_empty  : ∀ k, IsEmpty (L.Rel k)
 
 class ConstantInhabited (L : Language) extends Inhabited (L.Func 0)

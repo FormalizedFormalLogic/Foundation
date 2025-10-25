@@ -47,7 +47,7 @@ instance : Modal.KD ⪱ Modal.KDB := by
       use M, 0;
       constructor;
       . refine { serial := by intro x; use 1; omega;}
-      . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [M, Semantics.Realize, Satisfies];
+      . suffices ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by simpa [M, Semantics.Models, Satisfies];
         use 1;
         constructor <;> omega;
 
@@ -63,6 +63,6 @@ instance : Modal.KB ⪱ Modal.KDB := by
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
       . refine { symm := by simp; };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end LO.Modal

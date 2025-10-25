@@ -18,7 +18,7 @@ def cast [L.DecidableEq] {T : Theory L} {Γ Δ : Finset (SyntacticFormula L)} (d
 
 noncomputable def Sequent.quote (Γ : Finset (SyntacticFormula L)) : V := ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V)
 
-noncomputable instance : GoedelQuote (Finset (SyntacticFormula L)) V := ⟨Sequent.quote V⟩
+noncomputable instance : GödelQuote (Finset (SyntacticFormula L)) V := ⟨Sequent.quote V⟩
 
 omit [L.DecidableEq] in
 lemma Sequent.quote_def (Γ : Finset (SyntacticFormula L)) : ⌜Γ⌝ = ∑ φ ∈ Γ, Exp.exp (⌜φ⌝ : V) := rfl
@@ -96,7 +96,7 @@ lemma setShift_quote (Γ : Finset (SyntacticFormula L)) :
   rcases Derivation2.Sequent.mem_quote hx with ⟨p, _, rfl⟩;
   simp [Semiformula.quote_def]
 
-noncomputable instance : GoedelQuote (Finset (SyntacticFormula L)) (Metamath.Sequent V L) := ⟨fun Γ ↦ ⟨⌜Γ⌝, by simp⟩⟩
+noncomputable instance : GödelQuote (Finset (SyntacticFormula L)) (Metamath.Sequent V L) := ⟨fun Γ ↦ ⟨⌜Γ⌝, by simp⟩⟩
 
 @[simp] lemma Sequent.typed_quote_val (Γ : Finset (SyntacticFormula L)) : (⌜Γ⌝ : Metamath.Sequent V L).val = ⌜Γ⌝ := rfl
 
@@ -175,9 +175,9 @@ noncomputable def typedQuote {Γ : Finset (SyntacticFormula L)} : T ⟹₂ Γ �
   | cut (φ := φ) d dn =>
     TDerivation.cut (φ := ⌜φ⌝) (d.typedQuote.cast (by simp)) (dn.typedQuote.cast (by simp))
 
-noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⟹₂ Γ) (T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
+noncomputable instance (Γ : Finset (SyntacticFormula L)) : GödelQuote (T ⟹₂ Γ) (T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝) := ⟨typedQuote V⟩
 
-noncomputable instance (Γ : Finset (SyntacticFormula L)) : GoedelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val⟩
+noncomputable instance (Γ : Finset (SyntacticFormula L)) : GödelQuote (T ⟹₂ Γ) V := ⟨fun d ↦ (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val⟩
 
 lemma quote_def (d : (T : SyntacticFormulas L) ⟹₂ Γ) : (⌜d⌝ : V) = (⌜d⌝ : T.internalize V ⊢!ᵈᵉʳ ⌜Γ⌝).val := rfl
 
@@ -215,9 +215,9 @@ lemma coe_quote_eq (d : (T : SyntacticFormulas L) ⟹₂ Γ) : (↑(⌜d⌝ : �
 
 end Derivation2
 
-noncomputable instance (Γ : Sequent L) : GoedelQuote ((T : SyntacticFormulas L) ⟹ Γ) V := ⟨fun b ↦ ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝⟩
+noncomputable instance (Γ : Sequent L) : GödelQuote ((T : SyntacticFormulas L) ⟹ Γ) V := ⟨fun b ↦ ⌜Derivation.toDerivation2 (T : SyntacticFormulas L) b⌝⟩
 
-noncomputable instance (φ : Sentence L) : GoedelQuote (T ⊢! φ) V := ⟨fun b ↦
+noncomputable instance (φ : Sentence L) : GödelQuote (T ⊢! φ) V := ⟨fun b ↦
   let b : (T : SyntacticFormulas L) ⟹ [↑φ] := b
   ⌜b⌝⟩
 

@@ -146,7 +146,8 @@ variable (L)
 
 def IsUTerm : V → Prop := (construction L).Fixpoint ![]
 
-def isUTerm : 𝚫₁.Semisentence 1 := (blueprint L).fixpointDefΔ₁
+/-- Note: `noncomputable` attribute to prohibit compilation of a large term. This is necessary for Zoo and integration with Verso. -/
+noncomputable def isUTerm : 𝚫₁.Semisentence 1 := (blueprint L).fixpointDefΔ₁
 
 variable {L}
 
@@ -166,7 +167,7 @@ variable (L)
 
 def IsUTermVec (n w : V) : Prop := n = len w ∧ ∀ i < n, IsUTerm L w.[i]
 
-def isUTermVec : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def isUTermVec : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “n w. !lenDef n w ∧ ∀ i < n, ∃ u, !nthDef u w i ∧ !(isUTerm L).sigma u”)
   (.mkPi “n w. (∀ l, !lenDef l w → n = l) ∧ ∀ i < n, ∀ u, !nthDef u w i → !(isUTerm L).pi u”)
 
@@ -283,7 +284,7 @@ namespace Blueprint
 
 variable (L) (β : Blueprint arity)
 
-def blueprint : Fixpoint.Blueprint arity := ⟨.mkDelta
+noncomputable def blueprint : Fixpoint.Blueprint arity := ⟨.mkDelta
   (.mkSigma “pr C.
     ∃ t <⁺ pr, ∃ y <⁺ pr, !pairDef pr t y ∧ !(isUTerm L).sigma t ∧
     ( (∃ z < t, !qqBvarDef t z ∧ !β.bvar y z ⋯) ∨
@@ -299,13 +300,13 @@ def blueprint : Fixpoint.Blueprint arity := ⟨.mkDelta
         ((∀ l, !lenDef l w → k = l) ∧ ∀ i < k, ∀ vi, !nthDef vi v i → ∀ v'i, !nthDef v'i w i → :⟪vi, v'i⟫:∈ C) ∧
         !qqFuncDef t k f v ∧ !β.func.graphDelta.pi y k f v w ⋯) )”)⟩
 
-def graph : 𝚺₁.Semisentence (arity + 2) := .mkSigma
+noncomputable def graph : 𝚺₁.Semisentence (arity + 2) := .mkSigma
   “t y. ∃ pr <⁺ (t + y + 1)², !pairDef pr t y ∧ !(β.blueprint L).fixpointDef pr ⋯”
 
-def result : 𝚺₁.Semisentence (arity + 2) := .mkSigma
+noncomputable def result : 𝚺₁.Semisentence (arity + 2) := .mkSigma
   “y t. (!(isUTerm L).pi t → !(β.graph L) t y ⋯) ∧ (¬!(isUTerm L).sigma t → y = 0)”
 
-def resultVec : 𝚺₁.Semisentence (arity + 3) := .mkSigma
+noncomputable def resultVec : 𝚺₁.Semisentence (arity + 3) := .mkSigma
   “w' k w.
     (!(isUTermVec L).pi k w → !lenDef k w' ∧ ∀ i < k, ∃ z, !nthDef z w i ∧ ∃ z', !nthDef z' w' i ∧ !(β.graph L).val z z' ⋯) ∧
     (¬!(isUTermVec L).sigma k w → w' = 0)”
@@ -697,9 +698,9 @@ noncomputable def termBV (t : V) : V := construction.result L ![] t
 
 noncomputable def termBVVec (k v : V) : V := construction.resultVec L ![] k v
 
-def termBVGraph : 𝚺₁.Semisentence 2 := blueprint.result L
+noncomputable def termBVGraph : 𝚺₁.Semisentence 2 := blueprint.result L
 
-def termBVVecGraph : 𝚺₁.Semisentence 3 := blueprint.resultVec L
+noncomputable def termBVVecGraph : 𝚺₁.Semisentence 3 := blueprint.resultVec L
 
 variable {L}
 
@@ -752,11 +753,11 @@ def IsSemiterm (n t : V) : Prop := IsUTerm L t ∧ termBV L t ≤ n
 
 def IsSemitermVec (k n v : V) : Prop := IsUTermVec L k v ∧ ∀ i < k, termBV L v.[i] ≤ n
 
-def isSemiterm : 𝚫₁.Semisentence 2 := .mkDelta
+noncomputable def isSemiterm : 𝚫₁.Semisentence 2 := .mkDelta
   (.mkSigma “n p. !(isUTerm L).sigma p ∧ ∃ b, !(termBVGraph L) b p ∧ b ≤ n”)
   (.mkPi “n p. !(isUTerm L).pi p ∧ ∀ b, !(termBVGraph L) b p → b ≤ n”)
 
-def isSemitermVec : 𝚫₁.Semisentence 3 := .mkDelta
+noncomputable def isSemitermVec : 𝚫₁.Semisentence 3 := .mkDelta
   (.mkSigma “k n ps. !(isUTermVec L).sigma k ps ∧ ∀ i < k, ∃ p, !nthDef p ps i ∧ ∃ b, !(termBVGraph L) b p ∧ b ≤ n”)
   (.mkPi “k n ps. !(isUTermVec L).pi k ps ∧ ∀ i < k, ∀ p, !nthDef p ps i → ∀ b, !(termBVGraph L) b p → b ≤ n”)
 

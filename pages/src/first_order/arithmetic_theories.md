@@ -1,4 +1,4 @@
-# Theories of Arithmetics
+# Theories of Arithmetic
 
 |                            | Notation | Description                                       |                                                               |
 | :-:                        | :-:      | :--                                               | :--                                                           |

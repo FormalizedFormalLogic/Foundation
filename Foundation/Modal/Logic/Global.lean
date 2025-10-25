@@ -30,7 +30,7 @@ inductive GlobalConsequence (L : Logic α) : Set (Formula α) → Formula α →
   | protected imply₂ X φ ψ χ : GlobalConsequence L X $ Axioms.Imply₂ φ ψ χ
   | protected ec X φ ψ       : GlobalConsequence L X $ Axioms.ElimContra φ ψ
 
-instance : Entailment (Formula α) (Logic α × Set (Formula α)) := ⟨λ (L, Γ) => GlobalConsequence L Γ⟩
+instance : Entailment (Logic α × Set (Formula α)) (Formula α) := ⟨λ (L, Γ) => GlobalConsequence L Γ⟩
 
 namespace GlobalConsequence
 

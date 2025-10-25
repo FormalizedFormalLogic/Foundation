@@ -15,14 +15,15 @@ protected abbrev FrameClass.finite_K : FrameClass := { F | F.IsFinite }
 end Kripke
 
 
+namespace K
 
-instance : Sound Modal.K FrameClass.K := instSound_of_validates_axioms $ by
+instance Kripke.sound : Sound Modal.K FrameClass.K := instSound_of_validates_axioms $ by
   constructor;
   simp only [Set.mem_singleton_iff, forall_eq];
   intro F _;
   exact Formula.Kripke.ValidOnFrame.axiomK;
 
-instance : Sound Modal.K FrameClass.finite_K := instSound_of_validates_axioms $ by
+instance Kripke.finite_sound : Sound Modal.K FrameClass.finite_K := instSound_of_validates_axioms $ by
   constructor;
   simp only [Set.mem_singleton_iff, forall_eq];
   intro F hF;
@@ -34,9 +35,9 @@ instance : Entailment.Consistent Modal.K := consistent_of_sound_frameclass Frame
 
 instance : Kripke.Canonical Modal.K FrameClass.K := ⟨by trivial⟩
 
-instance : Complete Modal.K FrameClass.K := inferInstance
+instance Kripke.complete : Complete Modal.K FrameClass.K := inferInstance
 
-instance : Complete Modal.K (FrameClass.finite_K) := ⟨by
+instance Kripke.finite_complete : Complete Modal.K (FrameClass.finite_K) := ⟨by
   intro φ hp;
   apply Complete.complete (𝓜 := FrameClass.K);
   intro F _ V x;
@@ -49,5 +50,6 @@ instance : Complete Modal.K (FrameClass.finite_K) := ⟨by
   simp;
 ⟩
 
+end K
 
 end LO.Modal

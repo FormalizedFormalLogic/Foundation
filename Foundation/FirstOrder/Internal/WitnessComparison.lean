@@ -22,7 +22,7 @@ def _root_.LO.FirstOrder.Theory.ProvabilityComparison (φ ψ : V) : Prop :=
 
 section
 
-def _root_.LO.FirstOrder.Theory.provabilityComparison : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def _root_.LO.FirstOrder.Theory.provabilityComparison : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ b, !T.proof.sigma b φ ∧ ∀ b' < b, ¬!T.proof.pi b' ψ”
 
 lemma _root_.LO.FirstOrder.Theory.provability_comparison_defined :

@@ -17,12 +17,12 @@ variable {T : ArithmeticTheory} [T.Δ₁] [𝗜𝚺₁ ⪯ T] {A : Modal.Formula
 
 theorem unprovable_realization_exists
     (M₁ : Model) [Fintype M₁] {r₁ : M₁} [M₁.IsFiniteTree r₁]
-    (hA : ¬r₁ ⊧ A) (h : M₁.height < T.height) :
+    (hA : r₁ ⊭ A) (h : M₁.height < T.height) :
     ∃ f : T.StandardRealization, T ⊬ f A := by
   let M₀ := M₁.extendRoot 1
   let r₀ : M₀ := Frame.extendRoot.root
   have hdnA : r₀ ⊧ ◇(∼A) := by
-    suffices ∃ i, r₀ ≺ i ∧ ¬i ⊧ A by simpa [Formula.Kripke.Satisfies]
+    suffices ∃ i, r₀ ≺ i ∧ i ⊭ A by simpa [Formula.Kripke.Satisfies]
     refine ⟨.inr r₁, ?_, ?_⟩
     · simpa [r₀] using Frame.extendRoot.rooted_original
     · exact Model.extendRoot.inr_satisfies_iff |>.not.mpr hA
@@ -31,7 +31,7 @@ theorem unprovable_realization_exists
   use S.realization
   intro hC
   have : T.height ≤ M₁.height := by
-    apply PartENat.le_of_lt_add_one
+    apply Order.le_of_lt_add_one
     calc
       (Theory.standardProvability T).height < M₀.height := S.theory_height hdnA hC
       _                                     = M₁.height + 1 := by simp [M₀]
@@ -56,7 +56,7 @@ theorem GLPlusBoxBot.arithmetical_completeness_aux {n : ℕ} (height : n ≤ T.h
   intro hA
   obtain ⟨M₁, r₁, _, hA₁⟩ := GL.Kripke.iff_unprovable_exists_unsatisfies_FiniteTransitiveTree.mp hA
   have : Fintype M₁ := Fintype.ofFinite _
-  have hA₁ : r₁ ⊧ □^[n]⊥ ∧ ¬r₁ ⊧ A := by
+  have hA₁ : r₁ ⊧ □^[n]⊥ ∧ r₁ ⊭ A := by
     simpa [Formula.Kripke.Satisfies] using hA₁
   have M₁_height : M₁.height < n := height_lt_iff_satisfies_boxbot.mpr hA₁.1
   exact unprovable_realization_exists M₁ hA₁.2 <| lt_of_lt_of_le (by simp [M₁_height]) height
@@ -92,12 +92,12 @@ theorem GLPlusBoxBot.arithmetical_completeness
     exact GLPlusBoxBot.arithmetical_completeness_aux (n := n) (by simpa using hn) h
 
 theorem GLPlusBoxBot.arithmetical_completeness_iff :
-    (∀ f : T.StandardRealization, T ⊢ f A) ↔ Modal.GLPlusBoxBot T.height.toWithTop ⊢ A :=
+    (∀ f : T.StandardRealization, T ⊢ f A) ↔ Modal.GLPlusBoxBot T.height ⊢ A :=
   ⟨GLPlusBoxBot.arithmetical_completeness (T := T) (by simp), GLPlusBoxBot.arithmetical_soundness⟩
 
 /-- Provability logic of theory contains $\mathsf{I}\Sigma_1$ is $\mathsf{GL} + \square^{\text{height of } T} \bot$-/
 theorem provabilityLogic_eq_GLPlusBoxBot :
-    ProvabilityLogic T T ≊ Modal.GLPlusBoxBot T.height.toWithTop := by
+    ProvabilityLogic T T ≊ Modal.GLPlusBoxBot T.height := by
   apply Logic.iff_equal_provable_equiv.mp
   ext A
   simpa [ArithmeticTheory.ProvabilityLogic, Logic.iff_provable] using

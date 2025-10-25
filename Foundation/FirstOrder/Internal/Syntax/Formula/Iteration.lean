@@ -167,7 +167,7 @@ section disjSeqSubst
 
 namespace DisjSeqSubst
 
-def blueprint : PR.Blueprint 2 where
+noncomputable def blueprint : PR.Blueprint 2 where
   zero := .mkSigma “y w p. !qqFalsumDef y”
   succ := .mkSigma “y ih k w p. ∃ numeral, !numeralGraph numeral k ∧ ∃ v, !adjoinDef v numeral w ∧
     ∃ q, !(substsGraph ℒₒᵣ) q v p ∧ !qqOrDef y q ih”
@@ -189,7 +189,7 @@ noncomputable def disjSeqSubst (w p k : V) : V := construction.result ![w, p] k
 @[simp] lemma disjSeqSubst_succ (w p k : V) :
     disjSeqSubst w p (k + 1) = subst ℒₒᵣ (numeral k ∷ w) p ^⋎ disjSeqSubst w p k := by simp [disjSeqSubst, construction]
 
-def disjSeqSubstGraph : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
+noncomputable def disjSeqSubstGraph : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
 
 section
 
@@ -235,7 +235,7 @@ section substItr
 
 namespace SubstItr
 
-def blueprint : PR.Blueprint 2 where
+noncomputable def blueprint : PR.Blueprint 2 where
   zero := .mkSigma “y w p. y = 0”
   succ := .mkSigma “y ih k w p. ∃ numeral, !numeralGraph numeral k ∧ ∃ v, !adjoinDef v numeral w ∧
     ∃ sp, !(substsGraph ℒₒᵣ) sp v p ∧ !adjoinDef y sp ih”
@@ -258,7 +258,7 @@ noncomputable def substItr (w p k : V) : V := construction.result ![w, p] k
 
 section
 
-def substItrGraph : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
+noncomputable def substItrGraph : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
 
 lemma substItr.defined : 𝚺₁-Function₃ (substItr : V → V → V → V) via substItrGraph :=
   fun v ↦ by simp [construction.result_defined_iff, substItrGraph, substItr, Matrix.comp_vecCons', Matrix.constant_eq_singleton]

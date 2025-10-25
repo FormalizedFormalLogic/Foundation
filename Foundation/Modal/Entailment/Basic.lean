@@ -7,7 +7,7 @@ namespace LO.Modal.Entailment
 
 open LO.Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F]
 variable {𝓢 : S}
 
 section Rules
@@ -748,6 +748,10 @@ protected class EMT extends Entailment.E 𝓢, HasAxiomM 𝓢, HasAxiomT 𝓢
 instance [Entailment.EMT 𝓢] : Entailment.EM 𝓢 where
 instance [Entailment.EMT 𝓢] : Entailment.ET 𝓢 where
 
+protected class ED extends Entailment.E 𝓢, HasAxiomD 𝓢
+
+protected class EB extends Entailment.E 𝓢, HasAxiomB 𝓢
+
 protected class E4 extends Entailment.E 𝓢, HasAxiomFour 𝓢
 
 protected class EMC4 extends Entailment.EMC 𝓢, HasAxiomFour 𝓢
@@ -758,6 +762,8 @@ protected class EK4 extends Entailment.E4 𝓢, HasAxiomK 𝓢
 protected class EMT4 extends Entailment.E4 𝓢, HasAxiomT 𝓢, HasAxiomM 𝓢
 instance [Entailment.EMT4 𝓢] : Entailment.EMT 𝓢 where
 instance [Entailment.EMT4 𝓢] : Entailment.E4 𝓢 where
+
+protected class E5 extends Entailment.E 𝓢, HasAxiomFive 𝓢
 
 protected class K extends Entailment.Cl 𝓢, Necessitation 𝓢, HasAxiomK 𝓢, HasDiaDuality 𝓢
 
