@@ -64,7 +64,7 @@ namespace Construction
 variable {k : ℕ} {φ : Blueprint k} (c : Construction V φ) (v : Fin k → V)
 
 lemma eval_formula (v : Fin k.succ.succ → V) :
-    Semiformula.Evalbm V v φ.core.val ↔ c.Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0) := c.defined.df.iff v
+    Semiformula.Evalbm V v φ.core.val ↔ c.Φ (v ·.succ.succ) {x | x ∈ v 1} (v 0) := c.defined.iff
 
 lemma succ_existsUnique (s ih : V) :
     ∃! u : V, ∀ x, (x ∈ u ↔ x ≤ s ∧ c.Φ v {z | z ∈ ih} x) := by
@@ -92,20 +92,19 @@ private lemma succ_graph {u v s ih} :
       exact h x (lt_of_lt_of_le (lt_succ_iff_le.mpr (c.mem_succ_iff.mp hx).1)
         (by simp)) |>.mpr (c.mem_succ_iff.mp hx)⟩
 
-lemma succ_defined : 𝚺₁.DefinedFunction (fun v : Fin (k + 2) → V ↦ c.succ (v ·.succ.succ) (v 1) (v 0)) φ.succDef := by
-  intro v
+lemma succ_defined : 𝚺₁.DefinedFunction (fun v : Fin (k + 2) → V ↦ c.succ (v ·.succ.succ) (v 1) (v 0)) φ.succDef := .mk fun v ↦ by
   simp [Blueprint.succDef, succ_graph, HierarchySymbol.Semiformula.val_sigma, c.eval_formula,
     c.defined.proper.iff', -and_imp,  BinderNotation.finSuccItr]
   grind
 
 lemma eval_succDef (v) :
-    Semiformula.Evalbm V v φ.succDef.val ↔ v 0 = c.succ (v ·.succ.succ.succ) (v 2) (v 1) := c.succ_defined.df.iff v
+    Semiformula.Evalbm V v φ.succDef.val ↔ v 0 = c.succ (v ·.succ.succ.succ) (v 2) (v 1) := c.succ_defined.iff
 
 noncomputable def prConstruction : PR.Construction V φ.prBlueprint where
   zero := fun _ ↦ ∅
   succ := c.succ
-  zero_defined := by intro v; simp [Blueprint.prBlueprint, emptyset_def]
-  succ_defined := by intro v; simp [Blueprint.prBlueprint, c.eval_succDef]
+  zero_defined := .mk fun v ↦ by simp [Blueprint.prBlueprint, emptyset_def]
+  succ_defined := .mk fun v ↦ by simp [Blueprint.prBlueprint, c.eval_succDef]
 
 variable (v)
 
@@ -117,11 +116,11 @@ variable {v}
 
 lemma limSeq_succ (s : V) : c.limSeq v (s + 1) = c.succ v s (c.limSeq v s) := by simp [limSeq, prConstruction]
 
-lemma termSet_defined : 𝚺₁.DefinedFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef :=
+lemma termSet_defined : 𝚺₁.DefinedFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) φ.limSeqDef := .mk
   fun v ↦ by simp [c.prConstruction.result_defined_iff, Blueprint.limSeqDef]; rfl
 
 @[simp] lemma eval_limSeqDef (v) :
-    Semiformula.Evalbm V v φ.limSeqDef.val ↔ v 0 = c.limSeq (v ·.succ.succ) (v 1) := c.termSet_defined.df.iff v
+    Semiformula.Evalbm V v φ.limSeqDef.val ↔ v 0 = c.limSeq (v ·.succ.succ) (v 1) := c.termSet_defined.iff
 
 instance limSeq_definable :
   𝚺₁.DefinableFunction (fun v ↦ c.limSeq (v ·.succ) (v 0)) := c.termSet_defined.to_definable
@@ -231,18 +230,18 @@ theorem case [c.Finite] : c.Fixpoint v x ↔ c.Φ v {z | c.Fixpoint v z} x :=
 
 section
 
-lemma fixpoint_defined : 𝚺₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef := by
-  intro v; simp [Blueprint.fixpointDef, c.eval_limSeqDef]; rfl
+lemma fixpoint_defined : 𝚺₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDef := .mk fun v ↦ by
+  simp [Blueprint.fixpointDef, c.eval_limSeqDef]; rfl
 
 @[simp] lemma eval_fixpointDef (v) :
-    Semiformula.Evalbm V v φ.fixpointDef.val ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.df.iff v
+    Semiformula.Evalbm V v φ.fixpointDef.val ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_defined.iff
 
 lemma fixpoint_definedΔ₁ [c.StrongFinite] : 𝚫₁.Defined (fun v ↦ c.Fixpoint (v ·.succ) (v 0)) φ.fixpointDefΔ₁ :=
   ⟨by intro v; simp [Blueprint.fixpointDefΔ₁, c.eval_limSeqDef],
    by intro v; simp [Blueprint.fixpointDefΔ₁, c.eval_limSeqDef, fixpoint_iff]⟩
 
 @[simp] lemma eval_fixpointDefΔ₁ [c.StrongFinite] (v) :
-    Semiformula.Evalbm V v φ.fixpointDefΔ₁.val ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_definedΔ₁.df.iff v
+    Semiformula.Evalbm V v φ.fixpointDefΔ₁.val ↔ c.Fixpoint (v ·.succ) (v 0) := c.fixpoint_definedΔ₁.iff
 
 end
 

@@ -46,24 +46,24 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
       apply Definable.and (Definable.comp₁ (by definability))
       apply Definable.and
         (Definable.comp₂
-          (DefinableFunction.comp₂ (.var _) (.const _))
-          (DefinableFunction.comp₁ (.var _)))
+          (DefinableFunction₂.comp (.var _) (.const _))
+          (DefinableFunction₁.comp (.var _)))
       apply Definable.and
         (Definable.comp₂ (.var 0) (by definability))
       apply Definable.ball_lt (.var _)
       apply Definable.ball_lt (.var _)
       apply Definable.ball_lt (.var _)
       apply Definable.imp
-        (Definable.comp₂ (.var _) (DefinableFunction.comp₂ (.var _) (.var _)))
+        (Definable.comp₂ (.var _) (DefinableFunction₂.comp (.var _) (.var _)))
       apply Definable.imp
-        (Definable.comp₂ (.var _) (DefinableFunction.comp₂ (DefinableFunction.comp₂ (.var _) (.const _)) (.var _)))
+        (Definable.comp₂ (.var _) (DefinableFunction₂.comp (DefinableFunction₂.comp (.var _) (.const _)) (.var _)))
       apply Definable.ball_le
         (Definable.comp₂
           (.var _)
-          (DefinableFunction.comp₂ (.const _) (.var _)))
+          (DefinableFunction₂.comp (.const _) (.var _)))
       apply Definable.ball_le (.var _)
       apply Definable.comp₂
-        (DefinableFunction.comp₂
+        (DefinableFunction₂.comp
           (.var _) (.var _)) (.var _)
     case zero => exact ⟨!⟦y⟧, by simp⟩
     case succ k ih =>
@@ -92,8 +92,8 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
       apply Definable.imp
         (Definable.comp₂
           (.const _)
-          (DefinableFunction.comp₂
-            (DefinableFunction.comp₂
+          (DefinableFunction₂.comp
+            (DefinableFunction₂.comp
               (.const _) (.var _)) (.var _)))
       apply Definable.ball_le (.var _)
       apply Definable.ball_le (.var _)
@@ -117,7 +117,7 @@ theorem bounded_all_sigma1_order_induction {f : V → V → V} (hf : 𝚺₁-Fun
 
 lemma bounded_all_sigma1_order_induction' {f : V → V} (hf : 𝚺₁-Function₁ f) {P : V → V → Prop} (hP : 𝚺₁-Relation P)
     (ind : ∀ x y, (∀ x' < x, ∀ y' ≤ f y, P x' y') → P x y) : ∀ x y, P x y :=
-  have : 𝚺₁-Function₂ (fun _ ↦ f) := DefinableFunction.comp₁ (by simp)
+  have : 𝚺₁-Function₂ (fun _ ↦ f) := DefinableFunction₁.comp (by simp)
   bounded_all_sigma1_order_induction this hP ind
 
 lemma bounded_all_sigma1_order_induction₂ {fy fz : V → V → V → V}
@@ -127,18 +127,18 @@ lemma bounded_all_sigma1_order_induction₂ {fy fz : V → V → V → V}
   let Q : V → V → Prop := fun x w ↦ P x (π₁ w) (π₂ w)
   have hQ : 𝚺₁-Relation Q := by
     apply Definable.comp₃ (.var _)
-      (DefinableFunction.comp₁ (.var _))
-      (DefinableFunction.comp₁ (.var _))
+      (DefinableFunction₁.comp (.var _))
+      (DefinableFunction₁.comp (.var _))
   let f : V → V → V := fun x w ↦ ⟪fy x (π₁ w) (π₂ w), fz x (π₁ w) (π₂ w)⟫
   have hf : 𝚺₁-Function₂ f := by
     simp only [f]
-    apply DefinableFunction.comp₂
-    · apply DefinableFunction.comp₃ (.var _)
-      · apply DefinableFunction.comp₁ (.var _)
-      · apply DefinableFunction.comp₁ (.var _)
-    · apply DefinableFunction.comp₃ (.var _)
-      · apply DefinableFunction.comp₁ (.var _)
-      · apply DefinableFunction.comp₁ (.var _)
+    apply DefinableFunction₂.comp
+    · apply DefinableFunction₃.comp (.var _)
+      · apply DefinableFunction₁.comp (.var _)
+      · apply DefinableFunction₁.comp (.var _)
+    · apply DefinableFunction₃.comp (.var _)
+      · apply DefinableFunction₁.comp (.var _)
+      · apply DefinableFunction₁.comp (.var _)
   intro x y z
   simpa [Q] using bounded_all_sigma1_order_induction hf hQ (fun x w ih ↦
     ind x (π₁ w) (π₂ w) (fun x' hx' y' hy' z' hz' ↦ by simpa [Q] using ih x' hx' ⟪y', z'⟫ (pair_le_pair hy' hz')))
@@ -152,30 +152,30 @@ lemma bounded_all_sigma1_order_induction₃ {fy fz fw : V → V → V → V → 
   have hQ : 𝚺₁-Relation Q := by
     apply Definable.comp₄
       (.var _)
-      (DefinableFunction.comp₁ <| .var _)
-      (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
-      (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
+      (DefinableFunction₁.comp <| .var _)
+      (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+      (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
   let f : V → V → V := fun x v ↦
     ⟪fy x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fz x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)), fw x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v))⟫
   have hf : 𝚺₁-Function₂ f := by
     simp only [f]
-    apply DefinableFunction.comp₂
-    · apply DefinableFunction.comp₄
+    apply DefinableFunction₂.comp
+    · apply DefinableFunction₄.comp
         (.var _)
-        (DefinableFunction.comp₁ <| .var _)
-        (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
-        (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
-    · apply DefinableFunction.comp₂
-      · apply DefinableFunction.comp₄
+        (DefinableFunction₁.comp <| .var _)
+        (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+        (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+    · apply DefinableFunction₂.comp
+      · apply DefinableFunction₄.comp
           (.var _)
-          (DefinableFunction.comp₁ <| .var _)
-          (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
-          (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
-      · apply DefinableFunction.comp₄
+          (DefinableFunction₁.comp <| .var _)
+          (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+          (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+      · apply DefinableFunction₄.comp
           (.var _)
-          (DefinableFunction.comp₁ <| .var _)
-          (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
-          (DefinableFunction.comp₁ <| DefinableFunction.comp₁ <| .var _)
+          (DefinableFunction₁.comp <| .var _)
+          (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
+          (DefinableFunction₁.comp <| DefinableFunction₁.comp <| .var _)
   intro x y z w
   have := bounded_all_sigma1_order_induction hf hQ (fun x v ih ↦
     ind x (π₁ v) (π₁ (π₂ v)) (π₂ (π₂ v)) (fun x' hx' y' hy' z' hz' w' hw' ↦ by
