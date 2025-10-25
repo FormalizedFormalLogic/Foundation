@@ -3,7 +3,7 @@ import Foundation.Logic.HilbertStyle.Supplemental
 namespace LO.Entailment
 
 variable {F : Type*} [LogicalConnective F]
-variable {S : Type*} [Entailment F S]
+variable {S : Type*} [Entailment S F]
 
 class Disjunctive (𝓢 : S) : Prop where
   disjunctive : ∀ {φ ψ}, 𝓢 ⊢ φ ⋎ ψ → 𝓢 ⊢ φ ∨ 𝓢 ⊢ ψ

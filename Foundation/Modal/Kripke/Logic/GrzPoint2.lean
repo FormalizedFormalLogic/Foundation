@@ -306,7 +306,7 @@ instance : Modal.Grz ⪱ Modal.GrzPoint2 := by
           . omega;
           . apply Satisfies.dia_def.not.mpr;
             push_neg;
-            simp [M, Semantics.Realize, Satisfies, Frame.Rel'];
+            simp [M, Semantics.Models, Satisfies, Frame.Rel'];
 
 instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := by
   constructor;
@@ -333,7 +333,7 @@ instance : Modal.S4Point2McK ⪱ Modal.GrzPoint2 := by
             omega;
         };
       . suffices ∀ (x : Fin 3), (∀ (y : Fin 3), x = 0 ∨ x = 1 → y = 1 ∨ y = 2 → ∀ (z : Fin 3), y = 0 ∨ y = 1 → z = 1 ∨ z = 2) → x ≠ 1 → x = 2 by
-          simpa [Semantics.Realize, Satisfies];
+          simpa [Semantics.Models, Satisfies];
         intro x hx hxn1;
         by_contra hxn2;
         rcases @hx 1 (by omega) (by tauto) x (by omega);

@@ -58,7 +58,7 @@ instance : Modal.KD4 ⪱ Modal.KD45 := by
       . simp only [Set.mem_setOf_eq];
         refine { serial := by tauto, trans := by omega };
       . suffices (0 : M.World) ≺ 0 ∧ ∃ x : M.World, (0 : M.World) ≺ x ∧ ¬x ≺ 0 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         constructor;
         . tauto;
         . use 1;
@@ -86,7 +86,7 @@ instance : Modal.KD5 ⪱ Modal.KD45 := by
           reucl := by simp [RightEuclidean]; omega;
         };
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 1 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         constructor;
         . intro y;
           match y with
@@ -114,7 +114,7 @@ instance : Modal.K45 ⪱ Modal.KD45 := by
       constructor;
       . simp only [Set.mem_setOf_eq];
         refine { trans := by simp, reucl := by simp [RightEuclidean] }
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end Modal.KD45.Kripke
 

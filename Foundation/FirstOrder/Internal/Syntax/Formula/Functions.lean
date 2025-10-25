@@ -57,7 +57,7 @@ variable (L)
 
 noncomputable def neg (p : V) : V := construction.result L 0 p
 
-def negGraph : 𝚺₁.Semisentence 2 := (blueprint.result L).rew (Rew.subst ![#0, ‘0’, #1])
+noncomputable def negGraph : 𝚺₁.Semisentence 2 := (blueprint.result L).rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
 
@@ -165,11 +165,11 @@ noncomputable def imp (p q : V) : V := neg L p ^⋎ q
 
 notation:60 p:61 " ^→[" L "] " q:60 => Language.imp L p q
 
-def impGraph : 𝚺₁.Semisentence 3 := .mkSigma “r p q. ∃ np, !(negGraph L) np p ∧ !qqOrDef r np q”
+noncomputable def impGraph : 𝚺₁.Semisentence 3 := .mkSigma “r p q. ∃ np, !(negGraph L) np p ∧ !qqOrDef r np q”
 
 noncomputable def iff (p q : V) : V := (imp L p q) ^⋏ (imp L q p)
 
-def iffGraph : 𝚺₁.Semisentence 3 := .mkSigma
+noncomputable def iffGraph : 𝚺₁.Semisentence 3 := .mkSigma
   “r p q. ∃ pq, !(impGraph L) pq p q ∧ ∃ qp, !(impGraph L) qp q p ∧ !qqAndDef r pq qp”
 
 variable {L}
@@ -234,7 +234,7 @@ namespace Shift
 
 variable (L)
 
-def blueprint : UformulaRec1.Blueprint where
+noncomputable def blueprint : UformulaRec1.Blueprint where
   rel := .mkSigma “y param k R v. ∃ v', !(termShiftVecGraph L) v' k v ∧ !qqRelDef y k R v'”
   nrel := .mkSigma “y param k R v. ∃ v', !(termShiftVecGraph L) v' k v ∧ !qqNRelDef y k R v'”
   verum := .mkSigma “y param. !qqVerumDef y”
@@ -276,7 +276,7 @@ variable (L)
 
 noncomputable def shift (p : V) : V := (construction L).result L 0 p
 
-def shiftGraph : 𝚺₁.Semisentence 2 := blueprint L |>.result L |>.rew (Rew.subst ![#0, ‘0’, #1])
+noncomputable def shiftGraph : 𝚺₁.Semisentence 2 := blueprint L |>.result L |>.rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
 
@@ -387,7 +387,7 @@ namespace Substs
 
 variable (L)
 
-def blueprint : UformulaRec1.Blueprint where
+noncomputable def blueprint : UformulaRec1.Blueprint where
   rel    := .mkSigma “y param k R v. ∃ v', !(termSubstVecGraph L) v' k param v ∧ !qqRelDef y k R v'”
   nrel   := .mkSigma “y param k R v. ∃ v', !(termSubstVecGraph L) v' k param v ∧ !qqNRelDef y k R v'”
   verum  := .mkSigma “y param. !qqVerumDef y”
@@ -429,7 +429,7 @@ variable (L)
 
 noncomputable def subst (w p : V) : V := (construction L).result L w p
 
-def substsGraph : 𝚺₁.Semisentence 3 := (blueprint L).result L
+noncomputable def substsGraph : 𝚺₁.Semisentence 3 := (blueprint L).result L
 
 variable {L}
 
@@ -440,6 +440,8 @@ lemma subst.defined : 𝚺₁-Function₂[V] subst L via substsGraph L := (const
 instance subst.definable : 𝚺₁-Function₂[V] subst L := subst.defined.to_definable
 
 instance subst.definable' : Γ-[m + 1]-Function₂[V] subst L := subst.definable.of_sigmaOne
+
+attribute [irreducible] substsGraph
 
 end
 
@@ -757,7 +759,7 @@ variable (L)
 
 noncomputable def substs1 (t u : V) : V := subst L ?[t] u
 
-def substs1Graph : 𝚺₁.Semisentence 3 := .mkSigma “ z t p. ∃ v, !adjoinDef v t 0 ∧ !(substsGraph L) z v p”
+noncomputable def substs1Graph : 𝚺₁.Semisentence 3 := .mkSigma “ z t p. ∃ v, !adjoinDef v t 0 ∧ !(substsGraph L) z v p”
 
 variable {L}
 
@@ -783,7 +785,7 @@ variable (L)
 
 noncomputable def free (p : V) : V := substs1 L ^&0 (shift L p)
 
-def freeGraph : 𝚺₁.Semisentence 2 := .mkSigma
+noncomputable def freeGraph : 𝚺₁.Semisentence 2 := .mkSigma
   “q p. ∃ fz, !qqFvarDef fz 0 ∧ ∃ sp, !(shiftGraph L) sp p ∧ !(substs1Graph L) q fz sp”
 
 variable {L}
@@ -869,7 +871,7 @@ variable (L)
 
 noncomputable def formulaComplexity (p : V) : V := construction.result L 0 p
 
-def formulaComplexityGraph : 𝚺₁.Semisentence 2 := (blueprint.result L).rew (Rew.subst ![#0, ‘0’, #1])
+noncomputable def formulaComplexityGraph : 𝚺₁.Semisentence 2 := (blueprint.result L).rew (Rew.subst ![#0, ‘0’, #1])
 
 variable {L}
 

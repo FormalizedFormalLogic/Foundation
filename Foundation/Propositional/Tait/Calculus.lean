@@ -16,7 +16,7 @@ inductive Derivation (T : Theory α) : Sequent α → Type _
 | cut {Δ φ}   : Derivation T (φ :: Δ) → Derivation T (∼φ :: Δ) → Derivation T Δ
 | axm {φ}    : φ ∈ T → Derivation T [φ]
 
-instance : OneSided (NNFormula α) (Theory α) := ⟨Derivation⟩
+instance : OneSided (Theory α) (NNFormula α) := ⟨Derivation⟩
 
 namespace Derivation
 

@@ -34,7 +34,7 @@ lemma validate_WeakPoint2_of_weakConfluent [F.IsPiecewiseConvergent] : F ⊧ (Ax
   suffices
     ∀ y, x ≺ y → (∀ u, y ≺ u → V u 0) → V y 1 →
     ∀ z, x ≺ z → (∀ u, z ≺ u → ¬V u 0) → V z 1
-    by simpa [Semantics.Realize, Satisfies];
+    by simpa [Semantics.Models, Satisfies];
   intro y Rxy h₁ hy₁ z Rxz h₂;
   by_contra hC;
   have nyz : y ≠ z := by
@@ -55,7 +55,7 @@ lemma isPiecewiseConvergent_of_validate_axiomWeakPoint2 (h : F ⊧ (Axioms.WeakP
     apply ValidOnFrame.not_of_exists_valuation_world;
     use (λ w a => match a with | 0 => y ≺ w | 1 => w = y | _ => False), x;
     suffices x ≺ y ∧ ∃ z, x ≺ z ∧ (∀ u, z ≺ u → ¬y ≺ u) ∧ ¬z = y by
-      simpa [Satisfies, Semantics.Realize];
+      simpa [Satisfies, Semantics.Models];
     refine ⟨Rxy, z, Rxz, ?_, by tauto⟩;
     . intro u;
       contrapose;
@@ -68,7 +68,7 @@ end definability
 
 section canonicality
 
-variable {S} [Entailment (Formula ℕ) S]
+variable {S} [Entailment S (Formula ℕ)]
 variable {𝓢 : S} [Entailment.Consistent 𝓢] [Entailment.K 𝓢]
 
 open LO.Entailment LO.Modal.Entailment

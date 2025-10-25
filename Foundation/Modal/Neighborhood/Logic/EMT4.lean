@@ -21,20 +21,20 @@ end Neighborhood
 
 namespace EMT4
 
-instance : Sound Modal.EMT4 FrameClass.EMT4 := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EMT4 FrameClass.EMT4 := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Modal.EMT4 := consistent_of_sound_frameclass FrameClass.EMT4 $ by
+instance consistent : Entailment.Consistent Modal.EMT4 := consistent_of_sound_frameclass FrameClass.EMT4 $ by
   use Frame.simple_blackhole;
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Modal.EMT4 FrameClass.EMT4 := maximalCanonicalFrame.completeness $ by
+instance Neighborhood.complete : Complete Modal.EMT4 FrameClass.EMT4 := (supplementedBasicCanonicity Modal.EMT4).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 
-instance : Complete Modal.EMT4 FrameClass.finite_EMT4 := ⟨by
+instance Neighborhood.finite_complete : Complete Modal.EMT4 FrameClass.finite_EMT4 := ⟨by
   intro φ hφ;
   apply Complete.complete (𝓜 := FrameClass.EMT4);
   intro F F_trans V x;

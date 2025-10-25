@@ -26,16 +26,16 @@ end Neighborhood
 
 namespace EMC
 
-instance : Sound Modal.EMC FrameClass.EMC := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EMC FrameClass.EMC := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F (rfl | rfl) <;> simp;
 
-instance : Entailment.Consistent Modal.EMC := consistent_of_sound_frameclass FrameClass.EMC $ by
+instance consistent : Entailment.Consistent Modal.EMC := consistent_of_sound_frameclass FrameClass.EMC $ by
   use Frame.simple_blackhole;
   simp;
   constructor;
 
-instance : Complete Modal.EMC FrameClass.EMC := maximalCanonicalFrame.completeness $ by
+instance Neighborhood.complete : Complete Modal.EMC FrameClass.EMC := (supplementedBasicCanonicity Modal.EMC).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   constructor;
 

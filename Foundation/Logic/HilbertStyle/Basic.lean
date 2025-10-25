@@ -15,7 +15,7 @@ The names of the formalized proofs are determined by the following steps. (e.g. 
 
 namespace LO.Entailment
 
-variable {S F : Type*} [LogicalConnective F] [Entailment F S]
+variable {S F : Type*} [LogicalConnective F] [Entailment S F]
 variable {𝓢 : S} {φ ψ χ : F}
 
 
@@ -348,18 +348,15 @@ def Conj₂_intro (Γ : List F) (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢! φ) : 
   match Γ with
   |          [] => verum
   |         [ψ] => by apply b; simp;
-  | ψ :: χ :: Γ => by
-    simp;
-    exact K_intro (b ψ (by simp)) (Conj₂_intro _ (by aesop))
+  | ψ :: χ :: Γ => K_intro (b ψ (by simp)) (Conj₂_intro _ (by aesop))
 lemma Conj₂!_intro (b : (φ : F) → φ ∈ Γ → 𝓢 ⊢ φ) : 𝓢 ⊢ ⋀Γ := ⟨Conj₂_intro Γ (λ φ hp => (b φ hp).some)⟩
 
 def right_Conj₂_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! φ ➝ ⋀Γ :=
   match Γ with
   |          [] => C_of_conseq verum
   |         [ψ] => by apply b; simp;
-  | ψ :: χ :: Γ => by
-    simp;
-    apply CK_of_C_of_C (b ψ (by simp)) (right_Conj₂_intro φ _ (fun ψ hq ↦ b ψ (by simp [hq])));
+  | ψ :: χ :: Γ => CK_of_C_of_C (b ψ (by simp)) (right_Conj₂_intro φ _ (fun ψ hq ↦ b ψ (by simp [hq])))
+
 lemma right_Conj₂!_intro (φ : F) (Γ : List F) (b : (ψ : F) → ψ ∈ Γ → 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ φ ➝ ⋀Γ := ⟨right_Conj₂_intro φ Γ (λ ψ hq => (b ψ hq).some)⟩
 
 def CConj₂Conj₂ [DecidableEq F] {Γ Δ : List F} (h : Δ ⊆ Γ) : 𝓢 ⊢! ⋀Γ ➝ ⋀Δ :=
@@ -373,7 +370,7 @@ end
 
 section
 
-variable {G T : Type*} [Entailment G T] [LogicalConnective G] {𝓣 : T}
+variable {G T : Type*} [Entailment T G] [LogicalConnective G] {𝓣 : T}
 
 def Minimal.ofEquiv (𝓢 : S) [Entailment.Minimal 𝓢] (𝓣 : T) (f : G →ˡᶜ F) (e : (φ : G) → 𝓢 ⊢! f φ ≃ 𝓣 ⊢! φ) : Entailment.Minimal 𝓣 where
   mdp {φ ψ dpq dp} := (e ψ) (

@@ -1,45 +1,62 @@
-import Foundation.Modal.Entailment.Basic
+import Foundation.Modal.Entailment.E
 
 namespace LO.Modal.Entailment
 
 open LO.Entailment LO.Entailment.FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [Entailment S F]
 variable {𝓢 : S} [Entailment.K 𝓢] {n : ℕ} {φ ψ ξ χ: F}
 
--- TODO: move to supplemental
-section
 
-lemma conj_cons! [DecidableEq F] : 𝓢 ⊢ (φ ⋏ ⋀Γ) ⭤ ⋀(φ :: Γ) := by
-  induction Γ using List.induction_with_singleton with
-  | hnil =>
-    simp only [List.conj₂_nil, List.conj₂_singleton];
-    apply E!_intro;
-    . simp;
-    . exact right_K!_intro (by simp) (by simp);
-  | _ => simp;
+section E
 
-lemma iff_top_left'! (h : 𝓢 ⊢ φ) : 𝓢 ⊢ φ ⭤ ⊤ := by
+variable [DecidableEq F]
+
+-- TODO: move
+lemma neg_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ∼φ ⭤ ∼ψ := by
   apply E!_intro;
-  . simp;
-  . exact C!_of_conseq! h;
+  . apply contra! $ C_of_E_mpr! h;
+  . apply contra! $ C_of_E_mp! h;
 
-lemma iff_symm'! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ψ ⭤ φ := by
+
+def box_regularity (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! □φ ➝ □ψ := by
+  apply ?_ ⨀ nec h;
+  exact axiomK;
+
+omit [DecidableEq F] in
+lemma box_regularity! : 𝓢 ⊢ φ ➝ ψ → 𝓢 ⊢ □φ ➝ □ψ := λ ⟨h⟩ => ⟨box_regularity h⟩
+
+
+def box_congruence (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □φ ⭤ □ψ := by
+  apply E_intro
+  . apply box_regularity; exact K_left h;
+  . apply box_regularity; exact K_right h;
+
+-- TODO: move
+omit [DecidableEq F] in
+lemma box_congruence! : 𝓢 ⊢ φ ⭤ ψ → 𝓢 ⊢ □φ ⭤ □ψ := λ ⟨h⟩ => ⟨box_congruence h⟩
+
+-- TODO
+instance : Entailment.RE 𝓢 where
+  re a := box_congruence a
+
+instance : Entailment.E 𝓢 where
+
+-- TODO: move
+omit [DecidableEq F] in
+lemma E!_replace (h₁ : 𝓢 ⊢ φ₁ ⭤ ψ₁) (h₂ : 𝓢 ⊢ φ₂ ⭤ ψ₂) (h₃ : 𝓢 ⊢ φ₁ ⭤ φ₂) : 𝓢 ⊢ ψ₁ ⭤ ψ₂ := by
   apply E!_intro;
-  . exact K!_right h;
-  . exact K!_left h;
+  . apply C!_replace (C_of_E_mpr! h₁) (C_of_E_mp! h₂) (C_of_E_mp! h₃);
+  . apply C!_replace (C_of_E_mpr! h₂) (C_of_E_mp! h₁) (C_of_E_mpr! h₃);
 
-lemma iff_top_right! (h : 𝓢 ⊢ φ) : 𝓢 ⊢ ⊤ ⭤ φ := iff_symm'! $ iff_top_left'! h
+lemma dia_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ◇φ ⭤ ◇ψ := by
+  apply E!_replace (E!_symm $ dia_duality!) (E!_symm $ dia_duality!);
+  apply neg_congruence!;
+  apply box_congruence!;
+  apply neg_congruence!;
+  exact h;
 
-@[simp]
-lemma iff_not_bot_top! [DecidableEq F] : 𝓢 ⊢ ∼⊤ ⭤ ⊥ := by
-  apply E!_intro;
-  . apply CN!_of_CN!_left;
-    apply C!_of_conseq!;
-    simp;
-  . exact efq!;
-
-end
+end E
 
 
 def multibox_axiomK : 𝓢 ⊢! □^[n](φ ➝ ψ) ➝ □^[n]φ ➝ □^[n]ψ := by
@@ -67,23 +84,6 @@ def multiboxIff' (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! □^[n]φ ⭤ □^[n]ψ :
   | succ n ih => simpa using boxIff' ih;
 @[simp] lemma multibox_iff! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ □^[n]φ ⭤ □^[n]ψ := ⟨multiboxIff' h.some⟩
 
-
-def diaDuality_mp : 𝓢 ⊢! ◇φ ➝ ∼(□(∼φ)) := K_left diaDuality
-@[simp] lemma diaDuality_mp! : 𝓢 ⊢ ◇φ ➝ ∼(□(∼φ)) := ⟨diaDuality_mp⟩
-
-def diaDuality_mpr : 𝓢 ⊢! ∼(□(∼φ)) ➝ ◇φ := K_right diaDuality
-@[simp] lemma diaDuality_mpr! : 𝓢 ⊢ ∼(□(∼φ)) ➝ ◇φ := ⟨diaDuality_mpr⟩
-
-def diaDuality'.mp (h : 𝓢 ⊢! ◇φ) : 𝓢 ⊢! ∼(□(∼φ)) := (K_left diaDuality) ⨀ h
-def diaDuality'.mpr (h : 𝓢 ⊢! ∼(□(∼φ))) : 𝓢 ⊢! ◇φ := (K_right diaDuality) ⨀ h
-
-lemma dia_duality'! : 𝓢 ⊢ ◇φ ↔ 𝓢 ⊢ ∼(□(∼φ)) := ⟨λ h => ⟨diaDuality'.mp h.some⟩, λ h => ⟨diaDuality'.mpr h.some⟩⟩
-
-def box_dne : 𝓢 ⊢! □(∼∼φ) ➝ □φ := axiomK' $ nec dne
-@[simp] lemma box_dne! : 𝓢 ⊢ □(∼∼φ) ➝ □φ := ⟨box_dne⟩
-
-def box_dne' (h : 𝓢 ⊢! □(∼∼φ)): 𝓢 ⊢! □φ := box_dne ⨀ h
-lemma box_dne'! (h : 𝓢 ⊢ □(∼∼φ)): 𝓢 ⊢ □φ := ⟨box_dne' h.some⟩
 
 def multiboxverum : 𝓢 ⊢! (□^[n]⊤ : F) := multinec verum
 @[simp] lemma multiboxverum! : 𝓢 ⊢ (□^[n]⊤ : F) := ⟨multiboxverum⟩
@@ -134,29 +134,6 @@ variable [DecidableEq F]
 
 
 
-def multiDiaDuality : 𝓢 ⊢! ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := by
-  induction n with
-  | zero =>
-    simp only [Function.iterate_zero, id_eq];
-    apply dn;
-  | succ n ih =>
-    simp only [Dia.multidia_succ, Box.multibox_succ];
-    apply E_trans $ diaDuality (φ := ◇^[n]φ);
-    apply ENN_of_E;
-    apply boxIff';
-    apply E_intro;
-    . exact CN_of_CN_left $ K_right ih;
-    . exact CN_of_CN_right $ K_left ih;
-lemma multidia_duality! : 𝓢 ⊢ ◇^[n]φ ⭤ ∼(□^[n](∼φ)) := ⟨multiDiaDuality⟩
-
-@[simp] lemma multidia_duality!_mp : 𝓢 ⊢ ◇^[n]φ ➝ ∼(□^[n](∼φ)) := C_of_E_mp! multidia_duality!
-@[simp] lemma multidia_duality!_mpr : 𝓢 ⊢ ∼(□^[n](∼φ)) ➝ ◇^[n]φ := C_of_E_mpr! multidia_duality!
-
-lemma multidia_duality'! : 𝓢 ⊢ ◇^[n]φ ↔ 𝓢 ⊢ ∼(□^[n](∼φ)) := by
-  constructor;
-  . intro h; exact (K!_left multidia_duality!) ⨀ h;
-  . intro h; exact (K!_right multidia_duality!) ⨀ h;
-
 def diaK' (h : 𝓢 ⊢! φ ➝ ψ) : 𝓢 ⊢! ◇φ ➝ ◇ψ := by
   apply C_trans ?_ diaDuality_mpr;
   apply C_trans diaDuality_mp ?_;
@@ -196,39 +173,6 @@ def multidiaIff' (h : 𝓢 ⊢! φ ⭤ ψ) : 𝓢 ⊢! ◇^[n]φ ⭤ ◇^[n]ψ :
 @[simp] lemma multidia_iff! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ◇^[n]φ ⭤ ◇^[n]ψ := ⟨multidiaIff' h.some⟩
 
 
-def multiboxDuality : 𝓢 ⊢! □^[n]φ ⭤ ∼(◇^[n](∼φ)) := by
-  induction n with
-  | zero =>
-    simp only [Function.iterate_zero, id_eq];
-    apply dn;
-  | succ n ih =>
-    simp only [Box.multibox_succ, Dia.multidia_succ];
-    apply E_trans (boxIff' ih);
-    apply EN_of_EN_left;
-    exact E_symm $ diaDuality;
-@[simp] lemma multibox_duality! : 𝓢 ⊢ □^[n]φ ⭤ ∼(◇^[n](∼φ)) := ⟨multiboxDuality⟩
-
-@[simp] lemma multibox_duality_mp! : 𝓢 ⊢ □^[n]φ ➝ ∼(◇^[n](∼φ)) := K!_left multibox_duality!
-lemma multibox_duality_mp'! (h : 𝓢 ⊢ □^[n]φ) : 𝓢 ⊢ ∼(◇^[n](∼φ)) := multibox_duality_mp! ⨀ h
-
-@[simp] lemma multibox_duality_mpr! : 𝓢 ⊢ ∼(◇^[n](∼φ)) ➝ □^[n]φ := K!_right multibox_duality!
-lemma multibox_duality_mpr'! (h : 𝓢 ⊢ ∼(◇^[n](∼φ))) : 𝓢 ⊢ □^[n]φ := multibox_duality_mpr! ⨀ h
-
-def boxDuality : 𝓢 ⊢! □φ ⭤ ∼(◇(∼φ)) := multiboxDuality (n := 1)
-@[simp] lemma box_duality! : 𝓢 ⊢ □φ ⭤ ∼(◇(∼φ)) := ⟨boxDuality⟩
-
-def boxDuality_mp : 𝓢 ⊢! □φ ➝ ∼(◇(∼φ)) := K_left boxDuality
-@[simp] lemma boxDuality_mp! : 𝓢 ⊢ □φ ➝ ∼(◇(∼φ)) := ⟨boxDuality_mp⟩
-
-def boxDuality_mp' (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! ∼(◇(∼φ)) := boxDuality_mp ⨀ h
-lemma boxDuality_mp'! (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ ∼(◇(∼φ)) := ⟨boxDuality_mp' h.some⟩
-
-def boxDuality_mpr : 𝓢 ⊢! ∼(◇(∼φ)) ➝ □φ := K_right boxDuality
-@[simp] lemma boxDuality_mpr! : 𝓢 ⊢ ∼(◇(∼φ)) ➝ □φ := ⟨boxDuality_mpr⟩
-
-def boxDuality_mpr' (h : 𝓢 ⊢! ∼(◇(∼φ))) : 𝓢 ⊢! □φ := boxDuality_mpr ⨀ h
-lemma boxDuality_mpr'! (h : 𝓢 ⊢ ∼(◇(∼φ))) : 𝓢 ⊢ □φ := ⟨boxDuality_mpr' h.some⟩
-
 @[simp]
 lemma CNDiaBoxN! : 𝓢 ⊢ □(∼φ) ➝ ∼◇φ := by
   apply C!_trans boxDuality_mp!;
@@ -245,9 +189,6 @@ lemma multibox_duality'! : 𝓢 ⊢ □^[n]φ ↔ 𝓢 ⊢ ∼(◇^[n](∼φ)) :
 
 lemma box_duality'! : 𝓢 ⊢ □φ ↔ 𝓢 ⊢ ∼(◇(∼φ)) := multibox_duality'! (n := 1)
 
-
-def box_dni : 𝓢 ⊢! □φ ➝ □(∼∼φ) := axiomK' $ nec dni
-@[simp] lemma box_dni! : 𝓢 ⊢ □φ ➝ □(∼∼φ) := ⟨box_dni⟩
 
 def box_dni' (h : 𝓢 ⊢! □φ) : 𝓢 ⊢! □(∼∼φ) := box_dni ⨀ h
 lemma box_dni'! (h : 𝓢 ⊢ □φ) : 𝓢 ⊢ □(∼∼φ) := ⟨box_dni' h.some⟩
@@ -501,44 +442,6 @@ lemma not_dia_bot : 𝓢 ⊢ ∼◇^[n]⊥ := by
 
 -- def distributeDiaAnd' (h : 𝓢 ⊢! ◇(φ ⋏ ψ)) : 𝓢 ⊢! ◇φ ⋏ ◇ψ := distributeDiaAnd ⨀ h
 lemma distribute_dia_and'! (h : 𝓢 ⊢ ◇(φ ⋏ ψ)) : 𝓢 ⊢ ◇φ ⋏ ◇ψ := distribute_dia_and! ⨀ h
-
--- TODO: move
-lemma neg_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ∼φ ⭤ ∼ψ := by
-  apply E!_intro;
-  . apply contra! $ C_of_E_mpr! h;
-  . apply contra! $ C_of_E_mp! h;
-
-
-omit [DecidableEq F] in
-lemma box_regularity! (h : 𝓢 ⊢ φ ➝ ψ) : 𝓢 ⊢ □φ ➝ □ψ := by
-  apply ?_ ⨀ nec! h;
-  simp;
-
-
--- TODO: move
-omit [DecidableEq F] in
-lemma box_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ □φ ⭤ □ψ := by
-  apply E!_intro
-  . apply box_regularity!; exact C_of_E_mp! h;
-  . apply box_regularity!; exact C_of_E_mpr! h;
-
--- TODO
-noncomputable instance : Entailment.RE 𝓢 where
-  re a := box_congruence! ⟨a⟩ |>.some
-
--- TODO: move
-omit [DecidableEq F] in
-lemma E!_replace (h₁ : 𝓢 ⊢ φ₁ ⭤ ψ₁) (h₂ : 𝓢 ⊢ φ₂ ⭤ ψ₂) (h₃ : 𝓢 ⊢ φ₁ ⭤ φ₂) : 𝓢 ⊢ ψ₁ ⭤ ψ₂ := by
-  apply E!_intro;
-  . apply C!_replace (C_of_E_mpr! h₁) (C_of_E_mp! h₂) (C_of_E_mp! h₃);
-  . apply C!_replace (C_of_E_mpr! h₂) (C_of_E_mp! h₁) (C_of_E_mpr! h₃);
-
-lemma dia_congruence! (h : 𝓢 ⊢ φ ⭤ ψ) : 𝓢 ⊢ ◇φ ⭤ ◇ψ := by
-  apply E!_replace (E!_symm $ dia_duality!) (E!_symm $ dia_duality!);
-  apply neg_congruence!;
-  apply box_congruence!;
-  apply neg_congruence!;
-  exact h;
 
 section List
 

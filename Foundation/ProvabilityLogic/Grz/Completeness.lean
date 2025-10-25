@@ -53,7 +53,7 @@ lemma iff_models_interpret_boxdot_strongInterpret
   | hatom φ => simp [Realization.interpret, strongInterpret, Formula.boxdotTranslate];
   | hfalsum => simp [strongInterpret, Formula.boxdotTranslate];
   | himp A B ihA ihB =>
-    simp only [Formula.boxdotTranslate, interpret, Models, Semantics.Imp.realize_imp, strongInterpret];
+    simp only [Formula.boxdotTranslate, interpret, Models, Semantics.Imp.models_imply, strongInterpret];
     constructor;
     . intro hAB hA;
       apply ihB.mp;

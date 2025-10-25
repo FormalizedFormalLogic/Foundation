@@ -67,7 +67,7 @@ scoped [LO.Propositional] infix:45 " ⊧ₕ " => LO.Propositional.HeytingSemanti
 
 @[simp] lemma hVal_not (φ : Formula α) : (ℍ ⊧ₕ ∼φ) = (ℍ ⊧ₕ φ)ᶜ := by simp [Formula.neg_def];
 
-instance : Semantics (Formula α) (HeytingSemantics α) := ⟨fun ℍ φ ↦ (ℍ ⊧ₕ φ) = ⊤⟩
+instance : Semantics (HeytingSemantics α) (Formula α) := ⟨fun ℍ φ ↦ (ℍ ⊧ₕ φ) = ⊤⟩
 
 lemma val_def {ℍ : HeytingSemantics α} {φ : Formula α} : ℍ ⊧ φ ↔ φ.hVal ℍ.valAtom = ⊤ := by rfl
 
@@ -75,7 +75,7 @@ lemma val_def' {ℍ : HeytingSemantics α} {φ : Formula α} : ℍ ⊧ φ ↔ (�
 
 instance : Semantics.Top (HeytingSemantics α) := ⟨fun ℍ ↦ by simp [val_def]⟩
 
-instance : Semantics.Bot (HeytingSemantics α) := ⟨fun ℍ ↦ by simp [val_def]⟩
+instance : Semantics.Bot (HeytingSemantics α) := ⟨fun ℍ ↦ by simp [Semantics.NotModels, val_def]⟩
 
 instance : Semantics.And (HeytingSemantics α) := ⟨fun {ℍ φ ψ} ↦ by simp [val_def]⟩
 
@@ -106,7 +106,7 @@ lemma sound {φ : Formula α} (d : (Hilbert Ax) ⊢ φ) : mod (Hilbert Ax) ⊧ �
   intro ℍ hℍ;
   induction d with
   | @axm φ s hφ =>
-    apply hℍ.RealizeSet;
+    apply hℍ.models_set
     use φ;
     grind;
   | @mdp φ ψ _ _ ihpq ihp =>

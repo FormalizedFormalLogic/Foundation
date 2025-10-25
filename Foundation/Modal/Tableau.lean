@@ -11,7 +11,7 @@ namespace LO.Modal
 open LO.Entailment LO.Modal.Entailment
 
 variable {α : Type*}
-variable {S} [Entailment (Formula α) S]
+variable {S} [Entailment S (Formula α)]
 variable {𝓢 : S}
 
 

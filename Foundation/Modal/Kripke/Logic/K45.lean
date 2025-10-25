@@ -49,7 +49,7 @@ instance : Modal.K5 ⪱ Modal.K45 := by
       . simp only [Set.mem_setOf_eq];
         exact { reucl := by simp [RightEuclidean]; omega }
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ z, x ≺ z ∧ ¬z = 1 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         constructor;
         . intro y; tauto;
         . exact ⟨1, by omega, 2, by omega, by trivial⟩;
@@ -78,7 +78,7 @@ instance : Modal.K4Point3 ⪱ Modal.K45 := by
           p_connected := by simp [PiecewiseConnected, M]; omega;
         };
       . suffices (0 : M.World) ≺ 2 ∧ ∃ x, (0 : M.World) ≺ x ∧ ¬x ≺ 2 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         constructor;
         . omega;
         . use 2;

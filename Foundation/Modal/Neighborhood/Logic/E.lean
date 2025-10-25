@@ -21,13 +21,13 @@ open Formula.Neighborhood
 namespace Neighborhood
 
 
-abbrev FrameClass.E : FrameClass := Set.univ
+protected abbrev FrameClass.E : FrameClass := Set.univ
 
 protected abbrev Frame.simple_whitehole : Frame := ⟨Unit, λ _ => ∅⟩
 
 @[simp]
 lemma Frame.simple_whitehole.not_valid_axiomN : ¬Frame.simple_whitehole ⊧ Axioms.N := by
-  simp [Semantics.Realize, ValidOnFrame, ValidOnModel, Satisfies];
+  simp [Semantics.Models, ValidOnFrame, ValidOnModel, Satisfies];
 
 
 section
@@ -76,16 +76,13 @@ end Neighborhood
 
 namespace E
 
-instance : Sound Modal.E FrameClass.E := instSound_of_validates_axioms $ by simp;
+instance Neighborhood.sound : Sound Modal.E FrameClass.E := instSound_of_validates_axioms $ by simp;
 
-instance : Entailment.Consistent Modal.E := consistent_of_sound_frameclass FrameClass.E $ by
+instance consistent : Entailment.Consistent Modal.E := consistent_of_sound_frameclass FrameClass.E $ by
   use ⟨Unit, λ _ => {}⟩;
   simp;
 
-instance : Complete Modal.E FrameClass.E := minimalCanonicalFrame.completeness $ by tauto
-
-
-
+instance Neighborhood.complete : Complete Modal.E FrameClass.E := (basicCanonicity Modal.E).completeness $ by tauto
 
 end E
 
@@ -116,7 +113,7 @@ instance : Modal.E ⪱ Modal.EM := by
       use M, 0;
       constructor;
       . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
         ext x;
         simp;
         omega;
@@ -146,7 +143,80 @@ instance : Modal.E ⪱ Modal.EC := by
       use M, 0;
       constructor;
       . tauto;
-      . simp [M, Semantics.Realize, Satisfies]
+      . simp [M, Semantics.Models, Satisfies]
+
+instance : Modal.E ⪱ Modal.EN := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use Axioms.N
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
+      apply not_validOnFrameClass_of_exists_frame;
+      use Frame.simple_whitehole;
+      constructor;
+      . tauto;
+      . simp;
+
+instance : Modal.E ⪱ Modal.EM := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.M (.atom 0) (.atom 1));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
+      apply not_validOnFrameClass_of_exists_model_world;
+      let M : Model := {
+        World := Fin 3,
+        𝒩 := λ w =>
+          match w with
+          | 0 => {{1}}
+          | 1 => {{0}, {0, 1}}
+          | 2 => {{0}, {1, 2}},
+        Val := λ w =>
+          match w with
+          | 0 => {0, 1}
+          | 1 => {1, 2}
+          | _ => Set.univ
+      };
+      use M, 0;
+      constructor;
+      . tauto;
+      . simp! [M, Semantics.Models, Satisfies];
+        ext x;
+        simp;
+        omega;
+
+instance : Modal.E ⪱ Modal.EC := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use Axioms.C (.atom 0) (.atom 1);
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
+      apply not_validOnFrameClass_of_exists_model_world;
+      let M : Model := {
+        World := Fin 2,
+        𝒩 := λ w =>
+          match w with
+          | 0 => {{0}, {1}}
+          | 1 => {∅},
+        Val := λ w =>
+          match w with
+          | 0 => {0}
+          | 1 => {1}
+          | _ => Set.univ
+      };
+      use M, 0;
+      constructor;
+      . tauto;
+      . simp [M, Semantics.Models, Satisfies]
 
 instance : Modal.E ⪱ Modal.EN := by
   constructor;
@@ -189,26 +259,13 @@ instance : Modal.E ⪱ Modal.EK := by
       use M, 0;
       constructor;
       . tauto;
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
         constructor;
         . intro;
           ext x;
           simp;
           omega;
         . tauto_set;
-
-instance : Modal.E ⪱ Modal.E4 := by
-  constructor;
-  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
-    simp;
-  . apply Entailment.not_weakerThan_iff.mpr;
-    use (Axioms.Four (.atom 0));
-    constructor;
-    . simp;
-    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
-      apply not_validOnFrameClass_of_exists_frame;
-      use Frame.trivial_nontransitive;
-      simp;
 
 instance : Modal.E ⪱ Modal.ED := by
   constructor;
@@ -244,5 +301,23 @@ instance : Modal.E ⪱ Modal.EP := by
       . apply not_imp_not.mpr notContainsEmpty_of_valid_axiomP;
         by_contra! hC;
         simpa using hC.not_contains_empty;
+
+instance : Modal.E ⪱ Modal.EB := by
+  constructor;
+  . apply Hilbert.WithRE.weakerThan_of_subset_axioms;
+    simp;
+  . apply Entailment.not_weakerThan_iff.mpr;
+    use (Axioms.B (.atom 0));
+    constructor;
+    . simp;
+    . apply Sound.not_provable_of_countermodel (𝓜 := FrameClass.E);
+      apply not_validOnFrameClass_of_exists_frame;
+      use Frame.simple_whitehole;
+      constructor;
+      . tauto;
+      . apply not_imp_not.mpr isSymmetric_of_valid_axiomB;
+        by_contra! hC;
+        have := hC.symm {()};
+        simp [Frame.box] at this;
 
 end LO.Modal

@@ -371,7 +371,7 @@ lemma lenbit_mul_add {i j a r : V} (pi : Pow2 i) (pj : Pow2 j) (hr : r < j) :
     rcases (lenbit_iff_add_mul pi).mp h with ⟨a, b, hb, rfl⟩
     have : b * j + r < i * j :=
       pj.mul_add_lt_of_mul_lt_of_pos
-        (by simp [pi, pj]) ((mul_lt_mul_right pj.pos).mpr hb)
+        (by simp [pi, pj]) ((mul_lt_mul_iff_left₀ pj.pos).mpr hb)
         hr (lt_of_lt_of_le hr $ le_mul_of_pos_left $ pi.pos)
     exact
       (lenbit_iff_add_mul (by simp [pi, pj])).mpr
@@ -380,7 +380,7 @@ lemma lenbit_mul_add {i j a r : V} (pi : Pow2 i) (pj : Pow2 j) (hr : r < j) :
     rcases (not_lenbit_iff_add_mul pi).mp h with ⟨a, b, hb, rfl⟩
     have : b * j + r < i * j :=
       pj.mul_add_lt_of_mul_lt_of_pos
-        (by simp [pi, pj]) ((mul_lt_mul_right pj.pos).mpr hb)
+        (by simp [pi, pj]) ((mul_lt_mul_iff_left₀ pj.pos).mpr hb)
         hr (lt_of_lt_of_le hr $ le_mul_of_pos_left $ pi.pos)
     exact
       (not_lenbit_iff_add_mul (by simp [pi, pj])).mpr

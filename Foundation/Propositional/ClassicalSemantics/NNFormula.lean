@@ -33,7 +33,7 @@ def val : NNFormula α →ˡᶜ F where
   map_and' := fun _ _ => rfl
   map_or' := fun _ _ => rfl
   map_imply' := fun _ _ => by simp [DeMorgan.imply, valAux, ←neg_eq, valAux_neg]
-  map_neg' := fun _ => by simp [valAux, ←neg_eq, valAux_neg]
+  map_neg' := fun _ => by simp [valAux_neg]
 
 @[simp] lemma val_atom : val v (atom a) = v a := rfl
 
@@ -46,21 +46,21 @@ section semantics
 
 variable {v : Valuation α}
 
-instance semantics : Semantics (NNFormula α) (Valuation α) := ⟨fun v ↦ NNFormula.val v⟩
+instance semantics : Semantics (Valuation α) (NNFormula α) := ⟨fun v ↦ NNFormula.val v⟩
 
 lemma models_iff_val {v : Valuation α} {f : NNFormula α} : v ⊧ f ↔ NNFormula.val v f := iff_of_eq rfl
 
 instance : Semantics.Tarski (Valuation α) where
-  realize_top := by simp [models_iff_val]
-  realize_bot := by simp [models_iff_val]
-  realize_and := by simp [models_iff_val]
-  realize_or := by simp [models_iff_val]
-  realize_not := by simp [models_iff_val]
-  realize_imp := by simp [models_iff_val]
+  models_verum := by simp [models_iff_val]
+  models_falsum := by simp [Semantics.NotModels, models_iff_val]
+  models_and := by simp [models_iff_val]
+  models_or := by simp [models_iff_val]
+  models_not := by simp [Semantics.NotModels, models_iff_val]
+  models_imply := by simp [models_iff_val]
 
-@[simp] protected lemma realize_atom : v ⊧ .atom a ↔ v a := iff_of_eq rfl
+@[simp] protected lemma models_atom : v ⊧ .atom a ↔ v a := iff_of_eq rfl
 
-@[simp] protected lemma realize_natom : v ⊧ .natom a ↔ ¬v a := iff_of_eq rfl
+@[simp] protected lemma models_natom : v ⊧ .natom a ↔ ¬v a := iff_of_eq rfl
 
 end semantics
 

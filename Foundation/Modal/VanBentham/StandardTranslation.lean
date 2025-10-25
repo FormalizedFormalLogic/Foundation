@@ -39,7 +39,7 @@ open Lean PrettyPrinter Delaborator
 syntax:45 first_order_term:45 " ⊩ " term :max : first_order_formula
 
 macro_rules
-  | `(⤫formula($type)[ $binders* | $fbinders* | $t:first_order_term ⊩ $a:term]) => `(Semiformula.Operator.operator (forces $a) ![⤫term($type)[ $binders* | $fbinders* | $t ]])
+  | `(⤫formula(lit)[ $binders* | $fbinders* | $t:first_order_term ⊩ $a:term]) => `(Semiformula.Operator.operator (forces $a) ![⤫term(lit)[ $binders* | $fbinders* | $t ]])
 
 def transitive : Sentence 𝓛𝓕 := “∀ x y z, x < y → y < z → x < z”
 
@@ -52,7 +52,7 @@ end LO.FirstOrder
 
 namespace LO.Modal
 
-open NNFormula
+open NNFormula FirstOrder
 
 def standardTranslation : NNFormula ℕ → FirstOrder.Semisentence 𝓛𝓕 1
   | .atom  a => “x. x ⊩ a”

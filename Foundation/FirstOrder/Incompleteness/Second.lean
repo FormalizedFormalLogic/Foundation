@@ -21,6 +21,7 @@ theorem inconsistent_unprovable [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :
     T ⊬ ∼↑T.consistent :=
   T.standardProvability.con_unrefutable
 
+/-- The consistency statement is independent. -/
 theorem inconsistent_independent [ArithmeticTheory.SoundOnHierarchy T 𝚺 1] :
     Independent T ↑T.consistent :=
   T.standardProvability.con_independent

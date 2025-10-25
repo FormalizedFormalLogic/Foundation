@@ -43,7 +43,10 @@ instance : Complete Modal.KT FrameClass.KT := inferInstance
 
 instance : Modal.KD ⪱ Modal.KT := by
   constructor;
-  . apply Hilbert.Normal.weakerThan_of_provable_axioms $ by rintro _ (rfl | rfl | rfl) <;> simp;
+  . apply Hilbert.Normal.weakerThan_of_provable_axioms;
+    rintro _ (rfl | rfl | rfl);
+    . simp;
+    . simp;
   . apply Entailment.not_weakerThan_iff.mpr;
     use (Axioms.T (.atom 0));
     constructor;
@@ -53,6 +56,6 @@ instance : Modal.KD ⪱ Modal.KT := by
       use ⟨⟨Fin 2, λ x y => y = 1⟩, λ w _ => w = 1⟩, 0;
       constructor;
       . exact { serial := by tauto };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end LO.Modal

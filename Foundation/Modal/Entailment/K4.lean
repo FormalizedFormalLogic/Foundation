@@ -1,21 +1,14 @@
 import Foundation.Modal.Entailment.K
+import Foundation.Modal.Entailment.AxiomGeach
 
 namespace LO.Modal.Entailment
 
 open LO.Entailment Entailment.FiniteContext
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S} [Entailment.K4 𝓢]
 
-@[simp]
-lemma diaFour! : 𝓢 ⊢ ◇◇φ ➝ ◇φ := by
-  apply C!_replace diaDuality_mp! diaDuality_mpr!;
-  apply contra!;
-  suffices 𝓢 ⊢ □□(∼φ) ➝ □(∼◇φ) by apply C!_trans axiomFour! this;
-  apply axiomK'!;
-  apply nec!;
-  simp;
-lemma diaFour'! (h : 𝓢 ⊢ ◇◇φ) : 𝓢 ⊢ ◇φ := diaFour! ⨀ h
+lemma diaFour'! (h : 𝓢 ⊢ ◇◇φ) : 𝓢 ⊢ ◇φ := axiomFourDual ⨀ h
 
 def imply_BoxBoxdot_Box: 𝓢 ⊢!  □⊡φ ➝ □φ := by
   exact C_trans distribute_box_and and₁

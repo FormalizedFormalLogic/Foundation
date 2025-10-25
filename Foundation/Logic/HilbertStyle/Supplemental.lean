@@ -6,7 +6,7 @@ import Foundation.Vorspiel.Finset.Supplemental
 namespace LO.Entailment
 
 variable {F : Type*} [LogicalConnective F]
-         {S : Type*} [Entailment F S]
+         {S : Type*} [Entailment S F]
          {𝓢 : S} [Entailment.Minimal 𝓢]
          {φ φ₁ φ₂ ψ ψ₁ ψ₂ χ ξ : F}
          {Γ Δ : List F}

@@ -21,17 +21,17 @@ end Neighborhood
 
 namespace EN
 
-instance : Sound Modal.EN FrameClass.EN := instSound_of_validates_axioms $ by
+instance Neighborhood.sound : Sound Modal.EN FrameClass.EN := instSound_of_validates_axioms $ by
   constructor;
   rintro _ (rfl | rfl) F hF;
   simp_all;
 
-instance : Entailment.Consistent Modal.EN := consistent_of_sound_frameclass FrameClass.EN $ by
+instance consistent : Entailment.Consistent Modal.EN := consistent_of_sound_frameclass FrameClass.EN $ by
   use Frame.simple_blackhole;
   simp only [Set.mem_setOf_eq];
   infer_instance;
 
-instance : Complete Modal.EN FrameClass.EN := minimalCanonicalFrame.completeness $ by
+instance Neighborhood.complete : Complete Modal.EN FrameClass.EN := (basicCanonicity Modal.EN).completeness $ by
   apply Set.mem_setOf_eq.mpr;
   infer_instance;
 
@@ -67,7 +67,7 @@ instance : Modal.EN ⪱ Modal.ECN := by
             ext x;
             match x with | 0 | 1 => simp_all [M]
         }
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
         tauto_set;
 
 instance : Modal.EN ⪱ Modal.EMN := by
@@ -99,7 +99,7 @@ instance : Modal.EN ⪱ Modal.EMN := by
             ext x;
             match x with | 0 | 1 => simp_all [M]
         }
-      . simp! [M, Semantics.Realize, Satisfies];
+      . simp! [M, Semantics.Models, Satisfies];
 
 
 end LO.Modal

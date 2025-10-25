@@ -72,7 +72,7 @@ instance : Modal.KT ⪱ Modal.S4 := by
       constructor;
       . exact { refl := by omega };
       . suffices (∀ (y : M.World), (0 : M.World) ≺ y → y = 0 ∨ y = 1) ∧ ∃ x, (0 : M.World) ≺ x ∧ ∃ y, x ≺ y ∧ y ≠ 0 ∧ y ≠ 1 by
-          simpa [M, Semantics.Realize, Satisfies];
+          simpa [M, Semantics.Models, Satisfies];
         constructor;
         . intro y hy;
           match y with
@@ -101,7 +101,7 @@ instance : Modal.KD4 ⪱ Modal.S4 := by
           serial := by simp [Serial],
           trans := by simp
         };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 instance : Modal.KD ⪱ Modal.S4 := calc
   Modal.KD ⪱ Modal.KD4 := by infer_instance

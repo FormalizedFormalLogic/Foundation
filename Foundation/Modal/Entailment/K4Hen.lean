@@ -6,7 +6,7 @@ open LO.Entailment LO.Entailment.FiniteContext LO.Modal.Entailment
 
 namespace Entailment
 
-variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment F S]
+variable {S F : Type*} [BasicModalLogicalConnective F] [DecidableEq F] [Entailment S F]
 variable {𝓢 : S}
 
 protected class K4Hen (𝓢 : S) extends Entailment.K4 𝓢, HasAxiomHen 𝓢

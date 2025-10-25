@@ -54,7 +54,7 @@ instance : Modal.KD ⪱ Modal.KD4 := by
       use ⟨⟨Bool, λ x y => x != y⟩, λ w _ => w = true⟩, false;
       constructor;
       . exact { serial := by simp [Serial]; };
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
         tauto;
 
 instance : Modal.K4 ⪱ Modal.KD4 := by
@@ -69,6 +69,6 @@ instance : Modal.K4 ⪱ Modal.KD4 := by
       use ⟨⟨Fin 1, λ x y => False⟩, λ w _ => w = 0⟩, 0;
       constructor;
       . exact { trans := by simp; }
-      . simp [Semantics.Realize, Satisfies];
+      . simp [Semantics.Models, Satisfies];
 
 end LO.Modal
