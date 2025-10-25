@@ -48,7 +48,7 @@ lemma domain_subset_of_subset_prod {R X Y : V} (h : R ⊆ X ×ˢ Y) : domain R �
   have : x ∈ X ∧ y ∈ Y := by simpa using h _ hy
   exact this.1
 
-@[simp, grind =] lemma domain_insert {x y R : V} : domain (Insert.insert (⟨x, y⟩ₖ) R) = Insert.insert x (domain R) := by
+@[simp, grind =] lemma domain_insert {x y R : V} : domain (insert (⟨x, y⟩ₖ) R) = insert x (domain R) := by
   ext z; simp only [mem_domain_iff, mem_insert, kpair_iff]; grind
 
 end domain
@@ -85,7 +85,7 @@ lemma range_subset_of_subset_prod {R X Y : V} (h : R ⊆ X ×ˢ Y) : range R ⊆
   have : x ∈ X ∧ y ∈ Y := by simpa using h _ hx
   exact this.2
 
-@[simp, grind =] lemma range_insert {x y R : V} : range (Insert.insert (⟨x, y⟩ₖ) R) = Insert.insert y (range R) := by
+@[simp, grind =] lemma range_insert {x y R : V} : range (insert (⟨x, y⟩ₖ) R) = insert y (range R) := by
   ext z; simp only [mem_range_iff, mem_insert, kpair_iff]; grind
 
 end range
@@ -112,6 +112,9 @@ lemma mem_function.intro {f X Y : V} (prod : f ⊆ X ×ˢ Y) (total : ∀ x ∈ 
 
 lemma subset_prod_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : f ⊆ X ×ˢ Y := mem_function_iff.mp h |>.1
 
+lemma mem_of_mem_functions {f X Y : V} (h : f ∈ Y ^ X) (hx : ⟨x, y⟩ₖ ∈ f) : x ∈ X ∧ y ∈ Y := by
+  simpa using subset_prod_of_mem_function h _ hx
+
 lemma function_subset_power_prod (X Y : V) : Y ^ X ⊆ ℘ (X ×ˢ Y) := fun f hf ↦ by simpa using subset_prod_of_mem_function hf
 
 lemma exists_unique_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : ∀ x ∈ X, ∃! y, ⟨x, y⟩ₖ ∈ f := mem_function_iff.mp h |>.2
@@ -119,7 +122,7 @@ lemma exists_unique_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : ∀ x ∈ X,
 lemma exists_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : ∀ x ∈ X, ∃ y ∈ Y, ⟨x, y⟩ₖ ∈ f := by
   intro x hx
   rcases (exists_unique_of_mem_function h x hx).exists with ⟨y, hy⟩
-  have : x ∈ X ∧ y ∈ Y := by simpa using subset_prod_of_mem_function h _ hy
+  have : x ∈ X ∧ y ∈ Y := mem_of_mem_functions h hy
   exact ⟨y, this.2, hy⟩
 
 lemma domain_eq_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : domain f = X := by
@@ -127,7 +130,7 @@ lemma domain_eq_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : domain f = X := 
   suffices (∃ y, ⟨x, y⟩ₖ ∈ f) ↔ x ∈ X by simpa [mem_domain_iff]
   constructor
   · rintro ⟨y, hxy⟩
-    have : x ∈ X ∧ y ∈ Y := by simpa using subset_prod_of_mem_function h _ hxy
+    have : x ∈ X ∧ y ∈ Y := mem_of_mem_functions h hxy
     exact this.1
   · intro hx
     rcases exists_of_mem_function h x hx with ⟨y, hy⟩
@@ -137,7 +140,7 @@ lemma range_subset_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : range f ⊆ Y
   intro y hy
   have : ∃ x, ⟨x, y⟩ₖ ∈ f := by simpa [mem_range_iff] using hy
   rcases this with ⟨x, hxy⟩
-  have : x ∈ X ∧ y ∈ Y := by simpa using subset_prod_of_mem_function h _ hxy
+  have : x ∈ X ∧ y ∈ Y := mem_of_mem_functions h hxy
   exact this.2
 
 lemma mem_function_range_of_mem_function {f X Y : V} (h : f ∈ Y ^ X) : f ∈ range f ^ X := by
@@ -203,8 +206,8 @@ lemma unique {f : V} [hf : IsFunction f] {x y₁ y₂} (h₁ : ⟨x, y₁⟩ₖ 
 
 @[simp] instance empty : IsFunction (∅ : V) := ⟨∅, ∅, by simp⟩
 
-def insert (f x y : V) (hx : x ∉ domain f) [hf : IsFunction f] : IsFunction (Insert.insert (⟨x, y⟩ₖ) f) := by
-  refine ⟨Insert.insert x (domain f), Insert.insert y (range f), ?_⟩
+protected def insert (f x y : V) (hx : x ∉ domain f) [hf : IsFunction f] : IsFunction (insert ⟨x, y⟩ₖ f) := by
+  refine ⟨insert x (domain f), insert y (range f), ?_⟩
   apply mem_function.intro
   · have : f ⊆ domain f ×ˢ range f := subset_prod_of_mem_function hf.mem_function
     exact insert_kpair_subset_insert_prod_insert_of_subset_prod this x y
@@ -225,9 +228,41 @@ def insert (f x y : V) (hx : x ∉ domain f) [hf : IsFunction f] : IsFunction (I
         contradiction
       exact hf.unique Hw hzv
 
-@[simp] instance (x y : V) : IsFunction ({⟨x, y⟩ₖ} : V) := by simpa using insert ∅ x y (by simp)
+@[simp] instance (x y : V) : IsFunction ({⟨x, y⟩ₖ} : V) := by simpa using IsFunction.insert ∅ x y (by simp)
 
 end IsFunction
+
+lemma function_eq_of_subset {X Y f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Y ^ X) (h : f ⊆ g) : f = g := by
+  have : IsFunction f := IsFunction.of_mem hf
+  have : IsFunction g := IsFunction.of_mem hg
+  apply subset_antisymm h
+  intro p hp
+  rcases show ∃ x ∈ X, ∃ y ∈ Y, p = ⟨x, y⟩ₖ from by
+    simpa [mem_prod_iff] using subset_prod_of_mem_function hg _ hp with ⟨x, hx, y, hy, rfl⟩
+  rcases show ∃ y' ∈ Y, ⟨x, y'⟩ₖ ∈ f from exists_of_mem_function hf x hx with ⟨y', hy', Hf⟩
+  have : ⟨x, y'⟩ₖ ∈ g := h _ Hf
+  rcases show y = y' from IsFunction.unique hp (h _ Hf)
+  assumption
+
+lemma function_ext {X Y f g : V} (hf : f ∈ Y ^ X) (hg : g ∈ Y ^ X)
+    (h : ∀ x ∈ X, ∀ y ∈ Y, ⟨x, y⟩ₖ ∈ f → ⟨x, y⟩ₖ ∈ g) : f = g := by
+  apply function_eq_of_subset hf hg
+  intro p hp
+  rcases show ∃ x ∈ X, ∃ y ∈ Y, p = ⟨x, y⟩ₖ from by
+    simpa [mem_prod_iff] using subset_prod_of_mem_function hf _ hp with ⟨x, hx, y, hy, rfl⟩
+  exact h x hx y hy hp
+
+@[grind] lemma two_val_function_mem_iff_not {X f x : V} (hf : f ∈ (2 ^ X : V)) (hx : x ∈ X) : ⟨x, 0⟩ₖ ∈ f ↔ ⟨x, 1⟩ₖ ∉ f := by
+  have : IsFunction f := IsFunction.of_mem hf
+  constructor
+  · intro h0 h1
+    have : (0 : V) = 1 := IsFunction.unique h0 h1
+    simp_all
+  · intro h1
+    rcases exists_of_mem_function hf x hx with ⟨i, hi, hf⟩
+    rcases show i = 0 ∨ i = 1 by simpa using hi with (rfl | rfl)
+    · assumption
+    · contradiction
 
 def Injective (R : V) : Prop := ∀ x₁ x₂ y, ⟨x₁, y⟩ₖ ∈ R → ⟨x₂, y⟩ₖ ∈ R → x₁ = x₂
 
@@ -328,52 +363,165 @@ lemma compose_injective {R S : V} (hR : Injective R) (hS : Injective S) : Inject
 
 def CardLE (X Y : V) : Prop := ∃ f ∈ Y ^ X, Injective f
 
-scoped instance : LE V := ⟨CardLE⟩
+infix:50 " ≤# " => CardLE
 
-lemma cardLE_of_subset {X Y : V} (h : X ⊆ Y) : X ≤ Y :=
+lemma cardLE_of_subset {X Y : V} (h : X ⊆ Y) : X ≤# Y :=
   ⟨identity X, mem_function_of_mem_function_of_subset (identity_mem_function X) h, by simp⟩
 
-@[simp] lemma cardLE_empty (X : V) : ∅ ≤ X := cardLE_of_subset (by simp)
+@[simp] lemma cardLE_empty (X : V) : ∅ ≤# X := cardLE_of_subset (by simp)
 
-@[simp, refl] lemma CardLE.refl (X : V) : X ≤ X := cardLE_of_subset (by simp)
+@[simp, refl] lemma CardLE.refl (X : V) : X ≤# X := cardLE_of_subset (by simp)
 
-@[trans] lemma CardLE.trans {X Y Z : V} : X ≤ Y → Y ≤ Z → X ≤ Z := by
+@[trans] lemma CardLE.trans {X Y Z : V} : X ≤# Y → Y ≤# Z → X ≤# Z := by
   rintro ⟨f, hf, f_inj⟩
   rintro ⟨g, hg, g_inj⟩
   refine ⟨compose f g, compose_function hf hg, compose_injective f_inj g_inj⟩
 
-instance : Preorder V where
-  le_refl := CardLE.refl
-  le_trans _ _ _ := CardLE.trans
+def CardLT (X Y : V) : Prop := X ≤# Y ∧ ¬Y ≤# X
 
-lemma cardLE_def {X Y : V} : X ≤ Y ↔ ∃ f ∈ Y ^ X, Injective f := by rfl
-
-lemma cardLT_def {X Y : V} : X < Y ↔ X ≤ Y ∧ ¬Y ≤ X := by rfl
+infix:50 " <# " => CardLT
 
 def CardLE.dfn : Semisentence ℒₛₑₜ 2 := f“X Y. ∃ f ∈ !function.dfn Y X, !Injective.dfn f”
 
-instance CardLE.defined : ℒₛₑₜ-relation[V] (· ≤ ·) via dfn := ⟨fun v ↦ by simp [cardLE_def, dfn]⟩
+instance CardLE.defined : ℒₛₑₜ-relation[V] CardLE via dfn := ⟨fun v ↦ by simp [CardLE, dfn]⟩
 
-instance CardLE.definable : ℒₛₑₜ-relation[V] (· ≤ ·) := defined.to_definable
+instance CardLE.definable : ℒₛₑₜ-relation[V] CardLE := defined.to_definable
 
 def CardLT.dfn : Semisentence ℒₛₑₜ 2 := “X Y. !CardLE.dfn X Y ∧ ¬!CardLE.dfn Y X”
 
-instance CardLT.defined : ℒₛₑₜ-relation[V] (· < ·) via dfn := ⟨fun v ↦ by simp [cardLT_def, dfn]⟩
+instance CardLT.defined : ℒₛₑₜ-relation[V] CardLT via dfn := ⟨fun v ↦ by simp [CardLT, dfn]⟩
 
-instance CardLT.definable : ℒₛₑₜ-relation[V] (· < ·) := defined.to_definable
+instance CardLT.definable : ℒₛₑₜ-relation[V] CardLT := defined.to_definable
 
-def CardEQ (X Y : V) : Prop := X ≤ Y ∧ Y ≤ X
+def CardEQ (X Y : V) : Prop := X ≤# Y ∧ Y ≤# X
 
 infix:60 " ≋ " => CardEQ
 
 def CardEQ.dfn : Semisentence ℒₛₑₜ 2 := “X Y. !CardLE.dfn X Y ∧ !CardLE.dfn Y X”
 
-instance CardEQ.defined : ℒₛₑₜ-relation[V] (· ≋ ·) via dfn := ⟨fun v ↦ by simp [CardEQ, dfn]⟩
+instance CardEQ.defined : ℒₛₑₜ-relation[V] CardEQ via dfn := ⟨fun v ↦ by simp [CardEQ, dfn]⟩
 
-instance CardEQ.definable : ℒₛₑₜ-relation[V] (· ≋ ·) := defined.to_definable
+instance CardEQ.definable : ℒₛₑₜ-relation[V] CardEQ := defined.to_definable
+
+lemma CardEQ.le {X Y : V} (h : X ≋ Y) : X ≤# Y := h.1
+
+lemma CardEQ.ge {X Y : V} (h : X ≋ Y) : Y ≤# X := h.2
 
 @[simp, refl] lemma CardEQ.refl (X : V) : X ≋ X := ⟨by rfl, by rfl⟩
 
-@[simp, symm] lemma CardEQ.symm {X Y : V} : X ≋ Y → Y ≋ X := fun e ↦ ⟨e.2, e.1⟩
+@[symm] lemma CardEQ.symm {X Y : V} : X ≋ Y → Y ≋ X := fun e ↦ ⟨e.2, e.1⟩
+
+@[trans] lemma CardEQ.trans {X Y Z : V} : X ≋ Y → Y ≋ Z → X ≋ Z := fun eXY eYZ ↦
+  ⟨eXY.le.trans eYZ.le, eYZ.ge.trans eXY.ge⟩
+
+lemma cardLT_power (X : V) : X <# ℘ X := by
+  have : X ≤# ℘ X := by
+    let F : V := {p ∈ X ×ˢ ℘ X ; ∃ x ∈ X, p = ⟨x, {x}⟩ₖ}
+    have : F ∈ ℘ X ^ X := by
+      apply mem_function.intro
+      · simp [F]
+      · intro x hx
+        apply ExistsUnique.intro {x} (by simp [F, hx])
+        intro y hy
+        have : y ⊆ X ∧ y = {x} := by simpa [hx, F] using hy
+        simp [this]
+    have : Injective F := by
+      intro x₁ x₂ s h₁ h₂
+      rcases show (x₁ ∈ X ∧ s ⊆ X) ∧ x₁ ∈ X ∧ s = {x₁} by simpa [F] using h₁ with ⟨_, _, rfl⟩
+      have : (x₂ ∈ X ∧ x₁ ∈ X) ∧ x₁ ∈ X ∧ x₂ = x₁ := by simpa [F] using h₂
+      simp [this.2.2]
+    refine ⟨F, by assumption, by assumption⟩
+  have : ¬℘ X ≤# X := by
+    rintro ⟨F, hF, injF⟩
+    have : IsFunction F := IsFunction.of_mem hF
+    let D : V := {x ∈ X ; ∃ s ∈ ℘ X, ⟨s, x⟩ₖ ∈ F ∧ x ∉ s}
+    have : ∃ d ∈ X, ⟨D, d⟩ₖ ∈ F := exists_of_mem_function hF D (by simp [D])
+    rcases this with ⟨d, hd, Hd⟩
+    have : d ∈ D ↔ d ∉ D := calc
+      d ∈ D ↔ ∃ s ⊆ X, ⟨s, d⟩ₖ ∈ F ∧ d ∉ s := by simp [hd, D]
+      _     ↔ d ∉ D := ?_
+    · grind
+    constructor
+    · rintro ⟨S, hS, hSF, hdS⟩
+      rcases show D = S from injF _ _ _ Hd hSF
+      assumption
+    · intro h
+      refine ⟨D, by simpa [hd] using mem_of_mem_functions hF Hd, Hd, h⟩
+  refine ⟨by assumption, by assumption⟩
+
+lemma two_pow_cardEQ_power (X : V) : 2 ^ X ≋ ℘ X := by
+  constructor
+  · let F : V := {p ∈ (2 ^ X) ×ˢ ℘ X ; ∃ f s, p = ⟨f, s⟩ₖ ∧ ∀ x, x ∈ s ↔ ⟨x, 1⟩ₖ ∈ f}
+    refine ⟨F, ?_, ?_⟩
+    · apply mem_function.intro
+      · simp [F]
+      · intro f hf
+        let s : V := {x ∈ X ; ⟨x, 1⟩ₖ ∈ f}
+        have ss_s : s ⊆ X := by simp [s]
+        have mem_s : ∀ x, x ∈ s ↔ ⟨x, 1⟩ₖ ∈ f := by
+          simp only [mem_sep_iff, and_iff_right_iff_imp, s]
+          intro x hx
+          exact mem_of_mem_functions hf hx |>.1
+        apply ExistsUnique.intro s ?_ ?_
+        · simp [F, hf, ss_s, mem_s]
+        · intro t ht
+          ext x
+          have ht : (f ∈ ((2 : V) ^ X) ∧ t ⊆ X) ∧ ∀ x, x ∈ t ↔ ⟨x, 1⟩ₖ ∈ f := by simpa [F] using ht
+          simp [ht, mem_s]
+    · intro f₁ f₂ s h₁ h₂
+      have : (f₁ ∈ (2 ^ X : V) ∧ s ⊆ X) ∧ ∀ x, x ∈ s ↔ ⟨x, 1⟩ₖ ∈ f₁ := by simpa [F] using h₁
+      rcases this with ⟨⟨f₁func, hs⟩, H₁⟩
+      have : (f₂ ∈ (2 ^ X : V) ∧ s ⊆ X) ∧ ∀ x, x ∈ s ↔ ⟨x, 1⟩ₖ ∈ f₂ := by simpa [F] using h₂
+      rcases this with ⟨⟨f₂func, _⟩, H₂⟩
+      apply function_ext f₁func f₂func
+      intro x hx i hi
+      rcases show i = 0 ∨ i = 1 by simpa using hi with (rfl | rfl)
+      · contrapose
+        suffices ⟨x, 1⟩ₖ ∈ f₂ → ⟨x, 1⟩ₖ ∈ f₁ by grind
+        grind
+      · grind
+  · let F : V := {p ∈ ℘ X ×ˢ (2 ^ X) ; ∃ f s, p = ⟨s, f⟩ₖ ∧ ∀ x, ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s}
+    refine ⟨F, ?_, ?_⟩
+    · apply mem_function.intro
+      · simp [F]
+      · intro s hs
+        have hs : s ⊆ X := by simpa using hs
+        let f : V := {p ∈ X ×ˢ 2 ; ∃ x, (x ∈ s → p = ⟨x, 1⟩ₖ) ∧ (x ∉ s → p = ⟨x, 0⟩ₖ)}
+        have kp1_mem_f : ∀ x, ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s := by
+          intro x
+          have : x ∈ s → x ∈ X := fun hx ↦ hs _ hx
+          simp only [mem_sep_iff, kpair_mem_iff, mem_two_iff, one_ne_zero, or_true, and_true,
+            kpair_iff, and_false, imp_false, not_not, f]; grind
+        have f_func : f ∈ (2 ^ X : V) := by
+          apply mem_function.intro (by simp [f])
+          intro x hx
+          by_cases hxS : x ∈ s
+          · apply ExistsUnique.intro 1
+            · simp only [mem_sep_iff, kpair_mem_iff, hx, mem_two_iff, one_ne_zero, or_true, and_self,
+              kpair_iff, and_true, and_false, imp_false, not_not, true_and, f]; grind
+            · intro i hi
+              simp [f, hx] at hi
+              grind only
+          · apply ExistsUnique.intro 0
+            · simp only [mem_sep_iff, kpair_mem_iff, hx, mem_two_iff, zero_ne_one, or_false,
+              and_self, kpair_iff, and_false, imp_false, and_true, true_and, f]; grind
+            · intro i hi
+              simp [f, hx] at hi
+              grind
+        apply ExistsUnique.intro f ?_ ?_
+        · simp [F, hs, kp1_mem_f, f_func]
+        · intro g hg
+          have : (s ⊆ X ∧ g ∈ (2 ^ X : V)) ∧ ∀ x, ⟨x, 1⟩ₖ ∈ g ↔ x ∈ s := by simpa [F] using hg
+          rcases this with ⟨⟨_, g_func⟩, Hg⟩
+          apply function_ext g_func f_func
+          intro x hx i hi
+          rcases show i = 0 ∨ i = 1 by simpa using hi with (rfl | rfl)
+          · suffices ⟨x, 1⟩ₖ ∈ f → ⟨x, 1⟩ₖ ∈ g by grind
+            grind
+          · grind
+    · intro s₁ s₂ f h₁ h₂
+      have : (s₁ ⊆ X ∧ f ∈ (2 ^ X : V)) ∧ ∀ x, ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s₁ := by simpa [F] using h₁
+      have : (s₂ ⊆ X ∧ f ∈ (2 ^ X : V)) ∧ ∀ x, ⟨x, 1⟩ₖ ∈ f ↔ x ∈ s₂ := by simpa [F] using h₂
+      ext z; grind
 
 end LO.Zermelo
