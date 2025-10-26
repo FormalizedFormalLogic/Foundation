@@ -21,7 +21,7 @@ In this formalization, we prefer developing arithmetic _model theoretic_, i.e.
 show $`T \models \sigma` instead of $`T \vdash \sigma` (They are equivalent thanks to the completeness theorem.).
 
 ```lean
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 ```
 
 This procedure is done as follows.
@@ -55,9 +55,9 @@ Since `Exponential` and `Exponential.total` are defined in all the model of $`\m
 ```lean
 lemma exp_total :
     𝗜𝚺₁ ⊢ “∀ x, ∃ y, !↑exponentialDef x y” := by
-  apply oRing_provable_of.{0}
-  intro M _ _
-  suffices ∀ x, ∃ y, Exponential x y by
+  apply provable_of_models.{0}
+  intro V _ _
+  suffices ∀ x : V, ∃ y, Exponential x y by
     simpa [models_iff]
   exact range_exists
 ```
