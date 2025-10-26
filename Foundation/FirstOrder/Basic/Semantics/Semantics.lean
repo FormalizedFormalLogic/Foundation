@@ -701,13 +701,15 @@ namespace Structure
 
 variable (L)
 
-abbrev theory (M : Type u) [Nonempty M] [s : Structure L M] : Theory L := Semantics.theory s.toStruc
+abbrev theory (M : Type*) [Nonempty M] [s : Structure L M] : Theory L := Semantics.theory s.toStruc
 
-variable {L} {M : Type u} [Nonempty M] [Structure L M]
+variable {L} {M : Type v} [Nonempty M] [s : Structure L M]
 
 @[simp] lemma mem_theory_iff {σ} : σ ∈ theory L M ↔ M ⊧ₘ σ := by rfl
 
 lemma subset_of_models : T ⊆ theory L M ↔ M ⊧ₘ* T := ⟨fun h  ↦ ⟨fun _ hσ ↦ h hσ⟩, fun h _ hσ ↦ h.models_set hσ⟩
+
+lemma theory_satisfiable : Semantics.Satisfiable (Struc.{v} L) (theory L M) := ⟨s.toStruc, by simp⟩
 
 end Structure
 

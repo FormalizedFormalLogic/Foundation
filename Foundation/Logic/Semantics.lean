@@ -154,6 +154,10 @@ lemma not_meaningful_iff (𝓜 : M) : ¬Meaningful 𝓜 ↔ ∀ φ, 𝓜 ⊧ φ 
 lemma modelsSet_iff {𝓜 : M} {T : Set F} : 𝓜 ⊧* T ↔ ∀ ⦃φ⦄, φ ∈ T → Models 𝓜 φ :=
   ⟨by rintro ⟨h⟩ φ hf; exact h hf, by intro h; exact ⟨h⟩⟩
 
+@[simp] lemma modelsTheory_theory (𝓜 : M) : 𝓜 ⊧* theory 𝓜 := ⟨by simp [theory]⟩
+
+@[simp] lemma theory_satisfiable (𝓜 : M) : Satisfiable M (theory 𝓜) := ⟨𝓜, by simp⟩
+
 lemma not_satisfiable_finset [LogicalConnective F] [Tarski M] [DecidableEq F] (t : Finset F) :
     ¬Satisfiable M (t : Set F) ↔ Valid M (t.image (∼·)).disj := by
   simp [Satisfiable, modelsSet_iff, Valid]
