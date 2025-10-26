@@ -10,7 +10,7 @@ namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 section WitnessComparisons
 
@@ -41,12 +41,8 @@ noncomputable def _root_.LO.FirstOrder.Theory.consistent : 𝚷₁.Sentence :=
 noncomputable def _root_.LO.FirstOrder.Theory.consistentWith : 𝚷₁.Semisentence 1 := .mkPi
   “φ. ∀ nφ, !(negGraph L) nφ φ → ¬!T.provable nφ”
 
-lemma consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith := by
-  intro v
-  simp [Theory.ConsistentWith, Theory.consistentWith, neg.defined.df.iff]
-
-@[simp] lemma consistentWith.eval (v) :
-    Semiformula.Evalbm V v T.consistentWith.val ↔ T.ConsistentWith (v 0) := (consistentWith.defined T).df.iff v
+instance consistentWith.defined : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) via T.consistentWith := .mk fun v ↦ by
+  simp [Theory.ConsistentWith, Theory.consistentWith]
 
 instance consistentWith.definable : 𝚷₁-Predicate (T.ConsistentWith : V → Prop) := (consistentWith.defined T).to_definable
 

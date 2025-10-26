@@ -10,7 +10,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 section adjoin
 
@@ -65,11 +65,7 @@ section
 def _root_.LO.FirstOrder.Arithmetic.adjoinDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “w x v. ∃ xv < w, !pairDef xv x v ∧ w = xv + 1”
 
-lemma adjoin_defined : 𝚺₀-Function₂ (adjoin : V → V → V) via adjoinDef := by
-  intro v; simp_all [adjoinDef, adjoin_def]
-
-@[simp] lemma eval_adjoin (v) :
-    Semiformula.Evalbm V v adjoinDef.val ↔ v 0 = v 1 ∷ v 2 := adjoin_defined.df.iff v
+instance adjoin_defined : 𝚺₀-Function₂ (adjoin : V → V → V) via adjoinDef := .mk fun v ↦ by simp_all [adjoinDef, adjoin_def]
 
 instance adjoin_definable : 𝚺₀-Function₂ (adjoin : V → V → V) := adjoin_defined.to_definable
 
@@ -78,11 +74,7 @@ instance adjoin_definable' (ℌ) : ℌ-Function₂ (adjoin : V → V → V) := a
 def _root_.LO.FirstOrder.Arithmetic.mkVec₁Def : 𝚺₀.Semisentence 2 := .mkSigma
   “s x. !adjoinDef s x 0”
 
-lemma mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := by
-  intro v; simp [mkVec₁Def]
-
-@[simp] lemma eval_mkVec₁Def (v) :
-    Semiformula.Evalbm V v mkVec₁Def.val ↔ v 0 = ?[v 1] := mkVec₁_defined.df.iff v
+instance mkVec₁_defined : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) via mkVec₁Def := .mk fun v ↦ by simp [mkVec₁Def]
 
 instance mkVec₁_definable : 𝚺₀-Function₁ (fun x : V ↦ ?[x]) := mkVec₁_defined.to_definable
 
@@ -91,11 +83,7 @@ instance mkVec₁_definable' (ℌ) : ℌ-Function₁ (fun x : V ↦ ?[x]) := mkV
 def _root_.LO.FirstOrder.Arithmetic.mkVec₂Def : 𝚺₁.Semisentence 3 := .mkSigma
   “s x y. ∃ sy, !mkVec₁Def sy y ∧ !adjoinDef s x sy”
 
-lemma mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := by
-  intro v; simp [mkVec₂Def]
-
-@[simp] lemma eval_mkVec₂Def (v) :
-    Semiformula.Evalbm V v mkVec₂Def.val ↔ v 0 = ?[v 1, v 2] := mkVec₂_defined.df.iff v
+instance mkVec₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) via mkVec₂Def := .mk fun v ↦ by simp [mkVec₂Def]
 
 instance mkVec₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ ?[x, y]) := mkVec₂_defined.to_definable
 
@@ -141,7 +129,7 @@ def blueprint : Fixpoint.Blueprint 0 where
 
 def adjointruction : Fixpoint.Construction V blueprint where
   Φ := fun _ ↦ Phi
-  defined := .of_zero <| by intro v; simp [phi_iff]
+  defined := .of_zero <| .mk fun v ↦ by simp [phi_iff]
   monotone := by
     rintro C C' hC _ x (h | ⟨v, i, x, rfl, h⟩)
     · left; exact h
@@ -159,7 +147,7 @@ section
 
 def graphDef : 𝚺₁.Semisentence 1 := blueprint.fixpointDef
 
-lemma graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef := adjointruction.fixpoint_defined
+instance graph_defined : 𝚺₁-Predicate (Graph : V → Prop) via graphDef := adjointruction.fixpoint_defined
 
 instance graph_definable : 𝚺₁-Predicate (Graph : V → Prop) := graph_defined.to_definable
 
@@ -280,14 +268,11 @@ def _root_.LO.FirstOrder.Arithmetic.nthDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “y v i. ∃ pr, !pair₃Def pr v i y ∧ !graphDef pr”
 
 set_option linter.flexible false in
-lemma nth_defined : 𝚺₁-Function₂ (nth : V → V → V) via nthDef := by
-  intro v; simp [nthDef, graph_defined.df.iff]
+instance nth_defined : 𝚺₁-Function₂ (nth : V → V → V) via nthDef := .mk fun v ↦ by
+  simp [nthDef]
   constructor
-  · intro h; rw [h]; exact nth_graph _ _
   · intro h; simp [nth_eq_of_graph h]
-
-@[simp] lemma eval_nthDef (v) :
-    Semiformula.Evalbm V v nthDef.val ↔ v 0 = nth (v 1) (v 2) := nth_defined.df.iff v
+  · intro h; rw [h]; exact nth_graph _ _
 
 instance nth_definable : 𝚺₁-Function₂ (nth : V → V → V) := nth_defined.to_definable
 
@@ -404,9 +389,11 @@ private lemma phi_iff (param : Fin arity → V) (C pr : V) :
 
 def adjointruction : Fixpoint.Construction V β.blueprint where
   Φ := c.Phi
-  defined := ⟨by
-    intro v; simp [Blueprint.blueprint, c.nil_defined.df.iff, c.adjoin_defined.df.iff], by
-    intro v; simpa [Blueprint.blueprint, c.nil_defined.df.iff, c.adjoin_defined.df.iff] using c.phi_iff _ _ _⟩
+  defined := .mk ⟨by
+    intro v; simp [Blueprint.blueprint, c.nil_defined.iff, c.adjoin_defined.iff], by
+    intro v
+    symm
+    simpa [Blueprint.blueprint, c.nil_defined.iff, c.adjoin_defined.iff] using c.phi_iff _ _ _⟩
   monotone := by
     rintro C C' hC _ x (h | ⟨v, i, hv, rfl, h⟩)
     · left; exact h
@@ -427,10 +414,10 @@ section
 lemma graph_defined : 𝚺₁.Defined (fun v ↦ c.Graph (v ·.succ) (v 0)) β.graphDef :=
   c.adjointruction.fixpoint_defined
 
-instance graph_definable : 𝚺₁.Boldface (fun v ↦ c.Graph (v ·.succ) (v 0)) := c.graph_defined.to_definable
+instance graph_definable : 𝚺₁.Definable (fun v ↦ c.Graph (v ·.succ) (v 0)) := c.graph_defined.to_definable
 
 instance graph_definable' (param) : 𝚺₁-Predicate (c.Graph param) := by
-  simpa using HierarchySymbol.Boldface.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
+  simpa using HierarchySymbol.Definable.retractiont (n := 1) c.graph_definable (#0 :> fun i ↦ &(param i))
 
 instance graph_definable'' (param) : 𝚺-[0 + 1]-Predicate (c.Graph param) := c.graph_definable' param
 
@@ -507,20 +494,20 @@ lemma result_eq_of_graph {xs y : V} (h : c.Graph param ⟪xs, y⟫) : c.result p
 section
 
 set_option linter.flexible false in
-lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) β.resultDef := by
-  intro v; simp [Blueprint.resultDef, c.graph_defined.df.iff]
+lemma result_defined : 𝚺₁.DefinedFunction (fun v ↦ c.result (v ·.succ) (v 0)) β.resultDef := .mk fun v ↦ by
+  simp [Blueprint.resultDef, c.graph_defined.iff]
   constructor
-  · intro h; rw [h]; exact c.result_graph _ _
   · intro h; symm; simpa using c.result_eq_of_graph _ h
+  · intro h; rw [h]; exact c.result_graph _ _
 
 @[simp] lemma eval_resultDef (v) :
-    Semiformula.Evalbm V v β.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.df.iff v
+    Semiformula.Evalbm V v β.resultDef.val ↔ v 0 = c.result (v ·.succ.succ) (v 1) := c.result_defined.iff
 
-instance result_definable : 𝚺₁.BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
+instance result_definable : 𝚺₁.DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) :=
   c.result_defined.to_definable
 
 instance result_definable' (Γ m) :
-    Γ-[m + 1].BoldfaceFunction (fun v ↦ c.result (v ·.succ) (v 0)) := c.result_definable.of_sigmaOne
+    Γ-[m + 1].DefinableFunction (fun v ↦ c.result (v ·.succ) (v 0)) := c.result_definable.of_sigmaOne
 
 end
 
@@ -543,8 +530,8 @@ def blueprint : VecRec.Blueprint 0 where
 def adjointruction : VecRec.Construction V blueprint where
   nil _ := 0
   adjoin _ _ _ ih := ih + 1
-  nil_defined := by intro v; simp [blueprint]
-  adjoin_defined := by intro v; simp [blueprint]
+  nil_defined := .mk fun v ↦ by simp [blueprint]
+  adjoin_defined := .mk fun v ↦ by simp [blueprint]
 
 end Len
 
@@ -562,10 +549,7 @@ section
 
 def _root_.LO.FirstOrder.Arithmetic.lenDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
-lemma len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := adjointruction.result_defined
-
-@[simp] lemma eval_lenDef (v) :
-    Semiformula.Evalbm V v lenDef.val ↔ v 0 = len (v 1) := len_defined.df.iff v
+instance len_defined : 𝚺₁-Function₁ (len : V → V) via lenDef := adjointruction.result_defined
 
 instance len_definable : 𝚺₁-Function₁ (len : V → V) := len_defined.to_definable
 
@@ -675,8 +659,8 @@ def blueprint : VecRec.Blueprint 0 where
 noncomputable def adjointruction : VecRec.Construction V blueprint where
   nil _ := 0
   adjoin _ x _ ih := max x ih
-  nil_defined := by intro v; simp [blueprint]
-  adjoin_defined := by intro v; simp [blueprint]
+  nil_defined := .mk fun v ↦ by simp [blueprint]
+  adjoin_defined := .mk fun v ↦ by simp [blueprint]
 
 end ListMax
 
@@ -694,10 +678,7 @@ section
 
 def _root_.LO.FirstOrder.Arithmetic.listMaxDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
-lemma listMax_defined : 𝚺₁-Function₁ (listMax : V → V) via listMaxDef := adjointruction.result_defined
-
-@[simp] lemma eval_listMaxDef (v) :
-    Semiformula.Evalbm V v listMaxDef.val ↔ v 0 = listMax (v 1) := listMax_defined.df.iff v
+instance listMax_defined : 𝚺₁-Function₁ (listMax : V → V) via listMaxDef := adjointruction.result_defined
 
 instance listMax_definable : 𝚺₁-Function₁ (listMax : V → V) := listMax_defined.to_definable
 
@@ -757,12 +738,11 @@ def blueprint : VecRec.Blueprint 1 where
 noncomputable def adjointruction : VecRec.Construction V blueprint where
   nil _ := 0
   adjoin (param x xs ih) := if len xs < param 0 then x ∷ xs else ih
-  nil_defined := by intro v; simp [blueprint]
-  adjoin_defined := by
-    intro v
+  nil_defined := .mk fun v ↦ by simp [blueprint]
+  adjoin_defined := .mk fun v ↦ by
     suffices
-      (v 0 = if len (v 2) < v 4 then v 1 ∷ v 2 else v 3) ↔
-      (len (v 2) < v 4 → v 0 = v 1 ∷ v 2) ∧ (v 4 ≤ len (v 2) → v 0 = v 3) by
+      (len (v 2) < v 4 → v 0 = v 1 ∷ v 2) ∧ (v 4 ≤ len (v 2) → v 0 = v 3) ↔
+      (v 0 = if len (v 2) < v 4 then v 1 ∷ v 2 else v 3) by
       simpa [blueprint, Fin.isValue]
     rcases lt_or_ge (len (v 2)) (v 4) with (hv | hv)
     · simp [hv]
@@ -785,10 +765,7 @@ section
 
 def _root_.LO.FirstOrder.Arithmetic.takeLastDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
 
-lemma takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via takeLastDef := adjointruction.result_defined
-
-@[simp] lemma eval_takeLastDef (v) :
-    Semiformula.Evalbm V v takeLastDef.val ↔ v 0 = takeLast (v 1) (v 2) := takeLast_defined.df.iff v
+instance takeLast_defined : 𝚺₁-Function₂ (takeLast : V → V → V) via takeLastDef := adjointruction.result_defined
 
 instance takeLast_definable : 𝚺₁-Function₂ (takeLast : V → V → V) := takeLast_defined.to_definable
 
@@ -849,9 +826,8 @@ def blueprint : VecRec.Blueprint 1 where
 noncomputable def adjointruction : VecRec.Construction V blueprint where
   nil param := ?[param 0]
   adjoin (_ x _ ih) := x ∷ ih
-  nil_defined := by intro v; simp [blueprint]
-  adjoin_defined := by
-    intro v; simp [blueprint, Fin.isValue]
+  nil_defined := .mk fun v ↦ by simp [blueprint]
+  adjoin_defined := .mk fun v ↦ by simp [blueprint, Fin.isValue]
 
 end Concat
 
@@ -869,10 +845,7 @@ section
 
 def _root_.LO.FirstOrder.Arithmetic.concatDef : 𝚺₁.Semisentence 3 := blueprint.resultDef
 
-lemma concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDef := adjointruction.result_defined
-
-@[simp] lemma eval_concatDef (v) :
-    Semiformula.Evalbm V v concatDef.val ↔ v 0 = concat (v 1) (v 2) := concat_defined.df.iff v
+instance concat_defined : 𝚺₁-Function₂ (concat : V → V → V) via concatDef := adjointruction.result_defined
 
 instance concat_definable : 𝚺₁-Function₂ (concat : V → V → V) := concat_defined.to_definable
 
@@ -944,11 +917,8 @@ def _root_.LO.FirstOrder.Arithmetic.memVecDef : 𝚫₁.Semisentence 2 := .mkDel
   (.mkSigma “x v. ∃ l, !lenDef l v ∧ ∃ i < l, !nthDef x v i”)
   (.mkPi “x v. ∀ l, !lenDef l v → ∃ i < l, ∀ vi, !nthDef vi v i → x = vi”)
 
-lemma memVec_defined : 𝚫₁-Relation (MemVec : V → V → Prop) via memVecDef :=
+instance memVec_defined : 𝚫₁-Relation (MemVec : V → V → Prop) via memVecDef :=
   ⟨by intro v; simp [memVecDef], by intro v; simp [memVecDef, MemVec]⟩
-
-@[simp] lemma eval_memVecDef (v) :
-    Semiformula.Evalbm V v memVecDef.val ↔ v 0 ∈ᵥ v 1 := memVec_defined.df.iff v
 
 instance memVec_definable : 𝚫₁-Relation (MemVec : V → V → Prop) := memVec_defined.to_definable
 
@@ -981,16 +951,13 @@ def _root_.LO.FirstOrder.Arithmetic.subsetVecDef : 𝚫₁.Semisentence 2 := .mk
   (.mkPi “v w. ∀ x <⁺ v, !memVecDef.sigma x v → !memVecDef.pi x w”)
 
 set_option linter.flexible false in
-lemma subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
+instance subsetVec_defined : 𝚫₁-Relation (SubsetVec : V → V → Prop) via subsetVecDef :=
   ⟨by intro v; simp [subsetVecDef, HierarchySymbol.Semiformula.val_sigma, memVec_defined.proper.iff'],
    by intro v
       simp [subsetVecDef, HierarchySymbol.Semiformula.val_sigma, memVec_defined.proper.iff']
       constructor
-      · intro h x _; exact h x
-      · intro h x hx; exact h x (le_of_memVec hx) hx⟩
-
-@[simp] lemma eval_subsetVecDef (v) :
-    Semiformula.Evalbm V v subsetVecDef.val ↔ v 0 ⊆ᵥ v 1 := subsetVec_defined.df.iff v
+      · intro h x hx; exact h x (le_of_memVec hx) hx
+      · intro h x _; exact h x⟩
 
 instance subsetVec_definable : 𝚫₁-Relation (SubsetVec : V → V → Prop) := subsetVec_defined.to_definable
 
@@ -1015,8 +982,8 @@ def repeatVec.blueprint : PR.Blueprint 1 where
 noncomputable def repeatVec.adjointruction : PR.Construction V repeatVec.blueprint where
   zero := fun _ ↦ 0
   succ := fun x _ ih ↦ x 0 ∷ ih
-  zero_defined := by intro v; simp [blueprint]
-  succ_defined := by intro v; simp [blueprint]
+  zero_defined := .mk fun v ↦ by simp [blueprint]
+  succ_defined := .mk fun v ↦ by simp [blueprint]
 
 /-- `repeatVec x k = x ∷ x ∷ x ∷ ... k times ... ∷ 0`-/
 noncomputable def repeatVec (x k : V) : V := repeatVec.adjointruction.result ![x] k
@@ -1029,11 +996,8 @@ section
 
 def _root_.LO.FirstOrder.Arithmetic.repeatVecDef : 𝚺₁.Semisentence 3 := repeatVec.blueprint.resultDef |>.rew (Rew.subst ![#0, #2, #1])
 
-lemma repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via repeatVecDef :=
+instance repeatVec_defined : 𝚺₁-Function₂ (repeatVec : V → V → V) via repeatVecDef := .mk
   fun v ↦ by simp [repeatVec.adjointruction.result_defined_iff, repeatVecDef]; rfl
-
-@[simp] lemma eval_repeatVec (v) :
-    Semiformula.Evalbm V v repeatVecDef.val ↔ v 0 = repeatVec (v 1) (v 2) := repeatVec_defined.df.iff v
 
 instance repeatVec_definable : 𝚺₁-Function₂ (repeatVec : V → V → V) := repeatVec_defined.to_definable
 
@@ -1079,8 +1043,8 @@ def blueprint : VecRec.Blueprint 0 where
 noncomputable def adjointruction : VecRec.Construction V blueprint where
   nil _ := ∅
   adjoin (_ x _ ih) := insert x ih
-  nil_defined := by intro v; simp [blueprint, emptyset_def]
-  adjoin_defined := by intro v; simp [blueprint]
+  nil_defined := .mk fun v ↦ by simp [blueprint, emptyset_def]
+  adjoin_defined := .mk fun v ↦ by simp [blueprint]
 
 end VecToSet
 
@@ -1099,10 +1063,7 @@ section
 
 def _root_.LO.FirstOrder.Arithmetic.vecToSetDef : 𝚺₁.Semisentence 2 := blueprint.resultDef
 
-lemma vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDef := adjointruction.result_defined
-
-@[simp] lemma eval_vecToSetDef (v) :
-    Semiformula.Evalbm V v vecToSetDef.val ↔ v 0 = vecToSet (v 1) := vecToSet_defined.df.iff v
+instance vecToSet_defined : 𝚺₁-Function₁ (vecToSet : V → V) via vecToSetDef := adjointruction.result_defined
 
 instance vecToSet_definable : 𝚺₁-Function₁ (vecToSet : V → V) := vecToSet_defined.to_definable
 

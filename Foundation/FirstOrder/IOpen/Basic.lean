@@ -10,7 +10,7 @@ namespace LO
 
 open FirstOrder Arithmetic PeanoMinus
 
-variable {V : Type*} [ORingStruc V]
+variable {V : Type*} [ORingStructure V]
 
 namespace IOpen
 
@@ -105,11 +105,7 @@ lemma div_graph {a b c : V} : c = a / b ↔ ((0 < b → b * c ≤ a ∧ a < b * 
 def _root_.LO.FirstOrder.Arithmetic.divDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “c a b. (0 < b → b * c ≤ a ∧ a < b * (c + 1)) ∧ (b = 0 → c = 0)”
 
-lemma div_defined : 𝚺₀-Function₂ ((· / ·) : V → V → V) via divDef := by
-  intro v; simp [div_graph, divDef]
-
-@[simp] lemma div_defined_iff (v) :
-    Semiformula.Evalbm V v divDef.val ↔ v 0 = v 1 / v 2 := div_defined.df.iff v
+instance div_defined : 𝚺₀-Function₂[V] HDiv.hDiv via divDef := .mk fun v ↦ by simp [div_graph, divDef]
 
 lemma div_spec_of_pos' (a : V) (h : 0 < b) : ∃ v < b, a = (a / b) * b + v := by
   simpa [mul_comm] using eq_mul_div_add_of_pos a h
@@ -267,13 +263,10 @@ def _root_.LO.FirstOrder.Arithmetic.remDef : 𝚺₀.Semisentence 3 :=
 lemma rem_graph (a b c : V) : a = b % c ↔ ∃ x ≤ b, (x = b / c ∧ a = b - c * x) := by
   simp [mod_def]
 
-lemma rem_defined : 𝚺₀-Function₂ ((· % ·) : V → V → V) via remDef := by
-  intro v; simp [remDef, rem_graph, Semiformula.eval_substs, le_iff_lt_succ]
+instance rem_defined : 𝚺₀-Function₂[V] HMod.hMod via remDef := .mk fun v ↦ by
+  simp [remDef, rem_graph, Semiformula.eval_substs, le_iff_lt_succ]
 
-@[simp] lemma rem_defined_iff (v) :
-    Semiformula.Evalbm V v remDef.val ↔ v 0 = v 1 % v 2 := rem_defined.df.iff v
-
-instance rem_definable : 𝚺₀-Function₂ ((· % ·) : V → V → V) := rem_defined.to_definable _
+instance rem_definable : 𝚺₀-Function₂[V] HMod.hMod := rem_defined.to_definable _
 
 lemma div_add_mod (a b : V) : b * (a / b) + (a % b) = a :=
   add_tsub_self_of_le (mul_div_le a b)
@@ -432,13 +425,9 @@ lemma sqrt_graph {a b : V} : b = √a ↔ b * b ≤ a ∧ a < (b + 1) * (b + 1) 
 def _root_.LO.FirstOrder.Arithmetic.sqrtDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “b a. b * b ≤ a ∧ a < (b + 1) * (b + 1)”
 
-lemma sqrt_defined : 𝚺₀-Function₁ (λ a : V ↦ √a) via sqrtDef := by
-  intro v; simp [sqrt_graph, sqrtDef]
+instance sqrt_defined : 𝚺₀-Function₁[V] sqrt via sqrtDef := .mk fun v ↦ by simp [sqrt_graph, sqrtDef]
 
-@[simp] lemma sqrt_defined_iff (v) :
-    Semiformula.Evalbm V v sqrtDef.val ↔ v 0 = √(v 1) := sqrt_defined.df.iff v
-
-instance sqrt_definable : 𝚺₀-Function₁ ((√·) : V → V) := sqrt_defined.to_definable
+instance sqrt_definable : 𝚺₀-Function₁[V] sqrt := sqrt_defined.to_definable
 
 lemma eq_sqrt (x a : V) : x * x ≤ a ∧ a < (x + 1) * (x + 1) → x = √a := Classical.choose_uniq (sqrt_exists_unique a)
 
@@ -541,13 +530,9 @@ lemma pair_graph {a b c : V} :
 def _root_.LO.FirstOrder.Arithmetic.pairDef : 𝚺₀.Semisentence 3 :=
   .mkSigma “c a b. (a < b ∧ c = b * b + a) ∨ (b ≤ a ∧ c = a * a + a + b)”
 
-lemma pair_defined : 𝚺₀-Function₂ (λ a b : V ↦ ⟪a, b⟫) via pairDef := by
-  intro v; simp [pair_graph, pairDef]
+instance pair_defined : 𝚺₀-Function₂[V] pair via pairDef := .mk fun v ↦ by simp [pair_graph, pairDef]
 
-@[simp] lemma pair_defined_iff (v) :
-    Semiformula.Evalbm V v pairDef.val ↔ v 0 = ⟪v 1, v 2⟫ := pair_defined.df.iff v
-
-instance pair_definable : 𝚺₀-Function₂ (pair : V → V → V) := pair_defined.to_definable
+instance pair_definable : 𝚺₀-Function₂[V] pair := pair_defined.to_definable
 
 instance : Bounded₂ (pair : V → V → V) :=
   ⟨‘x y. (y * y + x) + (x * x + x + y)’, by intro v; simp [pair]; split_ifs <;> try simp [*]⟩
@@ -614,26 +599,20 @@ def _root_.LO.FirstOrder.Arithmetic.pi₂Def : 𝚺₀.Semisentence 2 :=
   .mkSigma “y p. ∃ x <⁺ p, !pairDef p x y”
 
 set_option linter.flexible false in
-lemma pi₁_defined : 𝚺₀-Function₁ (pi₁ : V → V) via pi₁Def := by
-  intro v; simp [pi₁Def]
+instance pi₁_defined : 𝚺₀-Function₁[V] pi₁ via pi₁Def := .mk fun v ↦ by
+  simp [pi₁Def]
   constructor
-  · intro h; exact ⟨π₂ v 1, by simp,  by simp [h]⟩
   · rintro ⟨a, _, e⟩; simp [show v 1 = ⟪v 0, a⟫ from e]
+  · intro h; exact ⟨π₂ v 1, by simp,  by simp [h]⟩
 
-@[simp] lemma pi₁_defined_iff (v) :
-    Semiformula.Evalbm V v pi₁Def.val ↔ v 0 = π₁ (v 1) := pi₁_defined.df.iff v
-
-instance pi₁_definable : 𝚺₀-Function₁ (pi₁ : V → V) := pi₁_defined.to_definable₀
+instance pi₁_definable : 𝚺₀-Function₁[V] pi₁ := pi₁_defined.to_definable₀
 
 set_option linter.flexible false in
-lemma pi₂_defined : 𝚺₀-Function₁ (pi₂ : V → V) via pi₂Def := by
-  intro v; simp [pi₂Def]
+instance pi₂_defined : 𝚺₀-Function₁ (pi₂ : V → V) via pi₂Def := .mk fun v ↦ by
+  simp [pi₂Def]
   constructor
-  · intro h; exact ⟨π₁ v 1, by simp, by simp [h]⟩
   · rintro ⟨a, _, e⟩; simp [show v 1 = ⟪a, v 0⟫ from e]
-
-@[simp] lemma pi₂_defined_iff (v) :
-    Semiformula.Evalbm V v pi₂Def.val ↔ v 0 = π₂ (v 1) := pi₂_defined.df.iff v
+  · intro h; exact ⟨π₁ v 1, by simp, by simp [h]⟩
 
 instance pi₂_definable : 𝚺₀-Function₁ (pi₂ : V → V) := pi₂_defined.to_definable₀
 
@@ -718,36 +697,20 @@ example (v : Fin 4 → ℕ) : v (2 : Fin 3).succ = v 3 := by simp
 theorem ss (v : Fin 4 → ℕ) : v (Fin.succ (0 : Fin (Nat.succ 1))).succ = v 2 := by { simp [Nat.succ_eq_add_one, Nat.reduceAdd, Fin.isValue, Fin.succ_zero_eq_one, Fin.succ_one_eq_two] }
 
 set_option linter.flexible false in
-lemma pair₃_defined : 𝚺₀-Function₃ ((⟪·, ·, ·⟫) : V → V → V → V) via pair₃Def := by
-  intro v; simp [pair₃Def]
-  intro h; simp [h]
-
-@[simp] lemma eval_pair₃Def (v) :
-    Semiformula.Evalbm V v pair₃Def.val ↔ v 0 = ⟪v 1, v 2, v 3⟫ := pair₃_defined.df.iff v
+instance pair₃_defined : 𝚺₀-Function₃[V] (⟪·, ·, ·⟫) via pair₃Def := .mk fun v ↦ by
+  simp [pair₃Def]; intro h; simp [h]
 
 set_option linter.flexible false in
-lemma pair₄_defined : 𝚺₀-Function₄ ((⟪·, ·, ·, ·⟫) : V → V → V → V → V) via pair₄Def := by
-  intro v; simp [pair₄Def]
-  intro e; simp [e]
-
-@[simp] lemma eval_pair₄Def (v) :
-    Semiformula.Evalbm V v pair₄Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4⟫ := pair₄_defined.df.iff v
+instance pair₄_defined : 𝚺₀-Function₄[V] (⟪·, ·, ·, ·⟫) via pair₄Def := .mk fun v ↦ by
+  simp [pair₄Def]; intro e; simp [e]
 
 set_option linter.flexible false in
-lemma pair₅_defined : 𝚺₀.DefinedFunction (fun v : Fin 5 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4⟫)) pair₅Def := by
-  intro v; simp [pair₅Def]
-  intro e; simp [e]
-
-@[simp] lemma eval_pair₅Def (v) :
-    Semiformula.Evalbm V v pair₅Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4, v 5⟫ := pair₅_defined.df.iff v
+instance pair₅_defined : 𝚺₀.DefinedFunction (fun v : Fin 5 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4⟫)) pair₅Def := .mk fun v ↦ by
+  simp [pair₅Def]; intro e; simp [e]
 
 set_option linter.flexible false in
-lemma pair₆_defined : 𝚺₀.DefinedFunction (fun v : Fin 6 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4, v 5⟫)) pair₆Def := by
-  intro v; simp [pair₆Def]
-  intro e; simp [e]
-
-@[simp] lemma eval_pair₆Def (v) :
-    Semiformula.Evalbm V v pair₆Def.val ↔ v 0 = ⟪v 1, v 2, v 3, v 4, v 5, v 6⟫ := pair₆_defined.df.iff v
+instance pair₆_defined : 𝚺₀.DefinedFunction (fun v : Fin 6 → V ↦ (⟪v 0, v 1, v 2, v 3, v 4, v 5⟫)) pair₆Def := .mk fun v ↦ by
+  simp [pair₆Def]; intro e; simp [e]
 
 end
 
@@ -775,16 +738,14 @@ def _root_.LO.FirstOrder.Arithmetic.unNpairDef : {n : ℕ} → (i : Fin n) → �
   | n + 1, i =>
     Fin.cases pi₁Def (fun i ↦ .mkSigma “z v. ∃ r <⁺ v, !pi₂Def r v ∧ !(unNpairDef i) z r”) i
 
-lemma unNpair_defined {n} (i : Fin n) : 𝚺₀-Function₁ (unNpair i : V → V) via unNpairDef i := by
+instance unNpair_defined {n} (i : Fin n) : 𝚺₀-Function₁[V] unNpair i via unNpairDef i := by
   induction' n with n ih
   · exact i.elim0
-  · intro v
+  · refine ⟨?_⟩
+    intro v
     cases' i using Fin.cases with i
     · simp [unNpairDef, unNpair]
-    · simp [unNpairDef, unNpair, (ih i).df.iff]
-
-@[simp] lemma eval_unNpairDef {n} (i : Fin n) (v) :
-    Semiformula.Evalbm V v (unNpairDef i).val ↔ v 0 = unNpair i (v 1) := (unNpair_defined i).df.iff v
+    · simp [unNpairDef, unNpair, (ih i).iff]
 
 @[definability, simp] instance unNpair_definable {n} (i : Fin n) (Γ) : Γ-Function₁ (unNpair i : V → V) :=
   (unNpair_defined i).to_definable₀

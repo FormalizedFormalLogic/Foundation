@@ -4,7 +4,7 @@ namespace LO
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -26,11 +26,8 @@ namespace IsFormulaSet
 
 section
 
-lemma defined : 𝚫₁-Predicate[V] IsFormulaSet L via isFormulaSet L :=
-  ⟨by intro v; simp [isFormulaSet, HierarchySymbol.Semiformula.val_sigma,
-    IsSemiformula.defined.df.iff, IsSemiformula.defined.proper.iff'],
-   by intro v; simp [isFormulaSet, HierarchySymbol.Semiformula.val_sigma,
-     IsSemiformula.defined.df.iff]; rfl⟩
+instance defined : 𝚫₁-Predicate[V] IsFormulaSet L via isFormulaSet L := .mk
+  ⟨by intro v; simp [isFormulaSet], by intro v; simp [isFormulaSet]; rfl⟩
 
 instance definable : 𝚫₁-Predicate[V] IsFormulaSet L := defined.to_definable
 
@@ -123,8 +120,7 @@ private lemma setShift_graph (t s : V) :
       rcases mem_setShift_iff.mp hy with ⟨x, hx, rfl⟩
       exact h₂ x hx
 
-lemma setShift.defined : 𝚺₁-Function₁[V] setShift L via setShiftGraph L := by
-  intro v; simp [setShiftGraph, setShift_graph, shift.defined.df.iff]
+instance setShift.defined : 𝚺₁-Function₁[V] setShift L via setShiftGraph L := .mk fun v ↦ by simp [setShiftGraph, setShift_graph]
 
 instance setShift.definable : 𝚺₁-Function₁[V] setShift L := setShift.defined.to_definable
 
@@ -157,92 +153,52 @@ section
 def axLGraph : 𝚺₀.Semisentence 3 :=
   .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 0 p ∧ y = y' + 1”
 
-lemma axL.defined : 𝚺₀-Function₂[V] axL via axLGraph := by
-  intro v; simp_all [axLGraph, axL]
-
-@[simp] lemma axL.eval (v) :
-    Semiformula.Evalbm V v axLGraph.val ↔ v 0 = axL (v 1) (v 2) := axL.defined.df.iff v
+instance axL.defined : 𝚺₀-Function₂[V] axL via axLGraph := .mk fun v ↦ by simp_all [axLGraph, axL]
 
 def verumIntroGraph : 𝚺₀.Semisentence 2 :=
   .mkSigma “y s. ∃ y' < y, !pair₃Def y' s 1 0 ∧ y = y' + 1”
 
-lemma verumIntro.defined : 𝚺₀-Function₁[V] verumIntro via verumIntroGraph := by
-  intro v; simp_all [verumIntroGraph, verumIntro]
-
-@[simp] lemma verumIntro.eval (v) :
-    Semiformula.Evalbm V v verumIntroGraph.val ↔ v 0 = verumIntro (v 1) := verumIntro.defined.df.iff v
+instance verumIntro.defined : 𝚺₀-Function₁[V] verumIntro via verumIntroGraph := .mk fun v ↦ by simp_all [verumIntroGraph, verumIntro]
 
 def andIntroGraph : 𝚺₀.Semisentence 6 :=
   .mkSigma “y s p q dp dq. ∃ y' < y, !pair₆Def y' s 2 p q dp dq ∧ y = y' + 1”
 
-lemma andIntro.defined : 𝚺₀-Function₅ (andIntro : V → V → V → V → V → V) via andIntroGraph := by
-  intro v; simp_all [andIntroGraph, andIntro]
-
-@[simp] lemma andIntro.eval (v) :
-    Semiformula.Evalbm V v andIntroGraph.val ↔ v 0 = andIntro (v 1) (v 2) (v 3) (v 4) (v 5) := andIntro.defined.df.iff v
+instance andIntro.defined : 𝚺₀-Function₅ (andIntro : V → V → V → V → V → V) via andIntroGraph := .mk fun v ↦ by simp_all [andIntroGraph, andIntro]
 
 def orIntroGraph : 𝚺₀.Semisentence 5 :=
   .mkSigma “y s p q d. ∃ y' < y, !pair₅Def y' s 3 p q d ∧ y = y' + 1”
 
-lemma orIntro.defined : 𝚺₀-Function₄ (orIntro : V → V → V → V → V) via orIntroGraph := by
-  intro v; simp_all [orIntroGraph, orIntro]
-
-@[simp] lemma orIntro.eval (v) :
-    Semiformula.Evalbm V v orIntroGraph.val ↔ v 0 = orIntro (v 1) (v 2) (v 3) (v 4) := orIntro.defined.df.iff v
+instance orIntro.defined : 𝚺₀-Function₄ (orIntro : V → V → V → V → V) via orIntroGraph := .mk fun v ↦ by simp_all [orIntroGraph, orIntro]
 
 def allIntroGraph : 𝚺₀.Semisentence 4 :=
   .mkSigma “y s p d. ∃ y' < y, !pair₄Def y' s 4 p d ∧ y = y' + 1”
 
-lemma allIntro.defined : 𝚺₀-Function₃ (allIntro : V → V → V → V) via allIntroGraph := by
-  intro v; simp_all [allIntroGraph, allIntro]
-
-@[simp] lemma allIntro.eval (v) :
-    Semiformula.Evalbm V v allIntroGraph.val ↔ v 0 = allIntro (v 1) (v 2) (v 3) := allIntro.defined.df.iff v
+instance allIntro.defined : 𝚺₀-Function₃ (allIntro : V → V → V → V) via allIntroGraph := .mk fun v ↦ by simp_all [allIntroGraph, allIntro]
 
 def exIntroGraph : 𝚺₀.Semisentence 5 :=
   .mkSigma “y s p t d. ∃ y' < y, !pair₅Def y' s 5 p t d ∧ y = y' + 1”
 
-lemma exIntro.defined : 𝚺₀-Function₄ (exIntro : V → V → V → V → V) via exIntroGraph := by
-  intro v; simp_all [exIntroGraph, numeral_eq_natCast, exIntro]
-
-@[simp] lemma exIntro.eval (v) :
-    Semiformula.Evalbm V v exIntroGraph.val ↔ v 0 = exIntro (v 1) (v 2) (v 3) (v 4) := exIntro.defined.df.iff v
+instance exIntro.defined : 𝚺₀-Function₄ (exIntro : V → V → V → V → V) via exIntroGraph := .mk fun v ↦ by simp_all [exIntroGraph, numeral_eq_natCast, exIntro]
 
 def wkRuleGraph : 𝚺₀.Semisentence 3 :=
   .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 6 d ∧ y = y' + 1”
 
-lemma wkRule.defined : 𝚺₀-Function₂ (wkRule : V → V → V) via wkRuleGraph := by
-  intro v; simp_all [wkRuleGraph, numeral_eq_natCast, wkRule]
-
-@[simp] lemma wkRule.eval (v) :
-    Semiformula.Evalbm V v wkRuleGraph.val ↔ v 0 = wkRule (v 1) (v 2) := wkRule.defined.df.iff v
+instance wkRule.defined : 𝚺₀-Function₂ (wkRule : V → V → V) via wkRuleGraph := .mk fun v ↦ by simp_all [wkRuleGraph, numeral_eq_natCast, wkRule]
 
 def shiftRuleGraph : 𝚺₀.Semisentence 3 :=
   .mkSigma “y s d. ∃ y' < y, !pair₃Def y' s 7 d ∧ y = y' + 1”
 
-lemma shiftRule.defined : 𝚺₀-Function₂ (shiftRule : V → V → V) via shiftRuleGraph := by
-  intro v; simp_all [shiftRuleGraph, numeral_eq_natCast, shiftRule]
-
-@[simp] lemma shiftRule.eval (v) :
-    Semiformula.Evalbm V v shiftRuleGraph.val ↔ v 0 = shiftRule (v 1) (v 2) := shiftRule.defined.df.iff v
+instance shiftRule.defined : 𝚺₀-Function₂ (shiftRule : V → V → V) via shiftRuleGraph := .mk fun v ↦ by simp_all [shiftRuleGraph, numeral_eq_natCast, shiftRule]
 
 def cutRuleGraph : 𝚺₀.Semisentence 5 :=
   .mkSigma “y s p d₁ d₂. ∃ y' < y, !pair₅Def y' s 8 p d₁ d₂ ∧ y = y' + 1”
 
-lemma cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V) via cutRuleGraph := by
-  intro v; simp_all [cutRuleGraph, numeral_eq_natCast, cutRule]
-
-@[simp] lemma cutRule.eval (v) :
-    Semiformula.Evalbm V v cutRuleGraph.val ↔ v 0 = cutRule (v 1) (v 2) (v 3) (v 4) := cutRule_defined.df.iff v
+instance cutRule_defined : 𝚺₀-Function₄ (cutRule : V → V → V → V → V) via cutRuleGraph := .mk fun v ↦ by simp_all [cutRuleGraph, numeral_eq_natCast, cutRule]
 
 def axmGraph : 𝚺₀.Semisentence 3 :=
   .mkSigma “y s p. ∃ y' < y, !pair₃Def y' s 9 p ∧ y = y' + 1”
 
-lemma axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph := by
-  intro v; simp_all [axmGraph, numeral_eq_natCast, axm]
-
-@[simp] lemma axm.eval (v) :
-    Semiformula.Evalbm V v axmGraph.val ↔ v 0 = axm (v 1) (v 2) := axm_defined.df.iff v
+instance axm_defined : 𝚺₀-Function₂ (axm : V → V → V) via axmGraph := .mk fun v ↦ by simp_all [axmGraph, numeral_eq_natCast, axm]
 
 @[simp] lemma seq_lt_axL (s p : V) : s < axL s p := le_iff_lt_succ.mp <| le_pair_left _ _
 @[simp] lemma arity_lt_axL (s p : V) : p < axL s p :=
@@ -444,74 +400,14 @@ noncomputable def blueprint : Fixpoint.Blueprint 0 := ⟨.mkDelta
         !axmGraph d s p ∧ p ∈ s ∧ !T.Δ₁ch.pi p) )”
     )⟩
 
+private lemma Phi_definable : 𝚫₁.Defined (fun v : Fin 2 → V ↦ Phi T {x | x ∈ v 1} (v 0)) (blueprint T).core := .mk <| by
+  constructor
+  · intro v; simp [blueprint]
+  · intro v; simp [phi_iff, blueprint]
+
 def construction : Fixpoint.Construction V (blueprint T) where
   Φ := fun _ ↦ Phi T
-  defined :=
-  ⟨by
-    intro v
-    /-
-    simp? [blueprint, HierarchySymbol.Semiformula.val_sigma,
-      IsFormulaSet.defined.df.iff, IsFormulaSet.defined.proper.iff',
-      neg.defined.df.iff,
-      free.defined.df.iff,
-      setShift.defined.df.iff,
-      IsSemiterm.defined.df.iff,
-      IsSemiterm.defined.proper.iff',
-      substs1.defined.df.iff,
-      Δ₁Class.defined.df.iff, Δ₁Class.defined.proper.iff']
-    -/
-    simp only [Nat.reduceAdd, blueprint, Nat.succ_eq_add_one, Fin.isValue,
-      HierarchySymbol.Semiformula.val_sigma, HierarchySymbol.Semiformula.sigma_mkDelta,
-      HierarchySymbol.Semiformula.val_mkSigma, LogicalConnective.HomClass.map_and,
-      Semiformula.eval_ex, Semiformula.eval_substs, eval_fstIdxDef, Matrix.cons_val_zero,
-      FirstOrder.Semiterm.val_bvar, Matrix.cons_val_one, Matrix.cons_val_fin_one,
-      IsFormulaSet.defined.df.iff, LogicalConnective.Prop.and_eq, exists_eq_left,
-      LogicalConnective.HomClass.map_or, Semiformula.eval_bexLT, axL.eval, Matrix.cons_app_two,
-      Semiformula.eval_operator_two, Structure.Mem.mem, neg.defined.df.iff, Fin.succ_zero_eq_one,
-      verumIntro.eval, eval_qqVerumDef, Matrix.cons_app_three, Matrix.cons_app_four, andIntro.eval,
-      Matrix.cons_app_five, eval_qqAndDef, insert_defined_iff, Matrix.cons_app_seven,
-      Matrix.cons_app_six, orIntro.eval, eval_qqOrDef, allIntro.eval, eval_qqAllDef,
-      free.defined.df.iff, setShift.defined.df.iff, exIntro.eval, eval_qqExDef,
-      IsSemiterm.defined.df.iff, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
-      ORingStruc.zero_eq_zero, substs1.defined.df.iff, Fin.succ_one_eq_two, wkRule.eval,
-      bitSubset_defined_iff, shiftRule.eval, cutRule.eval, axm.eval, Δ₁Class.defined.df.iff,
-      LogicalConnective.Prop.or_eq, HierarchySymbol.Semiformula.pi_mkDelta,
-      HierarchySymbol.Semiformula.val_mkPi, Semiformula.eval_all,
-      LogicalConnective.HomClass.map_imply, IsFormulaSet.defined.proper.iff',
-      LogicalConnective.Prop.arrow_eq, forall_eq, IsSemiterm.defined.proper.iff', Structure.Eq.eq,
-      Δ₁Class.defined.proper.iff']
-    ,
-  by
-    intro v
-    /-
-    simp? [phi_iff, blueprint, HierarchySymbol.Semiformula.val_sigma,
-      IsFormulaSet.defined.df.iff, IsFormulaSet.defined.proper.iff',
-      neg.defined.df.iff,
-      free.defined.df.iff,
-      setShift.defined.df.iff,
-      IsSemiterm.defined.df.iff,
-      IsSemiterm.defined.proper.iff',
-      substs1.defined.df.iff,
-      Δ₁Class.defined.df.iff, Δ₁Class.defined.proper.iff']
-    -/
-    simp only [Fin.isValue, phi_iff, Nat.reduceAdd, blueprint, Nat.succ_eq_add_one,
-      HierarchySymbol.Semiformula.val_sigma, HierarchySymbol.Semiformula.val_mkDelta,
-      HierarchySymbol.Semiformula.val_mkSigma, LogicalConnective.HomClass.map_and,
-      Semiformula.eval_ex, Semiformula.eval_substs, eval_fstIdxDef, Matrix.cons_val_zero,
-      FirstOrder.Semiterm.val_bvar, Matrix.cons_val_one, Matrix.cons_val_fin_one,
-      IsFormulaSet.defined.df.iff, LogicalConnective.Prop.and_eq, exists_eq_left,
-      LogicalConnective.HomClass.map_or, Semiformula.eval_bexLT, axL.eval, Matrix.cons_app_two,
-      Semiformula.eval_operator_two, Structure.Mem.mem, neg.defined.df.iff, Fin.succ_zero_eq_one,
-      verumIntro.eval, eval_qqVerumDef, Matrix.cons_app_three, Matrix.cons_app_four, andIntro.eval,
-      Matrix.cons_app_five, eval_qqAndDef, insert_defined_iff, Matrix.cons_app_seven,
-      Matrix.cons_app_six, orIntro.eval, eval_qqOrDef, allIntro.eval, eval_qqAllDef,
-      free.defined.df.iff, setShift.defined.df.iff, exIntro.eval, eval_qqExDef,
-      IsSemiterm.defined.df.iff, Semiterm.val_operator₀, Structure.numeral_eq_numeral,
-      ORingStruc.zero_eq_zero, substs1.defined.df.iff, Fin.succ_one_eq_two, wkRule.eval,
-      bitSubset_defined_iff, shiftRule.eval, cutRule.eval, axm.eval, Δ₁Class.defined.df.iff,
-      LogicalConnective.Prop.or_eq]
-
-      ⟩
+  defined := Phi_definable _
   monotone := by
     rintro C C' hC _ d ⟨hs, H⟩
     refine ⟨hs, ?_⟩
@@ -594,50 +490,39 @@ variable {T}
 
 section
 
-lemma Derivation.defined : 𝚫₁-Predicate[V] T.Derivation via T.derivation := (construction T).fixpoint_definedΔ₁
+instance Derivation.defined : 𝚫₁-Predicate[V] T.Derivation via T.derivation := (construction T).fixpoint_definedΔ₁
 
 instance Derivation.definable : 𝚫₁-Predicate[V] T.Derivation := Derivation.defined.to_definable
 
 instance Derivation.definable' : Γ-[m + 1]-Predicate[V] T.Derivation := Derivation.definable.of_deltaOne
 
-lemma DerivationOf.defined : 𝚫₁-Relation[V] T.DerivationOf via T.derivationOf :=
-  ⟨by intro v; simp [Theory.derivationOf, HierarchySymbol.Semiformula.val_sigma, Derivation.defined.proper.iff'],
-   by intro v; simp [Theory.derivationOf, HierarchySymbol.Semiformula.val_sigma, Derivation.defined.df.iff, eq_comm (b := fstIdx (v 0))]; rfl⟩
+instance DerivationOf.defined : 𝚫₁-Relation[V] T.DerivationOf via T.derivationOf := .mk
+  ⟨by intro v; simp [Theory.derivationOf], by intro v; simp [Theory.derivationOf, eq_comm (b := fstIdx (v 0))]; rfl⟩
 
 instance DerivationOf.definable : 𝚫₁-Relation[V] T.DerivationOf := DerivationOf.defined.to_definable
 
 instance DerivationOf.definable' : Γ-[m + 1]-Relation[V] T.DerivationOf := DerivationOf.definable.of_deltaOne
 
-lemma Derivable.defined : 𝚺₁-Predicate[V] T.Derivable via T.derivable := by
-  intro v; simp [Theory.derivable, HierarchySymbol.Semiformula.val_sigma, DerivationOf.defined.df.iff, Theory.Derivable]
+instance Derivable.defined : 𝚺₁-Predicate[V] T.Derivable via T.derivable := .mk fun v ↦ by simp [Theory.derivable, Theory.Derivable]
 
 instance Derivable.definable : 𝚺₁-Predicate[V] T.Derivable := Derivable.defined.to_definable
 
 /-- instance for definability tactic-/
 instance Derivable.definable' : 𝚺-[0 + 1]-Predicate[V] T.Derivable := Derivable.definable
 
-lemma Proof.defined : 𝚫₁-Relation[V] T.Proof via T.proof :=
-  ⟨by intro v; simp [Theory.proof, HierarchySymbol.Semiformula.val_sigma, DerivationOf.defined.proper.iff'],
-   by intro v; simp [Theory.Proof, Theory.proof, HierarchySymbol.Semiformula.val_sigma,
-     DerivationOf.defined.df.iff, singleton_eq_insert, emptyset_def]⟩
+instance Proof.defined : 𝚫₁-Relation[V] T.Proof via T.proof := .mk
+  ⟨by intro v; simp [Theory.proof], by intro v; simp [Theory.Proof, Theory.proof, singleton_eq_insert, emptyset_def]⟩
 
 instance Proof.definable : 𝚫₁-Relation[V] T.Proof := Proof.defined.to_definable
 
 instance Proof.definable' : Γ-[m + 1]-Relation[V] T.Proof := Proof.definable.of_deltaOne
 
-lemma Provable.defined : 𝚺₁-Predicate[V] T.Provable via T.provable := by
-  intro v; simp [Theory.provable, HierarchySymbol.Semiformula.val_sigma, Proof.defined.df.iff, Theory.Provable]
+instance Provable.defined : 𝚺₁-Predicate[V] T.Provable via T.provable := .mk fun v ↦ by simp [Theory.provable, Theory.Provable]
 
 instance Provable.definable : 𝚺₁-Predicate[V] T.Provable := Provable.defined.to_definable
 
 /-- instance for definability tactic-/
 instance Provable.definable' : 𝚺-[0 + 1]-Predicate[V] T.Provable := Provable.definable
-
-@[simp] lemma Proof.eval (v) :
-    Semiformula.Evalbm V v T.proof.val ↔ T.Proof (v 0) (v 1) := Proof.defined.df.iff v
-
-@[simp] lemma Provable.eval (v) :
-    Semiformula.Evalbm V v T.provable.val ↔ T.Provable (v 0) := Provable.defined.df.iff v
 
 end
 
@@ -882,10 +767,10 @@ lemma disjDistr (ps s : V) (d : T.Derivable (vecToSet ps ∪ s)) : T.Derivable (
       (∀ i < len ps - k, ps.[i] ∈ s') → T.Derivable (insert (^⋁ takeLast ps k) (s' ∪ s)) := by
     intro k hk
     induction k using ISigma1.sigma1_succ_induction
-    · apply HierarchySymbol.Boldface.imp (by definability)
-      apply HierarchySymbol.Boldface.ball_le (by definability)
-      apply HierarchySymbol.Boldface.imp (by definability)
-      apply HierarchySymbol.Boldface.imp (by definability)
+    · apply HierarchySymbol.Definable.imp (by definability)
+      apply HierarchySymbol.Definable.ball_le (by definability)
+      apply HierarchySymbol.Definable.imp (by definability)
+      apply HierarchySymbol.Definable.imp (by definability)
       definability
     case zero =>
       intro s' _ ss hs'

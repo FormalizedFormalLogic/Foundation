@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Definability.BoundedBoldface
+import Foundation.FirstOrder.Arithmetic.Definability.BoundedDefinable
 import Foundation.FirstOrder.R0.Basic
 
 namespace LO.FirstOrder.Arithmetic
@@ -9,7 +9,7 @@ lemma nat_modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisenten
     ℕ ⊧/v φ ↔ ℕ ⊧ₘ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
   simp [models_iff]
 
-variable (V : Type*) [ORingStruc V] [V ⊧ₘ* 𝗣𝗔⁻]
+variable (V : Type*) [ORingStructure V] [V ⊧ₘ* 𝗣𝗔⁻]
 
 lemma modelsWithParam_iff_models_substs {v : Fin k → ℕ} {φ : Semisentence ℒₒᵣ k} :
     V ⊧/(v ·) φ ↔ V ⊧ₘ (φ ⇜ (fun i ↦ Semiterm.Operator.numeral ℒₒᵣ (v i))) := by
@@ -49,7 +49,7 @@ lemma deltaOne_absolute {k} (φ : 𝚫₁.Semisentence k)
 lemma Defined.shigmaOne_absolute {k} {R : (Fin k → ℕ) → Prop} {R' : (Fin k → V) → Prop} {φ : 𝚫₁.Semisentence k}
     (hR : 𝚫₁.Defined R φ) (hR' : 𝚫₁.Defined R' φ) (v : Fin k → ℕ) :
     R v ↔ R' (fun i ↦ (v i : V)) := by
-  simpa [hR.df.iff, hR'.df.iff] using deltaOne_absolute V φ hR.proper hR'.proper v
+  simpa using deltaOne_absolute V φ hR.proper hR'.proper v
 
 lemma DefinedFunction.shigmaOne_absolute_func {k} {f : (Fin k → ℕ) → ℕ} {f' : (Fin k → V) → V} {φ : 𝚺₁.Semisentence (k + 1)}
     (hf : 𝚺₁.DefinedFunction f φ) (hf' : 𝚺₁.DefinedFunction f' φ) (v : Fin k → ℕ) :

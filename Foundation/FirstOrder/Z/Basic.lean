@@ -575,15 +575,15 @@ instance kpair.π₂.defined : ℒₛₑₜ-function₁[V] kpair.π₂ via kpair
   ⟨by intro v
       let u := ⋃ˢ v 1
       let i := ⋂ˢ v 1
-      suffices v 0 = ⋃ˢ {x ∈ u ; x ∈ i → u = i} ↔ ∀ s, (∀ z, z ∈ s ↔ z ∈ u ∧ (z ∈ i → u = i)) → v 0 = ⋃ˢ s by
+      suffices (∀ s, (∀ z, z ∈ s ↔ z ∈ u ∧ (z ∈ i → u = i)) → v 0 = ⋃ˢ s) ↔ v 0 = ⋃ˢ {x ∈ u ; x ∈ i → u = i} by
         simpa [kpair.π₂.dfn, π₂] using this
       constructor
-      · intro e s hs; rw [e]
-        congr; ext
-        simp only [mem_sep_iff]; grind
       · intro h
         apply h
-        intro z; simp⟩
+        intro z; simp
+      · intro e s hs; rw [e]
+        congr; ext
+        simp only [mem_sep_iff]; grind⟩
 
 instance kpair.π₂.definable : ℒₛₑₜ-function₁[V] kpair.π₂ := kpair.π₂.defined.to_definable
 

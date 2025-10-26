@@ -9,7 +9,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def Bit (i a : V) : Prop := LenBit (Exp.exp i) a
 
@@ -19,21 +19,18 @@ def _root_.LO.FirstOrder.Arithmetic.bitDef : 𝚺₀.Semisentence 2 := .mkSigma
   “x y. ∃ z <⁺ y, !expDef z x ∧ !lenbitDef z y”
 
 set_option linter.flexible false in
-lemma bit_defined : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) via bitDef := by
-  intro v; simp [bitDef]
+instance bit_defined : 𝚺₀-Relation[V] (· ∈ ·) via bitDef := .mk fun v ↦ by
+  simp [bitDef]
   constructor
-  · intro h; exact ⟨by simp [h.le], h⟩
   · rintro ⟨_, h⟩; exact h
+  · intro h; exact ⟨by simp [h.le], h⟩
 
-@[simp] lemma bit_defined_iff (v) :
-    Semiformula.Evalbm V v bitDef.val ↔ v 0 ∈ v 1 := bit_defined.df.iff v
+instance mem_definable : 𝚺₀-Relation[V] (· ∈ ·) := bit_defined.to_definable
 
-instance mem_definable : 𝚺₀-Relation ((· ∈ ·) : V → V → Prop) := bit_defined.to_definable
+instance mem_definable' (ℌ : HierarchySymbol) : ℌ-Relation[V] (· ∈ ·) := mem_definable.of_zero
 
-instance mem_definable' (ℌ : HierarchySymbol) : ℌ-Relation ((· ∈ ·) : V → V → Prop) := mem_definable.of_zero
-
-instance mem_definable'' (ℌ : HierarchySymbol) : ℌ-Relation (Membership.mem : V → V → Prop) := by
-  simpa using (mem_definable' ℌ).retraction (n := 2) ![1, 0]
+instance mem_definable'' (ℌ : HierarchySymbol) : ℌ-Relation[V] Membership.mem := by
+  simpa using (mem_definable' ℌ).retraction ![1, 0]
 
 lemma mem_absolute (i a : ℕ) : i ∈ a ↔ (i : V) ∈ (a : V) := by
   simpa using Defined.shigmaZero_absolute V bit_defined bit_defined ![i, a]
@@ -48,18 +45,18 @@ lemma not_mem_of_lt_exp {i a : V} (h : a < Exp.exp i) : i ∉ a := fun H ↦ by 
 
 section
 
-@[definability] lemma HierarchySymbol.Boldface.ball_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
-    Γ-[m + 1].Boldface (fun v ↦ ∀ x ∈ f v, P v x) := by
-  have : Γ-[m + 1].Boldface (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
-    .ball_lt hf (.imp (HierarchySymbol.Boldface.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction Fin.succ)) h)
+@[definability] lemma HierarchySymbol.Definable.ball_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γ-[m + 1].Definable (fun v ↦ ∀ x ∈ f v, P v x) := by
+  have : Γ-[m + 1].Definable (fun v ↦ ∀ x < f v, x ∈ f v → P v x) :=
+    .ball_lt hf (.imp (HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction Fin.succ)) h)
   exact this.of_iff <| by intro v; exact ⟨fun h x _ hxv ↦ h x hxv, fun h x hx ↦ h x (lt_of_mem hx) hx⟩
 
-@[definability] lemma HierarchySymbol.Boldface.bex_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
-    (hf : 𝚺-[m + 1].BoldfaceFunction f) (h : Γ-[m + 1].Boldface (fun w ↦ P (w ·.succ) (w 0))) :
-    Γ-[m + 1].Boldface (fun v ↦ ∃ x ∈ f v, P v x) := by
-  have : Γ-[m + 1].Boldface (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
-    .bex_lt hf (.and (HierarchySymbol.Boldface.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction _)) h)
+@[definability] lemma HierarchySymbol.Definable.bex_mem (Γ m) {P : (Fin k → V) → V → Prop} {f : (Fin k → V) → V}
+    (hf : 𝚺-[m + 1].DefinableFunction f) (h : Γ-[m + 1].Definable (fun w ↦ P (w ·.succ) (w 0))) :
+    Γ-[m + 1].Definable (fun v ↦ ∃ x ∈ f v, P v x) := by
+  have : Γ-[m + 1].Definable (fun v ↦ ∃ x < f v, x ∈ f v ∧ P v x) :=
+    .bex_lt hf (.and (HierarchySymbol.Definable.comp₂ (P := (· ∈ ·)) (.var 0) (hf.retraction _)) h)
   exact this.of_iff <| by
     intro v; exact ⟨by rintro ⟨x, hx, hxv⟩; exact ⟨x, lt_of_mem hx, hx, hxv⟩, by rintro ⟨x, _, hx, hvx⟩; exact ⟨x, hx, hvx⟩⟩
 
@@ -144,9 +141,9 @@ end
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0 ISigma1
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
-scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def, bit_defined.df.iff]⟩
+scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformula.Operator.val, operator_mem_def]⟩
 
 @[simp] lemma eval_ballIn {t : Semiterm ℒₒᵣ ξ n} {p : Semiformula ℒₒᵣ ξ (n + 1)} {e ε} :
     Semiformula.Evalm V e ε (ballIn t p) ↔ ∀ x ∈ t.valm V e ε, Semiformula.Evalm V (x :> e) ε p := by
@@ -166,21 +163,19 @@ scoped instance : Structure.Mem ℒₒᵣ V := ⟨by intro a b; simp [Semiformul
   · rintro ⟨x, _, hx, h⟩; exact ⟨x, hx, h⟩
   · rintro ⟨x, hx, h⟩; exact ⟨x, lt_of_mem hx, hx, h⟩
 
-lemma memRel_defined : 𝚺₀-Relation₃ (fun r x y : V ↦ ⟪x, y⟫ ∈ r) via memRel := by
-  intro v; simp [memRel, pair_defined.df.iff]
+instance memRel_defined : 𝚺₀-Relation₃ (fun r x y : V ↦ ⟪x, y⟫ ∈ r) via memRel := .mk fun v ↦ by simp [memRel]
 
-lemma memRel₃_defined : 𝚺₀-Relation₄ (fun r x y z : V ↦ ⟪x, y, z⟫ ∈ r) via memRel₃ := by
-  intro v; simp [memRel₃, pair_defined.df.iff]
+instance memRel₃_defined : 𝚺₀-Relation₄ (fun r x y z : V ↦ ⟪x, y, z⟫ ∈ r) via memRel₃ := .mk fun v ↦ by simp [memRel₃]
 
 @[simp] lemma eval_memRel {x y r : V} :
     memRelOpr.val ![r, x, y] ↔ ⟪x, y⟫ ∈ r := by
   unfold Semiformula.Operator.val
-  simp [memRelOpr, memRel_defined.df.iff]
+  simp [memRelOpr]
 
 @[simp] lemma eval_memRel₃ {x y z r : V} :
     memRel₃Opr.val ![r, x, y, z] ↔ ⟪x, y, z⟫ ∈ r := by
   unfold Semiformula.Operator.val
-  simp [memRel₃Opr, memRel₃_defined.df.iff]
+  simp [memRel₃Opr]
 
 end LO.FirstOrder.Arithmetic
 
@@ -188,7 +183,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 lemma mem_iff_mul_exp_add_exp_add {i a : V} : i ∈ a ↔ ∃ k, ∃ r < Exp.exp i, a = k * Exp.exp (i + 1) + Exp.exp i + r := by
   simpa [mem_iff_bit, exp_succ] using lenbit_iff_add_mul (exp_pow2 i) (a := a)
@@ -268,15 +263,11 @@ lemma insert_graph (b i a : V) :
 def _root_.LO.FirstOrder.Arithmetic.insertDef : 𝚺₀.Semisentence 3 := .mkSigma
   “b i a. (i ∈ a ∧ b = a) ∨ (i ∉ a ∧ ∃ e <⁺ b, !expDef e i ∧ b = a + e)”
 
-lemma insert_defined : 𝚺₀-Function₂ (insert : V → V → V) via insertDef := by
-  intro v; simp [insertDef, insert_graph]
+instance insert_defined : 𝚺₀-Function₂[V] insert via insertDef := .mk fun v ↦ by simp [insertDef, insert_graph]
 
-@[simp] lemma insert_defined_iff (v) :
-    Semiformula.Evalbm V v insertDef.val ↔ v 0 = insert (v 1) (v 2) := insert_defined.df.iff v
+instance insert_definable : 𝚺₀-Function₂[V] insert := insert_defined.to_definable
 
-instance insert_definable : 𝚺₀-Function₂ (insert : V → V → V) := insert_defined.to_definable
-
-instance insert_definable' (Γ) : Γ-Function₂ (insert : V → V → V) := insert_definable.of_zero
+instance insert_definable' (Γ) : Γ-Function₂[V] insert := insert_definable.of_zero
 
 open Classical in
 lemma insert_le_of_le_of_le {i j a b : V} (hij : i ≤ j) (hab : a ≤ b) : insert i a ≤ b + Exp.exp j := by
@@ -337,17 +328,13 @@ instance : HasSubset V := ⟨fun a b ↦ ∀ ⦃i⦄, i ∈ a → i ∈ b⟩
 def _root_.LO.FirstOrder.Arithmetic.bitSubsetDef : 𝚺₀.Semisentence 2 := .mkSigma
   “a b. ∀ i < a, i ∈ a → i ∈ b”
 
-lemma bitSubset_defined : 𝚺₀-Relation ((· ⊆ ·) : V → V → Prop) via bitSubsetDef := by
-  intro v
+instance bitSubset_defined : 𝚺₀-Relation[V] Subset via bitSubsetDef := .mk fun v ↦ by
   simpa [bitSubsetDef]
-    using ⟨by intro h x _ hx; exact h hx, by intro h x hx; exact h x (lt_of_mem hx) hx⟩
+    using ⟨by intro h x hx; exact h x (lt_of_mem hx) hx, by intro h x _ hx; exact h hx⟩
 
-@[simp] lemma bitSubset_defined_iff (v) :
-    Semiformula.Evalbm V v bitSubsetDef.val ↔ v 0 ⊆ v 1 := bitSubset_defined.df.iff v
+instance bitSubset_definable : 𝚺₀-Relation[V] Subset := bitSubset_defined.to_definable₀
 
-instance bitSubset_definable : 𝚺₀-Relation ((· ⊆ ·) : V → V → Prop) := bitSubset_defined.to_definable₀
-
-@[simp, definability] instance bitSubset_definable' (ℌ : HierarchySymbol) : ℌ-Relation ((· ⊆ ·) : V → V → Prop) := bitSubset_defined.to_definable₀
+@[simp, definability] instance bitSubset_definable' (ℌ : HierarchySymbol) : ℌ-Relation[V] Subset := bitSubset_defined.to_definable₀
 
 lemma subset_iff {a b : V} : a ⊆ b ↔ (∀ x ∈ a, x ∈ b) := by simp [HasSubset.Subset]
 
@@ -400,15 +387,11 @@ private lemma under_graph (x y : V) : y = under x ↔ y + 1 = Exp.exp x := by
 def _root_.LO.FirstOrder.Arithmetic.underDef : 𝚺₀.Semisentence 2 := .mkSigma
   “y x. !expDef.val (y + 1) x”
 
-lemma under_defined : 𝚺₀-Function₁ (under : V → V) via underDef := by
-  intro v; simp [underDef, under_graph]
+instance under_defined : 𝚺₀-Function₁[V] under via underDef := .mk fun v ↦ by simp [underDef, under_graph]
 
-@[simp] lemma under_defined_iff (v) :
-    Semiformula.Evalbm V v underDef.val ↔ v 0 = under (v 1) := under_defined.df.iff v
+instance under_definable : 𝚺₀-Function₁[V] under := under_defined.to_definable
 
-instance under_definable : 𝚺₀-Function₁ (under : V → V) := under_defined.to_definable
-
-instance under_definable' (Γ) : Γ-Function₁ (under : V → V) := under_definable.of_zero
+instance under_definable' (Γ) : Γ-Function₁[V] under := under_definable.of_zero
 
 lemma eq_zero_of_subset_zero {a : V} : a ⊆ 0 → a = 0 := by
   intro h; by_contra A
@@ -513,9 +496,9 @@ private lemma finset_comprehension_aux (Γ : Polarity) {P : V → Prop} (hP : Γ
     ⟨under a, pred_lt_self_of_pos (by simp), fun i hi _ ↦ by simpa [mem_under_iff] using hi⟩
   rcases this with ⟨s, hsn, hs⟩
   have : Γ.alt-[m]-Predicate (fun s : V ↦ ∀ i < a, P i → i ∈ s) := by
-    apply HierarchySymbol.Boldface.ball_blt; simp; apply HierarchySymbol.Boldface.imp
-    · simpa using HierarchySymbol.Boldface.bcomp₁ (by definability)
-    · simpa using HierarchySymbol.Boldface.bcomp₂ (by definability) (by definability)
+    apply HierarchySymbol.Definable.ball_blt; simp; apply HierarchySymbol.Definable.imp
+    · simpa using HierarchySymbol.Definable.bcomp₁ (by definability)
+    · simpa using HierarchySymbol.Definable.bcomp₂ (by definability) (by definability)
   have : ∃ t, (∀ i < a, P i → i ∈ t) ∧ ∀ t' < t, ∃ x < a, P x ∧ x ∉ (t' : V) := by
     simpa using InductionOnHierarchy.least_number Γ.alt m this hs
   rcases this with ⟨t, ht, t_minimal⟩

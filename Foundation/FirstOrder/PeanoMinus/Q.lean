@@ -26,7 +26,7 @@ instance (n : ℕ) : OfNat OmegaAddOne n := ⟨.some n⟩
 
 instance : Top OmegaAddOne := ⟨.none⟩
 
-instance : ORingStruc OmegaAddOne where
+instance : ORingStructure OmegaAddOne where
   add a b :=
     match a, b with
     | .some n, .some m => n + m
@@ -163,7 +163,7 @@ open FirstOrder FirstOrder.Arithmetic
 
 namespace PeanoMinus
 
-variable {M : Type*} [ORingStruc M] [M ⊧ₘ* 𝗣𝗔⁻]
+variable {M : Type*} [ORingStructure M] [M ⊧ₘ* 𝗣𝗔⁻]
 
 instance : M ⊧ₘ* 𝗤 := modelsTheory_iff.mpr <| by
   intro φ h
@@ -202,10 +202,10 @@ instance : M ⊧ₘ* 𝗤 := modelsTheory_iff.mpr <| by
       . apply ha.symm;
   all_goals simp [models_iff];
 
-instance : 𝗤 ⪯ 𝗣𝗔⁻ := oRing_weakerThan_of.{0} _ _ fun _ _ _ ↦ inferInstance
+instance : 𝗤 ⪯ 𝗣𝗔⁻ := weakerThan_of_models.{0} _ _ fun _ _ _ ↦ inferInstance
 
 instance w : 𝗤 ⪱ 𝗣𝗔⁻ := Entailment.StrictlyWeakerThan.of_unprovable_provable RobinsonQ.unprovable_neSucc $ by
-  apply oRing_provable_of.{0};
+  apply provable_of_models.{0};
   intro _ _ _;
   simp [models_iff];
 

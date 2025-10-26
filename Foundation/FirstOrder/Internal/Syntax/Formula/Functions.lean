@@ -5,7 +5,7 @@ namespace LO.ISigma1.Metamath
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 variable {L : Language} [L.Encodable] [L.LORDefinable]
 
@@ -38,16 +38,16 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   ex {_} := fun _ y₁ ↦ ^∀ y₁
   allChanges := fun _ ↦ 0
   exChanges := fun _ ↦ 0
-  rel_defined := by intro v; simp [blueprint]
-  nrel_defined := by intro v; simp [blueprint]
-  verum_defined := by intro v; simp [blueprint]
-  falsum_defined := by intro v; simp [blueprint]
-  and_defined := by intro v; simp [blueprint]
-  or_defined := by intro v; simp [blueprint]
-  all_defined := by intro v; simp [blueprint]
-  ex_defined := by intro v; simp [blueprint]
-  allChanges_defined := by intro v; simp [blueprint]
-  exChanges_defined := by intro v; simp [blueprint]
+  rel_defined := .mk fun v ↦ by simp [blueprint]
+  nrel_defined := .mk fun v ↦ by simp [blueprint]
+  verum_defined := .mk fun v ↦ by simp [blueprint]
+  falsum_defined := .mk fun v ↦ by simp [blueprint]
+  and_defined := .mk fun v ↦ by simp [blueprint]
+  or_defined := .mk fun v ↦ by simp [blueprint]
+  all_defined := .mk fun v ↦ by simp [blueprint]
+  ex_defined := .mk fun v ↦ by simp [blueprint]
+  allChanges_defined := .mk fun v ↦ by simp [blueprint]
+  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end Negation
 
@@ -63,8 +63,8 @@ variable {L}
 
 section
 
-lemma neg.defined : 𝚺₁-Function₁ neg (V := V) L via negGraph L  := fun v ↦ by
-  simpa [negGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using construction.result_defined ![v 0, 0, v 1]
+instance neg.defined : 𝚺₁-Function₁ neg (V := V) L via negGraph L  := .mk fun v ↦ by
+  simpa [negGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using construction.result_defined.defined ![v 0, 0, v 1]
 
 instance neg.definable : 𝚺₁-Function₁ neg (V := V) L := neg.defined.to_definable
 
@@ -186,8 +186,7 @@ section imp
 
 section
 
-lemma imp.defined : 𝚺₁-Function₂ imp (V := V) L via impGraph L := fun v ↦ by
-  simp [impGraph, neg.defined.df.iff]; rfl
+instance imp.defined : 𝚺₁-Function₂ imp (V := V) L via impGraph L := .mk fun v ↦ by simp [impGraph]; rfl
 
 instance imp.definable : 𝚺₁-Function₂ imp (V := V) L := imp.defined.to_definable
 
@@ -215,8 +214,7 @@ section iff
 
 section
 
-lemma iff.defined : 𝚺₁-Function₂ iff (V := V) L via iffGraph L := fun v ↦ by
-  simp [iffGraph, imp.defined.df.iff]; rfl
+instance iff.defined : 𝚺₁-Function₂ iff (V := V) L via iffGraph L := .mk fun v ↦ by simp [iffGraph]; rfl
 
 instance iff.definable : 𝚺₁-Function₂ iff (V := V) L := iff.defined.to_definable
 
@@ -257,16 +255,16 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   ex {_} := fun _ y₁ ↦ ^∃ y₁
   allChanges := fun _ ↦ 0
   exChanges := fun _ ↦ 0
-  rel_defined := by intro v; simp [blueprint, termShiftVec.defined.df.iff]
-  nrel_defined := by intro v; simp [blueprint, termShiftVec.defined.df.iff]
-  verum_defined := by intro v; simp [blueprint]
-  falsum_defined := by intro v; simp [blueprint]
-  and_defined := by intro v; simp [blueprint]
-  or_defined := by intro v; simp [blueprint]
-  all_defined := by intro v; simp [blueprint]
-  ex_defined := by intro v; simp [blueprint]
-  allChanges_defined := by intro v; simp [blueprint]
-  exChanges_defined := by intro v; simp [blueprint]
+  rel_defined := .mk fun v ↦ by simp [blueprint]
+  nrel_defined := .mk fun v ↦ by simp [blueprint]
+  verum_defined := .mk fun v ↦ by simp [blueprint]
+  falsum_defined := .mk fun v ↦ by simp [blueprint]
+  and_defined := .mk fun v ↦ by simp [blueprint]
+  or_defined := .mk fun v ↦ by simp [blueprint]
+  all_defined := .mk fun v ↦ by simp [blueprint]
+  ex_defined := .mk fun v ↦ by simp [blueprint]
+  allChanges_defined := .mk fun v ↦ by simp [blueprint]
+  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end Shift
 
@@ -282,8 +280,8 @@ variable {L}
 
 section
 
-lemma shift.defined : 𝚺₁-Function₁[V] shift L via shiftGraph L := fun v ↦ by
-  simpa [shiftGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using (construction L).result_defined ![v 0, 0, v 1]
+instance shift.defined : 𝚺₁-Function₁[V] shift L via shiftGraph L := .mk fun v ↦ by
+  simpa [shiftGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using (construction L).result_defined.defined ![v 0, 0, v 1]
 
 instance shift.definable : 𝚺₁-Function₁[V] shift L := shift.defined.to_definable
 
@@ -410,16 +408,16 @@ noncomputable def construction : UformulaRec1.Construction V (blueprint L) where
   ex _         := fun _ y₁ ↦ ^∃ y₁
   allChanges (param) := qVec L param
   exChanges (param) := qVec L param
-  rel_defined := by intro v; simp [blueprint, termSubstVec.defined.df.iff]
-  nrel_defined := by intro v; simp [blueprint, termSubstVec.defined.df.iff]
-  verum_defined := by intro v; simp [blueprint]
-  falsum_defined := by intro v; simp [blueprint]
-  and_defined := by intro v; simp [blueprint]
-  or_defined := by intro v; simp [blueprint]
-  all_defined := by intro v; simp [blueprint]
-  ex_defined := by intro v; simp [blueprint]
-  allChanges_defined := by intro v; simp [blueprint, qVec.defined.df.iff]
-  exChanges_defined := by intro v; simp [blueprint, qVec.defined.df.iff]
+  rel_defined := .mk fun v ↦ by simp [blueprint]
+  nrel_defined := .mk fun v ↦ by simp [blueprint]
+  verum_defined := .mk fun v ↦ by simp [blueprint]
+  falsum_defined := .mk fun v ↦ by simp [blueprint]
+  and_defined := .mk fun v ↦ by simp [blueprint]
+  or_defined := .mk fun v ↦ by simp [blueprint]
+  all_defined := .mk fun v ↦ by simp [blueprint]
+  ex_defined := .mk fun v ↦ by simp [blueprint]
+  allChanges_defined := .mk fun v ↦ by simp [blueprint]
+  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end Substs
 
@@ -435,7 +433,7 @@ variable {L}
 
 section
 
-lemma subst.defined : 𝚺₁-Function₂[V] subst L via substsGraph L := (construction L).result_defined
+instance subst.defined : 𝚺₁-Function₂[V] subst L via substsGraph L := (construction L).result_defined
 
 instance subst.definable : 𝚺₁-Function₂[V] subst L := subst.defined.to_definable
 
@@ -767,8 +765,7 @@ section substs1
 
 section
 
-lemma substs1.defined : 𝚺₁-Function₂[V] substs1 L via substs1Graph L := by
-  intro v; simp [substs1Graph, subst.defined.df.iff]; rfl
+instance substs1.defined : 𝚺₁-Function₂[V] substs1 L via substs1Graph L := .mk fun v ↦ by simp [substs1Graph]; rfl
 
 instance substs1.definable : 𝚺₁-Function₂[V] substs1 L := substs1.defined.to_definable
 
@@ -796,8 +793,7 @@ section free
 
 section
 
-lemma free.defined : 𝚺₁-Function₁[V] free L via freeGraph L := by
-  intro v; simp [freeGraph, shift.defined.df.iff, substs1.defined.df.iff, free]
+instance free.defined : 𝚺₁-Function₁[V] free L via freeGraph L := .mk fun v ↦ by simp [freeGraph, free]
 
 instance free.definable : 𝚺₁-Function₁[V] free L := free.defined.to_definable
 
@@ -852,16 +848,16 @@ noncomputable def construction : UformulaRec1.Construction V blueprint where
   ex {_} := fun _ y₁ ↦ y₁ + 1
   allChanges := fun _ ↦ 0
   exChanges := fun _ ↦ 0
-  rel_defined := by intro v; simp [blueprint]
-  nrel_defined := by intro v; simp [blueprint]
-  verum_defined := by intro v; simp [blueprint]
-  falsum_defined := by intro v; simp [blueprint]
-  and_defined := by intro v; simp [blueprint, max_add_add_right]
-  or_defined := by intro v; simp [blueprint, max_add_add_right]
-  all_defined := by intro v; simp [blueprint]
-  ex_defined := by intro v; simp [blueprint]
-  allChanges_defined := by intro v; simp [blueprint]
-  exChanges_defined := by intro v; simp [blueprint]
+  rel_defined := .mk fun v ↦ by simp [blueprint]
+  nrel_defined := .mk fun v ↦ by simp [blueprint]
+  verum_defined := .mk fun v ↦ by simp [blueprint]
+  falsum_defined := .mk fun v ↦ by simp [blueprint]
+  and_defined := .mk fun v ↦ by simp [blueprint, max_add_add_right]
+  or_defined := .mk fun v ↦ by simp [blueprint, max_add_add_right]
+  all_defined := .mk fun v ↦ by simp [blueprint]
+  ex_defined := .mk fun v ↦ by simp [blueprint]
+  allChanges_defined := .mk fun v ↦ by simp [blueprint]
+  exChanges_defined := .mk fun v ↦ by simp [blueprint]
 
 end FormulaComplexity
 
@@ -877,8 +873,8 @@ variable {L}
 
 section
 
-lemma formulaComplexity.defined : 𝚺₁-Function₁[V] formulaComplexity L via formulaComplexityGraph L  := fun v ↦ by
-  simpa [formulaComplexityGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using construction.result_defined ![v 0, 0, v 1]
+instance formulaComplexity.defined : 𝚺₁-Function₁[V] formulaComplexity L via formulaComplexityGraph L := .mk fun v ↦ by
+  simpa [formulaComplexityGraph, Matrix.comp_vecCons', Matrix.constant_eq_singleton] using construction.result_defined.defined ![v 0, 0, v 1]
 
 instance formulaComplexity.definable : 𝚺₁-Function₁[V] formulaComplexity L := formulaComplexity.defined.to_definable
 
@@ -1246,17 +1242,13 @@ def _root_.LO.FirstOrder.Arithmetic.qqLTDef : 𝚺₁.Semisentence 3 :=
 def _root_.LO.FirstOrder.Arithmetic.qqNLTDef : 𝚺₁.Semisentence 3 :=
   .mkSigma “p x y. ∃ v, !mkVec₂Def v x y ∧ !qqNRelDef p 2 ↑ltIndex v”
 
-lemma qqEQ_defined : 𝚺₁-Function₂ (qqEQ : V → V → V) via qqEQDef := by
-  intro v; simp [qqEQDef, numeral_eq_natCast, qqEQ]
+instance qqEQ_defined : 𝚺₁-Function₂ (qqEQ : V → V → V) via qqEQDef := .mk fun v ↦ by simp [qqEQDef, numeral_eq_natCast, qqEQ]
 
-lemma qqNEQ_defined : 𝚺₁-Function₂ (qqNEQ : V → V → V) via qqNEQDef := by
-  intro v; simp [qqNEQDef, numeral_eq_natCast, qqNEQ]
+instance qqNEQ_defined : 𝚺₁-Function₂ (qqNEQ : V → V → V) via qqNEQDef := .mk fun v ↦ by simp [qqNEQDef, numeral_eq_natCast, qqNEQ]
 
-lemma qqLT_defined : 𝚺₁-Function₂ (qqLT : V → V → V) via qqLTDef := by
-  intro v; simp [qqLTDef, numeral_eq_natCast, qqLT]
+instance qqLT_defined : 𝚺₁-Function₂ (qqLT : V → V → V) via qqLTDef := .mk fun v ↦ by simp [qqLTDef, numeral_eq_natCast, qqLT]
 
-lemma qqNLT_defined : 𝚺₁-Function₂ (qqNLT : V → V → V) via qqNLTDef := by
-  intro v; simp [qqNLTDef, numeral_eq_natCast, qqNLT]
+instance qqNLT_defined : 𝚺₁-Function₂ (qqNLT : V → V → V) via qqNLTDef := .mk fun v ↦ by simp [qqNLTDef, numeral_eq_natCast, qqNLT]
 
 instance (Γ m) : Γ-[m + 1]-Function₂ (qqEQ : V → V → V) := .of_sigmaOne qqEQ_defined.to_definable
 
@@ -1265,14 +1257,6 @@ instance (Γ m) : Γ-[m + 1]-Function₂ (qqNEQ : V → V → V) := .of_sigmaOne
 instance (Γ m) : Γ-[m + 1]-Function₂ (qqLT : V → V → V) := .of_sigmaOne qqLT_defined.to_definable
 
 instance (Γ m) : Γ-[m + 1]-Function₂ (qqNLT : V → V → V) := .of_sigmaOne qqNLT_defined.to_definable
-
-@[simp] lemma eval_qqEQDef (v) : Semiformula.Evalbm V v qqEQDef.val ↔ v 0 = v 1 ^= v 2 := qqEQ_defined.df.iff v
-
-@[simp] lemma eval_qqNEQDef (v) : Semiformula.Evalbm V v qqNEQDef.val ↔ v 0 = v 1 ^≠ v 2 := qqNEQ_defined.df.iff v
-
-@[simp] lemma eval_qqLTDef (v) : Semiformula.Evalbm V v qqLTDef.val ↔ v 0 = v 1 ^< v 2 := qqLT_defined.df.iff v
-
-@[simp] lemma eval_qqNLTDef (v) : Semiformula.Evalbm V v qqNLTDef.val ↔ v 0 = v 1 ^≮ v 2 := qqNLT_defined.df.iff v
 
 lemma neg_eq {t u : V} (ht : IsUTerm ℒₒᵣ t) (hu : IsUTerm ℒₒᵣ u) : neg ℒₒᵣ (t ^= u) = t ^≠ u := by
   simp only [qqEQ, qqNEQ]

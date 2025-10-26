@@ -10,7 +10,7 @@ namespace LO.ISigma0
 
 open FirstOrder Arithmetic PeanoMinus IOpen
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₀]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₀]
 
 def SPPow2 (m : V) : Prop := ¬LenBit 1 m ∧ LenBit 2 m ∧ ∀ i ≤ m, Pow2 i → 2 < i → (LenBit i m ↔ (√i)^2 = i ∧ LenBit (√i) m)
 
@@ -20,19 +20,16 @@ def _root_.LO.FirstOrder.Arithmetic.sppow2Def : 𝚺₀.Semisentence 1 :=
     ∀ i <⁺ m, !pow2Def i → 2 < i → (!lenbitDef i m ↔ ∃ s <⁺ i, !sqrtDef s i ∧ s * s = i ∧ !lenbitDef s m)
   ”
 
-lemma sppow2_defined : 𝚺₀-Predicate (SPPow2 : V → Prop) via sppow2Def := by
-  intro v
-  simp [SPPow2, sppow2Def, lenbit_defined.df.iff,
-    pow2_defined.df.iff, sqrt_defined.df.iff, sq, numeral_eq_natCast]
+instance sppow2_defined : 𝚺₀-Predicate[V] SPPow2 via sppow2Def := .mk fun v ↦ by
+  simp [SPPow2, sppow2Def, sq, numeral_eq_natCast]
 
 def PPow2 (i : V) : Prop := Pow2 i ∧ ∃ m < 2 * i, SPPow2 m ∧ LenBit i m
 
 def _root_.LO.FirstOrder.Arithmetic.ppow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “i. !pow2Def i ∧ ∃ m < 2 * i, !sppow2Def m ∧ !lenbitDef i m”
 
-lemma ppow2_defined : 𝚺₀-Predicate (PPow2 : V → Prop) via ppow2Def := by
-  intro v; simp [PPow2, ppow2Def,
-    lenbit_defined.df.iff, pow2_defined.df.iff, sppow2_defined.df.iff, numeral_eq_natCast]
+instance ppow2_defined : 𝚺₀-Predicate (PPow2 : V → Prop) via ppow2Def := .mk fun v ↦ by
+  simp [PPow2, ppow2Def, numeral_eq_natCast]
 
 instance ppow2_definable : 𝚺₀-Predicate (PPow2 : V → Prop) := ppow2_defined.to_definable
 

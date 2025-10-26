@@ -7,7 +7,7 @@ namespace LO.ISigma1.Metamath.InternalArithmetic
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 noncomputable def substNumeral (φ x : V) : V := subst ℒₒᵣ ?[numeral x] φ
 
@@ -41,27 +41,23 @@ section
 noncomputable def ssnum : 𝚺₁.Semisentence 3 := .mkSigma
   “y φ x. ∃ n, !numeralGraph n x ∧ ∃ v, !adjoinDef v n 0 ∧ !(substsGraph ℒₒᵣ) y v φ”
 
-lemma substNumeral.defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := by
-  intro v; simp [ssnum, (subst.defined (L := ℒₒᵣ)).df.iff, substNumeral]
+instance substNumeral.defined : 𝚺₁-Function₂ (substNumeral : V → V → V) via ssnum := .mk fun v ↦ by simp [ssnum, substNumeral]
 
 attribute [irreducible] ssnum
-
-@[simp] lemma substNumeral.eval (v) :
-    Semiformula.Evalbm V v ssnum.val ↔ v 0 = substNumeral (v 1) (v 2) := substNumeral.defined.df.iff v
 
 noncomputable def ssnums : 𝚺₁.Semisentence (k + 2) := .mkSigma
   “y φ. ∃ n, !lenDef ↑k n ∧
     (⋀ i, ∃ z, !nthDef z n ↑(i : Fin k).val ∧ !numeralGraph z #i.succ.succ.succ.succ) ∧
     !(substsGraph ℒₒᵣ) y n φ”
 
-lemma substNumerals.defined :
-    Arithmetic.HierarchySymbol.DefinedFunction (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := by
-  intro v
+instance substNumerals.defined :
+    Arithmetic.HierarchySymbol.DefinedFunction (fun v ↦ substNumerals (v 0) (v ·.succ) : (Fin (k + 1) → V) → V) ssnums := .mk fun v ↦ by
   unfold ssnums
+  symm
   suffices
       v 0 = subst ℒₒᵣ (matrixToVec fun i ↦ numeral (v i.succ.succ)) (v 1) ↔
       ∃ x, ↑k = len x ∧ (∀ i : Fin k, x.[↑↑i] = numeral (v i.succ.succ)) ∧ v 0 = subst ℒₒᵣ x (v 1) by
-    simpa [ssnums, substNumerals, (subst.defined (L := ℒₒᵣ)).df.iff, numeral_eq_natCast]
+    simpa [ssnums, substNumerals, numeral_eq_natCast]
   constructor
   · intro h
     refine ⟨matrixToVec fun i ↦ numeral (v i.succ.succ), ?_⟩
@@ -77,23 +73,20 @@ lemma substNumerals.defined :
 
 attribute [irreducible] ssnums
 
-@[simp] lemma substNumerals.eval (v : Fin (k + 2) → V) :
-    Semiformula.Evalbm V v ssnums.val ↔ v 0 = substNumerals (v 1) (fun i ↦ v i.succ.succ) := substNumerals.defined.df.iff v
-
 noncomputable def ssnumParams (k : ℕ) : 𝚺₁.Semisentence 3 := .mkSigma
   “y φ x. ∃ v, !lenDef ↑(k + 1) v ∧
     (∃ z, !nthDef z v 0 ∧ !numeralGraph z x) ∧
     (⋀ i, ∃ z, !nthDef z v ↑(i : Fin k).val.succ ∧ !qqBvarDef z ↑i) ∧
     !(substsGraph ℒₒᵣ) y v φ”
 
-lemma ssnumParams.defined :
-    𝚺₁-Function₂[V] substNumeralParams k via ssnumParams k := by
-  intro v
+instance ssnumParams.defined :
+    𝚺₁-Function₂[V] substNumeralParams k via ssnumParams k := .mk fun v ↦ by
+  symm
   unfold ssnumParams
   suffices
       v 0 = subst ℒₒᵣ (numeral (v 2) ∷ matrixToVec fun i ↦ ^#↑i) (v 1) ↔
       ∃ x, ↑(k + 1) = len x ∧ x.[0] = numeral (v 2) ∧ (∀ (i : Fin k), x.[↑i + 1] = ^#↑i) ∧ v 0 = subst ℒₒᵣ x (v 1) by
-    simpa [ssnumParams, substNumeralParams, (subst.defined (L := ℒₒᵣ)).df.iff, numeral_eq_natCast]
+    simpa [ssnumParams, substNumeralParams, numeral_eq_natCast]
   constructor
   · intro h
     use numeral (v 2) ∷ matrixToVec fun i : Fin k ↦ ^#↑i
@@ -107,9 +100,6 @@ lemma ssnumParams.defined :
     · have hi : i < ↑k := by simpa using hi
       rcases eq_fin_of_lt_nat hi with ⟨i, rfl⟩
       simp [hsucc]
-
-@[simp] lemma ssnumParams.eval (v : Fin 3 → V) :
-    Semiformula.Evalbm V v (ssnumParams k).val ↔ v 0 = substNumeralParams k (v 1) (v 2) := ssnumParams.defined.df.iff _
 
 end
 
@@ -130,7 +120,7 @@ noncomputable def fixedpoint (θ : Semisentence ℒₒᵣ 1) : Sentence ℒₒ�
 theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
     T ⊢ fixedpoint θ ⭤ θ/[⌜fixedpoint θ⌝] :=
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  provable_of_models _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (fixedpoint θ) ↔ V ⊧/![⌜fixedpoint θ⌝] θ by
       simpa [models_iff, Matrix.constant_eq_singleton]
@@ -158,7 +148,7 @@ noncomputable def multifixedpoint (θ : Fin k → Semisentence ℒₒᵣ k) (i :
 theorem multidiagonal (θ : Fin k → Semisentence ℒₒᵣ k) :
     T ⊢ multifixedpoint θ i ⭤ (Rew.subst fun j ↦ ⌜multifixedpoint θ j⌝) ▹ (θ i) :=
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  provable_of_models _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices V ⊧/![] (multifixedpoint θ i) ↔ V ⊧/(fun i ↦ ⌜multifixedpoint θ i⌝) (θ i) by simpa [models_iff]
     let t : Fin k → V := fun i ↦ ⌜multidiag (θ i)⌝
@@ -208,7 +198,7 @@ noncomputable def parameterizedFixedpoint (θ : Semisentence ℒₒᵣ (k + 1)) 
 theorem parameterized_diagonal (θ : Semisentence ℒₒᵣ (k + 1)) :
     T ⊢ ∀* (parameterizedFixedpoint θ ⭤ “!θ !!(⌜parameterizedFixedpoint θ⌝) ⋯”) :=
   haveI : 𝗘𝗤 ⪯ T := Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁) inferInstance inferInstance
-  complete <| oRing_consequence_of _ _ fun (V : Type) _ _ ↦ by
+  provable_of_models _ _ fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ := ModelsTheory.of_provably_subtheory V 𝗜𝚺₁ T inferInstance
     suffices
         ∀ params : Fin k → V,

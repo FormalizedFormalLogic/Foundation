@@ -27,7 +27,7 @@ alias _root_.LO.FirstOrder.Language.isRel := Language.LORDefinable.rel
 alias _root_.LO.FirstOrder.Language.iff_isFunc := Language.LORDefinable.func_iff
 alias _root_.LO.FirstOrder.Language.iff_isRel := Language.LORDefinable.rel_iff
 
-variable {V : Type*} [ORingStruc V] [L.LORDefinable]
+variable {V : Type*} [ORingStructure V] [L.LORDefinable]
 
 def _root_.LO.FirstOrder.Language.IsFunc (arity f : V) : Prop := V ⊧/![arity, f] L.isFunc.val
 
@@ -45,19 +45,19 @@ lemma isRel_def (k R : V) : L.IsRel k R ↔ V ⊧/![k, R] L.isRel.val := by rfl
 @[simp] lemma eval_rel_iff (v) :
     Semiformula.Evalbm V v L.isRel.val ↔ L.IsRel (v 0) (v 1) := by simp [Language.IsRel, ← Matrix.fun_eq_vec_two]
 
-lemma _root_.LO.FirstOrder.Language.IsFunc.defined : 𝚺₀-Relation (L.IsFunc (V := V)) via L.isFunc := fun v ↦ by simp
+instance _root_.LO.FirstOrder.Language.IsFunc.defined : 𝚺₀-Relation (L.IsFunc (V := V)) via L.isFunc := .mk fun v ↦ by simp
 
-lemma _root_.LO.FirstOrder.Language.IsRel.defined : 𝚺₀-Relation (L.IsRel (V := V)) via L.isRel := fun v ↦ by simp
+instance _root_.LO.FirstOrder.Language.IsRel.defined : 𝚺₀-Relation (L.IsRel (V := V)) via L.isRel := .mk fun v ↦ by simp
 
 instance _root_.LO.FirstOrder.Language.IsFunc.definable : 𝚺₀-Relation (L.IsFunc (V := V)) := Language.IsFunc.defined.to_definable
 
 instance _root_.LO.FirstOrder.Language.IsRel.definable : 𝚺₀-Relation (L.IsRel (V := V)) := Language.IsRel.defined.to_definable
 
 @[simp, definability] instance _root_.LO.FirstOrder.Language.IsFunc.definable' (ℌ) : ℌ-Relation (L.IsFunc (V := V)) :=
-  HierarchySymbol.Boldface.of_zero Language.IsFunc.definable
+  HierarchySymbol.Definable.of_zero Language.IsFunc.definable
 
 @[simp, definability] instance _root_.LO.FirstOrder.Language.IsRel.definable' (ℌ) : ℌ-Relation (L.IsRel (V := V)) :=
-  HierarchySymbol.Boldface.of_zero Language.IsRel.definable
+  HierarchySymbol.Definable.of_zero Language.IsRel.definable
 
 section
 
@@ -146,7 +146,7 @@ instance : (ℒₒᵣ).LORDefinable where
 
 namespace InternalArithmetic
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def zeroIndex : ℕ := Encodable.encode (Language.Zero.zero : (ℒₒᵣ : FirstOrder.Language).Func 0)
 

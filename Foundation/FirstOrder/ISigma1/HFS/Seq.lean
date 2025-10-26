@@ -10,7 +10,7 @@ namespace LO.ISigma1
 
 open FirstOrder Arithmetic PeanoMinus IOpen ISigma0
 
-variable {V : Type*} [ORingStruc V] [V ⊧ₘ* 𝗜𝚺₁]
+variable {V : Type*} [ORingStructure V] [V ⊧ₘ* 𝗜𝚺₁]
 
 def Seq (s : V) : Prop := IsMapping s ∧ ∃ l, domain s = under l
 
@@ -27,11 +27,8 @@ private lemma seq_iff (s : V) : Seq s ↔ IsMapping s ∧ ∃ l ≤ 2 * s, ∃ d
 def _root_.LO.FirstOrder.Arithmetic.seqDef : 𝚺₀.Semisentence 1 := .mkSigma
   “s. !isMappingDef s ∧ ∃ l <⁺ 2 * s, ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l”
 
-lemma seq_defined : 𝚺₀-Predicate (Seq : V → Prop) via seqDef := by
+instance seq_defined : 𝚺₀-Predicate (Seq : V → Prop) via seqDef := .mk <| by
   intro v; simp [seqDef, seq_iff]
-
-@[simp] lemma seq_defined_iff (v) :
-    Semiformula.Evalbm V v seqDef.val ↔ Seq (v 0) := seq_defined.df.iff v
 
 instance seq_definable : 𝚺₀-Predicate (Seq : V → Prop) := seq_defined.to_definable
 
@@ -84,11 +81,7 @@ private lemma lh_graph (l s : V) : l = lh s ↔ (Seq s → ∃ d ≤ 2 * s, d = 
 def _root_.LO.FirstOrder.Arithmetic.lhDef : 𝚺₀.Semisentence 2 := .mkSigma
   “l s. (!seqDef s → ∃ d <⁺ 2 * s, !domainDef d s ∧ !underDef d l) ∧ (¬!seqDef s → l = 0)”
 
-lemma lh_defined : 𝚺₀-Function₁ (lh : V → V) via lhDef := by
-  intro v; simp [lhDef, -exists_eq_right_right, lh_graph]
-
-@[simp] lemma lh_defined_iff (v) :
-    Semiformula.Evalbm V v lhDef.val ↔ v 0 = lh (v 1) := lh_defined.df.iff v
+instance lh_defined : 𝚺₀-Function₁ (lh : V → V) via lhDef := .mk fun v ↦ by simp [lhDef, -exists_eq_right_right, lh_graph]
 
 instance lh_definable : 𝚺₀-Function₁ (lh : V → V) := lh_defined.to_definable
 
@@ -140,15 +133,11 @@ lemma znth_prop_not {s i : V} (h : ¬Seq s ∨ lh s ≤ i) : znth s i = 0 :=
 def _root_.LO.FirstOrder.Arithmetic.znthDef : 𝚺₀.Semisentence 3 := .mkSigma
   “x s i. ∃ l <⁺ 2 * s, !lhDef l s ∧ (:Seq s ∧ i < l → i ∼[s] x) ∧ (¬(:Seq s ∧ i < l) → x = 0)”
 
-private lemma znth_graph {x s i : V} : x = znth s i ↔ ∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0) := by
+private lemma znth_graph {x s i : V} : (∃ l ≤ 2 * s, l = lh s ∧ (Seq s ∧ i < l → ⟪i, x⟫ ∈ s) ∧ (¬(Seq s ∧ i < l) → x = 0)) ↔ x = znth s i := by
   simp [znth, Classical.choose!_eq_iff_right]
 
-lemma znth_defined : 𝚺₀-Function₂ (znth : V → V → V) via znthDef := by
-  intro v;
+instance znth_defined : 𝚺₀-Function₂ (znth : V → V → V) via znthDef := .mk fun v ↦ by
   simpa [znthDef, -not_and, not_and_or] using znth_graph (V := V)
-
-@[simp] lemma eval_znthDef (v) :
-    Semiformula.Evalbm V v znthDef.val ↔ v 0 = znth (v 1) (v 2) := znth_defined.df.iff v
 
 instance znth_definable : 𝚺₀-Function₂ (znth : V → V → V) := znth_defined.to_definable
 
@@ -212,11 +201,7 @@ lemma seqCons_graph (t x s : V) :
 def _root_.LO.FirstOrder.Arithmetic.seqConsDef : 𝚺₀.Semisentence 3 := .mkSigma
   “t s x. ∃ l <⁺ 2 * s, !lhDef l s ∧ ∃ p <⁺ (2 * s + x + 1)², !pairDef p l x ∧ !insertDef t p s”
 
-lemma seqCons_defined : 𝚺₀-Function₂ (seqCons : V → V → V) via seqConsDef := by
-  intro v; simp [seqConsDef, seqCons_graph]
-
-@[simp] lemma seqCons_defined_iff (v) :
-    Semiformula.Evalbm V v seqConsDef.val ↔ v 0 = v 1 ⁀' v 2 := seqCons_defined.df.iff v
+instance seqCons_defined : 𝚺₀-Function₂ (seqCons : V → V → V) via seqConsDef := .mk fun v ↦ by simp [seqConsDef, seqCons_graph]
 
 instance seqCons_definable : 𝚺₀-Function₂ (seqCons : V → V → V) := seqCons_defined.to_definable
 
@@ -356,11 +341,7 @@ section
 def _root_.LO.FirstOrder.Arithmetic.mkSeq₁Def : 𝚺₀.Semisentence 2 := .mkSigma
   “s x. !seqConsDef s 0 x”
 
-lemma mkSeq₁_defined : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁Def := by
-  intro v; simp [mkSeq₁Def]; rfl
-
-@[simp] lemma eval_mkSeq₁Def (v) :
-    Semiformula.Evalbm V v mkSeq₁Def.val ↔ v 0 = !⟦v 1⟧ := mkSeq₁_defined.df.iff v
+instance mkSeq₁_defined : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) via mkSeq₁Def := .mk fun v ↦ by simp [mkSeq₁Def]; rfl
 
 instance mkSeq₁_definable : 𝚺₀-Function₁ (fun x : V ↦ !⟦x⟧) := mkSeq₁_defined.to_definable
 
@@ -369,11 +350,7 @@ instance mkSeq₁_definable' (Γ) : Γ-Function₁ (fun x : V ↦ !⟦x⟧) := m
 def _root_.LO.FirstOrder.Arithmetic.mkSeq₂Def : 𝚺₁.Semisentence 3 := .mkSigma
   “s x y. ∃ sx, !mkSeq₁Def sx x ∧ !seqConsDef s sx y”
 
-lemma mkSeq₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂Def := by
-  intro v; simp [mkSeq₂Def]
-
-@[simp] lemma eval_mkSeq₂Def (v) :
-    Semiformula.Evalbm V v mkSeq₂Def.val ↔ v 0 = !⟦v 1, v 2⟧ := mkSeq₂_defined.df.iff v
+instance mkSeq₂_defined : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) via mkSeq₂Def := .mk fun v ↦ by simp [mkSeq₂Def]
 
 instance mkSeq₂_definable : 𝚺₁-Function₂ (fun x y : V ↦ !⟦x, y⟧) := mkSeq₂_defined.to_definable
 

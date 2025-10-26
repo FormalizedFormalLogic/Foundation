@@ -10,7 +10,7 @@ namespace LO.ISigma0
 
 open FirstOrder Arithmetic PeanoMinus IOpen
 
-variable {V : Type*} [ORingStruc V]
+variable {V : Type*} [ORingStructure V]
 
 section IOpen
 
@@ -21,10 +21,9 @@ def Pow2 (a : V) : Prop := 0 < a ∧ ∀ r ≤ a, 1 < r → r ∣ a → 2 ∣ r
 def _root_.LO.FirstOrder.Arithmetic.pow2Def : 𝚺₀.Semisentence 1 :=
   .mkSigma “a. 0 < a ∧ ∀ r <⁺ a, 1 < r → r ∣ a → 2 ∣ r”
 
-lemma pow2_defined : 𝚺₀-Predicate (Pow2 : V → Prop) via pow2Def := by
-  intro v
+instance pow2_defined : 𝚺₀-Predicate (Pow2 : V → Prop) via pow2Def := .mk fun v ↦ by
   simp [Semiformula.eval_substs, Matrix.comp_vecCons', Matrix.constant_eq_singleton,
-    Pow2, pow2Def, le_iff_lt_succ, dvd_defined.df.iff, numeral_eq_natCast]
+    Pow2, pow2Def, le_iff_lt_succ, numeral_eq_natCast]
 
 instance pow2_definable : 𝚺₀-Predicate (Pow2 : V → Prop) := pow2_defined.to_definable
 
@@ -115,11 +114,8 @@ def LenBit (i a : V) : Prop := ¬2 ∣ (a / i)
 def _root_.LO.FirstOrder.Arithmetic.lenbitDef : 𝚺₀.Semisentence 2 :=
   .mkSigma “i a. ∃ z <⁺ a, !divDef.val z a i ∧ ¬2 ∣ z”
 
-lemma lenbit_defined : 𝚺₀-Relation (LenBit : V → V → Prop) via lenbitDef := by
-  intro v; simp [lenbitDef, LenBit, numeral_eq_natCast]
-
-@[simp] lemma lenbit_defined_iff (v) :
-    Semiformula.Evalbm V v lenbitDef.val ↔ LenBit (v 0) (v 1) := lenbit_defined.df.iff v
+instance lenbit_defined : 𝚺₀-Relation (LenBit : V → V → Prop) via lenbitDef := .mk fun v ↦ by
+  simp [lenbitDef, LenBit, numeral_eq_natCast]
 
 instance lenbit_definable : 𝚺₀-Relation (LenBit : V → V → Prop) := lenbit_defined.to_definable
 

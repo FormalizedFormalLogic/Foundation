@@ -12,17 +12,20 @@ namespace LO.FirstOrder
 
 variable {L : Language} {M : Type*} [Structure L M]
 
-class Defined (R : outParam ((Fin k → M) → Prop)) (φ : Semisentence L k) : Prop where
-  iff : ∀ v, R v ↔ Semiformula.Evalbm M v φ
+abbrev IsDefinedBy (R : (Fin k → M) → Prop) (φ : Semisentence L k) : Prop :=
+  ∀ v, Semiformula.Evalbm M v φ ↔ R v
 
-def DefinedWithParam (R : (Fin k → M) → Prop) (φ : Semiformula L M k) : Prop :=
-  ∀ v, R v ↔ Semiformula.Evalm M v id φ
+class Defined (R : outParam ((Fin k → M) → Prop)) (φ : Semisentence L k) : Prop where
+  iff : IsDefinedBy R φ
+
+abbrev IsDefinedByWithParam (R : (Fin k → M) → Prop) (φ : Semiformula L M k) : Prop :=
+  ∀ v, Semiformula.Evalm M v id φ ↔ R v
 
 @[simp] lemma Defined.eval_iff {R : (Fin k → M) → Prop} {φ : Semisentence L k} [h : Defined R φ] (v) :
-    Semiformula.Evalbm M v φ ↔ R v := (h.iff v).symm
+    Semiformula.Evalbm M v φ ↔ R v := h.iff v
 
-lemma DefinedWithParam.iff {R : (Fin k → M) → Prop} {φ : Semiformula L M k} (h : DefinedWithParam R φ) (v) :
-    Semiformula.Evalm M v id φ ↔ R v := (h v).symm
+lemma IsDefinedByWithParam.iff {R : (Fin k → M) → Prop} {φ : Semiformula L M k} (h : IsDefinedByWithParam R φ) (v) :
+    Semiformula.Evalm M v id φ ↔ R v := h v
 
 abbrev DefinedFunction (f : (Fin k → M) → M) (φ : Semisentence L (k + 1)) : Prop :=
   Defined (fun v ↦ v 0 = f (v ·.succ)) φ
@@ -100,7 +103,7 @@ namespace Language
 variable (L)
 
 class Definable {k} (P : (Fin k → M) → Prop) : Prop where
-  definable : ∃ φ : Semiformula L M k, DefinedWithParam P φ
+  definable : ∃ φ : Semiformula L M k, IsDefinedByWithParam P φ
 
 abbrev DefinablePred (P : M → Prop) : Prop := L.Definable (k := 1) fun v ↦ P (v 0)
 
@@ -243,13 +246,13 @@ instance mem [L.Mem] [Membership M M] [Structure.Mem L M] : L-relation[M] Member
 
 lemma fconj {P : ι → (Fin k → M) → Prop} (s : Finset ι)
     (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∀ i ∈ s, P i v := by
-  have : ∀ i, ∃ φ, DefinedWithParam (P i) φ := fun i ↦ (h i).definable
+  have : ∀ i, ∃ φ, IsDefinedByWithParam (P i) φ := fun i ↦ (h i).definable
   rcases Classical.axiomOfChoice this with ⟨φ, H⟩
   exact ⟨⩕ i ∈ s, φ i, fun v ↦ by simp [fun i ↦ (H i).iff]⟩
 
 lemma fdisj {P : ι → (Fin k → M) → Prop} (s : Finset ι)
     (h : ∀ i, L.Definable fun w : Fin k → M ↦ P i w) : L.Definable fun v : Fin k → M ↦ ∃ i ∈ s, P i v := by
-  have : ∀ i, ∃ φ, DefinedWithParam (P i) φ := fun i ↦ (h i).definable
+  have : ∀ i, ∃ φ, IsDefinedByWithParam (P i) φ := fun i ↦ (h i).definable
   rcases Classical.axiomOfChoice this with ⟨φ, H⟩
   exact ⟨⩖ i ∈ s, φ i, fun v ↦ by simp [fun i ↦ (H i).iff]⟩
 
@@ -483,12 +486,14 @@ macro "definability?" (config)? : tactic =>
 
 example {f : M → M} {g : M → M → M} [L.DefinableFunction₁ f] [L.DefinableFunction₂ g] (c : M) :
     L.DefinableRel fun x y : M ↦ ∀ z, f x = g y (g (f z) c) := by
-  definability?
+  definability
 
 example [L.Mem] [Membership M M] [Structure.Mem L M] {f : M → M} [L.DefinableFunction₁ f] :
     L.DefinableRel fun x y : M ↦ f x = y ↔ ∀ z, z ∈ f x ↔ z ∈ y := by
-  definability?
+  definability
 
 end aesop
 
-end LO.FirstOrder.Language
+end Language
+
+end LO.FirstOrder
