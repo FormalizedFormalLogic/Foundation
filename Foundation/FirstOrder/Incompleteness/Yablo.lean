@@ -56,12 +56,7 @@ def YabloSystem (T : ArithmeticTheory) [T.Δ₁] (φ n : V) : Prop := ∀ m, n <
 noncomputable def yabloSystem (T : ArithmeticTheory) [T.Δ₁] : 𝚷₁.Semisentence 2 := .mkPi
   “φ n. ∀ m, n < m → ∀ nσ, !ssnum nσ φ m → ¬!T.provable (nσ)”
 
-lemma yabloSystem.defined : 𝚷₁-Relation[V] (T.YabloSystem) via T.yabloSystem := by
-  intro f;
-  simp [Theory.YabloSystem, Theory.yabloSystem];
-
-@[simp]
-lemma yabloSystem.eval (v) : Semiformula.Evalbm V v T.yabloSystem.val ↔ T.YabloSystem (v 0) (v 1) := yabloSystem.defined.df.iff v
+instance yabloSystem.defined : 𝚷₁-Relation[V] (T.YabloSystem) via T.yabloSystem := .mk fun f ↦ by simp [Theory.YabloSystem, Theory.yabloSystem];
 
 instance yabloSystem.definable : 𝚷₁-Relation[V] (T.YabloSystem) := yabloSystem.defined.to_definable
 

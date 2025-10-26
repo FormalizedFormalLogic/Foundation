@@ -21,7 +21,7 @@ def _root_.LO.FirstOrder.Theory.Δ₁Class (T : Theory L) [T.Δ₁] : Set V := {
 
 variable {T : Theory L} [T.Δ₁]
 
-instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.Δ₁ch := by
+instance Δ₁Class.defined : 𝚫₁-Predicate[V] (· ∈ T.Δ₁Class) via T.Δ₁ch := .mk <| by
   constructor
   · intro v
     have : V ⊧/![v 0] (Theory.Δ₁.ch T).sigma.val ↔ V ⊧/![v 0] (Theory.Δ₁.ch T).pi.val := by

@@ -845,11 +845,14 @@ attribute [aesop 5 (rule_sets := [Definability]) safe]
   DefinableFunction₂.comp
   DefinableFunction₃.comp
   DefinableFunction₄.comp
+  DefinableFunction₅.comp
 
 attribute [aesop 6 (rule_sets := [Definability]) safe]
   Definable.comp₁
   Definable.comp₂
   Definable.comp₃
+  Definable.comp₄
+  Definable.comp₅
   Definable.const
 
 attribute [aesop 8 (rule_sets := [Definability]) safe]

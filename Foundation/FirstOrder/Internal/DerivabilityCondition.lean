@@ -24,13 +24,11 @@ local prefix:90 "□" => T.provabilityPred
 
 /-- The derivability condition D1. -/
 theorem provable_D1 {σ} : T ⊢ σ → 𝗜𝚺₁ ⊢ □σ := fun h ↦
-  complete <| consequence_of _ _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff] using internalize_provability (V := V) h
+  provable_of_models _ _ fun (V : Type) _ _ ↦ by simpa [models_iff] using internalize_provability (V := V) h
 
 /-- The derivability condition D2. -/
 theorem provable_D2 {σ π} : 𝗜𝚺₁ ⊢ □(σ ➝ π) ➝ □σ ➝ □π :=
-  complete <| consequence_of _ _ fun (V : Type) _ _ ↦ by
-    simpa [models_iff] using modus_ponens_sentence T
+  provable_of_models _ _ fun (V : Type) _ _ ↦ by simpa [models_iff] using modus_ponens_sentence T
 
 variable (T)
 
@@ -57,7 +55,7 @@ local prefix:90 "□" => T.provabilityPred
 
 lemma provable_sigma_one_complete [𝗣𝗔⁻ ⪯ T] {σ : Sentence ℒₒᵣ} (hσ : Hierarchy 𝚺 1 σ) :
     𝗜𝚺₁ ⊢ σ ➝ □σ :=
-  complete <| consequence_of _ _ fun (V : Type) _ _ ↦ by
+  provable_of_models _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using InternalArithmetic.sigma_one_complete (T := T) (V := V) hσ
 
 /-- The derivability condition D3. -/

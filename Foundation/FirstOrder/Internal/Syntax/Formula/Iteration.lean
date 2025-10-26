@@ -33,8 +33,8 @@ def blueprint : VecRec.Blueprint 0 where
 noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ^⊤
   adjoin _ p _ ih := p ^⋏ ih
-  nil_defined := by intro v; simp [blueprint]
-  adjoin_defined := by intro v; simp [blueprint]
+  nil_defined := .mk fun v ↦ by simp [blueprint]
+  adjoin_defined := .mk fun v ↦ by simp [blueprint]
 
 end QQConj
 
@@ -54,10 +54,7 @@ scoped notation:65 "^⋀ " ps:66 => qqConj ps
 
 section
 
-lemma qqConj.defined : 𝚺₁-Function₁[V] qqConj via qqConjGraph := construction.result_defined
-
-@[simp] lemma qqConj.eval (v) :
-    Semiformula.Evalbm V v qqConjGraph.val ↔ v 0 = qqConj (v 1) := qqConj.defined.df.iff v
+instance qqConj.defined : 𝚺₁-Function₁[V] qqConj via qqConjGraph := construction.result_defined
 
 instance qqConj.definable : 𝚺₁-Function₁ (qqConj : V → V) := qqConj.defined.to_definable
 
@@ -102,8 +99,8 @@ def blueprint : VecRec.Blueprint 0 where
 noncomputable def construction : VecRec.Construction V blueprint where
   nil _ := ^⊥
   adjoin _ p _ ih := p ^⋎ ih
-  nil_defined := by intro v; simp [blueprint]
-  adjoin_defined := by intro v; simp [blueprint]
+  nil_defined := .mk fun v ↦ by simp [blueprint]
+  adjoin_defined := .mk fun v ↦ by simp [blueprint]
 
 end QQDisj
 
@@ -123,10 +120,7 @@ scoped notation:65 "^⋁ " ps:66 => qqDisj ps
 
 section
 
-lemma qqDisj.defined : 𝚺₁-Function₁[V] qqDisj via qqDisjGraph := construction.result_defined
-
-@[simp] lemma qqDisj.eval (v) :
-    Semiformula.Evalbm V v qqDisjGraph.val ↔ v 0 = qqDisj (v 1) := qqDisj.defined.df.iff v
+instance qqDisj.defined : 𝚺₁-Function₁[V] qqDisj via qqDisjGraph := construction.result_defined
 
 instance qqDisj.definable : 𝚺₁-Function₁[V] qqDisj := qqDisj.defined.to_definable
 
@@ -175,8 +169,8 @@ noncomputable def blueprint : PR.Blueprint 2 where
 noncomputable def construction : PR.Construction V blueprint where
   zero _ := ^⊥
   succ param k ih := (subst ℒₒᵣ (numeral k ∷ param 0) (param 1)) ^⋎ ih
-  zero_defined := by intro v; simp [blueprint]
-  succ_defined := by intro v; simp [blueprint, subst.defined.df.iff]
+  zero_defined := .mk fun v ↦ by simp [blueprint]
+  succ_defined := .mk fun v ↦ by simp [blueprint]
 
 end DisjSeqSubst
 
@@ -193,11 +187,8 @@ noncomputable def disjSeqSubstGraph : 𝚺₁.Semisentence 4 := blueprint.result
 
 section
 
-lemma disjSeqSubst.defined : 𝚺₁-Function₃[V] disjSeqSubst via disjSeqSubstGraph :=
-  fun v ↦ by simp [construction.result_defined_iff, disjSeqSubstGraph, disjSeqSubst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
-
-@[simp] lemma disjSeqSubst.eval (v) :
-    Semiformula.Evalbm V v disjSeqSubstGraph.val ↔ v 0 = disjSeqSubst (v 1) (v 2) (v 3) := disjSeqSubst.defined.df.iff v
+instance disjSeqSubst.defined : 𝚺₁-Function₃[V] disjSeqSubst via disjSeqSubstGraph := .mk fun v ↦ by
+  simp [construction.result_defined_iff, disjSeqSubstGraph, disjSeqSubst, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
 instance disjSeqSubst.definable : 𝚺₁-Function₃[V] disjSeqSubst := disjSeqSubst.defined.to_definable
 
@@ -243,8 +234,8 @@ noncomputable def blueprint : PR.Blueprint 2 where
 noncomputable def construction : PR.Construction V blueprint where
   zero _ := 0
   succ param k ih := (subst ℒₒᵣ (numeral k ∷ param 0) (param 1)) ∷ ih
-  zero_defined := by intro v; simp [blueprint]
-  succ_defined := by intro v; simp [blueprint, subst.defined.df.iff]
+  zero_defined := .mk fun v ↦ by simp [blueprint]
+  succ_defined := .mk fun v ↦ by simp [blueprint]
 
 end SubstItr
 
@@ -260,11 +251,8 @@ section
 
 noncomputable def substItrGraph : 𝚺₁.Semisentence 4 := blueprint.resultDef |>.rew (Rew.subst ![#0, #3, #1, #2])
 
-lemma substItr.defined : 𝚺₁-Function₃ (substItr : V → V → V → V) via substItrGraph :=
-  fun v ↦ by simp [construction.result_defined_iff, substItrGraph, substItr, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
-
-@[simp] lemma substItr.eval (v) :
-    Semiformula.Evalbm V v substItrGraph.val ↔ v 0 = substItr (v 1) (v 2) (v 3) := substItr.defined.df.iff v
+instance substItr.defined : 𝚺₁-Function₃[V] substItr via substItrGraph := .mk fun v ↦ by
+  simp [construction.result_defined_iff, substItrGraph, substItr, Matrix.comp_vecCons', Matrix.constant_eq_singleton]
 
 instance substItr.definable : 𝚺₁-Function₃ (substItr : V → V → V → V) := substItr.defined.to_definable
 
@@ -407,11 +395,7 @@ def qqVerumsGraph : 𝚺₁.Semisentence 2 := .mkSigma
 
 section
 
-lemma qqVerums.defined : 𝚺₁-Function₁[V] qqVerums via qqVerumsGraph :=
-  fun v ↦ by simp [qqVerumsGraph]; rfl
-
-@[simp] lemma qqVerums.repeatVec (v) :
-    Semiformula.Evalbm V v qqVerumsGraph.val ↔ v 0 = qqVerums (v 1) := qqVerums.defined.df.iff v
+instance qqVerums.defined : 𝚺₁-Function₁[V] qqVerums via qqVerumsGraph := .mk fun v ↦ by simp [qqVerumsGraph]; rfl
 
 instance qqVerums.definable : 𝚺₁-Function₁[V] qqVerums := qqVerums.defined.to_definable
 

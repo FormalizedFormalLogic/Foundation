@@ -21,13 +21,9 @@ section
 noncomputable def _root_.LO.FirstOrder.Theory.rosserProvable : 𝚺₁.Semisentence 1 := .mkSigma
   “φ. ∃ nφ, !(negGraph L) nφ φ ∧ !T.provabilityComparison φ nφ”
 
-lemma _root_.LO.FirstOrder.Theory.RosserProvable_defined :
-    𝚺₁-Predicate (T.RosserProvable : V → Prop) via T.rosserProvable := by
-  intro v
-  simp [Theory.rosserProvable, Theory.RosserProvable, neg.defined.df.iff]
-
-@[simp] lemma _root_.LO.FirstOrder.Theory.RosserProvable.eval (v) :
-    Semiformula.Evalbm V v T.rosserProvable.val ↔ T.RosserProvable (v 0) := T.RosserProvable_defined.df.iff v
+instance _root_.LO.FirstOrder.Theory.RosserProvable_defined :
+    𝚺₁-Predicate (T.RosserProvable : V → Prop) via T.rosserProvable := .mk fun v ↦ by
+  simp [Theory.rosserProvable, Theory.RosserProvable]
 
 instance _root_.LO.FirstOrder.Theory.rosserProvable_definable :
     𝚺₁-Predicate (T.RosserProvable : V → Prop) := T.RosserProvable_defined.to_definable
@@ -112,11 +108,11 @@ variable {T : Theory L} [T.Δ₁] [Entailment.Consistent T]
 local prefix:90 "𝗥" => T.rosserPred
 
 theorem rosserProvable_D1 {σ} : T ⊢ σ → 𝗜𝚺₁ ⊢ 𝗥σ := fun h ↦
-  complete <| consequence_of _ _ fun (V : Type) _ _ ↦ by
+  provable_of_models _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using rosser_internalize_sentence h
 
 theorem rosserProvable_rosser {σ} : T ⊢ ∼σ → 𝗜𝚺₁ ⊢ ∼𝗥σ := fun h ↦
-  complete <| consequence_of _ _ fun (V : Type) _ _ ↦ by
+  provable_of_models _ _ fun (V : Type) _ _ ↦ by
     simpa [models_iff] using not_rosserProvable_sentence h
 
 end

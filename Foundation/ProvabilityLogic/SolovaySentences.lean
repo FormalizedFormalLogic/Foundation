@@ -162,12 +162,8 @@ section
 def negativeSuccessor : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ nφ, ∃ nψ, !(negGraph ℒₒᵣ) nφ φ ∧ !(negGraph ℒₒᵣ) nψ ψ ∧ !T.provabilityComparison nφ nψ”
 
-lemma negativeSuccessor_defined : 𝚺₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := by
-  intro v
-  simp [negativeSuccessor, NegativeSuccessor, (neg.defined (L := ℒₒᵣ)).df.iff]
-
-@[simp] lemma eval_negativeSuccessorDef (v) :
-    Semiformula.Evalbm V v (negativeSuccessor T).val ↔ NegativeSuccessor T (v 0) (v 1) := (negativeSuccessor_defined T).df.iff v
+instance negativeSuccessor_defined : 𝚺₁-Relation[V] NegativeSuccessor T via (negativeSuccessor T) := .mk fun v ↦ by
+  simp [negativeSuccessor, NegativeSuccessor]
 
 instance negativeSuccessor_definable : 𝚺₁-Relation (NegativeSuccessor T : V → V → Prop) := (negativeSuccessor_defined T).to_definable
 

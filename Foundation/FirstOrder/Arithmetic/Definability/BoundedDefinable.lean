@@ -1,4 +1,4 @@
-import Foundation.FirstOrder.Arithmetic.Definability.Boldface
+import Foundation.FirstOrder.Arithmetic.Definability.Definable
 
 namespace LO.FirstOrder.Arithmetic
 
@@ -371,9 +371,6 @@ lemma DefinableBoundedFunction.comp₃ {k} {F : V → V → V → V} {f₁ f₂ 
     DefinableBoundedFunction (fun v ↦ F (f₁ v) (f₂ v) (f₃ v)) := DefinableBoundedFunction₃.comp ⟨hFb, hFd⟩ hf₁ hf₂ hf₃
 
 section
-
--- https://github.com/leanprover-community/mathlib4/blob/77d078e25cc501fae6907bfbcd80821920125266/Mathlib/Tactic/Measurability.lean#L25-L26
-open Lean.Parser.Tactic (config)
 
 open HierarchySymbol
 

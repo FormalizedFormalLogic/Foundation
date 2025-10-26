@@ -11,13 +11,13 @@ lemma re_iff_sigma1 {P : ℕ → Prop} : REPred P ↔ 𝚺₁-Predicate P := by
   constructor
   · intro h
     refine ⟨.mkSigma (codeOfREPred P) (by simp [codeOfREPred, codeOfPartrec']), ?_⟩
-    intro v; symm
+    intro v
     simpa [←Matrix.fun_eq_vec_one] using codeOfREPred_spec h (x := v 0)
   · rintro ⟨φ, hφ⟩
     have : REPred fun x ↦ (Semiformula.Evalm ℕ (x ::ᵥ List.Vector.nil).get id) _ :=
       (sigma1_re id (φ.sigma_prop)).comp
         (Primrec.to_comp <| Primrec.vector_cons.comp .id <| .const _)
-    exact this.of_eq <| by intro x; symm; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
+    exact this.of_eq <| by intro x; simpa [List.Vector.cons_get, Matrix.empty_eq] using hφ ![x]
 
 open LO.Entailment FirstOrder Arithmetic R0 PeanoMinus IOpen ISigma0 ISigma1 Metamath InternalArithmetic
 

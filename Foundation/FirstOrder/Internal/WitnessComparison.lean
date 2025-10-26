@@ -25,11 +25,9 @@ section
 noncomputable def _root_.LO.FirstOrder.Theory.provabilityComparison : 𝚺₁.Semisentence 2 := .mkSigma
   “φ ψ. ∃ b, !T.proof.sigma b φ ∧ ∀ b' < b, ¬!T.proof.pi b' ψ”
 
-lemma _root_.LO.FirstOrder.Theory.provability_comparison_defined :
-    𝚺₁-Relation[V] T.ProvabilityComparison via T.provabilityComparison := by
-  intro v
-  simp [Theory.provabilityComparison, HierarchySymbol.Semiformula.val_sigma,
-    Theory.Proof.defined.df.iff, Theory.Proof.defined.proper.iff', Theory.ProvabilityComparison]
+instance _root_.LO.FirstOrder.Theory.provability_comparison_defined :
+    𝚺₁-Relation[V] T.ProvabilityComparison via T.provabilityComparison := .mk fun v ↦ by
+  simp [Theory.provabilityComparison, Theory.ProvabilityComparison]
 
 instance _root_.LO.FirstOrder.Theory.provability_comparison_definable : 𝚺₁-Relation[V] T.ProvabilityComparison :=
   T.provability_comparison_defined.to_definable
@@ -37,10 +35,6 @@ instance _root_.LO.FirstOrder.Theory.provability_comparison_definable : 𝚺₁-
 /-- instance for definability tactic-/
 instance _root_.LO.FirstOrder.Theory.provability_comparison_definable' :
     𝚺-[0 + 1]-Relation[V] T.ProvabilityComparison := T.provability_comparison_definable
-
-@[simp] lemma _root_.LO.FirstOrder.Theory.ProvabilityComparison.eval (v) :
-    Semiformula.Evalbm V v T.provabilityComparison.val ↔ T.ProvabilityComparison (v 0) (v 1) :=
-  (T.provability_comparison_defined).df.iff v
 
 end
 
