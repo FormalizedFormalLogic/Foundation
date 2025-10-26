@@ -6,13 +6,13 @@ namespace LO
 
 namespace FirstOrder
 
-open Semiformula Completeness
+open Classical Semiformula Completeness
 
 variable {L : Language.{u}} {T : Theory L}
 
 section Encodable
 
-variable [L.DecidableEq]  [L.Encodable]
+variable [L.Encodable]
 
 noncomputable def Derivation.completeness_of_encodable
   {Γ : Sequent L} (h : ∀ M [Nonempty M] [Structure L M], M ⊧ₘ* T → ∃ φ ∈ Γ, ∀ f, Semiformula.Evalfm M f φ) : (T : SyntacticFormulas L) ⟹ Γ := by
