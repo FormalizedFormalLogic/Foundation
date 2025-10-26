@@ -246,7 +246,7 @@ theorem diagonal (θ : Semisentence ℒₒᵣ 1) :
   haveI : 𝗘𝗤 ⪯ T :=
     Entailment.WeakerThan.trans (𝓣 := 𝗜𝚺₁)
     inferInstance inferInstance
-  complete <| oRing_consequence_of.{0} _ _
+  provable_of_models _ _
   fun (V : Type) _ _ ↦ by
     haveI : V ⊧ₘ* 𝗜𝚺₁ :=
       ModelsTheory.of_provably_subtheory
